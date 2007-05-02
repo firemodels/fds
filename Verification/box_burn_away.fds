@@ -1,0 +1,51 @@
+&HEAD CHID='box_burn_away',TITLE='Test BURN_AWAY feature' / 
+
+&MESH IJK=20,20,40 XB=0.0,1.0,0.0,1.0,0.0,2.0 /
+
+&TIME TWFIN=120. /
+
+&MATL ID                   = 'FOAM'
+      HEAT_OF_REACTION     = 500.
+      HEAT_OF_COMBUSTION   = 20000.
+      CONDUCTIVITY         = 0.2
+      SPECIFIC_HEAT        = 1.0
+      DENSITY              = 20.
+      N_REACTIONS          = 1
+      NU_FUEL              = 1.
+      REFERENCE_TEMPERATURE= 200. /
+
+&SURF ID                   = 'FOAM SLAB'
+      COLOR                = 'TOMATO 3'
+      MATL_ID              = 'FOAM'
+      THICKNESS            = 0.05
+      BURN_AWAY            = .TRUE.
+      BACKING              = 'EXPOSED' /
+
+&SURF ID = 'FIRE', HRRPUA=1000., RGB=1,0,0 /
+&VENT XB=0.30,0.40,0.45,0.55,0.00,0.00, SURF_ID='FIRE' /
+&OBST XB=0.40,0.80,0.30,0.70,0.00,0.40, SURF_ID='FOAM SLAB' /
+
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+
+&BNDF QUANTITY='WALL_TEMPERATURE' /
+&BNDF QUANTITY='BURNING_RATE' /
+&BNDF QUANTITY='HEAT_FLUX' /
+
+&SLCF PBY=0.5, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY=0.5, QUANTITY='HRRPUV' /
+
+&TAIL /
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,81 @@
+&HEAD CHID='spray_burner',TITLE='Test Simulation of 2 MW Heptane Spray Burner' /
+&MESH IJK=20,30,40, XB=3.0,5.0,-1.5,1.5,0.0,4.0 /
+&TIME TWFIN=90. /
+
+&MISC SURF_DEFAULT='GYPSUM BOARD', POROUS_FLOOR=.FALSE. /
+
+&REAC ID='HEPTANE TO CO2'
+      FYI='Heptane, C_7 H_16'
+      HEAT_OF_COMBUSTION=44000.
+      C=7.
+      H=16. 
+      CO_YIELD=0.008  
+      SOOT_YIELD=0.015 /
+
+&MATL ID                 = 'STEEL'
+      FYI                = 'A242 Steel'
+      SPECIFIC_HEAT_RAMP = 'c_steel'
+      CONDUCTIVITY_RAMP  = 'k_steel'
+      DENSITY            = 7850. /
+&RAMP ID='c_steel', T= 20.,F=0.45   /
+&RAMP ID='c_steel', T=377.,F=0.60   /
+&RAMP ID='c_steel', T=677.,F=0.85   /
+&RAMP ID='k_steel', T= 20.,F=48.    /
+&RAMP ID='k_steel', T=677.,F=30.    /
+
+&MATL ID            = 'GYPSUM'
+      CONDUCTIVITY  = 0.16
+      SPECIFIC_HEAT = 0.9
+      DENSITY       = 790. /
+
+&SURF ID                 = 'STEEL SHEET'
+      RGB                = 50,50,50
+      MATL_ID            = 'STEEL'
+      BACKING            = 'EXPOSED'
+      THICKNESS          = 0.003 /
+
+&SURF ID        = 'GYPSUM BOARD'
+      RGB       = 200,200,200
+      MATL_ID   = 'GYPSUM'
+      THICKNESS = 0.0254 /
+
+&DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
+&DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
+
+&OBST XB= 3.5, 4.5,-1.0, 1.0, 0.0, 0.0, SURF_ID='STEEL SHEET' /
+&OBST XB= 3.5, 4.5,-1.0,-1.0, 0.0, 0.1, SURF_ID='STEEL SHEET' /
+&OBST XB= 3.5, 4.5, 1.0, 1.0, 0.0, 0.1, SURF_ID='STEEL SHEET' /
+&OBST XB= 3.5, 3.5,-1.0, 1.0, 0.0, 0.1, SURF_ID='STEEL SHEET' /
+&OBST XB= 4.5, 4.5,-1.0, 1.0, 0.0, 0.1, SURF_ID='STEEL SHEET' /
+
+&PART ID='heptane droplets',FUEL=.TRUE.,VAPORIZATION_TEMPERATURE=98.,
+      HEAT_OF_VAPORIZATION=316.,SPECIFIC_HEAT=2.25,DENSITY=688.,
+      QUANTITIES(1:2)='DROPLET_DIAMETER','DROPLET_TEMPERATURE',
+      DROPLETS_PER_SECOND=2000,DIAMETER=1000.,HEAT_OF_COMBUSTION=44500.,
+      DT_INSERT=0.02,SAMPLING_FACTOR=1 /
+
+&PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets', FLOW_RATE=1.96, FLOW_RAMP='fuel',
+      DROPLET_VELOCITY=10., SPRAY_ANGLE=0.,30.    /
+&RAMP ID='fuel', T= 0.0, F=0.0 /
+&RAMP ID='fuel', T=20.0, F=1.0 /
+&RAMP ID='fuel', T=40.0, F=1.0 /
+&RAMP ID='fuel', T=60.0, F=0.0 /
+
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&SLCF PBX=4.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBX=4.0,QUANTITY='HRRPUV' /
+&SLCF PBX=4.0,QUANTITY='MIXTURE_FRACTION' /
+
+&BNDF QUANTITY='WALL_TEMPERATURE' /
+&BNDF QUANTITY='heptane droplets_MPUA' /
+&BNDF QUANTITY='heptane droplets_AMPUA' /
+
+&TAIL /
+
+
