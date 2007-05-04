@@ -487,18 +487,14 @@ The software described in this document, Fire Dynamics Simulator (FDS), is a com
 fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the
 Navier-Stokes equations\index{Navier-Stokes} appropriate for low-speed, thermally-driven flow
 with an emphasis on smoke and heat transport from fires.
-The formulation of the equations and the numerical algorithm are contained in a companion document,
-called {\em Fire Dynamics Simulator (Version 5) -- Technical Reference Guide}~\cite{FDS_Tech_Guide_5}.
-A verification assessment and a discussion of configuration management practices can be found in
-{\em Fire Dynamics Simulator (Version 5) -- Verification and Validation Guide Volume 1:Verification}
-An assessment of the accuracy and validity of the model can be found in {\em Fire Dynamics Simulator
-(Version 5) -- Verification and Validation Guide Volume 2:Validation} ~\cite{FDS_VV_Guide_5}.
+The formulation of the equations and the numerical algorithm are contained the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
+Code checking, accuracy assessment, and so forth, can be found in the FDS Verification and Validation Guide~\cite{FDS_VV_Guide_5}.
 These documents provide many useful examples of FDS applications, and these examples are cited
 throughout the present document.
 
 Smokeview is a separate visualization program that is used to display the
-results of an FDS simulation in 3-D. Some examples in this document are shown using Smokeview.
-A detailed description of Smokeview and its use can be found in a companion document, called
+results of an FDS simulation.
+A detailed description of Smokeview is found in the
 {\em User's Guide for Smokeview Version 5}~\cite{Smokeview_Users_Guide_5}.
 
 
@@ -655,36 +651,22 @@ Smokeview has a simple menu-driven interface. FDS does not. However, there are v
 that have been developed to generate the text file containing the input parameters needed by FDS.
 
 This guide describes how to obtain FDS and Smokeview and how to use FDS.
-A separate document~\cite{Smokeview_Users_Guide_5} describes how to use Smokeview.
+A separate document~\cite{Smokeview_Users_Guide_5} describes how to use Smokeview. Other tools related to
+FDS and Smokeview can be found at the web site.
 
 \section{How to Acquire FDS and Smokeview}
 \label{info:sfcvs}
 
-As of FDS Version 5, all executables, manuals and source code are available through the
-FDS / Smokeview (fds-sv) project page \index{SourceForge.net} hosted at:
-\href{http://sourceforge.net/projects/fds-sv/}{{\ct http://sourceforge.net/projects/fds-sv/}}
-
 Detailed instructions on how to download executables, manuals, source-code and related utilities,
-can be found on the NIST FDS Website.
-See \href{http://fds-sv.sourceforge.net}{{\ct http://fds-sv.sourceforge.net}} for more information.
-
-The typical FDS distribution consists of an installation package, which is available
-for both MS Windows and Mac OS X based PCs.  Users of other operating systems are directed to the
-SourceForge.net site for source code, a small selection of compiled executable binaries, Makefiles,
-{\em etc.}
-
-Users who have already downloaded earlier versions of FDS retain the same file structure as before.
-To avoid conflicts with the new version, a directory named FDS\_5 will be created and all files will be
-installed in subdirectories there.  As each new update is released, the files will be overwritten.  This
-method will ensure that conflicts from previous versions are avoided.  All released versions of FDS
-from version 4.0.8 and higher will be available in the File Management System on the SourceForge.net
-``fds-sv'' project site.
+can be found on the NIST FDS Website
+\href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}} for more information.
+The typical FDS/Smokeview distribution consists of an installation package, which is available
+for MS Windows, Mac OS X, and Linux.  For other operating systems, consult the web site.
 
 \begin{warning}
 \noindent
-If you want to keep the previous version and NOT have it overwritten during installation.
-You must Copy the FDS\_5 directory to another location.  It is recommended to create an ``Archive'' subdirectory
-to move the FDS\_5 to.  Files in this directory will not be over written when the new version is installed.
+If you ever want to keep an older version of FDS and Smokeview, copy the installation directory to some other
+place so that it is not overwritten during the updated installation.
 \end{warning}
 
 \section{Computer Hardware Requirements}
@@ -722,7 +704,7 @@ released prior to Windows 2000.
 \item[{\bf Mac OS X}]
 Mac OS X Tiger FDS installation packages are available for both the PowerPC and Intel architectures.
 OS X 10.4.x or better is recommended, versions of OS X prior to 10.4.x are not officially supported.
-Users can always download the latest version of FDS source from the SourceForge CVS repository and
+Users can always download the latest version of FDS source  and
 compile FDS for other versions of OS X (See Appendix~\ref{info:compilation} for details).
 
 \item[{\bf Unix, Linux}]
@@ -749,9 +731,10 @@ See the Development section of the website for more information.
 This chapter describes the procedure to run an FDS calculation.
 The primary requirement for any calculation is an FDS input file. The creation of an
 input file is covered in detail in Chapter~\ref{info:fdsBasic}.
-It is suggested that you start with an existing data file, run it as is,
+If you are new to FDS and Smokeview, it is strongly suggested that you start with an existing data file, run it as is,
 and then make the appropriate changes to the input file for the
-desired scenario. By running a sample case, you become
+desired scenario. Sample input files are included as part of the standard installation.
+By running a sample case, you become
 familiar with the procedure, learn how to use Smokeview, and
 ensure that your computer is up to the task before embarking on
 learning how to create new input files.
@@ -770,7 +753,7 @@ Message Passing Interface (MPI), which will be discussed below.
 \noindent
 Note that the input file for both single and parallel versions of FDS are the same.
 In fact, it is recommended that before embarking on parallel processing, you should run your input
-file in serial mode to ensure that it is properly set-up.
+file in serial mode to ensure that it is properly set up.
 \end{warning}
 
 
@@ -821,13 +804,11 @@ fds5 job_name.fds >& job_name.err &
 \end{verbatim}
 
 
-\begin{warning}
-\noindent
 Note that in the latter case, the screen output is stored in the file {\bf job\_name.err} and the
 detailed diagnostics are saved automatically in a file {\bf CHID.out}, where {\ct CHID} is a character
 string, usually the same as {\ct job\_name}, designated in the input file.
 It is preferable to run jobs in the background so as to free the console for other uses.
-\end{warning}
+
 
 
 \subsection{Starting an FDS Calculation (Multiple Processor Version)}
@@ -981,114 +962,77 @@ better simulation. It takes practice and experience with real fire.
 \chapter{Basic FDS Functionality}
 \label{info:fdsBasic}
 
-The operation of FDS is dependent on the namelist groups and keyword
-parameters that are specified in the ``data'' or ``input'' file.  This chapter will describe,
-with examples, the namelist groups and parameters required to define a model.
-An input file from the Validation Guide ({\bf WTC\_05\_v5.fds}) is used as the example
-for most of the input parameters of FDS.  When possible, the examples of input statements used
-throughout this guide have been extracted from input files that can be found in the
-Verification or Validation Guide and will be referenced by filename.  These files are copied
-to your local hard drive, along with all the other files, during installation. See
-Section~\ref{info:gettingstarted} for installation information.
+The operation of FDS is based on a single input text file containing parameters organized into
+{\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups.
+This chapter describes,
+with examples, the namelist groups and parameters required to define a fire scenario.
+When possible, the examples of input statements have been extracted from input files that can be found in the
+Verification or Validation Guide and will be referenced by filename.
 
 
-The following table is an overview of the basic features of FDS and
-the order in which they will be presented in the sections to follow.
-
-\begin{table}[ht]
-\begin{center}
-\caption{Basic Features Overview}
-\label{tab:fdsBasic}
-\vspace{\baselineskip}
-\begin{tabular}{|l|l|}
-\hline
-Features            & Namelist                      \\ \hline
-\hline
-Preliminary         & HEAD, TIME, MISC              \\ \hline
-Mesh                & MESH, TRNX, TRNY, TRNZ        \\ \hline
-Geometry            & OBST, HOLE                    \\ \hline
-Surface and Vent    & MATL, SURF, VENT              \\ \hline
-Particle            & PART                          \\ \hline
-Device and Control  & DEVC, PROP, CTRL              \\ \hline
-Output              & DUMP, BNDF, ISOF, SLCF, PROF  \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-\noindent
-The namelist groups that offer advanced FDS functionality (INIT, MISC*, RADI, REAC, SPEC, ZONE)
-will be covered in the next chapter. *Additional MISC parameters will be discussed.
 
 
 \section{Overview of Writing an Input File}
 \label{info:inputfilecreation}
-The first step in performing a calculation is to generate an ASCII text ``data'' or ``input'' file
-that provides the FDS application with all of the necessary information to
-describe the scenario to be simulated.
 
-The data file is saved with a name such as {\bf job\_name.fds},
-where ``job\_name'' stands for any character string that helps to identify
-the simulation. This same name should be used as the string passed to the
-CHID parameter in the HEAD namelist group within the input file. All of the
-output files associated with the calculation will then have this common prefix.
+The first step in performing an FDS simulation is to create an ASCII\footnote{American Standard Character II??} text input file
+that provides FDS  with all of the necessary information to
+describe the scenario.
+The input file is saved with a name such as {\bf job\_name.fds},
+where {\bf job\_name} is any character string that helps to identify
+the simulation. If this same string is repeated under the {\ct HEAD} namelist group within the input file, then all of the
+output files associated with the calculation will then have this common name.
 
 \begin{warning}
 \noindent
-There should be no blank spaces in the job name, instead use underscore
+There should be no blank spaces in the job name. Instead use underscore
 character to represent a space.
 \end{warning}
 
-Input data is prescribed within the file by using namelist formatted records.
-Each namelist record begins with the ampersand character ``{\ct \&}'' followed
-immediately by the name of the namelist group ({\ct HEAD, MESH, TIME}, {\em etc.}).
-The name is then followed by a space and then a comma delimited list of the input parameters
-corresponding to that group. Finally the set of input parameters in the namelist record is
-terminated with a forward slash ``{\ct /}''.
-
-The most fundamental input parameters required by all input files are;
-the file header information {\ct HEAD}, the dimensions and divisions of
-the numerical mesh(s) {\ct MESH} and the simulation time required {\ct TIME}.
-In addition to these fundamentals, the typical input file also includes;
-the geometrical features within the domain {\ct OBST} {\ct HOLE} and
-the ``fire'' and other boundary conditions {\ct MATL} {\ct SURF} {\ct VENT}.
-Finally, there are a number of parameters that customize the output
-files to capture the quantities of interest within the simulation.
-See Section~\ref{info:outputdata} for details.
-
-\begin{warning}
 \noindent
-Note that only the parameters that need to be changed from the default values
-are required to be listed in the input file.
-\end{warning}
+Parameters are specified within the input file by using {\em namelist} formatted records.
+Each namelist record begins with the ampersand character ``{\ct \&}'' followed
+immediately by the name of the namelist group, then a comma-delimited list of the input parameters, and
+finally a forward slash ``{\ct /}''. For example, the line
 
+\footnotesize
+\begin{verbatim}
+&DUMP NFRAMES=1800, DT_HRR=10., DT_DEVC=10., DT_PROF=30. /
+\end{verbatim}
+
+\normalsize \noindent
+sets various values of parameters contained in the {\ct DUMP} namelist group.
+Note that only the parameters that need to be changed from the default values
+are required to be listed in the input file. Also, namelist records can be split over several lines.
 The general structure of an input file is shown below, with many
 lines of the original input file removed for clarity.
 
 \footnotesize
 \begin{verbatim}
-&HEAD CHID='WTC_05_v5',TITLE='WTC Phase 1, Test 5, FDS version 5' /
+&HEAD CHID='WTC_05_v5', TITLE='WTC Phase 1, Test 5, FDS version 5' /
 &MESH IJK=90,36,38, XB=-1.0,8.0,-1.8,1.8,0.0,3.82 /
 &TIME TWFIN=5400. /
-&MISC SURF_DEFAULT='MARINITE BOARD',TMPA=20., POROUS_FLOOR=.FALSE. /
-&DUMP NFRAMES=1800,DT_HRR=10.,DT_DEVC=10.,DT_PROF=30. /
+&MISC SURF_DEFAULT='MARINITE BOARD', TMPA=20., POROUS_FLOOR=.FALSE. /
+&DUMP NFRAMES=1800, DT_HRR=10., DT_DEVC=10., DT_PROF=30. /
 
-&REAC ID='HEPTANE TO CO2'
-      FYI='Heptane, C_7 H_16'
-      C=7.
-      H=16.
-      CO_YIELD=0.008 /
-      SOOT_YIELD=0.015 /
+&REAC ID         = 'HEPTANE TO CO2'
+      FYI        = 'Heptane, C_7 H_16'
+      C          = 7.
+      H          = 16.
+      CO_YIELD   = 0.008 /
+      SOOT_YIELD = 0.015 /
 
 &OBST XB= 3.5, 4.5,-1.0, 1.0, 0.0, 0.0, SURF_ID='STEEL FLANGE' /  Fire Pan
 ...
-&SURF ID                 = 'STEEL FLANGE'
-      RGB                = 0.20,0.20,0.20
-      MATL_ID            = 'STEEL'
-      BACKING            = 'EXPOSED'
-      THICKNESS          = 0.0063 /
+&SURF ID        = 'STEEL FLANGE'
+      RGB       = 0.20,0.20,0.20
+      MATL_ID   = 'STEEL'
+      BACKING   = 'EXPOSED'
+      THICKNESS = 0.0063 /
 ...
 &VENT MB='XMIN',SURF_ID='OPEN' /
 ...
-&SLCF PBY=0.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 ...
 &BNDF QUANTITY='GAUGE_HEAT_FLUX' /
 ...
@@ -1103,8 +1047,8 @@ The parameters in the input file can be integers ({\ct TWFIN=5400}),
 real numbers ({\ct CO\_YIELD=0.008}), groups of real numbers or integers
 ({\ct XYZ=6.04,0.28,3.65}) or ({\ct IJK=90,36,38}),
 character strings ({\ct CHID='WTC\_05\_v5'}), groups of character strings
-({\ct SURF\_IDS = 'burner' 'INERT' 'INERT'}),
-or logicals ({\ct POROUS\_FLOOR=.FALSE.}). A logical parameter is either
+({\ct SURF\_IDS='burner','INERT','INERT'}),
+or logical parameters ({\ct POROUS\_FLOOR=.FALSE.}). A logical parameter is either
 {\ct .TRUE.} or {\ct .FALSE.} -- the periods are a
 Fortran convention. Character strings that are listed in
 this User's Manual must be copied exactly as written -- the code
@@ -1118,6 +1062,7 @@ simple text editor, in which case the punctuation marks may not transfer
 properly into the text file.
 \end{warning}
 
+\noindent
 Input parameters can be separated by either a comma, space, or line break.
 Comments and notes can be written into the file so long as nothing comes
 before the {\ct \&} except a space and nothing comes between the ampersand
@@ -1131,7 +1076,8 @@ exactly the parameter names from this manual and do not assume that the
 program understands if the case is changed.
 \end{warning}
 
-As stated previously, it is strongly encouraged that when looking at a new scenario,
+\noindent
+As stated previously, it is strongly recommended that when looking at a new scenario,
 first select a pre-written input file that resembles the case,
 make the necessary changes, then run the case at fairly low
 resolution to determine if the geometry is set up correctly.
@@ -1141,19 +1087,26 @@ might mask a fundamental flaw in the calculation. Initial calculations ought
 to be meshed coarsely so that the run times are less than an hour and
 corrections can easily be made without wasting too much time.
 As you learn how to write input files, you will continually
-run and rerun your case as you add in complexity.
+run and re-run your case as you add in complexity.
 
-The following table provides a quick reference to all the namelist parameters and
+\begin{warning}
+Be aware that FDS will simply over-write the output files of a given case if its assigned
+name is the same.
+\end{warning}
+
+\noindent
+Table~\ref{tbl:namelistgroups} provides a quick reference to all the namelist parameters and
 where you can find the reference to where it is introduced in the document and the
 table containing all of the keywords for each group.
 
 \vspace{\baselineskip}
 \begin{table}[ht]
-\small
+\label{tbl:namelistgroups}
 \begin{center}
+\caption{Namelist Group Reference Table}
 \begin{tabular}{|c|l|c|c|}
 \hline
-\multicolumn{4}{|c|}{Namelist Group Reference Table} \\ \hline \hline
+%\multicolumn{4}{|c|}{Namelist Group Reference Table} \\ \hline \hline
 Group Name  & Namelist Group Description& Reference Section & Parameter Table  \\ \hline
 {\ct BNDF}  & Boundary File Output         & \ref{info:BNDF} & \ref{tbl:BNDF}  \\ \hline
 {\ct CTRL}  & Control Function Parameters  & \ref{info:CTRL} & \ref{tbl:CTRL}  \\ \hline
@@ -1182,8 +1135,6 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 {\ct ZONE}  & Pressure Zone Parameters     & \ref{info:ZONE} & \ref{tbl:ZONE}  \\ \hline
 \end{tabular}
 \end{center}
-\normalsize
-\label{tbl:NLGRef}
 \end{table}
 
 \clearpage
@@ -1194,29 +1145,31 @@ The first thing to do when setting up an input file is to give the
 job a name.  The name of the job is important because often a project
 involves numerous simulations in which case the names of the individual
 simulations can help organize the effort.  The namelist group {\ct HEAD} contains
-two parameters.
+two parameters, as in this example:
+
+\footnotesize
+\begin{verbatim}
+&HEAD CHID='WTC_05_v5', TITLE='WTC Phase 1, Test 5, FDS version 5' /
+\end{verbatim}
+\normalsize
+
 \begin{description}
-\item {\ct CHID} is character string
-of 30 characters or less used to tag output files with a given
-character string. If, for example, {\ct CHID='WTC\_05\_v5'}, it is convenient to
+\item {\ct CHID} is a string
+of 30 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05\_v5'}, it is convenient to
 name the input data file {\ct WTC\_05\_v5.fds} so that the input file
 can be associated with the output files. No periods or spaces are allowed in
 {\ct CHID} because the output files are tagged with suffixes that
 are meaningful to certain computer operating systems.
-\item {\ct TITLE} is a character string of 60 characters or less that describes the
-problem.
+\item {\ct TITLE} is a string of 60 characters or less that describes the
+simulation. It is simply descriptive text that is passed to various output files.
 \end{description}
 
-\footnotesize
-\begin{verbatim}
-&HEAD CHID='WTC_05_v5',TITLE='WTC Phase 1, Test 5, FDS version 5' /
-\end{verbatim}
-\normalsize
+
 
 \section{Simulation Time: The \texorpdfstring{{\tt TIME}}{TIME} Namelist Group (Table \ref{tbl:TIME})}%Bryan
 \label{info:TIME}
 
-{\ct TIME} is the name of a group of parameters which define the time
+{\ct TIME} is the name of a group of parameters time define the time
 duration of the simulation and the initial time step used to advance
 the solution of the discretized equations. Usually, only the
 duration of the simulation is required on this line, via the
@@ -1232,7 +1185,7 @@ If {\ct TWFIN} is set to zero, only the set-up work is
 performed, allowing you to quickly check the geometry in
 Smokeview.
 
-The initial time step size can also be prescribed with
+The initial time step size can be specified with
 {\ct DT}. This parameter is normally set automatically by dividing the size of a grid cell by the
 characteristic velocity of the flow.
 During the calculation, the time step is adjusted so that the CFL (Courant, Friedrichs, Lewy) condition is
@@ -1240,6 +1193,15 @@ satisfied. The default value of {\ct DT} is $5 \, (\dx \, \dy \, \dz)^\ot/\sqrt{
 $\dx$, $\dy$, and $\dz$ are the dimensions of the smallest grid
 cell, $H$ is the height of the computational domain, and $g$ is the acceleration of gravity.
 
+\begin{warning}
+If something sudden is to
+happen right at the start of a simulation, like a sprinkler activation, it is a good idea to set the initial time step
+to avoid a numerical instability caused by too large a time step. Experiment with different values of {\ct DT}
+by monitoring the initial time step sizes
+recorded in the output file {\bf job\_name.out}.
+\end{warning}
+
+\noindent
 One additional parameter in the {\ct TIME} group is {\ct SYNCHRONIZE}, a
 logical flag ({\ct .TRUE.} or {\ct .FALSE.}) indicating that in a
 multi-mesh computation the time step for each mesh should be the same, thus
@@ -1287,6 +1249,7 @@ Note that it is best if the mesh cells resemble cubes, that is, the
 length, width and height of the cells ought to be roughly the same.
 \end{warning}
 
+\noindent
 Because an important part of the calculation uses a Poisson solver based on
 Fast Fourier Transforms (FFTs) in the $y$ and $z$ directions, the second and third dimensions
 of the grid should each be of the form $2^l \, 3^m \, 5^n$, where
@@ -1467,7 +1430,7 @@ than a transformation in one coordinate direction. Experiment with different mes
 strategies to see how much of a penalty you will pay.
 \end{warning}
 
-
+\noindent
 Here is an example of how to do a mesh transformation. Suppose your mesh is defined
 
 \footnotesize
@@ -1602,9 +1565,10 @@ left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line
 of the input file {\bf plume.fds}, or whatever you have chosen to
 name the input file. The existence of a restart file with the same
 {\ct CHID} as the original job tells FDS
-to continuing saving the new data in the same files as the old.  If a {\ct RESTART\_CHID} is specified that
-is different from {\ct CHID}, then the new data will be written to new data files using {\ct CHID} to generate
-the file names.
+to continue saving the new data in the same files as the old.  If {\ct RESTART\_CHID} is also specified on the
+{\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified
+{\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the
+old output files will not be altered.
 
 When running the restarted job, the diagnostic
 output of the restarted job is appended to the file {\bf CHID.out} that was created by
@@ -1620,15 +1584,14 @@ The default for {\ct DT\_RESTART} is 1000000, meaning no restart files are
 created unless you gracefully stop a job by
 creating a dummy file called {\bf CHID.stop}.
 
-It is now also possible by use of the new control function feature, see Section~\ref{info:CTRL}
-to stop a caculation or dump a restart file when the computation reaches
-some measureable condition such as the first sprinkler activation.
-
+It is also possible to use the new control function feature (see Section~\ref{info:CTRL})
+to stop a calculation or dump a restart file when the computation reaches
+some measurable condition such as a first sprinkler activation.
 
 Between job stops and restarts, major changes cannot be made in the calculation
 like adding or removing vents and obstructions. The changes are limited to those parameters that do
 not instantly alter the existing flow field. Since the restart
-capability has been used infrequently at NIST, it should be considered
+capability has been used infrequently by the developers, it should be considered
 a fragile construct. Examine the output
 to ensure that no sudden or unexpected events occur during the stop and
 restart.
