@@ -1808,8 +1808,7 @@ If an obstruction is not to be punctured by a {\ct HOLE}, add
 {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.
 
 It is a good idea to inspect the geometry by running either a setup job
-({\ct TWFIN=0} on the {\ct TIME} line) or a short-time job to test the operation of
-{\ct T\_CREATE} and/or {\ct T\_REMOVE}.
+({\ct TWFIN=0} on the {\ct TIME} line) or a short-time job to test the operation of devices and control functions.
 
 \begin{warning}
 \noindent
@@ -5360,12 +5359,12 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\ \hline \hline
-{\ct DEVC\_NAME}  & Character         & {\ct ID} of {\ct DEViCe} to control hole's existence         &       &           \\ \hline
-{\ct CTRL\_NAME}  & Character         & {\ct ID} of {\ct ConTRoL} to control hole's existence         &       &           \\ \hline
-{\ct RGB(3)   }     & Real Triplet      & Color indices for obstruction(s) to be cut    &       &           \\ \hline %Bryan What is this?
-{\ct XB(6)    }     & Real Sextuplet    & Physical coordinates                          & m     &           \\ \hline
-{\ct TRANSPARENCY}     & Real    & Transparency of obstruction                          &       &           \\ \hline
-{\ct COLOR    }     & Character   & Color name of obstruction color                     &       &           \\ \hline
+{\ct COLOR    }    & Character         & Color name of obstruction color                           &       &           \\ \hline
+{\ct CTRL\_ID}     & Character         & {\ct ID} of {\ct ConTRoL} to control hole's existence     &       &           \\ \hline
+{\ct DEVC\_ID}     & Character         & {\ct ID} of {\ct DEViCe} to control hole's existence      &       &           \\ \hline
+{\ct RGB(3)   }    & Integer Triplet   & Color indices (0 - 255) for obstruction(s) to be cut      &       &           \\ \hline %Bryan What is this?
+{\ct XB(6)    }    & Real Sextuplet    & Physical coordinates                                      & m     &           \\ \hline
+{\ct TRANSPARENCY} & Real              & Transparency of obstruction                               &       &           \\ \hline
 \end{tabular*}
 \end{table}
 
@@ -5527,22 +5526,23 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\ \hline \hline
-{\ct BNDF\_BLOCK}         & Logical             & Draw Boundary Info                    &    & {\ct .TRUE.}  \\ \hline
-{\ct DEVC\_CREATE }       & Character           & {\ct ID} of Controlling {\ct DEViCe}  &    &               \\ \hline
-{\ct DEVC\_REMOVE }       & Character           & {\ct ID} of Controlling {\ct DEViCe}  &    &               \\ \hline
-{\ct TRANSPARENCY}        & Real                & Transparency of obstruction           & 1  &               \\ \hline
+{\ct ALLOW\_VENT}         & Logical             & Allow vent to be placed on obstruction&    & {\ct .TRUE.}  \\ \hline
+{\ct BNDF\_FACE(-3:3)}    & Logical Array       & Draw Boundary Info                    &    & {\ct .TRUE.}  \\ \hline
+{\ct BNDF\_OBST}          & Logical             & Draw Boundary Info                    &    & {\ct .TRUE.}  \\ \hline
 {\ct COLOR    }           & Character           & Color name of obstruction color       &    &               \\ \hline
+{\ct CTRL\_ID }           & Character           & {\ct ID} of Controlling {\ct ConTRoL} &    &               \\ \hline
+{\ct DEVC\_ID }           & Character           & {\ct ID} of Controlling {\ct DEViCe}  &    &               \\ \hline
 {\ct OUTLINE}             & Logical             & Draw as Outline                       &    & {\ct .FALSE.} \\ \hline
 {\ct PERMIT\_HOLE}        & Logical             & Allow a Hole                          &    & {\ct .TRUE.}  \\ \hline
-{\ct RGB(3)}              & Real Triplet        & Color indices                         &    &               \\ \hline
+{\ct REMOVABLE}           & Logical             & Allow obstruction to be removed       &    & {\ct .TRUE.}  \\ \hline
+{\ct RGB(3)}              & Integer Triplet     & Color indices (0 - 255)               &    &               \\ \hline
 {\ct SAWTOOTH}            & Logical             & Smooth Obstruction                    &    & {\ct .FALSE.} \\ \hline
 {\ct SURF\_ID}            & Character           & Associated Surface                    &    &               \\ \hline
 {\ct SURF\_IDS(3)}        & Character Triplet   & Associated Surfaces (top,side,bot.)   &    &               \\ \hline
 {\ct SURF\_ID6(6)}        & Character Sextuplet & Associated Surfaces (like {\ct XB}    &    &               \\ \hline
-{\ct T\_CREATE}           & Real                & Time to Create Obstruction            & s  &               \\ \hline
-{\ct T\_REMOVE}           & Real                & Time to Remove Obstruction            & s  &               \\ \hline
-{\ct TEXTURE\_ORIGIN(3)}  & Real Triplet        & Coordinates of Texture Map            &    &               \\ \hline
 {\ct THICKEN}             & Logical             & No Thin Obstructions                  &    & {\ct .FALSE.} \\ \hline
+{\ct TEXTURE\_ORIGIN(3)}  & Real Triplet        & Coordinates of Texture Map            &    &               \\ \hline
+{\ct TRANSPARENCY}        & Real                & Transparency of obstruction           & 1  &               \\ \hline
 {\ct XB(6) }              & Real Sextuplet      & Physical coordinates                  & m  &               \\ \hline
 \end{tabular*}
 \end{table}
@@ -5562,33 +5562,33 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\ \hline \hline
-{\ct AGE}                       & Real          & Droplet lifetime                  & s          & 100000        \\ \hline
-{\ct COLOR}                     & Character     & Color name of obstruction color   &            &               \\ \hline
-{\ct DENSITY}                   & Real          & Droplet density                   & kg/m$^3$   & 1000          \\ \hline
-{\ct DIAMETER}                  & Real          & Median Volumetric Diameter        & $\mu$m     & 100           \\ \hline
-{\ct DROPLETS\_PER\_SECOND}     & Integer       & Drops per second per head         &            & 1000          \\ \hline
-{\ct DT\_INSERT}                & Real          & Time between particle insertions  & s          & 0.05          \\ \hline
-{\ct FUEL}                      & Logical       & Liquid Fuel                       &            & {\ct .FALSE.} \\ \hline
-{\ct GAMMA\_D}                  & Real          & Parameter for size distribution   &            & 2.4           \\ \hline
-{\ct HEAT\_OF\_COMBUSTION}      & Real          & Heat of Combustion                & kJ/kg      &               \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION}    & Real          & Latent Heat of Vaporization       & kJ/kg      & 2259          \\ \hline
-{\ct HORIZONTAL\_VELOCITY}      & Real          & Velocity on horizontal surface    & m/s        &  0.5          \\ \hline
-{\ct ID}                        & Character     & Identifier                        &            &               \\ \hline
-{\ct INITIAL\_TEMPERATURE}      & Real          & Initial Temperature               & $^\circ$C  & {\ct TMPA}    \\ \hline
-{\ct MASSLESS}                  & Logical       & Massless tracers                  &            & {\ct .FALSE.} \\ \hline
-{\ct MASS\_PER\_VOLUME}         & Real          & Droplet mass per unit volume      & kg/m$^3$   & 1             \\ \hline
-{\ct MELTING\_TEMPERATURE}      & Real          & Melting Temperature               & $^\circ$C  & 0             \\ \hline
-{\ct NUMBER\_INITIAL\_DROPLETS} & Integer       & Number of droplets at start       &            & 0             \\ \hline
-{\ct QUANTITY}                  & Character     & Quantity for coloring             &            &               \\ \hline
-{\ct RGB(3)}                    & Real Triplet  & Color indices                     &            &               \\ \hline
-{\ct SAMPLING\_FACTOR}          & Integer       & Filter for output file            &            & 1             \\ \hline
-{\ct SPEC\_ID}                  & Character     & Name of gas species               &            &               \\ \hline
-{\ct SPECIFIC\_HEAT}            & Real          & Droplet specific heat             & kJ/kg/K    & 4.184         \\ \hline
-{\ct STATIC}                    & Logical       & Stationary Particles              &            & {\ct .FALSE.} \\ \hline
-{\ct VAPORIZATION\_TEMPERATURE} & Real          & Liquid Droplet Boiling Temp       & $^\circ$C  & 100           \\ \hline
-{\ct VERTICAL\_VELOCITY}        & Real          & Velocity on vertical surface      & m/s        &  0.2          \\ \hline
-{\ct XB(6)}                     & Real          & Initial particle placement region & m          &               \\ \hline
-{\ct WATER}                     & Logical       & Water Droplet                     &            & {\ct .FALSE.} \\ \hline
+{\ct AGE}                       & Real            & Droplet lifetime                  & s         & 100000        \\ \hline
+{\ct COLOR}                     & Character       & Color name of obstruction color   &           &               \\ \hline
+{\ct DENSITY}                   & Real            & Droplet density                   & kg/m$^3$  & 1000          \\ \hline
+{\ct DIAMETER}                  & Real            & Median Volumetric Diameter        & $\mu$m    & 100           \\ \hline
+{\ct DROPLETS\_PER\_SECOND}     & Integer         & Drops per second per head         &           & 1000          \\ \hline
+{\ct DT\_INSERT}                & Real            & Time between particle insertions  & s         & 0.05          \\ \hline
+{\ct FUEL}                      & Logical         & Liquid Fuel                       &           & {\ct .FALSE.} \\ \hline
+{\ct GAMMA\_D}                  & Real            & Parameter for size distribution   &           & 2.4           \\ \hline
+{\ct HEAT\_OF\_COMBUSTION}      & Real            & Heat of Combustion                & kJ/kg     &               \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION}    & Real            & Latent Heat of Vaporization       & kJ/kg     & 2259          \\ \hline
+{\ct HORIZONTAL\_VELOCITY}      & Real            & Velocity on horizontal surface    & m/s       &  0.5          \\ \hline
+{\ct ID}                        & Character       & Identifier                        &           &               \\ \hline
+{\ct INITIAL\_TEMPERATURE}      & Real            & Initial Temperature               & $^\circ$C & {\ct TMPA}    \\ \hline
+{\ct MASSLESS}                  & Logical         & Massless tracers                  &           & {\ct .FALSE.} \\ \hline
+{\ct MASS\_PER\_VOLUME}         & Real            & Droplet mass per unit volume      & kg/m$^3$  & 1             \\ \hline
+{\ct MELTING\_TEMPERATURE}      & Real            & Melting Temperature               & $^\circ$C & 0             \\ \hline
+{\ct NUMBER\_INITIAL\_DROPLETS} & Integer         & Number of droplets at start       &           & 0             \\ \hline
+{\ct QUANTITY}                  & Character       & Quantity for coloring             &           &               \\ \hline
+{\ct RGB(3)}                    & Integer Triplet & Color indices (0-255)             &           &               \\ \hline
+{\ct SAMPLING\_FACTOR}          & Integer         & Filter for output file            &           & 1             \\ \hline
+{\ct SPEC\_ID}                  & Character       & Name of gas species               &           &               \\ \hline
+{\ct SPECIFIC\_HEAT}            & Real            & Droplet specific heat             & kJ/kg/K   & 4.184         \\ \hline
+{\ct STATIC}                    & Logical         & Stationary Particles              &           & {\ct .FALSE.} \\ \hline
+{\ct VAPORIZATION\_TEMPERATURE} & Real            & Liquid Droplet Boiling Temp       & $^\circ$C & 100           \\ \hline
+{\ct VERTICAL\_VELOCITY}        & Real            & Velocity on vertical surface      & m/s       &  0.2          \\ \hline
+{\ct XB(6)}                     & Real            & Initial particle placement region & m         &               \\ \hline
+{\ct WATER}                     & Logical         & Water Droplet                     &           & {\ct .FALSE.} \\ \hline
 \end{tabular*}
 \end{table}
 
@@ -5816,55 +5816,55 @@ Only prescribe those parameters which are necessary to describe the desired scen
 %\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\ \hline \hline
-{\ct ADIABATIC}                         & Logical       & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
-{\ct BACKING}                           & Character     & Back face boundary condition      &                     & {\ct 'VOID'}            \\ \hline
-{\ct BURN\_AWAY}                        & Logical       & Object can vanish                 &                     & {\ct .FALSE.}           \\ \hline
-{\ct COLOR    }                         & Character     & Surface Color                     &                     &                         \\ \hline
-{\ct CONVECTIVE\_HEAT\_FLUX}            & Real          & Heat flux at surface              & kW/m$^2$            & 0.                      \\ \hline
-{\ct DUCT\_PATH}                        & Integer Pair  & Pressure Zones for fans           &                     & 0,0                     \\ \hline
-{\ct E\_COEFFICIENT}                    & Real          & Extinguishing coefficient         & 1/s                 & 0.                      \\ \hline
-{\ct EXTERNAL\_FLUX}                    & Real          & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
-{\ct GEOMETRY}                          & Character     & Geometry type                     &                     &                         \\ \hline
-{\ct HRRPUA }                           & Real          & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
-{\ct ID     }                           & Character     & IDentifier                        &                     &                         \\ \hline
-{\ct LEAK\_PATH}                        & Integer Pair  & Pressure Zones for leakage        &                     &                         \\ \hline
-{\ct MASS\_FLUX(I)}                     & Real Array    & For species {\ct I}               &                     &                         \\ \hline
-{\ct MASS\_FLUX\_TOTAL}                 & Real          & Total Mass Flux                   &                     &                         \\ \hline
-{\ct MASS\_FRACTION(I)}                 & Real Array    & For species {\ct I}               &                     &                         \\ \hline
-{\ct MATL\_ID}                          & Char. 2D Array& (Layer,Component)                 &                     &                         \\ \hline
-{\ct MATL\_MASS\_FRACTION}              & Real 2D Array & (Layer,Component)                 &                     &                         \\ \hline
-{\ct MAX\_PRESSURE }                    & Real          & Maximum over-pressure for fan     & Pa                  & 100.                    \\ \hline
-{\ct MATL\_MASS\_FRACTION}              & Real 2D Array & (Layer,Component)                 &                     &                         \\ \hline
-{\ct NPPC}                              & Integer       & Number of particles per cell      &                     & 1                       \\ \hline
-{\ct PARTICLE\_MASS\_FLUX}              & Real          & Mass flux of particles            & kg/m$^2$/s          & 0.                      \\ \hline
-{\ct PART\_ID}                          & Character     & Lagrangian Particle ID            &                     &                         \\ \hline
-{\ct POROUS}                            & Logical       & Non-solid boundary                &                     & {\ct .FALSE.}           \\ \hline
-{\ct PLE}                               & Real          & Atmospheric profile exponent      &                     & 0.3                     \\ \hline
-{\ct PROFILE}                           & Character     & Name of velocity profile          &                     &                         \\ \hline
-{\ct RAMP\_MF(I)}                       & Character     & Ramp ID for species I             &                     &                         \\ \hline
-{\ct RAMP\_Q}                           & Character     & Ramp ID for HRR                   &                     &                         \\ \hline
-{\ct RAMP\_T}                           & Character     & Ramp ID for temp.                 &                     &                         \\ \hline
-{\ct RAMP\_V}                           & Character     & Ramp ID for velocity              &                     &                         \\ \hline
-{\ct RGB(3)}                            & Real Triplet  & Color indices for surface         &                     & \small 255,204,102      \\ \hline
-{\ct SHRINK}                            & Logical       & Shrinking thickness               &                     & {\ct .TRUE.}            \\ \hline
-{\ct SLIP\_FACTOR    }                  & Real          & Velocity Slip Condition           &                     & 0.5                     \\ \hline
-{\ct STRETCH\_FACTOR    }               & Real          & Solid phase noding parameter      &                     & 2.0                     \\ \hline
-{\ct TAU\_MF(I)}                        & Real Array    & Ramp time for species {\ct I}     & s                   & 1.     \\ \hline
-{\ct TAU\_Q}                            & Real          & Ramp time for HRR                 & s                   & 1.     \\ \hline
-{\ct TAU\_T}                            & Real          & Ramp time for temp.               & s                   & 1.     \\ \hline
-{\ct TAU\_V}                            & Real          & Ramp time for velocity            & s                   & 1.     \\ \hline
-{\ct TEXTURE\_HEIGHT}                   & Real          & Height of texture image           & m                   & 1.     \\ \hline
-{\ct TEXTURE\_MAP}                      & Character     & Name of texture map file          &                     &        \\ \hline
-{\ct TEXTURE\_WIDTH}                    & Real          & Width of texture image            & m                   & 1.     \\ \hline
-{\ct THICKNESS(IL)}                     & Real Array    & Thickness of Layer {\ct IL}       & m                   & 0.1    \\ \hline
-{\ct TMP\_BACK}                         & Real          & Back surface temperature          & $^\circ$C           & 20.    \\ \hline
-{\ct TMP\_FRONT}                        & Real          & Front surface temperature         & $^\circ$C           & 20.    \\ \hline
-{\ct TMP\_INNER}                        & Real          & Initial solid temperature         & $^\circ$C           & 20.    \\ \hline
-{\ct TRANSPARENCY}                      & Real          & Transparency of obstruction       &    1                &           \\ \hline
-{\ct VEL    }                           & Real          & Normal velocity                   & m/s                 & 0.     \\ \hline
-{\ct VEL\_T }                           & Real Pair     & Tangential velocity components    & m/s                 & 0.     \\ \hline
-{\ct VOLUME\_FLUX}                      & Real          & Normal velocity x vent area       & m$^3$/s             & 0.     \\ \hline
-{\ct Z0 }                               & Real          & Atmospheric profile origin        &  m                  & 10.    \\ \hline
+{\ct ADIABATIC}                       & Logical         & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
+{\ct BACKING}                         & Character       & Back face boundary condition      &                     & {\ct 'VOID'}            \\ \hline
+{\ct BURN\_AWAY}                      & Logical         & Object can vanish                 &                     & {\ct .FALSE.}           \\ \hline
+{\ct COLOR    }                       & Character       & Surface Color                     &                     &                         \\ \hline
+{\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Heat flux at surface              & kW/m$^2$            & 0.                      \\ \hline
+{\ct DUCT\_PATH}                      & Integer Pair    & Pressure Zones for fans           &                     & 0,0                     \\ \hline
+{\ct E\_COEFFICIENT}                  & Real            & Extinguishing coefficient         & 1/s                 & 0.                      \\ \hline
+{\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
+{\ct GEOMETRY}                        & Character       & Geometry type                     &                     &                         \\ \hline
+{\ct HRRPUA }                         & Real            & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
+{\ct ID     }                         & Character       & IDentifier                        &                     &                         \\ \hline
+{\ct LEAK\_PATH}                      & Integer Pair    & Pressure Zones for leakage        &                     &                         \\ \hline
+{\ct MASS\_FLUX(I)}                   & Real Array      & For species {\ct I}               &                     &                         \\ \hline
+{\ct MASS\_FLUX\_TOTAL}               & Real            & Total Mass Flux                   &                     &                         \\ \hline
+{\ct MASS\_FRACTION(I)}               & Real Array      & For species {\ct I}               &                     &                         \\ \hline
+{\ct MATL\_ID}                        & Char. 2D Array  & (Layer,Component)                 &                     &                         \\ \hline
+{\ct MATL\_MASS\_FRACTION}            & Real 2D Array   & (Layer,Component)                 &                     &                         \\ \hline
+{\ct MAX\_PRESSURE }                  & Real            & Maximum over-pressure for fan     & Pa                  & 100.                    \\ \hline
+{\ct MATL\_MASS\_FRACTION}            & Real 2D Array   & (Layer,Component)                 &                     &                         \\ \hline
+{\ct NPPC}                            & Integer         & Number of particles per cell      &                     & 1                       \\ \hline
+{\ct PARTICLE\_MASS\_FLUX}            & Real            & Mass flux of particles            & kg/m$^2$/s          & 0.                      \\ \hline
+{\ct PART\_ID}                        & Character       & Lagrangian Particle ID            &                     &                         \\ \hline
+{\ct POROUS}                          & Logical         & Non-solid boundary                &                     & {\ct .FALSE.}           \\ \hline
+{\ct PLE}                             & Real            & Atmospheric profile exponent      &                     & 0.3                     \\ \hline
+{\ct PROFILE}                         & Character       & Name of velocity profile          &                     &                         \\ \hline
+{\ct RAMP\_MF(I)}                     & Character       & Ramp ID for species I             &                     &                         \\ \hline
+{\ct RAMP\_Q}                         & Character       & Ramp ID for HRR                   &                     &                         \\ \hline
+{\ct RAMP\_T}                         & Character       & Ramp ID for temp.                 &                     &                         \\ \hline
+{\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
+{\ct RGB(3)}                          & Integer Triplet & Color indices (0-255) for surface &                     & \small 255,204,102      \\ \hline
+{\ct SHRINK}                          & Logical         & Shrinking thickness               &                     & {\ct .TRUE.}            \\ \hline
+{\ct SLIP\_FACTOR    }                & Real            & Velocity Slip Condition           &                     & 0.5                     \\ \hline
+{\ct STRETCH\_FACTOR    }             & Real            & Solid phase noding parameter      &                     & 2.0                     \\ \hline
+{\ct TAU\_MF(I)}                      & Real Array      & Ramp time for species {\ct I}     & s                   & 1.     \\ \hline
+{\ct TAU\_Q}                          & Real            & Ramp time for HRR                 & s                   & 1.     \\ \hline
+{\ct TAU\_T}                          & Real            & Ramp time for temp.               & s                   & 1.     \\ \hline
+{\ct TAU\_V}                          & Real            & Ramp time for velocity            & s                   & 1.     \\ \hline
+{\ct TEXTURE\_HEIGHT}                 & Real            & Height of texture image           & m                   & 1.     \\ \hline
+{\ct TEXTURE\_MAP}                    & Character       & Name of texture map file          &                     &        \\ \hline
+{\ct TEXTURE\_WIDTH}                  & Real            & Width of texture image            & m                   & 1.     \\ \hline
+{\ct THICKNESS(IL)}                   & Real Array      & Thickness of Layer {\ct IL}       & m                   & 0.1    \\ \hline
+{\ct TMP\_BACK}                       & Real            & Back surface temperature          & $^\circ$C           & 20.    \\ \hline
+{\ct TMP\_FRONT}                      & Real            & Front surface temperature         & $^\circ$C           & 20.    \\ \hline
+{\ct TMP\_INNER}                      & Real            & Initial solid temperature         & $^\circ$C           & 20.    \\ \hline
+{\ct TRANSPARENCY}                    & Real            & Transparency of obstruction       &    1                &           \\ \hline
+{\ct VEL    }                         & Real            & Normal velocity                   & m/s                 & 0.     \\ \hline
+{\ct VEL\_T }                         & Real Pair       & Tangential velocity components    & m/s                 & 0.     \\ \hline
+{\ct VOLUME\_FLUX}                    & Real            & Normal velocity x vent area       & m$^3$/s             & 0.     \\ \hline
+{\ct Z0 }                             & Real            & Atmospheric profile origin        &  m                  & 10.    \\ \hline
 %\end{tabular*}
 \end{longtable}
 
@@ -5938,7 +5938,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct MB    }                & Character         & Coordinate Plane                  &             &                     \\ \hline
 {\ct OUTLINE}               & Logical           & Draw vent as outline              &             &  {\ct .FALSE.}      \\ \hline
 {\ct PBX, PBY, PBZ  }       & Real              & Coordinate Plane                  &             &                     \\ \hline
-{\ct RGB(3)   }             & Real Triplet      & Color indices                     &             &                     \\ \hline
+{\ct RGB(3)   }             & Integer Triplet   & Color indices (0-255)             &             &                     \\ \hline
 {\ct SPREAD\_RATE}          & Real              & Rate of fire spread               & m/s         &  0.0                \\ \hline
 {\ct SURF\_ID}              & Character         & Associated Surface                &             &  {\ct 'INERT'}      \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}    & Real Triplet      & Coordinates of Texture Map        & m           &                     \\ \hline
