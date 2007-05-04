@@ -5468,7 +5468,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
    SPECIAL_DETECTION_QUANTITIES: SELECT CASE (DV%QUANTITY)
 
-      CASE('obscuration')
+      CASE('path obscuration')
          NM = DV%MESH
          M=>MESHES(NM)
          DISTANCE = SQRT((DV%X1-DV%X2)**2 + (DV%Y1-DV%Y2)**2 + (DV%Z1-DV%Z2)**2)
