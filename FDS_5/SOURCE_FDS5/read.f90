@@ -5021,6 +5021,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    CALL SET_DEVC_DEFAULTS
    READ(LU5,DEVC) 
 
+
    IF (XB(1)>-1.E5_EB) THEN
       XYZ(1) = 0.5_EB*(XB(1)+XB(2))
       XYZ(2) = 0.5_EB*(XB(3)+XB(4))
@@ -5036,6 +5037,13 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
 
    BAD = .FALSE.
    MESH_LOOP: DO NM=1,NMESHES
+      IF (QUANTITY=='TIME') THEN
+         MESH_NUMBER=1
+         XYZ(1) = MESHES(1)%XS
+         XYZ(2) = MESHES(1)%YS
+         XYZ(3) = MESHES(1)%ZS
+         CYCLE MESH_LOOP
+      ENDIF
       M=>MESHES(NM)
       IF (.NOT.EVACUATION_ONLY(NM)) THEN      
          IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
@@ -5045,7 +5053,6 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
       ENDIF
       IF (NM==NMESHES) BAD = .TRUE.
    ENDDO MESH_LOOP
-
    ! Make sure there is either a QUANTITY or PROP_ID for the DEVICE
 
    IF (QUANTITY=='null' .AND. PROP_ID=='null') THEN
