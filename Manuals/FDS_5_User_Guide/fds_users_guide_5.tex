@@ -3097,8 +3097,13 @@ smoke particles were implicitly defined. Shortcuts for defining water droplets a
 
 
 
+
+
+
+
+
 \clearpage
-\section{Devices and their Properties}
+\section{Devices and Control Logic}
 
 Sprinklers, smoke detectors, heat flux gauges, and thermocouples
 may seem to be completely unrelated, but from the point of view
@@ -3114,18 +3119,80 @@ of fire-specific sensing and measurement devices continues to expand, and
 the data structures in FDS could not easily accommodate all possibilities.
 In addition, the logic associated with sensor activation and
 subsequent actions, like a vent opening, had become too complicated and prone to bugs.
-Devices are now specified with a new format that greatly simplifies and expands the possibilities of sensor profiles.
+Devices are now specified with a new format that streamlines and expands the possibilities of sensor profiles.
 
-Starting in FDS 5, any device is defined by only two namelist groups, {\ct PROP} and {\ct DEVC}.
-The first group, {\ct PROP}, assigns the properties of the device, like the RTI of a sprinkler.
-The second group, {\ct DEVC}, places the device within the computational domain,
-indicating its location, orientation, and other parameters that may change from point to point. Consider the following set of input lines:
+Starting in FDS 5, all devices, in the broadest sense of the word, are designated via the namelist group {\ct DEVC}.
+In addition, advanced functionality and properties are accommodated via additional namelists groups called {\ct CTRL} (Control) and
+{\ct PROP} (Properties).
+
+
+
+
+\subsection{Device Location and Orientation: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group (Table \ref{tbl:DEVC})}
+\label{info:DEVC}
+
+Regardless of the specific properties, each device needs to be sited either at a point within the computational domain, or
+over a span of the domain, like a beam smoke detector. For example, a sprinkler is sited within the domain with a line like:
 
 \footnotesize
 \begin{verbatim}
-&PROP ID='K-11', CLASS='SPRINKLER', RTI=148., C_FACTOR=0.7, ACTIVATION_TEMPERATURE=74.,
-      OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3, DROPLET_VELOCITY=10.,
-      SPRAY_ANGLE=30.,80.   /
+&DEVC XYZ=3.0,5.6,2.3, PROP_ID='Acme Sprinkler 123', ID='Spk_39' /
+\end{verbatim}
+\normalsize
+
+\noindent
+The physical coordinates of the
+device are given by a triplet of real numbers {\ct XYZ}.
+The properties of the device are contained on the {\ct PROP} line {\ct PROP\_ID}, which will be explained below for each of the
+special devices included in FDS.
+The character string {\ct ID} is merely a descriptor to identify the
+device in the output files, and if any action is tied to its activation.
+Some devices have a particular orientation. For example, the (normally) downward-directed sprinkler
+spray can be redirected in some other direction. The triplet
+{\ct ORIENTATION} can be added to a given {\ct DEVC} line to change the direction of the spray.
+The default value of {\ct ORIENTATION} is (0,0,-1), but if you were
+to prescribe
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=3.0,5.6,2.3, PROP_ID='...', ID='...', ORIENTATION=1,0,0 /
+\end{verbatim}
+\normalsize
+
+\noindent
+the sprinkler would point in the positive $x$ direction.
+For other devices, the {\ct ORIENTATION} would only change the way the device is drawn by Smokeview.
+
+
+
+
+
+
+
+
+\subsection{Special Devices and their Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
+\label{info:PROP}
+
+Many devices are fairly easy to describe, like a point measurement, with only a few parameters which can be included on the
+{\ct DEVC} line. However, for more complicated devices, it is inconvenient to list all of the properties on each and every
+{\ct DEVC} line. For example, a simulation might include hundreds of sprinklers, but it is tedious to list the properties of the
+sprinkler each time the sprinkler is sited. For these devices, use a separate namelist group called {\ct PROP} to store the relevant parameters.
+Each {\ct PROP} line is identified by a unique {\ct ID}, and invoked by a {\ct DEVC} line by the string {\ct PROP\_ID}.
+The {\ct ID} might be the manufacturer's
+name, like {\ct 'ACME Sprinkler 123'}, for example.
+
+The best way to describe the {\ct PROP} group is to list the various special devices and their properties.
+
+
+\subsubsection{Sprinklers}
+
+Here is a very simple example of sprinkler:
+
+\footnotesize
+\begin{verbatim}
+&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
+      ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
+      DROPLET_VELOCITY=10., SPRAY_ANGLE=30.,80.   /
 
 &DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
 \end{verbatim} \normalsize
@@ -3133,30 +3200,12 @@ indicating its location, orientation, and other parameters that may change from 
 \noindent
 A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties are given on
 the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with another, so try to use {\ct ID}s that are as
-meaningful to you as possible.  The parameter {\ct CLASS='SPRINKLER'} {\em does} have a specific meaning to FDS, directing it to compute the activation of
-the device using the algorithm associated with the word {\ct 'SPRINKLER'}. The various sprinkler properties will be discussed below.
+meaningful to you as possible.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does} have a specific meaning to FDS, directing it to compute the activation of
+the device using the standard RTI algorithm. The various sprinkler properties will be discussed below.
 \footnote{Past versions of FDS used a separate file to store
 properties of a given sprinkler. This file is no longer used.}
 
-
-\subsection{Device Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
-\label{info:PROP}
-
-The parameters in this group define the properties of any device in FDS.
-Each device needs an {\ct ID}, a character string to which it will
-be referred by other input lines. The {\ct ID} might be the manufacturers
-name, like {\ct 'ACME Sprinkler 123'}, for example. Each device also
-needs to be associated with a particular sub-model that describes what it does.
-The parameter is called {\ct CLASS}, and it currently includes the choices
-{\ct 'SPRINKLER'}, {\ct 'NOZZLE'}, {\ct 'HEAT DETECTOR'},
-{\ct 'SMOKE DETECTOR'}, and {\ct 'UNSPECIFIED'}. These keywords or phrases
-must be entered exactly as written here.
-The {\ct CLASS} ties the device to a particular algorithm, and a specific visual
-representation in Smokeview.
-
-\subsubsection{Sprinkler Properties}
-
-The {\ct 'SPRINKLER'} class properties included in the {\ct PROP} group are:
+Properties associated with sprinklers included in the {\ct PROP} group are:
 \begin{description}
 \item[{\ct RTI}] Response Time Index in units of $\sqrt{\hbox{m}\cdot \hbox{s}}$. (Default 165.)
 \item[{\ct C\_FACTOR}] in units of $\sqrt{\hbox{m/s}}$. (Default 0.)
@@ -3192,37 +3241,39 @@ add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} (Section~\ref{info:
 droplets that land on the floor continue to move horizontally in randomly selected
 directions; bouncing off obstructions, and consuming CPU time.
 
-\begin{warning}
 \noindent
-Note that if one wishes to have a sprinkler activate by some means other than using an {\ct RTI} and {\ct
-ACTIVATION\_TEMPERATURE}, then use {\ct CLASS='NOZZLE'} along with specifying a {\ct QUANTITY} and {\ct SETPOINT},
-see Section~\ref{info:openclose}, or either a {\ct DEVC\_ID} or {\ct CTRL\_ID}, see Section~\ref{info:CTRL}.
-An example of this can be found in the verification case {\bf water\_fuel\_sprays.fds}
-\end{warning}
-\footnotesize
-\begin{verbatim}
-&HEAD CHID='water_fuel_sprays', TITLE='UL/NFPRF Heptane Spray Burner' /
-...
-&PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane drops', FLOW_RATE=2.132,
-      FLOW_TAU=-50., DROPLET_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
-...
-&DEVC XYZ=23.91,21.28,0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME',
-      SETPOINT=0., ID='noz_1' /
-\end{verbatim}
-\normalsize
-
 For more information about sprinklers, their activation and spray dynamics, is included in the FDS
 Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 
 
 
-\subsubsection{Heat Detector Properties}
+\subsubsection{Nozzles}
 
-{\ct CLASS='HEAT DETECTOR'}, as in this example, defines a heat detector, which uses essentially the same activation algorithm as a sprinkler, without the water spray.
+Nozzles are very much like sprinklers, only they do not activate based on the standard RTI model.
+To simulate a nozzle that activates at a given time, for example,
+specify a {\ct QUANTITY} and {\ct SETPOINT} directly on the {\ct DEVC} line. More about the idea of a {\em setpoint} can be found in
+Sections~\ref{info:openclose} and \ref{info:CTRL}.
+An example of a nozzle can be found in the verification case {\bf water\_fuel\_sprays.fds}
 
 \footnotesize
 \begin{verbatim}
-&PROP ID='Acme Heat', CLASS='HEAT DETECTOR', RTI=132., ACTIVATION_TEMPERATURE=74. /
+&PROP ID='nozzle', PART_ID='heptane drops', FLOW_RATE=2.132,
+      FLOW_TAU=-50., DROPLET_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
+&DEVC XYZ=23.91,21.28,0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME',
+      SETPOINT=0., ID='noz_1' /
+\end{verbatim}
+\normalsize
+
+
+
+
+\subsubsection{Heat Detectors}
+
+{\ct QUANTITY='LINK TEMPERATURE'}, as in this example, defines a heat detector, which uses essentially the same activation algorithm as a sprinkler, without the water spray.
+
+\footnotesize
+\begin{verbatim}
+&PROP ID='Acme Heat', QUANTITY='LINK TEMPERATURE', RTI=132., ACTIVATION_TEMPERATURE=74. /
 \end{verbatim}
 
 \normalsize
@@ -3233,13 +3284,13 @@ $\sqrt{\hbox{m}\cdot \hbox{s}}$.
 
 
 
-\subsubsection{Smoke Detectors Properties}
+\subsubsection{Smoke Detectors}
 \label{info:smoke_detector}
 The {\ct 'SMOKE DETECTOR'} class is defined in the input file with an entry similar to:
 
 \footnotesize
 \begin{verbatim}
-&PROP ID='Acme Smoke Detector', CLASS='SMOKE DETECTOR', LENGTH=1.8,
+&PROP ID='Acme Smoke Detector', QUANTITY='spot obscuration', LENGTH=1.8,
       ACTIVATION_OBSCURATION=3.28 /
 \end{verbatim}
 
@@ -3249,7 +3300,7 @@ for the single parameter Heskestad model, or
 
 \footnotesize
 \begin{verbatim}
-&PROP ID='Acme Smoke Detector', CLASS='SMOKE DETECTOR', ALPHA_C=1.8, BETA_C=-1.1,
+&PROP ID='Acme Smoke Detector', QUANTITY='spot obscuration', ALPHA_C=1.8, BETA_C=-1.1,
       ALPHA_E=0.98, BETA_E=-0.77, ACTIVATION_OBSCURATION=3.28 /
 \end{verbatim}
 
@@ -3283,43 +3334,7 @@ Heskestad Ionization          & ---         & ---          &  1.8               
 
 
 
-\subsection{Device Location and Orientation: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group (Table \ref{tbl:DEVC})}
-\label{info:DEVC}
-
-Regardless of the specific properties, each device needs to be sited either at a point within the computational domain, or
-over a span of the domain, like a beam smoke detector. For example, a sprinkler is sited within the domain with a line like:
-
-\footnotesize
-\begin{verbatim}
-&DEVC XYZ=3.0,5.6,2.3, PROP_ID='Acme Sprinkler 123', ID='Spk_39' /
-\end{verbatim}
-\normalsize
-
-\noindent
-The physical coordinates of the
-device are given by a triplet of real numbers {\ct XYZ}.
-The properties of the device are contained on the {\ct PROP} line {\ct PROP\_ID}.
-The character string {\ct ID} is merely a descriptor to identify the
-device in the output files, and if any action is tied to its activation.
-Some devices have a particular orientation. For example, the (normally) downward-directed sprinkler
-spray can be redirected in some other direction. The triplet
-{\ct ORIENTATION} can be added to a given {\ct DEVC} line to change the direction of the spray.
-The default value of {\ct ORIENTATION} is (0,0,-1), but if you were
-to prescribe
-
-\footnotesize
-\begin{verbatim}
-&DEVC XYZ=3.0,5.6,2.3, PROP_ID='...', ID='...', ORIENTATION=1,0,0 /
-\end{verbatim}
-\normalsize
-
-\noindent
-the sprinkler would point in the positive $x$ direction.
-For other devices, the {\ct ORIENTATION} would only change the way the device is drawn by Smokeview.
-
-
-
-\subsubsection{Creating or Removing Obstructions; Opening or Closing Vents}
+\subsection{Creating or Removing Obstructions; Opening or Closing Vents}
 \label{info:openclose}
 
 Devices can open and close vents, and add and remove obstructions and holes.
@@ -3449,6 +3464,9 @@ For example, to control a fan via the device {\ct 'det2'}, set
 \noindent
 Also note that none of these
 control parameters should be applied to a {\ct MIRROR} or {\ct OPEN} boundary.
+
+
+
 
 
 \clearpage
@@ -4107,6 +4125,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct INCIDENT\_HEAT\_FLUX}                      & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct INSIDE\_WALL\_TEMPERATURE}                 & See Section~\ref{info:PROF}                   & $^\circ$C      & D            \\ \hline
 {\ct LAYER HEIGHT}                              & See Section~\ref{info:layerheight}            & m              & D            \\ \hline
+{\ct LINK TEMPERATURE}                          & See Section~\ref{info:heatdetector}           & $^\circ$C      & D            \\ \hline
 {\ct LOWER TEMPERATURE}                         & See Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
 \end{tabular}
 \label{tab:output}
