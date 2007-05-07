@@ -481,6 +481,8 @@ on various uses of the model.
 
 \mainmatter
 
+
+
 \chapter{Introduction}
 
 The software described in this document, Fire Dynamics Simulator (FDS), is a computational
@@ -936,9 +938,9 @@ control functions as described in Section~\ref{info:CTRL}.
 
 
 
-\section{Having Problems?}
+\chapter{User Support}
 
-We're not surprised.  It is not unusual over the course of a
+It is not unusual over the course of a
 project to run into various problems, some related to FDS, some related to your computer. FDS is not a typical PC application. It is a serious
 calculation that pushes your computer's processor and memory to its limits. In fact, there are no hardwired bounds within FDS  that
 prevent you from starting a calculation that is too much for your hardware.
@@ -953,8 +955,103 @@ dissect a given scenario into its constitutive parts. For example, do not attemp
 building unless you have simulated the burning of the various combustibles with relatively small calculations. The examples described in the
 FDS Verification and Validation Guide~\cite{FDS_VV_Guide_5} should help you to develop larger, more complicated simulations from smaller building blocks.
 
-Chapter~\ref{info:Support} provides some guidance for trouble-shooting, but no single error message can tell you exactly how to design a
-better simulation. It takes practice and experience with real fire.
+Along with the FDS User's Guide, there are resources
+available on the internet. These include ``Issue Trackers,'' which allow you to report bugs and ask specific clarifying questions, and ``Group Discussions,'' which
+support more general topics than just specific problems. Before using these on-line resources, it is important to first try to solve your own problems by
+performing simple test calculations, or debugging your input file. The next few sections provide a list of error statements and suggestions on how to solve
+problems.
+
+\section{Common Error Statements}%Bryan
+
+An FDS calculation may end before the user-prescribed time limit.
+Following is a list of common error statements and how to diagnose the problems:
+\begin{description}
+\item[{\bf Input File Errors}:] The most common errors in FDS are due to mis-typed input statements.
+These errors result in the immediate halting of the program and a statement like, ``ERROR: Problem
+with the HEAD line.'' For these errors, check the line in the input file named in the error statement.
+Make sure the parameter names are spelled correctly. Make sure that a / (forward slash)
+is put at the end of each namelist entry. Make sure that the right type of information is
+being provided for each parameter, like whether one real number is expected, or several integers, or
+whatever. Make sure there are no non-ASCII characters being used, as can sometimes happen when text is
+cut and pasted from other applications or word-processing software. Make sure zeros are zeros and
+O's are O's. Make sure 1's are not !'s. Make sure apostrophes are used to designate character strings.
+Make sure the text file on a Unix/Linux machine was not created on a DOS machine, and {\em vice versa}.
+Make sure that all the parameters listed are still being used -- new versions of FDS often drop or
+change parameters to force you to re-examine old input files.
+
+\item [{\bf Numerical Instability Errors}:] It is possible that during an FDS calculation the flow
+velocity at some location in the domain can increase due to numerical error causing the time step
+size to decrease to a point where logic in the code decides that the results are unphysical
+and stops the calculation with an error message in the file {\bf CHID.out}.
+In these cases, FDS ends by dumping out one final
+Plot3D file giving the user some means by which to see where the
+error is occurring within the computational domain. Usually, a numerical
+instability can be identified by fictitiously large velocity vectors emanating from
+a small region within the domain. Common causes of such instabilities are
+mesh cells that have an aspect ratio larger than 2 to 1, high speed flow through a small
+opening, a sudden change in the heat release rate, or any number of sudden changes to the
+flow field. There are various ways to solve the problem, depending on the situation.
+Try to diagnose and fix the problem before reporting it. It is difficult
+for anyone but the originator of the input file to diagnose the problem.
+
+\item[{\bf Inadequate Computer Resources}:] The calculation might be using more RAM than the machine
+has, or the output files could have used up all the available disk space. In these situations, the
+computer may or may not produce an intelligible error message. Sometimes the computer is just
+unresponsive. It is the user's responsibility to ensure that the computer has adequate resources to
+do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it
+depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh,
+and gradually make refinements until the computer can no longer handle it. Then back off
+somewhat on the size of the calculation so that the computer can comfortably run the
+case. Trying to run with 90~\% to 100~\% of computer resources is risky.
+In fact, for a typical Windows PC with 4 GB RAM, only 2 GB will be available to FDS, based on user feedback.
+
+\item[{\bf Run-Time Errors}:] An error occurs either within the computer operating system or the
+FDS program. An error message is printed out by the operating system of
+the computer onto the screen or into the diagnostic output file. This
+message is most often unintelligible to most people, including the programmers,
+although occasionally one might get a small clue if there is mention of a specific problem,
+like ``stack overflow,'' ``divide by zero,'' or ``file write error, unit=...''
+These errors may be caused by a bug in FDS, for example if a number is divided by zero,
+or an array is used before it is allocated, or any number of other problems.
+Before reporting the error to the SourceForge Support Tracker, try to systematically simplify the
+input file until the error goes away. This process usually brings to light some feature of the
+calculation responsible for the problem and helps in the debugging.
+
+\item[{\bf Poisson Initialization}:] Sometimes at the very start of a calculation, an error
+appears stating that there is a problem with the ``Poisson initialization.'' The equation for
+pressure in FDS is known as the Poisson equation. The Poisson solver consists of large system
+of linear equations that must be initialized at the start of the calculation.
+Most often, an error in the initialization step is due to a mesh {\ct IJK} dimension
+being less than 4 (except in the case of a two-dimensional calculation). It is also possible that something is
+fundamentally wrong with the coordinates of the computational domain. Diagnose the problem by
+checking the {\ct MESH} lines in the input file.
+\end{description}
+
+
+\section{Support Requests and Bug Tracking}%Bryan
+
+Because FDS development is on-going, problems will inevitably occur
+with various routines and features. The developers need to know if a certain
+feature is not working, and reporting problems is encouraged. However, the
+problem must be clearly identified. The best way to do this is to simplify
+the input file as much as possible so that the bug can be diagnosed.
+Also, limit the bug reports to those features that clearly do not work.
+Physical problems such as fires that do not ignite, flames that do not
+spread, {\em etc.}, may be related to the mesh resolution or scenario
+formulation and need to be investigated first by the user before being
+reported. If an error message originates from the operating system as
+opposed to FDS, first investigate some of the more obvious possibilities,
+such as memory size, disk space, {\em etc.}
+
+If that does not solve the problem, report the problem with as much information about the error message and
+circumstances related to the problem. The input file should be simplified
+as much as possible so that the bug occurs early in the calculation.
+Attach the simplified input file if necessary, following the instructions provided at the web site.  In this way, the developers can
+quickly run the problem input file and hopefully diagnose the problem.
+
+
+
+
 
 
 
@@ -1595,6 +1692,23 @@ capability has been used infrequently by the developers, it should be considered
 a fragile construct. Examine the output
 to ensure that no sudden or unexpected events occur during the stop and
 restart.
+
+
+\subsection{Defying Gravity}
+\label{info:GVEC}
+
+Most users of FDS assume that the acceleration of gravity points toward
+the negative end of the $z$ axis, or more simply, downward.
+However, to change the direction of gravity to model
+a sloping roof or tunnel, for example, specify the gravity
+vector on the {\ct MISC} line with a triplet of numbers of the form
+{\ct GVEC=0.0, 0.0, -9.81} (units are m/s$^2$). This is the default, but it
+can be changed to be any direction.
+
+Note: if sprinklers are specified, the gravity vector must not be
+changed. Much of the logic governing the trajectories of water droplets
+over solid objects assumes that gravity points in the negative $z$
+direction.
 
 
 
@@ -2731,9 +2845,14 @@ be listed with monotonically increasing {\ct T}.
 \end{warning}
 
 
+
+
+
 \clearpage
 \section{Combustion Parameters: The \texorpdfstring{{\tt REAC}}{REAC} Namelist Group}
 \label{info:REAC}
+
+\subsection{Mixture Fraction-Based Combustion}
 
 There are two ways of designating a fire: the first is to specify a
 Heat Release Rate Per Unit Area {\ct HRRPUA} on a
@@ -2843,7 +2962,8 @@ A few sample {\ct REAC} lines are given here. The values are for demonstration o
 \normalsize
 
 
-\subsection{Important Issues Related to Combustion}%Simo
+
+\subsection{Important Issues Related to the Mixture Fraction Models}
 \label{info:combustion}
 
 This section explains the various approximations that
@@ -2895,23 +3015,6 @@ differs from the global reaction, the {\ct HEAT\_OF\_COMBUSTION} is
 used to ensure that an equivalent amount of fuel is injected into the
 flow domain from the burning object.
 
-\vspace{\baselineskip}
-\noindent
-{\bf Predicting the Burning Rate:} Either
-prescribe the burning rate of the fuel via the parameter {\ct HRRPUA}
-on the {\ct SURF} line, or let the burning rate be
-predicted based on the fuel's thermal properties and solid phase reaction parameters given on the
-{\ct MATL} line. This latter action introduces a fair
-amount of uncertainty into the calculation because the burning rate
-is a function of the energy fed back from the fire via convection and
-radiation.
-The various phenomena are still subjects of active research, so
-be aware of the potential errors introduced into the
-calculation. One of the greatest sources of error is the radiative
-heat flux from the fire to the fuel surface. The error is due to a
-combination of insufficient grid resolution in the boundary layer, and
-uncertainty in the absorption coefficient and flame temperature.
-As a result, the heat flux to the fuel surface is subject to considerable uncertainty.
 
 
 \vspace{\baselineskip}
@@ -2949,6 +3052,62 @@ increase runtimes and memory usage accordingly.  If the simulation you are
 performing will not result in an underventilated fire, then there will be of
 little if any benefit to enabling the CO production algorithm.
 \end{warning}
+
+
+
+
+\subsection{Finite-Rate Combustion}
+\label{info:finite}
+
+Usually, FDS uses mixture fraction concepts to describe combustion. However, FDS can also explicitly track gas species and
+reactions that can occur between them. This section describes how to do this.
+
+\begin{enumerate}
+\item It is strongly recommended that finite-rate reactions be invoked only
+when FDS is running in DNS mode. Set {\ct DNS=.TRUE.} on the {\ct MISC} line.
+Note: you may use the finite-rate reaction scheme in an
+LES calculation, but because the temperature in a large scale calculation
+is smeared out over a grid cell, some of the reaction parameters may need
+to be modified to account for the lower temperatures.
+
+\item The {\ct BACKGROUND\_SPECIES} on the {\ct MISC} line is normally
+set to be {\ct 'NITROGEN'}.
+
+\item The namelist group {\ct SPEC} is used to specify each additional
+species. Do not enter a {\ct SPEC} line for the background species.
+
+\item Read Section~\ref{info:SPEC} for a description of the boundary
+conditions for the gas species.
+
+\item The {\ct REAC} namelist group is used to designate the fuel and the reaction rate
+parameters.  For a finite-rate reaction you can specify multiple {\ct REAC}lines.  Note that
+FDS will evalute the reactions in the order they are listed in the input file. %Bryan don't know how to do what you ask %Jason add tech man ref
+\begin{description}
+\item[{\ct FUEL}] Character string indicating which of the listed
+optional gas species is the fuel.
+\item[{\ct OXIDIZER}] Character string indicating which of the listed
+optional gas species is the oxidizerl.
+\item[{\ct BOF}] Pre-exponential factor in one-step chemical reaction in
+units of cm$^3$/mole/s.
+\item[{\ct E}] Activation energy for one-step chemical reaction in
+units of kJ/kmol.
+\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where
+negative values indicate reactants and positive values indicate products.  Note that the background species
+cannot participate in the reaction.
+\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}.
+Note that a {\ct SPEC} can be given an {\ct N\_S} but not a {\ct NU}, i.e the rate equation can
+be dependent on a species that does not participate directly in the reaction.  Note that the background species
+cannot participate in the reaction.
+\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion the chemical reaction in units of kJ/kg. (Default 40,000 kJ/kg)
+\end{description}
+
+\end{enumerate}
+
+
+
+
+
+
 
 \clearpage
 \section{Lagrangian Particles: The \texorpdfstring{{\tt PART}}{PART} Namelist Group}
@@ -3093,6 +3252,51 @@ smoke particles were implicitly defined. Shortcuts for defining water droplets a
 {\ct WATER=.TRUE.} and {\ct MASSLESS=.TRUE.}
 \end{warning}
 
+
+\subsection{Burning Liquid Fuel Droplets}
+
+The evaporation of water droplets from sprinklers has been
+generalized so that a liquid fuel spray
+nozzle can be modeled. Fuel evaporation is triggered by the inclusion of the
+phrase {\ct FUEL=.TRUE.} on the appropriate {\ct PART} line.
+The spray nozzle characteristics are specified
+in the same way as those for a sprinkler. Here is an example of a liquid fuel spray nozzle ({\bf spray\_burner} in the V\&V Guide):
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
+
+&PART ID='heptane droplets', FUEL=.TRUE., VAPORIZATION_TEMPERATURE=98.,
+      HEAT_OF_VAPORIZATION=316., SPECIFIC_HEAT=2.25, DENSITY=688.,
+      QUANTITIES(1:2)='DROPLET_DIAMETER','DROPLET_TEMPERATURE',
+      DROPLETS_PER_SECOND=2000, DIAMETER=1000., HEAT_OF_COMBUSTION=44500.,
+      DT_INSERT=0.02, SAMPLING_FACTOR=1 /
+
+&PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets', FLOW_RATE=1.96,
+      FLOW_RAMP='fuel', DROPLET_VELOCITY=10., SPRAY_ANGLE=0.,30.    /
+&RAMP ID='fuel', T= 0.0, F=0.0 /
+&RAMP ID='fuel', T=20.0, F=1.0 /
+&RAMP ID='fuel', T=40.0, F=1.0 /
+&RAMP ID='fuel', T=60.0, F=0.0 /
+\end{verbatim}
+\normalsize
+
+\noindent
+The vaporization (boiling) temperature of
+the liquid fuel is in degrees Celsius, the heat of vaporization
+is in units of kJ/kg, the specific heat is in units of
+kJ/kg/K, and the density is in units of kg/m$^3$.
+{\ct FUEL=.TRUE.} automatically
+invokes a mixture fraction calculation in which fuel
+from the evaporating fuel droplets is burned according to the overall reaction scheme.
+
+Note
+that this construct is fragile and subject to grid
+dependence. If the grid cells are too coarse, the
+evaporating fuel is diluted to such a degree that it
+never burns. Proper resolution depends on the type of
+fuel and the amount of fuel being ejected from the
+nozzle.
 
 
 
@@ -4686,100 +4890,8 @@ The nozzle activates when both detection \underline{and} the time delay have occ
 
 
 
-\section{Finite-Rate or Premixed Combustion}
-\label{info:finite}
 
-By default, FDS assumes that the fire is essentially an infinitely-fast
-reaction between fuel and oxygen, and this reaction is not dependent on
-the surrounding gas temperature.
-If a finite-rate or a pre-mixed reaction is desired, the
-following steps must be taken:
 
-\begin{enumerate}
-\item It is strongly recommended that finite-rate reactions be invoked only
-when FDS is running in DNS mode. Set {\ct DNS=.TRUE.} on the {\ct MISC} line.
-Note: you may use the finite-rate reaction scheme in an
-LES calculation, but because the temperature in a large scale calculation
-is smeared out over a grid cell, some of the reaction parameters may need
-to be modified to account for the lower temperatures.
-
-\item The {\ct BACKGROUND\_SPECIES} on the {\ct MISC} line is normally
-set to be {\ct 'NITROGEN'}.
-
-\item The namelist group {\ct SPEC} is used to specify each additional
-species. Do not enter a {\ct SPEC} line for the background species.
-
-\item Read Section~\ref{info:SPEC} for a description of the boundary
-conditions for the gas species.
-
-\item The {\ct REAC} namelist group is used to designate the fuel and the reaction rate
-parameters.  For a finite-rate reaction you can specify multiple {\ct REAC}lines.  Note that
-FDS will evalute the reactions in the order they are listed in the input file. %Bryan don't know how to do what you ask %Jason add tech man ref
-\begin{description}
-\item[{\ct FUEL}] Character string indicating which of the listed
-optional gas species is the fuel.
-\item[{\ct OXIDIZER}] Character string indicating which of the listed
-optional gas species is the oxidizerl.
-\item[{\ct BOF}] Pre-exponential factor in one-step chemical reaction in
-units of cm$^3$/mole/s.
-\item[{\ct E}] Activation energy for one-step chemical reaction in
-units of kJ/kmol.
-\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where
-negative values indicate reactants and positive values indicate products.  Note that the background species
-cannot participate in the reaction.
-\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}.
-Note that a {\ct SPEC} can be given an {\ct N\_S} but not a {\ct NU}, i.e the rate equation can
-be dependent on a species that does not participate directly in the reaction.  Note that the background species
-cannot participate in the reaction.
-\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion the chemical reaction in units of kJ/kg. (Default 40,000 kJ/kg)
-\end{description}
-
-\end{enumerate}
-
-\section{Burning Liquid Fuel Droplets}
-
-The evaporation of water droplets from sprinklers has been
-generalized so that a liquid fuel spray
-nozzle can be modeled. Fuel evaporation is triggered by the inclusion of the
-phrase {\ct FUEL=.TRUE.} on the appropriate {\ct PART} line.
-The spray nozzle characteristics are specified
-in the same way as those for a sprinkler. Here is an example of a liquid fuel spray nozzle ({\bf spray\_burner} in the V\&V Guide):
-
-\footnotesize
-\begin{verbatim}
-&DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
-
-&PART ID='heptane droplets', FUEL=.TRUE., VAPORIZATION_TEMPERATURE=98.,
-      HEAT_OF_VAPORIZATION=316., SPECIFIC_HEAT=2.25, DENSITY=688.,
-      QUANTITIES(1:2)='DROPLET_DIAMETER','DROPLET_TEMPERATURE',
-      DROPLETS_PER_SECOND=2000, DIAMETER=1000., HEAT_OF_COMBUSTION=44500.,
-      DT_INSERT=0.02, SAMPLING_FACTOR=1 /
-
-&PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets', FLOW_RATE=1.96,
-      FLOW_RAMP='fuel', DROPLET_VELOCITY=10., SPRAY_ANGLE=0.,30.    /
-&RAMP ID='fuel', T= 0.0, F=0.0 /
-&RAMP ID='fuel', T=20.0, F=1.0 /
-&RAMP ID='fuel', T=40.0, F=1.0 /
-&RAMP ID='fuel', T=60.0, F=0.0 /
-\end{verbatim}
-\normalsize
-
-\noindent
-The vaporization (boiling) temperature of
-the liquid fuel is in degrees Celsius, the heat of vaporization
-is in units of kJ/kg, the specific heat is in units of
-kJ/kg/K, and the density is in units of kg/m$^3$.
-{\ct FUEL=.TRUE.} automatically
-invokes a mixture fraction calculation in which fuel
-from the evaporating fuel droplets is burned according to the overall reaction scheme.
-
-Note
-that this construct is fragile and subject to grid
-dependence. If the grid cells are too coarse, the
-evaporating fuel is diluted to such a degree that it
-never burns. Proper resolution depends on the type of
-fuel and the amount of fuel being ejected from the
-nozzle.
 
 
 
@@ -4928,143 +5040,8 @@ Section~\ref{info:combustion}.
 
 
 
-\section{Defying Gravity}
-\label{info:GVEC}
-
-Most users of FDS assume that the acceleration of gravity points toward
-the negative end of the $z$ axis, or more simply, downward.
-However, to change the direction of gravity to model
-a sloping roof or tunnel, for example, specify the gravity
-vector on the {\ct MISC} line with a triplet of numbers of the form
-{\ct GVEC=0.0, 0.0, -9.81} (units are m/s$^2$). This is the default, but it
-can be changed to be any direction.
-
-Note: if sprinklers are specified, the gravity vector must not be
-changed. Much of the logic governing the trajectories of water droplets
-over solid objects assumes that gravity points in the negative $z$
-direction.
 
 
-\chapter{Troubleshooting and Support}%Bryan
-
-\label{info:Support}
-
-This chapter will attempt to address many of the most common problems that users
-encounter when running FDS.  In coordination with the release of FDS version 5,
-more resources have been assembled for assisting in the process of solving the
-problems you might encounter.
-
-Along with this users guide, there are resources
-available on the internet. A good starting point is the FDS project home page at
-\href{http://fds-sv.sourceforge.net}{{\ct http://fds-sv.sourceforge.net}}.  There is also
-now a user support forum and support request tracker that can be found through the website on the
-\href{http://sourceforge.net/projects/fds-sv}{{\ct http://sourceforge.net/projects/fds-sv}} website.
-
-\section{Common Error Statements}%Bryan
-
-An FDS calculation may end before the user-prescribed time limit.
-More error related information can be found on the FDS-SV Website.
-Following is a list of common error statements and how to diagnose the problems:
-\begin{description}
-\item[{\bf Input File Errors}:] The most common errors in FDS are due to mis-typed input statements.
-These errors result in the immediate halting of the program and a statement like, ``ERROR: Problem
-with the HEAD line.'' For these errors, check the line in the input file named in the error statement.
-Make sure the parameter names are spelled correctly. Make sure that a / (forward slash)
-is put at the end of each namelist entry. Make sure that the right type of information is
-being provided for each parameter, like whether one real number is expected, or several integers, or
-whatever. Make sure there are no non-ASCII characters being used, as can sometimes happen when text is
-cut and pasted from other applications or word-processing software. Make sure zeros are zeros and
-O's are O's. Make sure 1's are not !'s. Make sure apostrophes are used to designate character strings.
-Make sure the text file on a Unix/Linux machine was not created on a DOS machine, and {\em vice versa}.
-Make sure that all the parameters listed are still being used -- new versions of FDS often drop or
-change parameters to force you to re-examine old input files.
-
-\item [{\bf Numerical Instability Errors}:] It is possible that during an FDS calculation the flow
-velocity at some location in the domain can increase due to numerical error causing the time step
-size to decrease to a point where logic in the code decides that the results are unphysical
-and stops the calculation with an error message in the file {\bf CHID.out}.
-In these cases, FDS ends by dumping out one final
-Plot3D file giving the user some means by which to see where the
-error is occurring within the computational domain. Usually, a numerical
-instability can be identified by fictitiously large velocity vectors emanating from
-a small region within the domain. Common causes of such instabilities are
-mesh cells that have an aspect ratio larger than 2 to 1, high speed flow through a small
-opening, a sudden change in the heat release rate, or any number of sudden changes to the
-flow field. There are various ways to solve the problem, depending on the situation.
-Try to diagnose and fix the problem before reporting it. It is difficult
-for anyone but the originator of the input file to diagnose the problem.
-
-\item[{\bf Inadequate Computer Resources}:] The calculation might be using more RAM than the machine
-has, or the output files could have used up all the available disk space. In these situations, the
-computer may or may not produce an intelligible error message. Sometimes the computer is just
-unresponsive. It is the user's responsibility to ensure that the computer has adequate resources to
-do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it
-depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh,
-and gradually make refinements until the computer can no longer handle it. Then back off
-somewhat on the size of the calculation so that the computer can comfortably run the
-case. Trying to run with 90~\% to 100~\% of computer resources is risky.
-In fact, for a typical Windows PC with 4 GB RAM, only 2 GB will be available to FDS, based on user feedback.
-
-\item[{\bf Run-Time Errors}:] An error occurs either within the computer operating system or the
-FDS program. An error message is printed out by the operating system of
-the computer onto the screen or into the diagnostic output file. This
-message is most often unintelligible to most people, including the programmers,
-although occasionally one might get a small clue if there is mention of a specific problem,
-like ``stack overflow,'' ``divide by zero,'' or ``file write error, unit=...''
-These errors may be caused by a bug in FDS, for example if a number is divided by zero,
-or an array is used before it is allocated, or any number of other problems.
-Before reporting the error to the SourceForge Support Tracker, try to systematically simplify the
-input file until the error goes away. This process usually brings to light some feature of the
-calculation responsible for the problem and helps in the debugging.
-
-\item[{\bf Poisson Initialization}:] Sometimes at the very start of a calculation, an error
-appears stating that there is a problem with the ``Poisson initialization.'' The equation for
-pressure in FDS is known as the Poisson equation. The Poisson solver consists of large system
-of linear equations that must be initialized at the start of the calculation.
-Most often, an error in the initialization step is due to a mesh {\ct IJK} dimension
-being less than 4 (except in the case of a two-dimensional calculation). It is also possible that something is
-fundamentally wrong with the coordinates of the computational domain. Diagnose the problem by
-checking the {\ct MESH} lines in the input file.
-\end{description}
-
-
-\section{Support Requests and Bug Tracking}%Bryan
-Because FDS development is on-going, problems will inevitably occur
-with various routines and features. The developers need to know if a certain
-feature is not working, and reporting problems is encouraged. However, the
-problem must be clearly identified. The best way to do this is to simplify
-the input file as much as possible so that the bug can be diagnosed.
-Also, limit the bug reports to those features that clearly do not work.
-Physical problems such as fires that do not ignite, flames that do not
-spread, {\em etc.}, may be related to the mesh resolution or scenario
-formulation and need to be investigated first by the user before being
-reported. If an error message originates from the operating system as
-opposed to FDS, first investigate some of the more obvious possibilities,
-such as memory size, disk space, {\em etc.}
-
-If that does not solve the problem, report the problem to the SourceForge.net
-Support Tracker with as much information about the error message and
-circumstances related to the problem. The input file should be simplified
-as much as possible so that the bug occurs early in the calculation.
-Attach the simplified Input file to the Support Tracker.  In this way, the developers can
-quickly run the problem input file and hopefully diagnose the problem.
-
-A \href{https://sourceforge.net/tracker/?group_id=183854&atid=906915}{``Support Requests'' Tracker}
-has been setup on the Sourceforge website to handle the reporting of
-problems and possible bugs to the FDS developers.  You must have an account
-and be logged into the Sourceforge site to submit new Support Requests.
-For more information about submitting a support request, see the User Support section of the FDS webpage:
-\href{http://www.fds-smv.net}{{\ct http://www.fds-smv.net}}
-
-\begin{warning}
-\noindent
-``Bugs" should not be reported directly by a user to the Bugs Tracker.
-If your Support Request is due to a ``Bug" with the FDS program,
-the Support Request will be converted into a ``Confirmed Bug'' report and will be tracked
-with the ``Confirmed Bugs" Tracker.  You will be notified of this change via the
-response to your Support Request and then will be able to monitor the bug tracker
-for the solution when it is posted.
-\end{warning}
 
 
 
@@ -5075,7 +5052,7 @@ for the solution when it is posted.
 
 \addcontentsline{toc}{chapter}{Appendices}
 
-\chapter{Compiling FDS}%Bryan - Generalize and move details to website.
+\chapter{Compiling FDS}
 \label{info:compilation}
 
 This section describes what you need to know if you want to compile the FDS source code yourself.
