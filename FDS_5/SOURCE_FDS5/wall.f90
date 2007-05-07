@@ -90,7 +90,6 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
          TMP_W(IW) = TMP_F(IW)
  
       CASE (SPECIFIED_TEMPERATURE) METHOD_OF_HEAT_TRANSFER
-
          TMP_G = TMP(IIG,JJG,KKG)
          TMP_F(IW) = TMP_0(KK) + EVALUATE_RAMP(T-TW(IW),SF%TAU(TIME_TEMP),SF%RAMP_INDEX(TIME_TEMP))*(SF%TMP_FRONT-TMP_0(KK))
          DTMP = TMP_G - TMP_F(IW)
@@ -100,7 +99,6 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
          CP_TERM   = MAX(0._EB,-CP_GAMMA*UW(IW)*RHOWAL)
          TMP_W(IW) = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G + CP_TERM*TMP_F(IW)-QCONF(IW) )/(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
          TMP_W(IW) = MAX(TMPMIN,TMP_W(IW))
- 
       CASE (ADIABATIC_INDEX) METHOD_OF_HEAT_TRANSFER
          TMP_G = TMP(IIG,JJG,KKG)
          TMP_OTHER = TMP_F(IW)
@@ -824,13 +822,11 @@ WALL_CELL_LOOP: DO IW=1,NWC
    RHO_S   = 0._EB
    RHOCBAR = 0._EB
    E_WALL(IW) = 0._EB
-   
    POINT_LOOP3: DO I=1,NWP
       VOLSUM = 0._EB
       MATERIAL_LOOP3: DO N=1,SF%N_MATL
          IF (WC%RHO_S(I,N)==0._EB) CYCLE MATERIAL_LOOP3
          ML  => MATERIAL(SF%MATL_INDEX(N))
-
          VOLSUM = VOLSUM + WC%RHO_S(I,N)/ML%RHO_S
          IF (ML%K_S>0._EB) THEN  
             K_S(I) = K_S(I) + WC%RHO_S(I,N)*ML%K_S/ML%RHO_S
@@ -847,7 +843,6 @@ WALL_CELL_LOOP: DO IW=1,NWC
             NR     = -NINT(ML%C_S)
             RHOCBAR(I) = RHOCBAR(I) + WC%RHO_S(I,N)*EVALUATE_RAMP(WC%TMP_S(I),0._EB,NR)*1000.
          ENDIF
-
          IF (I.EQ.1) E_WALL(IW) = E_WALL(IW) + WC%RHO_S(I,N)*ML%EMISSIVITY/ML%RHO_S
          RHO_S(I)   = RHO_S(I) + WC%RHO_S(I,N)
          
@@ -855,7 +850,6 @@ WALL_CELL_LOOP: DO IW=1,NWC
       
       K_S(I) = K_S(I)/VOLSUM
       IF (I.EQ.1) E_WALL(IW) = E_WALL(IW)/VOLSUM
-
    ENDDO POINT_LOOP3
  
    K_S(0)     = K_S(1)     ! Calculate average K_S between at grid cell boundaries. Store result in K_S
