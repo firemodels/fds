@@ -2380,13 +2380,13 @@ REAL(EB) :: ACTIVATION_OBSCURATION,ACTIVATION_TEMPERATURE,ALPHA_C,ALPHA_E,BETA_C
             OFFSET,OPERATING_PRESSURE,RTI
 INTEGER :: N            
 EQUIVALENCE(LENGTH,ALPHA_C)
-CHARACTER(30) :: SMOKEVIEW_ID,CLASS,PART_ID,FLOW_RAMP
+CHARACTER(30) :: SMOKEVIEW_ID,QUANTITY,PART_ID,FLOW_RAMP
 TYPE (PROPERTY_TYPE), POINTER :: PY
 
 NAMELIST /PROP/ ACTIVATION_OBSCURATION,ACTIVATION_TEMPERATURE,ALPHA_C,ALPHA_E,BETA_C,BETA_E, &
-                BEAD_DIAMETER,BEAD_EMISSIVITY,C_FACTOR,CHARACTERISTIC_VELOCITY,CLASS, &
+                BEAD_DIAMETER,BEAD_EMISSIVITY,C_FACTOR,CHARACTERISTIC_VELOCITY, &
                 DROPLET_VELOCITY,FLOW_RATE,FLOW_RAMP,FLOW_TAU,ID,GAUGE_TEMPERATURE,K_FACTOR,LENGTH,OFFSET, &
-                OPERATING_PRESSURE,PART_ID,RTI,SPRAY_ANGLE,SMOKEVIEW_ID
+                OPERATING_PRESSURE,PART_ID,QUANTITY,RTI,SPRAY_ANGLE,SMOKEVIEW_ID
 
 ! Count the PROP lines in the input file
 N_PROP=0
@@ -2429,7 +2429,6 @@ READ_PROP_LOOP: DO N=0,N_PROP
    PY%BEAD_EMISSIVITY          = BEAD_EMISSIVITY
    PY%C_FACTOR                 = C_FACTOR
    PY%CHARACTERISTIC_VELOCITY  = CHARACTERISTIC_VELOCITY
-   PY%CLASS                    = CLASS   
    PY%DROPLET_VELOCITY         = DROPLET_VELOCITY
    IF (FLOW_RAMP /= 'null') THEN
       CALL GET_RAMP_INDEX(FLOW_RAMP,'TIME',PY%FLOW_RAMP_INDEX)
@@ -2452,23 +2451,23 @@ READ_PROP_LOOP: DO N=0,N_PROP
    PY%OFFSET                   = OFFSET
    PY%OPERATING_PRESSURE       = OPERATING_PRESSURE
    PY%PART_ID                  = PART_ID
+   PY%QUANTITY                 = QUANTITY
    PY%RTI                      = RTI
    IF (SMOKEVIEW_ID /= 'null') THEN
       PY%SMOKEVIEW_ID          = SMOKEVIEW_ID
    ELSE
-      SELECT CASE(CLASS)
+      SELECT CASE(QUANTITY)
          CASE DEFAULT
             PY%SMOKEVIEW_ID = 'sensor'
-         CASE('SPRINKLER')
+         CASE('SPRINKLER LINK TEMPERATURE')
             PY%SMOKEVIEW_ID = 'sprinkler_pendent'
-         CASE('NOZZLE')
-            PY%SMOKEVIEW_ID = 'nozzle'
-         CASE('HEAT DETECTOR')
+         CASE('LINK TEMPERATURE')
             PY%SMOKEVIEW_ID = 'heat_detector'
-         CASE('SMOKE DETECTOR')
+         CASE('spot obscuration')
             PY%SMOKEVIEW_ID = 'smoke_detector'
       END SELECT
    ENDIF
+   IF (PY%PART_ID/='null' .AND. PY%QUANTITY/='SPRINKLER LINK TEMPERATURE') PY%SMOKEVIEW_ID = 'nozzle'
    PY%SPRAY_ANGLE(1)           = SPRAY_ANGLE(1)*PI/180._EB
    PY%SPRAY_ANGLE(2)           = SPRAY_ANGLE(2)*PI/180._EB
 
@@ -2490,19 +2489,19 @@ BEAD_DIAMETER            = 0.001       ! m
 BEAD_EMISSIVITY          = 0.85_EB
 C_FACTOR                 = 0.0_EB
 CHARACTERISTIC_VELOCITY  = 1.0_EB      ! m/s
-CLASS                    = 'UNSPECIFIED'
 DROPLET_VELOCITY         = 5._EB       ! m/s
 FLOW_RATE                = -1.         ! L/min
 FLOW_RAMP                = 'null'
 FLOW_TAU                 = 0._EB
 GAUGE_TEMPERATURE        = TMPA - TMPM
-ID                       = 'UNSPECIFIED'
+ID                       = 'null'
 K_FACTOR                 = 1.0_EB      ! L/min/atm**0.5
 OFFSET                   = 0.05_EB     ! m
 OPERATING_PRESSURE       = 1.0_EB      ! atm
 PART_ID                  = 'null'
+QUANTITY                 = 'null'
 RTI                      = 100._EB     ! (ms)**0.5
-SMOKEVIEW_ID          = 'null' 
+SMOKEVIEW_ID             = 'null' 
 SPRAY_ANGLE(1)           = 60._EB      ! degrees
 SPRAY_ANGLE(2)           = 75._EB      ! degrees
 
@@ -5037,13 +5036,6 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
 
    BAD = .FALSE.
    MESH_LOOP: DO NM=1,NMESHES
-      IF (QUANTITY=='TIME') THEN
-         MESH_NUMBER=1
-         XYZ(1) = MESHES(1)%XS
-         XYZ(2) = MESHES(1)%YS
-         XYZ(3) = MESHES(1)%ZS
-         CYCLE MESH_LOOP
-      ENDIF
       M=>MESHES(NM)
       IF (.NOT.EVACUATION_ONLY(NM)) THEN      
          IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
@@ -5053,6 +5045,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
       ENDIF
       IF (NM==NMESHES) BAD = .TRUE.
    ENDDO MESH_LOOP
+
    ! Make sure there is either a QUANTITY or PROP_ID for the DEVICE
 
    IF (QUANTITY=='null' .AND. PROP_ID=='null') THEN
@@ -5354,7 +5347,7 @@ USE DEVICE_VARIABLES, ONLY : DEVICE_TYPE, DEVICE, N_DEVC, N_PROP, PROPERTY
 USE CONTROL_VARIABLES
 ! Process the DEViCes
  
-INTEGER  :: N,NN,NNN,NM,QUANTITY_INDEX,PROP_INDEX,MAXCELLS,I,J,K
+INTEGER  :: N,NN,NNN,NM,QUANTITY_INDEX,MAXCELLS,I,J,K
 REAL(EB) :: XX,YY,ZZ,XX1,YY1,ZZ1,DISTANCE,SCANDISTANCE,DX,DY,DZ
 TYPE (DEVICE_TYPE), POINTER :: DV
  
@@ -5368,6 +5361,29 @@ DEVICE(1:N_DEVC)%COUNT = 0
 PROC_DEVC_LOOP: DO N=1,N_DEVC
 
    DV => DEVICE(N)
+
+   ! Check if the device PROPERTY exists and is appropriate
+
+   DV%PROP_INDEX = 0
+   IF (DV%PROP_ID /= 'null') THEN
+      SUCCESS = .FALSE.
+      SEARCH2: DO NN=1,N_PROP
+         IF (DV%PROP_ID==PROPERTY(NN)%ID) THEN
+            SUCCESS  = .TRUE.
+            DV%PROP_INDEX = NN
+            EXIT SEARCH2
+         ENDIF
+      ENDDO SEARCH2
+      IF (.NOT.SUCCESS) THEN
+         WRITE(MESSAGE,'(3A)')  ' ERROR: DEVC PROPerty ',TRIM(DV%PROP_ID),' not found'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+      IF (DV%QUANTITY=='null' .AND. PROPERTY(DV%PROP_INDEX)%QUANTITY=='null') THEN
+         WRITE(MESSAGE,'(3A)')  ' ERROR: DEVC ',TRIM(DV%ID),' or DEVC PROPerty ',TRIM(DV%PROP_ID),' must have a QUANTITY' 
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+      IF (DV%QUANTITY=='null' .AND. PROPERTY(DV%PROP_INDEX)%QUANTITY/='null') DV%QUANTITY = PROPERTY(DV%PROP_INDEX)%QUANTITY
+   ENDIF
 
    ! Check if the output QUANTITY exists and is appropriate
 
@@ -5403,36 +5419,6 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       ENDIF
    ENDIF
 
-   ! Check if the device PROPERTY exists and is appropriate
-
-   PROP_INDEX = 0
-   IF (DV%PROP_ID /= 'null') THEN
-      SUCCESS = .FALSE.
-      SEARCH2: DO NN=1,N_PROP
-         IF (DV%PROP_ID==PROPERTY(NN)%ID) THEN
-            SUCCESS  = .TRUE.
-            PROP_INDEX = NN
-            EXIT SEARCH2
-         ENDIF
-      ENDDO SEARCH2
-      IF (.NOT.SUCCESS) THEN
-         WRITE(MESSAGE,'(3A)')  ' ERROR: DEVC PROPerty ',TRIM(DV%PROP_ID),' not found'
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
-      IF (DV%QUANTITY=='null') THEN
-         SELECT CASE(PROPERTY(PROP_INDEX)%CLASS)
-            CASE('SPRINKLER')
-               QUANTITY_INDEX = 156
-            CASE('NOZZLE')
-               QUANTITY_INDEX = 156
-            CASE('HEAT DETECTOR')
-               QUANTITY_INDEX = 157
-            CASE('SMOKE DETECTOR')
-               QUANTITY_INDEX = 158
-         END SELECT
-      ENDIF
-   ENDIF
-
    ! Assign properties to the DEVICE array
 
    M  => MESHES(DV%MESH)
@@ -5442,47 +5428,40 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    DV%J                = MAX( 1 , MIN( M%JBAR , FLOOR(GINV(DV%Y-M%YS,2,DV%MESH)*M%RDETA) +1 ) )
    DV%K                = MAX( 1 , MIN( M%KBAR , FLOOR(GINV(DV%Z-M%ZS,3,DV%MESH)*M%RDZETA)+1 ) )
    DV%OUTPUT_INDEX     = QUANTITY_INDEX
-   DV%PROP_INDEX       = PROP_INDEX
    DV%CTRL_INDEX       = 0
    DV%QUANTITY         = OUTPUT_QUANTITY(QUANTITY_INDEX)%NAME
    DV%T                = 0._EB
    DV%TMP_L            = TMPA
    
-   ! Arrays for spot smoke detectors
+   ! Do initialization of special models
    
-   IF (PROPERTY(DV%PROP_INDEX)%CLASS=='SMOKE DETECTOR') THEN
-      ALLOCATE(DV%T_E(-1:10000))
-      ALLOCATE(DV%Y_E(-1:10000))
-      DV%T_E   = T_BEGIN - M%DT
-      DV%Y_E   = 0._EB
-      DV%N_T_E = -1
-      DV%Y_C   = 0._EB
-   ENDIF
+   SPECIAL_QUANTITIES: SELECT CASE (DV%QUANTITY)
+
+      CASE ('spot obscuration') 
+
+         ALLOCATE(DV%T_E(-1:10000))
+         ALLOCATE(DV%Y_E(-1:10000))
+         DV%T_E   = T_BEGIN - M%DT
+         DV%Y_E   = 0._EB
+         DV%N_T_E = -1
+         DV%Y_C   = 0._EB
+         IF (DV%PROP_INDEX > 0) DV%SETPOINT = PROPERTY(DV%PROP_INDEX)%ACTIVATION_OBSCURATION
    
-   !Set setpoint for property type devices
-   IF (DV%PROP_INDEX /= 0) THEN
-      SELECT CASE (PROPERTY(DV%PROP_INDEX)%CLASS)
-         CASE('SMOKE DETECTOR')
-            IF(DV%OUTPUT_INDEX==158) DV%SETPOINT = PROPERTY(DV%PROP_INDEX)%ACTIVATION_OBSCURATION
-         CASE('HEAT DETECTOR')
-            IF(DV%OUTPUT_INDEX==157) DV%SETPOINT = PROPERTY(DV%PROP_INDEX)%ACTIVATION_TEMPERATURE
-         CASE('SPRINKLER')
-            IF(DV%OUTPUT_INDEX==156) DV%SETPOINT = PROPERTY(DV%PROP_INDEX)%ACTIVATION_TEMPERATURE         
-      END SELECT
-   ENDIF
+      CASE ('LINK TEMPERATURE') 
 
-   ! Layer Height Quantities
+         IF (DV%PROP_INDEX > 0) DV%SETPOINT = PROPERTY(DV%PROP_INDEX)%ACTIVATION_TEMPERATURE
 
-   IF (OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%INTEGRATED) THEN
-      DV%K1 = MAX(1     ,DV%K1)
-      DV%K2 = MIN(M%KBAR,DV%K2)
-   ENDIF
-   
-   ! Parameters for various special integrated detectors
+      CASE ('SPRINKLER LINK TEMPERATURE') 
 
-   SPECIAL_DETECTION_QUANTITIES: SELECT CASE (DV%QUANTITY)
+         IF (DV%PROP_INDEX > 0) DV%SETPOINT = PROPERTY(DV%PROP_INDEX)%ACTIVATION_TEMPERATURE
 
-      CASE('path obscuration')
+      CASE ('LAYER HEIGHT','UPPER TEMPERATURE','LOWER TEMPERATURE','UPPER KAPPA') 
+
+         DV%K1 = MAX(1     ,DV%K1)
+         DV%K2 = MIN(M%KBAR,DV%K2)
+
+      CASE ('path obscuration')
+
          NM = DV%MESH
          M=>MESHES(NM)
          DISTANCE = SQRT((DV%X1-DV%X2)**2 + (DV%Y1-DV%Y2)**2 + (DV%Z1-DV%Z2)**2)
@@ -5531,6 +5510,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DV%N_PATH = NN
                      
       CASE ('CONTROL')
+
          DO NN=1,N_CTRL
             IF (CONTROL(NN)%ID==DV%CTRL_ID) DV%CTRL_INDEX = NN
          ENDDO
@@ -5543,8 +5523,9 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DV%TRIP_DIRECTION = 1
 
       CASE ('aspiration')
-         ! Count number of inputs for detector and verify that input is soot density device
+
          NNN = 0
+         ! Count number of inputs for detector and verify that input is soot density device
          DO NN=1,N_DEVC
             IF (DEVICE(NN)%DEVC_ID==DV%ID) THEN
                IF (DEVICE(NN)%QUANTITY /='soot density') THEN
@@ -5555,7 +5536,6 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                NNN = NNN + 1
             ENDIF
          ENDDO
-         !allocate arrays for aspiration system
          ALLOCATE(DV%DEVC_INDEX(NNN),STAT=IZERO)
          CALL ChkMemErr('READ','DV%DEVC_INDEX',IZERO)
          DV%DEVC_INDEX = -1
@@ -5569,7 +5549,6 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DV%DT             = -1._EB
          DV%N_INPUTS = NNN
          NNN = 1
-         !compute data for aspiration system
          DO NN=1,N_DEVC
             IF (DEVICE(NN)%DEVC_ID==DV%ID) THEN
                DV%TOTAL_FLOWRATE  = DV%TOTAL_FLOWRATE + DEVICE(NN)%FLOWRATE
@@ -5585,7 +5564,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          ENDDO
          DV%DT = DV%DT * 0.01_EB
 
-   END SELECT SPECIAL_DETECTION_QUANTITIES
+   END SELECT SPECIAL_QUANTITIES
 
    ! Set state variables
 
@@ -6357,15 +6336,17 @@ OUTPUT_QUANTITY(155)%MIXTURE_FRACTION_ONLY = .TRUE.
 OUTPUT_QUANTITY(155)%INTEGRATED = .TRUE.
 OUTPUT_QUANTITY(155)%SLCF_APPROPRIATE = .FALSE.
 
-OUTPUT_QUANTITY(156)%NAME = 'SPRINKLER_LINK_TEMPERATURE'
+OUTPUT_QUANTITY(156)%NAME = 'SPRINKLER LINK TEMPERATURE'
 OUTPUT_QUANTITY(156)%UNITS = 'C'
 OUTPUT_QUANTITY(156)%SHORT_NAME = 'link'
+OUTPUT_QUANTITY(156)%SLCF_APPROPRIATE = .FALSE.
 
-OUTPUT_QUANTITY(157)%NAME = 'LINK_TEMPERATURE'
+OUTPUT_QUANTITY(157)%NAME = 'LINK TEMPERATURE'
 OUTPUT_QUANTITY(157)%UNITS = 'C'
 OUTPUT_QUANTITY(157)%SHORT_NAME = 'link'
+OUTPUT_QUANTITY(157)%SLCF_APPROPRIATE = .FALSE.
 
-OUTPUT_QUANTITY(158)%NAME = 'obscuration'
+OUTPUT_QUANTITY(158)%NAME = 'spot obscuration'
 OUTPUT_QUANTITY(158)%UNITS = '%/m'
 OUTPUT_QUANTITY(158)%SHORT_NAME = 'obs'
 OUTPUT_QUANTITY(158)%MIXTURE_FRACTION_ONLY = .TRUE.
@@ -6374,13 +6355,15 @@ OUTPUT_QUANTITY(158)%SLCF_APPROPRIATE = .FALSE.
 OUTPUT_QUANTITY(159)%NAME = 'TIME'
 OUTPUT_QUANTITY(159)%UNITS = 's'
 OUTPUT_QUANTITY(159)%SHORT_NAME = 'time'
+OUTPUT_QUANTITY(159)%SLCF_APPROPRIATE = .FALSE.
 
 OUTPUT_QUANTITY(160)%NAME = 'CONTROL'
 OUTPUT_QUANTITY(160)%UNITS = ' '
 OUTPUT_QUANTITY(160)%SHORT_NAME = 'output'
+OUTPUT_QUANTITY(160)%SLCF_APPROPRIATE = .FALSE.
 
 OUTPUT_QUANTITY(161)%NAME = 'aspiration'
-OUTPUT_QUANTITY(161)%UNITS = ' %/m'
+OUTPUT_QUANTITY(161)%UNITS = '%/m'
 OUTPUT_QUANTITY(161)%SHORT_NAME = 'obs'
 OUTPUT_QUANTITY(161)%MIXTURE_FRACTION_ONLY = .TRUE.
 OUTPUT_QUANTITY(161)%SLCF_APPROPRIATE = .FALSE.
