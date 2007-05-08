@@ -1793,22 +1793,18 @@ IF (N_PROP > 0) WRITE(LU6,'(//A,I2)')  ' Device Properties'
 PROPERTY_LOOP: DO N=1,N_PROP
    PY => PROPERTY(N)
    WRITE(LU6,'(/I4,1X,A)')  N,TRIM(PY%ID)
-   SELECT CASE(PY%CLASS)
-      CASE('SPRINKLER')
+   SELECT CASE(PY%QUANTITY)
+      CASE('SPRINKLER LINK TEMPERATURE')
          WRITE(LU6,'(A,F8.1)') '     RTI (m-s)^1/2               ', PY%RTI
          WRITE(LU6,'(A,F8.2)') '     C-Factor (m/s)^1/2          ', PY%C_FACTOR
          WRITE(LU6,'(A,F8.1)') '     Activation Temperature (C)  ', PY%ACTIVATION_TEMPERATURE
          WRITE(LU6,'(A,F8.1)') '     Flow Rate (L/min)           ', PY%FLOW_RATE
          WRITE(LU6,'(A,A   )') '     Particle Class              ', TRIM(PY%PART_ID)
-      CASE('NOZZLE')
-         WRITE(LU6,'(A,F8.1)') '     Flow Rate (L/min)           ', PY%FLOW_RATE
-         WRITE(LU6,'(A,A   )') '     Nozzle Class                ', TRIM(PY%ID)
-         WRITE(LU6,'(A,A   )') '     Particle Class              ', TRIM(PY%PART_ID)         
-      CASE('HEAT DETECTOR')
+      CASE('LINK TEMPERATURE')
          WRITE(LU6,'(A,F8.1)') '     RTI (m-s)^1/2               ', PY%RTI
          WRITE(LU6,'(A,F8.1)') '     Activation Temperature (C)  ', PY%ACTIVATION_TEMPERATURE
          WRITE(LU6,'(A,A   )') '     Detector Class              ', TRIM(PY%ID)         
-      CASE('SMOKE DETECTOR')
+      CASE('spot obscuration')
          WRITE(LU6,'(A,F8.2)') '     Activation Obscuration (%/m)', PY%ACTIVATION_OBSCURATION 
          WRITE(LU6,'(A,F8.2)') '     Alpha_c                     ', PY%ALPHA_C
          WRITE(LU6,'(A,F8.2)') '     Beta_c                      ', PY%BETA_C
@@ -1994,10 +1990,10 @@ WRITE(LU91) T,ICYC,PART_CLOCK(NM),CORE_CLOCK(NM),SLCF_CLOCK(NM), &
 DO N=1,N_DEVC
    WRITE(LU91) DEVICE(N)%INSTANT_VALUE,DEVICE(N)%VALUE,DEVICE(N)%T_CHANGE,DV%TMP_L,DV%N_T_E,DV%Y_C,DEVICE(N)%COUNT,&
                DEVICE(N)%CURRENT_STATE,DEVICE(N)%PRIOR_STATE
-   IF (PROPERTY(DV%PROP_INDEX)%CLASS=='SMOKE DETECTOR') THEN
+   IF (DV%QUANTITY=='spot obscuration') THEN
       WRITE(LU91) DV%T_E,DV%Y_E
    ENDIF
-   IF (DV%QUANTITY=='ASPIRATION') THEN
+   IF (DV%QUANTITY=='aspiration') THEN
       WRITE(LU91) DV%YY_SOOT,DV%TIME_ARRAY
    ENDIF   
 ENDDO
@@ -2115,10 +2111,10 @@ READ(LU90) T,ICYC,PART_CLOCK(NM),CORE_CLOCK(NM),SLCF_CLOCK(NM), &
 DO N=1,N_DEVC
    READ(LU90) DEVICE(N)%INSTANT_VALUE,DEVICE(N)%VALUE,DEVICE(N)%T_CHANGE,DV%TMP_L,DV%N_T_E,DV%Y_C,DEVICE(N)%COUNT,&
                DEVICE(N)%CURRENT_STATE,DEVICE(N)%PRIOR_STATE
-   IF (PROPERTY(DV%PROP_INDEX)%CLASS=='SMOKE DETECTOR') THEN
+   IF (DV%QUANTITY=='spot obscuration') THEN
       READ(LU90) DV%T_E,DV%Y_E
    ENDIF
-   IF (DV%QUANTITY=='ASPIRATION') THEN
+   IF (DV%QUANTITY=='aspiration') THEN
       READ(LU90) DV%YY_SOOT,DV%TIME_ARRAY
    ENDIF   
 ENDDO
@@ -2892,7 +2888,7 @@ REAL(EB) FUNCTION GAS_PHASE_OUTPUT(II,JJ,KK,IND,T)
 
 ! Compute Gas Phase Output Quantities
 
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D,EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION
 USE CONTROL_VARIABLES, ONLY: CONTROL
 REAL(EB), INTENT(IN) :: T
@@ -3125,7 +3121,7 @@ SELECT CASE(IND)
       DV%TMP_L = MAX(TMPA,DV%TMP_L + DT*RHS)
       GAS_PHASE_OUTPUT      = DV%TMP_L - TMPM
 
-   CASE(157) ! HEAT_DETECTOR
+   CASE(157) ! LINK TEMPERATURE
       I = DV%I
       J = DV%J
       K = DV%K
@@ -3136,7 +3132,7 @@ SELECT CASE(IND)
       DV%TMP_L  = DV%TMP_L + DT*VELSR*(TMP_G-DV%TMP_L)/PY%RTI
       GAS_PHASE_OUTPUT       = DV%TMP_L - TMPM
 
-   CASE(158) ! obscuration (spot SMOKE DETECTOR)
+   CASE(158) ! spot obscuration
       I = DV%I
       J = DV%J
       K = DV%K
@@ -3163,43 +3159,43 @@ SELECT CASE(IND)
       DV%Y_C = DV%Y_C + DT*(Y_E_LAG - DV%Y_C)/DT_C
       GAS_PHASE_OUTPUT = (1._EB-EXP(-MASS_EXTINCTION_COEFFICIENT*RHO(I,J,K)*DV%Y_C))*100._EB  ! Obscuration
 
-  CASE(159) ! TIME
+   CASE(159) ! TIME
       GAS_PHASE_OUTPUT = T
 
-  CASE(160) ! CONTROL
+   CASE(160) ! CONTROL
       IF (CONTROL(DV%CTRL_INDEX)%CURRENT_STATE) THEN
          GAS_PHASE_OUTPUT = 1._EB
       ELSE
          GAS_PHASE_OUTPUT = 0._EB
       ENDIF
 
-  CASE (161) ! ASPIRATION
-     GAS_PHASE_OUTPUT = 0._EB
-     IF (T >= DV%T) THEN
-        ! If enough time has passed shift soot density array
-        DV%T = T + DV%DT
-        DV%TIME_ARRAY(0:99) = DV%TIME_ARRAY(1:100)
-        DV%YY_SOOT(:,0:99) = DV%YY_SOOT(:,1:100)
-        DV%YY_SOOT(:,100) = 0._EB
-     END IF
-     DV%TIME_ARRAY(100) = T
-     DO N = 1, DV%N_INPUTS
-        ! Update soot density array
-        DV2 => DEVICE(DV%DEVC_INDEX(N))
-        IF (DV%T == T + DV%DT) THEN
-           DV%YY_SOOT(N,100) = DV2%INSTANT_VALUE*1.E-6_EB
-        ELSE
-           DV%YY_SOOT(N,100) = (DV%YY_SOOT(N,100) * (DV%T - T + DT) +  DT * DV2%INSTANT_VALUE*1.E-6_EB) / &
-                               (DV%T - T)
-        END IF
-        ! Sum soot densities weighted by flow rat
-        CALL INTERPOLATE1D(DV%TIME_ARRAY,DV%YY_SOOT(N,:),T-DV2%DELAY,Y_E)
-        GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT + DV2%FLOWRATE * Y_E
-     END DO
-     ! Complete weighting and compute % obs
-     GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT / DV%TOTAL_FLOWRATE
-     GAS_PHASE_OUTPUT = (1._EB-EXP(-MASS_EXTINCTION_COEFFICIENT*GAS_PHASE_OUTPUT))*100._EB  ! Obscuration
-
+   CASE(161) ! aspiration
+      GAS_PHASE_OUTPUT = 0._EB
+      IF (T >= DV%T) THEN
+         ! If enough time has passed shift soot density array
+         DV%T = T + DV%DT
+         DV%TIME_ARRAY(0:99) = DV%TIME_ARRAY(1:100)
+         DV%YY_SOOT(:,0:99) = DV%YY_SOOT(:,1:100)
+         DV%YY_SOOT(:,100) = 0._EB
+      ENDIF
+      DV%TIME_ARRAY(100) = T
+      DO N = 1, DV%N_INPUTS
+         ! Update soot density array
+         DV2 => DEVICE(DV%DEVC_INDEX(N))
+         IF (DV%T == T + DV%DT) THEN
+            DV%YY_SOOT(N,100) = DV2%INSTANT_VALUE*1.E-6_EB
+         ELSE
+            DV%YY_SOOT(N,100) = (DV%YY_SOOT(N,100) * (DV%T - T + DT) +  DT * DV2%INSTANT_VALUE*1.E-6_EB) / &
+                                (DV%T - T)
+         END IF
+         ! Sum soot densities weighted by flow rat
+         CALL INTERPOLATE1D(DV%TIME_ARRAY,DV%YY_SOOT(N,:),T-DV2%DELAY,Y_E)
+         GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT + DV2%FLOWRATE * Y_E
+      END DO
+      ! Complete weighting and compute % obs
+      GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT / DV%TOTAL_FLOWRATE
+      GAS_PHASE_OUTPUT = (1._EB-EXP(-MASS_EXTINCTION_COEFFICIENT*GAS_PHASE_OUTPUT))*100._EB  ! Obscuration
+ 
    CASE(171:179) ! [PART_ID]_MPUV
       GAS_PHASE_OUTPUT = AVG_DROP_DEN(II,JJ,KK,IND-170)
    CASE(181:189) ! {PART_ID}_ADD
