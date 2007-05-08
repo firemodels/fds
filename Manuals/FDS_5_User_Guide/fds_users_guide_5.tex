@@ -483,6 +483,9 @@ on various uses of the model.
 
 
 
+\part{Running FDS}
+
+
 \chapter{Introduction}
 
 The software described in this document, Fire Dynamics Simulator (FDS), is a computational
@@ -732,7 +735,7 @@ See the Development section of the website for more information.
 
 This chapter describes the procedure to run an FDS calculation.
 The primary requirement for any calculation is an FDS input file. The creation of an
-input file is covered in detail in Chapter~\ref{info:fdsBasic}.
+input file is covered in detail in Part~\ref{info:inputfilecreation}.
 If you are new to FDS and Smokeview, it is strongly suggested that you start with an existing data file, run it as is,
 and then make the appropriate changes to the input file for the
 desired scenario. Sample input files are included as part of the standard installation.
@@ -1053,27 +1056,17 @@ quickly run the problem input file and hopefully diagnose the problem.
 
 
 
-
-
-
-\chapter{Basic FDS Functionality}
-\label{info:fdsBasic}
-
-The operation of FDS is based on a single input text file containing parameters organized into
-{\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups.
-This chapter describes,
-with examples, the namelist groups and parameters required to define a fire scenario.
-When possible, the examples of input statements have been extracted from input files that can be found in the
-Verification or Validation Guide and will be referenced by filename.
-
-
-
-
-\section{Overview of Writing an Input File}
+\part{Writing an FDS Input File}
 \label{info:inputfilecreation}
 
-The first step in performing an FDS simulation is to create an ASCII\footnote{American Standard Character II??} text input file
-that provides FDS  with all of the necessary information to
+
+
+\chapter{The Basic Structure of an Input File}
+\label{info:fdsBasic}
+
+The operation of FDS is based on a single input text\footnote{ASCII -- American Standard Code for Information Interchange} file containing parameters organized into
+{\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups.
+The input file provides FDS  with all of the necessary information to
 describe the scenario.
 The input file is saved with a name such as {\bf job\_name.fds},
 where {\bf job\_name} is any character string that helps to identify
@@ -1234,7 +1227,14 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 \end{center}
 \end{table}
 
+
+
+
 \clearpage
+
+\chapter{Setting the Bounds of Time and Space}
+
+
 \section{Naming the Job: The \texorpdfstring{{\tt HEAD}}{HEAD} Namelist Group (Table \ref{tbl:HEAD})}
 \label{info:HEAD}
 
@@ -1714,7 +1714,10 @@ direction.
 
 
 
-\newpage
+\clearpage
+
+\chapter{Building the Model}
+
 
 \section{Creating Obstructions: The \texorpdfstring{{\tt OBST}}{OBST} Namelist Group (Table \ref{tbl:OBST})}
 \label{info:OBST}
@@ -2096,10 +2099,10 @@ is (0,0,0), and the global default can be changed by added a
 
 \clearpage
 
-\section{Describing Solid Materials: The \texorpdfstring{{\tt MATL}}{MATL} Namelist Group}
-\label{info:MATL}
+\chapter{Boundary Conditions}
 
-This section describes how to specify the properties of the objects
+
+This chapter describes how to specify the properties of the objects
 that make up the bounding surfaces of the flow domain. {\bf This is
 the most challenging part of setting up the simulation.} Why?  First,
 for both real and simulated fires, the growth of the fire is very
@@ -2112,7 +2115,7 @@ properties of the materials, and then assess the performance of the
 model to ensure that the phenomena of interest are being captured.
 
 
-\subsection{Basics}
+\section{Basics}
 
 By default, the outer boundary of the computational domain is assumed
 to be a solid boundary that is maintained at ambient temperature. The
@@ -2121,7 +2124,7 @@ specify the properties of solids, use the namelist group {\ct SURF}
 (Section~\ref{info:SURF}). Starting in FDS 5, solids are assumed to
 consist of layers which can be made of different materials.  The
 properties of each material required are designated via the {\ct MATL}
-namelist group (Table \ref{tbl:MATL}).  These properties indicate how
+namelist group (Section~\ref{info:MATL}).  These properties indicate how
 rapidly the materials heat up, and how they burn.  Each {\ct MATL}
 entry in the input file must have an {\ct ID}, or name, so that they
 may be associated with a particular {\ct SURF} via the parameter {\ct
@@ -2155,6 +2158,258 @@ the {\ct OBST} line describes the overall geometric structure, the {\ct SURF} li
 characteristics of the surfaces of the geometry which includes the thickness of the layers of
 materials applied to that surface.
 \end{warning}
+
+
+\section{Describing the Bounding Surfaces: The \texorpdfstring{{\tt SURF}}{SURF} Namelist Group}
+\label{info:SURF}
+
+{\ct SURF} is the namelist group (Table \ref{tbl:SURF}) that defines
+the structure of all solid surfaces or openings within or
+bounding the flow domain. Boundary conditions for obstructions and vents are
+prescribed by referencing the appropriate {\ct SURF} line(s) whose
+parameters are described in this section.
+
+The default boundary condition for all solid surfaces is that of a
+cold, inert wall. If only this
+boundary condition is needed, there is no need to add any {\ct SURF} lines
+to the input file. If additional boundary conditions are desired,
+they are to be listed one boundary condition at a time.
+Each {\ct SURF} line consists of an identification string {\ct ID='...'} to
+allow references to it by an obstruction or vent. Thus, on each
+{\ct OBST} and {\ct VENT} line, the character string {\ct SURF\_ID='...'}
+indicates the {\ct ID} of the {\ct SURF} line containing the desired boundary
+condition parameters. If a particular {\ct SURF} line is to be applied
+as the default boundary condition, {\ct CONCRETE} for example,
+set {\ct SURF\_DEFAULT='CONCRETE'} on the {\ct MISC} line.
+
+
+\subsection{Specifying a Fire with a Known Heat Release Rate}
+
+Solids and liquid fuels can be modeled by specifying their relevant
+properties via the {\ct MATL} namelist group. However, if you simply
+want to specify a fire of a given heat release rate (HRR),
+you need not specify any material properties. A specified fire is
+basically modeled as the ejection of gaseous fuel
+from a solid surface or vent. This is essentially a burner, with a
+specified heat release rate per unit area.
+The stoichiometry of the gas phase reaction is set by the
+parameters on the {\ct REAC} line(s). All of the
+species associated with the combustion process are accounted for
+by way of the mixture fraction variable and should not be
+explicitly prescribed. The exception to this rule is
+where a non-reacting gas is introduced into the domain that merely serves
+as a diluent, like CO$_2$ from an extinguisher or H$_2$O from evaporated
+sprinkler droplets (see Section~\ref{info:SPEC} for details).
+If a finite rate combustion model is desired instead of the default mixture
+fraction model, see Section~\ref{info:finite}.
+
+Following is a list of parameters that
+are specified on a {\ct SURF} line to designate a fire using the mixture fraction approach.
+\begin{description}
+\item[{\ct HRRPUA}]
+Heat Release Rate Per Unit Area (kW/m$^2$). This parameter is used to
+control the burning rate of the fuel, as in the case of a prescribed
+fire using a gas burner. If all you want is a fire of a given heat
+release rate, then {\ct HRRPUA} is the only thing that need be set,
+for example
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='FIRE',HRRPUA=500. /
+\end{verbatim}
+\normalsize
+applies 500~kW/m$^2$ to any surface with the attribute
+{\ct SURF\_ID='FIRE'}. See the discussion of {\bf Time Dependent Conditions}
+in Section~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
+\item[{\ct MLRPUA}] Similar in functionality to {\ct HRRPUA}, except this parameter
+specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
+{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.
+\item[{\ct BURN\_AWAY}] If a burning object is to disappear from the
+calculation once it is exhausted of fuel, set {\ct BURN\_AWAY=.TRUE.}.
+Use this parameter cautiously. If an object has the potential of
+burning away, a significant amount of extra memory has to be set aside
+to store additional surface information as the rectangular block is
+eaten away. If {\ct BURN\_AWAY} is prescribed as a {\ct SURF} parameter, then a solid
+object with this {\ct SURF\_ID} disappears from a calculation as
+the mass of each of its grid cells is consumed. The mass of each grid
+cell is the volume of the grid cell multiplied by the {\ct DENSITY} of the
+materials making up the the obstruction.
+
+\begin{warning}
+\noindent
+Note also that if {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the
+entire object, not just a face of the object because it is unclear how to handle edges
+of solid obstructions that have different {\ct SURF\_ID}s on different faces.
+\end{warning}
+
+Also note that the amount of combustible fuel equals the {\ct DENSITY} of the designated materials
+multiplied by the volume of the grid cell. If the volume of the obstruction changes because it has
+to conform to the uniform grid, FDS does {\bf not} adjust the burning rate to account for this as
+it does with various quantities associated with areas, like {\ct HRRPUA}.
+\end{description}
+
+
+\subsection{Simple Thermal Boundary Conditions}
+\label{info:thermalboundary}
+
+Usually, the thermal properties of a solid boundary are specified via the
+{\ct MATL} namelist group, which is in turn invoked by the {\ct SURF} entry via
+the character string {\ct MATL\_ID}. However, sometimes it is convenient to
+simply specify a fixed temperature boundary condition, in which case set
+{\ct TMP\_FRONT} to be the surface temperature in units of $^\circ$C.
+For a solid surface of fixed convective heat flux, set {\ct HEAT\_FLUX} to be
+the convective heat flux in units of kW/m$^2$. If {\ct HEAT\_FLUX} is
+positive, the wall heats up the surrounding gases. If {\ct HEAT\_FLUX}
+is negative, the wall cools the surrounding gases.
+
+Fixed temperature or fixed heat flux boundary conditions are
+easy to apply, but only of limited usefulness in real fire scenarios.
+In most cases, walls, ceilings and floors are made up of several layers
+of lining materials.
+
+It is assumed that the innermost layer backs up to an air gap at ambient
+temperature (like a sheet of gypsum board attached to wood studs), or
+it backs up to an insulated material in which case no heat is lost to
+the backing material, or it backs up to the room on the other side of
+the wall. By default, it is assumed that the wall liner backs up to an air gap.
+If the wall liner is assumed to back up against an insulating material,
+like a sheet of steel attached to a fiber insulating board, the expression
+{\ct BACKING='INSULATED'} on the {\ct SURF} line prevents any heat
+loss from the back side of the material.
+
+Finally, if it is desired that the heat transfer
+through the wall into the space behind the wall, the attribute
+{\ct BACKING='EXPOSED'} should be listed. This feature only works
+if the wall is less than or equal to one grid cell thick, and if there is a non-zero volume
+of computational domain on the other side of the wall. Obviously, if
+the wall is an external boundary of the domain, the heat is lost
+to the void.
+
+For some special applications, it is often desired that a solid
+surface be adiabatic, that is, there is no net heat transfer
+(radiative and convective) from the gas to the solid. For this case,
+all that must be prescribed on the {\ct SURF} line is {\ct
+ADIABATIC=.TRUE.}, nothing else.  FDS will compute a wall temperature
+so that the sum of the convective and radiative fluxes is zero.
+
+\subsection{Velocity and Total Mass Flux Boundary Conditions}
+
+Velocity boundary conditions affect both the normal and tangential
+components of the velocity vector at boundaries.
+The normal component of velocity is controlled by the parameter
+{\ct VEL}. If {\ct VEL} is negative, the flow is entering the
+computational domain. If {\ct VEL} is positive, the flow is exiting the
+domain.
+Sometimes it is desired that a given volume flux through a vent
+be prescribed rather than a velocity. If this is the case then
+{\ct VOLUME\_FLUX} can be prescribed instead of {\ct VEL}. The units
+are m$^3$/s.
+If the flow is entering the computational domain, {\ct VOLUME\_FLUX}
+should be a negative number.
+\begin{warning}
+\noindent
+Note that either {\ct VEL} or {\ct VOLUME\_FLUX} should be prescribed,
+not both.  The choice depends on whether an exact velocity is desired at a
+given vent, or whether the given volume flux is desired.
+\end{warning}
+The dimensions of the vent that are prescribed usually change
+because the prescribed vent dimensions are sometimes altered so that
+the vent edges line up with grid cells. Also note that a {\ct SURF}
+group with a {\ct VOLUME\_FLUX} prescribed should only be called by a
+{\ct VENT}, not an {\ct OBST}.
+Finally, note that if {\ct HRRPUA} or solid phase reaction parameters are
+specified, no velocity should be prescribed. The combustible gases
+are ejected at a velocity computed by the code.
+
+As an example, a simple blowing vent would be described by the line
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='BLOWER',VEL=-1.2,TMP_FRONT=50. /
+\end{verbatim}
+\normalsize
+The vent with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C
+air at 1.2 m/s into the flow domain. Making {\ct VEL} positive would
+suck air out, in which case {\ct TMP\_FRONT} would not be necessary.
+
+At other times the user may wish that a specific flux of mass, be added or removed at
+a vent.  This can be accomplished by specifying the quantity {\ct MASS\_FLUX\_TOTAL}.
+{\ct MASS\_FLUX\_TOTAL} uses the same sign convention as {\ct VEL}.  In fact, the value entered for
+{\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
+for an outflow is adjusted based on the local density.
+
+The tangential velocity boundary condition controls how the gas
+``sticks'' to a solid surface. In theory, the tangential component of
+velocity is zero at the surface, but
+increases rapidly through a narrow region called the boundary layer.
+For most practical problems, the grid is not fine enough to resolve the
+boundary layer, which is typically a few millimeters thick.
+For this reason, in an LES calculation, the velocity at the wall
+is set to be a fraction of its value in the grid cell adjacent to the
+wall. Only in a DNS calculation is the velocity at the wall set to zero.
+To alter these defaults, set a parameter called
+{\ct SLIP\_FACTOR}. This parameter ranges from -1 to 1. If a no-slip wall is
+desired, {\ct SLIP\_FACTOR=-1}. If a free-slip wall is desired, {\ct SLIP\_FACTOR=1}.
+Numbers in between -1 and 1 can represent partial slip conditions,
+which may be appropriate for simulations involving large grid cells.
+(Default {\ct SLIP\_FACTOR} is 0.5 for LES, -1.0 for DNS)
+
+In the case of a blowing vent (or even a solid surface),
+it is possible to prescribe both the
+normal and tangential components of the flow (or just the tangential).
+The normal component is
+specified with {\ct VEL} as described above. The tangential is prescribed
+via a pair of real numbers {\ct VEL\_T} representing the desired tangential
+velocity components. For example, the line
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='LOUVER',VEL=-1.2,VEL_T=0.5,-0.3 /
+\end{verbatim}
+\normalsize
+is a boundary condition for a louver vent that pushes air into the
+space with a normal velocity of 1.2~m/s, and with a tangential velocity
+of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either
+the $y$ or $z$ direction, depending on what the normal direction is.
+
+\subsection{Species and Species Mass Flux Boundary Conditions}
+
+There are two species boundary conditions that can be specified
+(see Section~\ref{info:SPEC} for details on inputting and using species).
+These boundary conditions are {\ct MASS\_FLUX(N)} and {\ct MASS\_FRACTION(N)}
+where {\ct N} refers to a given species is via its place in the
+input file. For example, the second listed species is {\ct N=2}.
+If a simple no-flux condition is desired at a solid wall, do not set
+anything. If the mass fraction of the {\ct N}th species is to be some
+value at a forced flow boundary ({\ct VEL} or {\ct MASS\_FLUX\_TOTAL}) set
+{\ct MASS\_FRACTION(N)} equal to the desired mass fraction on the appropriate
+{\ct SURF} line.
+If the mass flux of the {\ct N}th species is desired, set
+{\ct MASS\_FLUX(N)} instead of {\ct MASS\_FRACTION(N)}.
+If {\ct MASS\_FLUX(N)}
+is set, no {\ct VEL} should be set. It is automatically
+calculated based on the mass flux.
+The inputs {\ct MASS\_FLUX(N)} (and typically {\ct MASS\_FRACTION(N)}) should only be used
+for inflow boundary conditions.  {\ct MASS\_FLUX(N)} should be postive with
+units of kg/m$^2$/s.
+
+\begin{warning}
+\noindent
+Note that specifying {\ct MASS\_FRACTION(N)}, sets the "ghost" cell values for the species
+mass fractions.  Since the mass conservation equation is an advection-diffusion equation,
+if the specfied velocity is small, then the diffusion term can dominate resulting in an unintended
+mass flux of species.  To obtain a guaranteed mass flux of a species, the user should use {\ct MASS\_FLUX(N)}
+\end{warning}
+
+
+
+
+
+
+
+
+\section{Describing Solid Materials: The \texorpdfstring{{\tt MATL}}{MATL} Namelist Group}
+\label{info:MATL}
 
 A solid boundary can consist of multiple layers of different materials, and each layer can consist of multiple material
 components. These combinations of layers and material components are specified on the {\ct SURF} line via the array called {\ct MATL\_ID(IL,IC)}. The
@@ -2444,255 +2699,6 @@ just absorb radiation at the surface, but rather over a thin layer near the surf
 significant. An example is given in the Verification Guide under the name {\bf ethanol\_pan}.
 
 
-
-
-\clearpage
-
-\section{Prescribing Boundary Conditions: The \texorpdfstring{{\tt SURF}}{SURF} Namelist Group}
-\label{info:SURF}
-
-{\ct SURF} is the namelist group (Table \ref{tbl:SURF}) that defines
-boundary conditions for all solid surfaces or openings within or
-bounding the flow domain.  The physical coordinates of obstructions or
-vents are listed in the {\ct OBST} and {\ct VENT} namelist groups
-below. Boundary conditions for the obstructions and vents are
-prescribed by referencing the appropriate {\ct SURF} line(s) whose
-parameters are described presently.
-
-The default boundary condition for all solid surfaces is that of a
-cold, inert wall. If only this
-boundary condition is needed, there is no need to add any {\ct SURF} lines
-to the input file. If additional boundary conditions are desired,
-they are to be listed one boundary condition at a time.
-Each {\ct SURF} line consists of an identification string {\ct ID='...'} to
-allow references to it by an obstruction or vent. Thus, on each
-{\ct OBST} and {\ct VENT} line, the character string {\ct SURF\_ID='...'}
-indicates the {\ct ID} of the {\ct SURF} line containing the desired boundary
-condition parameters. If a particular {\ct SURF} line is to be applied
-as the default boundary condition, {\ct CONCRETE} for example,
-set {\ct SURF\_DEFAULT='CONCRETE'} on the {\ct MISC} line.
-
-
-\subsection{Specifying a Fire}
-
-Solids and liquid fuels can be modeled by specifying their relevant
-properties via the {\ct MATL} namelist group. However, if you simply
-want to specify a fire of a given heat release rate (HRR),
-you need not specify any material properties. A specified fire is
-basically modeled as the ejection of gaseous fuel
-from a solid surface or vent. This is essentially a burner, with a
-specified heat release rate per unit area.
-The stoichiometry of the gas phase reaction is set by the
-parameters on the {\ct REAC} line(s). All of the
-species associated with the combustion process are accounted for
-by way of the mixture fraction variable and should not be
-explicitly prescribed. The exception to this rule is
-where a non-reacting gas is introduced into the domain that merely serves
-as a diluent, like CO$_2$ from an extinguisher or H$_2$O from evaporated
-sprinkler droplets (see Section~\ref{info:SPEC} for details).
-If a finite rate combustion model is desired instead of the default mixture
-fraction model, see Section~\ref{info:finite}.
-
-Following is a list of parameters that
-are specified on a {\ct SURF} line to designate a fire using the mixture fraction approach.
-\begin{description}
-\item[{\ct HRRPUA}]
-Heat Release Rate Per Unit Area (kW/m$^2$). This parameter is used to
-control the burning rate of the fuel, as in the case of a prescribed
-fire using a gas burner. If all you want is a fire of a given heat
-release rate, then {\ct HRRPUA} is the only thing that need be set,
-for example
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='FIRE',HRRPUA=500. /
-\end{verbatim}
-\normalsize
-applies 500~kW/m$^2$ to any surface with the attribute
-{\ct SURF\_ID='FIRE'}. See the discussion of {\bf Time Dependent Conditions}
-in Section~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
-\item[{\ct MLRPUA}] Similar in functionality to {\ct HRRPUA}, except this parameter
-specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
-{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.
-\item[{\ct BURN\_AWAY}] If a burning object is to disappear from the
-calculation once it is exhausted of fuel, set {\ct BURN\_AWAY=.TRUE.}.
-Use this parameter cautiously. If an object has the potential of
-burning away, a significant amount of extra memory has to be set aside
-to store additional surface information as the rectangular block is
-eaten away. If {\ct BURN\_AWAY} is prescribed as a {\ct SURF} parameter, then a solid
-object with this {\ct SURF\_ID} disappears from a calculation as
-the mass of each of its grid cells is consumed. The mass of each grid
-cell is the volume of the grid cell multiplied by the {\ct DENSITY} of the
-materials making up the the obstruction.
-
-\begin{warning}
-\noindent
-Note also that if {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the
-entire object, not just a face of the object because it is unclear how to handle edges
-of solid obstructions that have different {\ct SURF\_ID}s on different faces.
-\end{warning}
-
-Also note that the amount of combustible fuel equals the {\ct DENSITY} of the designated materials
-multiplied by the volume of the grid cell. If the volume of the obstruction changes because it has
-to conform to the uniform grid, FDS does {\bf not} adjust the burning rate to account for this as
-it does with various quantities associated with areas, like {\ct HRRPUA}.
-\end{description}
-
-
-\subsection{Thermal Boundary Conditions}
-\label{info:thermalboundary}
-
-Usually, the thermal properties of a solid boundary are specified via the
-{\ct MATL} namelist group, which is in turn invoked by the {\ct SURF} entry via
-the character string {\ct MATL\_ID}. However, sometimes it is convenient to
-simply specify a fixed temperature boundary condition, in which case set
-{\ct TMP\_FRONT} to be the surface temperature in units of $^\circ$C.
-For a solid surface of fixed convective heat flux, set {\ct HEAT\_FLUX} to be
-the convective heat flux in units of kW/m$^2$. If {\ct HEAT\_FLUX} is
-positive, the wall heats up the surrounding gases. If {\ct HEAT\_FLUX}
-is negative, the wall cools the surrounding gases.
-
-Fixed temperature or fixed heat flux boundary conditions are
-easy to apply, but only of limited usefulness in real fire scenarios.
-In most cases, walls, ceilings and floors are made up of several layers
-of lining materials.
-
-It is assumed that the innermost layer backs up to an air gap at ambient
-temperature (like a sheet of gypsum board attached to wood studs), or
-it backs up to an insulated material in which case no heat is lost to
-the backing material, or it backs up to the room on the other side of
-the wall. By default, it is assumed that the wall liner backs up to an air gap.
-If the wall liner is assumed to back up against an insulating material,
-like a sheet of steel attached to a fiber insulating board, the expression
-{\ct BACKING='INSULATED'} on the {\ct SURF} line prevents any heat
-loss from the back side of the material.
-
-Finally, if it is desired that the heat transfer
-through the wall into the space behind the wall, the attribute
-{\ct BACKING='EXPOSED'} should be listed. This feature only works
-if the wall is less than or equal to one grid cell thick, and if there is a non-zero volume
-of computational domain on the other side of the wall. Obviously, if
-the wall is an external boundary of the domain, the heat is lost
-to the void.
-
-For some special applications, it is often desired that a solid
-surface be adiabatic, that is, there is no net heat transfer
-(radiative and convective) from the gas to the solid. For this case,
-all that must be prescribed on the {\ct SURF} line is {\ct
-ADIABATIC=.TRUE.}, nothing else.  FDS will compute a wall temperature
-so that the sum of the convective and radiative fluxes is zero.
-
-\subsection{Velocity and Total Mass Flux Boundary Conditions}
-
-Velocity boundary conditions affect both the normal and tangential
-components of the velocity vector at boundaries.
-The normal component of velocity is controlled by the parameter
-{\ct VEL}. If {\ct VEL} is negative, the flow is entering the
-computational domain. If {\ct VEL} is positive, the flow is exiting the
-domain.
-Sometimes it is desired that a given volume flux through a vent
-be prescribed rather than a velocity. If this is the case then
-{\ct VOLUME\_FLUX} can be prescribed instead of {\ct VEL}. The units
-are m$^3$/s.
-If the flow is entering the computational domain, {\ct VOLUME\_FLUX}
-should be a negative number.
-\begin{warning}
-\noindent
-Note that either {\ct VEL} or {\ct VOLUME\_FLUX} should be prescribed,
-not both.  The choice depends on whether an exact velocity is desired at a
-given vent, or whether the given volume flux is desired.
-\end{warning}
-The dimensions of the vent that are prescribed usually change
-because the prescribed vent dimensions are sometimes altered so that
-the vent edges line up with grid cells. Also note that a {\ct SURF}
-group with a {\ct VOLUME\_FLUX} prescribed should only be called by a
-{\ct VENT}, not an {\ct OBST}.
-Finally, note that if {\ct HRRPUA} or solid phase reaction parameters are
-specified, no velocity should be prescribed. The combustible gases
-are ejected at a velocity computed by the code.
-
-As an example, a simple blowing vent would be described by the line
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='BLOWER',VEL=-1.2,TMP_FRONT=50. /
-\end{verbatim}
-\normalsize
-The vent with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C
-air at 1.2 m/s into the flow domain. Making {\ct VEL} positive would
-suck air out, in which case {\ct TMP\_FRONT} would not be necessary.
-
-At other times the user may wish that a specific flux of mass, be added or removed at
-a vent.  This can be accomplished by specifying the quantity {\ct MASS\_FLUX\_TOTAL}.
-{\ct MASS\_FLUX\_TOTAL} uses the same sign convention as {\ct VEL}.  In fact, the value entered for
-{\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
-for an outflow is adjusted based on the local density.
-
-The tangential velocity boundary condition controls how the gas
-``sticks'' to a solid surface. In theory, the tangential component of
-velocity is zero at the surface, but
-increases rapidly through a narrow region called the boundary layer.
-For most practical problems, the grid is not fine enough to resolve the
-boundary layer, which is typically a few millimeters thick.
-For this reason, in an LES calculation, the velocity at the wall
-is set to be a fraction of its value in the grid cell adjacent to the
-wall. Only in a DNS calculation is the velocity at the wall set to zero.
-To alter these defaults, set a parameter called
-{\ct SLIP\_FACTOR}. This parameter ranges from -1 to 1. If a no-slip wall is
-desired, {\ct SLIP\_FACTOR=-1}. If a free-slip wall is desired, {\ct SLIP\_FACTOR=1}.
-Numbers in between -1 and 1 can represent partial slip conditions,
-which may be appropriate for simulations involving large grid cells.
-(Default {\ct SLIP\_FACTOR} is 0.5 for LES, -1.0 for DNS)
-
-In the case of a blowing vent (or even a solid surface),
-it is possible to prescribe both the
-normal and tangential components of the flow (or just the tangential).
-The normal component is
-specified with {\ct VEL} as described above. The tangential is prescribed
-via a pair of real numbers {\ct VEL\_T} representing the desired tangential
-velocity components. For example, the line
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='LOUVER',VEL=-1.2,VEL_T=0.5,-0.3 /
-\end{verbatim}
-\normalsize
-is a boundary condition for a louver vent that pushes air into the
-space with a normal velocity of 1.2~m/s, and with a tangential velocity
-of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either
-the $y$ or $z$ direction, depending on what the normal direction is.
-
-\subsection{Species and Species Mass Flux Boundary Conditions}
-
-There are two species boundary conditions that can be specified
-(see Section~\ref{info:SPEC} for details on inputting and using species).
-These boundary conditions are {\ct MASS\_FLUX(N)} and {\ct MASS\_FRACTION(N)}
-where {\ct N} refers to a given species is via its place in the
-input file. For example, the second listed species is {\ct N=2}.
-If a simple no-flux condition is desired at a solid wall, do not set
-anything. If the mass fraction of the {\ct N}th species is to be some
-value at a forced flow boundary ({\ct VEL} or {\ct MASS\_FLUX\_TOTAL}) set
-{\ct MASS\_FRACTION(N)} equal to the desired mass fraction on the appropriate
-{\ct SURF} line.
-If the mass flux of the {\ct N}th species is desired, set
-{\ct MASS\_FLUX(N)} instead of {\ct MASS\_FRACTION(N)}.
-If {\ct MASS\_FLUX(N)}
-is set, no {\ct VEL} should be set. It is automatically
-calculated based on the mass flux.
-The inputs {\ct MASS\_FLUX(N)} (and typically {\ct MASS\_FRACTION(N)}) should only be used
-for inflow boundary conditions.  {\ct MASS\_FLUX(N)} should be postive with
-units of kg/m$^2$/s.
-
-\begin{warning}
-\noindent
-Note that specifying {\ct MASS\_FRACTION(N)}, sets the "ghost" cell values for the species
-mass fractions.  Since the mass conservation equation is an advection-diffusion equation,
-if the specfied velocity is small, then the diffusion term can dominate resulting in an unintended
-mass flux of species.  To obtain a guaranteed mass flux of a species, the user should use {\ct MASS\_FLUX(N)}
-\end{warning}
-
-
-
 \section{User-Specified Functions: The \texorpdfstring{{\tt RAMP}}{RAMP} Namelist Group}
 \label{info:RAMP}
 
@@ -2848,7 +2854,12 @@ be listed with monotonically increasing {\ct T}.
 
 
 
-\clearpage
+
+
+
+\chapter{Combustion and Radiation}
+
+
 \section{Combustion Parameters: The \texorpdfstring{{\tt REAC}}{REAC} Namelist Group}
 \label{info:REAC}
 
@@ -3110,7 +3121,8 @@ cannot participate in the reaction.
 
 
 \clearpage
-\section{Lagrangian Particles: The \texorpdfstring{{\tt PART}}{PART} Namelist Group}
+
+\chapter{Lagrangian Particles: The \texorpdfstring{{\tt PART}}{PART} Namelist Group}
 \label{info:PART}
 
 Lagrangian particles are used in FDS as water or liquid fuel
@@ -3253,7 +3265,7 @@ smoke particles were implicitly defined. Shortcuts for defining water droplets a
 \end{warning}
 
 
-\subsection{Burning Liquid Fuel Droplets}
+\section{Burning Liquid Fuel Droplets}
 
 The evaporation of water droplets from sprinklers has been
 generalized so that a liquid fuel spray
@@ -3307,7 +3319,8 @@ nozzle.
 
 
 \clearpage
-\section{Devices and Control Logic}
+
+\chapter{Devices and Control Logic}
 
 Sprinklers, smoke detectors, heat flux gauges, and thermocouples
 may seem to be completely unrelated, but from the point of view
@@ -3332,7 +3345,7 @@ In addition, advanced functionality and properties are accommodated via addition
 
 
 
-\subsection{Device Location and Orientation: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group (Table \ref{tbl:DEVC})}
+\section{Device Location and Orientation: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group (Table \ref{tbl:DEVC})}
 \label{info:DEVC}
 
 Regardless of the specific properties, each device needs to be sited either at a point within the computational domain, or
@@ -3369,12 +3382,24 @@ For other devices, the {\ct ORIENTATION} would only change the way the device is
 
 
 
+\section{Device Output}
+\label{info:out:DEVC}
+
+Each device has a {\ct QUANTITY} associated with it.
+The output file for all {\ct DEVC} quantities is a comma-delimited
+ASCII file called {\bf CHID\_devc.csv} (See Section~\ref{out:DEVC} for output file format.)
+This file can be imported into most spread sheet software packages. If the number of {\ct DEVC} lines
+exceeds 256, the limit of Microsoft Excel, the output file will be split into appropriately sized smaller
+files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.} on the {\ct DUMP} line.
 
 
 
 
 
-\subsection{Special Devices and their Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
+
+
+
+\section{Special Devices and their Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
 \label{info:PROP}
 
 Many devices are fairly easy to describe, like a point measurement, with only a few parameters which can be included on the
@@ -3388,7 +3413,8 @@ name, like {\ct 'ACME Sprinkler 123'}, for example.
 The best way to describe the {\ct PROP} group is to list the various special devices and their properties.
 
 
-\subsubsection{Sprinklers}
+\subsection{Sprinklers}
+\label{info:sprinklers}
 
 Here is a very simple example of sprinkler:
 
@@ -3451,7 +3477,8 @@ Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 
 
 
-\subsubsection{Nozzles}
+\subsection{Nozzles}
+\label{info:nozzles}
 
 Nozzles are very much like sprinklers, only they do not activate based on the standard RTI model.
 To simulate a nozzle that activates at a given time, for example,
@@ -3471,7 +3498,8 @@ An example of a nozzle can be found in the verification case {\bf water\_fuel\_s
 
 
 
-\subsubsection{Heat Detectors}
+\subsection{Heat Detectors}
+\label{info:heat_detectors}
 
 {\ct QUANTITY='LINK TEMPERATURE'}, as in this example, defines a heat detector, which uses essentially the same activation algorithm as a sprinkler, without the water spray.
 
@@ -3488,8 +3516,9 @@ $\sqrt{\hbox{m}\cdot \hbox{s}}$.
 
 
 
-\subsubsection{Smoke Detectors}
+\subsection{Smoke Detectors}
 \label{info:smoke_detector}
+
 The {\ct 'SMOKE DETECTOR'} class is defined in the input file with an entry similar to:
 
 \footnotesize
@@ -3537,8 +3566,62 @@ Heskestad Ionization          & ---         & ---          &  1.8               
 \end{table}
 
 
+\subsection{Beam Detection Systems}
+\label{info:beam_detector}
 
-\subsection{Creating or Removing Obstructions; Opening or Closing Vents}
+A beam detector can be defined by specifying the endpoints {\ct (x1,y1,z1),(x2,y2,z2)}, of the beam, using {\ct XB}, and the total
+total \% obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which grid
+cells lie along the path specified by the two endpoints.  The beam detector response is evaluated as
+\be
+  \hbox{Obscuration}  = \left(1 - \exp \left( -K_m \sum_{i=1}^N {\rho_{soot,i}\; \Delta x_i} \right)  \right) \times 100  \; \; \hbox{\%}
+\ee
+where $i$ is a grid cell along the path of the beam, $\rho_{soot,i}$ is the soot density of the grid cell, and $ \Delta x_i$
+is the distance within the grid cell that is traversed by the beam.
+
+\footnotesize
+\begin{verbatim}
+&DEVC XB=x1,x2,y1,y2,z1,z2, QUANTITY='path obscuration', ID='beam1', SETPOINT=0.33 /
+\end{verbatim}
+\normalsize
+
+\subsection{Aspiration Detection Systems}
+\label{info:aspiration_detector}
+
+An aspiration detection system groups together a series of soot measurement devices.
+An aspiration system consists of a sampling pipe network that draws air from a series of locations to a central point
+where an obscuration measurement is made.  To define such a system in FDS, you must provide the sampling locations,
+sampling flow rates, the transport time from each sampling location, and if an alarm output is desired, the overall obscuration
+``setpoint.''  One or more {\ct DEVC} inputs are used to specify details of the sampling locations, and one additional input is
+used to specify the central detector:
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=..., QUANTITY='soot density', ID='soot1', DEVC_ID='asp1', FLOWRATE=0.1, DELAY=20 /
+&DEVC XYZ=..., QUANTITY='soot density', ID='soot2', DEVC_ID='asp1', FLOWRATE=0.2, DELAY=10 /
+ ...
+&DEVC XYZ=..., QUANTITY='soot density', ID='sootN', DEVC_ID='asp1', FLOWRATE=0.3, DELAY=30 /
+
+&DEVC XYZ=..., QUANTITY='aspiration', ID='asp1', BYPASS_FLOWRATE=0.4, SETPOINT=0.02 /
+\end{verbatim}
+\normalsize
+
+\noindent
+where the {\ct DEVC\_ID} is used at each sampling point to reference the central detector, {\ct FLOWRATE} is the gas
+flow rate in kg/s, {\ct DELAY} is the transport time (in seconds) from the sampling location to the central detector,
+{\ct BYPASS\_FLOWRATE} is the flow rate in kg/s of any air drawn into the system from outside the computational
+domain (accounts for portions of the sampling network lying outside the domain defined by the {\ct MESH}
+inputs), and {\ct SETPOINT} is the alarm threshold obscuration in units of \%/m. The output of the aspiration system is
+computed as
+\be
+  \hbox{Obscuration}  = \left(1 - \exp \left( -K_m \frac {\sum_{i=1}^N {\rho_{soot,i}( t-t_{d,i}) \; \dm_i}} {\sum_{i=1}^N{ \dm_i} } \right)  \right) \times 100  \; \; \hbox{\%/m}
+\ee
+where $\dm_i$ is the mass {\ct FLOWRATE} of the $i$th sampling location, $\rho_{soot,i}( t-t_{d,i})$ is the soot density at
+the $i$th sampling location $t_{d,i}$ s prior ({\ct DELAY}) to the current time $t$, and $K_m$ is the {\ct MASS\_EXTINCTION\_COEFFICIENT} associated with visible light.
+
+
+
+
+\section{Creating or Removing Obstructions; Opening or Closing Vents}
 \label{info:openclose}
 
 Devices can open and close vents, and add and remove obstructions and holes.
@@ -3673,9 +3756,9 @@ control parameters should be applied to a {\ct MIRROR} or {\ct OPEN} boundary.
 
 
 
-\clearpage
 
-\section{Output Data} %Bryan
+
+\chapter{Output Data}
 \label{info:outputdata}
 
 Before a calculation is started, carefully consider
@@ -3712,7 +3795,8 @@ particles are no longer used to introduce heat into the flow, thus
 particles no longer are ejected automatically from burning surfaces.
 \end{warning}
 
-\subsection{Output Control Parameters: The \texorpdfstring{{\tt DUMP}}{DUMP} Namelist Group}
+
+\section{Output Control Parameters: The \texorpdfstring{{\tt DUMP}}{DUMP} Namelist Group}
 \label{info:DUMP}
 
 The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files
@@ -3735,16 +3819,9 @@ mesh at any given time. (Default 500000)
 \end{description}
 
 
-\subsection{Device Output}
-\label{info:out:DEVC}
+\section{Output Options}
 
-The output file for all {\ct DEVC} quantities is a comma-delimited
-ASCII file called {\bf CHID\_devc.csv} (See Section~\ref{out:DEVC} for output file format.)
-This file can be imported into most spread sheet software packages. If the number of {\ct DEVC} lines
-exceeds 256, the limit of Microsoft Excel, the output file will be split into appropriately sized smaller
-files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.} on the {\ct DUMP} line.
-
-\subsubsection{Point Measurement Devices}
+\subsection{Point Measurement Devices}
 
 For many commonly used measurement devices there is no need to associate a
 specific {\ct PROP} line to the {\ct DEVC} entry. In such cases, use the character string
@@ -3778,7 +3855,7 @@ direction.
 
 
 
-\subsubsection{Integrated (non-pointwise) Measurement Devices}
+\subsection{Integrated (non-pointwise) Measurement Devices}
 
 In addition to point measurements, the {\ct DEVC} group can be used
 to report integrated quantities (See Table~\ref{tab:output}).
@@ -3962,6 +4039,9 @@ does not require this file because the coordinate information can be
 obtained elsewhere.
 
 
+\clearpage
+
+\section{Special Output Quantities}
 
 \subsection{Heat Release Rate}
 \label{info:HRR}
@@ -4176,59 +4256,6 @@ carry along the uncertainty associated with the simple solid phase heat conducti
 objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and
 ultimately its mechanical response) than FDS can provide.
 
-\subsection{Beam Detection Systems}
-\label{info:beam_detector}
-
-A beam detector can be defined by specifying the endpoints {\ct (x1,y1,z1),(x2,y2,z2)}, of the beam, using {\ct XB}, and the total
-total \% obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which grid
-cells lie along the path specified by the two endpoints.  The beam detector response is evaluated as
-
-\be
-  \hbox{Obscuration}  = \left(1 - \exp \left( -K_m \sum_{i=1}^N {\rho_{soot,i}\; \Delta x_i} \right)  \right) \times 100  \; \; \hbox{\%}
-\ee
-
-\noindent
-where $i$ is a grid cell along the path of the beam, $\rho_{soot,i}$ is the soot density of the grid cell, and $ \Delta x_i$
-is the distance within the grid cell that is traversed by the beam.
-
-\footnotesize
-\begin{verbatim}
-&DEVC XB=x1,x2,y1,y2,z1,z2, QUANTITY='path obscuration', ID='beam1', SETPOINT=0.33 /
-\end{verbatim}
-\normalsize
-
-\subsection{Aspiration Detection Systems}
-\label{info:aspiration_detector}
-An aspiration detection system groups together a series of soot measurement devices.
-An aspiration system consists of a sampling pipe network that draws air from a series of locations to a central point
-where an obscuration measurement is made.  To define such a system in FDS, you must provide the sampling locations,
-sampling flow rates, the transport time from each sampling location, and if an alarm output is desired, the overall obscuration
-``setpoint.''  One or more {\ct DEVC} inputs are used to specify details of the sampling locations, and one additional input is
-used to specify the central detector:
-
-\footnotesize
-\begin{verbatim}
-&DEVC XYZ=..., QUANTITY='soot density', ID='soot1', DEVC_ID='asp1', FLOWRATE=0.1, DELAY=20 /
-&DEVC XYZ=..., QUANTITY='soot density', ID='soot2', DEVC_ID='asp1', FLOWRATE=0.2, DELAY=10 /
- ...
-&DEVC XYZ=..., QUANTITY='soot density', ID='sootN', DEVC_ID='asp1', FLOWRATE=0.3, DELAY=30 /
-
-&DEVC XYZ=..., QUANTITY='aspiration', ID='asp1', BYPASS_FLOWRATE=0.4, SETPOINT=0.02 /
-\end{verbatim}
-\normalsize
-
-\noindent
-where the {\ct DEVC\_ID} is used at each sampling point to reference the central detector, {\ct FLOWRATE} is the gas
-flow rate in kg/s, {\ct DELAY} is the transport time (in seconds) from the sampling location to the central detector,
-{\ct BYPASS\_FLOWRATE} is the flow rate in kg/s of any air drawn into the system from outside the computational
-domain (accounts for portions of the sampling network lying outside the domain defined by the {\ct MESH}
-inputs), and {\ct SETPOINT} is the alarm threshold obscuration in units of \%/m. The output of the aspiration system is
-computed as
-\be
-  \hbox{Obscuration}  = \left(1 - \exp \left( -K_m \frac {\sum_{i=1}^N {\rho_{soot,i}( t-t_{d,i}) \; \dm_i}} {\sum_{i=1}^N{ \dm_i} } \right)  \right) \times 100  \; \; \hbox{\%/m}
-\ee
-where $\dm_i$ is the mass {\ct FLOWRATE} of the $i$th sampling location, $\rho_{soot,i}( t-t_{d,i})$ is the soot density at
-the $i$th sampling location $t_{d,i}$ s prior ({\ct DELAY}) to the current time $t$, and $K_m$ is the {\ct MASS\_EXTINCTION\_COEFFICIENT} associated with visible light.
 
 
 \subsection{Integrated Mass and Energy Fluxes through Openings}
@@ -4282,7 +4309,7 @@ with the name {\bf CHID\_fds2ascii.csv}.
 
 
 \clearpage
-\subsection{Summary of Output Quantities}
+\section{Summary of Output Quantities}
 \label{info:outputquantities}
 
 Table~\ref{tab:output}, spread over the following pages, summarizes the various Output Quantities.
@@ -4344,7 +4371,6 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct MASS FLOW}                                 & See Section~\ref{info:flows}                  & kg/s           & D            \\ \hline
 {\ct MIXTURE\_FRACTION}                         & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct nitrogen}                                  & $X_{N_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
-%{\ct obscuration}                               & See Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
 {\ct oxygen}                                    & $X_{O_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
 {\ct oxygen mass fraction}                      & $Y_{O_2}(Z)$                                  & kg/kg          & D,I,P,S      \\ \hline
 {\ct [PART\_ID]\_AMPUA}                         & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
@@ -4364,8 +4390,14 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct soot density}                              & $\rho Y_s(Z)$                                 & mg/m$^3$       & D,I,P,S      \\ \hline
 {\ct [SPEC\_ID]}                                & $Y$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct [SPEC\_ID]\_VF}                            & $X$                                           & mol/mol        & D,I,P,S      \\ \hline
+{\ct [SPEC\_ID]\_FLUX\_X}                       & $\rho u Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
+{\ct [SPEC\_ID]\_FLUX\_Y}                       & $\rho v Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
+{\ct [SPEC\_ID]\_FLUX\_Z}                       & $\rho w Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
+{\ct spot obscuration}                          & See Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
+{\ct SPRINKLER LINK TEMPERATURE}                & See Section~\ref{info:sprinkler}              & $^\circ$C      & D            \\ \hline
 {\ct TEMPERATURE}                               & $T$ (Section~\ref{info:THERMOCOUPLE})         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & $T_{TC}$ (Section~\ref{info:THERMOCOUPLE})    & $^\circ$C      & D,I,P,S      \\ \hline
+{\ct TIME}                                      & $t$ (Section~\ref{info:DEVC})                 & s              & D            \\ \hline
 {\ct U-VELOCITY}                                & $u$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct V-VELOCITY}                                & $v$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct W-VELOCITY}                                & $w$                                           & m/s            & D,I,P,S      \\ \hline
@@ -4386,7 +4418,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 
 
 
-\clearpage
+
 
 
 \chapter{Advanced FDS Functionality}
@@ -5045,105 +5077,9 @@ Section~\ref{info:combustion}.
 
 
 
-\bibliography{../Bibliography/FDSVVBiB}
 
 
-\appendix
 
-\addcontentsline{toc}{chapter}{Appendices}
-
-\chapter{Compiling FDS}
-\label{info:compilation}
-
-This section describes what you need to know if you want to compile the FDS source code yourself.
-It is not a step by step guide, more detailed instructions can be found on the web site (http://fds-sv.sourceforge.net).
-
-If a compiled version of FDS exists for the machine on which the
-calculation is to be run and no changes have been made to
-the original source code, there is no need to re-compile the code.
-For example, the file {\bf fds5.exe} is the
-compiled single processor program for a Windows-based PC;
-thus PC users do not need a
-Fortran compiler and do not need to compile the source code.
-For machines for which an executable has not been compiled, you must
-compile the code. Fortran 90/95 and C compilers are needed for compilation.
-
-\section{FDS Source Code}
-
-Table~\ref{tab:sourcefiles} lists the files that make up the source code.
-The files with suffix ``.f90'' contain free form Fortran 90
-instructions conforming to the ANSI and ISO standards, with a few exceptions that are discussed below.
-The source files should be compiled in the order in which they are listed
-in Table~\ref{tab:sourcefiles} because some routines are dependent on others.
-For Unix/Linux users, {\bf Makefiles} for various platforms are available that assist in the
-compilation. Compiler options differ from platform to platform.
-Note the following:
-\begin{itemize}
-\item The source code consists mainly of Fortran 90
-statements organized into about 25 files, plus an extra file containing
-some additional C routines needed for output to Smokeview.
-All of the C code is contained within the file called {\bf isob.c}.
-\item Be aware that different
-compilers handle the names of C subroutines differently. Some compilers
-append an underscore to the names of the C routines called by the Fortran
-code. If the compiler produces an error involving the names of routines
-that are not recognized, invoke the C compiler pre-processing directive {\ct pp\_noappend} to stop
-the compiler from appending the underscore to the names of the C routines.
-\item There are only two non-standard calls in the Fortran code. The first is called
-{\ct FLUSH}. This routine forces the contents of a given output
-file buffer to be emptied, making it easier to check on
-the progress of a given calculation. Most Fortran compilers accept this
-routine, but if a compiler complains, comment out the call to {\ct FLUSH} in {\bf func.f90} or provide a suitable alternative.
-The second non-standard call is {\ct GETARG}, also in {\bf func.f90}. This routine reads the name of the input file off of the command line. This call cannot
-be simply commented out; a suitable alternative must be found. For Lahey compilers, the call is {\ct GETCL(STRING)}.
-\item The only compiler option necessary, in addition to any needed to
-address the above issues, is for full optimization (usually -O or some variant). Some
-compilers have a standard optimization level, plus various degrees of
-``aggressive'' optimization. Be cautious in using the highest levels of optimization.
-\item For the single processor version of FDS, compile with {\bf main.f90}
-\item The parallel version of FDS uses {\bf main\_mpi.f90} instead of
-{\bf main.f90}, plus additional MPI libraries need to be installed. More details on MPI can be found at the web site, along with links to the
-necessary organizations who have developed free MPI libraries.
-\end{itemize}
-
-\begin{table}[ht]
-\begin{center}
-\caption{\bf Source Code Files}
-\label{tab:sourcefiles}
-\vspace{.1in}
-\begin{tabular}{|l|l|}
-\hline
-File Name  & Description  \\ \hline \hline
-isob.c     & C Routine for computing isosurfaces and 3D smoke \\ \hline \hline
-prec.f90   & Specification of numerical precision \\ \hline
-smvv.f90   & Interfaces for C routines used for Smokeview output \\ \hline
-devc.f90   & Derived type definitions and constants for devices' \\ \hline
-type.f90   & Derived type definitions \\ \hline
-mesh.f90   & Arrays and constants associated with each mesh \\ \hline
-cons.f90   & Global arrays and constants \\ \hline
-func.f90   & Global functions and subroutines \\ \hline
-irad.f90   & Functions needed for radiation solver, including RadCal \\ \hline
-ieva.f90   & Support routines for evac.f90 \\ \hline
-evac.f90   & Egress computations (future capability) \\ \hline
-pois.f90   & Poisson (pressure) solver \\ \hline
-radi.f90   & Radiation solver  \\ \hline
-part.f90   & Lagrangian particle transport and sprinkler activation \\ \hline
-ctrl.f90   & Definitions and routines for control functions \\ \hline
-dump.f90   & Output data dumps into files \\ \hline
-read.f90   & Read input parameters \\ \hline
-mass.f90   & Mass equation(s) and thermal boundary conditions \\ \hline
-wall.f90   & Wall boundary conditions \\ \hline
-fire.f90   & Combustion routines \\ \hline
-pres.f90   & Spatial discretization of pressure (Poisson) equation \\ \hline
-divg.f90   & Compute the flow divergence \\ \hline
-init.f90   & Initialize variables and Poisson solver \\ \hline
-velo.f90   & Momentum equations \\ \hline
-main.f90 {\bf or} main\_mpi.f90   & Main programs, serial and parallel versions \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-\clearpage
 
 
 
@@ -5993,6 +5929,103 @@ Name & &  R  & G & B & Name & & R & G & B   \\ \hline \hline
 
 
 
+\part{Working with the FDS Source Code}
+
+
+\chapter{Compiling FDS}
+\label{info:compilation}
+
+This section describes what you need to know if you want to compile the FDS source code yourself.
+It is not a step by step guide, more detailed instructions can be found on the web site (http://fds-sv.sourceforge.net).
+
+If a compiled version of FDS exists for the machine on which the
+calculation is to be run and no changes have been made to
+the original source code, there is no need to re-compile the code.
+For example, the file {\bf fds5.exe} is the
+compiled single processor program for a Windows-based PC;
+thus PC users do not need a
+Fortran compiler and do not need to compile the source code.
+For machines for which an executable has not been compiled, you must
+compile the code. Fortran 90/95 and C compilers are needed for compilation.
+
+\section{FDS Source Code}
+
+Table~\ref{tab:sourcefiles} lists the files that make up the source code.
+The files with suffix ``.f90'' contain free form Fortran 90
+instructions conforming to the ANSI and ISO standards, with a few exceptions that are discussed below.
+The source files should be compiled in the order in which they are listed
+in Table~\ref{tab:sourcefiles} because some routines are dependent on others.
+For Unix/Linux users, {\bf Makefiles} for various platforms are available that assist in the
+compilation. Compiler options differ from platform to platform.
+Note the following:
+\begin{itemize}
+\item The source code consists mainly of Fortran 90
+statements organized into about 25 files, plus an extra file containing
+some additional C routines needed for output to Smokeview.
+All of the C code is contained within the file called {\bf isob.c}.
+\item Be aware that different
+compilers handle the names of C subroutines differently. Some compilers
+append an underscore to the names of the C routines called by the Fortran
+code. If the compiler produces an error involving the names of routines
+that are not recognized, invoke the C compiler pre-processing directive {\ct pp\_noappend} to stop
+the compiler from appending the underscore to the names of the C routines.
+\item There are only two non-standard calls in the Fortran code. The first is called
+{\ct FLUSH}. This routine forces the contents of a given output
+file buffer to be emptied, making it easier to check on
+the progress of a given calculation. Most Fortran compilers accept this
+routine, but if a compiler complains, comment out the call to {\ct FLUSH} in {\bf func.f90} or provide a suitable alternative.
+The second non-standard call is {\ct GETARG}, also in {\bf func.f90}. This routine reads the name of the input file off of the command line. This call cannot
+be simply commented out; a suitable alternative must be found. For Lahey compilers, the call is {\ct GETCL(STRING)}.
+\item The only compiler option necessary, in addition to any needed to
+address the above issues, is for full optimization (usually -O or some variant). Some
+compilers have a standard optimization level, plus various degrees of
+``aggressive'' optimization. Be cautious in using the highest levels of optimization.
+\item For the single processor version of FDS, compile with {\bf main.f90}
+\item The parallel version of FDS uses {\bf main\_mpi.f90} instead of
+{\bf main.f90}, plus additional MPI libraries need to be installed. More details on MPI can be found at the web site, along with links to the
+necessary organizations who have developed free MPI libraries.
+\end{itemize}
+
+\begin{table}[ht]
+\begin{center}
+\caption{\bf Source Code Files}
+\label{tab:sourcefiles}
+\vspace{.1in}
+\begin{tabular}{|l|l|}
+\hline
+File Name  & Description  \\ \hline \hline
+isob.c     & C Routine for computing isosurfaces and 3D smoke \\ \hline \hline
+prec.f90   & Specification of numerical precision \\ \hline
+smvv.f90   & Interfaces for C routines used for Smokeview output \\ \hline
+devc.f90   & Derived type definitions and constants for devices' \\ \hline
+type.f90   & Derived type definitions \\ \hline
+mesh.f90   & Arrays and constants associated with each mesh \\ \hline
+cons.f90   & Global arrays and constants \\ \hline
+func.f90   & Global functions and subroutines \\ \hline
+irad.f90   & Functions needed for radiation solver, including RadCal \\ \hline
+ieva.f90   & Support routines for evac.f90 \\ \hline
+evac.f90   & Egress computations (future capability) \\ \hline
+pois.f90   & Poisson (pressure) solver \\ \hline
+radi.f90   & Radiation solver  \\ \hline
+part.f90   & Lagrangian particle transport and sprinkler activation \\ \hline
+ctrl.f90   & Definitions and routines for control functions \\ \hline
+dump.f90   & Output data dumps into files \\ \hline
+read.f90   & Read input parameters \\ \hline
+mass.f90   & Mass equation(s) and thermal boundary conditions \\ \hline
+wall.f90   & Wall boundary conditions \\ \hline
+fire.f90   & Combustion routines \\ \hline
+pres.f90   & Spatial discretization of pressure (Poisson) equation \\ \hline
+divg.f90   & Compute the flow divergence \\ \hline
+init.f90   & Initialize variables and Poisson solver \\ \hline
+velo.f90   & Momentum equations \\ \hline
+main.f90 {\bf or} main\_mpi.f90   & Main programs, serial and parallel versions \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+
+
 
 \chapter{Output File Formats}
 
@@ -6519,7 +6552,9 @@ The syntax of the old {\ct THCP} namelist group is almost the same. Just swap {\
 
 
 
-%\clearpage
+\bibliography{../Bibliography/FDSVVBiB}
+
+
 
 %\printindex
 
