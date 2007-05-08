@@ -54,7 +54,7 @@
       DROPLETS_PER_SECOND=2000,DIAMETER=1000.,HEAT_OF_COMBUSTION=44500.,
       DT_INSERT=0.02,SAMPLING_FACTOR=1 /
 
-&PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets', FLOW_RATE=1.96, FLOW_RAMP='fuel',
+&PROP ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=1.96, FLOW_RAMP='fuel',
       DROPLET_VELOCITY=10., SPRAY_ANGLE=0.,30.    /
 &RAMP ID='fuel', T= 0.0, F=0.0 /
 &RAMP ID='fuel', T=20.0, F=1.0 /
