@@ -950,9 +950,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
          WM = WW(II,JJ,KK)
          IF (ABS(NOM1)==NM) THEN
             IF (NOM1>0 .AND. BC<1.5_EB) VP = BC*VM
-            IF (NOM1>0 .AND. BC>1.5_EB) VP = FVT*SF%VEL_T(1)
+            IF (NOM1>0 .AND. BC>1.5_EB) VP = FVT*SF%VEL_T(2)
             IF (NOM1<0 .AND. BC<1.5_EB) VM = BC*VP
-            IF (NOM1<0 .AND. BC>1.5_EB) VM = FVT*SF%VEL_T(1)
+            IF (NOM1<0 .AND. BC>1.5_EB) VM = FVT*SF%VEL_T(2)
          ENDIF
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
             IF (NOM1<0) VM = OMESH(ABS(NOM1))%V(IIO1,JJO1,KKO1)
@@ -1031,7 +1031,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          VP = VV(II+1,JJ,KK)
          VM = VV(II,JJ,KK)
          IF (ABS(NOM1)==NM) THEN
-         IF (NOM1>0 .AND. BC<1.5_EB) UP = BC*UM
+            IF (NOM1>0 .AND. BC<1.5_EB) UP = BC*UM
             IF (NOM1>0 .AND. BC>1.5_EB) UP = FVT*SF%VEL_T(1)
             IF (NOM1<0 .AND. BC<1.5_EB) UM = BC*UP
             IF (NOM1<0 .AND. BC>1.5_EB) UM = FVT*SF%VEL_T(1)
@@ -1042,9 +1042,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ENDIF
          IF (ABS(NOM2)==NM) THEN
             IF (NOM2>0 .AND. BC<1.5_EB) VP = BC*VM
-            IF (NOM2>0 .AND. BC>1.5_EB) VP = FVT*SF%VEL_T(2)
+            IF (NOM2>0 .AND. BC>1.5_EB) VP = FVT*SF%VEL_T(1)
             IF (NOM2<0 .AND. BC<1.5_EB) VM = BC*VP
-            IF (NOM2<0 .AND. BC>1.5_EB) VM = FVT*SF%VEL_T(2)
+            IF (NOM2<0 .AND. BC>1.5_EB) VM = FVT*SF%VEL_T(1)
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
             IF (NOM2<0) VM = OMESH(ABS(NOM2))%V(IIO2,JJO2,KKO2)
