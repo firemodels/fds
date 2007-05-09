@@ -114,8 +114,7 @@
 
 \vspace{1in}
 
-\Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, April 30, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, May 9, 2007)}
 
 \vspace{.5in}
 
@@ -1294,12 +1293,12 @@ are almost completely fabricated. What is important here are the
 
 A 10~m x 10~m x 4~m compartment is filled with 0.006~kg/kg of {\ct MIXTURE\_FRACTION\_2} with the default soot yield
 0.01~kg/kg.  This results in an initial soot density of 71.9~mg/m$^3$ which using the default extinction coefficient of
-7600~m$^2$/kg results in an optical depth of 0.546~m$^{-1}$.  The compartment has a series of obstructions placed at varying depths that are
-multiples of 1~m.  Using the correlation for the output quantity {\ct visibility}, one obtains a visibility distance of 5.5~m.
-When viewing the smoke levels with Smokeview, one can just barely see the sixth obstacle which is at a distance of 6~m.
+8700~m$^2$/kg results in an optical depth of 0.626~m$^{-1}$.  The compartment has a series of obstructions placed at varying depths that are
+multiples of 1~m.  Using the correlation for the output quantity {\ct visibility}, one obtains a visibility distance of 4.8~m.
+When viewing the smoke levels with Smokeview, one can just barely see the fifth obstacle which is at a distance of 5~m.
 Smokeview, therefore, is properly displaying the obscuration of the initial soot density.  Three beam detectors are also
 placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment.
-Using the optical depth of 0.546~m$^{-1}$ and the path length of 10~m, the expected total obscuration is 99.58~\%, which is the
+Using the optical depth of 0.626~m$^{-1}$ and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the
 result computed by FDS for each of the three detectors.
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{FIGURES/beam_detector_nosmoke} &
