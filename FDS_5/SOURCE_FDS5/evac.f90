@@ -35,7 +35,7 @@ Module EVAC
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS
   ! Public variables (needed in the main program):
   !
-  Character(20) :: EVAC_COMPILE_DATE = 'April 19, 2007'
+  Character(20) :: EVAC_COMPILE_DATE = 'May 9, 2007'
   Real(FB) :: EVAC_VERSION = 1.10
   !
   ! This is a group of persons, who are initialized together,
@@ -409,46 +409,6 @@ Contains
     EVAC_CLOCK = 0.0_EB    ! clock for the CHID_evac.csv file
 
     EVAC_N_QUANTITIES = 0
-    If (EVAC_N_QUANTITIES > 0) Then
-       Allocate(EVAC_QUANTITIES_INDEX(EVAC_N_QUANTITIES),STAT=IZERO)
-       Call ChkMemErr('READ_EVAC','EVAC_QUANTITIES_INDEX',IZERO)
-    End If
-
-    OUTPUT_QUANTITY(201)%NAME  = 'Movement Speed'
-    OUTPUT_QUANTITY(201)%UNITS  = 'm/s'
-    OUTPUT_QUANTITY(201)%SHORT_NAME  = 'v_human'
-
-    OUTPUT_QUANTITY(202)%NAME  = 'Center Circle Diameter'
-    OUTPUT_QUANTITY(202)%UNITS  = 'm'
-    OUTPUT_QUANTITY(202)%SHORT_NAME  = 'd_torso'
-
-    OUTPUT_QUANTITY(203)%NAME  = 'Shoulder Circle Diameter'
-    OUTPUT_QUANTITY(203)%UNITS  = 'm'
-    OUTPUT_QUANTITY(203)%SHORT_NAME  = 'd_shoulder'
-
-    OUTPUT_QUANTITY(204)%NAME  = 'Body-Shoulder Distance'
-    OUTPUT_QUANTITY(204)%UNITS  = 'm'
-    OUTPUT_QUANTITY(204)%SHORT_NAME  = 'd_circ'
-
-    OUTPUT_QUANTITY(205)%NAME  = 'Fractional Effective Dose'
-    OUTPUT_QUANTITY(205)%UNITS  = ' '
-    OUTPUT_QUANTITY(205)%SHORT_NAME  = 'FED'
-
-    OUTPUT_QUANTITY(206)%NAME  = 'Human Velocity x'
-    OUTPUT_QUANTITY(206)%UNITS  = 'm/s'
-    OUTPUT_QUANTITY(206)%SHORT_NAME  = 'vx_human'
-
-    OUTPUT_QUANTITY(207)%NAME  = 'Human Velocity y'
-    OUTPUT_QUANTITY(207)%UNITS  = 'm/s'
-    OUTPUT_QUANTITY(207)%SHORT_NAME  = 'vy_human'
-
-    OUTPUT_QUANTITY(208)%NAME  = 'Human Angle'
-    OUTPUT_QUANTITY(208)%UNITS  = 'rad'
-    OUTPUT_QUANTITY(208)%SHORT_NAME  = 'theta_human'
-
-    OUTPUT_QUANTITY(209)%NAME  = 'Human Pressure'
-    OUTPUT_QUANTITY(209)%UNITS  = 'N/m'
-    OUTPUT_QUANTITY(209)%SHORT_NAME  = 'h_pres'
 
     i33 = 0
     ilh = 0
@@ -2992,7 +2952,7 @@ Contains
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
     Integer I,J,II,JJ,KK,IPC, IZERO, n_tmp, ie, nom, i1, j1
     Integer i11, i22, group_size, i1_old, j1_old
-    Logical PP_see_group, PP_see_door
+    Logical PP_see_group, PP_see_door, Is_Solid
     Integer iie, jje, iio, jjo, jjj, tim_ic, iii, i44
     Real(EB) y_o, x_o, Delta_y, Delta_x, x_now, y_now, &
          xi, yj, x11, y11, group_X_sum, group_Y_sum, &
@@ -3219,8 +3179,8 @@ Contains
                       HR%Angle = HR%Angle + 2.0_EB*Pi
                    End Do
 
-                   If (i_endless_loop >= (8.0_EB*Log10(2.5_EB*VOL2)) / &
-                        Log10((2.5_EB*VOL2)/(2.5_EB*VOL2-1)) ) Then
+                   If (i_endless_loop >= (8.0_EB*Max(1.0_EB,Log10(2.5_EB*VOL2))) / &
+                        Max(1.0_EB,Log10((2.5_EB*VOL2)/(2.5_EB*VOL2-1))) ) Then
                       Write(lu0,'(A,I4,A,I4,A,I6)') &
                            'ERROR: Initialize_Humans, EVAC line ', &
                            IPC, ', Mesh ', NM, ', i_human ', n_humans
@@ -3234,27 +3194,62 @@ Contains
                    End If
 
 
-                   II = Floor( CELLSI(Floor((HR%X-XS)*RDXINT)) + 1.0_EB )
-                   JJ = Floor( CELLSJ(Floor((HR%Y-YS)*RDYINT)) + 1.0_EB )
+                   !Check, that a person is not put on top of some other person
+                   If (DENS_INIT > 2.0_EB) Then
+                      ! High density is wanted
+                      d_max = 0.0_EB
+                   Else
+                      d_max = 1.0_EB*HR%B
+                   End If
+
+                   Is_Solid = .False.
                    KK = Floor( CELLSK(Floor((HR%Z-ZS)*RDZINT)) + 1.0_EB )
-                   If (.Not. SOLID(CELL_INDEX(II,JJ,KK))) Then
-                      !Check, that a person is not put on top of some other person
-                      If (DENS_INIT > 2.0_EB) Then
-                         ! High density is wanted
-                         d_max = 0.0_EB
-                      Else
-                         d_max = 1.0_EB*HR%B
-                      End If
-                      r_tmp(1) = HR%r_shoulder ! right circle
-                      r_tmp(2) = HR%r_torso     ! center circle
-                      r_tmp(3) = HR%r_shoulder ! left circle
-                      y_tmp(1) = HR%Y - Cos(HR%angle)*HR%d_shoulder ! right
-                      x_tmp(1) = HR%X + Sin(HR%angle)*HR%d_shoulder
-                      y_tmp(2) = HR%Y ! torso
-                      x_tmp(2) = HR%X
-                      y_tmp(3) = HR%Y + Cos(HR%angle)*HR%d_shoulder ! left
-                      x_tmp(3) = HR%X - Sin(HR%angle)*HR%d_shoulder
-                      P2PLoop: Do ie = 1, n_humans - 1
+
+                   r_tmp(1) = HR%r_shoulder ! right circle
+                   r_tmp(2) = HR%r_torso     ! center circle
+                   r_tmp(3) = HR%r_shoulder ! left circle
+                   y_tmp(1) = HR%Y - Cos(HR%angle)*(HR%d_shoulder+HR%r_shoulder) ! right
+                   x_tmp(1) = HR%X + Sin(HR%angle)*(HR%d_shoulder+HR%r_shoulder)
+                   y_tmp(3) = HR%Y + Cos(HR%angle)*(HR%d_shoulder+HR%r_shoulder)
+                   x_tmp(3) = HR%X - Sin(HR%angle)*(HR%d_shoulder+HR%r_shoulder)
+                   II = Floor( CELLSI(Floor((x_tmp(1)-XS)*RDXINT)) + 1.0_EB )
+                   JJ = Floor( CELLSJ(Floor((y_tmp(1)-YS)*RDYINT)) + 1.0_EB )
+                   Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+                   II = Floor( CELLSI(Floor((x_tmp(3)-XS)*RDXINT)) + 1.0_EB )
+                   JJ = Floor( CELLSJ(Floor((y_tmp(3)-YS)*RDYINT)) + 1.0_EB )
+                   Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+                   y_tmp(2) = HR%Y + Sin(HR%angle)*(HR%r_torso)  ! torso
+                   x_tmp(2) = HR%X + Cos(HR%angle)*(HR%r_torso)
+                   II = Floor( CELLSI(Floor((x_tmp(2)-XS)*RDXINT)) + 1.0_EB )
+                   JJ = Floor( CELLSJ(Floor((y_tmp(2)-YS)*RDYINT)) + 1.0_EB )
+                   Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+                   y_tmp(2) = HR%Y - Sin(HR%angle)*(HR%r_torso)  ! torso
+                   x_tmp(2) = HR%X - Cos(HR%angle)*(HR%r_torso)
+                   II = Floor( CELLSI(Floor((x_tmp(2)-XS)*RDXINT)) + 1.0_EB )
+                   JJ = Floor( CELLSJ(Floor((y_tmp(2)-YS)*RDYINT)) + 1.0_EB )
+                   Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+                   
+                   r_tmp(1) = HR%r_shoulder ! right circle
+                   r_tmp(2) = HR%r_torso     ! center circle
+                   r_tmp(3) = HR%r_shoulder ! left circle
+                   y_tmp(1) = HR%Y - Cos(HR%angle)*HR%d_shoulder ! right
+                   x_tmp(1) = HR%X + Sin(HR%angle)*HR%d_shoulder
+                   y_tmp(2) = HR%Y ! torso
+                   x_tmp(2) = HR%X
+                   y_tmp(3) = HR%Y + Cos(HR%angle)*HR%d_shoulder ! left
+                   x_tmp(3) = HR%X - Sin(HR%angle)*HR%d_shoulder
+                   II = Floor( CELLSI(Floor((x_tmp(1)-XS)*RDXINT)) + 1.0_EB )
+                   JJ = Floor( CELLSJ(Floor((y_tmp(1)-YS)*RDYINT)) + 1.0_EB )
+                   Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+                   II = Floor( CELLSI(Floor((x_tmp(3)-XS)*RDXINT)) + 1.0_EB )
+                   JJ = Floor( CELLSJ(Floor((y_tmp(3)-YS)*RDYINT)) + 1.0_EB )
+                   Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+                   II = Floor( CELLSI(Floor((x_tmp(2)-XS)*RDXINT)) + 1.0_EB )
+                   JJ = Floor( CELLSJ(Floor((y_tmp(2)-YS)*RDYINT)) + 1.0_EB )
+                   Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+
+                   If (.Not.Is_Solid) Then
+                     P2PLoop: Do ie = 1, n_humans - 1
                          HRE => HUMAN(ie)
                          r_tmp(4) = HRE%r_shoulder ! right circle
                          r_tmp(5) = HRE%r_torso     ! center circle
@@ -4715,7 +4710,7 @@ Contains
     Logical PP_see_each, PP_see_door
     Logical L_eff_read, L_eff_save, L_Dead
     Real(EB) :: sin_x, sin_y, cos_x, cos_y, ss_h, &
-         speed_xm, speed_xp, speed_ym, speed_yp, hr_z, hr_a, hr_b
+         speed_xm, speed_xp, speed_ym, speed_yp, hr_z, hr_a, hr_b, hr_tau
     !
     Real(EB) ksi, eta, rn
     Real(EB) GaMe, GaTh, GaCM
@@ -5570,11 +5565,12 @@ Contains
                 fed_max_alive = Max(fed_max_alive,HR%IntDose)
              End If
              fed_max = Max(fed_max,HR%IntDose)
+             hr_tau = HR%Tau
              !
              ! Check, if new random force is needed on next time step.
              If ( GaTh > 0.0_EB .And. T > 0.0_EB ) Then
                 Call Random_number(rn)
-                If ( rn > Exp(-DTSP/(0.2_EB*HR%Tau)) ) HR%NewRnd = .True.
+                If ( rn > Exp(-DTSP/(0.2_EB*hr_tau)) ) HR%NewRnd = .True.
                 If ( HR%NewRnd ) Then
                    HR%NewRnd = .False.
                    HR%ksi = (GaussRand(GaMe, GaTh, GaCM))
@@ -5766,14 +5762,14 @@ Contains
                    HR%VBAR_Center =  &
                         HR%V_Center / Sqrt(HR%U_Center**2 + HR%V_Center**2)
                 Else
-                   HR%UBAR_Center = HR%U_Center  ! eli nolla
-                   HR%VBAR_Center = HR%V_Center  ! eli nolla
+                   HR%UBAR_Center = HR%U_Center
+                   HR%VBAR_Center = HR%V_Center
                 End If
              Else
                 HR%U_Center = 0.0_EB ! only one person in the group
                 HR%V_Center = 0.0_EB ! only one person in the group
-                HR%UBAR_Center = HR%U_Center ! eli nolla
-                HR%VBAR_Center = HR%V_Center ! eli nolla
+                HR%UBAR_Center = HR%U_Center
+                HR%VBAR_Center = HR%V_Center
              End If
 
 
@@ -5799,10 +5795,17 @@ Contains
                 VBAR = HR%VBAR_Center
              End If
 
-             If ( T <= Tpre .Or. T <= 0.0_EB ) Then
+             If ( T <= Tpre ) Then
                 ! Fire is not yet detected ==> no movement
                 UBAR = 0.0_EB
                 VBAR = 0.0_EB
+                hr_tau = Max(0.1_EB,HR%Tau/10.0_EB)
+             End If
+             If ( T <= 0.0_EB ) Then
+                ! Initialization phase
+                UBAR = 0.0_EB
+                VBAR = 0.0_EB
+                hr_tau = HR%Tau
              End If
 
              EVEL = Sqrt(UBAR**2 + VBAR**2)
@@ -5811,13 +5814,13 @@ Contains
                 speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + &
                      speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
                 speed = speed*HR%v0_fac
-                U_new = U_new + 0.5_EB*(DTSP/HR%Tau)* &
+                U_new = U_new + 0.5_EB*(DTSP/hr_tau)* &
                      (speed*(UBAR/EVEL) - HR%U)
 
                 speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + &
                      speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
                 speed = speed*HR%v0_fac
-                V_new = V_new + 0.5_EB*(DTSP/HR%Tau)* &
+                V_new = V_new + 0.5_EB*(DTSP/hr_tau)* &
                      (speed*(VBAR/EVEL) - HR%V)
                 If (VBAR >= 0.0_EB) Then
                    angle = ACos(UBAR/EVEL)
@@ -5829,22 +5832,22 @@ Contains
                 ! J(dw/dt) = (J/t_iner)*( ((angle-angle_0/pi))w_0 - w )
                 If (Abs(angle-HR%angle) <= Pi ) Then
                    ! zero is not crossed.
-                   Omega_new = Omega_new + 0.5_EB*(DTSP/HR%Tau_iner)* &
+                   Omega_new = Omega_new + 0.5_EB*(DTSP/HR%tau_iner)* &
                         ( (angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
                 Else
                    ! zero is crossed
-                   Omega_new = Omega_new + 0.5_EB*(DTSP/HR%Tau_iner)* &
+                   Omega_new = Omega_new + 0.5_EB*(DTSP/HR%tau_iner)* &
                         ( (2.0_EB*Pi-Abs(angle-HR%angle))*Sign(1.0_EB , HR%angle-angle)* &
                         (Omega_0/Pi) - HR%Omega )
                 End If
              Else
-                U_new = U_new + 0.5_EB*(DTSP/HR%Tau)* &
+                U_new = U_new + 0.5_EB*(DTSP/hr_tau)* &
                      (- HR%U)
-                V_new = V_new + 0.5_EB*(DTSP/HR%Tau)* &
+                V_new = V_new + 0.5_EB*(DTSP/hr_tau)* &
                      (- HR%V)
                 ! Slow rotation down if no direction available, i.e., target
                 ! Omega_0 is zero.
-                Omega_new = Omega_new + 0.5_EB*(DTSP/HR%Tau_iner)*(-HR%Omega)
+                Omega_new = Omega_new + 0.5_EB*(DTSP/HR%tau_iner)*(-HR%Omega)
              End If
 
              ! Check that velocities are not too large, i.e.,
@@ -6121,6 +6124,7 @@ Contains
                 HR%Mass = HR%Mass
                 HR%COLOR_INDEX = 6
              End If
+             hr_tau = HR%Tau
              !
              ! Psychological force: cut-off when acceleration below 0.0001 m/s**2
              P2P_DIST_MAX = HR%B*Log(HR%A/0.0001_EB)
@@ -7019,10 +7023,7 @@ Contains
              HR%SumForces2 = Social_F + Contact_F
              HR%Torque = P2P_Torque
              !
-             If (Sqrt(HR%F_X**2 + HR%F_Y**2) > 0.5_EB*HR%SumForces2 .And. &
-                  Sqrt(HR%F_X**2 + HR%F_Y**2) > 2000.0_EB) Then
 
-             End If
 
              If ( T <= 0.0_EB ) Then
                 If ( Abs(P2P_U)/HR%Mass > 550.0_EB ) &
@@ -7056,7 +7057,7 @@ Contains
              End If
 
 
-             fac_tim =  1.0_EB + (DTSP/(2.0_EB*HR%Tau))
+             fac_tim =  1.0_EB + (DTSP/(2.0_EB*hr_tau))
              ! 
              ! ========================================================
              ! Add self-propelling force terms, self-consistent
@@ -7125,11 +7126,11 @@ Contains
                       speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + &
                            speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
                       speed = speed*HR%v0_fac
-                      P2P_U = P2P_U + (HR%Mass/HR%Tau)*speed*(UBAR/EVEL)
+                      P2P_U = P2P_U + (HR%Mass/hr_tau)*speed*(UBAR/EVEL)
                       speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + &
                            speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
                       speed = speed*HR%v0_fac
-                      P2P_V = P2P_V + (HR%Mass/HR%Tau)*speed*(VBAR/EVEL)
+                      P2P_V = P2P_V + (HR%Mass/hr_tau)*speed*(VBAR/EVEL)
                    End If
                 End If
                 UBAR = 0.0_EB
@@ -7141,16 +7142,16 @@ Contains
                 speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + &
                      speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
                 speed = speed*HR%v0_fac
-                U_new = (U_new + 0.5_EB*(DTSP/HR%Tau)* &
+                U_new = (U_new + 0.5_EB*(DTSP/hr_tau)* &
                      speed*(UBAR/EVEL)) / fac_tim
-                P2P_U = P2P_U + (HR%Mass/HR%Tau)* &
+                P2P_U = P2P_U + (HR%Mass/hr_tau)* &
                      (speed*(UBAR/EVEL) - HR%U)
                 speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + &
                      speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
                 speed = speed*HR%v0_fac
-                V_new = (V_new + 0.5_EB*(DTSP/HR%Tau)* &
+                V_new = (V_new + 0.5_EB*(DTSP/hr_tau)* &
                      speed*(VBAR/EVEL)) / fac_tim
-                P2P_V = P2P_V + (HR%Mass/HR%Tau)* &
+                P2P_V = P2P_V + (HR%Mass/hr_tau)* &
                      (speed*(VBAR/EVEL) - HR%V)
                 If (VBAR >= 0.0_EB) Then
                    angle = ACos(UBAR/EVEL)
@@ -7165,9 +7166,9 @@ Contains
                 ! J(dw/dt) = (J/t_iner)*( ((angle-angle_0)/pi)w_0 - w )
                 If (Abs(angle-HR%angle) <= Pi ) Then
                    ! zero is not crossed.
-                   Omega_new = Omega_new + 0.5_EB*(DTSP/HR%Tau_iner)* &
+                   Omega_new = Omega_new + 0.5_EB*(DTSP/HR%tau_iner)* &
                         ( (angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
-                   P2P_Torque = P2P_Torque + (HR%M_iner/HR%Tau_iner)* &
+                   P2P_Torque = P2P_Torque + (HR%M_iner/HR%tau_iner)* &
                         ( (angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
                 Else
                    ! zero is crossed
