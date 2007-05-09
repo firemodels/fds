@@ -1540,7 +1540,7 @@ O                           = 0._EB
 N                           = 0._EB
 OTHER                       = 0._EB
 MW_OTHER                    = 28_EB        ! Nitrogen MW
-MASS_EXTINCTION_COEFFICIENT = 7600._EB     ! m2/kg
+MASS_EXTINCTION_COEFFICIENT = 8700._EB     ! m2/kg
 MAXIMUM_VISIBILITY          = 30._EB       ! m
 VISIBILITY_FACTOR           = 3._EB
  
