@@ -5445,8 +5445,8 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DEVC ' ,N,' must have a PROP_ID'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
-         ALLOCATE(DV%T_E(-1:10000))
-         ALLOCATE(DV%Y_E(-1:10000))
+         ALLOCATE(DV%T_E(-1:1000))
+         ALLOCATE(DV%Y_E(-1:1000))
          DV%T_E      = T_BEGIN - M%DT
          DV%Y_E      = 0._EB
          DV%N_T_E    = -1
