@@ -1826,7 +1826,7 @@ PROPERTY_LOOP: DO N=1,N_PROP
          WRITE(LU6,'(A,A   )') '     Detector Class              ', TRIM(PY%ID)         
       CASE('spot obscuration')
          WRITE(LU6,'(A,F8.2)') '     Activation Obscuration (%/m)', PY%ACTIVATION_OBSCURATION 
-         WRITE(LU6,'(A,F8.2)') '     Alpha_c                     ', PY%ALPHA_C
+         WRITE(LU6,'(A,F8.2)') '     Alpha_c or L                ', PY%ALPHA_C
          WRITE(LU6,'(A,F8.2)') '     Beta_c                      ', PY%BETA_C
          WRITE(LU6,'(A,F8.2)') '     Alpha_e                     ', PY%ALPHA_E
          WRITE(LU6,'(A,F8.2)') '     Beta_e                      ', PY%BETA_E

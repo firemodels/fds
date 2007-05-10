@@ -2480,12 +2480,12 @@ CONTAINS
  
 SUBROUTINE SET_PROP_DEFAULTS
  
-ACTIVATION_OBSCURATION   = 3.28_EB
-ACTIVATION_TEMPERATURE   = 74.0_EB
-ALPHA_C                  = 1.8_EB
+ACTIVATION_OBSCURATION   = 3.28_EB     ! %/m
+ACTIVATION_TEMPERATURE   = 74.0_EB     ! C
+ALPHA_C                  = 1.8_EB      ! m, Heskestad Length Scale
 ALPHA_E                  = 0.0_EB
-BETA_C                   = 1.0_EB
-BETA_E                   = 1.0_EB
+BETA_C                   = -1.0_EB
+BETA_E                   = -1.0_EB
 BEAD_DIAMETER            = 0.001       ! m
 BEAD_EMISSIVITY          = 0.85_EB
 C_FACTOR                 = 0.0_EB
