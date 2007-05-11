@@ -512,9 +512,9 @@ M%WALL_INDEX = 0
 ALLOCATE(M%WALL_INDEX_BACK(NDWC),STAT=IZERO)
 CALL ChkMemErr('INIT','WALL_INDEX_BACK',IZERO) 
 M%WALL_INDEX_BACK = 0
-ALLOCATE(M%IEA(0:M%NDBC,1:12),STAT=IZERO)
-CALL ChkMemErr('INIT','IEA',IZERO) 
-M%IEA = 0
+ALLOCATE(M%EDGE_INDEX(0:M%NDBC,1:12),STAT=IZERO)
+CALL ChkMemErr('INIT','EDGE_INDEX',IZERO) 
+M%EDGE_INDEX = 0
  
 ! Surface water arrays
  
@@ -2172,7 +2172,7 @@ REMOVE_ONLY: IF (REMOVE) THEN
 DO K=K1-1,K2
    DO J=J1-1,J2
       DO I=I1  ,I2
-         IE = IEA(CELL_INDEX(I,J,K),4)
+         IE = EDGE_INDEX(CELL_INDEX(I,J,K),4)
          IF (IE>0 .AND. J/=0 .AND. J/=JBAR .AND. K/=0 .AND. K/=KBAR) IJKE(4,IE) = 0
          IF ( IE <= 0 ) THEN 
                CONTINUE
@@ -2185,7 +2185,7 @@ ENDDO
 DO K=K1-1,K2
    DO J=J1  ,J2
       DO I=I1-1,I2
-         IE = IEA(CELL_INDEX(I,J,K),8)
+         IE = EDGE_INDEX(CELL_INDEX(I,J,K),8)
          IF (IE>0 .AND. I/=0 .AND. I/=IBAR .AND. K/=0 .AND. K/=KBAR) IJKE(4,IE) = 0
          IF ( IE <= 0 ) THEN 
                CONTINUE
@@ -2198,7 +2198,7 @@ ENDDO
 DO K=K1  ,K2
    DO J=J1-1,J2
       DO I=I1-1,I2
-         IE = IEA(CELL_INDEX(I,J,K),12)
+         IE = EDGE_INDEX(CELL_INDEX(I,J,K),12)
          IF (IE>0 .AND. I/=0 .AND. I/=IBAR .AND. J/=0 .AND. J/=JBAR) IJKE(4,IE) = 0
          IF ( IE <= 0 ) THEN 
                CONTINUE
@@ -2240,93 +2240,86 @@ SUBROUTINE DEFINE_EDGE(II,JJ,KK,IOR,IEC,NM,I_OBST)
  
 ! Set up edge arrays for velocity boundary conditions
  
+USE COMP_FUNCTIONS, ONLY : SHUTDOWN 
 INTEGER, INTENT(IN) :: II,JJ,KK,IOR,IEC,NM
 INTEGER :: NOM,ICMM,ICMP,ICPM,ICPP,IBC,I_OBST,IE,IW,IIO,JJO,KKO,IW1,IW2
  
-IBC = 0
-IF (I_OBST>0) THEN
-   OB=>OBSTRUCTION(I_OBST)
-   IBC = OB%IBC(IOR)
-ENDIF
+IF (I_OBST>0) OB=>OBSTRUCTION(I_OBST)
  
-! Reject edges that are at corners of obstacles
+! Find the wall cells on each side of the edge 
+
+IW1 = -1
+IW2 = -1
  
 COMP: SELECT CASE(IEC)
    CASE(1) COMP
-      IF (JJ/=0 .AND. JJ/=JBAR .AND. KK/=0 .AND. KK/=KBAR) THEN
-         SELECT CASE(IOR)
-            CASE(-2)
-               IW1 = WALL_INDEX(CELL_INDEX(II,JJ,KK)  ,2)
-               IW2 = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),2)
-               IF (IW1==0 .OR. IW2==0) RETURN
-            CASE( 2)
-               IW1 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK)  ,-2)
-               IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK+1),-2)
-               IF (IW1==0 .OR. IW2==0) RETURN
-            CASE(-3)
-               IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK),3)
-               IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),3)
-               IF (IW1==0 .OR. IW2==0) RETURN
-            CASE( 3)
-               IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK+1),-3)
-               IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK+1),-3)
-               IF (IW1==0 .OR. IW2==0) RETURN
-         END SELECT
-      ENDIF
+      SELECT CASE(IOR)
+         CASE(-2)
+            IW1 = WALL_INDEX(CELL_INDEX(II,JJ,KK)  ,2)
+            IW2 = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),2)
+         CASE( 2)
+            IW1 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK)  ,-2)
+            IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK+1),-2)
+         CASE(-3)
+            IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK),3)
+            IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),3)
+         CASE( 3)
+            IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK+1),-3)
+            IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK+1),-3)
+      END SELECT
    CASE(2) COMP
-      IF (II/=0 .AND. II/=IBAR .AND. KK/=0 .AND. KK/=KBAR) THEN
-         SELECT CASE(IOR)
-            CASE(-1)
-               IW1 = WALL_INDEX(CELL_INDEX(II,JJ,KK)  ,1)
-               IW2 = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),1)
-               IF (IW1==0 .OR. IW2==0) RETURN
-            CASE( 1)
-               IW1 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK)  ,-1)
-               IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK+1),-1)
-               IF (IW1==0 .OR. IW2==0) RETURN
-            CASE(-3)
-               IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ,KK+1),3)
-               IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK+1),3)
-               IF (IW1==0 .OR. IW2==0) RETURN
-            CASE( 3)
-               IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ,KK),-3)
-               IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),-3)
-               IF (IW1==0 .OR. IW2==0) RETURN
-         END SELECT
-      ENDIF
+      SELECT CASE(IOR)
+         CASE(-1)
+            IW1 = WALL_INDEX(CELL_INDEX(II,JJ,KK)  ,1)
+            IW2 = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),1)
+         CASE( 1)
+            IW1 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK)  ,-1)
+            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK+1),-1)
+         CASE(-3)
+            IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ,KK),3)
+            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),3)
+         CASE( 3)
+            IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ,KK+1),-3)
+            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK+1),-3)
+      END SELECT
    CASE(3) COMP
-      IF (II/=0 .AND. II/=IBAR .AND. JJ/=0 .AND. JJ/=JBAR) THEN
-         SELECT CASE(IOR)
-            CASE(-1)
-               IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK),1)
-               IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),1)
-               IF (IW1==0 .OR. IW2==0) RETURN
-            CASE( 1)
-               IW1 = WALL_INDEX(CELL_INDEX(II+1,JJ  ,KK),-1)
-               IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ+1,KK),-1)
-               IF (IW1==0 .OR. IW2==0) RETURN
-            CASE(-2)
-               IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ,KK),2)
-               IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),2)
-               IF (IW1==0 .OR. IW2==0) RETURN
-            CASE( 2)
-               IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ+1,KK),-2)
-               IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ+1,KK),-2)
-               IF (IW1==0 .OR. IW2==0) RETURN
-            END SELECT
-         ENDIF
+      SELECT CASE(IOR)
+         CASE(-1)
+            IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK),1)
+            IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),1)
+         CASE( 1)
+            IW1 = WALL_INDEX(CELL_INDEX(II+1,JJ  ,KK),-1)
+            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ+1,KK),-1)
+         CASE(-2)
+            IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ,KK),2)
+            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),2)
+         CASE( 2)
+            IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ+1,KK),-2)
+            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ+1,KK),-2)
+      END SELECT
 END SELECT COMP
+
+! Decide what to do based on whether or not adjacent tiles exist
+
+IF (IW1==-1 .OR. IW2==-1) THEN
+   WRITE(MESSAGE,'(A,I2,A,3I3)') 'ERROR: Edge initialization failed; Mesh: ',NM,', Cell: ',II,JJ,KK
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+IF (IW1==0 .AND. IW2==0) RETURN
+IF (IW1> 0 .AND. IW2==0) IW = IW1
+IF (IW1==0 .AND. IW2> 0) IW = IW2
+IF (IW1> 0 .AND. IW2> 0) IW = IW2  ! Arbitrary decision
  
-CALL CHECK_FOR_VENT(II,JJ,KK,IOR,IBC,IEC)
- 
+! Assign the Index of the Edge (IE) and add to the list
+
 ICMM = CELL_INDEX(II,JJ,KK)
 SELECT CASE(IEC)
    CASE(1)
-      IE = IEA(ICMM,4)
+      IE = EDGE_INDEX(ICMM,4)
    CASE(2)
-      IE = IEA(ICMM,8)
+      IE = EDGE_INDEX(ICMM,8)
    CASE(3)
-      IE = IEA(ICMM,12)
+      IE = EDGE_INDEX(ICMM,12)
 END SELECT
  
 IF (IE==0) THEN
@@ -2334,40 +2327,24 @@ IF (IE==0) THEN
    IE = N_EDGES
 ENDIF
  
-! Look for interpolated boundary cells
+! Determine the wall index of the adjacent wall tile
  
 NOM = NM
 IIO = 0
 JJO = 0
 KKO = 0
-IW  = 0
+IBC = IJKW(5,IW)
  
-IF (II==0 .AND. IEC==2 .AND. IOR==1)     IW = WALL_INDEX(CELL_INDEX(1,JJ,MIN(KBAR,KK+1)),-1)
-IF (II==0 .AND. IEC==3 .AND. IOR==1)     IW = WALL_INDEX(CELL_INDEX(1,MIN(JBAR,JJ+1),KK),-1)
-IF (II==IBAR .AND. IEC==2 .AND. IOR==-1) IW = WALL_INDEX(CELL_INDEX(IBAR,JJ,MIN(KBAR,KK+1)),1)
-IF (II==IBAR .AND. IEC==3 .AND. IOR==-1) IW = WALL_INDEX(CELL_INDEX(IBAR,MIN(JBAR,JJ+1),KK),1)
- 
-IF (JJ==0 .AND. IEC==1 .AND. IOR==2)     IW = WALL_INDEX(CELL_INDEX(II,1,MIN(KBAR,KK+1)),-2)
-IF (JJ==0 .AND. IEC==3 .AND. IOR==2)     IW = WALL_INDEX(CELL_INDEX(MIN(IBAR,II+1),1,KK),-2)
-IF (JJ==JBAR .AND. IEC==1 .AND. IOR==-2) IW = WALL_INDEX(CELL_INDEX(II,JBAR,MIN(KBAR,KK+1)),2)
-IF (JJ==JBAR .AND. IEC==3 .AND. IOR==-2) IW = WALL_INDEX(CELL_INDEX(MIN(IBAR,II+1),JBAR,KK),2)
- 
-IF (KK==0 .AND. IEC==1 .AND. IOR==3)     IW = WALL_INDEX(CELL_INDEX(II,MIN(JBAR,JJ+1),1),-3)
-IF (KK==0 .AND. IEC==2 .AND. IOR==3)     IW = WALL_INDEX(CELL_INDEX(MIN(IBAR,II+1),JJ,1),-3)
-IF (KK==KBAR .AND. IEC==1 .AND. IOR==-3) IW = WALL_INDEX(CELL_INDEX(II,MIN(JBAR,JJ+1),KBAR),3)
-IF (KK==KBAR .AND. IEC==2 .AND. IOR==-3) IW = WALL_INDEX(CELL_INDEX(MIN(IBAR,II+1),JJ,KBAR),3)
- 
-IF (IW > 0) THEN
-   IF (IJKW(9,IW)>0 .AND. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-      IBC = IJKW( 5,IW)
-      NOM = IJKW( 9,IW)
-      IIO = IJKW(10,IW)
-      JJO = IJKW(11,IW)
-      KKO = IJKW(12,IW)
-   ENDIF
+! Look for interpolated boundary cells
+
+IF (IJKW(9,IW)>0 .AND. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+   NOM = IJKW( 9,IW)
+   IIO = IJKW(10,IW)
+   JJO = IJKW(11,IW)
+   KKO = IJKW(12,IW)
 ENDIF
  
-! Fill up array with edge parameters
+! Fill up array IJKE with edge parameters
  
 IJKE(1,IE) = II
 IJKE(2,IE) = JJ
@@ -2376,11 +2353,15 @@ IJKE(4,IE) = IEC
 IJKE(5,IE) = IBC
 IJKE(6,IE) = IOR
  
+! Special "free-slip" cases
+
 IF (I_OBST>0) THEN
    IF (.NOT.OB%SAWTOOTH) IJKE(6,IE) = 0
 ENDIF
 
 IF (EVACUATION_ONLY(NM)) IJKE(6,IE) = 0
+
+! Fill in EDGE_INDEX and IJKE(7-14,IE)
  
 COMPONENT: SELECT CASE(IEC)
  
@@ -2389,10 +2370,10 @@ COMPONENT: SELECT CASE(IEC)
       ICPM = CELL_INDEX(II,JJ+1,KK)
       ICPP = CELL_INDEX(II,JJ+1,KK+1)
       ICMP = CELL_INDEX(II,JJ,KK+1)
-      IEA(ICPP,1) = IE
-      IEA(ICMP,2) = IE
-      IEA(ICPM,3) = IE
-      IEA(ICMM,4) = IE
+      EDGE_INDEX(ICPP,1) = IE
+      EDGE_INDEX(ICMP,2) = IE
+      EDGE_INDEX(ICPM,3) = IE
+      EDGE_INDEX(ICMM,4) = IE
       SELECT CASE(ABS(IOR))
          CASE( 2)
             IF (IOR>0) IJKE(11,IE) = -NOM
@@ -2415,10 +2396,10 @@ COMPONENT: SELECT CASE(IEC)
       ICPM = CELL_INDEX(II+1,JJ,KK)
       ICPP = CELL_INDEX(II+1,JJ,KK+1)
       ICMP = CELL_INDEX(II,JJ,KK+1)
-      IEA(ICPP,5) = IE
-      IEA(ICMP,6) = IE
-      IEA(ICPM,7) = IE
-      IEA(ICMM,8) = IE
+      EDGE_INDEX(ICPP,5) = IE
+      EDGE_INDEX(ICMP,6) = IE
+      EDGE_INDEX(ICPM,7) = IE
+      EDGE_INDEX(ICMM,8) = IE
       SELECT CASE(ABS(IOR))
          CASE( 1)
             IF (IOR>0) IJKE(11,IE) = -NOM
@@ -2441,10 +2422,10 @@ COMPONENT: SELECT CASE(IEC)
       ICPM = CELL_INDEX(II+1,JJ,KK)
       ICPP = CELL_INDEX(II+1,JJ+1,KK)
       ICMP = CELL_INDEX(II,JJ+1,KK)
-      IEA(ICPP, 9) = IE
-      IEA(ICMP,10) = IE
-      IEA(ICPM,11) = IE
-      IEA(ICMM,12) = IE
+      EDGE_INDEX(ICPP, 9) = IE
+      EDGE_INDEX(ICMP,10) = IE
+      EDGE_INDEX(ICPM,11) = IE
+      EDGE_INDEX(ICMM,12) = IE
       SELECT CASE(ABS(IOR))
          CASE( 1)
             IF (IOR>0) IJKE(11,IE) = -NOM
@@ -2463,58 +2444,6 @@ COMPONENT: SELECT CASE(IEC)
       END SELECT
  
 END SELECT COMPONENT
- 
- 
-CONTAINS
- 
-
-SUBROUTINE CHECK_FOR_VENT(II,JJ,KK,IOR,IBC,IEC)
- 
-INTEGER :: II,JJ,KK,IOR,IBC,IEC,NV
-TYPE (VENTS_TYPE), POINTER :: VT
- 
-VLOOP: DO NV=1,N_VENT
- 
-   VT => VENTS(NV)
-   IF (VT%IOR/=IOR) CYCLE VLOOP
-   IF (ABS(IOR)==1 .AND. II/=VT%I1) CYCLE VLOOP
-   IF (ABS(IOR)==2 .AND. JJ/=VT%J1) CYCLE VLOOP
-   IF (ABS(IOR)==3 .AND. KK/=VT%K1) CYCLE VLOOP
-   IF (IBC==INTERPOLATED_SURF_INDEX) CYCLE VLOOP
- 
-   IF (ABS(IOR)==1 .AND. IEC==2) THEN
-      IF (JJ<VT%J1+1 .OR. JJ>VT%J2) CYCLE VLOOP
-      IF (KK<VT%K1   .OR. KK>VT%K2) CYCLE VLOOP
-   ENDIF
-   IF (ABS(IOR)==1 .AND. IEC==3) THEN
-      IF (JJ<VT%J1   .OR. JJ>VT%J2) CYCLE VLOOP
-      IF (KK<VT%K1+1 .OR. KK>VT%K2) CYCLE VLOOP
-   ENDIF
- 
-   IF (ABS(IOR)==2 .AND. IEC==1) THEN
-      IF (II<VT%I1+1 .OR. II>VT%I2) CYCLE VLOOP
-      IF (KK<VT%K1   .OR. KK>VT%K2) CYCLE VLOOP
-   ENDIF
-   IF (ABS(IOR)==2 .AND. IEC==3) THEN
-      IF (II<VT%I1   .OR. II>VT%I2) CYCLE VLOOP
-      IF (KK<VT%K1+1 .OR. KK>VT%K2) CYCLE VLOOP
-   ENDIF
- 
-   IF (ABS(IOR)==3 .AND. IEC==1) THEN
-      IF (II<VT%I1+1 .OR. II>VT%I2) CYCLE VLOOP
-      IF (JJ<VT%J1   .OR. JJ>VT%J2) CYCLE VLOOP
-   ENDIF
-   IF (ABS(IOR)==3 .AND. IEC==2) THEN
-      IF (II<VT%I1   .OR. II>VT%I2) CYCLE VLOOP
-      IF (JJ<VT%J1+1 .OR. JJ>VT%J2) CYCLE VLOOP
-   ENDIF
- 
-   IBC = VT%IBC
-   EXIT VLOOP
- 
-ENDDO VLOOP
- 
-END SUBROUTINE CHECK_FOR_VENT
  
 END SUBROUTINE DEFINE_EDGE
  

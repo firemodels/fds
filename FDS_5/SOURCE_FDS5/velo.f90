@@ -899,16 +899,15 @@ END SUBROUTINE VELOCITY_CORRECTOR
  
  
 SUBROUTINE VELOCITY_BC(T,NM)
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
+
 ! Assert tangential velocity boundary conditions
- 
+
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
 REAL(EB) :: BC,MUA,T,FVT,UP,UM,VP,VM,WP,WM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY
 INTEGER  :: IBC,NOM1,NOM2,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2,NM,IE,II,JJ,KK,IEC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 TYPE (SURFACE_TYPE), POINTER :: SF
 
-! call POINT_TO_MESH(nm)
- 
 IF (PREDICTOR) THEN
    UU => US
    VV => VS
@@ -920,7 +919,7 @@ ELSE
 ENDIF
 
 EDGE_LOOP: DO IE=1,N_EDGES
- 
+
    II   = IJKE( 1,IE)
    JJ   = IJKE( 2,IE)
    KK   = IJKE( 3,IE)
@@ -991,13 +990,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
             IF (NOM1<0 .AND. BC>1.5_EB) UM = FVT*SF%VEL_T(1)
          ENDIF
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
-!        if (corrector) then
             IF (NOM1<0) UM = OMESH(ABS(NOM1))%U(IIO1,JJO1,KKO1)
             IF (NOM1>0) UP = OMESH(ABS(NOM1))%U(IIO1,JJO1,KKO1)
-!        else
-!           IF (NOM1<0) UM = MESHES(ABS(NOM1))%US(IIO1,JJO1,KKO1)
-!           IF (NOM1>0) UP = MESHES(ABS(NOM1))%US(IIO1,JJO1,KKO1)
-!        endif
          ENDIF
          IF (ABS(NOM2)==NM) THEN
             IF (NOM2>0 .AND. BC<1.5_EB) WP = BC*WM
@@ -1006,13 +1000,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
             IF (NOM2<0 .AND. BC>1.5_EB) WM = FVT*SF%VEL_T(2)
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
-!        if (corrector) then
             IF (NOM2<0) WM = OMESH(ABS(NOM2))%W(IIO2,JJO2,KKO2)
             IF (NOM2>0) WP = OMESH(ABS(NOM2))%W(IIO2,JJO2,KKO2)
-!        else
-!           IF (NOM2<0) WM = MESHES(ABS(NOM2))%WS(IIO2,JJO2,KKO2)
-!           IF (NOM2>0) WP = MESHES(ABS(NOM2))%WS(IIO2,JJO2,KKO2)
-!        endif
          ENDIF
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
          DUDZ = RDZN(KK)*(UP-UM)
