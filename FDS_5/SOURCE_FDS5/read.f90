@@ -861,7 +861,8 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,RELAXATION_FACTOR,FYI, &
                 TEXTURE_ORIGIN,NSTRATA, &
                 THICKEN_OBSTRUCTIONS, &
                 EVAC_PRESSURE_ITERATIONS,EVAC_TIME_ITERATIONS, &
-                PRESSURE_CORRECTION,CHECK_POISSON,STRATIFICATION,RESTART_CHID
+                PRESSURE_CORRECTION,CHECK_POISSON,STRATIFICATION,RESTART_CHID, &
+                CFL_MAX,CFL_MIN,VN_MAX,VN_MIN
  
 ! Physical constants
  
@@ -961,6 +962,10 @@ LAPSE_RATE           = 0._EB
 RELAXATION_FACTOR    = 1.00_EB      ! Relaxation factor for no-flux
 NSTRATA              = 7            ! Number bins for drop dist.
 THICKEN_OBSTRUCTIONS = .FALSE.
+CFL_MAX              = 1.0_EB       ! Stability bounds
+CFL_MIN              = 0.8_EB
+VN_MAX               = 1.0_EB
+VN_MIN               = 0.8_EB
  
 REWIND(LU5)
 MISC_LOOP: DO 
