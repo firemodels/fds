@@ -3647,7 +3647,7 @@ MESH_LOOP: DO NM=1,NMESHES
    N        = 0
    N_OBST_O = N_OBST
  
-   OBSTLOOP: DO NN=1,N_OBST_O
+   READ_OBST_LOOP: DO NN=1,N_OBST_O
       N        = N + 1
       SURF_ID  = 'null'
       SURF_IDS = 'null'
@@ -3673,7 +3673,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (     EVACUATION_ONLY(NM)) SAWTOOTH   = .FALSE.
  
       CALL CHECKREAD('OBST',LU5,IOS)
-      IF (IOS==1) EXIT OBSTLOOP
+      IF (IOS==1) EXIT READ_OBST_LOOP
       READ(LU5,OBST,END=35,ERR=36)
  
       ! Evacuation criteria
@@ -3681,13 +3681,13 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (MESH_ID/=MESH_NAME(NM) .AND. MESH_ID/='null') THEN
             N = N-1
             N_OBST = N_OBST-1
-            CYCLE OBSTLOOP
+            CYCLE READ_OBST_LOOP
       ENDIF
  
       IF ((.NOT.EVACUATION .AND. EVACUATION_ONLY(NM)) .OR. (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM))) THEN
             N = N-1
             N_OBST = N_OBST-1
-            CYCLE OBSTLOOP
+            CYCLE READ_OBST_LOOP
       ENDIF
  
       ! Reorder coords if necessary
@@ -3709,7 +3709,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (XB(1)>XF .OR. XB(2)<XS .OR. XB(3)>YF .OR. XB(4)<YS .OR. XB(5)>ZF .OR. XB(6)<ZS) THEN
          N = N-1
          N_OBST = N_OBST-1
-         CYCLE OBSTLOOP
+         CYCLE READ_OBST_LOOP
       ENDIF
  
       ! Begin processing of OBSTruction
@@ -3749,7 +3749,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF ((OB%I1==OB%I2 .AND. OB%J1==OB%J2) .OR. (OB%I1==OB%I2 .AND. OB%K1==OB%K2) .OR. (OB%J1==OB%J2 .AND. OB%K1==OB%K2)) THEN
          N = N-1
          N_OBST= N_OBST-1
-         CYCLE OBSTLOOP
+         CYCLE READ_OBST_LOOP
       ENDIF
 
       IF (OB%I1==OB%I2 .OR. OB%J1==OB%J2 .OR. OB%K1==OB%K2) OB%THIN = .TRUE.
@@ -3770,7 +3770,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (EMBEDDED  .AND. DEVC_ID=='null' .AND.  REMOVABLE .AND. CTRL_ID=='null' ) THEN
             N = N-1
             N_OBST= N_OBST-1
-            CYCLE OBSTLOOP
+            CYCLE READ_OBST_LOOP
       ENDIF
 
       ! Check if the SURF IDs exist
@@ -3820,7 +3820,13 @@ MESH_LOOP: DO NM=1,NMESHES
 
       FACE_LOOP: DO NNN=-3,3
          IF (NNN==0) CYCLE FACE_LOOP
-         IF (SURFACE(OB%IBC(NNN))%BURN_AWAY) OB%CONSUMABLE = .TRUE.
+         IF (SURFACE(OB%IBC(NNN))%BURN_AWAY) THEN
+            OB%CONSUMABLE = .TRUE.
+            IF (.NOT.SAWTOOTH) THEN
+               WRITE(MESSAGE,'(A,I5,A)')  'ERROR: OBST number',N,' cannot have a BURN_AWAY SURF_ID and SAWTOOTH=.FALSE.' 
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+         ENDIF
          IF (SURFACE(OB%IBC(NNN))%POROUS .AND. .NOT.OB%THIN) THEN
             WRITE(MESSAGE,'(A,I5,A)')  'ERROR: OBST number',N,' must be zero cells thick if it is to be POROUS'
             CALL SHUTDOWN(MESSAGE)
@@ -3889,7 +3895,7 @@ MESH_LOOP: DO NM=1,NMESHES
  
       IF (OUTLINE) OB%BTI = 2
  
-   36 ENDDO OBSTLOOP
+   36 ENDDO READ_OBST_LOOP
    35 REWIND(LU5)
  
 ENDDO MESH_LOOP
