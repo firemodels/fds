@@ -3559,9 +3559,11 @@ READ_RAMP_LOOP: DO N=1,N_RAMP
       IF (RAMP_TYPE(N)=='TEMPERATURE') T = T + TMPM
       NN = NN+1
       RP%INDEPENDENT_DATA(NN) = T
-      IF (NN>1 .AND. T<=RP%INDEPENDENT_DATA(NN-1)) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: RAMP ',TRIM(RAMP_ID(N)), ' variable T must be monotonically increasing'
-         CALL SHUTDOWN(MESSAGE)
+      IF (NN>1) THEN
+         IF (T<=RP%INDEPENDENT_DATA(NN-1)) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: RAMP ',TRIM(RAMP_ID(N)), ' variable T must be monotonically increasing'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
       ENDIF
       RP%DEPENDENT_DATA(NN) = F
       RP%NUMBER_INTERPOLATION_POINTS = NUMBER_INTERPOLATION_POINTS
