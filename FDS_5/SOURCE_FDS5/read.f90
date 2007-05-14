@@ -341,6 +341,7 @@ REWIND(LU5)
  
 NCGC = 0
 MESH_LOOP_2: DO NM=1,NMESHES
+   IF(EVACUATION_ONLY(NM)) CYCLE MESH_LOOP_2
    M=>MESHES(NM)
    ALLOCATE(M%CGI(M%IBAR,M%JBAR,M%KBAR))
    ALLOCATE(M%CGI2(M%IBAR2,M%JBAR2,M%KBAR2))
@@ -4931,13 +4932,16 @@ ENDDO COUNT_ZONE_LOOP
 ! Check to see if there are any OPEN vents. If there are not, and there are no declared pressure ZONEs, stop with an error.
 
 SEALED = .TRUE.
+IF (ALL(EVACUATION_ONLY)) SEALED = .FALSE.    
 
 DO NM=1,NMESHES
-   M => MESHES(NM)
-   DO N=1,M%N_VENT
-      VT => M%VENTS(N)
-      IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY) SEALED = .FALSE.
-   ENDDO
+   IF (.NOT.EVACUATION_ONLY(NM)) THEN      
+      M => MESHES(NM)
+      DO N=1,M%N_VENT
+         VT => M%VENTS(N)
+         IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY) SEALED = .FALSE.
+      ENDDO
+   END IF
 ENDDO
 
 IF (SEALED .AND. N_ZONE==0) THEN
@@ -5043,8 +5047,8 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
 
    BAD = .FALSE.
    MESH_LOOP: DO NM=1,NMESHES
-      M=>MESHES(NM)
       IF (.NOT.EVACUATION_ONLY(NM)) THEN      
+         M=>MESHES(NM)
          IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
             MESH_NUMBER = NM
             EXIT MESH_LOOP
@@ -5658,10 +5662,12 @@ PROF_LOOP: DO NN=1,N_PROFO
    BAD = .FALSE.
  
    MESH_LOOP: DO NM=1,NMESHES
-      M=>MESHES(NM)
-      IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
-         MESH_NUMBER = NM
-         EXIT MESH_LOOP
+      IF (.NOT.EVACUATION_ONLY(NM)) THEN      
+         M=>MESHES(NM)
+         IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
+            MESH_NUMBER = NM
+            EXIT MESH_LOOP
+         ENDIF
       ENDIF
       IF (NM==NMESHES) BAD = .TRUE.
    ENDDO MESH_LOOP
