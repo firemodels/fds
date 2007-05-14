@@ -2906,6 +2906,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Count the number of layers for the surface, and compile a LIST of all material names and indices
    SF%N_LAYERS = 0
    N_LIST = 0
+   NAME_LIST = 'null'
    SF%THICKNESS  = 0._EB
    SF%SURFACE_DENSITY  = 0._EB
    SF%LAYER_MATL_INDEX = 0
@@ -2942,18 +2943,18 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Add residue materials
 
    DO I = 1,MAX_STEPS    ! repeat the residue loop to find chained reactions - allows MAX_STEPS steps
-   N_LIST2 = N_LIST
-   DO NN = 1,N_LIST2
-      ML=>MATERIAL(INDEX_LIST(NN))
-      ADD_REAC_MATL: DO NNN=1,ML%N_REACTIONS
-         IF (ML%RESIDUE_MATL_NAME(NNN) == 'null') CYCLE ADD_REAC_MATL
-         IF (ANY(NAME_LIST==ML%RESIDUE_MATL_NAME(NNN))) CYCLE ADD_REAC_MATL
-         N_LIST = N_LIST + 1
-         IF (N_LIST.GT.MAX_MATERIALS_TOTAL) CALL SHUTDOWN('ERROR: Too many materials in the surface.')
-         NAME_LIST (N_LIST) = ML%RESIDUE_MATL_NAME(NNN)
-         INDEX_LIST(N_LIST) = ML%RESIDUE_MATL_INDEX(NNN)
-      ENDDO ADD_REAC_MATL
-   ENDDO
+      N_LIST2 = N_LIST
+      DO NN = 1,N_LIST2
+         ML=>MATERIAL(INDEX_LIST(NN))
+         ADD_REAC_MATL: DO NNN=1,ML%N_REACTIONS
+            IF (ML%RESIDUE_MATL_NAME(NNN) == 'null') CYCLE ADD_REAC_MATL
+            IF (ANY(NAME_LIST==ML%RESIDUE_MATL_NAME(NNN))) CYCLE ADD_REAC_MATL
+            N_LIST = N_LIST + 1
+            IF (N_LIST.GT.MAX_MATERIALS_TOTAL) CALL SHUTDOWN('ERROR: Too many materials in the surface.')
+            NAME_LIST (N_LIST) = ML%RESIDUE_MATL_NAME(NNN)
+            INDEX_LIST(N_LIST) = ML%RESIDUE_MATL_INDEX(NNN)
+         ENDDO ADD_REAC_MATL
+      ENDDO
    ENDDO
 
    ! Eliminate multiply counted materials from the list
