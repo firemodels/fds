@@ -114,7 +114,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, May 9, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, May 14, 2007)}
 
 \vspace{.5in}
 
@@ -382,14 +382,14 @@ format, and so on.
 \subsubsection{How is FDS Developed?}
 
 Starting with Version 5, the FDS development team uses
-SourceForge.net, an Internet-based development
-environment. SourceForge is a widely used service designed to assist
+an Internet-based development
+environment called GoogleCode, a free service of the search engine company, Google. GoogleCode is a widely used service designed to assist
 open source software development by providing a repository for source
 code, revision control, program distribution, bug tracking, and
 various other very useful services.
 
 Each member of the FDS development team has an account and password
-access to the FDS repository maintained at SourceForge.net. In
+access to the FDS repository. In
 addition, anonymous access is available to all interested users, who
 can receive the latest versions of the source code, manuals, and other
 items. Anonymous users simply do not have the power to commit changes
@@ -397,7 +397,7 @@ to any of these items. The power to commit changes to FDS or its
 manuals can be granted to anyone on a case by case basis.
 
 The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX files are essentially text files that are under
-CVS control on SourceForge. The figures are either in the form of PDF or jpeg files, depending on whether they are vector or
+SVN (Subversion) control. The figures are either in the form of PDF or jpeg files, depending on whether they are vector or
 raster format. There are a variety of \LaTeX packages available, including MiKTeX. The FDS developers edit the manuals as part of the
 day to day upkeep of the model. Different editions of the manuals are distinguished by date.
 
@@ -410,8 +410,8 @@ a significant upgrade, but still within the framework of FDS 5.  The
 12 indicates the twelveth minor upgrade of 5.2, mostly bug fixes and
 minor user requests.
 
-Changes are made to the FDS source code daily, and tracked via CVS
-revision control software, a feature of SourceForge. However, these
+Changes are made to the FDS source code daily, and tracked via
+revision control software. However, these
 daily changes do not constitute a change to the version number. After
 the developers determine that enough changes have been made to the
 source, they release a new minor upgrade, 5.2.12 to 5.2.13, for
