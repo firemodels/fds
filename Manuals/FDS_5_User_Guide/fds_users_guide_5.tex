@@ -246,7 +246,7 @@
 \vspace{1in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 9, 2007)}
+\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 14, 2007)}
 
 \vspace{.5in}
 
@@ -1768,11 +1768,51 @@ parameter {\ct TMP\_INNER} on the {\ct SURF} line. An initial velocity can be pr
 {\ct U0}, {\ct V0}, and {\ct W0} on the {\ct MISC} line.
 
 
-\subsection{Stack Effect}%Kevin - more information about how it relates to FDS.
-\label{stack}
+\subsection{Special Topic: Stack Effect}
+\label{info:stackeffect}
 
 Tall buildings often experience buoyancy-induced air movement due to temperature differences
-between inside and outside, known as {\em stack effect}.
+between inside and outside, known as {\em stack effect}. To simulate this phenomenon in FDS, you must
+include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
+is important to capture the pressure and density decrease in the atmosphere based on the specified
+temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line. Experiment with different meshing
+strategies before including any fire or HVAC functionality. Slowly build in complexity.
+
+
+\subsection{Special Topic: Numerical Stability Parameters}
+\label{info:CFL}
+
+The time step of an FDS simulation is constrained by the convective and diffusive
+transport speeds via two conditions. The first is known as the
+Courant-Friedrichs-Lewy (CFL) condition. The CFL condition asserts that the solution of the equations cannot be updated with a time step
+larger than that which would allow a parcel of fluid to travel further than a single mesh cell.
+In each mesh cell of dimension $\dx$ by $\dy$ by $\dz$ with velocity
+components $u$, $v$, and $w$, the CFL number is defined:
+\be \hbox{CFL} = \dt \; \max \left(\frac{|\hu|}{\dx},\frac{|\hv|}{\dy},\frac{|\hw|}{\dz} \right)   \label{cfl}
+\ee
+Every time step, the CFL number is computed in each mesh cell, and the time step, $\dt$, is adjusted if the
+maximum value of the CFL number is not between {\ct CFL\_MIN} and {\ct CFL\_MAX}, whose default values are
+0.8 and 1.0, respectively. These values are included in the {\ct MISC} namelist group.
+
+A similar condition, but one constraining the time step when diffusive transport dominates, is sometimes called
+the Von Neumann condition. The Von Neumann number is defined:
+\be
+\hbox{VN} = 2 \, \max \left( \nu , D , \frac{k}{\rho c_p} \right)  \; \dt  \left(\frac{1}{\dx^2}+\frac{1}{dy^2}+\frac{1}{\dz^2} \right)
+\ee
+Like the CFL number, VN is computed in each mesh cell, and the time step is adjusted if VN is outside the
+range between {\ct VN\_MIN} and {\ct VN\_MAX}, which are 0.8 and 1.0 by default.
+Note that this constraint is applied to the momentum, mass and energy equations via the
+relevant diffusion parameter -- viscosity, material diffusivity or thermal conductivity.
+This constraint on the time step is typical
+of any explicit, second-order numerical scheme for solving a parabolic partial differential
+equation. To save CPU time, the Von Neumann criterion is only invoked for DNS calculations or for LES
+calculations with grid cells smaller than 5~mm.
+
+\begin{warning}
+Resetting the stability parameters is not recommended except in very special circumstances, as they can lead to
+simulations failing due to numerical instabilities.
+\end{warning}
+
 
 
 
@@ -1899,6 +1939,14 @@ does provide a simple way of ensuring that the flow field around a
 non-rectangular obstruction is not inhibited by extra drag created at
 sharp corners.
 
+\begin{warning}
+Do not apply {\ct SAWTOOTH=.FALSE.} to obstructions that have any {\ct SURF\_ID}s with the
+attribute {\ct BURN\_AWAY=.TRUE.}
+\end{warning}
+
+
+
+
 \section{Creating Voids: The \texorpdfstring{{\tt HOLE}}{HOLE} Namelist Group}%Bryan
 \label{info:HOLE}
 
@@ -1961,6 +2009,35 @@ adjacent to obstructions or external walls. The vents are chosen in a
 similar manner to the obstructions, with the sextuplet {\ct XB}
 denoting a plane abutting a solid surface. Two of the six coordinates must
 be the same, denoting a plane as opposed to a solid.
+
+The term ``{\ct VENT}'' is somewhat misleading. Taken literally, a
+{\ct VENT} can be used to model components of the ventilation system in
+a building, like a diffuser or a return.
+In these cases, the {\ct VENT} coordinates form a plane on a
+solid surface forming the boundary of the duct.
+No holes need to be created through the solid; it is
+assumed that air is pushed out of or sucked into duct work within the
+wall. Less literally, a {\ct VENT} is used simply as a means of applying
+a particular boundary condition to a rectangular patch on a solid surface.
+A fire, for example, is usually created by first generating a solid
+obstruction via an {\ct OBST} line, and then specifying a {\ct VENT}
+somewhere on one of the faces of the solid with a {\ct SURF\_ID}
+with the characteristics of the thermal and combustion properties of the fuel.
+For example, the lines
+
+\footnotesize
+\begin{verbatim}
+&OBST XB=0.0,5.0,2.0,3.0,0.0,4.0, SURF_ID='big block' /
+&VENT XB=1.0,2.0,2.0,2.0,1.0,3.0, SURF_ID='hot patch' /
+\end{verbatim} \normalsize
+
+\noindent
+specify a large obstruction (with the properties given elsewhere in the file under the name {\ct 'big block'}) with
+a ``patch'' applied to one of its faces with alternative properties under the name {\ct 'hot patch'}. This latter
+surface property need not actually be a ``vent,'' like a supply or return duct, but rather just a patch with different boundary
+conditions than those assumed for the obstruction. Note that the surface properties of a {\ct VENT} over-ride those of the
+underlying obstruction.
+
 An easy way to specify an entire external wall is to replace {\ct XB} with
 {\ct MB}, a character string whose value is one of the following:
 {\ct 'XMAX'}, {\ct 'XMIN'}, {\ct 'YMAX'}, {\ct 'YMIN'}, {\ct 'ZMAX'} or
@@ -1980,20 +2057,6 @@ the {\ct VENT}s are properly prescribed. Use color as much as
 possible to double-check the set-up.  More detail on color in
 Section~\ref{info:colors} and Table \ref{tab:colors}.
 
-The term ``{\ct VENT}'' is somewhat misleading. Taken literally, a
-{\ct VENT} can be used to model components of the ventilation system in
-a building, like a diffuser or a return.
-In these cases, the {\ct VENT} coordinates form a plane on a
-solid surface forming the boundary of the duct.
-No holes need to be created through the solid; it is
-assumed that air is pushed out of or sucked into duct work within the
-wall. Less literally, a {\ct VENT} is used simply as a means of applying
-a particular boundary condition to a rectangular patch on a solid surface.
-A fire, for example, is usually created by first generating a solid
-obstruction via an {\ct OBST} line, and then specifying a {\ct VENT}
-somewhere on one of the faces of the solid with a {\ct SURF\_ID}
-with the characteristics of the thermal and combustion properties of the fuel.
-
 There are two reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT}.
 The first is {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT}
 is applied to the exterior boundary of the computational domain, where
@@ -2012,12 +2075,13 @@ exterior boundary of the computational domain.
 Often, {\ct OPEN} or {\ct MIRROR} {\ct VENT}s are prescribed along an
 entire side of the computational domain, in which case the ``{\ct MB}''
 notation is handy.
+
 \begin{warning}
 \noindent
 Note that the mirror image of a scene is {\bf not} shown in Smokeview.
 \end{warning}
 
-
+\noindent
 Vents to the outside of the computational domain ({\ct OPEN} vents)
 may {\bf not} be opened or closed during a simulation. See Section~\ref{info:openclose} for details.
 
@@ -2139,9 +2203,26 @@ want to specify a fire of a given heat release rate (HRR),
 you need not specify any material properties. A specified fire is
 basically modeled as the ejection of gaseous fuel
 from a solid surface or vent. This is essentially a burner, with a
-specified heat release rate per unit area.
-The stoichiometry of the gas phase reaction is set by the
-parameters on the {\ct REAC} line(s). All of the
+specified Heat Release Rate Per Unit Area, {\ct HRRPUA}, in units of
+kW/m$^2$. For example
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='FIRE',HRRPUA=500. /
+\end{verbatim}
+\normalsize
+
+\noindent
+applies 500~kW/m$^2$ to any surface with the attribute
+{\ct SURF\_ID='FIRE'}. See the discussion of {\bf Time Dependent Conditions}
+in Section~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
+
+An alternative to {\ct HRRPUA} with the exact same functionality is
+{\ct MLRPUA}, except this parameter
+specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
+{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line. With either,
+the stoichiometry of the gas phase reaction is set by the
+parameters on the {\ct REAC} line. All of the
 species associated with the combustion process are accounted for
 by way of the mixture fraction variable and should not be
 explicitly prescribed. The exception to this rule is
@@ -2151,29 +2232,11 @@ sprinkler droplets (see Section~\ref{info:SPEC} for details).
 If a finite rate combustion model is desired instead of the default mixture
 fraction model, see Section~\ref{info:finite}.
 
-Following is a list of parameters that
-are specified on a {\ct SURF} line to designate a fire using the mixture fraction approach.
-\begin{description}
-\item[{\ct HRRPUA}]
-Heat Release Rate Per Unit Area (kW/m$^2$). This parameter is used to
-control the burning rate of the fuel, as in the case of a prescribed
-fire using a gas burner. If all you want is a fire of a given heat
-release rate, then {\ct HRRPUA} is the only thing that need be set,
-for example
+\begin{warning}
+Specifying {\ct HRRPUA} or {\ct MLRPUA} automatically invokes the mixture fraction
+combustion model.
+\end{warning}
 
-\footnotesize
-\begin{verbatim}
-&SURF ID='FIRE',HRRPUA=500. /
-\end{verbatim}
-\normalsize
-applies 500~kW/m$^2$ to any surface with the attribute
-{\ct SURF\_ID='FIRE'}. See the discussion of {\bf Time Dependent Conditions}
-in Section~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
-\item[{\ct MLRPUA}] Similar in functionality to {\ct HRRPUA}, except this parameter
-specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
-{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.
-
-\end{description}
 
 
 \subsection{Simple Thermal Boundary Conditions}
@@ -2255,6 +2318,8 @@ As an example, a simple blowing vent would be described by the line
 &SURF ID='BLOWER',VEL=-1.2,TMP_FRONT=50. /
 \end{verbatim}
 \normalsize
+
+\noindent
 The vent with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C
 air at 1.2 m/s into the flow domain. Making {\ct VEL} positive would
 suck air out, in which case {\ct TMP\_FRONT} would not be necessary.
@@ -2294,6 +2359,8 @@ velocity components. For example, the line
 &SURF ID='LOUVER',VEL=-1.2,VEL_T=0.5,-0.3 /
 \end{verbatim}
 \normalsize
+
+\noindent
 is a boundary condition for a louver vent that pushes air into the
 space with a normal velocity of 1.2~m/s, and with a tangential velocity
 of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either
@@ -5473,15 +5540,17 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\ \hline \hline
-{\ct IJK}         & Triplet     & No. cells in $x$ direction  &    & 10  \\ \hline
-{\ct XB}          & Integer     & No. cells in $y$ direction  &    & 10  \\ \hline
-{\ct KBAR}        & Integer     & No. cells in $z$ direction  &    & 10  \\ \hline
-{\ct ID}          & Integer     & No. cells in $z$ direction  &    & 10  \\ \hline
-{\ct SYNCHRONIZE} & Logical     & Sync. time step of the mesh &    & 10  \\ \hline
-{\ct POISSON\_BC} & X           & No. cells in $z$ direction  &    & 10  \\ \hline
-{\ct IBAR2}       & Integer     & No. cells in $z$ direction  &    & 10  \\ \hline
-{\ct JBAR2}       & Integer     & No. cells in $z$ direction  &    & 10  \\ \hline
-{\ct KBAR2}       & Integer     & No. cells in $z$ direction  &    & 10  \\ \hline
+{\ct ID}          & Character                   & Color                                                 &    & {\ct 'BLACK'}                  \\ \hline
+{\ct CYLINDRICAL} & Logical                     & 2-D Axi-symmetric calculation                         &    & {\ct .FALSE.}    \\ \hline
+{\ct IJK}         & Integer Triplet             & No. cells in $x$, $y$, and $z$ directions             &    & 10               \\ \hline
+{\ct ID}          & Character                   & IDentifier                                            &    &                  \\ \hline
+{\ct RGB}         & Integer Triplet             & Color indices (0-255)                                 &    & 0,0,0               \\ \hline
+{\ct SYNCHRONIZE} & Logical                     & Sync. time step of the mesh                           &    & {\ct .TRUE.}     \\ \hline
+{\ct XB}          & Real Sextuplet              & Coordinates of the mesh                               & m  & 0,1,0,1,0,1      \\ \hline
+%{\ct POISSON\_BC} & Integer sextuplet           & Pressure boundary conditions      &    &    \\ \hline
+%{\ct IBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
+%{\ct JBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
+%{\ct KBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
 \end{tabular*}
 \end{table}
 
@@ -5500,25 +5569,29 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\ \hline \hline
-{\ct BACKGROUND\_SPECIES}   & Character     & Background species                    &               &       \\ \hline
-{\ct BAROCLINIC}            & Logical       & Baroclinic torque correction          &               & {\ct .FALSE.}   \\ \hline
-{\ct CSMAG}                 & Real          & Smagorinsky constant                  &               & 0.20  \\ \hline
-{\ct DNS}                   & Logical       & Direct Numerical Simulation           &               & {\ct .FALSE.}   \\ \hline
-{\ct GVEC}                  & Real triplet  & Gravity vector                        & m/s$^2$       & 0,0,-9.81  \\ \hline
-{\ct ISOTHERMAL}            & Logical       & Isothermal calculation                &               & {\ct .FALSE.}  \\ \hline
-{\ct LAPSE\_RATE}           & Real          & Atmospheric temperature lapse rate    &  $^\circ$C/m  & 0  \\ \hline
-{\ct PR}                    & Real          & Prandtl number (LES only)             &               & 0.5  \\ \hline
-{\ct P\_INF}                & Real          & Ambient pressure                      & Pa            & 101325  \\ \hline
-{\ct POROUS\_FLOOR}         & Logical       & Droplets disappear at floor           &               & {\ct .TRUE.}   \\ \hline
-{\ct RADIATION}             & Logical       & Radiation calculation flag            &               & {\ct .TRUE.}   \\ \hline
-{\ct RESTART}               & Logical       & Restart previous calculation          &               & {\ct .FALSE.}      \\ \hline
-{\ct RESTART\_CHID}         & Character     & Restart file CHID                     &               & {\ct CHID}    \\ \hline
-{\ct SC}                    & Real          & Schmidt number (LES only)             &               & 0.5  \\ \hline
-{\ct SUPPRESSION}           & Logical       & Suppression calculation flag          &               & {\ct .TRUE.}   \\ \hline
-{\ct SURF\_DEFAULT}         & Character     & Default SURFace type                  &               & {\ct 'INERT'}    \\ \hline
-{\ct TEXTURE\_ORIGIN(3)}    & Char.~Triplet & Origin of Texture Map                 & m             &   \\ \hline
-{\ct TMPA}                  & Real          & Ambient Temperature                   & $^\circ$C     & 20.  \\ \hline
-{\ct U0,V0,W0}              & Reals         & Prevailing velocity field             & m/s           & 0.  \\ \hline
+{\ct BACKGROUND\_SPECIES}   & Character     & Background species                            &               & {\ct 'AIR'}       \\ \hline
+{\ct BAROCLINIC}            & Logical       & Baroclinic torque correction                  &               & {\ct .FALSE.}     \\ \hline
+{\ct CFL\_MAX}              & Real          & Upper bound of CFL stability range            &               & 1.0               \\ \hline
+{\ct CFL\_MIN}              & Real          & Lower bound of CFL stability range            &               & 0.8               \\ \hline
+{\ct CSMAG}                 & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
+{\ct DNS}                   & Logical       & Direct Numerical Simulation                   &               & {\ct .FALSE.}     \\ \hline
+{\ct GVEC}                  & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
+{\ct ISOTHERMAL}            & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
+{\ct LAPSE\_RATE}           & Real          & Atmospheric temperature lapse rate            &  $^\circ$C/m  & 0                 \\ \hline
+{\ct PR}                    & Real          & Prandtl number (LES only)                     &               & 0.5               \\ \hline
+{\ct P\_INF}                & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
+{\ct POROUS\_FLOOR}         & Logical       & Droplets disappear at floor                   &               & {\ct .TRUE.}      \\ \hline
+{\ct RADIATION}             & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
+{\ct RESTART}               & Logical       & Restart previous calculation                  &               & {\ct .FALSE.}     \\ \hline
+{\ct RESTART\_CHID}         & Character     & Restart file CHID                             &               & {\ct CHID}        \\ \hline
+{\ct SC}                    & Real          & Schmidt number (LES only)                     &               & 0.5               \\ \hline
+{\ct SUPPRESSION}           & Logical       & Suppression calculation flag                  &               & {\ct .TRUE.}      \\ \hline
+{\ct SURF\_DEFAULT}         & Character     & Default SURFace type                          &               & {\ct 'INERT'}     \\ \hline
+{\ct TEXTURE\_ORIGIN(3)}    & Char.~Triplet & Origin of Texture Map                         & m             &                   \\ \hline
+{\ct TMPA}                  & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
+{\ct U0,V0,W0}              & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
+{\ct VN\_MAX}               & Real          & Upper bound of Von Neumann stability range    &               & 1.0               \\ \hline
+{\ct VN\_MIN}               & Real          & Lower bound of Von Neumann stability range    &               & 0.8               \\ \hline
 \end{tabular*}
 \end{table}
 
