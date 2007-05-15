@@ -246,7 +246,7 @@
 \vspace{1in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 14, 2007)}
+\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 15, 2007)}
 
 \vspace{.5in}
 
@@ -305,7 +305,7 @@ Jason Floyd \\
 
 \vspace{.25in}
 
-\flushright{March 2007}
+\flushright{May 2007}
 
 \vfill
 
@@ -339,7 +339,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1019-5 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019-5, \pageref{LastPage} pages (March 2007) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019-5, \pageref{LastPage} pages (May 2007) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -1075,7 +1075,7 @@ output files associated with the calculation will then have this common name.
 
 \begin{warning}
 \noindent
-There should be no blank spaces in the job name. Instead use underscore
+There should be no blank spaces in the job name. Instead use the underscore
 character to represent a space.
 \end{warning}
 
@@ -1995,7 +1995,7 @@ It is a good idea to inspect the geometry by running either a setup job
 
 \begin{warning}
 \noindent
-Note that a {\ct HOLE} cannot be used on a {\ct VENT} or a mesh boundary.
+Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only applies to {\ct OBST}structions.
 \end{warning}
 
 
@@ -2436,13 +2436,12 @@ For example, the lines
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='FIRE',HRRPUA=500.0,RAMP_Q='fireramp' /
-&RAMP ID='fireramp',T= 0.0,F=0.0 /
-&RAMP ID='fireramp',T= 1.0,F=1.0 /
-&RAMP ID='fireramp',T=30.0,F=1.0 /
-&RAMP ID='fireramp',T=31.0,F=0.0 /
-&VENT XB=0.0,5.0,1.5,9.5,0.0,0.0,SURF_ID='FIRE',
-      XYZ=1.5,4.0,0.0,SPREAD_RATE=0.03 /
+&SURF ID='FIRE', HRRPUA=500.0, RAMP_Q='fireramp' /
+&RAMP ID='fireramp', T= 0.0, F=0.0 /
+&RAMP ID='fireramp', T= 1.0, F=1.0 /
+&RAMP ID='fireramp', T=30.0, F=1.0 /
+&RAMP ID='fireramp', T=31.0, F=0.0 /
+&VENT XB=0.0,5.0,1.5,9.5,0.0,0.0, SURF_ID='FIRE', XYZ=1.5,4.0,0.0, SPREAD_RATE=0.03 /
 \end{verbatim}
 \normalsize
 create a rectangular patch at $z=0$ on which the fire starts at the
@@ -2457,7 +2456,7 @@ leads to a desired time history of the heat release rate.
 
 
 
-
+\clearpage
 
 \section{Leakage, Fans and Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group}
 \label{info:ZONE}
@@ -3220,36 +3219,52 @@ is (0,0,0), and the global default can be changed by added a
 
 
 \chapter{Combustion and Radiation}
+\label{chap:combustion}
+
+A common source of confusion in FDS is the distinction between gas phase {\em combustion} and solid phase {\em pyrolysis}. The former
+refers to the reaction of fuel vapor and oxygen; the latter the generation of fuel vapor at a solid or liquid surface. Whereas there
+can be many types of combustibles in an FDS fire simulation, there can only be one gaseous fuel. The reason is cost. It is expensive to
+solve transport equations for multiple gaseous fuels. Consequently, the burning rates of solids and liquids are automatically adjusted by
+FDS to account for the difference in the heats of combustion of the various combustibles. In effect, you specify a single gas phase
+reaction as a surrogate for all the potential fuel sources.
+
+The gas phase reaction can be described in two ways. By default, a so-called {\em mixture fraction} model is used to account for the evolution of
+the fuel gas from its surface of origin through the combustion process. The alternative is what is referred to as the {\em finite-rate}
+approach, where all of the individual gas species involved in the combustion process are defined and tracked individually. This is a
+costlier and more complicated approach than the {\em mixture fraction} model. This chapter describes both methods, with an emphasis on the more
+commonly used mixture fraction model.
 
 
-\section{Combustion Parameters: The \texorpdfstring{{\tt REAC}}{REAC} Namelist Group}
+\section{Mixture Fraction Combustion: The \texorpdfstring{{\tt REAC}}{REAC} Namelist Group}
 \label{info:REAC}
 
-\subsection{Mixture Fraction-Based Combustion}
 
 There are two ways of designating a fire: the first is to specify a
 Heat Release Rate Per Unit Area {\ct HRRPUA} on a
 {\ct SURF} line. The other is to specify a
 {\ct HEAT\_OF\_REACTION}, along with other thermal parameters on a {\ct MATL} line,
 in which case the burning rate of the fuel depends on the net heat feedback to the surface.
-In both cases, the mixture fraction combustion model is used.
-The {\ct REAC} line(s) is used for various parameters associated with the gas phase
-reaction of fuel and oxygen. Note that if only the fire's heat release
-rate is specified with {\ct HRRPUA}, then these parameters usually do not
-require adjusting. However, if the burning behavior of a fuel
-is governed by the heats of reaction of the solid phase pyrolysis,
-care must be taken in selecting the appropriate reaction parameters.
-See Section~\ref{info:combustion} for additional details.
+In both cases, the mixture fraction combustion model is used. In fact, the mere presence of these
+parameters automatically invokes the mixture fraction model. Do not specify explicitly gas species like
+oxygen if you have also specified heat release rates or solid phase reaction rates.
 
-Each reaction is assumed to be of the form:
+A single {\ct REAC} line is used with the mixture fraction model. If the {\ct REAC} line is not found in the input file, propane will
+be used as the surrogate fuel, and all burning rates will be adjusted accordingly.
+If you only specify the fire's heat release
+rate with {\ct HRRPUA}, then the reaction parameters may not
+require adjusting, and no {\ct REAC} line need be added to the input file.
+However, if you know something about the predominant fuel gas, you might want to consider
+specifying, at the very least, the basic stoichiometry via the {\ct REAC} line.
+
+Using the mixture fraction model, each reaction is assumed to be of the form:
 \be \mathrm{C_xH_yO_zN_vOther_w + \nu_{O_2} \; O_2 \rightarrow
     \nu_{CO_2} \; CO_2 + \nu_{H_2O} \; H_2O +
     \nu_{CO}   \; CO   + \nu_{Soot} \; Soot + \nu_{N_2} \; N_2 + \nu_{Other} \; Other } \ee
-The reaction is specified by providing the chemical formula of the fuel along with
-the yields of CO, soot, and H$_2$ and the amount of hydrogen in the soot, H$_{frac}$.
-For completeness the user can specify the N$_2$ content of
+You need only specify the chemical formula of the fuel along with
+the yields of CO, soot, and H$_2$, and the amount of hydrogen in the soot, H$_{frac}$.
+For completeness you can specify the N$_2$ content of
 the fuel and the presence of other species. FDS will use that information internally to
-determing the amount of combustion products that are formed:
+determine the amount of combustion products that are formed:
 \begin{eqnarray*}
 \nu_{O_2} &=& \nu_{CO_2} + \frac{\nu_{CO}}{2} + \frac{\nu_{H_2O}}{2} - \frac{\hbox{z}}{2} \\
 \nu_{CO_2} &=& \hbox{x} - \nu_{CO} - (1-H_{frac}) \nu_{soot}  \\
@@ -3262,13 +3277,15 @@ determing the amount of combustion products that are formed:
 W_s &=& H_{frac} W_H + (1-H_{frac}) W_C
 \end{eqnarray*}
 The following parameters may be prescribed on the {\ct REAC} line.
-
+Note that the various {\ct YIELD}s are for well-ventilated, post-flame conditions. There are options to
+predict various species yields in under-ventilated fire scenarios, but these special models still require
+the post-flame yields for CO, soot and any other species listed below.
 \begin{description}
 \item[{\ct ID}] A character string naming the reaction.
 \item[{\ct C, H, O, N, OTHER}] The fuel chemical formula. All numbers are positive.
 (Mixture Fraction only, default values are those of propane)
 \item[{\ct MW\_OTHER}] Average molecular weight for {\ct OTHER} (g/mol).
-(Mixture Fraction only, default is the molecular weight of $N_2$, 28 g/mol)
+(Mixture Fraction only, default is the molecular weight of N$_2$, 28 g/mol)
 \item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Mixture Fraction only, default 0.23)
 \item[{\ct Y\_F\_INLET}] Mass fraction of fuel in fuel stream (Mixture Fraction only, default 1.0)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_s$.
@@ -3278,8 +3295,7 @@ but rather to the net production of the smoke particulate from the fire.  (Mixtu
 (Mixture Fraction only, default 0.1)
 \item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon
 monoxide, $y_{CO}$. (Mixture Fraction only, default 0.0)
-\item[{\ct H2\_YIELD}] The fraction of fuel mass converted into hydrogen
-, $y_{H_2}$. (Mixture Fraction only, default 0.0)
+\item[{\ct H2\_YIELD}] The fraction of fuel mass converted into hydrogen, $y_{H_2}$. (Mixture Fraction only, default 0.0)
 \item[{\ct HEAT\_OF\_COMBUSTION}] $\Delta H$ (kJ/kg). The amount of
 energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
 specified, it is assumed to be
@@ -3380,7 +3396,7 @@ the relevant physical mechanisms occur at length scales smaller than a
 single grid cell. Flames are extinguished due to lowered
 temperatures and dilution of the oxygen supply. A simple
 suppression algorithm has been implemented in FDS that attempts to
-guage whether or not a flame is viable at the fuel-oxygen interface. The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
+gauge whether or not a flame is viable at the fuel-oxygen interface. The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
 contains more details about how the mechanism works. The only
 parameters you can control are the Limiting
 Oxygen Index {\ct X\_O2\_LL},
@@ -3393,21 +3409,26 @@ To eliminate any gas phase suppression, set {\ct X\_O2\_LL} to 0.
 \noindent
 {\bf CO Production:}
 An algorithm has been implemented that computes the combustion as a two step reaction that
-predicts the formation and desctruction of CO.  The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
-contains more details about how the mechanism works. This alogrithm is used when
-{\ct CO\_PRODUCTION} is set to {\ct .TRUE.} on the {\ct MISC} line.
+predicts the formation and destruction of CO.  The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
+contains more details about how the mechanism works. This algorithm is used when
+{\ct CO\_PRODUCTION} is set to {\ct .TRUE.} on the {\ct MISC} line. Even though the algorithm predicts
+CO formation and its eventual oxidation at elevated temperature, it cannot predict the post-flame
+yield of CO. For example, within a flashed over compartment, the algorithm predicts the elevated
+CO levels, but it cannot predict the CO concentration of the exhaust gases that exit the flaming region.
+Thus, even if using this model, you must specify the {\ct CO\_YIELD} that is expected of a well-ventilated fire.
 
 \begin{warning}
 \noindent
 Note that when active, this algorithm requires the use of three parameters
 for the mixture fraction vs. the two parameters used when it is disabled and will therefore
-increase runtimes and memory usage accordingly.  If the simulation you are
-performing will not result in an underventilated fire, then there will be of
+increase run times and memory usage accordingly.  If the simulation you are
+performing will not result in an under-ventilated fire, then there will be of
 little if any benefit to enabling the CO production algorithm.
 \end{warning}
 
 
 
+\clearpage
 
 \section{Extra Gas Species: The \texorpdfstring{{\tt SPEC}}{SPEC} Namelist Group}
 \label{info:SPEC}
@@ -3513,7 +3534,9 @@ Species &   Mol.~Wgt.        & $\sigma$  & $k/\epsilon$  \\
 
 
 
-\subsection{Finite-Rate Combustion}
+
+
+\section{Finite-Rate Combustion}
 \label{info:finite}
 
 Usually, FDS uses mixture fraction concepts to describe combustion. However, FDS can also explicitly track gas species and
@@ -3813,7 +3836,7 @@ in the same way as those for a sprinkler. Here is an example of a liquid fuel sp
       DROPLETS_PER_SECOND=2000, DIAMETER=1000., HEAT_OF_COMBUSTION=44500.,
       DT_INSERT=0.02, SAMPLING_FACTOR=1 /
 
-&PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets', FLOW_RATE=1.96,
+&PROP ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=1.96,
       FLOW_RAMP='fuel', DROPLET_VELOCITY=10., SPRAY_ANGLE=0.,30.    /
 &RAMP ID='fuel', T= 0.0, F=0.0 /
 &RAMP ID='fuel', T=20.0, F=1.0 /
@@ -4199,27 +4222,48 @@ the $i$th sampling location $t_{d,i}$ s prior ({\ct DELAY}) to the current time 
 
 
 
-\section{Creating or Removing Obstructions; Opening or Closing Vents}
-\label{info:openclose}
+\clearpage
 
-Devices can open and close vents, and add and remove obstructions and holes.
-This action is governed by the device's setpoint, its initial state, the direction of action, and whether
-or not the device latches.  If you desire to control FDS using more complex logic than can be provided
-by the use of a single device and its setpoint, control functions can be specified using the {\ct CTRL} input.
-See Section \ref{info:CTRL} for more on CTRL functions.
+\section{Basic Control Logic}
+\label{info:basic_control}
+
+Devices can be used to control various actions, like creating and removing obstructions, or activating and deactivating
+fans and vents. Every device has an associated {\ct QUANTITY}, whether it is included directly on the {\ct DEVC} line or
+indirectly on the optional {\ct PROP} line. Using the {\ct DEVC} parameter {\ct SETPOINT}, you can trigger an action to
+occur when the {\ct QUANTITY} value passes above, or below, the given {\ct SETPOINT}. The choice is dictated by the
+given {\ct TRIP\_DIRECTION}, which is just a positive or negative integer.
 The following parameters dictate how a device will control something:
-
 \begin{description}
 \item[{\ct SETPOINT}] The value of the device at which its state changes.  For a detection type of device
-(e.g. heat or smoke) this value is taken from the device's {\ct PROP} sinputs.
-\item[{\ct TRIP\_DIRECTION}] A postive integer means the device will change state when its value increases
+(e.g. heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
+\item[{\ct TRIP\_DIRECTION}] A positive integer means the device will change state when its value increases
 past the setpoint and a negative integer means the device will change state
 when its value decreases past the setpoint.  The default value is +1.
 \item[{\ct LATCH}] If this logical value is set to {\ct .TRUE.} the device will only change state once.
 The default value is {\ct .TRUE.}.
-\item[{\ct INTIAL\_STATE}] This logical value is the initial state of the device. The default value
-is {\ct .FALSE.}.
+\item[{\ct INITIAL\_STATE}] This logical value is the initial state of the device. The default value
+is {\ct .FALSE.} For example, if an obstruction associated with the device is to disappear, set {\ct INITIAL\_STATE=.TRUE.}
 \end{description}
+If you desire to control FDS using more complex logic than can be provided
+by the use of a single device and its setpoint, control functions can be specified using the {\ct CTRL} input.
+See Section \ref{info:CTRL} for more on {\ct CTRL} functions.
+
+The simplest example of a device is just a timer:
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=1.2,3.4,5.6, ID='my clock', QUANTITY='TIME', SETPOINT=30. /
+\end{verbatim}
+\normalsize
+
+\noindent
+Anything associated with the device via the parameter, {\ct DEVC\_ID='my clock'}, will change its state at 30 seconds. For example,
+if the text were added to an {\ct OBST} line, that obstruction would change from its {\ct INITIAL\_STATE} of {\ct .FALSE.} to {\ct .TRUE.} after
+30 s. In other words, it would be created at 30 s instead of at the start of the simulation. This is a simple way to open a door or window.
+
+
+\subsection{Creating and Removing Obstructions}
+\label{info:openclose}
 
 In many fire scenarios, the opening or closing of a door or window
 can lead to dramatic changes in the course of the fire. Sometimes these
@@ -4228,10 +4272,10 @@ Within the framework of an FDS calculation, these actions are
 represented by the creation or removal of solid obstacles, or the
 opening or closing of exterior vents.
 
-Remove or create a solid obstruction by assigning the character string {\ct DEVC\_ID} or {\ct CTRL\_ID} the name of
-a {\ct DEVC} or {\ct CTRL} {\ct ID} on the {\ct OBST} that is to be created or removed.  This will direct
-FDS to respectively remove or create the obstruction when
-the device or control function evaluates to {\ct .FALSE.} or {\ct .TRUE.}. For example, the lines
+Remove or create a solid obstruction by assigning the character string {\ct DEVC\_ID} the name of
+a {\ct DEVC} {\ct ID} on the {\ct OBST} line that is to be created or removed.  This will direct
+FDS to remove or create the obstruction when
+the device changes state to {\ct .FALSE.} or {\ct .TRUE.}, respectively. For example, the lines
 
 \footnotesize
 \begin{verbatim}
@@ -4244,15 +4288,16 @@ the device or control function evaluates to {\ct .FALSE.} or {\ct .TRUE.}. For e
 \normalsize
 
 \noindent
-will cause the given obstruction to be removed when the specified {\ct DEViCe} changes states.
+will cause the given obstruction to be removed when the specified {\ct DEVC} changes state.
 
 \begin{warning}
 \noindent
-Note that while single {\ct DEViCe} or {\ct CTRL} can be used to control multiple items, a {\ct DEViCe} or {\ct CTRL}
+Note that while single {\ct DEVC} can be used to control multiple items, a {\ct DEVC}
 that is being used for a {\ct HOLE} should not be used for anything else other than additional {\ct HOLE}s.
 \end{warning}
 
-Creation or removal at a predetermined time can be performed using a {\ct DEViCe} that has {\ct TIME} as
+\noindent
+Creation or removal at a predetermined time can be performed using a {\ct DEVC} that has {\ct TIME} as
 its measured quantity. For example, the following instructions will cause the specified {\ct HOLE}s and {\ct OBST}structions to
 appear/disappear at the various designated times:
 
@@ -4279,7 +4324,6 @@ embarking on a complicated creation/removal scheme for obstructions and holes.}
 
 To remove an obstruction, then re-create a different one in its place, use 2 lines
 
-
 \footnotesize
 \begin{verbatim}
 &OBST XB=..., SURF_ID='whatever', DEVC_ID='device 1' /
@@ -4289,27 +4333,6 @@ To remove an obstruction, then re-create a different one in its place, use 2 lin
 \normalsize
 \noindent
 since the code simply sees this as two different obstructions.
-
-One can have an obstacle appear and disapear multiple times by using a {\ct CUSTOM ConTRoL} function
-
-\footnotesize
-\begin{verbatim}
-&OBST XB=..., SURF_ID='whatever', CTRL_ID='cycling timer' /
-&DEVC ID='TIMER', XYZ=2..., QUANTITY='TIME' /
-&CTRL ID='cycling timer', FUNCTION_TYPE='CUSTUOM, INPUT_ID='TIMER', RAMP_ID='cycle' /
-&RAMP ID='cycle', T=  0, F=-1 /
-&RAMP ID='cycle', T= 59, F=-1 /
-&RAMP ID='cycle', T= 61, F= 1 /
-&RAMP ID='cycle', T=119, F= 1 /
-&RAMP ID='cycle', T=121, F=-1 /
-\end{verbatim}
-
-\normalsize
-\noindent
-The above will have the obstacle initially removed, then added at 60 s, and removed again at 120 s.
-
-Experiment with these combinations using a simple
-case before trying a case to make sure that FDS indeed is doing what is intended.
 
 The removal and creation of an obstruction
 can be used to model the opening of a door that connects one
@@ -4330,6 +4353,9 @@ For example, to control a fan via the device {\ct 'det2'}, set
 Also note that none of these
 control parameters should be applied to a {\ct MIRROR} or {\ct OPEN} boundary.
 
+
+
+\clearpage
 
 \section{Advanced Control Functions: The \texorpdfstring{{\tt CTRL}}{CTRL} Namelist Group}
 \label{info:CTRL}
@@ -4374,7 +4400,6 @@ Function Type                     & Description   \\ \hline \hline
 If you want to design a system of controls and devices that involves multiple changes of state, include the attribute {\ct LATCH=.FALSE.} on the
 relevant {\ct DEVC} or {\ct CTRL} input lines. By default, devices and controls may only change state once, like a sprinkler activating or
 smoke detector alarming. {\ct LATCH=.TRUE.} by default for both devices and controls.
-
 
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
@@ -4529,7 +4554,7 @@ on a fixed cycle by using a {\ct CUSTOM} control function based on time:
 &SURF ID='FAN', TMP_FRONT=40., VOLUME_FLUX=-1. /
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='cycling timer' /
 &DEVC ID='TIMER', XYZ=2.4,5.7,3.6, QUANTITY='TIME' /
-&CTRL ID='cycling timer', FUNCTION_TYPE='CUSTUOM, INPUT_ID='TIMER', RAMP_ID='cycle' /
+&CTRL ID='cycling timer', FUNCTION_TYPE='CUSTOM, INPUT_ID='TIMER', RAMP_ID='cycle' /
 &RAMP ID='cycle', T= 59, F=-1 /
 &RAMP ID='cycle', T= 61, F= 1 /
 &RAMP ID='cycle', T=119, F= 1 /
@@ -4538,6 +4563,27 @@ on a fixed cycle by using a {\ct CUSTOM} control function based on time:
 
 \noindent
 In the above example the fan will be off initially, turn on at 60~s and then turn off at 120~s.
+
+You can make an obstruction appear and disappear multiple times by using lines like
+
+\footnotesize
+\begin{verbatim}
+&OBST XB=..., SURF_ID='whatever', CTRL_ID='cycling timer' /
+&DEVC ID='TIMER', XYZ=..., QUANTITY='TIME' /
+&CTRL ID='cycling timer', FUNCTION_TYPE='CUSTOM, INPUT_ID='TIMER', RAMP_ID='cycle' /
+&RAMP ID='cycle', T=  0, F=-1 /
+&RAMP ID='cycle', T= 59, F=-1 /
+&RAMP ID='cycle', T= 61, F= 1 /
+&RAMP ID='cycle', T=119, F= 1 /
+&RAMP ID='cycle', T=121, F=-1 /
+\end{verbatim}
+
+\normalsize
+\noindent
+The above will have the obstacle initially removed, then added at 60 s, and removed again at 120 s.
+
+Experiment with these combinations using a simple
+case before trying a case to make sure that FDS indeed is doing what is intended.
 
 
 \subsection{Combining Control Functions: A Pre-Action Sprinkler System}
@@ -4994,7 +5040,7 @@ The output quantity {\ct THERMOCOUPLE} is the temperature
 of the thermocouple itself, usually close to the gas temperature, but not
 always. It is determined by solving the following equation
 for $T_{TC}$ iteratively~\cite{Welsh:1}
-\be \epsilon_{TC} (\sigma T_{TC}^4- U/4) + h(T_{TC}-T_g) = 0 \ee
+\be \epsilon_{TC} (\sigma T_{TC}^4- U/4) + h(T_{TC}-T_g) = 0 \label{TC}  \ee
 where $\epsilon_{TC}$ is the emissivity of the thermocouple, $U$ is the
 integrated radiative intensity, $T_g$ is the true gas temperature, and
 $h$ is the heat transfer coefficient to a small sphere,
@@ -5021,6 +5067,10 @@ When comparing against a radiometer measurement, use {\ct RADIOMETER}:
 $$\dq_r''/\epsilon + \sigma (T_w^4-T_\infty^4) $$
 For diagnostic purposes it is sometimes convenient to output the {\ct INCIDENT\_HEAT\_FLUX}:
 $$ \dq_r''/\epsilon + \sigma T_w^4 +\dq_c'' $$
+There is a gas phase output quantity called {\ct RADIANT\_INTENSITY}. This is used mainly for diagnosing problems with the
+radiation solver. Even though its units are kW/m$^2$, it should not be interpreted as the heat flux to an object that would
+occupy that particular point in space. Rather, it is the integral over all directions of the radiation intensity, $I(\bx,\bs)$, a function of both
+space and direction. It is denoted by $U$, as in Eq.~(\ref{TC}).
 
 
 \subsection{Droplet Output Quantities}
@@ -5051,8 +5101,8 @@ mechanical response of the walls or structure. For many applications, the 1-D so
 equation is adequate, but in situations where it is not, another approach can be followed. FDS includes a
 calculation of the Adiabatic Surface Temperature (AST), a quantity that is representative of the heat flux to a
 solid surface. Following the idea proposed by Ulf Wickstrom~\cite{SFPE:Wickstrom}, the following equation can
-be solved via a simple iterative technique to determine an effective gas temperature, $T_{\hbox{AST}}$:
-\be \dot{q}_r'' + \dot{q}_c'' = \epsilon \sigma \, \left( T_{\hbox{AST}}^4 - T_w^4 \right) + h (T_{\hbox{AST}} - T_w )  \ee
+be solved via a simple iterative technique to determine an effective gas temperature, $T_{\hbox{\tiny AST}}$:
+\be \dot{q}_r'' + \dot{q}_c'' = \epsilon \sigma \, \left( T_{\hbox{\tiny AST}}^4 - T_w^4 \right) + h (T_{\hbox{\tiny AST}} - T_w )  \ee
 The sum $\dot{q}_r'' + \dot{q}_c''$ is the {\em net} heat flux onto the solid surface, whose temperature is
 $T_w$. The heat fluxes and surface temperature are computed in FDS, and they are inter-dependent. The computed wall
 temperature affects the net heat flux and vice versa. However, because FDS only computes the solution to the
@@ -5062,7 +5112,7 @@ an accurate indicator of the thermal insult from the hot, smokey gases onto soli
 
 Of course, both the heat fluxes, $\dot{q}_r''$ and $\dot{q}_c''$, and the surface temperature, $T_w$ can be passed from FDS to the
 other model, and suitable corrections can be made based on a presumably more accurate prediction of the solid temperature.
-Alternatively, the single quantity, $T_{\hbox{AST}}$, can be transferred, as this is the temperature that the solid
+Alternatively, the single quantity, $T_{\hbox{\tiny AST}}$, can be transferred, as this is the temperature that the solid
 surface effectively ``sees.'' It represents the gas phase thermal environment, however complicated, but it does not
 carry along the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the
 objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and
@@ -5144,8 +5194,8 @@ when specifying complicated quantities for Iso-surface or Plot3D files, as it re
 \hline
 Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
 {\ct ABSORPTION\_COEFFICIENT}                   & $\kappa$                                      & 1/m            & D,I,P,S      \\ \hline
-{\ct ADIABATIC\_SURFACE\_TEMPERATURE}           & $T_{\hbox{AST}}$ (see Sec.~\ref{info:AST})    & $^\circ$C      & B,D          \\ \hline
-{\ct aspiration}                                & (See Section~\ref{info:aspiration_detector})  & \%             & D            \\ \hline
+{\ct ADIABATIC\_SURFACE\_TEMPERATURE}           & See Section~\ref{info:AST}                    & $^\circ$C      & B,D          \\ \hline
+{\ct aspiration}                                & See Section~\ref{info:aspiration_detector}    & \%             & D            \\ \hline
 {\ct BURNING\_RATE}                             & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
 {\ct carbon dioxide}                            & $X_{CO_2}(Z)$                                 & mol/mol        & D,I,P,S      \\ \hline
 {\ct carbon monoxide}                           & $X_{CO}(Z)$                                   & mol/mol        & D,I,P,S      \\ \hline
@@ -5168,7 +5218,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct INCIDENT\_HEAT\_FLUX}                      & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct INSIDE\_WALL\_TEMPERATURE}                 & See Section~\ref{info:PROF}                   & $^\circ$C      & D            \\ \hline
 {\ct LAYER HEIGHT}                              & See Section~\ref{info:layerheight}            & m              & D            \\ \hline
-{\ct LINK TEMPERATURE}                          & See Section~\ref{info:heatdetector}           & $^\circ$C      & D            \\ \hline
+{\ct LINK TEMPERATURE}                          & See Section~\ref{info:heat_detectors}         & $^\circ$C      & D            \\ \hline
 {\ct LOWER TEMPERATURE}                         & See Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
 \end{tabular}
 \label{tab:output}
@@ -5206,7 +5256,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct [SPEC\_ID]\_FLUX\_Y}                       & $\rho v Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
 {\ct [SPEC\_ID]\_FLUX\_Z}                       & $\rho w Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
 {\ct spot obscuration}                          & See Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
-{\ct SPRINKLER LINK TEMPERATURE}                & See Section~\ref{info:sprinkler}              & $^\circ$C      & D            \\ \hline
+{\ct SPRINKLER LINK TEMPERATURE}                & See Section~\ref{info:sprinklers}             & $^\circ$C      & D            \\ \hline
 {\ct TEMPERATURE}                               & $T$ (Section~\ref{info:THERMOCOUPLE})         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & $T_{TC}$ (Section~\ref{info:THERMOCOUPLE})    & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct TIME}                                      & $t$ (Section~\ref{info:DEVC})                 & s              & D            \\ \hline
@@ -5339,7 +5389,6 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{table}[H]
 \caption{For more information see Section~\ref{info:DEVC}.}\label{tbl:DEVC}
 \noindent
-\footnotesize
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\ \hline \hline
@@ -5376,7 +5425,6 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{table}[H]
 \caption{For more information see Section~\ref{info:DUMP}.}\label{tbl:DUMP}
 \noindent
-\footnotesize
 \begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ \hline \hline
@@ -5722,7 +5770,6 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of thermocouple bead  &                       & 0.85      \\ \hline
 {\ct C\_FACTOR}                         & Real          & Sprinkler activation parameter   &                       & 0.        \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & Free stream wind speed           & m/s                   & 1.0       \\ \hline
-{\ct CLASS}                             & Character     & Model Class                      &                       &           \\ \hline
 {\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity         & m/s                   & 5.0       \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Sprinkler or nozzle flow rate    & L/min                 &           \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & Time {\ct RAMP} for flow         &                       &           \\ \hline
@@ -5735,6 +5782,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct OFFSET}                            & Real          & Droplet offset distance          & m                     & 0.05      \\ \hline
 {\ct OPERATING\_PRESSURE}               & Real          & Sprinkler pipe pressure          & atm                   & 1.        \\ \hline
 {\ct PART\_ID}                          & Character     & Name of associated PART line     &                       &           \\ \hline
+{\ct QUANTITY}                          & Character     & Name of associate output         &                       &           \\ \hline
 {\ct RTI}                               & Real          & Response Time Index              & $\sqrt{\hbox{m~s}}$   & 100       \\ \hline
 {\ct SPRAY\_ANGLE(2)}                   & Real          & Cone angles for water spray      & deg                   & 60.,75.   \\ \hline
 {\ct SMOKEVIEW\_ID}                     & Character     & Name of drawn object             &                       &           \\ \hline
@@ -6062,6 +6110,178 @@ Only prescribe those parameters which are necessary to describe the desired scen
 %NAMELIST /ZONE/ XB,LEAK_AREA
 
 
+
+
+\chapter{Conversion of Old Input Files to FDS 5}
+
+Many changes and improvements have been made in the latest release FDS 5.
+To make an FDS 4 input data file compatible with the new FDS 5 application,
+a few changes must be made to the file.
+This appendix will point out all the changes that need to be made to convert
+an FDS 4.x input file to the new FDS 5.x format.
+
+\section{Numerical Domain Parameters: \texorpdfstring{{\tt GRID}}{GRID} and \texorpdfstring{{\tt PDIM}}{PDIM} }
+
+In previous versions, the computational domain and numerical grid were specified via lines of the form:
+
+\footnotesize
+\begin{verbatim}
+&GRID IBAR=30, JBAR=20, KBAR=10 /
+&PDIM XBAR0=0.0, XBAR=3.0, YBAR0=0.0, YBAR=2.0, ZBAR0=0.0, ZBAR=1.0 /
+\end{verbatim} \normalsize
+
+\noindent
+In FDS 5, these two lines are now written via the single line:
+
+\footnotesize
+\begin{verbatim}
+&MESH IJK=30,20,10, XB=0.0,3.0,0.0,2.0,0.0,1.0 /
+\end{verbatim} \normalsize
+
+\noindent
+Rules for multiple meshes and mesh transformations still apply.
+
+\section{Obstructions, Vents, and Holes: \texorpdfstring{{\tt OBST}}{OBST}, \texorpdfstring{{\tt VENT}}{VENT}, and \texorpdfstring{{\tt HOLE}}{HOLE}}
+
+The syntax for these lines is fairly similar to past versions, with the following exceptions:
+\begin{itemize}
+\item For a {\ct VENT} that spans an entire mesh boundary, {\ct CB='XBAR0'} is now {\ct MB='XMIN'}. The character string
+{\ct 'XBAR'} is now {\ct 'XMAX'}. The same applies for the $y$ and $z$ coordinate parameters.
+\item Control parameters like {\ct T\_ACTIVATE}, {\ct HEAT\_REMOVE}, {\em etc.}, are now consolidated into {\ct DEVC\_ID} and
+{\ct CTRL\_ID}. In brief,
+any change to an obstruction, vent, or hole is tied to a specific device or control function. See Sections~\ref{info:DEVC} and
+\ref{info:CTRL} for details.
+\end{itemize}
+
+
+\section{Surface Parameters: \texorpdfstring{{\tt SURF}}{SURF}}
+
+The most significant change to the input file format has been splitting of the {\ct SURF} line. In past versions, the {\ct SURF}
+namelist group contained all the information about a particular boundary type -- its material properties, color, thickness, and so on.
+However, in FDS 5, solid boundaries can now consist of multiple layers of materials, making the old {\ct SURF} line too cumbersome to
+specify. Instead, there is a new namelist group called {\ct MATL} that just contains the properties of a given material. What used to
+be
+
+\footnotesize
+\begin{verbatim}
+&SURF ID        = 'BRICK WALL'
+      RGB       = 0.6,0.2,0.2
+      KS        = 0.69
+      C_P       = 0.84
+      DENSITY   = 1600.
+      BACKING   = 'EXPOSED'
+      THICKNESS = 0.20 /
+\end{verbatim}
+\normalsize
+
+\noindent
+is now given by two input lines:
+
+\footnotesize
+\begin{verbatim}
+&MATL ID             = 'BRICK'
+      CONDUCTIVITY   = 0.69
+      SPECIFIC_HEAT  = 0.84
+      DENSITY        = 1600. /
+
+&SURF ID        = 'BRICK WALL'
+      MATL_ID   = 'BRICK'
+      RGB       = 166,41,41
+      BACKING   = 'EXPOSED'
+      THICKNESS = 0.20 /
+\end{verbatim}
+\normalsize
+
+\noindent
+The surface is still specified the same way as before, for example:
+
+\footnotesize
+\begin{verbatim}
+&OBST XB=0.1, 5.0, 1.0, 1.2, 0.0, 1.0, SURF_ID='BRICK WALL' /
+\end{verbatim}
+\normalsize
+
+\noindent
+Notice the change in the names of the thermal properties {\ct KS} and {\ct C\_P} to {\ct CONDUCTIVITY} and
+{\ct SPECIFIC\_HEAT}, respectively. Notice that the color {\ct RGB} is now specified via integers between 0 and 255, instead of
+real numbers between 0.0 and 1.0. Better yet, just use the {\ct COLOR} Table~\ref{tab:colors}.
+
+
+
+\section{Reaction Parameters: \texorpdfstring{{\tt REAC}}{REAC}}
+
+For most applications, the specification of the combustion reaction has become easier. In past versions, you needed to specify the fuel, its molecular weight, soot and/or CO yields, and the ideal stoichiometry of the reaction:
+
+\footnotesize
+\begin{verbatim}
+&REAC ID                 = 'PROPANE'
+      FYI                = 'C_3 H_8'
+      MW                 = 44.
+      SOOT_YIELD         = 0.01
+      NU_O2              = 5.
+      NU_CO2             = 3.
+      NU_H2O             = 4. /
+\end{verbatim}
+\normalsize
+
+\noindent
+Now, you just need to describe the composition of the fuel molecule and any non-ideal product yield. FDS 5 computes what it needs based on
+this information.
+
+\footnotesize
+\begin{verbatim}
+&REAC ID                 = 'PROPANE'
+      SOOT_YIELD         = 0.01
+      C                  = 3.
+      H                  = 8. /
+\end{verbatim}
+\normalsize
+
+
+\section{Device Parameters: \texorpdfstring{{\tt SPRK}}{SPRK}, \texorpdfstring{{\tt SMOD}}{SMOD},
+\texorpdfstring{{\tt HEAT}}{HEAT}, \texorpdfstring{{\tt THCP}}{THCP}}
+
+Past versions of FDS had a variety of ways to specify devices. For example, a sprinkler was specified via a line of the form:
+
+\footnotesize
+\begin{verbatim}
+&SPRK XYZ=4.5,6.7,3.6, MAKE='Acme_K-17', LABEL='spk_34' /
+\end{verbatim} \normalsize
+
+\noindent
+which located the sprinkler at {\ct XYZ} and indicated that the sprinkler's properties were listed in a file called {\bf Acme\_K-17.spk}.
+Smoke and heat detectors were specified via lines of the form:
+
+\footnotesize
+\begin{verbatim}
+&SMOD XYZ=4.5,6.7,3.6, LENGTH=2.6, ACTIVATION_OBSCURATION=1.4, LABEL='sd_34' /
+&HEAT XYZ=4.5,6.7,3.6, RTI=45., ACTIVATION_TEMPERATURE=74., LABEL='hd_39' /
+\end{verbatim} \normalsize
+
+\noindent
+In FDS 5, these devices are all specified in the same way:
+
+\footnotesize
+\begin{verbatim}
+&PROP ID='Acme_K-17', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
+      ACTIVATION_TEMPERATURE=74., PART_ID='water drops', FLOW_RATE=189.3,
+      DROPLET_VELOCITY=10., SPRAY_ANGLE=30.,80.   /
+
+&DEVC ID='spk_34', XYZ=4.5,6.7,3.6, PROP_ID='Acme_K-17' /
+\end{verbatim} \normalsize
+
+\noindent
+Point output via ``thermocouples'' ({\ct THCP}s) are now given by ``devices'' ({\ct DEVC}s):
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL_TEMPERATURE', IOR=-2, ID='probe_2' /
+\end{verbatim}
+\normalsize
+
+\noindent
+The syntax of the old {\ct THCP} namelist group is almost the same. Just swap {\ct DEVC} for {\ct THCP}, and change {\ct LABEL} to
+{\ct ID}. In FDS 5, any input record is identified via its {\ct ID}.
 
 
 
@@ -6518,176 +6738,6 @@ due to the solid phase reactions. Array {\ct Q} contains the values of
 the output quantity, which may be wall temperature, density or
 component density.
 
-\chapter{Conversion of Old Input Files to FDS 5}
-
-Many changes and improvements have been made in the latest release FDS 5.
-To make an FDS 4 input data file compatible with the new FDS 5 application,
-a few changes must be made to the file.
-This appendix will point out all the changes that need to be made to convert
-an FDS 4.x input file to the new FDS 5.x format.
-
-\section{Numerical Domain Parameters: \texorpdfstring{{\tt GRID}}{GRID} and \texorpdfstring{{\tt VENT}}{VENT} }
-
-In previous versions, the computational domain and numerical grid were specified via lines of the form:
-
-\footnotesize
-\begin{verbatim}
-&GRID IBAR=30, JBAR=20, KBAR=10 /
-&PDIM XBAR0=0.0, XBAR=3.0, YBAR0=0.0, YBAR=2.0, ZBAR0=0.0, ZBAR=1.0 /
-\end{verbatim} \normalsize
-
-\noindent
-In FDS 5, these two lines are now written via the single line:
-
-\footnotesize
-\begin{verbatim}
-&MESH IJK=30,20,10, XB=0.0,3.0,0.0,2.0,0.0,1.0 /
-\end{verbatim} \normalsize
-
-\noindent
-Rules for multiple meshes and mesh transformations still apply.
-
-\section{Obstructions, Vents, and Holes: \texorpdfstring{{\tt OBST}}{OBST}, \texorpdfstring{{\tt VENT}}{VENT}, and \texorpdfstring{{\tt HOLE}}{HOLE}}
-
-The syntax for these lines is fairly similar to past versions, with the following exceptions:
-\begin{itemize}
-\item For a {\ct VENT} that spans an entire mesh boundary, {\ct CB='XBAR0'} is now {\ct MB='XMIN'}. The character string
-{\ct 'XBAR'} is now {\ct 'XMAX'}. The same applies for the $y$ and $z$ coordinate parameters.
-\item Control parameters like {\ct T\_ACTIVATE}, {\ct HEAT\_REMOVE}, {\em etc.}, are now consolidated into {\ct DEVC\_ID} and
-{\ct CTRL\_ID}. In brief,
-any change to an obstruction, vent, or hole is tied to a specific device or control function. See Sections~\ref{info:DEVC} and
-\ref{info:CTRL} for details.
-\end{itemize}
-
-
-\section{Surface Parameters: \texorpdfstring{{\tt SURF}}{SURF}}
-
-The most significant change to the input file format has been splitting of the {\ct SURF} line. In past versions, the {\ct SURF}
-namelist group contained all the information about a particular boundary type -- its material properties, color, thickness, and so on.
-However, in FDS 5, solid boundaries can now consist of multiple layers of materials, making the old {\ct SURF} line too cumbersome to
-specify. Instead, there is a new namelist group called {\ct MATL} that just contains the properties of a given material. What used to
-be
-
-\footnotesize
-\begin{verbatim}
-&SURF ID        = 'BRICK WALL'
-      RGB       = 0.6,0.2,0.2
-      KS        = 0.69
-      C_P       = 0.84
-      DENSITY   = 1600.
-      BACKING   = 'EXPOSED'
-      THICKNESS = 0.20 /
-\end{verbatim}
-\normalsize
-
-\noindent
-is now given by two input lines:
-
-\footnotesize
-\begin{verbatim}
-&MATL ID             = 'BRICK'
-      CONDUCTIVITY   = 0.69
-      SPECIFIC_HEAT  = 0.84
-      DENSITY        = 1600. /
-
-&SURF ID        = 'BRICK WALL'
-      MATL_ID   = 'BRICK'
-      RGB       = 166,41,41
-      BACKING   = 'EXPOSED'
-      THICKNESS = 0.20 /
-\end{verbatim}
-\normalsize
-
-\noindent
-The surface is still specified the same way as before, for example:
-
-\footnotesize
-\begin{verbatim}
-&OBST XB=0.1, 5.0, 1.0, 1.2, 0.0, 1.0, SURF_ID='BRICK WALL' /
-\end{verbatim}
-\normalsize
-
-\noindent
-Notice the change in the names of the thermal properties {\ct KS} and {\ct C\_P} to {\ct CONDUCTIVITY} and
-{\ct SPECIFIC\_HEAT}, respectively. Notice that the color {\ct RGB} is now specified via integers between 0 and 255, instead of
-real numbers between 0.0 and 1.0. Better yet, just use the {\ct COLOR} Table~\ref{tab:colors}.
-
-
-
-\section{Reaction Parameters: \texorpdfstring{{\tt REAC}}{REAC}}
-
-For most applications, the specification of the combustion reaction has become easier. In past versions, you needed to specify the fuel, its molecular weight, soot and/or CO yields, and the ideal stoichiometry of the reaction:
-
-\footnotesize
-\begin{verbatim}
-&REAC ID                 = 'PROPANE'
-      FYI                = 'C_3 H_8'
-      MW                 = 44.
-      SOOT_YIELD         = 0.01
-      NU_O2              = 5.
-      NU_CO2             = 3.
-      NU_H2O             = 4. /
-\end{verbatim}
-\normalsize
-
-\noindent
-Now, you just need to describe the composition of the fuel molecule and any non-ideal product yield. FDS 5 computes what it needs based on
-this information.
-
-\footnotesize
-\begin{verbatim}
-&REAC ID                 = 'PROPANE'
-      SOOT_YIELD         = 0.01
-      C                  = 3.
-      H                  = 8. /
-\end{verbatim}
-\normalsize
-
-
-\section{Device Parameters: \texorpdfstring{{\tt SPRK}}{SPRK}, \texorpdfstring{{\tt SMOD}}{SMOD},
-\texorpdfstring{{\tt HEAT}}{HEAT}, \texorpdfstring{{\tt THCP}}{THCP}}
-
-Past versions of FDS had a variety of ways to specify devices. For example, a sprinkler was specified via a line of the form:
-
-\footnotesize
-\begin{verbatim}
-&SPRK XYZ=4.5,6.7,3.6, MAKE='Acme_K-17', LABEL='spk_34' /
-\end{verbatim} \normalsize
-
-\noindent
-which located the sprinkler at {\ct XYZ} and indicated that the sprinkler's properties were listed in a file called {\bf Acme\_K-17.spk}.
-Smoke and heat detectors were specified via lines of the form:
-
-\footnotesize
-\begin{verbatim}
-&SMOD XYZ=4.5,6.7,3.6, LENGTH=2.6, ACTIVATION_OBSCURATION=1.4, LABEL='sd_34' /
-&HEAT XYZ=4.5,6.7,3.6, RTI=45., ACTIVATION_TEMPERATURE=74., LABEL='hd_39' /
-\end{verbatim} \normalsize
-
-\noindent
-In FDS 5, these devices are all specified in the same way:
-
-\footnotesize
-\begin{verbatim}
-&PROP ID='Acme_K-17', CLASS='SPRINKLER', RTI=148., C_FACTOR=0.7,
-      ACTIVATION_TEMPERATURE=74., PART_ID='water drops', FLOW_RATE=189.3,
-      DROPLET_VELOCITY=10., SPRAY_ANGLE=30.,80.   /
-
-&DEVC ID='spk_34', XYZ=4.5,6.7,3.6, PROP_ID='Acme_K-17' /
-\end{verbatim} \normalsize
-
-\noindent
-Point output via ``thermocouples'' ({\ct THCP}s) are now given by ``devices'' ({\ct DEVC}s):
-
-\footnotesize
-\begin{verbatim}
-&DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL_TEMPERATURE', IOR=-2, ID='probe_2' /
-\end{verbatim}
-\normalsize
-
-\noindent
-The syntax of the old {\ct THCP} namelist group is almost the same. Just swap {\ct DEVC} for {\ct THCP}, and change {\ct LABEL} to
-{\ct ID}. In FDS 5, any input record is identified via its {\ct ID}.
 
 
 
