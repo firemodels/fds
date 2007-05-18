@@ -1306,8 +1306,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             RDC       = RD_NEW**3
             WCPUA(IW,EVAP_INDEX ) = WCPUA(IW,EVAP_INDEX ) + WGT*RDT*QUSE*RAW(IW)
             WMPUA(IW,EVAP_INDEX ) = WMPUA(IW,EVAP_INDEX ) + WGT*MDROP*RAW(IW)
-            WRITE(*,*) IW,QWALLC,QWALLR,WGT,QUSE,RAW(IW),RDT 
-            !STOP
          ENDIF
 
          ! Decrease temperature due to droplet heating/vaporization
