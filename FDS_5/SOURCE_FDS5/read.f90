@@ -2878,7 +2878,13 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%RAMP_Q               = RAMP_Q 
    SF%RAMP_V               = RAMP_V  
    SF%RAMP_T               = RAMP_T  
-   IF (COLOR/='null') CALL COLOR2RGB(RGB,COLOR)
+   IF (COLOR/='null') THEN
+      IF (COLOR=='INVISIBLE') THEN
+         TRANSPARENCY = 0._EB
+      ELSE
+         CALL COLOR2RGB(RGB,COLOR)
+      ENDIF
+   ENDIF
    SF%RGB                  = RGB
    SF%TRANSPARENCY         = TRANSPARENCY
    SF%STRETCH_FACTOR       = STRETCH_FACTOR
