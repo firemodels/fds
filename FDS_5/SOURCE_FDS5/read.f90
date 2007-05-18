@@ -5898,14 +5898,19 @@ MESH_LOOP: DO NM=1,NMESHES
       ! Throw out bad slices
  
       BAD = .FALSE.
-      IF (      OUTPUT_QUANTITY(ND)%MIXTURE_FRACTION_ONLY .AND. .NOT.MIXTURE_FRACTION)  BAD = .TRUE.
-      IF (      OUTPUT_QUANTITY(ND)%PART_APPROPRIATE)                                   BAD = .TRUE.
-      IF (.NOT. OUTPUT_QUANTITY(ND)%SLCF_APPROPRIATE)                                   BAD = .TRUE.
-      IF (BAD) THEN
-         WRITE(MESSAGE,'(3A)')  ' ERROR: SLCF quantity ',TRIM(QUANTITY),' not appropriate for SLCF'
-         CALL SHUTDOWN(MESSAGE)
+      IF (      OUTPUT_QUANTITY(ND)%MIXTURE_FRACTION_ONLY .AND. .NOT.MIXTURE_FRACTION)  THEN
+         BAD = .TRUE.
+         WRITE(MESSAGE,'(3A)')  ' ERROR: The quantity ',TRIM(QUANTITY),' can only be used when the MIXTURE_FRACTION model is active'
+      END IF
+      IF (      OUTPUT_QUANTITY(ND)%PART_APPROPRIATE) THEN
+         BAD = .TRUE.
+         WRITE(MESSAGE,'(3A)')  ' ERROR: The PART quantity ',TRIM(QUANTITY),' is not appropriate for SLCF'
       ENDIF
-      
+      IF (.NOT. OUTPUT_QUANTITY(ND)%SLCF_APPROPRIATE) THEN
+         BAD = .TRUE.
+         WRITE(MESSAGE,'(3A)')  ' ERROR: The quantity ',TRIM(QUANTITY),' is not appropriate for SLCF'     
+      ENDIF    
+      IF (BAD) CALL SHUTDOWN(MESSAGE)      
       ! Reject a slice if it is beyond the bounds of the current mesh
  
       IF (XB(1)>XF .OR. XB(2)<XS .OR. XB(3)>YF .OR. XB(4)<YS .OR. XB(5)>ZF .OR. XB(6)<ZS) THEN
