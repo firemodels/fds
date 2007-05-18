@@ -1065,317 +1065,305 @@ DROP_RAD => WORK5
 DROP_TMP => WORK6
 WMPUAOLD => WALL_WORK1
 WCPUAOLD => WALL_WORK2
-WMPUA    = 0._EB
-WCPUA    = 0._EB
 
-EVAP_INDEX_LOOP: DO N_PC = 1,N_PART
-   PC => PARTICLE_CLASS(N_PC)
-   IF (PC%EVAP_INDEX==0) CYCLE EVAP_INDEX_LOOP
-   IF (PC%SPECIES_INDEX==0) CYCLE EVAP_INDEX_LOOP
-   EVAP_INDEX = PC%EVAP_INDEX
-   DROP_DEN = 0._EB
-   DROP_TMP = 0._EB
-   DROP_RAD = 0._EB
+EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
    WMPUAOLD = WMPUA(:,EVAP_INDEX)
    WCPUAOLD = WCPUA(:,EVAP_INDEX)
-   CP_DROP =  PC%C_P
-   FTPR     = PC%FTPR
-   TMP_MELT = PC%TMP_MELT
-   TMP_BOIL = PC%TMP_V
-   IGAS     = PC%SPECIES_INDEX
-   MW_DROP  = SPECIES(IGAS)%MW
-   MW_RATIO = SPECIES(0)%MW/MW_DROP
-   DTLF     = 2._EB*(TMP_BOIL-TMPM)
-   CP_IGAS = PC%GAMMA_VAP*R0/((PC%GAMMA_VAP-1._EB)*MW_DROP)
-   ! Heat of Vaporization
-!   IF (IGAS==I_WATER) THEN 
-!      H_V = PC%H_V + 2400._EB*(TMP_BOIL-TMP_DROP_OLD) ! Incropera, 4th, p 846
-!   ELSE
-      H_V = PC%H_V
-!   ENDIF
+   WMPUA(:,EVAP_INDEX) = 0._EB
+   WCPUA(:,EVAP_INDEX) = 0._EB
+   PC_LOOP: DO N_PC = 1,N_PART
+      PC => PARTICLE_CLASS(N_PC)
+      IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PC_LOOP
+      DROP_DEN = 0._EB
+      DROP_TMP = 0._EB
+      DROP_RAD = 0._EB
+      CP_DROP =  PC%C_P
+      FTPR     = PC%FTPR
+      TMP_MELT = PC%TMP_MELT
+      TMP_BOIL = PC%TMP_V
+      IGAS     = PC%SPECIES_INDEX
+      MW_DROP  = SPECIES(IGAS)%MW
+      MW_RATIO = SPECIES(0)%MW/MW_DROP
+      DTLF     = 2._EB*(TMP_BOIL-TMPM)
+      CP_IGAS = PC%GAMMA_VAP*R0/((PC%GAMMA_VAP-1._EB)*MW_DROP)
+      ! Heat of Vaporization
+   !   IF (IGAS==I_WATER) THEN 
+   !      H_V = PC%H_V + 2400._EB*(TMP_BOIL-TMP_DROP_OLD) ! Incropera, 4th, p 846
+   !   ELSE
+         H_V = PC%H_V
+   !   ENDIF
 
-   DROPLET_LOOP: DO I=1,NLP
-      DR => DROPLET(I)
-      IF (DR%CLASS /= N_PC) CYCLE DROPLET_LOOP
-      IF (DR%R<=0._EB)      CYCLE DROPLET_LOOP
+      DROPLET_LOOP: DO I=1,NLP
+         DR => DROPLET(I)
+         IF (DR%CLASS /= N_PC) CYCLE DROPLET_LOOP
+         IF (DR%R<=0._EB)      CYCLE DROPLET_LOOP
 
-      ! Determine the current coordinates of the particle
-      XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
-      YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
-      ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
-      II  = FLOOR(XI+1._EB)
-      JJ  = FLOOR(YJ+1._EB)
-      KK  = FLOOR(ZK+1._EB)
-      
-      !Intiailize droplet thermophysical data
-      RD   = DR%R
-      RDS  = RD*RD
-      RDC  = RD*RDS
-      RRD  = 1._EB/RD
-      TMP_DROP_OLD = DR%TMP
-      TMP_DROP_NEW = TMP_DROP_OLD
-      MDROP = FTPR*RDC       ! Mass of drop
-      WGT   = DR%PWT
-      DHOR  = H_V*MW_DROP/R0
-      WALL  = 1._EB
-      ABOT  = 0._EB
-      ATOP  = 4._EB*PI*RDS
-      QUSE  = 0._EB
-      QWALLR= 0._EB
-      QWALLC= 0._EB
-      QVAP  = 0._EB
-      MVAP  = 0._EB
-      MVAPMIN = 0._EB
-      MVAPMAX = MDROP
-      RD_NEW = RD
-            
-      ! Gas conditions
-      TMP_GAS_OLD  = TMP(II,JJ,KK)
-      TMP_GAS_NEW  = TMP_GAS_OLD
-      RHO_G  = RHO(II,JJ,KK)
-      MU_AIR = SPECIES(0)%MU(MIN(500,NINT(0.1_EB*TMP_GAS_OLD)))
-      RVC    = RDX(II)*RDY(JJ)*RDZ(KK)
-      MGAS    = RHO_G/RVC           ! Mass of gas cell
-      KA      = CPOPR*MU_AIR
-      Y_IGAS     = YY(II,JJ,KK,IGAS)
-      Y_IGAS_Z   = 0._EB
-      IF (MIXTURE_FRACTION .AND. IGAS==I_WATER) THEN ! Add water vapor from combustion
-         IF (CO_PRODUCTION) THEN
-            Z_2 = YY(II,JJ,KK,I_PROG_CO)
-         ELSE
-            Z_2 = 0._EB
-         ENDIF
-         CALL GET_MASS_FRACTION(YY(II,JJ,KK,I_FUEL),Z_2,YY(II,JJ,KK,I_PROG_F),H2O_INDEX,Y_SUM(II,JJ,KK),Z_F,Y_IGAS_Z)
-      ENDIF
-      Y_GAS = Y_IGAS + Y_IGAS_Z
-
-      ! Determine radiation absorption for droplet (J)
-      QRADD = 0._EB
-      IF (AVG_DROP_DEN(II,JJ,KK,EVAP_INDEX )>0._EB) QRADD = QR_W(II,JJ,KK) / SUM(AVG_DROP_DEN(II,JJ,KK,:)) * DT * MDROP
-
-      ! Set variables for heat transfer on solid
-      SET_SOLID: IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
-         IW   = DR%WALL_INDEX
-         WALL = 0.5_EB  ! Droplet dimension adjust assuming hemisphere
-         RD   = CR2*RD
+         ! Determine the current coordinates of the particle
+         XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
+         YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
+         ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
+         II  = FLOOR(XI+1._EB)
+         JJ  = FLOOR(YJ+1._EB)
+         KK  = FLOOR(ZK+1._EB)
+         
+         !Intiailize droplet thermophysical data
+         RD   = DR%R
          RDS  = RD*RD
          RDC  = RD*RDS
          RRD  = 1._EB/RD
-         ABOT = PI*RDS
-         ATOP = 2._EB*PI*RDS
-         IF (WMPUAOLD(IW)/PC%DENSITY>FILMD) THEN
-            ABOT = MDROP/WMPUAOLD(IW)
-            ATOP = ABOT
+         TMP_DROP_OLD = DR%TMP
+         TMP_DROP_NEW = TMP_DROP_OLD
+         MDROP = FTPR*RDC       ! Mass of drop
+         WGT   = DR%PWT
+         DHOR  = H_V*MW_DROP/R0
+         WALL  = 1._EB
+         ABOT  = 0._EB
+         ATOP  = 4._EB*PI*RDS
+         QUSE  = 0._EB
+         QWALLR= 0._EB
+         QWALLC= 0._EB
+         QVAP  = 0._EB
+         MVAP  = 0._EB
+         MVAPMIN = 0._EB
+         MVAPMAX = MDROP
+         RD_NEW = RD
+               
+         ! Gas conditions
+         TMP_GAS_OLD  = TMP(II,JJ,KK)
+         TMP_GAS_NEW  = TMP_GAS_OLD
+         RHO_G  = RHO(II,JJ,KK)
+         MU_AIR = SPECIES(0)%MU(MIN(500,NINT(0.1_EB*TMP_GAS_OLD)))
+         RVC    = RDX(II)*RDY(JJ)*RDZ(KK)
+         MGAS    = RHO_G/RVC           ! Mass of gas cell
+         KA      = CPOPR*MU_AIR
+         Y_IGAS     = YY(II,JJ,KK,IGAS)
+         Y_IGAS_Z   = 0._EB
+         IF (MIXTURE_FRACTION .AND. IGAS==I_WATER) THEN ! Add water vapor from combustion
+            IF (CO_PRODUCTION) THEN
+               Z_2 = YY(II,JJ,KK,I_PROG_CO)
+            ELSE
+               Z_2 = 0._EB
+            ENDIF
+            CALL GET_MASS_FRACTION(YY(II,JJ,KK,I_FUEL),Z_2,YY(II,JJ,KK,I_PROG_F),H2O_INDEX,Y_SUM(II,JJ,KK),Z_F,Y_IGAS_Z)
          ENDIF
-         IF (TMP_WALL-TMP_BOIL>DTLF) THEN  ! Leidenfrost droplet
-            HADT_WALL = ABOT*DT*HLF
-         ELSE
-            HADT_WALL = ABOT*DT*HS
-         ENDIF
-         TMP_WALL   = TMP_F(IW)
-         DR%RE  = RHO_G*PC%HORIZONTAL_VELOCITY*2._EB*RD/MU_AIR
-         QRADD  = QRADD + ABOT*DT*QRAD(IW)
-         QWALLC = HADT_WALL*(TMP_WALL-TMP_DROP_OLD)                    
-      ELSE !If not a wall set wall variables just in case
-         QWALLC = 0._EB
-         ABOT  = ATOP
-      ENDIF SET_SOLID  
-      
-      !Heat Transfer coefficient
-      NUSSELT = 2._EB + NU_FAC*SQRT(DR%RE)
-      SHER    = 2._EB + SH_FAC*SQRT(DR%RE)
-      HD      = 0.5_EB*NUSSELT*KA*RRD
-      HADT_G  = HD*ATOP*DT
-      
-      ! Start the mass/energy transfer calc
-      !Compute evaporation
-      XVAP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP_OLD)))
-      Y_EQUIL  = XVAP/(MW_RATIO + (1._EB-MW_RATIO)*XVAP)
-      IF (Y_EQUIL > Y_GAS) THEN
-         IF (Y_EQUIL==1._EB) THEN   
-            QUSE = QRADD + QWALLC + HADT_G * (TMP_GAS_OLD - TMP_DROP_OLD) + MDROP * CP_DROP * (TMP_DROP_OLD - TMP_MELT)        
-            MVAP = QUSE/H_V
-         ELSE
-            MVAP = SHER*RHO_G*D_AIR*WALL*TWOPI*RD*LOG((Y_GAS-1._EB)/(Y_EQUIL-1._EB))* DT
-         ENDIF
-         MVAP = MAX(0._EB,MIN(MVAP,MDROP))
-      ENDIF
-      
-      !Misc variables
-      MGCP    = MGAS * CP_GAMMA
-      MVCP    = MVAP * CP_IGAS * 0.5_EB
-      MDCPNEW = (MDROP - MVAP) * CP_DROP
-      
-      !Compute new drop temperature and energy 
-      !Equations from solving for TMP_GAS and TMP_DROP using conservation equations for all mass and for gas mass only
-      ESYSOLD = MGCP * TMP_GAS_OLD + WGT * (CP_DROP * MDROP * (TMP_DROP_OLD - TMP_MELT) + QRADD + QWALLC) - &
-                WGT * (MDCPNEW * (-TMP_MELT) + H_V * MVAP + MVCP * (TMP_GAS_OLD - TMP_DROP_OLD))
-      EGASOLD = MGCP * TMP_GAS_OLD  -WGT * ((0.5_EB*HADT_G + MVCP) * (TMP_GAS_OLD - TMP_DROP_OLD))
+         Y_GAS = Y_IGAS + Y_IGAS_Z
 
-      DENOM = HADT_G * (MGCP + MDCPNEW * WGT) + 2._EB * MDCPNEW * (MGCP + MVCP * WGT)
-      TMP_DROP_NEW = (-2._EB * EGASOLD * (MGCP + MVCP * WGT) + ESYSOLD * (2._EB * MGCP + (HADT_G + 2._EB * MVCP) * WGT)) / &
-                     (WGT * DENOM)
-      TMP_GAS_NEW =  (2._EB * EGASOLD * (MDCPNEW - MVCP) + ESYSOLD * (HADT_G + 2._EB * MVCP)) / DENOM
-!      IF(I==12) WRITE(*,'(6(E12.5,1X))') CP_GAMMA,CP_DROP,CP_IGAS,WGT,HADT_G,H_V
-!      IF(I==12) WRITE(*,'(6(E12.5,1X))') MGAS,QRADD,QWALLC,XVAP,Y_EQUIL,Y_GAS
-!      IF(I==12) WRITE(*,'(6(E12.5,1X))') MDROP,MVAP,TMP_DROP_NEW,TMP_DROP_OLD,TMP_GAS_NEW,TMP_GAS_OLD
-      !If initial MVAP was zero or new drop temperature is over boiling compute a new guess
-      IF (MVAP ==0._EB .OR. TMP_DROP_NEW > TMP_BOIL) THEN
-         XVAP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(MAX(TMP_MELT,TMP_DROP_NEW),TMP_BOIL))))
+         ! Determine radiation absorption for droplet (J)
+         QRADD = 0._EB
+         IF (AVG_DROP_DEN(II,JJ,KK,EVAP_INDEX )>0._EB) QRADD = QR_W(II,JJ,KK) / SUM(AVG_DROP_DEN(II,JJ,KK,:)) * DT * MDROP
+
+         ! Set variables for heat transfer on solid
+         SET_SOLID: IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
+            IW   = DR%WALL_INDEX
+            WALL = 0.5_EB  ! Droplet dimension adjust assuming hemisphere
+            RD   = CR2*RD
+            RDS  = RD*RD
+            RDC  = RD*RDS
+            RRD  = 1._EB/RD
+            ABOT = PI*RDS
+            ATOP = 2._EB*PI*RDS
+            IF (WMPUAOLD(IW)/PC%DENSITY>FILMD) THEN
+               ABOT = MDROP/WMPUAOLD(IW)
+               ATOP = ABOT
+            ENDIF
+            IF (WGT*ABOT > AW(IW)) ABOT = AW(IW)/WGT
+            IF (TMP_WALL-TMP_BOIL>DTLF) THEN  ! Leidenfrost droplet
+               HADT_WALL = ABOT*DT*HLF
+            ELSE
+               HADT_WALL = ABOT*DT*HS
+            ENDIF
+            TMP_WALL   = TMP_F(IW)
+            DR%RE  = RHO_G*PC%HORIZONTAL_VELOCITY*2._EB*RD/MU_AIR
+            QRADD  = QRADD + ABOT*DT*QRAD(IW)
+            QWALLC = HADT_WALL*(TMP_WALL-TMP_DROP_OLD)                    
+         ELSE !If not a wall set wall variables just in case
+            QWALLC = 0._EB
+            ABOT  = ATOP
+         ENDIF SET_SOLID  
+         
+         !Heat Transfer coefficient
+         NUSSELT = 2._EB + NU_FAC*SQRT(DR%RE)
+         SHER    = 2._EB + SH_FAC*SQRT(DR%RE)
+         HD      = 0.5_EB*NUSSELT*KA*RRD
+         HADT_G  = HD*ATOP*DT
+         
+         ! Start the mass/energy transfer calc
+         !Compute evaporation
+         XVAP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP_OLD)))
          Y_EQUIL  = XVAP/(MW_RATIO + (1._EB-MW_RATIO)*XVAP)
          IF (Y_EQUIL > Y_GAS) THEN
-            IF (Y_EQUIL==1._EB) THEN      
-               QUSE = QRADD + QWALLC + HADT_G * (TMP_GAS_OLD - TMP_DROP_OLD) + MDROP * CP_DROP * (TMP_DROP_OLD - TMP_MELT)
+            IF (Y_EQUIL==1._EB) THEN   
+               QUSE = QRADD + QWALLC + HADT_G * (TMP_GAS_OLD - TMP_DROP_OLD) + MDROP * CP_DROP * (TMP_DROP_OLD - TMP_MELT)        
                MVAP = QUSE/H_V
             ELSE
                MVAP = SHER*RHO_G*D_AIR*WALL*TWOPI*RD*LOG((Y_GAS-1._EB)/(Y_EQUIL-1._EB))* DT
             ENDIF
-
             MVAP = MAX(0._EB,MIN(MVAP,MDROP))
-            
-            MVCP    = MVAP * CP_IGAS * 0.5_EB
-            MDCPNEW = (MDROP - MVAP) * CP_DROP
+         ENDIF
+         
+         !Misc variables
+         MGCP    = MGAS * CP_GAMMA
+         MVCP    = MVAP * CP_IGAS * 0.5_EB
+         MDCPNEW = (MDROP - MVAP) * CP_DROP
+         
+         !Compute new drop temperature and energy 
+         !Equations from solving for TMP_GAS and TMP_DROP using conservation equations for all mass and for gas mass only
+         ESYSOLD = MGCP * TMP_GAS_OLD + WGT * (CP_DROP * MDROP * (TMP_DROP_OLD - TMP_MELT) + QRADD + QWALLC) - &
+                  WGT * (MDCPNEW * (-TMP_MELT) + H_V * MVAP + MVCP * (TMP_GAS_OLD - TMP_DROP_OLD))
+         EGASOLD = MGCP * TMP_GAS_OLD  -WGT * ((0.5_EB*HADT_G + MVCP) * (TMP_GAS_OLD - TMP_DROP_OLD))
 
-            ESYSOLD = MGCP * TMP_GAS_OLD + WGT * (CP_DROP * MDROP * (TMP_DROP_OLD - TMP_MELT) + QRADD + QWALLC) - &
-                       WGT * (MDCPNEW * (-TMP_MELT) + H_V * MVAP + MVCP * (TMP_GAS_OLD - TMP_DROP_OLD))
-            EGASOLD = MGCP * TMP_GAS_OLD  -WGT * ((0.5_EB*HADT_G + MVCP) * (TMP_GAS_OLD - TMP_DROP_OLD))
+         DENOM = HADT_G * (MGCP + MDCPNEW * WGT) + 2._EB * MDCPNEW * (MGCP + MVCP * WGT)
+         TMP_DROP_NEW = (-2._EB * EGASOLD * (MGCP + MVCP * WGT) + ESYSOLD * (2._EB * MGCP + (HADT_G + 2._EB * MVCP) * WGT)) / &
+                        (WGT * DENOM)
+         TMP_GAS_NEW =  (2._EB * EGASOLD * (MDCPNEW - MVCP) + ESYSOLD * (HADT_G + 2._EB * MVCP)) / DENOM
 
-            DENOM = HADT_G * (MGCP + MDCPNEW * WGT) + 2._EB * MDCPNEW * (MGCP + MVCP * WGT)
-            TMP_DROP_NEW = (-2._EB * EGASOLD * (MGCP + MVCP * WGT) + ESYSOLD * (2._EB * MGCP + (HADT_G + 2._EB * MVCP) * WGT)) / &
-                           (WGT * DENOM)
-            TMP_GAS_NEW =  (2._EB * EGASOLD * (MDCPNEW - MVCP) + ESYSOLD * (HADT_G + 2._EB * MVCP)) / DENOM
-         ENDIF  
-       ENDIF
-!      IF(I==12) WRITE(*,*) 'B'
-!      IF(I==12) WRITE(*,'(6(E12.5,1X))') QRADD,QWALLC,XVAP,Y_EQUIL,Y_GAS
-!     WRITE(*,*) I
-!     WRITE(*,'(6(E12.5,1X))') MDROP,MVAP,TMP_DROP_NEW,TMP_DROP_OLD,TMP_GAS_NEW,TMP_GAS_OLD
-      !Using MVAP guess as max value, iterate to get actual evaporation
-      ITERATE_IF: IF (MVAP > 0._EB) THEN
-         ITER = 0
-         MVAPMAX = MVAP
-         MVAPMIN = 0._EB
-         ITER_LOOP: DO WHILE (ITER <=10)
+         !If initial MVAP was zero or new drop temperature is over boiling compute a new guess
+         IF (MVAP ==0._EB .OR. TMP_DROP_NEW > TMP_BOIL) THEN
             XVAP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(MAX(TMP_MELT,TMP_DROP_NEW),TMP_BOIL))))
             Y_EQUIL  = XVAP/(MW_RATIO + (1._EB-MW_RATIO)*XVAP)
-            Y_IGASN = MIN(1._EB,(MVAP*WGT+MGAS*Y_IGAS)/(MVAP*WGT+MGAS))
-            Y_GAS = MIN(1._EB,Y_IGASN + Y_IGAS_Z)
-            IF (TMP_DROP_OLD < TMP_MELT) THEN
-                ! Don't allow drop to freeze, reduce evaporation
-                MVAPMAX = MVAP
-                MVAP =  0.5_EB * (MVAP + MVAPMIN)
-            ELSE
-               IF (TMP_GAS_NEW < TMP_GAS_OLD .AND. TMP_DROP_NEW > TMP_GAS_NEW)  THEN
-                  !Don't allow too much gas to drop energy transfer, reduce evaporation
+            IF (Y_EQUIL > Y_GAS) THEN
+               IF (Y_EQUIL==1._EB) THEN      
+                  QUSE = QRADD + QWALLC + HADT_G * (TMP_GAS_OLD - TMP_DROP_OLD) + MDROP * CP_DROP * (TMP_DROP_OLD - TMP_MELT)
+                  MVAP = QUSE/H_V
+               ELSE
+                  MVAP = SHER*RHO_G*D_AIR*WALL*TWOPI*RD*LOG((Y_GAS-1._EB)/(Y_EQUIL-1._EB))* DT
+               ENDIF
+
+               MVAP = MAX(0._EB,MIN(MVAP,MDROP))
+               
+               MVCP    = MVAP * CP_IGAS * 0.5_EB
+               MDCPNEW = (MDROP - MVAP) * CP_DROP
+
+               ESYSOLD = MGCP * TMP_GAS_OLD + WGT * (CP_DROP * MDROP * (TMP_DROP_OLD - TMP_MELT) + QRADD + QWALLC) - &
+                        WGT * (MDCPNEW * (-TMP_MELT) + H_V * MVAP + MVCP * (TMP_GAS_OLD - TMP_DROP_OLD))
+               EGASOLD = MGCP * TMP_GAS_OLD  -WGT * ((0.5_EB*HADT_G + MVCP) * (TMP_GAS_OLD - TMP_DROP_OLD))
+
+               DENOM = HADT_G * (MGCP + MDCPNEW * WGT) + 2._EB * MDCPNEW * (MGCP + MVCP * WGT)
+               TMP_DROP_NEW = (-2._EB * EGASOLD * (MGCP + MVCP * WGT) + ESYSOLD * (2._EB * MGCP + (HADT_G + 2._EB * MVCP) * WGT))&
+                              /(WGT * DENOM)
+               TMP_GAS_NEW =  (2._EB * EGASOLD * (MDCPNEW - MVCP) + ESYSOLD * (HADT_G + 2._EB * MVCP)) / DENOM
+            ENDIF  
+         ENDIF
+
+         !Using MVAP guess as max value, iterate to get actual evaporation
+         ITERATE_IF: IF (MVAP > 0._EB) THEN
+            ITER = 0
+            MVAPMAX = MVAP
+            MVAPMIN = 0._EB
+            ITER_LOOP: DO WHILE (ITER <=10)
+               XVAP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(MAX(TMP_MELT,TMP_DROP_NEW),TMP_BOIL))))
+               Y_EQUIL  = XVAP/(MW_RATIO + (1._EB-MW_RATIO)*XVAP)
+               Y_IGASN = MIN(1._EB,(MVAP*WGT+MGAS*Y_IGAS)/(MVAP*WGT+MGAS))
+               Y_GAS = MIN(1._EB,Y_IGASN + Y_IGAS_Z)
+               IF (TMP_DROP_OLD < TMP_MELT) THEN
+                  ! Don't allow drop to freeze, reduce evaporation
                   MVAPMAX = MVAP
                   MVAP =  0.5_EB * (MVAP + MVAPMIN)
                ELSE
-                  IF (Y_EQUIL < Y_GAS) THEN
+                  IF (TMP_GAS_NEW < TMP_GAS_OLD .AND. TMP_DROP_NEW > TMP_GAS_NEW)  THEN
+                     !Don't allow too much gas to drop energy transfer, reduce evaporation
                      MVAPMAX = MVAP
                      MVAP =  0.5_EB * (MVAP + MVAPMIN)
-                  ELSEIF (Y_EQUIL > Y_GAS)  THEN
-                     IF (MVAP == MDROP) EXIT ITER_LOOP !If all the drop is evaporated, we can't evaporate any more
-                     MVAPMIN = MVAP
-                     MVAP = 0.5_EB * (MVAP + MVAPMAX)
-                  ELSE !Got lucky and Y_EQUIL = Y_GAS with good temperatures
-                     EXIT ITER_LOOP
+                  ELSE
+                     IF (Y_EQUIL < Y_GAS) THEN
+                        MVAPMAX = MVAP
+                        MVAP =  0.5_EB * (MVAP + MVAPMIN)
+                     ELSEIF (Y_EQUIL > Y_GAS)  THEN
+                        IF (MVAP == MDROP) EXIT ITER_LOOP !If all the drop is evaporated, we can't evaporate any more
+                        MVAPMIN = MVAP
+                        MVAP = 0.5_EB * (MVAP + MVAPMAX)
+                     ELSE !Got lucky and Y_EQUIL = Y_GAS with good temperatures
+                        EXIT ITER_LOOP
+                     ENDIF
                   ENDIF
                ENDIF
-            ENDIF
-            ITER = ITER + 1
+               ITER = ITER + 1
 
-            MVCP    = MVAP * CP_IGAS * 0.5_EB
-            MDCPNEW = (MDROP - MVAP) * CP_DROP
-            
-            ESYSOLD = MGCP * TMP_GAS_OLD + WGT * (CP_DROP * MDROP * (TMP_DROP_OLD - TMP_MELT) + QRADD + QWALLC) - &
-                     WGT * (MDCPNEW * (-TMP_MELT) + H_V * MVAP + MVCP * (TMP_GAS_OLD - TMP_DROP_OLD))
-            EGASOLD = MGCP * TMP_GAS_OLD  -WGT * ((0.5_EB*HADT_G + MVCP) * (TMP_GAS_OLD - TMP_DROP_OLD))
+               MVCP    = MVAP * CP_IGAS * 0.5_EB
+               MDCPNEW = (MDROP - MVAP) * CP_DROP
+               
+               ESYSOLD = MGCP * TMP_GAS_OLD + WGT * (CP_DROP * MDROP * (TMP_DROP_OLD - TMP_MELT) + QRADD + QWALLC) - &
+                        WGT * (MDCPNEW * (-TMP_MELT) + H_V * MVAP + MVCP * (TMP_GAS_OLD - TMP_DROP_OLD))
+               EGASOLD = MGCP * TMP_GAS_OLD  -WGT * ((0.5_EB*HADT_G + MVCP) * (TMP_GAS_OLD - TMP_DROP_OLD))
 
-            DENOM = HADT_G * (MGCP + MDCPNEW * WGT) + 2._EB * MDCPNEW * (MGCP + MVCP * WGT)
-            TMP_DROP_NEW = (-2._EB * EGASOLD * (MGCP + MVCP * WGT) + ESYSOLD * (2._EB * MGCP + (HADT_G + 2._EB * MVCP) * WGT)) / &
-                           (WGT * DENOM)
-            TMP_GAS_NEW =  (2._EB * EGASOLD * (MDCPNEW - MVCP) + ESYSOLD * (HADT_G + 2._EB * MVCP)) / DENOM
-!WRITE(*,*) 'ITER ',ITER
-!WRITE(*,'(6(E12.5,1X))') QRADD,QWALLC,XVAP,Y_EQUIL,Y_GAS
-!WRITE(*,'(6(E12.5,1X))') MDROP,MVAP,TMP_DROP_NEW,TMP_DROP_OLD,TMP_GAS_NEW,TMP_GAS_OLD
-         END DO ITER_LOOP
-      END IF ITERATE_IF
+               DENOM = HADT_G * (MGCP + MDCPNEW * WGT) + 2._EB * MDCPNEW * (MGCP + MVCP * WGT)
+               TMP_DROP_NEW = (-2._EB * EGASOLD * (MGCP + MVCP * WGT) + ESYSOLD * (2._EB * MGCP + (HADT_G + 2._EB * MVCP) * WGT))&
+                               /(WGT * DENOM)
+               TMP_GAS_NEW =  (2._EB * EGASOLD * (MDCPNEW - MVCP) + ESYSOLD * (HADT_G + 2._EB * MVCP)) / DENOM
+            END DO ITER_LOOP
+         END IF ITERATE_IF
 
-      IF (TMP_DROP_NEW > TMP_BOIL) TMP_DROP_NEW = TMP_BOIL
-      IF (TMP_DROP_NEW < TMP_MELT) TMP_DROP_NEW = TMP_MELT
- 
-!WRITE(*,'(6(E12.5,1X))') QRADD,QWALLC,XVAP,Y_EQUIL,Y_GAS
-!WRITE(*,'(6(E12.5,1X))') MDROP,MVAP,TMP_DROP_NEW,TMP_DROP_OLD,TMP_GAS_NEW,TMP_GAS_OLD
-!WRITE(*,*) WGT,MVAP*WGT
-      
-      MDROP = MDROP - MVAP
-      MVAP  = MVAP*WGT
-      DR%R = (MDROP / FTPR) ** ONTH
-     
-      IF (WALL<1._EB) THEN
-         QWALLC = HADT_WALL * (TMP_WALL - TMP_DROP_OLD)      
-         QUSE = QWALLR+QWALLC
-         RDC       = RD_NEW**3
-         WCPUA(IW,EVAP_INDEX ) = WCPUA(IW,EVAP_INDEX ) + WGT*RDT*QUSE*RAW(IW)
-         WMPUA(IW,EVAP_INDEX ) = WMPUA(IW,EVAP_INDEX ) + WGT*MDROP*RAW(IW)
-      ENDIF
+         IF (TMP_DROP_NEW > TMP_BOIL) TMP_DROP_NEW = TMP_BOIL
+         IF (TMP_DROP_NEW < TMP_MELT) TMP_DROP_NEW = TMP_MELT
+       
+         MDROP = MDROP - MVAP
+         MVAP  = MVAP*WGT
+         DR%R = (MDROP / FTPR) ** ONTH
+        
+         IF (WALL<1._EB) THEN
+            QWALLC = HADT_WALL * (TMP_WALL - TMP_DROP_OLD)      
+            QUSE = QWALLR+QWALLC
+            RDC       = RD_NEW**3
+            WCPUA(IW,EVAP_INDEX ) = WCPUA(IW,EVAP_INDEX ) + WGT*RDT*QUSE*RAW(IW)
+            WMPUA(IW,EVAP_INDEX ) = WMPUA(IW,EVAP_INDEX ) + WGT*MDROP*RAW(IW)
+            WRITE(*,*) IW,QWALLC,QWALLR,WGT,QUSE,RAW(IW),RDT 
+            !STOP
+         ENDIF
 
-      ! Decrease temperature due to droplet heating/vaporization
-      TMP(II,JJ,KK)=TMP_GAS_NEW
-      TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
+         ! Decrease temperature due to droplet heating/vaporization
+         TMP(II,JJ,KK)=TMP_GAS_NEW
+         TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
 
-      ! Save water vapor production rate for diverence expression
-      D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) +R0*RDT*( &
-            RHO_G*((1-Y_IGAS)/SPECIES(0)%MW+Y_IGAS/MW_DROP)*(TMP(II,JJ,KK)-TMP_GAS_OLD) +RVC*MVAP*TMP(II,JJ,KK)/MW_DROP) 
+         ! Save water vapor production rate for diverence expression
+         D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) +R0*RDT*( &
+               RHO_G*((1-Y_IGAS)/SPECIES(0)%MW+Y_IGAS/MW_DROP)*(TMP(II,JJ,KK)-TMP_GAS_OLD) +RVC*MVAP*TMP(II,JJ,KK)/MW_DROP) 
 
-      ! Adjust mass of evaporated liquid to account for different Heat of Combustion between fuel droplet and gas
-      MVAP = PC%ADJUST_EVAPORATION*MVAP
+         ! Adjust mass of evaporated liquid to account for different Heat of Combustion between fuel droplet and gas
+         MVAP = PC%ADJUST_EVAPORATION*MVAP
 
-      ! Add water vapor or fuel gas to the cell
+         ! Add water vapor or fuel gas to the cell
 
-      YY(II,JJ,KK,IGAS)= MIN(1._EB,(MVAP+MGAS*Y_IGAS)/(MVAP+MGAS))
-      ! Add new mass from vaporized water droplet 
+         YY(II,JJ,KK,IGAS)= MIN(1._EB,(MVAP+MGAS*Y_IGAS)/(MVAP+MGAS))
+         ! Add new mass from vaporized water droplet 
 
-      RHO(II,JJ,KK) = RHO(II,JJ,KK) + MVAP*RVC
+         RHO(II,JJ,KK) = RHO(II,JJ,KK) + MVAP*RVC
 
-      DR%TMP = TMP_DROP_NEW
-      IF (DR%R<=0._EB) CYCLE DROPLET_LOOP
+         DR%TMP = TMP_DROP_NEW
+         IF (DR%R<=0._EB) CYCLE DROPLET_LOOP
 
-      ! Assign water mass to the cell for airborne drops
+         ! Assign water mass to the cell for airborne drops
 
-      IF (DR%IOR==0) THEN
-         DEN_ADD = WGT*MDROP*RVC
-         DROP_DEN(II,JJ,KK) = DROP_DEN(II,JJ,KK) + DEN_ADD
-         DROP_TMP(II,JJ,KK) = DROP_TMP(II,JJ,KK) + DEN_ADD*TMP_DROP_NEW
-         DROP_RAD(II,JJ,KK) = DROP_RAD(II,JJ,KK) + DEN_ADD*DR%R
-      ENDIF
-!      IF(RHO(II,JJ,KK) <0) WRITE(*,*) I,II,JJ,KK
-!      IF(RHO(II,JJ,KK) <0) WRITE(*,*)MVAP,RD_NEW,RD,TMP_DROP_OLD,TMP_DROP_NEW,MDROP
-!      IF(RHO(II,JJ,KK) <0) WRITE(*,*)RHO(II,JJ,KK),TMP(II,JJ,KK),D_VAP(II,JJ,KK),YY(II,JJ,KK,IGAS)
-      
-   ENDDO DROPLET_LOOP
+         IF (DR%IOR==0) THEN
+            DEN_ADD = WGT*MDROP*RVC
+            DROP_DEN(II,JJ,KK) = DROP_DEN(II,JJ,KK) + DEN_ADD
+            DROP_TMP(II,JJ,KK) = DROP_TMP(II,JJ,KK) + DEN_ADD*TMP_DROP_NEW
+            DROP_RAD(II,JJ,KK) = DROP_RAD(II,JJ,KK) + DEN_ADD*DR%R
+         ENDIF
+         
+      ENDDO DROPLET_LOOP
 
-   ! Calculate cumulative quantities for droplet "clouds"
+      ! Calculate cumulative quantities for droplet "clouds"
 
-   WGT   = .5_EB
-   OMWGT = 1._EB-WGT
- 
-   DROP_RAD = DROP_RAD/(DROP_DEN+1.E-10_EB)
-   DROP_TMP = DROP_TMP/(DROP_DEN+1.E-10_EB)
- 
-   AVG_DROP_RAD(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_RAD(:,:,:,EVAP_INDEX )+ DROP_DEN*DROP_RAD) &
-                                       /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
-   AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_TMP(:,:,:,EVAP_INDEX )+DROP_DEN*DROP_TMP) &
-                                       /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
-   AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,EVAP_INDEX ))
-   AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = WGT*AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + OMWGT*DROP_DEN
-   WHERE (AVG_DROP_DEN(:,:,:,EVAP_INDEX )<0.0001_EB .AND. DROP_DEN==0._EB) AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = 0.0_EB
+      WGT   = .5_EB
+      OMWGT = 1._EB-WGT
+    
+      DROP_RAD = DROP_RAD/(DROP_DEN+1.E-10_EB)
+      DROP_TMP = DROP_TMP/(DROP_DEN+1.E-10_EB)
+    
+      AVG_DROP_RAD(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_RAD(:,:,:,EVAP_INDEX )+ DROP_DEN*DROP_RAD) &
+                                          /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
+      AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_TMP(:,:,:,EVAP_INDEX )+DROP_DEN*DROP_TMP) &
+                                          /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
+      AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,EVAP_INDEX ))
+      AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = WGT*AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + OMWGT*DROP_DEN
+      WHERE (AVG_DROP_DEN(:,:,:,EVAP_INDEX )<0.0001_EB .AND. DROP_DEN==0._EB) AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = 0.0_EB
 
-   ! Weight the new water mass array
+      ! Weight the new water mass array
 
-   WMPUA(:,EVAP_INDEX ) = WGT*WMPUAOLD + OMWGT*WMPUA(:,EVAP_INDEX )
-   WCPUA(:,EVAP_INDEX ) = WGT*WCPUAOLD + OMWGT*WCPUA(:,EVAP_INDEX)
+      WMPUA(:,EVAP_INDEX ) = WGT*WMPUAOLD + OMWGT*WMPUA(:,EVAP_INDEX )
+      WCPUA(:,EVAP_INDEX ) = WGT*WCPUAOLD + OMWGT*WCPUA(:,EVAP_INDEX)
 
+   ENDDO PC_LOOP
 ENDDO EVAP_INDEX_LOOP
 
 ! Remove out-of-bounds particles
