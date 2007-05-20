@@ -246,7 +246,7 @@
 \vspace{1in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 15, 2007)}
+\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 20, 2007)}
 
 \vspace{.5in}
 
@@ -1899,7 +1899,7 @@ caution.
 too small relative to the underlying numerical mesh are rejected.
 Be careful when testing cases on coarse grids.
 \item Obstructions may be created or removed during a simulation. See
-Section~\ref{info:openclose} for details.
+Section~\ref{info:create_remove} for details.
 \item If two obstructions overlap at one or more faces, the one listed last in the input file takes precedence over the one
 listed first, in the sense that the latter's surface properties will be applied to the overlapping face. Smokeview renders both obstructions
 independently of each other, often leading to an unsightly cross-hatching of the two surface colors where there is an overlap. A
@@ -1983,7 +1983,7 @@ chads.
 
 When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or
 created or removed at pre-determined times. See
-Section~\ref{info:openclose} for details.
+Section~\ref{info:create_remove} for details.
 
 If it is desired that the obstruction(s) to be cut out should have a different color
 than the original obstruction, set the {\ct COLOR} or integer triplet {\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}).
@@ -2081,13 +2081,16 @@ notation is handy.
 Note that the mirror image of a scene is {\bf not} shown in Smokeview.
 \end{warning}
 
-\noindent
+\begin{warning}
 Vents to the outside of the computational domain ({\ct OPEN} vents)
-may {\bf not} be opened or closed during a simulation. See Section~\ref{info:openclose} for details.
+may {\bf not} be opened or closed during a simulation. See Section~\ref{info:activate_deactivate} for details.
+\end{warning}
 
+\begin{warning}
 Unlike previous versions of FDS, you can no longer specify a free-standing fan using the {\ct VENT}
 construct. A {\ct VENT} must always be attached to a solid obstruction. See
 Section~\ref{info:ZONE} for instructions on specifying different types of fans.
+\end{warning}
 
 
 
@@ -2384,15 +2387,15 @@ If {\ct MASS\_FLUX(N)}
 is set, no {\ct VEL} should be set. It is automatically
 calculated based on the mass flux.
 The inputs {\ct MASS\_FLUX(N)} (and typically {\ct MASS\_FRACTION(N)}) should only be used
-for inflow boundary conditions.  {\ct MASS\_FLUX(N)} should be postive with
+for inflow boundary conditions.  {\ct MASS\_FLUX(N)} should be positive with
 units of kg/m$^2$/s.
 
 \begin{warning}
 \noindent
 Note that specifying {\ct MASS\_FRACTION(N)}, sets the "ghost" cell values for the species
 mass fractions.  Since the mass conservation equation is an advection-diffusion equation,
-if the specfied velocity is small, then the diffusion term can dominate resulting in an unintended
-mass flux of species.  To obtain a guaranteed mass flux of a species, the user should use {\ct MASS\_FLUX(N)}
+if the specified velocity is small, then the diffusion term can dominate resulting in an unintended
+mass flux of species.  To obtain a guaranteed mass flux of a species, you should use {\ct MASS\_FLUX(N)}
 \end{warning}
 
 
@@ -4072,8 +4075,7 @@ Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 
 Nozzles are very much like sprinklers, only they do not activate based on the standard RTI model.
 To simulate a nozzle that activates at a given time, for example,
-specify a {\ct QUANTITY} and {\ct SETPOINT} directly on the {\ct DEVC} line. More about the idea of a {\em setpoint} can be found in
-Sections~\ref{info:openclose} and \ref{info:CTRL}.
+specify a {\ct QUANTITY} and {\ct SETPOINT} directly on the {\ct DEVC} line.
 An example of a nozzle can be found in the verification case {\bf water\_fuel\_sprays.fds}
 
 The following lines:
@@ -4263,7 +4265,7 @@ if the text were added to an {\ct OBST} line, that obstruction would change from
 
 
 \subsection{Creating and Removing Obstructions}
-\label{info:openclose}
+\label{info:create_remove}
 
 In many fire scenarios, the opening or closing of a door or window
 can lead to dramatic changes in the course of the fire. Sometimes these
@@ -4334,24 +4336,39 @@ To remove an obstruction, then re-create a different one in its place, use 2 lin
 \noindent
 since the code simply sees this as two different obstructions.
 
-The removal and creation of an obstruction
-can be used to model the opening of a door that connects one
-part of the domain to another. {\bf However, this feature must not be used if the obstruction separates
-two ``pressure zones,'' and it must not be used to open or close an {\ct OPEN} vent.}
+\begin{warning}
+Until further notice, an obstruction that makes up the boundary of a ``pressure zone'' (see Section~\ref{info:ZONE}) should not be created or
+removed. The reason for this restriction is that abrupt changes in pressure can cause numerical instabilities.
+\end{warning}
 
-One additional feature associated with a {\ct VENT} is to specify when the {\ct VENT}'s
-{\ct SURF\_ID} is to be applied.  This is done in a similar manner as creating or removing an {\ct OBST}.
-For example, to control a fan via the device {\ct 'det2'}, set
+
+\subsection{Activating and Deactivating Vents}
+\label{info:activate_deactivate}
+
+When a device or control function is applied to a {\ct VENT}, the purpose is to either activate or deactivate any time ramp associated with
+the {\ct VENT} via its {\ct SURF\_ID}. For example, to control a fan with the device {\ct 'det2'}, do the following:
 
 \footnotesize
 \begin{verbatim}
 &SURF ID='FAN', VOLUME_FLUX=5. /
 &VENT XB=..., SURF_ID='FAN', DEVC_ID='det2' /
+&DEVC ID='det2', XYZ=..., QUANTITY='TIME', SETPOINT=30., INITIAL_STATE=.FALSE. /
 \end{verbatim}
 \normalsize
+
 \noindent
-Also note that none of these
-control parameters should be applied to a {\ct MIRROR} or {\ct OPEN} boundary.
+Note that at 30 seconds, the ``state'' of the {\ct 'FAN'} changes from {\ct .FALSE.} to {\ct .TRUE.}, or more simply, the {\ct 'FAN'} turns on. Since there
+is no explicit time function associated with the {\ct 'FAN'}, the default 1 second ramp-up will begin at 30 seconds instead of at 0 seconds.
+
+If in this example {\ct INITIAL\_STATE=.TRUE.}, then the fan should ``deactivate,'' or turn off at 30 seconds. Essentially, ``activation'' of a {\ct VENT} causes all associated
+time functions to be delayed until the device {\ct SETPOINT} is reached. ``Deactivation'' of a {\ct VENT} turns off all time functions. Usually this means
+that the parameters on the {\ct SURF} line are all nullified, so it is a good idea to check the functionality with a simple example.
+
+
+\begin{warning}
+Until further notice, a {\ct 'MIRROR'} or {\ct 'OPEN'} {\ct VENT} should not be activated or deactivated.
+The reason for this restriction is that abrupt changes in pressure can cause numerical instabilities.
+\end{warning}
 
 
 
