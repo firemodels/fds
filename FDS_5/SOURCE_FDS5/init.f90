@@ -769,6 +769,9 @@ M%OME_E = 0._EB
 ALLOCATE(M%TAU_E(N_EDGES_DIM),STAT=IZERO)
 CALL ChkMemErr('INIT','TAU_E',IZERO)  
 M%TAU_E = 0._EB
+ALLOCATE(M%ACTIVE_EDGE(N_EDGES_DIM),STAT=IZERO)
+CALL ChkMemErr('INIT','ACTIVE_EDGE',IZERO)  
+M%ACTIVE_EDGE = .TRUE.
  
 ! Initialize and allocate lagrangian particle/droplet arrays
 
@@ -2174,10 +2177,8 @@ DO K=K1-1,K2
       DO I=I1  ,I2
          IE = EDGE_INDEX(CELL_INDEX(I,J,K),4)
          IF (IE>0 .AND. J/=0 .AND. J/=JBAR .AND. K/=0 .AND. K/=KBAR) IJKE(4,IE) = 0
-         IF ( IE <= 0 ) THEN 
-               CONTINUE
-         ELSE IF ( IJKE(7,IE) > 0 ) THEN 
-               IJKE(5,IE)=INTERPOLATED_SURF_INDEX
+         IF (IE>0) THEN 
+            IF (IJKE(7,IE) > 0) IJKE(5,IE) = INTERPOLATED_SURF_INDEX
          ENDIF
       ENDDO
    ENDDO
@@ -2187,10 +2188,8 @@ DO K=K1-1,K2
       DO I=I1-1,I2
          IE = EDGE_INDEX(CELL_INDEX(I,J,K),8)
          IF (IE>0 .AND. I/=0 .AND. I/=IBAR .AND. K/=0 .AND. K/=KBAR) IJKE(4,IE) = 0
-         IF ( IE <= 0 ) THEN 
-               CONTINUE
-         ELSE IF ( IJKE(7,IE) > 0 ) THEN 
-               IJKE(5,IE)=INTERPOLATED_SURF_INDEX
+         IF (IE>0) THEN 
+            IF (IJKE(7,IE) > 0) IJKE(5,IE) = INTERPOLATED_SURF_INDEX
          ENDIF
       ENDDO
    ENDDO
@@ -2200,10 +2199,8 @@ DO K=K1  ,K2
       DO I=I1-1,I2
          IE = EDGE_INDEX(CELL_INDEX(I,J,K),12)
          IF (IE>0 .AND. I/=0 .AND. I/=IBAR .AND. J/=0 .AND. J/=JBAR) IJKE(4,IE) = 0
-         IF ( IE <= 0 ) THEN 
-               CONTINUE
-         ELSE IF ( IJKE(7,IE) > 0 ) THEN 
-               IJKE(5,IE)=INTERPOLATED_SURF_INDEX
+         IF (IE>0) THEN 
+            IF (IJKE(7,IE) > 0) IJKE(5,IE) = INTERPOLATED_SURF_INDEX
          ENDIF
       ENDDO
    ENDDO
