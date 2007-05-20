@@ -197,6 +197,7 @@ DO K=0,KBAR
 ENDDO
 
 ! Correct vorticity and stress tensor components at solid edges
+
 EDGE_LOOP: DO IE=1,N_EDGES
    II  = IJKE(1,IE)
    JJ  = IJKE(2,IE)
@@ -214,6 +215,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          TXY(II,JJ,KK) = TAU_E(IE)
    END SELECT
 ENDDO EDGE_LOOP
+
 ! Compute gravity components
  
 GX  = EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(1)
