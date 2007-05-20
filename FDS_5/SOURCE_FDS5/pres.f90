@@ -465,7 +465,7 @@ K_COARSE: DO KC=1,KBAR2
                   A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)*RDXN(II)
                   B(N)    = B(N)    + DY(JJ)*DZ(KK)*FVX(II,JJ,KK)
                ELSE 
-                  IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),1)
+                  IW = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),-1)
                   NOM = IJKW(9,IW)
                   IF (NOM>0) THEN
                      OM  => OMESH(NOM)
@@ -497,7 +497,7 @@ K_COARSE: DO KC=1,KBAR2
                   A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)*RDXN(II)
                   B(N)    = B(N)    - DY(JJ)*DZ(KK)*FVX(II,JJ,KK)
                ELSE
-                  IW = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),-1)
+                  IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),1)
                   NOM = IJKW(9,IW)
                   IF (NOM>0) THEN
                      OM  => OMESH(NOM)
@@ -529,7 +529,7 @@ K_COARSE: DO KC=1,KBAR2
                   A(N,NO) = A(N,NO) + DX(II)*DZ(KK)*RDYN(JJ)
                   B(N)    = B(N)    + DX(II)*DZ(KK)*FVY(II,JJ,KK)
                ELSE
-                  IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),2)
+                  IW = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),-2)
                   NOM = IJKW(9,IW)
                   IF (NOM>0) THEN
                      OM  => OMESH(NOM)
@@ -561,7 +561,7 @@ K_COARSE: DO KC=1,KBAR2
                   A(N,NO) = A(N,NO) + DX(II)*DZ(KK)*RDYN(JJ)
                   B(N)    = B(N)    - DX(II)*DZ(KK)*FVY(II,JJ,KK)
                ELSE
-                  IW = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),-2)
+                  IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),2)
                   NOM = IJKW(9,IW)
                   IF (NOM>0) THEN
                      OM  => OMESH(NOM)
@@ -593,7 +593,7 @@ K_COARSE: DO KC=1,KBAR2
                   A(N,NO) = A(N,NO) + DX(II)*DY(JJ)*RDZN(KK)
                   B(N)    = B(N)    + DX(II)*DY(JJ)*FVZ(II,JJ,KK)
                ELSE
-                  IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),3)
+                  IW = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),-3)
                   NOM = IJKW(9,IW)
                   IF (NOM>0) THEN
                      OM  => OMESH(NOM)
@@ -625,7 +625,7 @@ K_COARSE: DO KC=1,KBAR2
                   A(N,NO) = A(N,NO) + DX(II)*DY(JJ)*RDZN(KK)
                   B(N)    = B(N)    - DX(II)*DY(JJ)*FVZ(II,JJ,KK)
                ELSE
-                  IW = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),-3)
+                  IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),3)
                   NOM = IJKW(9,IW)
                   IF (NOM>0) THEN
                      OM  => OMESH(NOM)
