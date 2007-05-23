@@ -28,7 +28,7 @@ Values of 40, 150, and 1000 m**-1 are tested.
       SPECIFIC_HEAT= 2.45
       DENSITY= 787.
       ABSORPTION_COEFFICIENT = 40.
-      REFERENCE_TEMPERATURE=76. /
+      BOILING_TEMPERATURE=76. /
 
 &MATL ID = 'STEEL'
       EMISSIVITY = 1.0

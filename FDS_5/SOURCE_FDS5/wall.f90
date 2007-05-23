@@ -459,7 +459,7 @@ REAL(EB) :: DTMP,QNETF,QDXKF,QDXKB,RR,TMP_G,T,RFACF,RFACB,RFACF2,RFACB2, &
             PPCLAUS,PPSURF,TMP_G_B,RHOWAL,CP_TERM,TSI,DT_BC, &
             DXKF,DXKB,REACTION_RATE,QCONB,DELTA_RHO_S,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
             HVRG,Z_2,Z_F,Y_MF_G,Y_MF_W,YY_S,Y_SUM_W, RSUM_W, RSUM_G, RSUM_S, MFLUX, VOLSUM, &
-            DXF, DXB,HTCB,QINF,QINB, TMP_F_OLD, DX_GRID, RHO_S0
+            DXF, DXB,HTCB,QINF,QINB, TMP_F_OLD, DX_GRID, RHO_S0, H_R
 INTEGER :: IBC,IIG,JJG,KKG,IIB,JJB,KKB,IWB,IC,NWP,I,J,ITMP,NR,IL,NN,NNN,NL,J1,J2,II,JJ,KK,IW,IOR,N,I_OBST
 REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS,LAYER_THICKNESS_NEW(MAX_LAYERS)
 INTEGER  :: N_LAYER_CELLS_NEW(MAX_LAYERS), NWP_NEW
@@ -580,10 +580,13 @@ WALL_CELL_LOOP: DO IW=1,NWC
       DX_WGT_S(0:NWP)      = SF%DX_WGT(0:NWP)
       LAYER_INDEX(0:NWP+1) = SF%LAYER_INDEX(0:NWP+1)
    ENDIF COMPUTE_GRID
-
-   ! Calculate source term for 1-D solver
+ 
+   ! Calculate reaction rates based on the solid phase reactions
  
    Q_S                  = 0._EB
+
+   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
+
    MFLUX                = MASSFLUX(IW,I_FUEL)
    MASSFLUX(IW,I_FUEL)  = 0._EB
    ACTUAL_BURN_RATE(IW) = 0._EB
@@ -634,7 +637,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
             REACTION_RATE = MIN(REACTION_RATE , WC%RHO_S(I,N)/DT_BC)
             MASSFLUX(IW,I_FUEL)  = MASSFLUX(IW,I_FUEL)  +  ML%ADJUST_BURN_RATE*ML%NU_FUEL(J)*REACTION_RATE/RDX_S(I)
             ACTUAL_BURN_RATE(IW) = ACTUAL_BURN_RATE(IW) +                      ML%NU_FUEL(J)*REACTION_RATE/RDX_S(I)
-            IF (I_WATER>0) MASSFLUX(IW,I_WATER) = MASSFLUX(IW,I_WATER) + ML%ADJUST_BURN_RATE*ML%NU_WATER(J)*REACTION_RATE/RDX_S(I)
+            IF (I_WATER>0) MASSFLUX(IW,I_WATER) = MASSFLUX(IW,I_WATER) + ML%NU_WATER(J)*REACTION_RATE/RDX_S(I)
             ITMP = MIN(2000,MAX(0,NINT(WC%TMP_S(I)-TMPA)))
             Q_S(I) = Q_S(I) - REACTION_RATE * ML%Q_ARRAY(J,ITMP)
             WC%RHO_S(I,N) = WC%RHO_S(I,N) - DT_BC*REACTION_RATE
@@ -660,7 +663,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
       ENDIF
    ENDDO POINT_LOOP1
 
-   ! If the fuel massflux is non-zero, set the ignition time
+   ! If the fuel massflux is non-zero, set the iwgnition time
 
    IF (TW(IW)>T .AND. MASSFLUX(IW,I_FUEL)>0._EB) TW(IW) = T
 
@@ -714,9 +717,9 @@ WALL_CELL_LOOP: DO IW=1,NWC
 !      RSUM_S  = 0.5*(RSUM_W+RSUM_G)
       YY_S    = 0.2*Y_MF_W+0.8*Y_MF_G
       RSUM_S  = 0.2*RSUM_W+0.8*RSUM_G
-      HVRG    = REACTION(1)%MW_FUEL*ML%H_V(1)/R0
+      HVRG    = REACTION(1)%MW_FUEL*ML%H_R(1)/R0
       PPSURF  = MIN(1._EB,YY_S*R0/(REACTION(1)%MW_FUEL*RSUM_S))
-      PPCLAUS = MIN(1._EB,EXP(HVRG*(1./ML%TMP_REF(1)-1./WC%TMP_S(1))))
+      PPCLAUS = MIN(1._EB,EXP(HVRG*(1./ML%TMP_BOIL(1)-1./WC%TMP_S(1))))
       IF (PPSURF/=PPCLAUS) THEN
          IF (MFLUX==0.AND.PPSURF<PPCLAUS) THEN
             MFLUX = 2.E-5*REACTION(1)%MW_FUEL
@@ -725,17 +728,17 @@ WALL_CELL_LOOP: DO IW=1,NWC
             MFLUX = MFLUX*MIN(1.02_EB,MAX(0.98_EB,PPCLAUS/PPSURF))
          ENDIF
       ENDIF
-      IF (WC%TMP_S(1)>ML%TMP_REF(1)) THEN
+      IF (WC%TMP_S(1)>ML%TMP_BOIL(1)) THEN
          ! Net flux guess for liquid evap
          QNETF = QINF + QRADIN(IW) + QCONF(IW)
-         MFLUX = MAX(MFLUX,1.02*(QNETF - 2.*(ML%TMP_REF(1)-WC%TMP_S(1))/DXF/K_S(1))/ML%H_V(1))
+         MFLUX = MAX(MFLUX,1.02*(QNETF - 2.*(ML%TMP_BOIL(1)-WC%TMP_S(1))/DXF/K_S(1))/ML%H_R(1))
       ENDIF
       MFLUX = MIN(MFLUX,THICKNESS*ML%RHO_S/DT_BC)
       MASSFLUX(IW,I_FUEL) = MASSFLUX(IW,I_FUEL)  + ML%ADJUST_BURN_RATE*ML%NU_FUEL(1)*MFLUX
       ACTUAL_BURN_RATE(IW)= ACTUAL_BURN_RATE(IW) +                     ML%NU_FUEL(1)*MFLUX
-      IF (I_WATER>0) MASSFLUX(IW,I_WATER) = MASSFLUX(IW,I_WATER) + ML%ADJUST_BURN_RATE*ML%NU_WATER(J)*MFLUX
+      IF (I_WATER>0) MASSFLUX(IW,I_WATER) = MASSFLUX(IW,I_WATER) + ML%NU_WATER(J)*MFLUX
       DX_GRID = DT_BC*MFLUX/ML%RHO_S
-      Q_S(1) = Q_S(1) - MFLUX*ML%H_V(1)*RDX_S(1)  ! no improvement (in cone test) if used updated RDX 
+      Q_S(1) = Q_S(1) - MFLUX*ML%H_R(1)*RDX_S(1)  ! no improvement (in cone test) if used updated RDX 
 
       IF (POINT_SHRINK) THEN
          X_S_NEW(1:NWP) = MAX(0._EB,X_S_NEW(1:NWP)-DX_GRID)
@@ -818,6 +821,8 @@ WALL_CELL_LOOP: DO IW=1,NWC
       
    ENDIF RECOMPUTE_GRID
 
+   ENDIF
+
    ! Calculate thermal properties 
  
    K_S     = 0._EB
@@ -859,9 +864,20 @@ WALL_CELL_LOOP: DO IW=1,NWC
    DO I=1,NWP-1 
       K_S(I)  = 1.0_EB / ( DX_WGT_S(I)/K_S(I) + (1.-DX_WGT_S(I))/K_S(I+1) )
    ENDDO
+
+   ! Take off energy corresponding to specified burning rate
    
+   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_SPECIFIED) THEN
+      H_R = 0._EB
+      MATERIAL_LOOP4: DO N=1,SF%N_MATL
+         H_R = H_R + WC%RHO_S(1,N)*MATERIAL(SF%MATL_INDEX(N))%H_R(1)
+      ENDDO MATERIAL_LOOP4
+      H_R = H_R/RHO_S(1)
+      Q_S(1) = Q_S(1) - MASSFLUX(IW,I_FUEL)*H_R*RDX_S(1)
+   ENDIF
+
    ! Calculate internal radiation
-   
+      
    IF (SF%INTERNAL_RADIATION) THEN
 
       KAPPA_S = 0._EB
@@ -951,10 +967,10 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ! If the surface temperature exceeds the ignition temperature, burn it
 
    IF (TW(IW) > T ) THEN
-      MATERIAL_LOOP4: DO N=1,SF%N_MATL
+      MATERIAL_LOOP5: DO N=1,SF%N_MATL
          ML => MATERIAL(SF%MATL_INDEX(N))
          IF (TMP_F(IW) >= ML%TMP_IGN(1)) TW(IW) = T
-      ENDDO MATERIAL_LOOP4
+      ENDDO MATERIAL_LOOP5
    ENDIF
  
    ! Determine ghost wall temperature
