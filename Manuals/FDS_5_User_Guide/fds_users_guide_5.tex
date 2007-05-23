@@ -246,7 +246,7 @@
 \vspace{1in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 20, 2007)}
+\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 22, 2007)}
 
 \vspace{.5in}
 
@@ -2428,13 +2428,16 @@ The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
 
 \subsection{Special Topics: A Radially-Spreading Fire}
 
-Sometimes it is desired that a fire spread radially at some specified rate. Rather than trying to design material properties
+Sometimes it is desired that a fire spread radially at some specified
+rate. Rather than trying to design material properties 
 to achieve this, you can alternatively use a {\ct VENT} in a special way.
 If the {\ct SURF\_ID} associated with a {\ct VENT}
 defines a specified heat release rate, {\ct HRRPUA}, and
-time history, {\ct RAMP\_Q} or {\ct TAU\_Q}, you can also specify {\ct XYZ} and {\ct SPREAD\_RATE} on the {\ct VENT} line.
+time history, {\ct RAMP\_Q} or {\ct TAU\_Q}, you can also specify {\ct
+XYZ} and {\ct SPREAD\_RATE} on the {\ct VENT} line. 
 Then the fire is directed to start at the point {\ct XYZ} and spread
-radially at a rate of {\ct SPREAD\_RATE} (m/s). The ramp-up begins at the time when the fire arrives at a given point.
+radially at a rate of {\ct SPREAD\_RATE} (m/s). The ramp-up begins at
+the time when the fire arrives at a given point. 
 For example, the lines
 
 \footnotesize
@@ -2797,10 +2800,12 @@ accordingly.
 
 \subsubsection{Solid Fuels that Burn at a Specified Rate}
 
-Real materials, like furnishings, office equipment, and so on, are often very difficult to describe via the
-{\ct SURF} and {\ct MATL} parameters. Often, the only information about a given object is its bulk thermal properties, its ``ignition''
-temperature, and what its subsequent burning rate is, as a function of time from ignition. For this
-situation, add lines similar to the following:
+Real materials, like furnishings, office equipment, and so on, are
+often very difficult to describe via the {\ct SURF} and {\ct MATL}
+parameters. Often, the only information about a given object is its
+bulk thermal properties, its ``ignition'' temperature, and what its
+subsequent burning rate is, as a function of time from ignition. For
+this situation, add lines similar to the following:
 
 \footnotesize
 \begin{verbatim}
@@ -2824,22 +2829,44 @@ situation, add lines similar to the following:
 \end{verbatim} \normalsize
 
 \noindent
-An object with surface properties defined by {\ct 'my surface'} shall burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of
-10 s following its ``ignition'' when its surface temperature reaches 500~$^\circ$. Burning shall continue for 5~min, and then ramp-down
+An object with surface properties defined by {\ct 'my surface'} shall
+burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s
+following its ``ignition'' when its surface temperature reaches
+500~$^\circ$. Burning shall continue for 5~min, and then ramp-down 
 in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from ignition.
 
 \begin{warning}
-Be aware of the distinction between {\ct IGNITION\_TEMPERATURE} and {\ct REFERENCE\_TEMPERATURE}.
-Use the former {\em only} if you want to add the extra term to Eq.~(\ref{rr}) {\em or} to specify a temperature
+Be aware of the distinction between {\ct IGNITION\_TEMPERATURE} and
+{\ct REFERENCE\_TEMPERATURE}. Use the former {\em only} if you want to
+add the extra term to Eq.~(\ref{rr}) {\em or} to specify a temperature 
 at which the material burns at some specified rate.
 \end{warning}
+
+After the surface has ignited, the heat transfer into the solid is
+still being solved but there is no coupling between the burning rate
+and the surface temperature. As a result, the surface temperature may
+increase too much. To account for the energy loss due to the 
+production of gaseous fuel, the heat of reaction can be specified for
+the material. For example, when using the lines below, the net heat
+flux at the material surface is reduced by a factor corresponding to a
+product of burning rate and heat of reaction 1000.0 kJ/kg. 
+
+\footnotesize
+\begin{verbatim}
+&MATL ID                   = 'stuff'
+      IGNITION_TEMPERATURE = 500.
+      CONDUCTIVITY         = 0.1
+      SPECIFIC_HEAT        = 1.0
+      DENSITY              = 900.0 
+      HEAT_OF_REACTION     = 1000.0 /
+\end{verbatim} \normalsize
 
 
 \subsubsection{Liquid Fuels}
 
-For a liquid fuel, specify {\ct PYROLYSIS\_MODEL='LIQUID'} on the
-{\ct MATL} line. The thermal properties are assumed to be the same as for a solid
-material. The evaporation rate of the fuel
+For a liquid fuel, specify {\ct PYROLYSIS\_MODEL='LIQUID'} on the 
+{\ct MATL} line. The thermal properties are assumed to be the same as
+for a solid material. The evaporation rate of the fuel 
 is governed by the Clausius-Clapeyron equation (see FDS Technical Reference
 Guide for details). The only drawback of
 this approach is that the fuel gases burn regardless of any ignition
@@ -2858,7 +2885,7 @@ properties have not all been verified.
       SPECIFIC_HEAT          = 2.45
       DENSITY                = 787.
       ABSORPTION_COEFFICIENT = 40.
-      REFERENCE_TEMPERATURE  = 76. /
+      BOILING_TEMPERATURE    = 76. /
 
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0
@@ -2880,16 +2907,20 @@ properties have not all been verified.
 \end{verbatim} \normalsize
 
 \noindent
-Here, the {\ct REFERENCE\_TEMPERATURE} is assumed to be the boiling temperature of
-the liquid. The thermal conductivity, density and specific heat are used
+
+The thermal conductivity, density and specific heat are used
 to compute the loss of heat into the liquid via conduction using the
 same one-dimensional heat transfer equation that is used for solids. Obviously,
-the convection of the liquid is important, but is not considered in the model. The {\ct HEAT\_OF\_REACTION} in this
-case is the latent heat of vaporization.
+the convection of the liquid is important, but is not considered in
+the model. The {\ct HEAT\_OF\_REACTION} in this case is the latent
+heat of vaporization. 
 
-Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This denotes the absorption in depth of thermal radiation. Liquids do not
-just absorb radiation at the surface, but rather over a thin layer near the surface. Its effect on the burning rate is
-significant. An example is given in the Verification Guide under the name {\bf ethanol\_pan}.
+Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
+denotes the absorption in depth of thermal radiation. Liquids do not 
+just absorb radiation at the surface, but rather over a thin layer
+near the surface. Its effect on the burning rate is significant. An
+example is given in the Verification Guide under the name {\bf
+ethanol\_pan}. 
 
 
 \subsection{Making Fuels Disappear}
@@ -5568,6 +5599,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\ \hline \hline
 {\ct A}                       & Real        & Pre-exponential factor      &    1/s              & 1E13      \\ \hline
 {\ct ABSORPTION\_COEFFICIENT} & Real        & Absorption Coefficient      &    1/m              & 50000.     \\ \hline
+{\ct BOILING\_TEMPERATURE}    & Real        & Boiling temperature         & $^\circ$C           &        \\ \hline
 {\ct CONDUCTIVITY}            & Real        & Thermal conductivity        & W/m/K               & 0.1    \\ \hline
 {\ct CONDUCTIVITY\_RAMP}      & Character   & Ramp ID for conductivity    &                     &        \\ \hline
 {\ct DENSITY}                 & Real        & Solid mass per unit volume  & kg/m$^3$            & 500.   \\ \hline
@@ -5576,6 +5608,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct HEAT\_OF\_COMBUSTION}    & Real        & Heat of combustion          & kJ/kg               &        \\ \hline
 {\ct HEAT\_OF\_REACTION}      & Real        & Heat of reaction            & kJ/kg               &        \\ \hline
 {\ct ID     }                 & Character   & IDentifier                  &                     &        \\ \hline
+{\ct IGNITION\_TEMPERATURE}   & Real        & Ignition temperature & $^\circ$C           &        \\ \hline
 {\ct N\_REACTIONS}            & Character   & Number of Reactions         &                     & 0      \\ \hline
 {\ct N\_S}                    & Real        & Exponent of mass fraction   &                     & 1.     \\ \hline
 {\ct N\_T}                    & Real        & Exponent of temperature     &                     & 0.     \\ \hline
@@ -5583,8 +5616,9 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct NU\_RESIDUE}             & Real        & Residue Yield               & kg/kg               & 0.     \\ \hline
 {\ct NU\_WATER  }             & Real        & Steam Yield                 & kg/kg               & 0.     \\ \hline
 {\ct PYROLYSIS\_MODEL}        & Character   & Solid or Liquid Model       &                     & {\ct 'SOLID'} \\ \hline
-{\ct REFERENCE\_RATE}         & Real        & Reaction rate               & kg/m$^3$s           & 0.10   \\ \hline
-{\ct REFERENCE\_TEMPERATURE}  & Real        & Ignition temperature        & $^\circ$C           &        \\ \hline
+{\ct REFERENCE\_RATE}         & Real        & Reaction rate at
+	reference temperature       & kg/m$^3$s           & 0.10   \\ \hline
+{\ct REFERENCE\_TEMPERATURE}  & Real        & Reference temperature       & $^\circ$C           &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat               & kJ/kg/K             & 1.0    \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat   &                     &        \\ \hline
 \end{tabular*}

@@ -1692,15 +1692,15 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU6,'(A,F8.2)') '        Water Yield: ',ML%NU_WATER(NN)
       WRITE(LU6,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NN)
       WRITE(LU6,'(A,ES9.2)')'        E (kJ/kmol): ',ML%E(NN)/1000.
-      WRITE(LU6,'(A,ES9.2)')'        H_V (kJ/kg): ',ML%H_V(NN)/1000.
+      WRITE(LU6,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NN)/1000.
       WRITE(LU6,'(A,F8.2)') '        N          : ',ML%N_S(NN)
    ENDDO
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
       WRITE(LU6,'(A)')      '     Liquid evaporation reaction'
       WRITE(LU6,'(A,F8.2)') '        Fuel Yield             : ',ML%NU_FUEL(1)
       WRITE(LU6,'(A,F8.2)') '        Water Yield            : ',ML%NU_WATER(1)
-      WRITE(LU6,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_REF(1)-TMPM
-      WRITE(LU6,'(A,ES9.2)')'        H_V (kJ/kg)            : ',ML%H_V(1)/1000.
+      WRITE(LU6,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL(1)-TMPM
+      WRITE(LU6,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1)/1000.
    ENDIF
 ENDDO MATL_LOOP
  

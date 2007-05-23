@@ -1,9 +1,11 @@
-Solid phase heat conduction and reaction calculation of a 10 cm thick slab of wood pyrolyzing
-under a heat flux of 50 kW/m2. The calculation is purely for the solid phase. There is no gas phase
+Solid phase heat conduction and reaction calculation of a 10 cm thick 
+slab of wood pyrolyzing under a heat flux of 50 kW/m2. 
+The calculation is purely for the solid phase. There is no gas phase 
 coupling -- just a fixed external heat flux of 50 kW/m2.
 
-WARNING: The material properties contained in this file are for demonstration purposes only! 
-They may or may not be representative of any particular type of wood.
+WARNING: The material properties contained in this file are for 
+demonstration purposes only!  They may or may not be 
+representative of any particular type of wood.
 
 
 &HEAD CHID='charring_solid', TITLE='Demo of Charring Solid, No Gas Phase Reaction' /

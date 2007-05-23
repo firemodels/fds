@@ -1,6 +1,6 @@
 &HEAD CHID='specified_hrr', TITLE='Pre-defined HRRPUA' /
 
-&MESH IJK=9,9,12, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
 
 &TIME TWFIN=30. /
 
@@ -8,11 +8,11 @@
 
 &SURF ID='TEST'
       COLOR = 'TOMATO 2'
-	EXTERNAL_FLUX = 50.
-	MATL_ID(1,:) = 'MAT_A'
-	BACKING = 'INSULATED'
-	HRRPUA = 1000.
-	RAMP_Q = 'HRR'
+      EXTERNAL_FLUX = 50.
+      MATL_ID(1,:) = 'MAT_A'
+      BACKING = 'INSULATED'
+      HRRPUA = 1000.
+      RAMP_Q = 'HRR'
       THICKNESS=0.01 /
 
 &RAMP ID = 'HRR', T = 0,  F = 0. /
@@ -25,7 +25,8 @@
       IGNITION_TEMPERATURE = 500.
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT = 1.0
-      DENSITY = 1000.0 /
+      DENSITY = 1000.0 
+      HEAT_OF_REACTION = 1000. /
 
 &VENT XB = -0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'TEST' /
 
