@@ -2810,17 +2810,17 @@ this situation, add lines similar to the following:
 \footnotesize
 \begin{verbatim}
 &MATL ID                   = 'stuff'
-      IGNITION_TEMPERATURE = 500.
       CONDUCTIVITY         = 0.1
       SPECIFIC_HEAT        = 1.0
       DENSITY              = 900.0 /
 
-&SURF ID            = 'my surface'
-      COLOR         = 'GREEN'
-      MATL_ID       = 'stuff'
-      HRRPUA        = 1000.
-      RAMP_Q        = 'fire_ramp'
-      THICKNESS     = 0.01 /
+&SURF ID                   = 'my surface'
+      COLOR                = 'GREEN'
+      MATL_ID              = 'stuff'
+      HRRPUA               = 1000.
+      IGNITION_TEMPERATURE = 500.
+      RAMP_Q               = 'fire_ramp'
+      THICKNESS            = 0.01 /
 
 &RAMP ID='fire_ramp', T=  0.0, F=0.0 /
 &RAMP ID='fire_ramp', T= 10.0, F=1.0 /
@@ -2833,32 +2833,36 @@ An object with surface properties defined by {\ct 'my surface'} shall
 burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s
 following its ``ignition'' when its surface temperature reaches
 500~$^\circ$. Burning shall continue for 5~min, and then ramp-down 
-in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from ignition.
+in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from
+ignition. Note also that now the ''ignition temperature'' is a surface
+property, not material property.
 
-\begin{warning}
-Be aware of the distinction between {\ct IGNITION\_TEMPERATURE} and
-{\ct REFERENCE\_TEMPERATURE}. Use the former {\em only} if you want to
-add the extra term to Eq.~(\ref{rr}) {\em or} to specify a temperature 
-at which the material burns at some specified rate.
-\end{warning}
+%\begin{warning}
+%Be aware of the distinction between {\ct IGNITION\_TEMPERATURE} and
+%{\ct REFERENCE\_TEMPERATURE}. Use the former {\em only} if you want to
+%add the extra term to Eq.~(\ref{rr}) {\em or} to specify a temperature 
+%at which the material burns at some specified rate.
+%\end{warning}
 
 After the surface has ignited, the heat transfer into the solid is
 still being solved but there is no coupling between the burning rate
 and the surface temperature. As a result, the surface temperature may
 increase too much. To account for the energy loss due to the 
-production of gaseous fuel, the heat of reaction can be specified for
-the material. For example, when using the lines below, the net heat
-flux at the material surface is reduced by a factor corresponding to a
-product of burning rate and heat of reaction 1000.0 kJ/kg. 
+vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be
+specified for the surface. For example, when using the lines below,
+the net heat flux at the material surface is reduced by a factor
+1000.0 kJ/kg times the instantaneous burning rate.
 
 \footnotesize
 \begin{verbatim}
-&MATL ID                   = 'stuff'
+&SURF ID                   = 'my surface'
+      COLOR                = 'GREEN'
+      MATL_ID              = 'stuff'
+      HRRPUA               = 1000.
       IGNITION_TEMPERATURE = 500.
-      CONDUCTIVITY         = 0.1
-      SPECIFIC_HEAT        = 1.0
-      DENSITY              = 900.0 
-      HEAT_OF_REACTION     = 1000.0 /
+      HEAT_OF_VAPORIZATION = 1000.
+      RAMP_Q               = 'fire_ramp'
+      THICKNESS            = 0.01 /
 \end{verbatim} \normalsize
 
 
@@ -5608,7 +5612,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct HEAT\_OF\_COMBUSTION}    & Real        & Heat of combustion          & kJ/kg               &        \\ \hline
 {\ct HEAT\_OF\_REACTION}      & Real        & Heat of reaction            & kJ/kg               &        \\ \hline
 {\ct ID     }                 & Character   & IDentifier                  &                     &        \\ \hline
-{\ct IGNITION\_TEMPERATURE}   & Real        & Ignition temperature & $^\circ$C           &        \\ \hline
+{\ct IGNITION\_TEMPERATURE}   & Real        & Ignition temperature    & $^\circ$C             & 5000.        \\ \hline
 {\ct N\_REACTIONS}            & Character   & Number of Reactions         &                     & 0      \\ \hline
 {\ct N\_S}                    & Real        & Exponent of mass fraction   &                     & 1.     \\ \hline
 {\ct N\_T}                    & Real        & Exponent of temperature     &                     & 0.     \\ \hline
@@ -6010,8 +6014,10 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct E\_COEFFICIENT}                  & Real            & Extinguishing coefficient         & 1/s                 & 0.                      \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
 {\ct GEOMETRY}                        & Character       & Geometry type                     &                     &                         \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION }         & Real            & Heat of vaporization for specified HRR & kJ/kg          & 0.                      \\ \hline
 {\ct HRRPUA }                         & Real            & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
 {\ct ID     }                         & Character       & IDentifier                        &                     &                         \\ \hline
+{\ct IGNITION\_TEMPERATURE}           & Real            & Ignition temperature              & $^\circ$C           & 5000.                   \\ \hline
 {\ct LEAK\_PATH}                      & Integer Pair    & Pressure Zones for leakage        &                     &                         \\ \hline
 {\ct MASS\_FLUX(I)}                   & Real Array      & For species {\ct I}               &                     &                         \\ \hline
 {\ct MASS\_FLUX\_TOTAL}               & Real            & Total Mass Flux                   &                     &                         \\ \hline
