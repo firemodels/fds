@@ -585,7 +585,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
  
    Q_S                  = 0._EB
 
-   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
+   PYROLYSIS_MATERIAL: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
 
    MFLUX                = MASSFLUX(IW,I_FUEL)
    MASSFLUX(IW,I_FUEL)  = 0._EB
@@ -821,7 +821,12 @@ WALL_CELL_LOOP: DO IW=1,NWC
       
    ENDIF RECOMPUTE_GRID
 
-   ENDIF
+   ELSEIF (SF%PYROLYSIS_MODEL==PYROLYSIS_SPECIFIED) THEN
+
+      ! Take off energy corresponding to specified burning rate
+      Q_S(1) = Q_S(1) - MASSFLUX(IW,I_FUEL)*SF%H_V*RDX_S(1)
+
+   ENDIF PYROLYSIS_MATERIAL
 
    ! Calculate thermal properties 
  
@@ -864,12 +869,6 @@ WALL_CELL_LOOP: DO IW=1,NWC
    DO I=1,NWP-1 
       K_S(I)  = 1.0_EB / ( DX_WGT_S(I)/K_S(I) + (1.-DX_WGT_S(I))/K_S(I+1) )
    ENDDO
-
-   ! Take off energy corresponding to specified burning rate
-   
-   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_SPECIFIED) THEN
-      Q_S(1) = Q_S(1) - MASSFLUX(IW,I_FUEL)*SF%H_V*RDX_S(1)
-   ENDIF
 
    ! Calculate internal radiation
       
