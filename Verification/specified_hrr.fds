@@ -12,8 +12,10 @@
       MATL_ID(1,:) = 'MAT_A'
       BACKING = 'INSULATED'
       HRRPUA = 1000.
+      IGNITION_TEMPERATURE = 500.
       RAMP_Q = 'HRR'
-      THICKNESS=0.01 /
+      THICKNESS=0.01 
+      HEAT_OF_VAPORIZATION = 1000. /
 
 &RAMP ID = 'HRR', T = 0,  F = 0. /
 &RAMP ID = 'HRR', T = 1,  F = 1. /
@@ -22,11 +24,9 @@
 
 &MATL ID = 'MAT_A'
       EMISSIVITY = 1.0
-      IGNITION_TEMPERATURE = 500.
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT = 1.0
-      DENSITY = 1000.0 
-      HEAT_OF_REACTION = 1000. /
+      DENSITY = 1000.0 /
 
 &VENT XB = -0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'TEST' /
 

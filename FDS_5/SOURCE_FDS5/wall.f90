@@ -868,12 +868,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ! Take off energy corresponding to specified burning rate
    
    IF (SF%PYROLYSIS_MODEL==PYROLYSIS_SPECIFIED) THEN
-      H_R = 0._EB
-      MATERIAL_LOOP4: DO N=1,SF%N_MATL
-         H_R = H_R + WC%RHO_S(1,N)*MATERIAL(SF%MATL_INDEX(N))%H_R(1)
-      ENDDO MATERIAL_LOOP4
-      H_R = H_R/RHO_S(1)
-      Q_S(1) = Q_S(1) - MASSFLUX(IW,I_FUEL)*H_R*RDX_S(1)
+      Q_S(1) = Q_S(1) - MASSFLUX(IW,I_FUEL)*SF%H_V*RDX_S(1)
    ENDIF
 
    ! Calculate internal radiation
@@ -967,10 +962,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ! If the surface temperature exceeds the ignition temperature, burn it
 
    IF (TW(IW) > T ) THEN
-      MATERIAL_LOOP5: DO N=1,SF%N_MATL
-         ML => MATERIAL(SF%MATL_INDEX(N))
-         IF (TMP_F(IW) >= ML%TMP_IGN(1)) TW(IW) = T
-      ENDDO MATERIAL_LOOP5
+      IF (TMP_F(IW) >= SF%TMP_IGN) TW(IW) = T
    ENDIF
  
    ! Determine ghost wall temperature
