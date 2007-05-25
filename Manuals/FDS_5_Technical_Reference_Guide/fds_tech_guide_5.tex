@@ -117,7 +117,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: May 15, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: May 25, 2007)}
 
 \vspace{.5in}
 
@@ -1112,7 +1112,9 @@ and energy conservation equations. A few assumptions are needed. First, define t
 specific heat of the mixture: $c_p = \sum_\alpha c_{p,\alpha} \, Y_\alpha$ where
 $c_{p,\alpha}$ is the temperature-dependent specific heat of species $\alpha$.
 Next, define the enthalpy $h = \sum_\alpha h_\alpha \, Y_\alpha$ where
-\be h_\alpha = \int_{T_{\hbox{ref}}}^T c_{p,\alpha}(T') \; dT' \ee
+\be
+   h_\alpha = \int_{T_{\hbox{\tiny ref}}}^T c_{p,\alpha}(T') \; dT'
+\ee
 Finally, note that the material derivative of the background pressure, $\bp_m(z,t)$, is written:
 \be \frac{D\bp_m}{Dt} = \dod{\bp_m}{t} + w \, \dod{\bp_m}{z} = \dod{\bp_m}{t} - w \rho_m g   \ee
 The divergence can now be written:
@@ -1122,7 +1124,7 @@ where
 \cal{D}          &=& \frac{\R}{\bW c_p \bp_m} \; \Big( \dq''' - \nabla \cdot \dbq'' \Big) - {\cal P} \, w \rho_m g  \quad + \nonumber \\
                  & & \frac{\bW}{\rho} \sum_\alpha \nabla \cdot \rho D_\alpha \nabla (Y_\alpha/W_\alpha) -
 \frac{\R}{\bW c_p \bp_m} \; \sum_\alpha h_\alpha \nabla \cdot \rho D_\alpha \nabla Y_\alpha +
- \frac{1}{\rho} \sum_alpha \left( \frac{\bW}{W_\alpha} - \frac{h_\alpha}{c_p T} \right) \;
+ \frac{1}{\rho} \sum_\alpha \left( \frac{\bW}{W_\alpha} - \frac{h_\alpha}{c_p T} \right) \;
 \dm_\alpha''' \\
 \cal{P}          &=& \frac{1}{\bp_m} \; \left( \frac{\R}{\bW c_p} - 1 \right)   \label{phi}
 \end{eqnarray}
@@ -1165,10 +1167,8 @@ The numerical solution of the pressure equation obtained by taking the divergenc
 is greatly simplified by either neglecting the last term on the left hand side, or
 in cases where it cannot be neglected, treating it with some care.
 The decision to either neglect the extra pressure term or to approximate it depends on its
-relative contribution to the creation of vorticity.
-When the momentum equation is integrated around a closed loop that moves with
-the fluid, in the absence of any external forces, $\bof$, one can readily
-identify the sources of vorticity:
+relative contribution to the creation of vorticity. An evolution equation for the circulation, $\Gamma=\oint \bu \cdot d\bx$, reveals the
+sources of vorticity in the absence of any external forces, $\bof$:
 \be \frac{d\Gamma}{dt} =
     \oint \left(\frac{1}{\rho_\infty} - \frac{1}{\rho} \right) \nabla \tp \cdot d\bx
   + \oint \frac{\rho-\rho_n}{\rho} \bg \cdot d\bx
@@ -2721,7 +2721,7 @@ finite differences on a rectilinear grid. The overall
 domain is a rectangular box that is divided into rectangular grid cells.
 Each cell is assigned indices $i$, $j$ and $k$ representing the
 position of the cell in the $x$, $y$ and $z$ directions, respectively.
-Scalar quantities are assigned in the center of each grid cell, thus
+Scalar quantities are assigned in the center of each grid cell; thus,
 $\rho_{ijk}^n$ is the density at the $n$th time step in the center
 of the cell whose indices are $i$, $j$ and $k$. Vector quantities like
 velocity are assigned at their appropriate cell faces. For example,
@@ -2733,10 +2733,10 @@ negative-oriented face of the same cell.
 \clearpage
 \subsection{The Mass Transport Equations and the Divergence}
 
-Due to the low Mach number approximation being used in the model, the
+Due to the use of the low Mach number approximation, the
 mass and energy equations are combined through the divergence. The
 divergence of the flow field contains
-much of the fire-specific source terms described above.
+many of the fire-specific source terms described above.
 
 \subsubsection{Discretizing the Convective and Diffusive Transport Terms}
 
@@ -2958,7 +2958,7 @@ immediately following them, and serve to bias the differencing of
 the convective terms in the upwind direction.
 The subscript $i+\ha$ indicates that a variable is an average of its
 values at the $i$th and the $(i+1)$th cell.
-The divergence defined in Eq.~(\ref{divdis})
+By construction, the divergence defined in Eq.~(\ref{divdis})
 is identically equal to the divergence defined by
 \be (\nabla \cdot \bu)_{ijk} = \frac{u_{ijk}-u_{i-1,jk}}{\dx} +
                                \frac{v_{ijk}-v_{i,j-1,k}}{\dy} +
@@ -3086,7 +3086,7 @@ convective transport dominates diffusive, the CFL condition restricts the time s
 However, in small, finely-gridded domains, a second condition often dominates:
 \be 2 \, \max \left( \nu , D , \frac{k}{\rho c_p} \right)  \; \dt  \left(
               \frac{1}{\dx^2}+\frac{1}{dy^2}+\frac{1}{\dz^2} \right) < 1  \label{vn} \ee
-Note that this constraint applied to the momentum, mass and energy equations via the
+Note that this constraint is applied to the momentum, mass and energy equations via the
 relevant diffusion parameter -- viscosity, material diffusivity or thermal conductivity.
 This constraint on the time step, often referred to as the Von Neumann criterion, is typical
 of any explicit, second-order numerical scheme for solving a parabolic partial differential
