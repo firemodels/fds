@@ -45,7 +45,7 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date (All Nodes)
  
-COMPILE_DATE   = 'May 21, 2007'
+COMPILE_DATE   = 'May 25, 2007'
 VERSION_STRING = '5_RC4+' 
 VERSION_NUMBER = 5.0
  
