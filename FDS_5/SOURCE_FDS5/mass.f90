@@ -174,7 +174,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       END SELECT
    ENDDO WLOOP2
  
-   ! Construct weighted averages of u dot del (rho*Y) in grid cells
+   ! Sum up the convective and diffusive terms in the transport equation and store in DEL_RHO_D_DEL_Y
  
    DO K=1,KBAR
       DO J=1,JBAR
@@ -185,7 +185,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                             VDRHODY(I,J-1,K)*(1._EB+EPSY(I,J-1,K)) +  &
                             WDRHODZ(I,J,K)  *(1._EB-EPSZ(I,J,K))   +  &
                             WDRHODZ(I,J,K-1)*(1._EB+EPSZ(I,J,K-1)) ) 
-            DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + FXYZ + RHOP(I,J,K)*YYP(I,J,K,N)*DP(I,J,K) 
+            DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N) + FXYZ + RHOP(I,J,K)*YYP(I,J,K,N)*DP(I,J,K) 
          ENDDO
       ENDDO
    ENDDO

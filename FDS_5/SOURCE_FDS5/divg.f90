@@ -22,7 +22,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_CP,GET_D,GET_K
  
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
-          RHO_D_DYDX,RHO_D_DYDY,RHO_D_DYDZ,RHO_D,RHOP,TMP_RHO_D_DYDX,TMP_RHO_D_DYDY,TMP_RHO_D_DYDZ,RTRM
+          RHO_D_DYDX,RHO_D_DYDY,RHO_D_DYDZ,RHO_D,RHOP,H_RHO_D_DYDX,H_RHO_D_DYDY,H_RHO_D_DYDZ,RTRM
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,K_SUM,CP_SUM,XIF,YIF,ZIF, TNOW, &
             HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,VDOT_LEAK,TIME_RAMP_FACTOR,ZONE_VOLUME,CP_MF,Z_2,DELTA_P,PRES_RAMP_FACTOR
@@ -96,7 +96,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
 
    IF (LES) RHO_D = MU*RSC
  
-   ! Compute rho*D*dY/dx
+   ! Compute rho*D del Y
  
    DO K=0,KBAR
       DO J=0,JBAR
@@ -111,7 +111,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       ENDDO
    ENDDO
  
-   ! Correct rho*D*dY/dx at boundaries and store rho*D at boundaries
+   ! Correct rho*D del Y at boundaries and store rho*D at boundaries
  
    WALL_LOOP: DO IW=1,NWC
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP
@@ -120,7 +120,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       KKG = IJKW(8,IW) 
       RHODW(IW,N) = RHO_D(IIG,JJG,KKG)
       RHO_D_DYDN  = RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_W(IW,N))*RDN(IW)
-      DEL_RHO_D_DEL_Y(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Y(IIG,JJG,KKG,N) + RHO_D_DYDN*RDN(IW)
+      DEL_RHO_D_DEL_Y(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Y(IIG,JJG,KKG,N) - RHO_D_DYDN*RDN(IW)
       IOR = IJKW(4,IW)
       SELECT CASE(IOR) 
          CASE( 1)
@@ -138,29 +138,30 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       END SELECT
    ENDDO WALL_LOOP
 
-   ! Compute species transport terms for divergence expression
+   ! Compute del dot h_n*rho*D del Y_n only for non-mixture fraction cases
  
    SPECIES_DIFFUSION: IF (.NOT.MIXTURE_FRACTION) THEN
-    
-      TMP_RHO_D_DYDX => WORK4
-      TMP_RHO_D_DYDY => WORK5
-      TMP_RHO_D_DYDZ => WORK6
+
+      H_RHO_D_DYDX => WORK4
+      H_RHO_D_DYDY => WORK5
+      H_RHO_D_DYDZ => WORK6
     
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
                ITMP = .05_EB*(TMP(I+1,J,K)+TMP(I,J,K))
                HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
-               TMP_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
+               H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
                ITMP = .05_EB*(TMP(I,J+1,K)+TMP(I,J,K))
                HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
-               TMP_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
+               H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
                ITMP = .05_EB*(TMP(I,J,K+1)+TMP(I,J,K))
                HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
-               TMP_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
+               H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
             ENDDO
          ENDDO
       ENDDO
+
       WALL_LOOP2: DO IW=1,NWC
          IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2
          IIG = IJKW(6,IW)
@@ -172,17 +173,17 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          RHO_D_DYDN = RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_W(IW,N))*RDN(IW)
          SELECT CASE(IOR)
             CASE( 1) 
-               TMP_RHO_D_DYDX(IIG-1,JJG,KKG) = 0._EB
+               H_RHO_D_DYDX(IIG-1,JJG,KKG) = 0._EB
             CASE(-1) 
-               TMP_RHO_D_DYDX(IIG,JJG,KKG)   = 0._EB
+               H_RHO_D_DYDX(IIG,JJG,KKG)   = 0._EB
             CASE( 2) 
-               TMP_RHO_D_DYDY(IIG,JJG-1,KKG) = 0._EB
+               H_RHO_D_DYDY(IIG,JJG-1,KKG) = 0._EB
             CASE(-2) 
-               TMP_RHO_D_DYDY(IIG,JJG,KKG)   = 0._EB
+               H_RHO_D_DYDY(IIG,JJG,KKG)   = 0._EB
             CASE( 3) 
-               TMP_RHO_D_DYDZ(IIG,JJG,KKG-1) = 0._EB
+               H_RHO_D_DYDZ(IIG,JJG,KKG-1) = 0._EB
             CASE(-3) 
-               TMP_RHO_D_DYDZ(IIG,JJG,KKG)   = 0._EB
+               H_RHO_D_DYDZ(IIG,JJG,KKG)   = 0._EB
          END SELECT
          DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - RDN(IW)*HDIFF*RHO_D_DYDN
       ENDDO WALL_LOOP2
@@ -193,9 +194,9 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                DO J=1,JBAR
                   DO I=1,IBAR
                      DP(I,J,K) = DP(I,J,K) + & 
-                                 (TMP_RHO_D_DYDX(I,J,K)-TMP_RHO_D_DYDX(I-1,J,K))*RDX(I) + &
-                                 (TMP_RHO_D_DYDY(I,J,K)-TMP_RHO_D_DYDY(I,J-1,K))*RDY(J) + &
-                                 (TMP_RHO_D_DYDZ(I,J,K)-TMP_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+                                 (H_RHO_D_DYDX(I,J,K)-H_RHO_D_DYDX(I-1,J,K))*RDX(I) + &
+                                 (H_RHO_D_DYDY(I,J,K)-H_RHO_D_DYDY(I,J-1,K))*RDY(J) + &
+                                 (H_RHO_D_DYDZ(I,J,K)-H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
                   ENDDO
                ENDDO
             ENDDO
@@ -204,15 +205,15 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             DO K=1,KBAR
                DO I=1,IBAR
                   DP(I,J,K) = DP(I,J,K) + &
-                  (R(I)*TMP_RHO_D_DYDX(I,J,K)-R(I-1)*TMP_RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                       (TMP_RHO_D_DYDZ(I,J,K)-       TMP_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+                  (R(I)*H_RHO_D_DYDX(I,J,K)-R(I-1)*H_RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                       (H_RHO_D_DYDZ(I,J,K)-       H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
                ENDDO
             ENDDO
       END SELECT CYLINDER
     
    ENDIF SPECIES_DIFFUSION
 
-   ! Compute del dot rho D del Y_i or del dot rho D del Z
+   ! Compute del dot rho*D del Y_n or del dot rho D del Z
  
    CYLINDER2: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
@@ -220,9 +221,9 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             DO J=1,JBAR
                DO I=1,IBAR
                   DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + &
-                                 (RHO_D_DYDX(I-1,J,K)-RHO_D_DYDX(I,J,K))*RDX(I) + &
-                                 (RHO_D_DYDY(I,J-1,K)-RHO_D_DYDY(I,J,K))*RDY(J) + &
-                                 (RHO_D_DYDZ(I,J,K-1)-RHO_D_DYDZ(I,J,K))*RDZ(K)
+                                 (RHO_D_DYDX(I,J,K)-RHO_D_DYDX(I-1,J,K))*RDX(I) + &
+                                 (RHO_D_DYDY(I,J,K)-RHO_D_DYDY(I,J-1,K))*RDY(J) + &
+                                 (RHO_D_DYDZ(I,J,K)-RHO_D_DYDZ(I,J,K-1))*RDZ(K)
                ENDDO
             ENDDO 
          ENDDO
@@ -231,15 +232,30 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          DO K=1,KBAR
             DO I=1,IBAR
                DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + &
-               (R(I-1)*RHO_D_DYDX(I-1,J,K)-R(I)*RHO_D_DYDX(I,J,K))*RDX(I)*RRN(I) + &
-                      (RHO_D_DYDZ(I,J,K-1)-     RHO_D_DYDZ(I,J,K))*RDZ(K)
+               (R(I)*RHO_D_DYDX(I,J,K)-R(I-1)*RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                    (RHO_D_DYDZ(I,J,K)-       RHO_D_DYDZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
    END SELECT CYLINDER2
+
+   ! Compute -Sum h_n del dot rho*D del Y_n
+ 
+   SPECIES_DIFFUSION_2: IF (.NOT.MIXTURE_FRACTION) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ITMP = 0.1_EB*TMP(I,J,K)
+               HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
+               DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF SPECIES_DIFFUSION_2
  
 ENDDO SPECIES_LOOP
  
-! Compute del k del T
+
+! Compute del dot k del T
  
 ENERGY: IF (.NOT.ISOTHERMAL) THEN
  
@@ -277,10 +293,6 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                      CALL GET_CP(YY(I,J,K,I_FUEL),0._EB,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)                  
                   ENDIF
                   KP(I,J,K) = MU(I,J,K)*CP_MF*RPR
-!!!                  IZ   = NINT(Z_SUM(I,J,K)*100._EB)
-!!!                  IZ   = MAX(0,MIN(IZ,100))
-!!!                  KP(I,J,K) = MU(I,J,K)*SPECIES(I_FUEL)%CP_MF(IZ,ITMP)*RPR
-!!!               KP(I,J,K) = SPECIES(I_FUEL)%K_MF(IZ,ITMP)
                ENDDO
             ENDDO
          ENDDO
@@ -384,9 +396,6 @@ IF (MIXTURE_FRACTION) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             ITMP = 0.1_EB*TMP(I,J,K)
-!!!            IZ   = NINT(Z_SUM(I,J,K)*100._EB)
-!!!            IZ   = MAX(0,MIN(IZ,100))
-!!!            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*SPECIES(I_FUEL)%RCP_MF(IZ,ITMP)*RSUM(I,J,K)
             IF(CO_PRODUCTION) THEN
                CALL GET_CP(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)
             ELSE
@@ -425,6 +434,20 @@ IF (.NOT.MIXTURE_FRACTION .AND. N_SPECIES==0) THEN
       ENDDO
    ENDDO
 ENDIF
+
+! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Y_n
+
+SPECIES_DIFFUSION_3: IF (.NOT.MIXTURE_FRACTION) THEN
+   SPECIES_LOOP_2: DO N=1,N_SPECIES
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + (SPECIES(N)%RCON-SPECIES(0)%RCON)/(RSUM(I,J,K)*RHOP(I,J,K))*DEL_RHO_D_DEL_Y(I,J,K,N)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO SPECIES_LOOP_2
+ENDIF SPECIES_DIFFUSION_3
 
 ! Add water vapor if sprinklers are on
  
