@@ -2862,8 +2862,11 @@ the net heat flux at the material surface is reduced by a factor
 The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the
 burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they
 are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of
-an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. Finally, the addition of {\ct HEAT\_OF\_VAPORIZATION} to the
-{\ct SURF} line tells FDS to account for the energy used to vaporize the fuel.
+an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION}
+tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing
+a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. It should have no reaction parameters, product yields, and so on, like
+those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on
+the conditions of the surrounding environment.
 
 
 \subsubsection{Liquid Fuels}
