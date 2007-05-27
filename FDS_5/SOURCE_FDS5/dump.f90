@@ -246,9 +246,9 @@ IF (APPEND) THEN
 ELSE
    OPEN(LU_HRR,FILE=FNDUMP(2),FORM='FORMATTED',STATUS='REPLACE')
    WRITE(LU_HRR,*) 5+N_ZONE
-   WRITE(TCFORM,'(A,I4.4,A)') "(",6,"(A,','),A)"
-   WRITE(LU_HRR,TCFORM) 'FDS HRR Time','HRR','RAD LOSS','CONV LOSS','COND LOSS','BURN RATE','PBAR'
-   WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kg/s','atm'
+   WRITE(TCFORM,'(A,I4.4,A)') "(",5+N_ZONE,"(A,','),A)"
+   WRITE(LU_HRR,TCFORM) 'FDS_HRR_Time','HRR','RAD_LOSS','CONV_LOSS','COND_LOSS','BURN_RATE',(TRIM(P_ZONE(N)%ID),N=1,N_ZONE) 
+   WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kg/s',('atm',N=1,N_ZONE) 
 ENDIF
  
 ! Write out info about mixture fraction-based state relationships for all mixture fraction SPECies
