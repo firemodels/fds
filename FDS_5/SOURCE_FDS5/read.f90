@@ -2573,8 +2573,15 @@ READ_MATL_LOOP: DO N=1,N_MATL
    CALL CHECKREAD('MATL',LU5,IOS)
    CALL SET_MATL_DEFAULTS
    READ(LU5,MATL) 
+
+   ! Do some error checking on the inputs
+
+   IF (ANY(IGNITION_TEMPERATURE<5000._EB) .AND. N_REACTIONS==0) THEN
+      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,'. IGNITION_TEMPERATURE used, but N_REACTIONS=0' 
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
  
-! Pack MATL parameters into the MATERIAL derived type
+   ! Pack MATL parameters into the MATERIAL derived type
  
    ML%A(:)                 = A(:)
    ML%ADJUST_BURN_RATE     = 1._EB
