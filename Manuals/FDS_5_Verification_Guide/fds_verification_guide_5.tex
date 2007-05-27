@@ -114,7 +114,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, May 15, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, May 27, 2007)}
 
 \vspace{.5in}
 
@@ -1121,7 +1121,6 @@ an absorption coefficient for both the gas and solid/liquid phases. Here are the
 \scriptsize
 \begin{verbatim}
 &MATL ID = 'ETHANOL LIQUID'
-      PYROLYSIS_MODEL='LIQUID'
       EMISSIVITY = 1.0
       NU_FUEL =0.97
       HEAT_OF_REACTION=880.
@@ -1129,7 +1128,7 @@ an absorption coefficient for both the gas and solid/liquid phases. Here are the
       SPECIFIC_HEAT= 2.45
       DENSITY= 787.
       ABSORPTION_COEFFICIENT = 40.
-      REFERENCE_TEMPERATURE=76. /
+      BOILING_TEMPERATURE=76. /
 
 &SURF ID='ETHANOL POOL'
       FYI = '4 kg of ethanol in a 0.7 m x 0.8 m pan'
