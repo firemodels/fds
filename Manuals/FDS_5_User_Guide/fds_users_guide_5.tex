@@ -2721,9 +2721,9 @@ the radiation penetrate and absorb into the solid. Correspondingly,
 the emission of the material is based on the internal temperatures,
 not just the surface.
 
-\subsection{Pyrolysis Properties}
+\subsection{Pyrolysis Models}
 
-FDS has several approaches for describing the pyrolysis of materials. The approach to take depends largely
+FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely
 on the availability of material properties and the appropriateness of the underlying pyrolysis model. This
 section provides a description of the input parameters, starting with a general solid.
 
@@ -2832,17 +2832,10 @@ this situation, add lines similar to the following:
 An object with surface properties defined by {\ct 'my surface'} shall
 burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s
 following its ``ignition'' when its surface temperature reaches
-500~$^\circ$. Burning shall continue for 5~min, and then ramp-down
+500~$^\circ$C. Burning shall continue for 5~min, and then ramp-down
 in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from
 ignition. Note also that now the ''ignition temperature'' is a surface
 property, not material property.
-
-%\begin{warning}
-%Be aware of the distinction between {\ct IGNITION\_TEMPERATURE} and
-%{\ct REFERENCE\_TEMPERATURE}. Use the former {\em only} if you want to
-%add the extra term to Eq.~(\ref{rr}) {\em or} to specify a temperature
-%at which the material burns at some specified rate.
-%\end{warning}
 
 After the surface has ignited, the heat transfer into the solid is
 still being solved but there is no coupling between the burning rate
@@ -2851,7 +2844,7 @@ increase too much. To account for the energy loss due to the
 vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be
 specified for the surface. For example, when using the lines below,
 the net heat flux at the material surface is reduced by a factor
-1000.0 kJ/kg times the instantaneous burning rate.
+1000~kJ/kg times the instantaneous burning rate.
 
 \footnotesize
 \begin{verbatim}
@@ -2864,6 +2857,13 @@ the net heat flux at the material surface is reduced by a factor
       RAMP_Q               = 'fire_ramp'
       THICKNESS            = 0.01 /
 \end{verbatim} \normalsize
+
+\noindent
+The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the
+burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they
+are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of
+an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. Finally, the addition of {\ct HEAT\_OF\_VAPORIZATION} to the
+{\ct SURF} line tells FDS to account for the energy used to vaporize the fuel.
 
 
 \subsubsection{Liquid Fuels}
