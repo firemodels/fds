@@ -246,7 +246,7 @@
 \vspace{1in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 22, 2007)}
+\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 27, 2007)}
 
 \vspace{.5in}
 
@@ -2429,15 +2429,15 @@ The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
 \subsection{Special Topics: A Radially-Spreading Fire}
 
 Sometimes it is desired that a fire spread radially at some specified
-rate. Rather than trying to design material properties 
+rate. Rather than trying to design material properties
 to achieve this, you can alternatively use a {\ct VENT} in a special way.
 If the {\ct SURF\_ID} associated with a {\ct VENT}
 defines a specified heat release rate, {\ct HRRPUA}, and
 time history, {\ct RAMP\_Q} or {\ct TAU\_Q}, you can also specify {\ct
-XYZ} and {\ct SPREAD\_RATE} on the {\ct VENT} line. 
+XYZ} and {\ct SPREAD\_RATE} on the {\ct VENT} line.
 Then the fire is directed to start at the point {\ct XYZ} and spread
 radially at a rate of {\ct SPREAD\_RATE} (m/s). The ramp-up begins at
-the time when the fire arrives at a given point. 
+the time when the fire arrives at a given point.
 For example, the lines
 
 \footnotesize
@@ -2832,7 +2832,7 @@ this situation, add lines similar to the following:
 An object with surface properties defined by {\ct 'my surface'} shall
 burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s
 following its ``ignition'' when its surface temperature reaches
-500~$^\circ$. Burning shall continue for 5~min, and then ramp-down 
+500~$^\circ$. Burning shall continue for 5~min, and then ramp-down
 in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from
 ignition. Note also that now the ''ignition temperature'' is a surface
 property, not material property.
@@ -2840,14 +2840,14 @@ property, not material property.
 %\begin{warning}
 %Be aware of the distinction between {\ct IGNITION\_TEMPERATURE} and
 %{\ct REFERENCE\_TEMPERATURE}. Use the former {\em only} if you want to
-%add the extra term to Eq.~(\ref{rr}) {\em or} to specify a temperature 
+%add the extra term to Eq.~(\ref{rr}) {\em or} to specify a temperature
 %at which the material burns at some specified rate.
 %\end{warning}
 
 After the surface has ignited, the heat transfer into the solid is
 still being solved but there is no coupling between the burning rate
 and the surface temperature. As a result, the surface temperature may
-increase too much. To account for the energy loss due to the 
+increase too much. To account for the energy loss due to the
 vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be
 specified for the surface. For example, when using the lines below,
 the net heat flux at the material surface is reduced by a factor
@@ -2868,9 +2868,9 @@ the net heat flux at the material surface is reduced by a factor
 
 \subsubsection{Liquid Fuels}
 
-For a liquid fuel, specify {\ct PYROLYSIS\_MODEL='LIQUID'} on the 
+For a liquid fuel, specify {\ct PYROLYSIS\_MODEL='LIQUID'} on the
 {\ct MATL} line. The thermal properties are assumed to be the same as
-for a solid material. The evaporation rate of the fuel 
+for a solid material. The evaporation rate of the fuel
 is governed by the Clausius-Clapeyron equation (see FDS Technical Reference
 Guide for details). The only drawback of
 this approach is that the fuel gases burn regardless of any ignition
@@ -2917,14 +2917,14 @@ to compute the loss of heat into the liquid via conduction using the
 same one-dimensional heat transfer equation that is used for solids. Obviously,
 the convection of the liquid is important, but is not considered in
 the model. The {\ct HEAT\_OF\_REACTION} in this case is the latent
-heat of vaporization. 
+heat of vaporization.
 
 Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
-denotes the absorption in depth of thermal radiation. Liquids do not 
+denotes the absorption in depth of thermal radiation. Liquids do not
 just absorb radiation at the surface, but rather over a thin layer
 near the surface. Its effect on the burning rate is significant. An
 example is given in the Verification Guide under the name {\bf
-ethanol\_pan}. 
+ethanol\_pan}.
 
 
 \subsection{Making Fuels Disappear}
@@ -5136,6 +5136,11 @@ accumulated total is analogous to a ``bucket test,'' where the droplets are coll
 period. The cooling of a solid surface by droplets of a given type is given by {\ct [PART\_ID]\_CPUA}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea
 in units of kW/m$^2$.
 
+Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the
+{\ct MISC} line). \index{{\ct POROUS\_FLOOR}!output issues}
+In this case, {\ct [PART\_ID]\_MPUA} will be zero, but {\ct [PART\_ID]\_AMPUA} will not. FDS stores the droplet mass just before removing the droplet from
+the simulation for the purpose of saving CPU time.
+
 Away from solid surfaces, {\ct [PART\_ID]\_MPUV} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of the droplets as they fly through
 the air, in units of kg/m$^3$.  {\ct [PART\_ID]\_FLUX\_X},  {\ct [PART\_ID]\_FLUX\_Y}, and {\ct [PART\_ID]\_FLUX\_Z} produce {\em only} slice and Plot3D files
 of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
@@ -5621,7 +5626,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct NU\_WATER  }             & Real        & Steam Yield                 & kg/kg               & 0.     \\ \hline
 {\ct PYROLYSIS\_MODEL}        & Character   & Solid or Liquid Model       &                     & {\ct 'SOLID'} \\ \hline
 {\ct REFERENCE\_RATE}         & Real        & Reaction rate at
-	reference temperature       & kg/m$^3$s           & 0.10   \\ \hline
+    reference temperature       & kg/m$^3$s           & 0.10   \\ \hline
 {\ct REFERENCE\_TEMPERATURE}  & Real        & Reference temperature       & $^\circ$C           &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat               & kJ/kg/K             & 1.0    \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat   &                     &        \\ \hline
@@ -6802,6 +6807,6 @@ component density.
 
 
 
-%\printindex
+\printindex
 
 \end{document}
