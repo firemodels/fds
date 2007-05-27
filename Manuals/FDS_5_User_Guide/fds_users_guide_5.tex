@@ -2871,9 +2871,8 @@ the conditions of the surrounding environment.
 
 \subsubsection{Liquid Fuels}
 
-For a liquid fuel, specify {\ct PYROLYSIS\_MODEL='LIQUID'} on the
-{\ct MATL} line. The thermal properties are assumed to be the same as
-for a solid material. The evaporation rate of the fuel
+For a liquid fuel, the thermal properties are similar to those of a solid
+material, with a few exceptions. The evaporation rate of the fuel
 is governed by the Clausius-Clapeyron equation (see FDS Technical Reference
 Guide for details). The only drawback of
 this approach is that the fuel gases burn regardless of any ignition
@@ -2884,7 +2883,6 @@ properties have not all been verified.
 \footnotesize
 \begin{verbatim}
 &MATL ID                     = 'ETHANOL LIQUID'
-      PYROLYSIS_MODEL        = 'LIQUID'
       EMISSIVITY             = 1.0
       NU_FUEL                = 0.97
       HEAT_OF_REACTION       = 880.
@@ -2914,13 +2912,17 @@ properties have not all been verified.
 \end{verbatim} \normalsize
 
 \noindent
+The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
+pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the
+phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent
+heat of vaporization. The gaseous fuel yield, {\ct NU\_FUEL}, is 0.97 instead of 1 to account for
+impurities in the liquid that do not take part in the combustion process.
 
 The thermal conductivity, density and specific heat are used
 to compute the loss of heat into the liquid via conduction using the
 same one-dimensional heat transfer equation that is used for solids. Obviously,
 the convection of the liquid is important, but is not considered in
-the model. The {\ct HEAT\_OF\_REACTION} in this case is the latent
-heat of vaporization.
+the model.
 
 Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
 denotes the absorption in depth of thermal radiation. Liquids do not
@@ -5627,9 +5629,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct NU\_FUEL}                & Real        & Fuel Yield                  & kg/kg               & 0.     \\ \hline
 {\ct NU\_RESIDUE}             & Real        & Residue Yield               & kg/kg               & 0.     \\ \hline
 {\ct NU\_WATER  }             & Real        & Steam Yield                 & kg/kg               & 0.     \\ \hline
-{\ct PYROLYSIS\_MODEL}        & Character   & Solid or Liquid Model       &                     & {\ct 'SOLID'} \\ \hline
-{\ct REFERENCE\_RATE}         & Real        & Reaction rate at
-    reference temperature       & kg/m$^3$s           & 0.10   \\ \hline
+{\ct REFERENCE\_RATE}         & Real        & Reaction rate at ref.~temp. & kg/m$^3$s           & 0.10   \\ \hline
 {\ct REFERENCE\_TEMPERATURE}  & Real        & Reference temperature       & $^\circ$C           &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat               & kJ/kg/K             & 1.0    \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat   &                     &        \\ \hline
