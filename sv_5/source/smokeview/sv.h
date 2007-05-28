@@ -1,0 +1,1 @@
+void sniffErrors(char *whereat);
