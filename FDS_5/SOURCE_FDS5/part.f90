@@ -1,3 +1,4 @@
+!     Last change:  JEF  25 May 2007   11:07 am
 MODULE PART
  
 USE PRECISION_PARAMETERS
@@ -278,11 +279,12 @@ REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: PHI_RN,RN,FLOW_RATE,THETA_RN,SPHI,CPHI,MASS_SUM, &
             STHETA,CTHETA,PWT0,DROPLET_SPEED,XI,YJ,ZK,SHIFT1,SHIFT2,XTMP,YTMP,ZTMP,VLEN, &
-            TRIGT1,TRIGT2,TNOW
+            TRIGT1,TRIGT2,TNOW,SOLID_ANGLE_FLOWRATE,SOLID_ANGLE_TOTAL_FLOWRATE
 REAL(EB), PARAMETER :: VENT_OFFSET=0.1
 INTEGER :: I,KS,II,JJ,KK,IC,IL,IU,STRATUM,IPC,DROP_SUM,IIG,JJG,KKG,IW,IBC,IOR
 LOGICAL :: INSERT_ANOTHER_BATCH
 TYPE (PROPERTY_TYPE), POINTER :: PY
+TYPE (TABLES_TYPE), POINTER :: TA
 TYPE (DEVICE_TYPE), POINTER :: DV
 TYPE (SURFACE_TYPE), POINTER :: SF
  
@@ -316,6 +318,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
  
    MASS_SUM = 0._EB
    DROP_SUM = 0
+   SOLID_ANGLE_TOTAL_FLOWRATE = 0._EB
    DROPLET_INSERT_LOOP: DO I=1,PC%N_INSERT
       IF (NLP+1>MAXIMUM_DROPLETS) EXIT DROPLET_INSERT_LOOP
       NLP = NLP+1
@@ -345,15 +348,29 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
       ! Randomly choose theta and phi
  
       CHOOSE_COORDS: DO
- 
-         CALL RANDOM_NUMBER(RN)
-         THETA_RN = PY%SPRAY_ANGLE(1) + RN*(PY%SPRAY_ANGLE(2)-PY%SPRAY_ANGLE(1))
-         CALL RANDOM_NUMBER(RN)
+         PICK_PATTERN: IF(PY%SPRAY_PATTERN_INDEX>0) THEN !Use spray pattern table
+            TA => TABLES(PY%SPRAY_PATTERN_INDEX)
+            CALL RANDOM_NUMBER(RN)
+            FIND_ROW: DO II=1,TA%NUMBER_ROWS
+               IF (RN>PY%TABLE_ROW(II)) CYCLE FIND_ROW
+               EXIT FIND_ROW
+            END DO FIND_ROW
+            CALL RANDOM_NUMBER(RN)
+            THETA_RN = TA%TABLE_DATA(II,1) + RN*(TA%TABLE_DATA(II,2)-TA%TABLE_DATA(II,1))
+            CALL RANDOM_NUMBER(RN)
+            PHI_RN = TA%TABLE_DATA(II,3) + RN*(TA%TABLE_DATA(II,4)-TA%TABLE_DATA(II,3))
+            SOLID_ANGLE_FLOWRATE = TA%TABLE_DATA(II,6)
+            SOLID_ANGLE_TOTAL_FLOWRATE = SOLID_ANGLE_TOTAL_FLOWRATE + TA%TABLE_DATA(II,6)
+            PY%DROPLET_VELOCITY  = TA%TABLE_DATA(II,5)
+         ELSE PICK_PATTERN !Use conical spray
+            CALL RANDOM_NUMBER(RN)
+            THETA_RN = PY%SPRAY_ANGLE(1) + RN*(PY%SPRAY_ANGLE(2)-PY%SPRAY_ANGLE(1))
+            CALL RANDOM_NUMBER(RN)
+            PHI_RN = RN*TWOPI
+         ENDIF PICK_PATTERN
          PHI_RN = RN*TWOPI
          PHI_RN = PHI_RN + DV%ROTATION  ! Adjust for rotation of head by rotating about z-axis
- 
          !  Adjust for tilt of sprinkler pipe
- 
          SPHI   = SIN(PHI_RN)
          CPHI   = COS(PHI_RN)
          STHETA = SIN(THETA_RN)
@@ -450,15 +467,22 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
       DR%PWT = PC%W_CDF(STRATUM)
  
       ! Sum up mass of water being introduced
- 
-      MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
+      IF(PY%SPRAY_PATTERN_INDEX>0) THEN
+         MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3*SOLID_ANGLE_FLOWRATE
+      ELSE
+         MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
+      ENDIF
       DROP_SUM = DROP_SUM + 1
    ENDDO DROPLET_INSERT_LOOP
  
    ! Compute weighting factor for the droplets just inserted
  
    IF (DROP_SUM > 0) THEN
-      PWT0 = FLOW_RATE*MAX(T-DV%T,0.01_EB)/MASS_SUM
+      IF(PY%SPRAY_PATTERN_INDEX>0) THEN
+         PWT0 = FLOW_RATE*MAX(T-DV%T,0.01_EB)/(MASS_SUM/SOLID_ANGLE_TOTAL_FLOWRATE)
+      ELSE
+         PWT0 = FLOW_RATE*MAX(T-DV%T,0.01_EB)/MASS_SUM
+      ENDIF
       DROPLET(NLP-DROP_SUM+1:NLP)%PWT = DROPLET(NLP-DROP_SUM+1:NLP)%PWT*PWT0
    ENDIF
    ! Indicate that droplets from this device have been inserted at this time T

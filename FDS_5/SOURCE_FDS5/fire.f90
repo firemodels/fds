@@ -1,3 +1,4 @@
+!     Last change:  JEF  25 May 2007   11:08 am
 MODULE FIRE
  
 ! Compute combustion 
@@ -327,8 +328,6 @@ DO K=1,KBAR
                RN => REACTION(NR)
                X_O(NR)  = YY(I,J,K,RN%I_OXIDIZER)*1000._EB*RHO(I,J,K)/SPECIES(RN%I_OXIDIZER)%MW*1.E-6_EB
                X_FU(NR) = YY(I,J,K,RN%I_FUEL)*1000._EB*RHO(I,J,K)/RN%MW_FUEL*1.E-6_EB
-!               IF(I>=8 .AND. J==1 .AND. K==7 .AND. TMPD>1200.) &
-!               WRITE(*,'(1X,I3,4(1X,E14.5))') NR,X_O(NR),X_FU(NR),YY(I,J,K,RN%I_OXIDIZER),YY(I,J,K,RN%I_FUEL)
                IF (X_FU(NR)<=X_FU_MIN .OR. X_O(NR)<=X_O_MIN) THEN
                   IF (NR == 1) THEN
                      NO_REACTION = .TRUE.
@@ -340,18 +339,18 @@ DO K=1,KBAR
                   NO_REACTION = .FALSE.
                ENDIF
                ETRM = ETRM1(NR)
+
 ! Local flame extinction criteria
                SPEC_LOOP: DO N=1,N_SPECIES
                   IF (N==RN%I_FUEL .OR. N==RN%I_OXIDIZER .OR. RN%N(N)==-999._EB) CYCLE SPEC_LOOP
                   IF (YY(I,J,K,N) < 1.E-20_EB) CYCLE SPEC_LOOP
                   ETRM = ETRM * (YY(I,J,K,N)*1000._EB*RHO(I,J,K)/SPECIES(N)%MW*1.E-6_EB)**RN%N(N)
                ENDDO SPEC_LOOP
-!             IF(I>=8 .AND. J==1 .AND. K==7.AND. TMPD>1200.) WRITE(*,*) NR,ETRM,TMPD,'B'
+
 ! Solve the simple ODE to deplete fuel and oxidizer due to reaction
                DX_FDT= -ETRM*X_FU(NR)**RN%N_F*X_O(NR)**RN%N_O
                X_FU_S = X_FU(NR) + DTT*DX_FDT
-               X_O_S = X_O(NR) + DTT*DX_FDT*RN%N_O/RN%N_F
-!               IF(I>=8 .AND. J==1 .AND. K==7) WRITE(*,*) II,NR,NO_REACTION,X_FU_S,'C1'
+               X_O_S = X_O(NR) + DTT*DX_FDT*RN%NU(RN%I_OXIDIZER)/RN%NU(RN%I_FUEL)
                IF (X_O_S<X_O_MIN) THEN
                   X_O_S = X_O_MIN 
                   X_FU_S = MAX(0.0_EB,X_FU(NR)-(X_O(NR)-X_O_S)*RN%NU(RN%I_FUEL)/RN%NU(RN%I_OXIDIZER))
@@ -363,14 +362,11 @@ DO K=1,KBAR
                DX_FDT= -ETRM*X_FU_S**RN%N_F*X_O_S**RN%N_O
                X_FU_N(NR) = .5_EB*(X_FU(NR)+X_FU_S+DTT*DX_FDT)
                X_O_N(NR)  = .5_EB*(X_O(NR)+X_O_S+DTT*DX_FDT*RN%NU(RN%I_OXIDIZER)/RN%NU(RN%I_FUEL))
-!               IF(I>=8 .AND. J==1 .AND. K==7) WRITE(*,*) II,NR,NO_REACTION,X_FU_N(NR),'C2'               
                IF (X_O_N(NR)<X_O_MIN) &
                   X_FU_N(NR) = MAX(0.0_EB,0.5_EB*((X_FU(NR)+X_FU_S)-(X_O(NR)+X_O_S)*RN%NU(RN%I_FUEL)/RN%NU(RN%I_OXIDIZER)))
                IF (X_FU_N(NR)<X_FU_MIN) X_FU_N(NR) = X_FU_MIN
-!               IF(I>=8 .AND. J==1 .AND. K==7.AND. TMPD>1200.) WRITE(*,*) II,NR,NO_REACTION,X_FU_N(NR),X_FU(NR),'C'
                DYF(NR) = MAX(-X_FU(NR),X_FU_N(NR)-X_FU(NR))*RN%MW_FUEL*0.001_EB*1.E6_EB
                Q_NR(NR) = -DYF(NR) * HFAC_F(NR)
-!               IF(I>=8 .AND. J==1 .AND. K==7.AND. TMPD>1200.) WRITE(*,*) I,Q_NR(NR),DYF(NR),'D'             
                IF (Q(I,J,K) + Q_NR(NR) > Q_UPPER) THEN
                   QFAC = (1._EB - (Q(I,J,K) + Q_NR(NR) - Q_UPPER) / Q_NR(NR))
                   DYF(NR) = DYF(NR) * QFAC
@@ -386,6 +382,7 @@ DO K=1,KBAR
             ENDDO REACTION_LOOP
             IF (NO_REACTION) EXIT ODE_LOOP
             NO_REACTION = .FALSE.
+
 ! Update HRR and species mass fractions
          ENDDO ODE_LOOP
       ENDDO ILOOP3
