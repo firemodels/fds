@@ -27,8 +27,8 @@ INTEGER, PARAMETER :: FUEL_INDEX=1,O2_INDEX=2,N2_INDEX=3,H2O_INDEX=4,CO2_INDEX=5
 INTEGER, PARAMETER :: DIRICHLET=1,NEUMANN=2                                                 ! Pressure Boundary Conditions
 INTEGER, PARAMETER :: PYROLYSIS_NONE=0,PYROLYSIS_SOLID=1,PYROLYSIS_LIQUID=2,&
                       PYROLYSIS_MATERIAL=3,PYROLYSIS_SPECIFIED=4                            ! Pyrolysis model
-INTEGER, PARAMETER :: ATMOSPHERIC=1, PARABOLIC=2, ONED_PARABOLIC=3                          ! Surface velocity profile
-INTEGER, PARAMETER :: CELL_CENTER=1, CELL_FACE=2, CELL_EDGE=3                               ! Cell position for output quantities
+INTEGER, PARAMETER :: ATMOSPHERIC=1, PARABOLIC=2, ONED_PARABOLIC=3                            ! Surface velocity profile
+INTEGER, PARAMETER :: CELL_CENTER=1, CELL_FACE=2, CELL_EDGE=3                            ! Cell position for output quantities
 
 ! Miscellaneous logical constants
  
@@ -94,6 +94,12 @@ INTEGER, PARAMETER :: MAX_LAYERS=20, MAX_MATERIALS=20, MAX_MATERIALS_TOTAL=400, 
 CHARACTER(30) :: RAMP_ID(1000),RAMP_TYPE(1000)
 INTEGER :: I_RAMP_GX,I_RAMP_GY,I_RAMP_GZ,N_RAMP
 INTEGER, PARAMETER :: TIME_HEAT=-1,TIME_VELO=-2,TIME_TEMP=-3,TANH_RAMP=-2,TSQR_RAMP=-1
+
+! TABLe parameters
+CHARACTER(30) :: TABLE_ID(1000)
+INTEGER :: N_TABLE=0,TABLE_TYPE(1000)
+INTEGER, PARAMETER :: SPRAY_PATTERN=1
+
  
 ! Miscellaneous integer constants
  

@@ -174,7 +174,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       END SELECT
    ENDDO WLOOP2
  
-   ! Sum up the convective and diffusive terms in the transport equation and store in DEL_RHO_D_DEL_Y
+  ! Sum up the convective and diffusive terms in the transport equation and store in DEL_RHO_D_DEL_Y
  
    DO K=1,KBAR
       DO J=1,JBAR
@@ -283,7 +283,6 @@ CASE(.TRUE.) PREDICTOR_STEP
    ENDDO
 
    ! Correct mass fractions above or below clip limits
-
    CALL CHECK_MASS_FRACTION
 
    ! Predict background pressure at next time step
@@ -387,7 +386,7 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Correct densities above or below clip limits
    CALL CHECK_DENSITY
-
+ 
    ! Extract Y_n from rho*Y_n
 
    DO N=1,N_SPECIES
@@ -401,11 +400,9 @@ CASE(.FALSE.) PREDICTOR_STEP
    ENDDO
 
    ! Correct mass fractions above or below clip limits
- 
    CALL CHECK_MASS_FRACTION
 
    ! Correct background pressure
- 
    DO I=1,N_ZONE
       PBAR(:,I) = .5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_S_DT(I)*DT)
    ENDDO
@@ -749,21 +746,12 @@ SPECIESLOOP: DO N=1,N_SPECIES
                   YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMIN - Y00
                
                   CONST = MIN(1._EB,RHY0/SUM)
- !!!              WRITE(*,*) I,J,K,'MIN'
- !!!              WRITE(*,'(1X,4(E16.8,1X))') SUM,YMIN,CONST
- !!!              WRITE(*,'(1X,7(E10.3,1X))') YYP(I,J,K,N),YYP(I-1,J,K,N),YYP(I+1,J,K,N),YYP(I,J-1,K,N),YYP(I,J+1,K,N),&
- !!!                                      YYP(I,J,K-1,N),YYP(I,J,K+1,N)
- !!!              WRITE(*,'(1X,7(E10.3,1X))') YYDELTA(I,J,K),YYDELTA(I-1,J,K),YYDELTA(I+1,J,K),YYDELTA(I,J-1,K),YYDELTA(I,J+1,K),&
- !!!                       YYDELTA(I,J,K-1),YYDELTA(I,J,K+1)
                   IF (LC(-1)) YYDELTA(I-1,J,K) = YYDELTA(I-1,J,K) - RHYMI*CONST/RHOP(I-1,J,K)
                   IF (LC( 1)) YYDELTA(I+1,J,K) = YYDELTA(I+1,J,K) - RHYPI*CONST/RHOP(I+1,J,K)
                   IF (LC(-2)) YYDELTA(I,J-1,K) = YYDELTA(I,J-1,K) - RHYMJ*CONST/RHOP(I,J-1,K)
                   IF (LC( 2)) YYDELTA(I,J+1,K) = YYDELTA(I,J+1,K) - RHYPJ*CONST/RHOP(I,J+1,K)
                   IF (LC(-3)) YYDELTA(I,J,K-1) = YYDELTA(I,J,K-1) - RHYMK*CONST/RHOP(I,J,K-1)
                   IF (LC( 3)) YYDELTA(I,J,K+1) = YYDELTA(I,J,K+1) - RHYPK*CONST/RHOP(I,J,K+1)
-!!!              WRITE(*,'(1X,7(E10.3,1X))') RHY0,RHYMI,RHYPI,RHYMJ,RHYPJ,RHYMK,RHYPK
-!!!              WRITE(*,'(1X,7(E10.3,1X))') YYDELTA(I,J,K),YYDELTA(I-1,J,K),YYDELTA(I+1,J,K),YYDELTA(I,J-1,K),YYDELTA(I,J+1,K),&
-!!!                       YYDELTA(I,J,K-1),YYDELTA(I,J,K+1)
                ENDIF
             ENDIF
          ENDDO CHECK_LOOP
@@ -871,21 +859,12 @@ SPECIESLOOP: DO N=1,N_SPECIES
                ELSE
                   YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMAX - Y00               
                   CONST = MIN(1._EB,RHY0/SUM)
-!!!               WRITE(*,*) I,J,K,'MAX'
-!!!               WRITE(*,'(1X,4(E16.8,1X))') SUM,YMAX,CONST
-!!!               WRITE(*,'(1X,7(E10.3,1X))') YYP(I,J,K,N),YYP(I-1,J,K,N),YYP(I+1,J,K,N),YYP(I,J-1,K,N),YYP(I,J+1,K,N),&
-!!!                                       YYP(I,J,K-1,N),YYP(I,J,K+1,N)
-!!!               WRITE(*,'(1X,7(E10.3,1X))') YYDELTA(I,J,K),YYDELTA(I-1,J,K),YYDELTA(I+1,J,K),YYDELTA(I,J-1,K),YYDELTA(I,J+1,K),&
-!!!                        YYDELTA(I,J,K-1),YYDELTA(I,J,K+1)
                   IF (LC(-1)) YYDELTA(I-1,J,K) = YYDELTA(I-1,J,K) + RHYMI*CONST/RHOP(I-1,J,K)
                   IF (LC( 1)) YYDELTA(I+1,J,K) = YYDELTA(I+1,J,K) + RHYPI*CONST/RHOP(I+1,J,K)
                   IF (LC(-2)) YYDELTA(I,J-1,K) = YYDELTA(I,J-1,K) + RHYMJ*CONST/RHOP(I,J-1,K)
                   IF (LC( 2)) YYDELTA(I,J+1,K) = YYDELTA(I,J+1,K) + RHYPJ*CONST/RHOP(I,J+1,K)
                   IF (LC(-3)) YYDELTA(I,J,K-1) = YYDELTA(I,J,K-1) + RHYMK*CONST/RHOP(I,J,K-1)
                   IF (LC( 3)) YYDELTA(I,J,K+1) = YYDELTA(I,J,K+1) + RHYPK*CONST/RHOP(I,J,K+1)
-!!!               WRITE(*,'(1X,7(E10.3,1X))') RHY0,RHYMI,RHYPI,RHYMJ,RHYPJ,RHYMK,RHYPK
-!!!               WRITE(*,'(1X,7(E10.3,1X))') YYDELTA(I,J,K),YYDELTA(I-1,J,K),YYDELTA(I+1,J,K),YYDELTA(I,J-1,K),YYDELTA(I,J+1,K),&
-!!!                        YYDELTA(I,J,K-1),YYDELTA(I,J,K+1)
                ENDIF
             ENDIF
          ENDDO CHECK_LOOP2
