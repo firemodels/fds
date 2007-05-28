@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectType="typeStaticLibrary" ProjectCreator="Intel Fortran" Keyword="Static Library" Version="9.10" ProjectIdGuid="{9CDA6255-175F-40F8-9BCF-8820879D179B}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" PreprocessorDefinitions="pp_cvf;pp_PART5" LocalSavedScalarsZero="true" CallingConvention="callConventionStdRef" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" CompileOnly="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFLibrarianTool" OutputFile="../../libdbg/smokeview_fort.lib" SuppressStartupBanner="true"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)/$(InputName).res"/></Configuration>
+		<Configuration Name="Release|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" PreprocessorDefinitions="pp_cvf,pp_PART5" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreaded" CompileOnly="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFLibrarianTool" OutputFile="../../lib/smokeview_fort.lib" SuppressStartupBanner="true"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)/$(InputName).res"/></Configuration>
+		<Configuration Name="sv5_test|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" PreprocessorDefinitions="pp_cvf,pp_PART5" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreaded" CompileOnly="true"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)/$(InputName).res"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFLibrarianTool" OutputFile="../../libtest/smokeview_fort.lib" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="sv5_test_debug|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" PreprocessorDefinitions="pp_cvf;pp_PART5" LocalSavedScalarsZero="true" CallingConvention="callConventionStdRef" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" CompileOnly="true"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)/$(InputName).res"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFLibrarianTool" OutputFile="../../libtestdbg/smokeview_fort.lib" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath="..\..\..\source\smokeview\getdata.f90"/>
+		<File RelativePath="..\..\..\source\smokeview\getsizes.f90"/></Filter>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/></Files>
+	<Globals/></VisualStudioProject>
