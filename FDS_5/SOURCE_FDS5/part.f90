@@ -368,7 +368,6 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
             CALL RANDOM_NUMBER(RN)
             PHI_RN = RN*TWOPI
          ENDIF PICK_PATTERN
-         PHI_RN = RN*TWOPI
          PHI_RN = PHI_RN + DV%ROTATION  ! Adjust for rotation of head by rotating about z-axis
          !  Adjust for tilt of sprinkler pipe
          SPHI   = SIN(PHI_RN)

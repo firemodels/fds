@@ -3679,19 +3679,30 @@ COUNT_TABLE_POINTS: DO N=1,N_TABLE
       SELECT CASE(TABLE_TYPE(N))
          CASE (SPRAY_PATTERN)
             MESSAGE='null'
-            IF (TABLE_DATA(1)<0. .OR.           TABLE_DATA(1)>180) &
-               WRITE(MESSAGE,'(A,I5,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st lattitude'
-            IF (TABLE_DATA(2)<TABLE_DATA(1).OR. TABLE_DATA(2)>180) &
-               WRITE(MESSAGE,'(A,I5,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd lattitude'
-            IF (TABLE_DATA(3)<0. .OR.           TABLE_DATA(3)>360) &
-               WRITE(MESSAGE,'(A,I5,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st longitude'
-            IF (TABLE_DATA(4)<TABLE_DATA(3).OR. TABLE_DATA(4)>360) &
-               WRITE(MESSAGE,'(A,I5,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd longitude'
-            IF (TABLE_DATA(5)<0) &
-               WRITE(MESSAGE,'(A,I5,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad velocity'
-            IF (TABLE_DATA(6)<0) &
-               WRITE(MESSAGE,'(A,I5,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad mass flow'
-            IF (MESSAGE/='null') CALL SHUTDOWN(MESSAGE)
+            IF (TABLE_DATA(1)<0. .OR.           TABLE_DATA(1)>180) THEN
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st lattitude'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            IF (TABLE_DATA(2)<TABLE_DATA(1).OR. TABLE_DATA(2)>180) THEN
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd lattitude'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            IF (TABLE_DATA(3)<-180. .OR.        TABLE_DATA(3)>360) THEN
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st longitude'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            IF (TABLE_DATA(4)<TABLE_DATA(3).OR. TABLE_DATA(4)>360) THEN
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd longitude'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            IF (TABLE_DATA(5)<0) THEN
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad velocity'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            IF (TABLE_DATA(6)<0) THEN
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad mass flow'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
       END SELECT
          
       56 IF (IOS>0) CALL SHUTDOWN('ERROR: Problem with TABLE '//TRIM(TABLE_ID(N)) )
