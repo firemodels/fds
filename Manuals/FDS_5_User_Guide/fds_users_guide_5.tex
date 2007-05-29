@@ -2993,12 +2993,16 @@ it does with various quantities associated with areas, like {\ct HRRPUA}.
 
 \clearpage
 
-\section{User-Specified Functions: The \texorpdfstring{{\tt RAMP}}{RAMP} Namelist Group}
+\section{User-Specified Functions: The \texorpdfstring{{\tt RAMP}}{RAMP} and \texorpdfstring{{\tt TABL}}{TABL} Namelist Groups}
 \label{info:RAMP}\index{Namelist Group!RAMP}
+\label{info:TABL}\index{Namelist Group!TABL}
 
 Many of the parameters specified in the input file are fixed constants. However, there are several parameters that may vary in
-time or temperature. These functions can be complex, thus you have to have some way to convey them. The namelist group
-{\ct RAMP}, as it name implies, allows you to control the time or temperature history of selected parameters.
+time, temperature, or space. These functions can be complex, thus you have to have some way to convey them. The namelist group
+{\ct RAMP} and {\ct TABL}, as it names imply, allow you to control the behavior of selected parameters.  {\ct RAMP} allows you
+to specify a function with one independent variable (such as time) is mapped to one dependent variable (such as velocity). 
+{\ct TALB} allows for the specification of a mapping from multiple independent variables (such as a solid angle) to multiple 
+dependent variables (such as a sprinkler flow rate and droplet speed).
 
 \subsection{Time-Dependent Functions}
 
@@ -3144,8 +3148,31 @@ Note that each set of {\ct RAMP} lines must have a unique {\ct ID} and that the 
 be listed with monotonically increasing {\ct T}.
 \end{warning}
 
+\subsection{Tabular functions}
 
+Properties such as a sprinkler spray pattern vary multi-dimensionally. In such cases, use
+the {\ct TABL} function.  In the example below, the spray pattern is defined as two 10 m/s and 20 kg/s jets
+centered on 45 degrees from the vertical with a 180 degree seperation.
 
+\footnotesize
+\begin{verbatim}
+&PROP ID='y-pipe', 
+      QUANTITY='SPRINKLER LINK TEMPERATURE', 
+      OFFSET=0.10, 
+      PART_ID='water_drops', 
+      SPRAY_PATTERN_TABLE='TABLE1',
+      SMOKEVIEW_ID='sprinkler_upright' /
+
+&TABL ID='TABLE1',TABLE_DATA=40,50,85,95,10,20/
+&TABL ID='TABLE1',TABLE_DATA=40,50,185,10,20/
+\end{verbatim}
+\normalsize
+
+\begin{warning}
+\noindent
+Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Specific requirements on ordering the lines
+will depend upon the type of TABL and those requirements are provided in the appropriate section in this guide.
+\end{warning}
 
 \section{Coloring Obstructions, Vents, Surfaces and Meshes}
 \label{info:colors}\index{Colors}
@@ -4128,6 +4155,7 @@ For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave
 the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the orientation of
 the sprinkler is (0,0,-1), the default. The droplets are uniformly
 distributed within this belt.
+\item[{\ct SPRAY\_PATTERN\_TABLE}] Name of a set of {\ct TABL} lines containing the description of the spray pattern.
 \item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets.
 See Section~\ref{info:PART} for additional details.
 \end{description}
@@ -4145,7 +4173,42 @@ directions; bouncing off obstructions, and consuming CPU time.
 For more information about sprinklers, their activation and spray dynamics, is included in the FDS
 Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 
+\subsubsection{Specifying Complex Spray Patterns}
+\label{info:spraypattern}
+\index{Spray Pattern}
+\index{spinkler!Spray Pattern}
 
+If a more complex spray pattern is desired than can be achieved by using {\ct SPRAY\_ANGLE}, {\ct VELOCITY}, 
+and {\ct FLOW\_RATE}, then a {\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL}) 
+lines.  For a spray pattern, specify one or more {\ct TABL} lines of the format:
+
+\footnotesize
+\begin{verbatim}
+&TABL ID='table_id', TABLE_DATA=L1,L2,L3,L4,V,F/
+\end{verbatim} \normalsize
+
+where each {\ct TABL} line for a given {\ct 'table\_id'} provides information about the spherical distribution of the spray pattern
+for a specified solid angle. {\ct L1} and {\ct L2} are longitude range in degree for the solid angle measured in degrees from 
+the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  {\ct L3} and {\ct L4} are the
+lattitude range in degrees 
+where 0 or 360 is the {\ct -x} axis and 90 is the {\ct -y} axis.  {\ct V} and {\ct F} are respectively the velocity (m/s)
+and flow rate (kg/s) for that solid angle.  The {\ct TABL} lines can be specified in any order.
+
+In the example below, the spray pattern is defined as two 10 m/s and 20 kg/s jets
+centered on 45 degrees from the vertical with a 180 degree seperation.
+
+\footnotesize
+\begin{verbatim}
+&PROP ID='y-pipe', 
+      QUANTITY='SPRINKLER LINK TEMPERATURE', 
+      OFFSET=0.10, 
+      PART_ID='water_drops', 
+      SPRAY_PATTERN_TABLE='TABLE1',
+      SMOKEVIEW_ID='sprinkler_upright' /
+
+&TABL ID='TABLE1',TABLE_DATA=40,50,85,95,10,20/
+&TABL ID='TABLE1',TABLE_DATA=40,50,185,10,20/
+\end{verbatim} \normalsize
 
 \subsection{Nozzles}
 \label{info:nozzles}
@@ -5889,6 +5952,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct QUANTITY}                          & Character     & Name of associate output         &                       &           \\ \hline
 {\ct RTI}                               & Real          & Response Time Index              & $\sqrt{\hbox{m~s}}$   & 100       \\ \hline
 {\ct SPRAY\_ANGLE(2)}                   & Real          & Cone angles for water spray      & deg                   & 60.,75.   \\ \hline
+{\ct SPRAY\_PATTERN\_TABLE}             & Character     & {\ct TABL} fpr the spray pattern &                       &        s   \\ \hline
 {\ct SMOKEVIEW\_ID}                     & Character     & Name of drawn object             &                       &           \\ \hline
 \end{tabular*}
 \end{table}
@@ -6115,6 +6179,25 @@ Only prescribe those parameters which are necessary to describe the desired scen
 %                FYI,MATL_ID,BACKING,TMP_BACK,HRRPUA,MLRPUA,SHRINK, &
 %                TEXTURE_MAP,TEXTURE_WIDTH,TEXTURE_HEIGHT,RGB,TRANSPARENCY, BURN_AWAY,LEAK_PATH,DUCT_PATH,ADIABATIC, &
 %                EXTERNAL_FLUX,MASS_FLUX_TOTAL,GEOMETRY,STRETCH_FACTOR,MATL_MASS_FRACTION,EMISSIVITY,COLOR,POROUS
+
+\vspace{\baselineskip}
+
+\vfill
+
+\section{\texorpdfstring{{\tt TABL}}{TABL} (Table Parameters)}
+
+\hspace{1in}
+
+\begin{table}[H]
+\caption{For more information see Section~\ref{info:TABL}.}\label{tbl:TABL}
+\noindent
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\hline
+\multicolumn{5}{|c|}{{\ct TABL} (Time Parameters)} \\ \hline \hline
+{\ct ID}          & Character   & IDentifier                         &             &     \\ \hline
+{\ct TABLE\_DATA}  & Real Array  & Data for one row of the table      &             &     \\ \hline
+\end{tabular*}
+\end{table}
 
 \vspace{\baselineskip}
 
