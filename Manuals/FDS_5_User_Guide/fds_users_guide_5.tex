@@ -3151,7 +3151,7 @@ be listed with monotonically increasing {\ct T}.
 \subsection{Tabular functions}
 
 Properties such as a sprinkler spray pattern vary multi-dimensionally. In such cases, use
-the {\ct TABL} function.  In the example below, the spray pattern is defined as two 10 m/s and 20 kg/s jets
+the {\ct TABL} function.  In the example below, the spray pattern is defined as two 10 m/s and 20 lpm jets
 centered on 45 degrees from the vertical with a 180 degree seperation.
 
 \footnotesize
@@ -3159,12 +3159,13 @@ centered on 45 degrees from the vertical with a 180 degree seperation.
 &PROP ID='y-pipe', 
       QUANTITY='SPRINKLER LINK TEMPERATURE', 
       OFFSET=0.10, 
+      FLOW_RATE=40.,
       PART_ID='water_drops', 
       SPRAY_PATTERN_TABLE='TABLE1',
       SMOKEVIEW_ID='sprinkler_upright' /
 
-&TABL ID='TABLE1',TABLE_DATA=40,50,85,95,10,20/
-&TABL ID='TABLE1',TABLE_DATA=40,50,185,10,20/
+&TABL ID='TABLE1',TABLE_DATA=40,50,85,95,10,0.5/
+&TABL ID='TABLE1',TABLE_DATA=40,50,185,10,0.5/
 \end{verbatim}
 \normalsize
 
@@ -4180,7 +4181,8 @@ Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 
 If a more complex spray pattern is desired than can be achieved by using {\ct SPRAY\_ANGLE}, {\ct VELOCITY}, 
 and {\ct FLOW\_RATE}, then a {\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL}) 
-lines.  For a spray pattern, specify one or more {\ct TABL} lines of the format:
+lines.  For a spray pattern, specify the total flow using {\ct FLOW\_RATE}, the name of the spray pattern using
+{\ct SPRAY\_PARTTERN\_TABLE} and then or more {\ct TABL} lines of the format:
 
 \footnotesize
 \begin{verbatim}
@@ -4192,7 +4194,7 @@ for a specified solid angle. {\ct L1} and {\ct L2} are longitude range in degree
 the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  {\ct L3} and {\ct L4} are the
 lattitude range in degrees 
 where 0 or 360 is the {\ct -x} axis and 90 is the {\ct -y} axis.  {\ct V} and {\ct F} are respectively the velocity (m/s)
-and flow rate (kg/s) for that solid angle.  The {\ct TABL} lines can be specified in any order.
+and the relative flow rate for that solid angle.  The {\ct TABL} lines can be specified in any order.
 
 In the example below, the spray pattern is defined as two 10 m/s and 20 kg/s jets
 centered on 45 degrees from the vertical with a 180 degree seperation.

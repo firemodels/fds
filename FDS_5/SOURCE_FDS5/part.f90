@@ -456,7 +456,6 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
          IF (.NOT.SOLID(IC)) EXIT CHOOSE_COORDS
  
       ENDDO CHOOSE_COORDS
- 
       ! Randomly choose droplet size according to Cumulative Distribution Function (CDF)
  
       STRATUM = MOD(NLP,NSTRATA) + 1
@@ -475,10 +474,9 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
    ENDDO DROPLET_INSERT_LOOP
  
    ! Compute weighting factor for the droplets just inserted
- 
    IF (DROP_SUM > 0) THEN
       IF(PY%SPRAY_PATTERN_INDEX>0) THEN
-         PWT0 = FLOW_RATE*MAX(T-DV%T,0.01_EB)/(MASS_SUM/SOLID_ANGLE_TOTAL_FLOWRATE)
+         PWT0 = FLOW_RATE*MAX(T-DV%T,0.01_EB)/(MASS_SUM*REAL(PC%N_INSERT,EB)/SOLID_ANGLE_TOTAL_FLOWRATE)
       ELSE
          PWT0 = FLOW_RATE*MAX(T-DV%T,0.01_EB)/MASS_SUM
       ENDIF

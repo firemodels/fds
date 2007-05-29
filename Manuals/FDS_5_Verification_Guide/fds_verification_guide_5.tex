@@ -1403,14 +1403,15 @@ ensure that this is the case. The HRR curve for this example is given here:
 A common way of measuring the spray distribution for any fire sprinkler is called a ``bucket test.''  Usually, one or several sprinklers is
 mounted a specified distance above an array of catch bins, the water flows for a given period of time, and the water flux distribution is calculated
 from the accumulated water mass in each bin. In the test case {\bf bucket\_test}, a single sprinkler is mounted 10~cm below a 5~m ceiling. Water
-flows for 10~min at a constant rate of 180~L/min. The total mass of water discharged is
+flows for 5~s at a constant rate of 60~L/min.  The simulation continues for another 5~s to allow water drops time to reach the
+floor. The total mass of water discharged is
 \be
-  \mathrm{ 180 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 600 \; s = 1800 \; kg }
+  \mathrm{ 60 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 5 \; s = 5 \; kg }
 \ee
 In the simulation, the boundary quantity {\ct water\_drops\_AMPUA} (Accumulated Mass Per Unit Area) records the total water mass per unit area (kg/m$^2$), analogous to
 actual buckets the size of a grid cell.
-Summing the values of {\ct water\_drops\_AMPUA} over the entire floor yields 1764~kg. Where is the missing water? Some droplets evaporate, and some droplets
-fly beyond the computational domain. Also, since the simulation starts at time zero, there is a several second time lag before the first droplets reach the floor. Note that
+Summing the values of {\ct water\_drops\_AMPUA} over the entire floor yields 4.96~kg. Where is the missing water? Some droplets evaporate, and some droplets
+fly beyond the computational domain. Also, there remain a small number of suspended drops at the end of the simulation. Note that
 there are no actual ``buckets'' in the simulation.
 
 The accumulated water mass at the floor is extracted from the boundary ({\ct BNDF}) file via the command line program {\bf fds2ascii}. Here is a transcript of the session
@@ -1435,7 +1436,7 @@ y
 -5 5 -5 5 0 1
   1   MESH  1, water_drops_AMPUA
   Enter starting and ending time for averaging (s)
-599 601
+9 10
   Enter orientation: (plus or minus 1, 2 or 3)
 3
   Enter number of variables
@@ -1457,10 +1458,10 @@ The test case from the prior section is modified to create two jets of water.
 \footnotesize
 \begin{verbatim}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10, PART_ID='water_drops', 
-      SPRAY_PATTERN_TABLE='TABLE1', SMOKEVIEW_ID='sprinkler_upright' /
+      FLOW_RATE=60.,SPRAY_PATTERN_TABLE='TABLE1', SMOKEVIEW_ID='sprinkler_upright' /
 
-&TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,10/
-&TABL ID='TABLE1',TABLE_DATA=30,31,179,180,5,40
+&TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,0.2/
+&TABL ID='TABLE1',TABLE_DATA=30,31,179,180,5,0.8/
 \end{verbatim}
 \normalsize
 
@@ -1468,7 +1469,7 @@ The jets are seperated by 180 degrees.
 The jet in the {\ct -x} direction is given one quarter the flow rate of the jet in the {\ct +x} direction.
 
 Viewing the particles in Smokeview shows two distinct jets of droplets in opposite directions.  
-Following the post processing instructions above, except for using '9 10' for the integration time,  you can observe that
+Following the post processing instructions above,  you can observe that
 the {\ct +x} jet does have four times the flow of the {\ct -x} jet.
 
 \clearpage
