@@ -585,7 +585,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
  
    Q_S                  = 0._EB
 
-   PYROLYSIS_MATERIAL: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
+   PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
 
    MFLUX                = MASSFLUX(IW,I_FUEL)
    MASSFLUX(IW,I_FUEL)  = 0._EB
@@ -826,7 +826,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
       ! Take off energy corresponding to specified burning rate
       Q_S(1) = Q_S(1) - MASSFLUX(IW,I_FUEL)*SF%H_V*RDX_S(1)
 
-   ENDIF PYROLYSIS_MATERIAL
+   ENDIF PYROLYSIS_MATERIAL_IF
 
    ! Calculate thermal properties 
  
