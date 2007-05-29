@@ -1450,8 +1450,26 @@ bucket_test_fds2ascii.csv
 \normalsize \noindent
 
 
+\subsection{Complex Spray Patterns ({\bf bucket\_test\_2}) }
 
+The test case from the prior section is modified to create two jets of water.
 
+\footnotesize
+\begin{verbatim}
+&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10, PART_ID='water_drops', 
+      SPRAY_PATTERN_TABLE='TABLE1', SMOKEVIEW_ID='sprinkler_upright' /
+
+&TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,10/
+&TABL ID='TABLE1',TABLE_DATA=30,31,179,180,5,40
+\end{verbatim}
+\normalsize
+
+The jets are seperated by 180 degrees.  
+The jet in the {\ct -x} direction is given one quarter the flow rate of the jet in the {\ct +x} direction.
+
+Viewing the particles in Smokeview shows two distinct jets of droplets in opposite directions.  
+Following the post processing instructions above, except for using '9 10' for the integration time,  you can observe that
+the {\ct +x} jet does have four times the flow of the {\ct -x} jet.
 
 \clearpage
 
