@@ -45,8 +45,8 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date (All Nodes)
  
-COMPILE_DATE   = 'May 27, 2007'
-VERSION_STRING = '5_RC4+' 
+COMPILE_DATE   = 'May 30, 2007'
+VERSION_STRING = '5_RC5' 
 VERSION_NUMBER = 5.0
  
 ! Read input from CHID.data file (All Nodes)
