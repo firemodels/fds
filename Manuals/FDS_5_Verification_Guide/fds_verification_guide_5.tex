@@ -114,7 +114,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, May 27, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, May 30, 2007)}
 
 \vspace{.5in}
 
@@ -1457,7 +1457,7 @@ The test case from the prior section is modified to create two jets of water.
 
 \footnotesize
 \begin{verbatim}
-&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10, PART_ID='water_drops', 
+&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10, PART_ID='water_drops',
       FLOW_RATE=60.,SPRAY_PATTERN_TABLE='TABLE1', SMOKEVIEW_ID='sprinkler_upright' /
 
 &TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,0.2/
@@ -1465,10 +1465,10 @@ The test case from the prior section is modified to create two jets of water.
 \end{verbatim}
 \normalsize
 
-The jets are seperated by 180 degrees.  
+The jets are seperated by 180 degrees.
 The jet in the {\ct -x} direction is given one quarter the flow rate of the jet in the {\ct +x} direction.
 
-Viewing the particles in Smokeview shows two distinct jets of droplets in opposite directions.  
+Viewing the particles in Smokeview shows two distinct jets of droplets in opposite directions.
 Following the post processing instructions above,  you can observe that
 the {\ct +x} jet does have four times the flow of the {\ct -x} jet.
 
