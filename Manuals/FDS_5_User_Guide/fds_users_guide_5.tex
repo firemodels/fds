@@ -246,7 +246,7 @@
 \vspace{1in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 27, 2007)}
+\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, May 30, 2007)}
 
 \vspace{.5in}
 
@@ -665,7 +665,7 @@ FDS and Smokeview can be found at the web site.
 \label{info:sfcvs}
 \index{Download}
 Detailed instructions on how to download executables, manuals, source-code and related utilities,
-can be found on the FDS-SMV Website 
+can be found on the FDS-SMV Website
 \href{http://fire.nist.gov/fds}{{\ct http://fire.nist.net/fds}} for more information.
 The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac OS X, and Linux.  For other operating systems, consult the web site.
 
@@ -943,30 +943,30 @@ control functions as described in Section~\ref{info:CTRL}.
 \chapter{User Support}
 \index{Support}
 It is not unusual over the course of a
-project to run into various problems, some related to FDS, some related to your computer. 
-FDS is not a typical PC application. It is a serious calculation that pushes your computer's 
+project to run into various problems, some related to FDS, some related to your computer.
+FDS is not a typical PC application. It is a serious calculation that pushes your computer's
 processor and memory to its limits. In fact, there are no hardwired bounds within FDS that
 prevent you from starting a calculation that is too much for your hardware.
 Even if your machine has adequate memory (RAM), you can still easily set up calculations that can require
-weeks or months to complete. It is difficult to predict at the start of a simulation just how long and 
-how much memory will be required. Learn how to monitor the resource usage of your computer. 
+weeks or months to complete. It is difficult to predict at the start of a simulation just how long and
+how much memory will be required. Learn how to monitor the resource usage of your computer.
 Start with small calculations and build your way up.
 
-Although many features in FDS are fairly mature, there are many that are not. FDS is used for 
-practical engineering applications, but also for research in fire and combustion. As you become 
+Although many features in FDS are fairly mature, there are many that are not. FDS is used for
+practical engineering applications, but also for research in fire and combustion. As you become
 more familiar with the software, you will inevitably run into areas that are of current research
-interest. Indeed, burning a roomful of ordinary furniture is one of the most challenging applications 
-of the model. So be patient, and learn to dissect a given scenario into its constitutive parts. 
+interest. Indeed, burning a roomful of ordinary furniture is one of the most challenging applications
+of the model. So be patient, and learn to dissect a given scenario into its constitutive parts.
 For example, do not attempt to simulate a fire spreading through an entire floor of a
-building unless you have simulated the burning of the various combustibles with relatively small calculations. 
-The examples described in the FDS Verification and Validation Guide~\cite{FDS_VV_Guide_5} should help 
+building unless you have simulated the burning of the various combustibles with relatively small calculations.
+The examples described in the FDS Verification and Validation Guide~\cite{FDS_VV_Guide_5} should help
 you to develop larger, more complicated simulations from smaller building blocks.
 
-Along with the FDS User's Guide, there are resources available on the internet. 
-These include an ``Issue'' tracker, that allows you to report bugs, feature requests and ask specific clarifying questions, 
-and ``Group Discussions,'' which support more general topics than just specific problems. 
-Before using these on-line resources, it is important to first try to solve your own 
-problems by performing simple test calculations, or debugging your input file. The next few sections 
+Along with the FDS User's Guide, there are resources available on the internet.
+These include an ``Issue'' tracker, that allows you to report bugs, feature requests and ask specific clarifying questions,
+and ``Group Discussions,'' which support more general topics than just specific problems.
+Before using these on-line resources, it is important to first try to solve your own
+problems by performing simple test calculations, or debugging your input file. The next few sections
 provide a list of error statements and suggestions on how to solve problems.
 
 
@@ -979,7 +979,7 @@ Following is a list of common error statements and how to diagnose the problems:
 The most common errors in FDS are due to mis-typed input statements.
 These errors result in the immediate halting of the program and a statement like, ``ERROR: Problem
 with the HEAD line.'' For these errors, check the line in the input file named in the error statement.
-Make sure the parameter names are spelled correctly. Make sure that a / (forward slash) 
+Make sure the parameter names are spelled correctly. Make sure that a / (forward slash)
 is put at the end of each namelist entry. Make sure that the right type of information is
 being provided for each parameter, like whether one real number is expected, or several integers, or
 whatever. Make sure there are no non-ASCII characters being used, as can sometimes happen when text is
@@ -1017,7 +1017,7 @@ somewhat on the size of the calculation so that the computer can comfortably run
 case. Trying to run with 90~\% to 100~\% of computer resources is risky.
 In fact, for a typical Windows PC with 4 GB RAM, only 2 GB will be available to FDS, based on user feedback.
 
-\item[{\bf Run-Time Errors}:] \index{Support!Error Statements!Run-Time} 
+\item[{\bf Run-Time Errors}:] \index{Support!Error Statements!Run-Time}
 An error occurs either within the computer operating system or the
 FDS program. An error message is printed out by the operating system of
 the computer onto the screen or into the diagnostic output file. This
@@ -1061,12 +1061,12 @@ such as memory size, disk space, {\em etc.}
 If that does not solve the problem, report the problem with as much information about the error message and
 circumstances related to the problem. The input file should be simplified
 as much as possible so that the bug occurs early in the calculation.
-Attach the simplified input file if necessary, following the instructions provided at the web site.  
+Attach the simplified input file if necessary, following the instructions provided at the web site.
 In this way, the developers can quickly run the problem input file and hopefully diagnose the problem.
 
 \begin{warning}
 \noindent
-NOTE: Reports of specific problems, feature requests and enhancements 
+NOTE: Reports of specific problems, feature requests and enhancements
 should be posted to the Issue Tracker and not the Discussion Group.
 \end{warning}
 
@@ -1080,20 +1080,20 @@ should be posted to the Issue Tracker and not the Discussion Group.
 \chapter{The Basic Structure of an Input File}
 \label{info:fdsBasic} \index{Input File!Overview}
 
-The operation of FDS is based on a single input text\footnote{ASCII -- American Standard Code 
+The operation of FDS is based on a single input text\footnote{ASCII -- American Standard Code
 for Information Interchange} file containing parameters organized into
 {\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups. \index{Namelist Group}
 The input file provides FDS  with all of the necessary information to
 describe the scenario.
 The input file is saved with a name such as {\bf job\_name.fds},
 where {\bf job\_name} is any character string that helps to identify
-the simulation. If this same string is repeated under the {\ct HEAD} namelist group within the 
+the simulation. If this same string is repeated under the {\ct HEAD} namelist group within the
 input file, then all of the output files associated with the calculation will then have this common name.
 
 \begin{warning}
 \noindent
 There should be no blank spaces in the job name. Instead use the underscore
-character to represent a space.  Using an underscore characters instead of a space also applies 
+character to represent a space.  Using an underscore characters instead of a space also applies
 to the general practice of naming directories on your system.
 \end{warning}
 
@@ -1115,7 +1115,7 @@ To ensure that FDS reads the entire input file, it is possible to add \index{Nam
 
 \footnotesize
 \begin{verbatim}
-&TAIL / 
+&TAIL /
 \end{verbatim}
 \normalsize \noindent
 as the last line at the end of the input file. This completes the file from {\ct \&HEAD} to {\ct \&TAIL}.
@@ -1768,7 +1768,7 @@ To make this correction, simply include the statement {\ct BAROCLINIC=.TRUE.}
 on the {\ct MISC} line. In a DNS calculation ({\ct DNS=.TRUE.}), the
 correction is made by default. However, for an LES calculation (the default mode in FDS),
 the correction must be explicitly invoked. The cost of the
-correction is not prohibitive -- try calculations with and without 
+correction is not prohibitive -- try calculations with and without
 the correction to determine if its inclusion is warranted.
 
 
@@ -3000,8 +3000,8 @@ it does with various quantities associated with areas, like {\ct HRRPUA}.
 Many of the parameters specified in the input file are fixed constants. However, there are several parameters that may vary in
 time, temperature, or space. These functions can be complex, thus you have to have some way to convey them. The namelist group
 {\ct RAMP} and {\ct TABL}, as it names imply, allow you to control the behavior of selected parameters.  {\ct RAMP} allows you
-to specify a function with one independent variable (such as time) is mapped to one dependent variable (such as velocity). 
-{\ct TALB} allows for the specification of a mapping from multiple independent variables (such as a solid angle) to multiple 
+to specify a function with one independent variable (such as time) is mapped to one dependent variable (such as velocity).
+{\ct TALB} allows for the specification of a mapping from multiple independent variables (such as a solid angle) to multiple
 dependent variables (such as a sprinkler flow rate and droplet speed).
 
 \subsection{Time-Dependent Functions}
@@ -3148,32 +3148,32 @@ Note that each set of {\ct RAMP} lines must have a unique {\ct ID} and that the 
 be listed with monotonically increasing {\ct T}.
 \end{warning}
 
-\subsection{Tabular functions}
 
-Properties such as a sprinkler spray pattern vary multi-dimensionally. In such cases, use
-the {\ct TABL} function.  In the example below, the spray pattern is defined as two 10 m/s and 20 lpm jets
-centered on 45 degrees from the vertical with a 180 degree seperation.
+
+\subsection{Tabular Functions}
+
+Some input quantities, such as a sprinkler spray pattern, vary multi-dimensionally. In such cases, use
+the {\ct TABL} namelist group. The format of the {\ct TABL} lines is application-specific, but in general look like this:
 
 \footnotesize
 \begin{verbatim}
-&PROP ID='y-pipe', 
-      QUANTITY='SPRINKLER LINK TEMPERATURE', 
-      OFFSET=0.10, 
-      FLOW_RATE=40.,
-      PART_ID='water_drops', 
-      SPRAY_PATTERN_TABLE='TABLE1',
-      SMOKEVIEW_ID='sprinkler_upright' /
-
-&TABL ID='TABLE1',TABLE_DATA=40,50,85,95,10,0.5/
-&TABL ID='TABLE1',TABLE_DATA=40,50,185,10,0.5/
+&TABL ID='TABLE1', TABLE_DATA=40,50, 85, 95,10,0.5 /
+&TABL ID='TABLE1', TABLE_DATA=40,50,185,195,10,0.5 /
 \end{verbatim}
 \normalsize
+
+\noindent
+A detailed description of the various table entries is given in the sections that describe quantities that use such
+tables. Currently, only sprinklers and nozzles use this group of parameters to define a complex spray pattern.
 
 \begin{warning}
 \noindent
 Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Specific requirements on ordering the lines
 will depend upon the type of TABL and those requirements are provided in the appropriate section in this guide.
 \end{warning}
+
+
+\clearpage
 
 \section{Coloring Obstructions, Vents, Surfaces and Meshes}
 \label{info:colors}\index{Colors}
@@ -3635,7 +3635,7 @@ Species &   Mol.~Wgt.        & $\sigma$  & $k/\epsilon$  \\
 
 
 
-
+\clearpage
 
 \section{Finite-Rate Combustion}
 \label{info:finite}
@@ -4022,9 +4022,9 @@ In addition, the logic associated with sensor activation and
 subsequent actions, like a vent opening, had become too complicated and prone to bugs.
 Devices are now specified with a new format that streamlines and expands the possibilities of sensor profiles.
 
-Starting in FDS 5, all devices, in the broadest sense of the word, 
+Starting in FDS 5, all devices, in the broadest sense of the word,
 are designated via the namelist group {\ct DEVC}.
-In addition, advanced functionality and properties are accommodated 
+In addition, advanced functionality and properties are accommodated
 via additional namelists groups called {\ct CTRL} (Control) and
 {\ct PROP} (Properties).
 
@@ -4046,25 +4046,25 @@ over a span of the domain, like a beam smoke detector. For example, a sprinkler 
 \noindent
 The physical coordinates of the
 device are given by a triplet of real numbers {\ct XYZ} \index{DEVC!XYZ}.
-The properties of the device are contained on the {\ct PROP} line 
+The properties of the device are contained on the {\ct PROP} line
 {\ct PROP\_ID}\index{DEVC!PROP\_ID}, which will be explained below for each of the
 special devices included in FDS.
 The character string {\ct ID} \index{DEVC!ID}is merely a descriptor to identify the
 device in the output files, and if any action is tied to its activation.
 
-Some devices have a particular orientation which can be specified 
-with various parameters; {\ct IOR}, {\ct ORIENTATION}, {\ct ROTATION}. 
-{\ct IOR} or the Index of Orientation\index{DEVC!IOR}, is necessary for any device that is 
+Some devices have a particular orientation which can be specified
+with various parameters; {\ct IOR}, {\ct ORIENTATION}, {\ct ROTATION}.
+{\ct IOR} or the Index of Orientation\index{DEVC!IOR}, is necessary for any device that is
 placed on the surface of a solid. The values $\pm$1 or $\pm$2 or $\pm$3 indicate the direction
-that the device ``points'', where 1 is parallel to the X axis, 2 is parallel to the Y axis 
-and 3 is parallel to the Z axis.  
+that the device ``points'', where 1 is parallel to the X axis, 2 is parallel to the Y axis
+and 3 is parallel to the Z axis.
 
-{\ct ORIENTATION}\index{DEVC!ORIENTATION} is used for devices that are not on a surface 
-and require a directional specification, like a sprinkler. {\ct ORIENTATION} is specified with a 
-triplet of real number values that indicate the components of the direction vector. 
+{\ct ORIENTATION}\index{DEVC!ORIENTATION} is used for devices that are not on a surface
+and require a directional specification, like a sprinkler. {\ct ORIENTATION} is specified with a
+triplet of real number values that indicate the components of the direction vector.
 The default value of {\ct ORIENTATION} is (0,0,-1).
 
-For example, a default downward-directed sprinkler spray can be redirected in other direction. 
+For example, a default downward-directed sprinkler spray can be redirected in other direction.
 If you were to prescribe,
 
 \footnotesize
@@ -4084,10 +4084,10 @@ For other devices, the {\ct ORIENTATION} would only change the way the device is
 
 Each device has a {\ct QUANTITY} \index{DEVC!QUANTITY}associated with it.
 The output file for all {\ct DEVC} quantities is a comma-delimited
-ASCII file called {\bf CHID\_devc.csv} \index{Output Files!\_devc.csv} 
+ASCII file called {\bf CHID\_devc.csv} \index{Output Files!\_devc.csv}
 (See Section~\ref{out:DEVC} for output file format.)
-This file can be imported into most spread sheet software packages. 
-If the number of {\ct DEVC} lines exceeds 256, the limit of some spreadsheet 
+This file can be imported into most spread sheet software packages.
+If the number of {\ct DEVC} lines exceeds 256, the limit of some spreadsheet
 applications, the output file will be split into appropriately sized smaller
 files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.}
 \index{DUMP!COLUMN\_DUMP\_LIMIT} on the {\ct DUMP} line.
@@ -4174,43 +4174,59 @@ directions; bouncing off obstructions, and consuming CPU time.
 For more information about sprinklers, their activation and spray dynamics, is included in the FDS
 Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 
-\subsubsection{Specifying Complex Spray Patterns}
+\subsubsection{Special Topic: Specifying Complex Spray Patterns}
 \label{info:spraypattern}
 \index{Spray Pattern}
 \index{spinkler!Spray Pattern}
 
-If a more complex spray pattern is desired than can be achieved by using {\ct SPRAY\_ANGLE}, {\ct VELOCITY}, 
-and {\ct FLOW\_RATE}, then a {\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL}) 
-lines.  For a spray pattern, specify the total flow using {\ct FLOW\_RATE}, the name of the spray pattern using
-{\ct SPRAY\_PARTTERN\_TABLE} and then or more {\ct TABL} lines of the format:
+If a more complex spray pattern is desired than can be achieved by using {\ct SPRAY\_ANGLE}, {\ct VELOCITY},
+and {\ct FLOW\_RATE}, then a {\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL})
+namelist group.  For a spray pattern, specify the total flow using {\ct FLOW\_RATE} of the {\ct PROP} line, the name of the spray pattern using
+{\ct SPRAY\_PARTTERN\_TABLE} and then one or more {\ct TABL} lines of the format:
 
 \footnotesize
 \begin{verbatim}
-&TABL ID='table_id', TABLE_DATA=L1,L2,L3,L4,V,F/
+&TABL ID='table_id', TABLE_DATA=LAT1,LAT2,LON1,LON2,VELO,FRAC /
 \end{verbatim} \normalsize
 
+\noindent
 where each {\ct TABL} line for a given {\ct 'table\_id'} provides information about the spherical distribution of the spray pattern
-for a specified solid angle. {\ct L1} and {\ct L2} are longitude range in degree for the solid angle measured in degrees from 
-the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  {\ct L3} and {\ct L4} are the
-lattitude range in degrees 
-where 0 or 360 is the {\ct -x} axis and 90 is the {\ct -y} axis.  {\ct V} and {\ct F} are respectively the velocity (m/s)
-and the relative flow rate for that solid angle.  The {\ct TABL} lines can be specified in any order.
+for a specified solid angle. {\ct LAT1} and {\ct LAT2} are the bounds of the solid angle measured in degrees from
+the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  Note that this is not the conventional way of
+specifying a latitude, but rather a convenient system based on the fact that a typical sprinkler sprays water downwards, which is
+why 0 degrees is assigned to the ``south pole,'' or the $-z$ direction. The parameters {\ct LON1} and {\ct LON2} are the
+bounds of the solid angle (also in degrees),
+where 0 (or 360) is aligned with the $-x$ axis and 90 is aligned with the $-y$ axis.  {\ct VELO} is the velocity (m/s) of the droplets at their
+point of insertion.
+{\ct FRAC} the fraction of the total flow rate of liquid that should emerge from that particular solid angle.
 
-In the example below, the spray pattern is defined as two 10 m/s and 20 kg/s jets
-centered on 45 degrees from the vertical with a 180 degree seperation.
+In the example below, the spray pattern is defined as two jets, each with a velocity of 10~m/s and a flow rate
+of 20~L/min (the total {\ct FLOW\_RATE} is 40~L/min and the fraction for each jet is 0.5). The jets are centered at points 45$^\circ$ below the ``equator,'' and are separated
+by 180$^\circ$.
 
 \footnotesize
 \begin{verbatim}
-&PROP ID='y-pipe', 
-      QUANTITY='SPRINKLER LINK TEMPERATURE', 
-      OFFSET=0.10, 
-      PART_ID='water_drops', 
-      SPRAY_PATTERN_TABLE='TABLE1',
-      SMOKEVIEW_ID='sprinkler_upright' /
+&PROP ID='y-pipe',
+      QUANTITY='SPRINKLER LINK TEMPERATURE',
+      FLOW_RATE=40.,
+      PART_ID='water_drops',
+      SPRAY_PATTERN_TABLE='TABLE1' /
 
-&TABL ID='TABLE1',TABLE_DATA=40,50,85,95,10,20/
-&TABL ID='TABLE1',TABLE_DATA=40,50,185,10,20/
-\end{verbatim} \normalsize
+&TABL ID='TABLE1', TABLE_DATA=40,50, 85, 95,10,0.5 /
+&TABL ID='TABLE1', TABLE_DATA=40,50,185,195,10,0.5 /
+\end{verbatim}
+\normalsize
+
+\begin{warning}
+\noindent
+Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Specific requirements on ordering the lines
+will depend upon the type of TABL and those requirements are provided in the appropriate section in this guide. Also note that
+the {\ct TABL} lines can be specified in any order.
+\end{warning}
+
+
+
+
 
 \subsection{Nozzles}
 \label{info:nozzles}
@@ -4527,14 +4543,14 @@ The reason for this restriction is that abrupt changes in pressure can cause num
 
 There are many systems whose functionality cannot be described by a simple device with a single ``setpoint.''
 Consider for example, a typical HVAC\index{HVAC} system.  It is controlled by a thermostat that is given a temperature setpoint.
-The system turns on when the temperature goes below the setpoint by some 
-amount and then turns off when the temperature rises above that same setpoint by some amount.  
+The system turns on when the temperature goes below the setpoint by some
+amount and then turns off when the temperature rises above that same setpoint by some amount.
 This behavior can not be defined by merely specifying a single setpoint.
-You must also define the range or ``deadband'' around the setpoint, and whether an 
-increasing or decreasing temperature activates the system.  For the HVAC example, crossing the 
+You must also define the range or ``deadband'' around the setpoint, and whether an
+increasing or decreasing temperature activates the system.  For the HVAC example, crossing the
 lower edge of the deadband activates heating; crossing the upper edge activates cooling.
 
-While HVAC is not the primary purpose of FDS, there are numerous situations where a system responds to 
+While HVAC is not the primary purpose of FDS, there are numerous situations where a system responds to
 the fire in non-trivial way.  The {\ct CTRL} \index{CTRL}input is used to define these more complicated behaviors.
 A control function will take as input the outputs of one or more devices and/or control functions.
 In this manner, complicated behaviors can be simulated by making functions of other functions.  For most of the
@@ -4564,13 +4580,13 @@ Function Type                     & Description   \\ \hline \hline
 \end{center}
 \end{table}
 
-A control is identified by the {\ct ID} \index{CTRL!ID}parameter.  The inputs to the control are identified 
-by the {\ct INPUT\_ID} \index{CTRL!INPUT\_ID}parameter.  {\ct INPUT\_ID} would be passed one or more {\ct ID} strings 
+A control is identified by the {\ct ID} \index{CTRL!ID}parameter.  The inputs to the control are identified
+by the {\ct INPUT\_ID} \index{CTRL!INPUT\_ID}parameter.  {\ct INPUT\_ID} would be passed one or more {\ct ID} strings
 from either devices or other controls.
 
 
-If you want to design a system of controls and devices that involves multiple changes of state, 
-include the attribute {\ct LATCH=.FALSE.} \index{CTRL!LATCH}on the relevant {\ct DEVC} or {\ct CTRL} input lines. 
+If you want to design a system of controls and devices that involves multiple changes of state,
+include the attribute {\ct LATCH=.FALSE.} \index{CTRL!LATCH}on the relevant {\ct DEVC} or {\ct CTRL} input lines.
 By default, devices and controls may only change state once, like a sprinkler activating or
 smoke detector alarming. {\ct LATCH=.TRUE.} by default for both devices and controls.
 
@@ -4578,7 +4594,7 @@ smoke detector alarming. {\ct LATCH=.TRUE.} by default for both devices and cont
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT_LEAST}}
 
-Suppose you want an obstruction to be removed (a door is opened, for example) after any 
+Suppose you want an obstruction to be removed (a door is opened, for example) after any
 of four smoke detectors in a room has activated. Use input lines of the form:
 
 \footnotesize
@@ -4594,9 +4610,9 @@ of four smoke detectors in a room has activated. Use input lines of the form:
 \normalsize
 
 \noindent
-The {\ct INITIAL\_STATE} \index{CTRL!INITIAL\_STATE}of the control function {\ct SD} is {\ct .TRUE.}, 
-meaning that the obstruction exists initially. The ``change of state'' means that the obstruction is 
-removed when \underline{any} \index{CTRL!FUNCTION\_TYPE!ANY} smoke detector alarms.  By default, the {\ct INITIAL\_STATE} 
+The {\ct INITIAL\_STATE} \index{CTRL!INITIAL\_STATE}of the control function {\ct SD} is {\ct .TRUE.},
+meaning that the obstruction exists initially. The ``change of state'' means that the obstruction is
+removed when \underline{any} \index{CTRL!FUNCTION\_TYPE!ANY} smoke detector alarms.  By default, the {\ct INITIAL\_STATE}
 of the control function {\ct SD} is {\ct .FALSE.}, meaning that the obstruction does not exist initially.
 
 Suppose that now you want the obstruction to be created (a door is closed, for example) after all \index{CTRL!FUNCTION\_TYPE!ALL}
@@ -4610,7 +4626,7 @@ four smoke detectors in a room have activated. Use a control line of the form:
 
 \noindent
 
-The control functions {\ct AT\_LEAST} and {\ct ONLY} are generalizations of {\ct ANY} and {\ct ALL}. 
+The control functions {\ct AT\_LEAST} and {\ct ONLY} are generalizations of {\ct ANY} and {\ct ALL}.
 
 For example,
 
@@ -4621,11 +4637,11 @@ For example,
 
 \normalsize
 \noindent
-changes the state from {\ct .FALSE.} to {\ct .TRUE.} when \underline{at least} 
+changes the state from {\ct .FALSE.} to {\ct .TRUE.} when \underline{at least}
 \index{CTRL!FUNCTION\_TYPE!AT\_LEAST}3 detectors activate.
 
-Note that in this example, and the example below, the parameter {\ct N} \index{CTRL!N}is used to 
-specify the number of activated or ``TRUE'' inputs required for the conditions 
+Note that in this example, and the example below, the parameter {\ct N} \index{CTRL!N}is used to
+specify the number of activated or ``TRUE'' inputs required for the conditions
 of the Control Function to be satisfied.
 
 The control function,
@@ -4637,8 +4653,8 @@ The control function,
 
 \normalsize
 \noindent
-changes the state from {\ct .FALSE.} to {\ct .TRUE.} when 3, 
-and \underline{only} \index{CTRL!FUNCTION\_TYPE!ONLY}3, detectors activate. 
+changes the state from {\ct .FALSE.} to {\ct .TRUE.} when 3,
+and \underline{only} \index{CTRL!FUNCTION\_TYPE!ONLY}3, detectors activate.
 
 
 \subsection{Control Function: \texorpdfstring{{\tt TIME\_DELAY}}{TIME_DELAY}}
@@ -4684,9 +4700,9 @@ For an HVAC\index{HVAC} example, the following lines of input would set up a sim
 \end{verbatim} \normalsize
 
 \noindent
-Here, we want to control the {\ct VENT} that simulates the {\ct FAN}\index{fan}, which blows hot air 
-into the room. A {\ct DEVC} called {\ct TC} is positioned in the room to measure the {\ct TEMPERATURE}. 
-The {\ct thermostat} uses a {\ct SETPOINT}\index{CTRL!SETPOINT} to turn on the 
+Here, we want to control the {\ct VENT} that simulates the {\ct FAN}\index{fan}, which blows hot air
+into the room. A {\ct DEVC} called {\ct TC} is positioned in the room to measure the {\ct TEMPERATURE}.
+The {\ct thermostat} uses a {\ct SETPOINT}\index{CTRL!SETPOINT} to turn on the
 {\ct FAN} when the temperature falls below 23~$^\circ$C ({\ct ON\_BOUND='LOWER'}) \index{CTRL!ON\_BOUND}
 and it turns off when the temperature rises above 27~$^\circ$C.
 
@@ -4704,7 +4720,7 @@ Additionally there are analyses where one wishes to create some
 baseline condition and the run multiple permutations of that baseline.
 For example one may wish to run a series of simulations where
 different mitigation strategies are tried once a detector alarms.  By
-using the {\ct RESTART} \index{CTRL!FUNCTION\_TYPE!RESTART} 
+using the {\ct RESTART} \index{CTRL!FUNCTION\_TYPE!RESTART}
 control function, one can cause a restart file
 to be created once a desired condition is met.  The simulation can
 continue and the restart files can be copied to have the {\ct CHID} of
@@ -4729,14 +4745,14 @@ will lead to the job being stopped gracefully, with restart files output, when t
 
 \subsection{Control Function: \texorpdfstring{{\tt CUSTOM}}{CUSTOM} }
 
-For most of the control function types, the logical (true/false) output of 
+For most of the control function types, the logical (true/false) output of
 the devices and control functions and the time they last changed
 state are taken as inputs.  In the case below, the {\ct CUSTOM} \index{CTRL!FUNCTION\_TYPE!CUSTOM}
-control function uses the numerical output of a timer device as its input.  The function returns true, when the {\ct F} parameter 
+control function uses the numerical output of a timer device as its input.  The function returns true, when the {\ct F} parameter
 in the ramp specified with {\ct RAMP\_ID}\index{CTRL!RAMP\_ID} is a positive value and
-false when the {\ct RAMP} {\ct F} value is negative.  
-In this case, the control would start false and would switch to 
-true when the timer reaches 60 seconds.  It would then stay in a true 
+false when the {\ct RAMP} {\ct F} value is negative.
+In this case, the control would start false and would switch to
+true when the timer reaches 60 seconds.  It would then stay in a true
 state until the timer reaches 120 seconds and would then change back to false.
 
 \begin{warning}
@@ -4746,7 +4762,7 @@ same {\ct ID} for both a control function and a device.
 \end{warning}
 
 \noindent
-In the HVAC\index{HVAC} 
+In the HVAC\index{HVAC}
 example above, we could set the system to function
 on a fixed cycle by using a {\ct CUSTOM} control function based on time:
 
@@ -5012,7 +5028,7 @@ Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the 
 \subsection{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}\index{Namelist Group!BNDF}
 
-The {\ct BNDF} (``boundary file'') \index{Output!Boundary File} 
+The {\ct BNDF} (``boundary file'') \index{Output!Boundary File}
 \index{BNDF} namelist group parameters allows you
 to record surface quantities at all solid obstructions. As with
 the {\ct SLCF} group, each quantity is prescribed with a separate
@@ -5061,7 +5077,7 @@ anyway. However, {\ct soot density} or {\ct oxygen} demand substantial amounts o
 \subsection{Plot3D Static Data Dumps}
 \label{info:PL3D}\index{Output!Plot3D}
 
-By default, flow field data in Plot3D format is output 5 times a run. 
+By default, flow field data in Plot3D format is output 5 times a run.
 Five quantities are written out to a file at one instant in time. The default specification is:
 
 \footnotesize
@@ -5074,7 +5090,7 @@ Five quantities are written out to a file at one instant in time. The default sp
 \noindent
 It's best to leave the velocity components as is, because Smokeview
 uses them to draw velocity vectors. The first and fifth quantities can
-be changed with the parameters {\ct PLOT3D\_QUANTITY(1)} and {\ct PLOT3D\_QUANTITY(5)} 
+be changed with the parameters {\ct PLOT3D\_QUANTITY(1)} and {\ct PLOT3D\_QUANTITY(5)}
 on the {\ct DUMP} line.
 
 \begin{warning}
@@ -5106,7 +5122,7 @@ obtained elsewhere.
 \label{info:HRR} \index{Output Files!\_hrr.csv}
 
 Quantities associated with the overall energy budget are
-reported in the comma delimited file {\bf CHID\_hrr.csv}. 
+reported in the comma delimited file {\bf CHID\_hrr.csv}.
 This file is automatically generated; the only input parameter associated with it is
 {\ct DT\_HRR} on the {\ct DUMP} line. The file consists of six columns.
 The first column contains the time in seconds. The second through
