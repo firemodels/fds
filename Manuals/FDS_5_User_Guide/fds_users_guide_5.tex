@@ -3426,28 +3426,28 @@ A few sample {\ct REAC} lines are given here. The values are for demonstration o
       SOOT_YIELD         = 0.01
       C                  = 3.
       H                  = 8.
-      HEAT_OF_COMBUSTION = 46460.  /
+      HEAT_OF_COMBUSTION = 46460.
       IDEAL              = .TRUE. /
 
 &REAC ID                 = 'PROPANE'
       SOOT_YIELD         = 0.01
       C                  = 3.
       H                  = 8.
-      HEAT_OF_COMBUSTION = 46124.  /
+      HEAT_OF_COMBUSTION = 46124.
       IDEAL              = .FALSE. /
 
 &REAC ID                 = 'ACRYLONITRILE'
       C                  = 3.
       H                  = 3.
       N                  = 1.
-      HEAT_OF_COMBUSTION = 24500.  /
+      HEAT_OF_COMBUSTION = 24500.
       IDEAL              = .TRUE. /
 
 &REAC ID                 = 'CARBON DISULFIDE'
       C                  = 1.
       Other              = 2.
       MW_OTHER           = 32.
-      HEAT_OF_COMBUSTION = 13600.  /
+      HEAT_OF_COMBUSTION = 13600.
       IDEAL              = .TRUE. /
 \end{verbatim}
 \normalsize
@@ -5613,24 +5613,24 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ \hline \hline
-{\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}          \\ \hline
-{\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & {\ct 2*TWFIN/NFRAMES} \\ \hline
-{\ct DT\_DEVC}                  & Real         & Device output dump interval       &  s        & {\ct TWFIN/NFRAMES}   \\ \hline
-{\ct DT\_HRR}                   & Real         & Heat release dump interval        &  s        & {\ct TWFIN/NFRAMES}   \\ \hline
-{\ct DT\_ISOF}                  & Real         & Iso-surface dump interval         &  s        & {\ct TWFIN/NFRAMES}   \\ \hline
-{\ct DT\_MASS}                  & Real         & Mass diagnostic dump interval     &  s        & {\ct TWFIN/NFRAMES}   \\ \hline
-{\ct DT\_PART}                  & Real         & Particle dump interval            &  s        & {\ct TWFIN/NFRAMES}   \\ \hline
-{\ct DT\_PL3D}                  & Real         & PLOT3D dump interval              &  s        &{\ct TWFIN/NFRAMES}    \\ \hline
-{\ct DT\_PROF}                  & Real         & Profile dump interval             &  s        &{\ct TWFIN/NFRAMES}    \\ \hline
-{\ct DT\_RESTART}               & Real         & Restart core dump interval        &  s        & 1000000.              \\ \hline
-{\ct DT\_SLCF}                  & Real         & Slice dump interval               &  s        &{\ct TWFIN/NFRAMES}    \\ \hline
-{\ct MAXIMUM\_DROPLETS}         & Integer      & Max particles per mesh            &           & 500000                \\ \hline
-{\ct NFRAMES}                   & Integer      & Number of Frames of output data   &           & 1000                  \\ \hline
-{\ct PLOT3D\_QUANTITY(5)}       & Char.~Quint  & Names of PLOT3D Quantities        &           &                       \\ \hline
-{\ct RENDER\_FILE}              & Character    & Name of render file from dxf2fds  &           &                       \\ \hline
-{\ct SMOKE3D}                   & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}          \\ \hline
-{\ct MASS\_FILE}                & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}         \\ \hline
-{\ct WRITE\_XYZ}                & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}         \\ \hline
+{\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
+{\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & {\ct 2*(T\_END-T\_BEGIN)/NFRAMES} \\ \hline
+{\ct DT\_DEVC}                  & Real         & Device output dump interval       &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
+{\ct DT\_HRR}                   & Real         & Heat release dump interval        &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
+{\ct DT\_ISOF}                  & Real         & Iso-surface dump interval         &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
+{\ct DT\_MASS}                  & Real         & Mass diagnostic dump interval     &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
+{\ct DT\_PART}                  & Real         & Particle dump interval            &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
+{\ct DT\_PL3D}                  & Real         & PLOT3D dump interval              &  s        &{\ct (T\_END-T\_BEGIN)/5}          \\ \hline
+{\ct DT\_PROF}                  & Real         & Profile dump interval             &  s        &{\ct (T\_END-T\_BEGIN)/NFRAMES}    \\ \hline
+{\ct DT\_RESTART}               & Real         & Restart core dump interval        &  s        & 1000000.                          \\ \hline
+{\ct DT\_SLCF}                  & Real         & Slice dump interval               &  s        &{\ct (T\_END-T\_BEGIN)/NFRAMES}    \\ \hline
+{\ct MAXIMUM\_DROPLETS}         & Integer      & Max particles per mesh            &           & 500000                            \\ \hline
+{\ct NFRAMES}                   & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
+{\ct PLOT3D\_QUANTITY(5)}       & Char.~Quint  & Names of PLOT3D Quantities        &           &                                   \\ \hline
+{\ct RENDER\_FILE}              & Character    & Name of render file from dxf2fds  &           &                                   \\ \hline
+{\ct SMOKE3D}                   & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                      \\ \hline
+{\ct MASS\_FILE}                & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                     \\ \hline
+{\ct WRITE\_XYZ}                & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}                     \\ \hline
 \end{tabular*}
 \normalsize
 \end{table}
@@ -6232,9 +6232,12 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\ \hline \hline
-{\ct DT    }      & Real        & Initial time step                  & s           &     \\ \hline
-{\ct SYNCHRONIZE} & Logical     & Lock time step of multiple meshes  &             & {\ct .FALSE.}    \\ \hline
-{\ct TWFIN }      & Real        & Time When FINished                 & s           & 1.  \\ \hline
+{\ct DT    }          & Real        & Initial time step                           & s           &                  \\ \hline
+{\ct SYNCHRONIZE}     & Logical     & Lock time step of multiple meshes           &             & {\ct .TRUE.}     \\ \hline
+{\ct T\_BEGIN}        & Real        & Starting time for calculation               & s           & 0.               \\ \hline
+{\ct T\_END}          & Real        & Time When FINished                          & s           & TWFIN            \\ \hline
+{\ct TWFIN }          & Real        & Time When FINished                          & s           & 1.               \\ \hline
+{\ct WALL\_INCREMENT} & Integer     & Timesteps between 1D wall solution updates  &             & 2                \\ \hline
 \end{tabular*}
 \end{table}
 
