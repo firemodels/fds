@@ -1,10 +1,11 @@
+# *** Intel ***
+
 # Intel, Optimized
 
 FFLAGS  = -O3 -axP -ip -static -vec_report0
 CFLAGS  = -O -Dpp_noappend
 FCOMPL  = ifort
 CCOMPL  = icc
-
 
 # Intel, Debug
 
@@ -13,14 +14,12 @@ CCOMPL  = icc
 #FCOMPL  = ifort
 #CCOMPL  = icc
 
-
 # Intel, Optimized, Parallel
 
 #FFLAGS  = -O3 -axP -ip -vec_report0
 #CFLAGS  = -O -Dpp_noappend
 #FCOMPL  = mpif77
 #CCOMPL  = icc
-
 
 # Intel, Debug, Parallel
 
@@ -30,6 +29,25 @@ CCOMPL  = icc
 #CCOMPL  = icc
 
 
+# *** OSX Intel ***
+
+# OSX Intel, Optimized
+
+FFLAGS  = -O3 -axP -ip -vec_report0
+CFLAGS  = -O -Dpp_noappend -Dpp_OSX
+FCOMPL  = ifort
+CCOMPL  = icc
+
+# OSX Intel, Optimized, Parallel
+
+#FFLAGS  = -O3 -axP -ip -vec_report0
+#CFLAGS  = -O -Dpp_noappend -Dpp_OSX
+#FCOMPL  = mpif77
+#CCOMPL  = icc
+
+
+# *** Lahey ***
+
 # Lahey, Optimized
 
 #FFLAGS   = -O --tpp --staticlink --nap --nchk --npca --nsav --ntrace
@@ -37,14 +55,12 @@ CCOMPL  = icc
 #FCOMPL   = lf95
 #CCOMPL   = gcc
 
-
 # Lahey, Debug
 
 #FFLAGS   = --swm 3909 --wo --tpp --chk --f95 -g --warn --staticlink
 #CFLAGS   = -O
 #FCOMPL   = lf95
 #CCOMPL   = gcc
-
 
 # Lahey, Optimized, Parallel
 
@@ -55,6 +71,7 @@ CCOMPL  = icc
 #INCLUDEDIR=/usr/local/include
 
 
+# *** Absoft PPC OS X ***
 
 
 
