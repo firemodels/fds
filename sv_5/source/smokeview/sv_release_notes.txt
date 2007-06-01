@@ -1,5 +1,6 @@
 2007-05-27
 1.  Add streaklinewidth parameter to particle bounds dialog box
+2.  Fix thermocouple color for pre-fds5 cases
 
 2007-05-20
 1.  Fix zone fire modeling vent flow visualization
