@@ -13,7 +13,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
-
+/* dummy change - to test svn check out on the linux cluster */
 int endianswitch;
 
 int int_switch(int val);
