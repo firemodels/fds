@@ -23,6 +23,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+/* this is a dummy change to demonstrate svn */
  
 
 #ifdef WIN32
