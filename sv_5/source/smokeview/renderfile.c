@@ -162,9 +162,9 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
 
 #endif
 
-/* ------------------ writegif3 ------------------------ */
+/* ------------------ SVimage2file ------------------------ */
 
-int writegif3(char *RENDERfilename, int rendertype, int width, int height){
+int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
   FILE *RENDERfile;
   GLubyte *OpenGLimage, *p;

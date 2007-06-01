@@ -3874,7 +3874,7 @@ typedef struct {
               devicecopy->object = get_SVOBJECT_type("target");
             }
             else{
-              devicecopy->object = get_SVOBJECT_type("sensor");
+              devicecopy->object = get_SVOBJECT_type("thermoc4");
             }
           }
           else{
