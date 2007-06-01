@@ -91,6 +91,8 @@ I = 1,2,3 in any of the internal wall points.
 
 &TIME TWFIN=50, WALL_INCREMENT = 1, DT = 0.01/
 
+&MISC SOLID_PHASE_ONLY = .TRUE. /
+
 &DUMP DT_PL3D=10000000., NFRAMES=200 /
 &ZONE  /
 
