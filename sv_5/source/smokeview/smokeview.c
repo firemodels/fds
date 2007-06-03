@@ -23,10 +23,6 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
-/* line 1 test */
-/* line 2 test */
-/* line 3 test */
- 
 
 #ifdef WIN32
 #include <Commdlg.h>
