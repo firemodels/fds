@@ -1948,11 +1948,12 @@ any {\ct OBST}ruction can be made impenetrable to a {\ct HOLE} using this phrase
 otherwise directed.
 \end{itemize}
 
-\subsection{Non-rectangular Geometry}%Bryan
+\subsection{Non-rectangular Geometry and Sloped Ceilings}%Bryan
 \index{Sawtooth}
+\index{Sloped Ceilings}
 The efficiency of FDS is due to the simplicity of its numerical grid.
 However, there are situations in which certain geometric features do
-not conform to the rectangular grid. In these cases,
+not conform to the rectangular grid, such as a sloped ceiling or roof. In these cases,
 construct the curved geometry using rectangular obstructions, a process
 sometimes called ``stair stepping''. A concern is that
 the stair stepping changes the flow pattern near the wall. To lessen
@@ -1993,9 +1994,16 @@ out of an existing obstruction or set of obstructions. To do this, add lines of 
 \normalsize
 Any solid grid cells within the volume $2.0<x<4.5$, $1.9<y<4.8$,
 $0.0<z<9.2$ are removed. Obstructions intersecting the volume are
-broken up into smaller blocks. If the hole represents a door or window, a
-good rule of thumb is to punch more than enough to create the hole. For
-example, if the {\ct OBST} line denotes a wall 0.1 m thick:
+broken up into smaller blocks.
+
+\begin{notebox}
+\noindent
+If the hole represents a door or window, a good rule of thumb is to punch more than enough to create the hole.
+This ensures that the hole is created through the entire obstruction.
+\end{notebox}
+
+\noindent
+For example, if the {\ct OBST} line denotes a wall 0.1 m thick:
 
 \footnotesize
 \begin{verbatim}
@@ -2227,6 +2235,12 @@ indicates the {\ct ID} of the {\ct SURF} line containing the desired boundary
 condition parameters. If a particular {\ct SURF} line is to be applied
 as the default boundary condition, {\ct CONCRETE} for example,
 set {\ct SURF\_DEFAULT='CONCRETE'} on the {\ct MISC} line.
+
+\begin{notebox}
+\noindent
+The default boundary condition {\ct INERT} does allow for heat loss and is not the same as an adiabatic surface.
+If you wish to define a surface as adiabatic, then you should set {\ct ADIABATIC=.TRUE.} on the {\ct SURF} line.
+\end{notebox}
 
 
 \subsection{Specifying a Fire with a Known Heat Release Rate}
