@@ -3814,8 +3814,10 @@ MESH_LOOP: DO NM=1,NMESHES
       REMOVABLE   = .TRUE.
       IF (.NOT.EVACUATION_ONLY(NM)) EVACUATION = .FALSE.
       IF (     EVACUATION_ONLY(NM)) EVACUATION = .TRUE.
+      !Timo: A temporary bug fix for evacuation flow fields. Thin walls
+      !TImo: with thicken=false do not work in FDS5 (May 31, 20075_RC5+).
       IF (     EVACUATION_ONLY(NM)) THICKEN    = .TRUE.
-      IF (     EVACUATION_ONLY(NM)) SAWTOOTH   = .FALSE.
+      !IF (     EVACUATION_ONLY(NM)) SAWTOOTH   = .FALSE.
  
       CALL CHECKREAD('OBST',LU5,IOS)
       IF (IOS==1) EXIT READ_OBST_LOOP
