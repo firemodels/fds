@@ -184,6 +184,32 @@ void sv_startup_c(int argc, char **argv){
     STRCPY(smokeviewbindir,smokeviewini);
     STRCAT(smokeviewini,"smokeview.ini");
   }
+
+  printf("*********************************************************************\n");
+  printf("*********************************************************************\n");
+#ifdef pp_NISTREVIEW
+  printf("This version of Smokeview is intended for review and testing ONLY.\n");
+  printf("\n");
+#endif
+  printf("The US Department of Commerce makes no warranty, expressed or\n");
+  printf("implied, to users of Smokeview, and accepts no responsibility\n");
+  printf("for its use. Users of Smokeview assume sole responsibility under\n");
+  printf("Federal law for determining the appropriateness of its use in any\n");
+  printf("particular application; for any conclusions drawn from the results\n"); 
+  printf("of its use; and for any actions taken or not taken as a result of\n"); 
+  printf("analysis performed using this tools.\n");
+  printf("\n");
+  printf("Smokeview and the companion program FDS is intended for use only\n");
+  printf("by those competent in the fields of fluid dynamics, thermodynamics,\n");
+  printf("combustion, and heat transfer, and is intended only to supplement\n");
+  printf("the informed judgment of the qualified user. These software packages\n");
+  printf("may or may not have predictive capability when applied to a specific\n");
+  printf("set of factual circumstances.  Lack of accurate predictions could lead\n");
+  printf("to erroneous conclusions with regard to fire safety.  All results\n");
+  printf("should be evaluated by an informed user.\n\n");
+  printf("*********************************************************************\n");
+  printf("*********************************************************************\n");
+
   if(smoketempdir != NULL){
     lensmoketempdir = strlen(smoketempdir);
     if(NewMemory((void **)&smokeviewtempdir,(unsigned int)(lensmoketempdir+2))!=0){
@@ -1234,6 +1260,7 @@ void initvars1(void){
   stepclip_x=0,stepclip_y=0,stepclip_z=0;
   stepclip_X=0,stepclip_Y=0,stepclip_Z=0;
   partpointsize=2.0,vectorpointsize=3.0,streaklinewidth=1.0;
+  vectorpointsize=2.0, vectorlinewidth=1.0;
   sprinklerabssize=0.076f, sensorabssize=0.038f, heatabssize=0.076f;
 
   linewidth=2.0, ventlinewidth=2.0, highlight_linewidth=4.0;

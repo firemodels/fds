@@ -1,7 +1,9 @@
 2007-05-27
 1.  Add streaklinewidth parameter to particle bounds dialog box
 2.  Fix thermocouple color for pre-fds5 cases
-
+3.  Added linewidth and point size parameters to Slice bound dialog box
+    for drawing vector plots for slice file and Plot3d files
+ 
 2007-05-20
 1.  Fix zone fire modeling vent flow visualization
 2.  Fix initialization when loading particle files

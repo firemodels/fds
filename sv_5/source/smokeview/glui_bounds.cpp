@@ -111,6 +111,8 @@ GLUI_Spinner *SPINNER_partstreaklength=NULL;
 GLUI_Spinner *SPINNER_partpointsize=NULL;
 GLUI_Spinner *SPINNER_streaklinewidth=NULL;
 #endif
+GLUI_Spinner *SPINNER_vectorpointsize=NULL;
+GLUI_Spinner *SPINNER_vectorlinewidth=NULL;
 
 
 
@@ -353,6 +355,13 @@ extern "C" void glui_bounds_setup(int main_window){
       if(view_tstop>tttmax)tttmax=view_tstop;
       SPINNER_sliceaverage->set_float_limits(0.0,tttmax);
     }
+    SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_slice,"Vector particle size",GLUI_SPINNER_FLOAT,
+      &vectorpointsize);
+    SPINNER_vectorpointsize->set_float_limits(1.0,10.0);
+    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_slice,"Vector line width",GLUI_SPINNER_FLOAT,
+      &vectorlinewidth);
+    SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
+
     glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata,OUTPUTSLICEDATA,Slice_CB);
 
 

@@ -2639,7 +2639,7 @@ void drawvvolslice(const vslice *vd){
   w = vd->w;
   if(meshi->visx==1){
    constval = xplttemp[meshi->plotx]+sd->sliceoffset;
-   glLineWidth(linewidth);
+   glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    maxj = sd->js2;
    if(sd->js1+1>maxj)maxj=sd->js1+1;
@@ -2694,7 +2694,7 @@ void drawvvolslice(const vslice *vd){
   }
   if(meshi->visy==1){
    constval = yplttemp[meshi->ploty]+sd->sliceoffset;
-   glLineWidth(linewidth);
+   glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
      n = (i-sd->is1)*sd->nslicej*sd->nslicek - vectorskip;
@@ -2746,7 +2746,7 @@ void drawvvolslice(const vslice *vd){
   }
   if(meshi->visz==1){
    constval = zplttemp[meshi->plotz]+sd->sliceoffset;
-   glLineWidth(linewidth);
+   glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
      n = (i-sd->is1)*sd->nslicej*sd->nslicek - vectorskip*sd->nslicek;
@@ -2835,7 +2835,7 @@ void drawvslice(const vslice *vd){
   w = vd->w;
   if(sd->idir==1){
    constval = xplttemp[sd->is1]+sd->sliceoffset;
-   glLineWidth(linewidth);
+   glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    maxj = sd->js2;
    if(sd->js1+1>maxj)maxj=sd->js1+1;
@@ -2888,7 +2888,7 @@ void drawvslice(const vslice *vd){
   }
   else if(sd->idir==2){
    constval = yplttemp[sd->js1]+sd->sliceoffset;
-   glLineWidth(linewidth);
+   glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    for(i=sd->is1; i<sd->is2+1; i+=vectorskip){
      n = (i-sd->is1)*sd->nslicek - vectorskip;
@@ -2936,7 +2936,7 @@ void drawvslice(const vslice *vd){
   }
   else if(sd->idir==3){
    constval = zplttemp[sd->ks1]+sd->sliceoffset;
-   glLineWidth(linewidth);
+   glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    for(i=sd->is1; i<sd->is2+1; i+=vectorskip){
      n = (i-sd->is1)*sd->nslicej - vectorskip;

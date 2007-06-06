@@ -503,7 +503,7 @@ void drawplot3d_texture(mesh *meshi){
       yzcolor=yzcolorbase;
       dx_yzcopy=dx_yz; dy_yzcopy=dy_yz; dz_yzcopy=dz_yz;
       antialias(1);
-      glLineWidth(linewidth);
+      glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(j=0; j<=jbar; j+=vectorskip){
         dx_yzcopy = dx_yz+j*(kbar+1);
@@ -616,7 +616,7 @@ void drawplot3d_texture(mesh *meshi){
 
       xzcolor=xzcolorbase;
       antialias(1);
-      glLineWidth(linewidth);
+      glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
         dx_xzcopy=dx_xz+i*(kbar+1);
@@ -718,7 +718,7 @@ void drawplot3d_texture(mesh *meshi){
 
       xycolor=xycolorbase;
       antialias(1);
-      glLineWidth(linewidth);
+      glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
         dx_xycopy=dx_xy+i*(jbar+1);
@@ -910,7 +910,7 @@ void drawplot3d(mesh *meshi){
       yzcolor=yzcolorbase;
       dx_yzcopy=dx_yz; dy_yzcopy=dy_yz; dz_yzcopy=dz_yz;
       antialias(1);
-      glLineWidth(linewidth);
+      glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(j=0; j<=jbar; j+=vectorskip){
         dx_yzcopy = dx_yz+j*(kbar+1);
@@ -1023,7 +1023,7 @@ void drawplot3d(mesh *meshi){
 
       xzcolor=xzcolorbase;
       antialias(1);
-      glLineWidth(linewidth);
+      glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
         dx_xzcopy=dx_xz+i*(kbar+1);
@@ -1125,7 +1125,7 @@ void drawplot3d(mesh *meshi){
 
       xycolor=xycolorbase;
       antialias(1);
-      glLineWidth(linewidth);
+      glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
         dx_xycopy=dx_xy+i*(jbar+1);
@@ -1739,7 +1739,7 @@ void drawgrid(const mesh *meshi){
 
   if(meshi->visx==1||meshi->visy==1||meshi->visz==1){
     antialias(1);
-    glLineWidth(linewidth);
+    glLineWidth(vectorlinewidth);
     if(meshi->meshrgb_ptr!=NULL){
       const float *rgb;
 
