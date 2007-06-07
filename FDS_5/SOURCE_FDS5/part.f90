@@ -1196,7 +1196,12 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             TMP_WALL   = TMP_F(IW)
             DR%RE  = RHO_G*PC%HORIZONTAL_VELOCITY*2._EB*RD/MU_AIR
             QRADD  = QRADD + ABOT*DT*QRAD(IW)
-            QWALLC = HADT_WALL*(TMP_WALL-TMP_DROP_OLD)                    
+            QWALLC = HADT_WALL*(TMP_WALL-TMP_DROP_OLD)
+            IF (SURFACE(IJKW(5,IW))%THERMAL_BC_INDEX == THERMALLY_THICK) THEN
+              QUSE = AW(IW)*CP_DROP*MDROP*RCP_W(IW)*(TMP_WALL-TMP_DROP_OLD)/ &
+                     (AW(IW)*RCP_W(IW)+CP_DROP*MDROP*WGT)
+              IF(ABS(QWALLC)>ABS(QUSE)) QWALLC=QUSE
+            ENDIF
          ELSE !If not a wall set wall variables just in case
             QWALLC = 0._EB
             ABOT  = ATOP
@@ -1322,7 +1327,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          DR%R = (MDROP / FTPR) ** ONTH
         
          IF (WALL<1._EB) THEN
-            QWALLC = HADT_WALL * (TMP_WALL - TMP_DROP_OLD)      
+ !           QWALLC = HADT_WALL * (TMP_WALL - TMP_DROP_OLD)      
             QUSE = QWALLR+QWALLC
             RDC       = RD_NEW**3
             WCPUA(IW,EVAP_INDEX ) = WCPUA(IW,EVAP_INDEX ) + WGT*RDT*QUSE*RAW(IW)

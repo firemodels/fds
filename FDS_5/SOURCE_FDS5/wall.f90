@@ -863,7 +863,11 @@ WALL_CELL_LOOP: DO IW=1,NWC
       K_S(I) = K_S(I)/VOLSUM
       IF (I.EQ.1) E_WALL(IW) = E_WALL(IW)/VOLSUM
    ENDDO POINT_LOOP3
- 
+   !RCP_W for part
+   IF (N_EVAP_INDICIES>0) THEN
+      RCP_W(IW) = RHOCBAR(1)/RDX_S(1)
+   ENDIF
+  
    K_S(0)     = K_S(1)     ! Calculate average K_S between at grid cell boundaries. Store result in K_S
    K_S(NWP+1) = K_S(NWP)
    DO I=1,NWP-1 
