@@ -1,7 +1,7 @@
 module isodefs
 implicit none
 
-CHARACTER(255), PARAMETER :: smvvid='$Id: smvv.f90,v 1.4 2007/01/04 19:22:36 dr_jfloyd Exp $'
+CHARACTER(255), PARAMETER :: smvvid='$Id$'
 
 interface
 
