@@ -17,7 +17,7 @@
 !*********************************************************
 Module DCDFLIB
   Implicit None
-  CHARACTER(255), PARAMETER :: ievaid='$Id: ieva.f90,v 1.5 2007/03/12 08:31:08 tkorhon1 Exp $'
+  CHARACTER(255), PARAMETER :: ievaid='$Id$'
 
   Private
   Public cdfbet,cdfgam,cdfnor

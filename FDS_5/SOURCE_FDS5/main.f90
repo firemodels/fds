@@ -27,7 +27,7 @@ USE EVAC
 IMPLICIT NONE
  
 ! Miscellaneous declarations
-CHARACTER(255), PARAMETER :: mainid='$Id: main.f90,v 1.41 2007/04/30 17:13:26 mcgratta Exp $'
+CHARACTER(255), PARAMETER :: mainid='$Id$'
 LOGICAL  :: EX,DIAGNOSTICS
 INTEGER  :: LO10,NM,IZERO
 REAL(EB) :: T_MAX,T_MIN

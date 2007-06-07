@@ -26,7 +26,7 @@ Module EVAC
   Use MESH_POINTERS
   !
   Implicit None
-  CHARACTER(255), PARAMETER :: evacid='$Id: evac.f90,v 1.8 2007/04/23 07:24:08 tkorhon1 Exp $'
+  CHARACTER(255), PARAMETER :: evacid='$Id$'
   !
   Private
   ! Public subprograms (called from the main program)
