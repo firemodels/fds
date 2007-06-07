@@ -114,7 +114,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, May 30, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, June 7, 2007)}
 
 \vspace{.5in}
 
@@ -1148,6 +1148,145 @@ are also shown, courtesy of Ian Thomas, Victoria University, Australia.
 \end{center}
 
 
+
+\clearpage
+\subsection{A Thermoplastic ({\bf thermoplastic}) }
+
+This example just exercises the solid phase algorithm in FDS. Essentially, the gas phase is shut off except for the imposition of a 50~kW/m$^2$ ``virtual''
+heat flux. The solid in this example is a slab of plastic, similar in composition to PMMA.
+
+\scriptsize
+\begin{verbatim}
+&MATL ID='PMMA'
+      CONDUCTIVITY=0.25
+      SPECIFIC_HEAT=1.0
+      DENSITY=500.
+      N_REACTIONS=1
+      NU_FUEL=1.
+      HEAT_OF_REACTION=1578.
+      HEAT_OF_COMBUSTION=25200.
+      REFERENCE_TEMPERATURE=330. /
+
+&SURF ID='PMMA SLAB'
+      COLOR='BLACK'
+      MATL_ID='PMMA'
+      THICKNESS=0.025
+      BURN_AWAY=.TRUE.
+      EXTERNAL_FLUX=50. /  External Flux is ONLY for this simple demo exercise
+\end{verbatim} \normalsize
+
+\noindent
+The material undergoes only one reaction -- the conversion of solid to gaseous fuel vapor. In this case, the {\ct HEAT\_OF\_REACTION} is essentially the
+latent heat of vaporization. The {\ct REFERENCE\_TEMPERATURE} indicates that the reaction is to occur at a (default) rate of 0.1~s$^{-1}$ at 330~$^\circ$C. The
+{\ct HEAT\_OF\_COMBUSTION} refers to the combustion of the gaseous fuel vapor, which does not occur in this example.
+
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Surface_Temperature} &
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Burning_Rate}
+\end{tabular*}
+
+The figures above show that both the temperature and burning rate of the thermoplastic are more or less constant over
+the burning phase. The slab ``burns away'' after about 10~min. 
+
+
+
+
+
+
+\clearpage
+\subsection{A Charring Solid ({\bf charring\_solid}) }
+
+This example just exercises the solid phase algorithm in FDS. Essentially, the gas phase is shut off except for the imposition of a 50~kW/m$^2$ ``virtual''
+heat flux. The reaction mechanism is fairly complicated, as it includes various solids like cellulose, char, and ash. Each are input via {\ct MATL} lines
+as follows:
+
+\scriptsize
+\begin{verbatim}
+&SURF ID='SPRUCE'
+      STRETCH_FACTOR = 1.
+      CELL_SIZE_FACTOR = 0.5
+      MATL_ID(1,1:3) = 'CELLULOSE','WATER','LIGNIN'
+      MATL_MASS_FRACTION(1,1:3) = 0.70,0.1,0.20
+      MATL_ID(2,1) = 'CASI'
+      THICKNESS(1:2)  =  0.01,0.01
+      EXTERNAL_FLUX = 50. /
+
+&MATL ID               = 'CELLULOSE'
+      CONDUCTIVITY_RAMP = 'k_cell'
+      SPECIFIC_HEAT    = 2.3
+      DENSITY          = 400.
+      N_REACTIONS      = 1
+      A                = 2.8E19
+      E                = 2.424E5
+      HEAT_OF_REACTION = 0.
+      NU_RESIDUE       = 1.0
+      RESIDUE          = 'ACTIVE'/
+
+&MATL ID                    = 'ACTIVE'
+      EMISSIVITY            = 1.0
+      CONDUCTIVITY_RAMP     = 'k_cell'
+      SPECIFIC_HEAT         = 2.3
+      DENSITY               = 400.
+      N_REACTIONS           = 2
+      A(1:2)                = 1.3E10,  3.23E14
+      E(1:2)                = 1.505E5, 1.965E5
+      HEAT_OF_REACTION(1:2) = 418.,    418.
+      NU_RESIDUE(1:2)       = 0.35,    0.0
+      NU_FUEL(1:2)          = 0.65,    1.0
+      RESIDUE(1)            = 'CHAR' /
+
+&MATL ID               = 'WATER'
+      EMISSIVITY       = 1.0
+      DENSITY          = 1000.
+      CONDUCTIVITY     = 0.6
+      SPECIFIC_HEAT    = 4.19
+      N_REACTIONS      = 1
+      A                = 1E20
+      E                = 1.62E+05
+      NU_WATER         = 1.0
+      HEAT_OF_REACTION = 2260. /
+
+&MATL ID                = 'CASI'
+      CONDUCTIVITY_RAMP = 'k_CASI'
+      DENSITY           = 200.
+      SPECIFIC_HEAT     = 1.0 /
+
+&MATL ID               = 'LIGNIN'
+      EMISSIVITY       = 1.0
+      DENSITY          = 550.
+      CONDUCTIVITY     = 0.1
+      SPECIFIC_HEAT    = 1.1 /
+
+&MATL ID               = 'CHAR'
+      EMISSIVITY       = 1.0
+      DENSITY          = 140.
+      CONDUCTIVITY_RAMP = 'k_char'
+      SPECIFIC_HEAT    = 1.1 /
+
+&RAMP ID='k_cell', T= 20., F=0.15 /
+&RAMP ID='k_cell', T=500., F=0.29 /
+
+&RAMP ID='k_char', T= 20., F=0.08 /
+&RAMP ID='k_char', T=900., F=0.25 /
+
+&RAMP ID='k_CASI', T= 20., F=0.06 /
+&RAMP ID='k_CASI', T=400., F=0.25 /
+\end{verbatim} \normalsize
+
+\noindent
+Note the edition of the parameter {\ct EXTERNAL\_FLUX} on the {\ct SURF} line. This produces a 50~kW/m$^2$ flux on the sample, without any
+additional input lines in the file. It is just to test the solid phase model and should not be copied into an actual fire simulation.
+
+The figures below show the surface temperature and burning rate of the wood under the 50~kW/m$^2$ external heat flux. The burning rate peaks at the
+start of the simulation, decreases throughout the burning phase, and then peaks again at the end due to presence of an external backing material. The
+initial peak is typical of char-forming solids.
+
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/charring_solid_Surface_Temperature} &
+\includegraphics[width=3.2in]{FIGURES/charring_solid_Burning_Rate}
+\end{tabular*}
 
 
 
