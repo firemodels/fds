@@ -1187,7 +1187,7 @@ latent heat of vaporization. The {\ct REFERENCE\_TEMPERATURE} indicates that the
 \end{tabular*}
 
 The figures above show that both the temperature and burning rate of the thermoplastic are more or less constant over
-the burning phase. The slab ``burns away'' after about 10~min. 
+the burning phase. The slab ``burns away'' after about 10~min.
 
 
 
@@ -2028,7 +2028,15 @@ spread and fire growth.
 \backmatter
 
 
-\bibliography{../Bibliography/FDSVVBiB}
+% FDSVVBiB is split into FDS_refs, FDSVVBiBnew and FDS_mathcomp
+%    SV docs would typically use FDS_ref, FDS_mathcomp but not FDSVVBiBnew
+%
+%         FDS_refs:  FDS and SV reference documents (user, tech guides etc.)
+%         FDS_mathcomp:  mathematical, computer references
+%         FDSVVBiBnew: fire references, what is left over
+
+%\bibliography{../Bibliography/FDSVVBiB}
+\bibliography{../Bibliography/FDS_refs,../Bibliography/FDSVVBiBnew,../Bibliography/FDS_mathcomp}
 
 \addcontentsline{toc}{chapter}{References}
 
