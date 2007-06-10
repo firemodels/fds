@@ -114,7 +114,7 @@
 
 \Huge
 \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \&
-Validation Guide \\ \LARGE Volume 2: Validation Guide } 
+Validation Guide \\ \LARGE Volume 2: Validation Guide }
 
 \vspace{.5in}
 
@@ -147,7 +147,7 @@ Bryan Klein }
 
 \Huge
 \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \&
-Validation Guide \\ \LARGE Volume 2: Validation Guide } 
+Validation Guide \\ \LARGE Volume 2: Validation Guide }
 
 \vspace{.5in}
 
@@ -3673,7 +3673,15 @@ After applying the correction, it is easier to compare total heat fluxes that ar
 \backmatter
 
 
-\bibliography{../Bibliography/FDSVVBiB}
+% FDSVVBiB is split into FDS_refs, FDSVVBiBnew and FDS_mathcomp
+%    SV docs would typically use FDS_ref, FDS_mathcomp but not FDSVVBiBnew
+%
+%         FDS_refs:  FDS and SV reference documents (user, tech guides etc.)
+%         FDS_mathcomp:  mathematical, computer references
+%         FDSVVBiBnew: fire references, what is left over
+
+%\bibliography{../Bibliography/FDSVVBiB}
+\bibliography{../Bibliography/FDS_refs,../Bibliography/FDSVVBiBnew,../Bibliography/FDS_mathcomp}
 
 \addcontentsline{toc}{chapter}{References}
 
