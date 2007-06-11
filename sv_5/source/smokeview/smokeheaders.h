@@ -86,6 +86,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir);
 //void ShadeMenu(int value);
 #endif
 
+EXTERNCPP void update_glui_stereo(void);
 EXTERNCPP void escape_blanks(char *dirfrom, int maxlen);
 EXTERNCPP void InitOpenGL(void);
 EXTERNCPP void TextureShowMenu(int value);

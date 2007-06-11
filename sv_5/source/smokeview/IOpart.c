@@ -319,6 +319,7 @@ void init_part5prop(void){
     npart5prop=0;
 
     for(i=0;i<npartclassinfo;i++){
+      int ii;
       part5class *partclassi;
 
       partclassi = partclassinfo + i;
@@ -366,12 +367,12 @@ void init_part5prop(void){
           propi->buckets=NULL;
           propi->partlabels=NULL;
           NewMemory((void **)&propi->partlabels,256*sizeof(char *));
-          for(i=0;i<256;i++){
+          for(ii=0;ii<256;ii++){
             char *labeli;
 
             labeli=NULL;
             NewMemory((void **)&labeli,11);
-            propi->partlabels[i]=labeli;
+            propi->partlabels[ii]=labeli;
           }
           NewMemory((void **)&propi->scale,256);
           
