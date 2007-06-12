@@ -1193,6 +1193,16 @@ before the {\ct \&} except a space and nothing comes between the ampersand
 {\ct \&} and the slash {\ct /} except appropriate parameters corresponding
 to that particular namelist group.
 
+\noindent
+When inputting values in an array note the following.  If an input is given as an array containing 4 elements, then:
+
+A = x1, x2, x3 , x4 will write the values x1 through x4 to the first 4 elements of the array
+A(2) = x, will write x to the second element of the array 
+A(1:2) x1, x2 will write x1 and x2 to the first two elements of the array
+
+The same will apply to multi-dimensional arrays.
+
+
 \begin{warning}
 \noindent
 Note that FDS is case-sensitive. Copy
