@@ -314,7 +314,7 @@ SUBROUTINE INITIALIZE_MESH_DUMPS(NM)
 USE COMP_FUNCTIONS, ONLY : SECOND
 USE MEMORY_FUNCTIONS, ONLY:RE_ALLOCATE_STRINGS,CHKMEMERR 
 INTEGER, INTENT(IN) :: NM
-INTEGER :: IOR,IZERO,I,J,K,N,ERROR,I1,I2,J1,J2,K1,K2,I1B,I2B,IW,NN,NF,IBC
+INTEGER :: IOR,IZERO,I,J,K,N,ERROR,I1,I2,J1,J2,K1,K2,I1B,I2B,IW,NN,NF
 CHARACTER(30) :: LABEL1,LABEL2,LABEL3,CFORM
 CHARACTER(50) :: FNSF,FN10,FN_PROF,FN_XYZ
 REAL(EB) :: TNOW
@@ -676,8 +676,6 @@ PROF_LOOP: DO N=1,N_PROF
    ELSE
       OPEN(LU_PROF,FILE=FN_PROF,FORM='FORMATTED',STATUS='REPLACE')
       WRITE(LU_PROF,'(A)') PROFILE(N)%ID
-      IW  = PROFILE(N)%IW
-      IBC = M%IJKW(5,IW)
       WRITE(LU_PROF,'(A)') "Time(s), Npoints, Npoints x Depth (mm), Npoints x Value"
       WRITE(LU_PROF,*) 
    ENDIF
@@ -690,6 +688,7 @@ END SUBROUTINE INITIALIZE_MESH_DUMPS
 SUBROUTINE WRITE_SMOKEVIEW_FILE
 USE MATH_FUNCTIONS, ONLY:EVALUATE_RAMP 
 USE COMP_FUNCTIONS, ONLY : FLUSH_BUFFER
+USE MEMORY_FUNCTIONS, ONLY : CHKMEMERR
 INTEGER :: N,NN,I,J,K,NM,NX,NY,NZ,NIN,NXL,NYL,NZL,NDV,NDVOLD,NDVDIM,N_TICKS,INDX,IZERO,EVAC_CODE
 INTEGER, ALLOCATABLE, DIMENSION(:) ::IDV1,IDV2,JDV1,JDV2,KDV1,KDV2
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: WALL_DUMMY
@@ -934,6 +933,7 @@ ENDDO
  
 N_SEGMENTS_MAX = 100
 ALLOCATE(SEGMENT(1:N_SEGMENTS_MAX),STAT=IZERO)
+CALL ChkMemErr('DUMP','SEGMENT',IZERO)
  
 N = 0
  
@@ -1447,7 +1447,7 @@ SUBROUTINE TRIM_LABEL(T,LAB)
 CHARACTER(30), INTENT(OUT) :: LAB
 REAL(EB), INTENT(IN) :: T
 
-IF (T<  .00_EB   .AND. T>=  -.001_EB) WRITE(LAB,'(F3.1)') T
+IF (T<  .00_EB   .AND. T>=  -.001_EB) WRITE(LAB,'(F4.1)') T
 IF (T<   .001_EB .AND. T>=    -.1_EB) WRITE(LAB,'(F6.3)') T
 IF (T<    -.1_EB .AND. T>=    -1._EB) WRITE(LAB,'(F5.2)') T
 IF (T<    -1._EB .AND. T>=   -10._EB) WRITE(LAB,'(F4.1)') T
@@ -1456,10 +1456,10 @@ IF (T<  -100._EB .AND. T>= -1000._EB) WRITE(LAB,'(F5.0)') T
 IF (T< -1000._EB .AND. T>=-10000._EB) WRITE(LAB,'(F6.0)') T
 IF (T<-10000._EB                   ) WRITE(LAB,'(F7.0)') T
 
-IF (T>=  .00_EB  .AND. T<  .001_EB) WRITE(LAB,'(F3.1)') T
-IF (T>=  .001_EB .AND. T<    .1_EB) WRITE(LAB,'(F5.3)') T
-IF (T>=    .1_EB .AND. T<    1._EB) WRITE(LAB,'(F4.2)') T
-IF (T>=    1._EB .AND. T<   10._EB) WRITE(LAB,'(F3.1)') T
+IF (T>=  .00_EB  .AND. T<  .001_EB) WRITE(LAB,'(F4.1)') T
+IF (T>=  .001_EB .AND. T<    .1_EB) WRITE(LAB,'(F6.3)') T
+IF (T>=    .1_EB .AND. T<    1._EB) WRITE(LAB,'(F5.2)') T
+IF (T>=    1._EB .AND. T<   10._EB) WRITE(LAB,'(F4.1)') T
 IF (T>=   10._EB .AND. T<  100._EB) WRITE(LAB,'(F4.1)') T
 IF (T>=  100._EB .AND. T< 1000._EB) WRITE(LAB,'(F4.0)') T
 IF (T>= 1000._EB .AND. T<10000._EB) WRITE(LAB,'(F5.0)') T
@@ -1469,15 +1469,17 @@ END SUBROUTINE TRIM_LABEL
 
 
 SUBROUTINE RE_ALLOCATE_SEGMENTS
-
+USE MEMORY_FUNCTIONS, ONLY : ChkMemErr
 TYPE(SEGMENT_TYPE), ALLOCATABLE, DIMENSION(:) :: DUMMY_SEGMENT
 INTEGER :: IZERO
 
 ALLOCATE(DUMMY_SEGMENT(N_SEGMENTS_MAX),STAT=IZERO)
+CALL ChkMemErr('DUMP','DUMMY_SEGMENT',IZERO)
 DUMMY_SEGMENT(1:N_SEGMENTS_MAX) = SEGMENT(1:N_SEGMENTS_MAX)
 
 DEALLOCATE(SEGMENT)
 ALLOCATE(SEGMENT(N_SEGMENTS_MAX+100),STAT=IZERO)
+CALL ChkMemErr('DUMP','SEGMENT',IZERO)
 SEGMENT(1:N_SEGMENTS_MAX) = DUMMY_SEGMENT(1:N_SEGMENTS_MAX)
 N_SEGMENTS_MAX = N_SEGMENTS_MAX + 100
 
@@ -1690,7 +1692,7 @@ MATL_LOOP: DO N=1,N_MATL
    ENDIF
    DO NN=1,ML%N_REACTIONS
       WRITE(LU6,'(A,I2)')   '     Reaction ', NN
-      IF (ML%NU_RESIDUE(NN) > 0._EB) WRITE(LU6,'(A,A,A,I2,A,F5.3)') &
+      IF (ML%NU_RESIDUE(NN) > 0._EB) WRITE(LU6,'(A,A,A,I2,A,F6.3)') &
                             '        Residue: ',TRIM(ML%RESIDUE_MATL_NAME(NN)),', Material Index: ', &
                                                      ML%RESIDUE_MATL_INDEX(NN),', Yield: ',ML%NU_RESIDUE(NN)
       WRITE(LU6,'(A,F8.2)') '        Fuel Yield : ',ML%NU_FUEL(NN)
@@ -1703,7 +1705,7 @@ MATL_LOOP: DO N=1,N_MATL
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
       WRITE(LU6,'(A)')      '     Liquid evaporation reaction'
       WRITE(LU6,'(A,F8.2)') '        Fuel Yield             : ',ML%NU_FUEL(1)
-      WRITE(LU6,'(A,F8.2)') '        Water Yield            : ',ML%NU_WATER(1)
+      WRITE(LU6,'(A,F9.2)') '        Water Yield            : ',ML%NU_WATER(1)
       WRITE(LU6,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL(1)-TMPM
       WRITE(LU6,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1)/1000.
    ENDIF
@@ -1763,9 +1765,9 @@ SURFLOOP: DO N=0,N_SURF-1
    IF (SF%VOLUME_FLUX/=-999._EB)     WRITE(LU6,'(A,F8.3)') '     Volume Flux (m**3/s)        ', SF%VOLUME_FLUX
    IF (N_SPECIES>0 .AND. .NOT.MIXTURE_FRACTION) THEN
       DO NN=1,N_SPECIES
-         IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU6,'(A,I1,A,8X,F5.3)') &
+         IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU6,'(A,I1,A,8X,F6.3)') &
                   '     Species ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
-         IF (SF%MASS_FLUX(NN)/=0._EB) WRITE(LU6,'(A,I1,A,2X,F5.3)') &
+         IF (SF%MASS_FLUX(NN)/=0._EB) WRITE(LU6,'(A,I1,A,2X,F6.3)') &
                   '     Species ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
       ENDDO
    ENDIF
@@ -2220,8 +2222,8 @@ DO NM=1,NMESHES
    IF (T_ACCUM(NM)>=3600._EB)  WRITE(LU6,113) T_PER_STEP(NM),T_ACCUM(NM)/3600._EB
    WRITE(LU6,111) M%DT,T(NM), M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
    IF (ABS(M%RESMAX)>1.E-8_EB)  WRITE(LU6,133) M%RESMAX,M%IRM,M%JRM,M%KRM
-   IF (ABS(M%POIS_PTB)>1.E-10_EB)  WRITE(LU6,'(A,E8.2)') '       Poisson Pert. : ',M%POIS_PTB
-   IF (CHECK_POISSON) WRITE(LU6,'(A,E8.2)') '       Poisson Error : ',M%POIS_ERR
+   IF (ABS(M%POIS_PTB)>1.E-10_EB)  WRITE(LU6,'(A,E9.2)') '       Poisson Pert. : ',M%POIS_PTB
+   IF (CHECK_POISSON) WRITE(LU6,'(A,E9.2)') '       Poisson Error : ',M%POIS_ERR
    IF (DNS) WRITE(LU6,230) M%VN,M%I_VN,M%J_VN,M%K_VN
    IF (M%NLP>0) WRITE(LU6,141) M%NLP
    IF (ABS(HRR(NM) )>1._EB) WRITE(LU6,119)  HRR(NM)/1000._EB
@@ -2235,11 +2237,11 @@ WRITE(LU6,*)
 112 FORMAT(6X,' CPU/step:  ',F8.3,' s, Total CPU:  ',F8.2,' min')
 113 FORMAT(6X,' CPU/step:  ',F8.3,' s, Total CPU:  ',F8.2,' hr')
 111 FORMAT(6X,' Time step: ',F8.5,' s, Total time: ',F8.2,' s'/ &
-        6X,' Max CFL number: ',E8.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Max divergence: ',E8.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Min divergence: ',E8.2,' at (',I3,',',I3,',',I3,')')
-133 FORMAT(6X,' Max div. error: ',E8.2,' at (',I3,',',I3,',',I3,')')
-230 FORMAT(6X,' Max VN  number: ',E8.2,' at (',I3,',',I3,',',I3,')')
+        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
+133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I3,',',I3,',',I3,')')
+230 FORMAT(6X,' Max VN  number: ',E9.2,' at (',I3,',',I3,',',I3,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
 421 FORMAT(6X,' Fire Resolution Index:        ',F12.3)
