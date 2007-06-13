@@ -246,7 +246,7 @@
 \vspace{1in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, June 7, 2007)}
+\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, June 13, 2007)}
 
 \vspace{.5in}
 
@@ -305,7 +305,7 @@ Jason Floyd \\
 
 \vspace{.25in}
 
-\flushright{May 2007}
+\flushright{July 2007}
 
 \vfill
 
@@ -339,7 +339,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1019-5 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019-5, \pageref{LastPage} pages (May 2007) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019-5, \pageref{LastPage} pages (July 2007) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -1081,6 +1081,9 @@ should be posted to the Issue Tracker and not the Discussion Group.
 \chapter{The Basic Structure of an Input File}
 \label{info:fdsBasic} \index{Input File!Overview}
 
+
+\section{Naming the Job}
+
 The operation of FDS is based on a single input text\footnote{ASCII -- American Standard Code
 for Information Interchange} file containing parameters organized into
 {\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups. \index{Namelist Group}
@@ -1091,12 +1094,17 @@ where {\bf job\_name} is any character string that helps to identify
 the simulation. If this same string is repeated under the {\ct HEAD} namelist group within the
 input file, then all of the output files associated with the calculation will then have this common name.
 
-\begin{warning}
-\noindent
 There should be no blank spaces in the job name. Instead use the underscore
 character to represent a space.  Using an underscore characters instead of a space also applies
 to the general practice of naming directories on your system.
-\end{warning}
+
+Be aware that FDS will simply over-write the output files of a given case if its assigned
+name is the same. This is convenient when developing an input file because you save on disk space. Just be careful
+not to overwrite a calculation that you want to keep.
+
+
+
+\section{Namelist Formatting}
 
 \noindent
 Parameters are specified within the input file by using {\em namelist} formatted records.
@@ -1110,24 +1118,82 @@ finally a forward slash ``{\ct /}''. For example, the line
 \end{verbatim}
 
 \normalsize \noindent
-sets various values of parameters contained in the {\ct DUMP} namelist group.
+sets various values of parameters contained in the {\ct DUMP} namelist group. The meanings of these various parameters will
+be explained in subsequent chapters. The namelist records can span multiple lines in the input file, but just be sure to
+end the record with a ``/'' or else the data will not be understood. Do not add anything to a namelist line other than the
+parameters and values appropriate for that group. Otherwise, FDS will stop immediately upon execution.
 
-To ensure that FDS reads the entire input file, it is possible to add \index{Namelist Group!TAIL}
+Parameters within a namelist record can be separated by either commas, spaces, or line breaks. It is a good idea to use
+commas or line breaks. Some machines do not recognize the spaces.
+Comments and notes can be written into the file so long as nothing comes
+before the {\ct \&} except a space and nothing comes between the ampersand
+{\ct \&} and the slash {\ct /} except appropriate parameters corresponding
+to that particular namelist group.
+
+The parameters in the input file can be integers ({\ct TWFIN=5400}),
+real numbers ({\ct CO\_YIELD=0.008}), groups of real numbers or integers
+({\ct XYZ=6.04,0.28,3.65}) or ({\ct IJK=90,36,38}),
+character strings ({\ct CHID='WTC\_05\_v5'}), groups of character strings
+({\ct SURF\_IDS='burner','INERT','INERT'}),
+or logical parameters ({\ct POROUS\_FLOOR=.FALSE.}). A logical parameter is either
+{\ct .TRUE.} or {\ct .FALSE.} -- the periods are a
+Fortran convention. Character strings that are listed in
+this User's Manual must be copied exactly as written -- the code
+is case sensitive and underscores {\em do} matter.
+
+Most of the input parameters are simply real or integer scalars, like {\ct DT=0.02}, but sometimes the inputs are
+multidimensional arrays. For example, when describing a particular solid surface, you need to express the mass
+fractions of multiple materials that are to be found in multiple layers. The input array {\ct MATL\_MASS\_FRACTION(IL,IC)} is
+intended to convey to FDS the mass fraction of component {\ct IC} of layer {\ct IL}. For example, if the mass fraction of the
+second material of the third layer is 0.5, then write
+
+{\ct MATL\_MASS\_FRACTION(3,2)=0.5}
+
+\noindent
+To enter more than one mass fraction, use
+this notation:
+
+{\ct MATL\_MASS\_FRACTION(1,1:3)=0.5,0.4,0.1}
+
+\noindent
+which means that the first three materials of layer 1 have
+mass fractions of 0.5, 0.4, and 0.1, respectively. The notation {\ct 1:3} means array element 1 through 3, inclusive.
+
+
+
+\begin{warning}
+\noindent
+Note that character strings can be enclosed either by apostrophes or quotation marks.
+Be careful not to create the input file by pasting text from something other than a
+simple text editor, in which case the punctuation marks may not transfer
+properly into the text file.
+\end{warning}
+
+
+
+
+
+\section{Input File Structure}
+
+In general, the namelist records can be entered in any order in the input file, but it is a good idea to organize them
+in some systematic way. Typically, general information is listed near the top of the input file, and detailed information, like
+obstructions, devices, and so on, are listed below. FDS scans the entire input file each time it processes a particular namelist group.
+With some text editors, it has been noticed that the last line of the file is often not read by FDS because of the presence of an
+``end of file'' character.
+To ensure that FDS reads the entire input file, add \index{Namelist Group!TAIL}
 
 \footnotesize
 \begin{verbatim}
 &TAIL /
 \end{verbatim}
 \normalsize \noindent
-as the last line at the end of the input file. This completes the file from {\ct \&HEAD} to {\ct \&TAIL}.
+as the last line at the end of the input file. This completes the file from {\ct \&HEAD} to {\ct \&TAIL}. FDS does not even look for
+this last line. It just forces the ``end of file'' character past relevant input.
 
-\begin{warning}
-\noindent
-Note that only the parameters that need to be changed from the default values
-are required to be listed in the input file. Also, namelist records can be split over several lines.
-\end{warning}
+Another general rule of thumb when writing input files is to only add to the file parameters that are to change from their
+default value. That way, you can more easily distinguish between what you want and what FDS wants. Add comments liberally to the file, so long as
+these comments do not fall within the namelist records.
 
-\normalsize \noindent
 The general structure of an input file is shown below, with many
 lines of the original validation input file (WTC\_05\_v5.fds) removed for clarity.
 
@@ -1167,51 +1233,7 @@ lines of the original validation input file (WTC\_05\_v5.fds) removed for clarit
 \normalsize
 
 \noindent
-The parameters in the input file can be integers ({\ct TWFIN=5400}),
-real numbers ({\ct CO\_YIELD=0.008}), groups of real numbers or integers
-({\ct XYZ=6.04,0.28,3.65}) or ({\ct IJK=90,36,38}),
-character strings ({\ct CHID='WTC\_05\_v5'}), groups of character strings
-({\ct SURF\_IDS='burner','INERT','INERT'}),
-or logical parameters ({\ct POROUS\_FLOOR=.FALSE.}). A logical parameter is either
-{\ct .TRUE.} or {\ct .FALSE.} -- the periods are a
-Fortran convention. Character strings that are listed in
-this User's Manual must be copied exactly as written -- the code
-is case sensitive and underscores {\em do} matter.
-
-\begin{warning}
-\noindent
-Note that character strings can be enclosed either by apostrophes or quotation marks.
-Be careful not to create the input file by pasting text from something other than a
-simple text editor, in which case the punctuation marks may not transfer
-properly into the text file.
-\end{warning}
-
-\noindent
-Input parameters can be separated by either a comma, space, or line break.
-Comments and notes can be written into the file so long as nothing comes
-before the {\ct \&} except a space and nothing comes between the ampersand
-{\ct \&} and the slash {\ct /} except appropriate parameters corresponding
-to that particular namelist group.
-
-\noindent
-When inputting values in an array note the following.  If an input is given as an array containing 4 elements, then:
-
-A = x1, x2, x3 , x4 will write the values x1 through x4 to the first 4 elements of the array
-A(2) = x, will write x to the second element of the array 
-A(1:2) x1, x2 will write x1 and x2 to the first two elements of the array
-
-The same will apply to multi-dimensional arrays.
-
-
-\begin{warning}
-\noindent
-Note that FDS is case-sensitive. Copy
-exactly the parameter names from this manual and do not assume that the
-program understands if the case is changed.
-\end{warning}
-
-\noindent
-As stated previously, it is strongly recommended that when looking at a new scenario,
+It is strongly recommended that when looking at a new scenario,
 first select a pre-written input file that resembles the case,
 make the necessary changes, then run the case at fairly low
 resolution to determine if the geometry is set up correctly.
@@ -1223,12 +1245,6 @@ corrections can easily be made without wasting too much time.
 As you learn how to write input files, you will continually
 run and re-run your case as you add in complexity.
 
-\begin{warning}
-Be aware that FDS will simply over-write the output files of a given case if its assigned
-name is the same.
-\end{warning}
-
-\noindent
 Table~\ref{tbl:namelistgroups} provides a quick reference to all the namelist parameters and
 where you can find the reference to where it is introduced in the document and the
 table containing all of the keywords for each group. \index{Namelist Group}
@@ -7029,10 +7045,10 @@ component density.
 
 % FDSVVBiB is split into FDS_refs, FDSVVBiBnew and FDS_mathcomp
 %    SV docs would typically use FDS_ref, FDS_mathcomp but not FDSVVBiBnew
-% 
+%
 %         FDS_refs:  FDS and SV reference documents (user, tech guides etc.)
 %         FDS_mathcomp:  mathematical, computer references
-%         FDSVVBiBnew: fire references, what is left over 
+%         FDSVVBiBnew: fire references, what is left over
 
 %\bibliography{../Bibliography/FDSVVBiB}
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDSVVBiBnew,../Bibliography/FDS_mathcomp}
