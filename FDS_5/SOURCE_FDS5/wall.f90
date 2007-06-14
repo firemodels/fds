@@ -776,17 +776,20 @@ WALL_CELL_LOOP: DO IW=1,NWC
          IF ( (X_S_NEW(I)-X_S_NEW(I-1)) < 0.5 * SMALLEST_CELL_SIZE(LAYER_INDEX(I))) RECOMPUTE = .TRUE.
       ENDDO
       IF (THICKNESS == 0._EB) THEN
-         WC%TMP_S(0:NWP+1) = MAX(TMPMIN,SF%TMP_BACK)
-         TMP_F(IW)         = MIN(TMPMAX,MAX(TMPMIN,SF%TMP_BACK))
-         TMP_B(IW)         = MIN(TMPMAX,MAX(TMPMIN,SF%TMP_BACK))
-         RHOWAL            = 0.5_EB*(RHO(IIG,JJG,KKG)+RHO_W(IW))
-         CP_TERM           = MAX(0._EB,-CP_GAMMA*UW(IW)*RHOWAL)
-         QCONF(IW)         = HEAT_TRANS_COEF(IW) * (TMP_G - 0.5_EB * (TMP_F(IW) + TMP_F_OLD) )
-         TMP_W(IW)         = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G+CP_TERM*TMP_F(IW)-QCONF(IW) )/(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
-         TMP_W(IW)         = MAX(TMPMIN,TMP_W(IW))
-         MASSFLUX(IW,I_FUEL)= 0._EB
-         WC%BURNAWAY       = .TRUE.
-         I_OBST            = OBST_INDEX_W(IW)
+         WC%TMP_S(0:NWP+1)    = MAX(TMPMIN,SF%TMP_BACK)
+         TMP_F(IW)            = MIN(TMPMAX,MAX(TMPMIN,SF%TMP_BACK))
+         TMP_B(IW)            = MIN(TMPMAX,MAX(TMPMIN,SF%TMP_BACK))
+         RHOWAL               = 0.5_EB*(RHO(IIG,JJG,KKG)+RHO_W(IW))
+         CP_TERM              = MAX(0._EB,-CP_GAMMA*UW(IW)*RHOWAL)
+         QCONF(IW)            = HEAT_TRANS_COEF(IW) * (TMP_G - 0.5_EB * (TMP_F(IW) + TMP_F_OLD) )
+         TMP_W(IW)            = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G+CP_TERM*TMP_F(IW)-QCONF(IW) ) & 
+                                /(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
+         TMP_W(IW)            = MAX(TMPMIN,TMP_W(IW))
+         MASSFLUX(IW,I_FUEL)  = 0._EB
+         ACTUAL_BURN_RATE(IW) = 0._EB
+         WC%N_LAYER_CELLS     = 0
+         WC%BURNAWAY          = .TRUE.
+         I_OBST               = OBST_INDEX_W(IW)
          IF (I_OBST > 0) THEN
             IF (OBSTRUCTION(I_OBST)%CONSUMABLE) OBSTRUCTION(I_OBST)%MASS = -1.
          ENDIF
@@ -813,7 +816,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
          ENDDO
          WC%N_LAYER_CELLS = N_LAYER_CELLS_NEW
          NWP = NWP_NEW
-         WC%X_S(0:NWP) = X_S_NEW(0:NWP)
+         WC%X_S(0:NWP) = X_S_NEW(0:NWP)      ! Note: WC%X_S(NWP+1...) are not set to zero.
       ELSE      
          CALL GET_WALL_NODE_WEIGHTS(NWP,SF%N_LAYERS,N_LAYER_CELLS_NEW,THICKNESS,SF%GEOMETRY, &
             WC%X_S(0:NWP),RDX_S(0:NWP+1),RDXN_S(0:NWP),DX_WGT_S(0:NWP),DXF,DXB,LAYER_INDEX)

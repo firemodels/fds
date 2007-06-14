@@ -14,7 +14,7 @@ representative of any particular material.
 
 &TIME TWFIN=900., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
 
-&MISC H_FIXED=0.0 /  No convective heat transfer
+&MISC SOLID_PHASE_ONLY = .TRUE. H_FIXED=0.0 /  No convective heat transfer
 
 &REAC ID='NO REACTION', Y_O2_INFTY=0.01 /  No gas phase reaction with 1% O2 concentration
 
@@ -36,7 +36,6 @@ The plastic properties and surface designation
       COLOR='BLACK'
       MATL_ID='PMMA'
       THICKNESS=0.025 
-      BURN_AWAY=.TRUE.
       EXTERNAL_FLUX=50. /  External Flux is ONLY for this simple demo exercise
 
 The actual designation of the material in the FDS domain
