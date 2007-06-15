@@ -44,7 +44,8 @@ REAL(EB) :: YFU0,A,ETRM,YCOMIN,YO2MIN,YFUMIN,YO20,YCO0,&
             DYF,DX_FDT,HFAC_F,DTT,& 
             Z_F,Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,&
             F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,Z_2,RHOX, &
-            X_FU,X_O,X_FU_0,X_O_0,X_FU_S,X_O_S,X_FU_N,X_O_N,X_O_MIN,X_FU_MIN,COTOO2
+            X_FU,X_O,X_FU_0,X_O_0,X_FU_S,X_O_S,X_FU_N,X_O_N,X_O_MIN,X_FU_MIN,COTOO2, &
+            Y_F_MAX,TMP_F_MIN,Y_F_CORR
 INTEGER :: NODETS,N,I,J,K,II,JJ,KK,SCAN_DISTANCE,IC
 !LOGICAL :: BURN
 REAL(EB), POINTER, DIMENSION(:,:,:) :: YO2Z,QT,R_SUM_DILUENTS
@@ -159,6 +160,7 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             IF (YFU0<=YFUMIN .OR. YO20<=YO2MIN) CYCLE ILOOPY
             !Get min O2
                Y_O2_MAX = 0._EB
+               Y_F_MAX = 0._EB
                DO KK=MAX(1,K-SCAN_DISTANCE),MIN(KBAR,K+SCAN_DISTANCE)
                   DO JJ=MAX(1,J-SCAN_DISTANCE),MIN(JBAR,J+SCAN_DISTANCE)
                      DO II=MAX(1,I-SCAN_DISTANCE),MIN(IBAR,I+SCAN_DISTANCE)
@@ -168,13 +170,18 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
                               Y_O2_MAX = YO2Z(II,JJ,KK)
                               TMP_MIN = TMP(II,JJ,KK)
                            ENDIF
+                           IF (YY(II,JJ,KK,I_FUEL)>Y_F_MAX) THEN
+                              Y_F_MAX = YY(II,JJ,KK,I_FUEL)
+                              TMP_F_MIN = TMP(II,JJ,KK)
+                           ENDIF
                         ENDIF
                      ENDDO
                   ENDDO
                ENDDO
                Y_O2_CORR = RN%Y_O2_LL*(RN%CRIT_FLAME_TMP-TMP_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
+               Y_F_CORR  = 1100._EB*(RN%CRIT_FLAME_TMP-TMP_F_MIN)/REACTION(2)%HEAT_OF_COMBUSTION             
 !               IF (Y_O2_MAX<Y_O2_CORR .OR. (TMP(I,J,K) < 700._EB .AND. .NOT. BURN)) CYCLE ILOOPY
-               IF (Y_O2_MAX<Y_O2_CORR) CYCLE ILOOPY
+               IF (Y_O2_MAX<Y_O2_CORR) CYCLE ILOOPY !.AND. Y_F_MAX < Y_F_CORR) CYCLE ILOOPY
                DYF = MIN(YFU0,YO20/RN%O2_F_RATIO)
             Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F)
             DYF = Q_NEW /(RHO(I,J,K)*HFAC_F)
@@ -258,18 +265,18 @@ IF (N_SPEC_DILUENTS > 0) THEN
    R_SUM_DILUENTS => WORK4
    R_SUM_DILUENTS =  0._EB
    DO N=1,N_SPECIES
-      IF (SPECIES(N)%MODE==GAS_SPECIES) R_SUM_DILUENTS(:,:,:) = R_SUM_DILUENTS(:,:,:) + SPECIES(N)%RCON*YYS(:,:,:,N)
+      IF (SPECIES(N)%MODE==GAS_SPECIES) R_SUM_DILUENTS(:,:,:) = R_SUM_DILUENTS(:,:,:) + SPECIES(N)%RCON*YY(:,:,:,N)
    ENDDO
 ENDIF
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (CO_PRODUCTION) THEN
-            Z_2 = YYS(I,J,K,I_PROG_CO)
+            Z_2 = YY(I,J,K,I_PROG_CO)
          ELSE
             Z_2 = 0._EB
          ENDIF
-         CALL GET_MOLECULAR_WEIGHT(YYS(I,J,K,I_FUEL),Z_2,YYS(I,J,K,I_PROG_F),Y_SUM(I,J,K),RSUM(I,J,K))
+         CALL GET_MOLECULAR_WEIGHT(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),RSUM(I,J,K))
          RSUM(I,J,K) = R0/RSUM(I,J,K)
       ENDDO
    ENDDO
