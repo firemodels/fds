@@ -887,6 +887,27 @@ results in a velocity of 10.09~m/s through the vent.  FDS computes a peak veloci
 
 
 
+\subsection{Sawtooth ({\bf sawtooth})  }
+
+Sometimes it is desired to have stair-stepped obstructions representing curved or sloped geometry. A concern is that this may change the flow pattern near the wall. To lessen the impact of stair-stepped boundaries near the edges of the obstructions, one may specify the option {\ct SAWTOOTH=.FALSE.} If {\ct SAWTOOTH} is set to {\ct FALSE}, then the velocity boundary conditions will be applied in such a way as to minimize the impact of the boundaries due to vortices at sharp corners, as shown in the following example:
+
+\scriptsize
+\begin{verbatim}
+&OBST XB= 0.00, 0.05,-0.01, 0.01, 0.00, 0.05, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+&OBST XB= 0.05, 0.10,-0.01, 0.01, 0.00, 0.10, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+&OBST XB= 0.10, 0.15,-0.01, 0.01, 0.05, 0.15, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+&OBST XB= 0.15, 0.20,-0.01, 0.01, 0.10, 0.20, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+\end{verbatim}\normalsize
+
+In the figure below, the top set of obstructions are using the default {\ct SAWTOOTH=.TRUE.} and the bottom set of obstructions are using {\ct SAWTOOTH=.FALSE.} The adjacent obstructions that have {\ct SAWTOOTH=.FALSE.} are displayed in Smokeview as one smooth obstruction, shown in green. Notice that as the air moves across the different sets of obstructions, the air velocity on the bottom set of obstructions is not affected as much by the vortices.
+
+\begin{center}
+\includegraphics[width=3in]{FIGURES/sawtooth.jpg}
+\end{center}
+
+\clearpage
+
+
 
 
 
