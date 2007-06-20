@@ -3395,23 +3395,44 @@ phase routines. However, it is easy to perform a simple check of any set of surf
 no convective heat transfer. There are several parameters that allow you do this, spread out over the various namelist groups.
 
 \begin{enumerate}
-\item Create a trivially small mesh, just to let FDS run. Since the gas phase calculation is essentially being shut off, you just need 4 cells in each
-direction ({\ct IJK=4,4,4}) for the pressure solver to function properly.
-\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step),
-and set {\ct DT} to whatever value appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it
-is best to control this yourself.
-\item Put {\ct H\_FIXED=0.} on the {\ct MISC} line. This turns off the convective heat flux from gas to surface and vis verse. The heat flux to the
-solid is specified via {\ct EXTERNAL\_FLUX} (kW/m$^2$) on the {\ct SURF} line that is assigned to the solid surface.
-\item Turn off combustion by creating a {\ct REAC} line with only {\ct Y\_O2\_INFTY=0.01}. This sets the background oxygen mass fraction to 0.01, too low to
-support any burning.
-\item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply
-a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or cone calorimeter.
-\item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces.
-\item Finally, add solid phase output devices to the solid surface, like {\ct WALL\_TEMPERATURE}, {\ct HEAT\_FLUX}, {\ct BURNING\_RATE}, {\ct GAUGE\_HEAT\_FLUX}, and
-{\ct WALL\_THICKNESS} (assuming the solid is to burn away). Use these to track the condition of the solid as a function of time. In particular, make sure that
-the {\ct BURNING\_RATE} is appropriate for the particular external heat flux applied. Make sure that the {\ct WALL\_TEMPERATURE} is appropriate. Compare your
-results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly
-matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena.
+\item Create a trivially small mesh, just to let FDS run. Since the
+gas phase calculation is essentially being shut off, you just need 4
+cells in each direction ({\ct IJK=4,4,4}) for the pressure solver to
+function properly. 
+\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS
+to update the solid phase every time step (normally it does this every
+other time step), and set {\ct DT} to whatever value appropriate for
+the solid phase calculation. Since there is no gas phase calculation
+that will limit the time step, it is best to control this yourself.
+\item Put {\ct H\_FIXED=0.} on the {\ct MISC} line. This turns off the
+convective heat flux from gas to surface and vis verse. The heat flux
+to the solid is specified via {\ct EXTERNAL\_FLUX} (kW/m$^2$) on the
+{\ct SURF} line that is assigned to the solid surface. 
+\item Turn off all the gas phase computations by setting {\ct
+SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed
+up the computations significantly. If the gas phase computations are
+neede, you may turn off combustion by creating a {\ct REAC} line with only
+{\ct Y\_O2\_INFTY=0.01}. This sets the background oxygen mass fraction
+to 0.01, too low to support any burning.
+\item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you
+normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF}
+line. This is simply a ``virtual'' source that heats the solid. Think
+of this as a perfect radiant panel or cone calorimeter. 
+\item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom
+of the computational domain. Create {\ct OPEN} vents on all other
+faces. 
+\item Finally, add solid phase output devices to the solid surface,
+like {\ct WALL\_TEMPERATURE}, {\ct HEAT\_FLUX}, {\ct BURNING\_RATE},
+{\ct GAUGE\_HEAT\_FLUX}, and {\ct WALL\_THICKNESS} (assuming the solid
+is to burn away). Use these to track the condition of the solid as a
+function of time. In particular, make sure that the {\ct
+BURNING\_RATE} is appropriate for the particular external heat flux
+applied. Make sure that the {\ct WALL\_TEMPERATURE} is
+appropriate. Compare your results to measurements made in a
+bench-scale device, like the cone calorimeter. Keep in mind, however,
+that the calculation and the experiment are not necessarily perfectly
+matched. The calculation is designed to eliminate uncertainties
+related to convection, combustion, and apparatus-specific phenomena. 
 \end{enumerate}
 
 
