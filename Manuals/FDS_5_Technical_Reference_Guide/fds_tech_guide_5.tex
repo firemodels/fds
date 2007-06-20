@@ -3617,14 +3617,18 @@ the middle of the first grid cell and the length scale $L$, and the Prandtl numb
 
 \subsection{Solid Surface and Interior Temperatures}
 
-A one dimensional heat transfer calculation is
-performed at each solid boundary cell for which the user has prescribed thermal
+A one dimensional heat transfer calculation is performed at each solid
+boundary cell for which the user has prescribed thermal
 properties. The solid can consist of multiple layers of materials.
-Each layer is partitioned into non-uniform cells, clustered near the front and back faces.
-The smallest cells are chosen based on the criteria
-\be \dx < \sqrt{\frac{k_s}{\rho_s c_s}} \ee
-Interior cells double in size. The cell boundaries are located at points $x_i$.
-The temperature at the center of the $i$th cell is denoted $T_{s,i}$.
+Each layer is partitioned into non-uniform cells, clustered near the
+front and back faces.  The smallest cells are chosen based on the
+criteria
+\be \dx < S_s\sqrt{\frac{k_s}{\rho_s c_s}} \ee
+where $S_s$ is a cell size factor defined by the user. By default,
+$F_s$ is 1.0.  Interior cells increase in size by a user-defined
+stretch factor when moving inwards from the surfaces. By default, the
+stretch factor is 2.0. The cell boundaries are located at points
+$x_i$. The temperature at the center of the $i$th cell is denoted $T_{s,i}$.
 The (temperature-dependent) thermal conductivity of the solid
 at the center of the $i$th cell is denoted $k_{s,i}$.
 The temperatures are updated in time using an implicit
