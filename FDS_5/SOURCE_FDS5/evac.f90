@@ -35,7 +35,7 @@ Module EVAC
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS
   ! Public variables (needed in the main program):
   !
-  Character(20) :: EVAC_COMPILE_DATE = 'May 9, 2007'
+  Character(20) :: EVAC_COMPILE_DATE = 'June 19, 2007'
   Real(FB) :: EVAC_VERSION = 1.10
   !
   ! This is a group of persons, who are initialized together,
@@ -70,7 +70,8 @@ Module EVAC
   ! H is the height of the stand, S is the length along the incline.
   ! (&EVSS lines)
   Type EVAC_SSTAND_TYPE
-     Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, H=0._EB, S=0._EB
+     Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, H=0._EB, H0=0._EB, S=0._EB
+     Real(EB) :: Esc_SpeedUp=0._EB, Esc_SpeedDn=0._EB
      Real(EB) :: fac_v0_up=1._EB, fac_v0_down=1._EB, fac_v0_hori=1._EB
      Real(EB) :: cos_x=1._EB, cos_y=1._EB, sin_x=0._EB, sin_y=0._EB
      Character(60) :: ID_NAME='null'
@@ -345,7 +346,7 @@ Contains
          Reva_Tau_Evac, Reva_Corr_Vel
     Character(26), Dimension(:), Allocatable :: CharID_Tmp
     Character(26) :: VENT_FFIELD, EVAC_MESH
-    Real(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT
+    Real(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED
 
     Character(26), Dimension(51) :: KNOWN_DOOR_NAMES
     Real(EB), Dimension(51) :: KNOWN_DOOR_PROBS
@@ -380,8 +381,8 @@ Contains
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, EVAC_MESH
     Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, EVAC_MESH
 
-    Namelist /EVSS/ FYI, ID, XB, EVAC_MESH, HEIGHT, IOR, &
-         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI
+    Namelist /EVSS/ FYI, ID, XB, EVAC_MESH, HEIGHT, HEIGHT0, IOR, &
+         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, ESC_SPEED
 
     Namelist /PERS/ FYI,ID,DIAMETER_DIST,VELOCITY_DIST, &
          PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST, &
@@ -1739,11 +1740,15 @@ Contains
                ' problem with KNOWN_DOOR_NAMES'
           Call SHUTDOWN(MESSAGE)
        End If
-       i = 50
-       Do While ( Trim(KNOWN_DOOR_NAMES(i)) == 'null' .And. &
-            i > 0)
-          i = i-1
-       End Do
+       If (Trim(KNOWN_DOOR_NAMES(1)) == 'null') Then
+          i = 0 ! no doors given
+       Else
+          i = 50 ! known door names given
+          Do While ( Trim(KNOWN_DOOR_NAMES(i)) == 'null' .And. &
+               i > 0)
+             i = i-1
+          End Do
+       End If
        PNX%N_VENT_FFIELDS = i
        Allocate(PNX%I_DOOR_NODES(0:i),STAT=IZERO)
        Call ChkMemErr('Read_Evac','PNX%I_DOOR_NODES',IZERO) 
@@ -2218,9 +2223,11 @@ Contains
        EVAC_MESH     = 'null'
        IOR           = 0
        HEIGHT        = 0.0_EB
+       HEIGHT0       = 0.0_EB
        FAC_V0_UP     = 0.0_EB
        FAC_V0_DOWN   = 0.0_EB
        FAC_V0_HORI   = 0.0_EB
+       ESC_SPEED     = 0.0_EB
        !
        Call CHECKREAD('EVSS',LU5,IOS)
        If (IOS == 1) Exit READ_EVSS_LOOP
@@ -2241,14 +2248,19 @@ Contains
        ESS%Z1 = XB(5)
        ESS%Z2 = XB(6)
        ESS%ID_NAME     = ID
-       ESS%FAC_V0_HORI = FAC_V0_HORI
        ESS%H           = HEIGHT
+       ESS%H0          = HEIGHT0
+       ESS%FAC_V0_HORI = FAC_V0_HORI
        If (ESS%H < 0.0_EB) Then
           ESS%FAC_V0_UP   = FAC_V0_DOWN
           ESS%FAC_V0_DOWN = FAC_V0_UP
+          ESS%Esc_SpeedDn   = Max(0.0_EB,+ESC_SPEED)
+          ESS%Esc_SpeedUp   = Max(0.0_EB,-ESC_SPEED)
        Else
           ESS%FAC_V0_UP   = FAC_V0_UP
           ESS%FAC_V0_DOWN = FAC_V0_DOWN
+          ESS%Esc_SpeedUp   = Max(0.0_EB,+ESC_SPEED)
+          ESS%Esc_SpeedDn   = Max(0.0_EB,-ESC_SPEED)
        End If
        ESS%IOR         = IOR
        ! 
@@ -2283,21 +2295,21 @@ Contains
 
        Select Case (IOR)
        Case(-1,+1)
-          ESS%S = Sqrt((ESS%X2-ESS%X1)**2 + ESS%H**2)
+          ESS%S = Sqrt((ESS%X2-ESS%X1)**2 + (ESS%H-ESS%H0)**2)
           ESS%COS_X = Abs(ESS%X2-ESS%X1)/ &
-               Sqrt((ESS%X2-ESS%X1)**2 + ESS%H**2)
+               Sqrt((ESS%X2-ESS%X1)**2 + (ESS%H-ESS%H0)**2)
           ESS%COS_Y = 1.0_EB
-          ESS%SIN_X = Abs(ESS%H)/ &
-               Sqrt((ESS%X2-ESS%X1)**2 + ESS%H**2)
+          ESS%SIN_X = Abs(ESS%H-ESS%H0)/ &
+               Sqrt((ESS%X2-ESS%X1)**2 + (ESS%H-ESS%H0)**2)
           ESS%SIN_Y = 0.0_EB
        Case(-2,+2)
-          ESS%S = Sqrt((ESS%Y2-ESS%Y1)**2 + ESS%H**2)
+          ESS%S = Sqrt((ESS%Y2-ESS%Y1)**2 + (ESS%H-ESS%H0)**2)
           ESS%COS_X = 1.0_EB
           ESS%COS_Y = Abs(ESS%Y2-ESS%Y1)/ &
-               Sqrt((ESS%Y2-ESS%Y1)**2 + ESS%H**2)
+               Sqrt((ESS%Y2-ESS%Y1)**2 + (ESS%H-ESS%H0)**2)
           ESS%SIN_X = 0.0_EB
-          ESS%SIN_Y = Abs(ESS%H)/ &
-               Sqrt((ESS%Y2-ESS%Y1)**2 + ESS%H**2)
+          ESS%SIN_Y = Abs(ESS%H-ESS%H0)/ &
+               Sqrt((ESS%Y2-ESS%Y1)**2 + (ESS%H-ESS%H0)**2)
        Case Default
           Write(MESSAGE,'(A,I4,A)') &
                'ERROR: EVSS',N,' problem with IOR'
@@ -3807,28 +3819,30 @@ Contains
                          End Do
                       End If        ! there are known doors for this group
                    Else
-                      Human_Known_Doors(j1)%N_nodes = i_tmp
-                      If (Count(Is_Known_Door) > 0 ) Then
-                         Allocate(Human_Known_Doors(j1)%I_nodes(i_tmp), &
-                              STAT=IZERO)
-                         Call ChkMemErr('Initialize_Evacuation', &
-                              'Human_Known_Doors',IZERO) 
-                         i_tmp = 0
-                         Do ie = 1, n_doors
-                            If (Is_Known_Door(ie)) Then
-                               i_tmp = i_tmp + 1
-                               Human_Known_Doors(j1)%I_nodes(i_tmp) = &
-                                    EVAC_DOORS(ie)%INODE  
-                            End If
-                         End Do
-                         Do ie = 1, n_exits
-                            If (Is_Known_Door(ie+n_doors)) Then
-                               i_tmp = i_tmp + 1
-                               Human_Known_Doors(j1)%I_nodes(i_tmp) = &
-                                    EVAC_EXITS(ie)%INODE  
-                            End If
-                         End Do
-                      End If        ! there are known doors for this group
+                      If (j1 > 0) Then
+                         Human_Known_Doors(j1)%N_nodes = i_tmp
+                         If (Count(Is_Known_Door) > 0 ) Then
+                            Allocate(Human_Known_Doors(j1)%I_nodes(i_tmp), &
+                                 STAT=IZERO)
+                            Call ChkMemErr('Initialize_Evacuation', &
+                                 'Human_Known_Doors',IZERO) 
+                            i_tmp = 0
+                            Do ie = 1, n_doors
+                               If (Is_Known_Door(ie)) Then
+                                  i_tmp = i_tmp + 1
+                                  Human_Known_Doors(j1)%I_nodes(i_tmp) = &
+                                       EVAC_DOORS(ie)%INODE  
+                               End If
+                            End Do
+                            Do ie = 1, n_exits
+                               If (Is_Known_Door(ie+n_doors)) Then
+                                  i_tmp = i_tmp + 1
+                                  Human_Known_Doors(j1)%I_nodes(i_tmp) = &
+                                       EVAC_EXITS(ie)%INODE  
+                               End If
+                            End Do
+                         End If        ! there are known doors for this group
+                      End If
                    End If
 
                    Do ie = 1, n_doors
@@ -4108,17 +4122,17 @@ Contains
                         (ESS%Y1 <= HR%Y .And. ESS%Y2 >= HR%Y) ) Then
                       Select Case (ESS%IOR)
                       Case(-1)
-                         HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                              ESS%H*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
+                         HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                              (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
                       Case(+1)
-                         HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                              ESS%H*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
+                         HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                              (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
                       Case(-2)
-                         HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                              ESS%H*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                         HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                              (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
                       Case(+2)
-                         HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                              ESS%H*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                         HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                              (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
                       End Select
                       Exit SS_Loop
                    End If
@@ -5698,29 +5712,29 @@ Contains
                       speed_xp = cos_x*HR%Speed*ESS%FAC_V0_UP
                       speed_ym = HR%Speed*ESS%FAC_V0_HORI
                       speed_yp = HR%Speed*ESS%FAC_V0_HORI
-                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                           ESS%H*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
+                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                           (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
                    Case(+1)
                       speed_xm = cos_x*HR%Speed*ESS%FAC_V0_UP
                       speed_xp = cos_x*HR%Speed*ESS%FAC_V0_DOWN
                       speed_ym = HR%Speed*ESS%FAC_V0_HORI
                       speed_yp = HR%Speed*ESS%FAC_V0_HORI
-                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                           ESS%H*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
+                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                           (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
                    Case(-2)
                       speed_xm = HR%Speed*ESS%FAC_V0_HORI
                       speed_xp = HR%Speed*ESS%FAC_V0_HORI
                       speed_ym = cos_y*HR%Speed*ESS%FAC_V0_DOWN
                       speed_yp = cos_y*HR%Speed*ESS%FAC_V0_UP
-                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                           ESS%H*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                           (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
                    Case(+2)
                       speed_xm = HR%Speed*ESS%FAC_V0_HORI
                       speed_xp = HR%Speed*ESS%FAC_V0_HORI
                       speed_ym = cos_y*HR%Speed*ESS%FAC_V0_UP
                       speed_yp = cos_y*HR%Speed*ESS%FAC_V0_DOWN
-                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                           ESS%H*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                           (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
                    End Select
                    Exit SS_Loop1
                 End If
@@ -5876,6 +5890,28 @@ Contains
                 A1 = A1 + 2.0_EB*Pi
              End Do
              HR%Omega = Omega_new
+             !
+             ! Check, if human is on an escalator and change the coordinates.
+             SS_Loop1b: Do j = 1, n_sstands
+                ESS => EVAC_SSTANDS(j)
+                If (ESS%IMESH == nm .And. &
+                     (ESS%X1 <= HR%X .And. ESS%X2 >= HR%X) .And. &
+                     (ESS%Y1 <= HR%Y .And. ESS%Y2 >= HR%Y) ) Then
+                   cos_x = ESS%cos_x
+                   cos_y = ESS%cos_y
+                   Select Case (ESS%IOR)
+                   Case(-1)
+                      X1 = X1 - cos_x*(ESS%Esc_SpeedUp-ESS%Esc_SpeedDn)*DTSP
+                   Case(+1)
+                      X1 = X1 - cos_x*(ESS%Esc_SpeedUp-ESS%Esc_SpeedDn)*DTSP
+                   Case(-2)
+                      Y1 = Y1 + cos_y*(ESS%Esc_SpeedUp-ESS%Esc_SpeedDn)*DTSP
+                   Case(+2)
+                      Y1 = Y1 - cos_y*(ESS%Esc_SpeedUp-ESS%Esc_SpeedDn)*DTSP
+                   End Select
+                   Exit SS_Loop1b
+                End If
+             End Do SS_Loop1b
              !
              ! Where is the person, new coordinates (t + dt)?
              XI  = CELLSI(Floor((X1-XS)*RDXINT))
@@ -6234,29 +6270,29 @@ Contains
                       speed_xp = cos_x*HR%Speed*ESS%FAC_V0_UP
                       speed_ym = HR%Speed*ESS%FAC_V0_HORI
                       speed_yp = HR%Speed*ESS%FAC_V0_HORI
-                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                           ESS%H*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
+                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                           (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
                    Case(+1)
                       speed_xm = cos_x*HR%Speed*ESS%FAC_V0_UP
                       speed_xp = cos_x*HR%Speed*ESS%FAC_V0_DOWN
                       speed_ym = HR%Speed*ESS%FAC_V0_HORI
                       speed_yp = HR%Speed*ESS%FAC_V0_HORI
-                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                           ESS%H*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
+                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                           (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
                    Case(-2)
                       speed_xm = HR%Speed*ESS%FAC_V0_HORI
                       speed_xp = HR%Speed*ESS%FAC_V0_HORI
                       speed_ym = cos_y*HR%Speed*ESS%FAC_V0_DOWN
                       speed_yp = cos_y*HR%Speed*ESS%FAC_V0_UP
-                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                           ESS%H*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                           (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
                    Case(+2)
                       speed_xm = HR%Speed*ESS%FAC_V0_HORI
                       speed_xp = HR%Speed*ESS%FAC_V0_HORI
                       speed_ym = cos_y*HR%Speed*ESS%FAC_V0_UP
                       speed_yp = cos_y*HR%Speed*ESS%FAC_V0_DOWN
-                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + &
-                           ESS%H*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                      HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
+                           (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
                    End Select
                    Exit SS_Loop2
                 End If
