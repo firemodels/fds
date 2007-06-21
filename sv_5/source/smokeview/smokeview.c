@@ -3156,8 +3156,13 @@ void RenderFrame(int view_mode){
   case 1:
     ext=ext_jpg;
     break;
+#ifdef pp_GDGIF
+  case 2:
+    ext=ext_gif;
+    break;
+#endif
   default:
-    renderfiletype=0;
+    renderfiletype=2;
     ext=ext_png;
     break;
   }

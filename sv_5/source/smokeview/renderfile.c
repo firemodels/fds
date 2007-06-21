@@ -19,6 +19,9 @@
 
 #define PNG 0
 #define JPEG 1
+#ifdef pp_GDGIF
+#define GIF 2
+#endif
 
 //void pauseSV(void);
 
@@ -59,12 +62,17 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   int i,j,rgb;
 
   switch (renderfiletype){
-  case 0:
+  case PNG:
     ext=ext_png;
     break;
-  case 1:
+  case JPEG:
     ext=ext_jpg;
     break;
+#ifdef pp_GDGIF
+  case GIF:
+    ext=ext_gif;
+    break;
+#endif
   default:
     renderfiletype=0;
     ext=ext_png;
@@ -147,6 +155,11 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   case JPEG:
     gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
+#ifdef pp_GDGIF
+  case GIF:
+    gdImageGif(RENDERimage,RENDERfile);
+    break;
+#endif
   default:
     ASSERT(0);
     break;
@@ -212,6 +225,11 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   case JPEG:
     gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
+#ifdef pp_GDGIF
+  case GIF:
+    gdImageGif(RENDERimage,RENDERfile);
+    break;
+#endif
   default:
     ASSERT(0);
     break;
