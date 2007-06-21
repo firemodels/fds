@@ -1170,6 +1170,12 @@ void RenderMenu(int value){
      renderfiletype=1;
      updatemenu=1;  
      break;
+#ifdef pp_GDGIF
+  case RenderGIF:
+     renderfiletype=2;
+     updatemenu=1;  
+     break;
+#endif
   default:
     if(RenderTime==0&&touring==0)return;
     if(touring==1){
@@ -4959,10 +4965,23 @@ static int textureshowmenu=0;
   if(renderfiletype==0){
     glutAddMenuEntry("*PNG",RenderPNG);
     glutAddMenuEntry("JPEG",RenderJPEG);
+#ifdef pp_GDGIF
+    glutAddMenuEntry("GIF",RenderGIF);
+#endif
   }
   if(renderfiletype==1){
     glutAddMenuEntry("PNG",RenderPNG);
     glutAddMenuEntry("*JPEG",RenderJPEG);
+#ifdef pp_GDGIF
+    glutAddMenuEntry("GIF",RenderGIF);
+#endif
+  }
+  if(renderfiletype==2){
+    glutAddMenuEntry("PNG",RenderPNG);
+    glutAddMenuEntry("JPEG",RenderJPEG);
+#ifdef pp_GDGIF
+    glutAddMenuEntry("*GIF",RenderGIF);
+#endif
   }
   glutAddMenuEntry("-",10000);
   glutAddMenuEntry("NUMBER",10000);

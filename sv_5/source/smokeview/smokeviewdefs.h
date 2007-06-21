@@ -170,6 +170,9 @@ void _sniffErrors(char *whereat);
 #define RenderCancel 999
 #define RenderOnce 998
 #define RenderJPEG 997
+#ifdef pp_GDGIF
+#define RenderGIF 988
+#endif
 #define RenderPNG 996
 #define Render320 995
 #define Render640 994

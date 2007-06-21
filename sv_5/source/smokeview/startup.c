@@ -1458,6 +1458,9 @@ void initvars1(void){
   overwrite_all=0,erase_all=0;
   strcpy(ext_png,".png");
   strcpy(ext_jpg,".jpg");
+#ifdef pp_GDGIF
+  strcpy(ext_gif,".gif");
+#endif
   renderfiletype=0;
   strcpy(part_ext,".part");
   strcpy(ini_ext,".ini");
