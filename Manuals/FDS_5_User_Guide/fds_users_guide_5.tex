@@ -3751,7 +3751,10 @@ Species &   Mol.~Wgt.        & $\sigma$  & $k/\epsilon$  \\
 \end{center}
 \end{table}
 
-
+Recognized species that are emissive will been defined as {\ct ABSORBING} and radiative absorption for those species
+will be computed.  The keyword {\ct ABSORBING} can be specified on the {\ct SPEC} line as well.  If {\ct .TRUE.} and the 
+species is not in the recognized list, then it will be assumed to be a fuel when invoking RADCAL to compute its
+absorptivity.
 
 \clearpage
 
@@ -4210,6 +4213,16 @@ applications, the output file will be split into appropriately sized smaller
 files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.}
 \index{DUMP!COLUMN\_DUMP\_LIMIT} on the {\ct DUMP} line.
 
+
+\begin{warning}
+All devices must have a specified {\ct QUANTITY}.  Some special devices (Section~/ref{info:PROP}) have their {\ct QUANTITY}
+specifed on a {\ct PROP} line.
+\end{warning}
+
+\begin{warning}
+A {\ct QUANTITY} specified on a {\ct PROP} line associated with a {\ct DEVC} line will override an {\ct QUANTITY}
+specified on the {\ct DEVC} line.
+\end{warning}
 
 
 \section{Special Devices and their Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
@@ -4708,7 +4721,6 @@ include the attribute {\ct LATCH=.FALSE.} \index{CTRL!LATCH}on the relevant {\ct
 By default, devices and controls may only change state once, like a sprinkler activating or
 smoke detector alarming. {\ct LATCH=.TRUE.} by default for both devices and controls.
 
-
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT_LEAST}}
 
@@ -4927,7 +4939,8 @@ For a pre-action sprinkler system\index{pre-action sprinkler system}, the normal
 dry sprinkler pipes are flooded when a detection event occurs. For this example, the detection event is
 when two of four smoke detectors alarm.  It takes 30~s to flood the piping network.
 The nozzle is a {\ct DEVC} named {\ct 'NOZZLE 1'} controlled by the {\ct CTRL} named {\ct 'nozzle trigger'}.
-The nozzle activates when both detection \underline{and} the time delay have occurred.
+The nozzle activates when both detection \underline{and} the time delay have occurred.  Note that the {\ct DEVC} is
+specified with {\ct QUANTITY='CONTROL'}.
 
 \footnotesize
 \begin{verbatim}
@@ -4935,7 +4948,7 @@ The nozzle activates when both detection \underline{and} the time delay have occ
 &DEVC XYZ=1,4,3, PROP_ID='Acme Smoker', ID='SD_2' /
 &DEVC XYZ=4,1,3, PROP_ID='Acme Smoker', ID='SD_3' /
 &DEVC XYZ=4,4,3, PROP_ID='Acme Smoker', ID='SD_4' /
-&DEVC XYZ=2,2,3, PROP_ID='Acme Nozzle', ID='NOZZLE 1', CTRL_ID='nozzle trigger' /
+&DEVC XYZ=2,2,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL', ID='NOZZLE 1', CTRL_ID='nozzle trigger' /
 
 &CTRL ID='nozzle trigger', FUNCTION_TYPE='ALL', INPUT_ID='smokey','delay' /
 &CTRL ID='delay', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='smokey', DELAY=30. /
@@ -4943,7 +4956,31 @@ The nozzle activates when both detection \underline{and} the time delay have occ
 \end{verbatim}
 \normalsize
 
+\subsection{Combining Control Functions: A Dry Pipe Sprinkler System}
 
+For a dry-pipe sprinkler system\index{dry-pipe sprinkler system}, the normally
+dry sprinkler pipes are pressurized with gas.  When a link activates in a sprinkler head, the pressure drop allows
+water to flow into the pipe network.  For this example it takes 30~s to flood the piping network once a sprinkler link 
+has activated.  The sequence of events required for operation is first {\ct ANY} of the links must activate which
+starts the 30~s {\ct TIME\_DELAY}.  Once the 30~s delay has occurred, each nozzle with an active link, the {\ct ALL} 
+control functions, will then flow water.
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler Link', ID='LINK 1' /
+&DEVC XYZ=2,3,3, PROP_ID='Acme Sprinkler Link', ID='LINK 2' /
+
+&PROP ID='Acme Sprinkler Link', QUANTITY='LINK TEMPERATURE',ACTIVATION_TEMPERATURE=74.,RTI=30./
+
+&DEVC XYZ=2,2,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL', ID='NOZZLE 1', CTRL_ID='nozzle 1 trigger' /
+&DEVC XYZ=2,3,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL', ID='NOZZLE 2', CTRL_ID='nozzle 2 trigger' /
+
+&CTRL ID='check links', FUNCTION_TYPE='ANY', INPUT_ID='LINK 1','LINK 2'/
+&CTRL ID='delay', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='check links', DELAY=30. /
+&CTRL ID='nozzle 1 trigger', FUNCTION_TYPE='ALL', INPUT_ID='delay','LINK 1'/
+&CTRL ID='nozzle 2 trigger', FUNCTION_TYPE='ALL', INPUT_ID='delay','LINK 2'/
+\end{verbatim}
+\normalsize
 
 
 \chapter{Output Data}
@@ -5546,6 +5583,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct BURNING\_RATE}                             & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
 {\ct carbon dioxide}                            & $X_{CO_2}(Z)$                                 & mol/mol        & D,I,P,S      \\ \hline
 {\ct carbon monoxide}                           & $X_{CO}(Z)$                                   & mol/mol        & D,I,P,S      \\ \hline
+{\ct CONTROL}                                   & See Section~\ref{info:CTRL}                   &                & D            \\ \hline
 {\ct CONVECTIVE\_FLUX}                          & $\dq_c''$ (Section~\ref{info:heat_flux})      & kW/m$^2$       & B,D          \\ \hline
 {\ct DENSITY}                                   & $\rho$                                        & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & s$^{-1}$       & D,I,P,S      \\ \hline
@@ -5703,6 +5741,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct BYPASS\_FLOWRATE} & Real            & Aspiration smoke detector parameter                              & kg/s  & 0       \\ \hline
 {\ct CTRL\_ID}         & Character       & Associated {\ct CTRL} line                                       &       &         \\ \hline
 {\ct DELAY}            & Real            & Transport time for an aspiration detector                        & s     & 0       \\ \hline
+{\ct DEVC\_ID}         & Character       & Associated {\ct DEVC} line for aspiration detector               &       &         \\ \hline
 {\ct DEPTH}            & Real            & Depth into surface for internal wall temp                        & m     & 0       \\ \hline
 {\ct FLOWRATE}         & Real            & Suction flowrate for an aspiration detector                      & kg/s  & 0       \\ \hline
 {\ct IOR}              & Integer         & Index of Orientation ($\pm$1,$\pm$2,$\pm$3)                                &       &         \\ \hline
