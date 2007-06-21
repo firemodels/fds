@@ -2868,7 +2868,6 @@ DEVICE_LOOP: DO N=1,N_DEVC
    DV%COUNT         = DV%COUNT + 1
    DV%VALUE         = DV%VALUE + VALUE
    DV%INSTANT_VALUE = VALUE
-
    ! Check for change in control function output of device
 
    LATCHIF: IF (DV%LATCH) THEN
@@ -2898,7 +2897,6 @@ DEVICE_LOOP: DO N=1,N_DEVC
          ENDIF
       ENDIF DEVICE_DIRECTION2
    ENDIF LATCHIF
-   
    ! If a DEViCe changes state, save the Smokeview file strings and time of state change
    IF (DV%CURRENT_STATE .NEQV. DV%PRIOR_STATE) THEN
       DV%T_CHANGE = T
@@ -3234,7 +3232,7 @@ SELECT CASE(IND)
       ! Complete weighting and compute % obs
       GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT / DV%TOTAL_FLOWRATE
       GAS_PHASE_OUTPUT = (1._EB-EXP(-MASS_EXTINCTION_COEFFICIENT*GAS_PHASE_OUTPUT))*100._EB  ! Obscuration
- 
+
    CASE(171:179) ! [PART_ID]_MPUV
       GAS_PHASE_OUTPUT = AVG_DROP_DEN(II,JJ,KK,IND-170)
    CASE(181:189) ! {PART_ID}_ADD
