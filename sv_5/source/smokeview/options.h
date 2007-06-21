@@ -5,7 +5,7 @@
 #define pp_memstatus
 #define pp_COMPRESS
 #define pp_noappend
-#define pp_GDGIF
+
 #pragma warning (disable:4100)		/* disable bogus conversion warnings */
 #pragma warning (disable:4115)		/* disable bogus conversion warnings */
 #pragma warning (disable:4127)		/* disable bogus conversion warnings */
@@ -14,6 +14,10 @@
 #pragma warning (disable:4305)		/* disable bogus conversion warnings */
 #pragma warning (disable:4505)		/* disable bogus conversion warnings */
 #pragma warning (disable:4701)		/* disable bogus conversion warnings */
+#endif
+
+#ifndef pp_OSX
+#define pp_GDGIF
 #endif
 
 #ifndef _DEBUG
