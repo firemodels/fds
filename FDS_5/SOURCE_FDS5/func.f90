@@ -296,16 +296,26 @@ END SUBROUTINE GET_WALL_NODE_COORDINATES
 
 
 SUBROUTINE GET_WALL_NODE_WEIGHTS(N_CELLS,N_LAYERS,N_LAYER_CELLS, &
-         THICKNESS,GEOMETRY,X_S,RDX,RDXN,DX_WGT,DXF,DXB,LAYER_INDEX)
+         THICKNESS,GEOMETRY,X_S,DX,RDX,RDXN,DX_WGT,DXF,DXB,LAYER_INDEX)
 
 ! Get the wall internal coordinates
 
 INTEGER, INTENT(IN)     :: N_CELLS, N_LAYERS, N_LAYER_CELLS(N_LAYERS), GEOMETRY
 REAL(EB), INTENT(IN)    :: X_S(0:N_CELLS),THICKNESS
 INTEGER, INTENT(OUT)    :: LAYER_INDEX(0:N_CELLS+1)
-REAL(EB), INTENT(OUT)   :: RDX(0:N_CELLS+1),RDXN(0:N_CELLS),DX_WGT(0:N_CELLS),DXF,DXB
+REAL(EB), INTENT(OUT)   :: DX(1:N_CELLS),RDX(0:N_CELLS+1),RDXN(0:N_CELLS),DX_WGT(0:N_CELLS),DXF,DXB
 
-INTEGER I, II, NL
+INTEGER I, II, NL, I_GRAD
+REAL(EB) R
+
+SELECT CASE(GEOMETRY)
+CASE(SURF_CARTESIAN)
+   I_GRAD = 0
+CASE(SURF_CYLINDRICAL)
+   I_GRAD = 1
+CASE(SURF_SPHERICAL)
+   I_GRAD = 2
+END SELECT
 
    II = 0
    DO NL=1,N_LAYERS
@@ -328,12 +338,19 @@ INTEGER I, II, NL
    DX_WGT(0)       = 0.5_EB
    DX_WGT(N_CELLS) = 0.5_EB
 
-! Compute 1/dx for each node (dx is the distance from cell boundary to cell boundary)
+! Compute dx and 1/dx for each node (dx is the distance from cell boundary to cell boundary)
 
    DO I=1,N_CELLS
-      RDX(I) = 1._EB/(X_S(I)-X_S(I-1))
-      IF (GEOMETRY==SURF_CYLINDRICAL) RDX(I) = RDX(I)/(THICKNESS-0.5_EB*(X_S(I)+X_S(I-1)))
+      DX(I)  = X_S(I)-X_S(I-1)
+      RDX(I) = 1._EB/DX(I)
    ENDDO
+  ! Adjust 1/dx_n to 1/rdr for cylindrical case and 1/r^2dr for spaherical
+   IF (GEOMETRY /=SURF_CARTESIAN) THEN
+      DO I=1,N_CELLS
+         R = THICKNESS-0.5_EB*(X_S(I)+X_S(I-1))
+         RDX(I) = RDX(I)/R**I_GRAD
+      ENDDO
+   ENDIF
    RDX(0)         = RDX(1)
    RDX(N_CELLS+1) = RDX(N_CELLS)
 
@@ -345,11 +362,12 @@ INTEGER I, II, NL
    RDXN(0)       = 1._EB/(X_S(1)-X_S(0))
    RDXN(N_CELLS) = 1._EB/(X_S(N_CELLS)-X_S(N_CELLS-1))
 
-! Adjust 1/dx_n to r/dr for cylindrical case
+! Adjust 1/dx_n to r/dr for cylindrical case and r^2/dr for spaherical
 
-   IF (GEOMETRY==SURF_CYLINDRICAL) THEN
+   IF (GEOMETRY /= SURF_CARTESIAN) THEN
       DO I=0,N_CELLS
-         RDXN(I) = RDXN(I)*(THICKNESS-X_S(I))
+         R = THICKNESS-X_S(I)
+         RDXN(I) = RDXN(I)*R**I_GRAD
       ENDDO
    ENDIF
 
@@ -357,13 +375,13 @@ END SUBROUTINE GET_WALL_NODE_WEIGHTS
 
 
 SUBROUTINE GET_INTERPOLATION_WEIGHTS(N_LAYERS,NWP,NWP_NEW,N_LAYER_CELLS,N_LAYER_CELLS_NEW, &
-            X_S,X_S_NEW,RDX_S,INT_WGT)
+            X_S,X_S_NEW,INT_WGT)
 
 INTEGER, INTENT(IN)  :: N_LAYERS,NWP,NWP_NEW,N_LAYER_CELLS(N_LAYERS),N_LAYER_CELLS_NEW(N_LAYERS)
-REAL(EB), INTENT(IN) :: X_S(0:NWP), X_S_NEW(0:NWP_NEW), RDX_S(1:NWP_NEW)
+REAL(EB), INTENT(IN) :: X_S(0:NWP), X_S_NEW(0:NWP_NEW)
 REAL(EB), INTENT(OUT) :: INT_WGT(NWP_NEW,NWP)
 
-REAL(EB) XUP,XLOW,XUP_NEW,XLOW_NEW
+REAL(EB) XUP,XLOW,XUP_NEW,XLOW_NEW,DX_NEW
 INTEGER I, J, II, JJ, I_BASE, J_BASE, J_OLD,N
 II = 0
 JJ = 0
@@ -374,14 +392,15 @@ INT_WGT = 0._EB
 DO N = 1,N_LAYERS
    J_OLD = 1
    DO I = 1,N_LAYER_CELLS_NEW(N)
-      II = I_BASE + I
-      XUP_NEW = X_S_NEW(II)
+      II       = I_BASE + I
+      XUP_NEW  = X_S_NEW(II)
       XLOW_NEW = X_S_NEW(II-1)
+      DX_NEW   = XUP_NEW - XLOW_NEW 
       DO J = J_OLD,N_LAYER_CELLS(N)
          JJ = J_BASE + J
          XUP =  X_S(JJ)
          XLOW = X_S(JJ-1)
-         INT_WGT(II,JJ) = (MIN(XUP,XUP_NEW)-MAX(XLOW,XLOW_NEW))*RDX_S(II)
+         INT_WGT(II,JJ) = (MIN(XUP,XUP_NEW)-MAX(XLOW,XLOW_NEW))/DX_NEW
          IF (XUP .GE. XUP_NEW) EXIT
       ENDDO
       J_OLD = J
