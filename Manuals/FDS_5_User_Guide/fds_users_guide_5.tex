@@ -2533,23 +2533,33 @@ leads to a desired time history of the heat release rate.
 \subsection{Special Topics: Non-Planar Walls and Targets}
 \index{non-planar geometries}
 
-All obstructions in FDS are assumed to conform to the rectilinear mesh, and all bounding surfaces are assumed to be flat planes. However, many
-objects, like cables, pipes, and ducts, are not flat. Even though these objects have to be represented in FDS as ``boxes,'' you can still perform
-the internal heat transfer calculation as if the object were really cylindrical. For example, the input lines:
+All obstructions in FDS are assumed to conform to the rectilinear
+mesh, and all bounding surfaces are assumed to be flat
+planes. However, many objects, like cables, pipes, and ducts, are not
+flat. Even though these objects have to be represented in FDS as
+``boxes,'' you can still perform the internal heat transfer
+calculation as if the object were really cylindrical or spherical. For
+example, the input lines: 
 
 \footnotesize
 \begin{verbatim}
 &OBST XB=0.0,5.0,1.1,1.2,3.4,3.5, SURF_ID='CABLE' /
-&SURF ID='CABLE', COLOR='BLACK', MATL_ID='STEEL', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
+&SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
 \end{verbatim} \normalsize
 
 \noindent
-can be used to model a power cable that is 5~m long, cylindrical in cross section, 2~cm in diameter.
-The heat transfer calculation is still one-dimensional; that is, it is assumed that there
-is a uniform heat flux all about the object. This can be somewhat confusing because the cable is represented as an obstruction of square cross section, with a
-separate heat transfer calculation performed at each face, and no communication among the four faces. Obviously, this is not an ideal way to do solid phase heat
-transfer, but it does provide a reasonable bounding surface temperature for the gas phase calculation. More detailed assessment of a cable would require a two or
-three-dimensional heat conduction calculation, which is not included in FDS.
+can be used to model a power cable that is 5~m long, cylindrical in
+cross section, 2~cm in diameter. The heat transfer calculation is
+still one-dimensional; that is, it is assumed that there is a uniform
+heat flux all about the object. This can be somewhat confusing because
+the cable is represented as an obstruction of square cross section,
+with a separate heat transfer calculation performed at each face, and
+no communication among the four faces. Obviously, this is not an ideal
+way to do solid phase heat transfer, but it does provide a reasonable
+bounding surface temperature for the gas phase calculation. More
+detailed assessment of a cable would require a two or 
+three-dimensional heat conduction calculation, which is not included
+in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
 
 
 
