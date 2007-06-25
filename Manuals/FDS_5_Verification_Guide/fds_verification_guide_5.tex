@@ -1048,7 +1048,8 @@ pyrolysis.
 \subsection{Simple Heat Conduction Through a Solid Slab ({\bf heat\_conduction}) }
 
 Analytical solutions of transient, one-dimensional heat conduction through a
-slab can be found in Refs.~\cite{Drysdale:1} and \cite{Carslaw:1}. Four cases are examined here. In each, a slab of
+slab can be found in Refs.~\cite{Drysdale:1} and
+\cite{Carslaw:1}. Four cases are examined here. In each, a slab of 
 thickness $L=0.1$~m is exposed on one face to an air temperature of $T_g=120$~$^\circ$C. The other face is insulated (adiabatic). The convective
 heat transfer from the gas to the slab is $\dq_c'' = h \, (T_g - T_s)$,
 where $h$ is constant, and $T_s$ is the slab face temperature. No thermal radiation is included.
@@ -1074,6 +1075,57 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 
 
 \clearpage
+
+\subsection{Heat Conduction in Different Geometries With
+Temperature-dependent Thermal Properties ({\bf heat\_conduction\_kc})} 
+
+This example demostrates the 1D heat conduction in cartesian, 
+cylindrical and spherical geometries with temperature-dependent 
+thermal properties. The reference results were computed using a
+HEATING-code (version 7.3). HEATING is a multi-dimensional finite
+difference general purpose heat transfer model~\cite{Childs}. In
+cartesian and cylindrical cases, the results have also  been verified
+using a commercial finite element solver ABAQUS.
+
+The sample of homogenous material is initially at 0$^\circ$C and
+at $t>0$ exposed to a gas at 700 $^\circ$C. A fixed heat transfer
+coefficient of 10~W/Km$^2$ is assumed. The density 
+of the material is 10000 kg/m$^3$. The conductivity and specific heat
+are functions of temperature with following values: $k(0)=0.10$ W/Km$^2$, 
+$k(200)=0.20$ W/Km$^2$, $c(0)=1.0$ kJ/kgK, $c(100)=1.2$ kJ/kgK,
+$c(200)=1.0$ kJ/kgK. The thickness (radius) of the sample is 0.01 m. In
+cartesian case, the back surface of the material is exposed to a gas
+at 0$^\circ$C. In the Figure below, the solid lines are FDS results and open
+symbols are the HEATING results. An example input with cylindrical
+geometry looks like 
+
+\scriptsize
+\begin{verbatim}
+&MATL ID='MAT_1'
+      EMISSIVITY = 0.0
+      CONDUCTIVITY_RAMP='K_RAMP'
+      SPECIFIC_HEAT_RAMP = 'C_RAMP'
+      DENSITY=10000. /
+
+&RAMP ID = 'K_RAMP' T=0,   F= 0.10 /
+&RAMP ID = 'K_RAMP' T=100, F= 0.15 /
+&RAMP ID = 'K_RAMP' T=200, F= 0.20 /
+&RAMP ID = 'C_RAMP' T=0,   F= 1.00 /
+&RAMP ID = 'C_RAMP' T=100, F= 1.20 /
+&RAMP ID = 'C_RAMP' T=200, F= 1.00 /
+
+&SURF ID='SLAB'
+      STRETCH_FACTOR = 1.0
+      GEOMETRY = 'CYLINDRICAL'
+      MATL_ID='MAT_1'
+      THICKNESS=0.01 / 
+\end{verbatim} \normalsize
+
+\noindent
+\begin{center}
+\includegraphics[width=4.5in]{FIGURES/heat_conduction_kc}
+\end{center}
+
 
 \subsection{A Simple Two-Step Pyrolysis Example ({\bf two\_step\_solid\_reaction}) }
 
