@@ -2686,16 +2686,24 @@ compartments are considered as separate ``pressure zones.'' Two fans are mounted
 \normalsize
 
 \noindent
-Consider a few of the extra parameters. The attribute {\ct POROUS=.TRUE.} allows hot, smokey gases to pass through the obstructions that represent the fans. These obstructions
-are merely flat plates, by necessity. The velocity {\ct VEL} associated with a {\ct POROUS} surface is meant to represent the velocity in the positive or negative coordinate
-direction, as indicated by its sign. This is different than the convention used when the {\ct SURF} is attached to a solid wall. The {\ct DUCT\_PATH} defines the pressure
-{\ct ZONE} downstream and upstream of the fan, respectively. The fan with {\ct ID='BLOW LEFT'}, for example, blows air into {\ct ZONE} 1 from {\ct ZONE} 2.
-In more complicated scenarios,
-it is possible to tie the fan behavior to disconnected compartments, where it is assumed that a ``virtual'' duct connects the two spaces. The {\ct HOLE}s in the Partition Wall serve
-only to carve out space for the obstructions that represent the fans. Note the obstructions have zero thickness, as required by the {\ct POROUS} surface. The attribute
-{\ct PERMIT\_HOLE=.FALSE.} tells FDS not to reject the obstructions because they are embedded within the Partition Wall.
-
-
+Consider a few of the extra parameters. The attribute {\ct
+POROUS=.TRUE.} allows hot, smokey gases to pass through the
+obstructions that represent the fans. These obstructions are merely
+flat plates, by necessity. The velocity {\ct VEL} associated with a
+{\ct POROUS} surface is meant to represent the velocity in the
+positive or negative coordinate direction, as indicated by its
+sign. This is different than the convention used when the {\ct SURF}
+is attached to a solid wall. The {\ct DUCT\_PATH} defines the pressure
+{\ct ZONE} downstream and upstream of the fan, respectively. The fan
+with {\ct ID='BLOW LEFT'}, for example, blows air into {\ct ZONE} 1
+from {\ct ZONE} 2.  In more complicated scenarios, it is possible to
+tie the fan behavior to disconnected compartments, where it is assumed
+that a ``virtual'' duct connects the two spaces. The {\ct HOLE}s in
+the Partition Wall serve only to carve out space for the obstructions
+that represent the fans. Note the obstructions have zero thickness, as
+required by the {\ct POROUS} surface. The attribute {\ct
+PERMIT\_HOLE=.FALSE.} tells FDS not to reject the obstructions because
+they are embedded within the Partition Wall.
 
 
 
@@ -2712,11 +2720,16 @@ only to carve out space for the obstructions that represent the fans. Note the o
 \section{Describing Real Materials: The \texorpdfstring{{\tt MATL}}{MATL} Namelist Group}
 \label{info:MATL}\index{Namelist Group!MATL}
 
-A solid boundary can consist of multiple layers of different materials, and each layer can consist of multiple material
-components. These combinations of layers and material components are specified on the {\ct SURF} line via the array called {\ct MATL\_ID(IL,IC)}. The
-argument {\ct IL} is an integer indicating the layer index, starting at 1, the layer at the exterior boundary. The argument {\ct IC} is an integer
-indicating the component index. For example, {\ct MATL\_ID(2,3)='BRICK'} indicates that the third material component of the second layer is
-{\ct BRICK}. In practice, the materials are often listed as in the following example:
+A solid boundary can consist of multiple layers of different
+materials, and each layer can consist of multiple material
+components. These combinations of layers and material components are
+specified on the {\ct SURF} line via the array called {\ct
+MATL\_ID(IL,IC)}. The argument {\ct IL} is an integer indicating the
+layer index, starting at 1, the layer at the exterior boundary. The
+argument {\ct IC} is an integer indicating the component index. For
+example, {\ct MATL\_ID(2,3)='BRICK'} indicates that the third material
+component of the second layer is {\ct BRICK}. In practice, the
+materials are often listed as in the following example:
 
 \footnotesize
 \begin{verbatim}
@@ -2857,20 +2870,23 @@ $\rho_{s0}$ is the initial density of the material layer.
 $A_{ij}$ is prescribed under the name {\ct A(j)}, with units of
 1/s. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in
 units of kJ/kmol. Remember that 1~kcal is 4.184~kJ, and be careful
-with factors of 1000. $T_{ign,ij}$ is an ignition temperature that
+with factors of 1000. $n_{s,ij}$ is prescibed under the name {\ct
+N\_S(j)}. $T_{ign,ij}$ is an ignition temperature that
 allows the definition of non-Arrhenius pyrolysis functions and
 ignition criteria, and is prescribed by {\ct IGNITION\_TEMPERATURE(j)}.
 By default, the exponent of temperature $n_{t,j}$ is zero, and the
-temperature power does not affect the pyrolysis rate.
+temperature power does not affect the pyrolysis rate. $n_{t,j}$ is
+prescibed under the name {\ct N\_T(j)}.
 
-$A$ and $E$ are not readily accessible for most materials found at a
+$A$ and $E$  are not readily accessible for most materials found at a
 fire scene. However, if they are known, specify both. Avoid specifying
 just one because they act as a pair.  If $A$ and $E$ are not known,
 which is usually the case, specify {\ct REFERENCE\_RATE} (1/s) and
 {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). This directs FDS to choose
 {\ct A} and {\ct E} so that the reaction rate ({\ct REFERENCE\_RATE})
 is achieved at the {\ct REFERENCE\_TEMPERATURE}. The default value of {\ct
-REFERENCE\_RATE} is 0.1~s$^{-1}$.
+REFERENCE\_RATE} is 0.1~s$^{-1}$. If the value of $n_s$ is not known,
+it is a good starting point to assume $n_s=1$.
 \begin{warning}
 \noindent
 The temperature is read in using degrees Celsius, but is then converted to

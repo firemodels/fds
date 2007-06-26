@@ -1,9 +1,3 @@
-% This document is not using proper pdflatex syntax.
-% Many errors when building like:
-% Package hyperref Warning: Token not allowed in a PDFDocEncoded string,
-% *(hyperref)                removing `\f@encoding' on input line 1561.
-% See user guide for how this is resolved.
-
 \documentclass[11pt]{book}
 \usepackage{mathptm,times}
 \usepackage[pdftex]{graphicx}
@@ -120,7 +114,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, June 21, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, June 7, 2007)}
 
 \vspace{.5in}
 
@@ -1231,8 +1225,10 @@ are also shown, courtesy of Ian Thomas, Victoria University, Australia.
 \clearpage
 \subsection{A Thermoplastic ({\bf thermoplastic}) }
 
-This example just exercises the solid phase algorithm in FDS. Essentially, the gas phase is shut off except for the imposition of a 50~kW/m$^2$ ``virtual''
-heat flux. The solid in this example is a slab of plastic, similar in composition to PMMA.
+This example just exercises the solid phase algorithm in
+FDS. Essentially, the gas phase is shut off except for the imposition
+of a 50~kW/m$^2$ ``virtual'' heat flux. The solid in this example is a
+slab of plastic, similar in composition to PMMA. 
 
 \scriptsize
 \begin{verbatim}
@@ -1250,14 +1246,17 @@ heat flux. The solid in this example is a slab of plastic, similar in compositio
       COLOR='BLACK'
       MATL_ID='PMMA'
       THICKNESS=0.025
-      BURN_AWAY=.TRUE.
       EXTERNAL_FLUX=50. /  External Flux is ONLY for this simple demo exercise
 \end{verbatim} \normalsize
 
 \noindent
-The material undergoes only one reaction -- the conversion of solid to gaseous fuel vapor. In this case, the {\ct HEAT\_OF\_REACTION} is essentially the
-latent heat of vaporization. The {\ct REFERENCE\_TEMPERATURE} indicates that the reaction is to occur at a (default) rate of 0.1~s$^{-1}$ at 330~$^\circ$C. The
-{\ct HEAT\_OF\_COMBUSTION} refers to the combustion of the gaseous fuel vapor, which does not occur in this example.
+The material undergoes only one reaction -- the conversion of solid to
+gaseous fuel vapor. In this case, the {\ct HEAT\_OF\_REACTION} is
+essentially the latent heat of vaporization. The {\ct
+REFERENCE\_TEMPERATURE} indicates that the reaction is to occur at a
+(default) rate of 0.1~s$^{-1}$ at 330~$^\circ$C. The {\ct
+HEAT\_OF\_COMBUSTION} refers to the combustion of the gaseous fuel
+vapor, which does not occur in this example. 
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
@@ -1388,7 +1387,6 @@ ought to be:
 \times 20000 \; \hbox{kJ/kg} + 10 \; \hbox{kW} \times 120 \; \hbox{s} =
 26.8 \; \hbox{MJ}
 \ee
-Integration of FDS output HRR yields 29.1 MJ.
 
 
 
@@ -1828,7 +1826,7 @@ with different grid dimensions.
 
 Using FDS  version 1, Bounagui {\em  et al.}~\cite{Bounagui:1} studied
 the effect of grid size on simulation results to determine the nominal
-grid size for future work. A propane burner 1.0~m by 1.0~m was modeled
+grid size for future work. A propane burner 0.1~m by 0.1~m was modeled
 with  a heat  release rate  of  1500~kW. The  grid sizes  used in  the
 modeling are  given in Table~\ref{gridsize}. The results  of the model
 were         compared         against        Heskestad's         plume
