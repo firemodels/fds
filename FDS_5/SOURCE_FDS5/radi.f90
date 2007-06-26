@@ -512,7 +512,7 @@ SUBROUTINE RADIATION_FVM(NM)
 USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 
-REAL(EB) :: ZZ, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
+REAL(EB) :: ZZ, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, INRAD, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT, WAXIDLN , KAPPA_1, Z_2
 INTEGER  :: N,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
@@ -552,7 +552,6 @@ ENDIF
 
 IF (WIDE_BAND_MODEL) QR = 0._EB
 IF (UPDATE_INTENSITY) QRADIN = 0._EB
-IF (UPDATE_INTENSITY) QRAD   = 0._EB
  
 ! Loop over spectral bands
  
@@ -665,11 +664,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP_F(IW))
          IBC = IJKW(5,IW)
          SF  => SURFACE(IBC)
-         IF (SF%INTERNAL_RADIATION) THEN
-            OUTRAD_W(IW) = BBF*E_WALL(IW)*RPI*QRADOUT(IW)
-         ELSE
-            OUTRAD_W(IW) = BBF*E_WALL(IW)*RPI_SIGMA*TMP_F(IW)**4
+         IF (.NOT. SF%INTERNAL_RADIATION) THEN
+            QRADOUT(IW) = E_WALL(IW)*SIGMA*TMP_F(IW)**4
          ENDIF
+         OUTRAD_W(IW) = BBF*RPI*QRADOUT(IW)
       ENDDO
  
 ! Compute boundary condition term incoming radiation integral
@@ -942,49 +940,27 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDDO ANGLE_LOOP
       ENDDO UPDATE_LOOP
  
+      ! Compute incoming flux on walls 
+      DO IW=1,NWC
+         IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE 
+         IBC = IJKW(5,IW)
+         QRADIN(IW)  = QRADIN(IW) + E_WALL(IW)*(INRAD_W(IW)+SURFACE(IBC)%EXTERNAL_FLUX/NUMBER_SPECTRAL_BANDS)
+      ENDDO 
+
    ENDIF INTENSITY_UPDATE
-   
-IF (UPDATE_INTENSITY) THEN
-   ! Sum up the parts of the intensity
-   UII = SUM(UIID, DIM = 4)
-   ! Compute net flux on walls 
-   DO IW=1,NWC
-      IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE 
-      IBC = IJKW(5,IW)
-      QRADIN(IW) = QRADIN(IW) + E_WALL(IW)*(INRAD_W(IW)+SURFACE(IBC)%EXTERNAL_FLUX/NUMBER_SPECTRAL_BANDS)
-      QRAD(IW) = QRAD(IW) + QRADIN(IW)
-   ENDDO 
-ENDIF
  
-! Save source term for the energy equation (QR = -DIV Q)
+   ! Save source term for the energy equation (QR = -DIV Q)
    IF (WIDE_BAND_MODEL) THEN
       QR = QR + KAPPA*UIID(:,:,:,IBND)-KFST4
       IF (NLP>0 .AND.(WATER_EVAPORATION .OR. FUEL_EVAPORATION) ) QR_W = QR_W + KAPPAW*UIID(:,:,:,IBND) - KFST4W
    ENDIF
-
- ! Update radiation fluxes on the walls
-
-!IF (UPDATE_INTENSITY) THEN
-!   DO IW=1,NWC
-!      IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE 
-!      IBC = IJKW(5,IW)
-!      QRADIN(IW) = QRADIN(IW) + E_WALL(IW)*(INRAD_W(IW)+SURFACE(IBC)%EXTERNAL_FLUX/NUMBER_SPECTRAL_BANDS)
-!      QRAD(IW)   = QRAD(IW)   - PI*OUTRAD_W(IW)
-!   ENDDO 
-!ENDIF
 
 ENDDO BAND_LOOP
 
 IF (UPDATE_INTENSITY) THEN
    ! Sum up the parts of the intensity
    UII = SUM(UIID, DIM = 4)
-   ! Compute net flux on walls 
-   DO IW=1,NWC
-      IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE 
-      QRAD(IW) = QRAD(IW) - PI*OUTRAD_W(IW)
-   ENDDO 
 ENDIF
-
 
 ! Save source term for the energy equation (QR = -DIV Q). Done only in one-band (gray gas) case.
 IF (.NOT. WIDE_BAND_MODEL) THEN
