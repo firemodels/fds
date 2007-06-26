@@ -725,7 +725,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
       ENDIF
       IF (WC%TMP_S(1)>ML%TMP_BOIL(1)) THEN
          ! Net flux guess for liquid evap
-         QNETF = QINF + QRADIN(IW) + QCONF(IW)
+         QNETF = QINF + QRADIN(IW) - QRADOUT(IW) + QCONF(IW)
          MFLUX = MAX(MFLUX,1.02*(QNETF - 2.*(ML%TMP_BOIL(1)-WC%TMP_S(1))/DXF/K_S(1))/ML%H_R(1))
       ENDIF
       MFLUX = MIN(MFLUX,THICKNESS*ML%RHO_S/DT_BC)
@@ -897,7 +897,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
          RFLUX_UP = RFLUX_DOWN
       ENDDO
       IF (SF%BACKING==EXPOSED) THEN
-         IF (BOUNDARY_TYPE(IWB)==SOLID_BOUNDARY) QRADOUT(IWB) = RFLUX_UP
+         IF (BOUNDARY_TYPE(IWB)==SOLID_BOUNDARY) QRADOUT(IWB) = E_WALLB*RFLUX_UP
       ENDIF
       ! solution outwards   
       RFLUX_UP = QRADINB + (1.-E_WALLB)*RFLUX_UP
@@ -906,7 +906,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
          Q_S(I) = Q_S(I) + (RFLUX_UP - RFLUX_DOWN)/DX_S(I)
          RFLUX_UP = RFLUX_DOWN
       ENDDO
-      QRADOUT(IW) = RFLUX_DOWN
+      QRADOUT(IW) = E_WALL(IW)*RFLUX_DOWN
    ENDIF
 
    ! Update the 1-D heat transfer equation 
