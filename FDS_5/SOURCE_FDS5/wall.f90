@@ -110,7 +110,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
             QNET = HEAT_TRANS_COEF(IW)*DTMP + QRADIN(IW) - E_WALL(IW) * SIGMA * TMP_OTHER ** 4
             FDERIV = -HEAT_TRANS_COEF(IW) -  4._EB * E_WALL(IW) * SIGMA * TMP_OTHER ** 3
             IF (FDERIV /= 0._EB) TMP_OTHER = TMP_OTHER - QNET / FDERIV
-            IF ((TMP_OTHER - TMP_F(IW)) / TMP_F(IW) < 0.0001) THEN
+            IF (ABS(TMP_OTHER - TMP_F(IW)) / TMP_F(IW) < 0.0001) THEN
                 TMP_F(IW) = TMP_OTHER
                 EXIT ADLOOP
             ELSE
