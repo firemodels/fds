@@ -97,10 +97,8 @@ int initcase_c(int argc, char **argv){
   }
   readini(0);
   if(ntours==0)setup_tour();
-#ifdef pp_COLOR
   initcolorbars(); // DEBUG - WARNING check out how colorbars are defined - is this a memory leak?
   glui_colorbar_setup(mainwindow_id);
-#endif
   glui_motion_setup(mainwindow_id);
   glui_bounds_setup(mainwindow_id);
   glui_edit_setup(mainwindow_id);
@@ -141,21 +139,50 @@ void sv_startup_c(int argc, char **argv){
   int i;
   f_unit *units;
   f_units *ut;
-  char *smoketemp,*smoketempdir;
-  size_t lensmoketemp,lensmoketempdir;
+  char *smoketempdir;
+  size_t lensmoketempdir,lensmokebindir;
 #ifdef pp_OSX
   char workingdir[1000];
 #endif
 
-  first=2;
-  smoketemp = getenv("SMOKEVIEWINI");
-  if(smoketemp==NULL)smoketemp=getenv("smokeviewini");
-  if(smoketemp==NULL)smoketemp=getenv("svini");
-  if(smoketemp==NULL)smoketemp=getenv("SVINI");
+// get smokeview bin directory from argv[0] which contains the full path of the smokeview binary
+
+  lensmokebindir = strlen(argv[0]);
+  NewMemory((void **)&smokeviewbindir, (unsigned int)(lensmokebindir+1));
+
+  strcpy(smokeviewbindir,argv[0]);
+  for(i=lensmokebindir-1;i>=0;i--){
+    char c;
+
+    c = smokeviewbindir[i];
+    if(strncmp(&c,dirseparator,1)==0){
+      smokeviewbindir[i+1]=0;
+      break;
+    }
+  }
+
+  NewMemory((void **)&smokeviewini,    (unsigned int)(lensmokebindir+9));
+  STRCPY(smokeviewini,smokeviewbindir);
+  STRCAT(smokeviewini,"smokeview.ini");
+  
+  startup_pass=2;
+
   smoketempdir=getenv("SVTEMPDIR");
   if(smoketempdir==NULL)smoketempdir=getenv("svtempdir");
   if(smoketempdir==NULL)smoketempdir=getenv("TEMP");
   if(smoketempdir==NULL)smoketempdir=getenv("temp");
+
+  if(smoketempdir != NULL){
+    lensmoketempdir = strlen(smoketempdir);
+    if(NewMemory((void **)&smokeviewtempdir,(unsigned int)(lensmoketempdir+2))!=0){
+      STRCPY(smokeviewtempdir,smoketempdir);
+      if(strncmp(smokeviewtempdir+lensmoketempdir-1,dirseparator,1)!=0){
+        STRCAT(smokeviewtempdir,dirseparator);
+      }
+      printf("Scratch directory: %s\n",smokeviewtempdir);
+    }
+  }
+
   if(texturedir==NULL){
     char *texture_buffer;
     size_t texture_len;
@@ -166,23 +193,6 @@ void sv_startup_c(int argc, char **argv){
       NewMemory((void **)&texturedir,texture_len+1);
       strcpy(texturedir,texture_buffer);
     }
-  }
-
-  if(smoketemp != NULL){
-    lensmoketemp = strlen(smoketemp);
-    if(NewMemory((void **)&smokeviewini,    (unsigned int)(lensmoketemp+17))!=0&&
-       NewMemory((void **)&smokeviewbindir, (unsigned int)(lensmoketemp+17))!=0
-       ){
-      STRCPY(smokeviewini,smoketemp);
-      if(strncmp(smoketemp+lensmoketemp-1,dirseparator,1)!=0){
-        STRCAT(smokeviewini,dirseparator);
-      }
-    }
-    else{
-      printf("*** Warning: Unable to allocate needed memory in sv_startup_c\n");
-    }
-    STRCPY(smokeviewbindir,smokeviewini);
-    STRCAT(smokeviewini,"smokeview.ini");
   }
 
   printf("*********************************************************************\n");
@@ -209,17 +219,6 @@ void sv_startup_c(int argc, char **argv){
   printf("should be evaluated by an informed user.\n\n");
   printf("*********************************************************************\n");
   printf("*********************************************************************\n");
-
-  if(smoketempdir != NULL){
-    lensmoketempdir = strlen(smoketempdir);
-    if(NewMemory((void **)&smokeviewtempdir,(unsigned int)(lensmoketempdir+2))!=0){
-      STRCPY(smokeviewtempdir,smoketempdir);
-      if(strncmp(smokeviewtempdir+lensmoketempdir-1,dirseparator,1)!=0){
-        STRCAT(smokeviewtempdir,dirseparator);
-      }
-      printf("Scratch directory: %s\n",smokeviewtempdir);
-    }
-  }
 
 #ifdef pp_OSX
   getcwd(workingdir,1000);
@@ -1095,7 +1094,7 @@ void initvars1(void){
   ReadZoneFile=0, ReadPartFile=0, ReadEvacFile=0;;
 
   editwindow_status=-1;
-  first=1;
+  startup_pass=1;
   ntargtimes=500;
   showtitle1=0, showtitle2=0;
 
@@ -1160,7 +1159,7 @@ void initvars1(void){
   colorbarcycle=0;
   colorbartype=1;
   colorbartype_save=1;
-  colorbarframe=0;
+  colorbarpoint=0;
   vectorspresent=0;
 
   visTarg = 0, ReadTargFile;
@@ -1542,7 +1541,7 @@ void initvars1(void){
   visTicks=0;
   visCadTextures=1;
 #ifdef pp_COLOR
-  viscolorbarpath=1;
+  viscolorbarpath=0;
   showzerosplit=1;
 #else
   viscolorbarpath=0;

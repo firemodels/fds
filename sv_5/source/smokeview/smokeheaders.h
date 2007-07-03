@@ -86,6 +86,16 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir);
 //void ShadeMenu(int value);
 #endif
 
+EXTERNCPP void ResizeColorbar(colorbardata *cbi, int n);
+EXTERNCPP void addcolorbar(char *label);
+EXTERNCPP void ColorBarMenu(int val);
+EXTERNCPP void freecolorbar(colorbardata *cbi);
+EXTERNCPP void initdefaultcolorbars(void);
+EXTERNCPP void drawcolorbarpath(void);
+EXTERNCPP void remapcolorbar(colorbardata *cbi);
+EXTERNCPP void interpcolor(float *col1, float *col2,float *rgb,int npoints_seg, int jumpflag);
+EXTERNCPP void freecolorbars(void);
+EXTERNCPP void initcolorbars(void);
 EXTERNCPP void update_glui_stereo(void);
 EXTERNCPP void escape_blanks(char *dirfrom, int maxlen);
 EXTERNCPP void InitOpenGL(void);
@@ -123,7 +133,6 @@ EXTERNCPP void IsoShowMenu(int value);
 EXTERNCPP void ShowPatchMenu(int value);
 EXTERNCPP void Smoke3DShowMenu(int value);
 EXTERNCPP void ShowVSliceMenu(int value);
-EXTERNCPP void ColorBarMenu(int val);
 #ifdef pp_PART5
 EXTERNCPP int get_part5prop_index_s(char *shortlabel);
 EXTERNCPP int get_part5prop_index(char *label);
@@ -225,13 +234,6 @@ EXTERNCPP float cputime(void);
 EXTERNCPP void update_smoke3dflags(void);
 EXTERNCPP void mergesmoke3dcolors(void);
 EXTERNCPP void setsmokecolorflags(void);
-EXTERNCPP void freecolorbar(colorbardata *cbi);
-EXTERNCPP void initdefaultcolorbars(void);
-EXTERNCPP void drawcolorbarpath(void);
-EXTERNCPP void remapcolorbar(colorbardata *cbi);
-EXTERNCPP void interpcolor(float *col1, float *col2,float *rgb,int npoints_seg, int contflag);
-EXTERNCPP void freecolorbars(void);
-EXTERNCPP void initcolorbars(void);
 EXTERNCPP void sort_transparent_faces(float *mm);
 EXTERNCPP void getsmokedir(float *mm);
 EXTERNCPP void ExtractFrustum(void);

@@ -7643,7 +7643,8 @@ typedef struct {
       fraction r1 g1 b1 r2 g2 b2
       */
 
-    if(match(buffer,"GENCOLORBAR",11) == 1){
+#ifdef pp_COLOR
+      if(match(buffer,"GENCOLORBAR",11) == 1){
       {
         size_t nlabel;
         colorbardata *cbi;
@@ -7672,16 +7673,17 @@ typedef struct {
           strcpy(cbi->label,buffer);
 
           fgets(buffer,255,stream);
-          sscanf(buffer,"%i",&cbi->nlegs);
+          sscanf(buffer,"%i",&cbi->npoints);
 
-          cbi->legindex=0;
+          cbi->pointindex=0;
 
-          NewMemory((void **)&cbi->flegs,cbi->nlegs*sizeof(float));
-          NewMemory((void **)&cbi->rgbnodes,6*cbi->nlegs*sizeof(float));
-          NewMemory((void **)&cbi->contflag,cbi->nlegs*sizeof(int));
+          NewMemory((void **)&cbi->flegs,cbi->npoints*sizeof(float));
+          NewMemory((void **)&cbi->c_vals,cbi->npoints*sizeof(float));
+          NewMemory((void **)&cbi->rgbnodes,6*cbi->npoints*sizeof(float));
+          NewMemory((void **)&cbi->jumpflag,cbi->npoints*sizeof(int));
           NewMemory((void **)&cbi->rgb,MAXRGB*3*sizeof(float));
 //          sum=0.0;
-          for(i=0;i<cbi->nlegs;i++){
+          for(i=0;i<cbi->npoints;i++){
             fgets(buffer,255,stream);
             r1=-1.0; g1=-1.0; b1=-1.0; 
             r2=-1.0; g2=-1.0; b2=-1.0;
@@ -7695,16 +7697,17 @@ typedef struct {
             cbi->rgbnodes[nn+4]=g2;
             cbi->rgbnodes[nn+5]=b2;
             if(r2<0.0){
-              cbi->contflag[i]=1;
+              cbi->jumpflag[i]=0;
             }
             else{
-              cbi->contflag[i]=0;
+              cbi->jumpflag[i]=1;
             }
           }
           remapcolorbar(cbi);
         }
       }
     }
+#endif
 
       if(match(buffer,"TOURCOLORS",10)==1){
         col=tourcol_selectedpathline;
@@ -8035,6 +8038,7 @@ typedef struct {
   fclose(stream);
   if(mxframes_ini!=0&&mxframes_comm==0)mxframes=mxframes_ini;
   if(mxpoints_ini!=0&&mxpoints_comm==0)mxpoints=mxpoints_ini;
+  initcolorbars();
   updatecolors(-1);
   return 0;
 
@@ -8686,8 +8690,8 @@ void writeini(int flag){
     for(n=0;n<ncolorbarsini;n++){
       cbi = colorbariniinfo + n;
 	    fprintf(fileout,"%s\n",cbi->label);
-	    fprintf(fileout," %i\n",cbi->nlegs);
-      for(i=0;i<cbi->nlegs-1;i++){
+	    fprintf(fileout," %i\n",cbi->npoints);
+      for(i=0;i<cbi->npoints-2;i++){
 		    rrgb = cbi->rgbnodes+6*i;
 		    if(rrgb[3]==rrgb[6]&&rrgb[4]==rrgb[7]&&rrgb[5]==rrgb[8]){
           sprintf(buffer,"%f %f %f %f ",cbi->flegs[i],rrgb[0],rrgb[1],rrgb[2]);
@@ -8698,8 +8702,8 @@ void writeini(int flag){
         trimmzeros(buffer);
         fprintf(fileout,"%s\n",buffer);
       }
-	    if(cbi->nlegs>0){
-        i=cbi->nlegs-1;
+	    if(cbi->npoints>1){
+        i=cbi->npoints-2;
 		    rrgb = cbi->rgbnodes+6*i;
         sprintf(buffer,"%f %f %f %f %f %f %f ",cbi->flegs[i],rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
         trimmzeros(buffer);
