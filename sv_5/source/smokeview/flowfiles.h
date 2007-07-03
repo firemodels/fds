@@ -20,11 +20,13 @@ typedef struct {
 
 typedef struct {
   char *label;    // menu label
-  int nlegs;      // number of legs
-  int legindex;   // leg being edited
+  int npoints;      // number of legs
+  int pointindex;   // leg being edited
   float *flegs;   // fraction of points in each leg
   float *rgbnodes;
-  int *contflag;
+  float *c_vals;
+  float valmin, valmax;
+  int *jumpflag;
   float *rgb;     // color bar
 } colorbardata;
 

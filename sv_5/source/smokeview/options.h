@@ -39,6 +39,7 @@
 #define pp_PLOTTEXTURE
 #define pp_WUI
 #define pp_TRAINER
+#define pp_COLOR
 #endif
 
 #ifdef pp_PLOTTEXTURE

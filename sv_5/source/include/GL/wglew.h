@@ -1,7 +1,7 @@
 /*
 ** The OpenGL Extension Wrangler Library
-** Copyright (C) 2002-2006, Milan Ikits <milan ikits[]ieee org>
-** Copyright (C) 2002-2006, Marcelo E. Magallon <mmagallo[]debian org>
+** Copyright (C) 2002-2007, Milan Ikits <milan ikits[]ieee org>
+** Copyright (C) 2002-2007, Marcelo E. Magallon <mmagallo[]debian org>
 ** Copyright (C) 2002, Lev Povalahev
 ** All rights reserved.
 ** 
@@ -712,6 +712,39 @@ typedef BOOL (WINAPI * PFNWGLQUERYFRAMETRACKINGI3DPROC) (DWORD* pFrameCount, DWO
 
 #endif /* WGL_NV_float_buffer */
 
+/* -------------------------- WGL_NV_gpu_affinity -------------------------- */
+
+#ifndef WGL_NV_gpu_affinity
+#define WGL_NV_gpu_affinity 1
+
+#define WGL_ERROR_INCOMPATIBLE_AFFINITY_MASKS_NV 0x20D0
+#define WGL_ERROR_MISSING_AFFINITY_MASK_NV 0x20D1
+
+DECLARE_HANDLE(HGPUNV);
+typedef struct _GPU_DEVICE {
+  DWORD cb; 
+  CHAR DeviceName[32]; 
+  CHAR DeviceString[128]; 
+  DWORD Flags; 
+  RECT rcVirtualScreen; 
+} GPU_DEVICE, *PGPU_DEVICE;
+
+typedef HDC (WINAPI * PFNWGLCREATEAFFINITYDCNVPROC) (const HGPUNV *phGpuList);
+typedef BOOL (WINAPI * PFNWGLDELETEDCNVPROC) (HDC hdc);
+typedef BOOL (WINAPI * PFNWGLENUMGPUDEVICESNVPROC) (HGPUNV hGpu, UINT iDeviceIndex, PGPU_DEVICE lpGpuDevice);
+typedef BOOL (WINAPI * PFNWGLENUMGPUSFROMAFFINITYDCNVPROC) (HDC hAffinityDC, UINT iGpuIndex, HGPUNV *hGpu);
+typedef BOOL (WINAPI * PFNWGLENUMGPUSNVPROC) (UINT iGpuIndex, HGPUNV *phGpu);
+
+#define wglCreateAffinityDCNV WGLEW_GET_FUN(__wglewCreateAffinityDCNV)
+#define wglDeleteDCNV WGLEW_GET_FUN(__wglewDeleteDCNV)
+#define wglEnumGpuDevicesNV WGLEW_GET_FUN(__wglewEnumGpuDevicesNV)
+#define wglEnumGpusFromAffinityDCNV WGLEW_GET_FUN(__wglewEnumGpusFromAffinityDCNV)
+#define wglEnumGpusNV WGLEW_GET_FUN(__wglewEnumGpusNV)
+
+#define WGLEW_NV_gpu_affinity WGLEW_GET_VAR(__WGLEW_NV_gpu_affinity)
+
+#endif /* WGL_NV_gpu_affinity */
+
 /* ---------------------- WGL_NV_render_depth_texture ---------------------- */
 
 #ifndef WGL_NV_render_depth_texture
@@ -877,6 +910,12 @@ WGLEW_EXPORT PFNWGLENDFRAMETRACKINGI3DPROC __wglewEndFrameTrackingI3D;
 WGLEW_EXPORT PFNWGLGETFRAMEUSAGEI3DPROC __wglewGetFrameUsageI3D;
 WGLEW_EXPORT PFNWGLQUERYFRAMETRACKINGI3DPROC __wglewQueryFrameTrackingI3D;
 
+WGLEW_EXPORT PFNWGLCREATEAFFINITYDCNVPROC __wglewCreateAffinityDCNV;
+WGLEW_EXPORT PFNWGLDELETEDCNVPROC __wglewDeleteDCNV;
+WGLEW_EXPORT PFNWGLENUMGPUDEVICESNVPROC __wglewEnumGpuDevicesNV;
+WGLEW_EXPORT PFNWGLENUMGPUSFROMAFFINITYDCNVPROC __wglewEnumGpusFromAffinityDCNV;
+WGLEW_EXPORT PFNWGLENUMGPUSNVPROC __wglewEnumGpusNV;
+
 WGLEW_EXPORT PFNWGLALLOCATEMEMORYNVPROC __wglewAllocateMemoryNV;
 WGLEW_EXPORT PFNWGLFREEMEMORYNVPROC __wglewFreeMemoryNV;
 
@@ -915,6 +954,7 @@ WGLEW_EXPORT GLboolean __WGLEW_I3D_image_buffer;
 WGLEW_EXPORT GLboolean __WGLEW_I3D_swap_frame_lock;
 WGLEW_EXPORT GLboolean __WGLEW_I3D_swap_frame_usage;
 WGLEW_EXPORT GLboolean __WGLEW_NV_float_buffer;
+WGLEW_EXPORT GLboolean __WGLEW_NV_gpu_affinity;
 WGLEW_EXPORT GLboolean __WGLEW_NV_render_depth_texture;
 WGLEW_EXPORT GLboolean __WGLEW_NV_render_texture_rectangle;
 WGLEW_EXPORT GLboolean __WGLEW_NV_vertex_array_range;
@@ -935,12 +975,12 @@ GLEWAPI GLboolean wglewContextIsSupported (WGLEWContext* ctx, const char* name);
 #define wglewInit() wglewContextInit(wglewGetContext())
 #define wglewIsSupported(x) wglewContextIsSupported(wglewGetContext(), x)
 
-#define WGLEW_GET_VAR(x) wglewGetContext()->x
+#define WGLEW_GET_VAR(x) (*(const GLboolean*)&(wglewGetContext()->x))
 #define WGLEW_GET_FUN(x) wglewGetContext()->x
 
 #else /* GLEW_MX */
 
-#define WGLEW_GET_VAR(x) x
+#define WGLEW_GET_VAR(x) (*(const GLboolean*)&x)
 #define WGLEW_GET_FUN(x) x
 
 GLEWAPI GLboolean wglewIsSupported (const char* name);

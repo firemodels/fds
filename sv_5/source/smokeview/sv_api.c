@@ -133,7 +133,7 @@ void svWINAPI sv_startup(char *file, int showpart){
   argv[1]=file;
   if(showpart==0)argv[2]=nopart;
   CheckMemory;
-  if(first==1)sv_startup_c(argc,argv);
+  if(startup_pass==1)sv_startup_c(argc,argv);
   initcase_c(argc,argv);
 }
 

@@ -806,11 +806,19 @@ void DialogMenu(int value){
     if(showgluistereo==1)show_glui_stereo();
     if(showgluistereo==0)hide_glui_stereo();
     break;
+#ifdef pp_COLOR
   case 23:
     showcolorbar=1-showcolorbar;
-    if(showcolorbar==1)show_glui_colorbar();
-    if(showcolorbar==0)hide_glui_colorbar();
+    if(showcolorbar==1){
+      viscolorbarpath=1;
+      show_glui_colorbar();
+    }
+    if(showcolorbar==0){
+      viscolorbarpath=0;
+      hide_glui_colorbar();
+    }
     break;
+#endif
   case 16:
     showedit=1-showedit;
     if(showedit==1){
