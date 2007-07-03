@@ -4648,6 +4648,7 @@ int setSmokeShaders() {
 	const char * vv;
 	const char * ff;
   GLint error_code;
+  char fragbuffer[1024];
 
 	v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
 	f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
@@ -4657,8 +4658,13 @@ int setSmokeShaders() {
 //  NewMemory((void **)&vs,NSHADERLINES*80*sizeof(char));
 //  NewMemory((void **)&fs,NSHADERLINES*80*sizeof(char));
   
-  vs = textFileRead("c:\\nist\\fds\\smoke.vert");
-  fs = textFileRead("c:\\nist\\fds\\smoke.frag");
+  strcpy(fragbuffer,smokeviewbindir);
+  strcat(fragbuffer,"smoke.vert");
+  vs = textFileRead(fragbuffer);
+
+  strcpy(fragbuffer,smokeviewbindir);
+  strcat(fragbuffer,"smoke.frag");
+  fs = textFileRead(fragbuffer);
   
   vv = vs;
 	ff = fs;

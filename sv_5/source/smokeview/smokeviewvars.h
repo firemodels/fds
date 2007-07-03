@@ -279,7 +279,8 @@ SVEXTERN int Read3DSmoke3DFile;
 SVEXTERN int ReadZoneFile, ReadPartFile, ReadEvacFile;
 
 SVEXTERN int editwindow_status;
-SVEXTERN int first;
+//SVEXTERN int first;
+SVEXTERN int startup_pass;
 SVEXTERN int ntargtimes;
 SVEXTERN int showtitle1, showtitle2;
 
@@ -340,7 +341,7 @@ SVEXTERN int showgluitrainer;
 SVEXTERN int colorbarcycle;
 SVEXTERN int colorbartype;
 SVEXTERN int colorbartype_save;
-SVEXTERN int colorbarframe;
+SVEXTERN int colorbarpoint;
 SVEXTERN int vectorspresent;
 
 SVEXTERN int visTarg, ReadTargFile;
