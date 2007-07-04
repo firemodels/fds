@@ -1540,6 +1540,7 @@ void initvars1(void){
   nticks=0,ntickssmv=0;
   visTicks=0;
   visCadTextures=1;
+  cb_hidesv=0;
 #ifdef pp_COLOR
   viscolorbarpath=0;
   showzerosplit=1;

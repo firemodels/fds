@@ -1059,6 +1059,7 @@ void setClipPlanes(void){
   }
 }
 
+
 #ifndef pp_DEVICE
 /* ----------------------- drawDevices ----------------------------- */
 
@@ -1236,7 +1237,19 @@ void ShowScene(int mode, int view_mode){
 
   if(mode==RENDER){
 
-    setClipPlanes();
+    if(viscolorbarpath==1){
+      if(cb_hidesv==1){
+        setColorbarClipPlanes(1);
+      }
+      else{
+        setColorbarClipPlanes(0);
+      }
+    }
+    else{
+      setClipPlanes();
+    }
+
+
 
     glPointSize((float)1.0);
 
@@ -1486,6 +1499,9 @@ void ShowScene(int mode, int view_mode){
 
 #ifdef pp_COLOR
   if(viscolorbarpath==1){
+    if(cb_hidesv==1){
+      setColorbarClipPlanes(0);
+    }
     drawcolorbarpath();
   }
 #endif
