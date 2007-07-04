@@ -86,8 +86,9 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir);
 //void ShadeMenu(int value);
 #endif
 
+EXTERNCPP void setColorbarClipPlanes(int flag);
 EXTERNCPP void ResizeColorbar(colorbardata *cbi, int n);
-EXTERNCPP void addcolorbar(char *label);
+EXTERNCPP void addcolorbar(int icolorbar);
 EXTERNCPP void ColorBarMenu(int val);
 EXTERNCPP void freecolorbar(colorbardata *cbi);
 EXTERNCPP void initdefaultcolorbars(void);
@@ -251,6 +252,7 @@ EXTERNCPP void bench_out(float frame_rate);
 EXTERNCPP void output_Slicedata(void);
 EXTERNCPP void init_Slicedata(void);
 EXTERNCPP void update_camera_label(void);
+EXTERNCPP void update_colorbar_label(void);
 EXTERNCPP void init_camera_list(void);
 EXTERNCPP camera *insert_camera(camera *cb,camera *source, char *name);
 EXTERNCPP void add_default_views(void);

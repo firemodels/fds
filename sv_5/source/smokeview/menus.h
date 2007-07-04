@@ -4526,7 +4526,6 @@ static int textureshowmenu=0;
 
     for(i=0;i<ncolorbars;i++){
       cbi = colorbarinfo + i;
-      if(cbi->label==NULL)continue;
 
       if(colorbartype==i){
         strcpy(ccolorbarmenu,"*");

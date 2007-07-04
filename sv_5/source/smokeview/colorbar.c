@@ -8,83 +8,102 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+
+/* ------------------ setColorbarClipPlanes ------------------------ */
+
+void setColorbarClipPlanes(int flag){
+  static GLdouble clipplane_x[4], clipplane_y[4], clipplane_z[4];
+  static GLdouble clipplane_X[4], clipplane_Y[4], clipplane_Z[4];
+
+  if(flag==1){
+      clipplane_x[0]=1.0;
+      clipplane_x[1]=0.0;
+      clipplane_x[2]=0.0;
+      clipplane_x[3]=-2.0;
+      glClipPlane(GL_CLIP_PLANE0,clipplane_x);
+      glEnable(GL_CLIP_PLANE0);
+
+      clipplane_X[0]=-1.0;
+      clipplane_X[1]=0.0;
+      clipplane_X[2]=0.0;
+      clipplane_X[3]=2.0;
+      glClipPlane(GL_CLIP_PLANE3,clipplane_X);
+      glEnable(GL_CLIP_PLANE3);
+
+      clipplane_y[0]=0.0;
+      clipplane_y[1]=1.0;
+      clipplane_y[2]=0.0;
+      clipplane_y[3]=-2.0;
+      glClipPlane(GL_CLIP_PLANE1,clipplane_y);
+      glEnable(GL_CLIP_PLANE1);
+
+      clipplane_Y[0]=0.0;
+      clipplane_Y[1]=-1.0;
+      clipplane_Y[2]=0.0;
+      clipplane_Y[3]=2.0;
+      glClipPlane(GL_CLIP_PLANE4,clipplane_Y);
+      glEnable(GL_CLIP_PLANE4);
+
+      clipplane_z[0]=0.0;
+      clipplane_z[1]=0.0;
+      clipplane_z[2]=1.0;
+      clipplane_z[3]=-2.0;
+      glClipPlane(GL_CLIP_PLANE2,clipplane_z);
+      glEnable(GL_CLIP_PLANE2);
+
+      clipplane_Z[0]=0.0;
+      clipplane_Z[1]=0.0;
+      clipplane_Z[2]=-1.0;
+      clipplane_Z[3]=2.0;
+      glClipPlane(GL_CLIP_PLANE5,clipplane_Z);
+      glEnable(GL_CLIP_PLANE5);
+  }
+  else{
+    glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_CLIP_PLANE1);
+    glDisable(GL_CLIP_PLANE2);
+    glDisable(GL_CLIP_PLANE3);
+    glDisable(GL_CLIP_PLANE4);
+    glDisable(GL_CLIP_PLANE5);
+  }
+}
+
 /* ------------------ addcolorbar ------------------------ */
 
-void addcolorbar(char *label){
-  colorbardata *cbi;
+void addcolorbar(int icolorbar){
+  colorbardata *cb_to, *cb_from;
+  int i;
 
   ncolorbars++;
   CheckMemory;
   ResizeMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
+  cb_from = colorbarinfo + icolorbar;
   CheckMemory;
 
       // new colorbar
 
-  cbi=colorbarinfo+ncolorbars-1;
-  NewMemory((void **)&cbi->rgb,3*MAXRGB*sizeof(float));
-  cbi->label=NULL;
-  NewMemory((void **)&cbi->label,strlen(label)+1);
-  strcpy(cbi->label,label);
-  cbi->npoints=5;
-  NewMemory((void **)&cbi->flegs,cbi->npoints*sizeof(float));
-  NewMemory((void **)&cbi->c_vals,cbi->npoints*sizeof(float));
-  NewMemory((void **)&cbi->rgbnodes,6*cbi->npoints*sizeof(float));
-  NewMemory((void **)&cbi->jumpflag,cbi->npoints*sizeof(int));
+  cb_to=colorbarinfo+ncolorbars-1;
+  NewMemory((void **)&cb_to->rgb,3*MAXRGB*sizeof(float));
+  strcpy(cb_to->label,"Copy of ");
+  strcat(cb_to->label,cb_from->label);
+  cb_to->label_ptr=cb_to->label;
+  cb_to->npoints=cb_from->npoints;
+  cb_to->pointindex=cb_from->pointindex;
+  NewMemory((void **)&cb_to->flegs,cb_to->npoints*sizeof(float));
+  NewMemory((void **)&cb_to->c_vals,cb_to->npoints*sizeof(float));
+  NewMemory((void **)&cb_to->rgbnodes,6*cb_to->npoints*sizeof(float));
+  NewMemory((void **)&cb_to->jumpflag,cb_to->npoints*sizeof(int));
 
-  cbi->rgbnodes[0]=0.0;
-  cbi->rgbnodes[1]=0.0;
-  cbi->rgbnodes[2]=1.0;
+  for(i=0;i<6*cb_to->npoints;i++){
+    cb_to->rgbnodes[i]=cb_from->rgbnodes[i];
+  }
+  for(i=0;i<cb_to->npoints;i++){
+    cb_to->c_vals[i]=cb_from->c_vals[i];
+    cb_to->jumpflag[i]=cb_from->jumpflag[i];
+    cb_to->flegs[i]=cb_from->flegs[i];
+  }
 
-  cbi->rgbnodes[3]=0.0;
-  cbi->rgbnodes[4]=1.0;
-  cbi->rgbnodes[5]=1.0;
-
-  cbi->rgbnodes[6]=0.0;
-  cbi->rgbnodes[7]=1.0;
-  cbi->rgbnodes[8]=1.0;
-
-  cbi->rgbnodes[9]=0.0;
-  cbi->rgbnodes[10]=1.0;
-  cbi->rgbnodes[11]=0.0;
-
-  cbi->rgbnodes[12]=0.0;
-  cbi->rgbnodes[13]=1.0;
-  cbi->rgbnodes[14]=0.0;
-
-  cbi->rgbnodes[15]=1.0;
-  cbi->rgbnodes[16]=1.0;
-  cbi->rgbnodes[17]=0.0;
-
-  cbi->rgbnodes[18]=1.0;
-  cbi->rgbnodes[19]=1.0;
-  cbi->rgbnodes[20]=0.0;
-
-  cbi->rgbnodes[21]=1.0;
-  cbi->rgbnodes[22]=0.0;
-  cbi->rgbnodes[23]=0.0;
-
-  cbi->rgbnodes[24]=1.0;
-  cbi->rgbnodes[25]=0.0;
-  cbi->rgbnodes[26]=0.0;
-
-  cbi->rgbnodes[27]=1.0;
-  cbi->rgbnodes[28]=0.0;
-  cbi->rgbnodes[29]=0.0;
-
-  cbi->jumpflag[0]=0;
-  cbi->jumpflag[1]=0;
-  cbi->jumpflag[2]=0;
-  cbi->jumpflag[3]=0;
-  cbi->jumpflag[4]=0;
-
-  cbi->flegs[0]=1.0/(float)(cbi->npoints-1);
-  cbi->flegs[1]=1.0/(float)(cbi->npoints-1);
-  cbi->flegs[2]=1.0/(float)(cbi->npoints-1);
-  cbi->flegs[3]=1.0/(float)(cbi->npoints-1);
-  cbi->flegs[4]=1.0/(float)(cbi->npoints-1);
-  cbi->pointindex=0;
-
-  remapcolorbar(cbi);
+  remapcolorbar(cb_to);
 
 }
 
@@ -170,8 +189,8 @@ void drawcolorbarpath(void){
     }
     glEnd();
     if(cbi->jumpflag[colorbarpoint]==1){
-      output3Text(foregroundcolor,  rgbleft[0]+2*PLEFT, rgbleft[1]+2*PLEFT, rgbleft[2]+2*PLEFT, "Left");
-      output3Text(foregroundcolor, rgbright[0]+2*PLEFT,rgbright[1]+2*PLEFT,rgbright[2]+2*PLEFT,"Right");
+      output3Text(foregroundcolor,  rgbleft[0]+2*PLEFT, rgbleft[1]+2*PLEFT, rgbleft[2]+2*PLEFT, "Right");
+      output3Text(foregroundcolor, rgbright[0]+2*PLEFT,rgbright[1]+2*PLEFT,rgbright[2]+2*PLEFT,"Left");
     }
 
   }
@@ -300,7 +319,6 @@ void remapcolorbar(colorbardata *cbi){
 
 void freecolorbar(colorbardata *cbi){
   if(cbi==NULL)return;
-  FREEMEMORY(cbi->label);
   FREEMEMORY(cbi->rgb);
   FREEMEMORY(cbi->rgbnodes);
   FREEMEMORY(cbi->flegs);
@@ -357,7 +375,6 @@ void initdefaultcolorbars(void){
       for(i=0;i<ncolorbars;i++){
         cbi = colorbarinfo + i;
         cbi->rgb=NULL;
-        cbi->label=NULL;
         cbi->flegs=NULL;
         cbi->c_vals=NULL;
         cbi->rgbnodes=NULL;
@@ -370,8 +387,8 @@ void initdefaultcolorbars(void){
 
       cbi=colorbarinfo;
       NewMemory((void **)&cbi->rgb,3*MAXRGB*sizeof(float));
-      NewMemory((void **)&cbi->label,9);
       strcpy(cbi->label,"Original");
+      cbi->label_ptr=cbi->label;
       cbi->npoints=nrgb;
       NewMemory((void **)&cbi->flegs,cbi->npoints*sizeof(float));
       NewMemory((void **)&cbi->c_vals,cbi->npoints*sizeof(float));
@@ -395,8 +412,8 @@ void initdefaultcolorbars(void){
 
       cbi=colorbarinfo+1;
       NewMemory((void **)&cbi->rgb,3*MAXRGB*sizeof(float));
-      NewMemory((void **)&cbi->label,8);
       strcpy(cbi->label,"Rainbow");
+      cbi->label_ptr=cbi->label;
       cbi->npoints=5;
       NewMemory((void **)&cbi->flegs,cbi->npoints*sizeof(float));
       NewMemory((void **)&cbi->c_vals,cbi->npoints*sizeof(float));
@@ -463,8 +480,8 @@ void initdefaultcolorbars(void){
 
       cbi=colorbarinfo+2;
       NewMemory((void **)&cbi->rgb,3*MAXRGB*sizeof(float));
-      NewMemory((void **)&cbi->label,16);
       strcpy(cbi->label,"Black and White");
+      cbi->label_ptr=cbi->label;
 
       cbi->npoints=3;
       NewMemory((void **)&cbi->flegs,cbi->npoints*sizeof(float));

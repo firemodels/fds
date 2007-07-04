@@ -19,7 +19,8 @@ typedef struct {
 /* --------------------------  colorbardata ------------------------------------ */
 
 typedef struct {
-  char *label;    // menu label
+  char label[1024];    // menu label
+  char *label_ptr;
   int npoints;      // number of legs
   int pointindex;   // leg being edited
   float *flegs;   // fraction of points in each leg
