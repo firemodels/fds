@@ -7669,7 +7669,6 @@ typedef struct {
           fgets(buffer,255,stream);
           trim(buffer);
           nlabel=strlen(buffer);
-          NewMemory((void **)&cbi->label,nlabel+1);
           strcpy(cbi->label,buffer);
 
           fgets(buffer,255,stream);
