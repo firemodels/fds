@@ -255,18 +255,6 @@ void freecolorbars(void){
     FREEMEMORY(colorbarinfo);
     ncolorbars=0;
   }
-  if(ncolorbarsini>0){
-    {
-      colorbardata *cbi;
-
-      for(i=0;i<ncolorbarsini;i++){
-        cbi=colorbariniinfo+i;
-        freecolorbar(cbi);
-      }
-    }
-    FREEMEMORY(colorbariniinfo);
-    ncolorbarsini=0;
-  }
 }
 
 /* ------------------ remapcolorbar ------------------------ */
@@ -285,13 +273,12 @@ void remapcolorbar(colorbardata *cbi){
 
     rrr = cbi->rgbnodes+6*i;
     if(cbi->jumpflag[i]==0){
-       rgbleft = cbi->rgbnodes+6*i;
+      rgbleft = cbi->rgbnodes+6*i;
       rgbright = cbi->rgbnodes+6*i - 3;
 
       rgbright[0] = rgbleft[0];
       rgbright[1] = rgbleft[1];
       rgbright[2] = rgbleft[2];
-
     }
   }
 
@@ -363,6 +350,7 @@ void interpcolor(float *col1, float *col2,float *rrgb,int npoints_seg, int jumpf
 
 void initdefaultcolorbars(void){
   int i;
+  float dval;
 
   if(colorbarinfo==NULL){
     if(ncolorbars==0)ncolorbars=ndefaultcolorbars;
@@ -394,6 +382,7 @@ void initdefaultcolorbars(void){
       NewMemory((void **)&cbi->c_vals,cbi->npoints*sizeof(float));
       NewMemory((void **)&cbi->rgbnodes,6*cbi->npoints*sizeof(float));
       NewMemory((void **)&cbi->jumpflag,cbi->npoints*sizeof(float));
+      dval = (cb_valmax-cb_valmin)/(float)(cbi->npoints-1);
       for(i=0;i<cbi->npoints;i++){
         ii = 6*i;
         cbi->rgbnodes[ii]  =rgb[i][0];
@@ -403,8 +392,10 @@ void initdefaultcolorbars(void){
           cbi->rgbnodes[ii+3]=rgb[i+1][0];
           cbi->rgbnodes[ii+4]=rgb[i+1][1];
           cbi->rgbnodes[ii+5]=rgb[i+1][2];
+          cbi->c_vals[i]=cb_valmin + i*dval;
           cbi->flegs[i]=1.0/(float)(cbi->npoints-1);
         }
+        cbi->c_vals[cbi->npoints-1]=cb_valmax;
         cbi->jumpflag[i]=0;
       }
 
@@ -474,6 +465,13 @@ void initdefaultcolorbars(void){
         cbi->flegs[1]=1.0/(float)nlegs;
         cbi->flegs[2]=1.0/(float)nlegs;
         cbi->flegs[3]=1.0/(float)nlegs;
+        dval = (cb_valmax-cb_valmin)/(float)nlegs;
+        cbi->c_vals[0]=cb_valmin;
+        cbi->c_vals[1]=cb_valmin+dval;
+        cbi->c_vals[2]=cb_valmin+2*dval;
+        cbi->c_vals[3]=cb_valmin+3*dval;
+        cbi->c_vals[4]=cb_valmax;
+
       }
 
       // b&w colorbar
@@ -522,6 +520,8 @@ void initdefaultcolorbars(void){
         nlegs = cbi->npoints-1;
         cbi->flegs[0]=1.0/(float)nlegs;
         cbi->flegs[1]=1.0/(float)nlegs;
+        cbi->c_vals[0]=cb_valmin;
+        cbi->c_vals[1]=cb_valmax;
       }
 
     }
