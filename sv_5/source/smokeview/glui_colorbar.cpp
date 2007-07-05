@@ -58,7 +58,6 @@ GLUI_StaticText *STATICTEXT_left=NULL, *STATICTEXT_right=NULL;
 int selectedcolorbar_index;
 int cb_rgb[6];
 int cb_jump;
-float cb_valmin, cb_valmax, cb_val;
 int cb_hidesv;
 
 #define COLORBAR_LIST 0
@@ -151,12 +150,12 @@ extern "C" void glui_colorbar_setup(int main_window){
   
   panel_cb5 = glui_colorbar->add_panel_to_panel(panel_point,"",GLUI_PANEL_NONE);
 
-  BUTTON_addpoint=glui_colorbar->add_button_to_panel(panel_cb5,"Insert",COLORBAR_ADDPOINT,COLORBAR_CB);
+  BUTTON_deletepoint=glui_colorbar->add_button_to_panel(panel_cb5,"Remove",COLORBAR_DELETEPOINT,COLORBAR_CB);
   BUTTON_prev=glui_colorbar->add_button_to_panel(panel_cb5,"Previous",COLORBAR_PREV,COLORBAR_CB);
-
+  
   glui_colorbar->add_column_to_panel(panel_cb5,false);
 
-  BUTTON_deletepoint=glui_colorbar->add_button_to_panel(panel_cb5,"Remove",COLORBAR_DELETEPOINT,COLORBAR_CB);
+  BUTTON_addpoint=glui_colorbar->add_button_to_panel(panel_cb5,"Insert",COLORBAR_ADDPOINT,COLORBAR_CB);
   BUTTON_next=glui_colorbar->add_button_to_panel(panel_cb5,"Next",COLORBAR_NEXT,COLORBAR_CB);
 
   panel_cb4 = glui_colorbar->add_panel_to_panel(panel_point,"",GLUI_PANEL_NONE);
@@ -206,6 +205,14 @@ void COLORBAR_CB(int var){
   float *rgb0, *rgb0a;
 
   switch (var){
+  case COLORBAR_VALMINMAX:
+    if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
+      cbi = colorbarinfo + colorbartype;
+      colorbar_global2local();
+      remapcolorbar(cbi);
+      updatecolors(-1);
+    }
+    break;
   case COLORBAR_UPDATE:
     COLORBAR_CB(COLORBAR_LABEL);
     break;
@@ -232,6 +239,7 @@ void COLORBAR_CB(int var){
     npoints = cbi->npoints+1;
     ResizeColorbar(cbi,npoints);
     for(i=cbi->npoints-1;i>=colorbarpoint+1;i--){
+      float sum;
 
       cbi->c_vals[i]=cbi->c_vals[i-1];
       cbi->jumpflag[i]=0;
@@ -251,6 +259,10 @@ void COLORBAR_CB(int var){
     }
 
     cbi->c_vals[colorbarpoint]=(cbi->c_vals[colorbarpoint]+cbi->c_vals[colorbarpoint-1])/2.0;
+    for(i=0;i<cbi->npoints-1;i++){
+      cbi->flegs[i]=(cbi->c_vals[i+1]-cbi->c_vals[i])/(cb_valmax-cb_valmin);
+    }
+
     cbi->jumpflag[colorbarpoint]=0;
     rgb1 = cbi->rgbnodes+6*colorbarpoint;
     rgb2 = rgb1 + 6;
@@ -301,8 +313,8 @@ void COLORBAR_CB(int var){
       rgb1a[2]=rgb2a[2];
     }
     cbi->npoints--;
-    for(i=0;i<cbi->npoints;i++){
-      cbi->flegs[i]=1.0/(float)(cbi->npoints-1);
+    for(i=0;i<cbi->npoints-1;i++){
+      cbi->flegs[i]=(cbi->c_vals[i+1]-cbi->c_vals[i])/(cb_valmax-cb_valmin);
     }
     remapcolorbar(cbi);
     updatecolors(-1);
@@ -386,9 +398,13 @@ extern "C" void colorbar_global2local(void){
     
     cb_jump = cbi->jumpflag[colorbarpoint];
     CHECKBOX_jump->set_int_val(cb_jump);
+    SPINNER_val->set_float_val(cbi->c_vals[colorbarpoint]);
 
     ii = 6*colorbarpoint;
     rgb = cbi->rgbnodes+ii;
+
+    BUTTON_next->enable();
+    BUTTON_prev->enable();
 
     strcpy(colorbar_label,cbi->label);
     EDITTEXT_colorbar_label->set_text(colorbar_label);
@@ -397,6 +413,8 @@ extern "C" void colorbar_global2local(void){
     SPINNER_left_blue->set_int_val(  (int)(255*rgb[2]));
     icolorbar=LISTBOX_colorbar->get_int_val();
     if(icolorbar>=ndefaultcolorbars){
+      SPINNER_valmin->enable();
+      SPINNER_valmax->enable();
       EDITTEXT_colorbar_label->enable();
       SPINNER_left_red->enable();
       SPINNER_left_green->enable();
@@ -411,8 +429,6 @@ extern "C" void colorbar_global2local(void){
         SPINNER_right_green->disable();
         SPINNER_right_blue->disable();
       }
-      BUTTON_next->enable();
-      BUTTON_prev->enable();
       BUTTON_addpoint->enable();
       BUTTON_deletepoint->enable();
       if(colorbarpoint==0||colorbarpoint==cbi->npoints-1){
@@ -425,20 +441,20 @@ extern "C" void colorbar_global2local(void){
       }
     }
     else{
-     EDITTEXT_colorbar_label->disable();
-     BUTTON_next->disable();
-     BUTTON_prev->disable();
-     BUTTON_addpoint->disable();
-     BUTTON_deletepoint->disable();
-     CHECKBOX_jump->disable();
-     SPINNER_val->disable();
+      SPINNER_valmin->disable();
+      SPINNER_valmax->disable();
+      EDITTEXT_colorbar_label->disable();
+      BUTTON_addpoint->disable();
+      BUTTON_deletepoint->disable();
+      CHECKBOX_jump->disable();
+      SPINNER_val->disable();
 
-     SPINNER_left_red->disable();
-     SPINNER_left_green->disable();
-     SPINNER_left_blue->disable();
-     SPINNER_right_red->disable();
-     SPINNER_right_green->disable();
-     SPINNER_right_blue->disable();
+      SPINNER_left_red->disable();
+      SPINNER_left_green->disable();
+      SPINNER_left_blue->disable();
+      SPINNER_right_red->disable();
+      SPINNER_right_green->disable();
+      SPINNER_right_blue->disable();
     }
     if(colorbarpoint>0){
       SPINNER_right_red->set_float_val(  (int)(255*rgb[3-6]));

@@ -97,7 +97,6 @@ int initcase_c(int argc, char **argv){
   }
   readini(0);
   if(ntours==0)setup_tour();
-  initcolorbars(); // DEBUG - WARNING check out how colorbars are defined - is this a memory leak?
   glui_colorbar_setup(mainwindow_id);
   glui_motion_setup(mainwindow_id);
   glui_bounds_setup(mainwindow_id);
@@ -926,6 +925,10 @@ void initvars1(void){
 #ifdef pp_SPOTLIGHT
   spotlight=0;
 #endif
+  cb_valmin=0.0;
+  cb_valmax=100.0;
+  cb_val=50.0;
+
 #ifdef pp_WUI
   rgb_terrain[0][0]=1.0;
   rgb_terrain[0][1]=0.0;
@@ -1512,7 +1515,7 @@ void initvars1(void){
 #endif
   showall_textures=0;
 
-  ncolorbars=0,ncolorbarsini=0;
+  ncolorbars=0;
   ndefaultcolorbars=3;
   update_load_startup=0;
   do_ignited=0;
@@ -1879,7 +1882,7 @@ void initvars0(void){
 #endif
 
   tour_t=NULL, tour_t2=NULL, tour_dist=NULL, tour_dist2=NULL, tour_dist3=NULL;
-  colorbarinfo=NULL,colorbariniinfo=NULL;
+  colorbarinfo=NULL;
 
   selectfaceinfo=NULL;
   selectblockinfo=NULL;

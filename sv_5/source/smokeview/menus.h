@@ -5025,6 +5025,10 @@ static int textureshowmenu=0;
 #endif
   if(showlabels==1)glutAddMenuEntry("*Display...  ALT+d",22);
   if(showlabels==0)glutAddMenuEntry("Display...  ALT+d",22);
+#ifdef pp_COLOR
+  if(showcolorbar==1)glutAddMenuEntry("*Edit Colorbar...  ALT+c",23);
+  if(showcolorbar==0)glutAddMenuEntry("Edit Colorbar...  ALT+c",23);
+#endif
   if(isZoneFireModel==0){
     if(showedit==1)glutAddMenuEntry("*Edit Geometry...  ALT+e",16);
     if(showedit==0)glutAddMenuEntry("Edit Geometry...  ALT+e",16);
@@ -5048,10 +5052,6 @@ static int textureshowmenu=0;
     if(showtrainer==1)glutAddMenuEntry("*Trainer...",25);
     if(showtrainer==0)glutAddMenuEntry("Trainer...",25);
   }
-#endif
-#ifdef pp_COLOR
-  if(showcolorbar==1)glutAddMenuEntry("*Edit Colorbar...  ALT+c",23);
-  if(showcolorbar==0)glutAddMenuEntry("Edit Colorbar...  ALT+c",23);
 #endif
   glutAddMenuEntry("-",-1);
   glutAddMenuEntry("Close All Dialogs  ALT+x",-2);
