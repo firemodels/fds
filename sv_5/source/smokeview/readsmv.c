@@ -944,7 +944,6 @@ int readsmv(char *file){
    ************************************************************************
  */
 
-  ncolorbars=ndefaultcolorbars;
   startpass=1;
   nmeshes2=0;
   ioffset=0;
@@ -7644,27 +7643,27 @@ typedef struct {
       */
 
 #ifdef pp_COLOR
-      if(match(buffer,"GENCOLORBAR",11) == 1){
+      if(match(buffer,"GENCOLORBARS",12) == 1){
       {
         size_t nlabel;
         colorbardata *cbi;
         float r1, g1, b1, r2, g2, b2;
-//        float sum;
         int n;
+        int ncolorbarini;
 
         freecolorbars();
         fgets(buffer,255,stream);
 
-		    ncolorbarsini=0;
-        sscanf(buffer,"%i",&ncolorbarsini);
-        ncolorbars=ndefaultcolorbars+ncolorbarsini;
+		    ncolorbarini=0;
+        sscanf(buffer,"%i",&ncolorbarini);
+        ncolorbars=ndefaultcolorbars+ncolorbarini;
 
         initdefaultcolorbars();
 
-        if(ncolorbarsini>0)NewMemory((void **)&colorbariniinfo,ncolorbarsini*sizeof(colorbardata));
+        if(ncolorbarini>0)ResizeMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
 
-        for(n=0;n<ncolorbarsini;n++){
-          cbi = colorbariniinfo + n;
+        for(n=ndefaultcolorbars;n<ncolorbars;n++){
+          cbi = colorbarinfo + n;
 
           fgets(buffer,255,stream);
           trim(buffer);
@@ -7681,27 +7680,36 @@ typedef struct {
           NewMemory((void **)&cbi->rgbnodes,6*cbi->npoints*sizeof(float));
           NewMemory((void **)&cbi->jumpflag,cbi->npoints*sizeof(int));
           NewMemory((void **)&cbi->rgb,MAXRGB*3*sizeof(float));
-//          sum=0.0;
+          cbi->label_ptr=cbi->label;
           for(i=0;i<cbi->npoints;i++){
             fgets(buffer,255,stream);
             r1=-1.0; g1=-1.0; b1=-1.0; 
             r2=-1.0; g2=-1.0; b2=-1.0;
             sscanf(buffer,"%f %f %f %f %f %f %f",cbi->flegs+i,&r1,&g1,&b1,&r2,&g2,&b2);
-  //          sum+=cbi->flegs[i];
             nn = 6*i;
-            cbi->rgbnodes[nn]=r1;
+            cbi->rgbnodes[nn  ]=r1;
             cbi->rgbnodes[nn+1]=g1;
             cbi->rgbnodes[nn+2]=b1;
             cbi->rgbnodes[nn+3]=r2;
             cbi->rgbnodes[nn+4]=g2;
             cbi->rgbnodes[nn+5]=b2;
-            if(r2<0.0){
-              cbi->jumpflag[i]=0;
+          }
+          for(i=1;i<cbi->npoints-1;i++){
+            float *rgbr, *rgbl;
+
+            rgbr = cbi->rgbnodes+6*i;
+            rgbl = rgbr - 3;
+            if(rgbl[0]<0.0||(fabs(rgbr[0]-rgbl[0])<0.001&&
+               fabs(rgbr[1]-rgbl[1])<0.001&&
+               fabs(rgbr[2]-rgbl[2])<0.001)){
+                 cbi->jumpflag[i]=0;
             }
             else{
-              cbi->jumpflag[i]=1;
+                 cbi->jumpflag[i]=1;
             }
           }
+          cbi->jumpflag[0]=0;
+          cbi->jumpflag[cbi->npoints-1]=0;
           remapcolorbar(cbi);
         }
       }
@@ -8037,7 +8045,9 @@ typedef struct {
   fclose(stream);
   if(mxframes_ini!=0&&mxframes_comm==0)mxframes=mxframes_ini;
   if(mxpoints_ini!=0&&mxpoints_comm==0)mxpoints=mxpoints_ini;
-  initcolorbars();
+  if(ncolorbars<=ndefaultcolorbars){
+    initcolorbars();
+  }
   updatecolors(-1);
   return 0;
 
@@ -8679,20 +8689,20 @@ void writeini(int flag){
       ...
       fraction r1 g1 b1 r2 g2 b2
 	  */
-  if(ncolorbarsini>0){
+  if(ncolorbars>ndefaultcolorbars>0){
 	  colorbardata *cbi;
 	  float *rrgb;
 	  int n;
 
     fprintf(fileout,"GENCOLORBARS\n");
-	  fprintf(fileout," %i\n",ncolorbarsini);
-    for(n=0;n<ncolorbarsini;n++){
-      cbi = colorbariniinfo + n;
+	  fprintf(fileout," %i\n",ncolorbars-ndefaultcolorbars);
+    for(n=ndefaultcolorbars;n<ncolorbars;n++){
+      cbi = colorbarinfo + n;
 	    fprintf(fileout,"%s\n",cbi->label);
 	    fprintf(fileout," %i\n",cbi->npoints);
-      for(i=0;i<cbi->npoints-2;i++){
+      for(i=0;i<cbi->npoints-1;i++){
 		    rrgb = cbi->rgbnodes+6*i;
-		    if(rrgb[3]==rrgb[6]&&rrgb[4]==rrgb[7]&&rrgb[5]==rrgb[8]){
+		    if(fabs(rrgb[3]-rrgb[6])<0.001&&fabs(rrgb[4]-rrgb[7])<0.001&&fabs(rrgb[5]-rrgb[8])<0.001){
           sprintf(buffer,"%f %f %f %f ",cbi->flegs[i],rrgb[0],rrgb[1],rrgb[2]);
         }
 		    else{
@@ -8701,10 +8711,10 @@ void writeini(int flag){
         trimmzeros(buffer);
         fprintf(fileout,"%s\n",buffer);
       }
-	    if(cbi->npoints>1){
-        i=cbi->npoints-2;
+	    if(cbi->npoints>0){
+        i=cbi->npoints-1;
 		    rrgb = cbi->rgbnodes+6*i;
-        sprintf(buffer,"%f %f %f %f %f %f %f ",cbi->flegs[i],rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
+        sprintf(buffer,"%f %f %f %f %f %f %f ",0.0,rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
         trimmzeros(buffer);
         fprintf(fileout,"%s\n",buffer);
       }
