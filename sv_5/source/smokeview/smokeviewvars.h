@@ -53,6 +53,7 @@ SVEXTERN unsigned int GPU_depthtexture;
 SVEXTERN int i_hrrcutoff;
 #endif
 
+SVEXTERN float cb_valmin, cb_valmax, cb_val;
 SVEXTERN float rgb_plot3d[4*MAXRGB];
 
 SVEXTERN char inputfilename_ext[4];
@@ -731,9 +732,9 @@ SVEXTERN int smoketest,show_smoketest;
 #endif
 SVEXTERN int showall_textures;
 
-SVEXTERN int ncolorbars,ncolorbarsini;
+SVEXTERN int ncolorbars;
 SVEXTERN int ndefaultcolorbars;
-SVEXTERN colorbardata *colorbarinfo,*colorbariniinfo;
+SVEXTERN colorbardata *colorbarinfo;
 
 SVEXTERN int update_load_startup;
 SVEXTERN int do_ignited;
