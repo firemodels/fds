@@ -39,7 +39,6 @@
 #define pp_PLOTTEXTURE
 #define pp_WUI
 #define pp_TRAINER
-#define pp_COLOR
 #endif
 
 #ifdef pp_PLOTTEXTURE
@@ -47,6 +46,7 @@
 #endif
 
 #ifdef pp_TEST
+#define pp_COLOR
 #define pp_LIGHT
 #define pp_GPU
 #define pp_SVNET
