@@ -1934,8 +1934,8 @@ void draw_faces(){
     }
     glEnd();
   //  if(cullfaces==1)glEnable(GL_CULL_FACE); // DEBUG WORK AROUND
-    glDisable(GL_LIGHTING);
     glDisable(GL_COLOR_MATERIAL);
+    glDisable(GL_LIGHTING);
   }
   if(nface_normals_double>0){
     glEnable(GL_LIGHTING);
@@ -2006,8 +2006,8 @@ void draw_faces(){
     }
     glEnd();
     if(cullfaces==1)glEnable(GL_CULL_FACE); // DEBUG WORK AROUND
-    glDisable(GL_LIGHTING);
     glDisable(GL_COLOR_MATERIAL);
+    glDisable(GL_LIGHTING);
   }
   if(nface_outlines>0){
     glDisable(GL_LIGHTING);
