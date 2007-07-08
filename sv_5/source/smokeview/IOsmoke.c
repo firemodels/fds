@@ -4644,15 +4644,15 @@ void printInfoLog(GLhandleARB obj)
 
 int setSmokeShaders() {
 
-	char *vs = NULL,*fs = NULL;
-	const char * vv;
-	const char * ff;
+  char *vs = NULL,*fs = NULL;
+  const char * vv;
+  const char * ff;
   GLint error_code;
   char fragbuffer[1024];
 
-	v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-	f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-	f2 = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+  v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+  f2 = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 
 
 //  NewMemory((void **)&vs,NSHADERLINES*80*sizeof(char));
@@ -4667,7 +4667,7 @@ int setSmokeShaders() {
   fs = textFileRead(fragbuffer);
   
   vv = vs;
-	ff = fs;
+  ff = fs;
 
   // vertex shader
 
@@ -4677,26 +4677,28 @@ int setSmokeShaders() {
   // pass skip to GPU as uniform int
 
 
-	glShaderSourceARB(v, 1, &vv,NULL);
-	glShaderSourceARB(f, 1, &ff,NULL);
-
-	FREEMEMORY(vs);
-  FREEMEMORY(fs);
-
-	glCompileShaderARB(v);
-	glCompileShaderARB(f);
+  if(vv!=NULL){
+    glShaderSourceARB(v, 1, &vv,NULL);
+    FREEMEMORY(vs);
+    glCompileShaderARB(v);
+  }
+  if(ff!=NULL){
+    glShaderSourceARB(f, 1, &ff,NULL);
+    FREEMEMORY(fs);
+    glCompileShaderARB(f);
+  }
 
 #ifdef _DEBUG
   printInfoLog(v);
-	printInfoLog(f);
-	printInfoLog(f2);
+  printInfoLog(f);
+  printInfoLog(f2);
 #endif
 
-	p_smoke = glCreateProgramObjectARB();
-	glAttachObjectARB(p_smoke,v);
-	glAttachObjectARB(p_smoke,f);
+  p_smoke = glCreateProgramObjectARB();
+  glAttachObjectARB(p_smoke,v);
+  glAttachObjectARB(p_smoke,f);
 
-	glLinkProgramARB(p_smoke);
+  glLinkProgramARB(p_smoke);
   glGetObjectParameterivARB(p_smoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
   printf("  Smoke shader completion code:");
@@ -4720,7 +4722,7 @@ int setSmokeShaders() {
     printf(" unknown error\n");
     break;
   }
-	printInfoLog(p_smoke);
+  printInfoLog(p_smoke);
 #endif
   GPU_hrrcutoff = glGetUniformLocationARB(p_smoke,"hrrcutoff");
   GPU_hrr = glGetAttribLocationARB(p_smoke,"hrr");
