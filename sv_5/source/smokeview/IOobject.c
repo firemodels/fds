@@ -209,14 +209,15 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       framei->display_list_ID=displaylist_id;
       glNewList(displaylist_id,GL_COMPILE_AND_EXECUTE);
     }
-    glEnable(GL_LIGHTING);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+
+	glEnable(GL_LIGHTING);
+
+	glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
 
     glEnable(GL_COLOR_MATERIAL);
 
-//  while(iarg<framei->nargs&&iop<framei->nops){
     while(iop<framei->nops){
       arg = framei->args + iarg;
       op = framei->ops + iop;
@@ -360,6 +361,9 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     if(displaylist_id!=0){
       glEndList();
     }
+
+    glDisable(GL_COLOR_MATERIAL);
+	glDisable(GL_LIGHTING);
   }
   else{
     glCallList(framei->display_list_ID);

@@ -1410,10 +1410,13 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm){
     iso_specular[3] = 1.0;
     glPushAttrib(GL_LIGHTING_BIT);
     glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
     glBegin(GL_TRIANGLES);
 
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,asurface->color);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,asurface->color);
+	  glColor3fv(asurface->color);
+
     vertices_i=asurface->vertices;
     triangles_i=asurface->triangles;
     norm=asurface->norm;
@@ -1456,7 +1459,9 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm){
       }
     }
     glEnd();
-    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+
+	  glDisable(GL_LIGHTING);
 
     glPopAttrib();
   }
