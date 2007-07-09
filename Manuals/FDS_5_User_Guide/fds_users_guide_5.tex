@@ -45,7 +45,7 @@
 %     \setlength{\@tempdimb}{.5\paperwidth}
 %     \setlength{\@tempdimc}{.5\paperheight}
 %     \setlength{\unitlength}{1pt}
-%     \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){ 
+%     \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){
 %     \makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}\selectfont{RC6}}}}}
 % }
 %\makeatother
@@ -243,8 +243,7 @@
 
 \vspace{1in}
 
-\Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, June 21, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, July 9, 2007)}
 
 \vspace{.5in}
 
@@ -2539,7 +2538,7 @@ planes. However, many objects, like cables, pipes, and ducts, are not
 flat. Even though these objects have to be represented in FDS as
 ``boxes,'' you can still perform the internal heat transfer
 calculation as if the object were really cylindrical or spherical. For
-example, the input lines: 
+example, the input lines:
 
 \footnotesize
 \begin{verbatim}
@@ -2557,7 +2556,7 @@ with a separate heat transfer calculation performed at each face, and
 no communication among the four faces. Obviously, this is not an ideal
 way to do solid phase heat transfer, but it does provide a reasonable
 bounding surface temperature for the gas phase calculation. More
-detailed assessment of a cable would require a two or 
+detailed assessment of a cable would require a two or
 three-dimensional heat conduction calculation, which is not included
 in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
 
@@ -3422,7 +3421,7 @@ no convective heat transfer. There are several parameters that allow you do this
 \item Create a trivially small mesh, just to let FDS run. Since the
 gas phase calculation is essentially being shut off, you just need 4
 cells in each direction ({\ct IJK=4,4,4}) for the pressure solver to
-function properly. 
+function properly.
 \item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS
 to update the solid phase every time step (normally it does this every
 other time step), and set {\ct DT} to whatever value appropriate for
@@ -3431,7 +3430,7 @@ that will limit the time step, it is best to control this yourself.
 \item Put {\ct H\_FIXED=0.} on the {\ct MISC} line. This turns off the
 convective heat flux from gas to surface and vis verse. The heat flux
 to the solid is specified via {\ct EXTERNAL\_FLUX} (kW/m$^2$) on the
-{\ct SURF} line that is assigned to the solid surface. 
+{\ct SURF} line that is assigned to the solid surface.
 \item Turn off all the gas phase computations by setting {\ct
 SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed
 up the computations significantly. If the gas phase computations are
@@ -3441,10 +3440,10 @@ to 0.01, too low to support any burning.
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you
 normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF}
 line. This is simply a ``virtual'' source that heats the solid. Think
-of this as a perfect radiant panel or cone calorimeter. 
+of this as a perfect radiant panel or cone calorimeter.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom
 of the computational domain. Create {\ct OPEN} vents on all other
-faces. 
+faces.
 \item Finally, add solid phase output devices to the solid surface,
 like {\ct WALL\_TEMPERATURE}, {\ct HEAT\_FLUX}, {\ct BURNING\_RATE},
 {\ct GAUGE\_HEAT\_FLUX}, and {\ct WALL\_THICKNESS} (assuming the solid
@@ -3456,7 +3455,7 @@ appropriate. Compare your results to measurements made in a
 bench-scale device, like the cone calorimeter. Keep in mind, however,
 that the calculation and the experiment are not necessarily perfectly
 matched. The calculation is designed to eliminate uncertainties
-related to convection, combustion, and apparatus-specific phenomena. 
+related to convection, combustion, and apparatus-specific phenomena.
 \end{enumerate}
 
 
@@ -3776,7 +3775,7 @@ Species &   Mol.~Wgt.        & $\sigma$  & $k/\epsilon$  \\
 \end{table}
 
 Recognized species that are emissive will been defined as {\ct ABSORBING} and radiative absorption for those species
-will be computed.  The keyword {\ct ABSORBING} can be specified on the {\ct SPEC} line as well.  If {\ct .TRUE.} and the 
+will be computed.  The keyword {\ct ABSORBING} can be specified on the {\ct SPEC} line as well.  If {\ct .TRUE.} and the
 species is not in the recognized list, then it will be assumed to be a fuel when invoking RADCAL to compute its
 absorptivity.
 
@@ -4045,12 +4044,14 @@ then also add {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) of the fuel. Fuel droplets are 
 into {\ct WATER VAPOR}, which is a separate species that is automatically added to the calculation (Default {\ct .FALSE.}).
 Water droplets are colored blue in Smokeview.
 \item[{\ct NUMBER\_INITIAL\_DROPLETS}]
-Seed the domain with particles/droplets at the start of the simulation.
+Number of particles/droplets within the computational domain at the start of the simulation.
 (Default 0). If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which
 specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do
 not confuse this parameter with {\ct DENSITY}. For example, water has a
 {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets
-and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$.
+and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a
+certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format
+for {\ct XB} is the same as that used on the {\ct OBST} line.
 \item[{\ct DROPLETS\_PER\_SECOND}]  Number of sprinkler droplets inserted every
 second per active sprinkler. Note that this parameter only affects sprinkler
 droplets. Changing this parameter does {\em not} change the flow rate, but rather the number
@@ -4984,9 +4985,9 @@ specified with {\ct QUANTITY='CONTROL'}.
 
 For a dry-pipe sprinkler system\index{dry-pipe sprinkler system}, the normally
 dry sprinkler pipes are pressurized with gas.  When a link activates in a sprinkler head, the pressure drop allows
-water to flow into the pipe network.  For this example it takes 30~s to flood the piping network once a sprinkler link 
+water to flow into the pipe network.  For this example it takes 30~s to flood the piping network once a sprinkler link
 has activated.  The sequence of events required for operation is first {\ct ANY} of the links must activate which
-starts the 30~s {\ct TIME\_DELAY}.  Once the 30~s delay has occurred, each nozzle with an active link, the {\ct ALL} 
+starts the 30~s {\ct TIME\_DELAY}.  Once the 30~s delay has occurred, each nozzle with an active link, the {\ct ALL}
 control functions, will then flow water.
 
 \footnotesize
@@ -5361,9 +5362,9 @@ The light extinction coefficient, $K$, is a product of the
 density of smoke particulate, $\rho Y_s$, and a mass specific
 extinction coefficient that is fuel dependent
 \be K = K_m \; \rho \, Y_s \label{mec} \ee
-Devices that output a \% obscuration such as a {\ct DEVC} with a {\ct QUANTITY} of 
-{\ct aspiration}, {\ct spot obscuration} (smoke detector), or {\ct path obscuration} (beam detector) 
-are discussed respectively in Section~\ref{info:aspiration_detector}, Section~\ref{info:smoke_detector}, 
+Devices that output a \% obscuration such as a {\ct DEVC} with a {\ct QUANTITY} of
+{\ct aspiration}, {\ct spot obscuration} (smoke detector), or {\ct path obscuration} (beam detector)
+are discussed respectively in Section~\ref{info:aspiration_detector}, Section~\ref{info:smoke_detector},
 and Section~\ref{info:beam_detector}
 
 Estimates of visibility through smoke can be made by using the
