@@ -54,6 +54,7 @@ SVEXTERN int i_hrrcutoff;
 #endif
 
 SVEXTERN float cb_valmin, cb_valmax, cb_val;
+SVEXTERN int cb_colorindex;
 SVEXTERN float rgb_plot3d[4*MAXRGB];
 
 SVEXTERN char inputfilename_ext[4];

@@ -23,11 +23,11 @@ typedef struct {
   char *label_ptr;
   int npoints;      // number of legs
   int pointindex;   // leg being edited
-  float *flegs;   // fraction of points in each leg
+  unsigned char *c_index;
   float *rgbnodes;
   float *c_vals;
-  float valmin, valmax;
   int *jumpflag;
+  float valmin, valmax;
   float *rgb;     // color bar
 } colorbardata;
 

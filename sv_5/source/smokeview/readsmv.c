@@ -7626,13 +7626,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
   */
 
 /*
-typedef struct {
-  char *label;    // menu label
-  int nlegs;      // number of legs
-  float *flegs;   // fraction of points in each leg
-  float *rgbnodes;
-  float *rgb;     // color bar
-} colorbardata;
       GENCOLORBAR
 	  ncolorbars
       label
@@ -7675,7 +7668,7 @@ typedef struct {
 
           cbi->pointindex=0;
 
-          NewMemory((void **)&cbi->flegs,cbi->npoints*sizeof(float));
+          NewMemory((void **)&cbi->c_index,cbi->npoints*sizeof(unsigned char));
           NewMemory((void **)&cbi->c_vals,cbi->npoints*sizeof(float));
           NewMemory((void **)&cbi->rgbnodes,6*cbi->npoints*sizeof(float));
           NewMemory((void **)&cbi->jumpflag,cbi->npoints*sizeof(int));
@@ -7685,7 +7678,7 @@ typedef struct {
             fgets(buffer,255,stream);
             r1=-1.0; g1=-1.0; b1=-1.0; 
             r2=-1.0; g2=-1.0; b2=-1.0;
-            sscanf(buffer,"%f %f %f %f %f %f %f",cbi->flegs+i,&r1,&g1,&b1,&r2,&g2,&b2);
+            sscanf(buffer,"%i %f %f %f %f %f %f",cbi->c_index+i,&r1,&g1,&b1,&r2,&g2,&b2);
             nn = 6*i;
             cbi->rgbnodes[nn  ]=r1;
             cbi->rgbnodes[nn+1]=g1;
@@ -8703,10 +8696,10 @@ void writeini(int flag){
       for(i=0;i<cbi->npoints-1;i++){
 		    rrgb = cbi->rgbnodes+6*i;
 		    if(fabs(rrgb[3]-rrgb[6])<0.001&&fabs(rrgb[4]-rrgb[7])<0.001&&fabs(rrgb[5]-rrgb[8])<0.001){
-          sprintf(buffer,"%f %f %f %f ",cbi->flegs[i],rrgb[0],rrgb[1],rrgb[2]);
+          sprintf(buffer,"%i %f %f %f ",cbi->c_index[i],rrgb[0],rrgb[1],rrgb[2]);
         }
 		    else{
-          sprintf(buffer,"%f %f %f %f %f %f %f ",cbi->flegs[i],rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
+          sprintf(buffer,"%i %f %f %f %f %f %f ",cbi->c_index[i],rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
         }
         trimmzeros(buffer);
         fprintf(fileout,"%s\n",buffer);

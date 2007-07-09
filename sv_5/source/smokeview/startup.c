@@ -928,6 +928,7 @@ void initvars1(void){
   cb_valmin=0.0;
   cb_valmax=100.0;
   cb_val=50.0;
+  cb_colorindex=128;
 
 #ifdef pp_WUI
   rgb_terrain[0][0]=1.0;

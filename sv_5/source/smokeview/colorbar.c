@@ -89,7 +89,7 @@ void addcolorbar(int icolorbar){
   cb_to->label_ptr=cb_to->label;
   cb_to->npoints=cb_from->npoints;
   cb_to->pointindex=cb_from->pointindex;
-  NewMemory((void **)&cb_to->flegs,cb_to->npoints*sizeof(float));
+  NewMemory((void **)&cb_to->c_index,cb_to->npoints*sizeof(unsigned char));
   NewMemory((void **)&cb_to->c_vals,cb_to->npoints*sizeof(float));
   NewMemory((void **)&cb_to->rgbnodes,6*cb_to->npoints*sizeof(float));
   NewMemory((void **)&cb_to->jumpflag,cb_to->npoints*sizeof(int));
@@ -100,7 +100,7 @@ void addcolorbar(int icolorbar){
   for(i=0;i<cb_to->npoints;i++){
     cb_to->c_vals[i]=cb_from->c_vals[i];
     cb_to->jumpflag[i]=cb_from->jumpflag[i];
-    cb_to->flegs[i]=cb_from->flegs[i];
+    cb_to->c_index[i]=cb_from->c_index[i];
   }
 
   remapcolorbar(cb_to);
@@ -146,17 +146,8 @@ void drawcolorbarpath(void){
 #define PLEFT2 -0.1
 #define PRIGHT2 1.1
 
-//  glColor3fv(foregroundcolor);
-//  glVertex3f(PLEFT,PLEFT,PLEFT);
-//  glVertex3f(PLEFT,PRIGHT,PLEFT);
-//  glVertex3f(PRIGHT,PLEFT,PLEFT);
-//  glVertex3f(PRIGHT,PRIGHT,PLEFT);
-//  glVertex3f(PLEFT,PLEFT,PRIGHT);
-//  glVertex3f(PLEFT,PRIGHT,PRIGHT);
-//  glVertex3f(PRIGHT,PLEFT,PRIGHT);
-//  glVertex3f(PRIGHT,PRIGHT,PRIGHT);
-
   glEnd();
+
   // draw rgb color axese
 
   glLineWidth(5.0);
@@ -198,6 +189,37 @@ void drawcolorbarpath(void){
 
   {
     float zbot;
+    float dzpoint;
+
+
+    glPointSize(10.0);
+    glBegin(GL_POINTS);
+    for(i=0;i<cbi->npoints;i++){
+      rrgb = cbi->rgb+3*cbi->c_index[i];
+      dzpoint = (float)cbi->c_index[i]/255.0;
+      glColor3fv(rrgb);
+      glVertex3f(1.5,0.0,dzpoint);
+    }
+    glEnd();
+
+    for(i=0;i<cbi->npoints;i++){
+      int ii;
+      char cbuff[1024];
+
+      ii = cbi->c_index[i];
+      dzpoint = (float)cbi->c_index[i]/255.0;
+      sprintf(cbuff,"%i",ii);
+      output3Text(foregroundcolor, 1.55,0.0,dzpoint,cbuff);
+    }
+    if(colorbarpoint>=0&&colorbarpoint<cbi->npoints){
+      glPointSize(20.0);
+      glBegin(GL_POINTS);
+      rrgb = cbi->rgb+3*cbi->c_index[colorbarpoint];
+      dzpoint = (float)cbi->c_index[colorbarpoint]/255.0;
+      glColor3fv(rrgb);
+      glVertex3f(1.5,0.0,dzpoint);
+      glEnd();
+    }
 
     glBegin(GL_QUAD_STRIP);
     for(i=0;i<256;i++){
@@ -208,6 +230,7 @@ void drawcolorbarpath(void){
       glVertex3f(1.3,0.0,zbot);
     }
     glEnd();
+
     glBegin(GL_QUAD_STRIP);
     for(i=0;i<256;i++){
       rrgb=cbi->rgb+3*i;
@@ -261,12 +284,7 @@ void freecolorbars(void){
 
 void remapcolorbar(colorbardata *cbi){
   int i;
-  float sum;
 
-  sum = 0.0;
-  for(i=0;i<cbi->npoints-1;i++){
-    sum+=cbi->flegs[i];
-  }
   for(i=1;i<cbi->npoints;i++){
     float *rgbleft, *rgbright;
     float *rrr;
@@ -282,10 +300,6 @@ void remapcolorbar(colorbardata *cbi){
     }
   }
 
-  if(sum==0.0)sum=1.0;
-  for(i=0;i<cbi->npoints-1;i++){
-    cbi->flegs[i]/=sum;
-  }
   {
     int npoints=0,npoints_seg;
 
@@ -294,7 +308,10 @@ void remapcolorbar(colorbardata *cbi){
         npoints_seg=256-npoints;
       }
       else{
-        npoints_seg=256*cbi->flegs[i];
+        float frac;
+
+        frac=(float)(cbi->c_index[i+1]-cbi->c_index[i])/255.0;
+        npoints_seg=256*frac;
       }
       npoints += npoints_seg;
       interpcolor(cbi->rgbnodes+6*i,cbi->rgbnodes+6*i+3,cbi->rgb+3*(npoints-npoints_seg),npoints_seg,cbi->jumpflag[i]);
@@ -308,9 +325,9 @@ void freecolorbar(colorbardata *cbi){
   if(cbi==NULL)return;
   FREEMEMORY(cbi->rgb);
   FREEMEMORY(cbi->rgbnodes);
-  FREEMEMORY(cbi->flegs);
   FREEMEMORY(cbi->c_vals);
   FREEMEMORY(cbi->jumpflag);
+  FREEMEMORY(cbi->c_index);
   cbi->npoints=0;
 }
 
@@ -363,7 +380,7 @@ void initdefaultcolorbars(void){
       for(i=0;i<ncolorbars;i++){
         cbi = colorbarinfo + i;
         cbi->rgb=NULL;
-        cbi->flegs=NULL;
+        cbi->c_index=NULL;
         cbi->c_vals=NULL;
         cbi->rgbnodes=NULL;
         cbi->jumpflag=NULL;
@@ -378,7 +395,7 @@ void initdefaultcolorbars(void){
       strcpy(cbi->label,"Original");
       cbi->label_ptr=cbi->label;
       cbi->npoints=nrgb;
-      NewMemory((void **)&cbi->flegs,cbi->npoints*sizeof(float));
+      NewMemory((void **)&cbi->c_index,cbi->npoints*sizeof(unsigned char));
       NewMemory((void **)&cbi->c_vals,cbi->npoints*sizeof(float));
       NewMemory((void **)&cbi->rgbnodes,6*cbi->npoints*sizeof(float));
       NewMemory((void **)&cbi->jumpflag,cbi->npoints*sizeof(float));
@@ -393,8 +410,9 @@ void initdefaultcolorbars(void){
           cbi->rgbnodes[ii+4]=rgb[i+1][1];
           cbi->rgbnodes[ii+5]=rgb[i+1][2];
           cbi->c_vals[i]=cb_valmin + i*dval;
-          cbi->flegs[i]=1.0/(float)(cbi->npoints-1);
+          cbi->c_index[i]=255*(float)i/(cbi->npoints-1);
         }
+        cbi->c_index[cbi->npoints-1]=255;
         cbi->c_vals[cbi->npoints-1]=cb_valmax;
         cbi->jumpflag[i]=0;
       }
@@ -406,7 +424,7 @@ void initdefaultcolorbars(void){
       strcpy(cbi->label,"Rainbow");
       cbi->label_ptr=cbi->label;
       cbi->npoints=5;
-      NewMemory((void **)&cbi->flegs,cbi->npoints*sizeof(float));
+      NewMemory((void **)&cbi->c_index,cbi->npoints*sizeof(unsigned char));
       NewMemory((void **)&cbi->c_vals,cbi->npoints*sizeof(float));
       NewMemory((void **)&cbi->rgbnodes,6*cbi->npoints*sizeof(float));
       NewMemory((void **)&cbi->jumpflag,cbi->npoints*sizeof(float));
@@ -461,10 +479,11 @@ void initdefaultcolorbars(void){
         int nlegs;
 
         nlegs = cbi->npoints-1;
-        cbi->flegs[0]=1.0/(float)nlegs;
-        cbi->flegs[1]=1.0/(float)nlegs;
-        cbi->flegs[2]=1.0/(float)nlegs;
-        cbi->flegs[3]=1.0/(float)nlegs;
+        cbi->c_index[0]=0;
+        cbi->c_index[1]=64;
+        cbi->c_index[2]=128;
+        cbi->c_index[3]=192;
+        cbi->c_index[4]=255;
         dval = (cb_valmax-cb_valmin)/(float)nlegs;
         cbi->c_vals[0]=cb_valmin;
         cbi->c_vals[1]=cb_valmin+dval;
@@ -482,7 +501,7 @@ void initdefaultcolorbars(void){
       cbi->label_ptr=cbi->label;
 
       cbi->npoints=3;
-      NewMemory((void **)&cbi->flegs,cbi->npoints*sizeof(float));
+      NewMemory((void **)&cbi->c_index,cbi->npoints*sizeof(unsigned char));
       NewMemory((void **)&cbi->c_vals,cbi->npoints*sizeof(float));
       NewMemory((void **)&cbi->rgbnodes,6*cbi->npoints*sizeof(float));
       NewMemory((void **)&cbi->jumpflag,cbi->npoints*sizeof(float));
@@ -518,8 +537,9 @@ void initdefaultcolorbars(void){
         int nlegs;
 
         nlegs = cbi->npoints-1;
-        cbi->flegs[0]=1.0/(float)nlegs;
-        cbi->flegs[1]=1.0/(float)nlegs;
+        cbi->c_index[0]=0;
+        cbi->c_index[1]=128;
+        cbi->c_index[2]=255;
         cbi->c_vals[0]=cb_valmin;
         cbi->c_vals[1]=cb_valmax;
       }
@@ -550,7 +570,7 @@ void initcolorbars(void){
 
 void ResizeColorbar(colorbardata *cbi, int n){
   cbi->npoints=n;
-  ResizeMemory((void **)&cbi->flegs,n*sizeof(float));
+  ResizeMemory((void **)&cbi->c_index,n*sizeof(unsigned char));
   ResizeMemory((void **)&cbi->c_vals,n*sizeof(float));
   ResizeMemory((void **)&cbi->rgbnodes,6*n*sizeof(float));
   ResizeMemory((void **)&cbi->jumpflag,n*sizeof(int));

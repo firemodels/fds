@@ -631,9 +631,6 @@ void init_blockdist(void){
     }
     for(ig=0;ig<casei->nmeshes;ig++){
       float dz;
-#ifdef _DEBUG
-      printf("mesh %i\n",ig);
-#endif
       zbottommin=1000000000;
       for(jg=0;jg<casei->nmeshes;jg++){
         meshj = casei->meshinfo+jg;
@@ -684,11 +681,6 @@ void init_blockdist(void){
           else{
             b_zdist[ijknode]=0.0;
           }
-#ifdef _DEBUG
-          if(i==35&&j==31){
-            printf(" %f %f\n",zz,b_zdist[ijknode]);
-          }
-#endif
         }
       }
       for(k=1;k<=kbar;k++){
@@ -705,13 +697,6 @@ void init_blockdist(void){
             else{
               b_zdist[ijknode]=b_zdist[ijkm1node] + dz;
             }
-#ifdef _DEBUG
-            if(i==35&&j==31){
-              printf(" %f %f",zz,b_zdist[ijknode]);
-              if(k==kbar)printf(" ***");
-              printf("\n");
-            }
-#endif
           }
         }
       }
