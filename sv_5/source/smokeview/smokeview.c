@@ -1364,6 +1364,20 @@ void ShowScene(int mode, int view_mode){
     return;
   }
 
+/* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
+
+#ifdef pp_COLOR
+  if(viscolorbarpath==1){
+    if(cb_hidesv==1){
+      setColorbarClipPlanes(0);
+    }
+    drawcolorbarpath();
+    if(cb_hidesv==1){
+      setColorbarClipPlanes(1);
+    }
+  }
+
+#endif
 /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
   drawBlockages(mode);
@@ -1494,17 +1508,6 @@ void ShowScene(int mode, int view_mode){
     }
     sniffErrors("after drawsmoke");
   }
-
-/* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
-
-#ifdef pp_COLOR
-  if(viscolorbarpath==1){
-    if(cb_hidesv==1){
-      setColorbarClipPlanes(0);
-    }
-    drawcolorbarpath();
-  }
-#endif
 
 /* ++++++++++++++++++++++++ draw zone fire modeling info +++++++++++++++++++++++++ */
 
@@ -1781,6 +1784,15 @@ void ShowScene(int mode, int view_mode){
     if(RenderOnceNowR==0&&RenderOnceNowL==0){
       RenderState(0);
       RenderSkip=1;
+    }
+  }
+#endif
+/* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
+
+#ifdef pp_COLOR
+  if(viscolorbarpath==1){
+    if(cb_hidesv==1){
+      setColorbarClipPlanes(0);
     }
   }
 #endif
