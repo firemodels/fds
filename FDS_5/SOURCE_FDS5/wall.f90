@@ -181,6 +181,7 @@ IF (CORRECTOR) THEN
       BC_CLOCK = T
       CALL PYROLYSIS(T,DT_BC)
       WALL_COUNTER = 0
+      IF(N_EVAP_INDICIES>0) WCPUA = 0._EB
    ENDIF
 ENDIF
  
@@ -538,7 +539,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
             HTCB = HEAT_TRANSFER_COEFFICIENT(IWB,IIB,JJB,KKB,IOR,TMP_G_B,DTMP)            
             HEAT_TRANS_COEF(IWB) = HTCB
             QRADINB  = QRADIN(IWB)
-            IF (NLP>0) QINB = - SUM(WCPUA(IWB,:))
+            IF (NLP>0) QINB = -SUM(WCPUA(IWB,:))/WALL_INCREMENT
          ELSE
             TMP_G_B  = TMPA
             DTMP = TMP_G_B - TMP_B(IW)
@@ -550,7 +551,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ! Take away energy flux due to water evaporation
  
    IF (NLP>0) THEN
-      QINF  = - SUM(WCPUA(IW,:))
+      QINF  =  -SUM(WCPUA(IW,:))/WALL_INCREMENT
    ELSE
       QINF  = 0._EB
    ENDIF
@@ -863,16 +864,18 @@ WALL_CELL_LOOP: DO IW=1,NWC
       K_S(I) = K_S(I)/VOLSUM
       IF (I.EQ.1) E_WALL(IW) = E_WALL(IW)/VOLSUM
    ENDDO POINT_LOOP3
-   !RCP_W for part
-   IF (N_EVAP_INDICIES>0) THEN
-      RCP_W(IW) = RHOCBAR(1)*DX_S(1)
-   ENDIF
   
    K_S(0)     = K_S(1)     ! Calculate average K_S between at grid cell boundaries. Store result in K_S
    K_S(NWP+1) = K_S(NWP)
    DO I=1,NWP-1 
       K_S(I)  = 1.0_EB / ( DX_WGT_S(I)/K_S(I) + (1.-DX_WGT_S(I))/K_S(I+1) )
    ENDDO
+
+   !RCP_W for part
+   IF (N_EVAP_INDICIES>0) THEN
+      RCP_W(IW) = RHOCBAR(1)*DX_S(1)
+   ENDIF
+
 
    ! Calculate internal radiation
       
@@ -961,7 +964,6 @@ WALL_CELL_LOOP: DO IW=1,NWC
    TMP_F(IW)       = MIN(TMPMAX,MAX(TMPMIN,TMP_F(IW)))
    TMP_B(IW)       = 0.5_EB*(WC%TMP_S(NWP)+WC%TMP_S(NWP+1))
    TMP_B(IW)       = MIN(TMPMAX,MAX(TMPMIN,TMP_B(IW)))
-   
    ! If the surface temperature exceeds the ignition temperature, burn it
 
    IF (TW(IW) > T ) THEN
