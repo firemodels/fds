@@ -276,6 +276,33 @@ void freecolorbars(void){
   }
 }
 
+
+/* ------------------ adjust_colorbar_splits ------------------------ */
+
+void adjust_colorbar_splits(colorbardata *cbi){
+  int i,j;
+  int nsplits;
+
+  nsplits=0;
+  for(i=1;i<cbi->nlegs;i++){
+    if(i==0||i==cbi->nlegs-1||cbi->splitflag[i]==1){
+      cbi->splits[nsplits++]=i;
+    }
+  }
+  cbi->nsplits=nsplits;
+
+  for(i=0;i<cbi->nsplits-1;i++){
+    int i1, i2;
+    unsigned char *ci;
+
+    i1 = cbi->splits[i];
+    i2 = cbi->splits[i+1];
+    ci = cbi->colorbar_index;
+    for(j=i1+1;j<i2;j++){
+      ci[j] = ((float)(i2-j)*ci[i1] + (float)(j-i1)*ci[i2])/(float)(i2-i1);
+    }
+  }
+}
 /* ------------------ remapcolorbar ------------------------ */
 
 void remapcolorbar(colorbardata *cbi){
@@ -284,9 +311,7 @@ void remapcolorbar(colorbardata *cbi){
   CheckMemory;
   for(i=1;i<cbi->nlegs;i++){
     float *rgbleft, *rgbright;
-    float *rrr;
 
-    rrr = cbi->leg_rgb+6*i;
     if(cbi->splitflag[i]==0){
       rgbleft = cbi->leg_rgb+6*i;
       rgbright = cbi->leg_rgb+6*i - 3;
@@ -297,6 +322,8 @@ void remapcolorbar(colorbardata *cbi){
     }
   }
   CheckMemory;
+
+  adjust_colorbar_splits(cbi);
 
   {
     int nlegs=0,nlegs_seg;
@@ -337,30 +364,6 @@ typedef struct {
   float valmin, valmax, *vals;
 } colorbardata;
 */
-
-/* ------------------ adjust_colorbar_splits ------------------------ */
-
-void adjust_colorbar_splits(colorbardata *cbi){
-  int i,j;
-  int nsplits;
-
-  nsplits=0;
-  cbi->splits[nsplits++]=0;
-  for(i=1;i<cbi->nlegs-1;i++){
-    if(cbi->splitflag[i]==1){
-      cbi->splits[nsplits++]=i;
-    }
-  }
-  cbi->splits[nsplits++]=cbi->nlegs-1;
-  cbi->nsplits=nsplits;
-
-  for(i=0;i<cbi->nsplits-1;i++){
-    int i1, i2;
-
-    i1 = cbi->splits[i];
-    i2 = cbi->splits[i+1];
-  }
-}
 
 /* ------------------ interpcolor ------------------------ */
 
