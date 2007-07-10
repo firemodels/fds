@@ -5,7 +5,7 @@ USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 USE TRAN
-USE TYPES, ONLY: DROPLET_TYPE, PARTICLE_CLASS_TYPE, PARTICLE_CLASS
+USE TYPES, ONLY: DROPLET_TYPE, PARTICLE_CLASS_TYPE, PARTICLE_CLASS, WALL_TYPE
 IMPLICIT NONE
 PRIVATE
 PUBLIC INSERT_DROPLETS_AND_PARTICLES,UPDATE_PARTICLES, &
@@ -1054,11 +1054,11 @@ REAL(EB) :: RD,RDS,RDC,RRD,RD_NEW, &
             QUSE,HD, &
             SH_FAC,NU_FAC,T,PR,MVAP,XI,YJ,ZK,RDT,MU_AIR, &
             HS,HLF,DTLF,Y_IGAS,QRADD,QWALLC,QWALLR,DEN_ADD, &
-            Y_IGASN,Y_EQUIL,Y_GAS,MVAPMIN,MVAPMAX
+            Y_IGASN,Y_EQUIL,Y_GAS,MVAPMIN,MVAPMAX,TWN,DXW
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,ITER,EVAP_INDEX
 REAL(EB) :: SC_AIR,D_AIR,DHOR,SHER,XVAP,QVAP, HADT_WALL, HADT_G, &
             MDROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
-            CP_IGAS,CP_DROP,MGAS,ATOP,ABOT,CR2,WALL,FILMD,Z_2,Y_IGAS_Z,Z_F,&
+            CP_IGAS,CP_DROP,MGAS,ATOP,ABOT,CR2,WALL_FLAG,FILMD,Z_2,Y_IGAS_Z,Z_F,&
             TMP_GAS_OLD,TMP_GAS_NEW,TMP_DROP_OLD,TMP_DROP_NEW,TMP_MELT,TMP_BOIL,TMP_WALL, &
             DENOM,EGASOLD,ESYSOLD,MGCP,MVCP,MDCPNEW
 INTEGER, INTENT(IN) :: NM
@@ -1066,8 +1066,8 @@ INTEGER, INTENT(IN) :: NM
 
 D_VAP = 0.
 
-HS     = 3000._EB    ! Heat transfer coef from solid to drop (W/m2/K)
-HLF    = 1000._EB    ! Leidenfrost heat transfer coef (W/m2/K)
+HS     = 300._EB!3000._EB    ! Heat transfer coef from solid to drop (W/m2/K)
+HLF    = 100._EB!1000._EB    ! Leidenfrost heat transfer coef (W/m2/K)
 PR     = 0.7_EB      ! Prandtl number of air
 FILMD  = 0.002_EB    ! Thickness of continous water film
 NU_FAC = 0.6_EB*PR**ONTH
@@ -1086,9 +1086,13 @@ WCPUAOLD => WALL_WORK2
 
 EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
    WMPUAOLD = WMPUA(:,EVAP_INDEX)
-   WCPUAOLD = WCPUA(:,EVAP_INDEX)
+!   IF (WALL_COUNTER==0) THEN
+!      WCPUAOLD = 0._EB
+!   ELSE
+!      WCPUAOLD = WCPUA(:,EVAP_INDEX)
+!   ENDIF
    WMPUA(:,EVAP_INDEX) = 0._EB
-   WCPUA(:,EVAP_INDEX) = 0._EB
+!   WCPUA(:,EVAP_INDEX) = 0._EB
    PC_LOOP: DO N_PC = 1,N_PART
       PC => PARTICLE_CLASS(N_PC)
       IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PC_LOOP
@@ -1134,7 +1138,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          MDROP = FTPR*RDC       ! Mass of drop
          WGT   = DR%PWT
          DHOR  = H_V*MW_DROP/R0
-         WALL  = 1._EB
+         WALL_FLAG  = 1._EB
          ABOT  = 0._EB
          ATOP  = 4._EB*PI*RDS
          QUSE  = 0._EB
@@ -1173,7 +1177,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          ! Set variables for heat transfer on solid
          SET_SOLID: IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
             IW   = DR%WALL_INDEX
-            WALL = 0.5_EB  ! Droplet dimension adjust assuming hemisphere
+            WALL_FLAG = 0.5_EB  ! Droplet dimension adjust assuming hemisphere
             RD   = CR2*RD
             RDS  = RD*RD
             RDC  = RD*RDS
@@ -1184,21 +1188,51 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                ABOT = MDROP/WMPUAOLD(IW)
                ATOP = ABOT
             ENDIF
-            IF (WGT*ABOT > AW(IW)) ABOT = AW(IW)/WGT
+            IF (WGT*ABOT > AW(IW)) THEN
+               ABOT = AW(IW)/WGT
+               ATOP = ABOT
+            ENDIF 
             IF (TMP_WALL-TMP_BOIL>DTLF) THEN  ! Leidenfrost droplet
                HADT_WALL = ABOT*DT*HLF
             ELSE
                HADT_WALL = ABOT*DT*HS
             ENDIF
+            IF (SURFACE(IJKW(5,IW))%THERMAL_BC_INDEX == THERMALLY_THICK) THEN
+                HADT_WALL = MIN(HADT_WALL,RCP_W(IW)*AW(IW)/WGT*0.3_EB)
+            ENDIF
             TMP_WALL   = TMP_F(IW)
             DR%RE  = RHO_G*PC%HORIZONTAL_VELOCITY*2._EB*RD/MU_AIR
             QRADD  = QRADD + ABOT*DT*(QRADIN(IW)-QRADOUT(IW))
+            QWALLR = ABOT*DT*(QRADIN(IW)-QRADOUT(IW))
             QWALLC = HADT_WALL*(TMP_WALL-TMP_DROP_OLD)
-            IF (SURFACE(IJKW(5,IW))%THERMAL_BC_INDEX == THERMALLY_THICK) THEN
-              QUSE = AW(IW)*CP_DROP*MDROP*RCP_W(IW)*(TMP_WALL-TMP_DROP_OLD)/ &
-                     (AW(IW)*RCP_W(IW)+CP_DROP*MDROP*WGT)
-              IF(ABS(QWALLC)>ABS(QUSE)) QWALLC=QUSE
-            ENDIF
+!            IF (SURFACE(IJKW(5,IW))%THERMAL_BC_INDEX == THERMALLY_THICK) THEN
+!              IF (SURFACE(IJKW(5,IW))%SHRINK) THEN
+!                 DXW = WALL(IW)%X_S(1)-WALL(IW)%X_S(0)
+!              ELSE
+!                 DXW=SURFACE(IJKW(5,IW))%DX(1)
+!              ENDIF
+!              WALLCLOOP: DO
+!                 IF (QWALLC*RDT*RAW(IW)*WGT < 1.E-3_EB) EXIT WALLCLOOP
+!                 TWN = TMP_WALL - QWALLC*RAW(IW)*WGT*DXW*0.5_EB/KW_D(IW)+&
+!                                  DT*KW_D(IW)*(WALL(IW)%TMP_S(0)-2._EB*WALL(IW)%TMP_S(1)+WALL(IW)%TMP_S(2))/(DXW*RCP_W(IW))
+!                 TMP_DROP_NEW = TMP_DROP_OLD+QWALLC/(CP_DROP*MDROP)*REAL(WALL_INCREMENT,EB)
+!                 IF(IW==1050) WRITE(*,*) 'A',TWN,TMP_WALL,TMP_DROP_OLD,TMP_DROP_NEW,QWALLC*WGT*RAW(IW)
+!                 IF (TWN < TMP_WALL .AND. TWN < TMP_DROP_NEW .AND. QWALLC > 0._EB) THEN
+!                    QWALLC = 0.8_EB * QWALLC
+!                    CYCLE WALLCLOOP
+!                 ELSEIF (TWN > TMP_WALL .AND. TWN > TMP_DROP_NEW .AND. QWALLC < 0._EB) THEN
+!                    QWALLC = 0.8_EB * QWALLC
+!                    CYCLE WALLCLOOP
+!                 ENDIF
+!                 EXIT WALLCLOOP
+!              ENDDO WALLCLOOP
+!              QUSE = 0.5_EB*AW(IW)*CP_DROP*MDROP*RCP_W(IW)*(TMP_WALL-TMP_DROP_OLD)/ &
+!                     (AW(IW)*RCP_W(IW)+CP_DROP*MDROP*WGT)
+!              IF (TMP_DROP_OLD + QUSE / (CP_DROP*MDROP) > TMP_BOIL) QUSE = (TMP_BOIL - TMP_DROP_OLD) * CP_DROP*MDROP
+!              IF (TMP_DROP_OLD + QUSE / (CP_DROP*MDROP) < TMP_MELT) QUSE = (TMP_MELT - TMP_DROP_OLD) * CP_DROP*MDROP
+!              IF(ABS(QWALLC)>ABS(QUSE)) QWALLC=QUSE
+!              WRITE(*,*) TMP_DROP_OLD + QUSE / (CP_DROP*MDROP),TMP_WALL - QUSE*WGT/(AW(IW)*RCP_W(IW))
+!            ENDIF
          ELSE !If not a wall set wall variables just in case
             QWALLC = 0._EB
             ABOT  = ATOP
@@ -1219,7 +1253,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                QUSE = QRADD + QWALLC + HADT_G * (TMP_GAS_OLD - TMP_DROP_OLD) + MDROP * CP_DROP * (TMP_DROP_OLD - TMP_MELT)        
                MVAP = QUSE/H_V
             ELSE
-               MVAP = SHER*RHO_G*D_AIR*WALL*TWOPI*RD*LOG((Y_GAS-1._EB)/(Y_EQUIL-1._EB))* DT
+               MVAP = SHER*RHO_G*D_AIR*WALL_FLAG*TWOPI*RD*LOG((Y_GAS-1._EB)/(Y_EQUIL-1._EB))* DT
             ENDIF
             MVAP = MAX(0._EB,MIN(MVAP,MDROP))
          ENDIF
@@ -1249,7 +1283,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                   QUSE = QRADD + QWALLC + HADT_G * (TMP_GAS_OLD - TMP_DROP_OLD) + MDROP * CP_DROP * (TMP_DROP_OLD - TMP_MELT)
                   MVAP = QUSE/H_V
                ELSE
-                  MVAP = SHER*RHO_G*D_AIR*WALL*TWOPI*RD*LOG((Y_GAS-1._EB)/(Y_EQUIL-1._EB))* DT
+                  MVAP = SHER*RHO_G*D_AIR*WALL_FLAG*TWOPI*RD*LOG((Y_GAS-1._EB)/(Y_EQUIL-1._EB))* DT
                ENDIF
 
                MVAP = MAX(0._EB,MIN(MVAP,MDROP))
@@ -1323,14 +1357,13 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          MVAP  = MVAP*WGT
          DR%R = (MDROP / FTPR) ** ONTH
         
-         IF (WALL<1._EB) THEN
- !           QWALLC = HADT_WALL * (TMP_WALL - TMP_DROP_OLD)      
+         IF (WALL_FLAG<1._EB) THEN
             QUSE = QWALLR+QWALLC
             RDC       = RD_NEW**3
             WCPUA(IW,EVAP_INDEX ) = WCPUA(IW,EVAP_INDEX ) + WGT*RDT*QUSE*RAW(IW)
             WMPUA(IW,EVAP_INDEX ) = WMPUA(IW,EVAP_INDEX ) + WGT*MDROP*RAW(IW)
          ENDIF
-
+         
          ! Decrease temperature due to droplet heating/vaporization
          TMP(II,JJ,KK)=TMP_GAS_NEW
          TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
@@ -1381,8 +1414,9 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
       ! Weight the new water mass array
 
-      WMPUA(:,EVAP_INDEX ) = WGT*WMPUAOLD + OMWGT*WMPUA(:,EVAP_INDEX )
-      WCPUA(:,EVAP_INDEX ) = WGT*WCPUAOLD + OMWGT*WCPUA(:,EVAP_INDEX)
+      WMPUA(:,EVAP_INDEX ) = WGT*WMPUAOLD + OMWGT*WMPUA(:,EVAP_INDEX)
+!      WCPUA(:,EVAP_INDEX ) = WGT*WCPUAOLD + OMWGT*WCPUA(:,EVAP_INDEX)
+!      WCPUA(:,EVAP_INDEX ) = WCPUAOLD + WCPUA(:,EVAP_INDEX)
 
    ENDDO PC_LOOP
 ENDDO EVAP_INDEX_LOOP

@@ -1719,6 +1719,8 @@ SPECIES_LOOP: DO N=0,N_SPECIES
             SELECT CASE(SPECIES(N)%NAME)
                CASE DEFAULT
                   SS%CP(J) = SS%RCON*GAMMA/(GAMMA-1._EB)
+               CASE('AIR')
+                  SS%CP(J) = (0.77_EB*CP_N2+0.23_EB*CP_O2)*1000._EB
                CASE('NITROGEN')
                   SS%CP(J) = CP_N2 *1000._EB
                CASE('OXYGEN')
