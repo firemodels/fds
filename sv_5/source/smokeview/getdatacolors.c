@@ -1310,9 +1310,9 @@ void updatecolors(int changecolorindex){
   }
   //initcolorbars();
   for(n=0;n<nrgb_full;n++){
-    rgb_full[n][0]=colorbarinfo[colorbartype].rgb[3*n];
-    rgb_full[n][1]=colorbarinfo[colorbartype].rgb[3*n+1];
-    rgb_full[n][2]=colorbarinfo[colorbartype].rgb[3*n+2];
+    rgb_full[n][0]=colorbarinfo[colorbartype].colorbar[3*n];
+    rgb_full[n][1]=colorbarinfo[colorbartype].colorbar[3*n+1];
+    rgb_full[n][2]=colorbarinfo[colorbartype].colorbar[3*n+2];
     rgb_full[n][3]=transparentlevel;
   } 
   if(colorbarcycle!=0){

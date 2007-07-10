@@ -6281,6 +6281,7 @@ int readini2(char *inifile, int loaddatafile, int localfile){
   /* find number of each kind of file */
 
   while(!feof(stream)){
+    CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
     if(match(buffer,"V_PLOT3D",8)==1){
@@ -6813,6 +6814,7 @@ int readini2(char *inifile, int loaddatafile, int localfile){
     */
 
     if(match(buffer,"COLORBAR",8) == 1 && match(buffer,"COLORBARFLIP",12)!=1){
+      CheckMemory;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&nrgb_ini);
       FREEMEMORY(rgb_ini);
@@ -7664,45 +7666,40 @@ int readini2(char *inifile, int loaddatafile, int localfile){
           strcpy(cbi->label,buffer);
 
           fgets(buffer,255,stream);
-          sscanf(buffer,"%i",&cbi->npoints);
+          sscanf(buffer,"%i",&cbi->nlegs);
 
-          cbi->pointindex=0;
+          cbi->legindex=0;
 
-          NewMemory((void **)&cbi->c_index,cbi->npoints*sizeof(unsigned char));
-          NewMemory((void **)&cbi->c_vals,cbi->npoints*sizeof(float));
-          NewMemory((void **)&cbi->rgbnodes,6*cbi->npoints*sizeof(float));
-          NewMemory((void **)&cbi->jumpflag,cbi->npoints*sizeof(int));
-          NewMemory((void **)&cbi->rgb,MAXRGB*3*sizeof(float));
           cbi->label_ptr=cbi->label;
-          for(i=0;i<cbi->npoints;i++){
+          for(i=0;i<cbi->nlegs;i++){
             fgets(buffer,255,stream);
             r1=-1.0; g1=-1.0; b1=-1.0; 
             r2=-1.0; g2=-1.0; b2=-1.0;
-            sscanf(buffer,"%i %f %f %f %f %f %f",cbi->c_index+i,&r1,&g1,&b1,&r2,&g2,&b2);
+            sscanf(buffer,"%i %f %f %f %f %f %f",cbi->colorbar_index+i,&r1,&g1,&b1,&r2,&g2,&b2);
             nn = 6*i;
-            cbi->rgbnodes[nn  ]=r1;
-            cbi->rgbnodes[nn+1]=g1;
-            cbi->rgbnodes[nn+2]=b1;
-            cbi->rgbnodes[nn+3]=r2;
-            cbi->rgbnodes[nn+4]=g2;
-            cbi->rgbnodes[nn+5]=b2;
+            cbi->leg_rgb[nn  ]=r1;
+            cbi->leg_rgb[nn+1]=g1;
+            cbi->leg_rgb[nn+2]=b1;
+            cbi->leg_rgb[nn+3]=r2;
+            cbi->leg_rgb[nn+4]=g2;
+            cbi->leg_rgb[nn+5]=b2;
           }
-          for(i=1;i<cbi->npoints-1;i++){
+          for(i=1;i<cbi->nlegs-1;i++){
             float *rgbr, *rgbl;
 
-            rgbr = cbi->rgbnodes+6*i;
+            rgbr = cbi->leg_rgb+6*i;
             rgbl = rgbr - 3;
             if(rgbl[0]<0.0||(fabs(rgbr[0]-rgbl[0])<0.001&&
                fabs(rgbr[1]-rgbl[1])<0.001&&
                fabs(rgbr[2]-rgbl[2])<0.001)){
-                 cbi->jumpflag[i]=0;
+                 cbi->splitflag[i]=0;
             }
             else{
-                 cbi->jumpflag[i]=1;
+                 cbi->splitflag[i]=1;
             }
           }
-          cbi->jumpflag[0]=0;
-          cbi->jumpflag[cbi->npoints-1]=0;
+          cbi->splitflag[0]=0;
+          cbi->splitflag[cbi->nlegs-1]=0;
           remapcolorbar(cbi);
         }
       }
@@ -8692,21 +8689,21 @@ void writeini(int flag){
     for(n=ndefaultcolorbars;n<ncolorbars;n++){
       cbi = colorbarinfo + n;
 	    fprintf(fileout,"%s\n",cbi->label);
-	    fprintf(fileout," %i\n",cbi->npoints);
-      for(i=0;i<cbi->npoints-1;i++){
-		    rrgb = cbi->rgbnodes+6*i;
+	    fprintf(fileout," %i\n",cbi->nlegs);
+      for(i=0;i<cbi->nlegs-1;i++){
+		    rrgb = cbi->leg_rgb+6*i;
 		    if(fabs(rrgb[3]-rrgb[6])<0.001&&fabs(rrgb[4]-rrgb[7])<0.001&&fabs(rrgb[5]-rrgb[8])<0.001){
-          sprintf(buffer,"%i %f %f %f ",cbi->c_index[i],rrgb[0],rrgb[1],rrgb[2]);
+          sprintf(buffer,"%i %f %f %f ",cbi->colorbar_index[i],rrgb[0],rrgb[1],rrgb[2]);
         }
 		    else{
-          sprintf(buffer,"%i %f %f %f %f %f %f ",cbi->c_index[i],rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
+          sprintf(buffer,"%i %f %f %f %f %f %f ",cbi->colorbar_index[i],rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
         }
         trimmzeros(buffer);
         fprintf(fileout,"%s\n",buffer);
       }
-	    if(cbi->npoints>0){
-        i=cbi->npoints-1;
-		    rrgb = cbi->rgbnodes+6*i;
+	    if(cbi->nlegs>0){
+        i=cbi->nlegs-1;
+		    rrgb = cbi->leg_rgb+6*i;
         sprintf(buffer,"%f %f %f %f %f %f %f ",0.0,rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
         trimmzeros(buffer);
         fprintf(fileout,"%s\n",buffer);
