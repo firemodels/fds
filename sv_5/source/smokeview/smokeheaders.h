@@ -94,6 +94,7 @@ EXTERNCPP void freecolorbar(colorbardata *cbi);
 EXTERNCPP void initdefaultcolorbars(void);
 EXTERNCPP void drawcolorbarpath(void);
 EXTERNCPP void remapcolorbar(colorbardata *cbi);
+EXTERNCPP void adjust_colorbar_splits(colorbardata *cbi);
 EXTERNCPP void interpcolor(float *col1, float *col2,float *rgb,int npoints_seg, int jumpflag);
 EXTERNCPP void freecolorbars(void);
 EXTERNCPP void initcolorbars(void);

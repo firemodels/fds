@@ -205,7 +205,7 @@ void COLORBAR_CB(int var){
   colorbardata *cbi;
   float *rgb_nodes;
   int i;
-  int npoints;
+  int nlegs;
   float *rgb1, *rgb1a;
   float *rgb2, *rgb2a;
   float *rgb0, *rgb0a;
@@ -215,11 +215,11 @@ void COLORBAR_CB(int var){
     if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
       cbi = colorbarinfo + colorbartype;
       
-//    SPINNER_val->set_float_val(cbi->c_vals[colorbarpoint]);
-//    SPINNER_colorindex->set_int_val(cbi->c_index[colorbarpoint]);
+//    SPINNER_val->set_float_val(cbi->legvals[colorbarpoint]);
+//    SPINNER_colorindex->set_int_val(cbi->colorbar_index[colorbarpoint]);
       cb_val=cb_valmin + (cb_valmax-cb_valmin)*((float)cb_colorindex/255.0);
-      cbi->c_vals[colorbarpoint]=cb_val;
-      cbi->c_index[colorbarpoint]=cb_colorindex;
+      cbi->legvals[colorbarpoint]=cb_val;
+      cbi->colorbar_index[colorbarpoint]=cb_colorindex;
 
       colorbar_global2local();
       remapcolorbar(cbi);
@@ -229,12 +229,12 @@ void COLORBAR_CB(int var){
   case COLORBAR_MINMAX:
     if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
       cbi = colorbarinfo + colorbartype;
-      for(i=0;i<cbi->npoints-1;i++){
-        cbi->c_vals[i]=cb_valmin + (float)i*(cb_valmax-cb_valmin)/(cbi->npoints-1);
-        cbi->c_index[i]=255*(cbi->c_vals[i]-cb_valmin)/(cb_valmax-cb_valmin);
+      for(i=0;i<cbi->nlegs-1;i++){
+        cbi->legvals[i]=cb_valmin + (float)i*(cb_valmax-cb_valmin)/(cbi->nlegs-1);
+        cbi->colorbar_index[i]=255*(cbi->legvals[i]-cb_valmin)/(cb_valmax-cb_valmin);
       }
-      cbi->c_vals[cbi->npoints-1]=cb_valmax;
-      cbi->c_index[cbi->npoints-1]=255;
+      cbi->legvals[cbi->nlegs-1]=cb_valmax;
+      cbi->colorbar_index[cbi->nlegs-1]=255;
 
       SPINNER_val->set_float_limits(cb_valmin,cb_valmax);
       colorbar_global2local();
@@ -248,8 +248,8 @@ void COLORBAR_CB(int var){
       cb_colorindex=255*(cb_val-cb_valmin)/(cb_valmax-cb_valmin);
       if(cb_colorindex<0)cb_colorindex=0;
       if(cb_colorindex>255)cb_colorindex=255;
-      cbi->c_vals[colorbarpoint]=cb_val;
-      cbi->c_index[colorbarpoint]=cb_colorindex;
+      cbi->legvals[colorbarpoint]=cb_val;
+      cbi->colorbar_index[colorbarpoint]=cb_colorindex;
       colorbar_global2local();
       remapcolorbar(cbi);
       updatecolors(-1);
@@ -276,15 +276,15 @@ void COLORBAR_CB(int var){
   case COLORBAR_ADDPOINT:
     if(colorbartype<ndefaultcolorbars||colorbartype>=ncolorbars)return;
     cbi = colorbarinfo + colorbartype;
-    if(colorbarpoint<=0||colorbarpoint>cbi->npoints-1)return;
+    if(colorbarpoint<=0||colorbarpoint>cbi->nlegs-1)return;
 
-    npoints = cbi->npoints+1;
-    ResizeColorbar(cbi,npoints);
-    for(i=cbi->npoints-1;i>=colorbarpoint+1;i--){
-      cbi->c_vals[i]=cbi->c_vals[i-1];
-      cbi->c_index[i]=cbi->c_index[i-1];
-      cbi->jumpflag[i]=0;
-      rgb2 = cbi->rgbnodes+6*i;
+    nlegs = cbi->nlegs+1;
+    ResizeColorbar(cbi,nlegs);
+    for(i=cbi->nlegs-1;i>=colorbarpoint+1;i--){
+      cbi->legvals[i]=cbi->legvals[i-1];
+      cbi->colorbar_index[i]=cbi->colorbar_index[i-1];
+      cbi->splitflag[i]=0;
+      rgb2 = cbi->leg_rgb+6*i;
       rgb1 = rgb2-6;
       rgb2a = rgb2+3;
       rgb1a = rgb1+3;
@@ -295,11 +295,11 @@ void COLORBAR_CB(int var){
       rgb2a[1]=rgb1a[1];
       rgb2a[2]=rgb1a[2];
     }
-    cbi->c_index[colorbarpoint]=(cbi->c_index[colorbarpoint]+cbi->c_index[colorbarpoint-1])/2;
-    cbi->c_vals[colorbarpoint]=(cbi->c_vals[colorbarpoint]+cbi->c_vals[colorbarpoint-1])/2.0;
+    cbi->colorbar_index[colorbarpoint]=(cbi->colorbar_index[colorbarpoint]+cbi->colorbar_index[colorbarpoint-1])/2;
+    cbi->legvals[colorbarpoint]=(cbi->legvals[colorbarpoint]+cbi->legvals[colorbarpoint-1])/2.0;
 
-    cbi->jumpflag[colorbarpoint]=0;
-    rgb1 = cbi->rgbnodes+6*colorbarpoint;
+    cbi->splitflag[colorbarpoint]=0;
+    rgb1 = cbi->leg_rgb+6*colorbarpoint;
     rgb2 = rgb1 + 6;
     rgb1a = rgb1 + 3;
     rgb2a = rgb2 + 3;
@@ -322,22 +322,22 @@ void COLORBAR_CB(int var){
     remapcolorbar(cbi);
     updatecolors(-1);
 
-    if(colorbarpoint==cbi->npoints)colorbarpoint=cbi->npoints-1;
+    if(colorbarpoint==cbi->nlegs)colorbarpoint=cbi->nlegs-1;
     break;
   case COLORBAR_DELETEPOINT:
     if(colorbartype<ndefaultcolorbars||colorbartype>=ncolorbars)return;
     cbi = colorbarinfo + colorbartype;
-    if(colorbarpoint<0||colorbarpoint>cbi->npoints-1)return;
+    if(colorbarpoint<0||colorbarpoint>cbi->nlegs-1)return;
 
-    if(cbi->npoints<=2)return;
-    for(i=colorbarpoint+1;i<cbi->npoints;i++){
+    if(cbi->nlegs<=2)return;
+    for(i=colorbarpoint+1;i<cbi->nlegs;i++){
       float *rgb1, *rgb1a;
       float *rgb2, *rgb2a;
 
-      cbi->c_vals[i-1]=cbi->c_vals[i];
-      cbi->jumpflag[i-1]=cbi->jumpflag[i];
-      cbi->c_index[i-1]=cbi->c_index[i];
-      rgb2 = cbi->rgbnodes+6*i;
+      cbi->legvals[i-1]=cbi->legvals[i];
+      cbi->splitflag[i-1]=cbi->splitflag[i];
+      cbi->colorbar_index[i-1]=cbi->colorbar_index[i];
+      rgb2 = cbi->leg_rgb+6*i;
       rgb1 = rgb2-6;
       rgb2a = rgb2+3;
       rgb1a = rgb1+3;
@@ -348,25 +348,25 @@ void COLORBAR_CB(int var){
       rgb1a[1]=rgb2a[1];
       rgb1a[2]=rgb2a[2];
     }
-    cbi->npoints--;
+    cbi->nlegs--;
     remapcolorbar(cbi);
     updatecolors(-1);
-    if(colorbarpoint==cbi->npoints)colorbarpoint=cbi->npoints-1;
+    if(colorbarpoint==cbi->nlegs)colorbarpoint=cbi->nlegs-1;
     break;
   case COLORBAR_RGB:
     if(colorbartype<0||colorbartype>=ncolorbars)return;
     cbi = colorbarinfo + colorbartype;
-    if(colorbarpoint<0||colorbarpoint>cbi->npoints-1)return;
-    if(cbi->jumpflag[colorbarpoint]!=cb_jump){
-      cbi->jumpflag[colorbarpoint]=cb_jump;
+    if(colorbarpoint<0||colorbarpoint>cbi->nlegs-1)return;
+    if(cbi->splitflag[colorbarpoint]!=cb_jump){
+      cbi->splitflag[colorbarpoint]=cb_jump;
       colorbar_global2local();
     }
-    rgb_nodes=cbi->rgbnodes+6*colorbarpoint;
+    rgb_nodes=cbi->leg_rgb+6*colorbarpoint;
 
     for(i=0;i<3;i++){
       rgb_nodes[i]=(float)cb_rgb[i+3]/255.0;
     }
-    if(cbi->jumpflag[colorbarpoint]==1){
+    if(cbi->splitflag[colorbarpoint]==1){
       for(i=3;i<6;i++){
         rgb_nodes[i-6]=(float)cb_rgb[i-3]/255.0;
       }
@@ -395,13 +395,13 @@ void COLORBAR_CB(int var){
     cbi = colorbarinfo + colorbartype;
     if(var==COLORBAR_NEXT){
       colorbarpoint++;
-      if(colorbarpoint>cbi->npoints-1)colorbarpoint=0;
+      if(colorbarpoint>cbi->nlegs-1)colorbarpoint=0;
     }
     else if(var==COLORBAR_PREV){
       colorbarpoint--;
-      if(colorbarpoint<0)colorbarpoint=cbi->npoints-1;
+      if(colorbarpoint<0)colorbarpoint=cbi->nlegs-1;
     }
-    cbi->pointindex=colorbarpoint;
+    cbi->legindex=colorbarpoint;
     colorbar_global2local();
     break;
   case COLORBAR_NEW:
@@ -426,17 +426,16 @@ extern "C" void colorbar_global2local(void){
 
   if(colorbartype>=0&&colorbartype<ncolorbars){
     cbi = colorbarinfo + colorbartype;
-    if(cbi->rgbnodes==NULL)return;
-    colorbarpoint=cbi->pointindex;
+    colorbarpoint=cbi->legindex;
     
-    cb_jump = cbi->jumpflag[colorbarpoint];
+    cb_jump = cbi->splitflag[colorbarpoint];
     CHECKBOX_jump->set_int_val(cb_jump);
     
-    SPINNER_val->set_float_val(cbi->c_vals[colorbarpoint]);
-    SPINNER_colorindex->set_int_val(cbi->c_index[colorbarpoint]);
+    SPINNER_val->set_float_val(cbi->legvals[colorbarpoint]);
+    SPINNER_colorindex->set_int_val(cbi->colorbar_index[colorbarpoint]);
 
     ii = 6*colorbarpoint;
-    rgb = cbi->rgbnodes+ii;
+    rgb = cbi->leg_rgb+ii;
 
     BUTTON_next->enable();
     BUTTON_prev->enable();
@@ -454,7 +453,7 @@ extern "C" void colorbar_global2local(void){
       SPINNER_left_red->enable();
       SPINNER_left_green->enable();
       SPINNER_left_blue->enable();
-      if(cbi->jumpflag[colorbarpoint]==1){
+      if(cbi->splitflag[colorbarpoint]==1){
         SPINNER_right_red->enable();
         SPINNER_right_green->enable();
         SPINNER_right_blue->enable();
@@ -466,7 +465,7 @@ extern "C" void colorbar_global2local(void){
       }
       BUTTON_addpoint->enable();
       BUTTON_deletepoint->enable();
-      if(colorbarpoint==0||colorbarpoint==cbi->npoints-1){
+      if(colorbarpoint==0||colorbarpoint==cbi->nlegs-1){
         CHECKBOX_jump->disable();
         SPINNER_val->disable();
         SPINNER_colorindex->disable();
