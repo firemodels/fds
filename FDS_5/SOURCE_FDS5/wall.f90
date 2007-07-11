@@ -974,11 +974,10 @@ WALL_CELL_LOOP: DO IW=1,NWC
          IF (STEPCOUNT==1) THEN
             TOLERANCE        = MAXVAL(ABS((TMP_W_NEW-WC%TMP_S(0:NWP+1))/WC%TMP_S(0:NWP+1)))
             IF (TOLERANCE > 0.2_EB) THEN
-               STEPCOUNT = STEPCOUNT * (INT(TOLERANCE/0.2_EB) + 1)
+               STEPCOUNT = MIN(200,STEPCOUNT * (INT(TOLERANCE/0.2_EB) + 1))
                ITERATE=.TRUE.
                DT2_BC=DT_BC/REAL(STEPCOUNT)
                TMP_W_NEW = WC%TMP_S(0:NWP+1)
-               WRITE(*,*) STEPCOUNT,TOLERANCE
             ENDIF
          ENDIF
          TMP_F(IW)       = 0.5_EB*(TMP_W_NEW(0)+TMP_W_NEW(1))
