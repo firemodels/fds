@@ -39,30 +39,9 @@ SUBROUTINE READ_DATA
 
 ! Check for, open, and read the entire input file
 
-USE COMP_FUNCTIONS, ONLY: GET_INPUT_FILE
-
 ! Create an array of output QUANTITY names that are included in the various NAMELIST groups
  
 CALL FIXED_OUTPUT_QUANTITIES
-
-! Get the name of the input file by reading the command line argument
-
-CALL GET_INPUT_FILE
-
-! If no input file is given, just print out the version number and stop
-
-IF (INPUT_FILE(1:1)==' ') THEN
-   WRITE(MESSAGE,'(A,A,A)') "Fire Dynamics Simulator, Version ",TRIM(VERSION_STRING),". Consult Users Guide for instructions."
-   CALL SHUTDOWN(MESSAGE)
-ENDIF
-
-! Stop FDS if the input file cannot be found in the current directory
-
-INQUIRE(FILE=INPUT_FILE,EXIST=EX)
-IF (.NOT.EX) THEN
-   WRITE(MESSAGE,'(A,A,A)') "ERROR: The file, ", TRIM(INPUT_FILE),", does not exist in the current directory"
-   CALL SHUTDOWN(MESSAGE)
-ENDIF
 
 ! Open the input file
 

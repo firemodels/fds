@@ -23,6 +23,7 @@ USE WALL_ROUTINES
 USE FIRE
 USE CONTROL_FUNCTIONS
 USE EVAC
+USE COMP_FUNCTIONS, ONLY: GET_INPUT_FILE
 
 IMPLICIT NONE
  
@@ -45,9 +46,31 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date (All Nodes)
  
-COMPILE_DATE   = 'July 8, 2007'
+COMPILE_DATE   = 'July 11, 2007'
 VERSION_STRING = '5_RC6+' 
 VERSION_NUMBER = 5.0
+
+! Get the name of the input file by reading the command line argument
+
+CALL GET_INPUT_FILE
+
+! If no input file is given, just print out the version number and stop
+
+IF (INPUT_FILE(1:1)==' ') THEN
+   WRITE(LU0,'(A,A)') "Fire Dynamics Simulator, Version ",TRIM(VERSION_STRING)
+   WRITE(LU0,'(/A)')  "Consult Users Guide for instructions."
+   WRITE(LU0,'(/A)')  "Hit Enter to continue..."
+   READ(5,*)
+   STOP
+ENDIF
+
+! Stop FDS if the input file cannot be found in the current directory
+
+INQUIRE(FILE=INPUT_FILE,EXIST=EX)
+IF (.NOT.EX) THEN
+   WRITE(LU0,'(A,A,A)') "ERROR: The file, ", TRIM(INPUT_FILE),", does not exist in the current directory"
+   STOP
+ENDIF
  
 ! Read input from CHID.data file (All Nodes)
 
