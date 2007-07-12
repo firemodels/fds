@@ -2070,11 +2070,11 @@ DGROUP_B = LOG(RMMAX)-DGROUP_A*NDG
 RDTMP = 0.02_EB
 NX = 0
 DO WHILE (RDTMP < 3._EB*RMMAX*1.0E6_EB) 
-IF (RDTMP < 1000.0_EB) AVAL = 0.02_EB
-IF (RDTMP < 1.00_EB) AVAL = 0.1_EB
-IF (RDTMP < 0.10_EB) AVAL = 0.02_EB
-NX = NX + 1
-RDTMP = RDTMP + MIN(300._EB,MAX(AVAL,0.02_EB*RDTMP**(1.5_EB)))
+   IF (RDTMP < 1000.0_EB) AVAL = 0.02_EB
+   IF (RDTMP < 1.00_EB) AVAL = 0.1_EB
+   IF (RDTMP < 0.10_EB) AVAL = 0.02_EB
+   NX = NX + 1
+   RDTMP = RDTMP + MIN(300._EB,MAX(AVAL,0.02_EB*RDTMP**(1.5_EB)))
 ENDDO
 NRDMIE = NX 
 
@@ -2084,11 +2084,11 @@ CALL ChkMemErr('MIEV','RDMIE',IZERO)
 RDTMP = 0.02_EB
 RDMIE(1) = RDTMP
 DO NX = 2, NRDMIE
-IF (RDTMP < 1000.0_EB) AVAL = 0.02_EB
-IF (RDTMP < 1.00_EB) AVAL = 0.1_EB
-IF (RDTMP < 0.10_EB) AVAL = 0.02_EB
-RDTMP = RDTMP + MIN(300._EB,MAX(AVAL,0.02_EB*RDTMP**(1.5_EB)))
-RDMIE(NX) = RDTMP
+   IF (RDTMP < 1000.0_EB) AVAL = 0.02_EB
+   IF (RDTMP < 1.00_EB) AVAL = 0.1_EB
+   IF (RDTMP < 0.10_EB) AVAL = 0.02_EB
+   RDTMP = RDTMP + MIN(300._EB,MAX(AVAL,0.02_EB*RDTMP**(1.5_EB)))
+   RDMIE(NX) = RDTMP
 ENDDO
 RDMIE = RDMIE*1.0E-6_EB
 
@@ -2122,7 +2122,7 @@ CALL MIE_SCATTERING
 
 LMBDWGHT(1) = 0.5_EB*(LMBDMIE(2)-LMBDMIE(1))
 DO I = 2, NLMBDMIE-1
-LMBDWGHT(I) = 0.5_EB*(LMBDMIE(I+1) - LMBDMIE(I-1))
+   LMBDWGHT(I) = 0.5_EB*(LMBDMIE(I+1) - LMBDMIE(I-1))
 ENDDO
 LMBDWGHT(NLMBDMIE) = 0.5_EB*(LMBDMIE(NLMBDMIE)-LMBDMIE(NLMBDMIE-1))
 
@@ -2130,74 +2130,74 @@ LMBDWGHT(NLMBDMIE) = 0.5_EB*(LMBDMIE(NLMBDMIE)-LMBDMIE(NLMBDMIE-1))
 !     Loop over all radiation bands
 
 BANDLOOP: DO IBND = 1,NSB
-!
-IF (NSB == 1) THEN
-NLAMBDALOW = 1
-NLAMBDAHIGH = NLMBDMIE
-ELSE
-NLAMBDALOW  = MINLOC(LMBDMIE,MASK=LMBDMIE>=WL_LOW(IBND)*1.E-6)
-NLAMBDAHIGH = MAXLOC(LMBDMIE,MASK=LMBDMIE<=WL_HIGH(IBND)*1.0E-6)
-ENDIF
+   !
+   IF (NSB == 1) THEN
+      NLAMBDALOW = 1
+      NLAMBDAHIGH = NLMBDMIE
+   ELSE
+      NLAMBDALOW  = MINLOC(LMBDMIE,MASK=LMBDMIE>=WL_LOW(IBND)*1.E-6)
+      NLAMBDAHIGH = MAXLOC(LMBDMIE,MASK=LMBDMIE<=WL_HIGH(IBND)*1.0E-6)
+   ENDIF
 
-!     Loop over all droplet size groups
+   !     Loop over all droplet size groups
 
 
-DRGROUPLOOP: DO ND = 1, NDG
+   DRGROUPLOOP: DO ND = 1, NDG
 
-PC%KWR(ND) = EXP(DGROUP_A*REAL(ND,EB) + DGROUP_B)
-CALL DROPLET_SIZE_DISTRIBUTION(2._EB*PC%KWR(ND),RDDIST,FDDIST,NRDINT, GAMMA,SIGMA)     
+      PC%KWR(ND) = EXP(DGROUP_A*REAL(ND,EB) + DGROUP_B)
+      CALL DROPLET_SIZE_DISTRIBUTION(2._EB*PC%KWR(ND),RDDIST,FDDIST,NRDINT, GAMMA,SIGMA)     
 
-!     Calculate integration weights for droplet radius
+      !     Calculate integration weights for droplet radius
 
-RDWGHT(0) = 0.5_EB*(FDDIST(1)-FDDIST(0))
-DO I = 1,NRDINT-1
-RDWGHT(I) = 0.5_EB*(FDDIST(I+1)-FDDIST(I-1))
-ENDDO
-RDWGHT(NRDINT) = 0.5_EB*(FDDIST(NRDINT)-FDDIST(NRDINT-1))
+      RDWGHT(0) = 0.5_EB*(FDDIST(1)-FDDIST(0))
+      DO I = 1,NRDINT-1
+         RDWGHT(I) = 0.5_EB*(FDDIST(I+1)-FDDIST(I-1))
+      ENDDO
+      RDWGHT(NRDINT) = 0.5_EB*(FDDIST(NRDINT)-FDDIST(NRDINT-1))
 
-!     Loop over wavelengths
+      !     Loop over wavelengths
 
-IBSUM = 0._EB
+      IBSUM = 0._EB
 
-DO J = NLAMBDALOW(1),NLAMBDAHIGH(1)
-IB = PLANCK(RADTMP, LMBDMIE(J)*1.0E6_EB)
-IBSUM = IBSUM + LMBDWGHT(J)*IB
+      DO J = NLAMBDALOW(1),NLAMBDAHIGH(1)
+         IB = PLANCK(RADTMP, LMBDMIE(J)*1.0E6_EB)
+         IBSUM = IBSUM + LMBDWGHT(J)*IB
 
-ASUM = 0._EB
-BSUM = 0._EB
+         ASUM = 0._EB
+         BSUM = 0._EB
 
-!     Loop over droplet size distribution
+         !     Loop over droplet size distribution
 
-DO I = 0,NRDINT
+         DO I = 0,NRDINT
 
-!     Integrate effective scattering cross section 
-!     = scattering cross section * (1-forward fraction)
+            !     Integrate effective scattering cross section 
+            !     = scattering cross section * (1-forward fraction)
 
-CALL INTERPOLATE1D(RDMIE,QSCA(:,J),RDDIST(I),AVAL)
-CALL INTERPOLATE1D(RDMIE,CHI_F(:,J),RDDIST(I),BVAL)
-BVAL = (1._EB-BVAL)
-AVAL = AVAL*BVAL*PI*RDDIST(I)**2
-ASUM = ASUM + RDWGHT(I)*AVAL
+            CALL INTERPOLATE1D(RDMIE,QSCA(:,J),RDDIST(I),AVAL)
+            CALL INTERPOLATE1D(RDMIE,CHI_F(:,J),RDDIST(I),BVAL)
+            BVAL = (1._EB-BVAL)
+            AVAL = AVAL*BVAL*PI*RDDIST(I)**2
+            ASUM = ASUM + RDWGHT(I)*AVAL
 
-!     Integrate absorption cross sections
+            !     Integrate absorption cross sections
 
-CALL INTERPOLATE1D(RDMIE,QABS(:,J),RDDIST(I),BVAL)
-BVAL = BVAL*PI*RDDIST(I)**2
-BSUM = BSUM + RDWGHT(I)*BVAL
-ENDDO
-PC%WQSCA(ND,IBND) = PC%WQSCA(ND,IBND) + ASUM*LMBDWGHT(J)*IB
-PC%WQABS(ND,IBND) = PC%WQABS(ND,IBND) + BSUM*LMBDWGHT(J)*IB
-ENDDO
+            CALL INTERPOLATE1D(RDMIE,QABS(:,J),RDDIST(I),BVAL)
+            BVAL = BVAL*PI*RDDIST(I)**2
+            BSUM = BSUM + RDWGHT(I)*BVAL
+         ENDDO
+         PC%WQSCA(ND,IBND) = PC%WQSCA(ND,IBND) + ASUM*LMBDWGHT(J)*IB
+         PC%WQABS(ND,IBND) = PC%WQABS(ND,IBND) + BSUM*LMBDWGHT(J)*IB
+      ENDDO
 
-!     Normalize with blackbody radiation
+      !     Normalize with blackbody radiation
 
-PC%WQSCA(ND,IBND)  = PC%WQSCA(ND,IBND)/IBSUM
-PC%WQABS(ND,IBND)  = PC%WQABS(ND,IBND)/IBSUM
+      PC%WQSCA(ND,IBND)  = PC%WQSCA(ND,IBND)/IBSUM
+      PC%WQABS(ND,IBND)  = PC%WQABS(ND,IBND)/IBSUM
 
-!     Transform cross sections back to efficiency factors
+      !     Transform cross sections back to efficiency factors
 
-PC%WQSCA(ND,IBND)  = PC%WQSCA(ND,IBND)/(PI*PC%KWR(ND)**2)
-PC%WQABS(ND,IBND)  = PC%WQABS(ND,IBND)/(PI*PC%KWR(ND)**2)
+      PC%WQSCA(ND,IBND)  = PC%WQSCA(ND,IBND)/(PI*PC%KWR(ND)**2)
+      PC%WQABS(ND,IBND)  = PC%WQABS(ND,IBND)/(PI*PC%KWR(ND)**2)
 
 ENDDO DRGROUPLOOP
 ENDDO BANDLOOP
