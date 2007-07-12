@@ -58,7 +58,10 @@ CALL GET_INPUT_FILE
 
 IF (INPUT_FILE(1:1)==' ') THEN
    WRITE(LU0,'(A,A)') "Fire Dynamics Simulator, Version ",TRIM(VERSION_STRING)
-   WRITE(LU0,'(/A)')  "Consult Users Guide for instructions."
+   WRITE(LU0,'(/A)')  "Usage (from a command shell):"
+   WRITE(LU0,'(/A)')  "fds5 casename.fds"
+   WRITE(LU0,'(/A)')  "  casename.fds - name of case to be modeled"
+   WRITE(LU0,'(/A)')  "Consult Users Guide for further instructions."
    WRITE(LU0,'(/A)')  "Hit Enter to continue..."
    READ(5,*)
    STOP
