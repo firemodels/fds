@@ -669,7 +669,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDIF
          OUTRAD_W(IW) = BBF*RPI*QRADOUT(IW)
       ENDDO
- 
 ! Compute boundary condition term incoming radiation integral
  
       DO IW = 1,NWC
@@ -946,7 +945,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          IBC = IJKW(5,IW)
          QRADIN(IW)  = QRADIN(IW) + E_WALL(IW)*(INRAD_W(IW)+SURFACE(IBC)%EXTERNAL_FLUX/NUMBER_SPECTRAL_BANDS)
       ENDDO 
-
    ENDIF INTENSITY_UPDATE
  
    ! Save source term for the energy equation (QR = -DIV Q)

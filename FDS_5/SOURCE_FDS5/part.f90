@@ -1192,6 +1192,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                ABOT = AW(IW)/WGT
                ATOP = ABOT
             ENDIF 
+            TMP_WALL   = TMP_F(IW)
             IF (TMP_WALL-TMP_BOIL>DTLF) THEN  ! Leidenfrost droplet
                HADT_WALL = ABOT*DT*HLF
             ELSE
@@ -1200,7 +1201,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             IF (SURFACE(IJKW(5,IW))%THERMAL_BC_INDEX == THERMALLY_THICK) THEN
                 HADT_WALL = MIN(HADT_WALL,RCP_W(IW)*AW(IW)/WGT*0.3_EB)
             ENDIF
-            TMP_WALL   = TMP_F(IW)
             DR%RE  = RHO_G*PC%HORIZONTAL_VELOCITY*2._EB*RD/MU_AIR
             QRADD  = QRADD + ABOT*DT*(QRADIN(IW)-QRADOUT(IW))
             QWALLR = ABOT*DT*(QRADIN(IW)-QRADOUT(IW))
