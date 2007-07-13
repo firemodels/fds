@@ -6242,7 +6242,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
   char buffer[255],buffer2[255];
 
   int tours_flag;
-  float *rgb_ini_copy;
   int mxframes_ini=0;
   int mxpoints_ini=0;
   int nn;
@@ -6814,6 +6813,8 @@ int readini2(char *inifile, int loaddatafile, int localfile){
     */
 
     if(match(buffer,"COLORBAR",8) == 1 && match(buffer,"COLORBARFLIP",12)!=1){
+      float *rgb_ini_copy;
+      
       CheckMemory;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&nrgb_ini);
@@ -6825,9 +6826,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
         sscanf(buffer,"%f %f %f ",rgb_ini_copy,rgb_ini_copy+1,rgb_ini_copy+2);
         rgb_ini_copy+=3;
       }
+      initrgb();
       continue;
     }
     if(match(buffer,"COLOR2BAR",9) == 1){
+      float *rgb_ini_copy;
+
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&nrgb2_ini);
       if(nrgb2_ini<8){
@@ -7646,15 +7650,13 @@ int readini2(char *inifile, int loaddatafile, int localfile){
         int n;
         int ncolorbarini;
 
-        freecolorbars();
         fgets(buffer,255,stream);
-
 		    ncolorbarini=0;
         sscanf(buffer,"%i",&ncolorbarini);
-        ncolorbars=ndefaultcolorbars+ncolorbarini;
 
         initdefaultcolorbars();
 
+        ncolorbars=ndefaultcolorbars+ncolorbarini;
         if(ncolorbarini>0)ResizeMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
 
         for(n=ndefaultcolorbars;n<ncolorbars;n++){
@@ -7666,6 +7668,9 @@ int readini2(char *inifile, int loaddatafile, int localfile){
           strcpy(cbi->label,buffer);
 
           fgets(buffer,255,stream);
+          sscanf(buffer,"%f %f",&cbi->valmin,&cbi->valmax);
+
+          fgets(buffer,255,stream);
           sscanf(buffer,"%i",&cbi->nlegs);
 
           cbi->legindex=0;
@@ -7675,7 +7680,8 @@ int readini2(char *inifile, int loaddatafile, int localfile){
             fgets(buffer,255,stream);
             r1=-1.0; g1=-1.0; b1=-1.0; 
             r2=-1.0; g2=-1.0; b2=-1.0;
-            sscanf(buffer,"%i %f %f %f %f %f %f",cbi->colorbar_index+i,&r1,&g1,&b1,&r2,&g2,&b2);
+            sscanf(buffer,"%i %i %f %f %f %f %f %f",cbi->colorbar_index+i,cbi->splitflag+i,
+              &r1,&g1,&b1,&r2,&g2,&b2);
             nn = 6*i;
             cbi->leg_rgb[nn  ]=r1;
             cbi->leg_rgb[nn+1]=g1;
@@ -7683,20 +7689,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
             cbi->leg_rgb[nn+3]=r2;
             cbi->leg_rgb[nn+4]=g2;
             cbi->leg_rgb[nn+5]=b2;
-          }
-          for(i=1;i<cbi->nlegs-1;i++){
-            float *rgbr, *rgbl;
-
-            rgbr = cbi->leg_rgb+6*i;
-            rgbl = rgbr - 3;
-            if(rgbl[0]<0.0||(fabs(rgbr[0]-rgbl[0])<0.001&&
-               fabs(rgbr[1]-rgbl[1])<0.001&&
-               fabs(rgbr[2]-rgbl[2])<0.001)){
-                 cbi->splitflag[i]=0;
-            }
-            else{
-                 cbi->splitflag[i]=1;
-            }
           }
           cbi->splitflag[0]=0;
           cbi->splitflag[cbi->nlegs-1]=0;
@@ -8036,9 +8028,8 @@ typedef struct {
   if(mxframes_ini!=0&&mxframes_comm==0)mxframes=mxframes_ini;
   if(mxpoints_ini!=0&&mxpoints_comm==0)mxpoints=mxpoints_ini;
   if(ncolorbars<=ndefaultcolorbars){
-    initcolorbars();
+    initdefaultcolorbars();
   }
-  updatecolors(-1);
   return 0;
 
 }
@@ -8679,7 +8670,7 @@ void writeini(int flag){
       ...
       fraction r1 g1 b1 r2 g2 b2
 	  */
-  if(ncolorbars>ndefaultcolorbars>0){
+  if(ncolorbars>ndefaultcolorbars){
 	  colorbardata *cbi;
 	  float *rrgb;
 	  int n;
@@ -8689,14 +8680,17 @@ void writeini(int flag){
     for(n=ndefaultcolorbars;n<ncolorbars;n++){
       cbi = colorbarinfo + n;
 	    fprintf(fileout,"%s\n",cbi->label);
+      fprintf(fileout," %f %f\n",cbi->valmin,cbi->valmax);
 	    fprintf(fileout," %i\n",cbi->nlegs);
       for(i=0;i<cbi->nlegs-1;i++){
 		    rrgb = cbi->leg_rgb+6*i;
-		    if(fabs(rrgb[3]-rrgb[6])<0.001&&fabs(rrgb[4]-rrgb[7])<0.001&&fabs(rrgb[5]-rrgb[8])<0.001){
-          sprintf(buffer,"%i %f %f %f ",cbi->colorbar_index[i],rrgb[0],rrgb[1],rrgb[2]);
+        
+        fprintf(fileout," %i %i ",cbi->colorbar_index[i],cbi->splitflag[i]);
+		    if(cbi->splitflag[i]==0){
+          sprintf(buffer,"%f %f %f ",rrgb[0],rrgb[1],rrgb[2]);
         }
 		    else{
-          sprintf(buffer,"%i %f %f %f %f %f %f ",cbi->colorbar_index[i],rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
+          sprintf(buffer,"%f %f %f %f %f %f ",cbi->colorbar_index[i],cbi->splitflag[i],rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
         }
         trimmzeros(buffer);
         fprintf(fileout,"%s\n",buffer);
@@ -8704,7 +8698,8 @@ void writeini(int flag){
 	    if(cbi->nlegs>0){
         i=cbi->nlegs-1;
 		    rrgb = cbi->leg_rgb+6*i;
-        sprintf(buffer,"%f %f %f %f %f %f %f ",0.0,rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
+        fprintf(fileout," %i %i ",cbi->colorbar_index[i],cbi->splitflag[i]);
+        sprintf(buffer," %f %f %f %f %f %f ",rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
         trimmzeros(buffer);
         fprintf(fileout,"%s\n",buffer);
       }

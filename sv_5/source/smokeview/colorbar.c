@@ -72,7 +72,6 @@ void setColorbarClipPlanes(int flag){
 
 void addcolorbar(int icolorbar){
   colorbardata *cb_to, *cb_from;
-  int i;
 
   ncolorbars++;
   CheckMemory;
@@ -83,20 +82,11 @@ void addcolorbar(int icolorbar){
       // new colorbar
 
   cb_to=colorbarinfo+ncolorbars-1;
+
+  memcpy(cb_to,cb_from,sizeof(colorbardata));
   strcpy(cb_to->label,"Copy of ");
   strcat(cb_to->label,cb_from->label);
   cb_to->label_ptr=cb_to->label;
-  cb_to->nlegs=cb_from->nlegs;
-  cb_to->legindex=cb_from->legindex;
-
-  for(i=0;i<6*cb_to->nlegs;i++){
-    cb_to->leg_rgb[i]=cb_from->leg_rgb[i];
-  }
-  for(i=0;i<cb_to->nlegs;i++){
-    cb_to->legvals[i]=cb_from->legvals[i];
-    cb_to->splitflag[i]=cb_from->splitflag[i];
-    cb_to->colorbar_index[i]=cb_from->colorbar_index[i];
-  }
 
   remapcolorbar(cb_to);
 
@@ -256,26 +246,6 @@ void drawcolorbarpath(void){
   }
 }
 
-/* ------------------ freecolorbars ------------------------ */
-
-void freecolorbars(void){
-  int i;
-
-  CheckMemory;
-  if(ncolorbars>0&&colorbarinfo!=NULL){
-    {
-      colorbardata *cbi;
-
-      for(i=0;i<ncolorbars;i++){
-        cbi=colorbarinfo+i;
-        freecolorbar(cbi);
-      }
-    }
-    FREEMEMORY(colorbarinfo);
-    ncolorbars=0;
-  }
-}
-
 
 /* ------------------ adjust_colorbar_splits ------------------------ */
 
@@ -284,7 +254,7 @@ void adjust_colorbar_splits(colorbardata *cbi){
   int nsplits;
 
   nsplits=0;
-  for(i=1;i<cbi->nlegs;i++){
+  for(i=0;i<cbi->nlegs;i++){
     if(i==0||i==cbi->nlegs-1||cbi->splitflag[i]==1){
       cbi->splits[nsplits++]=i;
     }
@@ -346,25 +316,6 @@ void remapcolorbar(colorbardata *cbi){
   CheckMemory;
 }
 
-/* ------------------ freecolorbar ------------------------ */
-
-void freecolorbar(colorbardata *cbi){
-  if(cbi==NULL)return;
-  cbi->nlegs=0;
-}
-
-/*
-typedef struct {
-  char label[1024];        // menu label
-  char *label_ptr;
-  int legindex, nlegs; // selected leg, number of legs
-  int splitflag[256], splits[256], nsplits;
-  unsigned char *c_index;  // colorbar index
-  float *leg_rgb, *rgb;   // colorbar nodes, colorbar
-  float valmin, valmax, *vals;
-} colorbardata;
-*/
-
 /* ------------------ interpcolor ------------------------ */
 
 void interpcolor(float *col1, float *col2,float *rrgb,int nlegs_seg, int splitflag){
@@ -402,185 +353,163 @@ void interpcolor(float *col1, float *col2,float *rrgb,int nlegs_seg, int splitfl
 void initdefaultcolorbars(void){
   int i;
   float dval;
+  int nlegs;
+  colorbardata *cbi;
+  int ii;
 
-  if(colorbarinfo==NULL){
-    if(ncolorbars==0)ncolorbars=ndefaultcolorbars;
-    NewMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
+  FREEMEMORY(colorbarinfo);
+  ncolorbars=ndefaultcolorbars;
+  NewMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
 
-    {
-      colorbardata *cbi;
-      int ii;
-
-      for(i=0;i<ncolorbars;i++){
-        cbi = colorbarinfo + i;
-        cbi->nlegs=0;
-        cbi->legindex=0;
-      }
+  for(i=0;i<ncolorbars;i++){
+    cbi = colorbarinfo + i;
+    cbi->nlegs=0;
+    cbi->legindex=0;
+  }
 
       // original colorbar
 
-      cbi=colorbarinfo;
-      strcpy(cbi->label,"Original");
-      cbi->label_ptr=cbi->label;
-      cbi->nlegs=nrgb;
-      dval = (cb_valmax-cb_valmin)/(float)(cbi->nlegs-1);
-      for(i=0;i<cbi->nlegs;i++){
-        ii = 6*i;
-        cbi->leg_rgb[ii]  =rgb[i][0];
-        cbi->leg_rgb[ii+1]=rgb[i][1];
-        cbi->leg_rgb[ii+2]=rgb[i][2];
-        if(i!=cbi->nlegs-1){
-          cbi->leg_rgb[ii+3]=rgb[i+1][0];
-          cbi->leg_rgb[ii+4]=rgb[i+1][1];
-          cbi->leg_rgb[ii+5]=rgb[i+1][2];
-          cbi->legvals[i]=cb_valmin + i*dval;
-          cbi->colorbar_index[i]=255*(float)i/(cbi->nlegs-1);
-        }
-        cbi->colorbar_index[cbi->nlegs-1]=255;
-        cbi->legvals[cbi->nlegs-1]=cb_valmax;
-        cbi->splitflag[i]=0;
-      }
+  cbi=colorbarinfo;
+  strcpy(cbi->label,"Original");
+  cbi->label_ptr=cbi->label;
+  cbi->nlegs=nrgb;
+  cbi->valmin=0.0;
+  cbi->valmax=100.0;
+  dval = (cb_valmax-cb_valmin)/(float)(cbi->nlegs-1);
+  for(i=0;i<cbi->nlegs;i++){
+    ii = 6*i;
+    cbi->leg_rgb[ii]  =rgb[i][0];
+    cbi->leg_rgb[ii+1]=rgb[i][1];
+    cbi->leg_rgb[ii+2]=rgb[i][2];
+    if(i!=cbi->nlegs-1){
+      cbi->leg_rgb[ii+3]=rgb[i+1][0];
+      cbi->leg_rgb[ii+4]=rgb[i+1][1];
+      cbi->leg_rgb[ii+5]=rgb[i+1][2];
+      cbi->legvals[i]=cb_valmin + i*dval;
+      cbi->colorbar_index[i]=255*(float)i/(cbi->nlegs-1);
+    }
+  }
+  cbi->colorbar_index[cbi->nlegs-1]=255;
+  cbi->legvals[cbi->nlegs-1]=cb_valmax;
+  cbi->splitflag[cbi->nlegs-1]=0;
 
       // rainbow colorbar
 
-      cbi=colorbarinfo+1;
-      strcpy(cbi->label,"Rainbow");
-      cbi->label_ptr=cbi->label;
-      cbi->nlegs=5;
+  cbi=colorbarinfo+1;
+  strcpy(cbi->label,"Rainbow");
+  cbi->label_ptr=cbi->label;
+  cbi->nlegs=5;
+  cbi->valmin=0.0;
+  cbi->valmax=100.0;
 
-      cbi->leg_rgb[0]=0.0;
-      cbi->leg_rgb[1]=0.0;
-      cbi->leg_rgb[2]=1.0;
+  cbi->leg_rgb[0]=0.0;
+  cbi->leg_rgb[1]=0.0;
+  cbi->leg_rgb[2]=1.0;
 
-      cbi->leg_rgb[3]=0.0;
-      cbi->leg_rgb[4]=1.0;
-      cbi->leg_rgb[5]=1.0;
+  cbi->leg_rgb[3]=0.0;
+  cbi->leg_rgb[4]=1.0;
+  cbi->leg_rgb[5]=1.0;
 
-      cbi->leg_rgb[6]=0.0;
-      cbi->leg_rgb[7]=1.0;
-      cbi->leg_rgb[8]=1.0;
+  cbi->leg_rgb[6]=0.0;
+  cbi->leg_rgb[7]=1.0;
+  cbi->leg_rgb[8]=1.0;
 
-      cbi->leg_rgb[9]=0.0;
-      cbi->leg_rgb[10]=1.0;
-      cbi->leg_rgb[11]=0.0;
+  cbi->leg_rgb[9]=0.0;
+  cbi->leg_rgb[10]=1.0;
+  cbi->leg_rgb[11]=0.0;
 
-      cbi->leg_rgb[12]=0.0;
-      cbi->leg_rgb[13]=1.0;
-      cbi->leg_rgb[14]=0.0;
+  cbi->leg_rgb[12]=0.0;
+  cbi->leg_rgb[13]=1.0;
+  cbi->leg_rgb[14]=0.0;
 
-      cbi->leg_rgb[15]=1.0;
-      cbi->leg_rgb[16]=1.0;
-      cbi->leg_rgb[17]=0.0;
+  cbi->leg_rgb[15]=1.0;
+  cbi->leg_rgb[16]=1.0;
+  cbi->leg_rgb[17]=0.0;
 
-      cbi->leg_rgb[18]=1.0;
-      cbi->leg_rgb[19]=1.0;
-      cbi->leg_rgb[20]=0.0;
+  cbi->leg_rgb[18]=1.0;
+  cbi->leg_rgb[19]=1.0;
+  cbi->leg_rgb[20]=0.0;
 
-      cbi->leg_rgb[21]=1.0;
-      cbi->leg_rgb[22]=0.0;
-      cbi->leg_rgb[23]=0.0;
+  cbi->leg_rgb[21]=1.0;
+  cbi->leg_rgb[22]=0.0;
+  cbi->leg_rgb[23]=0.0;
 
-      cbi->leg_rgb[24]=1.0;
-      cbi->leg_rgb[25]=0.0;
-      cbi->leg_rgb[26]=0.0;
+  cbi->leg_rgb[24]=1.0;
+  cbi->leg_rgb[25]=0.0;
+  cbi->leg_rgb[26]=0.0;
 
-      cbi->leg_rgb[27]=1.0;
-      cbi->leg_rgb[28]=0.0;
-      cbi->leg_rgb[29]=0.0;
+  cbi->leg_rgb[27]=1.0;
+  cbi->leg_rgb[28]=0.0;
+  cbi->leg_rgb[29]=0.0;
 
+  cbi->splitflag[0]=0;
+  cbi->splitflag[1]=0;
+  cbi->splitflag[2]=0;
+  cbi->splitflag[3]=0;
+  cbi->splitflag[4]=0;
 
-      cbi->splitflag[0]=0;
-      cbi->splitflag[1]=0;
-      cbi->splitflag[2]=0;
-      cbi->splitflag[3]=0;
-
-      {
-        int nlegs;
-
-        nlegs = cbi->nlegs-1;
-        cbi->colorbar_index[0]=0;
-        cbi->colorbar_index[1]=64;
-        cbi->colorbar_index[2]=128;
-        cbi->colorbar_index[3]=192;
-        cbi->colorbar_index[4]=255;
-        dval = (cb_valmax-cb_valmin)/(float)nlegs;
-        cbi->legvals[0]=cb_valmin;
-        cbi->legvals[1]=cb_valmin+dval;
-        cbi->legvals[2]=cb_valmin+2*dval;
-        cbi->legvals[3]=cb_valmin+3*dval;
-        cbi->legvals[4]=cb_valmax;
-
-      }
+  nlegs = cbi->nlegs-1;
+  cbi->colorbar_index[0]=0;
+  cbi->colorbar_index[1]=64;
+  cbi->colorbar_index[2]=128;
+  cbi->colorbar_index[3]=192;
+  cbi->colorbar_index[4]=255;
+  dval = (cb_valmax-cb_valmin)/(float)nlegs;
+  cbi->legvals[0]=cb_valmin;
+  cbi->legvals[1]=cb_valmin+dval;
+  cbi->legvals[2]=cb_valmin+2*dval;
+  cbi->legvals[3]=cb_valmin+3*dval;
+  cbi->legvals[4]=cb_valmax;
 
       // b&w colorbar
 
-      cbi=colorbarinfo+2;
-      strcpy(cbi->label,"Black and White");
-      cbi->label_ptr=cbi->label;
+  cbi=colorbarinfo+2;
+  strcpy(cbi->label,"Black and White");
+  cbi->label_ptr=cbi->label;
+  cbi->valmin=0.0;
+  cbi->valmax=100.0;
 
-      cbi->nlegs=3;
+  cbi->nlegs=3;
 
-      cbi->leg_rgb[0]=1.0;
-      cbi->leg_rgb[1]=1.0;
-      cbi->leg_rgb[2]=1.0;
+  cbi->leg_rgb[0]=1.0;
+  cbi->leg_rgb[1]=1.0;
+  cbi->leg_rgb[2]=1.0;
 
-      cbi->leg_rgb[3]=0.5;
-      cbi->leg_rgb[4]=0.5;
-      cbi->leg_rgb[5]=0.5;
+  cbi->leg_rgb[3]=0.5;
+  cbi->leg_rgb[4]=0.5;
+  cbi->leg_rgb[5]=0.5;
 
-      cbi->leg_rgb[6]=0.5;
-      cbi->leg_rgb[7]=0.5;
-      cbi->leg_rgb[8]=0.5;
+  cbi->leg_rgb[6]=0.5;
+  cbi->leg_rgb[7]=0.5;
+  cbi->leg_rgb[8]=0.5;
 
-      cbi->leg_rgb[9] =0.0;
-      cbi->leg_rgb[10]=0.0;
-      cbi->leg_rgb[11]=0.0;
+  cbi->leg_rgb[9] =0.0;
+  cbi->leg_rgb[10]=0.0;
+  cbi->leg_rgb[11]=0.0;
 
-      cbi->leg_rgb[12] =0.0;
-      cbi->leg_rgb[13]=0.0;
-      cbi->leg_rgb[14]=0.0;
+  cbi->leg_rgb[12] =0.0;
+  cbi->leg_rgb[13]=0.0;
+  cbi->leg_rgb[14]=0.0;
 
-      cbi->leg_rgb[15] =0.0;
-      cbi->leg_rgb[16]=0.0;
-      cbi->leg_rgb[17]=0.0;
+  cbi->leg_rgb[15] =0.0;
+  cbi->leg_rgb[16]=0.0;
+  cbi->leg_rgb[17]=0.0;
 
-      cbi->splitflag[0]=0;
-      cbi->splitflag[1]=0;
+  cbi->splitflag[0]=0;
+  cbi->splitflag[1]=0;
+  cbi->splitflag[2]=0;
 
-      {
-        int nlegs;
+  nlegs = cbi->nlegs-1;
+  cbi->colorbar_index[0]=0;
+  cbi->colorbar_index[1]=128;
+  cbi->colorbar_index[2]=255;
+  cbi->legvals[0]=cb_valmin;
+  cbi->legvals[1]=cb_valmax;
 
-        nlegs = cbi->nlegs-1;
-        cbi->colorbar_index[0]=0;
-        cbi->colorbar_index[1]=128;
-        cbi->colorbar_index[2]=255;
-        cbi->legvals[0]=cb_valmin;
-        cbi->legvals[1]=cb_valmax;
-      }
-
-    }
-  }
   remapcolorbar(colorbarinfo);
   remapcolorbar(colorbarinfo+1);
   remapcolorbar(colorbarinfo+2);
 
 }
 
-/* ------------------ initcolorbar ------------------------ */
 
-void initcolorbars(void){
-
-  FREEMEMORY(colorbarinfo);
-
-  initdefaultcolorbars();
-
-  // add code here to init colorbars read in from .ini file
-
-}
-
-/* ------------------ ResizeColorbar ------------------------ */
-
-void ResizeColorbar(colorbardata *cbi, int n){
-  cbi->nlegs=n;
-  CheckMemory;
-}

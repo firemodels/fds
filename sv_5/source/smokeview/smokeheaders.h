@@ -87,17 +87,14 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir);
 #endif
 
 EXTERNCPP void setColorbarClipPlanes(int flag);
-EXTERNCPP void ResizeColorbar(colorbardata *cbi, int n);
 EXTERNCPP void addcolorbar(int icolorbar);
 EXTERNCPP void ColorBarMenu(int val);
-EXTERNCPP void freecolorbar(colorbardata *cbi);
 EXTERNCPP void initdefaultcolorbars(void);
 EXTERNCPP void drawcolorbarpath(void);
 EXTERNCPP void remapcolorbar(colorbardata *cbi);
 EXTERNCPP void adjust_colorbar_splits(colorbardata *cbi);
 EXTERNCPP void interpcolor(float *col1, float *col2,float *rgb,int npoints_seg, int jumpflag);
 EXTERNCPP void freecolorbars(void);
-EXTERNCPP void initcolorbars(void);
 EXTERNCPP void update_glui_stereo(void);
 EXTERNCPP void escape_blanks(char *dirfrom, int maxlen);
 EXTERNCPP void InitOpenGL(void);
@@ -558,6 +555,7 @@ EXTERNCPP float *getcolorptr(const float *color);
 EXTERNCPP void colorconvert(int flag);
 EXTERNCPP void initcadcolors(void);
 EXTERNCPP void updatecolors(int colorindex);
+EXTERNCPP void initrgb(void);
 EXTERNCPP void updatechopcolors(void);
 EXTERNCPP void freelabels(flowlabels *label);
 EXTERNCPP int readini(int loaddatafile);
