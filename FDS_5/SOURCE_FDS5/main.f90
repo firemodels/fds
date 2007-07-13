@@ -23,14 +23,13 @@ USE WALL_ROUTINES
 USE FIRE
 USE CONTROL_FUNCTIONS
 USE EVAC
-USE COMP_FUNCTIONS, ONLY: GET_INPUT_FILE
 
 IMPLICIT NONE
  
 ! Miscellaneous declarations
 CHARACTER(255), PARAMETER :: mainid='$Id$'
 LOGICAL  :: EX,DIAGNOSTICS
-INTEGER  :: LO10,NM,IZERO
+INTEGER  :: MYID=0,LO10,NM,IZERO
 REAL(EB) :: T_MAX,T_MIN
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: T,DT_SYNC,DTNEXT_SYNC
 INTEGER, ALLOCATABLE, DIMENSION(:) ::  MESH_STOP_STATUS
@@ -49,35 +48,11 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
 COMPILE_DATE   = 'July 11, 2007'
 VERSION_STRING = '5_RC6+' 
 VERSION_NUMBER = 5.0
-
-! Get the name of the input file by reading the command line argument
-
-CALL GET_INPUT_FILE
-
-! If no input file is given, just print out the version number and stop
-
-IF (INPUT_FILE(1:1)==' ') THEN
-   WRITE(LU0,'(A,A)') "Fire Dynamics Simulator, Version ",TRIM(VERSION_STRING)
-   WRITE(LU0,'(/A)')  "Usage (from a command shell):"
-   WRITE(LU0,'(/A)')  "fds5 casename.fds"
-   WRITE(LU0,'(/A)')  "  casename.fds - name of case to be modeled"
-   WRITE(LU0,'(/A)')  "Consult Users Guide for further instructions."
-   WRITE(LU0,'(/A)')  "Hit Enter to continue..."
-   READ(5,*)
-   STOP
-ENDIF
-
-! Stop FDS if the input file cannot be found in the current directory
-
-INQUIRE(FILE=INPUT_FILE,EXIST=EX)
-IF (.NOT.EX) THEN
-   WRITE(LU0,'(A,A,A)') "ERROR: The file, ", TRIM(INPUT_FILE),", does not exist in the current directory"
-   STOP
-ENDIF
+SERIAL         = .TRUE.
  
 ! Read input from CHID.data file (All Nodes)
 
-CALL READ_DATA
+CALL READ_DATA(MYID)
 
 CALL EVAC_READ_DATA
  
