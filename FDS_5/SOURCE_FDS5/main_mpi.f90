@@ -23,7 +23,6 @@ USE WALL_ROUTINES
 USE FIRE
 USE RADCONS
 USE CONTROL_FUNCTIONS
-USE COMP_FUNCTIONS, ONLY: GET_INPUT_FILE
 !EVAC:USE EVAC
 
 IMPLICIT NONE
@@ -74,34 +73,11 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
 COMPILE_DATE   = 'July 11, 2007'
 VERSION_STRING = '5_RC6+_MPI'
 VERSION_NUMBER = 5.0
-
-! Get the name of the input file by reading the command line argument
-
-CALL GET_INPUT_FILE
-
-! If no input file is given, just print out the version number and stop
-
-IF (INPUT_FILE(1:1)==' ') THEN
-   IF (MYID==0) THEN
-      WRITE(LU0,'(/A,A)') "Fire Dynamics Simulator, Version ",TRIM(VERSION_STRING)
-      WRITE(LU0,'(/A)')   "Consult Users Guide for instructions."
-      WRITE(LU0,'(/A)')   "Hit Enter to continue..."
-      READ(5,*)
-   ENDIF
-   STOP
-ENDIF
-
-! Stop FDS if the input file cannot be found in the current directory
-
-INQUIRE(FILE=INPUT_FILE,EXIST=EX)
-IF (.NOT.EX) THEN
-   WRITE(LU0,'(A,A,A)') "ERROR: The file, ", TRIM(INPUT_FILE),", does not exist in the current directory"
-   STOP
-ENDIF
+PARALLEL       = .TRUE.
  
 ! Read input from CHID.data file (All Nodes)
  
-CALL READ_DATA
+CALL READ_DATA(MYID)
  
 IF (NMESHES/=NUMPROCS) CALL SHUTDOWN('ERROR: Number of meshes not equal to '// 'number of threads')
  
