@@ -1257,17 +1257,10 @@ void update_texturebar(void){
 
 /* ------------------ updatecolors ------------------------ */
 
-void updatecolors(int changecolorindex){
-
+void initrgb(void){
+  float *rgb_ptr;
   int n,nn;
-  int i,j;
-  float *rgb_ptr, *rgb2ptr;
-  int cci;
-  mesh *meshi;
-  int vent_offset, outline_offset;
-  facedata *facej;
 
-  initcadcolors();
   if(setbw==0){
     colorconvert(TO_COLOR);
     if(nrgb_ini !=0){
@@ -1301,6 +1294,19 @@ void updatecolors(int changecolorindex){
       rgb[n][3] = transparentlevel;
     }
   }
+}
+void updatecolors(int changecolorindex){
+
+  int n,nn;
+  int i,j;
+  float *rgb_ptr, *rgb2ptr;
+  int cci;
+  mesh *meshi;
+  int vent_offset, outline_offset;
+  facedata *facej;
+
+  initcadcolors();
+  initrgb();
   nrgb_full = MAXRGB;
   for(n=0;n<nrgb_full;n++){
     rgb_trans[4*n+0]=0.0;
@@ -1308,7 +1314,6 @@ void updatecolors(int changecolorindex){
     rgb_trans[4*n+2]=0.0;
     rgb_trans[4*n+3]=(float)n/(float)(nrgb_full-1);
   }
-  //initcolorbars();
   for(n=0;n<nrgb_full;n++){
     rgb_full[n][0]=colorbarinfo[colorbartype].colorbar[3*n];
     rgb_full[n][1]=colorbarinfo[colorbartype].colorbar[3*n+1];
