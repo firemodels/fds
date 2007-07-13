@@ -8690,7 +8690,7 @@ void writeini(int flag){
           sprintf(buffer,"%f %f %f ",rrgb[0],rrgb[1],rrgb[2]);
         }
 		    else{
-          sprintf(buffer,"%f %f %f %f %f %f ",cbi->colorbar_index[i],cbi->splitflag[i],rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
+          sprintf(buffer,"%f %f %f %f %f %f ",rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
         }
         trimmzeros(buffer);
         fprintf(fileout,"%s\n",buffer);
