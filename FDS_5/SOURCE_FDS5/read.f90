@@ -1,4 +1,3 @@
-!     Last change:  JEF  25 May 2007   11:06 am
 MODULE READ_INPUT
  
 USE PRECISION_PARAMETERS
@@ -8,6 +7,7 @@ USE TRAN
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: SECOND,CHECKREAD, SHUTDOWN
 USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
+USE COMP_FUNCTIONS, ONLY: GET_INPUT_FILE
  
 IMPLICIT NONE
 PRIVATE
@@ -35,11 +35,37 @@ TYPE(REACTION_TYPE), POINTER :: RN
 CONTAINS
  
  
-SUBROUTINE READ_DATA
+SUBROUTINE READ_DATA(MYID)
+
+INTEGER, INTENT(IN) :: MYID
 
 ! Create an array of output QUANTITY names that are included in the various NAMELIST groups
  
 CALL FIXED_OUTPUT_QUANTITIES
+
+! Get the name of the input file by reading the command line argument
+
+CALL GET_INPUT_FILE
+
+! If no input file is given, just print out the version number and stop
+
+IF (INPUT_FILE(1:1)==' ') THEN
+   IF (MYID==0) THEN
+      WRITE(LU0,'(/A,A)') "Fire Dynamics Simulator, Version ",TRIM(VERSION_STRING)
+      WRITE(LU0,'(/A)')  "Consult Users Guide Chapter, Running FDS, for further instructions."
+      WRITE(LU0,'(/A)')  "Hit Enter to Escape..."
+   ENDIF
+   READ(5,*)
+   STOP
+ENDIF
+
+! Stop FDS if the input file cannot be found in the current directory
+
+INQUIRE(FILE=INPUT_FILE,EXIST=EX)
+IF (.NOT.EX) THEN
+   IF (MYID==0) WRITE(LU0,'(A,A,A)') "ERROR: The file, ", TRIM(INPUT_FILE),", does not exist in the current directory"
+   STOP
+ENDIF
 
 ! Open the input file
 
