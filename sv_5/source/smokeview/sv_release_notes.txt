@@ -1,3 +1,5 @@
+2007-07-13
+1.  Re-arrange motion/view dialog box in response to issue issue 60
 2007-07-02
 1.  Preliminary colorbar editor
 2.  Make gpu shader code more robust

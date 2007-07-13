@@ -60,8 +60,9 @@ GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
 GLUI_Panel *panel_rotate=NULL;
 GLUI_Panel *panel_speed=NULL;
 GLUI_Panel *panel_height=NULL;
-GLUI_Panel *panel_motion=NULL,*panel_translate2=NULL,*panel_translate3=NULL;
-GLUI_Panel *panel_projection=NULL;
+GLUI_Rollout *panel_motion=NULL;
+GLUI_Panel *panel_translate2=NULL,*panel_translate3=NULL;
+GLUI_Rollout *panel_projection=NULL;
 GLUI_Panel *panel_anglebuttons=NULL;
 GLUI_RadioGroup *projection_radio=NULL,*eyeview_radio=NULL;
 GLUI_RadioGroup *eyelevel_radio=NULL;
@@ -71,7 +72,7 @@ GLUI_Checkbox *blockpath_checkbox=NULL,*cursor_checkbox=NULL;
 GLUI_Button *eyerotate90_z=NULL,*eyelevel=NULL, *floorlevel=NULL, *reset_saved_view=NULL;
 GLUI_Button *restore_view=NULL,*save_view=NULL,*add_view=NULL,*delete_view=NULL;
 GLUI_Button *startup_button=NULL,*cycle_views_button=NULL;
-GLUI_Panel *reset_panel=NULL;
+GLUI_Rollout *reset_panel=NULL;
 GLUI_EditText *edit_view_label=NULL;
 GLUI_Listbox *view_lists=NULL;
 GLUI_Listbox *LIST_windowsize=NULL;
@@ -171,7 +172,7 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion = GLUI_Master.create_glui("Motion/View",0,0,0);
   if(showmotion==0)glui_motion->hide();
 
-  panel_motion = glui_motion->add_panel("Motion");
+  panel_motion = glui_motion->add_rollout("Motion");
 
   panel_translate2 = glui_motion->add_panel_to_panel(panel_motion,"",GLUI_PANEL_NONE);
   d_eye_xyz[0]=0.0;
@@ -224,9 +225,9 @@ extern "C" void glui_motion_setup(int main_window){
 //  glui_motion->add_column_to_panel(panel_anglebuttons,false);
   button_snap=glui_motion->add_button_to_panel(panel_anglebuttons,"Snap",SNAPVIEW,TRANSLATE_CB);
 
-  glui_motion->add_column(false);
+  //glui_motion->add_column(false);
 
-  panel_projection = glui_motion->add_panel("View");
+  panel_projection = glui_motion->add_rollout("View",false);
   projection_radio=glui_motion->add_radiogroup_to_panel(panel_projection,&projection_type,PROJECTION,TRANSLATE_CB);
   glui_motion->add_radiobutton_to_group(projection_radio,"Perspective");
   glui_motion->add_radiobutton_to_group(projection_radio,"Size Preserving");
@@ -256,7 +257,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_window_height->set_int_limits(100,max_screenHeight);
   window_update=glui_motion->add_button_to_panel(panel_projection,"Apply",WINDOW_RESIZE,TRANSLATE_CB);
 
-  reset_panel = glui_motion->add_panel("Save/Restore Views");
+  reset_panel = glui_motion->add_rollout("Save/Restore Views",false);
 
   restore_view=glui_motion->add_button_to_panel(reset_panel,"Restore",RESTORE_LIST_VIEW,BUTTON_Reset_CB);
   save_view=glui_motion->add_button_to_panel(reset_panel,"Replace",SAVE_LIST_VIEW,BUTTON_Reset_CB);
