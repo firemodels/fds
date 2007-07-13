@@ -1255,7 +1255,7 @@ void update_texturebar(void){
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
 }
 
-/* ------------------ updatecolors ------------------------ */
+/* ------------------ initrgb ------------------------ */
 
 void initrgb(void){
   float *rgb_ptr;
@@ -1295,6 +1295,9 @@ void initrgb(void){
     }
   }
 }
+
+/* ------------------ updatecolors ------------------------ */
+
 void updatecolors(int changecolorindex){
 
   int n,nn;
