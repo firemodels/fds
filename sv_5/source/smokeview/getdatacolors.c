@@ -1299,7 +1299,7 @@ void updatecolors(int changecolorindex){
 
   int n,nn;
   int i,j;
-  float *rgb_ptr, *rgb2ptr;
+  float *rgb2ptr;
   int cci;
   mesh *meshi;
   int vent_offset, outline_offset;
@@ -1314,12 +1314,22 @@ void updatecolors(int changecolorindex){
     rgb_trans[4*n+2]=0.0;
     rgb_trans[4*n+3]=(float)n/(float)(nrgb_full-1);
   }
-  for(n=0;n<nrgb_full;n++){
-    rgb_full[n][0]=colorbarinfo[colorbartype].colorbar[3*n];
-    rgb_full[n][1]=colorbarinfo[colorbartype].colorbar[3*n+1];
-    rgb_full[n][2]=colorbarinfo[colorbartype].colorbar[3*n+2];
-    rgb_full[n][3]=transparentlevel;
-  } 
+  if(colorbarinfo!=NULL){
+    for(n=0;n<nrgb_full;n++){
+      rgb_full[n][0]=colorbarinfo[colorbartype].colorbar[3*n];
+      rgb_full[n][1]=colorbarinfo[colorbartype].colorbar[3*n+1];
+      rgb_full[n][2]=colorbarinfo[colorbartype].colorbar[3*n+2];
+      rgb_full[n][3]=transparentlevel;
+    } 
+  }
+  else{
+    for(n=0;n<nrgb_full;n++){
+      rgb_full[n][0]=(float)n/(float)(nrgb_full);
+      rgb_full[n][1]=(float)n/(float)(nrgb_full);
+      rgb_full[n][2]=(float)n/(float)(nrgb_full);
+      rgb_full[n][3]=transparentlevel;
+    } 
+  }
   if(colorbarcycle!=0){
     {
       int icolor,nnn;
