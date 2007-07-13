@@ -20,6 +20,7 @@ GLUI_Panel *panel_cb1=NULL;
 GLUI_Panel *panel_cb2=NULL;
 GLUI_Panel *panel_cb2L=NULL;
 GLUI_Panel *panel_cb2R=NULL;
+GLUI_Panel *panel_cb2R2=NULL;
 GLUI_Panel *panel_cb3=NULL;
 GLUI_Panel *panel_cb4=NULL;
 GLUI_Panel *panel_cb4L=NULL;
@@ -42,6 +43,7 @@ GLUI_Spinner *SPINNER_right_green=NULL;
 GLUI_Spinner *SPINNER_right_blue=NULL;
 GLUI_Button *BUTTON_next=NULL,*BUTTON_prev=NULL;
 GLUI_Button *BUTTON_new=NULL;
+GLUI_Button *BUTTON_delete=NULL;
 GLUI_Button *BUTTON_addpoint=NULL;
 GLUI_Button *BUTTON_deletepoint=NULL;
 GLUI_Button *BUTTON_savesettings=NULL;
@@ -75,6 +77,7 @@ int cb_hidesv;
 #define COLORBAR_UPDATE 11
 #define COLORBAR_COLORINDEX 12
 #define COLORBAR_MINMAX 13
+#define COLORBAR_DELETE 14
 
 extern "C" void colorbar_global2local(void);
 
@@ -122,33 +125,32 @@ extern "C" void glui_colorbar_setup(int main_window){
   glui_colorbar = GLUI_Master.create_glui("Colorbar Editor",0,0,0);
   if(showcolorbar==0)glui_colorbar->hide();
 
-  panel_cb1 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
+  panel_cb2R2 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
+  BUTTON_new=glui_colorbar->add_button_to_panel(panel_cb2R2,"New Colorbar",COLORBAR_NEW,COLORBAR_CB);
+  glui_colorbar->add_column_to_panel(panel_cb2R2,false);
+  BUTTON_delete=glui_colorbar->add_button_to_panel(panel_cb2R2,"Delete Colorbar",COLORBAR_DELETE,COLORBAR_CB);
+  glui_colorbar->add_column_to_panel(panel_cb2R2,false);
+  cb_hidesv=1;
+  CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(panel_cb2R2,"Hide Scene",&cb_hidesv);
+
+  panel_cb1 = glui_colorbar->add_panel("Colorbar");
   if(ncolorbars>0){
     selectedcolorbar_index=-1;
-    LISTBOX_colorbar=glui_colorbar->add_listbox_to_panel(panel_cb1,"Colorbar:",&selectedcolorbar_index,COLORBAR_LIST,COLORBAR_CB);
+    LISTBOX_colorbar=glui_colorbar->add_listbox_to_panel(panel_cb1,"",&selectedcolorbar_index,COLORBAR_LIST,COLORBAR_CB);
 
     for(i=0;i<ncolorbars;i++){
       cbi = colorbarinfo + i;
+      cbi->label_ptr=cbi->label;
       LISTBOX_colorbar->add_item(i,cbi->label_ptr);
     }
     LISTBOX_colorbar->set_int_val(colorbartype);
   }
+  EDITTEXT_colorbar_label=glui_colorbar->add_edittext_to_panel(panel_cb1,"Label",GLUI_EDITTEXT_TEXT,colorbar_label,COLORBAR_LABEL,COLORBAR_CB);  
+  BUTTON_update=glui_colorbar->add_button_to_panel(panel_cb1,"Update label",COLORBAR_UPDATE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(panel_cb1,false);
-  cb_hidesv=1;
-  CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(panel_cb1,"hide smokeview scene",&cb_hidesv);
 
-  panel_cb2R = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
-  EDITTEXT_colorbar_label=glui_colorbar->add_edittext_to_panel(panel_cb2R,"Label",GLUI_EDITTEXT_TEXT,colorbar_label,COLORBAR_LABEL,COLORBAR_CB);  
-  //EDITTEXT_colorbar_label->set_w(100);
-  glui_colorbar->add_column_to_panel(panel_cb2R,false);
-  BUTTON_update=glui_colorbar->add_button_to_panel(panel_cb2R,"Update label",COLORBAR_UPDATE,COLORBAR_CB);
-  glui_colorbar->add_column_to_panel(panel_cb2R,false);
-  BUTTON_new=glui_colorbar->add_button_to_panel(panel_cb2R,"New Colorbar",COLORBAR_NEW,COLORBAR_CB);
-
-  panel_cb2L = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
-  SPINNER_valmin=  glui_colorbar->add_spinner_to_panel(panel_cb2L,"Min value",  GLUI_SPINNER_FLOAT,&cb_valmin,  COLORBAR_MINMAX,COLORBAR_CB);
-  glui_colorbar->add_column_to_panel(panel_cb2L,false);
-  SPINNER_valmax=  glui_colorbar->add_spinner_to_panel(panel_cb2L,"Max value",  GLUI_SPINNER_FLOAT,&cb_valmax,  COLORBAR_MINMAX,COLORBAR_CB);
+  SPINNER_valmin=  glui_colorbar->add_spinner_to_panel(panel_cb1,"Min value",  GLUI_SPINNER_FLOAT,&cb_valmin,  COLORBAR_MINMAX,COLORBAR_CB);
+  SPINNER_valmax=  glui_colorbar->add_spinner_to_panel(panel_cb1,"Max value",  GLUI_SPINNER_FLOAT,&cb_valmax,  COLORBAR_MINMAX,COLORBAR_CB);
 
   panel_point = glui_colorbar->add_panel("Colorbar Node");
   
@@ -205,7 +207,6 @@ void COLORBAR_CB(int var){
   colorbardata *cbi;
   float *rgb_nodes;
   int i;
-  int nlegs;
   float *rgb1, *rgb1a;
   float *rgb2, *rgb2a;
   float *rgb0, *rgb0a;
@@ -235,6 +236,8 @@ void COLORBAR_CB(int var){
       }
       cbi->legvals[cbi->nlegs-1]=cb_valmax;
       cbi->colorbar_index[cbi->nlegs-1]=255;
+      cbi->valmin=cb_valmin;
+      cbi->valmax=cb_valmax;
 
       SPINNER_val->set_float_limits(cb_valmin,cb_valmax);
       colorbar_global2local();
@@ -278,12 +281,11 @@ void COLORBAR_CB(int var){
     cbi = colorbarinfo + colorbartype;
     if(colorbarpoint<=0||colorbarpoint>cbi->nlegs-1)return;
 
-    nlegs = cbi->nlegs+1;
-    ResizeColorbar(cbi,nlegs);
+    cbi->nlegs++;
     for(i=cbi->nlegs-1;i>=colorbarpoint+1;i--){
       cbi->legvals[i]=cbi->legvals[i-1];
       cbi->colorbar_index[i]=cbi->colorbar_index[i-1];
-      cbi->splitflag[i]=0;
+      cbi->splitflag[i]=cbi->splitflag[i-1];
       rgb2 = cbi->leg_rgb+6*i;
       rgb1 = rgb2-6;
       rgb2a = rgb2+3;
@@ -371,7 +373,6 @@ void COLORBAR_CB(int var){
         rgb_nodes[i-6]=(float)cb_rgb[i-3]/255.0;
       }
     }
-   // initcolorbars();
     remapcolorbar(cbi);
     updatecolors(-1);
     break;
@@ -413,6 +414,29 @@ void COLORBAR_CB(int var){
     LISTBOX_colorbar->set_int_val(colorbartype);
     COLORBAR_CB(COLORBAR_LIST);
     break;
+  case COLORBAR_DELETE:
+    if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
+      colorbardata *cb_from, *cb_to, *cbi;
+
+      for(i=colorbartype;i<ncolorbars-1;i++){
+        cb_to = colorbarinfo + i;
+        cb_from = cb_to + 1;
+        memcpy(cb_to,cb_from,sizeof(colorbardata));
+        cb_to->label_ptr=cb_to->label;
+      }
+      for(i=colorbartype;i<ncolorbars;i++){
+        LISTBOX_colorbar->delete_item(i);
+      }
+      ncolorbars--;
+      for(i=colorbartype;i<ncolorbars;i++){
+        cbi = colorbarinfo + i;
+        LISTBOX_colorbar->add_item(i,cbi->label_ptr);
+      }
+      if(colorbartype==ncolorbars)colorbartype--;
+      LISTBOX_colorbar->set_int_val(0);
+      COLORBAR_CB(COLORBAR_LIST);
+    }
+    break;
   }
 }
 
@@ -433,6 +457,8 @@ extern "C" void colorbar_global2local(void){
     
     SPINNER_val->set_float_val(cbi->legvals[colorbarpoint]);
     SPINNER_colorindex->set_int_val(cbi->colorbar_index[colorbarpoint]);
+    SPINNER_valmin->set_float_val(  cbi->valmin);
+    SPINNER_valmax->set_float_val(  cbi->valmax);
 
     ii = 6*colorbarpoint;
     rgb = cbi->leg_rgb+ii;
@@ -447,6 +473,7 @@ extern "C" void colorbar_global2local(void){
     SPINNER_left_blue->set_int_val(  (int)(255*rgb[2]));
     icolorbar=LISTBOX_colorbar->get_int_val();
     if(icolorbar>=ndefaultcolorbars){
+      BUTTON_delete->enable();
       SPINNER_valmin->enable();
       SPINNER_valmax->enable();
       EDITTEXT_colorbar_label->enable();
@@ -477,6 +504,7 @@ extern "C" void colorbar_global2local(void){
       }
     }
     else{
+      BUTTON_delete->disable();
       SPINNER_valmin->disable();
       SPINNER_valmax->disable();
       EDITTEXT_colorbar_label->disable();
