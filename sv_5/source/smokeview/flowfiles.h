@@ -697,13 +697,11 @@ typedef struct {
 #endif
   int seq_id, autoload;
   char *file;
-#ifdef pp_SLICE
   char *size_file;
   char *rle_file, *comp_file, *reg_file;
   int compression_type;
   int ncompressed;
   float qval256[256];
-#endif
   char slicedir[50];
   int loaded, display, benchvis;
   int num_memblocks;
@@ -718,24 +716,16 @@ typedef struct {
   float valmin_data, valmax_data;
   flowlabels label;
   float *qslicedata, *slicetimes, *qslice;
-#ifdef pp_SLICE
   unsigned char *qslicedata_compressed;
   unsigned char *slicecomplevel;
   compinfo *compindex;
   unsigned char *slicelevel;
-#else
-  int *slicelevel;
-#endif
   char menulabel[128];
   char menulabel2[128];
   int nsteps,islice;
   float *slicedata;
-#ifdef pp_SLICE
   unsigned char *slicepoint;
   int volslice;
-#else
-  int *slicepoint;
-#endif
   int is1, is2, js1, js2, ks1, ks2;
   int nsliceii;
   int *slicetimeslist;
@@ -799,9 +789,7 @@ typedef struct {
 typedef struct {
   int seq_id, autoload;
   slice *u,*v,*w,*val;
-#ifdef pp_SLICE
   int volslice;
-#endif
   int iu, iv, iw, ival;
   int loaded,display;
   float valmin, valmax;

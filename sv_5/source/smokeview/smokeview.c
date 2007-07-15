@@ -1536,7 +1536,6 @@ void ShowScene(int mode, int view_mode){
       sd = sliceinfo + i;
       if(sd->display==0||sd->type!=islicetype)continue;
       if(sd->slicetimes[0]>times[itime])continue;
-#ifdef pp_SLICE
       if(sd->compression_type==1||sd->compression_type==2){
         uncompress_slicedataframe(sd,sd->islice);
         sd->slicepoint=sd->slicecomplevel;
@@ -1544,23 +1543,12 @@ void ShowScene(int mode, int view_mode){
       else{
         sd->slicepoint = sd->slicelevel + sd->islice*sd->nsliceii;
       }
-#else
-      sd->slicepoint = sd->slicelevel + sd->islice*sd->nsliceii;
-#endif
       sd->slicedata=NULL;
-#ifdef pp_SLICE
       if(sd->compression_type==0){
         ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
       }
-#else
-      ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
-#endif
 
       if(sd->qslicedata!=NULL)sd->slicedata = sd->qslicedata + sd->islice*sd->nsliceii;
-#ifndef pp_SLICE
-      drawslice(sd);
-#endif
-#ifdef pp_SLICE
 #ifdef pp_PLOTTEXTURE
       if(usetexturebar==1){
         if(sd->volslice==1){
@@ -1580,7 +1568,6 @@ void ShowScene(int mode, int view_mode){
         }
 #ifdef pp_PLOTTEXTURE
       }
-#endif
 #endif
     }
   } 
@@ -1604,7 +1591,6 @@ void ShowScene(int mode, int view_mode){
       if(u==NULL&&v==NULL&&w==NULL)continue;
       if(sliceinfo[vd->ival].slicetimes[0]>times[itime])continue;
 #define VAL val
-#ifdef pp_SLICE
       if(VAL->compression_type==1){
         uncompress_slicedataframe(VAL,VAL->islice);
         VAL->slicepoint=VAL->slicecomplevel;
@@ -1612,12 +1598,8 @@ void ShowScene(int mode, int view_mode){
       else{
         if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
       }
-#else
-      if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
-#endif
 #undef VAL
 #define VAL u
-#ifdef pp_SLICE
       if(VAL!=NULL){
         if(VAL->compression_type==1){
           uncompress_slicedataframe(VAL,VAL->islice);
@@ -1627,12 +1609,8 @@ void ShowScene(int mode, int view_mode){
           if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
         }
       }
-#else
-      if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
-#endif
 #undef VAL
 #define VAL v
-#ifdef pp_SLICE
       if(VAL!=NULL){
         if(VAL->compression_type==1){
           uncompress_slicedataframe(VAL,VAL->islice);
@@ -1642,12 +1620,8 @@ void ShowScene(int mode, int view_mode){
           if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
         }
       }
-#else
-      if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
-#endif
 #undef VAL
 #define VAL w
-#ifdef pp_SLICE
       if(VAL!=NULL){
         if(VAL->compression_type==1){
           uncompress_slicedataframe(VAL,VAL->islice);
@@ -1657,10 +1631,6 @@ void ShowScene(int mode, int view_mode){
           if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
         }
       }
-#else
-      if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
-#endif
-#ifdef pp_SLICE
       if(u!=NULL&&u->compression_type==0){
         u->qslice = u->qslicedata + u->islice*u->nsliceii;
       }
@@ -1670,27 +1640,12 @@ void ShowScene(int mode, int view_mode){
       if(w!=NULL&&w->compression_type==0){
         w->qslice = w->qslicedata + w->islice*w->nsliceii;
       }
-#else
-      if(u!=NULL){
-        u->qslice = u->qslicedata + u->islice*u->nsliceii;
-      }
-      if(v!=NULL){
-        v->qslice = v->qslicedata + v->islice*v->nsliceii;
-      }
-      if(w!=NULL){
-        w->qslice = w->qslicedata + w->islice*w->nsliceii;
-      }
-#endif
-#ifdef pp_SLICE
       if(vd->volslice==1){
         drawvvolslice(vd);
       }
       else{
         drawvslice(vd);
       }
-#else
-      drawvslice(vd);
-#endif
     }
   }
   sniffErrors("after drawvslice");
@@ -3553,9 +3508,6 @@ void usage(char **argv){
 #endif
 #ifdef pp_RENDER
     printf(", pp_RENDER");
-#endif
-#ifdef pp_SLICE
-    printf(", pp_SLICE");
 #endif
 #ifdef pp_SMOKETEST
     printf(", pp_SMOKETEST");

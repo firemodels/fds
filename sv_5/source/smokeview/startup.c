@@ -986,9 +986,7 @@ void initvars1(void){
   render_double=0;
   render_double_state=0;
 #endif
-#ifdef pp_SLICE
   usetexturebar=1;
-#endif
   percentile_level=0.01;
 
   trainerview=1;
@@ -1091,9 +1089,7 @@ void initvars1(void){
   xbar0ORIG=0.0, ybar0ORIG=0.0, zbar0ORIG=0.0;
   ReadPlot3dFile=0, ReadIsoFile=0;
 
-#ifdef pp_SLICE
   ReadVolSlice=0;
-#endif
   Read3DSmoke3DFile=0;
   ReadZoneFile=0, ReadPartFile=0, ReadEvacFile=0;;
 

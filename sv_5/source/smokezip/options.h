@@ -10,7 +10,6 @@
 #define pp_cvf
 #endif
 
-#define pp_SLICE
 #define pp_ISO
 #define EGZ
 #define USE_ZLIB

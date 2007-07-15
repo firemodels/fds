@@ -80,11 +80,8 @@ EXTERNCPP void freeall_objects(void);
 
 EXTERNCPP int plot3dlistcompare( const void *arg1, const void *arg2 );
 EXTERNCPP int plot3dcompare( const void *arg1, const void *arg2 );
-#ifdef pp_SLICE
 void update_plot_xyz(mesh *current_mesh);
 void updateplotslice_mesh(mesh *mesh_in, int slicedir);
-//void ShadeMenu(int value);
-#endif
 
 EXTERNCPP void setColorbarClipPlanes(int flag);
 EXTERNCPP void addcolorbar(int icolorbar);
@@ -153,9 +150,7 @@ EXTERNCPP void ResizeWindow(int width, int height);
 #ifdef pp_PART5
 EXTERNCPP void update_glui_streakvalue(float rvalue);
 #endif
-#ifdef pp_SLICE
 EXTERNCPP void uncompress_slicedataframe(slice *sd,int iframe);
-#endif
 EXTERNCPP void glui_alert_setup(int main_window);
 EXTERNCPP void show_load_alert(void);
 EXTERNCPP void hide_load_alert(void);
@@ -484,10 +479,8 @@ EXTERNCPP void drawslice(const slice *sd);
 EXTERNCPP void drawslice_texture(const slice *sd);
 EXTERNCPP void drawvolslice_texture(const slice *sd);
 #endif
-#ifdef pp_SLICE
 EXTERNCPP void drawvolslice(const slice *sd);
 EXTERNCPP void drawvvolslice(const vslice *vd);
-#endif
 EXTERNCPP void drawvslice(const vslice *vd);
 EXTERNCPP void drawTimeBar(void);
 EXTERNCPP void drawColorBars(void);
@@ -653,7 +646,6 @@ EXTERNCPP void getZoneColors(const float *t, int nt, unsigned char *it,
 EXTERNCPP void getPlot3DColors(int iplot, int settmin, float *ttmin, int settmax, float *ttmax, 
               int ndatalevel, int nlevel,
               char **labels,char **scale, float *tlevels, float *tlevels256);
-#ifdef pp_SLICE
 EXTERNCPP float getsliceval(slice *sd, unsigned char ival);
 EXTERNCPP void updateallslicelabels(int slicetype, int *errorcode);
 EXTERNCPP void setslicelabels(float smin, float smax, 
@@ -661,9 +653,6 @@ EXTERNCPP void setslicelabels(float smin, float smax,
 EXTERNCPP void getSliceLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
 EXTERNCPP void getSliceColors(const float *t, int nt, unsigned char *it,
-#else
-EXTERNCPP void getSliceColors(const float *t, int nt, int *it,
-#endif
               float tmin, float tmax, 
               int ndatalevel, int nlevel,
               char labels[12][11],char **scale, float *tlevels2);
