@@ -610,12 +610,10 @@ void keyboard(unsigned char key, int x, int y){
     if(showstereo==2)stereo_leftright=1;
     update_glui_stereo();
   }
-#ifdef pp_PLOTTEXTURE
   if(strncmp((const char *)&key2,"T",1)==0){
     usetexturebar=1-usetexturebar;
     printf("usetexturebar=%i\n",usetexturebar);
   }
-#endif
 #ifdef pp_GPU
   if(strncmp((const char *)&key2,"G",1)==0){
     if(gpuactive==1){

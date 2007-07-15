@@ -1412,7 +1412,6 @@ void ShowScene(int mode, int view_mode){
         if(filenum!=-1){
           patchi = patchinfo + filenum;
           if(patchi->loaded==0||patchi->display==0||patchi->type!=ipatchtype)continue;
-#ifdef pp_PLOTTEXTURE
           if(usetexturebar==1){
             if(vis_ignited==1&&do_ignited==1){
               drawpatch_texture_char(meshi);
@@ -1424,9 +1423,6 @@ void ShowScene(int mode, int view_mode){
           else{
             drawpatch(meshi);
           }
-#else
-          drawpatch(meshi);
-#endif
           if(vis_ignited==1&&vis_onlyignited==1&&do_ignited==1)drawonlyignited(meshi);
         }
       }
@@ -1549,7 +1545,6 @@ void ShowScene(int mode, int view_mode){
       }
 
       if(sd->qslicedata!=NULL)sd->slicedata = sd->qslicedata + sd->islice*sd->nsliceii;
-#ifdef pp_PLOTTEXTURE
       if(usetexturebar==1){
         if(sd->volslice==1){
           drawvolslice_texture(sd);
@@ -1559,16 +1554,13 @@ void ShowScene(int mode, int view_mode){
         }
       }
       else{
-#endif
         if(sd->volslice==1){
           drawvolslice(sd);
         }
         else{
           drawslice(sd);
         }
-#ifdef pp_PLOTTEXTURE
       }
-#endif
     }
   } 
   sniffErrors("after drawslice");
@@ -1667,16 +1659,12 @@ void ShowScene(int mode, int view_mode){
       meshi=selected_case->meshinfo+i;
       if(meshi->plot3dfilenum==-1)continue;
       if(plot3dinfo[meshi->plot3dfilenum].display==0)continue;
-#ifdef pp_PLOTTEXTURE
       if(usetexturebar==1){
         drawplot3d_texture(meshi);
       }
       else{
         drawplot3d(meshi);
       }
-#else
-      drawplot3d(meshi);
-#endif
     }
   }
   sniffErrors("after drawplot3d");

@@ -1373,11 +1373,7 @@ void updatecolors(int changecolorindex){
     if(valindex>255)valindex=255;
     cci = changecolorindex;
     if(setbw==1){
-#ifdef pp_PLOTTEXTURE
       for(n=-5;n<6;n++){
-#else
-      for(n=-5;n<5;n++){
-#endif
         if(cci+n>255)break;
         if(cci+n<0)continue;
         rgb_full[cci+n][0]=1.;
@@ -1387,11 +1383,7 @@ void updatecolors(int changecolorindex){
       }
     }
     else{
-#ifdef pp_PLOTTEXTURE
       for(n=-5;n<6;n++){
-#else
-      for(n=-5;n<6;n++){
-#endif
         if(cci+n>255)break;
         if(cci+n<0)continue;
         rgb_full[cci+n][0]=0.;
@@ -1464,9 +1456,7 @@ void updatecolors(int changecolorindex){
     updatechopcolors();
   }
   initcadcolors();
-#ifdef pp_PLOTTEXTURE
   update_texturebar();
-#endif
 }        
 
 /* ------------------ updatechopcolors ------------------------ */
@@ -1593,9 +1583,7 @@ void updatechopcolors(){
     } 
   }
 
-#ifdef pp_PLOTTEXTURE
   update_texturebar();
-#endif
 }
 
 /* ------------------ getrgb ------------------------ */
