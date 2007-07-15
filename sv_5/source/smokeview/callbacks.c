@@ -1199,9 +1199,7 @@ void specialkeyboard(int key, int x, int y){
       break;
     case 1:
       if(visGrid==1||plotstate==STATIC_PLOTS
-#ifdef pp_SLICE
   ||ReadVolSlice==1
-#endif
         ){
         keymode=P3_MODE;
       }

@@ -18,9 +18,7 @@ int endianswitch;
 
 int int_switch(int val);
 float float_switch(float val);
-#ifdef pp_SLICE
 void endian_switch(void *val, int nval);
-#endif
 
 int getslicezlibdata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
@@ -29,29 +27,15 @@ int getslicerledata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
                             float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
 int average_slice_data(float *data, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
-#ifdef pp_SLICE
 int getsliceheader(char *comp_file, char *size_file, int compression_type, 
                    int framestep, int set_tmin, int set_tmax, float tmin, float tmax,
                    int *nx, int *ny, int *nz, int *nsteps, int *ntotal, float *valmin, float *valmax);
-#else
-int getsliceheader(char *comp_file, char *size_file,
-                   int framestep, int set_tmin, int set_tmax, float tmin, float tmax,
-                   int *nx, int *ny, int *nz, int *nsteps, int *ntotal, float *valmin, float *valmax);
-#endif
-#ifdef pp_SLICE
 int getsliceheader0(char *comp_file, char *size_file, int compression_type, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *slice3d);
-#else
-int getsliceheader0(char *comp_file, char *size_file, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *slice3d);
-#endif
 int getslicecompresseddata(char *file,int compression_type,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
                             float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
 
-#ifdef pp_SLICE
 int makeslicesizefile(char *file, char *sizefile, int compression_type);
-#else
-int makeslicesizefile(char *file, char *sizefile);
-#endif
 
 #define ijk(i,j,k) ((i)+(j)*nx+(k)*nxy)
 
@@ -246,11 +230,6 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
 /* ------------------ readslice ------------------------ */
 
-#ifdef pp_nofortran
-void readslice(char *file, int ifile, int flag, int *errorcode){
-}
-#endif
-#ifndef pp_nofortran
 void readslice(char *file, int ifile, int flag, int *errorcode){
   size_t slicefilelen;
   float *xplt_local, *yplt_local, *zplt_local;
@@ -301,11 +280,9 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     FREEMEMORY(sd->slicetimes  );
     FREEMEMORY(sd->slicelevel  );
     FREEMEMORY(sd->iblank);
-#ifdef pp_SLICE
     FREEMEMORY(sd->compindex);
     FREEMEMORY(sd->qslicedata_compressed);
     FREEMEMORY(sd->slicecomplevel);
-#endif
     slicefilenum=ifile;
 
     if(flag==UNLOAD){
@@ -316,7 +293,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       sd->vloaded=0;
       sd->display=0;
       plotstate = getplotstate(DYNAMIC_PLOTS);
-#ifdef pp_SLICE
       ReadVolSlice=0;
       for(ii=0;ii<nslice_loaded;ii++){
         slice *sdi;
@@ -325,7 +301,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         sdi = sliceinfo+i;
         if(sdi->volslice==1)ReadVolSlice=1;
       }
-#endif
       for(ii=0;ii<nslice_loaded;ii++){
         slice *sdi;
 
@@ -370,7 +345,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
           vd->display=0;
         }
       }
-#ifdef pp_SLICE
       if(sd->compression_type==0){
         updateslicebounds();
         list_slice_index=islicetype;
@@ -380,12 +354,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       else{
         updateallslicelabels(islicetype,errorcode);
       }
-#else
-      updateslicebounds();
-      list_slice_index=islicetype;
-      setslicebounds(islicetype);
-      updateallslicecolors(islicetype,errorcode);
-#endif
 
       updateglui();
       updatetimes();
@@ -404,7 +372,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     if(settmax_s==0&&settmin_s==0){
       statfile=stat(file,&statbuffer);
     }
-#ifdef pp_SLICE
     if(sd->compression_type==0){
       FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->nsteps, &sliceframestep, &endian,&error,
         &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
@@ -434,20 +401,13 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       sd->volslice=1;
       ReadVolSlice=1;
     }
-#else
-    FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->nsteps, &sliceframestep, &endian,&error,
-      &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
-      slicefilelen);
-#endif
     if(error!=0){
       readslice("",ifile,UNLOAD,&error);
       *errorcode=1;
       return;
     }
     if(settmax_s==0&&settmin_s==0&&statfile==0
-#ifdef pp_SLICE
       &&sd->compression_type==0
-#endif
       ){
       sd->nsteps = (statbuffer.st_size-headersize)/framesize;
       if(sliceframestep>1)sd->nsteps/=sliceframestep;
@@ -459,7 +419,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     }
     printf("Loading slice data: %s\n",file);
     MEMSTATUS(1,&availmemory,NULL,NULL);
-#ifdef pp_SLICE
     if(sd->compression_type==1||sd->compression_type==2){
       char *datafile;
 
@@ -500,21 +459,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
                    slicefilelen,LABELLEN,LABELLEN,LABELLEN);
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
     }
-#else
-    if(NewMemory((void **)&sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps)==0||
-       NewMemory((void **)&sd->slicetimes,sizeof(float)*sd->nsteps)==0){
-      *errorcode=1;
-      readslice("",ifile,UNLOAD,&error);
-      return;
-    }
-    ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
-    FORTgetslicedata(file,slicelonglabels,sliceshortlabels,sliceunits,
-                 &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,&sd->idir,
-                 &qmin,&qmax,sd->qslicedata,sd->slicetimes,&sd->nsteps,&sliceframestep, &endian,
-                 &settmin_s,&settmax_s,&tmin_s,&tmax_s,
-                 slicefilelen,LABELLEN,LABELLEN,LABELLEN);
-    ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
-#endif
 
     if(slice_average_flag==1){
       int data_per_timestep;
@@ -526,15 +470,9 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       ndata = data_per_timestep*ntimes;
       show_slice_average=1;
 
-#ifdef pp_SLICE
       if(sd->compression_type==1||sd->compression_type==2||average_slice_data(sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes,slice_average_interval)==1){
         show_slice_average=0; // averaging failed
       }
-#else
-      if(average_slice_data(sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes,slice_average_interval)==1){
-        show_slice_average=0; // averaging failed
-      }
-#endif
     }
 
   /*  initialize slice data */
@@ -598,8 +536,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     sd->nsliceii = sd->nslicei*sd->nslicej*sd->nslicek;
     sd->nslicetotal=sd->nsteps*sd->nsliceii;
-#ifdef pp_SLICE
-//    if(NewMemory((void **)&sd->iblank,sd->nslicex*sd->nslicey*sizeof(int))==0){
     if(NewMemory((void **)&sd->iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(int))==0){
       readslice("",ifile,UNLOAD,&error);
       *errorcode=1;
@@ -619,15 +555,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         return;
       }
     }
-#else
-    if(NewMemory((void **)&sd->slicelevel,sd->nslicetotal*sizeof(int))==0||
-       NewMemory((void **)&sd->iblank,sd->nslicex*sd->nslicey*sizeof(int))==0
-      ){
-      readslice("",ifile,UNLOAD,&error);
-      *errorcode=1;
-      return;
-    }
-#endif
 
     nx = meshi->ibar + 1;
     ny = meshi->jbar + 1;
@@ -671,17 +598,12 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       ASSERT(FFALSE);
       break;
     }
-#ifdef pp_SLICE
     if(sd->compression_type==0){
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
     }
-#else
-    ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
-#endif
   }  /* RESETBOUNDS */
 
  /* convert slice points into integers pointing to an rgb color table */
-#ifdef pp_SLICE
   if(sd->compression_type==0){
     getslicedatabounds(sd,&qmin,&qmax);
   }
@@ -689,27 +611,18 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     qmin=sd->valmin;
     qmax=sd->valmax;
   }
-#else
-  getslicedatabounds(sd,&qmin,&qmax);
-#endif
   sd->globalmin=qmin;
   sd->globalmax=qmax;
-#ifdef pp_SLICE
   if(sd->compression_type==0){
     adjustslicebounds(sd,&qmin,&qmax);
   }
-#else
-  adjustslicebounds(sd,&qmin,&qmax);
-#endif
   sd->valmin=qmin;
   sd->valmax=qmax;
   sd->valmin_data=qmin;
   sd->valmax_data=qmax;
-#ifdef pp_SLICE
   for(i=0;i<256;i++){
     sd->qval256[i] = (qmin*(255-i) + qmax*i)/255;
   }
-#endif
 
   sd->loaded=1;
   if(sd->vloaded==0)sd->display=1;
@@ -717,7 +630,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatetimes();
 
-#ifdef pp_SLICE
   if(sd->compression_type==0){
     updateslicebounds();
     updateallslicecolors(islicetype,errorcode);
@@ -729,25 +641,14 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     slicebounds[islicetype].valmax_data=qmax;
     updateallslicelabels(islicetype,errorcode);
   }
-#endif
-#ifndef pp_SLICE
-  updateslicebounds();
-  updateallslicecolors(islicetype,errorcode);
-  list_slice_index=islicetype;
-  setslicebounds(islicetype);
-#endif
 
 
   updateslicelist(list_slice_index);
   updateslicelistindex(slicefilenum);
   updateglui();
-#ifdef pp_SLICE
   if(sd->compression_type==0){
     ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
   }
-#else
-  ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
-#endif
 #ifdef _DEBUG
   printf("After slice file load: ");
   GetMemoryInfo(sd->num_memblocks,num_memblocks_load);
@@ -762,7 +663,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
   glutPostRedisplay();
 }
-#endif
 /* ------------------ outputslicebounds ------------------------ */
 /*
 void outputslicebounds(void){
@@ -865,7 +765,6 @@ void updateslicebounds(void){
     if(maxflag2==1)slicebounds[i].valmax_data=valmax_data;
   }
 }
-#ifdef pp_SLICE
 
 /* ------------------ updateallslicelabels ------------------------ */
 
@@ -904,7 +803,6 @@ void updateallslicelabels(int slicetype, int *errorcode){
   setslicebounds(slicetype);
   updateglui();
 }
-#endif
 
 /* ------------------ updateallslicecolors ------------------------ */
 
@@ -1073,14 +971,12 @@ void updateslicemenulabels(void){
       STRCAT(sd->menulabel,", ");
       STRCAT(sd->menulabel,sd->file);
     }
-#ifdef pp_SLICE
     if(sd->compression_type==1){
       STRCAT(sd->menulabel," (ZLIB)");
     }
     else if(sd->compression_type==2){
       STRCAT(sd->menulabel," (RLE)");
     }
-#endif
     for(i=1;i<nslice;i++){
 #ifdef pp_PART5
       mesh *meshi;
@@ -1118,14 +1014,12 @@ void updateslicemenulabels(void){
         STRCAT(sd->menulabel,", ");
         STRCAT(sd->menulabel,sd->file);
       }
-#ifdef pp_SLICE
       if(sd->compression_type==1){
         STRCAT(sd->menulabel," (ZLIB)");
       }
       else if(sd->compression_type==2){
         STRCAT(sd->menulabel," (RLE)");
       }
-#endif
     } 
     for(i=0;i<nslice;i++){
       sd = sliceinfo + i;
@@ -1221,16 +1115,11 @@ void getsliceparams(void){
   mesh *meshi;
   multislice *mslicei;
   float delta;
-#ifndef pp_SLICE
-  int dummy;
-#endif
 
   for(i=0;i<nslice;i++){
     sd = sliceinfo + i;
     file = sd->file;
     lenfile = strlen(file);
-#ifndef pp_nofortran
-#ifdef pp_SLICE
     if(sd->compression_type==0){
       FORTgetsliceparms(file,&endian,
         &is1,&is2,&js1,&js2,&ks1,&ks2,&sd->volslice,&error,lenfile);
@@ -1243,11 +1132,6 @@ void getsliceparams(void){
       error=0;
       if(getsliceheader0(sd->rle_file,sd->size_file,sd->compression_type,&is1,&is2,&js1,&js2,&ks1,&ks2, &sd->volslice)==0)error=1;
     }
-#else
-    FORTgetsliceparms(file,&endian,
-        &is1,&is2,&js1,&js2,&ks1,&ks2,&dummy,&error,lenfile);
-#endif
-#endif
     if(error==0){
       sd->is1=is1;
       sd->is2=is2;
@@ -1261,9 +1145,7 @@ void getsliceparams(void){
       sprintf(sd->slicedir,"");
       position=-999.0;
       if(sd->is1==sd->is2
-#ifdef pp_SLICE
         ||(sd->js1!=sd->js2&&sd->ks1!=sd->ks2)
-#endif
         ){
         sd->idir=1;
         position = meshi->xplt_orig[is1];
@@ -1273,16 +1155,12 @@ void getsliceparams(void){
         else{
           sd->delta=(meshi->xplt_orig[is1+1]-meshi->xplt_orig[is1])/2.0;
         }
-#ifdef pp_SLICE
         if(sd->volslice==0){
           sprintf(sd->slicedir,"X=%f",position);
         }
         else{
           sprintf(sd->slicedir,"3D slice");
         }
-#else
-        sprintf(sd->slicedir,"X=%f",position);
-#endif
       }
       if(sd->js1==sd->js2){
         sd->idir=2;
@@ -1410,9 +1288,7 @@ void updatevslices(void){
       vd->display=0;
       vd->loaded=0;
       vd->vec_type=0;
-#ifdef pp_SLICE
       vd->volslice=sdi->volslice;
-#endif
       nvslice++;
     }
   }
@@ -1666,7 +1542,6 @@ void setslicecolors(float smin, float smax,
                 nrgb_full,nrgb,
                 sb->colorlabels,&scale,sb->levels256);
 }
-#ifdef pp_SLICE
 
 /* ------------------ setslicelabels ------------------------ */
 
@@ -1687,7 +1562,6 @@ void setslicelabels(float smin, float smax,
   getSliceLabels(smin,smax,nrgb,
                 sb->colorlabels,&scale,sb->levels256);
 }
-#endif
 
 /* ------------------ setslicebounds ------------------------ */
 
@@ -2409,7 +2283,6 @@ void drawvolslice_texture(const slice *sd){
 }
 #endif
 
-#ifdef pp_SLICE
 /* ------------------ drawvolslice ------------------------ */
 
 void drawvolslice(const slice *sd){
@@ -2799,7 +2672,6 @@ void drawvvolslice(const vslice *vd){
   }
 }
 
-#endif
 
 /* ------------------ drawvslice ------------------------ */
 
@@ -3217,26 +3089,16 @@ int average_slice_data(float *data, int ndata, int data_per_timestep, float *tim
   return 0;
 }
 
-#ifdef pp_SLICE
-
 
 /* ------------------ getsliceheader ------------------------ */
 
-#ifdef pp_SLICE
 int getsliceheader0(char *comp_file, char *size_file, int compression_type, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *slice3d){
-#else
-int getsliceheader0(char *comp_file, char *size_file, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *slice3d){
-#endif
   FILE *stream;
   char buffer[255];
 
   stream=fopen(size_file,"r");
   if(stream==NULL){
-#ifdef pp_SLICE
     if(makeslicesizefile(comp_file,size_file, compression_type)==0)return 0;
-#else
-    if(makeslicesizefile(comp_file,size_file)==0)return 0;
-#endif
     stream=fopen(size_file,"r");
     if(stream==NULL)return 0;
   }
@@ -3257,11 +3119,7 @@ int getsliceheader0(char *comp_file, char *size_file, int *i1, int *i2, int *j1,
 }
 /* ------------------ getsliceheader ------------------------ */
 
-#ifdef pp_SLICE
 int getsliceheader(char *comp_file, char *size_file, int compression_type,
-#else
-int getsliceheader(char *comp_file, char *size_file,
-#endif
                    int framestep, int set_tmin, int set_tmax, float tmin, float tmax,
                    int *nx, int *ny, int *nz, int *nsteps, int *ntotal, float *valmin, float *valmax){
   FILE *stream;
@@ -3271,17 +3129,11 @@ int getsliceheader(char *comp_file, char *size_file,
   int ncompressed;
   int count;
   char buffer[256];
-#ifdef pp_SLICE
   int ncompressed_rle, ncompressed_zlib;
-#endif
 
   stream=fopen(size_file,"r");
   if(stream==NULL){
-#ifdef pp_SLICE
     if(makeslicesizefile(comp_file,size_file,compression_type)==0)return 0;
-#else
-    if(makeslicesizefile(comp_file,size_file)==0)return 0;
-#endif
     stream=fopen(size_file,"r");
     if(stream==NULL)return 0;
   }
@@ -3306,7 +3158,6 @@ int getsliceheader(char *comp_file, char *size_file,
   while(!feof(stream)){
 
     if(fgets(buffer,255,stream)==NULL)break;
-#ifdef pp_SLICE
     sscanf(buffer,"%f %i %i",&time,&ncompressed_zlib, &ncompressed_rle);
     if(compression_type==1){
       ncompressed=ncompressed_zlib;
@@ -3314,9 +3165,6 @@ int getsliceheader(char *comp_file, char *size_file,
     else{
       ncompressed=ncompressed_rle;
     }
-#else
-    sscanf(buffer,"%f %i",&time,&ncompressed);
-#endif
     if(count++%framestep!=0)continue;
     if(set_tmin==1&&time<tmin)continue;
     if(set_tmax==1&&time>tmax)continue;
@@ -3539,11 +3387,7 @@ int getslicezlibdata(char *file,
   // compressed buffer
 
 /* ------------------ getslicecompressdata ------------------------ */
-#ifdef pp_SLICE
 int makeslicesizefile(char *file, char *sizefile, int compression_type){
-#else
-int makeslicesizefile(char *file, char *sizefile){
-#endif
   int endian_fromfile;
   float minmax[2];
   int ijkbar[6];
@@ -3551,15 +3395,11 @@ int makeslicesizefile(char *file, char *sizefile){
   float time;
   int ncompressed;
   int count;
-#ifdef pp_SLICE
   size_t returncode;
-#endif
 
   stream=fopen(file,"rb");
   if(stream==NULL)return 0;
-#ifdef pp_SLICE
   RLESLICEFILE=stream;
-#endif
 
   sizestream=fopen(sizefile,"w");
   if(sizestream==NULL){
@@ -3567,7 +3407,6 @@ int makeslicesizefile(char *file, char *sizefile){
     return 0;
   }
   count=0;
-#ifdef pp_SLICE
   if(compression_type==1){
     fread(&endian_fromfile,4,1,stream);
     fseek(stream,12,SEEK_CUR);
@@ -3632,24 +3471,6 @@ int makeslicesizefile(char *file, char *sizefile){
 
 
   }
-#else
-  fread(&endian_fromfile,4,1,stream);
-  fseek(stream,12,SEEK_CUR);
-  fread(minmax,4,2,stream);
-  fread(ijkbar,4,6,stream);
-
-  fprintf(sizestream,"%f %f\n",minmax[0],minmax[1]);
-  fprintf(sizestream,"%i %i %i %i %i %i\n",ijkbar[0],ijkbar[1],ijkbar[2],ijkbar[3],ijkbar[4],ijkbar[5]);
-  count=2;
-
-  while(!feof(stream)){
-    fread(&time,4,1,stream);
-    fread(&ncompressed,4,1,stream);
-    fprintf(sizestream,"%f %i\n",time,ncompressed);
-    count++;
-    fseek(stream,ncompressed,SEEK_CUR);
-  }
-#endif
   fclose(stream);
   fclose(sizestream);
   return count;
@@ -3667,7 +3488,6 @@ void uncompress_slicedataframe(slice *sd,int iframe){
   countin = sd->compindex[iframe].size;
   countout=sd->nsliceii;
 
-#ifdef pp_SLICE
   if(sd->compression_type==1){
     uncompress(sd->slicecomplevel,&countout,compressed_data,countin);
   }
@@ -3675,9 +3495,6 @@ void uncompress_slicedataframe(slice *sd,int iframe){
 //    irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out){
     irle(compressed_data, countin, sd->slicecomplevel);
   }
-#else
-  uncompress(sd->slicecomplevel,&countout,compressed_data,countin);
-#endif
 
 }
 
@@ -3690,4 +3507,3 @@ float getsliceval(slice *sd, unsigned char ival){
   return returnval;
 }
 
-#endif

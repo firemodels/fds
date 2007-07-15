@@ -40,9 +40,7 @@ SVEXTERN int updategluiview;
 #ifdef pp_RENDER
 SVEXTERN int render_double,render_double_state;
 #endif
-#ifdef pp_SLICE
 SVEXTERN int usetexturebar;
-#endif
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
 SVEXTERN int GPU_aspectratio, GPU_normx, GPU_normy, GPU_normz, GPU_skip, GPU_hrrcutoff, GPU_hrr;
@@ -274,9 +272,7 @@ SVEXTERN float xbar0, ybar0, zbar0;
 SVEXTERN float xbarORIG, ybarORIG, zbarORIG;
 SVEXTERN float xbar0ORIG, ybar0ORIG, zbar0ORIG;
 SVEXTERN int ReadPlot3dFile, ReadIsoFile;
-#ifdef pp_SLICE
 SVEXTERN int ReadVolSlice;
-#endif
 SVEXTERN int Read3DSmoke3DFile;
 SVEXTERN int ReadZoneFile, ReadPartFile, ReadEvacFile;
 
@@ -786,9 +782,7 @@ SVEXTERN int nsurfaces;
 SVEXTERN int ntotalfaces;
 SVEXTERN colordata *firstcolor;
 SVEXTERN texture *textureinfo;
-#ifdef pp_SLICE
 SVEXTERN GLuint texture_colorbar_id, texture_slice_colorbar_id, texture_plot3d_colorbar_id;
-#endif
 SVEXTERN float mscale[3];
 SVEXTERN float xclip_min, yclip_min, zclip_min;
 SVEXTERN float xclip_max, yclip_max, zclip_max;

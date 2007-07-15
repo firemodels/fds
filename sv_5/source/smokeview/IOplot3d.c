@@ -1370,7 +1370,6 @@ void update_plot_xyz(mesh *current_mesh){
 
 /* ------------------ updateplotslice ------------------------ */
 
-#ifdef pp_SLICE
 void updateplotslice(int slicedir){
   int i;
   if(current_mesh->plotx<0)current_mesh->plotx=current_mesh->ibar;
@@ -1391,9 +1390,6 @@ void updateplotslice(int slicedir){
   }
 }
 void updateplotslice_mesh(mesh *mesh_in, int slicedir){
-#else
-void updateplotslice(int slicedir){
-#endif
   int i, j, k;
   int plotx, ploty, plotz;
   int ibar, jbar, kbar;
@@ -1417,11 +1413,7 @@ void updateplotslice(int slicedir){
   int nx, ny, nz, nxy, nxyz;
   int *iblank_x, *iblank_y, *iblank_z;
 
-#ifdef pp_SLICE
   meshi = mesh_in;
-#else
-  meshi = current_mesh;
-#endif
   plotx = meshi->plotx;
   ploty = meshi->ploty;
   plotz = meshi->plotz;
@@ -1632,9 +1624,7 @@ void updateplotslice(int slicedir){
 void updateshowstep(int slicedir){
 
   if(ReadPlot3dFile==0&&visGrid==0
-#ifdef pp_SLICE
     &&ReadVolSlice==0
-#endif
     )return;
   current_mesh->slicedir=slicedir;
   switch (slicedir){
@@ -1658,7 +1648,6 @@ void updateshowstep(int slicedir){
   }
   plotstate=getplotstate(STATIC_PLOTS);
   if(ReadVolSlice==0&&plotstate==DYNAMIC_PLOTS&&visGrid==0)updatetimes();
-#ifdef pp_SLICE
   {
     int i;
     float xmin, xmax;
@@ -1715,7 +1704,6 @@ void updateshowstep(int slicedir){
 
     }
   }
-#endif
 }
 
 /* ------------------ drawgrid ------------------------ */

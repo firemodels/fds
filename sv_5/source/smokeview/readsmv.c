@@ -346,14 +346,10 @@ int readsmv(char *file){
       slice *sd;
       sd = sliceinfo + i;
       freelabels(&sliceinfo[i].label);
-#ifdef pp_SLICE
       FREEMEMORY(sd->reg_file);
       FREEMEMORY(sd->comp_file);
       FREEMEMORY(sd->rle_file);
       FREEMEMORY(sd->size_file);
-#else
-      FREEMEMORY(sliceinfo[i].file);
-#endif
     }
     FREEMEMORY(sliceorderindex);
     for(i=0;i<nmultislices;i++){
@@ -3528,7 +3524,6 @@ typedef struct {
 
       len=strlen(buffer);
       sd = sliceinfo+islice;
-#ifdef pp_SLICE
       NewMemory((void **)&sd->reg_file,(unsigned int)(len+1));
       STRCPY(sd->reg_file,buffer);
 
@@ -3556,22 +3551,16 @@ typedef struct {
       if(sd->compression_type==0){
         sd->file=sd->reg_file;
       }
-#else
-      if(NewMemory((void **)&sd->file,(unsigned int)(len+1))==0)return 2;
-      STRCPY(sd->file,buffer);
-#endif
 
       sd->seq_id=nn_slice;
       sd->autoload=0;
       sd->display=0;
       sd->loaded=0;
       sd->qslicedata=NULL;
-#ifdef pp_SLICE
       sd->compindex=NULL;
       sd->slicecomplevel=NULL;
       sd->qslicedata_compressed=NULL;
       sd->volslice=0;
-#endif
       sd->slicetimes=NULL;
       sd->slicelevel=NULL;
       sd->slicepoint=NULL;
