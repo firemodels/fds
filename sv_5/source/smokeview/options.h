@@ -35,7 +35,6 @@
 #define pp_RENDER
 #define pp_PART5
 #define pp_DEVICE
-#define pp_PLOTTEXTURE
 #define pp_WUI
 #define pp_TRAINER
 #endif

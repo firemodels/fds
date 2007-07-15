@@ -1233,8 +1233,6 @@ void global2localpatchbounds(const char *key){
   }
 }
 
-#ifdef pp_PLOTTEXTURE
-
 /* ------------------ drawpatch ------------------------ */
 
 void drawpatch_texture(const mesh *meshi){
@@ -1800,7 +1798,6 @@ void drawpatch_texture_char(const mesh *meshi){
   glDisable(GL_TEXTURE_1D);
 }
 
-#endif
 /* ------------------ drawpatch ------------------------ */
 
 void drawpatch(const mesh *meshi){

@@ -428,9 +428,7 @@ EXTERNCPP void updateslicelist(int index);
 EXTERNCPP void drawiso(const mesh *gb,int tranflag);
 EXTERNCPP int getendian(void);
 EXTERNCPP void drawplot3d(mesh *gb);
-#ifdef pp_PLOTTEXTURE
 EXTERNCPP void drawplot3d_texture(mesh *gb);
-#endif
 EXTERNCPP void updateshowstep(int slicedir);
 EXTERNCPP void updateclip(int slicedir);
 EXTERNCPP void updateclipbounds(int set_i0, int *i0, int set_i1, int *i1, int maxi);
@@ -441,10 +439,8 @@ EXTERNCPP int getxyzindex(float x,const float *xplt_orig,int ijkbar);
 EXTERNCPP int compare( const void *arg1, const void *arg2 );
 EXTERNCPP void updateplotslice(int slicedir);
 EXTERNCPP void drawpatch(const mesh *gb);
-#ifdef pp_PLOTTEXTURE
 EXTERNCPP void drawpatch_texture(const mesh *gb);
 EXTERNCPP void drawpatch_texture_char(const mesh *gb);
-#endif
 
 EXTERNCPP void updateslicebounds(void);
 EXTERNCPP void updateallslicecolors(int islicetype,int *errorcode);
@@ -475,10 +471,8 @@ EXTERNCPP void ApertureMenu(int value);
 EXTERNCPP void ZoomMenu(int value);
 EXTERNCPP void setslicecolors(float slicemin, float slicemax, slice *sd, int *errorcode);
 EXTERNCPP void drawslice(const slice *sd);
-#ifdef pp_PLOTTEXTURE
 EXTERNCPP void drawslice_texture(const slice *sd);
 EXTERNCPP void drawvolslice_texture(const slice *sd);
-#endif
 EXTERNCPP void drawvolslice(const slice *sd);
 EXTERNCPP void drawvvolslice(const vslice *vd);
 EXTERNCPP void drawvslice(const vslice *vd);

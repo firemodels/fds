@@ -343,9 +343,7 @@ typedef struct mesh_ {
   float *qdata;
   int *yzcolorbase, *xzcolorbase, *xycolorbase; 
   float *yzcolorfbase, *xzcolorfbase, *xycolorfbase;
-#ifdef pp_PLOTTEXTURE
   float *yzcolortbase, *xzcolortbase, *xycolortbase;
-#endif
   float *dx_xy, *dy_xy, *dz_xy;
   float *dx_xz, *dy_xz, *dz_xz;
   float *dx_yz, *dy_yz, *dz_yz;
