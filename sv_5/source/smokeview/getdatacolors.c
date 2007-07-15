@@ -610,11 +610,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
 
 /* ------------------ getSliceColors ------------------------ */
 
-#ifdef pp_SLICE
 void getSliceColors(const float *t, int nt, unsigned char *it,
-#else
-void getSliceColors(const float *t, int nt, int *it,
-#endif
               float local_tmin, float local_tmax, 
               int ndatalevel, int nlevel,
               char labels[12][11],char **scale, float *tlevels256){
@@ -671,8 +667,6 @@ void getSliceColors(const float *t, int nt, int *it,
   num2string(&labels[nlevel-1][0],tval,range);
 }
 
-#ifdef pp_SLICE
-
 /* ------------------ getSliceLabelels ------------------------ */
 
 void getSliceLabels(float local_tmin, float local_tmax, int nlevel,
@@ -715,7 +709,6 @@ void getSliceLabels(float local_tmin, float local_tmax, int nlevel,
   tval = local_tmax;
   num2string(&labels[nlevel-1][0],tval,range);
 }
-#endif
 
 /* ------------------ frexp10 ------------------------ */
 
