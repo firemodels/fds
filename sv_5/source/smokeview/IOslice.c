@@ -1879,7 +1879,6 @@ void drawslice(const slice *sd){
 
 }
 
-#ifdef pp_PLOTTEXTURE
 /* ------------------ drawslice_texture ------------------------ */
 
 void drawslice_texture(const slice *sd){
@@ -2281,7 +2280,6 @@ void drawvolslice_texture(const slice *sd){
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
-#endif
 
 /* ------------------ drawvolslice ------------------------ */
 

@@ -84,9 +84,7 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   FREEMEMORY(meshi->iqdata); FREEMEMORY(meshi->qdata);
   FREEMEMORY(meshi->yzcolorbase); FREEMEMORY(meshi->xzcolorbase); FREEMEMORY(meshi->xycolorbase); 
   FREEMEMORY(meshi->yzcolorfbase); FREEMEMORY(meshi->xzcolorfbase); FREEMEMORY(meshi->xycolorfbase);
-#ifdef pp_PLOTTEXTURE
   FREEMEMORY(meshi->yzcolortbase); FREEMEMORY(meshi->xzcolortbase); FREEMEMORY(meshi->xycolortbase);
-#endif
   FREEMEMORY(meshi->dx_xy); FREEMEMORY(meshi->dy_xy); FREEMEMORY(meshi->dz_xy);
   FREEMEMORY(meshi->dx_xz); FREEMEMORY(meshi->dy_xz); FREEMEMORY(meshi->dz_xz);
   FREEMEMORY(meshi->dx_yz); FREEMEMORY(meshi->dy_yz); FREEMEMORY(meshi->dz_yz);
@@ -176,11 +174,9 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
      NewMemory((void **)&meshi->yzcolorfbase,ny*nz*sizeof(int))==0||
      NewMemory((void **)&meshi->xzcolorfbase,nx*nz*sizeof(int))==0||
      NewMemory((void **)&meshi->xycolorfbase,nx*ny*sizeof(int))==0||
-#ifdef pp_PLOTTEXTURE
      NewMemory((void **)&meshi->yzcolortbase,ny*nz*sizeof(float))==0||
      NewMemory((void **)&meshi->xzcolortbase,nx*nz*sizeof(float))==0||
      NewMemory((void **)&meshi->xycolortbase,nx*ny*sizeof(float))==0||
-#endif
      NewMemory((void **)&meshi->dx_xy       ,nx*ny*sizeof(int))==0||
      NewMemory((void **)&meshi->dy_xy       ,nx*ny*sizeof(int))==0||
      NewMemory((void **)&meshi->dz_xy       ,nx*ny*sizeof(int))==0||
@@ -362,7 +358,6 @@ void update_plot3dtitle(void){
     STRCAT(FULLTITLE,plot3di->file);
   }
 }
-#ifdef pp_PLOTTEXTURE
 /* ------------------ drawplot3d_texture ------------------------ */
 
 void drawplot3d_texture(mesh *meshi){
@@ -781,7 +776,6 @@ void drawplot3d_texture(mesh *meshi){
 
 }
 
-#endif
 /* ------------------ drawplot3d ------------------------ */
 
 void drawplot3d(mesh *meshi){
@@ -1398,9 +1392,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   contour *plot3dcontour1ptr, *plot3dcontour2ptr, *plot3dcontour3ptr;
   int *yzcolorbase, *xzcolorbase, *xycolorbase; 
   float *yzcolorfbase, *xzcolorfbase, *xycolorfbase; 
-#ifdef pp_PLOTTEXTURE
   float *yzcolortbase, *xzcolortbase, *xycolortbase; 
-#endif
   float *dx_xy, *dy_xy, *dz_xy;
   float *dx_xz, *dy_xz, *dz_xz;
   float *dx_yz, *dy_yz, *dz_yz;
@@ -1435,11 +1427,9 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   xzcolorfbase=meshi->xzcolorfbase;
   xycolorfbase=meshi->xycolorfbase;
 
-#ifdef pp_PLOTTEXTURE
   yzcolortbase=meshi->yzcolortbase;
   xzcolortbase=meshi->xzcolortbase;
   xycolortbase=meshi->xycolortbase;
-#endif
 
   dx_xy=meshi->dx_xy;
   dx_xz=meshi->dx_xz;
@@ -1496,16 +1486,12 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   if(ReadPlot3dFile!=1)return;
   if(slicedir==1){
     float *yzcolorf;
-#ifdef pp_PLOTTEXTURE
     float *yzcolort;
-#endif
     int *yzcolor;
 
     yzcolor=yzcolorbase;
     yzcolorf=yzcolorfbase;
-#ifdef pp_PLOTTEXTURE
     yzcolort=yzcolortbase;
-#endif
     dx_yzcopy=dx_yz;
     dy_yzcopy=dy_yz;
     dz_yzcopy=dz_yz;
@@ -1515,9 +1501,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     }}
     for(j=0;j<=jbar;j++){for(k=0;k<=kbar;k++){
       *yzcolor++=iqdata[ijkn(plotx,j,k,plotn-1)];
-#ifdef pp_PLOTTEXTURE
       *yzcolort++=(float)iqdata[ijkn(plotx,j,k,plotn-1)]/255.0;
-#endif
       *yzcolorf++=qdata[ijkn(plotx,j,k,plotn-1)];
       *dx_yzcopy = 0.0;
       *dy_yzcopy = 0.0;
@@ -1537,16 +1521,12 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   }
   else if(slicedir==2){
     float *xzcolorf;
-#ifdef pp_PLOTTEXTURE
     float *xzcolort;
-#endif
     int *xzcolor;
 
     xzcolor=xzcolorbase;
     xzcolorf=xzcolorfbase;
-#ifdef pp_PLOTTEXTURE
     xzcolort=xzcolortbase;
-#endif
     dx_xzcopy=dx_xz;
     dy_xzcopy=dy_xz;
     dz_xzcopy=dz_xz;
@@ -1556,9 +1536,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     }}
     for(i=0;i<=ibar;i++){for(k=0;k<=kbar;k++){
       *xzcolor++=iqdata[ijkn(i,ploty,k,plotn-1)];
-#ifdef pp_PLOTTEXTURE
       *xzcolort++=(float)iqdata[ijkn(i,ploty,k,plotn-1)]/255.0;
-#endif
       *xzcolorf++=qdata[ijkn(i,ploty,k,plotn-1)];
       *dx_xzcopy = 0.0;
       *dy_xzcopy = 0.0;
@@ -1578,16 +1556,12 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   }
   else if(slicedir==3){
     float *xycolorf;
-#ifdef pp_PLOTTEXTURE
     float *xycolort;
-#endif
     int *xycolor;
 
     xycolor=xycolorbase;
     xycolorf=xycolorfbase;
-#ifdef pp_PLOTTEXTURE
     xycolort=xycolortbase;
-#endif
     dx_xycopy=dx_xy;
     dy_xycopy=dy_xy;
     dz_xycopy=dz_xy;
@@ -1597,9 +1571,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     }}
     for(i=0;i<=ibar;i++){for(j=0;j<=jbar;j++){
       *xycolor++=iqdata[ijkn(i,j,plotz,plotn-1)];
-#ifdef pp_PLOTTEXTURE
       *xycolort++=(float)iqdata[ijkn(i,j,plotz,plotn-1)]/255.0;
-#endif
       *xycolorf++=qdata[ijkn(i,j,plotz,plotn-1)];
       *dx_xycopy = 0.0;
       *dy_xycopy = 0.0;

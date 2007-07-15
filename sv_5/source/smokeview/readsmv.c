@@ -2091,7 +2091,6 @@ typedef struct {
   }
 #endif
   if(ntextures==0)FREEMEMORY(textureinfo);
-#ifdef pp_PLOTTEXTURE
   // define texture for colorbar
   // texture_colorbar_id
   printf("      Loading colorbar texture: ");
@@ -2114,7 +2113,6 @@ typedef struct {
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   printf(" - completed\n");
-#endif
 #ifdef pp_GPU
   createDepthTexture();
 #endif
@@ -5880,9 +5878,7 @@ void initmesh(mesh *meshi){
   meshi->iqdata=NULL;      meshi->qdata=NULL;
   meshi->yzcolorbase=NULL; meshi->xzcolorbase=NULL; meshi->xycolorbase=NULL; 
   meshi->yzcolorfbase=NULL;meshi->xzcolorfbase=NULL;meshi->xycolorfbase=NULL;
-#ifdef pp_PLOTTEXTURE
   meshi->yzcolortbase=NULL;meshi->xzcolortbase=NULL;meshi->xycolortbase=NULL;
-#endif
   meshi->dx_xy=NULL;       meshi->dy_xy=NULL;       meshi->dz_xy=NULL;
   meshi->dx_xz=NULL;       meshi->dy_xz=NULL;       meshi->dz_xz=NULL;
   meshi->dx_yz=NULL;       meshi->dy_yz=NULL;       meshi->dz_yz=NULL;
