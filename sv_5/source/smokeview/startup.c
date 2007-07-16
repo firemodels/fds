@@ -61,7 +61,6 @@ int initcase_c(int argc, char **argv){
   if(strcmp(inputfilename_ext,".svt")==0){
     input_type=1;
     return_code=readsmv(trainer_filename);
-#ifdef pp_TRAINER
     if(return_code==0){
       trainer_mode=1;
       trainer_active=1;
@@ -70,7 +69,6 @@ int initcase_c(int argc, char **argv){
         show_load_alert();
       }
     }
-#endif
   }
   else{
     input_type=2;
@@ -118,9 +116,7 @@ int initcase_c(int argc, char **argv){
   glutShowWindow();
   glutSetWindowTitle(fdsprefix);
   Init();
-#ifdef pp_TRAINER
   glui_trainer_setup(mainwindow_id);
-#endif
   glutDetachMenu(GLUT_RIGHT_BUTTON);
   InitMenus(LOAD);
   glutAttachMenu(GLUT_RIGHT_BUTTON);
@@ -835,9 +831,7 @@ void InitOpenGL(void){
     int i;
     int errorcode;
 
-#ifdef pp_TRAINER
 //    show_load_alert();
-#endif
     for(i=0;i<nplot3d;i++){
       plot3d *plot3di;
 
@@ -910,11 +904,8 @@ void InitOpenGL(void){
     update_framenumber(0);
     updatemenu=1;
     update_load_startup=0;
-#ifdef pp_TRAINER
     hide_load_alert();
     TrainerViewMenu(trainerview);
-
-#endif
   }
 
 
@@ -1638,7 +1629,13 @@ void initvars1(void){
 #else
   strcpy(TITLEBASE,"Smokeview 5.0.0 Beta - ");
 #endif
+#ifdef pp_FINALRELEASE
+  strcpy(TITLEBASE,"Smokeview 5.0.0 - ");
+#endif
   strcpy(TRAINERTITLEBASE,"Virtual Fire Fighter Trainer 0.9 Beta -");
+#ifdef pp_FINALRELEASE
+  strcpy(TRAINERTITLEBASE,"Virtual Fire Fighter Trainer 1.0 -");
+#endif
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");
 

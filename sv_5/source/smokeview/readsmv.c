@@ -6070,14 +6070,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       continue;
     }
 #endif
-#ifdef pp_TRAINER
     if(match(buffer,"TRAINERVIEW",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&trainerview);
       if(trainerview!=2&&trainerview!=3)trainerview=1;
       continue;
     }
-#endif
     if(match(buffer,"SLICEAVERAGE",12)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i",&slice_average_flag,&slice_average_interval,&vis_slice_average);
@@ -8146,10 +8144,8 @@ void writeini(int flag){
   fprintf(fileout," %i %i\n",vis_ignited,vis_onlyignited);
   fprintf(fileout,"TWOSIDEDVENTS\n");
   fprintf(fileout," %i %i\n",show_bothsides_int,show_bothsides_ext);
-#ifdef pp_TRAINER
   fprintf(fileout,"TRAINERVIEW\n");
   fprintf(fileout," %i\n",trainerview);
-#endif
 
   fprintf(fileout,"\nMISC\n");
   fprintf(fileout,"----\n\n");

@@ -20,6 +20,7 @@
 #define pp_GDGIF
 #endif
 
+// #define pp_FINALRELEASE
 #ifndef _DEBUG
 #define pp_RELEASE
 #endif
@@ -31,7 +32,6 @@
 #define pp_THREADS2
 
 #define pp_WUI
-#define pp_TRAINER
 
 #ifdef pp_TEST
 #define pp_COLOR
