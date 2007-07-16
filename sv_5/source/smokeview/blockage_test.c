@@ -176,9 +176,7 @@ void getnewpos(float *oldpos, float dx, float dy, float dz,float local_speed_fac
 
   pass_through=1;
   if(pass_through==1
-#ifdef pp_TRAINER
     ||from_glui_trainer==1
-#endif
     ){
     oldpos[0] += dx;
     oldpos[1] += dy;
@@ -252,11 +250,7 @@ void getnewpos(float *oldpos, float dx, float dy, float dz,float local_speed_fac
   delta = view_height-desired_view_height;
 
   if(speed_I>=0){
-#ifdef pp_TRAINER
     speed_now=speed_desired;
-#else
-    speed_now=(speed_I*speed_desired + (SPEEDMAXCOUNT-speed_I)*0.001)/(float)SPEEDMAXCOUNT;
-#endif
    // update_glui_speed();
     speed_I++;
     if(speed_I>SPEEDMAXCOUNT)speed_I=-1;
@@ -392,7 +386,6 @@ void get_move_status(float *oldpos,float *newpos,
   printf("  old status=%s new status=%s\n",label_now,label_next);
   printf("old distance=%f new distance=%f\n",view_height0,*view_height);
 #endif
-#ifdef pp_TRAINER
   {
     int trainee_now=0, trainee_next=0;
 
@@ -401,7 +394,6 @@ void get_move_status(float *oldpos,float *newpos,
     trainee_location=trainee_next;
   }
 
-#endif
 }
 
 /* ------------------ adjust_new_position ------------------------ */

@@ -760,13 +760,11 @@ void ViewpointMenu(int value){
 void DialogMenu(int value){
 
   switch (value){
-#ifdef pp_TRAINER
   case 25:
     showtrainer=1-showtrainer;
     if(showtrainer==1)show_trainer();
     if(showtrainer==0)hide_trainer();
     break;
-#endif
   case 22:
     showlabels=1-showlabels;
     if(showlabels==1)show_glui_labels();
@@ -836,9 +834,7 @@ void DialogMenu(int value){
       hide_glui_edit();
       visBlocks=visBlocksSave;
     }
-#ifdef pp_TRAINER
     update_trainer_outline();
-#endif
 
     break;
   case -2:
@@ -858,10 +854,8 @@ void DialogMenu(int value){
     showcolorbar=0;
     hide_glui_colorbar();
     if(showedit==1)DialogMenu(16);
-#ifdef pp_TRAINER
     showtrainer=0;
     hide_trainer();
-#endif
     break;
   default:
     ASSERT(FFALSE);
@@ -1956,15 +1950,11 @@ void TourMenu(int value){
       touri->display=0;
     }
     if(viewtourfrompath==1
-#ifdef pp_TRAINER
 //      &&from_glui_trainer==0
-#endif
       ){
       ResetView(RESTORE_EXTERIOR_VIEW);
     }
-#ifdef pp_TRAINER
     from_glui_trainer=0;
-#endif
 //    viewtourfrompath=0;
     selected_tour=NULL;
     break;
@@ -3004,17 +2994,13 @@ void BlockageMenu(int value){
      if(blocksneedsmoothing==1)update_smooth_blockages();
 #endif
      visBlocks=value;
-#ifdef pp_TRAINER
      update_trainer_outline();
-#endif
      break;
    case visBLOCKNormal:
    case visBLOCKOutline:
    case visBLOCKHide:
      visBlocks=value;
-#ifdef pp_TRAINER
      update_trainer_outline();
-#endif
      break;
    case BLOCKlocation_grid:
    case BLOCKlocation_exact:
@@ -4931,12 +4917,10 @@ static int textureshowmenu=0;
   if(showgluistereo==0)glutAddMenuEntry("Stereo Parameters...",19);
   if(showgluitour==1)glutAddMenuEntry("*Tours...  ALT+t",21);
   if(showgluitour==0)glutAddMenuEntry("Tours...  ALT+t",21);
-#ifdef pp_TRAINER
   if(trainer_active==1){
     if(showtrainer==1)glutAddMenuEntry("*Trainer...",25);
     if(showtrainer==0)glutAddMenuEntry("Trainer...",25);
   }
-#endif
   glutAddMenuEntry("-",-1);
   glutAddMenuEntry("Close All Dialogs  ALT+x",-2);
 
@@ -5042,9 +5026,7 @@ static int textureshowmenu=0;
 //  glutAddSubMenu("Aperture",aperturemenu);
   glutAddSubMenu("Zoom",zoommenu);
   glutAddMenuEntry("Benchmark",1);
-#ifdef pp_TRAINER
   if(trainer_active==1)glutAddMenuEntry("Trainer Menu",2);
-#endif
   /* --------------------------------reset menu -------------------------- */
 
   CREATEMENU(resetmenu,ResetMenu);
@@ -6237,7 +6219,6 @@ static int textureshowmenu=0;
 //        glutAddSubMenu("Viewpoint",resetmenu);
 //        glutAddSubMenu("Help",helpmenu);
       }
-#ifdef pp_TRAINER
       if(trainer_active==1){
         if(trainer_mode==1){
           glutAddMenuEntry("Smokeview Menus",997);
@@ -6246,7 +6227,6 @@ static int textureshowmenu=0;
           glutAddMenuEntry("Trainer Menus",997);
         }
       }
-#endif
     }
     glutAddMenuEntry("Quit",3);
   updatemenu=0;

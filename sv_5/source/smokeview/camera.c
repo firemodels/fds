@@ -179,9 +179,7 @@ void update_camera(camera *ca){
     update_highlight_mesh();
     handle_eyeview(1);
     update_meshlist1(ca->rotation_index);
-#ifdef pp_TRAINER
     update_trainer_moves();
-#endif
   }
   ca->dirty=0;
 }

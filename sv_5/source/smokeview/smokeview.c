@@ -3233,9 +3233,6 @@ void usage(char **argv){
 #ifdef pp_THREADS2
     printf(", pp_THREADS2");
 #endif
-#ifdef pp_TRAINER
-    printf(", pp_TRAINER");
-#endif
 #ifdef pp_WUI
     printf(", pp_WUI");
 #endif
