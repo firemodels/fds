@@ -181,7 +181,6 @@ IF (CORRECTOR) THEN
       BC_CLOCK = T
       CALL PYROLYSIS(T,DT_BC)
       WALL_COUNTER = 0
-      IF(N_EVAP_INDICIES>0) WCPUA = 0._EB
    ENDIF
 ENDIF
  
@@ -460,7 +459,7 @@ REAL(EB) :: DTMP,QNETF,QDXKF,QDXKB,RR,TMP_G,T,RFACF,RFACB,RFACF2,RFACB2, &
             PPCLAUS,PPSURF,TMP_G_B,RHOWAL,CP_TERM,TSI,DT_BC, &
             DXKF,DXKB,REACTION_RATE,QCONB,DELTA_RHO_S,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
             HVRG,Z_2,Z_F,Y_MF_G,Y_MF_W,YY_S,Y_SUM_W, RSUM_W, RSUM_G, RSUM_S, MFLUX, VOLSUM, &
-            DXF, DXB,HTCB,QINF,QINB, TMP_F_OLD, DX_GRID, RHO_S0, H_R,DT2_BC,TOLERANCE
+            DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, DX_GRID, RHO_S0, H_R,DT2_BC,TOLERANCE
 INTEGER :: IBC,IIG,JJG,KKG,IIB,JJB,KKB,IWB,IC,NWP,I,J,ITMP,NR,IL,NN,NNN,NL,J1,J2,II,JJ,KK,IW,IOR,N,I_OBST
 REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS,LAYER_THICKNESS_NEW(MAX_LAYERS)
 REAL(EB),ALLOCATABLE,DIMENSION(:) :: TMP_W_NEW
@@ -517,20 +516,20 @@ WALL_CELL_LOOP: DO IW=1,NWC
       CASE(VOID)  ! Non-insulated backing to an ambient void
          DTMP = SF%TMP_BACK - TMP_B(IW)
          HTCB = HEAT_TRANSFER_COEFFICIENT(IW,-1,-1,-1,IOR,SF%TMP_BACK,DTMP)
-         QRADINB =  E_WALLB*SIGMA*SF%TMP_BACK**4
-         QINB = 0._EB
+         QRADINB   =  E_WALLB*SIGMA*SF%TMP_BACK**4
+         Q_WATER_B = 0._EB
          TMP_G_B = SF%TMP_BACK
          
       CASE(INSULATED) 
-         HTCB    = 0._EB
-         QRADINB = 0._EB
-         E_WALLB = 0._EB
-         QINB = 0._EB
-         TMP_G_B = TMPA
+         HTCB      = 0._EB
+         QRADINB   = 0._EB
+         E_WALLB   = 0._EB
+         Q_WATER_B = 0._EB
+         TMP_G_B   = TMPA
                   
       CASE(EXPOSED)  
          IWB = WALL_INDEX_BACK(IW)
-         QINB = 0._EB
+         Q_WATER_B = 0._EB
          IF (BOUNDARY_TYPE(IWB)==SOLID_BOUNDARY) THEN
             IIB = IJKW(6,IWB)
             JJB = IJKW(7,IWB)
@@ -540,7 +539,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
             HTCB = HEAT_TRANSFER_COEFFICIENT(IWB,IIB,JJB,KKB,IOR,TMP_G_B,DTMP)            
             HEAT_TRANS_COEF(IWB) = HTCB
             QRADINB  = QRADIN(IWB)
-            IF (NLP>0) QINB = -SUM(WCPUA(IWB,:))/WALL_INCREMENT
+            IF (NLP>0) Q_WATER_B = -SUM(WCPUA(IWB,:))
          ELSE
             TMP_G_B  = TMPA
             DTMP = TMP_G_B - TMP_B(IW)
@@ -552,9 +551,9 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ! Take away energy flux due to water evaporation
  
    IF (NLP>0) THEN
-      QINF  =  -SUM(WCPUA(IW,:))/WALL_INCREMENT
+      Q_WATER_F  = -SUM(WCPUA(IW,:))
    ELSE
-      QINF  = 0._EB
+      Q_WATER_F  = 0._EB
    ENDIF
 
    ! Compute grid for shrinking wall nodes
@@ -727,7 +726,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
       ENDIF
       IF (WC%TMP_S(1)>ML%TMP_BOIL(1)) THEN
          ! Net flux guess for liquid evap
-         QNETF = QINF + QRADIN(IW) - QRADOUT(IW) + QCONF(IW)
+         QNETF = Q_WATER_F + QRADIN(IW) - QRADOUT(IW) + QCONF(IW)
          MFLUX = MAX(MFLUX,1.02*(QNETF - 2.*(ML%TMP_BOIL(1)-WC%TMP_S(1))/DXF/K_S(1))/ML%H_R(1))
       ENDIF
       MFLUX = MIN(MFLUX,THICKNESS*ML%RHO_S/DT_BC)
@@ -913,6 +912,10 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ENDIF
 
    ! Update the 1-D heat transfer equation 
+
+! if (ii==2 .and. jj==2 .and. kk==0) write(0,*) Q_WATER_F*0.001,QRADIN(IW)*0.001,QRADOUT(IW)*0.001,QCONF(IW)*0.001, &
+!  (Q_WATER_F+QRADIN(IW)-QRADOUT(IW)+QCONF(IW))*0.001
+
    DT2_BC = DT_BC
    STEPCOUNT = 1
    ALLOCATE(TMP_W_NEW(0:NWP+1))
@@ -942,12 +945,12 @@ WALL_CELL_LOOP: DO IW=1,NWC
          RFACF2 = (DXKF-RFACF)/(DXKF+RFACF)
          RFACB2 = (DXKB-RFACB)/(DXKB+RFACB)
          IF (SF%INTERNAL_RADIATION) THEN
-            QDXKF = (HEAT_TRANS_COEF(IW)*(TMP_G   - 0.5_EB * TMP_F(IW)) + QINF)/(DXKF+RFACF)
-            QDXKB = (HTCB*               (TMP_G_B - 0.5_EB * TMP_B(IW)) + QINB)/(DXKB+RFACB)
+            QDXKF = (HEAT_TRANS_COEF(IW)*(TMP_G   - 0.5_EB*TMP_F(IW)) + Q_WATER_F)/(DXKF+RFACF)
+            QDXKB = (HTCB*               (TMP_G_B - 0.5_EB*TMP_B(IW)) + Q_WATER_B)/(DXKB+RFACB)
          ELSE
-            QDXKF = (HEAT_TRANS_COEF(IW)*(TMP_G   - 0.5_EB * TMP_F(IW)) + QRADIN(IW) + 3._EB*E_WALL(IW)*SIGMA*TMP_F(IW)**4 + QINF) &
+            QDXKF = (HEAT_TRANS_COEF(IW)*(TMP_G   - 0.5_EB*TMP_F(IW)) + QRADIN(IW) + 3.*E_WALL(IW)*SIGMA*TMP_F(IW)**4 + Q_WATER_F) &
                   /(DXKF+RFACF)
-            QDXKB = (HTCB*               (TMP_G_B - 0.5_EB * TMP_B(IW)) + QRADINB    + 3._EB*E_WALLB   *SIGMA*TMP_B(IW)**4 + QINB) &
+            QDXKB = (HTCB*               (TMP_G_B - 0.5_EB*TMP_B(IW)) + QRADINB    + 3.*E_WALLB   *SIGMA*TMP_B(IW)**4 + Q_WATER_B) &
                   /(DXKB+RFACB)
          ENDIF
          CCS(1)   = CCS(1)   - BBS(1)  *QDXKF
