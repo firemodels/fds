@@ -1448,7 +1448,7 @@ Simple empirical rules can be used to predict local
 extinction based on the oxygen concentration and temperature of
 the gases in the vicinity of the flame sheet.
 Figure~\ref{plotsupp} shows values of temperature and oxygen
-concentration for which burning can and cannot take place.
+concentration for which burning can and cannot take place. A derivation of the model, based on the critical flame temperature concept, is given in Appendix~\ref{mowrer_model}.
 \begin{figure}[ht]
 \begin{minipage}[t]{4.1in}
 \includegraphics[width=4.in]{FIGURES/Extinction_Criteria}
@@ -4174,6 +4174,88 @@ and
 &=& \frac{\dot{m}_b^\tripleprime}{\rho} \frac{\overline{W}}{\overline{W}_b} + \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left( \dot{q}^\tripleprime - \Div \dot{\mathbf{q}}^{\prime\prime} \right) - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm}\\
 &+& \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) - \frac{\mathcal{R}}{\overline{W}c_p \overline{p}_i} \sum_\alpha h_{\alpha} \Div\left( \rho D_\alpha \nabla Y_\alpha \right) + \frac{1}{\rho} \sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime \,\mbox{.} \nonumber \vspace{0.3cm}\\
 \end{equationarray}
+
+
+
+
+\chapter{A Simple Model of Fire Suppression \\ \vspace{0.2in} \normalsize Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}
+
+\label{mowrer_model} 
+
+
+A diffusion flame immersed in a vitiated atmosphere will extinguish before consuming all the
+available oxygen from the atmosphere.  The classic example of this behavior is a candle burning
+within an inverted jar.  This same concept has been applied within FDS
+to determine the conditions under which the local ambient oxygen concentration will no longer
+support a diffusion flame.  In this appendix, the critical adiabatic flame temperature
+concept is used to estimate the local ambient oxygen concentration at which extinction will
+occur.
+
+Consider a control volume characterized
+by a bulk temperature, $T_m$, a mass, $m$, an average specific heat, $\overline{c_p}$, and an oxygen mass
+fraction, $Y_\OTWO$.  Complete combustion of the oxygen within the control volume would release a
+quantity of energy given by:
+\be
+   Q = m \, Y_\OTWO \, \left( \frac{\Delta H}{r_\OTWO}  \right)  \label{bbb}
+\ee
+where $\Delta H/r_\OTWO$ has a relatively constant value of
+approximately 13100~kJ/kg for most fuels of interest for fire applications.\footnote{C. Huggett, ``Estimation of the Rate of Heat Release by Means of Oxygen
+Consumption,'' {\em Fire and Materials}, Vol.~12, pp.~61-65, 1980.}
+Under adiabatic conditions, the energy released by combustion of the available oxygen within
+the control volume would raise the bulk temperature of the gases within the control volume by an
+amount equal to:
+\be
+   Q = m \, \overline{c_p} \, (T_f - T_m)  \label{eee}
+\ee
+The average specific heat of the gases within the control volume can be calculated based on the
+composition of the combustion products as:
+\be
+   \overline{c_p} = \frac{1}{(T_f-T_m)} \, \sum_\alpha \int_{T_m}^{T_f} c_{p,\alpha} (T) \, dT
+\ee
+To simplify the analysis, the combustion products are assumed to have an average specific heat
+of 1.1~kJ/kg/K over the temperature range of interest, a value similar to that of air, the primary
+component of the products.
+The relationship between the oxygen mass fraction within the control volume and the adiabatic
+temperature rise of the control volume is evaluated by equating Eqs.~(\ref{bbb}) and (\ref{eee}):
+\be
+   Y_\OTWO = \frac{ \overline{c_p} (T_f-T_m) }{\Delta H/r_\OTWO}
+\ee
+If the critical adiabatic flame temperature is assumed to have a constant value of approximately
+1700~K for hydrocarbon diffusion flames, as suggested by Beyler,\footnote{C. Beyler, ``Flammability Limits of Premixed and Diffusion Flames,''
+{\em SFPE Handbook of Fire Protection Engineering} (3rd Ed.), National Fire
+Protection Association, Quincy, MA, 2003.} then the relationship
+between the limiting oxygen mass fraction and the bulk temperature of a control volume is given
+by:
+\be
+   Y_{\OTWO,lim} = \frac{ \overline{c_p} (T_{f,lim}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.1 \, (1700-T_m) }{ 13100}
+\ee
+For a control volume at a temperature of 300~K, i.e., near room temperature, the limiting oxygen
+mass fraction would evaluate to $Y_{\OTWO,lim}=0.118$.  This value is consistent with the measurements
+of Morehart, Zukoski and Kubota,\footnote{Morehart, J., Zukoski, E., and Kubota, T., ``Characteristics of Large Diffusion Flames
+Burning in a Vitiated Atmosphere,'' {\em Third International Symposium on Fire Safety
+Science}, Elsevier Science Publishers, pp.~575-583, 1991.} although it is about 10 percent lower than their measured
+values and the limiting oxygen index values determined by Simmons and Wolfhard.\footnote{R.F.~Simmons and H.G.~Wolfhard, {\em Combustion and Flame}, Vol.~1, p.~155, 1957.}
+This difference would tend to be conservative in terms of indicating flammability of gas mixtures at
+oxygen concentrations lower than might occur in practice.
+Comparisons with additional
+experimental data are needed to further validate the concept.  Some improvement might result
+from a more exact analysis of the average specific heat of the combustion products or from the
+use of a slightly higher critical adiabatic flame temperature in the range of 1700~K to 1800~K,
+as suggested by the limiting oxygen index data of Simmons and Wolfhard that is
+summarized in the SFPE Handbook Chapter of Beyler.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
