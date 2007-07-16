@@ -1,4 +1,3 @@
-!     Last change:  JEF  25 May 2007   11:08 am
 MODULE FIRE
  
 ! Compute combustion 

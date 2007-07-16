@@ -1,4 +1,3 @@
-!     Last change:  JEF  25 May 2007   11:07 am
 MODULE PART
  
 USE PRECISION_PARAMETERS
@@ -1047,7 +1046,7 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,NM)
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN,DROP_RAD,DROP_TMP
-REAL(EB), POINTER, DIMENSION(:) :: WMPUAOLD,WCPUAOLD
+REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS
 REAL(EB) :: RD,RDS,RDC,RRD,RD_NEW, &
             NUSSELT,KA,H_V, &
             RVC,WGT,OMWGT, &
@@ -1058,7 +1057,7 @@ REAL(EB) :: RD,RDS,RDC,RRD,RD_NEW, &
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,ITER,EVAP_INDEX
 REAL(EB) :: SC_AIR,D_AIR,DHOR,SHER,XVAP,QVAP, HADT_WALL, HADT_G, &
             MDROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
-            CP_IGAS,CP_DROP,MGAS,ATOP,ABOT,CR2,WALL_FLAG,FILMD,Z_2,Y_IGAS_Z,Z_F,&
+            CP_IGAS,CP_DROP,MGAS,ATOP,ABOT,CR2,WALL_FLAG,Z_2,Y_IGAS_Z,Z_F,&
             TMP_GAS_OLD,TMP_GAS_NEW,TMP_DROP_OLD,TMP_DROP_NEW,TMP_MELT,TMP_BOIL,TMP_WALL, &
             DENOM,EGASOLD,ESYSOLD,MGCP,MVCP,MDCPNEW
 INTEGER, INTENT(IN) :: NM
@@ -1069,7 +1068,6 @@ D_VAP = 0.
 HS     = 300._EB!3000._EB    ! Heat transfer coef from solid to drop (W/m2/K)
 HLF    = 100._EB!1000._EB    ! Leidenfrost heat transfer coef (W/m2/K)
 PR     = 0.7_EB      ! Prandtl number of air
-FILMD  = 0.002_EB    ! Thickness of continous water film
 NU_FAC = 0.6_EB*PR**ONTH
 RDT    = 1._EB/DT
 CR2    = 2._EB**ONTH
@@ -1081,21 +1079,22 @@ SH_FAC = 0.6_EB*SC_AIR**ONTH
 DROP_DEN => WORK4
 DROP_RAD => WORK5
 DROP_TMP => WORK6
-WMPUAOLD => WALL_WORK1
-WCPUAOLD => WALL_WORK2
+
+! Loop over all types of evaporative species
 
 EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
-   WMPUAOLD = WMPUA(:,EVAP_INDEX)
-!   IF (WALL_COUNTER==0) THEN
-!      WCPUAOLD = 0._EB
-!   ELSE
-!      WCPUAOLD = WCPUA(:,EVAP_INDEX)
-!   ENDIF
+
+   WCPUA(:,EVAP_INDEX) = 0._EB
    WMPUA(:,EVAP_INDEX) = 0._EB
-!   WCPUA(:,EVAP_INDEX) = 0._EB
-   PC_LOOP: DO N_PC = 1,N_PART
+   FILM_THICKNESS => WALL_WORK2
+   FILM_THICKNESS =  0._EB
+
+   ! Loop over all particle/droplet classes that have the given evaporative index
+
+   PART_CLASS_LOOP: DO N_PC = 1,N_PART
+
       PC => PARTICLE_CLASS(N_PC)
-      IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PC_LOOP
+      IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
       DROP_DEN = 0._EB
       DROP_TMP = 0._EB
       DROP_RAD = 0._EB
@@ -1115,7 +1114,23 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          H_V = PC%H_V
    !   ENDIF
 
+      ! Loop through all droplets in the class and determine the depth of the liquid film on each surface cell
+
+      MASS_SUMMING_LOOP: DO I=1,NLP
+         DR => DROPLET(I)
+         IF (DR%IOR==0)        CYCLE MASS_SUMMING_LOOP
+         IF (DR%WALL_INDEX==0) CYCLE MASS_SUMMING_LOOP
+         IF (DR%CLASS /= N_PC) CYCLE MASS_SUMMING_LOOP
+         IF (DR%R<=0._EB)      CYCLE MASS_SUMMING_LOOP
+         IW = DR%WALL_INDEX
+         FILM_THICKNESS(IW) = FILM_THICKNESS(IW) + DR%PWT*DR%R**3/AW(IW)
+      ENDDO MASS_SUMMING_LOOP
+      FILM_THICKNESS = FILM_THICKNESS*FTPR/PC%DENSITY
+
+      ! Loop through all droplets within the class and determine mass/energy transfer
+
       DROPLET_LOOP: DO I=1,NLP
+
          DR => DROPLET(I)
          IF (DR%CLASS /= N_PC) CYCLE DROPLET_LOOP
          IF (DR%R<=0._EB)      CYCLE DROPLET_LOOP
@@ -1128,7 +1143,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          JJ  = FLOOR(YJ+1._EB)
          KK  = FLOOR(ZK+1._EB)
          
-         !Intiailize droplet thermophysical data
+         ! Intiailize droplet thermophysical data
          RD   = DR%R
          RDS  = RD*RD
          RDC  = RD*RDS
@@ -1182,16 +1197,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             RDS  = RD*RD
             RDC  = RD*RDS
             RRD  = 1._EB/RD
-            ABOT = PI*RDS
-            ATOP = 2._EB*PI*RDS
-            IF (WMPUAOLD(IW)/PC%DENSITY>FILMD) THEN
-               ABOT = MDROP/WMPUAOLD(IW)
-               ATOP = ABOT
-            ENDIF
-            IF (WGT*ABOT > AW(IW)) THEN
-               ABOT = AW(IW)/WGT
-               ATOP = ABOT
-            ENDIF 
+            ABOT = MDROP/(FILM_THICKNESS(IW)*PC%DENSITY)
+            ATOP = ABOT
             TMP_WALL   = TMP_F(IW)
             IF (TMP_WALL-TMP_BOIL>DTLF) THEN  ! Leidenfrost droplet
                HADT_WALL = ABOT*DT*HLF
@@ -1238,7 +1245,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ABOT  = ATOP
          ENDIF SET_SOLID  
          
-         !Heat Transfer coefficient
+         ! Heat Transfer coefficient
          NUSSELT = 2._EB + NU_FAC*SQRT(DR%RE)
          SHER    = 2._EB + SH_FAC*SQRT(DR%RE)
          HD      = 0.5_EB*NUSSELT*KA*RRD
@@ -1274,7 +1281,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                         (WGT * DENOM)
          TMP_GAS_NEW =  (2._EB * EGASOLD * (MDCPNEW - MVCP) + ESYSOLD * (HADT_G + 2._EB * MVCP)) / DENOM
 
-         !If initial MVAP was zero or new drop temperature is over boiling compute a new guess
+         ! If initial MVAP was zero or new drop temperature is over boiling compute a new guess
+
          IF (MVAP ==0._EB .OR. TMP_DROP_NEW > TMP_BOIL) THEN
             XVAP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(MAX(TMP_MELT,TMP_DROP_NEW),TMP_BOIL))))
             Y_EQUIL  = XVAP/(MW_RATIO + (1._EB-MW_RATIO)*XVAP)
@@ -1302,7 +1310,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ENDIF  
          ENDIF
 
-         !Using MVAP guess as max value, iterate to get actual evaporation
+         ! Using MVAP guess as max value, iterate to get actual evaporation
+
          ITERATE_IF: IF (MVAP > 0._EB) THEN
             ITER = 0
             MVAPMAX = MVAP
@@ -1353,36 +1362,42 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          IF (TMP_DROP_NEW > TMP_BOIL) TMP_DROP_NEW = TMP_BOIL
          IF (TMP_DROP_NEW < TMP_MELT) TMP_DROP_NEW = TMP_MELT
        
-         MDROP = MDROP - MVAP
-         MVAP  = MVAP*WGT
-         DR%R = (MDROP / FTPR) ** ONTH
+         MDROP  = MDROP - MVAP
+         MVAP   = MVAP*WGT
+         DR%R   = (MDROP/FTPR)**ONTH
+         DR%TMP = TMP_DROP_NEW
         
          IF (WALL_FLAG<1._EB) THEN
             QUSE = QWALLR+QWALLC
-            RDC       = RD_NEW**3
+            RDC  = RD_NEW**3
             WCPUA(IW,EVAP_INDEX ) = WCPUA(IW,EVAP_INDEX ) + WGT*RDT*QUSE*RAW(IW)
             WMPUA(IW,EVAP_INDEX ) = WMPUA(IW,EVAP_INDEX ) + WGT*MDROP*RAW(IW)
          ENDIF
          
          ! Decrease temperature due to droplet heating/vaporization
-         TMP(II,JJ,KK)=TMP_GAS_NEW
+
+         TMP(II,JJ,KK) = TMP_GAS_NEW
          TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
 
          ! Save water vapor production rate for diverence expression
+
          D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) +R0*RDT*( &
                RHO_G*((1-Y_IGAS)/SPECIES(0)%MW+Y_IGAS/MW_DROP)*(TMP(II,JJ,KK)-TMP_GAS_OLD) +RVC*MVAP*TMP(II,JJ,KK)/MW_DROP) 
 
          ! Adjust mass of evaporated liquid to account for different Heat of Combustion between fuel droplet and gas
+
          MVAP = PC%ADJUST_EVAPORATION*MVAP
 
-         ! Add water vapor or fuel gas to the cell
+         ! Add water vapor or fuel gas to the grid cell
 
          YY(II,JJ,KK,IGAS)= MIN(1._EB,(MVAP+MGAS*Y_IGAS)/(MVAP+MGAS))
-         ! Add new mass from vaporized water droplet 
+
+         ! Add new mass from vaporized water droplet to the grid cell
 
          RHO(II,JJ,KK) = RHO(II,JJ,KK) + MVAP*RVC
 
-         DR%TMP = TMP_DROP_NEW
+         ! Get out of the loop if the droplet has evaporated completely
+
          IF (DR%R<=0._EB) CYCLE DROPLET_LOOP
 
          ! Assign water mass to the cell for airborne drops
@@ -1404,7 +1419,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
       DROP_RAD = DROP_RAD/(DROP_DEN+1.E-10_EB)
       DROP_TMP = DROP_TMP/(DROP_DEN+1.E-10_EB)
     
-      AVG_DROP_RAD(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_RAD(:,:,:,EVAP_INDEX )+ DROP_DEN*DROP_RAD) &
+      AVG_DROP_RAD(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_RAD(:,:,:,EVAP_INDEX )+DROP_DEN*DROP_RAD) &
                                           /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
       AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_TMP(:,:,:,EVAP_INDEX )+DROP_DEN*DROP_TMP) &
                                           /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
@@ -1412,13 +1427,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
       AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = WGT*AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + OMWGT*DROP_DEN
       WHERE (AVG_DROP_DEN(:,:,:,EVAP_INDEX )<0.0001_EB .AND. DROP_DEN==0._EB) AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = 0.0_EB
 
-      ! Weight the new water mass array
+   ENDDO PART_CLASS_LOOP
 
-      WMPUA(:,EVAP_INDEX ) = WGT*WMPUAOLD + OMWGT*WMPUA(:,EVAP_INDEX)
-!      WCPUA(:,EVAP_INDEX ) = WGT*WCPUAOLD + OMWGT*WCPUA(:,EVAP_INDEX)
-!      WCPUA(:,EVAP_INDEX ) = WCPUAOLD + WCPUA(:,EVAP_INDEX)
-
-   ENDDO PC_LOOP
 ENDDO EVAP_INDEX_LOOP
 
 ! Remove out-of-bounds particles
