@@ -1634,7 +1634,7 @@ void initvars1(void){
 #endif
   strcpy(TRAINERTITLEBASE,"Virtual Fire Fighter Trainer 0.9 Beta -");
 #ifdef pp_FINALRELEASE
-  strcpy(TRAINERTITLEBASE,TITLEBASE");
+  strcpy(TRAINERTITLEBASE,TITLEBASE);
 #endif
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");
