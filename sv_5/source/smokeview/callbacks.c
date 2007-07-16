@@ -113,11 +113,7 @@ void mouse(int button, int state, int x, int y){
       glShadeModel(GL_FLAT);
 
 
-#ifdef pp_RENDER
       ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
-#else
-      ShowScene(SELECT,VIEW_CENTER);
-#endif
       glReadBuffer(GL_BACK);
       glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
       glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
@@ -197,11 +193,7 @@ void mouse(int button, int state, int x, int y){
       glDisable(GL_TEXTURE_2D);
       glShadeModel(GL_FLAT);
 
-#ifdef pp_RENDER
       ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
-#else
-      ShowScene(SELECT,VIEW_CENTER);
-#endif
       glReadBuffer(GL_BACK);
       glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
       glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
@@ -997,13 +989,9 @@ void keyboard(unsigned char key, int x, int y){
   }
 #ifndef pp_nolibs
   if(strncmp((const char *)&key2,"r",1)==0
-#ifdef pp_RENDER
     ||strncmp((const char *)&key2,"R",1)==0
-#endif
     ){
-#ifdef pp_RENDER
     if(strncmp((const char *)&key2,"R",1)==0)render_double=2;
-#endif
     RenderOnceNow=1;
     if(showstereo!=0){
       RenderOnceNowL=1;
@@ -1668,7 +1656,6 @@ void Display(void){
       }
     }
   }
-#ifdef pp_RENDER
   if(showstereo==1&&videoSTEREO==1){ 
     glDrawBuffer(GL_BACK_LEFT);
     ShowScene(RENDER,VIEW_LEFT,0,
@@ -1736,26 +1723,6 @@ void Display(void){
       }
     }
   }
-#else
-  if(showstereo==1&&videoSTEREO==1){ 
-    glDrawBuffer(GL_BACK_LEFT);
-    ShowScene(RENDER,VIEW_LEFT);
-    glDrawBuffer(GL_BACK_RIGHT);
-    ShowScene(RENDER,VIEW_RIGHT);
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
-  }
-   else{
-    if(benchmark_flag==1){
-      glDrawBuffer(GL_FRONT);
-      ShowScene(RENDER,VIEW_CENTER);
-    }
-    else{
-      glDrawBuffer(GL_BACK);
-      ShowScene(RENDER,VIEW_CENTER);
-      if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
-    }
-  }
-#endif
   if(touring == 1 ){
     if(RenderGif != 0){
       if(ntimes>0)angle += 2.0*PI/((float)ntimes/(float)RenderSkip);
@@ -1963,7 +1930,6 @@ void update_framenumber(int changetime){
         }
       }
     }
-#ifdef pp_ISO
     if(showiso==1){
       iso *isoi;
       mesh *meshi;
@@ -1987,16 +1953,6 @@ void update_framenumber(int changetime){
         }
       }
     }
-#else
-    if(showiso==1){
-      for(i=0;i<selected_case->nmeshes;i++){
-        meshi=selected_case->meshinfo+i;
-        if(meshi->isotimes==NULL)continue;
-        if(meshi->isotimeslist==NULL)continue;
-        meshi->iiso=meshi->isotimeslist[itime];
-      }
-    }
-#endif
     if(ntotal_smooth_blockages>0){
       for(i=0;i<selected_case->nmeshes;i++){
         smoothblockage *sb;

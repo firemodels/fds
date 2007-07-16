@@ -1,5 +1,4 @@
 #include "options.h"
-#ifdef pp_ISO
 #include "zlib.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -712,4 +711,3 @@ void getisosizes(EGZ_FILE *ISOFILE,float **levelsptr, int *nisolevels, int *size
   *sizebefore+=(4*nlevels);
 
 }
-#endif

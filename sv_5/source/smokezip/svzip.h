@@ -3,9 +3,7 @@
 #else
 #define EXTERN extern
 #endif
-#ifdef pp_ISO
 #include "csphere.h"
-#endif
 #define PERCENTILE_MIN 0
 #define SET_MIN 1
 #define GLOBAL_MIN 2
@@ -48,7 +46,6 @@ typedef struct {
   int dup;
 } patch;
 
-#ifdef pp_ISO
 typedef struct {
   int blocknumber;
   char *file, *filebase;
@@ -61,7 +58,6 @@ typedef struct {
   float *isolevels;
   int nisolevels,nisosteps;
 } iso;
-#endif
 
 
 typedef struct {
@@ -76,7 +72,6 @@ typedef struct {
   int rle;
 } slice;
 
-#ifdef pp_ISO
 typedef struct {
   int ibar, jbar, kbar;
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
@@ -86,7 +81,6 @@ typedef struct {
 typedef struct {
   float normal[3];
 } vert;
-#endif
 
 
 /* --------------------------  smoke3d ------------------------------------ */
@@ -126,9 +120,7 @@ int getendian(void);
 int convert_slice(slice *slicei);
 slice *getslice(char *string);
 void compress_slices(void);
-#ifdef pp_ISO
 void compress_isos(void);
-#endif
 int slicedup(slice *slicej, int islice);
 void compress_slices(void);
 void getfilesizelabel(int size, char *sizelabel);
@@ -163,9 +155,7 @@ void trim(char *line);
 void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *normal, float *area);
 
 EXTERN patch *patchinfo;
-#ifdef pp_ISO
 EXTERN mesh *meshinfo;
-#endif
 EXTERN smoke3d *smoke3dinfo;
 EXTERN int npatch_files;
 #ifdef pp_LIGHT
@@ -173,11 +163,9 @@ EXTERN int make_lighting_file;
 #endif
 EXTERN slice *sliceinfo;
 EXTERN int nslice_files;
-#ifdef pp_ISO
 EXTERN int niso_files;
 EXTERN iso *isoinfo;
 EXTERN int nmeshes;
-#endif
 EXTERN int overwrite_slice;
 #ifdef pp_PART
 EXTERN part *partinfo;
@@ -185,18 +173,14 @@ EXTERN int npart_files;
 #endif
 EXTERN int nsmoke3d_files;
 EXTERN int endianswitch,overwrite_b,overwrite_s;
-#ifdef pp_ISO
 EXTERN int overwrite_iso;
-#endif
 EXTERN int cleanfiles;
 EXTERN char *destdir,*sourcedir;
 EXTERN int lensourcedir,lendestdir;
 EXTERN char dirseparator[2];
 EXTERN char pp[2];
 EXTERN int smoke3dzipstep, boundzipstep, slicezipstep;
-#ifdef pp_ISO
 EXTERN int isozipstep,doiso;
-#endif
 EXTERN int filesremoved;
 #ifdef pp_LIGHT
 EXTERN float albedo;
@@ -204,7 +188,5 @@ EXTERN float albedo;
 EXTERN int endf, syst;
 EXTERN char endianfilebase[1024];
 EXTERN char *endianfile;
-#ifdef pp_ISO
 EXTERN spherepoints sphereinfo;
-#endif
 

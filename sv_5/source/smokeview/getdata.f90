@@ -324,7 +324,6 @@ end do
 
 end subroutine getdata2b
 
-#ifdef pp_PART5
 subroutine getdata2(xs,ys,zs,&
                     t,&
                     sprinkflag,isprink,tspr,bframe,sframe,sprframe,stimes,nspr,nmax,mxframes,nframes,&
@@ -336,38 +335,15 @@ subroutine getdata2(xs,ys,zs,&
 #ifdef pp_cvf
 !DEC$ ATTRIBUTES ALIAS:'_getdata2@128' :: getdata2
 #endif
-#else
-subroutine getdata2(partfilecompress,xb,yb,zb,&
-                    xs,ys,zs,&
-                    x,y,z,t,&
-                    sprinkflag,isprink,tspr,bframe,sframe,sprframe,stimes,nspr,nmax,mxframes,nframes,&
-                    settmin_p,settmax_p,tmin_p,tmax_p,frameloadstep,partpointstep, &
-              			xbox0, xbox, ybox0, ybox, zbox0, zbox, &
-                    offset_x, offset_y, offset_z, &
-      	    				error)
-                   
-#ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_getdata2@168' :: getdata2
-#endif
-#endif
 
 implicit none
-#ifdef pp_PART5
 real, dimension(*), intent(out) :: t
-#else
-real, dimension(*), intent(out) :: x, y, z, t
-character(len=1), dimension(*) :: xb, yb, zb
-#endif
 
 integer(2), dimension(*) :: xs, ys, zs
 integer, dimension(*) :: bframe, sframe, sprframe
 character(len=1), dimension(*) :: isprink
 real, dimension(*) ::  stimes,tspr
-#ifdef pp_PART5
 integer, intent(in) :: nspr,nmax, mxframes
-#else
-integer, intent(in) :: nspr,nmax, mxframes, partfilecompress
-#endif
 integer, intent(out) :: nframes,error
 integer, intent(in) :: settmin_p, settmax_p, frameloadstep, partpointstep
 integer, intent(out) :: sprinkflag
@@ -392,18 +368,6 @@ integer :: nf, npoints
 lu10 = 10
 factor=2**15
 
-#ifndef pp_PART5
-if(partfilecompress.eq.1.and.(xbox.eq.xbox0.or.ybox.eq.ybox0.or.zbox.eq.zbox0))then
-#ifndef pp_makedll
-  write(6,*)"*** fatal error ***"
-  if(xbox.eq.xbox0)write(6,*)"    xbox=xbox0 ",xbox0,xbox
-  if(ybox.eq.ybox0)write(6,*)"    ybox=ybox0 ",ybox0,ybox
-  if(zbox.eq.zbox0)write(6,*)"    zbox=zbox0 ",zbox0,zbox
-#endif
-  error=1
-  return
-endif
-#endif
 nframes = 0
 bframe(1) = 0
 nf = 0
@@ -461,7 +425,6 @@ do
     if(n+npoints.gt.nmax)then
       go to 999
     endif
-#ifdef pp_PART5
    iitemp(1:npoints) = factor*(offset_x+xpp(1:npp1:partpointstep)-xbox0)/(xbox-xbox0)
 	 where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
 	 where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
@@ -479,53 +442,6 @@ do
 
    t(n+1:n+npoints) = brp(1:npp1:partpointstep)
    isprink(n+1:n+npoints) = char(0)
-#else
-	  if(partfilecompress.eq.0)then
-      x(n+1:n+npoints) = xpp(1:npp1:partpointstep)+offset_x
-      y(n+1:n+npoints) = ypp(1:npp1:partpointstep)+offset_y
-      z(n+1:n+npoints) = zpp(1:npp1:partpointstep)+offset_z
-      t(n+1:n+npoints) = brp(1:npp1:partpointstep)
-      isprink(n+1:n+npoints) = char(0)
-  	 elseif(partfilecompress.eq.1)then
-
-      iitemp(1:npoints) = 256*(offset_x+xpp(1:npp1:partpointstep)-xbox0)/(xbox-xbox0)
-	    where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-	    where(iitemp(1:npoints).gt.255)iitemp(1:npoints)=255
-      xb(n+1:n+npoints) = char(iitemp(1:npoints))
-
-      iitemp(1:npoints) = 256*(offset_y+ypp(1:npp1:partpointstep)-ybox0)/(ybox-ybox0)
-  	  where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-  	  where(iitemp(1:npoints).gt.255)iitemp(1:npoints)=255
-      yb(n+1:n+npoints) = char(iitemp(1:npoints))
-
-      iitemp(1:npoints) = 256*(offset_z+zpp(1:npp1:partpointstep)-zbox0)/(zbox-zbox0)
-  	  where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-  	  where(iitemp(1:npoints).gt.255)iitemp(1:npoints)=255
-      zb(n+1:n+npoints) = char(iitemp(1:npoints))
-
-      t(n+1:n+npoints) = brp(1:npp1:partpointstep)
-      isprink(n+1:n+npoints) = char(0)
-  	 elseif(partfilecompress.eq.2)then 
-
-      iitemp(1:npoints) = factor*(offset_x+xpp(1:npp1:partpointstep)-xbox0)/(xbox-xbox0)
-	    where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-	    where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
-      xs(n+1:n+npoints) = iitemp(1:npoints)
-
-      iitemp(1:npoints) = factor*(offset_y+ypp(1:npp1:partpointstep)-ybox0)/(ybox-ybox0)
-  	  where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-  	  where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
-      ys(n+1:n+npoints) = iitemp(1:npoints)
-
-      iitemp(1:npoints) = factor*(offset_z+zpp(1:npp1:partpointstep)-zbox0)/(zbox-zbox0)
-  	  where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-  	  where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
-      zs(n+1:n+npoints) = iitemp(1:npoints)
-
-      t(n+1:n+npoints) = brp(1:npp1:partpointstep)
-      isprink(n+1:n+npoints) = char(0)
-	  endif
-#endif
   	npp1a = npoints
     n = n + npp1a
   endif
@@ -561,7 +477,6 @@ do
         t(n+1:n+npoints) = -1.0
 	  endif
       isprink(n+1:n+npoints) = char(1)
-#ifdef pp_PART5
         iitemp(1:npoints) = factor*(xpp(1:npp2:partpointstep)-xbox0)/(xbox-xbox0)
         where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
         where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
@@ -576,46 +491,6 @@ do
         where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
         where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
         zs(n+1:n+npoints) = iitemp(1:npoints)
-#else
-  	  if(partfilecompress.eq.0)then
-        x(n+1:n+npoints) = xpp(1:npp2:partpointstep)
-        y(n+1:n+npoints) = ypp(1:npp2:partpointstep)
-        z(n+1:n+npoints) = zpp(1:npp2:partpointstep)
-
-  	   elseif(partfilecompress.eq.1)then
-        iitemp(1:npoints) = 256*(xpp(1:npp2:partpointstep)-xbox0)/(xbox-xbox0)
-        where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-        where(iitemp(1:npoints).gt.255)iitemp(1:npoints)=255
-        xb(n+1:n+npoints) = char(iitemp(1:npoints))
-
-        iitemp(1:npoints) = 256*(ypp(1:npp2:partpointstep)-ybox0)/(ybox-ybox0)
-        where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-        where(iitemp(1:npoints).gt.255)iitemp(1:npoints)=255
-        yb(n+1:n+npoints) = char(iitemp(1:npoints))
-
-        iitemp(1:npoints) = 256*(zpp(1:npp2:partpointstep)-zbox0)/(zbox-zbox0)
-        where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-        where(iitemp(1:npoints).gt.255)iitemp(1:npoints)=255
-        zb(n+1:n+npoints) = char(iitemp(1:npoints))
-
-  	   elseif(partfilecompress.eq.2)then
-        iitemp(1:npoints) = factor*(xpp(1:npp2:partpointstep)-xbox0)/(xbox-xbox0)
-        where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-        where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
-        xs(n+1:n+npoints) = iitemp(1:npoints)
-
-        iitemp(1:npoints) = factor*(ypp(1:npp2:partpointstep)-ybox0)/(ybox-ybox0)
-        where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-        where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
-        ys(n+1:n+npoints) = iitemp(1:npoints)
-
-        iitemp(1:npoints) = factor*(zpp(1:npp2:partpointstep)-zbox0)/(zbox-zbox0)
-        where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-        where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
-        zs(n+1:n+npoints) = iitemp(1:npoints)
-
-  	  endif
-#endif
   	  npp2a = npoints
       n = n + npp2a
   	endif

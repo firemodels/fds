@@ -140,9 +140,7 @@ void svWINAPI sv_startup(char *file, int showpart){
 /* ------------------ ResizeWindow ------------------------ */
 
 void ResizeWindow(int width, int height){
-#ifdef pp_RENDER
   if(render_double!=0)return;
-#endif
   glutSetWindow(mainwindow_id);
   glutReshapeWindow(width,height);
   glutPostRedisplay();

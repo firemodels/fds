@@ -982,10 +982,8 @@ void initvars1(void){
   rgb_terrain[9][3]=1.0;
 #endif
 
-#ifdef pp_RENDER
   render_double=0;
   render_double_state=0;
-#endif
   usetexturebar=1;
   percentile_level=0.01;
 
@@ -1241,13 +1239,8 @@ void initvars1(void){
   smoke3dzipstep=1, smoke3dzipskip=0;
   evacframeskip=0, evacframestep=1;
   partpointstep=1;
-#ifdef pp_PART5
   partpointstep_old=0;
-#endif
   partpointskip=0;
-#ifndef pp_PART5
-  partpointcompress=2;
-#endif
   render_option=RenderWindow;
   RenderMenu(render_option);
   viewoption=0;
@@ -1562,7 +1555,6 @@ void initvars1(void){
   updateUpdateFrameRateMenu=0;
   ntextures=0;
   nskyboxinfo=0;
-#ifdef pp_PART5
   part5show=1;
   streak5show=0;
 //SVEXTERN int nstreak_value; // 5
@@ -1587,13 +1579,11 @@ void initvars1(void){
   showstreakhead=1;
   npartclassinfo=0;
   prop_index=1;
-#endif
   dummyvents=0;
   noutlineinfo=0;
   nmultislices=0;
   nmultivslices=0;
 
-#ifdef pp_DEVICE
   svofile_exists=0;
   devicenorm_length = 0.1;
   ndeviceinfo=0;
@@ -1606,7 +1596,6 @@ void initvars1(void){
   device_def_last.next=NULL;
   device_def_last.prev=&device_def_first;
   device_defs=NULL;
-#endif
  
   showfiles=0;
   smoke3d_external=0;
@@ -1644,24 +1633,12 @@ void initvars1(void){
   strcpy(dirseparator,"\\");
 #endif
 
-#ifdef pp_NISTREVIEW
-  strcpy(TITLEBASE,"Smokeview 4.0 Final Beta - ");
- #else
-#ifdef pp_SV5P0
 #ifdef pp_TEST
   strcpy(TITLEBASE,"Smokeview 5.0.0 Alpha - ");
 #else
   strcpy(TITLEBASE,"Smokeview 5.0.0 Beta - ");
 #endif
-#else
-  strcpy(TITLEBASE,"Smokeview 4.0.8 - ");
-#endif
-#endif
-#ifdef pp_SV5P0
   strcpy(TRAINERTITLEBASE,"Virtual Fire Fighter Trainer 0.9 Beta -");
-#else
-  strcpy(TRAINERTITLEBASE,"Virtual Fire Fighter Trainer 4.0.8 Beta -");
-#endif
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");
 
@@ -1896,12 +1873,10 @@ void initvars0(void){
   zoneinfo=NULL;
   activezone=NULL;
   partinfo=NULL;
-#ifdef pp_PART5
    current_property=NULL;
    partclassinfo=NULL;
    part5propinfo=NULL;
    npart5prop=0;
-#endif
   targinfo=NULL;
   sliceinfo=NULL;
   caminfo=NULL;
@@ -1987,9 +1962,7 @@ void initvars0(void){
   patchlabellist=NULL;
   sliceindex=NULL;
   face_transparent=NULL;
-#ifdef pp_DEVICE
   deviceinfo=NULL;
-#endif
 }
 
 void init_default_devices(void){

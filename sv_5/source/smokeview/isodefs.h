@@ -44,12 +44,10 @@ typedef struct {
   float tmin, tmax;
   float *xnorm, *ynorm, *znorm;
   short *norm, *vertexnorm;
-#ifdef pp_ISO
   unsigned char *comp_bufferframe, *full_bufferframe;
   int ncomp_bufferframe, nfull_bufferframe;
   unsigned char *s_norm;
   int compression_type;
-#endif
 } isosurface;
 
 #ifndef pp_DRAWISO

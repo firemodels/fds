@@ -1,7 +1,6 @@
 #ifndef SETCSPHERE
 #define SETCSPHERE
 
-#ifdef pp_ISO
 typedef struct {
   int n;
   float rad;
@@ -25,5 +24,4 @@ unsigned int getnormalindex(spherepoints *sphereinfo, float *normal);
 void getnormalvector(spherepoints *sphereinfo, unsigned int index, float *normal);
 float *getnormalvectorptr(spherepoints *sphereinfo, unsigned int index);
 
-#endif
 #endif

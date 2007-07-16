@@ -1,5 +1,4 @@
 #include "options.h"
-#ifdef pp_ISO
 #include <stdio.h>  
 #include <stdlib.h>
 #ifdef pp_DRAWISO
@@ -348,5 +347,4 @@ void drawspherepoints(spherepoints *spherei){
     }
   }
 }
-#endif
 #endif

@@ -278,14 +278,12 @@ typedef struct {
 
 typedef struct {
   int seq_id, autoload;
-#ifdef pp_ISO
   int compression_type;
   char *comp_file, *reg_file, *size_file;
   short *normaltable;
   unsigned char *comp_buffer, *full_bufferframe, *comp_bufferframe;
   int nfull_bufferframe, ncomp_bufferframe, maxfull_buffer;
   int nnormaltable; 
-#endif
   char *file;
   int dataflag;
   int type;
@@ -309,9 +307,7 @@ typedef struct {
 /* --------------------------  mesh ------------------------------------ */
 
 typedef struct mesh_ {
-#ifdef pp_PART5
   int mesh_type;
-#endif
   float meshrgb[3], *meshrgb_ptr;
   float cellsize;
   float *xplt, *yplt, *zplt;
@@ -356,12 +352,6 @@ typedef struct mesh_ {
   float *smoothblockagecolors;
   int nsmoothblockagecolors;
   int ntc;
-#ifndef pp_DEVICE
-  float *xtcplot, *ytcplot, *ztcplot;
-  float *xtc, *ytc, *ztc;
-  float *xtcnorm, *ytcnorm, *ztcnorm;
-  int *has_tcnorm;
-#endif
   int nspr;
   float *xsprplot, *ysprplot, *zsprplot, *tspr;
   int nheat;
@@ -475,8 +465,6 @@ typedef struct _tourdata {
   float global_tension;
 } tourdata;
 
-#ifdef pp_DEVICE
-
 /* --------------------------  sv_object_parts ------------------------------------ */
 
   // part/op types
@@ -525,7 +513,6 @@ typedef struct {
   sv_object *object;
   int type;
 } device;
-#endif
 
 /* --------------------------  casedata ------------------------------------ */
 
@@ -574,7 +561,6 @@ typedef struct _camera {
   char name[32];
 } camera;
 
-#ifdef pp_PART5
 /* --------------------------  partclass ------------------------------------ */
 
 typedef struct {
@@ -619,18 +605,15 @@ typedef struct {
   int **ivals;
   unsigned char **cvals;
 } part5data;
-#endif
 
 /* --------------------------  particle ------------------------------------ */
 
 typedef struct {
   int seq_id, autoload;
   char *file;
-#ifdef pp_PART5
   char *comp_file, *size_file, *reg_file;
   int sort_tags_loaded;
   int compression_type;
-#endif
   int loaded, display;
   int evac;
   int blocknumber;
@@ -648,11 +631,9 @@ typedef struct {
   flowlabels label;
   char menulabel[128];
   int version;
-#ifdef pp_PART5
   int nclasses;
   part5class **partclassptr;
   part5data *data5;
-#endif
 
 } particle;
 
@@ -690,9 +671,7 @@ typedef struct {
 /* --------------------------  slice ------------------------------------ */
 
 typedef struct {
-#ifdef pp_PART5
   int mesh_type;
-#endif
   int seq_id, autoload;
   char *file;
   char *size_file;
@@ -742,9 +721,7 @@ typedef struct {
 /* --------------------------  multislice ------------------------------------ */
 
 typedef struct {
-#ifdef pp_PART5
   int mesh_type;
-#endif
   int seq_id, autoload;
   int loaded,display,type;
   int nslices;
@@ -756,9 +733,7 @@ typedef struct {
 /* --------------------------  multivslice ------------------------------------ */
 
 typedef struct {
-#ifdef pp_PART5
   int mesh_type;
-#endif
   int seq_id, autoload;
   int loaded,display,type;
   int nvslices;
