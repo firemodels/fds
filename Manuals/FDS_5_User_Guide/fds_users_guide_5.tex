@@ -243,7 +243,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, July 9, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, July 16, 2007)}
 
 \vspace{.5in}
 
@@ -1653,6 +1653,30 @@ More constraints on the function lead to higher order polynomial functions, so b
 to non-monotonic functions.
 The monotonicity of the function is checked by the
 program and an error message is produced if it is not monotonic.
+
+
+\subsection{Choosing the Right Mesh Dimensions}
+
+A common question asked by new FDS users is, ``What size mesh should I use?''  The answer is not easy because it depends considerably on what you are trying
+to accomplish. In general, you should build an FDS input file using a relatively coarse mesh, and then gradually refine the mesh until you do not see
+appreciable differences in your results. Formally, this is referred to as a grid sensitivity study.
+
+For simulations involving buoyant plumes, a measure of how well the flow field is resolved is given by the
+non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic
+fire diameter
+\be D^* = \left(
+     \frac{\dQ}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} }
+     \right)^\frac{2}{5}  \ee
+and $\dx$ is the nominal size of a grid cell\footnote{The characteristic
+fire diameter is related to the characteristic fire size via the
+relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the
+fire.}. The quantity $D^*/\dx$
+can be thought of as the number of computational cells spanning the
+characteristic (not necessarily the physical) diameter of the fire.
+The more cells spanning the fire, the better the resolution of the
+calculation. It is better to assess the quality of the mesh in terms of this non-dimensional parameter, rather than
+an absolute grid cell size. For example, a cell size of 10~cm may be ``adequate,'' in some sense, for evaluating the spread of smoke and heat
+through a building from a sizeable fire, but may not be appropriate to study a very small, smoldering source.
 
 
 \clearpage
