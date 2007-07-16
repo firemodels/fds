@@ -16,7 +16,6 @@
 #ifdef pp_SPOTLIGHT
 void updateSpotLight(int init, float *spot_position, float *spot_direction);
 #endif
-#ifdef pp_RENDER
 int SUB_portortho(int quad, 
                    GLint i_left, GLint i_down, GLsizei i_width, GLsizei i_height,
                    GLdouble x_left, GLdouble x_right, GLdouble x_bottom, GLdouble x_top,
@@ -27,7 +26,6 @@ int SUB_portfrustum(int quad,
                    GLdouble fleft, GLdouble fright, GLdouble fdown, GLdouble fup, GLdouble fnear, GLdouble ffar,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
-#endif
 
 EXTERNCPP void add_new_tour(void);
 
@@ -62,7 +60,6 @@ EXTERNCPP void useSmokeShaders(void);
 EXTERNCPP void useOpenGLShaders(void);
 #endif
 EXTERNCPP void to_lower(char *string);
-#ifdef pp_DEVICE
 EXTERNCPP void init_device_defs(void);
 EXTERNCPP void make_error_frame(void);
 EXTERNCPP char *get_device_label(char *buffer);
@@ -76,7 +73,6 @@ EXTERNCPP sv_object *init_SVOBJECT2(char *label, char *commandson, char *command
 EXTERNCPP sv_object *get_SVOBJECT_type(char *label);
 EXTERNCPP int read_device_defs(char *file);
 EXTERNCPP void freeall_objects(void);
-#endif
 
 EXTERNCPP int plot3dlistcompare( const void *arg1, const void *arg2 );
 EXTERNCPP int plot3dcompare( const void *arg1, const void *arg2 );
@@ -129,7 +125,6 @@ EXTERNCPP void IsoShowMenu(int value);
 EXTERNCPP void ShowPatchMenu(int value);
 EXTERNCPP void Smoke3DShowMenu(int value);
 EXTERNCPP void ShowVSliceMenu(int value);
-#ifdef pp_PART5
 EXTERNCPP int get_part5prop_index_s(char *shortlabel);
 EXTERNCPP int get_part5prop_index(char *label);
 EXTERNCPP void print_part5prop(void);
@@ -137,7 +132,6 @@ EXTERNCPP part5prop *get_part5prop(char *label);
 EXTERNCPP void init_part5prop(void);
 EXTERNCPP void update_streakvalue(float value);
 EXTERNCPP void update_all_partvis2(void);
-#endif
 EXTERNCPP void ParticleMenu(int value);
 EXTERNCPP void LoadPatchMenu(int value);
 EXTERNCPP void LoadSliceMenu(int value);
@@ -147,9 +141,7 @@ EXTERNCPP void initvars0(void);
 EXTERNCPP void RenderState(int onoff);
 EXTERNCPP void update_windowsizelist(void);
 EXTERNCPP void ResizeWindow(int width, int height);
-#ifdef pp_PART5
 EXTERNCPP void update_glui_streakvalue(float rvalue);
-#endif
 EXTERNCPP void uncompress_slicedataframe(slice *sd,int iframe);
 EXTERNCPP void glui_alert_setup(int main_window);
 EXTERNCPP void show_load_alert(void);
@@ -199,9 +191,7 @@ EXTERNCPP void getnewpos(float *oldpos, float dx, float dy, float dz, float spee
 EXTERNCPP void free_skybox(void);
 EXTERNCPP void draw_skybox(void);
 EXTERNCPP void loadskytexture(char *filebase, texture *texti);
-#ifdef pp_ISO
-EXTERNCPP      void uncompress_isodataframe(isosurface *asurface, int n);
-#endif
+EXTERNCPP void uncompress_isodataframe(isosurface *asurface, int n);
 EXTERNCPP void uncompress_patchdataframe(mesh *meshi,int iframe);
 EXTERNCPP void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata, 
                        float *times, unsigned int *zipoffset, unsigned int *zipsize, int ntimes);
@@ -412,13 +402,9 @@ EXTERNCPP int getplotstate(int choice);
 EXTERNCPP void update_loaded_lists(void);
 EXTERNCPP void setsmokeviewvars(void);
 EXTERNCPP void updateLights(int pos);
-#ifdef pp_RENDER
 EXTERNCPP int mergescreenbuffers(GLubyte *screenbuffers[4]);
 EXTERNCPP GLubyte *getscreenbuffer(void);
 EXTERNCPP void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height);
-#else
-EXTERNCPP void ShowScene(int mode, int viewmode);
-#endif
 EXTERNCPP void updateShow(void);
 EXTERNCPP int  inblockage(const mesh *gb,float x, float y, float z);
 EXTERNCPP int inmesh_smoke(float x, float y, float z, int n, int flag);

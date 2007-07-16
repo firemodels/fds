@@ -1,5 +1,4 @@
 #include "options.h"
-#ifdef pp_DEVICE
 #include <stdio.h>  
 #include <stdlib.h>
 #include <math.h>
@@ -1566,4 +1565,3 @@ void init_device_defs(void){
     ndevice_defs=0;
   }
 }
-#endif

@@ -30,7 +30,6 @@
 #include <direct.h>
 #endif
 
-#ifdef pp_RENDER
  /* ------------------------ SUB_portortho ------------------------- */
  
 int SUB_portortho(int quad, 
@@ -175,22 +174,16 @@ int SUB_portfrustum(int quad,
   }
   return 1;
 }
-#endif
 
  /* ------------------------ BLOCK viewport ------------------------- */
 
-#ifdef pp_RENDER
 void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
-#else 
-void BLOCK_viewport(void){
-#endif
   float mesh_left;
   char slicelabel[255];
 
   mesh_left=0.9;
   if(fontindex==LARGE_FONT)mesh_left=0.7;
   if(visColorLabels==1){
-#ifdef pp_RENDER
     if(screenWidth<screenHeight){
       if(SUB_portortho(quad,
         screenWidth-dwinW-fontWoffset-titlesafe_offset,titlesafe_offset,dwinW, dwinH-fontHoffset,
@@ -203,18 +196,6 @@ void BLOCK_viewport(void){
         0.,(double)ratio,0.0,1.0,
         s_left, s_down, s_width, s_height)==0)return;
     }
-#else
-    glViewport(screenWidth-dwinW-fontWoffset-titlesafe_offset,titlesafe_offset, 
-      dwinW, dwinH-fontHoffset);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    if(screenWidth<screenHeight){
-      gluOrtho2D(0.,1.0,0.,(double)ratio);
-    }
-    else{
-      gluOrtho2D(0.,(double)ratio,0.,1.0);
-    }
-#endif
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -316,11 +297,7 @@ void BLOCK_viewport(void){
 
 /* ------------------------ TIME BAR Viewport ------------------------- */
 
-#ifdef pp_RENDER
 void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
-#else
-void TIMEBAR_viewport(void){
-#endif
   int timebarheight;
 #ifdef pp_memstatus
   unsigned int availmemory;
@@ -340,7 +317,6 @@ void TIMEBAR_viewport(void){
     )
   {
     timebarheight=(int)(0.75*dwinH);
-#ifdef pp_RENDER
     if(screenWidth<screenHeight){
     if(SUB_portortho(quad,
       fontWoffset+titlesafe_offset, fontHoffset+titlesafe_offset, screenWidth-dwinWW-2*fontWoffset-2*titlesafe_offset, timebarheight,
@@ -357,20 +333,6 @@ void TIMEBAR_viewport(void){
 
        xtemp=ratio;
      }
-#else
-    glViewport(fontWoffset+titlesafe_offset, fontHoffset+titlesafe_offset, 
-      screenWidth-dwinWW-2*fontWoffset-2*titlesafe_offset, timebarheight);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    if(screenWidth<screenHeight){
-      gluOrtho2D(0.,1.,0.,.75*ratio);
-      xtemp=1.0;
-    }
-     else{
-       gluOrtho2D(0.,(double)ratio,0.,0.75);
-       xtemp=ratio;
-     }
-#endif
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -419,18 +381,13 @@ void TIMEBAR_viewport(void){
 
 /* --------------------- COLOR BAR Viewport ------------------------- */
 
-#ifdef pp_RENDER
 void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
-#else
-void COLORBAR_viewport(void){
-#endif
   GLint temp;
   float xnum;
 
 
  if(visColorLabels==1&&numColorbars!=0){
     temp = (int)(1.2f*dwinH);
-#ifdef pp_RENDER
     xnum=numColorbars;
     if(fontindex==LARGE_FONT)xnum*=1.5;
     if(screenWidth<screenHeight){
@@ -447,21 +404,6 @@ void COLORBAR_viewport(void){
        0.,(double)barright,-0.5,(double)(nrgb+1),
        s_left, s_down, s_width, s_height)==0)return;
     }
-#else
-    glViewport(screenWidth-dwinWW-fontWoffset-titlesafe_offset,temp+titlesafe_offset,
-      dwinWW,screenHeight-temp-fontHoffset-2*titlesafe_offset);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    xnum=numColorbars;
-    if(fontindex==LARGE_FONT)xnum*=1.5;
-    if(screenWidth<screenHeight){
-      barright=xnum/3.0+0.1f;
-      gluOrtho2D(0.,(double)barright,-0.5,(double)(ratio*(nrgb+1)));}
-     else{
-       barright=ratio*(xnum/3.0+0.1f);
-       gluOrtho2D(0.,(double)barright,-0.5,(double)(nrgb+1));
-     }
-#endif
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -475,29 +417,12 @@ void COLORBAR_viewport(void){
 
 /* -------------------------- LOGO Viewport -------------------------- */
 
-#ifdef pp_RENDER
 void LOGO_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
-#else
-void LOGO_viewport(void){
-#endif
   if(use_nistlogo==1){   
-#ifdef pp_RENDER
       if(SUB_portortho(quad,
         titlesafe_offset,screenHeight-15-titlesafe_offset,75,100,
         0.0,1.4,0.0,1.75,
         s_left, s_down, s_width, s_height)==0)return;
-#else
-    glViewport(
-      titlesafe_offset,
-      screenHeight-15-titlesafe_offset,
-      75,
-      100
-      );
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0.0,1.4,0.0,1.75);
-#endif
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -621,16 +546,11 @@ void LOGO_viewport(void){
     /* -------------------------- TITLE Viewport -------------------------- */
 
 
-#ifdef pp_RENDER
 void TITLE_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
-#else
-void TITLE_viewport(void){
-#endif
   int left;
   float textdown;
 
   if(visTitle==1){
-#ifdef pp_RENDER
     if(screenWidth<screenHeight){
       if(SUB_portortho(quad,
         fontWoffset+titlesafe_offset,(int)(screenHeight-1.1f*ntitles*dwinH/4.f-fontHoffset)-titlesafe_offset,screenWidth-dwinWW-fontWoffset-2*titlesafe_offset,(int)(ntitles*dwinH/4),
@@ -645,24 +565,6 @@ void TITLE_viewport(void){
         s_left, s_down, s_width, s_height)==0)return;
       left=(float)75/(float)(screenWidth-dwinWW)*ratio;
      }
-#else
-    glViewport(
-      fontWoffset+titlesafe_offset,
-      (int)(screenHeight-1.1f*ntitles*dwinH/4.f-fontHoffset)-titlesafe_offset, 
-      screenWidth-dwinWW-fontWoffset-2*titlesafe_offset, 
-      (int)(ntitles*dwinH/4)
-      );
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    if(screenWidth<screenHeight){
-      gluOrtho2D(0.,1.,0.,(double)(ntitles*ratio));
-      left=(float)75/(float)(screenWidth-dwinWW);
-    }
-     else{
-      gluOrtho2D(0.,(double)ratio,0.,(double)(ntitles*ratio));
-      left=(float)75/(float)(screenWidth-dwinWW)*ratio;
-     }
-#endif
     textdown=ratio/5.0;
 
     glMatrixMode(GL_MODELVIEW);
@@ -695,11 +597,7 @@ void TITLE_viewport(void){
 } 
 
 /* ----------------------- 3D scene Viewport ----------------------------- */
-#ifdef pp_RENDER
 void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
-#else
-void Scene_viewport(int view_mode){
-#endif
 
   float up, down, left, right;
   float dh;
@@ -817,7 +715,6 @@ void Scene_viewport(int view_mode){
     FrustumAsymmetry=-StereoCameraOffset*pbalance*fnear/fzero;
   }
 
-#ifdef pp_RENDER
   if(SUB_portfrustum(quad,
     (int)(left+fontWoffset+titlesafe_offset),
     (int)(down+titlesafe_offset),
@@ -827,31 +724,6 @@ void Scene_viewport(int view_mode){
     (double)fdown,(double)fup,
     (double)fnear,(double)ffar,
       s_left, s_down, s_width, s_height)==0)return;
-#else
-  glViewport(
-    (int)(left+fontWoffset+titlesafe_offset),
-    (int)(down+titlesafe_offset),
-    (int)(right-left-2*fontWoffset-2*titlesafe_offset),
-    (int)(up-down-dh-2*titlesafe_offset)
-    );
-
-  
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  if(projection_type==0){
-    glFrustum(
-      (double)(fleft+FrustumAsymmetry),(double)(fright+FrustumAsymmetry),
-      (double)fdown,(double)fup,
-      (double)fnear,(double)ffar);
-  }
-  else{
-    glOrtho(
-      (double)(fleft+FrustumAsymmetry),(double)(fright+FrustumAsymmetry),
-      (double)fdown,(double)fup,
-      (double)fnear,(double)ffar);
-  }
-#endif
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -1060,93 +932,9 @@ void setClipPlanes(void){
 }
 
 
-#ifndef pp_DEVICE
-/* ----------------------- drawDevices ----------------------------- */
-
-void drawDevices(void){
-  int igrid;
-  mesh *meshi;
-  int i;
-
-  if(hasSensorNorm==1&&visSensor==1&&visSensorNorm==1){
-    glBegin(GL_LINES);
-    for(igrid=0;igrid<selected_case->nmeshes;igrid++){
-      meshi = selected_case->meshinfo + igrid;
-
-    /* draw the sensor norm vectors*/
-
-      if(meshi->ntc>0){
-        glColor4fv(sensornormcolor);
-        for(i=0;i<meshi->ntc;i++){
-          if(meshi->has_tcnorm[i]==1){
-            glVertex3f(
-              meshi->xtcplot[i],
-              meshi->ytcplot[i],
-              meshi->ztcplot[i]);
-            glVertex3f(
-              meshi->xtcplot[i]+meshi->xtcnorm[i],
-              meshi->ytcplot[i]+meshi->ytcnorm[i],
-              meshi->ztcplot[i]+meshi->ztcnorm[i]
-              );
-          }
-        }
-      }
-    }
-    glEnd();
-  }
-  glBegin(GL_QUADS);
-  for(igrid=0;igrid<selected_case->nmeshes;igrid++){
-    meshi = selected_case->meshinfo + igrid;
-
-    /* draw the sensors */
-
-    if(visSensor==1&&meshi->ntc>0){
-      glColor4fv(sensorcolor);
-      for(i=0;i<meshi->ntc;i++){
-        drawcbox(meshi->xtcplot[i],meshi->ytcplot[i],meshi->ztcplot[i],sensorabssize);
-      }
-    }
-  /* draw sprinklers */
-
-    if(visSprink==1&&meshi->nspr>0){
-      for(i=0;i<meshi->nspr;i++){
-        if(showtime==1&&itime>=0&&itime<ntimes){
-          if(meshi->tspr[i]<=times[itime])glColor4fv(sprinkoncolor);
-          if(meshi->tspr[i] >times[itime])glColor4fv(sprinkoffcolor);
-        }
-        else{
-          glColor4fv(sprinkoffcolor);
-        }
-        drawcbox(meshi->xsprplot[i],meshi->ysprplot[i],meshi->zsprplot[i],sprinklerabssize);
-      }
-    }
-
-  /* draw heat detectors*/
-
-    if(visHeat==1&&meshi->nheat>0){
-      for(i=0;i<meshi->nheat;i++){
-        if(plotstate==DYNAMIC_PLOTS&&showtime==1&&itime>=0&&itime<ntimes){
-          if(meshi->theat[i]<=times[itime])glColor4fv(heatoncolor);
-          if(meshi->theat[i] >times[itime])glColor4fv(heatoffcolor);
-        }
-        else{
-          glColor4fv(heatoffcolor);
-        }
-        drawcbox(meshi->xheatplot[i],meshi->yheatplot[i],meshi->zheatplot[i],heatabssize);
-      }
-    }
-  }
-  glEnd();
-  sniffErrors("after draw quads (sensors, heat detectors, sprinklers");
-}
-#endif
 /* ------------------ ShowScene ------------------------ */
 
-#ifdef pp_RENDER
 void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
-#else
-void ShowScene(int mode, int view_mode){
-#endif
   int i;
 
   CheckMemory;
@@ -1206,7 +994,6 @@ void ShowScene(int mode, int view_mode){
 
 /* ++++++++++++++++++++++++ draw viewports +++++++++++++++++++++++++ */
   if(mode==RENDER){
-#ifdef pp_RENDER
     /*
     BLOCK_viewport(0,0,0,screenWidth,screenHeight);
     TIMEBAR_viewport(0,0,0,screenWidth,screenHeight);
@@ -1221,14 +1008,6 @@ void ShowScene(int mode, int view_mode){
         LOGO_viewport(quad,          s_left,s_down,s_width,s_height);
        TITLE_viewport(quad,          s_left,s_down,s_width,s_height);
        Scene_viewport(quad,view_mode,s_left,s_down,s_width,s_height);
-#else
-    BLOCK_viewport();
-    TIMEBAR_viewport();
-    COLORBAR_viewport();
-    LOGO_viewport();
-    TITLE_viewport();
-    Scene_viewport(view_mode);
-#endif
   }
 
   if(eyeview==1&&nskyboxinfo>0)draw_skybox();
@@ -1308,18 +1087,9 @@ void ShowScene(int mode, int view_mode){
 
 /* ++++++++++++++++++++++++ draw sensors/sprinklers/heat detectors +++++++++++++++++++++++++ */
 
-#ifdef pp_DEVICE
     draw_devices();
     sniffErrors("after draw_devices");
 
-#else
-    if((visSensor==1&&ntc_total>0)||
-       (visSprink==1&&nspr_total>0)||
-       (visHeat==1&&nheat_total>0)){
-
-      drawDevices();
-    }
-#endif
     if(visaxislabels==1||showedit==1){
       outputAxisLabels();
     }
@@ -1679,9 +1449,7 @@ void ShowScene(int mode, int view_mode){
 
 #ifndef pp_nolibs
   if(RenderOnceNow==0&&RenderGif !=0
-#ifdef pp_RENDER
     &&render_double==0
-#endif
     ){
     if(plotstate==DYNAMIC_PLOTS && ntimes > 0){
      if(itime>=0&&itime<ntimes&&
@@ -1709,18 +1477,10 @@ void ShowScene(int mode, int view_mode){
     }
   }
 
-#ifdef pp_RENDER
   if(render_double==0)sniffErrors("after render");
-#else
-  sniffErrors("after render");
-#endif
 
   if(RenderOnceNow==1||RenderOnceNowL==1||RenderOnceNowR==1){
-#ifdef pp_RENDER
     if(render_double==0)RenderFrame(view_mode); 
-#else
-    RenderFrame(view_mode); 
-#endif
     RenderOnceNow=0;
     if(view_mode==VIEW_LEFT)RenderOnceNowL=0;
     if(view_mode==VIEW_RIGHT)RenderOnceNowR=0;
@@ -2041,7 +1801,6 @@ void updateShow(void){
   }
   isoflag=0;
   if(visTimeIso==1){
-#ifdef pp_ISO
     for(i=0;i<niso;i++){
       isoi = isoinfo+i;
       if(isoi->loaded==0)continue;
@@ -2053,19 +1812,6 @@ void updateShow(void){
         break;
       }
     }
-#else
-    for(ii=0;ii<niso_loaded;ii++){
-      i = iso_loaded_list[ii];
-      isoi = isoinfo+i;
-//xxx      if(isoi->display==0||isoi->type!=iisotype)continue;
-//      isoflag=1;
-//      break;
-      if(isoi->display!=0&&isoi->type==iisotype){
-        isoflag=1;
-        break;
-      }
-    }
-#endif
   }
   vsliceflag=0;
   if(visTimeSlice==1){
@@ -2287,9 +2033,6 @@ void updatetimes(void){
   int n,n2,ntimes2;
   float *timescopy;
   int i,j,k;
-#ifndef pp_ISO
-  int ii;
-#endif
   int listindex;
   slice *sd;
   iso *ib;
@@ -2429,7 +2172,6 @@ void updatetimes(void){
     }
   }
   if(ReadIsoFile==1&&visAIso!=0){
-#ifdef pp_ISO
     for(i=0;i<niso;i++){
       ib = isoinfo+i;
       if(ib->loaded==0)continue;
@@ -2438,16 +2180,6 @@ void updatetimes(void){
         *timescopy++=meshi->isotimes[n];
       }
     }
-#else
-    for(ii=0;ii<niso_loaded;ii++){
-      i = iso_loaded_list[ii];
-      ib = isoinfo+i;
-      meshi=selected_case->meshinfo + ib->blocknumber;
-      for(n=0;n<meshi->nisosteps;n++){
-        *timescopy++=meshi->isotimes[n];
-      }
-    }
-#endif
   }
   {
     smoke3d *smoke3di;
@@ -2790,9 +2522,7 @@ void Init(void){
   screenHeight2 = screenHeight - dwinH;
 
   glEnable(GL_DEPTH_TEST);
-#ifdef pp_DEVICE
   glEnable(GL_NORMALIZE);
-#endif
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
   glClearColor(backgroundcolor[0],backgroundcolor[1],backgroundcolor[2], 0.0f);
@@ -3455,17 +3185,11 @@ void usage(char **argv){
 #ifdef pp_cvf
     printf(", pp_cvf");
 #endif
-#ifdef pp_DEVICE
-    printf(", pp_DEVICE");
-#endif
 #ifdef pp_DRAWISO
     printf(", pp_DRAWISO");
 #endif
 #ifdef pp_GPU
     printf(", pp_GPU");
-#endif
-#ifdef pp_ISO
-    printf(", pp_ISO");
 #endif
 #ifdef pp_LAHEY
     printf(", pp_LAHEY");
@@ -3491,12 +3215,6 @@ void usage(char **argv){
 #ifdef pp_OSX
     printf(", pp_OSX");
 #endif
-#ifdef pp_PART5
-    printf(", pp_PART5");
-#endif
-#ifdef pp_RENDER
-    printf(", pp_RENDER");
-#endif
 #ifdef pp_SMOKETEST
     printf(", pp_SMOKETEST");
 #endif
@@ -3505,9 +3223,6 @@ void usage(char **argv){
 #endif
 #ifdef pp_SVNET
     printf(", pp_SVNET");
-#endif
-#ifdef pp_SV5P0
-    printf(", pp_SV5P0");
 #endif
 #ifdef pp_TEST
     printf(", pp_TEST");
@@ -3664,21 +3379,12 @@ int getplotstate(int choice){
         if(parti->loaded==0||parti->display==0)continue;
         return DYNAMIC_PLOTS;
       }
-#ifdef pp_ISO
       for(i=0;i<niso;i++){
         isoi = isoinfo + i;
         if(isoi->loaded==0)continue;
         if(isoi->display==0)continue;
         return DYNAMIC_PLOTS;
       }
-#else
-      for(ii=0;ii<niso_loaded;ii++){
-        i = iso_loaded_list[ii];
-        isoi = isoinfo + i;
-        if(isoi->display==0)continue;
-        return DYNAMIC_PLOTS;
-      }
-#endif
       for(i=0;i<nzone;i++){
         zonei = zoneinfo + i;
         if(zonei->loaded==0||zonei->display==0)continue;

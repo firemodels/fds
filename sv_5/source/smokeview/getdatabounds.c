@@ -65,7 +65,6 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
     }
 }
 
-#ifdef pp_PART5
 /* ------------------ adjustpart5bounds ------------------------ */
 
 void adjustpart5bounds(particle *parti){
@@ -241,7 +240,6 @@ void adjustpart5bounds(particle *parti){
   print_part5prop();
 #endif
 }
-#endif
 
 /* ------------------ adjustpartbounds ------------------------ */
 

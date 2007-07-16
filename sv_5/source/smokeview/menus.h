@@ -1063,9 +1063,7 @@ void RenderState(int onoff){
     }
     else{
       if(renderW>max_screenWidth){
-#ifdef pp_RENDER
         render_double=render_double_state;
-#endif
         ResizeWindow(max_screenWidth,max_screenHeight);
       }
       else{
@@ -1095,45 +1093,34 @@ void RenderMenu(int value){
   switch (value){
   case Render320:
     render_option=value;
-#ifdef pp_RENDER
     render_double_state=0;
-#endif
     renderW=320;
     renderH=240;
     break;
   case Render640:
     render_option=value;
-#ifdef pp_RENDER
     render_double_state=0;
-#endif
     renderW=640;
     renderH=480;
     break;
-#ifdef pp_RENDER
   case Render2Window:
     render_option=value;
     renderW=2*screenWidth;
     renderH=2*screenHeight;
     render_double_state=2;
     break;
-#endif
   case RenderWindow:
     render_option=value;
-#ifdef pp_RENDER
     render_double_state=0;
-#endif
     renderW=0;
     renderH=0;
     break;
   case RenderFull:
     render_option=value;
-#ifdef pp_RENDER
     render_double_state=0;
-#endif
     renderW=max_screenWidth;
     renderH=max_screenHeight;
     break;
-#ifdef pp_RENDER
   case Render2Full:
     render_option=value;
     renderW=2*max_screenWidth;
@@ -1146,15 +1133,11 @@ void RenderMenu(int value){
     renderH=4*max_screenHeight;
     render_double_state=4;
     break;
-#endif
   case RenderCancel:
-#ifdef pp_RENDER
     render_double_state=0;
-#endif
     RenderState(0);
     break;
   case RenderOnce:
-#ifdef pp_RENDER
     if(render_double_state!=0){
       render_double=render_double_state;
       keyboard('R',0,0);
@@ -1162,13 +1145,6 @@ void RenderMenu(int value){
     else{
       keyboard('r',0,0);
     }
-#else
-     RenderOnceNow=1;
-     if(showstereo!=0){
-       RenderOnceNowL=1;
-       RenderOnceNowR=1;
-     }
-#endif
      break;
   case RenderPNG:
      renderfiletype=0;
@@ -1891,7 +1867,6 @@ void LoadUnloadMenu(int value){
         readpart(partinfo[i].file,i,LOAD,&errorcode);
       }
     }
-#ifdef pp_ISO
     for(i=0;i<niso;i++){
       iso *isoi;
 
@@ -1899,17 +1874,6 @@ void LoadUnloadMenu(int value){
       if(isoi->loaded==0)continue;
       readiso(isoi->file,i,LOAD,&errorcode);
     }
-#else
-    for(ii=0;ii<niso_loaded;ii++){
-      i = iso_loaded_list[ii];
-      readiso(isoinfo[i].file,i,LOAD,&errorcode);
-    }
-    for(i=0;i<nzone;i++){
-      if(zoneinfo[i].loaded==1){
-        readzone(zoneinfo[i].file,i,LOAD,&errorcode);
-      }
-    }
-#endif
     UNLOCK_COMPRESS
   //  plotstate=DYNAMIC_PLOTS;
   //  visSmoke=1;
@@ -2151,7 +2115,6 @@ void EvacMenu(int value){
   glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
-#ifdef pp_PART5
 
 void update_streakvalue(float value){
   particle *parti;
@@ -2295,8 +2258,6 @@ void ParticlePropShowMenu(int value){
   glutPostRedisplay();
 }
 
-#endif
-
 /* ------------------ ParticleMenu ------------------------ */
 
 void ParticleMenu(int value){
@@ -2323,11 +2284,7 @@ void ParticleMenu(int value){
       for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->evac==1)continue;
-#ifdef pp_PART5
         if(parti->version==1||strcmp(parti->label.longlabel,partj->label.longlabel)==0){
-#else
-        if(strcmp(parti->label.longlabel,partj->label.longlabel)==0){
-#endif
           readpart(parti->file,i,LOAD,&errorcode);
         }
       }
@@ -2467,9 +2424,7 @@ void LoadVSliceMenu(int value){
   int errorcode;
   int i;
 
-#ifdef pp_PART5
   if(value==-999)return;
-#endif
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value==-1){
     for(i=0;i<nvslice;i++){
@@ -2737,9 +2692,7 @@ void UnloadTerrainMenu(int value){
 void LoadSliceMenu(int value){
   int errorcode,i;
 
-#ifdef pp_PART5
   if(value==-999)return;
-#endif
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
     readslice(sliceinfo[value].file,value,LOAD,&errorcode);
@@ -2760,9 +2713,7 @@ void LoadMultiVSliceMenu(int value){
   int i;
   multivslice *mvslicei;
 
-#ifdef pp_PART5
   if(value==-999)return;
-#endif
   if(value==-20){
     showallslicevectors=1-showallslicevectors;
     updatemenu=1;  
@@ -2787,9 +2738,7 @@ void LoadMultiSliceMenu(int value){
   int i;
   multislice *mslicei;
 
-#ifdef pp_PART5
   if(value==-999)return;
-#endif
   if(value>=0){
     mslicei = multisliceinfo + value;
     for(i=0;i<mslicei->nslices;i++){
@@ -3141,7 +3090,6 @@ void TitleMenu(int value){
   }
 }
 
-#ifdef pp_DEVICE
 /* ------------------ ShowDevicesMenu ------------------------ */
 
 void ShowDevicesMenu(int value){
@@ -3167,7 +3115,6 @@ void ShowDevicesMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
 }
-#endif
 
 /* ------------------ ZoneShowMenu ------------------------ */
 
@@ -3318,10 +3265,8 @@ void InitMenus(int unload){
   int nvsliceloaded2,nvsliceloaded;
   int nmultisliceloaded;
   int npartloaded;
-#ifdef pp_PART5
   int npart5loaded;
   int npart4loaded;
-#endif
   int npatchloaded;
   int nplot3dloaded;
   int nisoloaded;
@@ -3371,16 +3316,12 @@ static int *loadsubplot3dmenu=NULL, nloadsubplot3dmenu=0;
 static int loadmultivslicemenu=0, unloadmultivslicemenu=0;
 static int unloadmultislicemenu=0, vslicemenu=0, staticslicemenu=0;
 static int evacmenu=0, particlemenu=0, showpatchmenu=0, zonemenu=0, isoshowmenu=0, isolevelmenu=0, smoke3dshowmenu=0;
-#ifdef pp_PART5
 static int particle5showmenu=0;
 static int particlepropshowmenu=0;
 static int particlestreakshowmenu=0;
-#endif
 static int tourmenu=0;
 static int trainerviewmenu=0,mainmenu=0,zoneshowmenu=0,particleshowmenu=0,evacshowmenu=0,targetmenu=0;
-#ifdef pp_DEVICE
 static int showdevicesmenu=0;
-#endif
 static int unloadplot3dmenu=0, unloadpatchmenu=0, unloadisomenu=0;
 static int showmultislicemenu=0;
 static int textureshowmenu=0;
@@ -3460,10 +3401,8 @@ static int textureshowmenu=0;
   }
 
 
-#ifdef pp_PART5
   npart5loaded=0;
   npart4loaded=0;
-#endif
   npartloaded=0;
   nevacloaded=0;
   for(i=0;i<npartinfo;i++){
@@ -3472,12 +3411,10 @@ static int textureshowmenu=0;
     parti = partinfo+i;
     if(parti->loaded==1&&parti->evac==0)npartloaded++;
     if(parti->loaded==1&&parti->evac==1)nevacloaded++;
-#ifdef pp_PART5
     if(parti->loaded==1){
       if(parti->version==1)npart5loaded++;
       if(parti->version==0)npart4loaded++;
     }
-#endif
   }
 
   nplot3dloaded=0;
@@ -4106,7 +4043,6 @@ static int textureshowmenu=0;
     break;
   }
 
-#ifdef pp_DEVICE
   if(ndevice_defs>0){
     int i;
     sv_object *dv_typei;
@@ -4130,9 +4066,6 @@ static int textureshowmenu=0;
     glutAddMenuEntry("Show All",-1);
     glutAddMenuEntry("Hide All",-2);
   }
-#endif
-
-
 
 /* --------------------------------zone show menu -------------------------- */
 
@@ -4190,7 +4123,6 @@ static int textureshowmenu=0;
     }
   }
 
-#ifdef pp_PART5
   /* --------------------------------particle class show menu -------------------------- */
 
   if(npartclassinfo>0){
@@ -4276,7 +4208,6 @@ static int textureshowmenu=0;
       }
     }
   }
-#endif
 
 /* --------------------------------particle show menu -------------------------- */
 
@@ -4501,15 +4432,10 @@ static int textureshowmenu=0;
         STRCAT(levellabel," Levels");
         glutAddSubMenu(levellabel,isolevelmenu);
       }
-#ifdef pp_ISO
       if(niso_compressed==0){
         if(isonormtype==1)glutAddMenuEntry("*Smooth",4);
         if(isonormtype==0)glutAddMenuEntry("Smooth",4);
       }
-#else
-      if(isonormtype==1)glutAddMenuEntry("*Smooth",4);
-      if(isonormtype==0)glutAddMenuEntry("Smooth",4);
-#endif
 #ifdef _DEBUG
       if(showisonormals==1)glutAddMenuEntry("*Show normals",5);
       if(showisonormals==0)glutAddMenuEntry("Show normals",5);
@@ -4698,7 +4624,6 @@ static int textureshowmenu=0;
     glutAddSubMenu("Geometry",geometrymenu);
   }
   glutAddSubMenu("Labels",labelmenu);
-#ifdef pp_PART5
   if(npart5loaded>0){
     if(partinfo!=NULL&&partinfo->evac==1){
       glutAddSubMenu("Humans",particlepropshowmenu);
@@ -4723,16 +4648,6 @@ static int textureshowmenu=0;
       if(ReadPartFile==1&&showsmoke==0)glutAddMenuEntry("Particles",1);
     }
   }
-#else
-  if(havesprinkpart!=0||staticframe0!=0||npartloaded>1){
-    glutAddSubMenu("Particles",particleshowmenu);
-  }
-  else{
-    if(ReadPartFile==1&&showsmoke==1)glutAddMenuEntry("*Particles",1);
-    if(ReadPartFile==1&&showsmoke==0)glutAddMenuEntry("Particles",1);
-  }
-#endif
-#ifdef pp_PART5
   if(partinfo!=NULL&&partinfo[0].version==1){
   }
   else{
@@ -4744,16 +4659,6 @@ static int textureshowmenu=0;
       if(ReadEvacFile==1&&showevac==0)glutAddMenuEntry("Evacuation",13);
     }
   }
-#else
-  if(nevacloaded>1){
-    glutAddSubMenu("Evacuation",evacshowmenu);
-  }
-  else{
-    if(ReadEvacFile==1&&showevac==1)glutAddMenuEntry("*Evacuation",13);
-    if(ReadEvacFile==1&&showevac==0)glutAddMenuEntry("Evacuation",13);
-  }
-#endif
-#ifdef pp_ISO
   if(ReadIsoFile==1){
     int niso_loaded=0;
     for(i=0;i<niso;i++){
@@ -4770,16 +4675,6 @@ static int textureshowmenu=0;
      glutAddSubMenu("Animated Surface",isoshowmenu);
     }
   }
-#else
-  if(ReadIsoFile==1){
-    if(niso_loaded>1){
-     glutAddSubMenu("Animated Surfaces",isoshowmenu);
-    }
-    else{
-     glutAddSubMenu("Animated Surface",isoshowmenu);
-    }
-  }
-#endif
   if(Read3DSmoke3DFile==1&&nsmoke3dloaded>0){
       glutAddSubMenu("3D Smoke",smoke3dshowmenu);
   }
@@ -4831,7 +4726,6 @@ static int textureshowmenu=0;
     if(showtarget==1)glutAddMenuEntry("*Targets",2);
     if(showtarget==0)glutAddMenuEntry("Targets",2);
   }
-#ifdef pp_DEVICE
   if(ndevice_defs>0){
     int i;
     int num_activedevices=0;
@@ -4866,12 +4760,6 @@ static int textureshowmenu=0;
     }
 
   }
-#else
-  if(nheat_total>0&&visHeat==1)glutAddMenuEntry("*Heat Detectors",10);
-  if(nheat_total>0&&visHeat==0)glutAddMenuEntry("Heat Detectors",10);
-  if(nspr_total>0&&visSprink==1)glutAddMenuEntry("*Sprinklers",11);
-  if(nspr_total>0&&visSprink==0)glutAddMenuEntry("Sprinklers",11);
-#endif
   if(ntc_total>0){
     if(isZoneFireModel==1){
       if(visSensor==1)glutAddMenuEntry("*Targets",9);
@@ -4994,9 +4882,7 @@ static int textureshowmenu=0;
   glutAddMenuEntry("NUMBER",10000);
   glutAddMenuEntry("One Frame",RenderOnce);
   if(RenderTime==1||touring==1){
-#ifdef pp_RENDER
     if(render_double_state==0){
-#endif
     glutAddMenuEntry("All Frames",1);
     glutAddMenuEntry("Every 2nd Frame",2);
     glutAddMenuEntry("Every 3rd Frame",3);
@@ -5005,9 +4891,7 @@ static int textureshowmenu=0;
     glutAddMenuEntry("Every 10th Frame",10);
     glutAddMenuEntry("Every 20th Frame",20);
     glutAddMenuEntry("Cancel",RenderCancel);
-#ifdef pp_RENDER
     }
-#endif
   }
    }
 #endif
@@ -5294,7 +5178,6 @@ static int textureshowmenu=0;
       int atleastone=0;
       particle *parti, *partj;
 
-#ifdef pp_PART5
       if(nmeshes>1){
         if(npartinfo>0){
           if(partinfo->version==1){
@@ -5327,30 +5210,6 @@ static int textureshowmenu=0;
           }
         }
       }
-#else
-      if(nmeshes>1){
-        for(i=0;i<npartinfo;i++){
-          useitem=i;
-          parti = partinfo + i;
-          if(parti->evac==1)continue;
-          for(j=0;j<i;j++){
-            partj = partinfo + j;
-            if(partj->evac==1)continue;
-            if(strcmp(parti->label.longlabel,partj->label.longlabel)==0){
-              useitem=-1;
-              break;
-            }
-          }
-          if(useitem!=-1){
-            atleastone=1;
-            strcpy(menulabel,parti->label.longlabel);
-            strcat(menulabel," - All meshes");
-            glutAddMenuEntry(menulabel,-useitem-10);
-          }
-        }
-        if(atleastone==1)glutAddMenuEntry("-",-2);
-      }
-#endif
     }
 
     for(ii=0;ii<npartinfo;ii++){
@@ -5484,7 +5343,6 @@ static int textureshowmenu=0;
         if(i>0)sim1 = sliceinfo + vim1->ival;
         if(i==0||strcmp(si->label.longlabel,sim1->label.longlabel)!=0){
           if(si->vec_comp==0||showallslicevectors==1){
-#ifdef pp_PART5
             char mlabel[1024], mlabel2[1024];
 
             STRCPY(mlabel,si->label.longlabel);
@@ -5493,16 +5351,11 @@ static int textureshowmenu=0;
               glutAddMenuEntry(mlabel2,-999);
             }
             glutAddSubMenu(mlabel,loadsubmvslicemenu[nloadsubmvslicemenu]);
-#else
-            glutAddSubMenu(si->label.longlabel,loadsubmvslicemenu[nloadsubmvslicemenu]);
-#endif
           }
           nloadsubmvslicemenu++;
         }
       }
-#ifdef pp_PART5
       if(nmultivslices>0)glutAddMenuEntry("-",-999);
-#endif
       if(showallslicevectors==0)glutAddMenuEntry("Show All Vector Slice Entries",-20);
       if(showallslicevectors==1)glutAddMenuEntry("*Show All Vector Slice Entries",-20);
       if(nmultisliceloaded>1){
@@ -5579,7 +5432,6 @@ static int textureshowmenu=0;
           if(ii>0)sdm1 = sliceinfo + vdim1->ival;
           if(ii==0||strcmp(sd->label.longlabel,sdm1->label.longlabel)!=0){
             if(sd->vec_comp==0||showallslicevectors==1){
-#ifdef pp_PART5
               char mlabel[1024], mlabel2[1024];
 
               STRCPY(mlabel,sd->label.longlabel);
@@ -5588,18 +5440,13 @@ static int textureshowmenu=0;
                 glutAddMenuEntry(mlabel2,-999);
               }
               glutAddSubMenu(mlabel,loadsubvslicemenu[nloadsubvslicemenu]);
-#else
-              glutAddSubMenu(sd->label.longlabel,loadsubvslicemenu[nloadsubvslicemenu]);
-#endif
             }
             nloadsubvslicemenu++;
           }
         }
       }
     } 
-#ifdef pp_PART5
     if(nvslice>0)glutAddMenuEntry("-",-999);
-#endif
     if(showallslicevectors==0)glutAddMenuEntry("Show All Vector Slice Entries",-20);
     if(showallslicevectors==1)glutAddMenuEntry("*Show All Vector Slice Entries",-20);
     if(nvsliceloaded>1){
@@ -5719,7 +5566,6 @@ static int textureshowmenu=0;
           if(i>0)sdim1 = sliceinfo+(multisliceinfo + i-1)->islices[0];
 
           if(i==0||strcmp(sd->label.longlabel,sdim1->label.longlabel)!=0){
-#ifdef pp_PART5
             char mlabel[1024], mlabel2[1024];
 
             STRCPY(mlabel,sd->label.longlabel);
@@ -5728,15 +5574,10 @@ static int textureshowmenu=0;
               glutAddMenuEntry(mlabel2,-999);
             }
             glutAddSubMenu(mlabel,             loadsubmslicemenu[nloadsubmslicemenu]);
-#else
-            glutAddSubMenu(sd->label.longlabel,loadsubmslicemenu[nloadsubmslicemenu]);
-#endif
             nloadsubmslicemenu++;
           }
         }
-#ifdef pp_PART5
         if(nmultislices>0)glutAddMenuEntry("-",-999);
-#endif
         if(nmultisliceloaded>1){
           glutAddSubMenu("Unload",unloadmultislicemenu);
         }
@@ -5795,26 +5636,18 @@ static int textureshowmenu=0;
         sd = sliceinfo + sliceorderindex[i];
         sdim1 = sliceinfo + sliceorderindex[i-1];
         if(i==0||strcmp(sd->label.longlabel,sdim1->label.longlabel)!=0){
-#ifdef pp_PART5
           char mlabel[1024],mlabel2[1024];;
-#endif
 
-#ifdef pp_PART5
           STRCPY(mlabel,sd->label.longlabel);
           if(i>0&&sd->mesh_type!=sdim1->mesh_type){
             sprintf(mlabel2,"*** Evac type %i mesh ***",sd->mesh_type);
             glutAddMenuEntry(mlabel2,-999);
           }
           glutAddSubMenu(mlabel,loadsubslicemenu[iloadsubslicemenu]);
-#else
-          glutAddSubMenu(sd->label.longlabel,loadsubslicemenu[iloadsubslicemenu]);
-#endif
           iloadsubslicemenu++;
         }
       }
-#ifdef pp_PART5
       glutAddMenuEntry("-",-999);
-#endif
       if(nsliceloaded>1){
         glutAddSubMenu("Unload",unloadslicemenu);
       }
@@ -6346,11 +6179,7 @@ static int textureshowmenu=0;
         glutAddSubMenu(loadmenulabel,zonemenu);
       }
       glutAddMenuEntry("-",999);
-#ifdef pp_DEVICE
       glutAddSubMenu("Configuration files",smokeviewinimenu);
-#else
-      glutAddSubMenu("Preference File",smokeviewinimenu);
-#endif
 #ifdef pp_COMPRESS
       if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice>0)){
         glutAddSubMenu("Compression",compressmenu);

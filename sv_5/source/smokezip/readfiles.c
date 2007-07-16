@@ -11,9 +11,7 @@
 int readsmv(char *smvfile){
   
   FILE *streamsmv;
-#ifdef pp_ISO
   int iiso,igrid,ipdim;
-#endif
   int ipatch;
   int ismoke3d;
   int islice;
@@ -22,10 +20,8 @@ int readsmv(char *smvfile){
 #endif
   char buffer[255];
 
-#ifdef pp_ISO
   igrid=0;
   ipdim=0;
-#endif
   streamsmv=fopen(smvfile,"r");
   if(streamsmv==NULL){
     printf("The file: %s could not be opened\n",smvfile);
@@ -55,7 +51,6 @@ int readsmv(char *smvfile){
       nslice_files++;
       continue;
     }
-#ifdef pp_ISO
     if(match(buffer,"ISOF",4) == 1){
       niso_files++;
       continue;
@@ -68,7 +63,6 @@ int readsmv(char *smvfile){
       ipdim++;
       continue;
     }
-#endif
 
 
 
@@ -107,7 +101,6 @@ int readsmv(char *smvfile){
     }
   }
 
-#ifdef pp_ISO
   if(nmeshes>0&&nmeshes==ipdim){
     NewMemory((void **)&meshinfo,nmeshes*sizeof(mesh));
     doiso=1;
@@ -115,7 +108,6 @@ int readsmv(char *smvfile){
   else{
     doiso=0;
   }
-#endif
   // allocate memory for slice file info
 
   if(nslice_files>0){
@@ -136,7 +128,6 @@ int readsmv(char *smvfile){
   }
 
 
-#ifdef pp_ISO
   
   // allocate memory for slice file info
 
@@ -152,7 +143,6 @@ int readsmv(char *smvfile){
       isoi->isolevels=NULL;
     }
   }
-#endif
 
   // allocate memory for particle file info
 
@@ -181,11 +171,9 @@ int readsmv(char *smvfile){
   ipart=0;
 #endif
   islice=0;
-#ifdef pp_ISO
   iiso=0;
   ipdim=0;
   igrid=0;
-#endif
   ismoke3d=0;
   rewind(streamsmv);
   if(cleanfiles==0)printf("Compressing .bf, .s3d, and .sf data files referenced in %s\n",smvfile);
@@ -233,7 +221,6 @@ int readsmv(char *smvfile){
       continue;
     }
 
-#ifdef pp_ISO
     if(doiso==1&&match(buffer,"GRID",4) == 1){
       mesh *meshi;
 
@@ -252,8 +239,6 @@ int readsmv(char *smvfile){
       sscanf(buffer,"%f %f %f %f %f %f",&meshi->xbar0,&meshi->xbar,&meshi->ybar0,&meshi->ybar,&meshi->zbar0,&meshi->zbar);
       continue;
     }
-#endif
-
 
     if(match(buffer,"SYST",4) == 1){
       if(fgets(buffer,255,streamsmv)==NULL)break;
@@ -471,7 +456,6 @@ int readsmv(char *smvfile){
       }
       continue;
     }
-#ifdef pp_ISO
     if(match(buffer,"ISOF",4) == 1){
 
       int version=0;
@@ -530,9 +514,7 @@ int readsmv(char *smvfile){
       continue;
     }
 
-#endif
   }
-#ifdef pp_ISO
   {
     int i;
 
@@ -548,7 +530,6 @@ int readsmv(char *smvfile){
       meshi->dzz = (meshi->zbar-meshi->zbar0)/65535;
     }
   }
-#endif
   return 0;
 }
 
@@ -637,14 +618,12 @@ void readini2(char *inifile){
 	    if(slicezipstep<1)slicezipstep=1;
       continue;
     }
-#ifdef pp_ISO
     if(match(buffer,"ISOZIPSTEP",10)==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&isozipstep);
 	    if(isozipstep<1)isozipstep=1;
       continue;
     }
-#endif
     if(match(buffer,"SMOKE3DZIPSTEP",14)==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&smoke3dzipstep);

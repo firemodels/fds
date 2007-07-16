@@ -37,9 +37,7 @@ SVEXTERN int n_tcpdata, tcp_test;
 #endif
 
 SVEXTERN int updategluiview;
-#ifdef pp_RENDER
 SVEXTERN int render_double,render_double_state;
-#endif
 SVEXTERN int usetexturebar;
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
@@ -422,13 +420,8 @@ SVEXTERN int boundzipstep, boundzipskip;
 SVEXTERN int smoke3dzipstep, smoke3dzipskip;
 SVEXTERN int evacframeskip, evacframestep;
 SVEXTERN int partpointstep;
-#ifdef pp_PART5
 SVEXTERN int partpointstep_old;
-#endif
 SVEXTERN int partpointskip;
-#ifndef pp_PART5
-SVEXTERN int partpointcompress;
-#endif
 SVEXTERN int viewoption;
 SVEXTERN int xyz_clipplane;
 SVEXTERN int clip_x,clip_y,clip_z,clip_i,clip_j,clip_k;
@@ -537,7 +530,6 @@ SVEXTERN int output_slicedata,init_slicedata;
 SVEXTERN f_units *unitclasses,*unitclasses_default,*unitclasses_ini;
 SVEXTERN int nunitclasses,nunitclasses_default,nunitclasses_ini;
 SVEXTERN mesh *meshinfo,*current_mesh, *mesh_save, *mesh_last, *loaded_isomesh;
-#ifdef pp_DEVICE
 SVEXTERN float devicenorm_length;
 SVEXTERN int ndeviceinfo;
 SVEXTERN device *deviceinfo;
@@ -546,7 +538,6 @@ SVEXTERN sv_object device_def_first, device_def_last;
 SVEXTERN int ndevice_defs;
 SVEXTERN sv_object_frame *error_frame;
 SVEXTERN int svofile_exists;
-#endif
 #ifdef pp_WUI
 SVEXTERN treedata *treeinfo;
 SVEXTERN terraindata *terraininfo;
@@ -602,14 +593,9 @@ SVEXTERN int   reset_frame;
 SVEXTERN float reset_time,start_frametime,stop_frametime;
 SVEXTERN int reset_time_flag;
 SVEXTERN float velocity_range;
-#ifdef pp_ISO
 SVEXTERN int niso_compressed;
 SVEXTERN int nslice_loaded, npatch_loaded;
 SVEXTERN int *slice_loaded_list, *patch_loaded_list;
-#else
-SVEXTERN int nslice_loaded, niso_loaded, npatch_loaded;
-SVEXTERN int *slice_loaded_list, *iso_loaded_list, *patch_loaded_list;
-#endif
 SVEXTERN int *render_frame;
 SVEXTERN int RenderOnceNow, RenderOnceNowR, RenderOnceNowL;
 SVEXTERN char *fdsprefix, *fdsprefix2;
@@ -798,10 +784,8 @@ SVEXTERN zvent *zventinfo;
 SVEXTERN zone *zoneinfo;
 SVEXTERN zone *activezone;
 SVEXTERN particle *partinfo;
-#ifdef pp_PART5
 SVEXTERN int part5show;
 SVEXTERN int streak5show,streak5value, streak5step, showstreakhead;
-//SVEXTERN char streak5value[10];
 SVEXTERN int nstreak_value; // 5
 SVEXTERN char *streak_values[5]; // "1","2","4","8","16"
 SVEXTERN float streak_rvalue[7]; // 1.0, 2.0 4.0, 8.0, 16.0 
@@ -812,7 +796,6 @@ SVEXTERN int npartclassinfo;
 SVEXTERN part5prop *part5propinfo, *current_property;
 SVEXTERN int npart5prop,ipart5prop,ipart5prop_old;
 SVEXTERN int prop_index;
-#endif
 SVEXTERN targ *targinfo;
 SVEXTERN slice *sliceinfo;
 SVEXTERN camdata *caminfo;

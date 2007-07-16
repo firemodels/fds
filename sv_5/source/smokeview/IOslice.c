@@ -850,10 +850,8 @@ int slicecompare( const void *arg1, const void *arg2 ){
 
   slicei = sliceinfo + *(int *)arg1;
   slicej = sliceinfo + *(int *)arg2;
-#ifdef pp_PART5
   if(slicei->mesh_type<slicej->mesh_type)return -1;
   if(slicei->mesh_type>slicej->mesh_type)return 1;
-#endif
   delta = slicei->delta;
   if(slicej->delta>delta)delta=slicej->delta;
 
@@ -899,10 +897,8 @@ int vslicecompare( const void *arg1, const void *arg2 ){
   slicej = sliceinfo + vslicej->ival;
   delta = slicei->delta;
 
-#ifdef pp_PART5
   if(slicei->mesh_type<slicej->mesh_type)return -1;
   if(slicei->mesh_type>slicej->mesh_type)return 1;
-#endif
 
   if( strncmp(slicei->label.longlabel,"VE",2)==0){
     if(
@@ -954,18 +950,13 @@ void updateslicemenulabels(void){
     STRCAT(mslicei->menulabel2,sd->menulabel);
 
     if(nmeshes>1){
-#ifdef pp_PART5
       mesh *meshi;
-#endif
       sprintf(label,", Mesh %i",1+sd->blocknumber);
       STRCAT(sd->menulabel,label);
-#ifdef pp_PART5
       meshi = selected_case->meshinfo + sd->blocknumber;
       sprintf(label,", type: %i",meshi->mesh_type);
       STRCAT(mslicei->menulabel2,label);
       STRCAT(mslicei->menulabel,label);
-#endif
-      
     }
     if(showfiles==1){
       STRCAT(sd->menulabel,", ");
@@ -978,9 +969,8 @@ void updateslicemenulabels(void){
       STRCAT(sd->menulabel," (RLE)");
     }
     for(i=1;i<nslice;i++){
-#ifdef pp_PART5
       mesh *meshi;
-#endif
+
       sdold = sliceinfo + sliceorderindex[i - 1];
       sd = sliceinfo + sliceorderindex[i];
       STRCPY(sd->menulabel,sd->slicedir);
@@ -990,21 +980,17 @@ void updateslicemenulabels(void){
          ||sd->idir!=sdold->idir
          ||sd->position+delta<sdold->position
          ||sd->position-delta>sdold->position
-#ifdef pp_PART5
          ||sd->mesh_type!=sdold->mesh_type
-#endif
          ){
         mslicei++;
         STRCPY(mslicei->menulabel,sd->menulabel);
         STRCPY(mslicei->menulabel2,sd->label.longlabel);
         STRCAT(mslicei->menulabel2,", ");
         STRCAT(mslicei->menulabel2,sd->menulabel);
-#ifdef pp_PART5
         meshi = selected_case->meshinfo + sd->blocknumber;
         sprintf(label,", type: %i",meshi->mesh_type);
         STRCAT(mslicei->menulabel2,label);
         STRCAT(mslicei->menulabel,label);
-#endif
       }
       if(nmeshes>1){
         sprintf(label,", Mesh %i",1+sd->blocknumber);
@@ -1222,17 +1208,13 @@ void getsliceparams(void){
          ||sd->idir!=sdold->idir
          ||sd->position+delta<sdold->position
          ||sd->position-delta>sdold->position
-#ifdef pp_PART5
          ||sd->mesh_type!=sdold->mesh_type
-#endif
          ){
         nmultislices++;
         mslicei++;
         mslicei->nslices=0;
         mslicei->type=sd->type;
-#ifdef pp_PART5
         mslicei->mesh_type=sd->mesh_type;
-#endif
         mslicei->islices=NULL;
         NewMemory((void **)&mslicei->islices,sizeof(int)*nslice);
       }
@@ -1387,9 +1369,7 @@ void updatevslices(void){
          ||sd->idir!=sdold->idir
          ||sd->position+delta<sdold->position
          ||sd->position-delta>sdold->position
-#ifdef pp_PART5
          ||sd->mesh_type!=sdold->mesh_type
-#endif
          ){
         nmultivslices++;
         mvslicei++;
