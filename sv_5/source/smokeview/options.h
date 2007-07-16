@@ -20,7 +20,7 @@
 #define pp_GDGIF
 #endif
 
-// #define pp_FINALRELEASE
+// #define pp_FINALxxxRELEASE
 #ifndef _DEBUG
 #define pp_RELEASE
 #endif
