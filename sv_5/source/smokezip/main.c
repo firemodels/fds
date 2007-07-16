@@ -50,9 +50,7 @@ int main(int argc, char **argv){
   endianswitch=-1;
   overwrite_b=0;
   overwrite_s=0;
-#ifdef pp_ISO
   overwrite_iso=0;
-#endif
 #ifdef pp_LIGHT
   make_lighting_file=0;
   albedo=(float)0.3;
@@ -63,9 +61,7 @@ int main(int argc, char **argv){
   smoke3dzipstep=1;
   boundzipstep=1;
   slicezipstep=1;
-#ifdef pp_ISO
   isozipstep=1;
-#endif
   filesremoved=0;
 #ifdef WIN32
   strcpy(dirseparator,"\\");
@@ -81,11 +77,9 @@ int main(int argc, char **argv){
 #endif
   nslice_files=0;
   sliceinfo=NULL;
-#ifdef pp_ISO
   nmeshes=0;
   niso_files=0;
   isoinfo=NULL;
-#endif
 
   patchinfo=NULL;
   smoke3dinfo=NULL;
@@ -134,15 +128,11 @@ int main(int argc, char **argv){
         overwrite_b=1;
         overwrite_s=1;
         overwrite_slice=1;
-#ifdef pp_ISO
         overwrite_iso=1;
-#endif
         break;
-#ifdef pp_ISO
       case 'i':
         overwrite_iso=1;
         break;
-#endif
       case 'c':
         cleanfiles=1;
         break;
@@ -235,7 +225,6 @@ int main(int argc, char **argv){
 
   if(readsmv(smvfile)!=0)return 1;
 
-#ifdef pp_ISO
   if(doiso==1&&niso_files>0){
     for(i=0;i<niso_files;i++){
       iso *isoi;
@@ -247,7 +236,6 @@ int main(int argc, char **argv){
       }
     }
   }
-#endif
   if(npatch_files>0){
     patchinfo[0].dup=0;
     for(i=1;i<npatch_files;i++){
@@ -324,9 +312,7 @@ int main(int argc, char **argv){
 #ifdef pp_PART
   compress_parts();
 #endif
-#ifdef pp_ISO
   if(doiso==1)compress_isos();
-#endif
 
   if(cleanfiles==0&&destdir!=NULL){
     printf("Copying .smv, .ini and .end files to %s directory\n",destdir);
@@ -391,17 +377,9 @@ void usage(char *prog){
   strcpy(pp,"%");
   printf("\n");
   printf("  smokezip 1.1 - %s\n\n",__DATE__);
-#ifdef pp_ISO
   printf("  Compresses Smokeview 3D smoke, slice, iso-surface and boundary files\n\n");
-#else
-  printf("  Compresses Smokeview 3D smoke, slice and boundary files\n\n");
-#endif
   printf("  %s",prog);
-#ifdef pp_ISO
   printf(" [-c -f -3 -b -s -i]");
-#else
-  printf(" [-c -f -3 -b -s]");
-#endif
 #ifdef pp_LIGHT
   printf("[-a val -l]");
 #endif
@@ -409,9 +387,7 @@ void usage(char *prog){
   printf("  -2  - overwrites 2d slice compressed files\n");
   printf("  -3  - overwrites 3d smoke files\n");
   printf("  -b  - overwrites boundary compressed files\n");
-#ifdef pp_ISO
   printf("  -i  - overwrites iso-surface compressed files\n");
-#endif
   printf("  -f  - overwrites all compressed files\n");
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 

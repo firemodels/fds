@@ -27,7 +27,6 @@
 
 
 /* ------------------ getscreenbuffer --------- */
-#ifdef pp_RENDER
 GLubyte *getscreenbuffer(void){
 
   GLubyte *OpenGLimage;
@@ -173,7 +172,6 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
 }
 
 
-#endif
 
 /* ------------------ SVimage2file ------------------------ */
 

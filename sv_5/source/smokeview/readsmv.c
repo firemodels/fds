@@ -24,9 +24,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
-#ifdef pp_PART5
 void PART_CB_INIT(void);
-#endif
 
 #define DEVICE_DEVICE 0
 #define DEVICE_THCP 1
@@ -44,9 +42,7 @@ int readsmv(char *file){
 
 /* read the .smv file */
 
-#ifdef pp_DEVICE
   device *devicecopy;
-#endif
   int do_pass4=0;
   int nmeshes2;
   outline *outlinei;
@@ -153,9 +149,7 @@ int readsmv(char *file){
   FREEMEMORY(terraininfo);
   nterraininfo=0;
 #endif
-#ifdef pp_ISO
   niso_compressed=0;
-#endif
 #ifdef pp_SPHERE
   if(sphereinfo==NULL){
     NewMemory((void **)&sphereinfo,sizeof(spherepoints));
@@ -216,8 +210,6 @@ int readsmv(char *file){
     e_surfacedefault.color=mat_ambient2;
   }
 
-#ifdef pp_PART5
-
   // free memory for particle class
 
   /*
@@ -249,9 +241,7 @@ int readsmv(char *file){
     FREEMEMORY(partclassinfo);
   }
   npartclassinfo=0;
-#endif
 
-#ifdef pp_DEVICE
   freeall_objects();
   if(ndeviceinfo>0){
     int i;
@@ -261,7 +251,6 @@ int readsmv(char *file){
     FREEMEMORY(deviceinfo);
     ndeviceinfo=0;
   }
-#endif
 
   if(noutlineinfo>0){
     for(i=0;i<noutlineinfo;i++){
@@ -321,14 +310,10 @@ int readsmv(char *file){
   if(npartinfo>0){
     for(i=0;i<npartinfo;i++){
       freelabels(&partinfo[i].label);
-#ifdef pp_PART5
       FREEMEMORY(partinfo[i].partclassptr);
       FREEMEMORY(partinfo[i].reg_file);
       FREEMEMORY(partinfo[i].comp_file);
       FREEMEMORY(partinfo[i].size_file);
-#else
-      FREEMEMORY(partinfo[i].file);
-#endif
     }
     FREEMEMORY(partinfo);
   }
@@ -474,13 +459,11 @@ int readsmv(char *file){
       continue;
     }
 #endif
-#ifdef pp_PART5
     if(match(buffer,"CLASS_OF_PARTICLES",18) == 1||
        match(buffer,"CLASS_OF_HUMANS",15) == 1){
       npartclassinfo++;
       continue;
     }
-#endif
 #ifndef pp_nofortran
     if(match(buffer,"PL3D",4) == 1){
       nplot3d++;
@@ -488,7 +471,6 @@ int readsmv(char *file){
    
     }
 #endif
-#ifdef pp_DEVICE
     if(
       (match(buffer,"DEVICE",6) == 1)&&
       (match(buffer,"DEVICE_ACT",10) != 1)
@@ -515,7 +497,6 @@ int readsmv(char *file){
       }
       continue;
     }
-#endif
     if(match(buffer,"DATABASE",8)==1){
       if(fgets(buffer,255,stream)==NULL)break;
       buffer3=trim_front(buffer);
@@ -632,9 +613,7 @@ int readsmv(char *file){
     }
 #ifndef pp_nofortran
     if(match(buffer,"PART",4) == 1||match(buffer,"EVAC",4)==1
-#ifdef pp_PART5
       ||match(buffer,"PRT5",4)==1||match(buffer,"EVA5",4)==1
-#endif
       ){
       npartinfo++;
       continue;
@@ -697,7 +676,6 @@ int readsmv(char *file){
    nterraininfo=0;
  }
 #endif
-#ifdef pp_PART5
  if(npartclassinfo>=0){
    float rgb_class[4];
    part5class *partclassi;
@@ -735,7 +713,6 @@ int readsmv(char *file){
 
 
  }
-#endif
 
   ibartemp=2;
   jbartemp=2;
@@ -922,7 +899,6 @@ int readsmv(char *file){
     nlabels=0;
     nlabelssmv=0;
   }
-#ifdef pp_DEVICE
   if(ndeviceinfo>0){
     if(NewMemory((void **)&deviceinfo,ndeviceinfo*sizeof(device))==0)return 2;
     devicecopy=deviceinfo;
@@ -932,7 +908,6 @@ int readsmv(char *file){
 
 //  if(ndeviceinfo>0&&ndevice_defs==0){
     if(ndeviceinfo>0)init_device_defs();
-#endif
 
 /* 
    ************************************************************************
@@ -953,7 +928,6 @@ int readsmv(char *file){
   printf("   pass 2\n");
   while(!feof(stream)){
 
-#ifdef pp_PART5
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++ CLASS_OF_PARTICLES +++++++++++++++++++++++
@@ -1230,7 +1204,6 @@ typedef struct {
       npartclassinfo++;
       continue;
     }
-#endif
     if(noGRIDpresent==1&&startpass==1){
       strcpy(buffer,"GRID");
       startpass=0;
@@ -1749,9 +1722,7 @@ typedef struct {
   */
     if(match(buffer,"GRID",4) == 1){
       mesh *meshi;
-#ifdef pp_PART5
       int mesh_type=0;
-#endif
 
 //      int lenbuffer;
 
@@ -1805,11 +1776,7 @@ typedef struct {
       }
       else{
         fgets(buffer,255,stream);
-#ifdef pp_PART5
         sscanf(buffer,"%i %i %i %i",&ibartemp,&jbartemp,&kbartemp,&mesh_type);
-#else
-        sscanf(buffer,"%i %i %i",&ibartemp,&jbartemp,&kbartemp);
-#endif
       }
       if(ibartemp<1)ibartemp=1;
       if(jbartemp<1)jbartemp=1;
@@ -1824,9 +1791,7 @@ typedef struct {
          NewMemory((void **)&zp2,sizeof(float)*(kbartemp+1))==0
          )return 2;
       if(meshinfo!=NULL){
-#ifdef pp_PART5
         meshi->mesh_type=mesh_type;
-#endif
         meshi->xplt=xp;
         meshi->yplt=yp;
         meshi->zplt=zp;
@@ -2168,9 +2133,7 @@ typedef struct {
       
   }
 
-#ifdef pp_DEVICE
   ndeviceinfo=0;
-#endif
 
   nbtemp=0; nvents=0;
   itrnx=0, itrny=0, itrnz=0, igrid=0, ipdim=0, iobst=0, ivent=0;
@@ -2470,40 +2433,6 @@ typedef struct {
     ++++++++++++++++++++++ GRID ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-#ifndef pp_PART5
-
-    // this is being parsed in pass 2 - check out why it is also here
-
-    if(match(buffer,"GRID",4) == 1){
-//      int lenbuffer;
-
-//      trim(buffer);
-//      lenbuffer=strlen(buffer);
-//      if(lenbuffer>4){
-//        if(buffer[5]!=' ')continue;
-//      }
-
-      igrid++;
-      if(noGRIDpresent==1){
-        ibartemp=2;
-        jbartemp=2;
-        kbartemp=2;
-      }
-      else{
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i",&ibartemp,&jbartemp,&kbartemp);
-      }
-      if(meshinfo!=NULL&&igrid<=nmeshes){
-        mesh *meshi;
-
-       meshi=meshinfo+igrid-1;
-       meshi->ibar=ibartemp;
-       meshi->jbar=jbartemp;
-       meshi->kbar=kbartemp;
-      }
-      continue;
-    }
-#endif
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ PDIM ++++++++++++++++++++++++++++++
@@ -3221,9 +3150,7 @@ typedef struct {
   */
 #ifndef pp_nofortran
     if(match(buffer,"PART",4) == 1 || match(buffer,"EVAC",4)==1
-#ifdef pp_PART5
       ||match(buffer,"PRT5",4)==1||match(buffer,"EVA5",4)==1
-#endif
       ){
       unsigned int lenkey;
 
@@ -3232,17 +3159,13 @@ typedef struct {
       parti = partinfo + ipart;
 
       parti->version=0;
-#ifdef pp_PART5
       if(match(buffer,"PRT5",4)==1||match(buffer,"EVA5",4)==1){
         parti->version=1;
       }
-#endif
       lenkey=4;
       parti->evac=0;
       if(match(buffer,"EVAC",4)==1
-#ifdef pp_PART5
         ||match(buffer,"EVA5",4)==1
-#endif
         ){
         parti->evac=1;
         nevac++;
@@ -3271,7 +3194,6 @@ typedef struct {
       buffer[len-1]='\0';
       trim(buffer);
       len=strlen(buffer);
-#ifdef pp_PART5
       parti->reg_file=NULL;
       if(NewMemory((void **)&parti->reg_file,(unsigned int)(len+1))==0)return 2;
       STRCPY(parti->reg_file,buffer);
@@ -3294,14 +3216,8 @@ typedef struct {
         parti->compression_type=0;
         parti->file=parti->reg_file;
       }
-#else
-      if(NewMemory((void **)&parti->file,(unsigned int)(len+1))==0)return 2;
-      STRCPY(parti->file,buffer);
-#endif
-#ifdef pp_PART5
       parti->compression_type=0;
       parti->sort_tags_loaded=0;
-#endif
       parti->loaded=0;
       parti->display=0;
       parti->ptimes=NULL; 
@@ -3324,7 +3240,6 @@ typedef struct {
       parti->particle_type=0;
       parti->droplet_type=0;
 
-#ifdef pp_PART5
       parti->data5=NULL;
       parti->partclassptr=NULL;
 
@@ -3361,16 +3276,6 @@ typedef struct {
           npartinfo--;
         }
       }
-#else
-      if(stat(buffer,&statbuffer)==0){
-        if( readlabels(&parti->label,stream)==2 )return 2;
-        ipart++;
-      }
-      else{
-        if(readlabels(&parti->label,stream)==2)return 2;
-        npartinfo--;
-      }
-#endif
       continue;
     }
   /*
@@ -3568,14 +3473,12 @@ typedef struct {
       sd->blocknumber=blocknumber;
       sd->vloaded=0;
       sd->reload=0;
-#ifdef pp_PART5
       {
         mesh *meshi;
 
         meshi = meshinfo + blocknumber;
         sd->mesh_type=meshi->mesh_type;
       }
-#endif
       if(stat(buffer,&statbuffer)==0){
         if(readlabels(&sd->label,stream)==2)return 2;
         islice++;
@@ -3709,7 +3612,6 @@ typedef struct {
       isoi->display=0;
       isoi->dataflag=dataflag;
 
-#ifdef pp_ISO
       isoi->normaltable=NULL;
       isoi->comp_buffer=NULL;
       isoi->comp_bufferframe=NULL;
@@ -3750,31 +3652,6 @@ typedef struct {
         if(readlabels(&isoi->label,stream)==2)return 2;
         niso--;
       }
-#else
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim(buffer);
-
-      len=strlen(buffer);
-      if(NewMemory((void **)&isoi->file,(unsigned int)(len+1))==0)return 2;
-
-#ifdef USE_ZLIB
-      STRCPY(buffer2,buffer);
-      STRCAT(buffer2,".gz");
-      if(stat(buffer,&statbuffer)!=0&&stat(buffer2,&statbuffer2)!=0){
-#else
-      if(stat(buffer,&statbuffer)!=0){
-#endif
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
-        if(readlabels(&isoi->label,stream)==2)return 2;
-        niso--;
-      }
-      else{
-        STRCPY(isoi->file,buffer);
-        if(readlabels(&isoi->label,stream)==2)return 2;
-        iiso++;
-      }
-#endif
       continue;
     }
 
@@ -3786,9 +3663,7 @@ typedef struct {
     if(match(buffer,"THCP",4) == 1){
       mesh *meshi;
       float normdenom;
-#ifdef pp_DEVICE
       char *device_label;
-#endif
 
       if(ioffset==0)ioffset=1;
       meshi=meshinfo + ioffset - 1;
@@ -3799,41 +3674,10 @@ typedef struct {
       ntc_total += meshi->ntc;
       hasSensorNorm=0;
       if(meshi->ntc>0){
-#ifndef pp_DEVICE
-        float *xtccopy, *ytccopy, *ztccopy;
-        float *xtcnormcopy, *ytcnormcopy, *ztcnormcopy;
-        int *has_tcnormcopy;
-        FREEMEMORY(meshi->xtc); FREEMEMORY(meshi->ytc); FREEMEMORY(meshi->ztc);
-        FREEMEMORY(meshi->xtcnorm); FREEMEMORY(meshi->ytcnorm); FREEMEMORY(meshi->ztcnorm);
-        FREEMEMORY(meshi->has_tcnorm);
-        FREEMEMORY(meshi->xtcplot); FREEMEMORY(meshi->ytcplot); FREEMEMORY(meshi->ztcplot);
-        if(
-          NewMemory((void **)&meshi->xtc,meshi->ntc*sizeof(float))==0||
-          NewMemory((void **)&meshi->ytc,meshi->ntc*sizeof(float))==0||
-          NewMemory((void **)&meshi->ztc,meshi->ntc*sizeof(float))==0||
-          NewMemory((void **)&meshi->xtcplot,meshi->ntc*sizeof(float))==0||
-          NewMemory((void **)&meshi->ytcplot,meshi->ntc*sizeof(float))==0||
-          NewMemory((void **)&meshi->ztcplot,meshi->ntc*sizeof(float))==0||
-          NewMemory((void **)&meshi->xtcnorm,meshi->ntc*sizeof(float))==0||
-          NewMemory((void **)&meshi->ytcnorm,meshi->ntc*sizeof(float))==0||
-          NewMemory((void **)&meshi->ztcnorm,meshi->ntc*sizeof(float))==0||
-          NewMemory((void **)&meshi->has_tcnorm,meshi->ntc*sizeof(float))==0
-          )return 2;
-        xtccopy=meshi->xtc;
-        ytccopy=meshi->ytc;
-        ztccopy=meshi->ztc;
-        xtcnormcopy=meshi->xtcnorm;
-        ytcnormcopy=meshi->ytcnorm;
-        ztcnormcopy=meshi->ztcnorm;
-        has_tcnormcopy=meshi->has_tcnorm;
-#endif
         for(nn=0;nn<meshi->ntc;nn++){
-#ifdef pp_DEVICE
           float *xyz, *xyznorm;
-#endif
           fgets(buffer,255,stream);
 
-#ifdef pp_DEVICE
           xyz = devicecopy->xyz;
           xyznorm = devicecopy->xyznorm;
           xyz[0]=0.0;
@@ -3873,32 +3717,6 @@ typedef struct {
 
           devicecopy++;
           ndeviceinfo++;
-#else
-          *xtccopy=0.0;
-          *ytccopy=0.0;
-          *ztccopy=0.0;
-          *xtcnormcopy=0.0;
-          *ytcnormcopy=0.0;
-          *ztcnormcopy=0.0;
-          *has_tcnormcopy=0;
-          sscanf(buffer,"%f %f %f %f %f %f",xtccopy,ytccopy,ztccopy,xtcnormcopy,ytcnormcopy,ztcnormcopy);
-
-          normdenom=0.0;
-          normdenom+=(*xtcnormcopy)*(*xtcnormcopy);
-          normdenom+=(*ytcnormcopy)*(*ytcnormcopy);
-          normdenom+=(*ztcnormcopy)*(*ztcnormcopy);
-          if(normdenom>0.1){
-            *has_tcnormcopy=1;
-            hasSensorNorm=1;
-            normdenom=sqrt(normdenom);
-            *xtcnormcopy*=(0.05/normdenom);
-            *ytcnormcopy*=(0.05/normdenom);
-            *ztcnormcopy*=(0.05/normdenom);
-          }
-          xtccopy++; ytccopy++; ztccopy++;
-          xtcnormcopy++; ytcnormcopy++; ztcnormcopy++;
-          has_tcnormcopy++;
-#endif
         }
       }
       continue;
@@ -3908,7 +3726,6 @@ typedef struct {
     ++++++++++++++++++++++ DEVICE +++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-#ifdef pp_DEVICE
   /*
     DEVICE
     type
@@ -3983,7 +3800,6 @@ typedef struct {
 
       continue;
     }
-#endif
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ SPRK ++++++++++++++++++++++++++++++
@@ -3991,9 +3807,7 @@ typedef struct {
   */
     if(match(buffer,"SPRK",4) == 1 && match(buffer,"SPRK_ACT",8) != 1){
       mesh *meshi;
-#ifdef pp_DEVICE
       char *device_label;
-#endif
       meshi=meshinfo + ioffset - 1;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&tempval);
@@ -4014,12 +3828,9 @@ typedef struct {
         ysprcopy=meshi->yspr;
         zsprcopy=meshi->zspr;
         for(nn=0;nn<meshi->nspr;nn++){
-#ifdef pp_DEVICE
           float *xyznorm;
           float normdenom;
-#endif
           fgets(buffer,255,stream);
-#ifdef pp_DEVICE
           xyznorm = devicecopy->xyznorm;
           xyznorm[0]=0.0;
           xyznorm[1]=0.0;
@@ -4054,9 +3865,6 @@ typedef struct {
 
           devicecopy++;
           ndeviceinfo++;
-#else
-          sscanf(buffer,"%f %f %f",xsprcopy,ysprcopy,zsprcopy);
-#endif
 
           xsprcopy++; ysprcopy++; zsprcopy++;
         }
@@ -4091,7 +3899,6 @@ typedef struct {
       sscanf(buffer,"%i %f",&nn,&time);
       if(meshi->tspr!=NULL && nn <= meshi->nspr && nn > 0){
         meshi->tspr[nn-1]=time;
-#ifdef pp_DEVICE
         {
           int idev;
           int count=0;
@@ -4109,7 +3916,6 @@ typedef struct {
             }
           }
         }
-#endif
       }
       continue;
     }
@@ -4120,10 +3926,7 @@ typedef struct {
   */
     if(match(buffer,"HEAT",4) == 1 && match(buffer,"HEAT_ACT",8) != 1){
       mesh *meshi;
-#ifdef pp_DEVICE
       char *device_label;
-#endif
-
 
       meshi=meshinfo + ioffset - 1;
       fgets(buffer,255,stream);
@@ -4148,12 +3951,9 @@ typedef struct {
         yheatcopy=meshi->yheat;
         zheatcopy=meshi->zheat;
         for(nn=0;nn<meshi->nheat;nn++){
-#ifdef pp_DEVICE
           float *xyznorm;
           float normdenom;
-#endif
           fgets(buffer,255,stream);
-#ifdef pp_DEVICE
           xyznorm=devicecopy->xyznorm;
           xyznorm[0]=0.0;
           xyznorm[1]=0.0;
@@ -4188,9 +3988,6 @@ typedef struct {
 
           devicecopy++;
           ndeviceinfo++;
-#else
-          sscanf(buffer,"%f %f %f",xheatcopy,yheatcopy,zheatcopy);
-#endif
           xheatcopy++; yheatcopy++; zheatcopy++;
 
         }
@@ -4225,7 +4022,6 @@ typedef struct {
       sscanf(buffer,"%i %f",&nn,&time);
       if(meshi->theat!=NULL && nn <= meshi->nheat && nn > 0){
         meshi->theat[nn-1]=time;
-#ifdef pp_DEVICE
         {
           int idev;
           int count=0;
@@ -4243,11 +4039,9 @@ typedef struct {
             }
           }
         }
-#endif
       }
       continue;
     }
-#ifdef pp_DEVICE
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ SMOD ++++++++++++++++++++++++++++++
@@ -4330,7 +4124,6 @@ typedef struct {
       }
       continue;
     }
-#endif
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ SHOW_OBST ++++++++++++++++++++++++++++++
@@ -4632,9 +4425,7 @@ typedef struct {
   if(mt_compress==1)pthread_mutex_init(&mutexCOMPRESS,NULL);
 #endif
 
-#ifdef pp_PART5
   init_part5prop();
-#endif
   init_plot3dtimelist();
 
   case_number=0;
@@ -4664,12 +4455,6 @@ typedef struct {
   if(nslice>0){
     NewMemory((void **)&slice_loaded_list,nslice*sizeof(int));
   }
-#ifndef pp_ISO
-  FREEMEMORY(iso_loaded_list);
-  if(niso>0){
-    NewMemory((void **)&iso_loaded_list,niso*sizeof(int));
-  }
-#endif
   FREEMEMORY(patch_loaded_list);
   if(npatch_files>0){
     NewMemory((void **)&patch_loaded_list,npatch_files*sizeof(int));
@@ -5070,13 +4855,6 @@ typedef struct {
     mesh *meshi;
 
     meshi=meshinfo + i;
-#ifndef pp_DEVICE
-    for(n=0;n<meshi->ntc;n++){
-      meshi->xtcplot[n]=(meshi->offset[0]+meshi->xtc[n]-xbar0)/xyzmaxdiff;
-      meshi->ytcplot[n]=(meshi->offset[1]+meshi->ytc[n]-ybar0)/xyzmaxdiff;
-      meshi->ztcplot[n]=(meshi->offset[2]+meshi->ztc[n]-zbar0)/xyzmaxdiff;
-    }
-#endif
     for(n=0;n<meshi->nspr;n++){
       meshi->xsprplot[n]=(meshi->offset[0]+meshi->xspr[n]-xbar0)/xyzmaxdiff;
       meshi->ysprplot[n]=(meshi->offset[1]+meshi->yspr[n]-ybar0)/xyzmaxdiff;
@@ -5925,18 +5703,6 @@ void initmesh(mesh *meshi){
   meshi->patch_contours=NULL;
   meshi->patchtimeslist=NULL;
   meshi->ntc=0;
-#ifndef pp_DEVICE
-  meshi->xtcplot=NULL;
-  meshi->ytcplot=NULL;
-  meshi->ztcplot=NULL;
-  meshi->xtc=NULL;
-  meshi->ytc=NULL;
-  meshi->ztc=NULL;
-  meshi->xtcnorm=NULL;
-  meshi->ytcnorm=NULL;
-  meshi->ztcnorm=NULL;
-  meshi->has_tcnorm=NULL;
-#endif
   meshi->nspr=0;
   meshi->xsprplot=NULL;
   meshi->ysprplot=NULL;
@@ -6194,9 +5960,6 @@ int readini(int loaddatafile){
   if(statfile4==0&&casefilename!=NULL){
     if(readini2(casefilename,loaddatafile,1)==2)return 2;
   }
-#ifdef pp_PART5
-//  if(npart5prop>0)PART_CB_INIT();
-#endif
   updateglui();
   if(unitclasses_ini!=NULL){
     unitclasses=unitclasses_ini;
@@ -6354,14 +6117,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       }
       continue;
     }
-#ifdef pp_DEVICE
     if(match(buffer,"DEVICENORMLENGTH",16)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f",&devicenorm_length);
       if(devicenorm_length<0.0||devicenorm_length>1.0)devicenorm_length=0.1;
       continue;
     }
-#endif
 
     if(match(buffer,"TWOSIDEDVENTS",13)==1){
       fgets(buffer,255,stream);
@@ -6539,7 +6300,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       sscanf(buffer,"%i %f %i %f",&setpartmin,&partmin,&setpartmax,&partmax);
       continue;
     }
-#ifdef pp_PART5
     if(match(buffer,"V5_PARTICLES",12)==1){
       int ivmin, ivmax;
       float vmin, vmax;
@@ -6566,7 +6326,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       }
       continue;
     }
-#endif
     if(match(buffer,"C_PARTICLES",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i %f",&setpartchopmin,&partchopmin,&setpartchopmax,&partchopmax);
@@ -6656,14 +6415,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       evacframeskip=evacframeskip-1;
       continue;
     }
-#ifndef pp_PART5
-    if(match(buffer,"PARTPOINTCOMPRESS",17)==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&partpointcompress);
-      if(partpointcompress>2||partpointcompress<0)partpointcompress=1;
-      continue;
-    }
-#endif
     if(match(buffer,"USENISTLOGO",11)==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&use_nistlogo);
@@ -8205,7 +7956,6 @@ void writeini(int flag){
   fprintf(fileout,"\nVALUE MIN/MAX\n");
   fprintf(fileout,"-------------\n");
   fprintf(fileout,"(0/1 min 0/1 max (1=set, 0=unset)\n\n");
-#ifdef pp_PART5
   if(npart5prop>0){
     for(i=0;i<npart5prop;i++){
       part5prop *propi;
@@ -8218,10 +7968,6 @@ void writeini(int flag){
   }
   fprintf(fileout,"V_PARTICLES\n");
   fprintf(fileout," %i %f %i %f\n",setpartmin,partmin,setpartmax,partmax);
-#else
-  fprintf(fileout,"V_PARTICLES\n");
-  fprintf(fileout," %i %f %i %f\n",setpartmin,partmin,setpartmax,partmax);
-#endif
   fprintf(fileout,"C_PARTICLES\n");
   fprintf(fileout," %i %f %i %f\n",setpartchopmin,partchopmin,setpartchopmax,partchopmax);
   if(nslice2>0){
@@ -8305,10 +8051,6 @@ void writeini(int flag){
   fprintf(fileout," %i\n",nopart);
   fprintf(fileout,"PARTPOINTSTEP\n");
   fprintf(fileout," %i\n",partpointstep);
-#ifndef pp_PART5
-  fprintf(fileout,"PARTPOINTCOMPRESS\n");
-  fprintf(fileout," %i\n",partpointcompress);
-#endif
   fprintf(fileout,"PARTFRAMESTEP\n");
   fprintf(fileout," %i\n",partframestep);
   fprintf(fileout,"EVACFRAMESTEP\n");
@@ -8331,7 +8073,6 @@ void writeini(int flag){
     put_startup_smoke3d(fileout);
     fprintf(fileout,"LOADFILESATSTARTUP\n");
     fprintf(fileout," %i\n",loadfiles_at_startup);
-#ifdef pp_PART5
     if(npart5prop>0){
       fprintf(fileout,"PART5PROPDISP\n");
       for(i=0;i<npart5prop;i++){
@@ -8345,7 +8086,6 @@ void writeini(int flag){
         fprintf(fileout,"\n");
       }
     }
-#endif
   }
   fprintf(fileout,"\nCONTOURS\n");
   fprintf(fileout,"--------\n\n");
@@ -8818,9 +8558,6 @@ void writeini(int flag){
 void update_loaded_lists(void){
   int i;
   slice *slicei;
-#ifndef pp_ISO
-  iso *isoi;
-#endif
   patch *patchi;
 
   nslice_loaded=0;
@@ -8831,16 +8568,6 @@ void update_loaded_lists(void){
       nslice_loaded++;
     }
   }
-#ifndef pp_ISO
-  niso_loaded=0;
-  for(i=0;i<niso;i++){
-    isoi = isoinfo + i;
-    if(isoi->loaded==1){
-      iso_loaded_list[niso_loaded]=i;
-      niso_loaded++;
-    }
-  }
-#endif
 
   npatch_loaded=0;
   for(i=0;i<npatch_files;i++){
@@ -8853,7 +8580,6 @@ void update_loaded_lists(void){
 
 }
 
-#ifdef pp_DEVICE
 void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
   float coselev;
   float norm, norm2;
@@ -8879,4 +8605,3 @@ void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
 
 
 }
-#endif

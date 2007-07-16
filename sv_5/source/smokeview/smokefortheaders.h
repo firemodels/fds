@@ -81,7 +81,6 @@ STDCALL FORTgetpatchdata(int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk
 STDCALL FORTgetdata2a(int *nmax,int *nspr,float *x,float *y,float *z,float *t,
                       float *stime,int *np,int *ns,int *error);
 STDCALL FORTgetdata1(int *ipart, int *error);
-#ifdef pp_PART5
 STDCALL FORTgetdata2(
                      short *xparts, short *yparts, short *zparts,
                      float *t,
@@ -92,19 +91,6 @@ STDCALL FORTgetdata2(
                      float *offset_x, float *offset_y, float *offset_z,
                      int *error,
                      int lenisprink);
-#else
-STDCALL FORTgetdata2(int *partfilecompress, 
-                     unsigned char *xpartb, unsigned char *ypartb, unsigned char *zpartb, 
-                     short *xparts, short *yparts, short *zparts,
-                     float *x, float *y, float *z, float *t,
-                     int *sprinkflag, unsigned char *isprink, float *tspr, int *bframe,int *sframe,int *sprframe,
-                     float *ptimes,int *nspr,int *nmax,int *mxframes,int *nframes,
-                     int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p, int *partframestep, int *partpointstep, 
-                     float *xbox0, float *xbox, float *ybox0, float *ybox, float *zbox0, float *zbox, 
-                     float *offset_x, float *offset_y, float *offset_z,
-                     int *error,
-                     int lenxb, int lenyb, int lenzb, int lenisprink);
-#endif
 STDCALL FORTgetdata2b(char *partfilename, 
                       float *xpart, float *ypart, float *zpart,  
                       float *tpart,int *bframe,int *sframe,float *ptimes,

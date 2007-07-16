@@ -182,7 +182,6 @@ void getBoundaryLabels(
 }
 
 
-#ifdef pp_PART5
 /* ------------------ getPart5Colors ------------------------ */
 
 void getPart5Colors(particle *parti, int nlevel){
@@ -281,7 +280,6 @@ void getPart5Colors(particle *parti, int nlevel){
   }
 
 }
-#endif
 /* ------------------ getPartColors ------------------------ */
 
 void getPartColors(const float *t, int local_skip, int nt, 

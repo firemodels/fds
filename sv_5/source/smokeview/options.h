@@ -29,15 +29,9 @@
 #define EGZ
 #define USE_ZLIB
 #define pp_THREADS2
-#define pp_ISO
 
-#ifdef pp_SV5P0
-#define pp_RENDER
-#define pp_PART5
-#define pp_DEVICE
 #define pp_WUI
 #define pp_TRAINER
-#endif
 
 #ifdef pp_TEST
 #define pp_COLOR

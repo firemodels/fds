@@ -52,9 +52,7 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
 #define SETCHOPMAXVAL 16
 #define CHOPUPDATE 17
 #define FRAMELOADING 18
-#ifdef pp_PART5
 #define STREAKLENGTH 19
-#endif
 #define OUTPUTSLICEDATA 20
 
 #define SAVE_SETTINGS 99
@@ -106,11 +104,9 @@ GLUI_Spinner *SPINNER_isoframestep=NULL;
 GLUI_Spinner *SPINNER2_smoke3dframestep=NULL;
 GLUI_Spinner *SPINNER_smoke3dzipstep=NULL;
 GLUI_Spinner *SPINNER_boundzipstep=NULL;
-#ifdef pp_PART5
 GLUI_Spinner *SPINNER_partstreaklength=NULL;
 GLUI_Spinner *SPINNER_partpointsize=NULL;
 GLUI_Spinner *SPINNER_streaklinewidth=NULL;
-#endif
 GLUI_Spinner *SPINNER_vectorpointsize=NULL;
 GLUI_Spinner *SPINNER_vectorlinewidth=NULL;
 
@@ -217,7 +213,6 @@ extern "C" void glui_bounds_setup(int main_window){
   if(npartinfo>0&&nevac!=npartinfo){
     glui_active=1;
     panel_part = glui_bounds->add_rollout("Particle",false);
-#ifdef pp_PART5
     if(npart5prop>0){
       ipart5prop=0;
       ipart5prop_old=0;
@@ -234,7 +229,6 @@ extern "C" void glui_bounds_setup(int main_window){
     }
 
 
-#endif
     {
       char boundmenulabel[100];
       GLUI_EditText **editcon;
@@ -261,7 +255,6 @@ extern "C" void glui_bounds_setup(int main_window){
         SPINNER_partpointstep=glui_bounds->add_spinner_to_panel(panel_part,"Point Skip",GLUI_SPINNER_INT,
           &partpointskip,FRAMELOADING,PART_CB);
         SPINNER_partpointstep->set_int_limits(0,100);
-#ifdef pp_PART5
         SPINNER_partpointsize=glui_bounds->add_spinner_to_panel(panel_part,"Particle size",GLUI_SPINNER_FLOAT,
           &partpointsize);
         SPINNER_partpointsize->set_float_limits(1.0,10.0);
@@ -272,7 +265,6 @@ extern "C" void glui_bounds_setup(int main_window){
         SPINNER_partstreaklength=glui_bounds->add_spinner_to_panel(panel_part,"Streak Length (s)",GLUI_SPINNER_FLOAT,
           &float_streak5value,STREAKLENGTH,PART_CB);
         SPINNER_partstreaklength->set_float_limits(0.0,10.0);
-#endif
     }
   }
 
@@ -857,26 +849,19 @@ extern "C" void updatepatchlistindex(int patchfilenum){
   }
 }
 
-#ifdef pp_PART5
 extern "C" void update_glui_streakvalue(float rvalue){
   float_streak5value=rvalue;
   if(SPINNER_partstreaklength!=NULL)SPINNER_partstreaklength->set_float_val(rvalue);
 }
-#endif
 
 /* ------------------ PART_CB ------------------------ */
 
 void PART_CB(int var){
-#ifdef pp_PART5
   part5prop *propi, *propi0;
-#endif
 
-#ifdef pp_PART5
   propi = part5propinfo + ipart5prop;
   propi0 = part5propinfo + ipart5prop_old;
-#endif
   switch (var){
-#ifdef pp_PART5
   case VALMIN:
     if(setpartmax==SET_MAX)propi->user_max=partmax;
     break;
@@ -939,18 +924,15 @@ void PART_CB(int var){
     }
     updatemenu=1;
     break;
-#endif
   case FRAMELOADING:
     partframestep=partframeskip+1;
     partpointstep=partpointskip+1;
     evacframestep=evacframeskip+1;
     evacframestep=evacframeskip+1;
-#ifdef pp_PART5
     if(partpointstep!=partpointstep_old){
       update_all_partvis2();
       partpointstep_old=partpointstep;
     }
-#endif
 
     updatemenu=1;
     break;
@@ -1034,20 +1016,14 @@ void PART_CB(int var){
    break;
   case FILERELOAD:
     {
-#ifdef pp_PART5
       int prop_index_SAVE;
-#endif
 
-#ifdef pp_PART5
      prop_index_SAVE=prop_index;
      if(con_part_min!=NULL&&setpartmin==SET_MIN)PART_CB(SETVALMIN);
      if(con_part_max!=NULL&&setpartmax==SET_MAX)PART_CB(SETVALMAX);
-#endif
      ParticleMenu(0);
      updateglui();
-#ifdef pp_PART5
      ParticlePropShowMenu(prop_index_SAVE);
-#endif
     }
    break;
   }

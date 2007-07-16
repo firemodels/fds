@@ -17,7 +17,6 @@
 
 int tagscompare( const void *arg1, const void *arg2 );
 
-#ifdef pp_PART5
 void ParticlePropShowMenu(int val);
 void PART_CB_INIT(void);
 void update_all_partvis(particle *parti);
@@ -29,10 +28,6 @@ void endian_switch(void *val, int nval);
                            returncode=fread(var,4,size,PART5FILE);\
                            if(endianswitch==1)endian_switch(var,size);\
                            fseek(PART5FILE,4,SEEK_CUR)
-
-#endif
-
-#ifdef pp_PART5
 
 
 /* ------------------ freepart5data ------------------------ */
@@ -844,7 +839,6 @@ void update_all_partvis2(void){
   }
 }
 
-#endif  // end of part5 stuff
 /* ------------------ readpart ------------------------ */
 
 #ifdef pp_nofortran
@@ -855,12 +849,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
 void readpart(char *file, int ifile, int flag, int *errorcode){
   int nmax, n, i;
   size_t lenfile;
-#ifdef pp_PART5
   float *tcopy;
-#else
-  float *xcopy, *ycopy, *zcopy;
-  float *tcopy;
-#endif
   unsigned char *isprinkcopy;
   int error=0;
   int bytesperpoint;
@@ -882,12 +871,10 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   float offset_x, offset_y, offset_z;
 
   parti=partinfo+ifile;
-#ifdef pp_PART5
   if(parti->version==1){
     readpart5(file,ifile,flag,errorcode);
     return;
   }
-#endif
   blocknumber=parti->blocknumber;
   meshi=meshinfo+blocknumber;
   if(parti->loaded==0&&flag==UNLOAD)return;
@@ -1011,7 +998,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     readpart("",ifile,UNLOAD,&error);
     return;
   }
-#ifdef pp_PART5
   if(NewMemory((void **)&parti->xparts,npartpoints*sizeof(short))==0||
      NewMemory((void **)&parti->yparts,npartpoints*sizeof(short))==0||
      NewMemory((void **)&parti->zparts,npartpoints*sizeof(short))==0){
@@ -1021,46 +1007,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     return;
   }
   bytesperpoint=7;
-#else
-  switch (partpointcompress){
-  case 0:
-    if(NewMemory((void **)&parti->xpart,npartpoints*sizeof(float))==0||
-       NewMemory((void **)&parti->ypart,npartpoints*sizeof(float))==0||
-       NewMemory((void **)&parti->zpart,npartpoints*sizeof(float))==0){
-      *errorcode=1;
-      FORTclosepart();
-      readpart("",ifile,UNLOAD,&error);
-      return;
-    }
-    bytesperpoint=13;
-    break;
-  case 1:
-    if(NewMemory((void **)&parti->xpartb,npartpoints*sizeof(unsigned char))==0||
-       NewMemory((void **)&parti->ypartb,npartpoints*sizeof(unsigned char))==0||
-       NewMemory((void **)&parti->zpartb,npartpoints*sizeof(unsigned char))==0){
-      *errorcode=1;
-      FORTclosepart();
-      readpart("",ifile,UNLOAD,&error);
-      return;
-    }
-    bytesperpoint=4;
-    break;
-  case 2:
-    if(NewMemory((void **)&parti->xparts,npartpoints*sizeof(short))==0||
-       NewMemory((void **)&parti->yparts,npartpoints*sizeof(short))==0||
-       NewMemory((void **)&parti->zparts,npartpoints*sizeof(short))==0){
-      *errorcode=1;
-      FORTclosepart();
-      readpart("",ifile,UNLOAD,&error);
-      return;
-    }
-    bytesperpoint=7;
-    break;
-  default:
-    ASSERT(FFALSE);
-    break;
-  }
-#endif
 
   if(NewMemory((void **)&parti->tpart,npartpoints*sizeof(float))==0||
      NewMemory((void **)&parti->itpart,npartpoints*sizeof(unsigned char))==0||
@@ -1103,7 +1049,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   offset_x=meshi->offset[0];
   offset_y=meshi->offset[1];
   offset_z=meshi->offset[2];
-#ifdef pp_PART5
   FORTgetdata2(
     parti->xparts,parti->yparts,parti->zparts,
     parti->tpart,&parti->droplet_type,parti->isprink,
@@ -1112,18 +1057,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     &xbar0, &xbox, &ybar0, &ybox, &zbar0, &zbox,
     &offset_x, &offset_y, &offset_z,
     &error,1);
-#else
-  FORTgetdata2(&partpointcompress,
-    parti->xpartb,parti->ypartb,parti->zpartb,
-    parti->xparts,parti->yparts,parti->zparts,
-    parti->xpart,parti->ypart,parti->zpart,
-    parti->tpart,&parti->droplet_type,parti->isprink,
-    tspr,parti->bframe,parti->sframe,parti->sprframe,parti->ptimes,&nspr,&npartpoints,&mxframes,&parti->nframes,
-    &settmin_p,&settmax_p,&tmin_p,&tmax_p,&partframestep,&partpointstep, 
-    &xbar0, &xbox, &ybar0, &ybox, &zbar0, &zbox,
-    &offset_x, &offset_y, &offset_z,
-    &error,1,1,1,1);
-#endif
   if(npartframes2>mxframes||npartpoints2>mxpoints){
     if(npartframes2>mxframes){
       printf("*** warning number of frames (%i) in particle file is greater than %i\n",npartframes2,mxframes);
@@ -1155,7 +1088,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   havesprinkpart=0;
   skip=0;
   if(staticframe0==1)skip=parti->sframe[0];
-#ifdef pp_PART5
   tcopy=parti->tpart+skip;
   tmin=1000000000.0;
   tmax=-tmin;
@@ -1179,60 +1111,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     }
     tcopy++; 
     isprinkcopy++;
-#else
-  if(partpointcompress==0){
-    xcopy=parti->xpart+skip; 
-    ycopy=parti->ypart+skip; 
-    zcopy=parti->zpart+skip; 
-    tcopy=parti->tpart+skip;
-    tmin=1000000000.0;
-    tmax=-tmin;
-    isprinkcopy=parti->isprink;
-    for(n=skip;n<nmax;n++){
-      *xcopy = (*xcopy-xbar0)/xyzmaxdiff;
-      *ycopy = (*ycopy-ybar0)/xyzmaxdiff;
-      *zcopy = (*zcopy-zbar0)/xyzmaxdiff;
-      if(*isprinkcopy==0&&parti->particle_type==0){
-        xcopy++; ycopy++; zcopy++; tcopy++; isprinkcopy++;
-        continue;
-      }
-      if(*isprinkcopy==1&&parti->droplet_type==0){
-        xcopy++; ycopy++; zcopy++; tcopy++; isprinkcopy++;
-        havesprinkpart=1;
-        continue;
-      }
-      if(*tcopy<tmin)tmin=*tcopy;
-      if(*tcopy>tmax)tmax=*tcopy;
-      if(*isprinkcopy==1){havesprinkpart=1;}
-      xcopy++; ycopy++; zcopy++; tcopy++; isprinkcopy++;
-    }
-  }
-  else {
-    tcopy=parti->tpart+skip;
-    tmin=1000000000.0;
-    tmax=-tmin;
-    isprinkcopy=parti->isprink;
-    for(n=skip;n<nmax;n++){
-      if(*isprinkcopy==0&&parti->particle_type==0){
-        tcopy++; 
-        isprinkcopy++;
-        continue;
-      }
-      if(*isprinkcopy==1&&parti->droplet_type==0){
-        tcopy++; 
-        isprinkcopy++;
-        havesprinkpart=1;
-        continue;
-      }
-      if(*tcopy<tmin)tmin=*tcopy;
-      if(*tcopy>tmax)tmax=*tcopy;
-      if(*isprinkcopy==1){
-        havesprinkpart=1;
-      }
-      tcopy++; 
-      isprinkcopy++;
-    }
-#endif
   }
   /* convert particle temperatures into integers pointing to an rgb color table */
 
@@ -1272,7 +1150,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
   FREEMEMORY(parti->tpart);
   FREEMEMORY(parti->isprink);
-#ifdef pp_PART5
   if(ResizeMemory((void **)&parti->xparts,nmax*sizeof(short))==0||
      ResizeMemory((void **)&parti->yparts,nmax*sizeof(short))==0||
      ResizeMemory((void **)&parti->zparts,nmax*sizeof(short))==0){
@@ -1281,38 +1158,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     readpart("",ifile,UNLOAD,&error);
     return;
   }
-#else
-  if(partpointcompress==0){
-    if(ResizeMemory((void **)&parti->xpart,nmax*sizeof(float))==0||
-       ResizeMemory((void **)&parti->ypart,nmax*sizeof(float))==0||
-       ResizeMemory((void **)&parti->zpart,nmax*sizeof(float))==0){
-      FORTclosepart();
-      *errorcode=1;
-      readpart("",ifile,UNLOAD,&error);
-      return;
-    }
-  }
-  else if(partpointcompress==1){
-    if(ResizeMemory((void **)&parti->xpartb,nmax*sizeof(unsigned char))==0||
-       ResizeMemory((void **)&parti->ypartb,nmax*sizeof(unsigned char))==0||
-       ResizeMemory((void **)&parti->zpartb,nmax*sizeof(unsigned char))==0){
-      FORTclosepart();
-      *errorcode=1;
-      readpart("",ifile,UNLOAD,&error);
-      return;
-    }
-  }
-  else if(partpointcompress==2){
-    if(ResizeMemory((void **)&parti->xparts,nmax*sizeof(short))==0||
-       ResizeMemory((void **)&parti->yparts,nmax*sizeof(short))==0||
-       ResizeMemory((void **)&parti->zparts,nmax*sizeof(short))==0){
-      FORTclosepart();
-      *errorcode=1;
-      readpart("",ifile,UNLOAD,&error);
-      return;
-    }
-  }
-#endif
   if(ResizeMemory((void **)&parti->itpart,nmax*sizeof(unsigned char))==0){
     FORTclosepart();
     *errorcode=1;
@@ -1358,7 +1203,6 @@ void drawEvac(const particle *parti){
   drawPart(parti);
 }
 
-#ifdef pp_PART5
 
 /* ------------------ drawPart5 ------------------------ */
 
@@ -1542,14 +1386,9 @@ void drawPart5(const particle *parti){
 
 }
 
-#endif
 /* ------------------ drawPart ------------------------ */
 
 void drawPart(const particle *parti){
-#ifndef pp_PART5
-  float *xpoint, *ypoint, *zpoint;
-  unsigned char *xpointb, *ypointb, *zpointb;
-#endif
   short *xpoints, *ypoints, *zpoints;
   unsigned char *itpoint=NULL;
 
@@ -1565,39 +1404,19 @@ void drawPart(const particle *parti){
 
   if(parti->ptimes[0]>times[itime])return;
 
-#ifdef pp_PART5
   if(parti->version==1){
     drawPart5(parti);
     return;
   }
-#endif
 
   droplet_type = parti->droplet_type;
   particle_type = parti->particle_type;
 
   /* define the data locations to look at */
   
-#ifdef pp_PART5
     xpoints = parti->xparts + parti->bframe[ipframe];
     ypoints = parti->yparts + parti->bframe[ipframe];
     zpoints = parti->zparts + parti->bframe[ipframe];
-#else
-  if(partpointcompress==0){
-    xpoint = parti->xpart + parti->bframe[ipframe];
-    ypoint = parti->ypart + parti->bframe[ipframe];
-    zpoint = parti->zpart + parti->bframe[ipframe];
-  }
-  else if(partpointcompress==1){
-    xpointb = parti->xpartb + parti->bframe[ipframe];
-    ypointb = parti->ypartb + parti->bframe[ipframe];
-    zpointb = parti->zpartb + parti->bframe[ipframe];
-  }
-  else if(partpointcompress==2){
-    xpoints = parti->xparts + parti->bframe[ipframe];
-    ypoints = parti->yparts + parti->bframe[ipframe];
-    zpoints = parti->zparts + parti->bframe[ipframe];
-  }
-#endif
   /* isprinkframe = isprink + bframe[ipframe];*/
 
   itpoint = parti->itpart + parti->bframe[ipframe];
@@ -1606,7 +1425,6 @@ void drawPart(const particle *parti){
 
   glPointSize(partpointsize);
   glBegin(GL_POINTS);
-#ifdef pp_PART5
   if(parti->version==0){
     if(visSmokePart!=0){
       if(particle_type==0){
@@ -1641,110 +1459,6 @@ void drawPart(const particle *parti){
       }
     }
   }
-#else
-  if(partpointcompress==0){
-    if(visSmokePart!=0){
-      if(particle_type==0){
-        for (n = 0; n < nsmokepoints; n++) {
-          glColor4fv(rgb[itpoint[n]]);
-          glVertex3f(xpoint[n],ypoint[n],zpoint[n]);
-        }
-      }
-      else{
-        for (n = 0; n < nsmokepoints; n++) {
-    //      glColor4fv(rgb_full[itpoint[n]]);
-          rgb_ismoke = rgb_smoke + 4*itpoint[n];
-          if(rgb_ismoke[3]>0.5){
-            glColor4fv(rgb_ismoke);
-            glVertex3f(xpoint[n],ypoint[n],zpoint[n]);
-          }
-        }
-      }
-    }
-    if(visSprinkPart==1){
-      if(droplet_type==0){
-        glColor4fv(rgb[rgb_blue]);
-        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++) {
-          glVertex3f(xpoint[n],ypoint[n],zpoint[n]);
-        }
-      }
-      else{
-        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++) {
-          glColor4fv(rgb_full[itpoint[n]]);
-          glVertex3f(xpoint[n],ypoint[n],zpoint[n]);
-        }
-      }
-    }
-  }
-  else if(partpointcompress==1){
-    if(visSmokePart!=0){
-      if(particle_type==0){
-        for (n = 0; n < nsmokepoints; n++) {
-          glColor4fv(rgb[itpoint[n]]);
-          glVertex3f(xpltb[xpointb[n]],ypltb[ypointb[n]],zpltb[zpointb[n]]);
-        }
-      }
-      else{
-        for (n = 0; n < nsmokepoints; n++) {
-       //   glColor4fv(rgb_full[itpoint[n]]);
-          rgb_ismoke = rgb_smoke + 4*itpoint[n];
-          if(rgb_ismoke[3]>0.5){
-            glColor4fv(rgb_ismoke);
-            glVertex3f(xpltb[xpointb[n]],ypltb[ypointb[n]],zpltb[zpointb[n]]);
-          }
-        }
-      }
-    }
-    if(visSprinkPart==1){
-      if(droplet_type==0){
-        glColor4fv(rgb[rgb_blue]);
-        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++) {
-          glVertex3f(xpltb[xpointb[n]],ypltb[ypointb[n]],zpltb[zpointb[n]]);
-        }
-      }
-      else{
-        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++) {
-          glColor4fv(rgb_full[itpoint[n]]);
-          glVertex3f(xpltb[xpointb[n]],ypltb[ypointb[n]],zpltb[zpointb[n]]);
-        }
-      }
-    }
-  }
-  else if(partpointcompress==2){
-    if(visSmokePart!=0){
-      if(particle_type==0){
-        for (n = 0; n < nsmokepoints; n++) {
-          glColor4fv(rgb[itpoint[n]]);
-          glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
-        }
-      }
-      else{
-        for (n = 0; n < nsmokepoints; n++) {
-        //  glColor4fv(rgb_full[itpoint[n]]);
-          rgb_ismoke = rgb_smoke + 4*itpoint[n];
-          if(rgb_ismoke[3]>0.5){
-            glColor4fv(rgb_ismoke);
-            glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
-          }
-        }
-      }
-    }
-    if(visSprinkPart==1){
-      if(droplet_type==0){
-        glColor4fv(rgb[rgb_blue]);
-        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++) {
-          glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
-        }
-      }
-      else{
-        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++) {
-          glColor4fv(rgb_full[itpoint[n]]);
-          glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
-        }
-      }
-    }
-  }
-#endif
 
   glEnd();
 
@@ -1756,10 +1470,6 @@ void drawPart(const particle *parti){
 
 void drawStaticPart(const particle *parti){
 
-#ifndef pp_PART5
-  float *xpoint, *ypoint, *zpoint;
-  unsigned char *xpointb, *ypointb, *zpointb;
-#endif
   short *xpoints, *ypoints, *zpoints;
 
   int n;
@@ -1769,29 +1479,11 @@ void drawStaticPart(const particle *parti){
   /* define the data locations to look at */
 
   ipframe=0;
-#ifdef pp_PART5
   if(parti->version==0){
     xpoints = parti->xparts + parti->bframe[ipframe];
     ypoints = parti->yparts + parti->bframe[ipframe];
     zpoints = parti->zparts + parti->bframe[ipframe];
   }
-#else
-  if(partpointcompress==0){
-    xpoint = parti->xpart + parti->bframe[ipframe];
-    ypoint = parti->ypart + parti->bframe[ipframe];
-    zpoint = parti->zpart + parti->bframe[ipframe];
-  }
-  else if(partpointcompress==1){
-    xpointb = parti->xpartb + parti->bframe[ipframe];
-    ypointb = parti->ypartb + parti->bframe[ipframe];
-    zpointb = parti->zpartb + parti->bframe[ipframe];
-  }
-  else if(partpointcompress==2){
-    xpoints = parti->xparts + parti->bframe[ipframe];
-    ypoints = parti->yparts + parti->bframe[ipframe];
-    zpoints = parti->zparts + parti->bframe[ipframe];
-  }
-#endif
   /* isprinkframe = isprink + bframe[ipframe];*/
 
   nsprpoints = parti->sprframe[ipframe];
@@ -1801,23 +1493,11 @@ void drawStaticPart(const particle *parti){
 
   glColor4fv(static_color);
   glBegin(GL_POINTS);
-#ifdef pp_PART5
   if(parti->version==0){
     for(n=0;n<nsmokepoints+nsprpoints;n++){
       glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
     }
   }
-#else
-  if(partpointcompress==0){
-    for(n=0;n<nsmokepoints+nsprpoints;n++){glVertex3f(xpoint[n],ypoint[n],zpoint[n]);}
-  }
-  else if(partpointcompress==1){
-    for(n=0;n<nsmokepoints+nsprpoints;n++){glVertex3f(xpltb[xpointb[n]],ypltb[ypointb[n]],zpltb[zpointb[n]]);}
-  }
-  else if(partpointcompress==2){
-    for(n=0;n<nsmokepoints+nsprpoints;n++){glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);}
-  }
-#endif
 
   glEnd();
 
@@ -1848,7 +1528,6 @@ int partcompare( const void *arg1, const void *arg2 ){
   parti = partinfo + i;
   partj = partinfo + j;
 
-#ifdef pp_PART5
   if(parti->version==1){
     if(parti->blocknumber<partj->blocknumber)return -1;
     if(parti->blocknumber>partj->blocknumber)return 1;
@@ -1859,12 +1538,6 @@ int partcompare( const void *arg1, const void *arg2 ){
     if(parti->blocknumber<partj->blocknumber)return -1;
     if(parti->blocknumber>partj->blocknumber)return 1;
   }
-#else
-  if(strcmp(parti->label.longlabel,partj->label.longlabel)<0)return -1;
-  if(strcmp(parti->label.longlabel,partj->label.longlabel)>0)return 1;
-  if(parti->blocknumber<partj->blocknumber)return -1;
-  if(parti->blocknumber>partj->blocknumber)return 1;
-#endif
   return 0;
 }
 
@@ -1887,7 +1560,6 @@ void updatepartmenulabels(void){
     for(i=0;i<npartinfo;i++){
       parti = partinfo + i;
       STRCPY(parti->menulabel,"");
-#ifdef pp_PART5
       if(parti->evac==1){
         STRCAT(parti->menulabel,"humans");
       }
@@ -1899,9 +1571,6 @@ void updatepartmenulabels(void){
           STRCAT(parti->menulabel,parti->label.longlabel);
         }
       }
-#else
-      STRCAT(parti->menulabel,parti->label.longlabel);
-#endif
       lenlabel=strlen(parti->menulabel);
       if(nmeshes>1){
         sprintf(label,"Mesh %i",1+parti->blocknumber);
