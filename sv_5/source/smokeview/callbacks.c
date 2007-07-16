@@ -92,9 +92,7 @@ void mouse(int button, int state, int x, int y){
     timedrag=0;
     colordrag=0;
     glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
-#ifdef pp_TRAINER
     update_trainer_moves();
-#endif
     return;
   }
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
@@ -1559,9 +1557,6 @@ void handle_move_keys(int  key){
     break;
   case GLUT_KEY_F1:
     setspeed(speed_now/1.5);
-#ifndef pp_TRAINER
-    update_glui_speed();
-#endif
     break;
   case GLUT_KEY_F2:
     setspeed(speed_walk);
@@ -1569,16 +1564,9 @@ void handle_move_keys(int  key){
     break;
   case GLUT_KEY_F3:
     setspeed(speed_now*1.5);
-#ifndef pp_TRAINER
-    update_glui_speed();
-#endif
     break;
   case GLUT_KEY_F4:
-#ifdef pp_TRAINER
     camera_current->view_angle-=LOOKANGLE_CHANGE;
-#else
-    camera_current->view_angle-=INC_ANGLE;
-#endif
     if(camera_current->view_angle<0.0)camera_current->view_angle+=360.0;
     camera_current->cos_view_angle=cos(camera_current->view_angle*PI/180.0);
     camera_current->sin_view_angle=sin(camera_current->view_angle*PI/180.0);
@@ -1589,11 +1577,7 @@ void handle_move_keys(int  key){
     camera_current->sin_view_angle=0.0;
     break;
   case GLUT_KEY_F6:
-#ifdef pp_TRAINER
     camera_current->view_angle+=LOOKANGLE_CHANGE;
-#else
-    camera_current->view_angle+=INC_ANGLE;
-#endif
     if(camera_current->view_angle>360.0)camera_current->view_angle-=360.0;
     camera_current->cos_view_angle=cos(camera_current->view_angle*PI/180.0);
     camera_current->sin_view_angle=sin(camera_current->view_angle*PI/180.0);
