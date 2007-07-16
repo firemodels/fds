@@ -154,10 +154,27 @@ from under the sides of the enclosed area.
 
 \section{CAROLFIRE}
 
-This section will go into the chapter entitled ``Target Response'' or whatever. There will be several sections
-describing results from other experiments with measurements of various device temperatures, activation times,
-etc. This section should start with the HRRs, then list hood temperatures, Tray A, B, etc. Do it Tray by Tray, not
-test by test.
+The intermediate CAROLFIRE series consisted of 14 tests with different burner
+heat release rates and cable layouts. The enclosure shown in figure ?? contained
+seven trays which held different cable configurations for each test. Gas temperatures
+were measured with thermocouples below and above each cable tray as well as on the sides
+and top of the hood enclosure. Cable temperatures were measured with different
+thermocouple placements in the bundles. These thermocouples were recreated in the FDS model.
+
+For the cable geometry in FDS, the mass fraction of plastic jacketing and copper conductor
+was calculated using the diameter and density data given from the CAROLFIRE report. By doing this,
+the different tray configurations were able to be represented without creating a complex grid.
+The grid resolution used was 0.1 m x 0.1 m x 0.1 m. The tray dimensions were 2.4 m long
+by 0.2 m wide by 0.1 m high, which means each tray was two grid cells in width.
+
+By adjusting the thickness of the cable obstruction, we are able to account for the
+different tray configurations and total cable masses. For trays with one or two cables,
+we used an obstruction which was one grid cell wide (half of the tray width) and
+a thickness of 0.2 mm to 0.5 mm. For the cable fill tray configurations which
+contained between 10 and 20 cables, we used an obstruction that was two grid cells
+wide and a thickness of 3 mm to 5 mm. In the case of the full random fill tray cables,
+we used an obstruction which was two grid cells wide and a thickness of 10 mm to 15 mm.
+
 
 
 
