@@ -83,6 +83,8 @@ extern "C" void show_trainer(void){
   }
 }
 
+/* ------------------ update_trainer_outline ------------------------ */
+
 extern "C" void update_trainer_outline(void){
   if(visBlocks==visBLOCKOutline){
     trainer_outline=0;
@@ -90,8 +92,10 @@ extern "C" void update_trainer_outline(void){
   else{
     trainer_outline=1;
   }
-  CHECKBOX_outline->set_int_val(trainer_outline);
+  if(CHECKBOX_outline!=NULL)CHECKBOX_outline->set_int_val(trainer_outline);
 }
+
+/* ------------------ update_trainer_moves ------------------------ */
 
 extern "C" void update_trainer_moves(void){
   float *eye_xyz;
@@ -120,8 +124,8 @@ extern "C" void update_trainer_moves(void){
   }
 
 }
-/* ------------------ glui_trainer_setup ------------------------ */
 
+/* ------------------ glui_trainer_setup ------------------------ */
 
 extern "C" void glui_trainer_setup(int main_window){
 
@@ -200,6 +204,8 @@ extern "C" void glui_trainer_setup(int main_window){
 #define GO_BACKWARD 2
 #define MOVE_UP 3
 #define MOVE_DOWN 4
+
+/* ------------------ ROTATE_CB ------------------------ */
 
 void ROTATE_CB(int var){
 
