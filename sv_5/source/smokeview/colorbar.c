@@ -356,7 +356,7 @@ void initdefaultcolorbars(void){
   int nlegs;
   colorbardata *cbi;
   int ii;
-
+/* test */
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
   NewMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
