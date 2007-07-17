@@ -122,7 +122,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: July 13, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: July 17, 2007)}
 
 \vspace{.5in}
 
@@ -4178,9 +4178,9 @@ and
 
 
 
-\chapter{A Simple Model of Fire Suppression \\ \vspace{0.2in} \normalsize Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}
+\chapter{A Simple Model of Flame Extinction \\ \vspace{0.2in} \normalsize Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}
 
-\label{mowrer_model} 
+\label{mowrer_model}
 
 
 A diffusion flame immersed in a vitiated atmosphere will extinguish before consuming all the
@@ -4227,8 +4227,9 @@ Protection Association, Quincy, MA, 2003.} then the relationship
 between the limiting oxygen mass fraction and the bulk temperature of a control volume is given
 by:
 \be
-   Y_{\OTWO,lim} = \frac{ \overline{c_p} (T_{f,lim}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.1 \, (1700-T_m) }{ 13100}
+   Y_{\OTWO,lim} = \frac{ \overline{c_p} (T_{f,lim}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.1 \, (1700-T_m) }{ 13100}  \label{extinction_model}
 \ee
+The relationship represented by Eq.~(\ref{extinction_model}) is shown in Fig.~\ref{plotsupp}.
 For a control volume at a temperature of 300~K, i.e., near room temperature, the limiting oxygen
 mass fraction would evaluate to $Y_{\OTWO,lim}=0.118$.  This value is consistent with the measurements
 of Morehart, Zukoski and Kubota,\footnote{Morehart, J., Zukoski, E., and Kubota, T., ``Characteristics of Large Diffusion Flames
