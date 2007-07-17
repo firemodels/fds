@@ -3,7 +3,7 @@
 \usepackage[pdftex]{graphicx}
 \usepackage{hyperref}
 
-\usepackage{array,eqnarray}
+%\usepackage{array,eqnarray}
 
 %\usepackage{eso-pic}
 %\usepackage{graphicx}
@@ -4016,26 +4016,26 @@ Hence, the substitution of (\ref{eqn_fickslaw}) into the divergence constraint i
 
 It is convenient to work in terms of the material derivative of the mass fraction.  Care must be exercised in obtaining this expression because the continuity equation is of a non-standard form.
 Expanding (\ref{eqn_speciestransport}) we obtain
-\begin{equationarray}{lcl}
+\begin{eqnarray}
 \label{eqn_speciesexpansion}
 \rho\frac{\partial Y_\alpha}{\partial t} + Y_\alpha \frac{\partial \rho}{\partial t} + \rho \mathbf{u}\cdot \nabla Y_\alpha + Y_\alpha \Div \left(\rho \mathbf{u}\right) &=& - \Div \mathbf{J}_{\alpha} + \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b,\alpha}^{\tripleprime} \,\mbox{,} \nonumber\vspace{0.3cm}\\
 \rho \frac{\mbox{D} Y_\alpha}{\mbox{D} t} + Y_\alpha \underbrace{\left[ \frac{\partial \rho}{\partial t} + \Div \left(\rho \mathbf{u}\right) \right]}_{\displaystyle \dot{m}_b^{\tripleprime}} &=& \mbox{}
-\end{equationarray}
+\end{eqnarray}
 Thus, the material derivative of the mass fraction can be written as
-\begin{equationarray}{lcl}
+\begin{eqnarray}
 \label{eqn_matdermassfrac}
 \frac{\mbox{D} Y_\alpha}{\mbox{D} t} &=& \frac{1}{\rho}\left(  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b,\alpha}^{\tripleprime} - Y_\alpha \dot{m}_b^{\tripleprime}  - \Div \mathbf{J}_{\alpha} \right) \,\mbox{,} \nonumber \vspace{0.3cm}\\
 &=& \frac{1}{\rho}\left(  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right) \,\mbox{,}
-\end{equationarray}
+\end{eqnarray}
 where in the second step we use the identity $\dot{m}_{b,\alpha}^{\tripleprime} = Y_\alpha \dot{m}_{b}^{\tripleprime}$ with $Y_{b,\alpha}$ being the mass fraction of $\alpha$ in the bulk prior to its introduction into the fluid mixture.
 
 Utilizing (\ref{eqn_mixmolewt}) and (\ref{eqn_matdermassfrac}) we obtain
-\begin{equationarray}{lcl}
+\begin{eqnarray}
 \label{eqn_transportexpression}
 \frac{\mbox{D}}{\mbox{D} t}\left(\frac{1}{\overline{W}}\right) &=& \frac{\mbox{D}}{\mbox{D} t}\left(\sum_\alpha \frac{Y_\alpha}{W_\alpha} \right) \,\mbox{,} \nonumber \vspace{0.3cm}\\
 &=& \sum_\alpha \frac{1}{W_\alpha} \frac{\mbox{D}Y_\alpha }{\mbox{D} t} \,\mbox{,} \nonumber \vspace{0.3cm}\\
 &=& \frac{1}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left(  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right)  \,\mbox{,}
-\end{equationarray}
+\end{eqnarray}
 which is needed in the second term on the RHS of (\ref{eqn_DEOS2}).
 
 
@@ -4097,43 +4097,44 @@ defining the specific heat of the mixture.  Thus, by rearranging (\ref{eqn_chain
 \frac{\mbox{D} T}{\mbox{D} t} = \frac{1}{c_p} \left[ \frac{\mbox{D} h_s}{\mbox{D} t} - \sum_\alpha h_{\alpha} \frac{\mbox{D} Y_\alpha}{\mbox{D} t} \right] \,\mbox{.}
 \end{equation}
 Utilizing (\ref{eqn_matdermassfrac}) and (\ref{eqn_enthalpytransport}) in (\ref{eqn_DTDt1}) yields
-\begin{equationarray}{lcrl}
+\begin{eqnarray}
+\frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p}   \left[  -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} +
+\frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s )  \right.   \nonumber \vspace{0.3cm} \\
+& &  \left.  - \sum_\alpha h_{s,\alpha} \Big\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \Big\}  \right]
 \label{eqn_DTDt2}
-\frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p} & \left[ \Big\{ -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s ) \Big\}\right. \nonumber\vspace{0.3cm}\\
-& & &- \left. \sum_\alpha h_{s,\alpha} \Big\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \Big\} \right] \,\mbox{.}
-\end{equationarray}
+\end{eqnarray}
 Note that $\sum_\alpha h_{s,\alpha} \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] = \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s )$ and hence these terms cancel, leaving
-\begin{equationarray}{lcl}
+\begin{eqnarray}
 \label{eqn_DTDt}
 \frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p} \left[ -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime}  - \sum_\alpha h_{\alpha} \Big\{  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \Big\} \right] \,\mbox{.}
-\end{equationarray}
+\end{eqnarray}
 
 \subsubsection{Assembling Terms}
 \label{putting_it_all_together}
 
 We now have all the pieces we need to construct the divergence constraint which we introduced in Eq. (\ref{eqn_divconstraint1}).  Using (\ref{eqn_DEOS2}) in (\ref{eqn_divconstraint1}) we obtain
-\begin{equationarray}{lcl}
+\begin{eqnarray}
 \label{eqn_divconstraint2}
 \Div\mathbf{u} &=& \frac{1}{\rho} \left( \dot{m}_b^{\tripleprime} -  \left[ \frac{\overline{W}}{\mathcal{R}T} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} - \rho \overline{W} \frac{\mbox{D}}{\mbox{D} t}\left(\frac{1}{\overline{W}}\right) - \frac{\rho}{T} \frac{\mbox{D} T}{\mbox{D} t} \right] \right) \,\mbox{,} \nonumber \vspace{0.3cm} \\
 &=& \frac{1}{\rho} \,\dot{m}_b^{\tripleprime} -  \frac{1}{\overline{p}_i} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} + \overline{W} \frac{\mbox{D}}{\mbox{D} t}\left(\frac{1}{\overline{W}}\right) + \frac{1}{T} \frac{\mbox{D} T}{\mbox{D} t} \,\mbox{,}
-\end{equationarray}
+\end{eqnarray}
 where in the second step the EOS (\ref{eqn_idealgaslaw}) is used to simplify the second term on the RHS.
 
 Using (\ref{eqn_transportexpression}) and (\ref{eqn_DTDt}) in (\ref{eqn_divconstraint2}) yields
-\begin{equationarray}{lcl}
+\begin{eqnarray}
 \label{eqn_divconstraint3}
 \Div\mathbf{u} &=& \frac{1}{\rho} \,\dot{m}_b^{\tripleprime} -  \frac{1}{\overline{p}_i} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} \nonumber \vspace{0.3cm}\\
 &+& \overline{W} \left[\frac{1}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
 &+&  \frac{1}{T} \left[ \frac{1}{\rho c_p} \left\{-\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{\alpha} \Big(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \Big) \right\} \right] \,\mbox{.}
-\end{equationarray}
+\end{eqnarray}
 
 Note that $\overline{W} \sum_\alpha (Y_\alpha/W_\alpha) = 1$ and also $\overline{W} \sum_\alpha (Y_{b,\alpha}/W_\alpha) = \overline{W}/\overline{W}_b$, where $\overline{W}_b$ is the molecular weight of the bulk mixture prior to its introduction into the fluid mixture.  Equation (\ref{eqn_divconstraint3}) thus simplifies to
-\begin{equationarray}{lcl}
+\begin{eqnarray}
 \label{eqn_divconstraint_final}
 \Div\mathbf{u}  &=& \left(\frac{1}{\rho c_p T}  -  \frac{1}{\overline{p}_i}\right) \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} \nonumber \vspace{0.3cm}\\
 &+& \frac{1}{\rho} \left[ \dot{m}_b^{\tripleprime} \frac{\overline{W}}{\overline{W}_b} +  \overline{W}\sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime} - \Div\mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
 &+&  \frac{1}{\rho c_p T} \left[ -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} - \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{\alpha} \left\{  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right\} \right] \,\mbox{.}
-\end{equationarray}
+\end{eqnarray}
 
 
 \subsubsection{FDS Notation}
@@ -4149,10 +4150,10 @@ The heat release rate per unit volume is defined by
 \end{equation}
 Taking the $z$ direction to be aligned with the gravity vector we have $\partial \overline{p}_i/\partial z = -\rho_i g$, where $g = 9.8$ m/s$^2$ and $\rho_i$ is a specified background density for the $i$th zone.
 Thus, the material derivative of the background pressure may be written as
-\begin{equationarray}{lcl}
+\begin{eqnarray}{lcl}
 \label{eqn_expandp0}
 \frac{\mbox{D}\overline{p}_i}{\mbox{D}t} &=& \frac{\partial \overline{p}_i}{\partial t} - w \rho_i g \,\mbox{.}
-\end{equationarray}
+\end{eqnarray}
 Hence, utilizing (\ref{eqn_fickslaw}), (\ref{eqn_heatrelease}), and (\ref{eqn_expandp0}), and noting $1/(\rho T) = \mathcal{R}/(\overline{W} \overline{p}_i)$ from the EOS,
 for the $i$th zone we may write the divergence (\ref{eqn_divconstraint_final}) as
 \begin{equation}
@@ -4165,7 +4166,7 @@ where
 \mathcal{P} = \frac{1}{\overline{p}_i}\left( \frac{\overline{p}_i}{\rho \,c_p T} - 1 \right) = \frac{1}{\overline{p}_i}\left( \frac{\mathcal{R}}{\overline{W} c_p} - 1 \right)
 \ee
 and
-\begin{equationarray}{lcl}
+\begin{eqnarray}{lcl}
 \label{eqn_fdsD}
 \mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho} \frac{\overline{W}}{\overline{W}_b} - \left( \frac{1}{\rho c_p T} - \frac{1}{\overline{p}_i} \right) w \rho_i g \nonumber \vspace{0.3cm}\\
 &+& \frac{\overline{W}}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left( \dot{m}_{\alpha}^\tripleprime + \Div \left[\rho D_\alpha \nabla Y_\alpha\right] \right) \nonumber \vspace{0.3cm}\\
@@ -4173,7 +4174,7 @@ and
 & & \nonumber \vspace{0.3cm}\\
 &=& \frac{\dot{m}_b^\tripleprime}{\rho} \frac{\overline{W}}{\overline{W}_b} + \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left( \dot{q}^\tripleprime - \Div \dot{\mathbf{q}}^{\prime\prime} \right) - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm}\\
 &+& \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) - \frac{\mathcal{R}}{\overline{W}c_p \overline{p}_i} \sum_\alpha h_{\alpha} \Div\left( \rho D_\alpha \nabla Y_\alpha \right) + \frac{1}{\rho} \sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime \,\mbox{.} \nonumber \vspace{0.3cm}\\
-\end{equationarray}
+\end{eqnarray}
 
 
 
