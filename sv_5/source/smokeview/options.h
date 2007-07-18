@@ -32,6 +32,7 @@
 #define pp_THREADS2
 
 #define pp_WUI
+#define pp_TOUR
 
 #ifdef pp_TEST
 #define pp_COLOR

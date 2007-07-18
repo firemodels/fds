@@ -524,6 +524,7 @@ SVEXTERN pthread_t compress_thread_id;
 
 SVEXTERN int lock_allsmoke;
 
+SVEXTERN int tour_usecurrent;
 SVEXTERN int visVentLines, visVentSolid;
 SVEXTERN int isZoneFireModel;
 SVEXTERN int output_slicedata,init_slicedata;
