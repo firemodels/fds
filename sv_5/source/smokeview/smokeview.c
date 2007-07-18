@@ -664,6 +664,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
   angleyzINI = camera_current->angle_zx[1];
   anglexyINI = camera_current->angle_zx[0];
+  printf(" xyz=%f %f %f elev=%f az=%f\n",eyexINI,eyeyINI,eyezINI,angleyzINI,anglexyINI);
 
   fnear =  - eyeyINI-1.0;
   if(fnear<nearclip)fnear=nearclip;
