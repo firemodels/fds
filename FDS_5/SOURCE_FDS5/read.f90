@@ -3075,7 +3075,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%THERMALLY_THICK = .FALSE.
    IF (SF%N_LAYERS > 0) THEN
       SF%THERMALLY_THICK = .TRUE.
-      IF (TMP_INNER< -TMPM) TMP_INNER = TMPA
+      IF (TMP_INNER< -TMPM) TMP_INNER = -TMPM
       SF%TMP_INNER                    = TMP_INNER + TMPM
       SF%TMP_FRONT                    = TMP_INNER
       SF%TMP_BACK                     = SF%TMP_INNER
@@ -3206,7 +3206,7 @@ TEXTURE_HEIGHT          = 1._EB
 THICKNESS               = -1._EB
 TMP_BACK                = -TMPM-1._EB
 TMP_FRONT               = TMPA-TMPM 
-TMP_INNER               = -TMPM-1._EB
+TMP_INNER               = TMPA-TMPM
 IF (LES) SLIP_FACTOR    =  0.5_EB    ! Half slip
 IF (DNS) SLIP_FACTOR    = -1.0_EB    ! No slip
 VEL_T                   = -999._EB
