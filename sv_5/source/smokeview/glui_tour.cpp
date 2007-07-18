@@ -49,6 +49,7 @@ GLUI_Checkbox *snap_checkbox=NULL,*view_checkbox=NULL,*showtourroute_checkbox=NU
 GLUI_Checkbox *CHECKBOXshowtourlocus=NULL,*CHECKBOXshowintermediate=NULL;
 GLUI_Checkbox *CHECKBOXglobaltension_flag=NULL, *CHECKBOXtourhide=NULL;
 GLUI_Checkbox *CHECKBOXcartesian=NULL;
+GLUI_Checkbox *CHECKBOX_usecurrent=NULL;
 GLUI_Spinner *SPINNER_globaltourtension=NULL;
 GLUI_Spinner *SPINNER_tourtension=NULL;
 GLUI_Spinner *SPINNER_tourbias=NULL;
@@ -84,6 +85,7 @@ GLUI_Listbox *LISTBOX_tour=NULL;
 #define CARTESIANVIEW 26
 #define VIEW_times 27
 #define TOUR_UPDATELABEL 28
+#define TOUR_USECURRENT 29
 
 #define TOURMENU(f) callfrom_tourglui=1;TourMenu(f);callfrom_tourglui=0;
 
@@ -136,6 +138,10 @@ extern "C" void glui_tour_setup(int main_window){
 
   panel_keyframe = glui_tour->add_panel("Keyframe");
   
+#ifdef pp_TOUR
+  CHECKBOX_usecurrent=glui_tour->add_checkbox_to_panel(panel_keyframe,"Add keyframe using current position",
+    &tour_usecurrent,TOUR_USECURRENT,TOUR_CB);
+#endif
   panel_tour1 = glui_tour->add_panel_to_panel(panel_keyframe,"",GLUI_PANEL_NONE);
   glui_tour->add_button_to_panel(panel_tour1,"Next",    KEYFRAME_NEXT,TOUR_CB);
   glui_tour->add_button_to_panel(panel_tour1,"Previous",KEYFRAME_PREVIOUS,TOUR_CB);
@@ -420,6 +426,8 @@ void TOUR_CB(int var){
   }
 
   switch (var){
+  case TOUR_USECURRENT:
+    break;
   case TOUR_NEXT:
     if(nexttour()==1){
       selected_tour->display=0;
@@ -654,14 +662,35 @@ void TOUR_CB(int var){
         lastkey=thiskey->prev;
         key_time_in = thiskey->noncon_time;
         thiskey->noncon_time=(thiskey->noncon_time+lastkey->noncon_time)/2.0;
+#ifdef pp_TOUR
+        if(tour_usecurrent==1){
+          float *xyz, *angles;
+
+          xyz = camera_current->eye;
+          angles = camera_current->angle_zx;
+          key_xyz[0]=xbar0 + xyzmaxdiff*xyz[0];
+          key_xyz[1]=ybar0 + xyzmaxdiff*xyz[1];
+          key_xyz[2]=zbar0 + xyzmaxdiff*xyz[2];
+          key_azimuth = angles[0];
+          key_elevation=angles[1];
+        }
+        else{
+          key_xyz[0]=xbar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[0]-lastkey->nodeval.eye[0]);
+          key_xyz[1]=ybar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[1]-lastkey->nodeval.eye[1]);
+          key_xyz[2]=zbar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[2]-lastkey->nodeval.eye[2]);
+          key_azimuth = (2*thiskey->azimuth-lastkey->azimuth);
+          key_elevation=(2*thiskey->nodeval.elevation-lastkey->nodeval.elevation);
+        }
+#else
         key_xyz[0]=xbar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[0]-lastkey->nodeval.eye[0]);
         key_xyz[1]=ybar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[1]-lastkey->nodeval.eye[1]);
         key_xyz[2]=zbar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[2]-lastkey->nodeval.eye[2]);
+        key_azimuth = (2*thiskey->azimuth-lastkey->azimuth);
+        key_elevation=(2*thiskey->nodeval.elevation-lastkey->nodeval.elevation);
+#endif
         key_params[0]=(2*thiskey->bias-lastkey->bias);
         key_params[1]=(2*thiskey->continuity-lastkey->continuity);
         key_params[2]=(2*thiskey->tension-lastkey->tension);
-        key_azimuth = (2*thiskey->azimuth-lastkey->azimuth);
-        key_elevation=(2*thiskey->nodeval.elevation-lastkey->nodeval.elevation);
         key_view[0]=xbar0 + xyzmaxdiff*(2*thiskey->nodeval.aview[0]-lastkey->nodeval.aview[0]);
         key_view[1]=ybar0 + xyzmaxdiff*(2*thiskey->nodeval.aview[1]-lastkey->nodeval.aview[1]);
         key_view[2]=zbar0 + xyzmaxdiff*(2*thiskey->nodeval.aview[2]-lastkey->nodeval.aview[2]);
@@ -671,14 +700,42 @@ void TOUR_CB(int var){
       }
       else{
         key_time_in = (thiskey->noncon_time+nextkey->noncon_time)/2.0;
+#ifdef pp_TOUR
+        /*
+        camera_current->eye[0]=pj->eye[0];
+        camera_current->eye[1]=pj->eye[1];
+        camera_current->eye[2]=pj->eye[2];
+        camera_current->angle_zx[1]=0.0;
+        camera_current->angle_zx[0]=0.0;
+        */
+        if(tour_usecurrent==1){
+          float *xyz, *angles;
+
+          xyz = camera_current->eye;
+          angles = camera_current->angle_zx;
+          key_xyz[0]=xbar0 + xyzmaxdiff*xyz[0];
+          key_xyz[1]=ybar0 + xyzmaxdiff*xyz[1];
+          key_xyz[2]=zbar0 + xyzmaxdiff*xyz[2];
+          key_azimuth = angles[0];
+          key_elevation=angles[1];
+        }
+        else{
+          key_xyz[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.eye[0]+nextkey->nodeval.eye[0])/2.0;
+          key_xyz[1]=ybar0 + xyzmaxdiff*(thiskey->nodeval.eye[1]+nextkey->nodeval.eye[1])/2.0;
+          key_xyz[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.eye[2]+nextkey->nodeval.eye[2])/2.0;
+          key_azimuth = (thiskey->azimuth+nextkey->azimuth)/2.0;
+          key_elevation=(thiskey->nodeval.elevation+nextkey->nodeval.elevation)/2.0;
+        }
+#else
         key_xyz[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.eye[0]+nextkey->nodeval.eye[0])/2.0;
         key_xyz[1]=ybar0 + xyzmaxdiff*(thiskey->nodeval.eye[1]+nextkey->nodeval.eye[1])/2.0;
         key_xyz[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.eye[2]+nextkey->nodeval.eye[2])/2.0;
+        key_azimuth = (thiskey->azimuth+nextkey->azimuth)/2.0;
+        key_elevation=(thiskey->nodeval.elevation+nextkey->nodeval.elevation)/2.0;
+#endif
         key_params[0]=(thiskey->bias+nextkey->bias)/2.0;
         key_params[1]=(thiskey->continuity+nextkey->continuity)/2.0;
         key_params[2]=(thiskey->tension+nextkey->tension)/2.0;
-        key_azimuth = (thiskey->azimuth+nextkey->azimuth)/2.0;
-        key_elevation=(thiskey->nodeval.elevation+nextkey->nodeval.elevation)/2.0;
         key_view[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.aview[0]+nextkey->nodeval.aview[0])/2.0;
         key_view[1]=ybar0 + xyzmaxdiff*(thiskey->nodeval.aview[1]+nextkey->nodeval.aview[1])/2.0;
         key_view[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.aview[2]+nextkey->nodeval.aview[2])/2.0;

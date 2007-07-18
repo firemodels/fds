@@ -1520,6 +1520,7 @@ void initvars1(void){
   ntours=0,selectedtour_index=-1,selectedtour_index_old=-1,selectedtour_index_ini=-1;
   update_selectedtour_index=0;
   viewtourfrompath=0,viewalltours=0,viewanytours=0,edittour=0;
+  tour_usecurrent=0;
   rotation_index_OLD=-1;
   nticks=0,ntickssmv=0;
   visTicks=0;
