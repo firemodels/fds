@@ -2995,7 +2995,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%Z0                   = Z0
    SF%MASS_FLUX_TOTAL      = MASS_FLUX_TOTAL
 
-   TMPMIN        = MIN(TMPMIN,SF%TMP_FRONT,SF%TMP_INNER,SF%TMP_BACK)
    IF (SF%HRRPUA>0._EB .OR. SF%MLRPUA>0._EB) MIXTURE_FRACTION=.TRUE.
    
    ! Count the number of layers for the surface, and compile a LIST of all material names and indices
@@ -3078,6 +3077,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
       SF%THERMALLY_THICK = .TRUE.
       IF (TMP_INNER< -TMPM) TMP_INNER = TMPA
       SF%TMP_INNER                    = TMP_INNER + TMPM
+      SF%TMP_FRONT                    = TMP_INNER
+      SF%TMP_BACK                     = SF%TMP_INNER
       ALLOCATE(SF%N_LAYER_CELLS(SF%N_LAYERS))            ! The number of cells in each layer
       ALLOCATE(SF%MIN_DIFFUSIVITY(SF%N_LAYERS))          ! The smallest diffusivity of materials in each layer
       ALLOCATE(SF%MATL_NAME(SF%N_MATL))                  ! The list of all material names associated with the surface
@@ -3087,8 +3088,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
       SF%TMP_FRONT                  = TMP_FRONT + TMPM
       IF (TMP_BACK< -TMPM) TMP_BACK = TMP_FRONT
       SF%TMP_BACK                   = TMP_BACK + TMPM
+      SF%TMP_INNER                  = SF%TMP_FRONT
    ENDIF
-
+   TMPMIN        = MIN(TMPMIN,SF%TMP_FRONT,SF%TMP_INNER,SF%TMP_BACK)
    ! Store the names and indices of all materials associated with the surface
 
    NNN = 0
