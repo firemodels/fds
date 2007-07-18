@@ -1297,7 +1297,7 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
    IF (ID/='null') SS%NAME = ID
  
 ENDDO SPEC_LOOP
- 
+
 END SUBROUTINE READ_SPEC
  
  
@@ -2137,8 +2137,6 @@ READ_PART_LOOP: DO N=1,N_PART
    TREE                     = .FALSE.
    VERTICAL_VELOCITY        = 0.2_EB
    HORIZONTAL_VELOCITY      = 0.5_EB
-   FUEL_EVAPORATION         = .FALSE.
-   WATER_EVAPORATION         = .FALSE.
  
    ! Read the PART line from the input file or set up special PARTICLE_CLASS class for water droplets or tracers
  
@@ -2166,7 +2164,7 @@ READ_PART_LOOP: DO N=1,N_PART
    IF (SAMPLING_FACTOR<=0 .AND.      MASSLESS)  SAMPLING_FACTOR         = 1
    IF (SAMPLING_FACTOR<=0 .AND. .NOT.MASSLESS)  SAMPLING_FACTOR         = 10
    IF (NUMBER_INITIAL_DROPLETS>0 .AND. RESTART) NUMBER_INITIAL_DROPLETS =  0
-   
+
    PC%QUANTITIES = QUANTITIES
    ! Set up arrays in case the domain is to be seeded with droplets/particles
 
@@ -2237,7 +2235,7 @@ READ_PART_LOOP: DO N=1,N_PART
    PC%ADJUST_EVAPORATION = 1._EB   ! If H_O_C>0. this parameter will have to be reset later
    PC%VERTICAL_VELOCITY  = VERTICAL_VELOCITY
    PC%HORIZONTAL_VELOCITY= HORIZONTAL_VELOCITY
- 
+  
 ENDDO READ_PART_LOOP
 
 IF (FUEL_EVAPORATION .OR. WATER_EVAPORATION) EVAPORATION=.TRUE.
@@ -2989,12 +2987,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%TEXTURE_MAP          = TEXTURE_MAP
    SF%TEXTURE_WIDTH        = TEXTURE_WIDTH
    SF%TEXTURE_HEIGHT       = TEXTURE_HEIGHT
-   SF%TMP_FRONT            = TMP_FRONT + TMPM
    SF%TMP_IGN              = IGNITION_TEMPERATURE + TMPM
-   IF (TMP_INNER< -TMPM) TMP_INNER = TMP_FRONT
-   SF%TMP_INNER            = TMP_INNER + TMPM
-   IF (TMP_BACK< -TMPM)  TMP_BACK = TMP_FRONT
-   SF%TMP_BACK             = TMP_BACK + TMPM
    SF%SLIP_FACTOR          = SLIP_FACTOR
    SF%VEL                  = VEL
    SF%VEL_T                = VEL_T
@@ -3083,11 +3076,17 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%THERMALLY_THICK = .FALSE.
    IF (SF%N_LAYERS > 0) THEN
       SF%THERMALLY_THICK = .TRUE.
+      IF (TMP_INNER< -TMPM) TMP_INNER = TMPA
+      SF%TMP_INNER                    = TMP_INNER + TMPM
       ALLOCATE(SF%N_LAYER_CELLS(SF%N_LAYERS))            ! The number of cells in each layer
       ALLOCATE(SF%MIN_DIFFUSIVITY(SF%N_LAYERS))          ! The smallest diffusivity of materials in each layer
       ALLOCATE(SF%MATL_NAME(SF%N_MATL))                  ! The list of all material names associated with the surface
       ALLOCATE(SF%MATL_INDEX(SF%N_MATL))                 ! The list of all material indices associated with the surface
       ALLOCATE(SF%RESIDUE_INDEX(SF%N_MATL,MAX_REACTIONS))! Each material associated with the surface has a RESIDUE
+   ELSE
+      SF%TMP_FRONT                  = TMP_FRONT + TMPM
+      IF (TMP_BACK< -TMPM) TMP_BACK = TMP_FRONT
+      SF%TMP_BACK                   = TMP_BACK + TMPM
    ENDIF
 
    ! Store the names and indices of all materials associated with the surface
