@@ -111,3 +111,33 @@ The large differences between model and measurement seen in the smoke data do no
 \end{figure}
 
 \clearpage
+
+\section{NIST Diffusion Flame Test Series}
+
+The CO production model was used to simulate the methane/air slot burner flame.  The Figure shows predicted and 
+measured values of CH4 + O2, CO,  CO2 at three elevations above the burner along with a contour plot of CO near the 
+burner lip (black rectangle is burner).  Note that the test data shows that a small quantity of oxygen exists along 
+the burner centerline which is not echoed in the predictions.  This behavior is expected. The new combustion model considers 
+the first step, Fuel to CO, to be infinitely fast, assuming that the local oxygen concentration satisfies the 
+flammability criteria.  This is true in the vicinity of the lip of the burner.  In reality, the cold fuel and air 
+streams do not react infinitely fast there and some oxygen penetrates the flame at the base, resulting in cooler 
+gases being entrained into the core of the flame.  As a result, along the centerline, the model predicts higher values of fuel and higher values of 
+products than measured.  The species profiles are also slightly narrower than measured, echoing the temperature plot \
+in Fig.~\ref{WP_CH4_temp}.  The peak CH4 values along the burner centerline have errors ranging from 6 \% to 13 \%, 
+the peak CO2 values in the flame have errors ranging from 3 \% to 10 \%, and the peak CO values in the flame have 
+errors ranging from 9 \% to 25 \%.  Given the reported 10 \% to 20 \% species measurement uncertainty, the new 
+combustion model predicts well both the magnitude and shape of the mixture fraction profiles.
+
+The contour of CO illustrates the combustion model quite well.  At the burner lip, fuel and oxygen first meet.  
+Since ambient levels of oxygen exist on the air side of the slot and the temperatures are relatively low at the 
+burner lip, combustion occurs and converts $Z_1$ to $Z_2$.  This consumes the oxygen present and the CO does not have an 
+opportunity to fully convert to CO2.  As the CO rises in the flame, oxygen is entrained and the temperatures are high 
+enough that the CO reacts with the entrained oxygen to form CO2.  Eventually, at a point high enough in the flame, 
+all of the fuel is consumed and all of the CO is oxidized.
+
+\begin{figure}[p]
+\includegraphics[width=6in]{FIGURES/WP_CH4_species}
+\caption{Predicted and measured mole fractions at three elevations (7 mm, 9mm and 11 mm) above a methane-air slot burner, 
+along with contours of CO near the burner lip}
+\label{WP_CH4_Species}
+\end{figure}

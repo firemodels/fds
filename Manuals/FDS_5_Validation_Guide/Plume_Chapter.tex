@@ -49,3 +49,20 @@ to better assess the relative difference between the peak values of the model an
 \end{figure}
 
 \clearpage
+
+\section{NIST Diffusion Flame Test Series}
+
+The CO production model was used to simulate the methane/air slot burner flame.  The Figure shows predicted and 
+measured temperatures at three elevations above the burner.  The model predicts a flame that is slightly narrower 
+(5.5 mm vs. 6.5 mm or a 15 \% error) and cooler (1700 °C vs. 1800 °C or a 5 \% error) than measured.  The model 
+also predicts higher centerline temperatures.  These results are not surprising.  The new combustion model considers 
+the first step, Fuel to CO, to be infinitely fast, assuming that the local oxygen concentration satisfies the 
+flammability criteria.  This is true in the vicinity of the lip of the burner.  In reality, the cold fuel and air 
+streams do not react infinitely fast there and some oxygen penetrates the flame at the base, resulting in cooler 
+gases being entrained into the core of the flame with a resulting drop in the centerline temperature.
+
+\begin{figure}[p]
+\includegraphics[width=6in]{FIGURES/WP_CH4_Temp}
+\caption{Predicted and measured temperature at three elevations (7 mm, 9mm and 11 mm) above a methane-air slot burner}
+\label{WP_CH4_Temp}
+\end{figure}
