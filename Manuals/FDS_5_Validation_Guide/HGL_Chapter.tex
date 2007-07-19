@@ -1,0 +1,239 @@
+\chapter{Hot Gas Layer Temperature and Depth}
+
+FDS, like any CFD model, does not perform a direct calculation of the HGL temperature or height. These are constructs unique to two-zone models, like
+CFAST and MAGIC. Nevertheless, FDS does make predictions of gas temperature at the same locations as the thermocouples in the experiments, and these
+values can be reduced in the same manner as the experimental measurements to produce an ``average'' HGL temperature and height.  Regardless of the
+validity of the reduction method, the FDS predictions of the HGL temperature and height ought to be representative of the accuracy of its predictions
+of the individual thermocouple measurements that are used in the HGL reduction. The temperature measurements from all six test series are used to
+compute an HGL temperature and height with which to compare to FDS.  The same layer reduction method is used for five of the six test series. Only
+the NBS Multi-Room series uses another method.
+
+A brief description of each test series is included below, followed by graphs comparing the predicted and measured HGL temperature and layer height.
+A summary table is provided at the end of the section that displays the relative differences between predictions and measurements for all six test
+series.  Note that the calculation of relative difference is based on the temperature rise above ambient, and the layer depth, that is, the distance
+from the ceiling to where the hot gas layer descends.  Where the model over-predicts the HGL temperature or the depth of the HGL, the relative
+difference is a positive number. This convention is used throughout this report where the model over-predicts the severity of the fire, the relative
+difference is positive; where it under-predicts, the difference is negative.
+
+\clearpage
+
+
+\section{NIST/WTC Test Series}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/WTC_01_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/WTC_02_v5_HGL_Temperature} \\
+\includegraphics[width=2.6in]{FIGURES/WTC_03_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/WTC_04_v5_HGL_Temperature} \\
+\includegraphics[width=2.6in]{FIGURES/WTC_05_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/WTC_06_v5_HGL_Temperature}
+\end{tabular*}
+\caption{Hot Gas Layer Temperatures for the NIST/WTC Test Series.} \label{NIST_WTC_HGL_Temp}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/WTC_01_v5_HGL_Height} &
+\includegraphics[width=2.6in]{FIGURES/WTC_02_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/WTC_03_v5_HGL_Height} &
+\includegraphics[width=2.6in]{FIGURES/WTC_04_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/WTC_05_v5_HGL_Height} &
+\includegraphics[width=2.6in]{FIGURES/WTC_06_v5_HGL_Height}
+\end{tabular*}
+\caption{Hot Gas Layer Height for the NIST/WTC Test Series.} \label{NIST_WTC_HGL_Temp}
+\end{figure}
+
+\clearpage
+
+\section{VTT Large Hall Test Series}
+
+The HGL temperature and depth are calculated from the averaged gas temperatures from three vertical thermocouple arrays using the standard reduction
+method. There are 10 thermocouples in each vertical array, spaced 2 m apart in the lower two-thirds of the hall, and 1 m apart near the ceiling.
+Figure~\ref{VTT_Overview} presents a snapshot from one of the simulations. Note in the figure that all of the obstructions, including the slanted
+roof and exhaust duct, are approximated in the model as rectangular to conform with the rectilinear grid.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/VTT_01_v5_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/VTT_01_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/VTT_01_v5_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/VTT_01_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/VTT_01_v5_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/VTT_01_v5_HGL_Height}
+\end{tabular*}
+\caption{Predicted HGL Temperature and Height for the VTT Large Hall Tests.} \label{VTT_HGL}
+\end{figure}
+
+
+
+\clearpage
+
+\section{NIST/NRC Test Series}
+
+The NIST/NRC series consisted of 15 liquid spray fire tests with different heat release rates, pan locations, and ventilation conditions. The basic
+geometry, including the numerical grid, is shown in Figure~\ref{NIST_NRC_Overview}. Gas temperatures were measured using seven floor-to-ceiling
+thermocouple arrays (or ``trees'') distributed throughout the compartment.  The average hot gas layer temperature and height are calculated using
+thermocouple Trees 1, 2, 3, 5, 6 and 7. Tree 4 was not used because one of its thermocouples (4-9) malfunctioned during most of the experiments.
+
+A few observations about the simulations:
+\begin{itemize}
+\item During Tests 4, 5, 10 and 16 a fan blew air into the compartment through a vent in the south wall.
+The measured velocity profile of the fan is not uniform, with the bulk of the air blowing from the lower third of the duct towards the ceiling at a
+roughly 45? angle.  The exact flow pattern is difficult to replicate in the model, thus, the results for Tests 4, 5, 10 and 16 should be evaluated
+with this in mind. The effect of the fan on the hot gas layer is small, but it does have a some effect on target temperatures near the vent.
+\item For all of the tests involving a fan, the predicted HGL height rises after the fire is extinguished,
+while the measured HGL drops.  This appears to be a curious artifact of the layer reduction algorithm. It is not included in the calculation of the
+relative difference.
+\item In the closed door tests, the hot gas layer descends all the way to the floor.
+However, the reduction method, used on both the measured and predicted temperatures, does not account for the formation of a single layer, and
+therefore does not indicate that the layer drops all the way to the floor. This is neither a flaw in the measurements nor in FDS, but rather in the
+layer reduction method.
+\item The HGL reduction method produces spurious results in the first few minutes of each test because no clear layer has yet formed.
+These early times are not included in the relative difference calculation.
+\end{itemize}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_01_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_01_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_07_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_07_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_02_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_02_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_08_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_08_v5_HGL_Height}
+\end{tabular*}
+\caption{Predicted HGL Temperature and Height for the NIST/NRC Tests 1, 7, 2 and 8.} \label{NIST_NRC_HGL_Closed_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_04_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_04_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_10_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_10_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_13_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_13_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_16_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_16_v5_HGL_Height}
+\end{tabular*}
+\caption{Predicted HGL Temperature and Height for the NIST/NRC Tests 4, 10, 13 and 16.} \label{NIST_NRC_HGL_Closed_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_17_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_17_v5_HGL_Height} \\
+\multicolumn{2}{c}{Open door tests to follow} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_03_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_03_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_09_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_09_v5_HGL_Height}
+\end{tabular*}
+\caption{Predicted HGL Temperature and Height for the NIST/NRC Tests 17, 3 and 9.} \label{NIST_NRC_HGL_Open_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_05_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_05_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_14_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_14_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_15_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_15_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_18_v5_HGL_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_18_v5_HGL_Height}
+\end{tabular*}
+\caption{Predicted HGL Temperature and Height for the NIST/NRC Tests 5, 14, 15 and 18.} \label{NIST_NRC_HGL_Open_2}
+\end{figure}
+
+
+\clearpage
+
+\section{FM/SNL Test Series}
+
+Tests 4, 5, and 21 from the FM/SNL test series are selected for comparison. The hot gas layer temperature and height are calculated using the
+standard method. The thermocouple arrays that are referred to as Sectors 1, 2 and 3 are averaged (with an equal weighting for each) for Tests 4 and
+5. For Test 21, only Sectors 1 and 3 are used, as Sector 2 falls within the smoke plume.
+
+Note the following:
+\begin{itemize}
+\item The HGL heights, both the measured and predicted, are somewhat noisy due to the effect of ventilation ducts in the upper layer.
+\item The ventilation was turned off after 9 min in Test 5,
+the effect of which was a slight increase in both the measured and predicted HGL temperature.
+\item The measured HGL temperature is noticeably greater than the prediction in Test 21.
+This is possibly due to an increase in the HRR towards the end of the test.  The simulations all used fixed HRRs after the 4 min ramp up.
+\end{itemize}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/FM_SNL_04_v5_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/FM_SNL_04_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/FM_SNL_05_v5_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/FM_SNL_05_v5_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/FM_SNL_21_v5_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/FM_SNL_21_v5_HGL_Height}
+\end{tabular*}
+\caption{Hot Gas Layer Temperature and Height for the FM/SNL Tests.} \label{FM_SNL_HGL}
+\end{figure}
+
+\clearpage
+
+\section{NBS Multi-Room Test Series}
+
+This series of experiments consists of two relatively small rooms connected by a long corridor. The fire is located in one of the rooms.  Eight
+vertical arrays of thermocouples are positioned throughout the test space: one in the burn room, one near the door of the burn room, three in the
+corridor, one in the exit to the outside at the far end of the corridor, one near the door of the other or ``target'' room, and one inside the target
+room.  Four of the eight arrays have been selected for comparison with model prediction: the array in the burn room (BR), the array in the middle of
+the corridor (18 ft from the BR), the array at the far end of the corridor (38 ft from the BR), and the array in the target room (TR).  In Tests 100A
+and 100O, the target room is closed, in which case the array in the exit (EXI) doorway is used. The test director reduced the layer information
+individually for the eight thermocouple arrays using an alternative method. These results are included in the original data sets. However, for the
+current validation study, the selected TC trees were reduced using the conventional method common to all the experiments considered.  The results are
+presented below.
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NBS_100A_v5_Tree_1_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100A_v5_Tree_1_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NBS_100A_v5_Tree_3_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100A_v5_Tree_3_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NBS_100A_v5_Tree_4_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100A_v5_Tree_4_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NBS_100A_v5_Tree_5_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100A_v5_Tree_5_HGL_Height}
+\end{tabular*}
+\caption{Hot Gas Layer Temperature and Height for the NBS Multi-Room Test 100A.} \label{NBS_100A_HGL}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NBS_100O_v5_Tree_1_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100O_v5_Tree_1_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NBS_100O_v5_Tree_3_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100O_v5_Tree_3_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NBS_100O_v5_Tree_4_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100O_v5_Tree_4_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NBS_100O_v5_Tree_5_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100O_v5_Tree_5_HGL_Height}
+\end{tabular*}
+\caption{Hot Gas Layer Temperature and Height for the NBS Multi-Room Test 100O.} \label{NBS_100O_HGL}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NBS_100Z_v5_Tree_1_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100Z_v5_Tree_1_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NBS_100Z_v5_Tree_3_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100Z_v5_Tree_3_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NBS_100Z_v5_Tree_4_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100Z_v5_Tree_4_HGL_Height} \\
+\includegraphics[width=2.6in]{FIGURES/NBS_100Z_v5_Tree_5_HGL_Temp} &
+\includegraphics[width=2.6in]{FIGURES/NBS_100Z_v5_Tree_5_HGL_Height}
+\end{tabular*}
+\caption{Hot Gas Layer Temperature and Height for the NBS Multi-Room Test 100Z.} \label{NBS_100Z_HGL}
+\end{figure}
+
+\clearpage
