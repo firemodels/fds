@@ -1,0 +1,120 @@
+
+
+
+\chapter{Ceiling Jets and Device Activation}
+
+FDS is a computational fluid dynamics (CFD) model and has no explicit ceiling jet model.
+Rather, temperatures throughout the fire compartment are computed directly from the governing conservation equations.
+Nevertheless, temperature measurements near the ceiling can be used to evaluate the model's ability to predict the flow of
+hot gases across a relatively flat ceiling. Measurements for this category are available from the NIST/NRC and the FM/SNL series.
+
+\section{NIST/NRC Test Series}
+
+The thermocouple nearest the ceiling in Tree 7, located towards the back of the compartment,
+has been chosen as a surrogate for the ceiling jet temperature.
+Curiously, the difference between measured and predicted temperatures is noticeably greater for the open door tests.
+Certainly, the open door changes the flow pattern of the exhaust gases.
+However, the predicted HGL heights for the open door tests, shown in the previous section,
+do not show a noticeable difference from their closed door counterparts.
+The predicted HGL temperatures are only slightly less than those measured in the open door tests,
+due in large part to the contribution of Tree 7 in the layer reduction calculation.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_01_v5_Ceiling_Jet} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_07_v5_Ceiling_Jet} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_02_v5_Ceiling_Jet} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_08_v5_Ceiling_Jet} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_04_v5_Ceiling_Jet} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_10_v5_Ceiling_Jet} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_13_v5_Ceiling_Jet} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_16_v5_Ceiling_Jet}
+\end{tabular*}
+\caption{Ceiling Jet Temperature for the NIST/NRC Series, closed door tests.}
+\label{NIST_NRC_Jet_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_17_v5_Ceiling_Jet} &
+ \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_03_v5_Ceiling_Jet} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_09_v5_Ceiling_Jet} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_05_v5_Ceiling_Jet} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_14_v5_Ceiling_Jet} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_15_v5_Ceiling_Jet} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC_18_v5_Ceiling_Jet}
+\end{tabular*}
+\caption{Ceiling Jet Temperature for the NIST/NRC Series, open door tests.}
+\label{NIST_NRC_Jet_Open}
+\end{figure}
+
+\clearpage
+
+
+\section{FM/SNL Test Series}
+
+The near-ceiling thermocouples in Sectors 1 and 3 have been chosen as surrogates for the ceiling jet temperature.
+The results are shown below.  The only noticeable discrepancy is in Test 21, and it is the same pattern that
+was observed in the HGL temperature comparison for this test.
+
+
+
+
+
+\section{UL/NFPRF Sprinkler, Vent, and Draft Curtain Experiments}
+\label{UL_NFPRF:Results}
+
+The ceiling jet is an important fire phenomenon because of the presence of automatic fire protection devices at the ceiling, like
+sprinklers and smoke/heat vents. The results of the UL/NFPRF experiments provide useful data to assess the accuracy of FDS in predicting
+the velocity and temperature near the ceiling, and consequently the resulting activation of sprinklers.
+The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}, along with the predictions of FDS.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c||c|c|c|c|c|c|c|c|}
+\hline
+\multicolumn{9}{|c|}{\bf Heptane Spray Burner Test Series I}  \\ \hline \hline
+Test & Burner & Vent                    & \multicolumn{2}{|c|}{First Act. (s) } & \multicolumn{2}{|c|}{Total Acts.}  & Draft    & Heat Release Rate \\ \cline{4-7}
+No.  & Pos.   & Operation               & Exp. & FDS                            & Exp.  & FDS                        & Curtains & MW @ s \\
+\hline \hline
+I-1   & B  & Closed                     & 65   & 53                             & 11   & 12     & Yes  & 4.4 @ 50  \\ \hline
+I-2   & B  & Manual (0:40)              & 66   & 52                             & 12   & 8      & Yes  & 4.4 @ 50  \\ \hline
+I-3   & B  & Manual (1:30)              & 64   & 53                             & 12   & 9      & Yes  & 4.4 @ 50  \\ \hline
+I-4   & C  & Closed                     & 60   & 52                             & 10   & 11     & Yes  & 4.4 @ 50  \\ \hline
+I-5   & C  & Manual (0:40)              & 72   & 52                             & 9    & 8      & Yes  & 4.4 @ 50  \\ \hline
+I-6   & C  & Manual (1:30)              & 62   & 52                             & 8    & 8      & Yes  & 4.4 @ 50  \\ \hline
+I-7   & C  & 74$^\circ$C link (DNO)     & 70   & 52                             & 10   & 11     & Yes  & 4.4 @ 50  \\ \hline
+I-8   & B  & 74$^\circ$C link (9:26)    & 60   & 53                             & 11   & 12     & Yes  & 4.4 @ 50  \\ \hline
+I-9   & D  & 74$^\circ$C link (DNO)     & 70   & 55                             & 12   & 15     & Yes  & 4.4 @ 50  \\ \hline
+I-10  & D  & Manual (0:40)              & 72   & 54                             & 13   & 15     & Yes  & 4.4 @ 50  \\ \hline
+I-11  & D  & 74$^\circ$C link (4:48)    & N/A  & N/A                            & N/A  & N/A    & Yes  & 4.4 @ 50  \\ \hline
+I-12  & A  & Closed                     & 68   & 62                             & 14   & 14     & Yes  & 4.4 @ 50  \\ \hline
+I-13  & A  & 74$^\circ$C link (1:04)    & 69   & 62                             & 5    & 13     & Yes  & 6.0 @ 60  \\ \hline
+I-14  & A  & Manual (0:40)              & 74   & 136                            & 7    & 10     & Yes  & 5.8 @ 60  \\ \hline
+I-15  & A  & Manual (1:30)              & 64   & 60                             & 5    & 9      & Yes  & 5.8 @ 60  \\ \hline
+I-16  & A  & 74$^\circ$C link (1:46)    & 106  & 97                             & 4    & 7      & Yes  & 5.0 @ 110 \\ \hline
+\hline
+I-17  & B  & 100$^\circ$C link (DNO)    & 58   & 54                             & 4    & 4      & No   & 4.6 @ 50 \\ \hline
+I-18  & C  & 100$^\circ$C link (DNO)    & 58   & 57                             & 4    & 4      & No   & 3.7 @ 50 \\ \hline
+I-19  & A  & 100$^\circ$C link (10:00)  & 56   & 61                             & 10   & 5      & No   & 4.6 @ 50 \\ \hline
+I-20  & A  & 74$^\circ$C link (1:20)    & 54   & 64                             & 4    & 4      & No   & 4.2 @ 50 \\ \hline
+I-21  & C  & 74$^\circ$C link (7:00)    & 58   & 52                             & 10   & 4      & No   & 4.6 @ 50 \\ \hline
+I-22  & D  & 100$^\circ$C link (DNO)    & 60   & 54                             & 6    & 9      & No   & 4.6 @ 50 \\ \hline
+\end{tabular}
+\end{center}
+\caption[Results of the UL/NFPRF Experiments.]
+{\bf Results of the UL/NFPRF Experiments. Note that DNO means
+``Did Not Open''. Also note, the fires grew at a rate proportional
+to the square of the time until a certain flow rate of fuel was achieved
+at which time the flow rate was held steady. Thus, the ``Heat Release Rate''
+was the size of the fire at the time when the fuel supply was leveled off.}
+\label{ULmatrix}
+\end{table}
+
+
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{FIGURES/UL_NFPRF_Scatter_Plot}
+\caption{Measured vs. Predicted sprinkler activation times for the UL/NFPRF Test Series.}
+\label{UL_NFPRF_Scatter_Plot}
+\end{figure}
