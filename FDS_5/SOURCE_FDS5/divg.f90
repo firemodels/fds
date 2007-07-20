@@ -483,13 +483,13 @@ SPECIES_DIFFUSION_3: IF (.NOT.MIXTURE_FRACTION) THEN
    ENDDO SPECIES_LOOP_2
 ENDIF SPECIES_DIFFUSION_3
 
-! Add water vapor if sprinklers are on
+! Add contribution of evaporating droplets
  
 IF (NLP > 0) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + (R_PBAR(K,PRESSURE_ZONE(I,J,K))-RTRM(I,J,K))*D_VAP(I,J,K)
+            DP(I,J,K) = DP(I,J,K) + D_VAP(I,J,K)
          ENDDO
       ENDDO
    ENDDO
