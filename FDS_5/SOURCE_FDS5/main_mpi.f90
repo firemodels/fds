@@ -70,7 +70,7 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date (All Nodes)
  
-COMPILE_DATE   = 'July 19, 2007'
+COMPILE_DATE   = 'July 20, 2007'
 VERSION_STRING = '5_RC6+_MPI'
 VERSION_NUMBER = 5.0
 PARALLEL       = .TRUE.
