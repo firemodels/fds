@@ -181,6 +181,9 @@ IF (CORRECTOR) THEN
       BC_CLOCK = T
       CALL PYROLYSIS(T,DT_BC)
       WALL_COUNTER = 0
+      WMPUA = 0._EB
+      WCPUA = 0._EB
+      PART_COUNTER = 0
    ENDIF
 ENDIF
  
@@ -485,7 +488,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
    IBC = IJKW(5,IW)
    SF  => SURFACE(IBC)
    IF (SF%THERMAL_BC_INDEX /= THERMALLY_THICK) CYCLE WALL_CELL_LOOP
-   IF (SUM(WMPUA(IW,:))>0._EB .AND. T>TW(IW)) EW(IW) = EW(IW) + SF%E_COEFFICIENT*SUM(WMPUA(IW,:))*DT_BC
+   IF (SUM(WMPUA(IW,:))>0._EB .AND. T>TW(IW)) EW(IW) = EW(IW) + SF%E_COEFFICIENT*SUM(WMPUA(IW,:))*DT_BC/PART_COUNTER
    II  = IJKW(1,IW)
    JJ  = IJKW(2,IW)
    KK  = IJKW(3,IW)
@@ -546,7 +549,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
             HTCB = HEAT_TRANSFER_COEFFICIENT(IWB,IIB,JJB,KKB,IOR,TMP_G_B,DTMP)            
             HEAT_TRANS_COEF(IWB) = HTCB
             QRADINB  = QRADIN(IWB)
-            IF (NLP>0) Q_WATER_B = -SUM(WCPUA(IWB,:))
+            IF (NLP>0) Q_WATER_B = -SUM(WCPUA(IWB,:))/PART_COUNTER
          ELSE
             TMP_G_B  = TMPA
             DTMP = TMP_G_B - TMP_B(IW)
@@ -558,7 +561,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ! Take away energy flux due to water evaporation
  
    IF (NLP>0) THEN
-      Q_WATER_F  = -SUM(WCPUA(IW,:))
+      Q_WATER_F  = -SUM(WCPUA(IW,:))/PART_COUNTER
    ELSE
       Q_WATER_F  = 0._EB
    ENDIF
