@@ -1,25 +1,25 @@
 
 \chapter{Overview}
 
-Because FDS is used both  for research and for practical applications,
-there  are  some  routines  within   the  model  that  have  not  been
-comprehensively validated. Even  those parts of the model  for which a
-substantial  amount of  validation  work has  been  performed will  be
-pushed beyond these limits by  the need to perform increasingly comlex
-analyses.  Consequently,  it is  the  responsibility  of  the user  to
-demonstrate the applicability of the model for scenarios that have not
-yet been validated.
+This document is a compilation of past and present validation exercises for the Fire Dynamics Simulator (FDS).
+Validation typically involves comparing model simulations with experimental measurements. To say that FDS is
+``validated'' means that the model has been shown to be of a given level of accuracy for a given range of parameters for a given
+type of fire scenario. Although the FDS developers continuously perform validation studies, it is ultimately the end user of the model who
+decides if the model is adequate for the job at hand. Thus, this Guide provides the raw material for a validation study, but it does not
+and cannot be considered comprehensive.
 
-FDS  is  suited  for  a  wide range  of  thermally-driven  fluid  flow
-scenarios,  including fire, both  in the  open ({\em  e.g.} unconfined
-fire plumes) as  well as within the built  environment. To date, about
-half of  the applications of  FDS have been  for design, and  half for
-forensic reconstruction.
+
+
+\section{Model Scenarios}
+
+When doing a validation study, the first question to ask is, ``What is the application?'' There are countless fire scenarios to consider, but from the
+point of view of validation it is useful to divide them into two classes -- those for which the fire is {\em specified} as an input to the model and those for which the fire
+is {\em predicted} by the model. The former is often the case for a design application, the latter for a forensic reconstruction. Consider each in turn.
 
 Design  applications  typically  involve  an existing  building  or  a
 building  under  design. A  so-called  ``design  fire'' is  prescribed
 either by  a regulatory authority  or by the engineers  performing the
-analysis. Because the  fire's heat release rate is  known, the role of
+analysis. Because the  fire's heat release rate is  specified, the role of
 the model is to predict  the transport of heat and combustion products
 throughout  the room or  rooms of  interest. Ventilation  equipment is
 often included  in the simulation, like fans,  blowers, exhaust hoods,
@@ -65,6 +65,17 @@ measurements, as  well as simplifying assumptions in  the model, often
 force the  comparison between model and measurement  to be qualitative
 at best.  Nevertheless, current validation  efforts are moving  in the
 direction of these more difficult issues.
+
+
+
+
+\section{Model Outputs}
+
+For a given fire scenario, there are a number of different quantities that the model predicts, like gas temperature, heat flux, and so on. A typical
+fire experiment can produce hundreds of time histories of point measurements, each of which can be reproduced by the model to some level of accuracy.
+It is a challenge to sort out all the plots and graphs of all the different quantities and come to some general conclusion. For this reason, this Guide
+is organized by output quantity, not by individual experiment or fire scenario. In this way, it is possible to assess, over a range of different experiments
+and scenarios, the performance of the model in predicting a given quantity. Overall trends and biases become much more clear when the data is organized this way.
 
 
 
