@@ -74,46 +74,11 @@ assessment of the model.
 
 As part of the NIST investigation  of the World Trade Center fires and collapse,  a series  of large  scale fire  experiments  were performed
 specifically  to  validate  FDS~\cite{Hamins:WTC1}.   The  tests  were performed in  a rectangular  compartment 7.2~m long  by 3.6~m  wide by 3.8~m
-tall.   The fires were  fueled by heptane  for some tests  and a heptane/toluene mixture  for the others.  The fuel was sprayed  from a nozzle into a
-steel pan. The compartment was heavily instrumented.
+tall.   The fires were  fueled by heptane  for some tests  and a heptane/toluene mixture  for the others.  The results of the experiments and simulations
+are included in detail in this Guide.
 
-FDS  simulations were  performed  before testing  began  to guide  the design  of the  compartment  and also  to  provide a  baseline set  of "blind"
-predictions\footnote{A blind  prediction simply means that the calculation is performed before  the experiment is conducted. At NIST, the  results
-of  a  blind  prediction  are  given  to  the  engineers conducting  the experiment  so  that  they can  be  compared with  the measurements
-immediately after the experiment is completed. This is an effective  test the  model, and  also a  good way  to ensure  that the measurements make
-sense.}.  A uniform numerical grid  whose cells are 10 cm on a side was chosen based on a grid resolution study.  The heat release rate (HRR)  of the
-simulated burner was set  to that which was measured in  the experiments. No attempt  was made to  model the spray burner.
-
-To  quantify  the  accuracy  of  the  predictions,  the  measured  and predicted gas temperatures  of the upper layer were  compared for each test.
-Because the  uncertainty of the measured HRR  is often the major source of  disagreement between model and experiment,  an analysis was performed to
-assess how sensitive  the measured temperatures  were to changes  in  the  HRR.   According  to  an  empirical  correlation  by McCaffrey,  Quintiere
-and  Harkleroad~\cite{SFPE:Walton}, the  rise in the  upper layer  gas temperature  $\Delta  T_g$ in  a compartment  is related to  the overall HRR
-by the  relation \be \Delta T_g  = 6.85 \; \left(    \frac{\dQ^2}{A_0   \,    \sqrt{H_0}   \,    h_k    \,   A_T} \right)^\frac{1}{3} \label{MQH} \ee
-where $\dQ$ is the HRR (kW), $A_0$ is the area of the opening (m$^2$), $H_0$ is the height of the opening (m),  $h_k$ is  the thermal  conductivity
-of  the walls  (kW/m/K), and $A_T$ is the total area of  the compartment walls (m$^2$).  What is of importance here is the fact  that the temperature
-rise is proportional to the  HRR to  the 2/3  power. The reported  uncertainty in  the heat release rate  measurement was 5~\% (one standard
-deviation). The 5~\% uncertainty  in  the  HRR  corresponds  to  a  2/3  x  5~\%  =  3.3~\% uncertainty in the temperature  rise.  For upper layer
-temperatures of approximately 600~$^\circ$C, this  translates to roughly 20~$^\circ$C. The  difference in  measured  and predicted  upper layer
-temperatures ranged from 5~$^\circ$C to  20~$^\circ$C, meaning that the predictions were within the  uncertainty range of the HRR.   Even though
-there are uncertainties  in  the  measurement  of the  temperature  itself,  the discrepancy between measurement and prediction can be explained
-solely in terms of the uncertainty in the HRR measurement.
-
-To extend  this analysis further, it  was observed that  the heat flux onto surfaces in the upper layer was very nearly given by $\sigma T^4$ where
-$\sigma=5.67  \times 10^{-11}$~kW/m$^2$/K$^4$  and  $T$ is  the temperature in degrees K. In  other words, the emissivity of the upper layer  gases
-is  nearly  1, not  surprising  given the  high level  of soot. Given  the uncertainty  in the upper  layer temperature  rise of 3.3~\%, the
-uncertainty in  absolute temperature at  600~$^\circ$C is 2.3~\%, leading  to an  estimate for the  uncertainty in heat  flux of 4~$\times$~2.3~\% =
-9.2~\%.  In most instances, the difference between measurement and prediction was within 10~\%, confirming that the model is within experimental
-uncertainty.
-
-In the  discussion above,  it was shown  that the FDS  predicted upper layer temperatures  and heat fluxes were within  the uncertainty range of  the
-experiment.  For  this  exercise  it  was  assumed  that  the uncertainty in the  experiment was based solely on  the uncertainty of the heat
-release rate measurement.  Thus, it was shown  how sensitive the upper  layer temperature  and heat flux  measurements were  to the heat release
-rate. In the  numerical simulations there are  dozens of input parameters prescribed by the  model user.  Often there is no way to  assess the
-sensitivity of  these parameters  except  by numerical experiment; that is, running the  model with small changes to the base parameters to see  what
-effect these have on  the predictions. To this end, the  data set was exploited  to assess the sensitivity  of FDS to grid cell  size, wall thermal
-properties, fire soot  yield, radiation fraction,  and  various other  quantities.  Details  can  be found  in Reference~\cite{Hamins:WTC1}.
-
-A second set of experiments to validate FDS for use in the World Trade Center  investigation is  documented  in Ref.~\cite{Hamins:WTC2}.  The intent
+A second set of experiments to validate FDS for use in the World Trade Center  investigation is  documented  in Ref.~\cite{Hamins:WTC2}.  The experiments
+are not described as part of this Guide. The intent
 of  these tests  was to  evaluate the ability  of the  model to simulate the growth  of a fire burning 3  office workstations within a compartment of
 dimensions 11~m by 7~m by 4~m, open at one end to mimic the ventilation  of 5  windows similar to  those in  WTC 1 and  2. Six tests  were performed
 with various  initial conditions  exploring the effect of jet fuel spray and ceiling tiles covering the surface of the desks and carpet. Measurements
@@ -222,14 +187,7 @@ the official version of FDS.
 Chang and Meroney~\cite{ChangJWE2003} compared the results of FDS with the  commercial CFD  package  FLUENT in  simulating  the transport  of
 pollutants   from  steady   point  sources   in  an   idealized  urban environment.  FLUENT  employs a  variety  of  RANS (Reynolds  Averaged
 Navier-Stokes)  closure  methods,   whereas  FDS  employs  large  eddy simulation (LES).   The results of the numerical  models were compared with
-wind tunnel measurements within a 1:50 scale physical model of an urban street "canyon". The authors conclude:
-\begin{quote}
-The CFD  programs reproduced the  overall flow fields  observed during the  measurement   program,  but  it  is   evident  that  steady-state
-calculations  are  not  reproducing  the intermittent  nature  of  the penetration  of elevated flows  down into  the canyons  [areas between
-buildings].  This   results  in   situations  where  the   FLUENT  CFD concentrations overpredict magnitudes along  canyon walls. The FDS CFD program
-is inherently  a time-dependent  calculation; however,  it is found that wall  magnitudes can be very sensitive  to the rather crude wall boundary
-conditions incorporated in the program.
-\end{quote}
+wind tunnel measurements within a 1:50 scale physical model of an urban street "canyon".
 
 
 \subsubsection{Growing Fires}
@@ -260,18 +218,7 @@ the same construction as the test chamber. Six gas burners were mounted in the f
 at a constant rate to one of the  six burners.  For comparison with the  FDS model, only the fire room, hallway and curtained  region was input into
 the model, for a total of 450,000 grid cells.  The burners were defined within FDS as separate vents  with a constant  inlet velocity.  Two sets  of
 burners were created, the first set at the physical location of the burners as the source  of fuel and second set  directly above the first  set as a
-source for  ambient air.   The data was  presented at  fifteen minutes into  the fire.   The  results  comparing the  measured  data and  the
-predicted data are presented in Table~\ref{T51}.
-\begin{table}
-\begin{center}
-\caption{T51 Test Results \cite{Floyd:5}} \label{T51} \vspace{0.1in}
-\begin{tabular}{|*{3}{c|}} \hline
-Quantity & Experimental Data &  FDS \\ \hline \hline Upper Temperature
-$^\circ$C & 730  & 808 \\ \hline  Upper Velocity (m/s) & 4.5  & 2.8 \\
-\hline Lower Velocity  (m/s) & 2.3 & 1.1 \\ \hline  Layer Height (m) & 1.0 & 0.9 \\ \hline $O_{2}$ Concentration (\%) & 11.6 & 7.6 \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
+source for  ambient air.   The data was  presented at  fifteen minutes into  the fire.
 The FDS model predicted the  layer height and temperature of the space to within 10~\% of the experimental values~\cite{Floyd:5}.
 
 FDS predictions of fire growth and smoke movement in large spaces were presented by  Kashef~\cite{Kashef:1}.  The experiments  were conducted at the
@@ -414,30 +361,10 @@ Research Laboratory (VTFRL).  The  test compartment was outfitted with equipment
 concentrations, unburned hydrocarbon  and heat flux measurements.  The test facility consisted of  a single compartment geometrically similar to the
 ISO 9705 standard compartment with dimensions of 1.2~m by 1.8~m by  1.2~m  in height.   The  ceiling  and  walls were  constructed  of fiberboard
 over  a steel  shell  with  a  floor of  concrete.   Three baseline experiments  were completed with  fires ranging in  size from 90~kW  to 440~kW.
-A  sample of  the  test results  are presented  in Table~\ref{grid3}.
-
-\begin{table}
-\begin{center}
-\caption{Comparison of FDS and measured quantities in a half-scale ISO 9705 compartment \cite{Floyd:1}} \label{grid3} \vspace{0.1in}
-\begin{tabular}{|*{3}{c|}} \hline
-Parameter & VTFRL &  FDS \\ \hline \hline Room TC 1  & 191 $^\circ$C &
-134 $^\circ$C \\  \hline Door TC 5 & 348 $^\circ$C  & 365 $^\circ$C \\
-\hline Room TC 5 & 585 $^\circ$C & 529 $^\circ$C \\ \hline Door TC 8 & 227 $^\circ$C  & 409 $^\circ$C \\ \hline  Room TC 8 &  625 $^\circ$C & 559
-$^\circ$C \\ \hline Door Vel 1  & 4.4 m/s & 3.3 m/s \\ \hline Door $O_{2}$ 1 & 14.6 \% & 13.9 \% \\ \hline Door Vel 5 & -0.54 m/s & -0.75 m/s \\
-\hline Door $O_{2}$ 5 & 21.0  \% & 21.0 \% \\ \hline Room HF1 & 29 kW/m$^2$ & 26  kW/m$^2$ \\ \hline Door $CO_{2}$1 & 3.5  \% & 3.8 \%
-\\  \hline Door  HF2 &  3.6  kW/m$^2$ &  4.1 kW/m$^2$  \\ \hline  Door
-$CO_{2}$4 & 0.2 \% & 2.2 \% \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
 Overall,  FDS  predicted  the  temperatures  to within  15~\%  of  the measured  temperatures.  The  FDS velocity  measurements  followed the trend
 of  the test  data  but did  not  replicate  it.  The  outgoing velocities  were under-predicted by  30~\% to  40~\% and  the incoming velocities
 were  over-predicted by 40~\%. FDS predicted  the heat flux gauge response to within 10~\%  of the measured values.  The radiation model  in FDS
-predicted the  measured  fluxes to  within 15~\%.   The radiation to  and from the  compartment wall was estimated  well.  The mixture  fraction
-model was  also  successful.   For well  ventilated tests,  the  predictions  were  excellent.   The quality  of  the  FDS prediction decreased with
-the under-ventilated cases.  The main source of error with the model  predictions in the under-ventilated cases was the over-prediction  of
-compartment gas  temperatures and the  size of the upper layer~\cite{Floyd:1,Floyd:6}.
+predicted the  measured  fluxes to  within 15~\%.
 
 Xin   and  Gore~\cite{Xin:JSS2003}   compared   FDS  predictions   and measurements  of the  spectral radiation  intensities of  small fires. The
 fuel flow rates for  methane and ethylene burners were selected so that the  Froude numbers  matched that of  liquid toluene  pool fires. The heat
@@ -475,33 +402,7 @@ the  SBI (Single  Burning Item)  Euro-classification test apparatus (EN  13823, 
 configurations: one is  similar to the  room corner test but  has only partial linings and  the other is a  space to study fires in building
 cavities. In the study of upholstered furniture, the experimental configurations  are the cone  and furniture calorimeters, and the  ISO room. For
 liquid  pool fires, comparison is  made to data obtained  by  numerous  researchers.   The burning  materials  include spruce  timber, MDF  (Medium
-Density  Fiber) board,  PVC  wall carpet, upholstered furniture, cables with plastic sheathing, and heptane. The cases studied are summarized in
-Table~\ref{VTTwork}.
-
-\begin{table}[t]
-\begin{center}
-\caption{Summary of materials and test methods considered in VTT study \cite{Hietaniemi:1}} \label{VTTwork} \vspace{0.1in}
-\begin{tabular}{|l|l|}
-\hline Burning material          & Experimental Configuration  \\ \hline \hline
-10 mm thick spruce timber &  Cone calorimeter \\
-                          &  SBI test         \\
-                          &  Room corner test  \\ \hline
-22 mm thick spruce timber & Modified room corner test \\
-                          & 6 m by 1.1 m by 0.5 m cavity  \\ \hline
-12 mm thick MDF board     & Cone calorimeter \\
-                          & SBI test \\
-                          & Room corner test \\  \hline
-PVC wall carpet on        &  Cone calorimeter \\
-gypsum plasterboard       &  SBI test \\
-                          &  Room corner test \\ \hline
-Upholstered furniture:    &  Cone calorimeter \\
-a chair with PU padding   &  Furniture calorimeter \\
-and PP fabric             &  ISO room test \\ \hline
-Cables with plastic       &  6 m by 1.2 m by 0.6 m cavity \\
-sheathing                 &  lined  with non-combustible board \\ \hline Heptane                   & Pool fires of various sizes \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
+Density  Fiber) board,  PVC  wall carpet, upholstered furniture, cables with plastic sheathing, and heptane.
 
 The scope of the VTT work is considerable. Assessing the accuracy of the model must be done on a case by case basis. In some cases, predictions of
 the burning rate of the material were based solely on its fundamental properties, as in the heptane pool fire simulations. In other cases, some
