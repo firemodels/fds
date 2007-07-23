@@ -934,8 +934,8 @@ WALL_CELL_LOOP: DO IW=1,NWC
          DXKB   = K_S(NWP)/DXB
 
          DO I=1,NWP
-            BBS(I) = -0.5_EB*DT_BC*K_S(I-1)*RDXN_S(I-1)*RDX_S(I)/RHOCBAR(I)
-            AAS(I) = -0.5_EB*DT_BC*K_S(I)  *RDXN_S(I)  *RDX_S(I)/RHOCBAR(I)
+            BBS(I) = -0.5_EB*DT2_BC*K_S(I-1)*RDXN_S(I-1)*RDX_S(I)/RHOCBAR(I) ! DT_BC->DT2_BC
+            AAS(I) = -0.5_EB*DT2_BC*K_S(I)  *RDXN_S(I)  *RDX_S(I)/RHOCBAR(I)
          ENDDO
          DDS(1:NWP) = 1._EB    - AAS(1:NWP) - BBS(1:NWP)
          DO I=1,NWP
@@ -974,14 +974,15 @@ WALL_CELL_LOOP: DO IW=1,NWC
          TRIDIAGONAL_SOLVER_2: DO I=NWP-1,1,-1
             CCS(I) = (CCS(I) - AAS(I)*CCS(I+1))/DDT(I)
          ENDDO TRIDIAGONAL_SOLVER_2
-      !   WC%TMP_S(1:NWP) = MAX(TMPMIN,CCS(1:NWP))
-      !   WC%TMP_S(0)     = MAX(TMPMIN,WC%TMP_S(1)  *RFACF2+QDXKF)
-      !   WC%TMP_S(NWP+1) = MAX(TMPMIN,WC%TMP_S(NWP)*RFACB2+QDXKB)
          TMP_W_NEW(1:NWP) = MAX(TMPMIN,CCS(1:NWP))
          TMP_W_NEW(0)     = MAX(TMPMIN,TMP_W_NEW(1)  *RFACF2+QDXKF)
          TMP_W_NEW(NWP+1) = MAX(TMPMIN,TMP_W_NEW(NWP)*RFACB2+QDXKB)
          IF (STEPCOUNT==1) THEN
-            TOLERANCE        = MAXVAL(ABS((TMP_W_NEW-WC%TMP_S(0:NWP+1))/WC%TMP_S(0:NWP+1)))
+            TOLERANCE = MAXVAL(ABS((TMP_W_NEW-WC%TMP_S(0:NWP+1))/WC%TMP_S(0:NWP+1)), &
+               WC%TMP_S(0:NWP+1)>0._EB) ! returns a negative number, if all TMP_S == 0.
+            IF (TOLERANCE<0.0_EB) &
+            TOLERANCE = MAXVAL(ABS((TMP_W_NEW-WC%TMP_S(0:NWP+1))/TMP_W_NEW), &
+               TMP_W_NEW>0._EB) 
             IF (TOLERANCE > 0.2_EB) THEN
                STEPCOUNT = MIN(200,STEPCOUNT * (INT(TOLERANCE/0.2_EB) + 1))
                ITERATE=.TRUE.
