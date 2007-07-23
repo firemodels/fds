@@ -92,6 +92,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
          TMP_W(IW) = TMP_F(IW)
  
       CASE (SPECIFIED_TEMPERATURE) METHOD_OF_HEAT_TRANSFER
+
          TMP_G = TMP(IIG,JJG,KKG)
          TMP_F(IW) = TMP_0(KK) + EVALUATE_RAMP(T-TW(IW),SF%TAU(TIME_TEMP),SF%RAMP_INDEX(TIME_TEMP))*(SF%TMP_FRONT-TMP_0(KK))
          DTMP = TMP_G - TMP_F(IW)
@@ -101,18 +102,25 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
          CP_TERM   = MAX(0._EB,-CP_GAMMA*UW(IW)*RHOWAL)
          TMP_W(IW) = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G + CP_TERM*TMP_F(IW)-QCONF(IW) )/(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
          TMP_W(IW) = MAX(TMPMIN,TMP_W(IW))
+
       CASE (ADIABATIC_INDEX) METHOD_OF_HEAT_TRANSFER
+
          TMP_G = TMP(IIG,JJG,KKG)
          TMP_OTHER = TMP_F(IW)
          ADLOOP: DO
             DTMP = TMP_G - TMP_OTHER
             HEAT_TRANS_COEF(IW) = HEAT_TRANSFER_COEFFICIENT(IW,IIG,JJG,KKG,IOR,TMP_G,DTMP)
-            QNET = HEAT_TRANS_COEF(IW)*DTMP + QRADIN(IW) - E_WALL(IW) * SIGMA * TMP_OTHER ** 4
-            FDERIV = -HEAT_TRANS_COEF(IW) -  4._EB * E_WALL(IW) * SIGMA * TMP_OTHER ** 3
+            IF (RADIATION) THEN
+               QNET = HEAT_TRANS_COEF(IW)*DTMP + QRADIN(IW) - E_WALL(IW) * SIGMA * TMP_OTHER ** 4
+               FDERIV = -HEAT_TRANS_COEF(IW) -  4._EB * E_WALL(IW) * SIGMA * TMP_OTHER ** 3
+            ELSE
+               QNET = HEAT_TRANS_COEF(IW)*DTMP
+               FDERIV = -HEAT_TRANS_COEF(IW)
+            ENDIF
             IF (FDERIV /= 0._EB) TMP_OTHER = TMP_OTHER - QNET / FDERIV
             IF (ABS(TMP_OTHER - TMP_F(IW)) / TMP_F(IW) < 0.0001) THEN
-                TMP_F(IW) = TMP_OTHER
-                EXIT ADLOOP
+               TMP_F(IW) = TMP_OTHER
+               EXIT ADLOOP
             ELSE
                TMP_F(IW) = TMP_OTHER
                CYCLE ADLOOP
