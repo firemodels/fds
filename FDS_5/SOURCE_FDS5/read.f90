@@ -1077,7 +1077,7 @@ NAMELIST /DUMP/ RENDER_FILE,SMOKE3D,SMOKE3D_COMPRESSION,FLUSH_FILE_BUFFERS,MASS_
 RENDER_FILE          = 'null'
 NFRAMES              = 1000 
 SMOKE3D              = .TRUE.
-IF (TWO_D .OR. N_REACTIONS==0) SMOKE3D = .FALSE.
+IF (TWO_D .OR. N_REACTIONS==0 .OR. SOLID_PHASE_ONLY) SMOKE3D = .FALSE.
 SMOKE3D_COMPRESSION  = 'RLE'
 DEBUG                = .FALSE.
 TIMING               = .FALSE.
@@ -2751,7 +2751,7 @@ END SUBROUTINE READ_MATL
 SUBROUTINE PROC_MATL
 USE MATH_FUNCTIONS
 INTEGER N, I, J, NTEMP,NR,ITMP
-REAL(EB) TEMP, C_S_ML, C_S_RES, C_P_FUEL, C_P_WATER, H_T
+REAL(EB) TEMP, C_ML, C_RES, C_FUEL, C_WATER, H_T, NU_SUM
 TYPE(MATERIAL_TYPE), POINTER :: MLR
 
 NTEMP = 2000
@@ -2763,30 +2763,31 @@ PROC_MATL_LOOP: DO N=1,N_MATL
    ! change of sensible enthaly (H_T) plus the difference of latent (chemical)
    ! heats (heat of reaction). 
    DO J = 1,ML%N_REACTIONS
+      NU_SUM = ML%NU_RESIDUE(J) + ML%NU_FUEL(J) + ML%NU_WATER(J)
       H_T = 0._EB
       ! Integrate H_T from ambient temperature to 2000.
       DO I = 0,NTEMP
          TEMP = TMPA+REAL(I,EB)     ! I = MIN(2000,MAX(0,NINT(TEMP-TMPA)))
          IF (ML%C_S>0._EB) THEN
-            C_S_ML = ML%C_S
+            C_ML = ML%C_S
          ELSE
             NR     = -NINT(ML%C_S)
-            C_S_ML = EVALUATE_RAMP(TEMP,0._EB,NR)*1000.
+            C_ML = EVALUATE_RAMP(TEMP,0._EB,NR)*1000.
          ENDIF
-         C_S_RES = 0._EB
+         C_RES = 0._EB
          IF (ML%NU_RESIDUE(J)>0._EB) THEN
             MLR => MATERIAL(ML%RESIDUE_MATL_INDEX(J))
             IF (MLR%C_S>0._EB) THEN
-               C_S_RES = MLR%C_S
+               C_RES = MLR%C_S
             ELSE
                NR      = -NINT(MLR%C_S)
-               C_S_RES = EVALUATE_RAMP(TEMP,0._EB,NR)*1000.
+               C_RES = EVALUATE_RAMP(TEMP,0._EB,NR)*1000.
             ENDIF
          ENDIF
          ITMP = 0.1_EB*TEMP
-         C_P_FUEL = SPECIES(I_FUEL)%CP_MF(0,ITMP)
-         C_P_WATER = 2080
-         H_T = H_T + (C_S_ML-ML%NU_RESIDUE(J)*C_S_RES-ML%NU_FUEL(J)*C_P_FUEL-ML%NU_WATER(J)*C_P_WATER)
+         C_FUEL = SPECIES(I_FUEL)%CP_MF(0,ITMP)
+         C_WATER = 2080._EB
+         H_T = H_T + (NU_SUM*C_ML-ML%NU_RESIDUE(J)*C_RES-ML%NU_FUEL(J)*C_FUEL-ML%NU_WATER(J)*C_WATER)
          ML%Q_ARRAY(J,I) = ML%H_R(J) - H_T
       ENDDO
    ENDDO   
