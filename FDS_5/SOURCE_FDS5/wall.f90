@@ -677,7 +677,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
       ENDIF
    ENDDO POINT_LOOP1
 
-   ! If the fuel massflux is non-zero, set the iwgnition time
+   ! If the fuel massflux is non-zero, set the ignition time
 
    IF (TW(IW)>T .AND. MASSFLUX(IW,I_FUEL)>0._EB) TW(IW) = T
 

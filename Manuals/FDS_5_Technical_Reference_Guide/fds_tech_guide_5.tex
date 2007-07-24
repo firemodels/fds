@@ -2009,22 +2009,34 @@ mass fluxes are given by:
    \, dx
 \ee
 The chemical source term of the heat conduction equation consists of the
-heats of reaction and the enthalpy changes
+heats of reaction and the differences in latent heats between the original
+material and the products
 \be
-\dot{q}_{s,c}''' = \rho_{s0}\;
+\dot{q}_{s,c}'''(T) = \rho_{s0}\;
     \sum_{\alpha=1}^{N_m} \sum_{\beta=1}^{N_{r,\alpha}}
     r_{\alpha \beta} \;
     \left[H_{v,\alpha \beta}-
-    \int_{T_0}^T \left(c_{s,\alpha}-\nu_{s,\alpha \beta} \;
-    c_{s,\alpha \beta}
-        - \nu_{f,\alpha \beta} \; c_{f}
-        - \nu_{w,\alpha \beta} \; c_{w}\right) dT \right]
+    \int_{T_0}^T \Delta c(\theta)d\theta \right]
 \ee
-where $c_{s,\alpha \beta}$ is the specific heat of the residue of the
+It is possible to define a reaction where the sum of the residue, fuel
+and water yields is less than one. FDS then assumes that the solid is
+converted to a gas that is not tracked by the gas phase
+calculation. In the computation of $\Delta c(T)$, the
+specific heat of this dummy species is assumed to be equal to the
+specific heat of the original material $c_{s,\alpha}$
+\be
+  \Delta c(T) = c_{s,\alpha}(T)
+        - \nu_{s,\alpha \beta} \; c_{s,\alpha \beta}(T)
+        - \nu_{f,\alpha \beta} \; c_{f}(T)
+        - \nu_{w,\alpha \beta} \; c_{w}(T)
+        - (1-\sum_{\gamma=s,f,w} \nu_{\gamma,\alpha\beta}) \; c_{s,\alpha}(T)
+\ee
+$c_{s,\alpha \beta}$ is the specific heat of the residue of the
 $\beta$th reaction of material $\alpha$. The temperature integrals of the
 latent heat contents are computed in advance for all the reactions of
-each material and tabulated between $T_0$ and $T_0 \;+\;2000$~K.
-During the pyrolysis calculation, integral values are found from a ``look-up'' table.
+each material and the values of $\dot{q}_{s,c}'''$ are tabulated
+between $T_0$ and $T_0 \;+\;2000$~K. During the pyrolysis calculation,
+the values are found from a ``look-up'' table. 
 
 
 
