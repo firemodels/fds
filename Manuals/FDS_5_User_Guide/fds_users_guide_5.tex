@@ -2518,7 +2518,7 @@ domain is tens or hundreds of meters.
 The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
 
 
-\subsection{Special Topics: A Radially-Spreading Fire}
+\subsection{Special Topic: A Radially-Spreading Fire}
 \index{radial fire spread}
 
 Sometimes it is desired that a fire spread radially at some specified
@@ -2553,7 +2553,7 @@ Some trial and error is probably required to find the {\ct SPREAD\_RATE} that
 leads to a desired time history of the heat release rate.
 
 
-\subsection{Special Topics: Non-Planar Walls and Targets}
+\subsection{Special Topic: Non-Planar Walls and Targets}
 \index{non-planar geometries}
 
 All obstructions in FDS are assumed to conform to the rectilinear
@@ -3076,7 +3076,7 @@ example is given in the Verification Guide under the name {\bf
 ethanol\_pan}.
 
 
-\subsection{BURN\_AWAY: Making Fuels Disappear}
+\subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
 
 
 If a burning object is to disappear from the
@@ -3103,7 +3103,41 @@ multiplied by the volume of the grid cell. If the volume of the obstruction chan
 to conform to the uniform grid, FDS does {\bf not} adjust the burning rate to account for this as
 it does with various quantities associated with areas, like {\ct HRRPUA}.
 
+\subsection{Special Topic: Initial and Backside Boundary Conditions}
+\index{initial solid temperature}
 
+By default, the initial temperature of the solid material is set to
+ambient temperature. Use {\ct TMP\_INNER} at the {\ct SURF} line to 
+specify different initial temperature.
+
+Also, the backside temperature of the surfaces with heat transfer to
+void can be set using the {\ct TMP\_BACK} keyword. It has no meaning
+for surfaces with insulated or exposed backings.
+
+\subsection{Special Topic: Numerical Accuracy and Stability}
+
+To compute the temperature and reactions inside the solids, FDS solves
+the one-dimensional heat transfer equation numerically. The size of
+the grid cells on the surface of the solid is automatically chosen 
+using a rule that makes the cell size smaller than the square root of
+the material diffusivity $(k/\rho c)$. By default, the solid grid
+cells increase towards the middle of the material layer and are smallest
+on the layer boundaries. 
+
+The default parameters are usually appropriate for simple heat
+transfer calculations but sometimes the use of pyrolysis reactions
+makes the temperatures and burning rate fluctuate. The numerical
+stability of the solid phase solution may then be improved by making
+the grid density more uniform inside the material and by making the
+grid cells smaller. Adjustments may also be needed in case of
+extremely transient heat transfer situations. Use {\ct STRETCH\_FACTOR
+= 1.} on the {\ct SURF} line to have a perfectly uniform grid. Values
+between 1.0 and 2.0 give different levels of stretching.  The size of
+all the grid cells can be scaled by setting {\ct CELL\_SIZE\_FACTOR}
+less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR = 0.5} makes the 
+grid cells half the size. Setting {\ct WALL\_INCREMENT=1} on the 
+{\ct TIME} line forces the solid phase temperatures to be solved on every
+time step. 
 
 \clearpage
 
@@ -6352,7 +6386,8 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct ADIABATIC}                       & Logical         & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                         & Character       & Back face boundary condition      &                     & {\ct 'VOID'}            \\ \hline
 {\ct BURN\_AWAY}                      & Logical         & Object can vanish                 &                     & {\ct .FALSE.}           \\ \hline
-{\ct COLOR    }                       & Character       & Surface Color                     &                     &                         \\ \hline
+{\ct COLOR    }                       & Character       & Surface Color                     &                     &           \\ \hline
+{\ct CELL\_SIZE\_FACTOR}              & Real            & Scale solid phase noding          &                     & 1.0                     \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Heat flux at surface              & kW/m$^2$            & 0.                      \\ \hline
 {\ct DUCT\_PATH}                      & Integer Pair    & Pressure Zones for fans           &                     & 0,0                     \\ \hline
 {\ct E\_COEFFICIENT}                  & Real            & Extinguishing coefficient         & 1/s                 & 0.                      \\ \hline
