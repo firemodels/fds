@@ -3077,10 +3077,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%THERMALLY_THICK = .FALSE.
    IF (SF%N_LAYERS > 0) THEN
       SF%THERMALLY_THICK = .TRUE.
-      IF (TMP_INNER< -TMPM) TMP_INNER = -TMPM
       SF%TMP_INNER                    = TMP_INNER + TMPM
-      SF%TMP_FRONT                    = TMP_INNER
-      SF%TMP_BACK                     = SF%TMP_INNER
+      SF%TMP_FRONT                    = TMP_INNER + TMPM
+      SF%TMP_BACK                     = TMP_BACK  + TMPM
       ALLOCATE(SF%N_LAYER_CELLS(SF%N_LAYERS))            ! The number of cells in each layer
       ALLOCATE(SF%MIN_DIFFUSIVITY(SF%N_LAYERS))          ! The smallest diffusivity of materials in each layer
       ALLOCATE(SF%MATL_NAME(SF%N_MATL))                  ! The list of all material names associated with the surface
@@ -3088,11 +3087,11 @@ READ_SURF_LOOP: DO N=0,N_SURF
       ALLOCATE(SF%RESIDUE_INDEX(SF%N_MATL,MAX_REACTIONS))! Each material associated with the surface has a RESIDUE
    ELSE
       SF%TMP_FRONT                  = TMP_FRONT + TMPM
-      IF (TMP_BACK< -TMPM) TMP_BACK = TMP_FRONT
-      SF%TMP_BACK                   = TMP_BACK + TMPM
       SF%TMP_INNER                  = SF%TMP_FRONT
+      SF%TMP_BACK                   = SF%TMP_FRONT
    ENDIF
    TMPMIN        = MIN(TMPMIN,SF%TMP_FRONT,SF%TMP_INNER,SF%TMP_BACK)
+
    ! Store the names and indices of all materials associated with the surface
 
    NNN = 0
@@ -3206,7 +3205,7 @@ TEXTURE_MAP             = 'null'
 TEXTURE_WIDTH           = 1._EB
 TEXTURE_HEIGHT          = 1._EB
 THICKNESS               = -1._EB
-TMP_BACK                = -TMPM-1._EB
+TMP_BACK                = TMPA-TMPM
 TMP_FRONT               = TMPA-TMPM 
 TMP_INNER               = TMPA-TMPM
 IF (LES) SLIP_FACTOR    =  0.5_EB    ! Half slip
@@ -3503,7 +3502,7 @@ ALLOCATE(Q_S(1:NWP_MAX),STAT=IZERO)
 CALL ChkMemErr('INIT','Q_S',IZERO)
 ALLOCATE(RHO_S(0:NWP_MAX+1),STAT=IZERO)
 CALL ChkMemErr('INIT','RHO_S',IZERO)
-ALLOCATE(RHOCBAR(0:NWP_MAX+1),STAT=IZERO)
+ALLOCATE(RHOCBAR(1:NWP_MAX),STAT=IZERO)
 CALL ChkMemErr('INIT','RHOCBAR',IZERO)
 ALLOCATE(KAPPA_S(1:NWP_MAX),STAT=IZERO)
 CALL ChkMemErr('INIT','KAPPA_S',IZERO)
