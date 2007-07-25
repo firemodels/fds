@@ -16,6 +16,9 @@
 
 static int viewtype=0;
 static float tour_x=0.0, tour_y=0.0, tour_z=0.0, tour_ttt, tour_azimuth=0.0, tour_tension=0.0;
+#ifdef pp_TOUR
+static float tour_azimuth2=0.0,tour_elevation2=0.0;
+#endif
 static float tour_viewx=0.0, tour_viewy=0.0, tour_viewz=0.0, tour_elevation=0.0;
 static int tour_hide=0;
 static int tour_global_tension_flag=1;
@@ -30,9 +33,18 @@ void TOUR_CB(int var);
 GLUI_Spinner *SPINNER_t=NULL,*SPINNER_x=NULL, *SPINNER_y=NULL,*SPINNER_z=NULL;
 GLUI_Spinner *SPINNER_viewx=NULL, *SPINNER_viewy=NULL,*SPINNER_viewz=NULL;
 GLUI_Spinner *SPINNER_azimuth=NULL;
+#ifdef pp_TOUR
+GLUI_Spinner *SPINNER_azimuth2=NULL;
+GLUI_Spinner *SPINNER_elevation2=NULL;
+#endif
 
 GLUI *glui_advancedtour=NULL, *glui_tour=NULL;
 GLUI_Rollout *panel_tour=NULL;
+#ifdef pp_TOUR
+GLUI_Rollout *panel_view1=NULL;
+GLUI_Rollout *panel_view2=NULL;
+GLUI_Rollout *panel_view3=NULL;
+#endif
 GLUI_Panel *panel_path=NULL;
 GLUI_Panel *panel_advancedkeyframe=NULL;
 GLUI_Panel *panel_keyframe=NULL;
@@ -159,12 +171,29 @@ extern "C" void glui_tour_setup(int main_window){
 
   glui_tour->add_column_to_panel(panel_movedir,false);
   glui_tour->add_statictext_to_panel(panel_movedir,"View Direction");
+#ifdef pp_TOUR
+
+  panel_view1 = glui_tour->add_rollout_to_panel(panel_movedir,"x,y,z",false);
+  SPINNER_viewx=glui_tour->add_spinner_to_panel(panel_view1,"X",GLUI_SPINNER_FLOAT,&tour_viewx,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_viewy=glui_tour->add_spinner_to_panel(panel_view1,"Y",GLUI_SPINNER_FLOAT,&tour_viewy,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_viewz=glui_tour->add_spinner_to_panel(panel_view1,"Z",GLUI_SPINNER_FLOAT,&tour_viewz,KEYFRAME_viewXYZ,TOUR_CB);
+
+  panel_view2 = glui_tour->add_rollout_to_panel(panel_movedir,"Angles relative to path",false);
+  SPINNER_azimuth=glui_tour->add_spinner_to_panel(panel_view2,"Azimuth:",GLUI_SPINNER_FLOAT,&tour_azimuth,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_elevation=glui_tour->add_spinner_to_panel(panel_view2,"Elevation:",GLUI_SPINNER_FLOAT,&tour_elevation,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_elevation->set_float_limits(-90.0,90.0);
+
+  panel_view3 = glui_tour->add_rollout_to_panel(panel_movedir,"Angles relative to scene",false);
+  SPINNER_azimuth2=glui_tour->add_spinner_to_panel(panel_view3,"abs Azimuth:",GLUI_SPINNER_FLOAT,&tour_azimuth2,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_elevation2=glui_tour->add_spinner_to_panel(panel_view3,"abs Elevation:",GLUI_SPINNER_FLOAT,&tour_elevation2,KEYFRAME_tXYZ,TOUR_CB);
+#else
   SPINNER_viewx=glui_tour->add_spinner_to_panel(panel_movedir,"X",GLUI_SPINNER_FLOAT,&tour_viewx,KEYFRAME_viewXYZ,TOUR_CB);
   SPINNER_viewy=glui_tour->add_spinner_to_panel(panel_movedir,"Y",GLUI_SPINNER_FLOAT,&tour_viewy,KEYFRAME_viewXYZ,TOUR_CB);
   SPINNER_viewz=glui_tour->add_spinner_to_panel(panel_movedir,"Z",GLUI_SPINNER_FLOAT,&tour_viewz,KEYFRAME_viewXYZ,TOUR_CB);
   SPINNER_azimuth=glui_tour->add_spinner_to_panel(panel_movedir,"Azimuth:",GLUI_SPINNER_FLOAT,&tour_azimuth,KEYFRAME_tXYZ,TOUR_CB);
   SPINNER_elevation=glui_tour->add_spinner_to_panel(panel_movedir,"Elevation:",GLUI_SPINNER_FLOAT,&tour_elevation,KEYFRAME_tXYZ,TOUR_CB);
   SPINNER_elevation->set_float_limits(-90.0,90.0);
+#endif
 
   
  // if(tour_constant_vel==0){
@@ -703,9 +732,11 @@ void TOUR_CB(int var){
       key_xyz[0]=xbar0 + xyzmaxdiff*xyz[0];
       key_xyz[1]=ybar0 + xyzmaxdiff*xyz[1];
       key_xyz[2]=zbar0 + xyzmaxdiff*xyz[2];
-      key_azimuth = -angles[0];
-      key_elevation=-angles[1];
+      key_azimuth = angles[0];
+      key_elevation=angles[1];
       key_time_in = time0;
+      viewtype=0;
+      printf(" tour time=%f xyz=%f %f %f angles=%f %f\n",key_time_in,key_xyz[0],key_xyz[1],key_xyz[2],key_azimuth,key_elevation);
     }
     else{
       key_xyz[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.eye[0]+nextkey->nodeval.eye[0])/2.0;
