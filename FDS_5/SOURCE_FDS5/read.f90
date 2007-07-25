@@ -2764,6 +2764,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
    ! heats (heat of reaction). 
    DO J = 1,ML%N_REACTIONS
       NU_SUM = ML%NU_RESIDUE(J) + ML%NU_FUEL(J) + ML%NU_WATER(J)
+      NU_SUM = MIN(1.0_EB, NU_SUM)
       H_T = 0._EB
       ! Integrate H_T from ambient temperature to 2000.
       DO I = 0,NTEMP
@@ -2772,7 +2773,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
             C_ML = ML%C_S
          ELSE
             NR     = -NINT(ML%C_S)
-            C_ML = EVALUATE_RAMP(TEMP,0._EB,NR)*1000.
+            C_ML = EVALUATE_RAMP(TEMP,0._EB,NR)*1000._EB
          ENDIF
          C_RES = 0._EB
          IF (ML%NU_RESIDUE(J)>0._EB) THEN
@@ -2781,7 +2782,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
                C_RES = MLR%C_S
             ELSE
                NR      = -NINT(MLR%C_S)
-               C_RES = EVALUATE_RAMP(TEMP,0._EB,NR)*1000.
+               C_RES = EVALUATE_RAMP(TEMP,0._EB,NR)*1000._EB
             ENDIF
          ENDIF
          ITMP = 0.1_EB*TEMP
