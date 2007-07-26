@@ -122,7 +122,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: July 19, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: July 26, 2007)}
 
 \vspace{.5in}
 
@@ -2036,7 +2036,7 @@ $\beta$th reaction of material $\alpha$. The temperature integrals of the
 latent heat contents are computed in advance for all the reactions of
 each material and the values of $\dot{q}_{s,c}'''$ are tabulated
 between $T_0$ and $T_0 \;+\;2000$~K. During the pyrolysis calculation,
-the values are found from a ``look-up'' table. 
+the values are found from a ``look-up'' table.
 
 
 
@@ -2384,7 +2384,7 @@ The mass and heat transferred from each droplet will be multiplied by
 the weighting factor $C$.
 
 For a spray, the force term $\bof_b$ in Eq.~(\ref{momentum})
-represents the momentum transferred from the water droplets to the gas.
+represents the momentum transferred from the droplets to the gas.
 It is obtained by summing the force transferred from each droplet
 in a grid cell and dividing by the cell volume
 \be {\bof_b} = \ha \frac{\sum \rho C_D \pi  r_d^2 (\bu_d-\bu) |\bu_d-\bu|}
@@ -2413,49 +2413,57 @@ When a liquid droplet hits a solid horizontal surface, it is assigned a
 random horizontal direction and moves at a fixed velocity until it
 reaches the edge, at which point it drops straight down at the same
 fixed velocity. This ``dripping'' velocity has been measured for water to be on
-the order of 0.5~m/s~\cite{Hamins:1,Hamins:IAFSS2002}.
+the order of 0.5~m/s~\cite{Hamins:1,Hamins:IAFSS2002}. While attached to a surface, the ``droplet'' is assumed to form a thin film of liquid that transfers heat to the solid, and heat and mass to
+the gas. Details are included in the next section.
 
 \subsection{Mass and Energy Transfer from Droplets}
 
-The evaporation of liquid droplets is handled semi-empirically.
+Liquid ``droplets'' are represented either as discrete airborne spheres propelled through the gas, or as rectangular blocks that collectively form a thin liquid film on solid objects.
+These ``droplets'' are still individually tracked as
+lagrangian particles, but the heat and mass transfer coefficients are different. In the discussion to follow, the term ``droplets'' will be used to describe either form.
+
 Over the course of a time step of the gas phase solver, the droplets in a
 given grid cell evaporate as a function of
-the droplet equilibrium vapor mass fraction, $Y_d$,
-the local gas phase vapor mass fraction, $Y_g$, the (assumed uniform) droplet temperature, $T_d$,
-the local gas temperature, $T_g$,
-and the droplet velocity relative to the local gas velocity.
-The mass and energy transfer between the gas and the droplets can be described by the
+the liquid equilibrium vapor mass fraction, $Y_l$,
+the local gas phase vapor mass fraction, $Y_g$, the (assumed uniform) liquid temperature, $T_l$,
+and the local gas temperature, $T_g$.
+The mass and energy transfer between the gas and the liquid can be described by the
 following set of equations~\cite{Cheremisinoff:1}
 \begin{eqnarray}
-\frac{dm_d}{dt} & = & -2 \pi \; r_d \; \SH \; \rho D \; (Y_d - Y_g) \\
-\frac{dT_d}{dt} & = & \frac{1}{m_d \; c_w}
-     \left( A_d \, h_d \, (T_g-T_d) -  \frac{dm_d}{dt} \; h_v \right) \end{eqnarray}
-The subscripts $d$ and $g$ refer to the droplet and gas,
-respectively, $m_d$ is the droplet mass, $r_d$ is the droplet radius,
-$\rho$ is the gas density, $D$ is the diffusion coefficient for water vapor into air,
-and $\SH$ is the droplet Sherwood number, given by
-a correlation involving the Reynolds and Schmidt numbers
-\be \SH = 2 + 0.6 \; \RE_d^\ha \; \SC^\ot \ee
-The Schmidt number is assumed to have a constant value of 0.6.
-The vapor mass fraction of the gas, $Y_g$, is obtained from the overall
-set of gas phase mass conservation equations, and the droplet equilibrium vapor mass fraction
+\frac{dm_l}{dt}               & = & - A_l \; h_m \, \rho \, (Y_l - Y_g) \\ [0.1in]
+m_l \; c_l \; \frac{dT_l}{dt} & = &   A_l \, h   \, (T_g-T_l) + \frac{dm_l}{dt} \; h_v  \end{eqnarray}
+Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_l$ is the surface area of the liquid droplet (or that fraction of the
+film exposed to the gas), $h_m$ is the mass transfer coefficient to be discussed below,
+$\rho$ is the gas density, $c_l$ is the liquid specific heat, $h$ is the heat transfer coefficient, and $h_v$ is the latent heat of vaporization.
+The vapor mass fraction of the gas, $Y_g$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction
 is obtained from the Clausius-Clapeyron equation
-\be X_d = \exp \left[ \frac{h_v \, W_w}{\cal R}
-      \left( \frac{1}{T_b}-\frac{1}{T_d} \right) \right]  \quad ; \quad
-      Y_d = \frac{X_d}{X_d (1-W_a/W_w) + W_a/W_w}  \ee
-where $X_d$ is the droplet water vapor volume fraction,
-$h_v$ is the heat of vaporization, $W_w$ is the molecular weight
-of water, $W_a$ is the molecular weight of air,
-$\cal R$ is the gas constant, $T_b$ is the boiling temperature
-of the liquid and $T_d$ is the droplet temperature.
-In the energy transfer equation, $c_w$ is the specific heat of the liquid,
-$A_d=4\pi r_d^2$ is the surface
-area of the droplet, $h_d$ is the heat transfer coefficient, given by
-\be h_d = \frac{\NU \; k}{2 r_d} \quad ; \quad
-    \NU = 2 + 0.6\; \RE_d^\ha \; \PR^\ot \ee
-$\NU$ is the Nusselt number, $k$ is the thermal conductivity of air,
-and the Prandtl number, $\PR$, is approximately 0.7 for air. The Sherwood number,
-$\SH$, is analogous to the Nusselt number.
+\be X_l = \exp \left[ \frac{h_v \, W_l}{\cal R}
+      \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]  \quad ; \quad
+      Y_l = \frac{X_l}{X_l \, (1-W_a/W_l) + W_a/W_l}  \ee
+where $X_d$ is the equilibrium vapor {\em volume} fraction, $W_l$ is the molecular weight
+of the evaporated liquid, $W_a$ is the molecular weight of air,
+$\cal R$ is the universal gas constant, and $T_b$ is the boiling temperature
+of the liquid.
+
+Mass and heat transfer between liquid and gas are described with analogous empirical correlations.
+The mass transfer coefficient, $h_m$, is described by the empirical relationships~\cite{Incropera:1}:
+\be
+   h_m = \frac{\SH \; D_{lg}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
+                                                                                 0.037 \;   \RE_L^{\frac{4}{5}} \; \SC^\ot & \hbox{film}     \end{array} \right.
+\ee
+$\SH$ is the Sherwood number, $D_{lg}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or
+1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity),
+$\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number
+($\nu/D_{lg}$, assumed 0.6 for all cases).
+
+An analogous relationship exists for the heat transfer coefficient:
+\be
+   h  = \frac{\NU \; k}{L} \quad ; \quad \NU = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \; \PR^\ot           & \hbox{droplet} \\ [0.1in]
+                                                                         0.037 \;   \RE_L^{\frac{4}{5}} \; \PR^\ot & \hbox{film}     \end{array} \right.
+\ee
+$\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\PR$ is the Prandtl number (assumed 0.7 for all cases).
+
+
 
 
 
@@ -3892,7 +3900,7 @@ $\dQ$                     \> total heat release rate \\
 $Q^*$                     \> characteristic fire size \\
 $\R$                      \> universal gas constant \\
 $\RE$                     \> Reynolds number \\
-$r_d$                     \> water droplet radius \\
+$r_d$                     \> droplet radius \\
 $\hbox{RTI}$              \> Response Time Index of sprinkler \\
 $\bs$                     \> unit vector in direction of radiation intensity\\
 $\SC$                     \> Schmidt number \\
