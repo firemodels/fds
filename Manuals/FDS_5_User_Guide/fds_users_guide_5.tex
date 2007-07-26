@@ -243,7 +243,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, July 16, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, July 26, 2007)}
 
 \vspace{.5in}
 
@@ -1842,12 +1842,11 @@ This construct can also be used for {\ct DENSITY} or
 
 The {\ct INIT} construct may be useful in examining the influence of
 stack effect \index{stack effect} in a building, where the temperature
-is different inside and out. 
+is different inside and out.
 
 Note that a solid obstruction can be given an initial temperature via the
 parameter {\ct TMP\_INNER} on the {\ct SURF} line. An initial velocity
-can be prescribed via {\ct U0}, {\ct V0}, and {\ct W0} on the {\ct
-MISC} line. 
+can be prescribed via {\ct U0}, {\ct V0}, and {\ct W0} on the {\ct MISC} line.
 
 
 \subsection{Special Topic: Stack Effect}
@@ -3109,22 +3108,26 @@ it does with various quantities associated with areas, like {\ct HRRPUA}.
 \index{initial solid temperature}
 
 By default, the initial temperature of the solid material is set to
-ambient temperature. Use {\ct TMP\_INNER} at the {\ct SURF} line to 
-specify different initial temperature.
+ambient temperature. Use {\ct TMP\_INNER} on the {\ct SURF} line to
+specify a different initial temperature.
+Also, the backside temperature of a solid can be set using the parameter {\ct TMP\_BACK} on the {\ct SURF} line. However, this parameter has no
+meaning for surfaces with {\ct BACKING='EXPOSED'} or {\ct BACKING='INSULATED'}.
 
-Also, the backside temperature of the surfaces with heat transfer to
-void can be set using the {\ct TMP\_BACK} keyword. It has no meaning
-for surfaces with insulated or exposed backings.
+\begin{warning}
+\noindent
+Note that the parameters {\ct TMP\_INNER} and {\ct TMP\_BACK} are only meaningful for solids with specified {\ct THICKNESS} and material
+properties (via the {\ct MATL\_ID} keyword).
+\end{warning}
 
 \subsection{Special Topic: Numerical Accuracy and Stability}
 
 To compute the temperature and reactions inside the solids, FDS solves
 the one-dimensional heat transfer equation numerically. The size of
-the grid cells on the surface of the solid is automatically chosen 
+the grid cells on the surface of the solid is automatically chosen
 using a rule that makes the cell size smaller than the square root of
 the material diffusivity $(k/\rho c)$. By default, the solid grid
 cells increase towards the middle of the material layer and are smallest
-on the layer boundaries. 
+on the layer boundaries.
 
 The default parameters are usually appropriate for simple heat
 transfer calculations but sometimes the use of pyrolysis reactions
@@ -3136,10 +3139,17 @@ extremely transient heat transfer situations. Use {\ct STRETCH\_FACTOR
 = 1.} on the {\ct SURF} line to have a perfectly uniform grid. Values
 between 1.0 and 2.0 give different levels of stretching.  The size of
 all the grid cells can be scaled by setting {\ct CELL\_SIZE\_FACTOR}
-less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR = 0.5} makes the 
-grid cells half the size. Setting {\ct WALL\_INCREMENT=1} on the 
+less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR = 0.5} makes the
+grid cells half the size. Setting {\ct WALL\_INCREMENT=1} on the
 {\ct TIME} line forces the solid phase temperatures to be solved on every
-time step. 
+time step.
+
+See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
+
+
+
+
+
 
 \clearpage
 
@@ -3470,6 +3480,7 @@ is (0,0,0), and the global default can be changed by added a
 \clearpage
 
 \section{Verifying the Solid Phase Properties}
+\label{solid_phase_verification}
 
 As this chapter has demonstrated, real materials can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the
 input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know
@@ -4664,7 +4675,7 @@ the device changes state to {\ct .FALSE.} or {\ct .TRUE.}, respectively. For exa
                    .
                    .
 &DEVC XYZ=..., PROP_ID='...', ID='det1' /
-&DEVC XYZ=..., PROP_ID='...', ID='det2', INITIAL=.TRUE. /
+&DEVC XYZ=..., PROP_ID='...', ID='det2', INITIAL_STATE=.TRUE. /
 \end{verbatim}
 \normalsize
 
