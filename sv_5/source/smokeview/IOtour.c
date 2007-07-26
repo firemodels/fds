@@ -793,6 +793,8 @@ void createtourpaths(void){
         oview[1]=eye[1]+dy2;
         oview[2]=eye[2]+dz;
       }
+      else if((kf1->viewtype==2&&kf2->viewtype!=1)||(kf2->viewtype==2&&kf1->viewtype!=1)){
+      }
       else{
         dx = aview[0]-eye[0];
         dy = aview[1]-eye[1];

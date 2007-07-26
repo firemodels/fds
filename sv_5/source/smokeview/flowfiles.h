@@ -435,6 +435,9 @@ typedef struct _pathdata {
 
 typedef struct _keyframe {
   int selected,viewtype,npoints;
+#ifdef pp_TOUR
+  int viewtype1, viewtype2, viewtype3;
+#endif
   float noncon_time, con_time, disp_time;
   pathdata nodeval;
   float keyview_x, keyview_y;
