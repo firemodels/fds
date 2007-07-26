@@ -32,15 +32,20 @@
 #define pp_THREADS2
 
 #define pp_WUI
-#define pp_TOUR
 
-#ifdef pp_TEST
-#define pp_COLOR
-#define pp_LIGHT
-#define pp_GPU
+#ifdef pp_TEST2
+#define pp_TEST
 #define pp_SVNET
 #define pp_SPOTLIGHT
 #endif
+
+#ifdef pp_TEST
+#define pp_TOUR
+#define pp_COLOR
+#define pp_LIGHT
+#define pp_GPU
+#endif
+
 
 #ifdef pp_LINT
 /*lint -e534 */
