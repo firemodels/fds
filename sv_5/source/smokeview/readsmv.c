@@ -7275,6 +7275,9 @@ int readini2(char *inifile, int loaddatafile, int localfile){
     {
       int nkeyframes;
       float key_time, key_xyz[3], key_azimuth, key_view[3], params[3], zzoom, key_elevation;
+#ifdef pp_TOUR
+      float key_azimuth2, key_elevation2;
+#endif
       float t_globaltension, key_bank;
       int t_globaltension_flag;
       int viewtype,uselocalspeed;
@@ -7717,8 +7720,14 @@ typedef struct {
                 }
                 if(zzoom<0.25)zzoom=0.25;
                 if(zzoom>4.00)zzoom=4.0;
+#ifdef pp_TOUR
+                addedframe=add_frame(thisframe, key_time, key_xyz, 
+                  key_azimuth, key_elevation, key_azimuth2, key_elevation2,
+                  key_bank, params, viewtype,zzoom,key_view);
+#else
                 addedframe=add_frame(thisframe, key_time, key_xyz, key_azimuth, key_elevation, 
                   key_bank, params, viewtype,zzoom,key_view);
+#endif
                 thisframe=addedframe;
                 touri->keyframe_times[j]=key_time;
               }

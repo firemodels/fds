@@ -170,8 +170,7 @@ extern "C" void glui_tour_setup(int main_window){
   glui_tour->add_column_to_panel(panel_tour1,false);
   glui_tour->add_button_to_panel(panel_tour1,"Add",KEYFRAME_INSERT,TOUR_CB);
   glui_tour->add_button_to_panel(panel_tour1,"Delete",KEYFRAME_DELETE,TOUR_CB);
-#ifdef pp_TOUR
-#else
+#ifndef pp_TOUR
   CHECKBOXview1=glui_tour->add_checkbox_to_panel(panel_tour1,"X,Y,Z View",&viewtype,VIEW1,TOUR_CB);
 #endif
 
@@ -311,7 +310,7 @@ extern "C" void show_glui_advancedtour(void){
   if(glui_tour!=NULL)glui_advancedtour->show();
 }
 
-/* ------------------ set_glui_keyframe ------------------------ */
+/* ------------------ trim_val ------------------------ */
 extern "C" float trim_val(float val){
   if(val<0.000001&&val>-0.000001){
     return 0.0;
@@ -325,82 +324,94 @@ extern "C" void set_glui_keyframe(){
   tourdata *ti;
   float *eye,*aview;
 
-  if(selected_frame!=NULL){
-    ti = selected_tour;
-    if(ti!=NULL){
-      tour_hide=1-ti->display;
-    }
-    if(selected_tour!=NULL)strcpy(tour_label,selected_tour->label);
+  if(selected_frame==NULL)return;
 
-    eye = selected_frame->nodeval.eye;
-    aview = selected_frame->nodeval.aview;
+  ti = selected_tour;
+  if(ti!=NULL){
+    tour_hide=1-ti->display;
+  }
+  if(selected_tour!=NULL)strcpy(tour_label,selected_tour->label);
 
-    tour_ttt = selected_frame->disp_time;
-    tour_x = trim_val(xbar0 + eye[0]*xyzmaxdiff);
-    tour_y = trim_val(ybar0 + eye[1]*xyzmaxdiff);
-    tour_z = trim_val(zbar0 + eye[2]*xyzmaxdiff);
-    tour_viewx = trim_val(xbar0 + xyzmaxdiff*aview[0]);
-    tour_viewy = trim_val(ybar0 + xyzmaxdiff*aview[1]);
-    tour_viewz = trim_val(zbar0 + xyzmaxdiff*aview[2]);
-    tour_azimuth = selected_frame->azimuth;
-    tour_continuity=selected_frame->continuity;
-    tour_bias=selected_frame->bias;
-    viewtype=selected_frame->viewtype;
-    tour_tension=selected_frame->tension;
-    tour_zoom=selected_frame->nodeval.zoom;
-    tour_elevation=selected_frame->nodeval.elevation;
+  eye = selected_frame->nodeval.eye;
+  aview = selected_frame->nodeval.aview;
 
-    tour_global_tension_flag=selected_tour->global_tension_flag;
-    tour_global_tension=selected_tour->global_tension;
+  tour_ttt = selected_frame->disp_time;
+  tour_x = trim_val(xbar0 + eye[0]*xyzmaxdiff);
+  tour_y = trim_val(ybar0 + eye[1]*xyzmaxdiff);
+  tour_z = trim_val(zbar0 + eye[2]*xyzmaxdiff);
+  tour_viewx = trim_val(xbar0 + xyzmaxdiff*aview[0]);
+  tour_viewy = trim_val(ybar0 + xyzmaxdiff*aview[1]);
+  tour_viewz = trim_val(zbar0 + xyzmaxdiff*aview[2]);
+  tour_azimuth = selected_frame->azimuth;
+#ifdef pp_TOUR
+  tour_azimuth2 = selected_frame->azimuth2;
+  tour_elevation2 = selected_frame->nodeval.elevation2;
+#endif
+  tour_continuity=selected_frame->continuity;
+  tour_bias=selected_frame->bias;
+#ifdef pp_TOUR
+  viewtype1=selected_frame->viewtype1;
+  viewtype2=selected_frame->viewtype2;
+  viewtype3=selected_frame->viewtype3;
+  setviewcontrols();
+#else
+  viewtype=selected_frame->viewtype;
+#endif
+  tour_tension=selected_frame->tension;
+  tour_zoom=selected_frame->nodeval.zoom;
+  tour_elevation=selected_frame->nodeval.elevation;
+ 
+  tour_global_tension_flag=selected_tour->global_tension_flag;
+  tour_global_tension=selected_tour->global_tension;
 
 
-    if(SPINNER_t==NULL)return;
+  if(SPINNER_t==NULL)return;
 
-    CHECKBOXglobaltension_flag->set_int_val(tour_global_tension_flag);
-    SPINNER_globaltourtension->set_float_val(tour_global_tension);
-    if(tour_global_tension_flag==1){
-      SPINNER_globaltourtension->enable();
-      SPINNER_tourtension->disable();
-    }
-    else{
-      SPINNER_globaltourtension->disable();
-      SPINNER_tourtension->enable();
-    }
+  CHECKBOXglobaltension_flag->set_int_val(tour_global_tension_flag);
+  SPINNER_globaltourtension->set_float_val(tour_global_tension);
+  if(tour_global_tension_flag==1){
+    SPINNER_globaltourtension->enable();
+    SPINNER_tourtension->disable();
+  }
+  else{
+    SPINNER_globaltourtension->disable();
+    SPINNER_tourtension->enable();
+  }
 
-    {
-      float time_temp;
+  {
+    float time_temp;
       
-      time_temp=tour_ttt;
-      SPINNER_t->set_float_limits(selected_frame->prev->disp_time,selected_frame->next->disp_time);
-      tour_ttt=time_temp;
-      SPINNER_t->set_float_val(tour_ttt);
-    }
+    time_temp=tour_ttt;
+    SPINNER_t->set_float_limits(selected_frame->prev->disp_time,selected_frame->next->disp_time);
+    tour_ttt=time_temp;
+    SPINNER_t->set_float_val(tour_ttt);
+  }
 
-    if(edittour==1){
-      if(tour_constant_vel==0){
-        SPINNER_t->enable();
-      }  
-      else{
-        SPINNER_t->disable();
-      }
+  if(edittour==1){
+    if(tour_constant_vel==0){
+      SPINNER_t->enable();
+    }  
+    else{
+      SPINNER_t->disable();
     }
+  }
 
-    SPINNER_x->set_float_val(tour_x);
-    SPINNER_y->set_float_val(tour_y);
-    SPINNER_z->set_float_val(tour_z);
-    SPINNER_azimuth->set_float_val(tour_azimuth);
-    if(SPINNER_tourbias!=NULL)SPINNER_tourbias->set_float_val(tour_bias);
-    if(SPINNER_tourcontinuity!=NULL)SPINNER_tourcontinuity->set_float_val(tour_continuity);
-    SPINNER_tourtension->set_float_val(tour_tension);
+  SPINNER_x->set_float_val(tour_x);
+  SPINNER_y->set_float_val(tour_y);
+  SPINNER_z->set_float_val(tour_z);
+  SPINNER_azimuth->set_float_val(tour_azimuth);
+  if(SPINNER_tourbias!=NULL)SPINNER_tourbias->set_float_val(tour_bias);
+  if(SPINNER_tourcontinuity!=NULL)SPINNER_tourcontinuity->set_float_val(tour_continuity);
+  SPINNER_tourtension->set_float_val(tour_tension);
 //    SPINNER_tourzoom->set_float_val(tour_zoom);
-    SPINNER_viewx->set_float_val(tour_viewx);
-    SPINNER_viewy->set_float_val(tour_viewy);
-    SPINNER_viewz->set_float_val(tour_viewz);
-    SPINNER_elevation->set_float_val(tour_elevation);
-    if(ti!=NULL&&CHECKBOXtourhide!=NULL)CHECKBOXtourhide->set_int_val(tour_hide);
-    EDITlabel->set_text(tour_label);
+  SPINNER_viewx->set_float_val(tour_viewx);
+  SPINNER_viewy->set_float_val(tour_viewy);
+  SPINNER_viewz->set_float_val(tour_viewz);
+  SPINNER_elevation->set_float_val(tour_elevation);
+  if(ti!=NULL&&CHECKBOXtourhide!=NULL)CHECKBOXtourhide->set_int_val(tour_hide);
+  EDITlabel->set_text(tour_label);
 
-    if(edittour==1){
+  if(edittour==1){
 #ifdef pp_TOUR
     setviewcontrols();
 #else
@@ -419,14 +430,12 @@ extern "C" void set_glui_keyframe(){
       SPINNER_viewz->disable();
     }
 #endif
-    }
-#ifdef pp_TOUR
-    CHECKBOXview1->set_int_val(viewtype1);
-#else
-    CHECKBOXview1->set_int_val(viewtype);
-#endif
-
   }
+#ifdef pp_TOUR
+  CHECKBOXview1->set_int_val(viewtype1);
+#else
+  CHECKBOXview1->set_int_val(viewtype);
+#endif
 }
 
 extern "C" void update_tourindex(void){
@@ -438,15 +447,21 @@ extern "C" void update_tourindex(void){
 /* ------------------ TOUR_CB ------------------------ */
 
 void TOUR_CB(int var){
-  keyframe *lastkey,*thiskey,*nextkey,*newframe;
-  tourdata *thistour=NULL;
+  keyframe *thiskey,*nextkey,*newframe;
+#ifndef pp_TOUR
+  keyframe *lastkey;
   float dummy;
+#endif
+  tourdata *thistour=NULL;
   float *aview,*eye;
 
   float key_xyz[3];
   float key_params[3];
   float key_time_in, key_azimuth, key_view[3], key_zoom;
   float key_elevation, key_bank;
+#ifdef pp_TOUR
+  float key_azimuth2, key_elevation2;
+#endif
 
   if(ntours==0&&var!=TOUR_INSERT&&var!=TOUR_CLOSE&&var!=SAVE_SETTINGS){
     return;
@@ -542,8 +557,7 @@ void TOUR_CB(int var){
       viewtype3=0;
     }
     setviewcontrols();
-#endif
-#ifndef pp_TOUR
+#else
     if(viewtype==1){
       SPINNER_azimuth->disable();
       SPINNER_elevation->disable();
@@ -556,7 +570,7 @@ void TOUR_CB(int var){
         SPINNER_elevation->set_float_val(tour_elevation);
       }
     }
-    else if(viewtype=0){
+    else if(viewtype==0){
       SPINNER_azimuth->enable();
       SPINNER_elevation->enable();
       SPINNER_viewx->disable();
@@ -564,7 +578,15 @@ void TOUR_CB(int var){
       SPINNER_viewz->disable();
     }
 #endif
-    if(selected_frame!=NULL)selected_frame->viewtype=viewtype;
+    if(selected_frame!=NULL){
+#ifdef pp_TOUR
+      selected_frame->viewtype1=viewtype1;
+      selected_frame->viewtype2=viewtype2;
+      selected_frame->viewtype3=viewtype3;
+      setviewcontrols();
+#endif
+      selected_frame->viewtype=viewtype;
+    }
     createtourpaths();
     break;
 #ifdef pp_TOUR
@@ -578,7 +600,13 @@ void TOUR_CB(int var){
       viewtype2=0;
       viewtype3=1;
     }
+    if(selected_frame!=NULL){
+      selected_frame->viewtype1=viewtype1;
+      selected_frame->viewtype2=viewtype2;
+      selected_frame->viewtype3=viewtype3;
+    }
     setviewcontrols();
+    selected_frame->viewtype=viewtype;
     break;
   case VIEW3:
     if(viewtype3==1){
@@ -590,7 +618,13 @@ void TOUR_CB(int var){
       viewtype2=1;
       viewtype3=0;
     }
+    if(selected_frame!=NULL){
+      selected_frame->viewtype1=viewtype1;
+      selected_frame->viewtype2=viewtype2;
+      selected_frame->viewtype3=viewtype3;
+    }
     setviewcontrols();
+    selected_frame->viewtype=viewtype;
     break;
 #endif
   case VIEW_times:
@@ -655,6 +689,10 @@ void TOUR_CB(int var){
       }
       selected_frame->azimuth=tour_azimuth;
       selected_frame->nodeval.elevation=tour_elevation;
+#ifdef pp_TOUR
+      selected_frame->azimuth2=tour_azimuth2;
+      selected_frame->nodeval.elevation2=tour_elevation2;
+#endif
       selected_frame->tension=tour_tension;
       selected_frame->bias=tour_bias;
       selected_frame->continuity=tour_continuity;
@@ -761,8 +799,10 @@ void TOUR_CB(int var){
     else{
       thiskey=selected_frame;
     }
+    if(thiskey==NULL)return;
     if(thiskey->next!=NULL){
       nextkey=thiskey->next;
+      if(thiskey->viewtype!=nextkey->viewtype)nextkey=thiskey;
     }
     else{
       nextkey=thiskey;
@@ -779,11 +819,12 @@ void TOUR_CB(int var){
       key_xyz[0]=xbar0 + xyzmaxdiff*xyz[0];
       key_xyz[1]=ybar0 + xyzmaxdiff*xyz[1];
       key_xyz[2]=zbar0 + xyzmaxdiff*xyz[2];
-      key_azimuth = angles[0];
-      key_elevation=angles[1];
+      key_azimuth2 = angles[0];
+      key_elevation2=angles[1];
       key_time_in = time0;
       viewtype=0;
-      printf(" tour time=%f xyz=%f %f %f angles=%f %f\n",key_time_in,key_xyz[0],key_xyz[1],key_xyz[2],key_azimuth,key_elevation);
+      printf(" tour time=%f xyz=%f %f %f angles=%f %f\n",key_time_in,key_xyz[0],key_xyz[1],key_xyz[2],
+        key_azimuth2,key_elevation2);
     }
     else{
       key_xyz[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.eye[0]+nextkey->nodeval.eye[0])/2.0;
@@ -791,6 +832,8 @@ void TOUR_CB(int var){
       key_xyz[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.eye[2]+nextkey->nodeval.eye[2])/2.0;
       key_azimuth = (thiskey->azimuth+nextkey->azimuth)/2.0;
       key_elevation=(thiskey->nodeval.elevation+nextkey->nodeval.elevation)/2.0;
+      key_azimuth2 = (thiskey->azimuth2+nextkey->azimuth2)/2.0;
+      key_elevation2=(thiskey->nodeval.elevation2+nextkey->nodeval.elevation2)/2.0;
       key_time_in = (thiskey->noncon_time+nextkey->noncon_time)/2.0;
     }
 
@@ -802,48 +845,29 @@ void TOUR_CB(int var){
     key_view[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.aview[2]+nextkey->nodeval.aview[2])/2.0;
     key_zoom = (thiskey->nodeval.zoom + nextkey->nodeval.zoom)/2.0;
     key_bank = (thiskey->bank + nextkey->bank)/2.0;
-    if(thiskey->viewtype==0&&nextkey->viewtype==0){
-      viewtype=thiskey->viewtype||nextkey->viewtype;
-    }
-    else{
-      viewtype=1;
-      if(thiskey->viewtype==1&&nextkey->viewtype==0){
-        key_view[0]=xbar0 + xyzmaxdiff*thiskey->nodeval.aview[0];
-        key_view[1]=ybar0 + xyzmaxdiff*thiskey->nodeval.aview[1];
-        key_view[2]=zbar0 + xyzmaxdiff*thiskey->nodeval.aview[2];
-        key_elevation = thiskey->nodeval.elevation;
-      }
-      if(thiskey->viewtype==0&&nextkey->viewtype==1){
-        key_view[0]=xbar0 + xyzmaxdiff*nextkey->nodeval.aview[0];
-        key_view[1]=ybar0 + xyzmaxdiff*nextkey->nodeval.aview[1];
-        key_view[2]=zbar0 + xyzmaxdiff*nextkey->nodeval.aview[2];
-        key_elevation = nextkey->nodeval.elevation;
-      }
-    }
+    viewtype=thiskey->viewtype;
 
-    if(thiskey!=NULL){
-      newframe=add_frame(selected_frame,key_time_in,key_xyz,key_azimuth,key_elevation,key_bank,
-      key_params,viewtype,key_zoom,key_view);
-      createtourpaths();
-      new_select(newframe);
-      set_glui_keyframe();
-    }
+    newframe=add_frame(selected_frame,key_time_in,key_xyz,key_azimuth,key_azimuth2,key_elevation,key_elevation2,key_bank,
+    key_params,viewtype,key_zoom,key_view);
+    createtourpaths();
+    new_select(newframe);
+    set_glui_keyframe();
+
     break;
-#endif
-#ifndef pp_TOUR
+#else
   case KEYFRAME_INSERT:
     if(selected_frame!=NULL){
       thistour=selected_tour;
       thiskey=selected_frame;
       nextkey=thiskey->next;
       if(nextkey==&thistour->last_frame){
+        lastkey=thiskey->prev;
         key_xyz[0]=xbar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[0]-lastkey->nodeval.eye[0]);
         key_xyz[1]=ybar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[1]-lastkey->nodeval.eye[1]);
         key_xyz[2]=zbar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[2]-lastkey->nodeval.eye[2]);
         key_azimuth = (2*thiskey->azimuth-lastkey->azimuth);
         key_elevation=(2*thiskey->nodeval.elevation-lastkey->nodeval.elevation);
         key_time_in = thiskey->noncon_time;
-        lastkey=thiskey->prev;
         thiskey->noncon_time=(thiskey->noncon_time+lastkey->noncon_time)/2.0;
         key_params[0]=(2*thiskey->bias-lastkey->bias);
         key_params[1]=(2*thiskey->continuity-lastkey->continuity);
@@ -871,11 +895,11 @@ void TOUR_CB(int var){
         key_zoom = (thiskey->nodeval.zoom + nextkey->nodeval.zoom)/2.0;
         key_bank = (thiskey->bank + nextkey->bank)/2.0;
         if(thiskey->viewtype==0&&nextkey->viewtype==0){
-          viewtype=thiskey->viewtype||nextkey->viewtype;
+          viewtype=0;
         }
         else{
           viewtype=1;
-          if(thiskey->viewtype==1&&nextkey->viewtype==0){
+          if(thiskey->viewtype==1){
             key_view[0]=xbar0 + xyzmaxdiff*thiskey->nodeval.aview[0];
             key_view[1]=ybar0 + xyzmaxdiff*thiskey->nodeval.aview[1];
             key_view[2]=zbar0 + xyzmaxdiff*thiskey->nodeval.aview[2];
@@ -995,6 +1019,7 @@ void TOUR_CB(int var){
   }
 }
 
+#ifdef pp_TOUR
 /* ------------------ setviewcontrols ------------------------ */
 
 void setviewcontrols(void){
@@ -1008,19 +1033,11 @@ void setviewcontrols(void){
   if(viewtype3==1)viewtype=2;
   switch (viewtype){
     case 0:
-     // panel_view1->disable();
-     // panel_view2->enable();
-     // panel_view3->disable();
-
       panel_view1->close();
       panel_view2->open();
       panel_view3->close();
       break;
     case 1:
-     // panel_view1->enable();
-     // panel_view2->disable();
-     // panel_view3->disable();
-
       panel_view1->open();
       panel_view2->close();
       panel_view3->close();
@@ -1031,16 +1048,13 @@ void setviewcontrols(void){
       }
       break;
     case 2:
-    //  panel_view1->disable();
-    //  panel_view2->disable();
-    //  panel_view3->enable();
-
       panel_view1->close();
       panel_view2->close();
       panel_view3->open();
       break;
   }
 }
+#endif
 
 /* ------------------ delete_tourlsit ------------------------ */
 
