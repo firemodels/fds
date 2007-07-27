@@ -510,6 +510,10 @@ void createtourpaths(void){
         keyj->d_eye[4]=key2->nodeval.zoom - key1->nodeval.zoom;
 
         keyj->d_eye[5]=key2->nodeval.elevation - key1->nodeval.elevation;
+#ifdef pp_TOUR
+        keyj->d_eye[6]=key2->azimuth2 - key1->azimuth2;
+        keyj->d_eye[7]=key2->nodeval.elevation2 - key1->nodeval.elevation2;
+#endif
 
 
         keyj->s_aview[0]=0.0;
@@ -529,6 +533,10 @@ void createtourpaths(void){
         keyj->s_eye[4]=key1->nodeval.zoom - key0->nodeval.zoom;
 
         keyj->s_eye[5]=key1->nodeval.elevation - key0->nodeval.elevation;
+#ifdef pp_TOUR
+        keyj->s_eye[6]=key1->azimuth2 - key0->azimuth2;
+        keyj->s_eye[7]=key1->nodeval.elevation2 - key0->nodeval.elevation2;
+#endif
 
         keyj->d_eye[0]=0.0;
         keyj->d_eye[1]=0.0;
@@ -561,7 +569,10 @@ void createtourpaths(void){
         keyj->s_eye[3]=sfactor*(s1*(key1->azimuth -           key0->azimuth) +           s2*(key2->azimuth-          key1->azimuth));
         keyj->s_eye[4]=sfactor*(s1*(key1->nodeval.zoom -      key0->nodeval.zoom) +      s2*(key2->nodeval.zoom-     key1->nodeval.zoom));
         keyj->s_eye[5]=sfactor*(s1*(key1->nodeval.elevation - key0->nodeval.elevation) + s2*(key2->nodeval.elevation-key1->nodeval.elevation));
-
+#ifdef pp_TOUR
+        keyj->s_eye[6]=sfactor*(s1*(key1->azimuth2 -           key0->azimuth2) +           s2*(key2->azimuth2-          key1->azimuth2));
+        keyj->s_eye[7]=sfactor*(s1*(key1->nodeval.elevation2 - key0->nodeval.elevation2) + s2*(key2->nodeval.elevation2-key1->nodeval.elevation2));
+#endif
         keyj->s_aview[0]=sfactor*(s1*(aview1[0] - aview0[0]) + s2*(aview2[0]-aview1[0]));
         keyj->s_aview[1]=sfactor*(s1*(aview1[1] - aview0[1]) + s2*(aview2[1]-aview1[1]));
         keyj->s_aview[2]=sfactor*(s1*(aview1[2] - aview0[2]) + s2*(aview2[2]-aview1[2]));
@@ -573,6 +584,11 @@ void createtourpaths(void){
         keyj->d_eye[3]=dfactor*(d1*(key1->azimuth -           key0->azimuth) +           d2*(key2->azimuth-          key1->azimuth));
         keyj->d_eye[4]=dfactor*(d1*(key1->nodeval.zoom -      key0->nodeval.zoom) +      d2*(key2->nodeval.zoom-     key1->nodeval.zoom));
         keyj->d_eye[5]=dfactor*(d1*(key1->nodeval.elevation - key0->nodeval.elevation) + d2*(key2->nodeval.elevation-key1->nodeval.elevation));
+
+#ifdef pp_TOUR
+        keyj->d_eye[6]=dfactor*(d1*(key1->azimuth2 -           key0->azimuth2) +           d2*(key2->azimuth2-          key1->azimuth2));
+        keyj->d_eye[7]=dfactor*(d1*(key1->nodeval.elevation2 - key0->nodeval.elevation2) + d2*(key2->nodeval.elevation2-key1->nodeval.elevation2));
+#endif
 
 
         keyj->d_aview[0]=dfactor*(d1*(aview1[0] - aview0[0]) + d2*(aview2[0]-aview1[0]));
@@ -843,6 +859,17 @@ float hermiteeye(float t, int i, keyframe *kf1, keyframe *kf2, float *slope){
     p0 = kf1->nodeval.zoom;
     p1 = kf2->nodeval.zoom;
     break;
+#ifdef pp_TOUR
+  case 6:
+    p0=kf1->nodeval.elevation2;
+    p1=kf2->nodeval.elevation2;
+    break;
+  case 7:
+    p0 = kf1->azimuth2;
+    p1 = kf2->azimuth2;
+    break;
+#endif
+
   default:
     p0 = kf1->nodeval.eye[i];
     p1 = kf2->nodeval.eye[i];
@@ -898,16 +925,32 @@ void defaulttour(void){
 }
 
 /* ------------------ addframe ------------------------ */
-
+#ifdef pp_TOUR
+keyframe *add_frame(keyframe *framei, float time, float *eye, 
+                    float key_azimuth, float key_azimuth2,float elevation, float elevation2,
+                    float bank, float params[3],
+                    int viewtype,float zoom,float view[3]){
+#else
 keyframe *add_frame(keyframe *framei, float time, float *eye, float key_azimuth, float elevation, float bank, float params[3],
                     int viewtype,float zoom,float view[3]){
+#endif
   keyframe *frame,*framen;
   float *feye, *faview;
+  int viewtype1, viewtype2, viewtype3;
 
   NewMemory((void **)&frame,sizeof(keyframe));
   feye = frame->nodeval.eye;
   faview = frame->nodeval.aview;
+#ifdef pp_TOUR
+  viewtype1=0;
+  viewtype2=0;
+  viewtype3=0;
+  if(viewtype==0)viewtype2=1;
+  if(viewtype==1)viewtype1=1;
+  if(viewtype==2)viewtype3=1;
+#else
   if(viewtype!=0)viewtype=1;
+#endif
 
   framen=framei->next;
   if(framen==NULL){
@@ -922,6 +965,10 @@ keyframe *add_frame(keyframe *framei, float time, float *eye, float key_azimuth,
 
   frame->azimuth=key_azimuth;
   frame->nodeval.elevation=elevation;
+#ifdef pp_TOUR
+  frame->azimuth2=key_azimuth2;
+  frame->nodeval.elevation2=elevation2;
+#endif
   frame->bank=bank;
   feye[0]=(eye[0]-xbar0)/xyzmaxdiff;
   feye[1]=(eye[1]-ybar0)/xyzmaxdiff;
@@ -940,6 +987,11 @@ keyframe *add_frame(keyframe *framei, float time, float *eye, float key_azimuth,
   frame->continuity=0.0;         // no longer using continuity
   frame->tension=params[0];
   frame->viewtype=viewtype;
+#ifdef pp_TOUR
+  frame->viewtype1=viewtype1;
+  frame->viewtype2=viewtype2;
+  frame->viewtype3=viewtype3;
+#endif
   frame->nodeval.zoom=zoom;
   frame->keyview_x=0.0;
   frame->keyview_y=0.0;
@@ -982,14 +1034,16 @@ void new_select(keyframe *newselect){
 
 void init_circulartour(void){
   int nkeyframes,j;
-  float key_azimuth, key_bank, params[3],key_view[3], key_xyz[3], zoom;
+  float key_azimuth, elevation, key_bank, params[3],key_view[3], key_xyz[3], zoom;
+#ifdef pp_TOUR
+  float key_azimuth2, elevation2;
+#endif
   int viewtype=0;
   tourdata *touri;
   float key_time;
   float angle_local;
   float f1;
   float A, B, a, b, minAB, denom, cosangle, sinangle;
-  float elevation;
   float pi;
   keyframe *thisframe,*addedframe;
 
@@ -1015,6 +1069,10 @@ void init_circulartour(void){
   a = A/2.0 + minAB;
   b = B/2.0 + minAB;
   elevation=0.0;
+#ifdef pp_TOUR
+  elevation2=0.0;
+  key_azimuth2=0.0;
+#endif
 
 
   thisframe=&touri->first_frame;
@@ -1037,8 +1095,14 @@ void init_circulartour(void){
 
     viewtype=1;
     zoom=1.0;
-    addedframe=add_frame(thisframe, key_time, key_xyz, key_azimuth, 
-      key_bank, elevation, params, viewtype,zoom,key_view);
+#ifdef pp_TOUR
+    addedframe=add_frame(thisframe, key_time, key_xyz, 
+      key_azimuth, elevation, key_azimuth2, elevation2,
+      key_bank, params, viewtype,zoom,key_view);
+#else
+    addedframe=add_frame(thisframe, key_time, key_xyz, 
+      key_azimuth, elevation, key_bank, params, viewtype,zoom,key_view);
+#endif
     thisframe=addedframe;
     touri->keyframe_times[j]=key_time;
   }
@@ -1050,11 +1114,13 @@ void init_circulartour(void){
 tourdata *add_tour(char *label){
   tourdata *tourtemp=NULL,*touri;
   int nkeyframes;
-  float key_azimuth, key_bank, params[3],key_view[3], key_xyz[3], zoom;
+  float key_azimuth, elevation, key_bank, params[3],key_view[3], key_xyz[3], zoom;
+#ifdef pp_TOUR
+  float key_azimuth2, elevation2;
+#endif
   int viewtype=0;
   float key_time;
   int i;
-  float elevation;
   keyframe *thisframe, *addedframe;
 
   delete_tourlist();
@@ -1084,6 +1150,10 @@ tourdata *add_tour(char *label){
   key_azimuth = 0.0;
   key_bank = 0.0;
   elevation=0.0;
+#ifdef pp_TOUR
+  key_azimuth2=0.0;
+  elevation2=0.0;
+#endif
   params[0] = 0.0;
   params[1] = 0.0;
   params[2] = 0.0;
@@ -1095,8 +1165,14 @@ tourdata *add_tour(char *label){
   key_xyz[2] = (zbar0 + zbarORIG)/2.0;
   key_time = view_tstart;
   thisframe=&touri->first_frame;
-  addedframe=add_frame(thisframe,key_time, key_xyz, key_azimuth, key_bank, elevation, 
+#ifdef pp_TOUR
+  addedframe=add_frame(thisframe,key_time, key_xyz, 
+    key_azimuth, elevation, key_azimuth2, elevation2, 
+    key_bank, params, viewtype,zoom,key_view);
+#else
+  addedframe=add_frame(thisframe,key_time, key_xyz, key_azimuth, elevation, key_bank, 
     params, viewtype,zoom,key_view);
+#endif
   touri->keyframe_times[0]=key_time;
 
   key_xyz[0] = xbarORIG + 1.0;
@@ -1104,8 +1180,14 @@ tourdata *add_tour(char *label){
   key_xyz[2] = (zbar0 + zbarORIG)/2.0;
   key_time = view_tstop;
   thisframe=addedframe;
-  add_frame(thisframe,key_time, key_xyz, key_azimuth, key_bank, elevation, 
+#ifdef pp_TOUR
+  add_frame(thisframe,key_time, key_xyz, 
+    key_azimuth, elevation, key_azimuth2, elevation2, 
+    key_bank, params, viewtype,zoom,key_view);
+#else
+  add_frame(thisframe,key_time, key_xyz, key_azimuth, elevation, key_bank,
     params, viewtype,zoom,key_view);
+#endif
   touri->keyframe_times[1]=key_time;
   touri->display=1;
 
@@ -1272,6 +1354,11 @@ void adjustviewangle(keyframe *kf, float *azimuth, float *elevation){
   kf->nodeval.elevation=elev;
   kf->azimuth=az;
   kf->azimuth=az;
+#ifdef pp_TOUR
+  //*** fix this
+  kf->azimuth2=999.0;
+  kf->nodeval.elevation2=999.0;
+#endif
   *azimuth=az;
   *elevation = elev;
 }
