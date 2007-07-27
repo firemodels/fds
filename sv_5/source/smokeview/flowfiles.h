@@ -427,7 +427,7 @@ typedef struct mesh_ {
 
 typedef struct _pathdata {
   float time, eye[4], aview[3], oview[3];
-  float zoom,elevation;
+  float zoom,elevation,elevation2;
   struct _pathdata *keysnap;
 } pathdata;
 
@@ -442,11 +442,15 @@ typedef struct _keyframe {
   pathdata nodeval;
   float keyview_x, keyview_y;
   float cumdist, dist;
+#ifdef pp_TOUR
+  float s_eye[8], d_eye[8];
+#else
   float s_eye[6], d_eye[6];
+#endif
   float s_aview[3], d_aview[3];
   float bias, continuity, tension;
   float bank;
-  float azimuth;
+  float azimuth,azimuth2;
   float s1, s2, d1, d2;
   struct _keyframe *next,*prev;
 } keyframe;
