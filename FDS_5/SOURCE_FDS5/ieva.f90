@@ -6431,6 +6431,7 @@ Contains
     Real ( kind = 8 ), Parameter :: eps = 0.00001D+00
     !    Real ( kind = 8 ) gamma_log
     Integer i
+    Integer ii
     Integer icent
     Integer iterb
     Integer iterf
@@ -6449,9 +6450,8 @@ Contains
     Real ( kind = 8 ) x
     Real ( kind = 8 ) xnonc
     Real ( kind = 8 ) xx
-
     qsmall(xx) = sum1 < 1.0D-20 .Or. xx < eps * sum1
-    dg(i) = df +  2.0D+00  * Real ( i, kind = 8 )
+    dg(ii) = df +  2.0D+00  * Real ( ii, kind = 8 )
 
     If ( x <= 0.0D+00 ) Then
        cum = 0.0D+00
