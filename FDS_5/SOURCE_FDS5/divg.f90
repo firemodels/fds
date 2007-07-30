@@ -557,7 +557,8 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             END SELECT          
             ! Special Cases
             IF (BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .AND. IOR>0) UWS(IW) = -UWS(IW)  ! One-way flow through POROUS plate
-            IF (SURFACE(IBC)%MASS_FLUX_TOTAL /= -999._EB .AND. UW0(IW) > 0._EB ) THEN
+!            IF (SURFACE(IBC)%MASS_FLUX_TOTAL /= -999._EB .AND. UW0(IW) > 0._EB ) THEN
+            IF (SURFACE(IBC)%MASS_FLUX_TOTAL /= -999._EB) THEN
                IIG = IJKW(6,IW) 
                JJG = IJKW(7,IW) 
                KKG = IJKW(8,IW) 
