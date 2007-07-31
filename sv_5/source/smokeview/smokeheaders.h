@@ -331,7 +331,11 @@ EXTERNCPP void create_tourlist(void);
 EXTERNCPP void delete_tourlist(void);
 EXTERNCPP void updateviewtour(void);
 EXTERNCPP void update_tourcontrols(void);
+#ifdef pp_TOUR
+EXTERNCPP void adjustviewangle(keyframe *kf,int viewtype);
+#else
 EXTERNCPP void adjustviewangle(keyframe *kf,float *azimuth, float *elevation);
+#endif
 EXTERNCPP void setup_tour(void);
 EXTERNCPP void createtourpaths(void);
 EXTERNCPP void drawtours(void);
