@@ -601,7 +601,11 @@ void createtourpaths(void){
     for(keyj=(touri->first_frame).next;keyj->next!=NULL;keyj=keyj->next){
       keyj->keyview_x=keyj->d_eye[0];
       keyj->keyview_y=keyj->d_eye[1];
+#ifdef pp_TOUR
+      adjustviewangle(keyj,keyj->viewtype);
+#else
       if(keyj->viewtype==1)adjustviewangle(keyj,&dummy,&dummy);
+#endif
     }
 
     // evaluate quantities along path - determine distances
@@ -819,7 +823,7 @@ void createtourpaths(void){
         dz = sin(scene_elev)/10.0;
         oview[0]=eye[0]+dx;
         oview[1]=eye[1]+dy;
-        oview[2]=eye[0]+dz;
+        oview[2]=eye[2]+dz;
       }
 #endif
       else{
@@ -1323,7 +1327,116 @@ void setup_tour(void){
 }
 
 /* ------------------ adjustviewangle ------------------------ */
+#ifdef pp_TOUR
+void adjustviewangle(keyframe *kf, int viewtype){
+  float dx_aview, dy_aview, dz_aview;
+  float dx_keyview, dy_keyview;
+  float distxy_aview, distxy_keyview;
+  float angle_keyview, angle_aview;
+  float elev_path, az_path;
+  float elev_scene, az_scene;
+  float elev, az;
+  float *eye, *aview;
 
+  
+  eye = kf->nodeval.eye;
+  aview = kf->nodeval.aview;
+
+  switch (viewtype){
+    case 1: // absolute (x,y,z) view direction known
+      dx_keyview = kf->keyview_x;
+      dy_keyview = kf->keyview_y;
+      distxy_keyview = sqrt(dx_keyview*dx_keyview+dy_keyview*dy_keyview);
+      if(distxy_keyview<=0.0)return;
+      dx_keyview /= distxy_keyview;
+      dy_keyview /= distxy_keyview;
+
+      dx_aview = aview[0] - eye[0];
+      dy_aview = aview[1] - eye[1];
+      dz_aview = aview[2] - eye[2];
+
+      distxy_aview = sqrt(dx_aview*dx_aview+dy_aview*dy_aview);
+      if(distxy_aview<=0.0)return;
+      dx_aview /= distxy_aview;
+      dy_aview /= distxy_aview;
+      dz_aview /= distxy_aview;
+
+      angle_aview = 180.0*atan2(dy_aview,dx_aview)/PI;
+      angle_keyview = 180.0*atan2(dy_keyview,dx_keyview)/PI;
+      az = angle_aview - angle_keyview;
+      if(az>180.0)az = 360.0 - az;
+      if(az<-180.0)az = az + 360.0;
+      elev=atan(dz_aview)*180.0/PI;
+
+      kf->nodeval.elev_path=elev;
+      kf->az_path=az;
+
+      kf->az_scene=angle_aview;
+      kf->nodeval.elev_scene=elev;
+      break;
+    
+    case 0: // path relative view direction known (azimuth, elevation relative to path)
+      elev_path = kf->nodeval.elev_path;
+      az_path = kf->az_path;
+
+      dx_keyview = kf->keyview_x;
+      dy_keyview = kf->keyview_y;
+      distxy_keyview = sqrt(dx_keyview*dx_keyview+dy_keyview*dy_keyview);
+      if(distxy_keyview<=0.0)return;
+      dx_keyview /= distxy_keyview;
+      dy_keyview /= distxy_keyview;
+      angle_keyview = 180.0*atan2(dy_keyview,dx_keyview)/PI;
+
+      az_scene = angle_keyview + az_path;
+      if(az_scene>180.0)az_scene = 360.0 - az_scene;
+      if(az_scene<-180.0)az_scene += 360.0;
+      elev_scene = elev_path;
+      
+      aview[0]=cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      aview[1]=sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      aview[2]=sin(elev_scene*PI/180.0);
+
+      kf->az_scene=az_scene;
+      kf->nodeval.elev_scene=elev_scene;
+      break;
+    case 2: // absolute view angles known (azimuth, elevation, relative to scene)
+      az_scene = kf->az_scene;
+      elev_scene = kf->nodeval.elev_scene;
+
+      dx_aview = cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      dy_aview = sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      dz_aview = sin(elev_scene*PI/180.0);
+      distxy_aview = sqrt(dx_aview*dx_aview+dy_aview*dy_aview);
+      if(distxy_aview<=0.0)return;
+      dx_aview /= distxy_aview;
+      dy_aview /= distxy_aview;
+      dz_aview /= distxy_aview;
+
+      aview[0]=eye[0]+dx_aview;
+      aview[1]=eye[1]+dy_aview;
+      aview[2]=eye[2]+dz_aview;
+
+      dx_keyview = kf->keyview_x;
+      dy_keyview = kf->keyview_y;
+      distxy_keyview = sqrt(dx_keyview*dx_keyview+dy_keyview*dy_keyview);
+      if(distxy_keyview<=0.0)return;
+      dx_keyview /= distxy_keyview;
+      dy_keyview /= distxy_keyview;
+
+      angle_aview = 180.0*atan2(dy_aview,dx_aview)/PI;
+      angle_keyview = 180.0*atan2(dy_keyview,dx_keyview)/PI;
+      az_path = angle_aview - angle_keyview;
+      if(az_path>180.0)az_path = 360.0 - az_path;
+      if(az_path<-180.0)az_path += 360.0;
+      elev_path = elev_scene;
+
+      kf->nodeval.elev_path=elev_path;
+      kf->az_path=az_path;
+
+      break;
+  }
+}
+#else
 void adjustviewangle(keyframe *kf, float *az_path, float *elev_path){
   float dx, dy, dz;
   float dx2, dy2;
@@ -1365,14 +1478,10 @@ void adjustviewangle(keyframe *kf, float *az_path, float *elev_path){
   kf->nodeval.elev_path=elev;
   kf->az_path=az;
   kf->az_path=az;
-#ifdef pp_TOUR
-  //*** fix this
-  kf->az_scene=999.0;
-  kf->nodeval.elev_scene=999.0;
-#endif
   *az_path=az;
   *elev_path = elev;
 }
+#endif
 
 /* ------------------ adjusttourtimes ------------------------ */
 
