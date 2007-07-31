@@ -648,10 +648,16 @@ void TOUR_CB(int var){
       aview[1]=(tour_viewy-ybar0)/xyzmaxdiff;
       aview[2]=(tour_viewz-zbar0)/xyzmaxdiff;
 
+#ifdef pp_TOUR
+      setviewcontrols();
+//      adjustviewangle(selected_frame,viewtype);
+//      SPINNER_az_path->set_float_val(tour_az_path);
+//      SPINNER_elev_path->set_float_val(tour_elev_path);
+#else
       adjustviewangle(selected_frame,&tour_az_path,&tour_elev_path);
-
       SPINNER_az_path->set_float_val(tour_az_path);
       SPINNER_elev_path->set_float_val(tour_elev_path);
+#endif
 
       createtourpaths();
       selected_frame->selected=1;
@@ -696,10 +702,6 @@ void TOUR_CB(int var){
       }
       selected_frame->az_path=tour_az_path;
       selected_frame->nodeval.elev_path=tour_elev_path;
-#ifdef pp_TOUR
-      selected_frame->az_scene=tour_az_scene;
-      selected_frame->nodeval.elev_scene=tour_elev_scene;
-#endif
       selected_frame->tension=tour_tension;
       selected_frame->bias=tour_bias;
       selected_frame->continuity=tour_continuity;
@@ -713,6 +715,11 @@ void TOUR_CB(int var){
       if(viewtype==1){
         TOUR_CB(KEYFRAME_viewXYZ);
       }
+#ifdef pp_TOUR
+      setviewcontrols();
+//      selected_frame->az_scene=tour_az_scene;
+//      selected_frame->nodeval.elev_scene=tour_elev_scene;
+#endif
     }
     break;
   case GLOBAL_TENSIONFLAG:
@@ -1032,9 +1039,10 @@ void TOUR_CB(int var){
 void setviewcontrols(void){
   float dummy;
 
-  CHECKBOXview1->set_int_val(viewtype1);
-  CHECKBOXview2->set_int_val(viewtype2);
-  CHECKBOXview3->set_int_val(viewtype3);
+  if(viewtype1!=CHECKBOXview1->get_int_val())CHECKBOXview1->set_int_val(viewtype1);
+  if(viewtype2!=CHECKBOXview2->get_int_val())CHECKBOXview2->set_int_val(viewtype2);
+  if(viewtype3!=CHECKBOXview3->get_int_val())CHECKBOXview3->set_int_val(viewtype3);
+
   if(viewtype1==1)viewtype=1;
   if(viewtype2==1)viewtype=0;
   if(viewtype3==1)viewtype=2;
@@ -1048,17 +1056,27 @@ void setviewcontrols(void){
       panel_view1->open();
       panel_view2->close();
       panel_view3->close();
-      if(selected_frame!=NULL){
-        adjustviewangle(selected_frame,&dummy,&dummy);
-        SPINNER_az_path->set_float_val(tour_az_path);
-        SPINNER_elev_path->set_float_val(tour_elev_path);
-      }
       break;
     case 2:
       panel_view1->close();
       panel_view2->close();
       panel_view3->open();
       break;
+  }
+  if(selected_frame!=NULL){
+    keyframe *sf;
+
+    sf=selected_frame;
+    adjustviewangle(sf,viewtype);
+    SPINNER_az_path->set_float_val(sf->az_path);
+    SPINNER_elev_path->set_float_val(sf->nodeval.elev_path);
+
+    SPINNER_az_scene->set_float_val(sf->az_scene);
+    SPINNER_elev_scene->set_float_val(sf->nodeval.elev_scene);
+
+    SPINNER_viewx->set_float_val(sf->nodeval.aview[0]);
+    SPINNER_viewy->set_float_val(sf->nodeval.aview[1]);
+    SPINNER_viewz->set_float_val(sf->nodeval.aview[2]);
   }
 }
 #endif
