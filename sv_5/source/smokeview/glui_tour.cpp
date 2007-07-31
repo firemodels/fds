@@ -15,12 +15,12 @@
 #include "smokeheaders.h"
 
 static int viewtype=0;
-static float tour_x=0.0, tour_y=0.0, tour_z=0.0, tour_ttt, tour_azimuth=0.0, tour_tension=0.0;
+static float tour_x=0.0, tour_y=0.0, tour_z=0.0, tour_ttt, tour_az_path=0.0, tour_tension=0.0;
 #ifdef pp_TOUR
-static float tour_azimuth2=0.0,tour_elevation2=0.0;
+static float tour_az_scene=0.0,tour_elev_scene=0.0;
 static int viewtype1=0,viewtype2=1, viewtype3=0;
 #endif
-static float tour_viewx=0.0, tour_viewy=0.0, tour_viewz=0.0, tour_elevation=0.0;
+static float tour_viewx=0.0, tour_viewy=0.0, tour_viewz=0.0, tour_elev_path=0.0;
 static int tour_hide=0;
 static int tour_global_tension_flag=1;
 static float tour_global_tension=0.0;
@@ -34,10 +34,10 @@ void setviewcontrols(void);
 
 GLUI_Spinner *SPINNER_t=NULL,*SPINNER_x=NULL, *SPINNER_y=NULL,*SPINNER_z=NULL;
 GLUI_Spinner *SPINNER_viewx=NULL, *SPINNER_viewy=NULL,*SPINNER_viewz=NULL;
-GLUI_Spinner *SPINNER_azimuth=NULL;
+GLUI_Spinner *SPINNER_az_path=NULL;
 #ifdef pp_TOUR
-GLUI_Spinner *SPINNER_azimuth2=NULL;
-GLUI_Spinner *SPINNER_elevation2=NULL;
+GLUI_Spinner *SPINNER_az_scene=NULL;
+GLUI_Spinner *SPINNER_elev_scene=NULL;
 #endif
 
 GLUI *glui_advancedtour=NULL, *glui_tour=NULL;
@@ -72,7 +72,7 @@ GLUI_Spinner *SPINNER_tourtension=NULL;
 GLUI_Spinner *SPINNER_tourbias=NULL;
 GLUI_Spinner *SPINNER_tourcontinuity=NULL;
 //GLUI_Spinner *SPINNER_tourzoom=NULL;
-GLUI_Spinner *SPINNER_elevation=NULL;
+GLUI_Spinner *SPINNER_elev_path=NULL;
 GLUI_Button *BUTTON_settings=NULL,*BUTTONnext_tour=NULL,*BUTTONprev_tour=NULL;
 GLUI_EditText *EDITlabel=NULL;
 GLUI_Listbox *LISTBOX_tour=NULL;
@@ -194,20 +194,20 @@ extern "C" void glui_tour_setup(int main_window){
   SPINNER_viewz=glui_tour->add_spinner_to_panel(panel_view1,"Z",GLUI_SPINNER_FLOAT,&tour_viewz,KEYFRAME_viewXYZ,TOUR_CB);
 
   panel_view2 = glui_tour->add_rollout_to_panel(panel_movedir,"Path relative",false);
-  SPINNER_azimuth=glui_tour->add_spinner_to_panel(panel_view2,"Azimuth:",GLUI_SPINNER_FLOAT,&tour_azimuth,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_elevation=glui_tour->add_spinner_to_panel(panel_view2,"Elevation:",GLUI_SPINNER_FLOAT,&tour_elevation,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_elevation->set_float_limits(-90.0,90.0);
+  SPINNER_az_path=glui_tour->add_spinner_to_panel(panel_view2,"Azimuth:",GLUI_SPINNER_FLOAT,&tour_az_path,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_elev_path=glui_tour->add_spinner_to_panel(panel_view2,"Elevation:",GLUI_SPINNER_FLOAT,&tour_elev_path,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_elev_path->set_float_limits(-90.0,90.0);
 
   panel_view3 = glui_tour->add_rollout_to_panel(panel_movedir,"Scene relative",false);
-  SPINNER_azimuth2=glui_tour->add_spinner_to_panel(panel_view3,"Azimuth:",GLUI_SPINNER_FLOAT,&tour_azimuth2,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_elevation2=glui_tour->add_spinner_to_panel(panel_view3,"Elevation:",GLUI_SPINNER_FLOAT,&tour_elevation2,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_az_scene=glui_tour->add_spinner_to_panel(panel_view3,"Azimuth:",GLUI_SPINNER_FLOAT,&tour_az_scene,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_elev_scene=glui_tour->add_spinner_to_panel(panel_view3,"Elevation:",GLUI_SPINNER_FLOAT,&tour_elev_scene,KEYFRAME_tXYZ,TOUR_CB);
 #else
   SPINNER_viewx=glui_tour->add_spinner_to_panel(panel_movedir,"X",GLUI_SPINNER_FLOAT,&tour_viewx,KEYFRAME_viewXYZ,TOUR_CB);
   SPINNER_viewy=glui_tour->add_spinner_to_panel(panel_movedir,"Y",GLUI_SPINNER_FLOAT,&tour_viewy,KEYFRAME_viewXYZ,TOUR_CB);
   SPINNER_viewz=glui_tour->add_spinner_to_panel(panel_movedir,"Z",GLUI_SPINNER_FLOAT,&tour_viewz,KEYFRAME_viewXYZ,TOUR_CB);
-  SPINNER_azimuth=glui_tour->add_spinner_to_panel(panel_movedir,"Azimuth:",GLUI_SPINNER_FLOAT,&tour_azimuth,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_elevation=glui_tour->add_spinner_to_panel(panel_movedir,"Elevation:",GLUI_SPINNER_FLOAT,&tour_elevation,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_elevation->set_float_limits(-90.0,90.0);
+  SPINNER_az_path=glui_tour->add_spinner_to_panel(panel_movedir,"Azimuth:",GLUI_SPINNER_FLOAT,&tour_az_path,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_elev_path=glui_tour->add_spinner_to_panel(panel_movedir,"Elevation:",GLUI_SPINNER_FLOAT,&tour_elev_path,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_elev_path->set_float_limits(-90.0,90.0);
 #endif
 
   
@@ -268,7 +268,7 @@ extern "C" void glui_advancedtour_setup(int main_window){
   TOUR_CB(VIEW1);
   TOUR_CB(GLOBAL_TENSIONFLAG);
 
-  SPINNER_azimuth->set_float_limits(-180.0,180.0);
+  SPINNER_az_path->set_float_limits(-180.0,180.0);
   
   glui_advancedtour->add_button("Close",ADVANCEDTOUR_CLOSE,TOUR_CB);
 
@@ -311,6 +311,7 @@ extern "C" void show_glui_advancedtour(void){
 }
 
 /* ------------------ trim_val ------------------------ */
+
 extern "C" float trim_val(float val){
   if(val<0.000001&&val>-0.000001){
     return 0.0;
@@ -319,6 +320,8 @@ extern "C" float trim_val(float val){
     return val;
   }
 }
+
+/* ------------------ set_glui_keyframe ------------------------ */
 
 extern "C" void set_glui_keyframe(){
   tourdata *ti;
@@ -342,10 +345,10 @@ extern "C" void set_glui_keyframe(){
   tour_viewx = trim_val(xbar0 + xyzmaxdiff*aview[0]);
   tour_viewy = trim_val(ybar0 + xyzmaxdiff*aview[1]);
   tour_viewz = trim_val(zbar0 + xyzmaxdiff*aview[2]);
-  tour_azimuth = selected_frame->azimuth;
+  tour_az_path = selected_frame->az_path;
 #ifdef pp_TOUR
-  tour_azimuth2 = selected_frame->azimuth2;
-  tour_elevation2 = selected_frame->nodeval.elevation2;
+  tour_az_scene = selected_frame->az_scene;
+  tour_elev_scene = selected_frame->nodeval.elev_scene;
 #endif
   tour_continuity=selected_frame->continuity;
   tour_bias=selected_frame->bias;
@@ -359,7 +362,7 @@ extern "C" void set_glui_keyframe(){
 #endif
   tour_tension=selected_frame->tension;
   tour_zoom=selected_frame->nodeval.zoom;
-  tour_elevation=selected_frame->nodeval.elevation;
+  tour_elev_path=selected_frame->nodeval.elev_path;
  
   tour_global_tension_flag=selected_tour->global_tension_flag;
   tour_global_tension=selected_tour->global_tension;
@@ -399,7 +402,6 @@ extern "C" void set_glui_keyframe(){
   SPINNER_x->set_float_val(tour_x);
   SPINNER_y->set_float_val(tour_y);
   SPINNER_z->set_float_val(tour_z);
-  SPINNER_azimuth->set_float_val(tour_azimuth);
   if(SPINNER_tourbias!=NULL)SPINNER_tourbias->set_float_val(tour_bias);
   if(SPINNER_tourcontinuity!=NULL)SPINNER_tourcontinuity->set_float_val(tour_continuity);
   SPINNER_tourtension->set_float_val(tour_tension);
@@ -407,7 +409,12 @@ extern "C" void set_glui_keyframe(){
   SPINNER_viewx->set_float_val(tour_viewx);
   SPINNER_viewy->set_float_val(tour_viewy);
   SPINNER_viewz->set_float_val(tour_viewz);
-  SPINNER_elevation->set_float_val(tour_elevation);
+  SPINNER_az_path->set_float_val(tour_az_path);
+  SPINNER_elev_path->set_float_val(tour_elev_path);
+#ifdef pp_TOUR
+  SPINNER_az_scene->set_float_val(tour_az_scene);
+  SPINNER_elev_scene->set_float_val(tour_elev_scene);
+#endif
   if(ti!=NULL&&CHECKBOXtourhide!=NULL)CHECKBOXtourhide->set_int_val(tour_hide);
   EDITlabel->set_text(tour_label);
 
@@ -416,15 +423,15 @@ extern "C" void set_glui_keyframe(){
     setviewcontrols();
 #else
     if(viewtype==1){
-      SPINNER_azimuth->disable();
-      SPINNER_elevation->disable();
+      SPINNER_az_path->disable();
+      SPINNER_elev_path->disable();
       SPINNER_viewx->enable();
       SPINNER_viewy->enable();
       SPINNER_viewz->enable();
     }
     else{
-      SPINNER_azimuth->enable();
-      SPINNER_elevation->enable();
+      SPINNER_az_path->enable();
+      SPINNER_elev_path->enable();
       SPINNER_viewx->disable();
       SPINNER_viewy->disable();
       SPINNER_viewz->disable();
@@ -457,10 +464,10 @@ void TOUR_CB(int var){
 
   float key_xyz[3];
   float key_params[3];
-  float key_time_in, key_azimuth, key_view[3], key_zoom;
-  float key_elevation, key_bank;
+  float key_time_in, key_az_path, key_view[3], key_zoom;
+  float key_elev_path, key_bank;
 #ifdef pp_TOUR
-  float key_azimuth2, key_elevation2;
+  float key_az_scene, key_elev_scene;
 #endif
 
   if(ntours==0&&var!=TOUR_INSERT&&var!=TOUR_CLOSE&&var!=SAVE_SETTINGS){
@@ -559,20 +566,20 @@ void TOUR_CB(int var){
     setviewcontrols();
 #else
     if(viewtype==1){
-      SPINNER_azimuth->disable();
-      SPINNER_elevation->disable();
+      SPINNER_az_path->disable();
+      SPINNER_elev_path->disable();
       SPINNER_viewx->enable();
       SPINNER_viewy->enable();
       SPINNER_viewz->enable();
       if(selected_frame!=NULL){
         adjustviewangle(selected_frame,&dummy,&dummy);
-        SPINNER_azimuth->set_float_val(tour_azimuth);
-        SPINNER_elevation->set_float_val(tour_elevation);
+        SPINNER_az_path->set_float_val(tour_az_path);
+        SPINNER_elev_path->set_float_val(tour_elev_path);
       }
     }
     else if(viewtype==0){
-      SPINNER_azimuth->enable();
-      SPINNER_elevation->enable();
+      SPINNER_az_path->enable();
+      SPINNER_elev_path->enable();
       SPINNER_viewx->disable();
       SPINNER_viewy->disable();
       SPINNER_viewz->disable();
@@ -641,10 +648,10 @@ void TOUR_CB(int var){
       aview[1]=(tour_viewy-ybar0)/xyzmaxdiff;
       aview[2]=(tour_viewz-zbar0)/xyzmaxdiff;
 
-      adjustviewangle(selected_frame,&tour_azimuth,&tour_elevation);
+      adjustviewangle(selected_frame,&tour_az_path,&tour_elev_path);
 
-      SPINNER_azimuth->set_float_val(tour_azimuth);
-      SPINNER_elevation->set_float_val(tour_elevation);
+      SPINNER_az_path->set_float_val(tour_az_path);
+      SPINNER_elev_path->set_float_val(tour_elev_path);
 
       createtourpaths();
       selected_frame->selected=1;
@@ -685,13 +692,13 @@ void TOUR_CB(int var){
       eye[1]=(tour_y-ybar0)/xyzmaxdiff;
       eye[2]=(tour_z-zbar0)/xyzmaxdiff;
       if(viewtype==0){
-        tour_azimuth = SPINNER_azimuth->get_float_val();
+        tour_az_path = SPINNER_az_path->get_float_val();
       }
-      selected_frame->azimuth=tour_azimuth;
-      selected_frame->nodeval.elevation=tour_elevation;
+      selected_frame->az_path=tour_az_path;
+      selected_frame->nodeval.elev_path=tour_elev_path;
 #ifdef pp_TOUR
-      selected_frame->azimuth2=tour_azimuth2;
-      selected_frame->nodeval.elevation2=tour_elevation2;
+      selected_frame->az_scene=tour_az_scene;
+      selected_frame->nodeval.elev_scene=tour_elev_scene;
 #endif
       selected_frame->tension=tour_tension;
       selected_frame->bias=tour_bias;
@@ -819,21 +826,21 @@ void TOUR_CB(int var){
       key_xyz[0]=xbar0 + xyzmaxdiff*xyz[0];
       key_xyz[1]=ybar0 + xyzmaxdiff*xyz[1];
       key_xyz[2]=zbar0 + xyzmaxdiff*xyz[2];
-      key_azimuth2 = angles[0];
-      key_elevation2=angles[1];
+      key_az_scene = angles[0];
+      key_elev_scene=angles[1];
       key_time_in = time0;
       viewtype=0;
       printf(" tour time=%f xyz=%f %f %f angles=%f %f\n",key_time_in,key_xyz[0],key_xyz[1],key_xyz[2],
-        key_azimuth2,key_elevation2);
+        key_az_scene,key_elev_scene);
     }
     else{
       key_xyz[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.eye[0]+nextkey->nodeval.eye[0])/2.0;
       key_xyz[1]=ybar0 + xyzmaxdiff*(thiskey->nodeval.eye[1]+nextkey->nodeval.eye[1])/2.0;
       key_xyz[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.eye[2]+nextkey->nodeval.eye[2])/2.0;
-      key_azimuth = (thiskey->azimuth+nextkey->azimuth)/2.0;
-      key_elevation=(thiskey->nodeval.elevation+nextkey->nodeval.elevation)/2.0;
-      key_azimuth2 = (thiskey->azimuth2+nextkey->azimuth2)/2.0;
-      key_elevation2=(thiskey->nodeval.elevation2+nextkey->nodeval.elevation2)/2.0;
+      key_az_path = (thiskey->az_path+nextkey->az_path)/2.0;
+      key_elev_path=(thiskey->nodeval.elev_path+nextkey->nodeval.elev_path)/2.0;
+      key_az_scene = (thiskey->az_scene+nextkey->az_scene)/2.0;
+      key_elev_scene=(thiskey->nodeval.elev_scene+nextkey->nodeval.elev_scene)/2.0;
       key_time_in = (thiskey->noncon_time+nextkey->noncon_time)/2.0;
     }
 
@@ -847,7 +854,7 @@ void TOUR_CB(int var){
     key_bank = (thiskey->bank + nextkey->bank)/2.0;
     viewtype=thiskey->viewtype;
 
-    newframe=add_frame(selected_frame,key_time_in,key_xyz,key_azimuth,key_azimuth2,key_elevation,key_elevation2,key_bank,
+    newframe=add_frame(selected_frame,key_time_in,key_xyz,key_az_path,key_az_scene,key_elev_path,key_elev_scene,key_bank,
     key_params,viewtype,key_zoom,key_view);
     createtourpaths();
     new_select(newframe);
@@ -865,8 +872,8 @@ void TOUR_CB(int var){
         key_xyz[0]=xbar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[0]-lastkey->nodeval.eye[0]);
         key_xyz[1]=ybar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[1]-lastkey->nodeval.eye[1]);
         key_xyz[2]=zbar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[2]-lastkey->nodeval.eye[2]);
-        key_azimuth = (2*thiskey->azimuth-lastkey->azimuth);
-        key_elevation=(2*thiskey->nodeval.elevation-lastkey->nodeval.elevation);
+        key_az_path = (2*thiskey->az_path-lastkey->az_path);
+        key_elev_path=(2*thiskey->nodeval.elev_path-lastkey->nodeval.elev_path);
         key_time_in = thiskey->noncon_time;
         thiskey->noncon_time=(thiskey->noncon_time+lastkey->noncon_time)/2.0;
         key_params[0]=(2*thiskey->bias-lastkey->bias);
@@ -883,8 +890,8 @@ void TOUR_CB(int var){
         key_xyz[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.eye[0]+nextkey->nodeval.eye[0])/2.0;
         key_xyz[1]=ybar0 + xyzmaxdiff*(thiskey->nodeval.eye[1]+nextkey->nodeval.eye[1])/2.0;
         key_xyz[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.eye[2]+nextkey->nodeval.eye[2])/2.0;
-        key_azimuth = (thiskey->azimuth+nextkey->azimuth)/2.0;
-        key_elevation=(thiskey->nodeval.elevation+nextkey->nodeval.elevation)/2.0;
+        key_az_path = (thiskey->az_path+nextkey->az_path)/2.0;
+        key_elev_path=(thiskey->nodeval.elev_path+nextkey->nodeval.elev_path)/2.0;
         key_time_in = (thiskey->noncon_time+nextkey->noncon_time)/2.0;
         key_params[0]=(thiskey->bias+nextkey->bias)/2.0;
         key_params[1]=(thiskey->continuity+nextkey->continuity)/2.0;
@@ -903,17 +910,17 @@ void TOUR_CB(int var){
             key_view[0]=xbar0 + xyzmaxdiff*thiskey->nodeval.aview[0];
             key_view[1]=ybar0 + xyzmaxdiff*thiskey->nodeval.aview[1];
             key_view[2]=zbar0 + xyzmaxdiff*thiskey->nodeval.aview[2];
-            key_elevation = thiskey->nodeval.elevation;
+            key_elev_path = thiskey->nodeval.elev_path;
           }
           if(thiskey->viewtype==0&&nextkey->viewtype==1){
             key_view[0]=xbar0 + xyzmaxdiff*nextkey->nodeval.aview[0];
             key_view[1]=ybar0 + xyzmaxdiff*nextkey->nodeval.aview[1];
             key_view[2]=zbar0 + xyzmaxdiff*nextkey->nodeval.aview[2];
-            key_elevation = nextkey->nodeval.elevation;
+            key_elev_path = nextkey->nodeval.elev_path;
           }
         }
       }
-      newframe=add_frame(selected_frame,key_time_in,key_xyz,key_azimuth,key_elevation,key_bank,
+      newframe=add_frame(selected_frame,key_time_in,key_xyz,key_az_path,key_elev_path,key_bank,
       key_params,viewtype,key_zoom,key_view);
       createtourpaths();
       new_select(newframe);
@@ -1043,8 +1050,8 @@ void setviewcontrols(void){
       panel_view3->close();
       if(selected_frame!=NULL){
         adjustviewangle(selected_frame,&dummy,&dummy);
-        SPINNER_azimuth->set_float_val(tour_azimuth);
-        SPINNER_elevation->set_float_val(tour_elevation);
+        SPINNER_az_path->set_float_val(tour_az_path);
+        SPINNER_elev_path->set_float_val(tour_elev_path);
       }
       break;
     case 2:
