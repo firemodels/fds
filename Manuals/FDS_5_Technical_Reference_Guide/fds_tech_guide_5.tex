@@ -2531,20 +2531,21 @@ Over the course of a time step of the gas phase solver, the droplets in a
 given grid cell evaporate as a function of
 the liquid equilibrium vapor mass fraction, $Y_l$,
 the local gas phase vapor mass fraction, $Y_g$, the (assumed uniform) liquid temperature, $T_l$,
-and the local gas temperature, $T_g$.
+and the local gas temperature, $T_g$. If the droplet is attached to a surface, $T_s$ is the solid temperature.
 The mass and energy transfer between the gas and the liquid can be described by the
 following set of equations~\cite{Cheremisinoff:1}
 \begin{eqnarray}
-\frac{dm_l}{dt}               & = & - A_l \; h_m \, \rho \, (Y_l - Y_g) \\ [0.1in]
-m_l \; c_l \; \frac{dT_l}{dt} & = &   A_l \, h   \, (T_g-T_l) + \dq_r + \frac{dm_l}{dt} \; h_v  \end{eqnarray}
-Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_l$ is the surface area of the liquid droplet (or that fraction of the
-film exposed to the gas), $h_m$ is the mass transfer coefficient to be discussed below,
-$\rho$ is the gas density, $c_l$ is the liquid specific heat, $h$ is the heat transfer coefficient, $\dq_r$ is the rate of radiative heating of the droplet, and $h_v$ is the latent heat of vaporization of the
+\frac{dm_l}{dt}               & = & - A \; h_m \, \rho \, (Y_l - Y_g) \\ [0.1in]
+m_l \; c_l \; \frac{dT_l}{dt} & = &   A \, h  \, (T_g-T_l) + A \, h_s \, (T_s-T_l) + \dq_r + \frac{dm_l}{dt} \; h_v  \label{droplet_temp}   \end{eqnarray}
+Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the
+film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
+$\rho$ is the gas density, $c_l$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_s$ is the heat transfer coefficient between the liquid and the
+solid surface, $\dq_r$ is the rate of radiative heating of the droplet, and $h_v$ is the latent heat of vaporization of the
 liquid. The vapor mass fraction of the gas, $Y_g$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction
 is obtained from the Clausius-Clapeyron equation
 \be X_l = \exp \left[ \frac{h_v \, W_l}{\cal R}
       \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]  \quad ; \quad
-      Y_l = \frac{X_l}{X_l \, (1-W_a/W_l) + W_a/W_l}  \ee
+      Y_l = \frac{X_l}{X_l \, (1-W_a/W_l) + W_a/W_l}  \label{clausius_clapeyron} \ee
 where $X_d$ is the equilibrium vapor {\em volume} fraction, $W_l$ is the molecular weight
 of the evaporated liquid, $W_a$ is the molecular weight of air,
 $\cal R$ is the universal gas constant, and $T_b$ is the boiling temperature
@@ -3810,6 +3811,31 @@ an averaged value, it is multiplied by $C_s(r,\la)$. It is therefore
 $|S_1|^2+|S_2|^2$, not $P_0(\theta_d)$, that is integrated. Physically,
 this means that intensities are added, not
 probabilities~\cite{Wiscombe}.
+
+
+\subsection{Heating and Evaporation of Liquid Droplets}
+
+The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet. After the temperature of each droplet is computed, the
+appropriate amount of vaporized liquid is added to the given mesh cell, and the cell gas temperature is reduced slightly based on the energy lost to the droplet.
+
+Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows. Note that a few terms have been left out to make the algorithm more clear.
+\be
+   \frac{T_l^{n+1}-T_l^n}{\dt} = \frac{1}{m_l \, c_l} \left[ A \, h \, \left( T_g-\frac{T_l^{n+1}+T_l^n}{2} \right) - A \, h_m \, \rho \left( \frac{Y_l^{n+1}+Y_l^n}{2} - Y_g \right) h_v  \right]
+\ee
+The equilibrium vapor mass fraction, $Y_l^n$, is a function of $T_l^n$ via Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
+\be
+   Y_l^{n+1} \approx Y_l^n + \left( \frac{dY_l}{dT_l} \right)^n \; \Big( T_l^{n+1}-T_l^n \Big)
+\ee
+where the derivative of $Y_l$ with respect to temperature is obtained via the chain rule:
+\be
+   \frac{dY_l}{dT_l} = \frac{dY_l}{dX_l} \, \frac{dX_l}{dT_l}  = \frac{W_a/W_l}{ (X_l (1-W_a/W_l) + W_a/W_l)^2 } \;
+     \frac{h_v W_l}{{\cal R} \, T_l^2} \, \exp \left[ \frac{h_v \, W_l}{\cal R} \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]
+\ee
+The amount of evaporated liquid is given by
+\be
+   \delta m_l = \dt \, A \, h_m \, \rho  \left[  Y_l^n + \ha \left( \frac{dY_l}{dT_l} \right)^n \; \Big( T_l^{n+1}-T_l^n \Big)  \right]
+\ee
+
 
 
 
