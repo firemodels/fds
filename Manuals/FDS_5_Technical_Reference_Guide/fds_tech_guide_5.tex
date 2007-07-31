@@ -122,7 +122,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: July 26, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: July 31, 2007)}
 
 \vspace{.5in}
 
@@ -2364,7 +2364,7 @@ a typical industrial-scale sprinkler. The median diameter $d_m$ is
 
 
 
-\subsection{Spray Dynamics}
+\subsection{Droplet Transport in the Gas Phase}
 
 Every droplet from a given sprinkler or nozzle is not tracked. Instead,
 a sampled set of the droplets is tracked.
@@ -2406,6 +2406,8 @@ The drag coefficient is a function of the local Reynolds number (based on drople
 \RE_D &=& \frac{\rho \, |\bu_d-\bu| \, 2 r_d}{\mu(T)} \end{eqnarray}
 where $\mu(T)$ is the dynamic viscosity of air at temperature $T$.
 
+
+
 \subsection{Droplet Transport on a Surface}
 
 When a liquid droplet hits a solid horizontal surface, it is assigned a
@@ -2415,59 +2417,9 @@ fixed velocity. This ``dripping'' velocity has been measured for water to be on
 the order of 0.5~m/s~\cite{Hamins:1,Hamins:IAFSS2002}. While attached to a surface, the ``droplet'' is assumed to form a thin film of liquid that transfers heat to the solid, and heat and mass to
 the gas. Details are included in the next section.
 
-\subsection{Mass and Energy Transfer from Droplets}
-
-Liquid ``droplets'' are represented either as discrete airborne spheres propelled through the gas, or as rectangular blocks that collectively form a thin liquid film on solid objects.
-These ``droplets'' are still individually tracked as
-lagrangian particles, but the heat and mass transfer coefficients are different. In the discussion to follow, the term ``droplets'' will be used to describe either form.
-
-Over the course of a time step of the gas phase solver, the droplets in a
-given grid cell evaporate as a function of
-the liquid equilibrium vapor mass fraction, $Y_l$,
-the local gas phase vapor mass fraction, $Y_g$, the (assumed uniform) liquid temperature, $T_l$,
-and the local gas temperature, $T_g$.
-The mass and energy transfer between the gas and the liquid can be described by the
-following set of equations~\cite{Cheremisinoff:1}
-\begin{eqnarray}
-\frac{dm_l}{dt}               & = & - A_l \; h_m \, \rho \, (Y_l - Y_g) \\ [0.1in]
-m_l \; c_l \; \frac{dT_l}{dt} & = &   A_l \, h   \, (T_g-T_l) + \frac{dm_l}{dt} \; h_v  \end{eqnarray}
-Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_l$ is the surface area of the liquid droplet (or that fraction of the
-film exposed to the gas), $h_m$ is the mass transfer coefficient to be discussed below,
-$\rho$ is the gas density, $c_l$ is the liquid specific heat, $h$ is the heat transfer coefficient, and $h_v$ is the latent heat of vaporization.
-The vapor mass fraction of the gas, $Y_g$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction
-is obtained from the Clausius-Clapeyron equation
-\be X_l = \exp \left[ \frac{h_v \, W_l}{\cal R}
-      \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]  \quad ; \quad
-      Y_l = \frac{X_l}{X_l \, (1-W_a/W_l) + W_a/W_l}  \ee
-where $X_d$ is the equilibrium vapor {\em volume} fraction, $W_l$ is the molecular weight
-of the evaporated liquid, $W_a$ is the molecular weight of air,
-$\cal R$ is the universal gas constant, and $T_b$ is the boiling temperature
-of the liquid.
-
-Mass and heat transfer between liquid and gas are described with analogous empirical correlations.
-The mass transfer coefficient, $h_m$, is described by the empirical relationships~\cite{Incropera:1}:
-\be
-   h_m = \frac{\SH \; D_{lg}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
-                                                                                 0.037 \;   \RE_L^{\frac{4}{5}} \; \SC^\ot & \hbox{film}     \end{array} \right.
-\ee
-$\SH$ is the Sherwood number, $D_{lg}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or
-1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity),
-$\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number
-($\nu/D_{lg}$, assumed 0.6 for all cases).
-
-An analogous relationship exists for the heat transfer coefficient:
-\be
-   h  = \frac{\NU \; k}{L} \quad ; \quad \NU = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \; \PR^\ot           & \hbox{droplet} \\ [0.1in]
-                                                                         0.037 \;   \RE_L^{\frac{4}{5}} \; \PR^\ot & \hbox{film}     \end{array} \right.
-\ee
-$\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\PR$ is the Prandtl number (assumed 0.7 for all cases).
 
 
-
-
-
-
-\subsection{Interaction of Droplets and Radiation}
+\subsection{Absorption and Scattering of Thermal Radiation by Droplets}
 
 The attenuation of thermal radiation by liquid droplets is an
 important consideration, especially
@@ -2566,6 +2518,62 @@ mean diameter only, are saved in one-dimensional arrays.
 During the simulation, the local properties are
 calculated as a table look-up using the local mean droplet diameter~\cite{Hale:1}.
 Details of the computation are given in Section~\ref{dropnumericalmethod}.
+
+
+
+\subsection{Heating and Evaporation of Liquid Droplets}
+
+Liquid ``droplets'' are represented either as discrete airborne spheres propelled through the gas, or as rectangular blocks that collectively form a thin liquid film on solid objects.
+These ``droplets'' are still individually tracked as
+lagrangian particles, but the heat and mass transfer coefficients are different. In the discussion to follow, the term ``droplets'' will be used to describe either form.
+
+Over the course of a time step of the gas phase solver, the droplets in a
+given grid cell evaporate as a function of
+the liquid equilibrium vapor mass fraction, $Y_l$,
+the local gas phase vapor mass fraction, $Y_g$, the (assumed uniform) liquid temperature, $T_l$,
+and the local gas temperature, $T_g$.
+The mass and energy transfer between the gas and the liquid can be described by the
+following set of equations~\cite{Cheremisinoff:1}
+\begin{eqnarray}
+\frac{dm_l}{dt}               & = & - A_l \; h_m \, \rho \, (Y_l - Y_g) \\ [0.1in]
+m_l \; c_l \; \frac{dT_l}{dt} & = &   A_l \, h   \, (T_g-T_l) + \dq_r + \frac{dm_l}{dt} \; h_v  \end{eqnarray}
+Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_l$ is the surface area of the liquid droplet (or that fraction of the
+film exposed to the gas), $h_m$ is the mass transfer coefficient to be discussed below,
+$\rho$ is the gas density, $c_l$ is the liquid specific heat, $h$ is the heat transfer coefficient, $\dq_r$ is the rate of radiative heating of the droplet, and $h_v$ is the latent heat of vaporization of the
+liquid. The vapor mass fraction of the gas, $Y_g$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction
+is obtained from the Clausius-Clapeyron equation
+\be X_l = \exp \left[ \frac{h_v \, W_l}{\cal R}
+      \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]  \quad ; \quad
+      Y_l = \frac{X_l}{X_l \, (1-W_a/W_l) + W_a/W_l}  \ee
+where $X_d$ is the equilibrium vapor {\em volume} fraction, $W_l$ is the molecular weight
+of the evaporated liquid, $W_a$ is the molecular weight of air,
+$\cal R$ is the universal gas constant, and $T_b$ is the boiling temperature
+of the liquid.
+
+Mass and heat transfer between liquid and gas are described with analogous empirical correlations.
+The mass transfer coefficient, $h_m$, is described by the empirical relationships~\cite{Incropera:1}:
+\be
+   h_m = \frac{\SH \; D_{lg}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
+                                                                                 0.037 \;   \RE_L^{\frac{4}{5}} \; \SC^\ot & \hbox{film}     \end{array} \right.
+\ee
+$\SH$ is the Sherwood number, $D_{lg}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or
+1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity),
+$\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number
+($\nu/D_{lg}$, assumed 0.6 for all cases).
+
+An analogous relationship exists for the heat transfer coefficient:
+\be
+   h  = \frac{\NU \; k}{L} \quad ; \quad \NU = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \; \PR^\ot           & \hbox{droplet} \\ [0.1in]
+                                                                         0.037 \;   \RE_L^{\frac{4}{5}} \; \PR^\ot & \hbox{film}     \end{array} \right.
+\ee
+$\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\PR$ is the Prandtl number (assumed 0.7 for all cases).
+
+
+
+
+
+
+
 
 \subsection{Fire Suppression by Water}
 
