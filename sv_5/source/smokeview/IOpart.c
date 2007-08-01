@@ -108,8 +108,8 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
   fseek(PART5FILE,4,SEEK_CUR);fread(&one,4,1,PART5FILE);fseek(PART5FILE,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
 
-  FORTPART5READ(&version,1);
-  FORTPART5READ(&nclasses,1);
+  FORTPART5READ(&version,1);if(returncode==0)goto wrapup;
+  FORTPART5READ(&nclasses,1);if(returncode==0)goto wrapup;
   NewMemory((void **)&numtypes,2*nclasses*sizeof(int));
   NewMemory((void **)&numpoints,nclasses*sizeof(int));
   numtypescopy=numtypes;
@@ -117,10 +117,12 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
   numtypes_temp[1]=0;
   for(i=0;i<nclasses;i++){
     FORTPART5READ(numtypes_temp,2);
+    if(returncode==0)goto wrapup;
     *numtypescopy++=numtypes_temp[0];
     *numtypescopy++=numtypes_temp[1];
     skip = 2*(numtypes_temp[0]+numtypes_temp[1])*(8 + 30);
-    fseek(PART5FILE,skip,SEEK_CUR);
+    returncode=fseek(PART5FILE,skip,SEEK_CUR);
+    if(returncode!=0)goto wrapup;
   }
 
   datacopy = parti->data5;
@@ -139,7 +141,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
 
     FORTPART5READ(&time,1);
     if(returncode==0)break;
-    printf("particle time=%f\n",time);
+    printf("particle time=%f",time);
     if(doit==1){
       parti->ptimes[count2]=time;
     }
@@ -149,8 +151,8 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
 
       partclassi = partclassinfo + i;
       FORTPART5READ(&nparts,1);
-      numpoints[i]=nparts;
       if(returncode==0)goto wrapup;
+      numpoints[i]=nparts;
       skip=0;
       if(doit==1){
         short *sx, *sy, *sz;
@@ -158,26 +160,30 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
         int j;
 
         FORTPART5READ(partclassi->xyz,3*nparts);
-        xyz = partclassi->xyz;
-        sx = datacopy->sx;
-        sy = datacopy->sy;
-        sz = datacopy->sz;
+        if(nparts>0){
+          if(returncode==0)goto wrapup;
+          xyz = partclassi->xyz;
+          sx = datacopy->sx;
+          sy = datacopy->sy;
+          sz = datacopy->sz;
 
-        for(j=0;j<nparts;j++){
-          float xx, yy, zz;
 
-          xx = (xyz[         j]-xbar0)/xyzmaxdiff;
-          xx /= xbar;
+          for(j=0;j<nparts;j++){
+            float xx, yy, zz;
 
-          yy = (xyz[  nparts+j]-ybar0)/xyzmaxdiff;
-          yy /= ybar;
+            xx = (xyz[         j]-xbar0)/xyzmaxdiff;
+            xx /= xbar;
 
-          zz = (xyz[2*nparts+j]-zbar0)/xyzmaxdiff;
-          zz /= zbar;
+            yy = (xyz[  nparts+j]-ybar0)/xyzmaxdiff;
+            yy /= ybar;
 
-          sx[j] = factor*xx;
-          sy[j] = factor*yy;
-          sz[j] = factor*zz;
+            zz = (xyz[2*nparts+j]-zbar0)/xyzmaxdiff;
+            zz /= zbar;
+
+            sx[j] = factor*xx;
+            sy[j] = factor*yy;
+            sz[j] = factor*zz;
+          }
         }
       }
       else{
@@ -191,12 +197,15 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
         sort_tags=datacopy->sort_tags;
         vis_part=datacopy->vis_part;
         FORTPART5READ(datacopy->tags,nparts);
-        for(j=0;j<nparts;j++){
-          sort_tags[2*j]=datacopy->tags[j];
-          sort_tags[2*j+1]=j;
-        }
-        qsort( sort_tags, (size_t)nparts, 2*sizeof(int), tagscompare );
+        if(nparts>0){
+          if(returncode==0)goto wrapup;
+          for(j=0;j<nparts;j++){
+            sort_tags[2*j]=datacopy->tags[j];
+            sort_tags[2*j+1]=j;
+          }
+          qsort( sort_tags, (size_t)nparts, 2*sizeof(int), tagscompare );
       //  update_partvis(first_frame,datacopy,nclasses);
+        }
       }
       else{
         skip = 4 + 4*nparts + 4;  // skip over tag for now
@@ -204,6 +213,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
       if(numtypes[2*i]>0){
         //skip += 4 + 4*nparts*numtypes[2*i] + 4;  // skip over vals for now
         FORTPART5READ(datacopy->rvals,nparts*numtypes[2*i]);
+        if(nparts!=0&&returncode==0)goto wrapup;
       }
       if(numtypes[2*i+1]>0){
         skip += 4 + 4*nparts*numtypes[2*i+1] + 4;
@@ -211,11 +221,14 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
 
       
       returncode=0;
-      if(skip>0)returncode=fseek(PART5FILE,skip,SEEK_CUR);
-      if(returncode!=0)goto wrapup;
+      if(skip>0){
+        returncode=fseek(PART5FILE,skip,SEEK_CUR);
+        if(returncode!=0)goto wrapup;
+      }
       datacopy++;
     }
     if(first_frame==1)first_frame=0;
+    printf(" completed\n");
 
   }
 wrapup:
@@ -496,7 +509,7 @@ int get_tagindex(part5data *data, int tagval){
 
 /* ------------------ setpart5sizefile ------------------------ */
 
-void setpart5sizefile(char *reg_file, char *size_file){
+void create_part5sizefile(char *reg_file, char *size_file){
   FILE *size_stream, *PART5FILE;
   int one;
   int endianswitch=0;
@@ -539,12 +552,12 @@ void setpart5sizefile(char *reg_file, char *size_file){
 
   for(;;){
     FORTPART5READ(&time,1);
-    sprintf(buffer_out,"%f ",time);
     if(returncode==0)break;
-    for(i=0;i<nclasses;i++){
+    sprintf(buffer_out,"%f ",time);
+     for(i=0;i<nclasses;i++){
       FORTPART5READ(&nparts,1);
-      numpoints[i]=nparts;
       if(returncode==0)goto wrapup;
+      numpoints[i]=nparts;
       skip = 4 + 4*nparts*3 + 4;
       skip += 4 + 4*nparts + 4;
       if(numtypes[2*i]>0)skip += 4 + 4*nparts*numtypes[2*i] + 4;
@@ -555,8 +568,14 @@ void setpart5sizefile(char *reg_file, char *size_file){
     }
 
     fprintf(size_stream,"%f\n",time);
+#ifdef _DEBUG
+    printf("%f\n",time);
+#endif
     for(i=0;i<nclasses;i++){
       fprintf(size_stream,"  %i\n",numpoints[i]);
+#ifdef _DEBUG
+      printf("  %i\n",numpoints[i]);
+#endif
     }
 //    fprintf(size_stream,"\n");
   }
@@ -593,7 +612,7 @@ void getpart5header(particle *parti, int partframestep){
   //                       2) base file is newer than the size file
   if(stat_sizefile!=0||
     stat_regfile_buffer.st_mtime>stat_sizefile_buffer.st_mtime){
-    setpart5sizefile(reg_file,size_file);
+    create_part5sizefile(reg_file,size_file);
   }
   
   stream=fopen(size_file,"r");
