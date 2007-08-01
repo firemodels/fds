@@ -1,4 +1,5 @@
 #include "options.h"
+#define pp_TOUR
 #include <string.h>
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -1048,19 +1049,19 @@ void setviewcontrols(void){
   if(viewtype3==1)viewtype=2;
   switch (viewtype){
     case 0:
-      panel_view1->close();
-      panel_view2->open();
-      panel_view3->close();
+//      panel_view1->close();
+      if(panel_view2->is_open==0)panel_view2->open();
+//      panel_view3->close();
       break;
     case 1:
-      panel_view1->open();
-      panel_view2->close();
-      panel_view3->close();
+      if(panel_view1->is_open==0)panel_view1->open();
+//      panel_view2->close();
+//      panel_view3->close();
       break;
     case 2:
-      panel_view1->close();
-      panel_view2->close();
-      panel_view3->open();
+//      panel_view1->close();
+//      panel_view2->close();
+      if(panel_view3->is_open==0)panel_view3->open();
       break;
   }
   if(selected_frame!=NULL){
