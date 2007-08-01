@@ -243,7 +243,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, July 26, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 1, 2007)}
 
 \vspace{.5in}
 
@@ -5623,8 +5623,23 @@ the mass flow out of a compartment, use {\ct 'MASS FLOW +'} or {\ct 'MASS FLOW -
 \label{info:wind}
 
 In the field of wind engineering, a commonly used quantity is known as the {\ct PRESSURE\_COEFFICIENT}:
-$$ C_p = \frac{p-p_\infty}{\ha \rho_\infty U^2} $$
-The parameter $U$ is the free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the {\ct PROP} line.
+\be
+   C_p = \frac{p-p_\infty}{\ha \rho_\infty U^2}
+\ee
+$p_\infty$ is the ambient, or ``free stream'' pressure, and $\rho_\infty$ is the ambient density.
+The parameter $U$ is the free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the {\ct PROP} line
+
+\footnotesize
+\begin{verbatim}
+&BNDF QUANTITY='PRESSURE_COEFFICIENT', PROP_ID='whatever' /
+&DEVC ID='pressure tap', XYZ=..., IOR=2, QUANTITY='PRESSURE_COEFFICIENT', PROP_ID='whatever' /
+&PROP ID='whatever', CHARACTERISTIC_VELOCITY=3.4 /
+\end{verbatim}
+\normalsize
+
+\noindent
+Thus, you can either paint values of $C_p$ at all surface points, or create a single time history of $C_p$ using a single device at a single point.
+
 
 
 
