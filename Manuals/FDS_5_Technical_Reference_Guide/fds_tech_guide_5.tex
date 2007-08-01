@@ -836,17 +836,22 @@ computer programs. The
 Technical Reference Guide provides the theory, algorithm details, and verification work. The Validation Guide is new with FDS~5.
 It describes validation studies of FDS, both those performed by NIST and by others.
 
-There are numerous sources that describe various parts of the model. The basic set of equations solved in
-FDS was formulated by Rehm and Baum in the {\em Journal of Research of the National Bureau of Standards}~\cite{Rehm:1}.
-The basic hydrodynamic algorithm evolved at NIST through the 1980s and 1990s, incorporating fairly well-known numerical
-schemes that are documented in books by
-Anderson, Tannehill and Pletcher~\cite{Anderson:1}, Peyret and Taylor~\cite{Peyret:1}, and
-Ferziger and Peri\'{c}~\cite{Ferziger:1}. This last book provides a good description of the large eddy
-simulation technique and provides references to many current publications on the subject.
-Numerical techniques appropriate for combustion systems are described by Oran and Boris~\cite{Oran:1}.
-The mixture fraction combustion model is described in a review article by Bilger~\cite{Bilger:AnnRev}. Basic heat transfer
-theory is provided by Holman~\cite{Holman:1} and Incropera~\cite{Incropera:1}. Thermal radiation is
-described in Siegel and Howell~\cite{Siegel:1}.
+There are numerous sources that describe various parts of the
+model. The basic set of equations solved in FDS was formulated by Rehm
+and Baum in the {\em Journal of Research of the National Bureau of
+Standards}~\cite{Rehm:1}.  The basic hydrodynamic algorithm evolved at
+NIST through the 1980s and 1990s, incorporating fairly well-known
+numerical schemes that are documented in books by Anderson, Tannehill
+and Pletcher~\cite{Anderson:1}, Peyret and Taylor~\cite{Peyret:1}, and
+Ferziger and Peri\'{c}~\cite{Ferziger:1}. This last book provides a
+good description of the large eddy simulation technique and provides
+references to many current publications on the subject.  Numerical
+techniques appropriate for combustion systems are described by Oran
+and Boris~\cite{Oran:1}.  The mixture fraction combustion model is
+described in a review article by Bilger~\cite{Bilger:AnnRev}. Basic
+heat transfer theory is provided by Holman~\cite{Holman:1} and
+Incropera~\cite{Incropera:1}. Thermal radiation is described in Siegel
+and Howell~\cite{Siegel:1}.
 
 Much of the current knowledge of fire science and engineering
 is found in the {\em SFPE Handbook of Fire Protection Engineering}~\cite{SFPE}. Popular textbooks in fire protection
@@ -1825,8 +1830,9 @@ where $I_w(\bs)$ is the intensity at the wall, $\epsilon$ is the
 emissivity, and $T_{w}$ is the wall surface temperature.
 The radiant heat flux vector $\dbq_r''$ is defined
 \be \dbq_r''(\bx) = \int_{4\pi} \; \bs' \, I(\bx,\bs') \; d\bs'   \ee
-The radiative loss term in the energy equation is
-\be -\nabla \cdot \dbq_r''(\bx) =
+The gas phase contribution to the radiative loss term in the energy
+equation is 
+\be -\nabla \cdot \dbq_r''(\bx)(\mbox{gas}) =
     \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_b(\bx) \right]  \quad ; \quad
     U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'
 \ee
@@ -2422,13 +2428,12 @@ the gas. Details are included in the next section.
 \subsection{Absorption and Scattering of Thermal Radiation by Droplets}
 
 The attenuation of thermal radiation by liquid droplets is an
-important consideration, especially
-for water mist systems~\cite{Ravigururajan:1}.
-Liquid droplets attenuate thermal radiation through a combination of
-scattering and absorption~\cite{Tuntomo:1}.
-The radiation-droplet interaction
-must therefore be solved for both the accurate prediction of the
-radiation field and for the droplet energy balance.
+important consideration, especially for water mist
+systems~\cite{Ravigururajan:1}.  Liquid droplets attenuate thermal
+radiation through a combination of scattering and
+absorption~\cite{Tuntomo:1}.  The radiation-droplet interaction must
+therefore be solved for both the accurate prediction of the radiation
+field and for the droplet energy balance.
 
 If the gas phase absorption and emission in Eq.~(\ref{RTEbasic})
 are temporarily neglected for simplicity, the radiative transport
@@ -2452,33 +2457,49 @@ from the local droplet number density $N(\bx)$ and mean diameter $d_m(\bx)$ as
 where $r$ is the droplet radius and $C_a$ and $C_s$ are absorption and
 scattering cross sections, respectively, given by Mie theory.
 The droplet number density function $f(r,d_m)$ is assumed to have
-the same form as the droplet size distribution, but a different mean.
+the same form as the initial droplet size distribution, but a
+mean diameter depending on the location $\bx$. For the numerical
+implementation, the above equations are written in the form
+\be
+\begin{array}{l}
+\kappa_d(\bx,\la) = A_d(\bx)\int_0^\infty
+	\frac{f(r,d_m(\bx))\;C_a(r,\la)}
+	{\pi(d_m(\bx)/2)^2} \; dr \\ 
+\sigma_d(\bx,\la) = A_d(\bx)\int_0^\infty 
+	\frac{f(r,d_m(\bx)) \; C_s(r,\la)}
+	{\pi(d_m(\bx)/2)^2} \; dr \\ 	
+\end{array}
+\ee
+where $A_d$ is the total cross sectional area per unit volume of the
+droplets. $A_d$ is approximated as 
+\be
+A_d \approx \frac{\rho_d(\bx)}{2\rho_w d_m(\bx)/3}
+\ee
+% WHY? We could write N(\bx)=\rho_d/((4/3)*pi*rho_w*r_m^3) -- Simo
 
 An accurate computation of the in-scattering integral on the right
-hand side of Eq.~(\ref{RTEspray}) would be extremely time consuming. It is
-here approximated by dividing the total $4\pi$ solid angle to a
-``forward angle'' $\delta\Omega^l$
-and ``ambient angle'' $\delta\Omega^*=4\pi - \delta\Omega^l$.
-For compatibility with the FVM solver, $\delta\Omega^l$ is set
-equal to the control angle given by the angular discretization.
-However, it is assumed to be symmetric around the center of the control angle.
-Within $\delta\Omega^l$ the intensity is $I_{\la}(\bx,\bs)$ and elsewhere it
-is approximated as
+hand side of Eq.~(\ref{RTEspray}) would be extremely time
+consuming. It is here approximated by dividing the total $4\pi$ solid
+angle to a ``forward angle'' $\delta\Omega^l$ and ``ambient angle''
+$\delta\Omega^*=4\pi - \delta\Omega^l$.  For compatibility with the
+FVM solver, $\delta\Omega^l$ is set equal to the control angle given
+by the angular discretization.  However, it is assumed to be symmetric
+around the center of the control angle.  Within $\delta\Omega^l$ the
+intensity is $I_{\la}(\bx,\bs)$ and elsewhere it is approximated as
 \be
 U^*(\bx,\la) = \frac{U(\bx,\la) - \delta\Omega^l \, I_{\la}(\bx,\bs)}{\delta\Omega^*}
 \ee
-where $U(\bx)$ is the total integrated intensity.
-The in-scattering integral can now be written as
+where $U(\bx)$ is the total integrated intensity. The in-scattering
+integral can now be written as 
 \be
 \frac{\sigma_d(\bx,\la)}{4\pi}\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs')
   \; d\Omega' =
 \sigma_d(\bx,\la)\left[\chi_f \; I_{\la}(\bx,\bs) + (1-\chi_f)U^*(\bx)\right]
 \ee
-where $\chi_f = \chi_f(r,\la)$ is a fraction of the
-total intensity originally within the solid
-angle $\delta\Omega^l$ that is scattered into the same
-angle $\delta\Omega^l$.
-Defining an effective scattering coefficient section
+where $\chi_f = \chi_f(r,\la)$ is a fraction of the total intensity
+originally within the solid angle $\delta\Omega^l$ that is scattered
+into the same angle $\delta\Omega^l$.  Defining an effective
+scattering coefficient section
 \be
 \overline{\sigma_d}(\bx,\la) =
 \frac{4\pi N(\bx)}{4\pi-\delta\Omega^l}
@@ -2491,10 +2512,10 @@ the spray RTE becomes
 +\kappa_d(\bx,\la) \; I_{b,d}(\bx,\la)
 +\frac{\overline{\sigma_d}(\bx,\la)}{4\pi}U(\bx,\la)
 \ee
-This equation can be integrated over the spectrum to get the
-band specific RTE's. The
-procedure is exactly the same as that used for the gas phase RTE.
-After the band integrations, the spray RTE for band $n$ becomes
+This equation can be integrated over the spectrum to get the band
+specific RTE's. The procedure is exactly the same as that used for the
+gas phase RTE. After the band integrations, the spray RTE for band $n$
+becomes 
 \be
 \bs \cdot \nabla I_{n}(\bx,\bs) =
 -\left[\kappa_{d,n}(\bx) + \overline{\sigma_{d,n}}(\bx)\right] I_n(\bx,\bs)
@@ -2502,22 +2523,32 @@ After the band integrations, the spray RTE for band $n$ becomes
 +\frac{\overline{\sigma_d}(\bx,\la)}{4\pi}U_n(\bx)
 \ee
 where the source function is based on the average droplet
-temperature within a cell.
-The absorption and scattering cross sections and the
-scattering phase function are
-calculated using the MieV code developed by Wiscombe~\cite{Wiscombe}.
-Both $\kappa_d$ and
-$\overline{\sigma_d}$ are averaged over the possible droplet radii
-and wavelength before the actual simulation.
-A constant ``radiation'' temperature, $T_{rad}$, is used in the wavelength averaging.
-$T_{rad}$ should be selected to
-represent a typical radiating
-flame temperature. A value of 1173~K is used by default.
-The averaged quantities, now functions of the droplet
-mean diameter only, are saved in one-dimensional arrays.
-During the simulation, the local properties are
-calculated as a table look-up using the local mean droplet diameter~\cite{Hale:1}.
-Details of the computation are given in Section~\ref{dropnumericalmethod}.
+temperature within a cell. The droplet contribution to the radiative
+loss term in the energy equation is
+\be -\nabla \cdot \dbq_r''(\bx)(\mbox{droplets}) =
+    \kappa_d(\bx) \, \left[ U(\bx) - 4 \pi \, I_{b,d}(\bx) \right]  
+\ee
+For each individual droplet, the radiative heating/cooling power is
+computed as 
+\be
+\dq_r = \frac{m_d}{\rho_d(\bx)}
+	\kappa_d(\bx) \, \left[ U(\bx) - 4\pi \, I_{b,d}(\bx) \right]   
+\ee
+where $m_d$ is the mass of the droplet and $\rho_d(\bx)$ is the total
+density of droplets in the cell.
+
+The absorption and scattering cross sections and the scattering phase
+function are calculated using the MieV code developed by
+Wiscombe~\cite{Wiscombe}.  Both $\kappa_d$ and $\overline{\sigma_d}$
+are averaged over the possible droplet radii and wavelength before the
+actual simulation.  A constant ``radiation'' temperature, $T_{rad}$,
+is used in the wavelength averaging.  $T_{rad}$ should be selected to
+represent a typical radiating flame temperature. A value of 1173~K is
+used by default.  The averaged quantities, now functions of the
+droplet mean diameter only, are saved in one-dimensional arrays.
+During the simulation, the local properties are calculated as a table
+look-up using the local mean droplet diameter~\cite{Hale:1}.  Details
+of the computation are given in Section~\ref{dropnumericalmethod}.
 
 
 
