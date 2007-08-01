@@ -21,7 +21,7 @@
       BURN_AWAY            = .TRUE.
       BACKING              = 'EXPOSED' /
 
-&SURF ID = 'FIRE', HRRPUA=1000., RGB=1,0,0 /
+&SURF ID = 'FIRE', HRRPUA=1000., COLOR='RED' /
 &VENT XB=0.30,0.40,0.45,0.55,0.00,0.00, SURF_ID='FIRE' /
 &OBST XB=0.40,0.80,0.30,0.70,0.00,0.40, SURF_ID='FOAM SLAB' /
 

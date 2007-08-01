@@ -1,0 +1,39 @@
+&HEAD CHID='water_cooling', TITLE='Water spray on a hot wall' /
+
+&MESH IJK=20,20,40, XB=0.0,2.0,0.0,2.0,0.0,4.0 /
+
+&TIME TWFIN=60. /
+
+&PART ID='water drops', WATER=.TRUE., QUANTITIES(1:3)='DROPLET_DIAMETER','DROPLET_TEMPERATURE','DROPLET_AGE',
+      DROPLETS_PER_SECOND=2000, DIAMETER=750., SAMPLING_FACTOR=1 /
+
+&PROP ID='nozzle', PART_ID='water drops', FLOW_RATE=1.0, DROPLET_VELOCITY=5., SPRAY_ANGLE=0.,15., SMOKEVIEW_ID='nozzle' /
+
+&MATL ID            = 'TILE MATERIAL'                                                                                      
+      DENSITY       = 313.                                                                                              
+      SPECIFIC_HEAT = 0.753
+      CONDUCTIVITY  = 0.0611 /
+
+&SURF ID        = 'WALL'
+      COLOR     = 'WHEAT'   
+      MATL_ID   = 'TILE MATERIAL'
+      TMP_INNER = 200.
+      THICKNESS = 0.016 /
+
+&VENT MB='XMIN', SURF_ID='WALL' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&SLCF PBY=1.0,QUANTITY='TEMPERATURE' /
+&SLCF PBY=1.0,QUANTITY='WATER VAPOR' /
+
+&BNDF QUANTITY='WALL_TEMPERATURE' /
+&BNDF QUANTITY='water drops_CPUA' /
+&BNDF QUANTITY='water drops_MPUA' /
+
+&DEVC XYZ=1.0,1.0,3.5, PROP_ID='nozzle', ORIENTATION=-1,0,0, QUANTITY='TIME', SETPOINT=0., ID='noz_1' /
+
+&TAIL /
