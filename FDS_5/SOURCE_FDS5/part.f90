@@ -1085,10 +1085,10 @@ INTEGER, INTENT(IN) :: NM
 
 ! Initializations
 
-D_VAP  = 0.
+D_VAP  = 0._EB
 RDT    = 1._EB/DT
-WCPUA  = 0.5*WCPUA
-WMPUA  = 0.5*WMPUA
+WCPUA  = 0.5_EB*WCPUA
+WMPUA  = 0.5_EB*WMPUA
 
 ! Rough estimates
 
@@ -1209,9 +1209,9 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                   VEL = SQRT(U2+V2)
             END SELECT
             LENGTH   = 1._EB
-            RE_L     = MAX(5.E5,RHO_G*VEL*LENGTH/MU_AIR)
-            NUSSELT  = NU_FAC_WALL*RE_L**0.8
-            SHERWOOD = SH_FAC_WALL*RE_L**0.8
+            RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
+            NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
+            SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
             H_HEAT   = NUSSELT*K_AIR/LENGTH
             H_MASS   = SHERWOOD*D_AIR/LENGTH
             H_WALL   = H_SOLID
@@ -1251,7 +1251,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          TMP_DROP_NEW = ( TMP_DROP + DT*( Q_DOT_RAD + &
                                           A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) +  &
                                                   H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
-                                                  H_MASS*RHO_G*H_V*(Y_DROP-0.5*DY_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / &
+                                                  H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DY_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / &
                                                   DENOM
 
          ! Compute the total amount of heat extracted from the gas, wall and radiative fields
@@ -1295,8 +1295,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          ! Compute surface cooling and density
 
          IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
-            WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + 0.5*WGT*RDT*(Q_RAD+Q_CON_WALL)*RAW(IW)
-            WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + 0.5*WGT*M_DROP*RAW(IW)
+            WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + 0.5_EB*WGT*RDT*(Q_RAD+Q_CON_WALL)*RAW(IW)
+            WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + 0.5_EB*WGT*M_DROP*RAW(IW)
          ENDIF
          
          ! Decrease temperature of the gas cell
