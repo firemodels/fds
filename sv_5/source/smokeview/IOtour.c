@@ -18,6 +18,9 @@ void drawcir(float *center, float rad, float *color);
 //void TourMenu(int val);
 float hermiteeye(float f1, int i, keyframe *kf1, keyframe *kf2, float *slope);
 float hermiteview(float t, int i, keyframe *kf1, keyframe *kf2, float *slope);
+#ifdef pp_TOUR
+float linearview(float t, int i, keyframe *kf1, keyframe *kf2);
+#endif
 
 /* ------------------ freetour ------------------------ */
 
@@ -646,10 +649,17 @@ void createtourpaths(void){
       }
       eye[2] = hermiteeye(f1,2,kf1,kf2,&dummy);
       eye[3] = hermiteeye(f1,3,kf1,kf2,&dummy);
-
+#ifdef pp_TOUR
+      aview[0] = linearview(f1,0,kf1,kf2);
+      aview[1] = linearview(f1,1,kf1,kf2);
+      aview[2] = linearview(f1,2,kf1,kf2);
+      viewx=aview[0];
+      viewy=aview[1];
+#else
       aview[0] = hermiteview(f1,0,kf1,kf2,&dummy);
       aview[1] = hermiteview(f1,1,kf1,kf2,&dummy);
       aview[2] = hermiteview(f1,2,kf1,kf2,&dummy);
+#endif
 
       pj->elev_path = hermiteeye(f1,5,kf1,kf2,&dummy);
       pj->zoom   = hermiteeye(f1,4,kf1,kf2,&dummy);
@@ -898,7 +908,21 @@ float hermiteeye(float t, int i, keyframe *kf1, keyframe *kf2, float *slope){
   return val;
 
 }
+#ifdef pp_TOUR
 
+/* ------------------ lineareye ------------------------ */
+
+float linearview(float t, int i, keyframe *kf1, keyframe *kf2){
+  float p0, p1, m0, m1, val;
+  float t3, t2;
+
+  p0 = kf1->nodeval.aview[i];
+  p1 = kf2->nodeval.aview[i];
+  val = (1.0-t)*p0 + t*p1;
+  return val;
+
+}
+#endif
 /* ------------------ hermiteye ------------------------ */
 
 float hermiteview(float t, int i, keyframe *kf1, keyframe *kf2, float *slope){
@@ -1392,9 +1416,13 @@ void adjustviewangle(keyframe *kf, int viewtype){
       if(az_scene<-180.0)az_scene += 360.0;
       elev_scene = elev_path;
       
-      aview[0]=cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
-      aview[1]=sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
-      aview[2]=sin(elev_scene*PI/180.0);
+      dx_aview=cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      dy_aview=sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      dz_aview=sin(elev_scene*PI/180.0);
+
+      aview[0]=(xbar0+xyzmaxdiff*eye[0])+dx_aview;
+      aview[1]=(ybar0+xyzmaxdiff*eye[1])+dy_aview;
+      aview[2]=(zbar0+xyzmaxdiff*eye[2])+dz_aview;
 
       kf->az_scene=az_scene;
       kf->nodeval.elev_scene=elev_scene;
@@ -1412,9 +1440,9 @@ void adjustviewangle(keyframe *kf, int viewtype){
       dy_aview /= distxy_aview;
       dz_aview /= distxy_aview;
 
-      aview[0]=eye[0]+dx_aview;
-      aview[1]=eye[1]+dy_aview;
-      aview[2]=eye[2]+dz_aview;
+      aview[0]=(xbar0+xyzmaxdiff*eye[0])+dx_aview;
+      aview[1]=(ybar0+xyzmaxdiff*eye[1])+dy_aview;
+      aview[2]=(zbar0+xyzmaxdiff*eye[2])+dz_aview;
 
       dx_keyview = kf->keyview_x;
       dy_keyview = kf->keyview_y;
