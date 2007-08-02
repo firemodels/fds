@@ -442,101 +442,101 @@ Contains
     !
     ! Determine total number of EVAC lines in the input file
     !
-    Open(LU5,File=INPUT_FILE)
+    Open(LU_INPUT,File=FN_INPUT)
 
     NPC_EVAC = 0
     COUNT_EVAC_LOOP: Do
-       Call CHECKREAD('EVAC',LU5,IOS) 
+       Call CHECKREAD('EVAC',LU_INPUT,IOS) 
        If (IOS == 1) Exit COUNT_EVAC_LOOP
-       Read(LU5,NML=EVAC,End=219,ERR=220,IOSTAT=IOS)
+       Read(LU_INPUT,NML=EVAC,End=219,ERR=220,IOSTAT=IOS)
        NPC_EVAC = NPC_EVAC + 1
 220    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EVAC line')
     End Do COUNT_EVAC_LOOP
-219 Rewind(LU5)
+219 Rewind(LU_INPUT)
     !
     ! Determine total number of PERS lines in the input file
     !
     NPC_PERS = 0
     COUNT_PERS_LOOP: Do
-       Call CHECKREAD('PERS',LU5,IOS) 
+       Call CHECKREAD('PERS',LU_INPUT,IOS) 
        If (IOS == 1) Exit COUNT_PERS_LOOP
-       Read(LU5,NML=PERS,End=221,ERR=222,IOSTAT=IOS)
+       Read(LU_INPUT,NML=PERS,End=221,ERR=222,IOSTAT=IOS)
        NPC_PERS = NPC_PERS + 1
 222    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with PERS line')
     End Do COUNT_PERS_LOOP
-221 Rewind(LU5)
+221 Rewind(LU_INPUT)
     !
     ! Determine total number of EXIT lines in the input file
     !
     N_EXITS = 0
     COUNT_EXITS_LOOP: Do
-       Call CHECKREAD('EXIT',LU5,IOS) 
+       Call CHECKREAD('EXIT',LU_INPUT,IOS) 
        If (IOS == 1) Exit COUNT_EXITS_LOOP
-       Read(LU5,NML=Exit,End=223,ERR=224,IOSTAT=IOS)
+       Read(LU_INPUT,NML=Exit,End=223,ERR=224,IOSTAT=IOS)
        N_EXITS = N_EXITS + 1
 224    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EXIT line')
     End Do COUNT_EXITS_LOOP
-223 Rewind(LU5)
+223 Rewind(LU_INPUT)
     !
     ! Determine total number of DOOR lines in the input file
     !
     N_DOORS = 0
     COUNT_DOORS_LOOP: Do
-       Call CHECKREAD('DOOR',LU5,IOS) 
+       Call CHECKREAD('DOOR',LU_INPUT,IOS) 
        If (IOS == 1) Exit COUNT_DOORS_LOOP
-       Read(LU5,NML=DOOR,End=225,ERR=226,IOSTAT=IOS)
+       Read(LU_INPUT,NML=DOOR,End=225,ERR=226,IOSTAT=IOS)
        N_DOORS = N_DOORS + 1
 226    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with DOOR line')
     End Do COUNT_DOORS_LOOP
-225 Rewind(LU5)
+225 Rewind(LU_INPUT)
     !
     ! Determine total number of ENTR lines in the input file
     !
     N_ENTRYS = 0
     COUNT_ENTRYS_LOOP: Do
-       Call CHECKREAD('ENTR',LU5,IOS) 
+       Call CHECKREAD('ENTR',LU_INPUT,IOS) 
        If (IOS == 1) Exit COUNT_ENTRYS_LOOP
-       Read(LU5,NML=ENTR,End=227,ERR=228,IOSTAT=IOS)
+       Read(LU_INPUT,NML=ENTR,End=227,ERR=228,IOSTAT=IOS)
        N_ENTRYS = N_ENTRYS + 1
 228    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with ENTR line')
     End Do COUNT_ENTRYS_LOOP
-227 Rewind(LU5)
+227 Rewind(LU_INPUT)
     !
     ! Determine total number of CORR lines in the input file
     !
     N_CORRS = 0
     COUNT_CORRS_LOOP: Do
-       Call CHECKREAD('CORR',LU5,IOS) 
+       Call CHECKREAD('CORR',LU_INPUT,IOS) 
        If (IOS == 1) Exit COUNT_CORRS_LOOP
-       Read(LU5,NML=CORR,End=229,ERR=230,IOSTAT=IOS)
+       Read(LU_INPUT,NML=CORR,End=229,ERR=230,IOSTAT=IOS)
        N_CORRS = N_CORRS + 1
 230    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with CORR line')
     End Do COUNT_CORRS_LOOP
-229 Rewind(LU5)
+229 Rewind(LU_INPUT)
     !
     ! Determine total number of EVHO lines in the input file
     !
     N_HOLES = 0
     COUNT_EVHO_LOOP: Do
-       Call CHECKREAD('EVHO',LU5,IOS) 
+       Call CHECKREAD('EVHO',LU_INPUT,IOS) 
        If (IOS == 1) Exit COUNT_EVHO_LOOP
-       Read(LU5,NML=EVHO,End=231,ERR=232,IOSTAT=IOS)
+       Read(LU_INPUT,NML=EVHO,End=231,ERR=232,IOSTAT=IOS)
        N_HOLES = N_HOLES + 1
 232    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EVHO line')
     End Do COUNT_EVHO_LOOP
-231 Rewind(LU5)
+231 Rewind(LU_INPUT)
     !
     ! Determine total number of EVSS lines in the input file
     !
     N_SSTANDS = 0
     COUNT_EVSS_LOOP: Do
-       Call CHECKREAD('EVSS',LU5,IOS) 
+       Call CHECKREAD('EVSS',LU_INPUT,IOS) 
        If (IOS == 1) Exit COUNT_EVSS_LOOP
-       Read(LU5,NML=EVSS,End=233,ERR=234,IOSTAT=IOS)
+       Read(LU_INPUT,NML=EVSS,End=233,ERR=234,IOSTAT=IOS)
        N_SSTANDS = N_SSTANDS + 1
 234    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EVSS line')
     End Do COUNT_EVSS_LOOP
-233 Rewind(LU5)
+233 Rewind(LU_INPUT)
     !
     ! Allocate quantities for EVAC, PERS, EXIT types
     !
@@ -729,9 +729,9 @@ Contains
        !
        ! No read for default values
        If ( N > 0 ) Then
-          Call CHECKREAD('PERS',LU5,IOS)
+          Call CHECKREAD('PERS',LU_INPUT,IOS)
           If (IOS == 1) Exit READ_PERS_LOOP
-          Read(LU5,PERS,End=24,IOSTAT=IOS)
+          Read(LU_INPUT,PERS,End=24,IOSTAT=IOS)
 
           ! Check if some default human group is given.
           Select Case (Trim(DEFAULT_PROPERTIES))
@@ -942,7 +942,7 @@ Contains
        End If
        !
     End Do READ_PERS_LOOP
-24  Rewind(LU5)
+24  Rewind(LU_INPUT)
 
     If (GROUP_DENS .Le. 0.01_EB) GROUP_DENS = 0.25_EB
     If (GROUP_DENS .Gt. 3.50_EB) GROUP_DENS = 3.50_EB
@@ -1018,9 +1018,9 @@ Contains
        XYZ_SMOKE(:)  = Huge(XYZ_SMOKE)
        COLOR_INDEX   = 0
        !
-       Call CHECKREAD('EXIT',LU5,IOS)
+       Call CHECKREAD('EXIT',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_EXIT_LOOP
-       Read(LU5,Exit,End=26,IOSTAT=IOS)
+       Read(LU_INPUT,Exit,End=26,IOSTAT=IOS)
        !
        Do I=1,5,2
           If (XB(I) > XB(I+1)) Then
@@ -1213,7 +1213,7 @@ Contains
        End If
        !
     End Do READ_EXIT_LOOP
-26  Rewind(LU5)
+26  Rewind(LU_INPUT)
     !
     ! Read the DOOR lines
     !
@@ -1236,9 +1236,9 @@ Contains
        COLOR_INDEX   = 0
        KEEP_XY       = .False.
        !
-       Call CHECKREAD('DOOR',LU5,IOS)
+       Call CHECKREAD('DOOR',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_DOOR_LOOP
-       Read(LU5,DOOR,End=27,IOSTAT=IOS)
+       Read(LU_INPUT,DOOR,End=27,IOSTAT=IOS)
        !
        Do I=1,5,2
           If (XB(I) > XB(I+1)) Then
@@ -1432,7 +1432,7 @@ Contains
        End If
        ! 
     End Do READ_DOOR_LOOP
-27  Rewind(LU5)
+27  Rewind(LU_INPUT)
     !
     ! Read the CORR line
     !
@@ -1458,9 +1458,9 @@ Contains
        EFF_LENGTH    = 0.0_EB
        MAX_HUMANS_INSIDE = 0
        !
-       Call CHECKREAD('CORR',LU5,IOS)
+       Call CHECKREAD('CORR',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_CORR_LOOP
-       Read(LU5,CORR,End=29,IOSTAT=IOS)
+       Read(LU_INPUT,CORR,End=29,IOSTAT=IOS)
        !
        If (REVA_CORR_VEL /= 'null') NRAMP_Tmp = NRAMP_Tmp + 1
        PCX%Reva_Corr_Vel = REVA_CORR_VEL
@@ -1659,7 +1659,7 @@ Contains
        Nullify(PCX%First)
        !
     End Do READ_CORR_LOOP
-29  Rewind(LU5)
+29  Rewind(LU_INPUT)
 
 
     ! Now exits, doors, and corrs are already read in
@@ -1730,9 +1730,9 @@ Contains
        KNOWN_DOOR_PROBS         = 1.0_EB
        !
        !
-       Call CHECKREAD('ENTR',LU5,IOS)
+       Call CHECKREAD('ENTR',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_ENTR_LOOP
-       Read(LU5,ENTR,End=28,IOSTAT=IOS)
+       Read(LU_INPUT,ENTR,End=28,IOSTAT=IOS)
 
        If (Trim(KNOWN_DOOR_NAMES(51)) /= 'null') Then
           Write(MESSAGE,'(A,A,A)') &
@@ -1917,7 +1917,7 @@ Contains
        !
        ! 
     End Do READ_ENTR_LOOP
-28  Rewind(LU5)
+28  Rewind(LU_INPUT)
 
     If (n_nodes > 0 ) Then
        n_tmp = n_egrids
@@ -1971,9 +1971,9 @@ Contains
        KNOWN_DOOR_PROBS         = 1.0_EB
        !
        !
-       Call CHECKREAD('EVAC',LU5,IOS)
+       Call CHECKREAD('EVAC',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_EVAC_LOOP
-       Read(LU5,EVAC,End=25,IOSTAT=IOS)
+       Read(LU_INPUT,EVAC,End=25,IOSTAT=IOS)
 
        If (Trim(KNOWN_DOOR_NAMES(51)) /= 'null') Then
           Write(MESSAGE,'(A,A,A)') &
@@ -2147,7 +2147,7 @@ Contains
        End If
        !
     End Do READ_EVAC_LOOP
-25  Rewind(LU5)
+25  Rewind(LU_INPUT)
     !
     ! Read the EVHO lines
     !
@@ -2160,9 +2160,9 @@ Contains
        PERS_ID       = 'null'
        EVAC_MESH     = 'null'
        !
-       Call CHECKREAD('EVHO',LU5,IOS)
+       Call CHECKREAD('EVHO',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_EVHO_LOOP
-       Read(LU5,EVHO,End=30,IOSTAT=IOS)
+       Read(LU_INPUT,EVHO,End=30,IOSTAT=IOS)
        !
        Do I=1,5,2
           If (XB(I) > XB(I+1)) Then
@@ -2211,7 +2211,7 @@ Contains
           Call SHUTDOWN(MESSAGE)
        End If
     End Do READ_EVHO_LOOP
-30  Rewind(LU5)
+30  Rewind(LU_INPUT)
     !
     ! Read the EVSS lines
     !
@@ -2229,9 +2229,9 @@ Contains
        FAC_V0_HORI   = 0.0_EB
        ESC_SPEED     = 0.0_EB
        !
-       Call CHECKREAD('EVSS',LU5,IOS)
+       Call CHECKREAD('EVSS',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_EVSS_LOOP
-       Read(LU5,EVSS,End=31,IOSTAT=IOS)
+       Read(LU_INPUT,EVSS,End=31,IOSTAT=IOS)
        !
        Do I=1,5,2
           If (XB(I) > XB(I+1)) Then
@@ -2317,7 +2317,7 @@ Contains
        End Select
        ! 
     End Do READ_EVSS_LOOP
-31  Rewind(LU5)
+31  Rewind(LU_INPUT)
     !
     ! Count the evacuation ramps and save their IDs.
     !
@@ -2383,7 +2383,7 @@ Contains
 
     ! Read the evacuation ramps
     Call Read_Evac_Reva
-    Rewind(LU5)
+    Rewind(LU_INPUT)
     !
     ! Count the evacuation scenarios and save their IDs.
     !
@@ -2425,9 +2425,9 @@ Contains
 
     ! Read the evacuation scenarios
     Call Read_Evac_Scen
-    Rewind(LU5)
+    Rewind(LU_INPUT)
 
-    Close (LU5)    
+    Close (LU_INPUT)    
     !
     ! Set the IMESH and IMESH2 for corridors
     Do n = 1, n_corrs
@@ -2517,16 +2517,16 @@ Contains
       Call ChkMemErr('Read_Evac_Reva','NTT_Evac',IZERO) 
       NTT_Evac = 0
       !
-      Rewind(LU5)
+      Rewind(LU_INPUT)
       Do N = 1, NRAMP_Evac
          NTTLOOP: Do 
-            Call CHECKREAD('REVA',LU5,IOS) ; If (IOS == 1) Exit NTTLOOP
-            Read(LU5, NML=REVA, ERR=56, IOSTAT=IOS)
+            Call CHECKREAD('REVA',LU_INPUT,IOS) ; If (IOS == 1) Exit NTTLOOP
+            Read(LU_INPUT, NML=REVA, ERR=56, IOSTAT=IOS)
             If (ID /= REVAID(N)) Cycle NTTLOOP
             NTT_Evac(N) = NTT_Evac(N) + 1
 56          If (IOS > 0) Call SHUTDOWN('ERROR: Problem with REVA line')
          End Do NTTLOOP
-         Rewind(LU5)
+         Rewind(LU_INPUT)
          If (NTT_Evac(N) == 0) Then
             Write(MESSAGE,'(A,A,A)') 'ERROR: REVA ', &
                  Trim(REVAID(N)), ' not found'
@@ -2542,18 +2542,18 @@ Contains
       ! 
       ! Read once again (now the max. dimension is known)
       NTT_Evac = 0
-      Rewind(LU5)
+      Rewind(LU_INPUT)
       Do N = 1, NRAMP_Evac
          NTTLOOP2: Do 
-            Call CHECKREAD('REVA',LU5,IOS) ; If (IOS == 1) Exit NTTLOOP2
-            Read(LU5, NML=REVA, ERR=57, IOSTAT=IOS)
+            Call CHECKREAD('REVA',LU_INPUT,IOS) ; If (IOS == 1) Exit NTTLOOP2
+            Read(LU_INPUT, NML=REVA, ERR=57, IOSTAT=IOS)
             If (ID /= REVAID(N)) Cycle NTTLOOP2
             NTT_Evac(N) = NTT_Evac(N) + 1
             TT_Evac(NTT_Evac(N),N) = T
             FF_Evac(NTT_Evac(N),N) = F
 57          If (IOS > 0) Call SHUTDOWN('ERROR: Problem with REVA line')
          End Do NTTLOOP2
-         Rewind(LU5)
+         Rewind(LU_INPUT)
       End Do
       !
     End Subroutine Read_Evac_Reva
@@ -2573,16 +2573,16 @@ Contains
       Call ChkMemErr('Read_Evac_Scen','NTT_Scen',IZERO) 
       NTT_Scen = 0
       !
-      Rewind(LU5)
+      Rewind(LU_INPUT)
       Do N = 1, NSCEN_Evac
          NTTLOOP: Do 
-            Call CHECKREAD('SCEN',LU5,IOS) ; If (IOS == 1) Exit NTTLOOP
-            Read(LU5, NML=SCEN, ERR=56, IOSTAT=IOS)
+            Call CHECKREAD('SCEN',LU_INPUT,IOS) ; If (IOS == 1) Exit NTTLOOP
+            Read(LU_INPUT, NML=SCEN, ERR=56, IOSTAT=IOS)
             If (ID /= SCENID(N)) Cycle NTTLOOP
             NTT_Scen(N) = NTT_Scen(N) + 1
 56          If (IOS > 0) Call SHUTDOWN('ERROR: Problem with SCEN line')
          End Do NTTLOOP
-         Rewind(LU5)
+         Rewind(LU_INPUT)
          If (NTT_Scen(N) == 0) Then
             Write(MESSAGE,'(A,A,A)') 'ERROR: SCEN ', &
                  Trim(SCENID(N)), ' not found'
@@ -2598,18 +2598,18 @@ Contains
       ! 
       ! Read once again (now the max. dimension is known)
       NTT_Scen = 0
-      Rewind(LU5)
+      Rewind(LU_INPUT)
       Do N = 1, NSCEN_Evac
          NTTLOOP2: Do 
-            Call CHECKREAD('SCEN',LU5,IOS) ; If (IOS == 1) Exit NTTLOOP2
-            Read(LU5, NML=SCEN, ERR=57, IOSTAT=IOS)
+            Call CHECKREAD('SCEN',LU_INPUT,IOS) ; If (IOS == 1) Exit NTTLOOP2
+            Read(LU_INPUT, NML=SCEN, ERR=57, IOSTAT=IOS)
             If (ID /= SCENID(N)) Cycle NTTLOOP2
             NTT_Scen(N) = NTT_Scen(N) + 1
             TT_Scen(NTT_Scen(N),N) = Trim(EGRID)
             FF_Scen(NTT_Scen(N),N) = Trim(FFIELD)
 57          If (IOS > 0) Call SHUTDOWN('ERROR: Problem with SCEN line')
          End Do NTTLOOP2
-         Rewind(LU5)
+         Rewind(LU_INPUT)
       End Do
       !
     End Subroutine Read_Evac_Scen
@@ -2642,30 +2642,30 @@ Contains
     Write (FN122,'(A,A)') Trim(CHID),'_evac.eff'
     Write (FN123,'(A,A)') Trim(CHID),'_evac.fed'
     !
-    Write(LU0,'(A)')          ' FDS+Evac Evacuation Module'
-    Write(LU6,'(A)')          ' FDS+Evac Evacuation Module'
-    Write(LU0,'(A,A)')        ' FDS+Evac Compilation Date: ', &
+    Write(LU_ERR,'(A)')          ' FDS+Evac Evacuation Module'
+    Write(LU_OUTPUT,'(A)')          ' FDS+Evac Evacuation Module'
+    Write(LU_ERR,'(A,A)')        ' FDS+Evac Compilation Date: ', &
          EVAC_COMPILE_DATE
-    Write(LU6,'(A,A)')        ' FDS+Evac Compilation Date: ', &
+    Write(LU_OUTPUT,'(A,A)')        ' FDS+Evac Compilation Date: ', &
          EVAC_COMPILE_DATE
-    Write(LU0,'(A,F4.2,A/)')  ' FDS+Evac Version         : ', &
+    Write(LU_ERR,'(A,F4.2,A/)')  ' FDS+Evac Version         : ', &
          EVAC_VERSION,'b'
-    Write(LU6,'(A,F4.2,A/)')  ' FDS+Evac Version         : ', &
+    Write(LU_OUTPUT,'(A,F4.2,A/)')  ' FDS+Evac Version         : ', &
          EVAC_VERSION,'b'    
 
-    Write(lu0,fmt='(/a,i2)')  ' FDS+Evac Color_Method    :', &
+    Write(LU_ERR,fmt='(/a,i2)')  ' FDS+Evac Color_Method    :', &
          COLOR_METHOD
     If (Fed_Door_Crit >= 0) Then
-       Write(lu0,fmt='(a,f14.8)') &
+       Write(LU_ERR,fmt='(a,f14.8)') &
                               ' FDS+Evac Fed_Door_Crit   :', FED_DOOR_CRIT
     Else
        ! Visibility S = 3/K, K is extinction coeff.
-       Write(lu0,fmt='(a,f14.8,a)') &
+       Write(LU_ERR,fmt='(a,f14.8,a)') &
                               ' FDS+Evac Vis_Door_Crit   :', &
             Abs(FED_DOOR_CRIT), ' m'
        FED_DOOR_CRIT = 3.0_EB/FED_DOOR_CRIT ! Extinction coeff (1/m)
     End If
-    If (NOT_RANDOM ) Write(lu0,fmt='(a)') &
+    If (NOT_RANDOM ) Write(LU_ERR,fmt='(a)') &
                               ' FDS+Evac Random seed is not used.'
     !
     L_fed_read = Btest(I_EVAC,3)
@@ -2693,9 +2693,9 @@ Contains
        If (L_fed_read) Then
           Inquire (file=fn123,exist=L_status)
           If (.Not. L_status) Then
-             Write (LU0,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
+             Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
                   Trim(fn123), ', FED and soot not used'
-             Write (LU6,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
+             Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
                   Trim(fn123), ', FED and soot not used'
              l_fed_read = .False.
              l_fed_save = .False.
@@ -2716,9 +2716,9 @@ Contains
        If (L_eff_read) Then
           Inquire (file=fn122,exist=L_status)
           If (L_status) Then
-             Write (LU0,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                   Trim(fn122), ' is used'
-             Write (LU6,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                   Trim(fn122), ' is used'
              l_eff_save = .False.
              I_EVAC = Ibclr(I_EVAC,0)  ! do not save EFF
@@ -2764,9 +2764,9 @@ Contains
           Write (lu123_evac) ntmp1
           Write (lu123_evac) n_egrids_tmp, ntmp2, ntmp3, ntmp4, &
                ntmp5, ntmp6
-          Write (LU0,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
+          Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
                Trim(fn123), ' is calculated and used'
-          Write (LU6,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
+          Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
                Trim(fn123), ' is calculated and used'
        End If
        !
@@ -2778,18 +2778,18 @@ Contains
                status='replace')
           n_egrids_tmp = Count(EVACUATION_ONLY)
           Write (lu122_evac) n_egrids_tmp
-          Write (LU0,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+          Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                Trim(fn122), ' is calculated and used'
-          Write (LU6,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+          Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                Trim(fn122), ' is calculated and used'
        End If
        ! 
        If (L_fed_read) Then
           Inquire (file=fn123,exist=L_status)
           If (.Not. L_status) Then
-             Write (LU0,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
+             Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
                   Trim(fn123), ', FED and soot not used'
-             Write (LU6,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
+             Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
                   Trim(fn123), ', FED and soot not used'
              l_fed_read = .False.
              l_fed_save = .False.
@@ -2813,9 +2813,9 @@ Contains
              If ( ntmp2 /= 4 .Or. ntmp3 /= n_corrs .Or. ntmp1 >= 0 &
                   .Or. ntmp4 /= 8  .Or. &
                   ntmp5 /= n_doors+n_exits .Or. ntmp6 /= 4) Then
-                Write (LU0,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', &
+                Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', &
                      Trim(fn123), ', FED and soot not used'
-                Write (LU6,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', &
+                Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', &
                      Trim(fn123), ', FED and soot not used'
                 l_fed_read = .False.
                 l_fed_save = .False.
@@ -2825,9 +2825,9 @@ Contains
              End If
 
              If ( l_fed_read .Or. l_fed_save ) Then
-                Write (LU0,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
+                Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
                      Trim(fn123), ' is used'
-                Write (LU6,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
+                Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
                      Trim(fn123), ' is used'
              End If
              If (n_egrids_tmp /= n_egrids) Then
@@ -2853,9 +2853,9 @@ Contains
                   status='replace')
              n_egrids_tmp = Count(EVACUATION_ONLY)
              Write (lu122_evac) n_egrids_tmp
-             Write (LU0,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                   Trim(fn122), ' is (re)calculated'
-             Write (LU6,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                   Trim(fn122), ' is (re)calculated'
           Else
              l_eff_save = .False.
@@ -2863,9 +2863,9 @@ Contains
              Open (lu122_evac,file=fn122,form='unformatted', &
                   status='old')
              Read (lu122_evac) n_egrids_tmp
-             Write (LU0,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                   Trim(fn122), ' is used'
-             Write (LU6,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                   Trim(fn122), ' is used'
              If (n_egrids_tmp /= Count(EVACUATION_ONLY) ) Then
                 Write(MESSAGE,'(A,2I4)') &
@@ -3193,10 +3193,10 @@ Contains
 
                    If (i_endless_loop >= (8.0_EB*Max(1.0_EB,Log10(2.5_EB*VOL2))) / &
                         Max(1.0_EB,Log10((2.5_EB*VOL2)/(2.5_EB*VOL2-1))) ) Then
-                      Write(lu0,'(A,I4,A,I4,A,I6)') &
+                      Write(LU_ERR,'(A,I4,A,I4,A,I6)') &
                            'ERROR: Initialize_Humans, EVAC line ', &
                            IPC, ', Mesh ', NM, ', i_human ', n_humans
-                      Write(lu6,'(A,I4,A,I4,A,I6)') &
+                      Write(LU_OUTPUT,'(A,I4,A,I4,A,I6)') &
                            'ERROR: Initialize_Humans, EVAC line ', &
                            IPC, ', Mesh ', NM, ', i_human ', n_humans
                       ISTOP = 3
@@ -3559,9 +3559,9 @@ Contains
           ! 
        End Do EVAC_CLASS_LOOP ! ipc, number of evac-lines
 
-       Write (LU0,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', &
+       Write (LU_ERR,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', &
             0.0_EB,' mesh ',nm,' number of humans ',n_humans
-       Write (LU6,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', &
+       Write (LU_OUTPUT,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', &
             0.0_EB,' mesh ',nm,' number of humans ',n_humans
        !
     End If EVAC_MESH_ONLY
@@ -3581,8 +3581,8 @@ Contains
           Group_List(i)%GROUP_I_FFIELDS(:) = 0
        End Do
 
-       Write (lu0,fmt='(/a)') ' EVAC: Initial positions of the humans'
-       Write (lu0,fmt='(a,a)') &
+       Write (LU_ERR,fmt='(/a)') ' EVAC: Initial positions of the humans'
+       Write (LU_ERR,fmt='(a,a)') &
             ' person     x       y       z    Tpre    Tdet  ', &
             ' dia    v0   tau   i_gr i_ff'
 
@@ -4141,7 +4141,7 @@ Contains
                 j = Max(0,HR%GROUP_ID)
                 Group_List(j)%IEL = HR%IEL
 
-                Write (lu0,fmt='(i6,5f8.2,3f6.2,i6,i3,i2)') HR%ILABEL, &
+                Write (LU_ERR,fmt='(i6,5f8.2,3f6.2,i6,i3,i2)') HR%ILABEL, &
                      HR%X, HR%Y, HR%Z, HR%Tpre, HR%Tdet,2.0_EB*HR%Radius, &
                      HR%Speed, HR%Tau, HR%GROUP_ID, HR%i_ffield, &
                      Abs(HR%I_Target)+n_egrids+n_entrys
@@ -4681,9 +4681,9 @@ Contains
     Goto 325
 
 324 Continue
-    Write (LU0,fmt='(a,f12.4,a)') 'FED file EOF: time ', &
+    Write (LU_ERR,fmt='(a,f12.4,a)') 'FED file EOF: time ', &
          T_Save-DT_Save, ' not found'
-    Write (LU0,fmt='(a)') 'FED file EOF: use previous values'
+    Write (LU_ERR,fmt='(a)') 'FED file EOF: use previous values'
     T_Save = 1.0E15
 
 325 Continue
@@ -5491,7 +5491,7 @@ Contains
                             HR%FFIELD_NAME = Trim(name_new_ffield)
                             If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
                             If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
-                            Write (LU0,fmt='(a,i5,a,a,a,a)') &
+                            Write (LU_ERR,fmt='(a,i5,a,a,a,a)') &
                                  ' EVAC: Human ',ie,', new ffield: ', &
                                  Trim(name_new_ffield), ', old ffield: ', &
                                  Trim(name_old_ffield)
@@ -5503,7 +5503,7 @@ Contains
                             If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
                             If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
                             If (j > 0) Color_Tmp(j) = color_index
-                            Write (LU0,fmt='(a,i5,a,a,a,a)') &
+                            Write (LU_ERR,fmt='(a,i5,a,a,a,a)') &
                                  ' EVAC: Group ',j,', new ffield: ', &
                                  Trim(name_new_ffield), ', old ffield: ', &
                                  Trim(name_old_ffield)
@@ -7432,7 +7432,7 @@ Contains
                End If
             End Select
             If (HR%IOR > 0) Then
-               Write (LU0,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
+               Write (LU_ERR,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
                     ' EVAC: Person n:o', &
                     HR%ILABEL, ' out at ', T, &
                     ' s, exit ', Trim(PEX%ID_NAME), ' fed ', HR%IntDose
@@ -7616,7 +7616,7 @@ Contains
                   PDX%ICOUNT = PDX%ICOUNT + 1
                   If (PDX%T_first <= 0.0_EB) PDX%T_first = T
 
-                  Write (LU0,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
+                  Write (LU_ERR,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
                        ' EVAC: Person n:o', &
                        HR%ILABEL, ' out at ', T, &
                        ' s, door ', Trim(PDX%ID_NAME), ' fed ', HR%IntDose
@@ -7772,21 +7772,21 @@ Contains
                      End If
                      MESHES(imesh2)%N_HUMANS = MESHES(imesh2)%N_HUMANS + 1
                      MESHES(imesh2)%HUMAN(MESHES(imesh2)%N_HUMANS) = HR
-                     Write (LU0,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
+                     Write (LU_ERR,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
                           ' EVAC: Person n:o', &
                           HR%ILABEL, ' out at ', T, &
                           ' s, corr ', Trim(PCX%ID_NAME), ' fed ', HR%IntDose
                   End If            ! target is door or entry
 
                   If (ior_new == 3) Then ! corridor
-                     Write (LU0,fmt='(a,i6,a,f8.2,a,a,f8.4)') &
+                     Write (LU_ERR,fmt='(a,i6,a,f8.2,a,a,f8.4)') &
                           ' EVAC: Person n:o', &
                           HR%ILABEL, ' change corr ', T, &
                           ' s, corr ', Trim(PCX%ID_NAME), HR%IntDose
                   End If
 
                   If (ior_new == 5) Then ! exit
-                     Write (LU0,fmt='(a,i6,a,f8.2,a,a,f8.4)') &
+                     Write (LU_ERR,fmt='(a,i6,a,f8.2,a,a,f8.4)') &
                           ' EVAC: Person n:o', &
                           HR%ILABEL, ' exits ', T, &
                           ' s, corr ', Trim(PCX%ID_NAME), HR%IntDose
@@ -8820,7 +8820,7 @@ Contains
          HR%Eta       = 0.0_EB
          HR%Ksi       = 0.0_EB
          HR%NewRnd    = .True.
-         Write (LU0,fmt='(a,i6,a,f8.2,a,3a)') &
+         Write (LU_ERR,fmt='(a,i6,a,f8.2,a,3a)') &
               ' EVAC: Person n:o', &
               HR%ILABEL, ' inserted ', Tin, &
               ' s, entry ', Trim(PNX%ID_NAME),' ffield ', &
@@ -9371,8 +9371,8 @@ Contains
  
        ! Write the current time to the prt5 file, then start
        ! looping through the particle classes
-       LU_PROF  = 7000+NM
-       Write(LU_PROF) Real(T,FB)
+ !!!   LU_PART(NM)  = 7000+NM
+       Write(LU_PART(NM)) Real(T,FB)
 
        HUMAN_CLASS_LOOP: Do N=1,N_EVAC
           ! Count the number of humans to dump out
@@ -9459,10 +9459,10 @@ Contains
           !
           ! Dump human data into the .prt5 file
           !
-          Write(LU_PROF) NPLIM
-          WRITE(LU_PROF) (XP(I),I=1,NPLIM),(YP(I),I=1,NPLIM),(ZP(I),I=1,NPLIM)
-          WRITE(LU_PROF) (TA(I),I=1,NPLIM)
-          IF (EVAC_N_QUANTITIES > 0) WRITE(LU_PROF) ((QP(I,NN),I=1,NPLIM),NN=1,EVAC_N_QUANTITIES)
+          Write(LU_PART(NM)) NPLIM
+          WRITE(LU_PART(NM)) (XP(I),I=1,NPLIM),(YP(I),I=1,NPLIM),(ZP(I),I=1,NPLIM)
+          WRITE(LU_PART(NM)) (TA(I),I=1,NPLIM)
+          IF (EVAC_N_QUANTITIES > 0) WRITE(LU_PART(NM)) ((QP(I,NN),I=1,NPLIM),NN=1,EVAC_N_QUANTITIES)
           !
           If (EVAC_N_QUANTITIES > 0) Deallocate(QP)
           Deallocate(ZP)
