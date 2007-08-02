@@ -1367,6 +1367,35 @@ void adjustviewangle(keyframe *kf, int viewtype){
   aview = kf->nodeval.aview;
 
   switch (viewtype){
+    case 0: // path relative view direction known (azimuth, elevation relative to path)
+      elev_path = kf->nodeval.elev_path;
+      az_path = kf->az_path;
+
+      dx_keyview = kf->keyview_x;
+      dy_keyview = kf->keyview_y;
+      distxy_keyview = sqrt(dx_keyview*dx_keyview+dy_keyview*dy_keyview);
+      if(distxy_keyview<=0.0)return;
+      dx_keyview /= distxy_keyview;
+      dy_keyview /= distxy_keyview;
+      angle_keyview = 180.0*atan2(dx_keyview,dy_keyview)/PI;
+
+      az_scene = angle_keyview + az_path;
+      if(az_scene>180.0)az_scene = 360.0 - az_scene;
+      if(az_scene<-180.0)az_scene += 360.0;
+      elev_scene = elev_path;
+      
+      dx_aview=sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      dy_aview=cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      dz_aview=sin(elev_scene*PI/180.0);
+
+      aview[0]=eye[0] + dx_aview/10.0;
+      aview[1]=eye[1] + dy_aview/10.0;
+      aview[2]=eye[2] + dz_aview/10.0;
+
+      kf->az_scene=az_scene;
+      kf->nodeval.elev_scene=elev_scene;
+      break;
+
     case 1: // absolute (x,y,z) view direction known
       dx_keyview = kf->keyview_x;
       dy_keyview = kf->keyview_y;
@@ -1385,8 +1414,8 @@ void adjustviewangle(keyframe *kf, int viewtype){
       dy_aview /= distxy_aview;
       dz_aview /= distxy_aview;
 
-      angle_aview = 180.0*atan2(dy_aview,dx_aview)/PI;
-      angle_keyview = 180.0*atan2(dy_keyview,dx_keyview)/PI;
+      angle_aview = 180.0*atan2(dx_aview,dy_aview)/PI;
+      angle_keyview = 180.0*atan2(dx_keyview,dy_keyview)/PI;
       az = angle_aview - angle_keyview;
       if(az>180.0)az = 360.0 - az;
       if(az<-180.0)az = az + 360.0;
@@ -1399,34 +1428,6 @@ void adjustviewangle(keyframe *kf, int viewtype){
       kf->nodeval.elev_scene=elev;
       break;
     
-    case 0: // path relative view direction known (azimuth, elevation relative to path)
-      elev_path = kf->nodeval.elev_path;
-      az_path = kf->az_path;
-
-      dx_keyview = kf->keyview_x;
-      dy_keyview = kf->keyview_y;
-      distxy_keyview = sqrt(dx_keyview*dx_keyview+dy_keyview*dy_keyview);
-      if(distxy_keyview<=0.0)return;
-      dx_keyview /= distxy_keyview;
-      dy_keyview /= distxy_keyview;
-      angle_keyview = 180.0*atan2(dy_keyview,dx_keyview)/PI;
-
-      az_scene = angle_keyview + az_path;
-      if(az_scene>180.0)az_scene = 360.0 - az_scene;
-      if(az_scene<-180.0)az_scene += 360.0;
-      elev_scene = elev_path;
-      
-      dx_aview=sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
-      dy_aview=cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
-      dz_aview=sin(elev_scene*PI/180.0);
-
-      aview[0]=eye[0] + dx_aview/10.0;
-      aview[1]=eye[1] + dy_aview/10.0;
-      aview[2]=eye[2] + dz_aview/10.0;
-
-      kf->az_scene=az_scene;
-      kf->nodeval.elev_scene=elev_scene;
-      break;
     case 2: // absolute view angles known (azimuth, elevation, relative to scene)
       az_scene = kf->az_scene;
       elev_scene = kf->nodeval.elev_scene;
@@ -1446,8 +1447,8 @@ void adjustviewangle(keyframe *kf, int viewtype){
       dx_keyview /= distxy_keyview;
       dy_keyview /= distxy_keyview;
 
-      angle_aview = 180.0*atan2(dy_aview,dx_aview)/PI;
-      angle_keyview = 180.0*atan2(dy_keyview,dx_keyview)/PI;
+      angle_aview = 180.0*atan2(dx_aview,dy_aview)/PI;
+      angle_keyview = 180.0*atan2(dx_keyview,dy_keyview)/PI;
       az_path = angle_aview - angle_keyview;
       if(az_path>180.0)az_path = 360.0 - az_path;
       if(az_path<-180.0)az_path += 360.0;
