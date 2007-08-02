@@ -1284,7 +1284,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             Q_RAD      = 0._EB
          ENDIF
 
- !if (i==1) write(0,'(I5,2F8.2,2E12.3)') DR%TAG,TMP_DROP_NEW-TMPM,DR%R*2.E6,H_HEAT,H_WALL
+ !!! if (i==1) write(0,'(I5,2F8.2,2E12.3)') DR%TAG,TMP_DROP_NEW-TMPM,DR%R*2.E6,H_HEAT,H_MASS
 
          ! Update droplet quantities
          

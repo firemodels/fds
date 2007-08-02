@@ -3920,16 +3920,16 @@ REAL(EB)    FNORM, I1, I2
 !     INTRINSIC AIMAG, CONJG, REAL
 
 
-IF( PERFCT ) WRITE(LU0, '(''1'',10X,A,1P,E11.4)' )  'Perfectly Conducting Case, size parameter =', XX
+IF( PERFCT ) WRITE(LU_ERR, '(''1'',10X,A,1P,E11.4)' )  'Perfectly Conducting Case, size parameter =', XX
 
-IF( .NOT.PERFCT ) WRITE(LU0, '(''1'',10X,3(A,1P,E11.4))' ) &
+IF( .NOT.PERFCT ) WRITE(LU_ERR, '(''1'',10X,3(A,1P,E11.4))' ) &
     'Refractive Index:  Real ', REAL( CREFIN ), '  Imag ', &
     AIMAG( CREFIN ), ',   Size Parameter =', XX
 
 
 IF( PRNT( 1 ) .AND. NUMANG>0 ) THEN
 
-   WRITE(LU0, '(/,A)' ) &
+   WRITE(LU_ERR, '(/,A)' ) &
          '    cos(angle)  ------- S1 ---------  ------- S2 ---------' &
          // '  --- S1*conjg(S2) ---   i1=S1**2   i2=S2**2  (i1+i2)/2' &
          // '  DEG POLZN'
@@ -3937,35 +3937,35 @@ IF( PRNT( 1 ) .AND. NUMANG>0 ) THEN
    DO I = 1, NUMANG
       I1 = REAL( S1( I ) )**2 + AIMAG( S1( I ) )**2
       I2 = REAL( S2( I ) )**2 + AIMAG( S2( I ) )**2
-      WRITE(LU0, '( I4, F10.6, 1P,10E11.3 )'   ) I, XMU(I), S1(I), S2(I), S1(I)*CONJG(S2(I)),I1, I2, 0.5_EB*(I1+I2), (I2-I1)/(I2+I1)
+      WRITE(LU_ERR, '( I4, F10.6, 1P,10E11.3 )'   ) I, XMU(I), S1(I), S2(I), S1(I)*CONJG(S2(I)),I1, I2, 0.5_EB*(I1+I2), (I2-I1)/(I2+I1)
    END DO
 END IF
 
 
 IF( PRNT( 2 ) ) THEN
 
-   WRITE (LU0, '(/,A,9X,A,17X,A,17X,A,/,(0P,F7.2, 1P,6E12.3) )' ) &
+   WRITE (LU_ERR, '(/,A,9X,A,17X,A,17X,A,/,(0P,F7.2, 1P,6E12.3) )' ) &
             '  Angle', 'S-sub-1', 'T-sub-1', 'T-sub-2', &
                   0.0_EB,     SFORW,    TFORW(1),  TFORW(2), &
                180._EB,     SBACK,    TBACK(1),  TBACK(2)
-   WRITE (LU0, '(/,4(A,1P,E11.4))' ) &
+   WRITE (LU_ERR, '(/,4(A,1P,E11.4))' ) &
             ' Efficiency Factors,  extinction:', QEXT, &
                                  '   scattering:', QSCA, &
                                  '   absorption:', QEXT-QSCA, &
                               '   rad. pressure:', QEXT-GQSC
    IF( NMOM>0 ) THEN
-      WRITE(LU0, '(/,A)' ) ' Normalized moments of :'
-      IF( IPOLZN==0 ) WRITE(LU0, '(''+'',27X,A)' ) 'Phase Fcn'
-      IF( IPOLZN>0 ) WRITE(LU0, '(''+'',33X,A)' )  'M1           M2          S21          D21'
+      WRITE(LU_ERR, '(/,A)' ) ' Normalized moments of :'
+      IF( IPOLZN==0 ) WRITE(LU_ERR, '(''+'',27X,A)' ) 'Phase Fcn'
+      IF( IPOLZN>0 ) WRITE(LU_ERR, '(''+'',33X,A)' )  'M1           M2          S21          D21'
 
-      IF( IPOLZN<0 ) WRITE(LU0, '(''+'',33X,A)' )  'R1           R2           R3           R4'
+      IF( IPOLZN<0 ) WRITE(LU_ERR, '(''+'',33X,A)' )  'R1           R2           R3           R4'
       FNORM = 4._EB/ ( XX**2 * QSCA )
       DO M = 0, NMOM
-         WRITE(LU0, '(A,I4)' ) '      Moment no.', M
+         WRITE(LU_ERR, '(A,I4)' ) '      Moment no.', M
          DO J = 1, 4
             IF( CALCMO( J ) ) THEN
                WRITE( FMAT, '(A,I2,A)' ) '( ''+'', T', 24+(J-1)*13, ', 1P,E13.4 )'
-               WRITE(LU0, FMAT ) FNORM * PMOM( M, J )
+               WRITE(LU_ERR, FMAT ) FNORM * PMOM( M, J )
             END IF
          END DO
       END DO
@@ -4306,9 +4306,9 @@ IF (FATAL) CALL SHUTDOWN(MESSAG)
 NUMMSG = NUMMSG + 1
 IF( MSGLIM ) RETURN
 IF( NUMMSG<=MAXMSG ) THEN
-   WRITE(LU0, '(/,2A,/)' ) ' ****** WARNING *****  ', MESSAG
+   WRITE(LU_ERR, '(/,2A,/)' ) ' ****** WARNING *****  ', MESSAG
 ELSE
-   WRITE(LU0, 9000 )
+   WRITE(LU_ERR, 9000 )
    MSGLIM = .True.
 END IF
 RETURN
@@ -4326,7 +4326,7 @@ SAVE      NUMMSG, MAXMSG
 DATA      NUMMSG / 0 /, MAXMSG / 50 /
 WrtBad = .TRUE.
 NUMMSG = NUMMSG + 1
-WRITE(LU0, '(3A)' ) ' ****  Input variable  ', VarNam,'  in error  ****'
+WRITE(LU_ERR, '(3A)' ) ' ****  Input variable  ', VarNam,'  in error  ****'
 IF( NUMMSG==MAXMSG ) CALL ErrMsg( 'Too many input errors.  Aborting...',.TRUE.)
 RETURN
 END FUNCTION WrtBad
@@ -4343,7 +4343,7 @@ LOGICAL FUNCTION WrtDim( DimNam, Minval )
 CHARACTER :: DimNam*(*)
 INTEGER ::  Minval
 
-WRITE(LU0, '(3A,I7)' ) ' ****  Symbolic dimension  ', DimNam,'  should be increased to at least ', Minval
+WRITE(LU_ERR, '(3A,I7)' ) ' ****  Symbolic dimension  ', DimNam,'  should be increased to at least ', Minval
 WrtDim = .TRUE.
 RETURN
 END FUNCTION WrtDim
@@ -4354,7 +4354,7 @@ LOGICAL FUNCTION TstBad( VarNam, RelErr )
 CHARACTER :: VarNam*(*)
 REAL(EB) ::  RelErr
 TstBad = .FALSE.
-WRITE(LU0, '(/,3A,1P,E11.2,A)' ) ' *** Output variable ', VarNam, ' differed by ', &
+WRITE(LU_ERR, '(/,3A,1P,E11.2,A)' ) ' *** Output variable ', VarNam, ' differed by ', &
      100.*RelErr,' per cent from correct value.  Self-test failed.'
 RETURN
 END FUNCTION TstBad
