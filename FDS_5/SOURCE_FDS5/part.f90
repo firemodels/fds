@@ -314,7 +314,10 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
    ENDIF
    IF (T < PC%INSERT_CLOCK(NM)) CYCLE SPRINKLER_INSERT_LOOP
    FLOW_RATE = EVALUATE_RAMP(T-DV%T_CHANGE,PY%FLOW_TAU,PY%FLOW_RAMP_INDEX)*PY%FLOW_RATE*(PC%DENSITY/1000._EB)/60._EB  ! kg/s
-   IF (FLOW_RATE <= 0._EB) CYCLE SPRINKLER_INSERT_LOOP
+   IF (FLOW_RATE <= 0._EB) THEN
+      DV%T = T
+      CYCLE SPRINKLER_INSERT_LOOP
+   ENDIF
 
    ! Direction initialization stuff
 
@@ -503,8 +506,8 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
 
    ! Indicate that droplets from this device have been inserted at this time T
 
-   DV%T = T    
-     
+   DV%T = T 
+
 ENDDO SPRINKLER_INSERT_LOOP
  
 ! Loop through all boundary cells and insert particles if appropriate
