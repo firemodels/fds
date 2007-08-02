@@ -8615,6 +8615,8 @@ void update_loaded_lists(void){
 
 }
 
+/* ------------------ get_elevaz ------------------------ */
+
 void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
   float coselev;
   float norm, norm2;
