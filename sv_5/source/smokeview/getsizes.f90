@@ -1,3 +1,77 @@
+!void create_part5sizefile(char *reg_file, char *size_file);
+subroutine fcreate_part5sizefile(part5file, part5sizefile)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_fcreate_part5sizefile@16' :: fcreate_part5sizefile
+#endif
+implicit none
+character(len=*), intent(in) :: part5file, part5sizefile
+
+integer :: lu20, lu21, version, nclasses
+logical :: isopen, exists
+integer, allocatable, dimension(:) :: numtypes, numpoints
+character(len=30) :: dummy
+integer :: i, j,one
+real :: rdummy,time
+integer :: error
+
+lu20=20
+inquire(unit=lu20,opened=isopen)
+if(isopen)close(lu20)
+inquire(file=trim(part5file),exist=exists)
+if(.not.exists)return
+open(unit=lu20,file=trim(part5file),form="unformatted",action="read",shared)
+
+lu21=21
+inquire(unit=lu21,opened=isopen)
+if(isopen)close(lu21)
+open(unit=lu21,file=trim(part5sizefile),form="formatted",action="write")
+
+error=0
+read(lu20,iostat=error)one
+if(error.ne.0)go to 998
+read(lu20,iostat=error)version
+if(error.ne.0)go to 998
+read(lu20,iostat=error)nclasses
+if(error.ne.0)go to 998
+allocate(numtypes(2*nclasses))
+allocate(numpoints(nclasses))
+do i = 1, nclasses
+  read(lu20,iostat=error)numtypes(2*i-1),numtypes(2*i)
+  if(error.ne.0)go to 999
+  do j = 1, 2*(numtypes(2*i-1)+numtypes(2*i))
+    read(lu20,iostat=error)dummy
+    if(error.ne.0)go to 999
+    read(lu20)dummy
+    if(error.ne.0)go to 999    
+  end do
+end do
+do
+  read(lu20,iostat=error)time
+  if(error.ne.0)go to 999
+  if(error.ne.0)go to 999  
+  do i = 1, nclasses
+    read(lu20,iostat=error)numpoints(i)
+    if(error.ne.0)go to 999    
+    read(lu20,iostat=error)(rdummy,j=1,3*numpoints(i)*numtypes(2*i-1))
+    if(error.ne.0)go to 999    
+    read(lu20,iostat=error)(rdummy,j=1,numpoints(i)*numtypes(2*i))
+    if(error.ne.0)go to 999    
+  end do
+  write(lu21,"(e11.4)")time
+  do i = 1, nclasses
+    write(lu21,"(1x,i9)")numpoints(i)
+  end do
+end do
+
+999 continue
+deallocate(numpoints,numtypes)
+998 continue
+close(lu20)
+close(lu21)
+
+return
+end subroutine fcreate_part5sizefile
+
 #ifdef pp_nofortran
 subroutine dummy
 end subroutine dummy
