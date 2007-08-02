@@ -11,6 +11,7 @@
 #define STDCALL extern void _stdcall
 #endif
 #ifndef pp_noappend
+#define FORTfcreate_part5sizefile fcreate_part5sizefile_
 #define FORTclosepart closepart_
 #define FORTclosezone closezone_
 #define FORTclosepatch closepatch_
@@ -35,6 +36,7 @@
 #define FORTgetplot3dqa getplot3dqa_
 #define FORTgetsliceparms getsliceparms_
 #else
+#define FORTfcreate_part5sizefile fcreate_part5sizefile
 #define FORTclosepart  closepart
 #define FORTclosezone closezone
 #define FORTclosepatch closepatch
@@ -59,6 +61,8 @@
 #define FORTgetplot3dqa getplot3dqa
 #define FORTgetsliceparms getsliceparms
 #endif
+
+STDCALL FORTfcreate_part5sizefile(char *part5file, char *part5sizefile, int lenpart5file, int lenpart5sizefile);
 
 STDCALL FORTgetsliceparms(char *file,int *endian,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,int *slice3d, int *error,int lenfile);

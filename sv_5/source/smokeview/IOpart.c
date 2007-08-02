@@ -630,7 +630,17 @@ void getpart5header(particle *parti, int partframestep){
   //                       2) base file is newer than the size file
   if(stat_sizefile!=0||
     stat_regfile_buffer.st_mtime>stat_sizefile_buffer.st_mtime){
-    create_part5sizefile(reg_file,size_file);
+//    create_part5sizefile(reg_file,size_file);
+      {
+        int lenreg, lensize;
+
+        trim(reg_file);
+        trim(size_file);
+        lenreg=strlen(reg_file);
+        lensize=strlen(size_file);
+
+        FORTfcreate_part5sizefile(reg_file,size_file,lenreg,lensize);
+      }
   }
   
   stream=fopen(size_file,"r");
