@@ -615,6 +615,7 @@ void TOUR_CB(int var){
     }
     setviewcontrols();
     selected_frame->viewtype=viewtype;
+    createtourpaths();
     break;
   case VIEW3:
     if(viewtype3==1){
@@ -633,6 +634,7 @@ void TOUR_CB(int var){
     }
     setviewcontrols();
     selected_frame->viewtype=viewtype;
+    createtourpaths();
     break;
 #endif
   case VIEW_times:
@@ -703,6 +705,9 @@ void TOUR_CB(int var){
       }
       selected_frame->az_path=tour_az_path;
       selected_frame->nodeval.elev_path=tour_elev_path;
+      selected_frame->az_scene=tour_az_scene;
+      selected_frame->nodeval.elev_scene=tour_elev_scene;
+
       selected_frame->tension=tour_tension;
       selected_frame->bias=tour_bias;
       selected_frame->continuity=tour_continuity;
@@ -837,7 +842,7 @@ void TOUR_CB(int var){
       key_az_scene = angles[0];
       key_elev_scene=angles[1];
       key_time_in = time0;
-      viewtype=0;
+      viewtype=2;
       printf(" tour time=%f xyz=%f %f %f angles=%f %f\n",key_time_in,key_xyz[0],key_xyz[1],key_xyz[2],
         key_az_scene,key_elev_scene);
     }
@@ -850,6 +855,7 @@ void TOUR_CB(int var){
       key_az_scene = (thiskey->az_scene+nextkey->az_scene)/2.0;
       key_elev_scene=(thiskey->nodeval.elev_scene+nextkey->nodeval.elev_scene)/2.0;
       key_time_in = (thiskey->noncon_time+nextkey->noncon_time)/2.0;
+      viewtype=thiskey->viewtype;
     }
 
     key_params[0]=(thiskey->bias+nextkey->bias)/2.0;
@@ -860,7 +866,6 @@ void TOUR_CB(int var){
     key_view[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.aview[2]+nextkey->nodeval.aview[2])/2.0;
     key_zoom = (thiskey->nodeval.zoom + nextkey->nodeval.zoom)/2.0;
     key_bank = (thiskey->bank + nextkey->bank)/2.0;
-    viewtype=thiskey->viewtype;
 
     newframe=add_frame(selected_frame,key_time_in,key_xyz,key_az_path,key_az_scene,key_elev_path,key_elev_scene,key_bank,
     key_params,viewtype,key_zoom,key_view);
@@ -1075,9 +1080,9 @@ void setviewcontrols(void){
     SPINNER_az_scene->set_float_val(sf->az_scene);
     SPINNER_elev_scene->set_float_val(sf->nodeval.elev_scene);
 
-    SPINNER_viewx->set_float_val(sf->nodeval.aview[0]);
-    SPINNER_viewy->set_float_val(sf->nodeval.aview[1]);
-    SPINNER_viewz->set_float_val(sf->nodeval.aview[2]);
+    SPINNER_viewx->set_float_val(xbar0+xyzmaxdiff*sf->nodeval.aview[0]);
+    SPINNER_viewy->set_float_val(ybar0+xyzmaxdiff*sf->nodeval.aview[1]);
+    SPINNER_viewz->set_float_val(zbar0+xyzmaxdiff*sf->nodeval.aview[2]);
   }
 }
 #endif

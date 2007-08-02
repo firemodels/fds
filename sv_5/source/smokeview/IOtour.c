@@ -828,8 +828,8 @@ void createtourpaths(void){
 
         scene_elev = hermiteeye(f1,6,kf1,kf2,&dummy)*pi/180.0;
         scene_az = hermiteeye(f1,7,kf1,kf2,&dummy)*pi/180.0;
-        dx = cos(scene_az)*cos(scene_elev)/10.0;
-        dy = sin(scene_az)*cos(scene_elev)/10.0;
+        dx = sin(scene_az)*cos(scene_elev)/10.0;
+        dy = cos(scene_az)*cos(scene_elev)/10.0;
         dz = sin(scene_elev)/10.0;
         oview[0]=eye[0]+dx;
         oview[1]=eye[1]+dy;
@@ -1416,13 +1416,13 @@ void adjustviewangle(keyframe *kf, int viewtype){
       if(az_scene<-180.0)az_scene += 360.0;
       elev_scene = elev_path;
       
-      dx_aview=cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
-      dy_aview=sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      dx_aview=sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      dy_aview=cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
       dz_aview=sin(elev_scene*PI/180.0);
 
-      aview[0]=(xbar0+xyzmaxdiff*eye[0])+dx_aview;
-      aview[1]=(ybar0+xyzmaxdiff*eye[1])+dy_aview;
-      aview[2]=(zbar0+xyzmaxdiff*eye[2])+dz_aview;
+      aview[0]=eye[0] + dx_aview/10.0;
+      aview[1]=eye[1] + dy_aview/10.0;
+      aview[2]=eye[2] + dz_aview/10.0;
 
       kf->az_scene=az_scene;
       kf->nodeval.elev_scene=elev_scene;
@@ -1431,18 +1431,13 @@ void adjustviewangle(keyframe *kf, int viewtype){
       az_scene = kf->az_scene;
       elev_scene = kf->nodeval.elev_scene;
 
-      dx_aview = cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
-      dy_aview = sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      dx_aview = sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
+      dy_aview = cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
       dz_aview = sin(elev_scene*PI/180.0);
-      distxy_aview = sqrt(dx_aview*dx_aview+dy_aview*dy_aview);
-      if(distxy_aview<=0.0)return;
-      dx_aview /= distxy_aview;
-      dy_aview /= distxy_aview;
-      dz_aview /= distxy_aview;
 
-      aview[0]=(xbar0+xyzmaxdiff*eye[0])+dx_aview;
-      aview[1]=(ybar0+xyzmaxdiff*eye[1])+dy_aview;
-      aview[2]=(zbar0+xyzmaxdiff*eye[2])+dz_aview;
+      aview[0]=eye[0]+dx_aview/10.0;
+      aview[1]=eye[1]+dy_aview/10.0;
+      aview[2]=eye[2]+dz_aview/10.0;
 
       dx_keyview = kf->keyview_x;
       dy_keyview = kf->keyview_y;

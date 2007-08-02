@@ -23,11 +23,29 @@ void update_all_partvis(particle *parti);
 void update_partvis(int first_frame,part5data *datacopy, int nclasses);
 int get_tagindex(part5data *data, int tagval);
 void endian_switch(void *val, int nval);
+#define READPASS 1
+#define READFAIL 0
+#define SEEKPASS 0
 
-#define FORTPART5READ(var,size) fseek(PART5FILE,4,SEEK_CUR);\
+#define FORTPART5READORIG(var,size) fseek(PART5FILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,PART5FILE);\
                            if(endianswitch==1)endian_switch(var,size);\
                            fseek(PART5FILE,4,SEEK_CUR)
+
+
+#define FORTPART5READ(var,size) \
+returncode=READPASS;\
+fseek(PART5FILE,4,SEEK_CUR);if(ferror(PART5FILE)==1||feof(PART5FILE)==1)returncode=READFAIL;\
+if(returncode==READPASS){\
+  fread(var,4,size,PART5FILE);\
+  if(ferror(PART5FILE)==1||feof(PART5FILE)==1)returncode=READFAIL;\
+}\
+if(returncode==READPASS){\
+  if(endianswitch==1)endian_switch(var,size);\
+  fseek(PART5FILE,4,SEEK_CUR);\
+  if(ferror(PART5FILE)==1||feof(PART5FILE)==1)returncode=READFAIL;\
+}
+
 
 
 /* ------------------ freepart5data ------------------------ */
@@ -213,7 +231,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
       if(numtypes[2*i]>0){
         //skip += 4 + 4*nparts*numtypes[2*i] + 4;  // skip over vals for now
         FORTPART5READ(datacopy->rvals,nparts*numtypes[2*i]);
-        if(nparts!=0&&returncode==0)goto wrapup;
+        if(returncode==0)goto wrapup;
       }
       if(numtypes[2*i+1]>0){
         skip += 4 + 4*nparts*numtypes[2*i+1] + 4;
