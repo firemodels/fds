@@ -10,7 +10,7 @@ integer :: lu20, lu21, version, nclasses
 logical :: isopen, exists
 integer, allocatable, dimension(:) :: numtypes, numpoints
 character(len=30) :: dummy
-integer :: i, j,one
+integer :: i, j,one,idummy
 real :: rdummy,time
 integer :: error
 
@@ -38,30 +38,50 @@ allocate(numpoints(nclasses))
 do i = 1, nclasses
   read(lu20,iostat=error)numtypes(2*i-1),numtypes(2*i)
   if(error.ne.0)go to 999
-  do j = 1, 2*(numtypes(2*i-1)+numtypes(2*i))
+  do j = 1, (numtypes(2*i-1)+numtypes(2*i))
     read(lu20,iostat=error)dummy
     if(error.ne.0)go to 999
-    read(lu20)dummy
+    read(lu20,iostat=error)dummy
     if(error.ne.0)go to 999    
   end do
 end do
 do
   read(lu20,iostat=error)time
   if(error.ne.0)go to 999
-  if(error.ne.0)go to 999  
   do i = 1, nclasses
     read(lu20,iostat=error)numpoints(i)
     if(error.ne.0)go to 999    
-    read(lu20,iostat=error)(rdummy,j=1,3*numpoints(i)*numtypes(2*i-1))
+    read(lu20,iostat=error)(rdummy,j=1,3*numpoints(i))
     if(error.ne.0)go to 999    
-    read(lu20,iostat=error)(rdummy,j=1,numpoints(i)*numtypes(2*i))
+    read(lu20,iostat=error)(rdummy,j=1,numpoints(i))
     if(error.ne.0)go to 999    
+    if(numtypes(2*i-1)>0)then
+      read(lu20,iostat=error)(rdummy,j=1,numpoints(i)*numtypes(2*i-1))
+      if(error.ne.0)go to 999    
+    endif
+    if(numtypes(2*i)>0)then
+      read(lu20,iostat=error)(idummy,j=1,numpoints(i)*numtypes(2*i))
+      if(error.ne.0)go to 999    
+    endif    
   end do
   write(lu21,"(e11.4)")time
   do i = 1, nclasses
     write(lu21,"(1x,i9)")numpoints(i)
   end do
 end do
+!     for(i=0;i<nclasses;i++){
+!      FORTPART5READ(&nparts,1);
+!      if(returncode==0)goto wrapup;
+!      numpoints[i]=nparts;
+!      skip = 4 + 4*nparts*3 + 4;
+!      skip += 4 + 4*nparts + 4;
+!      if(numtypes[2*i]>0)skip += 4 + 4*nparts*numtypes[2*i] + 4;
+!      if(numtypes[2*i+1]>0)skip += 4 + 4*nparts*numtypes[2*i+1] + 4;
+!      
+!      returncode=fseek(PART5FILE,skip,SEEK_CUR);
+!      if(returncode!=0)goto wrapup;
+!    }
+
 
 999 continue
 deallocate(numpoints,numtypes)
