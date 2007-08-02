@@ -1940,6 +1940,7 @@ void initvars0(void){
   sorted_surfidlist=NULL,inv_sorted_surfidlist=NULL;
   trainer_filename=NULL;
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
+  flushfile=NULL, chidfilebase=NULL;
   smokezippath=NULL;
   shellfilename=NULL;
   INI_fds_filein=NULL, fds_filein=NULL, fds_fileout=NULL,fds_fileout2=NULL;

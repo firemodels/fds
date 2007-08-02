@@ -607,6 +607,7 @@ SVEXTERN int pass_through;
 SVEXTERN int *sorted_surfidlist,*inv_sorted_surfidlist,nsorted_surfidlist;
 SVEXTERN char *trainer_filename;
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
+SVEXTERN char *flushfile, *chidfilebase;
 SVEXTERN char *smokezippath;
 SVEXTERN char *shellfilename;
 SVEXTERN char *INI_fds_filein, *fds_filein, *fds_fileout,*fds_fileout2;

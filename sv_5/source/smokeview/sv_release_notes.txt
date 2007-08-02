@@ -1,5 +1,9 @@
+207-08-02
+1.  use fortran (rather than c) to read part5 file when building size file
+
 2007-07-13
 1.  Re-arrange motion/view dialog box in response to issue issue 60
+
 2007-07-02
 1.  Preliminary colorbar editor
 2.  Make gpu shader code more robust
