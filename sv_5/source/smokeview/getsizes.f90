@@ -1,10 +1,53 @@
-!void create_part5sizefile(char *reg_file, char *size_file);
-subroutine fcreate_part5sizefile(part5file, part5sizefile)
+integer function endian_open(file,lunit,endian)
+character(len=*), intent(in) :: file
+integer, intent(in) :: lunit, endian
+
+logical isopen,exists
+integer :: error
+integer :: one
+
+error=0
+inquire(unit=lunit,opened=isopen)
+if(isopen)close(lunit)
+
+inquire(file=trim(file),exist=exists)
+if(.not.exists)then
+  endian_open=1
+  return
+endif
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_fcreate_part5sizefile@16' :: fcreate_part5sizefile
+if(endian.eq.0)then
+  open(unit=lunit,file=trim(file),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+ else
+  open(unit=lunit,file=trim(file),form="unformatted",action="read",shared)
+endif
+#elif pp_LAHEY
+if(endian.eq.0)then
+  open(unit=lunit,file=trim(file),form="unformatted",action="read",convert="BIG_ENDIAN")
+ else
+  open(unit=lunit,file=trim(file),form="unformatted",action="read")
+endif
+#else
+open(unit=lunit,file=trim(file),form="unformatted",action="read")
+#endif
+read(lunit)one
+if(one.eq.1)then
+  endian_open=0
+  rewind(lunit)
+ else
+  endian_open=1
+endif
+return
+end function endian_open
+
+!void create_part5sizefile(char *reg_file, char *size_file, int *endian,int *error);
+subroutine fcreate_part5sizefile(part5file, part5sizefile, error)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_fcreate_part5sizefile@20' :: fcreate_part5sizefile
 #endif
 implicit none
 character(len=*), intent(in) :: part5file, part5sizefile
+integer, intent(out) :: error
 
 integer :: lu20, lu21, version, nclasses
 logical :: isopen, exists
@@ -12,14 +55,19 @@ integer, allocatable, dimension(:) :: numtypes, numpoints
 character(len=30) :: dummy
 integer :: i, j,one,idummy
 real :: rdummy,time
-integer :: error
+integer :: endian
+integer :: endian_open
 
+error=1
 lu20=20
-inquire(unit=lu20,opened=isopen)
-if(isopen)close(lu20)
-inquire(file=trim(part5file),exist=exists)
-if(.not.exists)return
-open(unit=lu20,file=trim(part5file),form="unformatted",action="read",shared)
+
+error=endian_open(trim(part5file),lu20,1)
+if(error.ne.0)then
+  error=endian_open(trim(part5file),lu20,0)
+endif
+if(error.ne.0)return
+
+
 
 lu21=21
 inquire(unit=lu21,opened=isopen)
@@ -91,6 +139,7 @@ close(lu21)
 
 return
 end subroutine fcreate_part5sizefile
+
 
 #ifdef pp_nofortran
 subroutine dummy

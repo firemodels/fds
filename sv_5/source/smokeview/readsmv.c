@@ -3398,6 +3398,29 @@ typedef struct {
     }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ CHID +++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"CHID",4) == 1){
+      if(fgets(buffer,255,stream)==NULL){
+        break;
+      }
+      trim(buffer);
+      len=strlen(buffer);
+      NewMemory((void **)&chidfilebase,(unsigned int)(len+1));
+      STRCPY(chidfilebase,buffer);
+
+#ifdef pp_FLUSH
+      NewMemory((void **)&flushfile,(unsigned int)(len+6+1));
+      STRCPY(flushfile,chidfilebase);
+      STRCAT(flushfile,".flush");
+#endif
+
+      continue;
+    }
+
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ SLCF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */

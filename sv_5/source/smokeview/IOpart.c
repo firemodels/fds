@@ -632,14 +632,15 @@ void getpart5header(particle *parti, int partframestep){
     stat_regfile_buffer.st_mtime>stat_sizefile_buffer.st_mtime){
     //create_part5sizefile(reg_file,size_file);
       {
-        int lenreg, lensize;
+        int lenreg, lensize, error;
 
         trim(reg_file);
         trim(size_file);
         lenreg=strlen(reg_file);
         lensize=strlen(size_file);
 
-        FORTfcreate_part5sizefile(reg_file,size_file,lenreg,lensize);
+        FORTfcreate_part5sizefile(reg_file,size_file, &error, 
+          lenreg,lensize);
       }
   }
   
