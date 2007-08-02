@@ -62,7 +62,8 @@
 #define FORTgetsliceparms getsliceparms
 #endif
 
-STDCALL FORTfcreate_part5sizefile(char *part5file, char *part5sizefile, int lenpart5file, int lenpart5sizefile);
+STDCALL FORTfcreate_part5sizefile(char *part5file, char *part5sizefile, int *error,
+                                  int lenpart5file, int lenpart5sizefile);
 
 STDCALL FORTgetsliceparms(char *file,int *endian,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,int *slice3d, int *error,int lenfile);
