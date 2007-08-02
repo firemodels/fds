@@ -1,5 +1,4 @@
 #include "options.h"
-#define pp_TOUR
 #include <string.h>
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -43,11 +42,11 @@ GLUI_Spinner *SPINNER_elev_scene=NULL;
 
 GLUI *glui_advancedtour=NULL, *glui_tour=NULL;
 GLUI_Rollout *panel_tour=NULL;
-//#ifdef pp_TOUR
+#ifdef pp_TOUR
 GLUI_Rollout *panel_view1=NULL;
 GLUI_Rollout *panel_view2=NULL;
 GLUI_Rollout *panel_view3=NULL;
-//#endif
+#endif
 GLUI_Panel *panel_path=NULL;
 GLUI_Panel *panel_advancedkeyframe=NULL;
 GLUI_Panel *panel_keyframe=NULL;
@@ -705,8 +704,10 @@ void TOUR_CB(int var){
       }
       selected_frame->az_path=tour_az_path;
       selected_frame->nodeval.elev_path=tour_elev_path;
+#ifdef pp_TOUR
       selected_frame->az_scene=tour_az_scene;
       selected_frame->nodeval.elev_scene=tour_elev_scene;
+#endif
 
       selected_frame->tension=tour_tension;
       selected_frame->bias=tour_bias;
