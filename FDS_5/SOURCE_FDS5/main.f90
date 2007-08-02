@@ -57,6 +57,7 @@ CALL EVAC_READ_DATA
  
 ! Open and write to Smokeview file 
  
+CALL ASSIGN_FILE_NAMES
 CALL WRITE_SMOKEVIEW_FILE
 
 ! Stop all the processes if this is just a set-up run
@@ -101,7 +102,7 @@ ENDDO
 ! Potentially read data from a previous calculation 
  
 DO NM=1,NMESHES
-   IF (RESTART) CALL READ_CORE(T(NM),NM)
+   IF (RESTART) CALL READ_RESTART(T(NM),NM)
 ENDDO
  
 ! Initialize output files containing global data 
@@ -739,7 +740,7 @@ INTEGER :: N,NM
  
 MESH_LOOP: DO NM=1,NMESHES
    DO N=1,MESHES(NM)%N_STRINGS
-      WRITE(LU4,'(A)') TRIM(MESHES(NM)%STRING(N))
+      WRITE(LU_SMV,'(A)') TRIM(MESHES(NM)%STRING(N))
    ENDDO
    MESHES(NM)%N_STRINGS = 0
 ENDDO MESH_LOOP
