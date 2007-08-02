@@ -1080,7 +1080,7 @@ REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS
 REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
             RVC,WGT,OMWGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
             T,PR_AIR,M_VAP,XI,YJ,ZK,RDT,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD, &
-            Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,MINIMUM_DROP_DIAMETER,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
+            Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX
@@ -1095,7 +1095,6 @@ WMPUA  = 0.5_EB*WMPUA
 
 ! Rough estimates
 
-MINIMUM_DROP_DIAMETER  = 2.E-5_EB   ! Minimum droplet diameter, below which evaporation assumed
 MINIMUM_FILM_THICKNESS = 1.E-5_EB   ! Minimum thickness of liquid film on the surface (m)
 H_SOLID                = 300._EB    ! Heat transfer coefficient from solid surface to drop (W/m2/K)
 
@@ -1252,10 +1251,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          DENOM = 1._EB + (H_HEAT + H_WALL + H_MASS*RHO_G*H_V*DY_DTMP_DROP)*DT*A_DROP/(2._EB*M_DROP*C_DROP) 
 
          TMP_DROP_NEW = ( TMP_DROP + DT*( Q_DOT_RAD + &
-                                          A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) +  &
-                                                  H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
-                                                  H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DY_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / &
-                                                  DENOM
+                          A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) + H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
+                          H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DY_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / DENOM
 
          ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
@@ -1267,7 +1264,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
   
          M_VAP  = DT*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
          M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP))
-         IF (R_DROP<0.5_EB*MINIMUM_DROP_DIAMETER) THEN  ! Evaporate the small droplet and extract all energy needed from gas
+         IF (R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  ! Evaporate the small droplet and extract all energy needed from gas
             M_VAP      = M_DROP
             Q_CON_GAS  = M_VAP*H_V
             Q_CON_WALL = 0._EB
