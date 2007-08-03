@@ -243,7 +243,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 1, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 3, 2007)}
 
 \vspace{.5in}
 
@@ -4096,7 +4096,13 @@ Note that the parameter $\sigma$ is given the value
 $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$
 which ensures that the two functions are smoothly joined at $d=d_m$.
 The larger the value of $\gamma$, the narrower the droplet size is
-distributed about the median value.
+distributed about the median value. Note that you can prevent droplets or particles from
+exceeding {\ct MAXIMIM\_DIAMETER}, which is infinitely large by default. Also note that
+droplets less than {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step, eliminating numerical
+instabilities that can occur when droplets get very, very small. The default {\ct MINIMUM\_DIAMETER} is 20~$\mu$m.
+To prevent FDS from generating a distribution of droplets/particles altogether, set
+{\ct MONODISPERSE=.TRUE.} on the {\ct PART} line, in which case every droplet or particle will be assigned the
+same {\ct DIAMETER}.
 \item[{\ct QUANTITIES}] A character string indicating which
 scalar quantities should be used to color the particles when viewed as an
 animation. The choices are {\ct 'DROPLET\_TEMPERATURE'} ($^\circ$C), {\ct 'DROPLET\_DIAMETER'} ($\mu$m),
@@ -6169,7 +6175,10 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct INITIAL\_TEMPERATURE}      & Real            & Initial Temperature               & $^\circ$C & {\ct TMPA}    \\ \hline
 {\ct MASSLESS}                  & Logical         & Massless tracers                  &           & {\ct .FALSE.} \\ \hline
 {\ct MASS\_PER\_VOLUME}         & Real            & Droplet mass per unit volume      & kg/m$^3$  & 1             \\ \hline
+{\ct MAXIMUM\_DIAMETER}         & Real            & Above which droplet breaks up     & $\mu$m    & $\infty$      \\ \hline
+{\ct MINIMUM\_DIAMETER}         & Real            & Below which droplet evaporates    & $\mu$m    & 20            \\ \hline
 {\ct MELTING\_TEMPERATURE}      & Real            & Melting Temperature               & $^\circ$C & 0             \\ \hline
+{\ct MONODISPERSE}              & Logical         & Uniform droplet size              &           & {\ct .FALSE.} \\ \hline
 {\ct NUMBER\_INITIAL\_DROPLETS} & Integer         & Number of droplets at start       &           & 0             \\ \hline
 {\ct QUANTITY}                  & Character       & Quantity for coloring             &           &               \\ \hline
 {\ct RGB(3)}                    & Integer Triplet & Color indices (0-255)             &           &               \\ \hline
