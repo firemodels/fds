@@ -54,7 +54,7 @@ DEVICEDEF
    0.010 0.017 0.020 drawtrunccone pop
  push 0.0 0.0 0.089 translate 
    0.064 0.002 0.004 -1.0 drawnotchplate pop
- 1.0 0.0 0.0 setcolor
+ 0.0 1.0 0.0 setcolor
  push 0.00 0.0 0.04 translate 
    0.4 0.4 1.0 scalexyz 0.03 drawsphere pop
  NEWFRAME
@@ -92,7 +92,7 @@ DEVICEDEF
    0.01 0.017 0.02 drawtrunccone pop
  push 0.0 0.0 0.089 translate 
    0.064 0.002 0.008 1.0 drawnotchplate pop
- 1.0 0.0 0.0 setcolor
+ 0.0 1.0 0.0 setcolor
  push 0.00 0.0 0.04 translate 
    0.4 0.4 1.0 scalexyz 0.03 drawsphere pop
  NEWFRAME

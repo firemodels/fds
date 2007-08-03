@@ -331,7 +331,7 @@ friendly.  David Evans, William (Ruddy) Mell and Ronald Rehm used
 Smokeview to visualize {\em urban-wildland interface}\ fires.   For
 basic research, Greg Linteris has used Smokeview to visualize fire
 simulations involving the cone calorimeter. Anthony Hamins has
-used Smokeview to visualize the structure of CH4/air flames
+used Smokeview to visualize the structure of CH$_4$/air flames
 undergoing the transition from normal to microgravity conditions
 and fire suppression in a compartment. Jiann Yang has used
 Smokeview to visualize smoke or particle number density and
@@ -1934,10 +1934,18 @@ isosurface at 320 \degC
 \end{figure}
 
 \chapter{Visualizing Zone Fire Data}
-The zone fire model CFAST\cite{Jones:2004A} creates files that Smokeview may use to visualize the case being simulated.
-Smokeview visualizes the geometric layout of the scenario.  It also visualizes the layer interface heights, upper layer temperature and vent flow.  The vent flow
-is computed internally in Smokeview using the same equations and data (pressure at floor, layer interface  heights and lower/upper layer temperatures) as used by CFAST.
-The vent flow colors represent the temperature of the flow origin, the length vent flow region is proportional to the flow velocity.  Plumes are represented as inverted cones with heights calculated in Smokeview using the same correlation as CFAST and heat release rate data computed by CFAST.
+Smokeview may be used to visualize data simulated by a zone fire model.
+The zone fire model, CFAST\cite{Jones:2004A}, creates data files containing geometric information such as room dimensions and orientation, vent locations {\em etc.}.  It also outputs modeling quantities such as pressure, layer interface heights, and lower and upper layer temperatures.
+Smokeview visualizes the geometric layout of the scenario.  It also visualizes the layer interface heights, upper layer temperature and vent flow.  
+Vent flow
+is computed internally in Smokeview using the same equations and data as used by CFAST.   For a given room, pressures , $P_i$, are computed at a number of elevations, $h_i$ using
+\begin{eqnarray*}
+P_i=P_f - \rho_L g \min(h_i,y_L) - \rho_U g \max(h_i-y_L,0)
+\end{eqnarray*}
+where $P_f$ is the pressure at the floor (relative to ambient), $\rho_L$ and $\rho_U$ are the lower and upper layer densities computed from layer temperatures using the ideal gas law and $g$ is the acceleration of gravity.  When densities vary continuously with height, this becomes $P_i=P_f-\int_0^h \rho(z)gdz$.
+A pressure difference profile is then determined using pressures computed on both sides of the given vent.
+
+In the visualization, colors represent the gas temperature of the vent flow.  The colors change because the flow may come from either the lower (cooler) or upper (hotter) layer.   The length and direction of the colored vent flow region represents a vent flow speed and direction.  Plumes are represented as inverted cones with heights calculated in Smokeview using the same correlation as CFAST and heat release rate data computed by CFAST.
 A Smokeview view of the one room sample case that comes with the CFAST installation is illustrated in Figure \ref{figcfast}.
 
 \begin{figure}[\figoptions]
