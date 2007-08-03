@@ -17,9 +17,10 @@
 %     \setlength{\@tempdimb}{.5\paperwidth}%
 %     \setlength{\@tempdimc}{.5\paperheight}%
 %     \setlength{\unitlength}{1pt}%
-%     \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
-
-%\makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}{8cm}\selectfont{DRAFT}}}}
+%     \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){
+%
+%\makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}{8cm}\selectfont{DRAFT
+%}}}}
 %    }
 % }
 %\makeatother
@@ -114,7 +115,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \Huge
 \flushright{User's Guide for Smokeview Version 5 \\
 - A Tool for Visualizing Fire Dynamics Simulation Data}
-\flushright{(Draft: June 20, 2007)}
+\flushright{(Draft: August 3, 2007)}
 
 \vspace{.5in}
 \normalsize
@@ -1936,7 +1937,7 @@ isosurface at 320 \degC
 \chapter{Visualizing Zone Fire Data}
 Smokeview may be used to visualize data simulated by a zone fire model.
 The zone fire model, CFAST\cite{Jones:2004A}, creates data files containing geometric information such as room dimensions and orientation, vent locations {\em etc.}.  It also outputs modeling quantities such as pressure, layer interface heights, and lower and upper layer temperatures.
-Smokeview visualizes the geometric layout of the scenario.  It also visualizes the layer interface heights, upper layer temperature and vent flow.  
+Smokeview visualizes the geometric layout of the scenario.  It also visualizes the layer interface heights, upper layer temperature and vent flow.
 Vent flow
 is computed internally in Smokeview using the same equations and data as used by CFAST.   For a given room, pressures , $P_i$, are computed at a number of elevations, $h_i$ using
 \begin{eqnarray*}
