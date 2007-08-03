@@ -424,12 +424,9 @@ void motion(int xm, int ym){
           xx = xx2;
           yy = yy2;
         }
-
-  
-        dx = (xyzbox+eye_xyz0[0])*xx;
-        dy = -(xyzbox-eye_xyz0[1])*yy;
-        
-        if(eyeview!=EYE_CENTERED){
+        else{
+          dx = (xyzbox+eye_xyz0[0])*xx;
+          dy = -(xyzbox-eye_xyz0[1])*yy;
           eye_xyz[0] = eye_xyz0[0] + dx;
           eye_xyz[1] = eye_xyz0[1] + dy;
           eye_xyz0[0]=eye_xyz[0];
