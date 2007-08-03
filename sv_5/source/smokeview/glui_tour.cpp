@@ -831,6 +831,7 @@ void TOUR_CB(int var){
     if(times!=NULL&&tour_usecurrent==1){
       float *xyz, *angles;
       float time0;
+      float az2, el2;
 
       time0 = timeoffset + times[itime];
 
@@ -840,8 +841,13 @@ void TOUR_CB(int var){
       key_xyz[0]=xbar0 + xyzmaxdiff*xyz[0];
       key_xyz[1]=ybar0 + xyzmaxdiff*xyz[1];
       key_xyz[2]=zbar0 + xyzmaxdiff*xyz[2];
-      key_az_scene = angles[0];
-      key_elev_scene=angles[1];
+      key_az_scene = camera_current->direction_angle + camera_current->view_angle;
+      key_elev_scene=camera_current->elevation_angle;
+      az2 = PI*key_az_scene/180.0;
+      el2 = PI*key_elev_scene/180.0;
+      key_view[0]=key_xyz[0] + sin(az2)*cos(el2);
+      key_view[1]=key_xyz[1] + cos(az2)*cos(el2);
+      key_view[2]=key_xyz[2] + sin(el2);
       key_time_in = time0;
       viewtype=2;
       printf(" tour time=%f xyz=%f %f %f angles=%f %f\n",key_time_in,key_xyz[0],key_xyz[1],key_xyz[2],
@@ -856,23 +862,24 @@ void TOUR_CB(int var){
       key_az_scene = (thiskey->az_scene+nextkey->az_scene)/2.0;
       key_elev_scene=(thiskey->nodeval.elev_scene+nextkey->nodeval.elev_scene)/2.0;
       key_time_in = (thiskey->noncon_time+nextkey->noncon_time)/2.0;
+      key_view[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.aview[0]+nextkey->nodeval.aview[0])/2.0;
+      key_view[1]=ybar0 + xyzmaxdiff*(thiskey->nodeval.aview[1]+nextkey->nodeval.aview[1])/2.0;
+      key_view[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.aview[2]+nextkey->nodeval.aview[2])/2.0;
       viewtype=thiskey->viewtype;
     }
 
     key_params[0]=(thiskey->bias+nextkey->bias)/2.0;
     key_params[1]=(thiskey->continuity+nextkey->continuity)/2.0;
     key_params[2]=(thiskey->tension+nextkey->tension)/2.0;
-    key_view[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.aview[0]+nextkey->nodeval.aview[0])/2.0;
-    key_view[1]=ybar0 + xyzmaxdiff*(thiskey->nodeval.aview[1]+nextkey->nodeval.aview[1])/2.0;
-    key_view[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.aview[2]+nextkey->nodeval.aview[2])/2.0;
     key_zoom = (thiskey->nodeval.zoom + nextkey->nodeval.zoom)/2.0;
     key_bank = (thiskey->bank + nextkey->bank)/2.0;
 
     newframe=add_frame(selected_frame,key_time_in,key_xyz,key_az_path,key_az_scene,key_elev_path,key_elev_scene,key_bank,
     key_params,viewtype,key_zoom,key_view);
-    createtourpaths();
     new_select(newframe);
     set_glui_keyframe();
+    adjustviewangle(newframe,2);
+    createtourpaths();
 
     break;
 #else
