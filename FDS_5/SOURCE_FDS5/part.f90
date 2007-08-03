@@ -142,11 +142,16 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
       ENDIF
  
       IF (PC%DIAMETER>0._EB) THEN
-         STRATUM = MOD(NLP-1,NSTRATA) + 1
-         IL = PC%IL_CDF(STRATUM)
-         IU = PC%IU_CDF(STRATUM)
-         CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
-         DR%PWT = PC%W_CDF(STRATUM)
+         IF (PC%MONODISPERSE) THEN
+            DR%R   = 0.5_EB*PC%DIAMETER
+            DR%PWT = 1._EB
+         ELSE
+            STRATUM = MOD(NLP-1,NSTRATA) + 1
+            IL = PC%IL_CDF(STRATUM)
+            IU = PC%IU_CDF(STRATUM)
+            CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
+            DR%PWT = PC%W_CDF(STRATUM)
+         ENDIF
          MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
       ENDIF
  
@@ -254,11 +259,16 @@ TREE_LOOP: DO NCT=1,N_TREES
       ELSE
          DR%SHOW = .FALSE.
       ENDIF
-      STRATUM = MOD(I-1,NSTRATA) + 1
-      IL = PC%IL_CDF(STRATUM)
-      IU = PC%IU_CDF(STRATUM)
-      CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
-      DR%PWT = PC%W_CDF(STRATUM)
+      IF (PC%MONODISPERSE) THEN
+         DR%R   = 0.5_EB*PC%DIAMETER
+         DR%PWT = 1._EB
+      ELSE
+         STRATUM = MOD(I-1,NSTRATA) + 1
+         IL = PC%IL_CDF(STRATUM)
+         IU = PC%IU_CDF(STRATUM)
+         CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
+         DR%PWT = PC%W_CDF(STRATUM)
+      ENDIF
       MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
    ENDDO NISP_LOOP2
  
@@ -477,11 +487,16 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
 
       ! Randomly choose droplet size according to Cumulative Distribution Function (CDF)
  
-      STRATUM = MOD(NLP-1,NSTRATA) + 1
-      IL = PC%IL_CDF(STRATUM)
-      IU = PC%IU_CDF(STRATUM)
-      CALL RANDOM_CHOICE(PC%CDF(IL:IU), PC%R_CDF(IL:IU), IU-IL,DR%R)
-      DR%PWT = PC%W_CDF(STRATUM)
+      IF (PC%MONODISPERSE) THEN
+         DR%R   = 0.5_EB*PC%DIAMETER
+         DR%PWT = 1._EB
+      ELSE
+         STRATUM = MOD(NLP-1,NSTRATA) + 1
+         IL = PC%IL_CDF(STRATUM)
+         IU = PC%IU_CDF(STRATUM)
+         CALL RANDOM_CHOICE(PC%CDF(IL:IU), PC%R_CDF(IL:IU), IU-IL,DR%R)
+         DR%PWT = PC%W_CDF(STRATUM)
+      ENDIF
  
       ! Sum up mass of liquid being introduced
 
@@ -611,11 +626,16 @@ WALL_INSERT_LOOP: DO IW=1,NWC
       DR%IOR = 0
  
       IF (PC%DIAMETER > 0._EB) THEN
-         STRATUM = MOD(NLP-1,NSTRATA) + 1
-         IL = PC%IL_CDF(STRATUM)
-         IU = PC%IU_CDF(STRATUM)
-         CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
-         DR%PWT = PC%W_CDF(STRATUM)
+         IF (PC%MONODISPERSE) THEN
+            DR%R   = 0.5_EB*PC%DIAMETER
+            DR%PWT = 1._EB
+         ELSE
+            STRATUM = MOD(NLP-1,NSTRATA) + 1
+            IL = PC%IL_CDF(STRATUM)
+            IU = PC%IU_CDF(STRATUM)
+            CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
+            DR%PWT = PC%W_CDF(STRATUM)
+         ENDIF
          MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
       ENDIF
 
@@ -1284,7 +1304,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             Q_RAD      = 0._EB
          ENDIF
 
- !!! if (i==1) write(0,'(I5,2F8.2,2E12.3)') DR%TAG,TMP_DROP_NEW-TMPM,DR%R*2.E6,H_HEAT,H_MASS
+! if (i==1) write(0,'(I5,2F8.2,3E12.3)') DR%TAG,TMP_DROP_NEW-TMPM,DR%R*2.E6,H_HEAT,H_MASS,DR%PWT
 
          ! Update droplet quantities
          
