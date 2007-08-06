@@ -4707,7 +4707,7 @@ static int textureshowmenu=0;
   if(npatchloaded>0){
     glutAddSubMenu("Boundaries",showpatchmenu);
   }
-  if(ReadZoneFile==1||nzvents>0)glutAddSubMenu("Zone",zoneshowmenu);
+  if(nzone>0&&(ReadZoneFile==1||nzvents>0))glutAddSubMenu("Zone",zoneshowmenu);
   if(ReadTargFile==1){
     if(showtarget==1)glutAddMenuEntry("*Targets",2);
     if(showtarget==0)glutAddMenuEntry("Targets",2);
