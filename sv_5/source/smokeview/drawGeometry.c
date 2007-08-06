@@ -3135,6 +3135,21 @@ void calcNormal4(const float *v1,
 
 /* ------------------ draw_demo ------------------------ */
 
+void draw_demo2(int option){
+      demo_mode++;
+      glBegin(GL_QUADS);
+      if(demo_mode%2==0){
+        glColor3f(1.0,0.0,0.0);
+      }
+      else{
+        glColor3f(0.0,0.0,1.0);
+      }
+      glVertex3f(0.0,0.3,0.0);
+      glVertex3f(0.0,0.6,0.0);
+      glVertex3f(1.0,0.6,0.0);
+      glVertex3f(1.0,0.3,0.0);
+      glEnd();
+}
 void draw_demo(int nlat, int nlong){
   int i, j;
   extern float *sphere_xyz;
