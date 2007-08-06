@@ -1335,6 +1335,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   } 
   sniffErrors("after drawslice");
 //  draw_demo(20,20);
+//  draw_demo2(1);
 
 /* ++++++++++++++++++++++++ draw vector slice files +++++++++++++++++++++++++ */
 

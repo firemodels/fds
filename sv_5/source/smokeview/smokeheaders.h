@@ -497,6 +497,7 @@ EXTERNCPP void Visible(int state);
 EXTERNCPP void Args(int argc, char **argv);
 EXTERNCPP void usage(char **argv);
 EXTERNCPP void draw_demo(int nlat, int nlong);
+EXTERNCPP void draw_demo2(int option);
 EXTERNCPP void init_demo(float rad, int nlat, int nlong);
 EXTERNCPP void drawoutlines(void);
 EXTERNCPP void drawcbox(float x, float y, float z, float size);
