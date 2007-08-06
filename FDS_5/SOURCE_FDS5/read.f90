@@ -5322,9 +5322,16 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    ENDIF
 
    IF (BAD) THEN
-      N      = N-1
-      N_DEVC = N_DEVC-1
-      CYCLE READ_DEVC_LOOP
+      IF (QUANTITY=='TIME') THEN
+         XYZ(1) = MESHES(1)%XS
+         XYZ(2) = MESHES(1)%YS
+         XYZ(3) = MESHES(1)%ZS
+         MESH_NUMBER = 1
+      ELSE
+         N      = N-1
+         N_DEVC = N_DEVC-1
+         CYCLE READ_DEVC_LOOP
+      ENDIF
    ENDIF
 
    ! Assign properties to the DEVICE array
