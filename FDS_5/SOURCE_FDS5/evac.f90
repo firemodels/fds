@@ -35,7 +35,7 @@ Module EVAC
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS
   ! Public variables (needed in the main program):
   !
-  Character(20) :: EVAC_COMPILE_DATE = 'June 19, 2007'
+  Character(20) :: EVAC_COMPILE_DATE = 'August 6, 2007'
   Real(FB) :: EVAC_VERSION = 1.10
   !
   ! This is a group of persons, who are initialized together,
@@ -2251,7 +2251,7 @@ Contains
        ESS%H           = HEIGHT
        ESS%H0          = HEIGHT0
        ESS%FAC_V0_HORI = FAC_V0_HORI
-       If (ESS%H < 0.0_EB) Then
+       If ( (ESS%H - ESS%H0) < 0.0_EB) Then
           ESS%FAC_V0_UP   = FAC_V0_DOWN
           ESS%FAC_V0_DOWN = FAC_V0_UP
           ESS%Esc_SpeedDn   = Max(0.0_EB,+ESC_SPEED)
@@ -2619,7 +2619,6 @@ Contains
   Subroutine Initialize_Evac_Dumps
     Implicit None
     !
-    Character(50) FN121, FN122, FN123
     Character(50) tcform
     Integer n_cols, i, j, nm
     Logical L_fed_read, L_fed_save, L_eff_read, L_eff_save, &
@@ -2631,16 +2630,13 @@ Contains
     Type (MESH_TYPE), Pointer :: MFF
     !
     ! Logical unit numbers
-    ! lu121_evac: CHID_evac.csv, number of persons
-    ! lu122_evac: CHID_evac.eff, evacflow fields, binary
-    ! lu123_evac: CHID_evac.fed, FED and soot, time dependent, binary
+    ! LU_EVACCSV: CHID_evac.csv, number of persons
+    ! LU_EVACEFF: CHID_evac.eff, evacflow fields, binary
+    ! LU_EVACFED: CHID_evac.fed, FED and soot, time dependent, binary
     !      Format: 1. row: n_egrids >=0  (Old Format, version 1.10)
     !              1a. row: n < 0 (New Format)
     !              1b. row: n_egrids,4,n_corrs=0,4 (New Format, version 1.11)
     !
-    Write (FN121,'(A,A)') Trim(CHID),'_evac.csv'
-    Write (FN122,'(A,A)') Trim(CHID),'_evac.eff'
-    Write (FN123,'(A,A)') Trim(CHID),'_evac.fed'
     !
     Write(LU_ERR,'(A)')          ' FDS+Evac Evacuation Module'
     Write(LU_OUTPUT,'(A)')          ' FDS+Evac Evacuation Module'
@@ -2682,30 +2678,30 @@ Contains
     !
     If (append) Then
 
-       Open (lu121_evac,file=fn121,form='formatted',status='old', &
+       Open (LU_EVACCSV,file=FN_EVACCSV,form='formatted',status='old', &
             position='append')
        !
        If (L_fed_save) Then
-          Open (lu123_evac,file=fn123,form='unformatted', &
+          Open (LU_EVACFED,file=FN_EVACFED,form='unformatted', &
                status='old',position='append')
        End If
        ! 
        If (L_fed_read) Then
-          Inquire (file=fn123,exist=L_status)
+          Inquire (file=FN_EVACFED,exist=L_status)
           If (.Not. L_status) Then
              Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
-                  Trim(fn123), ', FED and soot not used'
+                  Trim(FN_EVACFED), ', FED and soot not used'
              Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
-                  Trim(fn123), ', FED and soot not used'
+                  Trim(FN_EVACFED), ', FED and soot not used'
              l_fed_read = .False.
              l_fed_save = .False.
              I_EVAC = Ibclr(I_EVAC,3)  ! do not read FED
              I_EVAC = Ibclr(I_EVAC,1)  ! do not save FED
           Else
              Call SHUTDOWN('ERROR: Evac Dumps: FED, no restart yet')
-             Open (lu123_evac,file=fn123,form='unformatted', &
+             Open (LU_EVACFED,file=FN_EVACFED,form='unformatted', &
                   status='old')
-             Read (lu123_evac) n_egrids_tmp
+             Read (LU_EVACFED) n_egrids_tmp
              If (n_egrids_tmp /= n_egrids) Then
                 Write(MESSAGE,'(A,2I4)') &
                      'ERROR: Init Evac Dumps: FED ',n_egrids_tmp, n_egrids
@@ -2714,22 +2710,22 @@ Contains
           End If
        End If
        If (L_eff_read) Then
-          Inquire (file=fn122,exist=L_status)
+          Inquire (file=FN_EVACEFF,exist=L_status)
           If (L_status) Then
              Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-                  Trim(fn122), ' is used'
+                  Trim(FN_EVACEFF), ' is used'
              Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-                  Trim(fn122), ' is used'
+                  Trim(FN_EVACEFF), ' is used'
              l_eff_save = .False.
              I_EVAC = Ibclr(I_EVAC,0)  ! do not save EFF
-             Open (lu122_evac,file=fn122,form='unformatted', &
+             Open (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', &
                   status='old')
-             Read (lu122_evac) n_egrids_tmp
+             Read (LU_EVACEFF) n_egrids_tmp
              If (n_egrids_tmp /= Count(EVACUATION_ONLY)) Then
                 Write(MESSAGE,'(A,2I4)') &
                      'ERROR: Init Evac Dumps: EFF ',n_egrids_tmp, &
                      Count(EVACUATION_ONLY)
-                Close (lu122_evac)
+                Close (LU_EVACEFF)
                 Call SHUTDOWN(MESSAGE)
              End If
           Else
@@ -2747,7 +2743,7 @@ Contains
        If (L_fed_save) Then
           l_fed_read = .False.
           I_EVAC = Ibclr(I_EVAC,3)  ! do not read FED
-          Open (lu123_evac,file=fn123,form='unformatted', &
+          Open (LU_EVACFED,file=FN_EVACFED,form='unformatted', &
                status='replace')
           ! First line: <0 new format
           !             -1: second line: #mesh #reals #corrs #reals #doors+exits #nreals
@@ -2761,50 +2757,50 @@ Contains
           ntmp5 = N_DOORS+N_EXITS
           ntmp6 = 4
           n_egrids_tmp = n_egrids
-          Write (lu123_evac) ntmp1
-          Write (lu123_evac) n_egrids_tmp, ntmp2, ntmp3, ntmp4, &
+          Write (LU_EVACFED) ntmp1
+          Write (LU_EVACFED) n_egrids_tmp, ntmp2, ntmp3, ntmp4, &
                ntmp5, ntmp6
           Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
-               Trim(fn123), ' is calculated and used'
+               Trim(FN_EVACFED), ' is calculated and used'
           Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
-               Trim(fn123), ' is calculated and used'
+               Trim(FN_EVACFED), ' is calculated and used'
        End If
        !
        ! Number of evac flow fields is same as the number of all evac grids.
        If (L_eff_save) Then
           l_eff_read = .False.
           I_EVAC = Ibclr(I_EVAC,2)  ! do not read EFF
-          Open (lu122_evac,file=fn122,form='unformatted', &
+          Open (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', &
                status='replace')
           n_egrids_tmp = Count(EVACUATION_ONLY)
-          Write (lu122_evac) n_egrids_tmp
+          Write (LU_EVACEFF) n_egrids_tmp
           Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-               Trim(fn122), ' is calculated and used'
+               Trim(FN_EVACEFF), ' is calculated and used'
           Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-               Trim(fn122), ' is calculated and used'
+               Trim(FN_EVACEFF), ' is calculated and used'
        End If
        ! 
        If (L_fed_read) Then
-          Inquire (file=fn123,exist=L_status)
+          Inquire (file=FN_EVACFED,exist=L_status)
           If (.Not. L_status) Then
              Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
-                  Trim(fn123), ', FED and soot not used'
+                  Trim(FN_EVACFED), ', FED and soot not used'
              Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
-                  Trim(fn123), ', FED and soot not used'
+                  Trim(FN_EVACFED), ', FED and soot not used'
              l_fed_read = .False.
              l_fed_save = .False.
              I_EVAC = Ibclr(I_EVAC,3)  ! do not read FED
              I_EVAC = Ibclr(I_EVAC,1)  ! do not save FED
           Else
-             Open (lu123_evac,file=fn123,form='unformatted', &
+             Open (LU_EVACFED,file=FN_EVACFED,form='unformatted', &
                   status='old')
-             Read (lu123_evac) ntmp1
+             Read (LU_EVACFED) ntmp1
              If ( ntmp1 >= 0 ) Then
                 ! Old format (version 1.10)
                 n_egrids_tmp = ntmp1
              Else
                 ! New format (version 1.11)
-                Read (lu123_evac) n_egrids_tmp, ntmp2, ntmp3, ntmp4, &
+                Read (LU_EVACFED) n_egrids_tmp, ntmp2, ntmp3, ntmp4, &
                      ntmp5, ntmp6
              End If
 
@@ -2814,26 +2810,26 @@ Contains
                   .Or. ntmp4 /= 8  .Or. &
                   ntmp5 /= n_doors+n_exits .Or. ntmp6 /= 4) Then
                 Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', &
-                     Trim(fn123), ', FED and soot not used'
+                     Trim(FN_EVACFED), ', FED and soot not used'
                 Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', &
-                     Trim(fn123), ', FED and soot not used'
+                     Trim(FN_EVACFED), ', FED and soot not used'
                 l_fed_read = .False.
                 l_fed_save = .False.
                 I_EVAC = Ibclr(I_EVAC,3) ! do not read FED
                 I_EVAC = Ibclr(I_EVAC,1) ! do not save FED
-                Close (lu123_evac)
+                Close (LU_EVACFED)
              End If
 
              If ( l_fed_read .Or. l_fed_save ) Then
                 Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
-                     Trim(fn123), ' is used'
+                     Trim(FN_EVACFED), ' is used'
                 Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
-                     Trim(fn123), ' is used'
+                     Trim(FN_EVACFED), ' is used'
              End If
              If (n_egrids_tmp /= n_egrids) Then
                 Write(MESSAGE,'(A,2I4)') &
                      'ERROR: Init Evac Dumps: FED ',n_egrids_tmp, n_egrids
-                Close (lu123_evac)
+                Close (LU_EVACFED)
                 Call SHUTDOWN(MESSAGE)
              End If
           End If
@@ -2841,7 +2837,7 @@ Contains
        ! 
        ! Number of evac flow fields is same as the number of all evac grids.
        If (L_eff_read) Then
-          Inquire (file=fn122,exist=L_status)
+          Inquire (file=FN_EVACEFF,exist=L_status)
           If (.Not. L_status) Then
              ! If evac flow fields are not found on the disk then 
              ! recalculate these.
@@ -2849,29 +2845,29 @@ Contains
              l_eff_read = .False.
              I_EVAC = Ibclr(I_EVAC,2) ! do not read EFF
              I_EVAC = Ibset(I_EVAC,0) ! save EFF
-             Open (lu122_evac,file=fn122,form='unformatted', &
+             Open (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', &
                   status='replace')
              n_egrids_tmp = Count(EVACUATION_ONLY)
-             Write (lu122_evac) n_egrids_tmp
+             Write (LU_EVACEFF) n_egrids_tmp
              Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-                  Trim(fn122), ' is (re)calculated'
+                  Trim(FN_EVACEFF), ' is (re)calculated'
              Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-                  Trim(fn122), ' is (re)calculated'
+                  Trim(FN_EVACEFF), ' is (re)calculated'
           Else
              l_eff_save = .False.
              I_EVAC = Ibclr(I_EVAC,0) ! do not save EFF
-             Open (lu122_evac,file=fn122,form='unformatted', &
+             Open (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', &
                   status='old')
-             Read (lu122_evac) n_egrids_tmp
+             Read (LU_EVACEFF) n_egrids_tmp
              Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-                  Trim(fn122), ' is used'
+                  Trim(FN_EVACEFF), ' is used'
              Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-                  Trim(fn122), ' is used'
+                  Trim(FN_EVACEFF), ' is used'
              If (n_egrids_tmp /= Count(EVACUATION_ONLY) ) Then
                 Write(MESSAGE,'(A,2I4)') &
                      'ERROR: Init Evac Dumps: EFF ',n_egrids_tmp, &
                      Count(EVACUATION_ONLY)
-                Close (lu122_evac)
+                Close (LU_EVACEFF)
                 Call SHUTDOWN(MESSAGE)
              End If
           End If
@@ -2881,22 +2877,22 @@ Contains
        If ( l_fed_read .Or. l_fed_save ) Then
           ! Write the 'fed' columns
           n_dead = 0
-          Open (lu121_evac,file=fn121,form='formatted',status='replace')
-          Write (lu121_evac,*) n_cols+3
+          Open (LU_EVACCSV,file=FN_EVACCSV,form='formatted',status='replace')
+          Write (LU_EVACCSV,*) n_cols+3
           Write (tcform,'(a,i4.4,a)') "(",n_cols+3,"(a,','),a)"
-          Write (lu121_evac,tcform) 'Time','Humans', &
+          Write (LU_EVACCSV,tcform) 'Time','Humans', &
                ('Floor', i=1,n_egrids), &
                ('Corridor', i=1,n_corrs), &
                ('Exit', i=1,n_exits), &
                ('Door', i=1,n_doors), &
                'Fed','Fed','Fed'
-          Write (lu121_evac,tcform) 'Time','Inside', &
+          Write (LU_EVACCSV,tcform) 'Time','Inside', &
                ('Inside', i=1,n_egrids), &
                ('Inside', i=1,n_corrs), &
                ('Counter', i=1,n_exits), &
                ('Counter', i=1,n_doors), &
                'Counter','Fed','Fed'
-          Write (lu121_evac,tcform) 's','All Nodes', &
+          Write (LU_EVACCSV,tcform) 's','All Nodes', &
                (Trim(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
                (Trim(EVAC_CORRS(i)%ID_NAME), i=1,n_corrs), &
                (Trim(EVAC_EXITS(i)%ID_NAME), i=1,n_exits), &
@@ -2904,20 +2900,20 @@ Contains
                'Deads','FED_max','FED_max_alive'
        Else
           ! Do not write the 'fed' columns
-          Open (lu121_evac,file=fn121,form='formatted',status='replace')
-          Write (lu121_evac,*) n_cols
+          Open (LU_EVACCSV,file=FN_EVACCSV,form='formatted',status='replace')
+          Write (LU_EVACCSV,*) n_cols
           Write (tcform,'(a,i4.4,a)') "(",n_cols,"(a,','),a)"
-          Write (lu121_evac,tcform) 'Time','Humans', &
+          Write (LU_EVACCSV,tcform) 'Time','Humans', &
                ('Floor', i=1,n_egrids), &
                ('Corridor', i=1,n_corrs), &
                ('Exit', i=1,n_exits), &
                ('Door', i=1,n_doors)
-          Write (lu121_evac,tcform) 'Time','Inside', &
+          Write (LU_EVACCSV,tcform) 'Time','Inside', &
                ('Inside', i=1,n_egrids), &
                ('Inside', i=1,n_corrs), &
                ('Counter', i=1,n_exits), &
                ('Counter', i=1,n_doors)
-          Write (lu121_evac,tcform) 's','All Nodes', &
+          Write (LU_EVACCSV,tcform) 's','All Nodes', &
                (Trim(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
                (Trim(EVAC_CORRS(i)%ID_NAME), i=1,n_corrs), &
                (Trim(EVAC_EXITS(i)%ID_NAME), i=1,n_exits), &
@@ -2931,15 +2927,15 @@ Contains
        Do nm = 1, NMESHES
           If (EVACUATION_ONLY(NM)) Then
              MFF=>MESHES(nm)
-             Read (lu122_evac) ibar_tmp, jbar_tmp, kbar_tmp
+             Read (LU_EVACEFF) ibar_tmp, jbar_tmp, kbar_tmp
              If ( MFF%IBAR /= ibar_tmp .Or. MFF%JBAR /= jbar_tmp .Or. &
                   MFF%KBAR /= kbar_tmp ) Then
-                Close (lu122_evac)
+                Close (LU_EVACEFF)
                 Call SHUTDOWN('ERROR: Problems to read the EFF file')
              End If
              Do  i = 0, MFF%IBAR+1
                 Do j= 0, MFF%JBAR+1
-                   Read (lu122_evac) u_tmp, v_tmp
+                   Read (LU_EVACEFF) u_tmp, v_tmp
                    MFF%U(i,j,:) = u_tmp
                    MFF%V(i,j,:) = v_tmp
                    MFF%W(i,j,:) = 0.0_EB
@@ -4184,7 +4180,7 @@ Contains
     ! IBCLR(integer,bit) clears a bit
     ! IBSET(integer,bit) sets a bit
     !
-    ! lu123_evac: CHID_evac.fed, FED and soot, time dependent, binary
+    ! LU_EVACFED: CHID_evac.fed, FED and soot, time dependent, binary
     ! File format: 1. row: n_egrids >=0  (Old Format)
     !              1a. row: n < 0 (New Format)
     !              1b. row: n_egrids,4,n_corrs,8 (New Format)
@@ -4214,9 +4210,9 @@ Contains
 
     If (L_use_fed) Then
        If (L_fed_save) Then
-          Write (lu123_evac) Real(T,FB), Real(DT_Save,FB)
+          Write (LU_EVACFED) Real(T,FB), Real(DT_Save,FB)
        Else
-          Read (lu123_evac,End=324) t_tmp, dt_tmp
+          Read (LU_EVACFED,End=324) t_tmp, dt_tmp
           T_Save = t_tmp + dt_tmp ! next time point in the file
        End If
 
@@ -4231,12 +4227,12 @@ Contains
                 jbar_tmp = JBAR
                 kbar_tmp = 1
                 n_tmp    = 4  ! New format (version 1.11)
-                Write (lu123_evac) ibar_tmp, jbar_tmp, kbar_tmp, n_tmp
+                Write (LU_EVACFED) ibar_tmp, jbar_tmp, kbar_tmp, n_tmp
              Else
-                Read (lu123_evac) ibar_tmp, jbar_tmp, kbar_tmp, n_tmp
+                Read (LU_EVACFED) ibar_tmp, jbar_tmp, kbar_tmp, n_tmp
                 If (ibar_tmp /= IBAR .Or. jbar_tmp /= JBAR .Or. &
                      n_tmp < 4 ) Then
-                   Close (lu123_evac)
+                   Close (LU_EVACFED)
                    Call SHUTDOWN('ERROR: Problems to read the FED file')
                 End If
 
@@ -4313,7 +4309,7 @@ Contains
                       End If ! imesh > 0, i.e. fire grid found
 
                       ! Save Fed, Soot, Temp(C), and RadInt
-                      Write (lu123_evac) &
+                      Write (LU_EVACFED) &
                            Real(HUMAN_GRID(i,j)%FED_CO_CO2_O2,FB), &
                            Real(HUMAN_GRID(i,j)%SOOT_DENS,FB), &
                            Real(HUMAN_GRID(i,j)%TMP_G,FB), &
@@ -4321,7 +4317,7 @@ Contains
 
                    Else     ! Read FED from a file
                       ! Read Fed, Soot, Temp(C), and RadInt
-                      Read (lu123_evac) tmpout1, tmpout2, tmpout3, tmpout4
+                      Read (LU_EVACFED) tmpout1, tmpout2, tmpout3, tmpout4
                       HUMAN_GRID(i,j)%FED_CO_CO2_O2 = tmpout1
                       HUMAN_GRID(i,j)%SOOT_DENS = tmpout2
                       HUMAN_GRID(i,j)%TMP_G = tmpout3
@@ -4477,7 +4473,7 @@ Contains
              End If                ! fed_mesh2 > 0, i.e. fire grid found
 
              ! Save Fed, Soot, Temp(C), and RadInt
-             Write (lu123_evac) &
+             Write (LU_EVACFED) &
                   Real(EVAC_CORRS(i)%FED_CO_CO2_O2(1),FB), &
                   Real(EVAC_CORRS(i)%SOOT_DENS(1),FB), &
                   Real(EVAC_CORRS(i)%TMP_G(1),FB), &
@@ -4489,7 +4485,7 @@ Contains
 
           Else                    ! Read FED from a file
              ! Read Fed, Soot, Temp(C), and RadInt
-             Read (lu123_evac) tmpout1, tmpout2, tmpout3, tmpout4, &
+             Read (LU_EVACFED) tmpout1, tmpout2, tmpout3, tmpout4, &
                   tmpout5, tmpout6, tmpout7, tmpout8
              EVAC_CORRS(i)%FED_CO_CO2_O2(1) = tmpout1
              EVAC_CORRS(i)%SOOT_DENS(1) = tmpout2
@@ -4574,7 +4570,7 @@ Contains
              End If                ! fed_mesh > 0, i.e. fire grid found
 
              ! Save Fed, Soot, Temp(C), and RadInt
-             Write (lu123_evac) &
+             Write (LU_EVACFED) &
                   Real(EVAC_DOORS(i)%FED_CO_CO2_O2,FB), &
                   Real(EVAC_DOORS(i)%SOOT_DENS,FB), &
                   Real(EVAC_DOORS(i)%TMP_G,FB), &
@@ -4582,7 +4578,7 @@ Contains
 
           Else                    ! Read FED from a file
              ! Read Fed, Soot, Temp(C), and RadInt
-             Read (lu123_evac) tmpout1, tmpout2, tmpout3, tmpout4
+             Read (LU_EVACFED) tmpout1, tmpout2, tmpout3, tmpout4
              EVAC_DOORS(i)%FED_CO_CO2_O2 = tmpout1
              EVAC_DOORS(i)%SOOT_DENS = tmpout2
              EVAC_DOORS(i)%TMP_G = tmpout3
@@ -4661,7 +4657,7 @@ Contains
              End If                ! fed_mesh > 0, i.e. fire grid found
 
              ! Save Fed, Soot, Temp(C), and RadInt
-             Write (lu123_evac) &
+             Write (LU_EVACFED) &
                   Real(EVAC_EXITS(i)%FED_CO_CO2_O2,FB), &
                   Real(EVAC_EXITS(i)%SOOT_DENS,FB), &
                   Real(EVAC_EXITS(i)%TMP_G,FB), &
@@ -4669,7 +4665,7 @@ Contains
 
           Else                    ! Read FED from a file
              ! Read Fed, Soot, Temp(C), and RadInt
-             Read (lu123_evac) tmpout1, tmpout2, tmpout3, tmpout4
+             Read (LU_EVACFED) tmpout1, tmpout2, tmpout3, tmpout4
              EVAC_EXITS(i)%FED_CO_CO2_O2 = tmpout1
              EVAC_EXITS(i)%SOOT_DENS = tmpout2
              EVAC_EXITS(i)%TMP_G = tmpout3
@@ -4785,10 +4781,10 @@ Contains
                 ibar_tmp = MFF%IBAR
                 jbar_tmp = MFF%JBAR
                 kbar_tmp = 1
-                Write (lu122_evac) ibar_tmp, jbar_tmp, kbar_tmp
+                Write (LU_EVACEFF) ibar_tmp, jbar_tmp, kbar_tmp
                 Do  i = 0, MFF%IBAR+1
                    Do j= 0, MFF%JBAR+1
-                      Write (lu122_evac) Real(MFF%U(i,j,1),FB), &
+                      Write (LU_EVACEFF) Real(MFF%U(i,j,1),FB), &
                            Real(MFF%V(i,j,1),FB)
                    End Do
                 End Do
@@ -9371,7 +9367,7 @@ Contains
  
        ! Write the current time to the prt5 file, then start
        ! looping through the particle classes
- !!!   LU_PART(NM)  = 7000+NM
+!!!    LU_PART(NM)  = 7000+NM
        Write(LU_PART(NM)) Real(T,FB)
 
        HUMAN_CLASS_LOOP: Do N=1,N_EVAC
@@ -9623,7 +9619,7 @@ Contains
        ! Write the 'fed' columns
        Write(tcform,'(a,i4.4,a,a)') "(ES13.5E3,",n_cols+1, &
             "(',',i8)", ",',',ES13.5E3,',',ES13.5E3)"
-       Write (lu121_evac,fmt=tcform) Tin, n_tot_humans, &
+       Write (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
             (MESHES(EVAC_Node_List(i)%Mesh_index)%N_HUMANS, &
             i=1,n_egrids), &
             (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
@@ -9634,7 +9630,7 @@ Contains
        ! Do not write the 'fed' columns
        Write(tcform,'(a,i4.4,a)') "(ES13.5E3,",n_cols, &
             "(',',i8))"
-       Write (lu121_evac,fmt=tcform) Tin, n_tot_humans, &
+       Write (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
             (MESHES(EVAC_Node_List(i)%Mesh_index)%N_HUMANS, &
             i=1,n_egrids), &
             (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
