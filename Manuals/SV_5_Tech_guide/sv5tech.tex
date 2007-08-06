@@ -846,7 +846,7 @@ for(i=0;i<ndata;i++){
 }
 \end{verbatim}
 
-The data indices in {\tt dataindex}\ then point into a colorbar data structure containing 256 entries, each entry contains 4 components (red, green, blue and opacity).  Each component is scaled from 0.0 to 1.0.  The data in the colorbar data structure then defines colors (by default) as illustrated by the {\bf bold path}\ in Figure \ref{colorbarinfo}.  Other colorbars may be used, for example a color bar containing shades of gray from white to black.
+The data indices in {\tt dataindex}\ then point into a colorbar data structure containing 256 entries.  Each entry contains 4 components (red, green, blue and opacity).  Each component is scaled from 0.0 to 1.0.  The data in the colorbar data structure then defines colors (by default) as illustrated by the {\bf bold path}\ in Figure \ref{colorbarinfo}.  Other colorbars may be used, for example a color bar containing shades of gray from white to black.
 
 
 \begin{figure}[\figoptions]
@@ -955,7 +955,7 @@ Figure \ref{fignewslice} shows the old and new method for coloring.  Note that t
 \begin{tabular}{cc}
 \includegraphics[height=2.5in]{figures/interpcolorrgb}&
 \includegraphics[height=2.5in]{figures/interpcolorindex}\\
-a) colors interpolated within color cube&b) colors interpolated within the colorbar\\
+a) colors interpolated within the color cube&b) colors interpolated within the colorbar\\
 \end{tabular}
 \end{center}
 \caption[Color interpolation examples]
@@ -1115,7 +1115,8 @@ The case numbers in the first row are 0, 40, 1, 2 and 3.  The case numbers in th
 \begin{center}
 \includegraphics[width=7.0in]{figures/3d_contours}
 \end{center}
-\caption{3D isosurface canonical forms.
+\caption[3D isosurface canonical forms.]{3D isosurface canonical forms.
+Dots occur at corners where the data value is greater than the isosurface value.  Other corners are below the isosurface value.  Red polygons intersect cube edges at the isosurface value.  The red polygon (isosurface) NEVER intersects an edge with two or zero dots on the ends.
   }
 \label{figisosetup}%
 \end{figure}
