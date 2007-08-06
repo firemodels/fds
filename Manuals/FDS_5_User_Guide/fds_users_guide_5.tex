@@ -4708,10 +4708,10 @@ appear/disappear at the various designated times:
 &OBST XB=0.70,0.80,0.20,0.30,0.20,0.30, COLOR='BLUE',  DEVC_ID='timer 3' /
 &OBST XB=0.70,0.80,0.60,0.70,0.60,0.70, COLOR='PINK',  DEVC_ID='timer 4' /
 
-&DEVC XYZ=..., ID='timer 1', SETPOINT= 1.0, QUANTITY='TIME', INITIAL_STATE=.FALSE./
-&DEVC XYZ=..., ID='timer 2', SETPOINT= 2.0, QUANTITY='TIME', INITIAL_STATE=.TRUE. /
-&DEVC XYZ=..., ID='timer 3', SETPOINT= 3.0, QUANTITY='TIME', INITIAL_STATE=.FALSE./
-&DEVC XYZ=..., ID='timer 4', SETPOINT= 4.0, QUANTITY='TIME', INITIAL_STATE=.TRUE./
+&DEVC XYZ=..., ID='timer 1', SETPOINT= 1., QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=..., ID='timer 2', SETPOINT= 2., QUANTITY='TIME', INITIAL_STATE=.TRUE. /
+&DEVC XYZ=..., ID='timer 3', SETPOINT= 3., QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=..., ID='timer 4', SETPOINT= 4., QUANTITY='TIME', INITIAL_STATE=.TRUE. /
 \end{verbatim}
 \normalsize
 
@@ -4839,7 +4839,8 @@ of four smoke detectors in a room has activated. Use input lines of the form:
 &DEVC XYZ=1,4,3, PROP_ID='Acme Smoker', ID='SD_2' /
 &DEVC XYZ=4,1,3, PROP_ID='Acme Smoker', ID='SD_3' /
 &DEVC XYZ=4,4,3, PROP_ID='Acme Smoker', ID='SD_4' /
-&CTRL ID='SD', FUNCTION_TYPE='ANY', INPUT_ID='SD_1','SD_2','SD_3','SD_4', INITIAL_STATE=.TRUE. /
+&CTRL ID='SD', FUNCTION_TYPE='ANY', INPUT_ID='SD_1','SD_2','SD_3','SD_4',
+      INITIAL_STATE=.TRUE. /
 \end{verbatim}
 \normalsize
 
@@ -5052,7 +5053,8 @@ specified with {\ct QUANTITY='CONTROL'}.
 &DEVC XYZ=1,4,3, PROP_ID='Acme Smoker', ID='SD_2' /
 &DEVC XYZ=4,1,3, PROP_ID='Acme Smoker', ID='SD_3' /
 &DEVC XYZ=4,4,3, PROP_ID='Acme Smoker', ID='SD_4' /
-&DEVC XYZ=2,2,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL', ID='NOZZLE 1', CTRL_ID='nozzle trigger' /
+&DEVC XYZ=2,2,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL',
+      ID='NOZZLE 1', CTRL_ID='nozzle trigger' /
 
 &CTRL ID='nozzle trigger', FUNCTION_TYPE='ALL', INPUT_ID='smokey','delay' /
 &CTRL ID='delay', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='smokey', DELAY=30. /
@@ -5074,10 +5076,13 @@ control functions, will then flow water.
 &DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler Link', ID='LINK 1' /
 &DEVC XYZ=2,3,3, PROP_ID='Acme Sprinkler Link', ID='LINK 2' /
 
-&PROP ID='Acme Sprinkler Link', QUANTITY='LINK TEMPERATURE',ACTIVATION_TEMPERATURE=74.,RTI=30./
+&PROP ID='Acme Sprinkler Link', QUANTITY='LINK TEMPERATURE',
+      ACTIVATION_TEMPERATURE=74., RTI=30./
 
-&DEVC XYZ=2,2,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL', ID='NOZZLE 1', CTRL_ID='nozzle 1 trigger' /
-&DEVC XYZ=2,3,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL', ID='NOZZLE 2', CTRL_ID='nozzle 2 trigger' /
+&DEVC XYZ=2,2,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL',
+      ID='NOZZLE 1', CTRL_ID='nozzle 1 trigger' /
+&DEVC XYZ=2,3,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL',
+      ID='NOZZLE 2', CTRL_ID='nozzle 2 trigger' /
 
 &CTRL ID='check links', FUNCTION_TYPE='ANY', INPUT_ID='LINK 1','LINK 2'/
 &CTRL ID='delay', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='check links', DELAY=30. /
