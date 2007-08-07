@@ -246,7 +246,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 3, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 7, 2007)}
 
 \vspace{.5in}
 
@@ -304,7 +304,7 @@ Jason Floyd \\
 
 \vspace{.25in}
 
-\flushright{July 2007}
+\flushright{September 2007}
 
 \vfill
 
@@ -338,7 +338,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1019-5 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019-5, \pageref{LastPage} pages (July 2007) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019-5, \pageref{LastPage} pages (September 2007) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -4100,7 +4100,7 @@ $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$
 which ensures that the two functions are smoothly joined at $d=d_m$.
 The larger the value of $\gamma$, the narrower the droplet size is
 distributed about the median value. Note that you can prevent droplets or particles from
-exceeding {\ct MAXIMIM\_DIAMETER}, which is infinitely large by default. Also note that
+exceeding {\ct MAXIMUM\_DIAMETER}, which is infinitely large by default. Also note that
 droplets less than {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step, eliminating numerical
 instabilities that can occur when droplets get very, very small. The default {\ct MINIMUM\_DIAMETER} is 20~$\mu$m.
 To prevent FDS from generating a distribution of droplets/particles altogether, set
