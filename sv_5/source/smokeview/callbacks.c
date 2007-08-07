@@ -528,7 +528,7 @@ void keyboard(unsigned char key, int x, int y){
   }
   if(strncmp((const char *)&key2,"n",1)==0){
     adjustalphaflag++;
-    if(adjustalphaflag>2)adjustalphaflag=0;
+    if(adjustalphaflag>3)adjustalphaflag=0;
     printf("adjustalphaflag=%i\n",adjustalphaflag);
     update_smoke3dflags();
     return;
