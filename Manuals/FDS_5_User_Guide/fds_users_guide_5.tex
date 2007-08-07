@@ -1132,9 +1132,22 @@ to that particular namelist group.
 The parameters in the input file can be integers ({\ct TWFIN=5400}),
 real numbers ({\ct CO\_YIELD=0.008}), groups of real numbers or integers
 ({\ct XYZ=6.04,0.28,3.65}) or ({\ct IJK=90,36,38}),
-character strings ({\ct CHID='WTC\_05\_v5'}), groups of character strings
-({\ct SURF\_IDS='burner','INERT','INERT'}),
-or logical parameters ({\ct POROUS\_FLOOR=.FALSE.}). A logical parameter is either
+character strings:
+
+{\ct CHID='WTC\_05\_v5'}
+
+\noindent
+groups of character strings:
+
+{\ct SURF\_IDS='burner','INERT','INERT'}
+
+\noindent
+or logical parameters:
+
+{\ct POROUS\_FLOOR=.FALSE.}
+
+\noindent
+A logical parameter is either
 {\ct .TRUE.} or {\ct .FALSE.} -- the periods are a
 Fortran convention. Character strings that are listed in
 this User's Manual must be copied exactly as written -- the code
@@ -3931,7 +3944,7 @@ on the gas temperature and the chemical composition. By default, the {\ct RADIAT
 There are several ways to improve the performance of the Finite Volume
 Method in solving the radiation transport equation (RTE), most of which
 increase the computation time. The solver has two modes of
-operation -- a gray gas model (default) and a wide band model~\cite{FDS_Tech_Guide_4}.
+operation -- a gray gas model (default) and a wide band model~\cite{FDS_Tech_Guide_5}.
 Modifications to these models can be made via a namelist group called
 {\ct RADI}. If running in gray gas mode (default), increase the number
 of angles from the default 100 with the integer parameter
@@ -5591,7 +5604,7 @@ be transferred (via either {\ct DEVC} or {\ct BNDF} output) to other models that
 mechanical response of the walls or structure. For many applications, the 1-D solution of the heat conduction
 equation is adequate, but in situations where it is not, another approach can be followed. FDS includes a
 calculation of the Adiabatic Surface Temperature (AST), a quantity that is representative of the heat flux to a
-solid surface. Following the idea proposed by Ulf Wickstrom~\cite{SFPE:Wickstrom}, the following equation can
+solid surface. Following the idea proposed by Ulf Wickstrom~\cite{Wickstrom:Interflam2007}, the following equation can
 be solved via a simple iterative technique to determine an effective gas temperature, $T_{\hbox{\tiny AST}}$:
 \be \dot{q}_r'' + \dot{q}_c'' = \epsilon \sigma \, \left( T_{\hbox{\tiny AST}}^4 - T_w^4 \right) + h (T_{\hbox{\tiny AST}} - T_w )  \ee
 The sum $\dot{q}_r'' + \dot{q}_c''$ is the {\em net} heat flux onto the solid surface, whose temperature is
@@ -5900,16 +5913,16 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ \hline \hline
 {\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
-{\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & {\ct 2*(T\_END-T\_BEGIN)/NFRAMES} \\ \hline
-{\ct DT\_DEVC}                  & Real         & Device output dump interval       &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_HRR}                   & Real         & Heat release dump interval        &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_ISOF}                  & Real         & Iso-surface dump interval         &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_MASS}                  & Real         & Mass diagnostic dump interval     &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_PART}                  & Real         & Particle dump interval            &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_PL3D}                  & Real         & PLOT3D dump interval              &  s        &{\ct (T\_END-T\_BEGIN)/5}          \\ \hline
-{\ct DT\_PROF}                  & Real         & Profile dump interval             &  s        &{\ct (T\_END-T\_BEGIN)/NFRAMES}    \\ \hline
+{\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & {\ct 2*T\_END/NFRAMES} \\ \hline
+{\ct DT\_DEVC}                  & Real         & Device output dump interval       &  s        & {\ct T\_END/NFRAMES}   \\ \hline
+{\ct DT\_HRR}                   & Real         & Heat release dump interval        &  s        & {\ct T\_END/NFRAMES}   \\ \hline
+{\ct DT\_ISOF}                  & Real         & Iso-surface dump interval         &  s        & {\ct T\_END/NFRAMES}   \\ \hline
+{\ct DT\_MASS}                  & Real         & Mass diagnostic dump interval     &  s        & {\ct T\_END/NFRAMES}   \\ \hline
+{\ct DT\_PART}                  & Real         & Particle dump interval            &  s        & {\ct T\_END/NFRAMES}   \\ \hline
+{\ct DT\_PL3D}                  & Real         & PLOT3D dump interval              &  s        & {\ct T\_END/5}          \\ \hline
+{\ct DT\_PROF}                  & Real         & Profile dump interval             &  s        & {\ct T\_END/NFRAMES}    \\ \hline
 {\ct DT\_RESTART}               & Real         & Restart core dump interval        &  s        & 1000000.                          \\ \hline
-{\ct DT\_SLCF}                  & Real         & Slice dump interval               &  s        &{\ct (T\_END-T\_BEGIN)/NFRAMES}    \\ \hline
+{\ct DT\_SLCF}                  & Real         & Slice dump interval               &  s        & {\ct T\_END/NFRAMES}    \\ \hline
 {\ct MAXIMUM\_DROPLETS}         & Integer      & Max particles per mesh            &           & 500000                            \\ \hline
 {\ct NFRAMES}                   & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
 {\ct PLOT3D\_QUANTITY(5)}       & Char.~Quint  & Names of PLOT3D Quantities        &           &                                   \\ \hline
@@ -6112,8 +6125,8 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct TEXTURE\_ORIGIN(3)}    & Char.~Triplet & Origin of Texture Map                         & m             &                   \\ \hline
 {\ct TMPA}                  & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
 {\ct U0,V0,W0}              & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
-{\ct VN\_MAX}               & Real          & Upper bound of Von Neumann stability range    &               & 1.0               \\ \hline
-{\ct VN\_MIN}               & Real          & Lower bound of Von Neumann stability range    &               & 0.8               \\ \hline
+{\ct VN\_MAX}               & Real          & Upper bound of Von Neumann number             &               & 1.0               \\ \hline
+{\ct VN\_MIN}               & Real          & Lower bound of Von Neumann number             &               & 0.8               \\ \hline
 \end{tabular*}
 \end{table}
 
@@ -6242,8 +6255,8 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct ALPHA\_E}                          & Real          & Smoke detector parameter         &                       & 0.0       \\ \hline
 {\ct BETA\_C}                           & Real          & Smoke detector parameter         &                       & 1.0       \\ \hline
 {\ct BETA\_E}                           & Real          & Smoke detector parameter         &                       & 1.0       \\ \hline
-{\ct BEAD\_DIAMETER}                    & Real          & Diameter of thermocouple bead    & m                     & 0.001     \\ \hline
-{\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of thermocouple bead  &                       & 0.85      \\ \hline
+{\ct BEAD\_DIAMETER}                    & Real          & Diameter of TC bead              & m                     & 0.001     \\ \hline
+{\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of TC bead            &                       & 0.85      \\ \hline
 {\ct C\_FACTOR}                         & Real          & Sprinkler activation parameter   &                       & 0.        \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & Free stream wind speed           & m/s                   & 1.0       \\ \hline
 {\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity         & m/s                   & 5.0       \\ \hline
@@ -6428,7 +6441,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hline
 \multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\ \hline \hline
 {\ct ADIABATIC}                       & Logical         & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
-{\ct BACKING}                         & Character       & Back face boundary condition      &                     & {\ct 'VOID'}            \\ \hline
+{\ct BACKING}                         & Character       & Back boundary condition           &                     & {\ct 'VOID'}            \\ \hline
 {\ct BURN\_AWAY}                      & Logical         & Object can vanish                 &                     & {\ct .FALSE.}           \\ \hline
 {\ct COLOR    }                       & Character       & Surface Color                     &                     &           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}              & Real            & Scale solid phase noding          &                     & 1.0                     \\ \hline
@@ -6437,7 +6450,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct E\_COEFFICIENT}                  & Real            & Extinguishing coefficient         & 1/s                 & 0.                      \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
 {\ct GEOMETRY}                        & Character       & Geometry type                     &                     &                         \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION }         & Real            & Heat of vaporization for specified HRR & kJ/kg          & 0.                      \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION }         & Real            & For specified HRR only            & kJ/kg               & 0.                      \\ \hline
 {\ct HRRPUA }                         & Real            & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
 {\ct ID     }                         & Character       & IDentifier                        &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Ignition temperature              & $^\circ$C           & 5000.                   \\ \hline
@@ -6447,7 +6460,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct MASS\_FRACTION(I)}               & Real Array      & For species {\ct I}               &                     &                         \\ \hline
 {\ct MATL\_ID}                        & Char. 2D Array  & (Layer,Component)                 &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION}            & Real 2D Array   & (Layer,Component)                 &                     &                         \\ \hline
-{\ct MAX\_PRESSURE }                  & Real            & Maximum over-pressure for fan     & Pa                  & 100.                    \\ \hline
+{\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 100.                    \\ \hline
 {\ct MATL\_MASS\_FRACTION}            & Real 2D Array   & (Layer,Component)                 &                     &                         \\ \hline
 {\ct NPPC}                            & Integer         & Number of particles per cell      &                     & 1                       \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}            & Real            & Mass flux of particles            & kg/m$^2$/s          & 0.                      \\ \hline
@@ -6459,7 +6472,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct RAMP\_Q}                         & Character       & Ramp ID for HRR                   &                     &                         \\ \hline
 {\ct RAMP\_T}                         & Character       & Ramp ID for temp.                 &                     &                         \\ \hline
 {\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
-{\ct RGB(3)}                          & Integer Triplet & Color indices (0-255) for surface &                     & \small 255,204,102      \\ \hline
+{\ct RGB(3)}                          & Integer Triplet & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
 {\ct SHRINK}                          & Logical         & Shrinking thickness               &                     & {\ct .TRUE.}            \\ \hline
 {\ct SLIP\_FACTOR    }                & Real            & Velocity Slip Condition           &                     & 0.5                     \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & Solid phase noding parameter      &                     & 2.0                     \\ \hline
@@ -6476,7 +6489,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct TMP\_INNER}                      & Real            & Initial solid temperature         & $^\circ$C           & 20.    \\ \hline
 {\ct TRANSPARENCY}                    & Real            & Transparency of obstruction       &    1                &           \\ \hline
 {\ct VEL    }                         & Real            & Normal velocity                   & m/s                 & 0.     \\ \hline
-{\ct VEL\_T }                         & Real Pair       & Tangential velocity components    & m/s                 & 0.     \\ \hline
+{\ct VEL\_T }                         & Real Pair       & Tangential velocity comps.        & m/s                 & 0.     \\ \hline
 {\ct VOLUME\_FLUX}                    & Real            & Normal velocity x vent area       & m$^3$/s             & 0.     \\ \hline
 {\ct Z0 }                             & Real            & Atmospheric profile origin        &  m                  & 10.    \\ \hline
 %\end{tabular*}
