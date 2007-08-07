@@ -114,7 +114,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, June 7, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Verification \& Validation Guide \\ \LARGE Volume 1: Verification \\ (Draft, August 7, 2007)}
 
 \vspace{.5in}
 
@@ -174,7 +174,7 @@ Jason Floyd \\
 
 \vspace{.25in}
 
-\flushright{May 2007}
+\flushright{September 2007}
 
 \vfill
 
@@ -182,13 +182,13 @@ Jason Floyd \\
 
 \small
 \flushright{U.S. Department of Commerce \\
-{\em Donald L. Evans, Secretary} \\
+{\em Carlos M. Gutierrez, Secretary} \\
 \hspace{1in} \\
 Technology Administration \\
-{\em Phillip J.~Bond, Under Secretary for Technology}  \\
+{\em Robert Cresanti, Under Secretary for Technology}  \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em Arden L. Bement, Jr., Director} }
+{\em William A. Jeffrey, Director} }
 
 
 \end{minipage}
@@ -329,6 +329,8 @@ of the US Nuclear Regulatory Commission (US NRC). Special thanks to
 Mark Salley and Jason Dreisbach for their efforts.
 
 Thanks to Chris Lautenburger and Carlos Fernandez-Pello for their assistance with the ``two-reaction'' test case.
+
+Thanks to Ian Thomas, Khalid Moinuddin, and Ian Bennetts for their description of and data for the ethanol pan fire example.
 
 
 
@@ -1043,7 +1045,7 @@ pyrolysis.
 
 Analytical solutions of transient, one-dimensional heat conduction through a
 slab can be found in Refs.~\cite{Drysdale:1} and
-\cite{Carslaw:1}. Four cases are examined here. In each, a slab of 
+\cite{Carslaw:1}. Four cases are examined here. In each, a slab of
 thickness $L=0.1$~m is exposed on one face to an air temperature of $T_g=120$~$^\circ$C. The other face is insulated (adiabatic). The convective
 heat transfer from the gas to the slab is $\dq_c'' = h \, (T_g - T_s)$,
 where $h$ is constant, and $T_s$ is the slab face temperature. No thermal radiation is included.
@@ -1071,10 +1073,10 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 \clearpage
 
 \subsection{Heat Conduction in Different Geometries With
-Temperature-dependent Thermal Properties ({\bf heat\_conduction\_kc})} 
+Temperature-dependent Thermal Properties ({\bf heat\_conduction\_kc})}
 
-This example demostrates the 1D heat conduction in cartesian, 
-cylindrical and spherical geometries with temperature-dependent 
+This example demostrates the 1D heat conduction in cartesian,
+cylindrical and spherical geometries with temperature-dependent
 thermal properties. The reference results were computed using a
 HEATING-code (version 7.3). HEATING is a multi-dimensional finite
 difference general purpose heat transfer model~\cite{Childs}. In
@@ -1083,15 +1085,15 @@ using a commercial finite element solver ABAQUS.
 
 The sample of homogenous material is initially at 0$^\circ$C and
 at $t>0$ exposed to a gas at 700 $^\circ$C. A fixed heat transfer
-coefficient of 10~W/Km$^2$ is assumed. The density 
+coefficient of 10~W/Km$^2$ is assumed. The density
 of the material is 10000 kg/m$^3$. The conductivity and specific heat
-are functions of temperature with following values: $k(0)=0.10$ W/Km$^2$, 
+are functions of temperature with following values: $k(0)=0.10$ W/Km$^2$,
 $k(200)=0.20$ W/Km$^2$, $c(0)=1.0$ kJ/kgK, $c(100)=1.2$ kJ/kgK,
 $c(200)=1.0$ kJ/kgK. The thickness (radius) of the sample is 0.01 m. In
 cartesian case, the back surface of the material is exposed to a gas
 at 0$^\circ$C. In the Figure below, the solid lines are FDS results and open
 symbols are the HEATING results. An example input with cylindrical
-geometry looks like 
+geometry looks like
 
 \scriptsize
 \begin{verbatim}
@@ -1112,7 +1114,7 @@ geometry looks like
       STRETCH_FACTOR = 1.0
       GEOMETRY = 'CYLINDRICAL'
       MATL_ID='MAT_1'
-      THICKNESS=0.01 / 
+      THICKNESS=0.01 /
 \end{verbatim} \normalsize
 
 \noindent
@@ -1213,7 +1215,7 @@ an absorption coefficient for both the gas and solid/liquid phases. Here are the
 
 \noindent
 The results of three calculations are shown below, each identical except for the value of the \\ {\ct ABSORPTION\_COEFFICIENT}. The results of a single experiment
-are also shown, courtesy of Ian Thomas, Victoria University, Australia.
+are also shown, courtesy of Ian Thomas, Victoria University, Australia~\cite{Thomas:JFPE}.
 
 
 \begin{center}
@@ -1228,7 +1230,7 @@ are also shown, courtesy of Ian Thomas, Victoria University, Australia.
 This example just exercises the solid phase algorithm in
 FDS. Essentially, the gas phase is shut off except for the imposition
 of a 50~kW/m$^2$ ``virtual'' heat flux. The solid in this example is a
-slab of plastic, similar in composition to PMMA. 
+slab of plastic, similar in composition to PMMA.
 
 \scriptsize
 \begin{verbatim}
@@ -1256,7 +1258,7 @@ essentially the latent heat of vaporization. The {\ct
 REFERENCE\_TEMPERATURE} indicates that the reaction is to occur at a
 (default) rate of 0.1~s$^{-1}$ at 330~$^\circ$C. The {\ct
 HEAT\_OF\_COMBUSTION} refers to the combustion of the gaseous fuel
-vapor, which does not occur in this example. 
+vapor, which does not occur in this example.
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
