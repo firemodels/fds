@@ -469,7 +469,7 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB) :: DTMP,QNETF,QDXKF,QDXKB,RR,TMP_G,T,RFACF,RFACB,RFACF2,RFACB2, &
             PPCLAUS,PPSURF,TMP_G_B,RHOWAL,CP_TERM,TSI,DT_BC, &
             DXKF,DXKB,REACTION_RATE,QCONB,DELTA_RHO_S,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
-            HVRG,Z_2,Z_F,Y_MF_G,Y_MF_W,YY_S,Y_SUM_W, RSUM_W, RSUM_G, RSUM_S, MFLUX, VOLSUM, &
+            HVRG,Z_2,Z_F,Y_MF_G,Y_MF_W,YY_S,Y_SUM_W, RSUM_W, RSUM_G, RSUM_S, MFLUX, MFLUX_W, VOLSUM, &
             DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, DX_GRID, RHO_S0, H_R,DT2_BC,TOLERANCE,C_S_ADJUST_UNITS
 INTEGER :: IBC,IIG,JJG,KKG,IIB,JJB,KKB,IWB,IC,NWP,I,J,ITMP,NR,IL,NN,NNN,NL,J1,J2,II,JJ,KK,IW,IOR,N,I_OBST
 REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS,LAYER_THICKNESS_NEW(MAX_LAYERS)
@@ -598,6 +598,10 @@ WALL_CELL_LOOP: DO IW=1,NWC
    MFLUX                = MASSFLUX(IW,I_FUEL)
    MASSFLUX(IW,I_FUEL)  = 0._EB
    ACTUAL_BURN_RATE(IW) = 0._EB
+   IF (I_WATER>0) THEN
+      MFLUX_W           = MASSFLUX(IW,I_WATER)
+      MASSFLUX(IW,I_WATER)  = 0._EB
+   ENDIF
    POINT_SHRINK         = .FALSE.
    WC%SHRINKING         = .FALSE.
    IF (SF%SHRINK) X_S_NEW(0:NWP)  = WC%X_S(0:NWP)
@@ -674,9 +678,14 @@ WALL_CELL_LOOP: DO IW=1,NWC
       ENDIF
    ENDDO POINT_LOOP1
 
-   ! If the fuel massflux is non-zero, set the ignition time
+   ! If the fuel or water massflux is non-zero, set the ignition time
 
-   IF (TW(IW)>T .AND. MASSFLUX(IW,I_FUEL)>0._EB) TW(IW) = T
+   IF (TW(IW)>T) THEN
+      IF (MASSFLUX(IW,I_FUEL) > 0._EB) TW(IW) = T
+      IF (I_WATER > 0) THEN
+         IF (MASSFLUX(IW,I_WATER) > 0._EB) TW(IW) = T
+      ENDIF
+   ENDIF
 
    ! Special reactions: LIQUID
    ! Liquid evaporation can only take place on the surface (1st cell)
@@ -696,11 +705,16 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ! Estimate the previous value of liquid mass fluxes. The possibility of multiple liquids not taken into account.
 
    MFLUX = MAX(0._EB,MFLUX - MASSFLUX(IW,I_FUEL))
+   IF (I_WATER>0) MFLUX_W = MAX(0._EB,MFLUX_W - MASSFLUX(IW,I_WATER))
    MATERIAL_LOOP2: DO N=1,SF%N_MATL
       ML  => MATERIAL(SF%MATL_INDEX(N))
       IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID) CYCLE MATERIAL_LOOP2
       IF (WC%RHO_S(1,N)==0._EB) CYCLE MATERIAL_LOOP2     
-      MFLUX = MFLUX/(ML%NU_FUEL(1)+TINY(MFLUX))
+      IF (ML%NU_FUEL(1)>0._EB) THEN
+         MFLUX = MFLUX/ML%NU_FUEL(1)
+      ELSEIF (ML%NU_WATER(1)>0._EB) THEN
+         IF (I_WATER>0) MFLUX = MFLUX_W/ML%NU_WATER(1)
+      ENDIF
       ! gas phase 
       Y_MF_G = YY(IIG,JJG,KKG,I_FUEL)
       IF (CO_PRODUCTION) THEN
@@ -793,12 +807,14 @@ WALL_CELL_LOOP: DO IW=1,NWC
          TMP_B(IW)            = MIN(TMPMAX,MAX(TMPMIN,SF%TMP_BACK))
          RHOWAL               = 0.5_EB*(RHO(IIG,JJG,KKG)+RHO_W(IW))
          CP_TERM              = MAX(0._EB,-CP_GAMMA*UW(IW)*RHOWAL)
-         QCONF(IW)            = HEAT_TRANS_COEF(IW) * (TMP_G - 0.5_EB * (TMP_F(IW) + TMP_F_OLD) )
+!         QCONF(IW)            = HEAT_TRANS_COEF(IW) * (TMP_G - 0.5_EB * (TMP_F(IW) + TMP_F_OLD) )
+         QCONF(IW)            = 0._EB
          TMP_W(IW)            = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G+CP_TERM*TMP_F(IW)-QCONF(IW) ) & 
                                 /(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
          TMP_W(IW)            = MAX(TMPMIN,TMP_W(IW))
          MASSFLUX(IW,I_FUEL)  = 0._EB
          ACTUAL_BURN_RATE(IW) = 0._EB
+         IF (I_WATER>0) MASSFLUX(IW,I_WATER)  = 0._EB
          WC%N_LAYER_CELLS     = 0
          WC%BURNAWAY          = .TRUE.
          I_OBST               = OBST_INDEX_W(IW)
