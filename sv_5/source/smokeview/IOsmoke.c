@@ -27,7 +27,12 @@ char *textFileRead(char *fn);
             alphaf_out[n]=0;\
             if(ALPHAIN==0)continue;\
             if(adjustalphaflag==2&&iblank_smoke3d[n]==0)continue;\
-            alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE)
+            if(adjustalphaflag==3){\
+              alphaf_out[n]=ALPHAIN;\
+            }\
+            else{\
+              alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE);\
+            }
 
 //  if(iblank_x[n]!=2||iblank_y[n]!=2||iblank_z[n]!=2)continue;
  // if((k==ks1||k==ks2))continue;
