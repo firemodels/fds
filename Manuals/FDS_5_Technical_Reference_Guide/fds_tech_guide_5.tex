@@ -1859,10 +1859,10 @@ temperature $T_s(x,t)$ is applied in the direction $x$ pointing into
 the solid (the point $x = 0$ represents the surface)\footnote{In cylindrical and spherical coordinates, the heat conduction
 equation is written
 \be
-  \overline{\rho c} \; \dod{T_s}{t} = \frac{1}{r} \, \dod{}{r}
+  \rho_s c_s \; \dod{T_s}{t} = \frac{1}{r} \, \dod{}{r}
   \left(rk_s \dod{T_s}{r} \right)+\dq_s'''
   \label{1dheatcyl} \quad ; \quad
-  \overline{\rho c} \; \dod{T_s}{t} = \frac{1}{r^2} \, \dod{}{r}
+  \rho_s c_s \; \dod{T_s}{t} = \frac{1}{r^2} \, \dod{}{r}
   \left(r^2k_s \dod{T_s}{r} \right)+\dq_s'''
   \label{1dheatcyl}
 \ee
@@ -1870,24 +1870,25 @@ FDS offers the user these options, with the assumption that the obstruction is n
 cylindrical or spherical in shape. This option is useful in describing the behavior of small, complicated ``targets''
 like cables or heat detection devices.}
 \be
-  \overline{\rho c} \; \dod{T_s}{t} = \dod{}{x} k_s \dod{T_s}{x} +
+  \rho_s c_s \; \dod{T_s}{t} = \dod{}{x} k_s \dod{T_s}{x} +
     \dq_s'''
   \label{1dheat}
 \ee
-Section~\ref{matcoefs} describes the component-averaged material properties, $k_s$ and
-$\overline{\rho c}$.
-The source term, $\dq_s'''$, consists of chemical reactions and radiative absorption:
+Section~\ref{matcoefs} describes the component-averaged material
+properties, $k_s$ and $\rho_s c_s$. The source term, $\dq_s'''$,
+consists of chemical reactions and radiative absorption: 
 \be
   \dq_s'''=\dq_{s,c}'''+\dq_{s,r}'''
 \ee
-Section~\ref{pyrosection} describes the term $\dq_{s,c}'''$, which is essentially the pyrolysis models
-for different types of solid and liquid fuels.
-Section~\ref{inradsection} describes the term $\dq_{s,r}'''$, the
-radiative absorption and emission in depth.
+Section~\ref{pyrosection} describes the term $\dq_{s,c}'''$, which
+is essentially the heat production (loss) rate given by the  pyrolysis
+models for different types of solid and liquid fuels.
+Section~\ref{inradsection} describes the term 
+$\dq_{s,r}'''$, the radiative absorption and emission in depth.
 Section~\ref{conflux} describes the convective heat transfer to the
 solid surface. Finally, Section~\ref{matbc} describes how the
-radiative and convective heat fluxes are applied as
-boundary conditions for Eq.~(\ref{1dheat}).
+radiative and convective heat fluxes are applied as boundary
+conditions for Eq.~(\ref{1dheat}).
 
 
 
@@ -1895,12 +1896,13 @@ boundary conditions for Eq.~(\ref{1dheat}).
 \subsection{Component-Averaged Thermal Properties}
 \label{matcoefs}
 
-The conductivity and thermal inertia of the solid are defined
+The conductivity and volumetric heat capacity of the solid are defined
 \be
    k_s = \sum_{\alpha=1}^{N_m} X_\alpha \; k_{s,\alpha} \quad ; \quad
-   \overline{\rho c} = \sum_{\alpha=1}^{N_m} \rho_{s,\alpha} \; c_{s,\alpha}
+   \rho_s c_s = \sum_{\alpha=1}^{N_m} \rho_{s,\alpha} \; c_{s,\alpha}
 \ee
-$N_m$ is the number of material components forming the solid. $\rho_{s,\alpha}$ is the
+$N_m$ is the number of material components forming the
+solid. $\rho_{s,\alpha}$ is the 
 {\em component density}
 \be
   \rho_{s,\alpha}=\rho_s \, Y_\alpha
@@ -1924,20 +1926,25 @@ of the individual components of the composite.
 \subsection{Pyrolysis Models}
 \label{pyrosection}
 
-This section describes how the chemical source term in the solid phase heat conduction equation, $\dot{q}_{s,c}'''$,
-is modeled. This is what is commonly referred to as the ``pyrolysis model,'' but it actually can represent any number of
-reactive processes, including evaporation, charring, and internal heating.
+This section describes how solid phase reactions and the chemical
+source term in the solid phase heat conduction equation,
+$\dot{q}_{s,c}'''$,  are modeled. This is what is commonly referred to
+as the ``pyrolysis model,'' but it actually can represent any number
+of reactive processes, including evaporation, charring, and internal
+heating. 
 
 
 \subsubsection{Specified Heat Release Rate}
 
-Often the intent of a fire simulation is merely to predict the transport of smoke and heat from a {\em specified} fire. In other
-words, the heat release rate is a user input, not something the model predicts. In these instances, the desired HRR is translated into
-a mass flux for fuel at a given solid surface, which can be thought of as the surface of a burner:
-\be \dm_f'' = \frac{ f(t) \; \dq_{\hbox{user}}''}{\Delta H}  \ee
-Usually, the user specifies a desired heat release rate per unit area,
-$\dq_{\hbox{user}}''$, plus a time ramp, $f(t)$, and the mass
-loss rate is computed accordingly.
+Often the intent of a fire simulation is merely to predict the
+transport of smoke and heat from a {\em specified} fire. In other
+words, the heat release rate is a user input, not something the model
+predicts. In these instances, the desired HRR is translated into a
+mass flux for fuel at a given solid surface, which can be thought of
+as the surface of a burner: \be \dm_f'' = \frac{ f(t) \;
+\dq_{\hbox{user}}''}{\Delta H} \ee Usually, the user specifies a
+desired heat release rate per unit area, $\dq_{\hbox{user}}''$, plus a
+time ramp, $f(t)$, and the mass loss rate is computed accordingly.
 
 \subsubsection{Solid Fuels}
 
@@ -1948,16 +1955,17 @@ Solids can undergo simultaneous reactions under the following assumptions:
 \item local thermal equilibrium between the solid and the volatiles,
 \item no condensation of gaseous products, and
 \item no porosity effects\footnote{Although porosity effects are not explicitly included in the model, it is possible to account for it
-because the volume fractions defined by Eq.~(\ref{volfrac}) need not sum to unity, in which case
-the thermal conductivity and absorption coefficient are effectively reduced.}
+because the volume fractions defined by Eq.~(\ref{volfrac}) need not
+sum to unity, in which case the thermal conductivity and absorption
+coefficient are effectively reduced.} 
 \end{itemize}
 Each material component may undergo several competing reactions, and
 each of these reactions may produce some other solid component
 (residue), gaseous fuel, and/or water vapor according to
 the yield coefficients $\nu_s$, $\nu_f$ and $\nu_w$, respectively.
-These coefficients should satisfy $\nu_s + \nu_f + \nu_w = 1$,
-but smaller yields may also be
-used to take into account the gaseous products that are not explicitly included in the simulation.
+These coefficients should usually satisfy $\nu_s + \nu_f + \nu_w = 1$, 
+but smaller yields may also be used to take into account the gaseous
+products that are not explicitly included in the simulation. 
 
 Consider material component $\alpha$ that undergoes $N_{r,\alpha}$
 separate reactions. We will use the index $\beta$ to represent one of
@@ -1965,12 +1973,14 @@ these reactions:
 \be \hbox{Material}_\alpha \rightarrow \nu_{s,\alpha \beta} \;
     \hbox{Residue}_{\alpha \beta} + \nu_{w,\alpha \beta} \; \hbox{H$_2$O} + \nu_{f,\alpha \beta} \; \hbox{HC} \ee
 The local density of material component $\alpha$ evolves in time
-according to the equation
+according to the solid phase species conservation equation
 \be
   \dod{ }{t} \left( \frac{\rho_{s,\alpha}}{\rho_{s0}} \right) =
     -\sum_{\beta=1}^{N_{r,\alpha}} r_{\alpha \beta} + S_\alpha
 \ee
-where $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units
+which says that the mass of conponent $\alpha$ is consumed by the
+solid phase reactions $r_{\alpha \beta}$ and produced by other
+reactions. $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units 
 (1/s) and $\rho_{s0}$ is the initial density of the material layer.
 $S_\alpha$ is the production rate of material component
 $\alpha$ as a result of the reactions of the other
@@ -1980,12 +1990,13 @@ Arrhenius and power functions:
 \be
 r_{\alpha \beta} =
     \left( \frac{\rho_{s,\alpha}}{\rho_{s0}}\right)^{n_{s,\alpha\beta}}
-    A_{\alpha \beta} \; \exp \left(-\frac{E_{\alpha\beta}}{RT_s}\right)
+    B_{\alpha \beta} \; \exp \left(-\frac{E_{\alpha\beta}}{RT_s}\right)
     \; \max \big[0,T_s-T_{ign,\alpha \beta} \big]^{n_{t,\alpha\beta}}
 \ee
 where $T_{ign,\alpha \beta}$ is an effective ``ignition temperature''
-that can be used to dictate that the reaction not occur below a
-user-specified temperature. By default, the term is deactivated.
+that can be used to dictate that the reaction must not occur below a
+user-specified temperature. By default, the term is deactivated
+($n_{t,\alpha\beta}=0$).
 
 The production term $S_\alpha$ is the sum over all the reactions where the
 solid residue is material $\alpha$
@@ -2008,18 +2019,19 @@ The volumetric production rate of fuel gases and water vapor are
 It is assumed that the fuel gases and water vapor are transported instantaneously to the surface, where the
 mass fluxes are given by:
 \be
-   \dm_f'' = \int \dm_f''' \, dx  \quad ; \quad \dm_w'' = \int\dm_w'''
-   \, dx
+   \dm_f'' = \int_0^L \dm_f'''(x) \, dx  \quad ; \quad 
+   \dm_w'' = \int_0^L \dm_w'''(x) \, dx
 \ee
-The chemical source term of the heat conduction equation consists of the
-heats of reaction and the differences in latent heats between the original
-material and the products
+where $L$ is the thickness of the surface. The chemical source term of
+the heat conduction equation consists of the heats of reaction and the
+differences in latent heats between the original material and the
+products 
 \be
-\dot{q}_{s,c}'''(T) = \rho_{s0}\;
+\dot{q}_{s,c}'''(x) = \rho_{s0}\;
     \sum_{\alpha=1}^{N_m} \sum_{\beta=1}^{N_{r,\alpha}}
-    r_{\alpha \beta} \;
-    \left[H_{v,\alpha \beta}-
-    \int_{T_0}^T \Delta c(\theta)d\theta \right]
+    r_{\alpha \beta}(x) \;
+    \left[H_{r,\alpha \beta}-
+    \int_{T_0}^{T(x)} \Delta c(\theta)d\theta \right]
 \ee
 It is possible to define a reaction where the sum of the residue, fuel
 and water yields is less than one. FDS then assumes that the solid is
@@ -3930,6 +3942,7 @@ $B$                       \> pre-exponential factor for Arrhenius reaction \\
 $C$                       \> Sprinkler C-Factor \\
 $C_D$                     \> drag coefficient \\
 $C_s$                     \> Smagorinsky constant (LES)  \\
+$c_s$			  \> Solid material specific heat \\
 $c_p$                     \> constant pressure specific heat \\
 $D$                       \> diffusion coefficient   \\
 $d_m$                     \> median volumetric droplet diameter \\
@@ -3938,6 +3951,7 @@ $\bof_b$                  \> external force vector (excluding gravity) \\
 $g$                       \> acceleration of gravity \\
 $\bg$                     \> gravity vector, normally $(0,0,-g)$ \\
 $\cal H$                  \> total pressure divided by the density \\
+$H_{r,\alpha\beta}$	  \> heat of reaction for a solid phase reaction \\
 $h$                       \> enthalpy; heat transfer coefficient   \\
 $h_\alpha$                \> enthalpy of species $\alpha$   \\
 $h_\alpha^0$              \> heat of formation of species $\alpha$   \\
@@ -3963,10 +3977,12 @@ $Q^*$                     \> characteristic fire size \\
 $\R$                      \> universal gas constant \\
 $\RE$                     \> Reynolds number \\
 $r_d$                     \> droplet radius \\
+$r_{\alpha\beta}$	  \> solid phase reaction rate \\
 $\hbox{RTI}$              \> Response Time Index of sprinkler \\
 $\bs$                     \> unit vector in direction of radiation intensity\\
 $\SC$                     \> Schmidt number \\
 $\SH$                     \> Sherwood number \\
+$S_\alpha$		  \> solid component production rate \\
 $T$                       \> temperature \\
 $t$                       \> time           \\
 $U$                       \> integrated radiant intensity \\
@@ -3990,6 +4006,9 @@ $\epsilon$                \> dissipation rate \\
 $\kappa$                  \> absorption coefficient \\
 $\mu$                     \> dynamic viscosity \\
 $\nu_i$                   \> stoichiometric coefficient, species $i$ \\
+$\nu_s$			  \> yield of solid residue in solid phase reaction \\
+$\nu_f$			  \> yield of gaseous fuel in solid phase reaction \\
+$\nu_w$			  \> yield of gaseous water in solid phase reaction \\
 $\rho$                    \> density \\
 $\btau_{ij}$              \> viscous stress tensor \\
 $\chi_r$                  \> radiative loss fraction \\
