@@ -1990,7 +1990,7 @@ Arrhenius and power functions:
 \be
 r_{\alpha \beta} =
     \left( \frac{\rho_{s,\alpha}}{\rho_{s0}}\right)^{n_{s,\alpha\beta}}
-    B_{\alpha \beta} \; \exp \left(-\frac{E_{\alpha\beta}}{RT_s}\right)
+    A_{\alpha \beta} \; \exp \left(-\frac{E_{\alpha\beta}}{RT_s}\right)
     \; \max \big[0,T_s-T_{ign,\alpha \beta} \big]^{n_{t,\alpha\beta}}
 \ee
 where $T_{ign,\alpha \beta}$ is an effective ``ignition temperature''
@@ -3938,7 +3938,8 @@ tested.
 
 \begin{tabbing}
 $A_s$ \hspace{1in}        \= droplet surface area \\
-$B$                       \> pre-exponential factor for Arrhenius reaction \\
+$A_{\alpha\beta}$          \> pre-exponential factor for solid phase Arrhenius reaction \\
+$B$                       \> pre-exponential factor for gas phase Arrhenius reaction \\
 $C$                       \> Sprinkler C-Factor \\
 $C_D$                     \> drag coefficient \\
 $C_s$                     \> Smagorinsky constant (LES)  \\
