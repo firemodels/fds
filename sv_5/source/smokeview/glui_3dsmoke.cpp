@@ -87,6 +87,7 @@ extern "C" void glui_3dsmoke_setup2(int main_window){
   glui_3dsmoke->add_radiobutton_to_group(alphagroup,"none");
   glui_3dsmoke->add_radiobutton_to_group(alphagroup,"adjust off-center");
   glui_3dsmoke->add_radiobutton_to_group(alphagroup,"adjust off-center & zero at boundaries");
+  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"zero at boundaries");
 
   if(smoketest==1){
     panel7 = glui_3dsmoke->add_panel_to_panel(panel_smoke3d,"Test Smoke");
