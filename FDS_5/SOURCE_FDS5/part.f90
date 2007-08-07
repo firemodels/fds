@@ -151,6 +151,10 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
             IU = PC%IU_CDF(STRATUM)
             CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
             DR%PWT = PC%W_CDF(STRATUM)
+            IF (2._EB*DR%R > PC%MAXIMUM_DIAMETER) THEN
+               DR%PWT = DR%PWT*DR%R**3/(0.5_EB*PC%MAXIMUM_DIAMETER)**3
+               DR%R = 0.5_EB*PC%MAXIMUM_DIAMETER
+            ENDIF
          ENDIF
          MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
       ENDIF
@@ -268,6 +272,10 @@ TREE_LOOP: DO NCT=1,N_TREES
          IU = PC%IU_CDF(STRATUM)
          CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
          DR%PWT = PC%W_CDF(STRATUM)
+         IF (2._EB*DR%R > PC%MAXIMUM_DIAMETER) THEN
+            DR%PWT = DR%PWT*DR%R**3/(0.5_EB*PC%MAXIMUM_DIAMETER)**3
+            DR%R = 0.5_EB*PC%MAXIMUM_DIAMETER
+         ENDIF
       ENDIF
       MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
    ENDDO NISP_LOOP2
@@ -496,6 +504,10 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
          IU = PC%IU_CDF(STRATUM)
          CALL RANDOM_CHOICE(PC%CDF(IL:IU), PC%R_CDF(IL:IU), IU-IL,DR%R)
          DR%PWT = PC%W_CDF(STRATUM)
+         IF (2._EB*DR%R > PC%MAXIMUM_DIAMETER) THEN
+            DR%PWT = DR%PWT*DR%R**3/(0.5_EB*PC%MAXIMUM_DIAMETER)**3
+            DR%R = 0.5_EB*PC%MAXIMUM_DIAMETER
+         ENDIF
       ENDIF
  
       ! Sum up mass of liquid being introduced
@@ -635,6 +647,10 @@ WALL_INSERT_LOOP: DO IW=1,NWC
             IU = PC%IU_CDF(STRATUM)
             CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
             DR%PWT = PC%W_CDF(STRATUM)
+            IF (2._EB*DR%R > PC%MAXIMUM_DIAMETER) THEN
+               DR%PWT = DR%PWT*DR%R**3/(0.5_EB*PC%MAXIMUM_DIAMETER)**3
+               DR%R = 0.5_EB*PC%MAXIMUM_DIAMETER
+            ENDIF
          ENDIF
          MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
       ENDIF
