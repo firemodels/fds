@@ -191,7 +191,7 @@ CALL ChkMemErr('INIT','LOGICAL_WORK',IZERO)
  
 ! Boundary file patch counter
  
-ALLOCATE(M%INC(-3:3,0:M%N_OBST))
+ALLOCATE(M%INC(-3:3,0:M%N_OBST),STAT=IZERO)
 CALL ChkMemErr('INIT','INC',IZERO)
 
 ! Initialize background pressure, temperature and density
