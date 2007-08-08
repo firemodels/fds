@@ -6868,14 +6868,10 @@ append an underscore to the names of the C routines called by the Fortran
 code. If the compiler produces an error involving the names of routines
 that are not recognized, invoke the C compiler pre-processing directive {\ct pp\_noappend} to stop
 the compiler from appending the underscore to the names of the C routines.
-\item There are only two non-standard calls in the Fortran code. The first is called
-{\ct FLUSH}. This routine forces the contents of a given output
-file buffer to be emptied, making it easier to check on
-the progress of a given calculation. Most Fortran compilers accept this
-routine, but if a compiler complains, comment out the call to {\ct FLUSH} in {\bf func.f90} or provide a suitable alternative.
-The second non-standard call is {\ct GETARG}, also in {\bf func.f90}. This routine reads the name of the input file off of the command line. This call cannot
-be simply commented out; a suitable alternative must be found. For Lahey compilers, the call is {\ct GETCL(STRING)}.
-\item The only compiler option necessary, in addition to any needed to
+\item There is only one non-standard calls in the Fortran code. The non-standard call is {\ct GETARG}, 
+in {\bf func.f90}. This routine reads the name of the input file off of the command line. This call cannot
+be simply commented out; a suitable alternative must be found. 
+The only compiler option necessary, in addition to any needed to
 address the above issues, is for full optimization (usually -O or some variant). Some
 compilers have a standard optimization level, plus various degrees of
 ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
