@@ -1805,6 +1805,12 @@ changed. Much of the logic governing the trajectories of water droplets
 over solid objects assumes that gravity points in the negative $z$
 direction.
 
+There are a few special applications where you might want to vary the gravity vector in
+time, for instance, for spacecraft applications. The gravity vector, {\ct GVEC}, can be
+made a function of time using ``ramps'' for the individual components, {\ct RAMP\_GX},
+{\ct RAMP\_GY}, and {\ct RAMP\_GZ}, all specified on the {\ct MISC} line. More about
+{\ct RAMP}s can be found in Section~\ref{info:RAMP}.
+
 
 \subsection{Special Topic: Restoring the Baroclinic Vorticity}
 \index{baroclinic torque}
@@ -5311,7 +5317,9 @@ to record surface quantities at all solid obstructions. As with
 the {\ct SLCF} group, each quantity is prescribed with a separate
 {\ct BNDF} line, and the output files are of the form {\bf CHID\_$n$.bf}.
 No physical coordinates need be specified, however, just {\ct QUANTITY}\index{BNDF!QUANTITY}.
-See Table \ref{tab:output}
+See Table \ref{tab:output}. For certain output quantities, additional parameters need to be specified via
+the {\ct PROP} namelist group. In such cases, add the character string, {\ct PROP\_ID}, to the {\ct BNDF} line
+to tell FDS where to find the necessary extra information.
 
 Note that {\ct BNDF} files (Section~\ref{out:BNDF}) can become very
 large, so be careful in prescribing the time interval.
@@ -5825,8 +5833,9 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\ \hline \hline
-{\ct FYI}          & Character   & Comment String (has no effect)    &     \\ \hline
-{\ct QUANTITY}     & Character   & Quantity to visualize &           &     \\ \hline
+{\ct FYI}          & Character   & Comment String (has no effect)    &           &     \\ \hline
+{\ct PROP\_ID}     & Character   & Source of specific property info  &           &     \\ \hline
+{\ct QUANTITY}     & Character   & Quantity to visualize             &           &     \\ \hline
 \end{tabular*}
 \end{table}
 
@@ -5883,10 +5892,10 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct DEPTH}            & Real            & Depth into surface for internal wall temp                        & m     & 0       \\ \hline
 {\ct FLOWRATE}         & Real            & Suction flowrate for an aspiration detector                      & kg/s  & 0       \\ \hline
 {\ct FYI}              & Character       & Comment String (has no effect)                                   &       &         \\ \hline
-{\ct IOR}              & Integer         & Index of Orientation ($\pm$1,$\pm$2,$\pm$3)                                &       &         \\ \hline
+{\ct IOR}              & Integer         & Index of Orientation ($\pm$1,$\pm$2,$\pm$3)                      &       &         \\ \hline
 {\ct ID}               & Character       & Identifying label for output                                     &       &         \\ \hline
-{\ct INITIAL\_STATE}   & Logical         & Initial state of device                                          &       & .FALSE. \\ \hline
-{\ct LATCH}            & Logical         & Device cannot change state multiple times                        &       & .TRUE.  \\ \hline
+{\ct INITIAL\_STATE}   & Logical         & Initial state of device                                          &       & {\ct .FALSE.} \\ \hline
+{\ct LATCH}            & Logical         & Device cannot change state multiple times                        &       & {\ct .TRUE.}  \\ \hline
 {\ct ORIENTATION}      & Real Triplet    & Direction vector                                                 &       & 0,0,-1  \\ \hline
 {\ct PROP\_ID}         & Character       & Associated {\ct PROP}erty line                                   &       &         \\ \hline
 {\ct QUANTITY}         & Character       & Name of Quantity to output                                       &       &         \\ \hline
@@ -5898,7 +5907,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \end{tabular*}
 \normalsize
 \end{table}
- 
+
 \vspace{\baselineskip}
 
 \vfill
@@ -5915,17 +5924,17 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ \hline \hline
 {\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
-{\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & {\ct 2*(T\_END-T\_BEGIN)/NFRAMES} \\ \hline
-{\ct DT\_CTRL}                  & Real         & Control status dump interval      &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_DEVC}                  & Real         & Device output dump interval       &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_HRR}                   & Real         & Heat release dump interval        &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_ISOF}                  & Real         & Iso-surface dump interval         &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_MASS}                  & Real         & Mass diagnostic dump interval     &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_PART}                  & Real         & Particle dump interval            &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
-{\ct DT\_PL3D}                  & Real         & PLOT3D dump interval              &  s        & {\ct (T\_END-T\_BEGIN)/5}         \\ \hline
-{\ct DT\_PROF}                  & Real         & Profile dump interval             &  s        & {\ct (T\_END-T\_BEGIN)/NFRAMES}   \\ \hline
+{\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES} \\ \hline
+{\ct DT\_CTRL}                  & Real         & Control status dump interval      &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_DEVC}                  & Real         & Device output dump interval       &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_HRR}                   & Real         & Heat release dump interval        &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_ISOF}                  & Real         & Iso-surface dump interval         &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_MASS}                  & Real         & Mass diagnostic dump interval     &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_PART}                  & Real         & Particle dump interval            &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_PL3D}                  & Real         & PLOT3D dump interval              &  s        & $\Delta t${\ct /5}         \\ \hline
+{\ct DT\_PROF}                  & Real         & Profile dump interval             &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
 {\ct DT\_RESTART}               & Real         & Restart core dump interval        &  s        & 1000000.                          \\ \hline
-{\ct DT\_SLCF}                  & Real         & Slice dump interval               &  s        & {\ct T\_END/NFRAMES}    \\ \hline
+{\ct DT\_SLCF}                  & Real         & Slice dump interval               &  s        & $\Delta t${\ct /NFRAMES}    \\ \hline
 {\ct MASS\_FILE}                & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                     \\ \hline
 {\ct MAXIMUM\_DROPLETS}         & Integer      & Max particles per mesh            &           & 500000                            \\ \hline
 {\ct NFRAMES}                   & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
@@ -5936,6 +5945,9 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \end{tabular*}
 \normalsize
 \end{table}
+
+\noindent
+$\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
@@ -6065,7 +6077,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat      &                  &        \\ \hline
 \end{tabular*}
 \end{table}
-              
+
 \vspace{\baselineskip}
 
 \vfill
@@ -6127,6 +6139,9 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct P\_INF}                & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
 {\ct POROUS\_FLOOR}         & Logical       & Droplets disappear at floor                   &               & {\ct .TRUE.}      \\ \hline
 {\ct RADIATION}             & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
+{\ct RAMP\_GX}              & Character     & Time function for $x$ comp. of gravity        &               &                   \\ \hline
+{\ct RAMP\_GY}              & Character     & Time function for $y$ comp. of gravity        &               &                   \\ \hline
+{\ct RAMP\_GZ}              & Character     & Time function for $z$ comp. of gravity        &               &                   \\ \hline
 {\ct RESTART}               & Logical       & Restart previous calculation                  &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}         & Character     & Restart file CHID                             &               & {\ct CHID}        \\ \hline
 {\ct SC}                    & Real          & Schmidt number (LES only)                     &               & 0.5               \\ \hline
@@ -6177,7 +6192,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct XB(6) }              & Real Sextuplet      & Physical coordinates                  & m  &               \\ \hline
 \end{tabular*}
 \end{table}
- 
+
 \vspace{\baselineskip}
 
 \vfill
@@ -6215,7 +6230,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct MONODISPERSE}              & Logical         & Uniform droplet size              &           & {\ct .FALSE.} \\ \hline
 {\ct NUMBER\_INITIAL\_DROPLETS} & Integer         & Number of droplets at start       &           & 0             \\ \hline
 {\ct QUANTITIES(10)}            & Character       & Quantities for coloring           &           &               \\ \hline
-{\ct RGB(3)}                    & Integer Triplet & Color indices (0-255)             &           &               \\ \hline
+{\ct RGB(3)}                    & Integers        & Color indices (0-255)             &           &               \\ \hline
 {\ct SAMPLING\_FACTOR}          & Integer         & Filter for output file            &           & 1             \\ \hline
 {\ct SPEC\_ID}                  & Character       & Name of gas species               &           &               \\ \hline
 {\ct SPECIFIC\_HEAT}            & Real            & Droplet specific heat             & kJ/kg/K   & 4.184         \\ \hline
@@ -6358,7 +6373,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)      &   cm$^3$/mol/s    &     \\ \hline
 {\ct C}                                   & Real        & Carbon atoms in fuel                      &                   & 3    \\ \hline
 {\ct CO\_YIELD}                           & Real        & Fraction of CO from the fuel              & kg/kg             & 0        \\ \hline
-{\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real        & Suppression criterion                     &   $^\circ$C       & 1427    \\ \hline
+{\ct \tiny CRITICAL\_FLAME\_TEMPERATURE}        & Real        & Suppression criterion                     &   $^\circ$C       & 1427    \\ \hline
 {\ct E}                                   & Real        & Activation Energy (Finite Rate)           &   kJ/kmol         &     \\ \hline
 {\ct EPUMO2}                              & Real        & Energy per Unit Mass Oxygen               &   kJ/kg           & 13100    \\ \hline
 {\ct FUEL}                                & Character   & Name of Fuel (Finite Rate)                &                   &     \\ \hline
@@ -6366,10 +6381,10 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct H}                                   & Real        & Hydrogen atoms in fuel                    &                   & 8    \\ \hline
 {\ct H2\_YIELD}                           & Real        & Fraction of H$_2$ from the fuel           & kg/kg             & 0        \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}                & Real        & Energy per Unit Mass Fuel                 & kJ/kg             &         \\ \hline
-{\ct HRRPUA\_SHEET}                       & Real        & Upper limit on computed heat release rate & kW/m$^2$          & 200.    \\ \hline
+{\ct HRRPUA\_SHEET}                       & Real        & Upper limit on flame HRR                  & kW/m$^2$          & 200.    \\ \hline
 {\ct ID}                                  & Character   & Identifier                                &                   &     \\ \hline
 {\ct IDEAL}                               & Logical     & Adjust for minor product yields           &                   & {\ct .FALSE.}    \\ \hline
-{\ct MASS\_EXTINCTION\_COEFFICIENT}       & Real        & Visibility parameter                      &  m$^2$/kg         & 8700.    \\ \hline
+{\ct \tiny MASS\_EXTINCTION\_COEFFICIENT}       & Real        & Visibility parameter                      &  m$^2$/kg         & 8700.    \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                 & Real        & Visibility parameter                      &  m                &     30   \\ \hline
 {\ct MW\_OTHER}                           & Real        & Molecular Weight of {\ct OTHER}           &  g/mol            & 28      \\ \hline
 {\ct N}                                   & Real        & Nitrogen atoms in the fuel                &                   & 0    \\ \hline
@@ -6387,7 +6402,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct Y\_O2\_INFTY}                        & Real        & Ambient Oxygen Mass Frac.                 &  kg/kg            & 0.23    \\ \hline
 \end{tabular*}
 \end{table}
- 
+
 %NAMELIST /REAC/ E,BOF,HEAT_OF_COMBUSTION,FYI,FUEL,OXIDIZER,EPUMO2,ID, N_S,&
 %                Y_O2_INFTY,Y_F_INLET, &
 %                H2_YIELD,SOOT_YIELD,CO_YIELD,TEMPERATURE_DEPENDENT,X_O2_LL,CRITICAL_FLAME_TEMPERATURE,NU,SOOT_H_FRACTION, &
@@ -6561,7 +6576,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct FYI}             & Character   & Comment String (has no effect)              &             &                  \\ \hline
 {\ct SYNCHRONIZE}     & Logical     & Lock time step of multiple meshes           &             & {\ct .TRUE.}     \\ \hline
 {\ct T\_BEGIN}        & Real        & Starting time for calculation               & s           & 0.               \\ \hline
-{\ct T\_END}          & Real        & Time When FINished                          & s           & TWFIN            \\ \hline
+{\ct T\_END}          & Real        & Time When FINished                          & s           & {\ct TWFIN}            \\ \hline
 %{\ct TIME\_SHRINK\_FACTOR & Real        & Scaling factor for time ramps and specific heat &             & 1.               \\ \hline
 {\ct TWFIN }          & Real        & Time When FINished                          & s           & 1.               \\ \hline
 {\ct WALL\_INCREMENT} & Integer     & Timesteps between 1D wall solution updates  &             & 2                \\ \hline
@@ -6621,7 +6636,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct XYZ(3) }               & Real Triplet      & Physical coordinates              & m           &                     \\ \hline
 \end{tabularx}
 \end{table}
-          
+
 %NAMELIST /VENT/ XB,IOR,MB,PBX,PBY,PBZ,SURF_ID,FYI,RGB,TRANSPARENCY,COLOR, &
 %                TEXTURE_ORIGIN,OUTLINE,DEVC_ID,CTRL_ID, &
 %                XYZ,EVACUATION,MESH_ID,SPREAD_RATE
