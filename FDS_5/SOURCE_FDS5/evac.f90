@@ -45,7 +45,7 @@ Module EVAC
   Type EVACUATION_Type
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB,T_START=0._EB, Angle=0._EB
      Character(60) :: CLASS_NAME='null', ID_NAME='null'
-     Character(30) :: GRID_NAME='null', Scen_Id='null'
+     Character(30) :: GRID_NAME='null'
      Logical :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE.
      Integer :: N_INITIAL=0,COLOR_INDEX=0,SAMPLING=0, IPC=0, IMESH=0
      Integer :: GN_MIN=0, GN_MAX=0
@@ -105,8 +105,6 @@ Module EVAC
      Real(EB) :: A=0._EB,B=0._EB,Lambda=0._EB,C_Young=0._EB,Gamma=0._EB,Kappa=0._EB
      Real(EB) :: r_torso=0._EB,r_shoulder=0._EB,d_shoulder=0._EB,m_iner=0._EB, Tau_iner=0._EB
      Character(60) :: ID_NAME='null'
-     Character(30) :: Reva_Diameter='null', Reva_Velocity='null', Reva_Pre_Evac='null', &
-          Reva_Tau_Evac='null'
      Integer :: I_DIA_DIST=0, I_VEL_DIST=0, I_PRE_DIST=0, I_DET_DIST=0, I_TAU_DIST=0
   End Type EVAC_PERS_Type
   !
@@ -166,7 +164,6 @@ Module EVAC
      Character(60) :: ID_NAME='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
-     Character(30) :: Reva_Corr_Vel='null'
      Type (CORR_LL_Type), Pointer :: First
   End Type EVAC_CORR_Type
   !
@@ -181,7 +178,7 @@ Module EVAC
           TO_INODE=0, N_Initial=0
      Character(60) :: CLASS_NAME='null', ID_NAME='null'
      Character(60) :: TO_NODE='null'
-     Character(30) :: GRID_NAME='null', Scen_Id='null'
+     Character(30) :: GRID_NAME='null'
      Logical :: After_Tpre=.FALSE., No_Persons=.FALSE.
      Integer :: N_VENT_FFIELDS=0
      Integer, Pointer, Dimension(:) :: I_DOOR_NODES
@@ -284,16 +281,9 @@ Module EVAC
   Integer :: ILABEL_last
   Character(100) :: MESSAGE
   !
-  Character(30), Dimension(:), Allocatable :: REVAID
   Real(EB), Dimension(:,:), Allocatable :: TT_Evac, FF_Evac
   Integer, Dimension(:), Allocatable :: NTT_Evac
-  Integer :: NRAMP_Evac, REVA_DIM
   !
-  Character(30), Dimension(:), Allocatable :: SCENID
-  Character(30), Dimension(:,:), Allocatable :: &
-       TT_Scen, FF_Scen
-  Integer, Dimension(:), Allocatable :: NTT_Scen
-  Integer :: NSCEN_Evac, SCEN_DIM
   !
   Logical :: NOT_RANDOM
   Integer :: I_FRIC_SW, COLOR_METHOD
@@ -325,7 +315,7 @@ Contains
     Character(30) QUANTITY
     Character(60) FYI,CLASS_NAME,ID,PERS_ID,TO_NODE,EVAC_ID, &
          DEFAULT_PROPERTIES
-    Character(26) FLOW_FIELD_ID,SCEN_ID
+    Character(26) FLOW_FIELD_ID
     Integer :: DIAMETER_DIST,VELOCITY_DIST, &
          PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST, D_TORSO_DIST, &
          D_SHOULDER_DIST
@@ -342,8 +332,6 @@ Contains
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED
     Logical :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, &
          EXIT_SIGN, KEEP_XY
-    Character(26) Reva_Diameter, Reva_Velocity, Reva_Pre_Evac, &
-         Reva_Tau_Evac, Reva_Corr_Vel
     Character(26), Dimension(:), Allocatable :: CharID_Tmp
     Character(26) :: VENT_FFIELD, EVAC_MESH
     Real(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED
@@ -351,7 +339,6 @@ Contains
     Character(26), Dimension(51) :: KNOWN_DOOR_NAMES
     Real(EB), Dimension(51) :: KNOWN_DOOR_PROBS
 
-    Integer :: NRAMP_Tmp, NSCEN_Tmp
     Type (MESH_Type), Pointer :: M
     Integer :: ii,jj,kk
     
@@ -367,17 +354,17 @@ Contains
          EXIT_SIGN, EVAC_MESH, COLOR_INDEX, XYZ_SMOKE, KEEP_XY
     Namelist /ENTR/ ID, XB, IOR, FLOW_FIELD_ID, MAX_FLOW, &
          FYI, WIDTH, QUANTITY, PERS_ID, T_START, &
-         T_STOP, AFTER_REACTION_TIME, SCEN_ID, &
+         T_STOP, AFTER_REACTION_TIME, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, &
          EVAC_MESH
     Namelist /CORR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, WIDTH1, WIDTH2, &
          EFF_WIDTH, EFF_LENGTH, MAX_HUMANS_INSIDE, FAC_SPEED, &
-         REVA_CORR_VEL, XB1, XB2
+         XB1, XB2
     Namelist /EVAC/ NUMBER_INITIAL_PERSONS, QUANTITY, FYI, &
          ID, DTSAM, XB, FLOW_FIELD_ID, PERS_ID, &
          T_START, T_STOP, IOR, MAX_FLOW, WIDTH, ANGLE, &
-         AFTER_REACTION_TIME, SCEN_ID, GN_MIN, GN_MAX, &
+         AFTER_REACTION_TIME, GN_MIN, GN_MAX, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, EVAC_MESH
     Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, EVAC_MESH
 
@@ -393,8 +380,6 @@ Contains
          TAU_MEAN,TAU_PARA,TAU_PARA2,TAU_LOW,TAU_HIGH, &
          FCONST_A,FCONST_B,L_NON_SP, &
          C_YOUNG,GAMMA,KAPPA, GROUP_DENS, &
-         REVA_DIAMETER, REVA_VELOCITY, &
-         REVA_PRE_EVAC, REVA_TAU_EVAC, &
          FAC_A_WALL, FAC_B_WALL, LAMBDA_WALL, &
          NOISEME, NOISETH, NOISECM, &
          I_FRIC_SW, GROUP_EFF, RADIUS_COMPLETE_0, &
@@ -437,8 +422,6 @@ Contains
     ! identification number, which is ILABEL_last + 1
     ILABEL_last = 0
     !
-    NRAMP_Tmp = 0
-    NSCEN_Tmp = 0
     !
     ! Determine total number of EVAC lines in the input file
     !
@@ -679,10 +662,6 @@ Contains
        !
        ID  = 'null'
        ! Default: No distributions for human properties
-       REVA_DIAMETER = 'null'
-       REVA_VELOCITY = 'null'
-       REVA_PRE_EVAC = 'null'
-       REVA_TAU_EVAC = 'null'
        DEFAULT_PROPERTIES = 'null'
        DIAMETER_DIST = -1
        VELOCITY_DIST = -1
@@ -870,16 +849,8 @@ Contains
        TAU_EVAC_DIST = Max(0,TAU_EVAC_DIST)
        !
        !
-       If (REVA_DIAMETER /= 'null') NRAMP_Tmp = NRAMP_Tmp + 1
-       If (REVA_VELOCITY /= 'null') NRAMP_Tmp = NRAMP_Tmp + 1
-       If (REVA_PRE_EVAC /= 'null') NRAMP_Tmp = NRAMP_Tmp + 1
-       If (REVA_TAU_EVAC /= 'null') NRAMP_Tmp = NRAMP_Tmp + 1
        ! 
        PCP%ID_NAME = ID
-       PCP%Reva_Diameter = REVA_DIAMETER
-       PCP%Reva_Velocity = REVA_VELOCITY
-       PCP%Reva_Pre_Evac = REVA_PRE_EVAC
-       PCP%Reva_Tau_Evac = REVA_TAU_EVAC
        !
        PCP%D_mean = DIA_MEAN
        PCP%I_DIA_DIST  = DIAMETER_DIST
@@ -887,8 +858,6 @@ Contains
        PCP%D_high = DIA_HIGH
        PCP%D_para = DIA_PARA
        PCP%D_para2 = DIA_PARA2
-       ! Use user given distribution (REVA ramp)
-       If (PCP%Reva_Diameter /= 'null') PCP%I_DIA_DIST = -1
        !
        PCP%V_mean = VEL_MEAN
        PCP%I_VEL_DIST  = VELOCITY_DIST
@@ -896,8 +865,6 @@ Contains
        PCP%V_high = VEL_HIGH
        PCP%V_para = VEL_PARA
        PCP%V_para2 = VEL_PARA2
-       ! Use user given distribution (REVA ramp)
-       If (PCP%Reva_Velocity /= 'null') PCP%I_VEL_DIST = -1
        !
        PCP%Tau_mean = TAU_MEAN
        PCP%I_TAU_DIST  = TAU_EVAC_DIST
@@ -905,8 +872,6 @@ Contains
        PCP%Tau_high = TAU_HIGH
        PCP%Tau_para = TAU_PARA
        PCP%Tau_para2 = TAU_PARA2
-       ! Use user given distribution (REVA ramp)
-       If (PCP%Reva_Tau_Evac /= 'null') PCP%I_TAU_DIST = -1
        ! 
        PCP%Tpre_mean  = PRE_MEAN
        PCP%I_PRE_DIST = PRE_EVAC_DIST
@@ -914,8 +879,6 @@ Contains
        PCP%Tpre_high  = PRE_HIGH
        PCP%Tpre_para  = PRE_PARA
        PCP%Tpre_para2  = PRE_PARA2
-       ! Use user given distribution (REVA ramp)
-       If (PCP%Reva_Pre_Evac /= 'null') PCP%I_PRE_DIST = -1
        ! 
        PCP%Tdet_mean  = DET_MEAN
        PCP%I_DET_DIST = DET_EVAC_DIST
@@ -1447,7 +1410,6 @@ Contains
        IOR           = 0
        FLOW_FIELD_ID = 'null'
        TO_NODE       = 'null'
-       REVA_CORR_VEL = 'null'
        CHECK_FLOW    = .False.
        MAX_FLOW      = 0.0_EB
        WIDTH         = 0.0_EB
@@ -1462,8 +1424,6 @@ Contains
        If (IOS == 1) Exit READ_CORR_LOOP
        Read(LU_INPUT,CORR,End=29,IOSTAT=IOS)
        !
-       If (REVA_CORR_VEL /= 'null') NRAMP_Tmp = NRAMP_Tmp + 1
-       PCX%Reva_Corr_Vel = REVA_CORR_VEL
        !
        Do I=1,5,2
           If (XB(I) > XB(I+1)) Then
@@ -1719,7 +1679,6 @@ Contains
        EVAC_MESH     = 'null'
        TO_NODE       = 'null'
        PERS_ID       = 'null'
-       SCEN_ID       = 'null'
        QUANTITY      = 'null'
        MAX_FLOW      = 0.0_EB
        WIDTH         = 0.0_EB
@@ -1785,7 +1744,6 @@ Contains
        ! 
        PNX%ID_NAME    = ID
        PNX%CLASS_NAME = PERS_ID
-       PNX%Scen_Id    = SCEN_ID
 
        PNX%IPC = 0
        Do ipc= 1, npc_pers
@@ -1955,7 +1913,6 @@ Contains
        FLOW_FIELD_ID            = 'null'
        EVAC_MESH                = 'null'
        PERS_ID                  = 'null'
-       SCEN_ID                  = 'null'
        SAMPLING_FACTOR          = 1      
        NUMBER_INITIAL_PERSONS   = 0
        XB                       = 0.0_EB
@@ -2003,12 +1960,9 @@ Contains
        ! 
        If (NUMBER_INITIAL_PERSONS > 0) EVACFILE = .True.
        !
-       If (SCEN_ID /= 'null') NSCEN_Tmp = NSCEN_Tmp + 1
-       HPT%Scen_Id    = SCEN_ID
        !
        HPT%ID_NAME    = ID
        HPT%CLASS_NAME = PERS_ID
-       HPT%SCEN_ID    = SCEN_ID
        HPT%T_START    = T_START
 
        HPT%GN_MIN = GN_MIN
@@ -2320,112 +2274,8 @@ Contains
 31  Rewind(LU_INPUT)
     !
     ! Count the evacuation ramps and save their IDs.
-    !
-    If (NRAMP_Tmp >= 1) Then
-       Allocate(CharID_Tmp(1:NRAMP_Tmp),STAT=IZERO)
-       Call ChkMemErr('READ','CharID_Tmp',IZERO) 
-       NRAMP_Evac = 0 
-       Do n = 1, npc_pers
-          PCP=>EVAC_PERSON_CLASSES(N)
-          If (PCP%Reva_Diameter /= 'null') Then
-             Ltmp = .False.
-             Do i = 1, NRAMP_Evac
-                If (CharID_Tmp(i) == PCP%Reva_Diameter) Ltmp=.True.
-             End Do
-             If (.Not. Ltmp) NRAMP_Evac = NRAMP_Evac + 1
-             If (.Not. Ltmp) CharID_Tmp(NRAMP_Evac) = PCP%Reva_Diameter
-          End If
-          If (PCP%Reva_Velocity /= 'null') Then
-             Ltmp = .False.
-             Do i = 1, NRAMP_Evac
-                If (CharID_Tmp(i) == PCP%Reva_Velocity) Ltmp=.True.
-             End Do
-             If (.Not. Ltmp) NRAMP_Evac = NRAMP_Evac + 1
-             If (.Not. Ltmp) CharID_Tmp(NRAMP_Evac) = PCP%Reva_Velocity
-          End If
-          If (PCP%Reva_Pre_Evac /= 'null') Then
-             Ltmp = .False.
-             Do i = 1, NRAMP_Evac
-                If (CharID_Tmp(i) == PCP%Reva_Pre_Evac) Ltmp=.True.
-             End Do
-             If (.Not. Ltmp) NRAMP_Evac = NRAMP_Evac + 1
-             If (.Not. Ltmp) CharID_Tmp(NRAMP_Evac) = PCP%Reva_Pre_Evac
-          End If
-          If (PCP%Reva_Tau_Evac /= 'null') Then
-             Ltmp = .False.
-             Do i = 1, NRAMP_Evac
-                If (CharID_Tmp(i) == PCP%Reva_Tau_Evac) Ltmp=.True.
-             End Do
-             If (.Not. Ltmp) NRAMP_Evac = NRAMP_Evac + 1
-             If (.Not. Ltmp) CharID_Tmp(NRAMP_Evac) = PCP%Reva_Tau_Evac
-          End If
-       End Do
-       ! 
-       Do n = 1, n_corrs
-          PCX => EVAC_CORRS(N)
-          If (PCX%Reva_Corr_Vel /= 'null') Then
-             Ltmp = .False.
-             Do i = 1, NRAMP_Evac
-                If (CharID_Tmp(i) == PCX%Reva_Corr_Vel) Ltmp=.True.
-             End Do
-             If (.Not. Ltmp) NRAMP_Evac = NRAMP_Evac + 1
-             If (.Not. Ltmp) CharID_Tmp(NRAMP_Evac) = PCX%Reva_Corr_Vel
-          End If
-       End Do
-       !
-       If (NRAMP_Evac >= 1) Then
-          Allocate(REVAID(1:NRAMP_Evac),STAT=IZERO)
-          Call ChkMemErr('READ','REVAID',IZERO) 
-          REVAID(1:NRAMP_Evac) = CharID_Tmp(1:NRAMP_Evac)
-       End If
-       Deallocate(CharID_Tmp)
-    End If ! at least one evac ramp is given as input
 
-    ! Read the evacuation ramps
-    Call Read_Evac_Reva
-    Rewind(LU_INPUT)
-    !
-    ! Count the evacuation scenarios and save their IDs.
-    !
-    If (NSCEN_Tmp >= 1) Then
-       Allocate(CharID_Tmp(1:NSCEN_Tmp),STAT=IZERO)
-       Call ChkMemErr('READ','CharID_Tmp',IZERO) 
-       NSCEN_Evac = 0 
-       Do n = 1, npc_evac
-          HPT=>EVACUATION(N)
-          If (HPT%Scen_Id /= 'null') Then
-             Ltmp = .False.
-             Do i = 1, NSCEN_Evac
-                If (CharID_Tmp(i) == HPT%Scen_Id) Ltmp=.True.
-             End Do
-             If (.Not. Ltmp) NSCEN_Evac = NSCEN_Evac + 1
-             If (.Not. Ltmp) CharID_Tmp(NSCEN_Evac) = HPT%Scen_Id
-          End If
-       End Do
-       ! 
-       Do n = 1, n_entrys
-          PNX => EVAC_ENTRYS(N)
-          If (PNX%Scen_Id /= 'null') Then
-             Ltmp = .False.
-             Do i = 1, NSCEN_Evac
-                If (CharID_Tmp(i) == PNX%Scen_Id) Ltmp=.True.
-             End Do
-             If (.Not. Ltmp) NSCEN_Evac = NSCEN_Evac + 1
-             If (.Not. Ltmp) CharID_Tmp(NSCEN_Evac) = PNX%Scen_Id
-          End If
-       End Do
-       !
-       If (NSCEN_Evac >= 1 ) Then
-          Allocate(SCENID(1:NSCEN_Evac),STAT=IZERO)
-          Call ChkMemErr('READ','SCENID',IZERO) 
-          SCENID(1:NSCEN_Evac) = CharID_Tmp(1:NSCEN_Evac)
-       End If
-       Deallocate(CharID_Tmp)
-    End If                    ! at least one evac ramp is given as input
 
-    ! Read the evacuation scenarios
-    Call Read_Evac_Scen
-    Rewind(LU_INPUT)
 
     Close (LU_INPUT)    
     !
@@ -2497,122 +2347,6 @@ Contains
        End If
     End Do
 
-    !
-    ! ==========================================
-    ! Read_Evac: Private subprograms
-    ! ==========================================
-  Contains
-
-    Subroutine Read_Evac_Reva
-      Implicit None
-      ! (REVA = Ramp EVACuation)
-      !
-      Integer N
-      Real(EB) T,F
-      Namelist /REVA/ T,F,ID,FYI
-      !
-      If (NRAMP_Evac == 0) Return
-      !
-      Allocate(NTT_Evac(NRAMP_Evac),STAT=IZERO)
-      Call ChkMemErr('Read_Evac_Reva','NTT_Evac',IZERO) 
-      NTT_Evac = 0
-      !
-      Rewind(LU_INPUT)
-      Do N = 1, NRAMP_Evac
-         NTTLOOP: Do 
-            Call CHECKREAD('REVA',LU_INPUT,IOS) ; If (IOS == 1) Exit NTTLOOP
-            Read(LU_INPUT, NML=REVA, ERR=56, IOSTAT=IOS)
-            If (ID /= REVAID(N)) Cycle NTTLOOP
-            NTT_Evac(N) = NTT_Evac(N) + 1
-56          If (IOS > 0) Call SHUTDOWN('ERROR: Problem with REVA line')
-         End Do NTTLOOP
-         Rewind(LU_INPUT)
-         If (NTT_Evac(N) == 0) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: REVA ', &
-                 Trim(REVAID(N)), ' not found'
-            Call SHUTDOWN(MESSAGE)
-         End If
-      End Do
-      !
-      REVA_DIM = Maxval(NTT_Evac)
-      Allocate( TT_Evac(REVA_DIM,NRAMP_Evac),STAT=IZERO)
-      Call ChkMemErr('Read_Evac_Reva','TT_Evac',IZERO) 
-      Allocate( FF_Evac(REVA_DIM,NRAMP_Evac),STAT=IZERO)
-      Call ChkMemErr('Read_Evac_Reva','FF_Evac',IZERO) 
-      ! 
-      ! Read once again (now the max. dimension is known)
-      NTT_Evac = 0
-      Rewind(LU_INPUT)
-      Do N = 1, NRAMP_Evac
-         NTTLOOP2: Do 
-            Call CHECKREAD('REVA',LU_INPUT,IOS) ; If (IOS == 1) Exit NTTLOOP2
-            Read(LU_INPUT, NML=REVA, ERR=57, IOSTAT=IOS)
-            If (ID /= REVAID(N)) Cycle NTTLOOP2
-            NTT_Evac(N) = NTT_Evac(N) + 1
-            TT_Evac(NTT_Evac(N),N) = T
-            FF_Evac(NTT_Evac(N),N) = F
-57          If (IOS > 0) Call SHUTDOWN('ERROR: Problem with REVA line')
-         End Do NTTLOOP2
-         Rewind(LU_INPUT)
-      End Do
-      !
-    End Subroutine Read_Evac_Reva
-
-
-    Subroutine Read_Evac_Scen
-      Implicit None
-      ! (Evacuation scenarios)
-      !
-      Integer N
-      Character(26) :: EGRID, FFIELD
-      Namelist /SCEN/ EGRID, FFIELD ,ID, FYI
-      !
-      If (NSCEN_Evac == 0) Return
-      !
-      Allocate(NTT_Scen(NSCEN_Evac),STAT=IZERO)
-      Call ChkMemErr('Read_Evac_Scen','NTT_Scen',IZERO) 
-      NTT_Scen = 0
-      !
-      Rewind(LU_INPUT)
-      Do N = 1, NSCEN_Evac
-         NTTLOOP: Do 
-            Call CHECKREAD('SCEN',LU_INPUT,IOS) ; If (IOS == 1) Exit NTTLOOP
-            Read(LU_INPUT, NML=SCEN, ERR=56, IOSTAT=IOS)
-            If (ID /= SCENID(N)) Cycle NTTLOOP
-            NTT_Scen(N) = NTT_Scen(N) + 1
-56          If (IOS > 0) Call SHUTDOWN('ERROR: Problem with SCEN line')
-         End Do NTTLOOP
-         Rewind(LU_INPUT)
-         If (NTT_Scen(N) == 0) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: SCEN ', &
-                 Trim(SCENID(N)), ' not found'
-            Call SHUTDOWN(MESSAGE)
-         End If
-      End Do
-      !
-      SCEN_DIM = Maxval(NTT_Scen)
-      Allocate( TT_Scen(SCEN_DIM,NSCEN_Evac),STAT=IZERO)
-      Call ChkMemErr('Read_Evac_Scen','TT_Scen',IZERO) 
-      Allocate( FF_Scen(SCEN_DIM,NSCEN_Evac),STAT=IZERO)
-      Call ChkMemErr('Read_Evac_Scen','FF_Scen',IZERO) 
-      ! 
-      ! Read once again (now the max. dimension is known)
-      NTT_Scen = 0
-      Rewind(LU_INPUT)
-      Do N = 1, NSCEN_Evac
-         NTTLOOP2: Do 
-            Call CHECKREAD('SCEN',LU_INPUT,IOS) ; If (IOS == 1) Exit NTTLOOP2
-            Read(LU_INPUT, NML=SCEN, ERR=57, IOSTAT=IOS)
-            If (ID /= SCENID(N)) Cycle NTTLOOP2
-            NTT_Scen(N) = NTT_Scen(N) + 1
-            TT_Scen(NTT_Scen(N),N) = Trim(EGRID)
-            FF_Scen(NTT_Scen(N),N) = Trim(FFIELD)
-57          If (IOS > 0) Call SHUTDOWN('ERROR: Problem with SCEN line')
-         End Do NTTLOOP2
-         Rewind(LU_INPUT)
-      End Do
-      !
-    End Subroutine Read_Evac_Scen
 
   End Subroutine READ_EVAC
 
