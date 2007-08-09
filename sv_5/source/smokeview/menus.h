@@ -6068,6 +6068,22 @@ static int textureshowmenu=0;
         glutAddSubMenu("Terrain",loadterrainmenu);
       }
 #endif
+      if(nslice>0&&nmultislices<nslice){
+        strcpy(loadmenulabel,"Multi-Slices");
+        if(sliceframeskip>0){
+          sprintf(steplabel,"/Skip %i",sliceframeskip);
+          strcat(loadmenulabel,steplabel);
+        }
+        glutAddSubMenu(loadmenulabel,loadmultislicemenu);
+      }
+      if(nvslice>0&&nmultivslices<nvslice){
+        strcpy(loadmenulabel,"Multi-Vector Slices");
+        if(sliceframeskip>0){
+          sprintf(steplabel,"/Skip %i",sliceframeskip);
+          strcat(loadmenulabel,steplabel);
+        }
+        glutAddSubMenu(loadmenulabel,loadmultivslicemenu);
+      }
       if(nslice>0){
         strcpy(loadmenulabel,"Slice File");
         if(sliceframeskip>0){
@@ -6075,15 +6091,6 @@ static int textureshowmenu=0;
           strcat(loadmenulabel,steplabel);
         }
         glutAddSubMenu(loadmenulabel,loadslicemenu);
-
-        if(nmultislices<nslice){
-          strcpy(loadmenulabel,"Multi-Slices");
-          if(sliceframeskip>0){
-            sprintf(steplabel,"/Skip %i",sliceframeskip);
-            strcat(loadmenulabel,steplabel);
-          }
-          glutAddSubMenu(loadmenulabel,loadmultislicemenu);
-        }
       }
       if(nvslice>0){
         strcpy(loadmenulabel,"Vector slices");
@@ -6092,14 +6099,6 @@ static int textureshowmenu=0;
           strcat(loadmenulabel,steplabel);
         }
         glutAddSubMenu(loadmenulabel,vslicemenu);
-        if(nmultivslices<nvslice){
-          strcpy(loadmenulabel,"Multi-Vector Slices");
-          if(sliceframeskip>0){
-            sprintf(steplabel,"/Skip %i",sliceframeskip);
-            strcat(loadmenulabel,steplabel);
-          }
-          glutAddSubMenu(loadmenulabel,loadmultivslicemenu);
-        }
       }
       if(niso>0){
         strcpy(loadmenulabel,"Isosurface File");
@@ -6228,7 +6227,7 @@ static int textureshowmenu=0;
         }
       }
     }
-    glutAddMenuEntry("Quit",3);
+//    glutAddMenuEntry("Quit",3);
   updatemenu=0;
 
 }
