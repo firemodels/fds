@@ -506,7 +506,7 @@ void keyboard(unsigned char key, int x, int y){
   glutPostRedisplay();
   updatemenu=1;
   key2 = (char)key;
-  if(key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&isupper(key2))key2=tolower(key2); /* map upper case characters to lower */
+  if(key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&isupper(key2))key2=tolower(key2); /* map upper case characters to lower */
 
 #ifdef _DEBUG 
   if(strncmp((const char *)&key2,"l",1)==0){
@@ -534,6 +534,11 @@ void keyboard(unsigned char key, int x, int y){
     return;
   }
 #endif
+  if(strncmp((const char *)&key2,"N",1)==0||strncmp((const char *)&key2,"n",1)==0){
+    ReloadMenu(0);
+    printf("reloading files\n");
+    return;
+  }
   if(strncmp((const char *)&key2,"q",1)==0){
     blocklocation++;
     if(blocklocation>BLOCKlocation_cad||
