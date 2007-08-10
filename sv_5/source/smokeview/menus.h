@@ -6227,7 +6227,7 @@ static int textureshowmenu=0;
         }
       }
     }
-//    glutAddMenuEntry("Quit",3);
+  glutAddMenuEntry("Quit",3);
   updatemenu=0;
 
 }
