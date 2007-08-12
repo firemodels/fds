@@ -89,15 +89,22 @@ void outputText(float x, float y, const char *string){
 
 /* ------------------ outputBarText ------------------------ */
 
-void outputBarText(float x, float y, const GLfloat *color, const char *string)
-{
+void outputBarText(float x, float y, const GLfloat *color, const char *string){
   int len, i;
+  int length;
+  float xlength;
 
   if(string==NULL)return;
+
+  length=glutBitmapLength(small_font, string); 
+  xlength = length*barright/dwinWW+0.02;
+
   glColor3fv(color);
-  glRasterPos2f(x, y);
+  glRasterPos2f(x-xlength, y);
   len = (int) strlen(string);
-  for (i = 0; i < len; i++)glutBitmapCharacter(small_font,string[i]);
+  for (i = 0; i < len; i++){
+    glutBitmapCharacter(small_font,string[i]);
+  }
 }
 
 /* ------------------ bench_out ------------------------ */
