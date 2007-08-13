@@ -729,6 +729,10 @@ float frexp10(float x, int *exp10){
 /* ------------------ drawColorBars ------------------------ */
 
 void drawColorBars(void){
+  float dyfont;
+  int dyscreen;
+  int temp;
+
   int i,i2,i3;
   float labeltop;
   float barleft;
@@ -804,25 +808,29 @@ void drawColorBars(void){
   left[2] = left[1]-space;
   if(left[2]<0.0f)left[2]=0.0;
 
-  labeltop=nrgb+.7;
+//  labeltop=nrgb+.7;
+  labeltop=nrgb+1.0;
+  temp = (int)(1.2f*dwinH);
+  dyscreen=screenHeight-temp-fontHoffset-2*titlesafe_offset;
+
   switch (fontindex){
+
   case SMALL_FONT:
-    bottom[0]=labeltop-0.0;
-    bottom[1]=labeltop-0.4;
-    bottom[2]=labeltop-0.8;
-    bottom[3]=labeltop-1.2;
+    dyfont = (float)(small_font_height+1)*(float)(nrgb+1)/(float)dyscreen;
     break;
   case LARGE_FONT:
-    bottom[0]=labeltop-0.2;
-    bottom[1]=labeltop-0.8;
-    bottom[2]=labeltop-1.4;
-    bottom[3]=labeltop-2.0;
+    dyfont = (float)(large_font_height+1)*(float)(nrgb+1)/(float)dyscreen;
     break;
   default:
     ASSERT(FFALSE);
     break;
   }
   
+  bottom[0]=labeltop-dyfont;
+  bottom[1]=labeltop-2*dyfont;
+  bottom[2]=labeltop-3*dyfont;
+  bottom[3]=labeltop-4*dyfont;
+
   if((showsmoke==1&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
     sniffErrors("before colorbar");
     CheckMemory;

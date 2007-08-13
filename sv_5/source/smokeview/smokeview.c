@@ -393,7 +393,10 @@ void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GL
     if(screenWidth<screenHeight){
       barright=xnum/3.0+0.1f;
       if(SUB_portortho(quad,
-        screenWidth-dwinWW-fontWoffset-titlesafe_offset,temp+titlesafe_offset,dwinWW,screenHeight-temp-fontHoffset-2*titlesafe_offset,
+        screenWidth-dwinWW-fontWoffset-titlesafe_offset,
+        temp+titlesafe_offset,
+        dwinWW,
+        screenHeight-temp-fontHoffset-2*titlesafe_offset,
         0.,(double)barright,-0.5,(double)(ratio*(nrgb+1)),
         s_left, s_down, s_width, s_height)==0)return;
     }
