@@ -4950,7 +4950,7 @@ For an HVAC\index{HVAC} example, the following lines of input would set up a sim
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='thermostat' /
 &DEVC ID='TC', XYZ=2.4,5.7,3.6, QUANTITY='TEMPERATURE' /
 &CTRL ID='thermostat', FUNCTION_TYPE='DEADBAND', INPUT_ID='TC',
-      ON_BOUND='LOWER', SETPOINT=23.,27. /
+      ON_BOUND='LOWER', SETPOINT=23.,27.,LATCH=.FALSE./
 \end{verbatim} \normalsize
 
 \noindent
@@ -4960,7 +4960,9 @@ The {\ct thermostat} uses a {\ct SETPOINT}\index{CTRL!SETPOINT} to turn on the
 {\ct FAN} when the temperature falls below 23~$^\circ$C ({\ct ON\_BOUND='LOWER'}) \index{CTRL!ON\_BOUND}
 and it turns off when the temperature rises above 27~$^\circ$C.
 
-
+\begin{warning}
+Note that a deadband controller needs to have {\ct LATCH} set to {\ct .FALSE.} .
+\end{warning}
 
 \subsection{Control Function: \texorpdfstring{{\tt RESTART} and {\tt KILL}} {RESTARTKILL} }
 
