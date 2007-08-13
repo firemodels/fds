@@ -1,4 +1,8 @@
-207-08-02
+2007-08-13
+1.  fix plot3d file display (reduce time criteria to 0.1 s)
+2.  fix display of color label text
+
+2007-08-02
 1.  use fortran (rather than c) to read part5 file when building size file
 
 2007-07-13

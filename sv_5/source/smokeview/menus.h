@@ -929,6 +929,8 @@ void FontMenu(int value){
     fontindex=SMALL_FONT;
     large_font=GLUT_BITMAP_HELVETICA_12;
     small_font=GLUT_BITMAP_HELVETICA_10;
+    large_font_height=12;
+    small_font_height=10;
     fontWoffset=0;
     fontHoffset=0;
     dwinH=dwinHbase;
@@ -938,6 +940,8 @@ void FontMenu(int value){
     fontindex=LARGE_FONT;
     large_font=GLUT_BITMAP_HELVETICA_18;
     small_font=GLUT_BITMAP_HELVETICA_18;
+    large_font_height=18;
+    small_font_height=18;
     fontWoffset=0;
     fontHoffset=0;
     dwinH=1.2*dwinHbase;
@@ -946,6 +950,8 @@ void FontMenu(int value){
     fontindex=LARGE_FONT_SAFE;
     large_font=GLUT_BITMAP_HELVETICA_18;
     small_font=GLUT_BITMAP_HELVETICA_18;
+    large_font_height=18;
+    small_font_height=18;
     fontWoffset=50;
     fontHoffset=50;
     break;
@@ -5751,7 +5757,7 @@ static int textureshowmenu=0;
         im1 = plot3dorderindex[ii-1];
         plot3di = plot3dinfo + i;
         plot3dim1 = plot3dinfo + im1;
-        if(fabs(plot3di->time-plot3dim1->time)>0.5)nloadsubplot3dmenu++;
+        if(fabs(plot3di->time-plot3dim1->time)>0.1)nloadsubplot3dmenu++;
       }
       NewMemory((void **)&loadsubplot3dmenu,nloadsubplot3dmenu*sizeof(int));
       for(i=0;i<nloadsubplot3dmenu;i++){
@@ -5775,7 +5781,7 @@ static int textureshowmenu=0;
         im1 = plot3dorderindex[ii-1];
         plot3di = plot3dinfo + i;
         plot3dim1 = plot3dinfo + im1;
-        if(fabs(plot3di->time-plot3dim1->time)>0.5){
+        if(fabs(plot3di->time-plot3dim1->time)>0.1){
           if(nmeshes>1)glutAddMenuEntry("  All Meshes",-100000+nloadsubplot3dmenu-1);
           CREATEMENU(loadsubplot3dmenu[nloadsubplot3dmenu],LoadPlot3dMenu);
           nloadsubplot3dmenu++;
@@ -5824,7 +5830,7 @@ static int textureshowmenu=0;
           if(strcmp(plot3di->longlabel,plot3dim1->longlabel)!=0){
             glutAddMenuEntry(plot3di->longlabel,997);
           }
-          if(fabs(plot3di->time-plot3dim1->time)>0.5){
+          if(fabs(plot3di->time-plot3dim1->time)>0.1){
             sprintf(menulabel,"  %f",plot3di->time);
             trimzeros(menulabel);
             strcat(menulabel," s");
