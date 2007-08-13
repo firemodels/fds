@@ -1840,7 +1840,7 @@ void init_plot3dtimelist(void){
   lasttime=-999999.0;
   for(i=0;i<nplot3d;i++){
     val=plot3dtimelist[i];
-    if(fabs((double)(val-lasttime))>0.5){
+    if(fabs((double)(val-lasttime))>0.1){
       nplot3dtimelist++;
       plot3dtimelist[nplot3dtimelist-1]=val;
       lasttime=val;
