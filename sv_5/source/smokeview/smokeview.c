@@ -180,19 +180,34 @@ int SUB_portfrustum(int quad,
 void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
   float mesh_left;
   char slicelabel[255];
+  float mesh_bot;
 
   mesh_left=0.9;
   if(fontindex==LARGE_FONT)mesh_left=0.7;
   if(visColorLabels==1){
+    int portview_left;
+    float val_right,val_top;
+
+    portview_left=screenWidth-dwinW-fontWoffset-titlesafe_offset;
     if(screenWidth<screenHeight){
+      val_right=1.0;
+      val_top=ratio;
       if(SUB_portortho(quad,
-        screenWidth-dwinW-fontWoffset-titlesafe_offset,titlesafe_offset,dwinW, dwinH-fontHoffset,
+        portview_left,
+        titlesafe_offset,
+        dwinW, 
+        dwinH-fontHoffset,
         0.,1.0,0.,(double)ratio,
         s_left, s_down, s_width, s_height)==0)return;
     }
     else{
+      val_right=ratio;
+      val_top=1.0;
       if(SUB_portortho(quad,
-        screenWidth-dwinW-fontWoffset-titlesafe_offset,titlesafe_offset,dwinW, dwinH-fontHoffset,
+        portview_left,
+        titlesafe_offset,
+        dwinW, 
+        dwinH-fontHoffset,
         0.,(double)ratio,0.0,1.0,
         s_left, s_down, s_width, s_height)==0)return;
     }
@@ -200,10 +215,15 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
   
-  
+    
     if(visBlocklabel==1&&nmeshes>1){
+      int labellength;
+
       sprintf(slicelabel,"mesh: %i",highlight_mesh+1);
-      outputText(mesh_left,0.85f, slicelabel);
+      labellength=glutBitmapLength(large_font, slicelabel);
+      mesh_left=val_right-val_right*labellength/(float)dwinW;
+      mesh_bot=val_top-val_top*large_font_height/(float)(dwinH-fontHoffset);
+      outputText(mesh_left,mesh_bot, slicelabel);
     }
     if((showplot3d==1||visGrid==1)&&current_mesh->visx==1){
         {
