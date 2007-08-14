@@ -63,7 +63,7 @@ void output3Text(float *color, float x, float y, float z, const char *string){
   for (i = 0; i < len; i++)glutBitmapCharacter(large_font,string[i]);
 }
 
-/* ------------------ outputText ------------------------ */
+/* ------------------ outputLargeText ------------------------ */
 
 void outputLargeText(float x, float y, const char *string){
   int len, i;
