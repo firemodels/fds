@@ -2819,7 +2819,6 @@ IF( PASS1 ) CALL TESTMI( .FALSE., XX, CREFIN, MIMCUT, PERFCT, &
                          ANYANG, NMOM, IPOLZN, NUMANG, XMU, QEXT, &
                          QSCA, GQSC, SFORW, SBACK, S1, S2, TFORW, &
                          TBACK, PMOM, MOMDIM )
-
 MAIN_MIEV: DO 
 !                                        ** Check input and calculate
 !                                        ** certain variables from input
@@ -2970,7 +2969,7 @@ ELSE
    !                                                   ** Eq. R/B.7,8
          CSUM2 = CSUM2 + ( MM*TCOEF ) *( AN + BN )
    !                                         ** Eq (R8)
-         GQSC  = GQSC  + ( FN - RN ) * REAL( ANM1 * CONJG( AN ) + BNM1 * CONJG( BN ) ) + COEFF * REAL( AN * CONJG( BN ) )
+         GQSC  = GQSC  + (FN - RN) * REAL(ANM1 * CONJG(AN) + BNM1 * CONJG(BN) ) + COEFF * REAL(AN * CONJG(BN))
          IF( YESANG ) THEN
    !                                      ** Put Mie coefficients in form
    !                                      ** needed for computing S+, S-
@@ -3407,7 +3406,7 @@ L240: DO L = 0, NUMMOM
 !                                           ** vectorizable loop
          SUM = 0.0_EB
          DO M = LD2, MMAX - I
-            SUM = SUM + AM( M ) * ( REAL( C(M-I+1) * CONJG( C(M+I+IDEL) ) )+ REAL( D(M-I+1) * CONJG( D(M+I+IDEL) ) ) )
+            SUM = SUM + AM(M) * ( REAL(C(M-I+1) * CONJG(C(M+I+IDEL)))+ REAL(D(M-I+1) * CONJG(D(M+I+IDEL))))
          END DO
          PMOM( L, 1 ) = PMOM( L, 1 ) + BIDEL( I ) * SUM
       END DO
@@ -3442,7 +3441,7 @@ L240: DO L = 0, NUMMOM
          SUM = 0.0_EB
 !                                           ** vectorizable loop
          DO M = LD2, MMAX - I
-            SUM = SUM + AM( M ) *( REAL( C(M-I+1) * CONJG( D(M+I+IDEL) ) ) + REAL( C(M+I+IDEL) * CONJG( D(M-I+1) ) ) )
+            SUM = SUM + AM(M) *( REAL(C(M-I+1) * CONJG(D(M+I+IDEL))) + REAL(C(M+I+IDEL) * CONJG(D(M-I+1))))
          END DO
          PMOM( L, 3 ) = PMOM( L, 3 ) + BIDEL( I ) * SUM
       END DO
@@ -3454,7 +3453,7 @@ L240: DO L = 0, NUMMOM
          SUM= 0.0_EB
 !                                         ** vectorizable loop
          DO M = LD2, MMAX - I
-            SUM = SUM + AM( M ) *( AIMAG( C(M-I+1) * CONJG( D(M+I+IDEL) ) )+ AIMAG( C(M+I+IDEL) * CONJG( D(M-I+1) ) ) )
+            SUM = SUM + AM(M) *(AIMAG(C(M-I+1) * CONJG(D(M+I+IDEL)))+ AIMAG(C(M+I+IDEL) * CONJG(D(M-I+1))))
          END DO
          PMOM( L, 4 ) = PMOM( L, 4 ) + BIDEL( I ) * SUM
       END DO
@@ -3895,8 +3894,8 @@ END DO L10
 RETURN
 END FUNCTION CONFRA
 
-SUBROUTINE MIPRNT( PRNT, XX, PERFCT, CREFIN, NUMANG, XMU, QEXT, QSCA, GQSC, NMOM, IPOLZN, MOMDIM, CALCMO, PMOM, &
-                   SFORW, SBACK, TFORW, TBACK, S1, S2 )
+SUBROUTINE MIPRNT( PRNT, XX, PERFCT, CREFIN, NUMANG, XMU, QEXT, QSCA, GQSC, NMOM, IPOLZN, MOMDIM, &
+                   CALCMO, PMOM, SFORW, SBACK, TFORW, TBACK, S1, S2 )
 
 !         Print scattering quantities of a single particle
 
@@ -3937,7 +3936,8 @@ IF( PRNT( 1 ) .AND. NUMANG>0 ) THEN
    DO I = 1, NUMANG
       I1 = REAL( S1( I ) )**2 + AIMAG( S1( I ) )**2
       I2 = REAL( S2( I ) )**2 + AIMAG( S2( I ) )**2
-      WRITE(LU_ERR, '( I4, F10.6, 1P,10E11.3 )'   ) I, XMU(I), S1(I), S2(I), S1(I)*CONJG(S2(I)),I1, I2, 0.5_EB*(I1+I2), (I2-I1)/(I2+I1)
+      WRITE(LU_ERR, '( I4, F10.6, 1P,10E11.3 )'   ) I, XMU(I), S1(I), S2(I), &
+         S1(I)*CONJG(S2(I)),I1, I2, 0.5_EB*(I1+I2), (I2-I1)/(I2+I1)
    END DO
 END IF
 
@@ -4074,7 +4074,8 @@ CTMP   = CMPLX( 0._EB, TWOTHR )*( CIORSQ - 1.0_EB )
 
 !                                           ** Eq. R42a
 A( 1 ) = CTMP*( 1._EB- 0.1_EB*XX**2 +   ( CIORSQ / 350._EB + 1._EB/280._EB)*XX**4 ) / &
-          ( CIORSQ + 2._EB+ ( 1._EB- 0.7_EB*CIORSQ )*XX**2 -  ( CIORSQ**2 / 175._EB- 0.275_EB*CIORSQ + 0.25_EB )*XX**4 + &
+          ( CIORSQ + 2._EB+ ( 1._EB- 0.7_EB*CIORSQ )*XX**2 -  &
+          ( CIORSQ**2 / 175._EB- 0.275_EB*CIORSQ + 0.25_EB )*XX**4 + &
           XX**3 * CTMP * ( 1._EB- 0.1_EB*XX**2 ) )
 
 !                                           ** Eq. R42b
@@ -4083,7 +4084,8 @@ B( 1 ) = ( XX**2 / 30._EB )*CTMP*( 1._EB+  ( CIORSQ / 35._EB - 1._EB/ 14._EB)*XX
 
 !                                           ** Eq. R42c
 
-A( 2 ) = ( 0.1_EB*XX**2 )*CTMP*( 1._EB- XX**2 / 14._EB ) /  ( 2._EB*CIORSQ + 3._EB- ( CIORSQ / 7._EB- 0.5_EB ) * XX**2 )
+A( 2 ) = ( 0.1_EB*XX**2 )*CTMP*( 1._EB- XX**2 / 14._EB ) /  ( 2._EB*CIORSQ + 3._EB- &
+         ( CIORSQ / 7._EB- 0.5_EB ) * XX**2 )
 
 !                                           ** Eq. R40a
 
@@ -4172,7 +4174,6 @@ LOGICAL     CALCMO( 4 ), PRNT( 2 )
 REAL(EB)    TESTPM( 0:1 )
 COMPLEX(EB) TESTTB( 2 ), TESTTF( 2 )
 
-!     LOGICAL   WRONG
 
 SAVE      XXSAV, CRESAV, MIMSAV, PERSAV, ANYSAV, NMOSAV, IPOSAV,NUMSAV, XMUSAV
 
@@ -4188,12 +4189,6 @@ DATA      TESTQE / 2.459791_EB /,&
           TESTTB / ( 41.88414_EB, -15.57833_EB ),&
                    ( 43.37758_EB, -15.28196_EB ) /,&
           TESTPM / 227.1975_EB, 183.6898_EB /
-
-!     DATA      ACCUR / 1.E-4_EB /
-
-!     .. Statement Function definitions ..
-
-!     WRONG( CALC, EXACT ) = ABS( ( CALC - EXACT ) / EXACT )>ACCUR
 
 IF( .NOT.COMPAR ) THEN
 !                                   ** Save certain user input values
