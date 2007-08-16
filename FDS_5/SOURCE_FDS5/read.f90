@@ -475,8 +475,9 @@ MESH_LOOP: DO NM=1,NMESHES
          T%PCSTORE(N,IC) = PC
          T%IDERIVSTORE(N,IC) = IDERIV
          IF (IDERIV>=0) T%ITRAN(IC) = 1
-         IF (IDERIV<0) T%ITRAN(IC) = 2
-      2 ENDDO NLOOP
+         IF (IDERIV<0)  T%ITRAN(IC) = 2
+      2 CONTINUE
+        ENDDO NLOOP
       1 REWIND(LU_INPUT)
    ENDDO 
 
@@ -3916,7 +3917,7 @@ MESH_LOOP: DO NM=1,NMESHES
  
       CALL CHECKREAD('OBST',LU_INPUT,IOS)
       IF (IOS==1) EXIT READ_OBST_LOOP
-      READ(LU_INPUT,OBST,END=35,ERR=36)
+      READ(LU_INPUT,OBST,END=35)
  
       ! Evacuation criteria
  
@@ -4139,8 +4140,8 @@ MESH_LOOP: DO NM=1,NMESHES
       ! In Smokeview, draw the outline of the obstruction
  
       IF (OUTLINE) OB%BTI = 2
- 
-   36 ENDDO READ_OBST_LOOP
+      
+      ENDDO READ_OBST_LOOP
    35 REWIND(LU_INPUT)
  
 ENDDO MESH_LOOP
@@ -4909,8 +4910,9 @@ MESH_LOOP: DO NM=1,NMESHES
       VT%FIRE_SPREAD_RATE = SPREAD_RATE
  
       VT%TEXTURE(:) = TEXTURE_ORIGIN(:)
- 
-38 ENDDO READ_VENT_LOOP
+      
+38 CONTINUE
+   ENDDO READ_VENT_LOOP
 37 REWIND(LU_INPUT)
  
    ! Check vents and assign orientations
