@@ -246,7 +246,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 7, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 16, 2007)}
 
 \vspace{.5in}
 
@@ -5325,13 +5325,14 @@ to tell FDS where to find the necessary extra information.
 
 Note that {\ct BNDF} files (Section~\ref{out:BNDF}) can become very
 large, so be careful in prescribing the time interval.
-One way to reduce the size of the output file is to ``turn off'' the
+One way to reduce the size of the output file is to turn off the
 drawing of boundary information on desired obstructions. On any given
-{\ct OBST} line, if the string {\ct BNDF\_BLOCK=.FALSE.} is included,
+{\ct OBST} line, if the string {\ct BNDF\_OBST=.FALSE.} is included,
 the obstruction is not colored. To turn off all boundary drawing,
 set {\ct BNDF\_DEFAULT=.FALSE.} on the {\ct MISC} line. Then individual
-obstructions can be turned back on with {\ct BNDF\_BLOCK=.TRUE.} on
-the appropriate {\ct OBST} line.
+obstructions can be turned back on with {\ct BNDF\_OBST=.TRUE.} on
+the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled
+via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on).
 
 
 
@@ -6127,6 +6128,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\ \hline \hline
 {\ct BACKGROUND\_SPECIES}   & Character     & Background species                            &               & {\ct 'AIR'}       \\ \hline
 {\ct BAROCLINIC}            & Logical       & Baroclinic torque correction                  &               & {\ct .FALSE.}     \\ \hline
+{\ct BNDF\_DEFAULT}         & Logical       & See Section~\ref{info:BNDF}                   &               & {\ct .TRUE.}      \\ \hline
 {\ct CFL\_MAX}              & Real          & Upper bound of CFL stability range            &               & 1.0               \\ \hline
 {\ct CFL\_MIN}              & Real          & Lower bound of CFL stability range            &               & 0.8               \\ \hline
 {\ct CSMAG}                 & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
@@ -6173,9 +6175,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\ \hline \hline
-{\ct ALLOW\_VENT}         & Logical             & Allow vent to be placed on obstruction&    & {\ct .TRUE.}  \\ \hline
-{\ct BNDF\_FACE(-3:3)}    & Logical Array       & Draw Boundary Info                    &    & {\ct .TRUE.}  \\ \hline
-{\ct BNDF\_OBST}          & Logical             & Draw Boundary Info                    &    & {\ct .TRUE.}  \\ \hline
+{\ct ALLOW\_VENT}         & Logical             & Allow vents on obstruction            &    & {\ct .TRUE.}  \\ \hline
+{\ct BNDF\_FACE(-3:3)}    & Logical Array       & See Section~\ref{info:BNDF}           &    & {\ct .TRUE.}  \\ \hline
+{\ct BNDF\_OBST}          & Logical             & See Section~\ref{info:BNDF}           &    & {\ct .TRUE.}  \\ \hline
 {\ct COLOR    }           & Character           & Color name of obstruction color       &    &               \\ \hline
 {\ct CTRL\_ID }           & Character           & {\ct ID} of Controlling {\ct ConTRoL} &    &               \\ \hline
 {\ct DEVC\_ID }           & Character           & {\ct ID} of Controlling {\ct DEViCe}  &    &               \\ \hline
@@ -6767,7 +6769,8 @@ real numbers between 0.0 and 1.0. Better yet, just use the {\ct COLOR} Table~\re
 
 \section{Reaction Parameters: \texorpdfstring{{\tt REAC}}{REAC}}
 
-For most applications, the specification of the combustion reaction has become easier. In past versions, you needed to specify the fuel, its molecular weight, soot and/or CO yields, and the ideal stoichiometry of the reaction:
+For most applications, the specification of the combustion reaction has become easier. In past versions,
+you needed to specify the fuel, its molecular weight, soot and/or CO yields, and the ideal stoichiometry of the reaction:
 
 \footnotesize
 \begin{verbatim}
@@ -6885,9 +6888,9 @@ append an underscore to the names of the C routines called by the Fortran
 code. If the compiler produces an error involving the names of routines
 that are not recognized, invoke the C compiler pre-processing directive {\ct pp\_noappend} to stop
 the compiler from appending the underscore to the names of the C routines.
-\item There is only one non-standard calls in the Fortran code. The non-standard call is {\ct GETARG}, 
+\item There is only one non-standard calls in the Fortran code. The non-standard call is {\ct GETARG},
 in {\bf func.f90}. This routine reads the name of the input file off of the command line. This call cannot
-be simply commented out; a suitable alternative must be found. 
+be simply commented out; a suitable alternative must be found.
 The only compiler option necessary, in addition to any needed to
 address the above issues, is for full optimization (usually -O or some variant). Some
 compilers have a standard optimization level, plus various degrees of
