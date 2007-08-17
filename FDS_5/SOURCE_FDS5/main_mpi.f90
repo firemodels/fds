@@ -70,8 +70,8 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date (All Nodes)
  
-COMPILE_DATE   = 'August 10, 2007'
-VERSION_STRING = '5_RC8_MPI'
+COMPILE_DATE   = 'August 17, 2007'
+VERSION_STRING = '5_RC8+_MPI'
 VERSION_NUMBER = 5.0
 PARALLEL       = .TRUE.
  
@@ -238,6 +238,9 @@ DO NM=MYID+1,NMESHES,NUMPROCS
    CALL UPDATE_OUTPUTS(T(NM),NM)      
    CALL DUMP_MESH_OUTPUTS(T(NM),NM)
 ENDDO
+
+CALL MPI_ALLGATHER(T(MYID+1),1,MPI_DOUBLE_PRECISION,T,1, MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IERR)
+CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 CALL DUMP_GLOBAL_OUTPUTS(T(1))
  
 !***********************************************************************************************************************************
@@ -259,9 +262,9 @@ MAIN_LOOP: DO
    ENDIF
  
    ! Synchronize clocks
- 
+   
    CALL MPI_ALLGATHER(T(MYID+1),1,MPI_DOUBLE_PRECISION,T,1, MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IERR)
- 
+
    ! Check for program stops
  
    INQUIRE(FILE=TRIM(CHID)//'.stop',EXIST=EX)
