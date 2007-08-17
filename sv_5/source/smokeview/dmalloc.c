@@ -1,4 +1,7 @@
 #include "options.h"
+#ifdef pp_MEM2
+#define INDMALLOC
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -35,6 +38,19 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
 #endif
 #endif
 
+#ifdef pp_MEM2
+void initMM(void){
+  MMfirst=malloc(sizeof(MMdata));
+  MMlast=malloc(sizeof(MMdata));
+
+  MMfirst->prev=NULL;
+  MMfirst->next=MMlast;
+
+  MMlast->prev=MMfirst;
+  MMlast->next=NULL;
+}
+#endif
+
 /* ------------------ _NewMemory ------------------------ */
 
 mallocflag _NewMemory(void **ppv, size_t size){
@@ -42,9 +58,33 @@ mallocflag _NewMemory(void **ppv, size_t size){
 #ifdef _DEBUG
   char *c;
 #endif
+#ifdef pp_MEM2
+  void *this_ptr, *prev_ptr, *next_ptr;
+  MMdata *infoblock;
+  int infoblocksize;
+#endif
 
   ASSERT(ppv != NULL && size != 0);
+#ifdef pp_MEM2
+  infoblocksize=(sizeof(MMdata)+3)/4;
+  infoblocksize*=4;
+  this_ptr = (void *)malloc(infoblocksize+size+sizeofDebugByte);
+  if(this_ptr!=NULL){
+    infoblock=(MMdata *)this_ptr;
+    prev_ptr=MMfirst;
+    next_ptr=MMfirst->next;
+    prev_ptr->next=thisptr;
+    next_ptr->prev=thisptr;
+    infoblock->prev=prev_ptr;
+    infoblock->next=next_ptr;
+    *ppb=this_ptr+infoblocksize;
+  }
+  else{
+    *ppb=NULL;
+  }
+#else
   *ppb = (void *)malloc(size+sizeofDebugByte);
+#endif
 
 #ifdef _DEBUG
   {
