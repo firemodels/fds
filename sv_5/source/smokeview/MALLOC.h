@@ -10,6 +10,28 @@
 typedef int mallocflag;
 typedef char bbyte;
 
+#ifdef pp_MEM2
+
+#ifdef CPP
+#define MMCCC "C"
+#else
+#define MMCCC
+#endif
+
+#ifdef INDMALLOC
+#define MMEXTERN
+#else
+#define MMEXTERN extern MMCCC
+#endif
+
+
+typedef struct {
+  void *prev, *next;
+} MMdata;
+
+MMEXTERN MMdata *MMfirst, *MMlast;
+#endif
+
 #define debugByte 0xE1
 #ifdef _DEBUG
   #define sizeofDebugByte 1

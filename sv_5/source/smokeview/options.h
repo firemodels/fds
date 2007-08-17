@@ -44,6 +44,7 @@
 #define pp_COLOR
 #define pp_LIGHT
 #define pp_GPU
+#define pp_MEM2
 #endif
 
 
