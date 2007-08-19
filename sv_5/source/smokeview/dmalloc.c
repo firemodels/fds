@@ -59,7 +59,7 @@ mallocflag _NewMemory(void **ppv, size_t size){
   char *c;
 #endif
 #ifdef pp_MEM2
-  void *this_ptr, *prev_ptr, *next_ptr;
+  MMdata *this_ptr, *prev_ptr, *next_ptr;
   MMdata *infoblock;
   int infoblocksize;
 #endif
@@ -68,15 +68,19 @@ mallocflag _NewMemory(void **ppv, size_t size){
 #ifdef pp_MEM2
   infoblocksize=(sizeof(MMdata)+3)/4;
   infoblocksize*=4;
+
   this_ptr = (void *)malloc(infoblocksize+size+sizeofDebugByte);
   if(this_ptr!=NULL){
     infoblock=(MMdata *)this_ptr;
     prev_ptr=MMfirst;
     next_ptr=MMfirst->next;
-    prev_ptr->next=thisptr;
-    next_ptr->prev=thisptr;
+
+    prev_ptr->next=this_ptr;
+    next_ptr->prev=this_ptr;
+
     infoblock->prev=prev_ptr;
     infoblock->next=next_ptr;
+    infoblock->marker=markerByte;
     *ppb=this_ptr+infoblocksize;
   }
   else{
@@ -112,16 +116,38 @@ void FreeMemory(void *pv){
 #ifdef _DEBUG
   int len_memory;
 #endif
+  int infoblocksize;
+#ifdef pp_MEM2
+  MMdata *this_ptr, *prev_ptr, *next_ptr;
+#endif
+
   ASSERT(pv != NULL);
+#ifdef pp_MEM2
+  infoblocksize=(sizeof(MMdata)+3)/4;
+  infoblocksize*=4;
+#else
+  infoblocksize=0;
+#endif
 #ifdef _DEBUG
   {
     CheckMemory;
-    len_memory=sizeofBlock(pv);
-    memset(pv, memGarbage, len_memory);
-    FreeBlockInfo(pv);
+    len_memory=sizeofBlock((char *)pv+infoblocksize);
+    memset((char *)pv+infoblocksize, memGarbage, len_memory);
+    FreeBlockInfo((char *)pv+infoblocksize);
   }
 #endif
-  free(pv);
+#ifdef pp_MEM2
+  if(this_ptr->marker==markerByte){
+    this_ptr=(MMdata *)((char *)pv-infoblocksize);
+
+    prev_ptr=this_ptr->prev;
+    next_ptr=this_ptr->next;
+
+    prev_ptr->next=next_ptr;
+    next_ptr->prev=prev_ptr;
+  }
+#endif
+  free((char *)pv-infoblocksize);
 }
 
 /* ------------------ ResizeMemory ------------------------ */
@@ -129,9 +155,20 @@ void FreeMemory(void *pv){
 mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
   bbyte **ppb = (bbyte **)ppv;
   bbyte *pbNew;
+  int infoblocksize;
+#ifdef pp_MEM2
+  MMdata *this_ptr, *prev_ptr, *next_ptr;
+#endif
 #ifdef _DEBUG
   char *c;
   size_t sizeOld;
+#endif
+
+#ifdef pp_MEM2
+  infoblocksize=(sizeof(MMdata)+3)/4;
+  infoblocksize*=4;
+#else
+  infoblocksize=0;
 #endif
   ASSERT(ppb != NULL && sizeNew != 0);
 #ifdef _DEBUG
@@ -152,7 +189,20 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
   }
 #endif
 
-  pbNew = realloc(*ppb, sizeNew+sizeofDebugByte);
+  pbNew = realloc(*ppb, infoblocksize+sizeNew+sizeofDebugByte);
+#ifdef pp_MEM2
+  if(pbNew!=*ppb){
+    this_ptr=(MMdata *)(*ppb-infoblocksize);
+    prev_ptr=this_ptr->prev;
+    next_ptr=this_ptr->next;
+    this_ptr=(MMdata *)pbNew;
+    prev_ptr->next=this_ptr;
+    next_ptr->prev=this_ptr;
+    this_ptr->next=next_ptr;
+    this_ptr->prev=prev_ptr;
+    this_ptr->marker=markerByte;
+  }
+#endif
   if(pbNew != NULL){
 #ifdef _DEBUG
     {
@@ -166,7 +216,7 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
       }
     }
 #endif
-    *ppb = pbNew;
+    *ppb = pbNew+infoblocksize;
   }
   return (pbNew != NULL);
 }
@@ -274,6 +324,8 @@ static blockinfo *GetBlockInfo(bbyte *pb){
   ASSERT(pbi != NULL);
   return (pbi);
 }
+
+/* ------------------ GetMemoryInfo ------------------------ */
 
 int _GGetMemoryInfo(void){
   blockinfo *pbi;
