@@ -26,6 +26,7 @@ typedef char bbyte;
 
 
 typedef struct {
+  unsigned char marker;
   void *prev, *next;
 } MMdata;
 
@@ -33,6 +34,7 @@ MMEXTERN MMdata *MMfirst, *MMlast;
 #endif
 
 #define debugByte 0xE1
+#define markerByte 0xE1
 #ifdef _DEBUG
   #define sizeofDebugByte 1
 #else
