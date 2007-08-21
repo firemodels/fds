@@ -156,7 +156,7 @@ void sv_startup_c(int argc, char **argv){
     }
   }
 
-  NewMemory((void **)&smokeviewini,    (unsigned int)(lensmokebindir+9));
+  NewMemory((void **)&smokeviewini,    (unsigned int)(lensmokebindir+14));
   STRCPY(smokeviewini,smokeviewbindir);
   STRCAT(smokeviewini,"smokeview.ini");
   

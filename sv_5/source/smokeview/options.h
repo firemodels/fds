@@ -47,6 +47,16 @@
 #define pp_MEM2
 #endif
 
+#undef pp_OPEN
+#ifdef WIN32
+#ifdef _DEBUG
+#define pp_OPEN
+#endif
+#ifdef pp_MEM2
+#define pp_OPEN
+#endif
+#endif
+
 
 #ifdef pp_LINT
 /*lint -e534 */

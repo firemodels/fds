@@ -1893,8 +1893,7 @@ void LoadUnloadMenu(int value){
       sv_startup(fdsprefix2,0);
     }
   }
-#ifdef WIN32
-#ifdef _DEBUG
+#ifdef pp_OPEN
   if(value==3){
     OpenSMVFile(openfilebuffer,1024,&openfileflag);
     if(openfileflag==1){
@@ -1912,7 +1911,6 @@ void LoadUnloadMenu(int value){
       updateOpenSMVFile=0;
     }
   }
-#endif
 #endif
   if(value==SHOWFILES){
     glutPostRedisplay();  
@@ -6055,10 +6053,8 @@ static int textureshowmenu=0;
       char steplabel[100];
 
       CREATEMENU(loadunloadmenu,LoadUnloadMenu);
-#ifdef WIN32
-#ifdef _DEBUG
+#ifdef pp_OPEN
       glutAddMenuEntry("Open Smokeview (.smv) file",3);
-#endif
 #endif
       strcpy(steplabel,"error: steplabel not defined");
       if(nsmoke3d>0){
