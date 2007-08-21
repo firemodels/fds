@@ -1051,8 +1051,6 @@ void TOUR_CB(int var){
 /* ------------------ setviewcontrols ------------------------ */
 
 void setviewcontrols(void){
-  float dummy;
-
   if(viewtype1!=CHECKBOXview1->get_int_val())CHECKBOXview1->set_int_val(viewtype1);
   if(viewtype2!=CHECKBOXview2->get_int_val())CHECKBOXview2->set_int_val(viewtype2);
   if(viewtype3!=CHECKBOXview3->get_int_val())CHECKBOXview3->set_int_val(viewtype3);

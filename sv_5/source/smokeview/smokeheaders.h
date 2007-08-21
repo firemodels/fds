@@ -81,6 +81,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir);
 
 EXTERNCPP void setColorbarClipPlanes(int flag);
 EXTERNCPP void addcolorbar(int icolorbar);
+EXTERNCPP void ReloadMenu(int value);
 EXTERNCPP void ColorBarMenu(int val);
 EXTERNCPP void initdefaultcolorbars(void);
 EXTERNCPP void drawcolorbarpath(void);

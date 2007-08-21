@@ -30,7 +30,8 @@ typedef struct {
   void *prev, *next;
 } MMdata;
 
-MMEXTERN MMdata *MMfirst, *MMlast;
+MMEXTERN MMdata MMfirst, MMlast;
+MMEXTERN MMdata *MMfirstptr, *MMlastptr;
 #endif
 
 #define debugByte 0xE1
@@ -110,6 +111,10 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file,int li
 mallocflag _ResizeMemory(void **ppv, size_t sizeNew);
 mallocflag _NewMemory(void **ppv, size_t size);
 void FreeMemory(void *pv);
+void initMM(void);
+#ifdef pp_MEM2
+void FreeAllMemory(void);
+#endif
 mallocflag ValidPointer(void *pv, size_t size);
 
 #endif

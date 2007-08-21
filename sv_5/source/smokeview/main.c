@@ -21,6 +21,9 @@ int main(int argc, char **argv){
   char *smv_file;
 #endif
 
+#ifdef pp_MEM2
+  initMM();
+#endif
   initvars0();
   initcolors();
   initvars1();
