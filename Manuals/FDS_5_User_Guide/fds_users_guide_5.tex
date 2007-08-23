@@ -4916,7 +4916,7 @@ between when a device activates, and when some other action occurs, like in a dr
 
 \footnotesize
 \begin{verbatim}
-&DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler', ID='Spk_29', CTRL_ID='dry pipe' /
+&DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler', QUANTITY='CONTROL', ID='Spk_29', CTRL_ID='dry pipe' /
 &CTRL ID='dry pipe', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='Spk_29', DELAY=30. /
 \end{verbatim}
 \normalsize
@@ -5109,7 +5109,6 @@ control functions, will then flow water.
 &CTRL ID='nozzle 2 trigger', FUNCTION_TYPE='ALL', INPUT_ID='delay','LINK 2'/
 \end{verbatim}
 \normalsize
-
 
 \chapter{Output Data}
 \label{info:outputdata}
