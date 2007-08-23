@@ -122,7 +122,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: August 7, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: August 23, 2007)}
 
 \vspace{.5in}
 
@@ -2701,7 +2701,7 @@ explicit second-order predictor-corrector scheme.
   \label{species2} \ee
 
 \leftline{\underline{Conservation of Momentum}}
-\be \dod{\bu}{t} + \bu \times \bo + \nabla {\cal H} =
+\be \dod{\bu}{t} - \bu \times \bo + \nabla {\cal H} =
   \frac{1}{\rho} \left((\rho-\rho_0)\bg + {\bof_b}
   + \nabla \cdot \btau_{ij} \right) \label{momentum2} \ee
 
