@@ -3,12 +3,12 @@
 ! This module contains the FDS+Evac human movement algorithm and
 ! related subprograms.  Some of the types are defined in the
 ! type.f90 module file.  The statistic (cumulative distributions) are in
-! the stat.f90, which calls a module dcdflib.f by netlib (http://www.netlib.org/).
-! The dcdflib has been written in the public domain.  Some of the dcdflib code has
+! the ieva.f90, which includes a module dcdflib.f by netlib (http://www.netlib.org/).
+! The DCDFLIB has been written in the public domain.  Some of the DCDFLIB code has
 ! appeared in an ACM publication and it is subject to their algorithms policy,
-! see the comments at the start of the dcdflib.f file.
+! see the comments at the start of the DCDFLIB in ieva.f90.
 !
-! Author: Timo Korhonen, VTT Technical Research Centre of Finland
+! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007
 !
 !!!!!!!!!!!!!!
 !

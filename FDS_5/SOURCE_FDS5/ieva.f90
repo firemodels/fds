@@ -6431,7 +6431,7 @@ Contains
     Real ( kind = 8 ), Parameter :: eps = 0.00001D+00
     !    Real ( kind = 8 ) gamma_log
     Integer i
-    Integer ii
+    Real ( kind = 8 ) xi
     Integer icent
     Integer iterb
     Integer iterf
@@ -6451,7 +6451,8 @@ Contains
     Real ( kind = 8 ) xnonc
     Real ( kind = 8 ) xx
     qsmall(xx) = sum1 < 1.0D-20 .Or. xx < eps * sum1
-    dg(ii) = df +  2.0D+00  * Real ( ii, kind = 8 )
+    ! dg(ii) = df +  2.0D+00  * Real ( ii, kind = 8 )
+    dg(xi) = df +  2.0D+00  * xi
 
     If ( x <= 0.0D+00 ) Then
        cum = 0.0D+00
@@ -6491,11 +6492,11 @@ Contains
     !
     !  Calculate central chi-square.
     !
-    Call cumchi ( x, dg(icent), pcent, ccum )
+    Call cumchi ( x, dg(Real(icent,kind=8)), pcent, ccum )
     !
     !  Calculate central adjustment term.
     !
-    dfd2 = dg(icent) /  2.0D+00 
+    dfd2 = dg(Real(icent,kind=8)) /  2.0D+00 
     lfact = gamma_log ( 1.0D+00 + dfd2 )
     lcntaj = dfd2 * Log ( chid2 ) - chid2 - lfact
     centaj = Exp ( lcntaj )
@@ -6516,7 +6517,7 @@ Contains
 
     Do
 
-       dfd2 = dg(i) /  2.0D+00 
+       dfd2 = dg(Real(i,kind=8)) /  2.0D+00 
        !
        !  Adjust chi-square for two fewer degrees of freedom.
        !  The adjusted value ends up in PTERM.
@@ -6566,7 +6567,7 @@ Contains
        !  Update adjustment term for DF for next iteration.
        !
        i = i + 1
-       dfd2 = dg(i) /  2.0D+00 
+       dfd2 = dg(Real(i,kind=8)) /  2.0D+00 
        adj = adj * chid2 / dfd2
        sumadj = sumadj + adj
        iterf = iterf + 1
