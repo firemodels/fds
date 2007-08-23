@@ -4916,14 +4916,18 @@ between when a device activates, and when some other action occurs, like in a dr
 
 \footnotesize
 \begin{verbatim}
-&DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler', QUANTITY='CONTROL', ID='Spk_29', CTRL_ID='dry pipe' /
-&CTRL ID='dry pipe', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='Spk_29', DELAY=30. /
+&DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler_link', QUANTITY='LINK TEMPERATURE',
+      ID='Spk_29_link', CTRL_ID='dry pipe' /
+&DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler', QUANTITY='CONTROL', ID='Spk_29',
+      CTRL_ID='dry pipe' /
+&CTRL ID='dry pipe', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='Spk_29_link', DELAY=30. /
 \end{verbatim}
 \normalsize
 
 \noindent
 This relationship between a sprinkler \index{sprinkler}and its pipes means that the sprinkler spray is controlled (in this case delayed) by the
-{\ct dry pipe}, which adds 30 s to the activation time of {\ct Spk\_29} before water can flow out of the head. %A more complicated function is given by the lines:
+{\ct dry pipe}, which adds 30 s to the activation time of {\ct Spk\_29}, measured by  {\ct Spk\_29\_link},
+before water can flow out of the head. %A more complicated function is given by the lines:
 
 %\footnotesize
 %\begin{verbatim}
