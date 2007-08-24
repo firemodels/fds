@@ -2197,8 +2197,8 @@ READ_PART_LOOP: DO N=1,N_PART
    STATIC                   = .FALSE.
    MASSLESS                 = .FALSE.
    TREE                     = .FALSE.
-   VERTICAL_VELOCITY        = 0.2_EB
-   HORIZONTAL_VELOCITY      = 0.5_EB
+   VERTICAL_VELOCITY        = 0.5_EB
+   HORIZONTAL_VELOCITY      = 0.2_EB
  
    ! Read the PART line from the input file or set up special PARTICLE_CLASS class for water droplets or tracers
  
