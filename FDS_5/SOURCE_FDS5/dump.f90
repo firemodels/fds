@@ -3743,7 +3743,9 @@ DO K=1,KBAR
                Z_2 = 0._EB
             ENDIF               
             CALL GET_MASS_FRACTION_ALL(Z_1,Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),Y_MF_INT)            
-            MINT(:,NM) = MINT(:,NM) + RHO(I,J,K)*Y_MF_INT*VC
+            DO N=1,9
+               MINT(N,NM) = MINT(N,NM) + RHO(I,J,K)*Y_MF_INT(N)*VC
+            ENDDO
             NN = 9
             DO N=1,N_SPECIES
                IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
