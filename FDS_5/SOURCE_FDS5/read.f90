@@ -2661,7 +2661,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
    ! Do some error checking on the inputs
 
-   IF (ANY(IGNITION_TEMPERATURE<5000._EB) .AND. N_REACTIONS==0) THEN
+   IF (ANY(IGNITION_TEMPERATURE>-TMPM) .AND. N_REACTIONS==0) THEN
       WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,'. IGNITION_TEMPERATURE used, but N_REACTIONS=0' 
       CALL SHUTDOWN(MESSAGE)
    ENDIF
@@ -2765,7 +2765,7 @@ EMISSIVITY             = 0.9_EB
 HEAT_OF_COMBUSTION     = -1._EB      ! kJ/kg
 HEAT_OF_REACTION       = 0._EB       ! kJ/kg
 ID                     = 'null'
-IGNITION_TEMPERATURE   = 5000._EB    ! C
+IGNITION_TEMPERATURE   = -TMPM       ! 0 K
 N_REACTIONS            = 0
 N_S                    = 1._EB
 N_T                    = 0._EB
