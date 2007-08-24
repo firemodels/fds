@@ -105,6 +105,7 @@
 \newcommand{\WE}{\hbox{We}}
 \newcommand{\COTWO}{{\tiny \hbox{CO}_2}}
 \newcommand{\OTWO}{{\tiny \hbox{O}_2}}
+\newcommand{\NTWO}{{\tiny \hbox{N}_2}}
 \newcommand{\CO}{{\tiny \hbox{CO}}}
 \newcommand{\F}{{\tiny \hbox{F}}}
 \newcommand{\C}{{\tiny \hbox{C}}}
@@ -1481,27 +1482,22 @@ oxygen co-exist, a reaction occurs if conditions are favorable. If a reaction oc
 conversion of fuel to products. The heat release rate of the fire is obtained by multiplying the fuel consumption rate by the
 heat of combustion.
 
-The mass fraction of any species in the mixture is found via a
-linear combination of its state relations for Reaction 1 and Reaction 2. For example, let $Y_{\alpha,1}(Z)$
-represent the mass fraction of species $\alpha$ assuming that only the null reaction occurs. Likewise, $Y_{\alpha,2}(Z)$ is the mass fraction of
-species $\alpha$ assuming that only the complete reaction occurs.  For a mixture of products, unburned fuel, and unconsumed oxygen, the mass
-fraction of species $\alpha$ is
-\be  Y_{\alpha}(Z) = (1-c) \, Y_{\alpha,1}(Z) + c \, Y_{\alpha,2}(Z) \label{1step} \ee
-The variable $c$ is often referred to as a ``progress variable.'' It is a number between 0 and 1 that indicates the extent to which
-the gas mixture is composed of products of the null or complete reaction. If $c=1$, then none of the gases are the result of a
-local extinction. The value of $c$ is determined locally from the values of $Z_1$ and $Z_2$.
-\be c = \frac{Z-Z_1}{Z-Y_{\F,2}(Z)} = \frac{Z_2}{Z-Y_{\F,2}(Z)}   \ee
-The function $Y_{\F,2}(Z)$ is the fuel state relation for complete combustion.
+Since the mixture fraction variables result from linear combinations of the species transport equations, the converse
+is also true: that species are linear combinations of the mixture fraction variables.  The mass fractions of the species in the mixture, $Y_{\alpha}(Z_1,Z_2)$,are found via
+:   
+\begin{eqnarray}  Y_F      &=& Z_1    \\*[.1in]
+                  Y_\NTWO  &=& (1 - Z_1 - Z_2) Y_\NTWO^\infty    \\*[.1in]
+                           &=& (1 - Z) Y_\NTWO^\infty    \\*[.1in]
+                  Y_\OTWO  &=& (1 - Z_1 - Z_2) Y_\OTWO^\infty - W_\OTWO(\frac{Y_\COTWO}{W_\COTWO}+\frac{1}{2} 
+(\frac{Y_\CO}{W_\CO}+\frac{Y_{H_2O}}{W_{H_2O}}))   \\*[.1in]
+                           &=& (1 - Z) Y_\OTWO^\infty - \frac{W_\OTWO Z_2}{W_\F} (\nu_\COTWO+\frac{1}{2} 
+(\nu_\CO+\nu_{H_2O}))   \\*[.1in]
+                  Y_\COTWO &=& Z_2 \frac{\nu_\COTWO W_\COTWO}{W_\F} \\*[.1in]
+                  Y_{H_2O} &=& Z_2 \frac{\nu_{H_2O} W_{H_2O}}{W_\F} \\*[.1in]
+                  Y_\CO    &=& Z_2 \frac{\nu_\CO W_\CO}{W_\F} \\*[.1in]
+                  Y_s      &=& Z_2 \frac{\nu_s W_s}{W_\F}
+\end{eqnarray}
 
-Below is a pictorial rendering of Eq.~(\ref{1step}), demonstrating the linear combination of state relations.
-\begin{tabular*}{\textwidth}[t]{lccccr}
-\includegraphics[height=1.8in]{FIGURES/State_Relations_1+3_Full}
-\raisebox{0.7in}[0pt]{=} &
-\raisebox{0.7in}[0pt]{$(1-c)$} &
-\includegraphics[height=1.8in]{FIGURES/State_Relations_1_Full} &
-\raisebox{0.7in}[0pt]{+ $\quad c$} &
-\includegraphics[height=1.8in]{FIGURES/State_Relations_3_Full}
- \end{tabular*}
 It is important to note that the definitions of $Z_1$ and $Z_2$, unlike the single parameter model,
 do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
 
@@ -1531,73 +1527,26 @@ To describe the state of the system, the mixture fraction, $Z$, must be written 
                   Z_3 &=& \frac{W_\F}{x \, W_\COTWO } \;  Y_\COTWO  \end{eqnarray}
 Here, $x$ is the number of carbon atoms in the fuel molecule that are oxidized (i.e. $x$ does not include carbon that becomes soot).
 
-The decomposition of $Z$ into three components is numerically convenient. However, the recovery of the individual species mass fractions requires some care. As a first step,
-define two progress variables. The first, $c_\F$, indicates the extent to which the fuel has reacted with oxygen, and the second, $c_\CO$,
-indicates the extent to which CO has been converted to CO$_2$.  To derive formulae for the progress variables, we first must define the local stoichiometric
-value of the mixture fraction. The ``incomplete'' and ``complete'' reactions have different stoichiometric values of $Z$. Depending on the local composition of
-the gases, the stoichiometric value falls between those of the ``incomplete'' and ``complete'' reactions:
-\be  Z_f   = \left( 1+\frac{W_\OTWO}{W_\F} \left(1+\frac{Y_{{\tiny \hbox{N}_2}}^\infty}{Y_\OTWO^\infty} \right) \, \Big( (1-c)\, \nu_{O_2,2}+c \, \nu_{O_2,3} \Big) \right)^{-1}   \quad ; \quad  c = \frac {Z_3}{Z_2+Z_3}  \ee
-The state relation for fuel depends on the local stoichiometric value:
-\be  Y_\F(Z) = \left\{ \begin{array}{l@{\quad}l}  0                    & Z \le Z_f  \\
-                                                  \frac{Z-Z_f}{1-Z_f}    & Z >   Z_f  \end{array} \right.  \ee
-Now the progress variables are written:
-\begin{eqnarray}  c_\F   &=& \frac{Z-Z_1}{Z-Y_{\F}(Z)}    \\ \vspace{0.1in}
-                  c_\CO  &=& \frac{1}{c_\F} \, \frac{Z_3}{Z_{3,max}(Z)}   \quad ; \quad Z_{3,\max}(Z)  = \frac{W_\F}{x \, W_\COTWO } Y_{\COTWO,3}  \end{eqnarray}
+The decomposition of $Z$ into three components is numerically convenient. However, the recovery of the individual species mass fractions requires some care. We desire to allow the user to
+specify some amount of CO to survive Reaction 3.  The mass fraction of any species in the mixture, $Y_{\alpha}(Z_1,Z_2,Z_3)$,are still found via
+linear combinations of the mixture fraction variables; however, those combinations are somewhat more complex.  In the equations below, 
+the subscripted number on the $\nu_{\alpha}$ denotes the reaction number from above:
 
-With the definitions of the progress variables in hand, we are ready to define the state relations. As before, the state relations are essentially linear
-combinations of those of the individual reactions.
-The ``null'' reaction, and its corresponding progress variable, $c_\F$, is treated as before. However, the second and third reaction
-require some care. Consider a combination of products of the ``incomplete'' and ``complete'' reactions. The state relations for this
-mixture can be found via a linear combination of the state relations:
+\begin{eqnarray}  Y_F      &=& Z_1    \\*[.1in]
+                  Y_\NTWO  &=& (1 - Z_1 - Z_2 - Z_3) Y_\NTWO^\infty    \\*[.1in]
+                           &=& (1 - Z) Y_\NTWO^\infty    \\*[.1in]
+                  Y_\OTWO  &=& (1 - Z_1 - Z_2 - Z_3) Y_\OTWO^\infty - W_\OTWO(\frac{Y_\COTWO}{W_\COTWO}+\frac{1}{2} 
+(\frac{Y_\CO}{W_\CO}+\frac{Y_{H_2O}}{W_{H_2O}}))   \\*[.1in]
+                           &=& (1 - Z) Y_\OTWO^\infty - \frac{W_\OTWO}{W_\F} (Z_3 \nu_{\COTWO , 3}+\frac{1}{2}
+((Z_2 \nu_{\CO , 2} + Z_3 \nu_{\CO , 3})+(Z_2 \nu_{H_2O , 2} + Z_3 \nu_{H_2O , 3}))))   \\*[.1in]
+                  Y_\COTWO &=& Z_3 \frac{\nu_{\COTWO , 3} W_\COTWO}{W_\F} \\*[.1in]
+                  Y_{H_2O} &=& (Z_2 \nu_{H_2O , 2} + Z_3 \nu_{H_2O , 3})\frac{W_{H_2O}}{W_\F} \\*[.1in]
+                  Y_\CO    &=& (Z_2 \nu_{\CO , 2} + Z_3 \nu_{\CO , 3}) \frac{W_\CO}{W_\F} \\*[.1in]
+                  Y_s      &=& (Z_2 + Z_3) \frac{\nu_s W_s}{W_\F}
+\end{eqnarray}
 
-\vspace{0.1in}
-\noindent
-\begin{tabular*}{\textwidth}[t]{lccccr}
-\includegraphics[height=1.75in]{FIGURES/State_Relations_2+3} &
-\raisebox{0.75in}[0pt]{=} &
-\raisebox{0.75in}[0pt]{$(1-c_\CO)$} &
-\includegraphics[height=1.75in]{FIGURES/State_Relations_2} &
-\raisebox{0.75in}[0pt]{+ $c_\CO$} &
-\includegraphics[height=1.75in]{FIGURES/State_Relations_3}
- \end{tabular*}
-
-\vspace{0.1in}
-\noindent
-The state relations on the left represent a reaction of fuel and oxygen that produce only CO and H$_2$O (soot is neglected here,
-not only because methane is the fuel chosen for this example, but also to simplify the discussion). The state relations in the
-center represent the complete conversion of fuel and oxygen to CO$_2$ and H$_2$O. The state relations on the right represent a
-linear combination of the two (with $c_\CO=0.5$). Note that there is a small overlap of the fuel and oxygen lines between the
-stoichiometric values of each respective reaction. It is assumed that if only Reactions 2 and 3 are being considered, there should
-be no overlap of fuel and oxgyen. Thus, a correction needs to be made to consume excess oxygen on the fuel-rich side of
-the flame ($Z>Z_f$) or to consume excess fuel on the fuel-lean side ($Z<Z_f$), and adjust other products accordingly.
-The stoichiometric value of the gas mixture, $Z_f$, falls between the values
-for the individual reactions, $Z_{f,2}$ and $Z_{f,3}$, roughly (but not exactly) corresponding to the progress variable
-$c_\CO$.
-
-The state relations for the three-reaction system are derived as before for the two-reaction system. Pictorially:
-
-\vspace{0.1in}
-\noindent
-\begin{tabular*}{\textwidth}[t]{lccccr}
-\includegraphics[height=1.75in]{FIGURES/State_Relations_1+2+3} &
-\raisebox{0.75in}[0pt]{=} &
-\raisebox{0.75in}[0pt]{$(1-c_\F)$} &
-\includegraphics[height=1.75in]{FIGURES/State_Relations_1} &
-\raisebox{0.75in}[0pt]{+ $\quad c_\F$} &
-\includegraphics[height=1.75in]{FIGURES/State_Relations_2+3_Corrected}
-\end{tabular*}
-
-\vspace{0.1in}
-\noindent
-Notice that now fuel and oxygen mix, because Reaction 1 is nothing more than the mixing of fuel and oxgyen without burning.
-A summary of the derivation is:
-\be  Y_{\alpha}(Z) = (1-c_\F) \, Y_{\alpha,1}(Z) + c_\F \; \left[ (1-c_\CO) \, Y'_{\alpha,2}(Z) + c_\CO \, Y'_{\alpha,3}(Z) \right] \ee
-Note that the state relations for Reaction 2 and Reaction 3 require a slight modification:
-\be \begin{array}{ll}
-     Y'_{\alpha,2}(Z) = Y_{\alpha,2}(Z) \pm (\nu_\alpha W_\alpha/\nu_\OTWO W_\OTWO) \, Y_{\OTWO,2}(Z) \quad & \quad \hbox{if} \quad Z>Z_f  \\*[.1in]
-     Y'_{\alpha,3}(Z) = Y_{\alpha,3}(Z) \pm (\nu_\alpha W_\alpha/\nu_\F W_\F)       \, Y_{\F,3}(Z)    \quad & \quad \hbox{if} \quad Z<Z_f  \end{array} \ee
-
-
+As with the single step with extinction formulation, note that the definitions of $Z_1$, $Z_2$, and $Z_3$, unlike the single parameter model,
+do not imply anything regarding the rate of combustion, only that the combustion occurs in two steps.
 
 \subsubsection{Heat Release Rate}
 
