@@ -71,7 +71,9 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
       DO K=1,KBAR
          DO J=1,JBAR
             ILOOPB: DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOPB
+               IC = CELL_INDEX(I,J,K)
+               IF (SOLID(IC)) CYCLE ILOOPB
+               IWA = WALL_INDEX(IC,:)
                YO20  = YO2Z(I,J,K)
                YFU0  = MAX(0._EB,MIN(1._EB,YY(I,J,K,I_FUEL)))*RN%Y_F_INLET
                IF (YFU0<=YFUMIN .OR. YO20<=YO2MIN) CYCLE ILOOPB
@@ -100,7 +102,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
                         ENDIF
                      ENDDO
-                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
+                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
                      IF (YO2W>Y_O2_MAX) THEN
                         Y_O2_MAX = YO2W
                         TMP_MIN = TMP_F(IW)
@@ -128,7 +130,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
                         ENDIF
                      ENDDO
-                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
+                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
                      IF (YO2W>Y_O2_MAX) THEN
                         Y_O2_MAX = YO2W
                         TMP_MIN = TMP_F(IW)
@@ -157,7 +159,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
                         ENDIF
                      ENDDO
-                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
+                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
                      IF (YO2W>Y_O2_MAX) THEN
                         Y_O2_MAX = YO2W
                         TMP_MIN = TMP_F(IW)
@@ -185,7 +187,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
                         ENDIF
                      ENDDO
-                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
+                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
                      IF (YO2W>Y_O2_MAX) THEN
                         Y_O2_MAX = YO2W
                         TMP_MIN = TMP_F(IW)
@@ -214,7 +216,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
                         ENDIF
                      ENDDO
-                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
+                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
                      IF (YO2W>Y_O2_MAX) THEN
                         Y_O2_MAX = YO2W
                         TMP_MIN = TMP_F(IW)
@@ -242,7 +244,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
                         ENDIF
                      ENDDO
-                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
+                     CALL GET_MASS_FRACTION2(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
                      IF (YO2W>Y_O2_MAX) THEN
                         Y_O2_MAX = YO2W
                         TMP_MIN = TMP_F(IW)
@@ -303,6 +305,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
    ENDIF SUPPRESSIONIF
        
 ELSE PRODUCE_CO !Combustion with suppression and CO production
+
    YO2Z   => WORK1
 !   IGNITE => LOGICAL_WORK
 !   IGNITE = .FALSE.
