@@ -2917,9 +2917,12 @@ with factors of 1000. $n_{s,ij}$ is prescibed under the name {\ct
 N\_S(j)}. $T_{ign,ij}$ is an ignition temperature that
 allows the definition of non-Arrhenius pyrolysis functions and
 ignition criteria, and is prescribed by {\ct IGNITION\_TEMPERATURE(j)}.
-By default, the exponent of temperature $n_{t,j}$ is zero, and the
-temperature power does not affect the pyrolysis rate. $n_{t,j}$ is
-prescibed under the name {\ct N\_T(j)}.
+By default, $T_{ign,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero
+and the last term of Equation~\ref{rr} does not affect the pyrolysis rate. 
+The term can be used to describe a threshold temperature for the pyrolysis
+reaction by setting $T_{ign,ij}$ and $n_{t,j}$ = 0. Then the term
+becomes zero at temperatures below $T_{ign,ij}$ and one elsewhere.
+$n_{t,j}$ is prescibed under the name {\ct N\_T(j)}.  
 
 $A$ and $E$  are not readily accessible for most materials found at a
 fire scene. However, if they are known, specify both. Avoid specifying
@@ -6524,7 +6527,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_HEIGHT}                 & Real            & Height of texture image           & m                   & 1.     \\ \hline
 {\ct TEXTURE\_MAP}                    & Character       & Name of texture map file          &                     &        \\ \hline
 {\ct TEXTURE\_WIDTH}                  & Real            & Width of texture image            & m                   & 1.     \\ \hline
-{\ct THICKNESS(IL)}                   & Real Array      & Thickness of Layer {\ct IL}       & m                   & 0.1    \\ \hline
+{\ct THICKNESS(IL)}                   & Real Array      & Thickness of Layer {\ct IL}       & m                   & 0.    \\ \hline
 {\ct TMP\_BACK}                       & Real            & Back surface temperature          & $^\circ$C           & 20.    \\ \hline
 {\ct TMP\_FRONT}                      & Real            & Front surface temperature         & $^\circ$C           & 20.    \\ \hline
 {\ct TMP\_INNER}                      & Real            & Initial solid temperature         & $^\circ$C           & 20.    \\ \hline
@@ -6535,7 +6538,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Z0 }                             & Real            & Atmospheric profile origin        &  m                  & 10.    \\ \hline
 %\end{tabular*}
 \end{longtable}
-
+  
 %NAMELIST /SURF/ SLIP_FACTOR,TMP_FRONT,TMP_INNER,THICKNESS,MASS_FRACTION,VEL,VEL_T,NPPC, &
 %                E_COEFFICIENT,CONVECTIVE_HEAT_FLUX,TAU_Q,TAU_V,TAU_T,RAMP_Q,RAMP_T,TAU_MF, &
 %                RAMP_MF,PART_ID,RAMP_V,VOLUME_FLUX, PROFILE,PLE,Z0,ID,MASS_FLUX,PARTICLE_MASS_FLUX, &

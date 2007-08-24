@@ -635,13 +635,16 @@ WALL_CELL_LOOP: DO IW=1,NWC
          DO J=1,ML%N_REACTIONS
             ! Reaction rate in 1/s
             REACTION_RATE = ML%A(J)*(WC%RHO_S(I,N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*WC%TMP_S(I)))
-            IF (ML%N_T(J)/=0.) THEN
-               DTMP = WC%TMP_S(I)-ML%TMP_IGN(J)
+            ! power term
+            DTMP = WC%TMP_S(I)-ML%TMP_IGN(J)
+            IF (ML%N_T(J)/=0._EB) THEN
                IF (DTMP > 0._EB) THEN
                   REACTION_RATE = REACTION_RATE * DTMP**ML%N_T(J)
                ELSE
                   REACTION_RATE = 0._EB
                ENDIF
+            ELSE ! threshold
+               IF (DTMP < 0._EB) REACTION_RATE = 0._EB
             ENDIF
             ! Reaction rate in kg/(m3s)
             REACTION_RATE = RHO_S0 * REACTION_RATE
