@@ -253,7 +253,7 @@ TREE_LOOP: DO NCT=1,N_TREES
       DR%W = 0._EB
       DR%TMP = PC%TMP_INITIAL
       DR%T   = 0._EB
-      DR%IOR = 0_EB
+      DR%IOR = 0
       DR%A_X = 0._EB
       DR%A_Y = 0._EB
       DR%A_Z = 0._EB
@@ -746,11 +746,13 @@ USE PHYSICAL_FUNCTIONS, ONLY : DRAG
 REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,SFAC,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
             RD,T,C_DRAG,XI,YJ,ZK,MU_AIR, &
             DTSP,DTMIN,UBAR,VBAR,WBAR,BFAC,GRVT1,GRVT2,GRVT3,AUREL,AVREL,AWREL,CONST, &
-            UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION
+            UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION,R_NEW,SURFACE_DROPLET_DIAMETER
 LOGICAL :: HIT_SOLID
 INTEGER :: ICN,I,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,IW,N,NITER, &
            IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IOR_OLD,IC
 INTEGER, INTENT(IN) :: NM
+
+SURFACE_DROPLET_DIAMETER = 0.001_EB  ! All droplets adjusted to this size when on solid (m)
 
 GRVT1 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(1) 
 GRVT2 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(2) 
@@ -759,27 +761,37 @@ GRVT3 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GZ)*GVEC(3)
 ! Loop through all Lagrangian particles and move them one time step
 
 DROPLET_LOOP: DO I=1,NLP  
+
    DR => DROPLET(I)
    PC => PARTICLE_CLASS(DR%CLASS)
 
    ! Determine the current coordinates of the particle
-   
+
    XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
    YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
    ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
    II  = FLOOR(XI+1._EB)
    JJ  = FLOOR(YJ+1._EB)
    KK  = FLOOR(ZK+1._EB)
-   IIX = FLOOR(XI+.5_EB)
-   JJY = FLOOR(YJ+.5_EB)
-   KKZ = FLOOR(ZK+.5_EB)  
+   IC  = CELL_INDEX(II,JJ,KK)
+
+   ! Throw out particles that are inside a solid obstruction
+
+   IF (SOLID(IC)) THEN
+      DR%X = 1.E6_EB
+      CYCLE DROPLET_LOOP
+   ENDIF
+
    ! Interpolate the nearest velocity components of the gas
 
+   IIX  = FLOOR(XI+.5_EB)
+   JJY  = FLOOR(YJ+.5_EB)
+   KKZ  = FLOOR(ZK+.5_EB)
    UBAR = AFILL2(U,II-1,JJY,KKZ,XI-II+1,YJ-JJY+.5_EB,ZK-KKZ+.5_EB)
    VBAR = AFILL2(V,IIX,JJ-1,KKZ,XI-IIX+.5_EB,YJ-JJ+1,ZK-KKZ+.5_EB)
    WBAR = AFILL2(W,IIX,JJY,KK-1,XI-IIX+.5_EB,YJ-JJY+.5_EB,ZK-KK+1)
     
-   ! If the particle is just a massless tracer, just move it and get out
+   ! If the particle is just a massless tracer, just move it and go on to the next particle
 
    IF (PC%MASSLESS) THEN
       DR%U = UBAR
@@ -794,7 +806,6 @@ DROPLET_LOOP: DO I=1,NLP
    ! Calculate the particle velocity components and the amount of momentum to transfer to the gas
 
    RVC = RDX(II)*RDY(JJ)*RDZ(KK)
-   IC  = CELL_INDEX(II,JJ,KK)
    RD  = DR%R
    RDS = RD*RD
    RDC = RD*RDS
@@ -829,7 +840,7 @@ DROPLET_LOOP: DO I=1,NLP
       DR%A_Z  = 0._EB
    ENDIF DRAG_CALC
 
-   ! If the particle does not move, but does drag, get out now
+   ! If the particle does not move, but does drag, go on to the next particle
 
    IF (PC%STATIC) CYCLE DROPLET_LOOP
  
@@ -906,7 +917,7 @@ DROPLET_LOOP: DO I=1,NLP
       ZK  = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
       IIN = FLOOR(XI+1._EB)
       JJN = FLOOR(YJ+1._EB)
-      KKN = FLOOR(ZK+1._EB)      
+      KKN = FLOOR(ZK+1._EB)
       IF (IIN<0 .OR. IIN>IBP1) CYCLE DROPLET_LOOP
       IF (JJN<0 .OR. JJN>JBP1) CYCLE DROPLET_LOOP
       IF (KKN<0 .OR. KKN>KBP1) CYCLE DROPLET_LOOP
@@ -919,7 +930,7 @@ DROPLET_LOOP: DO I=1,NLP
          IF (DR%Y<YS .OR. DR%Y>YF) CYCLE DROPLET_LOOP
          IF (DR%Z<ZS .OR. DR%Z>ZF) CYCLE DROPLET_LOOP
       ENDIF
-    
+
       ! If droplet hits an obstacle, change its properties
 
       AIR_TO_SOLID: IF (II/=IIN .OR. JJ/=JJN .OR. KK/=KKN) THEN
@@ -939,32 +950,32 @@ DROPLET_LOOP: DO I=1,NLP
          IF (KKN>KK .AND. BOUNDARY_TYPE(IWP3)==SOLID_BOUNDARY) THEN
             DR%IOR=-3
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = (Z(KK)-Z_OLD-0.05_EB*DZ(KK))/(DR%Z-Z_OLD)
+            STEP_FRACTION = MAX(0._EB,(Z(KK)-Z_OLD-0.05_EB*DZ(KK))/(DR%Z-Z_OLD))
          ENDIF
          IF (KKN<KK .AND. BOUNDARY_TYPE(IWM3)==SOLID_BOUNDARY) THEN
             DR%IOR= 3
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = (Z(KKN)-Z_OLD+0.05_EB*DZ(KKN))/(DR%Z-Z_OLD)
+            STEP_FRACTION = MAX(0._EB,(Z(KKN)-Z_OLD+0.05_EB*DZ(KKN))/(DR%Z-Z_OLD))
          ENDIF
          IF (IIN>II .AND. BOUNDARY_TYPE(IWP1)==SOLID_BOUNDARY) THEN
             DR%IOR=-1
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = (X(II)-X_OLD-0.05_EB*DX(II))/(DR%X-X_OLD)
+            STEP_FRACTION = MAX(0._EB,(X(II)-X_OLD-0.05_EB*DX(II))/(DR%X-X_OLD))
          ENDIF
          IF (IIN<II .AND. BOUNDARY_TYPE(IWM1)==SOLID_BOUNDARY) THEN
             DR%IOR= 1
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = (X(IIN)-X_OLD+0.05_EB*DX(IIN))/(DR%X-X_OLD)
+            STEP_FRACTION = MAX(0._EB,(X(IIN)-X_OLD+0.05_EB*DX(IIN))/(DR%X-X_OLD))
          ENDIF
          IF (JJN>JJ .AND. BOUNDARY_TYPE(IWP2)==SOLID_BOUNDARY) THEN
             DR%IOR=-2
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = (Y(JJ)-Y_OLD-0.05_EB*DY(JJ))/(DR%Y-Y_OLD)
+            STEP_FRACTION = MAX(0._EB,(Y(JJ)-Y_OLD-0.05_EB*DY(JJ))/(DR%Y-Y_OLD))
          ENDIF
          IF (JJN<JJ .AND. BOUNDARY_TYPE(IWM2)==SOLID_BOUNDARY) THEN
             DR%IOR= 2
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = (Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD)
+            STEP_FRACTION = MAX(0._EB,(Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD))
          ENDIF
 
          DR%WALL_INDEX = WALL_INDEX(IC,-DR%IOR)
@@ -982,32 +993,32 @@ DROPLET_LOOP: DO I=1,NLP
             IF (KKN>KK .AND. BOUNDARY_TYPE(IWM3)==SOLID_BOUNDARY) THEN
                DR%IOR=-3
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = (Z(KK)-Z_OLD-0.05_EB*DZ(KK))/(DR%Z-Z_OLD)
+               STEP_FRACTION = MAX(0._EB,(Z(KK)-Z_OLD-0.05_EB*DZ(KK))/(DR%Z-Z_OLD))
             ENDIF
             IF (KKN<KK .AND. BOUNDARY_TYPE(IWP3)==SOLID_BOUNDARY) THEN
                DR%IOR= 3
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = (Z(KKN)-Z_OLD+0.05_EB*DZ(KKN))/(DR%Z-Z_OLD)
+               STEP_FRACTION = MAX(0._EB,(Z(KKN)-Z_OLD+0.05_EB*DZ(KKN))/(DR%Z-Z_OLD))
             ENDIF
             IF (IIN>II .AND. BOUNDARY_TYPE(IWM1)==SOLID_BOUNDARY) THEN
                DR%IOR=-1
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = (X(II)-X_OLD-0.05_EB*DX(II))/(DR%X-X_OLD)
+               STEP_FRACTION = MAX(0._EB,(X(II)-X_OLD-0.05_EB*DX(II))/(DR%X-X_OLD))
             ENDIF
             IF (IIN<II .AND. BOUNDARY_TYPE(IWP1)==SOLID_BOUNDARY) THEN
                DR%IOR= 1
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = (X(IIN)-X_OLD+0.05_EB*DX(IIN))/(DR%X-X_OLD)
+               STEP_FRACTION = MAX(0._EB,(X(IIN)-X_OLD+0.05_EB*DX(IIN))/(DR%X-X_OLD))
             ENDIF
             IF (JJN>JJ .AND. BOUNDARY_TYPE(IWM2)==SOLID_BOUNDARY) THEN
                DR%IOR=-2
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = (Y(JJ)-Y_OLD-0.05_EB*DY(JJ))/(DR%Y-Y_OLD)
+               STEP_FRACTION = MAX(0._EB,(Y(JJ)-Y_OLD-0.05_EB*DY(JJ))/(DR%Y-Y_OLD))
             ENDIF
             IF (JJN<JJ .AND. BOUNDARY_TYPE(IWP2)==SOLID_BOUNDARY) THEN
                DR%IOR= 2
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = (Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD)
+               STEP_FRACTION = MAX(0._EB,(Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD))
             ENDIF
             DR%WALL_INDEX = WALL_INDEX(ICN,DR%IOR)
          ENDIF
@@ -1018,7 +1029,14 @@ DROPLET_LOOP: DO I=1,NLP
  
             IF (DR%WALL_INDEX==0) CYCLE SUB_TIME_STEP_ITERATIONS
 
+            ! Adjust the size of the droplet and weighting factor 
+
+            R_NEW  = MIN(0.5_EB*SURFACE_DROPLET_DIAMETER,(DR%PWT*DR%R**3)**ONTH)
+            DR%PWT = DR%PWT*DR%R**3/R_NEW**3
+            DR%R   = R_NEW
+
             ! Move particle to where it almost hits solid
+
             DR%X = X_OLD + STEP_FRACTION*DTSP*DR%U
             DR%Y = Y_OLD + STEP_FRACTION*DTSP*DR%V
             DR%Z = Z_OLD + STEP_FRACTION*DTSP*DR%W
@@ -1034,9 +1052,11 @@ DROPLET_LOOP: DO I=1,NLP
                   ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
                   KKN = FLOOR(ZK+1._EB)
             END SELECT
+
             ICN = CELL_INDEX(IIN,JJN,KKN)
 
             IF (IOR_OLD==DR%IOR) CYCLE SUB_TIME_STEP_ITERATIONS
+
             ! Choose a direction for the droplets to move
 
             DIRECTION: SELECT CASE(ABS(DR%IOR))
@@ -1054,42 +1074,59 @@ DROPLET_LOOP: DO I=1,NLP
 
          ENDIF IF_HIT_SOLID
       ENDIF AIR_TO_SOLID 
-      ! Check if attached droplets are still attached
+
+      ! Check if droplets that were attached to a solid are still attached after the time update
 
       IW = 0
       SELECT CASE(DR%IOR)
          CASE( 1)
             IW = WALL_INDEX(ICN,-1)
-            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) DR%U = -PC%HORIZONTAL_VELOCITY
+            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
+               DR%X = DR%X - 0.2_EB*DX(II)
+               DR%W = -DR%W
+            ENDIF
          CASE(-1)
             IW = WALL_INDEX(ICN, 1)
-            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) DR%U =  PC%HORIZONTAL_VELOCITY
+            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
+               DR%X = DR%X + 0.2_EB*DX(II)
+               DR%W = -DR%W
+            ENDIF
          CASE( 2)
             IW = WALL_INDEX(ICN,-2)
-            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) DR%V = -PC%HORIZONTAL_VELOCITY
+            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
+               DR%Y = DR%Y - 0.2_EB*DY(JJ)
+               DR%W = -DR%W
+            ENDIF
          CASE(-2)
             IW = WALL_INDEX(ICN, 2)
-            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) DR%V =  PC%HORIZONTAL_VELOCITY
+            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
+               DR%Y = DR%Y + 0.2_EB*DY(JJ)
+               DR%W = -DR%W
+            ENDIF
          CASE( 3)
             IW = WALL_INDEX(ICN,-3)
-            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
+            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN  ! Particle has reached the edge of a horizontal surface
                DR%U = -DR%U
                DR%V = -DR%V
-               DR%Z = DR%Z - 0.2_EB*DZ(KK)
+               DR%Z =  DR%Z - 0.2_EB*DZ(KK)
             ENDIF
          CASE(-3)
-            IF (.NOT.SOLID(ICN)) DR%IOR = 0
+            IW = WALL_INDEX(ICN, 3)
       END SELECT
+
       IF (DR%IOR/=0 .AND. BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
          DR%IOR = 0
          DR%WALL_INDEX = 0
       ELSE
          DR%WALL_INDEX = WALL_INDEX(ICN,-DR%IOR)
       ENDIF
+
    ENDDO SUB_TIME_STEP_ITERATIONS
+
 ENDDO DROPLET_LOOP
 
 ! Remove out-of-bounds particles
+ 
 CALL REMOVE_DROPLETS(T,NM)
 
 END SUBROUTINE MOVE_PARTICLES
@@ -1200,6 +1237,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          II  = FLOOR(XI+1._EB)
          JJ  = FLOOR(YJ+1._EB)
          KK  = FLOOR(ZK+1._EB)
+         
          ! Initialize droplet thermophysical data
 
          R_DROP   = DR%R
@@ -1312,8 +1350,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             Q_RAD      = 0._EB
          ENDIF
 
-! if (i==1) write(0,'(I5,2F8.2,3E12.3)') DR%TAG,TMP_DROP_NEW-TMPM,DR%R*2.E6,H_HEAT,H_MASS,DR%PWT
-
          ! Update droplet quantities
          
          M_DROP = M_DROP - M_VAP
@@ -1383,7 +1419,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
 ENDDO EVAP_INDEX_LOOP
 
-! Remove out-of-bounds particles
+! Remove droplets that have completely evaporated
  
 CALL REMOVE_DROPLETS(T,NM)
  
