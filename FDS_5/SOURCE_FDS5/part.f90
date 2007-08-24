@@ -763,7 +763,7 @@ DROPLET_LOOP: DO I=1,NLP
    PC => PARTICLE_CLASS(DR%CLASS)
 
    ! Determine the current coordinates of the particle
-
+   
    XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
    YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
    ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
@@ -772,8 +772,7 @@ DROPLET_LOOP: DO I=1,NLP
    KK  = FLOOR(ZK+1._EB)
    IIX = FLOOR(XI+.5_EB)
    JJY = FLOOR(YJ+.5_EB)
-   KKZ = FLOOR(ZK+.5_EB)
-    
+   KKZ = FLOOR(ZK+.5_EB)  
    ! Interpolate the nearest velocity components of the gas
 
    UBAR = AFILL2(U,II-1,JJY,KKZ,XI-II+1,YJ-JJY+.5_EB,ZK-KKZ+.5_EB)
@@ -907,7 +906,7 @@ DROPLET_LOOP: DO I=1,NLP
       ZK  = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
       IIN = FLOOR(XI+1._EB)
       JJN = FLOOR(YJ+1._EB)
-      KKN = FLOOR(ZK+1._EB)
+      KKN = FLOOR(ZK+1._EB)      
       IF (IIN<0 .OR. IIN>IBP1) CYCLE DROPLET_LOOP
       IF (JJN<0 .OR. JJN>JBP1) CYCLE DROPLET_LOOP
       IF (KKN<0 .OR. KKN>KBP1) CYCLE DROPLET_LOOP
@@ -1020,7 +1019,6 @@ DROPLET_LOOP: DO I=1,NLP
             IF (DR%WALL_INDEX==0) CYCLE SUB_TIME_STEP_ITERATIONS
 
             ! Move particle to where it almost hits solid
-
             DR%X = X_OLD + STEP_FRACTION*DTSP*DR%U
             DR%Y = Y_OLD + STEP_FRACTION*DTSP*DR%V
             DR%Z = Z_OLD + STEP_FRACTION*DTSP*DR%W
@@ -1036,11 +1034,9 @@ DROPLET_LOOP: DO I=1,NLP
                   ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
                   KKN = FLOOR(ZK+1._EB)
             END SELECT
-
             ICN = CELL_INDEX(IIN,JJN,KKN)
 
             IF (IOR_OLD==DR%IOR) CYCLE SUB_TIME_STEP_ITERATIONS
-
             ! Choose a direction for the droplets to move
 
             DIRECTION: SELECT CASE(ABS(DR%IOR))
@@ -1058,7 +1054,6 @@ DROPLET_LOOP: DO I=1,NLP
 
          ENDIF IF_HIT_SOLID
       ENDIF AIR_TO_SOLID 
-
       ! Check if attached droplets are still attached
 
       IW = 0
@@ -1085,20 +1080,16 @@ DROPLET_LOOP: DO I=1,NLP
          CASE(-3)
             IF (.NOT.SOLID(ICN)) DR%IOR = 0
       END SELECT
-
       IF (DR%IOR/=0 .AND. BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
          DR%IOR = 0
          DR%WALL_INDEX = 0
       ELSE
          DR%WALL_INDEX = WALL_INDEX(ICN,-DR%IOR)
       ENDIF
-
    ENDDO SUB_TIME_STEP_ITERATIONS
-
 ENDDO DROPLET_LOOP
 
 ! Remove out-of-bounds particles
- 
 CALL REMOVE_DROPLETS(T,NM)
 
 END SUBROUTINE MOVE_PARTICLES
@@ -1109,7 +1100,7 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,NM)
     
 ! Mass and energy transfer between gas and droplets
 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION2
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN,DROP_RAD,DROP_TMP
 REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS
@@ -1209,7 +1200,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          II  = FLOOR(XI+1._EB)
          JJ  = FLOOR(YJ+1._EB)
          KK  = FLOOR(ZK+1._EB)
-         
          ! Initialize droplet thermophysical data
 
          R_DROP   = DR%R
