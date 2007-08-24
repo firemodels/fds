@@ -1127,7 +1127,7 @@ before the {\ct \&} except a space and nothing comes between the ampersand
 {\ct \&} and the slash {\ct /} except appropriate parameters corresponding
 to that particular namelist group.
 
-The parameters in the input file can be integers ({\ct TWFIN=5400}),
+The parameters in the input file can be integers ({\ct T\_END=5400}),
 real numbers ({\ct CO\_YIELD=0.008}), groups of real numbers or integers
 ({\ct XYZ=6.04,0.28,3.65}) or ({\ct IJK=90,36,38}),
 character strings:
@@ -1211,7 +1211,7 @@ lines of the original validation input file (WTC\_05\_v5.fds) removed for clarit
 \begin{verbatim}
 &HEAD CHID='WTC_05_v5', TITLE='WTC Phase 1, Test 5, FDS version 5' /
 &MESH IJK=90,36,38, XB=-1.0,8.0,-1.8,1.8,0.0,3.82 /
-&TIME TWFIN=5400. /
+&TIME T\_END=5400. /
 &MISC SURF_DEFAULT='MARINITE BOARD', TMPA=20., POROUS_FLOOR=.FALSE. /
 &DUMP NFRAMES=1800, DT_HRR=10., DT_DEVC=10., DT_PROF=30. /
 
@@ -1339,20 +1339,32 @@ simulation. It is simply descriptive text that is passed to various output files
 duration of the simulation and the initial time step used to advance
 the solution of the discretized equations. Usually, only the
 duration of the simulation is required on this line, via the
-parameter {\ct TWFIN} (Time When FINished). The default is 1 s.
+parameter {\ct T\_END} (Time End)\index{TIME!T\_END}. The default is 1 s.
+Note: {\ct TWFIN}{\ct TWFIN} will still work but it has been deprecated, 
+it is recommended that {\ct T\_END} be used now instead.
+
 For example, the following line will instruct FDS to run the simulation for 5400 seconds.
 
 \footnotesize
 \begin{verbatim}
-&TIME TWFIN=5400. /
+&TIME T_END=5400. /
 \end{verbatim}
+
 \normalsize
-If {\ct TWFIN} is set to zero, only the set-up work is
-performed, allowing you to quickly check the geometry in
-Smokeview.
+If {\ct T\_END} is set to zero, only the set-up work is performed, 
+allowing you to quickly check the geometry in Smokeview.
+
+If you want the timeline to start at a number other than zero, you can ues the parameter 
+{\ct T\_BEGIN} (Time Begin)\index{TIME!T\_BEGIN} to specify the time written to file for the first timestep.
+This would be useful for matching timelines of experimental data or or video recordings.
+
+\begin{warning}
+This does not run any of the simulation prior to the {\ct T\_BEGIN} value. 
+It is only used to offset the reported starting time from zero.
+\end{warning}
 
 The initial time step size can be specified with
-{\ct DT}. This parameter is normally set automatically by dividing the size of a grid cell by the
+{\ct DT}\index{TIME!DT}. This parameter is normally set automatically by dividing the size of a grid cell by the
 characteristic velocity of the flow.
 During the calculation, the time step is adjusted so that the CFL (Courant, Friedrichs, Lewy) condition is
 satisfied. The default value of {\ct DT} is $5 \, (\dx \, \dy \, \dz)^\ot/\sqrt{gH}$ s, where
@@ -1368,7 +1380,7 @@ recorded in the output file {\bf job\_name.out}.
 \end{warning}
 
 \noindent
-One additional parameter in the {\ct TIME} group is {\ct SYNCHRONIZE}, a
+One additional parameter in the {\ct TIME} group is {\ct SYNCHRONIZE}\index{TIME!SYNCHRONIZE} , a
 logical flag ({\ct .TRUE.} or {\ct .FALSE.}) indicating that in a
 multi-mesh computation the time step for each mesh should be the same, thus
 ensuring that each mesh is processed each iteration. More details can
@@ -1522,7 +1534,7 @@ even if the pressure zones
 cross mesh boundaries.
 \item In a parallel calculation, you can force the time steps in all meshes to
 be the same by setting \\
-{\ct SYNCHRONIZE=.TRUE.} on the {\ct TIME} line.
+{\ct SYNCHRONIZE=.TRUE.}\index{TIME!SYNCHRONIZE} on the {\ct TIME} line.
 This is the default for all modes of operation, starting in FDS 5. With this
 setting, all meshes are active each iteration. For a single-processor, multiple mesh
 calculation, this strategy reduces
@@ -1533,14 +1545,14 @@ inactive. Forcing the mesh to be updated with a smaller than ideal time step doe
 cost anything since that processor would have been idle anyway. The benefit is that
 there is a tighter connection between meshes.
 It is also possible to synchronize the time step in only a select set of meshes. To do
-this, add {\ct SYNCHRONIZE=.TRUE.} to the appropriate {\ct GRID} lines and then add
-{\ct SYNCHRONIZE=.FALSE.} to the {\ct TIME} line.
+this, add {\ct SYNCHRONIZE=.TRUE.} to the appropriate {\ct MESH} lines and then add
+{\ct SYNCHRONIZE=.FALSE.} to the {\ct TIME} line.\index{MESH!SYNCHRONIZE}
 \item If a planar obstruction is close to where two meshes abut, make sure that each
 mesh ``sees'' the obstruction. If the obstruction is even a millimeter outside of one
 of the meshes, that mesh does not account for it, in which case information is not
 transferred properly between meshes.
 \item When running a case with multiple meshes in parallel, the efficiency of the
-calculation can be checked as follows: (1) Set {\ct SYNCHRONIZE=.TRUE.} on the
+calculation can be checked as follows: (1) Set {\ct SYNCHRONIZE=.TRUE.}\index{TIME!SYNCHRONIZE} on the
 {\ct TIME} line, (2) Let the program run several hundred time steps, (3) Calculate
 the difference in wall clock time between two 100 iteration print outs in
 the file {\bf CHID.out} (see Section~\ref{out:file}).
@@ -2097,7 +2109,7 @@ If an obstruction is not to be punctured by a {\ct HOLE}, add
 {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.
 
 It is a good idea to inspect the geometry by running either a setup job
-({\ct TWFIN=0} on the {\ct TIME} line) or a short-time job to test the operation of devices and control functions.
+({\ct T\_END=0} on the {\ct TIME} line) or a short-time job to test the operation of devices and control functions.
 
 \begin{warning}
 \noindent
@@ -3162,7 +3174,7 @@ extremely transient heat transfer situations. Use {\ct STRETCH\_FACTOR
 between 1.0 and 2.0 give different levels of stretching.  The size of
 all the grid cells can be scaled by setting {\ct CELL\_SIZE\_FACTOR}
 less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR = 0.5} makes the
-grid cells half the size. Setting {\ct WALL\_INCREMENT=1} on the
+grid cells half the size. Setting {\ct WALL\_INCREMENT=1}\index{TIME!WALL\_INCREMENT} on the
 {\ct TIME} line forces the solid phase temperatures to be solved on every
 time step.
 
@@ -3515,7 +3527,7 @@ no convective heat transfer. There are several parameters that allow you do this
 gas phase calculation is essentially being shut off, you just need 4
 cells in each direction ({\ct IJK=4,4,4}) for the pressure solver to
 function properly.
-\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS
+\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1}\index{TIME!WALL\_INCREMENT} to force FDS
 to update the solid phase every time step (normally it does this every
 other time step), and set {\ct DT} to whatever value appropriate for
 the solid phase calculation. Since there is no gas phase calculation
@@ -5166,7 +5178,7 @@ parameters have been specified via other namelist groups in past versions.
 \begin{description}
 \item[{\ct NFRAMES}] Number of output dumps per calculation. The default is 1000.
 Device data, slice data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and
-control function data are saved every {\ct TWFIN/NFRAMES} unless otherwise specified
+control function data are saved every {\ct T\_END/NFRAMES} unless otherwise specified
 using {\ct DT\_DEVC}, {\ct DT\_SLCF}, {\ct DT\_PART}, {\ct DT\_ISOF}, {\ct DT\_BNDF}, {\ct DT\_PROF},
 or {\ct DT\_CTRL} Note that {\ct DT\_SLCF} controls Smoke3D output. {\ct DT\_HRR} controls the
 output of heat release rate and associated quantities.
@@ -6653,18 +6665,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\ \hline \hline
-{\ct DT}              & Real        & Initial time step                           & s           &                  \\ \hline
-{\ct FYI}             & Character   & Comment String (has no effect)              &             &                  \\ \hline
-{\ct SYNCHRONIZE}     & Logical     & Lock time step of multiple meshes           &             & {\ct .TRUE.}     \\ \hline
-{\ct T\_BEGIN}        & Real        & Starting time for calculation               & s           & 0.               \\ \hline
-{\ct T\_END}          & Real        & Time When FINished                          & s           & {\ct TWFIN}            \\ \hline
-%{\ct TIME\_SHRINK\_FACTOR & Real        & Scaling factor for time ramps and specific heat &             & 1.            \\ \hline
-{\ct TWFIN }          & Real        & Time When FINished                          & s           & 1.               \\ \hline
-{\ct WALL\_INCREMENT} & Integer     & Timesteps between 1D wall solution updates  &             & 2                \\ \hline
+{\ct DT}                   & Real       & Initial time step                   & s           &               \\ \hline
+{\ct FYI}                  & Character  & Comment String (has no effect)      &             &               \\ \hline
+{\ct SYNCHRONIZE}          & Logical    & Sync time step of multiple meshes   &             & {\ct .TRUE.}  \\ \hline
+{\ct T\_BEGIN}             & Real       & Starting time for calculation       & s           & 0.            \\ \hline
+{\ct T\_END}or{\ct TWFIN } & Real       & Ending time for calculation         & s           & 1             \\ \hline
+%{\ct TIME\_SHRINK\_FACTOR} & Real       & Scaling factor for time ramps and specific heat & & 1.            \\ \hline
+{\ct WALL\_INCREMENT}      & Integer    & Timesteps between 1D wall solution updates  &     & 2             \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /TIME/ DT,T_BEGIN,T_END,TWFIN,FYI,WALL_INCREMENT,SYNCHRONIZE,
-%                EVAC_DT_FLOWFIELD,EVAC_DT_STEADY_STATE,TIME_SHRINK_FACTOR
 
 \vspace{\baselineskip}
 
@@ -7340,7 +7349,7 @@ are stored in a FORTRAN unformatted (binary) file called {\bf CHID.prt5}.
 Note that the format of this file has changed from previous versions (4 and below).
 The file consists of some header material, followed by particle data output every
 {\ct DT\_PART} seconds. The time increment {\ct DT\_PART} is specified on the
-{\ct DUMP} line. It is {\ct TWFIN/NFRAMES} by default.
+{\ct DUMP} line. It is {\ct T\_END/NFRAMES} by default.
 The header materials is written by the following FORTRAN code in the file called {\bf dump.f90}.
 
 \footnotesize
@@ -7394,7 +7403,7 @@ due to the solid phase reactions. Array {\ct Q} contains the values of
 the output quantity, which may be wall temperature, density or
 component density.
 
-
+\backmatter
 
 % FDSVVBiB is split into FDS_refs, FDSVVBiBnew and FDS_mathcomp
 %    SV docs would typically use FDS_ref, FDS_mathcomp but not FDSVVBiBnew
@@ -7403,10 +7412,7 @@ component density.
 %         FDS_mathcomp:  mathematical, computer references
 %         FDSVVBiBnew: fire references, what is left over
 
-%\bibliography{../Bibliography/FDSVVBiB}
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDSVVBiBnew,../Bibliography/FDS_mathcomp}
-
-
 
 \printindex
 
