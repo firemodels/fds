@@ -721,7 +721,7 @@ extern "C" void update_meshlist1(int val){
   if(meshlist1==NULL)return;
   meshlist1->set_int_val(val);
   if(val>=0&&val<nmeshes){
-    eyeview_radio->set_int_val(2);
+    eyeview_radio->set_int_val(0);
     handle_eyeview(0);
   }
 }

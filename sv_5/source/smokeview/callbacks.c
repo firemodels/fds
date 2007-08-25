@@ -98,7 +98,7 @@ void mouse(int button, int state, int x, int y){
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
     glutSetCursor(GLUT_CURSOR_INFO);
 
-    /* edit blockates */
+    /* edit blockages */
 
     if(blockageSelect==1){
       mouse_x=x; mouse_y=screenHeight-y;

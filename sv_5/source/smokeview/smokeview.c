@@ -1037,8 +1037,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   if(UpdateLIGHTS==1)updateLights(0);
 
+  if(mode!=RENDER||viscolorbarpath!=1)setClipPlanes();
   if(mode==RENDER){
-
     if(viscolorbarpath==1){
       if(cb_hidesv==1){
         setColorbarClipPlanes(1);
@@ -1047,12 +1047,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         setColorbarClipPlanes(0);
       }
     }
-    else{
-      setClipPlanes();
-    }
-
-
-
     glPointSize((float)1.0);
 
 #ifdef pp_WUI
