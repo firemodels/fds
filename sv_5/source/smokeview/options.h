@@ -30,6 +30,7 @@
 #define EGZ
 #define USE_ZLIB
 #define pp_THREADS2
+#define pp_HRR
 
 #define pp_WUI
 

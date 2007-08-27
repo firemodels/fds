@@ -3415,6 +3415,16 @@ typedef struct {
       STRCPY(flushfile,chidfilebase);
       STRCAT(flushfile,".flush");
 #endif
+#ifdef pp_HRR
+  if(chidfilebase!=NULL){
+    NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
+    STRCPY(hrrfilename,chidfilebase);
+    STRCAT(hrrfilename,"_hrr.csv");
+    if(stat(hrrfilename,&statbuffer)!=0){
+      FREEMEMORY(hrrfilename);
+    }
+  }
+#endif
 
       continue;
     }
@@ -4444,6 +4454,13 @@ typedef struct {
  */
 
   CheckMemory;
+
+#ifdef pp_HRR
+  if(hrrfilename!=NULL){
+    readhrr(LOAD, &errorcode);
+  }
+#endif
+
 #ifdef pp_THREADS2
   if(mt_compress==1)pthread_mutex_init(&mutexCOMPRESS,NULL);
 #endif
@@ -6714,6 +6731,13 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       sscanf(buffer,"%i ",&visFramelabel);
       continue;
     }
+#ifdef pp_HRR
+    if(match(buffer,"SHOWHRRLABEL",12)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i ",&visHRRlabel);
+      continue;
+    }
+#endif
     if(match(buffer,"RENDERFILETYPE",14)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&renderfiletype);
@@ -8168,6 +8192,10 @@ void writeini(int flag){
   fprintf(fileout," %i\n",visTimelabel);
   fprintf(fileout,"SHOWFRAMELABEL\n");
   fprintf(fileout," %i\n",visFramelabel);
+#ifdef pp_HRR
+  fprintf(fileout,"SHOWFRAMELABEL\n");
+  fprintf(fileout," %i\n",visFramelabel);
+#endif
   fprintf(fileout,"SHOWFLOOR\n");
   fprintf(fileout," %i\n",visFloor);
   fprintf(fileout,"SHOWWALLS\n");

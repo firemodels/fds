@@ -79,6 +79,11 @@ EXTERNCPP int plot3dcompare( const void *arg1, const void *arg2 );
 void update_plot_xyz(mesh *current_mesh);
 void updateplotslice_mesh(mesh *mesh_in, int slicedir);
 
+#ifdef pp_HRR
+void printhrr(void);
+void readhrr(int flag, int *errorcode);
+void drawhrr(void);
+#endif
 EXTERNCPP void setColorbarClipPlanes(int flag);
 EXTERNCPP void addcolorbar(int icolorbar);
 EXTERNCPP void ReloadMenu(int value);
