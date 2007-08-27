@@ -1190,7 +1190,7 @@ in some systematic way. Typically, general information is listed near the top of
 obstructions, devices, and so on, are listed below. FDS scans the entire input file each time it processes a particular namelist group.
 With some text editors, it has been noticed that the last line of the file is often not read by FDS because of the presence of an
 ``end of file'' character.
-To ensure that FDS reads the entire input file, add \index{Namelist Group!TAIL}
+To ensure that FDS reads the entire input file, add \index{TAIL}
 
 \footnotesize
 \begin{verbatim}
@@ -1257,12 +1257,12 @@ run and re-run your case as you add in complexity.
 
 Table~\ref{tbl:namelistgroups} provides a quick reference to all the namelist parameters and
 where you can find the reference to where it is introduced in the document and the
-table containing all of the keywords for each group. \index{Namelist Group}
+table containing all of the keywords for each group.
 
 \vspace{\baselineskip}
 \begin{table}[ht]
 \begin{center}
-\caption{Namelist Group Reference Table}
+\caption{Namelist Group Reference Table}\index{Namlist Groups Table}
 \label{tbl:namelistgroups}
 \begin{tabular}{|c|l|c|c|}
 \hline
@@ -1305,7 +1305,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 
 
 \section{Naming the Job: The \texorpdfstring{{\tt HEAD}}{HEAD} Namelist Group (Table \ref{tbl:HEAD})}
-\label{info:HEAD}\index{Namelist Group!HEAD}
+\label{info:HEAD}\index{HEAD}
 
 The first thing to do when setting up an input file is to give the
 job a name.  The name of the job is important because often a project
@@ -1320,20 +1320,19 @@ two parameters, as in this example:
 \normalsize
 
 \begin{description}
-\item {\ct CHID} is a string
-of 30 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05\_v5'}, it is convenient to
+\item {\ct CHID}\index{HEAD!CHID} is a string of 30 characters or less used to tag the output files. 
+If, for example, {\ct CHID='WTC\_05\_v5'}, it is convenient to
 name the input data file {\ct WTC\_05\_v5.fds} so that the input file
 can be associated with the output files. No periods or spaces are allowed in
 {\ct CHID} because the output files are tagged with suffixes that
 are meaningful to certain computer operating systems.
-\item {\ct TITLE} is a string of 60 characters or less that describes the
+\item {\ct TITLE}\index{HEAD!TITLE} is a string of 60 characters or less that describes the
 simulation. It is simply descriptive text that is passed to various output files.
 \end{description}
 
 
-
-\section{Simulation Time: The \texorpdfstring{{\tt TIME}}{TIME} Namelist Group (Table \ref{tbl:TIME})}%Bryan
-\label{info:TIME}\index{Namelist Group!TIME}
+\section{Simulation Time: The \texorpdfstring{{\tt TIME}}{TIME} Namelist Group (Table \ref{tbl:TIME})}
+\label{info:TIME}\index{TIME}
 
 {\ct TIME} is the name of a group of parameters time define the time
 duration of the simulation and the initial time step used to advance
@@ -1364,18 +1363,18 @@ It is only used to offset the reported starting time from zero.
 \end{warning}
 
 The initial time step size can be specified with
-{\ct DT}\index{TIME!DT}. This parameter is normally set automatically by dividing the size of a grid cell by the
+{\ct DT}\index{TIME!DT}. This parameter is normally set automatically by dividing the size of a mesh cell by the
 characteristic velocity of the flow.
 During the calculation, the time step is adjusted so that the CFL (Courant, Friedrichs, Lewy) condition is
 satisfied. The default value of {\ct DT} is $5 \, (\dx \, \dy \, \dz)^\ot/\sqrt{gH}$ s, where
-$\dx$, $\dy$, and $\dz$ are the dimensions of the smallest grid
+$\dx$, $\dy$, and $\dz$ are the dimensions of the smallest mesh
 cell, $H$ is the height of the computational domain, and $g$ is the acceleration of gravity.
 
 \begin{warning}
-If something sudden is to
-happen right at the start of a simulation, like a sprinkler activation, it is a good idea to set the initial time step
-to avoid a numerical instability caused by too large a time step. Experiment with different values of {\ct DT}
-by monitoring the initial time step sizes
+If something sudden is to happen right at the start of a simulation, 
+like a sprinkler activation, it is a good idea to set the initial time step
+to avoid a numerical instability caused by too large a time step. 
+Experiment with different values of {\ct DT} by monitoring the initial time step sizes
 recorded in the output file {\bf job\_name.out}.
 \end{warning}
 
@@ -1389,7 +1388,7 @@ be found in Section~\ref{info:multimesh}. The default value of {\ct SYNCHRONIZE}
 \newpage
 
 \section{Computational Meshes: The \texorpdfstring{{\tt MESH}}{MESH} Namelist Group (Table \ref{tbl:MESH})}
-\label{info:MESH}\index{Namelist Group!MESH}
+\label{info:MESH}\index{MESH}
 
 All FDS calculations must be performed within a domain that is made up
 of rectilinear volumes called {\em meshes}. Each mesh is divided into rectangular {\em cells},
@@ -1398,7 +1397,7 @@ the number of which depends on the desired resolution of the flow dynamics.
 A mesh is a single right parallelepiped, {\em i.e.} a box.
 The coordinate system within a mesh conforms to the right hand rule.
 The origin point of a mesh is defined by the first, third
-and fifth values of the real number sextuplet, {\ct XB}, and the opposite
+and fifth values of the real number sextuplet, {\ct XB}\index{MESH!XB}, and the opposite
 corner is defined by the second, fourth and sixth values.
 For example,
 
@@ -1412,10 +1411,10 @@ For example,
 defines a mesh that spans the volume starting at the origin and extending 1~m in the positive
 $x$ direction, 2~m in the positive $y$ direction, and 3~m in the positive $z$ direction.
 The mesh is subdivided into uniform cells via the parameter
-{\ct IJK}. In this example, the mesh is divided into 10~cm cubes.
+{\ct IJK}\index{MESH!IJK}. In this example, the mesh is divided into 10~cm cubes.
 If it is desired that the mesh cells in a particular direction not be uniform in size,
 then the namelist groups {\ct TRNX}, {\ct TRNY} and/or {\ct TRNZ} may be used to alter the
-uniformity of the mesh (See Section~\ref{info:TRNX}).
+uniformity of the mesh (See Section~\ref{info:TRNX}).\index{TRNX,TRNY,TRNZ}
 
 Any obstructions or vents that extend beyond the boundary of the mesh
 are cut off at the boundary. There is no penalty for defining objects
@@ -1430,12 +1429,12 @@ length, width and height of the cells ought to be roughly the same.
 \noindent
 Because an important part of the calculation uses a Poisson solver based on
 Fast Fourier Transforms (FFTs) in the $y$ and $z$ directions, the second and third dimensions
-of the grid should each be of the form $2^l \, 3^m \, 5^n$, where
+of the mesh should each be of the form $2^l \, 3^m \, 5^n$, where
 $l$, $m$ and $n$ are integers. For example,
-$64=2^6$, $72=2^33^2$ and $108=2^23^3$ are good grid dimensions, but 37, 99 and 109 are not.
-The first grid dimension (the {\ct I} in {\ct IJK})  does not use FFTs and need not be given as a
-product of small numbers. However, you should experiment with different values of the mesh
-dimensions to ensure that those that are ultimately used do not unduly slow down the calculation.
+$64=2^6$, $72=2^33^2$ and $108=2^23^3$ are good mesh cell divisions, but 37, 99 and 109 are not.
+The first number of mesh cell divisions (the {\ct I} in {\ct IJK}) does not use FFTs and need not be given as a
+product of small numbers. However, you should experiment with different values of 
+divisions to ensure that those that are ultimately used do not unduly slow down the calculation.
 
 Here is a list of numbers between 1 and 1024 that can be factored
 down to 2's, 3's and 5's:
@@ -1453,7 +1452,7 @@ down to 2's, 3's and 5's:
 
 
 \subsection{Two-Dimensional and Axially-Symmetric Calculations}
-\label{info:2D}
+\label{info:2D} \index{2D Calculations} \index{Axially-Symmetric Calculations}
 
 The governing equations solved in FDS are written in terms of a
 three dimensional Cartesian coordinate system. However,
@@ -1478,7 +1477,7 @@ An example of an axially-symmetric helium plume ({\bf helium\_2d}) is given in t
 \end{figure}
 
 The term ``multiple meshes'' means that the computational domain consists of
-more than one rectangular mesh, usually connected although this is not
+more than one computational mesh, usually connected although this is not
 required. In each mesh, the governing equations can be solved with a time
 step based on the flow speed within that particular mesh. Because each
 mesh can have different time steps, this technique can save CPU time by
@@ -1495,7 +1494,7 @@ Here is a list of guidelines and warnings about the use of multiple meshes.
 \item If more than one mesh is used, there should be a
 {\ct MESH} line for each. The order in which these
 lines are entered in the input file matters. In general, the meshes should be entered
-from finest to coarsest. FDS assumes that a mesh listed first has
+from finest to coarsest. FDS assumes that a mesh listed first in the input file has
 precedence over a mesh listed second if the two meshes overlap.
 Meshes can overlap, abut, or not touch at all. In the last case, essentially two separate
 calculations are performed with no communication at all between them. Obstructions and vents are entered
@@ -1506,7 +1505,7 @@ entities and decides whether or not they are to be included.
 especially fire. Sometimes fire spread from mesh to mesh cannot be
 avoided, but if at all possible try to keep mesh interfaces relatively
 free of complicated phenomena since the exchange of information across
-mesh boundaries is not as accurate as cell to cell exchanges within one
+mesh boundaries is not yet as accurate as cell to cell exchanges within one
 mesh.
 \item Information from other meshes is received only at the exterior boundary
 of a given mesh. This means that a mesh that is completely embedded within
@@ -1514,30 +1513,31 @@ another receives information at its exterior boundary, but the larger
 mesh receives no information from the mesh embedded within. Essentially,
 the larger, usually coarser, mesh is doing its own simulation of the scenario
 and is not affected by the smaller, usually finer, mesh embedded within it.
-Details within the fine grid, especially related to fire growth and spread,
-may not be picked up by the coarse grid. In such cases, it is preferable to
+Details within the fine mesh, especially related to fire growth and spread,
+may not be picked up by the coarse mesh. In such cases, it is preferable to
 isolate the detailed fire behavior within one mesh, and position coarser
 meshes at the exterior boundary of the fine mesh. Then the fine and coarse
 meshes mutually exchange information.
 \item Experiment with different mesh configurations using relatively
-coarse grid cells to ensure that information is being transferred
+coarse mesh cells to ensure that information is being transferred
 properly from mesh to mesh. There are two issues of concern. First,
 does it appear that the flow is being badly affected by the mesh boundary? If so,
 try to move the mesh boundaries away from areas of activity. Second,
 is there too much of a jump in cell size from one mesh to another? If so, consider
 whether the loss of information moving from a fine to a coarse mesh is tolerable.
 \item Be careful when using the shortcut convention of declaring an
-entire face of the domain to be an {\ct OPEN} vent. Every grid
+entire face of the domain to be an {\ct OPEN} vent. Every mesh
 takes on this attribute. See Section~\ref{info:VENT} for more details.
 \item It is possible, starting with FDS 5, to have a background pressure rise in multiple pressure zones,
-even if the pressure zones
-cross mesh boundaries.
+even if the pressure zones cross mesh boundaries. See Section~\ref{info:ZONE} for more information.
 \item In a parallel calculation, you can force the time steps in all meshes to
-be the same by setting \\
-{\ct SYNCHRONIZE=.TRUE.}\index{TIME!SYNCHRONIZE} on the {\ct TIME} line.
-This is the default for all modes of operation, starting in FDS 5. With this
-setting, all meshes are active each iteration. For a single-processor, multiple mesh
-calculation, this strategy reduces
+be the same by setting {\ct SYNCHRONIZE=.TRUE.}\index{TIME!SYNCHRONIZE} on the {\ct TIME} line.
+\begin{warning}
+\noindent
+Starting in FDS 5, this is the default for all modes of operation.
+\end{warning}
+With this setting, all meshes are active each iteration. 
+For a single-processor, multiple mesh calculation, this strategy reduces
 and may even eliminate any benefit seen by using multiple meshes. However, in a
 parallel calculation, if a particular mesh is inactive during an iteration because
 it is not ready to be updated, then the processor assigned to that mesh is also
@@ -1551,8 +1551,8 @@ this, add {\ct SYNCHRONIZE=.TRUE.} to the appropriate {\ct MESH} lines and then 
 mesh ``sees'' the obstruction. If the obstruction is even a millimeter outside of one
 of the meshes, that mesh does not account for it, in which case information is not
 transferred properly between meshes.
-\item When running a case with multiple meshes in parallel, the efficiency of the
-calculation can be checked as follows: (1) Set {\ct SYNCHRONIZE=.TRUE.}\index{TIME!SYNCHRONIZE} on the
+\item When running a case with multiple meshes in parallel, the efficiency of the \index{multi-mesh efficiency}
+calculation can be checked as follows: (1) Set {\ct SYNCHRONIZE=.TRUE.} on the
 {\ct TIME} line, (2) Let the program run several hundred time steps, (3) Calculate
 the difference in wall clock time between two 100 iteration print outs in
 the file {\bf CHID.out} (see Section~\ref{out:file}).
@@ -1566,9 +1566,9 @@ parallel code is working well.
 
 
 \subsection{Mesh Stretching: The \texorpdfstring{{\tt TRNX}}{TRNX}, \texorpdfstring{{\tt TRNY}}{TRNY} and/or \texorpdfstring{{\tt TRNZ}}{TRNZ} Namelist Groups (Table \ref{tbl:TRNX})}
-\label{info:TRNX}\index{Namelist Group!TRNX,TRNY,TRNZ}
-
-By default the grid cells that fill the computational domain are uniform in size.
+\label{info:TRNX}\index{TRNX,TRNY,TRNZ}
+hn 
+By default the mesh cells that fill the computational domain are uniform in size.
 However, it is possible to specify that the cells be non-uniform in one or two
 \begin{figure}[ht]
 \begin{minipage}[t]{3.1in}
@@ -1591,13 +1591,13 @@ prescribed that transforms the uniformly-spaced mesh to a
 non-uniformly spaced mesh. {\bf Be careful with mesh transformations!}  If you shrink cells in one
 region you must stretch cells somewhere else. When one
 or two coordinate directions are transformed, the aspect ratio of the
-grid cells in the 3D mesh will vary. To be on the safe side, transformations
+mesh cells in the 3D mesh will vary. To be on the safe side, transformations
 that alter the aspect ratio of cells beyond 2 or 3 should be avoided.
 Keep in mind that the large eddy simulation technique is based on the
-assumption that the numerical grid should be fine enough to allow the formation
+assumption that the numerical mesh should be fine enough to allow the formation
 of eddies that are responsible for the mixing. In general, eddy formation
-is limited by the largest dimension of a grid cell, thus shrinking the
-grid in one or two directions may not necessarily lead to a better
+is limited by the largest dimension of a mesh cell, thus shrinking the
+mesh resolution in one or two directions may not necessarily lead to a better
 simulation if the third dimension is large.
 
 \begin{warning}
@@ -1621,11 +1621,11 @@ Here is an example of how to do a mesh transformation. Suppose your mesh is defi
 and you want to alter the uniform spacing in the $x$ direction.
 First, refer to the figures above.
 You need to define a function $x = f(\xi)$ that maps the uniformly-spaced
-{\em Computational Coordinate} $0 \le \xi \le 1.5$
-to the {\em Physical Coordinate} $0 \le x \le 1.5$.
+{\em Computational Coordinate} ({\ct CC}) $0 \le \xi \le 1.5$
+to the {\em Physical Coordinate} ({\ct PC}) $0 \le x \le 1.5$.
 The function has three mandatory constraints: it must be monotonic (always increasing),
 it must map $\xi=0$ to $x=0$, and it must map $\xi=1.5$ to $x=1.5$.
-The default transformation function is $f(\xi) = \xi$ for a uniform grid, but you need not do
+The default transformation function is $f(\xi) = \xi$ for a uniform mesh, but you need not do
 anything in this case.
 
 Two types of transformation functions are allowed. The first, and
@@ -1643,10 +1643,10 @@ connecting points ({\ct CC},{\ct PC}), in increasing order, as specified by the 
 \end{verbatim} \normalsize
 
 \noindent
-The parameter {\ct CC} refers to the Computational Coordinate, $\xi$, located
-on the horizontal axis; {\ct PC} is the Physical Coordinate, $x$, located on
+The parameter {\ct CC} refers to the Computational Coordinate\index{TRNX,TRNY,TRNZ!CC}, $\xi$, located
+on the horizontal axis; {\ct PC} is the Physical Coordinate\index{TRNX,TRNY,TRNZ!PC}, $x$, located on
 the vertical axis.  The slopes of the
-line segments in the plot indicate whether the grid is being stretched (slopes greater
+line segments in the plot indicate whether the mesh is being stretched (slopes greater
 than 1) or shrunk (slopes less than 1). The tricky part about this
 process is that you usually have a desired shrinking/stretching strategy
 for the Physical Coordinate on the vertical axis, and must work backwards
@@ -1681,10 +1681,13 @@ program and an error message is produced if it is not monotonic.
 
 
 \subsection{Choosing the Right Mesh Dimensions}
+\index{mesh dimensions}
 
-A common question asked by new FDS users is, ``What size mesh should I use?''  The answer is not easy because it depends considerably on what you are trying
-to accomplish. In general, you should build an FDS input file using a relatively coarse mesh, and then gradually refine the mesh until you do not see
-appreciable differences in your results. Formally, this is referred to as a grid sensitivity study.
+A common question asked by new FDS users is, ``What size mesh should I use?''  
+The answer is not easy because it depends considerably on what you are trying
+to accomplish. In general, you should build an FDS input file using a relatively 
+coarse mesh, and then gradually refine the mesh until you do not see
+appreciable differences in your results. Formally, this is referred to as a mesh sensitivity study.
 
 For simulations involving buoyant plumes, a measure of how well the flow field is resolved is given by the
 non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic
@@ -1692,21 +1695,28 @@ fire diameter
 \be D^* = \left(
      \frac{\dQ}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} }
      \right)^\frac{2}{5}  \ee
-and $\dx$ is the nominal size of a grid cell\footnote{The characteristic
+and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic
 fire diameter is related to the characteristic fire size via the
 relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the
-fire.}. The quantity $D^*/\dx$
-can be thought of as the number of computational cells spanning the
-characteristic (not necessarily the physical) diameter of the fire.
+fire.}. The quantity $D^*/\dx$ can be thought of as the number of computational cells 
+spanning the characteristic (not necessarily the physical) diameter of the fire.
 The more cells spanning the fire, the better the resolution of the
-calculation. It is better to assess the quality of the mesh in terms of this non-dimensional parameter, rather than
-an absolute grid cell size. For example, a cell size of 10~cm may be ``adequate,'' in some sense, for evaluating the spread of smoke and heat
-through a building from a sizeable fire, but may not be appropriate to study a very small, smoldering source.
+calculation. It is better to assess the quality of the mesh in terms 
+of this non-dimensional parameter, rather than an absolute mesh cell size. 
+For example, a cell size of 10~cm may be ``adequate,'' in some sense, 
+for evaluating the spread of smoke and heat through a building from a 
+sizable fire, but may not be appropriate to study a very small, smoldering source.  
+
+As an example, in the mesh sensitivity study for NUREG 1824~\cite{NUREG_1824}, the $D^*/\dx$ values ranged from 4 to 16.
+These values were used to adequately resolve plume dynamics, 
+along with other geometrical characteristics of the models as well.  
+This range does not indicate what values to use for all models, 
+only what values worked well for that particular set of models.
 
 
 \clearpage
 \section{Miscellaneous Parameters: The \texorpdfstring{{\tt MISC}}{MISC} Namelist Group (Table \ref{tbl:MISC})}
-\label{info:MISC}\index{Namelist Group!MISC}
+\label{info:MISC}\index{MISC}
 
 {\ct MISC} is the namelist group of global miscellaneous input parameters.
 Only one {\ct MISC} line should be entered in the data file. For example, the input line
@@ -1852,7 +1862,7 @@ the correction to determine if its inclusion is warranted.
 
 
 \subsection{Special Topic: Unusual Initial Conditions: The \texorpdfstring{{\tt INIT}}{INIT} Namelist Group (Table \ref{tbl:INIT})}
-\label{info:INIT}\index{Namelist Group!INIT}
+\label{info:INIT}\index{INIT}
 
 Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is
 assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This
@@ -1918,7 +1928,7 @@ relevant diffusion parameter -- viscosity, material diffusivity or thermal condu
 This constraint on the time step is typical
 of any explicit, second-order numerical scheme for solving a parabolic partial differential
 equation. To save CPU time, the Von Neumann criterion is only invoked for DNS calculations or for LES
-calculations with grid cells smaller than 5~mm.
+calculations with mesh cells smaller than 5~mm.
 
 \begin{warning}
 Resetting the stability parameters is not recommended except in very special circumstances, as they can lead to
@@ -1948,7 +1958,7 @@ chapter describes how to assign properties to the boundaries.
 
 
 \section{Creating Obstructions: The \texorpdfstring{{\tt OBST}}{OBST} Namelist Group (Table \ref{tbl:OBST})}
-\label{info:OBST}\index{Namelist Group!OBST}
+\label{info:OBST}\index{OBST}
 
 The namelist group {\ct OBST} contains parameters used to define obstructions.
 Each {\ct OBST} line contains the coordinates of a rectangular
@@ -1994,9 +2004,9 @@ $z=0.0$, and $z=9.2$, respectively.
 Note that {\ct SURF\_ID6} should not be used on the same {\ct OBST}
 line as {\ct SURF\_ID} or {\ct SURF\_IDS}.
 \item Obstructions can have zero thickness. Often, thin sheets, like a window, form a barrier,
-but if the numerical grid is coarse relative to the thickness of the barrier, the obstruction
-might be unnecessarily large if it is assumed to be one layer of grid cells thick. All faces
-of an obstruction are shifted to the closest grid cell. If the obstruction is very thin, the two
+but if the numerical mesh is coarse relative to the thickness of the barrier, the obstruction
+might be unnecessarily large if it is assumed to be one layer of mesh cells thick. All faces
+of an obstruction are shifted to the closest mesh cell. If the obstruction is very thin, the two
 faces may be approximated on the same cell face. FDS and Smokeview render
 this obstruction as a thin sheet, but it is allowed to have thermally
 thick boundary conditions. This feature is fragile, especially in terms
@@ -2004,12 +2014,12 @@ of burning and blowing gas. A thin sheet obstruction can only have one velocity
 vector on its face, thus a gas cannot be injected reliably from a
 thin obstruction because whatever is pushed from one side is necessarily pulled from the other.
 For full functionality, the obstruction should be specified to
-be at least one grid cell thick. Thin sheet obstructions
+be at least one mesh cell thick. Thin sheet obstructions
 work fine as flow barriers, but other features are fragile and should be used with
 caution.
 \item Unlike earlier versions of FDS, obstructions that are
 too small relative to the underlying numerical mesh are rejected.
-Be careful when testing cases on coarse grids.
+Be careful when testing cases on coarse meshes.
 \item Obstructions may be created or removed during a simulation. See
 Section~\ref{info:create_remove} for details.
 \item If two obstructions overlap at one or more faces, the one listed last in the input file takes precedence over the one
@@ -2030,9 +2040,9 @@ otherwise directed.
 \subsection{Non-rectangular Geometry and Sloped Ceilings}%Bryan
 \index{Sawtooth}
 \index{Sloped Ceilings}
-The efficiency of FDS is due to the simplicity of its numerical grid.
+The efficiency of FDS is due to the simplicity of its numerical mesh.
 However, there are situations in which certain geometric features do
-not conform to the rectangular grid, such as a sloped ceiling or roof. In these cases,
+not conform to the rectangular mesh, such as a sloped ceiling or roof. In these cases,
 construct the curved geometry using rectangular obstructions, a process
 sometimes called ``stair stepping''. A concern is that
 the stair stepping changes the flow pattern near the wall. To lessen
@@ -2061,17 +2071,17 @@ attribute {\ct BURN\_AWAY=.TRUE.}
 
 
 \section{Creating Voids: The \texorpdfstring{{\tt HOLE}}{HOLE} Namelist Group (Table \ref{tbl:HOLE})}
-\label{info:HOLE}\index{Namelist Group!HOLE}
+\label{info:HOLE}\index{HOLE}
 
-The {\ct HOLE} namelist group is used to define parameters (Table \ref{tbl:HEAD}) to carve a hole
-out of an existing obstruction or set of obstructions. To do this, add lines of the form
+The {\ct HOLE} namelist group is used to define parameters (Table \ref{tbl:HOLE}) to carve a hole
+out of an existing obstruction or set of obstructions. \index{HOLE!XB}To do this, add lines of the form
 
 \footnotesize
 \begin{verbatim}
 &HOLE XB=2.0,4.5,1.9,4.8,0.0,9.2 /
 \end{verbatim}
 \normalsize
-Any solid grid cells within the volume $2.0<x<4.5$, $1.9<y<4.8$,
+Any solid mesh cells within the volume $2.0<x<4.5$, $1.9<y<4.8$,
 $0.0<z<9.2$ are removed. Obstructions intersecting the volume are
 broken up into smaller blocks.
 
@@ -2100,16 +2110,28 @@ The extra centimeter added to the $x$ coordinates of the hole make it clear
 that the hole is to punch through the entire obstruction.
 
 When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or
-created or removed at pre-determined times. See
-Section~\ref{info:create_remove} for details.
+created or removed at pre-determined times. See Section~\ref{info:create_remove} for details.  
+To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID} parameter respectively, to the {\ct HOLE} line.\index{HOLE!CTRL\_ID} \index{HOLE!DEVC\_ID}
 
 If it is desired that the obstruction(s) to be cut out should have a different color
-than the original obstruction, set the {\ct COLOR} or integer triplet {\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}).
-If an obstruction is not to be punctured by a {\ct HOLE}, add
-{\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.
+than the original obstruction, set the {\ct COLOR} \index{HOLE!COLOR} or integer triplet 
+{\ct RGB} \index{HOLE!RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}).
 
+When a {\ct HOLE} is in a {\ct .FALSE.} state, an obstruction is placed in the hole.  
+To make this obstruction transparent, the {\ct TRANSPARENCY}\index{HOLE!TRANSPARENCY} parameter should be specified by 
+a real number from 0-1. This parameter could be used to simulate a window that initially has a high amount 
+of transparency when the {\ct HOLE}'s {\ct INITIAL\_STATE=.FALSE.}. When the {\ct DEVC} or {\ct CTRL} 
+is activated and changes the state of the hole to {\ct .TRUE.}, the {\ct HOLE} is then open and completely transparent.  
+See the 'create\_remove.fds' Verification case for an example.
+
+If an obstruction is not to be punctured by a {\ct HOLE}, add
+{\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.\index{OBST!PERMIT\_HOLE}
+
+\begin{warning}
+\noindent
 It is a good idea to inspect the geometry by running either a setup job
 ({\ct T\_END=0} on the {\ct TIME} line) or a short-time job to test the operation of devices and control functions.
+\end{warning}
 
 \begin{warning}
 \noindent
@@ -2119,7 +2141,7 @@ Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only
 
 
 \section{Applying Surface Properties: The \texorpdfstring{{\tt VENT}}{VENT} Namelist Group (Table \ref{tbl:VENT})}
-\label{info:VENT} \index{Namelist Group!VENT}
+\label{info:VENT} \index{VENT}
 
 Whereas the {\ct OBST} group is used to specify obstructions within the
 computational domain, the {\ct VENT} group (Table \ref{tbl:VENT}) is used to prescribe planes
@@ -2169,7 +2191,7 @@ apply. If the default boundary condition is desired, then {\ct SURF\_ID} need no
 Be careful when using the {\ct MB} shortcut when doing a multiple mesh
 simulation, that is, when more than one rectangular mesh is used. The
 plane designated by the keyword {\ct MB} is applied to all of the
-grids, possibly leading to confusion about whether a plane is a solid
+meshes, possibly leading to confusion about whether a plane is a solid
 wall or an open boundary. Check the geometry in Smokeview to assure that
 the {\ct VENT}s are properly prescribed. Use color as much as
 possible to double-check the set-up.  More detail on color in
@@ -2211,8 +2233,7 @@ Section~\ref{info:ZONE} for instructions on specifying different types of fans.
 \end{warning}
 
 
-
-One final note for {\ct VENT}: if an error message appears requesting that
+If an error message appears requesting that \index{Troubleshooting!VENT Orientation}
 the orientation of a vent be specified, first check to make sure that the vent is a plane.
 If the vent is a plane, then the orientation can be forced by specifying the parameter {\ct IOR}.
 If the normal direction of the {\ct VENT} is in the positive $x$ direction, set {\ct IOR=1}.
@@ -2223,12 +2244,7 @@ the {\ct VENT} is buried within a solid obstruction, in which case the program c
 the direction in which the {\ct VENT} is facing.
 
 
-
-
-
-
-
-
+To allow a vent to be controlled with the {\ct CTRL} namelist, you will need to add the {\ct CTRL\_ID} parameter to the {\ct VENT} line.\index{VENT!CTRL\_ID}
 
 
 
@@ -2294,7 +2310,7 @@ materials applied to that surface.
 \index{SURF!THICNKNESS}
 
 \section{Describing the Bounding Surfaces: The \texorpdfstring{{\tt SURF}}{SURF} Namelist Group (Table \ref{tbl:SURF})}
-\label{info:SURF}\index{Namelist Group!SURF}
+\label{info:SURF}\index{SURF}
 
 {\ct SURF} is the namelist group (Table \ref{tbl:SURF}) that defines
 the structure of all solid surfaces or openings within or
@@ -2404,7 +2420,7 @@ the {\ct SURF} line prevents any heat loss from the back side of the material.
 Finally, if it is desired that the heat transfer
 through the wall into the space behind the wall, the attribute
 {\ct BACKING='EXPOSED'} should be listed. This feature only works
-if the wall is less than or equal to one grid cell thick, and if there is a non-zero volume
+if the wall is less than or equal to one mesh cell thick, and if there is a non-zero volume
 of computational domain on the other side of the wall. Obviously, if
 the wall is an external boundary of the domain, the heat is lost
 to the void.
@@ -2441,7 +2457,7 @@ given vent, or whether the given volume flux is desired.
 \end{warning}
 The dimensions of the vent that are prescribed usually change
 because the prescribed vent dimensions are sometimes altered so that
-the vent edges line up with grid cells. Also note that a {\ct SURF}
+the vent edges line up with mesh cells. Also note that a {\ct SURF}
 group with a {\ct VOLUME\_FLUX} prescribed should only be called by a
 {\ct VENT}, not an {\ct OBST}.
 Finally, note that if {\ct HRRPUA} or solid phase reaction parameters are
@@ -2472,17 +2488,17 @@ The tangential velocity boundary condition controls how the gas
 ``sticks'' to a solid surface. In theory, the tangential
 \index{tangential velocity}component of velocity is zero at the surface, but
 increases rapidly through a narrow region called the boundary layer \index{boundary layer}.
-For most practical problems, the grid is not fine enough to resolve the
+For most practical problems, the mesh is not fine enough to resolve the
 boundary layer, which is typically a few millimeters thick.
 For this reason, in an LES calculation, the velocity at the wall
-is set to be a fraction of its value in the grid cell adjacent to the
+is set to be a fraction of its value in the mesh cell adjacent to the
 wall. Only in a DNS calculation is the velocity at the wall set to zero.
 To alter these defaults, set a parameter called
 {\ct SLIP\_FACTOR}. \index{SURF!SLIP\_FACTOR} This parameter ranges
 from -1 to 1. If a no-slip wall is desired, {\ct SLIP\_FACTOR=-1}. If
 a free-slip wall is desired, {\ct SLIP\_FACTOR=1}. Numbers in between
 -1 and 1 can represent partial slip conditions, which may be
-appropriate for simulations involving large grid cells. 
+appropriate for simulations involving large mesh cells. 
 (Default {\ct SLIP\_FACTOR} is 0.5 for LES, -1.0 for DNS)
 
 In the case of a blowing vent (or even a solid surface),
@@ -2643,7 +2659,7 @@ in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
 \clearpage
 
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
-\label{info:ZONE} \index{Namelist Group!ZONE} \index{pressure leakage}
+\label{info:ZONE} \index{ZONE} \index{pressure leakage}
 
 The basic FDS equation set assumes pressure
 to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation, $\tp(\bx,t)$. Most
@@ -2672,9 +2688,9 @@ The volume flow, $\dot{V}$, through a leak of area $A_L$ is given by
 \be  \dot{V}_{\hbox{\footnotesize leak}} = A_L \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
 where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and
 $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
-to be 1. Leakage is inherently a subgrid-scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
+to be 1. Leakage is inherently a submesh-scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
 numerical mesh. It is sometimes possible to ``lump'' the leaks into a single mesh-resolvable hole, but this is problematic
-for two reasons. First, the leakage area rarely corresponds neatly to the area of a single grid cell-sized hole. Second, the
+for two reasons. First, the leakage area rarely corresponds neatly to the area of a single mesh cell-sized hole. Second, the
 flow speeds through the hole can be large and cause numerical instabilities.
 
 A better way to handle leakage is by exploiting pressure zones. A pressure zone is a user-specified volume within the computational domain that is
@@ -2805,7 +2821,7 @@ they are embedded within the Partition Wall.
 
 
 \section{Describing Real Materials: The \texorpdfstring{{\tt MATL}}{MATL} Namelist Group}
-\label{info:MATL}\index{Namelist Group!MATL}\index{Material layers}
+\label{info:MATL}\index{MATL}\index{Material layers}
 \index{SURF!MATL\_ID}
 \index{SURF!THICKNESS}
 
@@ -3121,7 +3137,7 @@ the conditions of the surrounding environment.
 
 
 \subsubsection{Liquid Fuels}
-\index{Liquid fuels}
+\index{Liquid Fuels}
 
 For a liquid fuel, the thermal properties are similar to those of a solid
 material, with a few exceptions. The evaporation rate of the fuel
@@ -3195,8 +3211,8 @@ burning away, a significant amount of extra memory has to be set aside
 to store additional surface information as the rectangular block is
 eaten away. If {\ct BURN\_AWAY} is prescribed as a {\ct SURF} parameter, then a solid
 object with this {\ct SURF\_ID} disappears from a calculation as
-the mass of each of its grid cells is consumed. The mass of each grid
-cell is the volume of the grid cell multiplied by the {\ct DENSITY} of the
+the mass of each of its mesh cells are consumed. The mass of each mesh
+cell is the volume of the mesh cell multiplied by the {\ct DENSITY} of the
 materials making up the the obstruction.
 
 \begin{warning}
@@ -3208,8 +3224,8 @@ of solid obstructions that have different {\ct SURF\_ID}s on different faces.
 
 \noindent
 Also note that the amount of combustible fuel equals the {\ct DENSITY} of the designated materials
-multiplied by the volume of the grid cell. If the volume of the obstruction changes because it has
-to conform to the uniform grid, FDS does {\bf not} adjust the burning rate to account for this as
+multiplied by the volume of the mesh cell. If the volume of the obstruction changes because it has
+to conform to the uniform mesh, FDS does {\bf not} adjust the burning rate to account for this as
 it does with various quantities associated with areas, like {\ct HRRPUA}.
 
 \subsection{Special Topic: Initial and Backside Boundary Conditions}
@@ -3238,9 +3254,9 @@ properties (via the {\ct MATL\_ID} keyword).
 
 To compute the temperature and reactions inside the solids, FDS solves
 the one-dimensional heat transfer equation numerically. The size of
-the grid cells on the surface of the solid is automatically chosen
+the mesh cells on the surface of the solid is automatically chosen
 using a rule that makes the cell size smaller than the square root of
-the material diffusivity $(k/\rho c)$. By default, the solid grid
+the material diffusivity $(k/\rho c)$. By default, the solid mesh
 cells increase towards the middle of the material layer and are smallest
 on the layer boundaries.
 
@@ -3248,14 +3264,14 @@ The default parameters are usually appropriate for simple heat
 transfer calculations but sometimes the use of pyrolysis reactions
 makes the temperatures and burning rate fluctuate. The numerical
 stability of the solid phase solution may then be improved by making
-the grid density more uniform inside the material and by making the
-grid cells smaller. Adjustments may also be needed in case of
+the mesh density more uniform inside the material and by making the
+mesh cells smaller. Adjustments may also be needed in case of
 extremely transient heat transfer situations. Use {\ct STRETCH\_FACTOR
-= 1.} on the {\ct SURF} line to have a perfectly uniform grid. Values
+= 1.} on the {\ct SURF} line to have a perfectly uniform mesh. Values
 between 1.0 and 2.0 give different levels of stretching.  The size of
-all the grid cells can be scaled by setting {\ct CELL\_SIZE\_FACTOR}
+all the mesh cells can be scaled by setting {\ct CELL\_SIZE\_FACTOR}
 less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR = 0.5} makes the
-grid cells half the size. Setting {\ct WALL\_INCREMENT=1}\index{TIME!WALL\_INCREMENT} on the
+mesh cells half the size. Setting {\ct WALL\_INCREMENT=1}\index{TIME!WALL\_INCREMENT} on the
 {\ct TIME} line forces the solid phase temperatures to be solved on every
 time step.
 
@@ -3269,8 +3285,8 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 \clearpage
 
 \section{User-Specified Functions: The \texorpdfstring{{\tt RAMP}}{RAMP} and \texorpdfstring{{\tt TABL}}{TABL} Namelist Groups}
-\label{info:RAMP}\index{Namelist Group!RAMP}
-\label{info:TABL}\index{Namelist Group!TABL}
+\label{info:RAMP}\index{RAMP}
+\label{info:TABL}\index{TABL}
 
 Many of the parameters specified in the input file are fixed constants. However, there are several parameters that may vary in
 time, temperature, or space. These functions can be complex, thus you have to have some way to convey them. The namelist group
@@ -3670,7 +3686,7 @@ commonly used mixture fraction model.
 
 
 \section{Mixture Fraction Combustion: The \texorpdfstring{{\tt REAC}}{REAC} Namelist Group}
-\label{info:REAC}\index{Namelist Group!REAC}
+\label{info:REAC}\index{REAC}
 
 
 There are two ways of designating a fire: the first is to specify a
@@ -3793,7 +3809,7 @@ This section explains the various approximations that
 affect both the gas phase parameters ({\ct REAC} line) and the
 solid (or liquid) phase parameters ({\ct SURF} line). These
 approximations are needed either to compensate for less than
-desirable grid resolution or limitations of the mixture fraction
+desirable mesh resolution or limitations of the mixture fraction
 combustion model.
 
 
@@ -3827,7 +3843,7 @@ Modeling suppression of a fire due to the introduction of a suppression
 agent like CO$_2$ or water mist, or due to the exhaustion of oxygen
 within a compartment is challenging because
 the relevant physical mechanisms occur at length scales smaller than a
-single grid cell. Flames are extinguished due to lowered
+single mesh cell. Flames are extinguished due to lowered
 temperatures and dilution of the oxygen supply. A simple
 suppression algorithm has been implemented in FDS that attempts to
 gauge whether or not a flame is viable at the fuel-oxygen interface. The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
@@ -3865,7 +3881,7 @@ little if any benefit to enabling the CO production algorithm.
 \clearpage
 
 \section{Extra Gas Species: The \texorpdfstring{{\tt SPEC}}{SPEC} Namelist Group}
-\label{info:SPEC}\index{Namelist Group!SPEC}
+\label{info:SPEC}\index{SPEC}
 
 Normally when you specify a fire via either {\ct HRRPUA} on the {\ct SURF} line or
 reaction parameters on the {\ct MATL} line, the mixture fraction combustion model
@@ -3874,7 +3890,7 @@ the combustion process from pure fuel ($\sum Z_i=1$) to pure air ($\sum Z_i=0$).
 The major reactants and products of combustion -- fuel, O$_2$, CO$_2$,
 H$_2$O, N$_2$, CO and soot -- are all pre-tabulated functions of
 the mixture fraction, $Z$. In other words, the values of $Z_i$ in any
-given grid cell determines the mass fraction of all the gases listed.
+given mesh cell determines the mass fraction of all the gases listed.
 The fuel chemistry listed under the {\ct REAC} namelist
 group is used to generate the table associating the mass fractions
 with $Z_i$. You need not, {\em and should not},
@@ -3984,7 +4000,7 @@ reactions that can occur between them. This section describes how to do this.
 when FDS is running in DNS mode. Set {\ct DNS=.TRUE.} on the {\ct MISC} line.
 Note: you may use the finite-rate reaction scheme in an
 LES calculation, but because the temperature in a large scale calculation
-is smeared out over a grid cell, some of the reaction parameters may need
+is smeared out over a mesh cell, some of the reaction parameters may need
 to be modified to account for the lower temperatures.
 
 \item The {\ct BACKGROUND\_SPECIES} on the {\ct MISC} line is normally
@@ -4024,7 +4040,7 @@ cannot participate in the reaction.
 
 
 \section{Radiation Transport: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
-\label{info:RADI}\index{Namelist Group!RADI}
+\label{info:RADI}\index{RADI}
 \index{RADI!RADIATIVE\_FRACTION}
 
 For most FDS simulations, thermal radiation transport is computed by default and you need not set any
@@ -4038,7 +4054,7 @@ larger, the temperature near the flame surface cannot be relied upon when
 computing the source term in the radiation transport equation, especially
 because of the $T^4$ dependence.
 To compensate, if you prescribe a non-zero
-value of {\ct RADIATIVE\_FRACTION} on the {\ct RADI} line, a grid cell cut by the flame
+value of {\ct RADIATIVE\_FRACTION} on the {\ct RADI} line, a mesh cell cut by the flame
 radiates that fraction of the chemical energy being released into it.
 Some of that energy may be reabsorbed elsewhere, yielding a net radiative
 loss that is less than {\ct RADIATIVE\_FRACTION}, depending mainly on the size of
@@ -4106,7 +4122,7 @@ Section~\ref{info:combustion}.
 \clearpage
 
 \chapter{Lagrangian Particles: The \texorpdfstring{{\tt PART}}{PART} Namelist Group}
-\label{info:PART}\index{Namelist Group!PART}
+\label{info:PART}\index{PART}
 
 Lagrangian particles are used in FDS as water or liquid fuel
 droplets, flow tracers, and various other objects that are not defined or confined by the numerical mesh. Sometimes the
@@ -4310,8 +4326,8 @@ invokes a mixture fraction calculation in which fuel
 from the evaporating fuel droplets is burned according to the overall reaction scheme.
 
 Note
-that this construct is fragile and subject to grid
-dependence. If the grid cells are too coarse, the
+that this construct is fragile and subject to mesh
+dependence. If the mesh cells are too coarse, the
 evaporating fuel is diluted to such a degree that it
 never burns. Proper resolution depends on the type of
 fuel and the amount of fuel being ejected from the
@@ -4327,7 +4343,7 @@ Simulations with both fuel and water droplets are possible, unlike versions of F
 \index{SURF!E\_COEFFICIENT}
 Modeling suppression of a fire by a water spray is challenging because
 the relevant physical mechanisms occur at length scales smaller than a
-single grid cell. In the gas phase, flames are extinguished due to lowered
+single mesh cell. In the gas phase, flames are extinguished due to lowered
 temperatures and dilution of the oxygen supply. See Section~\ref{info:combustion}
 for more information about gas phase suppression.
 
@@ -4387,7 +4403,7 @@ via additional namelists groups called {\ct CTRL} (Control) and
 
 
 \section{Device Location and Orientation: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group (Table \ref{tbl:DEVC})}
-\label{info:DEVC} \index{Namelist Group!DEVC} \index{DEVC}
+\label{info:DEVC} \index{DEVC} \index{DEVC}
 
 Regardless of the specific properties, each device needs to be sited either at a point within the computational domain, or
 over a span of the domain, like a beam smoke detector. For example, a sprinkler is sited within the domain with a line like:
@@ -4460,7 +4476,7 @@ specified on the {\ct DEVC} line.
 
 
 \section{Special Devices and their Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
-\label{info:PROP} \index{Namelist Group!PROP}
+\label{info:PROP} \index{PROP}
 
 Many devices are fairly easy to describe, like a point measurement, with only a few parameters which can be included on the
 {\ct DEVC} line. However, for more complicated devices, it is inconvenient to list all of the properties on each and every
@@ -4700,13 +4716,13 @@ Heskestad Ionization          & ---         & ---          &  1.8               
 \index{Device!Beam Detector}
 
 A beam detector can be defined by specifying the endpoints {\ct (x1,y1,z1),(x2,y2,z2)}, of the beam, using {\ct XB}, and the total
-total \% obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which grid
+total \% obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which mesh
 cells lie along the path specified by the two endpoints.  The beam detector response is evaluated as
 \be
   \hbox{Obscuration}  = \left(1 - \exp \left( -K_m \sum_{i=1}^N {\rho_{soot,i}\; \Delta x_i} \right)  \right) \times 100  \; \; \hbox{\%}
 \ee
-where $i$ is a grid cell along the path of the beam, $\rho_{soot,i}$ is the soot density of the grid cell, and $ \Delta x_i$
-is the distance within the grid cell that is traversed by the beam.
+where $i$ is a mesh cell along the path of the beam, $\rho_{soot,i}$ is the soot density of the mesh cell, and $ \Delta x_i$
+is the distance within the mesh cell that is traversed by the beam.
 
 \footnotesize
 \begin{verbatim}
@@ -4903,7 +4919,7 @@ The reason for this restriction is that abrupt changes in pressure can cause num
 \clearpage
 
 \section{Advanced Control Functions: The \texorpdfstring{{\tt CTRL}}{CTRL} Namelist Group}
-\label{info:CTRL} \index{Namelist Group!CTRL}
+\label{info:CTRL} \index{CTRL}
 \index{Controls}
 
 There are many systems whose functionality cannot be described by a simple device with a single ``setpoint.''
@@ -5249,7 +5265,7 @@ time.
 
 For static pictures of the flow field, use the PLot3D files
 that are automatically generated 5 times a run. Plot3D format is used by many CFD programs as a simple
-way to store specified quantities over the entire grid at one instant in
+way to store specified quantities over the entire mesh at one instant in
 time.
 
 Finally, tracer particles can be injected into the flow field from
@@ -5266,7 +5282,7 @@ particles no longer are ejected automatically from burning surfaces.
 
 
 \section{Output Control Parameters: The \texorpdfstring{{\tt DUMP}}{DUMP} Namelist Group}
-\label{info:DUMP}\index{Namelist Group!DUMP}
+\label{info:DUMP}\index{DUMP}
 
 The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files
 are written, and various other global parameters associated with output files.
@@ -5301,7 +5317,7 @@ properties via the {\ct PROP} line.
 
 When prescribing a solid phase quantity, be sure to position the
 probe at a solid surface. It is not always obvious where the
-solid surface is since the grid does not always align with the input obstruction
+solid surface is since the mesh does not always align with the input obstruction
 locations. To help locate the appropriate surface, the parameter {\ct IOR} {\em must} be included
 when designating a solid phase quantity.
 If the orientation of the solid surface is in the
@@ -5354,9 +5370,9 @@ the centroid of the designated plane or volume.
 
 
 \subsection{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}%Simo
-\label{info:PROF} \index{Namelist Group!PROF}
+\label{info:PROF} \index{PROF}
 
-FDS uses a fine, non-uniform, one-dimensional grid at each boundary
+FDS uses a fine, non-uniform, one-dimensional mesh at each boundary
 cell to compute heat transfer within a solid. The parameters
 (Table~\ref{tbl:PROF}) to specify a given {\ct PROF}ile are similar to
 those used to specify a surface quantity in the {\ct DEVC} group. {\ct
@@ -5402,7 +5418,7 @@ show ambient temperature.
 
 
 \subsection{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}%Bryan
-\label{info:SLCF}\index{Namelist Group!SLCF}
+\label{info:SLCF}\index{SLCF}
 
 The {\ct SLCF} (``slice file'') namelist group parameters (Table~\ref{tbl:SLCF})
 allows you to record various gas phase quantities
@@ -5428,7 +5444,7 @@ Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the 
 
 
 \subsection{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
-\label{info:BNDF}\index{Namelist Group!BNDF}
+\label{info:BNDF}\index{BNDF}
 
 The {\ct BNDF} (``boundary file'') \index{Output!Boundary File}
 \index{BNDF} namelist group parameters allows you
@@ -5454,7 +5470,7 @@ via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for t
 
 
 \subsection{Animated Isosurfaces: The \texorpdfstring{{\tt ISOF}}{ISOF} Namelist Group}
-\label{info:ISOF} \index{Namelist Group!ISOF}
+\label{info:ISOF} \index{ISOF}
 
 The {\ct ISOF} (``ISOsurface File'') \index{Output!Isosurface File}namelist group is used to specify the output of
 gas phase scalar quantities, as three dimensional animated contours.
@@ -5473,8 +5489,8 @@ where the values are in degrees C. Note that the isosurface output
 files {\bf CHID\_$n$.iso} can become very large, so experiment with different sampling rates.
 
 Any gas phase quantity can animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be
-computed in every grid cell at every output time step. For quantities like {\ct TEMPERATURE}, this is not a problem, as FDS computes it and saves it
-anyway. However, {\ct soot density} or {\ct oxygen} demand substantial amounts of time to compute at each grid cell.
+computed in every mesh cell at every output time step. For quantities like {\ct TEMPERATURE}, this is not a problem, as FDS computes it and saves it
+anyway. However, {\ct soot density} or {\ct oxygen} demand substantial amounts of time to compute at each mesh cell.
 
 
 
@@ -5638,7 +5654,7 @@ interface height. Compute the quantities:
                   (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2 \end{eqnarray*}
 Solve for $z_{int}$:
 \be z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H} \ee
-Let $T_l$ be the temperature in the lowest grid cell and, using Simpson's Rule, perform the
+Let $T_l$ be the temperature in the lowest mesh cell and, using Simpson's Rule, perform the
 numerical integration of $I_1$ and $I_2$. $T_u$ is defined as the average upper layer
 temperature via
 \be (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; dz \ee
@@ -6124,7 +6140,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TITLE}     & Character   & Title for job                  &           &                            \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /HEAD/ TITLE,CHID,FYI
 
 \vspace{\baselineskip}
 
@@ -6145,11 +6160,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID}     & Character         & {\ct ID} of {\ct ConTRoL} to control hole's existence     &       &           \\ \hline
 {\ct DEVC\_ID}     & Character         & {\ct ID} of {\ct DEViCe} to control hole's existence      &       &           \\ \hline
 {\ct FYI}          & Character         & Comment String (has no effect)                            &       &           \\ \hline
-{\ct RGB(3)   }    & Integer Triplet   & Color indices (0 - 255) for resulting obstruction(s)      &       &           \\ \hline{\ct XB(6)    }    & Real Sextuplet    & Physical coordinates                                      & m     &           \\ \hline
+{\ct RGB(3)   }    & Integer Triplet   & Color indices (0 - 255) for resulting obstruction(s)      &       &           \\ \hline
 {\ct TRANSPARENCY} & Real              & Transparency of obstruction                               &       &           \\ \hline
+{\ct XB(6)    }    & Real Sextuplet    & Physical coordinates                                      & m     &           \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /HOLE/ XB,FYI,RGB,TRANSPARENCY,EVACUATION,MESH_ID,COLOR,DEVC_ID,CTRL_ID
 
 \vspace{\baselineskip}
 
@@ -6251,22 +6266,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\ \hline \hline
-{\ct COLOR}       & Character                   & Color                                                 &    & {\ct 'BLACK'}                  \\ \hline
-{\ct CYLINDRICAL} & Logical                     & 2-D Axi-symmetric calculation                         &    & {\ct .FALSE.}    \\ \hline
-{\ct ID}          & Character                   & IDentifier                                            &    &                  \\ \hline
-{\ct IJK}         & Integer Triplet             & No. cells in $x$, $y$, and $z$ directions             &    & 10               \\ \hline
-{\ct FYI}         & Character                   & Comment String (has no effect)                        &    &                  \\ \hline
-{\ct RGB}         & Integer Triplet             & Color indices (0-255)                                 &    & 0,0,0               \\ \hline
-{\ct SYNCHRONIZE} & Logical                     & Sync. time step of the mesh                           &    & {\ct .TRUE.}     \\ \hline
-{\ct XB}          & Real Sextuplet              & Coordinates of the mesh                               & m  & 0,1,0,1,0,1      \\ \hline
+{\ct COLOR}       & Character                   & Mesh Line Color                             &    & {\ct 'BLACK'}    \\ \hline
+{\ct CYLINDRICAL} & Logical                     & 2-D Axi-symmetric calculation               &    & {\ct .FALSE.}    \\ \hline
+{\ct ID}          & Character                   & MESH IDentifier                             &    &                  \\ \hline
+{\ct IJK}         & Integer Triplet             & No. cells in $x$, $y$, and $z$ directions   &    & 10               \\ \hline
+{\ct FYI}         & Character                   & Comment String (has no effect)              &    &                  \\ \hline
+{\ct RGB}         & Integer Triplet             & Color indices (0-255)                       &    & 0,0,0            \\ \hline
+{\ct SYNCHRONIZE} & Logical                     & Sync. time steps of multiple meshes         &    & {\ct .TRUE.}     \\ \hline
+{\ct XB}          & Real Sextuplet              & Min/Max Coordinates of the MESH             & m  & 0,1,0,1,0,1      \\ \hline
 %{\ct POISSON\_BC} & Integer sextuplet           & Pressure boundary conditions      &    &    \\ \hline
 %{\ct IBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
 %{\ct JBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
 %{\ct KBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /MESH/ IJK,FYI,ID,SYNCHRONIZE,EVACUATION,EVAC_HUMANS,POISSON_BC,
-%                IBAR2,JBAR2,KBAR2,CYLINDRICAL,XB,RGB,COLOR
+%NAMELIST /MESH/ POISSON_BC,IBAR2,JBAR2,KBAR2
 
 \vspace{\baselineskip}
 
@@ -6359,7 +6373,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct THICKEN}             & Logical             & No Thin Obstructions                  &    & {\ct .FALSE.} \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}  & Real Triplet        & Coordinates of Texture Map            &    &               \\ \hline
 {\ct TRANSPARENCY}        & Real                & Transparency of obstruction           & 1  &               \\ \hline
-{\ct XB(6) }              & Real Sextuplet      & Physical coordinates                  & m  &               \\ \hline
+{\ct XB(6) }              & Real Sextuplet      & Min/Max Physical coordinates          & m  &               \\ \hline
 \end{tabular*}
 \end{table}
 %NAMELIST /OBST/ XB,SURF_ID,SURF_IDS,SURF_ID6,FYI,BNDF_FACE,BNDF_OBST,SAWTOOTH,
@@ -6605,15 +6619,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\ \hline \hline
-{\ct FYI}               & Character         & Comment String (has no effect)    &           &     \\ \hline
-{\ct MB      }          & Character         & Mesh Boundary of  slice           &           &     \\ \hline
-{\ct MESH\_NUMBER}      & Integer           & Save only slices in this mesh     &           &     \\ \hline
-{\ct PBX     }          & Real              & $x$-plane to save slice file      &           &     \\ \hline
-{\ct PBY     }          & Real              & $y$-plane to save slice file      &           &     \\ \hline
-{\ct PBZ     }          & Real              & $z$-plane to save slice file      &           &     \\ \hline
-{\ct QUANTITY}          & Character         & Name of Quantity to display       &           &     \\ \hline
-{\ct VECTOR    }        & Logical           & Include flow vectors              &           & {\ct .FALSE.}    \\ \hline
-{\ct XB(6)}             & Real Sextuplet    & Coordinates of region to save     & m         &     \\ \hline
+{\ct FYI}               & Character         & Comment String (has no effect)         &           &     \\ \hline
+{\ct MB      }          & Character         & Mesh Boundary of  slice                &           &     \\ \hline
+{\ct MESH\_NUMBER}      & Integer           & Save only slices in this mesh          &           &     \\ \hline
+{\ct PBX     }          & Real              & $x$-plane to save slice file           &           &     \\ \hline
+{\ct PBY     }          & Real              & $y$-plane to save slice file           &           &     \\ \hline
+{\ct PBZ     }          & Real              & $z$-plane to save slice file           &           &     \\ \hline
+{\ct QUANTITY}          & Character         & Name of Quantity to display            &           &     \\ \hline
+{\ct VECTOR    }        & Logical           & Include flow vectors                   &           & {\ct .FALSE.}    \\ \hline
+{\ct XB(6)}             & Real Sextuplet    & Min/Max coordinates of region to save  & m         &     \\ \hline
 \end{tabular*}
 \end{table}
 %NAMELIST /SLCF/ XB,QUANTITY,MB,FYI,PBX,PBY,PBZ,VECTOR,MESH_NUMBER,RLE,MAXIMUM_VALUE,MINIMUM_VALUE,TWO_BYTE
@@ -6839,7 +6853,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURF\_ID}              & Character         & Associated Surface                &             &  {\ct 'INERT'}      \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}    & Real Triplet      & Coordinates of Texture Map        & m           &                     \\ \hline
 {\ct TRANSPARENCY}          & Real              & Transparency indicator            &             &   1.0               \\ \hline
-{\ct XB(6) }                & Real Sextuplet    & Physical coordinates              & m           &                     \\ \hline
+{\ct XB(6) }                & Real Sextuplet    & Min/Max physical coordinates      & m           &                     \\ \hline
 {\ct XYZ(3) }               & Real Triplet      & Physical coordinates              & m           &                     \\ \hline
 \end{tabularx}
 \end{table}
@@ -6861,7 +6875,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\ \hline \hline
 {\ct LEAK\_AREA(N)}         & Real              & Leakage area to pressure zone {\ct N}  & m$^2$  & 0             \\ \hline
-{\ct XB(6)}                 & Real Sextuplet    & Coordinates                            & m      &               \\ \hline
+{\ct XB(6)}                 & Real Sextuplet    & Min/Max Coordinates of Zone            & m      &               \\ \hline
 \end{tabular*}
 \end{table}
 %NAMELIST /ZONE/ XB,LEAK_AREA,ID
@@ -6882,7 +6896,7 @@ an FDS 4.x input file to the new FDS 5.x format.
 
 \section{Numerical Domain Parameters: \texorpdfstring{{\tt GRID}}{GRID} and \texorpdfstring{{\tt PDIM}}{PDIM} }
 
-In previous versions, the computational domain and numerical grid were specified via lines of the form:
+In previous versions, the computational domain and numerical mesh were specified via lines of the form:
 
 \footnotesize
 \begin{verbatim}
@@ -6910,7 +6924,7 @@ The syntax for these lines is fairly similar to past versions, with the followin
 \item Control parameters like {\ct T\_ACTIVATE}, {\ct HEAT\_REMOVE}, {\em etc.}, are now consolidated into {\ct DEVC\_ID} and
 {\ct CTRL\_ID}. In brief,
 any change to an obstruction, vent, or hole is tied to a specific device or control function. See Sections~\ref{info:DEVC} and
-\ref{info:CTRL} for details.
+\ref{info:CTRL} for details.\index{OBST!CTRL\_ID}\index{VENT!CTRL\_ID}\index{HOLE!CTRL\_ID}
 \end{itemize}
 
 
@@ -7216,7 +7230,7 @@ The Plot3D data sets are single precision (32 bit reals), whole and
 unformatted. Note that there is blanking, that is,
 blocked out data points are not plotted.
 If the statement {\ct WRITE\_XYZ=.TRUE.} is included on the {\ct DUMP}
-line, then the grid data is written out to a file called {\bf CHID.xyz}
+line, then the mesh data is written out to a file called {\bf CHID.xyz}
 
 \footnotesize
 \begin{verbatim}
@@ -7230,7 +7244,7 @@ line, then the grid data is written out to a file called {\bf CHID.xyz}
 where {\ct X, Y} and {\ct Z} are the coordinates of the cell corners,
 and {\ct IBLK} is an indicator of whether or not the cell is blocked.
 If the point ({\ct X,Y,Z}) is completely embedded within a solid region,
-then {\ct IBLK} is 0. Otherwise, {\ct IBLK} is 1. Normally, the grid
+then {\ct IBLK} is 0. Otherwise, {\ct IBLK} is 1. Normally, the mesh
 file is not dumped.
 
 The flow variables are written to a file called {\bf CHID\_****\_**.q},
@@ -7251,7 +7265,7 @@ per unit volume (kW/m$^3$). Alternate variables can be specified with
 the input parameter {\ct PLOT3D\_QUANTITY(1:5)} on the {\ct DUMP} line.
 Note that the data is interpolated at
 cell corners, thus the dimensions of the Plot3D data sets are
-one larger than the dimensions of the computational grid.
+one larger than the dimensions of the computational mesh.
 
 Smokeview can display the Plot3D data. In
 addition, the Plot3D data sets can be read into some other graphics
@@ -7365,9 +7379,9 @@ These files are written out from {\bf dump.f} with the following lines:
 \normalsize
 {\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are
 character strings of length 30.
-The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) denotes the bounding grid cell
-nodes. The sextuplet indices correspond to grid cell
-nodes, or corners, thus the entire grid would be represented by the
+The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) denotes the bounding mesh cell
+nodes. The sextuplet indices correspond to mesh cell
+nodes, or corners, thus the entire mesh would be represented by the
 sextuplet ({\ct 0,IBAR,0,JBAR,0,KBAR}).
 
 There is a short Fortran 90 program provided, called
@@ -7490,7 +7504,6 @@ due to the solid phase reactions. Array {\ct Q} contains the values of
 the output quantity, which may be wall temperature, density or
 component density.
 
-\backmatter
 
 % FDSVVBiB is split into FDS_refs, FDSVVBiBnew and FDS_mathcomp
 %    SV docs would typically use FDS_ref, FDS_mathcomp but not FDSVVBiBnew
