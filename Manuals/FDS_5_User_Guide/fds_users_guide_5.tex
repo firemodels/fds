@@ -2291,7 +2291,7 @@ the {\ct OBST} line describes the overall geometric structure, the {\ct SURF} li
 characteristics of the surfaces of the geometry which includes the thickness of the layers of
 materials applied to that surface.
 \end{warning}
-
+\index{SURF!THICNKNESS}
 
 \section{Describing the Bounding Surfaces: The \texorpdfstring{{\tt SURF}}{SURF} Namelist Group (Table \ref{tbl:SURF})}
 \label{info:SURF}\index{Namelist Group!SURF}
@@ -2320,6 +2320,7 @@ set {\ct SURF\_DEFAULT='CONCRETE'} on the {\ct MISC} line.
 The default boundary condition {\ct INERT} does allow for heat loss and is not the same as an adiabatic surface.
 If you wish to define a surface as adiabatic, then you should set {\ct ADIABATIC=.TRUE.} on the {\ct SURF} line.
 \end{notebox}
+\index{SURF!ADIABATIC}
 
 
 \subsection{Specifying a Fire with a Known Heat Release Rate}
@@ -2369,16 +2370,20 @@ combustion model.
 
 \subsection{Simple Thermal Boundary Conditions}
 \label{info:thermalboundary} \index{fixed surface temperature}
+\index{SURF!TMP\_FRONT}
+\index{SURF!CONVECTIVE\_HEAT\_FLUX}
+\index{SURF!EMISSIVITY}
 
 Usually, the thermal properties of a solid boundary are specified via the
 {\ct MATL} namelist group, which is in turn invoked by the {\ct SURF} entry via
 the character string {\ct MATL\_ID}. However, sometimes it is convenient to
 simply specify a fixed temperature boundary condition, in which case set
 {\ct TMP\_FRONT} to be the surface temperature in units of $^\circ$C.
-For a solid surface of fixed convective heat flux, set {\ct HEAT\_FLUX} to be
-the convective heat flux in units of kW/m$^2$. If {\ct HEAT\_FLUX} is
-positive, the wall heats up the surrounding gases. If {\ct HEAT\_FLUX}
-is negative, the wall cools the surrounding gases.
+For a solid surface of fixed convective heat flux, set {\ct CONVECTIVE\_HEAT\_FLUX} to be
+the convective heat flux in units of kW/m$^2$. If {\ct CONVECTIVE\_HEAT\_FLUX} is
+positive, the wall heats up the surrounding gases. If {\ct CONVECTIVE\_HEAT\_FLUX}
+is negative, the wall cools the surrounding gases. The radiative heat
+flux can be specified only by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY}.
 
 Fixed temperature or fixed heat flux boundary conditions are
 easy to apply, but only of limited usefulness in real fire scenarios.
@@ -2389,11 +2394,12 @@ It is assumed that the innermost layer backs up to an air gap at ambient
 temperature (like a sheet of gypsum board attached to wood studs), or
 it backs up to an insulated material in which case no heat is lost to
 the backing material, or it backs up to the room on the other side of
-the wall. By default, it is assumed that the wall liner backs up to an air gap.
-If the wall liner is assumed to back up against an insulating material,
-like a sheet of steel attached to a fiber insulating board, the expression
-{\ct BACKING='INSULATED'} on the {\ct SURF} line prevents any heat
-loss from the back side of the material.
+the wall. By default, it is assumed that the wall liner backs up to an air gap
+({\ct BACKING='VOID'}). If the wall liner is assumed to back up
+against an insulating material, like a sheet of steel attached to a
+fiber insulating board, the expression {\ct BACKING='INSULATED'} on
+the {\ct SURF} line prevents any heat loss from the back side of the material.
+\index{SURF!BACKING}
 
 Finally, if it is desired that the heat transfer
 through the wall into the space behind the wall, the attribute
@@ -2407,12 +2413,14 @@ For some special applications, it is often desired that a solid
 surface be adiabatic, that is, there is no net heat transfer
 (radiative and convective) from the gas to the solid. For this case,
 all that must be prescribed on the {\ct SURF} line is {\ct
-ADIABATIC=.TRUE.}, nothing else.  FDS will compute a wall temperature
+ADIABATIC=.TRUE.}, nothing else.  FDS will compute a wall temperature 
 so that the sum of the convective and radiative fluxes is zero.
+\index{SURF!ADIABATIC}
 
 \subsection{Velocity and Total Mass Flux Boundary Conditions}
 \index{Volume Flux} \index{Mass Flux}
-
+\index{SURF!VOLUME\_FLUX}
+\index{SURF!VEL}
 Velocity boundary conditions affect both the normal and tangential
 components of the velocity vector at boundaries.
 The normal component of velocity is controlled by the parameter
@@ -2458,10 +2466,11 @@ a vent.  This can be accomplished by specifying the quantity {\ct MASS\_FLUX\_TO
 {\ct MASS\_FLUX\_TOTAL} uses the same sign convention as {\ct VEL}.  In fact, the value entered for
 {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
 for an outflow is adjusted based on the local density.
+\index{SURF!MASS\_FLUX\_TOTAL}
 
 The tangential velocity boundary condition controls how the gas
-``sticks'' to a solid surface. In theory, the tangential \index{tangential velocity}component of
-velocity is zero at the surface, but
+``sticks'' to a solid surface. In theory, the tangential
+\index{tangential velocity}component of velocity is zero at the surface, but
 increases rapidly through a narrow region called the boundary layer \index{boundary layer}.
 For most practical problems, the grid is not fine enough to resolve the
 boundary layer, which is typically a few millimeters thick.
@@ -2469,10 +2478,11 @@ For this reason, in an LES calculation, the velocity at the wall
 is set to be a fraction of its value in the grid cell adjacent to the
 wall. Only in a DNS calculation is the velocity at the wall set to zero.
 To alter these defaults, set a parameter called
-{\ct SLIP\_FACTOR}. This parameter ranges from -1 to 1. If a no-slip wall is
-desired, {\ct SLIP\_FACTOR=-1}. If a free-slip wall is desired, {\ct SLIP\_FACTOR=1}.
-Numbers in between -1 and 1 can represent partial slip conditions,
-which may be appropriate for simulations involving large grid cells.
+{\ct SLIP\_FACTOR}. \index{SURF!SLIP\_FACTOR} This parameter ranges
+from -1 to 1. If a no-slip wall is desired, {\ct SLIP\_FACTOR=-1}. If
+a free-slip wall is desired, {\ct SLIP\_FACTOR=1}. Numbers in between
+-1 and 1 can represent partial slip conditions, which may be
+appropriate for simulations involving large grid cells. 
 (Default {\ct SLIP\_FACTOR} is 0.5 for LES, -1.0 for DNS)
 
 In the case of a blowing vent (or even a solid surface),
@@ -2494,6 +2504,9 @@ of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either
 the $y$ or $z$ direction, depending on what the normal direction is.
 
 \subsection{Species and Species Mass Flux Boundary Conditions}
+\index{SURF!MASS\_FLUX}
+\index{SURF!MASS\_FRACTION}
+
 
 There are two species boundary conditions that can be specified
 (see Section~\ref{info:SPEC} for details on inputting and using species).
@@ -2525,6 +2538,9 @@ mass flux of species.  To obtain a guaranteed mass flux of a species, you should
 
 \subsection{Special Topic: Fires and Flows in the Outdoors}
 \index{outdoor fires}
+\index{SURF!PLE}
+\index{SURF!Z0}
+\index{SURF!PROFILE}
 Simulating a fire in the outdoors is not much different than a fire
 indoors, but there are a few issues that need to be addressed.
 First, the velocity of the wind profile at any exterior boundary will be a top hat (constant) by default,
@@ -2552,6 +2568,8 @@ The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
 
 \subsection{Special Topic: A Radially-Spreading Fire}
 \index{radial fire spread}
+\index{SURF!RAMP\_Q}
+\index{SURF!HRRPUA}
 
 Sometimes it is desired that a fire spread radially at some specified
 rate. Rather than trying to design material properties
@@ -2587,7 +2605,7 @@ leads to a desired time history of the heat release rate.
 
 \subsection{Special Topic: Non-Planar Walls and Targets}
 \index{non-planar geometries}
-
+\index{SURF!GEOMETRY}
 All obstructions in FDS are assumed to conform to the rectilinear
 mesh, and all bounding surfaces are assumed to be flat
 planes. However, many objects, like cables, pipes, and ducts, are not
@@ -2679,6 +2697,7 @@ with a leak area of 0.0002~m$^2$.
 At least one of the obstructions that form the walls of Zone 1 must have the attribute
 {\ct LEAK\_PATH=1,0}, meaning that the leak between Zones 1 and 0 is uniformly distributed
 over solids defined with:
+\index{SURF!LEAK\_PATH}
 
 \footnotesize
 \begin{verbatim}
@@ -2713,14 +2732,25 @@ pressure difference the fan can operate upon. Figure~(\ref{fig:Fan_Curve} displa
 \end{center}
 \end{figure}
 
-The ideal velocity of the fan, $U_{\hbox{\footnotesize max}}$, is specified via the parameter {\ct VEL} on the appropriate {\ct SURF} line. Alternatively,
-the volume flow rate, $A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}}$, can be specified using {\ct VOLUME\_FLUX}. Do not use both.  These parameters were
-already introduced in Section~\ref{info:SURF}. To simulate the behavior of a real fan, a few extra parameters need to be specified. To set $\Delta p_{\hbox{\footnotesize max}}$,
-the maximum operating over-pressure, add {\ct MAX\_PRESSURE} to the {\ct SURF} line. Note that {\ct MAX\_PRESSURE} should always be positive and in units of Pa.
-If in the simulation the computed pressure exceeds the specified {\ct MAX\_PRESSURE}, then there will be a backflow in the duct.
+The ideal velocity of the fan, $U_{\hbox{\footnotesize max}}$, is
+specified via the parameter {\ct VEL} on the appropriate {\ct SURF}
+line. Alternatively, the volume flow rate, $A_{\hbox{\footnotesize
+duct}} U_{\hbox{\footnotesize max}}$, can be specified using {\ct
+VOLUME\_FLUX}. Do not use both.  These parameters were already
+introduced in Section~\ref{info:SURF}. To simulate the behavior of a
+real fan, a few extra parameters need to be specified. To set $\Delta
+p_{\hbox{\footnotesize max}}$, the maximum operating over-pressure,
+add {\ct MAX\_PRESSURE} to the {\ct SURF} line. Note that {\ct
+MAX\_PRESSURE} should always be positive and in units of Pa.  If in
+the simulation the computed pressure exceeds the specified {\ct
+MAX\_PRESSURE}, then there will be a backflow in the duct.
+\index{SURF!MAX\_PRESSURE}
 
-Here is an example how fans can be specified. The actual case ({\bf fan\_test}) is included in the V\&V Guide. In it, two simple compartments share a common wall. Both
-compartments are considered as separate ``pressure zones.'' Two fans are mounted in the Partition Wall, blowing in opposite directions.
+Here is an example how fans can be specified. The actual case ({\bf
+fan\_test}) is included in the V\&V Guide. In it, two simple
+compartments share a common wall. Both compartments are considered as
+separate ``pressure zones.'' Two fans are mounted in the Partition
+Wall, blowing in opposite directions. 
 
 \footnotesize
 \begin{verbatim}
@@ -2741,6 +2771,8 @@ compartments are considered as separate ``pressure zones.'' Two fans are mounted
 \normalsize
 
 \noindent
+\index{SURF!POROUS}
+\index{SURF!DUCT\_PATH}
 Consider a few of the extra parameters. The attribute {\ct
 POROUS=.TRUE.} allows hot, smokey gases to pass through the
 obstructions that represent the fans. These obstructions are merely
@@ -2773,7 +2805,9 @@ they are embedded within the Partition Wall.
 
 
 \section{Describing Real Materials: The \texorpdfstring{{\tt MATL}}{MATL} Namelist Group}
-\label{info:MATL}\index{Namelist Group!MATL}
+\label{info:MATL}\index{Namelist Group!MATL}\index{Material layers}
+\index{SURF!MATL\_ID}
+\index{SURF!THICKNESS}
 
 A solid boundary can consist of multiple layers of different
 materials, and each layer can consist of multiple material
@@ -2815,8 +2849,11 @@ The maximum number of material layers is 20. The maximum number of material comp
 \end{warning}
 
 Mixtures of solid materials within the same layer can be defined using
-the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same two indices as the {\ct MATL\_ID} keyword. For example, if the
+the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same
+two indices as the {\ct MATL\_ID} keyword. For example, if the 
 brick layer contains some additional water, the input could look like this:
+\index{SURF!MATL\_MASS\_FRACTION}
+\index{SURF!MATL\_ID}
 
 \footnotesize
 \begin{verbatim}
@@ -2856,6 +2893,10 @@ brick.
 
 
 \subsection{Thermal Properties}
+\index{MATL!CONDUCTIVITY}
+\index{MATL!DENSITY}
+\index{MATL!SPECIFIC\_HEAT}
+\index{MATL!EMISSIVITY}
 
 For any solid material, specify its thermal
 {\ct CONDUCTIVITY} (W/m$\cdot$K), {\ct DENSITY} (kg/m$^3$),
@@ -2893,14 +2934,25 @@ material can be given an {\ct ABSORPTION\_COEFFIENT} (1/m) that allows
 the radiation penetrate and absorb into the solid. Correspondingly,
 the emission of the material is based on the internal temperatures,
 not just the surface.
+\index{MATL!ABSORPTION\_COEFFICIENT}
 
 \subsection{Pyrolysis Models}
+\index{Pyrolysis models}
 
 FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely
 on the availability of material properties and the appropriateness of the underlying pyrolysis model. This
 section provides a description of the input parameters, starting with a general solid.
 
 \subsubsection{Solid Fuels}
+\index{Solid fuels}
+\index{MATL!A}
+\index{MATL!E}
+\index{MATL!HEAT\_OF\_REACTION}
+\index{MATL!N\_S}
+\index{MATL!NU\_FUEL}
+\index{MATL!NU\_RESIDUE}
+\index{MATL!NU\_WATER}
+\index{MATL!RESIDUE}
 
 Each {\ct MATL} can undergo several reactions, with each
 reaction creating a {\ct RESIDUE}, water vapor, and/or fuel
@@ -2918,23 +2970,25 @@ $j$th reaction is given by
   \dod{ }{t} \left( \frac{\rho_{s,i}}{\rho_{s0}} \right) =
   \left(\frac{\rho_{s,i}}{\rho_{s0}} \right)^{n_{s,ij}}
   A_{ij} \exp\left(-\frac{E_{ij}}{RT_s} \right)
-  \max\left[0,T_s-T_{ign,ij}\right]^{n_{t,ij}}  \label{rr}
+  \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}  \label{rr}
 \ee
 where $\rho_{s,i}$ is the current density of the $i$th material and
 $\rho_{s0}$ is the initial density of the material layer.
 $A_{ij}$ is prescribed under the name {\ct A(j)}, with units of
 1/s. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in
 units of kJ/kmol. Remember that 1~kcal is 4.184~kJ, and be careful
-with factors of 1000. $n_{s,ij}$ is prescibed under the name {\ct
-N\_S(j)}. $T_{ign,ij}$ is an ignition temperature that
+with factors of 1000. $n_{s,ij}$ is the reaction order and prescibed under the name 
+{\ct N\_S(j)}. $T_{thr,ij}$ is a threshold temperature that
 allows the definition of non-Arrhenius pyrolysis functions and
-ignition criteria, and is prescribed by {\ct IGNITION\_TEMPERATURE(j)}.
-By default, $T_{ign,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero
+ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
+By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero
 and the last term of Equation~\ref{rr} does not affect the pyrolysis rate. 
 The term can be used to describe a threshold temperature for the pyrolysis
-reaction by setting $T_{ign,ij}$ and $n_{t,j}$ = 0. Then the term
-becomes zero at temperatures below $T_{ign,ij}$ and one elsewhere.
+reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
+becomes zero at temperatures below $T_{thr,ij}$ and one elsewhere.
 $n_{t,j}$ is prescibed under the name {\ct N\_T(j)}.  
+\index{MATL!THRESHOLD\_TEMPERATURE}
+\index{MATL!N\_T}
 
 $A$ and $E$  are not readily accessible for most materials found at a
 fire scene. However, if they are known, specify both. Avoid specifying
@@ -2945,6 +2999,8 @@ which is usually the case, specify {\ct REFERENCE\_RATE} (1/s) and
 is achieved at the {\ct REFERENCE\_TEMPERATURE}. The default value of {\ct
 REFERENCE\_RATE} is 0.1~s$^{-1}$. If the value of $n_s$ is not known,
 it is a good starting point to assume $n_s=1$.
+\index{MATL!REFERENCE\_RATE}
+\index{MATL!REFERENCE\_TEMPERATURE}
 \begin{warning}
 \noindent
 The temperature is read in using degrees Celsius, but is then converted to
@@ -2976,9 +3032,25 @@ out of the system. The {\ct HEAT\_OF\_COMBUSTION} ensures that if the
 fuel vapors burn with a different $\Delta H$ than that of other
 materials included in the simulation, the model will account for this
 accordingly.
+\index{MATL!HEAT\_OF\_COMBUSTION}
+
+\index{SURF!SHRINK}
+If all the material components of the surface are reacting, and the
+pyrolysis reactions have no solid residue, the thickness of the
+surface is going to shrink when the surface reacts. The shrinking
+behaviour can be prevented in the numerical model by setting {\ct
+SHRINK = .FALSE.} on the {\ct SURF} line.
+\begin{warning}
+\noindent
+Setting {\ct SHRINK = .FALSE.} may introduce numerical problems in the
+wall solver.
+\end{warning}
 
 \subsubsection{Solid Fuels that Burn at a Specified Rate}
-
+\index{SURF!HEAT\_OF\_VAPORIZATION}
+\index{SURF!HRRPUA}
+\index{SURF!IGNITION\_TEMPERATURE}
+\index{SURF!RAMP\_Q}
 Real materials, like furnishings, office equipment, and so on, are
 often very difficult to describe via the {\ct SURF} and {\ct MATL}
 parameters. Often, the only information about a given object is its
@@ -3049,6 +3121,7 @@ the conditions of the surrounding environment.
 
 
 \subsubsection{Liquid Fuels}
+\index{Liquid fuels}
 
 For a liquid fuel, the thermal properties are similar to those of a solid
 material, with a few exceptions. The evaporation rate of the fuel
@@ -3091,6 +3164,7 @@ properties have not all been verified.
 \end{verbatim} \normalsize
 
 \noindent
+\index{MATL!BOILING\_TEMPERATURE}
 The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
 pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the
 phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent
@@ -3112,7 +3186,7 @@ ethanol\_pan}.
 
 
 \subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
-
+\index{SURF!BURN\_AWAY}
 
 If a burning object is to disappear from the
 calculation once it is exhausted of fuel, set {\ct BURN\_AWAY=.TRUE.}.
@@ -3140,12 +3214,17 @@ it does with various quantities associated with areas, like {\ct HRRPUA}.
 
 \subsection{Special Topic: Initial and Backside Boundary Conditions}
 \index{initial solid temperature}
-
+\index{SURF!TMP\_BACK}
+\index{SURF!TMP\_INNER}
 By default, the initial temperature of the solid material is set to
 ambient temperature. Use {\ct TMP\_INNER} on the {\ct SURF} line to
 specify a different initial temperature.
-Also, the backside temperature of a solid can be set using the parameter {\ct TMP\_BACK} on the {\ct SURF} line. However, this parameter has no
-meaning for surfaces with {\ct BACKING='EXPOSED'} or {\ct BACKING='INSULATED'}.
+Also, the backside temperature boundary condition of a solid can be
+set using the parameter {\ct TMP\_BACK} on the {\ct SURF}
+line. {\ct TMP\_BACK} is not the actual backside surface temperature,
+but the gas temperature that the surface transfer heat with. This
+parameter has no meaning for surfaces with {\ct BACKING='EXPOSED'} or  
+{\ct BACKING='INSULATED'}. 
 
 \begin{warning}
 \noindent
@@ -3154,6 +3233,8 @@ properties (via the {\ct MATL\_ID} keyword).
 \end{warning}
 
 \subsection{Special Topic: Numerical Accuracy and Stability}
+\index{SURF!CELL\_SIZE\_FACTOR}
+\index{SURF!STRETCH\_FACTOR}
 
 To compute the temperature and reactions inside the solids, FDS solves
 the one-dimensional heat transfer equation numerically. The size of
@@ -3200,33 +3281,35 @@ dependent variables (such as a sprinkler flow rate and droplet speed).
 
 \subsection{Time-Dependent Functions}
 
-At the start of any calculation, the temperature is
-ambient everywhere, the flow velocity is zero everywhere, nothing is burning, and
-the mass fractions of all species are uniform.
-When the calculation starts temperatures, velocities, burning rates,
-{\em etc.}, are ramped-up from their starting values because nothing
-can happen instantaneously. By default, everything is ramped-up to their
-prescribed values in roughly 1~s. However, control the
-rate at which things turn on, or turn off, by specifying time histories
-for the boundary conditions that are listed on a given {\ct SURF} line.
-The above boundary conditions can be made time-dependent using either
-prescribed functions or user-defined functions.
-The parameters {\ct TAU\_Q}, {\ct TAU\_T}, and {\ct TAU\_V}
-indicate that the heat release rate ({\ct HRRPUA}); surface temperature ({\ct TMP\_FRONT});
-and/or normal velocity ({\ct VEL}, {\ct VOLUME\_FLUX}), or {\ct MASS\_FLUX\_TOTAL} are to ramp up
-to their prescribed values in {\ct TAU} seconds and remain there.
-If {\ct TAU\_Q} is positive, then the heat release rate ramps up
-like tanh$(t/\tau)$. If negative, then
-the HRR ramps up like $(t/\tau)^2$. If the fire ramps up following
-a $t^2$ curve, it remains constant after {\ct TAU\_Q} seconds.
-These rules apply to {\ct TAU\_T} and {\ct TAU\_V} as well.
-The default value for all {\ct TAU}s is 1~s.
-If something other than a tanh or $t^2$ ramp up is desired,
-then a user-defined burning history must be input. To do this, set
-{\ct RAMP\_Q}, {\ct RAMP\_T} or {\ct RAMP\_V}
-equal to a character string designating the ramp function to use for that
-particular surface type, then somewhere in the input file generate lines
-of the form:
+At the start of any calculation, the temperature is ambient
+everywhere, the flow velocity is zero everywhere, nothing is burning,
+and the mass fractions of all species are uniform.  When the
+calculation starts temperatures, velocities, burning rates, {\em
+etc.}, are ramped-up from their starting values because nothing can
+happen instantaneously. By default, everything is ramped-up to their
+prescribed values in roughly 1~s. However, control the rate at which
+things turn on, or turn off, by specifying time histories for the
+boundary conditions that are listed on a given {\ct SURF} line.  The
+above boundary conditions can be made time-dependent using either
+prescribed functions or user-defined functions.  The parameters {\ct
+TAU\_Q}, {\ct TAU\_T}, and {\ct TAU\_V} indicate that the heat release
+rate ({\ct HRRPUA}); surface temperature ({\ct TMP\_FRONT}); and/or
+normal velocity ({\ct VEL}, {\ct VOLUME\_FLUX}), or {\ct
+MASS\_FLUX\_TOTAL} are to ramp up to their prescribed values in {\ct
+TAU} seconds and remain there.  If {\ct TAU\_Q} is positive, then the
+heat release rate ramps up like tanh$(t/\tau)$. If negative, then the
+HRR ramps up like $(t/\tau)^2$. If the fire ramps up following a $t^2$
+curve, it remains constant after {\ct TAU\_Q} seconds.  These rules
+apply to {\ct TAU\_T} and {\ct TAU\_V} as well.  The default value for
+all {\ct TAU}s is 1~s.  If something other than a tanh or $t^2$ ramp
+up is desired, then a user-defined burning history must be input. To
+do this, set {\ct RAMP\_Q}, {\ct RAMP\_T} or {\ct RAMP\_V} equal to a
+character string designating the ramp function to use for that
+particular surface type, then somewhere in the input file generate
+lines of the form:
+\index{SURF!RAMP\_Q}
+\index{SURF!RAMP\_T}
+\index{SURF!RAMP\_V}
 
 \footnotesize
 \begin{verbatim}
@@ -3295,18 +3378,18 @@ Use {\ct TAU\_MF(N)} or {\ct RAMP\_MF(N)}
 to control the ramp-ups for either the mass
 fraction or mass flux of species {\ct N}.
 The mass fraction of species $N$ at the surface is given by
-$$ Y_N(t) = Y_N(0) + f(t) \left( Y_N - Y_N(0) \right) $$
-where $Y_N(0)$ is the ambient mass fraction of species {\ct N}
-({\ct MASS\_FRACTION\_0} in
-the {\ct N}th {\ct SPEC} namelist line is used to prescribe $Y_N(0)$),
-$Y_N$ is the desired mass fraction to
-which the function $f(t)$ is ramping ({\ct MASS\_FRACTION(N)}
-specified in the {\ct SURF} line is used to prescribe $Y_N$).
-The function $f(t)$ is either
-a $\tanh$, $t^2$, or user-defined function. For a user-defined
-function, indicate the name of the ramp function with {\ct RAMP\_MF(N)},
-a character string.
-
+$$ Y_N(t) = Y_N(0) + f(t) \left( Y_N - Y_N(0) \right) $$ where
+$Y_N(0)$ is the ambient mass fraction of species {\ct N} ({\ct
+MASS\_FRACTION\_0} in the {\ct N}th {\ct SPEC} namelist line is used
+to prescribe $Y_N(0)$), $Y_N$ is the desired mass fraction to which
+the function $f(t)$ is ramping ({\ct MASS\_FRACTION(N)} specified in
+the {\ct SURF} line is used to prescribe $Y_N$).  The function $f(t)$
+is either a $\tanh$, $t^2$, or user-defined function. For a
+user-defined function, indicate the name of the ramp function with
+{\ct RAMP\_MF(N)}, a character string.
+\index{SURF!RAMP\_MF}
+\index{SURF!TAU\_MF}
+\index{SURF!MASS\_FRACTION}
 
 \subsection{Temperature-Dependent Functions}
 
@@ -3371,7 +3454,8 @@ will depend upon the type of TABL and those requirements are provided in the app
 
 \section{Coloring Obstructions, Vents, Surfaces and Meshes}
 \label{info:colors}\index{Colors}
-
+\index{SURF!COLOR}
+\index{SURF!RGB}
 Colors for many items within FDS can be prescribed in two ways; a triplet of
 integers after keyword {\ct RGB} or one of many {\ct COLOR} name character strings.
 
@@ -3466,6 +3550,7 @@ Name & &  R  & G & B & Name & & R & G & B   \\ \hline \hline
 
 \subsection{Texture Mapping}
 \index{Surface Texture Maps}
+\index{SURF!TEXTURE\_MAP}
 There are various ways of prescribing the color of various objects
 within the computational domain, but there is also a way of pasting
 images onto the obstructions for the purpose of making the Smokeview
@@ -3486,7 +3571,8 @@ wherever the paneling is used (SGI Users: use rgb files instead of jpg).
 Note that the image does not appear when Smokeview is first invoked. It is an option controlled by
 the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH}
 and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image.
-In this case, the JPEG image is of a 1 m wide by 2 m high piece of
+\index{SURF!TEXTURE\_HEIGHT} \index{SURF!TEXTURE\_WIDTH} In this case,
+the JPEG image is of a 1 m wide by 2 m high piece of 
 paneling. Smokeview replicates the image as often as necessary to
 make it appear that the paneling is applied where desired.
 Consider carefully how the image repeats itself when
@@ -3536,6 +3622,7 @@ that will limit the time step, it is best to control this yourself.
 convective heat flux from gas to surface and vis verse. The heat flux
 to the solid is specified via {\ct EXTERNAL\_FLUX} (kW/m$^2$) on the
 {\ct SURF} line that is assigned to the solid surface.
+\index{SURF!EXTERNAL\_FLUX}
 \item Turn off all the gas phase computations by setting {\ct
 SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed
 up the computations significantly. If the gas phase computations are
@@ -3938,6 +4025,7 @@ cannot participate in the reaction.
 
 \section{Radiation Transport: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
 \label{info:RADI}\index{Namelist Group!RADI}
+\index{RADI!RADIATIVE\_FRACTION}
 
 For most FDS simulations, thermal radiation transport is computed by default and you need not set any
 parameters to make this happen. However, there are situations where it is important to be aware of
@@ -3960,6 +4048,9 @@ and the source term in the radiative transport equation is then based solely
 on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is
 0.35 for an LES calculation, and zero for DNS.
 
+\index{RADI!NUMBER\_RADIATION\_ANGLES}
+\index{RADI!TIME\_STEP\_INCREMENT}
+\index{RADI!ANGLE\_INCRMENT}
 There are several ways to improve the performance of the Finite Volume
 Method in solving the radiation transport equation (RTE), most of which
 increase the computation time. The solver has two modes of
@@ -3975,6 +4066,8 @@ Briefly, if {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are
 both set to 1, the radiation field is completely updated in a single
 time step, but the cost of the calculation increases significantly.
 
+\index{RADI!NMIEANG}
+\index{RADI!RADTMP}
 A few parameters affecting the absorption of radiation by water
 droplets are as follows: {\ct RADTMP} is the assumed radiative source temperature.
 It is used in the computation of the mean scattering
@@ -3986,6 +4079,8 @@ of the better accuracy is seen in the initialization phase,
 not during the actual simulation. The default value for {\ct NMIEANG}
 is 15.
 
+\index{RADI!WIDE\_BAND\_MODEL}
+\index{RADI!CH4\_BANDS}
 If the optional six band model is desired,
 set {\ct WIDE\_BAND\_MODEL=.TRUE.}. It is recommended that this option
 only be used when the fuel is relatively non-sooting because it
@@ -3993,6 +4088,7 @@ adds significantly to the cost of the calculation. To add three
 additional fuel bands, set {\ct CH4\_BANDS=.TRUE.}. See FDS Technical
 Reference Guide for more details.
 
+\index{MISC!RADIATION}
 Note also that it is possible to turn off the radiation transport
 solver (saving roughly 20 \% in CPU time) by adding the statement
 {\ct RADIATION=.FALSE.} to the {\ct MISC} line. For isothermal
@@ -4002,7 +4098,6 @@ release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is
 input on the {\ct RADI} line. This radiated energy completely
 disappears from the calculation. More on this feature can be found in
 Section~\ref{info:combustion}.
-
 
 
 
@@ -4067,7 +4162,9 @@ if it is not. Also, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line if
 are to have a specified mass flux. The number of particles inserted at each solid cell every
 {\ct DT\_INSERT} seconds is specified by {\ct NPPC} on the {\ct SURF} line defining the solid surface. The default
 value of {\ct NPPC} is 1.
-
+\index{SURF!NPPC}
+\index{SURF!PARTICLE\_MASS\_FLUX}
+\index{SURF!PART\_ID}
 
 \section{Tracer Particles}
 
@@ -4227,6 +4324,7 @@ Simulations with both fuel and water droplets are possible, unlike versions of F
 
 \section{Special Topic: Suppression by Water (Mixture Fraction Model Only)}
 \index{Sprinkler Suppression}
+\index{SURF!E\_COEFFICIENT}
 Modeling suppression of a fire by a water spray is challenging because
 the relevant physical mechanisms occur at length scales smaller than a
 single grid cell. In the gas phase, flames are extinguished due to lowered
@@ -5267,6 +5365,8 @@ physical quantity to monitor, {\ct IOR} the orientation,
 and {\ct ID} an identifying character string. Here is an example of
 how you would use this feature to get a time history of temperature
 profiles within a given solid obstruction:
+\index{PROF!XYZ}
+\index{PROF!IOR}
 
 \footnotesize
 \begin{verbatim}
@@ -5274,6 +5374,7 @@ profiles within a given solid obstruction:
 \end{verbatim} \normalsize
 
 \noindent
+\index{PROF!QUANTITY}
 Other possible quantities are the total density of the wall ({\ct
 QUANTITY = 'DENSITY'}) or densities of solid material components ({\ct
 QUANTITY = 'MATL\_ID'}), where {\ct MATL\_ID} is the name of the
@@ -6103,14 +6204,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:MATL}.}\label{tbl:MATL}
+\caption{For more information see Section~\ref{info:MATL}.}\label{tbl:MATL} 
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\ \hline \hline
 {\ct A}                       & Real        & Pre-exponential factor         &    1/s           & 1E13   \\ \hline
 {\ct ABSORPTION\_COEFFICIENT} & Real        & Absorption Coefficient         &    1/m           & 50000. \\ \hline
-{\ct BOILING\_TEMPERATURE}    & Real        & Boiling temperature            & $^\circ$C        &        \\ \hline
+{\ct BOILING\_TEMPERATURE}    & Real        & Boiling temperature            & $^\circ$C        & 5000.  \\ \hline
 {\ct CONDUCTIVITY}            & Real        & Thermal conductivity           & W/m/K            & 0.1    \\ \hline
 {\ct CONDUCTIVITY\_RAMP}      & Character   & Ramp ID for conductivity       &                  &        \\ \hline
 {\ct DENSITY}                 & Real        & Solid mass per unit volume     & kg/m$^3$         & 500.   \\ \hline
@@ -6118,9 +6219,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EMISSIVITY    }          & Real        & Emissivity                     &                  & 0.9    \\ \hline
 {\ct FYI}                     & Character   & Comment String (has no effect) &                  &        \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}    & Real        & Heat of combustion             & kJ/kg            &        \\ \hline
-{\ct HEAT\_OF\_REACTION}      & Real        & Heat of reaction               & kJ/kg            &        \\ \hline
+{\ct HEAT\_OF\_REACTION}      & Real        & Heat of reaction               & kJ/kg            & 0.     \\ \hline
 {\ct ID     }                 & Character   & IDentifier                     &                  &        \\ \hline
-{\ct IGNITION\_TEMPERATURE}   & Real        & Ignition temperature           & $^\circ$C        & 5000.  \\ \hline
+{\ct THRESHOLD\_TEMPERATURE}  & Real        & Threshold temperature          & $^\circ$C        & -273.15 \\ \hline
 {\ct N\_REACTIONS}            & Character   & Number of Reactions            &                  & 0      \\ \hline
 {\ct N\_S}                    & Real        & Exponent of mass fraction      &                  & 1.     \\ \hline
 {\ct N\_T}                    & Real        & Exponent of temperature        &                  & 0.     \\ \hline
@@ -6134,11 +6235,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat      &                  &        \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /MATL/ ID,FYI,SPECIFIC_HEAT,CONDUCTIVITY,CONDUCTIVITY_RAMP,SPECIFIC_HEAT_RAMP,
-%                REFERENCE_TEMPERATURE, REFERENCE_RATE, IGNITION_TEMPERATURE,
-%                EMISSIVITY,HEAT_OF_REACTION,DENSITY,RESIDUE,
-%                HEAT_OF_COMBUSTION,A,E,NU_FUEL,NU_WATER,NU_RESIDUE,N_S,N_T,N_REACTIONS,
-%                ABSORPTION_COEFFICIENT, BOILING_TEMPERATURE
 
 \vspace{\baselineskip}
 
@@ -6346,7 +6442,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ}      & Real Triplet     & Coordinates of wall surface      & m          &     \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /PROF/ XYZ,QUANTITY,IOR,ID,FYI
 
 \vspace{\baselineskip}
 
@@ -6410,20 +6505,18 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\ \hline \hline
-{\ct ANGLE\_INCREMENT}          & Integer  & Number of angles skipped per update &                   & 5    \\ \hline
+{\ct ANGLE\_INCREMENT}          & Integer  & Number of angles skipped per update &                   & 5             \\ \hline
 {\ct CH4\_BANDS          }      & Logical  & Include extra fuel bands            &                   & {\ct .FALSE.} \\ \hline
-{\ct KAPPA0                   } & Real     & Constant absorption coefficient     & 1/m               & 0      \\ \hline
-{\ct NMIEANG                  } & Integer  & Number of polar angles              &                   & 15     \\ \hline
-{\ct NUMBER\_RADIATION\_ANGLES} & Integer  & Number of solid angles              &                   & 100    \\ \hline
-{\ct PATH\_LENGTH }             & Real     & Path length for radiation calc.     &   m               &        \\ \hline
-{\ct RADIATIVE\_FRACTION}       & Real     & Radiative Loss Fraction             &                   & 0.35    \\ \hline
-{\ct RADTMP                   } & Real     & Assumed radiative source temp.      & $^\circ$C         & 900    \\ \hline
-{\ct TIME\_STEP\_INCREMENT}     & Integer  & Number time steps skipped           &                   & 3    \\ \hline
+{\ct KAPPA0                   } & Real     & Constant absorption coefficient     & 1/m               & 0             \\ \hline
+{\ct NMIEANG                  } & Integer  & Number of polar angles              &                   & 15            \\ \hline
+{\ct NUMBER\_RADIATION\_ANGLES} & Integer  & Number of solid angles              &                   & 104           \\ \hline
+{\ct PATH\_LENGTH }             & Real     & Path length for radiation calc.     &   m               &               \\ \hline
+{\ct RADIATIVE\_FRACTION}       & Real     & Radiative Loss Fraction             &                   & 0.35          \\ \hline
+{\ct RADTMP                   } & Real     & Assumed radiative source temp.      & $^\circ$C         & 900           \\ \hline
+{\ct TIME\_STEP\_INCREMENT}     & Integer  & Number time steps skipped           &                   & 3             \\ \hline
 {\ct WIDE\_BAND\_MODEL    }     & Logical  & Non-gray gas assumption             &                   & {\ct .FALSE.} \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /RADI/ TIME_STEP_INCREMENT,NUMBER_RADIATION_ANGLES,ANGLE_INCREMENT,KAPPA0, &
-%                WIDE_BAND_MODEL,CH4_BANDS,PATH_LENGTH,NMIEANG,RADTMP,RADIATIVE_FRACTION
 
 \vspace{\baselineskip}
 
@@ -6570,28 +6663,29 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ADIABATIC}                       & Logical         & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                         & Character       & Back boundary condition           &                     & {\ct 'VOID'}            \\ \hline
 {\ct BURN\_AWAY}                      & Logical         & Object can vanish                 &                     & {\ct .FALSE.}           \\ \hline
-{\ct COLOR    }                       & Character       & Surface Color                     &                     &           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}              & Real            & Scale solid phase noding          &                     & 1.0                     \\ \hline
+{\ct COLOR    }                       & Character       & Surface Color                     &                     &                         \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Heat flux at surface              & kW/m$^2$            & 0.                      \\ \hline
 {\ct DUCT\_PATH}                      & Integer Pair    & Pressure Zones for fans           &                     & 0,0                     \\ \hline
 {\ct E\_COEFFICIENT}                  & Real            & Extinguishing coefficient         & 1/s                 & 0.                      \\ \hline
 {\ct EMISSIVITY}                      & Real            & Emissivity                        &                     & 0.9                     \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
 {\ct FYI}                             & Character       & Comment String (has no effect)    &                     &                         \\ \hline
-{\ct GEOMETRY}                        & Character       & Geometry type                     &                     &                         \\ \hline
+{\ct GEOMETRY}                        & Character       & Geometry type                     &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION }         & Real            & For specified HRR only            & kJ/kg               & 0.                      \\ \hline
 {\ct HRRPUA }                         & Real            & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
 {\ct ID     }                         & Character       & IDentifier                        &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Ignition temperature              & $^\circ$C           & 5000.                   \\ \hline
 {\ct LEAK\_PATH}                      & Integer Pair    & Pressure Zones for leakage        &                     &                         \\ \hline
-{\ct MASS\_FLUX(I)}                   & Real Array      & For species {\ct I}               &                     &                         \\ \hline
+{\ct MASS\_FLUX(I)}                   & Real Array      & For species {\ct I}               &                     & 0.                      \\ \hline
 {\ct MASS\_FLUX\_TOTAL}               & Real            & Total Mass Flux                   &                     &                         \\ \hline
 {\ct MASS\_FRACTION(I)}               & Real Array      & For species {\ct I}               &                     &                         \\ \hline
 {\ct MATL\_ID}                        & Char. 2D Array  & (Layer,Component)                 &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION}            & Real 2D Array   & (Layer,Component)                 &                     &                         \\ \hline
-{\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 100.                    \\ \hline
+{\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 1E12                    \\ \hline
+{\ct MLRPUA }                         & Real            & Mass loss rate per unit area      & kg/m$^2$s           & 0.                      \\ \hline
 {\ct NPPC}                            & Integer         & Number of particles per cell      &                     & 1                       \\ \hline
-{\ct PARTICLE\_MASS\_FLUX}            & Real            & Mass flux of particles            & kg/m$^2$/s          & 0.                      \\ \hline
+{\ct PARTICLE\_MASS\_FLUX}            & Real            & Mass flux of particles            & kg/m$^2$ s          & 0.                      \\ \hline
 {\ct PART\_ID}                        & Character       & Lagrangian Particle ID            &                     &                         \\ \hline
 {\ct POROUS}                          & Logical         & Non-solid boundary                &                     & {\ct .FALSE.}           \\ \hline
 {\ct PLE}                             & Real            & Atmospheric profile exponent      &                     & 0.3                     \\ \hline
@@ -6601,7 +6695,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_T}                         & Character       & Ramp ID for temp.                 &                     &                         \\ \hline
 {\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
 {\ct RGB(3)}                          & Integer Triplet & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
-{\ct SHRINK}                          & Logical         & Shrinking thickness               &                     & {\ct .TRUE.}            \\ \hline
+{\ct SHRINK}                          & Logical         & Shrinking material                &                     & {\ct .TRUE.}            \\ \hline
 {\ct SLIP\_FACTOR    }                & Real            & Velocity Slip Condition           &                     & 0.5                     \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & Solid phase noding parameter      &                     & 2.0                     \\ \hline
 {\ct TAU\_MF(I)}                      & Real Array      & Ramp time for species {\ct I}     & s                   & 1.     \\ \hline
@@ -6612,7 +6706,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_MAP}                    & Character       & Name of texture map file          &                     &        \\ \hline
 {\ct TEXTURE\_WIDTH}                  & Real            & Width of texture image            & m                   & 1.     \\ \hline
 {\ct THICKNESS(IL)}                   & Real Array      & Thickness of Layer {\ct IL}       & m                   & 0.    \\ \hline
-{\ct TMP\_BACK}                       & Real            & Back surface temperature          & $^\circ$C           & 20.    \\ \hline
+{\ct TMP\_BACK}                       & Real            & Back surface temperature BC       & $^\circ$C           & 20.    \\ \hline
 {\ct TMP\_FRONT}                      & Real            & Front surface temperature         & $^\circ$C           & 20.    \\ \hline
 {\ct TMP\_INNER}                      & Real            & Initial solid temperature         & $^\circ$C           & 20.    \\ \hline
 {\ct TRANSPARENCY}                    & Real            & Transparency of obstruction       &    1                &           \\ \hline
@@ -6622,13 +6716,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Z0 }                             & Real            & Atmospheric profile origin        &  m                  & 10.    \\ \hline
 %\end{tabular*}
 \end{longtable}
-%NAMELIST /SURF/ SLIP_FACTOR,TMP_FRONT,TMP_INNER,THICKNESS,MASS_FRACTION,VEL,VEL_T,NPPC,
-%                E_COEFFICIENT,CONVECTIVE_HEAT_FLUX,TAU_Q,TAU_V,TAU_T,RAMP_Q,RAMP_T,TAU_MF,
-%                RAMP_MF,PART_ID,RAMP_V,VOLUME_FLUX, PROFILE,PLE,Z0,ID,MASS_FLUX,PARTICLE_MASS_FLUX,
-%                FYI,MATL_ID,BACKING,TMP_BACK,HRRPUA,MLRPUA,SHRINK,CELL_SIZE_FACTOR,
-%                TEXTURE_MAP,TEXTURE_WIDTH,TEXTURE_HEIGHT,RGB,TRANSPARENCY, BURN_AWAY,LEAK_PATH,DUCT_PATH,ADIABATIC,
-%                EXTERNAL_FLUX,MASS_FLUX_TOTAL,GEOMETRY,STRETCH_FACTOR,MATL_MASS_FRACTION,EMISSIVITY,COLOR,POROUS,
-%                MAX_PRESSURE,IGNITION_TEMPERATURE,HEAT_OF_VAPORIZATION
 
 \vspace{\baselineskip}
 
