@@ -2653,11 +2653,11 @@ USE MATH_FUNCTIONS, ONLY : GET_RAMP_INDEX
 CHARACTER(30) :: CONDUCTIVITY_RAMP,SPECIFIC_HEAT_RAMP
 REAL(EB) :: EMISSIVITY,CONDUCTIVITY,SPECIFIC_HEAT,DENSITY,HEAT_OF_COMBUSTION,REFERENCE_RATE,ABSORPTION_COEFFICIENT
 REAL(EB), DIMENSION(1:MAX_REACTIONS) :: A,E,HEAT_OF_REACTION,NU_FUEL,NU_WATER,NU_RESIDUE,N_S,N_T,&
-                                        REFERENCE_TEMPERATURE,IGNITION_TEMPERATURE,BOILING_TEMPERATURE
+                                        REFERENCE_TEMPERATURE,THRESHOLD_TEMPERATURE,BOILING_TEMPERATURE
 CHARACTER(30), DIMENSION(1:MAX_REACTIONS) :: RESIDUE
 INTEGER :: N,NN,NNN,IOS,NR,N_REACTIONS
 NAMELIST /MATL/ ID,FYI,SPECIFIC_HEAT,CONDUCTIVITY,CONDUCTIVITY_RAMP,SPECIFIC_HEAT_RAMP, &
-                REFERENCE_TEMPERATURE, REFERENCE_RATE, IGNITION_TEMPERATURE, &
+                REFERENCE_TEMPERATURE, REFERENCE_RATE, THRESHOLD_TEMPERATURE, &
                 EMISSIVITY,HEAT_OF_REACTION,DENSITY,RESIDUE, &
                 HEAT_OF_COMBUSTION,A,E,NU_FUEL,NU_WATER,NU_RESIDUE,N_S,N_T,N_REACTIONS,&
                 ABSORPTION_COEFFICIENT, BOILING_TEMPERATURE
@@ -2696,8 +2696,8 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
    ! Do some error checking on the inputs
 
-   IF (ANY(IGNITION_TEMPERATURE>-TMPM) .AND. N_REACTIONS==0) THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,'. IGNITION_TEMPERATURE used, but N_REACTIONS=0' 
+   IF (ANY(THRESHOLD_TEMPERATURE>-TMPM) .AND. N_REACTIONS==0) THEN
+      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,'. THRESHOLD_TEMPERATURE used, but N_REACTIONS=0'  
       CALL SHUTDOWN(MESSAGE)
    ENDIF
  
@@ -2723,7 +2723,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ML%RHO_S                = DENSITY
    ML%RESIDUE_MATL_NAME(:) = RESIDUE(:)
    ML%TMP_BOIL(:)          = BOILING_TEMPERATURE(:) + TMPM
-   ML%TMP_IGN(:)           = IGNITION_TEMPERATURE(:) + TMPM
+   ML%TMP_THR(:)           = THRESHOLD_TEMPERATURE(:) + TMPM
    ML%TMP_REF(:)           = REFERENCE_TEMPERATURE(:) + TMPM
  
    ! Additional logic
@@ -2800,7 +2800,7 @@ EMISSIVITY             = 0.9_EB
 HEAT_OF_COMBUSTION     = -1._EB      ! kJ/kg
 HEAT_OF_REACTION       = 0._EB       ! kJ/kg
 ID                     = 'null'
-IGNITION_TEMPERATURE   = -TMPM       ! 0 K
+THRESHOLD_TEMPERATURE  = -TMPM       ! 0 K
 N_REACTIONS            = 0
 N_S                    = 1._EB
 N_T                    = 0._EB
@@ -3241,10 +3241,11 @@ EXTERNAL_FLUX           = 0._EB
 GEOMETRY                = 'CARTESIAN'
 HEAT_OF_VAPORIZATION    = 0._EB
 HRRPUA                  = 0._EB
-IGNITION_TEMPERATURE    = 5000._EB
 ID                      = 'null'
+IGNITION_TEMPERATURE    = 5000._EB
 LEAK_PATH               = -1 
 MASS_FLUX               = 0._EB
+MASS_FLUX_TOTAL         = -999._EB
 MASS_FRACTION           = -1._EB
 MATL_ID                 = 'null'
 MATL_MASS_FRACTION      = 0._EB
@@ -3264,8 +3265,9 @@ RAMP_T                  = 'null'
 RGB(1)                  = 255 
 RGB(2)                  = 204
 RGB(3)                  = 102
-TRANSPARENCY            = 1._EB
 SHRINK                  = .TRUE.
+IF (LES) SLIP_FACTOR    =  0.5_EB    ! Half slip
+IF (DNS) SLIP_FACTOR    = -1.0_EB    ! No slip
 STRETCH_FACTOR          = 2._EB
 TAU_MF                  =  1._EB
 TAU_Q                   = 1._EB
@@ -3278,11 +3280,9 @@ THICKNESS               = -1._EB
 TMP_BACK                = TMPA-TMPM
 TMP_FRONT               = TMPA-TMPM 
 TMP_INNER               = TMPA-TMPM
-IF (LES) SLIP_FACTOR    =  0.5_EB    ! Half slip
-IF (DNS) SLIP_FACTOR    = -1.0_EB    ! No slip
+TRANSPARENCY            = 1._EB
 VEL_T                   = -999._EB
 VEL                     = -999._EB
-MASS_FLUX_TOTAL         = -999._EB
 VOLUME_FLUX             = -999._EB
 Z0                      = 10._EB
 
