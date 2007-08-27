@@ -104,10 +104,15 @@
 \newcommand{\SH}{\hbox{Sh}}
 \newcommand{\WE}{\hbox{We}}
 \newcommand{\COTWO}{{\tiny \hbox{CO}_2}}
+\newcommand{\HTWOO}{{\tiny \hbox{H}_2\hbox{O}}}
 \newcommand{\OTWO}{{\tiny \hbox{O}_2}}
+\newcommand{\NTWO}{{\tiny \hbox{N}_2}}
 \newcommand{\CO}{{\tiny \hbox{CO}}}
 \newcommand{\F}{{\tiny \hbox{F}}}
 \newcommand{\C}{{\tiny \hbox{C}}}
+\newcommand{\xx}{{\tiny \hbox{x}}}
+\newcommand{\yy}{{\tiny \hbox{y}}}
+\newcommand{\zz}{{\tiny \hbox{z}}}
 
 \newcommand{\dif}{\mathrm{d}}
 \newcommand{\Div}{\nabla\cdot}
@@ -122,7 +127,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: August 1, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: August 27, 2007)}
 
 \vspace{.5in}
 
@@ -143,7 +148,8 @@ VTT Technical Research Centre of Finland  }
 
 \vfill
 
-\includegraphics[width=\textwidth]{FIGURES/nistlogo_1line}
+
+\flushright{\includegraphics[width=2.5in]{FIGURES/nistident_flright_300ppi}}
 
 
 \end{minipage}
@@ -1405,16 +1411,22 @@ single-step mixture fraction model is described.
 
 \subsubsection{A Single-Step, Instantaneous Reaction}
 
-Start with a simple combustion reaction:
-\be  \hbox{Fuel} +  \mathrm{O_2}  \rightarrow  \hbox{Products} \label{stoich} \ee
-The mixture fraction $Z$ can be defined in terms of the mass fraction of fuel (C$_x$H$_y$O$_z$)
+Consider a simple combustion reaction:
+\be  \hbox{Fuel} +  \nu_\OTWO \mathrm{O_2}  \rightarrow  \nu_\COTWO \mathrm{CO_2} + \nu_\HTWOO \mathrm{H_2O} + \nu_\CO \mathrm{CO} +
+     \nu_\C \mathrm{C}  \label{stoich} \ee
+Note that throughout this section, soot is to be regarded as pure carbon, C, for the purpose of developing the combustion model. The
+stoichiometric coefficient, $\nu_\C$, represents the number of carbon atoms in the fuel that end up as soot. It is related to the
+{\em soot yield}, $y_s$, via the relation:
+\be
+   \nu_C = \frac{W_\F}{W_\C} \; y_s
+\ee
+The mixture fraction $Z$ can be defined in terms of the mass fraction of fuel (C$_\xx$H$_\yy$O$_\zz$)
 and the carbon-carrying products of combustion:
 \be Z = Y_\F + \frac{W_\F}{x W_\COTWO} \, Y_\COTWO + \frac{W_\F}{x W_\CO} \, Y_\CO  + \frac{W_\F}{x W_\C} \, Y_\C
 \label{Zdef} \ee
 The mixture fraction satisfies the conservation equation
 \be \rho \DoD{Z}{t} = \nabla \cdot \rho D \nabla Z \label{Zeqn} \ee
 obtained from a linear combination of the conservation equations for fuel and the carbon carriers.
-
 If it is assumed that combustion occurs so rapidly that the fuel and oxygen cannot
 co-exist, both simultaneously vanish at a flame surface:
 \be Z(\bx,t) = Z_f \quad ; \quad
@@ -1451,7 +1463,8 @@ Simple empirical rules can be used to predict local
 extinction based on the oxygen concentration and temperature of
 the gases in the vicinity of the flame sheet.
 Figure~\ref{plotsupp} shows values of temperature and oxygen
-concentration for which burning can and cannot take place. A derivation of the model, based on the critical flame temperature concept, is given in Appendix~\ref{mowrer_model}.
+concentration for which burning can and cannot take place. A derivation of the model,
+based on the critical flame temperature concept, is given in Appendix~\ref{mowrer_model}.
 \begin{figure}[ht]
 \begin{minipage}[t]{4.1in}
 \includegraphics[width=4.in]{FIGURES/Extinction_Criteria}
@@ -1468,10 +1481,6 @@ are now two reactions to consider -- the ``null'' reaction, where fuel and oxyge
 and the ``complete'' reaction,
 where fuel and oxygen react and form products. Note that the term ``complete'' does not imply that
 no soot or CO is formed, but rather that their respective production rates are proportional to the fuel consumption rate.
-\begin{eqnarray}  \hbox{Reaction 1:} \quad \quad \hbox{Fuel} + \mathrm{O_2}  &\rightarrow& \hbox{Fuel} +  \mathrm{O_2} \nonumber \\
-                  \hbox{Reaction 2:} \quad \quad \hbox{Fuel} + \mathrm{O_2}  &\rightarrow& \hbox{Products} \label{2reac} \end{eqnarray}
-For each reaction, a set of state relations exist. Those for Reaction 2 are the same as for the single-step mixture fraction model
-described above. Those for Reaction 1 are linear functions describing the mixing of fuel, oxygen and nitrogen with no combustion.
 
 With the definition of the mixture fraction, Eq.~(\ref{Zdef}), in mind, consider a partitioning of $Z$ into the following components:
 \begin{eqnarray}  Z_1 &=& Y_\F    \\*[.1in]
@@ -1480,35 +1489,28 @@ With the definition of the mixture fraction, Eq.~(\ref{Zdef}), in mind, consider
 such that $Z=Z_1+Z_2$. Transport equations are required for both $Z_1$ and $Z_2$.
 At the burner surface, $Z_1$ is assigned the mass flux of fuel,
 while the mass flux for $Z_2$ is zero. In other words, no combustion products are generated at the fuel source. Where fuel and
-oxygen co-exist, a reaction occurs if conditions are favorable. If a reaction occurs, $Z_1$ is converted to $Z_2$ representing the
+oxygen co-exist, a reaction occurs if conditions are favorable in the sense shown in Fig.~\ref{plotsupp}.
+If a reaction occurs, $Z_1$ is converted to $Z_2$ representing the
 conversion of fuel to products. The heat release rate of the fire is obtained by multiplying the fuel consumption rate by the
 heat of combustion.
 
-The mass fraction of any species in the mixture is found via a
-linear combination of its state relations for Reaction 1 and Reaction 2. For example, let $Y_{\alpha,1}(Z)$
-represent the mass fraction of species $\alpha$ assuming that only the null reaction occurs. Likewise, $Y_{\alpha,2}(Z)$ is the mass fraction of
-species $\alpha$ assuming that only the complete reaction occurs.  For a mixture of products, unburned fuel, and unconsumed oxygen, the mass
-fraction of species $\alpha$ is
-\be  Y_{\alpha}(Z) = (1-c) \, Y_{\alpha,1}(Z) + c \, Y_{\alpha,2}(Z) \label{1step} \ee
-The variable $c$ is often referred to as a ``progress variable.'' It is a number between 0 and 1 that indicates the extent to which
-the gas mixture is composed of products of the null or complete reaction. If $c=1$, then none of the gases are the result of a
-local extinction. The value of $c$ is determined locally from the values of $Z_1$ and $Z_2$.
-\be c = \frac{Z-Z_1}{Z-Y_{\F,2}(Z)} = \frac{Z_2}{Z-Y_{\F,2}(Z)}   \ee
-The function $Y_{\F,2}(Z)$ is the fuel state relation for complete combustion.
-
-Below is a pictorial rendering of Eq.~(\ref{1step}), demonstrating the linear combination of state relations.
-\begin{tabular*}{\textwidth}[t]{lccccr}
-\includegraphics[height=1.8in]{FIGURES/State_Relations_1+3_Full}
-\raisebox{0.7in}[0pt]{=} &
-\raisebox{0.7in}[0pt]{$(1-c)$} &
-\includegraphics[height=1.8in]{FIGURES/State_Relations_1_Full} &
-\raisebox{0.7in}[0pt]{+ $\quad c$} &
-\includegraphics[height=1.8in]{FIGURES/State_Relations_3_Full}
- \end{tabular*}
-It is important to note that the definitions of $Z_1$ and $Z_2$, unlike the single parameter model,
+Since the mixture fraction variables result from linear combinations of the species transport equations, the converse
+is also true -- that species are linear combinations of the mixture fraction variables.
+The mass fractions of the species in the mixture, $Y_{\alpha}(Z_1,Z_2)$, are found via:
+\begin{eqnarray}  Y_\F     &=& Z_1    \\*[.1in]
+                  Y_\NTWO  &=& (1 - Z_1 - Z_2) \; Y_\NTWO^\infty   =  (1 - Z) \; Y_\NTWO^\infty    \\*[.1in]
+                  Y_\OTWO  &=& (1 - Z_1 - Z_2) \; Y_\OTWO^\infty - W_\OTWO \left[\frac{Y_\COTWO}{W_\COTWO}+\frac{1}{2}
+                                \left(\frac{Y_\CO}{W_\CO}+\frac{Y_\HTWOO}{W_\HTWOO} \right) \right]   \\*[.1in]
+                           &=& (1 - Z) \; Y_\OTWO^\infty - \frac{W_\OTWO}{W_\F}
+                                \left[\nu_\COTWO+\frac{1}{2} \left(\nu_\CO+\nu_\HTWOO \right) \right] \; Z_2   \\*[.1in]
+                  Y_\COTWO &=& \frac{\nu_\COTWO W_\COTWO}{W_\F} \; Z_2 \\*[.1in]
+                  Y_\HTWOO &=& \frac{\nu_\HTWOO W_\HTWOO}{W_\F} \; Z_2 \\*[.1in]
+                  Y_\CO    &=& \frac{\nu_\CO W_\CO}{W_\F} \; Z_2  \\*[.1in]
+                  Y_s      &=& \frac{\nu_s W_s}{W_\F} \; Z_2
+\end{eqnarray}
+It is important to note that the definitions of $Z_1$ and $Z_2$, unlike in the single parameter model,
 do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
 
-\newpage
 
 \subsubsection{CO Production (Two-Step Reaction with Extinction)}
 
@@ -1519,86 +1521,44 @@ products such that the production rate of each product species is proportional t
 This means that for each fuel molecule, fixed amounts of CO$_2$, H$_2$O, CO, and soot are formed and these products
 persist in the plume indefinitely with no further reaction. This is not an unreasonable assumption if
 the purpose of the fire simulation is to assess the impact of the fire on the larger space.
-However, in under-ventilated fires, soot and CO are produced at higher rates, and exist within the fuel-rich flame envelope at higher concentrations,
+However, in under-ventilated fires, soot and CO are produced at higher rates,
+and exist within the fuel-rich flame envelope at higher concentrations,
 than would otherwise be predicted with a single set of fixed yields that are based on post-flame measurements. To account for the
 production of CO and its eventual oxidation at the flame envelope or within a hot upper layer,
 an additional reaction is now needed:
-\begin{eqnarray}  \hbox{Reaction 1:} \quad \quad \hbox{Fuel} + \mathrm{O_2}  &\rightarrow& \hbox{Fuel} +  \mathrm{O_2}  \\
-                  \hbox{Reaction 2:} \quad \quad \hbox{Fuel} + \mathrm{O_2}  &\rightarrow& \mathrm{CO} + \hbox{Other Products}  \\
-                  \hbox{Reaction 3:} \quad \quad \hbox{Fuel} + \mathrm{O_2}  &\rightarrow& \mathrm{CO_2} + \hbox{Other Products}
-                  \label{3reac} \end{eqnarray}
-These reactions shall be referred to as the ``null,'' ``incomplete,'' and ``complete'' reactions, respectively.
+\begin{eqnarray}
+\hbox{Fuel} +  \nu_\OTWO' \mathrm{O_2}  &\rightarrow&  \nu_\HTWOO \mathrm{H_2O} + (\nu_\CO'+ \nu_\CO) \, \mathrm{CO} +
+     \nu_\C \, \mathrm{C}  \\*[.1in]
+\mathrm{CO} + \ha \mathrm{O_2} &\rightarrow& \mathrm{CO_2}
+\label{3reac} \end{eqnarray}
+Note that there are two stoichiometric coefficients for CO -- the first, $\nu_\CO'=\hbox{x}-\nu_\C-\nu_\CO$,
+represents CO that is produced in the first
+step of the reaction that can potentially be converted to CO$_2$ assuming the conditions are favorable. The second coefficient, $\nu_\CO$,
+is the so-called ``well-ventilated,'' or ``post-flame,'' value.
+
+
 To describe the state of the system, the mixture fraction, $Z$, must be written as the sum of three components:
 \begin{eqnarray}  Z_1 &=& Y_\F    \\*[.1in]
-                  Z_2 &=& \frac{W_\F}{x \, W_\CO }    \;  Y_\CO \\*[.1in]
-                  Z_3 &=& \frac{W_\F}{x \, W_\COTWO } \;  Y_\COTWO  \end{eqnarray}
-Here, $x$ is the number of carbon atoms in the fuel molecule that are oxidized (i.e. $x$ does not include carbon that becomes soot).
+                  Z_2 &=& \frac{W_\F}{(\hbox{x}-\nu_\C) \, W_\CO }    \;  Y_\CO \\*[.1in]
+                  Z_3 &=& \frac{W_\F}{(\hbox{x}-\nu_\C) \, W_\COTWO } \;  Y_\COTWO  \end{eqnarray}
+Here, $\hbox{x}-\nu_\C$ represents the number of carbon atoms in the fuel molecule that are oxidized; that is, the carbon atoms that do
+not end up as soot.
 
-The decomposition of $Z$ into three components is numerically convenient. However, the recovery of the individual species mass fractions requires some care. As a first step,
-define two progress variables. The first, $c_\F$, indicates the extent to which the fuel has reacted with oxygen, and the second, $c_\CO$,
-indicates the extent to which CO has been converted to CO$_2$.  To derive formulae for the progress variables, we first must define the local stoichiometric
-value of the mixture fraction. The ``incomplete'' and ``complete'' reactions have different stoichiometric values of $Z$. Depending on the local composition of
-the gases, the stoichiometric value falls between those of the ``incomplete'' and ``complete'' reactions:
-\be  Z_f   = \left( 1+\frac{W_\OTWO}{W_\F}\frac{1}{Y_\OTWO^\infty} \, \Big( (1-c)\, \nu_{O_2,2}+c \, \nu_{O_2,3} \Big) \right)^{-1}   \quad ; \quad  c = \frac {Z_3}{Z_2+Z_3}  \ee
-The state relation for fuel depends on the local stoichiometric value:
-\be  Y_\F(Z) = \left\{ \begin{array}{l@{\quad}l}  0                    & Z \le Z_f  \\
-                                                  \frac{Z-Z_f}{1-Z_f}    & Z >   Z_f  \end{array} \right.  \ee
-Now the progress variables are written:
-\begin{eqnarray}  c_\F   &=& \frac{Z-Z_1}{Z-Y_{\F}(Z)}    \\ \vspace{0.1in}
-                  c_\CO  &=& \frac{1}{c_\F} \, \frac{Z_3}{Z_{3,max}(Z)}   \quad ; \quad Z_{3,\max}(Z)  = \frac{W_\F}{x \, W_\COTWO } Y_{\COTWO,3}  \end{eqnarray}
-
-With the definitions of the progress variables in hand, we are ready to define the state relations. As before, the state relations are essentially linear
-combinations of those of the individual reactions.
-The ``null'' reaction, and its corresponding progress variable, $c_\F$, is treated as before. However, the second and third reaction
-require some care. Consider a combination of products of the ``incomplete'' and ``complete'' reactions. The state relations for this
-mixture can be found via a linear combination of the state relations:
-
-\vspace{0.1in}
-\noindent
-\begin{tabular*}{\textwidth}[t]{lccccr}
-\includegraphics[height=1.75in]{FIGURES/State_Relations_2+3} &
-\raisebox{0.75in}[0pt]{=} &
-\raisebox{0.75in}[0pt]{$(1-c_\CO)$} &
-\includegraphics[height=1.75in]{FIGURES/State_Relations_2} &
-\raisebox{0.75in}[0pt]{+ $c_\CO$} &
-\includegraphics[height=1.75in]{FIGURES/State_Relations_3}
- \end{tabular*}
-
-\vspace{0.1in}
-\noindent
-The state relations on the left represent a reaction of fuel and oxygen that produce only CO and H$_2$O (soot is neglected here,
-not only because methane is the fuel chosen for this example, but also to simplify the discussion). The state relations in the
-center represent the complete conversion of fuel and oxygen to CO$_2$ and H$_2$O. The state relations on the right represent a
-linear combination of the two (with $c_\CO=0.5$). Note that there is a small overlap of the fuel and oxygen lines between the
-stoichiometric values of each respective reaction. It is assumed that if only Reactions 2 and 3 are being considered, there should
-be no overlap of fuel and oxgyen. Thus, a correction needs to be made to consume excess oxygen on the fuel-rich side of
-the flame ($Z>Z_f$) or to consume excess fuel on the fuel-lean side ($Z<Z_f$), and adjust other products accordingly.
-The stoichiometric value of the gas mixture, $Z_f$, falls between the values
-for the individual reactions, $Z_{f,2}$ and $Z_{f,3}$, roughly (but not exactly) corresponding to the progress variable
-$c_\CO$.
-
-The state relations for the three-reaction system are derived as before for the two-reaction system. Pictorially:
-
-\vspace{0.1in}
-\noindent
-\begin{tabular*}{\textwidth}[t]{lccccr}
-\includegraphics[height=1.75in]{FIGURES/State_Relations_1+2+3} &
-\raisebox{0.75in}[0pt]{=} &
-\raisebox{0.75in}[0pt]{$(1-c_\F)$} &
-\includegraphics[height=1.75in]{FIGURES/State_Relations_1} &
-\raisebox{0.75in}[0pt]{+ $\quad c_\F$} &
-\includegraphics[height=1.75in]{FIGURES/State_Relations_2+3_Corrected}
-\end{tabular*}
-
-\vspace{0.1in}
-\noindent
-Notice that now fuel and oxygen mix, because Reaction 1 is nothing more than the mixing of fuel and oxgyen without burning.
-A summary of the derivation is:
-\be  Y_{\alpha}(Z) = (1-c_\F) \, Y_{\alpha,1}(Z) + c_\F \; \left[ (1-c_\CO) \, Y'_{\alpha,2}(Z) + c_\CO \, Y'_{\alpha,3}(Z) \right] \ee
-Note that the state relations for Reaction 2 and Reaction 3 require a slight modification:
-\be \begin{array}{ll}
-     Y'_{\alpha,2}(Z) = Y_{\alpha,2}(Z) \pm (\nu_\alpha W_\alpha/\nu_\OTWO W_\OTWO) \, Y_{\OTWO,2}(Z) \quad & \quad \hbox{if} \quad Z>Z_f  \\*[.1in]
-     Y'_{\alpha,3}(Z) = Y_{\alpha,3}(Z) \pm (\nu_\alpha W_\alpha/\nu_\F W_\F)       \, Y_{\F,3}(Z)    \quad & \quad \hbox{if} \quad Z<Z_f  \end{array} \ee
+The decomposition of $Z$ into three components is numerically convenient. However, the recovery of the
+individual species mass fractions requires some care.  The mass fraction of any species in the mixture,
+$Y_\alpha(Z_1,Z_2,Z_3)$, is still found via linear combinations of the mixture fraction variables:
+\begin{eqnarray}  Y_\F     &=& Z_1    \\*[.1in]
+                  Y_\NTWO  &=& (1 - Z_1 - Z_2 - Z_3) \; Y_\NTWO^\infty   = (1 - Z) \; Y_\NTWO^\infty    \\*[.1in]
+                  Y_\OTWO  &=& (1 - Z) \; Y_\OTWO^\infty - W_\OTWO \left[ \frac{Y_\COTWO}{W_\COTWO}+\frac{1}{2}
+                                \left(\frac{Y_\CO}{W_\CO}+\frac{Y_\HTWOO}{W_\HTWOO} \right) \right]   \\*[.1in]
+                           &=& (1 - Z) \; Y_\OTWO^\infty - \frac{W_\OTWO}{W_\F} \left[
+                               \left( \frac{\nu_\CO'}{2} + \frac{\nu_\HTWOO}{2} \right) \; Z_2 +
+                               \left( \nu_\COTWO + \frac{\nu_\CO}{2} + \frac{\nu_\HTWOO}{2} \right) \; Z_3 \right]  \\*[.1in]
+                  Y_\COTWO &=& \frac{ \nu_\COTWO W_\COTWO}{W_\F} \; Z_3 \\*[.1in]
+                  Y_\HTWOO &=& \frac{\nu_\HTWOO W_\HTWOO}{W_\F} \;  \big(Z_2+Z_3 \big) \\*[.1in]
+                  Y_\CO    &=& \frac{W_\CO}{W_\F} \; \big( \nu_\CO'  \; Z_2 + \nu_\CO \; Z_3 \big) \\*[.1in]
+                  Y_s      &=& \frac{\nu_\C W_\C}{W_\F} \; \big(Z_2+Z_3\big)
+\end{eqnarray}
 
 
 
@@ -1876,14 +1836,14 @@ like cables or heat detection devices.}
 \ee
 Section~\ref{matcoefs} describes the component-averaged material
 properties, $k_s$ and $\rho_s c_s$. The source term, $\dq_s'''$,
-consists of chemical reactions and radiative absorption: 
+consists of chemical reactions and radiative absorption:
 \be
   \dq_s'''=\dq_{s,c}'''+\dq_{s,r}'''
 \ee
 Section~\ref{pyrosection} describes the term $\dq_{s,c}'''$, which
 is essentially the heat production (loss) rate given by the  pyrolysis
 models for different types of solid and liquid fuels.
-Section~\ref{inradsection} describes the term 
+Section~\ref{inradsection} describes the term
 $\dq_{s,r}'''$, the radiative absorption and emission in depth.
 Section~\ref{conflux} describes the convective heat transfer to the
 solid surface. Finally, Section~\ref{matbc} describes how the
@@ -1902,7 +1862,7 @@ The conductivity and volumetric heat capacity of the solid are defined
    \rho_s c_s = \sum_{\alpha=1}^{N_m} \rho_{s,\alpha} \; c_{s,\alpha}
 \ee
 $N_m$ is the number of material components forming the
-solid. $\rho_{s,\alpha}$ is the 
+solid. $\rho_{s,\alpha}$ is the
 {\em component density}
 \be
   \rho_{s,\alpha}=\rho_s \, Y_\alpha
@@ -1931,7 +1891,7 @@ source term in the solid phase heat conduction equation,
 $\dot{q}_{s,c}'''$,  are modeled. This is what is commonly referred to
 as the ``pyrolysis model,'' but it actually can represent any number
 of reactive processes, including evaporation, charring, and internal
-heating. 
+heating.
 
 
 \subsubsection{Specified Heat Release Rate}
@@ -1957,15 +1917,15 @@ Solids can undergo simultaneous reactions under the following assumptions:
 \item no porosity effects\footnote{Although porosity effects are not explicitly included in the model, it is possible to account for it
 because the volume fractions defined by Eq.~(\ref{volfrac}) need not
 sum to unity, in which case the thermal conductivity and absorption
-coefficient are effectively reduced.} 
+coefficient are effectively reduced.}
 \end{itemize}
 Each material component may undergo several competing reactions, and
 each of these reactions may produce some other solid component
 (residue), gaseous fuel, and/or water vapor according to
 the yield coefficients $\nu_s$, $\nu_f$ and $\nu_w$, respectively.
-These coefficients should usually satisfy $\nu_s + \nu_f + \nu_w = 1$, 
+These coefficients should usually satisfy $\nu_s + \nu_f + \nu_w = 1$,
 but smaller yields may also be used to take into account the gaseous
-products that are not explicitly included in the simulation. 
+products that are not explicitly included in the simulation.
 
 Consider material component $\alpha$ that undergoes $N_{r,\alpha}$
 separate reactions. We will use the index $\beta$ to represent one of
@@ -1980,7 +1940,7 @@ according to the solid phase species conservation equation
 \ee
 which says that the mass of conponent $\alpha$ is consumed by the
 solid phase reactions $r_{\alpha \beta}$ and produced by other
-reactions. $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units 
+reactions. $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units
 (1/s) and $\rho_{s0}$ is the initial density of the material layer.
 $S_\alpha$ is the production rate of material component
 $\alpha$ as a result of the reactions of the other
@@ -1994,7 +1954,7 @@ r_{\alpha \beta} =
     \; \max \big[0,T_s-T_{thr,\alpha \beta} \big]^{n_{t,\alpha\beta}}
 \ee
 where $T_{thr,\alpha \beta}$ is a threshold temperature that can be
-used to dictate that the reaction must not occur below a 
+used to dictate that the reaction must not occur below a
 user-specified temperature. By default, the term is deactivated
 ($T_{thr,\alpha\beta}=0$ K).
 
@@ -2019,13 +1979,13 @@ The volumetric production rate of fuel gases and water vapor are
 It is assumed that the fuel gases and water vapor are transported instantaneously to the surface, where the
 mass fluxes are given by:
 \be
-   \dm_f'' = \int_0^L \dm_f'''(x) \, dx  \quad ; \quad 
+   \dm_f'' = \int_0^L \dm_f'''(x) \, dx  \quad ; \quad
    \dm_w'' = \int_0^L \dm_w'''(x) \, dx
 \ee
 where $L$ is the thickness of the surface. The chemical source term of
 the heat conduction equation consists of the heats of reaction and the
 differences in latent heats between the original material and the
-products 
+products
 \be
 \dot{q}_{s,c}'''(x) = \rho_{s0}\;
     \sum_{\alpha=1}^{N_m} \sum_{\beta=1}^{N_{r,\alpha}}
@@ -3943,7 +3903,7 @@ $B$                       \> pre-exponential factor for gas phase Arrhenius reac
 $C$                       \> Sprinkler C-Factor \\
 $C_D$                     \> drag coefficient \\
 $C_s$                     \> Smagorinsky constant (LES)  \\
-$c_s$			  \> Solid material specific heat \\
+$c_s$             \> Solid material specific heat \\
 $c_p$                     \> constant pressure specific heat \\
 $D$                       \> diffusion coefficient   \\
 $d_m$                     \> median volumetric droplet diameter \\
@@ -3952,7 +3912,7 @@ $\bof_b$                  \> external force vector (excluding gravity) \\
 $g$                       \> acceleration of gravity \\
 $\bg$                     \> gravity vector, normally $(0,0,-g)$ \\
 $\cal H$                  \> total pressure divided by the density \\
-$H_{r,\alpha\beta}$	  \> heat of reaction for a solid phase reaction \\
+$H_{r,\alpha\beta}$   \> heat of reaction for a solid phase reaction \\
 $h$                       \> enthalpy; heat transfer coefficient   \\
 $h_\alpha$                \> enthalpy of species $\alpha$   \\
 $h_\alpha^0$              \> heat of formation of species $\alpha$   \\
@@ -3978,12 +3938,12 @@ $Q^*$                     \> characteristic fire size \\
 $\R$                      \> universal gas constant \\
 $\RE$                     \> Reynolds number \\
 $r_d$                     \> droplet radius \\
-$r_{\alpha\beta}$	  \> solid phase reaction rate \\
+$r_{\alpha\beta}$     \> solid phase reaction rate \\
 $\hbox{RTI}$              \> Response Time Index of sprinkler \\
 $\bs$                     \> unit vector in direction of radiation intensity\\
 $\SC$                     \> Schmidt number \\
 $\SH$                     \> Sherwood number \\
-$S_\alpha$		  \> solid component production rate \\
+$S_\alpha$        \> solid component production rate \\
 $T$                       \> temperature \\
 $t$                       \> time           \\
 $U$                       \> integrated radiant intensity \\
@@ -4006,10 +3966,10 @@ $\delta$                  \> wall thickness \\
 $\epsilon$                \> dissipation rate \\
 $\kappa$                  \> absorption coefficient \\
 $\mu$                     \> dynamic viscosity \\
-$\nu_i$                   \> stoichiometric coefficient, species $i$ \\
-$\nu_s$			  \> yield of solid residue in solid phase reaction \\
-$\nu_f$			  \> yield of gaseous fuel in solid phase reaction \\
-$\nu_w$			  \> yield of gaseous water in solid phase reaction \\
+$\nu_\alpha$              \> stoichiometric coefficient, species $\alpha$ \\
+$\nu_s$           \> yield of solid residue in solid phase reaction \\
+$\nu_f$           \> yield of gaseous fuel in solid phase reaction \\
+$\nu_w$           \> yield of gaseous water in solid phase reaction \\
 $\rho$                    \> density \\
 $\btau_{ij}$              \> viscous stress tensor \\
 $\chi_r$                  \> radiative loss fraction \\
