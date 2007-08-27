@@ -684,6 +684,15 @@ typedef struct {
 /* --------------------------  slice ------------------------------------ */
 
 typedef struct {
+  char *file, hrrlabel[256];
+  int loaded, display, *timeslist, itime;
+  float *times, *hrrval;
+  int ntimes;
+} hrrdata;
+
+/* --------------------------  slice ------------------------------------ */
+
+typedef struct {
   int mesh_type;
   int seq_id, autoload;
   char *file;

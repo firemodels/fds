@@ -1875,6 +1875,15 @@ void update_framenumber(int changetime){
         }
       }
     }
+#ifdef pp_HRR
+    if(hrrinfo!=NULL){
+      if(hrrinfo->loaded==1&&hrrinfo->display==1){
+        if(hrrinfo->timeslist!=NULL){
+          hrrinfo->itime=hrrinfo->timeslist[itime];
+        }
+      }
+    }
+#endif
     if(showslice==1||showvslice==1){
       for(ii=0;ii<nslice_loaded;ii++){
         i = slice_loaded_list[ii];

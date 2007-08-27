@@ -1206,6 +1206,9 @@ void initvars1(void){
 #ifdef pp_memstatus
   visAvailmemory=0;
 #endif
+#ifdef pp_HRR
+  visHRRlabel=0;
+#endif
   visBlocklabel=1;
   visOpenVents=1,visDummyVents=1;
   visOpenVentsAsOutline=0;
@@ -1941,6 +1944,10 @@ void initvars0(void){
   trainer_filename=NULL;
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
   flushfile=NULL, chidfilebase=NULL;
+#ifdef pp_HRR
+  hrrfilename=NULL;
+  hrrinfo=NULL;
+#endif
   smokezippath=NULL;
   shellfilename=NULL;
   INI_fds_filein=NULL, fds_filein=NULL, fds_fileout=NULL,fds_fileout2=NULL;
