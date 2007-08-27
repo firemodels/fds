@@ -362,7 +362,12 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
 
      if( visTimeLabels==1&&showtime==1){
       if(visTimelabel==1)outputText(0.0f,0.1f, timelabel);
+#ifdef pp_HRR
+      if(visFramelabel==1&&visHRRlabel==0)outputText(0.0f,0.4f, framelabel);
+      if(visHRRlabel==1&&hrrinfo!=NULL)outputText(0.0f,0.4f, hrrinfo->hrrlabel);
+#else
       if(visFramelabel==1)outputText(0.0f,0.4f, framelabel);
+#endif
       drawTimeBar();
      }
 
@@ -2074,6 +2079,13 @@ void updatetimes(void){
     }
   }
 #endif
+#ifdef pp_HRR
+  if(hrrinfo!=NULL){
+    if(hrrinfo->display==1&&hrrinfo->loaded==1){
+      ntimes+=hrrinfo->ntimes;
+    }
+  }
+#endif
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
     if(touri->display==0)continue;
@@ -2141,6 +2153,15 @@ void updatetimes(void){
       if(terri->loaded==0)continue;
       for(n=0;n<terri->ntimes;n++){
         *timescopy++=terri->times[n];
+      }
+    }
+  }
+#endif
+#ifdef pp_HRR
+  if(hrrinfo!=NULL){
+    if(hrrinfo->loaded==1&&hrrinfo->display==1){
+      for(n=0;n<hrrinfo->ntimes;n++){
+        *timescopy++=hrrinfo->times[n];
       }
     }
   }
@@ -2217,7 +2238,14 @@ void updatetimes(void){
 
   n2=1;ntimes2=ntimes;
   for(n=1;n<ntimes;n++){
+#ifdef pp_HRR
+    float difftime;
+
+    difftime = fabs(times[ntimes-1]-times[0])/(float)ntimes;
+    if(difftime!=0.0&&fabs(times[n]-times[n-1])>difftime){
+#else
     if(times[n]!=times[n-1]){
+#endif
       times[n2]=times[n];
       n2++;
     }
@@ -2249,6 +2277,14 @@ void updatetimes(void){
         if(terri->loaded==0)continue;
         FREEMEMORY(terri->timeslist);
         NewMemory((void **)&terri->timeslist,ntimes*sizeof(int));
+      }
+    }
+#endif
+#ifdef pp_HRR
+    if(hrrinfo!=NULL){
+      if(hrrinfo->loaded==1&&hrrinfo->display==1){
+        FREEMEMORY(hrrinfo->timeslist);
+        NewMemory((void **)&hrrinfo->timeslist,ntimes*sizeof(int));
       }
     }
 #endif
@@ -2633,6 +2669,17 @@ void UpdateTimeLabels(void){
     }
   }
   sprintf(framelabel,"Frame: %i",itime);
+#ifdef pp_HRR
+  if(hrrinfo!=NULL){
+    if(hrrinfo->display==1&&hrrinfo->loaded==1){
+      float hrr;
+
+      hrr = hrrinfo->hrrval[hrrinfo->itime];
+      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f KW",hrr);
+      if(hrr>=1000.0)sprintf(hrrinfo->hrrlabel,"HRR: %4.1f MW",hrr/1000.0);
+    }
+  }
+#endif
 }
 
 /* ------------------ synctimes ------------------------ */
@@ -2709,6 +2756,26 @@ void synctimes(void){
         i--;
       }
       terri->timeslist[n]=i;
+    }
+#endif
+#ifdef pp_HRR
+    if(hrrinfo!=NULL){
+      if(hrrinfo->loaded==1&&hrrinfo->display==1){
+        if(n==0){
+          istart=0;
+        }
+        else{
+          istart=hrrinfo->timeslist[n-1];
+        }
+        i=istart;
+        while(hrrinfo->times[i]<times[n]&&i<hrrinfo->ntimes){
+          i++;
+        }
+        if(i>=hrrinfo->ntimes){
+          i--;
+        }
+        hrrinfo->timeslist[n]=i;
+      }
     }
 #endif
 
@@ -3077,7 +3144,6 @@ void Args(int argc, char **argv){
       STRCAT(smvmenufile,smvfilename);
     }
   }
-
   if(smvfilename!=NULL){
     FREEMEMORY(fds_filein);
     NewMemory((void **)&fds_filein,strlen(fdsprefix)+6);
