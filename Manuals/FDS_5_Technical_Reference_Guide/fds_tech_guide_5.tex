@@ -1411,24 +1411,32 @@ single-step mixture fraction model is described.
 
 \subsubsection{A Single-Step, Instantaneous Reaction}
 
-Consider a simple combustion reaction:
-\be  \hbox{Fuel} +  \nu_\OTWO \mathrm{O_2}  \rightarrow  \nu_\COTWO \mathrm{CO_2} + \nu_\HTWOO \mathrm{H_2O} + \nu_\CO \mathrm{CO} +
-     \nu_\C \mathrm{C}  \label{stoich} \ee
+Consider a simple, one-step reaction of fuel and oxygen:
+\be  \hbox{Fuel} +  \nu_\OTWO \, \mathrm{O_2}  \rightarrow  \nu_\COTWO \, \mathrm{CO_2} + \nu_\HTWOO \, \mathrm{H_2O} + \nu_\CO \, \mathrm{CO} +
+     \nu_\C \, \mathrm{C}  \label{stoich} \ee
 Note that throughout this section, soot is to be regarded as pure carbon, C, for the purpose of developing the combustion model. The
-stoichiometric coefficient, $\nu_\C$, represents the number of carbon atoms in the fuel that end up as soot. It is related to the
+stoichiometric coefficient, $\nu_\C$, represents the number of carbon atoms in the fuel that are converted to soot. It is related to the
 {\em soot yield}, $y_s$, via the relation:
 \be
-   \nu_C = \frac{W_\F}{W_\C} \; y_s
+   \nu_\C = \frac{W_\F}{W_\C} \; y_s  \label{soot_yield}
 \ee
-The mixture fraction $Z$ can be defined in terms of the mass fraction of fuel (C$_\xx$H$_\yy$O$_\zz$)
+Likewise, the stoichiometric coefficient of CO, $\nu_\CO$, is related to the {\em CO yield}, $y_\CO$, via:
+\be
+   \nu_\CO = \frac{W_\F}{W_\CO} \; y_\CO  \label{CO_yield}
+\ee
+The yields of soot and CO are based on ``well-ventilated'' or ``post-flame'' measurements. The increased production of CO and soot in an under-ventilated
+compartment will be addressed in the following sections.
+
+The mixture fraction, $Z$, can be defined in terms of the mass fraction of fuel, $\mathrm{C_xH_yO_z}$
 and the carbon-carrying products of combustion:
-\be Z = Y_\F + \frac{W_\F}{x W_\COTWO} \, Y_\COTWO + \frac{W_\F}{x W_\CO} \, Y_\CO  + \frac{W_\F}{x W_\C} \, Y_\C
+\be
+   Z = Y_\F + \frac{W_\F}{x W_\COTWO} \, Y_\COTWO + \frac{W_\F}{x W_\CO} \, Y_\CO  + \frac{W_\F}{x W_\C} \, Y_\C
 \label{Zdef} \ee
 The mixture fraction satisfies the conservation equation
 \be \rho \DoD{Z}{t} = \nabla \cdot \rho D \nabla Z \label{Zeqn} \ee
-obtained from a linear combination of the conservation equations for fuel and the carbon carriers.
+obtained by taking a linear combination of the transport equations for the fuel and the carbon carrying products.
 If it is assumed that combustion occurs so rapidly that the fuel and oxygen cannot
-co-exist, both simultaneously vanish at a flame surface:
+co-exist, then both simultaneously vanish at a flame surface:
 \be Z(\bx,t) = Z_f \quad ; \quad
 Z_f = \frac{Y_\OTWO^\infty}{s \, Y_\F^I + Y_\OTWO^\infty} \label{flamesheet} \ee
 and all species can be related to $Z$ via the  ``state relations'' shown in Fig.~\ref{staterelations}.
@@ -1439,13 +1447,15 @@ and all species can be related to $Z$ via the  ``state relations'' shown in Fig.
 \label{staterelations}
 \end{minipage}
 \end{figure}
+In versions of FDS prior to 5, this one-step, instantaneous reaction of fuel and oxygen was assumed. However, starting in version 5, a more
+generalized formulation has been implemented and is described next.
 
 
 \subsubsection{A Single-Step Reaction, but with Local Extinction}
 
 \label{extinction}
 
-The physical limitation of the single-step reaction is that it assumes fuel and
+The physical limitation of the single-step reaction model described in the previous section is that it assumes fuel and
 oxygen burn instantaneously when mixed. For large-scale, well-ventilated
 fires, this is a good assumption. However, if a fire is in an
 under-ventilated compartment, or if a suppression agent like water
@@ -1479,7 +1489,7 @@ values of $Z$ below stoichiometric, since now some fuel may be mixed
 with the other combustion products. Essentially, there
 are now two reactions to consider -- the ``null'' reaction, where fuel and oxygen simply mix and do not burn;
 and the ``complete'' reaction,
-where fuel and oxygen react and form products. Note that the term ``complete'' does not imply that
+where fuel and oxygen react and form products according to Eq.~(\ref{stoich}). Note that the term ``complete'' does not imply that
 no soot or CO is formed, but rather that their respective production rates are proportional to the fuel consumption rate.
 
 With the definition of the mixture fraction, Eq.~(\ref{Zdef}), in mind, consider a partitioning of $Z$ into the following components:
@@ -1489,13 +1499,13 @@ With the definition of the mixture fraction, Eq.~(\ref{Zdef}), in mind, consider
 such that $Z=Z_1+Z_2$. Transport equations are required for both $Z_1$ and $Z_2$.
 At the burner surface, $Z_1$ is assigned the mass flux of fuel,
 while the mass flux for $Z_2$ is zero. In other words, no combustion products are generated at the fuel source. Where fuel and
-oxygen co-exist, a reaction occurs if conditions are favorable in the sense shown in Fig.~\ref{plotsupp}.
+oxygen co-exist, a reaction occurs if conditions are favorable in the sense shown by Fig.~\ref{plotsupp}.
 If a reaction occurs, $Z_1$ is converted to $Z_2$ representing the
 conversion of fuel to products. The heat release rate of the fire is obtained by multiplying the fuel consumption rate by the
 heat of combustion.
 
 Since the mixture fraction variables result from linear combinations of the species transport equations, the converse
-is also true -- that species are linear combinations of the mixture fraction variables.
+is also true -- that species mass fractions are linear combinations of the mixture fraction variables.
 The mass fractions of the species in the mixture, $Y_{\alpha}(Z_1,Z_2)$, are found via:
 \begin{eqnarray}  Y_\F     &=& Z_1    \\*[.1in]
                   Y_\NTWO  &=& (1 - Z_1 - Z_2) \; Y_\NTWO^\infty   =  (1 - Z) \; Y_\NTWO^\infty    \\*[.1in]
@@ -1506,7 +1516,7 @@ The mass fractions of the species in the mixture, $Y_{\alpha}(Z_1,Z_2)$, are fou
                   Y_\COTWO &=& \frac{\nu_\COTWO W_\COTWO}{W_\F} \; Z_2 \\*[.1in]
                   Y_\HTWOO &=& \frac{\nu_\HTWOO W_\HTWOO}{W_\F} \; Z_2 \\*[.1in]
                   Y_\CO    &=& \frac{\nu_\CO W_\CO}{W_\F} \; Z_2  \\*[.1in]
-                  Y_s      &=& \frac{\nu_s W_s}{W_\F} \; Z_2
+                  Y_\C     &=& \frac{\nu_\C W_\C}{W_\F} \; Z_2
 \end{eqnarray}
 It is important to note that the definitions of $Z_1$ and $Z_2$, unlike in the single parameter model,
 do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
@@ -1529,21 +1539,23 @@ an additional reaction is now needed:
 \begin{eqnarray}
 \hbox{Fuel} +  \nu_\OTWO' \mathrm{O_2}  &\rightarrow&  \nu_\HTWOO \mathrm{H_2O} + (\nu_\CO'+ \nu_\CO) \, \mathrm{CO} +
      \nu_\C \, \mathrm{C}  \\*[.1in]
-\mathrm{CO} + \ha \mathrm{O_2} &\rightarrow& \mathrm{CO_2}
+\nu_\CO' \; \Big[ \mathrm{CO} + \ha \mathrm{O_2}  &\rightarrow&  \mathrm{CO_2}  \Big]
 \label{3reac} \end{eqnarray}
-Note that there are two stoichiometric coefficients for CO -- the first, $\nu_\CO'=\hbox{x}-\nu_\C-\nu_\CO$,
+The brackets around the second reaction are there merely to emphasize that the sum of the two reactions equal Eq.~(\ref{stoich}).
+There are two stoichiometric coefficients for CO -- the first, $\nu_\CO'=\hbox{x}-\nu_\C-\nu_\CO$,
 represents CO that is produced in the first
-step of the reaction that can potentially be converted to CO$_2$ assuming the conditions are favorable. The second coefficient, $\nu_\CO$,
-is the so-called ``well-ventilated,'' or ``post-flame,'' value.
+step of the reaction that can potentially be converted to CO$_2$ assuming the conditions are favorable. $\nu_\CO'$ is equivalent to $\nu_\COTWO$ in
+Eq.~(\ref{stoich}). The second coefficient, $\nu_\CO$,
+is the so-called ``well-ventilated,'' or ``post-flame,'' value that was introduced in the previous section. The proposed model of CO production
+still does not contain the necessary kinetic mechanism to predict the ``post-flame'' concentration of CO without the prescription of the
+measured value of the post-flame CO yield. Rather, the proposed model includes the production of large amounts of CO in the first step of a two-step
+reaction, followed by a partial conversion to CO$_2$ if there is a sufficient amount of oxygen present.
 
-
-To describe the state of the system, the mixture fraction, $Z$, must be written as the sum of three components:
+To describe the composition of the gas species, the mixture fraction, $Z$, must now be decomposed into three components:
 \begin{eqnarray}  Z_1 &=& Y_\F    \\*[.1in]
                   Z_2 &=& \frac{W_\F}{(\hbox{x}-\nu_\C) \, W_\CO }    \;  Y_\CO \\*[.1in]
                   Z_3 &=& \frac{W_\F}{(\hbox{x}-\nu_\C) \, W_\COTWO } \;  Y_\COTWO  \end{eqnarray}
-Here, $\hbox{x}-\nu_\C$ represents the number of carbon atoms in the fuel molecule that are oxidized; that is, the carbon atoms that do
-not end up as soot.
-
+Here, $\hbox{x}-\nu_\C$ represents the number of carbon atoms in the fuel molecule that are oxidized; that is, the carbon atoms that are not converted to soot.
 The decomposition of $Z$ into three components is numerically convenient. However, the recovery of the
 individual species mass fractions requires some care.  The mass fraction of any species in the mixture,
 $Y_\alpha(Z_1,Z_2,Z_3)$, is still found via linear combinations of the mixture fraction variables:
@@ -1557,8 +1569,10 @@ $Y_\alpha(Z_1,Z_2,Z_3)$, is still found via linear combinations of the mixture f
                   Y_\COTWO &=& \frac{ \nu_\COTWO W_\COTWO}{W_\F} \; Z_3 \\*[.1in]
                   Y_\HTWOO &=& \frac{\nu_\HTWOO W_\HTWOO}{W_\F} \;  \big(Z_2+Z_3 \big) \\*[.1in]
                   Y_\CO    &=& \frac{W_\CO}{W_\F} \; \big( \nu_\CO'  \; Z_2 + \nu_\CO \; Z_3 \big) \\*[.1in]
-                  Y_s      &=& \frac{\nu_\C W_\C}{W_\F} \; \big(Z_2+Z_3\big)
+                  Y_\C     &=& \frac{\nu_\C W_\C}{W_\F} \; \big(Z_2+Z_3\big)
 \end{eqnarray}
+All of the various stoichiometric coefficients in these formulae are based on the atomic composition of the fuel molecule, {\em except}
+$\nu_\CO$ and $\nu_\C$, which are based on user-specified yields as shown in Eqs.~(\ref{CO_yield})~and~(\ref{soot_yield}).
 
 
 
