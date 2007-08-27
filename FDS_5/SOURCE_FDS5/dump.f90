@@ -1844,7 +1844,11 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NN)
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (kJ/kmol): ',ML%E(NN)/1000.
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NN)/1000.
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        N          : ',ML%N_S(NN)
+      WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NN)
+      IF (ML%TMP_THR(NN)>0._EB) THEN
+      WRITE(LU_OUTPUT,'(A,F8.2)') '        Threshold temperature (C): ',ML%TMP_THR(NN)-TMPM
+      WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T        : ',ML%N_T(NN)
+      ENDIF
    ENDDO
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
       WRITE(LU_OUTPUT,'(A)')      '     Liquid evaporation reaction'
