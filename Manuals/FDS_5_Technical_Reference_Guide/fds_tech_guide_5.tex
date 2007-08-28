@@ -110,6 +110,8 @@
 \newcommand{\CO}{{\tiny \hbox{CO}}}
 \newcommand{\F}{{\tiny \hbox{F}}}
 \newcommand{\C}{{\tiny \hbox{C}}}
+\newcommand{\Hy}{{\tiny \hbox{H}}}
+\newcommand{\So}{{\tiny \hbox{S}}}
 \newcommand{\xx}{{\tiny \hbox{x}}}
 \newcommand{\yy}{{\tiny \hbox{y}}}
 \newcommand{\zz}{{\tiny \hbox{z}}}
@@ -1413,13 +1415,19 @@ single-step mixture fraction model is described.
 
 Consider a simple, one-step reaction of fuel and oxygen:
 \be  \hbox{Fuel} +  \nu_\OTWO \, \mathrm{O_2}  \rightarrow  \nu_\COTWO \, \mathrm{CO_2} + \nu_\HTWOO \, \mathrm{H_2O} + \nu_\CO \, \mathrm{CO} +
-     \nu_\C \, \mathrm{C}  \label{stoich} \ee
-Note that throughout this section, soot is to be regarded as pure carbon, C, for the purpose of developing the combustion model. The
-stoichiometric coefficient, $\nu_\C$, represents the number of carbon atoms in the fuel that are converted to soot. It is related to the
+     \nu_\So \, \mathrm{S}  \label{stoich} \ee
+Note that throughout this section, soot is to be regarded as mixture of carbon and hydrogen with the hydrogen atomic 
+fraction given by $X_\Hy$. The
+stoichiometric coefficient, $\nu_\So$, represents the amount of fuel that is converted to soot. It is related to the
 {\em soot yield}, $y_s$, via the relation:
 \be
-   \nu_\C = \frac{W_\F}{W_\C} \; y_s  \label{soot_yield}
+   \nu_\So = \frac{W_\F}{W_\So} \; y_s  \label{soot_yield}
 \ee
+where:
+\be
+   W_\So = X_\Hy W_\Hy + (1 - X_\Hy) W_\C \label{soot_weight}
+\ee
+
 Likewise, the stoichiometric coefficient of CO, $\nu_\CO$, is related to the {\em CO yield}, $y_\CO$, via:
 \be
    \nu_\CO = \frac{W_\F}{W_\CO} \; y_\CO  \label{CO_yield}
@@ -1430,7 +1438,7 @@ compartment will be addressed in the following sections.
 The mixture fraction, $Z$, can be defined in terms of the mass fraction of fuel, $\mathrm{C_xH_yO_z}$
 and the carbon-carrying products of combustion:
 \be
-   Z = Y_\F + \frac{W_\F}{x W_\COTWO} \, Y_\COTWO + \frac{W_\F}{x W_\CO} \, Y_\CO  + \frac{W_\F}{x W_\C} \, Y_\C
+   Z = Y_\F + \frac{W_\F}{x W_\COTWO} \, Y_\COTWO + \frac{W_\F}{x W_\CO} \, Y_\CO  + \frac{W_\F}{x W_\So} \, Y_\So
 \label{Zdef} \ee
 The mixture fraction satisfies the conservation equation
 \be \rho \DoD{Z}{t} = \nabla \cdot \rho D \nabla Z \label{Zeqn} \ee
@@ -1494,9 +1502,14 @@ no soot or CO is formed, but rather that their respective production rates are p
 
 With the definition of the mixture fraction, Eq.~(\ref{Zdef}), in mind, consider a partitioning of $Z$ into the following components:
 \begin{eqnarray}  Z_1 &=& Y_\F    \\*[.1in]
-                  Z_2 &=& \frac{W_\F}{x \, W_\COTWO } \,  Y_\COTWO  + \frac{W_\F}{x \, W_\CO } \, Y_\CO  + \frac{W_\F}{x \, W_\C } \, Y_\C
+                  Z_2 &=& \frac{W_\F}{x \, W_\COTWO } \,  Y_\COTWO  + \frac{W_\F}{x \, W_\CO } \, Y_\CO  + \frac{W_\F}{x \, W_\So }  \label{Z2first} \, Y_\So
 \end{eqnarray}
-such that $Z=Z_1+Z_2$. Transport equations are required for both $Z_1$ and $Z_2$.
+such that $Z=Z_1+Z_2$. Transport equations are required for both $Z_1$ and $Z_2$.  Note that since we are using our extra
+parameter to determine extinction, that the yields of CO and soot are still fixed.  Thus we can restate
+Eq.~(\ref{Z2first}) as:
+\be
+Z_2 = \frac{W_\F}{(x-\nu_\CO-\nu_\So) \, W_\COTWO }
+\ee
 At the burner surface, $Z_1$ is assigned the mass flux of fuel,
 while the mass flux for $Z_2$ is zero. In other words, no combustion products are generated at the fuel source. Where fuel and
 oxygen co-exist, a reaction occurs if conditions are favorable in the sense shown by Fig.~\ref{plotsupp}.
@@ -1505,19 +1518,31 @@ conversion of fuel to products. The heat release rate of the fire is obtained by
 heat of combustion.
 
 Since the mixture fraction variables result from linear combinations of the species transport equations, the converse
-is also true -- that species mass fractions are linear combinations of the mixture fraction variables.
+is also true -- that species mass fractions are linear combinations of the mixture fraction variables.  We will now allow
+for a slightly more complex fuel defintion and allow the user to specify the atoms of nitrogen in the fuel and the atoms of
+other species in the fuel.  The nitrogen is assumed to form $\NTWO$ and the atoms of other species are considered inert. 
 The mass fractions of the species in the mixture, $Y_{\alpha}(Z_1,Z_2)$, are found via:
 \begin{eqnarray}  Y_\F     &=& Z_1    \\*[.1in]
-                  Y_\NTWO  &=& (1 - Z_1 - Z_2) \; Y_\NTWO^\infty   =  (1 - Z) \; Y_\NTWO^\infty    \\*[.1in]
-                  Y_\OTWO  &=& (1 - Z_1 - Z_2) \; Y_\OTWO^\infty - W_\OTWO \left[\frac{Y_\COTWO}{W_\COTWO}+\frac{1}{2}
-                                \left(\frac{Y_\CO}{W_\CO}+\frac{Y_\HTWOO}{W_\HTWOO} \right) \right]   \\*[.1in]
-                           &=& (1 - Z) \; Y_\OTWO^\infty - \frac{W_\OTWO}{W_\F}
-                                \left[\nu_\COTWO+\frac{1}{2} \left(\nu_\CO+\nu_\HTWOO \right) \right] \; Z_2   \\*[.1in]
+                  Y_\NTWO  &=& (1 - Z_1 - Z_2) \; Y_\NTWO^\infty + \frac{\nu_\NTWO W_\NTWO}{W_\F} \; Z_2   =  (1 - Z) \; Y_\NTWO^\infty + \frac{\nu_\NTWO W_\NTWO}{W_\F} \; Z_2  \\*[.1in]
+                  Y_\OTWO  &=& (1 - Z_1 - Z_2) \; Y_\OTWO^\infty - \frac{\nu_\OTWO W_\OTWO}{W_\F} \; Z_2 \\*[.1in]
                   Y_\COTWO &=& \frac{\nu_\COTWO W_\COTWO}{W_\F} \; Z_2 \\*[.1in]
                   Y_\HTWOO &=& \frac{\nu_\HTWOO W_\HTWOO}{W_\F} \; Z_2 \\*[.1in]
                   Y_\CO    &=& \frac{\nu_\CO W_\CO}{W_\F} \; Z_2  \\*[.1in]
-                  Y_\C     &=& \frac{\nu_\C W_\C}{W_\F} \; Z_2
+                  Y_\C     &=& \frac{\nu_\C W_\C}{W_\F} \; Z_2 \\*[.1in]
+                  Y_{\hbox{Other}} &=& \frac{\nu_{\hbox{Other}} W_{\hbox{Other}}}{W_\F} \; Z_2     
 \end{eqnarray}
+
+where the stoichimetry based on a fuel definition of $C_x H_y O_z N_i Other_j$ results in:
+
+\begin{eqnarray}  \nu_\CO    &=& \frac{W_\F}{W_\CO} \; y_\CO \\*[.1in]
+                  \nu_\So    &=& \frac{W_\F}{W_\So} \; y_s \\*[.1in]
+                  \nu_\COTWO &=& \hbox{x} - \nu_\CO - (1-X_\Hy) \nu_\So \\*[.in]
+                  \nu_\HTWOO &=& \frac{\hbox{y}}{2}- X_\Hy \nu_\So\\*[.in]
+                  \nu_\OTWO  &=& \nu_\COTWO + \frac{\nu_\CO+nu_\HTWOO}{2}\\*[.in]
+                  \nu_\NTWO  &=& \frac{\hbox{i}}{2}\\*[.in]
+                  \nu_{\hbox{OTher}} &=& \hbox{j}
+\end{eqnarray}
+
 It is important to note that the definitions of $Z_1$ and $Z_2$, unlike in the single parameter model,
 do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
 
@@ -1538,11 +1563,11 @@ production of CO and its eventual oxidation at the flame envelope or within a ho
 an additional reaction is now needed:
 \begin{eqnarray}
 \hbox{Fuel} +  \nu_\OTWO' \mathrm{O_2}  &\rightarrow&  \nu_\HTWOO \mathrm{H_2O} + (\nu_\CO'+ \nu_\CO) \, \mathrm{CO} +
-     \nu_\C \, \mathrm{C}  \\*[.1in]
+     \nu_\So \, \mathrm{So}  \\*[.1in]
 \nu_\CO' \; \Big[ \mathrm{CO} + \ha \mathrm{O_2}  &\rightarrow&  \mathrm{CO_2}  \Big]
 \label{3reac} \end{eqnarray}
 The brackets around the second reaction are there merely to emphasize that the sum of the two reactions equal Eq.~(\ref{stoich}).
-There are two stoichiometric coefficients for CO -- the first, $\nu_\CO'=\hbox{x}-\nu_\C-\nu_\CO$,
+There are two stoichiometric coefficients for CO -- the first, $\nu_\CO'=\hbox{x}-(1-X_\Hy) \nu_\So-\nu_\CO$,
 represents CO that is produced in the first
 step of the reaction that can potentially be converted to CO$_2$ assuming the conditions are favorable. $\nu_\CO'$ is equivalent to $\nu_\COTWO$ in
 Eq.~(\ref{stoich}). The second coefficient, $\nu_\CO$,
@@ -1553,9 +1578,9 @@ reaction, followed by a partial conversion to CO$_2$ if there is a sufficient am
 
 To describe the composition of the gas species, the mixture fraction, $Z$, must now be decomposed into three components:
 \begin{eqnarray}  Z_1 &=& Y_\F    \\*[.1in]
-                  Z_2 &=& \frac{W_\F}{(\hbox{x}-\nu_\C) \, W_\CO }    \;  Y_\CO \\*[.1in]
-                  Z_3 &=& \frac{W_\F}{(\hbox{x}-\nu_\C) \, W_\COTWO } \;  Y_\COTWO  \end{eqnarray}
-Here, $\hbox{x}-\nu_\C$ represents the number of carbon atoms in the fuel molecule that are oxidized; that is, the carbon atoms that are not converted to soot.
+                  Z_2 &=& \frac{W_\F}{(\hbox{x}-(1-X_\Hy) \nu_\So) \, W_\CO }    \;  Y_\CO \\*[.1in]
+                  Z_3 &=& \frac{W_\F}{(\hbox{x}-(1-X_\Hy) \nu_\So) \, W_\COTWO } \;  Y_\COTWO  \end{eqnarray}
+Here, $\hbox{x}-(1-X_\Hy) \nu_\So$ represents the number of carbon atoms in the fuel molecule that are oxidized; that is, the carbon atoms that are not converted to soot.
 The decomposition of $Z$ into three components is numerically convenient. However, the recovery of the
 individual species mass fractions requires some care.  The mass fraction of any species in the mixture,
 $Y_\alpha(Z_1,Z_2,Z_3)$, is still found via linear combinations of the mixture fraction variables:
