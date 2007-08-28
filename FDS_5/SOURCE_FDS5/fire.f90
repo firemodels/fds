@@ -44,7 +44,7 @@ REAL(EB) :: YFU0,A,ETRM,YCOMIN,YO2MIN,YFUMIN,YO2W,YO20,YCO0,Y_SUM_W,&
             Z_F,Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,&
             F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,Z_2,RHOX, &
             X_FU,X_O,X_FU_0,X_O_0,X_FU_S,X_O_S,X_FU_N,X_O_N,X_O_MIN,X_FU_MIN,COTOO2, &
-            Y_F_MAX,TMP_F_MIN,Y_F_CORR
+            Y_F_MAX,TMP_F_MIN,Y_F_CORR,Z2_MIN
 INTEGER :: NODETS,N,I,J,K,II,JJ,KK,SCAN_DISTANCE,IC,IW,IWA(-3:3)
 !LOGICAL :: BURN
 REAL(EB), POINTER, DIMENSION(:,:,:) :: YO2Z,QT,R_SUM_DILUENTS
@@ -464,7 +464,7 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
                      TMP_F_MIN = TMP_F(IW)
                   ENDIF
                ENDIF
-            ENDIF                        
+            ENDIF       
             !Z direction
             IF (IWA(-3)==0) THEN
                IF (YO2Z(I,J,K-1)>Y_O2_MAX) THEN
@@ -571,6 +571,9 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             YO20  = YO2Z(I,J,K)
             YCO0  = MAX(0._EB,YY(I,J,K,I_PROG_CO))*RN%Y_F_INLET / F_TO_CO 
             IF (YCO0<=YCOMIN .OR. YO20<=YO2MIN) CYCLE ILOOPY1
+            !Get max conversion allowed
+            Z2_MIN = REACTION(2)%NU_CO / REACTION(1)%NU_CO * (YY(I,J,K,I_PROG_CO)+YY(I,J,K,I_PROG_F))
+            IF (YY(I,J,K,I_PROG_CO) < Z2_MIN) CYCLE ILOOPY1
             !Get max CO2
             IF((TMP(I,J,K) < 500._EB .AND. Q(I,J,K)==0._EB) .OR. Q(I,J,K)>=Q_UPPER) CYCLE ILOOPY1
             IF (Q(I,J,K)/=0._EB) THEN
@@ -613,10 +616,14 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             ENDIF
             Q_OLD = Q(I,J,K)
             Q_NEW = MIN(Q_UPPER-Q_OLD,DYCO*RHO(I,J,K)*HFAC_CO)
-            DYCO = Q_NEW/(RHO(I,J,K)*HFAC_CO*RN%Y_F_INLET)
+            DYCO = Q_NEW/(RHO(I,J,K)*HFAC_CO*RN%Y_F_INLET) * F_TO_CO
+            IF (YY(I,J,K,I_PROG_CO) - DYCO < Z2_MIN) THEN
+               Q_NEW = (Z2_MIN - YY(I,J,K,I_PROG_CO)) / DYCO
+               DYCO = Z2_MIN - YY(I,J,K,I_PROG_CO)
+            ENDIF
             Q(I,J,K) = Q_OLD + Q_NEW
-            YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) - DYCO * F_TO_CO
-            YY(I,J,K,I_PROG_F) = YY(I,J,K,I_PROG_F) + DYCO * F_TO_CO
+            YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) - DYCO
+            YY(I,J,K,I_PROG_F) = YY(I,J,K,I_PROG_F) + DYCO
          ENDDO ILOOPY1
       ENDDO
    ENDDO
