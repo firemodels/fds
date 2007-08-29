@@ -246,7 +246,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 28, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 29, 2007)}
 
 \vspace{.5in}
 
@@ -5305,7 +5305,7 @@ parameters have been specified via other namelist groups in past versions.
 \begin{description}
 \item[{\ct NFRAMES}] Number of output dumps per calculation. The default is 1000.
 Device data, slice data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and
-control function data are saved every {\ct T\_END/NFRAMES} unless otherwise specified
+control function data are saved every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified
 using {\ct DT\_DEVC}, {\ct DT\_SLCF}, {\ct DT\_PART}, {\ct DT\_ISOF}, {\ct DT\_BNDF}, {\ct DT\_PROF},
 or {\ct DT\_CTRL} Note that {\ct DT\_SLCF} controls Smoke3D output. {\ct DT\_HRR} controls the
 output of heat release rate and associated quantities.
@@ -5314,6 +5314,8 @@ of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_M
 \item[{\ct MAXIMUM\_DROPLETS}] Maximum number of Lagrangian particles that can be included on any
 mesh at any given time. (Default 500000)
 \item[{\ct SMOKE3D}] If {\ct .FALSE.}, do not produce an animation of the smoke and fire. It is {\ct .TRUE.} by default.
+\item[{\ct FLUSH\_FILE\_BUFFERS}] By default, every 10 time steps FDS purges the output file buffers and forces the data to be written out into the respective output files. To stop
+this from happening, set this parameter to {\ct .FALSE.}
 \end{description}
 
 
@@ -6103,6 +6105,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ \hline \hline
 {\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
 {\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES} \\ \hline
+%{\ct DEBUG}                     & Logical      & General purpose diagnostic flag   &           & {\ct .FALSE.}                      \\ \hline
 {\ct DT\_CTRL}                  & Real         & Control status dump interval      &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
 {\ct DT\_DEVC}                  & Real         & Device output dump interval       &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
 {\ct DT\_HRR}                   & Real         & Heat release dump interval        &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
@@ -6113,12 +6116,15 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct DT\_PROF}                  & Real         & Profile dump interval             &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
 {\ct DT\_RESTART}               & Real         & Restart core dump interval        &  s        & 1000000.                          \\ \hline
 {\ct DT\_SLCF}                  & Real         & Slice dump interval               &  s        & $\Delta t${\ct /NFRAMES}    \\ \hline
+{\ct FLUSH\_FILE\_BUFFERS}      & Logical      & Periodically empty file buffers   &           & {\ct .TRUE.}                      \\ \hline
 {\ct MASS\_FILE}                & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                     \\ \hline
 {\ct MAXIMUM\_DROPLETS}         & Integer      & Max particles per mesh            &           & 500000                            \\ \hline
 {\ct NFRAMES}                   & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
-{\ct PLOT3D\_QUANTITY(5)}       & Char.~Quint  & Names of PLOT3D Quantities        &           &                                   \\ \hline
-{\ct RENDER\_FILE}              & Character    & Name of render file from dxf2fds  &           &                                   \\ \hline
+{\ct PLOT3D\_QUANTITY(5)}       & Char.~Quint  & Names of PLOT3D Quantities        &           & See Section~\ref{info:PL3D}       \\ \hline
+%{\ct RENDER\_FILE}              & Character    & Name of render file from dxf2fds  &           &                                   \\ \hline
 {\ct SMOKE3D}                   & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                      \\ \hline
+%{\ct SMOKE3D\_COMPRESSION}      & Character    & Type of compression for S3D file  &           & {\ct 'RLE'}                      \\ \hline
+%{\ct TIMING}                    & Logical      & General purpose timing flag       &           & {\ct .FALSE.}                      \\ \hline
 {\ct WRITE\_XYZ}                & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}                     \\ \hline
 \end{tabular*}
 \normalsize
@@ -6127,9 +6133,6 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \noindent
 $\Delta t$={\ct T\_END-T\_BEGIN}
 
-%NAMELIST /DUMP/ RENDER_FILE,SMOKE3D,SMOKE3D_COMPRESSION,FLUSH_FILE_BUFFERS,MASS_FILE,
-%                DT_CTRL,DT_PART,DT_MASS,DT_HRR,DT_DEVC,DT_PROF,DT_SLCF,DT_PL3D,DT_ISOF,DT_BNDF,NFRAMES,
-%                DT_RESTART,DEBUG,TIMING,COLUMN_DUMP_LIMIT,MAXIMUM_DROPLETS,WRITE_XYZ,PLOT3D_QUANTITY
 
 \vspace{\baselineskip}
 
