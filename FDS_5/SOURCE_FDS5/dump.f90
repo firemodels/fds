@@ -288,7 +288,7 @@ MESH_LOOP: DO NM=1,NMESHES
    ! Slice Files
 
    DO N=1,M%N_SLCF
-      LU_SLCF(N,NM) = 3000+100*NM + N
+      LU_SLCF(N,NM) = 3000 + N_SLCF_MAX*(NM-1) + N
       IF (NMESHES>1) THEN
          IF (M%N_SLCF <100) CFORM = '(A,2(A,I2.2),A)'
          IF (M%N_SLCF>=100) CFORM = '(A,A,I2.2,A,I3.3,A)'
@@ -303,7 +303,7 @@ MESH_LOOP: DO NM=1,NMESHES
    ! Boundary Files
 
    DO N=1,N_BNDF
-      LU_BNDF(N,NM) = 1000+100*NM + N
+      LU_BNDF(N,NM) = 1000 + N_BNDF*(NM-1) + N
       IF (NMESHES>1) THEN
          WRITE(FN_BNDF(N,NM),'(A,A,I2.2,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf'
       ELSE
