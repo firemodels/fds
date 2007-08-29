@@ -1415,8 +1415,8 @@ single-step mixture fraction model is described.
 \subsubsection{A Single-Step, Instantaneous Reaction}
 
 Consider a simple, one-step reaction of fuel and oxygen:
-\be  \mathrm{C_xH_yO_zN_aM} +  \nu_\OTWO \, \mathrm{O_2}  \rightarrow  \nu_\COTWO \, \mathrm{CO_2} + \nu_\HTWOO \, \mathrm{H_2O} + \nu_\CO \, \mathrm{CO} +
-     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2} + \mathrm{M}  \label{stoich} \ee
+\be  \mathrm{C_xH_yO_zN_aM_b} +  \nu_\OTWO \, \mathrm{O_2}  \rightarrow  \nu_\COTWO \, \mathrm{CO_2} + \nu_\HTWOO \, \mathrm{H_2O} + \nu_\CO \, \mathrm{CO} +
+     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2} + \nu_\M \mathrm{M}  \label{stoich} \ee
 Note that the nitrogen in the fuel molecule is assumed to form $\mathrm{N_2}$ only. All other atoms in the fuel molecule are combined into
 species $\mathrm{M}$. Soot is assumed to be a mixture of carbon and hydrogen with the hydrogen atomic
 fraction given by $X_\Hy$. The stoichiometric coefficient, $\nu_\So$, represents the amount of fuel that is converted to soot. It is related to the
@@ -1530,7 +1530,7 @@ The mass fractions of the species in the mixture, $Y_{\alpha}(Z_1,Z_2)$, are fou
                   Y_\HTWOO &=& \frac{\nu_\HTWOO W_\HTWOO}{W_\F} \; Y_\F^I \; Z_2 \\*[.1in]
                   Y_\CO    &=& \frac{\nu_\CO W_\CO}{W_\F} \; Y_\F^I \; Z_2  \\*[.1in]
                   Y_\So    &=& \frac{\nu_\So W_\So}{W_\F} \; Y_\F^I \; Z_2 \\*[.1in]
-                  Y_\M     &=& \frac{W_\M}{W_\F} \; Y_\F^I \; Z_2
+                  Y_\M     &=& \frac{\nu_\M W_\M}{W_\F} \; Y_\F^I \; Z_2
 \end{eqnarray} }
 
 \noindent
@@ -1539,7 +1539,8 @@ The stoichiometric coefficients are defined:
 \parbox{2.5in}{
 \begin{eqnarray*}  \nu_\NTWO  &=& \frac{\hbox{a}}{2}\\*[.1in]
                   \nu_\OTWO  &=& \nu_\COTWO + \frac{\nu_\CO+\nu_\HTWOO}{2}\\*[.1in]
-                  \nu_\COTWO &=& \hbox{x} - \nu_\CO - (1-X_\Hy) \nu_\So     \end{eqnarray*} }
+                  \nu_\COTWO &=& \hbox{x} - \nu_\CO - (1-X_\Hy) \nu_\So  \\*[.1in]
+                  \nu_\M     &=& \hbox{b}  \end{eqnarray*} }
 \hfill \parbox{3.5in}{\begin{eqnarray}
                   \nu_\HTWOO &=& \frac{\hbox{y}}{2}- X_\Hy \nu_\So\\*[.1in]
                   \nu_\CO    &=& \frac{W_\F}{W_\CO} \; y_\CO \\*[.1in]
@@ -1564,8 +1565,8 @@ than would otherwise be predicted with a single set of fixed yields that are bas
 production of CO and its eventual oxidation at the flame envelope or within a hot upper layer,
 an additional reaction is now needed:
 \begin{eqnarray}
-\mathrm{C_xH_yO_zN_aM} +  \nu_\OTWO' \mathrm{O_2}  &\rightarrow&  \nu_\HTWOO \mathrm{H_2O} + (\nu_\CO'+ \nu_\CO) \, \mathrm{CO} +
-     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2} + \mathrm{M}  \\*[.1in]
+\mathrm{C_xH_yO_zN_aM_b} +  \nu_\OTWO' \mathrm{O_2}  &\rightarrow&  \nu_\HTWOO \mathrm{H_2O} + (\nu_\CO'+ \nu_\CO) \, \mathrm{CO} +
+     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2} + \nu_\M \mathrm{M}  \\*[.1in]
 \nu_\CO' \; \Big[ \mathrm{CO} + \ha \mathrm{O_2}  &\rightarrow&  \mathrm{CO_2}  \Big]
 \label{3reac} \end{eqnarray}
 The brackets around the second reaction are there merely to emphasize that the sum of the two reactions equal Eq.~(\ref{stoich}).
@@ -1596,7 +1597,7 @@ $Y_\alpha(Z_1,Z_2,Z_3)$, is still found via linear combinations of the mixture f
                   Y_\HTWOO &=& \frac{\nu_\HTWOO W_\HTWOO}{W_\F} \; Y_\F^I \; (Z_2 + Z_3) \\*[.1in]
                   Y_\CO    &=& \frac{(\nu_\CO+\nu_\CO') W_\COTWO}{W_\F} \; Y_\F^I \; Z_2 \\*[.1in]
                   Y_\So    &=& \frac{\nu_\So W_\So}{W_\F} \; Y_\F^I \; (Z_2 + Z_3) \\*[.1in]
-                  Y_\M     &=& \frac{W_\M}{W_\F} \; Y_\F^I \; (Z_2 + Z_3)
+                  Y_\M     &=& \frac{\nu_\M W_\M}{W_\F} \; Y_\F^I \; (Z_2 + Z_3)
 \end{eqnarray} }
 The stoichiometric coefficients are defined:
 
@@ -1604,7 +1605,8 @@ The stoichiometric coefficients are defined:
 \begin{eqnarray*} \nu_\NTWO  &=& \frac{\hbox{a}}{2}\\*[.1in]
                   \nu_\OTWO' &=& \frac{\nu_\CO'+\nu_\HTWOO}{2}\\*[.1in]
                   \nu_\OTWO  &=& \nu_\COTWO + \frac{\nu_\CO+\nu_\HTWOO}{2}\\*[.1in]
-                  \nu_\COTWO &=& \hbox{x} - \nu_\CO - (1-X_\Hy) \nu_\So  \end{eqnarray*} }
+                  \nu_\COTWO &=& \hbox{x} - \nu_\CO - (1-X_\Hy) \nu_\So \\*[.1in]
+                  \nu_\M     &=& \hbox{b} \end{eqnarray*} }
 \hfill \parbox{3.5in}{\begin{eqnarray}
                   \nu_\HTWOO &=& \frac{\hbox{y}}{2}- X_\Hy \nu_\So\\*[.1in]
                   \nu_\CO'   &=& x - \nu_\CO - (1-X_\Hy) \nu_\So \\*[.1in]
