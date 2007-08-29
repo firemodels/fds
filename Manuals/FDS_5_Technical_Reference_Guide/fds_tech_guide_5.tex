@@ -1417,8 +1417,9 @@ single-step mixture fraction model is described.
 Consider a simple, one-step reaction of fuel and oxygen:
 \be  \mathrm{C_xH_yO_zN_aM_b} +  \nu_\OTWO \, \mathrm{O_2}  \rightarrow  \nu_\COTWO \, \mathrm{CO_2} + \nu_\HTWOO \, \mathrm{H_2O} + \nu_\CO \, \mathrm{CO} +
      \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2} + \nu_\M \mathrm{M}  \label{stoich} \ee
-Note that the nitrogen in the fuel molecule is assumed to form $\mathrm{N_2}$ only. All other atoms in the fuel molecule are combined into
-species $\mathrm{M}$. Soot is assumed to be a mixture of carbon and hydrogen with the hydrogen atomic
+Note that the nitrogen in the fuel molecule is assumed to form $\mathrm{N_2}$ only. Addition product species can be 
+specified as some number of moles of an average molecular weight species $\mathrm{M}$.  These products are presumed to 
+not consume oxygen during their formation.  Soot is assumed to be a mixture of carbon and hydrogen with the hydrogen atomic
 fraction given by $X_\Hy$. The stoichiometric coefficient, $\nu_\So$, represents the amount of fuel that is converted to soot. It is related to the
 {\em soot yield}, $y_\So$, via the relation:
 \be
