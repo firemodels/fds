@@ -3395,9 +3395,9 @@ typedef struct {
         }
       }
       if(chidfilebase==NULL){
-        char *chidptr;
+        char *chidptr=NULL;
 
-        chidptr=get_chid(fds_filein);
+        if(fds_filein!=NULL)chidptr=get_chid(fds_filein);
         if(chidptr!=NULL){
           NewMemory((void **)&chidfilebase,(unsigned int)(strlen(chidptr)+1));
           STRCPY(chidfilebase,chidptr);
