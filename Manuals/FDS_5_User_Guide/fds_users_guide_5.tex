@@ -1738,6 +1738,8 @@ guide.
 \begin{description}
 \item[{\ct DNS}] A logical parameter that, if {\ct .TRUE.}, directs FDS to perform a Direct Numerical Simulation, as opposed to the default Large Eddy Simulation (LES).
 \item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
+\item[{\ct HUMIDITY}] Relative humidity, in units of \%. This need only be specified if there is a source of water in the simulation other than the fire
+itself. Otherwise, water vapor is not explicitly tracked. Default 40~\%.
 \item[{\ct ISOTHERMAL}] A logical parameter that indicates that the calculation does not involve any changes in temperature or
 radiation heat transfer, thus reducing the number of equations that must be solved, and simplifying those that are. Automatically sets {\ct RADIATION} to
 {\ct .FALSE.}
@@ -2056,7 +2058,8 @@ thin obstruction because whatever is pushed from one side is necessarily pulled 
 For full functionality, the obstruction should be specified to
 be at least one mesh cell thick. Thin sheet obstructions
 work fine as flow barriers, but other features are fragile and should be used with
-caution.
+caution. To prevent FDS from allowing thin sheet obstructions, set {\ct THICKEN\_OBSTRUCTIONS=.TRUE.} on the
+{\ct MISC} line, or {\ct THICKEN=.TRUE.} on each {\ct OBST} line for which the thin sheet assumption is not allowed.
 \item Unlike earlier versions of FDS, obstructions that are
 too small relative to the underlying numerical mesh are rejected.
 Be careful when testing cases on coarse meshes.
@@ -6390,7 +6393,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution             &               & 7                 \\ \hline
 {\ct PR}                        & Real          & Prandtl number (LES only)                     &               & 0.5               \\ \hline
 {\ct P\_INF}                    & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
-{\ct POROUS\_FLOOR}             & Logical       & Droplets disappear at floor                   &               & {\ct .TRUE.}      \\ \hline
+{\ct POROUS\_FLOOR}             & Logical       & See Section~\ref{info:sprinklers}             &               & {\ct .TRUE.}      \\ \hline
 {\ct RADIATION}                 & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
 {\ct RAMP\_GX}                  & Character     & Time function, $x$ comp. of gravity           &               &                   \\ \hline
 {\ct RAMP\_GY}                  & Character     & Time function, $y$ comp. of gravity           &               &                   \\ \hline
@@ -6404,6 +6407,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SUPPRESSION}               & Logical       & See Section~\ref{info:combustion}             &               & {\ct .TRUE.}      \\ \hline
 {\ct SURF\_DEFAULT}             & Character     & Default SURFace type                          &               & {\ct 'INERT'}     \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & Origin of Texture Map                         & m             &                   \\ \hline
+{\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST}                   &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
 {\ct U0,V0,W0}                  & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
 {\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
@@ -6413,9 +6417,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{table}
 %NAMELIST /MISC/
 %                C_FORCED,C_VERTICAL,C_HORIZONTAL,H_FIXED,
-%                GAMMA,HUMIDITY,
-%                POROUS_FLOOR,TEXTURE_ORIGIN
-%                THICKEN_OBSTRUCTIONS,
+%                GAMMA,TEXTURE_ORIGIN
 %                PRESSURE_CORRECTION,CHECK_POISSON
 
 \vspace{\baselineskip}
