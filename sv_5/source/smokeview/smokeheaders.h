@@ -84,6 +84,7 @@ void printhrr(void);
 void readhrr(int flag, int *errorcode);
 void drawhrr(void);
 #endif
+EXTERNCPP char *get_chid(char *file);
 EXTERNCPP void setColorbarClipPlanes(int flag);
 EXTERNCPP void addcolorbar(int icolorbar);
 EXTERNCPP void ReloadMenu(int value);
