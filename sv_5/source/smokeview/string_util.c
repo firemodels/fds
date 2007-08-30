@@ -274,19 +274,21 @@ char *get_chid(char *file){
   char *chidptr,*c;
   char buffer[1024];
   unsigned int i;
+  int found1st, found2nd;
 
+  if(file==NULL)return NULL;
   stream=fopen(file,"r");
   if(stream==NULL)return NULL;
 
   while(!feof(stream)){
-    int found1st=0, found2nd=0;
+    found1st=0;
+    found2nd=0;
 
     if(fgets(buffer,255,stream)==NULL)break;
     chidptr=strstr(buffer,"CHID");
-    if(chidptr==NULL){
-      fclose(stream);
-      return NULL;
-    }
+    if(chidptr==NULL)continue;
+
+    chidptr+=5;
     for(i=0;i<strlen(chidptr);i++){
       c=chidptr+i;
       if(*c=='\''){
@@ -295,24 +297,19 @@ char *get_chid(char *file){
         break;
       }
     }
-    if(found1st==0){
-      fclose(stream);
-      return NULL;
-    }
+    if(found1st==0)break;
+
     for(i=0;i<strlen(chidptr);i++){
       c=chidptr+i;
       if(*c=='\''){
         found2nd=1;
         *c=0;
-        fclose(stream);
-        return chidptr;
+        break;
       }
     }
-    if(found2nd==0){
-      fclose(stream);
-      return NULL;
-    }
+    if(found2nd==0)break;
   }
   fclose(stream);
-  return NULL;
+  if(found1st==0||found2nd==0)chidptr=NULL;
+  return chidptr;
 }
