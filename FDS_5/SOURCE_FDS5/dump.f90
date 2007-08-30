@@ -288,7 +288,7 @@ MESH_LOOP: DO NM=1,NMESHES
    ! Slice Files
 
    DO N=1,M%N_SLCF
-      LU_SLCF(N,NM) = 3000 + N_SLCF_MAX*(NM-1) + N
+      LU_SLCF(N,NM) = 3000 + N_SLCF_MAX*(NM-1)  + N
       IF (NMESHES>1) THEN
          IF (M%N_SLCF <100) CFORM = '(A,2(A,I2.2),A)'
          IF (M%N_SLCF>=100) CFORM = '(A,A,I2.2,A,I3.3,A)'
@@ -1712,10 +1712,10 @@ SPEC_LOOP: DO N=0,N_SPECIES
       WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',SS%MU(177)
    ENDIF
    IF (DNS .AND. SS%MODE==MIXTURE_FRACTION_SPECIES) THEN
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Viscosity (kg/m/s)   Ambient: ',SS%MU_MF(10,NINT(0.1_EB*TMPA))
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T= 500 C: ',SS%MU_MF(10,77)
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1000 C: ',SS%MU_MF(10,127)
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1500 C: ',SS%MU_MF(10,177)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Viscosity (kg/m/s)   Ambient: ',SS%MU_MF2(1,NINT(0.1_EB*TMPA))
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T= 500 C: ',SS%MU_MF2(1,77)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1000 C: ',SS%MU_MF2(1,127)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1500 C: ',SS%MU_MF2(1,177)
    ENDIF
    IF (.NOT.ISOTHERMAL .AND. DNS .AND. SS%MODE==GAS_SPECIES) THEN
       WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Therm. Cond. (W/m/K) Ambient: ',SS%K(NINT(0.1_EB*TMPA))
@@ -1724,10 +1724,10 @@ SPEC_LOOP: DO N=0,N_SPECIES
       WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',SS%K(177)
    ENDIF
    IF (.NOT.ISOTHERMAL .AND. DNS .AND. SS%MODE==MIXTURE_FRACTION_SPECIES) THEN
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Therm. Cond. (W/m/K) Ambient: ',SS%K_MF(10,NINT(0.1_EB*TMPA))
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T= 500 C: ',SS%K_MF(10,77)
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1000 C: ',SS%K_MF(10,127)
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1500 C: ',SS%K_MF(10,177)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Therm. Cond. (W/m/K) Ambient: ',SS%K_MF2(1,NINT(0.1_EB*TMPA))
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T= 500 C: ',SS%K_MF2(1,77)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1000 C: ',SS%K_MF2(1,127)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1500 C: ',SS%K_MF2(1,177)
    ENDIF
    IF (.NOT.ISOTHERMAL .AND. DNS .AND. SS%MODE==GAS_SPECIES) THEN
       WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',SS%CP(NINT(0.1_EB*TMPA))
@@ -1736,10 +1736,10 @@ SPEC_LOOP: DO N=0,N_SPECIES
       WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',SS%CP(177)
    ENDIF
    IF (.NOT.ISOTHERMAL .AND. DNS .AND. SS%MODE==MIXTURE_FRACTION_SPECIES) THEN
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',SS%CP_MF(10,NINT(0.1_EB*TMPA))
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T= 500 C: ',SS%CP_MF(10,77)
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1000 C: ',SS%CP_MF(10,127)
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1500 C: ',SS%CP_MF(10,177)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',SS%CP_MF2(1,NINT(0.1_EB*TMPA))
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T= 500 C: ',SS%CP_MF2(1,77)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1000 C: ',SS%CP_MF2(1,127)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1500 C: ',SS%CP_MF2(1,177)
    ENDIF
    IF (N>0 .AND. DNS .AND. SS%MODE==GAS_SPECIES) THEN
       WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Diff. Coeff. (m^2/s) Ambient: ',SS%D(NINT(0.1_EB*TMPA))
@@ -1748,10 +1748,10 @@ SPEC_LOOP: DO N=0,N_SPECIES
       WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',SS%D(177)
    ENDIF
    IF (N>0 .AND. DNS .AND. SS%MODE==MIXTURE_FRACTION_SPECIES) THEN
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Diff. Coeff. (m^2/s) Ambient: ',SS%D_MF(10,NINT(0.1_EB*TMPA))
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T= 500 C: ',SS%D_MF(10,77)
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1000 C: ',SS%D_MF(10,127)
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1500 C: ',SS%D_MF(10,177)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Diff. Coeff. (m^2/s) Ambient: ',SS%D_MF2(1,NINT(0.1_EB*TMPA))
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T= 500 C: ',SS%D_MF2(1,77)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1000 C: ',SS%D_MF2(1,127)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                Z=0.1, T=1500 C: ',SS%D_MF2(1,177)
    ENDIF
 ENDDO SPEC_LOOP
  
@@ -2830,7 +2830,6 @@ QUANTITY_LOOP: DO IQ=1,NQT
    ENDIF
  
    ! Determine what cells need to be evaluated to form cell-corner averages
-   
    II1 = I1
    II2 = I2+1
    JJ1 = J1
@@ -3077,7 +3076,7 @@ REAL(EB) :: FLOW,HMFAC,F1,F2,H_TC,SRAD,TMP_TC,MU_AIR,RE_D,K_AIR,NUSSELT,NU_FAC,P
             Z_1,Z_2,Z_3,VELSR,WATER_VOL_FRAC,RHS,Y_E,DT_C,DT_E,T_RATIO,Y_E_LAG
 REAL(FB) :: KAPUP,TMPUP,TMPLOW,ZINT
 INTEGER :: ITER,INDX,N,I,J,K,NN,IL,III,JJJ,KKK
- 
+
 SELECT CASE(IND)
    CASE DEFAULT  ! SMOKE/WATER
       GAS_PHASE_OUTPUT = 0._EB
