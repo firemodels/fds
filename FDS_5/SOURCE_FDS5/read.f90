@@ -3246,9 +3246,7 @@ RAMP_MF                 = 'null'
 RAMP_Q                  = 'null'
 RAMP_V                  = 'null'
 RAMP_T                  = 'null'
-RGB(1)                  = 255 
-RGB(2)                  = 235
-RGB(3)                  = 129
+RGB                     = -1
 SHRINK                  = .TRUE.
 IF (LES) SLIP_FACTOR    =  0.5_EB    ! Half slip
 IF (DNS) SLIP_FACTOR    = -1.0_EB    ! No slip
@@ -3914,9 +3912,7 @@ MESH_LOOP: DO NM=1,NMESHES
       SURF_ID6 = 'null'
       COLOR    = 'null'
       MESH_ID     = 'null'
-      RGB(1)      = 255 
-      RGB(2)      = 235
-      RGB(3)      = 129
+      RGB         = -1
       TRANSPARENCY=  1._EB
       BNDF_FACE   = BNDF_DEFAULT
       BNDF_OBST   = BNDF_DEFAULT
@@ -4118,6 +4114,9 @@ MESH_LOOP: DO NM=1,NMESHES
          CASE ('null')
             IF (ANY (RGB<0)) THEN
                OB%BCI=-1
+               RGB(1)   = 255
+               RGB(2)   = 235
+               RGB(3)   = 129   
             ELSE
                OB%BCI=-3
             ENDIF
@@ -4413,9 +4412,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
    CTRL_ID  = 'null'
    MESH_ID  = 'null'
    COLOR    = 'null'
-   RGB(1)   = 255
-   RGB(2)   = 235
-   RGB(3)   = 129   
+   RGB      = -1
    TRANSPARENCY  = 1._EB
    EVACUATION = .FALSE.
  
@@ -4629,6 +4626,9 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
                CASE ('null')
                   IF (ANY (RGB<0)) THEN
                      OB%BCI=-1
+                     RGB(1)   = 255
+                     RGB(2)   = 235
+                     RGB(3)   = 129   
                   ELSE
                      OB%BCI=-3
                   ENDIF
@@ -4724,9 +4724,7 @@ MESH_LOOP: DO NM=1,NMESHES
       SURF_ID = 'null'
       COLOR   = 'null'
       MESH_ID = 'null'
-      RGB(1)      = 255 
-      RGB(2)      = 235
-      RGB(3)      = 129
+      RGB     =-1
       TRANSPARENCY = 1._EB
       XYZ     = -999._EB
       SPREAD_RATE = 0.05_EB
