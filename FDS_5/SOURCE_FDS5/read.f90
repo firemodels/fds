@@ -1078,7 +1078,7 @@ NAMELIST /DUMP/ RENDER_FILE,SMOKE3D,SMOKE3D_COMPRESSION,FLUSH_FILE_BUFFERS,MASS_
 RENDER_FILE          = 'null'
 NFRAMES              = 1000 
 SMOKE3D              = .TRUE.
-IF (TWO_D .OR. N_REACTIONS==0 .OR. SOLID_PHASE_ONLY .OR. .NOT.MIXTURE_FRACTION) SMOKE3D = .FALSE.
+IF (TWO_D .OR. N_REACTIONS==0 .OR. SOLID_PHASE_ONLY .OR. .NOT. MIXTURE_FRACTION) SMOKE3D = .FALSE.
 SMOKE3D_COMPRESSION  = 'RLE'
 DEBUG                = .FALSE.
 TIMING               = .FALSE.
@@ -1738,14 +1738,6 @@ SPECIES_LOOP: DO N=0,N_SPECIES
       ENDIF
       SELECT CASE (SPECIES(N)%MODE)
          CASE (MIXTURE_FRACTION_SPECIES)
-            Z_LOOP: DO I=0,100
-               IYY = 100*I
-               SS%CP_MF(I,J) = ( SS%Y_MF(IYY,FUEL_INDEX)*CP_F  + SS%Y_MF(IYY,O2_INDEX)*CP_O2  + &
-                                (SS%Y_MF(IYY,N2_INDEX)         + SS%Y_MF(IYY,OTHER_INDEX))*CP_N2  +  &
-                                 SS%Y_MF(IYY,H2O_INDEX)*CP_H2O + SS%Y_MF(IYY,CO2_INDEX)*CP_CO2 +  &
-                                 SS%Y_MF(IYY,CO_INDEX)*CP_CO   + SS%Y_MF(IYY,H2_INDEX)*CP_H2)*1000._EB
-               SS%RCP_MF(I,J) = 1._EB/SS%CP_MF(I,J)
-            ENDDO Z_LOOP
             SS%CP_MF2(FUEL_INDEX,J)  = CP_F*1000._EB
             SS%CP_MF2(O2_INDEX,J)    = CP_O2*1000._EB
             SS%CP_MF2(N2_INDEX,J)    = CP_N2*1000._EB
@@ -1867,9 +1859,9 @@ SPECIES_LOOP_2: DO N=0,N_SPECIES
       STATE_SPECIES(7) = 'HYDROGEN'
       STATE_SPECIES(8) = 'CARBON MONOXIDE'
       STATE_SPECIES(9) = 'NITROGEN'
-      SS%D_MF  = 0._EB
-      SS%MU_MF = 0._EB
-      SS%K_MF  = 0._EB
+      SS%D_MF2  = 0._EB
+      SS%MU_MF2 = 0._EB
+      SS%K_MF2  = 0._EB
       SUB_SPECIES_LOOP: DO NN=1,9
          SIG_N = -1._EB
          EPSK_N = -1._EB 
@@ -1880,12 +1872,6 @@ SPECIES_LOOP_2: DO N=0,N_SPECIES
             TSTAR = ITMP*10/EPSK_N
             OMEGA = 1.16145_EB*TSTAR**(-0.14874_EB) + 0.52487_EB*EXP(-0.77320_EB*TSTAR) + 2.16178_EB*EXP(-2.43787_EB*TSTAR)
             MU_N = 26.69E-7_EB*(MW_N*ITMP*10)**0.5_EB/(SIGMA2*OMEGA)
-            DO IYY=0,100
-               K_N  = MU_N*SS%CP_MF(IYY,ITMP)/PR
-               WGT  = SS%Y_MF(100*IYY,NN)*SS%MW_MF(100*IYY)/MW_N
-               SS%MU_MF(IYY,ITMP) = SS%MU_MF(IYY,ITMP) + WGT*MU_N
-               SS%K_MF(IYY,ITMP)  = SS%K_MF(IYY,ITMP)  + WGT*K_N
-            ENDDO
             SS%MU_MF2(NN,ITMP) = MU_N
             SS%K_MF2(NN,ITMP)  = MU_N*SS%CP_MF2(NN,ITMP)/PR
          ENDDO
@@ -1897,9 +1883,6 @@ SPECIES_LOOP_2: DO N=0,N_SPECIES
             OMEGA = 1.06036_EB/TSTAR**(0.15610_EB) + 0.19300_EB/EXP(0.47635_EB*TSTAR) + 1.03587_EB/EXP(1.52996_EB*TSTAR) + &
                     1.76474_EB/EXP(3.89411_EB*TSTAR)
             D_N0 = 0.00266E-4_EB*AMW*(10*ITMP)**1.5_EB/(SIGMA2*OMEGA)
-            DO IYY=0,100
-               SS%D_MF(IYY,ITMP) = SS%D_MF(IYY,ITMP) + SS%Y_MF(100*IYY,NN)*D_N0
-            ENDDO
             SS%D_MF2(NN,ITMP) = D_N0
          ENDDO
       ENDDO SUB_SPECIES_LOOP
@@ -1908,7 +1891,6 @@ SPECIES_LOOP_2: DO N=0,N_SPECIES
 ENDDO SPECIES_LOOP_2
  
 ! Define all possible output quantities
- 
 CALL SPECIES_OUTPUT_QUANTITIES
  
 CONTAINS
@@ -2857,7 +2839,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
             ENDIF
          ENDIF
          ITMP = 0.1_EB*TEMP
-         C_FUEL = SPECIES(I_FUEL)%CP_MF(0,ITMP)
+         C_FUEL = SPECIES(I_FUEL)%CP_MF2(FUEL_INDEX,ITMP)
          C_WATER = 2080._EB
          H_T = H_T + (NU_SUM*C_ML-ML%NU_RESIDUE(J)*C_RES-ML%NU_FUEL(J)*C_FUEL-ML%NU_WATER(J)*C_WATER)
          ML%Q_ARRAY(J,I) = ML%H_R(J) - H_T
@@ -6179,7 +6161,7 @@ MESH_LOOP: DO NM=1,NMESHES
       ! Make sure the SLCF QUANTITY exists
  
       SUCCESS = .FALSE.
-      SEARCH1: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
+      SEARCH1: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES      
          IF (QUANTITY==OUTPUT_QUANTITY(ND)%NAME) THEN
             SUCCESS = .TRUE.
             EXIT SEARCH1
@@ -6189,7 +6171,6 @@ MESH_LOOP: DO NM=1,NMESHES
          WRITE(MESSAGE,'(3A)')  ' ERROR: SLCF quantity ',TRIM(QUANTITY),' not found'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      
       ! Throw out bad slices
  
       BAD = .FALSE.
@@ -6800,7 +6781,6 @@ INTEGER :: N
 SPECIES_LOOP: DO N=1,MIN(N_SPECIES,10)
 
    ! Species Mass Fractions
-
    OUTPUT_QUANTITY(50+N)%NAME=TRIM(SPECIES(N)%NAME)
    OUTPUT_QUANTITY(50+N)%UNITS='kg/kg'
    WRITE(OUTPUT_QUANTITY(50+N)%SHORT_NAME,'(A,I2.2)') 'spec_',N

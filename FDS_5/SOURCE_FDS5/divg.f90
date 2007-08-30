@@ -93,7 +93,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                Z_2 = 0._EB
                IF (CO_PRODUCTION) Z_2 = YYP(I,J,K,I_PROG_CO)
                CALL GET_D2(YYP(I,J,K,I_FUEL),YYP(I,J,K,I_PROG_CO),YYP(I,J,K,I_PROG_F),Y_SUM(I,J,K),RHO_D(I,J,K),ITMP)
-               RHO_D(I,J,K) = RHOP(I,J,K)*SPECIES(N)%D_MF(IZ,ITMP)
+               RHO_D(I,J,K) = RHOP(I,J,K)*RHO_D(I,J,K)
             ENDDO
          ENDDO
       ENDDO
