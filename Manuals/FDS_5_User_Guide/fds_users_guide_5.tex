@@ -246,7 +246,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 29, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 30, 2007)}
 
 \vspace{.5in}
 
@@ -3006,16 +3006,18 @@ $\rho_{s0}$ is the initial density of the material layer.
 $A_{ij}$ is prescribed under the name {\ct A(j)}, with units of
 1/s. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in
 units of kJ/kmol. Remember that 1~kcal is 4.184~kJ, and be careful
-with factors of 1000. $n_{s,ij}$ is the reaction order and prescibed under the name
-{\ct N\_S(j)}. $T_{thr,ij}$ is a threshold temperature that
+with factors of 1000. $n_{s,ij}$ is the reaction order and prescribed under the name
+{\ct N\_S(j)}.
+
+$T_{thr,ij}$ is an optional ``threshold'' temperature that
 allows the definition of non-Arrhenius pyrolysis functions and
 ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
 By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero
 and the last term of Equation~\ref{rr} does not affect the pyrolysis rate.
 The term can be used to describe a threshold temperature for the pyrolysis
 reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
-becomes zero at temperatures below $T_{thr,ij}$ and one elsewhere.
-$n_{t,j}$ is prescibed under the name {\ct N\_T(j)}.
+becomes 0 at temperatures below $T_{thr,ij}$ and 1 elsewhere.
+$n_{t,j}$ is prescribed under the name {\ct N\_T(j)}.
 \index{MATL!THRESHOLD\_TEMPERATURE}
 \index{MATL!N\_T}
 
@@ -5448,12 +5450,16 @@ that the entire plane $y=5.3$ slicing through the domain be saved.
 {\ct PBX} and {\ct PBZ} control planes perpendicular to the
 $x$ and $z$ axes, respectively.
 
+Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} If two {\ct SLCF}
+entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity
+component slices will be created.
+
 Slice file information is recorded in files (See Section~\ref{out:SLCF}) \index{Output!Slice File}
 labeled {\bf CHID\_$n$.sf}, where $n$ is the index of the slice file.
 A short fortran program {\bf fds2ascii.f} produces a text file from a line,
 plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
 
-Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.}
+
 
 
 
@@ -6257,7 +6263,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NU\_FUEL}                & Real        & Fuel Yield                     & kg/kg            & 0.     \\ \hline
 {\ct NU\_RESIDUE}             & Real        & Residue Yield                  & kg/kg            & 0.     \\ \hline
 {\ct NU\_WATER  }             & Real        & Steam Yield                    & kg/kg            & 0.     \\ \hline
-{\ct REFERENCE\_RATE}         & Real        & Reaction rate at ref.~temp.    & kg/m$^3$s        & 0.10   \\ \hline
+{\ct REFERENCE\_RATE}         & Real        & Reaction rate at ref.~temp.    & s$^{-1}$         & 0.10   \\ \hline
 {\ct REFERENCE\_TEMPERATURE}  & Real        & Reference temperature          & $^\circ$C        &        \\ \hline
 {\ct RESIDUE}                 & Character   & {\ct ID} of residue {\ct MATL} &                  &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat                  & kJ/kg/K          & 1.0    \\ \hline
@@ -6634,17 +6640,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline
 \multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\ \hline \hline
 {\ct FYI}               & Character         & Comment String (has no effect)         &           &     \\ \hline
-{\ct MB      }          & Character         & Mesh Boundary of  slice                &           &     \\ \hline
+%{\ct MAXIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
+%{\ct MINIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Save only slices in this mesh          &           &     \\ \hline
 {\ct PBX     }          & Real              & $x$-plane to save slice file           &           &     \\ \hline
 {\ct PBY     }          & Real              & $y$-plane to save slice file           &           &     \\ \hline
 {\ct PBZ     }          & Real              & $z$-plane to save slice file           &           &     \\ \hline
 {\ct QUANTITY}          & Character         & Name of Quantity to display            &           &     \\ \hline
+%{\ct RLE    }           & Logical           & Run Length Encoding                    &           & {\ct .FALSE.}    \\ \hline
+%{\ct TWO\_BYTE    }     & Logical           & Save as 2 byte real                    &           & {\ct .FALSE.}    \\ \hline
 {\ct VECTOR    }        & Logical           & Include flow vectors                   &           & {\ct .FALSE.}    \\ \hline
 {\ct XB(6)}             & Real Sextuplet    & Min/Max coordinates of region to save  & m         &     \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /SLCF/ XB,QUANTITY,MB,FYI,PBX,PBY,PBZ,VECTOR,MESH_NUMBER,RLE,MAXIMUM_VALUE,MINIMUM_VALUE,TWO_BYTE
+
 
 \vspace{\baselineskip}
 
