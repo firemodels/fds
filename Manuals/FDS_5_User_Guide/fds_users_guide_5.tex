@@ -1739,7 +1739,9 @@ guide.
 \item[{\ct DNS}] A logical parameter that, if {\ct .TRUE.}, directs FDS to perform a Direct Numerical Simulation, as opposed to the default Large Eddy Simulation (LES).
 \item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
 \item[{\ct ISOTHERMAL}] A logical parameter that indicates that the calculation does not involve any changes in temperature or
-radiation heat transfer, thus reducing the number of equations that must be solved, and simplifying those that are.
+radiation heat transfer, thus reducing the number of equations that must be solved, and simplifying those that are. Automatically sets {\ct RADIATION} to
+{\ct .FALSE.}
+\item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
 \item[{\ct RADIATION}] A logical parameter indicating whether radiation transport ought to be calculated. The default is {\ct .TRUE.}
 \item[{\ct SUPPRESSION}] A logical parameter indicating whether FDS should include gas phase flame extinction. The default is {\ct .TRUE.}
 \item[{\ct SURF\_DEFAULT}] The {\ct SURF} line that is to be applied to all boundaries, unless otherwise specified. The default is {\ct 'INERT'}.
@@ -1872,6 +1874,29 @@ include the entire building, or a substantial fraction of it, both inside and ou
 is important to capture the pressure and density decrease in the atmosphere based on the specified
 temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line. Experiment with different meshing
 strategies before including any fire or HVAC \index{HVAC} functionality. Slowly build in complexity.
+
+
+\subsection{Special Topic: Large Eddy Simulation Parameters}
+\label{info:LES} \index{Large Eddy Simulation}
+
+In default mode, FDS uses the Smagorinsky form of Large Eddy Simulation (LES) to model subgrid-scale turbulence.
+The viscosity $\mu$ is modeled
+\be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
+   \left(2 \; \overline{\bS}_{ij} \cdot \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
+where $C_s$ is an empirical constant and $\Delta$ is a length on the
+order of the size of a grid cell.
+The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning
+that they are computed on a numerical grid.
+The other diffusive parameters,
+the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
+\be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
+\quad ; \quad
+ (\rho D)_{l,\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be
+constant for a given scenario. Although it is not recommended for most calculations, you can modify
+$C_s=0.2$, $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct CSMAG}, {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed
+discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
+
 
 
 \subsection{Special Topic: Numerical Stability Parameters}
@@ -3635,7 +3660,8 @@ is (0,0,0), and the global default can be changed by added a
 
 As this chapter has demonstrated, real materials can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the
 input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know
-that what you have put together is right? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid
+that the various property values and the associated thermo-physical model in FDS
+constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid
 phase routines. However, it is easy to perform a simple check of any set of surface properties by essentially turning off the gas phase -- no combustion and
 no convective heat transfer. There are several parameters that allow you do this, spread out over the various namelist groups.
 
@@ -3652,16 +3678,17 @@ that will limit the time step, it is best to control this yourself.
 \item Put {\ct H\_FIXED=0.} on the {\ct MISC} line. This turns off the
 convective heat flux from gas to surface and vis verse. The heat flux
 to the solid is specified via {\ct EXTERNAL\_FLUX} (kW/m$^2$) on the
-{\ct SURF} line that is assigned to the solid surface.
-\index{SURF!EXTERNAL\_FLUX}
-\item Turn off all the gas phase computations by setting {\ct
-SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed
+{\ct SURF} line that is assigned to the solid surface. If you want to specify a particular
+convective heat flux to the solid surface, you can set {\ct ASSUMED\_GAS\_TEMPERATURE} on the
+{\ct MISC} line, along with a non-zero value of {\ct H\_FIXED}.
+\item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.}
+on the {\ct MISC} line. This will also speed
 up the computations significantly. If the gas phase computations are
-neede, you may turn off combustion by creating a {\ct REAC} line with only
+needed, you may turn off combustion by creating a {\ct REAC} line with only
 {\ct Y\_O2\_INFTY=0.01}. This sets the background oxygen mass fraction
 to 0.01, too low to support any burning.
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you
-normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF}
+normally would, except add {\ct EXTERNAL\_FLUX} \index{SURF!EXTERNAL\_FLUX} to the {\ct SURF}
 line. This is simply a ``virtual'' source that heats the solid. Think
 of this as a perfect radiant panel or cone calorimeter.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom
@@ -3950,8 +3977,7 @@ and the background species should be specified.
 \end{verbatim}
 \normalsize
 
-
-
+\noindent
 As an example, the lines:
 
 \footnotesize
@@ -3963,6 +3989,8 @@ As an example, the lines:
 &SURF ID='INLET', MASS_FRACTION(2)=0.2, VEL=-0.3, TAU_MF(2)=0.5, TAU_V=0.5 /
 \end{verbatim}
 \normalsize
+
+\noindent
 specify that {\ct ARGON} and {\ct HELIUM} are to be included in the calculation
 in addition to the (unlisted) default
 {\ct BACKGROUND\_SPECIES='AIR'}. At
@@ -3971,6 +3999,15 @@ because nothing different is specified), and air (0.7 by mass making
 up the rest) flows out at a velocity of 0.3~m/s {\em into} the flow
 domain. The mass fraction of helium and the velocity are both
 ramped up according to the function $\tanh(t/0.5)$.
+
+If the simulation does not involve the mixture fraction model -- either because no combustion is
+desired or if a finite rate reaction(s) is being specified (see Section~\ref{info:finite}) -- you can
+specify that the background gas species be something other than air. For a gas mixture comprised of
+$n$ species, FDS only solves transport equations for $n-1$ because it also solves an equation for
+total mass conservation. To set the properties of the implicitly defined {\ct BACKGROUND\_SPECIES}, use the
+{\ct MISC} line. If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW},
+and (optionally) its {\ct VISCOSITY} and {\ct CONDUCTIVITY}. In the absence of any of these parameters, the appropriate
+values of {\ct 'AIR'} are assumed.
 
 
 \begin{table}[t]
@@ -6207,7 +6244,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XB(6)}                 & Real Sextuplet    & Coordinates                                       & m             &               \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /INIT/ XB,TEMPERATURE,DENSITY,MASS_FRACTION
+
 
 \vspace{\baselineskip}
 
@@ -6223,12 +6260,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\ \hline \hline
-{\ct FYI}           & Character & Comment String (has no effect) &       &         \\ \hline
-{\ct QUANTITY}      & Character & Quantity to visualize          &       &     \\ \hline
-{\ct VALUE}         & Real      & Contour value                  &       &     \\ \hline
+{\ct FYI}                   & Character     & Comment String (has no effect)        &       &         \\ \hline
+%{\ct COLOR\_QUANTITY}       & Character     & Secondary quantity to color surface   &       &         \\ \hline
+{\ct QUANTITY}              & Character     & Quantity to visualize                 &       &         \\ \hline
+%{\ct REDUCE\_TRIANGLES}     & Integer       & Smokeview parameter                   &       & 1       \\ \hline
+{\ct VALUE(I)}              & Real Array    & Contour value(s)                      &       &         \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /ISOF/ QUANTITY,FYI,VALUE,REDUCE_TRIANGLES,COLOR_QUANTITY
+
 
 \vspace{\baselineskip}
 
@@ -6300,7 +6339,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct KBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /MESH/ POISSON_BC,IBAR2,JBAR2,KBAR2
+
 
 \vspace{\baselineskip}
 
@@ -6317,48 +6356,53 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\ \hline \hline
-{\ct BACKGROUND\_SPECIES}   & Character     & Background species                            &               & {\ct 'AIR'}       \\ \hline
-{\ct BAROCLINIC}            & Logical       & Baroclinic torque correction                  &               & {\ct .FALSE.}     \\ \hline
-{\ct BNDF\_DEFAULT}         & Logical       & See Section~\ref{info:BNDF}                   &               & {\ct .TRUE.}      \\ \hline
-{\ct CFL\_MAX}              & Real          & Upper bound of CFL stability range            &               & 1.0               \\ \hline
-{\ct CFL\_MIN}              & Real          & Lower bound of CFL stability range            &               & 0.8               \\ \hline
-{\ct CSMAG}                 & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
-{\ct DNS}                   & Logical       & Direct Numerical Simulation                   &               & {\ct .FALSE.}     \\ \hline
-{\ct FYI}                   & Character     & Comment String (has no effect)                &               &                   \\ \hline
-{\ct GVEC}                  & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
-{\ct HUMIDITY}              & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
-{\ct ISOTHERMAL}            & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
-{\ct LAPSE\_RATE}           & Real          & Atmospheric temperature lapse rate            &  $^\circ$C/m  & 0                 \\ \hline
-{\ct LES}                   & Logical       & Large Eddy Simulation                         &               & {\ct .TRUE.}      \\ \hline
-{\ct PR}                    & Real          & Prandtl number (LES only)                     &               & 0.5               \\ \hline
-{\ct P\_INF}                & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
-{\ct POROUS\_FLOOR}         & Logical       & Droplets disappear at floor                   &               & {\ct .TRUE.}      \\ \hline
-{\ct RADIATION}             & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
-{\ct RAMP\_GX}              & Character     & Time function for $x$ comp. of gravity        &               &                   \\ \hline
-{\ct RAMP\_GY}              & Character     & Time function for $y$ comp. of gravity        &               &                   \\ \hline
-{\ct RAMP\_GZ}              & Character     & Time function for $z$ comp. of gravity        &               &                   \\ \hline
-{\ct RESTART}               & Logical       & Restart previous calculation                  &               & {\ct .FALSE.}     \\ \hline
-{\ct RESTART\_CHID}         & Character     & Restart file CHID                             &               & {\ct CHID}        \\ \hline
-{\ct SC}                    & Real          & Schmidt number (LES only)                     &               & 0.5               \\ \hline
-{\ct SOLID\_PHASE\_ONLY}    & Logical       & Omit gas phase flag                           &               & {\ct .FALSE.}     \\ \hline
-{\ct SUPPRESSION}           & Logical       & Suppression calculation flag                  &               & {\ct .TRUE.}      \\ \hline
-{\ct SURF\_DEFAULT}         & Character     & Default SURFace type                          &               & {\ct 'INERT'}     \\ \hline
-{\ct TEXTURE\_ORIGIN(3)}    & Char.~Triplet & Origin of Texture Map                         & m             &                   \\ \hline
-{\ct TMPA}                  & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
-{\ct U0,V0,W0}              & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
-{\ct VN\_MAX}               & Real          & Upper bound of Von Neumann number             &               & 1.0               \\ \hline
-{\ct VN\_MIN}               & Real          & Lower bound of Von Neumann number             &               & 0.8               \\ \hline
+{\ct ASSUMED\_GAS\_TEMPERATURE} & Real          & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
+{\ct BACKGROUND\_SPECIES}       & Character     & See Section~\ref{info:SPEC}                   &               & {\ct 'AIR'}       \\ \hline
+{\ct BAROCLINIC}                & Logical       & Baroclinic torque correction                  &               & {\ct .FALSE.}     \\ \hline
+{\ct BNDF\_DEFAULT}             & Logical       & See Section~\ref{info:BNDF}                   &               & {\ct .TRUE.}      \\ \hline
+{\ct CFL\_MAX}                  & Real          & Upper bound of CFL stability range            &               & 1.0               \\ \hline
+{\ct CFL\_MIN}                  & Real          & Lower bound of CFL stability range            &               & 0.8               \\ \hline
+{\ct CSMAG}                     & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
+{\ct CONDUCTIVITY}              & Real          & See Section~\ref{info:SPEC}                   &  W/m/K        &                   \\ \hline
+{\ct DNS}                       & Logical       & Direct Numerical Simulation                   &               & {\ct .FALSE.}     \\ \hline
+%{\ct EVAC\_SURF\_DEFAULT}       & Character     & Default SURFace type for Evac Model           &               & {\ct 'INERT'}     \\ \hline
+{\ct FYI}                       & Character     & Comment String (has no effect)                &               &                   \\ \hline
+{\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
+{\ct H\_FIXED}                  & Real          & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
+{\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
+{\ct ISOTHERMAL}                & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
+{\ct LAPSE\_RATE}               & Real          & Atmospheric temperature lapse rate            &  $^\circ$C/m  & 0                 \\ \hline
+{\ct LES}                       & Logical       & Large Eddy Simulation                         &               & {\ct .TRUE.}      \\ \hline
+{\ct MW}                        & Real          & Molecular Weight (Section~\ref{info:SPEC})    &  g/mol        &                   \\ \hline
+{\ct PR}                        & Real          & Prandtl number (LES only)                     &               & 0.5               \\ \hline
+{\ct P\_INF}                    & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
+{\ct POROUS\_FLOOR}             & Logical       & Droplets disappear at floor                   &               & {\ct .TRUE.}      \\ \hline
+{\ct RADIATION}                 & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
+{\ct RAMP\_GX}                  & Character     & Time function, $x$ comp. of gravity           &               &                   \\ \hline
+{\ct RAMP\_GY}                  & Character     & Time function, $y$ comp. of gravity           &               &                   \\ \hline
+{\ct RAMP\_GZ}                  & Character     & Time function, $z$ comp. of gravity           &               &                   \\ \hline
+%{\ct RELAXATION\_FACTOR}        & Real          & Pressure solver parameter                     &               & 1.0               \\ \hline
+{\ct RESTART}                   & Logical       & Restart previous calculation                  &               & {\ct .FALSE.}     \\ \hline
+{\ct RESTART\_CHID}             & Character     & Restart file CHID                             &               & {\ct CHID}        \\ \hline
+{\ct SC}                        & Real          & Schmidt number (LES only)                     &               & 0.5               \\ \hline
+{\ct SOLID\_PHASE\_ONLY}        & Logical       & See Section~\ref{solid_phase_verification}    &               & {\ct .FALSE.}     \\ \hline
+{\ct SUPPRESSION}               & Logical       & Suppression calculation flag                  &               & {\ct .TRUE.}      \\ \hline
+{\ct SURF\_DEFAULT}             & Character     & Default SURFace type                          &               & {\ct 'INERT'}     \\ \hline
+{\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & Origin of Texture Map                         & m             &                   \\ \hline
+{\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
+{\ct U0,V0,W0}                  & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
+{\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
+{\ct VN\_MAX}                   & Real          & Von Neumann upper bound                       &               & 1.0               \\ \hline
+{\ct VN\_MIN}                   & Real          & Von Neumann lower bound                       &               & 0.8               \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /MISC/ PR,SC,TMPA,GVEC,RELAXATION_FACTOR,FYI,CSMAG,RAMP_GX,RAMP_GY,RAMP_GZ,BAROCLINIC,
-%                LAPSE_RATE,ISOTHERMAL,P_INF,SURF_DEFAULT,EVAC_SURF_DEFAULT,
-%                C_FORCED,C_VERTICAL,C_HORIZONTAL,H_FIXED,RESTART,ASSUMED_GAS_TEMPERATURE,
-%                BACKGROUND_SPECIES,MW,LES,DNS,VISCOSITY,CONDUCTIVITY,NOISE,
-%                RADIATION,GAMMA,BNDF_DEFAULT,U0,V0,W0,HUMIDITY,
+%NAMELIST /MISC/
+%                C_FORCED,C_VERTICAL,C_HORIZONTAL,H_FIXED,
+%                NOISE,
+%                GAMMA,HUMIDITY,
 %                POROUS_FLOOR,SUPPRESSION,CO_PRODUCTION,TEXTURE_ORIGIN,NSTRATA,
 %                THICKEN_OBSTRUCTIONS,EVAC_PRESSURE_ITERATIONS,EVAC_TIME_ITERATIONS,
-%                PRESSURE_CORRECTION,CHECK_POISSON,STRATIFICATION,RESTART_CHID,
-%                CFL_MAX,CFL_MIN,VN_MAX,VN_MIN,SOLID_PHASE_ONLY
+%                PRESSURE_CORRECTION,CHECK_POISSON,STRATIFICATION
 
 \vspace{\baselineskip}
 
