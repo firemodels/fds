@@ -266,3 +266,53 @@ int STRCMP(const char *s1, const char *s2){
   }
 	return (toupper(*(const unsigned char *)s1) - toupper(*(const unsigned char *)(s2 - 1)));
 }
+
+/* ------------------ get_chid ------------------------ */
+
+char *get_chid(char *file){
+  FILE *stream;
+  char *chidptr,*c;
+  char buffer[1024];
+  unsigned int i;
+
+  stream=fopen(file,"r");
+  if(stream==NULL)return NULL;
+
+  while(!feof(stream)){
+    int found1st=0, found2nd=0;
+
+    if(fgets(buffer,255,stream)==NULL)break;
+    chidptr=strstr(buffer,"CHID");
+    if(chidptr==NULL){
+      fclose(stream);
+      return NULL;
+    }
+    for(i=0;i<strlen(chidptr);i++){
+      c=chidptr+i;
+      if(*c=='\''){
+        found1st=1;
+        chidptr=c+1;
+        break;
+      }
+    }
+    if(found1st==0){
+      fclose(stream);
+      return NULL;
+    }
+    for(i=0;i<strlen(chidptr);i++){
+      c=chidptr+i;
+      if(*c=='\''){
+        found2nd=1;
+        *c=0;
+        fclose(stream);
+        return chidptr;
+      }
+    }
+    if(found2nd==0){
+      fclose(stream);
+      return NULL;
+    }
+  }
+  fclose(stream);
+  return NULL;
+}

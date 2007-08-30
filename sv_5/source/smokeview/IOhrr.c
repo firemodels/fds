@@ -52,7 +52,7 @@ void printhrr(void){
 
 void readhrr(int flag, int *errorcode){
   FILE *HRRFILE;
-  int ntimes;
+  int ntimes, nfirst;
   char buffer[1024];
   float *hrrtime, *hrrval;
 
@@ -81,28 +81,17 @@ void readhrr(int flag, int *errorcode){
     return;
   }
 
-// read first three lines
-
-  if(fgets(buffer,1024,HRRFILE)==NULL)*errorcode=1;
-  if(*errorcode==0){
-    if(fgets(buffer,1024,HRRFILE)==NULL)*errorcode=1;
-  }
-  if(*errorcode==0){
-    if(fgets(buffer,1024,HRRFILE)==NULL)*errorcode=1;
-  }
-  if(*errorcode==1){
-    readhrr(UNLOAD,errorcode);
-    *errorcode=1;
-    return;
-  }
 
 // size data
 
   ntimes=0;
+  nfirst=-1;
   while(!feof(HRRFILE)){
     if(fgets(buffer,1024,HRRFILE)==NULL)break;
+    if(nfirst==-1&&strstr(buffer,".")!=NULL)nfirst=ntimes;
     ntimes++;
   }
+  ntimes-=nfirst;
 
   rewind(HRRFILE);
   NewMemory((void **)&hrrinfo->times,ntimes*sizeof(float));
@@ -114,16 +103,12 @@ void readhrr(int flag, int *errorcode){
   hrrval=hrrinfo->hrrval;
   ntimes=0;
 
-  if(*errorcode==0&&fgets(buffer,1024,HRRFILE)==NULL)*errorcode=1;
-  if(*errorcode==0&&fgets(buffer,1024,HRRFILE)==NULL)*errorcode=1;
-  if(*errorcode==0&&fgets(buffer,1024,HRRFILE)==NULL)*errorcode=1;
-  if(*errorcode==1){
-    readhrr(UNLOAD,errorcode);
-    *errorcode=1;
-    return;
-  }
   while(!feof(HRRFILE)){
     if(fgets(buffer,10245,HRRFILE)==NULL)break;
+    if(ntimes<nfirst){
+      ntimes++;
+      continue;
+    }
     stripcommas(buffer);
     sscanf(buffer,"%f %f",hrrtime,hrrval);
     hrrtime++;

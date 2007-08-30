@@ -2675,8 +2675,15 @@ void UpdateTimeLabels(void){
       float hrr;
 
       hrr = hrrinfo->hrrval[hrrinfo->itime];
-      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f KW",hrr);
-      if(hrr>=1000.0)sprintf(hrrinfo->hrrlabel,"HRR: %4.1f MW",hrr/1000.0);
+      if(hrr<1.0){
+        sprintf(hrrinfo->hrrlabel,"HRR: %4.1f",hrr*1000.0);
+      }
+      else if(hrr>1000.0){
+        sprintf(hrrinfo->hrrlabel,"HRR: %4.1f MW",hrr/1000.0);
+      }
+      else{
+        sprintf(hrrinfo->hrrlabel,"HRR: %4.1f KW",hrr);
+      }
     }
   }
 #endif
