@@ -1741,6 +1741,8 @@ guide.
 \item[{\ct ISOTHERMAL}] A logical parameter that indicates that the calculation does not involve any changes in temperature or
 radiation heat transfer, thus reducing the number of equations that must be solved, and simplifying those that are. Automatically sets {\ct RADIATION} to
 {\ct .FALSE.}
+\item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the development of a perfectly symmetric flow when the boundary
+and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.}
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
 \item[{\ct RADIATION}] A logical parameter indicating whether radiation transport ought to be calculated. The default is {\ct .TRUE.}
 \item[{\ct SUPPRESSION}] A logical parameter indicating whether FDS should include gas phase flame extinction. The default is {\ct .TRUE.}
@@ -2591,7 +2593,9 @@ mass flux of species.  To obtain a guaranteed mass flux of a species, you should
 
 
 \subsection{Special Topic: Fires and Flows in the Outdoors}
+\label{info:stratification}
 \index{outdoor fires}
+\index{atmospheric stratification}
 \index{SURF!PLE}
 \index{SURF!Z0}
 \index{SURF!PROFILE}
@@ -2618,6 +2622,10 @@ temperature {\em decreases} with height.
 This need only be set for outdoor calculations where the height of the
 domain is tens or hundreds of meters.
 The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
+
+By default, FDS assumes that the density and pressure decrease with height, regardless of the
+application or domain size. For most simulations, this effect is negligible, but it can be
+turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line.
 
 
 \subsection{Special Topic: A Radially-Spreading Fire}
@@ -3880,7 +3888,7 @@ flow domain from the burning object.
 
 \vspace{\baselineskip}
 \noindent
-{\bf Gas Phase Fire Suppression:}
+{\bf Gas Phase Fire Suppression:} \index{Flame Extinction}
 Modeling suppression of a fire due to the introduction of a suppression
 agent like CO$_2$ or water mist, or due to the exhaustion of oxygen
 within a compartment is challenging because
@@ -3895,11 +3903,12 @@ Oxygen Index {\ct X\_O2\_LL},
 and the {\ct CRITICAL\_FLAME\_TEMPERATURE}. Both are
 set on the {\ct REAC} line.
 The default values are 0.15 (volume fraction) and 1427~$^\circ$C, respectively.
-To eliminate any gas phase suppression, set {\ct X\_O2\_LL} to 0.
+To eliminate any gas phase suppression, set {\ct X\_O2\_LL} to 0. To turn off suppression completely,
+set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
 
 \vspace{\baselineskip}
 \noindent
-{\bf CO Production:}
+{\bf CO Production:} \index{CO Production}
 An algorithm has been implemented that computes the combustion as a two step reaction that
 predicts the formation and destruction of CO.  The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
 contains more details about how the mechanism works. This algorithm is used when
@@ -6364,16 +6373,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CFL\_MIN}                  & Real          & Lower bound of CFL stability range            &               & 0.8               \\ \hline
 {\ct CSMAG}                     & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
 {\ct CONDUCTIVITY}              & Real          & See Section~\ref{info:SPEC}                   &  W/m/K        &                   \\ \hline
+{\ct CO\_PRODUCTION}            & Logical       & See Section~\ref{info:combustion}             &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                       & Logical       & Direct Numerical Simulation                   &               & {\ct .FALSE.}     \\ \hline
+%{\ct EVAC\_PRESSURE\_ITERATIONS}& Character     & Pressure solves for Evac Model                &               &                   \\ \hline
 %{\ct EVAC\_SURF\_DEFAULT}       & Character     & Default SURFace type for Evac Model           &               & {\ct 'INERT'}     \\ \hline
+%{\ct EVAC\_TIME\_ITERATIONS}    & Character     & Time iterations for Evac Model                &               &                   \\ \hline
 {\ct FYI}                       & Character     & Comment String (has no effect)                &               &                   \\ \hline
 {\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
 {\ct H\_FIXED}                  & Real          & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
 {\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
 {\ct ISOTHERMAL}                & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
-{\ct LAPSE\_RATE}               & Real          & Atmospheric temperature lapse rate            &  $^\circ$C/m  & 0                 \\ \hline
+{\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}         &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES}                       & Logical       & Large Eddy Simulation                         &               & {\ct .TRUE.}      \\ \hline
 {\ct MW}                        & Real          & Molecular Weight (Section~\ref{info:SPEC})    &  g/mol        &                   \\ \hline
+{\ct NOISE}                     & Logical       & Toggle initial noise on and off               &               & {\ct .TRUE.}      \\ \hline
+%{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution             &               & 7                 \\ \hline
 {\ct PR}                        & Real          & Prandtl number (LES only)                     &               & 0.5               \\ \hline
 {\ct P\_INF}                    & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
 {\ct POROUS\_FLOOR}             & Logical       & Droplets disappear at floor                   &               & {\ct .TRUE.}      \\ \hline
@@ -6386,7 +6400,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RESTART\_CHID}             & Character     & Restart file CHID                             &               & {\ct CHID}        \\ \hline
 {\ct SC}                        & Real          & Schmidt number (LES only)                     &               & 0.5               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}        & Logical       & See Section~\ref{solid_phase_verification}    &               & {\ct .FALSE.}     \\ \hline
-{\ct SUPPRESSION}               & Logical       & Suppression calculation flag                  &               & {\ct .TRUE.}      \\ \hline
+{\ct STRATIFICATION}            & Logical       & See Section~\ref{info:stratification}         &               & {\ct .TRUE.}      \\ \hline
+{\ct SUPPRESSION}               & Logical       & See Section~\ref{info:combustion}             &               & {\ct .TRUE.}      \\ \hline
 {\ct SURF\_DEFAULT}             & Character     & Default SURFace type                          &               & {\ct 'INERT'}     \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & Origin of Texture Map                         & m             &                   \\ \hline
 {\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
@@ -6398,11 +6413,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{table}
 %NAMELIST /MISC/
 %                C_FORCED,C_VERTICAL,C_HORIZONTAL,H_FIXED,
-%                NOISE,
 %                GAMMA,HUMIDITY,
-%                POROUS_FLOOR,SUPPRESSION,CO_PRODUCTION,TEXTURE_ORIGIN,NSTRATA,
-%                THICKEN_OBSTRUCTIONS,EVAC_PRESSURE_ITERATIONS,EVAC_TIME_ITERATIONS,
-%                PRESSURE_CORRECTION,CHECK_POISSON,STRATIFICATION
+%                POROUS_FLOOR,TEXTURE_ORIGIN
+%                THICKEN_OBSTRUCTIONS,
+%                PRESSURE_CORRECTION,CHECK_POISSON
 
 \vspace{\baselineskip}
 
