@@ -3394,6 +3394,25 @@ typedef struct {
           if(returnval!=0)return returnval;
         }
       }
+      if(chidfilebase==NULL){
+        char *chidptr;
+
+        chidptr=get_chid(fds_filein);
+        if(chidptr!=NULL){
+          NewMemory((void **)&chidfilebase,(unsigned int)(strlen(chidptr)+1));
+          STRCPY(chidfilebase,chidptr);
+        }
+      }
+#ifdef pp_HRR
+      if(chidfilebase!=NULL){
+        NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
+        STRCPY(hrrfilename,chidfilebase);
+        STRCAT(hrrfilename,"_hrr.csv");
+        if(stat(hrrfilename,&statbuffer)!=0){
+          FREEMEMORY(hrrfilename);
+        }
+      }
+#endif
       continue;
     }
   /*
@@ -3407,6 +3426,7 @@ typedef struct {
       }
       trim(buffer);
       len=strlen(buffer);
+      FREEMEMORY(chidfilebase);
       NewMemory((void **)&chidfilebase,(unsigned int)(len+1));
       STRCPY(chidfilebase,buffer);
 
