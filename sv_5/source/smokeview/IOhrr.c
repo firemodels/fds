@@ -15,6 +15,8 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+/* ------------------ stripcommas ------------------------ */
+
 void stripcommas(char *buffer){
   int i;
   char *c;
@@ -35,13 +37,13 @@ void printhrr(void){
     printf("hrr data not available\n");
     return;
   }
-  if(hrrinfo->ntimes==0){
+  if(hrrinfo->ntimes_csv==0){
     printf("hrr data not loaded\n");
     return;
   }
-  hrrtime=hrrinfo->times;
-  hrrval=hrrinfo->hrrval;
-  for(i=0;i<hrrinfo->ntimes;i++){
+  hrrtime=hrrinfo->times_csv;
+  hrrval=hrrinfo->hrrval_csv;
+  for(i=0;i<hrrinfo->ntimes_csv;i++){
     printf(" time=%f hrr=%f\n",*hrrtime,*hrrval);
     hrrtime++;
     hrrval++;
@@ -58,7 +60,9 @@ void readhrr(int flag, int *errorcode){
 
   *errorcode=0;
   if(hrrinfo!=NULL){
+    FREEMEMORY(hrrinfo->times_csv);
     FREEMEMORY(hrrinfo->times);
+    FREEMEMORY(hrrinfo->hrrval_csv);
     FREEMEMORY(hrrinfo->hrrval);
     FREEMEMORY(hrrinfo->timeslist);
   }
@@ -67,10 +71,12 @@ void readhrr(int flag, int *errorcode){
 
   NewMemory((void **)&hrrinfo,sizeof(hrrdata));
   hrrinfo->file=hrrfilename;
+  hrrinfo->times_csv=NULL;
   hrrinfo->times=NULL;
   hrrinfo->timeslist=NULL;
+  hrrinfo->hrrval_csv=NULL;
   hrrinfo->hrrval=NULL;
-  hrrinfo->ntimes=0;
+  hrrinfo->ntimes_csv=0;
   hrrinfo->loaded=1;
   hrrinfo->display=0;
   hrrinfo->itime=0;
@@ -94,13 +100,13 @@ void readhrr(int flag, int *errorcode){
   ntimes-=nfirst;
 
   rewind(HRRFILE);
-  NewMemory((void **)&hrrinfo->times,ntimes*sizeof(float));
-  NewMemory((void **)&hrrinfo->hrrval,ntimes*sizeof(float));
+  NewMemory((void **)&hrrinfo->times_csv,ntimes*sizeof(float));
+  NewMemory((void **)&hrrinfo->hrrval_csv,ntimes*sizeof(float));
 
 // read data
   
-  hrrtime=hrrinfo->times;
-  hrrval=hrrinfo->hrrval;
+  hrrtime=hrrinfo->times_csv;
+  hrrval=hrrinfo->hrrval_csv;
   ntimes=0;
 
   while(!feof(HRRFILE)){
@@ -115,7 +121,7 @@ void readhrr(int flag, int *errorcode){
     hrrval++;
     ntimes++;
   }
-  hrrinfo->ntimes=ntimes;
+  hrrinfo->ntimes_csv=ntimes-nfirst;
 }
 
 /* ------------------ drawhrr ------------------------ */

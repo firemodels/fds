@@ -2079,13 +2079,6 @@ void updatetimes(void){
     }
   }
 #endif
-#ifdef pp_HRR
-  if(hrrinfo!=NULL){
-    if(hrrinfo->display==1&&hrrinfo->loaded==1){
-      ntimes+=hrrinfo->ntimes;
-    }
-  }
-#endif
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
     if(touri->display==0)continue;
@@ -2153,15 +2146,6 @@ void updatetimes(void){
       if(terri->loaded==0)continue;
       for(n=0;n<terri->ntimes;n++){
         *timescopy++=terri->times[n];
-      }
-    }
-  }
-#endif
-#ifdef pp_HRR
-  if(hrrinfo!=NULL){
-    if(hrrinfo->loaded==1&&hrrinfo->display==1){
-      for(n=0;n<hrrinfo->ntimes;n++){
-        *timescopy++=hrrinfo->times[n];
       }
     }
   }
@@ -2282,9 +2266,43 @@ void updatetimes(void){
 #endif
 #ifdef pp_HRR
     if(hrrinfo!=NULL){
-      if(hrrinfo->loaded==1&&hrrinfo->display==1){
+      if(hrrinfo->loaded==1&&hrrinfo->display==1&&ntimes>0){
+        int jstart=0;
+
         FREEMEMORY(hrrinfo->timeslist);
         NewMemory((void **)&hrrinfo->timeslist,ntimes*sizeof(int));
+        FREEMEMORY(hrrinfo->times);
+        NewMemory((void **)&hrrinfo->times,ntimes*sizeof(float));
+        FREEMEMORY(hrrinfo->hrrval);
+        NewMemory((void **)&hrrinfo->hrrval,ntimes*sizeof(float));
+        hrrinfo->ntimes=ntimes;
+        for(i=0;i<ntimes;i++){
+          int j, foundit;
+
+          foundit=0;
+          hrrinfo->times[i]=times[i];
+          for(j=jstart;j<hrrinfo->ntimes_csv-1;j++){
+            if(hrrinfo->times_csv[j]<=times[i]&&times[i]<hrrinfo->times_csv[j+1]){
+              float f1, tbot;
+
+              foundit=1;
+              tbot = hrrinfo->times_csv[j+1]-hrrinfo->times_csv[j];
+              if(tbot>0.0){
+                f1 = (times[i]-hrrinfo->times_csv[j])/tbot;
+              }
+              else{
+                f1=0.0;
+              }
+              hrrinfo->hrrval[i]=(1.0-f1)*hrrinfo->hrrval_csv[j]+f1*hrrinfo->hrrval_csv[j+1];
+              jstart=j;
+              break;
+            }
+          }
+          if(foundit==0){
+            hrrinfo->hrrval[i]=hrrinfo->hrrval_csv[hrrinfo->ntimes_csv-1];
+          }
+        }
+
       }
     }
 #endif
@@ -2670,20 +2688,18 @@ void UpdateTimeLabels(void){
   }
   sprintf(framelabel,"Frame: %i",itime);
 #ifdef pp_HRR
-  if(hrrinfo!=NULL){
-    if(hrrinfo->display==1&&hrrinfo->loaded==1){
-      float hrr;
+  if(hrrinfo!=NULL&&hrrinfo->display==1&&hrrinfo->loaded==1){
+    float hrr;
 
-      hrr = hrrinfo->hrrval[hrrinfo->itime];
-      if(hrr<1.0){
-        sprintf(hrrinfo->hrrlabel,"HRR: %4.1f",hrr*1000.0);
-      }
-      else if(hrr>1000.0){
-        sprintf(hrrinfo->hrrlabel,"HRR: %4.1f MW",hrr/1000.0);
-      }
-      else{
-        sprintf(hrrinfo->hrrlabel,"HRR: %4.1f KW",hrr);
-      }
+    hrr = hrrinfo->hrrval[hrrinfo->itime];
+    if(hrr<1.0){
+      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f",hrr*1000.0);
+    }
+    else if(hrr>1000.0){
+      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f MW",hrr/1000.0);
+    }
+    else{
+      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f kW",hrr);
     }
   }
 #endif
@@ -2766,23 +2782,21 @@ void synctimes(void){
     }
 #endif
 #ifdef pp_HRR
-    if(hrrinfo!=NULL){
-      if(hrrinfo->loaded==1&&hrrinfo->display==1){
-        if(n==0){
-          istart=0;
-        }
-        else{
-          istart=hrrinfo->timeslist[n-1];
-        }
-        i=istart;
-        while(hrrinfo->times[i]<times[n]&&i<hrrinfo->ntimes){
-          i++;
-        }
-        if(i>=hrrinfo->ntimes){
-          i--;
-        }
-        hrrinfo->timeslist[n]=i;
+    if(hrrinfo!=NULL&&hrrinfo->loaded==1&&hrrinfo->display==1){
+      if(n==0){
+        istart=0;
       }
+      else{
+        istart=hrrinfo->timeslist[n-1];
+      }
+      i=istart;
+      while(hrrinfo->times[i]<times[n]&&i<hrrinfo->ntimes){
+        i++;
+      }
+      if(i>=hrrinfo->ntimes){
+        i--;
+      }
+      hrrinfo->timeslist[n]=i;
     }
 #endif
 

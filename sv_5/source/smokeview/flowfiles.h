@@ -686,8 +686,8 @@ typedef struct {
 typedef struct {
   char *file, hrrlabel[256];
   int loaded, display, *timeslist, itime;
-  float *times, *hrrval;
-  int ntimes;
+  float *times_csv, *times, *hrrval_csv, *hrrval;
+  int ntimes, ntimes_csv;
 } hrrdata;
 
 /* --------------------------  slice ------------------------------------ */
