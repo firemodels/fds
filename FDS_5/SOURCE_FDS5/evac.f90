@@ -3902,7 +3902,7 @@ Contains
     integer(4) ibar_tmp, jbar_tmp, kbar_tmp, n_tmp, n_egrids_tmp
     Real(FB) tmpout1, tmpout2, tmpout3, tmpout4, t_tmp, dt_tmp
     Real(FB) tmpout5, tmpout6, tmpout7, tmpout8
-    Real(EB) Z_1,Z_2,Z_3,Z_4
+    Real(EB) Z_1,Z_2,Z_3
     !
     If (ICYC < 1) Return
     !
@@ -3993,10 +3993,10 @@ Contains
                             Z_2 = 0._EB
                          End If
                          Z_3 = MESHES(nom)%YY(I1,J1,K1,I_PROG_F)
-                         Z_4 = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
+                         y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
                          ! Mass fraction array ==> soot density (mg/m3)
                          ! Next is for soot (mg/m3)
-                         Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,SOOT_INDEX,Z_4,Y_MF_INT)
+                         Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,SOOT_INDEX,y_extra,Y_MF_INT)
                          tmp_1 = Y_MF_INT*MESHES(nom)%RHO(i1,j1,k1)*1.E6_EB
                          HUMAN_GRID(i,j)%SOOT_DENS = tmp_1
                          ! Calculate Purser's fractional effective dose (FED)
@@ -4005,21 +4005,21 @@ Contains
                          ! CO:  (3.317E-5*RMV*t)/D
                          !      [RMV]=ltr/min, D=30% COHb concentration at incapacitation
                          ! Next is for CO (ppm)
-                         Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO_INDEX,Z_4,Y_MF_INT)
+                         Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO_INDEX,y_extra,Y_MF_INT)
                          tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/MESHES(nom)%RSUM(I1,J1,K1)
                          HUMAN_GRID(i,j)%FED_CO_CO2_O2 = 3.317E-5_EB*25.0_EB* &
                               tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
                          ! VCO2: CO2-induced hyperventilation
                          !      exp(0.1903*c_CO2(%) + 2.0004)
                          ! Next is for CO2
-                         Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO2_INDEX,Z_4,Y_MF_INT)
+                         Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO2_INDEX,y_extra,Y_MF_INT)
                          tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
                          HUMAN_GRID(i,j)%FED_CO_CO2_O2 = &
                               HUMAN_GRID(i,j)%FED_CO_CO2_O2*Exp( 0.1903_EB*tmp_1 &
                               *100.0_EB + 2.0004_EB )/7.1_EB
                          ! LO: low oxygen
                          ! Next is for O2
-                         Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,O2_INDEX,Z_4,Y_MF_INT)
+                         Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,O2_INDEX,y_extra,Y_MF_INT)
                          tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
                          If ( tmp_1 < 0.20_EB ) Then
                             HUMAN_GRID(i,j)%FED_CO_CO2_O2 = &
@@ -4078,31 +4078,31 @@ Contains
                    Z_2 = 0._EB
                 End If
                 Z_3 = MESHES(nom)%YY(I1,J1,K1,I_PROG_F)
-                Z_4 = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
+                y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
 
                 ! Mass fraction array ==> soot density (mg/m3)
                 ! Next is for soot (mg/m3)
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,SOOT_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,SOOT_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = Y_MF_INT*MESHES(nom)%RHO(i1,j1,k1)*1.E6_EB
                 EVAC_CORRS(i)%SOOT_DENS(1) = tmp_1
 
                 ! Calculate Purser's fractional effective dose (FED)
 
                 ! Next is for CO (ppm)
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/MESHES(nom)%RSUM(I1,J1,K1)
                 EVAC_CORRS(i)%FED_CO_CO2_O2(1) = 3.317E-5_EB*25.0_EB* &
                      tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
 
                 ! Next is for CO2
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO2_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO2_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
                 EVAC_CORRS(i)%FED_CO_CO2_O2(1) = &
                      EVAC_CORRS(i)%FED_CO_CO2_O2(1)*Exp( 0.1903_EB*tmp_1 &
                      *100.0_EB + 2.0004_EB )/7.1_EB
 
                 ! Next is for O2
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,O2_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,O2_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
                 If ( tmp_1 < 0.20_EB ) Then
                    EVAC_CORRS(i)%FED_CO_CO2_O2(1) = &
@@ -4137,31 +4137,31 @@ Contains
                    Z_2 = 0._EB
                 End If
                 Z_3 = MESHES(nom)%YY(I1,J1,K1,I_PROG_F)
-                Z_4 = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
+                y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
 
                 ! Mass fraction array ==> soot density (mg/m3)
                 ! Next is for soot (mg/m3)
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,SOOT_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,SOOT_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = Y_MF_INT*MESHES(nom)%RHO(i1,j1,k1)*1.E6_EB
                 EVAC_CORRS(i)%SOOT_DENS(2) = tmp_1
 
                 ! Calculate Purser's fractional effective dose (FED)
 
                 ! Next is for CO (ppm)
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/MESHES(nom)%RSUM(I1,J1,K1)
                 EVAC_CORRS(i)%FED_CO_CO2_O2(2) = 3.317E-5_EB*25.0_EB* &
                      tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
 
                 ! Next is for CO2
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO2_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO2_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
                 EVAC_CORRS(i)%FED_CO_CO2_O2(2) = &
                      EVAC_CORRS(i)%FED_CO_CO2_O2(2)*Exp( 0.1903_EB*tmp_1 &
                      *100.0_EB + 2.0004_EB )/7.1_EB
 
                 ! Next is for O2
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,O2_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,O2_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
                 If ( tmp_1 < 0.20_EB ) Then
                    EVAC_CORRS(i)%FED_CO_CO2_O2(2) = &
@@ -4225,31 +4225,31 @@ Contains
                    Z_2 = 0._EB
                 End If
                 Z_3 = MESHES(nom)%YY(I1,J1,K1,I_PROG_F)
-                Z_4 = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
+                y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
 
                 ! Mass fraction array ==> soot density (mg/m3)
                 ! Next is for soot (mg/m3)
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,SOOT_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,SOOT_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = Y_MF_INT*MESHES(nom)%RHO(i1,j1,k1)*1.E6_EB
                 EVAC_DOORS(i)%SOOT_DENS = tmp_1
 
                 ! Calculate Purser's fractional effective dose (FED)
 
                 ! Next is for CO (ppm)
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/MESHES(nom)%RSUM(I1,J1,K1)
                 EVAC_DOORS(i)%FED_CO_CO2_O2 = 3.317E-5_EB*25.0_EB* &
                      tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
 
                 ! Next is for CO2
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO2_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO2_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
                 EVAC_DOORS(i)%FED_CO_CO2_O2 = &
                      EVAC_DOORS(i)%FED_CO_CO2_O2*Exp( 0.1903_EB*tmp_1 &
                      *100.0_EB + 2.0004_EB )/7.1_EB
 
                 ! Next is for O2
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,O2_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,O2_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
                 If ( tmp_1 < 0.20_EB ) Then
                    EVAC_DOORS(i)%FED_CO_CO2_O2 = &
@@ -4305,31 +4305,31 @@ Contains
                    Z_2 = 0._EB
                 End If
                 Z_3 = MESHES(nom)%YY(I1,J1,K1,I_PROG_F)
-                Z_4 = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
+                y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
 
                 ! Mass fraction array ==> soot density (mg/m3)
                 ! Next is for soot (mg/m3)
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,SOOT_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,SOOT_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = Y_MF_INT*MESHES(nom)%RHO(i1,j1,k1)*1.E6_EB
                 EVAC_EXITS(i)%SOOT_DENS = tmp_1
 
                 ! Calculate Purser's fractional effective dose (FED)
 
                 ! Next is for CO (ppm)
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/MESHES(nom)%RSUM(I1,J1,K1)
                 EVAC_EXITS(i)%FED_CO_CO2_O2 = 3.317E-5_EB*25.0_EB* &
                      tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
 
                 ! Next is for CO2
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO2_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,CO2_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
                 EVAC_EXITS(i)%FED_CO_CO2_O2 = &
                      EVAC_EXITS(i)%FED_CO_CO2_O2*Exp( 0.1903_EB*tmp_1 &
                      *100.0_EB + 2.0004_EB )/7.1_EB
 
                 ! Next is for O2
-                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,O2_INDEX,Z_4,Y_MF_INT)
+                Call GET_MASS_FRACTION2(Z_1,Z_2,Z_3,O2_INDEX,y_extra,Y_MF_INT)
                 tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
                 If ( tmp_1 < 0.20_EB ) Then
                    EVAC_EXITS(i)%FED_CO_CO2_O2 = &
