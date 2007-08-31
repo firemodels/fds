@@ -307,7 +307,7 @@ char *get_chid(char *file){
         break;
       }
     }
-    if(found2nd==0)break;
+    break;
   }
   fclose(stream);
   if(found1st==0||found2nd==0)chidptr=NULL;
