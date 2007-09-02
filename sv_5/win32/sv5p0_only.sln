@@ -1,0 +1,43 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "smokeview", "sv5p0\smokeview\smokeview.vcproj", "{B5DE0296-0FDF-44C3-AE00-601041F7D042}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9CDA6255-175F-40F8-9BCF-8820879D179B} = {9CDA6255-175F-40F8-9BCF-8820879D179B}
+	EndProjectSection
+EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "smokeview_fort", "smokeview_fort\smokeview_fort\smokeview_fort.vfproj", "{9CDA6255-175F-40F8-9BCF-8820879D179B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		sv_test_dbg2|Win32 = sv_test_dbg2|Win32
+		sv5_test_debug|Win32 = sv5_test_debug|Win32
+		sv5_test|Win32 = sv5_test|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B5DE0296-0FDF-44C3-AE00-601041F7D042}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B5DE0296-0FDF-44C3-AE00-601041F7D042}.Debug|Win32.Build.0 = Debug|Win32
+		{B5DE0296-0FDF-44C3-AE00-601041F7D042}.Release|Win32.ActiveCfg = Release|Win32
+		{B5DE0296-0FDF-44C3-AE00-601041F7D042}.Release|Win32.Build.0 = Release|Win32
+		{B5DE0296-0FDF-44C3-AE00-601041F7D042}.sv_test_dbg2|Win32.ActiveCfg = sv_test_dbg2|Win32
+		{B5DE0296-0FDF-44C3-AE00-601041F7D042}.sv_test_dbg2|Win32.Build.0 = sv_test_dbg2|Win32
+		{B5DE0296-0FDF-44C3-AE00-601041F7D042}.sv5_test_debug|Win32.ActiveCfg = sv5_test_debug|Win32
+		{B5DE0296-0FDF-44C3-AE00-601041F7D042}.sv5_test_debug|Win32.Build.0 = sv5_test_debug|Win32
+		{B5DE0296-0FDF-44C3-AE00-601041F7D042}.sv5_test|Win32.ActiveCfg = sv5_test|Win32
+		{B5DE0296-0FDF-44C3-AE00-601041F7D042}.sv5_test|Win32.Build.0 = sv5_test|Win32
+		{9CDA6255-175F-40F8-9BCF-8820879D179B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9CDA6255-175F-40F8-9BCF-8820879D179B}.Debug|Win32.Build.0 = Debug|Win32
+		{9CDA6255-175F-40F8-9BCF-8820879D179B}.Release|Win32.ActiveCfg = Release|Win32
+		{9CDA6255-175F-40F8-9BCF-8820879D179B}.Release|Win32.Build.0 = Release|Win32
+		{9CDA6255-175F-40F8-9BCF-8820879D179B}.sv_test_dbg2|Win32.ActiveCfg = sv5_test_debug|Win32
+		{9CDA6255-175F-40F8-9BCF-8820879D179B}.sv_test_dbg2|Win32.Build.0 = sv5_test_debug|Win32
+		{9CDA6255-175F-40F8-9BCF-8820879D179B}.sv5_test_debug|Win32.ActiveCfg = sv5_test_debug|Win32
+		{9CDA6255-175F-40F8-9BCF-8820879D179B}.sv5_test_debug|Win32.Build.0 = sv5_test_debug|Win32
+		{9CDA6255-175F-40F8-9BCF-8820879D179B}.sv5_test|Win32.ActiveCfg = sv5_test|Win32
+		{9CDA6255-175F-40F8-9BCF-8820879D179B}.sv5_test|Win32.Build.0 = sv5_test|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
