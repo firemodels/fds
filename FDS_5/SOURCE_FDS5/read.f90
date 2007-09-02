@@ -3246,7 +3246,9 @@ RAMP_MF                 = 'null'
 RAMP_Q                  = 'null'
 RAMP_V                  = 'null'
 RAMP_T                  = 'null'
-RGB                     = -1
+RGB(1)                  = 255 
+RGB(2)                  = 204
+RGB(3)                  = 102
 SHRINK                  = .TRUE.
 IF (LES) SLIP_FACTOR    =  0.5_EB    ! Half slip
 IF (DNS) SLIP_FACTOR    = -1.0_EB    ! No slip
@@ -4114,9 +4116,6 @@ MESH_LOOP: DO NM=1,NMESHES
          CASE ('null')
             IF (ANY (RGB<0)) THEN
                OB%BCI=-1
-               RGB(1)   = 255
-               RGB(2)   = 235
-               RGB(3)   = 129   
             ELSE
                OB%BCI=-3
             ENDIF
@@ -4626,9 +4625,6 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
                CASE ('null')
                   IF (ANY (RGB<0)) THEN
                      OB%BCI=-1
-                     RGB(1)   = 255
-                     RGB(2)   = 235
-                     RGB(3)   = 129   
                   ELSE
                      OB%BCI=-3
                   ENDIF
