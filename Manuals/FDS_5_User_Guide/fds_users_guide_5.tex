@@ -246,7 +246,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, August 30, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, September 2, 2007)}
 
 \vspace{.5in}
 
@@ -2078,9 +2078,18 @@ long as the phrase {\ct PERMIT\_HOLE=.FALSE.} is included on the {\ct OBST} line
 any {\ct OBST}ruction can be made impenetrable to a {\ct HOLE} using this phrase. By default,
 {\ct PERMIT\_HOLE=.TRUE.}, meaning that an {\ct OBST}ruction is assumed to be penetrable unless
 otherwise directed.
+\item If the obstruction is not to be removed or rejected for any reason, set {\ct REMOVABLE=.FALSE.} This is sometimes needed to stop
+FDS from removing the obstruction if it is embedded within another, like a door within a wall.
+\item In rare cases, you might not want to allow a {\ct VENT} to be attached to a particular obstruction, in which case set
+{\ct ALLOW\_VENT=.FALSE.}
+\item Obstructions can be made semi-transparent by assigning a {\ct TRANSPARENCY} on the {\ct OBST} line. This real parameter ranges from
+0 to 1, with 0 being fully transparent. The parameter should always be set along with either {\ct COLOR} or an {\ct RGB} triplet. It can
+also be specified on the appropriate {\ct SURF} line, along with a color indicator.
+\item Obstructions are drawn solid in Smokeview. To draw an outline representation, set {\ct OUTLINE=.TRUE.}
 \end{itemize}
 
-\subsection{Non-rectangular Geometry and Sloped Ceilings}%Bryan
+\subsection{Non-rectangular Geometry and Sloped Ceilings}
+\label{info:SAWTOOTH}
 \index{Sawtooth}
 \index{Sloped Ceilings}
 The efficiency of FDS is due to the simplicity of its numerical mesh.
@@ -2097,6 +2106,8 @@ prescribe the parameter
 SAWTOOTH=.FALSE.
 \end{verbatim}
 \normalsize
+
+\noindent
 on each {\ct OBST} line that makes up the stair stepped obstruction.
 The effect of this parameter is to prevent vorticity from being generated
 at sharp corners, in effect smoothing out the jagged steps that make up
@@ -2154,7 +2165,8 @@ that the hole is to punch through the entire obstruction.
 
 When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or
 created or removed at pre-determined times. See Section~\ref{info:create_remove} for details.
-To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID} parameter respectively, to the {\ct HOLE} line.\index{HOLE!CTRL\_ID} \index{HOLE!DEVC\_ID}
+To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID}
+parameter respectively, to the {\ct HOLE} line.\index{HOLE!CTRL\_ID} \index{HOLE!DEVC\_ID}
 
 If it is desired that the obstruction(s) to be cut out should have a different color
 than the original obstruction, set the {\ct COLOR} \index{HOLE!COLOR} or integer triplet
@@ -2162,10 +2174,10 @@ than the original obstruction, set the {\ct COLOR} \index{HOLE!COLOR} or integer
 
 When a {\ct HOLE} is in a {\ct .FALSE.} state, an obstruction is placed in the hole.
 To make this obstruction transparent, the {\ct TRANSPARENCY}\index{HOLE!TRANSPARENCY} parameter should be specified by
-a real number from 0-1. This parameter could be used to simulate a window that initially has a high amount
-of transparency when the {\ct HOLE}'s {\ct INITIAL\_STATE=.FALSE.}. When the {\ct DEVC} or {\ct CTRL}
+a real number from 0-1. Note that if {\ct TRANSPARENCY} is specified, then either a {\ct COLOR} or {\ct RGB} triplet ought to be specified as well.
+A {\ct TRANSPARENCY} value near, but not equal to, zero can be used to simulate a window when the {\ct HOLE}'s {\ct INITIAL\_STATE=.FALSE.} When the {\ct DEVC} or {\ct CTRL}
 is activated and changes the state of the hole to {\ct .TRUE.}, the {\ct HOLE} is then open and completely transparent.
-See the 'create\_remove.fds' Verification case for an example.
+See the {\bf create\_remove.fds} Verification case for an example.
 
 If an obstruction is not to be punctured by a {\ct HOLE}, add
 {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.\index{OBST!PERMIT\_HOLE}
@@ -6441,24 +6453,24 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR    }           & Character           & Color name of obstruction color       &    &               \\ \hline
 {\ct CTRL\_ID }           & Character           & {\ct ID} of Controlling {\ct ConTRoL} &    &               \\ \hline
 {\ct DEVC\_ID }           & Character           & {\ct ID} of Controlling {\ct DEViCe}  &    &               \\ \hline
+%{\ct EVACUATION}          & Logical             & Only use for Evac case                &    & {\ct .FALSE.} \\ \hline
 {\ct FYI}                 & Character           & Comment String (has no effect)        &    &               \\ \hline
+%{\ct MESH\_ID}            & Character           & Only include in given mesh            &    &               \\ \hline
 {\ct OUTLINE}             & Logical             & Draw as Outline                       &    & {\ct .FALSE.} \\ \hline
 {\ct PERMIT\_HOLE}        & Logical             & Allow a Hole                          &    & {\ct .TRUE.}  \\ \hline
 {\ct REMOVABLE}           & Logical             & Allow obstruction to be removed       &    & {\ct .TRUE.}  \\ \hline
 {\ct RGB(3)}              & Integer Triplet     & Color indices (0 - 255)               &    &               \\ \hline
-{\ct SAWTOOTH}            & Logical             & Smooth Obstruction                    &    & {\ct .FALSE.} \\ \hline
+{\ct SAWTOOTH}            & Logical             & See Section~\ref{info:SAWTOOTH}       &    & {\ct .TRUE.}  \\ \hline
 {\ct SURF\_ID}            & Character           & Associated Surface                    &    &               \\ \hline
 {\ct SURF\_IDS(3)}        & Character Triplet   & Associated Surfaces (top,side,bot.)   &    &               \\ \hline
-{\ct SURF\_ID6(6)}        & Character Sextuplet & Associated Surfaces (like {\ct XB}    &    &               \\ \hline
-{\ct THICKEN}             & Logical             & No Thin Obstructions                  &    & {\ct .FALSE.} \\ \hline
-{\ct TEXTURE\_ORIGIN(3)}  & Real Triplet        & Coordinates of Texture Map            &    &               \\ \hline
-{\ct TRANSPARENCY}        & Real                & Transparency of obstruction           & 1  &               \\ \hline
+{\ct SURF\_ID6(6)}        & Character Sextuplet & Associated Surfaces (like {\ct XB})   &    &               \\ \hline
+{\ct THICKEN}             & Logical             & Force at least one cell thick         &    & {\ct .FALSE.} \\ \hline
+{\ct TEXTURE\_ORIGIN(3)}  & Real Triplet        & Coordinates of Texture Map            & m  &               \\ \hline
+{\ct TRANSPARENCY}        & Real                & Transparency indicator                &    &  1            \\ \hline
 {\ct XB(6) }              & Real Sextuplet      & Min/Max Physical coordinates          & m  &               \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /OBST/ XB,SURF_ID,SURF_IDS,SURF_ID6,FYI,BNDF_FACE,BNDF_OBST,SAWTOOTH,
-%                RGB,TRANSPARENCY,TEXTURE_ORIGIN,THICKEN, OUTLINE,DEVC_ID,CTRL_ID,COLOR,
-%                PERMIT_HOLE,ALLOW_VENT,EVACUATION,MESH_ID,REMOVABLE
+
 
 \vspace{\baselineskip}
 
