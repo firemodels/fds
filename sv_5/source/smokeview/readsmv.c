@@ -3214,7 +3214,15 @@ typedef struct {
       }
       else{
         parti->compression_type=0;
-        parti->file=parti->reg_file;
+        if(stat(parti->reg_file,&statbuffer)==0){
+          parti->file=parti->reg_file;
+        }
+        else{
+          FREEMEMORY(parti->reg_file);
+          FREEMEMORY(parti->comp_file);
+          FREEMEMORY(parti->size_file);
+          parti->file=NULL;
+        }
       }
       parti->compression_type=0;
       parti->sort_tags_loaded=0;
@@ -3248,11 +3256,12 @@ typedef struct {
         sscanf(buffer,"%i",&parti->nclasses);
         if(parti->nclasses>0){
 //          createnulllabel(&parti->label);
-          NewMemory((void **)&parti->partclassptr,parti->nclasses*sizeof(part5class *));
+          if(parti->file!=NULL)NewMemory((void **)&parti->partclassptr,parti->nclasses*sizeof(part5class *));
           for(i=0;i<parti->nclasses;i++){
             int iclass;
 
             fgets(buffer,255,stream);
+            if(parti->file==NULL)continue;
             sscanf(buffer,"%i",&iclass);
             if(iclass<1)iclass=1;
             if(iclass>parti->nclasses)iclass=parti->nclasses;
@@ -3260,7 +3269,7 @@ typedef struct {
           }
         }
         // if no classes were specifed for the prt5 entry then assign it the default class
-        if(parti->nclasses==0){
+        if(parti->file!=NULL&&parti->nclasses==0){
           NewMemory((void **)&parti->partclassptr,sizeof(part5class *));
             parti->partclassptr[i]=partclassinfo + parti->nclasses;
         }
