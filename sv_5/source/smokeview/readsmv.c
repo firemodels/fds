@@ -3264,7 +3264,12 @@ typedef struct {
           NewMemory((void **)&parti->partclassptr,sizeof(part5class *));
             parti->partclassptr[i]=partclassinfo + parti->nclasses;
         }
-        ipart++;
+        if(parti->file==NULL||stat(parti->file,&statbuffer)!=0){
+          npartinfo--;
+        }
+        else{
+          ipart++;
+        }
       }
       else{
         if(stat(buffer,&statbuffer)==0){
