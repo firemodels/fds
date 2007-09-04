@@ -183,4 +183,4 @@ main_mpi.o : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 
 
 .PHONY : clean
 clean:
-	-rm -f *.o *.mod
+	-rm -f *.o *.mod *.obj
