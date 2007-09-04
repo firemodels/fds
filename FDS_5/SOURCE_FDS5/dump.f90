@@ -2666,8 +2666,8 @@ USE MATH_FUNCTIONS, ONLY : RLE_COMPRESSION,TWO_BYTE_REAL
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: SUM,XI,YJ,ZK,DROPMASS,RVC
-INTEGER :: IFRMT,I,J,K,IPC,II,JJ,KK,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQQ,IND,NQ,NRLE,II1,II2,JJ1,JJ2,KK1,KK2
-REAL(EB), POINTER, DIMENSION(:,:,:) :: B,S,QUANTITY
+INTEGER :: IFRMT,I,J,K,IPC,II,JJ,KK,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQQ,IND,NQ,NRLE,II1,II2,JJ1,JJ2,KK1,KK2,IC
+REAL(EB), POINTER, DIMENSION(:,:,:) :: C,B,S,QUANTITY
 REAL(FB) :: ZERO,STIME
 LOGICAL :: D_FLUX,PLOT3D
 CHARACTER(1), ALLOCATABLE, DIMENSION(:) :: CVAL
@@ -2687,7 +2687,29 @@ B => WORK1
 B = 0._EB
 S => WORK2
 S = 0._EB
+C => WORK3  
+C = 1._EB  ! C is for cell face data (like U, V, W)
+
+! Zero out cell face data for ghost cells at the mesh edges
+
+C(0,0,0:KBP1) = 0._EB
+C(0,JBP1,0:KBP1) = 0._EB
+C(IBP1,0,0:KBP1) = 0._EB
+C(IBP1,JBP1,0:KBP1) = 0._EB
+C(0:IBP1,0,0) = 0._EB
+C(0:IBP1,0,KBP1) = 0._EB
+C(0:IBP1,JBP1,0) = 0._EB
+C(0:IBP1,JBP1,KBP1) = 0._EB
+C(0,0:JBP1,0) = 0._EB
+C(0,0:JBP1,KBP1) = 0._EB
+C(IBP1,0:JBP1,0) = 0._EB
+C(IBP1,0:JBP1,KBP1) = 0._EB
+
+IF (TWO_D) C(:,   0,:) = 0._EB
+IF (TWO_D) C(:,JBP1,:) = 0._EB
  
+! Zero out cell center data in all solid cells
+
 DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1
@@ -2873,7 +2895,18 @@ QUANTITY_LOOP: DO IQ=1,NQT
                CASE(CELL_CENTER)
                   QQ(I,J,K,IQQ) = CORNER_VALUE(QUANTITY,B,S,IND)
                CASE(CELL_FACE)
-                  QQ(I,J,K,IQQ) = FACE_VALUE(QUANTITY,B,S,OUTPUT_QUANTITY(IND)%IOR,IND)
+                  QQ(I,J,K,IQQ) = FACE_VALUE(QUANTITY,C,OUTPUT_QUANTITY(IND)%IOR,IND)
+                  IC = CELL_INDEX(I,J,K)
+                  IF (IC>0) THEN
+                     SELECT CASE(IND)
+                        CASE(6)
+                           IF (UVW_GHOST(IC,1)>-1.E5_EB) QQ(I,J,K,IQQ) = UVW_GHOST(IC,1)
+                        CASE(7)
+                           IF (UVW_GHOST(IC,2)>-1.E5_EB) QQ(I,J,K,IQQ) = UVW_GHOST(IC,2)
+                        CASE(8)
+                           IF (UVW_GHOST(IC,3)>-1.E5_EB) QQ(I,J,K,IQQ) = UVW_GHOST(IC,3)
+                     END SELECT
+                  ENDIF
                CASE(CELL_EDGE)
                   QQ(I,J,K,IQQ) = EDGE_VALUE(QUANTITY,B,S,IND)
             END SELECT
@@ -2939,32 +2972,38 @@ ENDIF
 END FUNCTION CORNER_VALUE
  
  
-REAL(EB) FUNCTION FACE_VALUE(A,B,S,IOR,INDX)
+REAL(EB) FUNCTION FACE_VALUE(A,C,IOR,INDX)
  
-REAL(EB), INTENT(IN), DIMENSION(0:,0:,0:) :: A,B,S
+REAL(EB), INTENT(IN), DIMENSION(0:,0:,0:) :: A,C
 INTEGER, INTENT(IN) :: IOR,INDX
+REAL(EB) :: SUM
 
-IF (S(I,J,K)==0._EB) THEN
-   FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
-ELSE
-   SELECT CASE(IOR)
-      CASE(1)
-         FACE_VALUE = S(I,J,K)*(A(I,J,K)    *B(I,J,K)     + A(I,J,K)    *B(I+1,J,K)   + &
-                                A(I,J,K+1)  *B(I,J,K+1)   + A(I,J,K+1)  *B(I+1,J,K+1) + &
-                                A(I,J+1,K)  *B(I,J+1,K)   + A(I,J+1,K)  *B(I+1,J+1,K) + &
-                                A(I,J+1,K+1)*B(I,J+1,K+1) + A(I,J+1,K+1)*B(I+1,J+1,K+1))
-      CASE(2)
-         FACE_VALUE = S(I,J,K)*(A(I,J,K)    *B(I,J,K)     + A(I+1,J,K)  *B(I+1,J,K)   + &
-                                A(I,J,K+1)  *B(I,J,K+1)   + A(I+1,J,K+1)*B(I+1,J,K+1) + &
-                                A(I,J,K)    *B(I,J+1,K)   + A(I+1,J,K)  *B(I+1,J+1,K) + &
-                                A(I,J,K+1)  *B(I,J+1,K+1) + A(I+1,J,K+1)*B(I+1,J+1,K+1))
-      CASE(3)
-         FACE_VALUE = S(I,J,K)*(A(I,J,K)    *B(I,J,K)     + A(I+1,J,K)  *B(I+1,J,K)   + &
-                                A(I,J,K)    *B(I,J,K+1)   + A(I+1,J,K)  *B(I+1,J,K+1) + &
-                                A(I,J+1,K)  *B(I,J+1,K)   + A(I+1,J+1,K)*B(I+1,J+1,K) + &
-                                A(I,J+1,K)  *B(I,J+1,K+1) + A(I+1,J+1,K)*B(I+1,J+1,K+1))
-   END SELECT
-ENDIF
+SELECT CASE(IOR)
+   CASE(1)
+      SUM = C(I,J,K)+C(I,J,K+1)+C(I,J+1,K)+C(I,J+1,K+1)
+      IF (SUM==0._EB) THEN
+         FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
+      ELSE
+         FACE_VALUE = ( A(I,J,K)  *C(I,J,K)   + A(I,J,K+1)  *C(I,J,K+1) + &
+                        A(I,J+1,K)*C(I,J+1,K) + A(I,J+1,K+1)*C(I,J+1,K+1) )/SUM
+      ENDIF
+   CASE(2)
+      SUM = C(I,J,K)+C(I,J,K+1)+C(I+1,J,K)+C(I+1,J,K+1)
+      IF (SUM==0._EB) THEN
+         FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
+      ELSE
+         FACE_VALUE = ( A(I,J,K)  *C(I,J,K)   + A(I,J,K+1)  *C(I,J,K+1) + &
+                        A(I+1,J,K)*C(I+1,J,K) + A(I+1,J,K+1)*C(I+1,J,K+1) )/SUM
+      ENDIF
+   CASE(3)
+      SUM = C(I,J,K)+C(I+1,J,K)+C(I,J+1,K)+C(I+1,J+1,K)
+      IF (SUM==0._EB) THEN
+         FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
+      ELSE
+         FACE_VALUE = ( A(I,J,K)  *C(I,J,K)   + A(I+1,J,K)  *C(I+1,J,K) + &
+                        A(I,J+1,K)*C(I,J+1,K) + A(I+1,J+1,K)*C(I+1,J+1,K) )/SUM
+      ENDIF
+END SELECT
  
 END FUNCTION FACE_VALUE
 
