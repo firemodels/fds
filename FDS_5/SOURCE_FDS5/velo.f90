@@ -906,9 +906,11 @@ SUBROUTINE VELOCITY_BC(T,NM)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
 REAL(EB) :: BC,MUA,T,FVT,UP,UM,VP,VM,WP,WM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY
-INTEGER  :: IBC,NOM1,NOM2,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2,NM,IE,II,JJ,KK,IEC
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
+INTEGER  :: I,J,K,IBC,NOM1,NOM2,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2,NM,IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y
 TYPE (SURFACE_TYPE), POINTER :: SF
+
+! Point to the appropriate velocity field
 
 IF (PREDICTOR) THEN
    UU => US
@@ -920,6 +922,26 @@ ELSE
    WW => W
 ENDIF
 
+! Set the boundary velocity place holder to some large negative number
+
+IF (CORRECTOR) THEN
+   UVW_GHOST = -1.E6_EB
+   U_Y => WORK1
+   U_Z => WORK2
+   V_X => WORK3
+   V_Z => WORK4
+   W_X => WORK5
+   W_Y => WORK6
+   U_Y = -1.E6_EB
+   U_Z = -1.E6_EB
+   V_X = -1.E6_EB
+   V_Z = -1.E6_EB
+   W_X = -1.E6_EB
+   W_Y = -1.E6_EB
+ENDIF
+
+! Loop over all cell edges and determine the appropriate velocity BCs
+
 EDGE_LOOP: DO IE=1,N_EDGES
 
    II   = IJKE( 1,IE)
@@ -927,6 +949,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
    KK   = IJKE( 3,IE)
    IEC  = IJKE( 4,IE)
    IBC  = IJKE( 5,IE)
+   IOR  = IJKE( 6,IE)
    NOM1 = IJKE( 7,IE)
    IIO1 = IJKE( 8,IE)
    JJO1 = IJKE( 9,IE)
@@ -945,30 +968,58 @@ EDGE_LOOP: DO IE=1,N_EDGES
  
       CASE(1) COMPONENT
 
-         VP = VV(II,JJ,KK+1)
-         VM = VV(II,JJ,KK)
-         WP = WW(II,JJ+1,KK)
-         WM = WW(II,JJ,KK)
-         IF (ABS(NOM1)==NM) THEN
-            IF (NOM1>0 .AND. BC<1.5_EB) VP = BC*VM
-            IF (NOM1>0 .AND. BC>1.5_EB) VP = FVT*SF%VEL_T(2)
-            IF (NOM1<0 .AND. BC<1.5_EB) VM = BC*VP
-            IF (NOM1<0 .AND. BC>1.5_EB) VM = FVT*SF%VEL_T(2)
+         ICMM = CELL_INDEX(II,JJ,KK)
+         ICMP = CELL_INDEX(II,JJ,KK+1)
+         ICPM = CELL_INDEX(II,JJ+1,KK)
+         ICPP = CELL_INDEX(II,JJ+1,KK+1)
+         VP   = VV(II,JJ,KK+1)
+         VM   = VV(II,JJ,KK)
+         WP   = WW(II,JJ+1,KK)
+         WM   = WW(II,JJ,KK)
+
+         IF (NOM1==NM) THEN
+            IWM = WALL_INDEX(ICMM, 3) 
+            IWP = WALL_INDEX(ICPM, 3) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) VP = BC*VM
+               IF (BC>1.5_EB) VP = FVT*SF%VEL_T(2)
+            ENDIF
          ENDIF
+         IF (NOM1==-NM) THEN
+            IWM = WALL_INDEX(ICMP,-3) 
+            IWP = WALL_INDEX(ICPP,-3) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) VM = BC*VP
+               IF (BC>1.5_EB) VM = FVT*SF%VEL_T(2)
+            ENDIF
+         ENDIF
+
+         IF (NOM2==NM) THEN
+            IWM = WALL_INDEX(ICMM, 2) 
+            IWP = WALL_INDEX(ICMP, 2) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) WP = BC*WM
+               IF (BC>1.5_EB) WP = FVT*SF%VEL_T(2)
+            ENDIF
+         ENDIF
+         IF (NOM2==-NM) THEN
+            IWM = WALL_INDEX(ICPM,-2) 
+            IWP = WALL_INDEX(ICPP,-2) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) WM = BC*WP
+               IF (BC>1.5_EB) WM = FVT*SF%VEL_T(2)
+            ENDIF
+         ENDIF
+
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
             IF (NOM1<0) VM = OMESH(ABS(NOM1))%V(IIO1,JJO1,KKO1)
             IF (NOM1>0) VP = OMESH(ABS(NOM1))%V(IIO1,JJO1,KKO1)
-         ENDIF
-         IF (ABS(NOM2)==NM) THEN
-            IF (NOM2>0 .AND. BC<1.5_EB) WP = BC*WM
-            IF (NOM2>0 .AND. BC>1.5_EB) WP = FVT*SF%VEL_T(2)
-            IF (NOM2<0 .AND. BC<1.5_EB) WM = BC*WP
-            IF (NOM2<0 .AND. BC>1.5_EB) WM = FVT*SF%VEL_T(2)
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
             IF (NOM2<0) WM = OMESH(ABS(NOM2))%W(IIO2,JJO2,KKO2)
             IF (NOM2>0) WP = OMESH(ABS(NOM2))%W(IIO2,JJO2,KKO2)
          ENDIF
+
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
          DVDZ = RDZN(KK)*(VP-VM)
          DWDY = RDYN(JJ)*(WP-WM)
@@ -978,33 +1029,65 @@ EDGE_LOOP: DO IE=1,N_EDGES
          IF (JJ==JBAR) WW(II,JJ+1,KK) = WP
          IF (KK==0)    VV(II,JJ,KK)   = VM
          IF (KK==KBAR) VV(II,JJ,KK+1) = VP
+         IF (CORRECTOR .AND. JJ>0 .AND. JJ<JBAR .AND. KK>0 .AND. KK<KBAR) THEN
+            W_Y(II,JJ,KK) = 0.5_EB*(WM+WP)
+            V_Z(II,JJ,KK) = 0.5_EB*(VM+VP)
+         ENDIF
  
       CASE(2) COMPONENT
 
-         UP = UU(II,JJ,KK+1)
-         UM = UU(II,JJ,KK)
-         WP = WW(II+1,JJ,KK)
-         WM = WW(II,JJ,KK)
-         IF (ABS(NOM1)==NM) THEN
-            IF (NOM1>0 .AND. BC<1.5_EB) UP = BC*UM
-            IF (NOM1>0 .AND. BC>1.5_EB) UP = FVT*SF%VEL_T(1)
-            IF (NOM1<0 .AND. BC<1.5_EB) UM = BC*UP
-            IF (NOM1<0 .AND. BC>1.5_EB) UM = FVT*SF%VEL_T(1)
+         ICMM = CELL_INDEX(II,JJ,KK)
+         ICMP = CELL_INDEX(II,JJ,KK+1)
+         ICPM = CELL_INDEX(II+1,JJ,KK)
+         ICPP = CELL_INDEX(II+1,JJ,KK+1)
+         UP   = UU(II,JJ,KK+1)
+         UM   = UU(II,JJ,KK)
+         WP   = WW(II+1,JJ,KK)
+         WM   = WW(II,JJ,KK)
+
+         IF (NOM1==NM) THEN
+            IWM = WALL_INDEX(ICMM, 3) 
+            IWP = WALL_INDEX(ICPM, 3) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) UP = BC*UM
+               IF (BC>1.5_EB) UP = FVT*SF%VEL_T(1)
+            ENDIF
          ENDIF
+         IF (NOM1==-NM) THEN
+            IWM = WALL_INDEX(ICMP,-3) 
+            IWP = WALL_INDEX(ICPP,-3) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) UM = BC*UP
+               IF (BC>1.5_EB) UM = FVT*SF%VEL_T(1)
+            ENDIF
+         ENDIF
+
+         IF (NOM2==NM) THEN
+            IWM = WALL_INDEX(ICMM, 1) 
+            IWP = WALL_INDEX(ICMP, 1) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) WP = BC*WM
+               IF (BC>1.5_EB) WP = FVT*SF%VEL_T(2)
+            ENDIF
+         ENDIF
+         IF (NOM2==-NM) THEN
+            IWM = WALL_INDEX(ICPM,-1) 
+            IWP = WALL_INDEX(ICPP,-1) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) WM = BC*WP
+               IF (BC>1.5_EB) WM = FVT*SF%VEL_T(2)
+            ENDIF
+         ENDIF
+
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
             IF (NOM1<0) UM = OMESH(ABS(NOM1))%U(IIO1,JJO1,KKO1)
             IF (NOM1>0) UP = OMESH(ABS(NOM1))%U(IIO1,JJO1,KKO1)
-         ENDIF
-         IF (ABS(NOM2)==NM) THEN
-            IF (NOM2>0 .AND. BC<1.5_EB) WP = BC*WM
-            IF (NOM2>0 .AND. BC>1.5_EB) WP = FVT*SF%VEL_T(2)
-            IF (NOM2<0 .AND. BC<1.5_EB) WM = BC*WP
-            IF (NOM2<0 .AND. BC>1.5_EB) WM = FVT*SF%VEL_T(2)
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
             IF (NOM2<0) WM = OMESH(ABS(NOM2))%W(IIO2,JJO2,KKO2)
             IF (NOM2>0) WP = OMESH(ABS(NOM2))%W(IIO2,JJO2,KKO2)
          ENDIF
+
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
          DUDZ = RDZN(KK)*(UP-UM)
          DWDX = RDXN(II)*(WP-WM)
@@ -1014,33 +1097,65 @@ EDGE_LOOP: DO IE=1,N_EDGES
          IF (II==IBAR) WW(II+1,JJ,KK) = WP
          IF (KK==0)    UU(II,JJ,KK)   = UM
          IF (KK==KBAR) UU(II,JJ,KK+1) = UP
- 
+         IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. KK>0 .AND. KK<KBAR) THEN
+            U_Z(II,JJ,KK) = 0.5_EB*(UM+UP) 
+            W_X(II,JJ,KK) = 0.5_EB*(WM+WP) 
+         ENDIF
+
       CASE(3) COMPONENT
 
-         UP = UU(II,JJ+1,KK)
-         UM = UU(II,JJ,KK)
-         VP = VV(II+1,JJ,KK)
-         VM = VV(II,JJ,KK)
-         IF (ABS(NOM1)==NM) THEN
-            IF (NOM1>0 .AND. BC<1.5_EB) UP = BC*UM
-            IF (NOM1>0 .AND. BC>1.5_EB) UP = FVT*SF%VEL_T(1)
-            IF (NOM1<0 .AND. BC<1.5_EB) UM = BC*UP
-            IF (NOM1<0 .AND. BC>1.5_EB) UM = FVT*SF%VEL_T(1)
+         ICMM = CELL_INDEX(II,JJ,KK)
+         ICMP = CELL_INDEX(II,JJ+1,KK)
+         ICPM = CELL_INDEX(II+1,JJ,KK)
+         ICPP = CELL_INDEX(II+1,JJ+1,KK)
+         UP   = UU(II,JJ+1,KK)
+         UM   = UU(II,JJ,KK)
+         VP   = VV(II+1,JJ,KK)
+         VM   = VV(II,JJ,KK)
+
+         IF (NOM1==NM) THEN
+            IWM = WALL_INDEX(ICMM, 2) 
+            IWP = WALL_INDEX(ICPM, 2) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) UP = BC*UM
+               IF (BC>1.5_EB) UP = FVT*SF%VEL_T(1)
+            ENDIF
          ENDIF
+         IF (NOM1==-NM) THEN
+            IWM = WALL_INDEX(ICMP,-2) 
+            IWP = WALL_INDEX(ICPP,-2) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) UM = BC*UP
+               IF (BC>1.5_EB) UM = FVT*SF%VEL_T(1)
+            ENDIF
+         ENDIF
+
+         IF (NOM2==NM) THEN
+            IWM = WALL_INDEX(ICMM, 1) 
+            IWP = WALL_INDEX(ICMP, 1) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) VP = BC*VM
+               IF (BC>1.5_EB) VP = FVT*SF%VEL_T(1)
+            ENDIF
+         ENDIF
+         IF (NOM2==-NM) THEN
+            IWM = WALL_INDEX(ICPM,-1) 
+            IWP = WALL_INDEX(ICPP,-1) 
+            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+               IF (BC<1.5_EB) VM = BC*VP
+               IF (BC>1.5_EB) VM = FVT*SF%VEL_T(1)
+            ENDIF
+         ENDIF
+
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
             IF (NOM1<0) UM = OMESH(ABS(NOM1))%U(IIO1,JJO1,KKO1)
             IF (NOM1>0) UP = OMESH(ABS(NOM1))%U(IIO1,JJO1,KKO1)
-         ENDIF
-         IF (ABS(NOM2)==NM) THEN
-            IF (NOM2>0 .AND. BC<1.5_EB) VP = BC*VM
-            IF (NOM2>0 .AND. BC>1.5_EB) VP = FVT*SF%VEL_T(1)
-            IF (NOM2<0 .AND. BC<1.5_EB) VM = BC*VP
-            IF (NOM2<0 .AND. BC>1.5_EB) VM = FVT*SF%VEL_T(1)
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
             IF (NOM2<0) VM = OMESH(ABS(NOM2))%V(IIO2,JJO2,KKO2)
             IF (NOM2>0) VP = OMESH(ABS(NOM2))%V(IIO2,JJO2,KKO2)
          ENDIF
+
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
          DVDX = RDXN(II)*(VP-VM)
          DUDY = RDYN(JJ)*(UP-UM)
@@ -1050,25 +1165,56 @@ EDGE_LOOP: DO IE=1,N_EDGES
          IF (II==IBAR) VV(II+1,JJ,KK) = VP
          IF (JJ==0)    UU(II,JJ,KK)   = UM
          IF (JJ==JBAR) UU(II,JJ+1,KK) = UP
+         IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. JJ>0 .AND. JJ<JBAR) THEN
+            U_Y(II,JJ,KK) = 0.5_EB*(UM+UP) 
+            V_X(II,JJ,KK) = 0.5_EB*(VM+VP) 
+         ENDIF
 
    END SELECT COMPONENT
 
-! For SAWTOOTH=.FALSE., zero out vorticity and strain at boundary
+   ! For SAWTOOTH=.FALSE., zero out vorticity and strain at boundary
 
-   IF (IJKE(6,IE)==0) THEN
+   IF (IOR==0) THEN
       OME_E(IE) = 0._EB
       TAU_E(IE) = 0._EB
    ENDIF
 
 ENDDO EDGE_LOOP
- 
+
+! Store cell node averages of the velocity components in UVW_GHOST for use in Smokeview
+
+IF (CORRECTOR) THEN
+   DO K=0,KBAR
+      DO J=0,JBAR
+         I_LOOP: DO I=0,IBAR
+            IC = CELL_INDEX(I,J,K) 
+            IF (IC==0) CYCLE I_LOOP
+            IF (U_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Y(I,J,K) 
+            IF (U_Y(I,J,K+1)>-1.E5_EB) UVW_GHOST(IC,1) = U_Y(I,J,K+1) 
+            IF (U_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Z(I,J,K) 
+            IF (U_Z(I,J+1,K)>-1.E5_EB) UVW_GHOST(IC,1) = U_Z(I,J+1,K) 
+            IF (V_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_X(I,J,K) 
+            IF (V_X(I,J,K+1)>-1.E5_EB) UVW_GHOST(IC,2) = V_X(I,J,K+1) 
+            IF (V_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_Z(I,J,K) 
+            IF (V_Z(I+1,J,K)>-1.E5_EB) UVW_GHOST(IC,2) = V_Z(I+1,J,K) 
+            IF (W_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_X(I,J,K) 
+            IF (W_X(I,J+1,K)>-1.E5_EB) UVW_GHOST(IC,3) = W_X(I,J+1,K) 
+            IF (W_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I,J,K) 
+            IF (W_Y(I+1,J,K)>-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I+1,J,K) 
+       !!!  UVW_GHOST(IC,1) = 0.25_EB*(U_Y(I,J,K)+U_Y(I,J,K+1)+U_Z(I,J,K)+U_Z(I,J+1,K)) 
+       !!!  UVW_GHOST(IC,2) = 0.25_EB*(V_X(I,J,K)+V_X(I,J,K+1)+V_Z(I,J,K)+V_Z(I+1,J,K)) 
+       !!!  UVW_GHOST(IC,3) = 0.25_EB*(W_X(I,J,K)+W_X(I,J+1,K)+W_Y(I,J,K)+W_Y(I+1,J,K)) 
+         ENDDO I_LOOP
+      ENDDO
+   ENDDO
+ENDIF
+
 END SUBROUTINE VELOCITY_BC 
  
  
 SUBROUTINE CHECK_STABILITY(NM)
  
-! Checks the Courant/Von Neumann stability criterion, and if necessary, 
-! reduces the time step accordingly
+! Checks the Courant and Von Neumann stability criteria, and if necessary, reduces the time step accordingly
  
 REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM
 INTEGER  :: NM,I,J,K

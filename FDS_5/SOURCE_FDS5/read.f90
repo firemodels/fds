@@ -4251,20 +4251,20 @@ MESH_LOOP_3: DO NM=1,NMESHES
    CELL_INDEX=>M%CELL_INDEX
  
    CELL_INDEX = 0 
-   NDBC       = 0
+   CELL_COUNT = 0
  
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,1
             IF (CELL_INDEX(I,J,K)==0) THEN
-               NDBC = NDBC + 1
-               CELL_INDEX(I,J,K) = NDBC
+               CELL_COUNT = CELL_COUNT + 1
+               CELL_INDEX(I,J,K) = CELL_COUNT
             ENDIF
          ENDDO
          DO I=IBAR,IBP1
             IF (CELL_INDEX(I,J,K)==0) THEN
-               NDBC = NDBC + 1
-               CELL_INDEX(I,J,K) = NDBC
+               CELL_COUNT = CELL_COUNT + 1
+               CELL_INDEX(I,J,K) = CELL_COUNT
             ENDIF
          ENDDO
       ENDDO
@@ -4274,14 +4274,14 @@ MESH_LOOP_3: DO NM=1,NMESHES
       DO I=0,IBP1
          DO J=0,1
             IF (CELL_INDEX(I,J,K)==0) THEN
-               NDBC = NDBC + 1
-               CELL_INDEX(I,J,K) = NDBC
+               CELL_COUNT = CELL_COUNT + 1
+               CELL_INDEX(I,J,K) = CELL_COUNT
             ENDIF
          ENDDO
          DO J=JBAR,JBP1
             IF (CELL_INDEX(I,J,K)==0) THEN
-               NDBC = NDBC + 1
-               CELL_INDEX(I,J,K) = NDBC
+               CELL_COUNT = CELL_COUNT + 1
+               CELL_INDEX(I,J,K) = CELL_COUNT
             ENDIF
          ENDDO
       ENDDO
@@ -4291,14 +4291,14 @@ MESH_LOOP_3: DO NM=1,NMESHES
       DO I=0,IBP1
          DO K=0,1
             IF (CELL_INDEX(I,J,K)==0) THEN
-               NDBC = NDBC + 1
-               CELL_INDEX(I,J,K) = NDBC
+               CELL_COUNT = CELL_COUNT + 1
+               CELL_INDEX(I,J,K) = CELL_COUNT
             ENDIF
          ENDDO
          DO K=KBAR,KBP1
             IF (CELL_INDEX(I,J,K)==0) THEN
-               NDBC = NDBC + 1
-               CELL_INDEX(I,J,K) = NDBC
+               CELL_COUNT = CELL_COUNT + 1
+               CELL_INDEX(I,J,K) = CELL_COUNT
             ENDIF
          ENDDO
       ENDDO
@@ -4310,8 +4310,8 @@ MESH_LOOP_3: DO NM=1,NMESHES
          DO J=OB%J1,OB%J2+1
             DO I=OB%I1,OB%I2+1
                IF (CELL_INDEX(I,J,K)==0) THEN
-                  NDBC = NDBC + 1
-                  CELL_INDEX(I,J,K) = NDBC
+                  CELL_COUNT = CELL_COUNT + 1
+                  CELL_INDEX(I,J,K) = CELL_COUNT
                ENDIF
             ENDDO
          ENDDO
@@ -4320,11 +4320,11 @@ MESH_LOOP_3: DO NM=1,NMESHES
  
    ! Store in SOLID which cells are solid and which are not
  
-   ALLOCATE(M%SOLID(0:NDBC),STAT=IZERO) 
+   ALLOCATE(M%SOLID(0:CELL_COUNT),STAT=IZERO) 
    CALL ChkMemErr('READ','SOLID',IZERO) 
    M%SOLID = .FALSE.
    SOLID=>M%SOLID
-   ALLOCATE(M%OBST_INDEX_C(0:NDBC),STAT=IZERO) 
+   ALLOCATE(M%OBST_INDEX_C(0:CELL_COUNT),STAT=IZERO) 
    CALL ChkMemErr('READ','OBST_INDEX_C',IZERO) 
    M%OBST_INDEX_C = 0
    OBST_INDEX_C=>M%OBST_INDEX_C 
@@ -4346,13 +4346,13 @@ MESH_LOOP_3: DO NM=1,NMESHES
       IF (.NOT.OB%HIDDEN) CALL BLOCK_CELL(NM,OB%I1+1,OB%I2,OB%J1+1,OB%J2,OB%K1+1,OB%K2,1,N)
    ENDDO
  
-   ALLOCATE(M%I_CELL(NDBC),STAT=IZERO) 
+   ALLOCATE(M%I_CELL(CELL_COUNT),STAT=IZERO) 
    CALL ChkMemErr('READ','I_CELL',IZERO) 
    M%I_CELL = -1
-   ALLOCATE(M%J_CELL(NDBC),STAT=IZERO) 
+   ALLOCATE(M%J_CELL(CELL_COUNT),STAT=IZERO) 
    CALL ChkMemErr('READ','J_CELL',IZERO) 
    M%J_CELL = -1
-   ALLOCATE(M%K_CELL(NDBC),STAT=IZERO) 
+   ALLOCATE(M%K_CELL(CELL_COUNT),STAT=IZERO) 
    CALL ChkMemErr('READ','K_CELL',IZERO) 
    M%K_CELL = -1
    I_CELL=>M%I_CELL 
