@@ -546,6 +546,7 @@ void create_part5sizefile(char *reg_file, char *size_file){
   if(PART5FILE==NULL)return;
   size_stream=fopen(size_file,"w");
   if(size_stream==NULL){
+    printf("*** warning:  unable to write to %s\n",size_file);
     fclose(PART5FILE);
     return;
   }
@@ -1001,8 +1002,13 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     FORTgetsizes2(&settmin_p,&tmin_p,&settmax_p,&tmax_p,
                      &nspr, &partframestep, &partpointstep, &npartpoints, &npartframes, &error);
     sizefile=fopen(partsizefile,"w");
-    if(sizefile!=NULL)fprintf(sizefile,"%i %i %i %i %i %i %i %i %i",
+    if(sizefile!=NULL){
+      fprintf(sizefile,"%i %i %i %i %i %i %i %i %i",
           nb,nv,nspr,mxframepoints,staticframe0,npartpoints,npartframes,partframestep,partpointstep);
+    }
+    else{
+      printf("*** warning:  unable to write to %s\n",partsizefile);
+    }
     FORTgetsizes(file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian,&staticframe0,&error,lenfile);
   }
   npartpoints2=npartpoints;
