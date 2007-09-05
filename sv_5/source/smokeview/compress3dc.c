@@ -46,7 +46,10 @@ void CCsmoke3dheader(char *file,int *is1, int *is2, int *js1, int *js2, int *ks1
 
 
   binfile=fopen(file,"wb");
-  if(binfile==NULL)return;
+  if(binfile==NULL){
+    printf("*** warning:  unable to write to %s\n",file);
+    return;
+  }
   fwrite(nxyz,  4,1,binfile);
   fwrite(nxyz+1,4,7,binfile);
   fclose(binfile);
@@ -57,6 +60,9 @@ void CCsmoke3dheader(char *file,int *is1, int *is2, int *js1, int *js2, int *ks1
   if(textfile!=NULL){
     fprintf(textfile,"%i\n",VERSION);
     fclose(textfile);
+  }
+  else{
+    printf("*** warning:  unable to write to %s\n",textfilename);
   }
 }
 

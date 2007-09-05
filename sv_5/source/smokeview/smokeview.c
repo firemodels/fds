@@ -3084,9 +3084,7 @@ void RenderFrame(int view_mode){
     }
     if(stream!=NULL)fclose(stream);
   }
-  printf("Rendering to: %s .",renderfile);
   SVimage2file(renderfile,renderfiletype,screenWidth,screenHeight);
-  printf(" Completed.\n");
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }

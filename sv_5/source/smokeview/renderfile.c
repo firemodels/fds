@@ -104,6 +104,7 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   printf("Rendering to: %s .",renderfile);
   RENDERfile = fopen(renderfile, "wb");
   if (RENDERfile == NULL) {
+    printf("*** warning: unable to write to %s\n",renderfile);
     return 1;
   }
   RENDERimage = gdImageCreateTrueColor(2*screenWidth,2*screenHeight);
@@ -186,6 +187,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
   RENDERfile = fopen(RENDERfilename, "wb");
   if (RENDERfile == NULL) {
+    printf("*** warning:  unable to write to %s\n",RENDERfilename);
     return 1;
   }
   OpenGLimage = (GLubyte *) malloc(width * height * sizeof(GLubyte) * 3);
@@ -194,6 +196,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
     pauseSV();
     exit(1);
   }
+  printf("Rendering to: %s .",RENDERfilename);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
   /* get the image from the OpenGL frame buffer */
@@ -238,6 +241,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
   gdImageDestroy(RENDERimage);
   free(OpenGLimage);
+  printf(" Completed.\n");
   return 0;
 }
 
