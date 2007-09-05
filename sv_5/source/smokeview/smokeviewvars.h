@@ -36,6 +36,7 @@ SVEXTERN int spotlight;
 SVEXTERN int n_tcpdata, tcp_test;
 #endif
 
+SVEXTERN int force_isometric;
 SVEXTERN int updategluiview;
 SVEXTERN int render_double,render_double_state;
 SVEXTERN int usetexturebar;

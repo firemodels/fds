@@ -913,6 +913,7 @@ void InitOpenGL(void){
 
 void initvars1(void){
 
+  force_isometric=0;
 #ifdef pp_SPOTLIGHT
   spotlight=0;
 #endif
