@@ -4488,7 +4488,9 @@ typedef struct {
  */
 
   CheckMemory;
-
+  if(meshinfo!=NULL&&meshinfo->jbar==1){
+    force_isometric=1;
+  }
 #ifdef pp_HRR
   if(hrrfilename!=NULL){
     readhrr(LOAD, &errorcode);

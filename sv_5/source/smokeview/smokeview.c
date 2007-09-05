@@ -1013,6 +1013,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(updateindexcolors==1){
     UpdateIndexColors();
   }
+  if(force_isometric==1){
+    force_isometric=0;
+    projection_type=0;
+    ZoomMenu(-2);
+  }
+
 
   updateShow();
   if(times!=NULL&&updateUpdateFrameRateMenu==1)sv_FrameRateMenu(frameratevalue);
