@@ -3031,21 +3031,98 @@ SUBROUTINE UPDATE_DEVICES(T,NM)
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION2
 USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_STRINGS
 REAL(EB), INTENT(IN) :: T
-REAL(EB) :: VALUE
-INTEGER :: NM,N
+REAL(EB) :: VALUE,STAT_VALUE
+INTEGER :: NM,N,I,J,K,STAT_COUNT,IW,IBC
+LOGICAL :: NOT_FOUND
  
 CALL POINT_TO_MESH(NM)
+
 DEVICE_LOOP: DO N=1,N_DEVC
+
    DV => DEVICE(N)
    IF (DV%MESH/=NM) CYCLE DEVICE_LOOP
    DV%PRIOR_STATE = DV%CURRENT_STATE
    PY => PROPERTY(DV%PROP_INDEX)
  
+   ! Initial values for statistics
+
+   NOT_FOUND  = .TRUE.
+   STAT_COUNT =  0
+   SELECT CASE(DV%STATISTICS)
+      CASE('MAX')
+         STAT_VALUE = -HUGE(0.0_EB) + 1.0_EB
+      CASE('MIN')
+         STAT_VALUE =  HUGE(0.0_EB) - 1.0_EB
+      CASE('MEAN')
+         STAT_VALUE =  0.0_EB
+   END SELECT
+
+   ! Select either gas or solid phase output quantity
+
    GAS_OR_SOLID_PHASE: IF (DV%OUTPUT_INDEX>0) THEN 
-      VALUE = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,T)
+
+      GAS_STATS: IF (DV%STATISTICS=='null') THEN
+
+         VALUE = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,T)
+
+      ELSE GAS_STATS
+
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  NOT_FOUND = .FALSE.
+                  SELECT CASE(DV%STATISTICS)
+                     CASE('MAX')
+                        STAT_VALUE = MAX(STAT_VALUE, GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T))
+                     CASE('MIN')
+                        STAT_VALUE = MIN(STAT_VALUE, GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T))
+                     CASE('MEAN')
+                        STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)
+                        STAT_COUNT = STAT_COUNT + 1
+                  END SELECT
+               ENDDO
+            ENDDO
+         ENDDO
+
+      ENDIF GAS_STATS
+
    ELSE GAS_OR_SOLID_PHASE            
-      VALUE  = SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX))
+
+      SOLID_STATS: IF (DV%STATISTICS=='null') THEN
+
+         VALUE = SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX))
+
+      ELSE SOLID_STATS
+
+         WALL_CELL_LOOP: DO IW=1,NWC
+            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE WALL_CELL_LOOP
+            IBC = IJKW(5,IW)
+            IF (DV%SURF_ID=='null' .OR. SURF_NAME(IBC)==DV%SURF_ID) THEN
+               NOT_FOUND = .FALSE.
+               SELECT CASE(DV%STATISTICS)
+                  CASE('MAX')
+                     STAT_VALUE = MAX(STAT_VALUE,SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX)))
+                  CASE('MIN')
+                     STAT_VALUE = MIN(STAT_VALUE,SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX)))
+                  CASE('MEAN')
+                     STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX))
+                     STAT_COUNT = STAT_COUNT + 1
+               END SELECT
+            ENDIF
+         ENDDO WALL_CELL_LOOP
+
+      ENDIF SOLID_STATS
+
    ENDIF GAS_OR_SOLID_PHASE
+
+   ! Update DEViCe values
+
+   IF (DV%STATISTICS/='null') THEN
+      IF (NOT_FOUND) STAT_VALUE = 0._EB
+      STAT_COUNT = MAX(STAT_COUNT,1)
+      VALUE = STAT_VALUE/REAL(STAT_COUNT,EB)
+   ENDIF
 
    DV%COUNT         = DV%COUNT + 1
    DV%VALUE         = DV%VALUE + VALUE
@@ -3082,6 +3159,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
    ENDIF LATCHIF
    
    ! If a DEViCe changes state, save the Smokeview file strings and time of state change
+
    IF (DV%CURRENT_STATE .NEQV. DV%PRIOR_STATE) THEN
       DV%T_CHANGE = T
       M=>MESHES(NM)
