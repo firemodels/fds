@@ -932,8 +932,11 @@ void ZoomMenu(int value){
     if(projection_type!=1){
       projection_type=1;
 //      zoom=zooms[2];
-      update_projection_type();
     }
+    else{
+      projection_type=0;
+    }
+    update_projection_type();
     ResetView(RESTORE_EXTERIOR_VIEW);
   }
   else{
@@ -5000,8 +5003,8 @@ static int textureshowmenu=0;
   if(zoomindex==4)glutAddMenuEntry("*4.0",4);
   if(zoomindex!=4)glutAddMenuEntry("4.0",4);
   glutAddMenuEntry("-",999);
-  if(zoomindex==-2)glutAddMenuEntry("*Isometric",-2);
-  if(zoomindex!=-2)glutAddMenuEntry("Isometric",-2);
+  if(projection_type==1)glutAddMenuEntry("*Isometric",-2);
+  if(projection_type==0)glutAddMenuEntry("Isometric",-2);
 
 
 

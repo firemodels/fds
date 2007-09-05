@@ -283,6 +283,7 @@ extern "C" void glui_motion_setup(int main_window){
   showhide_translate(eyeview);
   glui_motion->set_main_gfx_window( main_window );
 }
+
 /* ------------------ enable_disable_views ------------------------ */
 
 void enable_disable_views(void){
@@ -380,6 +381,8 @@ extern "C" void update_translate(void){
   rotate_zx->set_y(angle_zx[1]);
   eyerotate_z->set_x(camera_current->direction_angle);
 }
+
+/* ------------------ update_projection_type ------------------------ */
 
 extern "C" void update_projection_type(void){
   if(projection_radio!=NULL)projection_radio->set_int_val(projection_type);
