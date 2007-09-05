@@ -2250,7 +2250,11 @@ meshes, possibly leading to confusion about whether a plane is a solid
 wall or an open boundary. Check the geometry in Smokeview to assure that
 the {\ct VENT}s are properly prescribed. Use color as much as
 possible to double-check the set-up.  More detail on color in
-Section~\ref{info:colors} and Table \ref{tab:colors}.
+Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct OUTLINE=.TRUE.} causes the
+{\ct VENT} to be drawn as an outline in Smokeview.
+
+
+\subsection{Special {\tt VENT}s}
 
 There are two reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT}.
 The first is {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT}
@@ -2288,6 +2292,15 @@ Section~\ref{info:ZONE} for instructions on specifying different types of fans.
 \end{warning}
 
 
+\subsection{Controlling {\tt VENT}s}
+
+{\ct VENT} functionality can be controlled in some cases using ``devices'' and ``controls,'' specified via a {\ct DEVC\_ID} or a {\ct CTRL\_ID}.
+See Section~\ref{info:activate_deactivate} for details.
+
+
+
+\subsection{Trouble-Shooting {\tt VENT}s}
+
 If an error message appears requesting that \index{Troubleshooting!VENT Orientation}
 the orientation of a vent be specified, first check to make sure that the vent is a plane.
 If the vent is a plane, then the orientation can be forced by specifying the parameter {\ct IOR}.
@@ -2299,7 +2312,11 @@ the {\ct VENT} is buried within a solid obstruction, in which case the program c
 the direction in which the {\ct VENT} is facing.
 
 
-To allow a vent to be controlled with the {\ct CTRL} namelist, you will need to add the {\ct CTRL\_ID} parameter to the {\ct VENT} line.\index{VENT!CTRL\_ID}
+
+
+
+
+
 
 
 
@@ -2644,6 +2661,7 @@ turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} 
 
 
 \subsection{Special Topic: A Radially-Spreading Fire}
+\label{info:spread}
 \index{radial fire spread}
 \index{SURF!RAMP\_Q}
 \index{SURF!HRRPUA}
@@ -5454,6 +5472,26 @@ use in the integration, and it chooses the finest mesh overlapping
 the centroid of the designated plane or volume.
 
 
+\subsection{Output Statistics}
+\label{info:statistics}
+\index{Output!Statistics}
+
+A useful feature of a device ({\ct DEVC}) is to specify an output quantity along with a desired statistic. For example,
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=2.3,4.5,6.7, QUANTITY='TEMPERATURE', ID='whatever', STATISTICS='MAX' /
+\end{verbatim}
+\normalsize
+
+\noindent
+causes FDS to write out the maximum gas phase temperature over the entire mesh containing the point {\ct XYZ}. Note that it
+does not compute the maximum over the entire computational domain, just that particular mesh. Other {\ct STATISTICS} include
+{\ct 'MIN'} and {\ct 'MEAN'}. They can be used for both gas and solid phase output quantities. In the case of solids, the
+specification of a {\ct SURF\_ID} limits the search to only those surfaces. Use the {\ct STATISTICS} feature with caution because
+it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
+
+
 
 
 \subsection{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}%Simo
@@ -6155,6 +6193,8 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct QUANTITY}         & Character       & Name of Quantity to output                                       &       &         \\ \hline
 {\ct ROTATION}         & Real Triplet    & Rotation Angle                                                   & deg   & 0       \\ \hline
 {\ct SETPOINT}         & Real            & Value at which device changes state                              &       &         \\ \hline
+{\ct STATISTICS}       & Character       & See Section~\ref{info:statistics}                                &       &         \\ \hline
+{\ct SURF\_ID}         & Character       & See Section~\ref{info:statistics}                                &       &         \\ \hline
 {\ct TRIP\_DIRECTION}  & Integer         & Sign of derivative at first state change                         &       &  1      \\ \hline
 {\ct XB(6)}            & Real Sextuplet  & Coordinates of non-point measurement                             & m     &         \\ \hline
 {\ct XYZ}              & Real Triplet    & Physical coordinates                                             & m     &         \\ \hline
@@ -6389,13 +6429,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\ \hline \hline
-{\ct ASSUMED\_GAS\_TEMPERATURE} & Real          & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
+{\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE} & Real & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
 {\ct BACKGROUND\_SPECIES}       & Character     & See Section~\ref{info:SPEC}                   &               & {\ct 'AIR'}       \\ \hline
 {\ct BAROCLINIC}                & Logical       & Baroclinic torque correction                  &               & {\ct .FALSE.}     \\ \hline
 {\ct BNDF\_DEFAULT}             & Logical       & See Section~\ref{info:BNDF}                   &               & {\ct .TRUE.}      \\ \hline
-{\ct CFL\_MAX}                  & Real          & Upper bound of CFL stability range            &               & 1.0               \\ \hline
-{\ct CFL\_MIN}                  & Real          & Lower bound of CFL stability range            &               & 0.8               \\ \hline
+{\ct CFL\_MAX}                  & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
+{\ct CFL\_MIN}                  & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
 %{\ct CHECK\_POISSON}            & Logical       & Poisson solver diagnostic print out           &               & {\ct .FALSE.}     \\ \hline
+%{\ct C\_FORCED}                 & Real          & Convective heat transfer coefficient          &               & 0.037             \\ \hline
+%{\ct C\_HORIZONTAL}             & Real          & Convective heat transfer coefficient          &               & 1.52             \\ \hline
+%{\ct C\_VERTICAL}               & Real          & Convective heat transfer coefficient          &               & 1.31             \\ \hline
 {\ct CSMAG}                     & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
 {\ct CONDUCTIVITY}              & Real          & See Section~\ref{info:SPEC}                   &  W/m/K        &                   \\ \hline
 {\ct CO\_PRODUCTION}            & Logical       & See Section~\ref{info:combustion}             &               & {\ct .FALSE.}     \\ \hline
@@ -6404,6 +6447,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct EVAC\_SURF\_DEFAULT}       & Character     & Default SURFace type for Evac Model           &               & {\ct 'INERT'}     \\ \hline
 %{\ct EVAC\_TIME\_ITERATIONS}    & Character     & Time iterations for Evac Model                &               &                   \\ \hline
 {\ct FYI}                       & Character     & Comment String (has no effect)                &               &                   \\ \hline
+%{\ct GAMMA}                     & Real          & Ratio of specific heats                       &               & 1.4               \\ \hline
 {\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
 {\ct H\_FIXED}                  & Real          & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
 {\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
@@ -6434,13 +6478,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
 {\ct U0,V0,W0}                  & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
 {\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
-{\ct VN\_MAX}                   & Real          & Von Neumann upper bound                       &               & 1.0               \\ \hline
-{\ct VN\_MIN}                   & Real          & Von Neumann lower bound                       &               & 0.8               \\ \hline
+{\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
+{\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /MISC/
-%                C_FORCED,C_VERTICAL,C_HORIZONTAL,H_FIXED,
-%                GAMMA,TEXTURE_ORIGIN
+
 
 \vspace{\baselineskip}
 
@@ -6579,12 +6621,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BEAD\_DIAMETER}                    & Real          & Diameter of TC bead              & m                     & 0.001     \\ \hline
 {\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of TC bead            &                       & 0.85      \\ \hline
 {\ct C\_FACTOR}                         & Real          & Sprinkler activation parameter   &                       & 0.        \\ \hline
-{\ct CHARACTERISTIC\_VELOCITY}          & Real          & Free stream wind speed           & m/s                   & 1.0       \\ \hline
+{\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}      & m/s                   & 1.0       \\ \hline
 {\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity         & m/s                   & 5.0       \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Sprinkler or nozzle flow rate    & L/min                 &           \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & Time {\ct RAMP} for flow         &                       &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & Time constant for flow           &                       & 0.0       \\ \hline
-{\ct GAUGE\_TEMPERATURE}                & Real          & Temp.~of Heat Flux Gauge         & $^\circ$C             & {\ct TMPA}\\ \hline
+{\ct GAUGE\_TEMPERATURE}                & Real          & See Section~\ref{info:heat_flux} & $^\circ$C             & {\ct TMPA}\\ \hline
 {\ct ID}                                & Character     & IDentifier                       &                       &           \\ \hline
 {\ct INITIAL\_TEMPERATURE}              & Real          & Initial link temperature         & $^\circ$C             & {\ct TMPA}\\ \hline
 {\ct K\_FACTOR}                         & Real          & Flow parameter                   & L/min/atm$^{1/2}$     & 1.        \\ \hline
@@ -6592,17 +6634,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct OFFSET}                            & Real          & Droplet offset distance          & m                     & 0.05      \\ \hline
 {\ct OPERATING\_PRESSURE}               & Real          & Sprinkler pipe pressure          & atm                   & 1.        \\ \hline
 {\ct PART\_ID}                          & Character     & Name of associated PART line     &                       &           \\ \hline
-{\ct QUANTITY}                          & Character     & Name of associate output         &                       &           \\ \hline
-{\ct RTI}                               & Real          & Response Time Index              & $\sqrt{\hbox{m~s}}$   & 100       \\ \hline
-{\ct SPRAY\_ANGLE(2)}                   & Real          & Cone angles for water spray      & deg                   & 60.,75.   \\ \hline
-{\ct SPRAY\_PATTERN\_TABLE}             & Character     & {\ct TABL} fpr the spray pattern &                       &        s   \\ \hline
+{\ct QUANTITY}                          & Character     & Name of associated output        &                       &           \\ \hline
+{\ct RTI}                               & Real          & Response Time Index              & $\sqrt{\hbox{m~s}}$   & 100.      \\ \hline
 {\ct SMOKEVIEW\_ID}                     & Character     & Name of drawn object             &                       &           \\ \hline
+{\ct SPRAY\_ANGLE(2)}                   & Real          & Cone angles for water spray      & deg                   & 60.,75.   \\ \hline
+{\ct SPRAY\_PATTERN\_TABLE}             & Character     & {\ct TABL} for spray pattern     &                       &           \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /PROP/ ACTIVATION_OBSCURATION,ACTIVATION_TEMPERATURE,ALPHA_C,ALPHA_E,BETA_C,BETA_E,BEAD_DIAMETER,
-%                BEAD_EMISSIVITY,C_FACTOR,CHARACTERISTIC_VELOCITY,DROPLET_VELOCITY,FLOW_RATE,
-%                FLOW_RAMP,FLOW_TAU,ID,GAUGE_TEMPERATURE,INITIAL_TEMPERATURE,K_FACTOR,LENGTH,OFFSET,
-%                OPERATING_PRESSURE,PART_ID,QUANTITY,RTI,SPRAY_ANGLE,SMOKEVIEW_ID,SPRAY_PATTERN_TABLE
+
 
 \vspace{\baselineskip}
 
@@ -6645,13 +6684,17 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\ \hline \hline
-{\ct F}         & Real          & Function value                 &                     &     \\ \hline
-{\ct FYI}       & Character     & Comment String (has no effect) &                     &     \\ \hline
-{\ct ID}        & Character     & Identifier                     &                     &     \\ \hline
-{\ct T}         & Real          & Time (or Temperature)          & s (or $^\circ$C)    &     \\ \hline
+%{\ct CTRL\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &     \\ \hline
+%{\ct DEVC\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &     \\ \hline
+{\ct FYI}                           & Character     & Comment String (has no effect)    &                       &     \\ \hline
+{\ct F}                             & Real          & Function value                    &                       &     \\ \hline
+{\ct FYI}                           & Character     & Comment String (has no effect)    &                       &     \\ \hline
+%{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Points in interpolation function  &                       &  5000   \\ \hline
+{\ct ID}                            & Character     & Identifier                        &                       &     \\ \hline
+{\ct T}                             & Real          & Time (or Temperature)             & s (or $^\circ$C)      &     \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /RAMP/ T,F,ID,FYI,NUMBER_INTERPOLATION_POINTS,DEVC_ID,CTRL_ID
+
 
 \vspace{\baselineskip}
 
@@ -6923,9 +6966,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PC    }            & Real          & Physical coordinate or derivative  &              &     \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /TRNX/ IDERIV,CC,PC,FYI,MESH_NUMBER
-%NAMELIST /TRNY/ IDERIV,CC,PC,FYI,MESH_NUMBER
-%NAMELIST /TRNZ/ IDERIV,CC,PC,FYI,MESH_NUMBER
 
 \vspace{\baselineskip}
 
@@ -6942,25 +6982,26 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\ \hline \hline
-{\ct COLOR    }             & Character         & Color name                        &             &                     \\ \hline
+{\ct COLOR    }             & Character         & See Section~\ref{info:colors}     &             &                     \\ \hline
 {\ct CTRL\_ID }             & Character         & {\ct ID} of Control Function      &             &                     \\ \hline
 {\ct DEVC\_ID }             & Character         & {\ct ID} of Controlling Device    &             &                     \\ \hline
+%{\ct EVACUATION    }        & Logical           & Vent to be used in Evac calc      &             &  {\ct .FALSE.}      \\ \hline
 {\ct FYI}                   & Character         & Comment String (has no effect)    &             &                     \\ \hline
 {\ct IOR}                   & Integer           & Orientation Index                 &             &                     \\ \hline
 {\ct MB    }                & Character         & Coordinate Plane                  &             &                     \\ \hline
+%{\ct MESH\_ID    }          & Character         & Name of the controlling mesh      &             &                     \\ \hline
 {\ct OUTLINE}               & Logical           & Draw vent as outline              &             &  {\ct .FALSE.}      \\ \hline
 {\ct PBX, PBY, PBZ  }       & Real              & Coordinate Plane                  &             &                     \\ \hline
-{\ct RGB(3)   }             & Integer Triplet   & Color indices (0-255)             &             &                     \\ \hline
-{\ct SPREAD\_RATE}          & Real              & Rate of fire spread               & m/s         &  0.0                \\ \hline
+{\ct RGB(3)   }             & Integer Triplet   & See Section~\ref{info:colors}     &             &                     \\ \hline
+{\ct SPREAD\_RATE}          & Real              & See Section~\ref{info:spread}     & m/s         &  0.0                \\ \hline
 {\ct SURF\_ID}              & Character         & Associated Surface                &             &  {\ct 'INERT'}      \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}    & Real Triplet      & See Section~\ref{info:texture_map}& m           & (0.,0.,0.)          \\ \hline
 {\ct TRANSPARENCY}          & Real              & Transparency indicator            &             &   1.0               \\ \hline
 {\ct XB(6) }                & Real Sextuplet    & Min/Max physical coordinates      & m           &                     \\ \hline
-{\ct XYZ(3) }               & Real Triplet      & Physical coordinates              & m           &                     \\ \hline
+{\ct XYZ(3) }               & Real Triplet      & See Section~\ref{info:spread}     & m           &                     \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /VENT/ XB,IOR,MB,PBX,PBY,PBZ,SURF_ID,FYI,RGB,TRANSPARENCY,COLOR,TEXTURE_ORIGIN,
-%                OUTLINE,DEVC_ID,CTRL_ID,XYZ,EVACUATION,MESH_ID,SPREAD_RATE
+
 
 \vspace{\baselineskip}
 
@@ -6976,11 +7017,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\ \hline \hline
+{\ct ID}                    & Character         & {\ct ID}entifier                       &        &               \\ \hline
 {\ct LEAK\_AREA(N)}         & Real              & Leakage area to pressure zone {\ct N}  & m$^2$  & 0             \\ \hline
-{\ct XB(6)}                 & Real Sextuplet    & Min/Max Coordinates of Zone            & m      &               \\ \hline
+{\ct XB(6)}                 & Real Sextuplet    & Coordinates of Zone                    & m      &               \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /ZONE/ XB,LEAK_AREA,ID
+
 
 \vfill
 
