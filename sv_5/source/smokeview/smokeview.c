@@ -2066,6 +2066,9 @@ void updatetimes(void){
   particle *parti;
   tourdata *touri;
   int filenum;
+#ifdef pp_HRR
+  float dt_MIN=100000.0;
+#endif
 
   updateShow();  
   ntimes = 0;
@@ -2146,6 +2149,11 @@ void updatetimes(void){
       if(terri->loaded==0)continue;
       for(n=0;n<terri->ntimes;n++){
         *timescopy++=terri->times[n];
+#ifdef pp_HRR
+        if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
+          dt_MIN=timescopy[0]-timescopy[-1];
+        }
+#endif
       }
     }
   }
@@ -2155,6 +2163,11 @@ void updatetimes(void){
     if(touri->display==0)continue;
     for(n=0;n<touri->npath;n++){
       *timescopy++=touri->path_times[n];
+#ifdef pp_HRR
+      if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
+        dt_MIN=timescopy[0]-timescopy[-1];
+      }
+#endif
     }
   }
   for(i=0;i<npartinfo;i++){
@@ -2162,6 +2175,11 @@ void updatetimes(void){
     if(parti->loaded==0)continue;
     for(n=0;n<parti->nframes;n++){
       *timescopy++=parti->ptimes[n];
+#ifdef pp_HRR
+      if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
+        dt_MIN=timescopy[0]-timescopy[-1];
+      }
+#endif
     }
   }
   for(i=0;i<nslice;i++){
@@ -2169,12 +2187,22 @@ void updatetimes(void){
     if(sd->loaded==1||sd->vloaded==1){
         for(n=0;n<sd->nsteps;n++){
           *timescopy++=sd->slicetimes[n];
+#ifdef pp_HRR
+          if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
+            dt_MIN=timescopy[0]-timescopy[-1];
+          }
+#endif
         }
     }
   }
   if(ReadTargFile==1&&visTarg==1){
     for(n=0;n<ntargtimes;n++){
       *timescopy++=targtimes[n];
+#ifdef pp_HRR
+      if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
+        dt_MIN=timescopy[0]-timescopy[-1];
+      }
+#endif
     }
   }
   for(i=0;i<selected_case->nmeshes;i++){
@@ -2185,6 +2213,11 @@ void updatetimes(void){
       if(patchi->loaded==1){
         for(n=0;n<meshi->npatch_frames;n++){
           *timescopy++=meshi->patchtimes[n];
+#ifdef pp_HRR
+          if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
+            dt_MIN=timescopy[0]-timescopy[-1];
+          }
+#endif
         }
       }
     }
@@ -2192,6 +2225,11 @@ void updatetimes(void){
   if(ReadZoneFile==1&&visZone==1){
     for(n=0;n<nzonet;n++){
       *timescopy++=zonet[n];
+#ifdef pp_HRR
+      if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
+        dt_MIN=timescopy[0]-timescopy[-1];
+      }
+#endif
     }
   }
   if(ReadIsoFile==1&&visAIso!=0){
@@ -2201,6 +2239,11 @@ void updatetimes(void){
       meshi=selected_case->meshinfo + ib->blocknumber;
       for(n=0;n<meshi->nisosteps;n++){
         *timescopy++=meshi->isotimes[n];
+#ifdef pp_HRR
+        if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
+          dt_MIN=timescopy[0]-timescopy[-1];
+        }
+#endif
       }
     }
   }
@@ -2213,6 +2256,11 @@ void updatetimes(void){
         if(smoke3di->loaded==0)continue;
         for(n=0;n<smoke3di->n_times;n++){
           *timescopy++=smoke3di->times[n];
+#ifdef pp_HRR
+          if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
+            dt_MIN=timescopy[0]-timescopy[-1];
+          }
+#endif
         }
       }
     }
@@ -2223,10 +2271,7 @@ void updatetimes(void){
   n2=1;ntimes2=ntimes;
   for(n=1;n<ntimes;n++){
 #ifdef pp_HRR
-    float difftime;
-
-    difftime = fabs(times[ntimes-1]-times[0])/(float)ntimes;
-    if(difftime!=0.0&&fabs(times[n]-times[n-1])>difftime){
+    if(fabs(times[n]-times[n-1])>dt_MIN){
 #else
     if(times[n]!=times[n-1]){
 #endif
