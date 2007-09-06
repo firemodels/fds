@@ -2156,8 +2156,8 @@ void updatetimes(void){
       for(n=0;n<terri->ntimes;n++){
         *timescopy++=terri->times[n];
 #ifdef pp_HRR
-        if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
-          dt_MIN=timescopy[0]-timescopy[-1];
+        if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
+          dt_MIN=timescopy[-1]-timescopy[-2];
         }
 #endif
       }
@@ -2170,8 +2170,8 @@ void updatetimes(void){
     for(n=0;n<touri->npath;n++){
       *timescopy++=touri->path_times[n];
 #ifdef pp_HRR
-      if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
-        dt_MIN=timescopy[0]-timescopy[-1];
+      if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
+        dt_MIN=timescopy[-1]-timescopy[-2];
       }
 #endif
     }
@@ -2182,8 +2182,8 @@ void updatetimes(void){
     for(n=0;n<parti->nframes;n++){
       *timescopy++=parti->ptimes[n];
 #ifdef pp_HRR
-      if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
-        dt_MIN=timescopy[0]-timescopy[-1];
+      if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
+        dt_MIN=timescopy[-1]-timescopy[-2];
       }
 #endif
     }
@@ -2194,8 +2194,8 @@ void updatetimes(void){
         for(n=0;n<sd->nsteps;n++){
           *timescopy++=sd->slicetimes[n];
 #ifdef pp_HRR
-          if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
-            dt_MIN=timescopy[0]-timescopy[-1];
+          if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
+            dt_MIN=timescopy[-1]-timescopy[-2];
           }
 #endif
         }
@@ -2205,8 +2205,8 @@ void updatetimes(void){
     for(n=0;n<ntargtimes;n++){
       *timescopy++=targtimes[n];
 #ifdef pp_HRR
-      if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
-        dt_MIN=timescopy[0]-timescopy[-1];
+      if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
+        dt_MIN=timescopy[-1]-timescopy[-2];
       }
 #endif
     }
@@ -2220,8 +2220,8 @@ void updatetimes(void){
         for(n=0;n<meshi->npatch_frames;n++){
           *timescopy++=meshi->patchtimes[n];
 #ifdef pp_HRR
-          if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
-            dt_MIN=timescopy[0]-timescopy[-1];
+          if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
+            dt_MIN=timescopy[-1]-timescopy[-2];
           }
 #endif
         }
@@ -2232,8 +2232,8 @@ void updatetimes(void){
     for(n=0;n<nzonet;n++){
       *timescopy++=zonet[n];
 #ifdef pp_HRR
-      if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
-        dt_MIN=timescopy[0]-timescopy[-1];
+      if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
+        dt_MIN=timescopy[-1]-timescopy[-2];
       }
 #endif
     }
@@ -2246,8 +2246,8 @@ void updatetimes(void){
       for(n=0;n<meshi->nisosteps;n++){
         *timescopy++=meshi->isotimes[n];
 #ifdef pp_HRR
-        if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
-          dt_MIN=timescopy[0]-timescopy[-1];
+        if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
+          dt_MIN=timescopy[-1]-timescopy[-2];
         }
 #endif
       }
@@ -2263,8 +2263,8 @@ void updatetimes(void){
         for(n=0;n<smoke3di->n_times;n++){
           *timescopy++=smoke3di->times[n];
 #ifdef pp_HRR
-          if(n!=0&&timescopy[0]-timescopy[-1]<dt_MIN){
-            dt_MIN=timescopy[0]-timescopy[-1];
+          if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
+            dt_MIN=timescopy[-1]-timescopy[-2];
           }
 #endif
         }
@@ -2277,7 +2277,7 @@ void updatetimes(void){
   n2=1;ntimes2=ntimes;
   for(n=1;n<ntimes;n++){
 #ifdef pp_HRR
-    if(fabs(times[n]-times[n-1])>dt_MIN){
+    if(fabs(times[n]-times[n-1])>dt_MIN/10.0){
 #else
     if(times[n]!=times[n-1]){
 #endif
