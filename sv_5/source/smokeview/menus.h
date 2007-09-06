@@ -1787,6 +1787,11 @@ void SmokeviewiniMenu(int value){
   case 3:
     writeini(LOCAL_INI);
     break;
+  case 4:
+    init_device_defs();
+    break;
+  case 999:
+    break;
   default:
     ASSERT(FFALSE);
     break;
@@ -6087,6 +6092,11 @@ static int textureshowmenu=0;
     STRCAT(caselabel,casefilename);
 
     glutAddMenuEntry(caselabel,3);
+
+    if(ndeviceinfo>0){
+      glutAddMenuEntry("-",999);
+      glutAddMenuEntry("Read .svo files",4);
+    }
 
     CREATEMENU(reloadmenu,ReloadMenu);
     glutAddMenuEntry("Reload Now",0);
