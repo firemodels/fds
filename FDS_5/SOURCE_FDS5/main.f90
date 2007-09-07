@@ -44,8 +44,8 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date (All Nodes)
  
-COMPILE_DATE   = 'September 5, 2007'
-VERSION_STRING = '5_RC8_540' 
+COMPILE_DATE   = 'September 7, 2007'
+VERSION_STRING = '5_RC8_549' 
 VERSION_NUMBER = 5.0
 SERIAL         = .TRUE.
  
