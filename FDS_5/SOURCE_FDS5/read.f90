@@ -3032,6 +3032,11 @@ READ_SURF_LOOP: DO N=0,N_SURF
          CALL COLOR2RGB(RGB,COLOR)
       ENDIF
    ENDIF
+   IF (ANY(RGB< 0)) THEN
+      RGB(1) = 255
+      RGB(2) = 204
+      RGB(3) = 102
+   ENDIF
    SF%RGB                  = RGB
    SF%TRANSPARENCY         = TRANSPARENCY
    SF%STRETCH_FACTOR       = STRETCH_FACTOR
@@ -3246,9 +3251,7 @@ RAMP_MF                 = 'null'
 RAMP_Q                  = 'null'
 RAMP_V                  = 'null'
 RAMP_T                  = 'null'
-RGB(1)                  = 255 
-RGB(2)                  = 204
-RGB(3)                  = 102
+RGB                     = -1
 SHRINK                  = .TRUE.
 IF (LES) SLIP_FACTOR    =  0.5_EB    ! Half slip
 IF (DNS) SLIP_FACTOR    = -1.0_EB    ! No slip
@@ -4107,7 +4110,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (CTRL_ID /='null') OB%HIDDEN = .NOT. CONTROL(OB%CTRL_INDEX)%INITIAL_STATE      
       IF (DEVC_ID /='null') OB%REMOVABLE = .TRUE.
       IF (CTRL_ID /='null') OB%REMOVABLE = .TRUE.
-      IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.
+      IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.      
       ! Choose obstruction color index
       SELECT CASE (COLOR)
          CASE ('INVISIBLE')
@@ -4251,7 +4254,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
    CELL_INDEX=>M%CELL_INDEX
  
    CELL_INDEX = 0 
-   CELL_COUNT = 0
+   CELL_COUNT       = 0
  
    DO K=0,KBP1
       DO J=0,JBP1
@@ -4625,6 +4628,9 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
                CASE ('null')
                   IF (ANY (RGB<0)) THEN
                      OB%BCI=-1
+                     RGB(1)   = 255
+                     RGB(2)   = 235
+                     RGB(3)   = 129   
                   ELSE
                      OB%BCI=-3
                   ENDIF
@@ -5279,7 +5285,7 @@ CHARACTER(30) :: QUANTITY,PROP_ID,CTRL_ID,DEVC_ID,SURF_ID,STATISTICS
 LOGICAL :: INITIAL_STATE,LATCH
 TYPE (DEVICE_TYPE), POINTER :: DV
 NAMELIST /DEVC/ DEPTH,FYI,IOR,ID,ORIENTATION,PROP_ID,QUANTITY,ROTATION,XB,XYZ,INITIAL_STATE,LATCH,TRIP_DIRECTION,CTRL_ID,& 
-                SETPOINT,DEVC_ID,FLOWRATE,DELAY,BYPASS_FLOWRATE,STATISTICS,SURF_ID
+                SETPOINT,DEVC_ID,FLOWRATE,DELAY,BYPASS_FLOWRATE,SURF_ID,STATISTICS
  
 N_DEVC = 0
 REWIND(LU_INPUT)
@@ -5374,8 +5380,8 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    DV%ORIENTATION(1:3) = ORIENTATION(1:3)/SQRT(ORIENTATION(1)**2+ORIENTATION(2)**2+ORIENTATION(3)**2)
    DV%PROP_ID          = PROP_ID
    DV%CTRL_ID          = CTRL_ID   
-   DV%DEVC_ID          = DEVC_ID      
-   DV%SURF_ID          = SURF_ID      
+   DV%DEVC_ID          = DEVC_ID   
+   DV%SURF_ID          = SURF_ID            
    DV%QUANTITY         = QUANTITY
    DV%ROTATION         = ROTATION*TWOPI/360._EB
    DV%SETPOINT         = SETPOINT
@@ -5386,7 +5392,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    DV%PRIOR_STATE      = INITIAL_STATE
    DV%FLOWRATE         = FLOWRATE
    DV%BYPASS_FLOWRATE  = BYPASS_FLOWRATE
-   DV%STATISTICS       = STATISTICS
+   DV%STATISTICS       = STATISTICS   
    DV%DELAY            = DELAY
    DV%X1               = XB(1)
    DV%X2               = XB(2)
