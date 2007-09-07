@@ -2615,6 +2615,10 @@ PROP_LOOP: DO N=0,N_PROP
       TOTAL_FLOWRATE=0._EB
       SUBTOTAL_FLOWRATE=0._EB
       DO NN=1,TA%NUMBER_ROWS
+         IF (TA%TABLE_DATA(NN,6) <=0._EB) THEN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'Spray Pattern Table, ',TRIM(PY%TABLE_ID),', massflux <= 0 for line ',NN
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
          TOTAL_FLOWRATE = TOTAL_FLOWRATE + TA%TABLE_DATA(NN,6)
       ENDDO
       DO NN=1,TA%NUMBER_ROWS
