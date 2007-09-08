@@ -50,7 +50,7 @@ if(show_smoketest==0){\
   ivalue[2]=n22<<2;  \
   ivalue[3]=n21<<2;  \
   if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
-  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
+  if(fabs(value[0]-value[2])<fabs(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
   }                                                      \
   else{                                                  \
@@ -99,7 +99,7 @@ if(show_smoketest==0){\
   value[2]=alphaf_in[n22];\
   value[3]=alphaf_in[n21];\
   if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
-  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
+  if(fabs(value[0]-value[2])<fabs(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
   }                                                      \
   else{                                                  \
