@@ -727,7 +727,6 @@ integer :: npp1, npp2
 real :: stime
 integer :: nf
 logical :: load
-integer :: absnpp2
 
 lu10 = 10
 
@@ -762,16 +761,12 @@ do
   if(naspr.ne.0)then       ! read in sprinkler data
     read(lu10,iostat=error) npp2
     if(error.ne.0)go to 999
-	  if(npp2.ge.0)then
+	if(npp2.ge.0)then
       read(lu10,iostat=error) (dummy,i=1,npp2),(dummy,i=1,npp2),(dummy,i=1,npp2)
-	   else
+	 else
       read(lu10,iostat=error) (dummy,i=1,npp2),(dummy,i=1,npp2),(dummy,i=1,npp2),(dummy,i=1,npp2)
-	  endif
-  	if(load)then
-  	  absnpp2=npp2
-  	  if(npp2.lt.0)absnpp2=-absnpp2
-  	  npoints2 = (absnpp2-1)/partpointstep + 1
-  	endif
+	endif
+  	if(load)npoints2 = (abs(npp2)-1)/partpointstep + 1
   end if
   if(error.ne.0)goto 999
   if(load)then

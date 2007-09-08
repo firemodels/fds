@@ -281,6 +281,7 @@ EXTERNCPP int get_interval(float val, float *array, int n);
 EXTERNCPP void memorystatus(void);
 EXTERNCPP int getnewfilename(void);
 EXTERNCPP int remove_block(blockagedata *block, const blockagedata *hole,int flag,blockagedata *blocklist[6]);
+EXTERNCPP float flabs(float arg);
 EXTERNCPP void showhide_translate(int var);
 EXTERNCPP void updateallplotslices(void);
 EXTERNCPP int makeiblank(void);

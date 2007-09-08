@@ -1718,7 +1718,7 @@ void drawslice(const slice *sd){
        i33 = 4*sd->slicepoint[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
-       if(fabs(i11-i33)<fabs(i13-i31)){
+       if(abs(i11-i33)<abs(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);
          glVertex3f(constval,yy1,z1);
          glColor4fv(&rgb_ptr[i31]);
@@ -1770,7 +1770,7 @@ void drawslice(const slice *sd){
        i33 = 4*sd->slicepoint[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
-       if(fabs(i11-i33)<fabs(i13-i31)){
+       if(abs(i11-i33)<abs(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);
          glVertex3f(x1,constval,z1);
          glColor4fv(&rgb_ptr[i31]);
@@ -1820,7 +1820,7 @@ void drawslice(const slice *sd){
        i33 = 4*sd->slicepoint[n2+1];
        yy1 = yplt[j];
        y3 = yplt[j+1];
-       if(fabs(i11-i33)<fabs(i13-i31)){
+       if(abs(i11-i33)<abs(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);
          glVertex3f(x1,yy1,constval);
          glColor4fv(&rgb_ptr[i31]);
@@ -2329,7 +2329,7 @@ void drawvolslice(const slice *sd){
        n+1 (y1,z3) n2+1 (y3,z3)
          n (y1,z1)     n2 (y3,z1)
        */
-       if(fabs(i11-i33)<fabs(i13-i31)){
+       if(abs(i11-i33)<abs(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);glVertex3f(constval,yy1,z1);
          glColor4fv(&rgb_ptr[i31]);glVertex3f(constval,y3,z1);
          glColor4fv(&rgb_ptr[i33]);glVertex3f(constval,y3,z3);
@@ -2379,7 +2379,7 @@ void drawvolslice(const slice *sd){
 
         val(i,j,k) = di*nj*nk + dj*nk + dk
        */
-       if(fabs(i11-i33)<fabs(i13-i31)){
+       if(abs(i11-i33)<abs(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);glVertex3f(x1,constval,z1);
          glColor4fv(&rgb_ptr[i31]);glVertex3f(x3,constval,z1);
          glColor4fv(&rgb_ptr[i33]);glVertex3f(x3,constval,z3);
@@ -2429,7 +2429,7 @@ void drawvolslice(const slice *sd){
 
         val(i,j,k) = di*nj*nk + dj*nk + dk
        */
-       if(fabs(i11-i33)<fabs(i13-i31)){
+       if(abs(i11-i33)<abs(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);glVertex3f(x1,yy1,constval);
          glColor4fv(&rgb_ptr[i31]);glVertex3f(x3,yy1,constval);
          glColor4fv(&rgb_ptr[i33]);glVertex3f(x3,y3,constval);
