@@ -1637,10 +1637,10 @@ float *getcolorptr(const float *color){
   }
   for(colorptr=firstcolor;colorptr!=NULL;colorptr=colorptr->nextcolor){
     oldlastcolor=colorptr;
-    if(flabs(colorptr->color[0]-color[0])>0.0001)continue;
-    if(flabs(colorptr->color[1]-color[1])>0.0001)continue;
-    if(flabs(colorptr->color[2]-color[2])>0.0001)continue;
-    if(flabs(colorptr->color[3]-color[3])>0.0001)continue;
+    if(fabs(colorptr->color[0]-color[0])>0.0001)continue;
+    if(fabs(colorptr->color[1]-color[1])>0.0001)continue;
+    if(fabs(colorptr->color[2]-color[2])>0.0001)continue;
+    if(fabs(colorptr->color[3]-color[3])>0.0001)continue;
     return colorptr->color;
   }
   lastcolor=NULL;
