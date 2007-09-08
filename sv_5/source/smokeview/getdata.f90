@@ -450,8 +450,10 @@ do
 
   if(naspr.ne.0)then       ! read in sprinkler data
     read(lu10,iostat=error) npp2
-	if(npp2.lt.0)sprinkflag=1
-	npp2 = abs(npp2)
+	  if(npp2.lt.0)then
+	    sprinkflag=1
+	    npp2=-npp2
+	  endif
     if(error.ne.0)go to 999
     if(npp2.gt.0.and.npp2.gt.nppold)then
       allocated=.true.
