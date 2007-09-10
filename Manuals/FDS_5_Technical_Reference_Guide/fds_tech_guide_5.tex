@@ -130,7 +130,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: August 28, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: September 10, 2007)}
 
 \vspace{.5in}
 
@@ -363,9 +363,10 @@ subroutines that have been incorporated in FDS to provide the
 radiative properties of gases and smoke.
 
 Professor Fred Mowrer of the University of Maryland provided a simple
-of model of gas phase extinction to FDS. Chris Lautenberger of
-University of California helped in the development of the
-multi-component solid phase model.
+of model of gas phase extinction to FDS. Chris Lautenburger of the University of California, Berkeley, provided valuable insight in the development of the
+solid phase model.
+
+
 
 Finally, thanks to Randall McDermott for a very thorough review of the manuscript and suggestions for improvements
 to the various routines.
@@ -512,8 +513,8 @@ spectrum one wants to capture directly, and which end is to be ignored or approx
 \chapter{Model Overview}
 
 This chapter presents general information about the Fire Dynamics Simulator, following the basic framework set forth in
-ASTM E 1355~\cite{ASTM:E1355}. The next chapter provides a detailed description of the governing equations, followed in
-Chapter 4 by the numerical algorithm.
+ASTM E 1355~\cite{ASTM:E1355}. This chapter also provides information about how the FDS software is developed and maintained, often referred to as a
+{\em Configuration Management Plan}. Formal guidelines for such a plan are detailed in IEEE Standard~828-1998.
 
 
 \section{Basic Description of FDS}
@@ -542,30 +543,96 @@ to create the input file containing all the necessary information needed to perf
 
 Version 1 of FDS was publicly released in February 2000, version 2
 in December 2001, version 3 in November 2002, and version 4 in July 2004.
-The present version of FDS is 5, first released in August 2007. Changes in
-the version number correspond to major changes in the physical model
-or input parameters. For minor changes and bug fixes, incremental
-versions are released, referenced according to fractions of the integer
-version number. For example, version 5.1.4 would be a maintenance release of feature
-version 5.1, which in turn is an update within the major application release referred to as FDS 5.
+The present version of FDS is 5, first released in September, 2007.
 
 Starting with FDS 5, a formal revision management system has been implemented to track changes to the FDS source
 code. The open-source program development tools are provided by an Internet-based organization known as Google Code (code.google.com).
-More on Google Code, SVN version control, and related issues can be found in the Verification and Validation Guide~\cite{FDS_VV_Guide_5}.
+
+The version number for FDS has three parts.  For example, FDS 5.2.12
+indicates that this is FDS 5, the fifth major release. The 2 indicates
+a significant upgrade, but still within the framework of FDS 5.  The
+12 indicates the twelveth minor upgrade of 5.2, mostly bug fixes and
+minor user requests.
 
 
 \subsection{Model Developers}
 
-The Fire Dynamics Simulator (FDS) was developed and is currently
-maintained by the Fire Research Division in the Building and Fire
-Research Laboratory (BFRL) at the National Institute of Standards and
-Technology (NIST).  A substantial contribution to the development of
-the model was made by VTT in Finland and Hughes Associates, Inc. in
-Baltimore, MD. Additional contributors are cited in the
-Acknowledgments.
+
+Currently, FDS is maintained by the Building and Fire Research Laboratory (BFRL) of National Institute of Standards and Technology. The developers
+at NIST have formed a loose collaboration of interested stakeholders, including:
+\begin{itemize}
+\item VTT Technical Research Centre of Finland, a research and testing
+laboratory similar to NIST
+\item The Society of Fire Protection Engineers (SFPE) who conduct training classes on the use of FDS
+\item Fire protection engineering firms that use the software
+\item Engineering departments at various universities with a particular emphasis on fire
+\end{itemize}
+BFRL awards grants on a competitive basis to external organizations who conduct research in fire science and engineering. Some of these grants have
+been used to assist the development of FDS. The role of the grantee in supporting day to day development varies. Not all of the developers outside
+of NIST are grantees.
+
+Starting with Version 5, the FDS development team uses
+an Internet-based development
+environment called GoogleCode, a free service of the search engine company, Google. GoogleCode is a widely used service designed to assist
+open source software development by providing a repository for source
+code, revision control, program distribution, bug tracking, and
+various other very useful services.
+
+Each member of the FDS development team has an account and password
+access to the FDS repository. In
+addition, anonymous access is available to all interested users, who
+can receive the latest versions of the source code, manuals, and other
+items. Anonymous users simply do not have the power to commit changes
+to any of these items. The power to commit changes to FDS or its
+manuals can be granted to anyone on a case by case basis.
+
+The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX files are essentially text files that are under
+SVN (Subversion) control. The figures are either in the form of PDF or jpeg files, depending on whether they are vector or
+raster format. There are a variety of \LaTeX packages available, including MiKTeX. The FDS developers edit the manuals as part of the
+day to day upkeep of the model. Different editions of the manuals are distinguished by date.
 
 
-\subsection{Intended Uses}
+\subsection{Development Process}
+
+Changes are made to the FDS source code daily, and tracked via
+revision control software. However, these
+daily changes do not constitute a change to the version number. After
+the developers determine that enough changes have been made to the
+source, they release a new minor upgrade, 5.2.12 to 5.2.13, for
+example. This happens every few weeks. A change from 5.2 to 5.3 might
+happen only a few times a year, when significant improvements have
+been made to the model physics.
+
+There is no formal process by which FDS is updated. Each developer
+works on various routines, and makes changes as warranted. Minor bugs
+are fixed without any communication (the developers are in different
+locations), but more significant changes are discussed via email or
+telephone calls. A suite of simple verification calculations (included
+in this document) are routinely run to ensure that the daily bug fixes
+have not altered any of the important algorithms. A suite of
+validation calculations (also included here) are run with each
+significant upgrade.
+Significant changes to FDS are made based on the following criteria, in no particular order:
+\begin{description}
+\item[Better Physics:] The goal of any model is to be {\em predictive}, but it also must be reliable. FDS is a blend of empirical and
+deterministic sub-models, chosen based on their robustness, consistency, and reliability. Any new sub-model must demonstrate that it is
+of comparable or superior accuracy to its empirical counterpart.
+\item[Modest CPU Increase:] If a proposed algorithm doubles the calculation time but yields only a marginal improvement in accuracy, it is
+likely to be rejected. Also, the various routines in FDS are expected to consume CPU time in proportion to their overall importance. For example,
+the radiation transport algorithm consumes about 25~\% of the CPU time, consistent with the fact that about one-fourth to one-third of the
+fire's energy is emitted as thermal radiation.
+\item[Simpler Algorithm:] If a new algorithm does what the old one did using less lines of code, it is almost always accepted, so long as
+it does not decrease functionality.
+\item[Increased or Comparable Accuracy:] The validation experiments that are part of this guide serve as the metric for new routines. It is
+not enough for a new algorithm to perform well in a few cases. It must show clear improvement across the suite of experiments. If the
+accuracy is only comparable to the previous version, then some other criteria must be satisfied.
+\item[Acceptance by the Fire Protection Community:] Especially in regard to fire-specific devices, like sprinklers and smoke detectors, the
+algorithms in FDS often are based on their acceptance among the practicing engineers.
+\end{description}
+
+
+
+\subsection{Intended Uses of FDS}
 
 Throughout its development, FDS has been aimed at solving practical
 fire problems in fire protection engineering, while at the same time
@@ -588,7 +655,7 @@ systems and sprinkler/detector activation studies.
 The other half consist of residential and industrial fire reconstructions.
 
 
-\subsection{Required Input}
+\subsection{Required Input for FDS}
 
 All of the input parameters required by FDS to describe a particular
 scenario are conveyed via a single text file created by the user.
@@ -619,7 +686,7 @@ A complete description of the input parameters required by FDS can be found in t
 
 
 
-\subsection{Output Quantities}
+\subsection{FDS Output Quantities}
 
 FDS computes the temperature, density, pressure, velocity and chemical composition within each numerical
 grid cell at each discrete time step. There are typically hundreds of thousands to millions of grid
@@ -672,7 +739,7 @@ Details on the use of Smokeview are found in Ref.~\cite{Smokeview_Users_Guide_5}
 
 
 
-\subsection{Governing Equations, Assumptions and Numerics}
+\subsection{FDS Governing Equations, Assumptions and Numerics}
 
 Following is a brief description of
 the major components of FDS. Detailed information regarding the assumptions and governing equations associated
@@ -732,7 +799,7 @@ water droplets ejected from the sprinkler.
 \end{description}
 
 
-\subsection{Limitations of the Model}
+\subsection{Limitations of FDS}
 
 Although FDS can address most fire scenarios, there are limitations in all of its various
 algorithms. Some of the more prominent limitations of the model are listed here. More
@@ -1417,8 +1484,8 @@ single-step mixture fraction model is described.
 Consider a simple, one-step reaction of fuel and oxygen:
 \be  \mathrm{C_xH_yO_zN_aM_b} +  \nu_\OTWO \, \mathrm{O_2}  \rightarrow  \nu_\COTWO \, \mathrm{CO_2} + \nu_\HTWOO \, \mathrm{H_2O} + \nu_\CO \, \mathrm{CO} +
      \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2} + \nu_\M \mathrm{M}  \label{stoich} \ee
-Note that the nitrogen in the fuel molecule is assumed to form $\mathrm{N_2}$ only. Addition product species can be 
-specified as some number of moles of an average molecular weight species $\mathrm{M}$.  These products are presumed to 
+Note that the nitrogen in the fuel molecule is assumed to form $\mathrm{N_2}$ only. Addition product species can be
+specified as some number of moles of an average molecular weight species $\mathrm{M}$.  These products are presumed to
 not consume oxygen during their formation.  Soot is assumed to be a mixture of carbon and hydrogen with the hydrogen atomic
 fraction given by $X_\Hy$. The stoichiometric coefficient, $\nu_\So$, represents the amount of fuel that is converted to soot. It is related to the
 {\em soot yield}, $y_\So$, via the relation:
