@@ -363,15 +363,6 @@ This guide describes how to use the Fire Dynamics Simulator (FDS), Version 5.
 It does not provide the background theory. A companion document, called the FDS
 Technical Reference Guide~\cite{FDS_Tech_Guide_5}, contains details about the governing
 equations and numerical methods.
-A third document (in multi-volume form), called the FDS Verification and Validation
-(V\&V) Guide~\cite{FDS_VV_Guide_5}, contains descriptions of internal and external
-validation work and a set of simple but useful verification calculations. Although the User's
-Guide contains all the information necessary to perform
-fire simulations, you should also become familiar with some of the background theory in the
-Technical Reference Guide and sample calculations described in the V\&V Guide.
-The software and the User's Guide provide only limited guidance as to the proper prescription
-of input parameters.
-
 The FDS User's Guide contains limited information on how to operate Smokeview, the companion
 visualization program for FDS. Its full capability is described in the ``User's Guide for
 Smokeview Version~5''~\cite{Smokeview_Users_Guide_5}.
@@ -490,9 +481,6 @@ fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a f
 Navier-Stokes equations\index{Navier-Stokes} appropriate for low-speed, thermally-driven flow
 with an emphasis on smoke and heat transport from fires.
 The formulation of the equations and the numerical algorithm are contained the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
-Code checking, accuracy assessment, and so forth, can be found in the FDS Verification and Validation Guide~\cite{FDS_VV_Guide_5}.
-These documents provide many useful examples of FDS applications, and these examples are cited
-throughout the present document.
 
 Smokeview is a separate visualization program that is used to display the
 results of an FDS simulation.
@@ -636,8 +624,8 @@ development environment SourceForge.net is being used for configuration manageme
 (code archiving, revision tracking, bug fixes, user suggestions, and so on).
 See Section~\ref{info:sfcvs} for more information.
 
-\item[{\bf FDS Verification and Validation Guide}] Starting with FDS 5 a new multi-volume document has
-been created to report the FDS Verification and Validation work that has been done.  This improves the
+\item[{\bf FDS Verification and Validation Guide}] Starting with FDS 5, more emphasis has been placed on maintaining
+a permanent collection of Verification and Validation cases.  This improves the
 quality of each FDS update and release, as a standard test suite will now be used to insure that changes
 made to the source code do not degrade FDS output.  This also provides users with a standard
 data set to verify their own installation of FDS and to compare the results that FDS is returning
@@ -663,7 +651,7 @@ FDS and Smokeview can be found at the web site.
 \index{Download}
 Detailed instructions on how to download executables, manuals, source-code and related utilities,
 can be found on the FDS-SMV Website
-\href{http://fire.nist.gov/fds}{{\ct http://fire.nist.net/fds}} for more information.
+\href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}} for more information.
 The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac OS X, and Linux.  For other operating systems, consult the web site.
 
 \begin{warning}
@@ -957,7 +945,7 @@ interest. Indeed, burning a roomful of ordinary furniture is one of the most cha
 of the model. So be patient, and learn to dissect a given scenario into its constitutive parts.
 For example, do not attempt to simulate a fire spreading through an entire floor of a
 building unless you have simulated the burning of the various combustibles with relatively small calculations.
-The examples described in the FDS Verification and Validation Guide~\cite{FDS_VV_Guide_5} should help
+The examples described in Part~\ref{part:verification} should help
 you to develop larger, more complicated simulations from smaller building blocks.
 
 Along with the FDS User's Guide, there are resources available on the internet.
@@ -968,7 +956,7 @@ problems by performing simple test calculations, or debugging your input file. T
 provide a list of error statements and suggestions on how to solve problems.
 
 
-\section{Common Error Statements}%Bryan
+\section{Common Error Statements}
 \index{Support!Error Statements}
 An FDS calculation may end before the user-prescribed time limit.
 Following is a list of common error statements and how to diagnose the problems:
@@ -2177,7 +2165,7 @@ To make this obstruction transparent, the {\ct TRANSPARENCY}\index{HOLE!TRANSPAR
 a real number from 0-1. Note that if {\ct TRANSPARENCY} is specified, then either a {\ct COLOR} or {\ct RGB} triplet ought to be specified as well.
 A {\ct TRANSPARENCY} value near, but not equal to, zero can be used to simulate a window when the {\ct HOLE}'s {\ct INITIAL\_STATE=.FALSE.} When the {\ct DEVC} or {\ct CTRL}
 is activated and changes the state of the hole to {\ct .TRUE.}, the {\ct HOLE} is then open and completely transparent.
-See the {\bf create\_remove.fds} Verification case for an example.
+See Section~\ref{create_remove} for an example.
 
 If an obstruction is not to be punctured by a {\ct HOLE}, add
 {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.\index{OBST!PERMIT\_HOLE}
@@ -3278,8 +3266,7 @@ Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
 denotes the absorption in depth of thermal radiation. Liquids do not
 just absorb radiation at the surface, but rather over a thin layer
 near the surface. Its effect on the burning rate is significant. An
-example is given in the Verification Guide under the name {\bf
-ethanol\_pan}.
+example is given in Section~\ref{ethanol_pan}.
 
 
 \subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
@@ -7207,6 +7194,1044 @@ The syntax of the old {\ct THCP} namelist group is almost the same. Just swap {\
 
 
 
+\part{Sample Cases and Verification}
+\label{part:verification}
+
+
+
+
+\chapter{Verification Test Suite}
+\label{verification_suite}
+
+This section contains a description of a set of relatively simple
+calculations that are used to {\em verify} the major physical
+algorithms within FDS.  That is, these samples confirm that the
+equations have been properly coded.  They do not imply that the
+equations actually represent some physical phenomena.  That is left to Volume 2. Note that the names in parentheses in each section header
+correspond to the names of the input files for the cases.
+
+
+
+\section{Hydrodynamics}
+
+There are no analytical solutions of the fully-turbulent Navier-Stokes equations, but it is possible to simulate well
+known fluid flows to determine if the basic fluid flow solver in FDS is working properly.
+
+
+
+\subsection{Axially-Symmetric Helium Plume ({\bf helium\_2d}) }
+\label{helium_2d}
+
+The governing equations solved in FDS are written in terms of a
+three dimensional Cartesian coordinate system. However,
+a two dimensional Cartesian or two dimensional cylindrical
+(axially-symmetric) calculation can be performed by setting the number of
+cells in the $y$ direction to 1.
+An example of an axially-symmetric helium plume is shown here, along with the input file:
+
+\vspace{0.2in}
+\scriptsize
+\noindent
+\begin{minipage}{1.1in}
+\includegraphics[height=2in]{FIGURES/helium_2d}
+\end{minipage}
+\hfill
+\begin{minipage}{5.5in}
+\begin{verbatim}
+&HEAD CHID='helium_2d',TITLE='Axisymmetric Helium Plume' /
+&MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
+&TIME TWFIN=5.0 /
+&MISC DNS=.TRUE., ISOTHERMAL=.TRUE. /
+&SPEC ID='HELIUM'  /
+&SURF ID='HELIUM', VEL=-0.673, MASS_FRACTION(1)=1.0, TAU_MF(1)=0.3 /
+&VENT MB='XMAX' ,SURF_ID='OPEN' /
+&VENT MB='ZMAX' ,SURF_ID='OPEN' /
+&OBST XB= 0.0,0.036,-0.001,0.001,0.00,0.02, SURF_IDS='HELIUM','INERT','INERT' /
+&DUMP PLOT3D_QUANTITY(1)='PRESSURE',PLOT3D_QUANTITY(5)='HELIUM' /
+&SLCF PBY=0.000,QUANTITY='DENSITY', VECTOR=.TRUE. /
+&SLCF PBY=0.000,QUANTITY='HELIUM' /
+&TAIL /
+\end{verbatim}
+\end{minipage}
+\normalsize
+
+
+\clearpage
+
+\subsection{Pressure Rise in a Sealed Enclosure ({\bf pressure\_rise})  }
+\label{pressure_rise}
+
+This example tests several basic features of FDS. A narrow channel, 3~m long, 0.002~m wide, and 1~m tall, has air injected at a rate of
+0.1~kg/m$^2$/s over an area of 0.2~m by 0.002~m for 60 s, with a linear ramp-up and ramp-down over 1 s. The total mass of air in the channel at the start
+is 0.00718~kg. The total mass of air injected is 0.00244~kg.
+The domain is assumed two-dimensional, the walls are adiabatic, and {\ct STRATIFICATION} is set to {\ct .FALSE.}. The domain is divided into three
+meshes each 1~m long with identicle gridding.  We expect the pressure,
+ temperature and density to rise during the 60~s injection period. Afterwards, the
+temperature, density, and pressure should remain constant. A hand computation is performed at 10 second intervals using the First Law of
+Thermodynamics and the equation of state.  The figures below show the results of this verification case.  As is seen denisty
+matches exactly showing that FDS is injecting the appropriate quantity of mass and is properly initializing the domain.
+Pressure rise and temperature rise; however, are overpredicted by 3 \% and 12 \% respectively.  Also a slight drop in pressure
+is seen from 60 s to 120 s, indicating that the current implementation adiabatic boundary condition has a slight error in it.
+
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/pressure_rise_T} &
+\includegraphics[width=3.2in]{FIGURES/pressure_rise_P} \\
+\includegraphics[width=3.2in]{FIGURES/pressure_rise_R} &
+\includegraphics[width=3.2in]{FIGURES/pressure_rise_1000}
+\end{tabular*}
+
+
+
+
+\clearpage
+
+\subsection{Leaks and Fans in a Sealed Enclosure ({\bf leak\_test} and {\bf leak\_test\_2})  }
+\label{leak_test}
+
+A new feature of FDS 5 is the idea of a ``pressure zone.''  Unlike traditional compartment or ``zone'' fire models, FDS was not designed under the assumption that there exist
+rooms connected by doors or ducts. Rather, the geometry in FDS is completely specified by the user. However, there are features of simpler models that we want to retain. For example,
+a leak through a small crack, or the transport of air through a ventilation duct.  In the following example, a simple compartment (3.6~m by 2.4~m by 2.4~m) has a small fan at one
+end and one leak under the door at the other end. It is assumed for this example that the compartment is contained within a larger compartment that is perfectly sealed. The fan draws
+air into the compartment from the plenum space, increasing the pressure inside and decreasing it outside.  A steady state is achieved when the volume flow into and out of the compartment
+falls into balance.
+
+The volume flow rate of the fan is given by the ``fan curve''
+\be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}} \;
+   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
+   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
+where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.16$~m$^2$, $U_{\hbox{\scriptsize max}}=0.1$~m/s, and $\Delta p_{\hbox{\scriptsize max}}=1000$~Pa.
+The volume flow due to the leak is given by:
+\be \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}} \sqrt{ \frac{ 2 \Delta p}{ \rho_\infty} } \ee
+where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho_\infty=1.2$~kg/m$^3$.
+After 5~min the pressure difference is 938.2~Pa. The theoretical value, obtained by equating the fan and leak volume flow rates and solving for $\Delta_p$, is 938.9~Pa. The
+slight difference is due to the fact that the solid boundaries within the interior of the computational domain admit a slight volume flux related to details of the
+numerical solver.
+
+Just for fun, we add another leak to the compartment, only this time the leak is to the exterior of the entire computational domain, an infinite void at ambient pressure.
+Now the fan flow rate ought to balance the sum of the flow rates from the two leaks. After 5~min, the pressure difference is 935.2~Pa.
+
+The two cases are summarized in the following plots:
+
+\vspace{0.1in}
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.1in]{FIGURES/leak_test_Pressure_Case_1} &
+\includegraphics[width=3.1in]{FIGURES/leak_test_Pressure_Case_2}
+\end{tabular*}
+
+\clearpage
+
+
+\subsection{Two Fans in a Wall ({\bf fan\_test})  }
+\label{fan_test}
+
+Consider two simple compartments divided by a wall with two fans installed, blowing in opposite directions.
+
+
+
+\clearpage
+
+\subsection{Stack Effect ({\bf stack\_effect})  }
+\label{stack_effect}
+
+If the interior temperature of a building is at a different temperature than the surrounding atmosphere, upward or
+downward air flows within shafts or stairwells connected to the ambient via leakage paths will occur.  This
+phenomena is known as the stack effect.  The {\bf stack\_effect} test case is a 2D simulation of a 304~m tall building
+initialized to a temperature of 20~$^\circ$ with the surround ambient temperature initialized to 10~$^\circ$.
+Two small openings in the building are defined 2.5~m above the ground floor of the building and 2.5~m below the
+roof of the building.
+
+The initial density stratification is defined by assuming a lapse rate of 0~$^\circ$C/m.
+\be
+   \rho_0(z) = \rho_\infty \, e^{ \frac{g W}{{\cal R}_0 T_0} z}
+\ee
+Applying this to the external and internal locations at the lower and upper vents results in densities of 1.2392,
+1.1969, 1.1954, and 1.1546~kg/m$^3$, respectively.  FDS computes the same values to within machine precision.  Since the
+openings in the building are equally spaced over its height, the neutral plane of the building will be close to its midpoint.
+The pressure gradient across the building's wall can be computed as
+\be
+   \delta P = \frac{W P_0 g} {R_{0}} \left( \frac {1}{T_{ambient}} - \frac {1}{T_{building}} \right) h
+\ee
+where h is the distance from the neutral plane.  Using this pressure gradient in Bernoulli's equation (and assuming it remains constant)
+results in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10.13~m/s or an error of 0.5~\%.
+
+\clearpage
+
+
+
+\subsection{Sawtooth ({\bf sawtooth})  }
+\label{sawtooth}
+
+Sometimes it is desired to have stair-stepped obstructions representing curved or sloped geometry. A concern is that this may
+change the flow pattern near the wall. To lessen the impact of stair-stepped boundaries near the edges of the obstructions,
+one may specify the option {\ct SAWTOOTH=.FALSE.} If {\ct SAWTOOTH} is set to {\ct FALSE}, then the velocity boundary conditions will be applied in
+such a way as to minimize the impact of the boundaries due to vortices at sharp corners, as shown in the following example:
+
+\scriptsize
+\begin{verbatim}
+&OBST XB= 0.00, 0.05,-0.01, 0.01, 0.00, 0.05, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+&OBST XB= 0.05, 0.10,-0.01, 0.01, 0.00, 0.10, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+&OBST XB= 0.10, 0.15,-0.01, 0.01, 0.05, 0.15, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+&OBST XB= 0.15, 0.20,-0.01, 0.01, 0.10, 0.20, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+\end{verbatim}\normalsize
+
+In the figure below, the top set of obstructions are using the default {\ct SAWTOOTH=.TRUE.} and the bottom set of
+obstructions are using {\ct SAWTOOTH=.FALSE.} The adjacent obstructions that have {\ct SAWTOOTH=.FALSE.} are displayed
+in Smokeview as one smooth obstruction, shown in green. Notice that as the air moves across the different sets of obstructions,
+the air velocity on the bottom set of obstructions is not affected as much by the vortices.
+
+\begin{center}
+\includegraphics[width=3in]{FIGURES/sawtooth.jpg}
+\end{center}
+
+\clearpage
+
+
+
+
+
+\section{Combustion}
+
+
+\subsection{A Simple Under-Ventilated Compartment Fire ({\bf door\_crack}) }
+\label{door_crack}
+
+This example uses the same simple compartment that was used to test leakage and fan curves in the previous section. Now, we add a small (160~kW) fire, with the same
+fan and leak under the door. The compartment now opens to the atmosphere, not a sealed plenum. We expect a rapid pressure rise in the compartment due to the effect of the
+fire and the fan. Initially, the pressure rise is approximately:
+\be \frac{d \overline{p}_1}{dt} \approx (\gamma - 1) \; \frac{\dQ}{V} + \gamma \, \overline{p} \; \frac{ \dot{V} }{V} \approx 3200 \; \hbox{Pa/s}  \approx 0.03 \; \hbox{atm/s}   \ee
+where $\gamma \approx 1.4$, $\dot{Q}=160,000$~W, $V=20.7$~m$^3$, and $\dot{V}=0.016$~m$^3$/s. In roughly 150~s, the pressure rises about 0.6~atm, at which point the fire
+dies due to lack of oxygen. Then the pressure decreases, and the fan starts up again (it had stalled due to high pressure in the compartment). The fan, and the leak under the
+door, increase the oxygen concentration, at least near these openings, and the fuel-rich gases in the compartment continue to burn.
+
+\vspace{0.1in}
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.1in]{FIGURES/door_crack_Pressure} &
+\includegraphics[width=3.1in]{FIGURES/door_crack_HRR}
+\end{tabular*}
+
+While this case has a number of interesting physical effects, and it {\em verifiies} several features of FDS, it is very important to note the following:
+\begin{itemize}
+\item Although there is smoke seen flowing backwards out the fan duct, in reality there would have been much more. Most conventionally built structures will not withstand over-pressures
+of 0.6~atm without some sort of relief. The fan and the crack under the door obey simple formulae based on pressure differences, but these assumptions have limits.
+\item It is likely that the fire in this scenario would indeed extinguish itself as the oxygen volume fraction decreased below about 15~\%. {\bf But,} its re-ignition at the door crack
+and fan opening would depend on the presence of a spark or hot spot of some sort. FDS continues to flow fuel into the compartment past the point of local extinction, but the compartment
+cools. The default combustion algorithm in FDS assumes that in every grid cell there is a ``virtual spark plug'' that initiates combustion if the local ratio of fuel and oxygen are
+appropriate.
+\end{itemize}
+
+
+
+
+
+\clearpage
+
+\section{Radiation}
+
+\subsection{Radiation inside a box ({\bf radiation\_in\_a\_box}) }
+\label{radiation_in_a_box}
+
+This verification case tests the computation of three-dimensional
+configuration factor $\Phi$ inside a cube box with one hot wall and
+five cold (0~K) walls. An overview of the test geometry is shown here:
+\begin{center}
+\includegraphics[width=4.0in]{FIGURES/box}
+\end{center}
+The configuration factors are calculated at the
+diagonal of the cold wall opposite to the hot wall. The exact values of the configuration factor
+from plane element $dA$ to parallel rectangle $H$
+are calculated using the analytical solution~\cite{Siegel:1}
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline (y,z) & $\Phi_{HdA}$ & (y,z) & $\Phi_{HdA}$ \\ \hline \hline
+0.025   &0.1457 & 0.275 &0.2135 \\
+0.075   &0.1603 & 0.325 &0.2233 \\
+0.125   &0.1748 & 0.375 &0.2311 \\
+0.175   &0.1888 & 0.425 &0.2364 \\
+0.225   &0.2018 & 0.475 &0.2391 \\ \hline
+\end{tabular}
+\end{center}
+
+\noindent
+Different variations of the case include the mesh resolution (20$^3$ and 100$^3$ cells)
+and the number of radiation angles (50, 100, 300, 1000, 2000).
+The exact and FDS results are shown here:
+
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/box_results_20} &
+\includegraphics[width=3.2in]{FIGURES/box_results_100}
+\end{tabular*}
+
+
+
+
+
+\clearpage
+
+\subsection{Radiation from a plane layer ({\bf radiation\_plane\_layer}) }
+\label{radiation_plane_layer}
+
+This case tests the computation of three-dimensional
+radiation from a homogenous, infinitely wide layer of radiating
+material.  The temperature of the layer is 1273.15~K and absorption
+coefficients are varied. The thickness of the layer is fixed at 1.0~m,
+and the optical depth is $1.0 \kappa$. Wall temperatures are set to 0~K.
+The results are compared against the exact solution $S(\tau)$ presented
+in~\cite{Zeldovich:1}
+\be
+S(\tau) = S_b\left[1-2E_3(\tau)\right]
+\ee
+where $S_b = \sigma T^4$ is the black-body heat flux from
+the radiating plane and $E_3(\tau)$ is the exponential
+integral function (order 3) of optical depth $\tau$.
+
+The FDS results are computed at two mesh resolutions in the
+$x$-direction (I = 20 and I = 150). For I=20, both one-band and
+six-band versions are included to test the correct integration of heat
+fluxes over multiple bands. For I=20, 2D-versions are also computed
+(J=1). A special case with {\ct KAPPA0} = 0 and
+an opposite wall temperature of 1273.15~K is computed to test the wall
+heat flux computation. The exact values and FDS predictions of the
+wall heat fluxes are given here:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|} \hline
+$\tau$ & $S(\tau)$ & \multicolumn{2}{c}{FDS (I=20,J=20)}
+           & \multicolumn{2}{c}{FDS (I=20,J=1)}
+                   & FDS (I=150) \\
+     &          & 1 band  & 6 bands   & 1 band & 6 bands & 1 band \\
+                            \hline\hline
+0    & 148.9709 & 148.9709&  148.4037 & 147.9426 &147.3793 &148.9709 \\
+0.01 & 2.8970   & 2.9180  &  2.9069   & 2.8364   &2.8256   &2.9258   \\
+0.1  & 24.9403  & 25.5501 &  25.4529  & 25.1078  &25.0122  &25.7045  \\
+0.5  & 82.9457  & 83.1309 &  82.8144  & 84.3719  &84.0506  &84.0264  \\
+1.0  & 116.2891 & 115.4051&  114.9656 & 117.801  &117.353  &116.7751 \\
+10.  & 148.9698 & 148.9616&  148.3947 & 148.9677 &148.4005 &148.9695 \\ \hline
+\end{tabular}
+\end{center}
+
+
+
+\clearpage
+
+\section{Solid Phase Phenomena}
+
+This section contains examples that test the one-dimensional heat conduction solver in FDS, along with those that include
+pyrolysis.
+
+
+\subsection{Simple Heat Conduction Through a Solid Slab ({\bf heat\_conduction}) }
+\label{heat_conduction}
+
+Analytical solutions of transient, one-dimensional heat conduction through a
+slab can be found in Refs.~\cite{Drysdale:1} and
+\cite{Carslaw:1}. Four cases are examined here. In each, a slab of
+thickness $L=0.1$~m is exposed on one face to an air temperature of $T_g=120$~$^\circ$C. The other face is insulated (adiabatic). The convective
+heat transfer from the gas to the slab is $\dq_c'' = h \, (T_g - T_s)$,
+where $h$ is constant, and $T_s$ is the slab face temperature. No thermal radiation is included.
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Case  &  $k$      & $\rho$       &  $c$          &   $h$         &  Bi     \\
+      & (W/m/K)   & (kg/m$^3$)   &  (kJ/kg/K)    &  (W/m$^2$/K)  &  $hL/k$ \\ \hline \hline
+A     &   0.1     & 100          &  1            &  100          &  100    \\ \hline
+B     &   0.1     & 100          &  1            &  10           &  10     \\ \hline
+C     &   1.0     & 1000         &  1            &  10           &  1      \\ \hline
+D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \hline
+\end{tabular}
+\end{center}
+
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_A_Temperatures} &
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_B_Temperatures} \\
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_C_Temperatures} &
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_D_Temperatures}
+\end{tabular*}
+
+
+\clearpage
+
+\subsection{Temperature-Dependent Thermal Properties ({\bf heat\_conduction\_kc})}
+\label{heat_conduction_kc}
+
+This example demonstrates the 1-D heat conduction in cartesian,
+cylindrical and spherical geometries with temperature-dependent
+thermal properties. The reference results were computed using
+HEATING (version~7.3), a multi-dimensional, finite-difference, general purpose heat transfer model~\cite{Childs}. In
+cartesian and cylindrical cases, the results have also  been verified
+using a commercial finite-element solver, ABAQUS.
+
+The sample of homogenous material is initially at 0~$^\circ$C and
+at $t>0$ exposed to a gas at 700~$^\circ$C. A fixed heat transfer
+coefficient of 10~W/Km$^2$ is assumed. The density
+of the material is 10000~kg/m$^3$. The conductivity and specific heat
+are functions of temperature with the following values: $k(0)=0.10$~W/m/K,
+$k(200)=0.20$~W/m/K, $c(0)=1.0$~kJ/kg/K, $c(100)=1.2$~kJ/kg/K,
+$c(200)=1.0$~kJ/kg/K. The thickness (radius) of the sample is 0.01~m. In the
+cartesian case, the back surface of the material is exposed to a gas
+at 0~$^\circ$C. In the Figure below, the solid lines are FDS results and the open
+symbols are the HEATING results. An example input with cylindrical
+geometry looks like:
+
+\scriptsize
+\begin{verbatim}
+&MATL ID='MAT_1'
+      EMISSIVITY = 0.0
+      CONDUCTIVITY_RAMP='K_RAMP'
+      SPECIFIC_HEAT_RAMP = 'C_RAMP'
+      DENSITY=10000. /
+
+&RAMP ID = 'K_RAMP' T=0,   F= 0.10 /
+&RAMP ID = 'K_RAMP' T=100, F= 0.15 /
+&RAMP ID = 'K_RAMP' T=200, F= 0.20 /
+&RAMP ID = 'C_RAMP' T=0,   F= 1.00 /
+&RAMP ID = 'C_RAMP' T=100, F= 1.20 /
+&RAMP ID = 'C_RAMP' T=200, F= 1.00 /
+
+&SURF ID='SLAB'
+      STRETCH_FACTOR = 1.0
+      GEOMETRY = 'CYLINDRICAL'
+      MATL_ID='MAT_1'
+      THICKNESS=0.01 /
+\end{verbatim} \normalsize
+
+\noindent
+\begin{center}
+\includegraphics[width=4.5in]{FIGURES/heat_conduction_kc}
+\end{center}
+
+
+\subsection{A Simple Two-Step Pyrolysis Example ({\bf two\_step\_solid\_reaction}) }
+\label{two_step_solid_reaction}
+
+Consider  the set  of ordinary  differential equations  describing the
+mass  fraction of  three  components of  a  solid material  undergoing
+thermal degradation:
+\begin{eqnarray}
+    \frac{dY_a}{dt} &=&  -K_{ab} Y_a \nonumber  \\
+    \frac{dY_b}{dt} &=&   K_{ab} Y_a  -  K_{bc}  Y_b  \\
+    \frac{dY_c}{dt} &=&   K_{bc} Y_a
+    \nonumber
+\end{eqnarray}
+where  the  mass  fraction  of  component  $a$  is  1  initially.  The
+analytical solution is~\cite{Lautenberger:2006}
+\begin{eqnarray}
+    Y_a(t)    &=&    \exp(-K_{ab}t)    \nonumber   \\
+    Y_b(t)    &=&    \frac{K_{ab}}{K_{bc}-K_{ab}} \exp(-K_{ab} t)  - \exp(-K_{bc} t) \\
+    Y_c(t)    &=&    \left[   K_{ab}    (1-\exp(-K_{bc} t) )    +  K_{bc}*(\exp(-K_{ab} t) -1) \right] / (K_{ab}-K_{bc})
+\end{eqnarray}
+The analytical and  numerical solution
+for the parameters $K_{ab} = 0.389$ and $K_{bc} = 0.262$ are shown here:
+
+\begin{center}
+\includegraphics[width=4.5in]{FIGURES/two_step_solid_reaction_Mass_Fractions}
+\end{center}
+
+
+
+
+\clearpage
+\subsection{Wall Internal Radiation ({\bf wall\_internal\_radiation}) }
+\label{wall_internal_radiation}
+
+
+The radiative flux inside the walls is computed using a two-flux
+model.  In this case, the accuracy of the two-flux model is tested in
+the computation of emissive flux from a 0.10 m thick, homogenous layer
+of material at temperature of 1273.15 K and at ambient temperature of
+10 K. The absorption coefficient is varied to cover a range [0.01, 10]
+of optical depths.
+
+The exact solutions for radiative flux are the analytical solutions
+of plane layer emission~\cite{Zeldovich:1}
+\be
+S(\tau) = S_b\left[1-2E_3(\tau)\right]
+\ee
+where $S_b = \sigma T^4$ is the black-body heat flux from
+the radiating plane and $E_3(\tau)$ is the exponential
+integral function (order 3) of optical depth $\tau$. The exact
+solutions and FDS results are shown below
+
+\begin{center}
+\begin{tabular}{|c|c|c|} \hline
+$\tau$ & $S(\tau) {\rm (kW/m^2)}$ & FDS $\rm(kW/m^2)$ \\ \hline\hline
+0.01  & 2.897       & 2.950 \\
+0.1   & 24.94       & 26.98 \\
+0.5   & 82.95       & 93.90 \\
+1.0   & 116.3       & 128.4 \\
+10.   & 149.0       & 149.0 \\ \hline
+\end{tabular}
+\end{center}
+
+
+\clearpage
+\subsection{A Liquid Pool Fire ({\bf ethanol\_pan}) }
+\label{ethanol_pan}
+
+In this example, a steel pan (0.7~m by 0.8~m) is filled with a thin layer (about 5~L, 9~mm) of ethanol, which burns out within about 10~min. This case tests a number of features -- burning
+liquids, multiple layers of solids/liquids, and, most importantly, the absorption coefficient of the liquid. The pyrolysis models in FDS prior to version 5
+assumed that radiative feedback from the fire and hot gases within a compartment were absorbed at the surface. In reality, this energy is absorbed in
+depth; the extent of which is characterized by the absorption coefficient, $\kappa$. This is a property of the liquid, as well as the gaseous vapors. FDS now uses
+an absorption coefficient for both the gas and solid/liquid phases. Here are the input lines that describe the properties of ethanol, and the pan in which it lies:
+
+\scriptsize
+\begin{verbatim}
+&MATL ID = 'ETHANOL LIQUID'
+      EMISSIVITY = 1.0
+      NU_FUEL =0.97
+      HEAT_OF_REACTION=880.
+      CONDUCTIVITY=0.17
+      SPECIFIC_HEAT= 2.45
+      DENSITY= 787.
+      ABSORPTION_COEFFICIENT = 40.
+      BOILING_TEMPERATURE=76. /
+
+&SURF ID='ETHANOL POOL'
+      FYI = '4 kg of ethanol in a 0.7 m x 0.8 m pan'
+      COLOR = 'YELLOW'
+      MATL_ID = 'ETHANOL LIQUID','STEEL','CONCRETE'
+      THICKNESS=0.0091,0.001,0.05
+      TMP_INNER = 18. /
+\end{verbatim} \normalsize
+
+\noindent
+The results of three calculations are shown below, each identical except for the value of the \\ {\ct ABSORPTION\_COEFFICIENT}. The results of a single experiment
+are also shown, courtesy of Ian Thomas, Victoria University, Australia~\cite{Thomas:JFPE}.
+
+
+\begin{center}
+\includegraphics[width=4.5in]{FIGURES/ethanol_pan_HRR}
+\end{center}
+
+
+
+\clearpage
+\subsection{A Thermoplastic ({\bf thermoplastic}) }
+\label{thermoplastic}
+
+This example just exercises the solid phase algorithm in
+FDS. Essentially, the gas phase is shut off except for the imposition
+of a 50~kW/m$^2$ ``virtual'' heat flux. The solid in this example is a
+slab of plastic, similar in composition to PMMA.
+
+\scriptsize
+\begin{verbatim}
+&MATL ID='PMMA'
+      CONDUCTIVITY=0.25
+      SPECIFIC_HEAT=1.0
+      DENSITY=500.
+      N_REACTIONS=1
+      NU_FUEL=1.
+      HEAT_OF_REACTION=1578.
+      HEAT_OF_COMBUSTION=25200.
+      REFERENCE_TEMPERATURE=330. /
+
+&SURF ID='PMMA SLAB'
+      COLOR='BLACK'
+      MATL_ID='PMMA'
+      THICKNESS=0.025
+      EXTERNAL_FLUX=50. /  External Flux is ONLY for this simple demo exercise
+\end{verbatim} \normalsize
+
+\noindent
+The material undergoes only one reaction -- the conversion of solid to
+gaseous fuel vapor. In this case, the {\ct HEAT\_OF\_REACTION} is
+essentially the latent heat of vaporization. The {\ct
+REFERENCE\_TEMPERATURE} indicates that the reaction is to occur at a
+(default) rate of 0.1~s$^{-1}$ at 330~$^\circ$C. The {\ct
+HEAT\_OF\_COMBUSTION} refers to the combustion of the gaseous fuel
+vapor, which does not occur in this example.
+
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Surface_Temperature} &
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Burning_Rate}
+\end{tabular*}
+
+The figures above show that both the temperature and burning rate of the thermoplastic are more or less constant over
+the burning phase. The slab ``burns away'' after about 10~min.
+
+
+
+
+
+
+\clearpage
+\subsection{A Charring Solid ({\bf charring\_solid}) }
+\label{charring_solid}
+
+This example just exercises the solid phase algorithm in FDS. Essentially, the gas phase is shut off except for the imposition of a 50~kW/m$^2$ ``virtual''
+heat flux. The reaction mechanism is fairly complicated, as it includes various solids like cellulose, char, and ash. Each are input via {\ct MATL} lines
+as follows:
+
+\scriptsize
+\begin{verbatim}
+&SURF ID='SPRUCE'
+      STRETCH_FACTOR = 1.
+      CELL_SIZE_FACTOR = 0.5
+      MATL_ID(1,1:3) = 'CELLULOSE','WATER','LIGNIN'
+      MATL_MASS_FRACTION(1,1:3) = 0.70,0.1,0.20
+      MATL_ID(2,1) = 'CASI'
+      THICKNESS(1:2)  =  0.01,0.01
+      EXTERNAL_FLUX = 50. /
+
+&MATL ID               = 'CELLULOSE'
+      CONDUCTIVITY_RAMP = 'k_cell'
+      SPECIFIC_HEAT    = 2.3
+      DENSITY          = 400.
+      N_REACTIONS      = 1
+      A                = 2.8E19
+      E                = 2.424E5
+      HEAT_OF_REACTION = 0.
+      NU_RESIDUE       = 1.0
+      RESIDUE          = 'ACTIVE'/
+
+&MATL ID                    = 'ACTIVE'
+      EMISSIVITY            = 1.0
+      CONDUCTIVITY_RAMP     = 'k_cell'
+      SPECIFIC_HEAT         = 2.3
+      DENSITY               = 400.
+      N_REACTIONS           = 2
+      A(1:2)                = 1.3E10,  3.23E14
+      E(1:2)                = 1.505E5, 1.965E5
+      HEAT_OF_REACTION(1:2) = 418.,    418.
+      NU_RESIDUE(1:2)       = 0.35,    0.0
+      NU_FUEL(1:2)          = 0.65,    1.0
+      RESIDUE(1)            = 'CHAR' /
+
+&MATL ID               = 'WATER'
+      EMISSIVITY       = 1.0
+      DENSITY          = 1000.
+      CONDUCTIVITY     = 0.6
+      SPECIFIC_HEAT    = 4.19
+      N_REACTIONS      = 1
+      A                = 1E20
+      E                = 1.62E+05
+      NU_WATER         = 1.0
+      HEAT_OF_REACTION = 2260. /
+
+&MATL ID                = 'CASI'
+      CONDUCTIVITY_RAMP = 'k_CASI'
+      DENSITY           = 200.
+      SPECIFIC_HEAT     = 1.0 /
+
+&MATL ID               = 'LIGNIN'
+      EMISSIVITY       = 1.0
+      DENSITY          = 550.
+      CONDUCTIVITY     = 0.1
+      SPECIFIC_HEAT    = 1.1 /
+
+&MATL ID               = 'CHAR'
+      EMISSIVITY       = 1.0
+      DENSITY          = 140.
+      CONDUCTIVITY_RAMP = 'k_char'
+      SPECIFIC_HEAT    = 1.1 /
+
+&RAMP ID='k_cell', T= 20., F=0.15 /
+&RAMP ID='k_cell', T=500., F=0.29 /
+
+&RAMP ID='k_char', T= 20., F=0.08 /
+&RAMP ID='k_char', T=900., F=0.25 /
+
+&RAMP ID='k_CASI', T= 20., F=0.06 /
+&RAMP ID='k_CASI', T=400., F=0.25 /
+\end{verbatim} \normalsize
+
+\noindent
+Note the edition of the parameter {\ct EXTERNAL\_FLUX} on the {\ct SURF} line. This produces a 50~kW/m$^2$ flux on the sample, without any
+additional input lines in the file. It is just to test the solid phase model and should not be copied into an actual fire simulation.
+
+The figures below show the surface temperature and burning rate of the wood under the 50~kW/m$^2$ external heat flux. The burning rate peaks at the
+start of the simulation, decreases throughout the burning phase, and then peaks again at the end due to presence of an external backing material. The
+initial peak is typical of char-forming solids.
+
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/charring_solid_Surface_Temperature} &
+\includegraphics[width=3.2in]{FIGURES/charring_solid_Burning_Rate}
+\end{tabular*}
+
+
+
+
+
+\clearpage
+\subsection{Testing the ``Burn-Away'' Feature ({\bf box\_burn\_away}) }
+\label{box_burn_away}
+
+This is a silly example of a solid block of ``foam'' that is ignited
+and burns until it is completely consumed.  The properties of the
+block of foam were chosen simply to assure a quick calculation. The
+objective of the test is to check that the integrated heat release
+rate is consistent with the material properties of the block.  The
+block is 0.4~m on a side, with a density of 20~kg/m$^3$. Its heat of
+combustion is 20000~kJ/kg. The ignitor is a 10~kW burner placed beside
+the block. The integrated heat release rate for a 120 s calculation
+ought to be:
+\be
+(0.4)^3 \; \hbox{m}^3 \times 20 \; \hbox{kg/m}^3
+\times 20000 \; \hbox{kJ/kg} + 10 \; \hbox{kW} \times 120 \; \hbox{s} =
+26.8 \; \hbox{MJ}
+\ee
+
+
+
+\clearpage
+\subsection{A Couch Fire ({\bf couch}) }
+\label{couch}
+
+In residential fires, upholstered furniture makes up a significant fraction of the combustible load. A single couch can generate several
+megawatts of energy and sometimes lead to compartment flashover. Modeling a couch fire requires a simplification of its structure and materials.
+At the very least, we want the upholstery to be described as fabric covering foam:
+
+\footnotesize
+\begin{verbatim}
+&MATL ID                    = 'FABRIC'
+      FYI                   = 'Properties completely fabricated'
+      SPECIFIC_HEAT         = 1.0
+      CONDUCTIVITY          = 0.1
+      DENSITY               = 100.0
+      N_REACTIONS           = 1
+      NU_FUEL               = 1.
+      REFERENCE_TEMPERATURE = 350.
+      HEAT_OF_REACTION      = 3000.
+      HEAT_OF_COMBUSTION    = 15000. /
+
+&MATL ID                    = 'FOAM'
+      FYI                   = 'Properties completely fabricated'
+      SPECIFIC_HEAT         = 1.0
+      CONDUCTIVITY          = 0.05
+      DENSITY               = 40.0
+      N_REACTIONS           = 1
+      NU_FUEL               = 1.
+      REFERENCE_TEMPERATURE = 350.
+      HEAT_OF_REACTION      = 1500.
+      HEAT_OF_COMBUSTION    = 30000. /
+
+&SURF ID             = 'UPHOLSTERY'
+      FYI            = 'Properties completely fabricated'
+      COLOR          = 'PURPLE'
+      BURN_AWAY      = .TRUE.
+      MATL_ID(1:2,1) = 'FABRIC','FOAM'
+      THICKNESS(1:2) = 0.002,0.1
+      PART_ID        = 'smoke' /
+\end{verbatim} \normalsize
+
+\noindent
+Both the fabric and the foam decompose into fuel gases via single-step reactions. The fuel gases from each have different
+composition and heats of combustion. FDS automatically adjusts the mass loss rate of each so that the ``effective'' fuel gas
+is that specified by the user on the {\ct REAC} line. The attribute {\ct BURN\_AWAY} forces FDS to break up the couch into
+individual cell-sized blocks that will disappear from the calculation as soon as the fuel is exhausted. The surface is specified
+as consisting of two layers, with a thickness of 2~mm for the {\ct FABRIC} and 10~cm for the {\ct FOAM}. The 10~cm is chosen to be the
+same as the mesh cell size.
+
+
+
+
+
+\clearpage
+\subsection{Flame Spread along a Cable Tray ({\bf cable\_tray}) }
+\label{cable_tray}
+
+A common combustible in industrial settings are power, control, and instrument cables. The cables may be bundled in a variety of conduits; the most
+common of which is a ladder-like ``tray.'' From the point of view of FDS, the pile of cables in a tray is a composite of a variety of plastics, insulators,
+and metal, usually copper. Here is one way to describe a tray of cables:
+
+\footnotesize
+\begin{verbatim}
+&MATL ID                    = 'PLASTIC'
+      CONDUCTIVITY          = 0.2
+      SPECIFIC_HEAT         = 1.5
+      DENSITY               = 1500.
+      N_REACTIONS           = 1
+      HEAT_OF_REACTION      = 3000.
+      HEAT_OF_COMBUSTION    = 25000.
+      REFERENCE_TEMPERATURE = 400.
+      NU_FUEL               = 1.0 /
+
+&MATL ID            = 'COPPER'
+      SPECIFIC_HEAT = 0.38
+      CONDUCTIVITY  = 387.
+      DENSITY       = 8940.   /
+
+&SURF ID                        = 'Loose Cable'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1:2)            = 'PLASTIC','COPPER'
+      MATL_MASS_FRACTION(1,1:2) = 0.4,0.6
+      BACKING                   = 'EXPOSED'
+      THICKNESS                 = 0.02 /
+
+&OBST XB=-2.00, 2.00,-0.14, 0.14, 0.51, 0.55, SURF_ID='Loose Cable' /
+
+&OBST XB=-2.00, 2.00,-0.15,-0.15, 0.50, 0.60, SURF_ID='SHEET METAL' / Tray Side
+&OBST XB=-2.00, 2.00, 0.15, 0.15, 0.50, 0.60, SURF_ID='SHEET METAL' / Tray Side
+&OBST XB=-1.95,-1.90,-0.15, 0.15, 0.50, 0.50, SURF_ID='SHEET METAL' / Rung
+&OBST XB=-1.60,-1.55,-0.15, 0.15, 0.50, 0.50, SURF_ID='SHEET METAL' / Rung
+...
+&OBST XB= 1.90, 1.95,-0.15, 0.15, 0.50, 0.50, SURF_ID='SHEET METAL' / Rung
+\end{verbatim} \normalsize
+
+\noindent
+The pile of cables is assumed to be a solid slab, 28~cm wide and 2~cm deep. The tray is slightly wider and deeper, and because it is listed second in
+the input file, its surface properties take precedence wherever the cable slab and tray coincide. The mesh cells in this example are 5~cm on a side, but the
+heat transfer within the cable slab are governed by the 2~cm {\ct THICKNESS}. The slab is 60~\% copper, by mass. Note that we are not assuming multiple
+layers in this example -- the slab is a single layer composite of plastic and copper. The plastic burns at about 400~$^\circ$, but the copper remains. Thus,
+the cable does not ``burn away.''
+
+The point of this test case is merely to propose a simple model of flame spread along a tray of assorted cable. Detailed thermo-physical property data for
+industrial-grade cable is usually not available, and even if it were, it would probably not improve upon the given model. The properties given in this example
+are almost completely fabricated. What is important here are the
+{\ct HEAT\_OF\_REACTION} and {\ct REFERENCE\_TEMPERATURE}, obtained in most cases by a bench-scale measurement device like the cone calorimeter.
+
+
+
+
+
+
+\clearpage
+
+\section{Detectors}
+
+\subsection{Aspiration Detector ({\bf beam\_detector}) }
+\label{beam_detectors}
+
+A 10~m x 10~m x 4~m compartment is filled with 0.006~kg/kg of {\ct MIXTURE\_FRACTION\_2} with the default soot yield
+0.01~kg/kg.  This results in an initial soot density of 71.9~mg/m$^3$ which using the default extinction coefficient of
+8700~m$^2$/kg results in an optical depth of 0.626~m$^{-1}$.  The compartment has a series of obstructions placed at varying depths that are
+multiples of 1~m.  Using the correlation for the output quantity {\ct visibility}, one obtains a visibility distance of 4.8~m.
+When viewing the smoke levels with Smokeview, one can just barely see the fifth obstacle which is at a distance of 5~m.
+Smokeview, therefore, is properly displaying the obscuration of the initial soot density.  Three beam detectors are also
+placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment.
+Using the optical depth of 0.626~m$^{-1}$ and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the
+result computed by FDS for each of the three detectors.
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/beam_detector_nosmoke} &
+\includegraphics[width=3.2in]{FIGURES/beam_detector_smoke}
+\end{tabular*}
+
+\clearpage
+
+\subsection{Aspiration Detector ({\bf aspiration\_detector}) }
+\label{aspiration_detector}
+
+A cubical compartment, 2~m on a side with a fire has a three sampling location aspiration system.  The three locations
+have flow rates of 0.1, 0.5, and 0.8~kg/s, respectively, and transport times of 0.2, 0.1, and 0.3~s, respectively.  No bypass flow rate is
+specified for the aspiration detector.  The input file fixes the initial time step to 0.01~s so that the initial output
+times in the {\bf aspiration\_detector\_devc.csv} file will line up exactly with the transport times.  At 0.75~s, when
+FDS begins reducing the time step below 0.01~s, the time delayed soot densities at the three sampling locations are
+$7.4x10^{-6}$~kg/m$^3$, $9.5x10^{-4}$~kg/m$^3$, and $1.6x10^{-18}$~kg/m$^3$, respectively.  Using these values along with the
+respective flow rates results in a detector obscuration of 0.000823~\%/m which is the same obscuration as predicted by FDS.
+
+\clearpage
+
+\section{Droplets and Sprays}
+
+This section considers cases involving evaporating droplets, both water and fuel.
+
+
+\subsection{Water Droplet Evaporation ({\bf water\_evaporation}) }
+\label{water_evaporation}
+
+The case called {\bf water\_evaporation} is nothing more than stationary water droplets in an adiabatic box with dimensions of 1~m on a side. The air
+within the box is stirred to maintain uniform conditions, and there are no leaks or heat losses. The initial air
+ temperature is 40~$^\circ$C.
+Initially, the droplets have a median volumetric diameter of 100~$\mu$m, a temperature of 90~$^\circ$C, and a total mass of 0.02~kg.
+It is expected that a steady-state will be achieved after several minutes.  The initial energy content, sum of the
+air and water enthalpies, of the box is 360,000~kJ.  After a short period of time, 0.0141 kg of water evaporate and the box
+reaches an equilibrium temperature of 16.2~$^\circ$C, see the figure below.  At this point the energy content of the box is 372,000~kJ
+ or a 3~\% error.  At 16.2~$^\circ$C, the expected evaporation is 0.0142~kg.
+
+\begin{center}
+\includegraphics[width=4.5in]{FIGURES/water_evaporation}
+\end{center}
+
+
+%\subsection{Fuel Droplet Evaporation ({\bf fuel\_evaporation}) }
+
+%In the exact same geometry as the above example, stationary droplets of heptane at ambient temperature vaporize and burn.
+
+
+
+
+\clearpage
+
+\subsection{A Liquid Fuel Spray Burner ({\bf spray\_burner}) }
+\label{spray_burner}
+
+Controlled fire experiments are often conducted using a spray burner,
+where a liquid fuel is sprayed out of a nozzle and ignited. In this
+example ({\bf spray\_burner.data}), heptane from two nozzles is
+sprayed downwards into a steel pan.  The flow rate is increased
+linearly so that the fire grows to 2~MW in 20 s, burns steadily for
+another 20 s, and then ramps down linearly in 20 s. The key input
+parameters are given here:
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
+&DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
+
+&PART ID='heptane droplets', FUEL=.TRUE., VAPORIZATION_TEMPERATURE=98.,
+      HEAT_OF_VAPORIZATION=316., SPECIFIC_HEAT=2.25, DENSITY=688.,
+      QUANTITIES(1:2)='DIAMETER','DROPLET_TEMPERATURE',
+      DROPLETS_PER_SECOND=2000, DIAMETER=1000., HEAT_OF_COMBUSTION=44500.,
+      DT_INSERT=0.02, SAMPLING_FACTOR=1 /
+
+&PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets',
+      FLOW_RATE=1.96, FLOW_RAMP='fuel', DROPLET_VELOCITY=10.,
+      SPRAY_ANGLE=0.,30.   /
+&RAMP ID='fuel', T= 0.0, F=0.0  /
+&RAMP ID='fuel', T=20.0, F=1.0  /
+&RAMP ID='fuel', T=40.0, F=1.0  /
+&RAMP ID='fuel', T=60.0, F=0.0  /
+\end{verbatim}
+\normalsize
+Many of these parameters are self-explanatory and the
+units are given in the User's Guide~\cite{FDS_Users_Guide_5}. Note
+that a 2~MW fire is achieved via 2 nozzles flowing heptane at
+1.96~L/min each:
+\be 2 \times 1.96 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 688 \;
+\frac{\hbox{kg}}{\hbox{m}^3} \times \frac{1}{1000} \; \frac{\hbox{m}^3}{\hbox{L}} \times 44500 \;
+\frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW} \ee
+The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall reaction scheme. Thus, if other droplets
+or solid objects have different heats of combustion, the effective burning rates are adjusted so that the
+total heat release rate is that which the user expects. However, exercises like this ought to be conducted just to
+ensure that this is the case. The HRR curve for this example is given here:
+
+\begin{center}
+\includegraphics[width=4.5in]{FIGURES/spray_burner_HRR}
+\end{center}
+
+
+
+\clearpage
+
+\subsection{Measuring Water Flux ({\bf bucket\_test}) }
+\label{bucket_test}
+
+A common way of measuring the spray distribution for any fire sprinkler is called a ``bucket test.''  Usually, one or several sprinklers is
+mounted a specified distance above an array of catch bins, the water flows for a given period of time, and the water flux distribution is calculated
+from the accumulated water mass in each bin. In the test case {\bf bucket\_test}, a single sprinkler is mounted 10~cm below a 5~m ceiling. Water
+flows for 5~s at a constant rate of 60~L/min.  The simulation continues for another 5~s to allow water drops time to reach the
+floor. The total mass of water discharged is
+\be
+  \mathrm{ 60 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 5 \; s = 5 \; kg }
+\ee
+In the simulation, the boundary quantity {\ct water\_drops\_AMPUA} (Accumulated Mass Per Unit Area) records the total water mass per unit area (kg/m$^2$), analogous to
+actual buckets the size of a grid cell.
+Summing the values of {\ct water\_drops\_AMPUA} over the entire floor yields 4.96~kg. Where is the missing water? Some droplets evaporate, and some droplets
+fly beyond the computational domain. Also, there remain a small number of suspended drops at the end of the simulation. Note that
+there are no actual ``buckets'' in the simulation.
+
+The accumulated water mass at the floor is extracted from the boundary ({\ct BNDF}) file via the command line program {\bf fds2ascii}. Here is a transcript of the session
+used to convert the binary FDS output file into ASCII format:
+
+\footnotesize
+\begin{verbatim}
+>> fds2ascii
+  Enter Job ID string (CHID):
+bucket_test
+  What type of file to parse?
+  PL3D file? Enter 1
+  SLCF file? Enter 2
+  BNDF file? Enter 3
+3
+  Enter Sampling Factor for Data?
+  (1 for all data, 2 for every other point, etc.)
+1
+  Limit the domain size? (y or n)
+y
+  Enter min/max x, y and z
+-5 5 -5 5 0 1
+  1   MESH  1, water_drops_AMPUA
+  Enter starting and ending time for averaging (s)
+9 10
+  Enter orientation: (plus or minus 1, 2 or 3)
+3
+  Enter number of variables
+1
+ Enter boundary file index for variable 1
+1
+ Enter output file name:
+bucket_test_fds2ascii.csv
+  Writing to file...      bucket_test_fds2ascii.csv
+\end{verbatim}
+
+\normalsize \noindent
+
+
+\subsection{Complex Spray Patterns ({\bf bucket\_test\_2}) }
+\label{bucket_test_2}
+
+The test case from the prior section is modified to create two jets of water.
+
+\footnotesize
+\begin{verbatim}
+&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10, PART_ID='water_drops',
+      FLOW_RATE=60.,SPRAY_PATTERN_TABLE='TABLE1', SMOKEVIEW_ID='sprinkler_upright' /
+
+&TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,0.2/
+&TABL ID='TABLE1',TABLE_DATA=30,31,179,180,5,0.8/
+\end{verbatim}
+\normalsize
+
+The jets are separated by 180 degrees.
+The jet in the {\ct -x} direction is given one quarter the flow rate of the jet in the {\ct +x} direction.
+
+Viewing the particles in Smokeview shows two distinct jets of droplets in opposite directions.
+Following the post processing instructions above,  you can observe that
+the {\ct +x} jet does have four times the flow of the {\ct -x} jet.
+
+\clearpage
+
+\section{General Functionality}
+
+This section contains a variety of simple tests to check the functionality of the code. These examples are good demonstrations of how to
+make things happen in FDS.
+
+
+\subsection{Creating and Removing {\ct HOLE}s and {\ct OBST}ructions ({\bf create\_remove}) }
+\label{create_remove}
+
+It is often convenient to create or remove solid obstructions, or conversely, remove or create empty holes. They are essentially the same thing as far as the logic in
+FDS is concerned, but the input can be tricky. To avoid confusion, here is an example of holes and obstructions being created and removed.
+
+\vspace{0.2in}
+\tiny
+\noindent
+\begin{minipage}{1.4in}
+\includegraphics[height=1.4in]{FIGURES/create_remove}
+\end{minipage}
+\hfill
+\begin{minipage}{5.5in}
+\begin{verbatim}
+&HOLE XB=0.25,0.45,0.20,0.30,0.20,0.30, COLOR='RED',   DEVC_ID='timer 1' /
+&HOLE XB=0.25,0.45,0.70,0.80,0.70,0.80, COLOR='GREEN', DEVC_ID='timer 2' /
+
+&OBST XB=0.70,0.80,0.20,0.30,0.20,0.30, COLOR='BLUE',  DEVC_ID='timer 3' /
+&OBST XB=0.70,0.80,0.60,0.70,0.60,0.70, COLOR='PINK',  DEVC_ID='timer 4' /
+
+&DEVC XYZ=0.1,0.1,0.1, ID='timer 1', SETPOINT= 1.0, QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=0.2,0.1,0.1, ID='timer 2', SETPOINT= 2.0, QUANTITY='TIME', INITIAL_STATE=.TRUE. /
+&DEVC XYZ=0.1,0.1,0.1, ID='timer 3', SETPOINT= 3.0, QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=0.2,0.1,0.1, ID='timer 4', SETPOINT= 4.0, QUANTITY='TIME', INITIAL_STATE=.TRUE./
+\end{verbatim}
+\end{minipage}
+\normalsize
+
+
+
+
+
+
+
+
+
+
+
 \part{Working with the FDS Source Code}
 
 
@@ -7247,7 +8272,7 @@ append an underscore to the names of the C routines called by the Fortran
 code. If the compiler produces an error involving the names of routines
 that are not recognized, invoke the C compiler pre-processing directive {\ct pp\_noappend} to stop
 the compiler from appending the underscore to the names of the C routines.
-\item There is only one non-standard calls in the Fortran code. The non-standard call is {\ct GETARG},
+\item There is only one non-standard call in the Fortran code. The non-standard call is {\ct GETARG},
 in {\bf func.f90}. This routine reads the name of the input file off of the command line. This call cannot
 be simply commented out; a suitable alternative must be found.
 The only compiler option necessary, in addition to any needed to
