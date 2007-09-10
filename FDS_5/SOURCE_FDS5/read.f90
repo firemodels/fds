@@ -1288,7 +1288,9 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
       SELECT CASE(ID)
          CASE('MIXTURE_FRACTION_1')
             NN = I_FUEL
+            ABSORBING  = .TRUE.
          CASE('MIXTURE_FRACTION_2')
+            ABSORBING  = .TRUE.
             IF (CO_PRODUCTION) THEN
                NN = I_PROG_CO
             ELSE
@@ -1297,6 +1299,7 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
          CASE('MIXTURE_FRACTION_3')
             IF (CO_PRODUCTION) THEN
                NN = I_PROG_CO
+               ABSORBING  = .TRUE.
             ELSE
                NN = N
             ENDIF
