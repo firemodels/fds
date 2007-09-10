@@ -246,7 +246,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, September 4, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide \\ (Draft, September 10, 2007)}
 
 \vspace{.5in}
 
@@ -449,6 +449,9 @@ Morgan Hurley of the SFPE.
 Prof.~David McGill of Seneca College, Ontario, Canada has conducted a remote-learning course
 on the use of FDS, and he has also maintained a web site that has provided valuable suggestions from users.
 
+Thanks to Chris Lautenburger and Carlos Fernandez-Pello for their assistance with the ``two-reaction'' test case.
+
+Thanks to Ian Thomas, Khalid Moinuddin, and Ian Bennetts for their description of and data for the ethanol pan fire example.
 Prof.~Ian Thomas of Victoria University has also presented short courses on the use of FDS in Australia.
 His students have also performed some validation work on compartment fires.
 
@@ -7199,15 +7202,294 @@ The syntax of the old {\ct THCP} namelist group is almost the same. Just swap {\
 
 
 
+\chapter{Forms of Verification}
+
+ASTM~E~1355~\cite{ASTM:E1355} outlines methods to evaluate the
+mathematical and numerical robustness of deterministic fire
+models. This process, often referred to as {\em model verification},
+ensures the accuracy of the numerical solution of the governing
+equations. The methods include comparison with analytical solutions,
+code checking, and numerical tests.
+
+\section{Comparison with Analytical Solutions}
+\label{Analytical Tests}
+
+Most complex combustion processes, including fire, are turbulent and
+time-dependent. There are no closed-form mathematical solutions for
+the fully-turbulent, time-dependent Navier-Stokes equations. CFD
+provides an approximate solution for the non-linear partial
+differential equations by replacing them with discretized algebraic
+equations that can be solved using a powerful computer. While there is
+no general analytical solution for fully-turbulent flows, certain
+sub-models address phenomenon that do have analytical solutions, for
+example, one-dimensional heat conduction through a solid. These
+analytical solutions can be used to test sub-models within a complex
+code such as FDS. The developers of FDS routinely use such practices
+to verify the correctness of the coding of the
+model~\cite{Mell:1,McGrattan:4}. Such verification efforts are
+relatively simple and routine and the results may not always be
+published nor included in the documentation. Examples of routine
+analytical testing include:
+\begin{itemize}
+\item The radiation solver has been verified with scenarios where
+simple objects, like cubes or flat plates, are positioned in simple,
+sealed compartments. All convective motion is turned off, the object
+is given a fixed surface temperature and emissivity of one (making it
+a black body radiator). The heat flux to the cold surrounding walls is
+recorded and compared to analytical solutions.  These studies help
+determine the appropriate number of solid angles to be set as the
+default.
+\item Solid objects are heated with a fixed heat flux, and the
+interior and surface temperatures as a function of time are compared
+to analytical solutions of the one-dimensional heat transfer
+equation. These studies help determine the number of nodes to use in
+the solid phase heat transfer model. Similar studies are performed to
+check the pyrolysis models for thermoplastic and charring solids.
+\item Early in its development, the hydrodynamic solver that evolved
+to form the core of FDS was checked against analytical solutions of
+simplified fluid flow phenomena. These studies were conducted at the
+National Bureau of Standards (NBS)\footnote{The National Institute of
+Standards and Technology (NIST) was formerly known as the National
+Bureau of Standards.} by Rehm, Baum and
+co-workers~\cite{Rehm:SIAM83,Rehm:SIAM84,Baum:CST84,Rehm:ANM85}. The
+emphasis of this early work was to test the stability and consistency
+of the basic hydrodynamic solver, especially the velocity-pressure
+coupling that is vitally important in low Mach number
+applications. Many numerical algorithms developed up to that point in
+time were intended for use in high-speed flow applications, like
+aerospace. Many of the techniques adopted by FDS were originally
+developed for meteorological models, and as such needed to be tested
+to assess whether they would be appropriate to describe relatively
+low-speed flow within enclosures.
+\item A fundamental decision made by Rehm and Baum early in the FDS
+development was to use a direct (rather than iterative) solver for the
+pressure. In the low Mach number formulation of the Navier-Stokes
+equations, an elliptic partial differential equation for the pressure
+emerges, often referred to as the Poisson equation. Most CFD methods
+use iterative techniques to solve the governing conservation equations
+to avoid the necessity of directly solving the Poisson equation. The
+reason for this is that the equation is time-consuming to solve
+numerically on anything but a rectilinear grid. Because FDS is
+designed specifically for rectilinear grids, it can exploit fast,
+direct solvers of the Poisson equation, obtaining the pressure field
+with one pass through the solver to machine accuracy. FDS employs
+double-precision (8 byte) arithmetic, meaning that the relative
+difference between the computed and the exact solution of the
+discretized Poisson equation is on the order of $10^{-12}$. The
+fidelity of the numerical solution of the entire system of equations
+is tied to the pressure/velocity coupling because often simulations
+can involve hundreds of thousands of time steps, with each time step
+consisting of two solutions of the Poisson equation to preserve
+second-order accuracy. Without the use of the direct Poisson solver,
+build-up of numerical error over the course of a simulation could
+produce spurious results. Indeed, an attempt to use single-precision
+(4 byte) arithmetic to conserve machine memory led to spurious results
+simply because the error per time step built up to an intolerable
+level.
+\end{itemize}
+
+
+\section{Code Checking}
+\label{Code Checking}
+
+An examination of the structure of the computer program can be used to
+detect potential errors in the numerical solution of the governing
+equations.  The coding can be verified by a third party either
+manually or automatically with profiling programs to detect
+irregularities and inconsistencies~\cite{ASTM:E1355}.
+
+At NIST and elsewhere, FDS has been compiled and run on computers
+manufactured by IBM, Hewlett-Packard, Sun Microsystems, Digital
+Equipment Corporation, Apple, Silicon Graphics, Dell, Compaq, and
+various other personal computer vendors. The operating systems on
+these platforms include Unix, Linux, Microsoft Windows, and Mac
+OSX. Compilers used include Lahey Fortran, Digital Visual Fortran,
+Intel Fortran, IBM XL Fortran, HPUX Fortran, Forte Fortran for SunOS,
+the Portland Group Fortran, and several others. Each combination of
+hardware, operating system and compiler involves a slightly different
+set of compiler and run-time options and a rigorous evaluation of the
+source code to test its compliance with the Fortran 90 ISO/ANSI
+standard~\cite{F90}. Through this process, out-dated and potentially
+harmful code is updated or eliminated, and often the code is
+streamlined to improve its optimization on the various
+machines. However, simply because the FDS source code can be compiled
+and run on a wide variety of platforms does not guarantee that the
+numerics are correct. It is only the starting point in the process
+because it at least rules out the possibility that erratic or spurious
+results are due to the platform on which the code is running.
+
+Beyond hardware issues, there are several useful techniques for
+checking the FDS source code that have been developed over the
+years. One of the most best ways is to exploit symmetry. FDS is filled
+with thousands of lines of code in which the partial derivatives in
+the conservation equations are approximated as finite differences. It
+is very easy in this process to make a mistake. Consider, for example,
+the finite difference approximation of the thermal diffusion term in
+the $ijk$th cell of the three-dimensional grid:
+\begin{eqnarray*}
+(\nabla \cdot k \nabla T)_{ijk} &\approx&
+              \frac{1}{\dx}
+         \left[k_{i+\ha,jk}\frac{T_{i+1,jk}-T_{ijk}}{\dx}
+              -k_{i-\ha,jk}\frac{T_{ijk}-T_{i-1,jk}}{\dx}\right]+  \nonumber \\
+            &&\frac{1}{\dy}
+         \left[k_{i,j+\ha,k}\frac{T_{i,j+1,k}-T_{ijk}}{\dy}
+              -k_{i,j-\ha,k}\frac{T_{ijk}-T_{i,j-1,k}}{\dy}\right]+ \nonumber \\
+            &&\frac{1}{\dz}
+         \left[k_{ij,k+\ha}\frac{T_{ij,k+1}-T_{ijk}}{\dz}
+              -k_{ij,k-\ha}\frac{T_{ijk}-T_{ij,k-1}}{\dz}\right]
+\end{eqnarray*}
+which is written as follows in the Fortran source code:
+\begin{verbatim}
+      DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+      KDTDX(I,J,K) = .5*(KP(I+1,J,K)+KP(I,J,K))*DTDX
+      DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+      KDTDY(I,J,K) = .5*(KP(I,J+1,K)+KP(I,J,K))*DTDY
+      DTDZ = (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+      KDTDZ(I,J,K) = .5*(KP(I,J,K+1)+KP(I,J,K))*DTDZ
+
+      DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) +
+     .           (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) +
+     .           (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
+\end{verbatim}
+This is one of the simpler constructs because the pattern that emerges
+within the lines of code make it fairly easy to check. However, a
+mis-typing of an {\ct I} or a {\ct J}, a plus or a minus sign, or any
+of a hundred different mistakes can cause the code to fail, or worse
+produce the wrong answer. A simple way to eliminate many of these
+mistakes is to run simple scenarios that have perfectly symmetric
+initial and boundary conditions.  For example, put a hot cube in the
+exact center of a larger cold compartment, turn off gravity, and watch
+the heat diffuse from the hot cube into the cold gas. Any simple error
+in the coding of the energy equation will show up almost
+immediately. Then, turn on gravity, and in the absence of any coding
+error, a perfectly symmetric plume will rise from the hot cube. This
+checks both the coding of the energy and the momentum
+equations. Similar checks can be made for all of the three dimensional
+finite difference routines. So extensive are these types of checks
+that the release version of FDS has a routine that generates a tiny
+amount of random noise in the initial flow field so as to eliminate
+any false symmetries that might arise in the numerical solution.
+
+The process of adding new routines to FDS is as follows: typically the
+routine is written by one person (not necessarily a NIST staffer) who
+takes the latest version of the source code, adds the new routine, and
+writes a theoretical and numerical description for the FDS Technical
+Reference Guide, plus a description of the input parameters for the
+FDS User's Guide. The new version of FDS is then tested at NIST with a
+number of benchmark scenarios that exercise the range of the new
+parameters.  Provisional acceptance of the new routine is based on
+several factors: (1) it produces more accurate results when compared
+to experimental measurement, (2) the theoretical description is sound,
+and (3) any empirical parameters are obtainable from the open
+literature or standard bench-scale apparatus.  If the new routine is
+accepted, it is added to a test version of the software and evaluated
+by external users and/or NIST grantees whose research is related to
+the subject. Assuming that there are no intractable issues that arise
+during the testing period, the new routine eventually becomes part of
+the release version of FDS.
+
+Even with all the code checking performed at NIST, it is still
+possible for errors to go unnoticed. One remedy is the fact that the
+source code for FDS is publicly released. Although it consists of on
+the order of 10,000 lines of Fortran statements, various researchers
+outside of NIST have been able to work with it, add enhancements
+needed for very specific applications or for research purposes, and
+report back to the developers bugs that have been detected. The source
+code is organized into 14 separate files, each containing subroutines
+related to a particular feature of the model, like the mass, momentum,
+and energy conservation equations, sprinkler activation and sprays,
+the pressure solver, {\em etc.} The lengthiest routines are devoted to
+input, output and initialization.  Most of those working with the
+source code do not concern themselves with these lengthy routines but
+rather focus on the finite-difference algorithm contained in a few of
+the more important files. Most serious errors are found in these
+files, for they contain the core of the algorithm. The external
+researchers provide feedback on the organization of the code and its
+internal documentation, that is, comments within the source code
+itself.  Plus, they must compile the code on their own computers,
+adding to its portability. Some of the work performed by researchers
+who have modified the source code is discussed in Volume 2.  However, most of the routine
+error reports are via electronic mail and are undocumented.  Most of
+the current error reports involve routines that are not frequently
+used by the FDS developers.  For example, the opening of compartment
+doors or the breaking of windows, especially upon activation of a heat
+detector, is a feature of FDS commonly used in the fire protection
+engineering community but less so at NIST. As a result, numerous
+reports have been made over the years in which a complicated sequence
+of events prescribed by the user is not carried out by the program.
+The errors are easy to fix, but the number of possible permutations of
+events make it difficult to check them all. Another problem reported
+by users are scenarios that extend the parameter range beyond which
+the model was originally conceived.  Walls made of foam, fires in
+refrigerators, gas leaks, fuel spills, {\em etc.}, are just some of
+the phenomena that users have attempted to model but have run into
+difficulty because the model parameters either have never been
+exercised ({\em e.g.} very low thermal conductivities) or are not
+allowed ({\em e.g.} temperatures below ambient). These reports by the
+users help to improve and extend the use of the model.
+
+
+\section{Numerical Tests}
+\label{Numerical Tests}
+
+Numerical techniques used to solve the governing equations within a
+model can be a source of error in the predicted results.  The
+hydrodynamic model within FDS is second-order accurate in space and
+time.  This means that the error terms associated with the
+approximation of the spatial partial derivatives by finite differences
+is of the order of the square of the grid cell size, and likewise the
+error in the approximation of the temporal derivatives is of the order
+of the square of the time step. As the numerical grid is refined, the
+``discretization error'' decreases, and a more faithful rendering of
+the flow field emerges.  The issue of grid sensitivity is extremely
+important to the proper use of the model and will be taken up in the
+next chapter.
+
+A common technique of testing flow solvers is to systematically refine
+the numerical grid until the computed solution does not change, at
+which point the calculation is referred to as a Direct Numerical
+Solution (DNS) of the governing equations.  For most practical fire
+scenarios, DNS is not possible on conventional computers. However, FDS
+does have the option of running in DNS mode, where the Navier-Stokes
+equations are solved without the use of sub-grid scale turbulence
+models of any kind. Because the basic numerical method is the same for
+LES and DNS, DNS calculations are a very effective way to test the
+basic solver, especially in cases where the solution is steady-state.
+Throughout its development, FDS has been used in DNS mode for special
+applications.  For example, FDS (or its core algorithms) have been
+used at a grid resolution of roughly 1~mm to look at flames spreading
+over paper in a microgravity
+environment~\cite{McGrattan:C&F1996,Kashiwagi:CS1996,Mell:CS98,Mell:CS00,Prasad:CS2002,Nakamura:C&F2002},
+as well as "g-jitter" effects aboard spacecraft~\cite{Mell:g-jitter}.
+Simulations have been compared to experiments performed aboard the US
+Space Shuttle.  The flames are laminar and relatively simple in
+structure, and the comparisons are a qualitative assessment of the
+model solution. Similar studies have been performed comparing DNS
+simulations of a simple burner flame to laboratory
+experiments~\cite{Mukhopadhyay:1}. Another study compared FDS
+simulations of a counterflow diffusion flames to experimental
+measurements and the results of a one-dimensional multi-step kinetics
+model~\cite{Hamins:NASA}.
+
+Early work with the hydrodynamic solver compared two-dimensional
+simulations of gravity currents with salt-water
+experiments~\cite{McGrattan:1}. In these tests, the numerical grid was
+systematically refined until almost perfect agreement with experiment
+was obtained. Such convergence would not be possible if there were a
+fundamental flaw in the hydrodynamic solver.
+
+
+
+
 
 \chapter{Verification Test Suite}
 \label{verification_suite}
 
-This section contains a description of a set of relatively simple
+This Chapter contains a set of relatively simple
 calculations that are used to {\em verify} the major physical
 algorithms within FDS.  That is, these samples confirm that the
 equations have been properly coded.  They do not imply that the
-equations actually represent some physical phenomena.  That is left to Volume 2. Note that the names in parentheses in each section header
+equations actually represent some physical phenomena.  That is part of the Validation process. Note that the names in parentheses in each section header
 correspond to the names of the input files for the cases.
 
 
@@ -8223,6 +8505,370 @@ FDS is concerned, but the input can be tricky. To avoid confusion, here is an ex
 \normalsize
 
 
+
+\chapter{Sensitivity Analysis}
+
+A sensitivity  analysis considers the  extent to which  uncertainty in
+model  inputs influences  model output.  Model parameters  can  be the
+physical properties of solids  and gases, boundary conditions, initial
+conditions, {\em  etc.} The parameters  can also be  purely numerical,
+like the size  of the numerical grid. FDS  typically requires the user
+to  provide several  dozen different  types of  input  parameters that
+describe the geometry, materials,  combustion phenomena, {\em etc.} By
+design,  the user  is  not expected  to  provide numerical  parameters
+besides the grid size,  although the optional numerical parameters are
+described in both the Technical Reference Guide and the User's Guide.
+
+FDS does not  limit the range of most of  the input parameters because
+applications often push beyond the  range for which the model has been
+validated.  FDS is still used  for research at NIST and elsewhere, and
+the developers do not presume to know in all cases what the acceptable
+range  of   any  parameter  is.  Plus,  FDS   solves  the  fundamental
+conservation  equations  and  is   much  less  susceptible  to  errors
+resulting  from  input parameters  that  stray  beyond  the limits  of
+simpler empirical models.  However, the user is warned  that he/she is
+responsible for  the prescription of all parameters.   The FDS manuals
+can only provide guidance.
+
+The grid size is the  most important numerical parameter in the model,
+as it  dictates the spatial  and temporal accuracy of  the discretized
+partial  differential equations.  The heat  release rate  is  the most
+important physical parameter,  as it is the source  term in the energy
+equation. Property data, like  the thermal conductivity, density, heat
+of vaporization,  heat capacity, {\em  etc.}, ought to be  assessed in
+terms of their influence on  the heat release rate. Validation studies
+have shown that FDS predicts well the transport of heat and smoke when
+the HRR is prescribed. In  such cases, minor changes in the properties
+of  bounding  surfaces  do  not  have  a  significant  impact  on  the
+results. However, when the HRR is not prescribed, but rather predicted
+by the  model using  the thermophysical properties  of the  fuels, the
+model output is sensitive to even minor changes in these properties.
+
+The sensitivity  analyses described in this chapter  are all performed
+in basically the same way. For a given scenario, best estimates of all
+the  relevant  physical  and  numerical  parameters are  made,  and  a
+``baseline'' simulation is performed. Then, one by one, parameters are
+varied by a given percentage, and the changes in predicted results are
+recorded.  This is  the simplest  form of  sensitivity  analysis. More
+sophisticated  techniques that involve  the simultaneous  variation of
+several  parameters  are impractical  with  a  CFD  model because  the
+computation time is too long and the number of parameters too large to
+perform  the  necessary  number  of calculations  to  generate  decent
+statistics.
+
+
+
+\section{Grid Sensitivity}
+
+\label{gridsen}
+
+The most  important decision made by a  model user is the  size of the
+numerical grid. In  general, the finer the numerical  grid, the better
+the numerical solution of  the equations. FDS is second-order accurate
+in  space and  time,  meaning that  halving  the grid  cell size  will
+decrease  the discretization  error in  the governing  equations  by a
+factor  of 4.  Because  of  the non-linearity  of  the equations,  the
+decrease in discretization error does not necessarily translate into a
+comparable decrease  in the error of  a given FDS  output quantity. To
+find out  what effect a  finer grid has  on the solution,  model users
+usually  perform some  form of  grid  sensitivity study  in which  the
+numerical grid  is systematically refined until  the output quantities
+do not change  appreciably with each refinement. Of  course, with each
+halving of  the grid cell size,  the time required  for the simulation
+increases by  a factor of $2^4=16$  (a factor of two  for each spatial
+coordinate, plus  time). In  the end, a  compromise is  struck between
+model accuracy and computer capacity.
+
+Some   grid    sensitivity   studies   have    been   documented   and
+published. Since FDS was  first publicly released in 2000, significant
+changes   in  the   combustion  and   radiation  routines   have  been
+incorporated into the model. However, the basic transport algorithm is
+the  same, as  is  the  critical importance  of  grid sensitivity.  In
+compiling   sensitivity  studies,   only  those   that   examined  the
+sensitivity of routines no longer used have been excluded.
+
+As part of  a project to evaluate  the use of FDS version  1 for large
+scale   mechanically  ventilated   enclosures,  Friday~\cite{Friday:1}
+performed a  sensitivity analysis to find  the approximate calculation
+time based on varying grid sizes. A propylene fire with a nominal heat
+release rate was  modeled in FDS. There was  no mechanical ventilation
+and  the fire  was assumed  to grow  as a  function of  the  time from
+ignition  squared.  The  compartment  was   a  3~m  by  3~m  by  6.1~m
+space. Temperatures  were sampled 12~cm  below the ceiling.  Four grid
+sizes   were   chosen  for   the   analysis:   30~cm,  15~cm,   10~cm,
+7.5~cm. Temperature  estimates were  not found to  change dramatically
+with different grid dimensions.
+
+Using FDS  version 1, Bounagui {\em  et al.}~\cite{Bounagui:1} studied
+the effect of grid size on simulation results to determine the nominal
+grid size for future work. A propane burner 0.1~m by 0.1~m was modeled
+with  a heat  release rate  of  1500~kW. The  grid sizes  used in  the
+modeling are  given in Table~\ref{gridsize}. The results  of the model
+were         compared         against        Heskestad's         plume
+correlation.   Table~\ref{Heskestad}   shows   the  plume   centerline
+temperature comparisons.  Obviously, the smaller  grids provide better
+agreements among predictive methods.  A similar analysis was performed
+using  Alpert's ceiling  jet correlation~\cite{SFPE:Alpert}  that also
+showed better  predictions and reasonable agreement  with smaller grid
+sizes.  In a  related study,  Bounagui {\em  et al.}~\cite{Bounagui:2}
+used  FDS to  evaluate  the emergency  ventilation  strategies in  the
+Louis-Hippolyte-La Fontaine Tunnel in Montreal, Canada.
+
+\begin{table}[ht]
+\begin{center}
+\caption{Grid    Sizes    for    Computational    Domain    used    in
+Ref.~\cite{Bounagui:1}} \label{gridsize} \vspace{0.1in}
+\begin{tabular}{|c|c|}
+\hline Cases&Grid Size (m)\\ \hline \hline Case 1&0.20 x 0.20 x 0.20\\
+\hline Case 2&0.14 x 0.14 x  0.14\\ \hline Case 3&0.10 x 0.10 x 0.10\\
+\hline Case 4&0.08 x 0.08 x 0.08\\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[ht]
+\begin{center}
+\label{Heskestad} \caption{Plume Centerline Temperature Comparisons~\cite{Bounagui:1}} \vspace{0.1in}
+\begin{tabular}{|c|c|c|c|c|}        \hline
+Heskestad & Case 1 & Case 2 & Case  3 & Case 4 \\ \hline 839 C & 479 C
+& 593 C & 962 C & 967 C \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Xin~\cite{Xin:NFPA2004}  used FDS  to  model a  methane fueled  square
+burner (1~m  by 1~m) in  the open. Engineering correlations  for plume
+centerline temperature and velocity  profiles were compared with model
+predictions to assess the influence of the numerical grid and the size
+of the computational domain. The  results showed that FDS is sensitive
+to grid size effects, especially  in the region near the fuel surface,
+and domain size  effects when the domain width is  less than twice the
+plume  width.  FDS  uses   a  constant  pressure  assumption  at  open
+boundaries.  This assumption  will affect  the plume  behavior  if the
+boundary of the computational domain is too close to the plume.
+
+Ierardi  and Barnett~\cite{Ierardi:1} used  FDS version  3 to  model a
+0.3~m square methane diffusion burner with heat release rate values in
+the range of 14.4~kW to 57.5~kW. The physical domain used was 0.6~m by
+0.6~m with uniform grid spacings of  15, 10, 7.5, 5, 3, 1.5~cm for all
+three coordinate  directions. For both  fire sizes, a grid  spacing of
+1.5~cm  was found  to  provide  the best  agreement  when compared  to
+McCaffrey's     centerline    plume    temperature     and    velocity
+correlations~\cite{SFPE:Heskestad}.  Two similar  scenarios  that form
+the basis for Alpert's ceiling  jet correlation were also modeled with
+FDS. The first scenario was a  1~m by 1~m, 670~kW ethanol fire under a
+7~m   high  unconfined   ceiling.   The  planar   dimensions  of   the
+computational domain were 14~m by  14~m. Four uniform grid spacings of
+50, 33.3, 25, and 20~cm were  used in the modeling. The best agreement
+for  maximum  ceiling  jet  temperature  was  with  the  33.3~cm  grid
+spacing. The best  agreement for maximum ceiling jet  velocity was for
+the  50~cm grid  spacing. The  second scenario  was a  0.6~m  by 0.6~m
+1000~kW ethanol fire under a 7.2~m high unconfined ceiling. The planar
+dimensions of  the computational domain  were 14.4~m by  14.4~m. Three
+uniform  grid  spacings  of  60,  30,  and  20~cm  were  used  in  the
+modeling. The  results show that  the 60~cm grid spacing  exhibits the
+best  agreement with  the correlations  for both  maximum  ceiling jet
+temperature and velocity on a qualitative basis.
+
+Petterson~\cite{Petterson:1} also completed work assessing the optimal
+grid size for FDS version 2. The FDS model predictions of varying grid
+sizes were  compared to two separate fire  experiments: The University
+of Canterbury  McLeans Island  Tests and the  US Navy Hangar  Tests in
+Hawaii.  The first  set  of  tests utilized  a  room with  approximate
+dimensions of  2.4~m by  3.6~m by  2.4~m and fire  sizes of  55~kW and
+110~kW. The  Navy Hangar  tests were performed  in a  hangar measuring
+98~m by 74~m by 15~m in height and had fires in the range of 5.5~MW to
+6.6~MW. The results  of this study indicate that  FDS simulations with
+grids of 0.15~m had temperature predictions as accurate as models with
+grids as  small as 0.10~m. Each  of these grid  sizes produced results
+within   15~\%   of   the   University   of   Canterbury   temperature
+measurements. The 0.30~m grid  produced less accurate results. For the
+comparison of the Navy Hangar tests, grid sizes ranging from 0.60~m to
+1.80~m yielded results of comparable accuracy.
+
+Musser~{\em et  al.}~\cite{Musser:1} investigated  the use of  FDS for
+course grid  modeling of non-fire and fire  scenarios. Determining the
+appropriate  grid  size was  found  to  be  especially important  with
+respect  to heat  transfer  at heated  surfaces.  The convective  heat
+transfer  from the  heated surfaces  was most  accurate when  the near
+surface grid cells were smaller than the depth of the thermal boundary
+layer.  However, a  finer grid  size  produced better  results at  the
+expense of computational time. Accurate contaminant dispersal modeling
+required a significantly finer grid. The results of her study indicate
+that  non-fire simulations  can be  completed more  quickly  than fire
+simulations because  the time  step is not  limited by the  large flow
+speeds in a fire plume.
+
+
+\section{Sensitivity of Large Eddy Simulation Parameters}
+
+FDS  uses the  Smagorinsky form  of  the Large  Eddy Simulation  (LES)
+technique.  This  means  that   instead  of  using  the  actual  fluid
+viscosity, the model uses a viscosity of the form \be \mu_{\hbox{\tiny
+LES}} =  \rho \,  (C_s\, \Delta)^2  \, |S|^\ha \ee  where $C_s$  is an
+empirical constant, $\Delta$ is a length on the order of the size of a
+grid  cell,  and  the  deformation   term  $|S|$  is  related  to  the
+Dissipation Function, given by Eq.~(\ref{dissipation}). Related to the
+``turbulent  viscosity'' are  comparable expressions  for  the thermal
+conductivity  and  material diffusivity:  \be  k_{\hbox{\tiny LES}}  =
+\frac{\mu_{\hbox{\tiny  LES}}   \;  c_p}{\PR}  \quad   ;  \quad  (\rho
+D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC}  \ee  The
+Prandtl  number  $\PR$  and  the  Schmidt number  $\SC$  are  likewise
+considered to  be ``turbulent'' values.  Thus, $C_s$, $\PR$  and $\SC$
+are  a set  of  empirical constants.  Most  FDS users  simply use  the
+default values  of (0.2,0.5,0.5), but some have  explored their effect
+on the solution of the equations.
+
+In an effort  to validate FDS with some  simple room temperature data,
+Zhang~{\em et al.}~\cite{Zhang:2}  tried different combinations of the
+Smagorinsky parameters,  and suggested the current  default values. Of
+the  three parameters,  the  Smagorinsky constant  $C_s$  is the  most
+sensitive.   Smagorinsky~\cite{Smagorinsky:1}  originally  proposed  a
+value of 0.23,  but researchers over the past  three decades have used
+values ranging  from 0.1  to 0.23. There  are also refinements  of the
+original  Smagorinsky  model~\cite{Deardorff:1,Germano:1,Lilly:1} that
+do  not  require the  user  to  prescribe  the constants,  but  rather
+generate them automatically as part of the numerical scheme.
+
+\section{Sensitivity of Radiation Parameters}
+
+Radiative heat  transfer is  included in FDS  via the solution  of the
+radiation  transport equation for  a non-scattering  gray gas,  and in
+some limited  cases using  a wide band  model. The equation  is solved
+using  a technique  similar to  finite volume  methods  for convective
+transport,  thus the  name given  to it  is the  Finite  Volume Method
+(FVM).  There  are  several  limitations  of  the  model.  First,  the
+absorption coefficient  for the smoke-laden gas is  a complex function
+of  its  composition  and   temperature.  Because  of  the  simplified
+combustion  model,  the  chemical  composition of  the  smokey  gases,
+especially  the  soot content,  can  effect  both  the absorption  and
+emission  of thermal  radiation.  Second, the  radiation transport  is
+discretized via  approximately 100 solid angles. For  targets far away
+from  a  localized source  of  radiation,  like  a growing  fire,  the
+discretization can  lead to a non-uniform distribution  of the radiant
+energy. This can be seen in the visualization of surface temperatures,
+where  ``hot spots'' show  the effect  of the  finite number  of solid
+angles. The  problem can  be lessened by  the inclusion of  more solid
+angles, but at  a price of longer computing times.  In most cases, the
+radiative flux  to far-field targets is  not as important  as those in
+the near-field, where coverage by the default number of angles is much
+better.
+
+Hostikka {\em et al.} examined the sensitivity of the radiation solver
+to changes in  the assumed soot production, number  of spectral bands,
+number  of control  angles, and  flame temperature.  Some of  the more
+interesting findings were:
+\begin{itemize}
+\item  Changing  the  soot  yield  from 1~\%  to  2~\%  increased  the
+radiative flux from a simulated methane burner about 15~\%
+\item Lowering  the soot  yield to zero  decreased the  radiative flux
+about 20~\%.
+\item Increasing  the number of  control angles by  a factor of  3 was
+necessary  to  ensure  the  accuracy  of the  model  at  the  discrete
+measurement locations.
+\item Changing the number of spectral  bands from 6 to 10 did not have
+a strong effect on the results.
+\item Errors of 100~\% in heat  flux were caused by errors of 20~\% in
+absolute temperature.
+\end{itemize}
+The  sensitivity  to  flame   temperature  and  soot  composition  are
+consistent with  combustion theory, which states that  the source term
+of the  radiative transport equation  is a function of  the absorption
+coefficient  multiplied  by the  absolute  temperature  raised to  the
+fourth  power. The  number of  control angles  and spectral  bands are
+user-controlled numerical  parameters whose sensitivities  ought to be
+checked  for  each  new  scenario.  The  default  values  in  FDS  are
+appropriate for  most large scale fire  scenarios, but may  need to be
+refined for  more detailed simulations  such as a  low-sooting methane
+burner.
+
+
+\section{Sensitivity of Thermophysical Properties of Solid Fuels}
+
+An  extensive amount  of  verification and  validation  work with  FDS
+version 4  has been  performed by Hietaniemi,  Hostikka, and  Vaari at
+VTT,  Finland~\cite{Hietaniemi:1}. The case  studies are  comprised of
+fire  experiments   ranging  in   scale  from  the   cone  calorimeter
+(ISO~5660-1) to  full-scale fire  tests such as  the room  corner test
+(ISO~9705).  Comparisons are also  made between  FDS results  and data
+obtained  in the  SBI (Single  Burning Item)  Euro-classification test
+apparatus (EN  13823) as  well as  data obtained in  two {\em  ad hoc}
+experimental configurations:  one is similar  to the room  corner test
+but has only  partial linings and the other is a  space to study fires
+in building cavities.
+
+All of the  case studies involve real materials  whose properties must
+be prescribed  so as to conform  to the assumption in  FDS that solids
+are of uniform composition backed by a material that is either cold or
+totally insulating. Sensitivity of the various physical properties and
+the boundary conditions were tested. Some of the findings were:
+\begin{itemize}
+\item  The measured  burning  rates of  various  materials often  fell
+between two FDS  predictions in which cold or  insulated backings were
+assumed for the solid surfaces. FDS lacks a multi-layer solid model.
+\item  The ignition  time of  upholstery is  sensitive to  the thermal
+properties  of the  fabric covering,  but the  steady burning  rate is
+sensitive to the properties of the underlying foam.
+\item Moisture content of wooden fuels is very important and difficult
+to measure.
+\item Flame spread  over complicated objects, like cables  laid out in
+trays, can be modeled if the  surface area of the simplified object is
+comparable to that  of the real object. This  suggests sensitivity not
+only to  physical properties,  but also geometry.  It is  difficult to
+quantify the extent of the geometrical sensitivity.
+\end{itemize}
+There is  little quantification of  the observed sensitivities  in the
+study. Fire  growth curves can be  linear to exponential  in form, and
+small  changes in  fuel  properties  can lead  to  order of  magnitude
+changes  in heat  release rate  for unconfined  fires. The  subject is
+discussed  in the  FDS  Validation Guide~\cite{FDS_Validation_Guide_5}
+where it is  noted in many of the studies  that predicting fire growth
+is difficult.
+
+Recently,              Lautenberger,              Rein             and
+Fernandez-Pello~\cite{Lautenberger:FSJ} developed a method to automate
+the process of  estimating material properties to input  into FDS. The
+methodology involves simulating a  bench-scale test with the model and
+iterating  via a  "genetic"  algorithm  to obtain  an  optimal set  of
+material  properties for  that  particular item.  Such techniques  are
+necessary because most bench-scale apparatus do not provide a complete
+set of thermal properties.
+
+\section{Summary}
+
+The basis of  large eddy simulation is that  accuracy increases as the
+numerical mesh is refined. For fire applications, the grid sensitivity
+studies have shown that the accuracy of the model is a function of the
+characteristic fire diameter  $D^*$ divided by the grid  cell size. It
+is not enough to describe  the resolution of the calculation solely in
+terms of the grid cell size, but rather the grid cell size relative to
+the heat release rate.  For non-fire applications, there are no simple
+means to evaluate ``good resolution.''
+
+As  a  rule  of  thumb,  in  simulations  of  limited  resolution  FDS
+predictions are more reliable in the far-field because the substantial
+numerical diffusion mimics the  unresolved sub-grid scale mixing. This
+is hard to quantify other than through comparisons with experiment. In
+some of the sensitivity  studies discussed above, the authors conclude
+that the model works best with a cell size of a given value, and often
+this cell is not the smallest  one tested. In these cases, the authors
+have found a  flow scenario where the unresolved  convective mixing is
+almost exactly offset by  numerical diffusion. This is fortuitous, but
+the  conclusion does not  necessarily extend  to other  scenarios. The
+disadvantage of any turbulence  model, large eddy simulation included,
+is  that  good  results  are   not  guaranteed  on  grids  of  limited
+resolution. The advantage of LES  over other turbulence models is that
+the  solution of  the actual  governing equations,  not a  temporal or
+spatial average, is obtained as the mesh is refined.
+
+The same  can be said  for phenomena closer  in to the  fire. However,
+grid  resolution is  more  critical for  near-field phenomena  because
+numerical diffusion  near the fire on  coarse grids does  not have the
+same fortuitous  effect as it  does on far-field results.  In general,
+coarse  resolution  will   decrease  temperatures  and  velocities  by
+smearing the  values over  the large grid  cells. This can  affect the
+radiative flux, convection to surrounding solids, and ultimately flame
+spread and fire growth.
 
 
 
