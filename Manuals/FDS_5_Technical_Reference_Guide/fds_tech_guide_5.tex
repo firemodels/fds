@@ -2,6 +2,7 @@
 \usepackage{mathptm,times}
 \usepackage[pdftex]{graphicx}
 \usepackage{hyperref}
+\usepackage{lastpage} % Automatic last page number reference.
 
 %\usepackage{array,eqnarray}
 
@@ -130,7 +131,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ (Draft: September 10, 2007)}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide }
 
 \vspace{.5in}
 
@@ -191,7 +192,8 @@ Jason Floyd \\
 
 \vspace{.25in}
 
-\flushright{August 2007}
+\flushright{\today \\
+$SVN Repository$~$Revision$}
 
 \vfill
 
@@ -224,7 +226,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1018-5 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1018-5, 100 pages (August 2007) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1018-5, \pageref{LastPage} pages (August 2007) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -261,8 +263,7 @@ the ``Standard Guide for
 Evaluating the Predictive Capability of Deterministic Fire Models,'' ASTM~E~1355~\cite{ASTM:E1355}.
 
 A separate document, {\em Fire Dynamics Simulator, User's Guide}~\cite{FDS_Users_Guide_5} describes how the FDS software is
-actually used. A third document, {\em Fire Dynamics Simulator, Verification and Validation Guide}~\cite{FDS_VV_Guide_5} documents
-the process of verifying the numerical implementation of the model, and the comparison of the model with experimental data.
+actually used.
 
 
 \chapter{Disclaimer}
