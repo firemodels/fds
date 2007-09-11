@@ -27,6 +27,8 @@ IMPLICIT NONE
  
 ! Miscellaneous declarations
 CHARACTER(255), PARAMETER :: mainid='$Id$'
+CHARACTER(255), PARAMETER :: mainrev='$Revision:'
+CHARACTER(255), PARAMETER :: maindate='$Date:'
 LOGICAL  :: EX,DIAGNOSTICS
 INTEGER  :: MYID=0,LO10,NM,IZERO
 REAL(EB) :: T_MAX,T_MIN
