@@ -2,6 +2,8 @@ module isodefs
 implicit none
 
 CHARACTER(255), PARAMETER :: smvvid='$Id$'
+CHARACTER(255), PARAMETER :: smvvrev='$Revision$'
+CHARACTER(255), PARAMETER :: smvvdate='$Date$'
 
 interface
 
@@ -78,8 +80,20 @@ integer, intent(in) :: reduce_triangles
 end subroutine isot2file
 
 end interface
-end module isodefs
 
+CONTAINS
+
+SUBROUTINE GET_REV_smvv(MODULE_REV,MODULE_DATE)
+INTEGER,INTENT(INOUT) :: MODULE_REV
+CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
+
+WRITE(MODULE_DATE,*) smvvrev(INDEX(smvvrev,':')+1:LEN_TRIM(smvvrev)-2)
+READ (MODULE_DATE,'(I5)') MODULE_REV
+WRITE(MODULE_DATE,*) smvvdate
+
+END SUBROUTINE GET_REV_smvv
+
+end module isodefs
 
 module compressdefs
 

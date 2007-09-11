@@ -28,12 +28,14 @@ Module EVAC
   !
   Implicit None
   CHARACTER(255), PARAMETER :: evacid='$Id$'
+  CHARACTER(255), PARAMETER :: evacrev='$Revision$'
+  CHARACTER(255), PARAMETER :: evacdate='$Date$'
   !
   Private
   ! Public subprograms (called from the main program)
   Public EVACUATE_HUMANS, INITIALIZE_EVACUATION
   Public READ_EVAC, DUMP_EVAC, DUMP_EVAC_CSV
-  Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS
+  Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_evac
   ! Public variables (needed in the main program):
   !
   Character(20) :: EVAC_COMPILE_DATE = 'August 31, 2007'
@@ -9338,4 +9340,14 @@ Contains
     !
   End Subroutine DUMP_EVAC_CSV
 !
+SUBROUTINE GET_REV_evac(MODULE_REV,MODULE_DATE)
+INTEGER,INTENT(INOUT) :: MODULE_REV
+CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
+
+WRITE(MODULE_DATE,*) evacrev(INDEX(evacrev,':')+1:LEN_TRIM(evacrev)-2)
+READ (MODULE_DATE,'(I5)') MODULE_REV
+WRITE(MODULE_DATE,*) evacdate
+
+END SUBROUTINE GET_REV_evac
+
 End Module EVAC
