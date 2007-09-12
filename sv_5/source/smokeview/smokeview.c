@@ -3130,6 +3130,7 @@ void Args(int argc, char **argv){
 #endif
 
   strcpy(svn,"$Revision$");
+  //$Date$
   svnnum=strchr(svn,':');
   if(svnnum!=NULL&&strlen(svnnum)>2){
     svnnum++;
