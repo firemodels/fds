@@ -1643,7 +1643,7 @@ void initvars1(void){
 #endif
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");
-// $Revision $
+// $Revision: $
   tourcol_selectedpathline[0]=1.0;
   tourcol_selectedpathline[1]=0.0;
   tourcol_selectedpathline[2]=0.0;
