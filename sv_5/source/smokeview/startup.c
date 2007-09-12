@@ -912,7 +912,6 @@ void InitOpenGL(void){
 /* ------------------ initvars1 ------------------------ */
 
 void initvars1(void){
-
   force_isometric=0;
 #ifdef pp_SPOTLIGHT
   spotlight=0;
@@ -1629,21 +1628,54 @@ void initvars1(void){
   strcpy(dirseparator,"\\");
 #endif
 
+  {
+    char svn[1024];
+    char *svnnum;
 #ifdef pp_TEST
-  strcpy(TITLEBASE,"Smokeview 5.1.x Alpha - ");
+    char sv_version[100]="5.1.x";
 #else
-  strcpy(TITLEBASE,"Smokeview 5.0.0 - ");
+    char sv_version[100]="5.0.0";
 #endif
-#ifdef pp_FINALRELEASE
-  strcpy(TITLEBASE,"Smokeview 5.0.0 - ");
+  
+    strcpy(svn,"$Revision$");
+
+    svnnum=strchr(svn,':');
+    if(svnnum!=NULL&&strlen(svnnum)>4){
+      svnnum++;
+      svnnum=trim_front(svnnum);
+      svnnum[strlen(svnnum)-1]=0;
+      trim(svnnum);
+      strcat(sv_version,"_");
+      strcat(sv_version,svnnum);
+    }
+
+    strcpy(TITLEBASE,"Smokeview ");
+
+#ifdef pp_BETA
+    strcat(TITLEBASE," Beta ");
 #endif
-  strcpy(TRAINERTITLEBASE,"Virtual Fire Fighter Trainer 0.9 Beta -");
-#ifdef pp_FINALRELEASE
-  strcpy(TRAINERTITLEBASE,TITLEBASE);
+#ifdef pp_TEST
+    strcat(TITLEBASE," Test");
 #endif
+    strcat(TITLEBASE,sv_version);
+    strcat(TITLEBASE," - ");
+
+    strcpy(TRAINERTITLEBASE,"Smokeview Demonstrator");
+
+#ifdef pp_BETA
+    strcat(TRAINERTITLEBASE," Beta ");
+#endif
+#ifdef pp_TEST
+    strcat(TRAINERTITLEBASE," Test");
+#endif
+    strcat(TRAINERTITLEBASE,sv_version);
+    strcat(TRAINERTITLEBASE," - ");
+
+  }
+
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");
-  //$Revision$ this is a test is another test  oj
+
   tourcol_selectedpathline[0]=1.0;
   tourcol_selectedpathline[1]=0.0;
   tourcol_selectedpathline[2]=0.0;

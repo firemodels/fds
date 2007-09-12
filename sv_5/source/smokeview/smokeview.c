@@ -3116,8 +3116,6 @@ void Args(int argc, char **argv){
   char *argi;
   char SMVFILENAME[1024];
   int smv_parse;
-  char svn[1024];
-  char *svnnum;
 
   STRCPY(TRAINERTITLE,TRAINERTITLEBASE);
   STRCAT(TRAINERTITLEBASE,__DATE__);
@@ -3128,21 +3126,6 @@ void Args(int argc, char **argv){
   STRCPY(TITLE,TITLEBASE);
   STRCAT(TITLE,__DATE__);
 #endif
-
-  strcpy(svn,"$Revision$");
-  //$Date$
-  svnnum=strchr(svn,':');
-  if(svnnum!=NULL&&strlen(svnnum)>2){
-    svnnum++;
-    svnnum[strlen(svnnum)-1]=0;
-    STRCAT(TITLE," (SVN:");
-    STRCAT(TITLE,svnnum);
-    STRCAT(TITLE,")");
-    STRCAT(TRAINERTITLE,"(SVN:");
-    STRCAT(TRAINERTITLE,svnnum);
-    STRCAT(TRAINERTITLE,")");
-  }
-
 
   STRCPY(FULLTITLE,TITLE);
 
