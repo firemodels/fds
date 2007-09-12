@@ -35,7 +35,7 @@
 \usepackage{lastpage} % Automatic last page number reference.
 \usepackage[T1]{fontenc}
 \usepackage{upquote}
-
+\newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}{\tt\small}
 %\newfont{\ct}{cmtt10 at 9pt}
 
@@ -9319,6 +9319,8 @@ due to the solid phase reactions. Array {\ct Q} contains the values of
 the output quantity, which may be wall temperature, density or
 component density.
 
+\backmatter
+\nopart %Fix TOC in PDF output.
 
 % FDSVVBiB is split into FDS_refs, FDSVVBiBnew and FDS_mathcomp
 %    SV docs would typically use FDS_ref, FDS_mathcomp but not FDSVVBiBnew
