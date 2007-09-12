@@ -1486,7 +1486,7 @@ void free_object(sv_object *object){
 
 void remove_comment(char *buffer){
   char *comment;
-
+// test
   comment = strstr(buffer,"//");
   if(comment!=NULL)comment[0]=0;
   return;
