@@ -1672,8 +1672,10 @@ MESH_LOOP: DO NM=1,NMESHES
    WRITE(LU_OUTPUT,'(A,F8.3)')   '   Initial Time Step (s)         ',M%DT
 ENDDO MESH_LOOP
 WRITE(LU_OUTPUT,'(//A/)')     ' Miscellaneous Parameters'
+IF (TIME_SHRINK_FACTOR /= 1._EB) &
+WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
-WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',T_END
+WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
 IF (LES) THEN
    WRITE(LU_OUTPUT,'(A)')        '   LES Calculation'
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Smagorinsky Constant          ',CSMAG
