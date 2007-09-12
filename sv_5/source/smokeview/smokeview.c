@@ -3130,9 +3130,11 @@ void Args(int argc, char **argv){
 #endif
 
   strcpy(svn,"$Revision$");
-  svnnum=strchr(svn,":");
-  if(svnnum!=NULL&&strlen(svnnum)>1){
-    STRCAT(TITLE,"(SVN:");
+  svnnum=strchr(svn,':');
+  if(svnnum!=NULL&&strlen(svnnum)>2){
+    svnnum++;
+    svnnum[strlen(svnnum)-1]=0;
+    STRCAT(TITLE," (SVN:");
     STRCAT(TITLE,svnnum);
     STRCAT(TITLE,")");
     STRCAT(TRAINERTITLE,"(SVN:");
