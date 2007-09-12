@@ -1630,9 +1630,9 @@ void initvars1(void){
 #endif
 
 #ifdef pp_TEST
-  strcpy(TITLEBASE,"Smokeview 5.0.0 Alpha - ");
+  strcpy(TITLEBASE,"Smokeview 5.1.x Alpha - ");
 #else
-  strcpy(TITLEBASE,"Smokeview 5.0.0 Beta - ");
+  strcpy(TITLEBASE,"Smokeview 5.0.0 - ");
 #endif
 #ifdef pp_FINALRELEASE
   strcpy(TITLEBASE,"Smokeview 5.0.0 - ");
@@ -1643,7 +1643,7 @@ void initvars1(void){
 #endif
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");
-  $Revision$ this is a test is another test  oj
+  //$Revision$ this is a test is another test  oj
   tourcol_selectedpathline[0]=1.0;
   tourcol_selectedpathline[1]=0.0;
   tourcol_selectedpathline[2]=0.0;
