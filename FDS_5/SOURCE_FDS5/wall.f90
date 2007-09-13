@@ -743,9 +743,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
          ENDIF
       ENDDO            
       CALL GET_MOLECULAR_WEIGHT2(Y_MF_W ,Z_2,YY_W(IW,I_PROG_F),Y_SUM_W,RSUM_W)
-!!! Check  this at some point
-!      YY_S    = 0.5*(Y_MF_W+Y_MF_G)
-!      RSUM_S  = 0.5*(RSUM_W+RSUM_G)
+      ! Weighting for wall and gas values
       YY_S    = 0.2*Y_MF_W+0.8*Y_MF_G
       RSUM_S  = 0.2*RSUM_W+0.8*RSUM_G
       HVRG    = REACTION(1)%MW_FUEL*ML%H_R(1)/R0
