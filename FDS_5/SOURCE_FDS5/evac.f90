@@ -38,8 +38,9 @@ Module EVAC
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_evac
   ! Public variables (needed in the main program):
   !
-  Character(20) :: EVAC_COMPILE_DATE = 'August 31, 2007'
-  Real(FB) :: EVAC_VERSION = 1.10
+  Character(255):: EVAC_VERSION = '1.10'
+  Character(255) :: EVAC_COMPILE_DATE
+  INTEGER :: EVAC_MODULE_REV
   !
   ! This is a group of persons, who are initialized together,
   ! i.e., they have same mass, speed, etc distributions and
@@ -308,20 +309,19 @@ Contains
     !
     Integer :: NUMBER_INITIAL_PERSONS, &
          SAMPLING_FACTOR, IPC, n_tmp, GN_MIN, GN_MAX
-    Real(EB) :: DIAMETER,DTSAM
-    Logical :: EVACFILE, Ltmp
+    Real(EB) :: DTSAM
+    Logical :: EVACFILE
 
     Real(EB) :: DUMMY
     Real(EB) :: XB(6), XB1(6), XB2(6)
     Real(EB), Dimension(3) :: XYZ, XYZ_SMOKE
     Integer :: IOS, IZERO, N, I, IOR, j
     Character(30) QUANTITY
-    Character(60) FYI,CLASS_NAME,ID,PERS_ID,TO_NODE,EVAC_ID, &
+    Character(60) FYI,ID,PERS_ID,TO_NODE,EVAC_ID, &
          DEFAULT_PROPERTIES
     Character(26) FLOW_FIELD_ID
     Integer :: DIAMETER_DIST,VELOCITY_DIST, &
-         PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST, D_TORSO_DIST, &
-         D_SHOULDER_DIST
+         PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST
     Real(EB) :: VEL_MEAN,VEL_PARA,VEL_PARA2,VEL_LOW,VEL_HIGH, &
          DIA_MEAN,DIA_PARA,DIA_PARA2,DIA_LOW,DIA_HIGH, &
          PRE_MEAN,PRE_PARA,PRE_PARA2,PRE_LOW,PRE_HIGH, &
@@ -335,7 +335,6 @@ Contains
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED
     Logical :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, &
          EXIT_SIGN, KEEP_XY
-    Character(26), Dimension(:), Allocatable :: CharID_Tmp
     Character(26) :: VENT_FFIELD, EVAC_MESH
     Real(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED
 
@@ -2374,17 +2373,27 @@ Contains
     !              1a. row: n < 0 (New Format)
     !              1b. row: n_egrids,4,n_corrs=0,4 (New Format, version 1.11)
     !
+    WRITE(EVAC_COMPILE_DATE,'(A)') evacrev(INDEX(evacrev,':')+1:LEN_TRIM(evacrev)-2)
+    WRITE(LU_ERR,*) evacrev(INDEX(evacrev,':')+1:LEN_TRIM(evacrev)-2)
+    READ (EVAC_COMPILE_DATE,'(I5)') EVAC_MODULE_REV
+    WRITE(EVAC_COMPILE_DATE,'(A)') evacdate
+    Call GET_REV_evac(EVAC_MODULE_REV,EVAC_COMPILE_DATE)
+!    WRITE(EVAC_COMPILE_DATE,'(A)') EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1)
     !
     Write(LU_ERR,'(A)')          ' FDS+Evac Evacuation Module'
     Write(LU_OUTPUT,'(A)')          ' FDS+Evac Evacuation Module'
     Write(LU_ERR,'(A,A)')        ' FDS+Evac Compilation Date: ', &
-         EVAC_COMPILE_DATE
+         Trim(EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1))
     Write(LU_OUTPUT,'(A,A)')        ' FDS+Evac Compilation Date: ', &
-         EVAC_COMPILE_DATE
-    Write(LU_ERR,'(A,F4.2,A/)')  ' FDS+Evac Version         : ', &
-         EVAC_VERSION,'b'
-    Write(LU_OUTPUT,'(A,F4.2,A/)')  ' FDS+Evac Version         : ', &
-         EVAC_VERSION,'b'    
+         Trim(EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1))
+    Write(LU_ERR,'(A,A)')  ' FDS+Evac Version         : ', &
+         Trim(EVAC_VERSION)
+    Write(LU_OUTPUT,'(A,A)')  ' FDS+Evac Version         : ', &
+         Trim(EVAC_VERSION)
+    Write(LU_ERR,'(A,i0/)')  ' FDS+Evac SVN Revision No.: ', &
+         EVAC_MODULE_REV
+    Write(LU_OUTPUT,'(A,i0/)')  ' FDS+Evac SVN Revision No.: ', &
+         EVAC_MODULE_REV    
 
     Write(LU_ERR,fmt='(/a,i2)')  ' FDS+Evac Color_Method    :', &
          COLOR_METHOD
@@ -2695,8 +2704,8 @@ Contains
     Real(EB) RN, RN1, simoDX, simoDY, TNOW
     Real(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, &
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
-    Integer I,J,II,JJ,KK,IPC, IZERO, n_tmp, ie, nom, i1, j1
-    Integer i11, i22, group_size, i1_old, j1_old
+    Integer I,J,II,JJ,KK,IPC, IZERO, n_tmp, ie, nom, j1
+    Integer i11, i22, group_size
     Logical PP_see_group, PP_see_door, Is_Solid
     Integer iie, jje, iio, jjo, jjj, tim_ic, iii, i44
     Real(EB) y_o, x_o, Delta_y, Delta_x, x_now, y_now, &
@@ -2708,7 +2717,7 @@ Contains
     Integer, Dimension(:), Allocatable :: Color_Tmp
     Logical, Dimension(:), Allocatable :: Is_Known_Door, &
          Is_Visible_Door
-    Integer :: i_rn, i_tmp, i_endless_loop, i_egrid, color_index
+    Integer :: i_tmp, i_endless_loop, i_egrid, color_index
     Real(EB) :: L2_min, max_fed, L2_tmp
     Real(EB), Dimension(6) :: y_tmp, x_tmp, r_tmp
     ! 
@@ -2871,7 +2880,7 @@ Contains
                 !
                 If (N_HUMANS > N_HUMANS_DIM) Then
                    Call SHUTDOWN('ERROR: Init Humans: no re-allocation yet')
-                   Call RE_ALLOCATE_HUMANS(1,NM,0)
+                   Call RE_ALLOCATE_HUMANS(1,NM)
                    HUMAN=>MESHES(NM)%HUMAN
                 End If
                 !
@@ -3895,13 +3904,12 @@ Contains
     Integer, Intent(IN) :: I_mode, ICYC
     Real(EB) T_Save
     !
-    Integer nm, nom, i, j, i1, j1, k1, iyy1, iyy2, nn
+    Integer nm, nom, i, j, i1, j1, k1
     Integer istat
-    Real(EB) tmp_1, yyhat, ifac, y_extra, Y_MF_INT, &
-         RSUM_TOTAL
+    Real(EB) tmp_1, y_extra, Y_MF_INT
     Logical L_use_fed, L_fed_read, L_fed_save
     Real(EB) DT_Save
-    integer(4) ibar_tmp, jbar_tmp, kbar_tmp, n_tmp, n_egrids_tmp
+    integer(4) ibar_tmp, jbar_tmp, kbar_tmp, n_tmp
     Real(FB) tmpout1, tmpout2, tmpout3, tmpout4, t_tmp, dt_tmp
     Real(FB) tmpout5, tmpout6, tmpout7, tmpout8
     Real(EB) Z_1,Z_2,Z_3
@@ -4396,33 +4404,33 @@ Contains
     !
     Real(EB) DTSP,UBAR,VBAR, &
          X1,Y1,XI,YJ,ZK
-    Integer ICN,I,J,K,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,IW,N, &
-         IBC,IC, ICX, ICY, ior_tmp, ii_tmp, jj_tmp, kk_tmp
-    Integer  IE, tim_ic, tim_iw, i_dtloop, nm_tim, NM_now, j1, tim_iwx, tim_iwy
+    Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ, &
+         IBC, ICX, ICY
+    Integer  IE, tim_ic, tim_iw, nm_tim, NM_now, j1, tim_iwx, tim_iwy
     Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, &
-         EVEL, tim_dist, ZK2
-    Integer KK2, KKZ2, istat
+         EVEL, tim_dist
+    Integer istat
     integer(4) ibar_tmp, jbar_tmp, kbar_tmp
     !
     !
     Real(EB)  scal_prod_over_rsqr, t_init_timo, &
          U_new, V_new, Vmax_timo, CosPhiFac, &
-         Acc_max, Speed_max, Delta_min, Dt_sum, &
-         C_Yeff, Pressure, t_flow_relax, LambdaW, &
+         Speed_max, Delta_min, Dt_sum, &
+         C_Yeff, t_flow_relax, LambdaW, &
          B_Wall, A_Wall, T, Contact_F, Social_F, &
          smoke_beta, smoke_alpha, smoke_speed_fac
     Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, i_o
     Real(EB) y_o, x_o, Delta_x, Delta_y, x_now, y_now, &
-         pexx1, pexx2, pexy1, pexy2, d_humans, d_walls, &
-         pdxx1, pdxx2, pdxy1, pdxy2, fed_dose, DTSP_new, &
+         d_humans, d_walls, &
+         DTSP_new, &
          fac_tim, dt_group_door, x1_old, y1_old, x11, y11, &
-         max_fed, L2_min, L2_tmp, Speed, Tpre, ave_K, d_omega
+         max_fed, L2_min, L2_tmp, Speed, Tpre, ave_K
     Logical PP_see_each, PP_see_door
     Logical L_eff_read, L_eff_save, L_Dead
-    Real(EB) :: sin_x, sin_y, cos_x, cos_y, ss_h, &
+    Real(EB) :: cos_x, cos_y, &
          speed_xm, speed_xp, speed_ym, speed_yp, hr_z, hr_a, hr_b, hr_tau
     !
-    Real(EB) ksi, eta, rn
+    Real(EB) rn
     Real(EB) GaMe, GaTh, GaCM
     !
     Real(EB), Dimension(:), Allocatable :: K_ave_Door
@@ -4439,12 +4447,11 @@ Contains
     Real(EB), Dimension(6) :: y_tmp, x_tmp, r_tmp, v_tmp, u_tmp
     !
     Integer :: Max_Humans_Cell, i_dx, j_dy, ie_max, bl_max
-    Real(EB) :: Delta_Amax, dx_min, dy_min, evac_dt_min2
+    Real(EB) :: dx_min, dy_min, evac_dt_min2
     Integer, Dimension(:,:,:), Allocatable :: BLOCK_GRID
     Integer, Dimension(:,:), Allocatable :: BLOCK_GRID_N
     Integer, Dimension(:), Allocatable :: BLOCK_LIST
 
-    Real(EB) prob_det
     !
     Real(EB) d_humans_min, d_walls_min
     Real(EB) TNOW, tnow13, tnow14, tnow15
@@ -7299,7 +7306,7 @@ Contains
                            ! Re-allocation is not yet checked.
                            Call SHUTDOWN( &
                                 'ERROR: Humans: no re-allocation yet')
-                           Call RE_ALLOCATE_HUMANS(1,imesh2,0)
+                           Call RE_ALLOCATE_HUMANS(1,imesh2)
                         End If
                         MESHES(imesh2)%N_HUMANS = MESHES(imesh2)%N_HUMANS + 1
                         MESHES(imesh2)%HUMAN(MESHES(imesh2)%N_HUMANS) = HUMAN(I)
@@ -7464,7 +7471,7 @@ Contains
                           MESHES(imesh2)%N_HUMANS_DIM) Then
                         ! Re-allocation is not yet checked.
                         Call SHUTDOWN('ERROR: Humans: no re-allocation yet')
-                        Call RE_ALLOCATE_HUMANS(1,imesh2,0)
+                        Call RE_ALLOCATE_HUMANS(1,imesh2)
                      End If
                      MESHES(imesh2)%N_HUMANS = MESHES(imesh2)%N_HUMANS + 1
                      MESHES(imesh2)%HUMAN(MESHES(imesh2)%N_HUMANS) = HR
@@ -8338,7 +8345,7 @@ Contains
       If (N_HUMANS+1 > N_HUMANS_DIM) Then
          ! Re-allocation is not yet checked.
          Call SHUTDOWN('ERROR: Insert Humans: no re-allocation yet')
-         Call RE_ALLOCATE_HUMANS(1,NM,0)
+         Call RE_ALLOCATE_HUMANS(1,NM)
          HUMAN=>MESHES(NM)%HUMAN
       End If
       !
@@ -8538,7 +8545,6 @@ Contains
   Subroutine CLASS_PROPERTIES
     Implicit None
     !
-    Real(EB) RN
     ! How many rnd numbers per one call to the rnd routine
     Integer, Parameter  :: n_rnd=1, n_max_par=4
     Integer  :: n_par, RandomType
@@ -9021,12 +9027,12 @@ Contains
     !
   End Subroutine CLASS_PROPERTIES
 !
-  Subroutine RE_ALLOCATE_HUMANS(CODE,NM,NOM)
+  Subroutine RE_ALLOCATE_HUMANS(CODE,NM)
     Implicit None
     !
     Type (HUMAN_TYPE), Allocatable, Dimension(:) :: DUMMY
     Integer IZERO
-    Integer, Intent(IN) :: CODE,NM,NOM
+    Integer, Intent(IN) :: CODE,NM
     Type (MESH_TYPE), Pointer :: M
     !
     Select Case(CODE)
@@ -9054,7 +9060,7 @@ Contains
     !
     Integer, Intent(IN) :: NM
     Real(EB), Intent(IN) :: T
-    Integer :: NPP,NPLIM,i,izero,nn,n,IPC
+    Integer :: NPP,NPLIM,i,izero,nn,n
     Real(EB) :: TNOW
     Real(FB), Allocatable, Dimension(:) :: XP,YP,ZP
     Real(FB), Allocatable, Dimension(:,:) :: QP
@@ -9189,7 +9195,6 @@ Contains
 
     ! Local variables
     Real(EB) v1,v2,rsq,fac, rn
-    Integer i,j
 
     If ( (GaussFlag == 1)  .And. &
          (Abs(GaussSet2-gmean) <= gcutmult*Sqrt(gtheta)) ) Then
@@ -9249,7 +9254,6 @@ Contains
 
     ! Local variables
     Real(EB) v1, v2, rsq, fac, rn
-    Integer i,j
 
     If ( (GTrunFlag == 1)  .And. (GTrunSet2 >= glow) &
          .And. (GTrunSet2 <= ghigh) ) Then
