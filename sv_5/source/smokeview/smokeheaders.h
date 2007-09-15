@@ -189,7 +189,7 @@ EXTERNCPP void compress_svzip(void);
 EXTERNCPP void getdir(char *argi);
 EXTERNCPP char *lastname(char *argi);
 EXTERNCPP void drawTargets(void);
-EXTERNCPP void drawBlockages(int mode);
+EXTERNCPP void drawBlockages(int mode, int flag);
 EXTERNCPP void drawLabels(void);
 EXTERNCPP void Update_Tourlist(void);
 EXTERNCPP void update_glui_speed(void);
@@ -289,7 +289,7 @@ EXTERNCPP void makeiblank_smoke3d(void);
 EXTERNCPP void getunitinfo(const char *shortlabel, int *unitclass, int *unittype);
 EXTERNCPP void SmoothIsoSurface(isosurface *surfacedata);
 EXTERNCPP void updateslicefilenum(void);
-EXTERNCPP void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorms);
+EXTERNCPP void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorms, int trans_flag);
 #ifndef CPP
 EXTERNCPP void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr,
 				 int *nvertices, int *ntriangles, float **levels, int *nisolevels,

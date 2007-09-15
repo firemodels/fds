@@ -1178,7 +1178,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 #endif
 /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
-  drawBlockages(mode);
+  drawBlockages(mode,0);
 
 #ifdef pp_WUI
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
@@ -1303,6 +1303,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     sniffErrors("after drawsmoke");
   }
 
+
 /* ++++++++++++++++++++++++ draw zone fire modeling info +++++++++++++++++++++++++ */
 
   if(nrooms>0){
@@ -1364,6 +1365,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   sniffErrors("after drawslice");
 //  draw_demo(20,20);
 //  draw_demo2(1);
+  drawBlockages(mode,1);
 
 /* ++++++++++++++++++++++++ draw vector slice files +++++++++++++++++++++++++ */
 
