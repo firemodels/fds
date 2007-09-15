@@ -1124,7 +1124,7 @@ void drawiso(const mesh *meshi,int tranflag){
 
 /* ------------------ drawstaticiso ------------------------ */
 
-void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm){
+void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, int trans_flag){
   int j,k;
   float vv1[3],vv2[3],vv3[3];
   float vv1n[3],vv2n[3],vv3n[3];
@@ -1137,6 +1137,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm){
   short *norm1,*norm2,*norm3,*vertexnorm=NULL;
   int ntriangles;
   float xyzmin[3], xyzmaxdiff_local;
+  float *ccc;
 
   xyzmin[0] = asurface->xmin;
   xyzmin[1] = asurface->ymin;
@@ -1146,18 +1147,18 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm){
   nvertices=asurface->nvertices;
   ntriangles=asurface->ntriangles/3;
   if(ntriangles==0)return;
-
   if(surfacetype==1){
+    if(trans_flag!=0&&transparentflag==1)transparenton();
     iso_specular[3] = 1.0;
     glPushAttrib(GL_LIGHTING_BIT);
+
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
     glBegin(GL_TRIANGLES);
 
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,asurface->color);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,asurface->color);
-	  glColor3fv(asurface->color);
-
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
+	  glColor4fv(asurface->color);
     vertices_i=asurface->vertices;
     triangles_i=asurface->triangles;
     norm=asurface->norm;
@@ -1199,6 +1200,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm){
 	  glDisable(GL_LIGHTING);
 
     glPopAttrib();
+    if(trans_flag!=0&&transparentflag==1)transparentoff();
   }
 
   if(surfacetype==2){
