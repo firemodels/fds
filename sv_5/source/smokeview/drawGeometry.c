@@ -1632,7 +1632,11 @@ void update_facelists(void){
   int patch_dir[6]={2,1,3,0,4,5};
   int vent_offset, outline_offset, exteriorsurface_offset;
   ventdata *vi;
+  int drawing_smooth=0;
 
+  if(ntotal_smooth_blockages>0&&updatesmoothblocks==0&&visSmoothAsNormal==0){
+    drawing_smooth=1;
+  }
 
   if(updatehiddenfaces==1)update_hidden_faces();
   updatefacelists=0;
@@ -1755,12 +1759,22 @@ void update_facelists(void){
       }
       if(j<vent_offset){
         if(visBlocks==visBLOCKNormal){
-          if(facej->show_bothsides==0)meshi->face_normals_single[n_normals_single++]=facej;
-          if(facej->show_bothsides==1)meshi->face_normals_double[n_normals_double++]=facej;
+          if(facej->show_bothsides==0){
+            if(drawing_smooth==0||facej->type!=3){
+              meshi->face_normals_single[n_normals_single++]=facej;
+            }
+          }
+          if(facej->show_bothsides==1){
+            if(drawing_smooth==0||facej->type!=3){
+              meshi->face_normals_double[n_normals_double++]=facej;
+            }
+          }
           continue;
         }
         if(visBlocks==visBLOCKAsInput&&facej->transparent==1){
-          face_transparent[nface_transparent++]=facej;
+          if(drawing_smooth==0||facej->type!=3){
+            face_transparent[nface_transparent++]=facej;
+          }
           continue;
         }
       }
@@ -2867,7 +2881,7 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
 //  FREEMEMORY(meshi->smoothblockagecolors);
 //  FREEMEMORY(meshi->blockagesurfaces);
   if(nsmoothcolors>0){
-    NewMemory((void **)&meshi->smoothblockagecolors,3*nsmoothcolors*sizeof(float));
+    NewMemory((void **)&meshi->smoothblockagecolors,4*nsmoothcolors*sizeof(float));
     NewMemory((void **)&meshi->blockagesurfaces,nsmoothcolors*sizeof(isosurface *));
   }
   
@@ -2899,9 +2913,10 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
       break;
     }
     if(fail==0){
-      meshi->smoothblockagecolors[3*nsmoothcolors+0]=bc->color[0];
-      meshi->smoothblockagecolors[3*nsmoothcolors+1]=bc->color[1];
-      meshi->smoothblockagecolors[3*nsmoothcolors+2]=bc->color[2];
+      meshi->smoothblockagecolors[4*nsmoothcolors+0]=bc->color[0];
+      meshi->smoothblockagecolors[4*nsmoothcolors+1]=bc->color[1];
+      meshi->smoothblockagecolors[4*nsmoothcolors+2]=bc->color[2];
+      meshi->smoothblockagecolors[4*nsmoothcolors+3]=bc->color[3];
       nsmoothcolors++;
     }
   }
@@ -2964,7 +2979,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
   meshi->blockagesurfaces=sb->smoothblockagesurfaces;
 
   for(iblockcolor=0;iblockcolor<meshi->nsmoothblockagecolors;iblockcolor++){
-    rgbtemp=meshi->smoothblockagecolors + 3*iblockcolor;
+    rgbtemp=meshi->smoothblockagecolors + 4*iblockcolor;
     cellcopy=cell;
     nodecopy=node;
     for(i=0;i<(ibar+2)*(jbar+2)*(kbar+2);i++){
@@ -3355,10 +3370,9 @@ void drawticks(void){
   }
 }
 
-
 /* ------------------ drawBlockages ------------------------ */
 
-void drawBlockages(int mode){
+void drawBlockages(int mode, int flag){
 
   mesh *meshi;
   int smoothnorms;
@@ -3375,7 +3389,9 @@ void drawBlockages(int mode){
              smoothnorms=1;
              if(meshi->blockagesurface!=NULL){
                bsurface=meshi->blockagesurfaces[j];
-               drawstaticiso(bsurface,1,smoothnorms);
+               if((flag==0&&bsurface->color[3]>=0.99)||(flag==1&&bsurface->color[3]<0.99)){
+                 drawstaticiso(bsurface,1,smoothnorms,flag);
+               }
              }
            }
          }
@@ -3383,7 +3399,7 @@ void drawBlockages(int mode){
      sniffErrors("after drawblocks");
      if(xyz_clipplane==1)glEnable(GL_CULL_FACE);
    }
-   
+   if(flag==1)return;
    if(blocklocation!=BLOCKlocation_cad){
      if(mode==SELECT&&blockageSelect==1){
        draw_selectfaces();
@@ -3406,6 +3422,8 @@ void drawBlockages(int mode){
      }
    }
 }
+
+/* ------------------ snap_view_angles ------------------------ */
 
 void snap_view_angles(void){
   float *az, *elev;
