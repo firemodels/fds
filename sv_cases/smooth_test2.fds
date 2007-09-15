@@ -1,4 +1,4 @@
-&HEAD CHID='smooth_test2', TITLE='Single Couch Test Case'  /
+&HEAD CHID='smooth_test2', TITLE='smooth blockage test'  /
 
 &TIME TWFIN=10. /  Total simulation time
 
