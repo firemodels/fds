@@ -3062,7 +3062,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
         }
       }
     }
-    level=0.50;
+    level=0.250;
     asurface=NULL;
     NewMemory((void **)&asurface,sizeof(isosurface));
     InitIsosurface(asurface, level, rgbtemp,0);
