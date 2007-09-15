@@ -1651,6 +1651,7 @@ void initvars1(void){
 
     strcpy(TITLEBASE,"Smokeview ");
 
+#define pp_BETA
 #ifdef pp_BETA
     strcat(TITLEBASE," Beta ");
 #endif
