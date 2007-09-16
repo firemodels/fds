@@ -34,17 +34,21 @@ CALL DENSITY_BC
 
 TUSED(6,NM)=TUSED(6,NM)+SECOND()-TNOW
 
+
 CONTAINS
  
+
 SUBROUTINE THERMAL_BC(T)
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
+
 ! Thermal boundary conditions for adiabatic, fixed temperature, fixed flux and interpolated boundaries.
 ! One dimensional heat transfer and pyrolysis is done in PYROLYSIS, which is called at the end of this routine.
- 
-REAL(EB) :: DT_BC,T,TMP_G,DTMP,TMP_OTHER,CP_TERM,RHOWAL,RAMP_FACTOR,QNET,FDERIV
+
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
+REAL(EB) :: DT_BC,T,TMP_G,DTMP,TMP_OTHER,CP_TERM,RHOWAL,RAMP_FACTOR,QNET,FDERIV,TMP_EXTERIOR
 INTEGER  :: IOR,II,JJ,KK,IBC,IIG,JJG,KKG, IW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
 TYPE (SURFACE_TYPE), POINTER :: SF
+TYPE (VENTS_TYPE), POINTER :: VT
  
 IF (PREDICTOR) THEN
    UU => U
@@ -77,19 +81,24 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
       CASE (ZERO_GRADIENT) METHOD_OF_HEAT_TRANSFER 
  
          TMP_F(IW) = TMP(IIG,JJG,KKG)
+         TMP_EXTERIOR = TMP_0(KK)
+         IF (VENT_INDEX(IW)>0) THEN
+            VT => VENTS(VENT_INDEX(IW))
+            IF (VT%TMP_EXTERIOR>0._EB) TMP_EXTERIOR = VT%TMP_EXTERIOR
+         ENDIF
          SELECT CASE(IOR)
             CASE( 1) 
-               IF (UU(II,JJ,KK)>=0._EB)   TMP_F(IW) = TMP_0(KK)
+               IF (UU(II,JJ,KK)>=0._EB)   TMP_F(IW) = TMP_EXTERIOR
             CASE(-1) 
-               IF (UU(II-1,JJ,KK)<=0._EB) TMP_F(IW) = TMP_0(KK)
+               IF (UU(II-1,JJ,KK)<=0._EB) TMP_F(IW) = TMP_EXTERIOR
             CASE( 2) 
-               IF (VV(II,JJ,KK)>=0._EB)   TMP_F(IW) = TMP_0(KK)
+               IF (VV(II,JJ,KK)>=0._EB)   TMP_F(IW) = TMP_EXTERIOR
             CASE(-2) 
-               IF (VV(II,JJ-1,KK)<=0._EB) TMP_F(IW) = TMP_0(KK)
+               IF (VV(II,JJ-1,KK)<=0._EB) TMP_F(IW) = TMP_EXTERIOR
             CASE( 3) 
-               IF (WW(II,JJ,KK)>=0._EB)   TMP_F(IW) = TMP_0(KK)
+               IF (WW(II,JJ,KK)>=0._EB)   TMP_F(IW) = TMP_EXTERIOR
             CASE(-3) 
-               IF (WW(II,JJ,KK-1)<=0._EB) TMP_F(IW) = TMP_0(KK)
+               IF (WW(II,JJ,KK-1)<=0._EB) TMP_F(IW) = TMP_EXTERIOR
             END SELECT
          TMP(II,JJ,KK) = TMP_F(IW)
          TMP_W(IW) = TMP_F(IW)
