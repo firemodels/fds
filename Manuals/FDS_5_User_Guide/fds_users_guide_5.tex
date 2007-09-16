@@ -1869,7 +1869,7 @@ between inside and outside, known as {\em stack effect}. To simulate this phenom
 include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
 is important to capture the pressure and density decrease in the atmosphere based on the specified
 temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line. Experiment with different meshing
-strategies before including any fire or HVAC \index{HVAC} functionality. Slowly build in complexity.
+strategies before including any fire or HVAC \index{HVAC} functionality. Slowly build in complexity. See Section~\ref{stack_effect} for an example.
 
 
 \subsection{Special Topic: Large Eddy Simulation Parameters}
@@ -2225,6 +2225,13 @@ surface property need not actually be a ``vent,'' like a supply or return duct, 
 conditions than those assumed for the obstruction. Note that the surface properties of a {\ct VENT} over-ride those of the
 underlying obstruction.
 
+\begin{warning}
+Unlike previous versions of FDS, you can no longer specify a free-standing fan using the {\ct VENT}
+construct. A {\ct VENT} must always be attached to a solid obstruction. See
+Section~\ref{info:ZONE} for instructions on specifying different types of fans.
+\end{warning}
+
+\noindent
 An easy way to specify an entire external wall is to replace {\ct XB} with
 {\ct MB} (Mesh Boundary)\index{MB - Mesh Boundary}, a character string whose value is one of the following:
 {\ct 'XMAX'}, {\ct 'XMIN'}, {\ct 'YMAX'}, {\ct 'YMIN'}, {\ct 'ZMAX'} or
@@ -2248,14 +2255,30 @@ Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct O
 
 \subsection{Special {\tt VENT}s}
 
-There are two reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT}.
-The first is {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT}
+There are two reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {\ct 'OPEN'} and {\ct 'MIRROR'}. The term {\em reserved} means that these two
+{\ct SURF\_ID}s should not be explicitly defined by you. Their properties are predefined.
+
+\subsubsection{An {\tt OPEN} {\tt VENT}}
+
+The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT}
 is applied to the exterior boundary of the computational domain, where
-it denotes a passive opening to the outside. It is assumed here that
-the exterior boundary of the computational domain is a solid wall, and
-the {\ct OPEN} vent is essentially an open door or window.
-The second reserved {\ct SURF\_ID} is for a symmetry plane, in which
-case the {\ct VENT} has the attribute {\ct SURF\_ID='MIRROR'}.
+it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the {\ct XB}s on the {\ct MESH} line) is a solid wall. To
+change this, use an {\ct OPEN} vent as if it were an open door or window. To create a totally or partially open domain, use {\ct OPEN} vents on the exterior mesh boundaries ({\ct MB}s).
+
+By default, it is assumed that ambient conditions exist beyond the
+{\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than
+ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better
+to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more
+details.
+
+\begin{warning}
+Vents to the outside of the computational domain ({\ct OPEN} vents)
+may {\bf not} be opened or closed during a simulation. See Section~\ref{info:activate_deactivate} for details.
+\end{warning}
+
+\subsubsection{A {\tt MIRROR} {\tt VENT}}
+
+A {\ct VENT} with {\ct SURF\_ID='MIRROR'} denotes a symmetry plane.
 Usually, a {\ct MIRROR} spans an entire face of the computational
 domain, essentially doubling the size of the domain with the {\ct MIRROR}
 acting as a plane of symmetry. The flow on the opposite side of the
@@ -2272,16 +2295,9 @@ notation is handy.
 Note that the mirror image of a scene is {\bf not} shown in Smokeview.
 \end{warning}
 
-\begin{warning}
-Vents to the outside of the computational domain ({\ct OPEN} vents)
-may {\bf not} be opened or closed during a simulation. See Section~\ref{info:activate_deactivate} for details.
-\end{warning}
 
-\begin{warning}
-Unlike previous versions of FDS, you can no longer specify a free-standing fan using the {\ct VENT}
-construct. A {\ct VENT} must always be attached to a solid obstruction. See
-Section~\ref{info:ZONE} for instructions on specifying different types of fans.
-\end{warning}
+
+
 
 
 \subsection{Controlling {\tt VENT}s}
@@ -6973,23 +6989,24 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\ \hline \hline
-{\ct COLOR    }             & Character         & See Section~\ref{info:colors}     &             &                     \\ \hline
-{\ct CTRL\_ID }             & Character         & {\ct ID} of Control Function      &             &                     \\ \hline
-{\ct DEVC\_ID }             & Character         & {\ct ID} of Controlling Device    &             &                     \\ \hline
-%{\ct EVACUATION    }        & Logical           & Vent to be used in Evac calc      &             &  {\ct .FALSE.}      \\ \hline
-{\ct FYI}                   & Character         & Comment String (has no effect)    &             &                     \\ \hline
-{\ct IOR}                   & Integer           & Orientation Index                 &             &                     \\ \hline
-{\ct MB    }                & Character         & Coordinate Plane                  &             &                     \\ \hline
-%{\ct MESH\_ID    }          & Character         & Name of the controlling mesh      &             &                     \\ \hline
-{\ct OUTLINE}               & Logical           & Draw vent as outline              &             &  {\ct .FALSE.}      \\ \hline
-{\ct PBX, PBY, PBZ  }       & Real              & Coordinate Plane                  &             &                     \\ \hline
-{\ct RGB(3)   }             & Integer Triplet   & See Section~\ref{info:colors}     &             &                     \\ \hline
-{\ct SPREAD\_RATE}          & Real              & See Section~\ref{info:spread}     & m/s         &  0.0                \\ \hline
-{\ct SURF\_ID}              & Character         & Associated Surface                &             &  {\ct 'INERT'}      \\ \hline
-{\ct TEXTURE\_ORIGIN(3)}    & Real Triplet      & See Section~\ref{info:texture_map}& m           & (0.,0.,0.)          \\ \hline
-{\ct TRANSPARENCY}          & Real              & Transparency indicator            &             &   1.0               \\ \hline
-{\ct XB(6) }                & Real Sextuplet    & Min/Max physical coordinates      & m           &                     \\ \hline
-{\ct XYZ(3) }               & Real Triplet      & See Section~\ref{info:spread}     & m           &                     \\ \hline
+{\ct COLOR    }             & Character         & See Section~\ref{info:colors}             &             &                     \\ \hline
+{\ct CTRL\_ID }             & Character         & {\ct ID} of Control Function              &             &                     \\ \hline
+{\ct DEVC\_ID }             & Character         & {\ct ID} of Controlling Device            &             &                     \\ \hline
+%{\ct EVACUATION    }        & Logical           & Vent to be used in Evac calc              &             &  {\ct .FALSE.}      \\ \hline
+{\ct FYI}                   & Character         & Comment String (has no effect)            &             &                     \\ \hline
+{\ct IOR}                   & Integer           & Orientation Index                         &             &                     \\ \hline
+{\ct MB    }                & Character         & Coordinate Plane                          &             &                     \\ \hline
+%{\ct MESH\_ID    }          & Character         & Name of the controlling mesh              &             &                     \\ \hline
+{\ct OUTLINE}               & Logical           & Draw vent as outline                      &             &  {\ct .FALSE.}      \\ \hline
+{\ct PBX, PBY, PBZ  }       & Real              & Coordinate Plane                          &             &                     \\ \hline
+{\ct RGB(3)   }             & Integer Triplet   & See Section~\ref{info:colors}             &             &                     \\ \hline
+{\ct SPREAD\_RATE}          & Real              & See Section~\ref{info:spread}             & m/s         &  0.0                \\ \hline
+{\ct SURF\_ID}              & Character         & Associated Surface                        &             &  {\ct 'INERT'}      \\ \hline
+{\ct TEXTURE\_ORIGIN(3)}    & Real Triplet      & See Section~\ref{info:texture_map}        & m           & (0.,0.,0.)          \\ \hline
+{\ct TMP\_EXTERIOR}         & Real              & Temperature outside an {\ct OPEN} vent    & $^\circ$C   &                     \\ \hline
+{\ct TRANSPARENCY}          & Real              & Transparency indicator                    &             &   1.0               \\ \hline
+{\ct XB(6) }                & Real Sextuplet    & Min/Max physical coordinates              & m           &                     \\ \hline
+{\ct XYZ(3) }               & Real Triplet      & See Section~\ref{info:spread}             & m           &                     \\ \hline
 \end{tabular*}
 \end{table}
 
