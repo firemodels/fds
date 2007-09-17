@@ -1526,9 +1526,9 @@ END IF
 IF (M>3) THEN
   450    CALL VRFFTF (LDIMX*N,MM1,XT,LDIMX*N,X,WSAVE)
   IF (OUTARY) THEN
-    CALL VCOSTA(L,M,N*LDIMX,MM1,XT(1,M),X,XT)
+    CALL VCOSTA(M,N*LDIMX,MM1,XT(1,M),X,XT)
   ELSE
-    CALL VCOSTA(L,M,N*LDIMX,MM1,XT(1,M),XT,X)
+    CALL VCOSTA(M,N*LDIMX,MM1,XT(1,M),XT,X)
   END IF
 ELSE IF (M==2) THEN
   OUTARY=.FALSE.
@@ -1594,7 +1594,7 @@ RETURN
 END SUBROUTINE VCOST1
 
 
-SUBROUTINE VCOSTA(L,M,LDIMX,MM1,PL,X,XT)
+SUBROUTINE VCOSTA(M,LDIMX,MM1,PL,X,XT)
 
 ! +--------------------------------------------------------------------+
 ! |                                                                    |
@@ -1608,7 +1608,6 @@ SUBROUTINE VCOSTA(L,M,LDIMX,MM1,PL,X,XT)
 
 
 
-INTEGER                   :: L
 INTEGER                       :: M
 INTEGER                       :: LDIMX
 INTEGER                   :: MM1
@@ -1963,9 +1962,9 @@ CALL VRFFTF(LDIMF*N,M,FT,LDIMF*N,F,WORK)
 
 SCALE=SQRT(2.0_EB)*SCALE
 IF (OUTARY) THEN
-  CALL VSCSBA(L,M,N*LDIMF,FT,F)
+  CALL VSCSBA(M,N*LDIMF,FT,F)
 ELSE
-  CALL VSCSBA(L,M,N*LDIMF,F,FT)
+  CALL VSCSBA(M,N*LDIMF,F,FT)
 END IF
 RETURN
 END SUBROUTINE VSCOSB
@@ -2028,9 +2027,9 @@ CALL VRFFTB(LDIMF*N,M,FT,LDIMF*N,F,WORK)
 !     POSTPROCESSING
 
 IF (OUTARY) THEN
-  CALL VSCSFA(L,M,N*LDIMF,F,FT,C1,C2)
+  CALL VSCSFA(M,N*LDIMF,F,FT,C1,C2)
 ELSE
-  CALL VSCSFA(L,M,N*LDIMF,FT,F,C1,C2)
+  CALL VSCSFA(M,N*LDIMF,FT,F,C1,C2)
 END IF
 RETURN
 END SUBROUTINE VSCOSF
@@ -2186,7 +2185,7 @@ RETURN
 END SUBROUTINE VSCSB1
 
 
-SUBROUTINE VSCSBA(L,M,LDIMF,FT,F)
+SUBROUTINE VSCSBA(M,LDIMF,FT,F)
 
 ! +--------------------------------------------------------------------+
 ! |                                                                    |
@@ -2200,7 +2199,6 @@ SUBROUTINE VSCSBA(L,M,LDIMF,FT,F)
 
 
 
-INTEGER                   :: L
 INTEGER                       :: M
 INTEGER                       :: LDIMF
 REAL(EB)   F(LDIMF,M), FT(LDIMF,M)
@@ -2267,7 +2265,7 @@ RETURN
 END SUBROUTINE VSCSF1
 
 
-SUBROUTINE VSCSFA(L,M,LDIMF,F,FT,C1,C2)
+SUBROUTINE VSCSFA(M,LDIMF,F,FT,C1,C2)
 
 ! +--------------------------------------------------------------------+
 ! |                                                                    |
@@ -2281,7 +2279,6 @@ SUBROUTINE VSCSFA(L,M,LDIMF,F,FT,C1,C2)
 
 
 
-INTEGER                   :: L
 INTEGER                       :: M
 INTEGER                       :: LDIMF
 REAL(EB)    FT(LDIMF,M)
@@ -2639,7 +2636,7 @@ IF (TPOSE) THEN
   CALL VRFFTB(LDIMF*N,M,FT,LDIMF*N,F,WSAVE)
   OUTARY=.NOT.OUTARY
   IF (.NOT.NOCOPY) THEN
-    CALL VSRTB1(L,M,N*LDIMF,F,FT)
+    CALL VSRTB1(M,N*LDIMF,F,FT)
   END IF
 ELSE
   CALL VRFFTB(LDIMF*N,M,F,LDIMF*N,FT,WSAVE)
@@ -2682,7 +2679,7 @@ IF (TPOSE) THEN
   CALL VRFFTF(LDIMF*N,M,FT,LDIMF*N,F,WSAVE)
   OUTARY=.NOT.OUTARY
   IF (.NOT.NOCOPY) THEN
-    CALL VSRTB1(L,M,N*LDIMF,F,FT)
+    CALL VSRTB1(M,N*LDIMF,F,FT)
   END IF
 ELSE
   CALL VRFFTF(LDIMF*N,M,F,LDIMF*N,FT,WSAVE)
@@ -2726,7 +2723,7 @@ RETURN
 END SUBROUTINE VSRFTI
 
 
-SUBROUTINE VSRTB1(L,M,LDIMF,F,FT)
+SUBROUTINE VSRTB1(M,LDIMF,F,FT)
 
 ! +--------------------------------------------------------------------+
 ! |                                                                    |
@@ -2740,7 +2737,6 @@ SUBROUTINE VSRTB1(L,M,LDIMF,F,FT)
 
 
 
-INTEGER                   :: L
 INTEGER                       :: M
 INTEGER                       :: LDIMF
 REAL(EB)   F(LDIMF,M),  FT(LDIMF,M)
@@ -2834,9 +2830,9 @@ CALL VRFFTF(LDIMF*N,M,FT,LDIMF*N,F,WORK)
 
 SCALE=SQRT(2.0_EB)*SCALE
 IF (OUTARY) THEN
-  CALL VSSNBA(L,M,N*LDIMF,F,FT)
+  CALL VSSNBA(M,N*LDIMF,F,FT)
 ELSE
-  CALL VSSNBA(L,M,N*LDIMF,FT,F)
+  CALL VSSNBA(M,N*LDIMF,FT,F)
 END IF
 RETURN
 END SUBROUTINE VSSINB
@@ -2899,9 +2895,9 @@ CALL VRFFTB(LDIMF*N,M,FT,LDIMF*N,F,WORK)
 !     POSTPROCESSING
 
 IF (OUTARY) THEN
-  CALL VSSNFA(L,M,N*LDIMF,F,FT,C1,C2)
+  CALL VSSNFA(M,N*LDIMF,F,FT,C1,C2)
 ELSE
-  CALL VSSNFA(L,M,N*LDIMF,FT,F,C1,C2)
+  CALL VSSNFA(M,N*LDIMF,FT,F,C1,C2)
 END IF
 RETURN
 END SUBROUTINE VSSINF
@@ -3018,7 +3014,7 @@ RETURN
 END SUBROUTINE VSSNB1
 
 
-SUBROUTINE VSSNBA(L,M,LDIMF,F,FT)
+SUBROUTINE VSSNBA(M,LDIMF,F,FT)
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
@@ -3029,7 +3025,6 @@ SUBROUTINE VSSNBA(L,M,LDIMF,F,FT)
 
 
 
-INTEGER                   :: L
 INTEGER                       :: M
 INTEGER                       :: LDIMF
 
@@ -3098,7 +3093,7 @@ RETURN
 END SUBROUTINE VSSNF1
 
 
-SUBROUTINE VSSNFA(L,M,LDIMF,F,FT,C1,C2)
+SUBROUTINE VSSNFA(M,LDIMF,F,FT,C1,C2)
 
 ! +--------------------------------------------------------------------+
 ! |                                                                    |
@@ -3112,7 +3107,6 @@ SUBROUTINE VSSNFA(L,M,LDIMF,F,FT,C1,C2)
 
 
 
-INTEGER                   :: L
 INTEGER                       :: M
 INTEGER                       :: LDIMF
 REAL(EB)   FT(LDIMF,M)
