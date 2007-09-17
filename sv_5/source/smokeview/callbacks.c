@@ -518,14 +518,6 @@ void keyboard(unsigned char key, int x, int y){
     update_smoke3dflags();
     return;
   }
-  if(strncmp((const char *)&key2,"u",1)==0){
-    smokeskip++;
-    if(smokeskip>3)smokeskip=1;
-    printf("smokeskip=%i\n",smokeskip);
-    smokeskipm1=smokeskip-1;
-    update_smoke3dflags();
-    return;
-  }
   if(strncmp((const char *)&key2,"n",1)==0){
     adjustalphaflag++;
     if(adjustalphaflag>3)adjustalphaflag=0;
@@ -534,6 +526,10 @@ void keyboard(unsigned char key, int x, int y){
     return;
   }
 #endif
+  if(strncmp((const char *)&key2,"u",1)==0){
+    ReloadMenu(0);
+    return;
+  }
   if(strncmp((const char *)&key2,"N",1)==0||strncmp((const char *)&key2,"n",1)==0){
     ReloadMenu(0);
     printf("reloading files\n");
