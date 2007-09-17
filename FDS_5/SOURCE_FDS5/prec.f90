@@ -1,16 +1,29 @@
 MODULE PRECISION_PARAMETERS
  
-! Set the parameters for ``single'' and ``double'' precision
+! Set important parameters having to do with variable precision and array allocations
  
 IMPLICIT NONE
  
-INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
-INTEGER, PARAMETER :: EB = SELECTED_REAL_KIND(12)
 CHARACTER(255), PARAMETER :: precid='$Id$'
 CHARACTER(255), PARAMETER :: precrev='$Revision$'
 CHARACTER(255), PARAMETER :: precdate='$Date$'
 
+! Precision of "Four Byte" and "Eight Byte" reals
+
+INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
+INTEGER, PARAMETER :: EB = SELECTED_REAL_KIND(12)
+
+! Hardwired bounds for certain species and ZONE arrays
+
+INTEGER, PARAMETER :: MAX_SPECIES=20, MAX_LEAK_PATHS=20
+
+! Hardwired bounds for surface and material arrays
+
+INTEGER, PARAMETER :: MAX_LAYERS=20, MAX_MATERIALS=20, MAX_MATERIALS_TOTAL=400, MAX_REACTIONS=10, MAX_STEPS=20
+
+
 CONTAINS
+
 
 SUBROUTINE GET_REV_prec(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
