@@ -2864,6 +2864,7 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
       if(flabs(bc->color[0]-bc2->color[0])>0.0001)continue;
       if(flabs(bc->color[1]-bc2->color[1])>0.0001)continue;
       if(flabs(bc->color[2]-bc2->color[2])>0.0001)continue;
+      if(flabs(bc->color[3]-bc2->color[3])>0.0001)continue;
       fail=1;
       break;
     }
@@ -2909,6 +2910,7 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
       if(flabs(bc->color[0]-bc2->color[0])>0.0001)continue;
       if(flabs(bc->color[1]-bc2->color[1])>0.0001)continue;
       if(flabs(bc->color[2]-bc2->color[2])>0.0001)continue;
+      if(flabs(bc->color[3]-bc2->color[3])>0.0001)continue;
       fail=1;
       break;
     }
@@ -2990,7 +2992,11 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
       if(bc->type!=BLOCK_smooth||bc->del==1)continue;
       if(isblockagevisible(bc,sb->time)!=1)continue;
       rgbtemp2=bc->color;
-      if(flabs(rgbtemp[0]-rgbtemp2[0])<0.0001&&flabs(rgbtemp[1]-rgbtemp2[1])<0.0001&&flabs(rgbtemp[2]-rgbtemp2[2])<0.0001){
+      if(flabs(rgbtemp[0]-rgbtemp2[0])<0.0001&&
+         flabs(rgbtemp[1]-rgbtemp2[1])<0.0001&&
+         flabs(rgbtemp[2]-rgbtemp2[2])<0.0001&&
+         flabs(rgbtemp[3]-rgbtemp2[3])<0.0001
+         ){
         imin = bc->ijk[IMIN];
         imax = bc->ijk[IMAX];
         jmin = bc->ijk[JMIN];
