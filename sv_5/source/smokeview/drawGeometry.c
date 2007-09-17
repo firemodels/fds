@@ -1928,10 +1928,10 @@ void draw_faces(){
           }
         }
         if(
-           flabs(new_color[0]-old_color[0])>0.0001||
-           flabs(new_color[1]-old_color[1])>0.0001||
-           flabs(new_color[2]-old_color[2])>0.0001||
-           flabs(new_color[3]-old_color[3])>0.0001
+           fabs(new_color[0]-old_color[0])>0.0001||
+           fabs(new_color[1]-old_color[1])>0.0001||
+           fabs(new_color[2]-old_color[2])>0.0001||
+           fabs(new_color[3]-old_color[3])>0.0001
            ){
           old_color[0]=new_color[0];
           old_color[1]=new_color[1];
@@ -2000,10 +2000,10 @@ void draw_faces(){
           }
         }
         if(
-           flabs(new_color[0]-old_color[0])>0.0001||
-           flabs(new_color[1]-old_color[1])>0.0001||
-           flabs(new_color[2]-old_color[2])>0.0001||
-           flabs(new_color[3]-old_color[3])>0.0001
+           fabs(new_color[0]-old_color[0])>0.0001||
+           fabs(new_color[1]-old_color[1])>0.0001||
+           fabs(new_color[2]-old_color[2])>0.0001||
+           fabs(new_color[3]-old_color[3])>0.0001
            ){
           old_color[0]=new_color[0];
           old_color[1]=new_color[1];
@@ -2225,10 +2225,10 @@ void draw_transparent_faces(){
         }
       }
       if(
-         flabs(new_color[0]-old_color[0])>0.0001||
-         flabs(new_color[1]-old_color[1])>0.0001||
-         flabs(new_color[2]-old_color[2])>0.0001||
-         flabs(new_color[3]-old_color[3])>0.0001||
+         fabs(new_color[0]-old_color[0])>0.0001||
+         fabs(new_color[1]-old_color[1])>0.0001||
+         fabs(new_color[2]-old_color[2])>0.0001||
+         fabs(new_color[3]-old_color[3])>0.0001||
          transparency_override==1
          ){
         old_color[0]=new_color[0];
@@ -2861,10 +2861,10 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
       if(bc2->type!=BLOCK_smooth)continue;
       if(bc2->del==1)continue;
       if(isblockagevisible(bc2,sb->time)!=1)continue;
-      if(flabs(bc->color[0]-bc2->color[0])>0.0001)continue;
-      if(flabs(bc->color[1]-bc2->color[1])>0.0001)continue;
-      if(flabs(bc->color[2]-bc2->color[2])>0.0001)continue;
-      if(flabs(bc->color[3]-bc2->color[3])>0.0001)continue;
+      if(fabs(bc->color[0]-bc2->color[0])>0.0001)continue;
+      if(fabs(bc->color[1]-bc2->color[1])>0.0001)continue;
+      if(fabs(bc->color[2]-bc2->color[2])>0.0001)continue;
+      if(fabs(bc->color[3]-bc2->color[3])>0.0001)continue;
       fail=1;
       break;
     }
@@ -2907,10 +2907,10 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
       if(bc2->type!=BLOCK_smooth)continue;
       if(bc2->del==1)continue;
       if(isblockagevisible(bc2,sb->time)!=1)continue;
-      if(flabs(bc->color[0]-bc2->color[0])>0.0001)continue;
-      if(flabs(bc->color[1]-bc2->color[1])>0.0001)continue;
-      if(flabs(bc->color[2]-bc2->color[2])>0.0001)continue;
-      if(flabs(bc->color[3]-bc2->color[3])>0.0001)continue;
+      if(fabs(bc->color[0]-bc2->color[0])>0.0001)continue;
+      if(fabs(bc->color[1]-bc2->color[1])>0.0001)continue;
+      if(fabs(bc->color[2]-bc2->color[2])>0.0001)continue;
+      if(fabs(bc->color[3]-bc2->color[3])>0.0001)continue;
       fail=1;
       break;
     }
@@ -2992,10 +2992,10 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
       if(bc->type!=BLOCK_smooth||bc->del==1)continue;
       if(isblockagevisible(bc,sb->time)!=1)continue;
       rgbtemp2=bc->color;
-      if(flabs(rgbtemp[0]-rgbtemp2[0])<0.0001&&
-         flabs(rgbtemp[1]-rgbtemp2[1])<0.0001&&
-         flabs(rgbtemp[2]-rgbtemp2[2])<0.0001&&
-         flabs(rgbtemp[3]-rgbtemp2[3])<0.0001
+      if(fabs(rgbtemp[0]-rgbtemp2[0])<0.0001&&
+         fabs(rgbtemp[1]-rgbtemp2[1])<0.0001&&
+         fabs(rgbtemp[2]-rgbtemp2[2])<0.0001&&
+         fabs(rgbtemp[3]-rgbtemp2[3])<0.0001
          ){
         imin = bc->ijk[IMIN];
         imax = bc->ijk[IMAX];
