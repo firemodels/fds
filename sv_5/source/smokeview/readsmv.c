@@ -5453,11 +5453,6 @@ void updateusetextures(void){
   }
 }
 
-float flabs(float arg){
-  if(arg>=0.0)return arg;
-  return -arg;
-}
-
 /* ------------------ initsurface ------------------------ */
 
 void initsurface(surface *surf){
