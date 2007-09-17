@@ -2271,6 +2271,9 @@ ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. Use this 
 to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more
 details.
 
+As with exterior temperature, to change the exterior mass fraction of a particular gas species, set {\ct MASS\_FRACTION(N)} on the {\ct VENT} line, where {\ct N} denotes the
+species index. See Section~\ref{info:SPEC} for more information about gas species.
+
 \begin{warning}
 Vents to the outside of the computational domain ({\ct OPEN} vents)
 may {\bf not} be opened or closed during a simulation. See Section~\ref{info:activate_deactivate} for details.
@@ -6989,24 +6992,25 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\ \hline \hline
-{\ct COLOR    }             & Character         & See Section~\ref{info:colors}             &             &                     \\ \hline
-{\ct CTRL\_ID }             & Character         & {\ct ID} of Control Function              &             &                     \\ \hline
-{\ct DEVC\_ID }             & Character         & {\ct ID} of Controlling Device            &             &                     \\ \hline
-%{\ct EVACUATION    }        & Logical           & Vent to be used in Evac calc              &             &  {\ct .FALSE.}      \\ \hline
-{\ct FYI}                   & Character         & Comment String (has no effect)            &             &                     \\ \hline
-{\ct IOR}                   & Integer           & Orientation Index                         &             &                     \\ \hline
-{\ct MB    }                & Character         & Coordinate Plane                          &             &                     \\ \hline
-%{\ct MESH\_ID    }          & Character         & Name of the controlling mesh              &             &                     \\ \hline
-{\ct OUTLINE}               & Logical           & Draw vent as outline                      &             &  {\ct .FALSE.}      \\ \hline
-{\ct PBX, PBY, PBZ  }       & Real              & Coordinate Plane                          &             &                     \\ \hline
-{\ct RGB(3)   }             & Integer Triplet   & See Section~\ref{info:colors}             &             &                     \\ \hline
-{\ct SPREAD\_RATE}          & Real              & See Section~\ref{info:spread}             & m/s         &  0.0                \\ \hline
-{\ct SURF\_ID}              & Character         & Associated Surface                        &             &  {\ct 'INERT'}      \\ \hline
-{\ct TEXTURE\_ORIGIN(3)}    & Real Triplet      & See Section~\ref{info:texture_map}        & m           & (0.,0.,0.)          \\ \hline
-{\ct TMP\_EXTERIOR}         & Real              & Temperature outside an {\ct OPEN} vent    & $^\circ$C   &                     \\ \hline
-{\ct TRANSPARENCY}          & Real              & Transparency indicator                    &             &   1.0               \\ \hline
-{\ct XB(6) }                & Real Sextuplet    & Min/Max physical coordinates              & m           &                     \\ \hline
-{\ct XYZ(3) }               & Real Triplet      & See Section~\ref{info:spread}             & m           &                     \\ \hline
+{\ct COLOR    }             & Character         & See Section~\ref{info:colors}                                 &             &                     \\ \hline
+{\ct CTRL\_ID }             & Character         & {\ct ID} of Control Function                                  &             &                     \\ \hline
+{\ct DEVC\_ID }             & Character         & {\ct ID} of Controlling Device                                &             &                     \\ \hline
+%{\ct EVACUATION    }        & Logical           & Vent to be used in Evac calc                                  &             &  {\ct .FALSE.}      \\ \hline
+{\ct FYI}                   & Character         & Comment String (has no effect)                                &             &                     \\ \hline
+{\ct IOR}                   & Integer           & Orientation Index                                             &             &                     \\ \hline
+{\ct MASS\_FRACTION(N)}     & Real Array        & Mass Fraction of species {\ct N} at {\ct OPEN} vent           & kg/kg       &                     \\ \hline
+{\ct MB    }                & Character         & Mesh Boundary                                                 &             &                     \\ \hline
+%{\ct MESH\_ID    }          & Character         & Name of the controlling mesh                                  &             &                     \\ \hline
+{\ct OUTLINE}               & Logical           & Draw vent as outline                                          &             &  {\ct .FALSE.}      \\ \hline
+{\ct PBX, PBY, PBZ  }       & Real              & Coordinate Plane                                              &             &                     \\ \hline
+{\ct RGB(3)   }             & Integer Triplet   & See Section~\ref{info:colors}                                 &             &                     \\ \hline
+{\ct SPREAD\_RATE}          & Real              & See Section~\ref{info:spread}                                 & m/s         &  0.0                \\ \hline
+{\ct SURF\_ID}              & Character         & Associated Surface                                            &             &  {\ct 'INERT'}      \\ \hline
+{\ct TEXTURE\_ORIGIN(3)}    & Real Triplet      & See Section~\ref{info:texture_map}                            & m           & (0.,0.,0.)          \\ \hline
+{\ct TMP\_EXTERIOR}         & Real              & Temperature at {\ct OPEN} vent                                & $^\circ$C   &                     \\ \hline
+{\ct TRANSPARENCY}          & Real              & Transparency indicator                                        &             &   1.0               \\ \hline
+{\ct XB(6) }                & Real Sextuplet    & Min/Max physical coordinates                                  & m           &                     \\ \hline
+{\ct XYZ(3) }               & Real Triplet      & See Section~\ref{info:spread}                                 & m           &                     \\ \hline
 \end{tabular*}
 \end{table}
 
