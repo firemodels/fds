@@ -530,11 +530,6 @@ void keyboard(unsigned char key, int x, int y){
     ReloadMenu(0);
     return;
   }
-  if(strncmp((const char *)&key2,"N",1)==0||strncmp((const char *)&key2,"n",1)==0){
-    ReloadMenu(0);
-    printf("reloading files\n");
-    return;
-  }
   if(strncmp((const char *)&key2,"q",1)==0){
     blocklocation++;
     if(blocklocation>BLOCKlocation_cad||
