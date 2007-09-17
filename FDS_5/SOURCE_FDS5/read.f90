@@ -5223,7 +5223,7 @@ SUBROUTINE READ_ZONE
  
 REAL(EB) :: LEAK_AREA(0:MAX_LEAK_PATHS)
 INTEGER  :: N,NM
-LOGICAL :: SEALED
+LOGICAL :: SEALED,READ_ZONE_LINES
 CHARACTER(30) :: ID
 NAMELIST /ZONE/ XB,LEAK_AREA,ID
  
@@ -5256,9 +5256,12 @@ DO NM=1,NMESHES
    END IF
 ENDDO
 
+! If the whole domain lacks on OPEN boundary, assume it to be one big pressure zone
+
+READ_ZONE_LINES = .TRUE.
 IF (SEALED .AND. N_ZONE==0) THEN
-   WRITE(MESSAGE,'(A,I3)') 'ERROR: The domain appears to be sealed, but no pressure ZONEs are declared'
-   CALL SHUTDOWN(MESSAGE)
+   N_ZONE = 1
+   READ_ZONE_LINES = .FALSE.
 ENDIF
 
 ! If there are no ZONE lines, return
@@ -5279,9 +5282,11 @@ READ_ZONE_LOOP: DO N=1,N_ZONE
    XB(5)         = -1000000._EB
    XB(6)         =  1000000._EB
  
-   CALL CHECKREAD('ZONE',LU_INPUT,IOS)
-   IF (IOS==1) EXIT READ_ZONE_LOOP
-   READ(LU_INPUT,ZONE) 
+   IF (READ_ZONE_LINES) THEN
+      CALL CHECKREAD('ZONE',LU_INPUT,IOS)
+      IF (IOS==1) EXIT READ_ZONE_LOOP
+      READ(LU_INPUT,ZONE) 
+   ENDIF
  
    P_ZONE(N)%ID = ID
    P_ZONE(N)%LEAK_AREA = LEAK_AREA
