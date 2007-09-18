@@ -1,41 +1,22 @@
-&HEAD CHID='heat_conduction', TITLE='Heat Transfer through solid Slab' /
+&HEAD CHID='heat_conduction_c', TITLE='Heat Transfer through solid Slab' /
 
 &MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 /
 
 &TIME TWFIN=50000., WALL_INCREMENT=1, DT=0.5 /
 
- MISC ASSUMED_GAS_TEMPERATURE=120., H_FIXED=100. /  Case A
-&MISC ASSUMED_GAS_TEMPERATURE=120., H_FIXED=10.  /  Case B, C, D  <------- Select the right MISC line
+&MISC ASSUMED_GAS_TEMPERATURE=120., H_FIXED=10.  /  Case C
 
 &SURF ID        = 'SLAB'
-      MATL_ID   = 'SLAB_D'
+      MATL_ID   = 'SLAB_C'
       THICKNESS = 0.1
       STRETCH_FACTOR = 1.
-      BACKING   = 'INSULATED' /  <------- Change MATL_ID for each Case
-
-&MATL ID            = 'SLAB_A'
-      CONDUCTIVITY  = 0.1
-      EMISSIVITY    = 0.
-      SPECIFIC_HEAT = 1.0
-      DENSITY       = 100. /
-
-&MATL ID            = 'SLAB_B'
-      CONDUCTIVITY  = 0.1
-      EMISSIVITY    = 0.
-      SPECIFIC_HEAT = 1.0
-      DENSITY       = 100. /
+      BACKING   = 'INSULATED' /  
 
 &MATL ID            = 'SLAB_C'
       CONDUCTIVITY  = 1.0
       EMISSIVITY    = 0.
       SPECIFIC_HEAT = 1.0
       DENSITY       = 1000. /
-
-&MATL ID            = 'SLAB_D'
-      CONDUCTIVITY  = 10.0
-      EMISSIVITY    = 0.
-      SPECIFIC_HEAT = 1.0
-      DENSITY       = 10000. /
 
 &VENT XB = -0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID='SLAB' /
 
