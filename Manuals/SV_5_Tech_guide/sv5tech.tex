@@ -316,13 +316,20 @@ Guide\cite{FDS_Users_Guide_5}.
 
 \section{Version History}
 
-Version 1 of Smokeview was publicly released in February 2000, version 2
-in December 2001, version 3 in November 2002, and version 4 in July 2004.
+Beginning in the early 1980s and continuing into the 1990s, Howard Baum and Ron Rehm developed the basic flow solver that evolved into the Fire Dynamics Simulator which was publicly released in 2000.  Their solution technique, known as Large Eddy Simulation or LES, captures numerically very complicated fire plume dynamics.  Unfortunately, without an effective way to view the calculation results, we would not be able to appreciate the power of the.  Early attempts to visualize the calculation results consisted of nothing more than little particles swirling about in a box.  This was useful to the model developers, but hardly to anyone else.  It just did not look like a fire.
+
+Smokeview was written to address this problem.  
+Version 1 of Smokeview was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, and version 4 in July 2004.
 The present version of Smokeview is 5, officially released in September, 2007. Changes in
 the version number correspond to major changes in features. For minor changes and bug fixes, incremental
 versions are released, referenced according to fractions of the integer
 version number. For example, version 5.1.4 would be a maintenance release of feature
 version 5.1, which in turn is an update within the major application release referred to as Smokeview 5.
+
+Along with particle tracking as performed before, it visualized fire flow data by coloring and animating fire/smoke flow making it much easier to interpret FDS simulation results.  Immediately after 911, work began on both FDS and Smokeview to enable them to model and visualize much larger problems.  As a result, fire scenarios with several million grid cells can now be modeled and visualized using a cluster of computers.
+
+The next big step in Smokeview's development was the implementation of an algorithm for visualizing smoke realistically.   The line between FDS which performs smoke flow computations and Smokeview which performs smoke flow visualization became blurred as Smokeview now performs Physics based computations (Beer's law) in order to visualize the smoke.  The present algorithm for visualizing smoke only considers the effects of absorption - how much an object is obscured by smoke.  Future work involves modeling the effects of scattering - how the interaction between light and smoke effects the visualization.
+
 
 \section{Overview}
 Smokeview uses the 3D graphics library, OpenGL, to visualize data.
@@ -918,7 +925,7 @@ is completely open.  The upper half of the simulation on the right is obstructed
 
 
 \chapter{Contours}
-Smokeview uses contours to identify {\em where}\ rather than {\em how much}\ a specified level occurs.  Smokeview uses several methods for generating contours such as marching squares, marching cubes\cite{marchingcubes} and {\em hardware}\ methods.  
+Smokeview uses contours to identify {\em where}\ rather than {\em how much}\ a specified level occurs.  Smokeview uses several methods for generating contours such as marching squares, marching cubes\cite{marchingcubes} and {\em hardware}\ methods.
 
 {\em Marching}\ algorithms work by reducing the general contouring problem to that of finding the contour in an elementary figure such as a square or a cube.  Marching
 squares are used for finding 2D contours in a plane and marching cubes are used for finding isosurfaces in a volume.
