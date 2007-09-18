@@ -329,7 +329,18 @@ MESH_LOOP: DO NM=1,NMESHES
    ENDDO
 
    ! Process Physical Coordinates
-
+   IF (XB(1) > XB(2)) THEN
+      WRITE(MESSAGE,'(A,I2)') 'ERROR: XMIN > XMAX on MESH ', NM
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+   IF (XB(3) > XB(4)) THEN
+      WRITE(MESSAGE,'(A,I2)') 'ERROR: YMIN > YMAX on MESH ', NM
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+   IF (XB(5) > XB(6)) THEN
+      WRITE(MESSAGE,'(A,I2)') 'ERROR: ZMIN > ZMAX on MESH ', NM
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
    M%XS    = XB(1)
    M%XF    = XB(2)
    M%YS    = XB(3)
