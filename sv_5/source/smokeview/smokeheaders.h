@@ -288,7 +288,7 @@ EXTERNCPP void makeiblank_smoke3d(void);
 EXTERNCPP void getunitinfo(const char *shortlabel, int *unitclass, int *unittype);
 EXTERNCPP void SmoothIsoSurface(isosurface *surfacedata);
 EXTERNCPP void updateslicefilenum(void);
-EXTERNCPP void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorms, int trans_flag);
+EXTERNCPP void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorms, int trans_flag, int data_type);
 #ifndef CPP
 EXTERNCPP void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr,
 				 int *nvertices, int *ntriangles, float **levels, int *nisolevels,

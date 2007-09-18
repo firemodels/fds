@@ -4766,6 +4766,7 @@ typedef struct {
 
   }
   nsmoothblocks=0;
+  ntransparentblocks=0;
   nopenvents=0;
   nopenvents_nonoutline=0;
   ndummyvents=0;
@@ -4776,6 +4777,7 @@ typedef struct {
     for(i=0;i<meshi->nbptrs;i++){
       bc=meshi->blockageinfoptrs[i];
       if(bc->type==BLOCK_smooth)nsmoothblocks++;
+      if(bc->color[3]<0.99)ntransparentblocks++;
     }
     for(i=0;i<meshi->nvents;i++){
       vi = meshi->ventinfo + i;
@@ -6852,6 +6854,11 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       sscanf(buffer,"%i ",&visSmoothAsNormal);
       continue;
       }
+    if(match(buffer,"SHOWTRANSPARENT",15)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i ",&visTransparentBlockage);
+      continue;
+      }
     if(match(buffer,"VECTORPOINTSIZE",15)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f ",&vectorpointsize);
@@ -8213,6 +8220,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",visBlocks);
   fprintf(fileout,"SHOWNORMALWHENSMOOTH\n");
   fprintf(fileout," %i\n",visSmoothAsNormal);
+  fprintf(fileout,"SHOWTRANSPARENT\n");
+  fprintf(fileout," %i\n",visTransparentBlockage);
   fprintf(fileout,"SHOWVENTS\n");
   fprintf(fileout," %i %i %i\n",visVents,visVentLines,visVentSolid);
   fprintf(fileout,"SHOWSENSORS\n");

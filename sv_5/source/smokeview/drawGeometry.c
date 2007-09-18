@@ -1633,9 +1633,21 @@ void update_facelists(void){
   int vent_offset, outline_offset, exteriorsurface_offset;
   ventdata *vi;
   int drawing_smooth=0;
+  int drawing_transparent=0;
 
-  if(ntotal_smooth_blockages>0&&updatesmoothblocks==0&&visSmoothAsNormal==0){
-    drawing_smooth=1;
+//     visBlocks (visBLOCKNormal, visBLOCKAsInput )
+//     visSmoothAsNormal
+//     visTransparentBlockage
+
+  if(ntotal_smooth_blockages>0&&updatesmoothblocks==0){
+    if(visSmoothAsNormal==0||visBlocks==visBLOCKAsInput){
+      drawing_smooth=1;
+    }
+  }
+  if(ntransparentblocks>0){
+    if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput){
+      drawing_transparent=1;
+    }
   }
 
   if(updatehiddenfaces==1)update_hidden_faces();
@@ -1758,23 +1770,18 @@ void update_facelists(void){
         continue;
       }
       if(j<vent_offset){
-        if(visBlocks==visBLOCKNormal){
+        if(drawing_smooth==1&&facej->type==3)continue;
+        if(facej->transparent==0||drawing_transparent==0){
           if(facej->show_bothsides==0){
-            if(drawing_smooth==0||facej->type!=3){
-              meshi->face_normals_single[n_normals_single++]=facej;
-            }
+            meshi->face_normals_single[n_normals_single++]=facej;
           }
           if(facej->show_bothsides==1){
-            if(drawing_smooth==0||facej->type!=3){
-              meshi->face_normals_double[n_normals_double++]=facej;
-            }
+            meshi->face_normals_double[n_normals_double++]=facej;
           }
           continue;
         }
-        if(visBlocks==visBLOCKAsInput&&facej->transparent==1){
-          if(drawing_smooth==0||facej->type!=3){
-            face_transparent[nface_transparent++]=facej;
-          }
+        if(facej->transparent==1&&drawing_transparent==1){
+          face_transparent[nface_transparent++]=facej;
           continue;
         }
       }
@@ -2177,7 +2184,7 @@ void draw_transparent_faces(){
   float highlight_color[4]={1.0,0.0,0.0,1.0};
 
   if(nface_transparent>0){
-    if(transparentflag==1)transparenton();
+    if(visTransparentBlockage==1)transparenton();
 
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -2248,7 +2255,7 @@ void draw_transparent_faces(){
 //    if(cullfaces==1)glEnable(GL_CULL_FACE); // DEBUG WORK AROUND
     glDisable(GL_LIGHTING);
     glDisable(GL_COLOR_MATERIAL);
-    if(transparentflag==1)transparentoff();
+    if(visTransparentBlockage==1)transparentoff();
   }
 }
 
@@ -3384,24 +3391,39 @@ void drawBlockages(int mode, int flag){
   int smoothnorms;
   int i,j;
   cadgeom *cd;
+  int drawing_smooth=0;
+  int drawing_transparent=0;
 
-   if(ntotal_smooth_blockages>0&&updatesmoothblocks==0&&visSmoothAsNormal==0){
-       if(xyz_clipplane==1)glDisable(GL_CULL_FACE);
-       for(i=0;i<selected_case->nmeshes;i++){
-         meshi = selected_case->meshinfo + i;
-         if(visBlocks==visBLOCKAsInput&&showedit==0){
-           for(j=0;j<meshi->nsmoothblockagecolors;j++){
-             isosurface *bsurface;
-             smoothnorms=1;
-             if(meshi->blockagesurface!=NULL){
-               bsurface=meshi->blockagesurfaces[j];
-               if((flag==0&&bsurface->color[3]>=0.99)||(flag==1&&bsurface->color[3]<0.99)){
-                 drawstaticiso(bsurface,1,smoothnorms,flag);
-               }
-             }
+//     visBlocks (visBLOCKNormal, visBLOCKAsInput )
+//     visSmoothAsNormal
+//     visTransparentBlockage
+
+  if(ntotal_smooth_blockages>0&&updatesmoothblocks==0){
+    if(visSmoothAsNormal==0||visBlocks==visBLOCKAsInput){
+      drawing_smooth=1;
+    }
+  }
+  if(ntransparentblocks>0){
+    if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput){
+      drawing_transparent=1;
+    }
+  }
+
+   if(drawing_smooth==1&&showedit==0){
+     if(xyz_clipplane==1)glDisable(GL_CULL_FACE);
+     for(i=0;i<selected_case->nmeshes;i++){
+       meshi = selected_case->meshinfo + i;
+       for(j=0;j<meshi->nsmoothblockagecolors;j++){
+         isosurface *bsurface;
+         smoothnorms=1;
+         if(meshi->blockagesurface!=NULL){
+           bsurface=meshi->blockagesurfaces[j];
+           if((drawing_transparent==0&&flag==0)||(drawing_transparent==1&&flag==1)){
+             drawstaticiso(bsurface,1,smoothnorms,flag,1);
            }
          }
        }
+     }
      sniffErrors("after drawblocks");
      if(xyz_clipplane==1)glEnable(GL_CULL_FACE);
    }
