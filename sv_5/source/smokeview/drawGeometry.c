@@ -1769,16 +1769,24 @@ void update_facelists(void){
         meshi->face_outlines[n_outlines++]=facej;
         continue;
       }
-      if(j<vent_offset){
+      if(j<vent_offset){  //xxx  fix code below to handle textures
+        int drawing_texture=0;
+
+        if(facej->type==BLOCK_texture&&facej->textureinfo!=NULL&&facej->textureinfo->display==1){
+          drawing_texture=1;
+        }
+
         if(drawing_smooth==1&&facej->type==3)continue;
         if(facej->transparent==0||drawing_transparent==0){
-          if(facej->show_bothsides==0){
-            meshi->face_normals_single[n_normals_single++]=facej;
+          if(drawing_texture==0){
+            if(facej->show_bothsides==0){
+              meshi->face_normals_single[n_normals_single++]=facej;
+            }
+            if(facej->show_bothsides==1){
+              meshi->face_normals_double[n_normals_double++]=facej;
+            }
+            continue;
           }
-          if(facej->show_bothsides==1){
-            meshi->face_normals_double[n_normals_double++]=facej;
-          }
-          continue;
         }
         if(facej->transparent==1&&drawing_transparent==1){
           face_transparent[nface_transparent++]=facej;
