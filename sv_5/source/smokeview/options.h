@@ -17,7 +17,7 @@
 #endif
 
 #ifndef pp_OSX
-#define pp_GDGIF
+//#define pp_GDGIF
 #endif
 
 // #define pp_FINALxxxRELEASE
