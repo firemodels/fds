@@ -4226,7 +4226,7 @@ Section~\ref{info:combustion}.
 
 \clearpage
 
-\chapter{Lagrangian Particles: The \texorpdfstring{{\tt PART}}{PART} Namelist Group}
+\chapter{Particles and Droplets: The \texorpdfstring{{\tt PART}}{PART} Namelist Group}
 \label{info:PART}\index{PART}
 
 Lagrangian particles are used in FDS as water or liquid fuel
@@ -4274,70 +4274,72 @@ the properties of the droplets ejected by a sprinkler or nozzle, for example
 
 \footnotesize
 \begin{verbatim}
-&PROP ID='Acme Sprinkler 123', QUANTITY='SPRINKLER LINK TEMPERATURE', PART_ID='my water',... /
-\end{verbatim}
-\normalsize
-Note that a surface on which particles are specified must have a non-zero normal velocity directed into the
-computational domain. This happens automatically if the surface is burning, but must be specified
-if it is not. Also, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line if non-massless particles
-are to have a specified mass flux. The number of particles inserted at each solid cell every
-{\ct DT\_INSERT} seconds is specified by {\ct NPPC} on the {\ct SURF} line defining the solid surface. The default
-value of {\ct NPPC} is 1.
-\index{SURF!NPPC}
-\index{SURF!PARTICLE\_MASS\_FLUX}
-\index{SURF!PART\_ID}
-
-\section{Tracer Particles}
-
-The simplest use of Lagrangian particles is for visualization, in which case the
-particles are considered massless tracers. In this case, the particles are
-defined via the line
-
-\footnotesize
-\begin{verbatim}
-&PART ID='tracers',MASSLESS=.TRUE.,... /
+&PROP ID='Acme Spk-123', QUANTITY='SPRINKLER LINK TEMPERATURE', PART_ID='my water', ... /
 \end{verbatim}
 \normalsize
 
 \noindent
-Other options for massless particles are
+Note that a surface on which particles are specified must have a non-zero normal velocity directed into the
+computational domain. This happens automatically if the surface is burning, but must be specified
+if it is not.
+\index{SURF!PART\_ID}
+
+
+
+\section{Controlling Particles and Droplets}
+
+Depending on how the particles or droplets are introduced into the computational domain, the following are important
+parameters for controlling them:
 \begin{description}
-\item[{\ct DT\_INSERT}]    Time increment in seconds between Lagrangian particle insertions.
-If more particles are desired, lower the input value of this parameter. This value can be different
-for different particle groups. This parameter is appropriate for all types of particles. (Default 0.05~s)
-\item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the particle output
+\item[{\ct DT\_INSERT}] Time increment in seconds between the introduction of a ``batch'' of particles or droplets.
+The number per ``batch'' depends on how they are introduced.
+If more particles are desired, lower the input value of this parameter. The default value is 0.05~s.
+\item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
 file {\bf CHID.prt5}. This parameter can be used to reduce the size
-of the particle output file used to animate the simulation. (Default 1)
-\item[{\ct AGE}]  Number of seconds the particle or droplet exists. Useful parameter to use when
+of the particle output file used to animate the simulation. The default value is 1, meaning that every particle or droplet will be shown in Smokeview.
+\item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when
 trying to reduce the number of droplets or particles in a simulation.
 \end{description}
-Note that if the
-particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property.
-Unlike early versions of FDS, particles are no longer
-colored by gas phase quantities, but rather by properties of the particle itself. For example,
-{\ct 'DROPLET\_TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
-rather than the local gas temperature.
+
+\subsubsection{Particles Introduced at a Solid Surface}
+
+If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line.
+The number of particles inserted at each solid cell every
+{\ct DT\_INSERT} seconds is specified by {\ct NPPC} on the {\ct SURF} line defining the solid surface. The default
+value of {\ct NPPC} is 1.
+\index{SURF!NPPC}
+\index{SURF!PARTICLE\_MASS\_FLUX}
+
+\subsubsection{Droplets Introduced at a Sprinkler or Nozzle}
+
+{\ct DROPLETS\_PER\_SECOND} is the  number of droplets inserted every
+second per active sprinkler or nozzle. Its default value is 1000. Note that this parameter only affects sprinklers and nozzles.
+Changing this parameter does {\em not} change the flow rate, but rather the number
+of droplets used to represent the flow. Also note that the number of droplets introduced per ``batch'' is {\ct DROPLETS\_PER\_SECOND} times {\ct DT\_INSERT}.
+
+\subsubsection{Particles or Droplets Introduced Initially}
+
+Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, {\ct NUMBER\_INITIAL\_DROPLETS}
+is the number of particles/droplets within the computational domain at the start of the simulation.
+Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which
+specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do
+not confuse this parameter with {\ct DENSITY}, explained in the next section. For example, water has a
+{\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets
+and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a
+certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format
+for {\ct XB} is the same as that used on the {\ct OBST} line.
 
 
-\section{Droplets}
 
-For Lagrangian particles that are not {\ct MASSLESS}, the following additional parameters can be
-included on the {\ct PART} line. Note that
-many of these parameters are used only for certain types of particles or
-droplets and need to be specified only if they are relevant.
+\section{Particle and Droplet Properties}
+
+For Lagrangian particles that are not {\ct MASSLESS}, the following parameters should be
+included on the {\ct PART} line.
 \begin{description}
 \item[{\ct DENSITY}] The density of the liquid or solid droplet/particle.
 (Default 1000~kg/m$^3$)
-\item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet.
-(Default 100~$^\circ$C)
-\item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet.
-(Default 0~$^\circ$C)
-\item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet.
-(Default {\ct TMPA})
 \item[{\ct SPECIFIC\_HEAT}] Specific heat of liquid or solid droplet/particle.
 (Default 4.184~kJ/kg/K)
-\item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet.
-(Default 2259~kJ/kg)
 \item[{\ct DIAMETER}] Median volumetric diameter of droplets/particles, with the
 distribution assumed to be a combination of Rosin-Rammler and log-normal (Default 500~$\mu$m). The
 width of the distribution is controlled by the parameter {\ct GAMMA\_D} (default 2.4)
@@ -4358,39 +4360,87 @@ instabilities that can occur when droplets get very, very small. The default {\c
 To prevent FDS from generating a distribution of droplets/particles altogether, set
 {\ct MONODISPERSE=.TRUE.} on the {\ct PART} line, in which case every droplet or particle will be assigned the
 same {\ct DIAMETER}.
-\item[{\ct QUANTITIES}] A character string indicating which
-scalar quantities should be used to color the particles when viewed as an
-animation. The choices are {\ct 'DROPLET\_TEMPERATURE'} ($^\circ$C), {\ct 'DROPLET\_DIAMETER'} ($\mu$m),
-{\ct 'DROPLET\_VELOCITY'} (m/s), {\ct 'DROPLET\_MASS'} (kg), {\ct 'DROPLET\_AGE'} (s).
-As a default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then
-Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or
-{\ct COLOR}.
-\item[{\ct STATIC}] Logical parameter indicating whether particles move or just serve
-as obstructions or clutter. This parameter should only be used when
-{\ct NUMBER\_INITIAL\_DROPLETS} is greater than 0. (Default {\ct .FALSE.})
-\item[{\ct FUEL}] Logical parameter indicating whether the liquid droplets evaporate
-into fuel gas and burn. (Default {\ct .FALSE.}). If {\ct FUEL=.TRUE.},
-then also add {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) of the fuel. Fuel droplets are colored yellow by default in Smokeview.
-\item[{\ct WATER}] Logical parameter indicating whether the liquid droplets evaporate
-into {\ct WATER VAPOR}, which is a separate species that is automatically added to the calculation (Default {\ct .FALSE.}).
-Water droplets are colored blue in Smokeview.
-\item[{\ct NUMBER\_INITIAL\_DROPLETS}]
-Number of particles/droplets within the computational domain at the start of the simulation.
-(Default 0). If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which
-specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do
-not confuse this parameter with {\ct DENSITY}. For example, water has a
-{\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets
-and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a
-certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format
-for {\ct XB} is the same as that used on the {\ct OBST} line.
-\item[{\ct DROPLETS\_PER\_SECOND}]  Number of sprinkler droplets inserted every
-second per active sprinkler. Note that this parameter only affects sprinkler
-droplets. Changing this parameter does {\em not} change the flow rate, but rather the number
-of droplets used to represent the flow. (Default 1000)
+\end{description}
+
+\noindent
+The following parameters are optional, mainly to describe the evaporation of liquid droplets. It is always assumed that non-massless particles are
+liquid droplets, but if you specify high values of the vaporization temperature and the heat of vaporization, the effects of evaporation will be minimal.
+
+
+\begin{description}
+\item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet.
+(Default 100~$^\circ$C)
+\item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet.
+(Default 0~$^\circ$C)
+\item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet.
+(Default {\ct TMPA})
+\item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet.
+(Default 2259~kJ/kg)
 \end{description}
 
 
 
+\section{Special Types of Particles and Droplets}
+
+There are several useful attributes that you can assign to particles or droplets, usually via a simple logical parameter.
+
+\subsubsection{Massless Particles}
+
+The simplest use of Lagrangian particles is for visualization, in which case the
+particles are considered massless tracers. In this case, the particles are
+defined via the line
+
+\footnotesize
+\begin{verbatim}
+&PART ID='tracers', MASSLESS=.TRUE., ... /
+\end{verbatim}
+\normalsize
+
+\noindent
+Note that if the
+particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property.
+Unlike early versions of FDS, particles are no longer
+colored by gas phase quantities, but rather by properties of the particle itself. For example,
+{\ct 'DROPLET\_TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
+rather than the local gas temperature.
+
+
+\subsubsection{Static Particles or Droplets}
+
+{\ct STATIC} is a logical parameter indicating whether particles move or just serve
+as obstructions or clutter. This parameter should only be used when
+{\ct NUMBER\_INITIAL\_DROPLETS} is greater than 0. (Default {\ct .FALSE.})
+
+
+\subsubsection{Water Droplets}
+
+{\ct WATER=.TRUE.} indicates whether the liquid droplets evaporate
+into {\ct WATER VAPOR}, which is a separate species that is automatically added to the calculation. By default, {\ct WATER=.FALSE.}, but note that the default
+properties of droplets are that of water. Setting {\ct WATER=.TRUE.} instructs FDS to add {\ct WATER VAPOR} as an explicitly defined species.
+Water droplets are colored blue in Smokeview.
+
+If the liquid droplets are to evaporate into some other gaseous species, you must explicitly define the species via the {\ct SPEC} namelist group (see Section~\ref{info:SPEC}), and then
+designate the appropriate {\ct SPEC\_ID} on the {\ct PART} line.
+
+
+\subsubsection{Fuel Droplets}
+
+{\ct FUEL=.TRUE.} indicates that the liquid droplets evaporate
+into fuel gas and burn. In this case, add the {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) of the fuel. Fuel droplets are colored yellow by default in Smokeview.
+This feature only works for a mixture fraction-based combustion calculation, in which case the droplets evaporate into an equivalent amount of fuel
+vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}.
+
+
+
+\section{Coloring Particles and Droplets}
+
+The parameter {\ct QUANTITIES} is an array of character strings indicating which
+scalar quantities should be used to color the particles or droplets when viewed as an
+animation. The choices are {\ct 'DROPLET\_TEMPERATURE'} ($^\circ$C), {\ct 'DROPLET\_DIAMETER'} ($\mu$m),
+{\ct 'DROPLET\_VELOCITY'} (m/s), {\ct 'DROPLET\_MASS'} (kg), {\ct 'DROPLET\_AGE'} (s).
+As a default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then
+Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or
+{\ct COLOR}. By default, water droplets are colored blue and fuel droplets yellow. All others are colored black.
 
 
 
@@ -4402,7 +4452,7 @@ generalized so that a liquid fuel spray
 nozzle can be modeled. Fuel evaporation is triggered by the inclusion of the
 phrase {\ct FUEL=.TRUE.} on the appropriate {\ct PART} line.
 The spray nozzle characteristics are specified
-in the same way as those for a sprinkler. Here is an example of a liquid fuel spray nozzle ({\bf spray\_burner} in the V\&V Guide):
+in the same way as those for a sprinkler. Here is an example of a liquid fuel spray nozzle (also see Section~\ref{spray_burner}):
 
 \footnotesize
 \begin{verbatim}
@@ -6574,7 +6624,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct QUANTITIES(10)}            & Character       & Quantities for coloring           &           &               \\ \hline
 {\ct RGB(3)}                    & Integers        & Color indices (0-255)             &           &               \\ \hline
 {\ct SAMPLING\_FACTOR}          & Integer         & Filter for output file            &           & 1             \\ \hline
-%{\ct SPEC\_ID}                  & Character       & Name of gas species               &           &               \\ \hline
+{\ct SPEC\_ID}                  & Character       & Name of gas species               &           &               \\ \hline
 {\ct SPECIFIC\_HEAT}            & Real            & Droplet specific heat             & kJ/kg/K   & 4.184         \\ \hline
 {\ct STATIC}                    & Logical         & Stationary Particles              &           & {\ct .FALSE.} \\ \hline
 %{\ct TREE}                      & Logical         & Particles are leaves              &           & {\ct .FALSE.} \\ \hline
