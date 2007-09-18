@@ -282,7 +282,7 @@ unsigned char *readpicture(char *filename, int *width, int *height){
   }
 
   
-  printf("Loading texture:%s",filebuffer);
+  printf("Loading texture:%s ",filebuffer);
   ext = filebuffer + strlen(filebuffer) - 4;
   if(strncmp(ext,".jpg",4)==0||strncmp(ext,".JPG",4)==0){
     returncode = readjpeg(filebuffer,width,height,pixel_skip);
@@ -329,6 +329,7 @@ unsigned char *readjpeg(const char *filename,int *width, int *height, int skip){
   if (file == NULL)return NULL;
   image = gdImageCreateFromJpeg(file);
   fclose(file);
+  if(image==NULL)return NULL;
   WIDTH=gdImageSX(image);
   HEIGHT=gdImageSY(image);
   if(skip<0)skip=0;
