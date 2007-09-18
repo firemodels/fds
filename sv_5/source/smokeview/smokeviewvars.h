@@ -409,7 +409,7 @@ SVEXTERN int ntitles,ititle;
 SVEXTERN int visSmoke, visZone;
 SVEXTERN int visEvac;
 SVEXTERN int visBlocks;
-SVEXTERN int visSmoothAsNormal;
+SVEXTERN int visSmoothAsNormal,visTransparentBlockage;
 SVEXTERN int visBlocksSave;
 SVEXTERN int blocklocation;
 SVEXTERN int ncadgeom;
@@ -514,7 +514,7 @@ SVEXTERN char emptylabel[2];
 SVEXTERN void *large_font;
 SVEXTERN void *small_font;
 
-SVEXTERN int nsmoothblocks,nopenvents,nopenvents_nonoutline,ndummyvents;
+SVEXTERN int nsmoothblocks,nopenvents,nopenvents_nonoutline,ndummyvents,ntransparentblocks;
 SVEXTERN int ntotal_smooth_blockages;
 SVEXTERN float veclengths[NVECLENGTHS];
 SVEXTERN float texture_origin[3];
