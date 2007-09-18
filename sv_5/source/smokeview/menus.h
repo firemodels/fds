@@ -3039,7 +3039,11 @@ void VentMenu(int value){
 
 /* ------------------ BlockageMenu ------------------------ */
 
-void BlockageMenu(int value){
+//     visBlocks (visBLOCKNormal, visBLOCKAsInput )
+//     visSmoothAsNormal
+//     visTransparentBlockage
+
+     void BlockageMenu(int value){
   switch (value){
 //   case visBLOCKFacet:
 //   case visBLOCKSmooth:
@@ -3049,6 +3053,7 @@ void BlockageMenu(int value){
 #endif
      visBlocks=value;
      update_trainer_outline();
+     
      break;
    case visBLOCKNormal:
    case visBLOCKOutline:
@@ -3066,6 +3071,9 @@ void BlockageMenu(int value){
      break;
    case visBLOCKSmoothAsNormal:
      visSmoothAsNormal = 1 - visSmoothAsNormal;
+     break;
+   case visBLOCKTransparent:
+     visTransparentBlockage=1-visTransparentBlockage;
      break;
    case SMOOTH_BLOCKAGES:
      menusmooth=1;
@@ -3621,34 +3629,26 @@ static int textureshowmenu=0;
 /* --------------------------------blockage menu -------------------------- */
   CREATEMENU(blockagemenu,BlockageMenu);
   if(use_menusmooth==1){
-    glutAddMenuEntry("Smooth Blockages",SMOOTH_BLOCKAGES);
+    glutAddMenuEntry("Smooth Blockages Now",SMOOTH_BLOCKAGES);
   }
-  glutAddMenuEntry("Show Blockages As:",999);
+  glutAddMenuEntry("View Method:",999);
   if(visBlocks==visBLOCKAsInput){
     glutAddMenuEntry("   *Defined In Input File",visBLOCKAsInput);
   }
    else{
     glutAddMenuEntry("   Defined In Input File",visBLOCKAsInput);
   }
-  if(nsmoothblocks>0){
-    if(visSmoothAsNormal==1){
-       glutAddMenuEntry("      *Show Smoothed Blocks As Normal",visBLOCKSmoothAsNormal);
-    }
-    else{
-       glutAddMenuEntry("      Show Smoothed Blocks As Normal",visBLOCKSmoothAsNormal);
-    }
-  }
   if(visBlocks==visBLOCKNormal){
-    glutAddMenuEntry("   *Normal",visBLOCKNormal);
+    glutAddMenuEntry("   *Solid",visBLOCKNormal);
   }
    else{
-     glutAddMenuEntry("   Normal",visBLOCKNormal);
+     glutAddMenuEntry("   Solid",visBLOCKNormal);
    }
   if(visBlocks==visBLOCKOutline){
-    glutAddMenuEntry("   *Outlines",visBLOCKOutline);
+    glutAddMenuEntry("   *Outline",visBLOCKOutline);
   }
    else{
-     glutAddMenuEntry("   Outlines",visBLOCKOutline);
+     glutAddMenuEntry("   Outline",visBLOCKOutline);
    }
   if(visBlocks==visBLOCKHide){
     glutAddMenuEntry("   *Hidden",visBLOCKHide);
@@ -3656,8 +3656,28 @@ static int textureshowmenu=0;
   else{
     glutAddMenuEntry("   Hidden",visBLOCKHide);
   }
+  if(nsmoothblocks>0||ntransparentblocks>0){
+    glutAddMenuEntry("-",999);
+    glutAddMenuEntry("View Options",999);
+  }
+  if(nsmoothblocks>0){
+    if(visSmoothAsNormal==1){
+       glutAddMenuEntry("    Smooth",visBLOCKSmoothAsNormal);
+    }
+    else{
+       glutAddMenuEntry("    *Smooth",visBLOCKSmoothAsNormal);
+    }
+  }
+  if(ntransparentblocks>0){
+    if(visTransparentBlockage==1){
+       glutAddMenuEntry("    *Transparent",visBLOCKTransparent);
+    }
+    else{
+       glutAddMenuEntry("    Transparent",visBLOCKTransparent);
+    }
+  }
   glutAddMenuEntry("-",999);
-  glutAddMenuEntry("Blockage Locations:",999);
+  glutAddMenuEntry("Locations:",999);
   if(blocklocation==BLOCKlocation_grid){
     glutAddMenuEntry("   *Actual",BLOCKlocation_grid);
   }
@@ -4537,10 +4557,14 @@ static int textureshowmenu=0;
   else{
     glutAddMenuEntry("Flip background",1);
   }
-  if(setbw==0){glutAddMenuEntry("*Color",2);}
-   else{glutAddMenuEntry("Color",2);}
-  if(transparentflag==1){glutAddMenuEntry("*Transparent",3);}
-   else{glutAddMenuEntry("Transparent",3);}
+  if(setbw==0){glutAddMenuEntry("*Color/BW",2);}
+   else{glutAddMenuEntry("Color/*BW",2);}
+  if(transparentflag==1){
+    glutAddMenuEntry("*Transparent (data)",3);
+  }
+  else{
+    glutAddMenuEntry("Transparent (data)",3);
+  }
 
 /* --------------------------------showVslice menu -------------------------- */
 
@@ -5137,6 +5161,7 @@ static int textureshowmenu=0;
     glutAddMenuEntry("  t: set/unset single time step mode",6);
     glutAddMenuEntry("  o: reset animation to the initial time",6);
     glutAddMenuEntry("  T: toggle texture method for drawing slice and boundary colors",6);
+    glutAddMenuEntry("  u: reload files",6);
   }
   if(plotstate==STATIC_PLOTS){
     glutAddMenuEntry("",1);
@@ -5176,11 +5201,9 @@ static int textureshowmenu=0;
     glutAddMenuEntry("    ALT:left/right cursor: slide left/right",1);
     glutAddMenuEntry("    ALT:   up/down cursor: slide up/down",1);
     glutAddMenuEntry("     INSERT/HOME/PageUP: tilt down/reset/tilt up",1);
-    glutAddMenuEntry("               F1/F2/F3: slower/reset/faster",1);
-    glutAddMenuEntry("               F4/F5/F6: view left/reset view/view right",1);
   }
   glutAddMenuEntry("",1);
-  glutAddMenuEntry("URL: http://fire.nist.gov/smokeview",1);
+  glutAddMenuEntry("URL: http://fire.nist.gov/fds",1);
 
   /* -------------------------------- target menu -------------------------- */
 

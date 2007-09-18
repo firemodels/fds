@@ -1217,7 +1217,8 @@ void initvars1(void){
   visSmoke=1, visZone=0;
   visEvac=1;
   visBlocks=visBLOCKAsInput;
-  visSmoothAsNormal=0;
+  visSmoothAsNormal=1;
+  visTransparentBlockage=0;
   visBlocksSave=visBLOCKAsInput;
   blocklocation=BLOCKlocation_grid;
   ncadgeom=0;
@@ -1651,7 +1652,6 @@ void initvars1(void){
 
     strcpy(TITLEBASE,"Smokeview ");
 
-#define pp_BETA
 #ifdef pp_BETA
     strcat(TITLEBASE," Beta ");
 #endif
