@@ -14,7 +14,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
-// svn revision character string
+// svn revision character string2
 extern "C" char glui_labels_revision[]="$Revision$";
 
 extern "C" void Labels_CB(int value);
