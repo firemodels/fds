@@ -20,6 +20,7 @@
 char startup_revision[]="$Revision$";
 
 //void get_smokezippath(char *progdir, char **zippath);
+int getmaxrevision(void);
 void glui_colorbar_setup(int main_window);
 void glui_motion_setup(int main_window);
 void glui_bounds_setup(int main_window);
@@ -2039,7 +2040,9 @@ int getmaxrevision(void){
   MAXREV(camera_revision);
   MAXREV(colorbar_revision);
   MAXREV(compress3dc_revision);
+#ifdef pp_SPHERE
   MAXREV(csphere_revision);
+#endif
   MAXREV(dmalloc_revision);
   MAXREV(drawGeometry_revision);
   MAXREV(egz_stdio_revision);

@@ -14,6 +14,12 @@
 #pragma warning (disable:4305)		/* disable bogus conversion warnings */
 #pragma warning (disable:4505)		/* disable bogus conversion warnings */
 #pragma warning (disable:4701)		/* disable bogus conversion warnings */
+#pragma warning (disable:4018)		/* signied/unsigned match */
+#pragma warning (disable:4206)		/* translation unit empty */
+#pragma warning (disable:4267)		/* size_t to int possible loss of data */
+#pragma warning (disable:4389)		/* signed/unsigned mis-match */
+
+
 #endif
 
 #ifndef pp_OSX
