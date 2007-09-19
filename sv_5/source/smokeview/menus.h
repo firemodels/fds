@@ -4,6 +4,7 @@
 #define MENU_OUTLINEVIEW -104
 #define MENU_DUMMY -999
 
+// svn revision character string
 char menu_revision[]="$Revision$";
 /* ------------------ OpenSMVFile ------------------------ */
 
