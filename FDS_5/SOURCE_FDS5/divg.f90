@@ -537,10 +537,14 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                ENDIF
                FDS_LEAK_AREA(IPZ,IOPZ) = FDS_LEAK_AREA(IPZ,IOPZ) + AW(IW)
             ENDIF
-            TSI = T+DT-TW(IW)
-            IF (TSI<0._EB) THEN
-               UWS(IW) = 0._EB
-               CYCLE WALL_LOOP3
+            IF (TW(IW)==T_BEGIN) THEN
+               TSI = T            
+            ELSE
+               TSI = T+DT-TW(IW)
+               IF (TSI<0._EB) THEN
+                  UWS(IW) = 0._EB
+                  CYCLE WALL_LOOP3
+               ENDIF
             ENDIF
             TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
             KK               = IJKW(3,IW)
