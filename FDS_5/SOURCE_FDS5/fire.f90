@@ -308,7 +308,6 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
    ENDIF SUPPRESSIONIF
        
 ELSE PRODUCE_CO !Combustion with suppression and CO production
-
    YO2Z   => WORK1
 !   IGNITE => LOGICAL_WORK
 !   IGNITE = .FALSE.
@@ -575,12 +574,12 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             YCO0  = MAX(0._EB,YY(I,J,K,I_PROG_CO))*RN%Y_F_INLET / F_TO_CO 
             IF (YCO0<=YCOMIN .OR. YO20<=YO2MIN) CYCLE ILOOPY1
             !Get max conversion allowed
-            Z2_MIN = REACTION(2)%NU_CO / REACTION(1)%NU_CO * (YY(I,J,K,I_PROG_CO)+YY(I,J,K,I_PROG_F))
+            Z2_MIN = REACTION(2)%NU_CO / (REACTION(2)%NU_CO+REACTION(2)%NU_CO2) * (YY(I,J,K,I_PROG_CO)+YY(I,J,K,I_PROG_F))
             IF (YY(I,J,K,I_PROG_CO) < Z2_MIN) CYCLE ILOOPY1
             !Get max CO2
             IF((TMP(I,J,K) < 500._EB .AND. Q(I,J,K)==0._EB) .OR. Q(I,J,K)>=Q_UPPER) CYCLE ILOOPY1
             IF (Q(I,J,K)/=0._EB) THEN
-               DYCO = MIN(YCO0,YO20/COTOO2)    
+               DYCO = MIN(YCO0,YO20/COTOO2)
             ELSE
                RHOX = 1000._EB*RHO(I,J,K)
                X_FU_0 = YCO0*RHOX/MW_CO*1.E-6_EB
@@ -621,8 +620,8 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             Q_NEW = MIN(Q_UPPER-Q_OLD,DYCO*RHO(I,J,K)*HFAC_CO)
             DYCO = Q_NEW/(RHO(I,J,K)*HFAC_CO*RN%Y_F_INLET) * F_TO_CO
             IF (YY(I,J,K,I_PROG_CO) - DYCO < Z2_MIN) THEN
-               Q_NEW = (Z2_MIN - YY(I,J,K,I_PROG_CO)) / DYCO
-               DYCO = Z2_MIN - YY(I,J,K,I_PROG_CO)
+               Q_NEW = (YY(I,J,K,I_PROG_CO) - Z2_MIN) / DYCO * Q_NEW
+               DYCO = YY(I,J,K,I_PROG_CO) - Z2_MIN
             ENDIF
             Q(I,J,K) = Q_OLD + Q_NEW
             YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) - DYCO
@@ -631,7 +630,6 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
       ENDDO
    ENDDO
 ENDIF PRODUCE_CO
-
 IF (N_SPEC_DILUENTS > 0) THEN
    R_SUM_DILUENTS => WORK4
    R_SUM_DILUENTS =  0._EB

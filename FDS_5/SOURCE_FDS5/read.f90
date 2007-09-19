@@ -100,7 +100,7 @@ CALL READ_SPEC
 CALL PROC_SPEC    ! Set up various SPECies constructs
 CALL PROC_SURF_1  ! Set up SURFace constructs for species
 CALL READ_RAMP    ! Read in all RAMPs, assuming they have all been identified previously
-CALL READ_TABL    ! Read in all TABLs, assuming they have all been identified previously
+CALL READ_TABL   ! Read in all TABLs, assuming they have all been identified previously
 CALL PROC_MATL    ! Set up various MATeriaL constructs
 CALL PROC_SURF_2  ! Set up remaining SURFace constructs
 CALL READ_DUMP
@@ -3799,7 +3799,7 @@ ENDDO
 
 END SUBROUTINE READ_RAMP
  
-
+ 
 SUBROUTINE READ_TABL
  
 REAL(EB) :: TABLE_DATA(6)
@@ -3884,7 +3884,7 @@ READ_TABL_LOOP: DO N=1,N_TABLE
    ENDDO SEARCH_LOOP2
 ENDDO READ_TABL_LOOP
 
-END SUBROUTINE READ_TABL 
+END SUBROUTINE READ_TABL
  
 SUBROUTINE READ_OBST
 USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
@@ -4955,7 +4955,7 @@ MESH_LOOP: DO NM=1,NMESHES
       VT%X0 = XYZ(1)
       VT%Y0 = XYZ(2)
       VT%Z0 = XYZ(3)
-      VT%FIRE_SPREAD_RATE = SPREAD_RATE
+      VT%FIRE_SPREAD_RATE = SPREAD_RATE / TIME_SHRINK_FACTOR
 
       ! Miscellaneous
  
@@ -5427,7 +5427,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    DV%FLOWRATE         = FLOWRATE
    DV%BYPASS_FLOWRATE  = BYPASS_FLOWRATE
    DV%STATISTICS       = STATISTICS   
-   DV%DELAY            = DELAY
+   DV%DELAY            = DELAY / TIME_SHRINK_FACTOR
    DV%X1               = XB(1)
    DV%X2               = XB(2)
    DV%Y1               = XB(3)

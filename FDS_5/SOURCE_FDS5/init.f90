@@ -1861,7 +1861,7 @@ VLOOP: DO N=1,M%N_VENT
  
    IF (VT%X0>-900._EB) THEN
       DIST = SQRT((M%XW(IW)-VT%X0)**2 +(M%YW(IW)-VT%Y0)**2 +(M%ZW(IW)-VT%Z0)**2)
-      T_ACTIVATE = DIST/VT%FIRE_SPREAD_RATE
+      T_ACTIVATE = T_BEGIN+DIST/VT%FIRE_SPREAD_RATE
    ENDIF
 
    ! Miscellaneous settings
