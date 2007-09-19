@@ -3351,9 +3351,6 @@ void usage(char **argv){
 #ifdef pp_GPU
     printf(", pp_GPU");
 #endif
-#ifdef pp_LAHEY
-    printf(", pp_LAHEY");
-#endif
 #ifdef pp_LIGHT
     printf(", pp_LIGHT");
 #endif

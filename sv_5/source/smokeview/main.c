@@ -24,7 +24,6 @@ int main(int argc, char **argv){
 #ifdef WIN32
   char *smv_file;
 #endif
-  int max_revision;
 
 #ifdef pp_MEM2
   initMM();
