@@ -3053,7 +3053,6 @@ section provides a description of the input parameters, starting with a general 
 \index{Solid fuels}
 \index{MATL!A}
 \index{MATL!E}
-\index{MATL!HEAT\_OF\_REACTION}
 \index{MATL!N\_S}
 \index{MATL!NU\_FUEL}
 \index{MATL!NU\_RESIDUE}
@@ -3134,12 +3133,17 @@ converting all mass to fuel gases ({\ct NU\_FUEL=1.}).
 \normalsize
 \noindent
 The {\ct HEAT\_OF\_REACTION(j)} (kJ/kg) indicates the amount of energy
-consumed by the solid phase reaction. A positive value indicates that
-the reaction is {\em endothermic}; that is, the reaction takes energy
-out of the system. The {\ct HEAT\_OF\_COMBUSTION} ensures that if the
-fuel vapors burn with a different $\Delta H$ than that of other
-materials included in the simulation, the model will account for this
-accordingly.
+consumed by the solid phase reaction. Technically it is the enthalpy
+difference between the products and reactants at the same
+temperature. A positive value indicates that the reaction is {\em
+endothermic}; that is, the reaction takes energy out of the
+system. Usually the {\ct HEAT\_OF\_REACTION} is accuratelly known only
+for simple phase change reactions like the vaporization of water. For
+other reactions, it must be determined empirically. The {\ct
+HEAT\_OF\_COMBUSTION} ensures that if the fuel vapors burn with a
+different $\Delta H$ than that of other materials included in the
+simulation, the model will account for this accordingly.
+\index{MATL!HEAT\_OF\_REACTION}
 \index{MATL!HEAT\_OF\_COMBUSTION}
 
 \index{SURF!SHRINK}
