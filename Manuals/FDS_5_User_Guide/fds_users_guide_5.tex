@@ -1356,7 +1356,7 @@ It is only used to offset the reported starting time from zero.
 
 \begin{warning}
 Time based {\ct RAMP}s are evaluated using the actual time if the {\ct RAMP} activation time is the same as 
-{\ct T_BEGIN}; otherwise, the are evaluated using the time from when the {\ct RAMP} activates.  Therefore, if you are
+{\ct T\_BEGIN}; otherwise, the are evaluated using the time from when the {\ct RAMP} activates.  Therefore, if you are
 setting {\ct T\_BEGIN} in order to test a time based {\ct CTRL} or {\ct DEVC} that is ultimately 
 linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate.
 For example if you were testing a {\ct VENT} that is to open at 10 s whose {\ct SURF\_ID} uses a {\ct RAMP},
