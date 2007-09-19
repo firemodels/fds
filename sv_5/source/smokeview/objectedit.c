@@ -9,7 +9,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char objectedit_revision[]="$Revision: 614 $";
+char objectedit_revision[]="$Revision$";
 
 /* ------------------ movefblockage ------------------------ */
 

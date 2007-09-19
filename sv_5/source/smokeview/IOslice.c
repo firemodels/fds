@@ -15,7 +15,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOslice_revision[]="$Revision: 614 $";
+char IOslice_revision[]="$Revision$";
 
 /* dummy change - to test svn check out on the linux cluster */
 int endianswitch;

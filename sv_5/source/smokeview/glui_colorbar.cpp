@@ -15,7 +15,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-extern "C" char glui_colorbar_revision[]="$Revision: 614 $";
+extern "C" char glui_colorbar_revision[]="$Revision$";
 
 //
 // setColorbarClipPlanes(1);

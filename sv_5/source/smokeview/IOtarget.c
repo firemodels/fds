@@ -13,7 +13,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOtarget_revision[]="$Revision: 614 $";
+char IOtarget_revision[]="$Revision$";
 
 /* ------------------ readtarget ------------------------ */
 #ifdef pp_nofortran

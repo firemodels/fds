@@ -14,7 +14,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-extern "C" char glui_blockedit_revision[]="$Revision: 614 $";
+extern "C" char glui_blockedit_revision[]="$Revision$";
 
 #define NEW_OBJECT 1
 #define DELETE_OBJECT 4

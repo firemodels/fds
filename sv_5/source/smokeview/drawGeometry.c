@@ -19,7 +19,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char drawGeometry_revision[]="$Revision: 614 $";
+char drawGeometry_revision[]="$Revision$";
 
 cadgeom *current_cadgeom;
 
