@@ -526,11 +526,9 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
 
    IF (DROP_SUM > 0) THEN
       IF(PY%SPRAY_PATTERN_INDEX>0) THEN
-  !!!    PWT0 = FLOW_RATE*MAX(T-DV%T,0._EB)/(MASS_SUM*REAL(PC%N_INSERT,EB)/SOLID_ANGLE_TOTAL_FLOWRATE)
          PWT0 = FLOW_RATE*PC%DT_INSERT/(MASS_SUM*REAL(PC%N_INSERT,EB)/SOLID_ANGLE_TOTAL_FLOWRATE)
       ELSE
          PWT0 = FLOW_RATE*PC%DT_INSERT/MASS_SUM
-  !!!    PWT0 = FLOW_RATE*MAX(T-DV%T,0._EB)/MASS_SUM
       ENDIF
       DROPLET(NLP-DROP_SUM+1:NLP)%PWT = DROPLET(NLP-DROP_SUM+1:NLP)%PWT*PWT0
    ENDIF
@@ -663,7 +661,7 @@ WALL_INSERT_LOOP: DO IW=1,NWC
 
    IF (MASS_SUM > 0._EB) THEN
       IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
-         DROPLET(NLP-NPPCW(IW)+1:NLP)%PWT = DROPLET(NLP-NPPCW(IW)+1:NLP)%PWT*SF%PARTICLE_MASS_FLUX*AW(IW)/MASS_SUM/PC%DT_INSERT
+         DROPLET(NLP-NPPCW(IW)+1:NLP)%PWT = DROPLET(NLP-NPPCW(IW)+1:NLP)%PWT*SF%PARTICLE_MASS_FLUX*AW(IW)*PC%DT_INSERT/MASS_SUM
       ENDIF
    ENDIF
 
@@ -1157,10 +1155,7 @@ REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
 
 ! Initializations
 
-D_VAP  = 0._EB
 RDT    = 1._EB/DT
-WCPUA  = RUN_AVG_FAC*WCPUA
-WMPUA  = RUN_AVG_FAC*WMPUA
 OMRAF  = 1._EB - RUN_AVG_FAC
 
 ! Rough estimates
@@ -1180,9 +1175,14 @@ NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH
 
 ! Working arrays
 
-DROP_DEN => WORK4
-DROP_RAD => WORK5
-DROP_TMP => WORK6
+IF (N_EVAP_INDICIES>0) THEN
+   D_VAP  = 0._EB
+   WCPUA  = RUN_AVG_FAC*WCPUA
+   WMPUA  = RUN_AVG_FAC*WMPUA
+   DROP_DEN => WORK4
+   DROP_RAD => WORK5
+   DROP_TMP => WORK6
+ENDIF
 
 ! Loop over all types of evaporative species
 
@@ -1257,7 +1257,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          RVC    = RDX(II)*RDY(JJ)*RDZ(KK)
          M_GAS  = RHO_G/RVC        
          K_AIR  = CPOPR*MU_AIR
-         Y_GAS  = YY(II,JJ,KK,IGAS)
+         IF (IGAS>0) THEN
+            Y_GAS = YY(II,JJ,KK,IGAS)
+         ELSE
+            Y_GAS = 0._EB
+         ENDIF
 
          ! Set variables for heat transfer on solid
 
@@ -1285,7 +1289,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
             SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
             H_HEAT   = NUSSELT*K_AIR/LENGTH
-            H_MASS   = SHERWOOD*D_AIR/LENGTH
+            IF (PC%EVAPORATE) THEN
+               H_MASS = SHERWOOD*D_AIR/LENGTH
+            ELSE
+               H_MASS = 0._EB
+            ENDIF
             H_WALL   = H_SOLID
             Q_DOT_RAD = A_DROP*(QRADIN(IW)-QRADOUT(IW))
 
@@ -1295,7 +1303,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(DR%RE)
             SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(DR%RE)
             H_HEAT   = NUSSELT *K_AIR/(2._EB*R_DROP)
-            H_MASS   = SHERWOOD*D_AIR/(2._EB*R_DROP)
+            IF (PC%EVAPORATE) THEN
+               H_MASS = SHERWOOD*D_AIR/(2._EB*R_DROP)
+            ELSE
+               H_MASS = 0._EB
+            ENDIF
             H_WALL   = 0._EB
             TMP_WALL = TMPA
             IF (AVG_DROP_DEN(II,JJ,KK,EVAP_INDEX )>0._EB) THEN
@@ -1308,11 +1320,17 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          
          ! Compute equilibrium droplet vapor mass fraction, Y_DROP, and its derivative w.r.t. droplet temperature
     
-         X_DROP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP)))
-         Y_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
-         IF (TMP_DROP < TMP_BOIL) THEN
-            DY_DTMP_DROP = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2)*DHOR*X_DROP/TMP_DROP**2
+         IF (PC%EVAPORATE) THEN
+            X_DROP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP)))
+            Y_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
+            IF (TMP_DROP < TMP_BOIL) THEN
+               DY_DTMP_DROP = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2)*DHOR*X_DROP/TMP_DROP**2
+            ELSE
+               DY_DTMP_DROP = 0._EB
+            ENDIF
          ELSE
+            X_DROP = 0._EB
+            Y_DROP = 0._EB
             DY_DTMP_DROP = 0._EB
          ENDIF
 
@@ -1334,7 +1352,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
   
          M_VAP  = DT*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
          M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP))
-         IF (R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  ! Evaporate the small droplet and extract all energy needed from gas
+         IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  ! Evaporate small droplets
             M_VAP      = M_DROP
             Q_CON_GAS  = M_VAP*H_V
             Q_CON_WALL = 0._EB
@@ -1343,11 +1361,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
          ! If the droplet temperature drops below its freezing point, just reset it
 
-         IF (TMP_DROP_NEW < TMP_MELT) TMP_DROP_NEW = TMP_MELT
+         IF (PC%EVAPORATE .AND. TMP_DROP_NEW<TMP_MELT) TMP_DROP_NEW = TMP_MELT
 
          ! If the droplet temperature reaches boiling, use only enough energy from gas to vaporize liquid
 
-         IF (TMP_DROP_NEW >= TMP_BOIL) THEN  
+         IF (PC%EVAPORATE .AND. TMP_DROP_NEW>=TMP_BOIL) THEN  
             TMP_DROP_NEW = TMP_BOIL
             Q_CON_GAS  = M_VAP*H_V
             Q_CON_WALL = 0._EB
@@ -1382,7 +1400,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
          ! Add vapor or fuel gas to the grid cell
 
-         YY(II,JJ,KK,IGAS)= MIN(1._EB,(WGT*M_VAP+M_GAS*Y_GAS)/(WGT*M_VAP+M_GAS))
+         IF (IGAS>0) YY(II,JJ,KK,IGAS)= MIN(1._EB,(WGT*M_VAP+M_GAS*Y_GAS)/(WGT*M_VAP+M_GAS))
 
          ! Add new mass from vaporized droplet to the grid cell
 

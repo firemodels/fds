@@ -928,7 +928,7 @@ EVAC_ONLY3: IF (.NOT. ALL(EVACUATION_ONLY)) THEN
    DO N=1,N_PART
       PC => PARTICLE_CLASS(N)
       WRITE(LU_SMV,'(/A)') 'CLASS_OF_PARTICLES'
-      WRITE(LU_SMV,'(A,A)') ' ',PC%CLASS_NAME
+      WRITE(LU_SMV,'(A,A)') ' ',PC%ID
       WRITE(LU_SMV,'(3F13.5)') REAL(PC%RGB,FB)/255._FB
       WRITE(LU_SMV,'(I3)') PC%N_QUANTITIES
       DO NN=1,PC%N_QUANTITIES
@@ -1978,14 +1978,14 @@ PROPERTY_LOOP: DO N=1,N_PROP
       CASE('LINK TEMPERATURE')
          WRITE(LU_OUTPUT,'(A,F8.1)') '     RTI (m-s)^1/2               ', PY%RTI
          WRITE(LU_OUTPUT,'(A,F8.1)') '     Activation Temperature (C)  ', PY%ACTIVATION_TEMPERATURE
-         WRITE(LU_OUTPUT,'(A,A   )') '     Detector Class              ', TRIM(PY%ID)         
+         WRITE(LU_OUTPUT,'(A,A   )') '     Detector ID                 ', TRIM(PY%ID)         
       CASE('spot obscuration')
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Activation Obscuration (%/m)', PY%ACTIVATION_OBSCURATION 
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Alpha_c or L                ', PY%ALPHA_C
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Beta_c                      ', PY%BETA_C
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Alpha_e                     ', PY%ALPHA_E
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Beta_e                      ', PY%BETA_E
-         WRITE(LU_OUTPUT,'(A,A   )') '     Detector Class              ', TRIM(PY%ID)                  
+         WRITE(LU_OUTPUT,'(A,A   )') '     Detector ID                 ', TRIM(PY%ID)                  
    END SELECT
    WRITE(LU_OUTPUT,'(A,A   )') '     Smokeview ID                ', TRIM(PY%SMOKEVIEW_ID)
 ENDDO PROPERTY_LOOP
@@ -2076,8 +2076,6 @@ WRITE_RADIATION: IF (RADIATION) THEN
          WRITE(LU_OUTPUT,'(A,F6.2,A)')'   Constant absorption coeff. ',KAPPA0
       ENDIF
    ENDIF
-   IF (FUEL_EVAPORATION)  WRITE(LU_OUTPUT,'(A)')     '   Extinction by fuel droplets.'
-   IF (WATER_EVAPORATION) WRITE(LU_OUTPUT,'(A)')     '   Absorption and scattering by water droplets (Mie theory).'
 ENDIF WRITE_RADIATION
  
 WRITE(LU_OUTPUT,*)
