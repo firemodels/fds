@@ -11,7 +11,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOobject_revision[]="$Revision: 614 $";
+char IOobject_revision[]="$Revision$";
 
 #define SV_TRANSLATE  100
 #define SV_ROTATEX    101

@@ -17,7 +17,7 @@
 #include "csphere.h"
 
 // svn revision character string
-char csphere_revision[]="$Revision: 614 $";
+char csphere_revision[]="$Revision$";
 
 //typedef struct {
 //  int n;

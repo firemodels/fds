@@ -12,7 +12,7 @@
 #include "smokeviewvars.h"
 
 // svn revision character string
-char output_revision[]="$Revision: 614 $";
+char output_revision[]="$Revision$";
 
 
 /* ------------------ outputAxisLabels ------------------------ */

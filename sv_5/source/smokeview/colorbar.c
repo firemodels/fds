@@ -8,7 +8,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
-char colorbar_revision[]="$Revision: 614 $";
+char colorbar_revision[]="$Revision$";
 
 /* ------------------ setColorbarClipPlanes ------------------------ */
 

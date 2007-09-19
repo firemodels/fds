@@ -3,7 +3,7 @@
 #include <math.h>
 
 // svn revision character string
-char segtri_revision[]="$Revision: 614 $";
+char segtri_revision[]="$Revision$";
 
 #define HIT 1
 #define MISS 0

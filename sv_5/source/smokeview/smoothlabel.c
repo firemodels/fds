@@ -3,7 +3,7 @@
 #include <math.h>
 
 // svn revision character string
-char smoothlabel_revision[]="$Revision: 614 $";
+char smoothlabel_revision[]="$Revision$";
 
 void smoothlabel(float *a, float *b, int n){
   float delta, factor, logdelta;

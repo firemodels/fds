@@ -6,7 +6,7 @@ int getendian(void);
 #define LITTLE_ENDIAN 0
 
 // svn revision character string
-char endian_revision[]="$Revision: 614 $";
+char endian_revision[]="$Revision$";
 
 /* ------------------ getendian ------------------------ */
 

@@ -16,7 +16,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOplot3d_revision[]="$Revision: 614 $";
+char IOplot3d_revision[]="$Revision$";
 
 /* ------------------ plot3dcompare  ------------------------ */
 

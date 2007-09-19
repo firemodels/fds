@@ -10,7 +10,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOzone_revision[]="$Revision: 614 $";
+char IOzone_revision[]="$Revision$";
 
 /* ------------------ readzone ------------------------ */
 

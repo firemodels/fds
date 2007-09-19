@@ -14,7 +14,7 @@
 #include "smokeviewapi.h"
 
 // svn revision character string
-char main_revision[]="$Revision: 614 $";
+char main_revision[]="$Revision$";
 
 
 /* ------------------ main ------------------------ */

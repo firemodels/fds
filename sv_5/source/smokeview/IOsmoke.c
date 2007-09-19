@@ -22,7 +22,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOsmoke_revision[]="$Revision: 614 $";
+char IOsmoke_revision[]="$Revision$";
 
 char *textFileRead(char *fn);
 

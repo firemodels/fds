@@ -24,7 +24,7 @@
 #define KEY_SHIFT 3
 #define KEY_NONE 2
 
-char callbacks_revision[]="$Revision: 614 $";
+char callbacks_revision[]="$Revision$";
 
 float gmod(float x, float y);
 void  OBJECT_CB(int flag);

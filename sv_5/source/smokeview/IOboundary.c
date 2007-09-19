@@ -18,7 +18,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOboundary_revision[]="$Revision: 614 $";
+char IOboundary_revision[]="$Revision$";
 
 
 
