@@ -1,3 +1,4 @@
+extern char menu_revision[];
 extern char assert_revision[];
 extern char blockage_test_revision[];
 extern char callbacks_revision[];
