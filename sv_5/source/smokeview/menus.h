@@ -3642,6 +3642,22 @@ static int textureshowmenu=0;
   }
   if(visBlocks==visBLOCKNormal){
     glutAddMenuEntry("   *Solid",visBLOCKNormal);
+    if(nsmoothblocks>0){
+      if(visSmoothAsNormal==1){
+         glutAddMenuEntry("      Smooth",visBLOCKSmoothAsNormal);
+      }
+      else{
+         glutAddMenuEntry("      *Smooth",visBLOCKSmoothAsNormal);
+      }
+    }
+    if(ntransparentblocks>0){
+      if(visTransparentBlockage==1){
+         glutAddMenuEntry("      *Transparent",visBLOCKTransparent);
+      }
+      else{
+         glutAddMenuEntry("      Transparent",visBLOCKTransparent);
+      }
+    }
   }
    else{
      glutAddMenuEntry("   Solid",visBLOCKNormal);
@@ -3657,28 +3673,6 @@ static int textureshowmenu=0;
   }
   else{
     glutAddMenuEntry("   Hidden",visBLOCKHide);
-  }
-  if(visBlocks==visBLOCKNormal){
-    if(nsmoothblocks>0||ntransparentblocks>0){
-      glutAddMenuEntry("-",999);
-      glutAddMenuEntry("View Options",999);
-    }
-    if(nsmoothblocks>0){
-      if(visSmoothAsNormal==1){
-         glutAddMenuEntry("    Smooth",visBLOCKSmoothAsNormal);
-      }
-      else{
-         glutAddMenuEntry("    *Smooth",visBLOCKSmoothAsNormal);
-      }
-    }
-    if(ntransparentblocks>0){
-      if(visTransparentBlockage==1){
-         glutAddMenuEntry("    *Transparent",visBLOCKTransparent);
-      }
-      else{
-         glutAddMenuEntry("    Transparent",visBLOCKTransparent);
-      }
-    }
   }
   glutAddMenuEntry("-",999);
   glutAddMenuEntry("Locations:",999);
