@@ -4,6 +4,7 @@
 #define MENU_OUTLINEVIEW -104
 #define MENU_DUMMY -999
 
+char menu_revision[]="$Revision$";
 /* ------------------ OpenSMVFile ------------------------ */
 
 #ifdef WIN32
@@ -3656,24 +3657,26 @@ static int textureshowmenu=0;
   else{
     glutAddMenuEntry("   Hidden",visBLOCKHide);
   }
-  if(nsmoothblocks>0||ntransparentblocks>0){
-    glutAddMenuEntry("-",999);
-    glutAddMenuEntry("View Options",999);
-  }
-  if(nsmoothblocks>0){
-    if(visSmoothAsNormal==1){
-       glutAddMenuEntry("    Smooth",visBLOCKSmoothAsNormal);
+  if(visBlocks==visBLOCKNormal){
+    if(nsmoothblocks>0||ntransparentblocks>0){
+      glutAddMenuEntry("-",999);
+      glutAddMenuEntry("View Options",999);
     }
-    else{
-       glutAddMenuEntry("    *Smooth",visBLOCKSmoothAsNormal);
+    if(nsmoothblocks>0){
+      if(visSmoothAsNormal==1){
+         glutAddMenuEntry("    Smooth",visBLOCKSmoothAsNormal);
+      }
+      else{
+         glutAddMenuEntry("    *Smooth",visBLOCKSmoothAsNormal);
+      }
     }
-  }
-  if(ntransparentblocks>0){
-    if(visTransparentBlockage==1){
-       glutAddMenuEntry("    *Transparent",visBLOCKTransparent);
-    }
-    else{
-       glutAddMenuEntry("    Transparent",visBLOCKTransparent);
+    if(ntransparentblocks>0){
+      if(visTransparentBlockage==1){
+         glutAddMenuEntry("    *Transparent",visBLOCKTransparent);
+      }
+      else{
+         glutAddMenuEntry("    Transparent",visBLOCKTransparent);
+      }
     }
   }
   glutAddMenuEntry("-",999);
