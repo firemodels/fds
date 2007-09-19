@@ -490,7 +490,7 @@ ENDIF SPECIES_DIFFUSION_3
 
 ! Add contribution of evaporating droplets
  
-IF (NLP > 0) THEN
+IF (NLP>0 .AND. N_EVAP_INDICIES > 0) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
