@@ -278,6 +278,7 @@ EXTERNCPP void handle_plot3d_keys(int  key);
 EXTERNCPP void handle_move_keys(int  key);
 EXTERNCPP int get_interval(float val, float *array, int n);
 
+EXTERNCPP int getrevision(char *svn);
 EXTERNCPP void memorystatus(void);
 EXTERNCPP int getnewfilename(void);
 EXTERNCPP int remove_block(blockagedata *block, const blockagedata *hole,int flag,blockagedata *blocklist[6]);

@@ -16,6 +16,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char IOwui_revision[]="$Revision: 614 $";
+
 void init_tnode(terraindata *terri);
 void init_tnorm(terraindata *terri);
 void init_terraincell(terraindata *terri);

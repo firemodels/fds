@@ -2,6 +2,9 @@
 #include <stdio.h>  
 #include <math.h>
 
+// svn revision character string
+char segtri_revision[]="$Revision: 614 $";
+
 #define HIT 1
 #define MISS 0
 #define USE_REJECT_TESTS

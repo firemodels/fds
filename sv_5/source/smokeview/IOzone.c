@@ -9,6 +9,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char IOzone_revision[]="$Revision: 614 $";
+
 /* ------------------ readzone ------------------------ */
 
 #ifdef pp_nofortran

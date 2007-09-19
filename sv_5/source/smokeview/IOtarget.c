@@ -12,6 +12,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char IOtarget_revision[]="$Revision: 614 $";
+
 /* ------------------ readtarget ------------------------ */
 #ifdef pp_nofortran
 void readtarget(const char *file, int ifile, int flag, int *errorcode){

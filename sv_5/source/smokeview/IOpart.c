@@ -15,6 +15,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char IOpart_revision[]="$Revision: 614 $";
+
 int tagscompare( const void *arg1, const void *arg2 );
 
 void ParticlePropShowMenu(int val);

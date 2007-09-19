@@ -14,6 +14,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+extern "C" char glui_motion_revision[]="$Revision: 614 $";
+
 #define TRANSLATE_XY 101
 #define ROTATE_ZX 102
 #define GLUI_Z 2

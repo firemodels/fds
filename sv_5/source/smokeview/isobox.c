@@ -13,6 +13,9 @@
 #define IN_ISOBOX
 #include "isodefs.h"
 
+// svn revision character string
+char isobox_revision[]="$Revision: 614 $";
+
 unsigned short *vertices=NULL;
 int *rank=NULL,*sortedlist=NULL;
 int *closestnodes=NULL;

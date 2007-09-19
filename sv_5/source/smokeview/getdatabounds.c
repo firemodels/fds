@@ -6,6 +6,9 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 
+// svn revision character string
+char getdatabounds_revision[]="$Revision: 614 $";
+
 /* ------------------ adjustdatabounds ------------------------ */
 
 void adjustdatabounds(const float *pdata, int local_skip, int ndata,

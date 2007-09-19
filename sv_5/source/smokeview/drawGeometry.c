@@ -18,6 +18,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char drawGeometry_revision[]="$Revision: 614 $";
+
 cadgeom *current_cadgeom;
 
 /* ------------------ UpdateIndexolors ------------------------ */
