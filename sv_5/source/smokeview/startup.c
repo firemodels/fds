@@ -14,7 +14,10 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+#include "svn_revision.h"
 
+// svn revision character string
+char startup_revision[]="$Revision$";
 
 //void get_smokezippath(char *progdir, char **zippath);
 void glui_colorbar_setup(int main_window);
@@ -1630,28 +1633,19 @@ void initvars1(void){
 #endif
 
   {
-    char svn[1024];
-    char *svnnum;
+    char sv_version[100];
+    int svn_num;
+
+    svn_num=getmaxrevision();
+
 #ifdef pp_TEST
-    char sv_version[100]="5.1.x";
+    sprintf(sv_version,"5.1.x_%i",svn_num);
 #else
-    char sv_version[100]="5.0.0";
+    sprintf(sv_version,"5.0.0_%i",svn_num);
 #endif
-  
-    strcpy(svn,"$Revision$");
-
-    svnnum=strchr(svn,':');
-    if(svnnum!=NULL&&strlen(svnnum)>4){
-      svnnum++;
-      svnnum=trim_front(svnnum);
-      svnnum[strlen(svnnum)-1]=0;
-      trim(svnnum);
-      strcat(sv_version,"_");
-      strcat(sv_version,svnnum);
-    }
-
     strcpy(TITLEBASE,"Smokeview ");
 
+#define pp_BETA
 #ifdef pp_BETA
     strcat(TITLEBASE," Beta ");
 #endif
@@ -1861,6 +1855,26 @@ void initvars1(void){
 
 }
 
+int getrevision(char *svn){
+  char svn_string[256];
+  char *svn_ptr;
+  int return_val;
+
+  svn_ptr=svn_string;
+  svn=strchr(svn,':');
+  if(svn==NULL||strlen(svn)<=4)return 0;
+  
+  svn++;
+  strcpy(svn_ptr,svn);
+  svn_ptr=trim_front(svn_ptr);
+  svn_ptr[strlen(svn_ptr)-1]=0;
+  trim(svn_ptr);
+  sscanf(svn_ptr,"%i",&return_val);
+  return return_val;
+
+}
+
+
 /* ------------------ initvars0 ------------------------ */
 
 void initvars0(void){
@@ -2003,6 +2017,65 @@ void initvars0(void){
   sliceindex=NULL;
   face_transparent=NULL;
   deviceinfo=NULL;
+}
+
+#define MAXREV(cval) max_revision=max(getrevision(cval),max_revision)
+int getmaxrevision(void){
+  int max_revision=0;
+
+  MAXREV(assert_revision);
+  MAXREV(blockage_test_revision);
+  MAXREV(callbacks_revision);
+  MAXREV(camera_revision);
+  MAXREV(colorbar_revision);
+  MAXREV(compress3dc_revision);
+  MAXREV(csphere_revision);
+  MAXREV(dmalloc_revision);
+  MAXREV(drawGeometry_revision);
+  MAXREV(egz_stdio_revision);
+  MAXREV(endian_revision);
+  MAXREV(getdatabounds_revision);
+  MAXREV(getdatacolors_revision);
+  MAXREV(glui_3dsmoke_revision);
+  MAXREV(glui_blockedit_revision);
+  MAXREV(glui_bounds_revision);
+  MAXREV(glui_clip_revision);
+  MAXREV(glui_colorbar_revision);
+  MAXREV(glui_labels_revision);
+  MAXREV(glui_motion_revision);
+  MAXREV(glui_stereo_revision);
+  MAXREV(glui_tour_revision);
+  MAXREV(glui_trainer_revision);
+  MAXREV(IOboundary_revision);
+  MAXREV(IOhrr_revision);
+  MAXREV(IOiso_revision);
+  MAXREV(IOobject_revision);
+  MAXREV(IOpart_revision);
+  MAXREV(IOplot3d_revision);
+  MAXREV(IOslice_revision);
+  MAXREV(IOsmoke_revision);
+  MAXREV(IOtarget_revision);
+  MAXREV(IOtour_revision);
+  MAXREV(IOwui_revision);
+  MAXREV(IOzone_revision);
+  MAXREV(isobox_revision);
+  MAXREV(main_revision);
+  MAXREV(objectedit_revision);
+  MAXREV(output_revision);
+  MAXREV(parseobst_revision);
+  MAXREV(readsmv_revision);
+  MAXREV(renderfile_revision);
+  MAXREV(scontour2d_revision);
+  MAXREV(segtri_revision);
+  MAXREV(skybox_revision);
+  MAXREV(smoothlabel_revision);
+  MAXREV(startup_revision);
+  MAXREV(string_util_revision);
+  MAXREV(sv_api_revision);
+#ifdef pp_SVNET
+  MAXREV(sv_net_revision);
+#endif
+  return max_revision;
 }
 
 void init_default_devices(void){

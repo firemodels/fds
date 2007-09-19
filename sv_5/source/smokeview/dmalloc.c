@@ -14,6 +14,9 @@ static int checkmemoryflag=1;
 #include <windows.h>
 #endif
 
+// svn revision character string
+char dmalloc_revision[]="$Revision: 614 $";
+
 #ifdef pp_memstatus
 #ifdef WIN32
 void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physmemused, unsigned int *totalmem){

@@ -14,6 +14,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char IOtour_revision[]="$Revision: 614 $";
+
 void drawcir(float *center, float rad, float *color);
 //void TourMenu(int val);
 float hermiteeye(float f1, int i, keyframe *kf1, keyframe *kf2, float *slope);

@@ -8,6 +8,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char objectedit_revision[]="$Revision: 614 $";
+
 /* ------------------ movefblockage ------------------------ */
 
 void movefblockage(float *xmin, float *xmax, float *ymin, float *ymax, float *zmin, float *zmax){

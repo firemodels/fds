@@ -14,6 +14,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+extern "C" char glui_clip_revision[]="$Revision: 614 $";
+
 #define LOCAL_INI 2
 
 GLUI *glui_clip=NULL;

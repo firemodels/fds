@@ -15,6 +15,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char IOplot3d_revision[]="$Revision: 614 $";
+
 /* ------------------ plot3dcompare  ------------------------ */
 
 int plot3dcompare( const void *arg1, const void *arg2 ){

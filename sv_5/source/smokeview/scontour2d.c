@@ -8,6 +8,9 @@
 #include "contourdefs.h"
 #include "MALLOC.h"
 
+// svn revision character string
+char scontour2d_revision[]="$Revision: 614 $";
+
 /*  
   contouring algorithm
   --------------------

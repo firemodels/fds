@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <math.h>
 
+// svn revision character string
+char smoothlabel_revision[]="$Revision: 614 $";
+
 void smoothlabel(float *a, float *b, int n){
   float delta, factor, logdelta;
   int ndigits;

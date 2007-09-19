@@ -23,6 +23,10 @@
 #define GIF 2
 #endif
 
+// svn revision character string
+char renderfile_revision[]="$Revision: 614 $";
+
+
 //void pauseSV(void);
 
 

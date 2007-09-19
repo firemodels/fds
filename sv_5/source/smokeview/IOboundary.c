@@ -17,6 +17,10 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char IOboundary_revision[]="$Revision: 614 $";
+
+
 
 int getpatchfacedir(mesh *gb, int i1, int i2, int j1, int j2, int k1, int k2, 
 //                    int *patchfacevis, 

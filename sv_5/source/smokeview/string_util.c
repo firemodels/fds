@@ -9,6 +9,9 @@
 #include "smokeheaders.h"
 #include "smokeviewvars.h"
 
+// svn revision character string
+char string_util_revision[]="$Revision: 614 $";
+
 // extern char dirseparator[];
 
 /* ------------------ rootdir ------------------------ */

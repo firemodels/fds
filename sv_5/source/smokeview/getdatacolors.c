@@ -8,6 +8,8 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char getdatacolors_revision[]="$Revision: 614 $";
 
 #define EXPMIN -2
 #define EXPMAX 3
