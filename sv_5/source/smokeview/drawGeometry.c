@@ -3482,12 +3482,12 @@ void get_drawing_parms(int *drawing_smooth, int *drawing_transparent){
   *drawing_transparent=0;
   if(ntotal_smooth_blockages>0&&updatesmoothblocks==0){
     if(visSmoothAsNormal==0||visBlocks==visBLOCKAsInput){
-      if(visBlocks!=visBLOCKOutline)*drawing_smooth=1;
+      if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKHide)*drawing_smooth=1;
     }
   }
   if(ntransparentblocks>0){
     if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput){
-      if(visBlocks!=visBLOCKOutline)*drawing_transparent=1;
+      if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKHide)*drawing_transparent=1;
     }
   }
 }
