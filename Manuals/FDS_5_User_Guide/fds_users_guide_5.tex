@@ -4233,7 +4233,8 @@ Section~\ref{info:combustion}.
 \chapter{Particles and Droplets: The \texorpdfstring{{\tt PART}}{PART} Namelist Group}
 \label{info:PART}\index{PART}
 
-Lagrangian particles are used in FDS as water or liquid fuel
+Lagrangian particles\footnote{Throughout this section, the terms ``droplets'' and ``particles'' are used interchangeably. From the point of view of
+FDS, they are all Lagrangian particles; that is, point elements that are not bound by the structure of the underlying grid.} are used in FDS as water or liquid fuel
 droplets, flow tracers, and various other objects that are not defined or confined by the numerical mesh. Sometimes the
 particles have mass, sometimes they do not. Some evaporate,
 absorb radiation, {\em etc.}
@@ -4300,7 +4301,8 @@ The number per ``batch'' depends on how they are introduced.
 If more particles are desired, lower the input value of this parameter. The default value is 0.05~s.
 \item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
 file {\bf CHID.prt5}. This parameter can be used to reduce the size
-of the particle output file used to animate the simulation. The default value is 1, meaning that every particle or droplet will be shown in Smokeview.
+of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default
+is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{part_type}.
 \item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when
 trying to reduce the number of droplets or particles in a simulation.
 \end{description}
@@ -4332,6 +4334,20 @@ not confuse this parameter with {\ct DENSITY}, explained in the next section. Fo
 and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a
 certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format
 for {\ct XB} is the same as that used on the {\ct OBST} line.
+
+\subsubsection{Droplets that Strike Solid Surfaces}
+
+When a droplet strikes a solid surface, it sticks and is reassigned a new speed and direction. If the surface is
+horizontal, the direction is randomly chosen. If vertical, the direction is downwards.
+The rate at which the droplets move over the horizontal and vertical surfaces is difficult to
+quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line
+allow you to control the rate at which droplets move horizontally or vertically (downward). The defaults are
+0.2~m/s and 0.5~m/s, respectively.
+
+\begin{warning}
+Be aware that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
+\end{warning}
+
 
 
 
@@ -4367,8 +4383,8 @@ same {\ct DIAMETER}.
 \end{description}
 
 \noindent
-The following parameters are optional, mainly to describe the evaporation of liquid droplets. It is always assumed that non-massless particles are
-liquid droplets, but if you specify high values of the vaporization temperature and the heat of vaporization, the effects of evaporation will be minimal.
+The following parameters pertain to the evaporation of liquid droplets. It is assumed by default that non-massless particles are
+liquid droplets, but you can specify {\ct EVAPORATE=.FALSE.} to change this. Details are in the next section.
 
 
 \begin{description}
@@ -4385,8 +4401,12 @@ liquid droplets, but if you specify high values of the vaporization temperature 
 
 
 \section{Special Types of Particles and Droplets}
+\label{part_type}
 
-There are several useful attributes that you can assign to particles or droplets, usually via a simple logical parameter.
+There are several useful attributes that you can assign to particles or droplets, usually via a simple logical parameter. Be aware with each of these parameters that
+specifying it as {\ct .TRUE.} may cause other parameters to be functionally useless, or may cause conflicts that FDS may or may not detect. A good rule of thumb is always to
+ask yourself what is the basic information that {\em must} be conveyed to the program, and stick to that. For example, if the particles are to be {\ct MASSLESS}, there is no
+point in declaring anything else except maybe a {\ct COLOR} for Smokeview.
 
 \subsubsection{Massless Particles}
 
@@ -4408,20 +4428,23 @@ colored by gas phase quantities, but rather by properties of the particle itself
 {\ct 'DROPLET\_TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
 rather than the local gas temperature.
 
+Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be silly since {\ct MASSLESS} particles are for visualization only.
+
 
 \subsubsection{Static Particles or Droplets}
 
 {\ct STATIC} is a logical parameter indicating whether particles move or just serve
-as obstructions or clutter. This parameter should only be used when
-{\ct NUMBER\_INITIAL\_DROPLETS} is greater than 0. (Default {\ct .FALSE.})
+as obstructions or clutter. Setting {\ct STATIC=.TRUE.} only makes sense in conjunction with a non-zero value of
+{\ct NUMBER\_INITIAL\_DROPLETS}. The default value of {\ct STATIC} is {\ct .FALSE.}
 
 
 \subsubsection{Water Droplets}
 
-{\ct WATER=.TRUE.} indicates whether the liquid droplets evaporate
-into {\ct WATER VAPOR}, which is a separate species that is automatically added to the calculation. By default, {\ct WATER=.FALSE.}, but note that the default
-properties of droplets are that of water. Setting {\ct WATER=.TRUE.} instructs FDS to add {\ct WATER VAPOR} as an explicitly defined species.
-Water droplets are colored blue in Smokeview.
+{\ct WATER=.TRUE.} declares that the liquid droplets evaporate
+into {\ct WATER VAPOR}, a separate gas phase species that is {\em automatically} added to the calculation by this command. By default, {\ct WATER=.FALSE.}, even though the default
+properties of droplets are that of water. Setting {\ct WATER=.TRUE.} instructs FDS to add {\ct WATER VAPOR} as an explicitly defined species, and it also invokes appropriate constants
+related to the absorption of thermal radiation by the water droplets.
+It also causes the droplets to be colored blue in Smokeview.
 
 If the liquid droplets are to evaporate into some other gaseous species, you must explicitly define the species via the {\ct SPEC} namelist group (see Section~\ref{info:SPEC}), and then
 designate the appropriate {\ct SPEC\_ID} on the {\ct PART} line.
@@ -4434,6 +4457,17 @@ into fuel gas and burn. In this case, add the {\ct HEAT\_OF\_COMBUSTION} (kJ/kg)
 This feature only works for a mixture fraction-based combustion calculation, in which case the droplets evaporate into an equivalent amount of fuel
 vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}.
 
+\subsubsection{Particles that do not Evaporate}
+
+Unless you declare {\ct MASSLESS=.TRUE.} on the {\ct PART} line, it is assumed that the particle or droplet has mass and thermal properties that dictate its
+heat up and evaporation. To prevent evaporation, set {\ct EVAPORATE=.FALSE.} The particles will still heat up due to convection, but they will not
+shrink and no additional gaseous species need to be declared.
+
+\begin{warning}
+Note that the absorption of thermal radiation by water ({\ct WATER=.TRUE.}) or fuel droplets ({\ct FUEL=.TRUE.}) is handled in FDS with fairly well-established physical sub-models, the details
+of which are contained in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
+However, for arbitrary particles or droplets, there is no assumed radiative absorption.
+\end{warning}
 
 
 \section{Coloring Particles and Droplets}
@@ -4533,10 +4567,6 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and
 it is expressed in units of m$^2$/kg/s. Usually, this type of suppression
 algorithm is invoked when the fuel is complicated, like a cartoned commodity.
 
-The rate at which the water droplets move over the horizontal and vertical surfaces is difficult to
-quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line
-allow you to control the rate at which droplets move horizontally or vertically (downward). The defaults are
-0.2~m/s and 0.5~m/s, respectively.
 
 
 
@@ -6603,26 +6633,27 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\ \hline \hline
-{\ct AGE}                       & Real            & Droplet lifetime                  & s         & 100000        \\ \hline
-{\ct COLOR}                     & Character       & Default color of droplets         &           &               \\ \hline
-{\ct DENSITY}                   & Real            & Droplet density                   & kg/m$^3$  & 1000          \\ \hline
-{\ct DIAMETER}                  & Real            & Median Volumetric Diameter        & $\mu$m    & 100           \\ \hline
+{\ct AGE}                       & Real            & Droplet lifetime                  & s         & 100000.       \\ \hline
+{\ct COLOR}                     & Character       & Default color of droplets         &           & {\ct 'BLACK'} \\ \hline
+{\ct DENSITY}                   & Real            & Droplet density                   & kg/m$^3$  & 1000.         \\ \hline
+{\ct DIAMETER}                  & Real            & Median Volumetric Diameter        & $\mu$m    & 500.          \\ \hline
 {\ct DROPLETS\_PER\_SECOND}     & Integer         & Drops per second per head         &           & 1000          \\ \hline
 {\ct DT\_INSERT}                & Real            & Time between particle insertions  & s         & 0.05          \\ \hline
+{\ct EVAPORATE}                 & Logical         & Assume liquid evaporation         &           & {\ct .TRUE.}  \\ \hline
 {\ct FYI}                       & Character       & Comment String (has no effect)    &           &               \\ \hline
 {\ct FUEL}                      & Logical         & Liquid Fuel                       &           & {\ct .FALSE.} \\ \hline
 %{\ct GAMMA}                     & Real            & Specific heat ratio for vapor     &           & 1.4           \\ \hline
 {\ct GAMMA\_D}                  & Real            & Parameter for size distribution   &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}      & Real            & Heat of Combustion                & kJ/kg     &               \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION}    & Real            & Latent Heat of Vaporization       & kJ/kg     & 2259          \\ \hline
-{\ct HORIZONTAL\_VELOCITY}      & Real            & See Section~\ref{info:suppression}& m/s       &  0.2          \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION}    & Real            & Latent Heat of Vaporization       & kJ/kg     & 2259.         \\ \hline
+{\ct HORIZONTAL\_VELOCITY}      & Real            & Droplet speed, horizontal         & m/s       &  0.2          \\ \hline
 {\ct ID}                        & Character       & Identifier                        &           &               \\ \hline
 {\ct INITIAL\_TEMPERATURE}      & Real            & Initial Temperature               & $^\circ$C & {\ct TMPA}    \\ \hline
 {\ct MASSLESS}                  & Logical         & Massless tracers                  &           & {\ct .FALSE.} \\ \hline
-{\ct MASS\_PER\_VOLUME}         & Real            & Droplet mass per unit volume      & kg/m$^3$  & 1             \\ \hline
+{\ct MASS\_PER\_VOLUME}         & Real            & Droplet mass per unit volume      & kg/m$^3$  & 1.            \\ \hline
 {\ct MAXIMUM\_DIAMETER}         & Real            & Above which droplet breaks up     & $\mu$m    & $\infty$      \\ \hline
-{\ct MINIMUM\_DIAMETER}         & Real            & Below which droplet evaporates    & $\mu$m    & 20            \\ \hline
-{\ct MELTING\_TEMPERATURE}      & Real            & Melting Temperature               & $^\circ$C & 0             \\ \hline
+{\ct MINIMUM\_DIAMETER}         & Real            & Below which droplet evaporates    & $\mu$m    & 20.           \\ \hline
+{\ct MELTING\_TEMPERATURE}      & Real            & Melting Temperature               & $^\circ$C & 0.            \\ \hline
 {\ct MONODISPERSE}              & Logical         & Uniform droplet size              &           & {\ct .FALSE.} \\ \hline
 {\ct NUMBER\_INITIAL\_DROPLETS} & Integer         & Number of droplets at start       &           & 0             \\ \hline
 {\ct QUANTITIES(10)}            & Character       & Quantities for coloring           &           &               \\ \hline
@@ -6632,8 +6663,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPECIFIC\_HEAT}            & Real            & Droplet specific heat             & kJ/kg/K   & 4.184         \\ \hline
 {\ct STATIC}                    & Logical         & Stationary Particles              &           & {\ct .FALSE.} \\ \hline
 %{\ct TREE}                      & Logical         & Particles are leaves              &           & {\ct .FALSE.} \\ \hline
-{\ct VAPORIZATION\_TEMPERATURE} & Real            & Liquid Droplet Boiling Temp       & $^\circ$C & 100           \\ \hline
-{\ct VERTICAL\_VELOCITY}        & Real            & See Section~\ref{info:suppression}& m/s       &  0.5          \\ \hline
+{\ct VAPORIZATION\_TEMPERATURE} & Real            & Liquid Droplet Boiling Temp       & $^\circ$C & 100.          \\ \hline
+{\ct VERTICAL\_VELOCITY}        & Real            & Droplet speed, vertical           & m/s       &  0.5          \\ \hline
 {\ct XB(6)}                     & Real            & Initial particle placement region & m         &               \\ \hline
 {\ct WATER}                     & Logical         & Water Droplet                     &           & {\ct .FALSE.} \\ \hline
 \end{tabular*}
