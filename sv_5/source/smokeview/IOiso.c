@@ -1140,7 +1140,6 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
   short *norm1,*norm2,*norm3,*vertexnorm=NULL;
   int ntriangles;
   float xyzmin[3], xyzmaxdiff_local;
-  float *ccc;
   static int jjj=0;
   int drawing_transparent=0;
 

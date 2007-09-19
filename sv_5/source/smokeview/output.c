@@ -100,7 +100,7 @@ void outputBarText(float x, float y, const GLfloat *color, const char *string){
 
   if(string==NULL)return;
 
-  length=glutBitmapLength(small_font, string); 
+  length=glutBitmapLength(small_font, (const unsigned char *)string); 
   xlength = length*barright/dwinWW+0.02;
 
   glColor3fv(color);

@@ -978,7 +978,9 @@ keyframe *add_frame(keyframe *framei, float time, float *eye, float key_az_path,
 #endif
   keyframe *frame,*framen;
   float *feye, *faview;
+#ifdef pp_TOUR
   int viewtype1, viewtype2, viewtype3;
+#endif
 
   NewMemory((void **)&frame,sizeof(keyframe));
   feye = frame->nodeval.eye;
