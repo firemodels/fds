@@ -5,6 +5,10 @@
 #include "egz_stdio.h"
 #include "MALLOC.h"
 
+// svn revision character string
+char egz_stdio_revision[]="$Revision: 614 $";
+
+
 int getendian(void);
 
 /* ------------------ EGZ_FCLOSE ------------------------ */

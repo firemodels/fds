@@ -14,6 +14,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char IOiso_revision[]="$Revision: 614 $";
+
 void unloadiso(mesh *gb);
 
 void getisoheader(const char *isofile, EGZ_FILE **isostreamptr,

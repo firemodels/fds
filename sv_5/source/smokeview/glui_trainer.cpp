@@ -14,6 +14,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+extern "C" char glui_trainer_revision[]="$Revision: 614 $";
+
 void ROTATE_CB(int var);
 void TRAINER_CB(int var);
 

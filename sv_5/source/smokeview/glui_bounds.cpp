@@ -14,6 +14,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+extern "C" char glui_bounds_revision[]="$Revision: 614 $";
+
 extern "C" void update_glui_smoke3dframestep(void);
 extern "C" void ParticlePropShowMenu(int value);
 

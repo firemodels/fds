@@ -21,6 +21,9 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 
+// svn revision character string
+char sv_api_revision[]="$Revision: 614 $";
+
 /* ------------------ copy_args ------------------------ */
 
 #ifdef WIN32

@@ -24,6 +24,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+char readsmv_revision[]="$Revision: 614 $";
+
 void PART_CB_INIT(void);
 
 #define DEVICE_DEVICE 0

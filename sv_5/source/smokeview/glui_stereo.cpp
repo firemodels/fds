@@ -14,6 +14,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+// svn revision character string
+extern "C" char glui_stereo_revision[]="$Revision: 614 $";
+
 GLUI *glui_stereo=NULL;
 GLUI_Spinner *SPINNER_stereo_balance=NULL, *SPINNER_stereo_offset=NULL;
 GLUI_Checkbox *CHECKBOX_stereo_frame=NULL;

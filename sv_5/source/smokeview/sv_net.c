@@ -12,6 +12,9 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 
+// svn revision character string
+char sv_net_revision[]="$Revision: 614 $";
+
 void remove_svcom(svcom *svc);
 svcom *first_svcom, *last_svcom;
 void send_command(char *command);

@@ -8,6 +8,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+char camera_revision[]="$Revision: 614 $";
 
 /* ------------------ zoom2aperture ------------------------ */
 

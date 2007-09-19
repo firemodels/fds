@@ -11,6 +11,10 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 
+// svn revision character string
+char output_revision[]="$Revision: 614 $";
+
+
 /* ------------------ outputAxisLabels ------------------------ */
 
 void outputAxisLabels(){

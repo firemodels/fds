@@ -13,6 +13,9 @@
 #endif
 #include "smokeviewvars.h"
 
+// svn revision character string
+char compress3dc_revision[]="$Revision: 614 $";
+
 void compress_onoff(int flag);
 void compress_svzip2(void);
 unsigned int rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);

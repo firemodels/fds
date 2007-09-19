@@ -13,6 +13,10 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+
+// svn revision character string
+char IOslice_revision[]="$Revision: 614 $";
+
 /* dummy change - to test svn check out on the linux cluster */
 int endianswitch;
 

@@ -13,6 +13,10 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+
+// svn revision character string
+extern "C" char glui_colorbar_revision[]="$Revision: 614 $";
+
 //
 // setColorbarClipPlanes(1);
 

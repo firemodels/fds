@@ -30,6 +30,10 @@
 #include <direct.h>
 #endif
 
+// svn revision character string
+char smokeview_revision[]="$Revision$";
+
+
  /* ------------------------ SUB_portortho ------------------------- */
  
 int SUB_portortho(int quad, 
