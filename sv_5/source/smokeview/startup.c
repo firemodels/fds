@@ -2023,6 +2023,7 @@ void initvars0(void){
 int getmaxrevision(void){
   int max_revision=0;
 
+  MAXREV(menu_revision);
   MAXREV(assert_revision);
   MAXREV(blockage_test_revision);
   MAXREV(callbacks_revision);
