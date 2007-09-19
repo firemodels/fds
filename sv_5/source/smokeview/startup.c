@@ -2018,7 +2018,17 @@ void initvars0(void){
   deviceinfo=NULL;
 }
 
-#define MAXREV(cval) max_revision=max(getrevision(cval),max_revision)
+int imax(int a, int b){
+  if(a>b){
+    return a;
+  }
+  else{
+    return b;
+  }
+}
+
+
+#define MAXREV(cval) max_revision=imax(getrevision(cval),max_revision)
 int getmaxrevision(void){
   int max_revision=0;
 
