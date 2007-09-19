@@ -451,7 +451,7 @@ CALL RCDEALLOC  ! Deallocate RadCal arrays
 ! 
 !-----------------------------------------------------
 
-DROPLETS: IF (WATER_EVAPORATION .OR. FUEL_EVAPORATION) THEN
+DROPLETS: IF (N_EVAP_INDICIES>0) THEN
    GET_PC_RADI: DO J=1,N_PART
       PC => PARTICLE_CLASS(J)
       IF ((.NOT. PC%FUEL) .AND. (.NOT. PC%WATER)) CYCLE GET_PC_RADI
@@ -574,7 +574,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
 ! Generate water absorption and scattering coefficients
  
-   IF_DROPLETS_INCLUDED: IF (NLP>0 .AND. (WATER_EVAPORATION .OR. FUEL_EVAPORATION) ) THEN
+   IF_DROPLETS_INCLUDED: IF (NLP>0 .AND. N_EVAP_INDICIES>0) THEN
       IF (NUMBER_SPECTRAL_BANDS==1) THEN
          BBF = 1._EB
       ELSE
@@ -593,7 +593,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      ! Absorption and scattering efficiency
                      CALL INTERPOLATE1D(PC%KWR,PC%WQABS(:,IBND), 0.95_EB*AVG_DROP_RAD(I,J,K,EVAP_INDEX),QVAL) 
                      KAPPAW(I,J,K) = KAPPAW(I,J,K) + NCSDROP*QVAL
-                     IF (WATER_EVAPORATION) THEN
+                     IF (PC%WATER) THEN
                         CALL INTERPOLATE1D(PC%KWR,PC%WQSCA(:,IBND),0.95_EB*AVG_DROP_RAD(I,J,K,EVAP_INDEX),QVAL)
                         SCAEFF(I,J,K) = SCAEFF(I,J,K) + NCSDROP*QVAL
                      ENDIF
@@ -953,7 +953,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    ! Save source term for the energy equation (QR = -DIV Q)
    IF (WIDE_BAND_MODEL) THEN
       QR = QR + KAPPA*UIID(:,:,:,IBND)-KFST4
-      IF (NLP>0 .AND.(WATER_EVAPORATION .OR. FUEL_EVAPORATION) ) QR_W = QR_W + KAPPAW*UIID(:,:,:,IBND) - KFST4W
+      IF (NLP>0 .AND. N_EVAP_INDICIES>0) QR_W = QR_W + KAPPAW*UIID(:,:,:,IBND) - KFST4W
    ENDIF
 
 ENDDO BAND_LOOP
@@ -966,7 +966,7 @@ ENDIF
 ! Save source term for the energy equation (QR = -DIV Q). Done only in one-band (gray gas) case.
 IF (.NOT. WIDE_BAND_MODEL) THEN
    QR  = KAPPA*UII - KFST4
-   IF (NLP>0 .AND. (WATER_EVAPORATION .OR. FUEL_EVAPORATION) ) QR_W = QR_W + KAPPAW*UII - KFST4W
+   IF (NLP>0 .AND. N_EVAP_INDICIES>0) QR_W = QR_W + KAPPAW*UII - KFST4W
 ENDIF
 END SUBROUTINE RADIATION_FVM
 
