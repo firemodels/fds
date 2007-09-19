@@ -1635,23 +1635,14 @@ void update_facelists(void){
   int patch_dir[6]={2,1,3,0,4,5};
   int vent_offset, outline_offset, exteriorsurface_offset;
   ventdata *vi;
-  int drawing_smooth=0;
-  int drawing_transparent=0;
+  int drawing_smooth;
+  int drawing_transparent;
 
 //     visBlocks (visBLOCKNormal, visBLOCKAsInput )
 //     visSmoothAsNormal
 //     visTransparentBlockage
 
-  if(ntotal_smooth_blockages>0&&updatesmoothblocks==0){
-    if(visSmoothAsNormal==0||visBlocks==visBLOCKAsInput){
-      drawing_smooth=1;
-    }
-  }
-  if(ntransparentblocks>0){
-    if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput){
-      drawing_transparent=1;
-    }
-  }
+  get_drawing_parms(&drawing_smooth, &drawing_transparent);
 
   if(updatehiddenfaces==1)update_hidden_faces();
   updatefacelists=0;
@@ -3402,23 +3393,14 @@ void drawBlockages(int mode, int flag){
   int smoothnorms;
   int i,j;
   cadgeom *cd;
-  int drawing_smooth=0;
-  int drawing_transparent=0;
+  int drawing_smooth;
+  int drawing_transparent;
 
 //     visBlocks (visBLOCKNormal, visBLOCKAsInput )
 //     visSmoothAsNormal
 //     visTransparentBlockage
 
-  if(ntotal_smooth_blockages>0&&updatesmoothblocks==0){
-    if(visSmoothAsNormal==0||visBlocks==visBLOCKAsInput){
-      drawing_smooth=1;
-    }
-  }
-  if(ntransparentblocks>0){
-    if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput){
-      drawing_transparent=1;
-    }
-  }
+   get_drawing_parms(&drawing_smooth, &drawing_transparent);
 
    if(drawing_smooth==1&&showedit==0){
      if(xyz_clipplane==1)glDisable(GL_CULL_FACE);
@@ -3492,6 +3474,24 @@ void snap_view_angles(void){
   camera_current->dirty=1;
 
 }
+
+/* ------------------ get_drawing_parms ------------------------ */
+
+void get_drawing_parms(int *drawing_smooth, int *drawing_transparent){
+  *drawing_smooth=0;
+  *drawing_transparent=0;
+  if(ntotal_smooth_blockages>0&&updatesmoothblocks==0){
+    if(visSmoothAsNormal==0||visBlocks==visBLOCKAsInput){
+      if(visBlocks!=visBLOCKOutline)*drawing_smooth=1;
+    }
+  }
+  if(ntransparentblocks>0){
+    if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput){
+      if(visBlocks!=visBLOCKOutline)*drawing_transparent=1;
+    }
+  }
+}
+
   
 
   
