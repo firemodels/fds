@@ -10,7 +10,7 @@
 #include "smokeviewvars.h"
 
 // svn revision character string
-char string_util_revision[]="$Revision: 614 $";
+char string_util_revision[]="$Revision$";
 
 // extern char dirseparator[];
 

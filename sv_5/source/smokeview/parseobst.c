@@ -8,7 +8,7 @@
 #include "smokeviewvars.h"
 
 // svn revision character string
-char parseobst_revision[]="$Revision: 614 $";
+char parseobst_revision[]="$Revision$";
 
 void headsubst(char *line, FILE *stream_out);
 void parseobst_xb(char *line, int *i1, int *i2);

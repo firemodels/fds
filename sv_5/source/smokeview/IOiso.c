@@ -15,7 +15,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOiso_revision[]="$Revision: 614 $";
+char IOiso_revision[]="$Revision$";
 
 void unloadiso(mesh *gb);
 

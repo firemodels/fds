@@ -14,7 +14,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
-char blockage_test_revision[]="$Revision: 614 $";
+char blockage_test_revision[]="$Revision$";
 
 #define HIT 1
 #define MISS 0

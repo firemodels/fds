@@ -1,7 +1,7 @@
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
-char assert_revision[]="$Revision: 614 $";
+char assert_revision[]="$Revision$";
 
 void _Assert(char *filename, unsigned linenumber){
   int dummy;

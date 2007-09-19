@@ -17,7 +17,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOwui_revision[]="$Revision: 614 $";
+char IOwui_revision[]="$Revision$";
 
 void init_tnode(terraindata *terri);
 void init_tnorm(terraindata *terri);

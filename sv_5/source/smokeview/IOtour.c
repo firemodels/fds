@@ -15,7 +15,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOtour_revision[]="$Revision: 614 $";
+char IOtour_revision[]="$Revision$";
 
 void drawcir(float *center, float rad, float *color);
 //void TourMenu(int val);

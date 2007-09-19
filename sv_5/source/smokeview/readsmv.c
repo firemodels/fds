@@ -25,7 +25,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char readsmv_revision[]="$Revision: 614 $";
+char readsmv_revision[]="$Revision$";
 
 void PART_CB_INIT(void);
 

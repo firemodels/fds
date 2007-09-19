@@ -16,7 +16,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOpart_revision[]="$Revision: 614 $";
+char IOpart_revision[]="$Revision$";
 
 int tagscompare( const void *arg1, const void *arg2 );
 

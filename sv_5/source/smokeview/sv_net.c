@@ -13,7 +13,7 @@
 #include "smokeviewvars.h"
 
 // svn revision character string
-char sv_net_revision[]="$Revision: 614 $";
+char sv_net_revision[]="$Revision$";
 
 void remove_svcom(svcom *svc);
 svcom *first_svcom, *last_svcom;

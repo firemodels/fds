@@ -16,7 +16,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOhrr_revision[]="$Revision: 614 $";
+char IOhrr_revision[]="$Revision$";
 
 
 /* ------------------ stripcommas ------------------------ */

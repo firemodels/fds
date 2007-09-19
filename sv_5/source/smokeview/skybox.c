@@ -12,7 +12,7 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char skybox_revision[]="$Revision: 614 $";
+char skybox_revision[]="$Revision$";
 
 /* ------------------ loadskytexture ------------------------ */
 
