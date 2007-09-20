@@ -737,7 +737,7 @@ void drawiso(const mesh *meshi,int tranflag){
   offset[2]=(meshi->zbar0-zbar0)/xyzmaxdiff;
 
 
-  if(tranflag==SV_TRANSPARENT&&visAIso!=1)return;
+  if(tranflag==DRAW_TRANSPARENT&&visAIso!=1)return;
 
   if(iso_ambient_ini==NULL||n_iso_ambient_ini==0){
     iso_colors=iso_ambient;
@@ -754,7 +754,7 @@ void drawiso(const mesh *meshi,int tranflag){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
 
     iso_specular[3] = 1.0;
-    if(tranflag==SV_TRANSPARENT)transparenton();
+    if(tranflag==DRAW_TRANSPARENT)transparenton();
 
     glPushAttrib(GL_LIGHTING_BIT);
     if(demo_mode==0){
@@ -776,7 +776,7 @@ void drawiso(const mesh *meshi,int tranflag){
       icolor=i;
       if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
       if(showlevels[i]==0)continue;
-      if(tranflag==SV_TRANSPARENT){
+      if(tranflag==DRAW_TRANSPARENT){
         if(transparent_state==ALL_TRANSPARENT){
         }
         else if(transparent_state==MIN_SOLID){
@@ -789,7 +789,7 @@ void drawiso(const mesh *meshi,int tranflag){
           continue;
         }
       }
-      else if(tranflag==SOLID){
+      else if(tranflag==DRAW_SOLID){
         if(transparent_state==ALL_TRANSPARENT){
           continue;
         }
@@ -909,7 +909,7 @@ void drawiso(const mesh *meshi,int tranflag){
 
     glPopAttrib();
 
-    if(tranflag==SV_TRANSPARENT)transparentoff();
+    if(tranflag==DRAW_TRANSPARENT)transparentoff();
     if(cullfaces==1)glEnable(GL_CULL_FACE);
   }
 
@@ -1141,13 +1141,10 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
   int ntriangles;
   float xyzmin[3], xyzmaxdiff_local;
   static int jjj=0;
-  int drawing_transparent=0;
+  int drawing_transparent;
+  int drawing_smooth;
 
-  if(ntransparentblocks>0){
-    if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput){
-      drawing_transparent=1;
-    }
-  }
+  get_drawing_parms(&drawing_smooth, &drawing_transparent);
 
   xyzmin[0] = asurface->xmin;
   xyzmin[1] = asurface->ymin;
@@ -1161,25 +1158,6 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
     float rgbtemp[4];
     float *col;
 
-    if(
-      trans_flag!=0&&
-      (
-      (data_type==0&&transparentflag==1)||
-      (data_type==1&&drawing_transparent==1)
-      )
-      ){
-      drawing_transparent=1;
-      transparenton();
-    }
-    iso_specular[3] = 1.0;
-    glPushAttrib(GL_LIGHTING_BIT);
-
-    glEnable(GL_LIGHTING);
-    glEnable(GL_COLOR_MATERIAL);
-    glBegin(GL_TRIANGLES);
-
-    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,asurface->color);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
     col = asurface->color;
     if(setbw==1){
       rgbtemp[0]=0.299*col[0]+0.587*col[1]+0.114*col[2];
@@ -1191,7 +1169,30 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
       rgbtemp[1]=col[1];
       rgbtemp[2]=col[2];
     }
+
     rgbtemp[3]=asurface->color[3];
+    if(
+      trans_flag==DRAW_TRANSPARENT&&
+      (
+      (data_type==0&&transparentflag==1)||
+      (data_type==1&&drawing_transparent==1)
+      )
+      ){
+        if(rgbtemp[3]<0.99){
+          drawing_transparent=1;
+          transparenton();
+        }
+    }
+    iso_specular[3] = 1.0;
+    glPushAttrib(GL_LIGHTING_BIT);
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
+    glBegin(GL_TRIANGLES);
+
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,asurface->color);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
+
     if(drawing_transparent==1){
 	    glColor4fv(rgbtemp);
     }
