@@ -1646,6 +1646,7 @@ void initvars1(void){
 #endif
     strcpy(TITLEBASE,"Smokeview ");
 
+    // dummy comment to force increment of svn build number
 #ifdef pp_BETA
     strcat(TITLEBASE," Beta ");
 #endif
