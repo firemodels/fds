@@ -1355,9 +1355,9 @@ It is only used to offset the reported starting time from zero.
 \end{warning}
 
 \begin{warning}
-Time based {\ct RAMP}s are evaluated using the actual time if the {\ct RAMP} activation time is the same as 
+Time based {\ct RAMP}s are evaluated using the actual time if the {\ct RAMP} activation time is the same as
 {\ct T\_BEGIN}; otherwise, the are evaluated using the time from when the {\ct RAMP} activates.  Therefore, if you are
-setting {\ct T\_BEGIN} in order to test a time based {\ct CTRL} or {\ct DEVC} that is ultimately 
+setting {\ct T\_BEGIN} in order to test a time based {\ct CTRL} or {\ct DEVC} that is ultimately
 linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate.
 For example if you were testing a {\ct VENT} that is to open at 10 s whose {\ct SURF\_ID} uses a {\ct RAMP},
  {\ct T\_BEGIN} should be set slightly less than 10 s.
@@ -5520,8 +5520,20 @@ For many commonly used measurement devices there is no need to associate a
 specific {\ct PROP} line to the {\ct DEVC} entry. In such cases, use the character string
 {\ct QUANTITY} to indicate that a particular gas or solid phase quantity at the point should be recorded in
 the output file with the suffix {\bf \_devc.csv}. The quantities are listed in Table~\ref{tab:output}.
-Many of the gas phase quantities are self-explanatory, but some are not. Some of the quantities require specification of
-properties via the {\ct PROP} line.
+Many of the gas phase quantities are self-explanatory. For example, if you just want to record the time history of the temperature at a given point, add
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=6.7,2.9,2.1, QUANTITY='TEMPERATURE', ID='T-1' /
+\end{verbatim}
+\normalsize
+
+\noindent
+and a column will be added to the output file {\bf CHID\_devc.csv} under the label {\ct 'T-1'}. In this case, the {\ct ID} has no other role than as a column label in the output file.
+Note that versions of FDS prior to version 5 used an 8 cell linear interpolation for a given {\em gas phase} point measurement. In other words, if you
+specified a point via the triplet of real numbers, {\ct XYZ}, FDS would calculate the value of the quantity by linearly interpolating the
+values defined at the centers of the 8 nearest cells. Starting in FDS 5, this is no longer done. Instead, FDS reports the value of the {\ct QUANTITY} in
+the cell where the point {\ct XYZ} is located.
 
 When prescribing a solid phase quantity, be sure to position the
 probe at a solid surface. It is not always obvious where the
