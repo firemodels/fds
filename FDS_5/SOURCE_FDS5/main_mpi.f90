@@ -257,8 +257,15 @@ ENDDO
 
 CALL MPI_ALLGATHER(T(MYID+1),1,MPI_DOUBLE_PRECISION,T,1, MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IERR)
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+CALL UPDATE_CONTROLS(T)
 CALL DUMP_GLOBAL_OUTPUTS(T(1))
  
+! Check for changes in VENT or OBSTruction control and device status at t=T_BEGIN
+
+OBST_VENT_LOOP: DO NM=MYID+1,NMESHES,NUMPROCS
+   CALL OPEN_AND_CLOSE(T(NM),NM)  
+ENDDO OBST_VENT_LOOP
+
 !***********************************************************************************************************************************
 !                                                           MAIN TIMESTEPPING LOOP
 !***********************************************************************************************************************************
