@@ -3387,7 +3387,7 @@ void drawticks(void){
 
 /* ------------------ drawBlockages ------------------------ */
 
-void drawBlockages(int mode, int flag){
+void drawBlockages(int mode, int trans_flag){
 
   mesh *meshi;
   int smoothnorms;
@@ -3411,8 +3411,8 @@ void drawBlockages(int mode, int flag){
          smoothnorms=1;
          if(meshi->blockagesurface!=NULL){
            bsurface=meshi->blockagesurfaces[j];
-           if((drawing_transparent==0&&flag==0)||(drawing_transparent==1&&flag==1)){
-             drawstaticiso(bsurface,1,smoothnorms,flag,1);
+           if((drawing_transparent==0&&trans_flag==DRAW_SOLID)||(drawing_transparent==1&&trans_flag==DRAW_TRANSPARENT)){
+             drawstaticiso(bsurface,1,smoothnorms,trans_flag,1);
            }
          }
        }
@@ -3420,7 +3420,7 @@ void drawBlockages(int mode, int flag){
      sniffErrors("after drawblocks");
      if(xyz_clipplane==1)glEnable(GL_CULL_FACE);
    }
-   if(flag==1)return;
+   if(trans_flag==DRAW_TRANSPARENT)return;
    if(blocklocation!=BLOCKlocation_cad){
      if(mode==SELECT&&blockageSelect==1){
        draw_selectfaces();
