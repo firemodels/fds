@@ -39,7 +39,7 @@
 #define pp_HRR
 
 #define pp_WUI
-#define pp_BETA  // uncomment when building beta versions of SV
+//#define pp_BETA  // uncomment when building beta versions of SV
 
 #ifdef pp_TEST2
 #define pp_TEST
