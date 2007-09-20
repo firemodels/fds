@@ -62,7 +62,7 @@ int initcase_c(int argc, char **argv){
   */
   Args(argc, argv); 
   return_code=-1;
-  if(strcmp(inputfilename_ext,".svt")==0){
+  if(strcmp(inputfilename_ext,".svd")==0){
     input_type=1;
     return_code=readsmv(trainer_filename);
     if(return_code==0){
