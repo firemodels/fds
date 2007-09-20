@@ -3739,27 +3739,6 @@ The local incident radiation intensity is
 
 
 
-\subsection{Convective Heat Transfer to Solid Objects}
-
-In a DNS calculation where the boundary layer is resolved, the convective flux to the wall
-is given by
-\be
-\dq''_c = -k \frac{T_{gas}-T_w}{\dn/2}
-\ee
-where $T_{gas}$ is the gas temperature in the center of the first gas-phase grid cell,
-$T_w$ is the surface or ``wall'' temperature, $\dn$ is the
-size of a grid cell in the normal direction to the wall, and $k$ is
-the temperature-dependent thermal conductivity of the gas mixture.
-
-In an LES calculation, where the boundary layer is not resolved, an empirical heat transfer coefficient, $h$, is used: \be \dq''_c = h \,
-(T_{gas}-T_w)\quad \hbox{W/m}^2 \ee The heat transfer coefficient, $h$, is the maximum of its natural and forced empirical values:
- \be h = \max \left( C |T_{gas} -T_w|^\ot \, , \, \frac{k_{air}}{L} 0.037 \, \RE_L^{4/5} \PR^{1/3} \right)  \quad \hbox{W/m}^2\hbox{/K}  \ee
-$C$ is an empirical coefficient (1.31 for vertical surface; 1.52 for horizontal), $k_{air}$ is
-the thermal conductivity of air (not the ``turbulent''
-value used in the LES solver), $L$ is a length scale (assumed to be 1 m), the Reynolds number
-is based on the density and velocity of the gases in
-the middle of the first grid cell and the length scale $L$, and the Prandtl number is assumed to be 0.7.
-
 
 
 \clearpage
@@ -3804,6 +3783,28 @@ The convective and radiative fluxes at the next time step are approximated
 \dq''_r{}^{(n+1)} &\approx& \dq''_r{}^n - 4 \; \epsilon \; \sigma \; T_{s,\ha}^{n^3} \left(
   T_{s,\ha}^{n+1} - T_{s,\ha}^n \right)  \end{eqnarray}
 The wall temperature is defined $T_w \equiv T_{s,\ha}=(T_{s,0}+T_{s,1})/2$.
+
+
+\subsection{Convective Heat Transfer to Solid Objects}
+
+In a DNS calculation where the boundary layer is resolved, the convective flux to the wall
+is given by
+\be
+\dq''_c = -k \frac{T_{gas}-T_w}{\dn/2}
+\ee
+where $T_{gas}$ is the gas temperature in the center of the first gas-phase grid cell,
+$T_w$ is the surface or ``wall'' temperature, $\dn$ is the
+size of a grid cell in the normal direction to the wall, and $k$ is
+the temperature-dependent thermal conductivity of the gas mixture.
+
+In an LES calculation, where the boundary layer is not resolved, an empirical heat transfer coefficient, $h$, is used: \be \dq''_c = h \,
+(T_{gas}-T_w)\quad \hbox{W/m}^2 \ee The heat transfer coefficient, $h$, is the maximum of its natural and forced empirical values:
+ \be h = \max \left( C |T_{gas} -T_w|^\ot \, , \, \frac{k_{air}}{L} 0.037 \, \RE_L^{4/5} \PR^{1/3} \right)  \quad \hbox{W/m}^2\hbox{/K}  \ee
+$C$ is an empirical coefficient (1.31 for vertical surface; 1.52 for horizontal), $k_{air}$ is
+the thermal conductivity of air (not the ``turbulent''
+value used in the LES solver), $L$ is a length scale (assumed to be 1 m), the Reynolds number
+is based on the density and velocity of the gases in
+the middle of the first grid cell and the length scale $L$, and the Prandtl number is assumed to be 0.7.
 
 
 \subsection{Coupling the Gas and Solid Phase}
