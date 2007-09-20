@@ -3189,13 +3189,13 @@ void Args(int argc, char **argv){
       STRCPY(inputfilename_ext,c_ext);
       to_lower(inputfilename_ext);
 
-      if(c_ext!=NULL&&(strcmp(inputfilename_ext,".smv")==0||strcmp(inputfilename_ext,".svt")==0)){
+      if(c_ext!=NULL&&(strcmp(inputfilename_ext,".smv")==0||strcmp(inputfilename_ext,".svd")==0)){
         c_ext[0]=0;
         STRCPY(fdsprefix,argi);
         FREEMEMORY(trainer_filename);
         NewMemory((void **)&trainer_filename,(unsigned int)(len+7));
         STRCPY(trainer_filename,argi);
-        STRCAT(trainer_filename,".svt");
+        STRCAT(trainer_filename,".svd");
       }
     }
   }
@@ -3236,7 +3236,7 @@ void Args(int argc, char **argv){
   if(trainer_filename==NULL){
     NewMemory((void **)&trainer_filename,(unsigned int)(len+6));
     STRCPY(trainer_filename,fdsprefix);
-    STRCAT(trainer_filename,".svt");
+    STRCAT(trainer_filename,".svd");
   }
   if(shellfilename==NULL){
     NewMemory((void **)&shellfilename,(unsigned int)(len+6));
