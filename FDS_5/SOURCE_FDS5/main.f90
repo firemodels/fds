@@ -151,7 +151,13 @@ DO NM=1,NMESHES
    CALL UPDATE_OUTPUTS(T(NM),NM)      
    CALL DUMP_MESH_OUTPUTS(T(NM),NM)
 ENDDO
+CALL UPDATE_CONTROLS(T)
 CALL DUMP_GLOBAL_OUTPUTS(T(1))
+
+!Check for changes in VENTS or OBSTACLES do to t=0 control and device status.
+OBST_VENT_LOOP: DO NM=1,NMESHES
+   CALL OPEN_AND_CLOSE(T(NM),NM)
+ENDDO OBST_VENT_LOOP
 
 ! ********************************************************************
 !                      MAIN TIMESTEPPING LOOP
