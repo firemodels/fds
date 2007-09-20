@@ -1182,7 +1182,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 #endif
 /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
-  drawBlockages(mode,0);
+  drawBlockages(mode,DRAW_SOLID);
 
 #ifdef pp_WUI
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
@@ -1251,7 +1251,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       if(meshi->isotimes==NULL||meshi->isofilenum<0)continue;
       isoi = isoinfo + meshi->isofilenum;
       if(isoi->loaded==0||isoi->display==0||isoi->type!=iisotype)continue;
-      drawiso(meshi,SOLID);
+      drawiso(meshi,DRAW_SOLID);
     }
 
     /*  nothing transparent should be drawn before this portion of the code
@@ -1264,7 +1264,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       if(meshi->isotimes==NULL||meshi->isofilenum<0)continue;
       isoi = isoinfo + meshi->isofilenum;
       if(isoi->loaded==0||isoi->display==0||isoi->type!=iisotype)continue;
-      drawiso(meshi,SV_TRANSPARENT);
+      drawiso(meshi,DRAW_TRANSPARENT);
     }
   }
 
@@ -1369,7 +1369,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   sniffErrors("after drawslice");
 //  draw_demo(20,20);
 //  draw_demo2(1);
-  drawBlockages(mode,1);
+  drawBlockages(mode,DRAW_TRANSPARENT);
 
 /* ++++++++++++++++++++++++ draw vector slice files +++++++++++++++++++++++++ */
 
@@ -1982,7 +1982,6 @@ void transparenton(void){
   glEnable(GL_BLEND);
   glDepthMask(GL_FALSE);
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-//  glBlendFunc(GL_ZERO,GL_ONE_MINUS_SRC_ALPHA);
 }
 
 /* ------------------ transparentoff ------------------------ */

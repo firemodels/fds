@@ -147,8 +147,6 @@ void _sniffErrors(char *whereat);
 #define IINT int
 #define UIINT unsigned int
 #define FFLOAT float
-#define SV_TRANSPARENT 1
-#define SOLID 0
 #define ALL_TRANSPARENT 1
 #define ALL_SOLID 4
 #define MIN_SOLID 2
@@ -242,3 +240,6 @@ void _sniffErrors(char *whereat);
 #define UNLOCK_COMPRESS
 #endif
 #endif
+
+#define DRAW_SOLID 0
+#define DRAW_TRANSPARENT 1
