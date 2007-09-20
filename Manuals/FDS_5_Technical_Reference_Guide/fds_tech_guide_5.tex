@@ -3522,27 +3522,28 @@ the radiative and convective heat fluxes, $\dq_r''$ and $\dq_c''$, are computed 
 
 The radiative transport equation~(\ref{bandRTE}) is solved using
 techniques similar to those for convective transport in finite volume
-methods for fluid flow~\cite{Raithby}, thus the name given to it is the
-Finite Volume Method (FVM). To obtain the discretized form of the RTE,
-the unit sphere is divided into a finite number of solid angles.
+methods for fluid flow~\cite{Raithby}, thus the name given to it is
+the Finite Volume Method (FVM). To obtain the discretized form of the
+RTE, the unit sphere is divided into a finite number of solid angles.
 In each grid cell a discretized equation is derived by integrating
-Eq.~(\ref{bandRTE}) over the volume of cell $ijk$ and the control angle
-$\delta \Omega^l$, to obtain
+Eq.~(\ref{bandRTE}) over the volume of cell $ijk$ and the control
+angle $\delta \Omega^l$, to obtain
 \be
   \int_{\delta \Omega^l} \int_{V_{ijk}}
-   \bs \cdot \nabla I(\bx',\bs') d\bx' d\bs' =
+   \bs' \cdot \nabla I(\bx',\bs') d\bx' d\bs' =
    \int_{\delta \Omega^l} \int_{V_{ijk}} \kappa(\bx') \;
     \left[ I_{b}(\bx') - I(\bx',\bs') \right] d\bx' d\bs'
 \ee
-The volume integral on the left hand side is replaced by a surface integral
-over the cell faces using the divergence theorem. Note that the procedure outlined below is
-appropriate for each band of a narrow band model, thus the subscript $n$ has been removed for clarity.
+The volume integral on the left hand side is replaced by a surface
+integral over the cell faces using the divergence theorem. Note that
+the procedure outlined below is appropriate for each band of a wide
+band model, thus the subscript $n$ has been removed for clarity.
 
-Assuming that the radiation intensity $I(\bx,\bs)$ is constant
-on each of the cell faces, the surface integral can be approximated
-by a sum over the cell faces.
-Assuming further that $I(\bx,\bs)$ is constant within
-the volume $V_{ijk}$ and over the angle $\delta \bO^l$ we obtain
+Assuming that the radiation intensity $I(\bx,\bs)$ is constant on each
+of the cell faces, the surface integral can be approximated by a sum
+over the cell faces.  Assuming further that $I(\bx,\bs)$ is constant
+within the volume $V_{ijk}$ and over the angle $\delta \bO^l$ we
+obtain
 \be  \sum_{m=1}^6 A_m \; I_m^l \;
       \int_{\Omega^l}(\bs' \cdot \bn_m) d\bs'
    = \kappa_{ijk} \,
