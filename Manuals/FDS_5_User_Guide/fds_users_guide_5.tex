@@ -952,12 +952,34 @@ building unless you have simulated the burning of the various combustibles with 
 The examples described in Part~\ref{part:verification} should help
 you to develop larger, more complicated simulations from smaller building blocks.
 
-Along with the FDS User's Guide, there are resources available on the internet.
-These include an ``Issue'' tracker, that allows you to report bugs, feature requests and ask specific clarifying questions,
+Along with the FDS User's Guide, there are resources available on the Internet.
+These include an ``Issue Tracker,'' that allows you to report bugs, feature requests and ask specific clarifying questions,
 and ``Group Discussions,'' which support more general topics than just specific problems.
 Before using these on-line resources, it is important to first try to solve your own
 problems by performing simple test calculations, or debugging your input file. The next few sections
 provide a list of error statements and suggestions on how to solve problems.
+
+\section{The Version Number}
+\index{Support!Version Number}
+
+If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of
+FDS comes with a version number like 5.2.6, where the first number is the {\em major} release, the second is the {\em minor} release, and the
+third is the {\em maintenance} release. Major releases occur every few years, and as the name implies dramatically change the functionality of the model.
+Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should effect the
+type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just
+type the executable at the command prompt:
+\begin{verbatim}
+fds5
+\end{verbatim}
+and the relevant information will appear, along with a date of compilation (useful to you) and a so-called SVN number (useful to us).  The SVN number refers to
+the Subversion repository number of the source code. It allows us to go back in time and recover the exact source code files
+that were used to build that executable.
+
+Simply get in the habit of checking the version number of your executable, periodically checking for new releases which
+might already have addressed your problem, and telling us what version you are using if you report a problem.
+
+
+
 
 
 \section{Common Error Statements}
@@ -2547,11 +2569,27 @@ Note that either {\ct VEL} or {\ct VOLUME\_FLUX} should be prescribed,
 not both.  The choice depends on whether an exact velocity is desired at a
 given vent, or whether the given volume flux is desired.
 \end{warning}
+\noindent
 The dimensions of the vent that are prescribed usually change
 because the prescribed vent dimensions are sometimes altered so that
 the vent edges line up with mesh cells. Also note that a {\ct SURF}
-group with a {\ct VOLUME\_FLUX} prescribed should only be called by a
-{\ct VENT}, not an {\ct OBST}.
+group with a {\ct VOLUME\_FLUX} prescribed can be invoked by either a
+{\ct VENT} or an {\ct OBST}, but be aware that in the latter case, the resulting
+velocity on the face or faces of the obstruction will be given by the specified
+{\ct VOLUME\_FLUX} divided by the area of that particular face. For example:
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='LOUVER', VOLUME_FLUX=-5.0, VEL_T=2.0,-1.0, COLOR='GREEN' /
+&OBST XB=..., SURF_ID6='BRICK','LOUVER','BRICK','BRICK','BRICK','BRICK' /
+\end{verbatim}
+\normalsize
+
+\noindent
+dictates that the forward $x$-facing surface of the obstruction is to have a velocity
+equal to 5~m/s divided by the area of the face (as approximated within FDS) flowing into the
+computational domain.
+
 Finally, note that if {\ct HRRPUA} or solid phase reaction parameters are
 specified, no velocity should be prescribed. The combustible gases
 are ejected at a velocity computed by the code.
@@ -5341,8 +5379,8 @@ will lead to the job being stopped gracefully, with restart files output, when t
 For most of the control function types, the logical (true/false) output of
 the devices and control functions and the time they last changed
 state are taken as inputs.  A {\ct CUSTOM} function uses the numberical output of a {\ct DEVC} along with
-a {\ct RAMP} to determine the output of the function.  When the {\ct RAMP} output for the {\ct DEVC} value is negative, the 
-{\ct CTRL} will have the value of its {\ct INITIAL\_STATE}.  When the {\ct RAMP} output for the {\ct DEVC} value is positive, the 
+a {\ct RAMP} to determine the output of the function.  When the {\ct RAMP} output for the {\ct DEVC} value is negative, the
+{\ct CTRL} will have the value of its {\ct INITIAL\_STATE}.  When the {\ct RAMP} output for the {\ct DEVC} value is positive, the
 {\ct CTRL} will have the opposite value of its {\ct INITIAL\_STATE}. In the case below, the {\ct CUSTOM} \index{CTRL!FUNCTION\_TYPE!CUSTOM}
 control function uses the numerical output of a timer device as its input.  The function returns true (the default vaule for
 {\ct INITIAL\_STATE} is {\ct .FALSE.}) when the {\ct F} parameter
