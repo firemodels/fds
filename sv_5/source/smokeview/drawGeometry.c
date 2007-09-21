@@ -1763,7 +1763,7 @@ void update_facelists(void){
         meshi->face_outlines[n_outlines++]=facej;
         continue;
       }
-      if(j<vent_offset){  //xxx  fix code below to handle textures
+      if(j<vent_offset){
         int drawing_texture=0;
 
         if(facej->type==BLOCK_texture&&facej->textureinfo!=NULL&&facej->textureinfo->display==1){
@@ -2184,81 +2184,84 @@ void draw_transparent_faces(){
   float up_color[4]={0.9,0.9,0.9,1.0};
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
+  int drawing_smooth, drawing_transparent;
 
-  if(nface_transparent>0){
-    if(visTransparentBlockage==1)transparenton();
+  get_drawing_parms(&drawing_smooth, &drawing_transparent);
 
-    glEnable(GL_LIGHTING);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
-    glEnable(GL_COLOR_MATERIAL);
+  if(nface_transparent<=0)return;
+
+  if(drawing_transparent==1)transparenton();
+
+  glEnable(GL_LIGHTING);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+  glEnable(GL_COLOR_MATERIAL);
 //    if(cullfaces==1)glDisable(GL_CULL_FACE); // DEBUG WORK AROUND
-    glBegin(GL_QUADS);
-    for(i=0;i<nface_transparent;i++){
-      facei = face_transparent[i];
-     // if(blocklocation==BLOCKlocation_grid||showedit==1){
-      if(blocklocation==BLOCKlocation_grid){
-        vertices = facei->approx_vertex_coords;
-      }
-      else{
-        vertices = facei->exact_vertex_coords;
-      }
-      showtimelist_handle = facei->showtimelist_handle;
-      showtimelist = *showtimelist_handle;
-      if(showtimelist!=NULL&&showtimelist[itime]==0)continue;
-      if(showedit==0){
-        new_color=facei->color;
-      }
-      else{
-        if(visNormalEditColors==0)new_color=block_ambient2;
-        if(visNormalEditColors==1)new_color=facei->color;
-        if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
-          new_color=highlight_color;
-          switch (xyz_dir){
-           case XDIR:
-            if(facei->dir==UP_X)new_color=up_color;
-            if(facei->dir==DOWN_X)new_color=down_color;
-            break;
-           case YDIR:
-            if(facei->dir==UP_Y)new_color=up_color;
-            if(facei->dir==DOWN_Y)new_color=down_color;
-            break;
-           case ZDIR:
-            if(facei->dir==UP_Z)new_color=up_color;
-            if(facei->dir==DOWN_Z)new_color=down_color;
-            break;
-           default:
-            ASSERT(FFALSE);
-            break;
-          }
+  glBegin(GL_QUADS);
+  for(i=0;i<nface_transparent;i++){
+    facei = face_transparent[i];
+   // if(blocklocation==BLOCKlocation_grid||showedit==1){
+    if(blocklocation==BLOCKlocation_grid){
+      vertices = facei->approx_vertex_coords;
+    }
+    else{
+      vertices = facei->exact_vertex_coords;
+    }
+    showtimelist_handle = facei->showtimelist_handle;
+    showtimelist = *showtimelist_handle;
+    if(showtimelist!=NULL&&showtimelist[itime]==0)continue;
+    if(showedit==0){
+      new_color=facei->color;
+    }
+    else{
+      if(visNormalEditColors==0)new_color=block_ambient2;
+      if(visNormalEditColors==1)new_color=facei->color;
+      if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
+        new_color=highlight_color;
+        switch (xyz_dir){
+         case XDIR:
+          if(facei->dir==UP_X)new_color=up_color;
+          if(facei->dir==DOWN_X)new_color=down_color;
+          break;
+         case YDIR:
+          if(facei->dir==UP_Y)new_color=up_color;
+          if(facei->dir==DOWN_Y)new_color=down_color;
+          break;
+         case ZDIR:
+          if(facei->dir==UP_Z)new_color=up_color;
+          if(facei->dir==DOWN_Z)new_color=down_color;
+          break;
+         default:
+          ASSERT(FFALSE);
+          break;
         }
       }
-      if(
-         fabs(new_color[0]-old_color[0])>0.0001||
-         fabs(new_color[1]-old_color[1])>0.0001||
-         fabs(new_color[2]-old_color[2])>0.0001||
-         fabs(new_color[3]-old_color[3])>0.0001||
-         transparency_override==1
-         ){
-        old_color[0]=new_color[0];
-        old_color[1]=new_color[1];
-        old_color[2]=new_color[2];
-        old_color[3]=new_color[3];
-        if(transparency_override==1)old_color[3]=transparency_level;
-        glColor4fv(old_color);
-      }
-      glNormal3fv(facei->normal);
-      glVertex3fv(vertices+0);
-      glVertex3fv(vertices+3);
-      glVertex3fv(vertices+6);
-      glVertex3fv(vertices+9);
     }
-    glEnd();
-//    if(cullfaces==1)glEnable(GL_CULL_FACE); // DEBUG WORK AROUND
-    glDisable(GL_LIGHTING);
-    glDisable(GL_COLOR_MATERIAL);
-    if(visTransparentBlockage==1)transparentoff();
+    if(
+       fabs(new_color[0]-old_color[0])>0.0001||
+       fabs(new_color[1]-old_color[1])>0.0001||
+       fabs(new_color[2]-old_color[2])>0.0001||
+       fabs(new_color[3]-old_color[3])>0.0001||
+       transparency_override==1
+       ){
+      old_color[0]=new_color[0];
+      old_color[1]=new_color[1];
+      old_color[2]=new_color[2];
+      old_color[3]=new_color[3];
+      if(transparency_override==1)old_color[3]=transparency_level;
+      glColor4fv(old_color);
+    }
+    glNormal3fv(facei->normal);
+    glVertex3fv(vertices+0);
+    glVertex3fv(vertices+3);
+    glVertex3fv(vertices+6);
+    glVertex3fv(vertices+9);
   }
+  glEnd();
+//    if(cullfaces==1)glEnable(GL_CULL_FACE); // DEBUG WORK AROUND
+  glDisable(GL_LIGHTING);
+  glDisable(GL_COLOR_MATERIAL);
+  if(drawing_transparent==1)transparentoff();
 }
 
 /* ------------------ update_hidden_faces ------------------------ */
