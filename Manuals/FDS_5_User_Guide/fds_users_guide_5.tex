@@ -5340,8 +5340,12 @@ will lead to the job being stopped gracefully, with restart files output, when t
 
 For most of the control function types, the logical (true/false) output of
 the devices and control functions and the time they last changed
-state are taken as inputs.  In the case below, the {\ct CUSTOM} \index{CTRL!FUNCTION\_TYPE!CUSTOM}
-control function uses the numerical output of a timer device as its input.  The function returns true, when the {\ct F} parameter
+state are taken as inputs.  A {\ct CUSTOM} function uses the numberical output of a {\ct DEVC} along with
+a {\ct RAMP} to determine the output of the function.  When the {\ct RAMP} output for the {\ct DEVC} value is negative, the 
+{\ct CTRL} will have the value of its {\ct INITIAL\_STATE}.  When the {\ct RAMP} output for the {\ct DEVC} value is positive, the 
+{\ct CTRL} will have the opposite value of its {\ct INITIAL\_STATE}. In the case below, the {\ct CUSTOM} \index{CTRL!FUNCTION\_TYPE!CUSTOM}
+control function uses the numerical output of a timer device as its input.  The function returns true (the default vaule for
+{\ct INITIAL\_STATE} is {\ct .FALSE.}) when the {\ct F} parameter
 in the ramp specified with {\ct RAMP\_ID}\index{CTRL!RAMP\_ID} is a positive value and
 false when the {\ct RAMP} {\ct F} value is negative.
 In this case, the control would start false and would switch to
