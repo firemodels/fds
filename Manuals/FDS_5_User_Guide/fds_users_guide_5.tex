@@ -3106,113 +3106,139 @@ section provides a description of the input parameters, starting with a general 
 \index{MATL!NU\_WATER}
 \index{MATL!RESIDUE}
 
-Each {\ct MATL} can undergo several reactions, with each
-reaction creating a {\ct RESIDUE}, water vapor, and/or fuel
-gas. Designate the number of reactions with the integer {\ct
-N\_REACTIONS}, the residue {\ct MATL} of the $j$th reaction by {\ct
-RESIDUE(j)}, the heat of reaction by {\ct HEAT\_OF\_REACTION(j)}, the
-yields of the residue, wator vapor, and fuel vapor as
-{\ct NU\_RESIDUE(j)}, {\ct NU\_WATER(j)}, and {\ct NU\_FUEL(j)},
-respectively. Currently, the maximum number of reactions for each
+A solid object might contain multiple layers with multiple material components per layer. The solid object is
+described by a {\ct SURF} line which contains the names of the various {\ct MATL}s it is composed of.
+Each {\ct MATL} can undergo several reactions that may occur at different temperatures and consume different amounts of heat.
+Each individual reaction can produce a (single) solid {\ct RESIDUE}, water vapor, and/or fuel
+gas. For example, the evaporation of water from a solid material is described by the ``reaction'' that converts liquid water to
+water vapor. This reaction occurs at 100~$^\circ$C and produces only water vapor. It does not produce a solid {\ct RESIDUE} nor fuel gas. However, a
+pyrolyzing solid might undergo a reaction that produces a solid {\ct RESIDUE}, water vapor, {\em and} fuel gas.
+
+For each {\ct MATL} entry in the input file, decide how many reactions it can undergo. It may not undergo any -- it may only just heat up. However, if it
+is to change form via one or more reactions,
+designate the number of reactions with the integer {\ct N\_REACTIONS}. It is very important that you designate {\ct N\_REACTIONS} or else FDS will ignore
+all parameters associated with reactions. Currently, the maximum number of reactions for each
 material is 10 and the chain of consecutive reactions may contain up
-to 20 steps. The reaction rate of the $i$th material undergoing its
-$j$th reaction is given by
+to 20 steps.
+
+Next, decide what each reaction produces: a (single) solid {\ct RESIDUE}, water vapor, and/or fuel gas. This information
+is conveyed to FDS via the {\em yields}: {\ct NU\_RESIDUE(j)}, {\ct NU\_WATER(j)}, and {\ct NU\_FUEL(j)}, respectively. Here, {\ct j} indicates which reaction
+the parameters pertain to. If, like the evaporation of water, only water vapor is produced, set {\ct NU\_WATER(j)=1.0} and the other two to zero. The yields are
+all zero by default. If {\ct NU\_RESIDUE(j)} is non-zero, then you {\em must}
+indicate what the solid residue is via {\ct RESIDUE(j)}, the {\ct ID} of another {\ct MATL} that is also listed in the input file. Ideally, the sum of the yields should
+add to 1, meaning that the mass of the reactant is conserved. However, there are times when it is convenient to have the yields sum to something less than one. For
+example, the spalling or ablation of concrete can be described as a ``reaction'' that consumes energy but does not produce any ``product'' because the concrete is assumed to have
+either fallen off the surface in chunks or pulverized powder. The concrete's mass is not conserved {\em in the model} because it has essentially disappeared from that particular
+surface.
+
+Now you must specify at what temperature the reaction occurs, and how fast the reaction occurs at that temperature.
+The reaction rate at the temperature, $T_s$, of the $i$th material ({\em i.e.} the {\ct MATL} that you are currently describing) undergoing its $j$th reaction is given by:
 \be
   r_{ij} =
   \dod{ }{t} \left( \frac{\rho_{s,i}}{\rho_{s0}} \right) =
   \left(\frac{\rho_{s,i}}{\rho_{s0}} \right)^{n_{s,ij}}
-  A_{ij} \exp\left(-\frac{E_{ij}}{RT_s} \right)
+  A_{ij} \; \exp\left(-\frac{E_{ij}}{RT_s} \right) \;
   \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}  \label{rr}
 \ee
-where $\rho_{s,i}$ is the current density of the $i$th material and
-$\rho_{s0}$ is the initial density of the material layer.
-$A_{ij}$ is prescribed under the name {\ct A(j)}, with units of
+$\rho_{s,i}$ is the density of the $i$th material within that particular layer, in the sense of the mass of the $i$th material divided by the
+volume of the layer.
+$\rho_{s0}$ is the initial density of the layer. Thus, $\rho_{s,i}/\rho_{s0}$ is the {\em mass fraction} of the $i$th material in the layer, a quantity
+that decreases as the $i$th material decomposes.
+If the layer is composed of only one material, and if the reactions
+produce no solid residues, then $\rho_{s,i}/\rho_{s0}$ is always 1. $n_{s,ij}$ is the reaction order and prescribed under the name
+{\ct N\_S(j)}, and is 1 by default. If the value of $n_s$ is not known,
+it is a good starting point to assume $n_s=1$.
+
+The pre-exponential factor, $A_{ij}$, is prescribed under the name {\ct A(j)}, with units of
 1/s. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in
 units of kJ/kmol. Remember that 1~kcal is 4.184~kJ, and be careful
-with factors of 1000. $n_{s,ij}$ is the reaction order and prescribed under the name
-{\ct N\_S(j)}.
-
-$T_{thr,ij}$ is an optional ``threshold'' temperature that
-allows the definition of non-Arrhenius pyrolysis functions and
-ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
-By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero
-and the last term of Equation~\ref{rr} does not affect the pyrolysis rate.
-The term can be used to describe a threshold temperature for the pyrolysis
-reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
-becomes 0 at temperatures below $T_{thr,ij}$ and 1 elsewhere.
-$n_{t,j}$ is prescribed under the name {\ct N\_T(j)}.
-\index{MATL!THRESHOLD\_TEMPERATURE}
-\index{MATL!N\_T}
-
-$A$ and $E$  are not readily accessible for most materials found at a
-fire scene. However, if they are known, specify both. Avoid specifying
+with factors of 1000.  $A$ and $E$  are not readily accessible for most real materials.
+However, if they are known, specify both. Avoid specifying
 just one because they act as a pair.  If $A$ and $E$ are not known,
 which is usually the case, specify {\ct REFERENCE\_RATE} (1/s) and
 {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). This directs FDS to choose
 {\ct A} and {\ct E} so that the reaction rate ({\ct REFERENCE\_RATE})
-is achieved at the {\ct REFERENCE\_TEMPERATURE}. The default value of {\ct
-REFERENCE\_RATE} is 0.1~s$^{-1}$. If the value of $n_s$ is not known,
-it is a good starting point to assume $n_s=1$.
+is achieved at the {\ct REFERENCE\_TEMPERATURE}. The default value of {\ct REFERENCE\_RATE} is 0.1~s$^{-1}$.
+It is suggested that unless you have information to the contrary, leave {\ct REFERENCE\_RATE} at its default value and
+just specify the {\ct REFERENCE\_TEMPERATURE}. Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an
+ignition temperature. Rather, it is simply the temperature at which the mass fraction of the $i$th material decreases at a rate of
+0.1~s$^{-1}$. You should check the sensitivity of these parameters following the procedure explained in Section~\ref{solid_phase_verification}.
 \index{MATL!REFERENCE\_RATE}
 \index{MATL!REFERENCE\_TEMPERATURE}
+
+$T_{thr,ij}$ is an optional ``threshold'' temperature that
+allows the definition of non-Arrhenius pyrolysis functions and
+ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
+By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero;
+thus, the last term of Equation~\ref{rr} does not affect the pyrolysis rate.
+The term can be used to describe a threshold temperature for the pyrolysis
+reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
+is equal to 0 at temperatures below $T_{thr,ij}$ and 1 at temperatures above.
+$n_{t,j}$ is prescribed under the name {\ct N\_T(j)}.
+\index{MATL!THRESHOLD\_TEMPERATURE}
+\index{MATL!N\_T}
+
+
 \begin{warning}
 \noindent
-The temperature is read in using degrees Celsius, but is then converted to
-degrees Kelvin within the program.
+Remember that all temperatures are specified in degrees Celsius, but are then converted to
+degrees Kelvin within the program. Thus, the formulae in this section ought to be interpreted in terms of the absolute temperature.
 \end{warning}
 
+\noindent
+One last issue before a few examples -- the most important one of all. Eq.~(\ref{rr}) describes the rate of the reaction as a function of temperature.
+Most solid phase reactions require energy; that is, they are {\em endothermic}. The amount of energy consumed, per unit mass of reactant that is converted into
+something else, is specified by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy
+difference between the products and the reactant. A positive value indicates that the reaction is {\em endothermic}; that is, the reaction takes energy out of the
+system. Usually the {\ct HEAT\_OF\_REACTION} is accurately known only
+for simple phase change reactions like the vaporization of water. For
+other reactions, it must be determined empirically.
+\index{MATL!HEAT\_OF\_REACTION}
+
+
 Here is an example of a material that burns in the neighborhood of 350~$^\circ$C,
-converting all mass to fuel gases ({\ct NU\_FUEL=1.}).
+converting all its mass to fuel gases ({\ct NU\_FUEL=1.}).
 
 \footnotesize
 \begin{verbatim}
-&MATL ID                    = 'Whatever'
-      FYI                   = 'Properties completely fabricated'
-      SPECIFIC_HEAT         = 1.0
-      CONDUCTIVITY          = 0.1
-      DENSITY               = 100.0
-      N_REACTIONS           = 1
-      NU_FUEL               = 1.
-      REFERENCE_TEMPERATURE = 350.
-      HEAT_OF_REACTION      = 3000.
-      HEAT_OF_COMBUSTION    = 15000. /
+&MATL ID                       = 'My Fuel'
+      FYI                      = 'Properties completely fabricated'
+      SPECIFIC_HEAT            = 1.0
+      CONDUCTIVITY             = 0.1
+      DENSITY                  = 100.0
+      HEAT_OF_COMBUSTION       = 15000.
+      N_REACTIONS              = 1
+      NU_FUEL(1)               = 1.
+      REFERENCE_TEMPERATURE(1) = 350.
+      HEAT_OF_REACTION(1)      = 3000. /
 \end{verbatim}
 \normalsize
+
 \noindent
-The {\ct HEAT\_OF\_REACTION(j)} (kJ/kg) indicates the amount of energy
-consumed by the solid phase reaction. Technically it is the enthalpy
-difference between the products and reactants at the same
-temperature. A positive value indicates that the reaction is {\em
-endothermic}; that is, the reaction takes energy out of the
-system. Usually the {\ct HEAT\_OF\_REACTION} is accuratelly known only
-for simple phase change reactions like the vaporization of water. For
-other reactions, it must be determined empirically. The {\ct
-HEAT\_OF\_COMBUSTION} ensures that if the fuel vapors burn with a
-different $\Delta H$ than that of other materials included in the
-simulation, the model will account for this accordingly.
-\index{MATL!HEAT\_OF\_REACTION}
+Note that the {\ct (1)} has been added to the reaction parameters to emphasize the fact that these parameters are stored in arrays of length equal to {\ct N\_REACTIONS}. If there
+is only one reaction, you need not include the {\ct (1)}, but it is a good habit to get into.
+Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released per unit mass of fuel gas that mixes with oxygen and combusts.  This has nothing to do with the pyrolysis
+process, so why is it specified here? The answer is that there can be only one {\em gas phase} reaction of fuel and oxygen in FDS, but there can be dozens of different materials and
+dozens of {\em solid phase} reactions. To ensure that the fuel vapors from
+different materials combust to produce the proper amount of energy, it is very important to specify a {\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss rate
+of fuel gases is automatically adjusted so that the effective mass loss rate multiplied by the single, global, gas phase heat of combustion produces the expected heat release rate.
 \index{MATL!HEAT\_OF\_COMBUSTION}
 
-\index{SURF!SHRINK}
-If all the material components of the surface are reacting, and the
-pyrolysis reactions have no solid residue, the thickness of the
-surface is going to shrink when the surface reacts. The shrinking
-behaviour can be prevented in the numerical model by setting {\ct
-SHRINK = .FALSE.} on the {\ct SURF} line.
-\begin{warning}
-\noindent
-Setting {\ct SHRINK = .FALSE.} may introduce numerical problems in the
-wall solver.
-\end{warning}
+Several other examples of solid phase reactions can be found in various Verification examples. See Sections~\ref{thermoplastic} and \ref{charring_solid}.
+
+
+
+
+
 
 \subsubsection{Solid Fuels that Burn at a Specified Rate}
 \index{SURF!HEAT\_OF\_VAPORIZATION}
 \index{SURF!HRRPUA}
 \index{SURF!IGNITION\_TEMPERATURE}
 \index{SURF!RAMP\_Q}
-Real materials, like furnishings, office equipment, and so on, are
-often very difficult to describe via the {\ct SURF} and {\ct MATL}
-parameters. Often, the only information about a given object is its
+Real objects, like furnishings, office equipment, and so on, are
+often difficult to describe via the {\ct SURF} and {\ct MATL}
+parameters. Sometimes the only information about a given object is its
 bulk thermal properties, its ``ignition'' temperature, and what its
 subsequent burning rate is, as a function of time from ignition. For
 this situation, add lines similar to the following:
@@ -3369,6 +3395,15 @@ Also note that the amount of combustible fuel equals the {\ct DENSITY} of the de
 multiplied by the volume of the mesh cell. If the volume of the obstruction changes because it has
 to conform to the uniform mesh, FDS does {\bf not} adjust the burning rate to account for this as
 it does with various quantities associated with areas, like {\ct HRRPUA}.
+
+\index{SURF!SHRINK}
+If all the material components of the surface are reacting, and the
+pyrolysis reactions have no solid residue, the thickness of the
+surface is going to shrink when the surface reacts. The shrinking
+behavior can be prevented in the numerical model by setting {\ct SHRINK = .FALSE.} on the {\ct SURF} line.
+However, setting {\ct SHRINK = .FALSE.} may introduce numerical problems in the
+wall solver.
+
 
 \subsection{Special Topic: Initial and Backside Boundary Conditions}
 \index{initial solid temperature}
