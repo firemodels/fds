@@ -75,7 +75,7 @@ ENDIF
 
 ! Open the input file
 
-OPEN(LU_INPUT,FILE=FN_INPUT)
+OPEN(LU_INPUT,FILE=FN_INPUT,ACTION='READ')
 
 ! Read the input file, NAMELIST group by NAMELIST group
 
