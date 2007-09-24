@@ -838,13 +838,13 @@ WALL_CELL_LOOP: DO IW=1,NWC
       DO I = 1,NWP
          IF ( (X_S_NEW(I)-X_S_NEW(I-1)) < 0.5 * SMALLEST_CELL_SIZE(LAYER_INDEX(I))) RECOMPUTE = .TRUE.
       ENDDO
+      ! Shrinking wall has gone to zero thickness.
       IF (THICKNESS == 0._EB) THEN
          WC%TMP_S(0:NWP+1)    = MAX(TMPMIN,SF%TMP_BACK)
          TMP_F(IW)            = MIN(TMPMAX,MAX(TMPMIN,SF%TMP_BACK))
          TMP_B(IW)            = MIN(TMPMAX,MAX(TMPMIN,SF%TMP_BACK))
          RHOWAL               = 0.5_EB*(RHO(IIG,JJG,KKG)+RHO_W(IW))
          CP_TERM              = MAX(0._EB,-CP_GAMMA*UW(IW)*RHOWAL)
-!         QCONF(IW)            = HEAT_TRANS_COEF(IW) * (TMP_G - 0.5_EB * (TMP_F(IW) + TMP_F_OLD) )
          QCONF(IW)            = 0._EB
          TMP_W(IW)            = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G+CP_TERM*TMP_F(IW)-QCONF(IW) ) & 
                                 /(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
