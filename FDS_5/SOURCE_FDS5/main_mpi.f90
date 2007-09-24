@@ -1608,7 +1608,7 @@ ENDIF IF_DUMP_DEVC
 ! Dump CONTROL info. No gathering required as CONTROL is updated on all meshes
 
 IF (T>=CTRL_CLOCK .AND. N_CTRL>0) THEN
-   CALL DUMP_CONTROLS(T)
+   IF (MYID==0) CALL DUMP_CONTROLS(T)
    CTRL_CLOCK = CTRL_CLOCK + DT_CTRL
 ENDIF
 
