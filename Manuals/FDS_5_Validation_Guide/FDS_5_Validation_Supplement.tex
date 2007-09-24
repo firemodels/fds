@@ -26,9 +26,9 @@
 \setlength{\oddsidemargin}{0.0in}
 \setlength{\evensidemargin}{0.0in}
 
-\includeonly{Overview_Chapter,Survey_Chapter,Experiment_Chapter,HGL_Chapter,Plume_Chapter,Ceiling_Jet_Chapter,Velocity_Chapter,Species_Chapter,Pressure_Chapter,Heat_Flux_Chapter}
+%\includeonly{Overview_Chapter,Survey_Chapter,Experiment_Chapter,HGL_Chapter,Plume_Chapter,Ceiling_Jet_Chapter,Velocity_Chapter,Species_Chapter,Pressure_Chapter,Heat_Flux_Chapter}
 
-%\includeonly{Overview_Chapter,Survey_Chapter,Experiment_Chapter}
+\includeonly{Overview_Chapter,Survey_Chapter,Experiment_Chapter}
 
 
 \begin{document}
@@ -113,13 +113,13 @@
 \begin{minipage}[t][9in][s]{6.5in}
 
 \huge
-\flushright{NIST Special Publication XXXX}
+\flushright{NIST Special Publication 1018-5}
 
 \vspace{1in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ Verification \&
-Validation Guide \\ \LARGE Volume 2: Validation Guide }
+\flushright{Fire Dynamics Simulator (Version 5) \\
+Technical Reference Guide \\ \LARGE Supplement: Experimental Validation }
 
 \vspace{.5in}
 
@@ -128,8 +128,7 @@ Validation Guide \\ \LARGE Volume 2: Validation Guide }
 Kevin McGrattan \\
 Anthony Hamins \\
 Simo Hostikka \\
-Jason Floyd \\
-Bryan Klein }
+Jason Floyd  }
 
 \vfill
 
@@ -146,13 +145,13 @@ Bryan Klein }
 \begin{minipage}[t][9in][s]{6.5in}
 
 \huge
-\flushright{NIST Special Publication XXXX}
+\flushright{NIST Special Publication 1018-5}
 
 \vspace{1.in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ Verification \&
-Validation Guide \\ \LARGE Volume 2: Validation Guide }
+\flushright{Fire Dynamics Simulator (Version 5) \\
+Technical Reference Guide \\ \LARGE Supplement: Experimental Validation }
 
 \vspace{.5in}
 
@@ -160,19 +159,22 @@ Validation Guide \\ \LARGE Volume 2: Validation Guide }
 \flushright{
 Kevin McGrattan \\
 Anthony Hamins \\
-Bryan Klein \\
 {\em Fire Research Division} \\
 {\em Building and Fire Research Laboratory}  \\
+\hspace{1.in} \\
 Simo Hostikka \\
 {\em VTT Technical Research Centre of Finland}\\
 Espoo, Finland \\
+\hspace{1.in} \\
 Jason Floyd \\
 {\em Hughes Associates, Inc. }  \\
 Baltimore, Maryland, USA }
 
 \vspace{.25in}
 
-\flushright{September 2007}
+\flushright{\today \\
+$SVN Repository$~$Revision$}
+
 
 \vfill
 
@@ -187,34 +189,6 @@ National Institute of Standards and Technology \\
 
 \end{minipage}
 
-\newpage
-
-\begin{minipage}[t][9in][s]{6.5in}
-
-\flushright{Certain commercial entities, equipment, or materials may be identified in this \\
-document in order to describe an experimental procedure or concept adequately. Such \\
-identification is not intended to imply recommendation or endorsement by the \\
-National Institute of Standards and Technology, nor is it intended to imply that the \\
-entities, materials, or equipment are necessarily the best available for the purpose.
-}
-
-\vspace{3in}
-
-\large
-\flushright{\bf National Institute of Standards and Technology Special Publication XXXX \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~XXXX, 94 pages (September 2007) \\
-CODEN: NSPUE2 }
-
-\vfill
-
-\flushright{U.S. GOVERNMENT PRINTING OFFICE \\
-WASHINGTON: 2007 \\
-\rule{3.5in}{0.01in} \\
-For sale by the Superintendent of Documents, U.S. Government Printing Office \\
-Internet: bookstore.gpo.gov -- Phone: (202) 512-1800 -- Fax: (202) 512-2250 \\
-Mail: Stop SSOP, Washington, DC 20402-0001 }
-
-\end{minipage}
 
 
 
@@ -228,7 +202,7 @@ Mail: Stop SSOP, Washington, DC 20402-0001 }
 \chapter{Preface}
 
 
-This guide is based in part on the ``Standard Guide for
+This supplement to the FDS Technical Reference Guide is based in part on the ``Standard Guide for
 Evaluating the Predictive Capability of Deterministic Fire Models,'' ASTM~E~1355~\cite{ASTM:E1355}.
 ASTM~E~1355 defines {\em model evaluation} as ``the process of quantifying
 the accuracy of chosen results from a model when applied for a specific use.''
@@ -244,33 +218,12 @@ are attributed to the assumptions and simplifications of the physical model.
 
 Evaluation is critical to establishing both the acceptable uses
 and limitations of a model. Throughout its development, FDS has undergone various forms of evaluation,
-both at NIST and beyond. This guide provides a survey of work conducted to date to evaluate FDS.
+both at NIST and beyond. This Supplement provides a survey of validation work conducted to date to evaluate FDS.
+Documentation of FDS Verification is contained in the FDS User's Guide~\cite{FDS_Users_Guide_5}.
 
 
 
-\chapter{Disclaimer}
 
-The US Department of Commerce makes no warranty, expressed or implied,
-to users of the Fire Dynamics Simulator (FDS), and accepts no responsibility for its use.
-Users of FDS assume sole responsibility under Federal law for determining
-the appropriateness of its use in any particular application;
-for any conclusions drawn from the results of its use; and for any
-actions taken or not taken as a result of analysis performed using
-these tools.
-
-Users are warned that FDS is intended for use only by those competent
-in the fields of fluid dynamics, thermodynamics, heat transfer,
-combustion, and fire science, and is intended only to supplement the
-informed judgment of the qualified user. The software package is a
-computer model that may or may not have predictive capability when
-applied to a specific set of factual circumstances. Lack of accurate
-predictions by the model could lead to erroneous conclusions with
-regard to fire safety. All results should be evaluated by an informed
-user.
-
-Throughout this document, the mention of computer hardware or commercial
-software does not constitute endorsement by NIST, nor does it indicate that
-the products are necessarily those best suited for the intended purpose.
 
 
 \chapter{Acknowledgments}
@@ -343,10 +296,6 @@ of the Building Environment Division of BFRL.
 \include{Pressure_Chapter}
 \include{Heat_Flux_Chapter}
 
-
-
-
-\chapter{Conclusion}
 
 
 
