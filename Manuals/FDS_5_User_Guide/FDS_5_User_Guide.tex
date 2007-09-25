@@ -3130,7 +3130,7 @@ reactions does not imply {\ct N\_REACTIONS} > 1, but is caused by the
 fact that the examined sample is a mixture of multiple materials
 reacting at different temperatures.   Currently, the maximum number of
 reactions for each material is 10 and the chain of consecutive
-reactions may contain up to 20 steps. 
+reactions may contain up to 20 steps.
 
 Next, decide what each reaction produces: a (single) solid {\ct
 RESIDUE}, water vapor, and/or fuel gas. This information is conveyed
@@ -3427,16 +3427,11 @@ conform to the uniform mesh, FDS does {\bf not} adjust the burning
 rate to account for this as it does with various quantities associated
 with areas, like {\ct HRRPUA}.
 
-\index{SURF!SHRINK} If all the material components of the surface are
-reacting, and the pyrolysis reactions have no solid residue, the
-thickness of the surface is going to shrink when the surface
-reacts. The shrinking behavior can be prevented in the numerical model
-by setting {\ct SHRINK = .FALSE.} on the {\ct SURF} line.  However,
-setting {\ct SHRINK = .FALSE.} may introduce numerical problems in the
-wall solver. When all the material of a shrinking surface is consumed
-but the {\ct BURN\_AWAY} is not prescribed, the surface
-temperature is set to {\ct TMP\_BACK}, convective heat flux to zero and
-burning rate to zero. 
+\index{SURF!SHRINK} If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
+the surface is going to shrink when the surface reacts. The shrinking behavior can be prevented in the numerical model by setting {\ct SHRINK=.FALSE.}
+on the {\ct SURF} line.  However, setting {\ct SHRINK=.FALSE.} may introduce numerical problems in the wall solver. When all the material of
+a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux
+to zero and burning rate to zero.
 
 
 \subsection{Special Topic: Initial and Backside Boundary Conditions}
@@ -3460,6 +3455,7 @@ properties (via the {\ct MATL\_ID} keyword).
 \end{warning}
 
 \subsection{Special Topic: Numerical Accuracy and Stability}
+\label{info:solid_phase_stability}
 \index{SURF!CELL\_SIZE\_FACTOR}
 \index{SURF!STRETCH\_FACTOR}
 
@@ -3477,11 +3473,11 @@ makes the temperatures and burning rate fluctuate. The numerical
 stability of the solid phase solution may then be improved by making
 the mesh density more uniform inside the material and by making the
 mesh cells smaller. Adjustments may also be needed in case of
-extremely transient heat transfer situations. Use {\ct STRETCH\_FACTOR
-= 1.} on the {\ct SURF} line to have a perfectly uniform mesh. Values
-between 1.0 and 2.0 give different levels of stretching.  The size of
+extremely transient heat transfer situations. Use {\ct STRETCH\_FACTOR=1.}
+on the {\ct SURF} line to have a perfectly uniform mesh. Values
+between 1 and 2 give different levels of stretching.  The size of
 all the mesh cells can be scaled by setting {\ct CELL\_SIZE\_FACTOR}
-less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR = 0.5} makes the
+less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR=0.5} makes the
 mesh cells half the size. Setting {\ct WALL\_INCREMENT=1}\index{TIME!WALL\_INCREMENT} on the
 {\ct TIME} line forces the solid phase temperatures to be solved on every
 time step.
@@ -4424,11 +4420,27 @@ trying to reduce the number of droplets or particles in a simulation.
 \end{description}
 
 \subsubsection{Particles Introduced at a Solid Surface}
+\label{info:particle_flux}
 
 If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line.
 The number of particles inserted at each solid cell every
 {\ct DT\_INSERT} seconds is specified by {\ct NPPC} on the {\ct SURF} line defining the solid surface. The default
-value of {\ct NPPC} is 1.
+value of {\ct NPPC} is 1. As an example, the following set of input lines:
+
+\footnotesize
+\begin{verbatim}
+&PART ID='drops', QUANTITIES(1:3)='DROPLET_DIAMETER','DROPLET_TEMPERATURE','DROPLET_AGE',
+      DIAMETER=750., SAMPLING_FACTOR=1, COLOR='RED', EVAPORATE=.FALSE. /
+&SURF ID='HOLE', PART_ID='drops', VEL=-5., PARTICLE_MASS_FLUX=0.1, COLOR='RED' /
+&OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','HOLE','INERT' /
+\end{verbatim} \normalsize
+
+\noindent
+creates an obstruction that ejects non-evaporating, red particles with a mean volumetric diameter of 750~$\mu m$ out of its sides at a rate
+of 0.1~kg/m$^2$/s. FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. Note that the
+{\ct ID}s have no meaning other than as identifiers. The particles are colored red in Smokeview, but can also be colored according to their
+diameter, temperature, or age.
+
 \index{SURF!NPPC}
 \index{SURF!PARTICLE\_MASS\_FLUX}
 
@@ -7049,14 +7061,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ADIABATIC}                       & Logical         & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                         & Character       & Back boundary condition           &                     & {\ct 'VOID'}            \\ \hline
 {\ct BURN\_AWAY}                      & Logical         & Object can vanish                 &                     & {\ct .FALSE.}           \\ \hline
-{\ct CELL\_SIZE\_FACTOR}              & Real            & Scale solid phase noding          &                     & 1.0                     \\ \hline
+{\ct CELL\_SIZE\_FACTOR}              & Real            & See Section~\ref{info:solid_phase_stability}  &         & 1.0                     \\ \hline
 {\ct COLOR    }                       & Character       & Surface Color                     &                     &                         \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Heat flux at surface              & kW/m$^2$            & 0.                      \\ \hline
 {\ct DUCT\_PATH}                      & Integer Pair    & Pressure Zones for fans           &                     & 0,0                     \\ \hline
 {\ct E\_COEFFICIENT}                  & Real            & Extinguishing coefficient         & 1/s                 & 0.                      \\ \hline
 {\ct EMISSIVITY}                      & Real            & Emissivity                        &                     & 0.9                     \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
-{\ct FYI}                             & Character       & Comment String (has no effect)    &                     &                         \\ \hline
+{\ct FYI}                             & Character       & Comment String                    &                     &                         \\ \hline
 {\ct GEOMETRY}                        & Character       & Geometry type                     &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION }         & Real            & For specified HRR only            & kJ/kg               & 0.                      \\ \hline
 {\ct HRRPUA }                         & Real            & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
@@ -7071,7 +7083,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 1E12                    \\ \hline
 {\ct MLRPUA }                         & Real            & Mass loss rate per unit area      & kg/m$^2$s           & 0.                      \\ \hline
 {\ct NPPC}                            & Integer         & Number of particles per cell      &                     & 1                       \\ \hline
-{\ct PARTICLE\_MASS\_FLUX}            & Real            & Mass flux of particles            & kg/m$^2$ s          & 0.                      \\ \hline
+{\ct PARTICLE\_MASS\_FLUX}            & Real            & See Section~\ref{info:particle_flux} & kg/m$^2$ s       & 0.                      \\ \hline
 {\ct PART\_ID}                        & Character       & Lagrangian Particle ID            &                     &                         \\ \hline
 {\ct POROUS}                          & Logical         & Non-solid boundary                &                     & {\ct .FALSE.}           \\ \hline
 {\ct PLE}                             & Real            & Atmospheric profile exponent      &                     & 0.3                     \\ \hline
@@ -7083,7 +7095,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RGB(3)}                          & Integer Triplet & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
 {\ct SHRINK}                          & Logical         & Shrinking material                &                     & {\ct .TRUE.}            \\ \hline
 {\ct SLIP\_FACTOR    }                & Real            & Velocity Slip Condition           &                     & 0.5                     \\ \hline
-{\ct STRETCH\_FACTOR    }             & Real            & Solid phase noding parameter      &                     & 2.0                     \\ \hline
+{\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
 {\ct TAU\_MF(I)}                      & Real Array      & Ramp time for species {\ct I}     & s                   & 1.     \\ \hline
 {\ct TAU\_Q}                          & Real            & Ramp time for HRR                 & s                   & 1.     \\ \hline
 {\ct TAU\_T}                          & Real            & Ramp time for temp.               & s                   & 1.     \\ \hline
@@ -7144,7 +7156,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct T\_BEGIN}             & Real       & Starting time for calculation       & s           & 0.            \\ \hline
 {\ct T\_END}or{\ct TWFIN } & Real       & Ending time for calculation         & s           & 1             \\ \hline
 %{\ct TIME\_SHRINK\_FACTOR} & Real       & Scaling factor for time ramps and specific heat & & 1.            \\ \hline
-{\ct WALL\_INCREMENT}      & Integer    & Timesteps between 1D wall solution updates  &     & 2             \\ \hline
+{\ct WALL\_INCREMENT}      & Integer    & Time steps between 1D wall solution updates  &     & 2             \\ \hline
 \end{tabular*}
 \end{table}
 
