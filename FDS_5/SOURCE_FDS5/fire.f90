@@ -100,6 +100,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                ELSE
                   IW = IWA(-1)
                   IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN
+                     Y_SUM_W = 0._EB           
                      DO N=1,N_SPECIES
                         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -127,7 +128,8 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                   ENDIF
                ELSE
                   IW = IWA(1)
-                  IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
+                  IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN    
+                     Y_SUM_W = 0._EB           
                      DO N=1,N_SPECIES
                         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -157,6 +159,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                ELSE
                   IW = IWA(-2)
                   IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
+                     Y_SUM_W = 0._EB           
                      DO N=1,N_SPECIES
                         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -185,6 +188,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                ELSE
                   IW = IWA(2)
                   IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
+                     Y_SUM_W = 0._EB           
                      DO N=1,N_SPECIES
                         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -214,6 +218,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                ELSE
                   IW = IWA(-3)
                   IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
+                     Y_SUM_W = 0._EB           
                      DO N=1,N_SPECIES
                         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -242,6 +247,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                ELSE
                   IW = IWA(3)
                   IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN
+                     Y_SUM_W = 0._EB           
                      DO N=1,N_SPECIES
                         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                            Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -366,6 +372,7 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             ELSE
                IW = IWA(-1)
                IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN
+                  Y_SUM_W = 0._EB           
                   DO N=1,N_SPECIES
                      IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                         Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -394,6 +401,7 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             ELSE
                IW = IWA(1)
                IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
+                  Y_SUM_W = 0._EB           
                   DO N=1,N_SPECIES
                      IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                         Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -423,6 +431,7 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             ELSE
                IW = IWA(-2)
                IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
+                  Y_SUM_W = 0._EB           
                   DO N=1,N_SPECIES
                      IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                         Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -451,6 +460,7 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             ELSE
                IW = IWA(2)
                IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
+                  Y_SUM_W = 0._EB           
                   DO N=1,N_SPECIES
                      IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                         Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -480,6 +490,7 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             ELSE
                IW = IWA(-3)
                IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
+                  Y_SUM_W = 0._EB           
                   DO N=1,N_SPECIES
                      IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                         Y_SUM_W = Y_SUM_W + YY_W(IW,N)
@@ -508,6 +519,7 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             ELSE
                IW = IWA(3)
                IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN
+                  Y_SUM_W = 0._EB           
                   DO N=1,N_SPECIES
                      IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
                         Y_SUM_W = Y_SUM_W + YY_W(IW,N)
