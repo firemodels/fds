@@ -1174,13 +1174,12 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
             T,PR_AIR,M_VAP,XI,YJ,ZK,RDT,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
-            C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF
+            C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_TEMP1,Q_TEMP2
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX
 INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
 
 ! Initializations
-
 RDT    = 1._EB/DT
 OMRAF  = 1._EB - RUN_AVG_FAC
 
@@ -1321,7 +1320,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                H_MASS = 0._EB
             ENDIF
             H_WALL   = H_SOLID
-            Q_DOT_RAD = A_DROP*(QRADIN(IW)-QRADOUT(IW))
+!            Q_DOT_RAD = A_DROP*(QRADIN(IW)-QRADOUT(IW))
+            Q_DOT_RAD = A_DROP*QRADIN(IW)
 
          ELSE SOLID_OR_GAS_PHASE
 
@@ -1380,9 +1380,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP))
          IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  ! Evaporate small droplets
             M_VAP      = M_DROP
-            Q_CON_GAS  = M_VAP*H_V
-            Q_CON_WALL = 0._EB
-            Q_RAD      = 0._EB
+            Q_TEMP1 = Q_RAD+Q_CON_GAS+Q_CON_WALL
+            Q_TEMP1 = M_VAP*H_V/Q_TEMP1
+            Q_CON_GAS  = Q_CON_GAS*Q_TEMP1
+            Q_CON_WALL = Q_CON_WALL*Q_TEMP1
+            Q_RAD      = Q_RAD*Q_TEMP1
          ENDIF
 
          ! If the droplet temperature drops below its freezing point, just reset it
@@ -1392,10 +1394,13 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          ! If the droplet temperature reaches boiling, use only enough energy from gas to vaporize liquid
 
          IF (PC%EVAPORATE .AND. TMP_DROP_NEW>=TMP_BOIL) THEN  
+            Q_TEMP1 = Q_RAD+Q_CON_GAS+Q_CON_WALL
+            M_VAP = MIN(M_DROP,M_VAP + (TMP_DROP_NEW - TMP_BOIL)*C_DROP*M_DROP/H_V)
+            Q_TEMP1 = M_VAP*H_V/Q_TEMP1
             TMP_DROP_NEW = TMP_BOIL
-            Q_CON_GAS  = M_VAP*H_V
-            Q_CON_WALL = 0._EB
-            Q_RAD      = 0._EB
+            Q_CON_GAS  = Q_CON_GAS*Q_TEMP1
+            Q_CON_WALL = Q_CON_WALL*Q_TEMP1
+            Q_RAD      = Q_RAD*Q_TEMP1
          ENDIF
 
          ! Update droplet quantities
