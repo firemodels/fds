@@ -684,14 +684,6 @@ ENDDO
 IF (.NOT.INSERT_ANOTHER_BATCH) EXIT OVERALL_INSERT_LOOP
 ENDDO OVERALL_INSERT_LOOP
  
-!mass_sum=0.
-!do i=1,nlp
-!dr=>droplet(i)
-!pc=>particle_class(dr%class) 
-!mass_sum = mass_sum + pc%ftpr*dr%r**3*dr%pwt
-!enddo
-!write(0,*) nlp,t,mass_sum,flow_rate
-
 TUSED(8,NM)=TUSED(8,NM)+SECOND()-TNOW
 END SUBROUTINE INSERT_DROPLETS_AND_PARTICLES
  
@@ -754,10 +746,9 @@ USE PHYSICAL_FUNCTIONS, ONLY : DRAG
 REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,SFAC,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
             RD,T,C_DRAG,XI,YJ,ZK,MU_AIR, &
             DTSP,DTMIN,UBAR,VBAR,WBAR,BFAC,GRVT1,GRVT2,GRVT3,AUREL,AVREL,AWREL,CONST, &
-            UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION,R_NEW,SURFACE_DROPLET_DIAMETER
+            UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION(-3:3),R_NEW,SURFACE_DROPLET_DIAMETER
 LOGICAL :: HIT_SOLID
-INTEGER :: ICN,I,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,IW,N,NITER, &
-           IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IOR_OLD,IC
+INTEGER :: ICN,I,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,IW,N,NITER,IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IOR_OLD,IC,IOR_FIRST,IML
 INTEGER, INTENT(IN) :: NM
 
 SURFACE_DROPLET_DIAMETER = 0.001_EB  ! All droplets adjusted to this size when on solid (m)
@@ -954,39 +945,56 @@ DROPLET_LOOP: DO I=1,NLP
          IWM2 = WALL_INDEX(IC,-2)
          IWP3 = WALL_INDEX(IC, 3)
          IWM3 = WALL_INDEX(IC,-3)
+         STEP_FRACTION = 1._EB
 
          IF (KKN>KK .AND. BOUNDARY_TYPE(IWP3)==SOLID_BOUNDARY) THEN
             DR%IOR=-3
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = MAX(0._EB,(Z(KK)-Z_OLD-0.05_EB*DZ(KK))/(DR%Z-Z_OLD))
+            STEP_FRACTION(DR%IOR) = MAX(0._EB,(Z(KK)-Z_OLD-0.05_EB*DZ(KK))/(DR%Z-Z_OLD))
          ENDIF
          IF (KKN<KK .AND. BOUNDARY_TYPE(IWM3)==SOLID_BOUNDARY) THEN
             DR%IOR= 3
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = MAX(0._EB,(Z(KKN)-Z_OLD+0.05_EB*DZ(KKN))/(DR%Z-Z_OLD))
+            STEP_FRACTION(DR%IOR) = MAX(0._EB,(Z(KKN)-Z_OLD+0.05_EB*DZ(KKN))/(DR%Z-Z_OLD))
          ENDIF
          IF (IIN>II .AND. BOUNDARY_TYPE(IWP1)==SOLID_BOUNDARY) THEN
             DR%IOR=-1
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = MAX(0._EB,(X(II)-X_OLD-0.05_EB*DX(II))/(DR%X-X_OLD))
+            STEP_FRACTION(DR%IOR) = MAX(0._EB,(X(II)-X_OLD-0.05_EB*DX(II))/(DR%X-X_OLD))
          ENDIF
          IF (IIN<II .AND. BOUNDARY_TYPE(IWM1)==SOLID_BOUNDARY) THEN
             DR%IOR= 1
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = MAX(0._EB,(X(IIN)-X_OLD+0.05_EB*DX(IIN))/(DR%X-X_OLD))
+            STEP_FRACTION(DR%IOR) = MAX(0._EB,(X(IIN)-X_OLD+0.05_EB*DX(IIN))/(DR%X-X_OLD))
          ENDIF
          IF (JJN>JJ .AND. BOUNDARY_TYPE(IWP2)==SOLID_BOUNDARY) THEN
             DR%IOR=-2
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = MAX(0._EB,(Y(JJ)-Y_OLD-0.05_EB*DY(JJ))/(DR%Y-Y_OLD))
+            STEP_FRACTION(DR%IOR) = MAX(0._EB,(Y(JJ)-Y_OLD-0.05_EB*DY(JJ))/(DR%Y-Y_OLD))
          ENDIF
          IF (JJN<JJ .AND. BOUNDARY_TYPE(IWM2)==SOLID_BOUNDARY) THEN
             DR%IOR= 2
             HIT_SOLID = .TRUE.
-            STEP_FRACTION = MAX(0._EB,(Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD))
+            STEP_FRACTION(DR%IOR) = MAX(0._EB,(Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD))
          ENDIF
 
-         DR%WALL_INDEX = WALL_INDEX(IC,-DR%IOR)
+         IML = MINLOC(STEP_FRACTION,DIM=1)
+         IOR_FIRST = 0
+         SELECT CASE(IML)
+            CASE(1)
+               IOR_FIRST = -3
+            CASE(2)
+               IOR_FIRST = -2
+            CASE(3)
+               IOR_FIRST = -1
+            CASE(5)
+               IOR_FIRST =  1
+            CASE(6)
+               IOR_FIRST =  2
+            CASE(7)
+               IOR_FIRST =  3
+         END SELECT
+         DR%WALL_INDEX = WALL_INDEX(IC,-IOR_FIRST)
          
          ! If no solids boundaries of original cell have been crossed, check boundaries of new grid cell
     
@@ -998,37 +1006,55 @@ DROPLET_LOOP: DO I=1,NLP
             IWP3 = WALL_INDEX(ICN, 3)
             IWM3 = WALL_INDEX(ICN,-3)
             HIT_SOLID = .FALSE.
+            STEP_FRACTION = 1._EB
             IF (KKN>KK .AND. BOUNDARY_TYPE(IWM3)==SOLID_BOUNDARY) THEN
                DR%IOR=-3
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = MAX(0._EB,(Z(KK)-Z_OLD-0.05_EB*DZ(KK))/(DR%Z-Z_OLD))
+               STEP_FRACTION(DR%IOR) = MAX(0._EB,(Z(KK)-Z_OLD-0.05_EB*DZ(KK))/(DR%Z-Z_OLD))
             ENDIF
             IF (KKN<KK .AND. BOUNDARY_TYPE(IWP3)==SOLID_BOUNDARY) THEN
                DR%IOR= 3
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = MAX(0._EB,(Z(KKN)-Z_OLD+0.05_EB*DZ(KKN))/(DR%Z-Z_OLD))
+               STEP_FRACTION(DR%IOR) = MAX(0._EB,(Z(KKN)-Z_OLD+0.05_EB*DZ(KKN))/(DR%Z-Z_OLD))
             ENDIF
             IF (IIN>II .AND. BOUNDARY_TYPE(IWM1)==SOLID_BOUNDARY) THEN
                DR%IOR=-1
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = MAX(0._EB,(X(II)-X_OLD-0.05_EB*DX(II))/(DR%X-X_OLD))
+               STEP_FRACTION(DR%IOR) = MAX(0._EB,(X(II)-X_OLD-0.05_EB*DX(II))/(DR%X-X_OLD))
             ENDIF
             IF (IIN<II .AND. BOUNDARY_TYPE(IWP1)==SOLID_BOUNDARY) THEN
                DR%IOR= 1
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = MAX(0._EB,(X(IIN)-X_OLD+0.05_EB*DX(IIN))/(DR%X-X_OLD))
+               STEP_FRACTION(DR%IOR) = MAX(0._EB,(X(IIN)-X_OLD+0.05_EB*DX(IIN))/(DR%X-X_OLD))
             ENDIF
             IF (JJN>JJ .AND. BOUNDARY_TYPE(IWM2)==SOLID_BOUNDARY) THEN
                DR%IOR=-2
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = MAX(0._EB,(Y(JJ)-Y_OLD-0.05_EB*DY(JJ))/(DR%Y-Y_OLD))
+               STEP_FRACTION(DR%IOR) = MAX(0._EB,(Y(JJ)-Y_OLD-0.05_EB*DY(JJ))/(DR%Y-Y_OLD))
             ENDIF
             IF (JJN<JJ .AND. BOUNDARY_TYPE(IWP2)==SOLID_BOUNDARY) THEN
                DR%IOR= 2
                HIT_SOLID = .TRUE.
-               STEP_FRACTION = MAX(0._EB,(Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD))
+               STEP_FRACTION(DR%IOR) = MAX(0._EB,(Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD))
             ENDIF
-            DR%WALL_INDEX = WALL_INDEX(ICN,DR%IOR)
+
+            IML = MINLOC(STEP_FRACTION,DIM=1)
+            IOR_FIRST = 0
+            SELECT CASE(IML)
+               CASE(1)
+                  IOR_FIRST = -3
+               CASE(2)
+                  IOR_FIRST = -2
+               CASE(3)
+                  IOR_FIRST = -1
+               CASE(5)
+                  IOR_FIRST =  1
+               CASE(6)
+                  IOR_FIRST =  2
+               CASE(7)
+                  IOR_FIRST =  3
+            END SELECT
+            DR%WALL_INDEX = WALL_INDEX(ICN,IOR_FIRST)
          ENDIF
    
          ! Check if droplet has crossed no solid planes or too many
@@ -1045,22 +1071,16 @@ DROPLET_LOOP: DO I=1,NLP
 
             ! Move particle to where it almost hits solid
 
-            DR%X = X_OLD + STEP_FRACTION*DTSP*DR%U
-            DR%Y = Y_OLD + STEP_FRACTION*DTSP*DR%V
-            DR%Z = Z_OLD + STEP_FRACTION*DTSP*DR%W
+            DR%X = X_OLD + MINVAL(STEP_FRACTION)*DTSP*DR%U
+            DR%Y = Y_OLD + MINVAL(STEP_FRACTION)*DTSP*DR%V
+            DR%Z = Z_OLD + MINVAL(STEP_FRACTION)*DTSP*DR%W
 
-            SELECT CASE(ABS(DR%IOR))
-               CASE(1)
-                  XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
-                  IIN = FLOOR(XI+1._EB)
-               CASE(2)
-                  YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
-                  JJN = FLOOR(YJ+1._EB)
-               CASE(3)
-                  ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
-                  KKN = FLOOR(ZK+1._EB)
-            END SELECT
-
+            XI  = CELLSI(FLOOR((DR%X-XS)*RDXINT))
+            YJ  = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
+            ZK  = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
+            IIN = FLOOR(XI+1._EB)
+            JJN = FLOOR(YJ+1._EB)
+            KKN = FLOOR(ZK+1._EB)
             ICN = CELL_INDEX(IIN,JJN,KKN)
 
             IF (IOR_OLD==DR%IOR) CYCLE SUB_TIME_STEP_ITERATIONS
