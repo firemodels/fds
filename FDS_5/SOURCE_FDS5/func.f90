@@ -455,7 +455,7 @@ CONTAINS
 
 SUBROUTINE GET_F_C(Z_1,Z_2,Z_3,F,C,Z_F)
 !Returns progress variables for Mixture Fraction functions for suppression and CO production
-REAL(EB) :: Z_F,Z,WGT,Z_3_MAX,ZZ
+REAL(EB) :: Z_F,WGT,Z_3_MAX,ZZ
 REAL(EB), INTENT(IN) :: Z_1,Z_2,Z_3
 REAL(EB), INTENT(OUT) :: F,C
 INTEGER :: IZ1,IZ2
