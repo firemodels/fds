@@ -486,7 +486,7 @@ ELSE
       IF (ZZ < Z_F) THEN
          F = Z_1 / ZZ
       ELSE
-         F = (Z_1 * (1._EB - Z_F) - Z + Z_F) / (Z_F * (1._EB - ZZ))      
+         F = (Z_1 * (1._EB - Z_F) - ZZ + Z_F) / (Z_F * (1._EB - ZZ))      
       ENDIF      
       Z_3_MAX = (1._EB-WGT)*SPECIES(I_PROG_CO)%Z_MAX(IZ1)+ WGT*SPECIES(I_PROG_CO)%Z_MAX(IZ2)
       C = MAX(0._EB,MIN(1._EB,Z_3 / Z_3_MAX / (1._EB - F)))
