@@ -3940,7 +3940,7 @@ Contains
     !                 goto 2. (time points)
     !
     ! Update interval (seconds) fire ==> evac information
-    DT_Save = 10.0_EB
+    DT_Save = 2.0_EB
     istat = 0
 
     L_use_fed  = .False.
