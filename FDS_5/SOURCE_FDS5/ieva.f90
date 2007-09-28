@@ -13529,7 +13529,7 @@ Contains
     Real(EB) rnd_vec(n_rnd)
     ! a: first parameter, b: second parameter, n_rnd: vector lenght
     Integer i, imode, status
-    Real(EB) p,q,x,y, bound, binv
+    Real(EB) p,q,x, bound, binv
     !
     Call Random_number(rnd_vec)
     imode = 2   ! calculate inverse cdf
@@ -13573,7 +13573,7 @@ Contains
     ! rnd_vec:  32 bit random numbers as a vector
     ! a: first parameter, b: second parameter, n_rnd: vector lenght
     Integer i, imode, status
-    Real(EB) p,q,x,y,bound
+    Real(EB) p,q,x,bound
     !
     Call Random_number(rnd_vec)
     imode = 2   ! calculate inverse cdf
@@ -13595,7 +13595,7 @@ Contains
     ! rnd_vec:  32 bit random numbers as a vector
     ! a: first parameter, b: second parameter, n_rnd: vector lenght
     Integer i, imode, status
-    Real(EB) p,q,x,y,bound, pmax, pmin
+    Real(EB) p,q,x,bound, pmax, pmin
     !
     Call Random_number(rnd_vec)
     imode = 1   ! calculate cdf
@@ -13624,7 +13624,7 @@ Contains
     ! rnd_vec:  32 bit random numbers as a vector
     ! a: first parameter, b: second parameter, n_rnd: vector lenght
     Integer i, imode, status
-    Real(EB) p,q,x,y,bound
+    Real(EB) p,q,x,bound
     !
     Call Random_number(rnd_vec)
     imode = 2   ! calculate inverse cdf
@@ -13644,8 +13644,8 @@ Contains
     Real(EB) rnd_vec(n_rnd)
     ! rnd_vec:  32 bit random numbers as a vector
     ! a: first parameter, b: second parameter, n_rnd: vector lenght
-    Integer i, imode, status
-    Real(EB) p,x,y,bound
+    Integer i, imode
+    Real(EB) p,x
     !
     Call Random_number(rnd_vec)
     imode = 2   ! calculate inverse cdf
@@ -13704,7 +13704,7 @@ Contains
     ! rnd_vec:  32 bit random numbers as a vector
     ! a: first parameter, b: second parameter, n_rnd: vector lenght
     Integer i, imode
-    Real(EB) p,x,y
+    Real(EB) p,x
     !
     Call Random_number(rnd_vec)
     imode = 2   ! calculate inverse cdf
@@ -13756,7 +13756,7 @@ Contains
     ! rnd_vec:  32 bit random numbers as a vector
     ! a: first parameter, b: second parameter, n_rnd: vector lenght
     Integer i, imode
-    Real(EB) p,x,y
+    Real(EB) p,x
     !
     Call Random_number(rnd_vec)
     imode = 2   ! calculate inverse cdf
