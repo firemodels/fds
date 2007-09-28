@@ -923,6 +923,7 @@ ASSUMED_GAS_TEMPERATURE = -1000.   ! Assumed gas temperature, used for diagnosti
 ! Often used numbers
  
 PI      = 4._EB*ATAN(1.0_EB)
+SQRTPI  = SQRT(PI)
 RPI     = 1._EB/PI
 TWOPI   = 2._EB*PI
 PIO2    = PI/2._EB
