@@ -115,6 +115,7 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             FXYZ   = .5_EB*(UDRHODX(I,J,K)  *(1._EB-EPSX(I,J,K))   +  &
                             UDRHODX(I-1,J,K)*(1._EB+EPSX(I-1,J,K)) +  &
                             VDRHODY(I,J,K)  *(1._EB-EPSY(I,J,K))   +  &
@@ -202,7 +203,7 @@ END SUBROUTINE MASS_FINITE_DIFFERENCES
  
 SUBROUTINE DENSITY(NM)
 
-! Update the density
+! Update the density and species mass fractions
 
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT2
@@ -250,6 +251,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    ENDIF
 
    ! Predict the density at the next time step (RHOS or RHO^*)
+
    IF (.NOT.ISOTHERMAL) THEN
       DO K=1,KBAR
          DO J=1,JBAR
@@ -273,6 +275,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    ENDIF
  
    ! Correct densities above or below clip limits
+
    CALL CHECK_DENSITY
 
    ! Extract mass fraction from RHO * YY
@@ -288,6 +291,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    ENDDO
 
    ! Correct mass fractions above or below clip limits
+
    CALL CHECK_MASS_FRACTION
 
    ! Predict background pressure at next time step
@@ -341,7 +345,9 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDDO
       IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
    ENDIF
-    ! Extract predicted temperature at next time step from Equation of State
+
+   ! Extract predicted temperature at next time step from Equation of State
+
    IF (.NOT.ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
          FORALL (I=0:IBP1,J=0:JBP1,K=0:KBP1) TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*RHOS(I,J,K))
@@ -350,6 +356,8 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDIF
       TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
    ENDIF
+
+! The CORRECTOR step
    
 CASE(.FALSE.) PREDICTOR_STEP
 
@@ -366,6 +374,7 @@ CASE(.FALSE.) PREDICTOR_STEP
    ENDDO
 
    ! Correct density at next time step
+
    IF (.NOT.ISOTHERMAL) THEN
       DO K=1,KBAR
          DO J=1,JBAR
@@ -379,17 +388,11 @@ CASE(.FALSE.) PREDICTOR_STEP
       DO N=1,N_SPECIES
          WFAC = 1._EB - SPECIES(N)%RCON/SPECIES(0)%RCON
          FORALL (I=1:IBAR,J=1:JBAR,K=1:KBAR) RHO(I,J,K) = RHO(I,J,K) + WFAC*YY(I,J,K,N)
-!        DO K=1,KBAR
-!           DO J=1,JBAR
-!              DO I=1,IBAR
-!                 RHO(I,J,K) = RHO(I,J,K) + WFAC*YY(I,J,K,N)
-!              ENDDO 
-!           ENDDO
-!        ENDDO
       ENDDO
    ENDIF
 
    ! Correct densities above or below clip limits
+
    CALL CHECK_DENSITY
  
    ! Extract Y_n from rho*Y_n
@@ -405,9 +408,11 @@ CASE(.FALSE.) PREDICTOR_STEP
    ENDDO
 
    ! Correct mass fractions above or below clip limits
+
    CALL CHECK_MASS_FRACTION
 
    ! Correct background pressure
+
    DO I=1,N_ZONE
       PBAR(:,I) = .5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_S_DT(I)*DT)
    ENDDO
@@ -459,6 +464,7 @@ CASE(.FALSE.) PREDICTOR_STEP
    ENDIF
 
    ! Extract temperature from the Equation of State
+
    IF (.NOT.ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
          FORALL (I=0:IBP1,J=0:JBP1,K=0:KBP1) TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*RHO(I,J,K))
@@ -467,15 +473,18 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDIF
       TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
    ENDIF
+
 END SELECT PREDICTOR_STEP
 
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
  
 CONTAINS
  
+
 SUBROUTINE CHECK_DENSITY
  
 ! Redistribute mass from cells below or above the density cut-off limits
+
 USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,RHOMIN,RHOMAX 
 REAL(EB) :: SUM,CONST,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,RHO00,RMIN,RMAX
 INTEGER  :: IC,ISUM
@@ -492,7 +501,8 @@ ELSE
    YYP=>YY
 ENDIF
  
-!Correct undershoots
+! Correct undershoots
+
 RHODELTA = 0._EB
 DO K=1,KBAR
    DO J=1,JBAR
@@ -559,7 +569,8 @@ DO K=1,KBAR
 ENDDO
 RHOP = RHOP + RHODELTA
 
-!Correct overshoots
+! Correct overshoots
+
 RHODELTA = 0._EB
 DO K=1,KBAR
    DO J=1,JBAR
@@ -630,6 +641,9 @@ END SUBROUTINE CHECK_DENSITY
  
  
 SUBROUTINE CHECK_MASS_FRACTION
+
+! Redistribute species mass from cells below or above the cut-off limits
+
 USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,YYMIN,YYMAX
 REAL(EB) :: SUM,CONST,RHYMI,RHYPI,RHYMJ,RHYPJ,RHYMK,RHYPK,RHY0,YMI,YPI,YMJ,YPJ,YMK,YPK,Y00,YMIN,YMAX
 INTEGER  :: IC,N,ISUM, IW_A(-3:3)
@@ -647,9 +661,12 @@ ELSE
 ENDIF
 
 ! Search the domain for negative values of Y or Z. Redistribute mass where appropriate.
+
 SPECIESLOOP: DO N=1,N_SPECIES
    YYDELTA = 0._EB
+
    ! Do undershoots
+
    DO K=1,KBAR
       DO J=1,JBAR
          CHECK_LOOP: DO I=1,IBAR
@@ -764,7 +781,9 @@ SPECIESLOOP: DO N=1,N_SPECIES
    ENDDO
    YYP(:,:,:,N) = YYP(:,:,:,N) + YYDELTA
    YYDELTA=0._EB
+
    ! Do overshoots
+
    DO K=1,KBAR
       DO J=1,JBAR
          CHECK_LOOP2: DO I=1,IBAR
@@ -875,7 +894,9 @@ SPECIESLOOP: DO N=1,N_SPECIES
          ENDDO CHECK_LOOP2
       ENDDO
    ENDDO   
+
    YYP(:,:,:,N) = YYP(:,:,:,N) + YYDELTA   
+
 ENDDO SPECIESLOOP
 
 RETURN
@@ -884,14 +905,14 @@ END SUBROUTINE CHECK_MASS_FRACTION
  
 END SUBROUTINE DENSITY
 
+
+
 SUBROUTINE GET_REV_mass(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
 CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
-
 WRITE(MODULE_DATE,'(A)') massrev(INDEX(massrev,':')+1:LEN_TRIM(massrev)-2)
 READ (MODULE_DATE,'(I5)') MODULE_REV
 WRITE(MODULE_DATE,'(A)') massdate
-
 END SUBROUTINE GET_REV_mass
  
 END MODULE MASS
