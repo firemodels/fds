@@ -44,11 +44,11 @@ SUBROUTINE COMBUSTION_MF
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION2,GET_MOLECULAR_WEIGHT2
 REAL(EB) :: YFU0,A,ETRM,YCOMIN,YO2MIN,YFUMIN,YO2W,YO20,YCO0,Y_SUM_W,&
             DYF,DX_FDT,HFAC_F,DTT,& 
-            Z_F,Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,&
+            Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,&
             F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,Z_2,RHOX, &
             X_FU,X_O,X_FU_0,X_O_0,X_FU_S,X_O_S,X_FU_N,X_O_N,X_O_MIN,X_FU_MIN,COTOO2, &
             Y_F_MAX,TMP_F_MIN,Y_F_CORR,Z2_MIN
-INTEGER :: NODETS,N,I,J,K,II,JJ,KK,SCAN_DISTANCE,IC,IW,IWA(-3:3)
+INTEGER :: NODETS,N,I,J,K,II,IC,IW,IWA(-3:3)
 !LOGICAL :: BURN
 REAL(EB), POINTER, DIMENSION(:,:,:) :: YO2Z,QT,R_SUM_DILUENTS
 !LOGICAL, POINTER, DIMENSION(:,:,:) :: IGNITE
@@ -267,23 +267,6 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                Y_O2_CORR = RN%Y_O2_LL*(RN%CRIT_FLAME_TMP-TMP_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
                Y_F_CORR  = RN%Y_F_LFL*(RN%CRIT_FLAME_TMP-TMP_F_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
                IF (Y_O2_MAX < Y_O2_CORR .OR. Y_F_MAX*RN%Y_F_INLET < Y_F_CORR) CYCLE ILOOPB
-                             
-!               !Get min O2
-!               Y_O2_MAX = 0._EB   
-!               BURN = .FALSE.
-!               BURN_LOOP: DO KK=MAX(1,K-SCAN_DISTANCE),MIN(KBAR,K+SCAN_DISTANCE)
-!                  DO JJ=MAX(1,J-SCAN_DISTANCE),MIN(JBAR,J+SCAN_DISTANCE)
-!                     DO II=MAX(1,I-SCAN_DISTANCE),MIN(IBAR,I+SCAN_DISTANCE)
-!                        IF (YO2Z(II,JJ,KK)>Y_O2_MAX .AND. .NOT.SOLID(CELL_INDEX(II,JJ,KK)) ) THEN
-!                           Y_O2_MAX = YO2Z(II,JJ,KK)
-!                           TMP_MIN = TMP(II,JJ,KK)
-!                        ENDIF
-!                     ENDDO
-!                  ENDDO
-!               ENDDO BURN_LOOP
-!               Y_O2_CORR = RN%Y_O2_LL*(RN%CRIT_FLAME_TMP-TMP_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
-!               IF (Y_O2_MAX<Y_O2_CORR) CYCLE ILOOPB
-
                DYF = MIN(YFU0,YO20/RN%O2_F_RATIO)
                Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F)
                DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
@@ -343,7 +326,6 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
    YO2MIN = 1.E-10_EB
    YFUMIN = 1.E-10_EB
    !Loop and do F -> CO
-   SCAN_DISTANCE=1
    DO K=1,KBAR
       DO J=1,JBAR
          ILOOPY: DO I=1,IBAR
@@ -536,23 +518,6 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
                   ENDIF
                ENDIF
             ENDIF
-!            DO KK=MAX(1,K-SCAN_DISTANCE),MIN(KBAR,K+SCAN_DISTANCE)
-!               DO JJ=MAX(1,J-SCAN_DISTANCE),MIN(JBAR,J+SCAN_DISTANCE)
-!                  DO II=MAX(1,I-SCAN_DISTANCE),MIN(IBAR,I+SCAN_DISTANCE)
-!                     IF (.NOT. SOLID(CELL_INDEX(II,JJ,KK))) THEN
-!                           IF (IGNITE(II,JJ,KK)) BURN = .TRUE.
-!                        IF (YO2Z(II,JJ,KK)>Y_O2_MAX) THEN
-!                           Y_O2_MAX = YO2Z(II,JJ,KK)
-!                           TMP_MIN = TMP(II,JJ,KK)
-!                        ENDIF
-!                        IF (YY(II,JJ,KK,I_FUEL)>Y_F_MAX) THEN
-!                           Y_F_MAX = YY(II,JJ,KK,I_FUEL)
-!                           TMP_F_MIN = TMP(II,JJ,KK)
-!                        ENDIF
-!                     ENDIF
-!                  ENDDO
-!               ENDDO
-!            ENDDO
             Y_O2_CORR = RN%Y_O2_LL*(RN%CRIT_FLAME_TMP-TMP_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
             Y_F_CORR  = RN%Y_F_LFL*(RN%CRIT_FLAME_TMP-TMP_F_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
             IF (Y_O2_MAX < Y_O2_CORR .OR. Y_F_MAX*RN%Y_F_INLET < Y_F_CORR) CYCLE ILOOPY
