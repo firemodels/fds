@@ -471,7 +471,7 @@ z1z2z3: IF(ZZ <= 0._EB .OR. ZZ >= 1._EB) THEN
    F = 0._EB
    Z_F = REACTION(1)%Z_F
 ELSE
-   IF (Z_1==Z) THEN
+   IF (Z_1==ZZ) THEN
       F = 1._EB
       C = 0._EB
       Z_F = REACTION(1)%Z_F
