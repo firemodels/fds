@@ -100,8 +100,8 @@ DO I=1,NRT
          PHILOW = PI*REAL(J-1)/REAL(NRP(I))
          PHIUP  = PI*REAL(J)/REAL(NRP(I))
       ELSEIF (TWO_D) THEN
-         PHILOW = TWOPI*REAL(J-1)/REAL(NRP(I)) + PI/2._EB
-         PHIUP  = TWOPI*REAL(J)/REAL(NRP(I))   + PI/2._EB
+         PHILOW = TWOPI*REAL(J-1)/REAL(NRP(I)) + PIO2
+         PHIUP  = TWOPI*REAL(J)/REAL(NRP(I))   + PIO2
       ELSE
          PHILOW = TWOPI*REAL(J-1)/REAL(NRP(I))
          PHIUP  = TWOPI*REAL(J)/REAL(NRP(I))
@@ -473,7 +473,6 @@ ENDIF DROPLETS
  
 ! A few miscellaneous constants
 
-R4PI       = 1._EB/(4._EB*PI)
 FOUR_SIGMA = 4._EB*SIGMA
 RPI_SIGMA  = RPI*SIGMA
  
@@ -808,7 +807,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      ENDIF
                      RAP = 1._EB/(AXD+AYD+AZ+EXTCOE(I,J,K)*VC*RSA(N))
                      IL(I,J,K) = MAX(0._EB, RAP * (AXU*ILXU + AYU*ILYU + AZ*ILZU +  &
-                                 VC*RSA(N)*R4PI*( KFST4(I,J,K)+KFST4W(I,J,K) +RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                                 VC*RSA(N)*RFPI*( KFST4(I,J,K)+KFST4W(I,J,K) +RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
                   ENDDO CILOOP
                ENDDO CKLOOP
 
@@ -838,7 +837,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      ENDIF
                      RAP = 1._EB/(AX+AZ+EXTCOE(I,J,K)*VC*RSA(N))
                      IL(I,J,K) = MAX(0._EB, RAP * (AX*ILXU + AZ*ILZU + &
-                                 VC*RSA(N)*R4PI*(KFST4(I,J,K)+KFST4W(I,J,K) +  RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) ) 
+                                 VC*RSA(N)*RFPI*(KFST4(I,J,K)+KFST4W(I,J,K) +  RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) ) 
                   ENDDO I2LOOP
                ENDDO K2LOOP
 
@@ -878,7 +877,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         ENDIF
                         RAP = 1._EB/(AX+AY+AZ+EXTCOE(I,J,K)*VC*RSA(N))
                         IL(I,J,K) = MAX(0._EB, RAP * ( AX*ILXU + AY*ILYU + AZ*ILZU + &
-                                    VC*RSA(N)*R4PI*( KFST4(I,J,K)+KFST4W(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                                    VC*RSA(N)*RFPI*( KFST4(I,J,K)+KFST4W(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
                      ENDDO ILOOP
                   ENDDO JLOOP
                ENDDO KLOOP
@@ -1059,7 +1058,7 @@ ELSE selectmethod
    ZZ = MIN(1._EB,Z_1 + Z_2 + Z_3)
    KAPPA_N(I_FUEL)    = ZZ2KAPPA(ZZ,REACTION(1)%Z_F,SPECIES(I_FUEL)%NKAP_MASS,TYY,IBND,I_FUEL)
    KAPPA_N(I_PROG_CO) = ZZ2KAPPA(ZZ,REACTION(2)%Z_F,SPECIES(I_PROG_CO)%NKAP_MASS,TYY,IBND,I_PROG_CO)   
-   KAPPA_N(I_PROG_F)  = ZZ2KAPPA(ZZ,REACTION(3)%Z_F,SPECIES(I_PROG_F)%NKAP_MASS,TYY,IBND,I_PROG_F)   
+   KAPPA_N(I_PROG_F) = ZZ2KAPPA(ZZ,REACTION(3)%Z_F,SPECIES(I_PROG_F)%NKAP_MASS,TYY,IBND,I_PROG_F)   
    KAPPA = (1._EB - F) * ( (1._EB - C) * KAPPA_N(I_FUEL) + C * KAPPA_N(I_PROG_CO)) + F *KAPPA_N(I_PROG_F) 
 ENDIF selectmethod
 KAPPA = KAPPA/(1._EB - YY_SUM)

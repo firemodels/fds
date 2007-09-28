@@ -3,6 +3,7 @@ MODULE RADCALV
 ! Module wrapper for RadCal subroutine
 
 USE PRECISION_PARAMETERS
+USE GLOBAL_CONSTANTS, ONLY: PI,SQRTPI
 IMPLICIT NONE
 
 PRIVATE
@@ -153,19 +154,19 @@ L1000: DO KK=1,NOM
 !
                IF((I==3._EB).AND.(XC<=10)) THEN
                   AOM=XC
-                  XX=.5_EB*3.141593_EB**.5_EB*XC
+                  XX=.5_EB*SQRTPI*XC
                   IF(XX<=3._EB) THEN
                      ENN=1._EB
                      DO N=1,30
-                        ENN=ENN*N
+                        ENN=ENN*REAL(N,EB)
                         MM=2*N+1
-                        ARG=1.128379_EB*(-1._EB)**N*((.88622693_EB*XC)**MM)/(MM*ENN)
+                        ARG=1.128379_EB*(-1._EB)**N*((.88622693_EB*XC)**MM)/(REAL(MM,EB)*ENN)
                         ARGNEW=ARG+AOM
 !     IF(ABS(ARG/ARGNEW)<.000001)N=30
                         AOM=ARGNEW
                      ENDDO
                   ELSE
-                     AOM=1._EB-EXP(-XX**2)/(3.141593_EB**.5_EB*XX)
+                     AOM=1._EB-EXP(-XX**2)/(SQRTPI*XX)
                   ENDIF
                   IF(AOM>=1._EB)AOM=.9999999_EB
                   XC=-DLOG(1._EB-AOM)
@@ -881,7 +882,7 @@ END SUBROUTINE CO
 SUBROUTINE FUEL(OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV)
 
 INTEGER I,J
-REAL(EB) OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV,PI,BE,Q2, &
+REAL(EB) OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV,BE,Q2, &
       WM,GD,OM1,OM2,OM3,OM4,COM1,COM2,COM3,COM4,DINV,PE,W1,SDB, &
       SDA,SDC
 
@@ -893,7 +894,6 @@ IF(OMEGA>5000._EB .OR. OMEGA<1125._EB) THEN
 
 ELSE
 
-   PI=4._EB*ATAN(1._EB)
    BE=5.2412_EB
    Q2=1.4388_EB
    WM=16._EB
@@ -1750,7 +1750,7 @@ REAL(EB) DGROUP_A, DGROUP_B
 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RSA, DLX, DLY, DLZ, DLB
-REAL(EB) :: DPHI0, R4PI, W_AXI, FOUR_SIGMA, RPI_SIGMA, LTSTEP
+REAL(EB) :: DPHI0, W_AXI, FOUR_SIGMA, RPI_SIGMA, LTSTEP
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: DLM
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: NRP
 INTEGER :: NSB,NRA,NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
