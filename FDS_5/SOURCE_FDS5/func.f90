@@ -455,18 +455,18 @@ CONTAINS
 
 SUBROUTINE GET_F_C(Z_1,Z_2,Z_3,F,C,Z_F)
 !Returns progress variables for Mixture Fraction functions for suppression and CO production
-REAL(EB) :: Z_F,Z,WGT,Z_3_MAX
+REAL(EB) :: Z_F,Z,WGT,Z_3_MAX,ZZ
 REAL(EB), INTENT(IN) :: Z_1,Z_2,Z_3
 REAL(EB), INTENT(OUT) :: F,C
 INTEGER :: IZ1,IZ2
 
-Z = Z_1 + Z_2 + Z_3
-WGT =MIN(Z*10000._EB,10000._EB)
+ZZ = Z_1 + Z_2 + Z_3
+WGT =MIN(ZZ*10000._EB,10000._EB)
 IZ1 = FLOOR(WGT)
 IZ2 = MIN(10000,IZ1+1)
 WGT = WGT - IZ1
 
-z1z2z3: IF(Z <= 0._EB .OR. Z >= 1._EB) THEN
+z1z2z3: IF(ZZ <= 0._EB .OR. ZZ >= 1._EB) THEN
    C = 0._EB
    F = 0._EB
    Z_F = REACTION(1)%Z_F
@@ -483,10 +483,10 @@ ELSE
          C = Z_3 / (Z_3 + Z_2)
          Z_F = 1._EB/(1._EB+(1._EB - C)*REACTION(1)%Z_F_CONS + C * REACTION(2)%Z_F_CONS)
       ENDIF
-      IF (Z < Z_F) THEN
-         F = Z_1 / Z
+      IF (ZZ < Z_F) THEN
+         F = Z_1 / ZZ
       ELSE
-         F = (Z_1 * (1._EB - Z_F) - Z + Z_F) / (Z_F * (1._EB - Z))      
+         F = (Z_1 * (1._EB - Z_F) - Z + Z_F) / (Z_F * (1._EB - ZZ))      
       ENDIF      
       Z_3_MAX = (1._EB-WGT)*SPECIES(I_PROG_CO)%Z_MAX(IZ1)+ WGT*SPECIES(I_PROG_CO)%Z_MAX(IZ2)
       C = MAX(0._EB,MIN(1._EB,Z_3 / Z_3_MAX / (1._EB - F)))
@@ -500,20 +500,20 @@ SUBROUTINE GET_F(Z_1,Z_3,F,Z_F)
 !Returns progress variables for Mixture Fraction functions for suppression only
 REAL(EB), INTENT(IN) :: Z_1,Z_3,Z_F
 REAL(EB), INTENT(OUT) :: F
-REAL(EB) :: Z
+REAL(EB) :: ZZ
 
-Z = Z_1 + Z_3
-IF (Z > Z_F) THEN
-   IF (Z >= 1._EB) THEN
+ZZ = Z_1 + Z_3
+IF (ZZ > Z_F) THEN
+   IF (ZZ >= 1._EB) THEN
       F = 1._EB
    ELSE
-      F = (Z_1 * (1._EB - Z_F) - Z + Z_F) / (Z_F * (1._EB - Z))
+      F = (Z_1 * (1._EB - Z_F) - ZZ + Z_F) / (Z_F * (1._EB - ZZ))
    ENDIF
 ELSE
-   IF (Z <= 0._EB) THEN
+   IF (ZZ <= 0._EB) THEN
       F = 0._EB
    ELSE
-      F = Z_1 / Z
+      F = Z_1 / ZZ
    ENDIF
 ENDIF
 F = MIN(1._EB,MAX(0._EB,F))
