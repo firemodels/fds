@@ -236,13 +236,13 @@ IF (PREDICTOR) THEN
    VV => V
    WW => W
    RHOP => RHOS
-   YYP => YYS
+   IF (N_SPECIES > 0) YYP => YYS
 ELSE
    UU => US
    VV => VS
    WW => WS
    RHOP => RHO
-   YYP => YY
+   IF (N_SPECIES > 0) YYP => YY
 ENDIF 
  
 ! Loop through the wall cells, apply mass boundary conditions
@@ -251,7 +251,8 @@ WALL_CELL_LOOP: DO IW=1,NWC
    IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_CELL_LOOP
    IBC = IJKW(5,IW)
    SF  => SURFACE(IBC)
-   IF (N_SPECIES==0 .AND. SF%MASS_FLUX(0)==0._EB) CYCLE WALL_CELL_LOOP
+   IF (N_SPECIES==0 .AND. .NOT. SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX) CYCLE WALL_CELL_LOOP
+   IF (N_SPECIES==0 .AND. SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .AND. SF%MASS_FLUX(0) == 0._EB) CYCLE WALL_CELL_LOOP
    II  = IJKW(1,IW)
    JJ  = IJKW(2,IW)
    KK  = IJKW(3,IW)
@@ -322,7 +323,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
 
          ! If the current time is before the "activation" time, TW, apply simple BCs and get out
 
-         IF (T < TW(IW)) THEN
+         IF (T < TW(IW) .AND. N_SPECIES > 0) THEN
             IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) YY_W(IW,1:N_SPECIES)      = YYP(IIG,JJG,KKG,1:N_SPECIES)
             IF (SOLID(CELL_INDEX(II,JJ,KK)))         YYP(II,JJ,KK,1:N_SPECIES) = YY_W(IW,1:N_SPECIES)
             IF (PREDICTOR) UWS(IW)   = 0._EB 
@@ -355,7 +356,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
  
          ! Add total fuel consumed to various summing arrays
 
-         CONSUME_FUEL: IF (CORRECTOR .AND. SF%THERMALLY_THICK) THEN  
+         CONSUME_FUEL: IF (CORRECTOR .AND. SF%THERMALLY_THICK .AND. I_FUEL /= 0) THEN  
             IF (SF%SURFACE_DENSITY>0._EB .AND. SF%BACKING==EXPOSED) THEN
                IWB = WALL_INDEX_BACK(IW)
                IF (BOUNDARY_TYPE(IWB)==SOLID_BOUNDARY) MASS_LOSS(IWB) = MASS_LOSS(IWB) + MASSFLUX(IW,I_FUEL)*DT
@@ -406,7 +407,8 @@ WALL_CELL_LOOP: DO IW=1,NWC
 
    ! Only set species mass fraction in the ghost cell if it is solid
     
-   IF (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) YYP(II,JJ,KK,1:N_SPECIES) = YY_W(IW,1:N_SPECIES)
+   IF (N_SPECIES > 0 .AND. SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) &
+      YYP(II,JJ,KK,1:N_SPECIES) = YY_W(IW,1:N_SPECIES)
 
 ENDDO WALL_CELL_LOOP
 
