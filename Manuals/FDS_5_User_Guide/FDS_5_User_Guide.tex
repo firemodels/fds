@@ -267,7 +267,7 @@ VTT Technical Research Centre of Finland  }
 
 \vfill
 
-\flushright{\includegraphics[width=2.5in]{figures/nistident_flright_300ppi}}
+\flushright{\includegraphics[width=2.in]{figures/nistident_flright_300ppi}}
 
 
 \end{minipage}
@@ -317,7 +317,7 @@ $SVN Repository$~$Revision: 674 $}
 {\em Carlos M. Gutierrez, Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em William A. Jeffrey, Director} }
+{\em James M. Turner, Acting Director} }
 
 
 \end{minipage}
@@ -337,13 +337,13 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1019-5 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019-5, \pageref{LastPage} pages (September 2007) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019-5, \pageref{LastPage} pages (October 2007) \\
 CODEN: NSPUE2 }
 
 \vfill
 
 \flushright{U.S. GOVERNMENT PRINTING OFFICE \\
-WASHINGTON: 2004 \\
+WASHINGTON: 2007 \\
 \rule{3.5in}{0.01in} \\
 For sale by the Superintendent of Documents, U.S. Government Printing Office \\
 Internet: bookstore.gpo.gov -- Phone: (202) 512-1800 -- Fax: (202) 512-2250 \\
@@ -484,21 +484,22 @@ Doo Chan Choi                           & Rolf Jensen \& Associates, Inc., USA  
 Marco Cigolini                          & Italferr spa, Italy                  \\ \hline
 John Cutonilli                          & Hughes Associates, Inc., USA \\ \hline
 Sylvain Desanghere                      & CTICM (Centre Technique Industriel de la Construction Métallique), France                  \\ \hline
-Montu L Das                             & Gage-Babcock \& Associates, USA and Canada                  \\ \hline
+Montu L. Das                            & Gage-Babcock \& Associates, USA and Canada                  \\ \hline
 Franck Didieux                          & Laboratoire National de Métrologie et d'Essais (LNE), France                  \\ \hline
 Johannes Dimyadi                        & AstraVision-Solutions, New Zealand                  \\ \hline
 Bill Ferrante                           & Roosevelt Fire District, USA                  \\ \hline
-Paul Fuss                               & NIST, USA    \\ \hline  
+Paul Fuss                               & NIST, USA    \\ \hline
 Andreas Gerndt                          & University of Louisiana, USA                  \\ \hline
 Emanuele Gissi                          & Corpo Nazionale dei Vigili del Fuoco, Comando Prov. di Genova, Italy                  \\ \hline
 Paul Hart                               & Swiss Re, GAP Services, USA                  \\ \hline
-Davy Leroy                              & Arup Fire, UK                 \\ \hline
 Hsiao, Li Kai (Gary)                    & Fire Bureau, Taipei, Taiwan                  \\ \hline
-Ilya N Karkin                           & SITIS Ltd., Russia                  \\ \hline
+Hu Zhi-Xin                              & University of Maryland, USA                                            \\ \hline
+Ilya N. Karkin                          & SITIS Ltd., Russia                  \\ \hline
 Susanne Kilian                          & hhpberlin, Fire Safety Engineers, Germany                  \\ \hline
 Sung Chan Kim                           & School of Mechanical Engineering, Chung Ang University, Korea                  \\ \hline
 Pierre-Louis Lamballais                 & Flashover-Backdraft, France                                                                  \\ \hline
-A. Leonardi                             & StIL (Studio di Ingegneria Leonardi), Italy                         \\ \hline
+A.~Leonardi                             & StIL (Studio di Ingegneria Leonardi), Italy                         \\ \hline
+Davy Leroy                              & Arup Fire, UK                 \\ \hline
 Jason Liu                               & Warrington Fire Research, Australia                  \\ \hline
 Timothy Liu                             & Locke Carey Fire Consultants, UK                  \\ \hline
 Dave McGill                             & Seneca College, Ontario, Canada                  \\ \hline
@@ -506,6 +507,7 @@ Ken Miller                              & Las Vegas Fire \& Rescue, USA         
 Pete Muir                               & Safe Consulting, UK                  \\ \hline
 Stephen Olenick                         & Combustion Science \& Engineering, Inc., USA                  \\ \hline
 Kristopher Overholt                     & University of Houston-Downtown, USA                  \\ \hline
+PENG Wei                                & State Key Labortory of Fire Science, China                  \\ \hline
 Andrew Purchase                         & Maunsell, Australia                  \\ \hline
 Christian Rogsch                        & University of Wuppertal, Germany                  \\ \hline
 Michael Roth                            & RWDI, Canada                  \\ \hline
@@ -517,16 +519,15 @@ Jamie Stern-Gottfried                   & Arup Fire, UK                 \\ \hlin
 Boris Stock                             & BFT Cognos Gmb, Germany                  \\ \hline
 Blair Stratton                          & Beca, New Zealand                   \\ \hline
 Csaba Szilagyi                          & Szolnok Fire Department, Hungary                  \\ \hline
-Yang Shan-You                           & State Key Laboratory of Fire Science, China                  \\ \hline
 Charlie Thornton                        & Thunderhead Engineering, USA                  \\ \hline
 Sebastian Ukleja                        & University of Ulster, Northern Ireland                  \\ \hline
 Giacomo Villi                           & Dipartimento Fisica Tecnica (DfT) UNIPd, Italy                  \\ \hline
 Andreas Vischer                         & RWTH Aachen University, Germany                  \\ \hline
 Karl Wallasch                           & Hoare Lea Fire Engineering, UK                  \\ \hline
 Kaoru Wakatsuki                         & National Research Institute of Fire and Disaster, Japan                  \\ \hline
-PENG Wei                                & State Key Labortory of Fire Science, China                  \\ \hline
+Yang Shan-You                           & State Key Laboratory of Fire Science, China                  \\ \hline
 Robin Zevotek                           & C\&S Engineers, Life Safety Services, Syracuse, New York, USA                  \\ \hline
-Hu Zhi-Xin                              & University of Maryland, USA                                            \\ \hline
+
                                         & GIDAI, University of Cantabria, Spain                  \\ \hline
 %\end{tabular*}
 \end{longtable}
@@ -8923,39 +8924,13 @@ with different grid dimensions.
 Using FDS  version 1, Bounagui {\em  et al.}~\cite{Bounagui:1} studied
 the effect of grid size on simulation results to determine the nominal
 grid size for future work. A propane burner 0.1~m by 0.1~m was modeled
-with  a heat  release rate  of  1500~kW. The  grid sizes  used in  the
-modeling are  given in Table~\ref{gridsize}. The results  of the model
-were         compared         against        Heskestad's         plume
-correlation.   Table~\ref{Heskestad}   shows   the  plume   centerline
-temperature comparisons.  Obviously, the smaller  grids provide better
-agreements among predictive methods.  A similar analysis was performed
+with  a heat  release rate  of  1500~kW.   A similar analysis was performed
 using  Alpert's ceiling  jet correlation~\cite{SFPE:Alpert}  that also
-showed better  predictions and reasonable agreement  with smaller grid
+showed better  predictions   with smaller grid
 sizes.  In a  related study,  Bounagui {\em  et al.}~\cite{Bounagui:2}
 used  FDS to  evaluate  the emergency  ventilation  strategies in  the
 Louis-Hippolyte-La Fontaine Tunnel in Montreal, Canada.
 
-\begin{table}[ht]
-\begin{center}
-\caption{Grid    Sizes    for    Computational    Domain    used    in
-Ref.~\cite{Bounagui:1}} \label{gridsize} \vspace{0.1in}
-\begin{tabular}{|c|c|}
-\hline Cases&Grid Size (m)\\ \hline \hline Case 1&0.20 x 0.20 x 0.20\\
-\hline Case 2&0.14 x 0.14 x  0.14\\ \hline Case 3&0.10 x 0.10 x 0.10\\
-\hline Case 4&0.08 x 0.08 x 0.08\\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-\begin{table}[ht]
-\begin{center}
-\label{Heskestad} \caption{Plume Centerline Temperature Comparisons~\cite{Bounagui:1}} \vspace{0.1in}
-\begin{tabular}{|c|c|c|c|c|}        \hline
-Heskestad & Case 1 & Case 2 & Case  3 & Case 4 \\ \hline 839 C & 479 C
-& 593 C & 962 C & 967 C \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
 
 Xin~\cite{Xin:NFPA2004}  used FDS  to  model a  methane fueled  square
 burner (1~m  by 1~m) in  the open. Engineering correlations  for plume
