@@ -55,7 +55,8 @@ CALL GET_INPUT_FILE
 IF (FN_INPUT(1:1)==' ') THEN
    IF (MYID==0) THEN
       WRITE(LU_ERR,'(/A)') "Fire Dynamics Simulator"
-      WRITE(LU_ERR,'(/A,A)') "Version: ",TRIM(VERSION_STRING)
+      IF (SERIAL)   WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING)," Serial"
+      IF (PARALLEL) WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING)," Parallel"
       WRITE(LU_ERR,'(A,I4)') "SVN Revision Number: ",SVN_REVISION_NUMBER
       WRITE(LU_ERR,'(A,A)') "Compile Date: ",TRIM(COMPILE_DATE)
       WRITE(LU_ERR,'(/A)')  "Consult FDS Users Guide Chapter, Running FDS, for further instructions."
