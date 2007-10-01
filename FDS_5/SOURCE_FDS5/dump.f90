@@ -1642,20 +1642,22 @@ INTEGER :: NM,I,NN,N,NR,NL
 ! Write out preliminary stuff to error file (unit 0)
  
 WRITE(LU_ERR,'(/A/)')      ' Fire Dynamics Simulator'
-WRITE(LU_ERR,'(A,A)')      ' Compilation Date : ',COMPILE_DATE
-WRITE(LU_ERR,'(A,A)')      ' Version          : ',VERSION_STRING
+WRITE(LU_ERR,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
+IF (SERIAL)   WRITE(LU_ERR,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
+IF (PARALLEL) WRITE(LU_ERR,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
 WRITE(LU_ERR,'(A,I4/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
-WRITE(LU_ERR,'(A,A)')      ' Job TITLE        : ',TITLE
-WRITE(LU_ERR,'(A,A/)')     ' Job ID string    : ',CHID
+WRITE(LU_ERR,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
+WRITE(LU_ERR,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
  
 ! Write out the input parameters to output file (unit 6)
  
 WRITE(LU_OUTPUT,'(/A/)')      ' Fire Dynamics Simulator'
-WRITE(LU_OUTPUT,'(A,A)')      ' Compilation Date : ',COMPILE_DATE
-WRITE(LU_OUTPUT,'(A,A)')      ' Version          : ',VERSION_STRING
+WRITE(LU_OUTPUT,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
+IF (SERIAL)   WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
+IF (PARALLEL) WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
 WRITE(LU_OUTPUT,'(A,I4/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
-WRITE(LU_OUTPUT,'(A,A)')      ' Job TITLE        : ',TITLE
-WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',CHID
+WRITE(LU_OUTPUT,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
+WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
  
 IF (APPEND) RETURN
  
