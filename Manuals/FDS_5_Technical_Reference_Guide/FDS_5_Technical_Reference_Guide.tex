@@ -3695,20 +3695,19 @@ where
                \left[\left(\sin\theta^+\right)^2 -
                      \left(\sin\theta^-\right)^2\right] \nonumber
 \end{eqnarray}
-Here $\bf i$, $\bf j$ and $\bf k$ are the base vectors of the Cartesian
-coordinate system. $\theta^+$, $\theta^-$, $\phi^+$ and $\phi^+$ are
-the upper and lower boundaries of the control angle in the polar and
-azimuthal directions, respectively,
-and $\Delta\theta = \theta^+ - \theta^-$ and
-$\Delta\phi = \phi^+ - \phi^-$. The solution method of (\ref{RTEdiscrete3}) is
-based on an explicit marching sequence~\cite{Kim}. The marching direction
-depends on the propagation direction of the radiation
-intensity. As the marching is done in the ``downwind'' direction,
-the ``upwind''
-intensities in all three spatial directions are known, and the
-intensity $I_{ijk}^l$ can be solved directly. Iterations may be needed
-only with the reflective walls and optically thick situations.
-Currently, no iterations are made.
+Here $\bf i$, $\bf j$ and $\bf k$ are the base vectors of the
+Cartesian coordinate system. $\theta^+$, $\theta^-$, $\phi^+$ and
+$\phi^-$ are the upper and lower boundaries of the control angle in
+the polar and azimuthal directions, respectively, and $\Delta\theta =
+\theta^+ - \theta^-$ and $\Delta\phi = \phi^+ - \phi^-$. The solution
+method of (\ref{RTEdiscrete3}) is based on an explicit marching
+sequence~\cite{Kim}. The marching direction depends on the propagation
+direction of the radiation intensity. As the marching is done in the
+``downwind'' direction, the ``upwind'' intensities in all three
+spatial directions are known, and the intensity $I_{ijk}^l$ can be
+solved directly. Iterations may be needed only with the reflective
+walls and optically thick situations.  Currently, no iterations are
+made.
 
 \subsection{Radiation Heat Transfer to Solid Objects}
 
