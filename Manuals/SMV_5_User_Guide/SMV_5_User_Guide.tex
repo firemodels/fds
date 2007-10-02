@@ -169,7 +169,7 @@ $SVN Repository$~$Revision$}
 {\em Carlos M. Gutierrez, Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em James M. Turner, Acting Director} }
+{\em William A. Jeffrey, Director} }
 
 
 \end{minipage}
@@ -243,7 +243,9 @@ computed by FDS.  \Smokeview\ also visualizes static data at
 particular times again using 2D or 3D contours of data such as
 temperature and flow vectors showing flow direction and magnitude.
 
-
+\Smokeview\ and associated
+documentation for Windows, Linux and Mac/OSX may be downloaded from the web site {\bf
+\hhref{http://fire.nist.gov/fds}} at no cost.
 
 %---------------------------------------------------------------------------------
 %------------------------ Disclaimer ---------------------------------------------
@@ -698,7 +700,13 @@ part of all Windows distributions.
 Most computers purchased today are perfectly adequate for running \smokeview.
 For \smokeview\ it is more important to obtain a fast graphics card
 than a fast CPU. If the computer will run both \fds\ and \smokeview\,
-then it is important to obtain a fast CPU as well.
+then it is important to obtain a fast CPU as well. For example, the townhouse case used for many examples in this report consists
+of about 180000 grid cells and is used in many of the Figures in
+this report, required 5.0 hours of CPU time on a 3.6~GHZ Xeon
+Windows XP system. Cases with more grid cells and longer
+simulation times (the townhouse case simulated 300~s of smoke
+flow) would clearly benefit from a faster CPU and more memory
+which are now relatively inexpensive.
 
 %---------------------------------------------------------------------------------
 %------------------------ Basics  ------------------------------------------------
@@ -2516,9 +2524,13 @@ allowing one to continue visualization.  Smokeview adds the label
 compressed. Smokezip adds the extension svz to the corresponding
 compressed file name.
 
-Smokezip is run from the command line as follows:
+The usage for Smokezip is
 \begin{verbatim}
-smokezip [-f] [-s sourcedir] [-d destdir] [-c] casename [destdir]
+smokezip 1.0 - Mar 12 2006
+
+  Compresses Smokeview 3D smoke and boundary files
+
+  smokezip [-f] [-s sourcedir] [-d destdir] [-c] casename [destdir]
 \end{verbatim}
 
 \blist
@@ -3962,7 +3974,7 @@ draw blockages.  Blockages are drawn either snapped to the nearest
 grid (5), drawn at locations as specified in the FDS input file
 (6) or drawn as specified in a compatible CAD package (7)\footnote{There are various
 third party tools that have been developed to help process obstruction data for FDS. See
-the FDS/Smokeview website for details.}.   (default: 5)
+the FDS/Smokeview website, \hhref{http://fire.nist.gov/fds/}, for details.}.   (default: 5)
 
 \hitem{CLIP} Specifies the near and far clipping plane
 locations.  Dimensions are relative to the longest side of
@@ -4981,7 +4993,7 @@ A program called DXF2FDS, written by David Sheppard of the US Bureau of Alcohol,
 input file and a Smokeview geometric description file (.GE1) given
 a CAD description of the building being modelled.  The CAD
 description must be in a {\em dxf}\ format and created using {\em 3DFACE}\ commands.  The .GE1 file has a simple text format and is
-described below. Details of this program can be found at the FDS/Smokeview website.
+described below. Details of this program can be found at the FDS/Smokeview website, \hhref{http://fire.nist.gov/fds/}.
 
 \begin{verbatim}
 [APPEARANCE]
