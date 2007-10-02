@@ -3141,7 +3141,7 @@ void Args(int argc, char **argv){
   zonescale=a_zonescale;
 
   if(argc==1){
-    usage(argv);
+  //  usage(argv);
     exit(1);
   }
   if(strncmp(argv[1],"-ini",3)==0){
@@ -3296,9 +3296,35 @@ void Args(int argc, char **argv){
       exit(0);
     }
     else {
-      printf(" unknown option: %s\n",argv[i]);usage(argv);scanf("%s",buffer);exit(1);
+      printf(" unknown option: %s\n",argv[i]);
+      usage(argv);scanf("%s",buffer);exit(1);
     }
   }
+}
+
+/* ------------------ version ------------------------ */
+
+void version(void){
+    char smv_version[100];
+    int svn_num;
+
+    getSMVversion(smv_version);  // get Smokeview version (ie 5.x.z)
+    svn_num=getmaxrevision();    // get svn revision number
+    printf("\n");
+    printf("Smokeview\n\n");
+    printf("Version: %s\n",smv_version);
+    printf("SVN Revision Number: %i\n",svn_num);
+    printf("Compile Date: %s\n",__DATE__);
+#ifdef WIN32
+    printf("Platform: WIN32\n");
+#endif
+#ifdef pp_OSX
+    printf("Platform: OS X\n");
+#endif
+#ifdef pp_LINUX
+    printf("Platform: LINUX\n");
+#endif
+
 }
 
 /* ------------------ usage ------------------------ */
@@ -3312,10 +3338,12 @@ void usage(char **argv){
   printf("  casename = project id (file names without the extension)\n");
   printf("         m = maximum number of particles.  Default=%i\n",MAXPOINTS);
   printf("         n = maximum number of particle frames.  Default=%i\n",MAXFRAMES);
+  printf("     -help = display this message\n");
   printf("      -ini = output default smokeview parameters to smokeview.ini\n");
   printf("     -part = load particle file if present \n");
   printf("   -nopart = do not load particle file \n");
   printf("   -stereo = activate stereo mode (if supported)\n");
+  printf("  -version = display version information\n");
   printf("    -build = show pre-preprocessing directives used to build smokeview\n");
   if(showbuild==1){
     printf("  \n");

@@ -44,7 +44,7 @@ void OpenSMVFile(char *filebuffer,int filebufferlength,int *openfile){
     }
   }
   else{
-    printf("smv open error code=%x\n",CommDlgExtendedError());
+    //printf("smv open error code=%x\n",CommDlgExtendedError());
   }
 }
 #endif
