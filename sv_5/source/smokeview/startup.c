@@ -1634,16 +1634,22 @@ void initvars1(void){
 #endif
 
   {
-    char sv_version[100];
+    char version[100];
+    char svn_version[100];
+    char smv_version[100];
     int svn_num;
 
-    svn_num=getmaxrevision();
+    getSMVversion(smv_version);  // get Smokeview version (ie 5.x.z)
+    svn_num=getmaxrevision();    // get svn revision number
+    sprintf(svn_version,"%i",svn_num); // convert svn revision number to a character string
 
-#ifdef pp_TEST
-    sprintf(sv_version,"5.1.x_%i",svn_num);
-#else
-    sprintf(sv_version,"5.0.0_%i",svn_num);
-#endif
+// construct string of the form:
+//   5.x.y_#
+
+    strcpy(version,smv_version);
+    strcat(version,"_");
+    strcat(version,svn_version);
+
     strcpy(TITLEBASE,"Smokeview ");
 
     // dummy comment to force increment of svn build number
@@ -1653,7 +1659,7 @@ void initvars1(void){
 #ifdef pp_TEST
     strcat(TITLEBASE," Test");
 #endif
-    strcat(TITLEBASE,sv_version);
+    strcat(TITLEBASE,version);
     strcat(TITLEBASE," - ");
 
     strcpy(TRAINERTITLEBASE,"Smokeview Demonstrator");
@@ -1664,7 +1670,7 @@ void initvars1(void){
 #ifdef pp_TEST
     strcat(TRAINERTITLEBASE," Test");
 #endif
-    strcat(TRAINERTITLEBASE,sv_version);
+    strcat(TRAINERTITLEBASE,version);
     strcat(TRAINERTITLEBASE," - ");
 
   }
@@ -1855,6 +1861,14 @@ void initvars1(void){
   }
 
 }
+
+/* ------------------ getSMVversion ------------------------ */
+
+void getSMVversion(char *SMVversion){
+  strcpy(SMVversion,"5.0.1");
+}
+
+/* ------------------ getrevision ------------------------ */
 
 int getrevision(char *svn){
   char svn_string[256];

@@ -31,8 +31,14 @@ int main(int argc, char **argv){
   initvars0();
   initcolors();
   initvars1();
+  if(argc==1){
+    version();
+  }
 #ifdef WIN32
   copy_args(&argc, argv, &argv_sv);
+  if(argc==1){
+    exit(0);
+  }
   smv_file=argv_sv[1];
 #else
   argv_sv=argv;
