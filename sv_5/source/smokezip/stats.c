@@ -12,6 +12,9 @@
 #pragma warning (disable:4244)		/* disable bogus conversion warnings */
 #endif
 
+// svn revision character string
+char stats_revision[]="$Revision: 624 $";
+
 pdfdata pdftemp;
 
 float minval(float f1, float f2);

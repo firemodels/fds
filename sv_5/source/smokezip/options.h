@@ -1,5 +1,15 @@
 
  /* ------------------ options ------------------------ */
+#ifdef WIN32
+#pragma warning (disable:4996)		
+#pragma warning (disable:4701)		
+#pragma warning (disable:4310)		
+#pragma warning (disable:4127)		
+#pragma warning (disable:4267)		
+#pragma warning (disable:4244)		
+#endif
+
+
 
 #ifndef pp_RELEASE
 #undef _DEBUG
