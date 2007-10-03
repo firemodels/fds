@@ -11,10 +11,6 @@
 // svn revision character string
 char CNV3dsmoke_revision[]="$Revision$";
 
-#ifdef WIN32
-#pragma warning (disable:4244)		/* disable bogus conversion warnings */
-#endif
-
 #define ijknode(i,j,k) ((i)+(j)*nx+(k)*nxy)
 
 #ifdef pp_LIGHT

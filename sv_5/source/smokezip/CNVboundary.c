@@ -8,10 +8,6 @@
 #include "svzip.h"
 #include "MALLOC.h"
 
-#ifdef WIN32
-#pragma warning (disable:4244)		/* disable bogus conversion warnings */
-#endif
-
 // svn revision character string
 char CNVboundary_revision[]="$Revision$";
 

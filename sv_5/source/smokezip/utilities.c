@@ -10,10 +10,6 @@
 #include "MALLOC.h"
 #include "svn_revision.h"
 
-#ifdef WIN32
-#pragma warning (disable:4244)		/* disable bogus conversion warnings */
-#endif
-
 // svn revision character string
 char utilities_revision[]="$Revision$";
 
