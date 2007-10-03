@@ -892,7 +892,7 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,RELAXATION_FACTOR,FYI, &
                 THICKEN_OBSTRUCTIONS, &
                 EVAC_PRESSURE_ITERATIONS,EVAC_TIME_ITERATIONS, &
                 PRESSURE_CORRECTION,CHECK_POISSON,STRATIFICATION,RESTART_CHID, &
-                CFL_MAX,CFL_MIN,VN_MAX,VN_MIN,SOLID_PHASE_ONLY
+                CFL_MAX,CFL_MIN,VN_MAX,VN_MIN,SOLID_PHASE_ONLY,SMOKE_ALBEDO
  
 ! Physical constants
  
@@ -911,6 +911,7 @@ MW_AIR  = 28.8_EB        ! g/mol
 MW_SOOT = 0.9_EB * 12._EB + 0.1_EB * 1._EB
 HUMIDITY= -1._EB                           ! Relative Humidity
 RHO_SOOT= 1850._EB                         ! Density of soot particle (kg/m3)
+SMOKE_ALBEDO= 0.3        !Albedo of smoke
 RESTART_CHID = CHID
  
 ! Empirical heat transfer constants
