@@ -9,9 +9,6 @@
 #include "svzip.h"
 #include "MALLOC.h"
 
-#ifdef WIN32
-#pragma warning (disable:4244)		/* disable bogus conversion warnings */
-#endif
 #define MARK 255
 
 #define FORTREAD(read) fseek(BOUNDARYFILE,4,SEEK_CUR);returncode=read;fseek(BOUNDARYFILE,4,SEEK_CUR);
