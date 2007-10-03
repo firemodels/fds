@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 // svn revision character string
-char assert_revision[]="$Revision: 624 $";
+char assert_revision[]="$Revision$";
 
 
 void _Assert(char *filename, unsigned linenumber){

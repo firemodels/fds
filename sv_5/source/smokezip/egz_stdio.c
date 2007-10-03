@@ -7,7 +7,7 @@
 
 int getendian(void);
 // svn revision character string
-char egz_stdio_revision[]="$Revision: 624 $";
+char egz_stdio_revision[]="$Revision$";
 
 /* ------------------ EGZ_FCLOSE ------------------------ */
 

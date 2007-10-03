@@ -1,6 +1,6 @@
 #include "options.h"
 // svn revision character string
-char CNVpart_revision[]="$Revision: 624 $";
+char CNVpart_revision[]="$Revision$";
 #ifdef pp_PART
 #include "zlib.h"
 #include <stdio.h>

@@ -15,7 +15,7 @@
 #endif
 
 // svn revision character string
-char utilities_revision[]="$Revision: 624 $";
+char utilities_revision[]="$Revision$";
 
 #define MARK 255
 

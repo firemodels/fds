@@ -13,7 +13,7 @@
 #endif
 
 // svn revision character string
-char CNViso_revision[]="$Revision: 624 $";
+char CNViso_revision[]="$Revision$";
 
 int sortflag;
 
