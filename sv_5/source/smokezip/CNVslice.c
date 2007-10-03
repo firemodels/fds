@@ -12,6 +12,9 @@
 #pragma warning (disable:4244)		/* disable bogus conversion warnings */
 #endif
 
+// svn revision character string
+char CNVslice_revision[]="$Revision: 624 $";
+
 #ifdef pp_RLETEST
 
 #ifndef pp_cvf

@@ -114,6 +114,10 @@ typedef struct {
 } pdfdata;
 
 
+int getrevision(char *svn);
+void getSMZversion(char *SMZversion);
+int getmaxrevision(void);
+void version(void);
 unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
 int readsmv(char *file);
 int getendian(void);

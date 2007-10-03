@@ -16,6 +16,9 @@
 
 #define FORTREAD(read) fseek(BOUNDARYFILE,4,SEEK_CUR);returncode=read;fseek(BOUNDARYFILE,4,SEEK_CUR);
 
+// svn revision character string
+char main_revision[]="$Revision: 730 $";
+
 
 /* ------------------ main ------------------------ */
 
@@ -88,7 +91,7 @@ int main(int argc, char **argv){
   prog=argv[0];
   filebase=NULL;
   if(argc==1){
-    usage(prog);
+    version();
     return 1;
   }
 
@@ -170,6 +173,10 @@ int main(int argc, char **argv){
  //         }
           i++;
         }
+        break;
+      case 'h':
+        usage(prog);
+        return 1;
         break;
       default:
         usage(prog);
@@ -374,9 +381,15 @@ void filecopy(char *destdir, char *file, char *filebase){
 
 void usage(char *prog){
   char pp[2];
+  char smv_version[100];
+  int svn_num;
+
+  getSMZversion(smv_version);  // get Smokeview version (ie 5.x.z)
+  svn_num=getmaxrevision();    // get svn revision number
+
   strcpy(pp,"%");
   printf("\n");
-  printf("  smokezip 1.1 - %s\n\n",__DATE__);
+  printf("  smokezip %s(%i) - %s\n\n",smv_version,svn_num,__DATE__);
   printf("  Compresses Smokeview 3D smoke, slice, iso-surface and boundary files\n\n");
   printf("  %s",prog);
   printf(" [-c -f -3 -b -s -i]");
@@ -397,7 +410,8 @@ void usage(char *prog){
   printf("  -a albedo  - specifies albedo (0.0 to 1.0) of 3d smoke.\n");
   printf("               Used with the -l option\n");
 #endif
-  printf("  -c  - cleans or removes all compressed files\n\n");
+  printf("  -c  - cleans or removes all compressed files\n");
+  printf("  -h  - display this message\n\n");
   printf("  casename - Smokeview .smv file\n");
   printf("  Min and max bounds used to compress boundary files are obtained\n");
   printf("  from the casename.ini file or calculated by %s if casename.ini \n",prog);

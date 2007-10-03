@@ -8,6 +8,9 @@
 #include "svzip.h"
 #include "MALLOC.h"
 
+// svn revision character string
+char readfiles_revision[]="$Revision: 624 $";
+
 int readsmv(char *smvfile){
   
   FILE *streamsmv;

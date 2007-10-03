@@ -5,6 +5,10 @@ int getendian(void);
 #define BIG_ENDIAN 1
 #define LITTLE_ENDIAN 0
 extern int endianswitch;
+// svn revision character string
+
+char endian_revision[]="$Revision: 624 $";
+
 /* ------------------ getendian ------------------------ */
 
 int getendian(void){
