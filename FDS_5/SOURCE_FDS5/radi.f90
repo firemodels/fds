@@ -197,7 +197,7 @@ INIT_WIDE_BAND: IF (WIDE_BAND_MODEL) THEN
 ! Fraction of blackbody emission in a wavelength interval
  
    PLANCK_C2 = 14387.69_EB            ! micron.K
-   NLAMBDAT  = 4000_EB
+   NLAMBDAT  = 4000
    LTSTEP    = 25.0_EB           ! maximum LAMBDA*T = NLANBDAT*LTSTEP
    ALLOCATE(BBFRAC(0:NLAMBDAT),STAT=IZERO)
    CALL ChkMemErr('INIT','BBFRAC',IZERO)
