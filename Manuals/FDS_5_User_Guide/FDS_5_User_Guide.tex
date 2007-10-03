@@ -5926,7 +5926,7 @@ Three different values of the temperature can be saved via the line:
 
 \noindent
 where the values are in degrees C. Note that the isosurface output
-files {\bf CHID\_$n$.iso} can become very large, so experiment with different sampling rates.
+files {\bf CHID\_$n$.iso} can become very large, so experiment with different sampling rates ({\ct DT\_ISOF} on the {\ct DUMP} line).
 
 Any gas phase quantity can animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be
 computed in every mesh cell at every output time step. For quantities like {\ct TEMPERATURE}, this is not a problem, as FDS computes it and saves it
@@ -7149,8 +7149,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct IGNITION\_TEMPERATURE}           & Real            & Ignition temperature              & $^\circ$C           & 5000.                   \\ \hline
 {\ct LEAK\_PATH}                      & Integer Pair    & Pressure Zones for leakage        &                     &                         \\ \hline
 {\ct MASS\_FLUX(I)}                   & Real Array      & For species {\ct I}               &                     & 0.                      \\ \hline
-{\ct MASS\_FLUX\_TOTAL}               & Real            & Total Mass Flux                   &                     &                         \\ \hline
-{\ct MASS\_FRACTION(I)}               & Real Array      & For species {\ct I}               &                     &                         \\ \hline
+{\ct MASS\_FLUX\_TOTAL}               & Real            & Total Mass Flux                   & kg/m$^2$ s          &                         \\ \hline
+{\ct MASS\_FRACTION(I)}               & Real Array      & For species {\ct I}               & kg/m$^2$ s          &                         \\ \hline
 {\ct MATL\_ID}                        & Char. 2D Array  & (Layer,Component)                 &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION}            & Real 2D Array   & (Layer,Component)                 &                     &                         \\ \hline
 {\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 1E12                    \\ \hline
