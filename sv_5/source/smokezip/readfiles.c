@@ -9,7 +9,7 @@
 #include "MALLOC.h"
 
 // svn revision character string
-char readfiles_revision[]="$Revision: 624 $";
+char readfiles_revision[]="$Revision$";
 
 int readsmv(char *smvfile){
   

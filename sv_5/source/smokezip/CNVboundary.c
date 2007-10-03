@@ -13,7 +13,7 @@
 #endif
 
 // svn revision character string
-char CNVboundary_revision[]="$Revision: 624 $";
+char CNVboundary_revision[]="$Revision$";
 
 pdfdata pdfmerge,pdfframe;
 

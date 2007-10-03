@@ -7,7 +7,7 @@ int getendian(void);
 extern int endianswitch;
 // svn revision character string
 
-char endian_revision[]="$Revision: 624 $";
+char endian_revision[]="$Revision$";
 
 /* ------------------ getendian ------------------------ */
 
