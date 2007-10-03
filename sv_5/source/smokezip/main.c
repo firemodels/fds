@@ -17,7 +17,7 @@
 #define FORTREAD(read) fseek(BOUNDARYFILE,4,SEEK_CUR);returncode=read;fseek(BOUNDARYFILE,4,SEEK_CUR);
 
 // svn revision character string
-char main_revision[]="$Revision: 730 $";
+char main_revision[]="$Revision$";
 
 
 /* ------------------ main ------------------------ */

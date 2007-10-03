@@ -13,7 +13,7 @@
 #endif
 
 // svn revision character string
-char stats_revision[]="$Revision: 624 $";
+char stats_revision[]="$Revision$";
 
 pdfdata pdftemp;
 

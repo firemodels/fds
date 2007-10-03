@@ -12,7 +12,7 @@ static int checkmemoryflag=1;
 #endif
 
 // svn revision character string
-char dmalloc_revision[]="$Revision: 624 $";
+char dmalloc_revision[]="$Revision$";
 
 #ifdef pp_memstatus
 #ifdef WIN32

@@ -9,7 +9,7 @@
 #include "MALLOC.h"
 
 // svn revision character string
-char CNV3dsmoke_revision[]="$Revision: 624 $";
+char CNV3dsmoke_revision[]="$Revision$";
 
 #ifdef WIN32
 #pragma warning (disable:4244)		/* disable bogus conversion warnings */

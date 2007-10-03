@@ -13,7 +13,7 @@
 #endif
 
 // svn revision character string
-char CNVslice_revision[]="$Revision: 624 $";
+char CNVslice_revision[]="$Revision$";
 
 #ifdef pp_RLETEST
 
