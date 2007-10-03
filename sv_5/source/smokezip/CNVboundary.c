@@ -12,6 +12,9 @@
 #pragma warning (disable:4244)		/* disable bogus conversion warnings */
 #endif
 
+// svn revision character string
+char CNVboundary_revision[]="$Revision: 624 $";
+
 pdfdata pdfmerge,pdfframe;
 
 

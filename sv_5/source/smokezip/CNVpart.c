@@ -1,4 +1,6 @@
 #include "options.h"
+// svn revision character string
+char CNVpart_revision[]="$Revision: 624 $";
 #ifdef pp_PART
 #include "zlib.h"
 #include <stdio.h>
@@ -9,9 +11,7 @@
 #include "svzip.h"
 #include "MALLOC.h"
 
-#ifdef WIN32
-#pragma warning (disable:4244)		/* disable bogus conversion warnings */
-#endif
+
 
 void endian_switch(void *val, int nval);
 #define FORTREAD(var,size) fseek(PARTFILE,4,SEEK_CUR);\

@@ -6,6 +6,8 @@
 #include "MALLOC.h"
 
 int getendian(void);
+// svn revision character string
+char egz_stdio_revision[]="$Revision: 624 $";
 
 /* ------------------ EGZ_FCLOSE ------------------------ */
 

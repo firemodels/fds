@@ -8,10 +8,14 @@
 #include "egz_stdio.h"
 #include "svzip.h"
 #include "MALLOC.h"
+#include "svn_revision.h"
 
 #ifdef WIN32
 #pragma warning (disable:4244)		/* disable bogus conversion warnings */
 #endif
+
+// svn revision character string
+char utilities_revision[]="$Revision: 624 $";
 
 #define MARK 255
 
@@ -261,5 +265,88 @@ void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *n
   normal[1]/=norm2;
   normal[2]/=norm2;
 
+
+}
+
+/* ------------------ version ------------------------ */
+
+void version(void){
+    char smv_version[100];
+    int svn_num;
+
+    getSMZversion(smv_version);  // get Smokeview version (ie 5.x.z)
+    svn_num=getmaxrevision();    // get svn revision number
+    printf("\n");
+    printf("Smokezip\n\n");
+    printf("Version: %s\n",smv_version);
+    printf("SVN Revision Number: %i\n",svn_num);
+    printf("Compile Date: %s\n",__DATE__);
+#ifdef WIN32
+    printf("Platform: WIN32\n");
+#endif
+#ifdef pp_OSX
+    printf("Platform: OS X\n");
+#endif
+#ifdef pp_LINUX
+    printf("Platform: LINUX\n");
+#endif
+
+}
+
+int imax(int a, int b){
+  if(a>b){
+    return a;
+  }
+  else{
+    return b;
+  }
+}
+
+#define MAXREV(cval) max_revision=imax(getrevision(cval),max_revision)
+int getmaxrevision(void){
+  int max_revision=0;
+
+  MAXREV(assert_revision);
+  MAXREV(CNV3dsmoke_revision);
+  MAXREV(CNVboundary_revision);
+  MAXREV(CNViso_revision);
+  MAXREV(CNVpart_revision);
+  MAXREV(CNVslice_revision);
+  MAXREV(csphere_revision);
+  MAXREV(dmalloc_revision);
+  MAXREV(egz_stdio_revision);
+  MAXREV(endian_revision);
+  MAXREV(main_revision);
+  MAXREV(readfiles_revision);
+  MAXREV(stats_revision);
+  MAXREV(utilities_revision);
+  return max_revision;
+}
+
+
+/* ------------------ getSMVversion ------------------------ */
+
+void getSMZversion(char *SMZversion){
+  strcpy(SMZversion,"1.1.1");
+}
+
+/* ------------------ getrevision ------------------------ */
+
+int getrevision(char *svn){
+  char svn_string[256];
+  char *svn_ptr;
+  int return_val;
+
+  svn_ptr=svn_string;
+  svn=strchr(svn,':');
+  if(svn==NULL||strlen(svn)<=4)return 0;
+  
+  svn++;
+  strcpy(svn_ptr,svn);
+  svn_ptr=trim_front(svn_ptr);
+  svn_ptr[strlen(svn_ptr)-1]=0;
+  trim(svn_ptr);
+  sscanf(svn_ptr,"%i",&return_val);
+  return return_val;
 
 }

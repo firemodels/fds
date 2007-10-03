@@ -12,6 +12,9 @@
 #pragma warning (disable:4244)		/* disable bogus conversion warnings */
 #endif
 
+// svn revision character string
+char CNViso_revision[]="$Revision: 624 $";
+
 int sortflag;
 
 void getisosizes(EGZ_FILE *isostreamptr,float **levelsptr, int *nisolevels, int *sizebefore);

@@ -20,6 +20,9 @@
 #pragma warning (disable:4244)		/* disable bogus conversion warnings */
 #endif
 
+// svn revision character string
+char csphere_revision[]="$Revision: 624 $";
+
 
 //typedef struct {
 //  int n;
