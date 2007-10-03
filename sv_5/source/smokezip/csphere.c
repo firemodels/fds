@@ -16,10 +16,6 @@
 #include <math.h>
 #include "csphere.h"
 
-#ifdef WIN32
-#pragma warning (disable:4244)		/* disable bogus conversion warnings */
-#endif
-
 // svn revision character string
 char csphere_revision[]="$Revision$";
 
