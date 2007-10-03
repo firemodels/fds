@@ -881,10 +881,13 @@ WRITE(LU_SMV,'(A)') TRIM(CHID)//'.end'
 WRITE(LU_SMV,'(/A)') 'INPF'
 WRITE(LU_SMV,'(A)') TRIM(FN_INPUT)
 
+!Write out svn revision number
+WRITE(LU_SMV,'(/A)') 'REVISION'
+WRITE(LU_SMV,'(I6)') SVN_REVISION_NUMBER
+
 ! Write out the CHID
 WRITE(LU_SMV,'(/A)') 'CHID'
 WRITE(LU_SMV,'(A)') TRIM(CHID)
-
 
 ! Number of meshes
  
@@ -902,6 +905,10 @@ IF (RENDER_FILE/='null') THEN
    WRITE(LU_SMV,'(/A)') 'CADGEOM'
    WRITE(LU_SMV,'(A)') TRIM(RENDER_FILE)
 ENDIF
+
+! Write out smoke albedo
+WRITE(LU_SMV,'(/A)') 'ALBEDO'
+WRITE(LU_SMV,'(F13.5)') SMOKE_ALBEDO
 
 ! Write out info about surfaces
 
