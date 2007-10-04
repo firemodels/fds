@@ -4142,6 +4142,9 @@ MESH_LOOP: DO NM=1,NMESHES
       SELECT CASE (COLOR)
          CASE ('INVISIBLE')
             OB%BCI = -3
+            RGB(1) = 255
+            RGB(2) = 204
+            RGB(3) = 102
             TRANSPARENCY = 0._EB
          CASE ('null')
             IF (ANY (RGB<0)) THEN
