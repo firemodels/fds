@@ -916,6 +916,8 @@ void InitOpenGL(void){
 /* ------------------ initvars1 ------------------------ */
 
 void initvars1(void){
+  revision_fds=-1;
+  revision_smv=getmaxrevision();
   force_isometric=0;
 #ifdef pp_SPOTLIGHT
   spotlight=0;
@@ -1636,41 +1638,42 @@ void initvars1(void){
   {
     char version[100];
     char svn_version[100];
-    char smv_version[100];
     int svn_num;
 
-    getSMVversion(smv_version);  // get Smokeview version (ie 5.x.z)
     svn_num=getmaxrevision();    // get svn revision number
     sprintf(svn_version,"%i",svn_num); // convert svn revision number to a character string
 
 // construct string of the form:
 //   5.x.y_#
 
-    strcpy(version,smv_version);
-    strcat(version,"_");
-    strcat(version,svn_version);
+    strcpy(version,SMVVERSION);
 
     strcpy(TITLEBASE,"Smokeview ");
 
-    // dummy comment to force increment of svn build number
+    strcat(TITLEBASE,version);
 #ifdef pp_BETA
     strcat(TITLEBASE," Beta ");
+    strcat(TITLEBASE,"(");
+    strcat(TITLEBASE,svn_version);
+    strcat(TITLEBASE,")");
 #endif
 #ifdef pp_TEST
     strcat(TITLEBASE," Test");
 #endif
-    strcat(TITLEBASE,version);
     strcat(TITLEBASE," - ");
 
     strcpy(TRAINERTITLEBASE,"Smokeview Demonstrator");
 
+    strcat(TRAINERTITLEBASE,version);
 #ifdef pp_BETA
     strcat(TRAINERTITLEBASE," Beta ");
+    strcat(TRAINERTITLEBASE,"(");
+    strcat(TRAINERTITLEBASE,svn_version);
+    strcat(TRAINERTITLEBASE,")");
 #endif
 #ifdef pp_TEST
     strcat(TRAINERTITLEBASE," Test");
 #endif
-    strcat(TRAINERTITLEBASE,version);
     strcat(TRAINERTITLEBASE," - ");
 
   }
@@ -1860,12 +1863,6 @@ void initvars1(void){
     }
   }
 
-}
-
-/* ------------------ getSMVversion ------------------------ */
-
-void getSMVversion(char *SMVversion){
-  strcpy(SMVversion,"5.0.1");
 }
 
 /* ------------------ getrevision ------------------------ */
@@ -2106,18 +2103,3 @@ int getmaxrevision(void){
   return max_revision;
 }
 
-void init_default_devices(void){
-
-
-  /*
-  devices
-  -------
-  1 - sensor
-  2 - sprinkler
-  3 - heat detector
-  4 - smoke detector
-  */
-
-
-
-}

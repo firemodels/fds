@@ -27,7 +27,6 @@
 // svn revision character string
 char readsmv_revision[]="$Revision$";
 
-void PART_CB_INIT(void);
 
 #define DEVICE_DEVICE 0
 #define DEVICE_THCP 1
@@ -35,9 +34,7 @@ void PART_CB_INIT(void);
 #define DEVICE_SPRK 3
 #define DEVICE_SMOKE 4
 
-void RenderMenu(int value);
 
-int readlabels(flowlabels *label, FILE *stream);
 
 /* ------------------ readsmv ------------------------ */
 
@@ -513,6 +510,13 @@ int readsmv(char *file){
       continue;
     }
 
+    if(match(buffer,"REVISION",8)==1){
+      revision_fds=-1;
+      if(fgets(buffer,255,stream)==NULL)break;
+      sscanf(buffer,"%i",&revision_fds);
+      if(revision_fds<0)revision_fds=-1;
+      continue;
+    }
     if(match(buffer,"TOFFSET",7)==1){
       if(fgets(buffer,255,stream)==NULL)break;
       sscanf(buffer,"%f %f %f",texture_origin,texture_origin+1,texture_origin+2);
@@ -8674,7 +8678,32 @@ void writeini(int flag){
   glGetIntegerv(GL_DEPTH_BITS,&ndepth);
   glGetIntegerv(GL_ALPHA_BITS,&nalpha);
 
-  fprintf(fileout,"\n# Graphics Environment\n");
+
+  {
+    int svn_num;
+
+    svn_num=getmaxrevision();    // get svn revision number
+    fprintf(fileout,"\n\n# Development Environment\n");
+    fprintf(fileout,"# -----------------------\n\n");
+    fprintf(fileout,"# Smokeview Version: %s\n",SMVVERSION);
+    fprintf(fileout,"# Smokeview Revision Number: %i\n",svn_num);
+    fprintf(fileout,"# Smokeview Compile Date: %s\n",__DATE__);
+    if(revision_fds>0){
+      fprintf(fileout,"# FDS Revision Number: %i\n",revision_fds);
+    }
+#ifdef WIN32
+    fprintf(fileout,"# Platform: WIN32\n");
+#endif
+#ifdef pp_OSX
+    fprintf(fileout,"# Platform: OS X\n");
+#endif
+#ifdef pp_LINUX
+    fprintf(fileout,"# Platform: LINUX\n");
+#endif
+
+}
+
+  fprintf(fileout,"\n\n# Graphics Environment\n");
   fprintf(fileout,"# --------------------\n\n");
   fprintf(fileout,"#   Red bits:%i\n",nred);
   fprintf(fileout,"# Green bits:%i\n",ngreen);
