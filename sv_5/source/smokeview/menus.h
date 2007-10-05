@@ -5155,6 +5155,16 @@ static int textureshowmenu=0;
 
   CREATEMENU(helpmenu,HelpMenu);
   glutAddMenuEntry(TITLERELEASE,1);
+  {
+    char menulabel[256];
+
+    sprintf(menulabel,"  Smokeview revision:%i",revision_smv);
+    glutAddMenuEntry(menulabel,1);
+    if(revision_fds>0){
+      sprintf(menulabel,"  FDS revision:%i",revision_fds);
+      glutAddMenuEntry(menulabel,1);
+    }
+  }
   if(plotstate==DYNAMIC_PLOTS){
     glutAddMenuEntry("",1);
     glutAddMenuEntry("Animation keyboard commands",1);

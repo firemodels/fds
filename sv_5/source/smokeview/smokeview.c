@@ -3305,15 +3305,16 @@ void Args(int argc, char **argv){
 /* ------------------ version ------------------------ */
 
 void version(void){
-    char smv_version[100];
     int svn_num;
 
-    getSMVversion(smv_version);  // get Smokeview version (ie 5.x.z)
     svn_num=getmaxrevision();    // get svn revision number
     printf("\n");
     printf("Smokeview\n\n");
-    printf("Version: %s\n",smv_version);
-    printf("SVN Revision Number: %i\n",svn_num);
+    printf("Version: %s\n",SMVVERSION);
+    printf("Smokeview Revision Number: %i\n",svn_num);
+    if(revision_fds>0){
+      printf("FDS Revision Number: %i\n",revision_fds);
+    }
     printf("Compile Date: %s\n",__DATE__);
 #ifdef WIN32
     printf("Platform: WIN32\n");

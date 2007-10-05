@@ -499,13 +499,15 @@ EXTERNCPP void Idle(void);
 #ifndef pp_nolibs
 EXTERNCPP void RenderFrame(int view_mode);
 #endif
+EXTERNCPP int readlabels(flowlabels *label, FILE *stream);
+EXTERNCPP void PART_CB_INIT(void);
+EXTERNCPP void RenderMenu(int value);
 EXTERNCPP void LoadSmoke3DMenu(int value);
 EXTERNCPP void Display(void);
 EXTERNCPP void Visible(int state);
 EXTERNCPP void Args(int argc, char **argv);
 EXTERNCPP void usage(char **argv);
 EXTERNCPP void version(void);
-EXTERNCPP void getSMVversion(char *smv_version);
 EXTERNCPP int getmaxrevision(void);
 EXTERNCPP void draw_demo(int nlat, int nlong);
 EXTERNCPP void draw_demo2(int option);

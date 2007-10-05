@@ -1,3 +1,5 @@
+#define SMVVERSION "5.0.2"
+
 // #define pp_LINT // uncomment if using LINT
 #define _CRT_SECURE_NO_DEPRECATE
 #ifdef WIN32
@@ -39,7 +41,7 @@
 #define pp_HRR
 
 #define pp_WUI
-//#define pp_BETA  // uncomment when building beta versions of SV
+// #define pp_BETA  // uncomment when building beta versions of SV
 
 #ifdef pp_TEST2
 #define pp_TEST
