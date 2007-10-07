@@ -45,9 +45,5 @@ extern char scontour2d_revision[];
 extern char segtri_revision[];
 extern char skybox_revision[];
 extern char smoothlabel_revision[];
-//extern char startup_revision[];
 extern char string_util_revision[];
 extern char sv_api_revision[];
-#ifdef pp_SVNET
-extern char sv_net_revision[];
-#endif

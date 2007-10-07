@@ -242,9 +242,6 @@ void sv_startup_c(int argc, char **argv){
   }
   InitOpenGL();
 
-#ifdef pp_SVNET
-  init_svcom();
-#endif
   /* initialize units */
 
 #ifdef COMMENT
@@ -2107,9 +2104,6 @@ int getmaxrevision(void){
   MAXREV(startup_revision);
   MAXREV(string_util_revision);
   MAXREV(sv_api_revision);
-#ifdef pp_SVNET
-  MAXREV(sv_net_revision);
-#endif
   return max_revision;
 }
 

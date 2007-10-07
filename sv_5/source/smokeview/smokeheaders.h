@@ -29,21 +29,6 @@ int SUB_portfrustum(int quad,
 
 EXTERNCPP void add_new_tour(void);
 
-#ifdef pp_SVNET
-void init_svcom(void);
-void svc_keyboard(unsigned char key, int x, int y, int modifier_state);
-void svc_keyboard_up(unsigned char key, int x, int y);
-void svc_mouse(int button, int state, int x, int y, int modifier_state);
-void svc_motion(int xm, int ym);
-
-void put_keyboard(unsigned char key, int x, int y, int modifier_state);
-void put_motion(int xm, int ym);
-void put_keyboard_up(unsigned char key, int x, int y);
-void put_mouse(int button, int state, int x, int y, int modifier_state);
-
-void parse_svcom(void);
-
-#endif
 #ifdef pp_WUI
 void readterrain(char *file, int ifile, int flag, int *errorcode);
 float getterrain_z(float x, float y);
