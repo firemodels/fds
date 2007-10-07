@@ -212,11 +212,9 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
       }
       if(doit==1){
         int *sort_tags;
-        unsigned char *vis_part;
         int j;
 
         sort_tags=datacopy->sort_tags;
-        vis_part=datacopy->vis_part;
         FORTPART5READ(datacopy->tags,nparts);
         if(nparts>0){
           if(returncode==0)goto wrapup;
@@ -747,7 +745,6 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   size_t lenfile;
   int error=0;
   int ibar,jbar,kbar;
-  int nb,nv;
   particle *parti;
   int blocknumber;
   mesh *meshi;
@@ -764,8 +761,6 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   ibar=meshi->ibar;
   jbar=meshi->jbar;
   kbar=meshi->kbar;
-  nb=meshi->nbptrs;
-  nv=meshi->nvents;
 
   *errorcode=0;
   partfilenum=ifile;
@@ -1331,7 +1326,6 @@ void drawPart5(const particle *parti){
   for(i=0;i<parti->nclasses;i++){
     short *sx, *sy, *sz;
     short *sxx, *syy, *szz;
-    int *tags;
     unsigned char *vis;
     int k;
 
@@ -1354,7 +1348,6 @@ void drawPart5(const particle *parti){
     sy = datacopy->sy;
     sz = datacopy->sz;
     vis = datacopy->vis_part;
-    tags = datacopy->tags;
 
     if(itype==-1){
 
@@ -1384,18 +1377,18 @@ void drawPart5(const particle *parti){
       }
 
       // draw the dot at the end of the streak line
+
       if(showstreakhead==1){
         sx = datacopy->sx;
         sy = datacopy->sy;
         sz = datacopy->sz;
         vis = datacopy->vis_part;
-        tags = datacopy->tags;
         glPointSize(6.0);
         glColor4fv(datacopy->partclassbase->rgb);
         glBegin(GL_POINTS);
         for(j=0;j<datacopy->npoints;j++){
-          int tagval;
-          tagval=datacopy->tags[j];
+          //int tagval;
+          //tagval=datacopy->tags[j];
           if(vis[j]==0)continue;
           glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
         }

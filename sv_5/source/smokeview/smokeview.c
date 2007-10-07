@@ -224,7 +224,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       int labellength;
 
       sprintf(slicelabel,"mesh: %i",highlight_mesh+1);
-      labellength=glutBitmapLength(large_font, slicelabel);
+      labellength=glutBitmapLength(large_font, (const unsigned char *)slicelabel);
       mesh_left=val_right-val_right*labellength/(float)dwinW;
       mesh_bot=val_top-val_top*large_font_height/(float)(dwinH-fontHoffset);
       outputText(mesh_left,mesh_bot, slicelabel);
@@ -1673,9 +1673,11 @@ void getinverse(float *m, float *mi){
 
 void _sniffErrors(char *whereat){
   int error;
+  char *glu_error;
   while((error=glGetError())!=GL_NO_ERROR){
+    glu_error=(char *)gluErrorString((unsigned int)error);
     fprintf(stderr,"GL Error:%s where:%s %i\n",
-      gluErrorString((unsigned int)error),whereat,snifferrornumber);
+      glu_error,whereat,snifferrornumber);
       snifferrornumber++;
   }
 }

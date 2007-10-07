@@ -387,10 +387,9 @@ void get_move_status(float *oldpos,float *newpos,
   printf("old distance=%f new distance=%f\n",view_height0,*view_height);
 #endif
   {
-    int trainee_now=0, trainee_next=0;
+    int trainee_next=0;
 
     if(*sstatus_next!=GM_BLOCKAGE&&*sstatus_next!=GM_OUTSIDE)trainee_next=1;
-    if(*sstatus_now!=GM_BLOCKAGE&&*sstatus_now!=GM_OUTSIDE)trainee_now=1;
     trainee_location=trainee_next;
   }
 

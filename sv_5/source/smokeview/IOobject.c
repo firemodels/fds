@@ -700,13 +700,9 @@ void drawhexdisk(float diameter, float height, float *rgbcolor){
 
 void drawnotchplate(float diameter, float height, float notchheight, float direction, float *rgbcolor){
   int i;
-  float notch_width, notch_depth;
   float diameter2;
 
   diameter2 = diameter + notchheight;
-
-  notch_width=height;
-  notch_depth=height;
 
   if(ncirc==0)initcircle(12);
   if(cullfaces==1)glDisable(GL_CULL_FACE);
@@ -1056,7 +1052,7 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
   int iop;
   int local_nops, local_nargs;
   int numargs;
-  int error_code;
+//  int error_code;
 
   strcpy(buffer_save,buffer);
 
@@ -1091,7 +1087,7 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
 
   token=strtok(bufptr," ");
   numargs = 0;
-  error_code=0;
+
   while(token!=NULL){
     char c;
 
@@ -1505,7 +1501,6 @@ void init_device_defs(void){
 
     {
       char objectfile[1024];
-      int ndev;
 
       svofile_exists = 0;
 
@@ -1513,15 +1508,15 @@ void init_device_defs(void){
 
         strcpy(objectfile,smvprogdir);
         strcat(objectfile,"devices.svo");
-        ndev=read_device_defs(objectfile);
+        read_device_defs(objectfile);
       }
 
       strcpy(objectfile,"devices.svo");
-      ndev=read_device_defs(objectfile);
+      read_device_defs(objectfile);
 
       strcpy(objectfile,fdsprefix);
       strcat(objectfile,".svo");
-      ndev=read_device_defs(objectfile);
+      read_device_defs(objectfile);
 
     }
 
