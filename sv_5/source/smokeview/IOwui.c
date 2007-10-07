@@ -1,5 +1,4 @@
 #include "options.h"
-#ifdef pp_WUI
 #include <stdio.h>  
 #include <stdlib.h>
 #include <math.h>
@@ -685,5 +684,3 @@ void init_tnorm(terraindata *terri){
     }
   }
 }
-
-#endif

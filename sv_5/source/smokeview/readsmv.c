@@ -133,7 +133,6 @@ int readsmv(char *file){
   int nn_slice=0;
 
 
-#ifdef pp_WUI
   FREEMEMORY(treeinfo);
   ntreeinfo=0;
   for(i=0;i<nterraininfo;i++){
@@ -148,7 +147,6 @@ int readsmv(char *file){
   }
   FREEMEMORY(terraininfo);
   nterraininfo=0;
-#endif
   niso_compressed=0;
 #ifdef pp_SPHERE
   if(sphereinfo==NULL){
@@ -453,12 +451,10 @@ int readsmv(char *file){
       BUT if any one these keywords are present then the number of each MUST be equal 
     */
 
-#ifdef pp_WUI
     if(match(buffer,"TERRAIN",7) == 1){
       nterraininfo++;
       continue;
     }
-#endif
     if(match(buffer,"CLASS_OF_PARTICLES",18) == 1||
        match(buffer,"CLASS_OF_HUMANS",15) == 1){
       npartclassinfo++;
@@ -677,12 +673,10 @@ int readsmv(char *file){
    ************************************************************************
  */
 
-#ifdef pp_WUI
  if(nterraininfo>0){
    NewMemory((void **)&terraininfo,nterraininfo*sizeof(terraindata));
    nterraininfo=0;
  }
-#endif
  if(npartclassinfo>=0){
    float rgb_class[4];
    part5class *partclassi;
@@ -955,7 +949,6 @@ int readsmv(char *file){
 
 */
 
-#ifdef pp_WUI
     /*
 typedef struct {
   int nallocated, nstates;
@@ -1136,7 +1129,6 @@ typedef struct {
       }
       nterraininfo++;
     }
-#endif
     if(match(buffer,"CLASS_OF_PARTICLES",18) == 1||
        match(buffer,"CLASS_OF_HUMANS",15) == 1){
       float rgb_class[4];
@@ -2552,7 +2544,6 @@ typedef struct {
       }
       continue;
     }
-#ifdef pp_WUI
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ TREE ++++++++++++++++++++++++++++++
@@ -2608,7 +2599,6 @@ typedef struct {
       }
       continue;
     }
-#endif
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ OBST ++++++++++++++++++++++++++++++
@@ -2710,14 +2700,12 @@ typedef struct {
         sscanf(buffer,"%i %i %i %i %i %i %i %i",
           ijk,ijk+1,ijk+2,ijk+3,ijk+4,ijk+5,
           &colorindex,&blocktype);
-#ifdef pp_WUI
         if(blocktype>0){
           if((blocktype&8)==1){
             bc->is_wuiblock=1;
             blocktype -= 8;
           }
         }
-#endif
 
         /* custom color */
         
@@ -2734,14 +2722,12 @@ typedef struct {
           sscanf(buffer,"%i %i %i %i %i %i %i %i %f %f %f %f",
             ijk,ijk+1,ijk+2,ijk+3,ijk+4,ijk+5,
             &colorindex,&blocktype,s_color,s_color+1,s_color+2,s_color+3);
-#ifdef pp_WUI
           if(blocktype>0){
             if((blocktype&8)==1){
               bc->is_wuiblock=1;
               blocktype -= 8;
             }
           }
-#endif
 
           if(s_color[3]<0.999){
             bc->transparent=1;
@@ -5533,9 +5519,7 @@ void initobst(blockagedata *bc, surface *surf,int index,int meshindex){
   char blocklabel[255];
   size_t len;
 
-#ifdef pp_WUI
   bc->is_wuiblock=0;
-#endif
   bc->transparent=0;
   bc->usecolorindex=0;
   bc->colorindex=-1;
@@ -6033,7 +6017,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       }
       continue;
     }
-#ifdef pp_WUI
     if(match(buffer,"TREECOLORS",10)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",trunccolor,trunccolor+1,trunccolor+2);
@@ -6052,7 +6035,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       trunccolor[3]=1.0;
       continue;
     }
-#endif
     if(match(buffer,"TRAINERVIEW",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&trainerview);

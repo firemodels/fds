@@ -1068,14 +1068,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     }
     glPointSize((float)1.0);
 
-#ifdef pp_WUI
 
     /* ++++++++++++++++++++++++ draw trees +++++++++++++++++++++++++ */
 
     if(ntreeinfo>0){
       drawtrees();
     }
-#endif
 
 /* ++++++++++++++++++++++++ draw smoke +++++++++++++++++++++++++ */
 
@@ -1194,7 +1192,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   drawBlockages(mode,DRAW_SOLID);
   sniffErrors("drawBlockages");
 
-#ifdef pp_WUI
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
 
   if(visTerrain==1){
@@ -1207,7 +1204,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       if(terri->loaded==1)drawterrain(terri);
     }
   }
-#endif
 
 /* ++++++++++++++++++++++++ draw boundary files +++++++++++++++++++++++++ */
 
@@ -1738,9 +1734,7 @@ void updateShow(void){
   show3dsmoke=0;
   smoke3dflag=0;
   showtour=0;
-#ifdef pp_WUI
   showterrain=0;
-#endif
   ntitles=0;
   if(visTitle0==1)ntitles++;
   if(strlen(TITLE1)!=0&&visTitle1==1){ntitles++;showtitle1=1;}
@@ -1781,7 +1775,6 @@ void updateShow(void){
       }
     }
   }
-#ifdef pp_WUI
   if(visTerrain==1){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
@@ -1793,7 +1786,6 @@ void updateShow(void){
       }
     }
   }
-#endif
   {
     smoke3d *smoke3di;
 
@@ -1878,9 +1870,7 @@ void updateShow(void){
     smoke3dflag==1|| showtour==1 || evacflag==1||
     (ReadZoneFile==1&&visZone==1&&visTimeZone==1)||
     (ReadTargFile==1&&visTarg==1)
-#ifdef pp_WUI
     ||showterrain==1
-#endif
     )
     )showtime=1;
     if(plotstate==DYNAMIC_PLOTS&&ReadIsoFile==1&&visAIso!=0&&isoflag==1)showtime2=1;
@@ -2064,7 +2054,6 @@ void updatetimes(void){
 
   updateShow();  
   ntimes = 0;
-#ifdef pp_WUI
   if(visTerrain==1){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
@@ -2073,7 +2062,6 @@ void updatetimes(void){
       if(terri->loaded==1)ntimes+=terri->ntimes;
     }
   }
-#endif
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
     if(touri->display==0)continue;
@@ -2132,7 +2120,6 @@ void updatetimes(void){
   FREEMEMORY(times);
   NewMemory((void **)&times,ntimes*sizeof(float));
   timescopy=times;
-#ifdef pp_WUI
   if(visTerrain==1){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
@@ -2147,7 +2134,6 @@ void updatetimes(void){
       }
     }
   }
-#endif
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
     if(touri->display==0)continue;
@@ -2267,7 +2253,6 @@ void updatetimes(void){
       FREEMEMORY(touri->path_timeslist);
       NewMemory((void **)&touri->path_timeslist,ntimes*sizeof(int));
     }
-#ifdef pp_WUI
     if(visTerrain==1){
       for(i=0;i<nterraininfo;i++){
         terraindata *terri;
@@ -2278,7 +2263,6 @@ void updatetimes(void){
         NewMemory((void **)&terri->timeslist,ntimes*sizeof(int));
       }
     }
-#endif
     if(hrrinfo!=NULL){
       if(hrrinfo->loaded==1&&hrrinfo->display==1&&ntimes>0){
         int jstart=0;
@@ -2768,8 +2752,8 @@ void synctimes(void){
         tourj->path_timeslist[n]=i;
       }
     }
-#ifdef pp_WUI
-  /* synchronize terrain times */
+
+    /* synchronize terrain times */
 
     for(j=0;j<nterraininfo;j++){
       terraindata *terri;
@@ -2791,7 +2775,6 @@ void synctimes(void){
       }
       terri->timeslist[n]=i;
     }
-#endif
     if(hrrinfo!=NULL&&hrrinfo->loaded==1&&hrrinfo->display==1){
       if(n==0){
         istart=0;
@@ -3354,9 +3337,6 @@ void usage(char **argv){
 #ifdef pp_THREADS2
     printf(", pp_THREADS2");
 #endif
-#ifdef pp_WUI
-    printf(", pp_WUI");
-#endif
 #ifdef USE_ZLIB
     printf(", USE_ZLIB");
 #endif
@@ -3469,7 +3449,6 @@ int getplotstate(int choice){
       }
       if(visGrid==0)stept = 1;
       if(visGrid==1)stept = 0;
-#ifdef pp_WUI
       if(visTerrain==1){
         for(i=0;i<nterraininfo;i++){
           terraindata *terri;
@@ -3480,7 +3459,6 @@ int getplotstate(int choice){
           }
         }
       }
-#endif
       for(i=0;i<nvslice;i++){
         vslicei = vsliceinfo + i;
         if(vslicei->display==0||vslicei->type!=islicetype)continue;
