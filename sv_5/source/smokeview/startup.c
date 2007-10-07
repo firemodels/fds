@@ -916,9 +916,6 @@ void initvars1(void){
   revision_fds=-1;
   revision_smv=getmaxrevision();
   force_isometric=0;
-#ifdef pp_SPOTLIGHT
-  spotlight=0;
-#endif
   cb_valmin=0.0;
   cb_valmax=100.0;
   cb_val=50.0;
