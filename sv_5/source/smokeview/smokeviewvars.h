@@ -536,14 +536,12 @@ SVEXTERN sv_object device_def_first, device_def_last;
 SVEXTERN int ndevice_defs;
 SVEXTERN sv_object_frame *error_frame;
 SVEXTERN int svofile_exists;
-#ifdef pp_WUI
 SVEXTERN treedata *treeinfo;
 SVEXTERN terraindata *terraininfo;
 SVEXTERN int ntreeinfo, nterraininfo, visTerrain;
 SVEXTERN float treecolor[4], treecharcolor[4], trunccolor[4];
 SVEXTERN int showterrain;
 SVEXTERN float rgb_terrain[10][4];
-#endif
 SVEXTERN tourdata *tourinfo,default_tour;
 SVEXTERN keyframe **tourknotskeylist;
 SVEXTERN tourdata **tourknotstourlist;

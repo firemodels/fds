@@ -167,11 +167,9 @@ void svWINAPI sv_init0(void){
 void svWINAPI sv_unload(void){
     int errorcode,i;
   /* first unload file data */
-#ifdef pp_WUI
     for(i=0;i<nterraininfo;i++){
       readterrain("",i,UNLOAD,&errorcode);
     }
-#endif
     for(i=0;i<nslice;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
