@@ -52,11 +52,6 @@
 
 #define pp_WUI
 
-#ifdef pp_TEST2
-#define pp_TEST
-#define pp_SPOTLIGHT
-#endif
-
 #ifdef pp_TEST
 #define pp_TOUR
 #define pp_COLOR

@@ -13,9 +13,6 @@
 #define EXTERNCPP
 #endif
 
-#ifdef pp_SPOTLIGHT
-void updateSpotLight(int init, float *spot_position, float *spot_direction);
-#endif
 int SUB_portortho(int quad, 
                    GLint i_left, GLint i_down, GLsizei i_width, GLsizei i_height,
                    GLdouble x_left, GLdouble x_right, GLdouble x_bottom, GLdouble x_top,
