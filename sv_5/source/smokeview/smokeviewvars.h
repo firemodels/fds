@@ -395,9 +395,7 @@ SVEXTERN int menustatus;
 SVEXTERN int visTimeZone, visTimeSmoke, visTimeSlice, visTimePatch, visTimeIso, visTimeEvac;
 SVEXTERN int vishmsTimelabel, visTimeLabels, visColorLabels;
 SVEXTERN int visTitle, visFullTitle, visFramerate, visFramelabel, visTimelabel;
-#ifdef pp_HRR
 SVEXTERN int visHRRlabel;
-#endif
 #ifdef pp_memstatus
 SVEXTERN int visAvailmemory;
 #endif
@@ -564,6 +562,7 @@ SVEXTERN int showtours_whenediting;
 SVEXTERN float xtimeleft, xtimeright;
 SVEXTERN int pbalanceindex, eoffsetindex;
 SVEXTERN int showstereo;
+SVEXTERN int show_hrrcutoff, show_hrrcutoff_active;
 SVEXTERN int showglui3dsmoke;
 SVEXTERN int showgluitour;
 SVEXTERN int showalert;
@@ -614,10 +613,8 @@ SVEXTERN int *sorted_surfidlist,*inv_sorted_surfidlist,nsorted_surfidlist;
 SVEXTERN char *trainer_filename;
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
 SVEXTERN char *flushfile, *chidfilebase;
-#ifdef pp_HRR
 SVEXTERN char *hrrfilename;
 SVEXTERN hrrdata *hrrinfo;
-#endif
 SVEXTERN char *smokezippath;
 SVEXTERN char *shellfilename;
 SVEXTERN char *INI_fds_filein, *fds_filein, *fds_fileout,*fds_fileout2;

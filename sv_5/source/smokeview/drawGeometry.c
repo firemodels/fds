@@ -3348,13 +3348,13 @@ void drawticks(void){
     endt = ticki->end;
 
     glLineWidth(ticki->width);
+    glBegin(GL_LINES);
     if(ticki->useforegroundcolor==1){
       glColor3fv(foregroundcolor);
     }
     else{
       glColor3fv(ticki->rgb);
     }
-    glBegin(GL_LINES);
 
     dxyz=ticki->dxyz;
     if(ticki->nbars>1){
@@ -3381,7 +3381,8 @@ void drawticks(void){
       xyz2[0] = (xyz2[0] - xbar0)/xyzmaxdiff;
       xyz2[1] = (xyz2[1] - ybar0)/xyzmaxdiff;
       xyz2[2] = (xyz2[2] - zbar0)/xyzmaxdiff;
-      glVertex3fv(xyz), glVertex3fv(xyz2);
+      glVertex3fv(xyz);
+      glVertex3fv(xyz2);
     }
     glEnd();
 

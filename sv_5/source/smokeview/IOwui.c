@@ -606,10 +606,7 @@ void init_tnode(terraindata *terri){
   float *znode, *zcell;
   int i, j;
   int nxcell;
-  float dx, dy;
 
-  dx = (terri->xmax-terri->xmin)/terri->nx;
-  dy = (terri->ymax-terri->ymin)/terri->ny;
   znode = terri->znode;
   zcell = terri->zcell;
   nxcell = terri->nx;

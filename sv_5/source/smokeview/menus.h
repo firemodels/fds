@@ -192,9 +192,9 @@ void LabelMenu(int value){
     vis_slice_average=1;
     if(nticks>0)visTicks=1;
     visgridloc=1;
-#ifdef pp_HRR
     visHRRlabel=1;
-    visFramelabel=0;
+    show_hrrcutoff=1;
+    visFramelabel=1;
     if(hrrinfo!=NULL){
       if(hrrinfo->display==0){
         hrrinfo->display=1;
@@ -202,7 +202,6 @@ void LabelMenu(int value){
       }
       hrrinfo->display=1;
     }
-#endif
     break;
    case 5:
     visColorLabels=0;
@@ -216,8 +215,8 @@ void LabelMenu(int value){
     visTimelabel=0;
     visFramelabel=0;
     visBlocklabel=0;
-#ifdef pp_HRR
     visHRRlabel=0;
+    show_hrrcutoff=0;
     if(hrrinfo!=NULL){
       if(hrrinfo->display==1){
         hrrinfo->display=0;
@@ -225,7 +224,6 @@ void LabelMenu(int value){
       }
       hrrinfo->display=0;
     }
-#endif
     if(nticks>0)visTicks=0;
     visgridloc=0;
     vis_slice_average=0;
@@ -246,7 +244,6 @@ void LabelMenu(int value){
    case 9:
      visFramelabel=1-visFramelabel;
      if(visFramelabel==1)visTimeLabels=1;
-#ifdef pp_HRR
      if(visFramelabel==1){
        visHRRlabel=0;
        if(hrrinfo!=NULL){
@@ -254,7 +251,6 @@ void LabelMenu(int value){
          updatetimes();
        }
      }
-#endif
      break;
    case 10:
      visBlocklabel=1-visBlocklabel;
@@ -276,7 +272,6 @@ void LabelMenu(int value){
    case 15:
      vis_slice_average = 1 - vis_slice_average;
      break;
-#ifdef pp_HRR
    case 16:
      visHRRlabel=1-visHRRlabel;
      if(visHRRlabel==1)visTimeLabels=1;
@@ -285,7 +280,9 @@ void LabelMenu(int value){
        updatetimes();
      }
      break;
-#endif
+   case 17:
+     show_hrrcutoff=1-show_hrrcutoff;
+     break;
    default:
      ASSERT(FFALSE);
      break;
@@ -2716,10 +2713,7 @@ void UnloadTerrainMenu(int value){
   int i;
   int errorcode;
 
-  if(value>=0&&value<=nterraininfo){
-    terraindata *terri;
-
-    terri = terraininfo + value;
+  if(value>=0&&value<nterraininfo){
     readterrain("",value,UNLOAD,&errorcode);
   }
   else if(value==-10){
@@ -4055,12 +4049,14 @@ static int textureshowmenu=0;
   if(visTimelabel==0)glutAddMenuEntry("Time label",8);
   if(visFramelabel==1)glutAddMenuEntry("*Frame label",9);
   if(visFramelabel==0)glutAddMenuEntry("Frame label",9);
-#ifdef pp_HRR
   if(hrrinfo!=NULL){
     if(visHRRlabel==1)glutAddMenuEntry("*HRR label",16);
     if(visHRRlabel==0)glutAddMenuEntry("HRR label",16);
   }
-#endif
+  if(show_hrrcutoff_active==1){
+    if(show_hrrcutoff==1)glutAddMenuEntry("*HRRPUV cutoff",17);
+    if(show_hrrcutoff==0)glutAddMenuEntry("HRRPUV cutoff",17);
+  }
   if(vis_slice_average==1)glutAddMenuEntry("*Slice Average",15);
   if(vis_slice_average==0)glutAddMenuEntry("Slice Average",15);
   if(nmeshes>1){

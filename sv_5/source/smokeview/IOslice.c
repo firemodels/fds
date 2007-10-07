@@ -1132,7 +1132,8 @@ void getsliceparams(void){
       sd->idir=-1;
       iblock = sd->blocknumber;
       meshi = selected_case->meshinfo + iblock;
-      sprintf(sd->slicedir,"");
+
+      strcpy(sd->slicedir,"");
       position=-999.0;
       if(sd->is1==sd->is2
         ||(sd->js1!=sd->js2&&sd->ks1!=sd->ks2)
