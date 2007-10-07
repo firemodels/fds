@@ -958,11 +958,6 @@ void handle_eyeview(int flag){
   float *angle_zx;
 
   if(eyeview==eyeview_old)return;
-#ifdef pp_SPOTLIGHT
-  if(eyeview_old==EYE_CENTERED&&spotlight==1){
-    updateLights(1);
-  }
-#endif
   camera_current->eyeview=eyeview;
   angle_zx = camera_current->angle_zx;
   updatemenu=1;
@@ -974,19 +969,6 @@ void handle_eyeview(int flag){
       }
       break;
   case EYE_CENTERED:
-#ifdef pp_SPOTLIGHT
-      if(spotlight==1){
-        float spot_position[3], spot_direction[3];
-
-        spot_position[0]=eyexINI;
-        spot_position[1]=eyeyINI;
-        spot_position[2]=eyezINI;
-        spot_direction[0]=viewx;
-        spot_direction[1]=viewy;
-        spot_direction[2]=viewz;
-        updateSpotLight(1,spot_position, spot_direction);
-      }
-#endif
        angle_zx[1]=0.0;
        if(showtrainer==0&&flag==0&&eyeview_old!=EYE_CENTERED){
          ResetView(RESTORE_EXTERIOR_VIEW);

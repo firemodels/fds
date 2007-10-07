@@ -837,20 +837,6 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     }
 
     uup = camera_current->up;
-#ifdef pp_SPOTLIGHT
-      if(eyeview==1&&spotlight==1){
-        float spot_position[3], spot_direction[3];
-
-        spot_position[0]=eyexINI;
-        spot_position[1]=eyeyINI;
-        spot_position[2]=eyezINI;
-        spot_direction[0]=viewx;
-        spot_direction[1]=viewy;
-        spot_direction[2]=viewz;
-        updateSpotLight(0,spot_position, spot_direction);
-      }
-#endif
-
     gluLookAt(
       (double)(eyexINI+StereoCameraOffset*cos_dv_sum),
       (double)(eyeyINI-StereoCameraOffset*sin_dv_sum),
@@ -1678,36 +1664,6 @@ void _sniffErrors(char *whereat){
       snifferrornumber++;
   }
 }
-
-#ifdef pp_SPOTLIGHT
-void updateSpotLight(int init, float *spot_position, float *spot_direction){
-  GLfloat ambientlight2[4], diffuselight2[4];
-  int i;
-
-  return;
-  if(init==1){
-    glEnable(GL_LIGHT0);
-    glEnable(GL_LIGHT1);
-
-    for(i=0;i<3;i++){
-      ambientlight2[i]=ambientlight[i]/2.0;
-      diffuselight2[i]=diffuselight[i]/2.0;
-    }
-    ambientlight2[3]=1.0;
-    diffuselight2[3]=1.0;
-    glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuselight2);
-    glLightfv(GL_LIGHT0,GL_AMBIENT,ambientlight2);
-
-    glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuselight2);
-    glLightfv(GL_LIGHT1,GL_AMBIENT,ambientlight2);
-    glLightfv(GL_LIGHT1,GL_POSITION,light_position1);
-  }
-  glLightfv(GL_LIGHT0,GL_POSITION,spot_position);
-  glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
-  glLightf(GL_LIGHT0, GL_SPOT_CUTOFF,10.0);  //xxx test
-
-}
-#endif
 
 /* ------------------ updateLights ------------------------ */
 

@@ -29,10 +29,6 @@
 
 SVEXTERN int show_slice_in_obst;
 
-#ifdef pp_SPOTLIGHT
-SVEXTERN int spotlight;
-#endif
-
 SVEXTERN int force_isometric;
 SVEXTERN int updategluiview;
 SVEXTERN int render_double,render_double_state;
