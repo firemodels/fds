@@ -1000,9 +1000,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ update variables as needed +++++++++++++++++++++++++ */
 
-#ifdef pp_SVNET
-    parse_svcom();
-#endif
   if(loadfiles_at_startup&&update_load_startup==1){
     load_startup_smoke();
   }
@@ -3391,9 +3388,6 @@ void usage(char **argv){
 #endif
 #ifdef pp_SPHERE
     printf(", pp_SPHERE");
-#endif
-#ifdef pp_SVNET
-    printf(", pp_SVNET");
 #endif
 #ifdef pp_TEST
     printf(", pp_TEST");
