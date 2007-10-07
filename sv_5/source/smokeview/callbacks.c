@@ -47,24 +47,7 @@ void WindowStatus(int state){
 
 /* ------------------ mouse ------------------------ */
 
-#ifdef pp_SVNET
 void mouse(int button, int state, int x, int y){
-  int modifier_state;
-
-  modifier_state=glutGetModifiers();
-  if(n_tcpdata>0||tcp_test==1){
-    put_mouse(button, state, x, y, modifier_state);
-  }
-  else{
-    svc_mouse(button, state, x, y, modifier_state);
-  }
-  glutPostRedisplay();
-}
-
-void svc_mouse(int button, int state, int x, int y, int modifier_state){
-#else
-void mouse(int button, int state, int x, int y){
-#endif
   int temp;
   int yy;
   float factor;
@@ -272,11 +255,7 @@ void mouse(int button, int state, int x, int y){
       canrestorelastview=1;
       enable_reset_saved_view();
     }
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
     switch (state){
     case GLUT_ACTIVE_CTRL:
       key_state = KEY_CTRL;
@@ -309,21 +288,7 @@ void mouse(int button, int state, int x, int y){
 }
 
 /* ------------------ motion ------------------------ */
-#ifdef pp_SVNET
 void motion(int xm, int ym){
-  if(n_tcpdata>0||tcp_test==1){
-    put_motion(xm, ym);
-  }
-  else{
-    svc_motion(xm, ym);
-  }
-  glutPostRedisplay();
-}
-
-void svc_motion(int xm, int ym){
-#else
-void motion(int xm, int ym){
-#endif
   float xx, yy;
   int temp;
   int ifactor;
@@ -460,45 +425,13 @@ void motion(int xm, int ym){
 }
 
 /* ------------------ keyboard ------------------------ */
-#ifdef pp_SVNET
 void keyboard_up(unsigned char key, int x, int y){
-
-  if(n_tcpdata>0||tcp_test==1){
-    put_keyboard_up(key, x, y);
-  }
-  else{
-    svc_keyboard_up(key, x, y);
-  }
-  glutPostRedisplay();
-}
-
-void svc_keyboard_up(unsigned char key, int x, int y){
-#else
-void keyboard_up(unsigned char key, int x, int y){
-#endif
   resetclock=1;
 }
 
 /* ------------------ keyboard ------------------------ */
 
-#ifdef pp_SVNET
 void keyboard(unsigned char key, int x, int y){
-  int modifier_state;
-
-  modifier_state=glutGetModifiers();
-  if(n_tcpdata>0||tcp_test==1){
-    put_keyboard(key,x,y, modifier_state);
-  }
-  else{
-    svc_keyboard(key,x,y, modifier_state);
-  }
-  glutPostRedisplay();
-}
-
-void svc_keyboard(unsigned char key, int x, int y, int modifier_state){
-#else
-void keyboard(unsigned char key, int x, int y){
-#endif
   char key2;
   int skip2;
   char one='1';
@@ -613,11 +546,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"t",1)==0){
     int state;
 
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
 
     switch (state){
     case GLUT_ACTIVE_ALT:
@@ -649,11 +578,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"x",1)==0){
     int state;
 
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
 
     switch (state){
 
@@ -684,11 +609,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"z",1)==0){
     int state;
 
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
 
     switch (state){
     case GLUT_ACTIVE_ALT:
@@ -711,11 +632,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"e",1)==0){
     int state;
 
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
 
     switch (state){
     case GLUT_ACTIVE_ALT:
@@ -742,11 +659,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"f",1)==0){
     int state;
 
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
 
     switch (state){
     case GLUT_ACTIVE_ALT:
@@ -763,11 +676,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"]",1)==0){
     int state;
 
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
     if(state==GLUT_ACTIVE_ALT){
       printf("re-attaching menus to right mouse button\n");
       glutDetachMenu(GLUT_RIGHT_BUTTON);
@@ -779,11 +688,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"j",1)==0&&eyeview==EYE_CENTERED){
     int state;
 
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
 
     switch (state){
     case GLUT_ACTIVE_ALT:
@@ -811,11 +716,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"m",1)==0){
     int state;
 
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
 
     switch (state){
     case GLUT_ACTIVE_ALT:
@@ -836,11 +737,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"c",1)==0){
     int state;
 
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
     switch (state){
     case GLUT_ACTIVE_ALT:
       DialogMenu(18); // clip dialog
@@ -891,11 +788,7 @@ void keyboard(unsigned char key, int x, int y){
   }
   if(strncmp((const char *)&key2,"s",1)==0){
     int state;
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
 
     switch (state){
     case GLUT_ACTIVE_ALT:
@@ -919,11 +812,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"d",1)==0){
     int state;
 
-#ifdef pp_SVNET
-    state=modifier_state;
-#else
     state=glutGetModifiers();
-#endif
 
     switch (state){
     case GLUT_ACTIVE_ALT:

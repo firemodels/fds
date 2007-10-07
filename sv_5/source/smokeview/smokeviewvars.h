@@ -32,9 +32,6 @@ SVEXTERN int show_slice_in_obst;
 #ifdef pp_SPOTLIGHT
 SVEXTERN int spotlight;
 #endif
-#ifdef pp_SVNET
-SVEXTERN int n_tcpdata, tcp_test;
-#endif
 
 SVEXTERN int force_isometric;
 SVEXTERN int updategluiview;

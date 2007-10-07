@@ -54,7 +54,6 @@
 
 #ifdef pp_TEST2
 #define pp_TEST
-#define pp_SVNET
 #define pp_SPOTLIGHT
 #endif
 
