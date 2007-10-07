@@ -1,5 +1,4 @@
 #include "options.h"
-#ifdef pp_HRR
 #include <stdio.h>  
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -127,9 +126,3 @@ void readhrr(int flag, int *errorcode){
   }
   hrrinfo->ntimes_csv=ntimes-nfirst;
 }
-
-/* ------------------ drawhrr ------------------------ */
-
-void drawhrr(void){
-}
-#endif
