@@ -23,9 +23,6 @@ char main_revision[]="$Revision$";
 
 int main(int argc, char **argv){
   char **argv_sv;
-#ifdef WIN32
-  char *smv_file;
-#endif
 
 #ifdef pp_MEM2
   initMM();
@@ -41,7 +38,6 @@ int main(int argc, char **argv){
   if(argc==1){
     exit(0);
   }
-  smv_file=argv_sv[1];
 #else
   argv_sv=argv;
 #endif

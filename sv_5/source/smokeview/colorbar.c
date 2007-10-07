@@ -97,7 +97,7 @@ void addcolorbar(int icolorbar){
 
 void drawcolorbarpath(void){
   int i;
-  float *rrgb,*rrgb2;
+  float *rrgb;
   colorbardata *cbi;
   float *rgbleft, *rgbright;
 
@@ -116,15 +116,8 @@ void drawcolorbarpath(void){
   glBegin(GL_POINTS);
   for(i=0;i<cbi->nlegs;i++){
     rrgb=cbi->leg_rgb+6*i;
-    rrgb2=rrgb+3;
     glColor3fv(rrgb);
     glVertex3fv(rrgb);
-    /*
-    if(i!=cbi->nlegs-1){
-      glColor3fv(rrgb2);
-      glVertex3fv(rrgb2);
-    }
-    */
   }
 #define PLEFT -0.01
 #define PRIGHT 1.01

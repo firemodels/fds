@@ -1241,7 +1241,7 @@ void global2localpatchbounds(const char *key){
 
 void drawpatch_texture(const mesh *meshi){
   float r11, r12, r21, r22;
-  int n,nn,nn1,nn2;
+  int n,nn;
   int nrow, ncol, irow, icol;
   float *xyzp1, *xyzp2;
   unsigned char *ipq1, *ipq2;
@@ -1258,7 +1258,6 @@ void drawpatch_texture(const mesh *meshi){
   int iblock;
   blockagedata *bc;
   patch *patchi;
-  float *color11, *color12, *color21, *color22;
   mesh *meshblock;
   float clear_color[4]={1.0,1.0,1.0,1.0};
 
@@ -1296,12 +1295,6 @@ void drawpatch_texture(const mesh *meshi){
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
 
-  if(vis_ignited==0||do_ignited==0){
-    color11=clear_color;
-    color12=clear_color;
-    color21=clear_color;
-    color22=clear_color;
-  }
   nn =0;
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
@@ -1309,7 +1302,6 @@ void drawpatch_texture(const mesh *meshi){
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
     if(iblock!=-1&&meshblock!=NULL){
-//      bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -1326,12 +1318,10 @@ void drawpatch_texture(const mesh *meshi){
       for(irow=0;irow<nrow-1;irow++){
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
         ip1 = patchblankcopy + irow*ncol;
-        nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
         ipq1 = ipqqcopy + irow*ncol;
         ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
-        nn2 = nn1 + ncol;
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
             r11 = (float)(*ipq1)/255.0;
@@ -1392,12 +1382,10 @@ void drawpatch_texture(const mesh *meshi){
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
         ipq1 = ipqqcopy + irow*ncol;
         ip1 = patchblankcopy + irow*ncol;
-        nn1 = nn + irow*ncol;
 
         xyzp2 = xyzp1 + 3*ncol;
         ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
-        nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
@@ -1438,7 +1426,6 @@ void drawpatch_texture(const mesh *meshi){
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
     if(iblock!=-1&&meshblock!=NULL){
-//      bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -1454,12 +1441,10 @@ void drawpatch_texture(const mesh *meshi){
       for(irow=0;irow<nrow-1;irow++){
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
         ip1 = patchblankcopy + irow*ncol;
-        nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
         ipq1 = ipqqcopy + irow*ncol;
         ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
-        nn2 = nn1 + ncol;
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
             r11 = (float)(*ipq1)/255.0;

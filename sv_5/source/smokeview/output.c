@@ -159,8 +159,8 @@ void bench_out(float localframerate){
   fprintf(fileout,"     Window height:%i\n",screenHeight);
 
 #ifdef pp_memstatus
-  fprintf(fileout,"       Memory Used:%iMB\n",memused);
-  fprintf(fileout,"      Total Memory:%iMB\n",tmem);
+  fprintf(fileout,"       Memory Used:%iMB\n",(int)memused);
+  fprintf(fileout,"      Total Memory:%iMB\n",(int)tmem);
 #else
   fprintf(fileout,"       Memory Used:\n");
   fprintf(fileout,"      Total Memory:\n");

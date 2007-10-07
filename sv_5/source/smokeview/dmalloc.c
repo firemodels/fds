@@ -34,7 +34,7 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
 #endif
     if(size!=0&&size>stat.dwAvailPhys-0.1*stat.dwTotalPhys){
       printf("*** Low Memory Warning. Only %i M available for viewing data.\n",
-            stat.dwAvailPhys/(1024*1024));
+           (int)stat.dwAvailPhys/(1024*1024));
       printf("    Unload datafiles or system performance may degrade.\n");
     }
 }
@@ -62,7 +62,13 @@ mallocflag _NewMemory(void **ppv, size_t size){
 #ifdef _DEBUG
   char *c;
 #endif
+#ifdef pp_MEM2
   int infoblocksize;
+#else
+#ifdef _DEBUG
+  int infoblocksize;
+#endif
+#endif
 #ifdef pp_MEM2
   MMdata *this_ptr, *prev_ptr, *next_ptr;
 #endif
@@ -72,7 +78,9 @@ mallocflag _NewMemory(void **ppv, size_t size){
   infoblocksize=(sizeof(MMdata)+3)/4;
   infoblocksize*=4;
 #else
+#ifdef _DEBUG
   infoblocksize=0;
+#endif
 #endif
 
 #ifdef pp_MEM2
