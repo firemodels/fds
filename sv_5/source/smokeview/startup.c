@@ -1807,7 +1807,7 @@ void initvars1(void){
   valindex=0;
 
    iso_ambient[0] = 0.96;
-   iso_ambient[1] = 0.28;
+   iso_ambient[1] = 0.96;
    iso_ambient[2] = 0.00;
    iso_ambient[3] = 1.00;
    iso_ambient[4] = 0.75;
