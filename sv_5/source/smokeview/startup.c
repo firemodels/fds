@@ -1652,8 +1652,7 @@ void initvars1(void){
 
     strcat(TITLEBASE,version);
 #ifdef pp_BETA
-    strcat(TITLEBASE," Beta ");
-    strcat(TITLEBASE,"(");
+    strcat(TITLEBASE," (");
     strcat(TITLEBASE,svn_version);
     strcat(TITLEBASE,")");
 #endif
@@ -1662,11 +1661,11 @@ void initvars1(void){
 #endif
     strcat(TITLEBASE," - ");
 
-    strcpy(TRAINERTITLEBASE,"Smokeview Demonstrator");
+    strcpy(TRAINERTITLEBASE,"Fire Flow Demonstrator ");
 
     strcat(TRAINERTITLEBASE,version);
 #ifdef pp_BETA
-    strcat(TRAINERTITLEBASE," Beta ");
+    strcat(TRAINERTITLEBASE,"Test ");
     strcat(TRAINERTITLEBASE,"(");
     strcat(TRAINERTITLEBASE,svn_version);
     strcat(TRAINERTITLEBASE,")");
