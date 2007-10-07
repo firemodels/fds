@@ -1,4 +1,9 @@
-#define SMVVERSION ""
+#define pp_BETA  // uncomment when building beta versions of SV
+#ifdef pp_BETA
+#define SMVVERSION "Test"
+#else
+#define SMVVERSION "5.0.2"
+#endif
 
 // #define pp_LINT // uncomment if using LINT
 #define _CRT_SECURE_NO_DEPRECATE
@@ -46,7 +51,6 @@
 #define pp_THREADS2
 
 #define pp_WUI
-#define pp_BETA  // uncomment when building beta versions of SV
 
 #ifdef pp_TEST2
 #define pp_TEST
