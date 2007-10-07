@@ -13,14 +13,8 @@
 #define pp_COMPRESS
 #define pp_noappend
 
-#pragma warning (disable:4100)		/* disable bogus conversion warnings */
-#pragma warning (disable:4115)		/* disable bogus conversion warnings */
-#pragma warning (disable:4127)		/* disable bogus conversion warnings */
-#pragma warning (disable:4201)		/* disable bogus conversion warnings */
-#pragma warning (disable:4244)		/* disable bogus conversion warnings */
-#pragma warning (disable:4305)		/* disable bogus conversion warnings */
-#pragma warning (disable:4505)		/* disable bogus conversion warnings */
-#pragma warning (disable:4701)		/* disable bogus conversion warnings */
+#pragma warning (disable:810)		/* conversion from xx to yy may lose sig bits */
+#pragma warning (disable:869)		/* parameer was never referenced */
 #pragma warning (disable:4018)		/* signied/unsigned match */
 #pragma warning (disable:4206)		/* translation unit empty */
 #pragma warning (disable:4267)		/* size_t to int possible loss of data */
