@@ -15,6 +15,7 @@
 
 // svn revision character string
 char main_revision[]="$Revision$";
+// dummy change in main trunk to test two way branching
 
 
 /* ------------------ main ------------------------ */
