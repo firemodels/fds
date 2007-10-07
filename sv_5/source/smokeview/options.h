@@ -1,4 +1,4 @@
-#define SMVVERSION "5.0.2"
+#define SMVVERSION ""
 
 // #define pp_LINT // uncomment if using LINT
 #define _CRT_SECURE_NO_DEPRECATE
@@ -20,7 +20,13 @@
 #pragma warning (disable:4206)		/* translation unit empty */
 #pragma warning (disable:4267)		/* size_t to int possible loss of data */
 #pragma warning (disable:4389)		/* signed/unsigned mis-match */
-
+#pragma warning (disable:1418)		/* external function definition with no prior declaration */
+#pragma warning (disable:1599)		/* declaration hides variable */
+#pragma warning (disable:981)		/* operands are evaluated in unspecified order */
+#pragma warning (disable:1419)		/* external declaration in primary source file */
+#pragma warning (disable:1572)		/* floating-point equality and inequality comparisons are unreliable */
+#pragma warning (disable:494)		/* omission of "class"is nonstandard */
+#pragma warning (disable:444)		/* destructor for base class */
 
 #endif
 
@@ -38,10 +44,9 @@
 #define EGZ
 #define USE_ZLIB
 #define pp_THREADS2
-#define pp_HRR
 
 #define pp_WUI
-// #define pp_BETA  // uncomment when building beta versions of SV
+#define pp_BETA  // uncomment when building beta versions of SV
 
 #ifdef pp_TEST2
 #define pp_TEST

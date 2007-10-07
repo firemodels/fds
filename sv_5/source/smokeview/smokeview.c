@@ -366,12 +366,8 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
 
      if( visTimeLabels==1&&showtime==1){
       if(visTimelabel==1)outputText(0.0f,0.1f, timelabel);
-#ifdef pp_HRR
       if(visFramelabel==1&&visHRRlabel==0)outputText(0.0f,0.4f, framelabel);
       if(visHRRlabel==1&&hrrinfo!=NULL)outputText(0.0f,0.4f, hrrinfo->hrrlabel);
-#else
-      if(visFramelabel==1)outputText(0.0f,0.4f, framelabel);
-#endif
       drawTimeBar();
      }
 
@@ -394,9 +390,31 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       sprintf(frameratelabel," AVG: %4.1f",slice_average_interval);
       outputText((float)(xtimeright+0.025),0.56, frameratelabel); // test print
     }
+    if(show_hrrcutoff==1&&current_mesh!=NULL&&showtime==1){
+      char hrrcut_label[256];
+      int ihrrcut;
+      float xxl, xxr, yyl, yyu, ddx=0.03, ddy=0.2;
+
+      ihrrcut = current_mesh->hrrpuv_cutoff;
+
+      sprintf(hrrcut_label,">%i (kW/m3)",ihrrcut);
+      outputText((float)(xtimeright+0.06),0.56f, hrrcut_label);
+      xxl = xtimeright+0.025;
+      xxr = xxl+ddx;
+      yyl = 0.56;
+      yyu = yyl + ddy;
+
+      glBegin(GL_QUADS);
+      glColor3f(fire_red/255.0,fire_green/255.0,fire_blue/255.0);
+      glVertex3f(xxl,yyl,0.0);
+      glVertex3f(xxr,yyl,0.0);
+      glVertex3f(xxr,yyu,0.0);
+      glVertex3f(xxl,yyu,0.0);
+      glEnd();
+    }
 #ifdef pp_memstatus
     if(visAvailmemory==1){
-      sprintf(frameratelabel," Mem Load:%i%s",availmemory,percen);
+      sprintf(frameratelabel," Mem Load:%u%s",availmemory,percen);
       if((benchmark==1||visFramerate==1)&&showtime==1){
         outputText((float)(xtimeright+0.025),0.32f, frameratelabel);
       }
@@ -1032,20 +1050,23 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw viewports +++++++++++++++++++++++++ */
   if(mode==RENDER){
-    /*
-    BLOCK_viewport(0,0,0,screenWidth,screenHeight);
-    TIMEBAR_viewport(0,0,0,screenWidth,screenHeight);
-    COLORBAR_viewport(0,0,0,screenWidth,screenHeight);
-    LOGO_viewport(0,0,0,screenWidth,screenHeight);
-    TITLE_viewport(0,0,0,screenWidth,screenHeight);
-    Scene_viewport(0,view_mode,0,0,screenWidth,screenHeight);
-    */
-       BLOCK_viewport(quad,          s_left,s_down,s_width,s_height);
-     TIMEBAR_viewport(quad,          s_left,s_down,s_width,s_height);
+    BLOCK_viewport(quad,          s_left,s_down,s_width,s_height);
+    sniffErrors("after BLOCK_viewport");
+
+    TIMEBAR_viewport(quad,          s_left,s_down,s_width,s_height);
+    sniffErrors("after TIMEBAR_viewport");
+
     COLORBAR_viewport(quad,          s_left,s_down,s_width,s_height);
-        LOGO_viewport(quad,          s_left,s_down,s_width,s_height);
-       TITLE_viewport(quad,          s_left,s_down,s_width,s_height);
-       Scene_viewport(quad,view_mode,s_left,s_down,s_width,s_height);
+    sniffErrors("after COLORBAR_viewport");
+
+    LOGO_viewport(quad,          s_left,s_down,s_width,s_height);
+    sniffErrors("after LOGO_viewport");
+    
+    TITLE_viewport(quad,          s_left,s_down,s_width,s_height);
+    sniffErrors("after TITLE_viewport");
+
+    Scene_viewport(quad,view_mode,s_left,s_down,s_width,s_height);
+    sniffErrors("after Scene_viewport");
   }
 
   if(eyeview==1&&nskyboxinfo>0)draw_skybox();
@@ -1124,12 +1145,16 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
     if(visaxislabels==1||showedit==1){
       outputAxisLabels();
+      sniffErrors("after outputAxisLables");
     }
 
 
  /* ++++++++++++++++++++++++ draw ticks +++++++++++++++++++++++++ */
 
-    if(visTicks==1&&nticks>0)drawticks();
+    if(visTicks==1&&nticks>0){
+      drawticks();
+      sniffErrors("after drawticks");
+    }
 
     /* draw the box framing the simulation (corners at (0,0,0) (xbar,ybar,zbar) */
 
@@ -1138,8 +1163,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
      if(isZoneFireModel==0&&visFrame==1&&highlight_flag==2){
        drawoutlines();
+       sniffErrors("after drawoutlines");
      }
-     sniffErrors("after drawbox");
 
 
 /* ++++++++++++++++++++++++ draw mesh +++++++++++++++++++++++++ */
@@ -1152,6 +1177,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
          for(igrid=0;igrid<selected_case->nmeshes;igrid++){
            meshi=selected_case->meshinfo+igrid;
            drawgrid(meshi);
+           sniffErrors("drawgrid");
          }
        }
      }
@@ -1183,6 +1209,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
   drawBlockages(mode,DRAW_SOLID);
+  sniffErrors("drawBlockages");
 
 #ifdef pp_WUI
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
@@ -1647,8 +1674,9 @@ void getinverse(float *m, float *mi){
 void _sniffErrors(char *whereat){
   int error;
   while((error=glGetError())!=GL_NO_ERROR){
-    fprintf(stderr,"GL Error:%s where:%s  %i\n",
-      gluErrorString((unsigned int)error),whereat,snifferrornumber++);
+    fprintf(stderr,"GL Error:%s where:%s %i\n",
+      gluErrorString((unsigned int)error),whereat,snifferrornumber);
+      snifferrornumber++;
   }
 }
 
@@ -2077,9 +2105,7 @@ void updatetimes(void){
   particle *parti;
   tourdata *touri;
   int filenum;
-#ifdef pp_HRR
   float dt_MIN=100000.0;
-#endif
 
   updateShow();  
   ntimes = 0;
@@ -2160,11 +2186,9 @@ void updatetimes(void){
       if(terri->loaded==0)continue;
       for(n=0;n<terri->ntimes;n++){
         *timescopy++=terri->times[n];
-#ifdef pp_HRR
         if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
           dt_MIN=timescopy[-1]-timescopy[-2];
         }
-#endif
       }
     }
   }
@@ -2174,11 +2198,9 @@ void updatetimes(void){
     if(touri->display==0)continue;
     for(n=0;n<touri->npath;n++){
       *timescopy++=touri->path_times[n];
-#ifdef pp_HRR
       if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
         dt_MIN=timescopy[-1]-timescopy[-2];
       }
-#endif
     }
   }
   for(i=0;i<npartinfo;i++){
@@ -2186,11 +2208,9 @@ void updatetimes(void){
     if(parti->loaded==0)continue;
     for(n=0;n<parti->nframes;n++){
       *timescopy++=parti->ptimes[n];
-#ifdef pp_HRR
       if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
         dt_MIN=timescopy[-1]-timescopy[-2];
       }
-#endif
     }
   }
   for(i=0;i<nslice;i++){
@@ -2198,22 +2218,18 @@ void updatetimes(void){
     if(sd->loaded==1||sd->vloaded==1){
         for(n=0;n<sd->nsteps;n++){
           *timescopy++=sd->slicetimes[n];
-#ifdef pp_HRR
           if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
             dt_MIN=timescopy[-1]-timescopy[-2];
           }
-#endif
         }
     }
   }
   if(ReadTargFile==1&&visTarg==1){
     for(n=0;n<ntargtimes;n++){
       *timescopy++=targtimes[n];
-#ifdef pp_HRR
       if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
         dt_MIN=timescopy[-1]-timescopy[-2];
       }
-#endif
     }
   }
   for(i=0;i<selected_case->nmeshes;i++){
@@ -2224,11 +2240,9 @@ void updatetimes(void){
       if(patchi->loaded==1){
         for(n=0;n<meshi->npatch_frames;n++){
           *timescopy++=meshi->patchtimes[n];
-#ifdef pp_HRR
           if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
             dt_MIN=timescopy[-1]-timescopy[-2];
           }
-#endif
         }
       }
     }
@@ -2236,11 +2250,9 @@ void updatetimes(void){
   if(ReadZoneFile==1&&visZone==1){
     for(n=0;n<nzonet;n++){
       *timescopy++=zonet[n];
-#ifdef pp_HRR
       if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
         dt_MIN=timescopy[-1]-timescopy[-2];
       }
-#endif
     }
   }
   if(ReadIsoFile==1&&visAIso!=0){
@@ -2250,11 +2262,9 @@ void updatetimes(void){
       meshi=selected_case->meshinfo + ib->blocknumber;
       for(n=0;n<meshi->nisosteps;n++){
         *timescopy++=meshi->isotimes[n];
-#ifdef pp_HRR
         if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
           dt_MIN=timescopy[-1]-timescopy[-2];
         }
-#endif
       }
     }
   }
@@ -2267,11 +2277,9 @@ void updatetimes(void){
         if(smoke3di->loaded==0)continue;
         for(n=0;n<smoke3di->n_times;n++){
           *timescopy++=smoke3di->times[n];
-#ifdef pp_HRR
           if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
             dt_MIN=timescopy[-1]-timescopy[-2];
           }
-#endif
         }
       }
     }
@@ -2281,11 +2289,7 @@ void updatetimes(void){
 
   n2=1;ntimes2=ntimes;
   for(n=1;n<ntimes;n++){
-#ifdef pp_HRR
     if(fabs(times[n]-times[n-1])>dt_MIN/10.0){
-#else
-    if(times[n]!=times[n-1]){
-#endif
       times[n2]=times[n];
       n2++;
     }
@@ -2320,7 +2324,6 @@ void updatetimes(void){
       }
     }
 #endif
-#ifdef pp_HRR
     if(hrrinfo!=NULL){
       if(hrrinfo->loaded==1&&hrrinfo->display==1&&ntimes>0){
         int jstart=0;
@@ -2361,7 +2364,6 @@ void updatetimes(void){
 
       }
     }
-#endif
     for(i=0;i<nslice;i++){
       sd = sliceinfo + i;
       FREEMEMORY(sd->slicetimeslist);
@@ -2743,7 +2745,6 @@ void UpdateTimeLabels(void){
     }
   }
   sprintf(framelabel,"Frame: %i",itime);
-#ifdef pp_HRR
   if(hrrinfo!=NULL&&hrrinfo->display==1&&hrrinfo->loaded==1){
     float hrr;
 
@@ -2758,7 +2759,6 @@ void UpdateTimeLabels(void){
       sprintf(hrrinfo->hrrlabel,"HRR: %4.1f kW",hrr);
     }
   }
-#endif
 }
 
 /* ------------------ synctimes ------------------------ */
@@ -2837,7 +2837,6 @@ void synctimes(void){
       terri->timeslist[n]=i;
     }
 #endif
-#ifdef pp_HRR
     if(hrrinfo!=NULL&&hrrinfo->loaded==1&&hrrinfo->display==1){
       if(n==0){
         istart=0;
@@ -2854,7 +2853,6 @@ void synctimes(void){
       }
       hrrinfo->timeslist[n]=i;
     }
-#endif
 
   /* synchronize particle times */
 
@@ -3122,20 +3120,6 @@ void Args(int argc, char **argv){
   char SMVFILENAME[1024];
   int smv_parse;
 
-  STRCPY(TRAINERTITLE,TRAINERTITLEBASE);
-  STRCAT(TRAINERTITLEBASE,__DATE__);
-#ifdef _DEBUG
-  STRCPY(TITLE,TITLEBASE);
-  STRCAT(TITLE,__DATE__);
-#else
-  STRCPY(TITLE,TITLEBASE);
-  STRCAT(TITLE,__DATE__);
-#endif
-
-  STRCPY(FULLTITLE,TITLE);
-
-  STRCPY(TITLERELEASE,TITLE);
-
   CheckMemory;
   partscale=a_partscale;
   zonescale=a_zonescale;
@@ -3309,7 +3293,7 @@ void version(void){
 
     svn_num=getmaxrevision();    // get svn revision number
     printf("\n");
-    printf("Smokeview\n\n");
+    printf("%s\n\n",TITLERELEASE);
     printf("Version: %s\n",SMVVERSION);
     printf("Smokeview Revision Number: %i\n",svn_num);
     if(revision_fds>0){

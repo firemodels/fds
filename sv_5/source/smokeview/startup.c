@@ -31,7 +31,7 @@ void glui_tour_setup(int main_window);
 void glui_advancedtour_setup(int main_window);
 void glui_stereo_setup(int main_window);
 void glui_trainer_setup(int main_window);
-void glui_3dsmoke_setup2(int main_window);
+void glui_3dsmoke_setup(int main_window);
 void RenderMenu(int value);
 //void InitOpenGL(void);
 
@@ -109,7 +109,7 @@ int initcase_c(int argc, char **argv){
   glui_alert_setup(mainwindow_id);
   glui_advancedtour_setup(mainwindow_id);
   glui_stereo_setup(mainwindow_id);
-  glui_3dsmoke_setup2(mainwindow_id);
+  glui_3dsmoke_setup(mainwindow_id);
 
 
   if(UpdateLIGHTS==1)updateLights(0);
@@ -986,6 +986,8 @@ void initvars1(void){
 
   trainerview=1;
   show_bothsides_int=1;
+  show_hrrcutoff=1;
+  show_hrrcutoff_active=0;
   show_bothsides_ext=0;
   show_slice_in_obst=0;
   updategluiview=1;
@@ -1212,9 +1214,7 @@ void initvars1(void){
 #ifdef pp_memstatus
   visAvailmemory=0;
 #endif
-#ifdef pp_HRR
   visHRRlabel=0;
-#endif
   visBlocklabel=1;
   visOpenVents=1,visDummyVents=1;
   visOpenVentsAsOutline=0;
@@ -1677,6 +1677,19 @@ void initvars1(void){
     strcat(TRAINERTITLEBASE," - ");
 
   }
+  STRCPY(TRAINERTITLE,TRAINERTITLEBASE);
+  STRCAT(TRAINERTITLEBASE,__DATE__);
+#ifdef _DEBUG
+  STRCPY(TITLE,TITLEBASE);
+  STRCAT(TITLE,__DATE__);
+#else
+  STRCPY(TITLE,TITLEBASE);
+  STRCAT(TITLE,__DATE__);
+#endif
+
+  STRCPY(FULLTITLE,TITLE);
+
+  STRCPY(TITLERELEASE,TITLE);
 
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");
@@ -2004,10 +2017,8 @@ void initvars0(void){
   trainer_filename=NULL;
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
   flushfile=NULL, chidfilebase=NULL;
-#ifdef pp_HRR
   hrrfilename=NULL;
   hrrinfo=NULL;
-#endif
   smokezippath=NULL;
   shellfilename=NULL;
   INI_fds_filein=NULL, fds_filein=NULL, fds_fileout=NULL,fds_fileout2=NULL;

@@ -19,6 +19,7 @@ char main_revision[]="$Revision$";
 
 
 /* ------------------ main ------------------------ */
+// dummy change in svtest1 branch to test two way merging
 
 int main(int argc, char **argv){
   char **argv_sv;

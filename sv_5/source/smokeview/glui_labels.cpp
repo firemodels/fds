@@ -34,9 +34,8 @@ GLUI_Checkbox *CHECKBOX_labels_hms=NULL;
 GLUI_Checkbox *CHECKBOX_labels_framerate=NULL;
 GLUI_Checkbox *CHECKBOX_labels_timelabel=NULL;
 GLUI_Checkbox *CHECKBOX_labels_framelabel=NULL;
-#ifdef pp_HRR
 GLUI_Checkbox *CHECKBOX_labels_hrrlabel=NULL;
-#endif
+GLUI_Checkbox *CHECKBOX_labels_hrrcutoff=NULL;
 GLUI_Checkbox *CHECKBOX_labels_availmemory=NULL;
 GLUI_Checkbox *CHECKBOX_labels_labels=NULL;
 GLUI_Checkbox *CHECKBOX_labels_gridloc=NULL;
@@ -66,10 +65,9 @@ GLUI_Button *Button_BENCHMARK=NULL;
 GLUI_Panel *panel_showhide=NULL;
 
 #define LABELS_label 0
-#ifdef pp_HRR
 #define FRAME_label 21
 #define HRR_label 22
-#endif
+#define HRRPUVCUTOFF_label 23
 #define LABELS_showall 1
 #define LABELS_hideall 2
 #define LABELS_close 3
@@ -103,12 +101,9 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_colorbar=glui_labels->add_checkbox("Color Bar",&visColorLabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_timebar=glui_labels->add_checkbox("Time Bar",&visTimeLabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_timelabel=glui_labels->add_checkbox("Time Label",&visTimelabel,LABELS_label,Labels_CB);
-#ifdef pp_HRR
   CHECKBOX_labels_framelabel=glui_labels->add_checkbox("Frame Label",&visFramelabel,FRAME_label,Labels_CB);
   CHECKBOX_labels_hrrlabel=glui_labels->add_checkbox("HRR Label",&visHRRlabel,HRR_label,Labels_CB);
-#else
-  CHECKBOX_labels_framelabel=glui_labels->add_checkbox("Frame Label",&visFramelabel,LABELS_label,Labels_CB);
-#endif
+  CHECKBOX_labels_hrrcutoff=glui_labels->add_checkbox("HRRPUV cutoff",&show_hrrcutoff,HRRPUVCUTOFF_label,Labels_CB);
   CHECKBOX_labels_ticks=glui_labels->add_checkbox("Ticks",&visTicks,LABELS_label,Labels_CB);
   if(ntotal_blockages>0||isZoneFireModel==0){
     CHECKBOX_labels_gridloc=glui_labels->add_checkbox("Grid Loc",&visgridloc,LABELS_label,Labels_CB);
@@ -584,7 +579,6 @@ void Labels_CB(int var){
     break;
   case LABELS_label:
     break;
-#ifdef pp_HRR
   case FRAME_label:
     visFramelabel=1-visFramelabel;
     LabelMenu(9);
@@ -593,7 +587,8 @@ void Labels_CB(int var){
     visHRRlabel=1-visHRRlabel;
     LabelMenu(16);
     break;
-#endif
+  case HRRPUVCUTOFF_label:
+    break;
   default:
     ASSERT(FFALSE);
   }
@@ -604,6 +599,8 @@ void Labels_CB(int var){
 
 extern "C" void set_labels_controls(){
 
+  if(CHECKBOX_labels_hrrlabel!=NULL)CHECKBOX_labels_hrrlabel->set_int_val(visHRRlabel);
+  if(CHECKBOX_labels_hrrcutoff!=NULL)CHECKBOX_labels_hrrcutoff->set_int_val(show_hrrcutoff);
   if(CHECKBOX_labels_title!=NULL)CHECKBOX_labels_title->set_int_val(visTitle0);
   if(CHECKBOX_labels_colorbar!=NULL)CHECKBOX_labels_colorbar->set_int_val(visColorLabels);
   if(CHECKBOX_labels_timebar!=NULL)CHECKBOX_labels_timebar->set_int_val(visTimeLabels);

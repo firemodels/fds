@@ -748,7 +748,6 @@ int readsmv(char *file){
   update_current_mesh(meshinfo);
   for(n=0;n<nmeshes;n++){
     mesh *meshi;
-    int nlist;
 
     meshi=meshinfo+n;
     meshi->ibar=0;
@@ -762,11 +761,6 @@ int readsmv(char *file){
     meshi->nsmoothblockages_list=0;
     meshi->smoothblockages_list=NULL;
     meshi->nsmoothblockages_list++;
-    nlist=meshi->nsmoothblockages_list;
-  //  if(nlist==1){                      // all smooth blockages visible for  first entry in list
-  //    meshi->smoothblockages_list[0].time=-1.0;
-  //    meshi->nsmoothblockages_list++;
-  //  }
   }
   if(setPDIM==0){
     mesh *meshi;
@@ -1365,7 +1359,7 @@ typedef struct {
           else{
             ticki->useforegroundcolor=0;
           }
-          if(ticki->width<0.0)ticki->width=0.0;
+          if(ticki->width<0.0)ticki->width=1.0;
         }
         for(i=0;i<3;i++){
           term = endt[i]-begt[i];
@@ -1590,6 +1584,9 @@ typedef struct {
 
         if(stat(smoke3di->file,&statbuffer)==0){
           if(readlabels(&smoke3di->label,stream)==2)return 2;
+          if(strcmp(smoke3di->label.longlabel,"HRRPUV")==0){
+            show_hrrcutoff_active=1;
+          }
           ismoke3d++;
         }
         else{
@@ -2828,7 +2825,6 @@ typedef struct {
 
     if(match(buffer,"VENT",4) == 1&&match(buffer,"VENTGEOM",8) != 1){
       mesh *meshi;
-      float xmid, ymid, zmid;
 
       ivent++;
       meshi=meshinfo+ivent-1;
@@ -3061,96 +3057,6 @@ typedef struct {
           vi->color=foregroundcolor;
         }
         ASSERT(vi->color!=NULL);
-        xmid=(xplttemp[iv1]+xplttemp[iv2])/2.0f;
-        ymid=(yplttemp[jv1]+yplttemp[jv2])/2.0f;
-        zmid=(zplttemp[kv1]+zplttemp[kv2])/2.0f;
- /*       
-        if(iv1==iv2){
-          vi->dir2=1;
-          ventdir=DOWN_X;
-          offset=ventoffset_factor*(xplttemp[1]-xplttemp[0]);
-          voffset=-offset;
-          if(inblockage(meshi,xmid-offset,ymid,zmid)==1){
-            voffset=offset;
-            ventdir=UP_X;
-          }
-          if(inblockage(meshi,xmid+offset,ymid,zmid)==1){
-            voffset=-offset;
-            ventdir=DOWN_X;
-          }
-          if(iv1==0){
-            ventdir=UP_X;
-            voffset=offset;
-          }
-          if(iv1==ibartemp){
-            ventdir=DOWN_X;
-            voffset=-offset;
-          }
-          if(nn<nvents)vi->dir=ventdir;
-          if(vi->dummy==0){
-            vi->xvent1 += voffset;
-            vi->xvent2 += voffset;
-          }
-        }
-        if(jv1==jv2){
-          int ventdir;
-          float offset,voffset;
-
-          vi->dir2=2;
-          ventdir=DOWN_Y;
-          offset=ventoffset_factor*(yplttemp[1]-yplttemp[0]);
-          voffset=0.0;
-          if(inblockage(meshi,xmid,ymid-offset,zmid)==1){
-            ventdir = UP_Y;
-            voffset=offset;
-          }
-          if(inblockage(meshi,xmid,ymid+offset,zmid)==1){
-            ventdir=DOWN_Y;
-            voffset=-offset;
-          }
-          if(jv1==0){
-            ventdir=UP_Y;
-            voffset=offset;
-          }
-          if(jv1==jbartemp){
-            ventdir=DOWN_Y;
-            voffset=-offset;
-          }
-          if(vi->dummy==0){
-            vi->yvent1 += voffset;
-            vi->yvent2 += voffset;
-          }
-          if(nn<nvents)vi->dir=ventdir;
-        }
-        if(kv1==kv2){
-          vi->dir2=3;
-          offset=ventoffset_factor*(zplttemp[1]-zplttemp[0]);
-          ventdir = DOWN_Z;
-          voffset=0.0;
-          if(inblockage(meshi,xmid,ymid,zmid-offset)==1){
-            ventdir = UP_Z;
-            voffset=offset;
-          }
-          if(inblockage(meshi,xmid,ymid,zmid+offset)==1){
-            ventdir = DOWN_Z;
-            voffset=-offset;
-          }
-          if(kv1==0){
-            ventdir = UP_Z;
-            voffset=offset;
-          }
-          if(kv1==kbartemp){
-            ventdir = DOWN_Z;
-            voffset=-offset;
-          }
-          if(vi->dummy==0){
-            vi->zvent1 += voffset;
-            vi->zvent2 += voffset;
-          }
-          if(nn<nvents)vi->dir=ventdir;
-        }
-        */
-        
       }
       continue;
     }
@@ -3428,7 +3334,6 @@ typedef struct {
           STRCPY(chidfilebase,chidptr);
         }
       }
-#ifdef pp_HRR
       if(chidfilebase!=NULL){
         NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
         STRCPY(hrrfilename,chidfilebase);
@@ -3437,7 +3342,6 @@ typedef struct {
           FREEMEMORY(hrrfilename);
         }
       }
-#endif
       continue;
     }
   /*
@@ -3460,7 +3364,6 @@ typedef struct {
       STRCPY(flushfile,chidfilebase);
       STRCAT(flushfile,".flush");
 #endif
-#ifdef pp_HRR
   if(chidfilebase!=NULL){
     NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
     STRCPY(hrrfilename,chidfilebase);
@@ -3469,8 +3372,6 @@ typedef struct {
       FREEMEMORY(hrrfilename);
     }
   }
-#endif
-
       continue;
     }
 
@@ -4502,11 +4403,9 @@ typedef struct {
   if(meshinfo!=NULL&&meshinfo->jbar==1){
     force_isometric=1;
   }
-#ifdef pp_HRR
   if(hrrfilename!=NULL){
     readhrr(LOAD, &errorcode);
   }
-#endif
 
 #ifdef pp_THREADS2
   if(mt_compress==1)pthread_mutex_init(&mutexCOMPRESS,NULL);
@@ -6775,13 +6674,11 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       sscanf(buffer,"%i ",&visFramelabel);
       continue;
     }
-#ifdef pp_HRR
     if(match(buffer,"SHOWHRRLABEL",12)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&visHRRlabel);
       continue;
     }
-#endif
     if(match(buffer,"RENDERFILETYPE",14)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&renderfiletype);
@@ -7673,7 +7570,7 @@ typedef struct {
           else{
             ticki->useforegroundcolor=0;
           }
-          if(ticki->width<0.0)ticki->width=0.0;
+          if(ticki->width<0.0)ticki->width=1.0;
         }
         for(i=0;i<3;i++){
           term = endt[i]-begt[i];
@@ -8243,10 +8140,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",visTimelabel);
   fprintf(fileout,"SHOWFRAMELABEL\n");
   fprintf(fileout," %i\n",visFramelabel);
-#ifdef pp_HRR
   fprintf(fileout,"SHOWFRAMELABEL\n");
   fprintf(fileout," %i\n",visFramelabel);
-#endif
   fprintf(fileout,"SHOWFLOOR\n");
   fprintf(fileout," %i\n",visFloor);
   fprintf(fileout,"SHOWWALLS\n");
