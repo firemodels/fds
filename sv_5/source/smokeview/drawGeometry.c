@@ -1139,20 +1139,12 @@ void update_faces(void){
   for(i=0;i<selected_case->nmeshes;i++){
     meshi = selected_case->meshinfo + i;
     faceptr = meshi->faceinfo;
-#ifdef pp_WUI
     for(j=0;j<meshi->nbptrs;j++){
       bc = meshi->blockageinfoptrs[j];
       if(visTerrain==1&&bc->is_wuiblock==1)continue;
       obst_or_vent2faces(meshi,bc,NULL,faceptr,BLOCK_face);
       faceptr += 6;
     }
-#else
-    for(j=0;j<meshi->nbptrs;j++){
-      bc = meshi->blockageinfoptrs[j];
-      obst_or_vent2faces(meshi,bc,NULL,faceptr,BLOCK_face);
-      faceptr += 6;
-    }
-#endif
     for(j=0;j<meshi->nvents;j++){
       vi = meshi->ventinfo+j;
       obst_or_vent2faces(meshi,NULL,vi,faceptr,VENT_face);

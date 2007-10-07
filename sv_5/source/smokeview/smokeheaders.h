@@ -26,13 +26,11 @@ int SUB_portfrustum(int quad,
 
 EXTERNCPP void add_new_tour(void);
 
-#ifdef pp_WUI
 void readterrain(char *file, int ifile, int flag, int *errorcode);
 float getterrain_z(float x, float y);
 void initterrain(terraindata *terri);
 void drawterrain(terraindata *terri);
 void drawtrees(void);
-#endif
 int createnulllabel(flowlabels *flowlabel);
 #ifdef pp_GPU
 void getDepthTexture( void );

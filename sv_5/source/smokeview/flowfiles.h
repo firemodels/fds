@@ -3,7 +3,6 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 
-#ifdef pp_WUI
 /* --------------------------  treedata ------------------------------------ */
 
 typedef struct {
@@ -15,7 +14,7 @@ typedef struct {
   float base_height;
   int state;
 } treedata;
-#endif
+
 /* --------------------------  colorbardata ------------------------------------ */
 
 typedef struct {
@@ -84,7 +83,6 @@ typedef struct {
   GLuint name;
 } texture;
 
-#ifdef pp_WUI
 /* --------------------------  terraindata ------------------------------------ */
 
 typedef struct {
@@ -109,7 +107,6 @@ typedef struct {
   terraincell *tcell;
   int ntimes;
 } terraindata;
-#endif
 
 /* --------------------------  surface ------------------------------------ */
 
@@ -178,9 +175,7 @@ typedef struct {
   int patchvis[7];
   int usecolorindex;
   int id;
-#ifdef pp_WUI
   int is_wuiblock;
-#endif
   int hole;
   int nnodes;
   int hidden,invisible;

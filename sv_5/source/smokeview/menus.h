@@ -1841,11 +1841,9 @@ void LoadUnloadMenu(int value){
   if(value==999)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value==UNLOADALL){
-#ifdef pp_WUI
     for(i=0;i<nterraininfo;i++){
       readterrain("",i,UNLOAD,&errorcode);
     }
-#endif
     for(i=0;i<nslice;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
@@ -1878,13 +1876,11 @@ void LoadUnloadMenu(int value){
     for(i=0;i<nslice;i++){
       sliceinfo[i].reload=1;
     }
-#ifdef pp_WUI
     for(i=0;i<nterraininfo;i++){
       if(terraininfo[i].loaded==1){
         readterrain(terraininfo[i].file,i,LOAD,&errorcode);
       }
     }
-#endif
     for(i=0;i<nvslice;i++){
       if(vsliceinfo[i].loaded==1){
         readvslice(i,LOAD,&errorcode);
@@ -2679,7 +2675,7 @@ void ShowAllSlices(char *type){
   glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
-#ifdef pp_WUI
+
 void UnloadTerrainMenu(int value);
 void LoadTerrainMenu(int value);
 
@@ -2725,7 +2721,6 @@ void UnloadTerrainMenu(int value){
   glutPostRedisplay();
 
 }
-#endif
 
 /* ------------------ LoadSliceMenu ------------------------ */
 
@@ -3236,11 +3231,9 @@ void GeometryMenu(int value){
   case 7:
     visCeiling=1-visCeiling;
     break;
-#ifdef pp_WUI
   case 17:
     visTerrain=1 - visTerrain;
     break;
-#endif
   case 11:
     if(isZoneFireModel)visFrame=1;
     visFloor=1;
@@ -3346,9 +3339,7 @@ static int gridslicemenu=0, blockagemenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0;
 static int loadplot3dmenu=0, unloadvslicemenu=0, unloadslicemenu=0;
-#ifdef pp_WUI
 static int loadterrainmenu=0, unloadterrainmenu=0;
-#endif
 static int loadsmoke3dmenu=0;
 static int unloadsmoke3dmenu=0;
 static int unloadevacmenu=0, unloadpartmenu=0, loadslicemenu=0, loadmultislicemenu=0;
@@ -3976,12 +3967,10 @@ static int textureshowmenu=0;
 
   CREATEMENU(geometrymenu,GeometryMenu);
   if(showedit==0&&ntotal_blockages>0)glutAddSubMenu("Blockages",blockagemenu);
-#ifdef pp_WUI
   if(nterraininfo>0){
     if(visTerrain==1)glutAddMenuEntry("*Terrain",17);
     if(visTerrain==0)glutAddMenuEntry("Terrain",17);
   }
-#endif
  glutAddSubMenu("Vents",ventmenu);
  if(ntotal_blockages>0||isZoneFireModel==0){
     glutAddSubMenu("Grid",gridslicemenu);
@@ -5528,8 +5517,6 @@ static int textureshowmenu=0;
     }
   }
 
-#ifdef pp_WUI
-
   /* --------------------------------unload and load slice menus -------------------------- */
 
   if(nterraininfo>0){
@@ -5574,9 +5561,6 @@ static int textureshowmenu=0;
       glutAddSubMenu("Unload Terrain",unloadterrainmenu);
     }
   }
-
-#endif
-
     if(nslice>0){
 
       if(nmultislices<nslice){
@@ -6155,11 +6139,9 @@ static int textureshowmenu=0;
         }
         glutAddSubMenu(loadmenulabel,loadsmoke3dmenu);
       }
-#ifdef pp_WUI
       if(nterraininfo>0){
         glutAddSubMenu("Terrain",loadterrainmenu);
       }
-#endif
       if(nslice>0&&nmultislices<nslice){
         strcpy(loadmenulabel,"Multi-Slices");
         if(sliceframeskip>0){

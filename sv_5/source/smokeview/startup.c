@@ -878,7 +878,6 @@ void InitOpenGL(void){
         readslice(slicei->file,i,LOAD,&errorcode);
       }
     }
-#ifdef pp_WUI
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
 
@@ -886,7 +885,6 @@ void InitOpenGL(void){
       if(terri->autoload==0&&terri->loaded==1)readterrain(terri->file,i,UNLOAD,&errorcode);
       if(terri->autoload==1&&terri->loaded==0)readslice(terri->file,i,LOAD,&errorcode);
     }
-#endif
     for(i=0;i<nsmoke3d;i++){
       smoke3d *smoke3di;
 
@@ -921,7 +919,6 @@ void initvars1(void){
   cb_val=50.0;
   cb_colorindex=128;
 
-#ifdef pp_WUI
   rgb_terrain[0][0]=1.0;
   rgb_terrain[0][1]=0.0;
   rgb_terrain[0][2]=0.0;
@@ -971,7 +968,6 @@ void initvars1(void){
   rgb_terrain[9][1]=0.25;
   rgb_terrain[9][2]=0.5;
   rgb_terrain[9][3]=1.0;
-#endif
 
   render_double=0;
   render_double_state=0;
@@ -1143,9 +1139,7 @@ void initvars1(void){
   allexterior=1,showexterior=1;
   allinterior=1;
   showbounds=0,showmotion=0,showedit=0, showclip=0, showgluistereo=0, showtour=0, showlabels=0, showcolorbar=0;
-#ifdef pp_WUI
   showterrain=0;
-#endif
   showgluitrainer=0;
   colorbarcycle=0;
   colorbartype=1;
@@ -1970,7 +1964,7 @@ void initvars0(void){
   ventcolor=NULL;
   meshinfo=NULL,current_mesh=NULL, mesh_save=NULL, mesh_last=NULL, loaded_isomesh=NULL;
   tourinfo=NULL,default_tour;
-#ifdef pp_WUI
+
   treeinfo=NULL;
   ntreeinfo=0;
   terraininfo=NULL;
@@ -1988,7 +1982,7 @@ void initvars0(void){
   trunccolor[1]=0.2;
   trunccolor[2]=0.0;
   trunccolor[3]=1.0;
-#endif
+
   tourknotskeylist=NULL;
   tourknotstourlist=NULL;
   selected_frame=NULL;
