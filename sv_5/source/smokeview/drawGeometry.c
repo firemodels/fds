@@ -287,7 +287,7 @@ void setventdirs(void){
   int i, j, k;
   int index1,index2, index3;
   int nx, ny, nxy;
-  int *iblank_x, *iblank_y, *iblank_z, *iblank_cell;
+  int *iblank_x, *iblank_y, *iblank_z;
   int state1, state2, state3;
   int breakloop;
   int ventdir;
@@ -305,7 +305,6 @@ void setventdirs(void){
     iblank_x = meshi->iblank_x;
     iblank_y = meshi->iblank_y;
     iblank_z = meshi->iblank_z;
-    iblank_cell = meshi->iblank_cell;
     xplttemp=meshi->xplt;
     yplttemp=meshi->yplt;
     zplttemp=meshi->zplt;

@@ -1516,7 +1516,7 @@ void uncompress_isodataframe(isosurface *asurface, int n){
     uncompress(full_data,&countout,compressed_data,countin);
     if(countout!= asurface->nfull_bufferframe){
       printf("problems with decompressing iso data\n");
-      printf(" %i %i\n",asurface->nfull_bufferframe,countout);
+      printf(" %i %i\n",asurface->nfull_bufferframe,(int)countout);
     }
   }
 
