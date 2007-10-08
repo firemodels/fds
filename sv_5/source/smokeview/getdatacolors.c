@@ -797,7 +797,6 @@ void drawColorBars(void){
 
   GLfloat *color1, *color2;
 
-  printf("in colorbar\n");
   color1=&(foregroundcolor[0]);
   color2=&(redcolor[0]);
 

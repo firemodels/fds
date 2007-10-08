@@ -556,7 +556,7 @@ SVEXTERN int showtours_whenediting;
 SVEXTERN float xtimeleft, xtimeright;
 SVEXTERN int pbalanceindex, eoffsetindex;
 SVEXTERN int showstereo;
-SVEXTERN int show_hrrcutoff, show_hrrcutoff_active;
+SVEXTERN int show_hrrcutoff, show_hrrcutoff_active, hrrpuv_loaded;
 SVEXTERN int showglui3dsmoke;
 SVEXTERN int showgluitour;
 SVEXTERN int showalert;

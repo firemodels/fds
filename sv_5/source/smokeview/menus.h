@@ -4513,9 +4513,9 @@ static int textureshowmenu=0;
       else{
         strcpy(ccolorbarmenu,cbi->label);
       }
-	  if(i==ndefaultcolorbars){
+	    if(i==ndefaultcolorbars){
         glutAddMenuEntry("-",-999);
-	  }
+	    }
       glutAddMenuEntry(ccolorbarmenu,i);
     }
   }

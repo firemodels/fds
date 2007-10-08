@@ -33,16 +33,10 @@
 
 #endif
 
-#ifndef pp_OSX
-//#define pp_GDGIF
-#endif
-
-// #define pp_FINALxxxRELEASE
 #ifndef _DEBUG
 #define pp_RELEASE
 #endif
 
-#define pp_glui
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB
