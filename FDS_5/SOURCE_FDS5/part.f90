@@ -1180,8 +1180,10 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
 
 ! Initializations
+
 RDT    = 1._EB/DT
 OMRAF  = 1._EB - RUN_AVG_FAC
+FUEL_DROPLET_MLR(NM) = 0._EB
 
 ! Rough estimates
 
@@ -1424,6 +1426,10 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          ! Compute contribution to the divergence
 
          D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) + WGT*RDT*RVC/RHO_G * ( M_VAP*MW_RATIO - Q_CON_GAS/(CP_GAMMA*TMP(II,JJ,KK)) )
+
+         ! Add fuel evaporation rate to running counter before adjusting its value
+
+         IF (IGAS>0 .AND. IGAS==I_FUEL) FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP*RDT
 
          ! Adjust mass of evaporated liquid to account for different Heat of Combustion between fuel droplet and gas
 
