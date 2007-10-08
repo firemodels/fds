@@ -14,6 +14,7 @@
 
 // svn revision character string
 char IOtarget_revision[]="$Revision$";
+// $Date$ $Author$
 
 /* ------------------ readtarget ------------------------ */
 #ifdef pp_nofortran

@@ -10,6 +10,7 @@
 
 // svn revision character string
 char scontour2d_revision[]="$Revision$";
+// $Date$ $Author$
 
 /*  
   contouring algorithm

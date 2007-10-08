@@ -23,6 +23,7 @@
 
 // svn revision character string
 char IOsmoke_revision[]="$Revision$";
+// $Date$ $Author$
 
 char *textFileRead(char *fn);
 

@@ -16,6 +16,7 @@
 
 // svn revision character string
 extern "C" char glui_colorbar_revision[]="$Revision$";
+// $Date$ $Author$
 
 //
 // setColorbarClipPlanes(1);

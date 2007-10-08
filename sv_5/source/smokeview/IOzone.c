@@ -11,6 +11,7 @@
 
 // svn revision character string
 char IOzone_revision[]="$Revision$";
+// $Date$ $Author$
 
 /* ------------------ readzone ------------------------ */
 

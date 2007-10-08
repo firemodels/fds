@@ -16,6 +16,7 @@
 
 // svn revision character string
 char IOslice_revision[]="$Revision$";
+// $Date$ $Author$
 
 /* dummy change - to test svn check out on the linux cluster */
 int endianswitch;

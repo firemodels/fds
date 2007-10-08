@@ -1,3 +1,4 @@
+// $Date$ $Author$
 #ifndef DEF_smokeheaders
 #define DEF_smokeheaders
 

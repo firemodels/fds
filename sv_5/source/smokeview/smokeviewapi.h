@@ -1,3 +1,4 @@
+// $Date$ $Author$
 #define DLL
 #define svWINAPI
 

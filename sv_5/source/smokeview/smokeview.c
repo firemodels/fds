@@ -32,6 +32,7 @@
 
 // svn revision character string
 char smokeview_revision[]="$Revision$";
+// $Date$ $Author$
 
 
  /* ------------------------ SUB_portortho ------------------------- */

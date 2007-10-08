@@ -10,6 +10,7 @@
 
 // svn revision character string
 char getdatacolors_revision[]="$Revision$";
+// $Date$ $Author$
 
 #define EXPMIN -2
 #define EXPMAX 3

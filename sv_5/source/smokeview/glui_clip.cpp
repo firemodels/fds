@@ -16,6 +16,7 @@
 
 // svn revision character string
 extern "C" char glui_clip_revision[]="$Revision$";
+// $Date$ $Author$
 
 #define LOCAL_INI 2
 

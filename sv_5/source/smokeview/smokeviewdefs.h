@@ -1,3 +1,4 @@
+// $Date$ $Author$
 #ifndef SET_SMOKEVIEWDEFS
 #define SET_SMOKEVIEWDEFS
 #ifdef _DEBUG

@@ -1,3 +1,4 @@
+// $Date$ $Author$
 #define pp_BETA  // uncomment when building beta versions of SV
 #ifdef pp_BETA
 #define SMVVERSION "Test"

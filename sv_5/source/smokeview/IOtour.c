@@ -16,6 +16,7 @@
 
 // svn revision character string
 char IOtour_revision[]="$Revision$";
+// $Date$ $Author$
 
 void drawcir(float *center, float rad, float *color);
 //void TourMenu(int val);

@@ -7,6 +7,7 @@ int getendian(void);
 
 // svn revision character string
 char endian_revision[]="$Revision$";
+// $Date$ $Author$
 
 /* ------------------ getendian ------------------------ */
 

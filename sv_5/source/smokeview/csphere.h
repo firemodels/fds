@@ -1,3 +1,4 @@
+// $Date$ $Author$
 #ifndef SETCSPHERE
 #define SETCSPHERE
 

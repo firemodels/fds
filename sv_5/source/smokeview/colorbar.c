@@ -9,6 +9,7 @@
 #include "smokeheaders.h"
 
 char colorbar_revision[]="$Revision$";
+// $Date$ $Author$
 
 /* ------------------ setColorbarClipPlanes ------------------------ */
 

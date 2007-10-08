@@ -26,15 +26,13 @@
 
 // svn revision character string
 char readsmv_revision[]="$Revision$";
-
+// $Date$ $Author$
 
 #define DEVICE_DEVICE 0
 #define DEVICE_THCP 1
 #define DEVICE_HEAT 2     
 #define DEVICE_SPRK 3
 #define DEVICE_SMOKE 4
-
-
 
 /* ------------------ readsmv ------------------------ */
 

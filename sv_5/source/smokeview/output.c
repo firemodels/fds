@@ -13,7 +13,7 @@
 
 // svn revision character string
 char output_revision[]="$Revision$";
-
+// $Date$ $Author$
 
 /* ------------------ outputAxisLabels ------------------------ */
 

@@ -17,6 +17,7 @@
 
 // svn revision character string
 extern "C" char glui_3dsmoke_revision[]="$Revision$";
+// $Date$ $Author$
 
 extern "C" void update2_glui_smoke3dframestep(void);
 extern GLUI_Rollout *panel_smoke3d;
