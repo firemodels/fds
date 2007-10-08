@@ -394,7 +394,7 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       sprintf(frameratelabel," AVG: %4.1f",slice_average_interval);
       outputText((float)(xtimeright+0.025),0.56, frameratelabel); // test print
     }
-    if(show_hrrcutoff==1&&current_mesh!=NULL&&showtime==1){
+    if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL&&showtime==1){
       char hrrcut_label[256];
       int ihrrcut;
       float xxl, xxr, yyl, yyu, ddx=0.03, ddy=0.2;

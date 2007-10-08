@@ -1002,7 +1002,7 @@ typedef struct {
       nterraininfo++;
       continue;
     }
-    if(match(buffer,"XXXTERRAIN",10) == 1){
+    if(match(buffer,"TERRAIN",7) == 1){
       terraindata *terri;
       float xmin, xmax, ymin, ymax;
       int nx, ny;
@@ -5938,6 +5938,9 @@ int readini(int loaddatafile){
     nunitclasses=nunitclasses_default;
   }
   if(showall_textures==1)TextureShowMenu(-1);
+  if(ncolorbars<=ndefaultcolorbars){
+    initdefaultcolorbars();
+  }
   return 0;
 }
 
@@ -5974,7 +5977,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
   int tempval;
   float ventcolor_temp[4];
   float blockcolor_temp[4];
-
 
   updatemenu=1;
   updatefacelists=1;
@@ -7764,9 +7766,6 @@ typedef struct {
   fclose(stream);
   if(mxframes_ini!=0&&mxframes_comm==0)mxframes=mxframes_ini;
   if(mxpoints_ini!=0&&mxpoints_comm==0)mxpoints=mxpoints_ini;
-  if(ncolorbars<=ndefaultcolorbars){
-    initdefaultcolorbars();
-  }
   return 0;
 
 }
