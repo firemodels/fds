@@ -17,6 +17,7 @@
 
 // svn revision character string
 char IOpart_revision[]="$Revision$";
+// $Date$ $Author$
 
 int tagscompare( const void *arg1, const void *arg2 );
 

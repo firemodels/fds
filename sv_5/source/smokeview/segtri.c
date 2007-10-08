@@ -4,6 +4,7 @@
 
 // svn revision character string
 char segtri_revision[]="$Revision$";
+// $Date$ $Author$
 
 #define HIT 1
 #define MISS 0

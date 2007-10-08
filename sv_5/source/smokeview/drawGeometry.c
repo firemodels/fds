@@ -20,6 +20,7 @@
 
 // svn revision character string
 char drawGeometry_revision[]="$Revision$";
+// $Date$ $Author$
 
 cadgeom *current_cadgeom;
 

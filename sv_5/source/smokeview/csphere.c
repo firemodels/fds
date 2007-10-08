@@ -19,6 +19,7 @@
 
 // svn revision character string
 char csphere_revision[]="$Revision$";
+// $Date$ $Author$
 
 //typedef struct {
 //  int n;

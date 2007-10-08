@@ -16,6 +16,7 @@
 
 // svn revision character string2
 extern "C" char glui_labels_revision[]="$Revision$";
+// $Date$ $Author$
 
 extern "C" void Labels_CB(int value);
 int nevacloaded,nplot3dloaded,nsmoke3dloaded,nisoloaded,nsliceloaded,nvsliceloaded,npartloaded,npatchloaded;

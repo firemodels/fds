@@ -16,6 +16,7 @@
 
 // svn revision character string
 extern "C" char glui_bounds_revision[]="$Revision$";
+// $Date$ $Author$
 
 extern "C" void update_glui_smoke3dframestep(void);
 extern "C" void ParticlePropShowMenu(int value);

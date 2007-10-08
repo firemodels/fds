@@ -15,6 +15,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 char blockage_test_revision[]="$Revision$";
+// $Date$ $Author$
 
 #define HIT 1
 #define MISS 0

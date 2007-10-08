@@ -1,3 +1,4 @@
+// $Date$ $Author$
 #ifndef DEF_CONTOURTEST
 #define DEF_CONTOURTEST
 

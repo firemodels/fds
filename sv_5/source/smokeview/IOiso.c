@@ -16,6 +16,7 @@
 
 // svn revision character string
 char IOiso_revision[]="$Revision$";
+// $Date$ $Author$
 
 void unloadiso(mesh *gb);
 
