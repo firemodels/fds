@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #ifdef pp_GPU
 #include <GL/glew.h>
@@ -23,7 +27,6 @@
 
 // svn revision character string
 char IOsmoke_revision[]="$Revision$";
-// $Date$ $Author$
 
 char *textFileRead(char *fn);
 

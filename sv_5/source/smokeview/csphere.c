@@ -1,4 +1,8 @@
 #include "options.h"
+// $Date$ 
+// $Revision$
+// $Author$
+
 #ifdef pp_SPHERE
 #include <stdio.h>  
 #include <stdlib.h>
@@ -19,7 +23,6 @@
 
 // svn revision character string
 char csphere_revision[]="$Revision$";
-// $Date$ $Author$
 
 //typedef struct {
 //  int n;

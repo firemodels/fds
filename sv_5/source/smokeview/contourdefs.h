@@ -1,4 +1,7 @@
-// $Date$ $Author$
+// $Date$ 
+// $Revision$
+// $Author$
+
 #ifndef DEF_CONTOURTEST
 #define DEF_CONTOURTEST
 

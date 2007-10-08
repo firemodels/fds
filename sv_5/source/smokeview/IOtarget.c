@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -14,7 +18,6 @@
 
 // svn revision character string
 char IOtarget_revision[]="$Revision$";
-// $Date$ $Author$
 
 /* ------------------ readtarget ------------------------ */
 #ifdef pp_nofortran

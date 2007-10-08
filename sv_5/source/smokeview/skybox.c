@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -13,7 +17,6 @@
 
 // svn revision character string
 char skybox_revision[]="$Revision$";
-// $Date$ $Author$
 
 /* ------------------ loadskytexture ------------------------ */
 

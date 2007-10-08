@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #ifndef pp_nolibs
 #include <stdlib.h>
@@ -24,7 +28,6 @@
 
 // svn revision character string
 char renderfile_revision[]="$Revision$";
-// $Date$ $Author$
 
 //void pauseSV(void);
 

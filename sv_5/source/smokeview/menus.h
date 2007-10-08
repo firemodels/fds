@@ -1,4 +1,7 @@
-// $Date$ $Author$
+// $Date$ 
+// $Revision$
+// $Author$
+
 #define MENU_TIMEVIEW -103
 #define MENU_SAVEVIEW -101
 #define MENU_STARTUPVIEW -102

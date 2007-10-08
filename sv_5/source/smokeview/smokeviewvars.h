@@ -1,4 +1,7 @@
-// $Date$ $Author$
+// $Date$ 
+// $Revision$
+// $Author$
+
 #ifdef CPP
 #define CCC "C"
 #else

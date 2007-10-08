@@ -1,8 +1,11 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
 char assert_revision[]="$Revision$";
-// $Date$ $Author$
 
 void _Assert(char *filename, unsigned linenumber){
   int dummy;
