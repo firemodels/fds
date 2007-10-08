@@ -18,7 +18,7 @@
 
 // svn revision character string
 char startup_revision[]="$Revision$";
-// $Date $
+// $Date$
 
 //void get_smokezippath(char *progdir, char **zippath);
 int getmaxrevision(void);
