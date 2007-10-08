@@ -982,6 +982,7 @@ void initvars1(void){
   show_bothsides_int=1;
   show_hrrcutoff=1;
   show_hrrcutoff_active=0;
+  hrrpuv_loaded=0;
   show_bothsides_ext=0;
   show_slice_in_obst=0;
   updategluiview=1;
@@ -1811,8 +1812,8 @@ void initvars1(void){
   valindex=0;
 
    iso_ambient[0] = 0.96;
-   iso_ambient[1] = 0.96;
-   iso_ambient[2] = 0.00;
+   iso_ambient[1] = 0.00;
+   iso_ambient[2] = 0.96;
    iso_ambient[3] = 1.00;
    iso_ambient[4] = 0.75;
    iso_ambient[5] = 0.80;

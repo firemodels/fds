@@ -177,10 +177,14 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     Read3DSmoke3DFile=0;
     setsmokecolorflags();
 
+    hrrpuv_loaded=0;
     for(j=0;j<nsmoke3d;j++){
       smoke3dj = smoke3dinfo + j;
       if(smoke3dj->loaded==1){
         Read3DSmoke3DFile=1;
+        if(strcmp(smoke3dj->label.longlabel,"HRRPUV")==0){
+          hrrpuv_loaded=1;
+        }
         break;
       }
     }
@@ -454,7 +458,9 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   smoke3di->loaded=1;
   smoke3di->display=1;
   setsmokecolorflags();
-
+  if(strcmp(smoke3di->label.longlabel,"HRRPUV")==0){
+    hrrpuv_loaded=1;
+  }
 
   Read3DSmoke3DFile=1;
   makeiblank_smoke3d();
