@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #ifdef pp_GPU
 #include <GL/glew.h>
@@ -16,9 +20,6 @@
 #endif
 #include "contourdefs.h"
 #include "isodefs.h"
-// $Date$ 
-// $Revision$
-// $Author$
 
 #include "flowfiles.h"
 #include "smokeviewapi.h"
