@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdlib.h>
 #ifdef pp_OSX
@@ -10,7 +14,6 @@
 
 // svn revision character string
 char scontour2d_revision[]="$Revision$";
-// $Date$ $Author$
 
 /*  
   contouring algorithm

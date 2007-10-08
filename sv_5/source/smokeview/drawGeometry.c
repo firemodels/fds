@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -20,7 +24,6 @@
 
 // svn revision character string
 char drawGeometry_revision[]="$Revision$";
-// $Date$ $Author$
 
 cadgeom *current_cadgeom;
 

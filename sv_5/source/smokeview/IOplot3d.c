@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -17,7 +21,6 @@
 
 // svn revision character string
 char IOplot3d_revision[]="$Revision$";
-// $Date$ $Author$
 
 /* ------------------ plot3dcompare  ------------------------ */
 

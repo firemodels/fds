@@ -1,4 +1,7 @@
-// $Date$ $Author$
+// $Date$ 
+// $Revision$
+// $Author$
+
 #ifndef DEF_ISOTEST2
 #define DEF_ISOTEST2
 #define INCPOINTS 100000

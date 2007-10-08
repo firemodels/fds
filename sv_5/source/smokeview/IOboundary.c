@@ -1,5 +1,8 @@
-#include "options.h"
+// $Date$ 
+// $Revision$
+// $Author$
 
+#include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -19,7 +22,6 @@
 
 // svn revision character string
 char IOboundary_revision[]="$Revision$";
-// $Date$ $Author$
 
 
 

@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -13,7 +17,6 @@
 
 // svn revision character string
 char output_revision[]="$Revision$";
-// $Date$ $Author$
 
 /* ------------------ outputAxisLabels ------------------------ */
 

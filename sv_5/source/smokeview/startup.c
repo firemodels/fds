@@ -1,3 +1,7 @@
+// $Revision$
+// $Date$ 
+// $Author$
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -18,7 +22,6 @@
 
 // svn revision character string
 char startup_revision[]="$Revision$";
-// $Date$ $Author$
 
 //void get_smokezippath(char *progdir, char **zippath);
 int getmaxrevision(void);

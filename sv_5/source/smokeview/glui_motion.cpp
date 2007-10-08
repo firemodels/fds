@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <string.h>
 #ifdef pp_OSX
@@ -16,7 +20,6 @@
 
 // svn revision character string
 extern "C" char glui_motion_revision[]="$Revision$";
-// $Date$ $Author$
 
 #define TRANSLATE_XY 101
 #define ROTATE_ZX 102

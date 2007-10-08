@@ -1,4 +1,7 @@
-// $Date$ $Author$
+// $Date$ 
+// $Revision$
+// $Author$
+
 #ifndef DEF_FLOWFILES
 #define DEF_FLOWFILES
 #include "contourdefs.h"

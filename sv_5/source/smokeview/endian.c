@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 int htonl(int token);
 int ntohl(int token);
@@ -7,7 +11,6 @@ int getendian(void);
 
 // svn revision character string
 char endian_revision[]="$Revision$";
-// $Date$ $Author$
 
 /* ------------------ getendian ------------------------ */
 
