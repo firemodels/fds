@@ -23,6 +23,7 @@
 
 // svn revision character string
 char sv_api_revision[]="$Revision$";
+// $Date$ $Author$ $Author$
 
 /* ------------------ copy_args ------------------------ */
 

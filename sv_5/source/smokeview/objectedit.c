@@ -10,6 +10,7 @@
 
 // svn revision character string
 char objectedit_revision[]="$Revision$";
+// $Date$ $Author$
 
 /* ------------------ movefblockage ------------------------ */
 

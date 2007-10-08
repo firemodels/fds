@@ -1,6 +1,6 @@
 #ifndef MALLOC_DEFINED
 #define MALLOC_DEFINED
-
+// $Date$ $Author$
 #ifndef pp_OSX
 #include <malloc.h>
 #endif

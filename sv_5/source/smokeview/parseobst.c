@@ -9,6 +9,7 @@
 
 // svn revision character string
 char parseobst_revision[]="$Revision$";
+// $Date$ $Author$
 
 void headsubst(char *line, FILE *stream_out);
 void parseobst_xb(char *line, int *i1, int *i2);

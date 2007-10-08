@@ -9,6 +9,7 @@
 #include "smokeheaders.h"
 
 char camera_revision[]="$Revision$";
+// $Date$ $Author$
 
 /* ------------------ zoom2aperture ------------------------ */
 

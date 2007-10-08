@@ -16,6 +16,7 @@
 
 // svn revision character string
 char IOhrr_revision[]="$Revision$";
+// $Date$ $Author$
 
 
 /* ------------------ stripcommas ------------------------ */

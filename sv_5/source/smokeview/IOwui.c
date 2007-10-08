@@ -17,6 +17,7 @@
 
 // svn revision character string
 char IOwui_revision[]="$Revision$";
+// $Date$ $Author$
 
 void init_tnode(terraindata *terri);
 void init_tnorm(terraindata *terri);

@@ -1,4 +1,4 @@
-
+// $Date$ $Author$
 #ifdef CPP
 #define CCC "C"
 #else

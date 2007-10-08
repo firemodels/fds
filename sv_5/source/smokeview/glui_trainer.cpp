@@ -16,6 +16,7 @@
 
 // svn revision character string
 extern "C" char glui_trainer_revision[]="$Revision$";
+// $Date$ $Author$
 
 void ROTATE_CB(int var);
 void TRAINER_CB(int var);

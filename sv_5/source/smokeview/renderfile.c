@@ -15,7 +15,6 @@
 #endif
 #include "MALLOC.h"
 #include "gd.h"
-//#include "jpeglib.h"
 
 #define PNG 0
 #define JPEG 1
@@ -25,7 +24,7 @@
 
 // svn revision character string
 char renderfile_revision[]="$Revision$";
-
+// $Date$ $Author$
 
 //void pauseSV(void);
 

@@ -15,11 +15,10 @@
 
 // svn revision character string
 char main_revision[]="$Revision$";
-// dummy change in main trunk to test two way branching
+// $Date$ $Author$
 
 
 /* ------------------ main ------------------------ */
-// dummy change in svtest1 branch to test two way merging
 
 int main(int argc, char **argv){
   char **argv_sv;

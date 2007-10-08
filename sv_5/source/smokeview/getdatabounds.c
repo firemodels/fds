@@ -8,6 +8,7 @@
 
 // svn revision character string
 char getdatabounds_revision[]="$Revision$";
+// $Date$ $Author$
 
 /* ------------------ adjustdatabounds ------------------------ */
 

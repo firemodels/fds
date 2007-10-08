@@ -11,6 +11,7 @@
 
 // svn revision character string
 char string_util_revision[]="$Revision$";
+// $Date$ $Author$
 
 // extern char dirseparator[];
 

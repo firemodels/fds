@@ -17,6 +17,7 @@
 
 // svn revision character string
 char IOplot3d_revision[]="$Revision$";
+// $Date$ $Author$
 
 /* ------------------ plot3dcompare  ------------------------ */
 
