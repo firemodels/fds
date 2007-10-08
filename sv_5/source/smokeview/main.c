@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #define INMAIN
 #include <stdio.h>
@@ -15,8 +19,6 @@
 
 // svn revision character string
 char main_revision[]="$Revision$";
-// $Date$ $Author$
-
 
 /* ------------------ main ------------------------ */
 

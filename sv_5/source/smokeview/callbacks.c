@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -25,7 +29,6 @@
 #define KEY_NONE 2
 
 char callbacks_revision[]="$Revision$";
-// $Date$ $Author$
 
 float gmod(float x, float y);
 void  OBJECT_CB(int flag);

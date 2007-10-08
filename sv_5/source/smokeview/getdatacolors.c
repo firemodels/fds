@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>
 #include <string.h>
@@ -10,7 +14,6 @@
 
 // svn revision character string
 char getdatacolors_revision[]="$Revision$";
-// $Date$ $Author$
 
 #define EXPMIN -2
 #define EXPMAX 3

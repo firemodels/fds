@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdlib.h>
 #ifdef pp_DRAWISO
@@ -15,7 +19,6 @@
 
 // svn revision character string
 char isobox_revision[]="$Revision$";
-// $Date$ $Author$
 
 unsigned short *vertices=NULL;
 int *rank=NULL,*sortedlist=NULL;

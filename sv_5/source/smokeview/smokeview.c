@@ -16,6 +16,10 @@
 #endif
 #include "contourdefs.h"
 #include "isodefs.h"
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "flowfiles.h"
 #include "smokeviewapi.h"
 #include "MALLOC.h"
@@ -32,7 +36,6 @@
 
 // svn revision character string
 char smokeview_revision[]="$Revision$";
-// $Date$ $Author$
 
 
  /* ------------------------ SUB_portortho ------------------------- */

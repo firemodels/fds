@@ -1,4 +1,7 @@
-// $Date$ $Author$
+// $Date$ 
+// $Revision$
+// $Author$
+
 #ifndef DEF_smokefortheaders
 #define DEF_smokefortheaders
 

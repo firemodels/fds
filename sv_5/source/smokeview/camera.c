@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdlib.h>
 #include <math.h>
@@ -9,7 +13,6 @@
 #include "smokeheaders.h"
 
 char camera_revision[]="$Revision$";
-// $Date$ $Author$
 
 /* ------------------ zoom2aperture ------------------------ */
 

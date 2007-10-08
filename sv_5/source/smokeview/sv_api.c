@@ -12,6 +12,10 @@
 #include <GL/glut.h>
 #endif
 #include <sys/types.h>
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include <sys/stat.h>
 #include "isodefs.h"
 #include "smokeheaders.h"
@@ -23,7 +27,6 @@
 
 // svn revision character string
 char sv_api_revision[]="$Revision$";
-// $Date$ $Author$ $Author$
 
 /* ------------------ copy_args ------------------------ */
 

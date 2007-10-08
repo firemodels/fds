@@ -1,4 +1,7 @@
-// $Date$ $Author$
+// $Date$ 
+// $Revision$
+// $Author$
+
 #ifndef EGZ_DEFINED
 
 #define EGZ_DEFINED

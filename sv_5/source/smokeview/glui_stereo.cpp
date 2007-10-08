@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <string.h>
 #ifdef pp_OSX
@@ -16,7 +20,6 @@
 
 // svn revision character string
 extern "C" char glui_stereo_revision[]="$Revision$";
-// $Date$ $Author$
 
 GLUI *glui_stereo=NULL;
 GLUI_Spinner *SPINNER_stereo_balance=NULL, *SPINNER_stereo_offset=NULL;

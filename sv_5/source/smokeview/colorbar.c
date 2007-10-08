@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>
 #include <string.h>
@@ -9,7 +13,6 @@
 #include "smokeheaders.h"
 
 char colorbar_revision[]="$Revision$";
-// $Date$ $Author$
 
 /* ------------------ setColorbarClipPlanes ------------------------ */
 

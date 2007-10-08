@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #ifdef pp_MEM2
 #define INDMALLOC
@@ -16,7 +20,6 @@ static int checkmemoryflag=1;
 
 // svn revision character string
 char dmalloc_revision[]="$Revision$";
-// $Date$ $Author$
 
 #ifdef pp_memstatus
 #ifdef WIN32
