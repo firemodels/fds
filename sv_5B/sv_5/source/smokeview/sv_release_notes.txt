@@ -1,0 +1,1085 @@
+2007-08-13
+1.  fix plot3d file display (reduce time criteria to 0.1 s)
+2.  fix display of color label text
+
+2007-08-02
+1.  use fortran (rather than c) to read part5 file when building size file
+
+2007-07-13
+1.  Re-arrange motion/view dialog box in response to issue issue 60
+
+2007-07-02
+1.  Preliminary colorbar editor
+2.  Make gpu shader code more robust
+
+2007-06-20
+1.  Add support for rendering to GIF files for the win32 version of SV
+
+2007-05-27
+1.  Add streaklinewidth parameter to particle bounds dialog box
+2.  Fix thermocouple color for pre-fds5 cases
+3.  Added linewidth and point size parameters to Slice bound dialog box
+    for drawing vector plots for slice file and Plot3d files
+ 
+2007-05-20
+1.  Fix zone fire modeling vent flow visualization
+2.  Fix initialization when loading particle files
+3.  Add widget to specify particle size in File/Bounds dialog box
+4.  Added left/right stereo view, activiated from the stereo dialog box
+    or by pressing the "S" key
+5.  Color slice textures by interpolating at midpoint of square and drawing
+    four triangles
+
+2007-05-12
+1. fix time bar scrolling (when fonts are large)
+2. re-name string.c file to prevent name conflicts
+3. fix imbedded blank problem when running smokezip
+4. fix display of vents on one cell blockages
+5. change variable declarations to size_t as appropriate
+6. fix lighting for tree display
+7. fix trim function to handle all text file types (CR, CFLF, LF)
+
+2007-04-11
+1.  simplify trainer dialog box by removing controls
+2.  simplify motion dialog box removing un-used controls
+3.  added option to snap scene to nearest 45 deg angle
+    activated by pressing "!" key and from the motion
+    dialog box
+4.  move trainer code into 5.0 codebase
+5.  fixed problems with drawing smooth surfaces
+  
+2007-03-29
+
+1. fixed problem with mouse dragging in the time bar
+   (was not working when large fonts were being used)
+2007-03-23
+
+1.  add menu item to create new tour (bringing up Tour diaglog box)
+2.  allow the mesh outline and grid to be drawn using a user specified color
+
+2007-03-12
+reorganize vent menu items (make a sub-menu out of vent menu items)
+
+2007-03-11
+1.  fixed particle menus for evac cases
+2.  fixed particle bound menu
+3.  changed vent dispaly behavior so that 
+     a) interior vernts are drawn two-sided, 
+     b) exterior vents are drawn one-sided (as before) and 
+     c) a menu option is now available to reverse this behavior
+
+2007-02-15
+implement a switch to show or not show slices/vector slices inside blockages
+
+2007-01-29
+1. new part5 coloring changes
+2. create smooth blockages via menu item if there are a large number to create
+3. add preliminary SPOTLIGHT code
+
+2007-01-02
+fix show/hide menus for part5 format
+
+2006-12-28
+part5 version of smokeview ready for testing
+
+2006-12-27
+part5 almost working - all working except for "set user" bound optoin in dialog box
+
+2006-12-26
+add support bounds in part5 bounds dialog box
+
+2006-12-20
+add support for part5 value display (preliminary)
+
+2006-12-12
+cleaned up, completed implementation of slicefile data output (occurs when rendering an image)
+
+2006-12-04
+change format of devices.svo file to make it easier to use
+
+2006-11-09
+interim terrain implementation - now need to draw terrain time data
+
+2006-11-09
+preliminary terrain
+
+2006-11-08
+interim WUI terrain loading (load menu, dummy readterrain)
+
+2006-10-27
+1.  add tree color
+2.  add ponts to end of streak line to indicate direction
+
+2006-10-19
+implement trees for wui
+
+2006-10-19
+1.  add drawring opengl primative
+2.  put device labels after device entries rather than on device keyword entry
+
+2006-10-18
+1.  add drawnotchplate (for drawing sprinklers) to the opengl interpreter
+2.  read part5 data (rvalues)
+3.  fix part5 menu bug
+4.  let user specifiy custom device labels on THCP, SPRK, HEAT, SMOD and DEVICE keywords
+
+2006-10-15
+change structure of streaklength code to make it easier to add non-integer 
+streak lengths - have added 0.5 and 0.25 streak lengths
+
+2006-10-14
+add normal vectors to device input so that devices can be rotated arbitrarily
+
+2006-10-12
+make changes to view zonefire model targets in sv5
+
+2006-10-09
+1.  add fire/hrr to gpu calc
+2.  update plot textures (refine blackenikng  portion of colorbar)
+3.  isolate viewports so that smokeview scene can  1) be split across displays 2)  create higher resolution renderings
+4.  add include files to remove warnings
+5.  remove pp_CAMERA code
+
+2006-10-03
+1.  windH -> screenHeight and windW -> screenWidth for readability
+2.  couple of bug fixes
+
+2006-09-30
+1.  in drawslice_texture, draw four triangles for every quad by adding point in middle of quad and computing average value there
+2.  fix outline bug in zonefire model view
+3.  fix glossy blockage drawing bug
+
+2006-09-23
+1.  initial texture mapping for slices (in y direction)
+2.  GPU test for slice (will eliminate this because it will be done with textures)
+
+2006-09-14
+1.  implement simple GPU programming to color smoke
+2.  add setbw to openGL interpreter
+
+2006-09-11
+finish implementing dynamic drawing - (drawing opengl objects using info contained in a .svo data file
+
+2006-09-06
+1.  preliminary code to implement generatlized objects.  Now these objects will be used
+    to specfiy and draw heat detectors, sensors sprinklers etc.  Eventually the same code ]
+    will be used to implement and draw people.  The instructions for drawing the objects
+    are stored as data in the object itself.
+
+2.  allow user to specify Percentile level expressed as a fraction between 0.0 and 0.5
+    (default 0.01)
+
+3.  fix bug that shows up because default colors used in initcolors() were defined
+    after initcolors() was called.
+
+4.  fix bug showing up in cfast displays - could not step through a time step
+
+5.  unload all displays in trainer mode when Clear button is pressed
+
+2006-09-01
+1.  remove redundant data structures and headers
+2..  fix bug with standard file dialog startup (when smokeview is double-clicked rather than doc)
+3.  other bug fixes
+
+2006-08-28
+coding cleanup
+
+2006-08-26
+1.  restructuring of variable declarations - moving vars from smokeview.h -> smokeviewvars.h
+    vars in smokeviewvars.h have an "extern" declaration in all but the main procedure .
+    vars are now initialized in initvars0 (initial one time only) and initvars (each time a .smv file is read in)
+    Will include smokevars.h in each file
+
+2006-08-11
+3d slice compression complete
+
+2006-08-08
+1.  3d slice bug fixes
+2.  turn off transparency when displaying 2 or more 3d slice files (to prevent graphing artiact errors)
+
+2006-08-04
+1.  initial code to implement volumetric slices
+
+2006-07-11
+1.  put preprocessing directives into lint.h
+2.  remove dead code from main.c
+3.  add TICK and LABEL keyword to .ini file
+4.  change name of pause() to pauseSV() to avoid conflicts
+
+2006-06-22
+1.  fix display of slice files for 2d cases
+2.  remove debug grid/box printing
+
+2006-06-07
+1.  fix vector plot when files are compressed (thought it was working)
+
+2006-06-06
+1.  fix compressed isosurface code
+2.  fix vector slice when slices are not compressed
+3.  fix part5 data loading - do not read in more data than buffers were sized for
+
+2006-05-31
+1.  implement visualization using streak lines (via the tag parameters)
+2.  implement partpointstep parameter to reduce number of points viewed
+3.  add streak length and partpointstep widgets to glui bounds dialog
+
+2006-05-26
+modify multi-slice and multi-vector slice to accomodate different types of meshes (ie, flow and evac)
+
+2006-05-26
+1.  remove unused preprocessing directives/code (molecview, concreteview)
+2.  interim evac fiixes
+
+2006-05-24
+new particle file bug fixes - implemented show/hide of particle classes
+
+2006-05-23
+initial revision of new particle file format
+
+2006-05-18
+1.  initial cut at putting in generalized particles
+2.  implemented CLASS_OF_PARTICLE keyword
+3.  PRT5, EVC5
+4.  added menus to support showing and hiding of general particles
+
+2006-05-16
+support isosurface files, not quite working.  A problem with buffer sizes for buffers used to hold isosurface data
+
+2006-05-03
+1.  clean up warnings found by SGI compiler
+2.  fix bug in isosurface file loading with skipping
+
+2006-05-01
+1. remove pp_GLUI and pp_THREADS preprocessing directives
+2. improve trainer GUI
+3. add lighting vis. for special case (lit from left side)
+4. add slice compression
+
+2006-04-05
+add move buttons to glui_trainer dialog
+
+2006-03-29
+trainer gui update, implemented glui dialogbox
+
+2006-03-28
+initial trainer gui changes
+
+2006-03-13
+official release of 4.0.7
+
+2006-02-15
+1.  add time averaging of slice data
+
+2006-02-15
+1.  add listbox to clip dialog box to allow clipping to individual meshes
+2.  fully implement isometric projection option
+
+2006-02-12
+add rest of the key bindings for game mode (table 3 in sv guide)
+add smooth startup
+
+2006-02-10
+speed/crawl dialog bug fixes
+
+2006-02-10
+remove pp_GAME directive and some bug fixes
+
+2006-02-08
+updates to make key bindings and movement more like a computer game
+
+2006-01-26
+add autoloading of smokeview files
+
+2006-01-24
+add keyboard shortcuts to open up dialogs
+
+2006-01-24
+1. added "clean" option to smokezip call
+2. added skip frame options when using smokezip
+3. added load at startup for 3d smoke files
+
+2006-01-17
+clean up - get rid of warning messages generated by the SGI compiler
+
+2006-01-11
+1.  clean up GAMING mode
+2.  add "ignition only" drawing option (do not draw boundary file but color black wherever and whenever boundary exceeds ig temperature
+
+2006-01-04
+implement transparent blockages
+bug fix for toggling show/hide smooth blockages
+
+2005-12-23
+cfast vertical flow vent bug fix
+
+2005-12-12
+smooth blockage show/hide update
+
+2005-12-11
+1.  support show/hide for smooth blockages
+2.  preliminary implementation of transparent blockages (not thoroughly debugged)
+
+2005-11-03
+add smoke test entry to smoke dialog
+copy argv (from main) to smokeview allocated memory
+add showtextures_all entry to ini file - so textures can be loaded at startup
+
+2005-10-26
+fix cfast ylayer display bug
+make pp_nofortran work
+add pixel_skip parameter to make WTC textures smaller
+
+2005-10-18
+fix plot3d menus when more than one type of plot3d files are present
+
+2005-10-17
+fix parsing of .smv file
+
+2005-10-17
+removed pp_SUBMENUSLICE #ifdefs
+fixed problems when 3d smoke files were growing while smokeview read them in
+
+2005-10-07
+check for smokeview.ini file in directory where smokeview.exe is located (may be different than where SMOKEVIEWINI environment variable is pointing to.  Used for CFAST use of Smokeview
+
+2005-09-28
+organize plot3d files by time (when multiple meshes exist)
+
+2005-09-16
+fix cad version 1 format
+fix glEnd() mismatch
+
+2005-09-15
+fix aperture and zoom
+
+2005-09-01
+fix bug with vector slice file loading - 1.  was allocating full memory even if slice frames skipped.  2.  added error checking and gracefully abort vector slice file load if memory allocation failed
+
+2005-08-22
+detect when smokeview is viewing zone fire model, then display "target" rather than "sensor" labels
+
+2005-08-22
+add option to display target normal vector showing which direction target is pointing too (am using present code to display smoke sensors)
+
+2005-08-16
+added direction vector to THCP (for cfast target display)
+
+2005-08-15
+draw abs tour view direction
+re-arrange slice menus, adding sub-menus for each type of slice (temp, pressure etc.)
+
+2005-07-21
+fix generalized colorbar bugs
+fix bug in matching strings - make sure string length sent to match() is consistent with string
+add new svnet code
+
+2005-07-02
+add demo-mode to reduce number of smoke planes and keep the smoke planes from switching orientation (for demonstration purposes)
+
+2005-06-27
+fix sprinkler droplet, smoke particle, mesh display problem
+
+2005-06-27
+fix clipping
+read in .szz then .sz so that smokezip does not interfere with fds (when writing size files)
+add zone fire vent vis
+
+2005-06-16
+zone fire modeling bug fixes
+
+2005-06-16
+debug print - will be taken out
+
+2005-06-15
+remove uncessary menu commands from zone fire modeling version of smokeview
+fix vent flow vis.
+fix smoke3d menu label update when compressing files
+
+2005-06-14
+hide compress menu if pp_COMPRESS is not set
+
+2005-06-12
+rearrange Load/Unload menu to make clearer
+add compression, add multi-threading for compression and smoothing blockages
+
+2005-06-10
+make changes to remove "pc-lint" warnings
+
+2005-06-08
+clean up
+re-organize some code to make it easier to read
+
+2005-06-07
+clean up showscene routine to make it easier to understand
+
+2005-06-06
+1. add cellsize to mesh structure
+2. check interim steps for presence of blockages to prevent "quantum tunnelling"
+3.  added notion of "speed" so that motion is independent of video card.  if using slower card then will take bigger steps
+4.  added callbacks for keyboard and special keyboard upstrokes
+
+2005-06-01
+fix custom  blockage and vent colors
+
+2005-05-29
+added automatic speed change when entring or leaving the scene geometry
+
+2005-05-28
+change cfast horizontal vent keyword
+re-write code for game motion - consider cases : OUTSIDE, BLOCKAGE, TO LOW, TO HIGH just right
+
+2005-05-26
+added pp_GAME directive to isolate gamining mods from main code
+added target to "gamer"
+
+2005-05-23
+interim eyeview mode changes
+
+2005-05-14
+added "sliding" to blockage tracking .  In eyeview mode if you hit a blockage you will slide along the blockage
+
+2005-05-12
+added code to prevent motion into a blockage (while in eyeview mode)
+
+2005-05-11
+interim skybox changes draw smokeview within a "realistic" environment
+
+2005-05-04
+place dialogs in upper left hand corner of screen
+interim custom colorbar changes
+
+2005-03-22
+fix zoom startup
+change strcmp to strncmp when comparing to litterals
+
+2005-03-07
+support compressed files created by svzip
+
+2005-02-22
+added capability to read in 3d smoke files that were compressed using the ZLIB library rather than run length encoding (RLE)
+
+2004-12-28
+speed up boundary file drawing by re-organizing xyz coordinates as (x,y,z) triplets
+
+2004-12-28
+interim check in for boundary file fixes
+
+2004-12-22
+fixed algorithm for determining vent orientation (now look at each square until air is one side and blockage is on the other)
+
+2004-12-16
+add code to keep boundary files from being displayed on "interpolated" vents
+
+2004-12-02
+add correct texture mapping coordinate values for cad surface
+make drawing of cad files more efficient
+
+2004-11-30
+add textures to cad output
+
+2004-11-30
+remove pp_CADTEXTURE directive (leave code as if pp_CADTEXTURE is true)
+clean up cad drawing code
+
+2004-11-29
+fix file naming to allow imbedded "_" underscores (had assumed that three decimal digits appeared after the _ character for use with the edit blockage option
+
+2004-11-26
+plot3d show all menu addition
+
+2004-11-24
+fix bug in isosurface show/hide (data used by menus stored only first mesh)
+added "load all" for particles
+
+2004-11-20
+integrate evacuation visualization into smokeview
+
+2004-11-14
+merge 3dsmoke dialog and setbound dialog - changed name to File/Bounds Settings (since dialogs are setting more than just bounds parameters now)
+
+2004-11-13
+add frame skipping to 3d smoke files
+add frame skipping glui widgets to 3d Smoke and bounds dialog
+remove zlib compression for 3d smoke
+made render sequence numbers consecutive when skipping frames (at render time) - be compatible with LINUX mpeg compressor
+
+2004-11-04
+change slice menu orders (put velocity before velicty components
+put "load all" before individual components isosurface and smoke3d
+make tour "locus/avatar" more general - add a circle
+
+2004-09-07
+1.  fix plot3d "c" option (was not cycling through line contours
+2.  added code to update color table (used by BLOCK_COLOR and VENT_COLOR)
+3. added zone colorbar and V_ZONE .ini parameters
+
+2004-08-27
+fix reading in of outlinemode flag
+
+2004-08-26
+added disclaimer
+fixed point distrubution bug in touring option
+
+2004-08-24
+1.  make changes so that molecview will build
+2.  add antialiasing to touring
+
+2004-08-19
+official release of 4.01
+
+2004-07-25
+fixes to the blockage editor
+
+2004-07-23
+official 4.0 smokeview release
+
+2004-07-15
+add HEATONCOLOR and HEATOFFCOLOR .ini keywords
+add checkbox to toggle visibility of GRID plane locations
+
+2004-07-13
+add checkbox to toggle visibility of the tour avatar
+add "manual" to the tour list in the tour dialog box
+
+2004-07-04
+preliminary colorbar editor implementation
+
+2004-06-27
+colorbar update
+
+2004-06-25
+implement more general colorbar
+add "load all isosurface" menu item
+
+2004-06-22
+implement alternate color bars
+
+2004-06-19
+interim implementation of generalized color bar entry
+  one will be able to specify an arbitrary colorbar via a piece-wise linear path through the color cube
+bugfix - allow one to skip slice file frames using sliceframestep
+
+2004-06-14
+dummy 2
+
+2004-06-14
+add option to show/hide dummy vents (vents created by FDS)
+re-arrange 3d smoke menu
+
+2004-06-09
+fix some touring bugs
+  remove ability to overide constant velocity at a point.  now, either times are based on c.v. every where or completely settalble by user
+
+2004-06-06
+added printf message to tell user if texture file could not be loaded
+
+2004-06-01
+normally we don't show smoke inside of blockages.  But if a blockage is created or removed during a run we show smoke in the blockage
+
+let surfaces be invisible - define a surface to be invisible by negating each rgb component
+
+2004-05-14
+change "char" to "igninted" could have caused confustion
+define iblank_smoke3d array for indicating whether "alpha" should be set to zero
+
+2004-05-10
+misc bug fixes
+
+2004-04-23
+bug fixes
+add the unit "m" to x, y, z
+
+2004-04-20
+1.  toggle key mappings for plot3d/grid movement and eye centered movement
+2.  when re-loading slice files display files that were last loaded (ie if temperature and density are loaded and density is being shown, show density after a reload
+3.  fix color initialization (was displaying colors as black)
+
+2004-04-11
+add zoom glui widget to Motion dialog box
+
+2004-04-11
+preliminary "SHELL" version complete - ready for testing
+
+2004-04-10
+interim trainer code changes - link TRAINER keyword with SHELLMENU keyword but it doesn't do anything yet but print out diagnostic info
+
+2004-04-10
+add TRAINER keyword (not finished)
+add UNLOAD ALL menu item for smoke3d files
+
+2004-04-07
+1.  fix bug when a GRID line is not present (when used with cfast)
+2.  add DEBUG code to allow 3d smoke planes to be viewed from the side
+
+2004-04-04
+make sure SHELL keywords are not read in with the non-shell  version of smokeview
+update plot3d bounds glui dialog when the "c" key is depressed (changing display types)
+
+2004-04-03
+add "update local ini" button to gluji dialog boxes
+
+2004-04-02
+change fire half-depth from 5.0 to 2.0 and other misc changes
+
+2004-03-29
+interim shell update - working on adding dynamic menus configuraable from a data file to let us control what cases and options are available
+
+2004-03-27
+change variable names from shellxxx to casexxx
+
+2004-03-20
+add vent show/hide, obst show/hide to the "shell" option
+
+2004-03-18
+add code to switch between shellls - to switch geometry and smoke
+
+2004-03-16
+add multiple scenarios to SHELL option - can view 3d smoke files from multiple cases
+
+2004-03-14
+multi-thread bug fixes
+zero size particle file bug fix
+
+2004-03-01
+add hms keywords to .ini file
+move hms menu item under options/units menu
+
+2004-02-28
+1.  fix problem when BNDF entry is incomplete
+2.  add code to save 3d smoke settings in the .ini file
+3.  fix blockage editing when HOLES are present
+
+2004-02-13
+edit OpenGL include files to be compatible with a Mac OSX system
+
+2004-02-11
+changes made fix problems reported by lint
+
+2004-02-11
+modify tour option to extend tour when "add" button is clicked when "last" keyframe is selected.
+added "sniffer" debug code to tour
+
+2004-02-06
+fixed bug in tour dialog box - wasn't saving state of x,y,z view checkbox
+
+2004-01-28
+<>
+
+2004-01-21
+1. added preliminary code to texture the cad view
+2.  changed menu name from "reset" to "view" because of added functionality (can now save views)
+3.  fix state variable bug when saving and restoring .ini file
+
+2004-01-14
+add place holder code for banking
+change way default CIRCLE tour is saved
+rearrange TOUR buttons to make them easier to use
+
+2004-01-13
+fix bug with globaltension
+fix bug with deleting keyframes
+
+2004-01-13
+let user customize colors tours
+add widgets for number of tour points, view_starttime, stop time etc
+
+2004-01-03
+re-arranged tour buttons
+identified bug in trimzeros so removed call to it (temporarily)
+cleaned up and simplified glui_tour code
+
+2004-01-03
+remove double sized azimuths leaving only azimuth, elevation for describing relative view angles
+
+2004-01-01
+add listbox control for setting tours
+
+2003-12-30
+implemented view and edit from current selected keyframe
+
+2003-12-22
+tour bug fixes
+
+2003-12-21
+added elevation to tour setting list
+
+2003-12-19
+tour wrap up changes
+
+2003-12-19
+tour fully implemented - now need to debug and refine
+
+2003-12-15
+tour pausing, tour constant vel working
+
+2003-12-12
+interim tour update - re-organize dialog, add zoom control etc.
+
+2003-12-08
+interim tour path fixes
+
+2003-12-05
+added tour editing
+fixed a number of problems  indicated by compiler "warning" messages
+
+2003-11-27
+interim virtual touring completed - can now move around the scene, angles and hermite interppolation (ie smooth) not implemented yet
+
+2003-11-26
+remove pp_aloft keys (as if pp_aloft is set ot "true")
+initial touring option mods
+
+2003-11-23
+remove pre-processing directives: pp_sv4 and pp_3dsmoke since these options will always be set to true
+
+2003-11-03
+fixed bug in hrrpuvcut input
+
+2003-10-21
+added T_ISO (left out of smokeview 3.0) option
+
+2003-10-15
+1.  output warning if smokeview.ini mod times are out of sequence
+2.  force casename.ini output when saving view location for startup
+
+2003-10-06
+add outline option for blockages
+add CONVERT=BIGENDIAN option for Linux smokeview
+clean up
+
+2003-09-24
+miscelaneous bug fixes
+add .ini parameters for recording CHOP settings
+
+2003-09-22
+1.  add option to truncate data outside of bounds specified in set bounds glui dialog box
+2.  test code for using ZLIB compression for compressing 3d smoke
+
+2003-09-10
+1.  add non-removable NIST "logo" in upper left corner of screan
+2.  add dialog box to set/change smokeview labels
+
+2003-09-01
+beta release clean up
+
+2003-09-01
+added 1) cycle options to multiple views, 2) save and restore views from ini file 3) all apparent bugs fixed ie this version is working
+
+2003-09-01
+add save/restore of multiple views via the movement dialog
+
+2003-07-25
+make changes to get molecview to work with new code base
+
+2003-07-20
+preliminary version of the vritual tour option
+have implemented menus for reading in tour files
+
+2003-07-12
+add ipart=-3 (droplet size) to colored particle list
+when blockages are deleted remove them when viewed as smooth (if they were smooth to begin with)
+
+2003-07-02
+added new hazard color for the zone fire model smokeview viewer
+added more render skip choices
+
+2003-04-28
+let user display blockages at inputted vertex locations when using the blockage editing dialog box
+
+2003-04-17
+added widget to smoke3d dialog box for specifying thickness of the flame
+
+2003-04-15
+added options to smoke3d dialog to control visualization attributes (color of fire, smoke)
+
+2003-04-09
+changed .ini parameter to WINDOWOFFSET
+set text for official release
+
+2003-04-06
+added "title safe" option which indents display for use with making movies
+
+2003-04-05
+1.  added controls to smoke3d dialog box to control slices displayed and smoke thickness
+2. fixed a few misc bugs (framerate menu display)
+
+2003-03-12
+eliminate obsolete method for drawing 3d smoke (using slice files)
+fiix bug that prevented fire from being drawn without soot
+
+2003-03-04
+added 4 more ways to draw smoke planes
+
+2003-03-01
+added glui dialog to set smoke3d parameters
+remove old smoke3d code
+
+2003-02-24
+enhanced smoke3d algorithm to handle case where a grid cell is not a cube - where the length, width and height are different
+
+2003-02-24
+fix invisible blockage bug
+
+2003-02-23
+interim 3d smoke changes
+
+2003-02-17
+interm revsion to make smoke3d option into production code.
+have added culling (detect rectangles that are not visible), added alpha corrections to correct off center views
+
+2003-02-11
+1.  implement prototype code for 3d smoke allowing one to read in one compressed (with rle) file rather than many files.  also direction planes are plotted will change with view - not implemented yet
+2.  added write routiens to the EGZ library
+
+2003-01-10
+1.  added particle type and droplet_type variables to the "particle" structure to handle display of droplet values
+2.  rearrange particle show menu
+
+2002-12-25
+added tick and label .smv keywords
+read in new particle format
+
+2002-12-13
+bug fixes (coloring)
+added TICKS, LABELS and TOUR (not working yet)
+added glui dialog to specify 3d smoke planes to be loaded
+
+2002-12-03
+can draw a specified number of tick marks between two specified points
+
+2002-12-03
+fix bug to allow one to customize blockage and vent colors via the smokeview.ini file
+
+2002-11-15
+1.  fix char display by coloring surfaces black when ever the boundary temperature exceeeds the surfaces ignition temperature
+2.  fix blockage editing BLOCK_ID6 bug
+3. fix blockage editing output file naming bug
+
+2002-11-05
+1. skip frames when displaying in real time mode
+2. add menu option to display open vents as outlnes (if not already)
+3. add option display smooth blockages as normal blocks
+
+2002-11-02
+if a block is both textured and smoothed - draw it as textured
+
+2002-11-02
+added texture offsets
+
+2002-10-30
+1.  add multi-threading to 3dsmoke
+2. add water to 3dsmoke
+3.  3dsmoke bug fixes
+
+2002-10-28
+added test code to do 3d visualization of smoke using a simple volume rendering scheme (computing alpha transparencies using 1-exp(-k*s*dx), changing color for fire)
+
+2002-10-24
+1.  remove swapbuffer multi-thread lock because it wasn't being used
+2.  add test of volumetreic fog/smoke
+
+2002-10-20
+1.  added benchmark option - uses single buffering and computes frame rate over entire time interval
+2.  created InitOpenGL routine to contain all OpenGL initialization code
+
+2002-10-18
+1. change ->color2 to ->color
+2. fix viewport bug for "mem load" label
+3. fix smoothblockage color bug
+
+2002-10-16
+1.  fix some multi-threaded bugs
+2. added option to hide open vents
+3  consolidate Visible callback function
+4. change snifferror to use preprocessing directives
+5. fix mesh label
+
+2002-10-13
+1.  fixed bug which caused animated iso-surfaces to be drawn incorrectly after blockages were edited
+2.  extended clip min/max bounds slightly so that they would not interfere with edges of scene
+3.  fixed/added several options to INI file
+4.  made eye and center coordinates dimensionless when output to the INI file
+
+2002-10-12
+1. add reset buttons to glui_motion dialog box
+2. fix some "reset view" bugs
+
+2002-10-11
+Implement camera data structure to make resets easier
+
+2002-10-03
+1.  fixed bug that occurred when no database keyword was present in .smv file
+
+2002-10-03
+1.  now read in database file and add materials found to material list (alphabatized) in blockage editing dialog box
+
+2002-10-02
+1.  added mesh labels to blockage editing dialog box
+2. fixed bug in blockage editing - if more than one blockage was generated by an &OBST line then EACH of these blockages must be written out when ANY one of them has been changed
+
+2002-09-24
+1.  bug fixes for blockage editing
+2.  add color check box for blockage editor to let you view either 1) inputted blockage colors or 2) neutral colors
+3.  added memory usage label
+4. can rotate about the center of each mesh - jumps occur though when going from one mesh to another
+
+2002-09-22
+add UNDO for material properties for blockage editing
+
+2002-09-22
+1.  added revert buttons to blockage editing dialog box
+2.  added scanf to assert routine so that when an abort occurs the message window stays in view
+3.  added non-exiting ASSERT macro named WASSERT
+4.  removed extraneous printf statements from RELEASE version of smokeview
+5. fixed bug in PLOT3D menu
+6. modified blockage editing to handle 0 width blockages
+
+2002-09-21
+Changed file name on blockage editing dialog box so one can more easily run edited cases
+
+2002-09-19
+fixed bugs in 1, 3 and 6 wall blockage editor
+
+2002-09-19
+1.  added material property support for blockage editing.  not yet working for 3 or 6 wall specivications
+2.  added eyeview switching to the motion dialog box
+
+2002-09-13
+fix bug in use of pp_nolibs pre-processing directive
+add buffertype setting to better measure graphics performance by using single rather than double buffering
+
+2002-08-30
+Added the pre-processing directives, pp_nofortran and pp_nolibs so that smokeview can be easily built without FORTRAN and without external libraries (except for zlib).  This makes it easier to port an initial version of smokeview to another platform
+
+2002-08-24
+1) remove "move clip" region to simplify and speed up code
+2) save/restore clip parameters to/from preference file
+3) add activate stereo check box to stereo dialog
+4) simplify help menu by removing items that are never used
+5) change behavior of texture menu so that when textures are selected blockage menu changes so that texture becomes visible
+
+2002-08-20
+In single threaded smokeview, changed smooth viewing options so that smooth blockages are only computed just before they are viewed.  Multi-threaded smokeview works as before, smooth blockages are computed at beginning in a separate thread.
+
+Also fixed some multi-threaded calling arguments
+
+2002-08-14
+made boundary files "look nice" for cases with zero thick blockages.  now we take the face direction from the boundary file rather than figuring it out from the geometry (which we can't do because the faces may have no thicknesses)
+
+2002-07-26
+implemented a glui dialog box that handels clipping planes
+
+2002-07-11
+added surface ignition display (temporary method)
+
+2002-05-31
+fixed cad colors
+fixed blockage and boundary file coloring
+added dummy vents to cover exterior walls
+
+2002-05-07
+fix display of mesh number and plane location info when using large fonts
+changed key equivalent for outline toggle to "o"
+
+2002-05-06
+add mesh outline view that eliminates redundant lines (OUTLINE keyword)
+
+2002-04-29
+fixed OPEN_VENT/CLOSE_VENT mesh id bug
+added "RESTORE LAST VIEW" option
+
+2002-04-25
+fix duplicate texture problem
+
+2002-04-10
+added simplifying menu changes for particles files,
+fixed texture display when displaying on less than 6 faces of a block
+
+2002-04-10
+added multi-vector menus, simplifed all menus and made them more descriptive
+
+2002-04-04
+bug fixes, linted, add colors to cad
+
+2002-03-29
+target's for kuldeep
+
+2002-03-28
+blockage editing
+
+2002-03-25
+fixed bugs related to surfaces
+
+2002-03-04
+implemented blockage drawing by face rather than by block
+fixed inconsistency in velocity vector lengths
+
+2002-02-27
+fixed menu creation bug by checking status of pop up menu and not making windows when they are in use
+
+Also, cleaned up a bunch of status variables related to the grid and time stepping
+
+2002-02-25
+2/25/02 snapshot - fixed isosurface display but - made loading of various file types consistent under multi-block
+
+2002-02-21
+added blockages represented by cad
+
+2002-02-19
+1) Implemented an algorithm to color surfaces black if they exceed their ignition temperature
+(the "char" option)
+2) bug fixes
+
+2002-01-30
+intermin min max consistency changes
+
+2002-01-23
+convert to multi-thread
+
+2002-01-20
+fix bugs related to obstacle drawing
+
+2002-01-18
+bug fixes - fix time advance after hitting "t" key
+
+2002-01-09
+fixed placement of vectors and vector "points" so that they appear adjacent to blockages
+
+2002-01-08
+multi-block object editing - Can now select blockages and add blockages in any block
+
+2002-01-03
+modifying blockage edit dialog to handle multi-block cases
+blockage selection and coordinate display working
+
+2002-01-02
+Split glui code into different files - one file per function (object editing, motion and set bounds)
+This is to make changes to implement multi-block editing easier.
+
+2002-01-01
+changed blockageinfo array to blockageinfoptrs array so that it will be easier to add and subtract
+blockages dynamically
+
+2001-12-20
+implemented multi-block particle loading (can load more than one particle file)
+
+2001-12-19
+multi-block bug fixes
+
+2001-12-19
+more aloft bug fixes - 12/19/2001
+
+2001-12-18
+bug fixes
+
+2001-12-18
+merger of aloft code with 3.0 beta code
+
+2001-12-17
+smokeview 3.0 - beta  multi-block version
+
+2001-12-17
+smokeview 2.1 - aloft changes
+
+2001-12-17
+Initial revision
