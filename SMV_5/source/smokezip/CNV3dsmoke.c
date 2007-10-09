@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -355,7 +359,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
     if(make_lighting_file==1)fprintf(smoke3dsizestream," %i",smoke3di->ncompressed_lighting_zlib);
     fprintf(smoke3dsizestream,"\n");
 #else
-    fprintf(smoke3dsizestream,"%f %i %i %i\n",time,nfull,ncompressed_rle,ncompressed_zlib);
+    fprintf(smoke3dsizestream,"%f %i %i %i\n",time,nfull,ncompressed_rle,(int)ncompressed_zlib);
 #endif
   }
   printf(" 100%s completed\n",pp);

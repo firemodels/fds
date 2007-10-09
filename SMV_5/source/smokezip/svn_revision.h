@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 extern char assert_revision[];
 extern char CNV3dsmoke_revision[];
 extern char CNVboundary_revision[];
