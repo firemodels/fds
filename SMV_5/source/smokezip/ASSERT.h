@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 /* ------------------ ASSERT ------------------------ */
 #ifndef ASSERT_DEFINED
 #define ASSERT_DEFINED

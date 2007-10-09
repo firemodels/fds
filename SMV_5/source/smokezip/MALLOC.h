@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #ifndef MALLOC_DEFINED
 #define MALLOC_DEFINED
 

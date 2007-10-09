@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include "zlib.h"
 #include <stdio.h>
@@ -490,10 +494,10 @@ int convert_slice(slice *slicei){
       }
 #else
       if(slicei->rle==0){
-        fprintf(slicesizestream,"%f %i\n",time,ncompressed_zlib);
+        fprintf(slicesizestream,"%f %i\n",time,(int)ncompressed_zlib);
       }
       else{
-        fprintf(slicesizestream,"%f %i %i\n",time,ncompressed_zlib,ncomp_rle);
+        fprintf(slicesizestream,"%f %i %i\n",time,(int)ncompressed_zlib,(int)ncomp_rle);
       }
 #endif
 

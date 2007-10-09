@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -165,7 +169,6 @@ void freespherepoints(spherepoints *sphereinfo){
 float *getnormalvectorptr(spherepoints *sphereinfo, unsigned int index){
   float *normptr;
 
-  if(index<0)index=0;
   if(index>sphereinfo->npoints)index=sphereinfo->npoints;
   normptr=sphereinfo->normals+3*index;
   return normptr;
@@ -176,7 +179,6 @@ float *getnormalvectorptr(spherepoints *sphereinfo, unsigned int index){
 void getnormalvector(spherepoints *sphereinfo, unsigned int index, float *normal){
   float *normptr;
 
-  if(index<0)index=0;
   if(index>sphereinfo->npoints)index=sphereinfo->npoints;
   normptr=sphereinfo->normals+3*index;
   normal[0]=normptr[0];
@@ -221,7 +223,6 @@ unsigned int getnormalindex2(spherepoints *sphereinfo, float *normal){
   else{
     j=theta/sphereinfo->dtheta[k]+0.5;
     returnval=sphereinfo->vallist[k-1]+j;
-    if(returnval<0)returnval=0;
     if(returnval>sphereinfo->npoints)returnval=sphereinfo->npoints;
   }
   return returnval;

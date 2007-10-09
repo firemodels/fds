@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include "zlib.h"
 #include <stdio.h>
@@ -313,7 +317,7 @@ int convert_boundary(patch *patchi,int pass){
       }
 //      printf("time=%f before %i after=%i\n",time,npatchfull,ncompressed_zlib);
 
-      fprintf(boundarysizestream,"%f %i %i\n",time,npatchfull,ncompressed_zlib);
+      fprintf(boundarysizestream,"%f %i %i\n",time,(int)npatchfull,(int)ncompressed_zlib);
       fwrite(&time,4,1,boundarystream);                                       // write out time
       fwrite(&ncompressed_zlib,4,1,boundarystream);                           // write out compressed size of frame
       fwrite(compressed_boundarybuffer,1,ncompressed_zlib,boundarystream);    // write out compressed buffer
