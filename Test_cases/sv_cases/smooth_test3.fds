@@ -1,0 +1,24 @@
+&HEAD CHID='smooth_test3', TITLE='Transparency Test - Same Colours' /
+&TIME TWFIN=0. /
+
+&MESH IJK=50,50,50, XB=0.0,5.0,0.0,5.0,0.0,5.0 / 
+
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&SURF ID='Transparent1', RGB=255,100,100, TRANSPARENCY=1.0 /
+&SURF ID='Transparent2', RGB=255,100,100, TRANSPARENCY=0.5 /
+&OBST XB= 2.8, 3.8, 1.5, 2.5, 3.2, 3.3, SURF_ID='Transparent1', SAWTOOTH=.FALSE. /
+&OBST XB= 3.8, 4.8, 1.0, 2.0, 3.2, 3.3, SURF_ID='Transparent2', SAWTOOTH=.FALSE. /
+&OBST XB= 3.8, 4.8, 1.0, 2.0, 4.0, 4.8, OUTLINE=.TRUE. RGB=0,0,128 /
+
+&SURF ID='Transparent3', RGB=255,100,100, TRANSPARENCY=1.0 /
+&SURF ID='Transparent4', RGB=100,255,100, TRANSPARENCY=0.5 /
+&OBST XB= 0.8, 1.8, 2.5, 3.5, 3.2, 3.3, SURF_ID='Transparent3', SAWTOOTH=.FALSE. /
+&OBST XB= 1.8, 2.8, 2.0, 3.0, 3.2, 3.3, SURF_ID='Transparent4', SAWTOOTH=.FALSE. /
+
+&TAIL /
