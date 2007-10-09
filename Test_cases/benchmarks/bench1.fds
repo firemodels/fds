@@ -1,0 +1,53 @@
+&HEAD CHID='bench1', TITLE='plume fire'  / 
+
+&MESH IJK=32,32,64, XB=0.0,1.6,0.0,1.6,0.0,3.2 / 
+
+&TIME TWFIN=10.0 / 
+&DUMP NFRAMES=40 /
+
+&MISC SURF_DEFAULT='WALL' / 
+
+&REAC ID         = 'POLYURETHANE'
+      FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
+      SOOT_YIELD = 0.10
+      N          = 1.0
+      C          = 6.3
+      H          = 7.1
+      O          = 2.1  /
+
+&SURF ID='BURNER', HRRPUA=600., PART_ID='smoke', COLOR='RASPBERRY' /
+
+&MATL ID            = 'GYPSUM PLASTER'
+      CONDUCTIVITY  = 0.48
+      SPECIFIC_HEAT = 0.84
+      DENSITY       = 1440. /
+
+&SURF ID             = 'WALL'
+      RGB            = 200,200,200
+      MATL_ID        = 'GYPSUM PLASTER'
+      THICKNESS      = 0.012 /
+
+&PART ID='smoke', MASSLESS=.TRUE., SAMPLING_FACTOR=1 /
+
+&VENT XB=0.5,1.1,0.5,1.1,0.1,0.1,SURF_ID='BURNER' /  
+&OBST XB=0.5,1.1,0.5,1.1,0.0,0.1,SURF_ID='WALL' /
+
+&VENT MB='XMIN',SURF_ID='OPEN' / 
+&VENT MB='XMAX',SURF_ID='OPEN' / 
+&VENT MB='YMIN',SURF_ID='OPEN' / 
+&VENT MB='YMAX',SURF_ID='OPEN' / 
+&VENT MB='ZMAX',SURF_ID='OPEN' / 
+
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=30.0,100.0 /  Show 3D contours of temperature at 30 C and 100 C
+
+&SLCF PBX=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /  Add vector slices colored by temperature
+&SLCF PBY=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBZ=1.6,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBZ=3.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+
+&BNDF QUANTITY='GAUGE_HEAT_FLUX' /   Common surface quantities. Good for monitoring fire spread.
+&BNDF QUANTITY='BURNING_RATE' /
+&BNDF QUANTITY='WALL_TEMPERATURE' /
+
+&TAIL /
+
