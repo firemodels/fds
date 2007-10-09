@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #ifdef INMAIN
 #define EXTERN
 #else

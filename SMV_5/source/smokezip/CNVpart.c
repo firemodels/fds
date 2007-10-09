@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 // svn revision character string
 char CNVpart_revision[]="$Revision$";
