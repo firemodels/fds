@@ -2160,7 +2160,7 @@ void EvacMenu(int value){
 }
 
 void update_streakvalue(float value){
-  particle *parti;
+  particle *parti=NULL;
   int i;
 
   streak_index=-1;
@@ -5372,10 +5372,12 @@ static int textureshowmenu=0;
         mvslicei = multivsliceinfo + i;
 
         vi = vsliceinfo + mvslicei->ivslices[0];
-        if(i>0)vim1 = vsliceinfo + (multivsliceinfo+i-1)->ivslices[0];
         si = sliceinfo + vi->ival;
-        if(i>0)sim1 = sliceinfo + vim1->ival;
-        if(i==0||strcmp(si->label.longlabel,sim1->label.longlabel)!=0){
+        if(i>0){
+          vim1 = vsliceinfo + (multivsliceinfo+i-1)->ivslices[0];
+          sim1 = sliceinfo + vim1->ival;
+        }
+        if(i==0||(i!=0&&strcmp(si->label.longlabel,sim1->label.longlabel)!=0)){
           CREATEMENU(loadsubmvslicemenu[nloadsubmvslicemenu],LoadMultiVSliceMenu);
           nloadsubmvslicemenu++;
         }
@@ -5405,7 +5407,7 @@ static int textureshowmenu=0;
         if(i>0)vim1 = vsliceinfo + (multivsliceinfo+i-1)->ivslices[0];
         si = sliceinfo + vi->ival;
         if(i>0)sim1 = sliceinfo + vim1->ival;
-        if(i==0||strcmp(si->label.longlabel,sim1->label.longlabel)!=0){
+        if(i==0||(i>0&&strcmp(si->label.longlabel,sim1->label.longlabel)!=0)){
           if(si->vec_comp==0||showallslicevectors==1){
             char mlabel[1024], mlabel2[1024];
 
