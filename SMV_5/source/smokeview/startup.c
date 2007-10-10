@@ -2096,6 +2096,7 @@ int getmaxrevision(void){
   MAXREV(scontour2d_revision);
   MAXREV(segtri_revision);
   MAXREV(skybox_revision);
+  MAXREV(smokeview_revision);
   MAXREV(smoothlabel_revision);
   MAXREV(startup_revision);
   MAXREV(string_util_revision);
