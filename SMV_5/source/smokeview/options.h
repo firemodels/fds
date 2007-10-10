@@ -16,6 +16,7 @@
 #define pp_COMPRESS
 #define pp_noappend
 
+#ifdef pp_WIN_INTEL
 #pragma warning (disable:810)		/* conversion from xx to yy may lose sig bits */
 #pragma warning (disable:869)		/* parameer was never referenced */
 #pragma warning (disable:4018)		/* signied/unsigned match */
@@ -29,6 +30,19 @@
 #pragma warning (disable:1572)		/* floating-point equality and inequality comparisons are unreliable */
 #pragma warning (disable:494)		/* omission of "class"is nonstandard */
 #pragma warning (disable:444)		/* destructor for base class */
+#else
+#pragma warning (disable:4305)		/* truncation from 'double' to 'GLfloat' */
+#pragma warning (disable:4244)		/* truncation from '__w64' to 'int' */
+#pragma warning (disable:4267)		/* conversion from size_t to int */
+#pragma warning (disable:4018)		/* signed/unsigned mismatch */
+#pragma warning (disable:4100)		/* unreferenced formal parameter */
+#pragma warning (disable:4505)		/* unreferenced local function */
+#pragma warning (disable:4701)		/* potentially unitialized local variable */
+#pragma warning (disable:4389)		/* signed/unsigned mismatch */
+#pragma warning (disable:4189)		/* local variable set but not referenced */
+#pragma warning (disable:4206)		/* translation unit empty */
+
+#endif
 
 #endif
 
