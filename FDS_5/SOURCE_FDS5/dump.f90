@@ -1843,6 +1843,7 @@ MATL_LOOP: DO N=1,N_MATL
    IF (ML%KAPPA_S<1.0E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
    ENDIF
+   IF (ML%PYROLYSIS_MODEL==PYROLYSIS_SOLID) THEN
    DO NN=1,ML%N_REACTIONS
       WRITE(LU_OUTPUT,'(A,I2)')   '     Reaction ', NN
       IF (ML%NU_RESIDUE(NN) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,I2,A,F6.3)') &
@@ -1859,6 +1860,7 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T        : ',ML%N_T(NN)
       ENDIF
    ENDDO
+   ENDIF
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
       WRITE(LU_OUTPUT,'(A)')      '     Liquid evaporation reaction'
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Fuel Yield             : ',ML%NU_FUEL(1)
