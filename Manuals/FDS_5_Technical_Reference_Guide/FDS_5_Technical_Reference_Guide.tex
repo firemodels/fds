@@ -2534,7 +2534,7 @@ If the gas phase absorption and emission in Eq.~(\ref{RTEbasic})
 are temporarily neglected for simplicity, the radiative transport
 equation becomes
 \be \bs \cdot \nabla I_{\la}(\bx,\bs) = -\left[\kappa_d(\bx,\la) + \sigma_d(\bx,\la)\right]
-I(\bx,\bs) +\kappa_d(\bx,\la) \; I_{b,d}(\bx,\la) +
+I_{\la}(\bx,\bs) +\kappa_d(\bx,\la) \; I_{b,d}(\bx,\la) +
 \frac{\sigma_d(\bx,\la)}{4\pi}
 \int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs') \; d\bs'
 \label{RTEspray} \ee
@@ -2589,7 +2589,8 @@ integral can now be written as
 \be
 \frac{\sigma_d(\bx,\la)}{4\pi}\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs')
   \; d\Omega' =
-\sigma_d(\bx,\la)\left[\chi_f \; I_{\la}(\bx,\bs) + (1-\chi_f)U^*(\bx)\right]
+\sigma_d(\bx,\la)\left[\chi_f \; I_{\la}(\bx,\bs) +
+(1-\chi_f)U^*(\bx,\la)\right] 
 \ee
 where $\chi_f = \chi_f(r,\la)$ is a fraction of the total intensity
 originally within the solid angle $\delta\Omega^l$ that is scattered
@@ -2603,7 +2604,8 @@ scattering coefficient section
 the spray RTE becomes
 \be
 \bs \cdot \nabla I_{\la}(\bx,\bs) =
--\left[\kappa_d(\bx,\la) + \overline{\sigma_d}(\bx,\la)\right] I(\bx,\bs)
+-\left[\kappa_d(\bx,\la) + \overline{\sigma_d}(\bx,\la)\right]
+I_{\la}(\bx,\bs) 
 +\kappa_d(\bx,\la) \; I_{b,d}(\bx,\la)
 +\frac{\overline{\sigma_d}(\bx,\la)}{4\pi}U(\bx,\la)
 \ee
@@ -2634,16 +2636,22 @@ density of droplets in the cell.
 
 The absorption and scattering cross sections and the scattering phase
 function are calculated using the MieV code developed by
-Wiscombe~\cite{Wiscombe}.  Both $\kappa_d$ and $\overline{\sigma_d}$
-are averaged over the possible droplet radii and wavelength before the
-actual simulation.  A constant ``radiation'' temperature, $T_{rad}$,
-is used in the wavelength averaging.  $T_{rad}$ should be selected to
+Wiscombe~\cite{Wiscombe}.  Currently, the spectral data is only
+included for water. The values of the imaginary part of the complex
+refractive index (related to absorption coefficient) are taken from
+Ref.~\cite{Hale:1}.  Value 1.33 is used for the real part (index of
+refraction). 
+
+Before the actual simulation, both $\kappa_d$ and
+$\overline{\sigma_d}$ are averaged over the possible droplet radii and
+wavelength.  A constant ``radiation'' temperature, $T_{rad}$, is used
+in the wavelength averaging.  $T_{rad}$ should be selected to
 represent a typical radiating flame temperature. A value of 1173~K is
 used by default.  The averaged quantities, now functions of the
-droplet mean diameter only, are saved in one-dimensional arrays.
-During the simulation, the local properties are calculated as a table
-look-up using the local mean droplet diameter~\cite{Hale:1}.  Details
-of the computation are given in Section~\ref{dropnumericalmethod}.
+droplet mean diameter only, are stored in one-dimensional arrays.
+During the simulation, the local properties are found by table
+look-up using the local mean droplet diameter.  More details of the
+computation are given in Section~\ref{dropnumericalmethod}.
 
 
 
@@ -3909,7 +3917,7 @@ $\chi_f$ becomes
 \be
 \chi_f = \frac{1}{\delta\Omega^l}
 \int_0^{\mu^l}\int_0^{\mu^l}\int_{\mu_{d,0}}^{\mu_{d,\pi}}
-\frac{P_0(\theta_d)}{(1-\mu2)(1-\mu'^2)-(\mu_d-\mu\mu')2 }
+\frac{P_0(\theta_d)}{(1-\mu^2)(1-\mu'^2)-(\mu_d-\mu\mu')2 }
 \; d\mu_d \, d\mu \, d\mu'
 \ee
 where $\mu_d$ is a cosine of the scattering angle $\theta_d$ and
