@@ -1793,6 +1793,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          WRITE(LU_OUTPUT,'(/3X,A)') RN%NAME
          WRITE(LU_OUTPUT,'(3X,A)')  'Finte Rate Reaction'
    END SELECT
+   IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(3X,A)') RN%FYI
    WRITE(LU_OUTPUT,'(A,F8.2)')  '   Molecular Weight, Fuel (g/mol)',RN%MW_FUEL
    WRITE(LU_OUTPUT,'(A,F8.0)')  '   Heat of Combustion (kJ/kg)    ',RN%HEAT_OF_COMBUSTION/1000._EB
    SELECT CASE (RN%MODE)
@@ -1826,6 +1827,7 @@ WRITE(LU_OUTPUT,'(//A,I2)')  ' Material Information'
 MATL_LOOP: DO N=1,N_MATL
    ML => MATERIAL(N)
    WRITE(LU_OUTPUT,'(/I4,1X,A)')    N,MATL_NAME(N)
+   IF (ML%FYI/='null') WRITE(LU_OUTPUT,'(5X,A)') TRIM(ML%FYI)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '     Emissivity                   ',ML%EMISSIVITY
    WRITE(LU_OUTPUT,'(A,F8.1)')    '     Density (kg/m3)              ',ML%RHO_S
    IF (ML%C_S>0._EB) THEN
@@ -1882,6 +1884,7 @@ SURFLOOP: DO N=0,N_SURF-1
    ELSE
       WRITE(LU_OUTPUT,'(/I4,1X,A)')    N,SURF_NAME(N)
    ENDIF
+   IF (SF%FYI/='null') WRITE(LU_OUTPUT,'(5X,A)') TRIM(SF%FYI)
    IF (N==OPEN_SURF_INDEX) THEN
       WRITE(LU_OUTPUT,'(A)')      '     Passive Vent to Atmosphere'
       CYCLE SURFLOOP
