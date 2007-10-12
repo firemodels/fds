@@ -137,20 +137,26 @@ CALL WRITE_STRINGS
 
 CALL MESH_EXCHANGE(0)
 
-! Make an initial dump of ambient values
+! Initialize output files 
 
-DO NM=1,NMESHES
-   CALL UPDATE_OUTPUTS(T(NM),NM)      
-   CALL DUMP_MESH_OUTPUTS(T(NM),NM)
-ENDDO
-CALL UPDATE_CONTROLS(T)
-CALL DUMP_GLOBAL_OUTPUTS(T(1))
+IF (.NOT.RESTART) THEN
 
-! Check for changes in VENT or OBSTruction control and device status at t=T_BEGIN
+   ! Make an initial dump of ambient values
 
-OBST_VENT_LOOP: DO NM=1,NMESHES
-   CALL OPEN_AND_CLOSE(T(NM),NM)
-ENDDO OBST_VENT_LOOP
+   DO NM=1,NMESHES
+      CALL UPDATE_OUTPUTS(T(NM),NM)      
+      CALL DUMP_MESH_OUTPUTS(T(NM),NM)
+   ENDDO
+   CALL UPDATE_CONTROLS(T)
+   CALL DUMP_GLOBAL_OUTPUTS(T(1))
+
+   ! Check for changes in VENT or OBSTruction control and device status at t=T_BEGIN
+
+   OBST_VENT_LOOP: DO NM=1,NMESHES
+      CALL OPEN_AND_CLOSE(T(NM),NM)
+   ENDDO OBST_VENT_LOOP
+
+ENDIF
 
 ! ********************************************************************
 !                      MAIN TIMESTEPPING LOOP
