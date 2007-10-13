@@ -20,11 +20,7 @@
 char IOtarget_revision[]="$Revision$";
 
 /* ------------------ readtarget ------------------------ */
-#ifdef pp_nofortran
-void readtarget(const char *file, int ifile, int flag, int *errorcode){
-}
-#endif
-#ifndef pp_nofortran
+
 void readtarget(const char *file, int ifile, int flag, int *errorcode){
   FILE *stream;
   float ttargmin, ttargmax;
@@ -180,7 +176,7 @@ void readtarget(const char *file, int ifile, int flag, int *errorcode){
   IDLE();
 
 }
-#endif
+
 /* ------------------ readtarget2 ------------------------ */
 
 void readtarget2(const char *file, int ifile, int flag, int *errorcode){

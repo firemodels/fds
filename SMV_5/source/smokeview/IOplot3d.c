@@ -45,11 +45,6 @@ int plot3dcompare( const void *arg1, const void *arg2 ){
 
 /* ------------------ readplot  ------------------------ */
 
-#ifdef pp_nofortran
-void readplot(char *file, int ifile, int flag, int *errorcode){
-}
-#endif
-#ifndef pp_nofortran
 void readplot(char *file, int ifile, int flag, int *errorcode){
   int n, nn, ntotal, i, nnn;
   float *udata, *vdata, *wdata, *sdata;
@@ -345,7 +340,6 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
 
   glutPostRedisplay();
 }
-#endif
 
 /* ------------------ update_plot3dtitle ------------------------ */
 

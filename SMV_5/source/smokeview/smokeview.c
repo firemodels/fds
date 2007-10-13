@@ -3319,9 +3319,6 @@ void usage(char **argv){
 #ifdef pp_noappend
     printf(", pp_noappend");
 #endif
-#ifdef pp_nofortran
-    printf(", pp_nofortran");
-#endif
 #ifdef pp_NOSHOW
     printf(", pp_NOSHOW");
 #endif

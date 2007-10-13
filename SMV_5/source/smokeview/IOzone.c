@@ -18,11 +18,6 @@ char IOzone_revision[]="$Revision$";
 
 /* ------------------ readzone ------------------------ */
 
-#ifdef pp_nofortran
-void readzone(char *file, int ifile, int flag, int *errorcode){
-}
-#endif
-#ifndef pp_nofortran
 void readzone(char *file, int ifile, int flag, int *errorcode){
   int n;
   int error,ntotal,i,j,ii;
@@ -210,7 +205,6 @@ void readzone(char *file, int ifile, int flag, int *errorcode){
   IDLE();
 
 }
-#endif
 
 /* ------------------ fill_roomdata ------------------------ */
 
