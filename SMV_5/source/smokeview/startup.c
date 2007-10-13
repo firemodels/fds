@@ -1007,13 +1007,8 @@ void initvars1(void){
   trainerload=0;
   fontsize_save=0;
   showtrainer=0;
-//#ifdef pp_TRAINER
-//  trainer_mode=1;
-//  trainer_active=1;
-//#else
   trainer_mode=0;
   trainer_active=0;
-//#endif
   slice_average_flag=0;
   show_slice_average=0;
   vis_slice_average=1;
