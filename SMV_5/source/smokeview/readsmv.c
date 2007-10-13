@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #include <stdio.h>
 #include <string.h>
@@ -20,10 +24,6 @@
 #ifdef pp_SPHERE
 #include "csphere.h"
 #endif
-// $Date$ 
-// $Revision$
-// $Author$
-
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
@@ -6272,7 +6272,11 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       char short_label[256],*s1;
 
 
+#ifdef _DEBUG
+      printf("in V5_PARTICLES\n");
+#endif
       strcpy(short_label,"");
+      fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i %f %s",&ivmin,&vmin,&ivmax,&vmax,short_label);
   
       if(npart5prop>0){
@@ -6288,6 +6292,28 @@ int readini2(char *inifile, int loaddatafile, int localfile){
           propi->setvalmax=ivmax;
           propi->valmin=vmin;
           propi->valmax=vmax;
+          switch (ivmin){
+            case PERCENTILE_MIN:
+              if(propi!=NULL)propi->percentile_min=vmin;
+              break;
+            case GLOBAL_MIN:
+              if(propi!=NULL)propi->global_min=vmin;
+              break;
+            case SET_MIN:
+              if(propi!=NULL)propi->user_min=vmin;
+              break;
+          }
+          switch (ivmax){
+            case PERCENTILE_MAX:
+              if(propi!=NULL)propi->percentile_max=vmax;
+              break;
+            case GLOBAL_MAX:
+              if(propi!=NULL)propi->global_max=vmax;
+              break;
+            case SET_MAX:
+              if(propi!=NULL)propi->user_max=vmax;
+              break;
+          }
         }
       }
       continue;
