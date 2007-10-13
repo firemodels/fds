@@ -3289,9 +3289,6 @@ void usage(char **argv){
 #ifdef ISO_DEBUG
     printf(", ISO_DEBUG");
 #endif
-#ifdef isotest
-    printf(", isotest");
-#endif
 #ifdef pp_COLOR
     printf(", pp_COLOR");
 #endif
