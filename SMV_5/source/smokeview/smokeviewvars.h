@@ -580,13 +580,6 @@ SVEXTERN int *targtimeslist;
 SVEXTERN int *zonetlist;
 
 SVEXTERN int sv_age;
-#ifdef pp_NISTREVIEW
-SVEXTERN int nistreview;
-SVEXTERN int atNIST;
-#else
-SVEXTERN int nistreview;
-SVEXTERN int atNIST;
-#endif
 SVEXTERN int titlesafe_offset;
 SVEXTERN int titlesafe_offsetBASE;
 SVEXTERN int   reset_frame;

@@ -200,7 +200,7 @@ void sv_startup_c(int argc, char **argv){
 
   printf("*********************************************************************\n");
   printf("*********************************************************************\n");
-#ifdef pp_NISTREVIEW
+#ifdef pp_BETA
   printf("This version of Smokeview is intended for review and testing ONLY.\n");
   printf("\n");
 #endif
@@ -1418,13 +1418,6 @@ void initvars1(void){
   }
 
   sv_age=0;
-#ifdef pp_NISTREVIEW
-  nistreview=1;
-  atNIST=0;
-#else
-  nistreview=0;
-  atNIST=1;
-#endif
   titlesafe_offset=0;
   titlesafe_offsetBASE=45;
   reset_frame=0;
