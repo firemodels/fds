@@ -425,9 +425,6 @@ void DrawContours(const contour *ci,int drawoption){
   float *xline, *yline;
   float **rgb;
 
-#ifdef isotest
-float testcolor[4]={1.,0.,0.0,1.0};
-#endif
   int nlinepts,iline;
   int *npolysv;
 
@@ -454,11 +451,7 @@ float testcolor[4]={1.,0.,0.0,1.0};
         }
       }
       if(drawoption==2){
-#ifdef isotest
-        glColor4fv(testcolor);
-#else
         glColor4fv(rgb[n]);
-#endif
         glLineWidth((float)1.0);
         glBegin(GL_LINES);
         for(iline=0;iline<nlinepts;iline++){glVertex3f(xyzval,*xline++,*yline++);}
@@ -476,11 +469,7 @@ float testcolor[4]={1.,0.,0.0,1.0};
         }
       }
       if(drawoption==2){
-#ifdef isotest
-        glColor4fv(testcolor);
-#else
         glColor4fv(rgb[n]);
-#endif
         glLineWidth((float)1.0);
         glBegin(GL_LINES);
         for(iline=0;iline<nlinepts;iline++){glVertex3f(*xline++,xyzval,*yline++);}
@@ -497,11 +486,7 @@ float testcolor[4]={1.,0.,0.0,1.0};
         }
       }
       if(drawoption==2){
-#ifdef isotest
-        glColor4fv(testcolor);
-#else
         glColor4fv(rgb[n]);
-#endif
         glLineWidth((float)1.0);
         glBegin(GL_LINES);
         for(iline=0;iline<nlinepts;iline++){glVertex3f(*xline++,*yline++,xyzval);}
