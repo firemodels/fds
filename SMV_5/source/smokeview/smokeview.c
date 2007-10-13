@@ -3331,9 +3331,6 @@ void usage(char **argv){
 #ifdef pp_TEST
     printf(", pp_TEST");
 #endif
-#ifdef pp_TEXTUREPLOT
-    printf(", pp_TEXTUREPLOT");
-#endif
 #ifdef pp_THREADS2
     printf(", pp_THREADS2");
 #endif
