@@ -892,11 +892,6 @@ void update_all_partvis2(void){
 
 /* ------------------ readpart ------------------------ */
 
-#ifdef pp_nofortran
-void readpart(char *file, int ifile, int flag, int *errorcode){
-}
-#endif
-#ifndef pp_nofortran
 void readpart(char *file, int ifile, int flag, int *errorcode){
   int nmax, n, i;
   size_t lenfile;
@@ -1247,11 +1242,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
 
   glutPostRedisplay();
 }
-
-#endif
-
-
-
 
 /* ------------------ drawEvac ------------------------ */
 

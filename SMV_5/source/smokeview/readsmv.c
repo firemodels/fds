@@ -461,13 +461,11 @@ int readsmv(char *file){
       npartclassinfo++;
       continue;
     }
-#ifndef pp_nofortran
     if(match(buffer,"PL3D",4) == 1){
       nplot3d++;
       continue;
    
     }
-#endif
     if(
       (match(buffer,"DEVICE",6) == 1)&&
       (match(buffer,"DEVICE_ACT",10) != 1)
@@ -615,7 +613,6 @@ int readsmv(char *file){
       nvent++;
       continue;
     }
-#ifndef pp_nofortran
     if(match(buffer,"PART",4) == 1||match(buffer,"EVAC",4)==1
       ||match(buffer,"PRT5",4)==1||match(buffer,"EVA5",4)==1
       ){
@@ -626,17 +623,14 @@ int readsmv(char *file){
       nslice++;
       continue;
     }
-#endif
     if(match(buffer,"SMOKE3D",7) == 1){
       nsmoke3d++;
       continue;
     }
-#ifndef pp_nofortran
     if(match(buffer,"BNDF",4) == 1){
       npatch_files++;
       continue;
     }
-#endif
     if(match(buffer,"ISOF",4) == 1||match(buffer,"TISOF",5)==1){
       niso++;
       continue;
@@ -2171,7 +2165,6 @@ typedef struct {
       }
     }
     CheckMemory;
-#ifndef pp_nofortran
     /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
@@ -2259,7 +2252,6 @@ typedef struct {
       }
       continue;
     }
-#endif
 
     /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3052,7 +3044,6 @@ typedef struct {
     ++++++++++++++++++++++ PART ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-#ifndef pp_nofortran
     if(match(buffer,"PART",4) == 1 || match(buffer,"EVAC",4)==1
       ||match(buffer,"PRT5",4)==1||match(buffer,"EVA5",4)==1
       ){
@@ -3233,7 +3224,6 @@ typedef struct {
       }
       continue;
     }
-#endif
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ SYST ++++++++++++++++++++++++++++++
@@ -3346,11 +3336,6 @@ typedef struct {
       NewMemory((void **)&chidfilebase,(unsigned int)(len+1));
       STRCPY(chidfilebase,buffer);
 
-#ifdef pp_FLUSH
-      NewMemory((void **)&flushfile,(unsigned int)(len+6+1));
-      STRCPY(flushfile,chidfilebase);
-      STRCAT(flushfile,".flush");
-#endif
   if(chidfilebase!=NULL){
     NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
     STRCPY(hrrfilename,chidfilebase);
@@ -3367,7 +3352,6 @@ typedef struct {
     ++++++++++++++++++++++ SLCF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-#ifndef pp_nofortran
     if(match(buffer,"SLCF",4) == 1){
       nn_slice++;
       trim(buffer);
@@ -3532,9 +3516,8 @@ typedef struct {
       }
       continue;
     }
-#endif
 
-  /*
+    /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ ISOF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -6294,24 +6277,24 @@ int readini2(char *inifile, int loaddatafile, int localfile){
           propi->valmax=vmax;
           switch (ivmin){
             case PERCENTILE_MIN:
-              if(propi!=NULL)propi->percentile_min=vmin;
+              propi->percentile_min=vmin;
               break;
             case GLOBAL_MIN:
-              if(propi!=NULL)propi->global_min=vmin;
+              propi->global_min=vmin;
               break;
             case SET_MIN:
-              if(propi!=NULL)propi->user_min=vmin;
+              propi->user_min=vmin;
               break;
           }
           switch (ivmax){
             case PERCENTILE_MAX:
-              if(propi!=NULL)propi->percentile_max=vmax;
+              propi->percentile_max=vmax;
               break;
             case GLOBAL_MAX:
-              if(propi!=NULL)propi->global_max=vmax;
+              propi->global_max=vmax;
               break;
             case SET_MAX:
-              if(propi!=NULL)propi->user_max=vmax;
+              propi->user_max=vmax;
               break;
           }
         }

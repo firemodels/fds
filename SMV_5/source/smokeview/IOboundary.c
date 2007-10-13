@@ -35,11 +35,6 @@ int getpatchindex(const patch *patchi);
 
 /* ------------------ readpatch ------------------------ */
 
-#ifdef pp_nofortran
-void readpatch(int ifile, int flag, int *errorcode){
-}
-#endif
-#ifndef pp_nofortran
 
 /* ------------------ readpatch2 ------------------------ */
 
@@ -65,7 +60,6 @@ void readpatch(int ifile, int flag, int *errorcode){
   mesh *meshi;
   float patchmin_global, patchmax_global;
   int local_first,nsize,iblock;
-//  int dummy;
   int ext_wall;
 
   blockagedata *bc;
@@ -930,8 +924,6 @@ void readpatch(int ifile, int flag, int *errorcode){
   IDLE();
   glutPostRedisplay();
 }
-
-#endif
 
 /* ------------------ nodeinblockage ------------------------ */
 
