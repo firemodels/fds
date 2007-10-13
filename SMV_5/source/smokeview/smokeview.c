@@ -3313,9 +3313,6 @@ void usage(char **argv){
 #ifdef pp_memstatus
     printf(", pp_memstatus");
 #endif
-#ifdef pp_NISTREVIEW
-    printf(", pp_NISTREVIEW");
-#endif
 #ifdef pp_noappend
     printf(", pp_noappend");
 #endif
