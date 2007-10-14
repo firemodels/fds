@@ -7366,7 +7366,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
 #ifdef pp_COLOR
       if(match(buffer,"GENCOLORBARS",12) == 1){
       {
-        size_t nlabel;
         colorbardata *cbi;
         float r1, g1, b1, r2, g2, b2;
         int n;
@@ -7386,7 +7385,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
 
           fgets(buffer,255,stream);
           trim(buffer);
-          nlabel=strlen(buffer);
           strcpy(cbi->label,buffer);
 
           fgets(buffer,255,stream);
@@ -7399,11 +7397,15 @@ int readini2(char *inifile, int loaddatafile, int localfile){
 
           cbi->label_ptr=cbi->label;
           for(i=0;i<cbi->nlegs;i++){
+            int icbar, isflag;
+
             fgets(buffer,255,stream);
             r1=-1.0; g1=-1.0; b1=-1.0; 
             r2=-1.0; g2=-1.0; b2=-1.0;
-            sscanf(buffer,"%i %i %f %f %f %f %f %f",cbi->colorbar_index+i,cbi->splitflag+i,
+            sscanf(buffer,"%i %i %f %f %f %f %f %f",&icbar,&isflag,
               &r1,&g1,&b1,&r2,&g2,&b2);
+            cbi->colorbar_index[i]=icbar;
+            cbi->splitflag[i]=isflag;
             nn = 6*i;
             cbi->leg_rgb[nn  ]=r1;
             cbi->leg_rgb[nn+1]=g1;
