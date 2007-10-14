@@ -1129,7 +1129,6 @@ void RenderState(int onoff){
 
 /* ------------------ RenderMenu ------------------------ */
 
-#ifndef pp_nolibs
 void RenderMenu(int value){
   slice *sd;
   int i,n;
@@ -1234,7 +1233,6 @@ void RenderMenu(int value){
     break;
   }
 }
-#endif
 
 /* ------------------ EvacShowMenu ------------------------ */
 
@@ -4870,7 +4868,6 @@ static int textureshowmenu=0;
    else{glutAddMenuEntry("Step",-1);}
 
 /* --------------------------------render menu -------------------------- */
-#ifndef pp_nolibs
    {
      char renderwindow[1024];
      char renderwindow2[1024];
@@ -4951,8 +4948,8 @@ static int textureshowmenu=0;
     }
   }
    }
-#endif
-/* --------------------------------viewpoint menu -------------------------- */
+
+   /* --------------------------------viewpoint menu -------------------------- */
 
 
   CREATEMENU(dialogmenu,DialogMenu);
@@ -5090,9 +5087,7 @@ static int textureshowmenu=0;
 #endif
   glutAddSubMenu("Rotation",rotatetypemenu);
   glutAddSubMenu("Max Frame Rate",frameratemenu);
-#ifndef pp_nolibs
   glutAddSubMenu("Render",rendermenu);
-#endif
   if(showfontmenu==1)glutAddSubMenu("Font Size",fontmenu);
 //  glutAddSubMenu("Aperture",aperturemenu);
   glutAddSubMenu("Zoom",zoommenu);

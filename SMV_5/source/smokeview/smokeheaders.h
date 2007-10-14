@@ -477,9 +477,7 @@ EXTERNCPP void Reshape(int width, int height);
 EXTERNCPP void UpdateTimeLabels(void);
 EXTERNCPP void Idle(void);
 #define IDLE() Idle();
-#ifndef pp_nolibs
 EXTERNCPP void RenderFrame(int view_mode);
-#endif
 EXTERNCPP int readlabels(flowlabels *label, FILE *stream);
 EXTERNCPP void PART_CB_INIT(void);
 EXTERNCPP void RenderMenu(int value);
