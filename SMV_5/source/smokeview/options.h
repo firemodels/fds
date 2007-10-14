@@ -5,7 +5,11 @@
 #ifdef pp_BETA
 #define SMVVERSION "Test"
 #else
+#ifdef pp_ALPHA
+#define SMVVERSION "Experimental"
+#else
 #define SMVVERSION "5.0.2"
+#endif
 #endif
 
 // #define pp_LINT // uncomment if using LINT
@@ -55,7 +59,7 @@
 #define USE_ZLIB
 #define pp_THREADS2
 
-#ifdef pp_TEST
+#ifdef pp_ALPHA
 #define pp_COLOR
 #define pp_TOUR
 #define pp_LIGHT
