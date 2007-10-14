@@ -106,7 +106,6 @@ void drawcolorbarpath(void){
   float *rgbleft, *rgbright;
 
   cbi = colorbarinfo + colorbartype;
-
   glPointSize(5.0);
   glBegin(GL_POINTS);
   for(i=0;i<255;i++){

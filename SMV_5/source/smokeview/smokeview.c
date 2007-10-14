@@ -1494,7 +1494,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ render scene +++++++++++++++++++++++++ */
 
-#ifndef pp_nolibs
   if(RenderOnceNow==0&&RenderGif !=0
     &&render_double==0
     ){
@@ -1536,8 +1535,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       RenderSkip=1;
     }
   }
-#endif
-/* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
+
+ /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
 #ifdef pp_COLOR
   if(viscolorbarpath==1){
@@ -2947,7 +2946,6 @@ void synctimes(void){
 
 /* ------------------ RenderFrame ------------------------ */
 
-#ifndef pp_nolibs
 void RenderFrame(int view_mode){
   char renderfile[1024],renderfile2[1024];
   FILE *stream;
@@ -3036,7 +3034,6 @@ void RenderFrame(int view_mode){
     output_Slicedata();
   }
 }
-#endif
 
 /* ------------------ ClearBuffers ------------------------ */
 
