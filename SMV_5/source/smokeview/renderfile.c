@@ -3,7 +3,6 @@
 // $Author$
 
 #include "options.h"
-#ifndef pp_nolibs
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -673,4 +672,3 @@ unsigned char *readrgb(const char *name, int *width, int *height) {
     free(bbuf);
     return (unsigned char *) base;
 }
-#endif

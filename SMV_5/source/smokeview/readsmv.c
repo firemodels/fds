@@ -2000,7 +2000,6 @@ typedef struct {
    Now check to see if texture files exist .
    If so, then convert to OpenGL format 
   */
-#ifndef pp_nolibs
   for(i=0;i<ntextures;i++){
     texti = textureinfo + i;
     texti->loaded=0;
@@ -2045,7 +2044,6 @@ typedef struct {
     texti->loaded=1;
     printf(" - completed\n");
   }
-#endif
   if(ntextures==0)FREEMEMORY(textureinfo);
   // define texture for colorbar
   // texture_colorbar_id

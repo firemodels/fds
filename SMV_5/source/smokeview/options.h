@@ -56,8 +56,8 @@
 #define pp_THREADS2
 
 #ifdef pp_TEST
-#define pp_TOUR
 #define pp_COLOR
+#define pp_TOUR
 #define pp_LIGHT
 #define pp_GPU
 #define pp_MEM2
