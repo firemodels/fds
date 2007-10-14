@@ -1637,11 +1637,12 @@ void initvars1(void){
     strcat(TITLEBASE,svn_version);
     strcat(TITLEBASE,")");
 #endif
-#ifdef pp_TEST
-    strcat(TITLEBASE," Test");
+#ifdef pp_ALPHA
+    strcat(TITLEBASE," (");
+    strcat(TITLEBASE,svn_version);
+    strcat(TITLEBASE,")");
 #endif
     strcat(TITLEBASE," - ");
-
     strcpy(TRAINERTITLEBASE,"Fire Flow Demonstrator ");
 
     strcat(TRAINERTITLEBASE,version);
@@ -1651,11 +1652,7 @@ void initvars1(void){
     strcat(TRAINERTITLEBASE,svn_version);
     strcat(TRAINERTITLEBASE,")");
 #endif
-#ifdef pp_TEST
-    strcat(TRAINERTITLEBASE," Test");
-#endif
     strcat(TRAINERTITLEBASE," - ");
-
   }
   STRCPY(TRAINERTITLE,TRAINERTITLEBASE);
   STRCAT(TRAINERTITLEBASE,__DATE__);

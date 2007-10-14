@@ -5091,7 +5091,7 @@ static int textureshowmenu=0;
   if(showfontmenu==1)glutAddSubMenu("Font Size",fontmenu);
 //  glutAddSubMenu("Aperture",aperturemenu);
   glutAddSubMenu("Zoom",zoommenu);
-#ifdef pp_TEST
+#ifdef pp_ALPHA
   glutAddMenuEntry("Benchmark",1);
 #endif
   if(trainer_active==1)glutAddMenuEntry("Trainer Menu",2);

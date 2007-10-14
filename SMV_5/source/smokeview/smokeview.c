@@ -1058,7 +1058,22 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     sniffErrors("after Scene_viewport");
   }
 
-  if(eyeview==1&&nskyboxinfo>0)draw_skybox();
+  
+/* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
+
+#ifdef pp_COLOR
+  if(viscolorbarpath==1){
+    if(cb_hidesv==1){
+      setColorbarClipPlanes(0);
+    }
+    drawcolorbarpath();
+    if(cb_hidesv==1){
+      setColorbarClipPlanes(1);
+    }
+  }
+
+#endif
+if(eyeview==1&&nskyboxinfo>0)draw_skybox();
 
   if(UpdateLIGHTS==1)updateLights(0);
 
@@ -1179,21 +1194,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     return;
   }
 
-/* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
-
-#ifdef pp_COLOR
-  if(viscolorbarpath==1){
-    if(cb_hidesv==1){
-      setColorbarClipPlanes(0);
-    }
-    drawcolorbarpath();
-    if(cb_hidesv==1){
-      setColorbarClipPlanes(1);
-    }
-  }
-
-#endif
-/* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
+  /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
   drawBlockages(mode,DRAW_SOLID);
   sniffErrors("drawBlockages");
@@ -3322,8 +3323,8 @@ void usage(char **argv){
 #ifdef pp_SPHERE
     printf(", pp_SPHERE");
 #endif
-#ifdef pp_TEST
-    printf(", pp_TEST");
+#ifdef pp_ALPHA
+    printf(", pp_ALPHA");
 #endif
 #ifdef pp_THREADS2
     printf(", pp_THREADS2");
