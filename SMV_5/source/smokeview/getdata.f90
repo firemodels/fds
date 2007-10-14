@@ -1,8 +1,3 @@
-#ifdef pp_nofortran
-subroutine dummy2
-end subroutine dummy2
-#endif
-#ifndef pp_nofortran
 !  ------------------ getzonedata ------------------------ 
 
 subroutine getzonedata(nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,error)
@@ -278,9 +273,7 @@ if(exists)then
   open(unit=lu10,file=trim(partfilename),form="formatted",action="read")
 #endif
  else
-#ifndef pp_makedll
   write(6,*)'The particle file name, ',trim(partfilename),' does not exist'
-#endif
   error=-1
 endif
 do i = 1, 5
@@ -502,13 +495,11 @@ do
     sframe(nframes) = npp1a + npp2a
     sprframe(nframes) = npp2a
     if(nframes+1.le.mxframes)bframe(nframes+1) = bframe(nframes) + sframe(nframes)
-#ifndef pp_makedll
     if(npp2.eq.0)then
   	  write(6,*)"particle time=",stime
   	 else
       write(6,*)"particle time=",stime,"particles",npp1,"droplets",npp2
     endif
-#endif
   endif
 
 end do
@@ -626,9 +617,7 @@ endif
 #endif
 #endif
  else
-#ifndef pp_makedll
   write(6,*)'the slice file ',trim(slicefilename),' does not exist'
-#endif
   nsteps = 0
   return
 endif
@@ -694,9 +683,7 @@ do
   if(.not.load)cycle
   nsteps = nsteps + 1
   times(nsteps) = time
-#ifndef pp_makedll
   write(6,*)"slice time=",time
-#endif
   if(idir.eq.3)then
     istart = (nsteps-1)*nxsp*nysp
     do i = 1, nxsp
@@ -775,9 +762,7 @@ character(len=255) :: line
     open(unit=u_in,file=trim(qfilename),form="formatted",action="read",iostat=error2)
 #endif
    else
-#ifndef pp_makedll
     write(6,*)'The file name, ',trim(qfilename),' does not exist'
-#endif
     return
   endif
 
@@ -856,9 +841,7 @@ if(isotest.eq.0)then
 #endif
 #endif
    else
-#ifndef pp_makedll
     write(6,*)'The file name, ',trim(qfilename),' does not exist'
-#endif
     read(5,*)dummy
     stop
   endif
@@ -869,11 +852,9 @@ if(isotest.eq.0)then
     read(u_in,iostat=error)((((qq(i,j,k,n),i=1,nxpts),j=1,nypts),k=1,nzpts),n=1,5)
    else
     error = 1
-#ifndef pp_makedll
 	  write(6,*)"*** Fatal error in getplot3dq ***"
   	write(6,*)"Grid size found in plot3d file was:",nxpts,nypts,nzpts
   	write(6,*)"Was expecting:",nx,ny,nz
-#endif
   	stop
   endif
  else
@@ -894,5 +875,3 @@ close(u_in)
 
 return
 end subroutine getplot3dq
-
-#endif
