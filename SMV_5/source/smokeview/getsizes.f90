@@ -140,12 +140,6 @@ close(lu21)
 return
 end subroutine fcreate_part5sizefile
 
-
-#ifdef pp_nofortran
-subroutine dummy
-end subroutine dummy
-#endif
-#ifndef pp_nofortran
 !  ------------------ getisosize ------------------------ 
 
 subroutine getisosize(isofilename,endian,nisopoints,nisotriangles,nisolevels,nisosteps,error)
@@ -196,9 +190,7 @@ endif
   open(unit=lu20,file=trim(isofilename),form="unformatted",action="read")
 #endif
  else
-#ifndef pp_makedll
   write(6,*)'The iso file name, ',trim(isofilename),' does not exist'
-#endif
   error=1
   return
 endif
@@ -277,9 +269,7 @@ endif
   open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
 #endif
  else
-#ifndef pp_makedll
   write(6,*)'The zone file name, ',trim(zonefilename),' does not exist'
-#endif
   error=1
   return
 endif
@@ -361,9 +351,7 @@ endif
   open(unit=lu24,file=trim(xyzfilename),form="unformatted",action="read")
 #endif
  else
-#ifndef pp_makedll
   write(6,*)'The xyz file name, ',trim(xyzfilename),' does not exist'
-#endif
   error=1
   return
 endif
@@ -490,9 +478,7 @@ endif
   open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read")
 #endif
  else
-#ifndef pp_makedll
   write(6,*)'The boundary file name, ',trim(patchfilename),' does not exist'
-#endif
   error=1
   return
 endif
@@ -589,9 +575,7 @@ if(exists)then
   open(unit=lu10,file=trim(partfilename),form="formatted",action="read")
 #endif
  else
-#ifndef pp_makedll
   write(6,*)'The particle file name, ',trim(partfilename),' does not exist'
-#endif
   error=-1
 endif
 do i = 1, 5
@@ -654,9 +638,7 @@ endif
   open(unit=lu10,file=trim(partfilename),form="unformatted",action="read")
 #endif
  else
-#ifndef pp_makedll
   write(6,*)'The particle file name, ',trim(partfilename),' does not exist'
-#endif
   error=-1
 endif
 read(lu10,iostat=error) xx,xx,yy,ii,mxframepoints
@@ -666,14 +648,6 @@ if(error.ne.0)return
 
 read(lu10,iostat=error) ibar1,jbar1,kbar1
 if(error.ne.0)return
-if(ibar1.ne.ibar.or.jbar1.ne.jbar.or.kbar1.ne.kbar)then
-!#ifndef pp_makedll
-!  write(6,*)'*** error: grid dimension not consistent'
-!  write(6,*)'check file grid specs',ibar,jbar,kbar
-!  write(6,*)' part file grid specs',ibar1,jbar1,kbar1
-!#endif
-!  error=-2
-endif
 
 read(lu10,iostat=error) (xx,i=0,ibar1),(xx,j=0,jbar1),(xx,k=0,kbar1)
 if(error.ne.0)return
@@ -833,9 +807,6 @@ endif
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
 #endif
  else
-#ifndef pp_makedll
-  if(trim(slicefilename).ne."")write(6,*)'The slice file ',trim(slicefilename),' does not exist'
-#endif
   error=1
   return
 endif
@@ -916,9 +887,6 @@ endif
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
 #endif
  else
-#ifndef pp_makedll
-  if(trim(slicefilename).ne."")write(6,*)'The slice file ',trim(slicefilename),' does not exist'
-#endif
   error=1
   return
 endif
@@ -975,4 +943,3 @@ close(lu11)
 return
 
 end subroutine getslicesizes
-#endif
