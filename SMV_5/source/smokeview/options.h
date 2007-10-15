@@ -60,6 +60,7 @@
 #define pp_THREADS2
 
 #ifdef pp_ALPHA
+#define pp_SHOWLIGHT
 #define pp_COLOR
 #define pp_TOUR
 #define pp_LIGHT

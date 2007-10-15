@@ -7884,7 +7884,7 @@ void writeini(int flag){
 
   fprintf(fileout,"\n LIGHTING\n");
   fprintf(fileout,"--------\n\n");
-#ifdef pp_NOSHOW
+#ifdef pp_SHOWLIGHT
   fprintf(fileout,"SHOWLIGHT0\n");
   fprintf(fileout," %i\n",visLIGHT0);
   fprintf(fileout,"SHOWLIGHT1\n");

@@ -3311,8 +3311,8 @@ void usage(char **argv){
 #ifdef pp_noappend
     printf(", pp_noappend");
 #endif
-#ifdef pp_NOSHOW
-    printf(", pp_NOSHOW");
+#ifdef pp_SHOWLIGHT
+    printf(", pp_SHOWLIGHT");
 #endif
 #ifdef pp_OSX
     printf(", pp_OSX");

@@ -319,11 +319,24 @@ void LightingMenu(int value){
     ASSERTFLAG(visLIGHT0);
     ASSERTFLAG(visLIGHT1);
     switch (value){
-      case 1: visLIGHT0 = 1 - visLIGHT0; break;
-      case 2: visLIGHT1 = 1 - visLIGHT1; break;
-      case 3: visLIGHT1 = 1 - visLIGHT1; visLIGHT0 = 1 - visLIGHT0; break;
-      case 4: visLIGHT0=1; visLIGHT1=1; break;
-      case 5: visLIGHT0=0; visLIGHT1=0; break;
+      case 1: 
+        visLIGHT0 = 1 - visLIGHT0; 
+        break;
+      case 2: 
+        visLIGHT1 = 1 - visLIGHT1; 
+        break;
+      case 3: 
+        visLIGHT1 = 1 - visLIGHT1; 
+        visLIGHT0 = 1 - visLIGHT0; 
+        break;
+      case 4: 
+        visLIGHT0=1; 
+        visLIGHT1=1; 
+        break;
+      case 5: 
+        visLIGHT0=0; 
+        visLIGHT1=0; 
+        break;
       default:
         ASSERT(FFALSE);
         break;
@@ -5082,7 +5095,7 @@ static int textureshowmenu=0;
   CREATEMENU(optionmenu,OptionMenu);
   glutAddSubMenu("Shades",shademenu);
   if(nunitclasses>0)glutAddSubMenu("Units",unitsmenu);
-#ifdef _DEBUG
+#ifdef pp_SHOWLIGHT
   if(showlightmenu==1)glutAddSubMenu("Lighting",lightingmenu);
 #endif
   glutAddSubMenu("Rotation",rotatetypemenu);
