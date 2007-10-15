@@ -1,3 +1,7 @@
+% $Date$
+% $Revision$
+% $Author$
+
 \documentclass[11pt,twoside]{book}
 \usepackage{times,mathptm,multirow,fancyvrb,color}
 %\usepackage{picins}
@@ -92,7 +96,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \vspace{1in}
 
 \Huge \flushright{Smokeview (Version 5) Technical Reference Guide}
-\flushright{(Draft: August 10, 2007)}
+\flushright{(Draft: \today)}
 
 \vspace{.5in}
 \normalsize
@@ -100,7 +104,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 
 \vfill
 
-\includegraphics[width=\textwidth]{nistlogo_1line}
+\flushright{\includegraphics[width=2.in]{figures/nistident_flright_300ppi}}
 
 \end{minipage}
 
@@ -129,7 +133,8 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 
 \vspace{.25in}
 
-\flushright{September 2007}
+\flushright{November 2007\\
+SVN Repository~$Revision$}
 
 \vfill
 
@@ -143,7 +148,8 @@ Technology Administration \\
 {\em Robert Cresanti, Under Secretary for Technology}  \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em William A. Jeffrey, Director} }
+{\em James M. Turner, Acting Director} }
+
 
 
 \end{minipage}
@@ -174,7 +180,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1072\\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1072, 85 pages (September 2007) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1072, 85 pages (November 2007) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -267,7 +273,7 @@ intended purpose.
 %---------------------------------------------------------------------------------
 %------------------------ Introduction -------------------------------------------
 %---------------------------------------------------------------------------------
-\part{Basic Visualization Conceptas}
+\part{Basic Visualization Concepts}
 \chapter{Introduction}
 \section{Basic Description of Smokeview}
 \Smokeview\ is a software tool designed to visualize numerical
@@ -316,9 +322,9 @@ Guide\cite{FDS_Users_Guide_5}.
 
 \section{Version History}
 
-Beginning in the early 1980s and continuing into the 1990s, Howard Baum and Ron Rehm developed the basic flow solver that evolved into the Fire Dynamics Simulator which was publicly released in 2000.  Their solution technique, known as Large Eddy Simulation or LES, captures numerically very complicated fire plume dynamics.  Unfortunately, without an effective way to view the calculation results, we would not be able to appreciate the power of the.  Early attempts to visualize the calculation results consisted of nothing more than little particles swirling about in a box.  This was useful to the model developers, but hardly to anyone else.  It just did not look like a fire.
+Beginning in the early 1980s and continuing into the 1990s, Howard Baum and Ron Rehm developed the basic flow solver that evolved into the Fire Dynamics Simulator which was publicly released in 2000.  Their solution technique, known as Large Eddy Simulation or LES, captures numerically very complicated fire plume dynamics.  Unfortunately, without an effective way to view the calculation results, we would not be able to appreciate the power of the methodology.  Early attempts to visualize the calculation results consisted of nothing more than little particles swirling about in a box.  This was useful to the model developers, but hardly to anyone else.  It just did not look like a fire.
 
-Smokeview was written to address this problem.  
+Smokeview was written to address this problem.
 Version 1 of Smokeview was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, and version 4 in July 2004.
 The present version of Smokeview is 5, officially released in September, 2007. Changes in
 the version number correspond to major changes in features. For minor changes and bug fixes, incremental
@@ -345,7 +351,60 @@ More details on OpenGL may be found
 in the {\em Red book}\cite{OpenGLRed} or SuperBible\cite{SUPERBIBLE}.
 
 
-\chapter{Coordinate System}
+\chapter{Objects} The fundamental object in OpenGL is a vertex.
+An OpenGL vertex has the same meaning as in geometry, a location.
+Smokeview defines vertex locations in terms of a right handed coordinate system illustrated in Figure \ref{figrighthand} with the
+x axis pointing to the right, the y axis pointing to the back and the z axis pointing up.
+Vertices are specified in Smokeview using either {\bf glVertex3f(x,y,z)}\ or {\bf glVertex3fv(xv)}.  The suffix {\em 3f}\ is used to indicate that 3 scalar values are passed.
+The suffix {\em 3fv}\ is used to indicate that a pointer to a vertex location (or equivalently a memory address) is passed.
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=3.0in]{figures/righthandrule}
+\end{center}
+\caption{Right hand rule used by Smokeview for specifying a 3D vertex locations.}
+\label{figrighthand}
+\end{figure}
+
+To illustrate, suppose that {\tt xyz}\ is an array of size 3 then one could either use the OpenGl call
+\begin{verbatim}
+glVertex3fv(xyz);
+\end{verbatim}
+or
+\begin{verbatim}
+glVertex3f(xyz[0],xyz[1],xyz[2]);
+\end{verbatim}
+to represent the vertex location.
+
+Groups of vertices may be {\em built up}\ to form more complex geometric objects.
+Several objects are illustrated in Figure \ref{figshapes}.  They are formed by grouping vertices together
+and surrounding them with calls to {\tt glBegin()}\ and {\tt
+glEnd()}. To draw a shaded triangle one would use
+\begin{verbatim}
+glBegin(GL_TRIANGLE);
+glVertex3f(0.0,0.0,0.0);
+glVertex3f(0.0,1.0,0.0);
+glVertex3f(1.0,0.0,0.0);
+glEnd();
+\end{verbatim}
+To draw points or to connect the vertices with lines (also shown
+in Figure \ref{figshapes}) one would replace {\tt GL\_TRIANGLE}\
+with {\tt GL\_POINTS}\ or {\tt GL\_LINES}\ respectively.
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=6.0in]{figures/shapes}
+\end{center}
+\caption[Points, lines and a shaded triangle drawn using OpenGL.]
+{Points, lines and a shaded triangle drawn using OpenGL. Vertices
+are defined using {\tt glVertex*} and the particular shapes are
+generated by passing {\tt GL\_POINTS}, {\tt GL\_LINES}, and {\tt
+GL\_TRIANGLE}\ to {\tt glBegin()} } \label{figshapes}
+\end{figure}
+
+The triangles is the fundamental construct Smokeview uses to
+visualize objects.  To be useful though, these objects need to be
+colored, moved and projected onto a 2D terminal screen. These
+topics are discussed in the following sections.
+
 \chapter{Setting the Scene}
 \begin{figure}[t]
 \begin{center}
@@ -417,46 +476,6 @@ arbitrarily oriented planes.
 
 
 
-\chapter{Objects} The fundamental object in OpenGL is a vertex.
-An OpenGL vertex has the same meaning as in geometry, a three
-dimensional location. A vertex is specified using {\bf
-glVertex*()}\ where in Smokeview * is usually 3f meaning that
-three floating point scalar values are specified. Smokeview also
-uses {\bf 3fv}, allowing one to pass a pointer to data ({\em
-i.e.}\ a vector) which is more efficient. To specify the vertex
-$(0.0,1.0,2.0)$, one would use (in C)
-\begin{verbatim}
-glVertex3f(0.0,1.0,2.0);
-\end{verbatim}
-Various geometric objects, as illustrated in Figure
-\ref{figshapes}, may be specified by grouping vertices together
-and surrounding them with calls to {\tt glBegin()}\ and {\tt
-glEnd()}. To draw a shaded triangle one would use
-\begin{verbatim}
-glBegin(GL_TRIANGLE);
-glVertex3f(0.0,0.0,0.0);
-glVertex3f(0.0,1.0,0.0);
-glVertex3f(1.0,0.0,0.0);
-glEnd();
-\end{verbatim}
-To draw points or to connect the vertices with lines (also shown
-in Figure \ref{figshapes}) one would replace {\tt GL\_TRIANGLE}\
-with {\tt GL\_POINTS}\ or {\tt GL\_LINES}\ respectively.
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=6.0in]{figures/shapes}
-\end{center}
-\caption[Points, lines and a shaded triangle drawn using OpenGL.]
-{Points, lines and a shaded triangle drawn using OpenGL. Vertices
-are defined using {\tt glVertex*} and the particular shapes are
-generated by passing {\tt GL\_POINTS}, {\tt GL\_LINES}, and {\tt
-GL\_TRIANGLE}\ to {\tt glBegin()} } \label{figshapes}
-\end{figure}
-
-The triangles is the fundamental construct Smokeview uses to
-visualize objects.  To be useful though, these objects need to be
-colored, moved and projected onto a 2D terminal screen. These
-topics are discussed in the following sections.
 
 \chapter{Color and Blending}
 Besides location, a vertex also has the attribute of color. Color
@@ -477,7 +496,7 @@ glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 Choosing an alpha less than one allows one to
 {\em see through}\ an object. Smokeview uses this feature to implement
 partially transparent blockages and 2D animated slices.
-Slice files as illustrated in Figure
+Slice files illustrated in Figure
 \ref{figtransparent}, are drawn using transparency. Smokeview also implements
 data chopping or hiding using blending or transparency.  Data to be hidden is assigned an alpha
 value of 0.0 causing it to be completely transparent.
@@ -497,7 +516,7 @@ any portion of the scene behind the slice file is hidden. }
 \label{figtransparent}
 \end{figure}
 
-Complications arise because this blending model is not commuattive.The order objects are drawn
+Complications arise because this blending model is not commutative.  The order objects are drawn
 is significant.
 To see this, let $B_0$ denote the initial background color and let ($c_1,\alpha_1)$
 and $(c_2,\alpha_2)$ be a color, opacity pair for two fragments.  Applying ($c_1,\alpha_1)$
@@ -734,7 +753,7 @@ phenomena.  The first step in visualizing data quantitatively is mapping data to
 Several methods Smokeview uses to visualize data quantitatively involves converting data values to color.
 The basic procedure is to
 \begin{enumerate}
-\item obtain minimum and maxium data bounds to use in scaling, either through calculation or specification by the user,
+\item obtain minimum and maximum data bounds to use in scaling, either through calculation or specification by the user,
 \item map data onto integer indices between 0 to 255 ,
 \item obtain colors using indices computed in step 2 to index into a color table (a numerical representation of the color bar)
 \item display colors using 1D texture maps (or {\tt glColorxx}\ in the case of particles).
@@ -1104,7 +1123,7 @@ before decimation\\
 after decimation
 \end{tabular}
 \end{center}
-\caption[Example of triangle decimation.]{Example of triangle decimation.  Triangle with red dots is removed.  Region is re-triangulated by replacing any ediges connected to a red dot with teh blue dot (average position of removed red dot.}
+\caption[Example of triangle decimation.]{Example of triangle decimation.  Triangle with red dots is removed.  Region is re-triangulated by replacing any edges connected to a red dot with the blue dot (average position of removed red dot.}
 \label{figdecimate}%
 \end{figure}
 
@@ -1314,7 +1333,7 @@ energy. } \label{figplume}
 
 \noindent This process is repeated for each smoke plane. Figure
 \ref{figsmoke3d} illustrates this process showing smoke and fire
-in a townhousekitchen fire.
+in a townhouse kitchen fire.
 
 
 The visualization is performed by displaying a series of partially
