@@ -1029,7 +1029,11 @@ void initvars1(void){
   xyz_blockage_dir=0;
   which_face=2;
   showfontmenu=1;
+#ifdef pp_SHOWLIGHT
+  showlightmenu=1;
+#else
   showlightmenu=0;
+#endif
 
   VECFRACTION=1.0;
   vecfactor=0.25f;
