@@ -525,6 +525,7 @@ void update_partvis(int first_frame,part5data *datacopy, int nclasses){
 int get_tagindex(part5data *data, int tagval){
   int *returnval;
 
+  ASSERT(data->sort_tags!=NULL);
   returnval=bsearch(&tagval,data->sort_tags,data->npoints,2*sizeof(int),tagscompare);
   if(returnval==NULL)return -1;
   return *(returnval+1);
@@ -713,9 +714,9 @@ void getpart5header(particle *parti, int partframestep){
           NewMemory((void **)&datacopy->sort_tags,2*n*sizeof(int));
           NewMemory((void **)&datacopy->vis_part,n*sizeof(unsigned char));
           ntypes = datacopy->partclassbase->ntypes;
-          if(ntypes>2){
-            NewMemory((void **)&datacopy->rvals,(ntypes-2)*n*sizeof(float));
-            NewMemory((void **)&datacopy->irvals,(ntypes-2)*n*sizeof(unsigned char));
+          if(ntypes>0){ //xxx need to check this fix (was ntypes>2)
+            NewMemory((void **)&datacopy->rvals,(ntypes-0)*n*sizeof(float));  //xxx need to check this fix
+            NewMemory((void **)&datacopy->irvals,(ntypes-0)*n*sizeof(unsigned char)); //xxx need to check this fix
           }
         }
         if(n>0){
@@ -1262,6 +1263,7 @@ void drawPart5(const particle *parti){
   ipframe=parti->iframe;
   nclasses = parti->nclasses;
   datacopy = parti->data5+nclasses*ipframe;
+  CheckMemory;
   if(part5show==1){
     if(streak5show==0||(streak5show==1&&showstreakhead==1)){
       glPointSize(partpointsize);
@@ -1381,8 +1383,6 @@ void drawPart5(const particle *parti){
         glColor4fv(datacopy->partclassbase->rgb);
         glBegin(GL_POINTS);
         for(j=0;j<datacopy->npoints;j++){
-          //int tagval;
-          //tagval=datacopy->tags[j];
           if(vis[j]==0)continue;
           glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
         }
@@ -1410,7 +1410,7 @@ void drawPart5(const particle *parti){
           if(ipframe-k<0)break;
           datapast = parti->data5+nclasses*(ipframe-k)+i;
           jj = get_tagindex(datapast,tagval);
-          if(jj<0)break;
+          if(jj<0||datapast->irvals==NULL)break;
           sxx = datapast->sx;
           syy = datapast->sy;
           szz = datapast->sz;
@@ -1421,7 +1421,6 @@ void drawPart5(const particle *parti){
         }
         glEnd();
       }
-
     }
 
     datacopy++;
