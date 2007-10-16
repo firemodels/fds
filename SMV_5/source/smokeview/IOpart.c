@@ -525,6 +525,7 @@ void update_partvis(int first_frame,part5data *datacopy, int nclasses){
 int get_tagindex(part5data *data, int tagval){
   int *returnval;
 
+  if(data->npoints==0)return 1;
   ASSERT(data->sort_tags!=NULL);
   returnval=bsearch(&tagval,data->sort_tags,data->npoints,2*sizeof(int),tagscompare);
   if(returnval==NULL)return -1;
@@ -696,7 +697,7 @@ void getpart5header(particle *parti, int partframestep){
       }
       sscanf(buffer,"%f",&datacopy->time);
       for(j=0;j<parti->nclasses;j++){
-        int n,ntypes;
+        int npoints ,ntypes;
 
         part5class *partclassj;
 
@@ -707,22 +708,20 @@ void getpart5header(particle *parti, int partframestep){
           break;
         }
         sscanf(buffer,"%i",&datacopy->npoints);
-        n=datacopy->npoints;
-        if(n>partclassj->maxpoints)partclassj->maxpoints=n;
-        if(n>0){
-          NewMemory((void **)&datacopy->tags,n*sizeof(int));
-          NewMemory((void **)&datacopy->sort_tags,2*n*sizeof(int));
-          NewMemory((void **)&datacopy->vis_part,n*sizeof(unsigned char));
+        npoints=datacopy->npoints;
+        if(npoints>partclassj->maxpoints)partclassj->maxpoints=npoints;
+        if(npoints>0){
+          NewMemory((void **)&datacopy->tags,npoints*sizeof(int));
+          NewMemory((void **)&datacopy->sort_tags,2*npoints*sizeof(int));
+          NewMemory((void **)&datacopy->vis_part,npoints*sizeof(unsigned char));
+          NewMemory((void **)&datacopy->sx,npoints*sizeof(short));
+          NewMemory((void **)&datacopy->sy,npoints*sizeof(short));
+          NewMemory((void **)&datacopy->sz,npoints*sizeof(short));
           ntypes = datacopy->partclassbase->ntypes;
           if(ntypes>0){ //xxx need to check this fix (was ntypes>2)
-            NewMemory((void **)&datacopy->rvals,(ntypes-0)*n*sizeof(float));  //xxx need to check this fix
-            NewMemory((void **)&datacopy->irvals,(ntypes-0)*n*sizeof(unsigned char)); //xxx need to check this fix
+            NewMemory((void **)&datacopy->rvals,(ntypes-0)*npoints*sizeof(float));  //xxx need to check this fix
+            NewMemory((void **)&datacopy->irvals,(ntypes-0)*npoints*sizeof(unsigned char)); //xxx need to check this fix
           }
-        }
-        if(n>0){
-          NewMemory((void **)&datacopy->sx,n*sizeof(short));
-          NewMemory((void **)&datacopy->sy,n*sizeof(short));
-          NewMemory((void **)&datacopy->sz,n*sizeof(short));
         }
         datacopy++;
       }
