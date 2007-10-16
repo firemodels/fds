@@ -237,11 +237,20 @@ extern "C" void glui_bounds_setup(int main_window){
       }
 
       glui_bounds->add_column_to_panel(panel_part,false);
-      PART_CB(FILETYPEINDEX);/*
+
+      {
+        part5prop *propi;
+
+        propi = part5propinfo;
+        setpartmin=propi->setvalmin;
+        setpartmax=propi->setvalmax;
+        setpartchopmin=propi->setchopmin;
+        setpartchopmax=propi->setchopmax;
+      }
+
+      PART_CB(FILETYPEINDEX);
       PART_CB(SETVALMIN);
       PART_CB(SETVALMAX);
-      PART_CB(VALMIN);
-      PART_CB(VALMAX);*/
     }
 
 
