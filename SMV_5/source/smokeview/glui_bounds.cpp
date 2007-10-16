@@ -1044,6 +1044,7 @@ void PART_CB(int var){
       int prop_index_SAVE;
 
      prop_index_SAVE=prop_index;
+     PART_CB(FILETYPEINDEX);
      if(con_part_min!=NULL&&setpartmin==SET_MIN)PART_CB(SETVALMIN);
      if(con_part_max!=NULL&&setpartmax==SET_MAX)PART_CB(SETVALMAX);
      ParticleMenu(0);
