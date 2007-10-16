@@ -406,28 +406,25 @@ colored, moved and projected onto a 2D terminal screen. These
 topics are discussed in the following sections.
 
 \chapter{Setting the Scene}
-\begin{figure}[t]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=5.5in]{figures/figviewport}\\
-screen viewport $\leftarrow$ 3D scene\\
-\includegraphics[width=5.5in]{figures/figviewport2}\\
-Smokeview viewports\\
-\end{tabular}
-\end{center}
-\caption{Example view frustum used to convert 3D scenes to 2D
-screen viewports.}
- \label{figviewports}
-\end{figure}
-\section{Projections}
-The next step in the drawing process is to flatten or project the
-3D scene onto the 2D terminal screen where viewing occurs. A
+\section{Viewports}
+A
 viewport is the particular portion of the screen where the drawing
 occurs.  Smokeview defines separate viewports for drawing the
 title, time bar, color bar and the 3D scene.  Figure
 \ref{figviewports} illustrates the relationship between the 3D
 scene and the 2D screen giving several viewport examples used by
-Smokeview. Two common schemes for projecting geometry from 3D to
+Smokeview. 
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=4.0in]{figures/figviewport2}
+\end{center}
+\caption{Examples of several viewports in a typical Smokeview scene.}
+ \label{figviewports}
+\end{figure}
+
+\section{Projections}
+The next step in the drawing process is to flatten or project the
+3D scene onto the 2D terminal screen where viewing occurs. Two common schemes for projecting geometry from 3D to
 2D  are orthographic and perspective. An orthographic projection
 is size preserving. Objects in the foreground take up the same
 amount of screen space as objects in the background. A perspective
@@ -461,18 +458,25 @@ be activated in Smokeview (using the clipping dialog box) to hide
 geometry making it easier to see interior objects or
 visualizations.  OpenGL allows one to define clipping planes along
 arbitrarily oriented planes.
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=4.0in]{figures/figviewport}
+\end{center}
+\caption{Example view frustum used to convert 3D scenes to 2D
+screen viewport.}
+ \label{figfrustum}
+\end{figure}
 
 \section{Stereo Projections}
 
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=6.0in]{figures/fig_stereo}
+\includegraphics[width=4.0in]{figures/fig_stereo}
 \end{center}
 \caption{View frustums for stereo pairs.}
  \label{figstereo}
 \end{figure}
 
-\section{Viewports}
 
 
 
