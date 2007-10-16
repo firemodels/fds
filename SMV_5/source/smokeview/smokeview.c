@@ -3243,7 +3243,12 @@ void version(void){
     }
     printf("Compile Date: %s\n",__DATE__);
 #ifdef WIN32
-    printf("Platform: WIN32\n");
+    printf("Platform: WIN32 ");
+#ifdef pp_WIN_INTEL
+    printf(" (Intel C/C++)\n");
+#else
+    printf(" (MSVS C/C++)\n");
+#endif
 #endif
 #ifdef pp_OSX
     printf("Platform: OS X\n");
