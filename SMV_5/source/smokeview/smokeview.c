@@ -3298,9 +3298,6 @@ void usage(char **argv){
 #ifdef pp_COMPRESS
     printf(", pp_COMPRESS");
 #endif
-#ifdef pp_cvf
-    printf(", pp_cvf");
-#endif
 #ifdef pp_DRAWISO
     printf(", pp_DRAWISO");
 #endif
