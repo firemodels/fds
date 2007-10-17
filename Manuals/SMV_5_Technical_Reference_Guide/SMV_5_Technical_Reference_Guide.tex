@@ -326,7 +326,7 @@ Beginning in the early 1980s and continuing into the 1990s, Howard Baum and Ron 
 
 Smokeview was written to address this problem.
 Version 1 of Smokeview was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, and version 4 in July 2004.
-The present version of Smokeview is 5, officially released in September, 2007. Changes in
+The present version of Smokeview is 5, officially released in September 2007. Changes in
 the version number correspond to major changes in features. For minor changes and bug fixes, incremental
 versions are released, referenced according to fractions of the integer
 version number. For example, version 5.1.4 would be a maintenance release of feature
@@ -347,16 +347,12 @@ uses various tools and techniques such as color, lighting, motion and transforma
 
 These basic building blocks are used by each of the techniques discussed later for visualizing data, in particular, smoke visualization.  Smoke and other attributes of the fire is visualized using both quantitative and realistic techniques.  Realistic display of data refers to the intent of displaying data in a form as it would actually appear.
 These topics will be discussed here in the context of FDS and Smokeview.
-More details on OpenGL may be found
-in the {\em Red book}\cite{OpenGLRed} or SuperBible\cite{SUPERBIBLE}.
+More details on OpenGL may be found in Martz\cite{martz:06}, 
+the {\em Red book}\cite{OpenGLRed} or the SuperBible\cite{SUPERBIBLE}.
 
 
-\chapter{Objects} The fundamental object in OpenGL is a vertex.
-An OpenGL vertex has the same meaning as in geometry, a location.
-Smokeview defines vertex locations in terms of a right handed coordinate system illustrated in Figure \ref{figrighthand} with the
-x axis pointing to the right, the y axis pointing to the back and the z axis pointing up.
-Vertices are specified in Smokeview using either {\bf glVertex3f(x,y,z)}\ or {\bf glVertex3fv(xv)}.  The suffix {\em 3f}\ is used to indicate that 3 scalar values are passed.
-The suffix {\em 3fv}\ is used to indicate that a pointer to a vertex location (or equivalently a memory address) is passed.
+\chapter{Objects} Smokeview defines object locations in terms of a right handed coordinate system with the x axis pointing to the right, the y axis pointing to the back and the z axis pointing up (see Figure \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents {\em etc.}\ are transformed internally within Smokeview to lie between 0.0 and 1.0.
+These objects are drawn by grouping appropriately {\em OpenGL} vertices.
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=3.0in]{figures/righthandrule}
@@ -365,12 +361,12 @@ The suffix {\em 3fv}\ is used to indicate that a pointer to a vertex location (o
 \label{figrighthand}
 \end{figure}
 
-To illustrate, suppose that {\tt xyz}\ is an array of size 3 then one could either use the OpenGl call
+An OpenGL vertex has the same meaning as in geometry, a location.
+Vertices are specified in Smokeview using either {\bf glVertex3f(x,y,z)}\ or {\bf glVertex3fv(xv)}.  The suffix for glVertex indicates the number and type of data value to be passed.  For example, {\em 3f}\ is used when passing 3 scalar floating point.  The suffix {\em 3fv}\ is used to when passing a pointer (or equivalently a memory address) to 3 floating point  values.
+
+To illustrate, suppose that {\tt xyz}\ is a floating point array of size 3 containing a 3D coordinate.  One could then use either of the two OpenGL calls:
 \begin{verbatim}
 glVertex3fv(xyz);
-\end{verbatim}
-or
-\begin{verbatim}
 glVertex3f(xyz[0],xyz[1],xyz[2]);
 \end{verbatim}
 to represent the vertex location.
@@ -378,7 +374,8 @@ to represent the vertex location.
 Groups of vertices may be {\em built up}\ to form more complex geometric objects.
 Several objects are illustrated in Figure \ref{figshapes}.  They are formed by grouping vertices together
 and surrounding them with calls to {\tt glBegin()}\ and {\tt
-glEnd()}. To draw a shaded triangle one would use
+glEnd()}. The argument passed to {\tt glBegin()}\ determines which higher level object is drawn.
+To draw a shaded triangle one would use
 \begin{verbatim}
 glBegin(GL_TRIANGLE);
 glVertex3f(0.0,0.0,0.0);
@@ -386,8 +383,8 @@ glVertex3f(0.0,1.0,0.0);
 glVertex3f(1.0,0.0,0.0);
 glEnd();
 \end{verbatim}
-To draw points or to connect the vertices with lines (also shown
-in Figure \ref{figshapes}) one would replace {\tt GL\_TRIANGLE}\
+Similarly, to draw points or to connect the vertices with lines (also shown
+in Figure \ref{figshapes}) one would replace {\tt GL\_TRIANGLE}\ above 
 with {\tt GL\_POINTS}\ or {\tt GL\_LINES}\ respectively.
 \begin{figure}[t]
 \begin{center}
@@ -406,6 +403,8 @@ colored, moved and projected onto a 2D terminal screen. These
 topics are discussed in the following sections.
 
 \chapter{Setting the Scene}
+3D objects must be flattened or converted to 2D in order to display them on a computer screen.  This occurs in two steps.  The first step is called a projection.  Smokeview uses three kinds of projections, perspective, orthographic and stereo.  The second step takes whatever projection that has been applied and maps the resulting data onto a subset of the computer screen.  This subset is called a viewport.  Viewports are discussed first.
+
 \section{Viewports}
 A
 viewport is the particular portion of the screen where the drawing
@@ -413,7 +412,7 @@ occurs.  Smokeview defines separate viewports for drawing the
 title, time bar, color bar and the 3D scene.  Figure
 \ref{figviewports} illustrates the relationship between the 3D
 scene and the 2D screen giving several viewport examples used by
-Smokeview. 
+Smokeview.
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=4.0in]{figures/figviewport2}
@@ -421,6 +420,14 @@ Smokeview.
 \caption{Examples of several viewports in a typical Smokeview scene.}
  \label{figviewports}
 \end{figure}
+
+Smokeview uses {\tt glViewport()}\ to establish a window viewport.  In particular, the call
+\begin{verbatim}
+glViewport(left,down,width,height);
+\end{verbatim}
+is used to setup the portion of the screen where 3D drawing occurs where {\tt left}\
+and {\tt down}\ are the bottom left screen coordinates of the viewport and {\tt width}\
+and {\tt height}\ are the width and height of the viewport.
 
 \section{Projections}
 The next step in the drawing process is to flatten or project the
@@ -448,7 +455,7 @@ and {\tt glOrtho}\ to perform orthographic projections
         (double)fnear,(double)ffar);
 \end{verbatim}
 
-where {\tt fleft}, {\tt fright}, {\tt fdown}, {\tt fup}, {\tt
+\noindent where {\tt fleft}, {\tt fright}, {\tt fdown}, {\tt fup}, {\tt
 fnear}, {\tt ffar} are six clipping planes bounding the view
 frustum (truncated pyramid) for the perspective projection or the
 box in the orthographic projection.  Drawing does not occur
@@ -469,9 +476,12 @@ screen viewport.}
 
 \section{Stereo Projections}
 
+A stereo projection is simply a perspective applied twice making adjustments to simulate the viewpoint as seen for an observer's left and right eye.  The two resulting versions of the 
+scene can then be drawn in succession using shuttered glasses synched with the monitor to render the stereo effect.  Alternatively, left and right versions of the scene may be drawn at the same time using stereo viewers to reveal the stereo effect.  Figure \ref{figstereo} illustrates the two view frustums used for a stereo projection.
+
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=4.0in]{figures/fig_stereo}
+\includegraphics[width=3.0in]{figures/fig_stereo}
 \end{center}
 \caption{View frustums for stereo pairs.}
  \label{figstereo}
@@ -481,18 +491,70 @@ screen viewport.}
 
 
 
-\chapter{Color and Blending}
-Besides location, a vertex also has the attribute of color. Color
-in OpenGL consists of four components, red, green, blue, and
-alpha and if stored in this order is denoted RGBA. Each component ranges from 0.0 to 1.0. The alpha component
-represents opaqueness, 0.0 being completely transparent and 1.0
-being completely opaque. Smokeview uses the alpha parameter to
-blend the currently drawn object with the background where the
-background is the accumulation of all objects drawn to that point or
+\chapter{Color, Shading and Blending}
+\section{Color}
+Color
+in OpenGL consists of four not three components.  Besides the expected components
+of red, green and blue, OpenGL uses the {\em alpha}\ component to represent opaqueness.
+Each component ranges from 0.0 to 1.0. For the alpha component
+0.0 indicates a completely transparent color while 1.0
+represents a color that is completely opaque. 
+
+Colors are specified using the {\tt glColorXXX()}\ call.  As with {\tt glVertexXXX()}\ a suffix is used to indicate the number and type of argument passed to {\tt glColorXXX()}.  For the most part, Smokeview uses {\tt glColor3f}, {\tt glColor4f}, {\tt glColor3fv} and {\tt glColor4fv}\ to specify colors.  As before, the 3 or 4 indicates the number of data values used.  If 3 is specified in the call then it is tacitly assumed that the fourth {\tt alpha}\ component has value 1.0.  The {\tt f}\ parameter indicates that floating point values are used and the {\tt v}\ parameter indicates that the variable passed is a pointer to the actual data to be referenced.
+
+\section{Shading} OpenGL uses two shading models for drawing
+objects, flat and Gouraud.  These models are specified
+using {\tt glShadeModel(GL\_FLAT)}\ and {\tt glShadeModel(gl\_SMOOTH)}\
+respectively.
+Gouraud shading is also
+referred to as smooth shading.  Flat shading assumes that objects
+are drawn in an environment with uniform lighting - light
+surrounds an object equally in all directions. Smooth lighting on
+the other hand assumes that light comes from a particular
+direction.  This causes subtle changes in color to occur across an
+object's surface. Figure \ref{figlighting} shows examples of FDS
+blockages (the standard townhouse scenario) drawn using flat and
+smooth shading. Flat shading diminishes the three dimensionality of
+the scene.
+
+A normal vector, another vertex attribute, is required to
+implement a smooth lighting scheme. A normal vector points in a
+direction perpendicular to the surface at the vertex. OpenGL uses
+this information to estimate the fraction of light from the light
+source reflected off of the given surface and intercepted by the
+observer.  This is similar to a configuration factor calculation
+performed in fire modelling.  The amount of light perceived by the
+observer depends on the relative orientation of the light source,
+the object (as specified by the location and normal vector of each
+vertex) and the observer.
+
+For planar surfaces, the same normal vector is applied to each
+vertex defining the surface. For curved surfaces, normal vectors
+are determined using an average of the normal directions of faces
+surrounding the vertex.  If normals are not averaged then the
+discontinuity in slope going from one face or triangle to another
+will result in a faceted or gem-like appearance.  Figure
+\ref{fignormals} shows examples of drawing using non-averaged and
+averaged normals.
+
+The Gouraud method for shading then determines a vertex color
+using the angle between the light source direction and the vertex
+normal vector. The color of the object being shaded is then
+determined by interpolating these colors.
+
+Smokeview uses smooth shading or lighting to draw blockages and
+iso-surfaces. Particle, slice and boundary files are drawn without
+shading as are 3D smoke and Plot3D files.
+
+
+\section{Blending}
+Smokeview draws objects transparently by combining or blending the color of the object currently being with the current version of the background buffer.\footnote{The background buffer is updated as each object is drawn.}
+The blending fraction is determined from the alpha parameter of the object currently being drawn.
+A small alpha results in a small contribution from the currently drawn object while a large alpha results in a large contribution.  More precisely:
 \begin{eqnarray*}
-\noindent\mbox{updated background} = \alpha\times \mbox{fragment} + (1-\alpha)\times \mbox{original background}
+\noindent\mbox{updated background color} = \alpha\times \mbox{fragment color} + (1-\alpha)\times \mbox{original background color}
 \end{eqnarray*}
-This blending model is implemented in Smokeview using
+This particular blending model is the most common (there are others) and is implemented in Smokeview using
 \begin{verbatim}
 glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 \end{verbatim}
@@ -593,49 +655,6 @@ gem-like appearance. } \label{fignormals}
 
 
 
-\chapter{Shading Models} OpenGL uses two shading models for drawing
-objects, flat and Gouraud.  These models are specified
-using {\tt glShadeModel(GL\_FLAT)}\ and {\tt glShadeModel(gl\_SMOOTH)}\
-respectively.
-Gouraud shading is also
-referred to as smooth shading.  Flat shading assumes that objects
-are drawn in an environment with uniform lighting - light
-surrounds an object equally in all directions. Smooth lighting on
-the other hand assumes that light comes from a particular
-direction.  This causes subtle changes in color to occur across an
-object's surface. Figure \ref{figlighting} shows examples of FDS
-blockages (the standard townhouse scenario) drawn using flat and
-smooth shading. Flat shading diminishes the three dimensionality of
-the scene.
-
-A normal vector, another vertex attribute, is required to
-implement a smooth lighting scheme. A normal vector points in a
-direction perpendicular to the surface at the vertex. OpenGL uses
-this information to estimate the fraction of light from the light
-source reflected off of the given surface and intercepted by the
-observer.  This is similar to a configuration factor calculation
-performed in fire modelling.  The amount of light perceived by the
-observer depends on the relative orientation of the light source,
-the object (as specified by the location and normal vector of each
-vertex) and the observer.
-
-For planar surfaces, the same normal vector is applied to each
-vertex defining the surface. For curved surfaces, normal vectors
-are determined using an average of the normal directions of faces
-surrounding the vertex.  If normals are not averaged then the
-discontinuity in slope going from one face or triangle to another
-will result in a faceted or gem-like appearance.  Figure
-\ref{fignormals} shows examples of drawing using non-averaged and
-averaged normals.
-
-The Gouraud method for shading then determines a vertex color
-using the angle between the light source direction and the vertex
-normal vector. The color of the object being shaded is then
-determined by interpolating these colors.
-
-Smokeview uses smooth shading or lighting to draw blockages and
-iso-surfaces. Particle, slice and boundary files are drawn without
-shading as are 3D smoke and Plot3D files.
 
 
 
