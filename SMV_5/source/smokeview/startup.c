@@ -1614,10 +1614,10 @@ void initvars1(void){
   dwinHbase=60;
   dwinH=60;
 
-#ifndef pp_cvf
-  strcpy(dirseparator,"/");
-#else
+#ifdef WIN32
   strcpy(dirseparator,"\\");
+#else
+  strcpy(dirseparator,"/");
 #endif
 
   {
