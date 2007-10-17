@@ -8,14 +8,13 @@
 #ifdef pp_ALPHA
 #define SMVVERSION "Experimental"
 #else
-#define SMVVERSION "5.0.2"
+#define SMVVERSION "5.0.3"
 #endif
 #endif
 
 // #define pp_LINT // uncomment if using LINT
 #define _CRT_SECURE_NO_DEPRECATE
 #ifdef WIN32
-#define pp_cvf
 #define pp_memstatus
 #define pp_COMPRESS
 #define pp_noappend

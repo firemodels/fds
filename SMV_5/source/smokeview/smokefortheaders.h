@@ -9,10 +9,10 @@
 #include "flowfiles.h"
 #include "egz_stdio.h"
 
-#ifndef pp_cvf
-#define STDCALL extern void
-#else
+#ifdef WIN32
 #define STDCALL extern void _stdcall
+#else
+#define STDCALL extern void
 #endif
 #ifndef pp_noappend
 #define FORTfcreate_part5sizefile fcreate_part5sizefile_
