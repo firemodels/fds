@@ -3427,7 +3427,7 @@ typedef struct {
         meshi = meshinfo + blocknumber;
         sd->mesh_type=meshi->mesh_type;
       }
-      if(stat(buffer,&statbuffer)==0){
+      if(stat(sd->file,&statbuffer)==0){
         if(readlabels(&sd->label,stream)==2)return 2;
         islice++;
       }
