@@ -198,9 +198,9 @@ Mail: Stop SSOP, Washington, DC 20402-0001 }
 \frontmatter
 \pagestyle{plain}
 
-%---------------------------------------------------------------------------------
-%------------------------ Preface ------------------------------------------------
-%---------------------------------------------------------------------------------
+%
+% -------------------  Preface ------------------------
+%
 
 \chapter{Preface}
 \Smokeview\ is a software tool designed to visualize numerical
@@ -223,9 +223,9 @@ the opacity or optical thickness of smoke.  The details used to implement variou
 techniques for visualizing smoke will be discussed.
 
 
-%---------------------------------------------------------------------------------
-%------------------------ Disclaimer ---------------------------------------------
-%---------------------------------------------------------------------------------
+%
+% -------------------  Disclaimer ------------------------
+%
 
 \chapter{Disclaimer}
 
@@ -255,9 +255,9 @@ it indicate that the products are necessarily those
 best suited for the
 intended purpose.
 
-%---------------------------------------------------------------------------------
-%------------------------ Acknowledgements ---------------------------------------
-%---------------------------------------------------------------------------------
+%
+% -------------------  Acknowledgements ------------------------
+%
 
 %\chapter*{Acknowledgements}
 
@@ -270,10 +270,16 @@ intended purpose.
 
 \pagenumbering{arabic}
 
-%---------------------------------------------------------------------------------
-%------------------------ Introduction -------------------------------------------
-%---------------------------------------------------------------------------------
+%
+% -------------------  Basic Visualization Concepts ------------------------
+%
+
 \part{Basic Visualization Concepts}
+
+%
+% -------------------  Introduction ------------------------
+%
+
 \chapter{Introduction}
 \section{Basic Description of Smokeview}
 \Smokeview\ is a software tool designed to visualize numerical
@@ -322,7 +328,7 @@ Guide\cite{FDS_Users_Guide_5}.
 
 \section{Version History}
 
-Beginning in the early 1980s and continuing into the 1990s, Howard Baum and Ron Rehm developed the basic flow solver that evolved into the Fire Dynamics Simulator which was publicly released in 2000.  Their solution technique, known as Large Eddy Simulation or LES, captures numerically very complicated fire plume dynamics.  Unfortunately, without an effective way to view the calculation results, we would not be able to appreciate the power of the methodology.  Early attempts to visualize the calculation results consisted of nothing more than little particles swirling about in a box.  This was useful to the model developers, but hardly to anyone else.  It just did not look like a fire.
+Beginning in the early 1980s and continuing into the 1990s, Howard Baum and Ron Rehm developed the basic flow solver that evolved into the Fire Dynamics Simulator which was publicly released in 2000.  Their solution technique, known as Large Eddy Simulation or LES, captures numerically very complicated fire plume dynamics.  Unfortunately, the power of the methodology could not be appreciated without an effective way to view the calculation results, .  Early attempts to visualize the calculation results consisted of nothing more than little particles swirling about in a box.  This was useful to the model developers, but hardly to anyone else.  It just did not look like a fire.
 
 Smokeview was written to address this problem.
 Version 1 of Smokeview was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, and version 4 in July 2004.
@@ -347,9 +353,12 @@ uses various tools and techniques such as color, lighting, motion and transforma
 
 These basic building blocks are used by each of the techniques discussed later for visualizing data, in particular, smoke visualization.  Smoke and other attributes of the fire is visualized using both quantitative and realistic techniques.  Realistic display of data refers to the intent of displaying data in a form as it would actually appear.
 These topics will be discussed here in the context of FDS and Smokeview.
-More details on OpenGL may be found in Martz\cite{martz:06}, 
+More details on OpenGL may be found in Martz\cite{martz:06},
 the {\em Red book}\cite{OpenGLRed} or the SuperBible\cite{SUPERBIBLE}.
 
+%
+% -------------------  Objects ------------------------
+%
 
 \chapter{Objects} Smokeview defines object locations in terms of a right handed coordinate system with the x axis pointing to the right, the y axis pointing to the back and the z axis pointing up (see Figure \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents {\em etc.}\ are transformed internally within Smokeview to lie between 0.0 and 1.0.
 These objects are drawn by grouping appropriately {\em OpenGL} vertices.
@@ -384,7 +393,7 @@ glVertex3f(1.0,0.0,0.0);
 glEnd();
 \end{verbatim}
 Similarly, to draw points or to connect the vertices with lines (also shown
-in Figure \ref{figshapes}) one would replace {\tt GL\_TRIANGLE}\ above 
+in Figure \ref{figshapes}) one would replace {\tt GL\_TRIANGLE}\ above
 with {\tt GL\_POINTS}\ or {\tt GL\_LINES}\ respectively.
 \begin{figure}[t]
 \begin{center}
@@ -402,43 +411,19 @@ visualize objects.  To be useful though, these objects need to be
 colored, moved and projected onto a 2D terminal screen. These
 topics are discussed in the following sections.
 
+%
+% -------------------  Setting the Scene ------------------------
+%
+
 \chapter{Setting the Scene}
-3D objects must be flattened or converted to 2D in order to display them on a computer screen.  This occurs in two steps.  The first step is called a projection.  Smokeview uses three kinds of projections, perspective, orthographic and stereo.  The second step takes whatever projection that has been applied and maps the resulting data onto a subset of the computer screen.  This subset is called a viewport.  Viewports are discussed first.
-
-\section{Viewports}
-A
-viewport is the particular portion of the screen where the drawing
-occurs.  Smokeview defines separate viewports for drawing the
-title, time bar, color bar and the 3D scene.  Figure
-\ref{figviewports} illustrates the relationship between the 3D
-scene and the 2D screen giving several viewport examples used by
-Smokeview.
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=4.0in]{figures/figviewport2}
-\end{center}
-\caption{Examples of several viewports in a typical Smokeview scene.}
- \label{figviewports}
-\end{figure}
-
-Smokeview uses {\tt glViewport()}\ to establish a window viewport.  In particular, the call
-\begin{verbatim}
-glViewport(left,down,width,height);
-\end{verbatim}
-is used to setup the portion of the screen where 3D drawing occurs where {\tt left}\
-and {\tt down}\ are the bottom left screen coordinates of the viewport and {\tt width}\
-and {\tt height}\ are the width and height of the viewport.
+3D objects must be flattened or converted to 2D in order to display them on a computer screen.  This occurs in two steps.  The first step is called a projection.  Smokeview uses three kinds of projections: perspective, orthographic and stereo.  The second step takes whatever projection that has been applied and maps the resulting flattened geometry onto a subset of the computer screen.  This window subset, usually a rectangle is called a viewport.  All viewports in Smokeview are rectangular.
 
 \section{Projections}
-The next step in the drawing process is to flatten or project the
-3D scene onto the 2D terminal screen where viewing occurs. Two common schemes for projecting geometry from 3D to
-2D  are orthographic and perspective. An orthographic projection
-is size preserving. Objects in the foreground take up the same
-amount of screen space as objects in the background. A perspective
-projection causes objects to take up less screen space when they
-are drawn in the background resulting in the illusion of depth or
-perspective, hence its name. Both projection methods are available
-in Smokeview.
+Projections are used to flatten the 3D scene onto a two dimensional plane. Two common projections are orthographic and perspective. An orthographic projection is size preserving. Objects in the foreground take up the same amount of screen space as objects in the background. 
+This projection is sometimes called a parallel projection because parallel line in the 3D scene remain parallel when drawn on the screen.
+
+A perspective
+projection creates an illusion of depth by causing objects in the background to take up less screen space than the same sized object drawn in the foreground.  Both projection methods are available in Smokeview.
 
 Smokeview uses {\tt glFrustum}\ to perform perspective projections
 \begin{verbatim}
@@ -476,7 +461,7 @@ screen viewport.}
 
 \section{Stereo Projections}
 
-A stereo projection is simply a perspective applied twice making adjustments to simulate the viewpoint as seen for an observer's left and right eye.  The two resulting versions of the 
+A stereo projection is simply a perspective applied twice making adjustments to simulate the viewpoint as seen for an observer's left and right eye.  The two resulting versions of the
 scene can then be drawn in succession using shuttered glasses synched with the monitor to render the stereo effect.  Alternatively, left and right versions of the scene may be drawn at the same time using stereo viewers to reveal the stereo effect.  Figure \ref{figstereo} illustrates the two view frustums used for a stereo projection.
 
 \begin{figure}[t]
@@ -487,20 +472,45 @@ scene can then be drawn in succession using shuttered glasses synched with the m
  \label{figstereo}
 \end{figure}
 
+\section{Viewports}
+A viewport is the particular portion of the screen where the drawing
+occurs.  Smokeview defines separate viewports for drawing the
+title, time bar, color bar and the 3D scene.  Figure
+\ref{figviewports} illustrates the relationship between the 3D
+scene and the 2D screen giving several viewport examples used by
+Smokeview.
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=4.0in]{figures/figviewport2}
+\end{center}
+\caption{Examples of several viewports in a typical Smokeview scene.}
+ \label{figviewports}
+\end{figure}
 
+Smokeview uses {\tt glViewport()}\ to establish a window viewport.  In particular, the call
+\begin{verbatim}
+glViewport(left,down,width,height);
+\end{verbatim}
+is used to setup the portion of the screen where 3D drawing occurs where {\tt left}\
+and {\tt down}\ are the bottom left screen coordinates of the viewport and {\tt width}\
+and {\tt height}\ are the width and height of the viewport.
 
-
+%
+% -------------------  Color, Shading and Blending ------------------------
+%
 
 \chapter{Color, Shading and Blending}
+Color, shading and blending are three aspects of the same process used to draw objects residing in a three dimensional environment.  Smokeview uses color to display and more importantly to distinguish between two or more geometric or data elements.  Shading adds a further depth cue (besides perspective projections discussed earlier) to present an illusion of 3 dimensionality.  Using a virtual light source, colors are changed subtly based upon the relative orientation of the light source and the surface being drawn.  Portions of the surface oriented away from the light are drawn darker than portions oriented towards the light.  Blending is the process of combining the colors of two or more objects in such a way that objects in the background may be seen through semi-transparent objects drawn in the foreground.  Together, color, shading and blending add to the illusion that the image drawn on a two dimensional terminal screen is three dimensional.
+
 \section{Color}
 Color
 in OpenGL consists of four not three components.  Besides the expected components
 of red, green and blue, OpenGL uses the {\em alpha}\ component to represent opaqueness.
-Each component ranges from 0.0 to 1.0. For the alpha component
-0.0 indicates a completely transparent color while 1.0
-represents a color that is completely opaque. 
+Each component ranges from 0.0 to 1.0. An alpha component of
+0.0 indicates a color that is completely transparent while an alpha component of 1.0
+represents a color that is completely opaque.
 
-Colors are specified using the {\tt glColorXXX()}\ call.  As with {\tt glVertexXXX()}\ a suffix is used to indicate the number and type of argument passed to {\tt glColorXXX()}.  For the most part, Smokeview uses {\tt glColor3f}, {\tt glColor4f}, {\tt glColor3fv} and {\tt glColor4fv}\ to specify colors.  As before, the 3 or 4 indicates the number of data values used.  If 3 is specified in the call then it is tacitly assumed that the fourth {\tt alpha}\ component has value 1.0.  The {\tt f}\ parameter indicates that floating point values are used and the {\tt v}\ parameter indicates that the variable passed is a pointer to the actual data to be referenced.
+Colors are specified using the OpenGL routine {\tt glColorXXX()}.  As with {\tt glVertexXXX()}\ XXX is replaced by a suffix used to indicate the number and type of argument passed.  For the most part, Smokeview uses {\tt glColor3f}, {\tt glColor4f}, {\tt glColor3fv} and {\tt glColor4fv}\ to specify colors.  As before, the 3 or 4 indicates the number of data values used.  If 3 is specified in the call then it is tacitly assumed that the fourth, {\tt alpha}, component has value 1.0.  The {\tt f}\ parameter indicates that floating point values are used and the {\tt v}\ parameter indicates that the variable passed is a pointer to the actual data to be referenced.
 
 \section{Shading} OpenGL uses two shading models for drawing
 objects, flat and Gouraud.  These models are specified
@@ -548,19 +558,20 @@ shading as are 3D smoke and Plot3D files.
 
 
 \section{Blending}
-Smokeview draws objects transparently by combining or blending the color of the object currently being with the current version of the background buffer.\footnote{The background buffer is updated as each object is drawn.}
-The blending fraction is determined from the alpha parameter of the object currently being drawn.
-A small alpha results in a small contribution from the currently drawn object while a large alpha results in a large contribution.  More precisely:
+\label{blending}
+Smokeview using OpenGL draws semi-transparent objects by combining or blending the color of the object currently being drawn with the color in the current background buffer.\footnote{The background buffer is updated as each object is drawn.}
+The blending fraction is determined from the alpha color component of the object currently being drawn.
+A small alpha results in a small contribution from the currently drawn object color while a large alpha results in a large contribution.  More precisely:
 \begin{eqnarray*}
 \noindent\mbox{updated background color} = \alpha\times \mbox{fragment color} + (1-\alpha)\times \mbox{original background color}
 \end{eqnarray*}
-This particular blending model is the most common (there are others) and is implemented in Smokeview using
+This particular blending model is the most common (there are others) and is activated in Smokeview using the OpenGL call
 \begin{verbatim}
 glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 \end{verbatim}
 
 Choosing an alpha less than one allows one to
-{\em see through}\ an object. Smokeview uses this feature to implement
+{\em see through}\ objects. Smokeview uses this feature to implement
 partially transparent blockages and 2D animated slices.
 Slice files illustrated in Figure
 \ref{figtransparent}, are drawn using transparency. Smokeview also implements
@@ -582,27 +593,37 @@ any portion of the scene behind the slice file is hidden. }
 \label{figtransparent}
 \end{figure}
 
-Complications arise because this blending model is not commutative.  The order objects are drawn
-is significant.
-To see this, let $B_0$ denote the initial background color and let ($c_1,\alpha_1)$
-and $(c_2,\alpha_2)$ be a color, opacity pair for two fragments.  Applying ($c_1,\alpha_1)$
-then ($c_2,\alpha_2)$ to $B_0$ results in the updated background color $B_2$ given by
-\begin{eqnarray*}
-B_2&=&\alpha_2c_2+(1-\alpha_2)B_1\\
-&=&\alpha_2c_2+(1-\alpha_2)(\alpha_1c_1+(1-\alpha_1)B_0)\\
-&=&\alpha_2c_2+\alpha_1c_1-\alpha_1\alpha_2c_1+(1-\alpha_1)(1-\alpha_2)B_0
-\end{eqnarray*}
-where $B_1=\alpha_1c_1+(1-\alpha_1)B_0$ .  Applying ($c_2,\alpha_2)$
-then ($c_1,\alpha_1)$ to $B_0$ (reverse order) results in the updated background color, $\hat{B}_2$ given by
-\begin{eqnarray*}
-\hat{B}_2&=&\alpha_1c_1+(1-\alpha_1)\hat{B}_1\\
-&=&\alpha_1c_1+(1-\alpha_1)(\alpha_2c_2+(1-\alpha_2)B_0)\\
-&=&\alpha_1c_1+\alpha_2c_2-\alpha_1\alpha_2c_2+(1-\alpha_1)(1-\alpha_2)B_0
-\end{eqnarray*}
-where $\hat{B}_1=\alpha_2c_2+(1-\alpha_2)B_0$.
-In general, $\hat{B}_2-B_1=\alpha_1\alpha_2(c_1-c_2)\ne 0$, unless $c_1=c_2$.  Of course $B_2=\hat{B}_2$ if $\alpha_1=0$ or $\alpha_2=0$ but this is a trivial case when one of the fragments is completely transparent.
+Complications arise, however, because this blending model is not commutative.  The final color the user sees depends on the order in which the intermediate colors are drawn. To demonstrate this simmply, consider two objects, one opaque and one semi-transparent.  An opaque object drawn second and in front of a semi-transparent object will totaly obscure the semi-transparent object. A semi-transparent object drawn second and in front of an opaque object will blend with but not obscure the opaque object drawn previously.
 
-In order then to prevent inconsistent drawing, opaque
+To be more precise, consider two objects with colors $c_1$ and $c_2$ and alpha values $\alpha_1$ and $\alpha_2$.   Let the background color be denoted $b_0$.  Then blending object 1 with the background results in a new background color, $b_1$, given by
+\begin{eqnarray*}
+b_1=(1-\alpha_1)b_0 + \alpha_1c_1
+\end{eqnarray*}
+Blending the color $c_2$ with $b_1$ results in a new background color, $b_2$, given by
+\begin{eqnarray*}
+b_2&=&(1-\alpha_2)b_1 + \alpha_2c_2\\
+&=&(1-\alpha_2)((1-\alpha_1)b_0 + \alpha_1c_1)+\alpha_2c_2\\
+&=&(1-\alpha_2)(1-\alpha_1)b_0 + \alpha_1c_1 + \alpha_2c_2 - \alpha_2\alpha_1c_1
+\end{eqnarray*}
+
+Now blend colors $c_1$ and $c_2$ to the original background in the opposite order.
+Blending the color $c_2$ to with the background color $b_0$ results in a new background color, $\hat{b}_1$, given by
+\begin{eqnarray*}
+\hat{b}_1=(1-\alpha_2)b_0 + \alpha_2c_2
+\end{eqnarray*}
+Blending $c_1$ to the interim background color $\hat{b}_1$ results in a new background color, $\hat{b}_2$, given by
+\begin{eqnarray*}
+\hat{b_2}&=&(1-\alpha_1)\hat{b}_0+\alpha_1c_1\\
+\hat{b_2}&=&(1-\alpha_1)((1-\alpha_2)b_0 + \alpha_2c_2)+\alpha_1c_1\\
+\hat{b_2}&=&(1-\alpha_1)(1-\alpha_2)b_0 + \alpha_2c_2 + \alpha_1c_1 - \alpha_1\alpha_2c_2\\
+\end{eqnarray*}
+
+
+In general, $b_2-\hat{b}_2=\alpha_1\alpha_2(c_2-c_1)\ne 0$, unless $c_1=c_2$.  Of course $b_2=\hat{b}_2=0$ if $\alpha_1=0$ or $\alpha_2=0$ but this is a trivial case in which one of the two fragments is completely transparent.  
+
+The application to Smokeview is that since all smoke is drawn with the same color, smoke slice plane drawing is order independent.  However, whenever fire is visualized along with smoke, multiple colors may exist in a given plane (black for smoke, organge for fire).  In this case, the order that the planes are drawn becomes important.
+
+In order then to prevent inconsistent drawing for the general case, opaque
 objects are drawn first then partially transparent objects
 are drawn next from back to front (from the point of view of
 the observer). Otherwise transparent objects may appear blended in
@@ -653,12 +674,11 @@ normals.  Using non-averaged normals results in a faceted or
 gem-like appearance. } \label{fignormals}
 \end{figure}
 
+%
+% -------------------  Motion ------------------------
+%
 
-
-
-
-
-\chapter{Moving Objects} The previous sections discussed how appearance
+\chapter{Motion} The previous sections discussed how appearance
 is important in visualization.  Motion may also be used to gain insight
 into fire phenomena.
 Motion may be thought of in two equivalent ways - keeping the
@@ -752,16 +772,18 @@ These two angles and the translation amount are used by Smokeview to control the
 \end{verbatim}
 where {\tt xcen, ycen, zcen}\ are the coordinates of the scene center, YZ\_AXIS\_angle is the elevation angle, and XY\_AXIS\_angle is the azimuth angle.  The scene center (center of rotation) is translated to the origin, requested rotations are implemented, then the scene is translated back to its original location.
 
-
-
-
-
 %
-% .............. new section ..............................
+% .............. Visualizing Data Quantitatively ..............................
 %
 \part{Visualizing Data Quantitatively}
+
+%
+% -------------------  Overview ------------------------
+%
+
+\chapter{Overview}
 Smokeview displays fire dynamics data allowing quantitative assessment using
-standard visualization techniques such as animated tracer
+visualization techniques such as animated tracer
 particles that follow the flow, animated shaded 2D and 3D contours
 that display flow quantities and animated flow vectors that
 display flow quantities and direction. Smokeview also visualizes
@@ -769,8 +791,13 @@ smoke realistically by converting soot density to smoke opacity,
 displaying smoke as it would actually appear. This is discussed in the next chapter.
 Each of these visualization
 techniques highlight different aspects of the underlying flow
-phenomena.  The first step in visualizing data quantitatively is mapping data to colors which is discussed next.
+phenomena.  
 
+This part of the document discusses some of the technical procedures visualizing data quantitatively, in particular, techniques for coloring data, visualizing particle systems and creating contours for 2 and 3 dimensions.
+
+%
+% -------------------  Coloring Data ------------------------
+%
 
 \chapter{Coloring Data}
 Several methods Smokeview uses to visualize data quantitatively involves converting data values to color.
@@ -913,6 +940,10 @@ b) colors interpolated within the colorbar\\
 \label{colorinterp}%
 \end{figure}
 
+%
+% -------------------  Particle Systems ------------------------
+%
+
 \chapter{Particles Systems}
 FDS uses particles as tracer elements to allow one to visualize flow.  FDS
 also uses particles as droplets to model fire suppression.  Particle positions are determined in FDS using the differential equation
@@ -964,7 +995,9 @@ is completely open.  The upper half of the simulation on the right is obstructed
 \label{figstreak}%
 \end{figure}
 
-
+%
+% -------------------  Contours ------------------------
+%
 
 \chapter{Contours}
 Smokeview uses contours to identify {\em where}\ rather than {\em how much}\ a specified level occurs.  Smokeview uses several methods for generating contours such as marching squares, marching cubes\cite{marchingcubes} and {\em hardware}\ methods.
@@ -1173,22 +1206,11 @@ $S_2=1/\Delta x_2$ and $f=\Delta x_1/(\Delta x_1+\Delta x_2)$.
 
 
 \part{Visualizing Data Realistically}
-\begin{figure}[t]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[width=2.5in]{figures/flowchartpdf_fds}&
-\includegraphics[width=2.5in]{figures/flowchartpdf_smokeview}\\
-FDS pre-computations&Smokeview computations and corrections\\
-\end{tabular}
-\end{center}
-\caption [Flowchart of FDS and Smokeview computations for
-visualization smoke realistically.] {Flowchart of FDS and
-Smokeview computations for visualization smoke realistically. FDS
-computes obscuration parameters from one grid plane to the next.
-Smokeview corrects these parameters to account for non-axis
-aligned view directions.}
-\label{figflowchart}
-\end{figure}
+
+%
+% -------------------  Overview ------------------------
+%
+
 \chapter{Overview}
 Visualizing smoke realistically is challenging for three reasons.
 First, the storage requirements for describing smoke throughout the
@@ -1225,6 +1247,23 @@ transparent smoke and 1.0 for completely opaque.
 Figure \ref{figflowchart} gives a flowchart describing the process FDS uses to pre-compute smoke data and
 Smokeview uses update and draw the data.
 
+\begin{figure}[t]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=2.5in]{figures/flowchartpdf_fds}&
+\includegraphics[width=2.5in]{figures/flowchartpdf_smokeview}\\
+FDS pre-computations&Smokeview computations and corrections\\
+\end{tabular}
+\end{center}
+\caption [Flowchart of FDS and Smokeview computations for
+visualization smoke realistically.] {Flowchart of FDS and
+Smokeview computations for visualization smoke realistically. FDS
+computes obscuration parameters from one grid plane to the next.
+Smokeview corrects these parameters to account for non-axis
+aligned view directions.}
+\label{figflowchart}
+\end{figure}
+
 %\section{Background}
 
 %\cite{stam:99}\cite{stam:95}\cite{fedkiw:01}\cite{stam:00}
@@ -1233,7 +1272,27 @@ Smokeview uses update and draw the data.
 %\cite{stam:99a}\cite{sayood:96a}\cite{Bajaj:01a}\cite{Levoy:90a}
 %\cite{Sabella:88a}\cite{Gardner:85a}
 
+%
+% -------------------  Computing Opacity ------------------------
+%
+
 \chapter{Computing Opacity}
+The process of computing opacity is illustrated schematically in Figure \ref{figsmokesetup}.
+A ray travels from the background to the observer through intervening smoke.
+At each step towards the observer, light is absorbed, scattered or emitted by the smoke.  Emission effects are ignored.  Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Contributions are assume to be from both absorption and scattering.  
+The obscuration is computed along each ray one grid plane at a time, using Beer's law as follows.  The $\alpha$ values are pre-computed by FDS using Beer's
+law\cite{Siegel:2001}
+\begin{equation}
+\alpha=1-\exp(-ks\Delta x) \label{eq:alpha}
+\end{equation}
+
+\noindent for a particular view direction (down the x axis) where $\Delta x$
+is this distance between two nodes, $k$ is the total soot mass
+extinction coefficient and $s$ be the soot density. Beer's law is
+an empirical relationship relating light absorption to the
+material properties of the media the light is traveling through,
+in this case soot or smoke.  
+
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=6.0in]{figures/smoke_setup}
@@ -1244,22 +1303,19 @@ obscuration as determined from soot density and path length.}
 \label{figsmokesetup}
 \end{figure}
 
-Figure \ref{figsmokesetup} gives a schematic view of this process illustrating various rays from the background to the observer.  The obscuration is computed along each ray one grid plane at a time, using Beer's law as discussed in the following.  The $\alpha$ values are pre-computed by FDS using Beer's
-law\cite{Siegel:2001}
-\begin{equation}
-\alpha=1-\exp(-ks\Delta x) \label{eq:alpha}
-\end{equation}
+The $\alpha$ parameter in equation (\ref{eq:alpha}) is used by OpenGL to blend smoke planes with the current background, the same blending process discussed in Section \ref{blending}.  The $\alpha$ parameter used here also represents an opacity, 0.0 for completely transparent, 1.0 for completely opaque.
 
-\noindent for a particular view direction (down the x axis) where $\Delta x$
-is this distance between two nodes, $k$ is the soot mass
-extinction coefficient and $s$ be the soot density. Beer's law is
-an empirical relationship relating light absorption to the
-material properties of the media the light is traveling through,
-in this case soot or smoke.  Smokeview currently does not consider
-light scattering effects with smoke.
+
+%
+% -------------------  Adjusting Opacity ------------------------
+%
 
 \chapter{Adjusting Opacity}
 
+The absorption parameter, $\alpha$, needs to be adjusted when the
+view direction is not aligned along the axis orthogonal to the
+viewing planes (as in Figure \ref{figray}), the distance between
+adjacent smoke planes changes, or viewing planes are skipped.
 \begin{figure}[t]
 \centerline{\includegraphics[width=5.0in]{figures/forney_figure4}}
 \caption [Diagram illustrating the adjustment needed to opaqueness
@@ -1269,10 +1325,6 @@ for non axis aligned views. The $\alpha$ value along the ray
 containing the $\hat{x}$ segment needs to be larger to account for
 the longer path length. } \label{figray}
 \end{figure}
-The absorption parameter, $\alpha$, needs to be adjusted when the
-view direction is not aligned along the axis orthogonal to the
-viewing planes (as in Figure \ref{figray}), the distance between
-adjacent smoke planes changes, or viewing planes are skipped.
 
 Ten million exponential operations per second are required to
 display smoke with corrected $\alpha$'s at 10 frames per second if
@@ -1385,6 +1437,10 @@ all possible plane orientations.
 \label{figsmoke3d}%
 \end{figure}
 
+%
+% -------------------  Compression ------------------------
+%
+
 \chapter{Compression}
 
 The opacity parameters are computed at each node for all time
@@ -1419,7 +1475,30 @@ critical.
 Smokezip is a software program developed as a companion to Smokeview and FDS to compress FDS daa files.
 A second compression scheme is used by Smokezip to compress FDS files even more compactly.  Smokezip uses the ZLIB compression library available at (\hhref{http://zlib.net/}).
 
-\chapter{Smoke plane orientation}
+%
+% -------------------  Orienting smoke planes ------------------------
+%
+
+\chapter{Orienting smoke planes}
+
+Smoke opacity data computed as described in previous sections is stored in a 3D array.
+This array corresponds to the solution domain as setup in an FDS input file (or some other model).
+Smoke planes are drawn in Smokeview through this data.  The orientation is chosen to be most perpendicular
+to the viewers line of sight.  A plane orientation exactly perpendicular to the view direction could be drawn
+if one is willing to pay the added CPU cost of interpolating opacity values between grid nodes.
+
+Figure \ref{figDIRA} illustrates this process showing three view directions and the corresponding smoke plane orientations that would be used.
+Off-axis viewing is minimized by selecting the view planes orientation that minimizes the angle between the planes normal direction and the view direction.
+This angle, $\theta$, is illustrated in Figure \ref{figDIRB}, and is given by
+\begin{eqnarray*}
+\cos(\theta)=\frac{n\cdot v_e}{||n||||v_e||}
+\end{eqnarray*}
+
+\noindent where $n$ is normal vector for the candidate smoke plane, and $v_e$ is
+the view direction vector.  In OpenGL, the view direction vector,
+$v_e$, is computed by simply obtaining the modelview matrix, $M$
+and multiplying it by the vector, $(0,0,1)^T$ or equivalently the
+third row of $M$.
 
 \begin{figure}
 \begin{tabular}{ccc}
@@ -1441,29 +1520,17 @@ oriented so that are {\em most perpendicular}\ to the line of sight }
 and smoke plane normal vector.  View planes are chosen to minimize
 this angle.} \label{figDIRB}
 \end{figure}
-Smoke opacity data computed as described in previous sections is stored in a 3D array.
-This array corresponds to the solution domain as setup in an FDS input file (or some other model).
-Smoke planes are drawn in Smokeview through this data.  The orientation is chosen to be most perpendicular
-to the viewers line of sight.  A plane orientation exactly perpendicular to the view direction could be drawn
-if one is willing to pay the added CPU cost of interpolating opacity values between grid nodes.
+%
+% -------------------  Appendices ------------------------
+%
 
-Figure \ref{figDIRA} illustrates this process showing three view directions and the corresponding smoke plane orientations that would be used.
-Off-axis viewing is minimized by selecting the view planes orientation that minimizes the angle between the planes normal direction and the view direction.
-This angle, $\theta$, is illustrated in Figure \ref{figDIRB}, and is given by
-\begin{eqnarray*}
-\cos(\theta)=\frac{n\cdot v_e}{||n||||v_e||}
-\end{eqnarray*}
-
-\noindent where $n$ is normal vector for the candidate smoke plane, and $v_e$ is
-the view direction vector.  In OpenGL, the view direction vector,
-$v_e$, is computed by simply obtaining the modelview matrix, $M$
-and multiplying it by the vector, $(0,0,1)^T$ or equivalently the
-third row of $M$.
-
-
-%................................
 \part{Appendices}
 \appendix
+
+%
+% -------------------  Interfacing OpenGL with teh Host Operating System ----------
+%
+
 \chapter{Interfacing OpenGL with the Host Operating System}
 OpenGL by design draws
 the 3D geometry but does not interact with the user or the
@@ -1533,7 +1600,11 @@ clicked or when the mouse is moved.  Smokeview determines rotation
 and translation amounts using the {\tt motion} callback defined
 with {\tt glutMotionFunc(motion)}.
 
-\chapter{Compressing Data}
+%
+% -------------------  Compressing Data ------------------------
+%
+
+%\chapter{Compressing Data}
 \chapter{Rendering Smokeview Images}
 
 Smokeview uses the library GD\cite{GDLIB} to convert the currently displayed scene into either a JPEG, PNG or GIF image.  Smokeview reads in the OpenGL back buffer and then uses the GD routine, {\tt gdImageSetPixel}\ to store the image data in GD's internal format one pixel at a time.    Finally, Smokeview uses a GD routine to convert the image into the desired image format.
