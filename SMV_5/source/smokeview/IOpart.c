@@ -525,7 +525,7 @@ void update_partvis(int first_frame,part5data *datacopy, int nclasses){
 int get_tagindex(part5data *data, int tagval){
   int *returnval;
 
-  if(data->npoints==0)return 1;
+  if(data->npoints==0)return -1;
   ASSERT(data->sort_tags!=NULL);
   returnval=bsearch(&tagval,data->sort_tags,data->npoints,2*sizeof(int),tagscompare);
   if(returnval==NULL)return -1;
