@@ -8,7 +8,7 @@
 #ifdef pp_ALPHA
 #define SMVVERSION "Experimental"
 #else
-#define SMVVERSION "5.0.3"
+#define SMVVERSION "5.0.4"
 #endif
 #endif
 
