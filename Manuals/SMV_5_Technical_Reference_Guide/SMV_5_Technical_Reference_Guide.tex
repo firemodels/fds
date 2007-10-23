@@ -40,7 +40,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 }
 \newcommand{\degF}{$^\circ$F}
 \newcommand{\degC}{$^\circ$C}
-\newcommand{\figoptions}{P}
+\newcommand{\figoptions}{htp}
 \newcommand{\hhref}[1]{\href{#1}{{\tt #1}
 }}
 \newcommand{\figheight}{1.5in}
@@ -324,7 +324,8 @@ Any mention of commercial products is for information only;  it does not imply r
 For details on the use of Smokeview read the Smokeview User's
 Guide\cite{Smokeview_Users_Guide_5}. For details on setting up and
 running FDS cases read the FDS User's
-Guide\cite{FDS_Users_Guide_5}.
+Guide\cite{FDS_Users_Guide_5}.  For details on the theory and algorithms implemented in FDS
+read the FDS Technical Guide\cite{FDS_Tech_Guide_5}.
 
 \section{Version History}
 
@@ -354,15 +355,15 @@ uses various tools and techniques such as color, lighting, motion and transforma
 These basic building blocks are used by each of the techniques discussed later for visualizing data, in particular, smoke visualization.  Smoke and other attributes of the fire is visualized using both quantitative and realistic techniques.  Realistic display of data refers to the intent of displaying data in a form as it would actually appear.
 These topics will be discussed here in the context of FDS and Smokeview.
 More details on OpenGL may be found in Martz\cite{martz:06},
-the {\em Red book}\cite{OpenGLRed} or the SuperBible\cite{SUPERBIBLE}.
+the OpenGL Programming Guide (Red book)\cite{OpenGLRed} or the SuperBible\cite{SUPERBIBLE}.
 
 %
 % -------------------  Objects ------------------------
 %
 
 \chapter{Objects} Smokeview defines object locations in terms of a right handed coordinate system with the x axis pointing to the right, the y axis pointing to the back and the z axis pointing up (see Figure \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents {\em etc.}\ are transformed internally within Smokeview to lie between 0.0 and 1.0.
-These objects are drawn by grouping appropriately {\em OpenGL} vertices.
-\begin{figure}[t]
+All Smokeview objects are drawn by grouping appropriately {\em OpenGL} vertices.
+\begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=3.0in]{figures/righthandrule}
 \end{center}
@@ -395,7 +396,7 @@ glEnd();
 Similarly, to draw points or to connect the vertices with lines (also shown
 in Figure \ref{figshapes}) one would replace {\tt GL\_TRIANGLE}\ above
 with {\tt GL\_POINTS}\ or {\tt GL\_LINES}\ respectively.
-\begin{figure}[t]
+\begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=6.0in]{figures/shapes}
 \end{center}
@@ -419,7 +420,7 @@ topics are discussed in the following sections.
 3D objects must be flattened or converted to 2D in order to display them on a computer screen.  This occurs in two steps.  The first step is called a projection.  Smokeview uses three kinds of projections: perspective, orthographic and stereo.  The second step takes whatever projection that has been applied and maps the resulting flattened geometry onto a subset of the computer screen.  This window subset, usually a rectangle is called a viewport.  All viewports in Smokeview are rectangular.
 
 \section{Projections}
-Projections are used to flatten the 3D scene onto a two dimensional plane. Two common projections are orthographic and perspective. An orthographic projection is size preserving. Objects in the foreground take up the same amount of screen space as objects in the background. 
+Projections are used to flatten the 3D scene onto a two dimensional plane. Two common projections are orthographic and perspective. An orthographic projection is size preserving. Objects in the foreground take up the same amount of screen space as objects in the background.
 This projection is sometimes called a parallel projection because parallel line in the 3D scene remain parallel when drawn on the screen.
 
 A perspective
@@ -450,7 +451,7 @@ be activated in Smokeview (using the clipping dialog box) to hide
 geometry making it easier to see interior objects or
 visualizations.  OpenGL allows one to define clipping planes along
 arbitrarily oriented planes.
-\begin{figure}[t]
+\begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=4.0in]{figures/figviewport}
 \end{center}
@@ -464,7 +465,7 @@ screen viewport.}
 A stereo projection is simply a perspective applied twice making adjustments to simulate the viewpoint as seen for an observer's left and right eye.  The two resulting versions of the
 scene can then be drawn in succession using shuttered glasses synched with the monitor to render the stereo effect.  Alternatively, left and right versions of the scene may be drawn at the same time using stereo viewers to reveal the stereo effect.  Figure \ref{figstereo} illustrates the two view frustums used for a stereo projection.
 
-\begin{figure}[t]
+\begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=3.0in]{figures/fig_stereo}
 \end{center}
@@ -479,7 +480,7 @@ title, time bar, color bar and the 3D scene.  Figure
 \ref{figviewports} illustrates the relationship between the 3D
 scene and the 2D screen giving several viewport examples used by
 Smokeview.
-\begin{figure}[t]
+\begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=4.0in]{figures/figviewport2}
 \end{center}
@@ -500,17 +501,16 @@ and {\tt height}\ are the width and height of the viewport.
 %
 
 \chapter{Color, Shading and Blending}
-Color, shading and blending are three aspects of the same process used to draw objects residing in a three dimensional environment.  Smokeview uses color to display and more importantly to distinguish between two or more geometric or data elements.  Shading adds a further depth cue (besides perspective projections discussed earlier) to present an illusion of 3 dimensionality.  Using a virtual light source, colors are changed subtly based upon the relative orientation of the light source and the surface being drawn.  Portions of the surface oriented away from the light are drawn darker than portions oriented towards the light.  Blending is the process of combining the colors of two or more objects in such a way that objects in the background may be seen through semi-transparent objects drawn in the foreground.  Together, color, shading and blending add to the illusion that the image drawn on a two dimensional terminal screen is three dimensional.
+Color, shading and blending are three aspects of the same process used to draw objects residing in a three dimensional environment.  Smokeview uses color to display and more importantly to distinguish between two or more geometric or data elements.  Shading adds a further depth cue (besides perspective projections discussed earlier) to present an illusion of 3 dimensions.  Using a virtual light source, colors are changed subtly based upon the relative orientation of the light source and the surface being drawn.  Portions of the surface oriented away from the light are drawn darker than portions oriented towards the light.  Blending is the process of combining the colors of two or more objects in such a way that objects in the background may be seen through semi-transparent objects drawn in the foreground.  Together, color, shading and blending add to the illusion that the image drawn on a two dimensional terminal screen is three dimensional.
 
 \section{Color}
-Color
-in OpenGL consists of four not three components.  Besides the expected components
-of red, green and blue, OpenGL uses the {\em alpha}\ component to represent opaqueness.
+Color in OpenGL is defined using four not three components.  Besides the expected components
+of red, green and blue, OpenGL uses a component designated as {\em alpha}\ to represent opaqueness.
 Each component ranges from 0.0 to 1.0. An alpha component of
 0.0 indicates a color that is completely transparent while an alpha component of 1.0
 represents a color that is completely opaque.
 
-Colors are specified using the OpenGL routine {\tt glColorXXX()}.  As with {\tt glVertexXXX()}\ XXX is replaced by a suffix used to indicate the number and type of argument passed.  For the most part, Smokeview uses {\tt glColor3f}, {\tt glColor4f}, {\tt glColor3fv} and {\tt glColor4fv}\ to specify colors.  As before, the 3 or 4 indicates the number of data values used.  If 3 is specified in the call then it is tacitly assumed that the fourth, {\tt alpha}, component has value 1.0.  The {\tt f}\ parameter indicates that floating point values are used and the {\tt v}\ parameter indicates that the variable passed is a pointer to the actual data to be referenced.
+Colors are specified using the OpenGL routine {\tt glColorXXX()}.  As with {\tt glVertexXXX()}, XXX is replaced by a suffix used to indicate the number and type of argument passed.  For the most part, Smokeview uses {\tt glColor3f}, {\tt glColor4f}, {\tt glColor3fv} and {\tt glColor4fv}.  As before, the 3 or 4 indicates the number of data values used.  If 3 is specified in the call then it is tacitly assumed that the fourth component, {\tt alpha}, has value 1.0.  In other words, the color is opaque.  The {\tt f}\ parameter indicates that floating point values are used and the {\tt v}\ parameter indicates that the variable passed is a pointer to the actual data to be referenced.
 
 \section{Shading} OpenGL uses two shading models for drawing
 objects, flat and Gouraud.  These models are specified
@@ -526,6 +526,22 @@ object's surface. Figure \ref{figlighting} shows examples of FDS
 blockages (the standard townhouse scenario) drawn using flat and
 smooth shading. Flat shading diminishes the three dimensionality of
 the scene.
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=5.0in]{figures/th_unlit}\\
+flat shading\\
+\includegraphics[width=5.0in]{figures/th_lit}\\
+smooth (Gouraud) shading\\
+\end{tabular}
+\end{center}
+\caption [The FDS townhouse case drawn using flat and smooth
+shading.] { The FDS townhouse case drawn using flat and smooth
+shading. All blockage surfaces have identical colors when drawn
+with flat shading.  When drawn with smooth shading, blockage
+colors change.  Surfaces are darker when not in direct view of the
+light source adding to a sense of depth. } \label{figlighting}
+\end{figure}
 
 A normal vector, another vertex attribute, is required to
 implement a smooth lighting scheme. A normal vector points in a
@@ -546,6 +562,20 @@ discontinuity in slope going from one face or triangle to another
 will result in a faceted or gem-like appearance.  Figure
 \ref{fignormals} shows examples of drawing using non-averaged and
 averaged normals.
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.0in]{figures/triangle_normal}&
+\includegraphics[width=3.0in]{figures/triangle_normal2}\\
+\includegraphics[width=3.0in]{figures/sphere_facet}&
+\includegraphics[width=3.0in]{figures/sphere_lit}\\
+separate normals $\rightarrow$ faceted drawing&averaged normals $\rightarrow$ smooth drawing\\
+\end{tabular}
+\end{center}
+\caption {Two spheres drawn showing the effect of using averaged
+normals.  Using non-averaged normals results in a faceted or
+gem-like appearance. } \label{fignormals}
+\end{figure}
 
 The Gouraud method for shading then determines a vertex color
 using the angle between the light source direction and the vertex
@@ -578,7 +608,7 @@ Slice files illustrated in Figure
 data chopping or hiding using blending or transparency.  Data to be hidden is assigned an alpha
 value of 0.0 causing it to be completely transparent.
 
-\begin{figure}[t]
+\begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
 \includegraphics[width=5.0in]{figures/th_transparent}\\
@@ -619,7 +649,7 @@ Blending $c_1$ to the interim background color $\hat{b}_1$ results in a new back
 \end{eqnarray*}
 
 
-In general, $b_2-\hat{b}_2=\alpha_1\alpha_2(c_2-c_1)\ne 0$, unless $c_1=c_2$.  Of course $b_2=\hat{b}_2=0$ if $\alpha_1=0$ or $\alpha_2=0$ but this is a trivial case in which one of the two fragments is completely transparent.  
+In general, $b_2-\hat{b}_2=\alpha_1\alpha_2(c_2-c_1)\ne 0$, unless $c_1=c_2$.  Of course $b_2=\hat{b}_2=0$ if $\alpha_1=0$ or $\alpha_2=0$ but this is a trivial case in which one of the two fragments is completely transparent.
 
 The application to Smokeview is that since all smoke is drawn with the same color, smoke slice plane drawing is order independent.  However, whenever fire is visualized along with smoke, multiple colors may exist in a given plane (black for smoke, organge for fire).  In this case, the order that the planes are drawn becomes important.
 
@@ -642,37 +672,7 @@ Flat shaded triangles may be drawn more efficiently but are not
 effective at visualizing a 3D effect.  More sophisticated shading
 techniques are required and are discussed next.
 
-\begin{figure}[t]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[width=5.0in]{figures/th_unlit}\\
-flat shading\\
-\includegraphics[width=5.0in]{figures/th_lit}\\
-smooth (Gouraud) shading\\
-\end{tabular}
-\end{center}
-\caption [The FDS townhouse case drawn using flat and smooth
-shading.] { The FDS townhouse case drawn using flat and smooth
-shading. All blockage surfaces have identical colors when drawn
-with flat shading.  When drawn with smooth shading, blockage
-colors change.  Surfaces are darker when not in direct view of the
-light source adding to a sense of depth. } \label{figlighting}
-\end{figure}
 
-\begin{figure}[t]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[width=3.0in]{figures/triangle_normal}&
-\includegraphics[width=3.0in]{figures/triangle_normal2}\\
-\includegraphics[width=3.0in]{figures/sphere_facet}&
-\includegraphics[width=3.0in]{figures/sphere_lit}\\
-separate normals $\rightarrow$ faceted drawing&averaged normals $\rightarrow$ smooth drawing\\
-\end{tabular}
-\end{center}
-\caption {Two sphere drawn showing the effect of using averaged
-normals.  Using non-averaged normals results in a faceted or
-gem-like appearance. } \label{fignormals}
-\end{figure}
 
 %
 % -------------------  Motion ------------------------
@@ -791,7 +791,7 @@ smoke realistically by converting soot density to smoke opacity,
 displaying smoke as it would actually appear. This is discussed in the next chapter.
 Each of these visualization
 techniques highlight different aspects of the underlying flow
-phenomena.  
+phenomena.
 
 This part of the document discusses some of the technical procedures visualizing data quantitatively, in particular, techniques for coloring data, visualizing particle systems and creating contours for 2 and 3 dimensions.
 
@@ -864,22 +864,6 @@ the interpolated color between between the two colors $f(c_1)$ and $f(c_2)$ woul
 
 This is not a good method for displaying colors related to data since only data on the colorbar have physical meaning.  By using 1D texture maps, color indices are interpolated not colors.  Therefore, colors displayed in data plots are always contained in the colorbar which is what we want.
 
-
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[width=3.0in]{figures/plume_bad}&\includegraphics[width=3.0in]{figures/plume_good}\\
-interpolate colors&interpolate 1D texture color bar\\
-\end{tabular}
-\caption [Slice file snapshots illustrating old and new method for
-coloring data.] {Slice file snapshots illustrating old and new
-method for coloring data.}
-\label{fignewslice}%
-\end{center}
-\end{figure}
-
-
 Smokeview version 5 interpolates color indices not colors.
 As a result, interpolated colors are contained in the colorbar.  This interpolation method is implemented using 1D texture maps.  A 1D texture map is defined using the desired colorbar.  A texture coordinate is assigned to each data vertex.    Color indices at pixels between vertices are interpolated using the texture coordinate.  In general, Smokeview version 5 uses the scheme,
 \begin{eqnarray*}
@@ -923,6 +907,18 @@ The following code segments (simplified) shows an example of drawing a slice in 
 
 
 Figure \ref{fignewslice} shows the old and new method for coloring.  Note that the new method results in much crisper, clearer colors.
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.0in]{figures/plume_bad}&\includegraphics[width=3.0in]{figures/plume_good}\\
+interpolate colors&interpolate 1D texture color bar\\
+\end{tabular}
+\caption [Slice file snapshots illustrating old and new method for
+coloring data.] {Slice file snapshots illustrating old and new
+method for coloring data.}
+\label{fignewslice}%
+\end{center}
+\end{figure}
 
 
 
@@ -1096,18 +1092,6 @@ in the contour plot.
 \end{figure}
 
 \section{3D Contours - Isosurfaces}
-
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=7.0in]{figures/3d_contours}
-\end{center}
-\caption[3D isosurface canonical forms.]{3D isosurface canonical forms.
-Dots occur at corners where the data value is greater than the isosurface value.  Other corners are below the isosurface value.  Red polygons intersect cube edges at the isosurface value.  The red polygon (isosurface) NEVER intersects an edge with two or zero dots on the ends.
-  }
-\label{figisosetup}%
-\end{figure}
-
 FDS uses a mixture fraction model to simulate
 combustion. In this model, there is a critical or stoichimetric
 mixture fraction value, such that regions greater than the
@@ -1169,6 +1153,17 @@ solid view
   }
 \label{figiso}%
 \end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=7.0in]{figures/3d_contours}
+\end{center}
+\caption[3D isosurface canonical forms.]{3D isosurface canonical forms.
+Dots occur at corners where the data value is greater than the isosurface value.  Other corners are below the isosurface value.  Red polygons intersect cube edges at the isosurface value.  The red polygon (isosurface) NEVER intersects an edge with two or zero dots on the ends.
+  }
+\label{figisosetup}%
+\end{figure}
+
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1247,7 +1242,7 @@ transparent smoke and 1.0 for completely opaque.
 Figure \ref{figflowchart} gives a flowchart describing the process FDS uses to pre-compute smoke data and
 Smokeview uses update and draw the data.
 
-\begin{figure}[t]
+\begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
 \includegraphics[width=2.5in]{figures/flowchartpdf_fds}&
@@ -1279,7 +1274,7 @@ aligned view directions.}
 \chapter{Computing Opacity}
 The process of computing opacity is illustrated schematically in Figure \ref{figsmokesetup}.
 A ray travels from the background to the observer through intervening smoke.
-At each step towards the observer, light is absorbed, scattered or emitted by the smoke.  Emission effects are ignored.  Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Contributions are assume to be from both absorption and scattering.  
+At each step towards the observer, light is absorbed, scattered or emitted by the smoke.  Emission effects are ignored.  Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Contributions are assume to be from both absorption and scattering.
 The obscuration is computed along each ray one grid plane at a time, using Beer's law as follows.  The $\alpha$ values are pre-computed by FDS using Beer's
 law\cite{Siegel:2001}
 \begin{equation}
@@ -1291,9 +1286,9 @@ is this distance between two nodes, $k$ is the total soot mass
 extinction coefficient and $s$ be the soot density. Beer's law is
 an empirical relationship relating light absorption to the
 material properties of the media the light is traveling through,
-in this case soot or smoke.  
+in this case soot or smoke.
 
-\begin{figure}[t]
+\begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=6.0in]{figures/smoke_setup}
 \end{center}
@@ -1316,7 +1311,7 @@ The absorption parameter, $\alpha$, needs to be adjusted when the
 view direction is not aligned along the axis orthogonal to the
 viewing planes (as in Figure \ref{figray}), the distance between
 adjacent smoke planes changes, or viewing planes are skipped.
-\begin{figure}[t]
+\begin{figure}[\figoptions]
 \centerline{\includegraphics[width=5.0in]{figures/forney_figure4}}
 \caption [Diagram illustrating the adjustment needed to opaqueness
 parameter, $\alpha$, for non axis aligned views.] { Diagram
@@ -1387,7 +1382,7 @@ A simplistic description of one step of this process is given by
 \end{eqnarray*}
 
 
-\begin{figure}[t]
+\begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
 \includegraphics[height=4.0in]{figures/splume_20_27}&
