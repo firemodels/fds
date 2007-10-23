@@ -6025,6 +6025,13 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       if(trainerview!=2&&trainerview!=3)trainerview=1;
       continue;
     }
+    if(match(buffer,"COLORBAND",9)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&colorband);
+      if(colorband<1)colorband=1;
+      if(colorband>255)colorband=255;
+      continue;
+    }
     if(match(buffer,"SLICEAVERAGE",12)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i",&slice_average_flag,&slice_average_interval,&vis_slice_average);
@@ -7881,6 +7888,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",setbw);
   fprintf(fileout,"COLORBARFLIP\n");
   fprintf(fileout," %i\n",colorbarflip);
+  fprintf(fileout,"COLORBAND\n");
+  fprintf(fileout," %i\n",colorband);
 
   fprintf(fileout,"\n LIGHTING\n");
   fprintf(fileout,"--------\n\n");
