@@ -15,18 +15,20 @@ REM  5) repeaset setp 3.  Value noted should remain the same.
 REM  Smokeview fails this test.  This comment will be removed when
 REM  Smokeview is fixed.
 
-&MESH IJK=12,12,12, XB=0.0,1.2,0.0,1.2,0.0,1.2 /
+&MESH IJK=12,12,12, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
 &TIME TWFIN=10.0 / 
 
 &MISC RADIATION=.FALSE., LAPSE_RATE=10.0, TMPA=10. /
-&INIT XB=20.0,80.0,-2.0,2.0,0.0,304.0, TEMPERATURE=20. /
 
 &SLCF PBY=0.6, QUANTITY='TEMPERATURE' /
         
 &VENT MB='XMAX', SURF_ID='OPEN' /
-&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
 
 
 
