@@ -369,6 +369,14 @@ void ColorBarMenu(int value){
     case -5:
       viscolorbarpath=1-viscolorbarpath;
       break;
+    case -6:
+      if(colorband==1){
+        colorband=5;
+      }
+      else{
+        colorband=1;
+      }
+      break;
     default:
       ASSERT(FFALSE);
       break;
@@ -4531,6 +4539,12 @@ static int textureshowmenu=0;
     }
   }
   glutAddMenuEntry("-",-999);
+  if(colorband==1){
+    glutAddMenuEntry("*Narrow colorband",-6);
+  }
+  else{
+    glutAddMenuEntry("Narrow colorband",-6);
+  }
   if(colorbarflip==1){
     glutAddMenuEntry("*Flip",-2);
   }

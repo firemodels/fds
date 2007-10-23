@@ -722,7 +722,11 @@ void readpatch(int ifile, int flag, int *errorcode){
       for (n=0;n<boundframestep;n++){
         if(error==0){
           FORTgetpatchdata(&meshi->npatches,
-          meshi->pi1,meshi->pi2,meshi->pj1,meshi->pj2,meshi->pk1,meshi->pk2,meshi->patchtimesi,meshi->pqqi,&error);
+          meshi->pi1,meshi->pi2,
+          meshi->pj1,meshi->pj2,
+          meshi->pk1,meshi->pk2,
+          meshi->patchtimesi,meshi->pqqi,
+          &error);
         }
       }
     }
@@ -795,10 +799,13 @@ void readpatch(int ifile, int flag, int *errorcode){
         }
       }
     }
-    if(loadpatchbysteps==1)getBoundaryColors2(meshi->pqqi, meshi->npatchsize, meshi->ipqqi, 
+    if(loadpatchbysteps==1){
+      getBoundaryColors2(
+        meshi->pqqi, meshi->npatchsize, meshi->ipqqi, 
                  setpatchmin,&patchmin, setpatchmax,&patchmax, 
                  &patchmin_global, &patchmax_global,
                  nrgb_full);
+    }
     CheckMemory;
     if(error!=0)break;
     if(settmax_b!=0&&*meshi->patchtimesi>tmax_b)break;
