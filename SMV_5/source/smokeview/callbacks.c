@@ -52,12 +52,6 @@ void WindowStatus(int state){
 /* ------------------ mouse ------------------------ */
 
 void mouse(int button, int state, int x, int y){
-  int temp;
-  int yy;
-  float factor;
-  int ifactor;
-  int valmax=(255*11)/12;
-  int valmin=255/12;
   int mouse_x, mouse_y;
   GLubyte r, g, b;
   int val1, val;
@@ -218,6 +212,11 @@ void mouse(int button, int state, int x, int y){
     }
     glutPostRedisplay();
     if( showtime==1 || showplot3d==1){
+      int temp;
+      int yy;
+      float factor;
+      int ifactor;
+
       temp = (int)(1.2*dwinH);
       if(x>screenWidth-dwinWW){
         yy = screenHeight - y;
@@ -225,6 +224,9 @@ void mouse(int button, int state, int x, int y){
         if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
         ifactor=(int)(255*factor);
         if(ifactor>=0&&ifactor<256){
+          int valmax=255;
+          int valmin=0;
+
           if(ifactor>valmax)ifactor=valmax;
           if(ifactor<valmin)ifactor=valmin;
         }
@@ -294,11 +296,6 @@ void mouse(int button, int state, int x, int y){
 /* ------------------ motion ------------------------ */
 void motion(int xm, int ym){
   float xx, yy;
-  int temp;
-  int ifactor;
-  float factor;
-  int valmax=(255*11)/12;
-  int valmin=255/12;
   float *eye_xyz, *angle_zx;
   float direction_angle;
   float elevation_angle;
@@ -308,6 +305,12 @@ void motion(int xm, int ym){
 
   glutPostRedisplay();
   if( colordrag==1&&(showtime==1 || showplot3d==1)){
+    int temp;
+    int ifactor;
+    float factor;
+    int valmax=255;
+    int valmin=0;
+
     temp = (int)(1.2*dwinH);
     if(xm>screenWidth-dwinWW){
       yy = screenHeight - ym;
@@ -319,7 +322,9 @@ void motion(int xm, int ym){
         if(ifactor>valmax)ifactor=valmax;
         if(ifactor<valmin)ifactor=valmin;
       }
-      else{ifactor=-1;}
+      else{
+        ifactor=-1;
+      }
       updatecolors(ifactor);
     }
     return;
@@ -429,6 +434,7 @@ void motion(int xm, int ym){
 }
 
 /* ------------------ keyboard ------------------------ */
+
 void keyboard_up(unsigned char key, int x, int y){
   resetclock=1;
 }

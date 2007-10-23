@@ -694,6 +694,7 @@ SVEXTERN float direction_angleINI0;
 
 SVEXTERN float xyzeyeorig[3],xeyedir[3], yeyedir[3], zeyedir[3];
 SVEXTERN int adjustalphaflag;
+SVEXTERN int colorband;
 
 SVEXTERN int highlight_block, highlight_mesh, highlight_flag;
 SVEXTERN int updatesmoothblocks,menusmooth,use_menusmooth;

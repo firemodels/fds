@@ -134,13 +134,16 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
 
   range = local_tmax - local_tmin;
   factor = 0.0f;
-  if(range!=0.0f)factor = ndatalevel/range;
+  if(range!=0.0f){
+    factor = (ndatalevel-1)/range;
+  }
   for(n=0;n<nt;n++){
-    itt=(int)(factor*(*t++-local_tmin));
+    itt=(int)(0.5+(factor*(*t-local_tmin)));
     if(itt<0)itt=0;
     if(itt>ndatalevel-1)itt=ndatalevel-1;
     *it=itt;
     it++;
+    t++;
   }
 }
 
@@ -739,7 +742,7 @@ void drawColorBars(void){
   int dyscreen;
   int temp;
 
-  int i,i2,i3;
+  int i,i3;
   float labeltop;
   float barleft;
   float dbar=.10f, dtext=.3f, dspace=.05f, space;
@@ -832,7 +835,8 @@ void drawColorBars(void){
     ASSERT(FFALSE);
     break;
   }
-  
+#define DYFONT (-0.5)
+
   bottom[0]=labeltop-dyfont;
   bottom[1]=labeltop-2*dyfont;
   bottom[2]=labeltop-3*dyfont;
@@ -843,38 +847,38 @@ void drawColorBars(void){
     CheckMemory;
     glBegin(GL_QUADS);
     if(showplot3d==1&&p3cont2d!=SHADED_CONTOURS){
-      {
-        {
-          int icolmin, icolmax;
+      int icol;
 
-          for (i = 0; i < nrgb; i++){
-            i2 = i+1;i3 = i+1;
-            icolmin = i*((nrgb_full-1)/(nrgb-1));
-            icolmax = i*((nrgb_full-1)/(nrgb-1));
-            if(i3>nrgb_full-1)i3=nrgb_full;
+      // draw plot3d colorbars
+      for (i = 0; i < nrgb; i++){
+        i3 = i+1;
+        icol = i*((nrgb_full-1)/(nrgb-1));
+        if(i3>nrgb_full-1)i3=nrgb_full;
+        if(showplot3d==1&&(i==0&&minfill==0||i==nrgb-1&&maxfill==0)){
+        }
+        else{
+          float yy, yy2;
 
-            if(showplot3d==1&&(i==0&&minfill==0||i==nrgb-1&&maxfill==0)){}
-             else{
-              //glColor4fv(rgb[i]); 
-              glColor4fv(rgb_full[icolmin]);
-              glVertex2f(barleft, (float)i+barbot); 
-              glVertex2f(barright,(float)i+barbot);
+          yy = (barbot*(nrgb-i)+i*(nrgb+DYFONT+barbot))/nrgb;
+          yy2 = (barbot*(nrgb-1-i)+(i+1)*(nrgb+DYFONT+barbot))/nrgb;
+
+          glColor4fv(rgb_full[icol]);
+          glVertex2f(barleft, yy); 
+          glVertex2f(barright,yy);
        
-              //glColor4fv(rgb[i3]);
-              glColor4fv(rgb_full[icolmax]);
-              glVertex2f(barright,(float)i2+barbot);
-              glVertex2f(barleft, (float)i2+barbot);
-             }
-          }
+          glVertex2f(barright,yy2);
+          glVertex2f(barleft, yy2);
         }
       }
     }
     else{
+      // draw all other colorbars
       for (i = 0; i < nrgb_full; i++){
-        yy = (barbot*(255-i)+i*(nrgb+barbot))/255.;
-        yy2 = (barbot*(254-i)+(i+1)*(nrgb+barbot))/255.;
+        yy = (barbot*(255-i)+i*(nrgb+DYFONT+barbot))/255.;
+        yy2 = (barbot*(254-i)+(i+1)*(nrgb+DYFONT+barbot))/255.;
         i3=i+1;
         if(i==nrgb_full-1)i3=i;
+
         glColor4fv(rgb_full[i]); 
         glVertex2f(barleft, yy);
         glVertex2f(barright,yy);
@@ -884,14 +888,6 @@ void drawColorBars(void){
         glVertex2f(barleft,yy2);
       }
     }
-    /*  code to put in chop triangle
-    glColor3f(0.0,1.0,0.0);
-    glVertex2f(barleft-0.25,1.0);
-    glVertex2f(barleft,1.0);
-
-    glVertex2f(barleft-0.125,1.125);
-    glVertex2f(barleft-0.125,1.125);
-    */
     glEnd();
   }
   leftsmoke=0;
@@ -1024,25 +1020,28 @@ void drawColorBars(void){
         scalefloat2string(tttval,partcolorlabel, partfactor, partrange);
         partcolorlabel_ptr=partcolorlabel;
       }
-      position = (float)global_changecolorindex/255.*nrgb-0.5;
+      position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
       iposition=(int)position;
       outputBarText(right[leftsmoke],position,color2,partcolorlabel_ptr);
     }
-    for (i=1; i<nrgb; i++){
-      if(iposition==i-1)continue;
+    for (i=0; i<nrgb-1; i++){
+      float vert_position;
+
+      vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+//      if(iposition==i-1)continue;
       if(prop_index>=0&&prop_index<npart5prop){
-        partcolorlabel_ptr=&part5propinfo[prop_index].partlabels[i][0];
+        partcolorlabel_ptr=&part5propinfo[prop_index].partlabels[i+1][0];
       }
       else{
-        partcolorlabel_ptr=&colorlabelpart[i][0];
+        partcolorlabel_ptr=&colorlabelpart[i+1][0];
       }
       if(partflag==1){
-        val = tttmin + (i-1)*partrange/(nrgb-2);
+        val = tttmin + i*partrange/(nrgb-2);
         scalefloat2string(val,partcolorlabel, partfactor, partrange);
         scalestring(partcolorlabel_ptr,partcolorlabel, partfactor, partrange);
         partcolorlabel_ptr=partcolorlabel;
       }
-      outputBarText(right[leftsmoke],(float)i+barbot,color1,partcolorlabel_ptr);
+      outputBarText(right[leftsmoke],vert_position,color1,partcolorlabel_ptr);
     }
   }
   if(showslice==1||showvslice==1){
@@ -1059,19 +1058,22 @@ void drawColorBars(void){
         scalefloat2string(tttval,slicecolorlabel, slicefactor, slicerange);
         slicecolorlabel_ptr=slicecolorlabel;
       }
-      position = (float)global_changecolorindex/255.*nrgb-0.5;
+      position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
       iposition=(int)position;
       outputBarText(right[leftslice],position,color2,slicecolorlabel_ptr);
     }
-    for (i=1; i<nrgb; i++){
-      if(iposition==i-1)continue;
-      slicecolorlabel_ptr=&(sb->colorlabels[i][0]);
+    for (i=0; i<nrgb-1; i++){
+      float vert_position;
+
+      vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+      //if(iposition==i)continue;
+      slicecolorlabel_ptr=&(sb->colorlabels[i+1][0]);
       if(sliceflag==1){
-        val = tttmin + (i-1)*slicerange/(nrgb-2);
+        val = tttmin + i*slicerange/(nrgb-2);
         scalefloat2string(val,slicecolorlabel, slicefactor, slicerange);
         slicecolorlabel_ptr=slicecolorlabel;
       }
-      outputBarText(right[leftslice],(float)i+barbot,color1,slicecolorlabel_ptr);
+      outputBarText(right[leftslice],vert_position,color1,slicecolorlabel_ptr);
     }
   }
   if(showpatch==1){
@@ -1080,9 +1082,10 @@ void drawColorBars(void){
     tttmax = boundarylevels256[255];
     patchrange=tttmax-tttmin;
     if(global_changecolorindex!=-1){
+      // draw boundary file value selected with mouse
       tttval = boundarylevels256[valindex];
       num2string(boundarylabel,tttval,tttmax-tttmin);
-      position = (float)global_changecolorindex/255.*nrgb-0.5;
+      position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
       iposition=(int)position;
       patchcolorlabel_ptr=&(boundarylabel[0]);
       if(patchflag==1){
@@ -1091,15 +1094,19 @@ void drawColorBars(void){
       }
       outputBarText(right[leftpatch],position,color2,patchcolorlabel_ptr);
     }
-    for (i=1; i<nrgb; i++){
-      if(iposition==i-1)continue;
-      patchcolorlabel_ptr=&colorlabelpatch[i][0];
+    for (i=0; i<nrgb-1; i++){
+      float vert_position;
+
+      vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+
+      //if(iposition==i-1)continue;
+      patchcolorlabel_ptr=&colorlabelpatch[i+1][0];
       if(patchflag==1){
-        val = tttmin + (i-1)*patchrange/(nrgb-2);
+        val = tttmin + i*patchrange/(nrgb-2);
         scalefloat2string(val,patchcolorlabel, patchfactor, patchrange);
         patchcolorlabel_ptr=patchcolorlabel;
       }
-      outputBarText(right[leftpatch],(float)i+barbot,color1,patchcolorlabel_ptr);
+      outputBarText(right[leftpatch],vert_position,color1,patchcolorlabel_ptr);
     }
   }
   if(showzone==1&&sethazardcolor==0){
@@ -1110,7 +1117,7 @@ void drawColorBars(void){
     if(global_changecolorindex!=-1){
       tttval = zonelevels256[valindex];
       num2string(zonelabel,tttval,tttmax-tttmin);
-      position = (float)global_changecolorindex/255.*nrgb-0.5;
+      position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
       iposition=(int)position;
       zonecolorlabel_ptr=&(zonelabel[0]);
       if(zoneflag==1){
@@ -1120,6 +1127,9 @@ void drawColorBars(void){
       outputBarText(right[leftzone],position,color2,zonecolorlabel_ptr);
     }
     for (i=1; i<nrgb; i++){
+      float vert_position;
+
+      vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
       if(iposition==i-1)continue;
       zonecolorlabel_ptr=&colorlabelzone[i][0];
       if(zoneflag==1){
@@ -1127,9 +1137,10 @@ void drawColorBars(void){
         scalefloat2string(val,zonecolorlabel, zonefactor, zonerange);
         zonecolorlabel_ptr=zonecolorlabel;
       }
-      outputBarText(right[leftzone],(float)i+barbot,color1,zonecolorlabel_ptr);
+      outputBarText(right[leftzone],vert_position,color1,zonecolorlabel_ptr);
     }
   }
+
   if(showplot3d==1){
     iposition=-1;
     p3lev = p3levels256[plotn-1];
@@ -1144,20 +1155,45 @@ void drawColorBars(void){
         scalefloat2string(tttval,plot3dcolorlabel, plot3dfactor, plot3drange);
         plot3dcolorlabel_ptr=plot3dcolorlabel;
       }
-      position = (float)global_changecolorindex/255.*nrgb-0.5;
+      if(p3cont2d==SHADED_CONTOURS){
+        position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
+      }
+      else{
+        float yy, yy2;
+
+        yy = (barbot*(nrgb-i)+i*(nrgb+DYFONT+barbot))/nrgb;
+        yy2 = (barbot*(nrgb-1-i)+(i+1)*(nrgb+DYFONT+barbot))/nrgb;
+        position = (yy+yy2)/2.0;
+      }
       iposition=(int)position;
       outputBarText(right[0],position,color2,plot3dcolorlabel_ptr);
     }
     if(visiso==0){
-      for (i=1; i<nrgb; i++){
-        if(iposition==i-1)continue;
-        plot3dcolorlabel_ptr=&colorlabelp3[plotn-1][i][0];
+      for (i=0; i<nrgb-1; i++){
+        float vert_position;
+
+        if(p3cont2d==SHADED_CONTOURS){
+          vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+        }
+        else{
+          float yy, yy2;
+          int ii;
+
+          ii = i + 1;
+          yy = (barbot*(nrgb-ii)+ii*(nrgb+DYFONT+barbot))/nrgb;
+          yy2 = (barbot*(nrgb-1-ii)+(ii+1)*(nrgb+DYFONT+barbot))/nrgb;
+          vert_position = (yy+yy2)/2.0-dyfont/2.0;
+        }
+//        if(iposition==i)continue;
+        plot3dcolorlabel_ptr=&colorlabelp3[plotn-1][i+1][0];
         if(plot3dflag==1){
-          val = tttmin + (i-1)*plot3drange/(nrgb-2);
+          val = tttmin + i*plot3drange/(nrgb-2);
           scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
         }
-        outputBarText(right[0],(float)i+barbot,color1,plot3dcolorlabel_ptr);
+        if(p3cont2d==SHADED_CONTOURS||i!=nrgb-2){
+          outputBarText(right[0],vert_position,color1,plot3dcolorlabel_ptr);
+        }
       }
     }
     else
@@ -1384,12 +1420,11 @@ void updatecolors(int changecolorindex){
   global_changecolorindex=changecolorindex;
   if(changecolorindex>=0){
     valindex = global_changecolorindex;
-    valindex = (int)(6.*(valindex-255./12.)/5.+1);
     if(valindex<0)valindex=0;
     if(valindex>255)valindex=255;
     cci = changecolorindex;
     if(setbw==1){
-      for(n=-5;n<6;n++){
+      for(n=-colorband;n<colorband+1;n++){
         if(cci+n>255)break;
         if(cci+n<0)continue;
         rgb_full[cci+n][0]=1.;
@@ -1399,7 +1434,7 @@ void updatecolors(int changecolorindex){
       }
     }
     else{
-      for(n=-5;n<6;n++){
+      for(n=-colorband;n<colorband+1;n++){
         if(cci+n>255)break;
         if(cci+n<0)continue;
         rgb_full[cci+n][0]=0.;
