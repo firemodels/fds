@@ -4952,7 +4952,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
       SELECT CASE(COLOR)
          CASE('INVISIBLE')
-            VT%VCI=99
+            VT%VCI=8
             TRANSPARENCY = 0._EB
          CASE('null')
             VT%VCI=99
