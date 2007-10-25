@@ -386,6 +386,7 @@ int readsmv(char *file){
 
   updateindexcolors=0;
   ntrnx=0;ntrny=0;ntrnz=0;nmeshes=0;npdim=0;nvent=0;nobst=0,noffset=0;nsurfaces=0;
+  nvent_transparent=0;
 
   nvents=0; setPDIM=0;
   endian = getendian();
@@ -3014,6 +3015,7 @@ typedef struct {
             break;
           }
         }
+        if(vi->transparent==1)nvent_transparent++;
         vi->linewidth=&ventlinewidth;
         vi->showhide=NULL;
         vi->showtime=NULL;
@@ -5683,6 +5685,7 @@ void initmesh(mesh *meshi){
   meshi->faceinfo=NULL;
   meshi->face_normals_single=NULL;
   meshi->face_normals_double=NULL;
+  meshi->face_transparent_double=NULL;
   meshi->face_textures=NULL;
   meshi->face_outlines=NULL;
 
@@ -6032,6 +6035,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       sscanf(buffer,"%i",&colorband);
       if(colorband<1)colorband=1;
       if(colorband>255)colorband=255;
+      continue;
+    }
+    if(match(buffer,"SHOWTRANSPARENTVENTS",20)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&show_transparent_vents);
+      if(show_transparent_vents!=0)show_transparent_vents=1;
       continue;
     }
     if(match(buffer,"SHOWEXTREMEDATA",15)==1){
@@ -8140,6 +8149,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",visTransparentBlockage);
   fprintf(fileout,"SHOWVENTS\n");
   fprintf(fileout," %i %i %i\n",visVents,visVentLines,visVentSolid);
+  fprintf(fileout,"SHOWTRANSPARENTVENTS\n");
+  fprintf(fileout," %i\n",show_transparent_vents);
   fprintf(fileout,"SHOWSENSORS\n");
   fprintf(fileout," %i %i\n",visSensor,visSensorNorm);
   fprintf(fileout,"SHOWTIMEBAR\n");

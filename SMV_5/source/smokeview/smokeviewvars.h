@@ -860,7 +860,8 @@ SVEXTERN int *sliceindex;
 
 SVEXTERN int have_vents_int;
 SVEXTERN int nface_outlines, nface_textures, nface_transparent;
-SVEXTERN int nface_normals_single, nface_normals_double;
+SVEXTERN int nface_normals_single, nface_normals_double, nface_transparent_double, nvent_transparent;
+SVEXTERN int show_transparent_vents;
 SVEXTERN int show_bothsides_int, show_bothsides_ext;
 SVEXTERN float transparency_level;
 SVEXTERN int transparency_override;

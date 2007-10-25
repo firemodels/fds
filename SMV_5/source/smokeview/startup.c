@@ -1014,6 +1014,7 @@ void initvars1(void){
   vis_slice_average=1;
   slice_average_interval=10.0;
 
+  show_transparent_vents=1;
   angle=0.0, dang=0.025f, tourangle=0.0;
   maxtourframes=500;
   blockageSelect=0;

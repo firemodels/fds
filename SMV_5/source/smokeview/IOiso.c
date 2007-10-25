@@ -1145,10 +1145,10 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
   int ntriangles;
   float xyzmin[3], xyzmaxdiff_local;
   static int jjj=0;
-  int drawing_transparent;
+  int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
   int drawing_smooth;
 
-  get_drawing_parms(&drawing_smooth, &drawing_transparent);
+  get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   xyzmin[0] = asurface->xmin;
   xyzmin[1] = asurface->ymin;
@@ -1179,11 +1179,12 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
       trans_flag==DRAW_TRANSPARENT&&
       (
       (data_type==0&&transparentflag==1)||
-      (data_type==1&&drawing_transparent==1)
+      (data_type==1&&drawing_blockage_transparent==1)
       )
       ){
         if(rgbtemp[3]<0.99){
           drawing_transparent=1;
+          drawing_blockage_transparent=1;
           transparenton();
         }
     }
@@ -1197,7 +1198,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,asurface->color);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
 
-    if(drawing_transparent==1){
+    if(drawing_blockage_transparent==1){
 	    glColor4fv(rgbtemp);
     }
     else{
@@ -1244,7 +1245,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
 	  glDisable(GL_LIGHTING);
 
     glPopAttrib();
-    if(drawing_transparent==1)transparentoff();  
+    if(drawing_blockage_transparent==1)transparentoff();  
   }
 
   if(surfacetype==2){
