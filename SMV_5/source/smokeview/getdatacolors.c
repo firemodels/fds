@@ -1444,6 +1444,14 @@ void updatecolors(int changecolorindex){
       }
     }
   }
+  if(show_extremedata==1){
+    rgb_full[0][0]=0.0;
+    rgb_full[0][1]=0.0;
+    rgb_full[0][2]=0.0;
+    rgb_full[255][0]=0.0;
+    rgb_full[255][1]=0.0;
+    rgb_full[255][2]=0.0;
+  }
   if(rgb2_ini!=NULL){
     rgb2ptr=rgb2_ini;
   }
