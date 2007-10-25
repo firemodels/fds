@@ -1721,7 +1721,10 @@ void update_facelists(void){
           (vi->dummy==1||vi->hideboundary==0)){
           continue;
         }
-        /** put in check here for transparent vent face **/
+        if(facej->transparent==1&&drawing_transparent==1){
+          face_transparent[nface_transparent++]=facej;
+          continue;
+        }
         if(facej->textureinfo!=NULL&&facej->textureinfo->display==1){
           meshi->face_textures[n_textures++]=facej;
           continue;
@@ -3488,6 +3491,9 @@ void get_drawing_parms(int *drawing_smooth, int *drawing_transparent){
     if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput){
       if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKHide)*drawing_transparent=1;
     }
+  }
+  if(ntransparentvents>0){
+    *drawing_transparent=1;
   }
 }
 

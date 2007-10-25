@@ -4645,6 +4645,7 @@ typedef struct {
   }
   nsmoothblocks=0;
   ntransparentblocks=0;
+  ntransparentvents=0;
   nopenvents=0;
   nopenvents_nonoutline=0;
   ndummyvents=0;
@@ -4664,6 +4665,7 @@ typedef struct {
         if(vi->type!=BLOCK_OUTLINE)nopenvents_nonoutline++;
       }
       if(vi->dummy==1)ndummyvents++;
+      if(vi->color[3]<0.99)ntransparentvents++;
     }
   }
 
