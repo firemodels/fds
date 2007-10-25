@@ -509,7 +509,7 @@ SVEXTERN char emptylabel[2];
 SVEXTERN void *large_font;
 SVEXTERN void *small_font;
 
-SVEXTERN int nsmoothblocks,nopenvents,nopenvents_nonoutline,ndummyvents,ntransparentblocks;
+SVEXTERN int nsmoothblocks,nopenvents,nopenvents_nonoutline,ndummyvents,ntransparentblocks,ntransparentvents;
 SVEXTERN int ntotal_smooth_blockages;
 SVEXTERN float veclengths[NVECLENGTHS];
 SVEXTERN float texture_origin[3];
