@@ -1474,6 +1474,7 @@ void initvars1(void){
 
   adjustalphaflag=2;
   colorband=5;
+  show_extremedata=0;
 
   highlight_block=-1, highlight_mesh=0, highlight_flag=2;
   updatesmoothblocks=1;

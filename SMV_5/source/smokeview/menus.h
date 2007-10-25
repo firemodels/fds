@@ -377,6 +377,10 @@ void ColorBarMenu(int value){
         colorband=1;
       }
       break;
+    case -7:
+      show_extremedata=1-show_extremedata;
+      updatecolors(-1);
+      break;
     default:
       ASSERT(FFALSE);
       break;
@@ -4553,6 +4557,12 @@ static int textureshowmenu=0;
   }
   glutAddMenuEntry("Cycle",-3);
   glutAddMenuEntry("Reset",-4);
+  if(show_extremedata==1){
+    glutAddMenuEntry("*Highlight out of range data",-7);
+  }
+  else{
+    glutAddMenuEntry("Hilight out of range data",-7);
+  }
 #ifdef pp_COLOR
   if(viscolorbarpath==1)glutAddMenuEntry("*Show colorbar path",-5);
   if(viscolorbarpath==0)glutAddMenuEntry("Show colorbar path",-5);
