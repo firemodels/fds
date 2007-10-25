@@ -401,8 +401,8 @@ typedef struct mesh_ {
   smoothblockage **showsmoothtimelist;
 
   int nface_textures, nface_outlines, nfaces;
-  int nface_normals_single, nface_normals_double;
-  facedata *faceinfo, **face_normals_single, **face_normals_double, **face_textures, **face_outlines;
+  int nface_normals_single, nface_normals_double, nface_transparent_double;
+  facedata *faceinfo, **face_normals_single, **face_normals_double, **face_transparent_double, **face_textures, **face_outlines;
 
 
   int itextureoffset;

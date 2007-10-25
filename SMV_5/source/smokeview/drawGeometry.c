@@ -1620,7 +1620,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
 
 void update_facelists(void){
   int n_textures, n_outlines;
-  int n_normals_single, n_normals_double;
+  int n_normals_single, n_normals_double, n_transparent_double;
   int i,j,k;
   mesh *meshi;
   facedata *facej;
@@ -1631,18 +1631,19 @@ void update_facelists(void){
   int vent_offset, outline_offset, exteriorsurface_offset;
   ventdata *vi;
   int drawing_smooth;
-  int drawing_transparent;
+  int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
 //     visBlocks (visBLOCKNormal, visBLOCKAsInput )
 //     visSmoothAsNormal
 //     visTransparentBlockage
 
-  get_drawing_parms(&drawing_smooth, &drawing_transparent);
+  get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   if(updatehiddenfaces==1)update_hidden_faces();
   updatefacelists=0;
   nface_normals_single=0;
   nface_normals_double=0;
+  nface_transparent_double=0;
   nface_textures=0;
   nface_outlines=0;
   nface_transparent=0;
@@ -1685,6 +1686,7 @@ void update_facelists(void){
 
     n_normals_single=0;
     n_normals_double=0;
+    n_transparent_double=0;
     n_textures=0;
     n_outlines=0;
 
@@ -1721,8 +1723,13 @@ void update_facelists(void){
           (vi->dummy==1||vi->hideboundary==0)){
           continue;
         }
-        if(facej->transparent==1&&drawing_transparent==1){
-          face_transparent[nface_transparent++]=facej;
+        if(facej->transparent==1&&drawing_vent_transparent==1){
+          if(facej->show_bothsides==1){
+            meshi->face_transparent_double[n_transparent_double++]=facej;
+          }
+          else{
+            face_transparent[nface_transparent++]=facej;
+          }
           continue;
         }
         if(facej->textureinfo!=NULL&&facej->textureinfo->display==1){
@@ -1769,7 +1776,7 @@ void update_facelists(void){
         }
 
         if(drawing_smooth==1&&facej->type==3)continue;
-        if(facej->transparent==0||drawing_transparent==0){
+        if(facej->transparent==0||drawing_blockage_transparent==0){
           if(drawing_texture==0){
             if(facej->show_bothsides==0){
               meshi->face_normals_single[n_normals_single++]=facej;
@@ -1780,7 +1787,7 @@ void update_facelists(void){
             continue;
           }
         }
-        if(facej->transparent==1&&drawing_transparent==1){
+        if(facej->transparent==1&&drawing_blockage_transparent==1){
           face_transparent[nface_transparent++]=facej;
           continue;
         }
@@ -1827,10 +1834,12 @@ void update_facelists(void){
     meshi->nface_textures = n_textures;
     meshi->nface_normals_single  = n_normals_single;
     meshi->nface_normals_double  = n_normals_double;
+    meshi->nface_transparent_double  = n_transparent_double;
     meshi->nface_outlines = n_outlines;
     nface_textures += n_textures;
     nface_normals_single += n_normals_single;
     nface_normals_double += n_normals_double;
+    nface_transparent_double += n_transparent_double;
     nface_outlines += n_outlines;
   }
 }
@@ -1963,7 +1972,7 @@ void draw_faces(){
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
     glEnable(GL_COLOR_MATERIAL);
-    if(cullfaces==1)glDisable(GL_CULL_FACE); // DEBUG WORK AROUND
+    if(cullfaces==1)glDisable(GL_CULL_FACE);
     glBegin(GL_QUADS);
     for(j=0;j<selected_case->nmeshes;j++){
       meshi=selected_case->meshinfo + j;
@@ -2026,7 +2035,7 @@ void draw_faces(){
       }
     }
     glEnd();
-    if(cullfaces==1)glEnable(GL_CULL_FACE); // DEBUG WORK AROUND
+    if(cullfaces==1)glEnable(GL_CULL_FACE);
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
@@ -2173,8 +2182,9 @@ void sort_transparent_faces(float *mm){
 /* ------------------ draw_transparent_faces ------------------------ */
 
 void draw_transparent_faces(){
-  int i;
+  int i,j;
   facedata *facei;
+  mesh *meshi;
   float *vertices;
   float old_color[4]={(float)-1.0,(float)-1.0,(float)-1.0,(float)-1.0};
   float *new_color;
@@ -2182,11 +2192,11 @@ void draw_transparent_faces(){
   float up_color[4]={0.9,0.9,0.9,1.0};
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
-  int drawing_smooth, drawing_transparent;
+  int drawing_smooth, drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
-  get_drawing_parms(&drawing_smooth, &drawing_transparent);
+  get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
-  if(nface_transparent<=0)return;
+  if(nface_transparent<=0&&nface_transparent_double<=0)return;
 
   if(drawing_transparent==1)transparenton();
 
@@ -2256,9 +2266,55 @@ void draw_transparent_faces(){
     glVertex3fv(vertices+9);
   }
   glEnd();
-//    if(cullfaces==1)glEnable(GL_CULL_FACE); // DEBUG WORK AROUND
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
+
+  if(nface_transparent_double==1){
+  glEnable(GL_LIGHTING);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+  glEnable(GL_COLOR_MATERIAL);
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
+  glBegin(GL_QUADS);
+  for(j=0;j<selected_case->nmeshes;j++){
+    meshi=selected_case->meshinfo + j;
+    for(i=0;i<meshi->nface_transparent_double;i++){
+      facei = meshi->face_transparent_double[i];
+      if(blocklocation==BLOCKlocation_grid){
+        vertices = facei->approx_vertex_coords;
+      }
+      else{
+        vertices = facei->exact_vertex_coords;
+      }
+      showtimelist_handle = facei->showtimelist_handle;
+      showtimelist = *showtimelist_handle;
+      if(showtimelist!=NULL&&showtimelist[itime]==0)continue;
+      new_color=facei->color;
+      if(
+         fabs(new_color[0]-old_color[0])>0.0001||
+         fabs(new_color[1]-old_color[1])>0.0001||
+         fabs(new_color[2]-old_color[2])>0.0001||
+         fabs(new_color[3]-old_color[3])>0.0001
+         ){
+        old_color[0]=new_color[0];
+        old_color[1]=new_color[1];
+        old_color[2]=new_color[2];
+        old_color[3]=new_color[3];
+        glColor4fv(old_color);
+      }
+      glNormal3fv(facei->normal);
+      glVertex3fv(vertices+0);
+      glVertex3fv(vertices+3);
+      glVertex3fv(vertices+6);
+      glVertex3fv(vertices+9);
+    }
+  }
+  glEnd();
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
+  glDisable(GL_COLOR_MATERIAL);
+  glDisable(GL_LIGHTING);
+  }
+
   if(drawing_transparent==1)transparentoff();
 }
 
@@ -2491,6 +2547,7 @@ void allocate_faces(){
     FREEMEMORY(meshi->faceinfo);
     FREEMEMORY(meshi->face_normals_single);
     FREEMEMORY(meshi->face_normals_double);
+    FREEMEMORY(meshi->face_transparent_double);
     FREEMEMORY(meshi->face_textures);
     FREEMEMORY(meshi->face_outlines);
     
@@ -2498,6 +2555,7 @@ void allocate_faces(){
       NewMemory((void **)&meshi->faceinfo,sizeof(facedata)*ntotal);
       NewMemory((void **)&meshi->face_normals_single,sizeof(facedata *)*ntotal);
       NewMemory((void **)&meshi->face_normals_double,sizeof(facedata *)*ntotal);
+      NewMemory((void **)&meshi->face_transparent_double,sizeof(facedata *)*ntotal);
       NewMemory((void **)&meshi->face_textures,sizeof(facedata *)*ntotal);
       NewMemory((void **)&meshi->face_outlines,sizeof(facedata *)*ntotal);
     }
@@ -3395,14 +3453,9 @@ void drawBlockages(int mode, int trans_flag){
   int smoothnorms;
   int i,j;
   cadgeom *cd;
-  int drawing_smooth;
-  int drawing_transparent;
+  int drawing_smooth, drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
-//     visBlocks (visBLOCKNormal, visBLOCKAsInput )
-//     visSmoothAsNormal
-//     visTransparentBlockage
-
-   get_drawing_parms(&drawing_smooth, &drawing_transparent);
+  get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
    if(drawing_smooth==1&&showedit==0){
      if(xyz_clipplane==1)glDisable(GL_CULL_FACE);
@@ -3413,7 +3466,7 @@ void drawBlockages(int mode, int trans_flag){
          smoothnorms=1;
          if(meshi->blockagesurface!=NULL){
            bsurface=meshi->blockagesurfaces[j];
-           if((drawing_transparent==0&&trans_flag==DRAW_SOLID)||(drawing_transparent==1&&trans_flag==DRAW_TRANSPARENT)){
+           if((drawing_blockage_transparent==0&&trans_flag==DRAW_SOLID)||(drawing_blockage_transparent==1&&trans_flag==DRAW_TRANSPARENT)){
              drawstaticiso(bsurface,1,smoothnorms,trans_flag,1);
            }
          }
@@ -3479,9 +3532,11 @@ void snap_view_angles(void){
 
 /* ------------------ get_drawing_parms ------------------------ */
 
-void get_drawing_parms(int *drawing_smooth, int *drawing_transparent){
+void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent){
   *drawing_smooth=0;
   *drawing_transparent=0;
+  *drawing_blockage_transparent=0;
+  *drawing_vent_transparent=0;
   if(ntotal_smooth_blockages>0&&updatesmoothblocks==0){
     if(visSmoothAsNormal==0||visBlocks==visBLOCKAsInput){
       if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKHide)*drawing_smooth=1;
@@ -3489,11 +3544,15 @@ void get_drawing_parms(int *drawing_smooth, int *drawing_transparent){
   }
   if(ntransparentblocks>0){
     if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput){
-      if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKHide)*drawing_transparent=1;
+      if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKHide){
+        *drawing_transparent=1;
+        *drawing_blockage_transparent=1;
+      }
     }
   }
-  if(ntransparentvents>0){
+  if(ntransparentvents>0&&show_transparent_vents==1){
     *drawing_transparent=1;
+    *drawing_vent_transparent=1;
   }
 }
 

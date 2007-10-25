@@ -144,9 +144,6 @@ extern "C" void glui_bounds_setup(int main_window){
   int firstcount=0;
   int nradio;
 
-#ifdef _DEBUG
-  printf("in glui_bounds_setup\n");
-#endif
   overwrite_all=0;
   glui_bounds = GLUI_Master.create_glui( "File/Bounds Settings",0,0,0 );
   if(showbounds==0)glui_bounds->hide();

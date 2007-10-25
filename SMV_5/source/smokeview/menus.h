@@ -3046,6 +3046,10 @@ void VentMenu(int value){
      show_bothsides_ext = 1 - show_bothsides_ext;
      updatefaces=1;
      break;
+   case 20:
+     show_transparent_vents=1-show_transparent_vents;
+     updatefaces=1;
+     break;
   default:
     ASSERT(FFALSE);
     break;
@@ -3987,6 +3991,10 @@ static int textureshowmenu=0;
       }
       if(show_bothsides_ext==1)glutAddMenuEntry("*Two sided (exterior)",19);
       if(show_bothsides_ext==0)glutAddMenuEntry("Two sided (exterior)",19);
+      if(nvent_transparent>0){
+        if(show_transparent_vents==1)glutAddMenuEntry("*Transparent",20);
+        if(show_transparent_vents==0)glutAddMenuEntry("Transparent",20);
+      }
     }
   }
 
@@ -4561,7 +4569,7 @@ static int textureshowmenu=0;
     glutAddMenuEntry("*Highlight out of range data",-7);
   }
   else{
-    glutAddMenuEntry("Hilight out of range data",-7);
+    glutAddMenuEntry("Highlight out of range data",-7);
   }
 #ifdef pp_COLOR
   if(viscolorbarpath==1)glutAddMenuEntry("*Show colorbar path",-5);
