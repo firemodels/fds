@@ -6034,6 +6034,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       if(colorband>255)colorband=255;
       continue;
     }
+    if(match(buffer,"SHOWEXTREMEDATA",15)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&show_extremedata);
+      if(show_extremedata!=1)show_extremedata=0;
+      continue;
+    }
     if(match(buffer,"SLICEAVERAGE",12)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i",&slice_average_flag,&slice_average_interval,&vis_slice_average);
