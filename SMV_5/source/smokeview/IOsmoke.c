@@ -1135,9 +1135,7 @@ void mergesmoke3dcolors(void){
     }
   }
 }
-
-/* ------------------ drawsmoke3d ------------------------ */
-
+#ifndef pp_CULL
 void drawsmoke3d(smoke3d *smoke3di){
   int i,j,k,n;
   float constval,x1,x3,z1,z3, yy1, y3;
@@ -1196,9 +1194,6 @@ void drawsmoke3d(smoke3d *smoke3di){
   }
 #endif
 
-  if(demo_mode!=0){
-    demo_mode=demo_mode;
-  }
   switch (demo_mode){
   case 0:
     is1 = smoke3di->is1;
@@ -2891,6 +2886,7 @@ case -2:
 
 
 }
+#endif
 #ifdef pp_GPU
 /* ------------------ drawsmoke3dGPU ------------------------ */
 
@@ -4858,4 +4854,1405 @@ void getDepthTexture( void ){
 	sniffErrors("after getDepthTexture");
 }
 #endif
+#ifdef pp_CULL
+#define N_CULLNODES 16
+/*
+typedef struct {
+  float xbeg, xend, ybeg, yend, zbeg, zend;
+  int   ibeg, iend, jbeg, jend, kbeg, kend;
+  int iskip, jskip, kskip;
+  int npixels;
+} culldata;
+*/
 
+/* ------------------ initcull ------------------------ */
+
+void initcull(mesh *meshi, int cullflag){
+  culldata *culli;
+  int nx, ny, nz;
+  int i, j, k;
+  int ibeg, iend, jbeg, jend, kbeg, kend;
+  float xbeg, xend, ybeg, yend, zbeg, zend;
+  int iskip, jskip, kskip;
+
+  if(cullflag==1){
+    iskip = meshi->ibar/4;
+    jskip = iskip;
+    kskip = iskip;
+  }
+  else{
+    iskip = meshi->ibar+1;
+    jskip = meshi->ibar+1;
+    kskip = meshi->ibar+1;
+  }
+  nx = meshi->ibar/iskip + 1;
+  ny = meshi->jbar/jskip + 1;
+  nz = meshi->kbar/kskip + 1;
+  meshi->ncullinfo = nx*ny*nz;
+  FREEMEMORY(meshi->cullinfo);
+  NewMemory( (void **)&meshi->cullinfo,nx*ny*nz*sizeof(culldata));
+  NewMemory( (void **)&meshi->cullQueryId,nx*ny*nz*sizeof(GLuint));
+  culli=meshi->cullinfo;
+
+  for(k=0;k<nz;k++){
+    kbeg = k*kskip;
+    kend = kbeg + kskip;
+    if(kend>meshi->kbar)kend=meshi->kbar;
+    zbeg = meshi->zplt[kbeg];
+    zend = meshi->zplt[kend];
+    for(j=0;j<ny;j++){
+      jbeg = j*jskip;
+      jend = jbeg + jskip;
+      if(jend>meshi->jbar)jend=meshi->jbar;
+      ybeg = meshi->yplt[jbeg];
+      yend = meshi->yplt[jend];
+      for(i=0;i<nx;i++){
+        ibeg = i*iskip;
+        iend = ibeg + iskip;
+        if(iend>meshi->ibar)iend=meshi->ibar;
+        xbeg = meshi->xplt[ibeg];
+        xend = meshi->xplt[iend];
+
+        culli->ibeg=ibeg;
+        culli->iend=iend;
+
+        culli->jbeg=jbeg;
+        culli->jend=jend;
+
+        culli->kbeg=kbeg;
+        culli->kend=kend;
+
+        culli->xbeg=xbeg;
+        culli->xend=xend;
+
+        culli->ybeg=ybeg;
+        culli->yend=yend;
+
+        culli->zbeg=zbeg;
+        culli->zend=zend;
+
+        culli->iskip=iskip;
+        culli->jskip=jskip;
+        culli->kskip=kskip;
+
+        culli->npixels=0;
+
+        culli++;
+      }
+    }
+  }
+
+
+}
+#endif
+
+
+#ifdef pp_CULL
+/* ------------------ drawsmoke3d ------------------------ */
+
+void drawsmoke3d(smoke3d *smoke3di){
+  int i,j,k,n;
+  float constval,x1,x3,z1,z3, yy1, y3;
+  int is1, is2, js1, js2, ks1, ks2;
+  int ii, jj, kk;
+  int ibeg, iend, jbeg, jend, kbeg, kend;
+  float norm[3];
+
+  float *xplt, *yplt, *zplt;
+  unsigned char mergealpha,*mergealphaptr,*mergecolorptr;
+  int nx,ny,nz;
+  unsigned char *alphaf_in,*alphaf_out,*alphaf_ptr;
+#ifdef pp_LIGHT
+  unsigned char *color_in, *color_out;
+#endif
+  float alphaval;
+  unsigned char alphabyte;
+  unsigned char *colorptr;
+  int xyzindex1[6],xyzindex2[6],*xyzindex,node,mm;
+  float xnode[4],znode[4],ynode[4];
+  int skip;
+  float xp[3];
+  int iterm, jterm, kterm,nxy;
+  float x11[3], x12[3], x22[3], x21[3];
+  int n11, n12, n22, n21;
+  int ipj,jpk,ipk,jmi,kmi,kmj;
+  int iii, jjj, kkk;
+  int slice_end,slice_beg;
+  float aspectratio;
+  int ssmokedir;
+  unsigned char *iblank_smoke3d;
+
+  unsigned char value[4];
+  int ivalue[4];
+
+  mesh *meshi;
+
+  meshi = selected_case->meshinfo + smoke3di->blocknumber;
+  mergealphaptr = meshi->merge_alpha;
+  mergecolorptr = meshi->merge_color;
+  value[0]=255;
+  value[1]=255;
+  value[2]=255;
+  value[3]=255;
+
+  xplt=meshi->xplt;
+  yplt=meshi->yplt;
+  zplt=meshi->zplt;
+  iblank_smoke3d = meshi->iblank_smoke3d;
+  alphaf_in=smoke3di->smokeframe_in;
+  alphaf_out=smoke3di->smokeframe_out;
+#ifdef pp_LIGHT
+  if(smoke3di->use_lighting_file==1){
+    color_in=smoke3di->lightframe_in;
+    color_out=smoke3di->lightframe_out;
+  }
+#endif
+
+  is1 = smoke3di->is1;
+  is2 = smoke3di->is2;
+  js1 = smoke3di->js1;
+  js2 = smoke3di->js2;
+  ks1 = smoke3di->ks1;
+  ks2 = smoke3di->ks2;
+
+  nx = smoke3di->is2 + 1 - smoke3di->is1;
+  ny = js2 + 1 - js1;
+  nz = ks2 + 1 - ks1;
+  nxy = nx*ny;
+
+  ssmokedir=meshi->smokedir;
+  skip=smokeskipm1+1;
+
+  xyzindex1[0]=0;
+  xyzindex1[1]=1;
+  xyzindex1[2]=2;
+  xyzindex1[3]=0;
+  xyzindex1[4]=2;
+  xyzindex1[5]=3;
+
+  xyzindex2[0]=0;
+  xyzindex2[1]=1;
+  xyzindex2[2]=3;
+  xyzindex2[3]=1;
+  xyzindex2[4]=2;
+  xyzindex2[5]=3;
+
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
+
+  transparenton();
+  printf("case %i\n",ssmokedir);
+  switch (ssmokedir){
+    int icull;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
+
+
+  case 1:
+  case -1:
+
+    // ++++++++++++++++++  adjust transparency +++++++++++++++++
+
+    if(adjustalphaflag!=0){
+      culldata *culli;
+      int icull;
+
+      aspectratio=meshi->dx;
+
+      for(icull=0;icull<meshi->ncullinfo;icull++){
+        culli = meshi->cullinfo + icull;
+        if(cullsmoke==1&&culli->npixels==0)continue;
+//      for(i=is1;i<=is2;i++){
+        for(i=culli->ibeg;i<=culli->iend;i++){
+          iterm=(i-smoke3di->is1);
+          xp[0]=xplt[i];
+
+
+//        for(k=ks1;k<=ks2;k++){
+          for(k=culli->kbeg;k<=culli->kend;k++){
+            xp[2]=zplt[k];
+            kterm=(k-ks1)*nxy;
+
+//          for(j=js1;j<=js2;j++){
+            for(j=culli->jbeg;j<=culli->jend;j++){
+              jterm = (j-js1)*nx;
+              xp[1]=yplt[j];
+              n = iterm + jterm + kterm;
+              ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
+              mergealpha = mergealphaptr[n];
+              ADJUSTALPHA(mergealpha,aspectratio,NULL,1);
+            }
+          }
+        }
+      }
+      alphaf_ptr=alphaf_out;
+    }
+    else{
+      alphaf_ptr=alphaf_in;
+    }
+
+    // ++++++++++++++++++  draw triangles +++++++++++++++++
+
+    glBegin(GL_TRIANGLES);
+    for(icull=0;icull<meshi->ncullinfo;icull++){
+      culldata *culli;
+
+      culli = meshi->cullinfo + icull;
+      if(cullsmoke==1&&culli->npixels==0)continue;
+//    for(iii=slice_beg;iii<slice_end;iii+=skip){
+      for(iii=culli->ibeg;iii<culli->iend;iii+=skip){
+        i=iii;
+      //if(ssmokedir<0)i = is1+is2-iii-1;
+        iterm = (i-smoke3di->is1);
+
+        constval = xplt[i]+0.001;
+//      for(k=ks1; k<ks2; k++){
+        for(k=culli->kbeg; k<culli->kend; k++){
+          kterm = (k-ks1)*nxy;
+          z1 = zplt[k];
+          z3 = zplt[k+1];
+          znode[0]=z1;
+          znode[1]=z1;
+          znode[2]=z3;
+          znode[3]=z3;
+
+//        for(j=js1; j<js2; j++){
+          for(j=culli->jbeg; j<culli->jend; j++){
+            jterm = (j-js1)*nx;
+            yy1 = yplt[j];
+            y3 = yplt[j+1];
+            ynode[0]=yy1;
+            ynode[1]=y3;
+            ynode[2]=y3;
+            ynode[3]=yy1;
+
+            n = iterm + jterm + kterm;
+
+            n11 = n;              //n  
+            n12 = n11 + nx;       //n+nx
+            n22 = n12 + nxy;      //n+nx+nxy
+            n21 = n22 - nx;       //n+nxy
+
+//        n11 = (i-is1)   + (j-js1)*nx   + (k-ks1)*nx*ny;
+//        n12 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
+//        n22 = (i-is1)   + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
+//        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
+
+            DRAWVERTEX(constval,ynode[mm],znode[mm])
+
+          }
+        }
+      }
+    }
+    glEnd();
+
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 2 +++++++++++++++++++++++++++++++++++++++
+
+case 2:
+case -2:
+
+    // ++++++++++++++++++  adjust transparency +++++++++++++++++
+
+    if(adjustalphaflag!=0){
+
+      aspectratio=meshi->dy;         
+      for(icull=0;icull<meshi->ncullinfo;icull++){
+        culldata *culli;
+
+        culli = meshi->cullinfo + icull;
+        if(cullsmoke==1&&culli->npixels==0)continue;
+        for(j=culli->jbeg;j<=culli->jend;j++){
+          jterm = (j-js1)*nx;
+          xp[1]=yplt[j];
+
+          for(k=culli->kbeg;k<=culli->kend;k++){
+            xp[2]=zplt[k];
+            kterm = (k-ks1)*nxy;
+
+            for(i=culli->ibeg;i<=culli->iend;i++){
+              xp[0]=xplt[i];
+              iterm = (i-is1);
+              n = iterm + jterm + kterm;
+              ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
+              mergealpha = mergealphaptr[n];
+              ADJUSTALPHA(mergealpha,aspectratio,NULL,2);
+            }
+          }
+        }
+      }
+      alphaf_ptr=alphaf_out;
+    }
+    else{
+      alphaf_ptr=alphaf_in;
+    }
+
+    // ++++++++++++++++++  draw triangles +++++++++++++++++
+
+    glBegin(GL_TRIANGLES);
+    for(icull=0;icull<meshi->ncullinfo;icull++){
+      culldata *culli;
+
+      culli = meshi->cullinfo + icull;
+      if(cullsmoke==1&&culli->npixels==0)continue;
+      for(jjj=culli->jbeg;jjj<culli->jend;jjj+=skip){
+        j=jjj;
+        //if(ssmokedir<0)j = js1+js2-jjj-1;
+        constval = yplt[j]+0.001;
+        jterm = (j-js1)*nx;
+
+        for(k=culli->kbeg; k<culli->kend; k++){
+          kterm = (k-ks1)*nxy;
+          z1 = zplt[k];
+          z3 = zplt[k+1];
+
+          znode[0]=z1;
+          znode[1]=z1;
+          znode[2]=z3;
+          znode[3]=z3;
+
+          for(i=culli->ibeg; i<culli->iend; i++){
+            iterm = (i-is1);
+            x1 = xplt[i];
+            x3 = xplt[i+1];
+
+            xnode[0]=x1;
+            xnode[1]=x3;
+            xnode[2]=x3;
+            xnode[3]=x1;
+
+            n = iterm + jterm + kterm;
+            n11 = n;            //n
+            n12 = n11+1;;       //n+1
+            n22 = n12+nxy;      //n+1+nxy
+            n21 = n22-1;        //n+nxy
+     
+//        n11 = (i-is1)   + (j-js1)*nx   + (k-ks1)*nx*ny;
+//        n12 = (i+1-is1) + (j-js1)*nx   + (k-ks1)*nx*ny;
+//        n22 = (i+1-is1) + (j-js1)*nx   + (k+1-ks1)*nx*ny;
+//        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
+
+         // for(node=0;node<6;node++){
+         //   int mm;
+
+         //   mm = xyzindex[node];
+         //   glColor4ub(255,255,255,(unsigned char)smoke_alpha);
+         //   glVertex3f(xnode[mm],constval,znode[mm]);
+         // }
+            DRAWVERTEX(xnode[mm],constval,znode[mm])
+          }
+        }
+      }
+    }
+    glEnd();
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 3 +++++++++++++++++++++++++++++++++++++++
+
+  case 3:
+  case -3:
+    // ++++++++++++++++++  adjust transparency +++++++++++++++++
+
+    aspectratio=meshi->dz;
+    if(adjustalphaflag!=0){
+      for(icull=0;icull<meshi->ncullinfo;icull++){
+        culldata *culli;
+
+        culli = meshi->cullinfo + icull;
+        if(cullsmoke==1&&culli->npixels==0)continue;
+        for(k=culli->kbeg;k<=culli->kend;k++){
+          xp[2]=zplt[k];
+          kterm = (k-ks1)*nxy;
+          for(j=culli->jbeg;j<=culli->jend;j++){
+            xp[1]=yplt[j];
+            jterm = (j-js1)*nx;
+
+            for(i=culli->ibeg;i<=culli->iend;i++){
+              xp[0]=xplt[i];
+              iterm = (i-is1);
+              n = iterm + jterm + kterm;
+              ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
+              mergealpha = mergealphaptr[n];
+              ADJUSTALPHA(mergealpha,aspectratio,NULL,3);
+            }
+          }
+        }
+      }
+      alphaf_ptr=alphaf_out;
+    }
+    else{
+      alphaf_ptr=alphaf_in;
+    }
+
+    // ++++++++++++++++++  draw triangles +++++++++++++++++
+
+    glBegin(GL_TRIANGLES);
+    for(icull=0;icull<meshi->ncullinfo;icull++){
+      culldata *culli;
+
+      culli = meshi->cullinfo + icull;
+      if(cullsmoke==1&&culli->npixels==0)continue;
+
+      for(kkk=culli->kbeg;kkk<culli->kend;kkk+=skip){
+        k=kkk;
+      //  if(ssmokedir<0)k = ks1+ks2-kkk-1;
+        constval = zplt[k]+0.001;
+        kterm = (k-ks1)*nxy;
+
+        for(j=culli->jbeg; j<culli->jend; j++){
+          jterm = (j-js1)*nx;
+
+          yy1 = yplt[j];
+          y3 = yplt[j+1];
+
+          ynode[0]=yy1;
+          ynode[1]=yy1;
+          ynode[2]=y3;
+          ynode[3]=y3;
+ 
+          for(i=culli->ibeg; i<culli->iend; i++){
+            iterm = (i-is1);
+            x1 = xplt[i];
+            x3 = xplt[i+1];
+  
+            xnode[0]=x1;
+            xnode[1]=x3;
+            xnode[2]=x3;
+            xnode[3]=x1;
+
+            n = iterm + jterm + kterm;
+            n11 = n;
+            n12 = n11+1;;
+            n22 = n12+nx;
+            n21 = n22-1;
+
+            DRAWVERTEX(xnode[mm],ynode[mm],constval)
+          }
+        }
+      }
+    }
+    glEnd();
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 4 +++++++++++++++++++++++++++++++++++++++
+
+  case 4:
+  case -4:
+
+    // ++++++++++++++++++  adjust transparency +++++++++++++++++
+
+    aspectratio=meshi->dxy;    
+    if(adjustalphaflag!=0){
+      norm[0]=meshi->norm[0];
+      norm[1]=meshi->norm[1];
+      norm[2]=meshi->norm[2];
+
+      for(iii=1;iii<nx+ny-2;iii+=skip){
+        ipj = iii;
+        if(ssmokedir<0)ipj = nx+ny-2-iii;
+        ibeg=0;
+        jbeg=ipj;
+        if(jbeg>ny-1){
+          jbeg=ny-1;
+          ibeg=ipj-jbeg;
+        }
+        iend=nx-1;
+        jend=ipj-iend;
+        if(jend<0){
+          jend=0;
+          iend=ipj-jend;
+        }
+
+        for(k=ks1;k<=ks2;k++){
+          kterm = (k-ks1)*nxy;
+          xp[2]=zplt[k];
+
+          for(ii=ibeg;ii<=iend;ii++){
+            i=is1+ii;
+            iterm = (i-is1);
+
+            jj = ipj-ii;
+            j=js1+jj;
+            jterm = (j-js1)*nx;
+
+            xp[1]=yplt[j];
+            xp[0]=xplt[i];
+            n = iterm + jterm + kterm;
+            ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
+            mergealpha = mergealphaptr[n];
+            ADJUSTALPHA(mergealpha,aspectratio,norm,4);
+          }
+        }
+      }
+      alphaf_ptr=alphaf_out;
+    }
+    else{
+      alphaf_ptr=alphaf_in;
+    }
+
+    // ++++++++++++++++++  draw triangles +++++++++++++++++
+
+    glBegin(GL_TRIANGLES);
+    slice_beg=1;
+    slice_end=nx+ny-2;
+    for(iii=slice_beg;iii<slice_end;iii+=skip){
+      ipj = iii;
+      if(ssmokedir<0)ipj = nx+ny-2-iii;
+      ibeg=0;
+      jbeg=ipj;
+      if(jbeg>ny-1){
+        jbeg=ny-1;
+        ibeg=ipj-jbeg;
+      }
+      iend=nx-1;
+      jend=ipj-iend;
+      if(jend<0){
+        jend=0;
+        iend=ipj-jend;
+      }
+      for(k=ks1; k<ks2; k++){
+        kterm = (k-ks1)*nxy;
+        z1 = zplt[k];
+        z3 = zplt[k+1];
+        znode[0]=z1;
+        znode[1]=z1;
+        znode[2]=z3;
+        znode[3]=z3;
+
+        for(ii=ibeg;ii<iend;ii++){
+          i=is1+ii;
+          iterm = (i-is1);
+          x1 = xplt[i];
+          x3 = xplt[i+1];
+
+          xnode[0]=x1;
+          xnode[1]=x3;
+          xnode[2]=x3;
+          xnode[3]=x1;
+
+          jj = ipj-ii;
+          j=js1+jj;
+          jterm = (j-js1)*nx;
+
+          yy1=yplt[j];
+          y3=yplt[j-1];
+
+          ynode[0]=yy1;
+          ynode[1]=y3;
+          ynode[2]=y3;
+          ynode[3]=yy1;
+
+          n11 = iterm+jterm+kterm;
+          n12 = n11 - nx + 1;
+          n22 = n12 + nxy;
+          n21 = n11 + nxy;
+
+//        n11 = (j-js1)*nx   + (i-is1)   + (k-ks1)*nx*ny;
+//        n12 = (j-1-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
+//        n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+//        n21 = (j-js1)*nx   + (i-is1)   + (k+1-ks1)*nx*ny;
+
+          DRAWVERTEX(xnode[mm],ynode[mm],znode[mm])
+        }
+      }
+    }
+    glEnd();
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 5 +++++++++++++++++++++++++++++++++++++++
+
+    case 5:
+    case -5:
+
+    // ++++++++++++++++++  adjust transparency +++++++++++++++++
+
+    aspectratio=meshi->dxy;
+    if(adjustalphaflag!=0){
+      culldata *culli;
+      int icull;
+
+      norm[0]=meshi->norm[0];
+      norm[1]=meshi->norm[1];
+      norm[2]=meshi->norm[2];
+
+      aspectratio=meshi->dx;
+
+      for(iii=1;iii<nx+ny-2;iii+=skip){
+        jmi=iii;
+        if(ssmokedir<0)jmi = nx+ny-2-iii;
+
+        ibeg=0;
+        jbeg=ibeg-nx+1+jmi;
+        if(jbeg<0){
+          jbeg=0;
+          ibeg=jbeg+nx-1-jmi;
+        }
+        iend=nx-1;
+        jend=iend+jmi+1-nx;
+        if(jend>ny-1){
+          jend=ny-1;
+          iend=jend+nx-1-jmi;
+        }
+
+        for(k=ks1;k<=ks2;k++){
+          kterm = (k-ks1)*nxy;
+          xp[2]=zplt[k];
+
+          for(ii=ibeg;ii<=iend;ii++){
+            i = is1 + ii;
+            iterm = (i-is1);
+
+            jj = ii + jmi + 1 - nx;
+            j = js1 + jj;
+            jterm = (j-js1)*nx;
+
+
+            xp[1]=yplt[j];
+            xp[0]=xplt[i];
+            n = iterm + jterm + kterm;
+            ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
+            mergealpha = mergealphaptr[n];
+            ADJUSTALPHA(mergealpha,aspectratio,norm,4);
+          }
+        }
+      
+      }
+      alphaf_ptr=alphaf_out;
+    }
+    else{
+      alphaf_ptr=alphaf_in;
+    }
+
+    // ++++++++++++++++++  draw triangles +++++++++++++++++
+
+    glBegin(GL_TRIANGLES);
+
+    slice_beg=1;
+    slice_end=nx+ny-2;
+    for(iii=slice_beg;iii<slice_end;iii+=skip){
+      jmi=iii;
+      if(ssmokedir<0)jmi = nx+ny-2-iii;
+
+      ibeg=0;
+      jbeg=ibeg-nx+1+jmi;
+      if(jbeg<0){
+        jbeg=0;
+        ibeg=jbeg+nx-1-jmi;
+      }
+      iend=nx-1;
+      jend=iend+jmi+1-nx;
+      if(jend>ny-1){
+        jend=ny-1;
+        iend=jend+nx-1-jmi;
+      }
+
+      for(k=ks1; k<ks2; k++){
+        kterm = (k-ks1)*nxy;
+        z1 = zplt[k];
+        z3 = zplt[k+1];
+        znode[0]=z1;
+        znode[1]=z1;
+        znode[2]=z3;
+        znode[3]=z3;
+
+        for(ii=ibeg;ii<iend;ii++){
+          i = is1 + ii;
+          iterm = (i-is1);
+
+          jj = ii + jmi + 1 - nx;
+          j = js1 + jj;
+          jterm = (j-js1)*nx;
+                            
+
+          yy1=yplt[j];
+          y3=yplt[j+1];
+
+          ynode[0]=yy1;
+          ynode[1]=y3;
+          ynode[2]=y3;
+          ynode[3]=yy1;
+
+          x1 = xplt[i];
+          x3 = xplt[i+1];
+          xnode[0]=x1;
+          xnode[1]=x3;
+          xnode[2]=x3;
+          xnode[3]=x1;
+
+
+          n11 = jterm + iterm + kterm;
+          n12 = n11 + nx + 1;
+          n22 = n12 + nxy;
+          n21 = n11 + nxy;
+
+        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n12 = (j+1-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
+        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+        //    n21 = (j-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
+
+          DRAWVERTEX(xnode[mm], ynode[mm], znode[mm])
+        }
+      }
+    }
+    glEnd();
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 6 +++++++++++++++++++++++++++++++++++++++
+
+  case 6:
+  case -6:
+
+    // ++++++++++++++++++  adjust transparency +++++++++++++++++
+
+    aspectratio=meshi->dyz;    
+    if(adjustalphaflag!=0){
+      norm[0]=meshi->norm[0];
+      norm[1]=meshi->norm[1];
+      norm[2]=meshi->norm[2];
+
+      for(iii=1;iii<ny+nz-2;iii+=skip){
+        jpk = iii;
+        if(ssmokedir<0)jpk = ny+nz-2-iii;
+        jbeg=0;
+        kbeg=jpk;
+        if(kbeg>nz-1){
+          kbeg=nz-1;
+          jbeg=jpk-kbeg;
+        }
+        jend=ny-1;
+        kend=jpk-jend;
+        if(kend<0){
+          kend=0;
+          jend=jpk-kend;
+        }
+
+        for(i=is1;i<=is2;i++){
+          iterm = (i-is1);
+          xp[0]=xplt[i];
+
+          for(jj=jbeg;jj<=jend;jj++){
+            j=js1+jj;
+            jterm = (j-js1)*nx;
+
+            kk = jpk-jj;
+            k=ks1+kk;
+            kterm = (k-ks1)*nxy;
+
+            xp[2]=zplt[k];
+            xp[1]=yplt[j];
+            n = iterm + jterm + kterm;
+            ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
+            mergealpha = mergealphaptr[n];
+            ADJUSTALPHA(mergealpha,aspectratio,norm,4);
+          }
+        }
+      }
+      alphaf_ptr=alphaf_out;
+    }
+    else{
+      alphaf_ptr=alphaf_in;
+    }
+
+    // ++++++++++++++++++  draw triangles +++++++++++++++++
+
+    glBegin(GL_TRIANGLES);
+    slice_beg=1;
+    slice_end=ny+nz-2;
+    for(iii=slice_beg;iii<slice_end;iii+=skip){
+      jpk = iii;
+      if(ssmokedir<0)jpk = ny+nz-2-iii;
+      jbeg=0;
+      kbeg=jpk;
+      if(kbeg>nz-1){
+        kbeg=nz-1;
+        jbeg=jpk-kbeg;
+      }
+      jend=ny-1;
+      kend=jpk-jend;
+      if(kend<0){
+        kend=0;
+        jend=jpk-kend;
+      }
+
+      for(i=is1; i<is2; i++){
+        iterm = (i-is1);
+        x1 = xplt[i];
+        x3 = xplt[i+1];
+        xnode[0]=x1;
+        xnode[1]=x1;
+        xnode[2]=x3;
+        xnode[3]=x3;
+
+        for(jj=jbeg;jj<jend;jj++){
+          j=js1+jj;
+          jterm = (j-js1)*nx;
+          yy1 = yplt[j];
+          y3 = yplt[j+1];
+
+          ynode[0]=yy1;
+          ynode[1]=y3;
+          ynode[2]=y3;
+          ynode[3]=yy1;
+
+          kk = jpk-jj;
+          k=ks1+kk;
+          kterm = (k-ks1)*nxy;
+
+          z1=zplt[k];
+          z3=zplt[k-1];
+
+          znode[0]=z1;
+          znode[1]=z3;
+          znode[2]=z3;
+          znode[3]=z1;
+
+          n11 = iterm+jterm+kterm;
+          n12 = n11 + nx - nxy;
+          n22 = n12 + 1;
+          n21 = n22 - nx +  nxy;
+
+//        n11 = (i-is1)   + (j-js1)*nx   + (k-ks1)*nx*ny;
+//        n12 = (i-is1)   + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
+//        n22 = (i+1-is1) + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
+//        n21 = (i+1-is1) + (j-js1)*nx   + (k-ks1)*nx*ny;
+
+          DRAWVERTEX(xnode[mm],ynode[mm],znode[mm])
+        }
+      }
+    }
+    glEnd();
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 7 +++++++++++++++++++++++++++++++++++++++
+
+    case 7:
+    case -7:
+    aspectratio=meshi->dyz;
+
+    if(adjustalphaflag!=0){
+      norm[0]=meshi->norm[0];
+      norm[1]=meshi->norm[1];
+      norm[2]=meshi->norm[2];
+
+      for(iii=1;iii<ny+nz-2;iii+=skip){
+        kmj=iii;
+        if(ssmokedir<0)kmj = ny+nz-2-iii;
+
+        jbeg=0;
+        kbeg=jbeg-ny+1+kmj;
+        if(kbeg<0){
+          kbeg=0;
+          jbeg=kbeg+ny-1-kmj;
+        }
+        jend=ny-1;
+        kend=jend+kmj+1-ny;
+        if(kend>nz-1){
+          kend=nz-1;
+          jend=kend+ny-1-kmj;
+        }
+
+        for(i=is1;i<=is2;i++){
+          iterm = (i-is1);
+          xp[0]=xplt[i];
+
+          for(jj=jbeg;jj<=jend;jj++){
+            j = js1 + jj;
+            jterm = (j-js1)*nx;
+
+            kk = jj + kmj + 1 - ny;
+            k = ks1 + kk;
+            kterm = (k-ks1)*nxy;
+
+
+            xp[2]=zplt[k];
+            xp[1]=yplt[j];
+            n = iterm + jterm + kterm;
+            ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
+            mergealpha = mergealphaptr[n];
+            ADJUSTALPHA(mergealpha,aspectratio,norm,4);
+          }
+        }
+      }
+      alphaf_ptr=alphaf_out;
+    }
+    else{
+      alphaf_ptr=alphaf_in;
+    }
+
+    // ++++++++++++++++++  draw triangles +++++++++++++++++
+
+    glBegin(GL_TRIANGLES);
+
+    slice_beg=1;
+    slice_end=ny+nz-2;
+    for(iii=slice_beg;iii<slice_end;iii+=skip){
+      kmj=iii;
+      if(ssmokedir<0)kmi = ny+nz-2-iii;
+
+      jbeg=0;
+      kbeg=jbeg-ny+1+kmj;
+      if(kbeg<0){
+        kbeg=0;
+        jbeg=kbeg+ny-1-kmj;
+      }
+      jend=ny-1;
+      kend=jend+kmj+1-ny;
+      if(kend>nz-1){
+        kend=nz-1;
+        jend=kend+ny-1-kmj;
+      }
+
+      for(i=is1; i<is2; i++){
+        iterm = (i-is1);
+        x1 = xplt[i];
+        x3 = xplt[i+1];
+        xnode[0]=x1;
+        xnode[1]=x1;
+        xnode[2]=x3;
+        xnode[3]=x3;
+
+        for(jj=jbeg;jj<jend;jj++){
+          j = js1 + jj;
+          jterm = (j-js1)*nx;
+
+          kk = jj + kmj + 1 - ny;
+          k = ks1 + kk;
+          kterm = (k-ks1)*nxy;
+                            
+
+          z1=zplt[k];
+          z3=zplt[k+1];
+
+          znode[0]=z1;
+          znode[1]=z3;
+          znode[2]=z3;
+          znode[3]=z1;
+
+          yy1 = yplt[j];
+          y3 = yplt[j+1];
+          ynode[0]=yy1;
+          ynode[1]=y3;
+          ynode[2]=y3;
+          ynode[3]=yy1;
+
+
+          n11 = jterm + iterm + kterm;
+          n12 = n11 + nxy + nx;
+          n22 = n12 + 1;
+          n21 = n22 - nx - nxy;
+
+        //    n11 = (i-is1)   + (j-js1)*nx    + (k-ks1)*nx*ny;
+        //    n12 = (i-is1)   + (j+1-js1)*nx  + (k+1-ks1)*nx*ny;
+        //    n22 = (i+1-is1) + (j+1-js1)*nx  + (k+1-ks1)*nx*ny;
+        //    n21 = (i+1-is1) + (j-js1)*nx    + (k-ks1)*nx*ny;
+
+          DRAWVERTEX(xnode[mm], ynode[mm], znode[mm])
+        }
+      }
+    }
+    glEnd();
+    break;
+
+
+  // +++++++++++++++++++++++++++++++++++ DIR 8 +++++++++++++++++++++++++++++++++++++++
+
+  case 8:
+  case -8:
+
+    // ++++++++++++++++++  adjust transparency +++++++++++++++++
+
+    aspectratio=meshi->dxz;    
+    if(adjustalphaflag!=0){
+      norm[0]=meshi->norm[0];
+      norm[1]=meshi->norm[1];
+      norm[2]=meshi->norm[2];
+
+      for(iii=1;iii<nx+nz-2;iii+=skip){
+        ipk = iii;
+        if(ssmokedir<0)ipk = nx+nz-2-iii;
+        ibeg=0;
+        kbeg=ipk;
+        if(kbeg>nz-1){
+          kbeg=nz-1;
+          ibeg=ipk-kbeg;
+        }
+        iend=nx-1;
+        kend=ipk-iend;
+        if(kend<0){
+          kend=0;
+          iend=ipk-kend;
+        }
+
+        for(j=js1;j<=js2;j++){
+          jterm = (j-js1)*nx;
+          xp[1]=yplt[j];
+
+          for(ii=ibeg;ii<=iend;ii++){
+            i=is1+ii;
+            iterm = (i-is1);
+
+            kk = ipk-ii;
+            k=ks1+kk;
+            kterm = (k-ks1)*nxy;
+
+            xp[2]=zplt[k];
+            xp[0]=xplt[i];
+            n = iterm + jterm + kterm;
+            ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
+            mergealpha = mergealphaptr[n];
+            ADJUSTALPHA(mergealpha,aspectratio,norm,4);
+          }
+        }
+      }
+      alphaf_ptr=alphaf_out;
+    }
+    else{
+      alphaf_ptr=alphaf_in;
+    }
+
+    // ++++++++++++++++++  draw triangles +++++++++++++++++
+
+    glBegin(GL_TRIANGLES);
+    slice_beg=1;
+    slice_end=nx+nz-2;
+    for(iii=slice_beg;iii<slice_end;iii+=skip){
+      ipk = iii;
+      if(ssmokedir<0)ipk = nx+nz-2-iii;
+      ibeg=0;
+      kbeg=ipk;
+      if(kbeg>nz-1){
+        kbeg=nz-1;
+        ibeg=ipk-kbeg;
+      }
+      iend=nx-1;
+      kend=ipk-iend;
+      if(kend<0){
+        kend=0;
+        iend=ipk-kend;
+      }
+
+      for(j=js1; j<js2; j++){
+        jterm = (j-js1)*nx;
+        yy1 = yplt[j];
+        y3 = yplt[j+1];
+        ynode[0]=yy1;
+        ynode[1]=yy1;
+        ynode[2]=y3;
+        ynode[3]=y3;
+
+        for(ii=ibeg;ii<iend;ii++){
+          i=is1+ii;
+          iterm = (i-is1);
+          x1 = xplt[i];
+          x3 = xplt[i+1];
+
+          xnode[0]=x1;
+          xnode[1]=x3;
+          xnode[2]=x3;
+          xnode[3]=x1;
+
+          kk = ipk-ii;
+          k=ks1+kk;
+          kterm = (k-ks1)*nxy;
+
+          z1=zplt[k];
+          z3=zplt[k-1];
+
+          znode[0]=z1;
+          znode[1]=z3;
+          znode[2]=z3;
+          znode[3]=z1;
+
+          n11 = iterm+jterm+kterm;
+          n12 = n11 + 1 - nxy;
+          n22 = n12 + nx;
+          n21 = n22 - 1 +  nxy;
+
+//        n11 = (i-is1)   + (j-js1)*nx   + (k-ks1)*nx*ny;
+//        n12 = (i+1-is1) + (j-js1)*nx   + (k-1-ks1)*nx*ny;
+//        n22 = (i+1-is1) + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
+//        n21 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
+
+          DRAWVERTEX(xnode[mm],ynode[mm],znode[mm])
+        }
+      }
+    }
+    glEnd();
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 9 +++++++++++++++++++++++++++++++++++++++
+
+      /* interchange y and z, j and z */
+    case 9:
+    case -9:
+    aspectratio=meshi->dxz;
+    if(adjustalphaflag!=0){
+      norm[0]=meshi->norm[0];
+      norm[1]=meshi->norm[1];
+      norm[2]=meshi->norm[2];
+
+      for(iii=1;iii<nx+nz-2;iii+=skip){
+        kmi=iii;
+        if(ssmokedir<0)kmi = nx+nz-2-iii;
+
+        ibeg=0;
+        kbeg=ibeg-nx+1+kmi;
+        if(kbeg<0){
+          kbeg=0;
+          ibeg=kbeg+nx-1-kmi;
+        }
+        iend=nx-1;
+        kend=iend+kmi+1-nx;
+        if(kend>nz-1){
+          kend=nz-1;
+          iend=kend+nx-1-kmi;
+        }
+
+        for(j=js1;j<=js2;j++){
+          jterm = (j-js1)*nx;
+          xp[1]=yplt[j];
+
+          for(ii=ibeg;ii<=iend;ii++){
+            i = is1 + ii;
+            iterm = (i-is1);
+
+            kk = ii + kmi + 1 - nx;
+            k = ks1 + kk;
+            kterm = (k-ks1)*nxy;
+
+
+            xp[2]=zplt[k];
+            xp[0]=xplt[i];
+            n = iterm + jterm + kterm;
+            ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
+            mergealpha = mergealphaptr[n];
+            ADJUSTALPHA(mergealpha,aspectratio,norm,4);
+          }
+        }
+      }
+      alphaf_ptr=alphaf_out;
+    }
+    else{
+      alphaf_ptr=alphaf_in;
+    }
+
+    // ++++++++++++++++++  draw triangles +++++++++++++++++
+
+    glBegin(GL_TRIANGLES);
+    slice_beg=1;
+    slice_end=nx+nz-2;
+    for(iii=slice_beg;iii<slice_end;iii+=skip){
+      kmi=iii;
+      if(ssmokedir<0)kmi = nx+nz-2-iii;
+
+      ibeg=0;
+      kbeg=ibeg-nx+1+kmi;
+      if(kbeg<0){
+        kbeg=0;
+        ibeg=kbeg+nx-1-kmi;
+      }
+      iend=nx-1;
+      kend=iend+kmi+1-nx;
+      if(kend>nz-1){
+        kend=nz-1;
+        iend=kend+nx-1-kmi;
+      }
+
+      for(j=js1; j<js2; j++){
+        jterm = (j-js1)*nx;
+        yy1 = yplt[j];
+        y3 = yplt[j+1];
+        ynode[0]=yy1;
+        ynode[1]=yy1;
+        ynode[2]=y3;
+        ynode[3]=y3;
+
+        for(ii=ibeg;ii<iend;ii++){
+          i = is1 + ii;
+          iterm = (i-is1);
+
+          kk = ii + kmi + 1 - nx;
+          k = ks1 + kk;
+          kterm = (k-ks1)*nxy;
+                            
+
+          z1=zplt[k];
+          z3=zplt[k+1];
+
+          znode[0]=z1;
+          znode[1]=z3;
+          znode[2]=z3;
+          znode[3]=z1;
+
+          x1 = xplt[i];
+          x3 = xplt[i+1];
+          xnode[0]=x1;
+          xnode[1]=x3;
+          xnode[2]=x3;
+          xnode[3]=x1;
+
+
+          n11 = jterm + iterm + kterm;
+          n12 = n11 + nxy + 1;
+          n22 = n12 + nx;
+          n21 = n22 - 1 - nxy;
+
+        //    n11 = (i-is1)   + (j-js1)*nx   + (k-ks1)*nx*ny;
+        //    n12 = (i+1-is1) + (j-js1)*nx   + (k+1-ks1)*nx*ny;
+        //    n22 = (i+1-is1) + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
+        //    n21 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
+
+          DRAWVERTEX(xnode[mm], ynode[mm], znode[mm])
+        }
+      }
+    }
+    glEnd();
+    break;
+    default:
+      ASSERT(FFALSE);
+      break;
+  }
+  transparentoff();
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
+//  printf("majorcull=%i minorcull=%i\n",majorcull,minorcull);
+
+}
+
+/* ------------------ setPixelCount ------------------------ */
+
+void setPixelCount(void){
+  mesh *meshi;
+  int imesh;
+  int icull;
+  float x0[3], x1[3], x2[3], x3[3];
+  float x4[3], x5[3], x6[3], x7[3];
+
+  glDisable(GL_LIGHTING);
+  glDisable(GL_COLOR_MATERIAL);
+  glDisable(GL_NORMALIZE);
+  glDepthMask(GL_FALSE);
+  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+
+  for(imesh=0;imesh<selected_case->nmeshes;imesh++){
+    meshi = selected_case->meshinfo + imesh;
+
+    meshi->culldefined=1;
+    glGenQueries(meshi->ncullinfo,meshi->cullQueryId);
+
+    for(icull=0;icull<meshi->ncullinfo;icull++){
+      culldata *culli;
+
+      culli = meshi->cullinfo + icull;
+
+      x0[0]=culli->xbeg;
+      x1[0]=culli->xbeg;
+      x2[0]=culli->xend;
+      x3[0]=culli->xend;
+      x4[0]=culli->xbeg;
+      x5[0]=culli->xbeg;
+      x6[0]=culli->xend;
+      x7[0]=culli->xend;
+
+      x0[1]=culli->ybeg;
+      x1[1]=culli->yend;
+      x2[1]=culli->yend;
+      x3[1]=culli->ybeg;
+      x4[1]=culli->ybeg;
+      x5[1]=culli->yend;
+      x6[1]=culli->yend;
+      x7[1]=culli->ybeg;
+
+      x0[2]=culli->zbeg;
+      x1[2]=culli->zbeg;
+      x2[2]=culli->zbeg;
+      x3[2]=culli->zbeg;
+      x4[2]=culli->zend;
+      x5[2]=culli->zend;
+      x6[2]=culli->zend;
+      x7[2]=culli->zend;
+
+/* stuff min and max grid data into a more convenient form 
+  assuming the following grid numbering scheme
+
+       5-------6
+     / |      /| 
+   /   |     / | 
+  4 -------7   |
+  |    |   |   |  
+  Z    1---|---2
+  |  Y     |  /
+  |/       |/
+  0--X-----3     
+
+  */
+      glBeginQuery(GL_SAMPLES_PASSED,meshi->cullQueryId[icull]);
+      glBegin(GL_QUADS);
+      glVertex3fv(x0);
+      glVertex3fv(x3);
+      glVertex3fv(x7);
+      glVertex3fv(x4);
+
+      glVertex3fv(x3);
+      glVertex3fv(x2);
+      glVertex3fv(x6);
+      glVertex3fv(x7);
+
+      glVertex3fv(x2);
+      glVertex3fv(x1);
+      glVertex3fv(x5);
+      glVertex3fv(x6);
+
+      glVertex3fv(x1);
+      glVertex3fv(x0);
+      glVertex3fv(x4);
+      glVertex3fv(x5);
+
+      glVertex3fv(x1);
+      glVertex3fv(x2);
+      glVertex3fv(x3);
+      glVertex3fv(x0);
+
+      glVertex3fv(x4);
+      glVertex3fv(x7);
+      glVertex3fv(x6);
+      glVertex3fv(x5);
+      glEnd();
+      glEndQuery(GL_SAMPLES_PASSED);
+    }
+
+  }
+  glEnable(GL_LIGHTING);
+  glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_NORMALIZE);
+  glDepthMask(GL_TRUE);
+  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+
+}
+
+/* ------------------ getPixelCount ------------------------ */
+
+void getPixelCount(void){
+  mesh *meshi;
+  int i;
+  int icull;
+  int nzero=0;
+
+  for(i=0;i<selected_case->nmeshes;i++){
+    meshi = selected_case->meshinfo + i;
+
+
+    if(meshi->culldefined==0)continue;  
+    for(icull=0;icull<meshi->ncullinfo;icull++){
+      culldata *culli;
+
+      culli = meshi->cullinfo + icull;
+
+      glGetQueryObjectiv(meshi->cullQueryId[icull],GL_QUERY_RESULT,&culli->npixels);
+      if(culli->npixels==0)nzero++;
+    }
+    glDeleteQueries(meshi->ncullinfo,meshi->cullQueryId);
+  }
+  //printf("nzero=%i blocks out of %i\n",nzero,meshi->ncullinfo);
+
+}
+#endif

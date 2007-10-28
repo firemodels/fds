@@ -874,7 +874,12 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_scratch);
     matmatmult(inverse_modelview_setup,modelview_scratch,modelview_current);
 
-    if(nsmoke3d>0)getsmokedir(modelview_scratch);
+    if(nsmoke3d>0){
+      getsmokedir(modelview_scratch);
+#ifdef pp_CULL
+      if(cullsmoke==1)getPixelCount();
+#endif
+    }
     if(nface_transparent>0)sort_transparent_faces(modelview_scratch);
 
     // calculate transparent distances and sort
@@ -1059,6 +1064,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   }
 
   
+
 /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
 #ifdef pp_COLOR
@@ -1288,35 +1294,35 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
 /* ++++++++++++++++++++++++ draw 3D smoke +++++++++++++++++++++++++ */
 
   if(show3dsmoke==1){
-    {
-      smoke3d *smoke3di;
+    smoke3d *smoke3di;
 
-      CheckMemory;
+    CheckMemory;
 #ifdef pp_GPU
-      if(usegpu==1)useSmokeShaders();
+    if(usegpu==1)useSmokeShaders();
 #endif
-      for(i=0;i<nsmoke3d;i++){
-        smoke3di = smoke3dinfo + i;
-        if(smoke3di->loaded==0||smoke3di->display==0)continue;
-        if(smoke3di->d_display==0)continue;
+    for(i=0;i<nsmoke3d;i++){
+      smoke3di = smoke3dinfo + i;
+      if(smoke3di->loaded==0||smoke3di->display==0)continue;
+      if(smoke3di->d_display==0)continue;
 
 #ifdef pp_GPU
-        if(usegpu==1){
+      if(usegpu==1){
       //    getDepthTexture();
-          drawsmoke3dGPU(smoke3di);
-        }
-        else{
-          drawsmoke3d(smoke3di);
-        }
-#else
-        drawsmoke3d(smoke3di);
-#endif
+        drawsmoke3dGPU(smoke3di);
       }
-#ifdef pp_GPU
-      if(usegpu==1)useOpenGLShaders();
+      else{
+        drawsmoke3d(smoke3di);
+      }
+#else
+      drawsmoke3d(smoke3di);
 #endif
-
     }
+#ifdef pp_GPU
+    if(usegpu==1)useOpenGLShaders();
+#endif
+#ifdef pp_CULL
+    if(cullsmoke==1)setPixelCount();
+#endif
     sniffErrors("after drawsmoke");
   }
 

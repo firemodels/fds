@@ -66,6 +66,7 @@
 #define pp_LIGHT
 #define pp_GPU
 #define pp_MEM2
+#define pp_CULL
 #endif
 
 #undef pp_OPEN
