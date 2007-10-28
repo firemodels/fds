@@ -451,7 +451,11 @@ void keyboard(unsigned char key, int x, int y){
   glutPostRedisplay();
   updatemenu=1;
   key2 = (char)key;
-  if(key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&isupper(key2))key2=tolower(key2); /* map upper case characters to lower */
+  if(key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'
+#ifdef pp_CULL
+    &&key2!='C'
+#endif
+    &&isupper(key2))key2=tolower(key2); /* map upper case characters to lower */
 
 #ifdef _DEBUG 
   if(strncmp((const char *)&key2,"l",1)==0){
@@ -542,6 +546,12 @@ void keyboard(unsigned char key, int x, int y){
     usetexturebar=1-usetexturebar;
     printf("usetexturebar=%i\n",usetexturebar);
   }
+#ifdef pp_CULL
+  if(strncmp((const char *)&key2,"C",1)==0){
+    cullsmoke=1-cullsmoke;
+    printf("cullsmoke=%i\n",cullsmoke);
+  }
+#endif
 #ifdef pp_GPU
   if(strncmp((const char *)&key2,"G",1)==0){
     if(gpuactive==1){

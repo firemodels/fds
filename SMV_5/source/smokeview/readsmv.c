@@ -4989,6 +4989,18 @@ typedef struct {
     }
     nchanged_idlist=ntotal;
   }
+#ifdef pp_CULL
+
+  // define data structures used to speed up 3d smoke drawing (by culling non-visible smoke planes)
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi=meshinfo+i;
+    initcull(meshi,1);
+  }
+#endif
+
 
 
   printf("wrap up completed\n");
@@ -5576,6 +5588,11 @@ void initobst(blockagedata *bc, surface *surf,int index,int meshindex){
 
 void initmesh(mesh *meshi){
 
+#ifdef pp_CULL
+  meshi->cullinfo=NULL;
+  meshi->culldefined=0;
+  meshi->cullQueryId=NULL;
+#endif
   meshi->meshrgb[0]=0.0;
   meshi->meshrgb[1]=0.0;
   meshi->meshrgb[2]=0.0;

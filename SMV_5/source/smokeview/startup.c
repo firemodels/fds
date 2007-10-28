@@ -1013,6 +1013,9 @@ void initvars1(void){
   show_slice_average=0;
   vis_slice_average=1;
   slice_average_interval=10.0;
+#ifdef pp_CULL
+  cullsmoke=0;
+#endif
 
   show_transparent_vents=1;
   angle=0.0, dang=0.025f, tourangle=0.0;

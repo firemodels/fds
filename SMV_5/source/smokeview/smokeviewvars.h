@@ -36,6 +36,9 @@ SVEXTERN int force_isometric;
 SVEXTERN int updategluiview;
 SVEXTERN int render_double,render_double_state;
 SVEXTERN int usetexturebar;
+#ifdef pp_CULL
+SVEXTERN int cullsmoke;
+#endif
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
 SVEXTERN int GPU_aspectratio, GPU_normx, GPU_normy, GPU_normz, GPU_skip, GPU_hrrcutoff, GPU_hrr;

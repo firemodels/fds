@@ -7,6 +7,17 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 
+/* --------------------------  culldata ------------------------------------ */
+#ifdef pp_CULL
+typedef struct {
+  float xbeg, xend, ybeg, yend, zbeg, zend;
+  int   ibeg, iend, jbeg, jend, kbeg, kend;
+  int iskip, jskip, kskip;
+  int npixels;
+} culldata;
+#endif
+
+
 /* --------------------------  treedata ------------------------------------ */
 
 typedef struct {
@@ -417,6 +428,13 @@ typedef struct mesh_ {
 
   char *label;
   int smokeloaded;
+
+#ifdef pp_CULL
+  int ncullinfo;
+  culldata *cullinfo;
+  GLuint *cullQueryId;
+  int culldefined;
+#endif
 
 } mesh;
 
