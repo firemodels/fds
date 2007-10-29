@@ -2301,6 +2301,13 @@ similar manner to the obstructions, with the sextuplet {\ct XB}
 denoting a plane abutting a solid surface. Two of the six coordinates must
 be the same, denoting a plane as opposed to a solid.
 
+\begin{warning}
+\noindent
+Note that only one {\ct VENT} may be specified for any given wall cell.  If additional {\ct VENT} lines are specified for a 
+given wall cell, FDS will output a warning message and ignore the subsequent lines (i.e. only the first vent
+will be applied)
+\end{warning}
+
 The term ``{\ct VENT}'' is somewhat misleading. Taken literally, a
 {\ct VENT} can be used to model components of the ventilation system in
 a building, like a diffuser or a return.
