@@ -6112,6 +6112,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       continue;
     }
 
+    if(match(buffer,"SHOWHRRCUTOFF",13)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&show_hrrcutoff);
+      if(show_hrrcutoff!=1)show_hrrcutoff=0;
+      continue;
+    }
     if(match(buffer,"TWOSIDEDVENTS",13)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i",&show_bothsides_int,&show_bothsides_ext);
@@ -8202,6 +8208,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",showall_textures);
   fprintf(fileout,"SHOWIGNITION\n");
   fprintf(fileout," %i %i\n",vis_ignited,vis_onlyignited);
+  fprintf(fileout,"SHOWHRRCUTOFF\n");
+  fprintf(fileout," %i\n",show_hrrcutoff);
   fprintf(fileout,"TWOSIDEDVENTS\n");
   fprintf(fileout," %i %i\n",show_bothsides_int,show_bothsides_ext);
   fprintf(fileout,"TRAINERVIEW\n");
