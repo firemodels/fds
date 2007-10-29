@@ -1135,7 +1135,6 @@ void mergesmoke3dcolors(void){
     }
   }
 }
-#ifndef pp_CULL
 void drawsmoke3d(smoke3d *smoke3di){
   int i,j,k,n;
   float constval,x1,x3,z1,z3, yy1, y3;
@@ -2886,7 +2885,6 @@ case -2:
 
 
 }
-#endif
 #ifdef pp_GPU
 /* ------------------ drawsmoke3dGPU ------------------------ */
 
@@ -4855,7 +4853,7 @@ void getDepthTexture( void ){
 }
 #endif
 #ifdef pp_CULL
-#define N_CULLNODES 16
+
 /*
 typedef struct {
   float xbeg, xend, ybeg, yend, zbeg, zend;
@@ -4876,7 +4874,7 @@ void initcull(mesh *meshi, int cullflag){
   int iskip, jskip, kskip;
 
   if(cullflag==1){
-    iskip = meshi->ibar/4;
+    iskip = meshi->ibar/6;
     jskip = iskip;
     kskip = iskip;
   }
@@ -4950,7 +4948,7 @@ void initcull(mesh *meshi, int cullflag){
 #ifdef pp_CULL
 /* ------------------ drawsmoke3d ------------------------ */
 
-void drawsmoke3d(smoke3d *smoke3di){
+void drawsmoke3dCULL(smoke3d *smoke3di){
   int i,j,k,n;
   float constval,x1,x3,z1,z3, yy1, y3;
   int is1, is2, js1, js2, ks1, ks2;
@@ -5040,7 +5038,7 @@ void drawsmoke3d(smoke3d *smoke3di){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   transparenton();
-  printf("case %i\n",ssmokedir);
+//  printf("case %i\n",ssmokedir);
   switch (ssmokedir){
     int icull;
 
@@ -6117,15 +6115,12 @@ case -2:
 //  printf("majorcull=%i minorcull=%i\n",majorcull,minorcull);
 
 }
+void setPixelCountOrthog(mesh *meshi);
 
 /* ------------------ setPixelCount ------------------------ */
 
 void setPixelCount(void){
-  mesh *meshi;
-  int imesh;
-  int icull;
-  float x0[3], x1[3], x2[3], x3[3];
-  float x4[3], x5[3], x6[3], x7[3];
+  int imesh,icull;
 
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
@@ -6134,7 +6129,57 @@ void setPixelCount(void){
   glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 
   for(imesh=0;imesh<selected_case->nmeshes;imesh++){
+    mesh *meshi;
     meshi = selected_case->meshinfo + imesh;
+
+    switch (meshi->smokedir){
+      case 1:
+      case -1:
+      case 2:
+      case -2:
+      case 3:
+      case -3:
+        setPixelCountOrthog(meshi);
+        break;
+      case 4:
+      case -4:
+      case 5:
+      case -5:
+      case 6:
+      case -6:
+      case 7:
+      case -7:
+      case 8:
+      case -8:
+      case 9:
+      case -9:
+        for(icull=0;icull<meshi->ncullinfo;icull++){
+          culldata *culli;
+
+          culli = meshi->cullinfo + icull;
+          culli->npixels=1;
+        }
+        break;
+      default:
+        ASSERT(FFALSE);
+        break;
+    }
+  }
+  glEnable(GL_LIGHTING);
+  glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_NORMALIZE);
+  glDepthMask(GL_TRUE);
+  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+}
+
+/* ------------------ setPixelCountOrthog ------------------------ */
+
+void setPixelCountOrthog(mesh *meshi){
+  int icull;
+  float x0[3], x1[3], x2[3], x3[3];
+  float x4[3], x5[3], x6[3], x7[3];
+
+
 
     meshi->culldefined=1;
     glGenQueries(meshi->ncullinfo,meshi->cullQueryId);
@@ -6144,6 +6189,21 @@ void setPixelCount(void){
 
       culli = meshi->cullinfo + icull;
 
+/* 
+  stuff min and max grid data into a more convenient form 
+  assuming the following grid numbering scheme
+
+       5-------6
+     / |      /| 
+   /   |     / | 
+  4 -------7   |
+  |    |   |   |  
+  Z    1---|---2
+  |  Y     |  /
+  |/       |/
+  0--X-----3     
+
+  */
       x0[0]=culli->xbeg;
       x1[0]=culli->xbeg;
       x2[0]=culli->xend;
@@ -6171,20 +6231,6 @@ void setPixelCount(void){
       x6[2]=culli->zend;
       x7[2]=culli->zend;
 
-/* stuff min and max grid data into a more convenient form 
-  assuming the following grid numbering scheme
-
-       5-------6
-     / |      /| 
-   /   |     / | 
-  4 -------7   |
-  |    |   |   |  
-  Z    1---|---2
-  |  Y     |  /
-  |/       |/
-  0--X-----3     
-
-  */
       glBeginQuery(GL_SAMPLES_PASSED,meshi->cullQueryId[icull]);
       glBegin(GL_QUADS);
       glVertex3fv(x0);
@@ -6220,12 +6266,6 @@ void setPixelCount(void){
       glEndQuery(GL_SAMPLES_PASSED);
     }
 
-  }
-  glEnable(GL_LIGHTING);
-  glEnable(GL_COLOR_MATERIAL);
-  glEnable(GL_NORMALIZE);
-  glDepthMask(GL_TRUE);
-  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
 }
 
