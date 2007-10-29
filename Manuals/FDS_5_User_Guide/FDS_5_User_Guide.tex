@@ -518,7 +518,7 @@ Robert Schmidt                          & Combustion Science \& Engineering, Inc
 Joe Skaggs                              & CASE Forensics, USA                  \\ \hline
 Piotr Smardz                            & Ahearne Fire Engineering Consultants, Ireland                  \\ \hline
 Jamie Stern-Gottfried                   & Arup Fire, UK                 \\ \hline
-Boris Stock                             & BFT Cognos Gmb, Germany                  \\ \hline
+Boris Stock                             & BFT Cognos GmbH, Germany                  \\ \hline
 Blair Stratton                          & Beca, New Zealand                   \\ \hline
 Csaba Szilagyi                          & Szolnok Fire Department, Hungary                  \\ \hline
 Charlie Thornton                        & Thunderhead Engineering, USA                  \\ \hline
@@ -699,11 +699,12 @@ See Section~\ref{info:thermalboundary} for more information.
 \item[{\bf Development, Distribution and Formal User Support}] Starting with FDS 5, an online, open-source
 development environment is being used for configuration management
 (code archiving, revision tracking, bug fixes, user suggestions, and so on).
-See Section~\ref{info:sfcvs} for more information.
+See Section~\ref{info:aquire} for more information.
 
-\item[{\bf FDS Verification and Validation Guide}] Starting with FDS 5, more emphasis has been placed on maintaining
-a permanent collection of Verification and Validation cases.  This improves the
-quality of each FDS update and release, as a standard test suite will now be used to insure that changes
+\item[{\bf FDS Verification and Validation Information}] Starting with FDS 5, more 
+emphasis has been placed on maintaining a permanent collection of Verification 
+and Validation cases.  This improves the quality of each FDS update and release, 
+as a standard test suite will now be used to insure that changes
 made to the source code do not degrade FDS output.  This also provides users with a standard
 data set to verify their own installation of FDS and to compare the results that FDS is returning
 on their system to published data.
@@ -724,7 +725,7 @@ A separate document~\cite{Smokeview_Users_Guide_5} describes how to use Smokevie
 FDS and Smokeview can be found at the web site.
 
 \section{How to Acquire FDS and Smokeview}
-\label{info:sfcvs}
+\label{info:acquire}
 \index{Download}
 Detailed instructions on how to download executables, manuals, source-code and related utilities,
 can be found on the FDS-SMV Website
@@ -766,13 +767,14 @@ implementations of Unix/Linux.
 
 \begin{description}
 \item[{\bf MS Windows}]
-An installation package is available for Windows operating system.  It is not recommended to run FDS/Smokeview under any version of MS Windows
+An installation package is available for Windows operating system.  
+It is not recommended to run FDS/Smokeview under any version of MS Windows
 released prior to Windows 2000.
 
 \item[{\bf Mac OS X}]
-A Mac OS X Tiger FDS .zip archive is available for both the PowerPC and Intel architectures.
-OS X 10.4.x or better is recommended, versions of OS X prior to 10.4.x are not officially supported.
-Users can always download the latest version of FDS source and
+A Mac OS X FDS .zip archive is available for both the PowerPC and Intel architectures.
+Mac OS X 10.4.x or better is recommended, versions of OS X prior to 10.4.x are not 
+officially supported. Users can always download the latest version of FDS source and
 compile FDS for other versions of OS X (See Appendix~\ref{info:compilation} for details).
 
 \item[{\bf Unix, Linux}]
@@ -842,8 +844,8 @@ The character string {\ct job\_name} is usually
 designated within the input file as the {\ct CHID}. It is recommended that the
 name of the input file and the {\ct CHID} be the same so that all of the
 files associated with a given calculation have a consistent name.
-The progress of a simulation is indicated by diagnostic output that is written out onto the screen.
-Detailed diagnostic information is automatically
+The progress of a simulation is indicated by diagnostic output that is written 
+out onto the screen. Detailed diagnostic information is automatically
 written to a file {\bf CHID.out}, where {\ct CHID} is a character
 string, usually the same as {\ct job\_name}, designated in the input file..
 Screen output can be redirected to a file via the alternative command
@@ -855,10 +857,13 @@ fds5 job_name.fds > job_name.err
 
 \subsubsection{Mac OS X, Unix, Linux}
 
-Depending on the type of installation, you may need to set various path or environment variables in order to invoke
-FDS without a full path reference to the executable. The easiest way to do this is via an ``alias'' in your shell start-up
-script. For the example below, it is assumed that {\ct fds5} is aliased to its full path name.
-You may also need to ``chmod + x'' to make the file executable. Once this is done, run FDS from the command line by typing:
+Depending on the type of installation, you may need to set various 
+path or environment variables in order to invoke FDS without a full 
+path reference to the executable. The easiest way to do this is via 
+an ``alias'' in your shell start-up script. For the example below, 
+it is assumed that {\ct fds5} is aliased to its full path name.
+You may also need to ``chmod + x'' to make the file executable. 
+Once this is done, run FDS from the command line by typing:
 \begin{verbatim}
 fds5 job_name.fds
 \end{verbatim}
@@ -870,10 +875,11 @@ fds5 job_name.fds >& job_name.err &
 \end{verbatim}
 
 
-Note that in the latter case, the screen output is stored in the file {\bf job\_name.err} and the
-detailed diagnostics are saved automatically in a file {\bf CHID.out}, where {\ct CHID} is a character
-string, usually the same as {\ct job\_name}, designated in the input file.
-It is preferable to run jobs in the background so as to free the console for other uses.
+Note that in the latter case, the screen output is stored in the file 
+{\bf job\_name.err} and the detailed diagnostics are saved automatically 
+in a file {\bf CHID.out}, where {\ct CHID} is a character string, usually 
+the same as {\ct job\_name}, designated in the input file. It is preferable 
+to run jobs in the background so as to free the console for other uses.
 
 
 
@@ -2364,12 +2370,12 @@ Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct O
 {\ct VENT} to be drawn as an outline in Smokeview.
 
 
-\subsection{Special {\tt VENT}s}
+\subsection{Special \texorpdfstring{{\tt VENT}s}{VENTs}}
 
 There are two reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {\ct 'OPEN'} and {\ct 'MIRROR'}. The term {\em reserved} means that these two
 {\ct SURF\_ID}s should not be explicitly defined by you. Their properties are predefined.
 
-\subsubsection{An {\tt OPEN} {\tt VENT}}
+\subsubsection{An \texorpdfstring{{\tt OPEN}}{OPEN} \texorpdfstring{{\tt VENT}}{VENT}}
 
 The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT}
 is applied to the exterior boundary of the computational domain, where
@@ -2390,7 +2396,7 @@ Vents to the outside of the computational domain ({\ct OPEN} vents)
 may {\bf not} be opened or closed during a simulation. See Section~\ref{info:activate_deactivate} for details.
 \end{warning}
 
-\subsubsection{A {\tt MIRROR} {\tt VENT}}
+\subsubsection{A \texorpdfstring{{\tt MIRROR}}{MIRROR} \texorpdfstring{{\tt VENT}}{VENT}}
 
 A {\ct VENT} with {\ct SURF\_ID='MIRROR'} denotes a symmetry plane.
 Usually, a {\ct MIRROR} spans an entire face of the computational
@@ -2410,18 +2416,13 @@ Note that the mirror image of a scene is {\bf not} shown in Smokeview.
 \end{warning}
 
 
-
-
-
-
-\subsection{Controlling {\tt VENT}s}
+\subsection{\texorpdfstring{{Controlling {\tt VENT}s}}{Controlling VENTs}}
 
 {\ct VENT} functionality can be controlled in some cases using ``devices'' and ``controls,'' specified via a {\ct DEVC\_ID} or a {\ct CTRL\_ID}.
 See Section~\ref{info:activate_deactivate} for details.
 
 
-
-\subsection{Trouble-Shooting {\tt VENT}s}
+\subsection{\texorpdfstring{{Trouble-Shooting {\tt VENT}s}}{Trouble-Shooting VENTs}}
 
 If an error message appears requesting that \index{Troubleshooting!VENT Orientation}
 the orientation of a vent be specified, first check to make sure that the vent is a plane.
@@ -2432,13 +2433,6 @@ $z$ direction, use the number 2 and 3, respectively. Setting {\ct IOR} may somet
 the problem, but it is more likely that if there is an error message about orientation, then
 the {\ct VENT} is buried within a solid obstruction, in which case the program cannot determine
 the direction in which the {\ct VENT} is facing.
-
-
-
-
-
-
-
 
 
 
@@ -5805,7 +5799,7 @@ measurement point may get out of the solid, in which case it starts to
 show ambient temperature.
 
 
-\subsection{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}%Bryan
+\subsection{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}
 \label{info:SLCF}\index{SLCF}
 
 The {\ct SLCF} (``slice file'') namelist group parameters (Table~\ref{tbl:SLCF})
@@ -5816,12 +5810,12 @@ The sextuplet {\ct XB} indicates the boundaries of the ``slice'' plane.
 {\ct XB} is prescribed as in the {\ct OBST} or {\ct VENT} groups, with
 the possibility that 0, 2, or 4 out of the 6 values be the same to
 indicate a volume, plane or line, respectively. A handy trick is to
-specify, for example, {\ct PBY=5.3} instead of {\ct XB} if it is desired
+specify, for example, {\ct PBY=5.3} instead of {\ct XB} if it is desired\index{SLCF!PBX,PBY,PBZ}
 that the entire plane $y=5.3$ slicing through the domain be saved.
 {\ct PBX} and {\ct PBZ} control planes perpendicular to the
 $x$ and $z$ axes, respectively.
 
-Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} If two {\ct SLCF}
+Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} \index{SLCF!VECTOR}If two {\ct SLCF}
 entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity
 component slices will be created.
 
@@ -7470,16 +7464,6 @@ The syntax of the old {\ct THCP} namelist group is almost the same. Just swap {\
 
 
 
-
-
-
-
-
-
-
-
-
-
 \part{Sample Cases and Verification}
 \label{part:verification}
 
@@ -7579,7 +7563,7 @@ level.
 \clearpage
 \section{Thermodynamics}
 
-\subsection{Pressure Rise in a Sealed Enclosure ({\bf pressure\_rise})  }
+\subsection{Pressure Rise in a Sealed Enclosure (\texorpdfstring{{\bf pressure\_rise}}{pressure\_rise})  }
 \label{pressure_rise}
 
 This example tests several basic features of FDS. A narrow channel, 3~m long, 0.002~m wide, and 1~m tall, has air injected at a rate of
@@ -7604,7 +7588,7 @@ is seen from 60 s to 120 s, indicating that the current implementation adiabatic
 
 \clearpage
 
-\subsection{Leaks and Fans in a Sealed Enclosure ({\bf leak\_test} and {\bf leak\_test\_2})  }
+\subsection{Leaks and Fans in a Sealed Enclosure (\texorpdfstring{{\bf leak\_test} and {\bf leak\_test\_2}}{leak\_test and leak\_test\_2})}
 \label{leak_test}
 
 A new feature of FDS 5 is the idea of a ``pressure zone.''  Unlike traditional compartment or ``zone'' fire models, FDS was not designed under the assumption that there exist
@@ -7641,7 +7625,7 @@ The two cases are summarized in the following plots:
 
 \clearpage
 
-\subsection{Stack Effect ({\bf stack\_effect})  }
+\subsection{Stack Effect (\texorpdfstring{{\bf stack\_effect}}{stack\_effect})}
 \label{stack_effect}
 
 If the interior temperature of a building is at a different temperature than the surrounding atmosphere, upward or
@@ -7674,7 +7658,7 @@ There are numerous examples in the heat transfer literature of exact solutions, 
 radiation transport equation.
 
 
-\subsection{Radiation inside a box ({\bf radiation\_in\_a\_box}) }
+\subsection{Radiation inside a box (\texorpdfstring{{\bf radiation\_in\_a\_box}}{radiation\_in\_a\_box}) }
 \label{radiation_in_a_box}
 
 This verification case tests the computation of three-dimensional
@@ -7715,7 +7699,7 @@ The exact and FDS results are shown here:
 
 \clearpage
 
-\subsection{Radiation from a plane layer ({\bf radiation\_plane\_layer}) }
+\subsection{Radiation from a plane layer (\texorpdfstring{{\bf radiation\_plane\_layer}}{radiation\_plane\_layer})}
 \label{radiation_plane_layer}
 
 This case tests the computation of three-dimensional
@@ -7758,7 +7742,7 @@ $\tau$ & $S(\tau)$ & \multicolumn{2}{c}{FDS (I=20,J=20)}
 
 
 \clearpage
-\subsection{Wall Internal Radiation ({\bf wall\_internal\_radiation}) }
+\subsection{Wall Internal Radiation (\texorpdfstring{{\bf wall\_internal\_radiation}}{wall\_internal\_radiation}) }
 \label{wall_internal_radiation}
 
 
@@ -7794,11 +7778,12 @@ $\tau$ & $S(\tau) {\rm (kW/m^2)}$ & FDS $\rm(kW/m^2)$ \\ \hline\hline
 
 \section{Solid Phase Phenomena}
 
-This section contains examples that test the one-dimensional heat conduction solver in FDS, along with an example of a simple
+This section contains examples that test the one-dimensional heat 
+conduction solver in FDS, along with an example of a simple
 two-step, solid phase reaction scheme.
 
 
-\subsection{Simple Heat Conduction Through a Solid Slab ({\bf heat\_conduction}) }
+\subsection{Simple Heat Conduction Through a Solid Slab (\texorpdfstring{{\bf heat\_conduction}}{heat\_conduction})}
 \label{heat_conduction}
 
 Analytical solutions of transient, one-dimensional heat conduction through a
@@ -7830,7 +7815,7 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 
 \clearpage
 
-\subsection{Temperature-Dependent Thermal Properties ({\bf heat\_conduction\_kc})}
+\subsection{Temperature-Dependent Thermal Properties (\texorpdfstring{{\bf heat\_conduction\_kc}}{heat\_conduction\_kc})}
 \label{heat_conduction_kc}
 
 This example demonstrates the 1-D heat conduction in cartesian,
@@ -7880,7 +7865,7 @@ geometry looks like:
 \end{center}
 
 
-\subsection{A Simple Two-Step Pyrolysis Example ({\bf two\_step\_solid\_reaction}) }
+\subsection{A Simple Two-Step Pyrolysis Example (\texorpdfstring{{\bf two\_step\_solid\_reaction}}{two\_step\_solid\_reaction})}
 \label{two_step_solid_reaction}
 
 Consider  the set  of ordinary  differential equations  describing the
@@ -7893,7 +7878,7 @@ thermal degradation:
     \nonumber
 \end{eqnarray}
 where  the  mass  fraction  of  component  $a$  is  1  initially.  The
-analytical solution is~\cite{Lautenberger:2006}
+analytical solution is~\cite{Lautenberger:2006}%Kevin undefined in .bib file.
 \begin{eqnarray}
     Y_a(t)    &=&    \exp(-K_{ab}t)    \nonumber   \\
     Y_b(t)    &=&    \frac{K_{ab}}{K_{bc}-K_{ab}} \exp(-K_{ab} t)  - \exp(-K_{bc} t) \\
@@ -7905,14 +7890,6 @@ for the parameters $K_{ab} = 0.389$ and $K_{bc} = 0.262$ are shown here:
 \begin{center}
 \includegraphics[width=4.5in]{FIGURES/two_step_solid_reaction_Mass_Fractions}
 \end{center}
-
-
-
-
-
-
-
-
 
 
 \chapter{Code Checking}
@@ -8055,9 +8032,6 @@ allowed ({\em e.g.} temperatures below ambient). These reports by the
 users help to improve and extend the use of the model.
 
 
-
-
-
 \chapter{Numerical Tests}
 
 \label{Numerical Tests}
@@ -8121,7 +8095,7 @@ known fluid flows to determine if the basic fluid flow solver in FDS is working 
 
 
 
-\subsection{Axially-Symmetric Helium Plume ({\bf helium\_2d}) }
+\subsection{Axially-Symmetric Helium Plume (\texorpdfstring{{\bf helium\_2d}}{helium\_2d}) }
 \label{helium_2d}
 
 The governing equations solved in FDS are written in terms of a
@@ -8162,19 +8136,17 @@ An example of an axially-symmetric helium plume is shown here, along with the in
 
 
 
-
-
-
-
-
-
-\subsection{Sawtooth ({\bf sawtooth})  }
+\subsection{Sawtooth (\texorpdfstring{{\bf sawtooth}}{sawtooth})}
 \label{sawtooth}
 
-Sometimes it is desired to have stair-stepped obstructions representing curved or sloped geometry. A concern is that this may
-change the flow pattern near the wall. To lessen the impact of stair-stepped boundaries near the edges of the obstructions,
-one may specify the option {\ct SAWTOOTH=.FALSE.} If {\ct SAWTOOTH} is set to {\ct FALSE}, then the velocity boundary conditions will be applied in
-such a way as to minimize the impact of the boundaries due to vortices at sharp corners, as shown in the following example:
+Sometimes it is desired to have stair-stepped obstructions representing 
+curved or sloped geometry. A concern is that this may
+change the flow pattern near the wall. To lessen the impact of 
+stair-stepped boundaries near the edges of the obstructions,
+one may specify the option {\ct SAWTOOTH=.FALSE.} If {\ct SAWTOOTH} 
+is set to {\ct FALSE}, then the velocity boundary conditions will be applied in
+such a way as to minimize the impact of the boundaries due to vortices 
+at sharp corners, as shown in the following example:
 
 \scriptsize
 \begin{verbatim}
@@ -8202,7 +8174,7 @@ the air velocity on the bottom set of obstructions is not affected as much by th
 \section{Combustion}
 
 
-\subsection{A Simple Under-Ventilated Compartment Fire ({\bf door\_crack}) }
+\subsection{A Simple Under-Ventilated Compartment Fire (\texorpdfstring{{\bf door\_crack}}{door\_crack}) }
 \label{door_crack}
 
 This example uses the same simple compartment that was used to test leakage and fan curves in the previous section. Now, we add a small (160~kW) fire, with the same
@@ -8232,7 +8204,7 @@ appropriate.
 
 
 \clearpage
-\subsection{Testing the ``Burn-Away'' Feature ({\bf box\_burn\_away}) }
+\subsection{Testing the ``Burn-Away'' Feature (\texorpdfstring{{\bf box\_burn\_away}}{box\_burn\_away}) }
 \label{box_burn_away}
 
 This is a silly example of a solid block of ``foam'' that is ignited
@@ -8255,17 +8227,25 @@ ought to be:
 
 \section{Detectors}
 
-\subsection{Aspiration Detector ({\bf beam\_detector}) }
+\subsection{Aspiration Detector (\texorpdfstring{{\bf beam\_detector}}{beam\_detector})}
 \label{beam_detectors}
 
-A 10~m x 10~m x 4~m compartment is filled with 0.006~kg/kg of {\ct MIXTURE\_FRACTION\_2} with the default soot yield
-0.01~kg/kg.  This results in an initial soot density of 71.9~mg/m$^3$ which using the default extinction coefficient of
-8700~m$^2$/kg results in an optical depth of 0.626~m$^{-1}$.  The compartment has a series of obstructions placed at varying depths that are
-multiples of 1~m.  Using the correlation for the output quantity {\ct visibility}, one obtains a visibility distance of 4.8~m.
-When viewing the smoke levels with Smokeview, one can just barely see the fifth obstacle which is at a distance of 5~m.
-Smokeview, therefore, is properly displaying the obscuration of the initial soot density.  Three beam detectors are also
-placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment.
-Using the optical depth of 0.626~m$^{-1}$ and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the
+A 10~m x 10~m x 4~m compartment is filled with 0.006~kg/kg of 
+{\ct MIXTURE\_FRACTION\_2} with the default soot yield
+0.01~kg/kg.  This results in an initial soot density of 71.9~mg/m$^3$ 
+which using the default extinction coefficient of
+8700~m$^2$/kg results in an optical depth of 0.626~m$^{-1}$.  The 
+compartment has a series of obstructions placed at varying depths that are
+multiples of 1~m.  Using the correlation for the output quantity 
+{\ct visibility}, one obtains a visibility distance of 4.8~m.
+When viewing the smoke levels with Smokeview, one can just barely see 
+the fifth obstacle which is at a distance of 5~m.
+Smokeview, therefore, is properly displaying the obscuration of the 
+initial soot density.  Three beam detectors are also
+placed in the compartment.  These all have a path length of 10~m, 
+but are at different orientations within the compartment.
+Using the optical depth of 0.626~m$^{-1}$ and the path length of 
+10~m, the expected total obscuration is 99.81~\%, which is the
 result computed by FDS for each of the three detectors.
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{FIGURES/beam_detector_nosmoke} &
@@ -8274,16 +8254,22 @@ result computed by FDS for each of the three detectors.
 
 \clearpage
 
-\subsection{Aspiration Detector ({\bf aspiration\_detector}) }
+\subsection{Aspiration Detector (\texorpdfstring{{\bf aspiration\_detector}}{aspiration\_detector}) }
 \label{aspiration_detector}
 
-A cubical compartment, 2~m on a side with a fire has a three sampling location aspiration system.  The three locations
-have flow rates of 0.1, 0.5, and 0.8~kg/s, respectively, and transport times of 0.2, 0.1, and 0.3~s, respectively.  No bypass flow rate is
-specified for the aspiration detector.  The input file fixes the initial time step to 0.01~s so that the initial output
-times in the {\bf aspiration\_detector\_devc.csv} file will line up exactly with the transport times.  At 0.75~s, when
-FDS begins reducing the time step below 0.01~s, the time delayed soot densities at the three sampling locations are
-$7.4x10^{-6}$~kg/m$^3$, $9.5x10^{-4}$~kg/m$^3$, and $1.6x10^{-18}$~kg/m$^3$, respectively.  Using these values along with the
-respective flow rates results in a detector obscuration of 0.000823~\%/m which is the same obscuration as predicted by FDS.
+A cubical compartment, 2~m on a side with a fire has a three 
+sampling location aspiration system.  The three locations
+have flow rates of 0.1, 0.5, and 0.8~kg/s, respectively, and 
+transport times of 0.2, 0.1, and 0.3~s, respectively.  No bypass flow rate is
+specified for the aspiration detector.  The input file fixes the 
+initial time step to 0.01~s so that the initial output
+times in the {\bf aspiration\_detector\_devc.csv} file will line 
+up exactly with the transport times.  At 0.75~s, when
+FDS begins reducing the time step below 0.01~s, the time delayed 
+soot densities at the three sampling locations are $7.4x10^{-6}$~kg/m$^3$, 
+$9.5x10^{-4}$~kg/m$^3$, and $1.6x10^{-18}$~kg/m$^3$, respectively.  
+Using these values along with the respective flow rates results 
+in a detector obscuration of 0.000823~\%/m which is the same obscuration as predicted by FDS.
 
 \clearpage
 
@@ -8292,17 +8278,21 @@ respective flow rates results in a detector obscuration of 0.000823~\%/m which i
 This section considers cases involving evaporating droplets, both water and fuel.
 
 
-\subsection{Water Droplet Evaporation ({\bf water\_evaporation}) }
+\subsection{Water Droplet Evaporation (\texorpdfstring{{\bf water\_evaporation}}{water\_evaporation}) }
 \label{water_evaporation}
 
-The case called {\bf water\_evaporation} is nothing more than stationary water droplets in an adiabatic box with dimensions of 1~m on a side. The air
-within the box is stirred to maintain uniform conditions, and there are no leaks or heat losses. The initial air
- temperature is 40~$^\circ$C.
-Initially, the droplets have a median volumetric diameter of 100~$\mu$m, a temperature of 90~$^\circ$C, and a total mass of 0.02~kg.
-It is expected that a steady-state will be achieved after several minutes.  The initial energy content, sum of the
-air and water enthalpies, of the box is 360,000~kJ.  After a short period of time, 0.0141 kg of water evaporate and the box
-reaches an equilibrium temperature of 16.2~$^\circ$C, see the figure below.  At this point the energy content of the box is 372,000~kJ
- or a 3~\% error.  At 16.2~$^\circ$C, the expected evaporation is 0.0142~kg.
+The case called {\bf water\_evaporation} is nothing more than stationary 
+water droplets in an adiabatic box with dimensions of 1~m on a side. The air
+within the box is stirred to maintain uniform conditions, and there are no 
+leaks or heat losses. The initial air temperature is 40~$^\circ$C.
+Initially, the droplets have a median volumetric diameter of 100~$\mu$m, 
+a temperature of 90~$^\circ$C, and a total mass of 0.02~kg.
+It is expected that a steady-state will be achieved after several minutes.  
+The initial energy content, sum of the air and water enthalpies, of the box 
+is 360,000~kJ.  After a short period of time, 0.0141 kg of water evaporate and the box
+reaches an equilibrium temperature of 16.2~$^\circ$C, see the figure below.  
+At this point the energy content of the box is 372,000~kJ or a 3~\% error.  
+At 16.2~$^\circ$C, the expected evaporation is 0.0142~kg.
 
 \begin{center}
 \includegraphics[width=4.5in]{FIGURES/water_evaporation}
@@ -8315,24 +8305,33 @@ reaches an equilibrium temperature of 16.2~$^\circ$C, see the figure below.  At 
 
 \clearpage
 
-\subsection{Measuring Water Flux ({\bf bucket\_test}) }
+\subsection{Measuring Water Flux (\texorpdfstring{{\bf bucket\_test}}{bucket\_test}) }
 \label{bucket_test}
 
-A common way of measuring the spray distribution for any fire sprinkler is called a ``bucket test.''  Usually, one or several sprinklers is
-mounted a specified distance above an array of catch bins, the water flows for a given period of time, and the water flux distribution is calculated
-from the accumulated water mass in each bin. In the test case {\bf bucket\_test}, a single sprinkler is mounted 10~cm below a 5~m ceiling. Water
-flows for 5~s at a constant rate of 60~L/min.  The simulation continues for another 5~s to allow water drops time to reach the
-floor. The total mass of water discharged is
+A common way of measuring the spray distribution for any fire 
+sprinkler is called a ``bucket test.''  Usually, one or several 
+sprinklers is mounted a specified distance above an array of catch 
+bins, the water flows for a given period of time, and the water 
+flux distribution is calculated from the accumulated water mass in 
+each bin. In the test case {\bf bucket\_test}, a single sprinkler is 
+mounted 10~cm below a 5~m ceiling. Water flows for 5~s at a constant 
+rate of 60~L/min.  The simulation continues for another 5~s to allow 
+water drops time to reach the floor. The total mass of water discharged is
 \be
   \mathrm{ 60 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 5 \; s = 5 \; kg }
 \ee
-In the simulation, the boundary quantity {\ct water\_drops\_AMPUA} (Accumulated Mass Per Unit Area) records the total water mass per unit area (kg/m$^2$), analogous to
-actual buckets the size of a grid cell.
-Summing the values of {\ct water\_drops\_AMPUA} over the entire floor yields 4.96~kg. Where is the missing water? Some droplets evaporate, and some droplets
-fly beyond the computational domain. Also, there remain a small number of suspended drops at the end of the simulation. Note that
+In the simulation, the boundary quantity {\ct water\_drops\_AMPUA} 
+(Accumulated Mass Per Unit Area) records the total water mass per 
+unit area (kg/m$^2$), analogous to actual buckets the size of a grid cell.
+Summing the values of {\ct water\_drops\_AMPUA} over the entire 
+floor yields 4.96~kg. Where is the missing water? Some droplets evaporate, and some droplets
+fly beyond the computational domain. Also, there remain a small 
+number of suspended drops at the end of the simulation. Note that
 there are no actual ``buckets'' in the simulation.
 
-The accumulated water mass at the floor is extracted from the boundary ({\ct BNDF}) file via the command line program {\bf fds2ascii}. Here is a transcript of the session
+The accumulated water mass at the floor is extracted from 
+the boundary ({\ct BNDF}) file via the command line program 
+{\bf fds2ascii}. Here is a transcript of the session
 used to convert the binary FDS output file into ASCII format:
 
 \footnotesize
@@ -8369,7 +8368,7 @@ bucket_test_fds2ascii.csv
 \normalsize \noindent
 
 
-\subsection{Complex Spray Patterns ({\bf bucket\_test\_2}) }
+\subsection{Complex Spray Patterns (\texorpdfstring{{\bf bucket\_test\_2}}{bucket\_test\_2}) }
 \label{bucket_test_2}
 
 The test case from the prior section is modified to create two jets of water.
@@ -8395,15 +8394,17 @@ the {\ct +x} jet does have four times the flow of the {\ct -x} jet.
 
 \section{General Functionality}
 
-This section contains a variety of simple tests to check the functionality of the code. These examples are good demonstrations of how to
-make things happen in FDS.
+This section contains a variety of simple tests to check 
+the functionality of the code. These examples are good 
+demonstrations of how to make things happen in FDS.
 
-
-\subsection{Creating and Removing {\ct HOLE}s and {\ct OBST}ructions ({\bf create\_remove}) }
+\subsection{Creating and Removing \texorpdfstring{{\ct HOLE}s}{HOLEs} and \texorpdfstring{{\ct OBST}ructions}{OBSTructions} (\texorpdfstring{{\bf create\_remove}}{create\_remove})}
 \label{create_remove}
 
-It is often convenient to create or remove solid obstructions, or conversely, remove or create empty holes. They are essentially the same thing as far as the logic in
-FDS is concerned, but the input can be tricky. To avoid confusion, here is an example of holes and obstructions being created and removed.
+It is often convenient to create or remove solid obstructions, or conversely, 
+remove or create empty holes. They are essentially the same thing as far as the logic in
+FDS is concerned, but the input can be tricky. To avoid confusion, here 
+is an example of holes and obstructions being created and removed.
 
 \vspace{0.2in}
 \tiny
@@ -8493,7 +8494,7 @@ related to convection, combustion, and apparatus-specific phenomena.
 \clearpage
 \section{Thermoplastics}
 
-\subsection{A Simple Thermoplastic ({\bf thermoplastic}) }
+\subsection{A Simple Thermoplastic (\texorpdfstring{{\bf thermoplastic}}{thermoplastic}) }
 \label{thermoplastic}
 
 This example just exercises the solid phase algorithm in
@@ -8539,12 +8540,8 @@ The figures above show that both the temperature and burning rate of the thermop
 the burning phase. The slab ``burns away'' after about 10~min.
 
 
-
-
-
-
 \clearpage
-\subsection{A Charring Solid ({\bf charring\_solid}) }
+\subsection{A Charring Solid (\texorpdfstring{{\bf charring\_solid}}{charring\_solid}) }
 \label{charring_solid}
 
 This example just exercises the solid phase algorithm in FDS. Essentially, the gas phase is shut off except for the imposition of a 50~kW/m$^2$ ``virtual''
@@ -8645,17 +8642,20 @@ initial peak is typical of char-forming solids.
 
 \section{Background}
 
-All fire simulations must include a ``model'' of the fire itself. Almost always, these models are simplifications of the actual burning item. The examples
-in this chapter are merely starting points for more elaborate fire simulations. The point of these examples is to demonstrate that any simulation of a fire ought
-to first start with a model of just the fire itself and its immediate surroundings. It is a tremendous waste of time to begin a project
+All fire simulations must include a ``model'' of the fire itself. 
+Almost always, these models are simplifications of the actual burning item. The examples
+in this chapter are merely starting points for more elaborate 
+fire simulations. The point of these examples is to demonstrate that any simulation of a fire ought
+to first start with a model of just the fire itself and its 
+immediate surroundings. It is a tremendous waste of time to begin a project
 by setting up a calculation of the fire, smoke and heat transport,
-target/detector response, and so on, without first doing quick simulations of the fire itself to ensure that it conforms to either a test burn or your own
+target/detector response, and so on, without first doing quick 
+simulations of the fire itself to ensure that it conforms to either a test burn or your own
 conceptual model.
 
 
 
-
-\subsection{A Liquid Pool Fire ({\bf ethanol\_pan}) }
+\subsection{A Liquid Pool Fire (\texorpdfstring{{\bf ethanol\_pan}}{ethanol\_pan}) }
 \label{ethanol_pan}
 
 In this example, a steel pan (0.7~m by 0.8~m) is filled with a thin layer (about 5~L, 9~mm) of ethanol, which burns out within about 10~min. This case tests a number of features -- burning
@@ -8696,11 +8696,13 @@ are also shown, courtesy of Ian Thomas, Victoria University, Australia~\cite{Tho
 
 
 \clearpage
-\subsection{A Couch Fire ({\bf couch}) }
+\subsection{A Couch Fire (\texorpdfstring{{\bf couch}}{couch}) }
 \label{couch}
 
-In residential fires, upholstered furniture makes up a significant fraction of the combustible load. A single couch can generate several
-megawatts of energy and sometimes lead to compartment flashover. Modeling a couch fire requires a simplification of its structure and materials.
+In residential fires, upholstered furniture makes up a significant 
+fraction of the combustible load. A single couch can generate several
+megawatts of energy and sometimes lead to compartment flashover. Modeling 
+a couch fire requires a simplification of its structure and materials.
 At the very least, we want the upholstery to be described as fabric covering foam:
 
 \footnotesize
@@ -8737,20 +8739,27 @@ At the very least, we want the upholstery to be described as fabric covering foa
 \end{verbatim} \normalsize
 
 \noindent
-Both the fabric and the foam decompose into fuel gases via single-step reactions. The fuel gases from each have different
-composition and heats of combustion. FDS automatically adjusts the mass loss rate of each so that the ``effective'' fuel gas
-is that specified by the user on the {\ct REAC} line. The attribute {\ct BURN\_AWAY} forces FDS to break up the couch into
-individual cell-sized blocks that will disappear from the calculation as soon as the fuel is exhausted. The surface is specified
-as consisting of two layers, with a thickness of 2~mm for the {\ct FABRIC} and 10~cm for the {\ct FOAM}. The 10~cm is chosen to be the
+Both the fabric and the foam decompose into fuel gases via 
+single-step reactions. The fuel gases from each have different
+composition and heats of combustion. FDS automatically adjusts 
+the mass loss rate of each so that the ``effective'' fuel gas
+is that specified by the user on the {\ct REAC} line. The attribute 
+{\ct BURN\_AWAY} forces FDS to break up the couch into
+individual cell-sized blocks that will disappear from the calculation 
+as soon as the fuel is exhausted. The surface is specified
+as consisting of two layers, with a thickness of 2~mm for the {\ct FABRIC} 
+and 10~cm for the {\ct FOAM}. The 10~cm is chosen to be the
 same as the mesh cell size.
 
 
 \clearpage
-\subsection{Flame Spread along a Cable Tray ({\bf cable\_tray}) }
+\subsection{Flame Spread along a Cable Tray (\texorpdfstring{{\bf cable\_tray}}{cable\_tray}) }
 \label{cable_tray}
 
-A common combustible in industrial settings are power, control, and instrument cables. The cables may be bundled in a variety of conduits; the most
-common of which is a ladder-like ``tray.'' From the point of view of FDS, the pile of cables in a tray is a composite of a variety of plastics, insulators,
+A common combustible in industrial settings are power, control, and 
+instrument cables. The cables may be bundled in a variety of conduits; the most
+common of which is a ladder-like ``tray.'' From the point of view of FDS, 
+the pile of cables in a tray is a composite of a variety of plastics, insulators,
 and metal, usually copper. Here is one way to describe a tray of cables:
 
 \footnotesize
@@ -8788,27 +8797,34 @@ and metal, usually copper. Here is one way to describe a tray of cables:
 \end{verbatim} \normalsize
 
 \noindent
-The pile of cables is assumed to be a solid slab, 28~cm wide and 2~cm deep. The tray is slightly wider and deeper, and because it is listed second in
-the input file, its surface properties take precedence wherever the cable slab and tray coincide. The mesh cells in this example are 5~cm on a side, but the
-heat transfer within the cable slab are governed by the 2~cm {\ct THICKNESS}. The slab is 60~\% copper, by mass. Note that we are not assuming multiple
-layers in this example -- the slab is a single layer composite of plastic and copper. The plastic burns at about 400~$^\circ$, but the copper remains. Thus,
+The pile of cables is assumed to be a solid slab, 28~cm wide and 2~cm 
+deep. The tray is slightly wider and deeper, and because it is listed second in
+the input file, its surface properties take precedence wherever the 
+cable slab and tray coincide. The mesh cells in this example are 5~cm on a side, but the
+heat transfer within the cable slab are governed by the 2~cm {\ct THICKNESS}. 
+The slab is 60~\% copper, by mass. Note that we are not assuming multiple
+layers in this example -- the slab is a single layer composite of plastic 
+and copper. The plastic burns at about 400~$^\circ$, but the copper remains. Thus,
 the cable does not ``burn away.''
 
-The point of this test case is merely to propose a simple model of flame spread along a tray of assorted cable. Detailed thermo-physical property data for
-industrial-grade cable is usually not available, and even if it were, it would probably not improve upon the given model. The properties given in this example
+The point of this test case is merely to propose a simple model of flame 
+spread along a tray of assorted cable. Detailed thermo-physical property data for
+industrial-grade cable is usually not available, and even if it were, it 
+would probably not improve upon the given model. The properties given in this example
 are almost completely fabricated. What is important here are the
-{\ct HEAT\_OF\_REACTION} and {\ct REFERENCE\_TEMPERATURE}, obtained in most cases by a bench-scale measurement device like the cone calorimeter.
+{\ct HEAT\_OF\_REACTION} and {\ct REFERENCE\_TEMPERATURE}, obtained in 
+most cases by a bench-scale measurement device like the cone calorimeter.
 
 
 
 \clearpage
 
-\subsection{A Liquid Fuel Spray Burner ({\bf spray\_burner}) }
+\subsection{A Liquid Fuel Spray Burner (\texorpdfstring{{\bf spray\_burner}}{spray\_burner}) }
 \label{spray_burner}
 
 Controlled fire experiments are often conducted using a spray burner,
 where a liquid fuel is sprayed out of a nozzle and ignited. In this
-example ({\bf spray\_burner.data}), heptane from two nozzles is
+example ({\bf spray\_burner.fds}), heptane from two nozzles is
 sprayed downwards into a steel pan.  The flow rate is increased
 linearly so that the fire grows to 2~MW in 20 s, burns steadily for
 another 20 s, and then ramps down linearly in 20 s. The key input
@@ -8841,17 +8857,16 @@ that a 2~MW fire is achieved via 2 nozzles flowing heptane at
 \be 2 \times 1.96 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 688 \;
 \frac{\hbox{kg}}{\hbox{m}^3} \times \frac{1}{1000} \; \frac{\hbox{m}^3}{\hbox{L}} \times 44500 \;
 \frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW} \ee
-The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall reaction scheme. Thus, if other droplets
-or solid objects have different heats of combustion, the effective burning rates are adjusted so that the
-total heat release rate is that which the user expects. However, exercises like this ought to be conducted just to
-ensure that this is the case. The HRR curve for this example is given here:
+The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall 
+reaction scheme. Thus, if other droplets or solid objects have different 
+heats of combustion, the effective burning rates are adjusted so that the
+total heat release rate is that which the user expects. However, exercises 
+like this ought to be conducted just to ensure that this is the case. 
+The HRR curve for this example is given here:
 
 \begin{center}
 \includegraphics[width=4.5in]{FIGURES/spray_burner_HRR}
 \end{center}
-
-
-
 
 
 \chapter{Sensitivity Analysis}
@@ -9143,7 +9158,7 @@ There is  little quantification of  the observed sensitivities  in the
 study. Fire  growth curves can be  linear to exponential  in form, and
 small  changes in  fuel  properties  can lead  to  order of  magnitude
 changes  in heat  release rate  for unconfined  fires. The  subject is
-discussed  in the  FDS  Validation Guide~\cite{FDS_Validation_Guide_5}
+discussed  in the  FDS  Validation Guide~\cite{FDS_Validation_Guide_5}%Kevin unreferenced.
 where it is  noted in many of the studies  that predicting fire growth
 is difficult.
 
@@ -9195,11 +9210,6 @@ spread and fire growth.
 
 
 
-
-
-
-
-
 \part{Working with the FDS Source Code}
 
 
@@ -9222,12 +9232,12 @@ compile the code. Fortran 90/95 and C compilers are needed for compilation.
 \section{FDS Source Code}
 
 Table~\ref{tab:sourcefiles} lists the files that make up the source code.
-The files with suffix ``.f90'' contain free form Fortran 90
-instructions conforming to the ANSI and ISO standards, with a few exceptions that are discussed below.
+The files with suffix ``.f90'' contain free form Fortran 90 instructions 
+conforming to the ANSI and ISO standards, with a few exceptions that are discussed below.
 The source files should be compiled in the order in which they are listed
 in Table~\ref{tab:sourcefiles} because some routines are dependent on others.
-For Unix/Linux users, {\bf Makefiles} for various platforms are available that assist in the
-compilation. Compiler options differ from platform to platform.
+For Unix/Linux users, {\bf Makefiles} for various platforms are available 
+that assist in the compilation. Compiler options differ from platform to platform.
 Note the following:
 \begin{itemize}
 \item The source code consists mainly of Fortran 90
@@ -9249,7 +9259,8 @@ compilers have a standard optimization level, plus various degrees of
 ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
 \item For the single processor version of FDS, compile with {\bf main.f90}
 \item The parallel version of FDS uses {\bf main\_mpi.f90} instead of
-{\bf main.f90}, plus additional MPI libraries need to be installed. More details on MPI can be found at the web site, along with links to the
+{\bf main.f90}, plus additional MPI libraries need to be installed. More 
+details on MPI can be found at the web site, along with links to the
 necessary organizations who have developed free MPI libraries.
 \end{itemize}
 
@@ -9435,11 +9446,12 @@ T(2) , VAL(1,2)    , VAL(2,2)    , ... , VAL(N_DEVC,2)
 \end{verbatim}
 \normalsize
 where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined
-ID of the {\ct I}th device, {\ct QUANTITY(I)} is the physical quantity represented, {\ct UNITS(I)} the
-units, {\ct T(J)} the time of the {\ct J}th dump, and
+ID of the {\ct I}th device, {\ct QUANTITY(I)} is the physical quantity represented, 
+{\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
 {\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time.
 The files can be imported into Microsoft Excel or almost any other
-spread sheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
+spread sheet program. If the number of columns exceeds 256, the file will 
+automatically be split into smaller files.
 
 \section{Control Output Data}
 \label{out:CTRL}
@@ -9641,7 +9653,7 @@ the output quantity, which may be wall temperature, density or
 component density.
 
 \backmatter
-\nopart %Fix TOC in PDF output.
+\nopart %To Fix TOC in PDF output.
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
