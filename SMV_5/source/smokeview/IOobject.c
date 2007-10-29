@@ -1508,8 +1508,12 @@ void init_device_defs(void){
 
       svofile_exists = 0;
 
+#ifdef WIN32
+      strcpy(objectfile,"c:\\program files\\nist\\smokeview\\");
+      strcat(objectfile,"devices.svo");
+      read_device_defs(objectfile);
+#endif
       if(smvprogdir!=NULL){
-
         strcpy(objectfile,smvprogdir);
         strcat(objectfile,"devices.svo");
         read_device_defs(objectfile);
