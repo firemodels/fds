@@ -157,7 +157,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \vspace{.25in}
 
 
-\flushright{August 2007\\
+\flushright{October 2007\\
 $SVN Repository$~$Revision$}
 %
 \vfill
@@ -169,7 +169,7 @@ $SVN Repository$~$Revision$}
 {\em Carlos M. Gutierrez, Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em William A. Jeffrey, Director} }
+{\em James M. Turner, Acting Director} }
 
 
 \end{minipage}
@@ -204,7 +204,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1017-1 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-1, 134 pages (August 2007) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-1, 134 pages (October 2007) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -2599,8 +2599,9 @@ analysis.
 
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_mathcomp,../Bibliography/sv_fire,../Bibliography/sv_graphics}
-\addcontentsline{toc}{chapter}{References}
+%\addcontentsline{toc}{chapter}{References}
 
+\part{Appendices}
 \appendix
 \addcontentsline{toc}{chapter}{Appendices}
 
@@ -3565,6 +3566,7 @@ the character string after the {\tt ``:''} are ignored.
 %\label{figcolorbars}%
 %\end{figure}
 
+\hitem{COLORBAND} The data is displayed using 256 levels.  The colorbar consists of one color for each level.  The COLORBAND parameter specifies the width of the {\bf black}\ region on the colorbar highlighted when selected by the left mouse button.  Currently the colorband width may be either 1 level or 10. (default: 10)
 
 \hitem{COLORBARFLIP} Specifies whether the colorbar is flipped (1) or not flipped (0)
 (default: {\tt 0}).
@@ -4058,6 +4060,8 @@ the ceiling (upper bounding surface) should be drawn (1) or not drawn (0).
 the color bars should be drawn (1) or not drawn (0).
 (default: 1)
 
+\hitem{SHOWEXTREMEDATA}Specifies whether data exceeding the maximum colorbar label value or less than the minimum colorbar label value should be colored with a different color (black).  If SHOWEXTREMEDATA is set to 1 then extreme data is colored black, if SHOWEXTREMEDATA is set to 0 then extreme data is colored as indicated by the maximum and minimum region of the colorbar. (default: 0).  .
+
 \hitem{SHOWFLOOR}Specifies whether
 the floor (lower bounding surface) should be drawn (1) or not drawn
 (0).
@@ -4075,6 +4079,8 @@ the frame rate label should be drawn (1) or not drawn (0).
 (default: 0)
 
 \hitem{SHOWGRIDLOC} Specifies where grid location should be drawn (1) or not drawn (0). (default: 0)
+
+\hitem{SHOWHRRCUTOFF}Specifies whether the HRRPUV cutoff label should be (1) or should not be (0) displayed. (default: 0)
 
 \hitem{SHOWIGNITION} When drawing a temperature boundary file, this option
 specifies whether ignited materials (regions exceeding the materials ignition temperature) should be drawn (1) or not drawn (0).  A second parameter specifies whether only the ignited regions should be drawn (1) or both the ignited regions and other regions should be drawn (0).
@@ -4126,6 +4132,9 @@ described in subsection \ref{subsect_features}. (default: 0)
 
 \hitem{SHOWTIMELABEL} Specifies whether the time label should be
 drawn (1) or not drawn (0). (default: 1)
+
+\hitem{SHOWTRANSPARENTVENTS} Specifies whether vents specified as being invisible should be
+shown (1) or not shown (0). (default: 0)..
 
 \hitem{SHOWHMSTIMELABEL}Specifies whether the time label should be
 drawn (1) or not drawn (0) using the format ``h:m:s'' where ``h''
@@ -4684,7 +4693,7 @@ coordinates of the thermocouples.
 \subsection{Miscellaneous Keywords}
 \blist
 
-\hitem{ENDIAN}The {\tt ENDIAN} keyword defines whether a big or little
+\hitem{ENDIAN}The {\tt ENDIAN}\ keyword defines whether a big or little
 endian\footnote{
 Big-endian and little-endian are terms that describe the order in which a
 sequence of bytes are stored in computer memory.
@@ -4702,6 +4711,8 @@ for representing numbers while most UNIX workstations use the big endian system.
 The PC version of \smokeview\ uses this keyword  to determine whether data should
 be converted between these two systems before it is visualized.
 The valid {\tt ENDIAN} parameters are {\tt BIG} or {\tt LITTLE}.
+
+\hitem{REVISION}The {\tt REVISION}\ keyword defines the SVN revision or build number for the version of FDS that ran the case currently being visualized.  The FDS build number is displayed in the Help menu along with the Smokeview build number.
 
 \hitem{SYST}The {\tt SYST} keyword defines which system the \fds\ case was run on.
 The PC version of \smokeview\ uses this information (if the {\tt ENDIAN} keyword is absent)
