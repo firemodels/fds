@@ -1230,7 +1230,7 @@ character strings:
 \noindent
 groups of character strings:
 
-{\ct SURF\_IDS='burner','INERT','INERT'}
+{\ct SURF\_IDS='burner','STEEL','BRICK'}
 
 \noindent
 or logical parameters:
@@ -1298,13 +1298,14 @@ default value. That way, you can more easily distinguish between what you want a
 these comments do not fall within the namelist records.
 
 The general structure of an input file is shown below, with many
-lines of the original validation input file (WTC\_05\_v5.fds) removed for clarity.
+lines of the original validation input file\footnote{The actual input file, WTC\_05\_v5.fds, is part of the FDS
+Validation Suite} removed for clarity.
 
 \footnotesize
 \begin{verbatim}
 &HEAD CHID='WTC_05_v5', TITLE='WTC Phase 1, Test 5, FDS version 5' /
 &MESH IJK=90,36,38, XB=-1.0,8.0,-1.8,1.8,0.0,3.82 /
-&TIME T\_END=5400. /
+&TIME T_END=5400. /
 &MISC SURF_DEFAULT='MARINITE BOARD', TMPA=20., POROUS_FLOOR=.FALSE. /
 &DUMP NFRAMES=1800, DT_HRR=10., DT_DEVC=10., DT_PROF=30. /
 
@@ -1843,14 +1844,16 @@ guide.
 \item[{\ct HUMIDITY}] Relative humidity, in units of \%. This need only be specified if there is a source of water in the simulation other than the fire
 itself. Otherwise, water vapor is not explicitly tracked. Default 40~\%.
 \item[{\ct ISOTHERMAL}] A logical parameter that indicates that the calculation does not involve any changes in temperature or
-radiation heat transfer, thus reducing the number of equations that must be solved, and simplifying those that are. Automatically sets {\ct RADIATION} to
-{\ct .FALSE.}
-\item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the development of a perfectly symmetric flow when the boundary
+radiation heat transfer, thus reducing the number of equations that must be solved, and simplifying those that are.
+Automatically sets {\ct RADIATION} to {\ct .FALSE.}
+\item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the
+development of a perfectly symmetric flow when the boundary
 and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.}
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
 \item[{\ct RADIATION}] A logical parameter indicating whether radiation transport ought to be calculated. The default is {\ct .TRUE.}
 \item[{\ct SUPPRESSION}] A logical parameter indicating whether FDS should include gas phase flame extinction. The default is {\ct .TRUE.}
-\item[{\ct SURF\_DEFAULT}] The {\ct SURF} line that is to be applied to all boundaries, unless otherwise specified. The default is {\ct 'INERT'}.
+\item[{\ct SURF\_DEFAULT}] The {\ct SURF} line that is to be applied to all boundaries, unless otherwise specified.
+The default is {\ct 'INERT'}, a cold, non-reacting solid boundary. You do not need to define {\ct 'INERT'} via a {\ct SURF} line.
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
 \item[{\ct U0, V0, W0}] Initial values of the gas velocity in each of the coordinate directions. Normally, these are all 0~m/s, but there are a few applications where it is
 convenient to start the flow immediately, like in an outdoor simulation involving wind.
@@ -2119,7 +2122,7 @@ sides and bottom of the obstruction, respectively.
 If the default
 boundary condition is desired, then {\ct SURF\_ID(S)} need not be set.
 However, if at least one of the surface conditions for an
-obstruction is the inert default, it can be referred to as {\ct 'INERT'}.
+obstruction is the inert default, it can be referred to as {\ct 'INERT'}, but it does not have to be explicitly defined.
 For example:
 
 \footnotesize
@@ -2128,9 +2131,12 @@ For example:
 &OBST XB=2.3,4.5,1.3,4.8,0.0,9.2,SURF_IDS='FIRE','INERT','INERT' /
 \end{verbatim}
 \normalsize
+
+\noindent
 puts a fire on top of the obstruction. This is a simple way of
 prescribing a burner.
 
+\vspace{\baselineskip}
 \noindent
 Some additional features of obstructions are as follows:
 \begin{itemize}
@@ -2345,7 +2351,7 @@ underlying obstruction.
 \begin{warning}
 Unlike previous versions of FDS, you can no longer specify a free-standing fan using the {\ct VENT}
 construct. A {\ct VENT} must always be attached to a solid obstruction. See
-Section~\ref{info:ZONE} for instructions on specifying different types of fans.
+Section~\ref{info:Velocity_BC} for instructions on specifying different types of fans.
 \end{warning}
 
 \noindent
@@ -2423,6 +2429,25 @@ See Section~\ref{info:activate_deactivate} for details.
 
 
 \subsection{\texorpdfstring{{Trouble-Shooting {\tt VENT}s}}{Trouble-Shooting VENTs}}
+
+Unlike most of the entries in the input file, the order that you specify {\ct VENT}s can be important. There might be
+situations where it is convenient to position one {\ct VENT} atop another. For example, suppose you want to designate the
+ceiling of a compartment to have a particular set of surface properties, and you designate the entire ceiling to have the
+appropriate {\ct SURF\_ID}. Then, you want to designate a smaller patch on the ceiling to have another set of surface
+properties, like an air supply. In this case, you must designate the supply {\ct VENT} {\bf first} because for that area
+of the ceiling, FDS will ignore the ceiling properties and apply the supply properties. FDS processes the first {\ct VENT}, not
+the second as it did in versions prior to FDS 5. Now, the rule for {\ct VENT}s is ``first come, first served.''
+Keep in mind, however, that the
+second {\ct VENT} is not rejected entirely -- only where there is overlap. FDS will also print out a warning to the screen (or to
+standard error) saying which {\ct VENT} has priority.
+
+Smokeview can help identify where two {\ct VENT}s overlap, assuming each has a unique {\ct COLOR}. Because Smokeview draws {\ct VENT}s
+on top of each other, areas of overlap will have a grainy, awkward appearance that changes pattern as you move the scene. In situations
+where you desire the overlap for the sake of convenience, you might want to slightly adjust the coordinates of the preferred {\ct VENT}
+so that it is slightly offset from the solid surface. Make the offset less than about a tenth of a cell dimension so that FDS snaps it
+to its desired location. Then, by toggling the ``q'' key in Smokeview, you can eliminate the grainy color overlap by showing the
+{\ct VENT} exactly where you specified it, as opposed to where FDS repositioned it. This trick also works where the faces of two
+obstructions overlap.
 
 If an error message appears requesting that \index{Troubleshooting!VENT Orientation}
 the orientation of a vent be specified, first check to make sure that the vent is a plane.
@@ -2507,7 +2532,7 @@ prescribed by referencing the appropriate {\ct SURF} line(s) whose
 parameters are described in this section.
 
 The default boundary condition for all solid surfaces is that of a
-cold, inert wall. If only this
+cold, inert wall, and is referred to as {\ct 'INERT'}. If only this
 boundary condition is needed, there is no need to add any {\ct SURF} lines
 to the input file. If additional boundary conditions are desired,
 they are to be listed one boundary condition at a time.
@@ -2521,7 +2546,7 @@ set {\ct SURF\_DEFAULT='CONCRETE'} on the {\ct MISC} line.
 
 \begin{notebox}
 \noindent
-The default boundary condition {\ct INERT} does allow for heat loss and is not the same as an adiabatic surface.
+The default boundary condition {\ct 'INERT'} does allow for heat loss and is not the same as an adiabatic surface.
 If you wish to define a surface as adiabatic, then you should set {\ct ADIABATIC=.TRUE.} on the {\ct SURF} line.
 \end{notebox}
 \index{SURF!ADIABATIC}
@@ -2621,107 +2646,183 @@ ADIABATIC=.TRUE.}, nothing else.  FDS will compute a wall temperature
 so that the sum of the convective and radiative fluxes is zero.
 \index{SURF!ADIABATIC}
 
-\subsection{Velocity and Total Mass Flux Boundary Conditions}
+
+\subsection{Fans and other Velocity Boundary Conditions}
 \index{Volume Flux} \index{Mass Flux}
 \index{SURF!VOLUME\_FLUX}
 \index{SURF!VEL}
-Velocity boundary conditions affect both the normal and tangential
-components of the velocity vector at boundaries.
-The normal component of velocity is controlled by the parameter
-{\ct VEL}. If {\ct VEL} is negative, the flow is entering the
-computational domain. If {\ct VEL} is positive, the flow is exiting the
-domain.
-Sometimes it is desired that a given volume flux through a vent
-be prescribed rather than a velocity. If this is the case then
+\label{info:Velocity_BC}
+
+For most applications, the ventilation system of a building is described in FDS using
+velocity {\em boundary conditions}. For example, fresh air can be blown into, and smoke can
+be drawn from, a compartment by specifying a velocity in the {\em normal} direction to a solid
+surface. However, there are various other facets of velocity boundary conditions that are described below.
+
+\subsubsection{Supply and Exhaust Vents}
+
+The easiest way to describe a supply or exhaust fan is to create a {\ct VENT} positioned on a solid surface with
+a {\ct SURF\_ID} with some form of specified velocity or volume flow rate.
+The normal component of velocity is usually specified directly via the parameter
+{\ct VEL}. If {\ct VEL} is negative, the flow is directed {\em into} the
+computational domain, {\em i.e.}, a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the
+domain, {\em i.e.}, an exhaust vent. For example, the lines
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='SUPPLY', VEL=-1.2, COLOR='BLUE' /
+&VENT XB=5.0,5.0,1.0,1.4,2.0,2.4, SURF_ID='SUPPLY' /
+\end{verbatim}
+\normalsize
+
+\noindent
+create a {\ct VENT} that {\em supplies} air at a velocity of 1.2~m/s through an area of nominally 0.16~m$^2$, depending on the
+realignment of the {\ct VENT} onto the FDS mesh. Regardless of the
+orientation of the plane $x=5$, the flow will be directed {\em into} the room because of the sign of {\ct VEL}.
+In this example the {\ct VENT} may not be exactly
+0.16~m$^2$ in area because it may not align exactly with the computational mesh. If this is the case then
 {\ct VOLUME\_FLUX} can be prescribed instead of {\ct VEL}. The units
-are m$^3$/s.
-If the flow is entering the computational domain, {\ct VOLUME\_FLUX}
-should be a negative number.
-\begin{warning}
-\noindent
-Note that either {\ct VEL} or {\ct VOLUME\_FLUX} should be prescribed,
-not both.  The choice depends on whether an exact velocity is desired at a
-given vent, or whether the given volume flux is desired.
-\end{warning}
-\noindent
-The dimensions of the vent that are prescribed usually change
-because the prescribed vent dimensions are sometimes altered so that
-the vent edges line up with mesh cells. Also note that a {\ct SURF}
-group with a {\ct VOLUME\_FLUX} prescribed can be invoked by either a
+are m$^3$/s. If the flow is entering the computational domain, {\ct VOLUME\_FLUX}
+should be a negative number, the same convention as for {\ct VEL}. Note that a {\ct SURF}
+with a {\ct VOLUME\_FLUX} prescribed can be invoked by either a
 {\ct VENT} or an {\ct OBST}, but be aware that in the latter case, the resulting
 velocity on the face or faces of the obstruction will be given by the specified
 {\ct VOLUME\_FLUX} divided by the area of that particular face. For example:
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='LOUVER', VOLUME_FLUX=-5.0, VEL_T=2.0,-1.0, COLOR='GREEN' /
-&OBST XB=..., SURF_ID6='BRICK','LOUVER','BRICK','BRICK','BRICK','BRICK' /
+&SURF ID='SUPPLY', VOLUME_FLUX=-5.0, COLOR='GREEN' /
+&OBST XB=..., SURF_ID6='BRICK','SUPPLY','BRICK','BRICK','BRICK','BRICK' /
 \end{verbatim}
 \normalsize
 
 \noindent
 dictates that the forward $x$-facing surface of the obstruction is to have a velocity
-equal to 5~m/s divided by the area of the face (as approximated within FDS) flowing into the
+equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) flowing into the
 computational domain.
 
-Finally, note that if {\ct HRRPUA} or solid phase reaction parameters are
-specified, no velocity should be prescribed. The combustible gases
-are ejected at a velocity computed by the code.
+\begin{warning}
+\noindent
+Note that either {\ct VEL} or {\ct VOLUME\_FLUX} should be prescribed,
+not both.  The choice depends on whether an exact velocity is desired at a
+given vent, or whether the given volume flux is desired.
+\end{warning}
 
-As an example, a simple blowing vent would be described by the line
+
+\subsubsection{Heaters}
+
+You can create a simple heating vent by changing the temperature of the incoming air
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='BLOWER',VEL=-1.2,TMP_FRONT=50. /
+&SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50. /
 \end{verbatim}
 \normalsize
 
 \noindent
-The vent with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C
+The {\ct VENT} with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C
 air at 1.2 m/s into the flow domain. Making {\ct VEL} positive would
 suck air out, in which case {\ct TMP\_FRONT} would not be necessary.
 
-At other times the user may wish that a specific flux of mass, be added or removed at
-a vent.  This can be accomplished by specifying the quantity {\ct MASS\_FLUX\_TOTAL}.
-{\ct MASS\_FLUX\_TOTAL} uses the same sign convention as {\ct VEL}.  In fact, the value entered for
+\begin{warning}
+\noindent
+Note that if {\ct HRRPUA} or solid phase reaction parameters are
+specified, no velocity should be prescribed. The combustible gases
+are ejected at a velocity computed by FDS.
+\end{warning}
+
+
+\subsubsection{Total Mass Flux}
+
+Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at
+a solid surface. However, you may wish to control the mass flow rate (kg/s), as opposed to the volume flow
+rate (m$^3$/s), via the parameter {\ct MASS\_FLUX\_TOTAL}.
+{\ct MASS\_FLUX\_TOTAL} uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
 {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
 for an outflow is adjusted based on the local density.
 \index{SURF!MASS\_FLUX\_TOTAL}
 
-The tangential velocity boundary condition controls how the gas
-``sticks'' to a solid surface. In theory, the tangential
-\index{tangential velocity}component of velocity is zero at the surface, but
-increases rapidly through a narrow region called the boundary layer \index{boundary layer}.
-For most practical problems, the mesh is not fine enough to resolve the
-boundary layer, which is typically a few millimeters thick.
-For this reason, in an LES calculation, the velocity at the wall
+\subsubsection{Tangential Velocity Boundary Conditions}
+\index{tangential velocity}
+\index{boundary layer}
+
+As a gas flows past a solid obstruction, it ``sticks'' to the surface and forms a boundary layer. Ideally,
+the gas velocity at the surface is zero, and it increases rapidly through a boundary layer that is only a few
+millimeters thick to its ``free-stream''
+value. In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an
+empirical model is used to represent its effect on the overall flow field.
+In an LES calculation (default), the velocity at the wall
 is set to be a fraction of its value in the mesh cell adjacent to the
-wall. Only in a DNS calculation is the velocity at the wall set to zero.
-To alter these defaults, set a parameter called
+wall. Only in a DNS (Direct Numerical Simulation) calculation is the velocity at the wall actually set to zero.
+To alter these defaults, you can set a parameter called
 {\ct SLIP\_FACTOR}. \index{SURF!SLIP\_FACTOR} This parameter ranges
 from -1 to 1. If a no-slip wall is desired, {\ct SLIP\_FACTOR=-1}. If
 a free-slip wall is desired, {\ct SLIP\_FACTOR=1}. Numbers in between
 -1 and 1 can represent partial slip conditions, which may be
 appropriate for simulations involving large mesh cells.
-(Default {\ct SLIP\_FACTOR} is 0.5 for LES, -1.0 for DNS)
+The default {\ct SLIP\_FACTOR} is 0.5 for LES, -1.0 for DNS.
 
-In the case of a blowing vent (or even a solid surface),
-it is possible to prescribe both the normal and tangential components of the flow (or just the tangential).
+\begin{warning}
+\noindent
+It is not recommended that you change the default velocity boundary condition unless you are interested in
+its effect on the overall flow. Sometimes people represent various degrees of {\em surface roughness} via the
+{\ct SLIP\_FACTOR}. However, this should be done carefully using experimental data or empirical correlation as
+guidance.
+\end{warning}
+
+\subsubsection{Louvered Vents}
+
+Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the
+incoming air stream.
+It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow.
 The normal component is specified with {\ct VEL} as described above. The tangential is prescribed
 via a pair of real numbers {\ct VEL\_T} representing the desired tangential
-velocity components. For example, the line
+velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='LOUVER',VEL=-1.2,VEL_T=0.5,-0.3 /
+&SURF ID='LOUVER', VEL=-1.2, VEL_T=0.5,-0.3 /
 \end{verbatim}
 \normalsize
 
 \noindent
-is a boundary condition for a louver \index{louver}vent that pushes air into the
-space with a normal velocity of 1.2~m/s, and with a tangential velocity
+is a boundary condition for a louvered \index{louver}vent that pushes air into the
+space with a normal velocity of 1.2~m/s and a tangential velocity
 of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either
 the $y$ or $z$ direction, depending on what the normal direction is.
+
+In cases of limited mesh resolution, it may not be possible to describe a louvered vent or
+slot diffuser using {\ct VEL\_T} because there may not be enough mesh cells spanning the
+opening. In these cases, you might consider simply specifying a flat plate obstruction in front of the
+{\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral
+directions.
+
+\subsubsection{Jet Fans}
+\index{SURF!POROUS}
+
+Fans do not have to be mounted on a solid wall, like a supply or an exhaust fan.
+If you just want to blow gases in a particular direction, create a thin (zero cells thick)
+{\ct OBST}struction and apply to it, via {\ct SURF\_ID} only, a {\ct SURF} line that has
+the parameter {\ct POROUS=.TRUE.} along with the other velocity parameters described above.
+This allows hot, smokey gases to pass through the
+obstruction, much like a free-standing fan. These obstructions are merely
+flat plates, by necessity. The velocity {\ct VEL} associated with a
+{\ct POROUS} surface is meant to represent the velocity in the
+positive or negative coordinate direction, as indicated by its
+sign. {\bf This is different than the convention used when the {\ct SURF}
+is attached to a solid wall}.
+
+You may also want to construct a {\em shroud} around the fan using four flat plates arranged to form
+a short passageway that draws gases in one side and expels them out the other. The plate representing the
+fan itself can be positioned about halfway along the passage.
+
+
+\subsubsection{Fan Curves}
+
+The above strategies for specifying various parts of a ventilation system have not considered the fact
+that a real ventilation system is affected by pressure changes between compartments. This topic is taken up
+in Section~\ref{info:Fan_Curves}.
+
+
 
 \subsection{Species and Species Mass Flux Boundary Conditions}
 \index{SURF!MASS\_FLUX}
@@ -2933,22 +3034,26 @@ over solids defined with:
 \normalsize
 
 \noindent
-Likewise, the boundaries of Zone 1 and Zone 2 must include solids whose {\ct SURF} properties include {\ct LEAK\_PATH=1,2}. This tells FDS to lump all of the
+Likewise, the boundaries of Zone 1 and Zone 2 must include solids whose {\ct SURF} properties include {\ct LEAK\_PATH=1,2}.
+This tells FDS to lump all of the
 leakage over these surfaces. The order of the pressure zones designated by {\ct LEAK\_PATH} is unimportant.
 
 
 
 
-\subsection{Fans}
-\label{info:Fans}
+\subsection{Fan Curves}
+\label{info:Fan_Curves}
 
-In Section~\ref{info:SURF} there is a discussion of velocity boundary conditions, in which a fan is modeled simply as a solid boundary that blows or
-sucks air, regardless of the surrounding pressure field. In reality, fans operate based on the pressure drop across the duct or manifold in which they are
+In Section~\ref{info:Velocity_BC} there is a discussion of velocity boundary conditions,
+in which a fan is modeled simply as a solid boundary that blows or
+sucks air, regardless of the surrounding pressure field. In reality, fans operate based on
+the pressure drop across the duct or manifold in which they are
 installed. A very simple ``fan curve'' is given by:
 \be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}} \;
    \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
    \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
-where $A_{\hbox{\footnotesize duct}}$ is the area of the duct~(m$^2$), $U_{\hbox{\footnotesize max}}$ is the air velocity~(m/s), and $\Delta p_{\hbox{\footnotesize max}}$ is the maximum
+where $A_{\hbox{\footnotesize duct}}$ is the area of the duct~(m$^2$), $U_{\hbox{\footnotesize max}}$ is
+the air velocity~(m/s), and $\Delta p_{\hbox{\footnotesize max}}$ is the maximum
 pressure difference the fan can operate upon. Figure~(\ref{fig:Fan_Curve} displays a typical fan curve.
 
 \begin{figure}[ht!]
@@ -7104,7 +7209,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NPPC}                            & Integer         & Number of particles per cell      &                     & 1                       \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}            & Real            & See Section~\ref{info:particle_flux} & kg/m$^2$ s       & 0.                      \\ \hline
 {\ct PART\_ID}                        & Character       & Lagrangian Particle ID            &                     &                         \\ \hline
-{\ct POROUS}                          & Logical         & Non-solid boundary                &                     & {\ct .FALSE.}           \\ \hline
+{\ct POROUS}                          & Logical         & See Section~\ref{info:Velocity_BC}&                     & {\ct .FALSE.}           \\ \hline
 {\ct PLE}                             & Real            & Atmospheric profile exponent      &                     & 0.3                     \\ \hline
 {\ct PROFILE}                         & Character       & Name of velocity profile          &                     &                         \\ \hline
 {\ct RAMP\_MF(I)}                     & Character       & Ramp ID for species I             &                     &                         \\ \hline
