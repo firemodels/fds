@@ -372,8 +372,8 @@ IF (N_DEVC>0) THEN
             OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='REPLACE')
             WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(254, N_DEVC - 254 * (I - 1)),"(A,','),A)"
             WRITE(LU_DEVC(I),TCFORM) 's',(TRIM(OUTPUT_QUANTITY(DEVICE(N)%OUTPUT_INDEX)%UNITS),N=254*(I-1)+1,MIN(N_DEVC,I*254))
-            WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(254, N_DEVC - 254 * (I - 1)),"(A,','),A)"
-            WRITE(LU_DEVC(I),TCFORM) 'FDS Time',(TRIM(DEVICE(N)%ID),N=254 * (I - 1) + 1,MIN(N_DEVC, I * 254))
+            WRITE(TCFORM,'(A,I4.4,A)') "(A,",MIN(254, N_DEVC - 254 * (I - 1)),"(',',3A))"
+            WRITE(LU_DEVC(I),TCFORM) 'FDS Time',('"',TRIM(DEVICE(N)%ID),'"',N=254 * (I - 1) + 1,MIN(N_DEVC, I * 254))
          ENDIF
       ENDDO
    ELSE
@@ -383,8 +383,8 @@ IF (N_DEVC>0) THEN
          OPEN(LU_DEVC(1),FILE=FN_DEVC(1),FORM='FORMATTED',STATUS='REPLACE')
          WRITE(TCFORM,'(A,I4.4,A)') "(",N_DEVC,"(A,','),A)"
          WRITE(LU_DEVC(1),TCFORM) 's',(TRIM(OUTPUT_QUANTITY(DEVICE(N)%OUTPUT_INDEX)%UNITS),N=1,N_DEVC)
-         WRITE(TCFORM,'(A,I4.4,A)') "(",N_DEVC,"(A,','),A)"
-         WRITE(LU_DEVC(1),TCFORM) 'FDS Time',(TRIM(DEVICE(N)%ID),N=1,N_DEVC)
+            WRITE(TCFORM,'(A,I4.4,A)') "(A,",N_DEVC,"(',',3A))"
+            WRITE(LU_DEVC(I),TCFORM) 'FDS Time',('"',TRIM(DEVICE(N)%ID),'"',N=1,N_DEVC)
       ENDIF
    ENDIF
 ENDIF
@@ -400,8 +400,8 @@ IF (N_CTRL>0) THEN
             OPEN(LU_CTRL(I),FILE=FN_CTRL(I),FORM='FORMATTED',STATUS='REPLACE')
             WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(254, N_CTRL - 254 * (I - 1)),"(A,','),A)"
             WRITE(LU_CTRL(I),TCFORM) 's',('status',N=254 * (I - 1) + 1,MIN(N_CTRL, I * 254))
-            WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(254, N_CTRL - 254 * (I - 1)),"(A,','),A)"
-            WRITE(LU_CTRL(I),TCFORM) 'FDS Time',(TRIM(CONTROL(N)%ID),N=254 * (I - 1) + 1,MIN(N_CTRL, I * 254))
+            WRITE(TCFORM,'(A,I4.4,A)') "(A,",MIN(254, N_CTRL - 254 * (I - 1)),"(',',3A))"
+            WRITE(LU_CTRL(I),TCFORM) 'FDS Time',('"',TRIM(CONTROL(N)%ID),'"',N=254 * (I - 1) + 1,MIN(N_CTRL, I * 254))
          ENDIF
       ENDDO
    ELSE
@@ -411,8 +411,8 @@ IF (N_CTRL>0) THEN
          OPEN(LU_CTRL(1),FILE=FN_CTRL(1),FORM='FORMATTED',STATUS='REPLACE')
          WRITE(TCFORM,'(A,I4.4,A)') "(",N_CTRL,"(A,','),A)"
          WRITE(LU_CTRL(1),TCFORM) 's',('status',N=1,N_CTRL)
-         WRITE(TCFORM,'(A,I4.4,A)') "(",N_CTRL,"(A,','),A)"
-         WRITE(LU_CTRL(1),TCFORM) 'FDS Time',(TRIM(CONTROL(N)%ID),N=1,N_CTRL)
+            WRITE(TCFORM,'(A,I4.4,A)') "(A,",N_CTRL,"(',',3A))"
+            WRITE(LU_CTRL(I),TCFORM) 'FDS Time',('"',TRIM(CONTROL(N)%ID),'"',N=1,N_CTRL)
       ENDIF
    ENDIF
 ENDIF
