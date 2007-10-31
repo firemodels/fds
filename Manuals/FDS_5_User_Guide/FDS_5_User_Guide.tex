@@ -543,6 +543,8 @@ Robin Zevotek                           & C\&S Engineers, Life Safety Services, 
 
 
 \tableofcontents
+\listoffigures
+\listoftables
 
 \mainmatter
 
@@ -701,9 +703,9 @@ development environment is being used for configuration management
 (code archiving, revision tracking, bug fixes, user suggestions, and so on).
 See Section~\ref{info:aquire} for more information.
 
-\item[{\bf FDS Verification and Validation Information}] Starting with FDS 5, more 
-emphasis has been placed on maintaining a permanent collection of Verification 
-and Validation cases.  This improves the quality of each FDS update and release, 
+\item[{\bf FDS Verification and Validation Information}] Starting with FDS 5, more
+emphasis has been placed on maintaining a permanent collection of Verification
+and Validation cases.  This improves the quality of each FDS update and release,
 as a standard test suite will now be used to insure that changes
 made to the source code do not degrade FDS output.  This also provides users with a standard
 data set to verify their own installation of FDS and to compare the results that FDS is returning
@@ -767,13 +769,13 @@ implementations of Unix/Linux.
 
 \begin{description}
 \item[{\bf MS Windows}]
-An installation package is available for Windows operating system.  
+An installation package is available for Windows operating system.
 It is not recommended to run FDS/Smokeview under any version of MS Windows
 released prior to Windows 2000.
 
 \item[{\bf Mac OS X}]
 A Mac OS X FDS .zip archive is available for both the PowerPC and Intel architectures.
-Mac OS X 10.4.x or better is recommended, versions of OS X prior to 10.4.x are not 
+Mac OS X 10.4.x or better is recommended, versions of OS X prior to 10.4.x are not
 officially supported. Users can always download the latest version of FDS source and
 compile FDS for other versions of OS X (See Appendix~\ref{info:compilation} for details).
 
@@ -844,7 +846,7 @@ The character string {\ct job\_name} is usually
 designated within the input file as the {\ct CHID}. It is recommended that the
 name of the input file and the {\ct CHID} be the same so that all of the
 files associated with a given calculation have a consistent name.
-The progress of a simulation is indicated by diagnostic output that is written 
+The progress of a simulation is indicated by diagnostic output that is written
 out onto the screen. Detailed diagnostic information is automatically
 written to a file {\bf CHID.out}, where {\ct CHID} is a character
 string, usually the same as {\ct job\_name}, designated in the input file..
@@ -857,12 +859,12 @@ fds5 job_name.fds > job_name.err
 
 \subsubsection{Mac OS X, Unix, Linux}
 
-Depending on the type of installation, you may need to set various 
-path or environment variables in order to invoke FDS without a full 
-path reference to the executable. The easiest way to do this is via 
-an ``alias'' in your shell start-up script. For the example below, 
+Depending on the type of installation, you may need to set various
+path or environment variables in order to invoke FDS without a full
+path reference to the executable. The easiest way to do this is via
+an ``alias'' in your shell start-up script. For the example below,
 it is assumed that {\ct fds5} is aliased to its full path name.
-You may also need to ``chmod + x'' to make the file executable. 
+You may also need to ``chmod + x'' to make the file executable.
 Once this is done, run FDS from the command line by typing:
 \begin{verbatim}
 fds5 job_name.fds
@@ -875,10 +877,10 @@ fds5 job_name.fds >& job_name.err &
 \end{verbatim}
 
 
-Note that in the latter case, the screen output is stored in the file 
-{\bf job\_name.err} and the detailed diagnostics are saved automatically 
-in a file {\bf CHID.out}, where {\ct CHID} is a character string, usually 
-the same as {\ct job\_name}, designated in the input file. It is preferable 
+Note that in the latter case, the screen output is stored in the file
+{\bf job\_name.err} and the detailed diagnostics are saved automatically
+in a file {\bf CHID.out}, where {\ct CHID} is a character string, usually
+the same as {\ct job\_name}, designated in the input file. It is preferable
 to run jobs in the background so as to free the console for other uses.
 
 
@@ -2315,7 +2317,7 @@ be the same, denoting a plane as opposed to a solid.
 
 \begin{warning}
 \noindent
-Note that only one {\ct VENT} may be specified for any given wall cell.  If additional {\ct VENT} lines are specified for a 
+Note that only one {\ct VENT} may be specified for any given wall cell.  If additional {\ct VENT} lines are specified for a
 given wall cell, FDS will output a warning message and ignore the subsequent lines (i.e. only the first vent
 will be applied)
 \end{warning}
@@ -4305,7 +4307,7 @@ values of {\ct 'AIR'} are assumed.
 
 \begin{table}[t]
 \begin{center}
-\caption{\bf Optional Gas Species~\cite{Reid:1}}
+\caption[Optional Gas Species]{\bf Optional Gas Species~\cite{Reid:1}}
 \label{tab:gasspecies}
 \vspace{0.1in}
 \begin{tabular}{|l|c|c|c|}
@@ -5144,7 +5146,7 @@ The threshold can be set according to the setting commonly provided by the manuf
 The default setting is 3.28~\%/m (1~\%/ft).
 
 \begin{table}[ht]
-\caption{Suggested Values for Smoke Detector Model. See Ref.~\cite{SFPE} for others.}
+\caption[Suggested Values for Smoke Detector Model.]{Suggested Values for Smoke Detector Model. See Ref.~\cite{SFPE} for others.}
 \vspace{0.1in}
 \label{tab:sdvalues}
 \begin{center}
@@ -6456,7 +6458,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:BNDF}.}\label{tbl:BNDF}
+\caption[Boundary File Parameters]{For more information see Section~\ref{info:BNDF}.}\label{tbl:BNDF}
 \noindent
 \begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
 \hline
@@ -6478,7 +6480,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:CLIP}.}\label{tbl:CLIP}
+\caption[MIN/MAX Clipping Parameters]{For more information see Section~\ref{info:CLIP}.}\label{tbl:CLIP}
 \noindent
 \begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
 \hline
@@ -6503,7 +6505,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:CTRL}.}\label{tbl:CTRL}
+\caption[Control Function Parameters]{For more information see Section~\ref{info:CTRL}.}\label{tbl:CTRL}
 \noindent
 \begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
 \hline
@@ -6534,7 +6536,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:DEVC}.}\label{tbl:DEVC}
+\caption[Device Parameters]{For more information see Section~\ref{info:DEVC}.}\label{tbl:DEVC}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6576,7 +6578,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:DUMP}.}\label{tbl:DUMP}
+\caption[Output Parameters]{For more information see Section~\ref{info:DUMP}.}\label{tbl:DUMP}
 \noindent
 \begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6622,7 +6624,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:HEAD}.}\label{tbl:HEAD}
+\caption[Header Parameters]{For more information see Section~\ref{info:HEAD}.}\label{tbl:HEAD}
 \noindent
 \begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6643,7 +6645,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:HOLE}.}\label{tbl:HOLE}
+\caption[Obstruction Cutout Parameters]{For more information see Section~\ref{info:HOLE}.}\label{tbl:HOLE}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6668,7 +6670,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:INIT}.}\label{tbl:INIT}
+\caption[Initial Conditions]{For more information see Section~\ref{info:INIT}.}\label{tbl:INIT}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6690,7 +6692,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:ISOF}.}\label{tbl:ISOF}
+\caption[Isosurface Parameters]{For more information see Section~\ref{info:ISOF}.}\label{tbl:ISOF}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6713,7 +6715,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:MATL}.}\label{tbl:MATL}
+\caption[Material Properties]{For more information see Section~\ref{info:MATL}.}\label{tbl:MATL}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6755,7 +6757,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:MESH}.}\label{tbl:MESH}
+\caption[Mesh Parameters]{For more information see Section~\ref{info:MESH}.}\label{tbl:MESH}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6786,7 +6788,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:MISC}.}\label{tbl:MISC}
+\caption[Miscellaneous Parameters]{For more information see Section~\ref{info:MISC}.}\label{tbl:MISC}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6856,7 +6858,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:OBST}.}\label{tbl:OBST}
+\caption[Obstruction Parameters]{For more information see Section~\ref{info:OBST}.}\label{tbl:OBST}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6896,7 +6898,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:PART}.}\label{tbl:PART}
+\caption[Lagrangian Particles/Droplets]{For more information see Section~\ref{info:PART}.}\label{tbl:PART}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6948,7 +6950,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:PROF}.}\label{tbl:PROF}
+\caption[Wall Profile Parameters]{For more information see Section~\ref{info:PROF}.}\label{tbl:PROF}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -6970,7 +6972,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:PROP}.}\label{tbl:PROP}
+\caption[Device Properties]{For more information see Section~\ref{info:PROP}.}\label{tbl:PROP}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7015,7 +7017,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:RADI}.}\label{tbl:RADI}
+\caption[Radiation Parameters]{For more information see Section~\ref{info:RADI}.}\label{tbl:RADI}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7042,7 +7044,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:RAMP}.}\label{tbl:RAMP}
+\caption[Ramp Function Parameters]{For more information see Section~\ref{info:RAMP}.}\label{tbl:RAMP}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7068,7 +7070,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:REAC}.}\label{tbl:REAC}
+\caption[Reaction Parameters]{For more information see Section~\ref{info:REAC}.}\label{tbl:REAC}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7119,7 +7121,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:SLCF}.}\label{tbl:SLCF}
+\caption[Slice File Parameters]{For more information see Section~\ref{info:SLCF}.}\label{tbl:SLCF}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7149,7 +7151,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:SPEC}.}\label{tbl:SPEC}
+\caption[Species Parameters]{For more information see Section~\ref{info:SPEC}.}\label{tbl:SPEC}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7176,7 +7178,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \section{\texorpdfstring{{\tt SURF}}{SURF} (Surface Properties)}
 
 \begin{longtable}{|l|l|l|l|l|}
-\caption[  ]{For more information see Section~\ref{info:SURF}.}
+\caption[Surface Properties]{For more information see Section~\ref{info:SURF}.}
 \label{tbl:SURF} \\
 %\noindent
 %\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -7248,7 +7250,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:TABL}.}\label{tbl:TABL}
+\caption[Table Parameters]{For more information see Section~\ref{info:TABL}.}\label{tbl:TABL}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7269,7 +7271,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:TIME}.}\label{tbl:TIME}
+\caption[Time Parameters]{For more information see Section~\ref{info:TIME}.}\label{tbl:TIME}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7293,7 +7295,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %\hspace{0.5in}
 
 %\begin{table}[H]
-%\caption{For more information see Section~\ref{info:TIME}.}\label{tbl:TIME}
+%\caption[Conical Tree Parameters]{For more information see Section~\ref{info:TIME}.}\label{tbl:TIME}
 %\noindent
 %\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 %\hline
@@ -7317,7 +7319,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:TRNX}.}\label{tbl:TRNX}
+\caption[MESH Transformations]{For more information see Section~\ref{info:TRNX}.}\label{tbl:TRNX}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7340,7 +7342,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:VENT}.}\label{tbl:VENT}
+\caption[Vent Parameters]{For more information see Section~\ref{info:VENT}.}\label{tbl:VENT}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7377,7 +7379,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption{For more information see Section~\ref{info:ZONE}.}\label{tbl:ZONE}
+\caption[Pressure Zone Parameters]{For more information see Section~\ref{info:ZONE}.}\label{tbl:ZONE}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7883,7 +7885,7 @@ $\tau$ & $S(\tau) {\rm (kW/m^2)}$ & FDS $\rm(kW/m^2)$ \\ \hline\hline
 
 \section{Solid Phase Phenomena}
 
-This section contains examples that test the one-dimensional heat 
+This section contains examples that test the one-dimensional heat
 conduction solver in FDS, along with an example of a simple
 two-step, solid phase reaction scheme.
 
@@ -8244,13 +8246,13 @@ An example of an axially-symmetric helium plume is shown here, along with the in
 \subsection{Sawtooth (\texorpdfstring{{\bf sawtooth}}{sawtooth})}
 \label{sawtooth}
 
-Sometimes it is desired to have stair-stepped obstructions representing 
+Sometimes it is desired to have stair-stepped obstructions representing
 curved or sloped geometry. A concern is that this may
-change the flow pattern near the wall. To lessen the impact of 
+change the flow pattern near the wall. To lessen the impact of
 stair-stepped boundaries near the edges of the obstructions,
-one may specify the option {\ct SAWTOOTH=.FALSE.} If {\ct SAWTOOTH} 
+one may specify the option {\ct SAWTOOTH=.FALSE.} If {\ct SAWTOOTH}
 is set to {\ct FALSE}, then the velocity boundary conditions will be applied in
-such a way as to minimize the impact of the boundaries due to vortices 
+such a way as to minimize the impact of the boundaries due to vortices
 at sharp corners, as shown in the following example:
 
 \scriptsize
@@ -8335,21 +8337,21 @@ ought to be:
 \subsection{Aspiration Detector (\texorpdfstring{{\bf beam\_detector}}{beam\_detector})}
 \label{beam_detectors}
 
-A 10~m x 10~m x 4~m compartment is filled with 0.006~kg/kg of 
+A 10~m x 10~m x 4~m compartment is filled with 0.006~kg/kg of
 {\ct MIXTURE\_FRACTION\_2} with the default soot yield
-0.01~kg/kg.  This results in an initial soot density of 71.9~mg/m$^3$ 
+0.01~kg/kg.  This results in an initial soot density of 71.9~mg/m$^3$
 which using the default extinction coefficient of
-8700~m$^2$/kg results in an optical depth of 0.626~m$^{-1}$.  The 
+8700~m$^2$/kg results in an optical depth of 0.626~m$^{-1}$.  The
 compartment has a series of obstructions placed at varying depths that are
-multiples of 1~m.  Using the correlation for the output quantity 
+multiples of 1~m.  Using the correlation for the output quantity
 {\ct visibility}, one obtains a visibility distance of 4.8~m.
-When viewing the smoke levels with Smokeview, one can just barely see 
+When viewing the smoke levels with Smokeview, one can just barely see
 the fifth obstacle which is at a distance of 5~m.
-Smokeview, therefore, is properly displaying the obscuration of the 
+Smokeview, therefore, is properly displaying the obscuration of the
 initial soot density.  Three beam detectors are also
-placed in the compartment.  These all have a path length of 10~m, 
+placed in the compartment.  These all have a path length of 10~m,
 but are at different orientations within the compartment.
-Using the optical depth of 0.626~m$^{-1}$ and the path length of 
+Using the optical depth of 0.626~m$^{-1}$ and the path length of
 10~m, the expected total obscuration is 99.81~\%, which is the
 result computed by FDS for each of the three detectors.
 \begin{tabular*}{\textwidth}{lr}
@@ -8362,18 +8364,18 @@ result computed by FDS for each of the three detectors.
 \subsection{Aspiration Detector (\texorpdfstring{{\bf aspiration\_detector}}{aspiration\_detector}) }
 \label{aspiration_detector}
 
-A cubical compartment, 2~m on a side with a fire has a three 
+A cubical compartment, 2~m on a side with a fire has a three
 sampling location aspiration system.  The three locations
-have flow rates of 0.1, 0.5, and 0.8~kg/s, respectively, and 
+have flow rates of 0.1, 0.5, and 0.8~kg/s, respectively, and
 transport times of 0.2, 0.1, and 0.3~s, respectively.  No bypass flow rate is
-specified for the aspiration detector.  The input file fixes the 
+specified for the aspiration detector.  The input file fixes the
 initial time step to 0.01~s so that the initial output
-times in the {\bf aspiration\_detector\_devc.csv} file will line 
+times in the {\bf aspiration\_detector\_devc.csv} file will line
 up exactly with the transport times.  At 0.75~s, when
-FDS begins reducing the time step below 0.01~s, the time delayed 
-soot densities at the three sampling locations are $7.4x10^{-6}$~kg/m$^3$, 
-$9.5x10^{-4}$~kg/m$^3$, and $1.6x10^{-18}$~kg/m$^3$, respectively.  
-Using these values along with the respective flow rates results 
+FDS begins reducing the time step below 0.01~s, the time delayed
+soot densities at the three sampling locations are $7.4x10^{-6}$~kg/m$^3$,
+$9.5x10^{-4}$~kg/m$^3$, and $1.6x10^{-18}$~kg/m$^3$, respectively.
+Using these values along with the respective flow rates results
 in a detector obscuration of 0.000823~\%/m which is the same obscuration as predicted by FDS.
 
 \clearpage
@@ -8386,17 +8388,17 @@ This section considers cases involving evaporating droplets, both water and fuel
 \subsection{Water Droplet Evaporation (\texorpdfstring{{\bf water\_evaporation}}{water\_evaporation}) }
 \label{water_evaporation}
 
-The case called {\bf water\_evaporation} is nothing more than stationary 
+The case called {\bf water\_evaporation} is nothing more than stationary
 water droplets in an adiabatic box with dimensions of 1~m on a side. The air
-within the box is stirred to maintain uniform conditions, and there are no 
+within the box is stirred to maintain uniform conditions, and there are no
 leaks or heat losses. The initial air temperature is 40~$^\circ$C.
-Initially, the droplets have a median volumetric diameter of 100~$\mu$m, 
+Initially, the droplets have a median volumetric diameter of 100~$\mu$m,
 a temperature of 90~$^\circ$C, and a total mass of 0.02~kg.
-It is expected that a steady-state will be achieved after several minutes.  
-The initial energy content, sum of the air and water enthalpies, of the box 
+It is expected that a steady-state will be achieved after several minutes.
+The initial energy content, sum of the air and water enthalpies, of the box
 is 360,000~kJ.  After a short period of time, 0.0141 kg of water evaporate and the box
-reaches an equilibrium temperature of 16.2~$^\circ$C, see the figure below.  
-At this point the energy content of the box is 372,000~kJ or a 3~\% error.  
+reaches an equilibrium temperature of 16.2~$^\circ$C, see the figure below.
+At this point the energy content of the box is 372,000~kJ or a 3~\% error.
 At 16.2~$^\circ$C, the expected evaporation is 0.0142~kg.
 
 \begin{center}
@@ -8413,29 +8415,29 @@ At 16.2~$^\circ$C, the expected evaporation is 0.0142~kg.
 \subsection{Measuring Water Flux (\texorpdfstring{{\bf bucket\_test}}{bucket\_test}) }
 \label{bucket_test}
 
-A common way of measuring the spray distribution for any fire 
-sprinkler is called a ``bucket test.''  Usually, one or several 
-sprinklers is mounted a specified distance above an array of catch 
-bins, the water flows for a given period of time, and the water 
-flux distribution is calculated from the accumulated water mass in 
-each bin. In the test case {\bf bucket\_test}, a single sprinkler is 
-mounted 10~cm below a 5~m ceiling. Water flows for 5~s at a constant 
-rate of 60~L/min.  The simulation continues for another 5~s to allow 
+A common way of measuring the spray distribution for any fire
+sprinkler is called a ``bucket test.''  Usually, one or several
+sprinklers is mounted a specified distance above an array of catch
+bins, the water flows for a given period of time, and the water
+flux distribution is calculated from the accumulated water mass in
+each bin. In the test case {\bf bucket\_test}, a single sprinkler is
+mounted 10~cm below a 5~m ceiling. Water flows for 5~s at a constant
+rate of 60~L/min.  The simulation continues for another 5~s to allow
 water drops time to reach the floor. The total mass of water discharged is
 \be
   \mathrm{ 60 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 5 \; s = 5 \; kg }
 \ee
-In the simulation, the boundary quantity {\ct water\_drops\_AMPUA} 
-(Accumulated Mass Per Unit Area) records the total water mass per 
+In the simulation, the boundary quantity {\ct water\_drops\_AMPUA}
+(Accumulated Mass Per Unit Area) records the total water mass per
 unit area (kg/m$^2$), analogous to actual buckets the size of a grid cell.
-Summing the values of {\ct water\_drops\_AMPUA} over the entire 
+Summing the values of {\ct water\_drops\_AMPUA} over the entire
 floor yields 4.96~kg. Where is the missing water? Some droplets evaporate, and some droplets
-fly beyond the computational domain. Also, there remain a small 
+fly beyond the computational domain. Also, there remain a small
 number of suspended drops at the end of the simulation. Note that
 there are no actual ``buckets'' in the simulation.
 
-The accumulated water mass at the floor is extracted from 
-the boundary ({\ct BNDF}) file via the command line program 
+The accumulated water mass at the floor is extracted from
+the boundary ({\ct BNDF}) file via the command line program
 {\bf fds2ascii}. Here is a transcript of the session
 used to convert the binary FDS output file into ASCII format:
 
@@ -8499,16 +8501,16 @@ the {\ct +x} jet does have four times the flow of the {\ct -x} jet.
 
 \section{General Functionality}
 
-This section contains a variety of simple tests to check 
-the functionality of the code. These examples are good 
+This section contains a variety of simple tests to check
+the functionality of the code. These examples are good
 demonstrations of how to make things happen in FDS.
 
 \subsection{Creating and Removing \texorpdfstring{{\ct HOLE}s}{HOLEs} and \texorpdfstring{{\ct OBST}ructions}{OBSTructions} (\texorpdfstring{{\bf create\_remove}}{create\_remove})}
 \label{create_remove}
 
-It is often convenient to create or remove solid obstructions, or conversely, 
+It is often convenient to create or remove solid obstructions, or conversely,
 remove or create empty holes. They are essentially the same thing as far as the logic in
-FDS is concerned, but the input can be tricky. To avoid confusion, here 
+FDS is concerned, but the input can be tricky. To avoid confusion, here
 is an example of holes and obstructions being created and removed.
 
 \vspace{0.2in}
@@ -8747,14 +8749,14 @@ initial peak is typical of char-forming solids.
 
 \section{Background}
 
-All fire simulations must include a ``model'' of the fire itself. 
+All fire simulations must include a ``model'' of the fire itself.
 Almost always, these models are simplifications of the actual burning item. The examples
-in this chapter are merely starting points for more elaborate 
+in this chapter are merely starting points for more elaborate
 fire simulations. The point of these examples is to demonstrate that any simulation of a fire ought
-to first start with a model of just the fire itself and its 
+to first start with a model of just the fire itself and its
 immediate surroundings. It is a tremendous waste of time to begin a project
 by setting up a calculation of the fire, smoke and heat transport,
-target/detector response, and so on, without first doing quick 
+target/detector response, and so on, without first doing quick
 simulations of the fire itself to ensure that it conforms to either a test burn or your own
 conceptual model.
 
@@ -8804,9 +8806,9 @@ are also shown, courtesy of Ian Thomas, Victoria University, Australia~\cite{Tho
 \subsection{A Couch Fire (\texorpdfstring{{\bf couch}}{couch}) }
 \label{couch}
 
-In residential fires, upholstered furniture makes up a significant 
+In residential fires, upholstered furniture makes up a significant
 fraction of the combustible load. A single couch can generate several
-megawatts of energy and sometimes lead to compartment flashover. Modeling 
+megawatts of energy and sometimes lead to compartment flashover. Modeling
 a couch fire requires a simplification of its structure and materials.
 At the very least, we want the upholstery to be described as fabric covering foam:
 
@@ -8844,15 +8846,15 @@ At the very least, we want the upholstery to be described as fabric covering foa
 \end{verbatim} \normalsize
 
 \noindent
-Both the fabric and the foam decompose into fuel gases via 
+Both the fabric and the foam decompose into fuel gases via
 single-step reactions. The fuel gases from each have different
-composition and heats of combustion. FDS automatically adjusts 
+composition and heats of combustion. FDS automatically adjusts
 the mass loss rate of each so that the ``effective'' fuel gas
-is that specified by the user on the {\ct REAC} line. The attribute 
+is that specified by the user on the {\ct REAC} line. The attribute
 {\ct BURN\_AWAY} forces FDS to break up the couch into
-individual cell-sized blocks that will disappear from the calculation 
+individual cell-sized blocks that will disappear from the calculation
 as soon as the fuel is exhausted. The surface is specified
-as consisting of two layers, with a thickness of 2~mm for the {\ct FABRIC} 
+as consisting of two layers, with a thickness of 2~mm for the {\ct FABRIC}
 and 10~cm for the {\ct FOAM}. The 10~cm is chosen to be the
 same as the mesh cell size.
 
@@ -8861,9 +8863,9 @@ same as the mesh cell size.
 \subsection{Flame Spread along a Cable Tray (\texorpdfstring{{\bf cable\_tray}}{cable\_tray}) }
 \label{cable_tray}
 
-A common combustible in industrial settings are power, control, and 
+A common combustible in industrial settings are power, control, and
 instrument cables. The cables may be bundled in a variety of conduits; the most
-common of which is a ladder-like ``tray.'' From the point of view of FDS, 
+common of which is a ladder-like ``tray.'' From the point of view of FDS,
 the pile of cables in a tray is a composite of a variety of plastics, insulators,
 and metal, usually copper. Here is one way to describe a tray of cables:
 
@@ -8902,22 +8904,22 @@ and metal, usually copper. Here is one way to describe a tray of cables:
 \end{verbatim} \normalsize
 
 \noindent
-The pile of cables is assumed to be a solid slab, 28~cm wide and 2~cm 
+The pile of cables is assumed to be a solid slab, 28~cm wide and 2~cm
 deep. The tray is slightly wider and deeper, and because it is listed second in
-the input file, its surface properties take precedence wherever the 
+the input file, its surface properties take precedence wherever the
 cable slab and tray coincide. The mesh cells in this example are 5~cm on a side, but the
-heat transfer within the cable slab are governed by the 2~cm {\ct THICKNESS}. 
+heat transfer within the cable slab are governed by the 2~cm {\ct THICKNESS}.
 The slab is 60~\% copper, by mass. Note that we are not assuming multiple
-layers in this example -- the slab is a single layer composite of plastic 
+layers in this example -- the slab is a single layer composite of plastic
 and copper. The plastic burns at about 400~$^\circ$, but the copper remains. Thus,
 the cable does not ``burn away.''
 
-The point of this test case is merely to propose a simple model of flame 
+The point of this test case is merely to propose a simple model of flame
 spread along a tray of assorted cable. Detailed thermo-physical property data for
-industrial-grade cable is usually not available, and even if it were, it 
+industrial-grade cable is usually not available, and even if it were, it
 would probably not improve upon the given model. The properties given in this example
 are almost completely fabricated. What is important here are the
-{\ct HEAT\_OF\_REACTION} and {\ct REFERENCE\_TEMPERATURE}, obtained in 
+{\ct HEAT\_OF\_REACTION} and {\ct REFERENCE\_TEMPERATURE}, obtained in
 most cases by a bench-scale measurement device like the cone calorimeter.
 
 
@@ -8962,11 +8964,11 @@ that a 2~MW fire is achieved via 2 nozzles flowing heptane at
 \be 2 \times 1.96 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 688 \;
 \frac{\hbox{kg}}{\hbox{m}^3} \times \frac{1}{1000} \; \frac{\hbox{m}^3}{\hbox{L}} \times 44500 \;
 \frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW} \ee
-The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall 
-reaction scheme. Thus, if other droplets or solid objects have different 
+The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall
+reaction scheme. Thus, if other droplets or solid objects have different
 heats of combustion, the effective burning rates are adjusted so that the
-total heat release rate is that which the user expects. However, exercises 
-like this ought to be conducted just to ensure that this is the case. 
+total heat release rate is that which the user expects. However, exercises
+like this ought to be conducted just to ensure that this is the case.
 The HRR curve for this example is given here:
 
 \begin{center}
@@ -9337,11 +9339,11 @@ compile the code. Fortran 90/95 and C compilers are needed for compilation.
 \section{FDS Source Code}
 
 Table~\ref{tab:sourcefiles} lists the files that make up the source code.
-The files with suffix ``.f90'' contain free form Fortran 90 instructions 
+The files with suffix ``.f90'' contain free form Fortran 90 instructions
 conforming to the ANSI and ISO standards, with a few exceptions that are discussed below.
 The source files should be compiled in the order in which they are listed
 in Table~\ref{tab:sourcefiles} because some routines are dependent on others.
-For Unix/Linux users, {\bf Makefiles} for various platforms are available 
+For Unix/Linux users, {\bf Makefiles} for various platforms are available
 that assist in the compilation. Compiler options differ from platform to platform.
 Note the following:
 \begin{itemize}
@@ -9364,7 +9366,7 @@ compilers have a standard optimization level, plus various degrees of
 ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
 \item For the single processor version of FDS, compile with {\bf main.f90}
 \item The parallel version of FDS uses {\bf main\_mpi.f90} instead of
-{\bf main.f90}, plus additional MPI libraries need to be installed. More 
+{\bf main.f90}, plus additional MPI libraries need to be installed. More
 details on MPI can be found at the web site, along with links to the
 necessary organizations who have developed free MPI libraries.
 \end{itemize}
@@ -9551,11 +9553,11 @@ T(2) , VAL(1,2)    , VAL(2,2)    , ... , VAL(N_DEVC,2)
 \end{verbatim}
 \normalsize
 where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined
-ID of the {\ct I}th device, {\ct QUANTITY(I)} is the physical quantity represented, 
+ID of the {\ct I}th device, {\ct QUANTITY(I)} is the physical quantity represented,
 {\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
 {\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time.
 The files can be imported into Microsoft Excel or almost any other
-spread sheet program. If the number of columns exceeds 256, the file will 
+spread sheet program. If the number of columns exceeds 256, the file will
 automatically be split into smaller files.
 
 \section{Control Output Data}
