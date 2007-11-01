@@ -51,14 +51,31 @@ int main(int argc, char **argv){
     len=strlen(progname);
     if(len>2){
       NewMemory((void **)&smvprogdir,len+1);
+      strcpy(smvprogdir,progname);
+      getdir(smvprogdir);
     }
     else{
       smvprogdir=NULL;
     }
-    if(smvprogdir!=NULL){
-      strcpy(smvprogdir,progname);
-      getdir(smvprogdir);
+    if(smvprogdir==NULL||strlen(smvprogdir)==0){
+      char *temp_smvbindir=NULL, SMVBINDIR[1024];
+
+      strcpy(SMVBINDIR,"");
+      FREEMEMORY(smvprogdir);
+      temp_smvbindir=getenv("SMVBINDIR");
+      if(temp_smvbindir==NULL)temp_smvbindir=getenv("smvbindir");
+      if(temp_smvbindir!=NULL)strcpy(SMVBINDIR,temp_smvbindir);
+#ifdef WIN32
+      if(strlen(SMVBINDIR)==0){
+        strcpy(SMVBINDIR,"c:\\program files\\nist\\smokeview\\");
+      }
+#endif
+      if(strlen(SMVBINDIR)>0){
+        NewMemory((void **)&smvprogdir,strlen(SMVBINDIR)+1);
+        strcpy(smvprogdir,SMVBINDIR);
+      }
     }
+
     get_smokezippath(smvprogdir,&smokezippath);
 
     if(smokezippath!=NULL)printf(" Smokezip file: %s found\n",smokezippath);
