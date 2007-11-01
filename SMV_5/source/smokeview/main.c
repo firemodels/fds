@@ -16,7 +16,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "smokeviewapi.h"
-
+ 
 // svn revision character string
 char main_revision[]="$Revision$";
 
@@ -34,7 +34,7 @@ int main(int argc, char **argv){
   if(argc==1){
     version();
   }
-#ifdef WIN32
+  #ifdef WIN32
   copy_args(&argc, argv, &argv_sv);
   if(argc==1){
     exit(0);
