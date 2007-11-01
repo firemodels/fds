@@ -1311,16 +1311,7 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
         drawsmoke3dGPU(smoke3di);
       }
       else{
-#ifdef pp_CULL
-        if(cullsmoke==1){
-          drawsmoke3dCULL(smoke3di);
-        }
-        else{
         drawsmoke3d(smoke3di);
-        }
-#else
-          drawsmoke3d(smoke3di);
-#endif
       }
 #else
       drawsmoke3d(smoke3di);

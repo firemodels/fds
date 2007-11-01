@@ -2955,27 +2955,8 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   }
 #endif
 
-  if(demo_mode!=0){
-    demo_mode=demo_mode;
-  }
-  switch (demo_mode){
-  case 0:
-    is1 = smoke3di->is1;
-    is2 = smoke3di->is2;
-    break;
-  case 1:
-    is1 = (smoke3di->is1+smoke3di->is2)/2;
-    is2 = is1+1;
-    if(is1<smoke3di->is1)is1=smoke3di->is1;
-    if(is2>smoke3di->is2)is2=smoke3di->is2;
-    break;
-  default:
-    is1 = (smoke3di->is1+smoke3di->is2)/2-demo_mode;
-    is2 = is1+2*demo_mode;
-    if(is1<smoke3di->is1)is1=smoke3di->is1;
-    if(is2>smoke3di->is2)is2=smoke3di->is2;
-    break;
-  }
+  is1 = smoke3di->is1;
+  is2 = smoke3di->is2;
   js1 = smoke3di->js1;
   js2 = smoke3di->js2;
   ks1 = smoke3di->ks1;
@@ -3027,9 +3008,11 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   }
   glUniform1f(GPU_hrrcutoff,(float)i_hrrcutoff);
   transparenton();
+//  printf("case %i\n",ssmokedir);
   switch (ssmokedir){
-  // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
+    int icull;
 
+  // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
 
   case 1:
   case -1:
@@ -3042,32 +3025,22 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
     glBegin(GL_TRIANGLES);
     slice_beg=is1;
     slice_end=is2;
-    for(iii=slice_beg;iii<slice_end;iii+=skip){
+
+    for(icull=0;icull<meshi->ncullinfo;icull++){
+      culldata *culli;
+
+      culli = meshi->cullinfo + icull;
+      if(cullsmoke==1&&culli->npixels==0)continue;
+//    for(iii=slice_beg;iii<slice_end;iii+=skip){
+      for(iii=culli->ibeg;iii<culli->iend;iii+=skip){
+
       i=iii;
-      if(ssmokedir<0)i = is1+is2-iii-1;
+    //  if(ssmokedir<0)i = is1+is2-iii-1;
       iterm = (i-smoke3di->is1);
 
-      if(smokecullflag==1){
-        x11[0]=xplt[i];
-        x12[0]=xplt[i];
-        x22[0]=xplt[i];
-        x21[0]=xplt[i];
-
-        x11[1]=yplt[js1];
-        x12[1]=yplt[js2];
-        x22[1]=yplt[js2];
-        x21[1]=yplt[js1];
-
-        x11[2]=zplt[ks1];
-        x12[2]=zplt[ks1];
-        x22[2]=zplt[ks2];
-        x21[2]=zplt[ks2];
-
-        if(RectangleInFrustum(x11,x12,x22,x21)==0)continue;
-      }
-
       constval = xplt[i]+0.001;
-      for(k=ks1; k<ks2; k++){
+//      for(k=ks1; k<ks2; k++){
+        for(k=culli->kbeg; k<culli->kend; k++){
         kterm = (k-ks1)*nxy;
         z1 = zplt[k];
         z3 = zplt[k+1];
@@ -3076,15 +3049,8 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
         znode[2]=z3;
         znode[3]=z3;
 
-        if(smokecullflag==1&&k!=ks2){
-          x11[2]=zplt[k];
-          x12[2]=zplt[k];
-          x22[2]=zplt[k+1];
-          x21[2]=zplt[k+1];
-
-          if(RectangleInFrustum(x11,x12,x22,x21)==0)continue;
-        }
-        for(j=js1; j<js2; j++){
+//        for(j=js1; j<js2; j++){
+          for(j=culli->jbeg; j<culli->jend; j++){
           jterm = (j-js1)*nx;
           yy1 = yplt[j];
           y3 = yplt[j+1];
@@ -3110,6 +3076,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
         }
       }
     }
+    }
     glEnd();
 
     break;
@@ -3126,34 +3093,19 @@ case -2:
   // ++++++++++++++++++  draw triangles +++++++++++++++++
 
     glBegin(GL_TRIANGLES);
-    slice_beg=js1;
-    slice_end=js2;
-    for(jjj=slice_beg;jjj<slice_end;jjj+=skip){
+    for(icull=0;icull<meshi->ncullinfo;icull++){
+      culldata *culli;
+
+      culli = meshi->cullinfo + icull;
+      if(cullsmoke==1&&culli->npixels==0)continue;
+      for(jjj=culli->jbeg;jjj<culli->jend;jjj+=skip){
+
       j=jjj;
-      if(ssmokedir<0)j = js1+js2-jjj-1;
+//      if(ssmokedir<0)j = js1+js2-jjj-1;
       constval = yplt[j]+0.001;
       jterm = (j-js1)*nx;
 
-      if(smokecullflag==1){
-        x11[0]=xplt[is1];
-        x12[0]=xplt[is2];
-        x22[0]=xplt[is2];
-        x21[0]=xplt[is1];
-
-        x11[1]=yplt[j];
-        x12[1]=yplt[j];
-        x22[1]=yplt[j];
-        x21[1]=yplt[j];
-
-        x11[2]=zplt[ks1];
-        x12[2]=zplt[ks1];
-        x22[2]=zplt[ks2];
-        x21[2]=zplt[ks2];
-      
-        if(RectangleInFrustum(x11,x12,x22,x21)==0)continue;
-      }
-
-      for(k=ks1; k<ks2; k++){
+        for(k=culli->kbeg; k<culli->kend; k++){
         kterm = (k-ks1)*nxy;
         z1 = zplt[k];
         z3 = zplt[k+1];
@@ -3163,15 +3115,7 @@ case -2:
         znode[2]=z3;
         znode[3]=z3;
 
-        if(smokecullflag==1){
-          x11[2]=zplt[k];
-          x12[2]=zplt[k];
-          x22[2]=zplt[k+1];
-          x21[2]=zplt[k+1];
-          if(RectangleInFrustum(x11,x12,x22,x21)==0)continue;
-        }
-
-        for(i=is1; i<is2; i++){
+          for(i=culli->ibeg; i<culli->iend; i++){
           iterm = (i-is1);
           x1 = xplt[i];
           x3 = xplt[i+1];
@@ -3197,6 +3141,7 @@ case -2:
         }
       }
     }
+    }
     glEnd();
     break;
 
@@ -3212,34 +3157,19 @@ case -2:
     // ++++++++++++++++++  draw triangles +++++++++++++++++
 
     glBegin(GL_TRIANGLES);
-    slice_beg=ks1;
-    slice_end=ks2;
-    for(kkk=slice_beg;kkk<slice_end;kkk+=skip){
+    for(icull=0;icull<meshi->ncullinfo;icull++){
+      culldata *culli;
+
+      culli = meshi->cullinfo + icull;
+      if(cullsmoke==1&&culli->npixels==0)continue;
+
+      for(kkk=culli->kbeg;kkk<culli->kend;kkk+=skip){
       k=kkk;
-      if(ssmokedir<0)k = ks1+ks2-kkk-1;
+      //if(ssmokedir<0)k = ks1+ks2-kkk-1;
       constval = zplt[k]+0.001;
       kterm = (k-ks1)*nxy;
 
-      if(smokecullflag==1){
-        x11[0]=xplt[is1];
-        x12[0]=xplt[is2];
-        x22[0]=xplt[is2];
-        x21[0]=xplt[is1];
-
-        x11[1]=yplt[js1];
-        x12[1]=yplt[js1];
-        x22[1]=yplt[js2];
-        x21[1]=yplt[js2];
-
-        x11[2]=zplt[k];
-        x12[2]=zplt[k];
-        x22[2]=zplt[k];
-        x21[2]=zplt[k];
-      
-        if(RectangleInFrustum(x11,x12,x22,x21)==0)continue;
-      }
-
-      for(j=js1; j<js2; j++){
+        for(j=culli->jbeg; j<culli->jend; j++){
         jterm = (j-js1)*nx;
 
         yy1 = yplt[j];
@@ -3250,15 +3180,7 @@ case -2:
         ynode[2]=y3;
         ynode[3]=y3;
 
-        if(smokecullflag==1){
-          x11[1]=yplt[j];
-          x12[1]=yplt[j];
-          x22[1]=yplt[j+1];
-          x21[1]=yplt[j+1];
-          if(RectangleInFrustum(x11,x12,x22,x21)==0)continue;
-        }
-
-        for(i=is1; i<is2; i++){
+          for(i=culli->ibeg; i<culli->iend; i++){
           iterm = (i-is1);
           x1 = xplt[i];
           x3 = xplt[i+1];
@@ -3277,6 +3199,7 @@ case -2:
           DRAWVERTEXGPU(xnode[mm],ynode[mm],constval)
         }
       }
+    }
     }
     glEnd();
     break;
@@ -3944,7 +3867,6 @@ case -2:
 
 }
 #endif
-
 /* ------------------ updatesmoke3dmenulabels ------------------------ */
 
 void updatesmoke3dmenulabels(void){
