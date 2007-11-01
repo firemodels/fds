@@ -892,26 +892,26 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,RELAXATION_FACTOR,FYI, &
                 THICKEN_OBSTRUCTIONS, &
                 EVAC_PRESSURE_ITERATIONS,EVAC_TIME_ITERATIONS, &
                 PRESSURE_CORRECTION,CHECK_POISSON,STRATIFICATION,RESTART_CHID, &
-                CFL_MAX,CFL_MIN,VN_MAX,VN_MIN,SOLID_PHASE_ONLY,SMOKE_ALBEDO
+                CFL_MAX,CFL_MIN,VN_MAX,VN_MIN,SOLID_PHASE_ONLY,SMOKE_ALBEDO,GROUND_LEVEL
  
 ! Physical constants
  
-R0      = 8314.472_EB     ! Universal Gas Constant (J/kmol/K) (NIST Physics Constants)
-R1      = 1.986257E-03_EB ! Universal Gas Constant (kcal/mol/K)
-TMPA    = 20._EB        ! Ambient temperature (C)
-GRAV    = 9.80665_EB    ! Acceleration of gravity (m/s**2)
-GAMMA   = 1.4_EB        ! Heat capacity ratio for air
-P_INF   = 101325._EB    ! Ambient pressure (Pa)
-P_STP   = 101325._EB    ! Standard pressure (Pa)
-TMPM    = 273.15_EB     ! Melting temperature of water (K)
-SIGMA   = 5.67E-8_EB    ! Stefan-Boltzmann constant (W/m**2/K**4)
+R0      = 8314.472_EB        ! Universal Gas Constant (J/kmol/K) (NIST Physics Constants)
+R1      = 1.986257E-03_EB    ! Universal Gas Constant (kcal/mol/K)
+TMPA    = 20._EB             ! Ambient temperature (C)
+GRAV    = 9.80665_EB         ! Acceleration of gravity (m/s**2)
+GAMMA   = 1.4_EB             ! Heat capacity ratio for air
+P_INF   = 101325._EB         ! Ambient pressure (Pa)
+P_STP   = 101325._EB         ! Standard pressure (Pa)
+TMPM    = 273.15_EB          ! Melting temperature of water (K)
+SIGMA   = 5.67E-8_EB         ! Stefan-Boltzmann constant (W/m**2/K**4)
 C_P_W   = 4184._EB           ! Specific Heat of Water (J/kg/K)
 H_V_W   = 2259._EB*1000._EB  ! Heat of Vap of Water (J/kg)
-MW_AIR  = 28.8_EB        ! g/mol
+MW_AIR  = 28.8_EB            ! g/mol
 MW_SOOT = 0.9_EB * 12._EB + 0.1_EB * 1._EB
 HUMIDITY= -1._EB                           ! Relative Humidity
 RHO_SOOT= 1850._EB                         ! Density of soot particle (kg/m3)
-SMOKE_ALBEDO= 0.3        !Albedo of smoke
+SMOKE_ALBEDO= 0.3            ! Albedo of smoke
 RESTART_CHID = CHID
  
 ! Empirical heat transfer constants
