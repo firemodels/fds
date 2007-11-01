@@ -2098,4 +2098,3 @@ int getmaxrevision(void){
   MAXREV(sv_api_revision);
   return max_revision;
 }
-
