@@ -20,11 +20,12 @@ char string_util_revision[]="$Revision$";
 
 /* ------------------ rootdir ------------------------ */
 
-void getdir(char *argi){
+void getdir(char *argstart){
   size_t i,nargi;
+  char *argi;
 
-  nargi=strlen(argi);
-  argi = argi+nargi-1;
+  nargi=strlen(argstart);
+  argi = argstart+nargi-1;
   for(i=0;i<nargi;i++){
     if(strncmp(argi,dirseparator,1)==0){
       *(argi+1)='\0';
@@ -32,6 +33,7 @@ void getdir(char *argi){
     }
     argi--;
   }
+  *argstart='\0';
   return;
 }
 
