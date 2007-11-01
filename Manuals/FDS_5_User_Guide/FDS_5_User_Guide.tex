@@ -2866,6 +2866,8 @@ mass flux of species.  To obtain a guaranteed mass flux of a species, you should
 \index{SURF!PLE}
 \index{SURF!Z0}
 \index{SURF!PROFILE}
+\index{MISC!GROUND\_LEVEL}
+
 Simulating a fire in the outdoors is not much different than a fire
 indoors, but there are a few issues that need to be addressed.
 First, the velocity of the wind profile at any exterior boundary will be a top hat (constant) by default,
@@ -2876,7 +2878,11 @@ For example, {\ct PROFILE='PARABOLIC'} produces a parabolic profile with
 and {\ct 'ATMOSPHERIC'} produces a typical atmospheric wind
 profile of the form $u=u_0 (z/z_0)^p$. If an atmospheric profile is
 prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$.
-{\ct VEL} specifies the reference velocity $u_0$.
+{\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather some
+height where the wind speed is measured, like an elevated weather station. It is assumed that
+the ground is located at $z=0$. To change this assumption, set {\ct GROUND\_LEVEL} on the {\ct MISC} line to be
+the appropriate value of $z$. Be careful not to apply an atmospheric velocity profile below {\ct GROUND\_LEVEL} or
+FDS will stop with an error.
 
 Another useful parameter for outdoor simulations is the temperature
 lapse rate of the atmosphere. Typically, in the first few hundred meters
@@ -6812,6 +6818,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct EVAC\_TIME\_ITERATIONS}    & Character     & Time iterations for Evac Model                &               &                   \\ \hline
 {\ct FYI}                       & Character     & Comment String (has no effect)                &               &                   \\ \hline
 %{\ct GAMMA}                     & Real          & Ratio of specific heats                       &               & 1.4               \\ \hline
+{\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}         & m             & 0.                  \\ \hline
 {\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
 {\ct H\_FIXED}                  & Real          & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
 {\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
