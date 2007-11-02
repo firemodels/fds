@@ -1174,8 +1174,8 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
             T,PR_AIR,M_VAP,XI,YJ,ZK,RDT,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
-            C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_TEMP
-INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX
+            C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_TEMP,DT_SUBSTEP
+INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS
 INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
 
@@ -1268,184 +1268,196 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          II  = FLOOR(XI+1._EB)
          JJ  = FLOOR(YJ+1._EB)
          KK  = FLOOR(ZK+1._EB)
-         
-         ! Initialize droplet thermophysical data
+         RVC = RDX(II)*RDY(JJ)*RDZ(KK)
 
-         R_DROP   = DR%R
-         M_DROP   = FTPR*R_DROP**3
-         TMP_DROP = DR%TMP
-         WGT      = DR%PWT
+         ! Determine how many sub-time step iterations are needed and then iterate over the time step
+
+         N_SUBSTEPS = 0
+         GET_N: DO ITER=1,100
+            N_SUBSTEPS = N_SUBSTEPS + 1
+            IF (DT/REAL(N_SUBSTEPS,EB)<=100.*DR%R) EXIT GET_N
+         ENDDO GET_N
+         DT_SUBSTEP = DT/REAL(N_SUBSTEPS,EB) 
+
+         TIME_ITERATION_LOOP: DO ITER=1,N_SUBSTEPS
+         
+            ! Initialize droplet thermophysical data
+
+            R_DROP   = DR%R
+            M_DROP   = FTPR*R_DROP**3
+            TMP_DROP = DR%TMP
+            WGT      = DR%PWT
                
-         ! Gas conditions
+            ! Gas conditions
 
-         TMP_G  = TMP(II,JJ,KK)
-         RHO_G  = RHO(II,JJ,KK)
-         MU_AIR = SPECIES(0)%MU(MIN(500,NINT(0.1_EB*TMP_G)))
-         RVC    = RDX(II)*RDY(JJ)*RDZ(KK)
-         M_GAS  = RHO_G/RVC        
-         K_AIR  = CPOPR*MU_AIR
-         IF (IGAS>0) THEN
-            Y_GAS = YY(II,JJ,KK,IGAS)
-         ELSE
-            Y_GAS = 0._EB
-         ENDIF
-
-         ! Set variables for heat transfer on solid
-
-         SOLID_OR_GAS_PHASE: IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
-
-            IW   = DR%WALL_INDEX
-            A_DROP = M_DROP/(FILM_THICKNESS(IW)*PC%DENSITY)
-            TMP_WALL = TMP_F(IW) 
-            SELECT CASE(ABS(DR%IOR))
-               CASE(1)
-                  V2 = 0.25_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))**2
-                  W2 = 0.25_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))**2
-                  VEL = SQRT(V2+W2)
-               CASE(2)
-                  U2 = 0.25_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))**2
-                  W2 = 0.25_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))**2
-                  VEL = SQRT(U2+W2)
-               CASE(3)
-                  U2 = 0.25_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))**2
-                  V2 = 0.25_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))**2
-                  VEL = SQRT(U2+V2)
-            END SELECT
-            LENGTH   = 1._EB
-            RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
-            NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
-            SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
-            H_HEAT   = NUSSELT*K_AIR/LENGTH
-            IF (PC%EVAPORATE) THEN
-               H_MASS = SHERWOOD*D_AIR/LENGTH
+            TMP_G  = TMP(II,JJ,KK)
+            RHO_G  = RHO(II,JJ,KK)
+            MU_AIR = SPECIES(0)%MU(MIN(500,NINT(0.1_EB*TMP_G)))
+            M_GAS  = RHO_G/RVC        
+            K_AIR  = CPOPR*MU_AIR
+            IF (IGAS>0) THEN
+               Y_GAS = YY(II,JJ,KK,IGAS)
             ELSE
-               H_MASS = 0._EB
-            ENDIF
-            H_WALL   = H_SOLID
-!            Q_DOT_RAD = A_DROP*(QRADIN(IW)-QRADOUT(IW))
-            Q_DOT_RAD = A_DROP*QRADIN(IW)
-
-         ELSE SOLID_OR_GAS_PHASE
-
-            A_DROP   = 4._EB*PI*R_DROP**2
-            NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(DR%RE)
-            SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(DR%RE)
-            H_HEAT   = NUSSELT *K_AIR/(2._EB*R_DROP)
-            IF (PC%EVAPORATE) THEN
-               H_MASS = SHERWOOD*D_AIR/(2._EB*R_DROP)
-            ELSE
-               H_MASS = 0._EB
-            ENDIF
-            H_WALL   = 0._EB
-            TMP_WALL = TMPA
-            IF (AVG_DROP_DEN(II,JJ,KK,EVAP_INDEX )>0._EB) THEN
-               Q_DOT_RAD = QR_W(II,JJ,KK)/SUM(AVG_DROP_DEN(II,JJ,KK,:))*M_DROP
-            ELSE
-               Q_DOT_RAD = 0._EB
+               Y_GAS = 0._EB
             ENDIF
 
-         ENDIF SOLID_OR_GAS_PHASE
+            ! Set variables for heat transfer on solid
+
+            SOLID_OR_GAS_PHASE: IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
+
+               IW   = DR%WALL_INDEX
+               A_DROP = M_DROP/(FILM_THICKNESS(IW)*PC%DENSITY)
+               TMP_WALL = TMP_F(IW) 
+               SELECT CASE(ABS(DR%IOR))
+                  CASE(1)
+                     V2 = 0.25_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))**2
+                     W2 = 0.25_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))**2
+                     VEL = SQRT(V2+W2)
+                  CASE(2)
+                     U2 = 0.25_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))**2
+                     W2 = 0.25_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))**2
+                     VEL = SQRT(U2+W2)
+                  CASE(3)
+                     U2 = 0.25_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))**2
+                     V2 = 0.25_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))**2
+                     VEL = SQRT(U2+V2)
+               END SELECT
+               LENGTH   = 1._EB
+               RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
+               NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
+               SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
+               H_HEAT   = NUSSELT*K_AIR/LENGTH
+               IF (PC%EVAPORATE) THEN
+                  H_MASS = SHERWOOD*D_AIR/LENGTH
+               ELSE
+                  H_MASS = 0._EB
+               ENDIF
+               H_WALL    = H_SOLID
+               Q_DOT_RAD = A_DROP*QRADIN(IW)
+
+            ELSE SOLID_OR_GAS_PHASE
+
+               A_DROP   = 4._EB*PI*R_DROP**2
+               NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(DR%RE)
+               SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(DR%RE)
+               H_HEAT   = NUSSELT *K_AIR/(2._EB*R_DROP)
+               IF (PC%EVAPORATE) THEN
+                  H_MASS = SHERWOOD*D_AIR/(2._EB*R_DROP)
+               ELSE
+                  H_MASS = 0._EB
+               ENDIF
+               H_WALL   = 0._EB
+               TMP_WALL = TMPA
+               IF (AVG_DROP_DEN(II,JJ,KK,EVAP_INDEX )>0._EB) THEN
+                  Q_DOT_RAD = QR_W(II,JJ,KK)/SUM(AVG_DROP_DEN(II,JJ,KK,:))*M_DROP
+               ELSE
+                  Q_DOT_RAD = 0._EB
+               ENDIF
+
+            ENDIF SOLID_OR_GAS_PHASE
          
-         ! Compute equilibrium droplet vapor mass fraction, Y_DROP, and its derivative w.r.t. droplet temperature
+            ! Compute equilibrium droplet vapor mass fraction, Y_DROP, and its derivative w.r.t. droplet temperature
     
-         IF (PC%EVAPORATE) THEN
-            X_DROP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP)))
-            Y_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
-            IF (TMP_DROP < TMP_BOIL) THEN
-               DY_DTMP_DROP = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2)*DHOR*X_DROP/TMP_DROP**2
+            IF (PC%EVAPORATE) THEN
+               X_DROP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP)))
+               Y_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
+               IF (TMP_DROP < TMP_BOIL) THEN
+                  DY_DTMP_DROP = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2)*DHOR*X_DROP/TMP_DROP**2
+               ELSE
+                  DY_DTMP_DROP = 0._EB
+               ENDIF
             ELSE
+               X_DROP = 0._EB
+               Y_DROP = 0._EB
                DY_DTMP_DROP = 0._EB
             ENDIF
-         ELSE
-            X_DROP = 0._EB
-            Y_DROP = 0._EB
-            DY_DTMP_DROP = 0._EB
-         ENDIF
 
-         ! Update the droplet temperature semi_implicitly
+            ! Update the droplet temperature semi_implicitly
     
-         DENOM = 1._EB + (H_HEAT + H_WALL + H_MASS*RHO_G*H_V*DY_DTMP_DROP)*DT*A_DROP/(2._EB*M_DROP*C_DROP) 
+            DENOM = 1._EB + (H_HEAT + H_WALL + H_MASS*RHO_G*H_V*DY_DTMP_DROP)*DT_SUBSTEP*A_DROP/(2._EB*M_DROP*C_DROP) 
 
-         TMP_DROP_NEW = ( TMP_DROP + DT*( Q_DOT_RAD + &
-                          A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) + H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
-                          H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DY_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / DENOM
+            TMP_DROP_NEW = ( TMP_DROP + DT_SUBSTEP*( Q_DOT_RAD + &
+                             A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) + H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
+                             H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DY_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / DENOM
 
-         ! Compute the total amount of heat extracted from the gas, wall and radiative fields
+            ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
-         Q_RAD      = DT*Q_DOT_RAD
-         Q_CON_GAS  = DT*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
-         Q_CON_WALL = DT*A_DROP*H_WALL*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))
+            Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
+            Q_CON_GAS  = DT_SUBSTEP*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
+            Q_CON_WALL = DT_SUBSTEP*A_DROP*H_WALL*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))
 
-         ! Compute the total amount of liquid evaporated
+            ! Compute the total amount of liquid evaporated
   
-         M_VAP  = DT*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
-         M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP))
-         IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  ! Evaporate small droplets
-            M_VAP      = M_DROP
-            Q_TEMP = Q_RAD+Q_CON_GAS+Q_CON_WALL
-            Q_TEMP = M_VAP*H_V/Q_TEMP
-            Q_CON_GAS  = Q_CON_GAS*Q_TEMP
-            Q_CON_WALL = Q_CON_WALL*Q_TEMP
-            Q_RAD      = Q_RAD*Q_TEMP
-         ENDIF
+            M_VAP  = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
+            M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP))
+            IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  ! Evaporate small droplets
+               M_VAP      = M_DROP
+               Q_TEMP = Q_RAD+Q_CON_GAS+Q_CON_WALL
+               Q_TEMP = M_VAP*H_V/Q_TEMP
+               Q_CON_GAS  = Q_CON_GAS*Q_TEMP
+               Q_CON_WALL = Q_CON_WALL*Q_TEMP
+               Q_RAD      = Q_RAD*Q_TEMP
+            ENDIF
 
-         ! If the droplet temperature drops below its freezing point, just reset it
+            ! If the droplet temperature drops below its freezing point, just reset it
 
-         IF (PC%EVAPORATE .AND. TMP_DROP_NEW<TMP_MELT) TMP_DROP_NEW = TMP_MELT
+            IF (PC%EVAPORATE .AND. TMP_DROP_NEW<TMP_MELT) TMP_DROP_NEW = TMP_MELT
 
-         ! If the droplet temperature reaches boiling, use only enough energy from gas to vaporize liquid
+            ! If the droplet temperature reaches boiling, use only enough energy from gas to vaporize liquid
 
-         IF (PC%EVAPORATE .AND. TMP_DROP_NEW>=TMP_BOIL) THEN  
-            Q_TEMP = Q_RAD+Q_CON_GAS+Q_CON_WALL
-            M_VAP = MIN(M_DROP,M_VAP + (TMP_DROP_NEW - TMP_BOIL)*C_DROP*M_DROP/H_V)
-            Q_TEMP = M_VAP*H_V/Q_TEMP
-            TMP_DROP_NEW = TMP_BOIL
-            Q_CON_GAS  = Q_CON_GAS*Q_TEMP
-            Q_CON_WALL = Q_CON_WALL*Q_TEMP
-            Q_RAD      = Q_RAD*Q_TEMP
-         ENDIF
+            IF (PC%EVAPORATE .AND. TMP_DROP_NEW>=TMP_BOIL) THEN  
+               Q_TEMP = Q_RAD+Q_CON_GAS+Q_CON_WALL
+               M_VAP = MIN(M_DROP,M_VAP + (TMP_DROP_NEW - TMP_BOIL)*C_DROP*M_DROP/H_V)
+               Q_TEMP = M_VAP*H_V/Q_TEMP
+               TMP_DROP_NEW = TMP_BOIL
+               Q_CON_GAS  = Q_CON_GAS*Q_TEMP
+               Q_CON_WALL = Q_CON_WALL*Q_TEMP
+               Q_RAD      = Q_RAD*Q_TEMP
+            ENDIF
 
-         ! Update droplet quantities
+            ! Update droplet quantities
          
-         M_DROP = M_DROP - M_VAP
-         DR%R   = (M_DROP/FTPR)**ONTH
-         DR%TMP = TMP_DROP_NEW
+            M_DROP = M_DROP - M_VAP
+            DR%R   = (M_DROP/FTPR)**ONTH
+            DR%TMP = TMP_DROP_NEW
 
-         ! Compute surface cooling and density
+            ! Compute surface cooling and density
 
-         IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
-            WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*RDT*(Q_RAD+Q_CON_WALL)*RAW(IW)
-            WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*WGT*M_DROP*RAW(IW)
-         ENDIF
+            IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
+               WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*(Q_RAD+Q_CON_WALL)*RAW(IW)/DT_SUBSTEP
+               WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*WGT*M_DROP*RAW(IW)/REAL(N_SUBSTEPS,EB) 
+            ENDIF
          
-         ! Decrease temperature of the gas cell
+            ! Decrease temperature of the gas cell
 
-         TMP(II,JJ,KK) = (M_GAS*CP_GAMMA*TMP_G - WGT*Q_CON_GAS)/(M_GAS*CP_GAMMA)  
-         TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
+            TMP(II,JJ,KK) = (M_GAS*CP_GAMMA*TMP_G - WGT*Q_CON_GAS)/(M_GAS*CP_GAMMA)  
+            TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
 
-         ! Compute contribution to the divergence
+            ! Compute contribution to the divergence
 
-         D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) + WGT*RDT*RVC/RHO_G * ( M_VAP*MW_RATIO - Q_CON_GAS/(CP_GAMMA*TMP(II,JJ,KK)) )
+            D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) + WGT*RVC/(DT_SUBSTEP*RHO_G) * ( M_VAP*MW_RATIO - Q_CON_GAS/(CP_GAMMA*TMP(II,JJ,KK)) )
 
-         ! Add fuel evaporation rate to running counter before adjusting its value
+            ! Add fuel evaporation rate to running counter before adjusting its value
 
-         IF (IGAS>0 .AND. IGAS==I_FUEL) FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP*RDT
+            IF (IGAS>0 .AND. IGAS==I_FUEL) FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP
 
-         ! Adjust mass of evaporated liquid to account for different Heat of Combustion between fuel droplet and gas
+            ! Adjust mass of evaporated liquid to account for different Heat of Combustion between fuel droplet and gas
 
-         M_VAP = PC%ADJUST_EVAPORATION*M_VAP
+            M_VAP = PC%ADJUST_EVAPORATION*M_VAP
 
-         ! Add vapor or fuel gas to the grid cell
+            ! Add vapor or fuel gas to the grid cell
 
-         IF (IGAS>0) YY(II,JJ,KK,IGAS)= MIN(1._EB,(WGT*M_VAP+M_GAS*Y_GAS)/(WGT*M_VAP+M_GAS))
+            IF (IGAS>0) YY(II,JJ,KK,IGAS)= MIN(1._EB,(WGT*M_VAP+M_GAS*Y_GAS)/(WGT*M_VAP+M_GAS))
 
-         ! Add new mass from vaporized droplet to the grid cell
+            ! Add new mass from vaporized droplet to the grid cell
 
-         RHO(II,JJ,KK) = RHO(II,JJ,KK) + WGT*M_VAP*RVC
+            RHO(II,JJ,KK) = RHO(II,JJ,KK) + WGT*M_VAP*RVC
 
-         ! Get out of the loop if the droplet has evaporated completely
+            ! Get out of the loop if the droplet has evaporated completely
 
-         IF (DR%R<=0._EB) CYCLE DROPLET_LOOP
+            IF (DR%R<=0._EB) CYCLE DROPLET_LOOP
+
+         ENDDO TIME_ITERATION_LOOP
 
          ! Assign liquid mass to the cell for airborne drops
 
