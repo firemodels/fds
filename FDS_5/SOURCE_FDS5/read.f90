@@ -908,7 +908,6 @@ SIGMA   = 5.67E-8_EB         ! Stefan-Boltzmann constant (W/m**2/K**4)
 C_P_W   = 4184._EB           ! Specific Heat of Water (J/kg/K)
 H_V_W   = 2259._EB*1000._EB  ! Heat of Vap of Water (J/kg)
 MW_AIR  = 28.8_EB            ! g/mol
-MW_SOOT = 0.9_EB * 12._EB + 0.1_EB * 1._EB
 HUMIDITY= -1._EB                           ! Relative Humidity
 RHO_SOOT= 1850._EB                         ! Density of soot particle (kg/m3)
 SMOKE_ALBEDO= 0.3            ! Albedo of smoke
@@ -1431,6 +1430,8 @@ READ_REACTION_LOOP: DO NN=1,N_REAC_READ
    RN%OXIDIZER           = OXIDIZER
 ENDDO READ_REACTION_LOOP
 
+MW_SOOT = MW_C * (1._EB - SOOT_H_FRACTION) + MW_H * SOOT_H_FRACTION   
+
 SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
    !Set reaction variable constants
    REACTION%MW_OTHER        = MW_OTHER
@@ -1447,7 +1448,6 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
    REACTION%Y_F_INLET       = Y_F_INLET
    REACTION%MODE            = MIXTURE_FRACTION_REACTION
    REACTION%NAME            = ID
-   MW_SOOT                  = MW_C * (1._EB - SOOT_H_FRACTION) + MW_H * SOOT_H_FRACTION   
    
    SET_THREE_PARAMETER: IF (CO_PRODUCTION) THEN !Set reaction variables for three parameter mixture fraction 
 
