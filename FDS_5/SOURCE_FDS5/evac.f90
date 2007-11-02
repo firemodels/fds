@@ -5325,7 +5325,7 @@ Contains
                 smoke_speed_fac = 1.0_EB + (smoke_beta/smoke_alpha)* &
                      MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB* &
                      HUMAN_GRID(II,JJ)%SOOT_DENS
-                smoke_speed_fac = Max(smoke_speed_fac,0.0_EB)
+                smoke_speed_fac = Max(smoke_speed_fac, 0.1_EB)
              End If
              If (COLOR_METHOD == 3 ) Then
                 HR%COLOR_INDEX = Max(0,Min(6,Int(6.0_EB*HR%IntDose)))
@@ -5454,9 +5454,9 @@ Contains
 
              ! Add random force term
              If ( GaTh > 0.0_EB .And. T > 0.0_EB ) Then
-                U_new = U_new + 0.5_EB*DTSP* &
+                U_new = U_new + 0.5_EB*DTSP*HR%v0_fac* &
                      HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
-                V_new = V_new + 0.5_EB*DTSP* &
+                V_new = V_new + 0.5_EB*DTSP*HR%v0_fac* &
                      HR%Mass*HR%ksi*Sin(HR%eta)/HR%Mass
                 Omega_new = Omega_new + 0.5_EB*DTSP* &
                      1.0_EB*Sign(HR%ksi,HR%eta-Pi)
@@ -6781,12 +6781,12 @@ Contains
              ! Some random force here
              ! ========================================================
              If (GaTh > 0.0_EB .And. T > 0.0_EB ) Then
-                U_new = U_new + 0.5_EB*DTSP* &
+                U_new = U_new + 0.5_EB*DTSP*HR%v0_fac* &
                      HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
-                V_new = V_new + 0.5_EB*DTSP* &
+                V_new = V_new + 0.5_EB*DTSP*HR%v0_fac* &
                      HR%Mass*HR%ksi*Sin(HR%eta)/HR%Mass
-                P2P_U = P2P_U + HR%Mass*HR%ksi*Cos(HR%eta)
-                P2P_V = P2P_V + HR%Mass*HR%ksi*Sin(HR%eta)
+                P2P_U = P2P_U + HR%v0_fac*HR%Mass*HR%ksi*Cos(HR%eta)
+                P2P_V = P2P_V + HR%v0_fac*HR%Mass*HR%ksi*Sin(HR%eta)
                 Omega_new = Omega_new + 0.5_EB*DTSP* &
                      1.0_EB*Sign(HR%ksi,HR%eta-Pi)
                 P2P_Torque = P2P_Torque + 1.0_EB*Sign(HR%ksi,HR%eta-Pi)*HR%M_iner
