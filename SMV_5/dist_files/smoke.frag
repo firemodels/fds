@@ -1,3 +1,6 @@
+// $Date$ 
+// $Revision$
+// $Author$
 varying vec4 newcolor;
 uniform sampler2D depthmap;
 uniform float nearPlane;
