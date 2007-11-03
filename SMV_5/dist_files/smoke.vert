@@ -1,3 +1,6 @@
+// $Date$ 
+// $Revision$
+// $Author$
 uniform float aspectratio,normx,normy,normz;
 uniform float eyex,eyey,eyez;
 uniform float fire_red, fire_green, fire_blue, fire_alpha;
