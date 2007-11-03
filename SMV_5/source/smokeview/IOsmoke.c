@@ -2998,6 +2998,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   glUniform1f(GPU_fireblue,(float)fire_blue/256.0);
   glUniform1f(GPU_smokeshade,(float)smoke_shade/256.0);
   glUniform1i(GPU_skip,skip);
+  glUniform1i(GPU_smoke3d_thick,smoke3d_thick);
   if(firecolor==NULL){
     i_hrrcutoff=-1;
   }
@@ -4662,6 +4663,7 @@ int setSmokeShaders() {
   GPU_hrr = glGetAttribLocationARB(p_smoke,"hrr");
   GPU_smokealpha = glGetAttribLocationARB(p_smoke,"smoke_alpha");
   GPU_skip = glGetUniformLocationARB(p_smoke,"skip");
+  GPU_smoke3d_thick = glGetUniformLocationARB(p_smoke,"smoke3d_thick");
   GPU_smokeshade = glGetUniformLocationARB(p_smoke,"smoke_shade");
   GPU_firealpha = glGetUniformLocationARB(p_smoke,"fire_alpha");
   GPU_firered = glGetUniformLocationARB(p_smoke,"fire_red");
