@@ -5,6 +5,7 @@ uniform int skip;
 varying vec4 newcolor;
 uniform float hrrcutoff;
 uniform float smoke_shade;
+uniform int smoke3d_thick;
 attribute float hrr, smoke_alpha;
 
 void main(){
@@ -34,6 +35,27 @@ void main(){
     }
     else if(skip==3){
       alpha = 3.0*alpha*(1.0-alpha-alpha*alpha/3.0);
+    }
+    if(smoke3d_thick==1){
+      alpha=alpha/2;
+      }
+    else if (smoke3d_thick==2){
+      alpha=alpha/4;
+    }
+    else if (smoke3d_thick==3){
+      alpha=alpha/8;
+    }
+    else if (smoke3d_thick==4){
+      alpha=alpha/16;
+    }
+    else if (smoke3d_thick==5){
+      alpha=alpha/32;
+    }
+    else if (smoke3d_thick==6){
+      alpha=alpha/64;
+    }
+    else if (smoke3d_thick==7){
+      alpha=alpha/128;
     }
     newcolor = vec4(smoke_shade,smoke_shade,smoke_shade,alpha);
   }
