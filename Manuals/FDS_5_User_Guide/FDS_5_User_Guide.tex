@@ -3087,7 +3087,7 @@ MAX\_PRESSURE}, then there will be a backflow in the duct.
 \index{SURF!MAX\_PRESSURE}
 
 Here is an example how fans can be specified. The actual case ({\bf
-fan\_test}) is included in the V\&V Guide. In it, two simple
+fan\_test}) is part of the FDS Verification Suite and is discussed in Section~\ref{fan_test}. In it, two simple
 compartments share a common wall. Both compartments are considered as
 separate ``pressure zones.'' Two fans are mounted in the Partition
 Wall, blowing in opposite directions.
@@ -7734,6 +7734,59 @@ The two cases are summarized in the following plots:
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.1in]{FIGURES/leak_test_Pressure_Case_1} &
 \includegraphics[width=3.1in]{FIGURES/leak_test_Pressure_Case_2}
+\end{tabular*}
+
+
+\clearpage
+
+\subsection{Fan Curves (\texorpdfstring{{\bf fan\_test}}{fan\_test})}
+\label{fan_test}
+
+In this example, two sealed
+compartments share a common wall. Both compartments are considered as
+separate ``pressure zones.'' Two fans are mounted in the Partition
+Wall, blowing in opposite directions. The relevant input lines are:
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='BLOW LEFT',  POROUS=.TRUE., VEL=-0.2, DUCT_PATH=1,2, MAX_PRESSURE=1000. /
+&SURF ID='BLOW RIGHT', POROUS=.TRUE., VEL= 0.4, DUCT_PATH=2,1, MAX_PRESSURE=1000. /
+
+&ZONE XB=-3.0, 0.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 1
+&ZONE XB= 0.0, 3.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 2
+
+&OBST XB= 0.0, 0.0,-1.0, 1.0, 0.0, 2.0 / Partition Wall
+
+&HOLE XB=-0.1, 0.1,-0.1, 0.1, 0.4, 0.6 /
+&OBST XB= 0.0, 0.0,-0.1, 0.1, 0.4, 0.6, ..., SURF_ID='BLOW RIGHT', PERMIT_HOLE=.FALSE. /
+
+&HOLE XB=-0.1, 0.1,-0.1, 0.1, 1.4, 1.6 /
+&OBST XB= 0.0, 0.0,-0.1, 0.1, 1.4, 1.6, ..., SURF_ID='BLOW LEFT', PERMIT_HOLE=.FALSE. /
+\end{verbatim}
+\normalsize
+
+\noindent
+The volume flow through the fans is given by the expression:
+\be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}} \;
+   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
+   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
+where $A_{\hbox{\footnotesize duct}}$ is the area of the duct~(both are 0.04~m$^2$), $U_{\hbox{\footnotesize max}}$ is
+the air velocity~(0.4~m/s from Zone~1 to Zone~2 and 0.2~m/s from Zone~2 to Zone~1), and $\Delta p_{\hbox{\footnotesize max}}$ is the maximum
+pressure difference the fan can operate upon (in this case both fans use 1000~Pa).
+
+In steady state, the volume flow from compartment to compartment (or Zone to Zone) should be equal and opposite in sign.
+\be (0.04 \; \hbox{m}^2) (0.4 \; \hbox{m/s})  \;
+   \sqrt{ \frac{ |p_2-p_1-1000 \; \hbox{Pa}|}{1000 \; \hbox{Pa}}  } =
+   (0.04 \; \hbox{m}^2) (0.2 \; \hbox{m/s})  \;
+   \sqrt{ \frac{ |p_1-p_2-1000 \; \hbox{Pa}|}{1000 \; \hbox{Pa}}  } \ee
+The solution is $p_2=300$~Pa and $p_1=-300$~Pa. Note that the sign of the Volume Flow in FDS has to do with whether the flow is moving in the plus or minus
+coordinate direction. This convention can make these types of calculations a bit tricky.
+
+\vspace{0.1in}
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.1in]{FIGURES/fan_test_Pressure} &
+\includegraphics[width=3.1in]{FIGURES/fan_test_Volume_Flow}
 \end{tabular*}
 
 
