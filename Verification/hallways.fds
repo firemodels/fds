@@ -1,4 +1,4 @@
-&HEAD CHID='hallways', TITLE='Silly Multi-Mesh Test' /
+&HEAD CHID='hallways', TITLE='Silly Multi-Mesh Test, SVN Number $Revision$' /
 
 &MESH IJK=48,16,16, XB=0.0,3.0,0.0,1.0,0.0,1.0, COLOR='RED' /
 &MESH IJK=16,64,16, XB=3.0,4.0,0.0,4.0,0.0,1.0, COLOR='GREEN' /

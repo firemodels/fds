@@ -1,4 +1,4 @@
-&HEAD CHID='spray_burner', TITLE='Test Simulation of 2 MW Heptane Spray Burner' /
+&HEAD CHID='spray_burner', TITLE='Test Simulation of 2 MW Heptane Spray Burner, SVN Number $Revision$' /
 &MESH IJK=20,30,40, XB=3.0,5.0,-1.5,1.5,0.0,4.0 /
 &TIME TWFIN=90. /
 

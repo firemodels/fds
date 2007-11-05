@@ -2,7 +2,7 @@ A single steel pan with a shallow pool of ethanol burns completely out.
 This case tests the sensitivity of the ABSORPTION_COEFFICIENT. 
 Values of 40, 150, and 1000 m**-1 are tested.
 
-&HEAD CHID='ethanol_pan', TITLE='Single pan of burning ethanol' /
+&HEAD CHID='ethanol_pan', TITLE='Single pan of burning ethanol, SVN Number $Revision$' /
 
 &MESH IJK=24,24,48, XB=-0.6,0.6,-0.6,0.6,0.0,2.4 /
 

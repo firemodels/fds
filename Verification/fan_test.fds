@@ -1,4 +1,4 @@
-&HEAD CHID='fan_test', TITLE='Test of Fans Connecting Two Sealed Compartments' /
+&HEAD CHID='fan_test', TITLE='Test of Fans Connecting Two Sealed Compartments, SVN Number $Revision$' /
 
 &MESH IJK=60,20,20, XB=-3.0, 3.0,-1.0, 1.0, 0.0, 2.0 /
 
@@ -22,8 +22,10 @@
 &SLCF PBY=0.0,QUANTITY='DENSITY' /
 &SLCF PBY=0.0,QUANTITY='PRESSURE' /
 
-&DEVC ID='pres_1', XYZ=-1.5, 0.0, 0.5, QUANTITY='PRESSURE' /
-&DEVC ID='pres_2', XYZ= 1.5, 0.0, 0.5, QUANTITY='PRESSURE' /
+&DEVC ID='pres_1', XYZ=-1.5, 0.0, 0.5,  QUANTITY='PRESSURE' /
+&DEVC ID='pres_2', XYZ= 1.5, 0.0, 0.5,  QUANTITY='PRESSURE' /
+&DEVC ID='vflow1', XB=0.0,0.0,-0.1,0.1,0.4,0.6, QUANTITY='VOLUME FLOW' / 
+&DEVC ID='vflow2', XB=0.0,0.0,-0.1,0.1,1.4,1.6, QUANTITY='VOLUME FLOW' / 
 
 &TAIL /
 

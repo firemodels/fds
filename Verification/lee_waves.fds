@@ -1,4 +1,4 @@
-&HEAD CHID='lee_waves', TITLE='Test of Atmospheric Stratification' / 
+&HEAD CHID='lee_waves', TITLE='Test of Atmospheric Stratification, SVN Number $Revision$' / 
 
 &MESH IJK=200,1,50, XB=0.0,10000.0,-1.0,1.0,0.0,2500.0 /
 

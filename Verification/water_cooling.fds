@@ -1,4 +1,4 @@
-&HEAD CHID='water_cooling', TITLE='Water spray on a hot wall' /
+&HEAD CHID='water_cooling', TITLE='Water spray on a hot wall, SVN Number $Revision$' /
 
 &MESH IJK=20,20,40, XB=0.0,2.0,0.0,2.0,0.0,4.0 /
 

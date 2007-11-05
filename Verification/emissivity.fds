@@ -1,4 +1,4 @@
-&HEAD CHID='emissivity',TITLE='Test surface emissivity' /
+&HEAD CHID='emissivity',TITLE='Test surface emissivity, SVN Number $Revision$' /
 
 The emissivity of the TEST surface can be calculated as a 
 ratio of two devices measuring RADIATIVE_FLUX and INCIDENT_HEAT_FLUX
