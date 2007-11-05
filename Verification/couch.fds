@@ -1,4 +1,4 @@
-&HEAD CHID='couch', TITLE='Single Couch Test Case'  /
+&HEAD CHID='couch', TITLE='Single Couch Test Case, SVN Number $Revision$'  /
 
 &MESH IJK=24,10,24, XB=1.1,3.5,3.6,4.6,0.0,2.4 /
 

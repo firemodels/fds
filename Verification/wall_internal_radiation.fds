@@ -34,7 +34,7 @@ New York, 2002, 944 pp.
 
 -------FDS_Data-----------------------------------------------------
 
-&HEAD CHID='wall_internal_radiation',TITLE='Internal radiation' /
+&HEAD CHID='wall_internal_radiation',TITLE='Internal radiation, SVN Number $Revision$' /
 
 &MESH IJK = 5,3,4
       XB = 0.0,0.5,-0.15,0.15,0.0,0.4 /

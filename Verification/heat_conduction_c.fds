@@ -1,4 +1,4 @@
-&HEAD CHID='heat_conduction_c', TITLE='Heat Transfer through solid Slab' /
+&HEAD CHID='heat_conduction_c', TITLE='Heat Transfer through solid Slab, SVN Number $Revision$' /
 
 &MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 /
 

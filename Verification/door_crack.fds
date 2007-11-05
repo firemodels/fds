@@ -1,6 +1,6 @@
 An ISO 9701 compartment with a fan blowing into it, a small fire, and a crack under the door.
 
-&HEAD CHID='door_crack', TITLE='Test of smoke leaking under a door' /
+&HEAD CHID='door_crack', TITLE='Test of smoke leaking under a door, SVN Number $Revision$' /
 
 &MESH IJK=50,40,32, XB=-2.5, 2.5,-2.0, 2.0, 0.0, 3.2 /
 

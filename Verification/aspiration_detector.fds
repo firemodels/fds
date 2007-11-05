@@ -1,4 +1,4 @@
-&HEAD CHID='aspiration_detector',TITLE='Test of aspiration detector' /
+&HEAD CHID='aspiration_detector',TITLE='Test of aspiration detector, SVN Number $Revision$' /
 !Burner in Smokeview should be purple.
 !At end of simulation take the soot density for sp1 and 
 !interpolate to get soot density at end time - 0.2 s.  Do same for

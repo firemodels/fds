@@ -8,7 +8,7 @@ demonstration purposes only!  They may or may not be
 representative of any particular type of wood.
 
 
-&HEAD CHID='charring_solid', TITLE='Demo of Charring Solid, No Gas Phase Reaction' /
+&HEAD CHID='charring_solid', TITLE='Demo of Charring Solid, No Gas Phase Reaction, SVN Number $Revision$' /
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 

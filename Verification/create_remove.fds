@@ -1,4 +1,4 @@
-&HEAD CHID='create_remove',TITLE='Test OBST and HOLE Creation and Removal' / 
+&HEAD CHID='create_remove',TITLE='Test OBST and HOLE Creation and Removal, SVN Number $Revision$' / 
 
 &MESH IJK=20,20,20 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 

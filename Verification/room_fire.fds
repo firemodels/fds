@@ -1,7 +1,7 @@
 Room fire test case, based on an actual test conducted for US ATF by the University of Maryland. 
 All material properties are completely fabricated.
 
-&HEAD CHID='room_fire', TITLE='ATF Room Fire Test'  / 
+&HEAD CHID='room_fire', TITLE='ATF Room Fire Test, SVN Number $Revision$'  / 
 
 &MESH IJK=52,54,24, XB=0.0,5.2,-0.8,4.6,0.0,2.4 / 
 
