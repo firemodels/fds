@@ -45,7 +45,7 @@ New York, 2002, 944 pp.
 
 -----------------------------------------------------------------------
 
-&HEAD CHID='radiation_plane_layer', TITLE='Test wall heat transfer from a plane layer'/
+&HEAD CHID='radiation_plane_layer', TITLE='Test wall heat transfer from a plane layer, SVN Number $Revision$'/
 
 2D version
  MESH IJK = 20,1,20, XB = 0.0, 1.0, -0.1,  0.1, -10.0, 10.0 /

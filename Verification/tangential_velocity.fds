@@ -1,4 +1,4 @@
-&HEAD CHID='tangential_velocity', TITLE='Test VEL_T, the Tangential Velocity' /
+&HEAD CHID='tangential_velocity', TITLE='Test VEL_T, the Tangential Velocity, SVN Number $Revision$' /
 
 &MESH IJK=50,50,10, XB=0.0,5.0,0.0,5.0,0.0,1.0 /
 &TIME TWFIN=20.0 /

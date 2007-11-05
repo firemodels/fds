@@ -3,7 +3,7 @@ Case 1 has a fan and a crack under the door.
 Case 2 adds the extra leak to the great beyond.
 
 
-&HEAD CHID='leak_test_2', TITLE='Test of Leakage and Fans in an ISO 9705 Compartment' /
+&HEAD CHID='leak_test_2', TITLE='Test of Leakage and Fans in an ISO 9705 Compartment, SVN Number $Revision$' /
 
 &MESH IJK=50,40,32, XB=-2.5, 2.5,-2.0, 2.0, 0.0, 3.2 /
 

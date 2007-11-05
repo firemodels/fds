@@ -1,4 +1,4 @@
-&HEAD CHID='control_test', TITLE='Control function testing'/
+&HEAD CHID='control_test', TITLE='Control function testing, SVN Number $Revision$'/
 
 Test of control functions:
    At 3 s a restart file should be written

@@ -35,7 +35,7 @@ surface and center.
 
 -----------------
 
-&HEAD CHID='heat_conduction_kc', TITLE='Advanced 1D conduction' /
+&HEAD CHID='heat_conduction_kc', TITLE='Advanced 1D conduction, SVN Number $Revision$' /
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  
 

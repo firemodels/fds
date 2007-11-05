@@ -3,7 +3,7 @@ boundary conditions will be applied in such a way as to minimize the impact of
 "stair-stepped" boundaries.
 
 
-&HEAD CHID='sawtooth', TITLE='Test of SAWTOOTH Boundary Condition' / 
+&HEAD CHID='sawtooth', TITLE='Test of SAWTOOTH Boundary Condition, SVN Number $Revision$' / 
 
 &MESH IJK=20,1,20, XB=0.0,1.0,-0.01,0.01,0.0,1.0 /
 

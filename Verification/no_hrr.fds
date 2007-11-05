@@ -1,4 +1,4 @@
-&HEAD CHID='no_hrr', TITLE='No HRR' /
+&HEAD CHID='no_hrr', TITLE='No HRR, SVN Number $Revision$' /
 ! Since X_O2_LL > X_O2_INFTY, combustion should never occur. 
 ! In no_hrr_hrr.csv, the hrr should be 0.
 ! In no_hrr_devc.csv only the MIXTURE_FRACTION_1 should be non-zero

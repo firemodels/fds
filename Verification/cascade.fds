@@ -1,4 +1,4 @@
-&HEAD CHID='cascade', TITLE='Water droplets cascading over a stack of boxes' /
+&HEAD CHID='cascade', TITLE='Water droplets cascading over a stack of boxes, SVN Number $Revision$' /
 
 &MESH IJK=16,16,56, XB=-2.0,2.0,-2.0,2.0,0.0,14.0 /
 

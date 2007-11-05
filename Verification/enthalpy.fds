@@ -1,4 +1,4 @@
-&HEAD CHID='enthalpy',TITLE='Test reaction enthalpy' /
+&HEAD CHID='enthalpy',TITLE='Test reaction enthalpy, SVN Number $Revision$' /
 
 The calculation of reaction enthalpy is tested by
 heating up a thin slap with reaction at constant rate.
