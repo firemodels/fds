@@ -9,7 +9,7 @@
 #ifdef pp_ALPHA
 #define SMVVERSION "Experimental"
 #else
-#define SMVVERSION "5.0.4"
+#define SMVVERSION "5.0.5"
 #endif
 #endif
 
