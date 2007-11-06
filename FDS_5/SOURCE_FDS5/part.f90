@@ -1174,7 +1174,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
             T,PR_AIR,M_VAP,XI,YJ,ZK,RDT,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
-            C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_TEMP,DT_SUBSTEP
+            C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS
 INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
@@ -1270,13 +1270,16 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          KK  = FLOOR(ZK+1._EB)
          RVC = RDX(II)*RDY(JJ)*RDZ(KK)
 
-         ! Determine how many sub-time step iterations are needed and then iterate over the time step
+         ! Determine how many sub-time step iterations are needed and then iterate over the time step.
+         ! This is not fully functional. Keep as a placeholder for now.
 
-         N_SUBSTEPS = 0
-         GET_N: DO ITER=1,100
-            N_SUBSTEPS = N_SUBSTEPS + 1
-            IF (DT/REAL(N_SUBSTEPS,EB)<=100.*DR%R) EXIT GET_N
-         ENDDO GET_N
+    !!!  N_SUBSTEPS = 0  
+    !!!  GET_N: DO ITER=1,100
+    !!!     N_SUBSTEPS = N_SUBSTEPS + 1
+    !!!     IF (DT/REAL(N_SUBSTEPS,EB)<=10000000.*DR%R) EXIT GET_N
+    !!!  ENDDO GET_N
+
+         N_SUBSTEPS = 1
          DT_SUBSTEP = DT/REAL(N_SUBSTEPS,EB) 
 
          TIME_ITERATION_LOOP: DO ITER=1,N_SUBSTEPS
@@ -1366,10 +1369,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                ELSE
                   DY_DTMP_DROP = 0._EB
                ENDIF
-            ELSE
-               X_DROP = 0._EB
-               Y_DROP = 0._EB
-               DY_DTMP_DROP = 0._EB
+               IF (Y_DROP<=Y_GAS) H_MASS = 0._EB
             ENDIF
 
             ! Update the droplet temperature semi_implicitly
@@ -1388,15 +1388,20 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
             ! Compute the total amount of liquid evaporated
   
-            M_VAP  = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
+            M_VAP = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
             M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP))
-            IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  ! Evaporate small droplets
-               M_VAP      = M_DROP
-               Q_TEMP = Q_RAD+Q_CON_GAS+Q_CON_WALL
-               Q_TEMP = M_VAP*H_V/Q_TEMP
-               Q_CON_GAS  = Q_CON_GAS*Q_TEMP
-               Q_CON_WALL = Q_CON_WALL*Q_TEMP
-               Q_RAD      = Q_RAD*Q_TEMP
+
+            ! Evaporate completely small droplets
+
+            IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  
+               M_VAP  = M_DROP
+               Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
+               IF (Q_TOT>0._EB) THEN
+                  Q_FRAC = M_VAP*H_V/Q_TOT 
+                  Q_CON_GAS  = Q_CON_GAS*Q_FRAC
+                  Q_CON_WALL = Q_CON_WALL*Q_FRAC
+                  Q_RAD      = Q_RAD*Q_FRAC
+               ENDIF
             ENDIF
 
             ! If the droplet temperature drops below its freezing point, just reset it
@@ -1406,13 +1411,15 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ! If the droplet temperature reaches boiling, use only enough energy from gas to vaporize liquid
 
             IF (PC%EVAPORATE .AND. TMP_DROP_NEW>=TMP_BOIL) THEN  
-               Q_TEMP = Q_RAD+Q_CON_GAS+Q_CON_WALL
-               M_VAP = MIN(M_DROP,M_VAP + (TMP_DROP_NEW - TMP_BOIL)*C_DROP*M_DROP/H_V)
-               Q_TEMP = M_VAP*H_V/Q_TEMP
+               M_VAP  = MIN(M_DROP,M_VAP + (TMP_DROP_NEW - TMP_BOIL)*C_DROP*M_DROP/H_V)
                TMP_DROP_NEW = TMP_BOIL
-               Q_CON_GAS  = Q_CON_GAS*Q_TEMP
-               Q_CON_WALL = Q_CON_WALL*Q_TEMP
-               Q_RAD      = Q_RAD*Q_TEMP
+               Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
+               IF (Q_TOT>0._EB) THEN
+                  Q_FRAC = M_VAP*H_V/Q_TOT
+                  Q_CON_GAS  = Q_CON_GAS*Q_FRAC
+                  Q_CON_WALL = Q_CON_WALL*Q_FRAC
+                  Q_RAD      = Q_RAD*Q_FRAC
+               ENDIF
             ENDIF
 
             ! Update droplet quantities
@@ -1435,7 +1442,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
             ! Compute contribution to the divergence
 
-            D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) + WGT*RVC/(DT_SUBSTEP*RHO_G) * ( M_VAP*MW_RATIO - Q_CON_GAS/(CP_GAMMA*TMP(II,JJ,KK)) )
+            D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) + WGT*RVC/(DT_SUBSTEP*RHO_G)*( M_VAP*MW_RATIO-Q_CON_GAS/(CP_GAMMA*TMP(II,JJ,KK)) )
 
             ! Add fuel evaporation rate to running counter before adjusting its value
 
