@@ -4577,11 +4577,20 @@ diameter, temperature, or age.
 \index{SURF!PARTICLE\_MASS\_FLUX}
 
 \subsubsection{Droplets Introduced at a Sprinkler or Nozzle}
+\index{PART!DROPLETS\_PER\_SECOND}
 
 {\ct DROPLETS\_PER\_SECOND} is the  number of droplets inserted every
 second per active sprinkler or nozzle. Its default value is 1000. Note that this parameter only affects sprinklers and nozzles.
 Changing this parameter does {\em not} change the flow rate, but rather the number
 of droplets used to represent the flow. Also note that the number of droplets introduced per ``batch'' is {\ct DROPLETS\_PER\_SECOND} times {\ct DT\_INSERT}.
+
+\begin{warning}
+Note that {\ct DROPLETS\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the
+liquid mass is distributed more uniformly over the droplets. If this parameter is too small, it can lead to a grainy, or uneven evaporation pattern, sometimes even to the
+point of causing a numerical instability. If you encounter a numerical instability shortly after the activation of a sprinkler or nozzle, consider increasing
+{\ct DROPLETS\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more
+droplets created per second than the number that can be simulated.
+\end{warning} 
 
 \subsubsection{Particles or Droplets Introduced Initially}
 
