@@ -4590,7 +4590,7 @@ liquid mass is distributed more uniformly over the droplets. If this parameter i
 point of causing a numerical instability. If you encounter a numerical instability shortly after the activation of a sprinkler or nozzle, consider increasing
 {\ct DROPLETS\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more
 droplets created per second than the number that can be simulated.
-\end{warning} 
+\end{warning}
 
 \subsubsection{Particles or Droplets Introduced Initially}
 
@@ -5870,6 +5870,36 @@ does not compute the maximum over the entire computational domain, just that par
 specification of a {\ct SURF\_ID} limits the search to only those surfaces. Use the {\ct STATISTICS} feature with caution because
 it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
 
+\subsubsection{\ct VOLUME MEAN}
+
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME MEAN'} produces the discrete analog of
+\be \frac{1}{V} \; \int \phi(x,y,z) \; dx \, dy \, dz \ee
+which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this
+statistic is only appropriate for gas phase quantities.
+
+\subsubsection{\ct MASS MEAN}
+
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS MEAN'} produces the discrete analog of
+\be \frac{ \int \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
+which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this
+statistic is only appropriate for gas phase quantities.
+
+\subsubsection{\ct VOLUME INTEGRAL}
+
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME INTEGRAL'} produces the discrete analog of
+\be \int \phi(x,y,z) \; dx \, dy \, dz \ee
+Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example,
+heat release rate per unit volume is an appropriate output quantity.
+
+\subsubsection{\ct SURFACE INTEGRAL}
+
+For a given solid phase output quantity, $\phi$, {\ct STATISTICS='SURFACE INTEGRAL'} produces the discrete analog of
+\be \int \phi \; dA \ee
+Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass
+fluxes are appropriate output quantities.
+
+
+
 
 
 
@@ -6134,7 +6164,8 @@ is {\ct SOOT\_YIELD}, which is the fraction of fuel mass that
 is converted to soot. The second parameter is called the
 {\ct MASS\_EXTINCTION\_COEFFICIENT}, and it is the $K_m$ in
 Eq.~(\ref{mec}). The default value is 8700~m$^2$/kg, a value
-suggested for flaming combustion of wood and plastics.
+suggested for flaming combustion of wood and plastics\footnote{For most flaming fuels, a suggested value for $\kappa$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
+wavelength of 633~nm~\cite{Mulholland:F+M}}.
 The third parameter is called the {\ct VISIBILITY\_FACTOR}, the
 constant $C$ in Eq.~(\ref{vis}). It is 3 by default.
 
