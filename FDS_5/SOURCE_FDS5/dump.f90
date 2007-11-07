@@ -3101,6 +3101,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
                      CASE('MEAN')
                         STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)
                         STAT_COUNT = STAT_COUNT + 1
+                     CASE('VOLUME INTEGRAL')
+                        STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DY(J)*DZ(K)
                      CASE('VOLUME MEAN')
                         STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DY(J)*DZ(K)
                         SUM_VALUE = SUM_VALUE + DX(I)*DY(J)*DZ(K)
