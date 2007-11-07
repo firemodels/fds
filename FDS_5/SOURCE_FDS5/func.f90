@@ -531,10 +531,10 @@ IF (YY_SUM >=1._EB) THEN
    Y_MF = 0._EB
    RETURN
 ELSE
-   Z_1 = MAX(0._EB,Z1)/(1._EB - MAX(0._EB,YY_SUM))
-   Z_2 = MAX(0._EB,Z2)/(1._EB - MAX(0._EB,YY_SUM))         
-   Z_3 = MAX(0._EB,Z3)/(1._EB - MAX(0._EB,YY_SUM))          
-   ZZ  = Z_1 + Z_2 + Z_3
+   Z_1 = MAX(0._EB,MIN(1._EB,Z1))/(1._EB - MAX(0._EB,YY_SUM))
+   Z_2 = MAX(0._EB,MIN(1._EB,Z2))/(1._EB - MAX(0._EB,YY_SUM))         
+   Z_3 = MAX(0._EB,MIN(1._EB,Z3))/(1._EB - MAX(0._EB,YY_SUM))          
+   ZZ = MIN(1._EB,Z_1 + Z_2 + Z_3)
 ENDIF
 
 IF (CO_PRODUCTION) THEN
@@ -547,7 +547,7 @@ SELECT CASE(INDEX)
    CASE(FUEL_INDEX)
       Y_MF = Z_1 * RN%Y_F_INLET
    CASE(N2_INDEX)
-      Y_MF = (1._EB - ZZ) * RN%Y_N2_INFTY + Z_1 * RN%Y_N2_INLET + (Z_2 + Z_3) * RN%Y_F_INLET / RN%MW_FUEL * MW_N2 * RN%NU_N2
+      Y_MF = (1._EB - ZZ) * RN%Y_N2_INFTY + ZZ * RN%Y_N2_INLET + (Z_2 + Z_3) * RN%Y_F_INLET / RN%MW_FUEL * MW_N2 * RN%NU_N2
    CASE(O2_INDEX)
       Y_MF = (1._EB - ZZ) * RN%Y_O2_INFTY - Z_3 * RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * RN%NU_O2
       IF (CO_PRODUCTION) Y_MF = Y_MF - Z_2 * RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(1)%NU_O2
@@ -583,10 +583,10 @@ IF (YY_SUM >=1._EB) THEN
    Y_MF = 0._EB
    RETURN
 ELSE
-   Z_1 = MAX(0._EB,Z1)/(1._EB - MAX(0._EB,YY_SUM))
-   Z_2 = MAX(0._EB,Z2)/(1._EB - MAX(0._EB,YY_SUM))         
-   Z_3 = MAX(0._EB,Z3)/(1._EB - MAX(0._EB,YY_SUM))          
-   ZZ = Z_1 + Z_2 + Z_3
+   Z_1 = MAX(0._EB,MIN(1._EB,Z1))/(1._EB - MAX(0._EB,YY_SUM))
+   Z_2 = MAX(0._EB,MIN(1._EB,Z2))/(1._EB - MAX(0._EB,YY_SUM))         
+   Z_3 = MAX(0._EB,MIN(1._EB,Z3))/(1._EB - MAX(0._EB,YY_SUM))          
+   ZZ = MIN(1._EB,Z_1 + Z_2 + Z_3)
 ENDIF
 
 IF (CO_PRODUCTION) THEN
@@ -597,7 +597,7 @@ ENDIF
 
 Y_MF(FUEL_INDEX) = Z_1 * RN%Y_F_INLET
 
-Y_MF(N2_INDEX) = (1._EB - ZZ) * RN%Y_N2_INFTY + Z_1 * RN%Y_N2_INLET + (Z_2 + Z_3) * RN%Y_F_INLET / RN%MW_FUEL * MW_N2 * RN%NU_N2
+Y_MF(N2_INDEX) = (1._EB - ZZ) * RN%Y_N2_INFTY + ZZ * RN%Y_N2_INLET + (Z_2 + Z_3) * RN%Y_F_INLET / RN%MW_FUEL * MW_N2 * RN%NU_N2
 
 Y_MF(O2_INDEX) = (1._EB - ZZ) * RN%Y_O2_INFTY - Z_3 * RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * RN%NU_O2
 IF (CO_PRODUCTION) Y_MF(O2_INDEX) = Y_MF(O2_INDEX) - Z_2 * RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(1)%NU_O2
@@ -632,9 +632,9 @@ IF (YY_SUM >=1._EB) THEN
    MW_MF = MW_AIR
    RETURN
 ELSE
-   Z_1 = MAX(0._EB,Z1)/(1._EB - MAX(0._EB,YY_SUM))
-   Z_2 = MAX(0._EB,Z2)/(1._EB - MAX(0._EB,YY_SUM))         
-   Z_3 = MAX(0._EB,Z3)/(1._EB - MAX(0._EB,YY_SUM))          
+   Z_1 = MAX(0._EB,MIN(1._EB,Z1))/(1._EB - MAX(0._EB,YY_SUM))
+   Z_2 = MAX(0._EB,MIN(1._EB,Z2))/(1._EB - MAX(0._EB,YY_SUM))         
+   Z_3 = MAX(0._EB,MIN(1._EB,Z3))/(1._EB - MAX(0._EB,YY_SUM))          
 ENDIF
 
 CALL GET_MASS_FRACTION_ALL(Z_1,Z_2,Z_3,0._EB,Y_MF)
@@ -658,9 +658,9 @@ IF (YY_SUM >=1._EB) THEN
    MU_MF = SPECIES(0)%MU(ITMP)
    RETURN
 ELSE
-   Z_1 = MAX(0._EB,Z1)/(1._EB - MAX(0._EB,YY_SUM))
-   Z_2 = MAX(0._EB,Z2)/(1._EB - MAX(0._EB,YY_SUM))         
-   Z_3 = MAX(0._EB,Z3)/(1._EB - MAX(0._EB,YY_SUM))          
+   Z_1 = MAX(0._EB,MIN(1._EB,Z1))/(1._EB - MAX(0._EB,YY_SUM))
+   Z_2 = MAX(0._EB,MIN(1._EB,Z2))/(1._EB - MAX(0._EB,YY_SUM))         
+   Z_3 = MAX(0._EB,MIN(1._EB,Z3))/(1._EB - MAX(0._EB,YY_SUM))          
 ENDIF
 CALL GET_MASS_FRACTION_ALL(Z_1,Z_2,Z_3,0._EB,Y_MF)
 
@@ -690,9 +690,9 @@ IF (YY_SUM >=1._EB) THEN
    D_MF = SPECIES(0)%D(ITMP)
    RETURN
 ELSE
-   Z_1 = MAX(0._EB,Z1)/(1._EB - MAX(0._EB,YY_SUM))
-   Z_2 = MAX(0._EB,Z2)/(1._EB - MAX(0._EB,YY_SUM))         
-   Z_3 = MAX(0._EB,Z3)/(1._EB - MAX(0._EB,YY_SUM))          
+   Z_1 = MAX(0._EB,MIN(1._EB,Z1))/(1._EB - MAX(0._EB,YY_SUM))
+   Z_2 = MAX(0._EB,MIN(1._EB,Z2))/(1._EB - MAX(0._EB,YY_SUM))         
+   Z_3 = MAX(0._EB,MIN(1._EB,Z3))/(1._EB - MAX(0._EB,YY_SUM))          
 ENDIF
 
 CALL GET_MASS_FRACTION_ALL(Z_1,Z_2,Z_3,0._EB,Y_MF)
@@ -713,9 +713,9 @@ IF (YY_SUM >=1._EB) THEN
    CP_MF = SPECIES(0)%CP(ITMP)
    RETURN
 ELSE
-   Z_1 = MAX(0._EB,Z1)/(1._EB - MAX(0._EB,YY_SUM))
-   Z_2 = MAX(0._EB,Z2)/(1._EB - MAX(0._EB,YY_SUM))         
-   Z_3 = MAX(0._EB,Z3)/(1._EB - MAX(0._EB,YY_SUM))          
+   Z_1 = MAX(0._EB,MIN(1._EB,Z1))/(1._EB - MAX(0._EB,YY_SUM))
+   Z_2 = MAX(0._EB,MIN(1._EB,Z2))/(1._EB - MAX(0._EB,YY_SUM))         
+   Z_3 = MAX(0._EB,MIN(1._EB,Z3))/(1._EB - MAX(0._EB,YY_SUM))          
 ENDIF
 
 CALL GET_MASS_FRACTION_ALL(Z_1,Z_2,Z_3,0._EB,Y_MF)
@@ -737,9 +737,9 @@ IF (YY_SUM >=1._EB) THEN
    K_MF = SPECIES(0)%K(ITMP)
    RETURN
 ELSE
-   Z_1 = MAX(0._EB,Z1)/(1._EB - MAX(0._EB,YY_SUM))
-   Z_2 = MAX(0._EB,Z2)/(1._EB - MAX(0._EB,YY_SUM))         
-   Z_3 = MAX(0._EB,Z3)/(1._EB - MAX(0._EB,YY_SUM))          
+   Z_1 = MAX(0._EB,MIN(1._EB,Z1))/(1._EB - MAX(0._EB,YY_SUM))
+   Z_2 = MAX(0._EB,MIN(1._EB,Z2))/(1._EB - MAX(0._EB,YY_SUM))         
+   Z_3 = MAX(0._EB,MIN(1._EB,Z3))/(1._EB - MAX(0._EB,YY_SUM))          
 ENDIF
 
 CALL GET_MASS_FRACTION_ALL(Z_1,Z_2,Z_3,0._EB,Y_MF)
