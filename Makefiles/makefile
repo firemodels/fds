@@ -80,6 +80,14 @@ intel_osx : obj = fds5_osx_intel
 intel_osx : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 	
+intel_osx_db : FFLAGS = -O -g
+intel_osx_db : CFLAGS = -O -g -Dpp_noappend -Dpp_OSX
+intel_osx_db : FCOMPL = ifort
+intel_osx_db : CCOMPL = icc
+intel_osx_db : obj = fds5_osx_intel_db
+intel_osx_db : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+	
 intel_osx_mpi : FFLAGS  = -O3 -axP -ip -vec_report0
 intel_osx_mpi : CFLAGS  = -O -Dpp_noappend -Dpp_OSX
 intel_osx_mpi : FCOMPL  = mpif77
@@ -88,6 +96,13 @@ intel_osx_mpi : obj = fds5_osx_intel_mpi
 intel_osx_mpi : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
+intel_osx_mpi_db : FFLAGS  = -O -g
+intel_osx_mpi_db : CFLAGS  = -O -g -Dpp_noappend -Dpp_OSX
+intel_osx_mpi_db : FCOMPL  = mpif77
+intel_osx_mpi_db : CCOMPL  = icc
+intel_osx_mpi_db : obj = fds5_osx_intel_mpi_db
+intel_osx_mpi_db : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 #*** IBM XLF Compiler ***
 
