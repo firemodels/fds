@@ -5782,7 +5782,8 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Specify orientation of DEVC ' ,N,' using the parameter IOR'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      IF (QUANTITY_INDEX < 0 .AND. (DV%STATISTICS=='MASS MEAN' .OR. DV%STATISTICS=='VOLUME MEAN')) THEN
+      IF (QUANTITY_INDEX < 0 .AND. (DV%STATISTICS=='MASS MEAN' .OR. DV%STATISTICS=='VOLUME MEAN' .OR. &
+                                    DV%STATISTICS=='VOLUME INTEGRAL') ) THEN
          WRITE(MESSAGE,'(A,I4)') 'ERROR: Invalid STATISTIC specified for wall DEVC ' ,N
          CALL SHUTDOWN(MESSAGE)
       ENDIF
