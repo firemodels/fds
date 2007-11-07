@@ -1781,7 +1781,8 @@ VLOOP: DO N=1,M%N_VENT
    ! Check if there are over-lapping VENTs
   
    IF (VENT_FOUND) THEN
-      WRITE(MESSAGE,'(A,I2,A,3I3,A,I3,A)') 'WARNING: Two VENTs overlap in MESH ',NM,', Cell',I,J,K,'. VENT ',VT%ORDINAL,' rejected for that cell'
+      WRITE(MESSAGE,'(A,I2,A,3I3,A,I3,A)') 'WARNING: Two VENTs overlap in MESH ',NM,', Cell',I,J,K,'. VENT ', &
+                                           VT%ORDINAL,' rejected for that cell'
       WRITE(0,'(/A/)') MESSAGE
       EXIT VLOOP
    ENDIF

@@ -3074,7 +3074,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
          STAT_VALUE = -HUGE(0.0_EB) + 1.0_EB
       CASE('MIN')
          STAT_VALUE =  HUGE(0.0_EB) - 1.0_EB
-      CASE('MEAN','VOLUME MEAN','MASS MEAN')
+      CASE DEFAULT
          STAT_VALUE =  0.0_EB
    END SELECT
 
@@ -3135,6 +3135,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   CASE('MEAN')
                      STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX))
                      STAT_COUNT = STAT_COUNT + 1
+                  CASE('SURFACE INTEGRAL')
+                     STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX))*AW(IW) 
                END SELECT
             ENDIF
          ENDDO WALL_CELL_LOOP
