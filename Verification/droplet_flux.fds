@@ -1,4 +1,6 @@
-&HEAD CHID='droplet_flux', TITLE='Simple test of droplet mass flux from a surface, SVN Number $Revision$' /
+A test of the insertion of solid, non-evaporating droplets.
+
+&HEAD CHID='droplet_flux', TITLE='Simple test of droplet mass flux from a surface, SVN $Revision$' /
 
 &MESH IJK=50,50,25, XB=-5.0,5.0,-5.0,5.0,0.0,5.0 /
 

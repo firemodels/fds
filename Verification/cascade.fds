@@ -1,4 +1,7 @@
-&HEAD CHID='cascade', TITLE='Water droplets cascading over a stack of boxes, SVN Number $Revision$' /
+Water droplets cascading down over a stack of boxes. 
+The purpose of this case is to test functionality of the droplet routine.
+
+&HEAD CHID='cascade', TITLE='Water droplets cascading over a stack of boxes, SVN $Revision$' /
 
 &MESH IJK=16,16,56, XB=-2.0,2.0,-2.0,2.0,0.0,14.0 /
 

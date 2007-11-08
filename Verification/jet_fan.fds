@@ -1,7 +1,6 @@
-A simple example of a jet fan consisting of a rectangular shroud pushing
-smoke through a tunnel
+A simple example of a jet fan consisting of a rectangular shroud pushing smoke through a tunnel.
 
-&HEAD CHID='jet_fan', TITLE='How to construct a simple jet fan, SVN Number $Revision$' /
+&HEAD CHID='jet_fan', TITLE='How to construct a simple jet fan, SVN $Revision$' /
 
 &MESH IJK=50,20,20, XB=0.0,10.0,-2.0,2.0,0.0,4.0 /
 

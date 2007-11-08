@@ -34,12 +34,11 @@ New York, 2002, 944 pp.
 
 -------FDS_Data-----------------------------------------------------
 
-&HEAD CHID='wall_internal_radiation',TITLE='Internal radiation, SVN Number $Revision$' /
+&HEAD CHID='wall_internal_radiation',TITLE='Internal radiation, SVN $Revision$' /
 
-&MESH IJK = 5,3,4
-      XB = 0.0,0.5,-0.15,0.15,0.0,0.4 /
+&MESH IJK = 5,3,4, XB = 0.0,0.5,-0.15,0.15,0.0,0.4 /
 
-&TIME TWFIN=0.0001,WALL_INCREMENT = 1  DT = 0.0001/
+&TIME TWFIN=0.0001, WALL_INCREMENT = 1, DT = 0.0001/
 &MISC TMPA = -263.15, H_FIXED = 0. /
 
 &DUMP DT_PL3D = 10000. /

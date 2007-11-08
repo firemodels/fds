@@ -1,4 +1,4 @@
-&HEAD CHID='box_burn_away',TITLE='Test BURN_AWAY feature, SVN Number $Revision$' / 
+&HEAD CHID='box_burn_away', TITLE='Test BURN_AWAY feature, SVN $Revision$' / 
 
 &MESH IJK=20,20,40 XB=0.0,1.0,0.0,1.0,0.0,2.0 /
 
@@ -39,13 +39,5 @@
 &SLCF PBY=0.5, QUANTITY='HRRPUV' /
 
 &TAIL /
-
-
-
-
-
-
-
-
 
 

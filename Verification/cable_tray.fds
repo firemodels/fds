@@ -4,7 +4,7 @@ The material properties are estimates. The description of the "Loose Cable" is j
 many different ways of representing a complicated fuel source.
 
 
-&HEAD CHID='cable_tray', TITLE='Flame spread over a tray filled with cables, SVN Number $Revision$' /
+&HEAD CHID='cable_tray', TITLE='Flame spread over a tray filled with cables, SVN $Revision$' /
 
 &MESH IJK=80,12,20, XB=-2.00,2.00,-0.30,0.30,0.00,1.00 /
 

@@ -1,4 +1,7 @@
-&HEAD CHID='lee_waves', TITLE='Test of Atmospheric Stratification, SVN Number $Revision$' / 
+This case tests the atmospheric stratification features.
+It is a two-dimensional calculation of wind flow over a mountain range.
+
+&HEAD CHID='lee_waves', TITLE='Test of Atmospheric Stratification, SVN $Revision$' / 
 
 &MESH IJK=200,1,50, XB=0.0,10000.0,-1.0,1.0,0.0,2500.0 /
 

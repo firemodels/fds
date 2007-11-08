@@ -85,7 +85,7 @@ I = 1,2,3 in any of the internal wall points.
 
 -------FDS_Data-----------------------------------------------------
 
-&HEAD CHID='two_step_solid_reaction', TITLE='Reaction rate test, SVN Number $Revision$' /
+&HEAD CHID='two_step_solid_reaction', TITLE='Reaction rate test, SVN $Revision$' /
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
 
@@ -94,7 +94,6 @@ I = 1,2,3 in any of the internal wall points.
 &MISC SOLID_PHASE_ONLY = .TRUE. /
 
 &DUMP DT_PL3D=10000000., NFRAMES=200 /
-&ZONE  /
 
 &SURF ID='TEST'
       STRETCH_FACTOR = 1.0

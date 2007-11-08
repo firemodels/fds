@@ -1,10 +1,10 @@
-&HEAD CHID='control_test', TITLE='Control function testing, SVN Number $Revision$'/
-
 Test of control functions:
    At 3 s a restart file should be written
    At 5 s the fire should start
    DEVC for temperature should show rapid rise over 25 C but OBST should not disappear until 8 s is reached
    Case should die gracefully at 9 s
+
+&HEAD CHID='control_test', TITLE='Control function testing, SVN $Revision$'/
 
 &MESH XB=-1,1,-1,1,0,2, IJK=20,20,20 /
 &TIME TWFIN=10/

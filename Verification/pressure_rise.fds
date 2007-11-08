@@ -1,4 +1,6 @@
-&HEAD CHID='pressure_rise', TITLE='Pressure Rise in a Sealed Tunnel, SVN Number $Revision$' / 
+Test pressure rise in a multiple mesh simulation.
+
+&HEAD CHID='pressure_rise', TITLE='Pressure Rise in a Sealed Tunnel, SVN $Revision$' / 
 
 &MESH IJK=20,1,20, XB=0.0,1.0,-.001,0.001,0.0,1.0 /
 &MESH IJK=20,1,20, XB=1.0,2.0,-.001,0.001,0.0,1.0 /
@@ -6,11 +8,8 @@
 
 &TIME TWFIN=600.0 / 
 
-&ZONE  /
-
 &DUMP MASS_FILE=.TRUE. /
 
- SURF ID='BLOW', MASS_FLUX_TOTAL=-0.1, RAMP_V='blow' /
 &SURF ID='BLOW', MASS_FLUX(0)=0.1, RAMP_MF(0)='blow' /
 &RAMP ID='blow',T= 0.,F=0. /
 &RAMP ID='blow',T= 1.,F=1. /

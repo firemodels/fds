@@ -1,7 +1,7 @@
 Room fire test case, based on an actual test conducted for US ATF by the University of Maryland. 
 All material properties are completely fabricated.
 
-&HEAD CHID='room_fire', TITLE='ATF Room Fire Test, SVN Number $Revision$'  / 
+&HEAD CHID='room_fire', TITLE='ATF Room Fire Test, SVN $Revision$'  / 
 
 &MESH IJK=52,54,24, XB=0.0,5.2,-0.8,4.6,0.0,2.4 / 
 
@@ -53,6 +53,7 @@ All material properties are completely fabricated.
       SPECIFIC_HEAT         = 2.0
       DENSITY               = 750.
       N_REACTIONS           = 1
+      NU_FUEL               = 1.
       REFERENCE_TEMPERATURE = 290.
       HEAT_OF_COMBUSTION    = 22300.
       HEAT_OF_REACTION      = 2000. /
