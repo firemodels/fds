@@ -1867,7 +1867,7 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A)')      '     Liquid evaporation reaction'
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Fuel Yield             : ',ML%NU_FUEL(1)
       WRITE(LU_OUTPUT,'(A,F9.2)') '        Water Yield            : ',ML%NU_WATER(1)
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL(1)-TMPM
+      WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL-TMPM
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1)/1000.
    ENDIF
 ENDDO MATL_LOOP
