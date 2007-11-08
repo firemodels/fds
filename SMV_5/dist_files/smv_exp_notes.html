@@ -1,0 +1,116 @@
+<html>
+<head>
+<TITLE>Readme file for the Experimental version of Smokeview</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" >
+<h2>Release Notes for the Experimental Version of Smokeview</h2>
+<p>$Date$<br>
+$Revsision: $<br>
+$URL$
+<p><hr size="1">
+<h3>Summary</h3>
+<ul>
+<li><a href="#GPU">GPU</a> - The video card is used to speed up 3D smoke visualization
+<li><a href="#culling">Culling</a> - 3D smoke drawing is further speeded up by detecting blockage hidden smoke planes.
+<li><a href="#colorbar">Custom Color bars</a> - Custom colorbars may be created to highlight specific data.
+<li><a href="#memory">Memory management</a> - Smokeview's memory management routiens are modified to reduce the risk and consequences 
+of memory leaks.
+<li><a href="#lighting">Lighting</a> - More control is added for illuminating the scene.
+</ul>
+
+<p>This readme file describes several new features being tested 
+in an experimental version of Smokeview available at the 
+<a href="http://code.google.com/p/fds-smv/downloads/list"<a>download page</a>.  
+In theory, this version of Smokeview is backwards 
+compatible with the <em>official</em> version also located on the 
+<a href="http://code.google.com/p/fds-smv/downloads/list"<a>download page</a>.  
+However, there are no guarantees.  Use this version with caution.
+
+<a name="GPU"></a>
+<h3>GPU </h3>
+<p>The GPU or graphics programming unit is used to speed up 
+the display of smoke.  This feature is turned on and off by pressing the <strong>G</strong> key.
+Some of the smoke flow computations required to visualize smoke are now
+performed in the GPU rather than the CPU.  Speed ups of up to 50% have been observed.
+
+<p>Important note: 
+
+<ul>
+
+<li>This option is activated (or deactivated) by pressing the <strong>G</strong> key.  
+
+<li>Smokeview tries to detect whether the GPU is available (ie capable) for
+performing these computations.  Since all of the computers that I have access to are GPU capable,
+this version of Smokeview has
+not been tested on computers that are not GPU capable.
+
+<li>Best speed ups occur when the simulation has a lot of 3d smoke planes to display.  
+(3D smoke display may also be speeded up in the <em>official</em> version with a loss of 
+resolution by using the 
+3D Smokeview dialog box to skip
+smoke planes).
+
+<li>The GPU programs (vertex and fragment shaders), smoke.vert and smoke.frag, 
+<strong>must</strong> be copied in the same directory containing Smokeview 
+(<tt>c:\program files\nist\smokeview</tt> on the PC).
+These two files are contained in the same .zip archive containing Smokeview experimental.  
+</ul>
+
+<a name="culling"></a>
+<h3>Culling</h3>
+The best way to speed up any computation is not to do it in the first place!
+This applies to graphics as well.  The best way to speed up drawing in a graphics program is to simply
+not draw.  The hard part is figuring out when you can get away with this.
+This process is called <em>culling</em>.  There are several types of culling.  
+View frustum culling eliminates 
+objects that would not appear on the screen if drawn.  Smokeview (the official version) already
+uses view frustum to speed up 3D smoke visualization.
+<p>View frustum culling is not effective for culling objects that are hidden by other objects but 
+would otherwise appear on the screen.  
+OpenGL 1.5 and later has an extension to determine whether an object would be visible
+in the presence of other drawn objects.  The experimental version of Smokeview uses this extension to determine
+whether 3D smoke is hidden by blockages.
+<p>Notes:
+<ul>
+
+<li>This option is used in conjunction with the GPU programming option so is also activated/deactivated
+by pressing the <strong>G</strong> key.
+<li>This option has not been tested on systems where the extension is not availble.  Smokeview has been designed
+so that if the option is not available then it reverts back to the former method for drawing smoke.
+<li>Speed ups depend on the amount of geometry (&OBST's) present in the scene.  You can expect
+that smoke flow in a house will speed up more than smoke flow in an open fire plume.
+<li>This extenstion has only been implemented for the 3 view directions alligned with the coordinate axese.
+View directions where smoke planes are diagonal the these axes do not have this culling extension
+implemented.
+</ul>
+
+<a name="colorbar"></a>
+<h3>Custom Color Bars</h3>
+A new dialog box has been implemented for creating custom color bars.  
+In some sense a color bar is equivalent to a <em>Smokeview tour</em>.  Both are 3D paths.  A tour is a path through
+3D physical space.  A colorbar is a path through 3D <em>RGB color</em> space.   
+Colorbars that are discontinuous may be used to highlight or make certain color ranges more conspicuous.
+
+<a name="memory"></a>
+<h3>Memory management</h3>
+This is an internal technical change in how Smokeview allocates and deallocates
+needed memory.  If implemented improperly, it could have have undesirable
+side effects (Smokeview would most likely crash).  The major enhancment was to create a dynamic list of 
+currently allocated memory blocks so that memory blocks may be easily deallocated with one procedure call 
+thus eliminating the possibility 
+of a memory leak.
+
+<a name="lighting"></a>
+<h3>Lighting</h3>
+A minor addition to add a menu option to allow one to select lights used to illuminate 
+the scene.  This choice is made for you in the <em>official</em> version of Smokeview.
+
+<p><hr>
+<p><address>
+<A HREF="http://www.bfrl.nist.gov" >Building and Fire Research Laboratory</A><BR>
+<a href="http://www.nist.gov" >National Institute of Standards and Technology</a><br>
+Gaithersburg, MD 20899
+</address>
+
+
+</BODY></HTML>
