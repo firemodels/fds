@@ -1,4 +1,4 @@
-&HEAD CHID='bucket_test', TITLE='Single Sprinkler Test Case, SVN Number $Revision$' /
+&HEAD CHID='bucket_test', TITLE='Single Sprinkler Test Case, SVN $Revision$' /
 
 &MESH IJK=50,50,25, XB=-5.0,5.0,-5.0,5.0,0.0,5.0 /
 

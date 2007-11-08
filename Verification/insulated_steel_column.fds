@@ -2,7 +2,7 @@ Heat up an insulated, hollow column with a small hot block.
 The temperature profiles for the comparable interior and exterior
 cell should be the same.
 
-&HEAD CHID='insulated_steel_column', TITLE='Hollow, insulated steel column gets hot, SVN Number $Revision$' /
+&HEAD CHID='insulated_steel_column', TITLE='Hollow, insulated steel column gets hot, SVN $Revision$' /
 
 &MESH IJK=10,10,20, XB=2.3,3.3,0.0,1.0,0.0,2.0 /
 &TIME TWFIN=1800. /

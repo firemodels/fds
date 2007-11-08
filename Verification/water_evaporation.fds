@@ -1,4 +1,7 @@
-&HEAD CHID='water_evaporation', TITLE='Water Evaporation Test, SVN Number $Revision$' / 
+Water droplets evaporate in a box.
+This case tests conservation of mass and energy.
+
+&HEAD CHID='water_evaporation', TITLE='Water Evaporation Test, SVN $Revision$' / 
 
 &MESH IJK=20,20,20, XB=0.0,1.0,0.0,1.0,0.0,1.0 / 
 
@@ -35,8 +38,5 @@
 &BNDF QUANTITY='WALL_TEMPERATURE' / 
 &BNDF QUANTITY='CONVECTIVE_FLUX' / 
 &BNDF QUANTITY='RADIATIVE_FLUX' / 
-
-
-&ZONE /
 
 &TAIL /

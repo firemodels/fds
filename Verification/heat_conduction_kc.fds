@@ -35,7 +35,7 @@ surface and center.
 
 -----------------
 
-&HEAD CHID='heat_conduction_kc', TITLE='Advanced 1D conduction, SVN Number $Revision$' /
+&HEAD CHID='heat_conduction_kc', TITLE='Advanced 1D conduction, SVN $Revision$' /
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  
 
@@ -62,7 +62,6 @@ surface and center.
 &RAMP ID = 'C_RAMP' T=100, F= 1.20 /
 &RAMP ID = 'C_RAMP' T=200, F= 1.00 /
 
-      GEOMETRY = 'SPHERICAL'
 &SURF ID='SLAB'
       STRETCH_FACTOR = 1.0
       GEOMETRY = 'CYLINDRICAL'
@@ -82,8 +81,7 @@ Open up the domain on all sides except the bottom (ZMIN)
 Output
 
 &DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL_TEMPERATURE', ID='temp' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='INSIDE_WALL_TEMPERATURE',
-	DEPTH=0.10,  ID='back' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='INSIDE_WALL_TEMPERATURE', DEPTH=0.10,  ID='back' /
 
 &TAIL / 
 

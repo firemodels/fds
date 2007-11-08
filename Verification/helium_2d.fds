@@ -1,4 +1,7 @@
-&HEAD CHID='helium_2d',TITLE='Axisymmetric Helium Plume, SVN Number $Revision$' /
+A simple axially-symmetric simulation of a helium plume.
+This tests DNS and axial symmetry.
+
+&HEAD CHID='helium_2d',TITLE='Axisymmetric Helium Plume, SVN $Revision$' /
 
 &MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
 

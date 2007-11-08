@@ -1,4 +1,7 @@
-&HEAD CHID='scaling_test', TITLE='Test case for 64 CPUs, SVN Number $Revision$' /
+Test of parallel version of FDS. 
+A simple plume in the unit cube, broken up into 64 meshes.
+
+&HEAD CHID='scaling_test', TITLE='Test case for 64 CPUs, SVN $Revision$' /
 
 &MESH IJK=25,25,25, XB=0.00,0.25,0.00,0.25,0.00,0.25 /
 &MESH IJK=25,25,25, XB=0.25,0.50,0.00,0.25,0.00,0.25 /

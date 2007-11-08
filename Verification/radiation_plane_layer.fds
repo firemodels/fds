@@ -45,10 +45,7 @@ New York, 2002, 944 pp.
 
 -----------------------------------------------------------------------
 
-&HEAD CHID='radiation_plane_layer', TITLE='Test wall heat transfer from a plane layer, SVN Number $Revision$'/
-
-2D version
- MESH IJK = 20,1,20, XB = 0.0, 1.0, -0.1,  0.1, -10.0, 10.0 /
+&HEAD CHID='radiation_plane_layer', TITLE='Test wall heat transfer from a plane layer, SVN $Revision$'/
 
 &MESH IJK = 20,20,20, XB= 0.0, 1.0,-10.0, 10.0, -10.0, 10.0 /
 
@@ -60,17 +57,14 @@ New York, 2002, 944 pp.
       TIME_STEP_INCREMENT = 1
       ANGLE_INCREMENT = 1 
       KAPPA0 = 1. /
-      WIDE_BAND_MODEL=.TRUE.
-
-&ZONE XB = 0.0,1.0,-10.0, 10.0,-10.0, 10.0 /
 
 &DUMP NFRAMES = 500,
       SMOKE3D = .FALSE.
       DT_PL3D = 10000. /
       DT_DEVC = 0. /
 
-&SURF ID = 'HOT'  TMP_FRONT = 1000.00 TAU_T = 0. EMISSIVITY = 1.0 /
-&SURF ID = 'COLD' TMP_FRONT = -273.15 TAU_T = 0. EMISSIVITY = 1.0 /
+&SURF ID = 'HOT',  TMP_FRONT = 1000.00, TAU_T = 0., EMISSIVITY = 1.0 /
+&SURF ID = 'COLD', TMP_FRONT = -273.15, TAU_T = 0., EMISSIVITY = 1.0 /
 
 For KAPPA0 = 0
  VENT MB='XMIN',SURF_ID='HOT' /
@@ -85,6 +79,6 @@ For KAPPA0 = 0
 
 &BNDF QUANTITY = 'INCIDENT_HEAT_FLUX' /
 
-&DEVC QUANTITY = 'INCIDENT_HEAT_FLUX' XYZ = 1.0,0.0,0.0 IOR=-1  /
+&DEVC QUANTITY = 'INCIDENT_HEAT_FLUX', XYZ = 1.0,0.0,0.0, IOR=-1  /
 
 &TAIL /

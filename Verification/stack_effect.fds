@@ -1,4 +1,6 @@
-&HEAD CHID='stack_effect', TITLE='Test of Stack Effect, SVN Number $Revision$' / 
+A simple two-dimensional case demonstrating how to model stack effect in buildings.
+
+&HEAD CHID='stack_effect', TITLE='Test of Stack Effect, SVN $Revision$' / 
 
 &MESH IJK=100,1,400, XB=0.0,100.0,-1.0,1.0,0.0,400.0 /
 

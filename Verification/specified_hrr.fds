@@ -1,4 +1,6 @@
-&HEAD CHID='specified_hrr', TITLE='Pre-defined HRRPUA, SVN Number $Revision$' /
+A test of the simple "heat up and burn" pyrolysis model.
+
+&HEAD CHID='specified_hrr', TITLE='Pre-defined HRRPUA, SVN $Revision$' /
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
 
