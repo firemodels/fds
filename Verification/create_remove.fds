@@ -1,4 +1,6 @@
-&HEAD CHID='create_remove',TITLE='Test OBST and HOLE Creation and Removal, SVN Number $Revision$' / 
+Test functionality of obstruction creation and removal.
+
+&HEAD CHID='create_remove',TITLE='Test OBST and HOLE Creation and Removal, SVN $Revision$' / 
 
 &MESH IJK=20,20,20 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 

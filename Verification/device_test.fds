@@ -1,4 +1,6 @@
-&HEAD CHID='device_test', TITLE='Test sprinklers, heat detectors and smoke detectors, SVN Number $Revision$' /
+Test various devices and actions upon activation.
+
+&HEAD CHID='device_test', TITLE='Test sprinklers, heat detectors and smoke detectors, SVN $Revision$' /
 
 &MESH IJK=30,10,10, XB=0.0,3.0,0.0,1.0,0.0,1.0 /
 &MESH IJK=10,40,10, XB=3.0,4.0,0.0,4.0,0.0,1.0 /

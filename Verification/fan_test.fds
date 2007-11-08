@@ -1,4 +1,4 @@
-&HEAD CHID='fan_test', TITLE='Test of Fans Connecting Two Sealed Compartments, SVN Number $Revision$' /
+&HEAD CHID='fan_test', TITLE='Test of Fans Connecting Two Sealed Compartments, SVN $Revision$' /
 
 &MESH IJK=60,20,20, XB=-3.0, 3.0,-1.0, 1.0, 0.0, 2.0 /
 

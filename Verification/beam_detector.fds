@@ -1,10 +1,8 @@
-&HEAD CHID='beam_detector', TITLE='Test a Beam Detector and Verify Smokeview Smoke3D Feature, SVN Number $Revision$' /
+&HEAD CHID='beam_detector', TITLE='Test a Beam Detector and Verify Smokeview Smoke3D Feature, SVN $Revision$' /
 
 &MESH IJK=100,100,40, XB=0.0,10.0,0.0,10.0,0.0,4.0 /
 
 &TIME TWFIN=1.0 /
-
-&ZONE /
 
 &INIT MASS_FRACTION(2)=0.006 /
 

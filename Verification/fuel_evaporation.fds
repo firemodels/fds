@@ -1,4 +1,6 @@
-&HEAD CHID='fuel_evaporation', TITLE='Fuel Evaporation Test, SVN Number $Revision$' / 
+A sealed box is filled with fuel droplets that evaporate rapidly and burn.
+
+&HEAD CHID='fuel_evaporation', TITLE='Fuel Evaporation Test, SVN $Revision$' / 
 
 &MESH IJK=20,20,20, XB=0.0,1.0,0.0,1.0,0.0,1.0 / 
 
@@ -45,7 +47,5 @@ cSURF ID='WALL', ADIABATIC=.TRUE. /
 
 &BNDF QUANTITY='HEAT_FLUX' / 
 &BNDF QUANTITY='WALL_TEMPERATURE' / 
-
-&ZONE /
 
 &TAIL /
