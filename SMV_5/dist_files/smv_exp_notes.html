@@ -3,24 +3,27 @@
 <TITLE>Readme file for the Experimental version of Smokeview</TITLE>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
-<h2>Release Notes for the Experimental Version of Smokeview</h2>
+<h2>Smokeview Experimental - Release Notes</h2>
 
 <p>$Date$<br>
 $Revision$<br>
 
-<p>This readme file describes several new features being tested 
-in an experimental version of Smokeview available at the 
-<a href="http://code.google.com/p/fds-smv/downloads/list"<a>download page</a>.  
-In theory, this version of Smokeview is backwards 
-compatible with the <em>official</em> version also located on the 
-<a href="http://code.google.com/p/fds-smv/downloads/list"<a>download page</a>.  
+<p>This readme file describes several new features 
+in an experimental version of Smokeview available for testing at the 
+<a href="http://code.google.com/p/fds-smv/downloads/list"<a>download site</a>.  
+This version of Smokeview is designed to be backwards 
+compatible with the <em>official</em> version also located at the 
+<a href="http://code.google.com/p/fds-smv/downloads/list"<a>download site</a>.  
 However, there are no guarantees.  Use this version with caution.
+
+<p>The following options will be tested and refined over the next year and as they become sufficiently polished they 
+will be incorporated into the official Smokeview release.
 
 <p><ul>
 <li><a href="#GPU">GPU</a> - The video card is used to speed up 3D smoke visualization
 <li><a href="#culling">Culling</a> - 3D smoke drawing is further speeded up by detecting blockage hidden smoke planes.
 <li><a href="#colorbar">Custom Color bars</a> - Custom colorbars may be created to highlight specific data.
-<li><a href="#memory">Memory management</a> - Smokeview's memory management routiens are modified to reduce the risk and consequences 
+<li><a href="#memory">Memory management</a> - Smokeview's memory management routines are modified to reduce the risk and consequences 
 of memory leaks.
 <li><a href="#lighting">Lighting</a> - More control is added for illuminating the scene.
 </ul>
@@ -35,34 +38,32 @@ the display of smoke.  This feature is turned on and off by pressing the <strong
 Some of the smoke flow computations required to visualize smoke are now
 performed in the GPU rather than the CPU.  Speed ups of up to 50% have been observed.
 
-<p>Important note: 
-
 <ul>
 
 <li>This option is activated (or deactivated) by pressing the <strong>G</strong> key.  
 
-<li>Smokeview tries to detect whether the GPU is available (ie capable) for
+<li>Smokeview tries to determine whether a programmable GPU is available for
 performing these computations.  Since all of the computers that I have access to are GPU capable,
 this version of Smokeview has
-not been tested on computers that are not GPU capable.
+not been tested on computers that are not.
 
-<li>Best speed ups occur when the simulation has a lot of 3d smoke planes to display.  
-(3D smoke display may also be speeded up in the <em>official</em> version with a loss of 
-resolution by using the 
+<li>The best speed ups occur when the simulation has a lot of 3D smoke planes to display.  
+Note that 3D smoke display may be speeded using the official version of Smokeview (at a loss of resolution)
+by using the 
 3D Smokeview dialog box to skip
-smoke planes).
+smoke planes.
 
-<li>The GPU programs (vertex and fragment shaders), smoke.vert and smoke.frag, 
-<strong>must</strong> be copied in the same directory containing Smokeview 
-(<tt>c:\program files\nist\smokeview</tt> on the PC).
+<li>The GPU programs (vertex shader smoke.vert and fragment shader smoke.frag) 
+<strong>must</strong> be copied to the same directory containing Smokeview.
+The default location on the PC is <tt>c:\program files\nist\smokeview</tt>.
 These two files are contained in the same .zip archive containing Smokeview experimental.  
 </ul>
 
 <a name="culling"></a>
 <h3>Culling</h3>
 The best way to speed up any computation is not to do it in the first place!
-This applies to graphics as well.  The best way to speed up drawing in a graphics program is to simply
-not draw.  The hard part is figuring out when you can get away with this.
+This applies to video display.  The best way to speed up drawing in a graphics program is to simply not do it.
+The hard part is figuring out when you can get away with this.
 This process is called <em>culling</em>.  There are several types of culling.  
 View frustum culling eliminates 
 objects that would not appear on the screen if drawn.  Smokeview (the official version) already
@@ -77,8 +78,8 @@ whether 3D smoke is hidden by blockages.
 
 <li>This option is used in conjunction with the GPU programming option so is also activated/deactivated
 by pressing the <strong>G</strong> key.
-<li>This option has not been tested on systems where the extension is not availble.  Smokeview has been designed
-so that if the option is not available then it reverts back to the former method for drawing smoke.
+<li>This option has not been tested on systems where the extension is not available.  Smokeview has been designed
+so that if the option is not available it reverts back to the former method for drawing smoke.
 <li>Speed ups depend on the amount of geometry (&OBST's) present in the scene.  You can expect
 that smoke flow in a house will speed up more than smoke flow in an open fire plume.
 <li>This extenstion has only been implemented for the 3 view directions alligned with the coordinate axese.
