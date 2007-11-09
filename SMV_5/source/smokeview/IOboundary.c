@@ -36,8 +36,6 @@ int getpatchindex(const patch *patchi);
 /* ------------------ readpatch ------------------------ */
 
 
-/* ------------------ readpatch2 ------------------------ */
-
 void readpatch(int ifile, int flag, int *errorcode){
   int error;
   size_t lenfile;
