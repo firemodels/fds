@@ -5,7 +5,6 @@
 #include "options.h"
 #ifdef pp_GPU
 #include <GL/glew.h>
-#define NSHADERLINES 1000
 #endif
 #include <stdio.h>  
 #include <stdlib.h>
