@@ -7340,6 +7340,16 @@ int readini2(char *inifile, int loaddatafile, int localfile){
         sscanf(buffer,"%i",&smoke3d_thick);
         continue;
       }
+#ifdef pp_GPU
+      if(match(buffer,"SMOKERTHICK",11)==1){
+        if(fgets(buffer,255,stream)==NULL)break;
+        sscanf(buffer,"%f",&smoke3d_rthick);
+        if(smoke3d_rthick<1.0)smoke3d_rthick=1.0;
+        if(smoke3d_rthick>255.0)smoke3d_rthick=255.0;
+        smoke3d_thick=log2(smoke3d_rthick);
+        continue;
+      }
+#endif
       if(match(buffer,"FIRECOLOR",9)==1){
         if(fgets(buffer,255,stream)==NULL)break;
         sscanf(buffer,"%i %i %i",&fire_red,&fire_green,&fire_blue);
@@ -8443,8 +8453,13 @@ void writeini(int flag){
   fprintf(fileout," %i\n",smokeskipm1);
   fprintf(fileout,"SMOKESHADE\n");
   fprintf(fileout," %i\n",smoke_shade);
+#ifdef pp_GPU
+  fprintf(fileout,"SMOKERTHICK\n");
+  fprintf(fileout," %f\n",smoke3d_rthick);
+#else
   fprintf(fileout,"SMOKETHICK\n");
   fprintf(fileout," %i\n",smoke3d_thick);
+#endif
   fprintf(fileout,"FIRECOLOR\n");
   fprintf(fileout," %i %i %i\n",fire_red,fire_green,fire_blue);
   fprintf(fileout,"FIREDEPTH\n");

@@ -41,8 +41,8 @@ SVEXTERN int cullsmoke;
 #endif
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
-SVEXTERN int GPU_aspectratio, GPU_normx, GPU_normy, GPU_normz, GPU_skip, GPU_hrrcutoff, GPU_hrr;
-SVEXTERN int GPU_smoke3d_thick;
+SVEXTERN int GPU_aspectratio, GPU_normx, GPU_normy, GPU_normz;
+SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr;
 SVEXTERN int GPU_firered, GPU_firegreen, GPU_fireblue, GPU_firealpha;
 SVEXTERN int GPU_smokeshade,GPU_smokealpha;
 SVEXTERN int GPU_eyex, GPU_eyey, GPU_eyez;
@@ -832,6 +832,9 @@ SVEXTERN int smokecullflag;
 SVEXTERN int smokedrawtest,smokedrawtest2;
 SVEXTERN int visMAINmenus;
 SVEXTERN int smoke3d_thick;
+#ifdef pp_GPU
+SVEXTERN float smoke3d_rthick;
+#endif
 SVEXTERN int smokedrawtest_nummin;
 SVEXTERN int smokedrawtest_nummax;
 SVEXTERN int ijkbarmax;

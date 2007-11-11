@@ -322,3 +322,17 @@ char *get_chid(char *file){
   if(found1st==0||found2nd==0)chidptr=NULL;
   return chidptr;
 }
+#ifdef pp_GPU
+
+/* ------------------ log2 ------------------------ */
+
+int log2(float xx){
+  int r = 0;
+  int x;
+  x=xx;
+  while( (x >> r) != 0){
+    r++;
+  }
+  return r-1; // returns -1 for x==0, floor(log2(x)) otherwise
+}
+#endif

@@ -27,30 +27,30 @@ int setSmokeShaders() {
   int i,j;
   int fraglen=0, vertexlen=0;
   GLchar *fragcopy;
-  const GLchar **FragmentShader, **VertexShader;
 
-  const GLchar *FragmentShaderSource2[]={
-    "void main()"
-    "	{"
-    "		gl_FragColor = vec4(0.4,0.4,0.8,1.0);"
-    "	}"
-  };
   const GLchar *FragmentShaderSource[]={
     "varying vec4 newcolor;"
     "uniform sampler2D depthmap;"
     "uniform float nearPlane;"
     "uniform float farPlane;"
+
+//float convertZ( in float near, in float far, in float depthBufferValue )
+//{
+//	float clipZ = ( depthBufferValue - 0.5 ) * 2.0;
+//	return -(2.0 * far * near) / ( clipZ * ( far - near ) - ( far + near ));
+//}
+
     "void main(){"
-    "  gl_FragColor = newcolor;"
+
+//   float sceneDepth = texture2DRect( depthmap, gl_FragCoord.st ).z;
+//   float sceneDepth = shadow2D( depthmap, vec3(gl_FragCoord) ).z;
+//   float thickness = convertZ( nearPlane, farPlane, sceneDepth ) - gl_FragCoord.z;
+
+// if(gl_FragCoord.z<=0.75)discard;
+     "gl_FragColor = newcolor;"
     "}"
   };
 
-  const GLchar *VertexShaderSource2[]={
-    "void main()"
-    "	{	"
-    "		gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;"
-    "	}"
-  };
   const GLchar *VertexShaderSource[]={
     "uniform float aspectratio,normx,normy,normz;"
     "uniform float eyex,eyey,eyez;"
@@ -59,7 +59,7 @@ int setSmokeShaders() {
     "varying vec4 newcolor;"
     "uniform float hrrcutoff;"
     "uniform float smoke_shade;"
-    "uniform int smoke3d_thick;"
+    "uniform float smoke3d_rthick;"
     "attribute float hrr, smoke_alpha;"
     "void main()"
     "{"
@@ -89,37 +89,13 @@ int setSmokeShaders() {
     "    else if(skip==3){"
     "      alpha = 3.0*alpha*(1.0-alpha-alpha*alpha/3.0);"
     "    }"
-    "    if(smoke3d_thick==1){"
-    "      alpha=alpha/2;"
-    "      }"
-    "    else if (smoke3d_thick==2){"
-    "      alpha=alpha/4;"
-    "    }"
-    "    else if (smoke3d_thick==3){"
-    "      alpha=alpha/8;"
-    "    }"
-    "    else if (smoke3d_thick==4){"
-    "      alpha=alpha/16;"
-    "    }"
-    "    else if (smoke3d_thick==5){"
-    "      alpha=alpha/32;"
-    "    }"
-    "    else if (smoke3d_thick==6){"
-    "      alpha=alpha/64;"
-    "    }"
-    "    else if (smoke3d_thick==7){"
-    "      alpha=alpha/128;"
-    "    }"
+    "    alpha /= smoke3d_rthick;"
     "    newcolor = vec4(smoke_shade,smoke_shade,smoke_shade,alpha);"
     "  }"
     "  gl_Position = ftransform();"
     "}"
   };
 
-  FragmentShader=FragmentShaderSource;
-  VertexShader=VertexShaderSource;
-
-
   v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
   f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
   f2 = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
@@ -132,10 +108,10 @@ int setSmokeShaders() {
   // pass skip to GPU as uniform int
 
 
-    glShaderSource(v,1, VertexShader,NULL);
+    glShaderSource(v,1, VertexShaderSource,NULL);
     glCompileShaderARB(v);
 
-    glShaderSource(f, 1, FragmentShader,NULL);
+    glShaderSource(f, 1, FragmentShaderSource,NULL);
     glCompileShaderARB(f);
 
 #ifdef _DEBUG
@@ -177,7 +153,7 @@ int setSmokeShaders() {
   GPU_hrr = glGetAttribLocationARB(p_smoke,"hrr");
   GPU_smokealpha = glGetAttribLocationARB(p_smoke,"smoke_alpha");
   GPU_skip = glGetUniformLocationARB(p_smoke,"skip");
-  GPU_smoke3d_thick = glGetUniformLocationARB(p_smoke,"smoke3d_thick");
+  GPU_smoke3d_rthick = glGetUniformLocationARB(p_smoke,"smoke3d_rthick");
   GPU_smokeshade = glGetUniformLocationARB(p_smoke,"smoke_shade");
   GPU_firealpha = glGetUniformLocationARB(p_smoke,"fire_alpha");
   GPU_firered = glGetUniformLocationARB(p_smoke,"fire_red");
@@ -194,108 +170,6 @@ int setSmokeShaders() {
 
 }
 
-int setSmokeShaders2() {
-
-  char *vs = NULL,*fs = NULL;
-  const char * vv;
-  const char * ff;
-  GLint error_code;
-  char fragbuffer[1024];
-
-  v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-  f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-  f2 = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-
-
-//  NewMemory((void **)&vs,NSHADERLINES*80*sizeof(char));
-//  NewMemory((void **)&fs,NSHADERLINES*80*sizeof(char));
-  
-  strcpy(fragbuffer,smokeviewbindir);
-  strcat(fragbuffer,"smoke.vert");
-  vs = textFileRead(fragbuffer);
-
-  strcpy(fragbuffer,smokeviewbindir);
-  strcat(fragbuffer,"smoke.frag");
-  fs = textFileRead(fragbuffer);
-  
-  vv = vs;
-  ff = fs;
-
-  // vertex shader
-
-  // pass norm to GPU as uniform vec3
-  // pass xyzeyeorig to GPU as uniform vec3
-  // pass aspectratio to GPU as uniform float
-  // pass skip to GPU as uniform int
-
-
-  if(vv!=NULL){
-    glShaderSourceARB(v, 1, &vv,NULL);
-    FREEMEMORY(vs);
-    glCompileShaderARB(v);
-  }
-  if(ff!=NULL){
-    glShaderSourceARB(f, 1, &ff,NULL);
-    FREEMEMORY(fs);
-    glCompileShaderARB(f);
-  }
-
-#ifdef _DEBUG
-  printInfoLog(v);
-  printInfoLog(f);
-  printInfoLog(f2);
-#endif
-
-  p_smoke = glCreateProgramObjectARB();
-  glAttachObjectARB(p_smoke,v);
-  glAttachObjectARB(p_smoke,f);
-
-  glLinkProgramARB(p_smoke);
-  glGetObjectParameterivARB(p_smoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
-#ifdef _DEBUG
-  printf("  Smoke shader completion code:");
-  switch (error_code){
-  case GL_INVALID_VALUE:
-    printf(" INVALID VALUE\n");
-    break;
-  case GL_INVALID_OPERATION:
-    printf(" INVALID OPERATION\n");
-    break;
-  case GL_INVALID_ENUM:
-    printf(" INVALID ENUM\n");
-    break;
-  case 0:
-    printf(" Link failed\n");
-    break;
-  case 1:
-    printf(" Link succeeded\n");
-    break;
-  default:
-    printf(" unknown error\n");
-    break;
-  }
-  printInfoLog(p_smoke);
-#endif
-  GPU_hrrcutoff = glGetUniformLocationARB(p_smoke,"hrrcutoff");
-  GPU_hrr = glGetAttribLocationARB(p_smoke,"hrr");
-  GPU_smokealpha = glGetAttribLocationARB(p_smoke,"smoke_alpha");
-  GPU_skip = glGetUniformLocationARB(p_smoke,"skip");
-  GPU_smoke3d_thick = glGetUniformLocationARB(p_smoke,"smoke3d_thick");
-  GPU_smokeshade = glGetUniformLocationARB(p_smoke,"smoke_shade");
-  GPU_firealpha = glGetUniformLocationARB(p_smoke,"fire_alpha");
-  GPU_firered = glGetUniformLocationARB(p_smoke,"fire_red");
-  GPU_firegreen = glGetUniformLocationARB(p_smoke,"fire_green");
-  GPU_fireblue = glGetUniformLocationARB(p_smoke,"fire_blue");
-  GPU_aspectratio = glGetUniformLocationARB(p_smoke,"aspectratio");
-  GPU_normx = glGetUniformLocationARB(p_smoke,"normx");
-  GPU_normy = glGetUniformLocationARB(p_smoke,"normy");
-  GPU_normz = glGetUniformLocationARB(p_smoke,"normz");
-  GPU_eyex = glGetUniformLocationARB(p_smoke,"eyex");
-  GPU_eyey = glGetUniformLocationARB(p_smoke,"eyey");
-  GPU_eyez = glGetUniformLocationARB(p_smoke,"eyez");
-  return error_code;
-
-}
 /* ------------------ useSmokeShaders ------------------------ */
 
 void useSmokeShaders(void){
