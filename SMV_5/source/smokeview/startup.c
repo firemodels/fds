@@ -1602,6 +1602,9 @@ void initvars1(void){
   smokedrawtest=0,smokedrawtest2=0;
   visMAINmenus=0;
   smoke3d_thick=0;
+#ifdef pp_GPU
+  smoke3d_rthick=1.0;
+#endif
   smokedrawtest_nummin=1;
   smokedrawtest_nummax=1;
   ijkbarmax=5;
