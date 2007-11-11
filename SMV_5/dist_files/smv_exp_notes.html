@@ -4,7 +4,6 @@
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Smokeview Experimental - Release Notes</h2>
-
 <p>$Date$<br>
 $Revision$<br>
 
@@ -36,20 +35,20 @@ of memory leaks.
 <p>The GPU or graphics programming unit is used to speed up 
 the display of smoke.  This feature is turned on and off by pressing the <strong>G</strong> key.
 Some of the smoke flow computations required to visualize smoke are now
-performed in the GPU rather than the CPU.  Speed ups of up to 50% have been observed.
+performed on the GPU rather than the CPU.  Speed ups of up to 50% have been observed.
 
 <ul>
 
-<li>Copy glew32.dll to the directory containing Smokeview (default: c:\program files\nist\smokeview).
+<li>Copy glew32.dll from the .zip archive to the directory containing Smokeview (default: c:\program files\nist\smokeview).
 
 <li>This option is activated (or deactivated) by pressing the <strong>G</strong> key.  
 
 <li>Smokeview tries to determine whether a programmable GPU is available for
-performing these computations.  Since all of the computers that I have access to are GPU capable,
+performing these computations.  Since the computers that I have access to are GPU capable,
 this version of Smokeview has
 not been tested on computers that are not.
 
-<li>The best speed ups occur when the simulation has a lot of 3D smoke planes to display.  
+<li>The fastest speed ups occur when the simulation has many 3D smoke planes.
 Note that 3D smoke display may be speeded using the official version of Smokeview (at a loss of resolution)
 by using the 
 3D Smokeview dialog box to skip
@@ -62,23 +61,23 @@ This adjustment is made practical by performing the computation on the GPU.
 <a name="culling"></a>
 <h3>Culling</h3>
 The best way to speed up any computation is not to do it in the first place!
-This applies to video display.  The best way to speed up drawing in a graphics program is to simply not do it.
+This applies to visualization as well.  The best way to speed up drawing in a graphics program is simply not to do it.
 The hard part is figuring out when you can get away with this.
-This process is called <em>culling</em>.  There are several types of culling.  
+This process of not drawing graphical elements is called <em>culling</em>.  There are several types of culling used by Smokeview.  
 View frustum culling eliminates 
 objects that would not appear on the screen if drawn.  Smokeview (the official version) already
 uses view frustum to speed up 3D smoke visualization.
 <p>View frustum culling is not effective for culling objects that are hidden by other objects but 
 would otherwise appear on the screen.  
-OpenGL 1.5 and later has an extension to determine whether an object would be visible
-in the presence of other drawn objects.  The experimental version of Smokeview uses this extension to determine
+OpenGL 1.5 and later has a feature to determine whether an object would be visible
+in the presence of other drawn objects.  The experimental version of Smokeview uses this feature to determine
 whether 3D smoke is hidden by blockages.
 <p>Notes:
 <ul>
 
 <li>This option is used in conjunction with the GPU programming option so is also activated/deactivated
 by pressing the <strong>G</strong> key.
-<li>This option has not been tested on systems where the extension is not available.  Smokeview has been designed
+<li>This option has not been tested on systems where it is not available.  Smokeview has been designed
 so that if the option is not available it reverts back to the former method for drawing smoke.
 <li>Speed ups depend on the amount of geometry (&OBST's) present in the scene.  You can expect
 that smoke flow in a house will speed up more than smoke flow in an open fire plume.
