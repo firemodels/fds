@@ -834,7 +834,6 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF (DROPLET_FILE .AND.  (NIC(NM,NOM)>0 .OR. NIC(NOM,NM)>0)) THEN
       N_REQ=N_REQ+1
       CALL MPI_IRECV(M3%N_DROP_ADOPT, 1,MPI_INTEGER,RNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
-!!!  if (myid==1) write(0,*) 'Post Receive: N_REQ=',N_REQ,' Handle=',REQ(N_REQ) ,' Tag=',TAG
    ENDIF
  
    ! Droplet Buffer Arrays
@@ -997,7 +996,6 @@ SEND_OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF (DROPLET_FILE) THEN
       N_REQ=N_REQ+1
       CALL MPI_ISEND(M3%N_DROP_ORPHANS, 1,MPI_INTEGER,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
-!!! if (myid==0) write(0,*) 'Sending: ',MIN(M3%N_DROP_ORPHANS,N_DROP_ADOPT_MAX),' N_REQ,Handle=',N_REQ,REQ(N_REQ),' Tag=',TAG
    ENDIF
  
    ! Sending/Receiving Droplet Buffer Arrays
@@ -1147,7 +1145,6 @@ MESH_LOOP: DO NM=1,NMESHES
  
    IF (DROPLET_FILE) THEN
       M2%N_DROP_ADOPT = MIN(M2%N_DROP_ADOPT,N_DROP_ADOPT_MAX)
- !!! if (myid==1) write(0,*) 'Should be Receiving: ',M2%N_DROP_ADOPT
       IF (M4%NLP+M2%N_DROP_ADOPT>M4%NLPDIM) CALL RE_ALLOCATE_DROPLETS(1,NOM,0,N_DROP_ADOPT_MAX)
    ENDIF
  
@@ -1157,7 +1154,6 @@ MESH_LOOP: DO NM=1,NMESHES
       IF_DROPLETS_SENT: IF (M2%N_DROP_ADOPT>0) THEN
  
          NC = 13
- !!! if (myid==1) write(0,*) 'Receiving: ',M4%NLP+M2%N_DROP_ADOPT
          DO N=M4%NLP+1,M4%NLP+M2%N_DROP_ADOPT
             NN = N-M4%NLP-1
             M4%DROPLET(N)%X   = M2%R_RDBUF((NN)*NC+1) 
