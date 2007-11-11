@@ -39,7 +39,11 @@ void update_alpha(void);
 #define FIRE_ALPHA 5
 #define FIRE_CUTOFF 6
 #define SMOKE_SHADE 7
+#ifdef pp_GPU
+#define SMOKE_RTHICK 8
+#else
 #define SMOKE_THICK 8
+#endif
 #define SAVE_SETTINGS 9
 #define FRAMELOADING 10
 #define SMOKETEST 11
@@ -54,7 +58,11 @@ GLUI_Checkbox *CHECKBOX_zlib=NULL;
 GLUI_Spinner *SPINNER_smokedrawtest_nummin=NULL;
 GLUI_Spinner *SPINNER_smoke3dframestep=NULL;
 GLUI_Spinner *SPINNER_smokedrawtest_nummax=NULL;
+#ifdef pp_GPU
+GLUI_Spinner *SPINNER_smoke3d_rthick=NULL;
+#else
 GLUI_Spinner *SPINNER_smoke3d_thick=NULL;
+#endif
 GLUI_Spinner *SPINNER_smoke3d_smoke_shade=NULL;
 GLUI_Spinner *SPINNER_smoke3d_fire_red=NULL;
 GLUI_Spinner *SPINNER_smoke3d_fire_green=NULL;
@@ -146,8 +154,16 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   panel6->set_alignment(GLUI_ALIGN_LEFT);
   SPINNER_smoke3d_smoke_shade=glui_3dsmoke->add_spinner_to_panel(panel6,"Gray Level",GLUI_SPINNER_INT,&smoke_shade,SMOKE_SHADE,SMOKE_3D_CB);
   SPINNER_smoke3d_smoke_shade->set_int_limits(0,255);
-  SPINNER_smoke3d_thick=glui_3dsmoke->add_spinner_to_panel(panel6,"Thickness",GLUI_SPINNER_INT,&smoke3d_thick,SMOKE_THICK,SMOKE_3D_CB);
+#ifdef pp_GPU
+  SPINNER_smoke3d_rthick=glui_3dsmoke->add_spinner_to_panel(panel6,"Thickness",
+    GLUI_SPINNER_FLOAT,&smoke3d_rthick,SMOKE_RTHICK,SMOKE_3D_CB);
+  SPINNER_smoke3d_rthick->set_float_limits(1.0,255.0);
+  smoke3d_thick = log2(smoke3d_rthick);
+#else
+  SPINNER_smoke3d_thick=glui_3dsmoke->add_spinner_to_panel(panel6,"Thickness",
+    GLUI_SPINNER_INT,&smoke3d_thick,SMOKE_THICK,SMOKE_3D_CB);
   SPINNER_smoke3d_thick->set_int_limits(0,7);
+#endif
 #ifdef _DEBUG
   CHECKBOX_smoke3d_external=glui_3dsmoke->add_checkbox_to_panel(panel6,"View smoke externally (ONLY)",&smoke3d_external);
 #endif
@@ -275,12 +291,25 @@ void SMOKE_3D_CB(int var){
   case FIRE_CUTOFF:
   case FIRE_ALPHA:
   case SMOKE_SHADE:
-  case SMOKE_THICK:
-  glutPostRedisplay();
-  force_redisplay=1;
-  IDLE();
-
+    glutPostRedisplay();
+    force_redisplay=1;
+    IDLE();
     break;
+#ifdef pp_GPU
+  case SMOKE_RTHICK:
+  
+    smoke3d_thick = log2(smoke3d_rthick);
+    glutPostRedisplay();
+    force_redisplay=1;
+    IDLE();
+    break;
+#else
+  case SMOKE_THICK:
+    glutPostRedisplay();
+    force_redisplay=1;
+    IDLE();
+    break;
+#endif
   default:
 #ifdef _DEBUG
     abort();
@@ -288,4 +317,3 @@ void SMOKE_3D_CB(int var){
     break;
   }
 }
-

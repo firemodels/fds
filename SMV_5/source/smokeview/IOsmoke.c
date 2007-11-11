@@ -2997,7 +2997,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   glUniform1f(GPU_fireblue,(float)fire_blue/256.0);
   glUniform1f(GPU_smokeshade,(float)smoke_shade/256.0);
   glUniform1i(GPU_skip,skip);
-  glUniform1i(GPU_smoke3d_thick,smoke3d_thick);
+  glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
   if(firecolor==NULL){
     i_hrrcutoff=-1;
   }

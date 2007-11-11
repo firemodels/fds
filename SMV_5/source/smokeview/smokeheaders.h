@@ -30,6 +30,9 @@ int SUB_portfrustum(int quad,
 
 EXTERNCPP void add_new_tour(void);
 
+#ifdef pp_GPU
+EXTERNCPP int log2(float xx);
+#endif
 void readterrain(char *file, int ifile, int flag, int *errorcode);
 float getterrain_z(float x, float y);
 void initterrain(terraindata *terri);
