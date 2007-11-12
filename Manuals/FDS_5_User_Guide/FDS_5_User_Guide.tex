@@ -3284,6 +3284,7 @@ on the availability of material properties and the appropriateness of the underl
 section provides a description of the input parameters, starting with a general solid.
 
 \subsubsection{Solid Fuels}
+\label{info:solid_pyrolysis}
 \index{Solid fuels}
 \index{MATL!A}
 \index{MATL!E}
@@ -8701,13 +8702,31 @@ related to convection, combustion, and apparatus-specific phenomena.
 \clearpage
 \section{Thermoplastics}
 
+The term ``thermoplastic'' is often applied to materials that essentially heat up and gasify without leaving any solid
+residue. The term is used here merely to indicate the class of materials for which the pyrolysis can be modeled with a single
+reaction that converts solid to gaseous fuel.
+
+
 \subsection{A Simple Thermoplastic (\texorpdfstring{{\bf thermoplastic}}{thermoplastic}) }
 \label{thermoplastic}
 
-This example just exercises the solid phase algorithm in
-FDS. Essentially, the gas phase is shut off except for the imposition
+The purpose of this example is to demonstrate how the solid phase pyrolysis model works in
+FDS. Essentially, the gas phase calculation is shut off except for the imposition
 of a 50~kW/m$^2$ ``virtual'' heat flux. The solid in this example is a
-slab of plastic, similar in composition to PMMA.
+slab of plastic, similar in composition to PMMA. The solid is described by the following {\ct SURF} line:
+
+\scriptsize
+\begin{verbatim}
+&SURF ID='PMMA SLAB'
+      COLOR='BLACK'
+      MATL_ID='PMMA'
+      THICKNESS=0.025
+      EXTERNAL_FLUX=50. /  External Flux is ONLY for this simple demo exercise
+\end{verbatim} \normalsize
+
+\noindent
+The {\ct COLOR} is meaningless except to distinguish it in Smokeview. The {\ct EXTERNAL\_FLUX} is a virtual heat source that is only used for these types of
+diagnostic exercises. The properties of the material are conveyed via the {\ct MATL} line:
 
 \scriptsize
 \begin{verbatim}
@@ -8720,31 +8739,33 @@ slab of plastic, similar in composition to PMMA.
       HEAT_OF_REACTION=1578.
       HEAT_OF_COMBUSTION=25200.
       REFERENCE_TEMPERATURE=330. /
-
-&SURF ID='PMMA SLAB'
-      COLOR='BLACK'
-      MATL_ID='PMMA'
-      THICKNESS=0.025
-      EXTERNAL_FLUX=50. /  External Flux is ONLY for this simple demo exercise
 \end{verbatim} \normalsize
 
 \noindent
-The material undergoes only one reaction -- the conversion of solid to
-gaseous fuel vapor. In this case, the {\ct HEAT\_OF\_REACTION} is
-essentially the latent heat of vaporization. The {\ct
-REFERENCE\_TEMPERATURE} indicates that the reaction is to occur at a
-(default) rate of 0.1~s$^{-1}$ at 330~$^\circ$C. The {\ct
-HEAT\_OF\_COMBUSTION} refers to the combustion of the gaseous fuel
-vapor, which does not occur in this example.
+Notice that in addition to $k$, $\rho$ and $c$, there is one reaction specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_FUEL=1.}).
+The phase change from solid to gas {\em consumes} energy at a rate of 1,578~kJ/kg. Although not relevant in this example, the burning of these fuel gases would {\em produce}
+energy at a rate of 25,200~kJ/kg. The reaction nominally takes place at 330~$^\circ$C, a necessary parameter for the pyrolysis model described in Section~\ref{info:solid_pyrolysis}.
+
+The plots below show the surface temperature and heat flux as functions of time.
+Note that the default emissivity of the material surface is 0.9, meaning that only
+45~kW/m$^2$ out of the initial 50~kW/m$^2$ is actually heating the solid. Some of this energy
+heats up the solid to about 350~$^\circ$C at the surface, some is radiated away (about 8~kW/m$^2$), some is
+used to convert the solid material into a gas, and is plotted here as the product of the burning rate and the heat of reaction.
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{FIGURES/thermoplastic_Surface_Temperature} &
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Burning_Rate}
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Fluxes}
+\end{tabular*}
+The slab is 0.025~m thick, with a density of 500~kg/m$^3$. This means there is 12.5~kg/m$^2$ of fuel present, which if divided by the
+burning rate (about 0.018~kg/m$^2$/s) yields a burning time of about 700~s. After this, the material is ``burned away.''
+
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Burning_Rate} &
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Thickness}
 \end{tabular*}
 
-The figures above show that both the temperature and burning rate of the thermoplastic are more or less constant over
-the burning phase. The slab ``burns away'' after about 10~min.
 
 
 \clearpage
