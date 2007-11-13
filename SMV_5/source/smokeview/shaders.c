@@ -14,7 +14,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
-GLhandleARB v,f,f2,p_smoke, p_slice ;
+GLhandleARB v,f,p_smoke, p_slice ;
 char *textFileRead(char *fn);
 void printInfoLog(GLhandleARB obj);
 
@@ -22,11 +22,6 @@ void printInfoLog(GLhandleARB obj);
 
 int setSmokeShaders() {
   GLint error_code;
-  int nfrag=7;
-  int nvertex=63;
-  int i,j;
-  int fraglen=0, vertexlen=0;
-  GLchar *fragcopy;
 
   const GLchar *FragmentShaderSource[]={
     "varying vec4 newcolor;"
@@ -66,7 +61,6 @@ int setSmokeShaders() {
     "  float bottom,top,alpha,r;"
     "  float term1, term2, term3, term4;"
     "  vec3 rel_pos,eyexyz;"
-    "  int drawfire=0;"
     "  if(hrrcutoff>0.0&&hrr>hrrcutoff){"
     "    newcolor = vec4(fire_red,fire_green,fire_blue,fire_alpha);"
     "  }"
@@ -98,7 +92,6 @@ int setSmokeShaders() {
 
   v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
   f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-  f2 = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 
   // vertex shader
 
@@ -123,7 +116,7 @@ int setSmokeShaders() {
   glAttachObjectARB(p_smoke,v);
   glAttachObjectARB(p_smoke,f);
 
-  glLinkProgramARB(p_smoke);
+  glLinkProgram(p_smoke);
   glGetObjectParameterivARB(p_smoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
   printf("  Smoke shader completion code:");
@@ -149,23 +142,23 @@ int setSmokeShaders() {
   }
   printInfoLog(p_smoke);
 #endif
-  GPU_hrrcutoff = glGetUniformLocationARB(p_smoke,"hrrcutoff");
-  GPU_hrr = glGetAttribLocationARB(p_smoke,"hrr");
-  GPU_smokealpha = glGetAttribLocationARB(p_smoke,"smoke_alpha");
-  GPU_skip = glGetUniformLocationARB(p_smoke,"skip");
-  GPU_smoke3d_rthick = glGetUniformLocationARB(p_smoke,"smoke3d_rthick");
-  GPU_smokeshade = glGetUniformLocationARB(p_smoke,"smoke_shade");
-  GPU_firealpha = glGetUniformLocationARB(p_smoke,"fire_alpha");
-  GPU_firered = glGetUniformLocationARB(p_smoke,"fire_red");
-  GPU_firegreen = glGetUniformLocationARB(p_smoke,"fire_green");
-  GPU_fireblue = glGetUniformLocationARB(p_smoke,"fire_blue");
-  GPU_aspectratio = glGetUniformLocationARB(p_smoke,"aspectratio");
-  GPU_normx = glGetUniformLocationARB(p_smoke,"normx");
-  GPU_normy = glGetUniformLocationARB(p_smoke,"normy");
-  GPU_normz = glGetUniformLocationARB(p_smoke,"normz");
-  GPU_eyex = glGetUniformLocationARB(p_smoke,"eyex");
-  GPU_eyey = glGetUniformLocationARB(p_smoke,"eyey");
-  GPU_eyez = glGetUniformLocationARB(p_smoke,"eyez");
+  GPU_hrrcutoff = glGetUniformLocation(p_smoke,"hrrcutoff");
+  GPU_hrr = glGetAttribLocation(p_smoke,"hrr");
+  GPU_smokealpha = glGetAttribLocation(p_smoke,"smoke_alpha");
+  GPU_skip = glGetUniformLocation(p_smoke,"skip");
+  GPU_smoke3d_rthick = glGetUniformLocation(p_smoke,"smoke3d_rthick");
+  GPU_smokeshade = glGetUniformLocation(p_smoke,"smoke_shade");
+  GPU_firealpha = glGetUniformLocation(p_smoke,"fire_alpha");
+  GPU_firered = glGetUniformLocation(p_smoke,"fire_red");
+  GPU_firegreen = glGetUniformLocation(p_smoke,"fire_green");
+  GPU_fireblue = glGetUniformLocation(p_smoke,"fire_blue");
+  GPU_aspectratio = glGetUniformLocation(p_smoke,"aspectratio");
+  GPU_normx = glGetUniformLocation(p_smoke,"normx");
+  GPU_normy = glGetUniformLocation(p_smoke,"normy");
+  GPU_normz = glGetUniformLocation(p_smoke,"normz");
+  GPU_eyex = glGetUniformLocation(p_smoke,"eyex");
+  GPU_eyey = glGetUniformLocation(p_smoke,"eyey");
+  GPU_eyez = glGetUniformLocation(p_smoke,"eyez");
   return error_code;
 
 }
