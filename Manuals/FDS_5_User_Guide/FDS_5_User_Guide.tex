@@ -3213,6 +3213,13 @@ brick layer contains some additional water, the input could look like this:
 \end{verbatim}
 \normalsize
 \noindent
+In this example, layer 1 of the surface is composed of a mixture of
+brick and water. This is given by the {\ct MATL\_ID} array which sets
+material component 1 of layer 1 as brick, and material component 2 of
+layer 1 as brick. Additionally, the {\ct MATL\_MASS\_FRACTION} is
+specified which sets the percentage of brick within layer 1 as 95\%
+and the percentage of water within layer 1 as 5\%. 
+
 It is important to notice that the components of the solid mixtures
 are treated as pure substances with no voids. The density of the
 mixture is
