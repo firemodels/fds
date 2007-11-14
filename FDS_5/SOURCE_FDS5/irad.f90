@@ -703,20 +703,21 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
       J=(OMEGA-495._EB)/5._EB
       W1=495._EB+5._EB*FLOAT(J)
       WW=(OMEGA-W1)/5
-      IF(TEMP>=2400._EB)TEMP=2399.99_EB
-      IF(TEMP<300._EB)TEMP=300._EB
-      I=TEMP/300._EB
-      IF((I>2).AND.(TEMP<1200._EB)) THEN
-         I=2
-         TT=(TEMP-600._EB)/600._EB
-      ELSEIF((I>5).AND.(TEMP<2400._EB)) THEN
-         I=5
-         TT=(TEMP-1800._EB)/600._EB
-      ELSE
-         T1=FLOAT(I)*300._EB
-         TT=(TEMP-T1)/300._EB
-         IF(I>4)I=I-1
-         ENDIF
+      IF(TEMP>=2400._EB) TEMP = 2399.99_EB
+      IF(TEMP < 300._EB) TEMP =  300.00_EB
+      I = TEMP/300._EB
+      SELECT CASE(I)
+         CASE(3)
+            I=2
+            TT=(TEMP-600._EB)/600._EB
+         CASE(6:7) 
+            I=5
+            TT=(TEMP-1800._EB)/600._EB
+         CASE DEFAULT
+            T1=FLOAT(I)*300._EB
+            TT=(TEMP-T1)/300._EB
+            IF (I>=4) I=I-1      ! This line fixed, Nov 14, 2007
+      END SELECT
       TW=TT*WW
       SDWEAK=SD15(I,J)*(1._EB-TT-WW+TW)+SD15(I+1,J)*(TT-TW)  +SD15(I,J+1)*(WW-TW)+SD15(I+1,J+1)*TW
       IF(SDWEAK==0._EB) THEN
