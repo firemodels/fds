@@ -363,7 +363,7 @@ ELSE
       COM1=4._EB*OM2+OM3
       COM2=OM1+2._EB*OM2+OM3
       COM3=2._EB*OM1+OM3
-      ATOT(3)=0.426_EB*T0/TEMP*(1._EB-EXP(-Q2*COM3/TEMP/  (1._EB-EXP(-Q2*OM1/TEMP))))**2/(1._EB-EXP(-Q2*OM3/TEMP))
+      ATOT(3)=0.426_EB*T0/TEMP*(1._EB-EXP(-Q2*COM3/TEMP))/  (1._EB-EXP(-Q2*OM1/TEMP))**2/(1._EB-EXP(-Q2*OM3/TEMP))
       ATOT(2)=1.01_EB *T0/TEMP*(1._EB-EXP(-Q2*COM2/TEMP))/(1._EB-EXP(-Q2*OM1/TEMP))/(1._EB-EXP(-Q2*OM2/TEMP))**2/ &
               (1._EB-EXP(-Q2*OM3/TEMP))
       ATOT(1)=0.272_EB*T0/TEMP*(1._EB-EXP(-Q2*COM1/TEMP))/(1._EB-EXP(-Q2*OM2/TEMP))**4/(1._EB-EXP(-Q2*OM3/TEMP))
@@ -701,7 +701,7 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
 !CONTRIBUTION TO 15.0 MICRON BAND FROM (000)-(010) TRANS.
       TTEMP=TEMP
       J=(OMEGA-495._EB)/5._EB
-      W1=495._EB+5._EB*FLOAT(J)
+      W1=495._EB+5._EB*REAL(J,EB)
       WW=(OMEGA-W1)/5
       IF(TEMP>=2400._EB) TEMP = 2399.99_EB
       IF(TEMP < 300._EB) TEMP =  300.00_EB
@@ -714,9 +714,9 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
             I=5
             TT=(TEMP-1800._EB)/600._EB
          CASE DEFAULT
-            T1=FLOAT(I)*300._EB
+            T1=REAL(I,EB)*300._EB
             TT=(TEMP-T1)/300._EB
-            IF (I>=4) I=I-1      ! This line fixed, Nov 14, 2007
+            IF (I>=4) I=I-1     
       END SELECT
       TW=TT*WW
       SDWEAK=SD15(I,J)*(1._EB-TT-WW+TW)+SD15(I+1,J)*(TT-TW)  +SD15(I,J+1)*(WW-TW)+SD15(I+1,J+1)*TW
