@@ -489,6 +489,7 @@ Franck Didieux                          & Laboratoire National de Métrologie et 
 Johannes Dimyadi                        & AstraVision-Solutions, New Zealand                  \\ \hline
 Bill Ferrante                           & Roosevelt Fire District, USA                  \\ \hline
 Paul Fuss                               & NIST, USA    \\ \hline
+Ralf Galster                            & Ing.~B\"{u}ro f\"{u}r Brandschutz Riesener, Germany                  \\ \hline
 Andreas Gerndt                          & University of Louisiana, USA                  \\ \hline
 Emanuele Gissi                          & Corpo Nazionale dei Vigili del Fuoco, Comando Prov. di Genova, Italy                  \\ \hline
 Simon J. Ham                            & Fire Safety Engineering Consultants Ltd., UK                  \\ \hline
@@ -521,13 +522,16 @@ Jamie Stern-Gottfried                   & Arup Fire, UK                 \\ \hlin
 Boris Stock                             & BFT Cognos GmbH, Germany                  \\ \hline
 Blair Stratton                          & Beca, New Zealand                   \\ \hline
 Csaba Szilagyi                          & Szolnok Fire Department, Hungary                  \\ \hline
+Mahmood Tabaddor                        & Underwriters Laboratories, USA                  \\ \hline
 Charlie Thornton                        & Thunderhead Engineering, USA                  \\ \hline
 Sebastian Ukleja                        & University of Ulster, Northern Ireland                  \\ \hline
 Giacomo Villi                           & Dipartimento Fisica Tecnica (DfT) UNIPd, Italy                  \\ \hline
 Andreas Vischer                         & RWTH Aachen University, Germany                  \\ \hline
 Karl Wallasch                           & Hoare Lea Fire Engineering, UK                  \\ \hline
 Kaoru Wakatsuki                         & National Research Institute of Fire and Disaster, Japan                  \\ \hline
+Joachim Wollst\"{a}dt                   & Ing.~B\"{u}ro f\"{u}r Brandschutz Riesener, Germany                  \\ \hline
 Yang Shan-You                           & State Key Laboratory of Fire Science, China                  \\ \hline
+Matthias Z\"{a}hringer                  & Ing.~B\"{u}ro f\"{u}r Brandschutz Riesener, Germany                  \\ \hline
 Robin Zevotek                           & C\&S Engineers, Life Safety Services, Syracuse, New York, USA                  \\ \hline
 
                                         & GIDAI, University of Cantabria, Spain                  \\ \hline
@@ -3213,12 +3217,11 @@ brick layer contains some additional water, the input could look like this:
 \end{verbatim}
 \normalsize
 \noindent
-In this example, layer 1 of the surface is composed of a mixture of
-brick and water. This is given by the {\ct MATL\_ID} array which sets
-material component 1 of layer 1 as brick, and material component 2 of
-layer 1 as brick. Additionally, the {\ct MATL\_MASS\_FRACTION} is
-specified which sets the percentage of brick within layer 1 as 95\%
-and the percentage of water within layer 1 as 5\%. 
+In this example, the first layer of material, Layer~1, is composed of a mixture of
+brick and water. This is given by the {\ct MATL\_ID} array which specifies
+Component~1 of Layer~1 to be brick, and Component~2 of
+Layer~1 to be water. The mass fraction of each is specified via {\ct MATL\_MASS\_FRACTION}. In this
+case, brick is 95~\%, by mass, of Layer 1, and water is 5~\%.
 
 It is important to notice that the components of the solid mixtures
 are treated as pure substances with no voids. The density of the
