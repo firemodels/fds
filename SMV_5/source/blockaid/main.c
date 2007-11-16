@@ -1,6 +1,6 @@
-// $Date: 2007-10-09 15:35:36 -0400 (Tue, 09 Oct 2007) $ 
-// $Revision: 824 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #define INMAIN
 #include <stdio.h>
@@ -11,7 +11,7 @@
 #include "blockaid.h"
 
 // svn revision character string
-char main_revision[]="$Revision: 824 $";
+char main_revision[]="$Revision$";
 
 /* ------------------ main ------------------------ */
 
