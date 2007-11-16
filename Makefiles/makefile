@@ -39,6 +39,7 @@ setup:
 
 #*** Intel Compiler ***
 
+# Linux
 intel_linux : FFLAGS = -O3 -axP -ip -static -vec_report0
 intel_linux : CFLAGS = -O -Dpp_noappend
 intel_linux : FCOMPL = ifort
@@ -72,6 +73,7 @@ intel_linux_mpi_db : obj = fds5_intel_mpi_db
 intel_linux_mpi_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
+# OS X
 intel_osx : FFLAGS = -O3 -axP -ip -vec_report0
 intel_osx : CFLAGS = -O -Dpp_noappend -Dpp_OSX
 intel_osx : FCOMPL = ifort
@@ -114,9 +116,6 @@ ibm_osx_ppc : obj = fds5_osx_ppc_ibm
 ibm_osx_ppc : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 	
-ibm_osx_ppc_mpi: $(obj_mpi)
-	
-	
 #*** Lahey Compiler ***
 
 lahey_linux : FFLAGS = -O --tpp --staticlink --nap --nchk --npca --nsav --ntrace
@@ -144,7 +143,8 @@ lahey_linux_mpi : obj = fds5_lahey_mpi
 lahey_linux_mpi : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 	
-# Sun Solaris 10 Compiler
+#*** Sun Solaris 10 f95 Compiler ***
+
 f95_solaris10 : FFLAGS   = -O2 -m64 -Bstatic
 f95_solaris10 : CFLAGS   = -O2 -m64
 f95_solaris10 : FCOMPL   = f95
@@ -162,6 +162,18 @@ f95_solaris10_mpi : CCOMPL = cc
 f95_solaris10_mpi : obj = fds5_solaris_mpi
 f95_solaris10_mpi : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+
+#*** Portland Group Compiler***
+
+# AMD Opteron 64Bit PC
+pgi_linux : FFLAGS = -fast -tp k8-64 -Mstandard
+pgi_linux : CFLAGS = -fast -tp k8-64
+pgi_linux : FCOMPL = pgf90
+pgi_linux : CCOMPL = pgcc
+pgi_linux : LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
+pgi_linux : obj = fds5_pgi_Opteron64
+pgi_linux : $(obj_serial)
+       $(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 #*** End Compiler Specific Rules ***
 
