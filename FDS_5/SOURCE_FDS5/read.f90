@@ -2720,7 +2720,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (NU_FUEL(NN)==0._EB .AND. NU_WATER(NN)==0._EB .AND. NU_RESIDUE(NN)==0._EB) THEN
-            WRITE(MESSAGE,'(A,I2,A,I2,A)') 'WARNING: Problem with MATL ',N,', REACTION ',NN,'. No product yields (NUs) set'  
+            WRITE(MESSAGE,'(A,I2,A,I2,A)') 'WARNING: MATL ',N,', REACTION ',NN,'. No product yields (NUs) set'  
             IF (MYID==0) WRITE(0,'(A)') TRIM(MESSAGE)
          ENDIF
       ENDDO
