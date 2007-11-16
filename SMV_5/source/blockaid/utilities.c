@@ -1,6 +1,6 @@
-// $Date: 2007-10-09 15:35:36 -0400 (Tue, 09 Oct 2007) $ 
-// $Revision: 824 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #include "options.h"
 #include <stdio.h>
@@ -14,7 +14,7 @@
 #include "ASSERT.h"
 
 // svn revision character string
-char utilities_revision[]="$Revision: 824 $";
+char utilities_revision[]="$Revision$";
 
 /* ------------------ usage ------------------------ */
 
@@ -38,14 +38,14 @@ void usage(char *prog){
 /* ------------------ version ------------------------ */
 
 void version(void){
-    char smv_version[100];
+    char blockaid_version[100];
     int svn_num;
 
-    getASMversion(smv_version);  // get Smokeview version (ie 5.x.z)
+    getASMversion(blockaid_version);  // get Sblockaid verson (ie x,y,z)
     svn_num=getmaxrevision();    // get svn revision number
     printf("\n");
-    printf("Assemble\n\n");
-    printf("Version: %s\n",smv_version);
+    printf("Blockaid\n\n");
+    printf("Version: %s\n",blockaid_version);
     printf("SVN Revision Number: %i\n",svn_num);
     printf("Compile Date: %s\n",__DATE__);
 #ifdef WIN32
@@ -57,6 +57,21 @@ void version(void){
 #ifdef pp_LINUX
     printf("Platform: LINUX\n");
 #endif
+    printf("\n");
+    printf("Usage:\n");
+    printf(" blockaid casename.fds \n\n");
+    printf("  This program reads in an FDS input file and outputs a new one where\n");
+    printf("  specified groups of blockages, holes and vents are replicated, translated\n");
+    printf("  and rotated.  A group is defined by surrounding desired sets of blockages,\n");
+    printf("  vents and holes with:\n\n");
+    printf("      &BGRP GRP_ID='group label' ORIG=x,y,z /\n");
+    printf("          one or more &OBST, &VENT, &HOLE \n");
+    printf("      &EGRP / \n\n");
+    printf("  where ORIG is the point about which rotation occurs.\n");
+    printf("  The group may be translated or rotated by using:\n\n");
+    printf("  &GRP GRP_ID='group label' XYZ=x,y,z ROTATE=angle /\n\n");
+    printf("  where angle is snapped to the nearest 90 degrees.\n");
+
 
 }
 
