@@ -12,7 +12,7 @@
 #endif
 
 typedef struct _fdsdata {
-  char *line,*line_before, *line_after;
+  char *line,*linecopy,*line_before, *line_after;
   float xb[6];
   int ibeg, iend;
   int type;

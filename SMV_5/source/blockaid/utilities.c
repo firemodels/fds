@@ -62,14 +62,13 @@ void version(void){
     printf(" blockaid casename.fds \n\n");
     printf("  This program reads in an FDS input file and outputs a new one where\n");
     printf("  specified groups of blockages, holes and vents are replicated, translated\n");
-    printf("  and rotated.  A group is defined by surrounding desired sets of blockages,\n");
-    printf("  vents and holes with:\n\n");
+    printf("  and rotated.  A group is defined by surrounding the desired set with\n");
     printf("      &BGRP GRP_ID='group label' ORIG=x,y,z /\n");
     printf("          one or more &OBST, &VENT, &HOLE \n");
-    printf("      &EGRP / \n\n");
+    printf("      &EGRP /\n");
     printf("  where ORIG is the point about which rotation occurs.\n");
-    printf("  The group may be translated or rotated by using:\n\n");
-    printf("  &GRP GRP_ID='group label' XYZ=x,y,z ROTATE=angle /\n\n");
+    printf("  The group may be translated or rotated by using:\n");
+    printf("     &GRP GRP_ID='group label' XYZ=x,y,z ROTATE=angle /\n");
     printf("  where angle is snapped to the nearest 90 degrees.\n");
 
 
