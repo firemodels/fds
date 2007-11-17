@@ -69,7 +69,7 @@ int readfds(char *fdsfile){
       in_assembly=0;
       continue;
     }
-    if(match(buffer,"&GRP",4)==1){
+    if(in_assembly==0&&match(buffer,"&GRP",4)==1){
       in_assembly=2;
     }
     switch (in_assembly){
@@ -144,12 +144,14 @@ void expand_assembly(char *buffer, int first_time){
       assemi->in_use=0;
     }
     assem->in_use=1;
+    printf("\n MAJOR GROUP: %s offset=%f,%f,%f rotate=%f\n\n",assem->id,offset[0],offset[1],offset[2],rotate);
   }
   else{
-    if(assem->in_use==1){
-      printf(" *** fatal error: A &GRP may not contained within another &GRP with the same ID\n");
-      exit(1);
-    }
+    //if(assem->in_use==1){
+    //  printf(" *** fatal error: A &GRP may not contained within another &GRP with the same ID\n");
+    //  //exit(1);
+   // }
+    printf("\n    MINOR GROUP: %s offset=%f,%f,%f rotate=%f\n\n",assem->id,offset[0],offset[1],offset[2],rotate);
     assem->in_use=1;
   }
 
@@ -195,9 +197,9 @@ void expand_assembly(char *buffer, int first_time){
 
         id2=getkeyid(buffer2,"GRP_ID");
 
-        strcpy(buffer3,"&GRP GRP_ID=");
+        strcpy(buffer3,"&GRP GRP_ID='");
         strcat(buffer3,id2);
-        strcat(buffer3," OFFSET=");
+        strcat(buffer3,"' OFFSET=");
 
         sprintf(charoffset,"%f",offset2[0]);
         trimzeros(charoffset);
@@ -214,7 +216,7 @@ void expand_assembly(char *buffer, int first_time){
         strcat(buffer3,charoffset);
         strcat(buffer3,", ROTATE=");
 
-        sprintf(charoffset,"%f",rotate2);
+        sprintf(charrotate,"%f",rotate2);
         trimzeros(charrotate);
         strcat(buffer3,charrotate);
         strcat(buffer3," /");
@@ -315,18 +317,20 @@ void update_assembly(blockaiddata *assembly,char *buffer){
   if(buffer!=NULL){
     len=strlen(buffer);
     thisfds->line=malloc(len+1);
+    thisfds->linecopy=malloc(len+1);
     strcpy(thisfds->line,buffer);
+    strcpy(thisfds->linecopy,buffer);
     if(thisfds->type==1){
       get_irvals(buffer, "XB", 6, NULL, thisfds->xb,&thisfds->ibeg,&thisfds->iend);
     }
     else if(thisfds->type==2){
-      get_irvals(buffer, "ORIG", 3, NULL, thisfds->xb,&thisfds->ibeg,&thisfds->iend);
+      get_irvals(buffer, "OFFSET", 3, NULL, thisfds->xb,&thisfds->ibeg,&thisfds->iend);
     }
 
     if(thisfds->type!=0&&(thisfds->ibeg>=0&&thisfds->iend>=0)){
-      thisfds->line[thisfds->ibeg]=0;
-      thisfds->line_before=thisfds->line;
-      thisfds->line_after=thisfds->line+ thisfds->iend;
+      thisfds->linecopy[thisfds->ibeg]=0;
+      thisfds->line_before=thisfds->linecopy;
+      thisfds->line_after=thisfds->linecopy+ thisfds->iend;
     }
     else{
       thisfds->line_before=NULL;
