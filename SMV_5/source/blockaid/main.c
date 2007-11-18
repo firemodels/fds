@@ -9,6 +9,7 @@
 #include <math.h>
 #include "svn_revision.h"
 #include "blockaid.h"
+#include "MALLOC.h"
 
 // svn revision character string
 char main_revision[]="$Revision$";
@@ -75,4 +76,5 @@ void startup(void){
   blockaid_last->prev=blockaid_first;
   blockaid_last->next=NULL;
   nblockaid=0;
+  NewMemory((void **)&assemblylist,MAXRECURSE*sizeof(char *));
 }
