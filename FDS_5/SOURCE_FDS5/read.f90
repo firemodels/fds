@@ -1359,7 +1359,7 @@ REAL(EB) :: Y_O2_INFTY,Y_F_INLET, &
             CRITICAL_FLAME_TEMPERATURE,HEAT_OF_COMBUSTION,NU(MAX_SPECIES),E,N_S(MAX_SPECIES),C,H,N,O,OTHER,MW_OTHER, &
             FUEL_HEAT_OF_FORMATION,MAXIMUM_VISIBILITY 
 NAMELIST /REAC/ E,BOF,HEAT_OF_COMBUSTION,FYI,FUEL,OXIDIZER,EPUMO2,ID, N_S,&
-                Y_O2_INFTY,Y_F_INLET,HRRPUA_SHEET, &
+                Y_O2_INFTY,Y_F_INLET,HRRPUA_SHEET,DIMENSION_SHEET, &
                 H2_YIELD,SOOT_YIELD,CO_YIELD,Y_F_LFL,X_O2_LL,CRITICAL_FLAME_TEMPERATURE,NU,SOOT_H_FRACTION, &
                 C,H,N,O,OTHER,MW_OTHER,IDEAL,MASS_EXTINCTION_COEFFICIENT,VISIBILITY_FACTOR,MAXIMUM_VISIBILITY
  
@@ -1589,13 +1589,14 @@ SUBROUTINE SET_REAC_DEFAULTS
 BOF                         = 0._EB       ! cm**3/mol-s
 CO_YIELD                    = 0._EB
 CRITICAL_FLAME_TEMPERATURE  = 1427._EB    ! C
+DIMENSION_SHEET             = 2._EB       ! Fractal dimension of the flame sheet
 E                           = 0._EB       ! kJ/kmol
 EPUMO2                      = 13100._EB   ! kJ/kg
 FUEL                        = 'null'
 FYI                         = 'null'
 H2_YIELD                    = 0._EB
 HEAT_OF_COMBUSTION          = -1._EB
-HRRPUA_SHEET                = 200._EB     ! kW/m2
+HRRPUA_SHEET                = 200._EB     ! Heat Release Rate per Unit Area of flame sheet (kW/m2)
 ID                          = 'null'
 Y_F_INLET                   = 1._EB
 N_S                         = -999._EB
@@ -6666,6 +6667,15 @@ OUTPUT_QUANTITY(119)%SHORT_NAME  = 'hflow-'
 
 OUTPUT_QUANTITY(111:119)%INTEGRATED = .TRUE.
 OUTPUT_QUANTITY(111:119)%SLCF_APPROPRIATE = .FALSE.
+
+! Special integration of HRRPUV 
+
+OUTPUT_QUANTITY(120)%NAME  = 'HRRPUL'
+OUTPUT_QUANTITY(120)%UNITS  = 'kW/m'
+OUTPUT_QUANTITY(120)%SHORT_NAME  = 'hrrpul'
+
+OUTPUT_QUANTITY(120)%INTEGRATED = .TRUE.
+OUTPUT_QUANTITY(120)%SLCF_APPROPRIATE = .TRUE.
 
 ! Mixture Fraction mass fractions 
  
