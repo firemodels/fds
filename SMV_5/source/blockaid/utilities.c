@@ -60,18 +60,17 @@ void version(void){
     printf("\n");
     printf("Usage:\n");
     printf(" blockaid casename.fds \n\n");
-    printf("  This program reads in an FDS input file and outputs a new one where\n");
-    printf("  specified groups of blockages, holes and vents are replicated, translated\n");
-    printf("  and rotated.  A group is defined by surrounding the desired set with\n");
+    printf("  This program reads in an FDS input file and outputs a new one where specified\n");
+    printf("  groups of blockages, holes and vents are replicated, translated and rotated.\n");
+    printf("  A group is defined by surrounding the desired set with &BGRP and &EGRP as in:\n");
     printf("      &BGRP GRP_ID='group label' ORIG=x,y,z /\n");
     printf("          one or more &OBST, &VENT, &HOLE \n");
     printf("      &EGRP /\n");
     printf("  where ORIG is the point about which rotation occurs.\n");
-    printf("  The group may be translated or rotated by using:\n");
+    printf("  This group may be replicated using:\n");
     printf("     &GRP GRP_ID='group label' XYZ=x,y,z ROTATE=angle /\n");
-    printf("  where angle is snapped to the nearest 90 degrees.\n");
-
-
+    printf("  where x,y,z is the translation amount and angle is snapped to the \n");
+    printf("  nearest 90 degrees.\n");
 }
 
 /* ------------------ imax ------------------------ */
@@ -92,6 +91,7 @@ int getmaxrevision(void){
   int max_revision=0;
 
   MAXREV(assert_revision);
+  MAXREV(dmalloc_revision);
   MAXREV(main_revision);
   MAXREV(readfds_revision);
   MAXREV(utilities_revision);
