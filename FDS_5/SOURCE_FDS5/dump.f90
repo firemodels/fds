@@ -3425,6 +3425,14 @@ SELECT CASE(IND)
          ENDDO
       ENDDO
       GAS_PHASE_OUTPUT = FLOW
+
+   CASE(120) ! HRRPUL
+      GAS_PHASE_OUTPUT = 0._EB
+      DO J=1,JBAR
+         DO I=1,IBAR
+            GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT + Q(I,J,KK)*DX(I)*DY(J)*0.001
+         ENDDO
+      ENDDO
       
    CASE(155) ! path obscuration
       EXT_COEF = 0._EB
