@@ -10,6 +10,7 @@
 #include <math.h>
 #include "svn_revision.h"
 #include "blockaid.h"
+#include "MALLOC.h"
 
 // svn revision character string
 char readfds_revision[]="$Revision$";
@@ -237,7 +238,7 @@ blockaiddata *create_assembly(char *buffer){
   char *id;
   fdsdata *first_line, *last_line;
 
-  blockaidi=malloc(sizeof(blockaiddata));
+  NewMemory((void **)&blockaidi,sizeof(blockaiddata));
   bprev=blockaid_first;
   bnext=blockaid_first->next;
   blockaidi->prev=bprev;
@@ -253,7 +254,7 @@ blockaiddata *create_assembly(char *buffer){
   get_irvals(buffer, "ORIG", 3, NULL, orig, NULL, NULL);
   id=getkeyid(buffer,"GRP_ID");
   if(id!=NULL){
-    blockaidi->id=malloc(strlen(id)+1);
+    NewMemory((void **)&blockaidi->id,strlen(id)+1);
     strcpy(blockaidi->id,id);
   }
 /*
@@ -301,7 +302,8 @@ void update_assembly(blockaiddata *assembly,char *buffer){
   next=assembly->last_line;
   prev=next->prev;
 
-  thisfds=malloc(sizeof(fdsdata));
+  NewMemory((void **)&thisfds,sizeof(fdsdata));
+
   thisfds->line=NULL;
   if(match(buffer,"&OBST",5)==1||
     match(buffer,"&HOLE",5)==1||
@@ -316,8 +318,8 @@ void update_assembly(blockaiddata *assembly,char *buffer){
   }
   if(buffer!=NULL){
     len=strlen(buffer);
-    thisfds->line=malloc(len+1);
-    thisfds->linecopy=malloc(len+1);
+    NewMemory((void **)&thisfds->line,len+1);
+    NewMemory((void **)&thisfds->linecopy,len+1);
     strcpy(thisfds->line,buffer);
     strcpy(thisfds->linecopy,buffer);
     if(thisfds->type==1){
@@ -365,7 +367,7 @@ void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *nex
   blockaiddata *newassem;
   fdsdata *fl, *ll;
 
-  newassem = malloc(sizeof(blockaiddata));
+  NewMemory((void **)&newassem,sizeof(blockaiddata));
   strcpy(newassem->id,id);
   newassem->orig[0]=orig[0];
   newassem->orig[1]=orig[1];
@@ -374,8 +376,9 @@ void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *nex
   newassem->next=next;
   prev->next=newassem;
   next->prev=newassem;
-  newassem->first_line=malloc(sizeof(fdsdata));
-  newassem->last_line=malloc(sizeof(fdsdata));
+  NewMemory((void **)&newassem->first_line,sizeof(fdsdata));
+
+  NewMemory((void **)&newassem->last_line,sizeof(fdsdata));
   fl = newassem->first_line;
   ll = newassem->last_line;
 
