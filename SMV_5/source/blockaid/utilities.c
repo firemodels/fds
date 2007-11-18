@@ -102,7 +102,7 @@ int getmaxrevision(void){
 /* ------------------ getSMVversion ------------------------ */
 
 void getASMversion(char *ASMversion){
-  strcpy(ASMversion,"0.1.0");
+  strcpy(ASMversion,BLOCKAIDVERSION);
 }
 
 /* ------------------ getrevision ------------------------ */
