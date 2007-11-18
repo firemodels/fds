@@ -40,10 +40,10 @@ int readfds(char *fdsfile){
 
     if(match(buffer,"&BGRP",5)==1){
       in_assembly=1;
-      assembly=create_assembly(buffer); // BASM ID='....' ORIG=x,y,z
+      assembly=create_assembly(buffer); // &BASM ID='....' ORIG=x,y,z
       continue;
     }
-    if(match(buffer,"&EGRP",5)==1){
+    if(match(buffer,"&EGRP",5)==1){ // &EASM /
       in_assembly=0;
       continue;
     }
@@ -81,7 +81,7 @@ int readfds(char *fdsfile){
         break;
       case 2:  // assembly line, apply translation and rotation then output assembly lines
         in_assembly=0;
-        expand_assembly(buffer,1);
+        expand_assembly(buffer,0);
         break;
     }
   }
@@ -119,15 +119,16 @@ int get_fds_line(FILE *stream, char *fdsbuffer, unsigned int len_fdsbuffer){
 
 /* ------------------ expand_assembly ------------------------ */
 
-void expand_assembly(char *buffer, int first_time){
+void expand_assembly(char *buffer, int recurse_level){
   char buffer2[1000],buffer3[1000];
   float offset[3], rotate;
   float offset2[3], rotate2;
   char *id,*id2;
-  blockaiddata *assem,*assemi;
+  char blank[100];
+  blockaiddata *assem;
   fdsdata *thisline;
   char charxb[32], charoffset[32], charrotate[32];
-  int i;
+  int i,j;
 
   offset[0]=0.0;
   offset[1]=0.0;
@@ -139,20 +140,43 @@ void expand_assembly(char *buffer, int first_time){
 
   id=getkeyid(buffer,"GRP_ID");
   assem=get_assembly(id);
+  if(assem==NULL){
+    printf(" **** warning ****\n");
+    printf("      The blockage assembly, %s, is not defined\n",id);
+    printf(" **** warning ****\n");
+    return;
+  }
 
-  if(first_time==1){
-    for(assemi=blockaid_first->next;assemi->next!=NULL;assemi=assemi->next){
-      assemi->in_use=0;
-    }
-    assem->in_use=1;
-    printf("\n MAJOR GROUP: %s offset=%f,%f,%f rotate=%f\n\n",assem->id,offset[0],offset[1],offset[2],rotate);
+  assemblylist[recurse_level]=id;
+  if(recurse_level==0&&recurse_level<MAXRECURSE){
+    printf("\n MAJOR GROUP: %s offset=%f,%f,%f rotate=%f\n",
+      assem->id,offset[0],offset[1],offset[2],rotate);
   }
   else{
-    //if(assem->in_use==1){
-    //  printf(" *** fatal error: A &GRP may not contained within another &GRP with the same ID\n");
-    //  //exit(1);
-   // }
-    printf("\n    MINOR GROUP: %s offset=%f,%f,%f rotate=%f\n\n",assem->id,offset[0],offset[1],offset[2],rotate);
+    int lenspace;
+
+    for(i=0;i<recurse_level;i++){
+      if(strcmp(id,assemblylist[i])==0){
+        printf(" **** warning ****\n");
+        printf("      Block defintions with Id's: \n");
+        for(j=0;j<recurse_level;j++){
+          printf(" %s,",assemblylist[j]);
+        }
+        printf(" %s\n",assemblylist[recurse_level]);
+        printf(" are defined circularly.  Their expansion is halted\n");
+        printf(" **** warning ****\n");
+        return;
+      }
+    }
+    
+    lenspace = recurse_level;
+    if(lenspace>4)lenspace=4;
+    strcpy(blank,"");
+    for(j=0;j<lenspace;j++){
+      strcat(blank,"  ");
+    }
+    printf("\n%s MINOR GROUP: %s offset=%f,%f,%f rotate=%f\n",
+      blank,assem->id,offset[0],offset[1],offset[2],rotate);
     assem->in_use=1;
   }
 
@@ -223,7 +247,7 @@ void expand_assembly(char *buffer, int first_time){
         strcat(buffer3," /");
 
 
-        expand_assembly(buffer3,0);
+        expand_assembly(buffer3,recurse_level+1);
       }
     }
   }

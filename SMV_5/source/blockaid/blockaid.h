@@ -4,6 +4,7 @@
 
 #define FFALSE 0
 #define TTRUE 1
+#define MAXRECURSE 100
 
 #ifdef INMAIN
 #define EXTERN
@@ -39,7 +40,7 @@ int getfileinfo(char *filename, char *source_dir, int *filesize);
 int readfds(char *fdsfile);
 int match(const char *buffer, const char *key, unsigned int lenkey);
 int get_fds_line(FILE *stream, char *fdsbuffer, unsigned int len_fdsbuffer);
-void expand_assembly(char *buffer, int first_time);
+void expand_assembly(char *buffer, int recurse_level);
 blockaiddata *create_assembly(char *buffer);
 void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *next);
 void update_assembly(blockaiddata *assembly,char *buffer);
@@ -53,4 +54,5 @@ void trimmzeros(char *line);
 void rotatexy(float *dx, float *dy, float *orig, float rotate);
 
 EXTERN blockaiddata *blockaidinfo, *blockaid_first, *blockaid_last, ba_first, ba_last;
+EXTERN char **assemblylist;
 EXTERN int nblockaid;
