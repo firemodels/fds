@@ -2835,7 +2835,7 @@ IF (PLOT3D) THEN  ! Write out information to .smv file
          IF (NMESHES==1) WRITE(FN_PL3D(NM),'(A,A1,I5.5,A,I2.2,A2)')        TRIM(CHID),'_',ITM,'_',ITM1,'.q'
       ENDIF
    ENDIF
-   IF (N_STRINGS+5>N_STRINGS_MAX) THEN
+   IF (N_STRINGS+17>N_STRINGS_MAX) THEN
       CALL RE_ALLOCATE_STRINGS(NM)
       STRING => MESHES(NM)%STRING
    ENDIF
