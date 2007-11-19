@@ -62,7 +62,7 @@ void version(void){
     printf(" blockaid casename.fds \n\n");
     printf("  This program reads in an FDS input file and outputs a new one where specified\n");
     printf("  groups of blockages, holes and vents are replicated, translated and rotated.\n");
-    printf("  A group is defined by surrounding the desired set with &BGRP and &EGRP as in:\n");
+    printf("  These groups are surrounded with &BGRP and &EGRP as in:\n");
     printf("      &BGRP GRP_ID='group label' ORIG=x,y,z /\n");
     printf("          one or more &OBST, &VENT, &HOLE \n");
     printf("      &EGRP /\n");
