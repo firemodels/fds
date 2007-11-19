@@ -5,6 +5,8 @@
 #define FFALSE 0
 #define TTRUE 1
 #define MAXRECURSE 100
+#define MAXPOS 100000000.0
+#define MINPOS -MAXPOS
 
 #ifdef INMAIN
 #define EXTERN
@@ -22,7 +24,7 @@ typedef struct _fdsdata {
 
 typedef struct _blockaiddata {
   char *id;
-  float orig[3];
+  float orig[4],xyzmax[3], dxy[3];
   int in_use;
   struct _fdsdata *first_line, *last_line;
   struct _fdsdata f_line, l_line;

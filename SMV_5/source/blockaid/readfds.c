@@ -133,7 +133,7 @@ void expand_assembly(char *buffer, int recurse_level){
   offset[0]=0.0;
   offset[1]=0.0;
   offset[2]=0.0;
-  get_irvals(buffer, "OFFSET", 3, NULL, offset, NULL, NULL);
+  get_irvals(buffer, "XYZ", 3, NULL, offset, NULL, NULL);
 
   rotate=0.0;
   get_irvals(buffer, "ROTATE", 1, NULL, &rotate, NULL, NULL);
@@ -191,6 +191,36 @@ void expand_assembly(char *buffer, int recurse_level){
         }
         rotatexy(xb,xb+2,assem->orig,rotate);
         rotatexy(xb+1,xb+3,assem->orig,rotate);
+        if(assem->orig[3]<0.0){
+          int irotate;
+          float dx, dy;
+
+          irotate = (int)(rotate/90.0+0.5);
+          irotate = irotate%4;
+
+          dx = 0.0;
+          dy = 0.0;
+          switch (irotate){
+            case 1:
+              dx = assem->dxy[1];
+              dy=0.0;
+              break;
+            case 2:
+              dx = assem->dxy[0];
+              dy = assem->dxy[1];
+              break;
+            case 3:
+              dx = 0.0;
+              dy = assem->dxy[0];
+              break;
+          }
+          dx-=assem->orig[0];
+          dy-=assem->orig[1];
+          xb[0]+=dx;
+          xb[1]+=dx;
+          xb[2]+=dy;
+          xb[3]+=dy;
+        }
         for(i=0;i<6;i++){
           xb[i]+=offset[i/2];
         }
@@ -211,7 +241,7 @@ void expand_assembly(char *buffer, int recurse_level){
         offset2[0]=0.0;
         offset2[1]=0.0;
         offset2[2]=0.0;
-        get_irvals(buffer2, "OFFSET", 3, NULL, offset2, NULL, NULL);
+        get_irvals(buffer2, "XYZ", 3, NULL, offset2, NULL, NULL);
         offset2[0]+=offset[0];
         offset2[1]+=offset[1];
         offset2[2]+=offset[2];
@@ -224,7 +254,7 @@ void expand_assembly(char *buffer, int recurse_level){
 
         strcpy(buffer3,"&GRP GRP_ID='");
         strcat(buffer3,id2);
-        strcat(buffer3,"' OFFSET=");
+        strcat(buffer3,"' XYZ=");
 
         sprintf(charoffset,"%f",offset2[0]);
         trimzeros(charoffset);
@@ -258,7 +288,7 @@ void expand_assembly(char *buffer, int recurse_level){
 
 blockaiddata *create_assembly(char *buffer){
   blockaiddata *blockaidi, *bprev, *bnext;
-  float *orig;
+  float *orig, *xyz_max;
   char *id;
   fdsdata *first_line, *last_line;
 
@@ -271,11 +301,21 @@ blockaiddata *create_assembly(char *buffer){
   bnext->prev=blockaidi;
 
   orig=blockaidi->orig;
-  orig[0]=0.0;
-  orig[1]=0.0;
-  orig[2]=0.0;
+  xyz_max=blockaidi->xyzmax;
 
-  get_irvals(buffer, "ORIG", 3, NULL, orig, NULL, NULL);
+  if(get_irvals(buffer, "ORIG", 3, NULL, orig, NULL, NULL)==3){
+    // first 3 positions of orig are defined in get_irvals
+    orig[3]=1.0;
+  }
+  else{
+    orig[0]=MAXPOS;
+    orig[1]=MAXPOS;
+    orig[2]=MAXPOS;
+    orig[3]=-1.0;
+    xyz_max[0]=MINPOS;
+    xyz_max[1]=MINPOS;
+    xyz_max[2]=MINPOS;
+  }
   id=getkeyid(buffer,"GRP_ID");
   if(id!=NULL){
     NewMemory((void **)&blockaidi->id,strlen(id)+1);
@@ -322,6 +362,7 @@ typedef struct _blockaiddata {
 void update_assembly(blockaiddata *assembly,char *buffer){
   fdsdata *prev, *next, *thisfds;
   size_t len;
+  int is_obst=0;
 
   next=assembly->last_line;
   prev=next->prev;
@@ -333,6 +374,7 @@ void update_assembly(blockaiddata *assembly,char *buffer){
     match(buffer,"&HOLE",5)==1||
     match(buffer,"&VENT",5)==1){
     thisfds->type=1;
+    if(match(buffer,"&OBST",5)==1)is_obst=1;
   }
   else if(match(buffer,"&GRP",4)==1){
     thisfds->type=2;
@@ -347,10 +389,32 @@ void update_assembly(blockaiddata *assembly,char *buffer){
     strcpy(thisfds->line,buffer);
     strcpy(thisfds->linecopy,buffer);
     if(thisfds->type==1){
+      float *orig, *xyz_max, *dxy, *xb;
+        
       get_irvals(buffer, "XB", 6, NULL, thisfds->xb,&thisfds->ibeg,&thisfds->iend);
+      if(is_obst==1){
+
+        xb = thisfds->xb;
+        if(assembly->orig[3]<0.0){
+
+          orig = assembly->orig;
+          if(xb[0]<orig[0])orig[0]=xb[0];
+          if(xb[2]<orig[1])orig[1]=xb[2];
+          if(xb[4]<orig[2])orig[2]=xb[4];
+        }
+        xyz_max = assembly->xyzmax;
+        if(xb[1]>xyz_max[0])xyz_max[0]=xb[1];
+        if(xb[3]>xyz_max[1])xyz_max[1]=xb[3];
+        if(xb[5]>xyz_max[2])xyz_max[2]=xb[5];
+
+        dxy = assembly->dxy;
+        dxy[0]=xyz_max[0]-orig[0];
+        dxy[1]=xyz_max[1]-orig[1];
+        dxy[2]=xyz_max[2]-orig[2];
+      }
     }
     else if(thisfds->type==2){
-      get_irvals(buffer, "OFFSET", 3, NULL, thisfds->xb,&thisfds->ibeg,&thisfds->iend);
+      get_irvals(buffer, "XYZ", 3, NULL, thisfds->xb,&thisfds->ibeg,&thisfds->iend);
     }
 
     if(thisfds->type!=0&&(thisfds->ibeg>=0&&thisfds->iend>=0)){
