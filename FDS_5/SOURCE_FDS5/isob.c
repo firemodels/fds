@@ -2174,7 +2174,7 @@ void CCsmoke3dtofile(char *file, float *time, float *dx, float *extcoef,int *typ
   switch (*type){
   case SOOT:
     xtype = *extcoef;
-    factor = -xtype*(*dx)/1000.0;
+    factor = -xtype*(*dx);
     for(i=0;i<nxyz;i++){
       if(*xyz<0.0)*xyz=0.0;
       buffer_in[i]=254*(1.0-exp( factor*(*xyz++)) );
