@@ -6084,6 +6084,23 @@ does not require this file because the coordinate information can be
 obtained elsewhere.
 
 
+
+\subsection{SMOKE3D: Realistic Smoke and Fire}
+
+\label{info:SMOKE3D}
+\index{Output!Smoke and Fire}
+
+When you do a fire simulation using the default mixture fraction combustion model, FDS automatically creates two output files that are rendered by
+Smokeview as realistic looking smoke and fire. By default, the output quantities {\ct 'soot mass fraction'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume)
+are used in the visualization. You have the option of rendering any other species mass fraction instead of {\ct 'soot mass fraction'}, so long as the
+{\ct MASS\_EXTINCTION\_COEFFICIENT} ({\ct REAC} line) is appropriate in describing the attenuation of visible light by the specified gas species.
+The alternative gas species is given by {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line.
+See the Smokeview User's Guide for more details on how these quantities are rendered.
+
+
+
+
+
 \clearpage
 
 \section{Special Output Quantities}
@@ -6662,6 +6679,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct PLOT3D\_QUANTITY(5)}       & Char.~Quint  & Names of PLOT3D Quantities        &           & See Section~\ref{info:PL3D}       \\ \hline
 %{\ct RENDER\_FILE}              & Character    & Name of render file from dxf2fds  &           &                                   \\ \hline
 {\ct SMOKE3D}                   & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                      \\ \hline
+{\ct SMOKE3D\_QUANTITY}         & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
 %{\ct SMOKE3D\_COMPRESSION}      & Character    & Type of compression for S3D file  &           & {\ct 'RLE'}                      \\ \hline
 %{\ct TIMING}                    & Logical      & General purpose timing flag       &           & {\ct .FALSE.}                      \\ \hline
 {\ct WRITE\_XYZ}                & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}                     \\ \hline
