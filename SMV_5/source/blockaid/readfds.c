@@ -54,6 +54,8 @@ int readfds(char *fdsfile){
 
   }
 
+  init_bb();
+
   // pass 2
 
   rewind(streamfds);
@@ -115,6 +117,101 @@ int get_fds_line(FILE *stream, char *fdsbuffer, unsigned int len_fdsbuffer){
     strcpy(fdsbuffer,buffer);
   }
   return (int)strlen(fdsbuffer);
+}
+
+/* ------------------ get_boundbox ------------------------ */
+
+void get_boundbox(blockaiddata *assem_top, blockaiddata *assem, 
+                  float *offset, float rotate, int recurse_level){
+  fdsdata *thisline;
+  int i,j;
+
+  if(recurse_level>MAXRECURSE){
+    printf(" *** Fatal error:  recursion level must be less than %i\n",MAXRECURSE);
+    return;
+  }
+
+  assemblylist[recurse_level]=assem;
+  if(recurse_level==0){
+    offset_rotate[4*recurse_level ] =0.0;
+    offset_rotate[4*recurse_level+1]=0.0;
+    offset_rotate[4*recurse_level+2]=0.0;
+    offset_rotate[4*recurse_level+3]=0.0;
+  }
+  else{
+    offset_rotate[4*recurse_level ] =offset[0];
+    offset_rotate[4*recurse_level+1]=offset[1];
+    offset_rotate[4*recurse_level+2]=offset[2];
+    offset_rotate[4*recurse_level+3]=rotate;
+  }
+
+  for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
+    float xb[6];
+
+    if(thisline->line_after!=NULL&&thisline->line_before!=NULL){
+      if(thisline->type==1&&thisline->is_obst==1){
+        float *xyz, *rotate, *orig;
+        float *bb_min, *bb_max;
+
+        for(i=0;i<6;i++){
+          xb[i]=thisline->xb[i];
+        }
+        for(i=recurse_level;i>=0;i--){
+          xyz = offset_rotate+4*i;
+          rotate = offset_rotate+4*i+3;
+          orig = assemblylist[i]->orig;
+          rotatexy(xb,xb+2,  orig,rotate[0]);
+          rotatexy(xb+1,xb+3,orig,rotate[0]);
+          for(j=0;j<6;j++){
+            xb[j]+=xyz[j/2]-orig[j/2];
+          }
+        }
+        bb_min=assem_top->bb_min;
+        bb_max=assem_top->bb_max;
+        if(xb[0]<bb_min[0])bb_min[0]=xb[0];
+        if(xb[2]<bb_min[1])bb_min[1]=xb[2];
+        if(xb[4]<bb_min[2])bb_min[2]=xb[4];
+        if(xb[1]>bb_max[0])bb_max[0]=xb[1];
+        if(xb[3]>bb_max[1])bb_max[1]=xb[3];
+        if(xb[5]>bb_max[2])bb_max[2]=xb[5];
+
+
+      }
+      else if(thisline->type==2){
+        char linebuffer[1024];
+        char *id2;
+        blockaiddata *assem2;        
+        float offset2[3], rotate2;
+
+        strcpy(linebuffer,thisline->line);
+
+        offset2[0]=0.0;
+        offset2[1]=0.0;
+        offset2[2]=0.0;
+        get_irvals(linebuffer, "XYZ", 3, NULL, offset2, NULL, NULL);
+
+        rotate2=0.0;
+        get_irvals(linebuffer, "ROTATE", 1, NULL, &rotate2, NULL, NULL);
+
+        id2=getkeyid(linebuffer,"GRP_ID");
+        assem2=get_assembly(id2);
+
+        get_boundbox(assem_top,assem2,offset2,rotate2,recurse_level+1);
+      }
+    }
+  }
+  if(recurse_level==0){
+    float *bb_min, *bb_max, *bb_dxyz;
+
+    bb_dxyz=assem_top->bb_dxyz;
+    bb_min=assem_top->bb_min;
+    bb_max=assem_top->bb_max;
+
+    bb_dxyz=assem->bb_dxyz;
+    bb_dxyz[0]=bb_max[0]-bb_min[0];
+    bb_dxyz[1]=bb_max[1]-bb_min[1];
+    bb_dxyz[2]=bb_max[2]-bb_min[2];
+  }
 }
 
 /* ------------------ expand_assembly ------------------------ */
@@ -321,11 +418,15 @@ void update_assembly(blockaiddata *assembly,char *buffer){
   NewMemory((void **)&thisfds,sizeof(fdsdata));
 
   thisfds->line=NULL;
+  thisfds->is_obst=0;
   if(match(buffer,"&OBST",5)==1||
     match(buffer,"&HOLE",5)==1||
     match(buffer,"&VENT",5)==1){
     thisfds->type=1;
-    if(match(buffer,"&OBST",5)==1)is_obst=1;
+    if(match(buffer,"&OBST",5)==1){
+      is_obst=1;
+      thisfds->is_obst=1;
+    }
   }
   else if(match(buffer,"&GRP",4)==1){
     thisfds->type=2;
@@ -398,6 +499,33 @@ void remove_assembly(blockaiddata *assemb){
 
 /* ------------------ get_assembly ------------------------ */
 
+void init_bb(void){
+  blockaiddata *assm;
+
+  for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
+    assm->bb_min[0]=MAXPOS;
+    assm->bb_min[1]=MAXPOS;
+    assm->bb_min[2]=MAXPOS;
+    assm->bb_max[0]=MINPOS;
+    assm->bb_max[1]=MINPOS;
+    assm->bb_max[2]=MINPOS;
+  }
+  for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
+    float *x1, *x2, *dx;
+
+    get_boundbox(assm,assm,NULL,0.0,0);
+
+    x1 = assm->bb_min;
+    x2 = assm->bb_max;
+    dx = assm->bb_dxyz;
+
+    printf("assm=%s\n",assm->id);
+    printf("  bounds=(%f,%f), (%f,%f), (%f,%f)\n",x1[0],x2[0],x1[1],x2[1],x1[2],x2[2]);
+  }
+}
+
+/* ------------------ get_assembly ------------------------ */
+
 blockaiddata *get_assembly(char *id){
   blockaiddata *assm;
 
@@ -421,6 +549,7 @@ void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *nex
   newassem->orig[2]=orig[2];
   newassem->prev=prev;
   newassem->next=next;
+
   prev->next=newassem;
   next->prev=newassem;
   NewMemory((void **)&newassem->first_line,sizeof(fdsdata));

@@ -18,7 +18,7 @@ typedef struct _fdsdata {
   char *line,*linecopy,*line_before, *line_after;
   float xb[6];
   int ibeg, iend;
-  int type;
+  int type,is_obst;
   struct _fdsdata *prev, *next;
 } fdsdata;
 
@@ -26,6 +26,7 @@ typedef struct _blockaiddata {
   char *id;
   float orig[4],xyzmax[3], dxy[3];
   int in_use;
+  float bb_min[3], bb_dxyz[3], bb_max[3];
   struct _fdsdata *first_line, *last_line;
   struct _fdsdata f_line, l_line;
   struct _blockaiddata *prev, *next;
@@ -54,6 +55,8 @@ blockaiddata *get_assembly(char *id);
 void trimzeros(char *line);
 void trimmzeros(char *line);
 void rotatexy(float *dx, float *dy, float *orig, float rotate);
+void get_boundbox(blockaiddata *assem_top, blockaiddata *assem, float *offset, float rotate, int recurse_level);
+void init_bb(void);
 
 EXTERN blockaiddata *blockaidinfo, *blockaid_first, *blockaid_last, ba_first, ba_last;
 EXTERN blockaiddata **assemblylist;
