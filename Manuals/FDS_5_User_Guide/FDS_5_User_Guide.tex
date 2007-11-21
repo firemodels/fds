@@ -4900,6 +4900,18 @@ special devices included in FDS.
 The character string {\ct ID} \index{DEVC!ID}is merely a descriptor to identify the
 device in the output files, and if any action is tied to its activation.
 
+Not all devices need to be associated with a particular set of properties via the {\ct PROP\_ID}. For example, pointwise
+output quantities are specified with a single {\ct DEVC} line, like
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='TC-23', XYZ=3.0,5.6,2.3, QUANTITY='TEMPERATURE'  /
+\end{verbatim}
+\normalsize
+
+\noindent
+which tells FDS to record the temperature at the given point as a function of time. The {\ct ID} is a label in the output file.
+
 Some devices have a particular orientation which can be specified
 with various parameters; {\ct IOR}, {\ct ORIENTATION}, {\ct ROTATION}.
 {\ct IOR} or the Index of Orientation\index{DEVC!IOR}, is necessary for any device that is
@@ -4942,11 +4954,8 @@ files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.}
 
 
 \begin{warning}
-All devices must have a specified {\ct QUANTITY}.  Some special devices (Section~/ref{info:PROP}) have their {\ct QUANTITY}
-specifed on a {\ct PROP} line.
-\end{warning}
-
-\begin{warning}
+All devices must have a specified {\ct QUANTITY}.  Some special devices (Section~\ref{info:PROP}) have their {\ct QUANTITY}
+specified on a {\ct PROP} line.
 A {\ct QUANTITY} specified on a {\ct PROP} line associated with a {\ct DEVC} line will override an {\ct QUANTITY}
 specified on the {\ct DEVC} line.
 \end{warning}
