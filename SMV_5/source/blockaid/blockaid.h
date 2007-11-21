@@ -56,5 +56,6 @@ void trimmzeros(char *line);
 void rotatexy(float *dx, float *dy, float *orig, float rotate);
 
 EXTERN blockaiddata *blockaidinfo, *blockaid_first, *blockaid_last, ba_first, ba_last;
-EXTERN char **assemblylist;
+EXTERN blockaiddata **assemblylist;
+EXTERN float *offset_rotate;
 EXTERN int nblockaid;

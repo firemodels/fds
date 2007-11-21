@@ -120,15 +120,18 @@ int get_fds_line(FILE *stream, char *fdsbuffer, unsigned int len_fdsbuffer){
 /* ------------------ expand_assembly ------------------------ */
 
 void expand_assembly(char *buffer, int recurse_level){
-  char buffer2[1000],buffer3[1000];
   float offset[3], rotate;
-  float offset2[3], rotate2;
-  char *id,*id2;
+  char *id;
   char blank[100];
   blockaiddata *assem;
   fdsdata *thisline;
-  char charxb[32], charoffset[32], charrotate[32];
+  char charxb[32];
   int i,j;
+
+  if(recurse_level>MAXRECURSE){
+    printf(" *** Fatal error:  recursion level must be less than %i\n",MAXRECURSE);
+    return;
+  }
 
   offset[0]=0.0;
   offset[1]=0.0;
@@ -147,8 +150,14 @@ void expand_assembly(char *buffer, int recurse_level){
     return;
   }
 
-  assemblylist[recurse_level]=id;
-  if(recurse_level==0&&recurse_level<MAXRECURSE){
+  assemblylist[recurse_level]=assem;
+  offset_rotate[4*recurse_level ] =offset[0];
+  offset_rotate[4*recurse_level+1]=offset[1];
+  offset_rotate[4*recurse_level+2]=offset[2];
+  offset_rotate[4*recurse_level+3]=rotate ;
+
+
+  if(recurse_level==0){
     printf("\n MAJOR GROUP: %s offset=%f,%f,%f rotate=%f\n",
       assem->id,offset[0],offset[1],offset[2],rotate);
   }
@@ -156,13 +165,13 @@ void expand_assembly(char *buffer, int recurse_level){
     int lenspace;
 
     for(i=0;i<recurse_level;i++){
-      if(strcmp(id,assemblylist[i])==0){
+      if(strcmp(id,assemblylist[i]->id)==0){
         printf(" **** warning ****\n");
         printf("      Block defintions with Id's: \n");
         for(j=0;j<recurse_level;j++){
-          printf(" %s,",assemblylist[j]);
+          printf(" %s,",assemblylist[j]->id);
         }
-        printf(" %s\n",assemblylist[recurse_level]);
+        printf(" %s\n",assemblylist[recurse_level]->id);
         printf(" are defined circularly.  Their expansion is halted\n");
         printf(" **** warning ****\n");
         return;
@@ -185,44 +194,22 @@ void expand_assembly(char *buffer, int recurse_level){
 
     if(thisline->line_after!=NULL&&thisline->line_before!=NULL){
       if(thisline->type==1){
+        float *xyz, *rotate, *orig;
+
+
         printf("%s ",thisline->line_before);
         for(i=0;i<6;i++){
           xb[i]=thisline->xb[i];
         }
-        rotatexy(xb,xb+2,assem->orig,rotate);
-        rotatexy(xb+1,xb+3,assem->orig,rotate);
-        if(assem->orig[3]<0.0){
-          int irotate;
-          float dx, dy;
-
-          irotate = (int)(rotate/90.0+0.5);
-          irotate = irotate%4;
-
-          dx = 0.0;
-          dy = 0.0;
-          switch (irotate){
-            case 1:
-              dx = assem->dxy[1];
-              dy=0.0;
-              break;
-            case 2:
-              dx = assem->dxy[0];
-              dy = assem->dxy[1];
-              break;
-            case 3:
-              dx = 0.0;
-              dy = assem->dxy[0];
-              break;
+        for(i=recurse_level;i>=0;i--){
+          xyz = offset_rotate+4*i;
+          rotate = offset_rotate+4*i+3;
+          orig = assemblylist[i]->orig;
+          rotatexy(xb,xb+2,  orig,rotate[0]);
+          rotatexy(xb+1,xb+3,orig,rotate[0]);
+          for(j=0;j<6;j++){
+            xb[j]+=xyz[j/2]-orig[j/2];
           }
-          dx-=assem->orig[0];
-          dy-=assem->orig[1];
-          xb[0]+=dx;
-          xb[1]+=dx;
-          xb[2]+=dy;
-          xb[3]+=dy;
-        }
-        for(i=0;i<6;i++){
-          xb[i]+=offset[i/2];
         }
         for(i=0;i<6;i++){
           sprintf(charxb,"%f",xb[i]);
@@ -235,49 +222,13 @@ void expand_assembly(char *buffer, int recurse_level){
           }
         }
         printf("%s\n",thisline->line_after);
+
       }
       else if(thisline->type==2){
-        strcpy(buffer2,thisline->line);
-        offset2[0]=0.0;
-        offset2[1]=0.0;
-        offset2[2]=0.0;
-        get_irvals(buffer2, "XYZ", 3, NULL, offset2, NULL, NULL);
-        offset2[0]+=offset[0];
-        offset2[1]+=offset[1];
-        offset2[2]+=offset[2];
+        char linebuffer[1024];
 
-        rotate2=0.0;
-        get_irvals(buffer2, "ROTATE", 1, NULL, &rotate2, NULL, NULL);
-        rotate2+=rotate;
-
-        id2=getkeyid(buffer2,"GRP_ID");
-
-        strcpy(buffer3,"&GRP GRP_ID='");
-        strcat(buffer3,id2);
-        strcat(buffer3,"' XYZ=");
-
-        sprintf(charoffset,"%f",offset2[0]);
-        trimzeros(charoffset);
-        strcat(buffer3,charoffset);
-        strcat(buffer3,", ");
-
-        sprintf(charoffset,"%f",offset2[1]);
-        trimzeros(charoffset);
-        strcat(buffer3,charoffset);
-        strcat(buffer3,", ");
-
-        sprintf(charoffset,"%f",offset2[2]);
-        trimzeros(charoffset);
-        strcat(buffer3,charoffset);
-        strcat(buffer3,", ROTATE=");
-
-        sprintf(charrotate,"%f",rotate2);
-        trimzeros(charrotate);
-        strcat(buffer3,charrotate);
-        strcat(buffer3," /");
-
-
-        expand_assembly(buffer3,recurse_level+1);
+        strcpy(linebuffer,thisline->line);
+        expand_assembly(linebuffer,recurse_level+1);
       }
     }
   }
@@ -389,18 +340,25 @@ void update_assembly(blockaiddata *assembly,char *buffer){
     strcpy(thisfds->line,buffer);
     strcpy(thisfds->linecopy,buffer);
     if(thisfds->type==1){
-      float *orig, *xyz_max, *dxy, *xb;
+      float *orig,oorig[3],*xyz_max, *dxy, *xb;
         
       get_irvals(buffer, "XB", 6, NULL, thisfds->xb,&thisfds->ibeg,&thisfds->iend);
       if(is_obst==1){
 
         xb = thisfds->xb;
         if(assembly->orig[3]<0.0){
+          float *orig;
 
           orig = assembly->orig;
           if(xb[0]<orig[0])orig[0]=xb[0];
           if(xb[2]<orig[1])orig[1]=xb[2];
           if(xb[4]<orig[2])orig[2]=xb[4];
+        }
+        else{
+          oorig[0]=0.0;
+          oorig[1]=0.0;
+          oorig[2]=0.0;
+          orig=oorig;
         }
         xyz_max = assembly->xyzmax;
         if(xb[1]>xyz_max[0])xyz_max[0]=xb[1];
@@ -443,6 +401,7 @@ void remove_assembly(blockaiddata *assemb){
 blockaiddata *get_assembly(char *id){
   blockaiddata *assm;
 
+  if(id==NULL)return NULL;
   for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
     if(strcmp(assm->id,id)==0)return assm;
   }
