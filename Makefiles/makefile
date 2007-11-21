@@ -61,7 +61,7 @@ intel_linux_mpi : FFLAGS = -O3 -axP -ip -vec_report0
 intel_linux_mpi : CFLAGS = -O -Dpp_noappend
 intel_linux_mpi : FCOMPL = mpif77
 intel_linux_mpi : CCOMPL = icc
-intel_linux_mpi : obj = fds5_intel_mpi
+intel_linux_mpi : obj = fds5_mpi_intel
 intel_linux_mpi : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
@@ -69,7 +69,7 @@ intel_linux_mpi_db : FFLAGS = -FR -check all -O0 -auto -WB -traceback -g -fpe0 -
 intel_linux_mpi_db : CFLAGS = -O -Dpp_noappend
 intel_linux_mpi_db : FCOMPL = mpif77
 intel_linux_mpi_db : CCOMPL = icc
-intel_linux_mpi_db : obj = fds5_intel_mpi_db
+intel_linux_mpi_db : obj = fds5_mpi_intel_db
 intel_linux_mpi_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
@@ -94,7 +94,7 @@ intel_osx_mpi : FFLAGS  = -O3 -axP -ip -vec_report0
 intel_osx_mpi : CFLAGS  = -O -Dpp_noappend -Dpp_OSX
 intel_osx_mpi : FCOMPL  = mpif77
 intel_osx_mpi : CCOMPL  = icc
-intel_osx_mpi : obj = fds5_osx_intel_mpi
+intel_osx_mpi : obj = fds5_mpi_osx_intel
 intel_osx_mpi : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
@@ -139,7 +139,7 @@ lahey_linux_mpi : CFLAGS = -O
 lahey_linux_mpi : FCOMPL = hf77
 lahey_linux_mpi : CCOMPL = gcc
 lahey_linux_mpi : INCLUDEDIR = /usr/local/include
-lahey_linux_mpi : obj = fds5_lahey_mpi
+lahey_linux_mpi : obj = fds5_mpi_lahey
 lahey_linux_mpi : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 	
@@ -159,7 +159,7 @@ f95_solaris10_mpi : FFLAGS = -m64 $(INC_FLAGS)
 f95_solaris10_mpi : CFLAGS = -m64
 f95_solaris10_mpi : FCOMPL = mpif90
 f95_solaris10_mpi : CCOMPL = cc
-f95_solaris10_mpi : obj = fds5_solaris_mpi
+f95_solaris10_mpi : obj = fds5_mpi_solaris
 f95_solaris10_mpi : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
