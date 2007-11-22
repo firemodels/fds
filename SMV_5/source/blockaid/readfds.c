@@ -14,7 +14,8 @@
 
 // svn revision character string
 char readfds_revision[]="$Revision$";
-
+int compare( const void *arg1, const void *arg2 );
+void init_sorted_list(void);
 /* ------------------ readfds ------------------------ */
 
 int readfds(char *fdsfile){
@@ -160,19 +161,24 @@ void get_boundbox(blockaiddata *assem_top, blockaiddata *assem,
           xyz = offset_rotate+4*i;
           rotate = offset_rotate+4*i+3;
           orig = assemblylist[i]->orig;
-          rotatexy(xb,xb+2,  orig,rotate[0]);
-          rotatexy(xb+1,xb+3,orig,rotate[0]);
+          rotatexy(xb,xb+2,  orig,rotate[0], assem->bb_dxyz);
+          rotatexy(xb+1,xb+3,orig,rotate[0], assem->bb_dxyz);
           for(j=0;j<6;j++){
             xb[j]+=xyz[j/2]-orig[j/2];
           }
+          reorder(xb);
+          reorder(xb+2);
+          reorder(xb+4);
         }
         bb_min=assem_top->bb_min;
         bb_max=assem_top->bb_max;
         if(xb[0]<bb_min[0])bb_min[0]=xb[0];
-        if(xb[2]<bb_min[1])bb_min[1]=xb[2];
-        if(xb[4]<bb_min[2])bb_min[2]=xb[4];
         if(xb[1]>bb_max[0])bb_max[0]=xb[1];
+
+        if(xb[2]<bb_min[1])bb_min[1]=xb[2];
         if(xb[3]>bb_max[1])bb_max[1]=xb[3];
+
+        if(xb[4]<bb_min[2])bb_min[2]=xb[4];
         if(xb[5]>bb_max[2])bb_max[2]=xb[5];
 
 
@@ -242,13 +248,12 @@ void expand_assembly(char *buffer, int recurse_level){
   assem=get_assembly(id);
   if(assem==NULL){
     printf(" **** warning ****\n");
-    printf("      The blockage assembly, %s, is not defined\n",id);
-    printf(" **** warning ****\n");
+    printf("      The blockage assembly, %s, is not defined\n\n",id);
     return;
   }
 
   assemblylist[recurse_level]=assem;
-  offset_rotate[4*recurse_level ] =offset[0];
+  offset_rotate[4*recurse_level  ] =offset[0];
   offset_rotate[4*recurse_level+1]=offset[1];
   offset_rotate[4*recurse_level+2]=offset[2];
   offset_rotate[4*recurse_level+3]=rotate ;
@@ -299,14 +304,21 @@ void expand_assembly(char *buffer, int recurse_level){
           xb[i]=thisline->xb[i];
         }
         for(i=recurse_level;i>=0;i--){
+          blockaiddata *assemi;
+
+          assemi = assemblylist[i];
           xyz = offset_rotate+4*i;
           rotate = offset_rotate+4*i+3;
           orig = assemblylist[i]->orig;
-          rotatexy(xb,xb+2,  orig,rotate[0]);
-          rotatexy(xb+1,xb+3,orig,rotate[0]);
+          rotatexy(xb,xb+2,  orig,rotate[0],assemi->bb_dxyz);
+          rotatexy(xb+1,xb+3,orig,rotate[0],assemi->bb_dxyz);
           for(j=0;j<6;j++){
             xb[j]+=xyz[j/2]-orig[j/2];
           }
+          reorder(xb);
+          reorder(xb+2);
+          reorder(xb+4);
+
         }
         for(i=0;i<6;i++){
           sprintf(charxb,"%f",xb[i]);
@@ -330,6 +342,21 @@ void expand_assembly(char *buffer, int recurse_level){
     }
   }
 
+}
+
+/* ------------------ reorder ------------------------ */
+
+void reorder(float *xy){
+  float xymin, xymax;
+
+  xymin = xy[0];
+  if(xy[1]<xymin)xymin=xy[1];
+
+  xymax = xy[0];
+  if(xy[1]>xymax)xymax=xy[1];
+
+  xy[0]=xymin;
+  xy[1]=xymax;
 }
 
 /* ------------------ create_assembly ------------------------ */
@@ -501,17 +528,23 @@ void remove_assembly(blockaiddata *assemb){
 
 void init_bb(void){
   blockaiddata *assm;
+  int i;
 
+  init_sorted_list();
   for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
     assm->bb_min[0]=MAXPOS;
-    assm->bb_min[1]=MAXPOS;
-    assm->bb_min[2]=MAXPOS;
     assm->bb_max[0]=MINPOS;
+
+    assm->bb_min[1]=MAXPOS;
     assm->bb_max[1]=MINPOS;
+
+    assm->bb_min[2]=MAXPOS;
     assm->bb_max[2]=MINPOS;
   }
-  for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
+  for(i=0;i<nassembly;i++){
     float *x1, *x2, *dx;
+
+    assm=assembly_sorted_list[i];
 
     get_boundbox(assm,assm,NULL,0.0,0);
 
@@ -535,6 +568,62 @@ blockaiddata *get_assembly(char *id){
   }
   return NULL;
 }
+
+
+/* ------------------ get_assembly ------------------------ */
+
+void init_sorted_list(void){
+  blockaiddata *assm;
+  int i;
+
+  nassembly=0;
+  for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
+    nassembly++;
+  }
+  if(nassembly>0){
+    NewMemory((void **)&assembly_sorted_list,nassembly*sizeof(blockaiddata));
+  }
+  i=0;
+  for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
+    assembly_sorted_list[i++]=assm;
+  }
+  qsort( (blockaiddata **)assembly_sorted_list, (size_t)nassembly, sizeof( blockaiddata *), compare );
+  return;
+}
+
+/* ------------------ compare ------------------------ */
+
+int compare( const void *arg1, const void *arg2 ){
+  blockaiddata *block1, *block2;
+  char linebuffer[1024];
+  char *id;
+  blockaiddata *assem, *assem_id;
+  fdsdata *thisline;
+
+  block1=*(blockaiddata **)arg1;
+  block2=*(blockaiddata **)arg2;
+
+  assem = block1;
+  for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
+    if(match(thisline->line,"&GRP",4)==1){
+      strcpy(linebuffer,thisline->line);
+      id=getkeyid(linebuffer,"GRP_ID");
+      assem_id=get_assembly(id);
+      if(assem_id!=NULL&&strcmp(assem_id->id,block2->id)==0)return 1;
+    }
+  }
+  assem = block2;
+  for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
+    if(match(thisline->line,"&GRP",4)==1){
+      strcpy(linebuffer,thisline->line);
+      id=getkeyid(linebuffer,"GRP_ID");
+      assem_id=get_assembly(id);
+      if(assem_id!=NULL&&strcmp(assem_id->id,block1->id)==0)return -1;
+    }
+  }
+  return 0;
+}
+
 
 /* ------------------ init_assemdata ------------------------ */
 

@@ -54,11 +54,13 @@ void startup(void);
 blockaiddata *get_assembly(char *id);
 void trimzeros(char *line);
 void trimmzeros(char *line);
-void rotatexy(float *dx, float *dy, float *orig, float rotate);
+void rotatexy(float *dx, float *dy, float *orig, float rotate, float *dxy);
 void get_boundbox(blockaiddata *assem_top, blockaiddata *assem, float *offset, float rotate, int recurse_level);
 void init_bb(void);
+void reorder(float *xy);
 
 EXTERN blockaiddata *blockaidinfo, *blockaid_first, *blockaid_last, ba_first, ba_last;
-EXTERN blockaiddata **assemblylist;
+EXTERN blockaiddata **assemblylist, **assembly_sorted_list;
+EXTERN int nassembly;
 EXTERN float *offset_rotate;
 EXTERN int nblockaid;
