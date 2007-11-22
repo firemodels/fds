@@ -384,7 +384,7 @@ void trimmzeros(char *line){
 
 /* ------------------ rotatexy ------------------------ */
 
-  void rotatexy(float *dx, float *dy, float *orig, float rotate){
+  void rotatexy(float *dx, float *dy, float *orig, float rotate, float *dxy){
     int irotate;
     float dxy0[2], dxy2[2];
 
@@ -401,14 +401,24 @@ void trimmzeros(char *line){
       case 1:
         dxy2[0]=-dxy0[1];
         dxy2[1]= dxy0[0];
+        if(dxy!=NULL){
+          dxy2[0]+=dxy[1];
+        }
         break;
       case 2:
         dxy2[0]=-dxy0[0];
         dxy2[1]=-dxy0[1];
+        if(dxy!=NULL){
+          dxy2[0]+=dxy[0];
+          dxy2[1]+=dxy[1];
+        }
         break;
       case 3:
         dxy2[0]= dxy0[1];
         dxy2[1]=-dxy0[0];
+        if(dxy!=NULL){
+          dxy2[1]+=dxy[0];
+        }
         break;
     }
     *dx=dxy2[0]+orig[0];
