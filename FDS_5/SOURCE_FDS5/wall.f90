@@ -44,9 +44,10 @@ SUBROUTINE THERMAL_BC(T)
 ! One dimensional heat transfer and pyrolysis is done in PYROLYSIS, which is called at the end of this routine.
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
-REAL(EB) :: DT_BC,T,TSI,TMP_G,DTMP,TMP_OTHER,CP_TERM,RHOWAL,RAMP_FACTOR,QNET,FDERIV,TMP_EXTERIOR
+REAL(EB) :: DT_BC,T,TSI,TMP_G,DTMP,TMP_OTHER,CP_TERM,RHOWAL,RAMP_FACTOR,QNET,FDERIV,TMP_EXTERIOR,UN
 INTEGER  :: IOR,II,JJ,KK,IBC,IIG,JJG,KKG, IW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
+LOGICAL :: INFLOW
 TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (VENTS_TYPE), POINTER :: VT
  
@@ -85,28 +86,42 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
 
       CASE (INFLOW_OUTFLOW) METHOD_OF_HEAT_TRANSFER 
  
-         TMP_F(IW) = TMP(IIG,JJG,KKG)
-         TMP_EXTERIOR = TMP_0(KK)
-         IF (VENT_INDEX(IW)>0) THEN
-            VT => VENTS(VENT_INDEX(IW))
-            IF (VT%TMP_EXTERIOR>0._EB) TMP_EXTERIOR = VT%TMP_EXTERIOR
-         ENDIF
+         INFLOW = .FALSE.
          SELECT CASE(IOR)
             CASE( 1) 
-               IF (UU(II,JJ,KK)>=0._EB)   TMP_F(IW) = TMP_EXTERIOR
+               UN = UU(II,JJ,KK) 
             CASE(-1) 
-               IF (UU(II-1,JJ,KK)<=0._EB) TMP_F(IW) = TMP_EXTERIOR
+               UN = -UU(II-1,JJ,KK) 
             CASE( 2) 
-               IF (VV(II,JJ,KK)>=0._EB)   TMP_F(IW) = TMP_EXTERIOR
+               UN = VV(II,JJ,KK)
             CASE(-2) 
-               IF (VV(II,JJ-1,KK)<=0._EB) TMP_F(IW) = TMP_EXTERIOR
+               UN = -VV(II,JJ-1,KK)
             CASE( 3) 
-               IF (WW(II,JJ,KK)>=0._EB)   TMP_F(IW) = TMP_EXTERIOR
+               UN = WW(II,JJ,KK)
             CASE(-3) 
-               IF (WW(II,JJ,KK-1)<=0._EB) TMP_F(IW) = TMP_EXTERIOR
-            END SELECT
+               UN = -WW(II,JJ,KK-1)
+         END SELECT
+         IF (UN>=0._EB) INFLOW = .TRUE.
+
+         IF (INFLOW) THEN
+            TMP_EXTERIOR = TMP_0(KK)
+            IF (VENT_INDEX(IW)>0) THEN
+               VT => VENTS(VENT_INDEX(IW))
+               IF (VT%TMP_EXTERIOR>0._EB) TMP_EXTERIOR = VT%TMP_EXTERIOR
+            ENDIF
+            TMP_F(IW) = TMP_EXTERIOR
+            HEAT_TRANS_COEF(IW) = 0._EB
+            QCONF(IW) = 0._EB
+            TMP_G     = TMP(IIG,JJG,KKG)
+            RHOWAL    = 0.5_EB*(RHOP(IIG,JJG,KKG)+RHO_W(IW))
+            CP_TERM   = MAX(0._EB,CP_GAMMA*UN*RHOWAL)
+            TMP_W(IW) = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G + CP_TERM*TMP_F(IW)-QCONF(IW) )/(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
+            TMP_W(IW) = MAX(TMPMIN,TMP_W(IW))
+         ELSE
+            TMP_F(IW) = TMP(IIG,JJG,KKG)
+            TMP_W(IW) = TMP_F(IW)
+         ENDIF
          TMP(II,JJ,KK) = TMP_F(IW)
-         TMP_W(IW) = TMP_F(IW)
  
       CASE (SPECIFIED_TEMPERATURE) METHOD_OF_HEAT_TRANSFER
 
@@ -157,6 +172,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
          TMP_W(IW) = MAX(TMPMIN,TMP_W(IW))
 
       CASE (SPECIFIED_HEAT_FLUX) METHOD_OF_HEAT_TRANSFER
+
          IF (TW(IW)==T_BEGIN) THEN
             TSI = T
          ELSE
@@ -302,6 +318,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
          ENDIF
  
       CASE (SPECIFIED_MASS_FRACTION) METHOD_OF_MASS_TRANSFER
+
          IF (TW(IW)==T_BEGIN) THEN
             IF (PREDICTOR) TSI = T + DT
             IF (CORRECTOR) TSI = T
