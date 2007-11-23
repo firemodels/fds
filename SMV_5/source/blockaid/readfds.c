@@ -13,6 +13,7 @@
 #include "MALLOC.h"
 
 // svn revision character string
+void init_boundbox0(void);
 char readfds_revision[]="$Revision$";
 int compare( const void *arg1, const void *arg2 );
 void init_sorted_list(void);
@@ -145,74 +146,39 @@ int get_fds_line(FILE *stream, char *fdsbuffer, unsigned int len_fdsbuffer){
   return (int)strlen(fdsbuffer);
 }
 
-/* ------------------ get_boundbox ------------------------ */
+/* ------------------ get_boundbox2 ------------------------ */
 
-void get_boundbox(blockaiddata *assem_top, blockaiddata *assem, 
-                  float *offset, float rotate, int recurse_level){
+void get_boundbox(blockaiddata *assem,int recurse_level){
   fdsdata *thisline;
-  int i,j;
+  int i;
+  float *bb_min, *bb_max, *bb_dxyz;
+
+  if(assem->bb_box_defined==1)return;
 
   if(recurse_level>MAXRECURSE){
     printf(" *** Fatal error:  recursion level must be less than %i\n",MAXRECURSE);
     return;
   }
 
-  assemblylist[recurse_level]=assem;
-  if(recurse_level==0){
-    offset_rotate[4*recurse_level ] =0.0;
-    offset_rotate[4*recurse_level+1]=0.0;
-    offset_rotate[4*recurse_level+2]=0.0;
-    offset_rotate[4*recurse_level+3]=0.0;
-  }
-  else{
-    offset_rotate[4*recurse_level ] =offset[0];
-    offset_rotate[4*recurse_level+1]=offset[1];
-    offset_rotate[4*recurse_level+2]=offset[2];
-    offset_rotate[4*recurse_level+3]=rotate;
-  }
+  bb_min=assem->bb_min;
+  bb_max=assem->bb_max;
+  bb_dxyz=assem->bb_dxyz;
 
   for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
     float xb[6];
 
     if(thisline->line_after!=NULL&&thisline->line_before!=NULL){
       if(thisline->type==1&&thisline->is_obst==1){
-        float *xyz, *rotate, *orig;
-        float *bb_min, *bb_max;
-
         for(i=0;i<6;i++){
-          xb[i]=thisline->xb[i];
+          xb[i]=thisline->xb[i]-assem->orig[i/2];
         }
-        for(i=recurse_level;i>=0;i--){
-          xyz = offset_rotate+4*i;
-          rotate = offset_rotate+4*i+3;
-          orig = assemblylist[i]->orig;
-          rotatexy(xb,xb+2,  orig,rotate[0], assem->bb_dxyz);
-          rotatexy(xb+1,xb+3,orig,rotate[0], assem->bb_dxyz);
-          for(j=0;j<6;j++){
-            xb[j]+=xyz[j/2]-orig[j/2];
-          }
-          reorder(xb);
-          reorder(xb+2);
-          reorder(xb+4);
-        }
-        bb_min=assem_top->bb_min;
-        bb_max=assem_top->bb_max;
-        if(xb[0]<bb_min[0])bb_min[0]=xb[0];
-        if(xb[1]>bb_max[0])bb_max[0]=xb[1];
-
-        if(xb[2]<bb_min[1])bb_min[1]=xb[2];
-        if(xb[3]>bb_max[1])bb_max[1]=xb[3];
-
-        if(xb[4]<bb_min[2])bb_min[2]=xb[4];
-        if(xb[5]>bb_max[2])bb_max[2]=xb[5];
-
-
       }
       else if(thisline->type==2){
         char linebuffer[1024];
         char *id2;
         blockaiddata *assem2;        
         float offset2[3], rotate2;
+        int j;
 
         strcpy(linebuffer,thisline->line);
 
@@ -227,24 +193,90 @@ void get_boundbox(blockaiddata *assem_top, blockaiddata *assem,
         id2=getkeyid(linebuffer,"GRP_ID");
         assem2=get_assembly(id2);
 
-        get_boundbox(assem_top,assem2,offset2,rotate2,recurse_level+1);
+        get_boundbox(assem2,recurse_level+1);
+
+        xb[0]=assem2->bb_min[0];
+        xb[1]=assem2->bb_max[0];
+        xb[2]=assem2->bb_min[1];
+        xb[3]=assem2->bb_max[1];
+        xb[4]=assem2->bb_min[2];
+        xb[5]=assem2->bb_max[2];
+
+        rotatexy(xb,xb+2,  assem2->orig,rotate2, assem2->bb_dxyz);
+        rotatexy(xb+1,xb+3,assem2->orig,rotate2, assem2->bb_dxyz);
+        for(j=0;j<6;j++){
+          xb[j]+=offset2[j/2]-assem2->orig[j/2];
+        }
+        reorder(xb);
+        reorder(xb+2);
+        reorder(xb+4);
       }
+      else{
+        continue;
+      }
+
+      if(xb[0]<bb_min[0])bb_min[0]=xb[0];
+      if(xb[1]>bb_max[0])bb_max[0]=xb[1];
+
+      if(xb[2]<bb_min[1])bb_min[1]=xb[2];
+      if(xb[3]>bb_max[1])bb_max[1]=xb[3];
+
+      if(xb[4]<bb_min[2])bb_min[2]=xb[4];
+      if(xb[5]>bb_max[2])bb_max[2]=xb[5];
+
+      bb_dxyz[0]=bb_max[0]-bb_min[0];
+      bb_dxyz[1]=bb_max[1]-bb_min[1];
+      bb_dxyz[2]=bb_max[2]-bb_min[2];
     }
-  }
-  if(recurse_level==0){
-    float *bb_min, *bb_max, *bb_dxyz;
-
-    bb_dxyz=assem_top->bb_dxyz;
-    bb_min=assem_top->bb_min;
-    bb_max=assem_top->bb_max;
-
-    bb_dxyz=assem->bb_dxyz;
-    bb_dxyz[0]=bb_max[0]-bb_min[0];
-    bb_dxyz[1]=bb_max[1]-bb_min[1];
-    bb_dxyz[2]=bb_max[2]-bb_min[2];
   }
 }
 
+/* ------------------ init_boundbox0 ------------------------ */
+
+void init_boundbox0(void){
+  fdsdata *thisline;
+  blockaiddata *assem;
+
+  for(assem=blockaid_first->next;assem->next!=NULL;assem=assem->next){
+    float xb[6];
+    int do_this_assm;
+
+    if(assem->bb_box_defined==1)continue;
+
+    do_this_assm=1;
+    for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
+      if(thisline->type==1&&thisline->is_obst==1){
+      }
+      else if(thisline->type==2){
+        do_this_assm=0;
+        break;
+      }
+    }
+    if(do_this_assm==0)continue;
+
+    for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
+      float *bb_min, *bb_max;
+      int i;
+
+      if(thisline->type!=1||thisline->is_obst!=1)continue;
+
+      for(i=0;i<6;i++){
+        xb[i]=thisline->xb[i]-assem->orig[i/2];
+      }
+
+      bb_min=assem->bb_min;
+      bb_max=assem->bb_max;
+      if(xb[0]<bb_min[0])bb_min[0]=xb[0];
+      if(xb[1]>bb_max[0])bb_max[0]=xb[1];
+
+      if(xb[2]<bb_min[1])bb_min[1]=xb[2];
+      if(xb[3]>bb_max[1])bb_max[1]=xb[3];
+
+      if(xb[4]<bb_min[2])bb_min[2]=xb[4];
+      if(xb[5]>bb_max[2])bb_max[2]=xb[5];
+    }
+  }
+}
 /* ------------------ expand_assembly ------------------------ */
 
 void expand_assembly(char *buffer, int recurse_level){
@@ -534,13 +566,11 @@ void update_assembly(blockaiddata *assembly,char *buffer){
 void remove_assembly(blockaiddata *assemb){
 }
 
-/* ------------------ get_assembly ------------------------ */
+/* ------------------ init_bb ------------------------ */
 
 void init_bb(void){
   blockaiddata *assm;
-  int i;
 
-  init_sorted_list();
   for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
     assm->bb_min[0]=MAXPOS;
     assm->bb_max[0]=MINPOS;
@@ -550,13 +580,14 @@ void init_bb(void){
 
     assm->bb_min[2]=MAXPOS;
     assm->bb_max[2]=MINPOS;
+
+    assm->bb_box_defined=0;
   }
-  for(i=0;i<nassembly;i++){
+  init_boundbox0();
+  for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
     float *x1, *x2, *dx;
 
-    assm=assembly_sorted_list[i];
-
-    get_boundbox(assm,assm,NULL,0.0,0);
+    get_boundbox(assm,0);
 
     x1 = assm->bb_min;
     x2 = assm->bb_max;
