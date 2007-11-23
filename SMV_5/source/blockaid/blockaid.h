@@ -27,9 +27,11 @@ typedef struct _blockaiddata {
   float orig[4],xyzmax[3], dxy[3];
   int in_use;
   float bb_min[3], bb_dxyz[3], bb_max[3];
+  int bb_box_defined;
   struct _fdsdata *first_line, *last_line;
   struct _fdsdata f_line, l_line;
   struct _blockaiddata *prev, *next;
+  struct _blockaiddata **assemblylist[MAXRECURSE];
 } blockaiddata;
 
 int getrevision(char *svn);
@@ -55,7 +57,7 @@ blockaiddata *get_assembly(char *id);
 void trimzeros(char *line);
 void trimmzeros(char *line);
 void rotatexy(float *dx, float *dy, float *orig, float rotate, float *dxy);
-void get_boundbox(blockaiddata *assem_top, blockaiddata *assem, float *offset, float rotate, int recurse_level);
+void get_boundbox(blockaiddata *assem, int recurse_level);
 void init_bb(void);
 void reorder(float *xy);
 
