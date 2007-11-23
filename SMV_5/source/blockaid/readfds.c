@@ -16,6 +16,8 @@
 char readfds_revision[]="$Revision$";
 int compare( const void *arg1, const void *arg2 );
 void init_sorted_list(void);
+int read_pass1(char *fdsfile, int recurse_level);
+
 /* ------------------ readfds ------------------------ */
 
 int readfds(char *fdsfile){
@@ -25,41 +27,17 @@ int readfds(char *fdsfile){
   char buffer[LENBUFFER];
   int in_assembly=0;
 
-  streamfds=fopen(fdsfile,"r");
-  if(streamfds==NULL){
-    printf("The file: %s could not be opened\n",fdsfile);
-    return 1;
-  }
-
-// pass 1
-
-  while(!feof(streamfds)){
-    blockaiddata *assembly;
-
-    if(get_fds_line(streamfds, buffer, LENBUFFER)==-1)break;
-    trim(buffer);
-
-    if(match(buffer,"&BGRP",5)==1){
-      in_assembly=1;
-      assembly=create_assembly(buffer); // &BASM ID='....' ORIG=x,y,z
-      continue;
-    }
-    if(match(buffer,"&EGRP",5)==1){ // &EASM /
-      in_assembly=0;
-      continue;
-    }
-    if(in_assembly==0)continue;
-
-    // using info in current buffer add to assembly data structures
-    update_assembly(assembly,buffer);
-
-  }
+  if(read_pass1(fdsfile,0)!=0)return 1;
 
   init_bb();
 
   // pass 2
 
-  rewind(streamfds);
+  streamfds=fopen(fdsfile,"r");
+  if(streamfds==NULL){
+    printf("The file: %s could not be opened\n",fdsfile);
+    return 1;
+  }
   in_assembly=0;
   while(!feof(streamfds)){
     if(get_fds_line(streamfds, buffer, LENBUFFER)==-1)break;
@@ -88,6 +66,53 @@ int readfds(char *fdsfile){
         break;
     }
   }
+  return 0;
+}
+
+/* ------------------ read_pass1 ------------------------ */
+
+int read_pass1(char *fdsfile, int recurse_level){
+  FILE *streamfds;
+  char buffer[LENBUFFER];
+  int in_assembly=0;
+
+  streamfds=fopen(fdsfile,"r");
+  if(streamfds==NULL){
+    printf("The file: %s could not be opened\n",fdsfile);
+    return 1;
+  }
+
+// pass 1
+
+  while(!feof(streamfds)){
+    blockaiddata *assembly;
+
+    if(get_fds_line(streamfds, buffer, LENBUFFER)==-1)break;
+    trim(buffer);
+
+    if(match(buffer,"&BGRP",5)==1){
+      in_assembly=1;
+      assembly=create_assembly(buffer); // &BASM ID='....' ORIG=x,y,z
+      continue;
+    }
+    if(match(buffer,"&EGRP",5)==1){ // &EASM /
+      in_assembly=0;
+      continue;
+    }
+    if(match(buffer,"&INCL",5)==1){ // &INCL FILE='kdkdkkdk' /
+      char *file;
+
+      file=getkeyid(buffer,"FILE");
+      if(file!=NULL&&recurse_level<10){
+        read_pass1(file,recurse_level+1);
+      }
+      continue;
+    }
+    if(in_assembly==0)continue;
+   // using info in current buffer add to assembly data structures
+    update_assembly(assembly,buffer);
+  }
+  fclose(streamfds);
   return 0;
 }
 
@@ -418,21 +443,6 @@ typedef struct _fdsdata {
 }
 
 /* ------------------ update_assembly ------------------------ */
-
-/*
-typedef struct _fdsdata {
-  char *line;
-  struct _fdsdata *prev, *next;
-} fdsdata;
-
-typedef struct _blockaiddata {
-  char *id;
-  float orig[3];
-  struct _fdsdata *first_line, *last_line;
-  struct _fdsdata f_line, l_line;
-  struct _blockaiddata *prev, *next;
-} blockaiddata;
-*/
 
 void update_assembly(blockaiddata *assembly,char *buffer){
   fdsdata *prev, *next, *thisfds;
