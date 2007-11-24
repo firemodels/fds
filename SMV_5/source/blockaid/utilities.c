@@ -19,20 +19,27 @@ char utilities_revision[]="$Revision$";
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
-  char pp[2];
   char asm_version[100];
   int svn_num;
 
   getASMversion(asm_version);  // get Assembly version (ie 5.x.z)
   svn_num=getmaxrevision();    // get svn revision number
 
-  strcpy(pp,"%");
-  printf("\n");
-  printf("  assemble %s(%i) - %s\n\n",asm_version,svn_num,__DATE__);
-  printf("  This program translates and rotates a given a collection of user defined\n");
-  printf("  blockage/vent assemblies creating a new FDS input file\n");
-  printf("  %s",prog);
-  printf("  See http://fire.nist.gov/fds for more information.\n");
+    printf("\n");
+    printf("Usage:\n");
+    printf(" blockaid casename.fds \n\n");
+    printf("  This program reads in an FDS input file and outputs a new one where specified\n");
+    printf("  groups of blockages, holes and vents are replicated, translated and rotated.\n");
+    printf("  These groups are surrounded with &BGRP and &EGRP as in:\n");
+    printf("      &BGRP GRP_ID='group label' ORIG=x,y,z /\n");
+    printf("          one or more &OBST, &VENT, &HOLE \n");
+    printf("      &EGRP /\n");
+    printf("  where ORIG is the point about which rotation occurs.\n");
+    printf("  This group may be replicated using:\n");
+    printf("     &GRP GRP_ID='group label' XYZ=x,y,z ROTATE=angle /\n");
+    printf("  where x,y,z is the translation amount and angle is snapped to the \n");
+    printf("  nearest 90 degrees.\n");
+    printf("  See http://fire.nist.gov/fds for more information.\n");
 }
 
 /* ------------------ version ------------------------ */
@@ -57,20 +64,7 @@ void version(void){
 #ifdef pp_LINUX
     printf("Platform: LINUX\n");
 #endif
-    printf("\n");
-    printf("Usage:\n");
-    printf(" blockaid casename.fds \n\n");
-    printf("  This program reads in an FDS input file and outputs a new one where specified\n");
-    printf("  groups of blockages, holes and vents are replicated, translated and rotated.\n");
-    printf("  These groups are surrounded with &BGRP and &EGRP as in:\n");
-    printf("      &BGRP GRP_ID='group label' ORIG=x,y,z /\n");
-    printf("          one or more &OBST, &VENT, &HOLE \n");
-    printf("      &EGRP /\n");
-    printf("  where ORIG is the point about which rotation occurs.\n");
-    printf("  This group may be replicated using:\n");
-    printf("     &GRP GRP_ID='group label' XYZ=x,y,z ROTATE=angle /\n");
-    printf("  where x,y,z is the translation amount and angle is snapped to the \n");
-    printf("  nearest 90 degrees.\n");
+    printf("\nUse blockaid -h for more information\n");
 }
 
 /* ------------------ imax ------------------------ */
@@ -384,43 +378,41 @@ void trimmzeros(char *line){
 
 /* ------------------ rotatexy ------------------------ */
 
-  void rotatexy(float *dx, float *dy, float *orig, float rotate, float *dxy){
+  void rotatexy(float *dx, float *dy, float rotate, float *dxy){
     int irotate;
-    float dxy0[2], dxy2[2];
+    float dxy2[2];
 
     irotate = (int)(rotate/90.0+0.5);
     irotate = irotate%4;
 
-    dxy0[0]=*dx-orig[0];
-    dxy0[1]=*dy-orig[1];
     switch (irotate){
       case 0:
-        dxy2[0]=dxy0[0];
-        dxy2[1]=dxy0[1];
+        dxy2[0]=*dx;
+        dxy2[1]=*dy;
         break;
       case 1:
-        dxy2[0]=-dxy0[1];
-        dxy2[1]= dxy0[0];
+        dxy2[0]=-(*dy);
+        dxy2[1]= *dx;
         if(dxy!=NULL){
           dxy2[0]+=dxy[1];
         }
         break;
       case 2:
-        dxy2[0]=-dxy0[0];
-        dxy2[1]=-dxy0[1];
+        dxy2[0]=-(*dx);
+        dxy2[1]=-(*dy);
         if(dxy!=NULL){
           dxy2[0]+=dxy[0];
           dxy2[1]+=dxy[1];
         }
         break;
       case 3:
-        dxy2[0]= dxy0[1];
-        dxy2[1]=-dxy0[0];
+        dxy2[0]= *dy;
+        dxy2[1]=-(*dx);
         if(dxy!=NULL){
           dxy2[1]+=dxy[0];
         }
         break;
     }
-    *dx=dxy2[0]+orig[0];
-    *dy=dxy2[1]+orig[1];
+    *dx=dxy2[0];
+    *dy=dxy2[1];
   }
