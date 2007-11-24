@@ -24,8 +24,7 @@ typedef struct _fdsdata {
 
 typedef struct _blockaiddata {
   char *id;
-  float orig[4],xyzmax[3], dxy[3];
-  int in_use;
+  float xyz0[4];
   float bb_min[3], bb_dxyz[3], bb_max[3];
   int bb_box_defined;
   struct _fdsdata *first_line, *last_line;
@@ -40,7 +39,7 @@ int getmaxrevision(void);
 void version(void);
 char *trim_front(char *line);
 void trim(char *line);
-void usage(char *prog);
+void usage(void);
 int getfileinfo(char *filename, char *source_dir, int *filesize);
 int readfds(char *fdsfile);
 int match(const char *buffer, const char *key, unsigned int lenkey);
@@ -56,13 +55,13 @@ void startup(void);
 blockaiddata *get_assembly(char *id);
 void trimzeros(char *line);
 void trimmzeros(char *line);
-void rotatexy(float *dx, float *dy, float *orig, float rotate, float *dxy);
+void rotatexy(float *dx, float *dy, float rotate, float *dxy);
 void get_boundbox(blockaiddata *assem, int recurse_level);
 void init_bb(void);
 void reorder(float *xy);
 
 EXTERN blockaiddata *blockaidinfo, *blockaid_first, *blockaid_last, ba_first, ba_last;
-EXTERN blockaiddata **assemblylist, **assembly_sorted_list;
+EXTERN blockaiddata **assemblylist;
 EXTERN int nassembly;
 EXTERN float *offset_rotate;
 EXTERN int nblockaid;
