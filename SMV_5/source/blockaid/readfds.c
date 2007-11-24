@@ -16,7 +16,6 @@
 void init_boundbox0(void);
 char readfds_revision[]="$Revision$";
 int compare( const void *arg1, const void *arg2 );
-void init_sorted_list(void);
 int read_pass1(char *fdsfile, int recurse_level);
 
 /* ------------------ readfds ------------------------ */
@@ -146,7 +145,7 @@ int get_fds_line(FILE *stream, char *fdsbuffer, unsigned int len_fdsbuffer){
   return (int)strlen(fdsbuffer);
 }
 
-/* ------------------ get_boundbox2 ------------------------ */
+/* ------------------ get_boundbox ------------------------ */
 
 void get_boundbox(blockaiddata *assem,int recurse_level){
   fdsdata *thisline;
@@ -170,7 +169,7 @@ void get_boundbox(blockaiddata *assem,int recurse_level){
     if(thisline->line_after!=NULL&&thisline->line_before!=NULL){
       if(thisline->type==1&&thisline->is_obst==1){
         for(i=0;i<6;i++){
-          xb[i]=thisline->xb[i]-assem->orig[i/2];
+          xb[i]=thisline->xb[i]-assem->xyz0[i/2];
         }
       }
       else if(thisline->type==2){
@@ -202,14 +201,14 @@ void get_boundbox(blockaiddata *assem,int recurse_level){
         xb[4]=assem2->bb_min[2];
         xb[5]=assem2->bb_max[2];
 
-        rotatexy(xb,xb+2,  assem2->orig,rotate2, assem2->bb_dxyz);
-        rotatexy(xb+1,xb+3,assem2->orig,rotate2, assem2->bb_dxyz);
-        for(j=0;j<6;j++){
-          xb[j]+=offset2[j/2]-assem2->orig[j/2];
-        }
+        rotatexy(xb,xb+2,  rotate2, assem2->bb_dxyz);
+        rotatexy(xb+1,xb+3,rotate2, assem2->bb_dxyz);
         reorder(xb);
         reorder(xb+2);
         reorder(xb+4);
+        for(j=0;j<6;j++){
+          xb[j]+=offset2[j/2];
+        }
       }
       else{
         continue;
@@ -240,11 +239,17 @@ void init_boundbox0(void){
   for(assem=blockaid_first->next;assem->next!=NULL;assem=assem->next){
     float xb[6];
     int do_this_assm;
+    float *bb_min, *bb_max, *bb_dxyz;
 
     if(assem->bb_box_defined==1)continue;
 
+    bb_min=assem->bb_min;
+    bb_max=assem->bb_max;
+    bb_dxyz=assem->bb_dxyz;
+
     do_this_assm=1;
     for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
+
       if(thisline->type==1&&thisline->is_obst==1){
       }
       else if(thisline->type==2){
@@ -255,17 +260,14 @@ void init_boundbox0(void){
     if(do_this_assm==0)continue;
 
     for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
-      float *bb_min, *bb_max;
       int i;
 
       if(thisline->type!=1||thisline->is_obst!=1)continue;
 
       for(i=0;i<6;i++){
-        xb[i]=thisline->xb[i]-assem->orig[i/2];
+        xb[i]=thisline->xb[i]-assem->xyz0[i/2];
       }
 
-      bb_min=assem->bb_min;
-      bb_max=assem->bb_max;
       if(xb[0]<bb_min[0])bb_min[0]=xb[0];
       if(xb[1]>bb_max[0])bb_max[0]=xb[1];
 
@@ -275,6 +277,10 @@ void init_boundbox0(void){
       if(xb[4]<bb_min[2])bb_min[2]=xb[4];
       if(xb[5]>bb_max[2])bb_max[2]=xb[5];
     }
+    bb_dxyz[0]=bb_max[0]-bb_min[0];
+    bb_dxyz[1]=bb_max[1]-bb_min[1];
+    bb_dxyz[2]=bb_max[2]-bb_min[2];
+    assem->bb_box_defined=1;
   }
 }
 /* ------------------ expand_assembly ------------------------ */
@@ -345,7 +351,6 @@ void expand_assembly(char *buffer, int recurse_level){
     }
     printf("\n%s MINOR GROUP: %s offset=%f,%f,%f rotate=%f\n",
       blank,assem->id,offset[0],offset[1],offset[2],rotate);
-    assem->in_use=1;
   }
 
   for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
@@ -353,24 +358,24 @@ void expand_assembly(char *buffer, int recurse_level){
 
     if(thisline->line_after!=NULL&&thisline->line_before!=NULL){
       if(thisline->type==1){
-        float *xyz, *rotate, *orig;
+        float *xyz, *rotate;
 
 
         printf("%s ",thisline->line_before);
         for(i=0;i<6;i++){
-          xb[i]=thisline->xb[i];
+          xb[i]=thisline->xb[i]-assem->xyz0[i/2];
         }
+
         for(i=recurse_level;i>=0;i--){
           blockaiddata *assemi;
 
           assemi = assemblylist[i];
           xyz = offset_rotate+4*i;
           rotate = offset_rotate+4*i+3;
-          orig = assemblylist[i]->orig;
-          rotatexy(xb,xb+2,  orig,rotate[0],assemi->bb_dxyz);
-          rotatexy(xb+1,xb+3,orig,rotate[0],assemi->bb_dxyz);
+          rotatexy(xb,xb+2,  rotate[0],assemi->bb_dxyz);
+          rotatexy(xb+1,xb+3,rotate[0],assemi->bb_dxyz);
           for(j=0;j<6;j++){
-            xb[j]+=xyz[j/2]-orig[j/2];
+            xb[j]+=xyz[j/2];
           }
           reorder(xb);
           reorder(xb+2);
@@ -420,7 +425,7 @@ void reorder(float *xy){
 
 blockaiddata *create_assembly(char *buffer){
   blockaiddata *blockaidi, *bprev, *bnext;
-  float *orig, *xyz_max;
+  float *orig;
   char *id;
   fdsdata *first_line, *last_line;
 
@@ -432,33 +437,23 @@ blockaiddata *create_assembly(char *buffer){
   bprev->next=blockaidi;
   bnext->prev=blockaidi;
 
-  orig=blockaidi->orig;
-  xyz_max=blockaidi->xyzmax;
+  orig=blockaidi->xyz0;
 
   if(get_irvals(buffer, "ORIG", 3, NULL, orig, NULL, NULL)==3){
     // first 3 positions of orig are defined in get_irvals
     orig[3]=1.0;
   }
   else{
-    orig[0]=MAXPOS;
-    orig[1]=MAXPOS;
-    orig[2]=MAXPOS;
-    orig[3]=-1.0;
-    xyz_max[0]=MINPOS;
-    xyz_max[1]=MINPOS;
-    xyz_max[2]=MINPOS;
+    orig[0]=0.0;
+    orig[1]=0.0;
+    orig[2]=0.0;
+    orig[3]=1.0;
   }
   id=getkeyid(buffer,"GRP_ID");
   if(id!=NULL){
     NewMemory((void **)&blockaidi->id,strlen(id)+1);
     strcpy(blockaidi->id,id);
   }
-/*
-typedef struct _fdsdata {
-  char *line;
-  struct _fdsdata *prev, *next;
-} fdsdata;
-*/
   blockaidi->first_line=&blockaidi->f_line;
   blockaidi->last_line=&blockaidi->l_line;
   first_line=blockaidi->first_line;
@@ -510,16 +505,16 @@ void update_assembly(blockaiddata *assembly,char *buffer){
     strcpy(thisfds->line,buffer);
     strcpy(thisfds->linecopy,buffer);
     if(thisfds->type==1){
-      float *orig,oorig[3],*xyz_max, *dxy, *xb;
+      float *orig,oorig[3], *xb;
         
       get_irvals(buffer, "XB", 6, NULL, thisfds->xb,&thisfds->ibeg,&thisfds->iend);
       if(is_obst==1){
 
         xb = thisfds->xb;
-        if(assembly->orig[3]<0.0){
+        if(assembly->xyz0[3]<0.0){
           float *orig;
 
-          orig = assembly->orig;
+          orig = assembly->xyz0;
           if(xb[0]<orig[0])orig[0]=xb[0];
           if(xb[2]<orig[1])orig[1]=xb[2];
           if(xb[4]<orig[2])orig[2]=xb[4];
@@ -530,15 +525,6 @@ void update_assembly(blockaiddata *assembly,char *buffer){
           oorig[2]=0.0;
           orig=oorig;
         }
-        xyz_max = assembly->xyzmax;
-        if(xb[1]>xyz_max[0])xyz_max[0]=xb[1];
-        if(xb[3]>xyz_max[1])xyz_max[1]=xb[3];
-        if(xb[5]>xyz_max[2])xyz_max[2]=xb[5];
-
-        dxy = assembly->dxy;
-        dxy[0]=xyz_max[0]-orig[0];
-        dxy[1]=xyz_max[1]-orig[1];
-        dxy[2]=xyz_max[2]-orig[2];
       }
     }
     else if(thisfds->type==2){
@@ -611,61 +597,6 @@ blockaiddata *get_assembly(char *id){
 }
 
 
-/* ------------------ get_assembly ------------------------ */
-
-void init_sorted_list(void){
-  blockaiddata *assm;
-  int i;
-
-  nassembly=0;
-  for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
-    nassembly++;
-  }
-  if(nassembly>0){
-    NewMemory((void **)&assembly_sorted_list,nassembly*sizeof(blockaiddata));
-  }
-  i=0;
-  for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
-    assembly_sorted_list[i++]=assm;
-  }
-  qsort( (blockaiddata **)assembly_sorted_list, (size_t)nassembly, sizeof( blockaiddata *), compare );
-  return;
-}
-
-/* ------------------ compare ------------------------ */
-
-int compare( const void *arg1, const void *arg2 ){
-  blockaiddata *block1, *block2;
-  char linebuffer[1024];
-  char *id;
-  blockaiddata *assem, *assem_id;
-  fdsdata *thisline;
-
-  block1=*(blockaiddata **)arg1;
-  block2=*(blockaiddata **)arg2;
-
-  assem = block1;
-  for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
-    if(match(thisline->line,"&GRP",4)==1){
-      strcpy(linebuffer,thisline->line);
-      id=getkeyid(linebuffer,"GRP_ID");
-      assem_id=get_assembly(id);
-      if(assem_id!=NULL&&strcmp(assem_id->id,block2->id)==0)return 1;
-    }
-  }
-  assem = block2;
-  for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
-    if(match(thisline->line,"&GRP",4)==1){
-      strcpy(linebuffer,thisline->line);
-      id=getkeyid(linebuffer,"GRP_ID");
-      assem_id=get_assembly(id);
-      if(assem_id!=NULL&&strcmp(assem_id->id,block1->id)==0)return -1;
-    }
-  }
-  return 0;
-}
-
-
 /* ------------------ init_assemdata ------------------------ */
 
 void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *next){
@@ -674,9 +605,9 @@ void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *nex
 
   NewMemory((void **)&newassem,sizeof(blockaiddata));
   strcpy(newassem->id,id);
-  newassem->orig[0]=orig[0];
-  newassem->orig[1]=orig[1];
-  newassem->orig[2]=orig[2];
+  newassem->xyz0[0]=orig[0];
+  newassem->xyz0[1]=orig[1];
+  newassem->xyz0[2]=orig[2];
   newassem->prev=prev;
   newassem->next=next;
 

@@ -36,10 +36,12 @@ int main(int argc, char **argv){
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
-      case 'b':
+      case 'h':
+        usage();
+        return 1;
         break;
       default:
-        usage(prog);
+        usage();
         return 1;
       }
     }
@@ -53,7 +55,7 @@ int main(int argc, char **argv){
   // construct smv filename
   
   if(fdsfile==NULL){
-    usage(prog);
+    usage();
     return 1;
   }
 
