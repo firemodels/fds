@@ -18,7 +18,7 @@ char utilities_revision[]="$Revision$";
 
 /* ------------------ usage ------------------------ */
 
-void usage(char *prog){
+void usage(void){
   char asm_version[100];
   int svn_num;
 
