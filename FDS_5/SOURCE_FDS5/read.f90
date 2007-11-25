@@ -4148,26 +4148,29 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (DEVC_ID /='null') OB%REMOVABLE = .TRUE.
       IF (CTRL_ID /='null') OB%REMOVABLE = .TRUE.
       IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.      
+
       ! Choose obstruction color index
+
       SELECT CASE (COLOR)
          CASE ('INVISIBLE')
-            OB%BCI = -3
+            OB%COLOR_INDICATOR = -3
             RGB(1) = 255
             RGB(2) = 204
             RGB(3) = 102
             TRANSPARENCY = 0._EB
          CASE ('null')
             IF (ANY (RGB<0)) THEN
-               OB%BCI=-1
+               OB%COLOR_INDICATOR = -1
             ELSE
-               OB%BCI=-3
+               OB%COLOR_INDICATOR = -3
             ENDIF
          CASE DEFAULT
             CALL COLOR2RGB(RGB,COLOR)
-            OB%BCI = -3
+            OB%COLOR_INDICATOR = -3
       END SELECT
       OB%RGB  = RGB
       OB%TRANSPARENCY = TRANSPARENCY
+
       ! Miscellaneous assignments
  
       OB%TEXTURE(:) = TEXTURE_ORIGIN(:)  ! Origin of texture map
@@ -4179,7 +4182,7 @@ MESH_LOOP: DO NM=1,NMESHES
  
       DO NOM=1,NM-1
          IF (XB(1)>=MESHES(NOM)%XS .AND. XB(2)<=MESHES(NOM)%XF .AND. XB(3)>=MESHES(NOM)%YS .AND. XB(4)<=MESHES(NOM)%YF .AND. &
-             XB(5)>=MESHES(NOM)%ZS .AND. XB(6)<=MESHES(NOM)%ZF) OB%BCI=-2
+             XB(5)>=MESHES(NOM)%ZS .AND. XB(6)<=MESHES(NOM)%ZF) OB%COLOR_INDICATOR=-2
       ENDDO
  
       ! Prevent drawing of boundary info if desired
@@ -4195,13 +4198,13 @@ MESH_LOOP: DO NM=1,NMESHES
       ! Smooth obstacles if desired
  
       IF (.NOT.SAWTOOTH) THEN
-         OB%BTI = 3
+         OB%TYPE_INDICATOR = 3
          OB%SAWTOOTH = .FALSE.
       ENDIF
  
       ! In Smokeview, draw the outline of the obstruction
  
-      IF (OUTLINE) OB%BTI = 2
+      IF (OUTLINE) OB%TYPE_INDICATOR = 2
       
       ENDDO READ_OBST_LOOP
    35 REWIND(LU_INPUT)
@@ -4638,7 +4641,8 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
  
          ! If the HOLE is to be created or removed, save it in OBSTRUCTION(NN), the original OBST that was broken up
 
-         IF (DEVC_ID/='null' .OR. CTRL_ID/='null') THEN
+         DEVC_OR_CTRL: IF (DEVC_ID/='null' .OR. CTRL_ID/='null') THEN
+
             OBSTRUCTION(NN) = TEMP_OBST(0)
             OB => OBSTRUCTION(NN)
             OB%DEVC_ID = DEVC_ID
@@ -4656,30 +4660,34 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
             ENDIF
             
             IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.
+
             SELECT CASE (COLOR)
                CASE ('INVISIBLE')
-                  OB%BCI = -3
-                  TRANSPARENCY = 0._EB
+                  OB%COLOR_INDICATOR = -3
+                  OB%RGB(1) = 255
+                  OB%RGB(2) = 204
+                  OB%RGB(3) = 102
+                  OB%TRANSPARENCY = 0._EB
                CASE ('null')
-                  IF (ANY (RGB<0)) THEN
-                     OB%BCI=-1
-                     RGB(1)   = 255
-                     RGB(2)   = 235
-                     RGB(3)   = 129   
-                  ELSE
-                     OB%BCI=-3
+                  IF (ANY(RGB>0)) THEN
+                     OB%COLOR_INDICATOR = -3
+                     OB%RGB  = RGB
+                     OB%TRANSPARENCY = TRANSPARENCY
                   ENDIF
                CASE DEFAULT
                   CALL COLOR2RGB(RGB,COLOR)
-                  OB%BCI = -3
+                  OB%COLOR_INDICATOR = -3
+                  OB%RGB  = RGB
+                  OB%TRANSPARENCY = TRANSPARENCY
             END SELECT
-            OB%RGB  = RGB
-            OB%TRANSPARENCY = TRANSPARENCY
-         ELSE
+
+         ELSE DEVC_OR_CTRL
+
             OBSTRUCTION(NN) = OBSTRUCTION(N_OBST)
             N_OBST = N_OBST-1
             NN = NN-1
-         ENDIF
+
+         ENDIF DEVC_OR_CTRL
  
       ENDDO OBST_LOOP
    ENDDO MESH_LOOP
@@ -4922,9 +4930,9 @@ MESH_LOOP: DO NM=1,NMESHES
          IF (SURF_ID==SURF_NAME(NNN)) VT%IBC = NNN
       ENDDO
 
-      IF (SURF_ID=='OPEN')   VT%VTI =  2
-      IF (SURF_ID=='MIRROR') VT%VTI = -2
-      IF ((MB/='null' .OR.  PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) .AND. SURF_ID=='OPEN') VT%VTI = -2
+      IF (SURF_ID=='OPEN')   VT%TYPE_INDICATOR =  2
+      IF (SURF_ID=='MIRROR') VT%TYPE_INDICATOR = -2
+      IF ((MB/='null' .OR.  PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) .AND. SURF_ID=='OPEN') VT%TYPE_INDICATOR = -2
  
       VT%BOUNDARY_TYPE = SOLID_BOUNDARY
       IF (VT%IBC==OPEN_SURF_INDEX)   VT%BOUNDARY_TYPE = OPEN_BOUNDARY
@@ -4951,16 +4959,16 @@ MESH_LOOP: DO NM=1,NMESHES
 
       SELECT CASE(COLOR)
          CASE('INVISIBLE')
-            VT%VCI=8
+            VT%COLOR_INDICATOR = 8
             TRANSPARENCY = 0._EB
          CASE('null')
-            VT%VCI=99
+            VT%COLOR_INDICATOR = 99
          CASE DEFAULT
-            VT%VCI=99
+            VT%COLOR_INDICATOR = 99
             CALL COLOR2RGB(RGB,COLOR)
       END SELECT
-      IF (VT%VCI==8) VT%VTI = -2
-      IF (OUTLINE)   VT%VTI =  2
+      IF (VT%COLOR_INDICATOR==8) VT%TYPE_INDICATOR = -2
+      IF (OUTLINE)               VT%TYPE_INDICATOR =  2
       VT%RGB = RGB
       VT%TRANSPARENCY = TRANSPARENCY 
 
