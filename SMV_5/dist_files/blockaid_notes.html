@@ -2,7 +2,7 @@
 <head>
 <TITLE>Readme file for Blockaid, an FDS blockage converter</TITLE>
 </HEAD>
-<BODY BGCOLOR="#FAFAFA" >
+<BODY BGCOLOR="#FFFFFF" >
 <h2>Blockaid - Release Notes</h2>
 <p>$Date$<br>
 $Revision$<br>
@@ -28,8 +28,8 @@ $Revision$<br>
   is referenced using the <tt>&INCL</tt> keyword as in
   <tt>&INCL FILE='file name' /</tt>
   
-  <h2>Example</h2>
- <img src="blockaid1.png" width=320 align="right"/>
+  <h2>Examples</h2>
+  <h3>Arranging Furniture</h3>
 A group of blockages defining a couch:
 <pre>
 &BGRP GRP_ID='COUCH' ORIG=3.0,3.0,0.0 /
@@ -41,6 +41,7 @@ A group of blockages defining a couch:
 &HOLE   XB= 3.1, 4.9, 3.5, 3.7, 0.0, 0.1  /
 &EGRP /
 </pre>
+ <img src="blockaid1.png" width=320 align="right"/>
 <p>A group of three couches defining a living room arrangement:
 <pre>
 &BGRP GRP_ID='LIVE1' ORIG=0.0,0.0,0.0 /
@@ -59,8 +60,45 @@ are expanded by Blockaid using:
 &GRP GRP_ID='LIVE1' XYZ=4.0,4.3,0.0 ROTATE=180.0 /
 &GRP GRP_ID='LIVE1' XYZ=0.0,4.3,0.0 ROTATE=270.0 /
 </pre>
+<h3>Stairs</h3>
+<p>Group of blockages to define a set of stairs for one half of a building story:</p>
+<pre>
+&BGRP GRP_ID='STAIRS' ORIG=0.0,0.0,0.0 /
+&OBST   XB= 0.0, 1.0, 0.0, 0.4, 0.0, 0.2  ,   COLOR='RED' /  stairwell
+&OBST   XB= 0.0, 1.0, 0.3, 0.7, 0.2, 0.4  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 0.6, 1.0, 0.4, 0.6  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 0.9, 1.3, 0.6, 0.8  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 1.2, 1.6, 0.8, 1.0  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 1.5, 1.9, 1.0, 1.2  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 1.8, 2.2, 1.2, 1.4  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 2.1, 2.5, 1.4, 1.6  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 2.4, 2.8, 1.6, 1.8  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 2.7, 3.1, 1.8, 2.0  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 3.0, 3.4, 2.0, 2.2  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 3.3, 3.7, 2.2, 2.4  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.0, 1.0, 3.6, 4.0, 2.4, 2.6  ,   RGB=100,50,25/  stairwell
+&OBST   XB= 0.9, 1.1, 0.0, 4.3, 0.0, 2.8  ,   COLOR='MAGENTA' /  stairwell
+&OBST   XB= 0.0, 1.0, 3.9, 4.3, 2.6, 2.8  ,   COLOR='GREEN' /  stairwell
+&OBST   XB= 0.0, 2.0, 4.3, 5.3, 2.6, 2.8  ,   COLOR='BLUE' /  stairwell
+&EGRP /
+</pre>
 
+<img src="story3.png" width=320 align="right"/>
+<p>Combine two sets of <em>half</em> stairs to form a full set of stairs:
+<pre>
+&BGRP GRP_ID='BISTAIRS' ORIG=0.0,0.0,0.0 /
+&GRP GRP_ID='STAIRS' XYZ=0.0,0.0,0.0 /
+&GRP GRP_ID='STAIRS' XYZ=0.0,-1.0,2.8 ROTATE=180.0 /
+&EGRP /
+</pre>
 
+<p>The &OBST keywords used by FDS to define a set of stairs for 
+3 floors are expanded by Blockaid using:
+<pre>
+&GRP GRP_ID='BISTAIRS' XYZ=0.0,1.0,0.0 /
+&GRP GRP_ID='BISTAIRS' XYZ=0.0,1.0,5.6 /
+&GRP GRP_ID='BISTAIRS' XYZ=0.0,1.0,11.2 /
+</pre>
 <p><hr>
 <p><address>
 <A HREF="http://www.bfrl.nist.gov" >Building and Fire Research Laboratory</A><BR>
