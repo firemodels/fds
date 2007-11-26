@@ -51,6 +51,10 @@ int readfds(char *fdsfile){
       in_assembly=0;
       continue;
     }
+    if(match(buffer,"&INCL",5)==1){
+      in_assembly=3;
+      continue;
+    }
     if(in_assembly==0&&match(buffer,"&GRP",4)==1){
       in_assembly=2;
     }
@@ -63,6 +67,9 @@ int readfds(char *fdsfile){
       case 2:  // assembly line, apply translation and rotation then output assembly lines
         in_assembly=0;
         expand_assembly(buffer,0);
+        break;
+      case 3:  // &INCL line, don't write it out
+        in_assembly=0;
         break;
     }
   }
@@ -360,8 +367,15 @@ void expand_assembly(char *buffer, int recurse_level){
       if(thisline->type==1){
         float *xyz, *rotate;
 
+        if(thisline->blockaid!=NULL&&thisline->blockaid->nkeywordlist>0){
+          char line_before2[10000];
 
-        printf("%s ",thisline->line_before);
+          subst_keys(line_before2,thisline,thisline->line_before);
+          printf("%s ",line_before2);
+        }
+        else{
+          printf("%s ",thisline->line_before);
+        }
         for(i=0;i<6;i++){
           xb[i]=thisline->xb[i]-assem->xyz0[i/2];
         }
@@ -392,7 +406,15 @@ void expand_assembly(char *buffer, int recurse_level){
             printf("%s,",charxb);
           }
         }
-        printf("%s\n",thisline->line_after);
+        if(thisline->blockaid!=NULL&&thisline->blockaid->nkeywordlist>0){
+          char line_after2[10000];
+
+          subst_keys(line_after2,thisline,thisline->line_after);
+          printf("%s ",line_after2);
+        }
+        else{
+          printf("%s\n",thisline->line_after);
+        }
 
       }
       else if(thisline->type==2){
@@ -421,6 +443,137 @@ void reorder(float *xy){
   xy[1]=xymax;
 }
 
+/* ------------------ subst ------------------------ */
+
+void subst(char *line, char *keybeg,char *keyend,char *val){
+  char lineend[10000];
+  size_t len_from, len_to;
+
+  if(keybeg==NULL||keyend==NULL)return;
+
+  len_from=keyend-keybeg;
+  if(len_from<1)return;
+
+  len_to=strlen(val);
+  if(len_to<0)return;
+
+  strcpy(lineend,keyend);
+  if(len_to>0)strncpy(keybeg,val,len_to);
+  strcat(keybeg+len_to,lineend);
+
+}
+
+/* ------------------ get_keyend ------------------------ */
+
+char *get_keyend(char *keybeg){
+  char *key;
+
+  key=keybeg;
+  for(key=keybeg;;key++){
+    if(*key=='\0')return NULL;
+    if(*key=' '||*key==','||*key=='/')return key;
+    if(key-keybeg>1000)return NULL;
+  }
+}
+
+/* ------------------ get_val ------------------------ */
+
+char *get_val(char *keybeg, char *keyend){
+  char key2[100],*key;
+  char *c2;
+
+  if(keybeg==NULL||keyend==NULL)return NULL;
+
+  c2=key2;
+  for(key=keybeg;key<keyend;key++){
+    *c2++=*key;
+  }
+  *c2='\0';
+  //  get value associated with key2
+
+  return NULL;
+}
+
+/* ------------------ subst_keys ------------------------ */
+
+void subst_keys(char *line_after,fdsdata *thisline,char *line_before){
+  char line[10000];
+  char *keybeg, *keyend, *val;
+
+  strcpy(line,line_before);
+  keybeg=strstr(line,"#");
+  keyend=get_keyend(keybeg);
+
+  val=get_val(keybeg,keyend);
+  while(val!=NULL){
+    subst(line,keybeg,keyend,val);
+
+    keybeg=strstr(line,"#");
+    keyend=get_keyend(keybeg);
+
+    val=get_val(keybeg,keyend);
+  }
+  strcpy(line_after,line);
+  return;
+}
+  
+
+/* ------------------ get_keywords ------------------------ */
+
+void get_keywords(blockaiddata *blockaidi, char *buffer){
+  char buffer2[1024], *buffptr;
+  char *key, *endkey, *val, *endval;
+  int nkeys;
+
+  strcpy(buffer2,buffer);
+  buffptr=buffer2;
+  nkeys=0;
+  for(key=strstr(buffptr,"#");key!=NULL;){
+    nkeys++;
+    buffptr=key+1;
+    key=strstr(buffptr,"#");
+  }
+  blockaidi->nkeywordlist=0;
+  if(nkeys==0)return;
+
+  NewMemory((void **)&blockaidi->keyword_list,nkeys*sizeof(char *));
+  NewMemory((void **)&blockaidi->val_list,nkeys*sizeof(char *));
+  nkeys=0;
+  buffptr=buffer2;
+
+  for(key=strstr(buffptr,"#");key!=NULL;){
+    size_t lenkey, lenval;
+    char *ckey, *cval;
+
+    endkey=strstr(key+1,"=");
+    if(endkey==NULL)break;
+
+    val=strstr(endkey+1,"'");
+    if(val==NULL)break;
+    val++;
+
+    endval=strstr(val,"'");
+    if(endval==NULL)break;
+    *endkey='\0';
+    *endval='\0';
+    lenkey=strlen(key);
+    lenval=strlen(val);
+    if(lenkey<1||lenval<1)continue;
+
+    NewMemory((void **)&ckey,lenkey+1);
+    NewMemory((void **)&cval,lenval+1);
+    strcpy(ckey,key);
+    strcpy(cval,val);
+    blockaidi->keyword_list[nkeys]=ckey;
+    blockaidi->val_list[nkeys]=cval;
+    nkeys++;
+    buffptr=endval+1;
+    key=strstr(buffptr,"#");
+  }
+  blockaidi->nkeywordlist=nkeys;
+  return;
+}
+
 /* ------------------ create_assembly ------------------------ */
 
 blockaiddata *create_assembly(char *buffer){
@@ -436,6 +589,7 @@ blockaiddata *create_assembly(char *buffer){
   blockaidi->next=bnext;
   bprev->next=blockaidi;
   bnext->prev=blockaidi;
+  get_keywords(blockaidi,buffer);
 
   orig=blockaidi->xyz0;
 
@@ -483,6 +637,7 @@ void update_assembly(blockaiddata *assembly,char *buffer){
 
   thisfds->line=NULL;
   thisfds->is_obst=0;
+  thisfds->blockaid=NULL;
   if(match(buffer,"&OBST",5)==1||
     match(buffer,"&HOLE",5)==1||
     match(buffer,"&VENT",5)==1){
@@ -494,6 +649,15 @@ void update_assembly(blockaiddata *assembly,char *buffer){
   }
   else if(match(buffer,"&GRP",4)==1){
     thisfds->type=2;
+    if(strstr(buffer,"#")!=NULL){
+      NewMemory((void **)&thisfds->blockaid,sizeof(blockaiddata ));
+      if(thisfds->blockaid!=NULL){
+        get_keywords(thisfds->blockaid, buffer);
+      }
+    }
+    else{
+      thisfds->blockaid=NULL;
+    }
   }
   else{
     thisfds->type=0;
@@ -548,6 +712,8 @@ void update_assembly(blockaiddata *assembly,char *buffer){
   thisfds->next=next;
   next->prev=thisfds;
 }
+
+/* ------------------ remove_assemblyb ------------------------ */
 
 void remove_assembly(blockaiddata *assemb){
 }
