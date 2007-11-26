@@ -9642,60 +9642,34 @@ Following the completion of a successful run, a summary of the CPU
 usage per subroutine is listed. This is useful in determining where
 most of the computational effort is being placed.
 
-\section{Plot3D Data}
-\label{out:PL3D}
+\section{Heat Release Rate and Related Quantities}
 
-Quantities over the entire mesh can be output in a format used by the graphics package {\bf Plot3D}.
-The Plot3D data sets are single precision (32 bit reals), whole and
-unformatted. Note that there is blanking, that is,
-blocked out data points are not plotted.
-If the statement {\ct WRITE\_XYZ=.TRUE.} is included on the {\ct DUMP}
-line, then the mesh data is written out to a file called {\bf CHID.xyz}
+\label{out:hrr}
+The heat release rate of the fire, plus other global energy-related quantities, are automatically written into a text file
+called {\bf CHID\_hrr.csv}. The format of the file is as follows
 
 \footnotesize
 \begin{verbatim}
-      WRITE(LU13) IBAR+1,JBAR+1,KBAR+1
-      WRITE(LU13) (((X(I),I=0,IBAR),J=0,JBAR),K=0,KBAR),
-     .            (((Y(J),I=0,IBAR),J=0,JBAR),K=0,KBAR),
-     .            (((Z(K),I=0,IBAR),J=0,JBAR),K=0,KBAR),
-     .     (((IBLK(I,J,K),I=0,IBAR),J=0,JBAR),K=0,KBAR)
-\end{verbatim}
+s,kW,kW,kW,kW,kg/s,atm,atm
+FDS_HRR_Time,HRR,RAD_LOSS,CONV_LOSS,COND_LOSS,BURN_RATE,ZONE_01,ZONE_02, ...
+ 0.0000000E+000, 0.0000000E+000, ...
+ 3.5355338E-001, 0.0000000E+000, ...
+ .
+ .
+ .
+ \end{verbatim}
 \normalsize
-where {\ct X, Y} and {\ct Z} are the coordinates of the cell corners,
-and {\ct IBLK} is an indicator of whether or not the cell is blocked.
-If the point ({\ct X,Y,Z}) is completely embedded within a solid region,
-then {\ct IBLK} is 0. Otherwise, {\ct IBLK} is 1. Normally, the mesh
-file is not dumped.
 
-The flow variables are written to a file called {\bf CHID\_****\_**.q},
-where the stars indicate a time at which the data is output.
-The file is written with the lines
+\noindent
+{\ct HRR} is the total heat release rate, {\ct RAD\_LOSS} is the amount of thermal radiation lost to the boundaries,
+{\ct CONV\_LOSS} is the rate of energy that is flowing out of (positive) or into (negative) the computational domain,
+{\ct COND\_LOSS} is the rate of energy that is being conducted into (positive) or out of (negative) the solid surfaces,
+{\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, {\em etc.}, are the background pressures of the various
+pressure {\ct ZONE}s.
 
-\footnotesize
-\begin{verbatim}
-      WRITE(LU14) IBAR+1,JBAR+1,KBAR+1
-      WRITE(LU14) ZERO,ZERO,ZERO,ZERO
-      WRITE(LU14) ((((QQ(I,J,K,N),I=0,IBAR),J=0,JBAR),K=0,KBAR),N=1,5)
-\end{verbatim}
-\normalsize
-The five channels {\ct N=1,5} are by default the temperature
-($^\circ$C), the $u$, $v$ and
-$w$ components of the velocity (m/s), and the heat release rate
-per unit volume (kW/m$^3$). Alternate variables can be specified with
-the input parameter {\ct PLOT3D\_QUANTITY(1:5)} on the {\ct DUMP} line.
-Note that the data is interpolated at
-cell corners, thus the dimensions of the Plot3D data sets are
-one larger than the dimensions of the computational mesh.
 
-Smokeview can display the Plot3D data. In
-addition, the Plot3D data sets can be read into some other graphics
-programs that accept the data format.
-This particular format is very convenient, and recognized by
-a number of graphics packages, including AVS, IRIS Explorer
-and Tecplot
-\footnote{With the exception of Smokeview,
-the graphics packages referred to in this document are
-not included with the source code, but are commercially available.}.
+
+
 
 \section{Device Output Data}
 \label{out:DEVC}
@@ -9707,19 +9681,17 @@ group {\ct DEVC} is output in comma delimited format in a file called
 
 \footnotesize
 \begin{verbatim}
-N_DEVC
+s        , UNITS(1) , UNITS(2) , ... , UNITS(N_DEVC)
 FDS Time , ID(1)    , ID(2)    , ... , ID(N_DEVC)
-TIME , QUANTITY(1) , QUANTITY(2) , ... , QUANTITY(N_DEVC)
-s    , UNITS(1)    , UNITS(2)    , ... , UNITS(N_DEVC)
-T(1) , VAL(1,1)    , VAL(2,1)    , ... , VAL(N_DEVC,1)
-T(2) , VAL(1,2)    , VAL(2,2)    , ... , VAL(N_DEVC,2)
+T(1)     , VAL(1,1) , VAL(2,1) , ... , VAL(N_DEVC,1)
+T(2)     , VAL(1,2) , VAL(2,2) , ... , VAL(N_DEVC,2)
                       .
                       .
                       .
 \end{verbatim}
 \normalsize
 where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined
-ID of the {\ct I}th device, {\ct QUANTITY(I)} is the physical quantity represented,
+ID of the {\ct I}th device,
 {\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
 {\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time.
 The files can be imported into Microsoft Excel or almost any other
@@ -9735,20 +9707,20 @@ namelist group {\ct CTRL} is output in comma delimited format in a file called
 
 \footnotesize
 \begin{verbatim}
-N_CTRL
-FDS Time , ID(1)    , ID(2)    , ... , ID(N_CTRL)
-TIME ,   ,  , ... ,
-s    , status    , status    , ... , status(N_CTRL)
-T(1) , VAL(1,1)    , VAL(2,1)    , ... , VAL(N_CTRL,1)
-T(2) , VAL(1,2)    , VAL(2,2)    , ... , VAL(N_CTRL,2)
-                      .
-                      .
-                      .
+s,status,status,status,status
+FDS Time,ID(1),ID(2),...,ID(N_CTRL)
+ 0.00000E+000,-001, 001, ...
+ 1.11803E-001,-001,-001, ...
+            .
+            .
+            .
+
 \end{verbatim}
 \normalsize
-where {\ct N\_CTRL} is the number of control functions, {\ct ID(I)} is the user-defined
-ID of the {\ct I}th control function, and
-{\ct VAL(I,J)} the state, {\ct -1 = .FALSE. and +1 = .TRUE.}, of the {\ct I}th control function at the {\ct J}th time.
+
+\noindent
+where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the
+state {\ct -1 = .FALSE. and +1 = .TRUE.} of the {\ct I}th control function at the particular time.
 The files can be imported into Microsoft Excel or almost any other
 spread sheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
 
@@ -9761,6 +9733,9 @@ file {\bf CHID\_mass.csv}. The file consists of several columns,
 the first column containing the time in seconds, the second contains the
 total mass of all the gas species in the computational domain in units of kg,
 the next lines contain the total mass of the individual species.
+
+You must specifically ask that this file be generated, as it can potentially cost a fair amount of CPU time to generate. Set
+{\ct MASS\_FILE=.TRUE.} on the {\ct DUMP} line to create this output file.
 
 \section{Mixture Fraction State Relations}
 
@@ -9818,6 +9793,64 @@ Tecplot
 reads this file and produces contour, streamline and/or vector plots.
 See Section~\ref{info:fds2ascii} for more details about the program
 {\bf fds2ascii}.
+
+\section{Plot3D Data}
+\label{out:PL3D}
+
+Quantities over the entire mesh can be output in a format used by the graphics package {\bf Plot3D}.
+The Plot3D data sets are single precision (32 bit reals), whole and
+unformatted. Note that there is blanking, that is,
+blocked out data points are not plotted.
+If the statement {\ct WRITE\_XYZ=.TRUE.} is included on the {\ct DUMP}
+line, then the mesh data is written out to a file called {\bf CHID.xyz}
+
+\footnotesize
+\begin{verbatim}
+      WRITE(LU13) IBAR+1,JBAR+1,KBAR+1
+      WRITE(LU13) (((X(I),I=0,IBAR),J=0,JBAR),K=0,KBAR),
+     .            (((Y(J),I=0,IBAR),J=0,JBAR),K=0,KBAR),
+     .            (((Z(K),I=0,IBAR),J=0,JBAR),K=0,KBAR),
+     .     (((IBLK(I,J,K),I=0,IBAR),J=0,JBAR),K=0,KBAR)
+\end{verbatim}
+\normalsize
+
+\noindent
+where {\ct X, Y} and {\ct Z} are the coordinates of the cell corners,
+and {\ct IBLK} is an indicator of whether or not the cell is blocked.
+If the point ({\ct X,Y,Z}) is completely embedded within a solid region,
+then {\ct IBLK} is 0. Otherwise, {\ct IBLK} is 1. Normally, the mesh
+file is not dumped.
+
+The flow variables are written to a file called {\bf CHID\_****\_**.q},
+where the stars indicate a time at which the data is output.
+The file is written with the lines
+
+\footnotesize
+\begin{verbatim}
+      WRITE(LU14) IBAR+1,JBAR+1,KBAR+1
+      WRITE(LU14) ZERO,ZERO,ZERO,ZERO
+      WRITE(LU14) ((((QQ(I,J,K,N),I=0,IBAR),J=0,JBAR),K=0,KBAR),N=1,5)
+\end{verbatim}
+\normalsize
+The five channels {\ct N=1,5} are by default the temperature
+($^\circ$C), the $u$, $v$ and
+$w$ components of the velocity (m/s), and the heat release rate
+per unit volume (kW/m$^3$). Alternate variables can be specified with
+the input parameter {\ct PLOT3D\_QUANTITY(1:5)} on the {\ct DUMP} line.
+Note that the data is interpolated at
+cell corners, thus the dimensions of the Plot3D data sets are
+one larger than the dimensions of the computational mesh.
+
+Smokeview can display the Plot3D data. In
+addition, the Plot3D data sets can be read into some other graphics
+programs that accept the data format.
+This particular format is very convenient, and recognized by
+a number of graphics packages, including AVS, IRIS Explorer
+and Tecplot
+\footnote{With the exception of Smokeview,
+the graphics packages referred to in this document are
+not included with the source code, but are commercially available.}.
+
 
 \section{Boundary Files}%Kevin
 \label{out:BNDF}
