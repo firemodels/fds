@@ -19,11 +19,14 @@ typedef struct _fdsdata {
   float xb[6];
   int ibeg, iend;
   int type,is_obst;
+  struct _blockaiddata *blockaid;
   struct _fdsdata *prev, *next;
 } fdsdata;
 
 typedef struct _blockaiddata {
   char *id;
+  char **keyword_list, **val_list;
+  int nkeywordlist;
   float xyz0[4];
   float bb_min[3], bb_dxyz[3], bb_max[3];
   int bb_box_defined;
@@ -59,6 +62,10 @@ void rotatexy(float *dx, float *dy, float rotate, float *dxy);
 void get_boundbox(blockaiddata *assem, int recurse_level);
 void init_bb(void);
 void reorder(float *xy);
+void get_keywords(blockaiddata *blockaidi, char *buffer);
+void subst_keys(char *line_after,fdsdata *thisline,char *line_before);
+char *get_val(char *keybeg, char *keyend);
+char *get_keyend(char *keybeg);
 
 EXTERN blockaiddata *blockaidinfo, *blockaid_first, *blockaid_last, ba_first, ba_last;
 EXTERN blockaiddata **assemblylist;
