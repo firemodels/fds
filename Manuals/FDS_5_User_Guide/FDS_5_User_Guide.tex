@@ -4798,7 +4798,10 @@ is in units of kJ/kg, the specific heat is in units of
 kJ/kg/K, and the density is in units of kg/m$^3$.
 {\ct FUEL=.TRUE.} automatically
 invokes a mixture fraction calculation in which fuel
-from the evaporating fuel droplets is burned according to the overall reaction scheme.
+from the evaporating fuel droplets is burned according to the overall reaction scheme. Because the default mixture fraction
+combustion model assumes that fuel and oxygen burn when mixed (assuming that the oxygen concentration is above an empirically
+determined threshold), there is no need to specify an ignition source. For most liquid fuels, the small amount of evaporation
+at ambient temperature is enough to start the combustion process. In some sense, there is an implicit pilot flame.
 
 Note
 that this construct is fragile and subject to mesh
@@ -9134,6 +9137,9 @@ The HRR curve for this example is given here:
 \begin{center}
 \includegraphics[width=4.5in]{FIGURES/spray_burner_HRR}
 \end{center}
+
+Note that in this example there is no need for a separate ignition source. The combustion model assumes fuel and oxygen burn
+on contact, and so the small amount of evaporation at ambient temperature is enough to start the reaction.
 
 
 \chapter{Sensitivity Analysis}
