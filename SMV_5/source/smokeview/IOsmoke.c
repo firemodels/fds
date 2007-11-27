@@ -4549,7 +4549,7 @@ void initcull(mesh *meshi, int cullflag){
   float xbeg, xend, ybeg, yend, zbeg, zend;
   int iskip, jskip, kskip;
 
-  if(cullflag==1){
+  if(cullflag==1&&meshi->ibar>5){
     iskip = meshi->ibar/6;
     jskip = iskip;
     kskip = iskip;

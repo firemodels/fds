@@ -66,6 +66,13 @@ int readfds(char *fdsfile){
         break;
       case 2:  // assembly line, apply translation and rotation then output assembly lines
         in_assembly=0;
+        get_keywords(blockaid_first, buffer);
+
+        nkeyvalstack=1;
+        keyvalstack[nkeyvalstack-1].keyword_list=blockaid_first->keyword_list;
+        keyvalstack[nkeyvalstack-1].val_list=blockaid_first->val_list;
+        keyvalstack[nkeyvalstack-1].nkeywordlist=blockaid_first->nkeywordlist;
+
         expand_assembly(buffer,0);
         break;
       case 3:  // &INCL line, don't write it out
@@ -196,7 +203,7 @@ void get_boundbox(blockaiddata *assem,int recurse_level){
         rotate2=0.0;
         get_irvals(linebuffer, "ROTATE", 1, NULL, &rotate2, NULL, NULL);
 
-        id2=getkeyid(linebuffer,"GRP_ID");
+        id2=getkeyid(linebuffer,"ID");
         assem2=get_assembly(id2);
 
         get_boundbox(assem2,recurse_level+1);
@@ -314,7 +321,7 @@ void expand_assembly(char *buffer, int recurse_level){
   rotate=0.0;
   get_irvals(buffer, "ROTATE", 1, NULL, &rotate, NULL, NULL);
 
-  id=getkeyid(buffer,"GRP_ID");
+  id=getkeyid(buffer,"ID");
   assem=get_assembly(id);
   if(assem==NULL){
     printf(" **** warning ****\n");
@@ -323,6 +330,7 @@ void expand_assembly(char *buffer, int recurse_level){
   }
 
   assemblylist[recurse_level]=assem;
+
   offset_rotate[4*recurse_level  ] =offset[0];
   offset_rotate[4*recurse_level+1]=offset[1];
   offset_rotate[4*recurse_level+2]=offset[2];
@@ -366,12 +374,20 @@ void expand_assembly(char *buffer, int recurse_level){
     if(thisline->line_after!=NULL&&thisline->line_before!=NULL){
       if(thisline->type==1){
         float *xyz, *rotate;
+        char *block_key;
 
-        if(thisline->blockaid!=NULL&&thisline->blockaid->nkeywordlist>0){
+        nkeyvalstack++;
+        keyvalstack[nkeyvalstack-1].keyword_list=assem->keyword_list;
+        keyvalstack[nkeyvalstack-1].val_list=assem->val_list;
+        keyvalstack[nkeyvalstack-1].nkeywordlist=assem->nkeywordlist;
+
+        block_key=strstr(thisline->line_before,"#");
+        if(block_key!=NULL){
           char line_before2[10000];
 
-          subst_keys(line_before2,thisline,thisline->line_before);
-          printf("%s ",line_before2);
+          strcpy(line_before2,thisline->line_before);
+          subst_keys(line_before2,recurse_level);
+          printf("%s\n",line_before2);
         }
         else{
           printf("%s ",thisline->line_before);
@@ -406,22 +422,45 @@ void expand_assembly(char *buffer, int recurse_level){
             printf("%s,",charxb);
           }
         }
-        if(thisline->blockaid!=NULL&&thisline->blockaid->nkeywordlist>0){
+        block_key=strstr(thisline->line_after,"#");
+        if(block_key!=NULL){
           char line_after2[10000];
 
-          subst_keys(line_after2,thisline,thisline->line_after);
-          printf("%s ",line_after2);
+          strcpy(line_after2,thisline->line_after);
+          subst_keys(line_after2,recurse_level);
+          printf("%s\n",line_after2);
         }
         else{
           printf("%s\n",thisline->line_after);
         }
+        nkeyvalstack--;
 
       }
       else if(thisline->type==2){
         char linebuffer[1024];
+        blockaiddata *blockaidi;
+
+        nkeyvalstack++;
+        blockaidi = thisline->blockaid;
+        if(blockaidi!=NULL){
+          keyvalstack[nkeyvalstack-1].keyword_list=blockaidi->keyword_list;
+          keyvalstack[nkeyvalstack-1].val_list=blockaidi->val_list;
+          keyvalstack[nkeyvalstack-1].nkeywordlist=blockaidi->nkeywordlist;
+        }
+        else{
+          keyvalstack[nkeyvalstack-1].keyword_list=NULL;
+          keyvalstack[nkeyvalstack-1].val_list=NULL;
+          keyvalstack[nkeyvalstack-1].nkeywordlist=0;
+        }
+
+        nkeyvalstack++;
+        keyvalstack[nkeyvalstack-1].keyword_list=assem->keyword_list;
+        keyvalstack[nkeyvalstack-1].val_list=assem->val_list;
+        keyvalstack[nkeyvalstack-1].nkeywordlist=assem->nkeywordlist;
 
         strcpy(linebuffer,thisline->line);
         expand_assembly(linebuffer,recurse_level+1);
+        nkeyvalstack-=2;
       }
     }
   }
@@ -445,9 +484,12 @@ void reorder(float *xy){
 
 /* ------------------ subst ------------------------ */
 
-void subst(char *line, char *keybeg,char *keyend,char *val){
+void subst(char *keybeg,char *keyend,char *val){
   char lineend[10000];
   size_t len_from, len_to;
+  int i;
+  char *c;
+  char *valcopy;
 
   if(keybeg==NULL||keyend==NULL)return;
 
@@ -458,62 +500,83 @@ void subst(char *line, char *keybeg,char *keyend,char *val){
   if(len_to<0)return;
 
   strcpy(lineend,keyend);
-  if(len_to>0)strncpy(keybeg,val,len_to);
-  strcat(keybeg+len_to,lineend);
-
-}
-
-/* ------------------ get_keyend ------------------------ */
-
-char *get_keyend(char *keybeg){
-  char *key;
-
-  key=keybeg;
-  for(key=keybeg;;key++){
-    if(*key=='\0')return NULL;
-    if(*key=' '||*key==','||*key=='/')return key;
-    if(key-keybeg>1000)return NULL;
+  c=keybeg;
+  valcopy=val;
+  for(i=0;i<len_to;i++){
+    *c++=*valcopy++;
   }
+  for(i=0;i<strlen(lineend);i++){
+    *c++=lineend[i];
+  }
+  *c='\0';
+
 }
 
 /* ------------------ get_val ------------------------ */
 
-char *get_val(char *keybeg, char *keyend){
-  char key2[100],*key;
-  char *c2;
+char *get_val(char *key, int recurse_level){
+  int i,j;
 
-  if(keybeg==NULL||keyend==NULL)return NULL;
+  if(key==NULL||strlen(key)==0)return NULL;
 
-  c2=key2;
-  for(key=keybeg;key<keyend;key++){
-    *c2++=*key;
+  for(i=0;i<nkeyvalstack;i++){
+    char **keylist, **vallist;
+
+    keylist=keyvalstack[i].keyword_list;
+    if(keylist==NULL)continue;
+    vallist=keyvalstack[i].val_list;
+    for(j=0;j<keyvalstack[i].nkeywordlist;j++){
+      if(keylist[j]==NULL)continue;
+      if(strcmp(keylist[j],key)==0)return vallist[j];
+    }
   }
-  *c2='\0';
-  //  get value associated with key2
-
   return NULL;
 }
 
+/* ------------------ getkey ------------------------ */
+
+void getkey(char *line, char *key, char **keybeg, char **keyend){
+  char *keyptr, *lineptr;
+
+  *keybeg=strstr(line,"#");
+  if(*keybeg==NULL)return;
+  for(keyptr=key,lineptr=*keybeg;;){
+    *keyptr=*lineptr;
+    if(*lineptr=='\0'||*lineptr==' '||*lineptr==','||*lineptr=='/'){
+      *keyptr='\0';
+      *keyend=lineptr;
+      return;
+    }
+    lineptr++;
+    keyptr++;
+  }
+}
 /* ------------------ subst_keys ------------------------ */
 
-void subst_keys(char *line_after,fdsdata *thisline,char *line_before){
-  char line[10000];
+void subst_keys(char *line_in, int recurse_level){
+  char line[10000],key[100];
   char *keybeg, *keyend, *val;
 
-  strcpy(line,line_before);
-  keybeg=strstr(line,"#");
-  keyend=get_keyend(keybeg);
-
-  val=get_val(keybeg,keyend);
-  while(val!=NULL){
-    subst(line,keybeg,keyend,val);
-
-    keybeg=strstr(line,"#");
-    keyend=get_keyend(keybeg);
-
-    val=get_val(keybeg,keyend);
+  strcpy(line,line_in);
+  getkey(line,key, &keybeg, &keyend);
+  if(keybeg!=NULL){
+    val=get_val(key,recurse_level);
   }
-  strcpy(line_after,line);
+  else{
+    val=NULL;
+  }
+  while(val!=NULL){
+    subst(keybeg,keyend,val);
+
+    getkey(line,key, &keybeg, &keyend);
+    if(keybeg!=NULL){
+      val=get_val(key,recurse_level);
+    }
+    else{
+      val=NULL;
+    }
+  }
+  strcpy(line_in ,line);
   return;
 }
   
@@ -524,6 +587,19 @@ void get_keywords(blockaiddata *blockaidi, char *buffer){
   char buffer2[1024], *buffptr;
   char *key, *endkey, *val, *endval;
   int nkeys;
+  int i;
+
+  for(i=0;i<blockaidi->nkeywordlist;i++){
+    char *key, *val;
+
+    key=blockaidi->keyword_list[i];
+    val=blockaidi->val_list[i];
+    FREEMEMORY(key);
+    FREEMEMORY(val);
+  }
+  FREEMEMORY(blockaidi->keyword_list);
+  FREEMEMORY(blockaidi->val_list);
+  blockaidi->nkeywordlist=0;
 
   strcpy(buffer2,buffer);
   buffptr=buffer2;
@@ -556,6 +632,8 @@ void get_keywords(blockaiddata *blockaidi, char *buffer){
     if(endval==NULL)break;
     *endkey='\0';
     *endval='\0';
+    trim(key);
+    trim(val);
     lenkey=strlen(key);
     lenval=strlen(val);
     if(lenkey<1||lenval<1)continue;
@@ -571,6 +649,15 @@ void get_keywords(blockaiddata *blockaidi, char *buffer){
     key=strstr(buffptr,"#");
   }
   blockaidi->nkeywordlist=nkeys;
+  for(i=0;i<nkeys;i++){
+    char *key, *val;
+
+    key=blockaidi->keyword_list[i];
+    val=blockaidi->val_list[i];
+#ifdef _DEBUG
+    printf("key=%s val=%s\n",key,val);
+#endif
+  }
   return;
 }
 
@@ -583,6 +670,9 @@ blockaiddata *create_assembly(char *buffer){
   fdsdata *first_line, *last_line;
 
   NewMemory((void **)&blockaidi,sizeof(blockaiddata));
+  blockaidi->keyword_list=NULL;
+  blockaidi->val_list=NULL;
+  blockaidi->nkeywordlist=0;
   bprev=blockaid_first;
   bnext=blockaid_first->next;
   blockaidi->prev=bprev;
@@ -603,7 +693,7 @@ blockaiddata *create_assembly(char *buffer){
     orig[2]=0.0;
     orig[3]=1.0;
   }
-  id=getkeyid(buffer,"GRP_ID");
+  id=getkeyid(buffer,"ID");
   if(id!=NULL){
     NewMemory((void **)&blockaidi->id,strlen(id)+1);
     strcpy(blockaidi->id,id);
@@ -651,6 +741,9 @@ void update_assembly(blockaiddata *assembly,char *buffer){
     thisfds->type=2;
     if(strstr(buffer,"#")!=NULL){
       NewMemory((void **)&thisfds->blockaid,sizeof(blockaiddata ));
+      thisfds->blockaid->keyword_list=NULL;
+      thisfds->blockaid->val_list=NULL;
+      thisfds->blockaid->nkeywordlist=0;
       if(thisfds->blockaid!=NULL){
         get_keywords(thisfds->blockaid, buffer);
       }
@@ -736,6 +829,7 @@ void init_bb(void){
     assm->bb_box_defined=0;
   }
   init_boundbox0();
+//#ifdef _DEBUG
   for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
     float *x1, *x2, *dx;
 
@@ -748,6 +842,7 @@ void init_bb(void){
     printf("assm=%s\n",assm->id);
     printf("  bounds=(%f,%f), (%f,%f), (%f,%f)\n",x1[0],x2[0],x1[1],x2[1],x1[2],x2[2]);
   }
+//#endif
 }
 
 /* ------------------ get_assembly ------------------------ */
@@ -776,6 +871,10 @@ void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *nex
   newassem->xyz0[2]=orig[2];
   newassem->prev=prev;
   newassem->next=next;
+  newassem->keyword_list=NULL;
+  newassem->val_list=NULL;
+  newassem->nkeywordlist=0;
+
 
   prev->next=newassem;
   next->prev=newassem;

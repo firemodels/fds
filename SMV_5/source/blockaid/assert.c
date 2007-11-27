@@ -16,7 +16,7 @@ void _Assert(char *filename, unsigned linenumber){
 #endif
 
 #ifdef _DEBUG
-   y=1.0/x;
+   y=(float)1.0/(float)x;
 #endif
    fflush(NULL);
    fprintf(stderr, "\nAssertion failed: %s, line %u\n",filename, linenumber);
