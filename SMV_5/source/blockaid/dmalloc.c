@@ -152,7 +152,7 @@ void FreeAllMemory(void){
 
 void FreeMemory(void *pv){
 #ifdef _DEBUG
-  int len_memory;
+  size_t len_memory;
 #endif
   int infoblocksize;
 #ifdef pp_MEM2
@@ -368,7 +368,8 @@ static blockinfo *GetBlockInfo(bbyte *pb){
 
 int _GGetMemoryInfo(void){
   blockinfo *pbi;
-  int n=0,size=0;
+  int n=0;
+  size_t size=0;
 
   for (pbi = pbiHead; pbi != NULL; pbi = pbi->pbiNext)
   {
@@ -382,7 +383,8 @@ int _GGetMemoryInfo(void){
 
 void _PrintMemoryInfo(void){
   blockinfo *pbi;
-  int n=0,size=0;
+  int n=0;
+  size_t size=0;
 
   for (pbi = pbiHead; pbi != NULL; pbi = pbi->pbiNext)
   {
@@ -397,7 +399,8 @@ void _PrintMemoryInfo(void){
 
 void _PrintAllMemoryInfo(void){
   blockinfo *pbi;
-  int n=0,size=0;
+  int n=0;
+  size_t size=0;
 
   printf("\n\n");
   printf("********************************************\n");
@@ -537,7 +540,7 @@ mallocflag ValidPointer(void *pv, size_t size){
 
 char *_strcpy(char *s1, const char *s2){
   blockinfo *pbi;
-  int offset;
+  size_t offset;
   CheckMemory;
   pbi = GetBlockInfo_nofail(s1);
   if(pbi!=NULL){
@@ -552,7 +555,7 @@ char *_strcpy(char *s1, const char *s2){
 
 char *_strcat(char *s1, const char *s2){
   blockinfo *pbi;
-  int offset;
+  size_t offset;
   CheckMemory;
   pbi = GetBlockInfo_nofail(s1);
   if(pbi!=NULL){

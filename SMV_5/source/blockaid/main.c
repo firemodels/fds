@@ -71,10 +71,14 @@ int main(int argc, char **argv){
 }
 
 void startup(void){
+  nkeyvalstack=0;
   blockaid_first=&ba_first;
   blockaid_last=&ba_last;
   blockaid_first->prev=NULL;
   blockaid_first->next=blockaid_last;
+  blockaid_first->keyword_list=NULL;
+  blockaid_first->val_list=NULL;
+  blockaid_first->nkeywordlist=0;
   blockaid_last->prev=blockaid_first;
   blockaid_last->next=NULL;
   nblockaid=0;
