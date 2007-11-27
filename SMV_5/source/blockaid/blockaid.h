@@ -14,6 +14,11 @@
 #define EXTERN extern
 #endif
 
+typedef struct {
+  char **keyword_list, **val_list;
+  int nkeywordlist;
+} keyvaldata;
+
 typedef struct _fdsdata {
   char *line,*linecopy,*line_before, *line_after;
   float xb[6];
@@ -33,7 +38,6 @@ typedef struct _blockaiddata {
   struct _fdsdata *first_line, *last_line;
   struct _fdsdata f_line, l_line;
   struct _blockaiddata *prev, *next;
-  struct _blockaiddata **assemblylist[MAXRECURSE];
 } blockaiddata;
 
 int getrevision(char *svn);
@@ -63,12 +67,13 @@ void get_boundbox(blockaiddata *assem, int recurse_level);
 void init_bb(void);
 void reorder(float *xy);
 void get_keywords(blockaiddata *blockaidi, char *buffer);
-void subst_keys(char *line_after,fdsdata *thisline,char *line_before);
-char *get_val(char *keybeg, char *keyend);
-char *get_keyend(char *keybeg);
+void subst_keys(char *line_after,int recurse_level);
+char *get_val(char *key, int recurse_level);
 
-EXTERN blockaiddata *blockaidinfo, *blockaid_first, *blockaid_last, ba_first, ba_last;
+EXTERN blockaiddata *blockaid_first, *blockaid_last, ba_first, ba_last;
 EXTERN blockaiddata **assemblylist;
+EXTERN keyvaldata keyvalstack[MAXRECURSE];
+EXTERN nkeyvalstack;
 EXTERN int nassembly;
 EXTERN float *offset_rotate;
 EXTERN int nblockaid;
