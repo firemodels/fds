@@ -9,30 +9,39 @@ $Revision$<br>
 
 <p>Blockaid reads in an FDS input file and outputs a new one where specified
   groups of blockages, holes and vents are replicated, translated and/or rotated.
-  These groups are surrounded with <tt>&BGRP</tt> and <tt>&EGRP</tt> keywords as in:<br />
+  These groups are surrounded with keywords <tt>&BGRP</tt> and <tt>&EGRP</tt> as in:<br />
   <p><tt>
-      &BGRP GRP_ID='group label' ORIG=x,y,z /<br />
+      &BGRP ID='group label' /<br />
  </tt>
-        <p>&nbsp&nbsp&nbsp one or more &OBST, &VENT, &HOLE or &GRP lines<br />
+        <p>&nbsp&nbsp&nbsp one or more <tt>&OBST, &VENT, &HOLE</tt> or <tt>&GRP</tt> lines<br />
 <tt>          
       <p>&EGRP /<br />
  </tt>
-  <p>where ORIG is the point about which rotation occurs.  Note that the <tt>&BGRP &EGRP</tt> 
-  pair may contain references to other groups.
-  <p>A group may be replicated using:
-    <p><tt> &GRP GRP_ID='group label' XYZ=x,y,z ROTATE=angle /</tt>
-  <p>where x,y,z is the translation amount and angle is snapped to the 
-  nearest 90 degrees.
-  
-  <p>A collection of groups may be defined and stored in a file.  This file
-  is referenced using the <tt>&INCL</tt> keyword as in
+<p>and expanded using <tt>&GRP /</tt> .  
+<p>Notes:
+<ul>
+<li>A group may be expanded using:
+<tt> &GRP ID='group label' XYZ=x,y,z ROTATE=angle /</tt>
+where <em>x,y,z</em> is the translation amount and <em>angle</em> is the rotation amount snapped to the 
+  nearest 90 degrees. 
+<li>The &BGRP represents groups relative to a point defined by the <tt>XYZ0=x,y,z</tt> parameter.
+<li>Text substitions may be performed by placing one or more
+<tt>#keyword='value'</tt> terms on a <tt>&GRP</tt> 
+or a <tt>&BGRP</tt> line.
+Default keyword values may be specified on the <tt>&BGRP</tt> line.
+These parameters may be over-ridden on the <tt>&GRP</tt> line.
+
+<li>A collection of groups may be defined and stored in a file.  This file
+  is referenced using the <tt>&INCL</tt> keyword as in<br />
   <tt>&INCL FILE='file name' /</tt>
+<li>A group may be defined recurseivly in terms of other groups.
+</UL>
   
   <h2>Examples</h2>
   <h3>Arranging Furniture</h3>
 A group of blockages defining a couch:
 <pre>
-&BGRP GRP_ID='COUCH' ORIG=3.0,3.0,0.0 /
+&BGRP ID='COUCH' XYZ0=3.0,3.0,0.0 /
 &OBST   XB= 3.0, 5.0, 3.5, 3.7, 0.5, 0.9  ,   RGB=128, 64, 32 /
 &OBST   XB= 3.0, 3.2, 3.0, 3.5, 0.5, 0.6  ,   RGB= 64, 96, 64 /
 &OBST   XB= 4.8, 5.0, 3.0, 3.5, 0.5, 0.6  ,   RGB= 32,128, 96 /
@@ -42,28 +51,30 @@ A group of blockages defining a couch:
 &EGRP /
 </pre>
  <img src="blockaid1.png" width=320 align="right"/>
-<p>A group of three couches defining a living room arrangement:
+<p>A group of three couches defining a living room arrangement
+with a default origin of <tt>XYZ0=0.0,0.0,0.0</tt> is given by:
 <pre>
-&BGRP GRP_ID='LIVE1' ORIG=0.0,0.0,0.0 /
-&GRP GRP_ID='COUCH' XYZ=0.0,  0.0,0.0 ROTATE=180.0 /
-&GRP GRP_ID='COUCH' XYZ=2.0,  0.8,0.0 ROTATE=270.0 /
-&GRP GRP_ID='COUCH' XYZ=0.0,  3.0,0.0 ROTATE=0.0 /
+&BGRP ID='LIVE1' ORIG=0.0,0.0,0.0 /
+&GRP ID='COUCH' XYZ=0.8,  0.0,0.0 ROTATE=180.0 /
+&GRP ID='COUCH' XYZ=0.0,  0.8,0.0 ROTATE=90.0 /
+&GRP ID='COUCH' XYZ=0.8,  3.0,0.0 ROTATE=0.0 /
 &EGRP /
 </pre>
 
+
 <p>The <tt>&OBST</tt> and <tt>&HOLE</tt> keywords used by FDS to define 
 couches in 4 living room arrangements
-are expanded by Blockaid using:
+are expanded using:
 <pre>
-&GRP GRP_ID='LIVE1' XYZ=0.0,0.0,0.0 ROTATE=0.0 /
-&GRP GRP_ID='LIVE1' XYZ=4.0,0.0,0.0 ROTATE=90.0 /
-&GRP GRP_ID='LIVE1' XYZ=4.0,4.3,0.0 ROTATE=180.0 /
-&GRP GRP_ID='LIVE1' XYZ=0.0,4.3,0.0 ROTATE=270.0 /
+&GRP ID='LIVE1' XYZ=0.0,0.0,0.0 ROTATE=0.0 /
+&GRP ID='LIVE1' XYZ=5.5,0.0,0.0 ROTATE=90.0 /
+&GRP ID='LIVE1' XYZ=5.5,5.5 0.0 ROTATE=180.0 /
+&GRP ID='LIVE1' XYZ=0.0,5.5,0.0 ROTATE=270.0 /
 </pre>
 <h3>Stairs</h3>
 <p>Group of blockages to define a set of stairs for one half of a building story:</p>
 <pre>
-&BGRP GRP_ID='STAIRS' ORIG=0.0,0.0,0.0 /
+&BGRP ID='STAIRS' /
 &OBST   XB= 0.0, 1.0, 0.0, 0.4, 0.0, 0.2  ,   COLOR='RED' /  stairwell
 &OBST   XB= 0.0, 1.0, 0.3, 0.7, 0.2, 0.4  ,   RGB=100,50,25/  stairwell
 &OBST   XB= 0.0, 1.0, 0.6, 1.0, 0.4, 0.6  ,   RGB=100,50,25/  stairwell
@@ -86,19 +97,45 @@ are expanded by Blockaid using:
 <img src="story3.png" width=320 align="right"/>
 <p>Combine two sets of <em>half</em> stairs to form a full set of stairs:
 <pre>
-&BGRP GRP_ID='BISTAIRS' ORIG=0.0,0.0,0.0 /
-&GRP GRP_ID='STAIRS' XYZ=0.0,0.0,0.0 /
-&GRP GRP_ID='STAIRS' XYZ=0.0,-1.0,2.8 ROTATE=180.0 /
+&BGRP ID='FULLSTAIRS' /
+&GRP ID='STAIRS' XYZ=0.0,0.0,0.0 /
+&GRP ID='STAIRS' XYZ=0.0,-1.0,2.8 ROTATE=180.0 /
 &EGRP /
 </pre>
 
 <p>The &OBST keywords used by FDS to define a set of stairs for 
 3 floors are expanded by Blockaid using:
 <pre>
-&GRP GRP_ID='BISTAIRS' XYZ=0.0,1.0,0.0 /
-&GRP GRP_ID='BISTAIRS' XYZ=0.0,1.0,5.6 /
-&GRP GRP_ID='BISTAIRS' XYZ=0.0,1.0,11.2 /
+&GRP ID='FULLSTAIRS' XYZ=0.0,1.0,0.0 /
+&GRP ID='FULLSTAIRS' XYZ=0.0,1.0,5.6 /
+&GRP ID='FULLSTAIRS' XYZ=0.0,1.0,11.2 /
 </pre>
+
+<h3>Keyword Expansion</h3>
+<h4>Before Expansion</h4>
+Default keyword values may be specified on the <tt>&BGRP</tt> line.
+Keywords begin with <strong>#</strong>.
+Keyword values may be over-ridden on the <tt>&GRP</tt> line.  Define the group:
+<pre>
+&BGRP ID='TEST'  #SURF='GYPSUM' #COLOR1='100,100,100' /
+&OBST   XB= 3.0, 5.0, 3.5, 3.7, 0.5, 0.9  ,   RGB=#COLOR /
+&OBST   XB= 3.0, 5.0, 3.0, 3.7, 0.0, 0.5  ,   SURF_ID='#SURF' /
+&EGRP /
+</pre>
+<p>Expand the group:
+<pre>
+&GRP ID='TEST' / 
+&GRP ID='TEST' #COLOR='25,25,25' #SURF='PINE' /
+</pre>
+<h4>After Expansion</h4>
+<pre>
+&OBST   XB= 3.0, 5.0, 3.5, 3.7, 0.5, 0.9  ,   RGB=100,100,100 /
+&OBST   XB= 3.0, 5.0, 3.0, 3.7, 0.0, 0.5  ,   SURF_ID='GYPSUM' /
+
+&OBST   XB= 3.0, 5.0, 3.5, 3.7, 0.5, 0.9  ,   RGB=25,25,25 /
+&OBST   XB= 3.0, 5.0, 3.0, 3.7, 0.0, 0.5  ,   SURF_ID='PINE' /
+</pre>
+
 <p><hr>
 <p><address>
 <A HREF="http://www.bfrl.nist.gov" >Building and Fire Research Laboratory</A><BR>
