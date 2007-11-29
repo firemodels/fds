@@ -106,7 +106,7 @@ int read_pass1(char *fdsfile, int recurse_level){
 
     if(match(buffer,"&BGRP",5)==1){
       in_assembly=1;
-      assembly=create_assembly(buffer); // &BASM ID='....' ORIG=x,y,z
+      assembly=create_assembly(buffer); // &BASM ID='....' XYZ0=x,y,z
       continue;
     }
     if(match(buffer,"&EGRP",5)==1){ // &EASM /
@@ -683,7 +683,7 @@ blockaiddata *create_assembly(char *buffer){
 
   orig=blockaidi->xyz0;
 
-  if(get_irvals(buffer, "ORIG", 3, NULL, orig, NULL, NULL)==3){
+  if(get_irvals(buffer, "XYZ0", 3, NULL, orig, NULL, NULL)==3){
     // first 3 positions of orig are defined in get_irvals
     orig[3]=1.0;
   }
