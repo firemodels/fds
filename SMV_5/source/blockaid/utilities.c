@@ -31,14 +31,14 @@ void usage(void){
     printf("  This program reads in an FDS input file and outputs a new one where specified\n");
     printf("  groups of blockages, holes and vents are replicated, translated and rotated.\n");
     printf("  These groups are surrounded with &BGRP and &EGRP as in:\n");
-    printf("      &BGRP ID='group label' ORIG=x,y,z /\n");
+    printf("      &BGRP ID='group label' XYZ0=x,y,z /\n");
     printf("          one or more &OBST, &VENT, &HOLE \n");
     printf("      &EGRP /\n");
-    printf("  where ORIG group's origin.  This group may be replicated using:\n");
+    printf("  where XYZ0 is the group's origin.  This group may be replicated using:\n");
     printf("     &GRP ID='group label' XYZ=x,y,z ROTATE=angle /\n");
-    printf("  where x,y,z is the translation amount and angle is snapped to the \n");
-    printf("  nearest 90 degrees.\n");
-    printf("  See http://fire.nist.gov/fds for more information.\n");
+    printf("  where x,y,z is the translation amount and angle is the rotation amount\n");
+    printf("  snapped to the nearest 90 degrees.\n");
+    printf("  See the blockaid Wiki at http://fire.nist.gov/fds for more information.\n");
 }
 
 /* ------------------ version ------------------------ */
