@@ -2030,6 +2030,7 @@ void initvars0(void){
   sliceindex=NULL;
   face_transparent=NULL;
   deviceinfo=NULL;
+  FontMenu(fontindex);
 }
 
 int imax(int a, int b){

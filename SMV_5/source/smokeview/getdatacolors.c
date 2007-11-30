@@ -1131,7 +1131,7 @@ void drawColorBars(void){
 
       vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
       //if(iposition==i-1)continue;
-      zonecolorlabel_ptr=&colorlabelzone[i][0];
+      zonecolorlabel_ptr=&colorlabelzone[i+1][0];
       if(zoneflag==1){
         val = tttmin + (i-1)*zonerange/(nrgb-2);
         scalefloat2string(val,zonecolorlabel, zonefactor, zonerange);
