@@ -6272,7 +6272,7 @@ droplet in the Technical Reference Guide for details of the convective
 heat transfer to a small sphere.
 
 
-\subsection{Heat Fluxes}
+\subsection{Heat Fluxes and Thermal Radiation}
 \label{info:heat_flux}
 
 There are various ways of recording the heat flux at a solid boundary. If you want to record the {\em net} heat flux to
@@ -6289,10 +6289,30 @@ When comparing against a radiometer measurement, use {\ct RADIOMETER}:
 $$\dq_r''/\epsilon + \sigma (T_w^4-T_\infty^4) $$
 For diagnostic purposes it is sometimes convenient to output the {\ct INCIDENT\_HEAT\_FLUX}:
 $$ \dq_r''/\epsilon + \sigma T_w^4 +\dq_c'' $$
-There is a gas phase output quantity called {\ct RADIANT\_INTENSITY}. This is used mainly for diagnosing problems with the
+
+All of the above output quantities related to heat flux are defined at a solid surface. However,
+there is a gas phase output quantity called {\ct RADIANT\_INTENSITY} that is used mainly for diagnosing problems with the
 radiation solver. Even though its units are kW/m$^2$, it should not be interpreted as the heat flux to an object that would
-occupy that particular point in space. Rather, it is the integral over all directions of the radiation intensity, $I(\bx,\bs)$, a function of both
-space and direction. It is denoted by $U$, as in Eq.~(\ref{TC}).
+occupy that particular point in space. Rather, it is the integral over all directions of the radiation intensity, $I(\bx,\bs)$, which is a function of both
+space and direction ($\bs$ is a direction vector that ranges over $4\pi$ solid angles):
+\be
+   U(\bx) = \int I(\bx,\bs)\, d\bs
+\ee
+Note that $U$ is used in Eq.~(\ref{TC}) to get the effective radiative flux to a small thermocouple bead so that its temperature, as opposed to the gas temperature,
+can be calculated. If you divide $U$ by $4\pi$, you get the the average intensity at a particular point in space:
+\be
+   \overline{I}(\bx) = \frac{U(\bx)}{4 \pi}
+\ee
+The incident heat flux due to a constant intensity would be $\pi \, \overline{I}$, thus, the average incident radiative heat flux would then be:
+\be
+   \overline{\dq_{r,inc}''} = \pi \, \overline{I} = \pi \; \frac{U}{4 \pi} = \frac{U}{4}
+\ee
+Thus, you can use {\ct RADIATIVE\_INTENSITY}/4 as an approximation for the incident radiative heat flux. However, this number can not
+take into account the non-uniform nature of radiation. Also note that this is the {\em incident} heat flux. To get the {\em net} heat flux to the
+object or person whose surface temperature is $T_s$, you need to subtract $\epsilon \sigma T_s^4$, the outgoing heat flux.
+
+
+
 
 
 \subsection{Droplet Output Quantities}
@@ -6490,7 +6510,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct path obscuration}                          & See Section~\ref{info:beam_detector}          & \%             & D            \\ \hline
 {\ct PRESSURE}                                  & $\tp$                                         & Pa             & D,I,P,S      \\ \hline
 {\ct PRESSURE\_COEFFICIENT}                     & $C_p$ (Section~\ref{info:wind})               &                & B,D          \\ \hline
-{\ct RADIANT\_INTENSITY}                        & $\int I(\bx,\bs)\, d\Omega$                   & kW/m$^2$       & D,I,P,S      \\ \hline
+{\ct RADIANT\_INTENSITY}                        & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct RADIATIVE\_FLUX}                           & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RADIOMETER}                                & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Relative humidity                             & \%             & D,I,P,S      \\ \hline
