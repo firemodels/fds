@@ -2,7 +2,6 @@
 // $Revision$
 // $Author$
 
-// dummy change
 #include "options.h"
 #define INMAIN
 #include <stdio.h>
