@@ -20,27 +20,80 @@ int read_pass1(char *fdsfile, int recurse_level);
 
 /* ------------------ readfds ------------------------ */
 
-int readfds(char *fdsfile){
+int readfds(char *in_file_base){
   
-  FILE *streamfds;
+  char in_file[1024], out_file[1024];
+  char file[1024];
+  char *ext;
+
+  FILE *stream_in, *stream_out;
 #define LENBUFFER 10000
   char buffer[LENBUFFER];
   int in_assembly=0;
 
-  if(read_pass1(fdsfile,0)!=0)return 1;
+  strcpy(file,in_file_base);
+  trim(file);
+  ext=strrchr(file,'.');
+  if(ext==NULL||ext==file){
+    ext=NULL;
+  }
+  else{
+    *ext='\0';
+  }
+
+  if(ext==NULL){
+    strcpy(in_file,file);
+    strcat(in_file,".fof");
+  }
+  else{
+    strcpy(in_file,in_file_base);
+  }
+
+  strcpy(out_file,file);
+  strcat(out_file,".fds");
+
+  if(getfileinfo(in_file,NULL,NULL)!=0){
+    printf("file: %s does not exist\n",in_file);
+    return 1;
+  }
+
+  stream_in=fopen(in_file,"r");
+  if(stream_in==NULL){
+    printf("input file: %s does not exist or can not be opened for input\n",in_file);
+    return 1;
+  }
+  fclose(stream_in);
+
+  stream_out=fopen(out_file,"r");
+  if(stream_out!=NULL){
+    if(force_write!=1){
+      printf("output file: %s exists, use the -f option to overwrite\n",out_file);
+      fclose(stream_out);
+      return 1;
+    }
+    fclose(stream_out);
+  }
+
+  if(read_pass1(in_file,0)!=0)return 1;
 
   init_bb();
 
   // pass 2
 
-  streamfds=fopen(fdsfile,"r");
-  if(streamfds==NULL){
-    printf("The file: %s could not be opened\n",fdsfile);
+  stream_in=fopen(in_file,"r");
+  if(stream_in==NULL){
+    printf("The file: %s could not be opened\n",in_file);
     return 1;
   }
+  stream_out=fopen(out_file,"w");
+  if(stream_out==NULL){
+    printf("ouput file: %s cannot be opened for output\n",out_file);
+    return 1;
+  }
+
   in_assembly=0;
-  while(!feof(streamfds)){
-    if(get_fds_line(streamfds, buffer, LENBUFFER)==-1)break;
+  while(!feof(stream_in)){
+    if(get_fds_line(stream_in, buffer, LENBUFFER)==-1)break;
     trim(buffer);
 
     if(match(buffer,"&BGRP",5)==1){
@@ -60,7 +113,7 @@ int readfds(char *fdsfile){
     }
     switch (in_assembly){
       case 0:  // regular line, output it
-        printf("%s\n",buffer);
+        fprintf(stream_out,"%s\n",buffer);
         break;
       case 1:  // inside an assembly defn, skip
         break;
@@ -73,7 +126,7 @@ int readfds(char *fdsfile){
         keyvalstack[nkeyvalstack-1].val_list=blockaid_first->val_list;
         keyvalstack[nkeyvalstack-1].nkeywordlist=blockaid_first->nkeywordlist;
 
-        expand_assembly(buffer,0);
+        expand_assembly(stream_out,buffer,0);
         break;
       case 3:  // &INCL line, don't write it out
         in_assembly=0;
@@ -85,23 +138,23 @@ int readfds(char *fdsfile){
 
 /* ------------------ read_pass1 ------------------------ */
 
-int read_pass1(char *fdsfile, int recurse_level){
-  FILE *streamfds;
+int read_pass1(char *in_file, int recurse_level){
+  FILE *stream_in;
   char buffer[LENBUFFER];
   int in_assembly=0;
 
-  streamfds=fopen(fdsfile,"r");
-  if(streamfds==NULL){
-    printf("The file: %s could not be opened\n",fdsfile);
+  stream_in=fopen(in_file,"r");
+  if(stream_in==NULL){
+    printf("The file: %s could not be opened for input.\n",in_file);
     return 1;
   }
 
 // pass 1
 
-  while(!feof(streamfds)){
+  while(!feof(stream_in)){
     blockaiddata *assembly;
 
-    if(get_fds_line(streamfds, buffer, LENBUFFER)==-1)break;
+    if(get_fds_line(stream_in, buffer, LENBUFFER)==-1)break;
     trim(buffer);
 
     if(match(buffer,"&BGRP",5)==1){
@@ -126,7 +179,7 @@ int read_pass1(char *fdsfile, int recurse_level){
    // using info in current buffer add to assembly data structures
     update_assembly(assembly,buffer);
   }
-  fclose(streamfds);
+  fclose(stream_in);
   return 0;
 }
 
@@ -299,7 +352,7 @@ void init_boundbox0(void){
 }
 /* ------------------ expand_assembly ------------------------ */
 
-void expand_assembly(char *buffer, int recurse_level){
+void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
   float offset[3], rotate;
   char *id;
   char blank[100];
@@ -338,7 +391,7 @@ void expand_assembly(char *buffer, int recurse_level){
 
 
   if(recurse_level==0){
-    printf("\n MAJOR GROUP: %s offset=%f,%f,%f rotate=%f\n",
+    fprintf(stream_out,"\n MAJOR GROUP: %s offset=%f,%f,%f rotate=%f\n",
       assem->id,offset[0],offset[1],offset[2],rotate);
   }
   else{
@@ -364,7 +417,7 @@ void expand_assembly(char *buffer, int recurse_level){
     for(j=0;j<lenspace;j++){
       strcat(blank,"  ");
     }
-    printf("\n%s MINOR GROUP: %s offset=%f,%f,%f rotate=%f\n",
+    fprintf(stream_out,"\n%s MINOR GROUP: %s offset=%f,%f,%f rotate=%f\n",
       blank,assem->id,offset[0],offset[1],offset[2],rotate);
   }
 
@@ -387,10 +440,10 @@ void expand_assembly(char *buffer, int recurse_level){
 
           strcpy(line_before2,thisline->line_before);
           subst_keys(line_before2,recurse_level);
-          printf("%s\n",line_before2);
+          fprintf(stream_out,"%s\n",line_before2);
         }
         else{
-          printf("%s ",thisline->line_before);
+          fprintf(stream_out,"%s ",thisline->line_before);
         }
         for(i=0;i<6;i++){
           xb[i]=thisline->xb[i]-assem->xyz0[i/2];
@@ -416,10 +469,10 @@ void expand_assembly(char *buffer, int recurse_level){
           sprintf(charxb,"%f",xb[i]);
           trimzeros(charxb);
           if(i==5){
-            printf("%s",charxb);
+            fprintf(stream_out,"%s",charxb);
           }
           else{
-            printf("%s,",charxb);
+            fprintf(stream_out,"%s,",charxb);
           }
         }
         block_key=strstr(thisline->line_after,"#");
@@ -428,10 +481,10 @@ void expand_assembly(char *buffer, int recurse_level){
 
           strcpy(line_after2,thisline->line_after);
           subst_keys(line_after2,recurse_level);
-          printf("%s\n",line_after2);
+          fprintf(stream_out,"%s\n",line_after2);
         }
         else{
-          printf("%s\n",thisline->line_after);
+          fprintf(stream_out,"%s\n",thisline->line_after);
         }
         nkeyvalstack--;
 
@@ -459,7 +512,7 @@ void expand_assembly(char *buffer, int recurse_level){
         keyvalstack[nkeyvalstack-1].nkeywordlist=assem->nkeywordlist;
 
         strcpy(linebuffer,thisline->line);
-        expand_assembly(linebuffer,recurse_level+1);
+        expand_assembly(stream_out,linebuffer,recurse_level+1);
         nkeyvalstack-=2;
       }
     }
@@ -487,7 +540,7 @@ void reorder(float *xy){
 void subst(char *keybeg,char *keyend,char *val){
   char lineend[10000];
   size_t len_from, len_to;
-  int i;
+  size_t i;
   char *c;
   char *valcopy;
 
@@ -839,8 +892,10 @@ void init_bb(void){
     x2 = assm->bb_max;
     dx = assm->bb_dxyz;
 
+#ifdef _DEBUG
     printf("assm=%s\n",assm->id);
     printf("  bounds=(%f,%f), (%f,%f), (%f,%f)\n",x1[0],x2[0],x1[1],x2[1],x1[2],x2[2]);
+#endif
   }
 //#endif
 }
