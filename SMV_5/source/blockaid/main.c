@@ -20,14 +20,16 @@ int main(int argc, char **argv){
 
   int i;
   char *arg, *prog;
-  char *fdsfile=NULL;
+  char *in_file_base=NULL;
 
   prog=argv[0];
-  fdsfile=NULL;
+  in_file_base=NULL;
   if(argc==1){
     version();
     return 1;
   }
+
+  force_write = 0;
 
   for(i=1;i<argc;i++){
     size_t lenarg;
@@ -36,6 +38,9 @@ int main(int argc, char **argv){
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
+      case 'f':
+        force_write=1;
+        break;
       case 'h':
         usage();
         return 1;
@@ -46,27 +51,24 @@ int main(int argc, char **argv){
       }
     }
     else{
-      if(fdsfile==NULL){
-        fdsfile=argv[i];
+      if(in_file_base==NULL){
+        in_file_base=argv[i];
       }
     }
   }
 
-  // construct smv filename
+  // construct input and output filenames
   
-  if(fdsfile==NULL){
+  if(in_file_base==NULL){
     usage();
     return 1;
   }
 
   // make sure smv file name exists
 
-  if(getfileinfo(fdsfile,NULL,NULL)!=0){
-    printf("file: %s does not exist\n",fdsfile);
-    return 1;
-  }
+
   startup();
-  readfds(fdsfile);
+  readfds(in_file_base);
 
 }
 
