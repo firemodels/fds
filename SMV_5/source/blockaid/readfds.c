@@ -52,14 +52,19 @@ int readfds(char *in_file_base){
   strcpy(out_file,file);
   strcat(out_file,".fds");
 
+  if(strcmp(in_file,out_file)==0){
+    printf("ERROR: The input and output files: %s are the same.\n",in_file);
+    return 1;
+  }
+
   if(getfileinfo(in_file,NULL,NULL)!=0){
-    printf("file: %s does not exist\n",in_file);
+    printf("ERROR: The input file file %s does not exist\n",in_file);
     return 1;
   }
 
   stream_in=fopen(in_file,"r");
   if(stream_in==NULL){
-    printf("input file: %s does not exist or can not be opened for input\n",in_file);
+    printf("ERROR: The input file %s does not exist or can not be opened for input\n",in_file);
     return 1;
   }
   fclose(stream_in);
@@ -67,7 +72,7 @@ int readfds(char *in_file_base){
   stream_out=fopen(out_file,"r");
   if(stream_out!=NULL){
     if(force_write!=1){
-      printf("output file: %s exists, use the -f option to overwrite\n",out_file);
+      printf("ERROR: The output file %s exists, use the -f option to force an overwrite.\n",out_file);
       fclose(stream_out);
       return 1;
     }
@@ -82,12 +87,12 @@ int readfds(char *in_file_base){
 
   stream_in=fopen(in_file,"r");
   if(stream_in==NULL){
-    printf("The file: %s could not be opened\n",in_file);
+    printf("ERROR: The input file %s could not be opened.\n",in_file);
     return 1;
   }
   stream_out=fopen(out_file,"w");
   if(stream_out==NULL){
-    printf("ouput file: %s cannot be opened for output\n",out_file);
+    printf("ERROR: The ouput file %s could not be opened for output.\n",out_file);
     return 1;
   }
 
@@ -145,7 +150,7 @@ int read_pass1(char *in_file, int recurse_level){
 
   stream_in=fopen(in_file,"r");
   if(stream_in==NULL){
-    printf("The file: %s could not be opened for input.\n",in_file);
+    printf("ERROR: The input file %s could not be opened for input.\n",in_file);
     return 1;
   }
 
