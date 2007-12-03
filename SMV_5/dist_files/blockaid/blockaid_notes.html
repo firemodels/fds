@@ -3,18 +3,26 @@
 <TITLE>Readme file for Blockaid, an FDS blockage converter</TITLE>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
-<h2>Blockaid Release Notes - December 2, 2007</h2>
+<h1>Blockaid Release Notes - December 3, 2007</h1>
 
+<ul>
+<li><a href="#overview">Overview</a>
+<li><a href="#examples">Examples</a>
+<li><a href="#other">Other Applications</a>
+</ul>
+
+<a name="overview"></a>
+<h2>Overview</h2>
 <p><img src="blockaid0.png" width=320 align="right"/>
 <hr size="1">
 <font size="-1">
-The program <em>Blockaid</em> groups blockages together forming forming objects such as couches or stairs.
+The program <em>Blockaid</em> groups blockages together forming objects such as couches or stairs.
 It then can replicate them one or more times while applying a specified rotation and/or translation amount.
 </font>
 <hr size="1">
 
 <p>Blockaid reads in a file containing regular FDS &keywords plus additional
-keywords (&BGRP, &EGRP, &GRP and &INCL) known only to blockaid.
+keywords (&BGRP, &EGRP, &GRP and &INCL) known only to Blockaid.
 It uses these keywords
 to output an FDS input file where specified
   groups of blockages, holes and vents are replicated, translated and/or rotated.
@@ -34,7 +42,7 @@ using <tt>&INCL file='file name' /</tt>
 <tt> &GRP ID='group label' XYZ=x,y,z ROTATE=angle /</tt>
 where <em>x,y,z</em> is the translation amount and <em>angle</em> is the rotation amount snapped to the 
   nearest 90 degrees. 
-<li>Blockage/hole positions are stored in a group relative to a point defined by the <tt>XYZ0=x,y,z</tt> parameter found on the <tt>&BGRP</tt> line.
+<li>Blockage/hole positions are stored in a group relative to a point defined by the <tt>ORIGIN=x,y,z</tt> parameter found on the <tt>&BGRP</tt> line.
 <li>Text substitions may be performed by placing one or more
 <tt>#keyword='value'</tt> terms on a <tt>&GRP</tt> 
 or a <tt>&BGRP</tt> line.
@@ -47,6 +55,7 @@ These parameters may be over-ridden on the <tt>&GRP</tt> line.
 <li>A group may be defined recurseivly in terms of other groups.
 </UL>
   
+<a name="examples"></a>
   <h2>Examples</h2>
   <h3>Arranging Furniture</h3>
 <img src="blockaid1.png" width=320 align="right"/>
@@ -58,7 +67,7 @@ The <tt>LIVE1</tt> group is in turn defined in terms of three <tt>COUCH</tt> gro
 <hr size="1">
  A group of blockages defining a couch:
 <pre>
-&BGRP ID='COUCH' XYZ0=3.0,3.0,0.0 /
+&BGRP ID='COUCH' ORIGIN=3.0,3.0,0.0 /
 &OBST   XB= 3.0, 5.0, 3.5, 3.7, 0.5, 0.9  ,   RGB=128, 64, 32 /
 &OBST   XB= 3.0, 3.2, 3.0, 3.5, 0.5, 0.6  ,   RGB= 64, 96, 64 /
 &OBST   XB= 4.8, 5.0, 3.0, 3.5, 0.5, 0.6  ,   RGB= 32,128, 96 /
@@ -69,9 +78,9 @@ The <tt>LIVE1</tt> group is in turn defined in terms of three <tt>COUCH</tt> gro
 </pre>
  
 <p>A group of three couches defining a living room arrangement
-with a default origin of <tt>XYZ0=0.0,0.0,0.0</tt>:
+with a default origin of <tt>ORIGIN=0.0,0.0,0.0</tt>:
 <pre>
-&BGRP ID='LIVE1' XYZ0=0.0,0.0,0.0 /
+&BGRP ID='LIVE1' ORIGIN=0.0,0.0,0.0 /
 &GRP ID='COUCH' XYZ=0.8,  0.0,0.0 ROTATE=180.0 /
 &GRP ID='COUCH' XYZ=0.0,  0.8,0.0 ROTATE=90.0 /
 &GRP ID='COUCH' XYZ=0.8,  3.0,0.0 ROTATE=0.0 /
@@ -161,7 +170,7 @@ Default keyword values may be specified on the <tt>&BGRP</tt> line.
 Keywords begin with <strong>#</strong>.
 Keyword values may be over-ridden on the <tt>&GRP</tt> line.  Define the group:
 <pre>
-&BGRP ID='COUCH' XYZ0=3.0,3.0,0.0 #COLOR='196, 0, 0' /
+&BGRP ID='COUCH' ORIGIN=3.0,3.0,0.0 #COLOR='196, 0, 0' /
 &OBST   XB= 3.0, 5.0, 3.5, 3.7, 0.5, 0.9  ,   RGB=#COLOR /
 &OBST   XB= 3.0, 3.2, 3.0, 3.5, 0.5, 0.6  ,   RGB=#COLOR /
 &OBST   XB= 4.8, 5.0, 3.0, 3.5, 0.5, 0.6  ,   RGB=#COLOR /
@@ -194,6 +203,12 @@ blockaid blockaid3
 fds5 blockaid3.fds
 smokeview blockaid3
 </pre>
+<a name="other"></a>
+<h2>Other Applications</h2>
+The original intent of Blockaid was to provide an easy means to define a set of blockages once and duplicate them one or more times
+with differing placements and orientations.  However, with the <tt>&INCL</tt> keyword one may create a database of material properties 
+using <tt>&MATL</tt> and <tt>&SURF</tt> keywords.  Since <tt>Blockaid</tt> creates a self contained FDS input file, there is not a problem 
+of data later changing after a case has been run.  This was a problem with <tt>FDS4</tt> and earlier.
 
 <p><hr>
 <p><address>
