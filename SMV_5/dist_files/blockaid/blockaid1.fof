@@ -10,7 +10,7 @@
 &VENT XB=0.0,8.0, 8.0,8.0, 0.0,4.0 SURF_ID='OPEN' /
 &VENT XB=0.0,8.0, 0.0,8.0, 4.0,4.0 SURF_ID='OPEN' /
 
-&BGRP ID='COUCH' XYZ0=3.0,3.0,0.0 /
+&BGRP ID='COUCH' ORIGIN=3.0,3.0,0.0 /
 &OBST   XB= 3.0, 5.0, 3.5, 3.7, 0.5, 0.9  ,   RGB=128, 64, 32 /
 &OBST   XB= 3.0, 3.2, 3.0, 3.5, 0.5, 0.6  ,   RGB= 64, 96, 64 /
 &OBST   XB= 4.8, 5.0, 3.0, 3.5, 0.5, 0.6  ,   RGB= 32,128, 96 /
@@ -19,7 +19,7 @@
 &HOLE   XB= 3.1, 4.9, 3.5, 3.7, 0.0, 0.1  /
 &EGRP /
 
-&BGRP ID='LIVE1' XYZ0=0.0,0.0,0.0 /
+&BGRP ID='LIVE1' ORIGIN=0.0,0.0,0.0 /
 &GRP ID='COUCH' XYZ=0.8,  0.0,0.0 ROTATE=180.0 /
 &GRP ID='COUCH' XYZ=0.0,  0.8,0.0 ROTATE=90.0 /
 &GRP ID='COUCH' XYZ=0.8,  3.0,0.0 ROTATE=0.0 /

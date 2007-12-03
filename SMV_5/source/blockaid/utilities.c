@@ -33,10 +33,10 @@ void usage(void){
     printf("  This program reads in casename.fof and outputs casename.fds where specified\n");
     printf("  groups of blockages, holes and vents are replicated, translated and rotated.\n");
     printf("  These groups are surrounded with &BGRP and &EGRP as in:\n");
-    printf("      &BGRP ID='group label' XYZ0=x,y,z /\n");
+    printf("      &BGRP ID='group label' ORIGIN=x,y,z /\n");
     printf("          one or more &OBST, &VENT, &HOLE \n");
     printf("      &EGRP /\n");
-    printf("  where XYZ0 is the group's origin.  This group may be replicated using:\n");
+    printf("  where ORIGIN is the group's origin.  This group may be replicated using:\n");
     printf("     &GRP ID='group label' XYZ=x,y,z ROTATE=angle /\n");
     printf("  where x,y,z is the translation amount and angle is the rotation amount\n");
     printf("  snapped to the nearest 90 degrees.\n");
