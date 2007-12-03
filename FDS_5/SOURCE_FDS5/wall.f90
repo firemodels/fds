@@ -327,7 +327,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
             IF (CORRECTOR) TSI = T      - TW(IW)
          ENDIF
          DO N=1,N_SPECIES
-            IF (UWS(IW) <= 0._EB) THEN
+            IF (UWS(IW) < 0._EB) THEN
                YY_WALL = SPECIES(N)%YY0 + EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*(SF%MASS_FRACTION(N)-SPECIES(N)%YY0)
             ELSE
                YY_WALL = YYP(IIG,JJG,KKG,N)
