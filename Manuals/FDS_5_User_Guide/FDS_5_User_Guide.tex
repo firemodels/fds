@@ -6878,7 +6878,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FYI}         & Character                   & Comment String (has no effect)              &    &                  \\ \hline
 {\ct RGB}         & Integer Triplet             & Color indices (0-255)                       &    & 0,0,0            \\ \hline
 {\ct SYNCHRONIZE} & Logical                     & Sync. time steps of multiple meshes         &    & {\ct .TRUE.}     \\ \hline
-{\ct XB}          & Real Sextuplet              & Min/Max Coordinates of the MESH             & m  & 0,1,0,1,0,1      \\ \hline
+{\ct XB(6)}          & Real Sextuplet              & Min/Max Coordinates of the MESH             & m  & 0,1,0,1,0,1      \\ \hline
 %{\ct POISSON\_BC} & Integer sextuplet           & Pressure boundary conditions      &    &    \\ \hline
 %{\ct IBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
 %{\ct JBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
@@ -7045,7 +7045,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct TREE}                      & Logical         & Particles are leaves              &           & {\ct .FALSE.} \\ \hline
 {\ct VAPORIZATION\_TEMPERATURE} & Real            & Liquid Droplet Boiling Temp       & $^\circ$C & 100.          \\ \hline
 {\ct VERTICAL\_VELOCITY}        & Real            & Droplet speed, vertical           & m/s       &  0.5          \\ \hline
-{\ct XB(6)}                     & Real            & Initial particle placement region & m         &               \\ \hline
+{\ct XB(6)}                     & Real Sextuplet            & Initial particle placement region & m         &               \\ \hline
 {\ct WATER}                     & Logical         & Water Droplet                     &           & {\ct .FALSE.} \\ \hline
 \end{tabular*}
 \end{table}
