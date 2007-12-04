@@ -4651,7 +4651,8 @@ The Rosin-Rammler/log-normal distribution is given by
    \end{array} \right.  \ee
 Note that the parameter $\sigma$ is given the value
 $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$
-which ensures that the two functions are smoothly joined at $d=d_m$.
+which ensures that the two functions are smoothly joined at $d=d_m$. You can also add a value for {\ct SIGMA\_D} to the {\ct PART} line if you want to
+over-ride this feature.
 The larger the value of $\gamma$, the narrower the droplet size is
 distributed about the median value. Note that you can prevent droplets or particles from
 exceeding {\ct MAXIMUM\_DIAMETER}, which is infinitely large by default. Also note that
@@ -7039,6 +7040,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct QUANTITIES(10)}            & Character       & Quantities for coloring           &           &               \\ \hline
 {\ct RGB(3)}                    & Integers        & Color indices (0-255)             &           &               \\ \hline
 {\ct SAMPLING\_FACTOR}          & Integer         & Filter for output file            &           & 1             \\ \hline
+{\ct SIGMA\_D}                  & Real            & Parameter for size distribution   &           &               \\ \hline
 {\ct SPEC\_ID}                  & Character       & Name of gas species               &           &               \\ \hline
 {\ct SPECIFIC\_HEAT}            & Real            & Droplet specific heat             & kJ/kg/K   & 4.184         \\ \hline
 {\ct STATIC}                    & Logical         & Stationary Particles              &           & {\ct .FALSE.} \\ \hline
