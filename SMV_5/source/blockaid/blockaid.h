@@ -7,6 +7,7 @@
 #define MAXRECURSE 100
 #define MAXPOS 100000000.0
 #define MINPOS -MAXPOS
+#define MAXLINE 1024
 
 #ifdef INMAIN
 #define EXTERN
@@ -21,9 +22,9 @@ typedef struct {
 
 typedef struct _fdsdata {
   char *line,*linecopy,*line_before, *line_after;
-  float xb[6];
+  float xb[6], delta;
   int ibeg, iend;
-  int type,is_obst;
+  int type,is_obst, is_shell;
   struct _blockaiddata *blockaid;
   struct _fdsdata *prev, *next;
 } fdsdata;
@@ -56,7 +57,7 @@ blockaiddata *create_assembly(char *buffer);
 void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *next);
 void update_assembly(blockaiddata *assembly,char *buffer);
 void remove_assembly(blockaiddata *assembly);
-char *getkeyid(char *source, const char *key);
+char *get_keyid(char *source, const char *key);
 int get_irvals(char *line, char *key, int nvals, float *ivals, float *rvals, int *ibeg, int *iend);
 void startup(void);
 blockaiddata *get_assembly(char *id);

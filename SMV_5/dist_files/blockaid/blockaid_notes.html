@@ -3,7 +3,7 @@
 <TITLE>Readme file for Blockaid, an FDS blockage converter</TITLE>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
-<h2>Blockaid Release Notes - December 4, 2007</h2>
+<h2>Blockaid Release Notes - December 5, 2007</h2>
 
 <ul>
 <li><a href="#overview">Overview</a>
@@ -49,6 +49,20 @@ where <em>x,y,z</em> is the translation amount and <em>angle</em> is the rotatio
 or a <tt>&BGRP</tt> line.
 Default keyword values may be specified on the <tt>&BGRP</tt> line.
 These parameters may be over-ridden on the <tt>&GRP</tt> line.
+<li>A hollow blockage may be defined using <tt>&SHELL</tt>.
+  This keyword
+has all the same options and parameters
+as <tt>&OBST</tt>.  In addition <tt>DELTA</tt> 
+is used to specify the <em>wall</em> thickness
+of the hollow blockage.  Blockaid converts the following <tt>&SHELL</tt> line
+<pre>
+&SHELL XB=xmin,xmax,ymin,ymax,zmin,zmax DELTA=del ..... /
+</pre>
+into an <tt>&OBST</tt> and <tt>&HOLE</tt> line given by:
+<pre>
+&OBST XB=xmin,xmax,ymin,ymax,zmin,zmax ..... /
+&HOLE XB=xmin+del,xmax-del,ymin+del,ymax-del,zmin+del,zmin-del /
+</pre>
 
 <li>A collection of groups may be defined and stored in a file.  This file
   is referenced using the <tt>&INCL</tt> keyword as in<br />

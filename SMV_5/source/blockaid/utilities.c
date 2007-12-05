@@ -124,14 +124,10 @@ int getrevision(char *svn){
 /* ------------------ trim_front ------------------------ */
 
 char *trim_front(char *line){
-  char *blank=" ";
-  const char *c;
-  size_t i,len;
+  size_t i;
 
-  c = line;
-  len=strlen(line);
-  for(i=0;i<len;i++){
-    if(strncmp(c++,blank,1)!=0)return line+i;
+  for(i=0;i<strlen(line);i++){
+    if(line[i]!=' ')return line+i;
   }
   return line;
 }
@@ -162,7 +158,7 @@ void trim(char *line){
 int getfileinfo(char *filename, char *source_dir, int *filesize){
   struct stat statbuffer;
   int statfile;
-  char buffer[1024];
+  char buffer[MAXLINE];
 
   if(source_dir==NULL){
     strcpy(buffer,filename);
@@ -187,7 +183,7 @@ int match(const char *buffer, const char *key, unsigned int lenkey){
 
 /* ------------------ getkeyparam ------------------------ */
 
-char *getkeyid(char *source, const char *key){
+char *get_keyid(char *source, const char *key){
   char *keyptr,*s1,*e1;
 
 // given:  key='xxxyyy'
@@ -209,7 +205,7 @@ char *getkeyid(char *source, const char *key){
 /* ------------------ parseobst_xb ------------------------ */
 
 int get_irvals(char *line, char *key, int nvals, float *ivals, float *rvals, int *ibeg, int *iend){
-  char *keyptr, *xslash, *c;
+  char *keyptr, *keystart, *xslash, *c;
   char *cvals;
   char line2[10000];
   size_t len;
@@ -232,8 +228,20 @@ int get_irvals(char *line, char *key, int nvals, float *ivals, float *rvals, int
     line2[i]=toupper(line[i]);
   }
   line2[len]='\0';
-  keyptr = strstr(line2,key);
-  if(keyptr==NULL)return 0;
+
+  keyptr=NULL;
+  keystart=line2;
+  while(keyptr==NULL){
+    keyptr = strstr(keystart,key);
+    if(keyptr==NULL)return 0;
+    if(keyptr!=NULL){
+      if(!isspace(keyptr[-1])&&keyptr[-1]!=','){
+        keystart=keyptr+1;
+        keyptr=NULL;
+      }
+    }
+  }
+
   xslash = strstr(line2,"/");
   if(xslash==NULL||keyptr>xslash)return 0;
 
@@ -343,7 +351,7 @@ void trimzeros(char *line){
 void trimmzeros(char *line){
   size_t i,j,lenline;
   char *linecopy, c;
-  char buffer[1024];
+  char buffer[MAXLINE];
   size_t ibeg;
   size_t start=1;
   size_t bufstart=0;
