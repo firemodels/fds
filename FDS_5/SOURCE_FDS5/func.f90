@@ -502,6 +502,10 @@ REAL(EB), INTENT(IN) :: Z_1,Z_3,Z_F
 REAL(EB), INTENT(OUT) :: F
 REAL(EB) :: ZZ
 
+IF (Z_1 <= 0._EB .AND. Z_3 > 0._EB) THEN
+   F = 1._EB
+   RETURN
+ENDIF  
 ZZ = Z_1 + Z_3
 IF (ZZ > Z_F) THEN
    IF (ZZ >= 1._EB) THEN
@@ -517,6 +521,8 @@ ELSE
    ENDIF
 ENDIF
 F = MIN(1._EB,MAX(0._EB,F))
+
+RETURN
    
 END SUBROUTINE GET_F
 
