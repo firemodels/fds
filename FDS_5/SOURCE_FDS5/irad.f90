@@ -868,11 +868,17 @@ END SUBROUTINE CO
 !     ABSORPTION COEF. IS BASED UPON MEASUREMENTS OF WIDMANN AND
 !     MULHOLLAND
       IF (AL2O3) THEN
-         FF_FAC = 0.00076
+         IF (RCT(1) > 2570._EB) THEN
+            FF_FAC = 0.017_EB
+         ELSEIF (RCT(1) < 500._EB) THEN
+            FF_FAC = 5.E-6_EB
+         ELSE
+            FF_FAC = 0.00073_EB     
+         ENDIF
       ELSE
-         FF_FAC = 8.9
+         FF_FAC = 8.9_EB
       ENDIF
-      FF=8.9/LAMBDA
+      FF=FF_FAC/LAMBDA
       DO J=1,NPT
          ABCO=FF*SVF(J)*1.E6_EB
          IF(J==1) THEN
