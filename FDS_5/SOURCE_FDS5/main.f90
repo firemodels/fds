@@ -47,7 +47,7 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date, version number, revision number
 
-WRITE(VERSION_STRING,'(A)') '5.0.2'
+WRITE(VERSION_STRING,'(A)') '5.0.3'
 SERIAL = .TRUE.
 
 IF (INDEX(mainrev,':',BACK=.TRUE.)>0) THEN
