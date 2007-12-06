@@ -32,6 +32,7 @@ typedef struct _fdsdata {
 typedef struct _blockaiddata {
   char *id;
   char **keyword_list, **val_list;
+  int type;
   int nkeywordlist;
   float xyz0[4];
   float bb_min[3], bb_dxyz[3], bb_max[3];
