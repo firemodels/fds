@@ -479,8 +479,12 @@ void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
 
 
   if(recurse_level==0){
-    fprintf(stream_out,"\n MAJOR GROUP: %s offset=%f,%f,%f rotate=%f\n",
-      assem->id,offset[0],offset[1],offset[2],rotate);
+    fprintf(stream_out,"\n MAJOR GROUP: %s ",assem->id);
+    if(assem->type==1){
+      fprintf(stream_out,"offset=%f,%f,%f rotate=%f\n",
+        offset[0],offset[1],offset[2],rotate);
+    }
+    fprintf(stream_out,"\n");
   }
   else{
     int lenspace;
@@ -511,6 +515,31 @@ void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
 
   for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
     float xb[6];
+
+    if(thisline->line_after==NULL||thisline->line_before==NULL){
+      if(thisline->type==1&&thisline->line!=NULL){
+        char *block_key;
+        char line2[MAXLINE];
+
+        nkeyvalstack++;
+        keyvalstack[nkeyvalstack-1].keyword_list=assem->keyword_list;
+        keyvalstack[nkeyvalstack-1].val_list=assem->val_list;
+        keyvalstack[nkeyvalstack-1].nkeywordlist=assem->nkeywordlist;
+
+        block_key=strstr(thisline->line,"#");
+        if(block_key!=NULL){
+          char line_before2[MAXLINE];
+
+          strcpy(line_before2,thisline->line);
+          subst_keys(line_before2,recurse_level);
+          strcpy(line2,line_before2);
+        }
+        else{
+          strcpy(line2,thisline->line);
+        }
+        fprintf(stream_out,"%s\n",line2);
+      }
+    }
 
     if(thisline->line_after!=NULL&&thisline->line_before!=NULL){
       if(thisline->type==1){
@@ -676,15 +705,17 @@ char *get_val(char *key, int recurse_level){
     vallist=keyvalstack[i].val_list;
     for(j=0;j<keyvalstack[i].nkeywordlist;j++){
       if(keylist[j]==NULL)continue;
-      if(strcmp(keylist[j],key)==0)return vallist[j];
+      if(strcmp(keylist[j],key)==0){
+        return vallist[j];
+      }
     }
   }
   return NULL;
 }
 
-/* ------------------ getkey ------------------------ */
+/* ------------------ get_key ------------------------ */
 
-void getkey(char *line, char *key, char **keybeg, char **keyend){
+void get_key(char *line, char *key, char **keybeg, char **keyend){
   char *keyptr, *lineptr;
 
   *keybeg=strstr(line,"#");
@@ -696,6 +727,7 @@ void getkey(char *line, char *key, char **keybeg, char **keyend){
     if(*lineptr=='\0'||*lineptr==' '||*lineptr==','||*lineptr=='/'||*lineptr=='\''){
       *keyptr='\0';
       *keyend=lineptr;
+      trim(key);
       return;
     }
     lineptr++;
@@ -709,7 +741,7 @@ void subst_keys(char *line_in, int recurse_level){
   char *keybeg, *keyend, *val;
 
   strcpy(line,line_in);
-  getkey(line,key, &keybeg, &keyend);
+  get_key(line,key, &keybeg, &keyend);
   if(keybeg!=NULL){
     val=get_val(key,recurse_level);
   }
@@ -719,7 +751,7 @@ void subst_keys(char *line_in, int recurse_level){
   while(val!=NULL){
     subst(keybeg,keyend,val);
 
-    getkey(line,key, &keybeg, &keyend);
+    get_key(line,key, &keybeg, &keyend);
     if(keybeg!=NULL){
       val=get_val(key,recurse_level);
     }
@@ -728,6 +760,12 @@ void subst_keys(char *line_in, int recurse_level){
     }
   }
   strcpy(line_in ,line);
+  get_key(line,key, &keybeg, &keyend);
+  if(keybeg!=NULL){
+    *keyend='\0';
+    trim(keybeg);
+    printf("WARNING: No value found for the key %s\n",keybeg);
+  }
   return;
 }
   
@@ -770,7 +808,7 @@ void get_keywords(blockaiddata *blockaidi, char *buffer){
 
   for(key=strstr(buffptr,"#");key!=NULL;){
     size_t lenkey, lenval;
-    char *ckey, *cval;
+    char *ckey, *cval, *endline;
 
     endkey=strstr(key+1,"=");
     if(endkey==NULL)break;
@@ -778,7 +816,8 @@ void get_keywords(blockaiddata *blockaidi, char *buffer){
     val=strstr(endkey+1,"'");
     if(val==NULL)break;
     val++;
-
+    
+    endline=strstr(val,"\n");
     endval=strstr(val,"'");
     if(endval==NULL)break;
     *endkey='\0';
@@ -787,6 +826,14 @@ void get_keywords(blockaiddata *blockaidi, char *buffer){
     trim(val);
     lenkey=strlen(key);
     lenval=strlen(val);
+    if(endline!=NULL&&endval>endline){
+      printf("**********\n");
+      printf("ERROR: A keyword value can't be split across a line\n");
+      printf("    keyword: %s\n",key);
+      printf("    value: %s\n",val);
+      printf("**********\n");
+      break;
+    }
     if(lenkey<1||lenval<1)continue;
 
     NewMemory((void **)&ckey,lenkey+1);
@@ -821,6 +868,7 @@ blockaiddata *create_assembly(char *buffer){
   fdsdata *first_line, *last_line;
 
   NewMemory((void **)&blockaidi,sizeof(blockaiddata));
+  blockaidi->type=0;
   blockaidi->keyword_list=NULL;
   blockaidi->val_list=NULL;
   blockaidi->nkeywordlist=0;
@@ -887,21 +935,7 @@ void update_assembly(blockaiddata *assembly,char *buffer){
   thisfds->is_obst=0;
   thisfds->is_shell=0;
   thisfds->blockaid=NULL;
-  if(match(buffer,"&OBST",5)==1||
-    match(buffer,"&HOLE",5)==1||
-    match(buffer,"&SHELL",6)==1||
-    match(buffer,"&VENT",5)==1){
-    thisfds->type=1;
-    if(match(buffer,"&OBST",5)==1){
-      is_obst=1;
-      thisfds->is_obst=1;
-    }
-    if(match(buffer,"&SHELL",6)==1){
-      is_shell=1;
-      thisfds->is_shell=1;
-    }
-  }
-  else if(match(buffer,"&GRP",4)==1){
+  if(match(buffer,"&GRP",4)==1){
     thisfds->type=2;
     if(strstr(buffer,"#")!=NULL){
       NewMemory((void **)&thisfds->blockaid,sizeof(blockaiddata ));
@@ -916,8 +950,28 @@ void update_assembly(blockaiddata *assembly,char *buffer){
       thisfds->blockaid=NULL;
     }
   }
-  else{
+  else if(match(buffer,"&BGRP",5)==1||match(buffer,"&EGRP",5)==1){
+    printf("ERROR: &BGRP and &EGRP cannot be nested\n");
     thisfds->type=0;
+  }
+  else{
+    thisfds->type=1;
+    if(
+      match(buffer,"&OBST",5)==1||
+      match(buffer,"&VENT",5)==1||
+      match(buffer,"&SHELL",6)==1||
+      match(buffer,"&HOLE",5)==1
+      ){
+        assembly->type=1;
+    }
+    if(match(buffer,"&OBST",5)==1){
+      is_obst=1;
+      thisfds->is_obst=1;
+    }
+    if(match(buffer,"&SHELL",6)==1){
+      is_shell=1;
+      thisfds->is_shell=1;
+    }
   }
   if(buffer!=NULL){
     len=strlen(buffer);
@@ -955,14 +1009,14 @@ void update_assembly(blockaiddata *assembly,char *buffer){
       get_irvals(buffer, "XYZ", 3, NULL, thisfds->xb,&thisfds->ibeg,&thisfds->iend);
     }
 
-    if(thisfds->type!=0&&(thisfds->ibeg>=0&&thisfds->iend>=0)){
-      thisfds->linecopy[thisfds->ibeg]=0;
-      thisfds->line_before=thisfds->linecopy;
-      thisfds->line_after=thisfds->linecopy+ thisfds->iend;
-    }
-    else{
-      thisfds->line_before=NULL;
-      thisfds->line_after=NULL;
+    thisfds->line_before=NULL;
+    thisfds->line_after=NULL;
+    if(thisfds->type!=0){
+      if(thisfds->ibeg>=0&&thisfds->iend>=0){
+        thisfds->linecopy[thisfds->ibeg]=0;
+        thisfds->line_before=thisfds->linecopy;
+        thisfds->line_after=thisfds->linecopy+ thisfds->iend;
+      }
     }
 
 
