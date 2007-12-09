@@ -42,6 +42,9 @@ typedef struct _blockaiddata {
   struct _blockaiddata *prev, *next;
 } blockaiddata;
 
+void subst_string(char *string, int ibeg, int iend, char *replace);
+void int2string(int *ib, int nib, char *ibstring);
+void float2string(float *xb, int nxb, char *xbstring);
 int getrevision(char *svn);
 void getASMversion(char *SMZversion);
 int getmaxrevision(void);
@@ -52,14 +55,16 @@ void usage(void);
 int getfileinfo(char *filename, char *source_dir, int *filesize);
 int readfds(char *fdsfile);
 int match(const char *buffer, const char *key, unsigned int lenkey);
-int get_fds_line(FILE *stream, char *fdsbuffer, unsigned int len_fdsbuffer);
+int get_fds_line(FILE *stream, 
+                 char *fdsbuffer, char *repbuffer, unsigned int len_fdsbuffer, 
+                 int *irep, int *nprep);
 void expand_assembly(FILE *stream_out, char *buffer, int recurse_level);
 blockaiddata *create_assembly(char *buffer);
 void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *next);
 void update_assembly(blockaiddata *assembly,char *buffer);
 void remove_assembly(blockaiddata *assembly);
 char *get_keyid(char *source, const char *key);
-int get_irvals(char *line, char *key, int nvals, float *ivals, float *rvals, int *ibeg, int *iend);
+int get_irvals(char *line, char *key, int nvals, int *ivals, float *rvals, int *ibeg, int *iend);
 void startup(void);
 blockaiddata *get_assembly(char *id);
 void trimzeros(char *line);

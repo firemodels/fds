@@ -204,19 +204,19 @@ char *get_keyid(char *source, const char *key){
 
 /* ------------------ parseobst_xb ------------------------ */
 
-int get_irvals(char *line, char *key, int nvals, float *ivals, float *rvals, int *ibeg, int *iend){
+int get_irvals(char *line, char *key, int nvals, int *ivals, float *rvals, int *ibeg, int *iend){
   char *keyptr, *keystart, *xslash, *c;
   char *cvals;
   char line2[10000];
   size_t len;
   int mode,token;
   size_t i;
-  int exitfor;
+  int exitloop;
 #define INBLANK 0
 #define INTOKEN 1
 
   if(ibeg!=NULL)*ibeg=-1;
-  if(iend!=NULL)*iend=-1;
+  if(iend!=NULL)*iend=-2;
   if(line==NULL||strlen(line)<1)return 0;
   if(key==NULL||strlen(key)<1)return 0;
   if(nvals<1)return 0;
@@ -234,11 +234,9 @@ int get_irvals(char *line, char *key, int nvals, float *ivals, float *rvals, int
   while(keyptr==NULL){
     keyptr = strstr(keystart,key);
     if(keyptr==NULL)return 0;
-    if(keyptr!=NULL){
-      if(!isspace(keyptr[-1])&&keyptr[-1]!=','){
-        keystart=keyptr+1;
-        keyptr=NULL;
-      }
+    if(!isspace(keyptr[-1])&&keyptr[-1]!=','){
+      keystart=keyptr+1;
+      keyptr=NULL;
     }
   }
 
@@ -248,9 +246,9 @@ int get_irvals(char *line, char *key, int nvals, float *ivals, float *rvals, int
   mode = INBLANK;
   token=0;
   cvals=NULL;
-  exitfor=0;
+  exitloop=0;
   for(c=keyptr+strlen(key);*c!='\0';c++){
-    if(exitfor==1)break;
+    if(exitloop==1)break;
     switch (mode) {
     case INBLANK:
       if(*c==' '||*c==','||*c=='\n'){
@@ -258,9 +256,8 @@ int get_irvals(char *line, char *key, int nvals, float *ivals, float *rvals, int
         break;
       }
       if(token==0&&*c=='='){
-        ++c;
-        cvals=c;
-        if(ibeg!=NULL)*ibeg=(int)(c-line2);
+        cvals=c+1;
+        if(ibeg!=NULL)*ibeg=(int)(cvals-line2);
         break;
       }
       token++;
@@ -269,7 +266,7 @@ int get_irvals(char *line, char *key, int nvals, float *ivals, float *rvals, int
     case INTOKEN:
       if(*c==' '||*c==','||*c=='/'){
         if(token==nvals){
-          exitfor=1;
+          exitloop=1;
 //          *c='\0';
           if(iend!=NULL)*iend=(int)(c-line2);
           break;
@@ -425,3 +422,63 @@ void trimmzeros(char *line){
     *dx=dxy2[0];
     *dy=dxy2[1];
   }
+
+/* ------------------ float2string ------------------------ */
+
+void float2string(float *xb, int nxb, char *xbstring){
+  char charxb[100];
+  int i;
+
+  strcpy(xbstring,"");
+  for(i=0;i<nxb;i++){
+
+    sprintf(charxb,"%f",xb[i]);
+    trimzeros(charxb);
+    strcat(xbstring,charxb);
+    if(i!=nxb-1){
+      strcat(xbstring,", ");
+    }
+  }
+}
+
+/* ------------------ int2string ------------------------ */
+
+void int2string(int *ib, int nib, char *ibstring){
+  char charib[100];
+  int i;
+
+  strcpy(ibstring,"");
+  for(i=0;i<nib;i++){
+
+    sprintf(charib,"%f",ib[i]);
+    trimzeros(charib);
+    strcat(ibstring,charib);
+    if(i!=nib-1){
+      strcat(ibstring,", ");
+    }
+  }
+}
+
+/* ------------------ subst_string ------------------------ */
+
+void subst_string(char *string, int ibeg, int iend, char *replace){
+  char buffer[MAXLINE];
+  int ii,i;
+
+  if(string==NULL)return;
+  ii=0;
+  for(i=0;i<ibeg;i++){
+    buffer[ii++]=string[i];
+  }
+  if(replace!=NULL){
+    for(i=0;i<strlen(replace);i++){
+      buffer[ii++]=replace[i];
+    }
+  }
+  for(i=iend+1;i<strlen(string);i++){
+    buffer[ii++]=string[i];
+  }
+  buffer[ii]='\0';
+  strcpy(string,buffer);
+}
+
