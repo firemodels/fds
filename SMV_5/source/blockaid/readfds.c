@@ -29,7 +29,8 @@ int readfds(char *in_file_base){
 
   FILE *stream_in, *stream_out;
 #define LENBUFFER 10000
-  char buffer[LENBUFFER];
+  char buffer[LENBUFFER], repbuffer[LENBUFFER];
+  int irep, nrep;
   int in_assembly=0;
 
   strcpy(file,in_file_base);
@@ -98,8 +99,14 @@ int readfds(char *in_file_base){
   }
 
   in_assembly=0;
-  while(!feof(stream_in)){
-    if(get_fds_line(stream_in, buffer, LENBUFFER)==-1)break;
+  irep=0;
+  nrep=0;
+  while((nrep>0&&irep<nrep)||!feof(stream_in)){
+    if(get_fds_line(stream_in, buffer, repbuffer, LENBUFFER, &irep, &nrep)==-1)break;
+    if(nrep!=0&&irep>=nrep){
+      irep=0;
+      nrep=0;
+    }
     trim(buffer);
 
     if(match(buffer,"&BGRP",5)==1){
@@ -153,7 +160,8 @@ int readfds(char *in_file_base){
 
 int read_pass1(char *in_file, int recurse_level){
   FILE *stream_in;
-  char buffer[LENBUFFER];
+  char buffer[LENBUFFER], repbuffer[LENBUFFER];
+  int irep, nrep;
   int in_assembly=0;
 
   stream_in=fopen(in_file,"r");
@@ -163,11 +171,16 @@ int read_pass1(char *in_file, int recurse_level){
   }
 
 // pass 1
-
-  while(!feof(stream_in)){
+  irep=0;
+  nrep=0;
+  while((nrep>0&&irep<nrep)||!feof(stream_in)){
     blockaiddata *assembly;
 
-    if(get_fds_line(stream_in, buffer, LENBUFFER)==-1)break;
+    if(get_fds_line(stream_in, buffer, repbuffer, LENBUFFER, &irep, &nrep)==-1)break;
+    if(nrep!=0&&irep>=nrep){
+      irep=0;
+      nrep=0;
+    }
     trim(buffer);
 
     if(match(buffer,"&BGRP",5)==1){
@@ -208,40 +221,106 @@ int read_pass1(char *in_file, int recurse_level){
 
 /* ------------------ get_fds_line ------------------------ */
 
-int get_fds_line(FILE *stream, char *fdsbuffer, unsigned int len_fdsbuffer){
+int get_fds_line(FILE *stream, 
+                 char *fdsbuffer, char *repbuffer, unsigned int len_fdsbuffer, 
+                 int *irep, int *nrep){
   int copyback=0;
   size_t lenbuffer2;
-  char buffer[LENBUFFER], buffer2[LENBUFFER];
+  char buffer[LENBUFFER], buffer2[LENBUFFER], buffer3[LENBUFFER];
   int is_command=0;
 
-  copyback=0;
-  if(fgets(buffer,LENBUFFER,stream)==NULL||strlen(buffer)>len_fdsbuffer)return -1;
-  strcpy(buffer2,buffer);
-  lenbuffer2=0;
-  if(buffer[0]=='&')is_command=1;
-  while(is_command==1&&strstr(buffer,"/")==NULL){
-    if(fgets(buffer,LENBUFFER,stream)==NULL)return -1;
-    lenbuffer2+=strlen(buffer);
-    if(lenbuffer2>len_fdsbuffer||lenbuffer2>LENBUFFER)return -1;
-    strcat(buffer2,buffer);
-    copyback=1;
-  }
-  if(copyback==1){
-    strcpy(fdsbuffer,buffer2);
+  if(*nrep==0){
+    copyback=0;
+    if(fgets(buffer,LENBUFFER,stream)==NULL||strlen(buffer)>len_fdsbuffer)return -1;
+    strcpy(buffer2,buffer);
+    lenbuffer2=0;
+    if(buffer[0]=='&')is_command=1;
+    while(is_command==1&&strstr(buffer,"/")==NULL){
+      if(fgets(buffer,LENBUFFER,stream)==NULL)return -1;
+      lenbuffer2+=strlen(buffer);
+      if(lenbuffer2>len_fdsbuffer||lenbuffer2>LENBUFFER)return -1;
+      strcat(buffer2,buffer);
+      copyback=1;
+    }
+    if(copyback==1){
+      strcpy(fdsbuffer,buffer2);
+    }
+    else{
+      strcpy(fdsbuffer,buffer);
+    }
+    if(match(fdsbuffer,"&OBST",5)==1){
+      int repeat;
+      int ibeg, iend;
+      float dxyz[6];
+      char *crepeat, *cdxyz;
+
+      strcpy(buffer3,fdsbuffer);
+      strcpy(repbuffer,buffer3);
+      if(get_irvals(buffer3, "COPIES", 1, &repeat, NULL,&ibeg,&iend)==1&&repeat>0){
+
+        crepeat=strstr(buffer3,"COPIES");
+        if(crepeat!=NULL)ibeg=crepeat-buffer3;
+        subst_string(buffer3,ibeg,iend,NULL); // remove REPEAT sub-string
+
+        if(get_irvals(buffer3, "DXYZ", 6, NULL, dxyz, &ibeg,&iend)==6){
+
+          cdxyz=strstr(buffer3,"DXYZ");
+          if(cdxyz!=NULL)ibeg=cdxyz-buffer3;
+          subst_string(buffer3,ibeg,iend,NULL); // remove DXYZ sub-string
+
+          *nrep=repeat;
+          *irep=1;
+          strcpy(fdsbuffer,buffer3);
+        }
+      }
+    }
+    return (int)strlen(fdsbuffer);
   }
   else{
-    strcpy(fdsbuffer,buffer);
+    int repeat;
+    int ibeg, iend;
+    float xb[6],dxyz[6];
+    int i;
+    char xbstring[256], xb2string[256], *cbeg;
+
+    (*irep)++;
+    strcpy(buffer3,repbuffer);
+    if(get_irvals(buffer3, "COPIES", 1, &repeat, NULL,&ibeg,&iend)==1&&repeat>0){
+      cbeg=strstr(buffer3,"COPIES");
+      if(cbeg!=NULL)ibeg=cbeg-buffer3;
+      subst_string(buffer3,ibeg,iend,NULL);  // remove REPEAT sub-string
+      if(get_irvals(buffer3, "DXYZ", 6, NULL, dxyz, &ibeg,&iend)==6){
+        cbeg=strstr(buffer3,"DXYZ");
+        if(cbeg!=NULL)ibeg=cbeg-buffer3;
+        subst_string(buffer3,ibeg,iend,NULL); // remove DXYZ sub-string
+        if(get_irvals(buffer3, "XB", 6, NULL, xb, &ibeg,&iend)==6){
+          cbeg=strstr(buffer3,"XB");
+          if(cbeg!=NULL)ibeg=cbeg-buffer3;
+          for(i=0;i<6;i++){
+            xb[i]+=(*irep)*dxyz[i];
+          }
+          float2string(xb,6,xbstring);
+          strcpy(xb2string,"XB=");
+          strcat(xb2string,xbstring);
+          subst_string(buffer3,ibeg,iend,xb2string);
+          strcpy(fdsbuffer,buffer3);
+          return (int)strlen(fdsbuffer);
+        }
+      }
+    }
   }
-  return (int)strlen(fdsbuffer);
+  *nrep=0;
+  *irep=0;
+  return 0;
 }
 
 /* ------------------ expand_shell ------------------------ */
 
 void expand_shell(FILE *stream_out, char *buffer){
   float xb[6], delta;
-  char charxb[MAXLINE], line2[MAXLINE];
+  char xbstring[MAXLINE];
   char *delta_beg;
-  int i, ii;
+  int i;
   int ibeg, iend;
   int have_delta=1;
 
@@ -256,31 +335,19 @@ void expand_shell(FILE *stream_out, char *buffer){
     ibeg=(int)(delta_beg-buffer);
   }
 
-  ii=0;
-  for(i=0;i<strlen(buffer);i++){
-    if(i>=ibeg&&i<=iend)continue;
-    line2[ii]=buffer[i];
-    ii++;
-  }
-  line2[ii]='\0';
+  subst_string(buffer,ibeg,iend,NULL);  // remove DELTA substring
 
   fprintf(stream_out,"%s ","&OBST");
-  fprintf(stream_out,"%s\n",trim_front(line2+6));
+  fprintf(stream_out,"%s\n",trim_front(buffer+6));
   if(have_delta==0||delta<0.000001)return;
 
   fprintf(stream_out,"%s","&HOLE XB=");
   for(i=0;i<6;i++){
     if(i%2==0)xb[i]+=delta;
     if(i%2==1)xb[i]-=delta;
-    sprintf(charxb,"%f",xb[i]);
-    trimzeros(charxb);
-    if(i==5){
-      fprintf(stream_out,"%s",charxb);
-    }
-    else{
-      fprintf(stream_out,"%s,",charxb);
-    }
   }
+  float2string(xb,6,xbstring);
+  fprintf(stream_out,"XB=%s",xbstring);
   fprintf(stream_out,"%s\n"," /");
 }
 
