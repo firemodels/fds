@@ -269,7 +269,7 @@ int get_fds_line(FILE *stream,
           subst_string(buffer3,ibeg,iend,NULL); // remove DXYZ sub-string
 
           *nrep=repeat;
-          *irep=1;
+          *irep=0;
           strcpy(fdsbuffer,buffer3);
         }
       }
@@ -297,11 +297,12 @@ int get_fds_line(FILE *stream,
           cbeg=strstr(buffer3,"XB");
           if(cbeg!=NULL)ibeg=cbeg-buffer3;
           for(i=0;i<6;i++){
-            xb[i]+=(*irep)*dxyz[i];
+            xb[i]+=(*irep-1)*dxyz[i];
           }
           float2string(xb,6,xbstring);
           strcpy(xb2string,"XB=");
           strcat(xb2string,xbstring);
+          strcat(xb2string," ");
           subst_string(buffer3,ibeg,iend,xb2string);
           strcpy(fdsbuffer,buffer3);
           return (int)strlen(fdsbuffer);
@@ -341,7 +342,7 @@ void expand_shell(FILE *stream_out, char *buffer){
   fprintf(stream_out,"%s\n",trim_front(buffer+6));
   if(have_delta==0||delta<0.000001)return;
 
-  fprintf(stream_out,"%s","&HOLE XB=");
+  fprintf(stream_out,"%s","&HOLE ");
   for(i=0;i<6;i++){
     if(i%2==0)xb[i]+=delta;
     if(i%2==1)xb[i]-=delta;
