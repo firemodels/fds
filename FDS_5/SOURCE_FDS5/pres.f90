@@ -67,6 +67,9 @@ WALL_CELL_LOOP: DO IW=1,NEWC
    J   = IJKW(2,IW)
    K   = IJKW(3,IW)
    IOR = IJKW(4,IW)
+
+   ! Identify the type of pressure BC for each of the six mesh boundaries
+
    SELECT CASE(IOR)
       CASE( 1)
          IF (LBC==3 .OR. LBC==4 .OR. LBC==6) BC_TYPE = NEUMANN
@@ -87,7 +90,9 @@ WALL_CELL_LOOP: DO IW=1,NEWC
          IF (NBC==3 .OR. NBC==2) BC_TYPE = NEUMANN
          IF (NBC==1 .OR. NBC==4) BC_TYPE = DIRICHLET
    END SELECT
-      
+
+   ! Apply pressure gradients at NEUMANN boundaries: dH/dn = -F_n - d(u_n)/dt
+
    IF_NEUMANN: IF (BC_TYPE==NEUMANN) THEN
       SELECT CASE(IOR)
          CASE( 1)
@@ -104,9 +109,13 @@ WALL_CELL_LOOP: DO IW=1,NEWC
             BZF(I,J) = HZ(KBP1)*(-FVZ(I,J,KBAR) - DUWDT(IW))
       END SELECT
    ENDIF IF_NEUMANN
+
+   ! Apply pressures at DIRICHLET boundaries, depending on the specific type
  
    IF_DIRICHLET: IF (BC_TYPE==DIRICHLET) THEN
- 
+
+      ! Solid or interpolated boundaries
+
       NOT_OPEN: IF (BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) THEN
  
          SELECT CASE(IOR)
@@ -153,26 +162,28 @@ WALL_CELL_LOOP: DO IW=1,NEWC
          SELECT CASE(IOR)
             CASE( 1)
                BXS(J,K) = HH + 0.5_EB*DX(0)   *(DUDT+FVX(0,J,K))
-               IF (GET_H.AND.BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) BXS(J,K) = HH 
+               IF (GET_H) BXS(J,K) = HH 
             CASE(-1) 
                BXF(J,K) = HH - 0.5_EB*DX(IBP1)*(DUDT+FVX(IBAR,J,K))
-               IF (GET_H.AND.BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) BXF(J,K) = HH
+               IF (GET_H) BXF(J,K) = HH
             CASE( 2) 
                BYS(I,K) = HH + 0.5_EB*DY(0)   *(DVDT+FVY(I,0,K))
-               IF (GET_H.AND.BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) BYS(I,K) = HH
+               IF (GET_H) BYS(I,K) = HH
             CASE(-2) 
                BYF(I,K) = HH - 0.5_EB*DY(JBP1)*(DVDT+FVY(I,JBAR,K))
-               IF (GET_H.AND.BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) BYF(I,K) = HH
+               IF (GET_H) BYF(I,K) = HH
             CASE( 3) 
                BZS(I,J) = HH + 0.5_EB*DZ(0)   *(DWDT+FVZ(I,J,0))
-               IF (GET_H.AND.BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) BZS(I,J) = HH
+               IF (GET_H) BZS(I,J) = HH
             CASE(-3) 
                BZF(I,J) = HH - 0.5_EB*DZ(KBP1)*(DWDT+FVZ(I,J,KBAR))
-               IF (GET_H.AND.BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) BZF(I,J) = HH
+               IF (GET_H) BZF(I,J) = HH
          END SELECT
  
       ENDIF NOT_OPEN
  
+      ! OPEN (passive opening to exterior of domain) boundary. Apply inflow/outflow BC.
+
       OPEN: IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
  
          SELECT CASE(IOR)
@@ -243,6 +254,7 @@ WALL_CELL_LOOP: DO IW=1,NEWC
    ENDIF IF_DIRICHLET
  
 ENDDO WALL_CELL_LOOP
+
 ! Compute the RHS of the Poisson equation
  
 IF (CYLINDRICAL) THEN
@@ -270,7 +282,7 @@ IF ( (IPS<=1 .OR. IPS==4 .OR. IPS==7) .AND. .NOT.CYLINDRICAL) THEN
    ENDDO
 END IF
  
-IF (IPS==2) THEN
+IF (IPS==2) THEN  ! Switch x and y
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -286,7 +298,7 @@ IF (IPS==2) THEN
    BZFT = TRANSPOSE(BZF)
 ENDIF
  
-IF (IPS==3 .OR. IPS==6) THEN
+IF (IPS==3 .OR. IPS==6) THEN  ! Switch x and z
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -306,7 +318,7 @@ IF (IPS==3 .OR. IPS==6) THEN
    BZFT = TRANSPOSE(BZF)
 END IF
  
-IF (IPS==5) THEN
+IF (IPS==5) THEN  ! Switch y and z
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -350,6 +362,8 @@ IF (IPS==6) CALL H3CSSS(BZST,BZFT,BYST,BYFT,BXST,BXFT,ITRN,JTRN,PRHS,POIS_PTB,SA
  
 IF (IPS==7) CALL H2CZSS(BXS,BXF,BYS,BYF,ITRN,PRHS,POIS_PTB,SAVE,WORK,HX)
  
+! Put output of Poisson solver into the H array
+
 IF (IPS<=1 .OR. IPS==4 .OR. IPS==7) THEN
    DO K=1,KBAR
       DO J=1,JBAR
@@ -438,12 +452,14 @@ IF (CHECK_POISSON) THEN
       ENDDO
    ENDDO
 ENDIF
-!
+ 
 ! **********************************************************************
-!
+ 
 TUSED(5,NM)=TUSED(5,NM)+SECOND()-TNOW
 END SUBROUTINE PRESSURE_SOLVER
- 
+
+
+! Everything below this point is experimental and not currently implemented
  
 SUBROUTINE COMPUTE_A_B(A,B,NM)
 USE GLOBAL_CONSTANTS, ONLY: NCGC, SOLID_BOUNDARY, OPEN_BOUNDARY, PREDICTOR
