@@ -1127,6 +1127,17 @@ Before reporting the error to the Issue Tracker, try to systematically simplify 
 input file until the error goes away. This process usually brings to light some feature of the
 calculation responsible for the problem and helps in the debugging.
 
+\item[{\bf File Writing Errors}:] \index{Support!Error Statements!READONLY}
+Ocassionally, especially on Windows machines, FDS fails because it is not permitted to write to a file. A typical error statement reads:
+\footnotesize
+\begin{verbatim}
+forrtl: severe (47): write to READONLY file, unit 8598, file C:\Users\...\
+\end{verbatim} \normalsize
+The unit, in this case 8598, is just a number that FDS has associated with one of the output files. If this error occurs just after the start of
+the calculation, you can try adding the phrase \\ {\ct FLUSH\_FILE\_BUFFERS=.FALSE.} \\ on the {\ct DUMP} line of the input file (see Section~\ref{info:DUMP}).
+This will prevent FDS from attempting to flush the contents of the internal buffers, something it does to make it possible to view the FDS output
+in Smokeview during the FDS simulation.
+
 \item[{\bf Poisson Initialization}:] \index{Support!Error Statements!Poisson}
 Sometimes at the very start of a calculation, an error
 appears stating that there is a problem with the ``Poisson initialization.''\index{Poisson initialization} The equation for
@@ -5795,8 +5806,9 @@ of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_M
 \item[{\ct MAXIMUM\_DROPLETS}] Maximum number of Lagrangian particles that can be included on any
 mesh at any given time. (Default 500000)
 \item[{\ct SMOKE3D}] If {\ct .FALSE.}, do not produce an animation of the smoke and fire. It is {\ct .TRUE.} by default.
-\item[{\ct FLUSH\_FILE\_BUFFERS}] By default, every 10 time steps FDS purges the output file buffers and forces the data to be written out into the respective output files. To stop
-this from happening, set this parameter to {\ct .FALSE.}
+\item[{\ct FLUSH\_FILE\_BUFFERS}] By default, every 10 time steps FDS purges the output file buffers and forces the data to be written out into the respective output files. It has been
+noticed on Windows machines that ocassionally a runtime error occurs because of file access problems related to the buffer flushing. If this happens, set this parameter to {\ct .FALSE.}, but
+be aware that it may not be possible to look at output in Smokeview until after the calculation is finished.
 \end{description}
 
 
