@@ -41,16 +41,6 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
  
    PC=>PARTICLE_CLASS(IPC)
 
-   ! Check if droplets evaporate into a SPECIES
- 
-   SPECIES_LOOP: DO I=1,N_SPECIES
-      IF (PC%SPECIES=='null') CYCLE SPECIES_LOOP
-      IF (SPECIES(I)%NAME==PC%SPECIES) THEN
-         PC%SPECIES_INDEX = I
-         EXIT SPECIES_LOOP
-      ENDIF
-   ENDDO SPECIES_LOOP
- 
    ! If particles/droplets have a size distribution, initialize here
  
    IF_SIZE_DISTRIBUTION: IF (PC%DIAMETER > 0._EB) THEN
@@ -1231,7 +1221,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
       FTPR     = PC%FTPR
       TMP_MELT = PC%TMP_MELT
       TMP_BOIL = PC%TMP_V
-      IGAS     = PC%SPECIES_INDEX
+      IGAS     = PC%SPEC_INDEX
       MW_DROP  = SPECIES(IGAS)%MW
       MW_RATIO = SPECIES(0)%MW/MW_DROP
       H_V      = PC%H_V
