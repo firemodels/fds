@@ -5211,6 +5211,39 @@ Heskestad Ionization          & ---         & ---          &  1.8               
 \end{center}
 \end{table}
 
+\subsubsection{Defining Smoke}
+\label{info:alternative_smoke}
+
+By default, FDS assumes that the smoke from a fire is generated in direct proportion to the heat release rate. A value
+of {\ct SOOT\_YIELD=0.01} on the {\ct REAC} line means that the smoke generation rate is 0.01 of the fuel burning rate. The
+``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the mixture fraction
+variables that are explicitly tracked.
+
+Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of
+the HRR (or even in lieu of an actual fire, like a smouldering source). You also want to define a mass extinction coefficient for the
+smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using
+the ``SMOKE3D'' feature in Smokeview. Use the following lines:
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COFFICIENT=7600. /
+&SURF ID='SMOULDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, COLOR='RED' /
+&VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='SMOULDER' /
+
+&PROP ID='Acme Smoke', QUANTITY='spot obscuration', SPEC_ID='MY SMOKE' /
+&DEVC XYZ=1.00,0.50,0.95, PROP_ID='Acme Smoke', ID='smoke_1' /
+
+&DUMP SMOKE3D_QUANTITY='MY SMOKE', DT_PL3D=30. /
+\end{verbatim}
+
+\normalsize
+\noindent
+The same smoke detector model is used that was described above. Only now, the mass fraction of your species {\ct 'MY SMOKE'} is used in the
+algorithm, rather than that associated with the mixture fraction. Note that your species will not participate in the radiation calculation. It
+will merely serve as a surrogate for smoke.
+
+
+
 
 \subsection{Beam Detection Systems}
 \label{info:beam_detector}
@@ -6118,9 +6151,26 @@ obtained elsewhere.
 When you do a fire simulation using the default mixture fraction combustion model, FDS automatically creates two output files that are rendered by
 Smokeview as realistic looking smoke and fire. By default, the output quantities {\ct 'soot mass fraction'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume)
 are used in the visualization. You have the option of rendering any other species mass fraction instead of {\ct 'soot mass fraction'}, so long as the
-{\ct MASS\_EXTINCTION\_COEFFICIENT} ({\ct REAC} line) is appropriate in describing the attenuation of visible light by the specified gas species.
+{\ct MASS\_EXTINCTION\_COEFFICIENT} (either from the {\ct REAC} line, or over-ridden by the value on the {\ct SPEC} line) is appropriate in
+describing the attenuation of visible light by the specified gas species.
 The alternative gas species is given by {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line.
 See the Smokeview User's Guide for more details on how these quantities are rendered.
+
+Here is an example of how to control the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default mixture fraction model.
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=7600. /
+&SURF ID='NO FIRE', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, COLOR='RED' /
+&VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='NO FIRE' /
+&DUMP SMOKE3D_QUANTITY='MY SMOKE' /
+\end{verbatim}
+
+\normalsize
+\noindent
+The production rate of {\ct 'MY SMOKE'} is 0.0001~kg/m$^2$/s, applied to an area of 0.16~m$^2$. The \\ {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to
+Smokeview to be used for visualization.
+
 
 
 
@@ -7101,33 +7151,34 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\ \hline \hline
-{\ct ACTIVATION\_TEMPERATURE}           & Real          & Threshold link temperature       & $^\circ$C             & 74        \\ \hline
-{\ct ACTIVATION\_OBSCURATION}           & Real          & Threshold value of obscuration   & \%/m                  & 3.28      \\ \hline
-{\ct ALPHA\_C}                          & Real          & Smoke detector parameter         &                       & 1.8       \\ \hline
-{\ct ALPHA\_E}                          & Real          & Smoke detector parameter         &                       & 0.0       \\ \hline
-{\ct BETA\_C}                           & Real          & Smoke detector parameter         &                       & 1.0       \\ \hline
-{\ct BETA\_E}                           & Real          & Smoke detector parameter         &                       & 1.0       \\ \hline
-{\ct BEAD\_DIAMETER}                    & Real          & Diameter of TC bead              & m                     & 0.001     \\ \hline
-{\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of TC bead            &                       & 0.85      \\ \hline
-{\ct C\_FACTOR}                         & Real          & Sprinkler activation parameter   &                       & 0.        \\ \hline
-{\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}      & m/s                   & 1.0       \\ \hline
-{\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity         & m/s                   & 5.0       \\ \hline
-{\ct FLOW\_RATE}                        & Real          & Sprinkler or nozzle flow rate    & L/min                 &           \\ \hline
-{\ct FLOW\_RAMP}                        & Character     & Time {\ct RAMP} for flow         &                       &           \\ \hline
-{\ct FLOW\_TAU}                         & Real          & Time constant for flow           &                       & 0.0       \\ \hline
-{\ct GAUGE\_TEMPERATURE}                & Real          & See Section~\ref{info:heat_flux} & $^\circ$C             & {\ct TMPA}\\ \hline
-{\ct ID}                                & Character     & IDentifier                       &                       &           \\ \hline
-{\ct INITIAL\_TEMPERATURE}              & Real          & Initial link temperature         & $^\circ$C             & {\ct TMPA}\\ \hline
-{\ct K\_FACTOR}                         & Real          & Flow parameter                   & L/min/atm$^{1/2}$     & 1.        \\ \hline
-{\ct LENGTH}                            & Real          & Smoke detector parameter         &                       & 1.8       \\ \hline
-{\ct OFFSET}                            & Real          & Droplet offset distance          & m                     & 0.05      \\ \hline
-{\ct OPERATING\_PRESSURE}               & Real          & Sprinkler pipe pressure          & atm                   & 1.        \\ \hline
-{\ct PART\_ID}                          & Character     & Name of associated PART line     &                       &           \\ \hline
-{\ct QUANTITY}                          & Character     & Name of associated output        &                       &           \\ \hline
-{\ct RTI}                               & Real          & Response Time Index              & $\sqrt{\hbox{m~s}}$   & 100.      \\ \hline
-{\ct SMOKEVIEW\_ID}                     & Character     & Name of drawn object             &                       &           \\ \hline
-{\ct SPRAY\_ANGLE(2)}                   & Real          & Cone angles for water spray      & deg                   & 60.,75.   \\ \hline
-{\ct SPRAY\_PATTERN\_TABLE}             & Character     & {\ct TABL} for spray pattern     &                       &           \\ \hline
+{\ct ACTIVATION\_TEMPERATURE}           & Real          & Threshold link temperature                & $^\circ$C             & 74        \\ \hline
+{\ct ACTIVATION\_OBSCURATION}           & Real          & Threshold value of obscuration            & \%/m                  & 3.28      \\ \hline
+{\ct ALPHA\_C}                          & Real          & Smoke detector parameter                  &                       & 1.8       \\ \hline
+{\ct ALPHA\_E}                          & Real          & Smoke detector parameter                  &                       & 0.0       \\ \hline
+{\ct BETA\_C}                           & Real          & Smoke detector parameter                  &                       & 1.0       \\ \hline
+{\ct BETA\_E}                           & Real          & Smoke detector parameter                  &                       & 1.0       \\ \hline
+{\ct BEAD\_DIAMETER}                    & Real          & Diameter of TC bead                       & m                     & 0.001     \\ \hline
+{\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of TC bead                     &                       & 0.85      \\ \hline
+{\ct C\_FACTOR}                         & Real          & Sprinkler activation parameter            &                       & 0.        \\ \hline
+{\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}               & m/s                   & 1.0       \\ \hline
+{\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity                  & m/s                   & 5.0       \\ \hline
+{\ct FLOW\_RATE}                        & Real          & Sprinkler or nozzle flow rate             & L/min                 &           \\ \hline
+{\ct FLOW\_RAMP}                        & Character     & Time {\ct RAMP} for flow                  &                       &           \\ \hline
+{\ct FLOW\_TAU}                         & Real          & Time constant for flow                    &                       & 0.0       \\ \hline
+{\ct GAUGE\_TEMPERATURE}                & Real          & See Section~\ref{info:heat_flux}          & $^\circ$C             & {\ct TMPA}\\ \hline
+{\ct ID}                                & Character     & IDentifier                                &                       &           \\ \hline
+{\ct INITIAL\_TEMPERATURE}              & Real          & Initial link temperature                  & $^\circ$C             & {\ct TMPA}\\ \hline
+{\ct K\_FACTOR}                         & Real          & Flow parameter                            & L/min/atm$^{1/2}$     & 1.        \\ \hline
+{\ct LENGTH}                            & Real          & Smoke detector parameter                  &                       & 1.8       \\ \hline
+{\ct OFFSET}                            & Real          & Droplet offset distance                   & m                     & 0.05      \\ \hline
+{\ct OPERATING\_PRESSURE}               & Real          & Sprinkler pipe pressure                   & atm                   & 1.        \\ \hline
+{\ct PART\_ID}                          & Character     & Name of associated PART line              &                       &           \\ \hline
+{\ct QUANTITY}                          & Character     & Name of associated output                 &                       &           \\ \hline
+{\ct RTI}                               & Real          & Response Time Index                       & $\sqrt{\hbox{m~s}}$   & 100.      \\ \hline
+{\ct SMOKEVIEW\_ID}                     & Character     & Name of drawn object                      &                       &           \\ \hline
+{\ct SPEC\_ID}                          & Character     & See Section~\ref{info:alternative_smoke}  &                       &           \\ \hline
+{\ct SPRAY\_ANGLE(2)}                   & Real          & Cone angles for water spray               & deg                   & 60.,75.   \\ \hline
+{\ct SPRAY\_PATTERN\_TABLE}             & Character     & {\ct TABL} for spray pattern              &                       &           \\ \hline
 \end{tabular*}
 \end{table}
 
@@ -7280,16 +7331,17 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\ \hline \hline
-{\ct ABSORBING}         & Logical     & Gas species abosrbs radiation   &                   & {\ct .FALSE.} \\ \hline
-{\ct CONDUCTIVITY}      & Real        & Conductivity $k$                & W/m/K             &     \\ \hline
-{\ct DIFFUSIVITY}       & Real        & Diffusivity   $D$               & m$^2$/s           &     \\ \hline
-{\ct EPSILONKLJ}        & Real        & Leonard-Jones Parameter         &                   & 0   \\ \hline
-{\ct FYI}               & Character   & Comment String (has no effect)  &                   &     \\ \hline
-{\ct ID }               & Character   & Name of species                 &                   &     \\ \hline
-{\ct MASS\_FRACTION\_0} & Real        & Initial mass fraction           &                   & 0   \\ \hline
-{\ct MW}                & Real        & Molecular Weight                & g/mol             & 29.  \\ \hline
-{\ct SIGMALJ}           & Real        & Leonard-Jones Parameter         &                   & 0   \\ \hline
-{\ct VISCOSITY}         & Real        & Dynamic Viscosity $mu$          & kg/m/s            &     \\ \hline
+{\ct ABSORBING}                     & Logical     & Absorbs radiation                           &                   & {\ct .FALSE.} \\ \hline
+{\ct CONDUCTIVITY}                  & Real        & Conductivity $k$                            & W/m/K             &     \\ \hline
+{\ct DIFFUSIVITY}                   & Real        & Diffusivity   $D$                           & m$^2$/s           &     \\ \hline
+{\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
+{\ct FYI}                           & Character   & Comment String                              &                   &     \\ \hline
+{\ct ID }                           & Character   & Name of species                             &                   &     \\ \hline
+{\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0   \\ \hline
+{\ct MASS\_FRACTION\_0}             & Real        & Initial mass fraction                       &                   & 0   \\ \hline
+{\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.  \\ \hline
+{\ct SIGMALJ}                       & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
+{\ct VISCOSITY}                     & Real        & Dynamic Viscosity $mu$                      & kg/m/s            &     \\ \hline
 \end{tabular*}
 \end{table}
 %NAMELIST /SPEC/ MASS_FRACTION_0,MW,FYI,ID,SIGMALJ, EPSILONKLJ,CONDUCTIVITY, VISCOSITY,DIFFUSIVITY, ABSORBING
