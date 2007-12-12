@@ -30,6 +30,9 @@ int SUB_portfrustum(int quad,
 
 EXTERNCPP void add_new_tour(void);
 
+#ifdef pp_PEOPLE
+  void init_people(void);
+#endif
 #ifdef pp_GPU
 EXTERNCPP int log2(float xx);
 #endif

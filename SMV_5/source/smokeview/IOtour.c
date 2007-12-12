@@ -28,6 +28,9 @@ float hermiteview(float t, int i, keyframe *kf1, keyframe *kf2, float *slope);
 #ifdef pp_TOUR
 float linearview(float t, int i, keyframe *kf1, keyframe *kf2);
 #endif
+#ifdef pp_PEOPLE
+void draw_SVOBJECT(sv_object *object, int iframe);
+#endif
 
 /* ------------------ freetour ------------------------ */
 
@@ -283,6 +286,10 @@ void drawtours(void){
 
     /* keyframe avatar */
 
+#ifdef pp_PEOPLE
+  //show_tourlocus=1;
+  //tourlocus_type=2;
+#endif
   if(show_tourlocus==1){
     switch (tourlocus_type){
       case 0:
@@ -329,6 +336,34 @@ void drawtours(void){
 
         }
         break;
+#ifdef pp_PEOPLE
+      case 2:
+        for(i=0;i<ntours;i++){
+          touri = tourinfo + i;
+          if(touri->display==0||touri->nkeyframes<=1)continue;
+          if(touri->path_timeslist==NULL)continue;
+          if(showtours_whenediting==0&&selectedtour_index!=i)continue;
+
+
+          iframe = touri->path_timeslist[itime];
+          pj = touri->pathnodes + iframe;
+          if(keyframe_snap==1)pj = pj->keysnap;
+
+          eye = pj->eye;
+
+      //    drawcir(eye,tourrad_avatar,tourcol_avatar);
+          glPushMatrix();
+          glTranslatef(eye[0],eye[1],eye[2]);
+
+          //glRotatef(devicei->angle_az,0.0,0.0,1.0);
+
+          draw_SVOBJECT(people_types[ipeople_types],0);
+          glPopMatrix();
+
+
+        }
+        break;
+#endif
       default:
         ASSERT(FFALSE);
         break;

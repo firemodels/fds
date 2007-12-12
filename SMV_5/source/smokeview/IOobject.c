@@ -1238,11 +1238,23 @@ int read_device_defs(char *file){
     if(lenbuffer<1)continue;
 
 
+#ifdef pp_PEOPLE
+    if(match(buffer,"DEVICEDEF",9) == 1||
+       match(buffer,"PEOPLEDEF",9) == 1
+      ){
+        int is_people=0;
+#else
     if(match(buffer,"DEVICEDEF",9) == 1){
+#endif
       char *label;
 
       sv_object_frame *first_frame, *last_frame;
 
+#ifdef pp_PEOPLE
+      if(match(buffer,"PEOPLEDEF",9) == 1){
+        is_people=1;
+      }  
+#endif
       ndevices++;
       if(fgets(buffer,255,stream)==NULL)break;
       remove_comment(buffer);
@@ -1270,6 +1282,9 @@ int read_device_defs(char *file){
 
       first_frame = &current_object->first_frame;
       last_frame = &current_object->last_frame;
+#ifdef pp_PEOPLE
+      current_object->type=is_people;
+#endif
 
       first_frame->next=last_frame;
       first_frame->prev=NULL;
@@ -1498,7 +1513,9 @@ void remove_comment(char *buffer){
 /* ----------------------- init_device_defs ----------------------------- */
 
 void init_device_defs(void){
+#ifndef pp_PEOPLE
   if(ndeviceinfo>0){
+#endif
     char com_buffer[1024];
     char com_buffer2[1024];
 
@@ -1521,6 +1538,9 @@ void init_device_defs(void){
       strcat(objectfile,".svo");
       read_device_defs(objectfile);
 
+#ifdef pp_PEOPLE
+      init_people();
+#endif
     }
 
     if(isZoneFireModel==1){
@@ -1561,8 +1581,32 @@ void init_device_defs(void){
     //   if(strcmp(device_defs[ii]->label,"sensor")==0)strcpy(device_defs[ii]->label,"target");
     //  }
     //}
+#ifndef pp_PEOPLE
   }
   else{
     ndevice_defs=0;
   }
+#endif
 }
+#ifdef pp_PEOPLE
+  void init_people(void){
+    sv_object *objecti,*object_start;
+    
+    object_start = device_def_first.next;
+    npeople_types=0;
+    for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
+      if(objecti->type==1)npeople_types++;
+    }
+    if(npeople_types>0){
+      int ipeople_types;
+
+      NewMemory((void **)&people_types,npeople_types*sizeof(sv_object *));
+      ipeople_types=0;
+      for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
+        if(objecti->type==0)continue;
+        people_types[ipeople_types++]=objecti;
+      }
+      ipeople_types=0;
+    }
+  }
+#endif

@@ -55,6 +55,7 @@
 #define pp_LIGHT
 #endif
 #ifdef pp_ALPHA
+#define pp_PEOPLE
 #define pp_SHOWLIGHT
 #define pp_COLOR
 #define pp_GPU
