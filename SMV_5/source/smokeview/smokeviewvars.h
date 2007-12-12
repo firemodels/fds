@@ -734,6 +734,10 @@ SVEXTERN int keyframe_snap;
 SVEXTERN int tourviewtype;
 SVEXTERN int show_tourlocus;
 SVEXTERN int tourlocus_type;
+#ifdef pp_PEOPLE
+SVEXTERN int ipeople_types, npeople_types;
+SVEXTERN sv_object **people_types;
+#endif
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;
 SVEXTERN float *tour_t, *tour_t2, *tour_dist, *tour_dist2, *tour_dist3;
