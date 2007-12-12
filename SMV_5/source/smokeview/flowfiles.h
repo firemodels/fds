@@ -523,6 +523,9 @@ typedef struct _sv_object_frame {
 
 typedef struct _sv_object {
   char label[256];
+#ifdef pp_PEOPLE
+  int type;
+#endif
   int visible;
   int used;
   int nframes;

@@ -2094,7 +2094,24 @@ void TourMenu(int value){
     break;
   case -11: // bird's eye
     break;
-  default:               //  show one tour
+#ifdef pp_PEOPLE
+  case -21:
+    tourlocus_type=0;
+    break;
+  case -22:
+    tourlocus_type=1;
+    break;
+#endif
+  default: 
+#ifdef pp_PEOPLE
+    if(value<-22){
+      tourlocus_type=2;
+      ipeople_types=(-value-23);
+    }
+#endif
+    
+    //  show one tour
+
     if(value>=0&&value<ntours){
       {
         int current_val;
@@ -4716,6 +4733,34 @@ static int textureshowmenu=0;
       }
       glutAddMenuEntry(menulabel,i);
     }
+#ifdef pp_PEOPLE
+    if(npeople_types>0){
+      int i;
+      char menulabel[256];
+
+      glutAddMenuEntry("-",-999);
+      if(tourlocus_type==0){
+        glutAddMenuEntry("*Type 1",-21);
+      }
+      else{
+        glutAddMenuEntry("Type 1",-21);
+      }
+      if(tourlocus_type==1){
+        glutAddMenuEntry("*Type 2",-22);
+      }
+      else{
+        glutAddMenuEntry("Type 2",-22);
+      }
+      for(i=0;i<npeople_types;i++){
+        strcpy(menulabel,"");
+        if(tourlocus_type==2&&ipeople_types==i){
+          strcat(menulabel,"*");
+        }
+        strcat(menulabel,people_types[i]->label);
+        glutAddMenuEntry(menulabel,-23-i);
+      }
+    }
+#endif
 
 /* --------------------------------showhide menu -------------------------- */
 

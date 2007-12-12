@@ -915,6 +915,11 @@ void InitOpenGL(void){
 /* ------------------ initvars1 ------------------------ */
 
 void initvars1(void){
+
+#ifdef pp_PEOPLE
+  npeople_types=0;
+  people_types=NULL;
+#endif
   revision_fds=-1;
   revision_smv=getmaxrevision();
   force_isometric=0;
