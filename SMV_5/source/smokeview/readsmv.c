@@ -968,14 +968,17 @@ typedef struct {
 */
     if(match(buffer,"TERRAIN",7) == 1){
       terraindata *terri;
-
-      if(fgets(buffer,255,stream)==NULL)continue;
-      trim(buffer);
-      if(stat(buffer,&statbuffer)!=0)continue;
-
-      len=strlen(buffer);
+      float xmin, xmax, ymin, ymax;
+      int nx, ny;
+      float dx, dy;
+      float *x, *y;
+      int init_terrain=0;
+      float *znode, *zcell;
+      int nxcell;
+      float *znormal;
 
       terri = terraininfo + nterraininfo;
+
       NewMemory((void **)&terri->file,(unsigned int)(len+1));
       STRCPY(terri->file,buffer);
       terri->x=NULL;
@@ -993,22 +996,6 @@ typedef struct {
       terri->ter_texture=NULL;
       terri->state=NULL;
       terri->timeslist=NULL;
-      
-      nterraininfo++;
-      continue;
-    }
-    if(match(buffer,"TERRAIN",7) == 1){
-      terraindata *terri;
-      float xmin, xmax, ymin, ymax;
-      int nx, ny;
-      float dx, dy;
-      float *x, *y;
-      int init_terrain=0;
-      float *znode, *zcell;
-      int nxcell;
-      float *znormal;
-
-      terri = terraininfo + nterraininfo;
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %i %f %f %i",&xmin, &xmax, &nx, &ymin, &ymax, &ny);
@@ -1031,7 +1018,7 @@ typedef struct {
       NewMemory((void **)&terri->state,nx*ny);
       NewMemory((void **)&terri->znode,(nx+1)*(ny+1)*sizeof(float));
       NewMemory((void **)&terri->znormal,3*(nx+1)*(ny+1)*sizeof(float));
-      printf(" normal memory=%i\n",3*(nx+1)*(ny+1));
+
       x = terri->x;
       y = terri->y;
       dx = (xmax-xmin)/nx;
