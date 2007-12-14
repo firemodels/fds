@@ -3284,10 +3284,13 @@ void GeometryMenu(int value){
     break;
   case 11:
     if(isZoneFireModel)visFrame=1;
+    /*
     visFloor=1;
     visWalls=1;
     visCeiling=1;
+    */
     visVents=1;
+    BlockageMenu(visBLOCKAsInput);
     break;
   case 13:
     visFrame=0;
@@ -3295,6 +3298,8 @@ void GeometryMenu(int value){
     visWalls=0;
     visCeiling=0;
     visVents=0;
+    visGrid=0;
+    BlockageMenu(visBLOCKHide);
     break;
   default:
     ASSERT(FFALSE);
@@ -4034,12 +4039,14 @@ static int textureshowmenu=0;
   else{
     visFrame=0;
   }
+  /*
   if(visCeiling==1)glutAddMenuEntry("*Ceiling",7);
   if(visCeiling==0)glutAddMenuEntry("Ceiling",7);
   if(visWalls==1)glutAddMenuEntry("*Walls",6);
   if(visWalls==0)glutAddMenuEntry("Walls",6);
   if(visFloor==1)glutAddMenuEntry("*Floor",5);
   if(visFloor==0)glutAddMenuEntry("Floor",5);
+  */
   glutAddMenuEntry("Show All",11);
   glutAddMenuEntry("Hide All",13);
 
@@ -4734,6 +4741,12 @@ static int textureshowmenu=0;
       glutAddMenuEntry(menulabel,i);
     }
 #ifdef pp_PEOPLE
+    glutAddMenuEntry("-",-999);
+    glutAddMenuEntry("Show All Tours",-3);
+    glutAddMenuEntry("Hide All Tours",-2);
+    if(viewtourfrompath==1)glutAddMenuEntry("*View From Tour Route",-5);
+    if(viewtourfrompath==0)glutAddMenuEntry("View From Tour Route",-5);
+
     if(npeople_types>0){
       int i;
       char menulabel[256];
