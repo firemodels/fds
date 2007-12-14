@@ -738,6 +738,7 @@ SVEXTERN int tourlocus_type;
 SVEXTERN int ipeople_types, npeople_types;
 SVEXTERN sv_object **people_types;
 SVEXTERN int glui_people_index;
+SVEXTERN sv_object *people_defs_backup[2];
 #endif
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;

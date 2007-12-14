@@ -1590,23 +1590,35 @@ void init_device_defs(void){
 }
 #ifdef pp_PEOPLE
   void init_people(void){
+    int ipeople_types;
     sv_object *objecti,*object_start;
+    char com_buffer[1024];
     
     object_start = device_def_first.next;
-    npeople_types=0;
+    npeople_types=2;
     for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
       if(objecti->type==1)npeople_types++;
     }
-    if(npeople_types>0){
-      int ipeople_types;
+    NewMemory((void **)&people_types,npeople_types*sizeof(sv_object *));
 
-      NewMemory((void **)&people_types,npeople_types*sizeof(sv_object *));
-      ipeople_types=0;
-      for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
-        if(objecti->type==0)continue;
-        people_types[ipeople_types++]=objecti;
-      }
-      ipeople_types=0;
+//    strcpy(com_buffer,"1.0 0.0 0.0 setcolor 0.0 0.0 0.0 1.0 0.0 0.0 drawline 0.0 0.0 0.0 0.0 0.0 1.0 drawline");
+    strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.02 0.05 drawdisk");
+    people_defs_backup[0] = init_SVOBJECT1("Avatar_1", com_buffer,1);
+    people_defs_backup[0]->type=1;
+
+//    strcpy(com_buffer,"0.0 0.0 1.0 setcolor 0.1 drawcircle");
+    strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.02 0.05 drawdisk");
+    people_defs_backup[1] = init_SVOBJECT1("Avatar_2", com_buffer,1);
+    people_defs_backup[1]->type=1;
+
+    people_types[0]=people_defs_backup[0];
+    people_types[1]=people_defs_backup[1];
+
+    ipeople_types=2;
+    for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
+      if(objecti->type==0)continue;
+      people_types[ipeople_types++]=objecti;
     }
+    ipeople_types=0;
   }
 #endif

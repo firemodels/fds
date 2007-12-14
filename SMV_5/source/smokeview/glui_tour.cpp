@@ -169,8 +169,6 @@ extern "C" void glui_tour_setup(int main_window){
   if(npeople_types>0){
     LISTBOX_people=glui_tour->add_listbox_to_panel(panel_settings,"Avatar:",&glui_people_index,TOUR_PEOPLE,TOUR_CB);
 
-    LISTBOX_people->add_item(-1,"Type 1");
-    LISTBOX_people->add_item(-2,"Type 2");
     for(i=0;i<npeople_types;i++){
       touri = tourinfo + i;
       LISTBOX_people->add_item(i,people_types[i]->label);
