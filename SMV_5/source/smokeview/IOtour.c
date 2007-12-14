@@ -303,7 +303,9 @@ void drawtours(void){
           touri = tourinfo + i;
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
+#ifndef pp_PEOPLE
           if(showtours_whenediting==0&&selectedtour_index!=i)continue;
+#endif
 
 
           iframe = touri->path_timeslist[itime];
@@ -326,7 +328,9 @@ void drawtours(void){
           touri = tourinfo + i;
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
+#ifndef pp_PEOPLE
           if(showtours_whenediting==0&&selectedtour_index!=i)continue;
+#endif
 
 
           iframe = touri->path_timeslist[itime];
@@ -345,8 +349,6 @@ void drawtours(void){
           touri = tourinfo + i;
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
-          if(showtours_whenediting==0&&selectedtour_index!=i)continue;
-
 
           iframe = touri->path_timeslist[itime];
           pj = touri->pathnodes + iframe;
@@ -360,7 +362,7 @@ void drawtours(void){
 
           //glRotatef(devicei->angle_az,0.0,0.0,1.0);
 
-          draw_SVOBJECT(people_types[ipeople_types],0);
+          draw_SVOBJECT(people_types[touri->glui_people_index],0);
           glPopMatrix();
 
 
