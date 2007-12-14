@@ -52,6 +52,9 @@ void freetour(tourdata *touri){
 /* ------------------ inittour ------------------------ */
 
 void inittour(tourdata *touri){
+#ifdef pp_PEOPLE
+  touri->glui_people_index=0;
+#endif
   touri->global_tension=0.0;
   touri->global_tension_flag=1;
   touri->display=0;

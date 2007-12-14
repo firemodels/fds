@@ -485,6 +485,9 @@ typedef struct _tourdata {
   keyframe first_frame,last_frame;
   keyframe **keyframe_list;
   pathdata *pathnodes;
+#ifdef pp_PEOPLE
+  int glui_people_index;
+#endif
   float *path_times,*keyframe_times;
   float global_dist, local_dist;
   int *path_timeslist;
