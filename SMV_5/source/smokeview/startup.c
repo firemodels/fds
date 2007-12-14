@@ -1524,6 +1524,9 @@ void initvars1(void){
   tour_bias=0.0,tour_continuity=0.0;
   view_ntimes=1000;
   ntours=0,selectedtour_index=-1,selectedtour_index_old=-1,selectedtour_index_ini=-1;
+#ifdef pp_PEOPLE
+  glui_people_index=0;
+#endif
   update_selectedtour_index=0;
   viewtourfrompath=0,viewalltours=0,viewanytours=0,edittour=0;
   tour_usecurrent=0;
