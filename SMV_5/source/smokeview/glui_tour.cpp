@@ -83,7 +83,7 @@ GLUI_Spinner *SPINNER_elev_path=NULL;
 GLUI_Button *BUTTON_settings=NULL,*BUTTONnext_tour=NULL,*BUTTONprev_tour=NULL;
 GLUI_EditText *EDITlabel=NULL;
 GLUI_Listbox *LISTBOX_tour=NULL;
-GLUI_Listbox *LISTBOX_people=NULL;
+GLUI_Listbox *LISTBOX_avatar=NULL;
 
 #define TOUR_CLOSE 99
 #define KEYFRAME_tXYZ 1
@@ -107,7 +107,7 @@ GLUI_Listbox *LISTBOX_people=NULL;
 #define KEYFRAME_viewXYZ 22
 #define VIEWSNAP 23
 #define TOUR_LIST 24
-#define TOUR_PEOPLE 31
+#define TOUR_AVATAR 31
 #define VIEW1 26
 #ifdef pp_TOUR
 #define VIEW2 30
@@ -165,25 +165,25 @@ extern "C" void glui_tour_setup(int main_window){
   glui_tour->add_button_to_panel(panel_settings,"Update Tour Label",TOUR_UPDATELABEL,TOUR_CB);
   EDITlabel=glui_tour->add_edittext_to_panel(panel_settings,"Tour Label",GLUI_EDITTEXT_TEXT,tour_label,TOUR_LABEL,TOUR_CB);
   EDITlabel->set_w(240);
-#ifdef pp_PEOPLE
-  if(npeople_types>0){
-    LISTBOX_people=glui_tour->add_listbox_to_panel(panel_settings,"Avatar:",&glui_people_index,TOUR_PEOPLE,TOUR_CB);
+#ifdef pp_AVATAR
+  if(navatar_types>0){
+    LISTBOX_avatar=glui_tour->add_listbox_to_panel(panel_settings,"Avatar:",&glui_avatar_index,TOUR_AVATAR,TOUR_CB);
 
-    for(i=0;i<npeople_types;i++){
+    for(i=0;i<navatar_types;i++){
       touri = tourinfo + i;
-      LISTBOX_people->add_item(i,people_types[i]->label);
+      LISTBOX_avatar->add_item(i,avatar_types[i]->label);
     }
     if(tourlocus_type==0){
-      glui_people_index=-1;
+      glui_avatar_index=-1;
     }
     else if(tourlocus_type==1){
-      glui_people_index=-2;
+      glui_avatar_index=-2;
     }
     else{
-      glui_people_index=ipeople_types;
+      glui_avatar_index=iavatar_types;
     }
 
-     LISTBOX_people->set_int_val(glui_people_index);
+     LISTBOX_avatar->set_int_val(glui_avatar_index);
   }
 
 #endif
@@ -365,10 +365,10 @@ extern "C" void set_glui_keyframe(){
     tour_hide=1-ti->display;
   }
   if(selected_tour!=NULL)strcpy(tour_label,selected_tour->label);
-#ifdef pp_PEOPLE
-  glui_people_index=ti->glui_people_index;
-  TOUR_CB(TOUR_PEOPLE);
-  LISTBOX_people->set_int_val(glui_people_index);
+#ifdef pp_AVATAR
+  glui_avatar_index=ti->glui_avatar_index;
+  TOUR_CB(TOUR_AVATAR);
+  LISTBOX_avatar->set_int_val(glui_avatar_index);
 #endif
   eye = selected_frame->nodeval.eye;
   aview = selected_frame->nodeval.aview;
@@ -996,18 +996,18 @@ void TOUR_CB(int var){
       }
     }
     break;
-#ifdef pp_PEOPLE
-  case TOUR_PEOPLE:
-    selected_tour->glui_people_index=glui_people_index;
-    if(glui_people_index==-1){
+#ifdef pp_AVATAR
+  case TOUR_AVATAR:
+    selected_tour->glui_avatar_index=glui_avatar_index;
+    if(glui_avatar_index==-1){
       tourlocus_type=0;
     }
-    else if(glui_people_index==-2){
+    else if(glui_avatar_index==-2){
       tourlocus_type=1;
     }
     else{
       tourlocus_type=2;
-      ipeople_types=glui_people_index;
+      iavatar_types=glui_avatar_index;
     }
     updatemenu=1;
     break;

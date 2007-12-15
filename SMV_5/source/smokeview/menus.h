@@ -2002,6 +2002,17 @@ void LoadUnloadMenu(int value){
 }
 
 
+/* ------------------ ShowTourMenu ------------------------ */
+
+void ShowTourMenu(int value){
+}
+
+
+/* ------------------ AvatarTourMenu ------------------------ */
+
+void AvatarTourMenu(int value){
+}
+
 /* ------------------ TourMenu ------------------------ */
 
 void TourMenu(int value){
@@ -2094,7 +2105,7 @@ void TourMenu(int value){
     break;
   case -11: // bird's eye
     break;
-#ifdef pp_PEOPLE
+#ifdef pp_AVATAR
   case -21:
     tourlocus_type=0;
     break;
@@ -2103,39 +2114,64 @@ void TourMenu(int value){
     break;
 #endif
   default: 
-#ifdef pp_PEOPLE
+#ifdef pp_AVATAR
     if(value<-22){
       tourlocus_type=2;
-      ipeople_types=(-value-23);
+      iavatar_types=(-value-23);
+      if(selectedtour_index>=0&&selectedtour_index<ntours){
+        tourinfo[selectedtour_index].glui_avatar_index=iavatar_types;
+      }
     }
 #endif
     
     //  show one tour
 
     if(value>=0&&value<ntours){
-      {
-        int current_val;
+#ifdef pp_AVATAR
+      int j;
 
-        touri = tourinfo + value;
-        current_val = touri->display;
+      touri = tourinfo + value;
+      touri->display = 1 - touri->display;
+      if(touri->display==1){
+        selectedtour_index=value;
+        selected_frame=touri->first_frame.next;
+        selected_tour=touri;
+      }
+      else{
+        for(j=0;i<ntours;i++){
+          tourdata *tourj;
 
-        if(callfrom_tourglui==0){
-          for(i=0;i<ntours;i++){
-            touri = tourinfo + i;
-            touri->display=0;
-          }
-          viewtourfrompath=0;
-          edittour=0;
-        }
-        if(current_val==0){
-          touri = tourinfo + value;
-          touri->display=1;
-          selectedtour_index=value;
-          selected_frame=(tourinfo + value)->first_frame.next;
-          selected_tour=tourinfo+value;
-          if(callfrom_tourglui==0)viewtourfrompath=1;
+          tourj = tourinfo + j;
+          if(touri==tourj||tourj->display==0)continue;
+          selectedtour_index=j;
+          selected_frame=tourj->first_frame.next;
+          selected_tour=tourj;
+          break;
         }
       }
+#else
+      int current_val;
+
+      touri = tourinfo + value;
+      current_val = touri->display;
+
+      if(callfrom_tourglui==0){
+        for(i=0;i<ntours;i++){
+          touri = tourinfo + i;
+          touri->display=0;
+        }
+        viewtourfrompath=0;
+        edittour=0;
+      }
+      if(current_val==0){
+        touri = tourinfo + value;
+        touri->display=1;
+        selectedtour_index=value;
+        selected_frame=(tourinfo + value)->first_frame.next;
+        selected_tour=tourinfo+value;
+        if(callfrom_tourglui==0)viewtourfrompath=1;
+      }
+#endif
     }
     break;
   }
@@ -3408,6 +3444,9 @@ static int particle5showmenu=0;
 static int particlepropshowmenu=0;
 static int particlestreakshowmenu=0;
 static int tourmenu=0;
+#ifdef pp_AVATAR
+static int showtourmenu=0, avatartourmenu=0;
+#endif
 static int trainerviewmenu=0,mainmenu=0,zoneshowmenu=0,particleshowmenu=0,evacshowmenu=0,targetmenu=0;
 static int showdevicesmenu=0;
 static int unloadplot3dmenu=0, unloadpatchmenu=0, unloadisomenu=0;
@@ -4714,6 +4753,76 @@ static int textureshowmenu=0;
     }
   }
 
+/* -------------------------------- avatartour menu -------------------------- */
+#ifdef pp_AVATAR
+  CREATEMENU(avatartourmenu,TourMenu);
+  if(navatar_types>0){
+    int i;
+    char menulabel[256];
+    if(selectedtour_index>=0&&selectedtour_index<ntours){
+      tourdata *touri;
+
+      touri = tourinfo + selectedtour_index;
+      strcpy(menulabel,"For ");
+      strcat(menulabel,touri->label);
+      glutAddMenuEntry(menulabel,-999);
+      glutAddMenuEntry("-",-999);
+    }
+
+    for(i=0;i<navatar_types;i++){
+      strcpy(menulabel,"");
+      if(tourlocus_type==2&&iavatar_types==i){
+        strcat(menulabel,"*");
+      }
+      strcat(menulabel,avatar_types[i]->label);
+      glutAddMenuEntry(menulabel,-23-i);
+    }
+  }
+#endif
+/* -------------------------------- showtour menu -------------------------- */
+#ifdef pp_AVATAR
+  CREATEMENU(showtourmenu,TourMenu);
+
+    for(i=0;i<ntours;i++){
+      tourdata *touri;
+      int glui_avatar_index;
+
+      touri = tourinfo + i;
+      if(touri->isDefault==1&&isShell==1)continue;
+      if(touri->display==1){
+        STRCPY(menulabel,"");
+        if(selectedtour_index==i){
+          STRCAT(menulabel,"@");
+        }
+        STRCAT(menulabel,check);
+        STRCAT(menulabel,touri->menulabel);  
+      }
+      else{
+        STRCPY(menulabel,touri->menulabel);
+      }
+      glui_avatar_index = touri->glui_avatar_index;
+      if(glui_avatar_index>=0&&glui_avatar_index<navatar_types){
+        sv_object *avatari;
+
+        avatari=avatar_types[glui_avatar_index];
+        strcat(menulabel,"(");
+        strcat(menulabel,avatari->label);
+        strcat(menulabel,")");
+      }
+      glutAddMenuEntry(menulabel,i);
+    }
+    glutAddMenuEntry("-",-999);
+    glutAddMenuEntry("Show All Tours",-3);
+    glutAddMenuEntry("Hide All Tours",-2);
+    if(selectedtour_index>=0){
+      strcpy(menulabel,"");
+      if(viewtourfrompath==1)strcat(menulabel,"*");
+      strcat(menulabel,"View from ");
+      strcat(menulabel,tourinfo[selectedtour_index].label);
+      glutAddMenuEntry(menulabel,-5);
+    }
+#endif
+/* --------------------------------tour menu -------------------------- */
     CREATEMENU(tourmenu,TourMenu);
       
     glutAddMenuEntry("New...",-12);
@@ -4728,6 +4837,7 @@ static int textureshowmenu=0;
       }
       if(trainer_mode==0||(trainer_mode==1&&ntours>0))glutAddMenuEntry("-",-999);
     }
+#ifndef pp_AVATAR
     if(trainer_mode==0&&isShell==0)glutAddMenuEntry("Default",-1);
     for(i=0;i<ntours;i++){
       if(tourinfo[i].isDefault==1&&isShell==1)continue;
@@ -4740,40 +4850,16 @@ static int textureshowmenu=0;
       }
       glutAddMenuEntry(menulabel,i);
     }
-#ifdef pp_PEOPLE
-    glutAddMenuEntry("-",-999);
-    glutAddMenuEntry("Show All Tours",-3);
-    glutAddMenuEntry("Hide All Tours",-2);
-    if(viewtourfrompath==1)glutAddMenuEntry("*View From Tour Route",-5);
-    if(viewtourfrompath==0)glutAddMenuEntry("View From Tour Route",-5);
-
-    if(npeople_types>0){
-      int i;
-      char menulabel[256];
-
-      glutAddMenuEntry("-",-999);
-      if(tourlocus_type==0){
-        glutAddMenuEntry("*Type 1",-21);
-      }
-      else{
-        glutAddMenuEntry("Type 1",-21);
-      }
-      if(tourlocus_type==1){
-        glutAddMenuEntry("*Type 2",-22);
-      }
-      else{
-        glutAddMenuEntry("Type 2",-22);
-      }
-      for(i=0;i<npeople_types;i++){
-        strcpy(menulabel,"");
-        if(tourlocus_type==2&&ipeople_types==i){
-          strcat(menulabel,"*");
-        }
-        strcat(menulabel,people_types[i]->label);
-        glutAddMenuEntry(menulabel,-23-i);
-      }
-    }
 #endif
+#ifdef pp_AVATAR
+  if(ntours>1){
+    glutAddSubMenu("Show/Hide",showtourmenu);
+  }
+  if(navatar_types>0){
+    glutAddSubMenu("Avatars",avatartourmenu);
+  }
+#endif
+
 
 /* --------------------------------showhide menu -------------------------- */
 
