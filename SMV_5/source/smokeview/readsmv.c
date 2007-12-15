@@ -898,7 +898,7 @@ int readsmv(char *file){
   // read in device (.svo) definitions
 
 //  if(ndeviceinfo>0&&ndevice_defs==0){
-#ifdef pp_PEOPLE
+#ifdef pp_AVATAR
     init_device_defs();
 #else
     if(ndeviceinfo>0)init_device_defs();
@@ -7389,12 +7389,21 @@ int readini2(char *inifile, int loaddatafile, int localfile){
         sscanf(buffer,"%i",&tour_constant_vel);
         continue;
       }
+#ifdef pp_AVATAR
+      if(match(buffer,"TOUR_AVATAR",10)==1){
+        if(fgets(buffer,255,stream)==NULL)break;
+//        sscanf(buffer,"%i %f %f %f %f",&tourlocus_type,tourcol_avatar,tourcol_avatar+1,tourcol_avatar+2,&tourrad_avatar);
+//        if(tourlocus_type!=0)tourlocus_type=1;
+        continue;
+      }
+#else
       if(match(buffer,"TOURAVATAR",10)==1){
         if(fgets(buffer,255,stream)==NULL)break;
         sscanf(buffer,"%i %f %f %f %f",&tourlocus_type,tourcol_avatar,tourcol_avatar+1,tourcol_avatar+2,&tourrad_avatar);
         if(tourlocus_type!=0)tourlocus_type=1;
         continue;
       }
+#endif
 
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -8513,11 +8522,19 @@ void writeini(int flag){
   fprintf(fileout," %i\n",show_path_knots);
   fprintf(fileout,"TOURCONSTANTVEL\n");
   fprintf(fileout," %i\n",tour_constant_vel);
+#ifdef pp_AVATAR
+//  fprintf(fileout,"TOUR_AVATAR\n");
+//  fprintf(fileout," %i %f %f %f %f\n",
+//    tourlocus_type,
+//    tourcol_avatar[0],tourcol_avatar[1],tourcol_avatar[2],
+//    tourrad_avatar);
+#else
   fprintf(fileout,"TOURAVATAR\n");
   fprintf(fileout," %i %f %f %f %f\n",
     tourlocus_type,
     tourcol_avatar[0],tourcol_avatar[1],tourcol_avatar[2],
     tourrad_avatar);
+#endif
   {
     keyframe *framei;
     float *col;

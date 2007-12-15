@@ -485,8 +485,8 @@ typedef struct _tourdata {
   keyframe first_frame,last_frame;
   keyframe **keyframe_list;
   pathdata *pathnodes;
-#ifdef pp_PEOPLE
-  int glui_people_index;
+#ifdef pp_AVATAR
+  int glui_avatar_index;
 #endif
   float *path_times,*keyframe_times;
   float global_dist, local_dist;
@@ -526,7 +526,7 @@ typedef struct _sv_object_frame {
 
 typedef struct _sv_object {
   char label[256];
-#ifdef pp_PEOPLE
+#ifdef pp_AVATAR
   int type;
 #endif
   int visible;
