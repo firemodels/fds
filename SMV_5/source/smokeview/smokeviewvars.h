@@ -734,11 +734,11 @@ SVEXTERN int keyframe_snap;
 SVEXTERN int tourviewtype;
 SVEXTERN int show_tourlocus;
 SVEXTERN int tourlocus_type;
-#ifdef pp_PEOPLE
-SVEXTERN int ipeople_types, npeople_types;
-SVEXTERN sv_object **people_types;
-SVEXTERN int glui_people_index;
-SVEXTERN sv_object *people_defs_backup[2];
+#ifdef pp_AVATAR
+SVEXTERN int iavatar_types, navatar_types;
+SVEXTERN sv_object **avatar_types;
+SVEXTERN int glui_avatar_index;
+SVEXTERN sv_object *avatar_defs_backup[2];
 #endif
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;
