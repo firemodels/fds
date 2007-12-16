@@ -346,6 +346,8 @@ void drawtours(void){
 #ifdef pp_AVATAR
       case 2:
         for(i=0;i<ntours;i++){
+          float *oview, az_angle, dxy[2];
+
           touri = tourinfo + i;
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
@@ -353,19 +355,24 @@ void drawtours(void){
           iframe = touri->path_timeslist[itime];
           pj = touri->pathnodes + iframe;
           if(keyframe_snap==1)pj = pj->keysnap;
-
           eye = pj->eye;
+          oview = pj->oview;
+          dxy[0]=oview[0]-eye[0];
+          dxy[1]=oview[1]-eye[1];
+          if(dxy[0]!=0.0||dxy[1]!=0.0){
+            az_angle=atan2(dxy[1],dxy[0])*180.0/3.14159;
+          }
+          else{
+            az_angle=0.0;
+          }
 
-      //    drawcir(eye,tourrad_avatar,tourcol_avatar);
           glPushMatrix();
           glTranslatef(eye[0],eye[1],eye[2]);
 
-          //glRotatef(devicei->angle_az,0.0,0.0,1.0);
+          glRotatef(az_angle,0.0,0.0,1.0);
 
           draw_SVOBJECT(avatar_types[touri->glui_avatar_index],0);
           glPopMatrix();
-
-
         }
         break;
 #endif

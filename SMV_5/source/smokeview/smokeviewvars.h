@@ -739,6 +739,8 @@ SVEXTERN int iavatar_types, navatar_types;
 SVEXTERN sv_object **avatar_types;
 SVEXTERN int glui_avatar_index;
 SVEXTERN sv_object *avatar_defs_backup[2];
+SVEXTERN float valstack[1000];
+SVEXTERN int topvalstack;
 #endif
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;

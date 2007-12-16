@@ -154,3 +154,51 @@ DEVICEDEF
  push 0.0 0.0 0.035052 translate 0.00635 drawsphere pop
  push 0.0 0.0 1.0 setcolor 
    0.0 0.0 0.0414 translate 0.012 drawsphere pop
+AVATARDEF
+ person_sprinkler
+ 0.0 0.0 -0.04 translate
+ 0.69 0.49 0.17 setcolor
+ push  0.0 0.0 -0.015 translate 0.03 0.03 drawdisk  pop
+ push  0.0105 0.0 0.055 translate -22 rotatey 
+   0.0085 0.004 0.05 scalexyz 1.0 drawcube pop 
+ push -0.0105 0.0 0.055 translate  22 rotatey 
+   0.0085 0.004 0.05 scalexyz 1.0 drawcube pop
+ push  0.019 0.0 0.02 translate 
+   0.0085 0.004 0.03 scalexyz 1.0 drawcube pop
+ push -0.019 0.0 0.02 translate 
+   0.0085 0.004 0.03 scalexyz 1.0 drawcube pop
+ push 0.0 0.0 0.07 translate 
+   0.010 0.017 0.020 drawtrunccone pop
+ push 0.0 0.0 0.089 translate 
+   0.064 0.002 0.004 -1.0 drawnotchplate pop
+ 0.0 1.0 0.0 setcolor
+ push 0.00 0.0 0.04 translate 
+   0.4 0.4 1.0 scalexyz 0.03 drawsphere pop
+ NEWFRAME
+ 0.69 0.49 0.17 setcolor
+ 0.0 0.0 -0.04 translate
+ push  0.0 0.0 -0.015 translate 0.03 0.03 drawdisk  pop
+ push 0.0105 0.0 0.055 translate -22 rotatey 
+   0.0085 0.004 0.05 scalexyz 1.0 drawcube pop
+ push 0.0190 0.0 0.020 translate 
+   0.0085 0.004 0.03 scalexyz 1.0 drawcube pop
+ push -0.0105 0.0 0.055 translate 22 rotatey 
+   0.0085 0.004 0.05 scalexyz 1.0 drawcube pop
+ push -0.0190 0.0 0.020 translate 
+   0.0085 0.004 0.03 scalexyz 1.0 drawcube pop
+ push 0.0 0.0 0.07 translate 
+   0.01 0.017 0.02 drawtrunccone pop
+ push 0.0 0.0 0.089 translate 
+   0.064 0.002 0.004 -1.0 drawnotchplate pop
+ 0.0 0.0 1.0 setcolor 
+ push 0.0 0.0 0.015 translate  0.015 drawsphere pop
+AVATARDEF
+ pointer2         // label, name of device
+ 1.0 0.0 0.0 setcolor 0.03 0.1 drawdisk 
+ 0.0 0.0 1.0 setcolor 90.0 rotatey 0.03 0.2 drawdisk 0.0 0.0 0.4 translate 0.2 0.3 0.2 drawring
+AVATARDEF
+ pointer3         // label, name of device
+ 0.0 0.0 0.0 setcolor 90.0 rotatey 0.0 0.0 0.1 translate 0.09 0.16 0.002 drawring
+ 
+ 
+   

@@ -23,6 +23,9 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEZ    103
 #define SV_SCALEXYZ   104
 #define SV_SCALE      105
+#ifdef pp_AVATAR
+#define SV_GETUSERVALS    106
+#endif
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -30,7 +33,9 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEZ_NUMARGS    1
 #define SV_SCALEXYZ_NUMARGS   3
 #define SV_SCALE_NUMARGS      1
-
+#ifdef pp_AVATAR
+#define SV_GETUSERVALS_NUMARGS    1
+#endif
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -228,6 +233,24 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       arg = framei->args + iarg;
       op = framei->ops + iop;
       switch (*op){
+#ifdef pp_AVATAR
+      case SV_GETUSERVALS:
+        if(iarg+SV_GETUSERVALS_NUMARGS<=framei->nargs){
+          int iiarg;
+
+          iiarg=arg[0]+0.5;
+          topvalstack-=iiarg;
+          if(topvalstack>=0&&iarg+1+iiarg<framei->nargs){
+            int i;
+
+            for(i=0;i<iiarg;i++){
+              arg[1+i]=valstack[topvalstack+i];
+            }
+          }
+        }
+        iarg+=1;
+        break;
+#endif
       case SV_TRANSLATE:
         if(iarg+SV_TRANSLATE_NUMARGS<=framei->nargs)glTranslatef(arg[0],arg[1],arg[2]);
         iarg+=3;
@@ -1193,6 +1216,12 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
         iop=SV_POP;
         reporterror(buffer_save,token,numargs,SV_POP_NUMARGS);
       }
+#ifdef pp_AVATAR
+      else if(strcmp(token,"getuservals")==0){
+        iop=SV_GETUSERVALS;
+        reporterror(buffer_save,token,numargs,SV_GETUSERVALS_NUMARGS);
+      }
+#endif
       else{
         iop=SV_ERR;
       }
@@ -1602,7 +1631,7 @@ void init_device_defs(void){
     NewMemory((void **)&avatar_types,navatar_types*sizeof(sv_object *));
 
 //    strcpy(com_buffer,"1.0 0.0 0.0 setcolor 0.0 0.0 0.0 1.0 0.0 0.0 drawline 0.0 0.0 0.0 0.0 0.0 1.0 drawline");
-    strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.02 0.05 drawdisk");
+    strcpy(com_buffer,"1.0 0.0 0.0 setcolor 0.03 0.1 drawdisk 0.0 0.0 1.0 setcolor 90.0 rotatey 0.03 0.2 drawdisk");
     avatar_defs_backup[0] = init_SVOBJECT1("Avatar_1", com_buffer,1);
     avatar_defs_backup[0]->type=1;
 
