@@ -1526,6 +1526,7 @@ void initvars1(void){
   ntours=0,selectedtour_index=-1,selectedtour_index_old=-1,selectedtour_index_ini=-1;
 #ifdef pp_AVATAR
   glui_avatar_index=0;
+  topvalstack=0;
 #endif
   update_selectedtour_index=0;
   viewtourfrompath=0,viewalltours=0,viewanytours=0,edittour=0;
