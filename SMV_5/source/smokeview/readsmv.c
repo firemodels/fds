@@ -7703,9 +7703,11 @@ typedef struct {
           {
             keyframe *thisframe, *addedframe;
 
-
             for(i=1;i<ntours;i++){
               tourdata *touri;
+#ifdef pp_AVATAR
+              int glui_avatar_index;
+#endif
 
               touri = tourinfo + i;
               inittour(touri);
@@ -7717,7 +7719,16 @@ typedef struct {
               t_globaltension=touri->global_tension;
               t_globaltension_flag=touri->global_tension_flag;
               fgets(buffer,255,stream);
+#ifdef pp_AVATAR
+              glui_avatar_index=0;
+              sscanf(buffer,"%i %i %f %i %i",&nkeyframes,&t_globaltension_flag,&t_globaltension,&glui_avatar_index,&touri->display);
+              if(glui_avatar_index<0)glui_avatar_index=0;
+              if(glui_avatar_index>navatar_types-1)glui_avatar_index=navatar_types-1;
+              touri->glui_avatar_index=glui_avatar_index;
+              if(touri->display!=1)touri->display=0;
+#else
               sscanf(buffer,"%i %i %f",&nkeyframes,&t_globaltension_flag,&t_globaltension);
+#endif
               touri->global_tension_flag=t_globaltension_flag;
               touri->global_tension=t_globaltension;
               touri->nkeyframes=nkeyframes;
@@ -8588,7 +8599,12 @@ void writeini(int flag){
 
           trim(touri->label);
           fprintf(fileout,"%s\n",touri->label);
+#ifdef pp_AVATAR
+          fprintf(fileout," %i %i %f %i %i\n",
+            touri->nkeyframes,touri->global_tension_flag,touri->global_tension,touri->glui_avatar_index,&touri->display);
+#else
           fprintf(fileout," %i %i %f\n",touri->nkeyframes,touri->global_tension_flag,touri->global_tension);
+#endif
           for(framei=&touri->first_frame;framei!=&touri->last_frame;framei=framei->next){
             if(framei==&touri->first_frame)continue;
             sprintf(buffer,"%f %f %f %f ",
