@@ -7390,7 +7390,7 @@ int readini2(char *inifile, int loaddatafile, int localfile){
         continue;
       }
 #ifdef pp_AVATAR
-      if(match(buffer,"TOUR_AVATAR",10)==1){
+      if(match(buffer,"TOUR_AVATAR",11)==1){
         if(fgets(buffer,255,stream)==NULL)break;
 //        sscanf(buffer,"%i %f %f %f %f",&tourlocus_type,tourcol_avatar,tourcol_avatar+1,tourcol_avatar+2,&tourrad_avatar);
 //        if(tourlocus_type!=0)tourlocus_type=1;
@@ -8629,7 +8629,6 @@ void writeini(int flag){
           }
         }
       }
-
     }
   }
   

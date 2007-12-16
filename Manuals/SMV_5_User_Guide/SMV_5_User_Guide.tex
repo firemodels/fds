@@ -1457,6 +1457,10 @@ used to save the origin or axis orientation while the POP command
 is used to restore the origin and axis orientation.
 
 \blist
+\hitem{GETUSERVALS} The command, {\tt getuservals}, allows one to change
+an object dynamically.  Smokeview places values into a stack then copies them
+to the device definition whenever the {\tt getuservals} keyword is invoked.
+ 
 
 \hitem{POP} The command, {\tt pop}, restores the origin and axis
 orientation saved using a previous {\tt pop}\ command.  The total
