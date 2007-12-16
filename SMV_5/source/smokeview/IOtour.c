@@ -368,6 +368,7 @@ void drawtours(void){
 
           glPushMatrix();
           glTranslatef(eye[0],eye[1],eye[2]);
+          glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
 
           glRotatef(az_angle,0.0,0.0,1.0);
 
