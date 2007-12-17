@@ -486,7 +486,7 @@ typedef struct _tourdata {
   keyframe **keyframe_list;
   pathdata *pathnodes;
 #ifdef pp_AVATAR
-  int glui_avatar_index;
+  int glui_avatar_index, display2;
 #endif
   float *path_times,*keyframe_times;
   float global_dist, local_dist;

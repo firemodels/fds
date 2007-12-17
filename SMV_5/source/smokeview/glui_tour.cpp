@@ -1026,10 +1026,17 @@ void TOUR_CB(int var){
       TOURMENU(-3); // show all tours
       set_glui_keyframe();
       break;
+#ifdef pp_AVATAR
+    case -1:
+      edittour=0;
+      TOURMENU(-13);  // reset tour vis to ini values
+      break;
+#else
     case -1:
       edittour=0;
       TOURMENU(-2);  // hide all tours
       break;
+#endif
     case -4:
       TOURMENU(-1);  // default tour
       break;
