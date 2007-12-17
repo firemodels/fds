@@ -3575,8 +3575,6 @@ SELECT CASE(IND)
          ! Sum soot densities weighted by flow rat
          CALL INTERPOLATE1D(DV%TIME_ARRAY,DV%YY_SOOT(N,:),T-DV2%DELAY,Y_E)
          GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT + DV2%FLOWRATE * Y_E
-         WRITE(444,*) T,N,DV2%INSTANT_VALUE
-         WRITE(444,*) DV%YY_SOOT(N,:)
       END DO      
       ! Complete weighting and compute % obs
       GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT / DV%TOTAL_FLOWRATE
