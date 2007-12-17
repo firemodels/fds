@@ -54,6 +54,7 @@ void freetour(tourdata *touri){
 void inittour(tourdata *touri){
 #ifdef pp_AVATAR
   touri->glui_avatar_index=0;
+  touri->display2=0;
 #endif
   touri->global_tension=0.0;
   touri->global_tension_flag=1;

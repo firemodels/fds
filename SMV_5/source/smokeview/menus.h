@@ -2031,6 +2031,29 @@ void TourMenu(int value){
       show_glui_tour();
     }
     break;
+#ifdef pp_AVATAR
+  case -13:               // clear all tours
+    for(i=0;i<ntours;i++){
+      touri = tourinfo + i;
+      touri->display=touri->display2;
+    }
+    if(viewtourfrompath==1
+//      &&from_glui_trainer==0
+      ){
+      ResetView(RESTORE_EXTERIOR_VIEW);
+    }
+    from_glui_trainer=0;
+//    viewtourfrompath=0;
+    for(i=0;i<ntours;i++){
+      touri = tourinfo + i;
+      if(touri->display==1){
+        selected_tour=touri;
+        break;
+      }
+    }
+    selected_tour=NULL;
+    break;
+#endif
   case -2:               // clear all tours
     for(i=0;i<ntours;i++){
       touri = tourinfo + i;
