@@ -7702,30 +7702,29 @@ typedef struct {
           init_circulartour();
           {
             keyframe *thisframe, *addedframe;
-
-            for(i=1;i<ntours;i++){
-              tourdata *touri;
+            tourdata *touri;
 #ifdef pp_AVATAR
-              int glui_avatar_index;
+            int glui_avatar_index;
 #endif
 
+            for(i=1;i<ntours;i++){
               touri = tourinfo + i;
               inittour(touri);
               fgets(buffer,255,stream);
               trim(buffer);
               strcpy(touri->label,buffer);
 
-
               t_globaltension=touri->global_tension;
               t_globaltension_flag=touri->global_tension_flag;
               fgets(buffer,255,stream);
 #ifdef pp_AVATAR
               glui_avatar_index=0;
-              sscanf(buffer,"%i %i %f %i %i",&nkeyframes,&t_globaltension_flag,&t_globaltension,&glui_avatar_index,&touri->display);
+              sscanf(buffer,"%i %i %f %i %i",
+                &nkeyframes,&t_globaltension_flag,&t_globaltension,&glui_avatar_index,&touri->display2);
               if(glui_avatar_index<0)glui_avatar_index=0;
               if(glui_avatar_index>navatar_types-1)glui_avatar_index=navatar_types-1;
               touri->glui_avatar_index=glui_avatar_index;
-              if(touri->display!=1)touri->display=0;
+              if(touri->display2!=1)touri->display2=0;
 #else
               sscanf(buffer,"%i %i %f",&nkeyframes,&t_globaltension_flag,&t_globaltension);
 #endif
@@ -8601,7 +8600,7 @@ void writeini(int flag){
           fprintf(fileout,"%s\n",touri->label);
 #ifdef pp_AVATAR
           fprintf(fileout," %i %i %f %i %i\n",
-            touri->nkeyframes,touri->global_tension_flag,touri->global_tension,touri->glui_avatar_index,&touri->display);
+            touri->nkeyframes,touri->global_tension_flag,touri->global_tension,touri->glui_avatar_index,touri->display);
 #else
           fprintf(fileout," %i %i %f\n",touri->nkeyframes,touri->global_tension_flag,touri->global_tension);
 #endif

@@ -4,8 +4,8 @@
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Smokeview Experimental - Release Notes</h2>
-<p>November 11, 2007<br>
-Revision: 971<br>
+<p>December 16, 2007<br>
+Revision: 1112<br>
 
 <p>This readme file describes several new features 
 in an experimental version of Smokeview available for testing at the 
@@ -25,6 +25,7 @@ will be incorporated into the official Smokeview release.
 <li><a href="#memory">Memory management</a> - Smokeview's memory management routines are modified to reduce the risk and consequences 
 of memory leaks.
 <li><a href="#lighting">Lighting</a> - More control is added for illuminating the scene.
+<li><a href="#touring">Touring</a> - More control over touring option, allowing some or all tours to be displayed simulataneously.
 </ul>
 
 
@@ -106,6 +107,15 @@ of a memory leak.
 <h3>Lighting</h3>
 A minor addition to add a menu option to allow one to select lights used to illuminate 
 the scene.  This choice is made for you in the <em>official</em> version of Smokeview.
+
+<a name="touring"></a>
+<h3>Touring</h3>
+The touring option is being enhanced to allow one to display multiple tours simultaneously and to display 
+user defined objects at each tour locus.  These objects also known as <em>avatars</em> are defined 
+by adding entries in the device (<em>.svo</em>) file.  The entries are defined using the <tt>AVATARDEF</tt>
+keyword rather than <tt>DEVICEDEF</tt>.
+See the chapter in the Smokeview User's guide on defining devices for details.
+
 
 <p><hr>
 <p><address>
