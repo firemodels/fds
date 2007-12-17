@@ -3094,7 +3094,6 @@ DEVICE_LOOP: DO N=1,N_DEVC
       GAS_STATS: IF (DV%STATISTICS=='null') THEN
 
          VALUE = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,T)
-
       ELSE GAS_STATS
 
          DO K=1,KBAR
@@ -3570,17 +3569,18 @@ SELECT CASE(IND)
          IF (DV%T == T + DV%DT) THEN
             DV%YY_SOOT(N,100) = DV2%INSTANT_VALUE*1.E-6_EB
          ELSE
-            DV%YY_SOOT(N,100) = (DV%YY_SOOT(N,100) * (DV%T - T + DT) +  DT * DV2%INSTANT_VALUE*1.E-6_EB) / &
-                                (DV%T - T)
+            DV%YY_SOOT(N,100) = (DV%YY_SOOT(N,100) * (T - DV%TIME_ARRAY(99) - DT) +  DT * DV2%INSTANT_VALUE*1.E-6_EB) / &
+                                (T - DV%TIME_ARRAY(99))
          END IF
          ! Sum soot densities weighted by flow rat
          CALL INTERPOLATE1D(DV%TIME_ARRAY,DV%YY_SOOT(N,:),T-DV2%DELAY,Y_E)
          GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT + DV2%FLOWRATE * Y_E
-      END DO
+         WRITE(444,*) T,N,DV2%INSTANT_VALUE
+         WRITE(444,*) DV%YY_SOOT(N,:)
+      END DO      
       ! Complete weighting and compute % obs
       GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT / DV%TOTAL_FLOWRATE
       GAS_PHASE_OUTPUT = (1._EB-EXP(-MASS_EXTINCTION_COEFFICIENT*GAS_PHASE_OUTPUT))*100._EB  ! Obscuration
-
    CASE(171:179) ! [PART_ID]_MPUV
       GAS_PHASE_OUTPUT = AVG_DROP_DEN(II,JJ,KK,IND-170)
    CASE(181:189) ! {PART_ID}_ADD
