@@ -740,7 +740,8 @@ SVEXTERN int iavatar_evac;
 SVEXTERN sv_object **avatar_types;
 SVEXTERN int glui_avatar_index;
 SVEXTERN sv_object *avatar_defs_backup[2];
-SVEXTERN float valstack[1000];
+#define SIZE_VALSTACK 1000
+SVEXTERN float valstack[SIZE_VALSTACK];
 SVEXTERN int topvalstack;
 #endif
 SVEXTERN float tourrad_avatar;
