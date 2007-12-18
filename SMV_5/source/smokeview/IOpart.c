@@ -13,6 +13,9 @@
 #else
 #include <GL/glut.h>
 #endif
+#ifdef pp_AVATAR
+#include <math.h>
+#endif
 #include "MALLOC.h"
 #include "ASSERT.h"
 #include "smokeviewdefs.h"
@@ -24,6 +27,10 @@ char IOpart_revision[]="$Revision$";
 
 int tagscompare( const void *arg1, const void *arg2 );
 
+#ifdef pp_AVATAR
+float get_part_azangle(part5data *data, part5data *datapast, int j);
+void draw_SVOBJECT(sv_object *object, int iframe);
+#endif
 void ParticlePropShowMenu(int val);
 void PART_CB_INIT(void);
 void update_all_partvis(particle *parti);
@@ -1254,7 +1261,7 @@ void drawEvac(const particle *parti){
 
 void drawPart5(const particle *parti){
   int ipframe;
-  part5data *datacopy,*datapast;
+  part5data *datacopy,*datapast,*dataforward;
   int nclasses;
   int i,j;
 
@@ -1265,8 +1272,10 @@ void drawPart5(const particle *parti){
   CheckMemory;
   if(part5show==1){
     if(streak5show==0||(streak5show==1&&showstreakhead==1)){
+#ifndef pp_AVATAR
       glPointSize(partpointsize);
       glBegin(GL_POINTS);
+#endif
       for(i=0;i<parti->nclasses;i++){
         short *sx, *sy, *sz;
         unsigned char *vis, *color;
@@ -1290,7 +1299,56 @@ void drawPart5(const particle *parti){
         sy = datacopy->sy;
         sz = datacopy->sz;
         vis = datacopy->vis_part;
+#ifdef pp_AVATAR
+        if(parti->evac==1){
+          part5data *data1, *data2;
 
+          if(ipframe==0){
+            data1=datacopy;
+            data2 = parti->data5+nclasses*(ipframe+1)+i;
+          }
+          else{
+            data1 = parti->data5+nclasses*(ipframe-1)+i;
+            data2=datacopy;
+          }
+          CheckMemory;
+          for(j=0;j<datacopy->npoints;j++){
+            float az_angle;
+
+            if(vis[j]==1){
+              glPushMatrix();
+              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+              glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+                 
+              az_angle=get_part_azangle(data1,data2,j);
+              glRotatef(az_angle,0.0,0.0,1.0);
+              draw_SVOBJECT(avatar_types[3],0);
+              glPopMatrix();
+            }
+          }
+          sniffErrors("after draw in Evac");
+        }
+        else{
+          glPointSize(partpointsize);
+          glBegin(GL_POINTS);
+          if(itype==-1){
+            glColor4fv(datacopy->partclassbase->rgb);
+            for(j=0;j<datacopy->npoints;j++){
+              if(vis[j]==1)glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+            }
+          }
+          else{
+            color=datacopy->irvals+itype*datacopy->npoints;
+            for(j=0;j<datacopy->npoints;j++){
+              if(vis[j]==1){
+                glColor4fv(rgb_full[color[j]]);
+                glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+              }
+            }
+          }
+          glEnd();
+        }
+#else
         if(itype==-1){
           glColor4fv(datacopy->partclassbase->rgb);
           for(j=0;j<datacopy->npoints;j++){
@@ -1306,10 +1364,13 @@ void drawPart5(const particle *parti){
             }
           }
         }
+#endif
 
         datacopy++;
       }
+#ifndef pp_AVATAR
       glEnd();
+#endif
     }
   }
 
@@ -1372,7 +1433,7 @@ void drawPart5(const particle *parti){
       }
 
       // draw the dot at the end of the streak line
-
+#ifndef pp_AVATAR
       if(showstreakhead==1){
         sx = datacopy->sx;
         sy = datacopy->sy;
@@ -1387,6 +1448,7 @@ void drawPart5(const particle *parti){
         }
         glEnd();
       }
+#endif
     }
     else{
       unsigned char *color;
@@ -1657,3 +1719,21 @@ void update_visSmokePart(void){
   }
   */
 }
+
+#ifdef pp_AVATAR
+float get_part_azangle(part5data *data1, part5data *data2, int j){
+  int tagval, jj;
+  float dx, dy;
+
+  if(j<0||j>=data2->npoints)return 0.0;
+
+  tagval=data2->tags[j];
+  jj = get_tagindex(data1,tagval);
+  if(jj<0||jj>=data1->npoints)return 0.0;
+
+  dx = data2->sx[j]-data1->sx[jj];
+  dy = data2->sy[j]-data1->sy[jj];
+  if(dx==0.0&&dy==0.0)return 0.0;
+  return 180.0*atan2(dy,dx)/3.14159;
+}
+#endif

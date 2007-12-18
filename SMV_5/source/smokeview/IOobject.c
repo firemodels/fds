@@ -17,6 +17,8 @@
 // svn revision character string
 char IOobject_revision[]="$Revision$";
 
+#define CIRCLE_SEGS 12
+
 #define SV_TRANSLATE  100
 #define SV_ROTATEX    101
 #define SV_ROTATEY    102
@@ -49,6 +51,9 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWHEXDISK   209
 #define SV_DRAWPOLYDISK  210
 #define SV_DRAWPOINT     211
+#ifdef pp_AVATAR
+#define SV_DRAWARC       212
+#endif
 
 
 #define SV_DRAWCUBE_NUMARGS      1
@@ -63,6 +68,9 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWHEXDISK_NUMARGS   2
 #define SV_DRAWPOLYDISK_NUMARGS   3
 #define SV_DRAWPOINT_NUMARGS     0
+#ifdef pp_AVATAR
+#define SV_DRAWARC_NUMARGS       2
+#endif
 
 #define SV_PUSH       300
 #define SV_POP        301
@@ -87,6 +95,9 @@ void reporterror(char *buffer, char *token, int numargs_found, int numargs_expec
 void drawcone(float d1, float height, float *rgbcolor);
 void drawtrunccone(float d1, float d2, float height, float *rgbcolor);
 void drawline(float *xyz1, float *xyz2, float *rgbcolor);
+#ifdef pp_AVATAR
+void drawarc(float angle, float diameter, float *rgbcolor);
+#endif
 void drawcircle(float diameter, float *rgbcolor);
 void drawpoint(float *rgbcolor);
 void drawsphere(float diameter, float *rgbcolor);
@@ -330,6 +341,13 @@ void draw_SVOBJECT(sv_object *object, int iframe){
         rgbptr=NULL;
         iarg++;
         break;
+#ifdef pp_AVATAR
+    case SV_DRAWARC:
+      if(iarg+SV_DRAWARC_NUMARGS<=framei->nargs)drawarc(arg[0],arg[1],rgbptr);
+      rgbptr=NULL;
+      iarg+=2;
+      break;
+#endif
       case SV_DRAWPOINT:
         if(iarg+SV_DRAWPOINT_NUMARGS<=framei->nargs)drawpoint(rgbptr);
         rgbptr=NULL;
@@ -418,7 +436,7 @@ void drawsphere(float diameter, float *rgbcolor){
   int i,j;
   float *radsphere, *zsphere;
 
-  if(ncirc==0)initcircle(12);
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
   radsphere=ycirc;
   zsphere=xcirc;
   glPushMatrix();
@@ -459,7 +477,7 @@ void drawpoint(float *rgbcolor){
 void drawcircle(float diameter,float *rgbcolor){
   int i;
 
-  if(ncirc==0)initcircle(12);
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
   glBegin(GL_LINE_LOOP);
   if(rgbcolor!=NULL)glColor3fv(rgbcolor);
   for(i=0;i<ncirc;i++){
@@ -467,6 +485,25 @@ void drawcircle(float diameter,float *rgbcolor){
   }
   glEnd();
 }
+
+#ifdef pp_AVATAR
+/* ----------------------- drawarc ----------------------------- */
+
+void drawarc(float angle, float diameter,float *rgbcolor){
+  int i, iarc;
+
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  iarc = CIRCLE_SEGS*(angle+180.0/CIRCLE_SEGS)/360.0;
+  if(iarc<2)iarc=2;
+  if(iarc>CIRCLE_SEGS)iarc=CIRCLE_SEGS;
+  glBegin(GL_LINE_LOOP);
+  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  for(i=0;i<iarc;i++){
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+  }
+  glEnd();
+}
+#endif
 
 /* ----------------------- drawcube ----------------------------- */
 
@@ -525,7 +562,7 @@ void drawcube(float size, float *rgbcolor){
 void drawring(float diam_inner, float diam_outer, float height, float *rgbcolor){
   int i;
 
-  if(ncirc==0)initcircle(12);
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
   glBegin(GL_QUADS);
   if(rgbcolor!=NULL)glColor3fv(rgbcolor);
 
@@ -577,7 +614,7 @@ void drawring(float diam_inner, float diam_outer, float height, float *rgbcolor)
 void drawdisk(float diameter, float height, float *rgbcolor){
   int i;
 
-  if(ncirc==0)initcircle(12);
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
   glBegin(GL_QUADS);
   if(rgbcolor!=NULL)glColor3fv(rgbcolor);
 
@@ -731,7 +768,7 @@ void drawnotchplate(float diameter, float height, float notchheight, float direc
 
   diameter2 = diameter + notchheight;
 
-  if(ncirc==0)initcircle(12);
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
 
@@ -870,7 +907,7 @@ void drawcone(float d1, float height, float *rgbcolor){
   int i;
   float dz;
 
-  if(ncirc==0)initcircle(12);
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
   if(height<=0.0)height=0.0001;
 
   dz = d1/height;
@@ -904,7 +941,7 @@ void drawtrunccone(float d1, float d2, float height, float *rgbcolor){
   int i;
   float dz;
 
-  if(ncirc==0)initcircle(12);
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
   if(height<=0.0)height=0.0001;
 
   dz = -(d2-d1)/height;
@@ -1192,6 +1229,12 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
         iop=SV_DRAWCIRCLE;
         reporterror(buffer_save,token,numargs,SV_DRAWCIRCLE_NUMARGS);
       }
+#ifdef pp_AVATAR
+      else if(strcmp(token,"drawarc")==0){
+        iop=SV_DRAWARC;
+        reporterror(buffer_save,token,numargs,SV_DRAWARC_NUMARGS);
+      }
+#endif
       else if(strcmp(token,"setcolor")==0){
         iop=SV_SETCOLOR;
         reporterror(buffer_save,token,numargs,SV_SETCOLOR_NUMARGS);
