@@ -736,6 +736,7 @@ SVEXTERN int show_tourlocus;
 SVEXTERN int tourlocus_type;
 #ifdef pp_AVATAR
 SVEXTERN int iavatar_types, navatar_types;
+SVEXTERN int iavatar_evac;
 SVEXTERN sv_object **avatar_types;
 SVEXTERN int glui_avatar_index;
 SVEXTERN sv_object *avatar_defs_backup[2];
