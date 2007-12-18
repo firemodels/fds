@@ -1318,14 +1318,21 @@ void drawPart5(const particle *parti){
           if(iavatar_evac!=-1)avatar_type=iavatar_evac;
           for(j=0;j<datacopy->npoints;j++){
             float az_angle;
+            float *rgbobject;
 
             if(vis[j]==1){
               glPushMatrix();
-              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]-1.0/xyzmaxdiff);
               glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
                  
               az_angle=get_part_azangle(data1,data2,j);
               glRotatef(az_angle,0.0,0.0,1.0);
+
+              rgbobject = datacopy->partclassbase->rgb;
+
+              valstack[0]=rgbobject[0];
+              valstack[1]=rgbobject[1];
+              valstack[2]=rgbobject[2];
               draw_SVOBJECT(avatar_types[avatar_type],0);
               glPopMatrix();
             }

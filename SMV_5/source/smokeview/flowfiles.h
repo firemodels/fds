@@ -531,6 +531,9 @@ typedef struct _sv_object {
 #endif
   int visible;
   int used;
+#ifdef pp_AVATAR
+  int use_displaylist;
+#endif
   int nframes;
   sv_object_frame **obj_frames, first_frame, last_frame;
  struct _sv_object *prev, *next;
