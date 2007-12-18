@@ -2013,6 +2013,14 @@ void ShowTourMenu(int value){
 void AvatarTourMenu(int value){
 }
 
+#ifdef pp_AVATAR
+void AvatarEvacMenu(int value){
+  if(value==-999)return;
+  iavatar_evac=value;
+  updatemenu=1;
+}
+#endif
+
 /* ------------------ TourMenu ------------------------ */
 
 void TourMenu(int value){
@@ -3468,7 +3476,7 @@ static int particlepropshowmenu=0;
 static int particlestreakshowmenu=0;
 static int tourmenu=0;
 #ifdef pp_AVATAR
-static int showtourmenu=0, avatartourmenu=0;
+static int showtourmenu=0, avatartourmenu=0,avatarevacmenu=0;
 #endif
 static int trainerviewmenu=0,mainmenu=0,zoneshowmenu=0,particleshowmenu=0,evacshowmenu=0,targetmenu=0;
 static int showdevicesmenu=0;
@@ -4778,6 +4786,27 @@ static int textureshowmenu=0;
 
 /* -------------------------------- avatartour menu -------------------------- */
 #ifdef pp_AVATAR
+  CREATEMENU(avatarevacmenu,AvatarEvacMenu);
+  if(navatar_types>0){
+    int i;
+    char menulabel[256];
+
+    if(iavatar_evac==-1){
+      glutAddMenuEntry("*Defined in Evac File",-1);
+    }
+    else{
+      glutAddMenuEntry("Defined in Evac File",-1);
+    }
+    glutAddMenuEntry("-",-999);
+    for(i=0;i<navatar_types;i++){
+      strcpy(menulabel,"");
+      if(iavatar_evac==i){
+        strcat(menulabel,"*");
+      }
+      strcat(menulabel,avatar_types[i]->label);
+      glutAddMenuEntry(menulabel,i);
+    }
+  }
   CREATEMENU(avatartourmenu,TourMenu);
   if(navatar_types>0){
     int i;
@@ -4878,9 +4907,6 @@ static int textureshowmenu=0;
   if(ntours>1){
     glutAddSubMenu("Show/Hide",showtourmenu);
   }
-  if(navatar_types>0){
-    glutAddSubMenu("Avatars",avatartourmenu);
-  }
 #endif
 
 
@@ -4904,8 +4930,13 @@ static int textureshowmenu=0;
     else{
       glutAddSubMenu("Streaks",particlestreakshowmenu);
     }
-
   }
+#ifdef pp_AVATAR
+  if(nevac>0&&navatar_types>0){
+    glutAddSubMenu("Use Avatar:",avatarevacmenu);
+  }
+#endif
+
   if(npart4loaded>0){
     if(havesprinkpart!=0||staticframe0!=0||npartloaded>1){
       glutAddSubMenu("Particles",particleshowmenu);

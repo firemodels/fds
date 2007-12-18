@@ -1302,6 +1302,7 @@ void drawPart5(const particle *parti){
 #ifdef pp_AVATAR
         if(parti->evac==1){
           part5data *data1, *data2;
+          int avatar_type=0;
 
           if(ipframe==0){
             data1=datacopy;
@@ -1312,6 +1313,9 @@ void drawPart5(const particle *parti){
             data2=datacopy;
           }
           CheckMemory;
+
+          avatar_type=0;
+          if(iavatar_evac!=-1)avatar_type=iavatar_evac;
           for(j=0;j<datacopy->npoints;j++){
             float az_angle;
 
@@ -1322,7 +1326,7 @@ void drawPart5(const particle *parti){
                  
               az_angle=get_part_azangle(data1,data2,j);
               glRotatef(az_angle,0.0,0.0,1.0);
-              draw_SVOBJECT(avatar_types[3],0);
+              draw_SVOBJECT(avatar_types[avatar_type],0);
               glPopMatrix();
             }
           }
