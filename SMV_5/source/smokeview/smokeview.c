@@ -1076,7 +1076,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     if(cb_hidesv==1){
       setColorbarClipPlanes(1);
     }
-  }
+    sniffErrors("after setColorbarClipPlanes 1");
+}
 
 #endif
 if(eyeview==1&&nskyboxinfo>0)draw_skybox();
@@ -1092,6 +1093,7 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
       else{
         setColorbarClipPlanes(0);
       }
+      sniffErrors("after setColorbarClipPlanes 2");
     }
     glPointSize((float)1.0);
 
@@ -1100,6 +1102,7 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
 
     if(ntreeinfo>0){
       drawtrees();
+      sniffErrors("after drawtrees");
     }
 
 /* ++++++++++++++++++++++++ draw smoke +++++++++++++++++++++++++ */
@@ -1113,9 +1116,11 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
           if(parti->loaded==0||parti->display==0)continue;
           if(parti->evac==1){
             drawEvac(parti);
+            sniffErrors("after drawEvac");
           }
           else{
             drawPart(parti);
+            sniffErrors("after drawPart");
           }
         }
       }
@@ -1124,6 +1129,7 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
           parti = partinfo + i;
           if(parti->loaded==0||parti->display==0)continue;
           drawStaticPart(parti);
+          sniffErrors("after drawStaticPart");
         }
       }
     }
@@ -1138,6 +1144,7 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
           if(parti->loaded==0||parti->display==0||parti->evac==0)continue;
           drawEvac(parti);
         }
+        sniffErrors("after drawEvac 2");
     }
 
 /* ++++++++++++++++++++++++ draw targets +++++++++++++++++++++++++ */
