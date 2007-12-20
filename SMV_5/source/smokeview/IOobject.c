@@ -1056,7 +1056,7 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
 
   NewMemory( (void **)&object,sizeof(sv_object));
 #ifdef pp_AVATAR
-  object->use_displaylist=0;
+  object->use_displaylist=1;
 #endif
   object->used=0;
   object->visible=visible;
@@ -1094,7 +1094,7 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
 
   NewMemory( (void **)&object,sizeof(sv_object));
 #ifdef pp_AVATAR
-  object->use_displaylist=0;
+  object->use_displaylist=1;
 #endif
   object->used=0;
   object->visible=visible;
@@ -1361,7 +1361,7 @@ int read_device_defs(char *file){
   
       NewMemory((void **)&current_object,sizeof(sv_object));
 #ifdef pp_AVATAR
-      current_object->use_displaylist=0;
+      current_object->use_displaylist=1;
 #endif
       strcpy(current_object->label,label);
       prev_object = device_def_last.prev;
