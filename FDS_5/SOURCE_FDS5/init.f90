@@ -1881,7 +1881,7 @@ VLOOP: DO N=1,M%N_VENT
  
    ! Check if fire spreads radially
  
-   IF (VT%X0>-900._EB) THEN
+   IF (VT%X0>-900._EB .AND. VT%ACTIVATED) THEN
       DIST = SQRT((M%XW(IW)-VT%X0)**2 +(M%YW(IW)-VT%Y0)**2 +(M%ZW(IW)-VT%Z0)**2)
       T_ACTIVATE = T_BEGIN+DIST/VT%FIRE_SPREAD_RATE
    ENDIF
@@ -1904,7 +1904,7 @@ ENDDO VLOOP
  
 ! Set ignition time of each boundary cell
  
-IF (T_ACTIVATE<0._EB) THEN
+IF (T_ACTIVATE < T_BEGIN) THEN
    M%TW(IW) = SURFACE(IBCX)%T_IGN
 ELSE
    M%TW(IW) = T_ACTIVATE
@@ -2082,7 +2082,11 @@ VENT_LOOP: DO N=1,N_VENT
             IF (JJ<VT%J1+1 .OR. JJ>VT%J2)   CYCLE SEARCH
       END SELECT
       IF (ACTIVATE_VENT) THEN
-         TW(IW) = T
+         IF (VT%X0>-900._EB) THEN
+            TW(IW) = T + SQRT((M%XW(IW)-VT%X0)**2 +(M%YW(IW)-VT%Y0)**2 +(M%ZW(IW)-VT%Z0)**2)/VT%FIRE_SPREAD_RATE
+         ELSE
+            TW(IW) = T        
+         ENDIF
       ELSE
          TW(IW) = 1000000._EB
       ENDIF
