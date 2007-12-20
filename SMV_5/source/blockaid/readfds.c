@@ -31,7 +31,7 @@ int readfds(char *in_file_base){
 #define LENBUFFER 10000
   char buffer[LENBUFFER], repbuffer[LENBUFFER];
   int irep, nrep;
-  int in_assembly=0;
+  int in_group=0;
 
   strcpy(file,in_file_base);
   trim(file);
@@ -98,7 +98,7 @@ int readfds(char *in_file_base){
     return 1;
   }
 
-  in_assembly=0;
+  in_group=0;
   irep=0;
   nrep=0;
   while((nrep>0&&irep<nrep)||!feof(stream_in)){
@@ -110,31 +110,31 @@ int readfds(char *in_file_base){
     trim(buffer);
 
     if(match(buffer,"&BGRP",5)==1){
-      in_assembly=1;
+      in_group=1;
       continue;
     }
     if(match(buffer,"&EGRP",5)==1){
-      in_assembly=0;
+      in_group=0;
       continue;
     }
     if(match(buffer,"&INCL",5)==1){
-      in_assembly=3;
+      in_group=3;
       continue;
     }
-    if(in_assembly==0&&match(buffer,"&GRP",4)==1){
-      in_assembly=2;
+    if(in_group==0&&match(buffer,"&GRP",4)==1){
+      in_group=2;
     }
-    if(in_assembly==0&&match(buffer,"&SHELL",6)==1){
-      in_assembly=4;
+    if(in_group==0&&match(buffer,"&SHELL",6)==1){
+      in_group=4;
     }
-    switch (in_assembly){
+    switch (in_group){
       case 0:  // regular line, output it
         fprintf(stream_out,"%s\n",buffer);
         break;
-      case 1:  // inside an assembly defn, skip
+      case 1:  // inside an group defn, skip
         break;
-      case 2:  // assembly line, apply translation and rotation then output assembly lines
-        in_assembly=0;
+      case 2:  // group line, apply translation and rotation then output group lines
+        in_group=0;
         get_keywords(blockaid_first, buffer);
 
         nkeyvalstack=1;
@@ -142,14 +142,14 @@ int readfds(char *in_file_base){
         keyvalstack[nkeyvalstack-1].val_list=blockaid_first->val_list;
         keyvalstack[nkeyvalstack-1].nkeywordlist=blockaid_first->nkeywordlist;
 
-        expand_assembly(stream_out,buffer,0);
+        expand_group(stream_out,buffer,0);
         break;
       case 3:  // &INCL line, don't write it out
-        in_assembly=0;
+        in_group=0;
         break;
       case 4:  // &SHELL
         expand_shell(stream_out,buffer);
-        in_assembly=0;
+        in_group=0;
         break;
     }
   }
@@ -162,7 +162,7 @@ int read_pass1(char *in_file, int recurse_level){
   FILE *stream_in;
   char buffer[LENBUFFER], repbuffer[LENBUFFER];
   int irep, nrep;
-  int in_assembly=0;
+  int in_group=0;
 
   stream_in=fopen(in_file,"r");
   if(stream_in==NULL){
@@ -174,7 +174,7 @@ int read_pass1(char *in_file, int recurse_level){
   irep=0;
   nrep=0;
   while((nrep>0&&irep<nrep)||!feof(stream_in)){
-    blockaiddata *assembly;
+    blockaiddata *group;
 
     if(get_fds_line(stream_in, buffer, repbuffer, LENBUFFER, &irep, &nrep)==-1)break;
     if(nrep!=0&&irep>=nrep){
@@ -184,17 +184,17 @@ int read_pass1(char *in_file, int recurse_level){
     trim(buffer);
 
     if(match(buffer,"&BGRP",5)==1){
-      in_assembly=1;
-      assembly=create_assembly(buffer); // &BASM ID='....' ORIGIN=x,y,z
-      if(assembly==NULL){
+      in_group=1;
+      group=create_group(buffer); // &BGRP ID='....' ORIGIN=x,y,z
+      if(group==NULL){
         printf("FATAL ERROR: failed to create group for the following:\n");
         printf("%s\n",buffer);
         exit(1);
       }
       continue;
     }
-    if(match(buffer,"&EGRP",5)==1){ // &EASM /
-      in_assembly=0;
+    if(match(buffer,"&EGRP",5)==1){ // &EGRP /
+      in_group=0;
       continue;
     }
     if(match(buffer,"&INCL",5)==1){ // &INCL FILE='kdkdkkdk' /
@@ -211,9 +211,9 @@ int read_pass1(char *in_file, int recurse_level){
       }
       continue;
     }
-    if(in_assembly==0)continue;
-   // using info in current buffer add to assembly data structures
-    update_assembly(assembly,buffer);
+    if(in_group==0)continue;
+   // using info in current buffer add to group data structures
+    update_group(group,buffer);
   }
   fclose(stream_in);
   return 0;
@@ -354,35 +354,38 @@ void expand_shell(FILE *stream_out, char *buffer){
 
 /* ------------------ get_boundbox ------------------------ */
 
-void get_boundbox(blockaiddata *assem,int recurse_level){
+int get_boundbox(blockaiddata *group,int recurse_level){
   fdsdata *thisline;
   int i;
   float *bb_min, *bb_max, *bb_dxyz;
 
-  if(assem->bb_box_defined==1)return;
+  group->nloaded++;
+  if(group->loadonce==1&&group->nloaded>1)return 0;
+  if(group->bb_box_defined==1)return 1;
+  
 
   if(recurse_level>MAXRECURSE){
     printf(" *** Fatal error:  recursion level must be less than %i\n",MAXRECURSE);
-    return;
+    return 1;
   }
 
-  bb_min=assem->bb_min;
-  bb_max=assem->bb_max;
-  bb_dxyz=assem->bb_dxyz;
+  bb_min=group->bb_min;
+  bb_max=group->bb_max;
+  bb_dxyz=group->bb_dxyz;
 
-  for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
+  for(thisline=group->first_line->next;thisline->next!=NULL;thisline=thisline->next){
     float xb[6];
 
     if(thisline->line_after!=NULL&&thisline->line_before!=NULL){
       if(thisline->type==1&&(thisline->is_obst==1||thisline->is_shell==1)){
         for(i=0;i<6;i++){
-          xb[i]=thisline->xb[i]-assem->xyz0[i/2];
+          xb[i]=thisline->xb[i]-group->xyz0[i/2];
         }
       }
       else if(thisline->type==2){
         char linebuffer[MAXLINE];
         char *id2;
-        blockaiddata *assem2;        
+        blockaiddata *group2;        
         float offset2[3], rotate2;
         int j;
 
@@ -400,26 +403,26 @@ void get_boundbox(blockaiddata *assem,int recurse_level){
         if(id2==NULL){
           printf("ERROR: The keyword, ID, has not been defined properly on the following line:\n");
           printf("%s\n",linebuffer);
-          return;
+          return 1;
         }
-        assem2=get_assembly(id2);
-        if(assem2==NULL){
+        group2=get_group(id2);
+        if(group2==NULL){
           printf("ERROR: The group, %s, referenced on the following line has not been defined.\n",id2);
           printf("%s\n",linebuffer);
-          return;
+          return 1;
         }
 
-        get_boundbox(assem2,recurse_level+1);
+        if(get_boundbox(group2,recurse_level+1)==0)continue;;
 
-        xb[0]=assem2->bb_min[0];
-        xb[1]=assem2->bb_max[0];
-        xb[2]=assem2->bb_min[1];
-        xb[3]=assem2->bb_max[1];
-        xb[4]=assem2->bb_min[2];
-        xb[5]=assem2->bb_max[2];
+        xb[0]=group2->bb_min[0];
+        xb[1]=group2->bb_max[0];
+        xb[2]=group2->bb_min[1];
+        xb[3]=group2->bb_max[1];
+        xb[4]=group2->bb_min[2];
+        xb[5]=group2->bb_max[2];
 
-        rotatexy(xb,xb+2,  rotate2, assem2->bb_dxyz);
-        rotatexy(xb+1,xb+3,rotate2, assem2->bb_dxyz);
+        rotatexy(xb,xb+2,  rotate2, group2->bb_dxyz);
+        rotatexy(xb+1,xb+3,rotate2, group2->bb_dxyz);
         reorder(xb);
         reorder(xb+2);
         reorder(xb+4);
@@ -445,27 +448,28 @@ void get_boundbox(blockaiddata *assem,int recurse_level){
       bb_dxyz[2]=bb_max[2]-bb_min[2];
     }
   }
+  return 1;
 }
 
 /* ------------------ init_boundbox0 ------------------------ */
 
 void init_boundbox0(void){
   fdsdata *thisline;
-  blockaiddata *assem;
+  blockaiddata *group;
 
-  for(assem=blockaid_first->next;assem->next!=NULL;assem=assem->next){
+  for(group=blockaid_first->next;group->next!=NULL;group=group->next){
     float xb[6];
     int do_this_assm;
     float *bb_min, *bb_max, *bb_dxyz;
 
-    if(assem->bb_box_defined==1)continue;
+    if(group->bb_box_defined==1)continue;
 
-    bb_min=assem->bb_min;
-    bb_max=assem->bb_max;
-    bb_dxyz=assem->bb_dxyz;
+    bb_min=group->bb_min;
+    bb_max=group->bb_max;
+    bb_dxyz=group->bb_dxyz;
 
     do_this_assm=1;
-    for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
+    for(thisline=group->first_line->next;thisline->next!=NULL;thisline=thisline->next){
 
       if(thisline->type==1&&(thisline->is_obst==1||thisline->is_shell==1)){
       }
@@ -476,13 +480,13 @@ void init_boundbox0(void){
     }
     if(do_this_assm==0)continue;
 
-    for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
+    for(thisline=group->first_line->next;thisline->next!=NULL;thisline=thisline->next){
       int i;
 
       if(thisline->type!=1||(thisline->is_obst!=1&&thisline->is_shell!=1))continue;
 
       for(i=0;i<6;i++){
-        xb[i]=thisline->xb[i]-assem->xyz0[i/2];
+        xb[i]=thisline->xb[i]-group->xyz0[i/2];
       }
 
       if(xb[0]<bb_min[0])bb_min[0]=xb[0];
@@ -497,16 +501,15 @@ void init_boundbox0(void){
     bb_dxyz[0]=bb_max[0]-bb_min[0];
     bb_dxyz[1]=bb_max[1]-bb_min[1];
     bb_dxyz[2]=bb_max[2]-bb_min[2];
-    assem->bb_box_defined=1;
+    group->bb_box_defined=1;
   }
 }
-/* ------------------ expand_assembly ------------------------ */
+/* ------------------ expand_group ------------------------ */
 
-void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
+void expand_group(FILE *stream_out, char *buffer, int recurse_level){
   float offset[3], rotate;
   char *id;
-  char blank[100];
-  blockaiddata *assem;
+  blockaiddata *group;
   fdsdata *thisline;
   char charxb[32];
   int i,j;
@@ -531,14 +534,17 @@ void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
     return;
   }
 
-  assem=get_assembly(id);
-  if(assem==NULL){
+  group=get_group(id);
+  if(group==NULL){
     printf("ERROR: The group, %s, referenced on the following line has not been defined.\n",id);
     printf("%s\n",buffer);
     return;
   }
 
-  assemblylist[recurse_level]=assem;
+  group->nloaded++;
+  if(group->loadonce==1&&group->nloaded>1)return;
+
+  grouplist[recurse_level]=group;
 
   offset_rotate[4*recurse_level  ] =offset[0];
   offset_rotate[4*recurse_level+1]=offset[1];
@@ -546,42 +552,28 @@ void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
   offset_rotate[4*recurse_level+3]=rotate ;
 
 
-  if(recurse_level==0){
-    fprintf(stream_out,"\n MAJOR GROUP: %s ",assem->id);
-    if(assem->type==1){
-      fprintf(stream_out,"offset=%f,%f,%f rotate=%f\n",
-        offset[0],offset[1],offset[2],rotate);
-    }
-    fprintf(stream_out,"\n");
-  }
-  else{
-    int lenspace;
-
-    for(i=0;i<recurse_level;i++){
-      if(strcmp(id,assemblylist[i]->id)==0){
-        printf(" **** warning ****\n");
-        printf("      Block defintions with Id's: \n");
-        for(j=0;j<recurse_level;j++){
-          printf(" %s,",assemblylist[j]->id);
-        }
-        printf(" %s\n",assemblylist[recurse_level]->id);
-        printf(" are defined circularly.  Their expansion is halted\n");
-        printf(" **** warning ****\n");
-        return;
+  for(i=0;i<recurse_level;i++){
+    if(strcmp(id,grouplist[i]->id)==0){
+      printf(" **** warning ****\n");
+      printf("      Block defintions with Id's: \n");
+      for(j=0;j<recurse_level;j++){
+        printf(" %s,",grouplist[j]->id);
       }
+      printf(" %s\n",grouplist[recurse_level]->id);
+      printf(" are defined circularly.  Their expansion is halted\n");
+      printf(" **** warning ****\n");
+      return;
     }
-    
-    lenspace = recurse_level;
-    if(lenspace>4)lenspace=4;
-    strcpy(blank,"");
-    for(j=0;j<lenspace;j++){
-      strcat(blank,"  ");
-    }
-    fprintf(stream_out,"\n%s MINOR GROUP: %s offset=%f,%f,%f rotate=%f\n",
-      blank,assem->id,offset[0],offset[1],offset[2],rotate);
   }
 
-  for(thisline=assem->first_line->next;thisline->next!=NULL;thisline=thisline->next){
+  fprintf(stream_out,"\n *** GROUP: %s ",group->id);
+  if(group->type==1){
+    fprintf(stream_out,"offset=%f,%f,%f rotate=%f\n",
+      offset[0],offset[1],offset[2],rotate);
+  }
+  fprintf(stream_out,"\n");
+
+  for(thisline=group->first_line->next;thisline->next!=NULL;thisline=thisline->next){
     float xb[6];
 
     if(thisline->line_after==NULL||thisline->line_before==NULL){
@@ -590,9 +582,9 @@ void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
         char line2[MAXLINE];
 
         nkeyvalstack++;
-        keyvalstack[nkeyvalstack-1].keyword_list=assem->keyword_list;
-        keyvalstack[nkeyvalstack-1].val_list=assem->val_list;
-        keyvalstack[nkeyvalstack-1].nkeywordlist=assem->nkeywordlist;
+        keyvalstack[nkeyvalstack-1].keyword_list=group->keyword_list;
+        keyvalstack[nkeyvalstack-1].val_list=group->val_list;
+        keyvalstack[nkeyvalstack-1].nkeywordlist=group->nkeywordlist;
 
         block_key=strstr(thisline->line,"#");
         if(block_key!=NULL){
@@ -607,6 +599,12 @@ void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
         }
         fprintf(stream_out,"%s\n",line2);
       }
+      if(thisline->type==2&&thisline->line!=NULL){
+        char linebuffer[MAXLINE];
+
+        strcpy(linebuffer,thisline->line);
+        expand_group(stream_out,linebuffer,recurse_level+1);      
+      }
     }
 
     if(thisline->line_after!=NULL&&thisline->line_before!=NULL){
@@ -616,9 +614,9 @@ void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
         char line2[MAXLINE];
 
         nkeyvalstack++;
-        keyvalstack[nkeyvalstack-1].keyword_list=assem->keyword_list;
-        keyvalstack[nkeyvalstack-1].val_list=assem->val_list;
-        keyvalstack[nkeyvalstack-1].nkeywordlist=assem->nkeywordlist;
+        keyvalstack[nkeyvalstack-1].keyword_list=group->keyword_list;
+        keyvalstack[nkeyvalstack-1].val_list=group->val_list;
+        keyvalstack[nkeyvalstack-1].nkeywordlist=group->nkeywordlist;
 
         block_key=strstr(thisline->line_before,"#");
         if(block_key!=NULL){
@@ -632,17 +630,17 @@ void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
           strcpy(line2,thisline->line_before);
         }
         for(i=0;i<6;i++){
-          xb[i]=thisline->xb[i]-assem->xyz0[i/2];
+          xb[i]=thisline->xb[i]-group->xyz0[i/2];
         }
 
         for(i=recurse_level;i>=0;i--){
-          blockaiddata *assemi;
+          blockaiddata *groupi;
 
-          assemi = assemblylist[i];
+          groupi = grouplist[i];
           xyz = offset_rotate+4*i;
           rotate = offset_rotate+4*i+3;
-          rotatexy(xb,xb+2,  rotate[0],assemi->bb_dxyz);
-          rotatexy(xb+1,xb+3,rotate[0],assemi->bb_dxyz);
+          rotatexy(xb,xb+2,  rotate[0],groupi->bb_dxyz);
+          rotatexy(xb+1,xb+3,rotate[0],groupi->bb_dxyz);
           for(j=0;j<6;j++){
             xb[j]+=xyz[j/2];
           }
@@ -700,12 +698,12 @@ void expand_assembly(FILE *stream_out, char *buffer, int recurse_level){
         }
 
         nkeyvalstack++;
-        keyvalstack[nkeyvalstack-1].keyword_list=assem->keyword_list;
-        keyvalstack[nkeyvalstack-1].val_list=assem->val_list;
-        keyvalstack[nkeyvalstack-1].nkeywordlist=assem->nkeywordlist;
+        keyvalstack[nkeyvalstack-1].keyword_list=group->keyword_list;
+        keyvalstack[nkeyvalstack-1].val_list=group->val_list;
+        keyvalstack[nkeyvalstack-1].nkeywordlist=group->nkeywordlist;
 
         strcpy(linebuffer,thisline->line);
-        expand_assembly(stream_out,linebuffer,recurse_level+1);
+        expand_group(stream_out,linebuffer,recurse_level+1);
         nkeyvalstack-=2;
       }
     }
@@ -927,15 +925,22 @@ void get_keywords(blockaiddata *blockaidi, char *buffer){
   return;
 }
 
-/* ------------------ create_assembly ------------------------ */
+/* ------------------ create_group ------------------------ */
 
-blockaiddata *create_assembly(char *buffer){
+blockaiddata *create_group(char *buffer){
   blockaiddata *blockaidi, *bprev, *bnext;
   float *orig;
   char *id;
   fdsdata *first_line, *last_line;
 
   NewMemory((void **)&blockaidi,sizeof(blockaiddata));
+  blockaidi->nloaded=0;
+  if(strstr(buffer,"LOADONCE")==NULL){
+    blockaidi->loadonce=0;
+  }
+  else{
+    blockaidi->loadonce=1;
+  }
   blockaidi->type=0;
   blockaidi->keyword_list=NULL;
   blockaidi->val_list=NULL;
@@ -986,15 +991,15 @@ blockaiddata *create_assembly(char *buffer){
   return blockaidi;
 }
 
-/* ------------------ update_assembly ------------------------ */
+/* ------------------ update_group ------------------------ */
 
-void update_assembly(blockaiddata *assembly,char *buffer){
+void update_group(blockaiddata *group,char *buffer){
   fdsdata *prev, *next, *thisfds;
   size_t len;
   int is_obst=0;
   int is_shell=0;
 
-  next=assembly->last_line;
+  next=group->last_line;
   prev=next->prev;
 
   NewMemory((void **)&thisfds,sizeof(fdsdata));
@@ -1004,19 +1009,25 @@ void update_assembly(blockaiddata *assembly,char *buffer){
   thisfds->is_shell=0;
   thisfds->blockaid=NULL;
   if(match(buffer,"&GRP",4)==1){
+    blockaiddata *blockaid;
+
     thisfds->type=2;
     if(strstr(buffer,"#")!=NULL){
-      NewMemory((void **)&thisfds->blockaid,sizeof(blockaiddata ));
-      thisfds->blockaid->keyword_list=NULL;
-      thisfds->blockaid->val_list=NULL;
-      thisfds->blockaid->nkeywordlist=0;
-      if(thisfds->blockaid!=NULL){
-        get_keywords(thisfds->blockaid, buffer);
+
+      NewMemory((void **)&blockaid,sizeof(blockaiddata ));
+      blockaid->nloaded=0;
+      blockaid->loadonce=0;
+      blockaid->keyword_list=NULL;
+      blockaid->val_list=NULL;
+      blockaid->nkeywordlist=0;
+      if(blockaid!=NULL){
+        get_keywords(blockaid, buffer);
       }
     }
     else{
-      thisfds->blockaid=NULL;
+      blockaid=NULL;
     }
+    thisfds->blockaid=blockaid;
   }
   else if(match(buffer,"&BGRP",5)==1||match(buffer,"&EGRP",5)==1){
     printf("ERROR: &BGRP and &EGRP cannot be nested\n");
@@ -1030,7 +1041,7 @@ void update_assembly(blockaiddata *assembly,char *buffer){
       match(buffer,"&SHELL",6)==1||
       match(buffer,"&HOLE",5)==1
       ){
-        assembly->type=1;
+        group->type=1;
     }
     if(match(buffer,"&OBST",5)==1){
       is_obst=1;
@@ -1054,10 +1065,10 @@ void update_assembly(blockaiddata *assembly,char *buffer){
       if(is_obst==1||is_shell==1){
 
         xb = thisfds->xb;
-        if(assembly->xyz0[3]<0.0){
+        if(group->xyz0[3]<0.0){
           float *orig;
 
-          orig = assembly->xyz0;
+          orig = group->xyz0;
           if(xb[0]<orig[0])orig[0]=xb[0];
           if(xb[2]<orig[1])orig[1]=xb[2];
           if(xb[4]<orig[2])orig[2]=xb[4];
@@ -1095,9 +1106,9 @@ void update_assembly(blockaiddata *assembly,char *buffer){
   next->prev=thisfds;
 }
 
-/* ------------------ remove_assemblyb ------------------------ */
+/* ------------------ remove_groupb ------------------------ */
 
-void remove_assembly(blockaiddata *assemb){
+void remove_group(blockaiddata *groupb){
 }
 
 /* ------------------ init_bb ------------------------ */
@@ -1133,12 +1144,15 @@ void init_bb(void){
     printf("  bounds=(%f,%f), (%f,%f), (%f,%f)\n",x1[0],x2[0],x1[1],x2[1],x1[2],x2[2]);
 #endif
   }
+  for(assm=blockaid_first->next;assm->next!=NULL;assm=assm->next){
+    assm->nloaded=0;
+  }
 //#endif
 }
 
-/* ------------------ get_assembly ------------------------ */
+/* ------------------ get_group ------------------------ */
 
-blockaiddata *get_assembly(char *id){
+blockaiddata *get_group(char *id){
   blockaiddata *assm;
 
   if(id==NULL)return NULL;
@@ -1149,31 +1163,33 @@ blockaiddata *get_assembly(char *id){
 }
 
 
-/* ------------------ init_assemdata ------------------------ */
+/* ------------------ init_groupdata ------------------------ */
 
-void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *next){
-  blockaiddata *newassem;
+void init_groupdata(char *id, float *orig, blockaiddata *prev, blockaiddata *next){
+  blockaiddata *newgroup;
   fdsdata *fl, *ll;
 
-  NewMemory((void **)&newassem,sizeof(blockaiddata));
-  strcpy(newassem->id,id);
-  newassem->xyz0[0]=orig[0];
-  newassem->xyz0[1]=orig[1];
-  newassem->xyz0[2]=orig[2];
-  newassem->prev=prev;
-  newassem->next=next;
-  newassem->keyword_list=NULL;
-  newassem->val_list=NULL;
-  newassem->nkeywordlist=0;
+  NewMemory((void **)&newgroup,sizeof(blockaiddata));
+  strcpy(newgroup->id,id);
+  newgroup->loadonce=0;
+  newgroup->nloaded=0;
+  newgroup->xyz0[0]=orig[0];
+  newgroup->xyz0[1]=orig[1];
+  newgroup->xyz0[2]=orig[2];
+  newgroup->prev=prev;
+  newgroup->next=next;
+  newgroup->keyword_list=NULL;
+  newgroup->val_list=NULL;
+  newgroup->nkeywordlist=0;
 
 
-  prev->next=newassem;
-  next->prev=newassem;
-  NewMemory((void **)&newassem->first_line,sizeof(fdsdata));
+  prev->next=newgroup;
+  next->prev=newgroup;
+  NewMemory((void **)&newgroup->first_line,sizeof(fdsdata));
 
-  NewMemory((void **)&newassem->last_line,sizeof(fdsdata));
-  fl = newassem->first_line;
-  ll = newassem->last_line;
+  NewMemory((void **)&newgroup->last_line,sizeof(fdsdata));
+  fl = newgroup->first_line;
+  ll = newgroup->last_line;
 
   fl->line=NULL;
   fl->prev=NULL;

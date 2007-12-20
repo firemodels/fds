@@ -32,7 +32,7 @@ typedef struct _fdsdata {
 typedef struct _blockaiddata {
   char *id;
   char **keyword_list, **val_list;
-  int type;
+  int type, loadonce, nloaded;
   int nkeywordlist;
   float xyz0[4];
   float bb_min[3], bb_dxyz[3], bb_max[3];
@@ -46,7 +46,7 @@ void subst_string(char *string, int ibeg, int iend, char *replace);
 void int2string(int *ib, int nib, char *ibstring);
 void float2string(float *xb, int nxb, char *xbstring);
 int getrevision(char *svn);
-void getASMversion(char *SMZversion);
+void getBLOCKAIDversion(char *SMZversion);
 int getmaxrevision(void);
 void version(void);
 char *trim_front(char *line);
@@ -58,19 +58,19 @@ int match(const char *buffer, const char *key, unsigned int lenkey);
 int get_fds_line(FILE *stream, 
                  char *fdsbuffer, char *repbuffer, unsigned int len_fdsbuffer, 
                  int *irep, int *nprep);
-void expand_assembly(FILE *stream_out, char *buffer, int recurse_level);
-blockaiddata *create_assembly(char *buffer);
-void init_assemdata(char *id, float *orig, blockaiddata *prev, blockaiddata *next);
-void update_assembly(blockaiddata *assembly,char *buffer);
-void remove_assembly(blockaiddata *assembly);
+void expand_group(FILE *stream_out, char *buffer, int recurse_level);
+blockaiddata *create_group(char *buffer);
+void init_groupdata(char *id, float *orig, blockaiddata *prev, blockaiddata *next);
+void update_group(blockaiddata *group,char *buffer);
+void remove_group(blockaiddata *group);
 char *get_keyid(char *source, const char *key);
 int get_irvals(char *line, char *key, int nvals, int *ivals, float *rvals, int *ibeg, int *iend);
 void startup(void);
-blockaiddata *get_assembly(char *id);
+blockaiddata *get_group(char *id);
 void trimzeros(char *line);
 void trimmzeros(char *line);
 void rotatexy(float *dx, float *dy, float rotate, float *dxy);
-void get_boundbox(blockaiddata *assem, int recurse_level);
+int get_boundbox(blockaiddata *group, int recurse_level);
 void init_bb(void);
 void reorder(float *xy);
 void get_keywords(blockaiddata *blockaidi, char *buffer);
@@ -78,9 +78,9 @@ void subst_keys(char *line_after,int recurse_level);
 char *get_val(char *key, int recurse_level);
 
 EXTERN blockaiddata *blockaid_first, *blockaid_last, ba_first, ba_last;
-EXTERN blockaiddata **assemblylist;
+EXTERN blockaiddata **grouplist;
 EXTERN keyvaldata keyvalstack[MAXRECURSE];
 EXTERN nkeyvalstack;
-EXTERN int nassembly;
+EXTERN int ngroup;
 EXTERN float *offset_rotate;
 EXTERN int nblockaid, force_write;
