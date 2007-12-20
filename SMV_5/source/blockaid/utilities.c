@@ -19,10 +19,10 @@ char utilities_revision[]="$Revision$";
 /* ------------------ usage ------------------------ */
 
 void usage(void){
-  char asm_version[100];
+  char group_version[100];
   int svn_num;
 
-  getASMversion(asm_version);  // get Assembly version (ie 5.x.z)
+  getBLOCKAIDversion(group_version);  // get Blockaid version (ie 5.x.z)
   svn_num=getmaxrevision();    // get svn revision number
 
     printf("\n");
@@ -49,7 +49,7 @@ void version(void){
     char blockaid_version[100];
     int svn_num;
 
-    getASMversion(blockaid_version);  // get Sblockaid verson (ie x,y,z)
+    getBLOCKAIDversion(blockaid_version);  // get Sblockaid verson (ie x,y,z)
     svn_num=getmaxrevision();    // get svn revision number
     printf("\n");
     printf("Blockaid\n\n");
@@ -96,8 +96,8 @@ int getmaxrevision(void){
 
 /* ------------------ getSMVversion ------------------------ */
 
-void getASMversion(char *ASMversion){
-  strcpy(ASMversion,BLOCKAIDVERSION);
+void getBLOCKAIDversion(char *BLOCKAIDversion){
+  strcpy(BLOCKAIDversion,BLOCKAIDVERSION);
 }
 
 /* ------------------ getrevision ------------------------ */
