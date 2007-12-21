@@ -1304,7 +1304,7 @@ void drawPart5(const particle *parti){
           part5data *data1, *data2;
           int avatar_type=0;
 
-          if(ipframe==0){
+          if(ipframe+1<parti->nframes){
             data1=datacopy;
             data2 = parti->data5+nclasses*(ipframe+1)+i;
           }
