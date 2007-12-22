@@ -2590,7 +2590,7 @@ integral can now be written as
 \frac{\sigma_d(\bx,\la)}{4\pi}\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs')
   \; d\Omega' =
 \sigma_d(\bx,\la)\left[\chi_f \; I_{\la}(\bx,\bs) +
-(1-\chi_f)U^*(\bx,\la)\right] 
+(1-\chi_f)U^*(\bx,\la)\right]
 \ee
 where $\chi_f = \chi_f(r,\la)$ is a fraction of the total intensity
 originally within the solid angle $\delta\Omega^l$ that is scattered
@@ -2605,7 +2605,7 @@ the spray RTE becomes
 \be
 \bs \cdot \nabla I_{\la}(\bx,\bs) =
 -\left[\kappa_d(\bx,\la) + \overline{\sigma_d}(\bx,\la)\right]
-I_{\la}(\bx,\bs) 
+I_{\la}(\bx,\bs)
 +\kappa_d(\bx,\la) \; I_{b,d}(\bx,\la)
 +\frac{\overline{\sigma_d}(\bx,\la)}{4\pi}U(\bx,\la)
 \ee
@@ -2640,7 +2640,7 @@ Wiscombe~\cite{Wiscombe}.  Currently, the spectral data is only
 included for water. The values of the imaginary part of the complex
 refractive index (related to absorption coefficient) are taken from
 Ref.~\cite{Hale:1}.  Value 1.33 is used for the real part (index of
-refraction). 
+refraction).
 
 Before the actual simulation, both $\kappa_d$ and
 $\overline{\sigma_d}$ are averaged over the possible droplet radii and
@@ -2827,6 +2827,8 @@ of the quantities at the $(n+1)$st time step.
 estimated at the next time step with an explicit Euler step. For
 example, the density is estimated by
 \be \rho^{(n+1)_e} = \rho^n - \dt (\bu^n \cdot \nabla \rho^n + \rho^n \nabla \cdot \bu^n) \ee
+Before boundary conditions for $\rho$ and $Y_\alpha$ are applied, values of these quantities at
+interpolated mesh boundaries are exchanged via MPI calls.
 
 \item The divergence $(\nabla \cdot \bu)^{(n+1)_e}$ is formed from these
 estimated thermodynamic quantities. The normal velocity components at
@@ -2851,11 +2853,16 @@ both constraints and the procedure returns to the beginning of the time step.
 If the time step satisfies the stability criteria, the procedure continues to the corrector step.
 See Section~\ref{stability} for more details on stability.
 
+This concludes the ``Predictor'' stage of the time step. At this point, mesh interface values of $\cal H$ are
+exchanged via MPI calls.
+
 \item The thermodynamic quantities $\rho$, $Y_\alpha$, and $\bp_m$ are
 ``corrected'' at the next time step. For example, the density is corrected
 \be \rho^{n+1} =
    \ha \left(\rho^n + \rho^{(n+1)_e} - \dt
     (\bu^{(n+1)_e} \cdot \nabla \rho^{(n+1)_e} + \rho^{(n+1)_e} \nabla \cdot \bu^{(n+1)_e}) \right)  \ee
+Before boundary conditions for $\rho$ and $Y_\alpha$ are applied, values of these quantities at
+interpolated mesh boundaries are exchanged via MPI calls.
 
 \item The corrected divergence $(\nabla \cdot \bu)^{(n+1)}$ is computed from the
 corrected thermodynamic quantities.
@@ -2870,6 +2877,9 @@ corrected thermodynamic quantities.
      - \dt \left( \bF^{(n+1)_e} + \nabla {\cal H}^{(n+1)_e} \right) \right] \ee
 Note again that the divergence of the corrected velocity field is
 identically equal to the corrected divergence.
+
+At the conclusion of the time step, values of $\cal H$ and the components of $\bu$ are exchanged at
+mesh boundaries via MPI calls.
 
 \end{enumerate}
 
@@ -3876,6 +3886,42 @@ Once the temperature and species mass fractions have been defined in the
 ghost cell, the density in the ghost cell is computed from the equation of
 state
 \be  \rho_{ghost} = \frac{p_0}{ {\cal R} \, T_{ghost} \, \sum_l (Y_{l,ghost}/W_l) }  \ee
+
+
+\subsection{Mass and Energy Transfer at Interpolated Mesh Boundaries}
+
+In simulations involving more than one numerical mesh, information has to be passed between meshes, even when
+the meshes are being processed by separate computers. If two meshes abut each other, and the mesh cells are aligned and the same size, then
+one mesh simply uses the density and species mass fractions of the adjacent mesh as the ``ghost'' cell values. However, in cases where the
+mesh cells are not the same size, the exchange of information must be done more carefully. Consider a case where two meshes meet:
+
+\begin{picture}(200,110)(0,-10)
+\setlength{\unitlength}{0.02in}
+\put(120,10){\framebox(20,20){ }}
+\put(120,30){\framebox(20,20){ }}
+\put(140,10){\framebox(40,40){ }}
+\put(100,30){\makebox(0,0){Mesh 1}}
+\put(200,30){\makebox(0,0){Mesh 2}}
+\thicklines
+\put(140,0){\line(0,1){60}}
+\end{picture}
+
+\noindent
+We want the total and species mass fluxes between meshes to be the same, or as close as possible.
+Let the density in cell $(1,j',k')$ of Mesh 2 be denoted $\rho_{1,j'k'}^{(2)}$. Assume that this cell abuts four cells in Mesh 1. The densities in the four abutting cells
+of Mesh 1 are denoted $\rho_{I,jk}^{(1)}$. Note that $j$ and $k$ are not the same as $j'$ and $k'$. $I$ is the number of cells in the $x$ direction of Mesh 1. The
+ghost cell quantities in Mesh 1 have an $i$ index of $I+1$. The ghost cell quantities in Mesh 2 have an $i$ index of 0.
+We want to assert mass conservation at the mesh interface:
+\be
+   \sum_{j,k} u_{I,jk}^{(1)} \; \frac{\rho_{I+1,jk}^{(1)}+\rho_{I,jk}^{(1)}}{2} \; \dy^{(1)} \, \dz^{(1)}  =
+              u_{0,j'k'}^{(2)} \; \frac{\rho_{1,j'k'}^{(2)}+\rho_{0,j'k'}^{(2)}}{2} \; \dy^{(2)} \, \dz^{(2)}  \label{rhou}
+\ee
+When solving for $\rho_{0,j'k'}^{(2)}$, the ghost cell value for Mesh 2, we have to assume that the ghost cells values for Mesh 1 are simply linearly interpolated
+from the gas phase values of Mesh 1 and Mesh 2:
+\be \rho_{I+1,jk}^{(1)} = \rho_{I,jk}^{(1)} + \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}} \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \label{ghostrho} \ee
+Rearranging terms in Eq.~(\ref{rhou}) and using the expression for the ghost cells from Eq.~(\ref{ghostrho}), we get:
+\be \rho_{0,j'k'}^{(2)} = -\rho_{1,j'k'}^{(2)} + \frac{1}{u_{0,j'k'}^{(2)} \dy^{(2)} \, \dz^{(2)} } \sum_{j,k}  u_{1,jk}^{(1)} \dy^{(1)} \, \dz^{(1)}
+    \left[ 2 \, \rho_{I,jk}^{(1)} +  \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}}  \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \right]  \ee
 
 
 
