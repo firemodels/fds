@@ -9986,10 +9986,11 @@ thus one pair of cell nodes is the same.
 Presently, Smokeview is the only program available to view the
 boundary files.
 
-\section{Particle Data}%Kevin
+\section{Particle Data}
 \label{out:PART}
-The tracer particles and sprinkler droplets coordinates and related quantities
-are stored in a FORTRAN unformatted (binary) file called {\bf CHID.prt5}.
+
+Coordinates and specified quantities related to tracer particles, sprinkler droplets, and other Lagrangian particles are written
+to a FORTRAN unformatted (binary) file called {\bf CHID.prt5}.
 Note that the format of this file has changed from previous versions (4 and below).
 The file consists of some header material, followed by particle data output every
 {\ct DT\_PART} seconds. The time increment {\ct DT\_PART} is specified on the
@@ -9998,7 +9999,7 @@ The header materials is written by the following FORTRAN code in the file called
 
 \footnotesize
 \begin{verbatim}
-WRITE(LUPF) ONE_INTEGER          ! The number ONE as a 4 byte real
+WRITE(LUPF) ONE_INTEGER          ! Integer 1 to check Endian-ness
 WRITE(LUPF) NINT(VERSION*100.)   ! FDS version number
 WRITE(LUPF) N_PART               ! Number of PARTicle classes
 DO N=1,N_PART
@@ -10011,15 +10012,22 @@ DO N=1,N_PART
 ENDDO
 \end{verbatim}
 \normalsize
+Note that the initial printout of the number 1 is used by Smokeview to determine the
+Endian-ness of the file. The Endian-ness has to do with the particular way real numbers are written into a binary file.
+The version number is used to distinguish new versus old file formats.
+The parameter {\ct N\_PART} is not the number of particles, but rather the number of
+particle classes corresponding to the {\ct PART} namelist groups in the input file.
 Every {\ct DT\_PART} seconds the coordinates of the particles and droplets are output as 4 byte reals:
 
 \footnotesize
 \begin{verbatim}
 WRITE(LUPF) REAL(T,FB)  ! Write out the time T as a 4 byte real
-WRITE(LUPF) NPLIM       ! Number of particles to write out for this time step
-WRITE(LUPF) (XP(I),I=1,NPLIM),(YP(I),I=1,NPLIM),(ZP(I),I=1,NPLIM)
-WRITE(LUPF) (TA(I),I=1,NPLIM)  ! Integer "tag" for each particle
-IF (PC%N_QUANTITIES > 0) WRITE(LUPF) ((QP(I,NN),I=1,NPLIM),NN=1,PC%N_QUANTITIES)
+DO N=1,N_PART
+   WRITE(LUPF) NPLIM    ! Number of particles in the PART class
+   WRITE(LUPF) (XP(I),I=1,NPLIM),(YP(I),I=1,NPLIM),(ZP(I),I=1,NPLIM)
+   WRITE(LUPF) (TA(I),I=1,NPLIM)  ! Integer "tag" for each particle
+   IF (PC%N_QUANTITIES > 0) WRITE(LUPF) ((QP(I,NN),I=1,NPLIM),NN=1,PC%N_QUANTITIES)
+ENDDO
 \end{verbatim}
 \normalsize
 The particle ``tag'' is used by Smokeview to keep track of individual particles and droplets for the purpose of drawing
@@ -10027,7 +10035,7 @@ streamlines. It is also useful when parsing the file. The quantity data, {\ct QP
 the particles and droplets. Note that it is now possible with the new format to color the particles and droplets with
 several different quantities.
 
-\section{Profile Files}%Simo
+\section{Profile Files}
 \label{out:PROF}
 
 The profile files defined under the namelist group {\ct PROF} are
