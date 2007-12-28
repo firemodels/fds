@@ -292,9 +292,9 @@ MAIN_LOOP: DO
          CALL MASS_FINITE_DIFFERENCES(NM)
          CALL DENSITY(NM)
          ! Do combustion, then apply thermal, species and density boundary conditions and solve for radiation
-         IF (N_REACTIONS > 0) CALL COMBUSTION (NM)
+         IF (N_REACTIONS > 0 .AND. (.NOT. ISOTHERMAL)) CALL COMBUSTION (NM)
          CALL WALL_BC(T(NM),NM)
-         CALL COMPUTE_RADIATION(NM)
+         IF (.NOT. ISOTHERMAL) CALL COMPUTE_RADIATION(NM)
       ENDIF
       CALL UPDATE_PARTICLES(T(NM),NM)
       CALL DIVERGENCE_PART_1(T(NM),NM)
