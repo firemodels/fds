@@ -8115,6 +8115,8 @@ $\tau$ & $S(\tau) {\rm (kW/m^2)}$ & FDS $\rm(kW/m^2)$ \\ \hline\hline
 
 
 
+\clearpage
+
 \section{Solid Phase Phenomena}
 
 This section contains examples that test the one-dimensional heat
@@ -8516,13 +8518,14 @@ the air velocity on the bottom set of obstructions is not affected as much by th
 \subsection{A Simple Under-Ventilated Compartment Fire (\texorpdfstring{{\bf door\_crack}}{door\_crack}) }
 \label{door_crack}
 
-This example uses the same simple compartment that was used to test leakage and fan curves in the previous section. Now, we add a small (160~kW) fire, with the same
+This example uses the same simple compartment that was used to test leakage and fan curves (Sections~\ref{leak_test} and~\ref{fan_test}. Now, we add a small (160~kW) fire, with the same
 fan and leak under the door. The compartment now opens to the atmosphere, not a sealed plenum. We expect a rapid pressure rise in the compartment due to the effect of the
-fire and the fan. Initially, the pressure rise is approximately:
+fire and the fan. Initially, the pressure rises due to the heat from the fire and the fan blowing air into the compartment:
 \be \frac{d \overline{p}_1}{dt} \approx (\gamma - 1) \; \frac{\dQ}{V} + \gamma \, \overline{p} \; \frac{ \dot{V} }{V} \approx 3200 \; \hbox{Pa/s}  \approx 0.03 \; \hbox{atm/s}   \ee
-where $\gamma \approx 1.4$, $\dot{Q}=160,000$~W, $V=20.7$~m$^3$, and $\dot{V}=0.016$~m$^3$/s. In roughly 150~s, the pressure rises about 0.6~atm, at which point the fire
-dies due to lack of oxygen. Then the pressure decreases, and the fan starts up again (it had stalled due to high pressure in the compartment). The fan, and the leak under the
-door, increase the oxygen concentration, at least near these openings, and the fuel-rich gases in the compartment continue to burn.
+where $\gamma \approx 1.4$, $\dot{Q}=160,000$~W, $V=20.7$~m$^3$, and $\dot{V}=0.016$~m$^3$/s. However, as heat is lost to the walls, and as the leak begins to relieve the
+pressure increase, the pressure rise slows, and then reverses at about 0.25~atm. In roughly 150~s, the fire
+is self-extinguished due to lack of oxygen. As the pressure rise decreases back to zero, and actually goes below zero, the fan, and the leak under the
+door, increase the oxygen supply, at least near these openings, and the fuel-rich gases in the compartment continue to burn.
 
 \vspace{0.1in}
 \noindent
@@ -8530,13 +8533,12 @@ door, increase the oxygen concentration, at least near these openings, and the f
 \includegraphics[width=3.1in]{FIGURES/door_crack_Pressure} &
 \includegraphics[width=3.1in]{FIGURES/door_crack_HRR}
 \end{tabular*}
-
-While this case has a number of interesting physical effects, and it {\em verifiies} several features of FDS, it is very important to note the following:
+While this case has a number of interesting physical effects, and it {\em verifies} several features of FDS, it is very important to note the following:
 \begin{itemize}
 \item Although there is smoke seen flowing backwards out the fan duct, in reality there would have been much more. Most conventionally built structures will not withstand over-pressures
-of 0.6~atm without some sort of relief. The fan and the crack under the door obey simple formulae based on pressure differences, but these assumptions have limits.
+of 0.25~atm without some sort of relief. The fan and the crack under the door obey simple formulae based on pressure differences, but these assumptions have limits.
 \item It is likely that the fire in this scenario would indeed extinguish itself as the oxygen volume fraction decreased below about 15~\%. {\bf But,} its re-ignition at the door crack
-and fan opening would depend on the presence of a spark or hot spot of some sort. FDS continues to flow fuel into the compartment past the point of local extinction, but the compartment
+and fan grill would depend on the presence of a spark or hot spot of some sort. FDS continues to flow fuel into the compartment past the point of local extinction, but the compartment
 cools. The default combustion algorithm in FDS assumes that in every grid cell there is a ``virtual spark plug'' that initiates combustion if the local ratio of fuel and oxygen are
 appropriate.
 \end{itemize}
