@@ -82,7 +82,7 @@ intel_osx_32 : obj = fds5_osx_intel_32
 intel_osx_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-intel_osx_64 : FFLAGS = -O3 -axTP -heap-arrays -ip -m64
+intel_osx_64 : FFLAGS = -O3 -axTP -heap-arrays -ip -vec_report0 -m64
 intel_osx_64 : CFLAGS = -O2 -Dpp_noappend -Dpp_OSX
 intel_osx_64 : FCOMPL = ifort
 intel_osx_64 : CCOMPL = icc
@@ -108,7 +108,7 @@ intel_osx_db : setup $(obj_serial)
 
 intel_osx_mpi_64 : FFLAGS  = -O3 -axP -ip -parallel -m64
 intel_osx_mpi_64 : CFLAGS  = -O -Dpp_noappend -Dpp_OSX
-intel_osx_mpi_64 : FCOMPL  = mpif77
+intel_osx_mpi_64 : FCOMPL  = /usr/local/bin/mpif77
 intel_osx_mpi_64 : CCOMPL  = icc
 intel_osx_mpi_64 : obj = fds5_mpi_osx_intel_64
 intel_osx_mpi_64 : setup $(obj_mpi)
@@ -116,7 +116,7 @@ intel_osx_mpi_64 : setup $(obj_mpi)
 
 intel_osx_mpi : FFLAGS  = -O3 -axTP -ip -vec_report0
 intel_osx_mpi : CFLAGS  = -O -Dpp_noappend -Dpp_OSX
-intel_osx_mpi : FCOMPL  = mpif77
+intel_osx_mpi : FCOMPL  = /usr/local/bin/mpif77
 intel_osx_mpi : CCOMPL  = icc
 intel_osx_mpi : obj = fds5_mpi_osx_intel
 intel_osx_mpi : setup $(obj_mpi)
@@ -124,7 +124,7 @@ intel_osx_mpi : setup $(obj_mpi)
 
 intel_osx_mpi_db : FFLAGS  = -O -g
 intel_osx_mpi_db : CFLAGS  = -O -g -Dpp_noappend -Dpp_OSX
-intel_osx_mpi_db : FCOMPL  = mpif77
+intel_osx_mpi_db : FCOMPL  = /usr/local/bin/mpif77
 intel_osx_mpi_db : CCOMPL  = icc
 intel_osx_mpi_db : obj = fds5_osx_intel_mpi_db
 intel_osx_mpi_db : setup $(obj_mpi)
