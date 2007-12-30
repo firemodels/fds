@@ -431,13 +431,10 @@ void float2string(float *xb, int nxb, char *xbstring){
 
   strcpy(xbstring,"");
   for(i=0;i<nxb;i++){
-
     sprintf(charxb,"%f",xb[i]);
     trimzeros(charxb);
     strcat(xbstring,charxb);
-    if(i!=nxb-1){
-      strcat(xbstring,", ");
-    }
+    strcat(xbstring,", ");
   }
 }
 

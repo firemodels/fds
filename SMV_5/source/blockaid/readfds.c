@@ -317,39 +317,56 @@ int get_fds_line(FILE *stream,
 
 /* ------------------ expand_shell ------------------------ */
 
+#define OBST_SHELL(SIDE) \
+  for(i=0;i<6;i++){\
+    xb2[i]=xb[i];\
+  }\
+  SIDE;\
+  strcpy(obst_string,buffer);\
+  float2string(xb2,6,xbstring);\
+  subst_string(obst_string,ibeg,iend,xbstring);\
+  fprintf(stream_out,"%s\n",obst_string)
+
 void expand_shell(FILE *stream_out, char *buffer){
-  float xb[6], delta;
+  float xb[6], xb2[6], delta;
   char xbstring[MAXLINE];
+  char obst_string[MAXLINE];
   char *delta_beg;
   int i;
   int ibeg, iend;
   int have_delta=1;
+  float fullblock=0;
 
-  if(get_irvals(buffer, "XB", 6, NULL, xb,NULL,NULL)!=6)return;
   if(get_irvals(buffer, "DELTA", 1, NULL, &delta,&ibeg, &iend)!=1){
     delta=0.0;
     have_delta=0;
   }
-
   delta_beg=strstr(buffer,"DELTA");
   if(delta_beg!=NULL){
     ibeg=(int)(delta_beg-buffer);
   }
-
   subst_string(buffer,ibeg,iend,NULL);  // remove DELTA substring
+  subst_string(buffer,0,5,"&OBST"); // replace initial &SHELL with &OBST
 
-  fprintf(stream_out,"%s ","&OBST");
-  fprintf(stream_out,"%s\n",trim_front(buffer+6));
+  if(get_irvals(buffer, "XB", 6, NULL, xb, &ibeg, &iend)!=6)return;
+
   if(have_delta==0||delta<0.000001)return;
 
-  fprintf(stream_out,"%s","&HOLE ");
-  for(i=0;i<6;i++){
-    if(i%2==0)xb[i]+=delta;
-    if(i%2==1)xb[i]-=delta;
+  if(delta>(xb[1]-xb[0])/2.0)fullblock=1;
+  if(delta>(xb[3]-xb[2])/2.0)fullblock=1;
+  if(delta>(xb[5]-xb[4])/2.0)fullblock=1;
+
+  if(fullblock==0){
+    OBST_SHELL(xb2[1]=xb[0]+delta); // xmin
+    OBST_SHELL(xb2[0]=xb[1]-delta); // xmax
+    OBST_SHELL(xb2[3]=xb[2]+delta); // ymin
+    OBST_SHELL(xb2[2]=xb[3]-delta); // ymax
+    OBST_SHELL(xb2[5]=xb[4]+delta); // zmin
+    OBST_SHELL(xb2[4]=xb[5]-delta); // zmax
   }
-  float2string(xb,6,xbstring);
-  fprintf(stream_out,"XB=%s",xbstring);
-  fprintf(stream_out,"%s\n"," /");
+  else{
+    OBST_SHELL(xb2[1]=xb[1]);
+  }
 }
 
 /* ------------------ get_boundbox ------------------------ */
