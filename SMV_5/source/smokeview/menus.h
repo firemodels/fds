@@ -4109,14 +4109,6 @@ static int textureshowmenu=0;
   else{
     visFrame=0;
   }
-  /*
-  if(visCeiling==1)glutAddMenuEntry("*Ceiling",7);
-  if(visCeiling==0)glutAddMenuEntry("Ceiling",7);
-  if(visWalls==1)glutAddMenuEntry("*Walls",6);
-  if(visWalls==0)glutAddMenuEntry("Walls",6);
-  if(visFloor==1)glutAddMenuEntry("*Floor",5);
-  if(visFloor==0)glutAddMenuEntry("Floor",5);
-  */
   glutAddMenuEntry("Show All",11);
   glutAddMenuEntry("Hide All",13);
 
