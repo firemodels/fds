@@ -113,7 +113,11 @@ void free_object(sv_object *object);
 void remove_comment(char *buffer);
 void freecircle(void);
 void initcircle(unsigned int npoints);
+#ifdef pp_AVATAR
 void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int *use_displaylist);
+#else
+void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops);
+#endif
 
 static float *xcirc=NULL, *ycirc=NULL;
 static int ncirc;
@@ -1067,7 +1071,11 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
   NewMemory((void **)&object->obj_frames,object->nframes*sizeof(sv_object_frame *));
 
   object->obj_frames[0]=framei;
+#ifdef pp_AVATAR
   getargsops(commands,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
+#else
+  getargsops(commands,&framei->args,&framei->nargs,&framei->ops,&framei->nops);
+#endif
   framei->display_list_ID=-1;
   framei->error=0;
 
@@ -1082,7 +1090,11 @@ void make_error_frame(void){
   error_frame=NULL;
   NewMemory((void **)&error_frame,sizeof(sv_object_frame));
   strcpy(buffer,"1.0 0.0 0.0 setcolor 0.1 drawsphere");
+#ifdef pp_AVATAR
   getargsops(buffer,&error_frame->args,&error_frame->nargs,&error_frame->ops,&error_frame->nops,NULL);
+#else
+  getargsops(buffer,&error_frame->args,&error_frame->nargs,&error_frame->ops,&error_frame->nops);
+#endif
   error_frame->display_list_ID=-1;
 }
 
@@ -1110,13 +1122,21 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
       NewMemory((void **)&framei,sizeof(sv_object_frame));
       object->obj_frames[0]=framei;
       framei->error=0;
+#ifdef pp_AVATAR
       getargsops(commandsoff,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
+#else
+      getargsops(commandsoff,&framei->args,&framei->nargs,&framei->ops,&framei->nops);
+#endif
       framei->display_list_ID=-1;
     }
     else{
       NewMemory((void **)&framei,sizeof(sv_object_frame));
       object->obj_frames[1]=framei;
+#ifdef pp_AVATAR
       getargsops(commandson,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
+#else
+      getargsops(commandson,&framei->args,&framei->nargs,&framei->ops,&framei->nops);
+#endif
       framei->error=0;
       framei->display_list_ID=-1;
     }
@@ -1126,8 +1146,11 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
 
 
 /* ----------------------- getargsops ----------------------------- */
-
+#ifdef pp_AVATAR
 void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int *use_displaylist){
+#else
+void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
+#endif
   char *token;
   char buffer2[256];
   char buffer_save[256];
@@ -1416,7 +1439,11 @@ int read_device_defs(char *file){
       firstdef=0;
       if(match(trim_buffer,"NEWFRAME",8)==1)continue;
     }
+#ifdef pp_AVATAR
     getargsops(buffer,&arglist, &nargs, &oplist, &nops, &current_object->use_displaylist);
+#else
+    getargsops(buffer,&arglist, &nargs, &oplist, &nops);
+#endif
     if(nargs>0){
       if(current_frame->nargs==0){
         current_frame->args=arglist;
