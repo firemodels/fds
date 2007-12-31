@@ -357,12 +357,12 @@ void expand_shell(FILE *stream_out, char *buffer){
   if(delta>(xb[5]-xb[4])/2.0)fullblock=1;
 
   if(fullblock==0){
-    OBST_SHELL(xb2[1]=xb[0]+delta); // xmin
-    OBST_SHELL(xb2[0]=xb[1]-delta); // xmax
-    OBST_SHELL(xb2[3]=xb[2]+delta); // ymin
-    OBST_SHELL(xb2[2]=xb[3]-delta); // ymax
-    OBST_SHELL(xb2[5]=xb[4]+delta); // zmin
-    OBST_SHELL(xb2[4]=xb[5]-delta); // zmax
+    OBST_SHELL(xb2[4]=xb[5]-delta); // top
+    OBST_SHELL(xb2[5]=xb[4]+delta); // bottom
+    OBST_SHELL(xb2[3]=xb[2]+delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // front
+    OBST_SHELL(xb2[2]=xb[3]-delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // back
+    OBST_SHELL(xb2[1]=xb[0]+delta;xb2[2]=xb[2]+delta;xb2[3]=xb[3]-delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // left
+    OBST_SHELL(xb2[0]=xb[1]-delta;xb2[2]=xb[2]+delta;xb2[3]=xb[3]-delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // right
   }
   else{
     OBST_SHELL(xb2[1]=xb[1]);
