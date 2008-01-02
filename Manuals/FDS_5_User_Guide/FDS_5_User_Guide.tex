@@ -20,6 +20,7 @@
 \definecolor{linkred}{rgb}{1,0,0}
 \definecolor{linkblue}{rgb}{0,0,1}
 \usepackage{caption}
+\usepackage{graphpap}
 \usepackage{rotating}
 \usepackage{epsfig,psfrag}
 %\usepackage{wrapfig}
@@ -1598,20 +1599,7 @@ An example of an axially-symmetric helium plume ({\bf helium\_2d}) is given in t
 
 The term ``multiple meshes'' means that the computational domain consists of
 more than one computational mesh, usually connected although this is not
-required. In each mesh, the governing equations can be solved with a time
-step based on the flow speed within that particular mesh. Because each
-mesh can have different time steps, this technique can save CPU time by
-requiring relatively coarse meshes to be updated only when necessary.
-Coarse meshes are best used in regions where temporal and spatial gradients of key
-quantities are small or unimportant.
-{\bf To run FDS in parallel, you need to break up the computational domain into
-multiple meshes so that each processor receives one mesh to work on.} Whether
-the calculation is to be run on a single processor, or on multiple processors,
-the rules of prescribing multiple meshes are similar, with some issues to keep in mind.
-Here is a list of guidelines and warnings about the use of multiple meshes.
-
-\begin{itemize}
-\item If more than one mesh is used, there should be a
+required. If more than one mesh is used, there should be a
 {\ct MESH} line for each. The order in which these
 lines are entered in the input file matters. In general, the meshes should be entered
 from finest to coarsest. FDS assumes that a mesh listed first in the input file has
@@ -1621,41 +1609,26 @@ calculations are performed with no communication at all between them. Obstructio
 in terms of the overall coordinate system and need not apply to any one particular mesh.
 Each mesh checks the coordinates of all the geometric
 entities and decides whether or not they are to be included.
-\item Avoid putting mesh boundaries where critical action is expected,
-especially fire. Sometimes fire spread from mesh to mesh cannot be
-avoided, but if at all possible try to keep mesh interfaces relatively
-free of complicated phenomena since the exchange of information across
-mesh boundaries is not yet as accurate as cell to cell exchanges within one
-mesh.
-\item Information from other meshes is received only at the exterior boundary
-of a given mesh. This means that a mesh that is completely embedded within
-another receives information at its exterior boundary, but the larger
-mesh receives no information from the mesh embedded within. Essentially,
-the larger, usually coarser, mesh is doing its own simulation of the scenario
-and is not affected by the smaller, usually finer, mesh embedded within it.
-Details within the fine mesh, especially related to fire growth and spread,
-may not be picked up by the coarse mesh. In such cases, it is preferable to
-isolate the detailed fire behavior within one mesh, and position coarser
-meshes at the exterior boundary of the fine mesh. Then the fine and coarse
-meshes mutually exchange information.
-\item Experiment with different mesh configurations using relatively
-coarse mesh cells to ensure that information is being transferred
-properly from mesh to mesh. There are two issues of concern. First,
-does it appear that the flow is being badly affected by the mesh boundary? If so,
-try to move the mesh boundaries away from areas of activity. Second,
-is there too much of a jump in cell size from one mesh to another? If so, consider
-whether the loss of information moving from a fine to a coarse mesh is tolerable.
-\item Be careful when using the shortcut convention of declaring an
-entire face of the domain to be an {\ct OPEN} vent. Every mesh
-takes on this attribute. See Section~\ref{info:VENT} for more details.
-\item It is possible, starting with FDS 5, to have a background pressure rise in multiple pressure zones,
-even if the pressure zones cross mesh boundaries. See Section~\ref{info:ZONE} for more information.
-\item In a parallel calculation, you can force the time steps in all meshes to
-be the same by setting {\ct SYNCHRONIZE=.TRUE.}\index{TIME!SYNCHRONIZE} on the {\ct TIME} line.
-\begin{warning}
-\noindent
-Starting in FDS 5, this is the default for all modes of operation.
-\end{warning}
+
+
+
+\subsubsection{Serial vs. Parallel Processing of Multiple Meshes}
+
+To run FDS in parallel, you {\bf must} break up the computational domain into
+multiple meshes so that the workload can be divided among the available processors.
+In general, it is better to run multiple mesh cases with the parallel version of FDS if you have the
+computers available, but be aware that two computers will not necessarily finish the job in half the time as one. For the
+parallel version to work well, there has to be a comparable number of cells in each mesh, or otherwise most of the computers will sit idle
+waiting for the one with the largest mesh to finish processing each time step. You can use multiple meshes even when running the serial version of FDS,
+in which case one CPU will serially process each mesh, one by one. Why do this? For one, if you set \\ {\ct SYNCHRONIZE=.FALSE.} \\ on the {\ct TIME} line,
+then in each mesh, the governing equations will be solved with a time
+step based on the flow speed within that particular mesh. Because each
+mesh can have different time steps, this technique can save CPU time by
+requiring relatively coarse meshes to be updated only when necessary.
+Coarse meshes are best used in regions where temporal and spatial gradients of key
+quantities are small or unimportant. Be aware, however, that unsynchronized time steps are more likely to lead to numerical instabilities.
+
+By default, the time steps in each mesh are synchronized.
 With this setting, all meshes are active each iteration.
 For a single-processor, multiple mesh calculation, this strategy reduces
 and may even eliminate any benefit seen by using multiple meshes. However, in a
@@ -1667,11 +1640,118 @@ there is a tighter connection between meshes.
 It is also possible to synchronize the time step in only a select set of meshes. To do
 this, add {\ct SYNCHRONIZE=.TRUE.} to the appropriate {\ct MESH} lines and then add
 {\ct SYNCHRONIZE=.FALSE.} to the {\ct TIME} line.\index{MESH!SYNCHRONIZE}
+
+
+\subsection{Mesh Alignment}
+
+Whether
+the calculation is to be run on a single processor, or on multiple processors,
+the rules of prescribing multiple meshes are similar, with some issues to keep in mind. The most important rule of mesh alignment is that
+abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}. The requirement of integral mesh
+alignment is new starting with FDS version 5.1. It is a more restrictive requirement than in previous versions because it was becoming too
+difficult to maintain complete flexiblity in alignment while trying to improve the accuracy of the methodology.
+
+\begin{figure}[p]
+\begin{picture}(325,600)(0,-20)
+\setlength{\unitlength}{0.02in}
+
+\newsavebox{\mygraph}
+\savebox{\mygraph}{
+\begin{picture}(0,0)
+\thinlines
+\multiput( 0,20)(0,20){3}{\line(1,0){100}}
+\multiput(20, 0)(20,0){4}{\line(0,1){80}}
+\thicklines
+\put(0,0){\framebox(100,80){ }}
+\end{picture} }
+
+\newsavebox{\myfinegraph}
+\savebox{\myfinegraph}{
+\begin{picture}(0,0)
+\thinlines
+\multiput( 0,10)(0,10){7}{\line(1,0){100}}
+\multiput(10, 0)(10,0){9}{\line(0,1){80}}
+\thicklines
+\put(0,0){\framebox(100,80){ }}
+\end{picture} }
+
+\newsavebox{\myotherfinegraph}
+\savebox{\myotherfinegraph}{
+\begin{picture}(0,0)
+\thinlines
+\multiput( 0, 8)(0, 8){9}{\line(1,0){100}}
+\multiput(10, 0)(10,0){9}{\line(0,1){80}}
+\thicklines
+\put(0,0){\framebox(100,80){ }}
+\end{picture} }
+
+\put(  0,320){\usebox{\mygraph}}
+\put(100,320){\usebox{\mygraph}}
+\put(230,370){\parbox{1.9in}{This is the ideal kind of mesh to mesh alignment.}}
+
+\put(  0,220){\usebox{\mygraph}}
+\put(100,220){\usebox{\myfinegraph}}
+\put(230,270){\parbox{1.9in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell.}}
+
+\put(  0,100){\usebox{\mygraph}}
+\put( 80,120){\usebox{\myfinegraph}}
+\put(230,170){\parbox{1.9in}{This is allowed, but of questionable value.}}
+
+\put(  0,  0){\usebox{\mygraph}}
+\put(100,  0){\usebox{\myotherfinegraph}}
+\put(230, 50){\parbox{1.9in}{This is no longer allowed in FDS 5.1 and higher.}}
+\end{picture}
+
+\caption{\bf Rules concerning alignment of meshes.}
+\label{fig:meshes}
+\end{figure}
+
+The following rules of thumb should also be followed when setting up a multiple mesh calculation:
+\begin{itemize}
+\item Avoid putting mesh boundaries where critical action is expected,
+especially fire. Sometimes fire spread from mesh to mesh cannot be
+avoided, but if at all possible try to keep mesh interfaces relatively
+free of complicated phenomena since the exchange of information across
+mesh boundaries is not yet as accurate as cell to cell exchanges within one
+mesh.
+
+\item In general, there is little advantage to overlapping meshes because
+information is only exchanged at exterior boundaries. This means that a mesh that is completely embedded within
+another receives information at its exterior boundary, but the larger
+mesh receives no information from the mesh embedded within. Essentially,
+the larger, usually coarser, mesh is doing its own simulation of the scenario
+and is not affected by the smaller, usually finer, mesh embedded within it.
+Details within the fine mesh, especially related to fire growth and spread,
+may not be picked up by the coarse mesh. In such cases, it is preferable to
+isolate the detailed fire behavior within one mesh, and position coarser
+meshes at the exterior boundary of the fine mesh. Then the fine and coarse
+meshes mutually exchange information.
+
+\item Be careful when using the shortcut convention of declaring an
+entire face of the domain to be an {\ct OPEN} vent. Every mesh
+takes on this attribute. See Section~\ref{info:VENT} for more details.
+
 \item If a planar obstruction is close to where two meshes abut, make sure that each
 mesh ``sees'' the obstruction. If the obstruction is even a millimeter outside of one
 of the meshes, that mesh does not account for it, in which case information is not
 transferred properly between meshes.
-\item When running a case with multiple meshes in parallel, the efficiency of the \index{multi-mesh efficiency}
+\end{itemize}
+
+
+\subsubsection{Accuracy of the Parallel Calculation}
+
+Experiment with different mesh configurations using relatively
+coarse mesh cells to ensure that information is being transferred
+properly from mesh to mesh. There are two issues of concern. First,
+does it appear that the flow is being badly affected by the mesh boundary? If so,
+try to move the mesh boundaries away from areas of activity. Second,
+is there too much of a jump in cell size from one mesh to another? If so, consider
+whether the loss of information moving from a fine to a coarse mesh is tolerable.
+
+
+\subsubsection{Efficiency of the Parallel Calculation}
+
+When running a case with multiple meshes in parallel, the efficiency of the \index{multi-mesh efficiency}
 calculation can be checked as follows: (1) Set {\ct SYNCHRONIZE=.TRUE.} on the
 {\ct TIME} line, (2) Let the program run several hundred time steps, (3) Calculate
 the difference in wall clock time between two 100 iteration print outs in
@@ -1682,7 +1762,7 @@ largest value should be less than, but close to, the average elapsed wall clock 
 The efficiency of the parallel calculation is the maximum {\ct CPU/step} divided by
 the average wall clock time per step. If this number is between 90~\% and 100~\%, the
 parallel code is working well.
-\end{itemize}
+
 
 
 \subsection{Mesh Stretching: The \texorpdfstring{{\tt TRNX}}{TRNX}, \texorpdfstring{{\tt TRNY}}{TRNY} and/or \texorpdfstring{{\tt TRNZ}}{TRNZ} Namelist Groups (Table \ref{tbl:TRNX})}
