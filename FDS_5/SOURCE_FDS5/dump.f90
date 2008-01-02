@@ -2389,13 +2389,13 @@ END SELECT
 
 WRITE(LU_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,',    Simulation Time:',T(1),' s'
 
-WRITE(LU_OUTPUT,'(7X,A,I6,3X,A,I3,A,I4,2X,I2.2,A,I2.2,A,I2.2)')  &
+WRITE(LU_OUTPUT,'(7X,A,I7,3X,A,I3,A,I4,2X,I2.2,A,I2.2,A,I2.2)')  &
     'Time Step ',ICYC,TRIM(MONTH),DATE_TIME(3),', ',DATE_TIME(1), &
     DATE_TIME(5),':',DATE_TIME(6),':',DATE_TIME(7)
 WRITE(LU_OUTPUT,'(7X,A)') '----------------------------------------------'
 
 DO NM=1,NMESHES
-   IF (NMESHES>1) WRITE(LU_OUTPUT,'(6X,A,I2,A,I6)') ' Mesh ',NM,', Cycle ',NTCYC(NM)
+   IF (NMESHES>1) WRITE(LU_OUTPUT,'(6X,A,I2,A,I7)') ' Mesh ',NM,', Cycle ',NTCYC(NM)
    M => MESHES(NM)
    IF (T_ACCUM(NM)<60._EB) WRITE(LU_OUTPUT,110) T_PER_STEP(NM),T_ACCUM(NM)
    IF (T_ACCUM(NM)>=60._EB .AND. T_ACCUM(NM)<3600._EB) WRITE(LU_OUTPUT,112) T_PER_STEP(NM),T_ACCUM(NM)/60._EB
