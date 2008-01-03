@@ -6135,6 +6135,13 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       sscanf(buffer,"%i",&trainer_mode);
       continue;
     }
+#ifdef pp_COMPRESS_AUTOLOADED
+    if(match(buffer,"COMPRESSAUTO",12)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&compress_autoloaded);
+      continue;
+    }
+#endif
     if(match(buffer,"PLOT3DAUTO",10)==1){
       int n3dsmokes=0;
       int i;

@@ -1771,6 +1771,9 @@ void GridSliceMenu(int value){
 /* ------------------ CompressMenu ------------------------ */
 
 void CompressMenu(int value){
+#ifdef pp_COMPRESS_AUTOLOADED
+  if(value==999)return;
+#endif
   switch (value){
   case 1:
     erase_all=1;
@@ -1778,6 +1781,21 @@ void CompressMenu(int value){
     update_overwrite();
     compress_svzip();
     break;
+#ifdef pp_COMPRESS_AUTOLOADED
+  case 2:
+    erase_all=0;
+    overwrite_all=1-overwrite_all;
+    update_overwrite();
+    break;
+  case 3:
+    erase_all=0;
+    compress_svzip();
+    break;
+  case 4:
+    compress_autoloaded=1-compress_autoloaded;
+    update_overwrite();
+    break;
+#else
   case 2:
     erase_all=0;
     overwrite_all=1;
@@ -1790,11 +1808,14 @@ void CompressMenu(int value){
     update_overwrite();
     compress_svzip();
     break;
-    break;
+#endif
   default:
     ASSERT(FFALSE);
     break;
   }
+#ifdef pp_COMPRESS_AUTOLOADED
+  updatemenu=1;
+#endif
 }
 #endif
 
@@ -6307,9 +6328,28 @@ static int textureshowmenu=0;
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice>0)){
     CREATEMENU(compressmenu,CompressMenu);
+#ifdef pp_COMPRESS_AUTOLOADED
+    glutAddMenuEntry("Compression Options",999);  // -c
+    if(overwrite_all==1){
+      glutAddMenuEntry("  *Overwrite compressed files",2);  // -f
+    }
+    else{
+      glutAddMenuEntry("  Overwrite compressed files",2);  // -f
+    }
+    if(compress_autoloaded==1){
+      glutAddMenuEntry("  *Compress only autoloaded files",4);  // -f
+    }
+    else{
+      glutAddMenuEntry("  Compress only autoloaded files",4);  // -f
+    }
+    glutAddMenuEntry("-",999);  // -c
+    glutAddMenuEntry("Compress now",3);
+    glutAddMenuEntry("Erase compressed files",1);  // -c
+#else
     glutAddMenuEntry("Erase compressed boundary/3d smoke files",1);  // -c
     glutAddMenuEntry("Compress boundary/3d smoke files (with overwrite)",2);  // -f
     glutAddMenuEntry("Compress boundary/3d smoke files (no overwrite)",3);
+#endif
   }
 #endif
 
