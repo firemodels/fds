@@ -1,7 +1,6 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
 #ifdef INMAIN
 #define EXTERN
 #else
@@ -42,6 +41,7 @@ typedef struct {
 typedef struct {
   char *file,*filebase;
   int filesize;
+  int seq_id, autozip;
   int doit, done, count;
   int setvalmin, setvalmax;
   float valmin, valmax;
@@ -55,6 +55,7 @@ typedef struct {
   char *file, *filebase;
   flowlabels label;
   int filesize;
+  int seq_id, autozip;
   int dup;
   int version;
   int dataflag;
@@ -67,6 +68,7 @@ typedef struct {
 typedef struct {
   char *file,*filebase;
   int filesize;
+  int seq_id,autozip;
   int doit, done, count;
   int setvalmin, setvalmax;
   float valmin, valmax;
@@ -91,6 +93,7 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  int seq_id, autozip;
   int nx, ny, nz, filesize;
   unsigned char *compressed_lightingbuffer;
   uLongf ncompressed_lighting_zlib;
@@ -103,6 +106,7 @@ typedef struct {
 typedef struct {
   char *file,*filebase;
   int filesize;
+  int seq_id, autozip;
   int setvalmin, setvalmax;
   float valmin, valmax;
   flowlabels label;
@@ -118,6 +122,10 @@ typedef struct {
 } pdfdata;
 
 
+void get_startup_slice(int seq_id);
+void get_startup_iso(int seq_id);
+void get_startup_smoke(int seq_id);
+void get_startup_patch(int seq_id);
 int getrevision(char *svn);
 void getSMZversion(char *SMZversion);
 int getmaxrevision(void);
@@ -197,4 +205,5 @@ EXTERN int endf, syst;
 EXTERN char endianfilebase[1024];
 EXTERN char *endianfile;
 EXTERN spherepoints sphereinfo;
+EXTERN int autozip;
 

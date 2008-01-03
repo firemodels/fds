@@ -26,6 +26,7 @@
 #pragma warning (disable:494)		/* omission of "class"is nonstandard */
 #pragma warning (disable:444)		/* destructor for base class */
 
+#define _CRT_SECURE_NO_WARNINGS
 #endif
 
 
