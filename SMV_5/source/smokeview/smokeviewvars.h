@@ -613,6 +613,9 @@ SVEXTERN char *casefilename;
 SVEXTERN char *zonelonglabels, *zoneshortlabels, *zoneunits;
 SVEXTERN char *smokeviewini;
 SVEXTERN int overwrite_all,erase_all;
+#ifdef pp_COMPRESS_AUTOLOADED
+SVEXTERN int compress_autoloaded;
+#endif
 #ifdef WIN32
 SVEXTERN   char openfilebuffer[1024];
 SVEXTERN   int openfileflag;

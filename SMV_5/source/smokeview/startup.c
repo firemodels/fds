@@ -716,6 +716,10 @@ void InitOpenGL(void){
         if(patchi->loaded==1)fprintf(fileout," %i\n",patchi->seq_id);
      }
    }
+#ifdef pp_COMPRESS_AUTOLOADED
+   fprintf(fileout,"COMPRESSAUTO\n");
+   fprintf(fileout," %i \n",compress_autoloaded);
+#endif
 
  }
 
@@ -1443,6 +1447,9 @@ void initvars1(void){
   nsorted_surfidlist=0;
 
   overwrite_all=0,erase_all=0;
+#ifdef pp_COMPRESS_AUTOLOADED
+  compress_autoloaded=0;
+#endif
   strcpy(ext_png,".png");
   strcpy(ext_jpg,".jpg");
 #ifdef pp_GDGIF
