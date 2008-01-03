@@ -908,10 +908,11 @@ SUBROUTINE VELOCITY_BC(T,NM)
 ! Assert tangential velocity boundary conditions
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
-REAL(EB) :: BC,MUA,T,FVT,UP,UM,VP,VM,WP,WM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,TSI
+REAL(EB) :: BC,MUA,T,FVT,UP,UM,VP,VM,WP,WM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,TSI,WGT
 INTEGER  :: I,J,K,IBC,NOM1,NOM2,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2,NM,IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y
 TYPE (SURFACE_TYPE), POINTER :: SF
+TYPE (OMESH_TYPE), POINTER :: OM
 
 ! Point to the appropriate velocity field
 
@@ -974,12 +975,12 @@ EDGE_LOOP: DO IE=1,N_EDGES
  
    COMPONENT: SELECT CASE(IEC)
  
-      CASE(1) COMPONENT
+      CASE(1) COMPONENT  ! Treat edges that point in the x direction (omega_x, tau_x) 
 
-         ICMM = CELL_INDEX(II,JJ,KK)
-         ICMP = CELL_INDEX(II,JJ,KK+1)
-         ICPM = CELL_INDEX(II,JJ+1,KK)
-         ICPP = CELL_INDEX(II,JJ+1,KK+1)
+         ICMM = CELL_INDEX(II,MAX(1,JJ)     ,MAX(1,KK)     )
+         ICMP = CELL_INDEX(II,MAX(1,JJ)     ,MIN(KBAR,KK+1))
+         ICPM = CELL_INDEX(II,MIN(JBAR,JJ+1),MAX(1,KK)     )
+         ICPP = CELL_INDEX(II,MIN(JBAR,JJ+1),MIN(KBAR,KK+1))
          VP   = VV(II,JJ,KK+1)
          VM   = VV(II,JJ,KK)
          WP   = WW(II,JJ+1,KK)
@@ -1020,12 +1021,16 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ENDIF
 
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
-            IF (NOM1<0) VM = OMESH(ABS(NOM1))%V(IIO1,JJO1,KKO1)
-            IF (NOM1>0) VP = OMESH(ABS(NOM1))%V(IIO1,JJO1,KKO1)
+            OM => OMESH(ABS(NOM1)) 
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
+            IF (NOM1<0) VM = WGT*OM%V(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%V(IIO1,JJO1-1,KKO1) 
+            IF (NOM1>0) VP = WGT*OM%V(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%V(IIO1,JJO1-1,KKO1) 
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
-            IF (NOM2<0) WM = OMESH(ABS(NOM2))%W(IIO2,JJO2,KKO2)
-            IF (NOM2>0) WP = OMESH(ABS(NOM2))%W(IIO2,JJO2,KKO2)
+            OM => OMESH(ABS(NOM2)) 
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
+            IF (NOM2<0) WM = WGT*OM%W(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%W(IIO2,JJO2,KKO2-1)
+            IF (NOM2>0) WP = WGT*OM%W(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%W(IIO2,JJO2,KKO2-1) 
          ENDIF
 
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
@@ -1042,12 +1047,12 @@ EDGE_LOOP: DO IE=1,N_EDGES
             V_Z(II,JJ,KK) = 0.5_EB*(VM+VP)
          ENDIF
  
-      CASE(2) COMPONENT
+      CASE(2) COMPONENT  ! Treat edges that point in the y direction (omega_y, tau_y)
 
-         ICMM = CELL_INDEX(II,JJ,KK)
-         ICMP = CELL_INDEX(II,JJ,KK+1)
-         ICPM = CELL_INDEX(II+1,JJ,KK)
-         ICPP = CELL_INDEX(II+1,JJ,KK+1)
+         ICMM = CELL_INDEX(MAX(1,II)     ,JJ,MAX(1,KK)     )
+         ICMP = CELL_INDEX(MAX(1,II)     ,JJ,MIN(KBAR,KK+1))
+         ICPM = CELL_INDEX(MIN(IBAR,II+1),JJ,MAX(1,KK)     )
+         ICPP = CELL_INDEX(MIN(IBAR,II+1),JJ,MIN(KBAR,KK+1))
          UP   = UU(II,JJ,KK+1)
          UM   = UU(II,JJ,KK)
          WP   = WW(II+1,JJ,KK)
@@ -1088,12 +1093,16 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ENDIF
 
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
-            IF (NOM1<0) UM = OMESH(ABS(NOM1))%U(IIO1,JJO1,KKO1)
-            IF (NOM1>0) UP = OMESH(ABS(NOM1))%U(IIO1,JJO1,KKO1)
+            OM => OMESH(ABS(NOM1)) 
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
+            IF (NOM1<0) UM = WGT*OM%U(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%U(IIO1-1,JJO1,KKO1)
+            IF (NOM1>0) UP = WGT*OM%U(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%U(IIO1-1,JJO1,KKO1)
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
-            IF (NOM2<0) WM = OMESH(ABS(NOM2))%W(IIO2,JJO2,KKO2)
-            IF (NOM2>0) WP = OMESH(ABS(NOM2))%W(IIO2,JJO2,KKO2)
+            OM => OMESH(ABS(NOM2)) 
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
+            IF (NOM2<0) WM = WGT*OM%W(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%W(IIO2,JJO2,KKO2-1) 
+            IF (NOM2>0) WP = WGT*OM%W(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%W(IIO2,JJO2,KKO2-1) 
          ENDIF
 
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
@@ -1110,12 +1119,12 @@ EDGE_LOOP: DO IE=1,N_EDGES
             W_X(II,JJ,KK) = 0.5_EB*(WM+WP) 
          ENDIF
 
-      CASE(3) COMPONENT
+      CASE(3) COMPONENT   ! Treat edges that point in the z direction (omega_z, tau_z)
 
-         ICMM = CELL_INDEX(II,JJ,KK)
-         ICMP = CELL_INDEX(II,JJ+1,KK)
-         ICPM = CELL_INDEX(II+1,JJ,KK)
-         ICPP = CELL_INDEX(II+1,JJ+1,KK)
+         ICMM = CELL_INDEX(MAX(1,II)     ,MAX(1,JJ)     ,KK)
+         ICMP = CELL_INDEX(MAX(1,II)     ,MIN(JBAR,JJ+1),KK)
+         ICPM = CELL_INDEX(MIN(IBAR,II+1),MAX(1,JJ)     ,KK)
+         ICPP = CELL_INDEX(MIN(IBAR,II+1),MIN(JBAR,JJ+1),KK)
          UP   = UU(II,JJ+1,KK)
          UM   = UU(II,JJ,KK)
          VP   = VV(II+1,JJ,KK)
@@ -1156,12 +1165,16 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ENDIF
 
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
-            IF (NOM1<0) UM = OMESH(ABS(NOM1))%U(IIO1,JJO1,KKO1)
-            IF (NOM1>0) UP = OMESH(ABS(NOM1))%U(IIO1,JJO1,KKO1)
+            OM => OMESH(ABS(NOM1)) 
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
+            IF (NOM1<0) UM = WGT*OM%U(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%U(IIO1-1,JJO1,KKO1)
+            IF (NOM1>0) UP = WGT*OM%U(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%U(IIO1-1,JJO1,KKO1)
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
-            IF (NOM2<0) VM = OMESH(ABS(NOM2))%V(IIO2,JJO2,KKO2)
-            IF (NOM2>0) VP = OMESH(ABS(NOM2))%V(IIO2,JJO2,KKO2)
+            OM => OMESH(ABS(NOM2)) 
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
+            IF (NOM2<0) VM = WGT*OM%V(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%V(IIO2,JJO2-1,KKO2) 
+            IF (NOM2>0) VP = WGT*OM%V(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%V(IIO2,JJO2-1,KKO2) 
          ENDIF
 
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
