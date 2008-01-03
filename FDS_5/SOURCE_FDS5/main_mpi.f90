@@ -33,8 +33,7 @@ CHARACTER(255), PARAMETER :: mainmpiid='$Id$'
 CHARACTER(255), PARAMETER :: mainmpirev='$Revision$'
 CHARACTER(255), PARAMETER :: mainmpidate='$Date$'
 LOGICAL  :: EX,DIAGNOSTICS,EXCHANGE_RADIATION=.TRUE.
-INTEGER  :: LO10,NM,IZERO,DATE_TIME(8),NN,REVISION_NUMBER,IOS
-CHARACTER(10) :: BIG_BEN(3)
+INTEGER  :: LO10,NM,IZERO,NN,REVISION_NUMBER,IOS
 CHARACTER(255) :: REVISION_DATE
 REAL(EB) :: T_MAX,T_MIN
 REAL(EB), ALLOCATABLE, DIMENSION(:) ::  T,TC_GLB,TC_LOC,DT_SYNC, DTNEXT_SYNC,DSUM_ALL,PSUM_ALL,USUM_ALL
@@ -57,6 +56,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ARRAY_OF_STATUSES
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ARRAY_OF_STATUSES2
 INTEGER :: N_REQ,N_PREQ
 CHARACTER(MPI_MAX_PROCESSOR_NAME) PNAME
+REAL(EB) :: MPI_WALL_TIME,MPI_WALL_TIME_START
  
 ! Initialize MPI (First executable lines of code)
  
@@ -64,6 +64,7 @@ CALL MPI_INIT(IERR)
 CALL MPI_COMM_RANK(MPI_COMM_WORLD, MYID, IERR)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD, NUMPROCS, IERR)
 CALL MPI_GET_PROCESSOR_NAME(PNAME, PNAMELEN, IERR)
+MPI_WALL_TIME_START = MPI_WTIME()
  
 WRITE(LU_ERR,'(A,I2,A,I2,A,A)') 'Mesh ',MYID+1,' of ', NUMPROCS,' is alive on ',PNAME(1:PNAMELEN)
 
@@ -73,7 +74,7 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date (All Nodes)
 
-WRITE(VERSION_STRING,'(A)') '5.0.3'
+WRITE(VERSION_STRING,'(A)') '5.1.0_beta'
 PARALLEL = .TRUE.
 
 IF (INDEX(mainmpirev,':',BACK=.TRUE.)>0) THEN
@@ -155,7 +156,7 @@ ALLOCATE(PREQ(NMESHES*NMESHES*10))
 PREQ = MPI_REQUEST_NULL
 ALLOCATE(ARRAY_OF_STATUSES(MPI_STATUS_SIZE,NMESHES*NMESHES*10))
 ALLOCATE(ARRAY_OF_STATUSES2(MPI_STATUS_SIZE,NMESHES*NMESHES*10))
-ALLOCATE(TAGS(NMESHES,NMESHES,0:2))
+ALLOCATE(TAGS(NMESHES,NMESHES,0:4))
 TAG = 0
 DO NM=1,NMESHES
    DO NOM=NM,NMESHES
@@ -166,6 +167,8 @@ DO NM=1,NMESHES
 ENDDO
 TAGS(:,:,1) = TAGS(:,:,0) + 1000
 TAGS(:,:,2) = TAGS(:,:,0) + 2000
+TAGS(:,:,3) = TAGS(:,:,0) + 3000
+TAGS(:,:,4) = TAGS(:,:,0) + 4000
  
 ! Initialize global parameters (All Nodes)
  
@@ -282,8 +285,8 @@ MAIN_LOOP: DO
    ICYC  = ICYC + 1 
  
    IF (MOD(ICYC,3)==0 .AND. TIMING) THEN
-      CALL DATE_AND_TIME(BIG_BEN(1),BIG_BEN(2),BIG_BEN(3),DATE_TIME)
-      WRITE(0,'(A,I2,A,I6,A,I2,A,I3.3)')  ' Thread ',MYID+1,' starts iteration',ICYC,' at ', DATE_TIME(7),'.',DATE_TIME(8)
+      MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+      WRITE(0,'(A,I2,A,I6,A,F12.4)')  ' Thread ',MYID+1,' starts iteration',ICYC,' at ', MPI_WALL_TIME
    ENDIF
  
    EXCHANGE_RADIATION = .FALSE.
@@ -390,9 +393,9 @@ MAIN_LOOP: DO
 
    IF (DEBUG) WRITE(0,*) 'Cycle ',ICYC,' Mesh ',MYID+1, ' starting',ACTIVE_MESH(MYID+1)
 
-   IF (MOD(ICYC,3)==0 .AND. TIMING) THEN
-      CALL DATE_AND_TIME(BIG_BEN(1),BIG_BEN(2),BIG_BEN(3),DATE_TIME)
-      IF (ACTIVE_MESH(MYID+1)) WRITE(0,'(A,I2,A,I2,A,I3.3)') ' Thread ',MYID+1,' is active at ', DATE_TIME(7),'.',DATE_TIME(8)
+   IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(MYID+1)) THEN
+      MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+      WRITE(0,'(A,I3,A,F12.4)')  ' Thread ',MYID+1,' is active at ', MPI_WALL_TIME
    ENDIF
  
    ! Begin the PREDICTOR step
@@ -411,25 +414,52 @@ MAIN_LOOP: DO
       IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) CALL MASS_FINITE_DIFFERENCES(NM)
  
    ENDDO COMPUTE_FINITE_DIFFERENCES_1
+
+   ! Estimate quantities at next time step, and decrease/increase time step if necessary based on CFL condition
  
    CHANGE_TIME_STEP_LOOP: DO
+
+      ! Predict density and mass fractions at next time step, and then start the divergence calculation
  
+      COMPUTE_DENSITY_LOOP: DO NM=MYID+1,NMESHES,NUMPROCS
+         IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DENSITY_LOOP
+         IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) CALL DENSITY(NM)
+         CALL POST_RECEIVES(NM,1)
+      ENDDO COMPUTE_DENSITY_LOOP
+
+      ! Exchange density and species mass fractions in interpolated boundaries
+
+      IF (MOD(ICYC,3)==0.AND.TIMING.AND.ACTIVE_MESH(MYID+1)) THEN
+         MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+         WRITE(0,'(A,I3,A,F12.4)')  ' Thread ',MYID+1,' enters Mesh Exchange 1 at ', MPI_WALL_TIME
+      ENDIF
+      CALL MESH_EXCHANGE(1)
+      IF (MOD(ICYC,3)==0.AND.TIMING.AND.ACTIVE_MESH(MYID+1)) THEN
+         MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+         WRITE(0,'(A,I3,A,F12.4)')  ' Thread ',MYID+1,' exits  Mesh Exchange 1 at ', MPI_WALL_TIME
+      ENDIF
+
+      ! Do mass and energy boundary conditions, and begin divergence calculation
+
       COMPUTE_DIVERGENCE_LOOP: DO NM=MYID+1,NMESHES,NUMPROCS
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DIVERGENCE_LOOP
-         IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
-            CALL DENSITY(NM)
-            CALL WALL_BC(T(NM),NM)
-         ENDIF
+         IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) CALL WALL_BC(T(NM),NM)
          CALL DIVERGENCE_PART_1(T(NM),NM)
       ENDDO COMPUTE_DIVERGENCE_LOOP
 
+      ! If there are pressure ZONEs, exchange integrated quantities mesh to mesh for use in the divergence calculation
+
       CALL EXCHANGE_DIVERGENCE_INFO
+
+      ! Finish the divergence calculation and solve for the pressure at the current time step
 
       COMPUTE_PRESSURE_LOOP: DO NM=MYID+1,NMESHES,NUMPROCS
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_PRESSURE_LOOP
          CALL DIVERGENCE_PART_2(NM)
          CALL PRESSURE_SOLVER(NM)
       ENDDO COMPUTE_PRESSURE_LOOP
+
+      ! Experimental pressure correction
 
       IF (PRESSURE_CORRECTION) CALL CORRECT_PRESSURE(1)
  
@@ -440,17 +470,24 @@ MAIN_LOOP: DO
 !        ENDDO PRESSURE_ITERATION_LOOP
 !     ENDIF
  
+      ! Predict the velocity components at the next time step
+
       PREDICT_VELOCITY_LOOP: DO NM=MYID+1,NMESHES,NUMPROCS
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE PREDICT_VELOCITY_LOOP
          CALL VELOCITY_PREDICTOR(T(NM),NM,MESH_STOP_STATUS(NM))
       ENDDO PREDICT_VELOCITY_LOOP
+
+      ! Exchange information about the time step status, and if need be, repeat the CHANGE_TIME_STEP_LOOP
  
       IF (SYNCHRONIZE) THEN
          NM = MYID+1
          CALL MPI_ALLGATHER(CHANGE_TIME_STEP(NM),1,MPI_LOGICAL, CHANGE_TIME_STEP,1,MPI_LOGICAL,MPI_COMM_WORLD,IERR)
          CALL MPI_ALLGATHER(MESH_STOP_STATUS(NM),1,MPI_INTEGER,MESH_STOP_STATUS,1, MPI_INTEGER,MPI_COMM_WORLD,IERR)
          IF (ANY(MESH_STOP_STATUS/=NO_STOP)) THEN
-            IF (ANY(MESH_STOP_STATUS==INSTABILITY_STOP)) GLOBAL_STOP_STATUS = INSTABILITY_STOP
+            IF (ANY(MESH_STOP_STATUS==INSTABILITY_STOP)) THEN
+               GLOBAL_STOP_STATUS = INSTABILITY_STOP
+               DIAGNOSTICS = .TRUE.
+            ENDIF
             EXIT CHANGE_TIME_STEP_LOOP
          ENDIF
          IF (ANY(CHANGE_TIME_STEP)) THEN
@@ -466,6 +503,7 @@ MAIN_LOOP: DO
  
       IF (MESH_STOP_STATUS(MYID+1)/=NO_STOP) THEN
          GLOBAL_STOP_STATUS = MESH_STOP_STATUS(MYID+1)
+         IF (GLOBAL_STOP_STATUS==INSTABILITY_STOP) DIAGNOSTICS = .TRUE.
          EXIT CHANGE_TIME_STEP_LOOP
       ENDIF
  
@@ -475,31 +513,31 @@ MAIN_LOOP: DO
  
    CHANGE_TIME_STEP = .FALSE.
  
-   ! Do the first step in the Runge-Kutta update scheme for sprinklers and detectors
+   ! Set-up "receive" arrays for inter-mesh info exchange, and advance the time to start the CORRECTOR step
  
    UPDATE_TIME: DO NM=MYID+1,NMESHES,NUMPROCS
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE UPDATE_TIME
-      CALL POST_RECEIVES(NM,1)
-      T(NM) = T(NM) + MESHES(NM)%DT  ! Advance the time and start the CORRECTOR part of the time step
+      CALL POST_RECEIVES(NM,2)
+      T(NM) = T(NM) + MESHES(NM)%DT  
    ENDDO UPDATE_TIME
  
-!====================================================================================================================
+   !============================================================================================================================
  
    ! Exchange information among meshes
  
    IF (MOD(ICYC,3)==0.AND.TIMING.AND.ACTIVE_MESH(MYID+1)) THEN
-      CALL DATE_AND_TIME(BIG_BEN(1),BIG_BEN(2),BIG_BEN(3),DATE_TIME)
-      WRITE(0,'(A,I2,A,I2,A,I3.3)')  ' Thread ',MYID+1,' enters Mesh Exchange 1 at ', DATE_TIME(7),'.',DATE_TIME(8)
+      MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+      WRITE(0,'(A,I3,A,F12.4)')  ' Thread ',MYID+1,' enters Mesh Exchange 2 at ', MPI_WALL_TIME
    ENDIF
  
-   CALL MESH_EXCHANGE(1)
+   CALL MESH_EXCHANGE(2)
  
    IF (MOD(ICYC,3)==0.AND.TIMING.AND.ACTIVE_MESH(MYID+1)) THEN
-   CALL DATE_AND_TIME(BIG_BEN(1),BIG_BEN(2),BIG_BEN(3),DATE_TIME)
-   WRITE(0,'(A,I2,A,I2,A,I3.3)')  ' Thread ',MYID+1,' exits  Mesh Exchange 1 at ', DATE_TIME(7),'.',DATE_TIME(8)
+      MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+      WRITE(0,'(A,I3,A,F12.4)')  ' Thread ',MYID+1,' exits  Mesh Exchange 2 at ', MPI_WALL_TIME
    ENDIF
  
-!+=============================================+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   !============================================================================================================================
  
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
@@ -510,7 +548,25 @@ MAIN_LOOP: DO
       IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
          CALL MASS_FINITE_DIFFERENCES(NM)
          CALL DENSITY(NM)
-         ! Do combustion, then apply thermal, species and density boundary conditions and solve for radiation
+      ENDIF
+      CALL POST_RECEIVES(NM,3)   ! Post Receive Arrays
+   ENDDO COMPUTE_FINITE_DIFFERENCES_2
+
+   ! Exchange density and mass species
+
+   IF (MOD(ICYC,3)==0.AND.TIMING.AND.ACTIVE_MESH(MYID+1)) THEN
+      MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+      WRITE(0,'(A,I3,A,F12.4)')  ' Thread ',MYID+1,' enters Mesh Exchange 3 at ', MPI_WALL_TIME
+   ENDIF
+   CALL MESH_EXCHANGE(3)
+   IF (MOD(ICYC,3)==0.AND.TIMING.AND.ACTIVE_MESH(MYID+1)) THEN
+      MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+      WRITE(0,'(A,I3,A,F12.4)')  ' Thread ',MYID+1,' exits  Mesh Exchange 3 at ', MPI_WALL_TIME
+   ENDIF
+
+   COMPUTE_DIVERGENCE_2: DO NM=MYID+1,NMESHES,NUMPROCS
+      IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DIVERGENCE_2
+      IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
          IF (N_REACTIONS > 0) CALL COMBUSTION (NM)
          CALL WALL_BC(T(NM),NM)
          CALL COMPUTE_RADIATION(NM)
@@ -518,15 +574,15 @@ MAIN_LOOP: DO
 !     IF (EVACUATION_ONLY(NM)) CALL EVACUATE_HUMANS(T(NM),NM)
       CALL UPDATE_PARTICLES(T(NM),NM)
       CALL DIVERGENCE_PART_1(T(NM),NM)
-   ENDDO COMPUTE_FINITE_DIFFERENCES_2
+   ENDDO COMPUTE_DIVERGENCE_2
 
    CALL EXCHANGE_DIVERGENCE_INFO
 
-   COMPUTE_FINITE_DIFFERENCES_3: DO NM=MYID+1,NMESHES,NUMPROCS
-      IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_FINITE_DIFFERENCES_3
+   COMPUTE_PRESSURE_2: DO NM=MYID+1,NMESHES,NUMPROCS
+      IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_PRESSURE_2
       CALL DIVERGENCE_PART_2(NM)
       CALL PRESSURE_SOLVER(NM)
-   ENDDO COMPUTE_FINITE_DIFFERENCES_3
+   ENDDO COMPUTE_PRESSURE_2
 
    IF (PRESSURE_CORRECTION) CALL CORRECT_PRESSURE(2)
  
@@ -539,7 +595,7 @@ MAIN_LOOP: DO
  
    CORRECT_VELOCITY_LOOP: DO NM=MYID+1,NMESHES,NUMPROCS
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE CORRECT_VELOCITY_LOOP
-      CALL POST_RECEIVES(NM,2)   ! Post Receive Arrays
+      CALL POST_RECEIVES(NM,4)   ! Post Receive Arrays
       CALL OPEN_AND_CLOSE(T(NM),NM)   ! Doors, windows, etc.
       CALL VELOCITY_CORRECTOR(T(NM),NM)
       CALL UPDATE_OUTPUTS(T(NM),NM)
@@ -547,22 +603,23 @@ MAIN_LOOP: DO
       IF (DIAGNOSTICS) CALL CHECK_DIVERGENCE(NM)
    ENDDO CORRECT_VELOCITY_LOOP
  
-   !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  
    ! Exchange information among meshes
  
    IF (MOD(ICYC,3)==0.AND.TIMING.AND.ACTIVE_MESH(MYID+1)) THEN
-      CALL DATE_AND_TIME(BIG_BEN(1),BIG_BEN(2),BIG_BEN(3),DATE_TIME)
-      WRITE(0,'(A,I2,A,I2,A,I3.3)')  ' Thread ',MYID+1,' enters Mesh Exchange 2 at ', DATE_TIME(7),'.',DATE_TIME(8)
+      MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+      WRITE(0,'(A,I3,A,F12.4)')  ' Thread ',MYID+1,' enters Mesh Exchange 4 at ', MPI_WALL_TIME
    ENDIF
  
-   CALL MESH_EXCHANGE(2)
+   CALL MESH_EXCHANGE(4)
+
    IF (MOD(ICYC,3)==0.AND.TIMING.AND.ACTIVE_MESH(MYID+1)) THEN
-      CALL DATE_AND_TIME(BIG_BEN(1),BIG_BEN(2),BIG_BEN(3),DATE_TIME)
-      WRITE(0,'(A,I2,A,I2,A,I3.3)')  ' Thread ',MYID+1,' exits  Mesh Exchange 2 at ', DATE_TIME(7),'.',DATE_TIME(8)
+      MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+      WRITE(0,'(A,I3,A,F12.4)')  ' Thread ',MYID+1,' exits  Mesh Exchange 4 at ', MPI_WALL_TIME
    ENDIF
  
-   !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  
    ! Write character strings out to the .smv file
  
@@ -595,15 +652,15 @@ MAIN_LOOP: DO
    ENDIF
 
    IF (MOD(ICYC,3) ==0 .AND. TIMING) THEN
-      CALL DATE_AND_TIME(BIG_BEN(1),BIG_BEN(2),BIG_BEN(3),DATE_TIME)
-      WRITE(0,'(A,I2,A,I6,A,I2,A,I3.3)')  ' Thread ',MYID+1,' ends iteration',ICYC,' at ', DATE_TIME(7),'.',DATE_TIME(8)
+      MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+      WRITE(0,'(A,I3,A,I6,A,F12.4)')  ' Thread ',MYID+1,' ends Iteration ',ICYC,' at ', MPI_WALL_TIME
    ENDIF
  
 ENDDO MAIN_LOOP
  
-!****************************************************************************************************************************
-!                                                   END OF TIME STEPPING LOOP
-!****************************************************************************************************************************
+!***********************************************************************************************************************************
+!                                                     END OF TIME STEPPING LOOP
+!***********************************************************************************************************************************
  
 TUSED(1,MYID+1) = SECOND() - TUSED(1,MYID+1)
 CALL MPI_GATHER(TUSED(1,MYID+1),N_TIMERS,MPI_DOUBLE_PRECISION, TUSED,N_TIMERS,MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,IERR)
@@ -673,20 +730,19 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
          CASE( 1) 
             IMIN=MAX(IMIN,M%IJKW(10,IW)-1)
          CASE(-1) 
-            IMAX=MIN(IMAX,M%IJKW(10,IW))
+            IMAX=MIN(IMAX,M%IJKW(13,IW))
          CASE( 2) 
             JMIN=MAX(JMIN,M%IJKW(11,IW)-1)
          CASE(-2) 
-            JMAX=MIN(JMAX,M%IJKW(11,IW))
+            JMAX=MIN(JMAX,M%IJKW(14,IW))
          CASE( 3) 
             KMIN=MAX(KMIN,M%IJKW(12,IW)-1)
          CASE(-3) 
-            KMAX=MIN(KMAX,M%IJKW(12,IW))
+            KMAX=MIN(KMAX,M%IJKW(15,IW))
       END SELECT
    ENDDO SEARCH_LOOP
  
-   IF ( M2%XS>=M%XS .AND. M2%XF<=M%XF .AND. M2%YS>=M%YS .AND. M2%YF<=M%YF .AND. &
-      M2%ZS>=M%ZS .AND. M2%ZF<=M%ZF ) FOUND = .TRUE.
+   IF ( M2%XS>=M%XS .AND. M2%XF<=M%XF .AND. M2%YS>=M%YS .AND. M2%YF<=M%YF .AND. M2%ZS>=M%ZS .AND. M2%ZF<=M%ZF ) FOUND = .TRUE.
  
    IF (.NOT.FOUND) CYCLE OTHER_MESH_LOOP
  
@@ -697,8 +753,10 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    K_MIN(NOM,NM) = KMIN
    K_MAX(NOM,NM) = KMAX
  
-   ALLOCATE(M%OMESH(NOM)% TMP(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
-   M%OMESH(NOM)%TMP = TMPA
+   ALLOCATE(M%OMESH(NOM)% RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
+   M%OMESH(NOM)%RHO = RHOA
+   ALLOCATE(M%OMESH(NOM)%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
+   M%OMESH(NOM)%RHOS = RHOA
    ALLOCATE(M%OMESH(NOM)%   H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    M%OMESH(NOM)%H = 0.
    ALLOCATE(M%OMESH(NOM)%   U(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
@@ -722,7 +780,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
    ! Wall arrays
  
-   ALLOCATE(M%OMESH(NOM)%IJKW(12,M2%NEWC))
+   ALLOCATE(M%OMESH(NOM)%IJKW(15,M2%NEWC))
    ALLOCATE(M%OMESH(NOM)%BOUNDARY_TYPE(0:M2%NEWC))
    ALLOCATE(M%OMESH(NOM)%WALL(0:M2%NEWC))
  
@@ -757,7 +815,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
    IF (NIC(NM,NOM)==0 .AND. NIC(NOM,NM)>0) THEN
       M2=>MESHES(NOM)
-      ALLOCATE(M%OMESH(NOM)%IJKW(12,M2%NEWC))
+      ALLOCATE(M%OMESH(NOM)%IJKW(15,M2%NEWC))
       ALLOCATE(M%OMESH(NOM)%BOUNDARY_TYPE(0:M2%NEWC))
       ALLOCATE(M%OMESH(NOM)%WALL(0:M2%NEWC))
    ENDIF
@@ -795,64 +853,85 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    INITIALIZATION_IF: IF (CODE==0) THEN
  
       IF (NIC(NM,NOM)>0) THEN
-         ALLOCATE(M3%RPKG1(NIC(NM,NOM)*(3+N_SPECIES)+1))
-         ALLOCATE(M3%RPKG2(NIC(NM,NOM)*(9+N_SPECIES)+1))
-         IF (PRESSURE_CORRECTION) ALLOCATE(M3%RPKG3(NIC(NM,NOM)*(6      )+1))
-         ALLOCATE(M3%WRPKG((NRA*NSB+1)*NIC(NM,NOM)+1))
+         ALLOCATE(M3%REAL_RECV_PKG1(MAX(NIC(NM,NOM),NIC(NOM,NM))*(2+N_SPECIES)+1))
+         ALLOCATE(M3%REAL_RECV_PKG2(MAX(NIC(NM,NOM),NIC(NOM,NM))*(2          )+1))
+         ALLOCATE(M3%REAL_RECV_PKG3(MAX(NIC(NM,NOM),NIC(NOM,NM))*(2+N_SPECIES)+1))
+         ALLOCATE(M3%REAL_RECV_PKG4(MAX(NIC(NM,NOM),NIC(NOM,NM))*(8          )+1))
+         ALLOCATE(M3%REAL_RECV_PKG5((NRA*NSB+1)*NIC(NM,NOM)+1))
+         ALLOCATE(M3%REAL_RECV_PKG7(MAX(NIC(NM,NOM),NIC(NOM,NM))*(6          )+1))
       ENDIF
  
       N_REQ = N_REQ+1
-      CALL MPI_IRECV(M3%IJKW(1,1),12*M4%NEWC, MPI_INTEGER,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+      CALL MPI_IRECV(M3%IJKW(1,1),15*M4%NEWC,MPI_INTEGER,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
  
       IF (NIC(NM,NOM)>0 .OR. NIC(NOM,NM)>0) THEN
-         ALLOCATE(M3%R_RDBUF(13*N_DROP_ADOPT_MAX))
-         ALLOCATE(M3%R_IDBUF( 2*N_DROP_ADOPT_MAX))
-         ALLOCATE(M3%R_LDBUF(   N_DROP_ADOPT_MAX))
+         ALLOCATE(M3%REAL_RECV_PKG6(13*N_DROP_ADOPT_MAX))
+         ALLOCATE(M3%INTG_RECV_PKG1( 2*N_DROP_ADOPT_MAX))
+         ALLOCATE(M3%LOGI_RECV_PKG1( 2*N_DROP_ADOPT_MAX))
       ENDIF
  
    ENDIF INITIALIZATION_IF
+
+   ! First posting for density and mass fraction
  
-   PREDICTOR: IF (CODE==1 .AND. NIC(NM,NOM)>0) THEN
+   IF (CODE==1 .AND. NIC(NM,NOM)>0) THEN
       N_REQ = N_REQ+1
-      CALL MPI_IRECV(M3%RPKG1(1),NIC(NM,NOM)*(3+N_SPECIES)+1, MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
-   ENDIF PREDICTOR
- 
-   CORRECTOR: IF (CODE==0 .OR. CODE==2) THEN
- 
+      CALL MPI_IRECV(M3%REAL_RECV_PKG1(1),SIZE(M3%REAL_RECV_PKG1),MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+   ENDIF
+
+   ! First posting for pressure
+
+   IF (CODE==2 .AND. NIC(NM,NOM)>0) THEN
       N_REQ = N_REQ+1
-      CALL MPI_IRECV(M3%BOUNDARY_TYPE(0),M4%NEWC+1, MPI_INTEGER,RNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
+      CALL MPI_IRECV(M3%REAL_RECV_PKG2(1),SIZE(M3%REAL_RECV_PKG2),MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+   ENDIF
+
+   ! Second posting for density and mass fraction
  
-      IF (CODE==2 .AND. NIC(NM,NOM)>0) THEN
-         N_REQ=N_REQ+1
-         CALL MPI_IRECV(M3%RPKG2(1),NIC(NM,NOM)*(9+N_SPECIES)+1, MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
-      ENDIF
-      IF (EXCHANGE_RADIATION .AND. NIC(NM,NOM)>0 .AND. CODE==2) THEN
-         IWW = NIC(NM,NOM)
-         N_REQ=N_REQ+1
-         CALL MPI_IRECV(M3%WRPKG(1),(NRA*NSB+1)*IWW+1, MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
-      ENDIF
- 
-   ENDIF CORRECTOR
- 
-   ! Droplet Orphan Numbers
- 
-   IF (DROPLET_FILE .AND.  (NIC(NM,NOM)>0 .OR. NIC(NOM,NM)>0)) THEN
+   IF (CODE==3 .AND. NIC(NM,NOM)>0) THEN
       N_REQ=N_REQ+1
-      CALL MPI_IRECV(M3%N_DROP_ADOPT, 1,MPI_INTEGER,RNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
+      CALL MPI_IRECV(M3%REAL_RECV_PKG3(1),SIZE(M3%REAL_RECV_PKG3),MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+   ENDIF
+
+   ! BOUNDARY_TYPE
+
+   IF (CODE==0 .OR. CODE==4) THEN
+      N_REQ = N_REQ+1
+      CALL MPI_IRECV(M3%BOUNDARY_TYPE(0),M4%NEWC+1,MPI_INTEGER,RNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
+   ENDIF
+
+   ! Second posting for pressure and only posting for velocities
+
+   IF (CODE==4 .AND. NIC(NM,NOM)>0) THEN
+      N_REQ=N_REQ+1
+      CALL MPI_IRECV(M3%REAL_RECV_PKG4(1),SIZE(M3%REAL_RECV_PKG4),MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+   ENDIF
+
+   ! Radiation
+
+   IF (CODE==4 .AND. EXCHANGE_RADIATION .AND. NIC(NM,NOM)>0) THEN
+      IWW = NIC(NM,NOM)
+      N_REQ=N_REQ+1
+      CALL MPI_IRECV(M3%REAL_RECV_PKG5(1),(NRA*NSB+1)*IWW+1,MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
    ENDIF
  
-   ! Droplet Buffer Arrays
+   ! Droplets
+ 
+   IF (CODE==4 .AND. DROPLET_FILE .AND. (NIC(NM,NOM)>0 .OR. NIC(NOM,NM)>0)) THEN
 
-   IF (DROPLET_FILE .AND. (NIC(NM,NOM)>0 .OR. NIC(NOM,NM)>0)) THEN
+      N_REQ=N_REQ+1
+      CALL MPI_IRECV(M3%N_DROP_ADOPT,1,MPI_INTEGER,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+ 
       BUFFER_SIZE=13*N_DROP_ADOPT_MAX
       N_REQ=N_REQ+1
-      CALL MPI_IRECV(M3%R_RDBUF(1),BUFFER_SIZE, MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
+      CALL MPI_IRECV(M3%REAL_RECV_PKG6(1),BUFFER_SIZE,MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
       BUFFER_SIZE=2*N_DROP_ADOPT_MAX
       N_REQ=N_REQ+1
-      CALL MPI_IRECV(M3%R_IDBUF(1),BUFFER_SIZE, MPI_INTEGER,RNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
-      BUFFER_SIZE=N_DROP_ADOPT_MAX
+      CALL MPI_IRECV(M3%INTG_RECV_PKG1(1),BUFFER_SIZE,MPI_INTEGER,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+      BUFFER_SIZE=2*N_DROP_ADOPT_MAX
       N_REQ=N_REQ+1
-      CALL MPI_IRECV(M3%R_LDBUF(1),BUFFER_SIZE, MPI_LOGICAL,RNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
+      CALL MPI_IRECV(M3%LOGI_RECV_PKG1(1),BUFFER_SIZE,MPI_LOGICAL,RNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+
    ENDIF
  
 ENDDO OTHER_MESH_LOOP
@@ -873,9 +952,9 @@ INTEGER :: NN1,NN2
  
 TNOW = SECOND()
  
-! Send Information to other meshes
- 
 NM = MYID+1
+
+! Information about Mesh NM is packed into SEND packages and shipped out to the other meshes (machines) via MPI
  
 SEND_OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
@@ -897,155 +976,211 @@ SEND_OTHER_MESH_LOOP: DO NOM=1,NMESHES
    RNODE = NM-1
  
    TAG = TAGS(NM,NOM,CODE)
+
+   ! Initial information exchange
  
    INITIALIZE_SEND_IF: IF (CODE==0) THEN
  
       IF (NIC(NOM,NM)>0) THEN
-         ALLOCATE(M3%SPKG1(NIC(NOM,NM)*(3+N_SPECIES)+1))
-         ALLOCATE(M3%SPKG2(NIC(NOM,NM)*(9+N_SPECIES)+1))
-         ALLOCATE(M3%SPKG3(NIC(NOM,NM)*(6      )+1))
+         ALLOCATE(M3%REAL_SEND_PKG1(MAX(NIC(NOM,NM),NIC(NM,NOM))*(2+N_SPECIES)+1))
+         ALLOCATE(M3%REAL_SEND_PKG2(MAX(NIC(NOM,NM),NIC(NM,NOM))*(2          )+1))
+         ALLOCATE(M3%REAL_SEND_PKG3(MAX(NIC(NOM,NM),NIC(NM,NOM))*(2+N_SPECIES)+1))
+         ALLOCATE(M3%REAL_SEND_PKG4(MAX(NIC(NOM,NM),NIC(NM,NOM))*(8          )+1))
+         ALLOCATE(M3%REAL_SEND_PKG5((NRA*NSB+1)*NIC(NOM,NM)+1))
+         ALLOCATE(M3%REAL_SEND_PKG7(MAX(NIC(NOM,NM),NIC(NM,NOM))*(6          )+1))
       ENDIF
  
       N_REQ=N_REQ+1
-      CALL MPI_ISEND(M%IJKW(1,1),12*M%NEWC, MPI_INTEGER,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
- 
-      IF (NIC(NOM,NM)>0)  ALLOCATE(M3%WSPKG((NRA*NSB+1)*NIC(NOM,NM)+1))
+      CALL MPI_ISEND(M%IJKW(1,1),15*M%NEWC, MPI_INTEGER,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
  
       IF (DROPLET_FILE .AND.  (NIC(NOM,NM)>0 .OR. NIC(NM,NOM)>0)) THEN
-         ALLOCATE(M3%S_RDBUF(13*N_DROP_ADOPT_MAX))
-         ALLOCATE(M3%S_IDBUF( 2*N_DROP_ADOPT_MAX))
-         ALLOCATE(M3%S_LDBUF(   N_DROP_ADOPT_MAX))
+         ALLOCATE(M3%REAL_SEND_PKG6(13*N_DROP_ADOPT_MAX))
+         ALLOCATE(M3%INTG_SEND_PKG1( 2*N_DROP_ADOPT_MAX))
+         ALLOCATE(M3%LOGI_SEND_PKG1( 2*N_DROP_ADOPT_MAX))
       ENDIF
  
    ENDIF INITIALIZE_SEND_IF
+
+   ! Exchange of density and species mass fractions following the PREDICTOR update
  
-   SEND_PREDICTOR_IF: IF (CODE==1) THEN
- 
-      IF (NIC(NOM,NM)>0) THEN
-         LL = 0
-         IWW = 0
-         PACK_SPKG1: DO IW=1,M4%NEWC
-            IF (M3%IJKW(9,IW)/=NM .OR. M3%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE PACK_SPKG1
-            IWW = IWW + 1
-            II = M3%IJKW(10,IW)
-            JJ = M3%IJKW(11,IW)
-            KK = M3%IJKW(12,IW)
-            M3%SPKG1(LL+1) = REAL(IW,EB)
-            M3%SPKG1(LL+2) = M%TMP(II,JJ,KK)
-            M3%SPKG1(LL+3) = M%H(II,JJ,KK)
-            IF (N_SPECIES>0) M3%SPKG1(LL+4:LL+3+N_SPECIES) = M%YYS(II,JJ,KK,1:N_SPECIES)
-            LL = LL+3+N_SPECIES
-         ENDDO PACK_SPKG1
-         M3%SPKG1(IWW*(3+N_SPECIES)+1) = -999.0_EB
-         N_REQ=N_REQ+1
-         CALL MPI_ISEND(M3%SPKG1(1),IWW*(3+N_SPECIES)+1, MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
-      ENDIF
- 
-   ENDIF SEND_PREDICTOR_IF
- 
-   SEND_CORRECTOR_IF: IF (CODE==0 .OR. CODE==2) THEN
- 
-      N_REQ=N_REQ+1
-      CALL MPI_ISEND(M%BOUNDARY_TYPE(0),M%NEWC+1, MPI_INTEGER,SNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
- 
-      IF (CODE==2 .AND. NIC(NOM,NM)>0) THEN
-         LL = 0
-         IWW = 0
-         PACK_SPKG2: DO IW=1,M4%NEWC
-            IF (M3%IJKW(9,IW)/=NM .OR. M3%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE PACK_SPKG2
-            IWW = IWW + 1
-            II = M3%IJKW(10,IW)
-            JJ = M3%IJKW(11,IW)
-            KK = M3%IJKW(12,IW)
-            M3%SPKG2(LL+1) = REAL(IW,EB)
-            M3%SPKG2(LL+2) = M%TMP(II,JJ,KK)
-            M3%SPKG2(LL+3) = M%H(II,JJ,KK)
-            M3%SPKG2(LL+4) = M%U(II,JJ,KK)
-            M3%SPKG2(LL+5) = M%V(II,JJ,KK)
-            M3%SPKG2(LL+6) = M%W(II,JJ,KK)
-            M3%SPKG2(LL+7) = M%U(II-1,JJ,KK)
-            M3%SPKG2(LL+8) = M%V(II,JJ-1,KK)
-            M3%SPKG2(LL+9) = M%W(II,JJ,KK-1)
-            IF (N_SPECIES>0) M3%SPKG2(LL+10:LL+9+N_SPECIES) = M%YY(II,JJ,KK,1:N_SPECIES)
-            LL = LL+9+N_SPECIES
-         ENDDO PACK_SPKG2
-         M3%SPKG2(IWW*(9+N_SPECIES)+1) = -999.0_EB
-         N_REQ=N_REQ+1
-         CALL MPI_ISEND(M3%SPKG2(1),IWW*(9+N_SPECIES)+1, MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
-      ENDIF
- 
-      SEND_RADIATION: IF ( NIC(NOM,NM)>0 .AND. EXCHANGE_RADIATION .AND. CODE==2) THEN
-         IWW=0
-         LL =0
-         PACK_WSPKG: DO IW=1,M4%NEWC
-            IF (M3%IJKW(9,IW)/=NM .OR. M3%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE PACK_WSPKG
-            IWW = IWW+1
-            LL  = LL +1
-            M3%WSPKG(LL) = REAL(IW,EB)
-            DO NN2=1,NSB
-               DO NN1=1,NRA
-                  LL = LL + 1
-                  M3%WSPKG(LL) = M3%WALL(IW)%ILW(NN1,NN2)
+   IF (CODE==1 .AND. NIC(NOM,NM)>0) THEN
+      LL = 0
+      IWW = 0
+      PACK_REAL_SEND_PKG1: DO IW=1,M4%NEWC
+         IF (M3%IJKW(9,IW)/=NM .OR. M3%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE PACK_REAL_SEND_PKG1
+         DO KK=M3%IJKW(12,IW),M3%IJKW(15,IW)
+            DO JJ=M3%IJKW(11,IW),M3%IJKW(14,IW)
+               DO II=M3%IJKW(10,IW),M3%IJKW(13,IW)
+                  IWW = IWW + 1
+                  M3%REAL_SEND_PKG1(LL+1) = REAL(IW,EB)
+                  M3%REAL_SEND_PKG1(LL+2) = M%RHOS(II,JJ,KK)
+                  IF (N_SPECIES>0) M3%REAL_SEND_PKG1(LL+3:LL+2+N_SPECIES) = M%YYS(II,JJ,KK,1:N_SPECIES)
+                  LL = LL+2+N_SPECIES
                ENDDO
             ENDDO
-         ENDDO PACK_WSPKG
-         M3%WSPKG(LL+1) = -999.0_EB
-         N_REQ=N_REQ+1
-         CALL MPI_ISEND(M3%WSPKG(1),(NRA*NSB+1)*IWW+1, MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
-      ENDIF SEND_RADIATION
- 
-   ENDIF SEND_CORRECTOR_IF
- 
-   ! Get Number of Droplet Orphans
- 
-   IF (DROPLET_FILE) THEN
+         ENDDO
+      ENDDO PACK_REAL_SEND_PKG1
+      M3%REAL_SEND_PKG1(IWW*(2+N_SPECIES)+1) = -999.0_EB
       N_REQ=N_REQ+1
-      CALL MPI_ISEND(M3%N_DROP_ORPHANS, 1,MPI_INTEGER,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+      CALL MPI_ISEND(M3%REAL_SEND_PKG1(1),IWW*(2+N_SPECIES)+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+   ENDIF
+
+   ! Send pressure information at the end of the PREDICTOR stage of the time step
+ 
+   IF (CODE==2 .AND. NIC(NOM,NM)>0) THEN
+      LL = 0
+      IWW = 0
+      PACK_REAL_SEND_PKG2: DO IW=1,M4%NEWC
+         IF (M3%IJKW(9,IW)/=NM .OR. M3%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE PACK_REAL_SEND_PKG2
+         DO KK=M3%IJKW(12,IW),M3%IJKW(15,IW)
+            DO JJ=M3%IJKW(11,IW),M3%IJKW(14,IW)
+               DO II=M3%IJKW(10,IW),M3%IJKW(13,IW)
+                  IWW = IWW + 1
+                  M3%REAL_SEND_PKG2(LL+1) = REAL(IW,EB)
+                  M3%REAL_SEND_PKG2(LL+2) = M%H(II,JJ,KK)
+                  LL = LL+2
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO PACK_REAL_SEND_PKG2
+      M3%REAL_SEND_PKG2(IWW*2+1) = -999.0_EB
+      N_REQ=N_REQ+1
+      CALL MPI_ISEND(M3%REAL_SEND_PKG2(1),IWW*2+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+   ENDIF
+
+   ! Exchange density and mass fraction following CORRECTOR update
+ 
+   IF (CODE==3 .AND. NIC(NOM,NM)>0) THEN
+      LL = 0
+      IWW = 0
+      PACK_REAL_SEND_PKG3: DO IW=1,M4%NEWC
+         IF (M3%IJKW(9,IW)/=NM .OR. M3%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE PACK_REAL_SEND_PKG3
+         DO KK=M3%IJKW(12,IW),M3%IJKW(15,IW)
+            DO JJ=M3%IJKW(11,IW),M3%IJKW(14,IW)
+               DO II=M3%IJKW(10,IW),M3%IJKW(13,IW)
+                  IWW = IWW + 1
+                  M3%REAL_SEND_PKG3(LL+1) = REAL(IW,EB)
+                  M3%REAL_SEND_PKG3(LL+2) = M%RHO(II,JJ,KK)
+                  IF (N_SPECIES>0) M3%REAL_SEND_PKG3(LL+3:LL+2+N_SPECIES) = M%YY(II,JJ,KK,1:N_SPECIES)
+                  LL = LL+2+N_SPECIES
+               ENDDO
+             ENDDO
+          ENDDO
+      ENDDO PACK_REAL_SEND_PKG3
+      M3%REAL_SEND_PKG3(IWW*(2+N_SPECIES)+1) = -999.0_EB
+      N_REQ=N_REQ+1
+      CALL MPI_ISEND(M3%REAL_SEND_PKG3(1),IWW*(2+N_SPECIES)+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+   ENDIF
+
+   ! Exchange BOUNDARY_TYPE following the CORRECTOR stage of the time step
+
+   IF (CODE==0 .OR. CODE==4) THEN
+      N_REQ=N_REQ+1
+      CALL MPI_ISEND(M%BOUNDARY_TYPE(0),M%NEWC+1,MPI_INTEGER,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+   ENDIF
+
+   ! Exchange pressure and velocities following CORRECTOR stage of time step
+ 
+   IF (CODE==4 .AND. NIC(NOM,NM)>0) THEN
+      LL = 0
+      IWW = 0
+      PACK_REAL_SEND_PKG4: DO IW=1,M4%NEWC
+         IF (M3%IJKW(9,IW)/=NM .OR. M3%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE PACK_REAL_SEND_PKG4
+         DO KK=M3%IJKW(12,IW),M3%IJKW(15,IW)
+            DO JJ=M3%IJKW(11,IW),M3%IJKW(14,IW)
+               DO II=M3%IJKW(10,IW),M3%IJKW(13,IW)
+                  IWW = IWW + 1
+                  M3%REAL_SEND_PKG4(LL+1) = REAL(IW,EB)
+                  M3%REAL_SEND_PKG4(LL+2) = M%H(II,JJ,KK)
+                  M3%REAL_SEND_PKG4(LL+3) = M%U(II,JJ,KK)
+                  M3%REAL_SEND_PKG4(LL+4) = M%V(II,JJ,KK)
+                  M3%REAL_SEND_PKG4(LL+5) = M%W(II,JJ,KK)
+                  M3%REAL_SEND_PKG4(LL+6) = M%U(II-1,JJ,KK)
+                  M3%REAL_SEND_PKG4(LL+7) = M%V(II,JJ-1,KK)
+                  M3%REAL_SEND_PKG4(LL+8) = M%W(II,JJ,KK-1)
+                  LL = LL+8
+               ENDDO
+             ENDDO
+          ENDDO
+      ENDDO PACK_REAL_SEND_PKG4
+      M3%REAL_SEND_PKG4(IWW*8+1) = -999.0_EB
+      N_REQ=N_REQ+1
+      CALL MPI_ISEND(M3%REAL_SEND_PKG4(1),IWW*8+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+   ENDIF
+
+   ! Send out radiation info
+
+   SEND_RADIATION: IF ( CODE==4 .AND. NIC(NOM,NM)>0 .AND. EXCHANGE_RADIATION) THEN
+      IWW=0
+      LL =0
+      PACK_REAL_SEND_PKG5: DO IW=1,M4%NEWC
+         IF (M3%IJKW(9,IW)/=NM .OR. M3%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE PACK_REAL_SEND_PKG5
+         IWW = IWW+1
+         LL  = LL +1
+         M3%REAL_SEND_PKG5(LL) = REAL(IW,EB)
+         DO NN2=1,NSB
+            DO NN1=1,NRA
+               LL = LL + 1
+               M3%REAL_SEND_PKG5(LL) = M3%WALL(IW)%ILW(NN1,NN2)
+            ENDDO
+         ENDDO
+      ENDDO PACK_REAL_SEND_PKG5
+      M3%REAL_SEND_PKG5(LL+1) = -999.0_EB
+      N_REQ=N_REQ+1
+      CALL MPI_ISEND(M3%REAL_SEND_PKG5(1),(NRA*NSB+1)*IWW+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+   ENDIF SEND_RADIATION
+ 
+   ! Get Number of Droplet Orphans (droplets that have left other meshes and are waiting to be picked up)
+ 
+   IF (CODE==4 .AND. DROPLET_FILE) THEN
+      N_REQ=N_REQ+1
+      CALL MPI_ISEND(M3%N_DROP_ORPHANS,1,MPI_INTEGER,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
    ENDIF
  
    ! Sending/Receiving Droplet Buffer Arrays
  
-   IF_SEND_DROPLETS: IF (DROPLET_FILE) THEN 
+   IF_SEND_DROPLETS: IF (CODE==4 .AND. DROPLET_FILE) THEN 
  
       NC = 13
       DO N=1,MIN(M3%N_DROP_ORPHANS,N_DROP_ADOPT_MAX)
-         M3%S_RDBUF((N-1)*NC+1)  = M3%DROPLET(N)%X
-         M3%S_RDBUF((N-1)*NC+2)  = M3%DROPLET(N)%Y
-         M3%S_RDBUF((N-1)*NC+3)  = M3%DROPLET(N)%Z
-         M3%S_RDBUF((N-1)*NC+4)  = M3%DROPLET(N)%TMP
-         M3%S_RDBUF((N-1)*NC+5)  = M3%DROPLET(N)%U
-         M3%S_RDBUF((N-1)*NC+6)  = M3%DROPLET(N)%V
-         M3%S_RDBUF((N-1)*NC+7)  = M3%DROPLET(N)%W
-         M3%S_RDBUF((N-1)*NC+8)  = M3%DROPLET(N)%R
-         M3%S_RDBUF((N-1)*NC+9)  = M3%DROPLET(N)%PWT
-         M3%S_RDBUF((N-1)*NC+10) = M3%DROPLET(N)%A_X
-         M3%S_RDBUF((N-1)*NC+11) = M3%DROPLET(N)%A_Y
-         M3%S_RDBUF((N-1)*NC+12) = M3%DROPLET(N)%A_Z
-         M3%S_RDBUF((N-1)*NC+13) = M3%DROPLET(N)%T
+         M3%REAL_SEND_PKG6((N-1)*NC+1)  = M3%DROPLET(N)%X
+         M3%REAL_SEND_PKG6((N-1)*NC+2)  = M3%DROPLET(N)%Y
+         M3%REAL_SEND_PKG6((N-1)*NC+3)  = M3%DROPLET(N)%Z
+         M3%REAL_SEND_PKG6((N-1)*NC+4)  = M3%DROPLET(N)%TMP
+         M3%REAL_SEND_PKG6((N-1)*NC+5)  = M3%DROPLET(N)%U
+         M3%REAL_SEND_PKG6((N-1)*NC+6)  = M3%DROPLET(N)%V
+         M3%REAL_SEND_PKG6((N-1)*NC+7)  = M3%DROPLET(N)%W
+         M3%REAL_SEND_PKG6((N-1)*NC+8)  = M3%DROPLET(N)%R
+         M3%REAL_SEND_PKG6((N-1)*NC+9)  = M3%DROPLET(N)%PWT
+         M3%REAL_SEND_PKG6((N-1)*NC+10) = M3%DROPLET(N)%A_X
+         M3%REAL_SEND_PKG6((N-1)*NC+11) = M3%DROPLET(N)%A_Y
+         M3%REAL_SEND_PKG6((N-1)*NC+12) = M3%DROPLET(N)%A_Z
+         M3%REAL_SEND_PKG6((N-1)*NC+13) = M3%DROPLET(N)%T
       ENDDO
       BUFFER_SIZE = NC*MIN(M3%N_DROP_ORPHANS,N_DROP_ADOPT_MAX)
       BUFFER_SIZE = MAX(1,BUFFER_SIZE)
       N_REQ=N_REQ+1
-      CALL MPI_ISEND(M3%S_RDBUF(1),BUFFER_SIZE, MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD, REQ(N_REQ),IERR)
+      CALL MPI_ISEND(M3%REAL_SEND_PKG6(1),BUFFER_SIZE,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
  
       NC = 2
       DO N=1,MIN(M3%N_DROP_ORPHANS,N_DROP_ADOPT_MAX)
-         M3%S_IDBUF((N-1)*NC+1) = M3%DROPLET(N)%IOR
-         M3%S_IDBUF((N-1)*NC+2) = M3%DROPLET(N)%CLASS
+         M3%INTG_SEND_PKG1((N-1)*NC+1) = M3%DROPLET(N)%IOR
+         M3%INTG_SEND_PKG1((N-1)*NC+2) = M3%DROPLET(N)%CLASS
       ENDDO
       BUFFER_SIZE = NC*MIN(M3%N_DROP_ORPHANS,N_DROP_ADOPT_MAX)
       BUFFER_SIZE = MAX(1,BUFFER_SIZE)
       N_REQ=N_REQ+1
-      CALL MPI_ISEND(M3%S_IDBUF(1),BUFFER_SIZE, MPI_INTEGER,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+      CALL MPI_ISEND(M3%INTG_SEND_PKG1(1),BUFFER_SIZE,MPI_INTEGER,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
  
-      NC = 1
+      NC = 2
       DO N=1,MIN(M3%N_DROP_ORPHANS,N_DROP_ADOPT_MAX)
-         M3%S_LDBUF((N-1)*NC+1) = M3%DROPLET(N)%SHOW
+         M3%LOGI_SEND_PKG1((N-1)*NC+1) = M3%DROPLET(N)%SHOW
+         M3%LOGI_SEND_PKG1((N-1)*NC+2) = M3%DROPLET(N)%SPLAT
       ENDDO
       BUFFER_SIZE = NC*MIN(M3%N_DROP_ORPHANS,N_DROP_ADOPT_MAX)
       BUFFER_SIZE = MAX(1,BUFFER_SIZE)
       N_REQ=N_REQ+1
-      CALL MPI_ISEND(M3%S_LDBUF(1),BUFFER_SIZE, MPI_LOGICAL,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+      CALL MPI_ISEND(M3%LOGI_SEND_PKG1(1),BUFFER_SIZE,MPI_LOGICAL,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
  
       M3%N_DROP_ORPHANS = 0
  
@@ -1053,7 +1188,8 @@ SEND_OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
 ENDDO SEND_OTHER_MESH_LOOP
  
-! Receive Messages (NOM is the receiver, NM is the sender)
+
+! Information from Mesh NM is RECV'ed by Mesh NOM.  NOM is the receiver, NM is the sender.
  
 CALL MPI_WAITALL(N_REQ,REQ(1:N_REQ),ARRAY_OF_STATUSES,IERR)
  
@@ -1079,114 +1215,157 @@ MESH_LOOP: DO NM=1,NMESHES
    RNODE = NM-1
  
    TAG = TAGS(NM,NOM,CODE)
+
+   ! Receive information before the time stepping starts needed for radiation exchange
  
-   INITIALIZE_RECEIVE_IF: IF (CODE==0 .AND. RADIATION) THEN
+   IF (CODE==0 .AND. RADIATION) THEN
       DO IW=1,M%NEWC
          IF (M2%IJKW(9,IW)==NOM) THEN
             ALLOCATE(M2%WALL(IW)%ILW(NRA,NSB))
             M2%WALL(IW)%ILW = SIGMA*TMPA4*RPI
          ENDIF
       ENDDO
-   ENDIF INITIALIZE_RECEIVE_IF
+   ENDIF 
  
-   RECEIVE_PREDICTOR_IF: IF (CODE==1) THEN
-      IF (NIC(NOM,NM)>0) THEN
-         LL = 0
-         UNPACK_RPKG1: DO 
-            IW = NINT(M2%RPKG1(LL+1))
-            IF (IW==-999) EXIT UNPACK_RPKG1
-            II = M4%IJKW(10,IW)
-            JJ = M4%IJKW(11,IW)
-            KK = M4%IJKW(12,IW)
-            M2%TMP(II,JJ,KK) = M2%RPKG1(LL+2)
-            M2%H(II,JJ,KK)   = M2%RPKG1(LL+3)
-            IF (N_SPECIES>0) M2%YYS(II,JJ,KK,1:N_SPECIES)= M2%RPKG1(LL+4:LL+3+N_SPECIES)
-            LL = LL+3+N_SPECIES
-         ENDDO UNPACK_RPKG1
-      ENDIF
-   ENDIF RECEIVE_PREDICTOR_IF
- 
-   RECEIVE_CORRECTOR_IF: IF (CODE==0 .OR. CODE==2) THEN
- 
-      IF (CODE==2 .AND. NIC(NOM,NM)>0) THEN
-         LL = 0
-         UNPACK_RPKG2: DO 
-            IW = NINT(M2%RPKG2(LL+1))
-            IF (IW==-999) EXIT UNPACK_RPKG2
-            II = M4%IJKW(10,IW)
-            JJ = M4%IJKW(11,IW)
-            KK = M4%IJKW(12,IW)
-            M2%TMP(II,JJ,KK) = M2%RPKG2(LL+2)
-            M2%H(II,JJ,KK)   = M2%RPKG2(LL+3)
-            M2%U(II,JJ,KK)   = M2%RPKG2(LL+4)
-            M2%V(II,JJ,KK)   = M2%RPKG2(LL+5)
-            M2%W(II,JJ,KK)   = M2%RPKG2(LL+6)
-            M2%U(II-1,JJ,KK) = M2%RPKG2(LL+7)
-            M2%V(II,JJ-1,KK) = M2%RPKG2(LL+8)
-            M2%W(II,JJ,KK-1) = M2%RPKG2(LL+9)
-            IF (N_SPECIES>0) M2%YY(II,JJ,KK,1:N_SPECIES)= M2%RPKG2(LL+10:LL+9+N_SPECIES)
-            LL = LL+9+N_SPECIES
-         ENDDO UNPACK_RPKG2
-      ENDIF
- 
-      RECEIVE_RADIATION: IF ( NIC(NOM,NM)>0 .AND. EXCHANGE_RADIATION  .AND. CODE==2) THEN
-         LL =0
-         UNPACK_WRPKG: DO 
-            LL  = LL + 1
-            IW = NINT(M2%WRPKG(LL))
-            IF (IW==-999) EXIT UNPACK_WRPKG
-            DO NN2=1,NSB
-               DO NN1=1,NRA
-                  LL = LL + 1
-                  M4%WALL(IW)%ILW(NN1,NN2) = M2%WRPKG(LL)
+   ! Unpack densities and species mass fractions following PREDICTOR exchange
+
+   IF (CODE==1 .AND. NIC(NOM,NM)>0) THEN
+      LL = 0
+      UNPACK_REAL_RECV_PKG1: DO 
+         IW = NINT(M2%REAL_RECV_PKG1(LL+1))
+         IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG1
+         DO KK=M4%IJKW(12,IW),M4%IJKW(15,IW)
+            DO JJ=M4%IJKW(11,IW),M4%IJKW(14,IW)
+               DO II=M4%IJKW(10,IW),M4%IJKW(13,IW)
+                  M2%RHOS(II,JJ,KK) = M2%REAL_RECV_PKG1(LL+2)
+                  IF (N_SPECIES>0) M2%YYS(II,JJ,KK,1:N_SPECIES)= M2%REAL_RECV_PKG1(LL+3:LL+2+N_SPECIES)
+                  LL = LL+2+N_SPECIES
                ENDDO
             ENDDO
-         ENDDO UNPACK_WRPKG
-      ENDIF RECEIVE_RADIATION
+         ENDDO
+      ENDDO UNPACK_REAL_RECV_PKG1
+   ENDIF 
+
+   ! Unpack pressure following PREDICTOR stage of time step
  
-   ENDIF RECEIVE_CORRECTOR_IF
+   IF (CODE==2 .AND. NIC(NOM,NM)>0) THEN
+      LL = 0
+      UNPACK_REAL_RECV_PKG2: DO
+         IW = NINT(M2%REAL_RECV_PKG2(LL+1))
+         IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG2
+         DO KK=M4%IJKW(12,IW),M4%IJKW(15,IW)
+            DO JJ=M4%IJKW(11,IW),M4%IJKW(14,IW)
+               DO II=M4%IJKW(10,IW),M4%IJKW(13,IW)
+                  M2%H(II,JJ,KK) = M2%REAL_RECV_PKG2(LL+2)
+                  LL = LL+2
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO UNPACK_REAL_RECV_PKG2
+   ENDIF 
+
+   ! Unpack density and species mass fractions following CORRECTOR update
+
+   IF (CODE==3 .AND. NIC(NOM,NM)>0) THEN
+      LL = 0
+      UNPACK_REAL_RECV_PKG3: DO 
+         IW = NINT(M2%REAL_RECV_PKG3(LL+1))
+         IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG3
+         DO KK=M4%IJKW(12,IW),M4%IJKW(15,IW)
+            DO JJ=M4%IJKW(11,IW),M4%IJKW(14,IW)
+               DO II=M4%IJKW(10,IW),M4%IJKW(13,IW)
+                  M2%RHO(II,JJ,KK) = M2%REAL_RECV_PKG3(LL+2)
+                  IF (N_SPECIES>0) M2%YY(II,JJ,KK,1:N_SPECIES)= M2%REAL_RECV_PKG3(LL+3:LL+2+N_SPECIES)
+                  LL = LL+2+N_SPECIES
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO UNPACK_REAL_RECV_PKG3
+   ENDIF
+
+   ! Unpack pressure and velocities at the end of the CORRECTOR stage of the time step
+ 
+   IF (CODE==4 .AND. NIC(NOM,NM)>0) THEN
+      LL = 0
+      UNPACK_REAL_RECV_PKG4: DO
+         IW = NINT(M2%REAL_RECV_PKG4(LL+1))
+         IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG4
+         DO KK=M4%IJKW(12,IW),M4%IJKW(15,IW)
+            DO JJ=M4%IJKW(11,IW),M4%IJKW(14,IW)
+               DO II=M4%IJKW(10,IW),M4%IJKW(13,IW)
+                  M2%H(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+2)
+                  M2%U(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+3)
+                  M2%V(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+4)
+                  M2%W(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+5)
+                  M2%U(II-1,JJ,KK) = M2%REAL_RECV_PKG4(LL+6)
+                  M2%V(II,JJ-1,KK) = M2%REAL_RECV_PKG4(LL+7)
+                  M2%W(II,JJ,KK-1) = M2%REAL_RECV_PKG4(LL+8)
+                  LL = LL+8
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO UNPACK_REAL_RECV_PKG4
+   ENDIF
+
+   ! Unpack radiation information at the end of the CORRECTOR stage of the time step
+
+   RECEIVE_RADIATION: IF ( CODE==4 .AND. NIC(NOM,NM)>0 .AND. EXCHANGE_RADIATION) THEN
+      LL = 0
+      UNPACK_REAL_RECV_PKG5: DO 
+         LL  = LL + 1
+         IW = NINT(M2%REAL_RECV_PKG5(LL))
+         IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG5
+         DO NN2=1,NSB
+            DO NN1=1,NRA
+               LL = LL + 1
+               M4%WALL(IW)%ILW(NN1,NN2) = M2%REAL_RECV_PKG5(LL)
+            ENDDO
+         ENDDO
+      ENDDO UNPACK_REAL_RECV_PKG5
+   ENDIF RECEIVE_RADIATION
  
    ! Get Number of Droplet Orphans
  
-   IF (DROPLET_FILE) THEN
+   IF (CODE==4 .AND. DROPLET_FILE) THEN
       M2%N_DROP_ADOPT = MIN(M2%N_DROP_ADOPT,N_DROP_ADOPT_MAX)
       IF (M4%NLP+M2%N_DROP_ADOPT>M4%NLPDIM) CALL RE_ALLOCATE_DROPLETS(1,NOM,0,N_DROP_ADOPT_MAX)
    ENDIF
  
    ! Sending/Receiving Droplet Buffer Arrays
  
-   IF_RECEIVE_DROPLETS: IF (DROPLET_FILE) THEN 
+   IF_RECEIVE_DROPLETS: IF (CODE==4 .AND. DROPLET_FILE) THEN 
       IF_DROPLETS_SENT: IF (M2%N_DROP_ADOPT>0) THEN
  
          NC = 13
          DO N=M4%NLP+1,M4%NLP+M2%N_DROP_ADOPT
             NN = N-M4%NLP-1
-            M4%DROPLET(N)%X   = M2%R_RDBUF((NN)*NC+1) 
-            M4%DROPLET(N)%Y   = M2%R_RDBUF((NN)*NC+2) 
-            M4%DROPLET(N)%Z   = M2%R_RDBUF((NN)*NC+3) 
-            M4%DROPLET(N)%TMP = M2%R_RDBUF((NN)*NC+4) 
-            M4%DROPLET(N)%U   = M2%R_RDBUF((NN)*NC+5) 
-            M4%DROPLET(N)%V   = M2%R_RDBUF((NN)*NC+6) 
-            M4%DROPLET(N)%W   = M2%R_RDBUF((NN)*NC+7) 
-            M4%DROPLET(N)%R   = M2%R_RDBUF((NN)*NC+8) 
-            M4%DROPLET(N)%PWT = M2%R_RDBUF((NN)*NC+9) 
-            M4%DROPLET(N)%A_X = M2%R_RDBUF((NN)*NC+10) 
-            M4%DROPLET(N)%A_Y = M2%R_RDBUF((NN)*NC+11) 
-            M4%DROPLET(N)%A_Z = M2%R_RDBUF((NN)*NC+12) 
-            M4%DROPLET(N)%T   = M2%R_RDBUF((NN)*NC+13) 
+            M4%DROPLET(N)%X   = M2%REAL_RECV_PKG6((NN)*NC+1) 
+            M4%DROPLET(N)%Y   = M2%REAL_RECV_PKG6((NN)*NC+2) 
+            M4%DROPLET(N)%Z   = M2%REAL_RECV_PKG6((NN)*NC+3) 
+            M4%DROPLET(N)%TMP = M2%REAL_RECV_PKG6((NN)*NC+4) 
+            M4%DROPLET(N)%U   = M2%REAL_RECV_PKG6((NN)*NC+5) 
+            M4%DROPLET(N)%V   = M2%REAL_RECV_PKG6((NN)*NC+6) 
+            M4%DROPLET(N)%W   = M2%REAL_RECV_PKG6((NN)*NC+7) 
+            M4%DROPLET(N)%R   = M2%REAL_RECV_PKG6((NN)*NC+8) 
+            M4%DROPLET(N)%PWT = M2%REAL_RECV_PKG6((NN)*NC+9) 
+            M4%DROPLET(N)%A_X = M2%REAL_RECV_PKG6((NN)*NC+10) 
+            M4%DROPLET(N)%A_Y = M2%REAL_RECV_PKG6((NN)*NC+11) 
+            M4%DROPLET(N)%A_Z = M2%REAL_RECV_PKG6((NN)*NC+12) 
+            M4%DROPLET(N)%T   = M2%REAL_RECV_PKG6((NN)*NC+13) 
          ENDDO
  
          NC = 2
          DO N=M4%NLP+1,M4%NLP+M2%N_DROP_ADOPT
             NN = N-M4%NLP-1
-            M4%DROPLET(N)%IOR    = M2%R_IDBUF((NN)*NC+1) 
-            M4%DROPLET(N)%CLASS  = M2%R_IDBUF((NN)*NC+2) 
+            M4%DROPLET(N)%IOR    = M2%INTG_RECV_PKG1((NN)*NC+1) 
+            M4%DROPLET(N)%CLASS  = M2%INTG_RECV_PKG1((NN)*NC+2) 
          ENDDO
  
-         NC = 1
+         NC = 2
          DO N=M4%NLP+1,M4%NLP+M2%N_DROP_ADOPT
             NN = N-M4%NLP-1
-            M4%DROPLET(N)%SHOW = M2%R_LDBUF((NN)*NC+1)  
+            M4%DROPLET(N)%SHOW  = M2%LOGI_RECV_PKG1((NN)*NC+1)  
+            M4%DROPLET(N)%SPLAT = M2%LOGI_RECV_PKG1((NN)*NC+2)  
          ENDDO
  
          M4%NLP = M4%NLP + M2%N_DROP_ADOPT
@@ -1361,7 +1540,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    TAG   = TAGS(NM,NOM,CODE)
 
    N_PREQ = N_PREQ+1
-   CALL MPI_IRECV(M3%RPKG3(1),NIC(NM,NOM)*6+1, MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD, PREQ(N_PREQ),IERR)
+   CALL MPI_IRECV(M3%REAL_RECV_PKG7(1),NIC(NM,NOM)*6+1, MPI_DOUBLE_PRECISION,RNODE,TAG,MPI_COMM_WORLD, PREQ(N_PREQ),IERR)
 
 ENDDO OTHER_MESH_LOOP
 
@@ -1382,40 +1561,40 @@ SEND_OTHER_MESH_LOOP: DO NOM=1,NMESHES
 
    LL = 0
    IWW = 0
-   PACK_SPKG3: DO IW=1,M4%NEWC
-      IF (M3%IJKW(9,IW)/=NM .OR. M3%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE PACK_SPKG3
+   PACK_REAL_SEND_PKG7: DO IW=1,M4%NEWC
+      IF (M3%IJKW(9,IW)/=NM .OR. M3%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE PACK_REAL_SEND_PKG7
       IWW = IWW + 1
       II = M3%IJKW(10,IW)
       JJ = M3%IJKW(11,IW)
       KK = M3%IJKW(12,IW)
       IOR = M3%IJKW(4,IW)
-      M3%SPKG3(LL+1) = REAL(IW,EB)
-      M3%SPKG3(LL+2) = M%H(II,JJ,KK)
+      M3%REAL_SEND_PKG7(LL+1) = REAL(IW,EB)
+      M3%REAL_SEND_PKG7(LL+2) = M%H(II,JJ,KK)
       SELECT CASE(IOR)
          CASE(-1) 
-            M3%SPKG3(LL+3) = M%H(II-1,JJ,KK)
-            M3%SPKG3(LL+4) = M%FVX(II-1,JJ,KK)
+            M3%REAL_SEND_PKG7(LL+3) = M%H(II-1,JJ,KK)
+            M3%REAL_SEND_PKG7(LL+4) = M%FVX(II-1,JJ,KK)
          CASE( 1) 
-            M3%SPKG3(LL+3) = M%H(II+1,JJ,KK)
-            M3%SPKG3(LL+4) = M%FVX(II,JJ,KK)
+            M3%REAL_SEND_PKG7(LL+3) = M%H(II+1,JJ,KK)
+            M3%REAL_SEND_PKG7(LL+4) = M%FVX(II,JJ,KK)
          CASE(-2) 
-            M3%SPKG3(LL+3) = M%H(II,JJ-1,KK)
-            M3%SPKG3(LL+5) = M%FVY(II,JJ-1,KK)
+            M3%REAL_SEND_PKG7(LL+3) = M%H(II,JJ-1,KK)
+            M3%REAL_SEND_PKG7(LL+5) = M%FVY(II,JJ-1,KK)
          CASE( 2) 
-            M3%SPKG3(LL+3) = M%H(II,JJ+1,KK)
-            M3%SPKG3(LL+5) = M%FVY(II,JJ,KK)
+            M3%REAL_SEND_PKG7(LL+3) = M%H(II,JJ+1,KK)
+            M3%REAL_SEND_PKG7(LL+5) = M%FVY(II,JJ,KK)
          CASE(-3) 
-            M3%SPKG3(LL+3) = M%H(II,JJ,KK-1)
-            M3%SPKG3(LL+6) = M%FVZ(II,JJ,KK-1)
+            M3%REAL_SEND_PKG7(LL+3) = M%H(II,JJ,KK-1)
+            M3%REAL_SEND_PKG7(LL+6) = M%FVZ(II,JJ,KK-1)
          CASE( 3) 
-            M3%SPKG3(LL+3) = M%H(II,JJ,KK+1)
-            M3%SPKG3(LL+6) = M%FVZ(II,JJ,KK)
+            M3%REAL_SEND_PKG7(LL+3) = M%H(II,JJ,KK+1)
+            M3%REAL_SEND_PKG7(LL+6) = M%FVZ(II,JJ,KK)
       END SELECT
       LL = LL+6
-   ENDDO PACK_SPKG3
-   M3%SPKG3(IWW*6+1) = -999.0_EB
+   ENDDO PACK_REAL_SEND_PKG7
+   M3%REAL_SEND_PKG7(IWW*6+1) = -999.0_EB
    N_PREQ=N_PREQ+1
-   CALL MPI_ISEND(M3%SPKG3(1),IWW*6+1, MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD, PREQ(N_PREQ),IERR)
+   CALL MPI_ISEND(M3%REAL_SEND_PKG7(1),IWW*6+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,PREQ(N_PREQ),IERR)
 
    IF (DEBUG) THEN
       WRITE(0,*) NM,' sending P data to ',NOM, ' tag=',TAGS(NM,NOM,CODE),' PREQ=',PREQ(N_PREQ)
@@ -1440,36 +1619,36 @@ RNODE = NM-1
 TAG = TAGS(NM,NOM,CODE)
 
 LL = 0
-UNPACK_RPKG3: DO
-   IW = NINT(M2%RPKG3(LL+1))
-   IF (IW==-999) EXIT UNPACK_RPKG3
+UNPACK_REAL_RECV_PKG7: DO
+   IW = NINT(M2%REAL_RECV_PKG7(LL+1))
+   IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG7
    II = M4%IJKW(10,IW)
    JJ = M4%IJKW(11,IW)
    KK = M4%IJKW(12,IW)
    IOR = M4%IJKW(4,IW)
-   M2%H(II,JJ,KK)                = M2%RPKG3(LL+2)
+   M2%H(II,JJ,KK)                = M2%REAL_RECV_PKG7(LL+2)
    SELECT CASE(IOR)
       CASE(-1) 
-         M2%H(II-1,JJ,KK)   = M2%RPKG3(LL+3)
-         M2%FVX(II-1,JJ,KK) = M2%RPKG3(LL+4)
+         M2%H(II-1,JJ,KK)   = M2%REAL_RECV_PKG7(LL+3)
+         M2%FVX(II-1,JJ,KK) = M2%REAL_RECV_PKG7(LL+4)
       CASE( 1) 
-         M2%H(II+1,JJ,KK)   = M2%RPKG3(LL+3)
-         M2%FVX(II,JJ,KK)   = M2%RPKG3(LL+4)
+         M2%H(II+1,JJ,KK)   = M2%REAL_RECV_PKG7(LL+3)
+         M2%FVX(II,JJ,KK)   = M2%REAL_RECV_PKG7(LL+4)
       CASE(-2) 
-         M2%H(II,JJ-1,KK)   = M2%RPKG3(LL+3)
-         M2%FVY(II,JJ-1,KK) = M2%RPKG3(LL+5)
+         M2%H(II,JJ-1,KK)   = M2%REAL_RECV_PKG7(LL+3)
+         M2%FVY(II,JJ-1,KK) = M2%REAL_RECV_PKG7(LL+5)
       CASE( 2) 
-         M2%H(II,JJ+1,KK)   = M2%RPKG3(LL+3)
-         M2%FVY(II,JJ,KK)   = M2%RPKG3(LL+5)
+         M2%H(II,JJ+1,KK)   = M2%REAL_RECV_PKG7(LL+3)
+         M2%FVY(II,JJ,KK)   = M2%REAL_RECV_PKG7(LL+5)
       CASE(-3) 
-         M2%H(II,JJ,KK-1)   = M2%RPKG3(LL+3)
-         M2%FVZ(II,JJ,KK-1) = M2%RPKG3(LL+6)
+         M2%H(II,JJ,KK-1)   = M2%REAL_RECV_PKG7(LL+3)
+         M2%FVZ(II,JJ,KK-1) = M2%REAL_RECV_PKG7(LL+6)
       CASE( 3) 
-         M2%H(II,JJ,KK+1)   = M2%RPKG3(LL+3)
-         M2%FVZ(II,JJ,KK)   = M2%RPKG3(LL+6)
+         M2%H(II,JJ,KK+1)   = M2%REAL_RECV_PKG7(LL+3)
+         M2%FVZ(II,JJ,KK)   = M2%REAL_RECV_PKG7(LL+6)
    END SELECT
    LL = LL+6
-ENDDO UNPACK_RPKG3
+ENDDO UNPACK_REAL_RECV_PKG7
 
 ENDDO RECEIVE_OTHER_MESH_LOOP
 

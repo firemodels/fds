@@ -26,10 +26,10 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
           RHO_D_DYDX,RHO_D_DYDY,RHO_D_DYDZ,RHO_D,RHOP,H_RHO_D_DYDX,H_RHO_D_DYDY,H_RHO_D_DYDZ,RTRM
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
-REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,K_SUM,CP_SUM,XIF,YIF,ZIF, TNOW, &
+REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,K_SUM,CP_SUM,INT_FAC,TNOW, &
             HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,VDOT_LEAK,TIME_RAMP_FACTOR,ZONE_VOLUME,CP_MF,Z_2,DELTA_P,PRES_RAMP_FACTOR
 TYPE(SURFACE_TYPE), POINTER :: SF
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,IZ,NM_IN,II_IN,JJ_IN,KK_IN,I,J,K,IPZ,IOPZ
+INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,IZ,NOM,IIO,JJO,KKO,I,J,K,IPZ,IOPZ,N_INT_CELLS
  
 IF (SOLID_PHASE_ONLY) RETURN
 
@@ -592,28 +592,41 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   UWS(IW) =  W(II,JJ,KK-1)
             END SELECT
          CASE(INTERPOLATED_BOUNDARY)
-            NM_IN = IJKW(9,IW)
-            II_IN = IJKW(10,IW)
-            JJ_IN = IJKW(11,IW)
-            KK_IN = IJKW(12,IW)
+            NOM = IJKW(9,IW)
             INTERPOLATED(NM) = .TRUE.
+            INT_FAC = INTERPOLATION_FACTOR(IW)
+            UWS(IW) = 0._EB
             SELECT CASE(ABS(IOR))
                CASE(1) 
-                  XIF = INTERPOLATION_FACTOR(IW,1)
-                  UWS(IW) = -SIGN(1,IOR)*  &
-                             (OMESH(NM_IN)%U(II_IN,JJ_IN,KK_IN)  * XIF &
-                             +OMESH(NM_IN)%U(II_IN-1,JJ_IN,KK_IN)*(1._EB-XIF))
+                  IIO = IJKW(10,IW) 
+                  DO KKO=IJKW(12,IW),IJKW(15,IW)
+                     DO JJO=IJKW(11,IW),IJKW(14,IW)
+                        UWS(IW) =  UWS(IW) - SIGN(1,IOR)*  &
+                                   (OMESH(NOM)%U(IIO,JJO,KKO)  * INT_FAC &
+                                   +OMESH(NOM)%U(IIO-1,JJO,KKO)*(1._EB-INT_FAC))
+                     ENDDO
+                  ENDDO
                CASE(2) 
-                  YIF = INTERPOLATION_FACTOR(IW,2)
-                  UWS(IW) = -SIGN(1,IOR)* &
-                             (OMESH(NM_IN)%V(II_IN,JJ_IN,KK_IN)  * YIF &
-                             +OMESH(NM_IN)%V(II_IN,JJ_IN-1,KK_IN)*(1._EB-YIF))
+                  JJO = IJKW(11,IW) 
+                  DO KKO=IJKW(12,IW),IJKW(15,IW)
+                     DO IIO=IJKW(10,IW),IJKW(13,IW)
+                        UWS(IW) =  UWS(IW) - SIGN(1,IOR)* &
+                                   (OMESH(NOM)%V(IIO,JJO,KKO)  * INT_FAC &
+                                   +OMESH(NOM)%V(IIO,JJO-1,KKO)*(1._EB-INT_FAC))
+                     ENDDO
+                  ENDDO
                CASE(3) 
-                  ZIF = INTERPOLATION_FACTOR(IW,3)
-                  UWS(IW) = -SIGN(1,IOR)* &
-                             (OMESH(NM_IN)%W(II_IN,JJ_IN,KK_IN)  * ZIF &
-                             +OMESH(NM_IN)%W(II_IN,JJ_IN,KK_IN-1)*(1._EB-ZIF))
+                  KKO = IJKW(12,IW) 
+                  DO JJO=IJKW(11,IW),IJKW(14,IW)
+                     DO IIO=IJKW(10,IW),IJKW(13,IW)
+                        UWS(IW) =  UWS(IW) - SIGN(1,IOR)* &
+                                   (OMESH(NOM)%W(IIO,JJO,KKO)  * INT_FAC &
+                                   +OMESH(NOM)%W(IIO,JJO,KKO-1)*(1._EB-INT_FAC))
+                     ENDDO
+                  ENDDO
             END SELECT
+            N_INT_CELLS   = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
+            UWS(IW) = UWS(IW)/REAL(N_INT_CELLS,EB)
       END SELECT WALL_CELL_TYPE
    ENDDO WALL_LOOP3
 

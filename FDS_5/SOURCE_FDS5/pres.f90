@@ -23,7 +23,7 @@ USE GLOBAL_CONSTANTS
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:) :: UWP
-INTEGER :: I,J,K,IW,IOR,BC_TYPE
+INTEGER :: I,J,K,IW,IOR,BC_TYPE,NOM,N_INT_CELLS,IIO,JJO,KKO
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,HH, DWDT,DVDT,DUDT,HQ2,RFODT,U2,V2,W2,HFAC,H0RR(6),TNOW
 LOGICAL :: GET_H
  
@@ -156,7 +156,19 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                CASE(-3)
                   IF (WW(I,J,KBAR)<0._EB .AND. UWP(IW)<0._EB) GET_H=.TRUE.
             END SELECT
-            IF (GET_H) HH = OMESH(IJKW(9,IW))%H(IJKW(10,IW),IJKW(11,IW),IJKW(12,IW))
+            IF (GET_H) THEN
+               NOM = IJKW(9,IW)
+               HH  = 0._EB
+               DO KKO=IJKW(12,IW),IJKW(15,IW)
+                  DO JJO=IJKW(11,IW),IJKW(14,IW)
+                     DO IIO=IJKW(10,IW),IJKW(13,IW)
+                        HH = HH + OMESH(NOM)%H(IIO,JJO,KKO)
+                     ENDDO
+                  ENDDO
+               ENDDO
+               N_INT_CELLS   = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
+               HH = HH/REAL(N_INT_CELLS,EB)
+            ENDIF
          ENDIF
  
          SELECT CASE(IOR)
