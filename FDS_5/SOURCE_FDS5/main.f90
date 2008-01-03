@@ -26,6 +26,7 @@ USE EVAC
 IMPLICIT NONE
  
 ! Miscellaneous declarations
+
 CHARACTER(255), PARAMETER :: mainid='$Id$'
 CHARACTER(255), PARAMETER :: mainrev='$Revision$'
 CHARACTER(255), PARAMETER :: maindate='$Date$'
@@ -47,7 +48,7 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date, version number, revision number
 
-WRITE(VERSION_STRING,'(A)') '5.0.3'
+WRITE(VERSION_STRING,'(A)') '5.1.0_beta'
 SERIAL = .TRUE.
 
 IF (INDEX(mainrev,':',BACK=.TRUE.)>0) THEN
@@ -161,18 +162,21 @@ IF (.NOT.RESTART) THEN
 
 ENDIF
 
-! ********************************************************************
-!                      MAIN TIMESTEPPING LOOP
-! ********************************************************************
+!***********************************************************************************************************************************
+!                                                     MAIN TIMESTEPPING LOOP
+!***********************************************************************************************************************************
 
 MAIN_LOOP: DO  
+
    ICYC  = ICYC + 1 
+
    ! Check for program stops
 
    INQUIRE(FILE=TRIM(CHID)//'.stop',EXIST=EX)
    IF (EX) MESH_STOP_STATUS = USER_STOP
  
    ! Figure out fastest and slowest meshes
+
    T_MAX = -1000000._EB
    T_MIN =  1000000._EB
    DO NM=1,NMESHES
@@ -210,9 +214,9 @@ MAIN_LOOP: DO
    IF (ALL(.NOT.ACTIVE_MESH)) ACTIVE_MESH = .TRUE.
    CALL EVAC_MAIN_LOOP
 
-!=====================================================================
-!  Predictor Step
-!=====================================================================
+   !=============================================================================================================================
+   !                                                     PREDICTOR Step
+   !=============================================================================================================================
 
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
@@ -228,12 +232,17 @@ MAIN_LOOP: DO
    ENDDO COMPUTE_FINITE_DIFFERENCES_1
    
    CHANGE_TIME_STEP_LOOP: DO
+
+      COMPUTE_DENSITY_LOOP: DO NM=1,NMESHES
+         IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DENSITY_LOOP
+         IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) CALL DENSITY(NM)
+      ENDDO COMPUTE_DENSITY_LOOP
+
+      CALL MESH_EXCHANGE(1)
+ 
       COMPUTE_DIVERGENCE_LOOP: DO NM=1,NMESHES
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DIVERGENCE_LOOP
-         IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
-            CALL DENSITY(NM)
-            CALL WALL_BC(T(NM),NM)
-         ENDIF
+         IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) CALL WALL_BC(T(NM),NM)
          CALL DIVERGENCE_PART_1(T(NM),NM)
       ENDDO COMPUTE_DIVERGENCE_LOOP
 
@@ -247,6 +256,7 @@ MAIN_LOOP: DO
       ENDDO COMPUTE_PRESSURE_LOOP
  
       IF (PRESSURE_CORRECTION) CALL CORRECT_PRESSURE
+
       PREDICT_VELOCITY_LOOP: DO NM=1,NMESHES
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE PREDICT_VELOCITY_LOOP
          CALL VELOCITY_PREDICTOR(T(NM),NM,MESH_STOP_STATUS(NM))
@@ -268,6 +278,7 @@ MAIN_LOOP: DO
       IF (.NOT.ANY(CHANGE_TIME_STEP)) EXIT CHANGE_TIME_STEP_LOOP
  
    ENDDO CHANGE_TIME_STEP_LOOP
+
    CHANGE_TIME_STEP = .FALSE.
    
    DO NM=1,NMESHES
@@ -276,11 +287,11 @@ MAIN_LOOP: DO
 
    ! Exchange information among meshes
 
-   CALL MESH_EXCHANGE(1)
+   CALL MESH_EXCHANGE(2)
 
-!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-!  Corrector Step
-!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   !                                                      CORRECTOR Step
+   !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
@@ -291,14 +302,21 @@ MAIN_LOOP: DO
       IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
          CALL MASS_FINITE_DIFFERENCES(NM)
          CALL DENSITY(NM)
-         ! Do combustion, then apply thermal, species and density boundary conditions and solve for radiation
-         IF (N_REACTIONS > 0 .AND. (.NOT. ISOTHERMAL)) CALL COMBUSTION (NM)
+      ENDIF
+   ENDDO COMPUTE_FINITE_DIFFERENCES_2
+
+   CALL MESH_EXCHANGE(3) 
+
+   COMPUTE_DIVERGENCE_2: DO NM=1,NMESHES
+      IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DIVERGENCE_2
+      IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
+         IF (N_REACTIONS > 0) CALL COMBUSTION (NM)
          CALL WALL_BC(T(NM),NM)
-         IF (.NOT. ISOTHERMAL) CALL COMPUTE_RADIATION(NM)
+         CALL COMPUTE_RADIATION(NM)
       ENDIF
       CALL UPDATE_PARTICLES(T(NM),NM)
       CALL DIVERGENCE_PART_1(T(NM),NM)
-   ENDDO COMPUTE_FINITE_DIFFERENCES_2
+   ENDDO COMPUTE_DIVERGENCE_2
      
    CALL EXCHANGE_DIVERGENCE_INFO
    
@@ -324,12 +342,10 @@ MAIN_LOOP: DO
       CALL DUMP_MESH_OUTPUTS(T(NM),NM)
    ENDDO OUTPUT_LOOP
 
+   ! Exchange information among meshes
 
-!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-! Exchange information among meshes
-   CALL MESH_EXCHANGE(2)
+   CALL MESH_EXCHANGE(4)
    CALL EVAC_EXCHANGE
-!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
    ! Write character strings out to the .smv file
  
@@ -363,9 +379,9 @@ MAIN_LOOP: DO
 
 ENDDO MAIN_LOOP
  
-!***********************************************************************
-!                          END OF TIMESTEP
-!***********************************************************************
+!***********************************************************************************************************************************
+!                                                        END OF TIMESTEP
+!***********************************************************************************************************************************
  
 TUSED(1,1:NMESHES) = SECOND() - TUSED(1,1:NMESHES)
  
@@ -412,7 +428,7 @@ SUBROUTINE INITIALIZE_MESH_EXCHANGE(NM)
  
 ! Create arrays by which info is to exchanged across meshes
  
-INTEGER IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,NOM,IOR,IW
+INTEGER IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,NOM,IOR,IW,N
 INTEGER, INTENT(IN) :: NM
 TYPE (MESH_TYPE), POINTER :: M2,M
 LOGICAL FOUND
@@ -443,20 +459,19 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
          CASE( 1)
             IMIN=MAX(IMIN,M%IJKW(10,IW)-1)
          CASE(-1) 
-            IMAX=MIN(IMAX,M%IJKW(10,IW))
+            IMAX=MIN(IMAX,M%IJKW(13,IW))
          CASE( 2) 
             JMIN=MAX(JMIN,M%IJKW(11,IW)-1)
          CASE(-2) 
-            JMAX=MIN(JMAX,M%IJKW(11,IW))
+            JMAX=MIN(JMAX,M%IJKW(14,IW))
          CASE( 3) 
             KMIN=MAX(KMIN,M%IJKW(12,IW)-1)
          CASE(-3) 
-            KMAX=MIN(KMAX,M%IJKW(12,IW))
+            KMAX=MIN(KMAX,M%IJKW(15,IW))
       END SELECT
    ENDDO SEARCH_LOOP
  
-   IF ( M2%XS>=M%XS .AND. M2%XF<=M%XF .AND. M2%YS>=M%YS .AND. M2%YF<=M%YF .AND. &
-         M2%ZS>=M%ZS .AND. M2%ZF<=M%ZF ) FOUND = .TRUE.
+   IF ( M2%XS>=M%XS .AND. M2%XF<=M%XF .AND. M2%YS>=M%YS .AND. M2%YF<=M%YF .AND. M2%ZS>=M%ZS .AND. M2%ZF<=M%ZF ) FOUND = .TRUE.
  
    IF (.NOT.FOUND) CYCLE OTHER_MESH_LOOP
  
@@ -467,7 +482,8 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    K_MIN(NOM,NM) = KMIN
    K_MAX(NOM,NM) = KMAX
  
-   ALLOCATE(M%OMESH(NOM)% TMP(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
+   ALLOCATE(M%OMESH(NOM)% RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
+   ALLOCATE(M%OMESH(NOM)%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    ALLOCATE(M%OMESH(NOM)%   H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    ALLOCATE(M%OMESH(NOM)%   U(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    ALLOCATE(M%OMESH(NOM)%   V(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
@@ -479,13 +495,24 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
       ALLOCATE(M%OMESH(NOM)%  YY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,N_SPECIES))
       ALLOCATE(M%OMESH(NOM)% YYS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,N_SPECIES))
    ENDIF
+
+   M%OMESH(NOM)% RHO = RHOA
+   M%OMESH(NOM)%RHOS = RHOA
+   M%OMESH(NOM)%H    = 0._EB
+   M%OMESH(NOM)%U    = U0
+   M%OMESH(NOM)%V    = V0
+   M%OMESH(NOM)%W    = W0
+   DO N=1,N_SPECIES
+      M%OMESH(NOM)%YY(:,:,:,N)  = SPECIES(N)%YY0
+      M%OMESH(NOM)%YYS(:,:,:,N) = SPECIES(N)%YY0
+   ENDDO
  
    ! Wall arrays
  
    ALLOCATE(M%OMESH(NOM)%BOUNDARY_TYPE(0:M2%NEWC))
    M%OMESH(NOM)%BOUNDARY_TYPE(0:M2%NEWC) = M2%BOUNDARY_TYPE(0:M2%NEWC)
-   ALLOCATE(M%OMESH(NOM)%IJKW(12,M2%NEWC))
-   M%OMESH(NOM)%IJKW(1:12,1:M2%NEWC) = M2%IJKW(1:12,1:M2%NEWC)
+   ALLOCATE(M%OMESH(NOM)%IJKW(15,M2%NEWC))
+   M%OMESH(NOM)%IJKW = M2%IJKW
     
    ALLOCATE(M%OMESH(NOM)%WALL(0:M2%NEWC))
  
@@ -518,7 +545,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF (NOM==NM) CYCLE OTHER_MESH_LOOP
    IF (NIC(NM,NOM)==0 .AND. NIC(NOM,NM)>0) THEN
       M2=>MESHES(NOM)
-      ALLOCATE(M%OMESH(NOM)%IJKW(12,M2%NEWC))
+      ALLOCATE(M%OMESH(NOM)%IJKW(15,M2%NEWC))
       ALLOCATE(M%OMESH(NOM)%BOUNDARY_TYPE(0:M2%NEWC))
       ALLOCATE(M%OMESH(NOM)%WALL(0:M2%NEWC))
    ENDIF
@@ -553,9 +580,9 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
  
       IF (NIC(NOM,NM)==0 .AND. NIC(NM,NOM)==0) CYCLE OTHER_MESH_LOOP
-      IF (CODE>0) THEN
-      IF (.NOT.ACTIVE_MESH(NM) .OR. .NOT.ACTIVE_MESH(NOM)) CYCLE OTHER_MESH_LOOP
-      ENDIF
+
+      IF (CODE>0 .AND. (.NOT.ACTIVE_MESH(NM) .OR. .NOT.ACTIVE_MESH(NOM))) CYCLE OTHER_MESH_LOOP
+
       IF (DEBUG) WRITE(0,*) NOM,' receiving data from ',NM,' code=',CODE
  
       M =>MESHES(NM)
@@ -570,38 +597,58 @@ MESH_LOOP: DO NM=1,NMESHES
       KMIN = K_MIN(NOM,NM)
       KMAX = K_MAX(NOM,NM)
  
-      INITIALIZE_IF: IF (CODE==0 .AND. RADIATION) THEN
+      ! Set up arrays needed for radiation exchange
+
+      IF (CODE==0 .AND. RADIATION) THEN
          DO IW=1,M%NEWC
          IF (M%IJKW(9,IW)==NOM) THEN
             ALLOCATE(M2%WALL(IW)%ILW(NRA,NSB))
             M2%WALL(IW)%ILW = SIGMA*TMPA4*RPI
             ENDIF
          ENDDO
-      ENDIF INITIALIZE_IF
+      ENDIF
+
+      ! Exchange density and species mass fraction in PREDICTOR stage
  
-      PREDICTOR_IF: IF (CODE==1 .AND. NIC(NOM,NM)>0) THEN
-         M2%TMP(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= M%TMP(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
-         M2%H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= M%H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+      IF (CODE==1 .AND. NIC(NOM,NM)>0) THEN
+         M2%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= M%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
          IF (N_SPECIES>0) M2%YYS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,1:N_SPECIES)= M%YYS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,1:N_SPECIES)
-      ENDIF PREDICTOR_IF
+      ENDIF 
+
+      ! Exchange pressures at end of PREDICTOR stage
+
+      IF (CODE==2 .AND. NIC(NOM,NM)>0) THEN
+         M2%H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= M%H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+      ENDIF 
  
-      CORRECTOR_IF: IF (CODE==0 .OR. CODE==2) THEN
-         IF (NIC(NOM,NM)>0) THEN
-            M2%BOUNDARY_TYPE(0:M%NEWC) = M%BOUNDARY_TYPE(0:M%NEWC)
-            M2%TMP(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= M%TMP(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
-            M2%H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)=  M%H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
-            M2%U(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)=  M%U(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
-            M2%V(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)=  M%V(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
-            M2%W(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)=  M%W(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
-            IF (N_SPECIES>0) M2%YY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,1:N_SPECIES)= M%YY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,1:N_SPECIES)
-         ENDIF
-         RADIATION_IF: IF (RADIATION .AND. CODE==2 .AND. NIC(NOM,NM)>0) THEN
-            DO IW=1,M4%NEWC
-               IF (M4%IJKW(9,IW)==NM .AND. M4%BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY)  &
-                  M4%WALL(IW)%ILW(1:NRA,1:NSB) = M3%WALL(IW)%ILW(1:NRA,1:NSB)
-            ENDDO
-         ENDIF RADIATION_IF
-      ENDIF CORRECTOR_IF
+      ! Exchange density and species mass fraction in CORRECTOR stage
+      
+      IF (CODE==3 .AND. NIC(NOM,NM)>0) THEN
+         M2%RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= M%RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+         IF (N_SPECIES>0) M2%YY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,1:N_SPECIES)= M%YY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,1:N_SPECIES)
+      ENDIF
+
+      ! Exchange BOUNDARY_TYPE
+
+      IF (CODE==0 .OR. CODE==4) M2%BOUNDARY_TYPE(0:M%NEWC) = M%BOUNDARY_TYPE(0:M%NEWC)
+
+      ! Exchange pressures and velocities at end of CORRECTOR stage
+
+      IF (CODE==4 .AND. NIC(NOM,NM)>0) THEN
+         M2%H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)=  M%H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+         M2%U(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)=  M%U(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+         M2%V(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)=  M%V(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+         M2%W(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)=  M%W(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+      ENDIF
+
+      ! Exchange radiation at the end of the CORRECTOR stage
+
+      IF (CODE==4 .AND. RADIATION .AND. NIC(NOM,NM)>0) THEN
+         DO IW=1,M4%NEWC
+            IF (M4%IJKW(9,IW)==NM .AND. M4%BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY)  &
+               M4%WALL(IW)%ILW(1:NRA,1:NSB) = M3%WALL(IW)%ILW(1:NRA,1:NSB)
+         ENDDO
+      ENDIF
  
       ! Get Number of Droplet Orphans
  

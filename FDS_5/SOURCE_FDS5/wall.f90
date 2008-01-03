@@ -44,23 +44,31 @@ SUBROUTINE THERMAL_BC(T)
 ! One dimensional heat transfer and pyrolysis is done in PYROLYSIS, which is called at the end of this routine.
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
-REAL(EB) :: DT_BC,T,TSI,TMP_G,DTMP,TMP_OTHER,CP_TERM,RHOWAL,RAMP_FACTOR,QNET,FDERIV,TMP_EXTERIOR,UN
-INTEGER  :: IOR,II,JJ,KK,IBC,IIG,JJG,KKG, IW
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
+REAL(EB) :: DT_BC,T,TSI,TMP_G,RHO_G,DTMP,TMP_OTHER,CP_TERM,RHOWAL,RAMP_FACTOR,QNET,FDERIV,TMP_EXTERIOR,UN,ARO,UWO,INT_FAC
+INTEGER  :: IOR,II,JJ,KK,IBC,IIG,JJG,KKG,IW,NOM,IIO,JJO,KKO,N_INT_CELLS
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,OM_RHOP
+REAL(EB), POINTER, DIMENSION(:) :: UWP
 LOGICAL :: INFLOW
 TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (VENTS_TYPE), POINTER :: VT
- 
+TYPE (OMESH_TYPE), POINTER :: OM
+TYPE (MESH_TYPE), POINTER :: MM
+REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
+
 IF (PREDICTOR) THEN
    UU => U
    VV => V
    WW => W
    RHOP => RHOS
+   UWP => UWS
+   PBAR_P => PBAR_S
 ELSE
    UU => US
    VV => VS
    WW => WS
    RHOP => RHO
+   UWP => UW
+   PBAR_P => PBAR
 ENDIF
  
 ! Loop through all boundary cells and apply heat transfer method, except for thermally-thick cells
@@ -189,29 +197,51 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
  
       CASE (INTERPOLATED_BC) METHOD_OF_HEAT_TRANSFER
  
-         TMP_G = TMP(IIG,JJG,KKG)
-         TMP_OTHER =OMESH(IJKW(9,IW))%TMP(IJKW(10,IW),IJKW(11,IW),IJKW(12,IW))
-         IF (CELL_VOLUME_RATIO(IW)<0.5 .OR.  CELL_VOLUME_RATIO(IW)>2.0) THEN
-            TMP_W(IW) = TMP_G
-            SELECT CASE(IOR)
-               CASE( 1) 
-                  IF (UU(II,JJ,KK)>=0._EB)   TMP_W(IW) = TMP_OTHER
-               CASE(-1) 
-                  IF (UU(II-1,JJ,KK)<=0._EB) TMP_W(IW) = TMP_OTHER
-               CASE( 2) 
-                  IF (VV(II,JJ,KK)>=0._EB)   TMP_W(IW) = TMP_OTHER
-               CASE(-2) 
-                  IF (VV(II,JJ-1,KK)<=0._EB) TMP_W(IW) = TMP_OTHER
-               CASE( 3) 
-                  IF (WW(II,JJ,KK)>=0._EB)   TMP_W(IW) = TMP_OTHER
-               CASE(-3) 
-                  IF (WW(II,JJ,KK-1)<=0._EB) TMP_W(IW) = TMP_OTHER
-            END SELECT
+         NOM   = IJKW(9,IW)
+         OM    => OMESH(NOM)
+         IF (PREDICTOR) THEN
+            OM_RHOP => OM%RHOS
          ELSE
-            TMP_W(IW) = TMP_OTHER
+            OM_RHOP => OM%RHO
          ENDIF
-         TMP_F(IW) = TMP_W(IW)
-         QCONF(IW) = KW(IW)*(TMP_G-TMP_W(IW))*RDN(IW)
+         MM    => MESHES(NOM)
+         RHO_G = RHOP(IIG,JJG,KKG)
+         RHO_W(IW) = RHO_G
+         INT_FAC = INTERPOLATION_FACTOR(IW)
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  SELECT CASE(ABS(IOR))
+                     CASE(1)
+                 !!     ARO = MIN(1._EB , RDY(JJ)*RDZ(KK)*MM%DY(JJO)*MM%DZ(KKO)) * DX(II)*MM%RDX(IIO)
+                        ARO = MIN(1._EB , RDY(JJ)*RDZ(KK)*MM%DY(JJO)*MM%DZ(KKO)) * 2.*DX(II)/(MM%DX(IIO)+DX(II))
+                        UWO = -SIGN(1,IOR)*( OM%U(IIO,JJO,KKO)*INT_FAC + OM%U(IIO-1,JJO,KKO)*(1._EB-INT_FAC) )
+                     CASE(2)
+                 !!     ARO = MIN(1._EB , RDX(II)*RDZ(KK)*MM%DX(IIO)*MM%DZ(KKO)) * DY(JJ)*MM%RDY(JJO)
+                        ARO = MIN(1._EB , RDX(II)*RDZ(KK)*MM%DX(IIO)*MM%DZ(KKO)) * 2.*DY(JJ)/(MM%DY(JJO)+DY(JJ))
+                        UWO = -SIGN(1,IOR)*( OM%V(IIO,JJO,KKO)*INT_FAC + OM%V(IIO,JJO-1,KKO)*(1._EB-INT_FAC) )
+                     CASE(3)
+                 !!     ARO = MIN(1._EB , RDX(II)*RDY(JJ)*MM%DX(IIO)*MM%DY(JJO)) * DZ(KK)*MM%RDZ(KKO)
+                        ARO = MIN(1._EB , RDX(II)*RDY(JJ)*MM%DX(IIO)*MM%DY(JJO)) * 2.*DZ(KK)/(MM%DZ(KKO)+DZ(KK))
+                        UWO = -SIGN(1,IOR)*( OM%W(IIO,JJO,KKO)*INT_FAC + OM%W(IIO,JJO,KKO-1)*(1._EB-INT_FAC) )
+                  END SELECT
+               !  IF (UWP(IW)/=0._EB) THEN
+               !     RHO_W(IW) = RHO_W(IW) + UWO/UWP(IW)*ARO*(OM_RHOP(IIO,JJO,KKO)-RHO_G)
+               !  ELSE
+ !if (nm==1 .and. ii==0 .and. jj==24 .and. kk==2) write(0,'(7i4,3f8.2)') nm,ijkw(10:15,iw),aro,rho_w(iw),OM_RHOP(IIO,JJO,KKO) 
+ !if (nm==3 .and. ii==56 .and. jj==6 .and. kk==1) write(0,'(7i4,3f8.2)') nm,ijkw(10:15,iw),aro,rho_w(iw),OM_RHOP(IIO,JJO,KKO) 
+                     RHO_W(IW) = RHO_W(IW) +             ARO*(OM_RHOP(IIO,JJO,KKO)-RHO_G)
+               !  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+         IF (N_SPECIES==0) THEN
+            TMP_W(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(SPECIES(0)%RCON*RHO_W(IW))
+         ELSE
+            TMP_W(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM_W(IW)*RHO_W(IW))
+         ENDIF
+         TMP_F(IW)     = TMP_W(IW)
+         QCONF(IW)     = 0._EB
          TMP(II,JJ,KK) = TMP_W(IW)
  
    END SELECT METHOD_OF_HEAT_TRANSFER
@@ -237,27 +267,34 @@ ENDIF
 END SUBROUTINE THERMAL_BC
  
  
+
 SUBROUTINE SPECIES_BC(T)
+
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
- 
-REAL(EB) T,YY_WALL,YY_G,DENOM,YY_OTHER(MAX_SPECIES),YY_EXTERIOR(MAX_SPECIES),RHO_G,UN,DD,EPSB,MFT,TSI
-INTEGER IBC,IIG,JJG,KKG,IOR,IWB,IW, II, JJ, KK, N
+REAL(EB) :: T,YY_WALL,DENOM,YY_OTHER(MAX_SPECIES),RHO_YY_OTHER(MAX_SPECIES),YY_EXTERIOR(MAX_SPECIES), &
+            YY_G(MAX_SPECIES),RHO_G,UN,DD,EPSB,MFT,TSI,INT_FAC,ARO,UWO
+INTEGER :: IBC,IIG,JJG,KKG,IOR,IWB,IW,II,JJ,KK,N,IIO,JJO,KKO,N_INT_CELLS,NOM
 TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (VENTS_TYPE), POINTER :: VT
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
+TYPE (OMESH_TYPE), POINTER :: OM
+TYPE (MESH_TYPE), POINTER :: MM
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP,OM_YYP
+REAL(EB), POINTER, DIMENSION(:) :: UWP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,OM_RHOP
  
 IF (PREDICTOR) THEN
    UU => U
    VV => V
    WW => W
    RHOP => RHOS
+   UWP => UWS
    IF (N_SPECIES > 0) YYP => YYS
 ELSE
    UU => US
    VV => VS
    WW => WS
    RHOP => RHO
+   UWP => UW
    IF (N_SPECIES > 0) YYP => YY
 ENDIF 
  
@@ -311,9 +348,9 @@ WALL_CELL_LOOP: DO IW=1,NWC
             IF (CORRECTOR) EPSB =  .5_EB*UN**2*DT*RDN(IW)
             SPECIES_LOOP_1: DO N=1,N_SPECIES
                DD    = RHODW(IW,N)*RDN(IW)
-               YY_G  = YYP(IIG,JJG,KKG,N)
+               YY_G(N)  = YYP(IIG,JJG,KKG,N)
                DENOM = DD + (.5_EB*UN+EPSB)*RHO_W(IW)
-               YY_W(IW,N) = ( MASSFLUX(IW,N) + YY_G*(DD + (EPSB-.5_EB*UN)*RHO_G) ) / DENOM
+               YY_W(IW,N) = ( MASSFLUX(IW,N) + YY_G(N)*(DD + (EPSB-.5_EB*UN)*RHO_G) ) / DENOM
             ENDDO SPECIES_LOOP_1
          ENDIF
  
@@ -391,33 +428,56 @@ WALL_CELL_LOOP: DO IW=1,NWC
          IF (CORRECTOR) EPSB =  .5_EB*UN**2*DT*RDN(IW)
          SPECIES_LOOP: DO N=1,N_SPECIES
             DD    = RHODW(IW,N)*RDN(IW)
-            YY_G  = YYP(IIG,JJG,KKG,N)
+            YY_G(N)  = YYP(IIG,JJG,KKG,N)
             DENOM = DD + (.5_EB*UN+EPSB)*RHO_W(IW)
-            YY_W(IW,N) = ( MASSFLUX(IW,N) + YY_G*(DD + (EPSB-.5_EB*UN)*RHO_G) ) / DENOM
+            YY_W(IW,N) = ( MASSFLUX(IW,N) + YY_G(N)*(DD + (EPSB-.5_EB*UN)*RHO_G) ) / DENOM
          ENDDO SPECIES_LOOP
 
       CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER
  
-         YY_OTHER(1:N_SPECIES) = OMESH(IJKW(9,IW))%YY(IJKW(10,IW),IJKW(11,IW),IJKW(12,IW),1:N_SPECIES)
-         IF (CELL_VOLUME_RATIO(IW)<0.5_EB .OR. CELL_VOLUME_RATIO(IW)>2._EB) THEN
-            IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) YY_W(IW,1:N_SPECIES) = YYP(IIG,JJG,KKG,1:N_SPECIES) 
-            SELECT CASE(IOR)
-               CASE( 1)
-                  IF (UU(II,JJ,KK)>0._EB)   YY_W(IW,1:N_SPECIES) = YY_OTHER(1:N_SPECIES)
-               CASE(-1)
-                  IF (UU(II-1,JJ,KK)<0._EB) YY_W(IW,1:N_SPECIES) = YY_OTHER(1:N_SPECIES)
-               CASE( 2)
-                  IF (VV(II,JJ,KK)>0._EB)   YY_W(IW,1:N_SPECIES) = YY_OTHER(1:N_SPECIES)
-               CASE(-2)
-                  IF (VV(II,JJ-1,KK)<0._EB) YY_W(IW,1:N_SPECIES) = YY_OTHER(1:N_SPECIES)
-               CASE( 3)
-                  IF (WW(II,JJ,KK)>0._EB)   YY_W(IW,1:N_SPECIES) = YY_OTHER(1:N_SPECIES)
-               CASE(-3)
-                  IF (WW(II,JJ,KK-1)<0._EB) YY_W(IW,1:N_SPECIES) = YY_OTHER(1:N_SPECIES)
-            END SELECT
+         NOM   = IJKW(9,IW)
+         OM    => OMESH(NOM)
+         IF (PREDICTOR) THEN
+            OM_RHOP => OM%RHOS
+            OM_YYP  => OM%YYS
          ELSE
-            YY_W(IW,1:N_SPECIES) = YY_OTHER(1:N_SPECIES)
+            OM_RHOP => OM%RHO
+            OM_YYP  => OM%YY
          ENDIF
+         MM    => MESHES(NOM)
+         RHO_G = RHOP(IIG,JJG,KKG)
+         YY_G(1:N_SPECIES) = YYP(IIG,JJG,KKG,1:N_SPECIES)
+         RHO_YY_OTHER(1:N_SPECIES) = RHO_G*YY_G(1:N_SPECIES) ! Initialize summation of mass fluxes
+         INT_FAC = INTERPOLATION_FACTOR(IW)
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  SELECT CASE(ABS(IOR))
+                     CASE(1)
+               !!       ARO = MIN(1._EB , RDY(JJ)*RDZ(KK)*MM%DY(JJO)*MM%DZ(KKO)) * DX(II)*MM%RDX(IIO)
+                        ARO = MIN(1._EB , RDY(JJ)*RDZ(KK)*MM%DY(JJO)*MM%DZ(KKO)) * 2.*DX(II)/(MM%DX(IIO)+DX(II))
+                        UWO = -SIGN(1,IOR)*( OM%U(IIO,JJO,KKO)*INT_FAC + OM%U(IIO-1,JJO,KKO)*(1._EB-INT_FAC) )
+                     CASE(2)
+               !!       ARO = MIN(1._EB , RDX(II)*RDZ(KK)*MM%DX(IIO)*MM%DZ(KKO)) * DY(JJ)*MM%RDY(JJO)
+                        ARO = MIN(1._EB , RDX(II)*RDZ(KK)*MM%DX(IIO)*MM%DZ(KKO)) * 2.*DY(JJ)/(MM%DY(JJO)+DY(JJ))
+                        UWO = -SIGN(1,IOR)*( OM%V(IIO,JJO,KKO)*INT_FAC + OM%V(IIO,JJO-1,KKO)*(1._EB-INT_FAC) )
+                     CASE(3)
+               !!       ARO = MIN(1._EB , RDX(II)*RDY(JJ)*MM%DX(IIO)*MM%DY(JJO)) * DZ(KK)*MM%RDZ(KKO)
+                        ARO = MIN(1._EB , RDX(II)*RDY(JJ)*MM%DX(IIO)*MM%DY(JJO)) * 2.*DZ(KK)/(MM%DZ(KKO)+DZ(KK))
+                        UWO = -SIGN(1,IOR)*( OM%W(IIO,JJO,KKO)*INT_FAC + OM%W(IIO,JJO,KKO-1)*(1._EB-INT_FAC) )
+                  END SELECT
+              !   IF (UWP(IW)/=0._EB) THEN
+              !      RHO_YY_OTHER(1:N_SPECIES) = RHO_YY_OTHER(1:N_SPECIES) + &
+              !         UWO/UWP(IW)*ARO*(OM_RHOP(IIO,JJO,KKO)*OM_YYP(IIO,JJO,KKO,1:N_SPECIES)-RHO_G*YY_G(1:N_SPECIES))
+              !   ELSE
+                     RHO_YY_OTHER(1:N_SPECIES) = RHO_YY_OTHER(1:N_SPECIES) + &
+                                    ARO*(OM_RHOP(IIO,JJO,KKO)*OM_YYP(IIO,JJO,KKO,1:N_SPECIES)-RHO_G*YY_G(1:N_SPECIES))
+              !   ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+         YY_OTHER(1:N_SPECIES) = RHO_YY_OTHER(1:N_SPECIES)/RHO_W(IW)
+         YY_W(IW,1:N_SPECIES)  = YY_OTHER(1:N_SPECIES)
          YYP(II,JJ,KK,1:N_SPECIES) = YY_W(IW,1:N_SPECIES)
 
    END SELECT METHOD_OF_MASS_TRANSFER
