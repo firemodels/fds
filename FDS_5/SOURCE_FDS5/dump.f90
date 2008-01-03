@@ -341,7 +341,7 @@ SUBROUTINE INITIALIZE_GLOBAL_DUMPS
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT2
 USE CONTROL_VARIABLES
-REAL(EB) :: ZZ,Z1,Z2,Z3,YY_SUM,Y_MF(9),MW_MF,TNOW,Z_F
+REAL(EB) :: ZZ,Z1,Z2,Z3,YY_SUM,Y_MF(9),MW_MF,TNOW,Z_F,CO_TO_F
 INTEGER :: NN,IZ,I,N
 CHARACTER(30), DIMENSION(20) :: LABEL
 
@@ -428,29 +428,50 @@ ENDIF
 ! Write out info about mixture fraction-based state relationships for all mixture fraction SPECies
  
 IF (MIXTURE_FRACTION .AND. STATE_FILE) THEN
+   YY_SUM = 0._EB
    OPEN(LU_STATE(1),FILE=FN_STATE(1),FORM='FORMATTED',STATUS='REPLACE')
    WRITE(TCFORM,'(A,I4.4,A)') "(",10,"(A,','),A)"
    WRITE(LU_STATE(1),TCFORM) ('kg/kg',NN=1,10),'g/mol'
    WRITE(LU_STATE(1),TCFORM) 'Z','Fuel','O2','N2','H2O','CO2','CO','H2','Soot','Other','Wgt'
-   Z_F = REACTION(1)%Z_F
-   DO IZ=0,1000
-      ZZ = IZ/REAL(1000,EB)
-      IF (ZZ<Z_F) THEN
-         Z1 = 0._EB
-         Z2 = 0._EB
-         Z3 = ZZ
-      ELSE
-         Z1 = REACTION(1)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
-         Z2 = 0._EB
-         Z3 = ZZ-Z1
-      ENDIF
-      CALL GET_MASS_FRACTION_ALL(Z1,Z2,Z3,YY_SUM,Y_MF)
-      CALL GET_MOLECULAR_WEIGHT2(Z1,Z2,Z3,YY_SUM,MW_MF)
-      WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
-   ENDDO
+   IF (CO_PRODUCTION) THEN
+      Z_F = REACTION(2)%Z_F
+      CO_TO_F = REACTION(2)%CO_YIELD * REACTION(1)%MW_FUEL / (REACTION(1)%NU_CO * MW_CO)
+      DO IZ=0,1000
+         ZZ = IZ/REAL(1000,EB)
+         IF (ZZ<Z_F) THEN
+            Z1 = 0._EB
+            Z2 = ZZ * CO_TO_F   
+            Z3 = ZZ - Z2
+         ELSE
+            Z1 = REACTION(2)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
+            Z2 = (ZZ - Z1) * CO_TO_F
+            Z3 = ZZ - Z1 - Z2
+         ENDIF
+         CALL GET_MASS_FRACTION_ALL(Z1,Z2,Z3,YY_SUM,Y_MF)
+         CALL GET_MOLECULAR_WEIGHT2(Z1,Z2,Z3,YY_SUM,MW_MF)
+         WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
+      ENDDO
+   ELSE
+      Z_F = REACTION(1)%Z_F
+      DO IZ=0,1000
+         ZZ = IZ/REAL(1000,EB)
+         IF (ZZ<Z_F) THEN
+            Z1 = 0._EB
+            Z2 = 0._EB
+            Z3 = ZZ
+         ELSE
+            Z1 = REACTION(1)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
+            Z2 = 0._EB
+            Z3 = ZZ - Z1
+         ENDIF
+         CALL GET_MASS_FRACTION_ALL(Z1,Z2,Z3,YY_SUM,Y_MF)
+         CALL GET_MOLECULAR_WEIGHT2(Z1,Z2,Z3,YY_SUM,MW_MF)
+         WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
+      ENDDO  
+   ENDIF
    CLOSE(LU_STATE(1))
 ENDIF
- 
+
 ! Open species mass file
  
 IF_DUMP_SPECIES_INFO: IF (MASS_FILE) THEN
