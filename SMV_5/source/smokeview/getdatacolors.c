@@ -1545,6 +1545,10 @@ void updatechopcolors(){
   if(slicebounds!=NULL&&islicetype!=-1){
     smin=slicebounds[islicetype].valmin;
     smax=slicebounds[islicetype].valmax;
+#ifdef pp_COMPRESS_AUTOLOADED
+    setslicebounds(islicetype);
+#endif
+
     if(setslicechopmin==1){
       ichopmin=nrgb_full*(slicechopmin-smin)/(smax-smin);
       if(ichopmin<0)ichopmin=0;
@@ -1561,6 +1565,9 @@ void updatechopcolors(){
       }
     }
     if(setslicechopmax==1){
+#ifdef pp_COMPRESS_AUTOLOADED
+      setslicebounds(islicetype);
+#endif
       ichopmax=nrgb_full*(slicechopmax - smin)/(smax-smin);
       if(ichopmax<0)ichopmax=0;
       if(ichopmax>nrgb_full-1)ichopmax=nrgb_full-1;
