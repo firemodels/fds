@@ -562,10 +562,12 @@ void compress_slices(void){
   printf("\n");
   for(i=0;i<nslice_files;i++){
     slicei = sliceinfo + i;
+    if(autozip==1&&slicei->autozip==0)continue;
     slicei->count=0;
   }
   for(i=0;i<nslice_files;i++){
     slicei = sliceinfo + i;
+    if(autozip==1&&slicei->autozip==0)continue;
     slicei->doit=1;
 
     sb=getslice(slicei->label.shortlabel);
@@ -584,6 +586,7 @@ void compress_slices(void){
 
   for(i=0;i<nslice_files;i++){
     slicei = sliceinfo + i;
+    if(autozip==1&&slicei->autozip==0)continue;
 
     if(slicei->doit==1){
       convert_slice(slicei);

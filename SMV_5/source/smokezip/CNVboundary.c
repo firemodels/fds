@@ -400,10 +400,12 @@ void compress_patches(void){
   printf("\n");
   for(i=0;i<npatch_files;i++){
     patchi = patchinfo + i;
+    if(autozip==1&&patchi->autozip==0)continue;
     patchi->count=0;
   }
   for(i=0;i<npatch_files;i++){
     patchi = patchinfo + i;
+    if(autozip==1&&patchi->autozip==0)continue;
 
     pb=getpatch(patchi->label.shortlabel);
 //    if(pb!=NULL&&pb->setvalmin==1&&pb->setvalmax==1&&pb->valmax>pb->valmin){
@@ -426,6 +428,8 @@ void compress_patches(void){
   if(npatch_files>0&&cleanfiles==0)printf("Finding bounds.\n");
   for(i=0;i<npatch_files;i++){
     patchi = patchinfo + i;
+    if(autozip==1&&patchi->autozip==0)continue;
+
     patchi->done=0;
 
     patchi->doit=convert_boundary(patchi,1);
@@ -437,6 +441,7 @@ void compress_patches(void){
     printf("Consolidating bounds.\n");
     for(i=0;i<npatch_files;i++){
       patchi = patchinfo + i;
+      if(autozip==1&&patchi->autozip==0)continue;
       if(patchi->doit==0||patchi->done==1)continue;  // if we can't doit or this patch is done then skip it
       if(patchi->setvalmax!=PERCENTILE_MAX&&
          patchi->setvalmin!=PERCENTILE_MIN)continue; // only need to consolidate percentile bounds
@@ -447,6 +452,7 @@ void compress_patches(void){
       valmax=patchi->valmax;
       for(j=i+1;j<npatch_files;j++){
         patchj = patchinfo + j;
+        if(autozip==1&&patchj->autozip==0)continue;
         if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)!=0)continue;
         patchi->done=1;
 
@@ -459,6 +465,7 @@ void compress_patches(void){
 
       for(j=i;j<npatch_files;j++){
         patchj = patchinfo + j;
+        if(autozip==1&&patchj->autozip==0)continue;
         if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)!=0)continue;
 
         patchj->valmin=valmin;
@@ -471,6 +478,7 @@ void compress_patches(void){
 
   for(i=0;i<npatch_files;i++){
     patchi = patchinfo + i;
+    if(autozip==1&&patchi->autozip==0)continue;
 
     if(patchi->doit==0)continue;
     convert_boundary(patchi,2);

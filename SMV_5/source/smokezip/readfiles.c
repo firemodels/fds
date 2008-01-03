@@ -18,12 +18,12 @@ char readfiles_revision[]="$Revision$";
 int readsmv(char *smvfile){
   
   FILE *streamsmv;
-  int iiso,igrid,ipdim;
-  int ipatch;
-  int ismoke3d;
-  int islice;
+  int iiso,igrid,ipdim, iiso_seq;
+  int ipatch,ipatch_seq;
+  int ismoke3d, ismoke3d_seq;
+  int islice, islice_seq;
 #ifdef pp_PART
-  int ipart;
+  int ipart,ipart_seq;
 #endif
   char buffer[255];
 
@@ -174,14 +174,19 @@ int readsmv(char *smvfile){
   // read in smv file a second time to compress files
 
   ipatch=0;
+  ipatch_seq=0;
 #ifdef pp_PART
   ipart=0;
+  ipart_seq=0;
 #endif
   islice=0;
+  islice_seq=0;
   iiso=0;
+  iiso_seq=0;
   ipdim=0;
   igrid=0;
   ismoke3d=0;
+  ismoke3d_seq=0;
   rewind(streamsmv);
   if(cleanfiles==0)printf("Compressing .bf, .s3d, and .sf data files referenced in %s\n",smvfile);
   if(cleanfiles==1){
@@ -276,6 +281,9 @@ int readsmv(char *smvfile){
       int filelen;
 
       smoke3di = smoke3dinfo + ismoke3d;
+      ismoke3d_seq++;
+      smoke3di->seq_id = ismoke3d_seq;
+      smoke3di->autozip = 0;
       if(fgets(buffer,255,streamsmv)==NULL)break;
       trim(buffer);
       filelen=strlen(buffer);
@@ -320,6 +328,9 @@ int readsmv(char *smvfile){
       }
 
       parti = partinfo + ipart;
+      ipart_seq++;
+      parti->seq_id = ipart_seq;
+      parti->autozip = 0;
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
       trim(buffer);
@@ -364,6 +375,9 @@ int readsmv(char *smvfile){
       }
 
       patchi = patchinfo + ipatch;
+      ipatch_seq++;
+      patchi->seq_id = ipatch;
+      patchi->autozip = 0;
       patchi->version=version;
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
@@ -409,8 +423,11 @@ int readsmv(char *smvfile){
         sscanf(buffer2,"%i %i",&dummy,&version);
       }
 
+      islice_seq++;
       slicei = sliceinfo + islice;
       slicei->version=version;
+      slicei->seq_id = islice_seq;
+      slicei->autozip = 0;
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
       trim(buffer);
@@ -483,6 +500,9 @@ int readsmv(char *smvfile){
 
       CheckMemory;
       isoi = isoinfo + iiso;
+      iiso_seq++;
+      isoi->seq_id = iiso_seq;
+      isoi->autozip = 0;
       isoi->version=version;
       isoi->dataflag=0;
       isoi->blocknumber=blocknumber;
@@ -665,10 +685,129 @@ void readini2(char *inifile){
       continue;
     }
 #endif
+    if(match(buffer,"SLICEAUTO",9)==1){
+      int nslice_auto=0;
+      int i;
+      int seq_id;
 
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&nslice_auto);
+      for(i=0;i<nslice_auto;i++){
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i",&seq_id);
+        get_startup_slice(seq_id);
+      }
+      continue;
+    }
+    if(match(buffer,"ISOAUTO",7)==1){
+      int n3dsmokes=0;
+      int i;
+      int seq_id;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&n3dsmokes);
+      for(i=0;i<n3dsmokes;i++){
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i",&seq_id);
+        get_startup_iso(seq_id);
+      }
+      continue;
+    }
+    if(match(buffer,"S3DAUTO",7)==1){
+      int n3dsmokes=0;
+      int i;
+      int seq_id;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&n3dsmokes);
+      for(i=0;i<n3dsmokes;i++){
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i",&seq_id);
+        get_startup_smoke(seq_id);
+      }
+      continue;
+    }
+    if(match(buffer,"PATCHAUTO",9)==1){
+      int n3dsmokes=0;
+      int i;
+      int seq_id;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&n3dsmokes);
+      for(i=0;i<n3dsmokes;i++){
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i",&seq_id);
+        get_startup_patch(seq_id);
+      }
+      continue;
+    }
   } 
   fclose(stream);
   return;
 
 }
+
+ /* ------------------ get_startup_patch ------------------------ */
+
+  void get_startup_patch(int seq_id){
+    int i;
+    for(i=0;i<npatch_files;i++){
+      patch *patchi;
+
+      patchi = patchinfo + i;
+      if(patchi->seq_id==seq_id){
+        patchi->autozip=1;
+        return;
+      }
+    }
+  }
+
+ /* ------------------ get_startup_smoke3d ------------------------ */
+
+  void get_startup_smoke(int seq_id){
+    int i;
+    for(i=0;i<nsmoke3d_files;i++){
+      smoke3d *smoke3di;
+
+      smoke3di = smoke3dinfo + i;
+
+      if(smoke3di->seq_id==seq_id){
+        smoke3di->autozip=1;
+        return;
+      }
+    }
+  }
+
+
+ /* ------------------ get_startup_iso ------------------------ */
+
+  void get_startup_iso(int seq_id){
+    int i;
+    for(i=0;i<niso_files;i++){
+      iso *isoi;
+
+      isoi = isoinfo + i;
+
+      if(isoi->seq_id==seq_id){
+        isoi->autozip=1;
+        return;
+      }
+    }
+  }
+
+ /* ------------------ get_startup_slice ------------------------ */
+
+  void get_startup_slice(int seq_id){
+    int i;
+    for(i=0;i<nslice_files;i++){
+      slice *slicei;
+
+      slicei = sliceinfo + i;
+
+      if(slicei->seq_id==seq_id){
+        slicei->autozip=1;
+        return;
+      }
+    }
+  }
 

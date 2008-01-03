@@ -44,6 +44,7 @@ int main(int argc, char **argv){
   int endian_fds;
   int endian_info;
 
+  autozip=0;
   endf=0;
   syst=0;
   endianfile=NULL;
@@ -113,10 +114,19 @@ int main(int argc, char **argv){
         break;
       case 'a':
         arg2=argv[i+1];
-        sscanf(arg2,"%f",&albedo);
-        if(albedo<0.0)albedo=0.0;
-        if(albedo>1.0)albedo=1.0;
-        i++;
+        if(strcmp(arg2,"auto"){
+          autozip=1;
+        }
+        else{
+          sscanf(arg2,"%f",&albedo);
+          if(albedo<0.0)albedo=0.0;
+          if(albedo>1.0)albedo=1.0;
+          i++;
+        }
+        break;
+#else
+      case 'a':
+        autozip=1;
         break;
 #endif
       case 'b':
@@ -406,6 +416,7 @@ void usage(char *prog){
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 
   printf("  -s sourcedir - specifies directory containing source files\n");
+  printf("  -auto - compress only files that are auto-loaded by Smokeview\n");
 #ifdef pp_LIGHT
   printf("  -l  - create lighting file used with 3d smoke\n");
   printf("  -a albedo  - specifies albedo (0.0 to 1.0) of 3d smoke.\n");

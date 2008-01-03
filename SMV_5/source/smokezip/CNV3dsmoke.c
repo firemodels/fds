@@ -407,6 +407,7 @@ void compress_smoke3ds(void){
   printf("\n");
   for(i=0;i<nsmoke3d_files;i++){
     smoke3di = smoke3dinfo + i;
+    if(autozip==1&&smoke3di->autozip==0)continue;
 
     convert_3dsmoke(smoke3di);
   }

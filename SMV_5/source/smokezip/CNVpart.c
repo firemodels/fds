@@ -71,6 +71,7 @@ void compress_parts(void){
 
   for(i=0;i<npart_files;i++){
     parti = partinfo + i;
+    if(autozip==1&&parti->autozip==0)continue;
 
     pb=getpart(parti->label.shortlabel);
     if(pb!=NULL){

@@ -680,6 +680,7 @@ void compress_isos(void){
   // convert and compress files
   for(i=0;i<niso_files;i++){
     isoi = isoinfo + i;
+    if(autozip==1&&isoi->autozip==0)continue;
     convert_iso(isoi);
   }
 }
