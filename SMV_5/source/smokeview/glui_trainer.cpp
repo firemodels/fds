@@ -137,7 +137,7 @@ extern "C" void update_trainer_moves(void){
 extern "C" void glui_trainer_setup(int main_window){
 
   if(glui_trainer!=NULL)glui_trainer->close();
-  glui_trainer = GLUI_Master.create_glui("Trainer",0,screenWidth,0);
+  glui_trainer = GLUI_Master.create_glui("",0,screenWidth+12,0);
   if(showgluitrainer==0)glui_trainer->hide();
   
   glui_trainer->set_main_gfx_window( main_window );
@@ -167,7 +167,7 @@ extern "C" void glui_trainer_setup(int main_window){
     }
   }
 
-  LIST_viewpoint = glui_trainer->add_listbox_to_panel(panel_explore,"View",&trainer_viewpoints,TRAINERVIEWPOINTS,TRAINER_CB);
+  LIST_viewpoint = glui_trainer->add_listbox_to_panel(panel_explore,"Viewpoint:",&trainer_viewpoints,TRAINERVIEWPOINTS,TRAINER_CB);
   {
     camera *ca;
 
@@ -321,9 +321,11 @@ void TRAINER_CB(int var){
     break;
   case LOAD_TEMP:
     TrainerViewMenu(2);
+    updatechopcolors();
     break;
   case LOAD_OXY:
     TrainerViewMenu(3);
+    updatechopcolors();
     break;
   }
 }
