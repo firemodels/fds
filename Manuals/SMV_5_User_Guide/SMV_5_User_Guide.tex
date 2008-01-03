@@ -4,6 +4,20 @@
 
 %\usepackage{wrapfig}
 \usepackage[pdftex]{graphicx}
+\usepackage[pdftex,
+        colorlinks=true,
+        urlcolor=linkblue,     % \href{...}{...} external (URL)
+        citecolor=linkred,     % citation number colors
+        linkcolor=linknavy,    % \ref{...} and \pageref{...}
+        pdftitle={User's Guide for Smokeview Version 5 - A Tool for Visualizing Fire Dynamics Simulation Data},
+        pdfauthor={Glenn Forney},
+        pdfsubject={User Guide},
+        pdfkeywords={FDS, Fire Model, NIST, BFRL},
+        pdfproducer={pdflatex},
+        pagebackref,
+        pdfpagemode=UseNone,
+        bookmarksopen=true,
+        plainpages=false]{hyperref}
 \usepackage{hyperref}
 \pdfcompresslevel=9
 \DeclareGraphicsExtensions{.jpg,.pdf,.png}
@@ -11,6 +25,9 @@
 
 %\usepackage{eso-pic}
 \usepackage{color}
+\definecolor{linknavy}{rgb}{0,0,0.50196}
+\definecolor{linkred}{rgb}{1,0,0}
+\definecolor{linkblue}{rgb}{0,0,1}
 
 %\makeatletter
 %   \AddToShipoutPicture{%
@@ -157,7 +174,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \vspace{.25in}
 
 
-\flushright{October 2007\\
+\flushright{January 2008\\
 $SVN Repository$~$Revision$}
 %
 \vfill
@@ -204,7 +221,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1017-1 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-1, 134 pages (October 2007) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-1, 134 pages (January 2008) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -1458,9 +1475,9 @@ is used to restore the origin and axis orientation.
 
 \blist
 \hitem{GETUSERVALS} The command, {\tt offset nvals getuservals}, copies {\tt nvals}\ values
-from an internal Smokeview array (starting at array index {\tt offset}) 
+from an internal Smokeview array (starting at array index {\tt offset})
 to the device operand stack to be used by the next keyword.  This allows one to modify
-the look of a device at run-time.  
+the look of a device at run-time.
 
 
 \hitem{POP} The command, {\tt pop}, restores the origin and axis
