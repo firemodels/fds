@@ -336,6 +336,8 @@ void expand_shell(FILE *stream_out, char *buffer){
   int ibeg, iend;
   int have_delta=1;
   float fullblock=0;
+  char *sides_beg;
+  int sides[6];
 
   if(get_irvals(buffer, "DELTA", 1, NULL, &delta,&ibeg, &iend)!=1){
     delta=0.0;
@@ -344,8 +346,22 @@ void expand_shell(FILE *stream_out, char *buffer){
   delta_beg=strstr(buffer,"DELTA");
   if(delta_beg!=NULL){
     ibeg=(int)(delta_beg-buffer);
+    subst_string(buffer,ibeg,iend,NULL);  // remove DELTA substring
   }
-  subst_string(buffer,ibeg,iend,NULL);  // remove DELTA substring
+
+  for(i=0;i<6;i++){
+    sides[i]=1;
+  }
+  get_irvals(buffer, "SIDES", 6, sides, NULL,&ibeg, &iend);
+  for(i=0;i<6;i++){
+    if(sides[i]!=0)sides[i]=1;
+  }
+  sides_beg=strstr(buffer,"SIDES");
+  if(sides_beg!=NULL){
+    ibeg=(int)(sides_beg-buffer);
+    subst_string(buffer,ibeg,iend,NULL);  // remove SIDES substring
+  }
+
   subst_string(buffer,0,5,"&OBST"); // replace initial &SHELL with &OBST
 
   if(get_irvals(buffer, "XB", 6, NULL, xb, &ibeg, &iend)!=6)return;
@@ -357,12 +373,24 @@ void expand_shell(FILE *stream_out, char *buffer){
   if(delta>(xb[5]-xb[4])/2.0)fullblock=1;
 
   if(fullblock==0){
-    OBST_SHELL(xb2[4]=xb[5]-delta); // top
-    OBST_SHELL(xb2[5]=xb[4]+delta); // bottom
-    OBST_SHELL(xb2[3]=xb[2]+delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // front
-    OBST_SHELL(xb2[2]=xb[3]-delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // back
-    OBST_SHELL(xb2[1]=xb[0]+delta;xb2[2]=xb[2]+delta;xb2[3]=xb[3]-delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // left
-    OBST_SHELL(xb2[0]=xb[1]-delta;xb2[2]=xb[2]+delta;xb2[3]=xb[3]-delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // right
+    if(sides[0]==1){
+      OBST_SHELL(xb2[1]=xb[0]+delta;xb2[2]=xb[2]+delta;xb2[3]=xb[3]-delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // left
+    }
+    if(sides[1]==1){
+      OBST_SHELL(xb2[0]=xb[1]-delta;xb2[2]=xb[2]+delta;xb2[3]=xb[3]-delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // right
+    }
+    if(sides[2]==1){
+      OBST_SHELL(xb2[3]=xb[2]+delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // front
+    }
+    if(sides[3]==1){
+      OBST_SHELL(xb2[2]=xb[3]-delta;xb2[4]=xb[4]+delta;xb2[5]=xb[5]-delta); // back
+    }
+    if(sides[4]==1){
+      OBST_SHELL(xb2[5]=xb[4]+delta); // bottom
+    }
+    if(sides[5]==1){
+      OBST_SHELL(xb2[4]=xb[5]-delta); // top
+    }
   }
   else{
     OBST_SHELL(xb2[1]=xb[1]);
