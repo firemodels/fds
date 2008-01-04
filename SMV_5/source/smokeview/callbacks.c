@@ -777,7 +777,12 @@ void keyboard(unsigned char key, int x, int y){
       handle_move_keys(GLUT_KEY_UP);
     }
     else{
+#ifdef pp_CLIP
+      xyz_clipplane++;
+      if(xyz_clipplane>2)xyz_clipplane=0;
+#else
       xyz_clipplane = 1 - xyz_clipplane;
+#endif
       update_clip_all();
     }
   }
@@ -913,7 +918,7 @@ void keyboard(unsigned char key, int x, int y){
      strncmp((const char *)&key2,",",1)!=0&&strncmp((const char *)&key2,".",1)!=0&&
      strncmp((const char *)&key2,"_",1)!=0)return;
 
-  if(xyz_clipplane==1&&(
+  if(xyz_clipplane!=0&&(
     strncmp((const char *)&key2,"<",1)==0||strncmp((const char *)&key2,",",1)==0||
     strncmp((const char *)&key2,">",1)==0||strncmp((const char *)&key2,".",1)==0)){
 
@@ -1014,7 +1019,12 @@ void handle_eyeview(int flag){
 
 void update_clipplanes(void){
   if(xyz_clipplane==0)printf("clipping off\n");
+#ifdef pp_CLIP
+  if(xyz_clipplane==1)printf("clipping blockages + data\n");
+  if(xyz_clipplane==2)printf("clipping blockages\n");
+#else
   if(xyz_clipplane==1)printf("clipping on\n");
+#endif
   if(xyz_clipplane==0){
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_CLIP_PLANE1);

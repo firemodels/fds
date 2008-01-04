@@ -888,14 +888,28 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     ExtractFrustum();
   }
 }
-  
+
 /* ----------------------- setClipPlanes ----------------------------- */
 
-void setClipPlanes(void){
+void unsetClipPlanes(void){
+  if(xyz_clipplane==2){
+    glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_CLIP_PLANE1);
+    glDisable(GL_CLIP_PLANE2);
+    glDisable(GL_CLIP_PLANE3);
+    glDisable(GL_CLIP_PLANE4);
+    glDisable(GL_CLIP_PLANE5);
+  }
+}
+
+/* ----------------------- setClipPlanes ----------------------------- */
+
+void setClipPlanes(int mode){
   static GLdouble clipplane_x[4], clipplane_y[4], clipplane_z[4];
   static GLdouble clipplane_X[4], clipplane_Y[4], clipplane_Z[4];
 
-  if(xyz_clipplane==1){
+  if(mode==1&&xyz_clipplane!=2)return;
+  if(xyz_clipplane!=0){
     if(clip_x==1){
       clipplane_x[0]=1.0;
       clipplane_x[1]=0.0;
@@ -968,7 +982,7 @@ void setClipPlanes(void){
       glDisable(GL_CLIP_PLANE5);
     }
   }
-  else{
+  else if(xyz_clipplane==0){
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_CLIP_PLANE1);
     glDisable(GL_CLIP_PLANE2);
@@ -1084,7 +1098,7 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
 
   if(UpdateLIGHTS==1)updateLights(0);
 
-  if(mode!=RENDER||viscolorbarpath!=1)setClipPlanes();
+  if(mode!=RENDER||viscolorbarpath!=1)setClipPlanes(0);
   if(mode==RENDER){
     if(viscolorbarpath==1){
       if(cb_hidesv==1){
@@ -1208,8 +1222,13 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
   }
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
-
+#ifdef pp_CLIP
+  if(xyz_clipplane==2)setClipPlanes(1);
+#endif
   drawBlockages(mode,DRAW_SOLID);
+#ifdef pp_CLIP
+  if(xyz_clipplane==2)unsetClipPlanes();
+#endif
   sniffErrors("drawBlockages");
 
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
