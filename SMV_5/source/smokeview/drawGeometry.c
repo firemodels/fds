@@ -3458,7 +3458,7 @@ void drawBlockages(int mode, int trans_flag){
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
    if(drawing_smooth==1&&showedit==0){
-     if(xyz_clipplane==1)glDisable(GL_CULL_FACE);
+     if(xyz_clipplane!=0)glDisable(GL_CULL_FACE);
      for(i=0;i<selected_case->nmeshes;i++){
        meshi = selected_case->meshinfo + i;
        for(j=0;j<meshi->nsmoothblockagecolors;j++){
@@ -3473,7 +3473,7 @@ void drawBlockages(int mode, int trans_flag){
        }
      }
      sniffErrors("after drawblocks");
-     if(xyz_clipplane==1)glEnable(GL_CULL_FACE);
+     if(xyz_clipplane!=0)glEnable(GL_CULL_FACE);
    }
    if(trans_flag==DRAW_TRANSPARENT)return;
    if(blocklocation!=BLOCKlocation_cad){
