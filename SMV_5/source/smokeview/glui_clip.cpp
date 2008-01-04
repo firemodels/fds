@@ -23,6 +23,11 @@ extern "C" char glui_clip_revision[]="$Revision$";
 
 #define LOCAL_INI 2
 
+#ifdef pp_CLIP
+GLUI_RadioGroup *radio_clip=NULL;
+#else
+GLUI_Checkbox *CHECKBOX_clip=NULL;
+#endif
 GLUI *glui_clip=NULL;
 GLUI_Spinner *SPINNER_clip_xupper=NULL, *SPINNER_clip_xlower=NULL;
 GLUI_Spinner *SPINNER_clip_yupper=NULL, *SPINNER_clip_ylower=NULL;
@@ -31,7 +36,6 @@ GLUI_Spinner *SPINNER_clip_zupper=NULL, *SPINNER_clip_zlower=NULL;
 GLUI_Checkbox *CHECKBOX_clip_xlower=NULL, *CHECKBOX_clip_xupper=NULL;
 GLUI_Checkbox *CHECKBOX_clip_ylower=NULL, *CHECKBOX_clip_yupper=NULL;
 GLUI_Checkbox *CHECKBOX_clip_zlower=NULL, *CHECKBOX_clip_zupper=NULL;
-GLUI_Checkbox *CHECKBOX_clip=NULL;
 
 GLUI_Panel *panel_clip_lower=NULL, *panel_clip_upper=NULL, *panel_clip=NULL,*panel_wrapup=NULL;
 GLUI_Panel *panel_clipx=NULL, *panel_clipX=NULL;
@@ -118,8 +122,14 @@ extern "C" void glui_clip_setup(int main_window){
       LIST_mesh->add_item(i+1,meshstring);
     }
   }
-
+#ifdef pp_CLIP
+    radio_clip = glui_clip->add_radiogroup_to_panel(panel_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
+    glui_clip->add_radiobutton_to_group(radio_clip,"Clipping Disabled");
+    glui_clip->add_radiobutton_to_group(radio_clip,"Clip Blockages + Data");
+    glui_clip->add_radiobutton_to_group(radio_clip,"Clip Blockages");
+#else
   CHECKBOX_clip=glui_clip->add_checkbox_to_panel(panel_clip,"Activate Clipping",&xyz_clipplane,CLIP_all,CLIP_CB);
+#endif
 
   glui_clip->add_column_to_panel(panel_clip,false);
 
@@ -243,7 +253,7 @@ void CLIP_CB(int var){
       CHECKBOX_clip_yupper->enable();
       CHECKBOX_clip_zupper->enable();
     }
-    else{
+    else if(xyz_clipplane==0){
       SPINNER_clip_xlower->disable();
       SPINNER_clip_ylower->disable();
       SPINNER_clip_zlower->disable();
@@ -287,7 +297,11 @@ void CLIP_CB(int var){
 
 extern "C" void update_clip_all(void){
   CLIP_CB(CLIP_all);
+#ifdef pp_CLIP
+  radio_clip->set_int_val(xyz_clipplane);
+#else
   CHECKBOX_clip->set_int_val(xyz_clipplane);
+#endif
 }
 
 /* ------------------ set_clip_controls ------------------------ */
