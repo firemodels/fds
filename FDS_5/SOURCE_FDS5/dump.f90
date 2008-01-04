@@ -1632,11 +1632,11 @@ REAL(EB), INTENT(IN) :: T
 IF (T<  .00_EB   .AND. T>=  -.001_EB) WRITE(LAB,'(F4.1)') T
 IF (T<   .001_EB .AND. T>=    -.1_EB) WRITE(LAB,'(F6.3)') T
 IF (T<    -.1_EB .AND. T>=    -1._EB) WRITE(LAB,'(F5.2)') T
-IF (T<    -1._EB .AND. T>=   -10._EB) WRITE(LAB,'(F4.1)') T
-IF (T<   -10._EB .AND. T>=  -100._EB) WRITE(LAB,'(F5.1)') T
-IF (T<  -100._EB .AND. T>= -1000._EB) WRITE(LAB,'(F5.0)') T
-IF (T< -1000._EB .AND. T>=-10000._EB) WRITE(LAB,'(F6.0)') T
-IF (T<-10000._EB                   ) WRITE(LAB,'(F7.0)') T
+IF (T<    -1._EB .AND. T>=   -10._EB) WRITE(LAB,'(F5.1)') T
+IF (T<   -10._EB .AND. T>=  -100._EB) WRITE(LAB,'(F5.0)') T
+IF (T<  -100._EB .AND. T>= -1000._EB) WRITE(LAB,'(F6.0)') T
+IF (T< -1000._EB .AND. T>=-10000._EB) WRITE(LAB,'(F7.0)') T
+IF (T<-10000._EB                   ) WRITE(LAB,'(F8.0)') T
 
 IF (T>=  .00_EB  .AND. T<  .001_EB) WRITE(LAB,'(F4.1)') T
 IF (T>=  .001_EB .AND. T<    .1_EB) WRITE(LAB,'(F6.3)') T
@@ -1935,7 +1935,7 @@ SURFLOOP: DO N=0,N_SURF-1
       DO NL=1,SF%N_LAYERS
          WRITE(LU_OUTPUT,'(A,I2)')      '     Layer ',NL
          WRITE(LU_OUTPUT,'(A,F8.3)')    '        Thickness   (m): ',SF%LAYER_THICKNESS(NL)
-         WRITE(LU_OUTPUT,'(A,F8.3)')    '        Density (kg/m3): ',SF%LAYER_DENSITY(NL)
+         WRITE(LU_OUTPUT,'(A,F8.2)')    '        Density (kg/m3): ',SF%LAYER_DENSITY(NL)
          DO NN=1,SF%N_LAYER_MATL(NL)
             WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SF%LAYER_MATL_NAME(NL,NN)),', Mass fraction: ',SF%LAYER_MATL_FRAC(NL,NN)
          ENDDO
@@ -2051,7 +2051,7 @@ ENDIF
  
 IF (DT_PL3D<T_END) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' PLOT3D Information'
-   WRITE(LU_OUTPUT,'(A,F8.3/)')'   Sampling Interval (s)          ',DT_PL3D
+   WRITE(LU_OUTPUT,'(A,F8.1/)')'   Sampling Interval (s)          ',DT_PL3D
    DO N=1,5
       WRITE(LU_OUTPUT,'(I4,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N))
    ENDDO
@@ -2162,7 +2162,7 @@ WRITE(LU_CORE(NM)) MASSFLUX
 WRITE(LU_CORE(NM)) RHODW
 WRITE(LU_CORE(NM)) QRADIN
 WRITE(LU_CORE(NM)) QRADOUT
-WRITE(LU_CORE(NM)) QR_W
+IF (N_EVAP_INDICIES>0) WRITE(LU_CORE(NM)) QR_W
 WRITE(LU_CORE(NM)) TW
 WRITE(LU_CORE(NM)) EW
 WRITE(LU_CORE(NM)) KW
@@ -2282,7 +2282,7 @@ READ(LU_RESTART(NM))  MASSFLUX
 READ(LU_RESTART(NM))  RHODW
 READ(LU_RESTART(NM))  QRADIN
 READ(LU_RESTART(NM))  QRADOUT
-READ(LU_RESTART(NM))  QR_W
+IF (N_EVAP_INDICIES>0) READ(LU_RESTART(NM))  QR_W
 READ(LU_RESTART(NM))  TW
 READ(LU_RESTART(NM))  EW
 READ(LU_RESTART(NM))  KW
