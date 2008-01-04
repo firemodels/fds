@@ -1371,6 +1371,9 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                   DY_DTMP_DROP = 0._EB
                ENDIF
                IF (Y_DROP<=Y_GAS) H_MASS = 0._EB
+            ELSE
+               DY_DTMP_DROP = 0._EB
+               Y_DROP       = 0._EB
             ENDIF
 
             ! Update the droplet temperature semi_implicitly
