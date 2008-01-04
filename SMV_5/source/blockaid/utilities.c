@@ -306,10 +306,10 @@ int get_irvals(char *line, char *key, int nvals, int *ivals, float *rvals, int *
         sscanf(cvals,"%i",ivals);
         break;
       case 3:
-        scanf(cvals,"%i %i %i",ivals,ivals+1,ivals+2);
+        sscanf(cvals,"%i %i %i",ivals,ivals+1,ivals+2);
         break;
       case 6:
-        scanf(cvals,"%i %i %i %i %i %i",ivals,ivals+1,ivals+2,ivals+3,ivals+4,ivals+5);
+        sscanf(cvals,"%i %i %i %i %i %i",ivals,ivals+1,ivals+2,ivals+3,ivals+4,ivals+5);
         break;
       default:
         return 0;
