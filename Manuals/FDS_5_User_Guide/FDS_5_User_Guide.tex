@@ -5916,6 +5916,8 @@ or {\ct DT\_CTRL} Note that {\ct DT\_SLCF} controls Smoke3D output. {\ct DT\_HRR
 output of heat release rate and associated quantities.
 \item[{\ct MASS\_FILE}] If {\ct .TRUE.}, produce an output file listing the total masses of all gas species as a function of time. It is {\ct .FALSE.} by default because the calculation
 of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} controls the frequency of output.
+\item[{\ct STATE\_FILE}] If {\ct .TRUE.}, produce an output file listing the species mass fractions associated with the mixture fraction, assuming complete combustion. It is {\ct .FALSE.} by default,
+and only makes sense for calculations involving the mixture fraction model.
 \item[{\ct MAXIMUM\_DROPLETS}] Maximum number of Lagrangian particles that can be included on any
 mesh at any given time. (Default 500000)
 \item[{\ct SMOKE3D}] If {\ct .FALSE.}, do not produce an animation of the smoke and fire. It is {\ct .TRUE.} by default.
@@ -6856,6 +6858,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct SMOKE3D}                   & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                      \\ \hline
 {\ct SMOKE3D\_QUANTITY}         & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
 %{\ct SMOKE3D\_COMPRESSION}      & Character    & Type of compression for S3D file  &           & {\ct 'RLE'}                      \\ \hline
+{\ct STATE\_FILE}               & Logical      & Flag for state relation file      &           & {\ct .FALSE.}                     \\ \hline
 %{\ct TIMING}                    & Logical      & General purpose timing flag       &           & {\ct .FALSE.}                      \\ \hline
 {\ct WRITE\_XYZ}                & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}                     \\ \hline
 \end{tabular*}
@@ -9913,14 +9916,14 @@ You must specifically ask that this file be generated, as it can potentially cos
 The functional dependence of the mass fraction of the reactants and
 products of combustion on the mixture fraction is
 reported in the comma delimited
-file {\bf CHID\_state\_II.csv}. The file consists of nominally 10 columns,
+file {\bf CHID\_state.csv}. The file consists of nominally 10 columns,
 the first column containing the mixture fraction, the last column the average molecular weight, and
-the rest the mass fractions of the various gases.  Where {\ct II} represents the chemical reaction for
-which the state relationships represent.  For the two parameter model these are {\ct 01}
-for the complete reaction (formation of combustion products) and {\ct 02} for the null reaction
-(extinction).  For the three parameter model these are {\ct 01}, {\ct 02}, and {\ct 03} for the
-incomplete (CO production) reaction, complete ($CO_2$ production) reaction, and the null
-reaction respectively.
+the rest the mass fractions of the various gas species in the case where complete combustion has occurred.
+
+You must specifically ask that this file be generated. Set
+{\ct STATE\_FILE=.TRUE.} on the {\ct DUMP} line to create this output file. If you forget to do this, you can easily re-run the case (remember to rename it something else!) for
+a few time steps. This file is created before the time iterations even begin.
+
 
 \section{Slice Files}
 \label{out:SLCF}
