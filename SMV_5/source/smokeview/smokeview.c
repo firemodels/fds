@@ -3312,11 +3312,14 @@ void usage(char **argv){
   if(showbuild==1){
     printf("  \n");
     printf("  Smokeview was built with the following pre-processing directives set:\n");
+#ifdef pp_ALPHA
+    printf(" pp_ALPHA");
+#endif
 #ifdef pp_release
-    printf("   pp_release");
+    printf(" pp_release");
 #endif
 #ifdef _DEBUG
-    printf("   _DEBUG");
+    printf(" _DEBUG");
 #endif
 #ifdef EGZ
     printf(", EGZ");
@@ -3324,8 +3327,17 @@ void usage(char **argv){
 #ifdef ISO_DEBUG
     printf(", ISO_DEBUG");
 #endif
+#ifdef pp_AVATAR
+    printf(", pp_AVATAR");
+#endif
+#ifdef pp_CLIP
+    printf(", pp_CLIP");
+#endif
 #ifdef pp_COLOR
     printf(", pp_COLOR");
+#endif
+#ifdef pp_COMPRESS_AUTOLOADED
+    printf(", pp_COMPRESS_AUTOLOADED");
 #endif
 #ifdef pp_COMPRESS
     printf(", pp_COMPRESS");
@@ -3356,9 +3368,6 @@ void usage(char **argv){
 #endif
 #ifdef pp_SPHERE
     printf(", pp_SPHERE");
-#endif
-#ifdef pp_ALPHA
-    printf(", pp_ALPHA");
 #endif
 #ifdef pp_THREADS2
     printf(", pp_THREADS2");
