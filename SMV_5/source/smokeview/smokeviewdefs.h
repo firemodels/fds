@@ -236,13 +236,8 @@ void _sniffErrors(char *whereat);
 #define PINK 3
 #define RED 4
 
-#ifdef pp_THREADS2
 #define LOCK_COMPRESS if(mt_compress==1)pthread_mutex_lock(&mutexCOMPRESS);
 #define UNLOCK_COMPRESS if(mt_compress==1)pthread_mutex_unlock(&mutexCOMPRESS);
-#else
-#define LOCK_COMPRESS
-#define UNLOCK_COMPRESS
-#endif
 #endif
 
 #define DRAW_SOLID 0

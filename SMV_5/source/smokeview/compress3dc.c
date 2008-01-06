@@ -12,9 +12,7 @@
 #include <math.h>
 #include "ASSERT.h"
 #include "smokeviewdefs.h"
-#ifdef pp_THREADS2
 #include <pthread.h>
-#endif
 #include "smokeviewvars.h"
 
 // svn revision character string
@@ -247,7 +245,6 @@ unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer
 
  /* ------------------ mt_compress_svzip ------------------------ */
 
-#ifdef pp_THREADS2
 void *mt_compress_svzip(void *arg){
 
   LOCK_COMPRESS
@@ -258,12 +255,10 @@ void *mt_compress_svzip(void *arg){
   return NULL;
 
    }
-#endif
 
 /* ------------------ compreess_svzip ------------------------ */
 
 void compress_svzip(void){
-#ifdef pp_THREADS2
   if(mt_compress==1){
     pthread_create( 
       &compress_thread_id, 
@@ -275,9 +270,6 @@ void compress_svzip(void){
   else{
     compress_svzip2();
   }
-#else
-    compress_svzip2();
-#endif
 }
 
 

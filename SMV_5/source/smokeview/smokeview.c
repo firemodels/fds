@@ -3369,9 +3369,6 @@ void usage(char **argv){
 #ifdef pp_SPHERE
     printf(", pp_SPHERE");
 #endif
-#ifdef pp_THREADS2
-    printf(", pp_THREADS2");
-#endif
 #ifdef USE_ZLIB
     printf(", USE_ZLIB");
 #endif

@@ -16,9 +16,7 @@
 
 
 #ifndef CPP
-#ifdef pp_THREADS2
 #include <pthread.h>
-#endif
 #endif
 
 #ifdef pp_SPHERE
@@ -519,11 +517,9 @@ SVEXTERN float veclengths[NVECLENGTHS];
 SVEXTERN float texture_origin[3];
 
 #ifndef CPP
-#ifdef pp_THREADS2
 SVEXTERN pthread_mutex_t mutexCOMPRESS;
 SVEXTERN pthread_t smooth_block_thread_id;
 SVEXTERN pthread_t compress_thread_id;
-#endif
 #endif
 
 SVEXTERN int lock_allsmoke;
@@ -725,11 +721,7 @@ SVEXTERN colorbardata *colorbarinfo;
 
 SVEXTERN int update_load_startup;
 SVEXTERN int do_ignited;
-#ifdef pp_THREADS2
 SVEXTERN int mt_compress;
-#else
-SVEXTERN int mt_compress;
-#endif
 SVEXTERN int ntotal_blockages;
 SVEXTERN int updateindexcolors;
 SVEXTERN int show_path_knots;
