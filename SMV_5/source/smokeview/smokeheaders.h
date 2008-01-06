@@ -228,9 +228,6 @@ EXTERNCPP void drawsmoke3d(smoke3d *smoke3di);
 #ifdef pp_GPU
 EXTERNCPP void drawsmoke3dGPU(smoke3d *smoke3di);
 #endif
-#ifdef pp_CULL
-EXTERNCPP void drawsmoke3dCULL(smoke3d *smoke3di);
-#endif
 EXTERNCPP void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent);
 EXTERNCPP void updatesmoke3dmenulabels(void);
 EXTERNCPP void Labels_CB(int value);

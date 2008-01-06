@@ -356,7 +356,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       EGZ_FREAD(&time,4,1,isostream);
       if(EGZ_FEOF(isostream)!=0)break;
       meshi->isotimes[i]=time;
-      printf("isosurface time=%f\n",time);
+      printf("isosurface time=%.2f\n",time);
       for(j=0;j<meshi->nisolevels;j++){
         EGZ_FREAD(ibuffer,4,4,isostream);
         nvertices=ibuffer[0];
