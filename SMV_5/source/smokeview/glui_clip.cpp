@@ -109,6 +109,7 @@ extern "C" void glui_clip_setup(int main_window){
   glui_clip->add_column_to_panel(panel_clipz,false);
   CHECKBOX_clip_zlower=glui_clip->add_checkbox_to_panel(panel_clipz,"",&clip_z,CLIP_zlower,CLIP_CB);
 
+  /*
   if(nmeshes>1){
     int i;
 
@@ -122,6 +123,7 @@ extern "C" void glui_clip_setup(int main_window){
       LIST_mesh->add_item(i+1,meshstring);
     }
   }
+  */
 #ifdef pp_CLIP
     radio_clip = glui_clip->add_radiogroup_to_panel(panel_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
     glui_clip->add_radiobutton_to_group(radio_clip,"Clipping Disabled");
@@ -177,7 +179,6 @@ extern "C" void glui_clip_setup(int main_window){
       set_clip_controls(clip_mesh);  // clip vals from mesh clip_mesh
     }
   }
-
 
   glui_clip->set_main_gfx_window( main_window );
 }
