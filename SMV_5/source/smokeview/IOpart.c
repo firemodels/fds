@@ -173,7 +173,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
 
     FORTPART5READ(&time,1);
     if(returncode==0)break;
-    printf("particle time=%f",time);
+    printf("particle time=%.2f",time);
     if(doit==1){
       parti->ptimes[count2]=time;
     }
