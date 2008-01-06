@@ -12,9 +12,7 @@
 #else
 #include <GL/glut.h>
 #endif
-#ifdef pp_THREADS2
 #include <pthread.h>
-#endif
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "ASSERT.h"
@@ -2800,7 +2798,6 @@ int remove_block(blockagedata *block, const blockagedata *hole,int flag,blockage
 
 /* ------------------ mt_update_smooth_blockages ------------------------ */
 
-#ifdef pp_THREADS2
 void *mt_update_smooth_blockages(void *arg){
 
   if(ifsmoothblock()==1){
@@ -2812,13 +2809,11 @@ void *mt_update_smooth_blockages(void *arg){
   return NULL;
 
    }
-#endif
 
 /* ------------------ smooth_blockages ------------------------ */
 
 void smooth_blockages(void){
   smoothing_blocks=1;
-#ifdef pp_THREADS2
   if(mt_compress==1){
     pthread_create( 
       &smooth_block_thread_id,
@@ -2833,12 +2828,6 @@ void smooth_blockages(void){
       update_smooth_blockages();
     }
   }
-#else
-  blocksneedsmoothing=ifsmoothblock();
-  if(blocksneedsmoothing==1){
-    update_smooth_blockages();
-  }
-#endif
 }
 
 /* ------------------ update_smooth_blockages ------------------------ */

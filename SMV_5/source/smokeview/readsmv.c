@@ -18,9 +18,7 @@
 #endif
 #include "flowfiles.h"
 #include "MALLOC.h"
-#ifdef pp_THREADS2
 #include <pthread.h>
-#endif
 #ifdef pp_SPHERE
 #include "csphere.h"
 #endif
@@ -4369,9 +4367,7 @@ typedef struct {
     readhrr(LOAD, &errorcode);
   }
 
-#ifdef pp_THREADS2
   if(mt_compress==1)pthread_mutex_init(&mutexCOMPRESS,NULL);
-#endif
 
   init_part5prop();
   init_plot3dtimelist();
