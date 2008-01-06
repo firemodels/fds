@@ -1513,11 +1513,7 @@ void initvars1(void){
   ndefaultcolorbars=3;
   update_load_startup=0;
   do_ignited=0;
-#ifdef pp_THREADS2
   mt_compress=1;
-#else
-  mt_compress=0;
-#endif
   updateindexcolors=0;
   show_path_knots=0;
   keyframe_snap=0;

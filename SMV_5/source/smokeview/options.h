@@ -48,21 +48,22 @@
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB
-#define pp_THREADS2
 
 #ifdef pp_ALPHA2
 #define pp_TOUR
 #define pp_LIGHT
 #endif
+
 #ifdef pp_ALPHA
 #define pp_CLIP
 #define pp_COMPRESS_AUTOLOADED
-#define pp_AVATAR
-#define pp_SHOWLIGHT
-#define pp_COLOR
 #define pp_GPU
 #define pp_MEM2
 #define pp_CULL
+
+#define pp_AVATAR
+#define pp_SHOWLIGHT
+#define pp_COLOR
 #endif
 
 #undef pp_OPEN

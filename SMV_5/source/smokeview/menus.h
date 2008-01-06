@@ -3175,9 +3175,6 @@ void VentMenu(int value){
 //   case visBLOCKFacet:
 //   case visBLOCKSmooth:
    case visBLOCKAsInput:
-#ifndef pp_THREADS2
-     if(blocksneedsmoothing==1)update_smooth_blockages();
-#endif
      visBlocks=value;
      update_trainer_outline();
      
