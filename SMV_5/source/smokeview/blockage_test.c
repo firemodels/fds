@@ -216,7 +216,7 @@ void getnewpos(float *oldpos, float dx, float dy, float dz,float local_speed_fac
   
 #ifdef _DEBUG
   rthistime=(float)local_thistime/1000.0;
-  printf("time=%f\n",rthistime);
+  printf("time=%.2f\n",rthistime);
 #endif
 
   seek_dist=0.3;

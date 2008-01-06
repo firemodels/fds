@@ -29,7 +29,7 @@
 #endif
 
 #ifdef pp_STANDARD
-#define SMVVERSION "5.0.7"
+#define SMVVERSION "5.1"
 #endif
 
 
@@ -42,7 +42,7 @@
 #endif
 
 #ifndef _DEBUG
-#define pp_RELEASE
+#define pp_release
 #endif
 
 #define pp_DRAWISO
@@ -54,13 +54,13 @@
 #define pp_LIGHT
 #endif
 
-#ifdef pp_ALPHA
 #define pp_CLIP
 #define pp_COMPRESS_AUTOLOADED
-#define pp_GPU
 #define pp_MEM2
-#define pp_CULL
 
+#ifdef pp_ALPHA
+#define pp_GPU
+#define pp_CULL
 #define pp_AVATAR
 #define pp_SHOWLIGHT
 #define pp_COLOR

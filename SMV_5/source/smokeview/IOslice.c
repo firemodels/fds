@@ -3044,7 +3044,7 @@ int average_slice_data(float *data, int ndata, int data_per_timestep, float *tim
     datatemp[i]=0.0;
   }
   for(i=0;i<ntimes;i++){
-    printf("averaging time=%f\n",times[i]);
+    printf("averaging time=%.2f\n",times[i]);
     below=0;
     for(j=i-1;j>=0;j--){
       if(times[i]-times[j]>average_timed2){
@@ -3265,7 +3265,7 @@ int getslicerledata(char *file,
     compindex[ns].offset=compindex[ns-1].offset+nncomp;
     compindex[ns-1].size=nncomp;
 
-    printf("slice time=%4.1f\n",ttime);
+    printf("slice time=%.2f\n",ttime);
     returncode=fseek(stream,4,SEEK_CUR);
     if(returncode!=0)break;
 
@@ -3351,7 +3351,7 @@ int getslicezlibdata(char *file,
     compindex[ns].offset=compindex[ns-1].offset+nncomp;
     compindex[ns-1].size=nncomp;
 
-    printf("slice time=%4.1f\n",ttime);
+    printf("slice time=%.2f\n",ttime);
     fread(cd,1,nncomp,stream);
     cd+=nncomp;
     if(ns>=nsliceframes||cd-compressed_data>=ncompressed)break;

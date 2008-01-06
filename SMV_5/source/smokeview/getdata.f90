@@ -496,9 +496,12 @@ do
     sprframe(nframes) = npp2a
     if(nframes+1.le.mxframes)bframe(nframes+1) = bframe(nframes) + sframe(nframes)
     if(npp2.eq.0)then
-  	  write(6,*)"particle time=",stime
+  	  write(6,10)stime
+10    format("particle time=",f9.2)
   	 else
       write(6,*)"particle time=",stime,"particles",npp1,"droplets",npp2
+      write(6,20)stime,npp2
+20    format("particle time=",f9.2," particles",i9," droplets",i9)      
     endif
   endif
 
@@ -683,7 +686,8 @@ do
   if(.not.load)cycle
   nsteps = nsteps + 1
   times(nsteps) = time
-  write(6,*)"slice time=",time
+  write(6,10)time
+10 format("slice time=",f9.2)  
   if(idir.eq.3)then
     istart = (nsteps-1)*nxsp*nysp
     do i = 1, nxsp

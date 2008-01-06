@@ -810,7 +810,7 @@ void readpatch(int ifile, int flag, int *errorcode){
 
     if(loadpatchbysteps==0||loadpatchbysteps==1){
       if(!(settmin_b!=0&&*meshi->patchtimesi<tmin_b)){
-        printf("boundary time=%f\n",*meshi->patchtimesi);
+        printf("boundary time=%.2f\n",*meshi->patchtimesi);
 
         meshi->npatch_frames++;
         if(meshi->npatch_frames + 1 > mxpatch_frames){
@@ -3019,7 +3019,7 @@ void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata,
     if(local_count%boundframestep!=0)continue;
     i++;
     if(i>=ntimes)break;
-    printf("boundary time=%f\n",local_time);
+    printf("boundary time=%.2f\n",local_time);
     ASSERT(i<ntimes);
     local_times[i]=local_time;
     zipoffset[i]=offset;
