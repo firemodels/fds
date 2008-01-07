@@ -2518,6 +2518,15 @@ notation is handy.
 Note that the mirror image of a scene is {\bf not} shown in Smokeview.
 \end{warning}
 
+A word of warning about {\ct MIRROR} boundaries in FDS. In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundaries are often used as a way of
+saving on computation time. However, because FDS is an LES (Large Eddy Simulation) model, the use of symmetry boundaries should be considered carefully. The reason for this is that
+an LES model does not compute a time-averaged solution of the N-S equations. In other words, for a RANS model, a fire plume is represented as an axially-symmetric flow field because
+that is what you would expect if you time-averaged the actual flow field over a sufficient amount of time. Thus, for a RANS model, a symmetry boundary along the plume centerline is
+appropriate. In an LES model, however, there is no time-averaging built into the equations, and there is no time-averaged, symmetric solution. Putting a {\ct MIRROR} boundary
+along the centerline of a fire plume will change its dynamics entirely. It will produce something very much like the flow field of a fire that is adjacent to a vertical wall. For this
+reason, a {\ct MIRROR} boundary condition is not recommended along the centerline of a turbulent fire plume. If the fire or burner is very small, and the flow is laminar, then the
+{\ct MIRROR} boundary condition makes sense. In fact, in 2-D calculations, {\ct MIRROR} boundary conditions are employed in the third coordinate direction (this is done automatically, you
+need not specify it explicitly).
 
 \subsection{\texorpdfstring{{Controlling {\tt VENT}s}}{Controlling VENTs}}
 
