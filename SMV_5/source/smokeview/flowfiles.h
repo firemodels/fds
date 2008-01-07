@@ -7,14 +7,25 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 
-/* --------------------------  culldata ------------------------------------ */
 #ifdef pp_CULL
+
+/* --------------------------  culldata ------------------------------------ */
+
 typedef struct {
   float xbeg, xend, ybeg, yend, zbeg, zend;
   int   ibeg, iend, jbeg, jend, kbeg, kend;
   int iskip, jskip, kskip;
   int npixels;
 } culldata;
+
+/* --------------------------  cullplanedata ------------------------------------ */
+
+typedef struct {
+  int   ibeg, iend, jbeg, jend, kbeg, kend;
+  float dist;
+  culldata *cull;
+} cullplanedata;
+
 #endif
 
 

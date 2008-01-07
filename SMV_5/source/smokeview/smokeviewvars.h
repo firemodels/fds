@@ -35,7 +35,9 @@ SVEXTERN int updategluiview;
 SVEXTERN int render_double,render_double_state;
 SVEXTERN int usetexturebar;
 #ifdef pp_CULL
-SVEXTERN int cullsmoke;
+SVEXTERN int cullsmoke, ncullplanexinfo, ncullplaneyinfo, ncullplanezinfo;
+SVEXTERN cullplanedata *cullplanexinfo, *cullplaneyinfo, *cullplanezinfo;
+SVEXTERN cullplanedata **sort_cullplanexinfo, **sort_cullplaneyinfo, **sort_cullplanezinfo;
 #endif
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
