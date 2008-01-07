@@ -3101,7 +3101,8 @@ case -2:
 
       culli = meshi->cullinfo + icull;
       if(cullsmoke==1&&culli->npixels==0)continue;
-      for(jjj=culli->jbeg;jjj<culli->jend;jjj+=skip){
+//      for(jjj=culli->jbeg;jjj<culli->jend;jjj+=skip){
+      for(jjj=culli->jend-1;jjj>=culli->jbeg;jjj-=skip){
 
       j=jjj;
 //      if(ssmokedir<0)j = js1+js2-jjj-1;
@@ -3967,10 +3968,19 @@ unsigned char adjustalpha(unsigned char alpha, float *xe, float *xp, float facto
 
 void getsmokedir(float *mm){
     /*
-      ( m00 m01 m02 m03 ) (x)    (0)
-      ( m10 m11 m12 m13 ) (y)    (0)
-      ( m20 m21 m22 m23 ) (z)  = (0)
-      ( m30 m31 m32 m33 ) (1)    (1)
+      ( m0 m4 m8  m12 ) (x)    (0)
+      ( m1 m5 m9  m13 ) (y)    (0)
+      ( m2 m6 m10 m14 ) (z)  = (0)
+      ( m3 m7 m11 m15 ) (1)    (1)
+
+       ( m0 m4  m8 )      (m12)
+   Q=  ( m1 m5  m9 )  u = (m13)
+       ( m2 m6 m10 )      (m14)
+      
+      (Q   u) (x)     (0)      
+      (v^T 1) (y)   = (1)
+       
+      m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
     */
   int i,ii,j;
   mesh *meshj;
@@ -3984,10 +3994,9 @@ void getsmokedir(float *mm){
 
   pi=4.0*atan(1.0);
 
-  xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+mm[2]*mm[14])/mscale[0];
-  xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+mm[6]*mm[14])/mscale[1];
+  xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
+  xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
   xyzeyeorig[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
-
   
   for(j=0;j<selected_case->nmeshes;j++){
     meshj = selected_case->meshinfo + j;
@@ -4182,8 +4191,6 @@ void getsmokedir(float *mm){
     }
     meshj->smokedir=iminangle;
     if(demo_mode!=0)meshj->smokedir=1;
-
-
   }
 }
 
@@ -4533,99 +4540,229 @@ void makeiblank_smoke3d(void){
 
 #ifdef pp_CULL
 
-/*
-typedef struct {
-  float xbeg, xend, ybeg, yend, zbeg, zend;
-  int   ibeg, iend, jbeg, jend, kbeg, kend;
-  int iskip, jskip, kskip;
-  int npixels;
-} culldata;
-*/
+/* ------------------ cullplane_compare ------------------------ */
+
+int cullplane_compare( const void *arg1, const void *arg2 ){
+  cullplanedata *cpi, *cpj;
+
+  cpi = *(cullplanedata **)arg1;
+  cpj = *(cullplanedata **)arg2;
+
+  if(cpi->dist<cpj->dist)return -1;
+  if(cpi->dist>cpj->dist)return 1;
+
+  return 0;
+}
 
 /* ------------------ initcull ------------------------ */
 
-void initcull(mesh *meshi, int cullflag){
+void initcull(int cullflag){
   culldata *culli;
   int nx, ny, nz;
-  int i, j, k;
+  int i, j, k, ii;
   int ibeg, iend, jbeg, jend, kbeg, kend;
   float xbeg, xend, ybeg, yend, zbeg, zend;
   int iskip, jskip, kskip;
+  cullplanedata *cpx, *cpy, *cpz;
 
-  if(cullflag==1&&meshi->ibar>5){
-    iskip = meshi->ibar/6;
-    jskip = iskip;
-    kskip = iskip;
-  }
-  else{
-    iskip = meshi->ibar+1;
-    jskip = meshi->ibar+1;
-    kskip = meshi->ibar+1;
-  }
-  nx = meshi->ibar/iskip + 1;
-  ny = meshi->jbar/jskip + 1;
-  nz = meshi->kbar/kskip + 1;
-  meshi->ncullinfo = nx*ny*nz;
-  FREEMEMORY(meshi->cullinfo);
-  NewMemory( (void **)&meshi->cullinfo,nx*ny*nz*sizeof(culldata));
-  NewMemory( (void **)&meshi->cullQueryId,nx*ny*nz*sizeof(GLuint));
-  culli=meshi->cullinfo;
+  FREEMEMORY(cullplanexinfo);
+  FREEMEMORY(cullplaneyinfo);
+  FREEMEMORY(cullplanezinfo);
+  ncullplanexinfo=0;
+  ncullplaneyinfo=0;
+  ncullplanezinfo=0;
 
-  for(k=0;k<nz;k++){
-    kbeg = k*kskip;
-    kend = kbeg + kskip;
-    if(kend>meshi->kbar)kend=meshi->kbar;
-    zbeg = meshi->zplt[kbeg];
-    zend = meshi->zplt[kend];
-    for(j=0;j<ny;j++){
-      jbeg = j*jskip;
-      jend = jbeg + jskip;
-      if(jend>meshi->jbar)jend=meshi->jbar;
-      ybeg = meshi->yplt[jbeg];
-      yend = meshi->yplt[jend];
-      for(i=0;i<nx;i++){
-        ibeg = i*iskip;
-        iend = ibeg + iskip;
-        if(iend>meshi->ibar)iend=meshi->ibar;
-        xbeg = meshi->xplt[ibeg];
-        xend = meshi->xplt[iend];
+#define NCULLS 5
+  for(ii=0;ii<nmeshes;ii++){
+    mesh *meshi;
 
-        culli->ibeg=ibeg;
-        culli->iend=iend;
+    meshi=meshinfo+ii;
 
-        culli->jbeg=jbeg;
-        culli->jend=jend;
+    if(cullflag==1&&meshi->ibar>(NCULLS-1)){
+      iskip = meshi->ibar/NCULLS;
+      jskip = iskip;
+      kskip = iskip;
+    }
+    else{
+      iskip = meshi->ibar+1;
+      jskip = meshi->ibar+1;
+      kskip = meshi->ibar+1;
+    }
+    nx = meshi->ibar/iskip + 1;
+    ny = meshi->jbar/jskip + 1;
+    nz = meshi->kbar/kskip + 1;
+    meshi->ncullinfo = nx*ny*nz;
 
-        culli->kbeg=kbeg;
-        culli->kend=kend;
+    FREEMEMORY(meshi->cullinfo);
+    NewMemory( (void **)&meshi->cullinfo,nx*ny*nz*sizeof(culldata));
 
-        culli->xbeg=xbeg;
-        culli->xend=xend;
+    FREEMEMORY(meshi->cullQueryId);
+    NewMemory( (void **)&meshi->cullQueryId,nx*ny*nz*sizeof(GLuint));
+    culli=meshi->cullinfo;
 
-        culli->ybeg=ybeg;
-        culli->yend=yend;
+    for(k=0;k<nz;k++){
+      kbeg = k*kskip;
+      kend = kbeg + kskip;
+      if(kend>meshi->kbar)kend=meshi->kbar;
+      zbeg = meshi->zplt[kbeg];
+      zend = meshi->zplt[kend];
+      for(j=0;j<ny;j++){
+        jbeg = j*jskip;
+        jend = jbeg + jskip;
+        if(jend>meshi->jbar)jend=meshi->jbar;
+        ybeg = meshi->yplt[jbeg];
+        yend = meshi->yplt[jend];
+        for(i=0;i<nx;i++){
+          ibeg = i*iskip;
+          iend = ibeg + iskip;
+          if(iend>meshi->ibar)iend=meshi->ibar;
+          xbeg = meshi->xplt[ibeg];
+          xend = meshi->xplt[iend];
 
-        culli->zbeg=zbeg;
-        culli->zend=zend;
+          culli->ibeg=ibeg;
+          culli->iend=iend;
 
-        culli->iskip=iskip;
-        culli->jskip=jskip;
-        culli->kskip=kskip;
+          culli->jbeg=jbeg;
+          culli->jend=jend;
 
-        culli->npixels=0;
+          culli->kbeg=kbeg;
+          culli->kend=kend;
 
-        culli++;
+          culli->xbeg=xbeg;
+          culli->xend=xend;
+
+          culli->ybeg=ybeg;
+          culli->yend=yend;
+
+          culli->zbeg=zbeg;
+          culli->zend=zend;
+
+          culli->iskip=iskip;
+          culli->jskip=jskip;
+          culli->kskip=kskip;
+
+          culli->npixels=0;
+
+          ncullplanexinfo+=(iend-ibeg);
+          ncullplaneyinfo+=(jend-jbeg);
+          ncullplanezinfo+=(kend-kbeg);
+
+          culli++;
+        }
       }
     }
   }
+  NewMemory( (void **)&cullplanexinfo,ncullplanexinfo*sizeof(cullplanedata));
+  NewMemory( (void **)&cullplaneyinfo,ncullplaneyinfo*sizeof(cullplanedata));
+  NewMemory( (void **)&cullplanezinfo,ncullplanezinfo*sizeof(cullplanedata));
 
+  NewMemory( (void **)&sort_cullplanexinfo,ncullplanexinfo*sizeof(cullplanedata *));
+  NewMemory( (void **)&sort_cullplaneyinfo,ncullplaneyinfo*sizeof(cullplanedata *));
+  NewMemory( (void **)&sort_cullplanezinfo,ncullplanezinfo*sizeof(cullplanedata *));
+
+  cpx = cullplanexinfo;
+  cpy = cullplaneyinfo;
+  cpz = cullplanezinfo;
+
+  for(ii=0;ii<nmeshes;ii++){
+    mesh *meshi;
+
+    meshi=meshinfo+ii;
+
+    culli=meshi->cullinfo;
+    if(cullflag==1&&meshi->ibar>(NCULLS-1)){
+      iskip = meshi->ibar/NCULLS;
+      jskip = iskip;
+      kskip = iskip;
+    }
+    else{
+      iskip = meshi->ibar+1;
+      jskip = meshi->ibar+1;
+      kskip = meshi->ibar+1;
+    }
+    nx = meshi->ibar/iskip + 1;
+    ny = meshi->jbar/jskip + 1;
+    nz = meshi->kbar/kskip + 1;
+
+    for(k=0;k<nz;k++){
+      kbeg = k*kskip;
+      kend = kbeg + kskip;
+      if(kend>meshi->kbar)kend=meshi->kbar;
+      for(j=0;j<ny;j++){
+        jbeg = j*jskip;
+        jend = jbeg + jskip;
+        if(jend>meshi->jbar)jend=meshi->jbar;
+        for(i=0;i<nx;i++){
+          int ii, jj, kk;
+
+          ibeg = i*iskip;
+          iend = ibeg + iskip;
+          if(iend>meshi->ibar)iend=meshi->ibar;
+
+          for(ii=ibeg;ii<iend;ii++){
+            cpx->cull=culli;
+            cpx->ibeg=ibeg;
+            cpx->iend=iend;
+            cpx->jbeg=jbeg;
+            cpx->jend=jend;
+            cpx->kbeg=kbeg;
+            cpx->kend=kend;
+            cpx->dist=meshi->xplt[ii];
+
+            cpx++;
+          }
+          for(jj=jbeg;jj<jend;jj++){
+            cpy->cull=culli;
+            cpy->ibeg=ibeg;
+            cpy->iend=iend;
+            cpy->jbeg=jj;
+            cpy->jend=jj;
+            cpy->kbeg=kbeg;
+            cpy->kend=kend;
+            cpy->dist=meshi->yplt[jj];
+
+            cpy++;
+          }
+          for(kk=kbeg;kk<kend;kk++){
+            cpz->cull=culli;
+            cpz->ibeg=ibeg;
+            cpz->iend=iend;
+            cpz->jbeg=jbeg;
+            cpz->jend=jend;
+            cpz->kbeg=kk;
+            cpz->kend=kk;
+            cpz->dist=meshi->zplt[kk];
+
+            cpz++;
+          }
+        }
+      }
+      culli++;
+    }
+  }
+
+  NewMemory( (void **)&sort_cullplanexinfo,ncullplanexinfo*sizeof(cullplanedata *));
+  NewMemory( (void **)&sort_cullplaneyinfo,ncullplaneyinfo*sizeof(cullplanedata *));
+  NewMemory( (void **)&sort_cullplanezinfo,ncullplanezinfo*sizeof(cullplanedata *));
+
+  for(ii=0;ii<ncullplanexinfo;ii++){
+    sort_cullplanexinfo[ii]=cullplanexinfo+ii;
+  }
+
+  for(ii=0;ii<ncullplaneyinfo;ii++){
+    sort_cullplaneyinfo[ii]=cullplaneyinfo+ii;
+  }
+
+  for(ii=0;ii<ncullplanezinfo;ii++){
+    sort_cullplanezinfo[ii]=cullplanezinfo+ii;
+  }
+
+  qsort((cullplanedata *)sort_cullplanexinfo,(size_t)ncullplanexinfo,sizeof(cullplanedata *),cullplane_compare);
+  qsort((cullplanedata *)sort_cullplaneyinfo,(size_t)ncullplaneyinfo,sizeof(cullplanedata *),cullplane_compare);
+  qsort((cullplanedata *)sort_cullplanezinfo,(size_t)ncullplanezinfo,sizeof(cullplanedata *),cullplane_compare);
+  printf(" ncullx=%i ncully=%i ncullz=%i\n",ncullplanexinfo,ncullplaneyinfo,ncullplanezinfo);
 
 }
-#endif
-
-
-#ifdef pp_CULL
-void setPixelCountOrthog(mesh *meshi);
 
 /* ------------------ setPixelCount ------------------------ */
 

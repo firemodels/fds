@@ -4981,12 +4981,7 @@ typedef struct {
 
   // define data structures used to speed up 3d smoke drawing (by culling non-visible smoke planes)
 
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi=meshinfo+i;
-    initcull(meshi,1);
-  }
+  initcull(cullsmoke);
 #endif
 
 
