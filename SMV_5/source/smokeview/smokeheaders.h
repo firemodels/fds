@@ -43,8 +43,9 @@ void drawterrain(terraindata *terri);
 void drawtrees(void);
 int createnulllabel(flowlabels *flowlabel);
 #ifdef pp_CULL
-EXTERNCPP void initcull(mesh *meshi, int cullflag);
+EXTERNCPP void initcull(int cullflag);
 EXTERNCPP void setPixelCount(void);
+EXTERNCPP void setPixelCountOrthog(mesh *meshi);
 EXTERNCPP void getPixelCount(void);
 #endif
 #ifdef pp_GPU

@@ -1024,6 +1024,12 @@ void initvars1(void){
   slice_average_interval=10.0;
 #ifdef pp_CULL
   cullsmoke=0;
+  cullplanexinfo=NULL;
+  ncullplanexinfo=0;
+  cullplaneyinfo=NULL;
+  ncullplaneyinfo=0;
+  cullplanezinfo=NULL;
+  ncullplanezinfo=0;
 #endif
 
   show_transparent_vents=1;

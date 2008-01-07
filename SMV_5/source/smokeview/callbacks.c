@@ -549,12 +549,7 @@ void keyboard(unsigned char key, int x, int y){
 #ifdef pp_CULL
   if(strncmp((const char *)&key2,"C",1)==0){
     cullsmoke=1-cullsmoke;
-    for(i=0;i<nmeshes;i++){
-      mesh *meshi;
-
-      meshi=meshinfo+i;
-      initcull(meshi,cullsmoke);
-    }
+    initcull(cullsmoke);
     printf("cullsmoke=%i\n",cullsmoke);
   }
 #endif
