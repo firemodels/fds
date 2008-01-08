@@ -118,8 +118,9 @@ Module EVAC
   ! (&EXIT lines)
   Type EVAC_EXIT_Type
      Real(EB) :: T_first=0._EB, T_last=0._EB, Flow_max=0._EB, Width=0._EB
-     Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, &
-          X=0._EB,Y=0._EB,Z=0._EB,Xsmoke=0._EB,Ysmoke=0._EB,Zsmoke=0._EB
+     Real(EB) :: X1=0._EB, X2=0._EB, Y1=0._EB, Y2=0._EB, Z1=0._EB, Z2=0._EB, &
+          X=0._EB, Y=0._EB, Z=0._EB, Xsmoke=0._EB, Ysmoke=0._EB, Zsmoke=0._EB, &
+          TIME_OPEN=0._EB, TIME_CLOSE=0._EB
      Integer :: IOR=0, ICOUNT=0, IMESH=0, INODE=0
      Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADINT=0._EB
      Integer :: II=0, JJ=0, KK=0, FED_MESH=0, COLOR_INDEX=0
@@ -136,8 +137,9 @@ Module EVAC
   ! (&DOOR lines)
   Type EVAC_DOOR_Type
      Real(EB) :: T_first=0._EB, T_last=0._EB, Flow_max=0._EB, Width=0._EB
-     Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, &
-          X=0._EB,Y=0._EB,Z=0._EB,Xsmoke=0._EB,Ysmoke=0._EB,Zsmoke=0._EB
+     Real(EB) :: X1=0._EB, X2=0._EB, Y1=0._EB, Y2=0._EB, Z1=0._EB, Z2=0._EB, &
+          X=0._EB, Y=0._EB, Z=0._EB, Xsmoke=0._EB, Ysmoke=0._EB, Zsmoke=0._EB, &
+          TIME_OPEN=0._EB, TIME_CLOSE=0._EB
      Integer :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0
      Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADINT=0._EB
      Integer :: II=0, JJ=0, KK=0, FED_MESH=0, COLOR_INDEX=0
@@ -304,8 +306,10 @@ Module EVAC
   !
 Contains
   !
-  Subroutine READ_EVAC
+  Subroutine READ_EVAC(MYID)
     Implicit None
+
+    Integer, Intent(In) :: MYID
     !
     Integer :: NUMBER_INITIAL_PERSONS, &
          SAMPLING_FACTOR, IPC, n_tmp, GN_MIN, GN_MAX
@@ -332,7 +336,8 @@ Contains
          D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA
     Integer :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX
     Real(EB) :: MAX_FLOW, WIDTH, T_START, T_STOP, WIDTH1, &
-         WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED
+         WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED, &
+         TIME_OPEN, TIME_CLOSE
     Logical :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, &
          EXIT_SIGN, KEEP_XY
     Character(26) :: VENT_FFIELD, EVAC_MESH
@@ -350,10 +355,12 @@ Contains
 
     Namelist /EXIT/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, FYI, COUNT_ONLY, WIDTH, XYZ, VENT_FFIELD, &
-         EVAC_MESH, COLOR_INDEX, XYZ_SMOKE
+         EVAC_MESH, COLOR_INDEX, XYZ_SMOKE, &
+         TIME_OPEN, TIME_CLOSE
     Namelist /DOOR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, XYZ, VENT_FFIELD, &
-         EXIT_SIGN, EVAC_MESH, COLOR_INDEX, XYZ_SMOKE, KEEP_XY
+         EXIT_SIGN, EVAC_MESH, COLOR_INDEX, XYZ_SMOKE, KEEP_XY, &
+         TIME_OPEN, TIME_CLOSE
     Namelist /ENTR/ ID, XB, IOR, FLOW_FIELD_ID, MAX_FLOW, &
          FYI, WIDTH, QUANTITY, PERS_ID, T_START, &
          T_STOP, AFTER_REACTION_TIME, &
@@ -979,6 +986,8 @@ Contains
        COUNT_ONLY    = .False.
        MAX_FLOW      = 0.0_EB
        WIDTH         = 0.0_EB
+       TIME_OPEN     = 0.0_EB
+       TIME_CLOSE    = Huge(TIME_CLOSE)
        XYZ(:)        = Huge(XYZ)
        XYZ_SMOKE(:)  = Huge(XYZ_SMOKE)
        COLOR_INDEX   = 0
@@ -1011,6 +1020,8 @@ Contains
        PEX%T_last     = 0.0_EB
        PEX%ICOUNT     = 0
        PEX%Flow_max   = 0.0_EB
+       PEX%TIME_OPEN  = TIME_OPEN
+       PEX%TIME_CLOSE = TIME_CLOSE
        If (CHECK_FLOW) PEX%Flow_max   = MAX_FLOW
        PEX%COUNT_ONLY = .False.
        If (COUNT_ONLY) PEX%COUNT_ONLY = .True.
@@ -1196,6 +1207,8 @@ Contains
        EXIT_SIGN     = .False.
        MAX_FLOW      = 0.0_EB
        WIDTH         = 0.0_EB
+       TIME_OPEN     = 0.0_EB
+       TIME_CLOSE    = Huge(TIME_CLOSE)
        XYZ(:)        = Huge(XYZ)
        XYZ_SMOKE(:)  = Huge(XYZ_SMOKE)
        COLOR_INDEX   = 0
@@ -1233,6 +1246,8 @@ Contains
        PDX%T_last     = 0.0_EB
        PDX%ICOUNT     = 0
        PDX%Flow_max   = 0.0_EB
+       PDX%TIME_OPEN  = TIME_OPEN
+       PDX%TIME_CLOSE = TIME_CLOSE
        If (CHECK_FLOW) PDX%Flow_max   = MAX_FLOW
 
        PDX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX),8) ! 0-7 always
@@ -3600,6 +3615,20 @@ Contains
                    End Do
 
 
+                   Do ie = 1, n_doors
+                      If ( EVAC_DOORS(ie)%TIME_OPEN > 0.0_EB ) Then
+                         Is_Visible_Door(ie) = .False.
+                         Is_Known_Door(ie) = .False.
+                      End If
+                   End Do
+                   Do ie = 1, n_exits
+                      If ( EVAC_EXITS(ie)%TIME_OPEN > 0.0_EB .And. &
+                           .Not. EVAC_EXITS(ie)%COUNT_ONLY ) Then
+                         Is_Visible_Door(n_doors+ie) = .False.
+                         Is_Known_Door(n_doors+ie) = .False.
+                      End If
+                   End Do
+
                    If (Any(Is_Known_Door) .Or. Any(Is_Visible_Door)) Then
                       i_tmp   = 0
                       L2_min = Huge(L2_min)
@@ -4893,6 +4922,20 @@ Contains
                          End Do
                       End If
 
+
+                      Do i = 1, n_doors
+                         If ( EVAC_DOORS(i)%TIME_OPEN > T .Or. EVAC_DOORS(i)%TIME_CLOSE < T) Then
+                            Is_Visible_Door(i) = .False.
+                            Is_Known_Door(i) = .False.
+                         End If
+                      End Do
+                      Do i = 1, n_exits
+                         If ( (EVAC_EXITS(i)%TIME_OPEN > T .Or. EVAC_EXITS(i)%TIME_CLOSE < T) .And. &
+                              .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
+                            Is_Visible_Door(n_doors+i) = .False.
+                            Is_Known_Door(n_doors+i) = .False.
+                         End If
+                      End Do
 
                       If (Any(Is_Known_Door) .Or. Any(Is_Visible_Door)) Then
                          i_tmp   = 0
@@ -7990,6 +8033,20 @@ Contains
                   End If            ! correct floor
                End Do              ! doors and exits
 
+
+               Do ie = 1, n_doors
+                  If ( EVAC_DOORS(ie)%TIME_OPEN > T .Or. EVAC_DOORS(ie)%TIME_CLOSE < T) Then
+                     Is_Visible_Door(ie) = .False.
+                     Is_Known_Door(ie) = .False.
+                  End If
+               End Do
+               Do ie = 1, n_exits
+                  If ( (EVAC_EXITS(ie)%TIME_OPEN > T .Or. EVAC_EXITS(ie)%TIME_CLOSE < T) .And. &
+                       .Not. EVAC_EXITS(ie)%COUNT_ONLY ) Then
+                     Is_Visible_Door(n_doors+ie) = .False.
+                     Is_Known_Door(n_doors+ie) = .False.
+                  End If
+               End Do
 
                If (Any(Is_Known_Door) .Or. Any(Is_Visible_Door)) Then
                   irn = 0
