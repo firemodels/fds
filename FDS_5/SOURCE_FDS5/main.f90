@@ -48,7 +48,7 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date, version number, revision number
 
-WRITE(VERSION_STRING,'(A)') '5.1.0_beta'
+WRITE(VERSION_STRING,'(A)') '5.1.0'
 SERIAL = .TRUE.
 
 IF (INDEX(mainrev,':',BACK=.TRUE.)>0) THEN
@@ -886,7 +886,7 @@ Implicit None
 ! Read input for EVACUATION routines
  
 IF (.Not. ANY(EVACUATION_GRID)) N_EVAC = 0
-IF (ANY(EVACUATION_GRID)) CALL READ_EVAC
+IF (ANY(EVACUATION_GRID)) CALL READ_EVAC(MYID)
 
 END SUBROUTINE EVAC_READ_DATA
 
