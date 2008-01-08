@@ -2,9 +2,9 @@ Test pressure rise in a multiple mesh simulation.
 
 &HEAD CHID='pressure_rise', TITLE='Pressure Rise in a Sealed Tunnel, SVN $Revision$' / 
 
-&MESH IJK=20,1,20, XB=0.0,1.0,-.01,0.01,0.0,1.0 /
-&MESH IJK=20,1,20, XB=1.0,2.0,-.01,0.01,0.0,1.0 /
-&MESH IJK=20,1,20, XB=2.0,3.0,-.01,0.01,0.0,1.0 /
+&MESH IJK=20,1,20, XB=0.0,1.0,-.001,0.001,0.0,1.0 /
+&MESH IJK=20,1,20, XB=1.0,2.0,-.001,0.001,0.0,1.0 /
+&MESH IJK=20,1,20, XB=2.0,3.0,-.001,0.001,0.0,1.0 /
 
 &TIME TWFIN=600.0 / 
 
@@ -21,6 +21,9 @@ Test pressure rise in a multiple mesh simulation.
 &SLCF PBY=0.0, QUANTITY='PRESSURE' /
 &SLCF PBY=0.0, QUANTITY='H' /
 &SLCF PBY=0.0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBY=0.0, QUANTITY='VORTICITY_X' /
+&SLCF PBY=0.0, QUANTITY='VORTICITY_Y' /
+&SLCF PBY=0.0, QUANTITY='VORTICITY_Z' /
         
 &VENT XB=0.0,0.0,-.1,0.1,0.4,0.6,SURF_ID='BLOW' /
 
