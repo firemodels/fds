@@ -706,7 +706,7 @@ See Section~\ref{info:thermalboundary} for more information.
 \item[{\bf Development, Distribution and Formal User Support}] Starting with FDS 5, an online, open-source
 development environment is being used for configuration management
 (code archiving, revision tracking, bug fixes, user suggestions, and so on).
-See Section~\ref{info:aquire} for more information.
+See Section~\ref{info:acquire} for more information.
 
 \item[{\bf FDS Verification and Validation Information}] Starting with FDS 5, more
 emphasis has been placed on maintaining a permanent collection of Verification
@@ -3797,7 +3797,7 @@ Many of the parameters specified in the input file are fixed constants. However,
 time, temperature, or space. These functions can be complex, thus you have to have some way to convey them. The namelist group
 {\ct RAMP} and {\ct TABL}, as it names imply, allow you to control the behavior of selected parameters.  {\ct RAMP} allows you
 to specify a function with one independent variable (such as time) is mapped to one dependent variable (such as velocity).
-{\ct TALB} allows for the specification of a mapping from multiple independent variables (such as a solid angle) to multiple
+{\ct TABL} allows for the specification of a mapping from multiple independent variables (such as a solid angle) to multiple
 dependent variables (such as a sprinkler flow rate and droplet speed).
 
 \subsection{Time-Dependent Functions}
@@ -9501,7 +9501,7 @@ viscosity, the model uses a viscosity of the form \be \mu_{\hbox{\tiny
 LES}} =  \rho \,  (C_s\, \Delta)^2  \, |S|^\ha \ee  where $C_s$  is an
 empirical constant, $\Delta$ is a length on the order of the size of a
 grid  cell,  and  the  deformation   term  $|S|$  is  related  to  the
-Dissipation Function, given by Eq.~(\ref{dissipation}). Related to the
+Dissipation Function (see FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5} for details). Related to the
 ``turbulent  viscosity'' are  comparable expressions  for  the thermal
 conductivity  and  material diffusivity:  \be  k_{\hbox{\tiny LES}}  =
 \frac{\mu_{\hbox{\tiny  LES}}   \;  c_p}{\PR}  \quad   ;  \quad  (\rho
