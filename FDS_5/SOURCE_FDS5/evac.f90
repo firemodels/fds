@@ -23,7 +23,8 @@ Module EVAC
   Use COMP_FUNCTIONS
   Use MATH_FUNCTIONS
   Use MEMORY_FUNCTIONS
-  Use MESH_POINTERS
+  Use MESH_POINTERS, ONLY: DT,IJKW,BOUNDARY_TYPE,XW,YW,WALL_INDEX,POINT_TO_MESH
+  Use EVAC_MESH_POINTERS
   Use PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION2
   !
   Implicit None
@@ -33,8 +34,8 @@ Module EVAC
   !
   Private
   ! Public subprograms (called from the main program)
-  Public EVACUATE_HUMANS, INITIALIZE_EVACUATION
-  Public READ_EVAC, DUMP_EVAC, DUMP_EVAC_CSV
+  Public EVACUATE_HUMANS, INITIALIZE_EVACUATION, INIT_EVAC_GROUPS
+  Public READ_EVAC, DUMP_EVAC, DUMP_EVAC_CSV, PREPARE_TO_EVACUATE
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_evac
   ! Public variables (needed in the main program):
   !
@@ -340,7 +341,7 @@ Contains
          TIME_OPEN, TIME_CLOSE
     Logical :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, &
          EXIT_SIGN, KEEP_XY
-    Character(26) :: VENT_FFIELD, EVAC_MESH
+    Character(26) :: VENT_FFIELD, MESH_ID
     Real(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED
 
     Character(26), Dimension(51) :: KNOWN_DOOR_NAMES
@@ -355,17 +356,17 @@ Contains
 
     Namelist /EXIT/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, FYI, COUNT_ONLY, WIDTH, XYZ, VENT_FFIELD, &
-         EVAC_MESH, COLOR_INDEX, XYZ_SMOKE, &
+         MESH_ID, COLOR_INDEX, XYZ_SMOKE, &
          TIME_OPEN, TIME_CLOSE
     Namelist /DOOR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, XYZ, VENT_FFIELD, &
-         EXIT_SIGN, EVAC_MESH, COLOR_INDEX, XYZ_SMOKE, KEEP_XY, &
+         EXIT_SIGN, MESH_ID, COLOR_INDEX, XYZ_SMOKE, KEEP_XY, &
          TIME_OPEN, TIME_CLOSE
     Namelist /ENTR/ ID, XB, IOR, FLOW_FIELD_ID, MAX_FLOW, &
          FYI, WIDTH, QUANTITY, PERS_ID, T_START, &
          T_STOP, AFTER_REACTION_TIME, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, &
-         EVAC_MESH
+         MESH_ID
     Namelist /CORR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, WIDTH1, WIDTH2, &
          EFF_WIDTH, EFF_LENGTH, MAX_HUMANS_INSIDE, FAC_SPEED, &
@@ -374,10 +375,10 @@ Contains
          ID, DTSAM, XB, FLOW_FIELD_ID, PERS_ID, &
          T_START, T_STOP, IOR, MAX_FLOW, WIDTH, ANGLE, &
          AFTER_REACTION_TIME, GN_MIN, GN_MAX, &
-         KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, EVAC_MESH
-    Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, EVAC_MESH
+         KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, MESH_ID
+    Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID
 
-    Namelist /EVSS/ FYI, ID, XB, EVAC_MESH, HEIGHT, HEIGHT0, IOR, &
+    Namelist /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, ESC_SPEED
 
     Namelist /PERS/ FYI,ID,DIAMETER_DIST,VELOCITY_DIST, &
@@ -935,10 +936,8 @@ Contains
     Select Case (COLOR_METHOD)
     Case (0:6,8)
        N_EVAC = 7
-    Case (7)
-       N_EVAC = 3
     Case Default
-       N_EVAC = 3
+       N_EVAC = 7
     End Select
 
     Allocate(EVAC_CLASS_NAME(N_EVAC),STAT=IZERO)
@@ -962,13 +961,13 @@ Contains
        EVAC_CLASS_RGB(1:3,5) = (/  0,255,  0/)  ! green
        EVAC_CLASS_RGB(1:3,6) = (/255,  0,255/)  ! magenta
        EVAC_CLASS_RGB(1:3,7) = (/  0,255,255/)  ! cyan
-    Case (7)
-       EVAC_CLASS_NAME(1) = 'HumanR'
-       EVAC_CLASS_NAME(2) = 'HumanL'
-       EVAC_CLASS_NAME(3) = 'HumanC'
-       EVAC_CLASS_RGB(1:3,1) = (/  0,255,  0/)  ! green
-       EVAC_CLASS_RGB(1:3,2) = (/255,  0,  0/)  ! red
-       EVAC_CLASS_RGB(1:3,3) = (/  0,  0,  0/)  ! black
+!!$    Case (7)
+!!$       EVAC_CLASS_NAME(1) = 'HumanR'
+!!$       EVAC_CLASS_NAME(2) = 'HumanL'
+!!$       EVAC_CLASS_NAME(3) = 'HumanC'
+!!$       EVAC_CLASS_RGB(1:3,1) = (/  0,255,  0/)  ! green
+!!$       EVAC_CLASS_RGB(1:3,2) = (/255,  0,  0/)  ! red
+!!$       EVAC_CLASS_RGB(1:3,3) = (/  0,  0,  0/)  ! black
     End Select
     !
     ! Read the EXIT lines
@@ -981,7 +980,7 @@ Contains
        IOR           = 0
        FLOW_FIELD_ID = 'null'
        VENT_FFIELD   = 'null'
-       EVAC_MESH     = 'null'
+       MESH_ID       = 'null'
        CHECK_FLOW    = .False.
        COUNT_ONLY    = .False.
        MAX_FLOW      = 0.0_EB
@@ -1087,8 +1086,8 @@ Contains
              If ( (PEX%Z1 >= Meshes(i)%ZS .And. PEX%Z2 <= Meshes(i)%ZF).And. &
                   (PEX%Y1 >= Meshes(i)%YS .And. PEX%Y2 <= Meshes(i)%YF).And. &
                   (PEX%X1 >= Meshes(i)%XS .And. PEX%X2 <= Meshes(i)%XF)) Then
-                If (Trim(EVAC_MESH) == 'null' .Or. &
-                     Trim(EVAC_MESH) == Trim(MESH_NAME(i))) Then
+                If (Trim(MESH_ID) == 'null' .Or. &
+                     Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
                    ii = ii + 1
                    PEX%IMESH = i
                    !cc             Exit PEX_MeshLoop
@@ -1201,7 +1200,7 @@ Contains
        IOR           = 0
        FLOW_FIELD_ID = 'null'
        VENT_FFIELD   = 'null'
-       EVAC_MESH     = 'null'
+       MESH_ID       = 'null'
        TO_NODE       = 'null'
        CHECK_FLOW    = .False.
        EXIT_SIGN     = .False.
@@ -1312,8 +1311,8 @@ Contains
              If ( (PDX%Z1 >= Meshes(i)%ZS .And. PDX%Z2 <= Meshes(i)%ZF).And. &
                   (PDX%Y1 >= Meshes(i)%YS .And. PDX%Y2 <= Meshes(i)%YF).And. &
                   (PDX%X1 >= Meshes(i)%XS .And. PDX%X2 <= Meshes(i)%XF)) Then
-                If (Trim(EVAC_MESH) == 'null' .Or. &
-                     Trim(EVAC_MESH) == Trim(MESH_NAME(i))) Then
+                If (Trim(MESH_ID) == 'null' .Or. &
+                     Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
                    ii = ii + 1
                    PDX%IMESH = i
                 End If
@@ -1693,7 +1692,7 @@ Contains
        XB            = 0.0_EB
        IOR           = 0
        FLOW_FIELD_ID = 'null'
-       EVAC_MESH     = 'null'
+       MESH_ID       = 'null'
        TO_NODE       = 'null'
        PERS_ID       = 'null'
        QUANTITY      = 'null'
@@ -1813,8 +1812,8 @@ Contains
              If ( (PNX%Z1 >= Meshes(i)%ZS .And. PNX%Z2 <= Meshes(i)%ZF).And. &
                   (PNX%Y1 >= Meshes(i)%YS .And. PNX%Y2 <= Meshes(i)%YF).And. &
                   (PNX%X1 >= Meshes(i)%XS .And. PNX%X2 <= Meshes(i)%XF)) Then
-                If (Trim(EVAC_MESH) == 'null' .Or. &
-                     Trim(EVAC_MESH) == Trim(MESH_NAME(i))) Then
+                If (Trim(MESH_ID) == 'null' .Or. &
+                     Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
                    ii = ii + 1
                    PNX%IMESH = i
                    PNX%TO_INODE = n_tmp
@@ -1928,7 +1927,7 @@ Contains
        ID                       = 'null'
        QUANTITY                 = 'null'
        FLOW_FIELD_ID            = 'null'
-       EVAC_MESH                = 'null'
+       MESH_ID                  = 'null'
        PERS_ID                  = 'null'
        SAMPLING_FACTOR          = 1      
        NUMBER_INITIAL_PERSONS   = 0
@@ -2042,8 +2041,8 @@ Contains
              If ( (HPT%Z1 >= Meshes(i)%ZS .And. HPT%Z2 <= Meshes(i)%ZF).And. &
                   (HPT%Y1 >= Meshes(i)%YS .And. HPT%Y2 <= Meshes(i)%YF).And. &
                   (HPT%X1 >= Meshes(i)%XS .And. HPT%X2 <= Meshes(i)%XF)) Then
-                If (Trim(EVAC_MESH) == 'null' .Or. &
-                     Trim(EVAC_MESH) == Trim(MESH_NAME(i))) Then
+                If (Trim(MESH_ID) == 'null' .Or. &
+                     Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
                    ii = ii + 1
                    HPT%IMESH = i
                 End If
@@ -2129,7 +2128,7 @@ Contains
        XB            = 0.0_EB
        EVAC_ID       = 'null'
        PERS_ID       = 'null'
-       EVAC_MESH     = 'null'
+       MESH_ID       = 'null'
        !
        Call CHECKREAD('EVHO',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_EVHO_LOOP
@@ -2160,8 +2159,8 @@ Contains
              If ( (EHX%Z1 >= Meshes(i)%ZS .And. EHX%Z2 <= Meshes(i)%ZF).And. &
                   (EHX%Y1 >= Meshes(i)%YS .And. EHX%Y2 <= Meshes(i)%YF).And. &
                   (EHX%X1 >= Meshes(i)%XS .And. EHX%X2 <= Meshes(i)%XF)) Then
-                If (Trim(EVAC_MESH) == 'null' .Or. &
-                     Trim(EVAC_MESH) == Trim(MESH_NAME(i))) Then
+                If (Trim(MESH_ID) == 'null' .Or. &
+                     Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
                    ii = ii + 1
                    EHX%IMESH = i
                    EHX%GRID_NAME  = MESH_NAME(i)
@@ -2191,7 +2190,7 @@ Contains
        !
        ID            = 'null'
        XB            = 0.0_EB
-       EVAC_MESH     = 'null'
+       MESH_ID       = 'null'
        IOR           = 0
        HEIGHT        = 0.0_EB
        HEIGHT0       = 0.0_EB
@@ -2242,8 +2241,8 @@ Contains
              If ( (ESS%Z1 >= Meshes(i)%ZS .And. ESS%Z2 <= Meshes(i)%ZF).And. &
                   (ESS%Y1 >= Meshes(i)%YS .And. ESS%Y2 <= Meshes(i)%YF).And. &
                   (ESS%X1 >= Meshes(i)%XS .And. ESS%X2 <= Meshes(i)%XF)) Then
-                If (Trim(EVAC_MESH) == 'null' .Or. &
-                     Trim(EVAC_MESH) == Trim(MESH_NAME(i))) Then
+                If (Trim(MESH_ID) == 'null' .Or. &
+                     Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
                    ii = ii + 1
                    ESS%IMESH = i
                    ESS%GRID_NAME  = MESH_NAME(i)
@@ -2719,21 +2718,14 @@ Contains
     Real(EB) RN, RN1, simoDX, simoDY, TNOW
     Real(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, &
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
-    Integer I,J,II,JJ,KK,IPC, IZERO, n_tmp, ie, nom, j1
+    Integer I,J,II,JJ,KK,IPC, IZERO, n_tmp, ie, nom
     Integer i11, i22, group_size
-    Logical PP_see_group, PP_see_door, Is_Solid
+    Logical PP_see_group, Is_Solid
     Integer iie, jje, iio, jjo, jjj, tim_ic, iii, i44
     Real(EB) y_o, x_o, Delta_y, Delta_x, x_now, y_now, &
          xi, yj, x11, y11, group_X_sum, group_Y_sum, &
          group_X_center, group_Y_center
-    Character(26) :: GROUP_FFIELD_NAME
-    Integer :: GROUP_FFIELD_I
-    Real(EB), Dimension(:), Allocatable :: FED_max_Door
-    Integer, Dimension(:), Allocatable :: Color_Tmp
-    Logical, Dimension(:), Allocatable :: Is_Known_Door, &
-         Is_Visible_Door
-    Integer :: i_tmp, i_endless_loop, i_egrid, color_index
-    Real(EB) :: L2_min, max_fed, L2_tmp
+    Integer :: i_endless_loop
     Real(EB), Dimension(6) :: y_tmp, x_tmp, r_tmp
     ! 
     Type (MESH_TYPE), Pointer :: M
@@ -3181,9 +3173,6 @@ Contains
                 Case (6)
                    ! Color is a measure of the pressure (HR%SumForces)
                    HR%COLOR_INDEX = 0
-                Case (7)
-                   ! Torso black, right shoulder green, left red
-                   HR%COLOR_INDEX = 0
                 Case (8)
                    ! Color is a measure of the pressure (HR%SumForces2)
                    HR%COLOR_INDEX = 0
@@ -3323,11 +3312,41 @@ Contains
        !
     End If EVAC_MESH_ONLY
     !
+    TUSED(12,NM)=TUSED(12,NM)+SECOND()-TNOW
     !
-    If ( Any(EVACUATION_GRID) .And. NM == NMESHES ) Then
+  End Subroutine INITIALIZE_EVACUATION
+
+!
+  Subroutine INIT_EVAC_GROUPS
+    Implicit None
+    !
+    ! Initialize group lists, known doors, etc
+    !
+    Real(EB) RN, TNOW
+    Real(EB) x1_old, y1_old
+    Integer I,J,II,JJ,KK, IZERO, ie, nom, j1
+    Logical PP_see_door
+    Integer iie, jje, iio, jjo, jjj, tim_ic, iii
+    Real(EB) y_o, x_o, Delta_y, Delta_x, x_now, y_now, &
+         xi, yj, x11, y11
+    Character(26) :: GROUP_FFIELD_NAME
+    Integer :: GROUP_FFIELD_I
+    Real(EB), Dimension(:), Allocatable :: FED_max_Door
+    Logical, Dimension(:), Allocatable :: Is_Known_Door, Is_Visible_Door
+    Integer, Dimension(:), Allocatable :: Color_Tmp
+    Integer :: i_tmp, i_egrid, color_index
+    Real(EB) :: L2_min, max_fed, L2_tmp
+    ! 
+    Type (MESH_TYPE), Pointer :: M
+    !
+    If (.NOT.Any(EVACUATION_GRID)) RETURN
+
+ !! TNOW=SECOND()
+    !
+ !!!If (Any(EVACUATION_GRID)) Then
 
        ilh_dim = ilh           ! lonely humans dimension
-       i33_dim = i33
+       i33_dim = i33           ! number of groups
        Allocate(Group_List(0:i33_dim),STAT=IZERO)
        Call ChkMemErr('Initialize_Evacuation','Group_List',IZERO) 
        Group_List(:)%Tdoor   = Huge(Group_List(0)%Tdoor)
@@ -3349,7 +3368,6 @@ Contains
        Allocate(Human_Known_Doors(1:ilh_dim),STAT=IZERO)
        Call ChkMemErr('Initialize_Evacuation', &
             'Human_Known_Doors',IZERO) 
-
        !
        Allocate(Is_Known_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
        Call ChkMemErr('Initialize_Evacuation','Is_Known_Door',IZERO) 
@@ -3920,11 +3938,9 @@ Contains
           End If
        End Do
 
-    End If
+ !! End If ! any evacuation grid
     !
-    TUSED(12,NM)=TUSED(12,NM)+SECOND()-TNOW
-
-  End Subroutine INITIALIZE_EVACUATION
+  End Subroutine INIT_EVAC_GROUPS
 !
   Subroutine EVAC_MESH_EXCHANGE(T,T_Save,I_mode, ICYC)
     Implicit None
@@ -4423,6 +4439,54 @@ Contains
 
   End Subroutine EVAC_MESH_EXCHANGE
 !
+  Subroutine PREPARE_TO_EVACUATE(ICYC)
+    Implicit None
+    !
+    ! Do the mesh independent initializations for the 
+    ! subroutine evacuate_humans.
+    !
+    Integer, Intent(IN) :: ICYC
+    !
+    Logical L_eff_read, L_eff_save
+    Integer(4) ibar_tmp, jbar_tmp, kbar_tmp
+    Integer nm_tim, i, j
+    ! 
+    Type (MESH_TYPE), Pointer :: MFF
+     
+    If (.NOT.Any(EVACUATION_GRID)) RETURN
+        
+       L_eff_read = Btest(I_EVAC,2)
+       L_eff_save = Btest(I_EVAC,0)
+       If ( ICYC == 0 .And. L_eff_save ) Then
+          Do nm_tim = 1, NMESHES
+             If (EVACUATION_ONLY(nm_tim)) Then
+                MFF=>MESHES(nm_tim)
+                ibar_tmp = MFF%IBAR
+                jbar_tmp = MFF%JBAR
+                kbar_tmp = 1
+                Write (LU_EVACEFF) ibar_tmp, jbar_tmp, kbar_tmp
+                Do  i = 0, MFF%IBAR+1
+                   Do j= 0, MFF%JBAR+1
+                      Write (LU_EVACEFF) Real(MFF%U(i,j,1),FB), &
+                           Real(MFF%V(i,j,1),FB)
+                   End Do
+                End Do
+             End If
+          End Do
+          ! Clear the save bit, save is done only once.
+          L_eff_save = .False.
+          I_EVAC = Ibclr(I_EVAC,0)
+       End If
+       !
+       ! Initialize counters only once for each time step.
+       If ( ICYC >= 0 .And. icyc_old < ICYC ) Then
+          icyc_old = ICYC
+          fed_max_alive = 0.0_EB
+          fed_max       = 0.0_EB
+       End If
+
+  End Subroutine PREPARE_TO_EVACUATE
+!
   Subroutine EVACUATE_HUMANS(Tin,NM,ICYC)
     Implicit None
     !
@@ -4439,7 +4503,6 @@ Contains
     Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, &
          EVEL, tim_dist
     Integer istat
-    integer(4) ibar_tmp, jbar_tmp, kbar_tmp
     !
     !
     Real(EB)  scal_prod_over_rsqr, t_init_timo, &
@@ -4510,33 +4573,34 @@ Contains
        !
        L_eff_read = Btest(I_EVAC,2)
        L_eff_save = Btest(I_EVAC,0)
-       If ( ICYC == 0 .And. L_eff_save ) Then
-          Do nm_tim = 1, NMESHES
-             If (EVACUATION_ONLY(nm_tim)) Then
-                MFF=>MESHES(nm_tim)
-                ibar_tmp = MFF%IBAR
-                jbar_tmp = MFF%JBAR
-                kbar_tmp = 1
-                Write (LU_EVACEFF) ibar_tmp, jbar_tmp, kbar_tmp
-                Do  i = 0, MFF%IBAR+1
-                   Do j= 0, MFF%JBAR+1
-                      Write (LU_EVACEFF) Real(MFF%U(i,j,1),FB), &
-                           Real(MFF%V(i,j,1),FB)
-                   End Do
-                End Do
-             End If
-          End Do
-          ! Clear the save bit, save is done only once.
-          L_eff_save = .False.
-          I_EVAC = Ibclr(I_EVAC,0)
-       End If
-       !
-       ! Initialize counters only once for each time step.
-       If ( ICYC >= 0 .And. icyc_old < ICYC ) Then
-          icyc_old = ICYC
-          fed_max_alive = 0.0_EB
-          fed_max       = 0.0_EB
-       End If
+!!$       If ( ICYC == 0 .And. L_eff_save ) Then
+!!$          Do nm_tim = 1, NMESHES
+!!$             If (EVACUATION_ONLY(nm_tim)) Then
+!!$                MFF=>MESHES(nm_tim)
+!!$                ibar_tmp = MFF%IBAR
+!!$                jbar_tmp = MFF%JBAR
+!!$                kbar_tmp = 1
+!!$                Write (LU_EVACEFF) ibar_tmp, jbar_tmp, kbar_tmp
+!!$                Do  i = 0, MFF%IBAR+1
+!!$                   Do j= 0, MFF%JBAR+1
+!!$                      Write (LU_EVACEFF) Real(MFF%U(i,j,1),FB), &
+!!$                           Real(MFF%V(i,j,1),FB)
+!!$                   End Do
+!!$                End Do
+!!$             End If
+!!$          End Do
+!!$          ! Clear the save bit, save is done only once.
+!!$          L_eff_save = .False.
+!!$          I_EVAC = Ibclr(I_EVAC,0)
+!!$       End If
+!!$       !
+!!$       ! Initialize counters only once for each time step.
+!!$       If ( ICYC >= 0 .And. icyc_old < ICYC ) Then
+!!$          icyc_old = ICYC
+!!$          fed_max_alive = 0.0_EB
+!!$          fed_max       = 0.0_EB
+!!$       End If
+
 
        !
        ! Find the egrid index
@@ -6341,7 +6405,7 @@ Contains
 
              ! Find the closest wall at the +x direction
              x_now = -DX(iin)
-             TIM_PX: Do ii = iin,ibp1
+             TIM_PX: Do ii = iin,IBAR+1
                 x_now = x_now + DX(ii)
                 If ( x_now-HR%Radius > P2P_DIST_MAX) Exit TIM_PX
                 tim_ic = cell_index(ii,jjn,kkn)
@@ -6435,7 +6499,7 @@ Contains
 
              ! Find the closest wall at the +y direction
              y_now = -DY(jjn)
-             TIM_PY: Do jj = jjn,jbp1
+             TIM_PY: Do jj = jjn,JBAR+1
                 y_now = y_now + DY(jj)
                 If ( y_now-HR%Radius > P2P_DIST_MAX) Exit TIM_PY
                 tim_ic = cell_index(iin,jj,kkn)
@@ -6490,11 +6554,11 @@ Contains
 
              ! top right corner (x > x_human, y > y_human)
              x_now = -DX(iin+1)
-             Loop_px: Do ii = iin+1, ibp1
+             Loop_px: Do ii = iin+1, IBAR+1
                 x_now = x_now + DX(ii)
                 If (x_now-HR%Radius > P2P_DIST_MAX) Exit Loop_px
                 y_now = -DY(jjn-1)
-                Loop_pxpy: Do jj = jjn+1, jbp1
+                Loop_pxpy: Do jj = jjn+1, JBAR+1
                    y_now = y_now + DY(jj)
                    If (Sqrt(x_now**2 + y_now**2)-HR%Radius &
                         > P2P_DIST_MAX) Exit Loop_pxpy
@@ -6570,7 +6634,7 @@ Contains
                 x_now = x_now + DX(ii)
                 If (x_now-HR%Radius > P2P_DIST_MAX) Exit Loop_mx
                 y_now = -DY(jjn-1)
-                Loop_mxpy: Do jj = jjn+1, jbp1
+                Loop_mxpy: Do jj = jjn+1, JBAR+1
                    y_now = y_now + DY(jj)
                    If (Sqrt(x_now**2 + y_now**2)-HR%Radius &
                         > P2P_DIST_MAX) Exit Loop_mxpy
@@ -6642,7 +6706,7 @@ Contains
 
              ! bottom right corner (x > x_human, y < y_human)
              x_now = -DX(iin+1)
-             Loop_py: Do ii = iin+1, ibp1
+             Loop_py: Do ii = iin+1, IBAR+1
                 x_now = x_now + DX(ii)
                 If (x_now-HR%Radius > P2P_DIST_MAX) Exit Loop_py
                 y_now = -DY(jjn-1)
@@ -7072,15 +7136,15 @@ Contains
          Case(-1)
             If (II>0)      II = II-1
          Case( 1)
-            If (II<IBP1) II = II+1
+            If (II<IBAR+1) II = II+1
          Case(-2)
             If (JJ>0)      JJ = JJ-1
          Case( 2)
-            If (JJ<JBP1) JJ = JJ+1
+            If (JJ<JBAR+1) JJ = JJ+1
          Case(-3)
             If (KK>0)      KK = KK-1
          Case( 3)
-            If (KK<KBP1) KK = KK+1
+            If (KK<KBAR+1) KK = KK+1
          End Select
       Endif
       
@@ -7092,15 +7156,15 @@ Contains
          Case(-1)
             If (II>0)      IC = CELL_INDEX(II-1,JJ,KK)
          Case( 1)
-            If (II<IBP1) IC = CELL_INDEX(II+1,JJ,KK)
+            If (II<IBAR+1) IC = CELL_INDEX(II+1,JJ,KK)
          Case(-2)
             If (JJ>0)      IC = CELL_INDEX(II,JJ-1,KK)
          Case( 2)
-            If (JJ<JBP1) IC = CELL_INDEX(II,JJ+1,KK)
+            If (JJ<JBAR+1) IC = CELL_INDEX(II,JJ+1,KK)
          Case(-3)
             If (KK>0)      IC = CELL_INDEX(II,JJ,KK-1)
          Case( 3)
-            If (KK<KBP1) IC = CELL_INDEX(II,JJ,KK+1)
+            If (KK<KBAR+1) IC = CELL_INDEX(II,JJ,KK+1)
          End Select
          IW = WALL_INDEX(IC,-IOR)
       Endif
@@ -8538,9 +8602,6 @@ Contains
          Case (6)
             ! Pressure (HR%SumForces)
             HR%COLOR_INDEX = 0
-         Case (7)
-            ! Torso black, right shoulder green, left red
-            HR%COLOR_INDEX = 0
          Case (8)
             ! Color is a measure of the pressure (HR%SumForces2)
             HR%COLOR_INDEX = 0
@@ -9120,7 +9181,7 @@ Contains
     Integer :: NPP,NPLIM,i,izero,nn,n
     Real(EB) :: TNOW
     Real(FB), Allocatable, Dimension(:) :: XP,YP,ZP
-    Real(FB), Allocatable, Dimension(:,:) :: QP
+    Real(FB), Allocatable, Dimension(:,:) :: QP, AP
     Integer, Allocatable, Dimension(:) :: TA
     !
     TNOW=SECOND() 
@@ -9155,6 +9216,9 @@ Contains
           Call ChkMemErr('DUMP_EVAC','YP',IZERO)
           Allocate(ZP(NPLIM),STAT=IZERO)
           Call ChkMemErr('DUMP_EVAC','ZP',IZERO)
+          ! body angle, semi major axis, semi minor axis
+          Allocate(AP(NPLIM,3),STAT=IZERO)
+          Call ChkMemErr('DUMP_EVAC','AP',IZERO)
           If (EVAC_N_QUANTITIES > 0) Then
              Allocate(QP(NPLIM,EVAC_N_QUANTITIES),STAT=IZERO)
              Call ChkMemErr('DUMP_EVAC','QP',IZERO)
@@ -9169,27 +9233,13 @@ Contains
              If (N_EVAC == 7 .And. .Not.(HR%COLOR_INDEX == N-1)) Cycle PLOOP
              NPP = NPP + 1
              TA(NPP) = HR%ILABEL
-             If (N_EVAC == 3) Then
-                Select Case (N)
-                Case (3) ! Torso
-                   XP(NPP) = HR%X
-                   YP(NPP) = HR%Y
-                   ZP(NPP) = HR%Z + Min(0.5_EB*(ZF-ZS)-0.0001_EB,0.1_EB)
-                Case (1) ! Right shoulder
-                   XP(NPP) = HR%X + Sin(HR%angle)*HR%d_shoulder
-                   YP(NPP) = HR%Y - Cos(HR%angle)*HR%d_shoulder
-                   ZP(NPP) = HR%Z - Min(0.5_EB*(ZF-ZS)-0.0001_EB,0.1_EB)
-                Case (2) ! Left shoulder
-                   XP(NPP) = HR%X - Sin(HR%angle)*HR%d_shoulder
-                   YP(NPP) = HR%Y + Cos(HR%angle)*HR%d_shoulder
-                   ZP(NPP) = HR%Z - Min(0.5_EB*(ZF-ZS)-0.0001_EB,0.1_EB)
-                End Select
-             Else
-                If (.Not. HR%COLOR_INDEX == N-1) Cycle PLOOP
-                XP(NPP) = HR%X
-                YP(NPP) = HR%Y
-                ZP(NPP) = HR%Z
-             End If
+             If (.Not. HR%COLOR_INDEX == N-1) Cycle PLOOP
+             XP(NPP) = HR%X
+             YP(NPP) = HR%Y
+             ZP(NPP) = HR%Z
+             AP(NPP,1) = HR%Angle*180.0_EB/Pi
+             AP(NPP,2) = HR%Radius
+             AP(NPP,3) = HR%r_torso
              DO NN=1,EVAC_N_QUANTITIES
                 SELECT CASE(EVAC_QUANTITIES_INDEX(NN))
                 CASE(201)  ! Movement Speed
@@ -9219,11 +9269,18 @@ Contains
           ! Dump human data into the .prt5 file
           !
           Write(LU_PART(NM)) NPLIM
+!          WRITE(LU_PART(NM)) (XP(I),I=1,NPLIM),(YP(I),I=1,NPLIM),(ZP(I),I=1,NPLIM), &
+!               (AP(I,1),I=1,NPLIM),(AP(I,2),I=1,NPLIM),(AP(I,3),I=1,NPLIM)
           WRITE(LU_PART(NM)) (XP(I),I=1,NPLIM),(YP(I),I=1,NPLIM),(ZP(I),I=1,NPLIM)
           WRITE(LU_PART(NM)) (TA(I),I=1,NPLIM)
-          IF (EVAC_N_QUANTITIES > 0) WRITE(LU_PART(NM)) ((QP(I,NN),I=1,NPLIM),NN=1,EVAC_N_QUANTITIES)
+          If (EVAC_N_QUANTITIES > 0) Then
+             WRITE(LU_PART(NM)) ((QP(I,NN),I=1,NPLIM),NN=1,EVAC_N_QUANTITIES)
+          End If
           !
-          If (EVAC_N_QUANTITIES > 0) Deallocate(QP)
+          If (EVAC_N_QUANTITIES > 0) Then
+             Deallocate(QP)
+          End If
+          Deallocate(AP)
           Deallocate(ZP)
           Deallocate(YP)
           Deallocate(XP)
