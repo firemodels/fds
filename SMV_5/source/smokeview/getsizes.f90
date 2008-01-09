@@ -40,13 +40,13 @@ endif
 return
 end function endian_open
 
-!void create_part5sizefile(char *reg_file, char *size_file, int *endian,int *error);
-subroutine fcreate_part5sizefile(part5file, part5sizefile, error)
+subroutine fcreate_part5sizefile(part5file, part5sizefile, angle_flag, error)
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_fcreate_part5sizefile@20' :: fcreate_part5sizefile
+!DEC$ ATTRIBUTES ALIAS:'_fcreate_part5sizefile@24' :: fcreate_part5sizefile
 #endif
 implicit none
 character(len=*), intent(in) :: part5file, part5sizefile
+integer, intent(in) :: angle_flag
 integer, intent(out) :: error
 
 integer :: lu20, lu21, version, nclasses
@@ -99,7 +99,11 @@ do
   do i = 1, nclasses
     read(lu20,iostat=error)numpoints(i)
     if(error.ne.0)go to 999    
-    read(lu20,iostat=error)(rdummy,j=1,3*numpoints(i))
+    if(angle_flag.eq.1)then
+      read(lu20,iostat=error)(rdummy,j=1,4*numpoints(i))
+     else
+      read(lu20,iostat=error)(rdummy,j=1,3*numpoints(i))
+    endif
     if(error.ne.0)go to 999    
     read(lu20,iostat=error)(rdummy,j=1,numpoints(i))
     if(error.ne.0)go to 999    

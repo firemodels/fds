@@ -648,6 +648,9 @@ typedef struct {
   float time;
   int npoints,n_rtypes, n_itypes;
   short *sx, *sy, *sz;
+#ifdef pp_AVATAR
+  float *avatar_angle;
+#endif
   int *tags,*sort_tags;
   unsigned char *vis_part;
   float *rvals;
