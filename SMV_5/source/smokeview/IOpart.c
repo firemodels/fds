@@ -1,6 +1,7 @@
 // $Date$ 
 // $Revision$
 // $Author$
+#define XYZ_EXTRA 4
 
 #include "options.h"
 #include <stdio.h>  
@@ -70,6 +71,9 @@ void freepart5data(part5data *datacopy){
   FREEMEMORY(datacopy->sx);
   FREEMEMORY(datacopy->sy);
   FREEMEMORY(datacopy->sz);
+#ifdef pp_AVATAR
+  FREEMEMORY(datacopy->avatar_angle);
+#endif
   FREEMEMORY(datacopy->tags);
   FREEMEMORY(datacopy->sort_tags);
   FREEMEMORY(datacopy->vis_part);
@@ -102,6 +106,9 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
   datacopy->sx=NULL;
   datacopy->sy=NULL;
   datacopy->sz=NULL;
+#ifdef pp_AVATAR
+  datacopy->avatar_angle=NULL;
+#endif
   datacopy->tags=NULL;
   datacopy->vis_part=NULL;
   datacopy->sort_tags=NULL;
@@ -191,7 +198,16 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
         float *xyz;
         int j;
 
+#ifdef pp_AVATAR
+        if(parti->evac==1){
+          FORTPART5READ(partclassi->xyz,XYZ_EXTRA*nparts);
+        }
+        else{
+          FORTPART5READ(partclassi->xyz,3*nparts);
+        }
+#else
         FORTPART5READ(partclassi->xyz,3*nparts);
+#endif
         if(nparts>0){
           if(returncode==0)goto wrapup;
           xyz = partclassi->xyz;
@@ -219,7 +235,16 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
         }
       }
       else{
+#ifdef pp_AVATAR
+        if(parti->evac==1){
+          skip = 4 + XYZ_EXTRA*4*nparts + 4;  
+        }
+        else{
+          skip = 4 + 3*4*nparts + 4;  
+        }
+#else
         skip = 4 + 3*4*nparts + 4;  
+#endif
       }
       if(doit==1){
         int *sort_tags;
@@ -539,85 +564,6 @@ int get_tagindex(part5data *data, int tagval){
   return *(returnval+1);
 }
 
-/* ------------------ setpart5sizefile ------------------------ */
-
-void create_part5sizefile(char *reg_file, char *size_file){
-  FILE *size_stream, *PART5FILE;
-  int one;
-  int endianswitch=0;
-  int version;
-  int nclasses;
-  int i;
-  int skip;
-  size_t returncode;
-  float time;
-  int nparts;
-  int *numtypes=NULL,*numtypescopy, *numpoints=NULL;
-  int numtypes_temp[2];
-  char buffer_out[1024];
-
-  PART5FILE=fopen(reg_file,"rb");
-  if(PART5FILE==NULL)return;
-  size_stream=fopen(size_file,"w");
-  if(size_stream==NULL){
-    printf("*** warning:  unable to write to %s\n",size_file);
-    fclose(PART5FILE);
-    return;
-  }
-
-  fseek(PART5FILE,4,SEEK_CUR);fread(&one,4,1,PART5FILE);fseek(PART5FILE,4,SEEK_CUR);
-  if(one!=1)endianswitch=1;
-
-  FORTPART5READ(&version,1);
-  FORTPART5READ(&nclasses,1);
-  NewMemory((void **)&numtypes,2*nclasses*sizeof(int));
-  NewMemory((void **)&numpoints,nclasses*sizeof(int));
-  numtypescopy=numtypes;
-  numtypes_temp[0]=0;
-  numtypes_temp[1]=0;
-  for(i=0;i<nclasses;i++){
-    FORTPART5READ(numtypes_temp,2);
-    *numtypescopy++=numtypes_temp[0];
-    *numtypescopy++=numtypes_temp[1];
-    skip = 2*(numtypes_temp[0]+numtypes_temp[1])*(8 + 30);
-    fseek(PART5FILE,skip,SEEK_CUR);
-  }
-
-  for(;;){
-    FORTPART5READ(&time,1);
-    if(returncode==0)break;
-    sprintf(buffer_out,"%f ",time);
-     for(i=0;i<nclasses;i++){
-      FORTPART5READ(&nparts,1);
-      if(returncode==0)goto wrapup;
-      numpoints[i]=nparts;
-      skip = 4 + 4*nparts*3 + 4;
-      skip += 4 + 4*nparts + 4;
-      if(numtypes[2*i]>0)skip += 4 + 4*nparts*numtypes[2*i] + 4;
-      if(numtypes[2*i+1]>0)skip += 4 + 4*nparts*numtypes[2*i+1] + 4;
-      
-      returncode=fseek(PART5FILE,skip,SEEK_CUR);
-      if(returncode!=0)goto wrapup;
-    }
-
-    fprintf(size_stream,"%f\n",time);
-#ifdef _DEBUG
-    printf("%f\n",time);
-#endif
-    for(i=0;i<nclasses;i++){
-      fprintf(size_stream,"  %i\n",numpoints[i]);
-#ifdef _DEBUG
-      printf("  %i\n",numpoints[i]);
-#endif
-    }
-//    fprintf(size_stream,"\n");
-  }
-wrapup:
-  FREEMEMORY(numtypes);
-  fclose(PART5FILE);
-  fclose(size_stream);
-}
-
 /* ------------------ getpart5header ------------------------ */
 
 void getpart5header(particle *parti, int partframestep){
@@ -648,14 +594,25 @@ void getpart5header(particle *parti, int partframestep){
     //create_part5sizefile(reg_file,size_file);
       {
         int lenreg, lensize, error;
+        int angle_flag=0;
 
         trim(reg_file);
         trim(size_file);
         lenreg=strlen(reg_file);
         lensize=strlen(size_file);
-
-        FORTfcreate_part5sizefile(reg_file,size_file, &error, 
+#ifdef pp_AVATAR
+        if(parti->evac==1){
+          angle_flag=1;
+          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
+        }
+        else{
+          angle_flag=0;
+          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
+        }
+#else
+        FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, 
           lenreg,lensize);
+#endif
       }
   }
   
@@ -724,6 +681,11 @@ void getpart5header(particle *parti, int partframestep){
           NewMemory((void **)&datacopy->sx,npoints*sizeof(short));
           NewMemory((void **)&datacopy->sy,npoints*sizeof(short));
           NewMemory((void **)&datacopy->sz,npoints*sizeof(short));
+#ifdef pp_AVATAR
+          if(parti->evac==1){
+            NewMemory((void **)&datacopy->avatar_angle,npoints*sizeof(float));
+          }
+#endif
           ntypes = datacopy->partclassbase->ntypes;
           if(ntypes>0){ //xxx need to check this fix (was ntypes>2)
             NewMemory((void **)&datacopy->rvals,(ntypes-0)*npoints*sizeof(float));  //xxx need to check this fix
@@ -745,7 +707,18 @@ void getpart5header(particle *parti, int partframestep){
     part5class *partclassi;
 
     partclassi = partclassinfo + i;
-    if(partclassi->maxpoints>0)NewMemory((void **)&partclassi->xyz,3*partclassi->maxpoints*sizeof(float));
+    if(partclassi->maxpoints>0){
+#ifdef pp_AVATAR
+      if(parti->evac==1){
+        NewMemory((void **)&partclassi->xyz,XYZ_EXTRA*partclassi->maxpoints*sizeof(float));
+      }
+      else{
+        NewMemory((void **)&partclassi->xyz,3*partclassi->maxpoints*sizeof(float));
+      }
+#else
+      NewMemory((void **)&partclassi->xyz,3*partclassi->maxpoints*sizeof(float));
+#endif
+    }
   }
 
 }
@@ -1278,6 +1251,9 @@ void drawPart5(const particle *parti){
 #endif
       for(i=0;i<parti->nclasses;i++){
         short *sx, *sy, *sz;
+#ifdef pp_AVATAR
+        float *angle;
+#endif
         unsigned char *vis, *color;
         part5class *partclassi;
         int partclass_index, itype, vistype, class_vis;
@@ -1304,14 +1280,7 @@ void drawPart5(const particle *parti){
           part5data *data1, *data2;
           int avatar_type=0;
 
-          if(ipframe+1<parti->nframes){
-            data1=datacopy;
-            data2 = parti->data5+nclasses*(ipframe+1)+i;
-          }
-          else{
-            data1 = parti->data5+nclasses*(ipframe-1)+i;
-            data2=datacopy;
-          }
+          angle=datacopy->avatar_angle;
           CheckMemory;
 
           avatar_type=0;
@@ -1325,7 +1294,7 @@ void drawPart5(const particle *parti){
               glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]-1.0/xyzmaxdiff);
               glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
                  
-              az_angle=get_part_azangle(data1,data2,j);
+              az_angle=angle[j];
               glRotatef(az_angle,0.0,0.0,1.0);
 
               rgbobject = datacopy->partclassbase->rgb;

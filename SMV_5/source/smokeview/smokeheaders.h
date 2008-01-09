@@ -44,6 +44,7 @@ void drawtrees(void);
 int createnulllabel(flowlabels *flowlabel);
 #ifdef pp_CULL
 EXTERNCPP void initcull(int cullflag);
+EXTERNCPP void initcullplane(int cullflag, int dir);
 EXTERNCPP void setPixelCount(void);
 EXTERNCPP void setPixelCountOrthog(mesh *meshi);
 EXTERNCPP void getPixelCount(void);
@@ -228,6 +229,9 @@ EXTERNCPP void updatesmoke3d(smoke3d *smoke3di);
 EXTERNCPP void drawsmoke3d(smoke3d *smoke3di);
 #ifdef pp_GPU
 EXTERNCPP void drawsmoke3dGPU(smoke3d *smoke3di);
+#endif
+#ifdef pp_CULL
+EXTERNCPP void drawsmoke3dCULL(smoke3d *smoke3di);
 #endif
 EXTERNCPP void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent);
 EXTERNCPP void updatesmoke3dmenulabels(void);
