@@ -874,10 +874,11 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_scratch);
     matmatmult(inverse_modelview_setup,modelview_scratch,modelview_current);
 
-    if(nsmoke3d>0){
+    if(nsmoke3d>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
 #ifdef pp_CULL
       if(cullsmoke==1)getPixelCount();
+    //  initcullplane(cullsmoke);
 #endif
     }
     if(nface_transparent>0)sort_transparent_faces(modelview_scratch);
