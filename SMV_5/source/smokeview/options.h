@@ -4,7 +4,7 @@
 
 // build Smokeview as a standard release unless the pp_ALPHA or pp_BETA directives are defined
 
-#define pp_STANDARD
+#define pp_release
 
 // uncomment the following line if using LINT to check code
 // #define pp_LINT
@@ -14,21 +14,22 @@
 
 #ifdef pp_BETA
 #define SMVVERSION "Test"
-#undef pp_STANDARD
+#undef pp_release
+#define pp_AVATAR
 #endif
 
 #ifdef pp_ALPHA
 #define SMVVERSION "Experimental"
-#undef pp_STANDARD
+#undef pp_release
 #endif
 
 #ifdef pp_ALPHA2
 #define pp_ALPHA
 #define SMVVERSION "Experimental Full"
-#undef pp_STANDARD
+#undef pp_release
 #endif
 
-#ifdef pp_STANDARD
+#ifdef pp_release
 #define SMVVERSION "5.1"
 #endif
 
@@ -39,10 +40,6 @@
 #define pp_COMPRESS
 #define pp_noappend
 #include "pragmas.h"
-#endif
-
-#ifndef _DEBUG
-#define pp_release
 #endif
 
 #define pp_DRAWISO
@@ -61,7 +58,6 @@
 #ifdef pp_ALPHA
 #define pp_GPU
 #define pp_CULL
-#define pp_AVATAR
 #define pp_SHOWLIGHT
 #define pp_COLOR
 #endif
