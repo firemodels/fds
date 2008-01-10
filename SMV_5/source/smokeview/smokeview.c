@@ -909,86 +909,89 @@ void setClipPlanes(int mode){
   static GLdouble clipplane_x[4], clipplane_y[4], clipplane_z[4];
   static GLdouble clipplane_X[4], clipplane_Y[4], clipplane_Z[4];
 
+#ifdef pp_AVATAR
+  if(mode==0&&xyz_clipplane==2)return;
+#endif
   if(mode==1&&xyz_clipplane!=2)return;
-  if(xyz_clipplane!=0){
-    if(clip_x==1){
-      clipplane_x[0]=1.0;
-      clipplane_x[1]=0.0;
-      clipplane_x[2]=0.0;
-      clipplane_x[3]=-(clip_x_val-xbar0)/xyzmaxdiff;
-      glClipPlane(GL_CLIP_PLANE0,clipplane_x);
-      glEnable(GL_CLIP_PLANE0);
-    }
-    else{
-      glDisable(GL_CLIP_PLANE0);
-    }
-
-    if(clip_X==1){
-      clipplane_X[0]=-1.0;
-      clipplane_X[1]=0.0;
-      clipplane_X[2]=0.0;
-      clipplane_X[3]=(clip_X_val-xbar0)/xyzmaxdiff;
-      glClipPlane(GL_CLIP_PLANE3,clipplane_X);
-      glEnable(GL_CLIP_PLANE3);
-    }
-    else{
-      glDisable(GL_CLIP_PLANE3);
-    }
-
-    if(clip_y==1){
-      clipplane_y[0]=0.0;
-      clipplane_y[1]=1.0;
-      clipplane_y[2]=0.0;
-      clipplane_y[3]=-(clip_y_val-ybar0)/xyzmaxdiff;
-      glClipPlane(GL_CLIP_PLANE1,clipplane_y);
-      glEnable(GL_CLIP_PLANE1);
-    }
-    else{
-      glDisable(GL_CLIP_PLANE1);
-    }
-
-    if(clip_Y==1){
-      clipplane_Y[0]=0.0;
-      clipplane_Y[1]=-1.0;
-      clipplane_Y[2]=0.0;
-      clipplane_Y[3]=(clip_Y_val-ybar0)/xyzmaxdiff;
-      glClipPlane(GL_CLIP_PLANE4,clipplane_Y);
-      glEnable(GL_CLIP_PLANE4);
-    }
-    else{
-      glDisable(GL_CLIP_PLANE4);
-    }
-
-    if(clip_z==1){
-      clipplane_z[0]=0.0;
-      clipplane_z[1]=0.0;
-      clipplane_z[2]=1.0;
-      clipplane_z[3]=-(clip_z_val-zbar0)/xyzmaxdiff;
-      glClipPlane(GL_CLIP_PLANE2,clipplane_z);
-      glEnable(GL_CLIP_PLANE2);
-    }
-    else{
-      glDisable(GL_CLIP_PLANE2);
-    }
-
-    if(clip_Z==1){
-      clipplane_Z[0]=0.0;
-      clipplane_Z[1]=0.0;
-      clipplane_Z[2]=-1.0;
-      clipplane_Z[3]=(clip_Z_val-zbar0)/xyzmaxdiff;
-      glClipPlane(GL_CLIP_PLANE5,clipplane_Z);
-      glEnable(GL_CLIP_PLANE5);
-    }
-    else{
-      glDisable(GL_CLIP_PLANE5);
-    }
-  }
-  else if(xyz_clipplane==0){
+  if(xyz_clipplane==0){
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_CLIP_PLANE1);
     glDisable(GL_CLIP_PLANE2);
     glDisable(GL_CLIP_PLANE3);
     glDisable(GL_CLIP_PLANE4);
+    glDisable(GL_CLIP_PLANE5);
+    return;
+  }
+
+  if(clip_x==1){
+    clipplane_x[0]=1.0;
+    clipplane_x[1]=0.0;
+    clipplane_x[2]=0.0;
+    clipplane_x[3]=-(clip_x_val-xbar0)/xyzmaxdiff;
+    glClipPlane(GL_CLIP_PLANE0,clipplane_x);
+    glEnable(GL_CLIP_PLANE0);
+  }
+  else{
+    glDisable(GL_CLIP_PLANE0);
+  }
+
+  if(clip_X==1){
+    clipplane_X[0]=-1.0;
+    clipplane_X[1]=0.0;
+    clipplane_X[2]=0.0;
+    clipplane_X[3]=(clip_X_val-xbar0)/xyzmaxdiff;
+    glClipPlane(GL_CLIP_PLANE3,clipplane_X);
+    glEnable(GL_CLIP_PLANE3);
+  }
+  else{
+    glDisable(GL_CLIP_PLANE3);
+  }
+
+  if(clip_y==1){
+    clipplane_y[0]=0.0;
+    clipplane_y[1]=1.0;
+    clipplane_y[2]=0.0;
+    clipplane_y[3]=-(clip_y_val-ybar0)/xyzmaxdiff;
+    glClipPlane(GL_CLIP_PLANE1,clipplane_y);
+    glEnable(GL_CLIP_PLANE1);
+  }
+  else{
+    glDisable(GL_CLIP_PLANE1);
+  }
+
+  if(clip_Y==1){
+    clipplane_Y[0]=0.0;
+    clipplane_Y[1]=-1.0;
+    clipplane_Y[2]=0.0;
+    clipplane_Y[3]=(clip_Y_val-ybar0)/xyzmaxdiff;
+    glClipPlane(GL_CLIP_PLANE4,clipplane_Y);
+    glEnable(GL_CLIP_PLANE4);
+  }
+  else{
+    glDisable(GL_CLIP_PLANE4);
+  }
+
+  if(clip_z==1){
+    clipplane_z[0]=0.0;
+    clipplane_z[1]=0.0;
+    clipplane_z[2]=1.0;
+    clipplane_z[3]=-(clip_z_val-zbar0)/xyzmaxdiff;
+    glClipPlane(GL_CLIP_PLANE2,clipplane_z);
+    glEnable(GL_CLIP_PLANE2);
+  }
+  else{
+    glDisable(GL_CLIP_PLANE2);
+  }
+
+  if(clip_Z==1){
+    clipplane_Z[0]=0.0;
+    clipplane_Z[1]=0.0;
+    clipplane_Z[2]=-1.0;
+    clipplane_Z[3]=(clip_Z_val-zbar0)/xyzmaxdiff;
+    glClipPlane(GL_CLIP_PLANE5,clipplane_Z);
+    glEnable(GL_CLIP_PLANE5);
+  }
+  else{
     glDisable(GL_CLIP_PLANE5);
   }
 }
@@ -1095,11 +1098,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 }
 
 #endif
-if(eyeview==1&&nskyboxinfo>0)draw_skybox();
+  if(eyeview==1&&nskyboxinfo>0)draw_skybox();
 
   if(UpdateLIGHTS==1)updateLights(0);
 
-  if(mode!=RENDER||viscolorbarpath!=1)setClipPlanes(0);
+  if(mode!=RENDER||viscolorbarpath!=1){
+    setClipPlanes(0);
+  }
   if(mode==RENDER){
     if(viscolorbarpath==1){
       if(cb_hidesv==1){
@@ -1152,14 +1157,14 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
 /* ++++++++++++++++++++++++ draw evacuation +++++++++++++++++++++++++ */
 
     if(showevac==1){
-        for(i=0;i<npartinfo;i++){
-          particle *parti;
+      for(i=0;i<npartinfo;i++){
+        particle *parti;
 
-          parti = partinfo + i;
-          if(parti->loaded==0||parti->display==0||parti->evac==0)continue;
-          drawEvac(parti);
-        }
-        sniffErrors("after drawEvac 2");
+        parti = partinfo + i;
+        if(parti->loaded==0||parti->display==0||parti->evac==0)continue;
+        drawEvac(parti);
+      }
+      sniffErrors("after drawEvac 2");
     }
 
 /* ++++++++++++++++++++++++ draw targets +++++++++++++++++++++++++ */
@@ -1211,7 +1216,7 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
          }
        }
      }
-   } /* end of if(mode==RENDER) code segment */
+  } /* end of if(mode==RENDER) code segment */
 
 
 /* ++++++++++++++++++++++++ draw tours +++++++++++++++++++++++++ */
@@ -1224,11 +1229,15 @@ if(eyeview==1&&nskyboxinfo>0)draw_skybox();
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 #ifdef pp_CLIP
-  if(xyz_clipplane==2)setClipPlanes(1);
+  if(xyz_clipplane==2){
+    setClipPlanes(1);
+  }
 #endif
   drawBlockages(mode,DRAW_SOLID);
 #ifdef pp_CLIP
-  if(xyz_clipplane==2)unsetClipPlanes();
+  if(xyz_clipplane==2){
+    unsetClipPlanes();
+  }
 #endif
   sniffErrors("drawBlockages");
 
