@@ -1,7 +1,7 @@
 // $Date$ 
 // $Revision$
 // $Author$
-#define XYZ_EXTRA 4
+#define XYZ_EXTRA 6
 
 #include "options.h"
 #include <stdio.h>  
@@ -196,6 +196,9 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
       if(doit==1){
         short *sx, *sy, *sz;
         float *xyz;
+#ifdef pp_AVATAR
+        float *angle;
+#endif
         int j;
 
 #ifdef pp_AVATAR
@@ -214,8 +217,9 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
           sx = datacopy->sx;
           sy = datacopy->sy;
           sz = datacopy->sz;
-
-
+#ifdef pp_AVATAR
+          angle=datacopy->avatar_angle;
+#endif
           for(j=0;j<nparts;j++){
             float xx, yy, zz;
 
@@ -231,6 +235,9 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
             sx[j] = factor*xx;
             sy[j] = factor*yy;
             sz[j] = factor*zz;
+#ifdef pp_AVATAR
+            angle[j]=xyz[j+3*nparts];
+#endif
           }
         }
       }

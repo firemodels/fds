@@ -15,7 +15,6 @@
 #ifdef pp_BETA
 #define SMVVERSION "Test"
 #undef pp_release
-#define pp_AVATAR
 #endif
 
 #ifdef pp_ALPHA
@@ -46,14 +45,16 @@
 #define EGZ
 #define USE_ZLIB
 
+#define pp_AVATAR
+#define pp_CLIP
+#define pp_COMPRESS_AUTOLOADED
+#define pp_MEM2
+
 #ifdef pp_ALPHA2
 #define pp_TOUR
 #define pp_LIGHT
 #endif
 
-#define pp_CLIP
-#define pp_COMPRESS_AUTOLOADED
-#define pp_MEM2
 
 #ifdef pp_ALPHA
 #define pp_GPU
