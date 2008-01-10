@@ -73,6 +73,8 @@ void freepart5data(part5data *datacopy){
   FREEMEMORY(datacopy->sz);
 #ifdef pp_AVATAR
   FREEMEMORY(datacopy->avatar_angle);
+  FREEMEMORY(datacopy->avatar_width);
+  FREEMEMORY(datacopy->avatar_depth);
 #endif
   FREEMEMORY(datacopy->tags);
   FREEMEMORY(datacopy->sort_tags);
@@ -108,6 +110,8 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
   datacopy->sz=NULL;
 #ifdef pp_AVATAR
   datacopy->avatar_angle=NULL;
+  datacopy->avatar_width=NULL;
+  datacopy->avatar_depth=NULL;
 #endif
   datacopy->tags=NULL;
   datacopy->vis_part=NULL;
@@ -197,7 +201,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
         short *sx, *sy, *sz;
         float *xyz;
 #ifdef pp_AVATAR
-        float *angle;
+        float *angle, *width, *depth;
 #endif
         int j;
 
@@ -219,6 +223,8 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
           sz = datacopy->sz;
 #ifdef pp_AVATAR
           angle=datacopy->avatar_angle;
+          width=datacopy->avatar_width;
+          depth=datacopy->avatar_depth;
 #endif
           for(j=0;j<nparts;j++){
             float xx, yy, zz;
@@ -237,6 +243,8 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
             sz[j] = factor*zz;
 #ifdef pp_AVATAR
             angle[j]=xyz[j+3*nparts];
+            width[j]=xyz[j+4*nparts];
+            depth[j]=xyz[j+5*nparts];
 #endif
           }
         }
@@ -691,6 +699,8 @@ void getpart5header(particle *parti, int partframestep){
 #ifdef pp_AVATAR
           if(parti->evac==1){
             NewMemory((void **)&datacopy->avatar_angle,npoints*sizeof(float));
+            NewMemory((void **)&datacopy->avatar_width,npoints*sizeof(float));
+            NewMemory((void **)&datacopy->avatar_depth,npoints*sizeof(float));
           }
 #endif
           ntypes = datacopy->partclassbase->ntypes;
@@ -1259,7 +1269,7 @@ void drawPart5(const particle *parti){
       for(i=0;i<parti->nclasses;i++){
         short *sx, *sy, *sz;
 #ifdef pp_AVATAR
-        float *angle;
+        float *angle, *width, *depth;
 #endif
         unsigned char *vis, *color;
         part5class *partclassi;
@@ -1288,6 +1298,8 @@ void drawPart5(const particle *parti){
           int avatar_type=0;
 
           angle=datacopy->avatar_angle;
+          width=datacopy->avatar_width;
+          depth=datacopy->avatar_depth;
           CheckMemory;
 
           avatar_type=0;
@@ -1309,6 +1321,9 @@ void drawPart5(const particle *parti){
               valstack[0]=rgbobject[0];
               valstack[1]=rgbobject[1];
               valstack[2]=rgbobject[2];
+              valstack[3]=width[j];
+              valstack[4]=depth[j];
+              valstack[5]=1.0;
               draw_SVOBJECT(avatar_types[avatar_type],0);
               glPopMatrix();
             }

@@ -649,7 +649,7 @@ typedef struct {
   int npoints,n_rtypes, n_itypes;
   short *sx, *sy, *sz;
 #ifdef pp_AVATAR
-  float *avatar_angle;
+  float *avatar_angle, *avatar_width, *avatar_depth;
 #endif
   int *tags,*sort_tags;
   unsigned char *vis_part;
