@@ -44,7 +44,7 @@ void drawtrees(void);
 int createnulllabel(flowlabels *flowlabel);
 #ifdef pp_CULL
 EXTERNCPP void initcull(int cullflag);
-EXTERNCPP void initcullplane(int cullflag, int dir);
+EXTERNCPP void initcullplane(int cullflag);
 EXTERNCPP void setPixelCount(void);
 EXTERNCPP void setPixelCountOrthog(mesh *meshi);
 EXTERNCPP void getPixelCount(void);
@@ -53,8 +53,8 @@ EXTERNCPP void getPixelCount(void);
 void getDepthTexture( void );
 void createDepthTexture( void );
 EXTERNCPP void init_shaders(void);
-EXTERNCPP void useSmokeShaders(void);
-EXTERNCPP void useOpenGLShaders(void);
+EXTERNCPP void LoadSmokeShaders(void);
+EXTERNCPP void UnloadSmokeShaders(void);
 #endif
 EXTERNCPP void to_lower(char *string);
 EXTERNCPP void init_device_defs(void);
@@ -231,7 +231,7 @@ EXTERNCPP void drawsmoke3d(smoke3d *smoke3di);
 EXTERNCPP void drawsmoke3dGPU(smoke3d *smoke3di);
 #endif
 #ifdef pp_CULL
-EXTERNCPP void drawsmoke3dCULL(smoke3d *smoke3di);
+EXTERNCPP void drawsmoke3dCULL(void);
 #endif
 EXTERNCPP void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent);
 EXTERNCPP void updatesmoke3dmenulabels(void);

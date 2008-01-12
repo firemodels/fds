@@ -878,7 +878,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
       getsmokedir(modelview_scratch);
 #ifdef pp_CULL
       if(cullsmoke==1)getPixelCount();
-    //  initcullplane(cullsmoke);
+      initcullplane(cullsmoke);
 #endif
     }
     if(nface_transparent>0)sort_transparent_faces(modelview_scratch);
@@ -1330,13 +1330,35 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw 3D smoke +++++++++++++++++++++++++ */
 
   if(show3dsmoke==1){
-    smoke3d *smoke3di;
-
     CheckMemory;
 #ifdef pp_GPU
-    if(usegpu==1)useSmokeShaders();
+    if(usegpu==1){
+      LoadSmokeShaders();
+    }
 #endif
+#ifdef pp_CULL
+    if(usegpu==1&&cullsmoke==1){
+        drawsmoke3dCULL();
+    }
+    else{
+      for(i=0;i<nsmoke3d;i++){
+        smoke3d *smoke3di;
+
+        smoke3di = smoke3dinfo + i;
+        if(smoke3di->loaded==0||smoke3di->display==0)continue;
+        if(smoke3di->d_display==0)continue;
+        if(usegpu==1){
+          drawsmoke3dGPU(smoke3di);
+        }
+        else{
+          drawsmoke3d(smoke3di);
+        }
+      }
+    }
+#else
     for(i=0;i<nsmoke3d;i++){
+      smoke3d *smoke3di;
+
       smoke3di = smoke3dinfo + i;
       if(smoke3di->loaded==0||smoke3di->display==0)continue;
       if(smoke3di->d_display==0)continue;
@@ -1353,11 +1375,16 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       drawsmoke3d(smoke3di);
 #endif
     }
+#endif
 #ifdef pp_GPU
-    if(usegpu==1)useOpenGLShaders();
+    if(usegpu==1){
+      UnloadSmokeShaders();
+    }
 #endif
 #ifdef pp_CULL
-    if(cullsmoke==1)setPixelCount();
+    if(cullsmoke==1){
+      setPixelCount();
+    }
 #endif
     sniffErrors("after drawsmoke");
   }

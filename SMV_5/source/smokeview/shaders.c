@@ -163,15 +163,15 @@ int setSmokeShaders() {
 
 }
 
-/* ------------------ useSmokeShaders ------------------------ */
+/* ------------------ LoadSmokeShaders ------------------------ */
 
-void useSmokeShaders(void){
+void LoadSmokeShaders(void){
   glUseProgramObjectARB(p_smoke);
 }
 
-/* ------------------ useOpenGLShaders ------------------------ */
+/* ------------------ UnloadShadeShaders ------------------------ */
 
-void useOpenGLShaders(void){
+void UnloadSmokeShaders(void){
   glUseProgramObjectARB(0);
 }
 

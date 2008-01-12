@@ -7,28 +7,6 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 
-#ifdef pp_CULL
-
-/* --------------------------  culldata ------------------------------------ */
-
-typedef struct {
-  float xbeg, xend, ybeg, yend, zbeg, zend;
-  int   ibeg, iend, jbeg, jend, kbeg, kend;
-  int iskip, jskip, kskip;
-  int npixels;
-} culldata;
-
-/* --------------------------  cullplanedata ------------------------------------ */
-
-typedef struct {
-  int   ibeg, iend, jbeg, jend, kbeg, kend;
-  float dist;
-  culldata *cull;
-} cullplanedata;
-
-#endif
-
-
 /* --------------------------  treedata ------------------------------------ */
 
 typedef struct {
@@ -442,13 +420,38 @@ typedef struct mesh_ {
 
 #ifdef pp_CULL
   int ncullinfo;
-  culldata *cullinfo;
+  struct _culldata *cullinfo;
   GLuint *cullQueryId;
   int culldefined;
+  struct _smoke3d *cull_smoke3d;
 #endif
 
 } mesh;
 
+#ifdef pp_CULL
+
+/* --------------------------  culldata ------------------------------------ */
+
+typedef struct _culldata {
+  float xbeg, xend, ybeg, yend, zbeg, zend;
+  int   ibeg, iend, jbeg, jend, kbeg, kend;
+  int iskip, jskip, kskip;
+  mesh *cull_mesh;
+  int npixels;
+} culldata;
+
+/* --------------------------  cullplanedata ------------------------------------ */
+
+typedef struct {
+  int   ibeg, iend, jbeg, jend, kbeg, kend;
+  float xmin, xmax, ymin, ymax, zmin, zmax;
+  int dir;
+  float dist;
+  culldata *cull;
+  mesh *cull_mesh;
+} cullplanedata;
+
+#endif
 
 
 /* --------------------------  pathdata ------------------------------------ */
@@ -841,7 +844,7 @@ typedef struct {
 
 /* --------------------------  smoke3d ------------------------------------ */
 
-typedef struct {
+typedef struct _smoke3d {
   int seq_id,autoload;
   char *file;
   char *comp_file, *reg_file;
