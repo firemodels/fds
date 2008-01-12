@@ -63,6 +63,10 @@
 #define pp_COLOR
 #endif
 
+#ifdef pp_CULL
+#define pp_GPU
+#endif
+
 #undef pp_OPEN
 #ifdef WIN32
 #ifdef _DEBUG
