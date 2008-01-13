@@ -43,7 +43,6 @@ int readsmv(char *file){
 
   device *devicecopy;
   int do_pass4=0;
-  int nmeshes2;
   outline *outlinei;
   int roomdefined=0;
   int haveSHELL=0;
@@ -926,7 +925,6 @@ int readsmv(char *file){
  */
 
   startpass=1;
-  nmeshes2=0;
   ioffset=0;
   iobst=0;
   ncadgeom=0;

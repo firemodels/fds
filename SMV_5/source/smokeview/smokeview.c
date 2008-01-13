@@ -876,9 +876,14 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
     if(nsmoke3d>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
+      sniffErrors("after getsmokedir");
 #ifdef pp_CULL
-      if(cullsmoke==1)getPixelCount();
+      if(cullsmoke==1){
+        getPixelCount();
+        sniffErrors("after getPixelCount");
+      }
       initcullplane(cullsmoke);
+      sniffErrors("after initcullplane");
 #endif
     }
     if(nface_transparent>0)sort_transparent_faces(modelview_scratch);

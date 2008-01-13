@@ -1029,6 +1029,7 @@ void initvars1(void){
   cullsmoke=0;
   cullplaneinfo=NULL;
   ncullplaneinfo=0;
+  have_setpixelcount=0;
 #endif
 
   show_transparent_vents=1;
@@ -1465,7 +1466,6 @@ void initvars1(void){
   strcpy(ini_ext,".ini");
 
   updatehiddenfaces=0;
-  isShell=0;
 
   start_xyz0[0]=0.0;
   start_xyz0[1]=0.0;
