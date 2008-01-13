@@ -189,6 +189,9 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     }
 
     makeiblank_smoke3d();
+#ifdef pp_CULL
+    initcull(cullsmoke);
+#endif
     return;
   }
   CheckMemory;
@@ -465,6 +468,9 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   makeiblank_smoke3d();
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatetimes();
+#ifdef pp_CULL
+    initcull(cullsmoke);
+#endif
   IDLE();
 }
 
@@ -3974,6 +3980,7 @@ void drawsmoke3dCULL(void){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
   transparenton();
 
+  sniffErrors("before drawsmoke3dcull");
   value[0]=255;
   value[1]=255;
   value[2]=255;
@@ -4023,6 +4030,7 @@ void drawsmoke3dCULL(void){
     if(meshi!=mesh_old){
       mesh_old=meshi;
   
+     glEnd();
       smoke3di=meshi->cull_smoke3d;
       firecolor=smoke3di->hrrpuv_color;
       if(fire_halfdepth<=0.0){
@@ -4070,8 +4078,24 @@ void drawsmoke3dCULL(void){
         if(i_hrrcutoff>254)i_hrrcutoff=254;
       }
       glUniform1f(GPU_hrrcutoff,(float)i_hrrcutoff);
+      switch (meshi->smokedir){
+      case 1:
+      case -1:
+        aspectratio=meshi->dx;
+        glUniform1f(GPU_aspectratio,aspectratio);
+        break;
+      case 2:
+      case -2:
+        aspectratio=meshi->dy;
+        break;
+      case 3:
+      case -3:
+        aspectratio=meshi->dz;
+        break;
+      }
+      glUniform1f(GPU_aspectratio,aspectratio);
+      glBegin(GL_TRIANGLES);
     }
-
     switch (meshi->smokedir){
       int icull;
 
@@ -4079,12 +4103,6 @@ void drawsmoke3dCULL(void){
 
       case 1:
       case -1:
-
-    // ++++++++++++++++++  draw triangles +++++++++++++++++
-
-        aspectratio=meshi->dx;
-        glUniform1f(GPU_aspectratio,aspectratio);
-
         iterm = (culli->ibeg-is1);
         constval = xplt[culli->ibeg]+0.001;
         for(k=culli->kbeg; k<culli->kend; k++){
@@ -4121,7 +4139,90 @@ void drawsmoke3dCULL(void){
 
           }
         }
-  
+        break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 2 +++++++++++++++++++++++++++++++++++++++
+
+      case 2:
+      case -2:
+        constval = yplt[culli->jbeg]+0.001;
+        jterm = (culli->jbeg-js1)*nx;
+
+        for(k=culli->kbeg; k<culli->kend; k++){
+          kterm = (k-ks1)*nxy;
+          z1 = zplt[k];
+          z3 = zplt[k+1];
+
+          znode[0]=z1;
+          znode[1]=z1;
+          znode[2]=z3;
+          znode[3]=z3;
+
+          for(i=culli->ibeg; i<culli->iend; i++){
+            iterm = (i-is1);
+            x1 = xplt[i];
+            x3 = xplt[i+1];
+
+            xnode[0]=x1;
+            xnode[1]=x3;
+            xnode[2]=x3;
+            xnode[3]=x1;
+
+            n = iterm + jterm + kterm;
+            n11 = n;            //n
+            n12 = n11+1;;       //n+1
+            n22 = n12+nxy;      //n+1+nxy
+            n21 = n22-1;        //n+nxy
+     
+//        n11 = (i-is1)   + (j-js1)*nx   + (k-ks1)*nx*ny;
+//        n12 = (i+1-is1) + (j-js1)*nx   + (k-ks1)*nx*ny;
+//        n22 = (i+1-is1) + (j-js1)*nx   + (k+1-ks1)*nx*ny;
+//        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
+
+            DRAWVERTEXGPU(xnode[mm],constval,znode[mm])
+
+          }
+        }
+      //  sniffErrors("after drawsmokecull case 2");
+        break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 3 +++++++++++++++++++++++++++++++++++++++
+
+      case 3:
+      case -3:
+        constval = zplt[culli->kbeg]+0.001;
+        kterm = (culli->kbeg-ks1)*nxy;
+
+        for(j=culli->jbeg; j<culli->jend; j++){
+          jterm = (j-js1)*nx;
+
+          yy1 = yplt[j];
+          y3 = yplt[j+1];
+
+          ynode[0]=yy1;
+          ynode[1]=yy1;
+          ynode[2]=y3;
+          ynode[3]=y3;
+
+          for(i=culli->ibeg; i<culli->iend; i++){
+            iterm = (i-is1);
+            x1 = xplt[i];
+            x3 = xplt[i+1];
+
+            xnode[0]=x1;
+            xnode[1]=x3;
+            xnode[2]=x3;
+            xnode[3]=x1;
+
+            n = iterm + jterm + kterm;
+            n11 = n;
+            n12 = n11+1;;
+            n22 = n12+nx;
+            n21 = n22-1;
+
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],constval)
+          }
+        }
         break;
 
 //    default:
@@ -4132,6 +4233,7 @@ void drawsmoke3dCULL(void){
   glEnd();
   transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
+  sniffErrors("after drawsmokecull");
 
 
 }
@@ -4864,8 +4966,8 @@ void initcullplane(int cullflag){
     }
     else{
       iskip = meshi->ibar+1;
-      jskip = meshi->ibar+1;
-      kskip = meshi->ibar+1;
+      jskip = meshi->jbar+1;
+      kskip = meshi->kbar+1;
     }
     nx = meshi->ibar/iskip + 1;
     ny = meshi->jbar/jskip + 1;
@@ -4981,8 +5083,6 @@ void initcullplane(int cullflag){
     qsort((cullplanedata *)sort_cullplaneinfo,(size_t)ncullplaneinfo,
        sizeof(cullplanedata *),cullplane_compare);
   }
-
-  printf(" ncull=%i \n",ncullplaneinfo);
 }
 
 /* ------------------ initcull ------------------------ */
@@ -5013,8 +5113,8 @@ void initcull(int cullflag){
     }
     else{
       iskip = meshi->ibar+1;
-      jskip = meshi->ibar+1;
-      kskip = meshi->ibar+1;
+      jskip = meshi->jbar+1;
+      kskip = meshi->kbar+1;
     }
     nx = meshi->ibar/iskip + 1;
     ny = meshi->jbar/jskip + 1;
