@@ -1730,7 +1730,7 @@ void _sniffErrors(char *whereat){
   char *glu_error;
   while((error=glGetError())!=GL_NO_ERROR){
     glu_error=(char *)gluErrorString((unsigned int)error);
-    fprintf(stderr,"GL Error:%s where:%s %i\n",
+    fprintf(stderr,"GL Error:%s, where:%s %i\n",
       glu_error,whereat,snifferrornumber);
       snifferrornumber++;
   }
