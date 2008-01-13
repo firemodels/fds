@@ -1,7 +1,7 @@
 // $Date$ 
 // $Revision$
 // $Author$
-#define XYZ_EXTRA 6
+#define XYZ_EXTRA 7
 
 #include "options.h"
 #include <stdio.h>  
@@ -74,6 +74,7 @@ void freepart5data(part5data *datacopy){
 #ifdef pp_AVATAR
   FREEMEMORY(datacopy->avatar_angle);
   FREEMEMORY(datacopy->avatar_width);
+  FREEMEMORY(datacopy->avatar_height);
   FREEMEMORY(datacopy->avatar_depth);
 #endif
   FREEMEMORY(datacopy->tags);
@@ -111,6 +112,7 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
 #ifdef pp_AVATAR
   datacopy->avatar_angle=NULL;
   datacopy->avatar_width=NULL;
+  datacopy->avatar_height=NULL;
   datacopy->avatar_depth=NULL;
 #endif
   datacopy->tags=NULL;
@@ -201,7 +203,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
         short *sx, *sy, *sz;
         float *xyz;
 #ifdef pp_AVATAR
-        float *angle, *width, *depth;
+        float *angle, *width, *depth, *height;
 #endif
         int j;
 
@@ -225,6 +227,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
           angle=datacopy->avatar_angle;
           width=datacopy->avatar_width;
           depth=datacopy->avatar_depth;
+          height=datacopy->avatar_height;
 #endif
           for(j=0;j<nparts;j++){
             float xx, yy, zz;
@@ -242,9 +245,10 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
             sy[j] = factor*yy;
             sz[j] = factor*zz;
 #ifdef pp_AVATAR
-            angle[j]=xyz[j+3*nparts];
-            width[j]=xyz[j+4*nparts];
-            depth[j]=xyz[j+5*nparts];
+            angle[j] =xyz[j+3*nparts];
+            width[j] =xyz[j+4*nparts];
+            depth[j] =xyz[j+5*nparts];
+            height[j]=xyz[j+6*nparts];
 #endif
           }
         }
@@ -701,6 +705,7 @@ void getpart5header(particle *parti, int partframestep){
             NewMemory((void **)&datacopy->avatar_angle,npoints*sizeof(float));
             NewMemory((void **)&datacopy->avatar_width,npoints*sizeof(float));
             NewMemory((void **)&datacopy->avatar_depth,npoints*sizeof(float));
+            NewMemory((void **)&datacopy->avatar_height,npoints*sizeof(float));
           }
 #endif
           ntypes = datacopy->partclassbase->ntypes;
@@ -1300,6 +1305,7 @@ void drawPart5(const particle *parti){
           angle=datacopy->avatar_angle;
           width=datacopy->avatar_width;
           depth=datacopy->avatar_depth;
+          height=datacopy->avatar_height;
           CheckMemory;
 
           avatar_type=0;
@@ -1310,7 +1316,7 @@ void drawPart5(const particle *parti){
 
             if(vis[j]==1){
               glPushMatrix();
-              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]-1.0/xyzmaxdiff);
+              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
               glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
                  
               az_angle=angle[j];
@@ -1324,6 +1330,9 @@ void drawPart5(const particle *parti){
               valstack[3]=width[j];
               valstack[4]=depth[j];
               valstack[5]=1.0;
+              valstack[3]=width[j];
+              valstack[4]=depth[j];
+              valstack[5]=height[j];
               draw_SVOBJECT(avatar_types[avatar_type],0);
               glPopMatrix();
             }

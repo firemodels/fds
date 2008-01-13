@@ -132,6 +132,11 @@ int readsmv(char *file){
   int nn_slice=0;
 
 
+#ifdef pp_AVATAR
+  navatar_colors=0;
+  FREEMEMORY(avatar_colors);
+#endif
+
   FREEMEMORY(treeinfo);
   ntreeinfo=0;
   for(i=0;i<nterraininfo;i++){
@@ -450,6 +455,32 @@ int readsmv(char *file){
       The keywords TRNX, TRNY, TRNZ, GRID, PDIM, OBST and VENT are not required 
       BUT if any one these keywords are present then the number of each MUST be equal 
     */
+#ifdef pp_AVATAR
+    if(match(buffer,"AVATAR_COLORS",13) == 1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&navatar_colors);
+      if(navatar_colors<0)navatar_colors=0;
+      if(navatar_colors>0){
+        float *acolor;
+
+        NewMemory((void **)&avatar_colors,3*navatar_colors*sizeof(float));
+        acolor=avatar_colors;
+        for(i=0;i<navatar_colors;i++){
+          int irgb[3];
+          fgets(buffer,255,stream);
+          irgb[0]=0;
+          irgb[1]=0;
+          irgb[2]=0;
+          sscanf(buffer,"%i %i %i",irgb,irgb+1,irgb+2);
+          acolor[0]=(float)irgb[0]/255.0;
+          acolor[1]=(float)irgb[1]/255.0;
+          acolor[2]=(float)irgb[2]/255.0;
+          acolor+=3;
+        }
+      }
+      continue;
+    }
+#endif
 
     if(match(buffer,"TERRAIN",7) == 1){
       nterraininfo++;
