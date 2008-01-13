@@ -1023,6 +1023,7 @@ void initvars1(void){
   vis_slice_average=1;
   slice_average_interval=10.0;
 #ifdef pp_CULL
+  updatecull=1;
   cullsmoke=0;
   cullplaneinfo=NULL;
   ncullplaneinfo=0;
