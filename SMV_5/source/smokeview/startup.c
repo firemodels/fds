@@ -923,6 +923,8 @@ void initvars1(void){
 #ifdef pp_AVATAR
   navatar_types=0;
   avatar_types=NULL;
+  navatar_colors=0;
+  avatar_colors=NULL;
 #endif
   revision_fds=-1;
   revision_smv=getmaxrevision();
