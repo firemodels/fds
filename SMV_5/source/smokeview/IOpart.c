@@ -1274,7 +1274,7 @@ void drawPart5(const particle *parti){
       for(i=0;i<parti->nclasses;i++){
         short *sx, *sy, *sz;
 #ifdef pp_AVATAR
-        float *angle, *width, *depth;
+        float *angle, *width, *depth, *height;
 #endif
         unsigned char *vis, *color;
         part5class *partclassi;
