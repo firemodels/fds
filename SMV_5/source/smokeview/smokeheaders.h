@@ -48,6 +48,7 @@ EXTERNCPP void initcullplane(int cullflag);
 EXTERNCPP void setPixelCount(void);
 EXTERNCPP void setPixelCountOrthog(mesh *meshi);
 EXTERNCPP void getPixelCount(void);
+EXTERNCPP void init_cull_exts(void);
 #endif
 #ifdef pp_GPU
 void getDepthTexture( void );

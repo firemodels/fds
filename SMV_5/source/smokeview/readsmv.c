@@ -4922,7 +4922,7 @@ typedef struct {
 
   // define data structures used to speed up 3d smoke drawing (by culling non-visible smoke planes)
 
-  initcull(cullsmoke);
+  if(cullactive==1)initcull(cullsmoke);
 #endif
 
 
