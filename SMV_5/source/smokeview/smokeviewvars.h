@@ -43,6 +43,7 @@ SVEXTERN int usetexturebar;
 SVEXTERN int cullsmoke, ncullplaneinfo, updatecull;
 SVEXTERN cullplanedata *cullplaneinfo;
 SVEXTERN cullplanedata **sort_cullplaneinfo;
+SVEXTERN int have_setpixelcount;
 #endif
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
@@ -634,7 +635,6 @@ SVEXTERN char part_ext[6];
 SVEXTERN char ini_ext[5];
 
 SVEXTERN int updatehiddenfaces;
-SVEXTERN int isShell;
 SVEXTERN int nsurfids;
 SVEXTERN surfid *surfids;
 SVEXTERN int key_state;

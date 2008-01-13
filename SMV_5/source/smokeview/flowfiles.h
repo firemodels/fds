@@ -445,6 +445,7 @@ typedef struct _culldata {
 typedef struct {
   int   ibeg, iend, jbeg, jend, kbeg, kend;
   float xmin, xmax, ymin, ymax, zmin, zmax;
+  float norm[3];
   int dir;
   float dist;
   culldata *cull;
