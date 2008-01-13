@@ -4020,7 +4020,7 @@ void drawsmoke3dCULL(void){
   glBegin(GL_TRIANGLES);
   mesh_old=NULL;
   //for(nn=0;nn<ncullplaneinfo;nn++){
-  ntemp=5;
+  ntemp=ncullplaneinfo;
   if(ncullplaneinfo<ntemp)ntemp=ncullplaneinfo;
   for(nn=0;nn<ntemp;nn++){
     mesh *meshi;
@@ -4975,6 +4975,9 @@ void initcullplane(int cullflag){
           if(iend>meshi->ibar)iend=meshi->ibar;
 
           if(culli->npixels>0||cullflag==0){
+            cp->norm[0]=0.0;
+            cp->norm[1]=0.0;
+            cp->norm[2]=0.0;
             switch (meshi->smokedir) {
               case 1:
               case -1:
@@ -4990,7 +4993,12 @@ void initcullplane(int cullflag){
                   cp->jend=jend;
                   cp->kbeg=kbeg;
                   cp->kend=kend;
-
+                  if(meshi->smokedir>0){
+                    cp->norm[0]=1.0;
+                  }
+                  else{
+                    cp->norm[0]=-1.0;
+                  }
                   cp->xmin=meshi->xplt[cp->ibeg];
                   cp->xmax=meshi->xplt[cp->iend];
                   cp->ymin=meshi->yplt[cp->jbeg];
@@ -5016,6 +5024,12 @@ void initcullplane(int cullflag){
                   cp->jend=jj;
                   cp->kbeg=kbeg;
                   cp->kend=kend;
+                  if(meshi->smokedir>0){
+                    cp->norm[1]=1.0;
+                  }
+                  else{
+                    cp->norm[1]=-1.0;
+                  }
 
                   cp->xmin=meshi->xplt[cp->ibeg];
                   cp->xmax=meshi->xplt[cp->iend];
@@ -5042,6 +5056,12 @@ void initcullplane(int cullflag){
                   cp->jend=jend;
                   cp->kbeg=kk;
                   cp->kend=kk;
+                  if(meshi->smokedir>0){
+                    cp->norm[2]=1.0;
+                  }
+                  else{
+                    cp->norm[2]=-1.0;
+                  }
 
                   cp->xmin=meshi->xplt[cp->ibeg];
                   cp->xmax=meshi->xplt[cp->iend];
@@ -5080,13 +5100,19 @@ int cullplane_compare( const void *arg1, const void *arg2 ){
   cpj = *(cullplanedata **)arg2;
 
   if(cpi->dir==cpj->dir){
-    if(cpi->dist<cpj->dist)return -1;
-    if(cpi->dist>cpj->dist)return 1;
+    float di, dj;
+    float dx, dy, dz;
+
+    di = cpi->norm[0]*cpi->xmin + cpi->norm[1]*cpi->ymin + cpi->norm[2]*cpi->zmin;
+    dj = cpj->norm[0]*cpj->xmin + cpj->norm[1]*cpj->ymin + cpj->norm[2]*cpj->zmin;
+
+    if(di>dj)return -1;  // sort in descending order
+    if(di<dj)return 1;
   }
   else{
-    if(cpi->xmax<=cpj->xmin)return -1;
-    if(cpi->ymax<=cpj->ymin)return -1;
-    if(cpi->zmax<=cpj->zmin)return -1;
+    if(cpi->xmax>cpj->xmin)return -1;
+    if(cpi->ymax>cpj->ymin)return -1;
+    if(cpi->zmax>cpj->zmin)return -1;
     return 1;
   }
   return 0;
@@ -5194,6 +5220,7 @@ void initcull(int cullflag){
 void setPixelCount(void){
   int imesh,icull,n;
 
+  have_setpixelcount=1;
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_NORMALIZE);
@@ -5359,24 +5386,29 @@ void getPixelCount(void){
   mesh *meshi;
   int i;
   int icull;
-  int nzero=0;
 
   for(i=0;i<nmeshes;i++){
     meshi = meshinfo + i;
 
-
     if(meshi->culldefined==0)continue;  
-    for(icull=0;icull<meshi->ncullinfo;icull++){
-      culldata *culli;
+    if(have_setpixelcount==1){
+      for(icull=0;icull<meshi->ncullinfo;icull++){
+        culldata *culli;
 
-      culli = meshi->cullinfo + icull;
+        culli = meshi->cullinfo + icull;
 
-      glGetQueryObjectiv(meshi->cullQueryId[icull],GL_QUERY_RESULT,&culli->npixels);
-      if(culli->npixels==0)nzero++;
+        glGetQueryObjectiv(meshi->cullQueryId[icull],GL_QUERY_RESULT,&culli->npixels);
+      }
+      glDeleteQueries(meshi->ncullinfo,meshi->cullQueryId);
     }
-    glDeleteQueries(meshi->ncullinfo,meshi->cullQueryId);
-  }
-  //printf("nzero=%i blocks out of %i\n",nzero,meshi->ncullinfo);
+    else{
+      for(icull=0;icull<meshi->ncullinfo;icull++){
+        culldata *culli;
 
+        culli = meshi->cullinfo + icull;
+        culli->npixels=1;
+      }
+    }
+  }
 }
 #endif

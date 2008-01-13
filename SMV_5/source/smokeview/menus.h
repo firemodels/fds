@@ -4849,7 +4849,6 @@ static int textureshowmenu=0;
       int glui_avatar_index;
 
       touri = tourinfo + i;
-      if(touri->isDefault==1&&isShell==1)continue;
       if(touri->display==1){
         STRCPY(menulabel,"");
         if(selectedtour_index==i){
@@ -4899,9 +4898,8 @@ static int textureshowmenu=0;
       if(trainer_mode==0||(trainer_mode==1&&ntours>0))glutAddMenuEntry("-",-999);
     }
 #ifndef pp_AVATAR
-    if(trainer_mode==0&&isShell==0)glutAddMenuEntry("Default",-1);
+    if(trainer_mode==0)glutAddMenuEntry("Default",-1);
     for(i=0;i<ntours;i++){
-      if(tourinfo[i].isDefault==1&&isShell==1)continue;
       if(tourinfo[i].display==1){
         STRCPY(menulabel,check);
         STRCAT(menulabel,tourinfo[i].menulabel);  
@@ -6540,37 +6538,23 @@ static int textureshowmenu=0;
     }
 
     CREATEMENU(mainmenu,MainMenu);
-    if(isShell==0||visMAINmenus==1){
-      if(trainer_mode==1){
-   //     glutAddSubMenu("Smoke View",trainerviewmenu);
-   //     glutAddSubMenu("Explore",tourmenu);
-      }
-      if(trainer_mode==0){
-        glutAddSubMenu("Load/Unload",loadunloadmenu);
-        glutAddSubMenu("Show/Hide",showhidemenu);
-        glutAddSubMenu("Options",optionmenu);
-        glutAddSubMenu("Dialogs",dialogmenu);
-        glutAddSubMenu("Tours",tourmenu);
-      }
-   // if(ntours>0)glutAddSubMenu("Tours",tourmenu);
-   // if(ntours==0)glutAddMenuEntry("Tour",1);
+    if(trainer_mode==0){
+      glutAddSubMenu("Load/Unload",loadunloadmenu);
+      glutAddSubMenu("Show/Hide",showhidemenu);
+      glutAddSubMenu("Options",optionmenu);
+      glutAddSubMenu("Dialogs",dialogmenu);
+      glutAddSubMenu("Tours",tourmenu);
     }
-    if(isShell==0||visMAINmenus==1){
-      if(trainer_mode==0){
-        glutAddSubMenu("View",resetmenu);
-        glutAddSubMenu("Help",helpmenu);
-      }
+    if(trainer_mode==0){
+      glutAddSubMenu("View",resetmenu);
+      glutAddSubMenu("Help",helpmenu);
+    }
+    if(trainer_active==1){
       if(trainer_mode==1){
-//        glutAddSubMenu("Viewpoint",resetmenu);
-//        glutAddSubMenu("Help",helpmenu);
+        glutAddMenuEntry("Smokeview Menus",997);
       }
-      if(trainer_active==1){
-        if(trainer_mode==1){
-          glutAddMenuEntry("Smokeview Menus",997);
-        }
-        else{
-          glutAddMenuEntry("Trainer Menus",997);
-        }
+      else{
+        glutAddMenuEntry("Trainer Menus",997);
       }
     }
   glutAddMenuEntry("Quit",3);
