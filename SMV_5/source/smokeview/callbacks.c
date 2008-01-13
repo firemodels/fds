@@ -114,7 +114,7 @@ void mouse(int button, int state, int x, int y){
         highlight_block=sd->blockage;
         highlight_mesh=sd->mesh;
         update_highlight_mesh();
-        meshi = selected_case->meshinfo + highlight_mesh;
+        meshi = meshinfo + highlight_mesh;
         update_rotation_index(highlight_mesh);
         update_current_mesh(meshi);
         bchighlight_old=bchighlight;
@@ -614,9 +614,9 @@ void keyboard(unsigned char key, int x, int y){
       updateshowstep(1);
       break;
     default:
-      for(i=0;i<selected_case->nmeshes;i++){
+      for(i=0;i<nmeshes;i++){
         mesh *meshi;
-        meshi = selected_case->meshinfo + i;
+        meshi = meshinfo + i;
         meshi->visx2 = 1 - current_mesh->visx;
       }
       updateshowstep(1);
@@ -749,7 +749,7 @@ void keyboard(unsigned char key, int x, int y){
       if(nmeshes>1){
         highlight_mesh++;
         if(highlight_mesh>nmeshes-1)highlight_mesh=0;
-        update_current_mesh(selected_case->meshinfo+highlight_mesh);
+        update_current_mesh(meshinfo+highlight_mesh);
         update_highlight_mesh();
       }
     }
@@ -799,8 +799,8 @@ void keyboard(unsigned char key, int x, int y){
       vecfactor=VECFRACTION*veclengths[iveclengths];
       if(visVector==1&&ReadPlot3dFile==1){
         gbsave=current_mesh;
-        for(i=0;i<selected_case->nmeshes;i++){
-          gbi = selected_case->meshinfo + i;
+        for(i=0;i<nmeshes;i++){
+          gbi = meshinfo + i;
           if(gbi->plot3dfilenum==-1)continue;
           update_current_mesh(gbi);
           updateplotslice(1);
@@ -1113,9 +1113,9 @@ void handle_plot3d_keys(int  key){
   case GLUT_KEY_LEFT:
   case GLUT_KEY_RIGHT:
     if(current_mesh->visx2==0){
-      for(i=0;i<selected_case->nmeshes;i++){
+      for(i=0;i<nmeshes;i++){
         mesh *meshi;
-        meshi = selected_case->meshinfo+i;
+        meshi = meshinfo+i;
         if(meshi->visx2==1){
           update_current_mesh(meshi);
           break;
@@ -1207,7 +1207,7 @@ void training_move(int  mode){
   float INC_ANGLE=11.25;
   float INC_XY, INC_Z;
 
-  INC_XY=selected_case->meshinfo->cellsize/xyzmaxdiff;
+  INC_XY=meshinfo->cellsize/xyzmaxdiff;
   INC_Z=0.1/xyzmaxdiff;
 
   eye_xyz = camera_current->eye;
@@ -1298,7 +1298,7 @@ void handle_move_keys(int  key){
 
   glui_move_mode=-1;
 
-  INC_XY=selected_case->meshinfo->cellsize/xyzmaxdiff;
+  INC_XY=meshinfo->cellsize/xyzmaxdiff;
   INC_Z=INC_XY;
   INC_ANGLE = 5*INC_ANGLE0;
 
@@ -1516,11 +1516,11 @@ void Display(void){
   if(showtime==0&&ntotal_smooth_blockages>0){
     int i;
 
-    for(i=0;i<selected_case->nmeshes;i++){
+    for(i=0;i<nmeshes;i++){
       smoothblockage *sb;
       mesh *meshi;
 
-      meshi = selected_case->meshinfo+i;
+      meshi = meshinfo+i;
       meshi->nsmoothblockagecolors=0;
       meshi->smoothblockagecolors=NULL;
       meshi->blockagesurfaces=NULL;
@@ -1796,10 +1796,10 @@ void update_framenumber(int changetime){
       }
     }
     if(showpatch==1){
-      for(i=0;i<selected_case->nmeshes;i++){
+      for(i=0;i<nmeshes;i++){
         patch *patchi;
 
-        meshi = selected_case->meshinfo+i;
+        meshi = meshinfo+i;
         patchi=patchinfo + meshi->patchfilenum;
         if(meshi->patchtimes==NULL)continue;
         if(meshi->patchtimeslist==NULL)continue;
@@ -1820,7 +1820,7 @@ void update_framenumber(int changetime){
       for(i=0;i<niso;i++){
         isoi = isoinfo + i;
         if(isoi->loaded==0)continue;
-        meshi = selected_case->meshinfo + isoi->blocknumber;
+        meshi = meshinfo + isoi->blocknumber;
 
         if(meshi->isotimes==NULL)continue;
         if(meshi->isotimeslist==NULL)continue;
@@ -1836,10 +1836,10 @@ void update_framenumber(int changetime){
       }
     }
     if(ntotal_smooth_blockages>0){
-      for(i=0;i<selected_case->nmeshes;i++){
+      for(i=0;i<nmeshes;i++){
         smoothblockage *sb;
 
-        meshi = selected_case->meshinfo+i;
+        meshi = meshinfo+i;
         if(meshi->showsmoothtimelist!=NULL){
           sb=meshi->showsmoothtimelist[itime];
           if(sb==NULL)continue;
@@ -1924,8 +1924,8 @@ void togglegridstate(int visg){
     if(current_mesh->plotz==-1){
       current_mesh->plotz=current_mesh->kbar/2;
     }
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo + i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo + i;
       if(meshi->visx!=0||meshi->visy!=0||meshi->visz!=0)return;
     }
     updateshowstep(2);
@@ -1976,7 +1976,7 @@ void update_current_mesh(mesh *meshi){
     for(i=0;i<niso;i++){
       isoi = isoinfo + i;
       if(isoi->loaded==0)continue;
-      loaded_isomesh = selected_case->meshinfo+isoi->blocknumber;
+      loaded_isomesh = meshinfo+isoi->blocknumber;
       break;
     }
   }

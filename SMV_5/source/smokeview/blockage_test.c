@@ -40,7 +40,7 @@ int seg_in_rect(float *p1, float *p2,
                 float ymin, float ymax, 
                 float zmin, float zmax,
                 int checkbounds);
-float getblockdist0(casedata *casei, float x, float y, float z);
+float getblockdist0(float x, float y, float z);
 int get_move_status0(float view_height,char *label);
 void get_move_status(float *oldpos,float *newpos,
                      int *sstatus_now,int *sstatus_new,float *view_height);
@@ -329,13 +329,13 @@ void get_move_status(float *oldpos,float *newpos,
   char label_now[10], label_next[10];
   mesh *mesh_point;
 
-  view_height0 = getblockdist0(selected_case,oldpos[0],oldpos[1],oldpos[2]);
+  view_height0 = getblockdist0(oldpos[0],oldpos[1],oldpos[2]);
   *sstatus_now=get_move_status0(view_height0,label_now);
 
   mesh_point=getmesh(oldpos);
 
   if(mesh_point==NULL||*sstatus_now==GM_OUTSIDE||*sstatus_now==GM_BLOCKAGE){
-    *view_height = getblockdist0(selected_case,newpos[0],newpos[1],newpos[2]);
+    *view_height = getblockdist0(newpos[0],newpos[1],newpos[2]);
     *sstatus_next=get_move_status0(*view_height,label_next);
   }
   else{
@@ -360,7 +360,7 @@ void get_move_status(float *oldpos,float *newpos,
       testpos[0]=oldpos[0]+i*dx2;
       testpos[1]=oldpos[1]+i*dy2;
       testpos[2]=oldpos[2]+i*dz2;
-      v_height = getblockdist0(selected_case,testpos[0],testpos[1],testpos[2]);
+      v_height = getblockdist0(testpos[0],testpos[1],testpos[2]);
       s_next=get_move_status0(v_height,label_next);
       if(s_next==GM_BLOCKAGE||s_next==GM_LOW){
         *view_height=v_height;
@@ -411,21 +411,21 @@ void adjust_new_position(float oldpos[3], float newpos[3]){
   dz = newpos[2]-oldpos[2];
 
 
-  view_height = getblockdist0(selected_case,oldpos[0]+dx,oldpos[1],oldpos[2]);
+  view_height = getblockdist0(oldpos[0]+dx,oldpos[1],oldpos[2]);
   status=get_move_status0(view_height,NULL);
   if(status!=GM_OUTSIDE&&status!=GM_BLOCKAGE&&status!=GM_LOW){
     oldpos[0] += dx;
     return;
   }
 
-  view_height = getblockdist0(selected_case,oldpos[0],oldpos[1]+dy,oldpos[2]);
+  view_height = getblockdist0(oldpos[0],oldpos[1]+dy,oldpos[2]);
   status=get_move_status0(view_height,NULL);
   if(status!=GM_OUTSIDE&&status!=GM_BLOCKAGE&&status!=GM_LOW){
     oldpos[1] += dy;
     return;
   }
 
-  view_height = getblockdist0(selected_case,oldpos[0],oldpos[1],oldpos[2]+dz);
+  view_height = getblockdist0(oldpos[0],oldpos[1],oldpos[2]+dz);
   status=get_move_status0(view_height,NULL);
   if(status!=GM_OUTSIDE&&status!=GM_BLOCKAGE&&status!=GM_LOW){
     oldpos[2] += dz;
@@ -491,8 +491,8 @@ mesh *getmesh(float *xyz){
   float zmin, zmax;
   float *xplt, *yplt, *zplt;
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi = selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi = meshinfo+i;
 
     ibar = meshi->ibar;
     jbar = meshi->jbar;
@@ -521,7 +521,7 @@ mesh *getmesh(float *xyz){
 
 /* ------------------ getblockdist ------------------------ */
 
-float getblockdist(casedata *casei, float x, float y, float z){
+float getblockdist(float x, float y, float z){
   int i;
   mesh *meshi;
   float *xplt, *yplt, *zplt;
@@ -532,8 +532,8 @@ float getblockdist(casedata *casei, float x, float y, float z){
   float view_height;
   int *iblank_cell;
 
-  for(i=0;i<casei->nmeshes;i++){
-    meshi = casei->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi = meshinfo+i;
 
     iblank_cell = meshi->iblank_cell;
 
@@ -578,14 +578,14 @@ float getblockdist(casedata *casei, float x, float y, float z){
 
 /* ------------------ getblockdist0 ------------------------ */
 
-float getblockdist0(casedata *casei, float x, float y, float z){
+float getblockdist0(float x, float y, float z){
   float xx, yy, zz;
   float view_height;
 
   xx = xbar0 + x*xyzmaxdiff;
   yy = ybar0 + y*xyzmaxdiff;
   zz = zbar0 + z*xyzmaxdiff;
-  view_height = getblockdist(casei,xx,yy,zz);
+  view_height = getblockdist(xx,yy,zz);
   return view_height;
 }
 
@@ -595,7 +595,6 @@ void init_blockdist(void){
   int is;
   int ig,jg;
   float *b_zdist;
-  casedata *casei;
   mesh *meshi,*meshj;
   int minindex;
   int ibar,jbar,kbar, nx, nxy;
@@ -607,10 +606,8 @@ void init_blockdist(void){
   int ijkm1cell, ijknode, ijkm1node;
   int *iblank_cell;
 
-  for(is=0;is<ncases;is++){
-    casei=caseinfo + is;
-    for(ig=0;ig<casei->nmeshes;ig++){
-      meshi = casei->meshinfo+ig;
+    for(ig=0;ig<nmeshes;ig++){
+      meshi = meshinfo+ig;
       ibar = meshi->ibar;
       jbar = meshi->jbar;
       kbar = meshi->kbar;
@@ -624,18 +621,18 @@ void init_blockdist(void){
       meshi->block_zdist=b_zdist;
       meshi->zdist_flag=0;
     }
-    for(ig=0;ig<casei->nmeshes;ig++){
+    for(ig=0;ig<nmeshes;ig++){
       float dz;
       zbottommin=1000000000;
-      for(jg=0;jg<casei->nmeshes;jg++){
-        meshj = casei->meshinfo+jg;
+      for(jg=0;jg<nmeshes;jg++){
+        meshj = meshinfo+jg;
         if(meshj->zdist_flag==1)continue;
         if(meshj->zplt[0]<zbottommin){
           zbottommin=meshj->zplt[0];
           minindex=jg;
         }
       }
-      meshi=casei->meshinfo+minindex;
+      meshi=meshinfo+minindex;
       meshi->zdist_flag=1;
 
       xplt = meshi->xplt_orig;
@@ -669,7 +666,7 @@ void init_blockdist(void){
 
           ijknode=IJKNODE(i,j,k);
           xx = xplt[i];
-          zdist=getblockdist(casei,xx,yy,zz-dz/2.0);
+          zdist=getblockdist(xx,yy,zz-dz/2.0);
           if(zdist>0.0){
             b_zdist[ijknode]=zdist+dz/2.0;
           }
@@ -696,7 +693,6 @@ void init_blockdist(void){
         }
       }
     }
-  }
 }
 
 /* ------------------ makeiblank ------------------------ */
@@ -712,12 +708,9 @@ int makeiblank(void){
   int nx, ny, nxy;
   int *iblank,*iblank_cell,*iblank_x,*iblank_y,*iblank_z;
   int is;
-  casedata *casei;
 
-  for(is=0;is<ncases;is++){
-    casei=caseinfo + is;
-  for(ig=0;ig<casei->nmeshes;ig++){
-    meshi = casei->meshinfo+ig;
+  for(ig=0;ig<nmeshes;ig++){
+    meshi = meshinfo+ig;
     ibar = meshi->ibar;
     jbar = meshi->jbar;
     kbar = meshi->kbar;
@@ -881,7 +874,6 @@ int makeiblank(void){
     }
     }
   }
-  }
    init_blockdist();
 //  checksolve();
   return 0;
@@ -894,8 +886,8 @@ int seg_in_blockage(float *p1, float *p2){
   mesh *meshi;
   blockagedata *bc;
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo + i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
       bc = meshi->blockageinfoptrs[j];
       if(bc->showtime==NULL)continue;
@@ -920,8 +912,8 @@ int seg_in_vent(float *p1, float *p2){
   ventdata *vi;
   int checkbounds=1;
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo + i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo + i;
 #ifdef _DEBUG
     printf("\n");
 #endif

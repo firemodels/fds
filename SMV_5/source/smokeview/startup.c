@@ -1611,7 +1611,6 @@ void initvars1(void){
   showfiles=0;
   smoke3d_external=0;
  
-  ncases=0,case_number=0;
   smoke_shade=0, fire_red=255, fire_green=128, fire_blue=0;
   fire_halfdepth=2.0;
   hrrpuv_cutoff=600.0;
@@ -1916,6 +1915,7 @@ void initvars0(void){
   GPU_depthtexture=0;
 #endif
 
+  current_mesh=NULL;
   camera_current=NULL, camera_save=NULL, camera_last=NULL;
   camera_external=NULL, camera_internal=NULL, camera_ini=NULL;
   camera_list=NULL;
@@ -1970,7 +1970,6 @@ void initvars0(void){
   slicebounds=NULL;
   vsliceinfo=NULL;
   smoke3dinfo=NULL;
-  caseinfo=NULL,selected_case=NULL;
   labelinfo=NULL;
   slicetypes=NULL, isotypes=NULL, vslicetypes=NULL, patchtypes=NULL;
   plot3dinfo=NULL;

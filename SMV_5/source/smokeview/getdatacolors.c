@@ -527,7 +527,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   for(i=0;i<nplot3d;i++){
     p = plot3dinfo+i;
     if(p->loaded==0||p->display==0)continue;
-    meshi = selected_case->meshinfo+p->blocknumber;
+    meshi = meshinfo+p->blocknumber;
     ntotal=(meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
     iblank=meshi->iblank;
     q=meshi->qdata+plot3dvar*ntotal;
@@ -568,7 +568,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   for(i=0;i<nplot3d;i++){
     p = plot3dinfo+i;
     if(p->loaded==0||p->display==0)continue;
-    meshi = selected_case->meshinfo+p->blocknumber;
+    meshi = meshinfo+p->blocknumber;
     ntotal=(meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
     q=meshi->qdata+plot3dvar*ntotal;
     iq=meshi->iqdata+plot3dvar*ntotal;
@@ -1502,18 +1502,16 @@ void updatecolors(int changecolorindex){
     rgb[rgb_black][1]=1.0;
     rgb[rgb_black][2]=1.0;
   }
-  if(selected_case!=NULL){
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo + i;
-      vent_offset = 6*meshi->nbptrs;
-      outline_offset = vent_offset + meshi->nvents;
-      for(j=outline_offset;j<outline_offset+6;j++){
-        facej = meshi->faceinfo + j;
-        facej->color=foregroundcolor;
-      }
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo + i;
+    vent_offset = 6*meshi->nbptrs;
+    outline_offset = vent_offset + meshi->nvents;
+    for(j=outline_offset;j<outline_offset+6;j++){
+      facej = meshi->faceinfo + j;
+      facej->color=foregroundcolor;
     }
-    updatechopcolors();
   }
+  updatechopcolors();
   initcadcolors();
   update_texturebar();
 }        

@@ -30,8 +30,8 @@ void outputAxisLabels(){
   mesh *meshi;
 
   glColor3fv(foregroundcolor);
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
     ibar=meshi->ibar;
     jbar=meshi->jbar;
     kbar=meshi->kbar;
