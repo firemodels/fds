@@ -24,6 +24,9 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+#ifdef pp_CULL
+int cullplane_compare( const void *arg1, const void *arg2 );
+#endif
 // svn revision character string
 char IOsmoke_revision[]="$Revision$";
 
@@ -4913,27 +4916,6 @@ void makeiblank_smoke3d(void){
 
 #ifdef pp_CULL
 
-/* ------------------ cullplane_compare ------------------------ */
-
-int cullplane_compare( const void *arg1, const void *arg2 ){
-  cullplanedata *cpi, *cpj;
-
-  cpi = *(cullplanedata **)arg1;
-  cpj = *(cullplanedata **)arg2;
-
-  if(cpi->dir==cpj->dir){
-    if(cpi->dist<cpj->dist)return -1;
-    if(cpi->dist>cpj->dist)return 1;
-  }
-  else{
-    if(cpi->xmax<=cpj->xmin)return -1;
-    if(cpi->ymax<=cpj->ymin)return -1;
-    if(cpi->zmax<=cpj->zmin)return -1;
-    return 1;
-  }
-  return 0;
-}
-
 /* ------------------ initcull ------------------------ */
 
 #define NCULLS 5
@@ -5083,10 +5065,31 @@ void initcullplane(int cullflag){
   for(ii=0;ii<ncullplaneinfo;ii++){
     sort_cullplaneinfo[ii]=cullplaneinfo+ii;
   }
-  if(ncullplaneinfo>0){
+  if(ncullplaneinfo>1){
     qsort((cullplanedata *)sort_cullplaneinfo,(size_t)ncullplaneinfo,
        sizeof(cullplanedata *),cullplane_compare);
   }
+}
+
+/* ------------------ cullplane_compare ------------------------ */
+
+int cullplane_compare( const void *arg1, const void *arg2 ){
+  cullplanedata *cpi, *cpj;
+
+  cpi = *(cullplanedata **)arg1;
+  cpj = *(cullplanedata **)arg2;
+
+  if(cpi->dir==cpj->dir){
+    if(cpi->dist<cpj->dist)return -1;
+    if(cpi->dist>cpj->dist)return 1;
+  }
+  else{
+    if(cpi->xmax<=cpj->xmin)return -1;
+    if(cpi->ymax<=cpj->ymin)return -1;
+    if(cpi->zmax<=cpj->zmin)return -1;
+    return 1;
+  }
+  return 0;
 }
 
 /* ------------------ initcull ------------------------ */
