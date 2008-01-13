@@ -3970,6 +3970,7 @@ void drawsmoke3dCULL(void){
   //int slice_end,slice_beg;
   float aspectratio;
   unsigned char *firecolor;
+  int ntemp;
 
   unsigned char value[4];
   unsigned char fvalue[4];
@@ -4015,13 +4016,16 @@ void drawsmoke3dCULL(void){
 
   glBegin(GL_TRIANGLES);
   mesh_old=NULL;
-  for(nn=0;nn<ncullplaneinfo;nn++){
+  //for(nn=0;nn<ncullplaneinfo;nn++){
+  ntemp=5;
+  if(ncullplaneinfo<ntemp)ntemp=ncullplaneinfo;
+  for(nn=0;nn<ntemp;nn++){
     mesh *meshi;
     smoke3d *smoke3di;
 
     cullplanedata *culli;
 
-    culli = sort_cullplaneinfo[nn];
+    culli = sort_cullplaneinfo[ncullplaneinfo-1-nn];
 
     meshi = culli->cull_mesh;
 

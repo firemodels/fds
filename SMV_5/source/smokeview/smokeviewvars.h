@@ -28,6 +28,11 @@
 #include "smokeheaders.h"
 #endif
 
+#ifdef pp_AVATAR
+SVEXTERN int navatar_colors;
+SVEXTERN float *avatar_colors;
+#endif
+
 SVEXTERN int show_slice_in_obst;
 
 SVEXTERN int force_isometric;
