@@ -175,7 +175,7 @@ void UnloadSmokeShaders(void){
   glUseProgramObjectARB(0);
 }
 
-/* ------------------ init_slice_shader ------------------------ */
+/* ------------------ init_shaders ------------------------ */
 
 void init_shaders(void){
 	glewInit();
@@ -187,6 +187,7 @@ void init_shaders(void){
     }
     else{
   		printf("***GPU smoke shader failed to load.\n");
+      usegpu=0;
     }
   }
 	else {
