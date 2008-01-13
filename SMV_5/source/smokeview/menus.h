@@ -1245,8 +1245,8 @@ void RenderMenu(int value){
       sd->islice=0;
     }
     iframe=iframebeg;
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       meshi->ipatch=0;
     }
     UpdateTimeLabels();
@@ -2707,7 +2707,6 @@ void LoadSmoke3DMenu(int value){
     lock_allsmoke=1;
     for(i=0;i<nsmoke3d;i++){
       smoke3di = smoke3dinfo + i;
-      if(smoke3di->case_number!=case_number)continue;
       if(smoke3di->loaded==1)continue;
       readsmoke3d(i,LOAD,&errorcode);
     }
@@ -4073,10 +4072,10 @@ static int textureshowmenu=0;
   {
     int ntotal_vents=0;
 
-    for(i=0;i<selected_case->nmeshes;i++){
+    for(i=0;i<nmeshes;i++){
       mesh *meshi;
 
-      meshi=selected_case->meshinfo+i;
+      meshi=meshinfo+i;
       ntotal_vents+=meshi->nvents;
     }
     if(ntotal_vents>0){
@@ -4614,7 +4613,7 @@ static int textureshowmenu=0;
       if(visAIso!=2)glutAddMenuEntry("Outline",2);
       if(visAIso!=3)glutAddMenuEntry("Points",3);
       if(visAIso==3)glutAddMenuEntry("*Points",3);
-      hmesh=selected_case->meshinfo+highlight_mesh;
+      hmesh=meshinfo+highlight_mesh;
       if(hmesh->isofilenum!=-1){
         STRCPY(levellabel,isoinfo[hmesh->isofilenum].label.shortlabel);
         STRCAT(levellabel," Levels");

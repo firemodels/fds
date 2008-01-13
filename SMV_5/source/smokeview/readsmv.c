@@ -303,12 +303,6 @@ int readsmv(char *file){
     }
   }
 
-  if(ncases>0){
-    FREEMEMORY(caseinfo);
-    selected_case=NULL;
-    ncases=0;
-  }
-
   if(npartinfo>0){
     for(i=0;i<npartinfo;i++){
       freelabels(&partinfo[i].label);
@@ -764,6 +758,7 @@ int readsmv(char *file){
   }
   FREEMEMORY(meshinfo);
   if(NewMemory((void **)&meshinfo,nmeshes*sizeof(mesh))==0)return 2;
+  meshinfo->plot3dfilenum=-1;
   update_current_mesh(meshinfo);
   for(n=0;n<nmeshes;n++){
     mesh *meshi;
@@ -827,13 +822,6 @@ int readsmv(char *file){
     if(NewMemory( (void **)&smoke3dinfo, nsmoke3d*sizeof(smoke3d))==0)return 2;
   }
 
-  if(ncases>0){
-    if(NewMemory( (void **)&caseinfo, ncases*sizeof(casedata))==0)return 2;
-  }
-  else{
-    if(NewMemory( (void **)&caseinfo, sizeof(casedata))==0)return 2;
-  }
-  selected_case=caseinfo;
 #ifndef pp_OSX
 //  updatecolors(-1);
 #endif
@@ -880,9 +868,6 @@ int readsmv(char *file){
     if(NewMemory((void **)&zventinfo,nzvents*sizeof(zvent))==0)return 2;
   }
   nzvents=0;
-  case_number=0;
-  if(haveSHELL==1)case_number=-1;
-  ncases=0;
 
   FREEMEMORY(textureinfo);
   FREEMEMORY(surfaceinfo);
@@ -1545,7 +1530,6 @@ typedef struct {
         smoke3di->seq_id=nn_smoke3d;
         smoke3di->autoload=0;
         smoke3di->version=-1;
-        smoke3di->case_number=case_number;
         smoke3di->hrrpuv_color=NULL;
         smoke3di->water_color=NULL;
         smoke3di->soot_color=NULL;
@@ -1744,16 +1728,6 @@ typedef struct {
 //      if(lenbuffer>4){
 //        if(buffer[5]!=' ')continue;
 //      }
-
-      if(haveSHELL==1){
-        nmeshes2++;
-        {
-          casedata *casei;
-
-          casei = caseinfo + case_number;
-          casei->nmeshes=nmeshes2;
-        }
-      }
 
       igrid++;
       if(meshinfo!=NULL){
@@ -2128,25 +2102,6 @@ typedef struct {
     }
   }
 
-  {
-    casedata *casei,*caseim1;
-
-    if(ncases==0){
-      strcpy(caseinfo->label,smvfilename);
-      caseinfo->nmeshes=nmeshes;
-      caseinfo->nobst=nobst;
-      ncases=1;
-    }
-    caseinfo->meshinfo=meshinfo;
-    caseinfo->meshoffset=0;
-    for(i=1;i<ncases;i++){
-      casei = caseinfo + i;
-      caseim1 = casei - 1;
-      casei->meshinfo=caseim1->meshinfo+caseim1->nmeshes;
-      casei->meshoffset=caseim1->meshoffset+caseim1->nmeshes;
-    }
-      
-  }
 
   ndeviceinfo=0;
 
@@ -2154,8 +2109,6 @@ typedef struct {
   itrnx=0, itrny=0, itrnz=0, igrid=0, ipdim=0, iobst=0, ivent=0;
   ioffset=0;
   if(noffset==0)ioffset=1;
-  case_number=0;
-  if(haveSHELL==1)case_number=-1;
 
 /* 
    ************************************************************************
@@ -2273,16 +2226,6 @@ typedef struct {
       continue;
     }
 
-    /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ CASE +++++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-
-    if(isShell==1&&match(buffer,"CASE",4) == 1){
-      fgets(buffer,255,stream);
-      case_number++;
-    }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ OFFSET ++++++++++++++++++++++++++++++
@@ -3859,12 +3802,7 @@ typedef struct {
         sscanf(buffer,"%s %i",buffer2,&blocktemp);
         if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
       }
-      {
-        casedata *casei;
-
-        casei = caseinfo + case_number;
-        meshi=casei->meshinfo + blocknumber;
-      }
+      meshi=meshinfo + blocknumber;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&nn,&time);
       if(meshi->tspr!=NULL && nn <= meshi->nspr && nn > 0){
@@ -3982,12 +3920,7 @@ typedef struct {
         sscanf(buffer,"%s %i",buffer2,&blocktemp);
         if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
       }
-      {
-        casedata *casei;
-
-        casei = caseinfo + case_number;
-        meshi=casei->meshinfo + blocknumber;
-      }
+      meshi=meshinfo + blocknumber;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&nn,&time);
       if(meshi->theat!=NULL && nn <= meshi->nheat && nn > 0){
@@ -4115,12 +4048,7 @@ typedef struct {
       }
       showobst=0;
       if(match(buffer,"SHOW_OBST",9) == 1)showobst=1;
-      {
-        casedata *casei;
-
-        casei = caseinfo + case_number;
-        meshi=casei->meshinfo + blocknumber;
-      }
+      meshi=meshinfo + blocknumber;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&tempval,&time);
       tempval--;
@@ -4167,12 +4095,7 @@ typedef struct {
           if(blocknumber>nmeshes-1)blocknumber=nmeshes-1;
         }
       }
-      {
-        casedata *casei;
-
-        casei = caseinfo + case_number;
-        meshi=casei->meshinfo + blocknumber;
-      }
+      meshi=meshinfo + blocknumber;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&tempval,&time);
       tempval--;
@@ -4259,12 +4182,7 @@ typedef struct {
 
       if(match(buffer,"HIDE_OBST",9) == 1)show_slice_in_obst=1;
       */
-      {
-        casedata *casei;
-
-        casei = caseinfo + case_number;
-        meshi=casei->meshinfo + blocknumber;
-      }
+      meshi=meshinfo + blocknumber;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&tempval,&time);
       tempval--;
@@ -4346,12 +4264,7 @@ typedef struct {
           if(blocknumber>nmeshes-1)blocknumber=nmeshes-1;
         }
       }
-      {
-        casedata *casei;
-
-        casei = caseinfo + case_number;
-        meshi=casei->meshinfo + blocknumber;
-      }
+      meshi=meshinfo + blocknumber;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&tempval,&time);
       tempval--;
@@ -4403,7 +4316,6 @@ typedef struct {
   init_part5prop();
   init_plot3dtimelist();
 
-  case_number=0;
   if(noutlineinfo>0){
     highlight_flag=2;
   }
@@ -4993,10 +4905,10 @@ typedef struct {
   {
     int ntotal=0;
 
-    for(i=0;i<selected_case->nmeshes;i++){
+    for(i=0;i<nmeshes;i++){
       mesh *meshi;
 
-      meshi = selected_case->meshinfo + i;
+      meshi = meshinfo + i;
       ntotal += meshi->nbptrs;
     }
     FREEMEMORY(changed_idlist);
@@ -5294,8 +5206,8 @@ int ifsmoothblock(void){
   mesh *meshi;
   blockagedata *bc;
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi = selected_case->meshinfo + i;
+  for(i=0;i<nmeshes;i++){
+    meshi = meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
       bc = meshi->blockageinfoptrs[j];
       if(bc->type==BLOCK_smooth&&bc->del!=1)return 1;
@@ -5316,8 +5228,8 @@ void updateusetextures(void){
     texti=textureinfo + i;
     texti->used=0;
   }
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo + i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
       bc=meshi->blockageinfoptrs[j];
       if(textureinfo!=NULL){

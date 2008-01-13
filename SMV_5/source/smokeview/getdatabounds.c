@@ -347,7 +347,7 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
       for(i=0;i<nplot3d;i++){
         p = plot3dinfo+i;
         if(p->loaded==0||p->display==0)continue;
-        meshi=selected_case->meshinfo+p->blocknumber;
+        meshi=meshinfo+p->blocknumber;
         ntotal=(meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
         ndata += ntotal;
         iblank=meshi->iblank;

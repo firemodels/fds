@@ -94,8 +94,8 @@ extern "C" void glui_edit_setup(int main_window){
   panel_obj_new=glui_edit->add_panel_to_panel(panel_obj_select,"",GLUI_PANEL_NONE);
   if(nmeshes>1){
     meshlist = glui_edit->add_listbox_to_panel(panel_obj_new,"Mesh",&highlight_mesh,MESH_LIST,OBJECT_CB);
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi = selected_case->meshinfo + i;
+    for(i=0;i<nmeshes;i++){
+      meshi = meshinfo + i;
       meshlist->add_item(i,meshi->label);
     }
   }
@@ -309,8 +309,8 @@ void BUTTON_hide3_CB(int var){
     break;
   case UNDO_ALL_BLOCKAGES:
     bchighlight_save=bchighlight;
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       for(j=0;j<meshi->nbptrs;j++){
         bc=meshi->blockageinfoptrs[j];
         if(bc==NULL)continue;
@@ -548,7 +548,7 @@ void OBJECT_CB(int var){
   int i,temp;
   switch (var){
     case MESH_LIST:
-      update_current_mesh(selected_case->meshinfo + highlight_mesh);
+      update_current_mesh(meshinfo + highlight_mesh);
       update_rotation_index(highlight_mesh);
     break;
     case SET_LABEL:

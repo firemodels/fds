@@ -151,7 +151,7 @@ void output_new_obst(FILE *stream_out, FILE *stream_out2){
   for(i=0;i<nselectblocks;i++){
     bc = selectblockinfo[sortedblocklist[i]];
     if(bc->id==-1){
-      meshi = selected_case->meshinfo + bc->meshindex;
+      meshi = meshinfo + bc->meshindex;
       xplt = meshi->xplt_orig;
       yplt = meshi->yplt_orig;
       zplt = meshi->zplt_orig;
@@ -194,7 +194,7 @@ void output_obst(char *buffer,int *smvobstcount, int fdsobstcount, FILE *stream_
     *smvobstcount=i;
     if(bc->id==-1)continue;
     if(bc->id==-1){
-      meshi = selected_case->meshinfo + bc->meshindex;
+      meshi = meshinfo + bc->meshindex;
       xplt = meshi->xplt_orig;
       yplt = meshi->yplt_orig;
       zplt = meshi->zplt_orig;
@@ -328,8 +328,8 @@ void getlabels(const char *filein){
   }
   fclose(stream_in);
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi = selected_case->meshinfo + i;
+  for(i=0;i<nmeshes;i++){
+    meshi = meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
       bc = meshi->blockageinfoptrs[j];
       id = bc->id-1;
@@ -371,7 +371,7 @@ void xb_obstsubst(char *source,blockagedata *bc){
   if(i1>=0&&i2>=0){
     strncpy(buffer,source,(unsigned int)i1);
     buffer[i1]='\0';
-    meshi=selected_case->meshinfo + bc->meshindex;
+    meshi=meshinfo + bc->meshindex;
     xplt = meshi->xplt_orig;
     yplt = meshi->yplt_orig;
     zplt = meshi->zplt_orig;

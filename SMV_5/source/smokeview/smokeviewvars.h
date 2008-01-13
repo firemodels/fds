@@ -833,8 +833,6 @@ SVEXTERN float p3min_temp, p3max_temp;
 SVEXTERN int smoke3d_external;
 
 SVEXTERN smoke3d *smoke3dinfo;
-SVEXTERN casedata *caseinfo,*selected_case;
-SVEXTERN int ncases,case_number;
 SVEXTERN int smoke_shade, fire_red, fire_green, fire_blue;
 SVEXTERN float smoke_shade4[4];
 SVEXTERN float fire_halfdepth;

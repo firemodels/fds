@@ -232,7 +232,7 @@ void addnewobject(void){
   int meshindex;
 
   meshi=current_mesh;
-  meshindex = meshi - selected_case->meshinfo;
+  meshindex = meshi - meshinfo;
   meshi->nbptrs++;
   return_code1=NewMemory((void **)&bc,sizeof(blockagedata));
   if(meshi->nbptrs==1){
@@ -278,7 +278,7 @@ void addnewobject(void){
   CheckMemory;
   update_faces();
   highlight_block=meshi->nbptrs-1;
-  highlight_mesh=meshi-selected_case->meshinfo;
+  highlight_mesh=meshi-meshinfo;
   update_highlight_mesh();
   xyz_dir=0;
   which_face=0;

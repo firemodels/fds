@@ -228,7 +228,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   if(ib->loaded==0&&flag==UNLOAD)return;
 
   blocknumber=ib->blocknumber;
-  meshi = selected_case->meshinfo+blocknumber;
+  meshi = meshinfo+blocknumber;
   unloadiso(meshi);
   FREEMEMORY(meshi->isotimes);
   ib->loaded=0;
@@ -253,7 +253,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       for(i=0;i<niso;i++){
         isoi=isoinfo+i;
         if(isoi->loaded==1){
-          loaded_isomesh=selected_case->meshinfo+isoi->blocknumber;
+          loaded_isomesh=meshinfo+isoi->blocknumber;
           break;
         }
       }
@@ -626,7 +626,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 
   ib->loaded=1;
   ib->display=1;
-  loaded_isomesh=selected_case->meshinfo+ib->blocknumber;
+  loaded_isomesh=meshinfo+ib->blocknumber;
   update_iso_showlevels();
   visAIso=1;
   ReadIsoFile=1;
@@ -685,8 +685,8 @@ void unloadiso(mesh *meshi){
   ib->display=0;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   meshi->isofilenum=-1;
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi2 = selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi2 = meshinfo+i;
     if(meshi2->isofilenum!=-1)nloaded++;
   }
   if(nloaded==0){
@@ -1490,13 +1490,13 @@ void update_iso_showlevels(void){
   int i, j;
   mesh *meshi;
 
-  if(loaded_isomesh==NULL||selected_case==NULL)return;
+  if(loaded_isomesh==NULL)return;
 
   nisolevels=loaded_isomesh->nisolevels;
   showlevels=loaded_isomesh->showlevels;
 
-  for(j=0;j<selected_case->nmeshes;j++){
-    meshi = selected_case->meshinfo+j;
+  for(j=0;j<nmeshes;j++){
+    meshi = meshinfo+j;
     if(meshi->isofilenum==-1)continue;
     for(i=0;i<nisolevels;i++){
       if(i<meshi->nisolevels)meshi->showlevels[i]=showlevels[i];
