@@ -169,7 +169,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     smoke3di->d_display=0;
   }
 
-  meshi=selected_case->meshinfo+smoke3di->blocknumber;
+  meshi=meshinfo+smoke3di->blocknumber;
   FREEMEMORY(meshi->merge_alpha);
   FREEMEMORY(meshi->merge_color);
 
@@ -888,8 +888,8 @@ void mergesmoke3dcolors(void){
   i_hrrpuv_cutoff=254*hrrpuv_cutoff/1200.0;
 
 #ifdef pp_CULL
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi = selected_case->meshinfo + i;
+  for(i=0;i<nmeshes;i++){
+    meshi = meshinfo + i;
     meshi->cull_smoke3d=NULL;
   }
 #endif
@@ -924,7 +924,7 @@ void mergesmoke3dcolors(void){
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==0)continue;
     if(smoke3di->d_display==0)continue;
-    meshi=selected_case->meshinfo+smoke3di->blocknumber;
+    meshi=meshinfo+smoke3di->blocknumber;
 #ifdef pp_CULL
     meshi->cull_smoke3d=smoke3di;
 #endif
@@ -1193,7 +1193,7 @@ void drawsmoke3d(smoke3d *smoke3di){
 
   mesh *meshi;
 
-  meshi = selected_case->meshinfo + smoke3di->blocknumber;
+  meshi = meshinfo + smoke3di->blocknumber;
   mergealphaptr = meshi->merge_alpha;
   mergecolorptr = meshi->merge_color;
   value[0]=255;
@@ -2941,7 +2941,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   mesh *meshi;
   float fire_alpha;
 
-  meshi = selected_case->meshinfo + smoke3di->blocknumber;
+  meshi = meshinfo + smoke3di->blocknumber;
   firecolor=smoke3di->hrrpuv_color;
  
 
@@ -2952,7 +2952,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
     fire_alpha=256*(1.0-pow(0.5,meshi->dx/fire_halfdepth));
   }
 
-  meshi = selected_case->meshinfo + smoke3di->blocknumber;
+  meshi = meshinfo + smoke3di->blocknumber;
   value[0]=255;
   value[1]=255;
   value[2]=255;
@@ -4374,8 +4374,8 @@ void getsmokedir(float *mm){
   xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
   xyzeyeorig[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
   
-  for(j=0;j<selected_case->nmeshes;j++){
-    meshj = selected_case->meshinfo + j;
+  for(j=0;j<nmeshes;j++){
+    meshj = meshinfo + j;
 
     minangle=1000.0;
     iminangle=-10;
@@ -4667,13 +4667,13 @@ void makeiblank_smoke3d(void){
   float x, y, z;
   float dx, dy, dz;
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    smokemesh = selected_case->meshinfo + i;
+  for(i=0;i<nmeshes;i++){
+    smokemesh = meshinfo + i;
     smokemesh->smokeloaded=0;
   }
   for(i=0;i<nsmoke3d;i++){
     smoke3di = smoke3dinfo + i;
-    smokemesh = selected_case->meshinfo + smoke3di->blocknumber;
+    smokemesh = meshinfo + smoke3di->blocknumber;
 
     if(smoke3di->loaded==1){
       smokemesh->smokeloaded=1;
@@ -4699,8 +4699,8 @@ void makeiblank_smoke3d(void){
 #define ALLMESHES 0
 #define LOWERMESHES 1
 
-  for(ic=selected_case->nmeshes-1;ic>=0;ic--){
-    smokemesh = selected_case->meshinfo + ic;
+  for(ic=nmeshes-1;ic>=0;ic--){
+    smokemesh = meshinfo + ic;
     if(smokemesh->smokeloaded==0)continue;
     iblank_smoke3d = smokemesh->iblank_smoke3d;
 
@@ -4853,10 +4853,10 @@ void makeiblank_smoke3d(void){
     n = nm;
   }
   else{
-    n = selected_case->nmeshes;
+    n = nmeshes;
   }
   for(i=0;i<n;i++){
-    meshi = selected_case->meshinfo + i;
+    meshi = meshinfo + i;
     if(flag==ALLMESHES&&i==nm)continue;
     if(meshi->smokeloaded==0)continue;
 
@@ -5200,9 +5200,9 @@ void setPixelCount(void){
   glDepthMask(GL_FALSE);
   glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 
-  for(imesh=0;imesh<selected_case->nmeshes;imesh++){
+  for(imesh=0;imesh<nmeshes;imesh++){
     mesh *meshi;
-    meshi = selected_case->meshinfo + imesh;
+    meshi = meshinfo + imesh;
 
     meshi->culldefined=0;
   }
@@ -5212,7 +5212,7 @@ void setPixelCount(void){
 
     smoke3di = smoke3dinfo + n;
     if(smoke3di->loaded==0||smoke3di->display==0)continue;
-    meshi = selected_case->meshinfo + smoke3di->blocknumber;
+    meshi = meshinfo + smoke3di->blocknumber;
     if(meshi->culldefined==1)continue;
 
 
@@ -5361,8 +5361,8 @@ void getPixelCount(void){
   int icull;
   int nzero=0;
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi = selected_case->meshinfo + i;
+  for(i=0;i<nmeshes;i++){
+    meshi = meshinfo + i;
 
 
     if(meshi->culldefined==0)continue;  

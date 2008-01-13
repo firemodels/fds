@@ -140,8 +140,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     mesh *meshi;
 
     glui_3dsmoke->add_statictext_to_panel(panel2,"HRRPUV cutoff (kW/m3):");
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi = selected_case->meshinfo + i;
+    for(i=0;i<nmeshes;i++){
+      meshi = meshinfo + i;
       SPINNER_smoke3d_hrrpuv_cutoffptr[i]=glui_3dsmoke->add_spinner_to_panel
         (panel2,meshi->label,GLUI_SPINNER_FLOAT,&meshi->hrrpuv_cutoff,FIRE_CUTOFF,SMOKE_3D_CB);
       SPINNER_smoke3d_hrrpuv_cutoffptr[i]->set_float_limits(0.0,1200);

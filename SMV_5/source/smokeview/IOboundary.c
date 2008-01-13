@@ -78,7 +78,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   blocknumber = pi->blocknumber;
   highlight_mesh = blocknumber;
   update_highlight_mesh();
-  meshi = selected_case->meshinfo+blocknumber;
+  meshi = meshinfo+blocknumber;
   update_current_mesh(meshi);
   filenum = meshi->patchfilenum;
   if(filenum>=0&&filenum<npatch_files){
@@ -952,8 +952,8 @@ int nodeinblockage(const mesh *meshnode, int i,int j,int k, int *imesh, int *ibl
 
   *imesh=-1;
 
-  for(ii=0;ii<selected_case->nmeshes;ii++){
-    meshii = selected_case->meshinfo + ii;
+  for(ii=0;ii<nmeshes;ii++){
+    meshii = meshinfo + ii;
     if(meshnode==meshii)continue;
 
     xplt = meshii->xplt;
@@ -1145,7 +1145,7 @@ void nodein_extvent(
         if(patchblank[iii]==1)continue;
         patchblank[iii] = nodeinblockage(meshi,i1,j,k,&imesh,&iblockage);
         if(imesh!=-1){
-    //      meshblock = selected_case->meshinfo+imesh;
+    //      meshblock = meshinfo+imesh;
     //      meshi->blockonpatch[ipatch]=iblockage;
     //      meshi->meshonpatch[ipatch]=meshblock;
     //      bc = meshblock->blockageinfoptrs[iblockage];
@@ -1161,7 +1161,7 @@ void nodein_extvent(
         if(patchblank[iii]==1)continue;
         patchblank[iii]=nodeinblockage(meshi,i,j1,k,&imesh,&iblockage);
         if(imesh!=-1){
-          meshblock = selected_case->meshinfo+imesh;
+          meshblock = meshinfo+imesh;
           ASSERT(iblockage>=0&&iblockage<meshblock->nbptrs);
           meshi->blockonpatch[ipatch]=iblockage;
           meshi->meshonpatch[ipatch]=meshblock;
@@ -1178,7 +1178,7 @@ void nodein_extvent(
         if(patchblank[iii]==1)continue;
         patchblank[iii]=nodeinblockage(meshi,i,j,k1,&imesh,&iblockage);
         if(imesh!=-1){
-    //      meshblock = selected_case->meshinfo+imesh;
+    //      meshblock = meshinfo+imesh;
     //      meshi->blockonpatch[ipatch]=iblockage;
     //      meshi->meshonpatch[ipatch]=meshblock;
     //      bc = meshblock->blockageinfoptrs[iblockage];
@@ -1198,8 +1198,8 @@ int ispatchtype(int type){
   int n,i;
   mesh *meshi;
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
     for(n=0;n<meshi->npatches;n++){
       if(meshi->patchtype[n]==type)return 1;
     }
@@ -2438,7 +2438,7 @@ int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2,
       }
     }
     for(imesh=0;imesh<nmeshes;imesh++){
-      meshblock = selected_case->meshinfo + imesh;
+      meshblock = meshinfo + imesh;
       if(meshblock==meshi)continue;
       for(i=0;i<meshblock->nbptrs;i++){
         bc=meshblock->blockageinfoptrs[i];
@@ -2553,7 +2553,7 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
       }
     }
     for(imesh=0;imesh<nmeshes;imesh++){
-      meshblock = selected_case->meshinfo + imesh;
+      meshblock = meshinfo + imesh;
       if(meshblock==meshi)continue;
       for(i=0;i<meshblock->nbptrs;i++){
         bc=meshblock->blockageinfoptrs[i];

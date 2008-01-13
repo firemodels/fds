@@ -567,14 +567,6 @@ typedef struct {
   int type;
 } device;
 
-/* --------------------------  casedata ------------------------------------ */
-
-typedef struct {
-  mesh *meshinfo;
-  char label[128];
-  int nobst,nmeshes,meshoffset;
-} casedata;
-
 /* --------------------------  camera ------------------------------------ */
 
 typedef struct {
@@ -852,7 +844,6 @@ typedef struct _smoke3d {
   int use_lighting_file;
   char *light_file;
 #endif
-  int case_number;
   int loaded, display, d_display;
   int soot_loaded,water_loaded,hrrpuv_loaded;
   int blocknumber;

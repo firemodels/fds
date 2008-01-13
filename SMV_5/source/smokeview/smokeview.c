@@ -1209,8 +1209,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
          int igrid;
          mesh *meshi;
 
-         for(igrid=0;igrid<selected_case->nmeshes;igrid++){
-           meshi=selected_case->meshinfo+igrid;
+         for(igrid=0;igrid<nmeshes;igrid++){
+           meshi=meshinfo+igrid;
            drawgrid(meshi);
            sniffErrors("drawgrid");
          }
@@ -1260,8 +1260,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     patch *patchi;
     mesh *meshi;
 
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       if(meshi->npatches>0){
         int filenum;
 
@@ -1301,8 +1301,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     iso *isoi;
     mesh *meshi;
 
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       if(meshi->isotimes==NULL||meshi->isofilenum<0)continue;
       isoi = isoinfo + meshi->isofilenum;
       if(isoi->loaded==0||isoi->display==0||isoi->type!=iisotype)continue;
@@ -1314,8 +1314,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         draw transparent objects
         */
 
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       if(meshi->isotimes==NULL||meshi->isofilenum<0)continue;
       isoi = isoinfo + meshi->isofilenum;
       if(isoi->loaded==0||isoi->display==0||isoi->type!=iisotype)continue;
@@ -1542,8 +1542,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(showplot3d==1){
     mesh *meshi;
 
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       if(meshi->plot3dfilenum==-1)continue;
       if(plot3dinfo[meshi->plot3dfilenum].display==0)continue;
       if(usetexturebar==1){
@@ -1634,7 +1634,7 @@ void update_rotation_index(int val){
   *rotation_index=val;
   if(*rotation_index==rotation_index_OLD)return;
   if(*rotation_index>=0&&*rotation_index<nmeshes){
-    meshi = selected_case->meshinfo + *rotation_index;
+    meshi = meshinfo + *rotation_index;
     camera_current->xcen=meshi->xcen;
     camera_current->ycen=meshi->ycen;
     camera_current->zcen=meshi->zcen;
@@ -1954,13 +1954,13 @@ void updateShow(void){
     if(partflag==1)showsmoke=1;
     if(evacflag==1)showevac=1;
     if(patchflag==1)showpatch=1;
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       meshi->visInteriorPatches=0;
     }
     if(showpatch==1&&visPatchType[0]==1){
-      for(i=0;i<selected_case->nmeshes;i++){
-        meshi=selected_case->meshinfo+i;
+      for(i=0;i<nmeshes;i++){
+        meshi=meshinfo+i;
         if(meshi->patchtimes==NULL)continue;
         patchi = patchinfo+meshi->patchfilenum;
         if(patchi->loaded==1&&patchi->display==1&&patchi->type==ipatchtype){
@@ -2156,8 +2156,8 @@ void updatetimes(void){
   if(ReadTargFile==1&&visTarg==1){
     ntimes+=ntargtimes;
   }
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
     filenum =meshi->patchfilenum;
     if(filenum!=-1){
       patchi=patchinfo+filenum;
@@ -2170,8 +2170,8 @@ void updatetimes(void){
     ntimes+=nzonet;
   }
   if(ReadIsoFile==1&&visAIso!=0){
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       if(meshi->isofilenum<0)continue;
       ib = isoinfo + meshi->isofilenum;
       if(ib->loaded==0)continue;
@@ -2248,8 +2248,8 @@ void updatetimes(void){
       }
     }
   }
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo + i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo + i;
     filenum=meshi->patchfilenum;
     if(filenum!=-1){
       patchi = patchinfo + filenum;
@@ -2275,7 +2275,7 @@ void updatetimes(void){
     for(i=0;i<niso;i++){
       ib = isoinfo+i;
       if(ib->loaded==0)continue;
-      meshi=selected_case->meshinfo + ib->blocknumber;
+      meshi=meshinfo + ib->blocknumber;
       for(n=0;n<meshi->nisosteps;n++){
         *timescopy++=meshi->isotimes[n];
         if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
@@ -2392,19 +2392,19 @@ void updatetimes(void){
         NewMemory((void **)&smoke3di->timeslist,ntimes*sizeof(int));
       }
     }
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       if(meshi->isotimes==NULL)continue;
       FREEMEMORY(meshi->isotimeslist);
       NewMemory((void **)&meshi->isotimeslist,  ntimes*sizeof(int));  
     }
 
-    for(i=0;i<selected_case->nmeshes;i++){
-      FREEMEMORY(selected_case->meshinfo[i].patchtimeslist); 
+    for(i=0;i<nmeshes;i++){
+      FREEMEMORY(meshinfo[i].patchtimeslist); 
     }
-    for(i=0;i<selected_case->nmeshes;i++){
-      if(selected_case->meshinfo[i].patchtimes==NULL)continue;
-      NewMemory((void **)&selected_case->meshinfo[i].patchtimeslist,ntimes*sizeof(int));
+    for(i=0;i<nmeshes;i++){
+      if(meshinfo[i].patchtimes==NULL)continue;
+      NewMemory((void **)&meshinfo[i].patchtimeslist,ntimes*sizeof(int));
     }
 
     FREEMEMORY(zonetlist); 
@@ -2414,8 +2414,8 @@ void updatetimes(void){
     NewMemory((void **)&targtimeslist,  ntimes*sizeof(int));
 
     if(ntotal_smooth_blockages>0){
-      for(i=0;i<selected_case->nmeshes;i++){
-        meshi=selected_case->meshinfo+i;
+      for(i=0;i<nmeshes;i++){
+        meshi=meshinfo+i;
         FREEMEMORY(meshi->showsmoothtimelist);
         NewMemory((void **)&meshi->showsmoothtimelist,ntimes*sizeof(smoothblockage *));
       }
@@ -2426,8 +2426,8 @@ void updatetimes(void){
     ResizeMemory((void **)&times,ntimes*sizeof(float));
   }
   izone=0; itime=0;
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
     meshi->ipatch=0;
   }
   for(i=0;i<nslice;i++){
@@ -2435,16 +2435,16 @@ void updatetimes(void){
     sd->islice=0; 
   }
   iframe=iframebeg; 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
     if(meshi->isotimes==NULL)continue;
     meshi->iiso=0;
   }
 
   /* determine visibility of each blockage at each time step */
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
     for(j=0;j<meshi->nbptrs;j++){
       bc = meshi->blockageinfoptrs[j];
       if(bc->showtime==NULL)continue;
@@ -2462,8 +2462,8 @@ void updatetimes(void){
 
   /* determine visibility of each vent at each time step */
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
     if(meshi->ventinfo==NULL)continue;
     for(j=0;j<meshi->nvents;j++){
       vi = meshi->ventinfo+j;
@@ -2482,8 +2482,8 @@ void updatetimes(void){
 
   /* determine visibility of each smooth blockage */
 
-//  for(i=0;i<selected_case->nmeshes;i++){
-//    meshi=selected_case->meshinfo+i;
+//  for(i=0;i<nmeshes;i++){
+//    meshi=meshinfo+i;
 //  }
   
   synctimes();
@@ -2607,8 +2607,8 @@ void Init(void){
     modelview_setup[i+4*i]=1.0;
   }
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
     initcontour(&meshi->plot3dcontour1,rgbptr,nrgb+1);
     initcontour(&meshi->plot3dcontour2,rgbptr,nrgb+1);
     initcontour(&meshi->plot3dcontour3,rgbptr,nrgb+1);
@@ -2617,8 +2617,8 @@ void Init(void){
   if(set_no_part!=1&&nopart!=1&&npartinfo>0){
     readpart(partinfo[0].file,0,LOAD,&errorcode);
   }
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
     meshi->currentsurf.defined=0;
     meshi->currentsurf2.defined=0;
   }
@@ -2790,8 +2790,8 @@ void synctimes(void){
     //       meshi->nsmoothcolors;
     //       meshi->blockagesurfaces
   if(ntotal_smooth_blockages>0){
-    for(igrid=0;igrid<selected_case->nmeshes;igrid++){
-      meshi=selected_case->meshinfo+igrid;
+    for(igrid=0;igrid<nmeshes;igrid++){
+      meshi=meshinfo+igrid;
       if(meshi->showsmoothtimelist==NULL)continue;
       for(n=0;n<ntimes;n++){
         smoothblockage *sb;
@@ -2953,8 +2953,8 @@ void synctimes(void){
 
   /* synchronize patch times */
 
-    for(j=0;j<selected_case->nmeshes;j++){
-      meshi=selected_case->meshinfo+j;
+    for(j=0;j<nmeshes;j++){
+      meshi=meshinfo+j;
       if(meshi->patchtimes==NULL)continue;
       if(n==0){
         istart=0;
@@ -2974,8 +2974,8 @@ void synctimes(void){
 
   /* synchronize isosurface times */
 
-    for(igrid=0;igrid<selected_case->nmeshes;igrid++){
-      meshi=selected_case->meshinfo+igrid;
+    for(igrid=0;igrid<nmeshes;igrid++){
+      meshi=meshinfo+igrid;
       if(meshi->isotimes==NULL)continue;
       if(n==0){
         istart=0;
@@ -3431,12 +3431,12 @@ void checktimebound(void){
       sd=sliceinfo+i;
       sd->islice=0;
     }
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       meshi->ipatch=0;
     }
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       if(meshi->isotimes==NULL)continue;
       meshi->iiso=0;
     }
@@ -3451,20 +3451,20 @@ void checktimebound(void){
       sd=sliceinfo+i;
       sd->islice=sd->nsteps-1;
     }
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       meshi->ipatch=meshi->npatch_frames-1;
     }
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi=selected_case->meshinfo+i;
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
       if(meshi->isotimes==NULL)continue;
       meshi->iiso=meshi->nisosteps-1;
     }
   }
   /* set blockage visibility */
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
     for(j=0;j<meshi->nbptrs;j++){
       bc=meshi->blockageinfoptrs[j];
       if(bc->showtimelist==NULL)continue;
@@ -3495,8 +3495,8 @@ int getplotstate(int choice){
     case STATIC_PLOTS:
     case STATIC_PLOTS_NORECURSE:
       stept = 0;
-      for(i=0;i<selected_case->nmeshes;i++){
-        meshi=selected_case->meshinfo + i;
+      for(i=0;i<nmeshes;i++){
+        meshi=meshinfo + i;
         if(meshi->plot3dfilenum==-1)continue;
         ploti = plot3dinfo + meshi->plot3dfilenum;
         if(ploti->loaded==0||ploti->display==0)continue;

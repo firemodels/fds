@@ -67,7 +67,7 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
 
   highlight_mesh=p->blocknumber;
   update_highlight_mesh();
-  meshi=selected_case->meshinfo+highlight_mesh;
+  meshi=meshinfo+highlight_mesh;
   update_current_mesh(meshi);
 
 
@@ -101,8 +101,8 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   initcontour(&meshi->plot3dcontour3,rgbptr,nrgb);
 
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    gbb=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    gbb=meshinfo+i;
     if(gbb->plot3dfilenum!=-1)nloaded++;
   }
   if(nloaded==0){
@@ -133,7 +133,7 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
     p->loaded=0;
     p->display=0;
     plotstate=getplotstate(STATIC_PLOTS);
-    meshi=selected_case->meshinfo+p->blocknumber;
+    meshi=meshinfo+p->blocknumber;
     meshi->plot3dfilenum=-1;
     if(nloaded==0){
       ReadPlot3dFile=0;
@@ -303,8 +303,8 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   meshi->plot3d_speedmax=0.0f;
   if(uindex!=-1||vindex!=-1||windex!=-1||numplot3dvars>5)meshi->plot3d_speedmax=p3max[5];
   speedmax=-1000000.;
-  for(i=0;i<selected_case->nmeshes;i++){
-    gbi=selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    gbi=meshinfo+i;
     if(gbi->plot3dfilenum==-1)continue;
     if(speedmax<gbi->plot3d_speedmax)speedmax=gbi->plot3d_speedmax;
   }
@@ -349,9 +349,8 @@ void update_plot3dtitle(void){
   mesh *meshi;
 
   STRCPY(FULLTITLE,TITLEBASE);
-  if(selected_case==NULL)return;
   meshi=current_mesh;
-  if(meshi==NULL)meshi=selected_case->meshinfo;
+  if(meshi==NULL)meshi=meshinfo;
   filenum=meshi->plot3dfilenum;
   if(filenum!=-1){
     plot3di = plot3dinfo+meshi->plot3dfilenum;
@@ -1195,8 +1194,8 @@ void updatesurface(void){
   int plot3dsize;
   int i;
 
-  for(i=0;i<selected_case->nmeshes;i++){
-    meshi = selected_case->meshinfo+i;
+  for(i=0;i<nmeshes;i++){
+    meshi = meshinfo+i;
     if(meshi->plot3dfilenum==-1)continue;
 
     ibar=meshi->ibar;
@@ -1261,7 +1260,7 @@ void updateallplotslices(void){
   for(i=0;i<nplot3d;i++){
     p=plot3dinfo+i;
     if(p->loaded==0)continue;
-    update_current_mesh(selected_case->meshinfo+p->blocknumber);
+    update_current_mesh(meshinfo+p->blocknumber);
     if(current_mesh->visx==1)updateplotslice(1);
     if(current_mesh->visy==1)updateplotslice(2);
     if(current_mesh->visz==1)updateplotslice(3);
@@ -1280,13 +1279,13 @@ void update_plot_xyz(mesh *current_mesh){
   yval = current_mesh->yplt[current_mesh->ploty];
   zval = current_mesh->zplt[current_mesh->plotz];
 
-  for(i=0;i<selected_case->nmeshes;i++){
+  for(i=0;i<nmeshes;i++){
     mesh *meshi;
     float xmin, xmax;
     float ymin, ymax;
     float zmin, zmax;
 
-    meshi=selected_case->meshinfo+i;
+    meshi=meshinfo+i;
     if(meshi==current_mesh)continue;
 
     xmin = meshi->xplt[0];
@@ -1379,7 +1378,7 @@ void updateplotslice(int slicedir){
   for(i=0;i<nmeshes;i++){
     mesh *meshjj;
 
-    meshjj = selected_case->meshinfo + i;
+    meshjj = meshinfo + i;
     if(meshjj->plot3dfilenum==-1)continue;
     updateplotslice_mesh(meshjj,slicedir);
   }
@@ -1634,13 +1633,13 @@ void updateshowstep(int slicedir){
     ymax = current_mesh->yplt[current_mesh->jbar];
     zmin = current_mesh->zplt[0];
     zmax = current_mesh->zplt[current_mesh->kbar];
-    for(i=0;i<selected_case->nmeshes;i++){
+    for(i=0;i<nmeshes;i++){
       mesh *meshi;
       float xmin2, xmax2;
       float ymin2, ymax2;
       float zmin2, zmax2;
 
-      meshi = selected_case->meshinfo+i;
+      meshi = meshinfo+i;
       if(meshi==current_mesh)continue;
 
       xmin2 = meshi->xplt[0];

@@ -218,8 +218,8 @@ extern "C" void glui_motion_setup(int main_window){
   rotation_index_OLD=nmeshes;
   if(nmeshes>1){
     meshlist1 = glui_motion->add_listbox_to_panel(panel_motion,"Rotate about:",rotation_index,MESH_LIST,TRANSLATE_CB);
-    for(i=0;i<selected_case->nmeshes;i++){
-      meshi = selected_case->meshinfo + i;
+    for(i=0;i<nmeshes;i++){
+      meshi = meshinfo + i;
       meshlist1->add_item(i,meshi->label);
     }
     meshlist1->add_item(nmeshes,"world center");
@@ -626,11 +626,11 @@ void TRANSLATE_CB(int var){
       break;
     case MESH_LIST:
       if(*rotation_index>=0&&*rotation_index<nmeshes){
-        update_current_mesh(selected_case->meshinfo + (*rotation_index));
+        update_current_mesh(meshinfo + (*rotation_index));
         update_rotation_index(*rotation_index);
       }
       else{
-        update_current_mesh(selected_case->meshinfo);
+        update_current_mesh(meshinfo);
         update_rotation_index(nmeshes);
       }
       return;

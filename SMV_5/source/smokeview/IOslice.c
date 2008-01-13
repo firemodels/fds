@@ -267,7 +267,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   error=0;
   show_slice_average=0;
   blocknumber = sliceinfo[ifile].blocknumber;
-  meshi=selected_case->meshinfo+blocknumber;
+  meshi=meshinfo+blocknumber;
 
   slicefilenumber = ifile;
   slicefilenum=ifile;
@@ -493,9 +493,9 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
      that it does not "interfere" with an adjacent block */
 
     blocknumber = sliceinfo[ifile].blocknumber;
-    xplt_local=selected_case->meshinfo[blocknumber].xplt;
-    yplt_local=selected_case->meshinfo[blocknumber].yplt;
-    zplt_local=selected_case->meshinfo[blocknumber].zplt;
+    xplt_local=meshinfo[blocknumber].xplt;
+    yplt_local=meshinfo[blocknumber].yplt;
+    zplt_local=meshinfo[blocknumber].zplt;
 
     xslicemid = (xplt_local[sd->is1]+xplt_local[sd->is2])/2.0;
     yslicemid = (yplt_local[sd->js1]+yplt_local[sd->js2])/2.0;
@@ -961,7 +961,7 @@ void updateslicemenulabels(void){
       mesh *meshi;
       sprintf(label,", Mesh %i",1+sd->blocknumber);
       STRCAT(sd->menulabel,label);
-      meshi = selected_case->meshinfo + sd->blocknumber;
+      meshi = meshinfo + sd->blocknumber;
       sprintf(label,", type: %i",meshi->mesh_type);
       STRCAT(mslicei->menulabel2,label);
       STRCAT(mslicei->menulabel,label);
@@ -995,7 +995,7 @@ void updateslicemenulabels(void){
         STRCPY(mslicei->menulabel2,sd->label.longlabel);
         STRCAT(mslicei->menulabel2,", ");
         STRCAT(mslicei->menulabel2,sd->menulabel);
-        meshi = selected_case->meshinfo + sd->blocknumber;
+        meshi = meshinfo + sd->blocknumber;
         sprintf(label,", type: %i",meshi->mesh_type);
         STRCAT(mslicei->menulabel2,label);
         STRCAT(mslicei->menulabel,label);
@@ -1135,7 +1135,7 @@ void getsliceparams(void){
       sd->ks2=ks2;
       sd->idir=-1;
       iblock = sd->blocknumber;
-      meshi = selected_case->meshinfo + iblock;
+      meshi = meshinfo + iblock;
 
       strcpy(sd->slicedir,"");
       position=-999.0;
@@ -1689,7 +1689,7 @@ void drawslice(const slice *sd){
 
   rgb_ptr = rgb_slice;
 
-  meshi = selected_case->meshinfo + sd->blocknumber;
+  meshi = meshinfo + sd->blocknumber;
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -1887,7 +1887,7 @@ void drawslice_texture(const slice *sd){
 
   //rgb_ptr = rgb_slice;
 
-  meshi = selected_case->meshinfo + sd->blocknumber;
+  meshi = meshinfo + sd->blocknumber;
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -2069,7 +2069,7 @@ void drawvolslice_texture(const slice *sd){
 
   //rgb_ptr = rgb_slice;
 
-  meshi = selected_case->meshinfo + sd->blocknumber;
+  meshi = meshinfo + sd->blocknumber;
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -2289,7 +2289,7 @@ void drawvolslice(const slice *sd){
 
   rgb_ptr = rgb_slice;
 
-  meshi = selected_case->meshinfo + sd->blocknumber;
+  meshi = meshinfo + sd->blocknumber;
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -2482,7 +2482,7 @@ void drawvvolslice(const vslice *vd){
   float *rgb_ptr;
 
   sd = sliceinfo + vd->ival;
-  meshi=selected_case->meshinfo+sd->blocknumber;
+  meshi=meshinfo+sd->blocknumber;
   xplttemp=meshi->xplt;
   yplttemp=meshi->yplt;
   zplttemp=meshi->zplt;
@@ -2677,7 +2677,7 @@ void drawvslice(const vslice *vd){
   float *rgb_ptr;
 
   sd = sliceinfo + vd->ival;
-  meshi=selected_case->meshinfo+sd->blocknumber;
+  meshi=meshinfo+sd->blocknumber;
   xplttemp=meshi->xplt;
   yplttemp=meshi->yplt;
   zplttemp=meshi->zplt;
@@ -2959,7 +2959,7 @@ void init_Slicedata(void){
     if(fileout==NULL)continue;
     fprintf(fileout,"%s\n",sd->label.longlabel);
     fprintf(fileout,"%s\n",sd->label.unit);
-    meshi = selected_case->meshinfo + sd->blocknumber;
+    meshi = meshinfo + sd->blocknumber;
 
     xplt = meshi->xplt_orig;
     yplt = meshi->yplt_orig;
