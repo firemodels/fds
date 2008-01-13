@@ -30,6 +30,20 @@
 
 char callbacks_revision[]="$Revision$";
 
+#undef pp_GPU_CULL_STATE
+#ifdef pp_GPU
+#define pp_GPU_CULL_STATE
+#endif
+#ifdef pp_CULL
+#ifndef pp_GPU_CULL_STATE
+#define pp_GPU_CULL_STATE
+#endif
+#endif
+
+#ifdef pp_GPU_CULL_STATE
+void print_gpu_cull_state(void);
+#endif
+
 float gmod(float x, float y);
 void  OBJECT_CB(int flag);
 /* ------------------ WindowStatus ------------------------ */
@@ -548,20 +562,17 @@ void keyboard(unsigned char key, int x, int y){
   }
 #ifdef pp_CULL
   if(strncmp((const char *)&key2,"C",1)==0){
-    cullsmoke=1-cullsmoke;
-    initcull(cullsmoke);
-    printf("cullsmoke=%i\n",cullsmoke);
+    if(cullactive==1){
+      cullsmoke=1-cullsmoke;
+      initcull(cullsmoke);
+    }
+    print_gpu_cull_state();
   }
 #endif
 #ifdef pp_GPU
   if(strncmp((const char *)&key2,"G",1)==0){
-    if(gpuactive==1){
-      usegpu=1-usegpu;
-      printf("usegpu=%i\n",usegpu);
-    }
-    else{
-      printf("gpu not active\n");
-    }
+    if(gpuactive==1)usegpu=1-usegpu;
+    print_gpu_cull_state();
   }
 #endif
   if(strncmp((const char *)&key2,"t",1)==0){
@@ -975,6 +986,49 @@ void keyboard(unsigned char key, int x, int y){
     updatesurface(); 
   }
 }
+#ifdef pp_GPU_CULL_STATE
+/* ------------------ print_gpu_cull_state ------------------------ */
+
+void print_gpu_cull_state(void){
+  char gpu_label[128];
+#ifdef pp_CULL
+  char cull_label[128];
+
+  if(cullactive==1){
+    if(cullsmoke==1&&usegpu==1){
+      strcpy(cull_label,"Smoke culling in use.");
+    }
+    else if(cullsmoke==1&&usegpu==0){
+      strcpy(cull_label,"Smoke culling not in use (available if GPU activates).");
+    }
+    else{
+      strcpy(cull_label,"Smoke culling not in use.");
+    }
+  }
+  else{
+    strcpy(cull_label,"Smoke culling not available.");
+  }
+#endif
+#ifdef pp_GPU
+  if(gpuactive==1){
+    if(usegpu==1){
+      strcpy(gpu_label,"GPU in use.");
+    }
+    else{
+      strcpy(gpu_label,"GPU not in use.");
+    }
+  }
+  else{
+    strcpy(gpu_label,"GPU not available.");
+  }
+  printf("%s ",gpu_label);
+#endif
+#ifdef pp_CULL
+  printf("%s",cull_label);
+#endif
+  printf("\n");
+}
+#endif
 
 /* ------------------ handle_eyeview ------------------------ */
 

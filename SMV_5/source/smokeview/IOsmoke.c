@@ -193,7 +193,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
     makeiblank_smoke3d();
 #ifdef pp_CULL
-    initcull(cullsmoke);
+    if(cullactive==1)initcull(cullsmoke);
 #endif
     return;
   }
@@ -472,7 +472,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatetimes();
 #ifdef pp_CULL
-    initcull(cullsmoke);
+    if(cullactive==1)initcull(cullsmoke);
 #endif
   IDLE();
 }
@@ -3946,6 +3946,32 @@ case -2:
 }
 #endif
 #ifdef pp_CULL
+
+/* ------------------ drawsmoke3dCULL ------------------------ */
+
+void init_cull_exts(void){
+  char *GLversion;
+  char version_label[256];
+  int i, major,  minor;
+  float version;
+
+  cullactive=0;
+  GLversion=glGetString(GL_VERSION);
+  strcpy(version_label,GLversion);
+  for(i=0;i<strlen(version_label);i++){
+    if(version_label[i]=='.')version_label[i]=' ';
+  }
+  sscanf(version_label,"%i %i",&major,&minor);
+  if(major>1||(major==1&&minor>=5)){
+    cullactive=1;
+  }
+  if(cullactive==0){
+    trim(version_label);
+    printf("Smokeview is running on a system using OpenGL %s\n",version_label);
+    printf("OpenGL 1.5 or later in order to implement smoke culling.\n");
+    cullsmoke=0;
+  }
+}
 
 /* ------------------ drawsmoke3dCULL ------------------------ */
 
