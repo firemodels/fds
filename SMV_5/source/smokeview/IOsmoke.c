@@ -25,6 +25,7 @@
 #include "smokeheaders.h"
 
 #ifdef pp_CULL
+#define NCULLS 5
 int cullplane_compare( const void *arg1, const void *arg2 );
 #endif
 // svn revision character string
@@ -1263,8 +1264,8 @@ void drawsmoke3d(smoke3d *smoke3di){
 
   transparenton();
   switch (ssmokedir){
-  // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
-
+ 
+    // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
 
   case 1:
   case -1:
@@ -3947,17 +3948,15 @@ case -2:
 #endif
 #ifdef pp_CULL
 
-/* ------------------ drawsmoke3dCULL ------------------------ */
+/* ------------------ init_cull_exts ------------------------ */
 
 void init_cull_exts(void){
-  char *GLversion;
   char version_label[256];
   int i, major,  minor;
   float version;
 
   cullactive=0;
-  GLversion=glGetString(GL_VERSION);
-  strcpy(version_label,GLversion);
+  strcpy(version_label,(char *)glGetString(GL_VERSION));
   for(i=0;i<strlen(version_label);i++){
     if(version_label[i]=='.')version_label[i]=' ';
   }
@@ -3978,7 +3977,7 @@ void init_cull_exts(void){
 void drawsmoke3dCULL(void){
   int i,j,k,n,nn;
   float constval,x1,x3,z1,z3, yy1, y3;
-  int is1, is2, js1, js2, ks1, ks2;
+  int is1, is2, js1, js2, ks1;
   int ii, jj, kk;
   int ibeg, iend, jbeg, jend, kbeg, kend;
 
@@ -4063,7 +4062,7 @@ void drawsmoke3dCULL(void){
     if(meshi!=mesh_old){
       mesh_old=meshi;
   
-     glEnd();
+      glEnd();
       smoke3di=meshi->cull_smoke3d;
       firecolor=smoke3di->hrrpuv_color;
       if(fire_halfdepth<=0.0){
@@ -4089,7 +4088,6 @@ void drawsmoke3dCULL(void){
       js1 = smoke3di->js1;
       js2 = smoke3di->js2;
       ks1 = smoke3di->ks1;
-      ks2 = smoke3di->ks2;
 
       nx = is2 + 1 - is1;
       ny = js2 + 1 - js1;
@@ -4115,7 +4113,6 @@ void drawsmoke3dCULL(void){
       case 1:
       case -1:
         aspectratio=meshi->dx;
-        glUniform1f(GPU_aspectratio,aspectratio);
         break;
       case 2:
       case -2:
@@ -4125,12 +4122,14 @@ void drawsmoke3dCULL(void){
       case -3:
         aspectratio=meshi->dz;
         break;
+      case 4:
+      case -4:
+        aspectratio=meshi->dxy;
       }
       glUniform1f(GPU_aspectratio,aspectratio);
       glBegin(GL_TRIANGLES);
     }
     switch (meshi->smokedir){
-      int icull;
 
   // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
 
@@ -4257,6 +4256,56 @@ void drawsmoke3dCULL(void){
           }
         }
         break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 4 +++++++++++++++++++++++++++++++++++++++
+
+  case 4:
+  case -4:
+      for(k=culli->kbeg; k<culli->kend; k++){
+        kterm = (k-ks1)*nxy;
+        z1 = zplt[k];
+        z3 = zplt[k+1];
+        znode[0]=z1;
+        znode[1]=z1;
+        znode[2]=z3;
+        znode[3]=z3;
+
+        for(i=culli->ibeg;i<culli->iend;i++){
+          iterm = (i-is1);
+          x1 = xplt[i];
+          x3 = xplt[i+1];
+
+          xnode[0]=x1;
+          xnode[1]=x3;
+          xnode[2]=x3;
+          xnode[3]=x1;
+
+          j = culli->jend-(i-culli->ibeg);
+          jterm = (j-js1)*nx;
+
+          yy1=yplt[j];
+          y3=yplt[j-1];
+
+          ynode[0]=yy1;
+          ynode[1]=y3;
+          ynode[2]=y3;
+          ynode[3]=yy1;
+
+          n11 = iterm+jterm+kterm;
+          n12 = n11 - nx + 1;
+          n22 = n12 + nxy;
+          n21 = n11 + nxy;
+
+//        n11 = (j-js1)*nx   + (i-is1)   + (k-ks1)*nx*ny;
+//        n12 = (j-1-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
+//        n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+//        n21 = (j-js1)*nx   + (i-is1)   + (k+1-ks1)*nx*ny;
+
+          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+        }
+      }
+    break;
+
 
 //    default:
 //      ASSERT(FFALSE);
@@ -4944,16 +4993,17 @@ void makeiblank_smoke3d(void){
 
 /* ------------------ initcull ------------------------ */
 
-#define NCULLS 5
-
 void initcullplane(int cullflag){
   int ii;
   int iskip, jskip, kskip;
   int nx, ny, nz;
+  int nxx, nyy, nzz;
   int ibeg, iend, jbeg, jend, kbeg, kend;
-  int i, j, k;
+  int i, j, k, ik, ij;
   cullplanedata *cp;
   smoke3d *smoke3di;
+  float norm[3];
+  float dx, dy, factor;
 
   cp = cullplaneinfo;
   ncullplaneinfo=0;
@@ -5011,7 +5061,6 @@ void initcullplane(int cullflag){
                   cp->dir=meshi->smokedir;
                   cp->cull=culli;
                   cp->cull_mesh=meshi;
-                  cp->dist=meshi->xplt[ii];
 
                   cp->ibeg=ii;
                   cp->iend=ii;
@@ -5042,7 +5091,6 @@ void initcullplane(int cullflag){
                   cp->dir=meshi->smokedir;
                   cp->cull=culli;
                   cp->cull_mesh=meshi;
-                  cp->dist=meshi->yplt[jj];
 
                   cp->ibeg=ibeg;
                   cp->iend=iend;
@@ -5074,7 +5122,6 @@ void initcullplane(int cullflag){
                   cp->dir=meshi->smokedir;
                   cp->cull=culli;
                   cp->cull_mesh=meshi;
-                  cp->dist=meshi->zplt[kk];
 
                   cp->ibeg=ibeg;
                   cp->iend=iend;
@@ -5087,6 +5134,70 @@ void initcullplane(int cullflag){
                   }
                   else{
                     cp->norm[2]=-1.0;
+                  }
+
+                  cp->xmin=meshi->xplt[cp->ibeg];
+                  cp->xmax=meshi->xplt[cp->iend];
+                  cp->ymin=meshi->yplt[cp->jbeg];
+                  cp->ymax=meshi->yplt[cp->jend];
+                  cp->zmin=meshi->zplt[cp->kbeg];
+                  cp->zmax=meshi->zplt[cp->kend];
+
+                  ncullplaneinfo++;
+                  cp++;
+                }
+                break;
+              case 4:
+              case -4:
+                nxx = iend - ibeg;
+                nyy = jend - jbeg;
+                norm[2]=0.0;
+                dx = meshi->xplt_orig[1]-meshi->xplt_orig[0];
+                dy = meshi->yplt_orig[1]-meshi->yplt_orig[0];
+                factor= dx*dx+dy*dy;
+                if(factor==0.0){
+                  factor=1.0;
+                }
+                else{
+                  factor=1.0/sqrt(factor);
+                }
+                norm[0]=-dy*factor;
+                norm[1]=-dx*factor;
+                for(ij=1;ij<nxx+nyy+1;ij++){
+                  cp->dir=meshi->smokedir;
+                  cp->cull=culli;
+                  cp->cull_mesh=meshi;
+
+                  if(ij<=nyy){
+                    cp->ibeg=ibeg;
+                  }
+                  else{
+                    cp->ibeg=ibeg+(ij-nyy);
+                  }
+                  cp->iend = ibeg + ij;
+                  if(cp->iend>iend)cp->iend=iend;
+
+                  if(ij<=nxx){
+                    cp->jbeg=jbeg;
+                  }
+                  else{
+                    cp->jbeg=jbeg+(ij-nxx);
+                  }
+                  cp->jend = jbeg + ij;
+                  if(cp->jend>jend)cp->jend=jend;
+
+                  cp->kbeg=kbeg;
+                  cp->kend=kend;
+
+                  if(meshi->smokedir>0){
+                    cp->norm[0]=norm[0];
+                    cp->norm[1]=norm[1];
+                    cp->norm[2]=norm[2];
+                  }
+                  else{
+                    cp->norm[0]=-norm[0];
+                    cp->norm[1]=-norm[1];
+                    cp->norm[2]=-norm[2];
                   }
 
                   cp->xmin=meshi->xplt[cp->ibeg];
@@ -5159,7 +5270,6 @@ void initcull(int cullflag){
   FREEMEMORY(sort_cullplaneinfo);
   ncullplaneinfo=0;
 
-#define NCULLS 5
   for(ii=0;ii<nmeshes;ii++){
     mesh *meshi;
 
@@ -5268,39 +5378,7 @@ void setPixelCount(void){
     meshi = meshinfo + smoke3di->blocknumber;
     if(meshi->culldefined==1)continue;
 
-
-    switch (meshi->smokedir){
-      case 1:
-      case -1:
-      case 2:
-      case -2:
-      case 3:
-      case -3:
-        setPixelCountOrthog(meshi);
-        break;
-      case 4:
-      case -4:
-      case 5:
-      case -5:
-      case 6:
-      case -6:
-      case 7:
-      case -7:
-      case 8:
-      case -8:
-      case 9:
-      case -9:
-        for(icull=0;icull<meshi->ncullinfo;icull++){
-          culldata *culli;
-
-          culli = meshi->cullinfo + icull;
-          culli->npixels=1;
-        }
-        break;
-      default:
-        ASSERT(FFALSE);
-        break;
-    }
+    setPixelCountOrthog(meshi);
   }
   glEnable(GL_LIGHTING);
   glEnable(GL_COLOR_MATERIAL);
@@ -5402,8 +5480,6 @@ void setPixelCountOrthog(mesh *meshi){
       glEnd();
       glEndQuery(GL_SAMPLES_PASSED);
     }
-
-
 }
 
 /* ------------------ getPixelCount ------------------------ */

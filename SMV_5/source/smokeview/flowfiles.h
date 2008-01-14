@@ -447,7 +447,6 @@ typedef struct {
   float xmin, xmax, ymin, ymax, zmin, zmax;
   float norm[3];
   int dir;
-  float dist;
   culldata *cull;
   mesh *cull_mesh;
 } cullplanedata;
