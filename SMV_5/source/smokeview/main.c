@@ -16,7 +16,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "smokeviewapi.h"
-// dummy change to force revision update 
+
 // svn revision character string
 char main_revision[]="$Revision$";
 
