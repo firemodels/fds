@@ -1032,6 +1032,7 @@ void initvars1(void){
   cullplaneinfo=NULL;
   ncullplaneinfo=0;
   have_setpixelcount=0;
+  update_initcullplane=1;
 #endif
 
   show_transparent_vents=1;

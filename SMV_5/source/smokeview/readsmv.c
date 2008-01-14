@@ -5517,6 +5517,7 @@ void initmesh(mesh *meshi){
   meshi->culldefined=0;
   meshi->cullQueryId=NULL;
   meshi->cull_smoke3d=NULL;
+  meshi->smokedir_old=-100;
 #endif
   meshi->meshrgb[0]=0.0;
   meshi->meshrgb[1]=0.0;
