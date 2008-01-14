@@ -366,7 +366,7 @@ typedef struct mesh_ {
   float *isotimes;
   int *isotimeslist;
   int iiso;
-  int smokedir;
+  int smokedir,smokedir_old;
   float dx, dy, dz, dxy,dxz,dyz;
   float norm[3];
 
@@ -437,7 +437,7 @@ typedef struct _culldata {
   int   ibeg, iend, jbeg, jend, kbeg, kend;
   int iskip, jskip, kskip;
   mesh *cull_mesh;
-  int npixels;
+  int npixels,npixels_old;
 } culldata;
 
 /* --------------------------  cullplanedata ------------------------------------ */

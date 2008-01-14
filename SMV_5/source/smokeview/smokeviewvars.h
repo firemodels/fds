@@ -44,7 +44,7 @@ SVEXTERN int cullactive;
 SVEXTERN int cullsmoke, ncullplaneinfo;
 SVEXTERN cullplanedata *cullplaneinfo;
 SVEXTERN cullplanedata **sort_cullplaneinfo;
-SVEXTERN int have_setpixelcount;
+SVEXTERN int have_setpixelcount,update_initcullplane;
 #endif
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
