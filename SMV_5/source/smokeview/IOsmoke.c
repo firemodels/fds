@@ -24,6 +24,8 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+int cull_count=0;
+
 #ifdef pp_CULL
 #define NCULLS 5
 int cullplane_compare( const void *arg1, const void *arg2 );
@@ -4044,10 +4046,7 @@ void drawsmoke3dCULL(void){
 
   glBegin(GL_TRIANGLES);
   mesh_old=NULL;
-  //for(nn=0;nn<ncullplaneinfo;nn++){
-  ntemp=ncullplaneinfo;
-  if(ncullplaneinfo<ntemp)ntemp=ncullplaneinfo;
-  for(nn=0;nn<ntemp;nn++){
+  for(nn=0;nn<ncullplaneinfo;nn++){
     mesh *meshi;
     smoke3d *smoke3di;
 
@@ -4124,7 +4123,22 @@ void drawsmoke3dCULL(void){
         break;
       case 4:
       case -4:
+      case 5:
+      case -5:
         aspectratio=meshi->dxy;
+        break;
+      case 6:
+      case -6:
+      case 7:
+      case -7:
+        aspectratio = meshi->dyz;
+        break;
+      case 8:
+      case -8:
+      case 9:
+      case -9:
+        aspectratio = meshi->dxz;
+        break;
       }
       glUniform1f(GPU_aspectratio,aspectratio);
       glBegin(GL_TRIANGLES);
@@ -4306,10 +4320,257 @@ void drawsmoke3dCULL(void){
       }
     break;
 
+  // +++++++++++++++++++++++++++++++++++ DIR 5 +++++++++++++++++++++++++++++++++++++++
 
-//    default:
-//      ASSERT(FFALSE);
-//      break;
+  case 5:
+  case -5:
+      for(k=culli->kbeg; k<culli->kend; k++){
+        kterm = (k-ks1)*nxy;
+        z1 = zplt[k];
+        z3 = zplt[k+1];
+        znode[0]=z1;
+        znode[1]=z1;
+        znode[2]=z3;
+        znode[3]=z3;
+
+        for(i=culli->ibeg;i<culli->iend;i++){
+          iterm = (i-is1);
+          x1 = xplt[i];
+          x3 = xplt[i+1];
+
+          xnode[0]=x1;
+          xnode[1]=x3;
+          xnode[2]=x3;
+          xnode[3]=x1;
+
+          j = culli->jbeg+(i-culli->ibeg);
+          jterm = (j-js1)*nx;
+
+          yy1=yplt[j];
+          y3=yplt[j+1];
+
+          ynode[0]=yy1;
+          ynode[1]=y3;
+          ynode[2]=y3;
+          ynode[3]=yy1;
+
+          n11 = jterm + iterm + kterm;
+          n12 = n11 + nx + 1;
+          n22 = n12 + nxy;
+          n21 = n11 + nxy;
+
+        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n12 = (j+1-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
+        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+        //    n21 = (j-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
+
+          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+        }
+      }
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 6 +++++++++++++++++++++++++++++++++++++++
+
+  case 6:
+  case -6:
+      for(i=culli->ibeg; i<culli->iend; i++){
+        iterm = (i-is1);
+        x1 = xplt[i];
+        x3 = xplt[i+1];
+
+        xnode[0]=x1;
+        xnode[1]=x3;
+        xnode[2]=x3;
+        xnode[3]=x1;
+
+        for(j=culli->jend;j>culli->jbeg;j--){
+
+          k = culli->kbeg-(j-culli->jend);
+          jterm = (j-js1)*nx;
+
+          yy1=yplt[j];
+          y3=yplt[j-1];
+
+          ynode[0]=yy1;
+          ynode[1]=yy1;
+          ynode[2]=y3;
+          ynode[3]=y3;
+
+          kterm = (k-ks1)*nxy;
+          z1 = zplt[k];
+          z3 = zplt[k+1];
+          znode[0]=z1;
+          znode[1]=z1;
+          znode[2]=z3;
+          znode[3]=z3;
+
+
+          n11 = jterm + iterm + kterm;
+          n12 = n11 + 1;
+          n22 = n12 -nx + nxy;
+          n21 = n11 -nx +  nxy;
+
+        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n12 = (j-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
+        //    n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+        //    n21 = (j-1-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
+
+          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+        }
+      }
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 7 +++++++++++++++++++++++++++++++++++++++
+
+  case 7:
+  case -7:
+      for(i=culli->ibeg; i<culli->iend; i++){
+        iterm = (i-is1);
+        x1 = xplt[i];
+        x3 = xplt[i+1];
+
+        xnode[0]=x1;
+        xnode[1]=x3;
+        xnode[2]=x3;
+        xnode[3]=x1;
+
+        for(j=culli->jbeg;j<culli->jend;j++){
+
+          k = culli->kbeg+(j-culli->jbeg);
+          jterm = (j-js1)*nx;
+
+          yy1=yplt[j];
+          y3=yplt[j+1];
+
+          ynode[0]=yy1;
+          ynode[1]=yy1;
+          ynode[2]=y3;
+          ynode[3]=y3;
+
+          kterm = (k-ks1)*nxy;
+          z1 = zplt[k];
+          z3 = zplt[k+1];
+          znode[0]=z1;
+          znode[1]=z1;
+          znode[2]=z3;
+          znode[3]=z3;
+
+
+          n11 = jterm + iterm + kterm;
+          n12 = n11 + 1;
+          n22 = n12 +nx + nxy;
+          n21 = n11 +nx +  nxy;
+
+        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n12 = (j-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
+        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+        //    n21 = (j+1-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
+
+          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+        }
+      }
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 8 +++++++++++++++++++++++++++++++++++++++
+
+  case 8:
+  case -8:
+      for(j=culli->jbeg; j<culli->jend; j++){
+        jterm = (j-js1)*nx;
+
+        yy1=yplt[j];
+        y3=yplt[j+1];
+
+        ynode[0]=yy1;
+        ynode[1]=yy1;
+        ynode[2]=y3;
+        ynode[3]=y3;
+
+        for(i=culli->ibeg;i<culli->iend;i++){
+          iterm = (i-is1);
+          x1 = xplt[i];
+          x3 = xplt[i+1];
+
+          xnode[0]=x1;
+          xnode[1]=x3;
+          xnode[2]=x3;
+          xnode[3]=x1;
+
+          k = culli->kend-(i-culli->ibeg);
+          kterm = (k-ks1)*nxy;
+          z1 = zplt[k];
+          z3 = zplt[k-1];
+          znode[0]=z1;
+          znode[1]=z3;
+          znode[2]=z3;
+          znode[3]=z1;
+
+          n11 = jterm + iterm + kterm;
+          n12 = n11 + 1-nx;
+          n22 = n12 + nx;
+          n21 = n11 +nx ;
+
+        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n12 = (j-js1)*nx + (i+1-is1) + (k-1-ks1)*nx*ny;
+        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k-1-ks1)*nx*ny;
+        //    n21 = (j+1-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+
+          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+        }
+      }
+    break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 9 +++++++++++++++++++++++++++++++++++++++
+
+  case 9:
+  case -9:
+      for(j=culli->jbeg; j<culli->jend; j++){
+        jterm = (j-js1)*nx;
+
+        yy1=yplt[j];
+        y3=yplt[j+1];
+
+        ynode[0]=yy1;
+        ynode[1]=y3;
+        ynode[2]=y3;
+        ynode[3]=yy1;
+
+        for(i=culli->ibeg;i<culli->iend;i++){
+          iterm = (i-is1);
+          x1 = xplt[i];
+          x3 = xplt[i+1];
+
+          xnode[0]=x1;
+          xnode[1]=x1;
+          xnode[2]=x3;
+          xnode[3]=x3;
+
+          k = culli->kbeg+(i-culli->ibeg);
+          kterm = (k-ks1)*nxy;
+          z1 = zplt[k];
+          z3 = zplt[k+1];
+          znode[0]=z1;
+          znode[1]=z1;
+          znode[2]=z3;
+          znode[3]=z3;
+
+          n11 = jterm + iterm + kterm;
+          n12 = n11 + nx;
+          n22 = n12 + 1 + nxy;
+          n21 = n11 + 1 + nxy ;
+
+        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n12 = (j+1-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+        //    n21 = (j-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+
+          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+        }
+      }
+    break;
+    default:
+      ASSERT(FFALSE);
+      break;
     }
   }
   glEnd();
@@ -4641,7 +4902,15 @@ void getsmokedir(float *mm){
       }
     }
     meshj->smokedir=iminangle;
-    if(demo_mode!=0)meshj->smokedir=1;
+#ifdef pp_CULL
+    if(meshj->smokedir!=meshj->smokedir_old){
+      meshj->smokedir_old=meshj->smokedir;
+      update_initcullplane=1;
+    }
+#endif
+    if(demo_mode!=0){
+      meshj->smokedir=1;
+    }
   }
 }
 
@@ -5003,8 +5272,10 @@ void initcullplane(int cullflag){
   cullplanedata *cp;
   smoke3d *smoke3di;
   float norm[3];
-  float dx, dy, factor;
+  float dx, dy, dz, factor;
 
+  printf("updating initcullplane %i\n",cull_count++);
+  update_initcullplane=0; 
   cp = cullplaneinfo;
   ncullplaneinfo=0;
 
@@ -5161,8 +5432,8 @@ void initcullplane(int cullflag){
                 else{
                   factor=1.0/sqrt(factor);
                 }
-                norm[0]=-dy*factor;
-                norm[1]=-dx*factor;
+                norm[0]=dy*factor;
+                norm[1]=dx*factor;
                 for(ij=1;ij<nxx+nyy+1;ij++){
                   cp->dir=meshi->smokedir;
                   cp->cull=culli;
@@ -5210,6 +5481,331 @@ void initcullplane(int cullflag){
                   ncullplaneinfo++;
                   cp++;
                 }
+                break;
+              case 5:
+              case -5:
+                nxx = iend - ibeg;
+                nyy = jend - jbeg;
+                norm[2]=0.0;
+                dx = meshi->xplt_orig[1]-meshi->xplt_orig[0];
+                dy = meshi->yplt_orig[1]-meshi->yplt_orig[0];
+                factor= dx*dx+dy*dy;
+                if(factor==0.0){
+                  factor=1.0;
+                }
+                else{
+                  factor=1.0/sqrt(factor);
+                }
+                norm[0]=-dy*factor;
+                norm[1]=dx*factor;
+                for(ij=1;ij<nxx+nyy+1;ij++){
+                  cp->dir=meshi->smokedir;
+                  cp->cull=culli;
+                  cp->cull_mesh=meshi;
+
+                  cp->ibeg=iend-ij;
+                  if(ij>nxx){
+                    cp->ibeg=ibeg;
+                  }
+                  cp->iend = iend;
+                  if(ij>nyy)cp->iend=iend-(ij-nyy);
+
+                  if(ij<=nxx){
+                    cp->jbeg=jbeg;
+                  }
+                  else{
+                    cp->jbeg=jbeg+(ij-nxx);
+                  }
+                  cp->jend = jbeg + ij;
+                  if(cp->jend>jend)cp->jend=jend;
+
+                  cp->kbeg=kbeg;
+                  cp->kend=kend;
+
+                  if(meshi->smokedir>0){
+                    cp->norm[0]=norm[0];
+                    cp->norm[1]=norm[1];
+                    cp->norm[2]=norm[2];
+                  }
+                  else{
+                    cp->norm[0]=-norm[0];
+                    cp->norm[1]=-norm[1];
+                    cp->norm[2]=-norm[2];
+                  }
+
+                  cp->xmin=meshi->xplt[cp->ibeg];
+                  cp->xmax=meshi->xplt[cp->iend];
+                  cp->ymin=meshi->yplt[cp->jbeg];
+                  cp->ymax=meshi->yplt[cp->jend];
+                  cp->zmin=meshi->zplt[cp->kbeg];
+                  cp->zmax=meshi->zplt[cp->kend];
+
+                  ncullplaneinfo++;
+                  cp++;
+                }
+                break;
+              case 6:
+              case -6:
+                nyy = jend - jbeg;
+                nzz = kend - kbeg;
+                norm[0]=0.0;
+                dy = meshi->yplt_orig[1]-meshi->yplt_orig[0];
+                dz = meshi->zplt_orig[1]-meshi->zplt_orig[0];
+                factor= dz*dz+dy*dy;
+                if(factor==0.0){
+                  factor=1.0;
+                }
+                else{
+                  factor=1.0/sqrt(factor);
+                }
+                norm[1]=dz*factor;
+                norm[2]=dy*factor;
+                for(ij=1;ij<nzz+nyy+1;ij++){
+                  cp->dir=meshi->smokedir;
+                  cp->cull=culli;
+                  cp->cull_mesh=meshi;
+
+                  cp->ibeg=ibeg;
+                  cp->iend=iend;
+
+                  cp->jbeg=jbeg;
+                  if(ij>nzz){
+                    cp->jbeg=jbeg+(ij-nzz);
+                  }
+                  cp->jend=jbeg+ij;
+                  if(ij>nyy){
+                    cp->jend=jend;
+                  }
+
+                  cp->kbeg = kbeg;
+                  if(ij>nyy){
+                    cp->kbeg=kbeg+(ij-nyy);
+                  }
+                  cp->kend = kbeg+ij;
+                  if(ij>nzz){
+                    cp->kend=kend;
+                  }
+
+                  if(meshi->smokedir>0){
+                    cp->norm[0]=norm[0];
+                    cp->norm[1]=norm[1];
+                    cp->norm[2]=norm[2];
+                  }
+                  else{
+                    cp->norm[0]=-norm[0];
+                    cp->norm[1]=-norm[1];
+                    cp->norm[2]=-norm[2];
+                  }
+
+                  cp->xmin=meshi->xplt[cp->ibeg];
+                  cp->xmax=meshi->xplt[cp->iend];
+                  cp->ymin=meshi->yplt[cp->jbeg];
+                  cp->ymax=meshi->yplt[cp->jend];
+                  cp->zmin=meshi->zplt[cp->kbeg];
+                  cp->zmax=meshi->zplt[cp->kend];
+
+                  ncullplaneinfo++;
+                  cp++;
+                }
+                break;
+              case 7:
+              case -7:
+                nyy = jend - jbeg;
+                nzz = kend - kbeg;
+                norm[0]=0.0;
+                dy = meshi->yplt_orig[1]-meshi->yplt_orig[0];
+                dz = meshi->zplt_orig[1]-meshi->zplt_orig[0];
+                factor= dz*dz+dy*dy;
+                if(factor==0.0){
+                  factor=1.0;
+                }
+                else{
+                  factor=1.0/sqrt(factor);
+                }
+                norm[1]=-dz*factor;
+                norm[2]=dy*factor;
+                for(ij=1;ij<nzz+nyy+1;ij++){
+                  cp->dir=meshi->smokedir;
+                  cp->cull=culli;
+                  cp->cull_mesh=meshi;
+
+                  cp->ibeg=ibeg;
+                  cp->iend=iend;
+
+                  cp->jbeg=jbeg;
+                  if(ij>nzz){
+                    cp->jbeg=jbeg+(ij-nzz);
+                  }
+                  cp->jend=jbeg+ij;
+                  if(ij>nyy){
+                    cp->jend=jend;
+                  }
+
+                  cp->kbeg = kend-ij;
+                  if(ij>nzz){
+                    cp->kbeg=kbeg;
+                  }
+                  cp->kend = kend;
+                  if(ij>nyy){
+                    cp->kend=kend-(ij-nyy);
+                  }
+
+                  if(meshi->smokedir>0){
+                    cp->norm[0]=norm[0];
+                    cp->norm[1]=norm[1];
+                    cp->norm[2]=norm[2];
+                  }
+                  else{
+                    cp->norm[0]=-norm[0];
+                    cp->norm[1]=-norm[1];
+                    cp->norm[2]=-norm[2];
+                  }
+
+                  cp->xmin=meshi->xplt[cp->ibeg];
+                  cp->xmax=meshi->xplt[cp->iend];
+                  cp->ymin=meshi->yplt[cp->jbeg];
+                  cp->ymax=meshi->yplt[cp->jend];
+                  cp->zmin=meshi->zplt[cp->kbeg];
+                  cp->zmax=meshi->zplt[cp->kend];
+
+                  ncullplaneinfo++;
+                  cp++;
+                }
+                break;
+              case 8:
+              case -8:
+                nxx = iend - ibeg;
+                nzz = kend - kbeg;
+                norm[1]=0.0;
+                dx = meshi->xplt_orig[1]-meshi->xplt_orig[0];
+                dz = meshi->zplt_orig[1]-meshi->zplt_orig[0];
+                factor= dz*dz+dy*dy;
+                if(factor==0.0){
+                  factor=1.0;
+                }
+                else{
+                  factor=1.0/sqrt(factor);
+                }
+                norm[0]=dz*factor;
+                norm[2]=dx*factor;
+                for(ij=1;ij<nzz+nxx+1;ij++){
+                  cp->dir=meshi->smokedir;
+                  cp->cull=culli;
+                  cp->cull_mesh=meshi;
+
+
+                  cp->ibeg=iend-ij;
+                  if(ij>nxx){
+                    cp->ibeg=ibeg;
+                  }
+                  ASSERT(cp->ibeg>=ibeg);
+                  cp->iend=iend;
+                  if(ij>nzz){
+                    cp->iend=iend-(ij-nzz);
+                  }
+
+                  cp->jbeg=jbeg;
+                  cp->jend=jend;
+
+                  cp->kbeg = kbeg-ij;
+                  if(ij>nzz){
+                    cp->kbeg=kbeg;
+                  }
+                  cp->kend = kend;
+                  if(ij>nxx){
+                    cp->kend=kend-(ij-nxx);
+                  }
+
+                  if(meshi->smokedir>0){
+                    cp->norm[0]=norm[0];
+                    cp->norm[1]=norm[1];
+                    cp->norm[2]=norm[2];
+                  }
+                  else{
+                    cp->norm[0]=-norm[0];
+                    cp->norm[1]=-norm[1];
+                    cp->norm[2]=-norm[2];
+                  }
+
+                  cp->xmin=meshi->xplt[cp->ibeg];
+                  cp->xmax=meshi->xplt[cp->iend];
+                  cp->ymin=meshi->yplt[cp->jbeg];
+                  cp->ymax=meshi->yplt[cp->jend];
+                  cp->zmin=meshi->zplt[cp->kbeg];
+                  cp->zmax=meshi->zplt[cp->kend];
+
+                  ncullplaneinfo++;
+                  cp++;
+                }
+                break;
+              case 9:
+              case -9:
+                nxx = iend - ibeg;
+                nzz = kend - kbeg;
+                norm[1]=0.0;
+                dx = meshi->xplt_orig[1]-meshi->xplt_orig[0];
+                dz = meshi->zplt_orig[1]-meshi->zplt_orig[0];
+                factor= dz*dz+dy*dy;
+                if(factor==0.0){
+                  factor=1.0;
+                }
+                else{
+                  factor=1.0/sqrt(factor);
+                }
+                norm[0]=-dz*factor;
+                norm[2]=dx*factor;
+                for(ij=1;ij<nzz+nxx+1;ij++){
+                  cp->dir=meshi->smokedir;
+                  cp->cull=culli;
+                  cp->cull_mesh=meshi;
+
+
+                  cp->ibeg=iend-ij;
+                  if(ij>nxx){
+                    cp->ibeg=ibeg;
+                  }
+                  ASSERT(cp->ibeg>=ibeg);
+                  cp->iend=iend;
+                  if(ij>nzz){
+                    cp->iend=iend-(ij-nzz);
+                  }
+
+                  cp->jbeg=jbeg;
+                  cp->jend=jend;
+
+                  cp->kbeg = kbeg;
+                  if(ij>nxx){
+                    cp->kbeg=kbeg+(ij-nxx);
+                  }
+                  cp->kend = kbeg+ij;
+                  if(ij>nzz){
+                    cp->kend=kend;
+                  }
+
+                  if(meshi->smokedir>0){
+                    cp->norm[0]=norm[0];
+                    cp->norm[1]=norm[1];
+                    cp->norm[2]=norm[2];
+                  }
+                  else{
+                    cp->norm[0]=-norm[0];
+                    cp->norm[1]=-norm[1];
+                    cp->norm[2]=-norm[2];
+                  }
+
+                  cp->xmin=meshi->xplt[cp->ibeg];
+                  cp->xmax=meshi->xplt[cp->iend];
+                  cp->ymin=meshi->yplt[cp->jbeg];
+                  cp->ymax=meshi->yplt[cp->jend];
+                  cp->zmin=meshi->zplt[cp->kbeg];
+                  cp->zmax=meshi->zplt[cp->kend];
+
+                  ncullplaneinfo++;
+                  cp++;
+                }
+                break;
+              default:
+                ASSERT(FFALSE);
                 break;
             }
           }
@@ -5266,6 +5862,8 @@ void initcull(int cullflag){
   int iskip, jskip, kskip;
   cullplanedata *cpx, *cpy, *cpz;
 
+  printf("in initcull\n");
+  update_initcullplane=1;
   FREEMEMORY(cullplaneinfo);
   FREEMEMORY(sort_cullplaneinfo);
   ncullplaneinfo=0;
@@ -5339,6 +5937,7 @@ void initcull(int cullflag){
           culli->kskip=kskip;
 
           culli->npixels=0;
+          culli->npixels_old=-1;
 
           ncullplaneinfo+=(iend-ibeg)+(jend-jbeg)+(kend-kbeg);
 
@@ -5500,6 +6099,11 @@ void getPixelCount(void){
         culli = meshi->cullinfo + icull;
 
         glGetQueryObjectiv(meshi->cullQueryId[icull],GL_QUERY_RESULT,&culli->npixels);
+        if(culli->npixels!=0)culli->npixels=1;
+        if(update_initcullplane==0&&culli->npixels!=culli->npixels_old){
+          culli->npixels_old=culli->npixels;
+          update_initcullplane=1;
+        }
       }
       glDeleteQueries(meshi->ncullinfo,meshi->cullQueryId);
     }
@@ -5509,6 +6113,10 @@ void getPixelCount(void){
 
         culli = meshi->cullinfo + icull;
         culli->npixels=1;
+        if(update_initcullplane==0&&culli->npixels!=culli->npixels_old){
+          culli->npixels_old=culli->npixels;
+          update_initcullplane=1;
+        }
       }
     }
   }
