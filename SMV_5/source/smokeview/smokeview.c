@@ -1,7 +1,6 @@
 // $Date$ 
 // $Revision$
 // $Author$
-// dummy change to force svn increment
 
 #include "options.h"
 #ifdef pp_GPU
