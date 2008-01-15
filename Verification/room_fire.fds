@@ -17,7 +17,7 @@ All material properties are completely fabricated.
       H          = 7.1
       O          = 2.1  /
 
-&SURF ID='BURNER', HRRPUA=1000., PART_ID='smoke', COLOR='RASPBERRY' /
+&SURF ID='BURNER', HRRPUA=1000., COLOR='RASPBERRY' /
 
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
@@ -63,8 +63,7 @@ All material properties are completely fabricated.
       COLOR          = 'PURPLE'
       BURN_AWAY      = .TRUE.
       MATL_ID(1:2,1) = 'FABRIC','FOAM'
-      THICKNESS(1:2) = 0.002,0.1
-      PART_ID        = 'smoke' /
+      THICKNESS(1:2) = 0.002,0.1 /
 
 &SURF ID             = 'WALL'
       RGB            = 200,200,200
@@ -76,8 +75,6 @@ All material properties are completely fabricated.
       COLOR           = 'KHAKI'
       BACKING         = 'INSULATED'
       THICKNESS       = 0.006 /
-
-&PART ID='smoke', MASSLESS=.TRUE., SAMPLING_FACTOR=1 /
 
 &OBST XB= 1.50, 3.10, 3.80, 4.60, 0.00, 0.40 /
 &OBST XB= 1.50, 3.10, 3.80, 4.60, 0.40, 0.60, SURF_ID='UPHOLSTERY' / Couch, seat cushions
