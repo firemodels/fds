@@ -53,6 +53,7 @@ SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr;
 SVEXTERN int GPU_firered, GPU_firegreen, GPU_fireblue, GPU_firealpha;
 SVEXTERN int GPU_smokeshade,GPU_smokealpha;
 SVEXTERN int GPU_eyex, GPU_eyey, GPU_eyez;
+SVEXTERN int GPU_adjustalphaflag;
 SVEXTERN unsigned int GPU_depthtexture;
 SVEXTERN int i_hrrcutoff;
 #endif

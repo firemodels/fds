@@ -1028,7 +1028,7 @@ void initvars1(void){
   vis_slice_average=1;
   slice_average_interval=10.0;
 #ifdef pp_CULL
-  cullsmoke=0;
+  cullsmoke=1;
   cullplaneinfo=NULL;
   ncullplaneinfo=0;
   have_setpixelcount=0;
@@ -1624,6 +1624,7 @@ void initvars1(void){
   smoke3d_thick=0;
 #ifdef pp_GPU
   smoke3d_rthick=1.0;
+  usegpu=1;
 #endif
   smokedrawtest_nummin=1;
   smokedrawtest_nummax=1;

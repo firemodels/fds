@@ -564,6 +564,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"C",1)==0){
     if(cullactive==1){
       cullsmoke=1-cullsmoke;
+      update_smoke3dflags();
       initcull(cullsmoke);
     }
     print_gpu_cull_state();
@@ -572,6 +573,7 @@ void keyboard(unsigned char key, int x, int y){
 #ifdef pp_GPU
   if(strncmp((const char *)&key2,"G",1)==0){
     if(gpuactive==1)usegpu=1-usegpu;
+    update_smoke3dflags();
     print_gpu_cull_state();
   }
 #endif

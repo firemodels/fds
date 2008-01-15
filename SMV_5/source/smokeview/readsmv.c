@@ -5930,6 +5930,14 @@ int readini2(char *inifile, int loaddatafile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
+#ifdef pp_GPU
+    if(match(buffer,"USEGPU",6)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&usegpu);
+      if(usegpu!=0)usegpu=1;
+      continue;
+    }
+#endif
     if(match(buffer,"V_PLOT3D",8)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&tempval);
@@ -7255,7 +7263,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       }
       if(match(buffer,"SMOKECULL",9)==1){
         if(fgets(buffer,255,stream)==NULL)break;
+#ifdef pp_CULL
+        sscanf(buffer,"%i",&cullsmoke);
+        if(cullsmoke!=0)cullsmoke=1;
+#else
         sscanf(buffer,"%i",&smokecullflag);
+#endif
         continue;
       }
       if(match(buffer,"SMOKESKIP",9)==1){
@@ -8399,8 +8412,16 @@ void writeini(int flag){
   fprintf(fileout,"-------------\n\n");
   fprintf(fileout,"ADJUSTALPHA\n");
   fprintf(fileout," %i\n",adjustalphaflag);
+#ifdef pp_GPU
+  fprintf(fileout,"USEGPU\n");
+  fprintf(fileout," %i\n",usegpu);
+#endif
   fprintf(fileout,"SMOKECULL\n");
+#ifdef pp_CULL
+  fprintf(fileout," %i\n",cullsmoke);
+#else
   fprintf(fileout," %i\n",smokecullflag);
+#endif
   fprintf(fileout,"SMOKESKIP\n");
   fprintf(fileout," %i\n",smokeskipm1);
   fprintf(fileout,"SMOKESHADE\n");
