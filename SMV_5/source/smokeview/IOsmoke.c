@@ -110,6 +110,12 @@ if(show_smoketest==0){\
   value[1]=alphaf_in[n12];\
   value[2]=alphaf_in[n22];\
   value[3]=alphaf_in[n21];\
+  if(adjustalphaflag==2||adjustalphaflag==3){\
+    if(iblank_smoke3d[n11]==0)value[0]=0;\
+    if(iblank_smoke3d[n12]==0)value[1]=0;\
+    if(iblank_smoke3d[n22]==0)value[2]=0;\
+    if(iblank_smoke3d[n21]==0)value[3]=0;\
+  }\
   if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
@@ -1013,7 +1019,6 @@ void mergesmoke3dcolors(void){
           mergecolor++;
           *mergealpha=sootcolor[j]>>smoke3d_thick;
           mergealpha++;
-//        *mergealpha++=14;
         }
 #endif
         continue;
@@ -2937,6 +2942,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   float aspectratio;
   int ssmokedir;
   unsigned char *firecolor;
+  unsigned char *iblank_smoke3d;
 
   unsigned char value[4];
   unsigned char fvalue[4];
@@ -2948,6 +2954,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   firecolor=smoke3di->hrrpuv_color;
  
 
+  iblank_smoke3d = meshi->iblank_smoke3d;
   if(fire_halfdepth<=0.0){
     fire_alpha=256.0;
   }
@@ -3008,6 +3015,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
+  glUniform1i(GPU_adjustalphaflag,adjustalphaflag);
   glUniform1f(GPU_normx,meshi->norm[0]);
   glUniform1f(GPU_normy,meshi->norm[1]);
   glUniform1f(GPU_normz,meshi->norm[2]);
@@ -3991,7 +3999,6 @@ void drawsmoke3dCULL(void){
 #endif
   int xyzindex1[6],xyzindex2[6],*xyzindex,node,mm;
   float xnode[4],znode[4],ynode[4];
-  int skip;
   int iterm, jterm, kterm,nxy;
   float x11[3], x12[3], x22[3], x21[3];
   int n11, n12, n22, n21;
@@ -4001,6 +4008,7 @@ void drawsmoke3dCULL(void){
   float aspectratio;
   unsigned char *firecolor;
   int ntemp;
+  unsigned char *iblank_smoke3d;
 
   unsigned char value[4];
   unsigned char fvalue[4];
@@ -4035,6 +4043,7 @@ void drawsmoke3dCULL(void){
   xyzindex2[4]=2;
   xyzindex2[5]=3;
 
+  glUniform1i(GPU_adjustalphaflag,adjustalphaflag);
   glUniform1f(GPU_eyex,xyzeyeorig[0]);
   glUniform1f(GPU_eyey,xyzeyeorig[1]);
   glUniform1f(GPU_eyez,xyzeyeorig[2]);
@@ -4075,6 +4084,7 @@ void drawsmoke3dCULL(void){
       yplt=meshi->yplt;
       zplt=meshi->zplt;
       alphaf_in=smoke3di->smokeframe_in;
+      iblank_smoke3d = meshi->iblank_smoke3d;
 #ifdef pp_LIGHT
       if(smoke3di->use_lighting_file==1){
         color_in=smoke3di->lightframe_in;
@@ -4092,12 +4102,10 @@ void drawsmoke3dCULL(void){
       ny = js2 + 1 - js1;
       nxy = nx*ny;
 
-      skip=smokeskipm1+1;
       glUniform1f(GPU_normx,meshi->norm[0]);
       glUniform1f(GPU_normy,meshi->norm[1]);
       glUniform1f(GPU_normz,meshi->norm[2]);
       glUniform1f(GPU_firealpha,fire_alpha/256.0);
-      glUniform1i(GPU_skip,skip);
 
       if(firecolor==NULL){
         i_hrrcutoff=-1;
@@ -4262,9 +4270,14 @@ void drawsmoke3dCULL(void){
 
             n = iterm + jterm + kterm;
             n11 = n;
-            n12 = n11+1;;
+            n12 = n11+1;
             n22 = n12+nx;
             n21 = n22-1;
+
+//        n11 = (i-is1)   + (j-js1)*nx     + (k-ks1)*nx*ny;
+//        n12 = (i+1-is1) + (j-js1)*nx     + (k-ks1)*nx*ny;
+//        n22 = (i+1-is1) + (j+1-js1)*nx   + (k-ks1)*nx*ny;
+//        n21 = (i-is1)   + (j+1-js1)*nx   + (k-ks1)*nx*ny;
 
             DRAWVERTEXGPU(xnode[mm],ynode[mm],constval)
           }
@@ -4906,7 +4919,9 @@ void getsmokedir(float *mm){
     if(meshj->smokedir!=meshj->smokedir_old){
       meshj->smokedir_old=meshj->smokedir;
       update_initcullplane=1;
+#ifdef _DEBUG
       printf("mesh dir has changed\n");
+#endif
     }
 #endif
     if(demo_mode!=0){
@@ -5275,7 +5290,9 @@ void initcullplane(int cullflag){
   float norm[3];
   float dx, dy, dz, factor;
 
+#ifdef _DEBUG
   printf("updating initcullplane %i\n",cull_count++);
+#endif
   update_initcullplane=0; 
   cp = cullplaneinfo;
   ncullplaneinfo=0;
@@ -5823,6 +5840,7 @@ void initcullplane(int cullflag){
     qsort((cullplanedata *)sort_cullplaneinfo,(size_t)ncullplaneinfo,
        sizeof(cullplanedata *),cullplane_compare);
   }
+  glutPostRedisplay();
 }
 
 /* ------------------ cullplane_compare ------------------------ */
@@ -5863,7 +5881,6 @@ void initcull(int cullflag){
   int iskip, jskip, kskip;
   cullplanedata *cpx, *cpy, *cpz;
 
-  printf("in initcull\n");
   update_initcullplane=1;
   FREEMEMORY(cullplaneinfo);
   FREEMEMORY(sort_cullplaneinfo);

@@ -47,10 +47,19 @@ void update_alpha(void);
 #define SAVE_SETTINGS 9
 #define FRAMELOADING 10
 #define SMOKETEST 11
+#ifdef pp_CULL
+#define CULL_SMOKE 12
+#endif
+#ifdef pp_GPU
+#define GPU_SMOKE 13
+#endif
 
 GLUI *glui_3dsmoke=NULL;
 GLUI_RadioGroup *alphagroup=NULL,*skipframes;
 GLUI_Checkbox *CHECKBOX_smokecullflag=NULL;
+#ifdef pp_GPU
+GLUI_Checkbox *CHECKBOX_smokeGPU=NULL;
+#endif
 GLUI_Checkbox *CHECKBOX_smokedrawtest=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest2=NULL;
 GLUI_Checkbox *CHECKBOX_smoke3d_external=NULL;
@@ -78,14 +87,31 @@ GLUI_StaticText *TEXT_smokealpha=NULL;
 GLUI_StaticText *TEXT_smokedepth=NULL;
 GLUI_Checkbox *CHECKBOX_show_smoketest=NULL;
 
+/* ------------------ update_smoke3dflags ------------------------ */
+
 extern "C" void update_smoke3dflags(void){
   alphagroup->set_int_val(adjustalphaflag);
+#ifdef pp_GPU
+  if(CHECKBOX_smokeGPU!=NULL)CHECKBOX_smokeGPU->set_int_val(usegpu);
+#endif
+#ifdef pp_CULL
+  CHECKBOX_smokecullflag->set_int_val(cullsmoke);
+#else
   CHECKBOX_smokecullflag->set_int_val(smokecullflag);
+#endif
   if(CHECKBOX_smokedrawtest!=NULL)CHECKBOX_smokedrawtest->set_int_val(smokedrawtest);
   if(CHECKBOX_smokedrawtest2!=NULL)CHECKBOX_smokedrawtest2->set_int_val(smokedrawtest2);
   skipframes->set_int_val(smokeskipm1);
-
+#ifdef pp_GPU
+  SMOKE_3D_CB(GPU_SMOKE);
+#endif
+#ifdef pp_CULL
+  SMOKE_3D_CB(CULL_SMOKE);
+#endif
+  glutPostRedisplay();
 }
+
+/* ------------------ glui_3dsmoke_setup ------------------------ */
 
 extern "C" void glui_3dsmoke_setup(int main_window){
 
@@ -172,7 +198,22 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   panel5 = glui_3dsmoke->add_panel_to_panel(panel1,"Slices");
   panel5->set_alignment(GLUI_ALIGN_LEFT);
+#ifdef pp_GPU
+  CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel5,"Use GPU",&usegpu,GPU_SMOKE,SMOKE_3D_CB);
+  if(gpuactive==0){
+    usegpu=0;
+    CHECKBOX_smokeGPU->disable();
+  }
+#endif
+#ifdef pp_CULL
+  CHECKBOX_smokecullflag=glui_3dsmoke->add_checkbox_to_panel(panel5,"Cull hidden slices",&cullsmoke,CULL_SMOKE,SMOKE_3D_CB);
+  if(cullactive==0){
+    cullsmoke=0;
+    CHECKBOX_smokecullflag->disable();
+  }
+#else
   CHECKBOX_smokecullflag=glui_3dsmoke->add_checkbox_to_panel(panel5,"Cull hidden slices",&smokecullflag);
+#endif
 #ifdef _DEBUG
   CHECKBOX_smokedrawtest=glui_3dsmoke->add_checkbox_to_panel(panel5,"Show Only Back Slices",&smokedrawtest);
   CHECKBOX_smokedrawtest2=glui_3dsmoke->add_checkbox_to_panel(panel5,"Show Only Dir X Slices",&smokedrawtest2);
@@ -189,6 +230,9 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   glui_3dsmoke->add_radiobutton_to_group(skipframes,"   ... every 2nd");
   glui_3dsmoke->add_radiobutton_to_group(skipframes,"   ... every 3rd");
 
+#ifdef pp_GPU
+  SMOKE_3D_CB(GPU_SMOKE);
+#endif
 
 
 
@@ -308,6 +352,29 @@ void SMOKE_3D_CB(int var){
     glutPostRedisplay();
     force_redisplay=1;
     IDLE();
+    break;
+#endif
+#ifdef pp_CULL
+  case CULL_SMOKE:
+    initcull(cullsmoke);
+    break;
+#endif
+#ifdef pp_GPU
+  case GPU_SMOKE:
+    if(usegpu==1){
+      skipframes->set_int_val(0);
+      skipframes->disable();
+      if(cullactive==1){
+        CHECKBOX_smokecullflag->enable();
+      }
+//      alphagroup->set_int_val(1);
+//      alphagroup->disable();
+    }
+    else{
+      skipframes->enable();
+      CHECKBOX_smokecullflag->disable();
+//      alphagroup->enable();
+    }
     break;
 #endif
   default:
