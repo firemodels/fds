@@ -1231,6 +1231,14 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     return;
   }
 
+
+/* ++++++++++++++++++++++++ draw tours +++++++++++++++++++++++++ */
+
+  if(showtour==1){
+    drawtours();
+    sniffErrors("after drawTours");
+  }
+
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 #ifdef pp_CLIP
   if(xyz_clipplane==2){
@@ -1532,14 +1540,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     }
   }
   sniffErrors("after drawvslice");
-
-/* ++++++++++++++++++++++++ draw tours +++++++++++++++++++++++++ */
-
-  if(showtour==1){
-    drawtours();
-    sniffErrors("after drawTours");
-  }
-
 
 /* ++++++++++++++++++++++++ draw plot3d files +++++++++++++++++++++++++ */
 
