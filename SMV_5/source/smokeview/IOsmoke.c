@@ -4906,6 +4906,7 @@ void getsmokedir(float *mm){
     if(meshj->smokedir!=meshj->smokedir_old){
       meshj->smokedir_old=meshj->smokedir;
       update_initcullplane=1;
+      printf("mesh dir has changed\n");
     }
 #endif
     if(demo_mode!=0){
@@ -6097,12 +6098,10 @@ void getPixelCount(void){
         culldata *culli;
 
         culli = meshi->cullinfo + icull;
-
         glGetQueryObjectiv(meshi->cullQueryId[icull],GL_QUERY_RESULT,&culli->npixels);
-        if(culli->npixels!=0)culli->npixels=1;
-        if(update_initcullplane==0&&culli->npixels!=culli->npixels_old){
-          culli->npixels_old=culli->npixels;
+        if(culli->npixels_old!=culli->npixels){
           update_initcullplane=1;
+          culli->npixels_old=culli->npixels;
         }
       }
       glDeleteQueries(meshi->ncullinfo,meshi->cullQueryId);
@@ -6120,5 +6119,8 @@ void getPixelCount(void){
       }
     }
   }
+#ifdef _DEBUG
+  if(update_initcullplane==1)printf("pixel count has changed - 1\n");
+#endif
 }
 #endif
