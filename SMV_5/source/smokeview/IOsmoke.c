@@ -5310,10 +5310,18 @@ void initcullplane(int cullflag){
     meshi->culldefined=1;
 
     culli=meshi->cullinfo;
-    if(cullflag==1&&meshi->ibar>(NCULLS-1)){
-      iskip = meshi->ibar/NCULLS;
-      jskip = iskip;
-      kskip = iskip;
+    if(cullflag==1){
+      iskip = cull_portsize;
+      if(iskip<3)iskip=3;
+      if(iskip>meshi->ibar+1)iskip=meshi->ibar+1;
+
+      jskip = cull_portsize;
+      if(jskip<3)jskip=3;
+      if(jskip>meshi->jbar+1)jskip=meshi->jbar+1;
+
+      kskip = cull_portsize;
+      if(kskip<3)kskip=3;
+      if(kskip>meshi->kbar+1)kskip=meshi->kbar+1;
     }
     else{
       iskip = meshi->ibar+1;
@@ -5891,10 +5899,18 @@ void initcull(int cullflag){
 
     meshi=meshinfo+ii;
 
-    if(cullflag==1&&meshi->ibar>(NCULLS-1)){
-      iskip = meshi->ibar/NCULLS;
-      jskip = iskip;
-      kskip = iskip;
+    if(cullflag==1){
+      iskip = cull_portsize;
+      if(iskip<3)iskip=3;
+      if(iskip>meshi->ibar+1)iskip=meshi->ibar+1;
+
+      jskip = cull_portsize;
+      if(jskip<3)jskip=3;
+      if(jskip>meshi->jbar+1)jskip=meshi->jbar+1;
+
+      kskip = cull_portsize;
+      if(kskip<3)kskip=3;
+      if(kskip>meshi->kbar+1)kskip=meshi->kbar+1;
     }
     else{
       iskip = meshi->ibar+1;
@@ -5974,11 +5990,13 @@ void setPixelCount(void){
   int imesh,icull,n;
 
   have_setpixelcount=1;
-  glDisable(GL_LIGHTING);
-  glDisable(GL_COLOR_MATERIAL);
-  glDisable(GL_NORMALIZE);
-  glDepthMask(GL_FALSE);
-  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+  if(show_cullports==0){
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+    glDisable(GL_NORMALIZE);
+    glDepthMask(GL_FALSE);
+    glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+  }
 
   for(imesh=0;imesh<nmeshes;imesh++){
     mesh *meshi;
@@ -5991,17 +6009,19 @@ void setPixelCount(void){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + n;
-    if(smoke3di->loaded==0||smoke3di->display==0)continue;
+    if(show_cullports==0&&(smoke3di->loaded==0||smoke3di->display==0))continue;
     meshi = meshinfo + smoke3di->blocknumber;
     if(meshi->culldefined==1)continue;
 
     setPixelCountOrthog(meshi);
   }
-  glEnable(GL_LIGHTING);
-  glEnable(GL_COLOR_MATERIAL);
-  glEnable(GL_NORMALIZE);
-  glDepthMask(GL_TRUE);
-  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+  if(show_cullports==0){
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_NORMALIZE);
+    glDepthMask(GL_TRUE);
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+  }
 }
 
 /* ------------------ setPixelCountOrthog ------------------------ */
@@ -6014,7 +6034,7 @@ void setPixelCountOrthog(mesh *meshi){
 
 
     meshi->culldefined=1;
-    glGenQueries(meshi->ncullinfo,meshi->cullQueryId);
+    if(show_cullports==0)glGenQueries(meshi->ncullinfo,meshi->cullQueryId);
 
     for(icull=0;icull<meshi->ncullinfo;icull++){
       culldata *culli;
@@ -6063,39 +6083,73 @@ void setPixelCountOrthog(mesh *meshi){
       x6[2]=culli->zend;
       x7[2]=culli->zend;
 
-      glBeginQuery(GL_SAMPLES_PASSED,meshi->cullQueryId[icull]);
-      glBegin(GL_QUADS);
-      glVertex3fv(x0);
-      glVertex3fv(x3);
-      glVertex3fv(x7);
-      glVertex3fv(x4);
+      if(show_cullports==0){
+        glBeginQuery(GL_SAMPLES_PASSED,meshi->cullQueryId[icull]);
+        glBegin(GL_QUADS);
+      
+        glVertex3fv(x0);
+        glVertex3fv(x3);
+        glVertex3fv(x7);
+        glVertex3fv(x4);
 
-      glVertex3fv(x3);
-      glVertex3fv(x2);
-      glVertex3fv(x6);
-      glVertex3fv(x7);
+        glVertex3fv(x3);
+        glVertex3fv(x2);
+        glVertex3fv(x6);
+        glVertex3fv(x7);
 
-      glVertex3fv(x2);
-      glVertex3fv(x1);
-      glVertex3fv(x5);
-      glVertex3fv(x6);
+        glVertex3fv(x2);
+        glVertex3fv(x1);
+        glVertex3fv(x5);
+        glVertex3fv(x6);
 
-      glVertex3fv(x1);
-      glVertex3fv(x0);
-      glVertex3fv(x4);
-      glVertex3fv(x5);
+        glVertex3fv(x1);
+        glVertex3fv(x0);
+        glVertex3fv(x4);
+        glVertex3fv(x5);
 
-      glVertex3fv(x1);
-      glVertex3fv(x2);
-      glVertex3fv(x3);
-      glVertex3fv(x0);
+        glVertex3fv(x1);
+        glVertex3fv(x2);
+        glVertex3fv(x3);
+        glVertex3fv(x0);
 
-      glVertex3fv(x4);
-      glVertex3fv(x7);
-      glVertex3fv(x6);
-      glVertex3fv(x5);
-      glEnd();
-      glEndQuery(GL_SAMPLES_PASSED);
+        glVertex3fv(x4);
+        glVertex3fv(x7);
+        glVertex3fv(x6);
+        glVertex3fv(x5);
+        glEnd();
+      }
+      else{
+        glBegin(GL_LINES);
+        glVertex3fv(x0);
+        glVertex3fv(x1);
+        glVertex3fv(x4);
+        glVertex3fv(x5);
+        glVertex3fv(x3);
+        glVertex3fv(x2);
+        glVertex3fv(x7);
+        glVertex3fv(x6);
+
+        glVertex3fv(x3);
+        glVertex3fv(x0);
+        glVertex3fv(x7);
+        glVertex3fv(x4);
+        glVertex3fv(x6);
+        glVertex3fv(x5);
+        glVertex3fv(x2);
+        glVertex3fv(x1);
+
+        glVertex3fv(x0);
+        glVertex3fv(x4);
+        glVertex3fv(x3);
+        glVertex3fv(x7);
+        glVertex3fv(x2);
+        glVertex3fv(x6);
+        glVertex3fv(x1);
+        glVertex3fv(x5);
+
+        glEnd();
+      }
+      if(show_cullports==0)glEndQuery(GL_SAMPLES_PASSED);
     }
 }
 
@@ -6110,7 +6164,7 @@ void getPixelCount(void){
     meshi = meshinfo + i;
 
     if(meshi->culldefined==0)continue;  
-    if(have_setpixelcount==1){
+    if(show_cullports==0&&have_setpixelcount==1){
       for(icull=0;icull<meshi->ncullinfo;icull++){
         culldata *culli;
 
