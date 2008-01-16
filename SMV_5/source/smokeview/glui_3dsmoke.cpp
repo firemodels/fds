@@ -49,14 +49,19 @@ void update_alpha(void);
 #define SMOKETEST 11
 #ifdef pp_CULL
 #define CULL_SMOKE 12
+#define CULL_PORTSIZE 14
 #endif
 #ifdef pp_GPU
 #define GPU_SMOKE 13
 #endif
 
+#ifdef pp_CULL
+GLUI_Spinner *SPINNER_cull_portsize=NULL;
+GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
+#endif
+GLUI_Checkbox *CHECKBOX_smokecullflag=NULL;
 GLUI *glui_3dsmoke=NULL;
 GLUI_RadioGroup *alphagroup=NULL,*skipframes;
-GLUI_Checkbox *CHECKBOX_smokecullflag=NULL;
 #ifdef pp_GPU
 GLUI_Checkbox *CHECKBOX_smokeGPU=NULL;
 #endif
@@ -174,7 +179,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     }
   }
 
- glui_3dsmoke->add_column_to_panel(panel1,false);
+  glui_3dsmoke->add_column_to_panel(panel1,false);
 
   panel6 = glui_3dsmoke->add_panel_to_panel(panel1,"Smoke");
   panel6->set_alignment(GLUI_ALIGN_LEFT);
@@ -210,6 +215,20 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   if(cullactive==0){
     cullsmoke=0;
     CHECKBOX_smokecullflag->disable();
+  }
+  CHECKBOX_show_cullports=glui_3dsmoke->add_checkbox_to_panel(panel5,"Show cull ports",&show_cullports);
+  SPINNER_cull_portsize=glui_3dsmoke->add_spinner_to_panel(panel5,"Cull port size",GLUI_SPINNER_INT,&cull_portsize,CULL_PORTSIZE,SMOKE_3D_CB);
+  {
+    int i, ijk_max=0;
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
+      meshi = meshinfo + i;
+      if(ijk_max<meshi->ibar+1)ijk_max=meshi->ibar+1;
+      if(ijk_max<meshi->jbar+1)ijk_max=meshi->jbar+1;
+      if(ijk_max<meshi->kbar+1)ijk_max=meshi->kbar+1;
+    }
+    SPINNER_cull_portsize->set_int_limits(3,ijk_max);
   }
 #else
   CHECKBOX_smokecullflag=glui_3dsmoke->add_checkbox_to_panel(panel5,"Cull hidden slices",&smokecullflag);
@@ -355,6 +374,9 @@ void SMOKE_3D_CB(int var){
     break;
 #endif
 #ifdef pp_CULL
+  case CULL_PORTSIZE:
+    initcull(cullsmoke);
+    break;
   case CULL_SMOKE:
     initcull(cullsmoke);
     break;
@@ -367,13 +389,14 @@ void SMOKE_3D_CB(int var){
       if(cullactive==1){
         CHECKBOX_smokecullflag->enable();
       }
-//      alphagroup->set_int_val(1);
-//      alphagroup->disable();
+      SPINNER_cull_portsize->enable();
+      CHECKBOX_show_cullports->enable();
     }
     else{
       skipframes->enable();
       CHECKBOX_smokecullflag->disable();
-//      alphagroup->enable();
+      SPINNER_cull_portsize->disable();
+      CHECKBOX_show_cullports->disable();
     }
     break;
 #endif
