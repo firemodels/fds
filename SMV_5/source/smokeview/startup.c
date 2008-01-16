@@ -1028,6 +1028,8 @@ void initvars1(void){
   vis_slice_average=1;
   slice_average_interval=10.0;
 #ifdef pp_CULL
+  show_cullports=0;
+  cull_portsize=16;
   cullsmoke=1;
   cullplaneinfo=NULL;
   ncullplaneinfo=0;
