@@ -215,22 +215,39 @@ void getPart5Colors(particle *parti, int nlevel){
         prop_id = get_part5prop(partclassi->labels[k].longlabel);
         if(prop_id==NULL)continue;
 
-        valmin = prop_id->valmin;
-        valmax = prop_id->valmax;
-        dval = valmax - valmin;
-        if(dval<=0.0)dval=1.0;
+#ifdef pp_AVATAR
+        if(strcmp(partclassi->labels[k].longlabel,"HUMAN_COLOR")==0){
+          for(m=0;m<datacopy->npoints;m++){
+            float val;
+            int irval;
 
-        for(m=0;m<datacopy->npoints;m++){
-          float val;
-          int irval;
-
-          val=*rvals++;
-          irval = 255*(val-valmin)/dval;
-          if(irval<0)irval=0;
-          if(irval>255)irval=255;
-          *irvals++=irval;
-
+            val=*rvals++;
+            irval = val+0.5;
+            if(irval<0)irval=0;
+            if(irval>navatar_colors-1)irval=navatar_colors-1;
+            *irvals++=irval;
+          }
         }
+        else{
+#endif
+          valmin = prop_id->valmin;
+          valmax = prop_id->valmax;
+          dval = valmax - valmin;
+          if(dval<=0.0)dval=1.0;
+
+          for(m=0;m<datacopy->npoints;m++){
+            float val;
+            int irval;
+
+            val=*rvals++;
+            irval = 255*(val-valmin)/dval;
+            if(irval<0)irval=0;
+            if(irval>255)irval=255;
+            *irvals++=irval;
+          }
+#ifdef pp_AVATAR
+        }
+#endif
       }
       FREEMEMORY(datacopy->rvals);
       datacopy++;
