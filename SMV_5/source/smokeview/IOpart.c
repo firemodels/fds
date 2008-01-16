@@ -1313,6 +1313,8 @@ void drawPart5(const particle *parti){
           for(j=0;j<datacopy->npoints;j++){
             float az_angle;
             float *rgbobject;
+            float *colorptr;
+            int is_human_color;
 
             if(vis[j]==1){
               glPushMatrix();
@@ -1324,15 +1326,46 @@ void drawPart5(const particle *parti){
 
               rgbobject = datacopy->partclassbase->rgb;
 
+              //  0->2   class color
+              //  3->5   width, depth, 1.0 
+              //  6->8   width, depth, height
+              //  9->11  data file color
+              //  12->14 0.0 0.0 height/2.0
+
               valstack[0]=rgbobject[0];
               valstack[1]=rgbobject[1];
               valstack[2]=rgbobject[2];
               valstack[3]=width[j];
               valstack[4]=depth[j];
               valstack[5]=1.0;
-              valstack[3]=width[j];
-              valstack[4]=depth[j];
-              valstack[5]=height[j];
+              valstack[6]=width[j];
+              valstack[7]=depth[j];
+              valstack[8]=height[j];
+              is_human_color=0;
+
+              if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0&&navatar_colors>0){
+                is_human_color=1;
+              }
+              if(itype==-1){
+                colorptr=datacopy->partclassbase->rgb;
+              }
+              else{
+                color = datacopy->irvals+itype*datacopy->npoints;
+                if(is_human_color==1){
+                  colorptr = avatar_colors + 3*color[j];
+                }
+                else{
+                  colorptr=rgb_full[color[j]];
+                }
+              }
+              valstack[9] =colorptr[0];
+              valstack[10]=colorptr[1];
+              valstack[11]=colorptr[2];
+              
+              valstack[12]=0.0;
+              valstack[13]=0.0;
+              valstack[14]=height[j]/2.0;
+              nvalstack=15;
               draw_SVOBJECT(avatar_types[avatar_type],0);
               glPopMatrix();
             }

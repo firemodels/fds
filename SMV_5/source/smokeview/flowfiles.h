@@ -645,6 +645,7 @@ typedef struct {
   short *sx, *sy, *sz;
 #ifdef pp_AVATAR
   float *avatar_angle, *avatar_width, *avatar_depth, *avatar_height;
+  int humancolor_varindex;
 #endif
   int *tags,*sort_tags;
   unsigned char *vis_part;
