@@ -5276,7 +5276,34 @@ void makeiblank_smoke3d(void){
 
 #ifdef pp_CULL
 
-/* ------------------ initcull ------------------------ */
+/* ------------------ get_cullskips ------------------------ */
+
+void get_cullskips(mesh *meshi, int cullflag, int *iiskip, int *jjskip, int *kkskip){
+  int iskip, jskip, kskip;
+
+  if(cullflag==1){
+    iskip = cull_portsize;
+    if(iskip<3)iskip=3;
+    if(iskip>meshi->ibar+1)iskip=meshi->ibar+1;
+    jskip = cull_portsize;
+    if(jskip<3)jskip=3;
+    if(jskip>meshi->jbar+1)jskip=meshi->jbar+1;
+
+    kskip = cull_portsize;
+    if(kskip<3)kskip=3;
+    if(kskip>meshi->kbar+1)kskip=meshi->kbar+1;
+  }
+  else{
+    iskip = meshi->ibar+1;
+    jskip = meshi->jbar+1;
+    kskip = meshi->kbar+1;
+  }
+  *iiskip=iskip;
+  *jjskip=jskip;
+  *kkskip=kskip;
+}
+
+    /* ------------------ initcullplane ------------------------ */
 
 void initcullplane(int cullflag){
   int ii;
@@ -5310,24 +5337,8 @@ void initcullplane(int cullflag){
     meshi->culldefined=1;
 
     culli=meshi->cullinfo;
-    if(cullflag==1){
-      iskip = cull_portsize;
-      if(iskip<3)iskip=3;
-      if(iskip>meshi->ibar+1)iskip=meshi->ibar+1;
+    get_cullskips(meshi,cullflag, &iskip,&jskip,&kskip);
 
-      jskip = cull_portsize;
-      if(jskip<3)jskip=3;
-      if(jskip>meshi->jbar+1)jskip=meshi->jbar+1;
-
-      kskip = cull_portsize;
-      if(kskip<3)kskip=3;
-      if(kskip>meshi->kbar+1)kskip=meshi->kbar+1;
-    }
-    else{
-      iskip = meshi->ibar+1;
-      jskip = meshi->jbar+1;
-      kskip = meshi->kbar+1;
-    }
     nx = meshi->ibar/iskip + 1;
     ny = meshi->jbar/jskip + 1;
     nz = meshi->kbar/kskip + 1;
@@ -5899,24 +5910,7 @@ void initcull(int cullflag){
 
     meshi=meshinfo+ii;
 
-    if(cullflag==1){
-      iskip = cull_portsize;
-      if(iskip<3)iskip=3;
-      if(iskip>meshi->ibar+1)iskip=meshi->ibar+1;
-
-      jskip = cull_portsize;
-      if(jskip<3)jskip=3;
-      if(jskip>meshi->jbar+1)jskip=meshi->jbar+1;
-
-      kskip = cull_portsize;
-      if(kskip<3)kskip=3;
-      if(kskip>meshi->kbar+1)kskip=meshi->kbar+1;
-    }
-    else{
-      iskip = meshi->ibar+1;
-      jskip = meshi->jbar+1;
-      kskip = meshi->kbar+1;
-    }
+    get_cullskips(meshi,cullflag,&iskip,&jskip,&kskip);
     nx = meshi->ibar/iskip + 1;
     ny = meshi->jbar/jskip + 1;
     nz = meshi->kbar/kskip + 1;
