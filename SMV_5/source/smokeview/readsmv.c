@@ -449,7 +449,7 @@ int readsmv(char *file){
       BUT if any one these keywords are present then the number of each MUST be equal 
     */
 #ifdef pp_AVATAR
-    if(match(buffer,"AVATAR_COLORS",13) == 1){
+    if(match(buffer,"AVATAR_COLOR",12) == 1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&navatar_colors);
       if(navatar_colors<0)navatar_colors=0;
