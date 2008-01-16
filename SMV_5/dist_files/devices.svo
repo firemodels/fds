@@ -170,7 +170,7 @@ DEVICEDEF
    //  12->14 0.0 0.0 height/2.0
    
 AVATARDEF
- human_fixed         // label, name of avatar
+ human_fixed          // label, name of avatar
  90.0 rotatez
  0.82 0.70 0.55 setcolor // head color  TAN 210 180 140
  0.3 0.3 0.3 scalexyz 
