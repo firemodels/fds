@@ -1335,11 +1335,11 @@ void drawPart5(const particle *parti){
               valstack[0]=rgbobject[0];
               valstack[1]=rgbobject[1];
               valstack[2]=rgbobject[2];
-              valstack[3]=width[j];
-              valstack[4]=depth[j];
+              valstack[3]=2.0*width[j];
+              valstack[4]=2.0*depth[j];
               valstack[5]=1.0;
-              valstack[6]=width[j];
-              valstack[7]=depth[j];
+              valstack[6]=1.0;
+              valstack[7]=1.0;
               valstack[8]=height[j];
               is_human_color=0;
 
