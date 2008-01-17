@@ -29,7 +29,6 @@ char IOpart_revision[]="$Revision$";
 int tagscompare( const void *arg1, const void *arg2 );
 
 #ifdef pp_AVATAR
-float get_part_azangle(part5data *data, part5data *datapast, int j);
 void draw_SVOBJECT(sv_object *object, int iframe);
 #endif
 void ParticlePropShowMenu(int val);
@@ -1318,7 +1317,7 @@ void drawPart5(const particle *parti){
 
             if(vis[j]==1){
               glPushMatrix();
-              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]-parti->zoffset);
               glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
                  
               az_angle=angle[j];
@@ -1763,21 +1762,3 @@ void update_visSmokePart(void){
   }
   */
 }
-
-#ifdef pp_AVATAR
-float get_part_azangle(part5data *data1, part5data *data2, int j){
-  int tagval, jj;
-  float dx, dy;
-
-  if(j<0||j>=data2->npoints)return 0.0;
-
-  tagval=data2->tags[j];
-  jj = get_tagindex(data1,tagval);
-  if(jj<0||jj>=data1->npoints)return 0.0;
-
-  dx = data2->sx[j]-data1->sx[jj];
-  dy = data2->sy[j]-data1->sy[jj];
-  if(dx==0.0&&dy==0.0)return 0.0;
-  return 180.0*atan2(dy,dx)/3.14159;
-}
-#endif
