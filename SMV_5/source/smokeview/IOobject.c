@@ -78,6 +78,12 @@ char IOobject_revision[]="$Revision$";
 #define SV_SETBW      303
 #define SV_SETLINEWIDTH 304
 #define SV_SETPOINTSIZE 305
+#ifdef pp_AVATAR
+#define SV_IF_AGEB     306
+#define SV_IF_AGTB     307
+#define SV_IF_ALEB     308
+#define SV_IF_ALTB     309
+#endif
 
 #define SV_NO_OP      999
 
@@ -87,6 +93,12 @@ char IOobject_revision[]="$Revision$";
 #define SV_SETBW_NUMARGS      1
 #define SV_SETLINEWIDTH_NUMARGS 1
 #define SV_SETPOINTSIZE_NUMARGS 1
+#ifdef pp_AVATAR
+#define SV_IF_AGEB_NUMARGS     3
+#define SV_IF_AGTB_NUMARGS     3
+#define SV_IF_ALEB_NUMARGS     3
+#define SV_IF_ALTB_NUMARGS     3
+#endif
 
 #define SV_ERR -1
 
@@ -214,6 +226,7 @@ void draw_SVOBJECT(sv_object *object, int iframe){
   float *rgbptr;
   float rgbcolor[4];
   int displaylist_id=0;
+  int op_skip=0;
 
   framei=object->obj_frames[iframe];
   ASSERT(framei->error==0||framei->error==1);
@@ -268,7 +281,7 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     switch (*op){
 #ifdef pp_AVATAR
     case SV_GETUSERVALS:
-      if(iarg+SV_GETUSERVALS_NUMARGS<=framei->nargs){
+      if(op_skip==0&&iarg+SV_GETUSERVALS_NUMARGS<=framei->nargs){
         int i, nargs, iargstart;
 
         iargstart=arg[0]+0.5;
@@ -281,21 +294,57 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       }
       iarg+=2;
       break;
+    case SV_IF_AGEB:
+      if(op_skip==0&&iarg+SV_IF_AGEB_NUMARGS<=framei->nargs){
+        if(arg[0]>=arg[1]){
+          op_skip=arg[3]+1.5;
+          if(op_skip<1)op_skip=1;
+        }
+      }
+      iarg+=3;
+      break;
+    case SV_IF_AGTB:
+      if(op_skip==0&&iarg+SV_IF_AGEB_NUMARGS<=framei->nargs){
+        if(arg[0]>arg[1]){
+          op_skip=arg[3]+1.5;
+          if(op_skip<1)op_skip=1;
+        }
+      }
+      iarg+=3;
+      break;
+    case SV_IF_ALEB:
+      if(op_skip==0&&iarg+SV_IF_AGEB_NUMARGS<=framei->nargs){
+        if(arg[0]<=arg[1]){
+          op_skip=arg[3]+1.5;
+          if(op_skip<1)op_skip=1;
+        }
+      }
+      iarg+=3;
+      break;
+    case SV_IF_ALTB:
+      if(op_skip==0&&iarg+SV_IF_AGEB_NUMARGS<=framei->nargs){
+        if(arg[0]>arg[1]){
+          op_skip=arg[3]+1.5;
+          if(op_skip<1)op_skip=1;
+        }
+      }
+      iarg+=3;
+      break;
 #endif
     case SV_TRANSLATE:
-      if(iarg+SV_TRANSLATE_NUMARGS<=framei->nargs)glTranslatef(arg[0],arg[1],arg[2]);
+      if(op_skip==0&&iarg+SV_TRANSLATE_NUMARGS<=framei->nargs)glTranslatef(arg[0],arg[1],arg[2]);
       iarg+=3;
       break;
     case SV_ROTATEX:
-      if(iarg+SV_ROTATEX_NUMARGS<=framei->nargs)glRotatef(arg[0],1.0,0.0,0.0);
+      if(op_skip==0&&iarg+SV_ROTATEX_NUMARGS<=framei->nargs)glRotatef(arg[0],1.0,0.0,0.0);
       iarg++;
       break;
     case SV_ROTATEY:
-      if(iarg+SV_ROTATEY_NUMARGS<=framei->nargs)glRotatef(arg[0],0.0,1.0,0.0);
+      if(op_skip==0&&iarg+SV_ROTATEY_NUMARGS<=framei->nargs)glRotatef(arg[0],0.0,1.0,0.0);
       iarg++;
       break;
     case SV_ROTATEZ:
-      if(iarg+SV_ROTATEZ_NUMARGS<=framei->nargs)glRotatef(arg[0],0.0,0.0,1.0);
+      if(op_skip==0&&iarg+SV_ROTATEZ_NUMARGS<=framei->nargs)glRotatef(arg[0],0.0,0.0,1.0);
       iarg++;
       break;
     case SV_SCALEXYZ:
@@ -303,26 +352,26 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       iarg+=3;
       break;
     case SV_SCALE:
-      if(iarg+SV_SCALE_NUMARGS<=framei->nargs)glScalef(arg[0],arg[1],arg[2]);
+      if(op_skip==0&&iarg+SV_SCALE_NUMARGS<=framei->nargs)glScalef(arg[0],arg[1],arg[2]);
       iarg++;
       break;
     case SV_DRAWCUBE:
-      if(iarg+SV_DRAWCUBE_NUMARGS<=framei->nargs)drawcube(arg[0],rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWCUBE_NUMARGS<=framei->nargs)drawcube(arg[0],rgbptr);
       rgbptr=NULL;
       iarg++;
       break;
     case SV_DRAWDISK:
-      if(iarg+SV_DRAWDISK_NUMARGS<=framei->nargs)drawdisk(arg[0],arg[1], rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWDISK_NUMARGS<=framei->nargs)drawdisk(arg[0],arg[1], rgbptr);
       rgbptr=NULL;
       iarg+=2;
       break;
     case SV_DRAWHEXDISK:
-      if(iarg+SV_DRAWHEXDISK_NUMARGS<=framei->nargs)drawhexdisk(arg[0],arg[1], rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWHEXDISK_NUMARGS<=framei->nargs)drawhexdisk(arg[0],arg[1], rgbptr);
       rgbptr=NULL;
       iarg+=2;
       break;
     case SV_DRAWPOLYDISK:
-      if(iarg+SV_DRAWPOLYDISK_NUMARGS<=framei->nargs){
+      if(op_skip==0&&iarg+SV_DRAWPOLYDISK_NUMARGS<=framei->nargs){
         int nsides;
   
         nsides = arg[0]+0.5;
@@ -332,48 +381,48 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       iarg+=3;
       break;
     case SV_DRAWRING:
-      if(iarg+SV_DRAWRING_NUMARGS<=framei->nargs)drawring(arg[0],arg[1], arg[2], rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWRING_NUMARGS<=framei->nargs)drawring(arg[0],arg[1], arg[2], rgbptr);
       rgbptr=NULL;
       iarg+=3;
       break;
     case SV_DRAWNOTCHPLATE:
-      if(iarg+SV_DRAWNOTCHPLATE_NUMARGS<=framei->nargs)drawnotchplate(arg[0],arg[1], arg[2], arg[3], rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWNOTCHPLATE_NUMARGS<=framei->nargs)drawnotchplate(arg[0],arg[1], arg[2], arg[3], rgbptr);
       rgbptr=NULL;
       iarg+=4;
       break;
     case SV_DRAWTRUNCCONE:
-      if(iarg+SV_DRAWTRUNCCONE_NUMARGS<=framei->nargs)drawtrunccone(arg[0],arg[1],arg[2], rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWTRUNCCONE_NUMARGS<=framei->nargs)drawtrunccone(arg[0],arg[1],arg[2], rgbptr);
       rgbptr=NULL;
       iarg+=3;
       break;
     case SV_DRAWCONE:
-      if(iarg+SV_DRAWCONE_NUMARGS<=framei->nargs)drawcone(arg[0],arg[1], rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWCONE_NUMARGS<=framei->nargs)drawcone(arg[0],arg[1], rgbptr);
       rgbptr=NULL;
       iarg+=2;
       break;
     case SV_DRAWSPHERE:
-      if(iarg+SV_DRAWSPHERE_NUMARGS<=framei->nargs)drawsphere(arg[0],rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWSPHERE_NUMARGS<=framei->nargs)drawsphere(arg[0],rgbptr);
       rgbptr=NULL;
       iarg++;
       break;
     case SV_DRAWCIRCLE:
-      if(iarg+SV_DRAWCIRCLE_NUMARGS<=framei->nargs)drawcircle(arg[0],rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWCIRCLE_NUMARGS<=framei->nargs)drawcircle(arg[0],rgbptr);
       rgbptr=NULL;
       iarg++;
       break;
 #ifdef pp_AVATAR
     case SV_DRAWARC:
-      if(iarg+SV_DRAWARC_NUMARGS<=framei->nargs)drawarc(arg[0],arg[1],rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWARC_NUMARGS<=framei->nargs)drawarc(arg[0],arg[1],rgbptr);
       rgbptr=NULL;
       iarg+=2;
       break;
 #endif
     case SV_DRAWPOINT:
-      if(iarg+SV_DRAWPOINT_NUMARGS<=framei->nargs)drawpoint(rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWPOINT_NUMARGS<=framei->nargs)drawpoint(rgbptr);
       rgbptr=NULL;
       break;
     case SV_SETCOLOR:
-      if(iarg+SV_SETCOLOR_NUMARGS<=framei->nargs){
+      if(op_skip==0&&iarg+SV_SETCOLOR_NUMARGS<=framei->nargs){
         rgbcolor[0]=arg[0];
         rgbcolor[1]=arg[1];
         rgbcolor[2]=arg[2];
@@ -383,19 +432,19 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       iarg+=3;
       break;
     case SV_SETLINEWIDTH:
-      if(iarg+SV_SETLINEWIDTH_NUMARGS<=framei->nargs){
+      if(op_skip==0&&iarg+SV_SETLINEWIDTH_NUMARGS<=framei->nargs){
         glLineWidth(arg[0]);
         iarg++;
       }
       break;
     case SV_SETPOINTSIZE:
-      if(iarg+SV_SETPOINTSIZE_NUMARGS<=framei->nargs){
+      if(op_skip==0&&iarg+SV_SETPOINTSIZE_NUMARGS<=framei->nargs){
         glPointSize(arg[0]);
         iarg++;
       }
       break;
     case SV_SETBW:
-      if(iarg+SV_SETBW_NUMARGS<=framei->nargs){
+      if(op_skip==0&&iarg+SV_SETBW_NUMARGS<=framei->nargs){
         rgbcolor[0]=arg[0];
         rgbcolor[1]=arg[0];
         rgbcolor[2]=arg[0];
@@ -405,15 +454,15 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       iarg+=1;
       break;
     case SV_DRAWLINE:
-      if(iarg+SV_DRAWLINE_NUMARGS<=framei->nargs)drawline(arg,arg+3,rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWLINE_NUMARGS<=framei->nargs)drawline(arg,arg+3,rgbptr);
       rgbptr=NULL;
       iarg+=6;
       break;
     case SV_PUSH:
-      glPushMatrix();
+      if(op_skip==0)glPushMatrix();
       break;
     case SV_POP:
-      glPopMatrix();
+      if(op_skip==0)glPopMatrix();
       break;
     case SV_NO_OP:
       break;
@@ -424,6 +473,7 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       break;
     }
     iop++;
+    if(op_skip>0)op_skip--;
   }
 #ifdef pp_AVATAR
   if(object->use_displaylist==1&&displaylist_id!=0){
@@ -1229,6 +1279,24 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
         iop=SV_DRAWCUBE;
         reporterror(buffer_save,token,numargs,SV_DRAWCUBE_NUMARGS);
       }
+#ifdef pp_AVATAR
+      else if(strcmp(token,"skipifge")==0){
+        iop=SV_IF_AGEB;
+        reporterror(buffer_save,token,numargs,SV_IF_AGEB_NUMARGS);
+      }
+      else if(strcmp(token,"skipifgt")==0){
+        iop=SV_IF_AGTB;
+        reporterror(buffer_save,token,numargs,SV_IF_AGTB_NUMARGS);
+      }
+      else if(strcmp(token,"skipifle")==0){
+        iop=SV_IF_ALEB;
+        reporterror(buffer_save,token,numargs,SV_IF_ALEB_NUMARGS);
+      }
+      else if(strcmp(token,"skipiflt")==0){
+        iop=SV_IF_ALTB;
+        reporterror(buffer_save,token,numargs,SV_IF_ALTB_NUMARGS);
+      }
+#endif
       else if(strcmp(token,"drawdisk")==0){
         iop=SV_DRAWDISK;
         reporterror(buffer_save,token,numargs,SV_DRAWDISK_NUMARGS);
