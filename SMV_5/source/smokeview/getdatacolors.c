@@ -859,7 +859,11 @@ void drawColorBars(void){
   bottom[2]=labeltop-3*dyfont;
   bottom[3]=labeltop-4*dyfont;
 
+#ifdef pp_AVATAR
+  if(((showsmoke==1||showevac==1)&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
+#else
   if((showsmoke==1&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
+#endif
     sniffErrors("before colorbar");
     CheckMemory;
     glBegin(GL_QUADS);
@@ -911,7 +915,11 @@ void drawColorBars(void){
   leftslice=0;
   leftpatch=0;
   leftzone=0;
+#ifdef pp_AVATAR
+  if(showevac==1||showsmoke==1){
+#else
   if(showsmoke==1){
+#endif
     if(parttype!=0){
       leftsmoke=ileft;
       ileft++;
@@ -926,8 +934,19 @@ void drawColorBars(void){
   }
   strcpy(partshortlabel2,"");
   strcpy(partunitlabel2,"");
+#ifdef pp_AVATAR
+  if(showevac==1||showsmoke==1){
+#else
   if(showsmoke==1){
-    if(parttype!=0)outputBarText(right[leftsmoke],bottom[0],color1,"Part");
+#endif
+    if(parttype!=0){
+#ifdef pp_AVATAR
+      if(showsmoke==1)outputBarText(right[leftsmoke],bottom[0],color1,"Part");
+      if(showevac==1)outputBarText(right[leftsmoke],bottom[0],color1,"Human");
+#else
+      outputBarText(right[leftsmoke],bottom[0],color1,"Part");
+#endif
+    }
     if(parttype==-1){
       strcpy(partshortlabel2,"temp");
       strcpy(partunitlabel2,"C");
@@ -1017,7 +1036,11 @@ void drawColorBars(void){
     outputBarText(right[leftzone],bottom[3],color1,zonescale);
 
   }
+#ifdef pp_AVATAR
+  if((showsmoke==1||showevac==1)&&parttype!=0){
+#else
   if(showsmoke==1&&parttype!=0){
+#endif
     float *partlevels256_ptr;
 
     partlevels256_ptr=partlevels256;
