@@ -3036,7 +3036,19 @@ typedef struct {
       }
       if(len>lenkey+1){
         buffer3=buffer+lenkey;
+#ifdef pp_AVATAR
+        if(parti->evac==1){
+          float zoffset=0.0;
+
+          sscanf(buffer3,"%i %f",&blocknumber,&zoffset);
+          parti->zoffset=zoffset;
+        }
+        else{
+          sscanf(buffer3,"%i",&blocknumber);
+        }
+#else
         sscanf(buffer3,"%i",&blocknumber);
+#endif
         blocknumber--;
       }
 

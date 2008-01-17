@@ -665,6 +665,9 @@ typedef struct {
   int compression_type;
   int loaded, display;
   int evac;
+#ifdef pp_AVATAR
+  float zoffset;
+#endif
   int blocknumber;
   int num_memblocks;
   float *ptimes;
