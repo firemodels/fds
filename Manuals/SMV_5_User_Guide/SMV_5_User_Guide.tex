@@ -1537,7 +1537,27 @@ translate}\ as translating the origin by (-x,-y,-z).
 
 \elist
 
+\section{Conditionals}
+Conditional commands ({\tt skipif}\ statements) may be used to exclude portions of a device 
+definition  based upon variable values
+obtained using the {\tt getusers}\ command .  For example, a tree trunk may be drawn black if a temperature exceeds a specified value.  Four forms of the {\tt skipif}\ command are
+implemented: {\tt skipifle, skipiflt, skipifge} and {\tt skipifgt}.
+The notation {\tt , gt, le} and {\tt lt} has the usual meaning of greater than or equal to, greater than, {\em etc.}.  
 
+
+\blist
+\hitem{skip if $a<=b$} The command, {\tt a b n skipifle}\ skips the {\tt n} commands following the
+{\tt skipifle}\ if the floating point values {\em a} and {\em b} satisfy $a\le b$.
+
+\hitem{skip if $a<b$} The command, {\tt a b n skipiflt} skips the {\tt n} commands following
+{\tt skipiflt}\ if the floating point values {\em a} and {\em b} satisfy $a<b$.
+
+\hitem{skip if $a>=b$} The command, {\tt a b n skipifge} skips the {\tt n} commands following
+{\tt skipifge}\ if the floating point values {\em a} and {\em b} satisfy $a\ge b$.
+
+\hitem{skip if $a>b$} The command, {\tt a b n skipifgt} skips the {\tt n} commands following 
+{\tt skipifgt}\ if the floating point values {\em a} and {\em b} satisfy $a> b$.
+\elist
 
 \part{Visualization}
 \chapter{Realistic or Qualitative Visualization - 3D Smoke}
