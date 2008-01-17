@@ -7528,11 +7528,25 @@ Contains
     Real ( kind = 8 ) zrelto
     Real ( kind = 8 ) zsmall
     Real ( kind = 8 ) zstpmu
-
     Save
 
+    ! write(0,*) 'Subroutine dinvr'
     If ( 0 < status ) Then
-       go to i99999
+       ! go to i99999
+       Select Case(i99999)
+          Case(10)
+             Go To 10
+          Case(20)
+             Go To 20
+          Case(90)
+             Go To 90
+          Case(130)
+             Go To 130
+          Case(200)
+             Go To 200
+          Case(270)
+             Go To 270
+       End Select
     End If
 
     qcond = .Not. ( small <= x .And. x <= big )
@@ -7552,7 +7566,8 @@ Contains
     !
     !  GET-function-VALUE
     !
-    Assign 10 to i99999
+    ! Assign 10 to i99999
+    i99999 = 10
     status = 1
     Return
 
@@ -7563,7 +7578,8 @@ Contains
     !
     !  GET-function-VALUE
     !
-    Assign 20 to i99999
+    ! Assign 20 to i99999
+    i99999 = 20
     status = 1
     Return
 
@@ -7613,7 +7629,8 @@ Contains
     !  YY = F(X) - Y
     !  GET-function-VALUE
     !
-    Assign 90 to i99999
+    ! Assign 90 to i99999
+    i99999 = 90
     status = 1
     Return
 
@@ -7655,7 +7672,8 @@ Contains
     !
     !  GET-function-VALUE
     !
-    Assign 130 to i99999
+    ! Assign 130 to i99999
+    i99999 = 130
     status = 1
     Return
 
@@ -7711,7 +7729,8 @@ Contains
     !
     !  GET-function-VALUE
     !
-    Assign 200 to i99999
+    ! Assign 200 to i99999
+    i99999 = 200
     status = 1
     Return
 
@@ -7769,7 +7788,8 @@ Contains
     !
     !  GET-function-VALUE
     !
-    Assign 270 to i99999
+    ! Assign 270 to i99999
+    i99999 = 270
     status = 1
     Return
 
@@ -7777,7 +7797,7 @@ Contains
     go to 250
 
     Entry dstinv ( zsmall, zbig, zabsst, zrelst, zstpmu, zabsto, zrelto )
-
+    ! write(0,*) 'Entry dstinv'
     !*****************************************************************************80
     !
     !! DSTINV SeT INverse finder - Reverse Communication
@@ -8164,9 +8184,9 @@ Contains
     Real ( kind = 8 ) zxlo
 
     Save
-
     ftol(zx) = 0.5D+00 * Max ( abstol, reltol * Abs ( zx ) )
 
+    ! write(0,*) 'Subroutine dzror'
     If ( 0 < status ) Then
        go to 280
     End If
@@ -8178,7 +8198,8 @@ Contains
     !
     !     GET-function-VALUE
     !
-    Assign 10 to i99999
+    ! Assign 10 to i99999
+    i99999 = 10
     go to 270
 
 10  Continue
@@ -8190,7 +8211,8 @@ Contains
     !
     !     GET-function-VALUE
     !
-    Assign 20 to i99999
+    ! Assign 20 to i99999
+    i99999 = 20
     go to 270
     !
     !  Check that F(ZXLO) < 0 < F(ZXHI)  or F(ZXLO) > 0 > F(ZXHI)
@@ -8343,7 +8365,8 @@ Contains
     !
     !     GET-function-VALUE
     !
-    Assign 200 to i99999
+    ! Assign 200 to i99999
+    i99999 = 200
     go to 270
 
 200 Continue
@@ -8381,7 +8404,7 @@ Contains
     Return
 
     Entry dstzr ( zxlo, zxhi, zabstl, zreltl )
-
+    ! write(0,*) 'Entry dstzr'
     !*****************************************************************************80
     !
     !! DSTZR - SeT ZeRo finder - Reverse communication version
@@ -8437,7 +8460,15 @@ Contains
     Return
 
 280 Continue
-    go to i99999
+    ! go to i99999
+    Select Case(i99999)
+       Case(10)
+          Go To 10
+       Case(20)
+          Go To 20
+       Case(200)
+          Go To 200
+    End Select
 
   End Subroutine dzror
 
