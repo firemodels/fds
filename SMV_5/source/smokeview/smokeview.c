@@ -1812,6 +1812,7 @@ void updateShow(void){
   showtime=0; showtime2=0; showplot3d=0; showpatch=0; 
   showslice=0; showvslice=0; showsmoke=0; showzone=0; showiso=0;
   showevac=0;
+  showevac_colorbar=0;
   showtarget=0;
   showtitle1=0; showtitle2=0;
   show3dsmoke=0;
@@ -1961,6 +1962,12 @@ void updateShow(void){
     if(smoke3dflag==1)show3dsmoke=1;
     if(partflag==1)showsmoke=1;
     if(evacflag==1)showevac=1;
+    if(showevac==1&&parttype>0){
+      showevac_colorbar=1;
+      if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0){
+        showevac_colorbar=0;
+      }
+    }
     if(patchflag==1)showpatch=1;
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;

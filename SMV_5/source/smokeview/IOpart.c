@@ -1317,7 +1317,7 @@ void drawPart5(const particle *parti){
 
             if(vis[j]==1){
               glPushMatrix();
-              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]-parti->zoffset);
+              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]-parti->zoffset/xyzmaxdiff);
               glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
                  
               az_angle=angle[j];

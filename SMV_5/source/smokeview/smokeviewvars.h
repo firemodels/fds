@@ -159,6 +159,7 @@ SVEXTERN char *LESsystem,*LESendian;
 SVEXTERN int show3dsmoke;
 SVEXTERN float frustum[6][4];
 SVEXTERN int showtime, showtime2, showplot3d, showpatch, showslice, showvslice, showsmoke, showzone, showiso, showevac;
+SVEXTERN int showevac_colorbar;
 SVEXTERN int visgridloc;
 
 SVEXTERN int valindex;
