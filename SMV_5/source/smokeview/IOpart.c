@@ -1329,13 +1329,13 @@ void drawPart5(const particle *parti){
               //  3->5   width, depth, 1.0 
               //  6->8   width, depth, height
               //  9->11  data file color
-              //  12->14 0.0 0.0 height/2.0
+              //  12->14 0.0 0.0 height
 
               valstack[0]=rgbobject[0];
               valstack[1]=rgbobject[1];
               valstack[2]=rgbobject[2];
-              valstack[3]=2.0*width[j];
-              valstack[4]=2.0*depth[j];
+              valstack[3]=width[j];
+              valstack[4]=depth[j];
               valstack[5]=1.0;
               valstack[6]=1.0;
               valstack[7]=1.0;
