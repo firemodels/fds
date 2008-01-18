@@ -223,10 +223,12 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
           sy = datacopy->sy;
           sz = datacopy->sz;
 #ifdef pp_AVATAR
-          angle=datacopy->avatar_angle;
-          width=datacopy->avatar_width;
-          depth=datacopy->avatar_depth;
-          height=datacopy->avatar_height;
+          if(parti->evac==1){
+            angle=datacopy->avatar_angle;
+            width=datacopy->avatar_width;
+            depth=datacopy->avatar_depth;
+            height=datacopy->avatar_height;
+          }
 #endif
           for(j=0;j<nparts;j++){
             float xx, yy, zz;
@@ -244,10 +246,12 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
             sy[j] = factor*yy;
             sz[j] = factor*zz;
 #ifdef pp_AVATAR
-            angle[j] =xyz[j+3*nparts];
-            width[j] =xyz[j+4*nparts];
-            depth[j] =xyz[j+5*nparts];
-            height[j]=xyz[j+6*nparts];
+            if(parti->evac==1){
+              angle[j] =xyz[j+3*nparts];
+              width[j] =xyz[j+4*nparts];
+              depth[j] =xyz[j+5*nparts];
+              height[j]=xyz[j+6*nparts];
+            }
 #endif
           }
         }
