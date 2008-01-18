@@ -4,8 +4,8 @@
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Smokeview Experimental - Release Notes</h2>
-<p>December 16, 2007<br>
-Revision: 1112<br>
+<p>January 17, 2008<br>
+Revision: 1207<br>
 
 <p>This readme file describes several new features 
 in an experimental version of Smokeview available for testing at the 
@@ -19,7 +19,12 @@ However, there are no guarantees.  Use this version with caution.
 will be incorporated into the official Smokeview release.
 
 <p><ul>
-<li><a href="#GPU">GPU</a> - The video card is used to speed up 3D smoke visualization
+<li><a href="#GPU">GPU</a> - The video card is used to speed up 3D smoke visualization by <em>off-loading</em>
+opacity corrections to the 
+GPU (graphics processing unit) rather than performing them on the CPU.  The GPU and culling features
+may be controlled form the <em>3D Smoke</em> dialog box.  They may also be controlled by pressing the upper case
+<strong>G</strong>
+and <strong>C</strong> keys respectively.  
 <li><a href="#culling">Culling</a> - 3D smoke drawing is further speeded up by detecting blockage hidden smoke planes.
 <li><a href="#colorbar">Custom Color bars</a> - Custom colorbars may be created to highlight specific data.
 <li><a href="#memory">Memory management</a> - Smokeview's memory management routines are modified to reduce the risk and consequences 
@@ -27,6 +32,8 @@ of memory leaks.
 <li><a href="#lighting">Lighting</a> - More control is added for illuminating the scene.
 <li><a href="#touring">Touring</a> - More control over touring option, allowing some or all tours to be displayed simulataneously.
 </ul>
+
+<p><strong>Please report problems to the issue tracker or make comments to the discussion group .</strong>
 
 
 <p><hr size="1">
