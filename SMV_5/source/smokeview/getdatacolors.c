@@ -858,9 +858,8 @@ void drawColorBars(void){
   bottom[1]=labeltop-2*dyfont;
   bottom[2]=labeltop-3*dyfont;
   bottom[3]=labeltop-4*dyfont;
-
 #ifdef pp_AVATAR
-  if(((showsmoke==1||showevac==1)&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
+  if(showevac_colorbar==1||(showsmoke==1&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
 #else
   if((showsmoke==1&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
 #endif
@@ -916,7 +915,7 @@ void drawColorBars(void){
   leftpatch=0;
   leftzone=0;
 #ifdef pp_AVATAR
-  if(showevac==1||showsmoke==1){
+  if(showevac_colorbar==1||showsmoke==1){
 #else
   if(showsmoke==1){
 #endif
@@ -935,7 +934,7 @@ void drawColorBars(void){
   strcpy(partshortlabel2,"");
   strcpy(partunitlabel2,"");
 #ifdef pp_AVATAR
-  if(showevac==1||showsmoke==1){
+  if(showevac_colorbar==1||showsmoke==1){
 #else
   if(showsmoke==1){
 #endif
@@ -1037,7 +1036,7 @@ void drawColorBars(void){
 
   }
 #ifdef pp_AVATAR
-  if((showsmoke==1||showevac==1)&&parttype!=0){
+  if(showevac_colorbar==1||(showsmoke==1&&parttype!=0)){
 #else
   if(showsmoke==1&&parttype!=0){
 #endif
