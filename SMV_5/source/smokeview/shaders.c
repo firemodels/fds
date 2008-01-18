@@ -47,29 +47,28 @@ int setSmokeShaders() {
   };
 
   const GLchar *VertexShaderSource[]={
-    "uniform float aspectratio,normx,normy,normz;"
-    "uniform int adjustalphaflag;"
-    "uniform float eyex,eyey,eyez;"
-    "uniform float fire_red, fire_green, fire_blue, fire_alpha;"
-    "varying vec4 newcolor;"
+    "uniform vec4 firecolor;"
+    "uniform vec3 norm, eye;"
+    "uniform float aspectratio;"
     "uniform float hrrcutoff;"
     "uniform float smoke_shade;"
     "uniform float smoke3d_rthick;"
+    "uniform int adjustalphaflag;"
+    "varying vec4 newcolor;"
     "attribute float hrr, smoke_alpha;"
     "void main()"
     "{"
     "  float bottom,top,alpha,r;"
     "  float term1, term2, term3, term4;"
-    "  vec3 rel_pos,eyexyz;"
+    "  vec3 rel_pos;"
     "  if(hrrcutoff>0.0&&hrr>hrrcutoff){"
-    "    newcolor = vec4(fire_red,fire_green,fire_blue,fire_alpha);"
+    "    newcolor = firecolor;"
     "  }"
     "  else{"
-    "    eyexyz = vec3(eyex,eyey,eyez);"
     "    alpha=smoke_alpha/256.0;"
     "    if(adjustalphaflag==1||adjustalphaflag==2){"
-    "      rel_pos=vec3(gl_Vertex)-eyexyz;"
-    "      bottom = abs(rel_pos.x*normx+rel_pos.y*normy+rel_pos.z*normz);"
+    "      rel_pos=vec3(gl_Vertex)-eye;"
+    "      bottom = abs(dot(rel_pos,norm));"
     "      top=length(rel_pos);"
     "      r=aspectratio*top/bottom;"
     "      term1 = alpha*r;"
@@ -136,17 +135,10 @@ int setSmokeShaders() {
   GPU_skip = glGetUniformLocation(p_smoke,"skip");
   GPU_smoke3d_rthick = glGetUniformLocation(p_smoke,"smoke3d_rthick");
   GPU_smokeshade = glGetUniformLocation(p_smoke,"smoke_shade");
-  GPU_firealpha = glGetUniformLocation(p_smoke,"fire_alpha");
-  GPU_firered = glGetUniformLocation(p_smoke,"fire_red");
-  GPU_firegreen = glGetUniformLocation(p_smoke,"fire_green");
-  GPU_fireblue = glGetUniformLocation(p_smoke,"fire_blue");
+  GPU_firecolor = glGetUniformLocation(p_smoke,"firecolor");
   GPU_aspectratio = glGetUniformLocation(p_smoke,"aspectratio");
-  GPU_normx = glGetUniformLocation(p_smoke,"normx");
-  GPU_normy = glGetUniformLocation(p_smoke,"normy");
-  GPU_normz = glGetUniformLocation(p_smoke,"normz");
-  GPU_eyex = glGetUniformLocation(p_smoke,"eyex");
-  GPU_eyey = glGetUniformLocation(p_smoke,"eyey");
-  GPU_eyez = glGetUniformLocation(p_smoke,"eyez");
+  GPU_norm = glGetUniformLocation(p_smoke,"norm");
+  GPU_eye = glGetUniformLocation(p_smoke,"eye");
   GPU_adjustalphaflag = glGetUniformLocation(p_smoke,"adjustalphaflag");
   return error_code;
 
@@ -263,7 +255,7 @@ int printOglError(char *file, int line)
     glErr = glGetError();
     while (glErr != GL_NO_ERROR)
     {
-        printf("glError in file %s @ line %d: %s\n", file, line, gluErrorString(glErr));
+        printf("glError in file %s @ line %d: %s\n", file, line, (char *)gluErrorString(glErr));
         retCode = 1;
         glErr = glGetError();
     }
