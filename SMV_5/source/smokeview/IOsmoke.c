@@ -3016,18 +3016,18 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   glUniform1i(GPU_adjustalphaflag,adjustalphaflag);
-  glUniform1f(GPU_normx,meshi->norm[0]);
-  glUniform1f(GPU_normy,meshi->norm[1]);
-  glUniform1f(GPU_normz,meshi->norm[2]);
-  glUniform1f(GPU_eyex,xyzeyeorig[0]);
-  glUniform1f(GPU_eyey,xyzeyeorig[1]);
-  glUniform1f(GPU_eyez,xyzeyeorig[2]);
-  glUniform1f(GPU_firealpha,fire_alpha/256.0);
-  glUniform1f(GPU_firered,(float)fire_red/256.0);
-  glUniform1f(GPU_firegreen,(float)fire_green/256.0);
-  glUniform1f(GPU_fireblue,(float)fire_blue/256.0);
+  glUniform3fv(GPU_eye,1,xyzeyeorig);
+  {
+    float fire_color[4];
+
+    fire_color[0]=fire_red/256;
+    fire_color[1]=fire_green/256;
+    fire_color[2]=fire_blue/256;
+    fire_color[3]=fire_alpha/256.0;
+    glUniform4fv(GPU_firecolor,1,fire_color);
+  }
   glUniform1f(GPU_smokeshade,(float)smoke_shade/256.0);
-  glUniform1i(GPU_skip,skip);
+ // glUniform1i(GPU_skip,skip);
   glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
   if(firecolor==NULL){
     i_hrrcutoff=-1;
@@ -4044,12 +4044,13 @@ void drawsmoke3dCULL(void){
   xyzindex2[5]=3;
 
   glUniform1i(GPU_adjustalphaflag,adjustalphaflag);
-  glUniform1f(GPU_eyex,xyzeyeorig[0]);
-  glUniform1f(GPU_eyey,xyzeyeorig[1]);
-  glUniform1f(GPU_eyez,xyzeyeorig[2]);
-  glUniform1f(GPU_firered,(float)fire_red/256.0);
-  glUniform1f(GPU_firegreen,(float)fire_green/256.0);
-  glUniform1f(GPU_fireblue,(float)fire_blue/256.0);
+//  glUniform1f(GPU_eyex,xyzeyeorig[0]);
+//  glUniform1f(GPU_eyey,xyzeyeorig[1]);
+//  glUniform1f(GPU_eyez,xyzeyeorig[2]);
+  glUniform3fv(GPU_eye,1,xyzeyeorig);
+//  glUniform1f(GPU_firered,(float)fire_red/256.0);
+//  glUniform1f(GPU_firegreen,(float)fire_green/256.0);
+//  glUniform1f(GPU_fireblue,(float)fire_blue/256.0);
   glUniform1f(GPU_smokeshade,(float)smoke_shade/256.0);
   glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
 
@@ -4079,6 +4080,17 @@ void drawsmoke3dCULL(void){
       else{
         fire_alpha=256*(1.0-pow(0.5,meshi->dx/fire_halfdepth));
       }
+    {
+      float fire_color[4];
+      float *firecolor;
+
+      fire_color[0]=(float)fire_red/256.0;
+      fire_color[1]=(float)fire_green/256.0;
+      fire_color[2]=(float)fire_blue/256.0;
+      fire_color[3]=(float)fire_alpha/256.0;
+      firecolor=fire_color;
+      glUniform4fv(GPU_firecolor,1,firecolor);
+    }
 
       xplt=meshi->xplt;
       yplt=meshi->yplt;
@@ -4102,10 +4114,11 @@ void drawsmoke3dCULL(void){
       ny = js2 + 1 - js1;
       nxy = nx*ny;
 
-      glUniform1f(GPU_normx,meshi->norm[0]);
-      glUniform1f(GPU_normy,meshi->norm[1]);
-      glUniform1f(GPU_normz,meshi->norm[2]);
-      glUniform1f(GPU_firealpha,fire_alpha/256.0);
+//      glUniform1f(GPU_normx,meshi->norm[0]);
+//      glUniform1f(GPU_normy,meshi->norm[1]);
+//      glUniform1f(GPU_normz,meshi->norm[2]);
+      glUniform3fv(GPU_norm,1,meshi->norm);
+//      glUniform1f(GPU_firealpha,fire_alpha/256.0);
 
       if(firecolor==NULL){
         i_hrrcutoff=-1;

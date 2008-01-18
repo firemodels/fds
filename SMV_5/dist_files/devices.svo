@@ -200,7 +200,6 @@ AVATARDEF
    push -0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
    push  0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
    pop // head
-  // 0.0 3.0 getuservals 
  9.0 3.0 getuservals 0.93 0.87 0.51 setcolor  // body color 
  push  0.0 0.0 3.55 translate 3.0 3.0 getuservals 1.0 1.0 1.0 scalexyz 1.334 1.33 1.0 scalexyz 2.5 drawsphere pop // trunk, scale by width and depth
  0.82 0.70 0.55 setcolor // arm color TAN 210 180 140
