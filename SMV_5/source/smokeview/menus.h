@@ -5398,6 +5398,37 @@ static int textureshowmenu=0;
       sprintf(menulabel,"  FDS revision:%i",revision_fds);
       glutAddMenuEntry(menulabel,1);
     }
+#ifdef pp_GPU
+    if(gpuactive==1){
+      if(usegpu==1){
+        strcpy(menulabel,"  GPU activated. (Press G to deactivate)");
+      }
+      else{
+        strcpy(menulabel,"  GPU available but not in use. (Press G to activate)");
+      }
+    }
+    else{
+      strcpy(menulabel,"  GPU not available");
+    }
+    glutAddMenuEntry(menulabel,1);
+#endif
+#ifdef pp_CULL
+    if(cullactive==1&&gpuactive==1){
+      if(cullsmoke==1&&usegpu==1){
+        strcpy(menulabel,"  Smoke culling activated. (Press C to deactivate)");
+      }
+      else{
+        strcpy(menulabel,"  Smoke culling available but not in use. ( To activate: ");
+        if(usegpu==0 && cullsmoke==1)strcat(menulabel," Press G.)");
+        if(usegpu==1 && cullsmoke==0)strcat(menulabel," Press C.)");
+        if(usegpu==0 && cullsmoke==0)strcat(menulabel," Press G then C.)");
+      }
+    }
+    else{
+      strcpy(menulabel,"  Smoke culling not available");
+    }
+    glutAddMenuEntry(menulabel,1);
+#endif
   }
   if(plotstate==DYNAMIC_PLOTS){
     glutAddMenuEntry("",1);
