@@ -205,7 +205,7 @@ void getPart5Colors(particle *parti, int nlevel){
       float *rvals;
       unsigned char *irvals;
 
-      partclassi = partclassinfo + j;
+      partclassi = parti->partclassptr[j];
       rvals = datacopy->rvals;
       irvals = datacopy->irvals;
 

@@ -159,6 +159,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
   numtypescopy=numtypes;
   numtypes_temp[0]=0;
   numtypes_temp[1]=0;
+  CheckMemory;
   for(i=0;i<nclasses;i++){
     FORTPART5READ(numtypes_temp,2);
     if(returncode==0)goto wrapup;
@@ -168,11 +169,13 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
     returncode=fseek(PART5FILE,skip,SEEK_CUR);
     if(returncode!=0)goto wrapup;
   }
+  CheckMemory;
 
   datacopy = parti->data5;
   for(;;){
     int doit;
 
+    CheckMemory;
     count++;
     if(count>=parti->nframes)break;
     if(count%partframestep==0){
@@ -193,11 +196,12 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
       part5class *partclassi;
       int factor=256*128;
 
-      partclassi = partclassinfo + i;
+      partclassi = parti->partclassptr[i];
       FORTPART5READ(&nparts,1);
       if(returncode==0)goto wrapup;
       numpoints[i]=nparts;
       skip=0;
+      CheckMemory;
       if(doit==1){
         short *sx, *sy, *sz;
         float *xyz;
@@ -216,6 +220,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
 #else
         FORTPART5READ(partclassi->xyz,3*nparts);
 #endif
+        CheckMemory;
         if(nparts>0){
           if(returncode==0)goto wrapup;
           xyz = partclassi->xyz;
@@ -254,6 +259,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
             }
 #endif
           }
+          CheckMemory;
         }
       }
       else{
@@ -268,12 +274,14 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
         skip = 4 + 3*4*nparts + 4;  
 #endif
       }
+      CheckMemory;
       if(doit==1){
         int *sort_tags;
         int j;
 
         sort_tags=datacopy->sort_tags;
         FORTPART5READ(datacopy->tags,nparts);
+        CheckMemory;
         if(nparts>0){
           if(returncode==0)goto wrapup;
           for(j=0;j<nparts;j++){
@@ -287,11 +295,13 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
       else{
         skip = 4 + 4*nparts + 4;  // skip over tag for now
       }
+      CheckMemory;
       if(numtypes[2*i]>0){
         //skip += 4 + 4*nparts*numtypes[2*i] + 4;  // skip over vals for now
         FORTPART5READ(datacopy->rvals,nparts*numtypes[2*i]);
         if(returncode==0)goto wrapup;
       }
+      CheckMemory;
       if(numtypes[2*i+1]>0){
         skip += 4 + 4*nparts*numtypes[2*i+1] + 4;
       }
@@ -302,13 +312,16 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
         returncode=fseek(PART5FILE,skip,SEEK_CUR);
         if(returncode!=0)goto wrapup;
       }
+      CheckMemory;
       datacopy++;
     }
+    CheckMemory;
     if(first_frame==1)first_frame=0;
     printf(" completed\n");
 
   }
 wrapup:
+  CheckMemory;
   update_all_partvis(parti);
   FREEMEMORY(numtypes);
   FREEMEMORY(numpoints);
@@ -663,7 +676,7 @@ void getpart5header(particle *parti, int partframestep){
   for(i=0;i<parti->nclasses;i++){
     part5class *partclassi;
 
-    partclassi = partclassinfo + i;
+    partclassi = parti->partclassptr[i];
     FREEMEMORY(partclassi->xyz);
     partclassi->maxpoints=0;
   }
@@ -687,7 +700,7 @@ void getpart5header(particle *parti, int partframestep){
 
         part5class *partclassj;
 
-        partclassj = partclassinfo + j;
+        partclassj = parti->partclassptr[j];
         initpart5data(datacopy,partclassj);
         if(fgets(buffer,255,stream)==NULL){
           fail=1;
@@ -731,7 +744,7 @@ void getpart5header(particle *parti, int partframestep){
   for(i=0;i<parti->nclasses;i++){
     part5class *partclassi;
 
-    partclassi = partclassinfo + i;
+    partclassi = parti->partclassptr[i];
     if(partclassi->maxpoints>0){
 #ifdef pp_AVATAR
       if(parti->evac==1){

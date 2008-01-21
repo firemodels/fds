@@ -1961,10 +1961,10 @@ void initvars0(void){
   zoneinfo=NULL;
   activezone=NULL;
   partinfo=NULL;
-   current_property=NULL;
-   partclassinfo=NULL;
-   part5propinfo=NULL;
-   npart5prop=0;
+  current_property=NULL;
+  partclassinfo=NULL;
+  part5propinfo=NULL;
+  npart5prop=0;
   targinfo=NULL;
   sliceinfo=NULL;
   caminfo=NULL;
