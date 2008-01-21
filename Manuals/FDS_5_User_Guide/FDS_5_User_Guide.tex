@@ -80,9 +80,6 @@
 \newcommand{\hv}{v}
 \newcommand{\hw}{w}
 \newcommand{\bo}{{\bf \omega}}
-\newcommand{\bsig}{\mbox{\boldmath $\sigma$}}
-\newcommand{\btau}{{\bf \tau}}
-\newcommand{\sumym}{\sum (Y_i/M_i)}
 \newcommand{\oW}{\overline{W}}
 \newcommand{\om}{\omega}
 \newcommand{\omx}{\omega_x}
@@ -893,6 +890,7 @@ to run jobs in the background so as to free the console for other uses.
 \subsection{Starting an FDS Calculation (Multiple Processor Version)}
 \label{info:parallelprocessing}
 \index{Running FDS!Parallel}
+
 Running FDS across a network using multiple processors and multiple
 banks of memory (RAM) is more difficult than running the single
 processor version.  More is required of the user to make the
@@ -901,17 +899,48 @@ involves creating accounts for a given user on each machine, sharing
 directories, increasing the speed of the network, making each machine
 aware of the others, {\em etc.}  Some of these details are handled by
 the parallel-processing software, others are not. Undoubtedly the
-process will be simplified in years to come, but for the moment,
+procedure will be simplified in years to come, but for the moment,
 parallel-processing is still relatively new and requires more
 expertise in terms of understanding both the operating system and the
 network connections of a given set of computers.
 
 FDS uses MPI (Message-Passing Interface)~\cite{Gropp:1} to allow
-multiple computers to run a single FDS job. Actually, the job must be
-broken up into multiple meshes, and a processor is assigned to work on
-each mesh. Each processor runs an FDS job (called a thread) for its
-given mesh, and the MPI handles the transfer of information between
-meshes.  There are different implementations of MPI, much like there
+multiple computers to run a single FDS job. The main idea is that you must break up the FDS domain into multiple meshes, and then
+the flow field in each mesh is computed by a different ``process.''
+Note the subtle difference between these
+terms -- a ``process'' does not have the same meaning as a ``processor.'' The former can be thought of as a ``task'' that you would see in
+the Windows Task Manager or by executing the ``top'' command on a Linux/Unix machine. The latter refers to the computer itself. A single
+processor may run multiple processes, for example. The computation on a given FDS mesh is thought of as an individual ``process,'' and
+MPI handles the transfer of information between these processes. Currently, each mesh is assigned its own process in a parallel calculation, although plans
+are underway to relax this restriction, allowing multiple meshes to be handled via a single process. In this way, large meshes can be computed on dedicated processors, while
+smaller meshes can be clustered together in a single process running on a single processor, without the need for MPI message passing between themselves.
+
+Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, whereas MPI refers to its processes by the numbers
+0, 1, 2, and so on. Thus, Mesh 1 is assigned to Process 0; Mesh 2 to Process 1, and so on. As a user, you never actually number the meshes or the processes yourself, but
+error statements from FDS or from MPI might refer to the meshes or processes by number. As an example, if a five mesh FDS case is run in parallel, the first printout (usually to the screen unless
+otherwise directed) is:
+
+\begin{verbatim}
+Process  4 of  4 is running on fire65
+Process  3 of  4 is running on fire64
+Process  2 of  4 is running on fire63
+Process  0 of  4 is running on fire61
+Process  1 of  4 is running on fire62
+Mesh   1 is assigned to Process   0
+Mesh   2 is assigned to Process   1
+Mesh   3 is assigned to Process   2
+Mesh   4 is assigned to Process   3
+Mesh   5 is assigned to Process   4
+\end{verbatim}
+This means that 5 processes (numbered 0 to 4) have started on the computers named fire61, fire62, {\em etc}., and that each mesh is being computed as an individual process on the
+individual computers. Each computer has its own memory (RAM), and MPI is the protocol by which information is passed from process to process during the calculation. Note that these
+computers may have multiple processors, and each processor may have multiple ``cores.'' You have control over how many processes get assigned to each computer, but you may or may not
+have control over how the processes are handled by a given computer. That depends on the operating system and the particular version of MPI. For example, fire62 happens to have
+two quad-core processors, and all five meshes could have been assigned to run as five processes all on fire62. Whether or not this is the best strategy is still a subject of
+research and heavily dependent on the technical specifications of the OS and hardware.
+
+
+There are different implementations of MPI, much like there
 are different Fortran and C compilers. Each implementation is
 essentially a library of subroutines called from FDS that transfer
 data from one thread to another across a fast network. The format of
@@ -7104,6 +7133,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct RELAXATION\_FACTOR}        & Real          & Pressure solver parameter                     &               & 1.0               \\ \hline
 {\ct RESTART}                   & Logical       & Restart previous calculation                  &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}             & Character     & Restart file CHID                             &               & {\ct CHID}        \\ \hline
+%{\ct RESTRICT\_MESH\_ASSIGNMENT}& Character     & Enforce one mesh, one process rule                &               &  {\ct .TRUE.}                 \\ \hline
 {\ct SC}                        & Real          & Schmidt number (LES only)                     &               & 0.5               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}        & Logical       & See Section~\ref{solid_phase_verification}    &               & {\ct .FALSE.}     \\ \hline
 {\ct STRATIFICATION}            & Logical       & See Section~\ref{info:stratification}         &               & {\ct .TRUE.}      \\ \hline
