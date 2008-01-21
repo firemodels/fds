@@ -8,7 +8,6 @@ USE MESH_POINTERS
 USE GLOBAL_CONSTANTS
 USE TRAN
 USE MEMORY_FUNCTIONS, ONLY : CHKMEMERR 
-USE COMP_FUNCTIONS, ONLY : SHUTDOWN
 USE DEVICE_VARIABLES
 IMPLICIT NONE
 
@@ -18,7 +17,6 @@ CHARACTER(255), PARAMETER :: initid='$Id$'
 CHARACTER(255), PARAMETER :: initrev='$Revision$'
 CHARACTER(255), PARAMETER :: initdate='$Date$'
 
-CHARACTER(100) MESSAGE
 PUBLIC INITIALIZE_MESH_VARIABLES,INITIALIZE_GLOBAL_VARIABLES, OPEN_AND_CLOSE, GET_REV_init
 
 TYPE (MESH_TYPE), POINTER :: M
@@ -33,7 +31,7 @@ CONTAINS
 SUBROUTINE INITIALIZE_MESH_VARIABLES(NM)
 USE RADCONS, ONLY: UIIDIM,NSB,NRA
 USE CONTROL_VARIABLES
-INTEGER :: N,I,J,K,II,JJ,KK,IPTS,JPTS,KPTS,N_EDGES_DIM,IW,IC,IBC,IOR,IOPZ
+INTEGER :: N,I,J,K,II,JJ,KK,IPTS,JPTS,KPTS,N_EDGES_DIM,IW,IC,IBC,IOR,IOPZ,IERR
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: MU_N,CELL_SIZE
 INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR, NDWC, N_EDGES, NWC
@@ -41,6 +39,7 @@ REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
 TYPE (INITIALIZATION_TYPE), POINTER :: IN
 TYPE (P_ZONE_TYPE), POINTER :: PZ
  
+IERR = 0
 M => MESHES(NM)
 IBP1 =>M%IBP1
 JBP1 =>M%JBP1
@@ -577,7 +576,8 @@ DO K=1,KBAR
       IOR = 1
       NWC = NWC + 1
       IW  = NWC
-      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC)
+      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
+      IF (IERR>0) RETURN
    ENDDO
 ENDDO
 DO K=1,KBAR
@@ -587,7 +587,8 @@ DO K=1,KBAR
       IOR = -1
       NWC = NWC + 1
       IW  = NWC
-      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC)
+      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
+      IF (IERR>0) RETURN
    ENDDO
 ENDDO
  
@@ -598,7 +599,8 @@ DO K=1,KBAR
       IOR = 2
       NWC = NWC + 1
       IW  = NWC
-      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC)
+      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
+      IF (IERR>0) RETURN
    ENDDO
 ENDDO
 DO K=1,KBAR
@@ -608,7 +610,8 @@ DO K=1,KBAR
       IOR = -2
       NWC = NWC + 1
       IW  = NWC
-      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC)
+      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
+      IF (IERR>0) RETURN
    ENDDO
 ENDDO
  
@@ -619,7 +622,8 @@ DO J=1,JBAR
       IOR = 3
       NWC = NWC + 1
       IW  = NWC
-      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC)
+      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
+      IF (IERR>0) RETURN
    ENDDO
 ENDDO
 DO J=1,JBAR
@@ -629,7 +633,8 @@ DO J=1,JBAR
       IOR = -3
       NWC = NWC + 1
       IW  = NWC
-      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC)
+      CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
+      IF (IERR>0) RETURN
    ENDDO
 ENDDO
 
@@ -651,7 +656,8 @@ OBST_LOOP_2: DO N=1,M%N_OBST
             NWC = NWC + 1
             IW  = NWC
          ENDIF
-         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC)
+         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC,IERR)
+         IF (IERR>0) RETURN
       ENDDO
    ENDDO
  
@@ -668,7 +674,8 @@ OBST_LOOP_2: DO N=1,M%N_OBST
             NWC = NWC + 1
             IW  = NWC
          ENDIF
-         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC)
+         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC,IERR)
+         IF (IERR>0) RETURN
       ENDDO 
    ENDDO
  
@@ -685,7 +692,8 @@ OBST_LOOP_2: DO N=1,M%N_OBST
             NWC = NWC + 1
             IW  = NWC
          ENDIF
-         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC)
+         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC,IERR)
+         IF (IERR>0) RETURN
       ENDDO
    ENDDO   
  
@@ -702,7 +710,8 @@ OBST_LOOP_2: DO N=1,M%N_OBST
             NWC = NWC + 1
             IW  = NWC
          ENDIF
-         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC)
+         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC,IERR)
+         IF (IERR>0) RETURN
       ENDDO
    ENDDO   
  
@@ -719,7 +728,8 @@ OBST_LOOP_2: DO N=1,M%N_OBST
             NWC = NWC + 1
             IW  = NWC
          ENDIF
-         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC)
+         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC,IERR)
+         IF (IERR>0) RETURN
       ENDDO
    ENDDO   
  
@@ -736,7 +746,8 @@ OBST_LOOP_2: DO N=1,M%N_OBST
             NWC = NWC + 1
             IW  = NWC
          ENDIF
-         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC)
+         CALL INIT_WALL_CELL(NM,I,J,K,N,IW,IOR,IBC,IERR)
+         IF (IERR>0) RETURN
       ENDDO
    ENDDO   
  
@@ -830,11 +841,15 @@ CALL INITIALIZE_EDGES
 ! Initialize Pressure solver
  
 CALL INITIALIZE_POISSON_SOLVER
+IF (IERR/=0) RETURN
  
 ! Determine which wall cells to assign for solid phase thermocouples and profiles
  
 CALL INITIALIZE_DEVC
+IF (IERR/=0) RETURN
+
 CALL INITIALIZE_PROF
+IF (IERR/=0) RETURN
  
 ! Allocate and Initialize Mesh-Dependent Radiation Arrays
  
@@ -878,53 +893,55 @@ N_EDGES = 0
  
 DO K=0,KBAR
    DO J=0,JBAR
-      IF (J>0) CALL DEFINE_EDGE(   0,J,K, 1,2,NM,0)
-      IF (J>0) CALL DEFINE_EDGE(IBAR,J,K,-1,2,NM,0)
-      IF (K>0) CALL DEFINE_EDGE(   0,J,K, 1,3,NM,0)
-      IF (K>0) CALL DEFINE_EDGE(IBAR,J,K,-1,3,NM,0)
+      IF (J>0) CALL DEFINE_EDGE(   0,J,K, 1,2,NM,0,IERR)
+      IF (J>0) CALL DEFINE_EDGE(IBAR,J,K,-1,2,NM,0,IERR)
+      IF (K>0) CALL DEFINE_EDGE(   0,J,K, 1,3,NM,0,IERR)
+      IF (K>0) CALL DEFINE_EDGE(IBAR,J,K,-1,3,NM,0,IERR)
    ENDDO
 ENDDO
 DO K=0,KBAR
    DO I=0,IBAR
-      IF (I>0) CALL DEFINE_EDGE(I,   0,K, 2,1,NM,0)
-      IF (I>0) CALL DEFINE_EDGE(I,JBAR,K,-2,1,NM,0)
-      IF (K>0) CALL DEFINE_EDGE(I,   0,K, 2,3,NM,0)
-      IF (K>0) CALL DEFINE_EDGE(I,JBAR,K,-2,3,NM,0)
+      IF (I>0) CALL DEFINE_EDGE(I,   0,K, 2,1,NM,0,IERR)
+      IF (I>0) CALL DEFINE_EDGE(I,JBAR,K,-2,1,NM,0,IERR)
+      IF (K>0) CALL DEFINE_EDGE(I,   0,K, 2,3,NM,0,IERR)
+      IF (K>0) CALL DEFINE_EDGE(I,JBAR,K,-2,3,NM,0,IERR)
    ENDDO
 ENDDO
 DO J=0,JBAR
    DO I=0,IBAR
-      IF (I>0) CALL DEFINE_EDGE(I,J,   0, 3,1,NM,0)
-      IF (I>0) CALL DEFINE_EDGE(I,J,KBAR,-3,1,NM,0)
-      IF (J>0) CALL DEFINE_EDGE(I,J,   0, 3,2,NM,0)
-      IF (J>0) CALL DEFINE_EDGE(I,J,KBAR,-3,2,NM,0)
+      IF (I>0) CALL DEFINE_EDGE(I,J,   0, 3,1,NM,0,IERR)
+      IF (I>0) CALL DEFINE_EDGE(I,J,KBAR,-3,1,NM,0,IERR)
+      IF (J>0) CALL DEFINE_EDGE(I,J,   0, 3,2,NM,0,IERR)
+      IF (J>0) CALL DEFINE_EDGE(I,J,KBAR,-3,2,NM,0,IERR)
    ENDDO
 ENDDO
+
+IF (IERR/=0) RETURN
 
 OBST_LOOP_3: DO N=1,N_OBST
    OB => OBSTRUCTION(N)
    DO K=OB%K1,OB%K2
       DO J=OB%J1,OB%J2
-         IF (J>OB%J1) CALL DEFINE_EDGE(OB%I1,J,K,-1,2,NM,N)
-         IF (J>OB%J1) CALL DEFINE_EDGE(OB%I2,J,K, 1,2,NM,N)
-         IF (K>OB%K1) CALL DEFINE_EDGE(OB%I1,J,K,-1,3,NM,N)
-         IF (K>OB%K1) CALL DEFINE_EDGE(OB%I2,J,K, 1,3,NM,N)
+         IF (J>OB%J1) CALL DEFINE_EDGE(OB%I1,J,K,-1,2,NM,N,IERR)
+         IF (J>OB%J1) CALL DEFINE_EDGE(OB%I2,J,K, 1,2,NM,N,IERR)
+         IF (K>OB%K1) CALL DEFINE_EDGE(OB%I1,J,K,-1,3,NM,N,IERR)
+         IF (K>OB%K1) CALL DEFINE_EDGE(OB%I2,J,K, 1,3,NM,N,IERR)
       ENDDO
    ENDDO
    DO K=OB%K1,OB%K2
       DO I=OB%I1,OB%I2
-         IF (I>OB%I1) CALL DEFINE_EDGE(I,OB%J1,K,-2,1,NM,N)
-         IF (I>OB%I1) CALL DEFINE_EDGE(I,OB%J2,K, 2,1,NM,N)
-         IF (K>OB%K1) CALL DEFINE_EDGE(I,OB%J1,K,-2,3,NM,N)
-         IF (K>OB%K1) CALL DEFINE_EDGE(I,OB%J2,K, 2,3,NM,N)
+         IF (I>OB%I1) CALL DEFINE_EDGE(I,OB%J1,K,-2,1,NM,N,IERR)
+         IF (I>OB%I1) CALL DEFINE_EDGE(I,OB%J2,K, 2,1,NM,N,IERR)
+         IF (K>OB%K1) CALL DEFINE_EDGE(I,OB%J1,K,-2,3,NM,N,IERR)
+         IF (K>OB%K1) CALL DEFINE_EDGE(I,OB%J2,K, 2,3,NM,N,IERR)
       ENDDO
    ENDDO
    DO J=OB%J1,OB%J2
       DO I=OB%I1,OB%I2
-         IF (I>OB%I1) CALL DEFINE_EDGE(I,J,OB%K1,-3,1,NM,N)
-         IF (I>OB%I1) CALL DEFINE_EDGE(I,J,OB%K2, 3,1,NM,N)
-         IF (J>OB%J1) CALL DEFINE_EDGE(I,J,OB%K1,-3,2,NM,N)
-         IF (J>OB%J1) CALL DEFINE_EDGE(I,J,OB%K2, 3,2,NM,N)
+         IF (I>OB%I1) CALL DEFINE_EDGE(I,J,OB%K1,-3,1,NM,N,IERR)
+         IF (I>OB%I1) CALL DEFINE_EDGE(I,J,OB%K2, 3,1,NM,N,IERR)
+         IF (J>OB%J1) CALL DEFINE_EDGE(I,J,OB%K1,-3,2,NM,N,IERR)
+         IF (J>OB%J1) CALL DEFINE_EDGE(I,J,OB%K2, 3,2,NM,N,IERR)
       ENDDO
    ENDDO
 ENDDO OBST_LOOP_3
@@ -935,7 +952,7 @@ END SUBROUTINE INITIALIZE_EDGES
 SUBROUTINE INITIALIZE_POISSON_SOLVER
 USE POIS, ONLY: H3CZIS,H2CZIS,H3CSIS,H2CYIS
 REAL(EB) :: XLM,XMU
-INTEGER  :: N,IERR
+INTEGER  :: N
 INTEGER, POINTER :: ITRN,JTRN,KTRN,LBC,MBC,NBC
 INTEGER, POINTER, DIMENSION(:) :: NOC
 TYPE (VENTS_TYPE), POINTER :: VT
@@ -957,7 +974,12 @@ IF (NOC(1)/=0 .AND. NOC(2)/=0 .AND. NOC(3)==0) M%IPS=4
 IF (NOC(1)/=0 .AND. NOC(2)==0 .AND. NOC(3)/=0) M%IPS=5
 IF (NOC(1)==0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) M%IPS=6
 IF (EVACUATION_ONLY(NM)                      ) M%IPS=7
-IF (NOC(1)/=0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) CALL SHUTDOWN('ERROR: Stretch at most 2 coordinate directions')
+IF (NOC(1)/=0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) THEN
+   WRITE(LU_ERR,'(A,I3)') 'ERROR: Stretch at most 2 coordinate directions in MESH ',NM
+   PROCESS_STOP_STATUS = SETUP_STOP
+   IERR = 1
+   RETURN
+ENDIF
  
 IF (M%IPS<=1 .OR. M%IPS==4) THEN
    ITRN = IBP1
@@ -1190,8 +1212,9 @@ IF (PBC(5,NM)==1 .AND. PBC(6,NM)==0) NBC = 4
 ! Check for errors with Poisson solver initialization
  
 IF (IERR/=0) THEN
-   WRITE(MESSAGE,'(A,I2,A,I3)') 'ERROR: Poisson initialization error, Number=',IERR, ', Mesh=',NM
-   CALL SHUTDOWN(MESSAGE)
+   WRITE(LU_ERR,'(A,I2,A,I3)') 'ERROR: Poisson initialization error, Number=',IERR, ', Mesh=',NM
+   PROCESS_STOP_STATUS = SETUP_STOP
+   RETURN
 ENDIF
  
 END SUBROUTINE INITIALIZE_POISSON_SOLVER
@@ -1272,8 +1295,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
       IF (DV%OUTPUT_INDEX==-6) THEN
          IBC = M%IJKW(5,IW)
          IF (SURFACE(IBC)%THERMAL_BC_INDEX /= THERMALLY_THICK) THEN
-            WRITE(MESSAGE,'(A,I3,A)') 'DEViCe ',N, ' must be associated with a heat-conducting surface'
-            CALL SHUTDOWN(MESSAGE)
+            WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEViCe ',N, ' must be associated with a heat-conducting surface'
+            PROCESS_STOP_STATUS = SETUP_STOP
+            IERR = 1
+            RETURN
          ENDIF
          DV%I_DEPTH = SURFACE(IBC)%N_CELLS
          DO III=SURFACE(IBC)%N_CELLS,1,-1
@@ -1281,8 +1306,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
          ENDDO
       ENDIF
    ELSE
-      WRITE(MESSAGE,'(A,I4,A)') 'Reposition DEVC No.',DV%ORDINAL, '. FDS cannot determine which boundary cell to assign'
-      CALL SHUTDOWN(MESSAGE)
+      WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL, '. FDS cannot determine which boundary cell to assign'
+      PROCESS_STOP_STATUS = SETUP_STOP
+      IERR = 1
+      RETURN
    ENDIF
 ENDDO DEVICE_LOOP
  
@@ -1307,8 +1334,10 @@ PROF_LOOP: DO N=1,N_PROF
       PF%IW = IW
       SF => SURFACE(IJKW(5,IW))
       IF (.NOT.SF%THERMALLY_THICK) THEN
-         WRITE(MESSAGE,'(A,I3,A)') 'PROFile ',N, ' must be associated with a heat-conducting surface'
-         CALL SHUTDOWN(MESSAGE)
+         WRITE(LU_ERR,'(A,I3,A)') 'ERROR: PROFile ',N, ' must be associated with a heat-conducting surface'
+         PROCESS_STOP_STATUS = SETUP_STOP
+         IERR = 1
+         RETURN
       ENDIF
       IF (PF%QUANTITY /= 'TEMPERATURE' .AND. PF%QUANTITY /= 'DENSITY') THEN
          SUCCESS = .FALSE.
@@ -1316,13 +1345,17 @@ PROF_LOOP: DO N=1,N_PROF
             IF (PF%QUANTITY==SF%MATL_NAME(NN)) SUCCESS = .TRUE.
          ENDDO
          IF (.NOT.SUCCESS) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'QUANTITY ',TRIM(PF%QUANTITY), ' is not appropriate for the designated location'
-            CALL SHUTDOWN(MESSAGE)
+            WRITE(LU_ERR,'(A,A,A)') 'ERROR: QUANTITY ',TRIM(PF%QUANTITY), ' is not appropriate for the designated location'
+            PROCESS_STOP_STATUS = SETUP_STOP
+            IERR = 1
+            RETURN
          ENDIF
       ENDIF
    ELSE
-      WRITE(MESSAGE,'(A,I4,A)') 'Reposition PROF No.',PF%ORDINAL, '. FDS cannot determine which boundary cell to assign'
-      CALL SHUTDOWN(MESSAGE)
+      WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition PROF No.',PF%ORDINAL, '. FDS cannot determine which boundary cell to assign'
+      PROCESS_STOP_STATUS = SETUP_STOP
+      IERR = 1
+      RETURN
    ENDIF
 ENDDO PROF_LOOP
  
@@ -1541,20 +1574,22 @@ END SUBROUTINE INITIALIZE_GLOBAL_VARIABLES
  
  
 
-SUBROUTINE INIT_WALL_CELL(NM,I,J,K,I_OBST,IW,IOR,IBC)
+SUBROUTINE INIT_WALL_CELL(NM,I,J,K,I_OBST,IW,IOR,IBC,IERR)
 
 ! Initialize wall cell variables at external and obstruction boundaries
  
 USE GEOMETRY_FUNCTIONS, ONLY : SEARCH_OTHER_MESHES
 INTEGER  :: NM,NOM,ICO,IBC,IOR,ITER,IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX
+INTEGER, INTENT(OUT) :: IERR
 REAL(EB) :: PX,PY,PZ,X1,X2,Y1,Y2,Z1,Z2,T_ACTIVATE,XIN,YIN,ZIN,DIST,XIF,YIF,ZIF
 INTEGER  :: II,N,NN,I_OBST,I,J,K,IBCX,IIG,JJG,KKG,IW,IIO,JJO,KKO,ICG,IL,NOM_CHECK(0:1)
-LOGICAL :: VENT_FOUND
+LOGICAL :: VENT_FOUND,ALIGNED
 TYPE (MESH_TYPE), POINTER :: MM
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (OBSTRUCTION_TYPE), POINTER :: OBX
 TYPE (VENTS_TYPE), POINTER :: VT
  
+IERR = 0
 M=>MESHES(NM)
  
 ! Compute boundary cell physical coords (XW,YW,ZW) and area (AW)
@@ -1686,14 +1721,31 @@ CHECK_MESHES: IF (IW<=M%NEWC .AND.  .NOT.EVACUATION_ONLY(NM)) THEN
          KKO_MAX = MAX(KKO_MAX,KKO)
       ENDIF
    ENDDO
+  
+   ! Check to see if the current interpolated cell face spans more than one other mesh
 
    IF (NOM_CHECK(0)/=NOM_CHECK(1)) THEN
-      WRITE(MESSAGE,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is out of alignment with MESH ',MAXVAL(NOM_CHECK)
-      CALL SHUTDOWN(MESSAGE)
+      WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is out of alignment with MESH ',MAXVAL(NOM_CHECK)
+      PROCESS_STOP_STATUS = SETUP_STOP
+      IERR = 1
+      RETURN
    ENDIF
 
    FOUND_OTHER_MESH: IF (NOM>0) THEN 
       MM=>MESHES(NOM)
+      ALIGNED = .TRUE.
+      IF ( (ABS(IOR)==2 .OR. ABS(IOR)==3) .AND. MM%DX(IIO_MIN)<=M%DX(I) .AND. &
+            ABS( ((IIO_MAX-IIO_MIN+1)*MM%DX(IIO_MIN)-M%DX(I)) / MM%DX(IIO_MIN))>0.05 ) ALIGNED = .FALSE.
+      IF ( (ABS(IOR)==1 .OR. ABS(IOR)==3) .AND. MM%DY(JJO_MIN)<=M%DY(J) .AND. &
+            ABS( ((JJO_MAX-JJO_MIN+1)*MM%DY(JJO_MIN)-M%DY(J)) / MM%DY(JJO_MIN))>0.05 ) ALIGNED = .FALSE.
+      IF ( (ABS(IOR)==1 .OR. ABS(IOR)==2) .AND. MM%DZ(KKO_MIN)<=M%DZ(K) .AND. &
+            ABS( ((KKO_MAX-KKO_MIN+1)*MM%DZ(KKO_MIN)-M%DZ(K)) / MM%DZ(KKO_MIN))>0.05 ) ALIGNED = .FALSE.
+      IF (.NOT.ALIGNED) THEN
+         WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is out of alignment with MESH ',NOM
+         PROCESS_STOP_STATUS = SETUP_STOP
+         IERR = 1
+         RETURN
+      ENDIF
       IF (ABS(IOR)==1) M%INTERPOLATION_FACTOR(IW) = XIF
       IF (ABS(IOR)==2) M%INTERPOLATION_FACTOR(IW) = YIF
       IF (ABS(IOR)==3) M%INTERPOLATION_FACTOR(IW) = ZIF
@@ -1791,9 +1843,8 @@ VLOOP: DO N=1,M%N_VENT
    ! Check if there are over-lapping VENTs
   
    IF (VENT_FOUND) THEN
-      WRITE(MESSAGE,'(A,I0,A,3(I0,1X),A,I0,A)') 'WARNING: Two VENTs overlap in MESH ',NM,', Cell',I,J,K,'. VENT ', &
+      WRITE(LU_ERR,'(A,I0,A,3(I0,1X),A,I0,A)') 'WARNING: Two VENTs overlap in MESH ',NM,', Cell',I,J,K,'. VENT ', &
                                            VT%ORDINAL,' rejected for that cell'
-      WRITE(0,'(/A/)') MESSAGE
       EXIT VLOOP
    ENDIF
 
@@ -1855,8 +1906,10 @@ VLOOP: DO N=1,M%N_VENT
  
    IF (SURFACE(IBCX)%PROFILE==ATMOSPHERIC) THEN
       IF (M%ZC(K)<GROUND_LEVEL) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SURF_NAME(IBCX)),' cannot be applied below GROUND_LEVEL'
-         CALL SHUTDOWN(MESSAGE)
+         WRITE(LU_ERR,'(A,A,A)') 'ERROR: SURF ',TRIM(SURF_NAME(IBCX)),' cannot be applied below GROUND_LEVEL'
+         PROCESS_STOP_STATUS = SETUP_STOP
+         IERR = 1
+         RETURN
       ENDIF
       M%UW0(IW) = M%UW0(IW)*((M%ZC(K)-GROUND_LEVEL)/SURFACE(IBCX)%Z0)**SURFACE(IBCX)%PLE
    ENDIF
@@ -1896,8 +1949,10 @@ VLOOP: DO N=1,M%N_VENT
    IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
       M%BOUNDARY_TYPE(IW) = OPEN_BOUNDARY
       IF (M%PRESSURE_ZONE_WALL(IW)>0) THEN
-         WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Pressure ZONE ',M%PRESSURE_ZONE_WALL(IW),' cannot have an OPEN boundary'
-         CALL SHUTDOWN(MESSAGE)
+         WRITE(LU_ERR,'(A,I2,A)') 'ERROR: Pressure ZONE ',M%PRESSURE_ZONE_WALL(IW),' cannot have an OPEN boundary'
+         PROCESS_STOP_STATUS = SETUP_STOP
+         IERR = 1
+         RETURN
       ENDIF
    ENDIF
 
@@ -2327,12 +2382,12 @@ END SUBROUTINE GET_BOUNDARY_TYPE
 END SUBROUTINE CREATE_OR_REMOVE_OBST
 
 
-SUBROUTINE DEFINE_EDGE(II,JJ,KK,IOR,IEC,NM,I_OBST)
+SUBROUTINE DEFINE_EDGE(II,JJ,KK,IOR,IEC,NM,I_OBST,IERR)
  
 ! Set up edge arrays for velocity boundary conditions
  
 INTEGER, INTENT(IN) :: II,JJ,KK,IOR,IEC,NM
-INTEGER :: NOM,ICMM,ICMP,ICPM,ICPP,IBC,I_OBST,IE,IW,IIO,JJO,KKO,IW1,IW2
+INTEGER :: NOM,ICMM,ICMP,ICPM,ICPP,IBC,I_OBST,IE,IW,IIO,JJO,KKO,IW1,IW2,IERR
 REAL(EB) :: XI,YJ,ZK
 TYPE (MESH_TYPE), POINTER :: MM
  
@@ -2394,8 +2449,10 @@ END SELECT COMP
 ! Decide what to do based on whether or not adjacent tiles exist
 
 IF (IW1==-1 .OR. IW2==-1) THEN
-   WRITE(MESSAGE,'(A,I2,A,3I3)') 'ERROR: Edge initialization failed; Mesh: ',NM,', Cell: ',II,JJ,KK
-   CALL SHUTDOWN(MESSAGE)
+   WRITE(LU_ERR,'(A,I2,A,3I3)') 'ERROR: Edge initialization failed; Mesh: ',NM,', Cell: ',II,JJ,KK
+   PROCESS_STOP_STATUS = SETUP_STOP
+   IERR = 1
+   RETURN
 ENDIF
 IF (IW1==0 .AND. IW2==0) RETURN
 IF (IW1> 0 .AND. IW2==0) IW = IW1
