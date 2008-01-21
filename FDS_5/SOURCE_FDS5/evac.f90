@@ -23,8 +23,9 @@ Module EVAC
   Use COMP_FUNCTIONS
   Use MATH_FUNCTIONS
   Use MEMORY_FUNCTIONS
-  Use MESH_POINTERS, ONLY: DT,IJKW,BOUNDARY_TYPE,XW,YW,WALL_INDEX,POINT_TO_MESH
-  Use EVAC_MESH_POINTERS
+  Use MESH_POINTERS
+! Use MESH_POINTERS, ONLY: DT,IJKW,BOUNDARY_TYPE,XW,YW,WALL_INDEX,POINT_TO_MESH
+! Use EVAC_MESH_POINTERS
   Use PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION2
   !
   Implicit None
@@ -307,11 +308,9 @@ Module EVAC
   !
 Contains
   !
-  Subroutine READ_EVAC(MYID)
+  Subroutine READ_EVAC
     Implicit None
 
-    Integer, Intent(In) :: MYID
-    !
     Integer :: NUMBER_INITIAL_PERSONS, &
          SAMPLING_FACTOR, IPC, n_tmp, GN_MIN, GN_MAX
     Real(EB) :: DTSAM
@@ -3322,7 +3321,7 @@ Contains
     !
     ! Initialize group lists, known doors, etc
     !
-    Real(EB) RN, TNOW
+    Real(EB) RN
     Real(EB) x1_old, y1_old
     Integer I,J,II,JJ,KK, IZERO, ie, nom, j1
     Logical PP_see_door
