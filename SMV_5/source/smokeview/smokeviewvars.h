@@ -49,12 +49,10 @@ SVEXTERN int have_setpixelcount,update_initcullplane;
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
 SVEXTERN int GPU_aspectratio, GPU_norm;
-// SVEXTERN int GPU_normx, GPU_normy, GPU_normz;
 SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr;
-//SVEXTERN int GPU_firered, GPU_firegreen, GPU_fireblue, GPU_firealpha;
 SVEXTERN int GPU_firecolor;
 SVEXTERN int GPU_smokeshade,GPU_smokealpha;
-//SVEXTERN int GPU_eyex, GPU_eyey, GPU_eyez;
+SVEXTERN int GPU_blank;
 SVEXTERN int GPU_eye;
 SVEXTERN int GPU_adjustalphaflag;
 SVEXTERN unsigned int GPU_depthtexture;

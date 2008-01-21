@@ -25,23 +25,19 @@ int setSmokeShaders() {
 
   const GLchar *FragmentShaderSource[]={
     "varying vec4 newcolor;"
-    "uniform sampler2D depthmap;"
-    "uniform float nearPlane;"
-    "uniform float farPlane;"
-
-//float convertZ( in float near, in float far, in float depthBufferValue )
-//{
-//	float clipZ = ( depthBufferValue - 0.5 ) * 2.0;
-//	return -(2.0 * far * near) / ( clipZ * ( far - near ) - ( far + near ));
-//}
-
+    "varying float fblank;"
     "void main(){"
 
-//   float sceneDepth = texture2DRect( depthmap, gl_FragCoord.st ).z;
-//   float sceneDepth = shadow2D( depthmap, vec3(gl_FragCoord) ).z;
-//   float thickness = convertZ( nearPlane, farPlane, sceneDepth ) - gl_FragCoord.z;
-
-// if(gl_FragCoord.z<=0.75)discard;
+     "float a,base;"
+     "if(fblank>0.95)discard;"
+     "if(fblank>0.001){"
+     "  a=1.0-fblank;"
+     "  base=1.0-newcolor.a/a;"
+     "  if(base>0.0){"
+     "    newcolor.a=(1.0-pow(base,a));"
+     "  }"
+     "  if(base==0.0)newcolor.a=0.0;"
+     "}"
      "gl_FragColor = newcolor;"
     "}"
   };
@@ -55,7 +51,8 @@ int setSmokeShaders() {
     "uniform float smoke3d_rthick;"
     "uniform int adjustalphaflag;"
     "varying vec4 newcolor;"
-    "attribute float hrr, smoke_alpha;"
+    "varying float fblank;"
+    "attribute float hrr, smoke_alpha, blank;"
     "void main()"
     "{"
     "  float bottom,top,alpha,r;"
@@ -81,6 +78,7 @@ int setSmokeShaders() {
     "    alpha /= smoke3d_rthick;"
     "    newcolor = vec4(smoke_shade,smoke_shade,smoke_shade,alpha);"
     "  }"
+    "  fblank=blank;"
     "  gl_Position = ftransform();"
     "}"
   };
@@ -132,6 +130,7 @@ int setSmokeShaders() {
   GPU_hrrcutoff = glGetUniformLocation(p_smoke,"hrrcutoff");
   GPU_hrr = glGetAttribLocation(p_smoke,"hrr");
   GPU_smokealpha = glGetAttribLocation(p_smoke,"smoke_alpha");
+  GPU_blank = glGetAttribLocation(p_smoke,"blank");
   GPU_skip = glGetUniformLocation(p_smoke,"skip");
   GPU_smoke3d_rthick = glGetUniformLocation(p_smoke,"smoke3d_rthick");
   GPU_smokeshade = glGetUniformLocation(p_smoke,"smoke_shade");
