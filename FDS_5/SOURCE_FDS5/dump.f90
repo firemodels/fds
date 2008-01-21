@@ -3355,10 +3355,10 @@ SELECT CASE(IND)
    CASE(29)  ! VORTICITY_Z
       KKK = MAX(1,MIN(KK,KBAR))
       GAS_PHASE_OUTPUT = (V(II+1,JJ,KKK)-V(II,JJ,KKK))*RDXN(II) - (U(II,JJ+1,KKK)-U(II,JJ,KKK))*RDYN(JJ)
-   CASE(41:49,141:149,151:154) ! Mixture Fraction Related Quantities
+   CASE(41:49,141:149,151:154,162) ! Mixture Fraction Related Quantities
       IF (IND<100) INDX = IND- 40
       IF (IND>100) INDX = IND-140
-      IF (IND>150) INDX = 8
+      IF (IND>150) INDX = SOOT_INDEX
       Z_1 = YY(II,JJ,KK,I_FUEL)            
       IF (CO_PRODUCTION) THEN
          Z_2 = YY(II,JJ,KK,I_PROG_CO)
