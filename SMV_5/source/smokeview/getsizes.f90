@@ -100,7 +100,7 @@ do
     read(lu20,iostat=error)numpoints(i)
     if(error.ne.0)go to 999    
     if(angle_flag.eq.1)then
-      read(lu20,iostat=error)(rdummy,j=1,4*numpoints(i))
+      read(lu20,iostat=error)(rdummy,j=1,7*numpoints(i))
      else
       read(lu20,iostat=error)(rdummy,j=1,3*numpoints(i))
     endif

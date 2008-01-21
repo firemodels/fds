@@ -3128,13 +3128,26 @@ typedef struct {
           if(parti->file!=NULL)NewMemory((void **)&parti->partclassptr,parti->nclasses*sizeof(part5class *));
           for(i=0;i<parti->nclasses;i++){
             int iclass;
+            int ic,iii;
 
             fgets(buffer,255,stream);
             if(parti->file==NULL)continue;
             sscanf(buffer,"%i",&iclass);
             if(iclass<1)iclass=1;
-            if(iclass>parti->nclasses)iclass=parti->nclasses;
-            parti->partclassptr[i]=partclassinfo + iclass - 1;
+            if(iclass>npartclassinfo)iclass=npartclassinfo;
+            ic=0;
+            for(iii=0;iii<npartclassinfo;iii++){
+              part5class *pci;
+
+              pci = partclassinfo + iii;
+              if(parti->evac==1&&pci->kind!=HUMANS)continue;
+              if(parti->evac==0&&pci->kind!=PARTICLES)continue;
+              if(iclass-1==ic){
+                parti->partclassptr[i]=pci;
+                break;
+              }
+              ic++;
+            }
           }
         }
         // if no classes were specifed for the prt5 entry then assign it the default class

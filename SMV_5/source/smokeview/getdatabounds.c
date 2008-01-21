@@ -101,7 +101,7 @@ void adjustpart5bounds(particle *parti){
       part5class *partclassi;
       float *rvals;
 
-      partclassi = partclassinfo + j;
+      partclassi=parti->partclassptr[j];
       rvals = datacopy->rvals;
 
       for(k=2;k<partclassi->ntypes;k++){
@@ -137,7 +137,7 @@ void adjustpart5bounds(particle *parti){
       part5class *partclassi;
       float *rvals;
 
-      partclassi = partclassinfo + j;
+      partclassi = parti->partclassptr[j];
       rvals = datacopy->rvals;
 
       for(k=2;k<partclassi->ntypes;k++){
