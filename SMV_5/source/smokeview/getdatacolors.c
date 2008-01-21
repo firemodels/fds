@@ -940,7 +940,7 @@ void drawColorBars(void){
 #endif
     if(parttype!=0){
 #ifdef pp_AVATAR
-      if(showsmoke==1)outputBarText(right[leftsmoke],bottom[0],color1,"Part");
+      if(showsmoke==1&&showevac==0)outputBarText(right[leftsmoke],bottom[0],color1,"Part");
       if(showevac==1)outputBarText(right[leftsmoke],bottom[0],color1,"Human");
 #else
       outputBarText(right[leftsmoke],bottom[0],color1,"Part");

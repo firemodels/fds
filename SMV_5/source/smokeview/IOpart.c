@@ -442,6 +442,9 @@ void init_part5prop(void){
           part5prop *propi;
 
           propi = part5propinfo + npart5prop;
+
+          propi->human_property=0;
+          propi->particle_property=0;
           propi->label=flowlabel;
 
           propi->setvalmin=0;
@@ -501,7 +504,7 @@ void init_part5prop(void){
   }
   for(i=0;i<npartclassinfo;i++){
     part5class *partclassi;
-
+ 
     partclassi = partclassinfo + i;
     for(j=1;j<partclassi->ntypes;j++){
       flowlabels *flowlabel;
@@ -510,6 +513,12 @@ void init_part5prop(void){
       flowlabel = partclassi->labels + j;
       classprop = get_part5prop(flowlabel->longlabel);
       if(classprop!=NULL){
+        if(partclassi->kind==1){
+          classprop->human_property=1;
+        }
+        else{
+          classprop->particle_property=1;
+        }
         classprop->class_present[i]=1;
         classprop->class_types[i]=j-2;
       }

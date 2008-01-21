@@ -624,6 +624,7 @@ typedef struct {
   char **partlabels, *scale;
   unsigned char *class_present, *class_vis;
   unsigned int *class_types;
+  int human_property, particle_property;
   int display;
   float ppartlevels256[256];
   float valmin, valmax;

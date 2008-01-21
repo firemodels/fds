@@ -2270,6 +2270,20 @@ void TargetMenu(int value){
 void EvacMenu(int value){
   int errorcode,i;
   glutSetCursor(GLUT_CURSOR_WAIT);
+  if(value==-11){
+    int i;
+
+    for(i=0;i<npartinfo;i++){
+      particle *parti;
+
+      parti=partinfo + i;
+      if(parti->evac==0)continue;
+      ReadEvacFile=1;
+      readpart(parti->file,i,LOAD,&errorcode);
+    }
+    force_redisplay=1;
+    update_framenumber(0);
+  }
   if(value>=0){
     ReadEvacFile=1;
     readpart(partinfo[value].file,value,LOAD,&errorcode);
@@ -3489,7 +3503,7 @@ static int loadmultivslicemenu=0, unloadmultivslicemenu=0;
 static int unloadmultislicemenu=0, vslicemenu=0, staticslicemenu=0;
 static int evacmenu=0, particlemenu=0, showpatchmenu=0, zonemenu=0, isoshowmenu=0, isolevelmenu=0, smoke3dshowmenu=0;
 static int particle5showmenu=0;
-static int particlepropshowmenu=0;
+static int particlepropshowmenu=0,humanpropshowmenu=0;
 static int particlestreakshowmenu=0;
 static int tourmenu=0;
 #ifdef pp_AVATAR
@@ -4351,6 +4365,7 @@ static int textureshowmenu=0;
         part5prop *propi;
 
         propi = part5propinfo + i;
+        if(propi->particle_property==0)continue;
         if(propi->display==1){
           strcpy(menulabel,"  *");
         }
@@ -4376,8 +4391,9 @@ static int textureshowmenu=0;
           part5class *partclassj;
 
           if(propi->class_present[j]==0)continue;
-          ntypes++;
           partclassj = partclassinfo + j;
+          if(partclassj->kind==HUMANS)continue;
+          ntypes++;
           if(propi->class_vis[j]==1){
             strcpy(menulabel,"  *");
           }
@@ -4394,7 +4410,63 @@ static int textureshowmenu=0;
         glutAddMenuEntry("  Hide All Types",-3);
       }
     }
-  }
+
+    CREATEMENU(humanpropshowmenu,ParticlePropShowMenu);
+    if(npart5prop>=0){
+      char menulabel[256];
+      int ntypes;
+
+      glutAddMenuEntry("Color:",-1);
+      for(i=0;i<npart5prop;i++){
+        part5prop *propi;
+
+        propi = part5propinfo + i;
+        if(propi->human_property==0)continue;
+        if(propi->display==1){
+          strcpy(menulabel,"  *");
+        }
+        else{
+          strcpy(menulabel,"  ");
+        }
+        strcat(menulabel,propi->label->longlabel);
+        glutAddMenuEntry(menulabel,i);
+      }
+    
+      if(part5show==0)glutAddMenuEntry("  *Hide",-4);
+      if(part5show==1)glutAddMenuEntry("  Hide",-4);
+      glutAddMenuEntry("-",-1);
+
+      glutAddMenuEntry("Type:",-1);
+      ntypes=0;
+      for(i=0;i<npart5prop;i++){
+        part5prop *propi;
+
+        propi = part5propinfo + i;
+        if(propi->display==0)continue;
+        for(j=0;j<npartclassinfo;j++){
+          part5class *partclassj;
+
+          if(propi->class_present[j]==0)continue;
+          partclassj = partclassinfo + j;
+          if(partclassj->kind!=HUMANS)continue;
+          ntypes++;
+          if(propi->class_vis[j]==1){
+            strcpy(menulabel,"  *");
+          }
+          else{
+            strcpy(menulabel,"  ");
+          }
+          strcat(menulabel,partclassj->name);
+          glutAddMenuEntry(menulabel,-10-j);
+        }
+        break;
+      }
+      if(ntypes>1){
+        glutAddMenuEntry("  Show All Types",-2);
+        glutAddMenuEntry("  Hide All Types",-3);
+      }
+    }
+}
 
 /* --------------------------------particle show menu -------------------------- */
 
@@ -4464,7 +4536,7 @@ static int textureshowmenu=0;
   }
 
 
-/* --------------------------------particle show menu -------------------------- */
+/* --------------------------------Evac show menu -------------------------- */
 
   if(nevac>0){
     CREATEMENU(evacshowmenu,EvacShowMenu);
@@ -4924,12 +4996,24 @@ static int textureshowmenu=0;
     glutAddSubMenu("Geometry",geometrymenu);
   }
   glutAddSubMenu("Labels",labelmenu);
-  if(npart5loaded>0){
-    if(partinfo!=NULL&&partinfo->evac==1){
-      glutAddSubMenu("Humans",particlepropshowmenu);
+  {
+    int human_present=0;
+    int particle_present=0;
+    int ii;
+
+    for(ii=0;ii<npartinfo;ii++){
+      particle *parti;
+
+      parti = partinfo + ii;
+      if(parti->loaded==0)continue;
+      if(parti->evac==1)human_present=1;
+      if(parti->evac==0)particle_present=1;
     }
-    else{
+    if(particle_present==1){
       glutAddSubMenu("Particles",particlepropshowmenu);
+    }
+    if(human_present==1){
+      glutAddSubMenu("Humans",humanpropshowmenu);
     }
     if(streak5show==1){
       glutAddSubMenu("*Streaks",particlestreakshowmenu);
@@ -5587,25 +5671,43 @@ static int textureshowmenu=0;
     glutAddMenuEntry("Unload All",-1);
 
     CREATEMENU(evacmenu,EvacMenu);
-    for(ii=0;ii<npartinfo;ii++){
-      i = partorderindex[ii];
-      if(partinfo[i].evac==0)continue;
-      if(partinfo[i].loaded==1){
-        STRCPY(menulabel,check);
-        STRCAT(menulabel,partinfo[i].menulabel);  
+    {
+      int nevacs=0,nevacloaded=0;
+
+      for(ii=0;ii<npartinfo;ii++){
+        particle *parti;
+
+        parti = partinfo + ii;
+        if(parti->evac==1){
+          if(parti->loaded==1)nevacloaded++;
+          nevacs++;
+        }
       }
-      else{
-        STRCPY(menulabel,partinfo[i].menulabel);
+      if(nevacs>1){
+        strcpy(menulabel,"Humans - All meshes");
+        glutAddMenuEntry(menulabel,-11);
+        glutAddMenuEntry("-",-2);
       }
-      glutAddMenuEntry(menulabel,i);
-    }
-    if(npartloaded<=1){
-      glutAddMenuEntry("Unload",-1);
-    }
-     else{
-       glutAddSubMenu("Unload",unloadevacmenu);
-     }
+      for(ii=0;ii<npartinfo;ii++){
+        i = partorderindex[ii];
+        if(partinfo[i].evac==0)continue;
+        if(partinfo[i].loaded==1){
+          STRCPY(menulabel,check);
+          STRCAT(menulabel,partinfo[i].menulabel);  
+        }
+        else{
+          STRCPY(menulabel,partinfo[i].menulabel);
+        }
+        glutAddMenuEntry(menulabel,i);
+      }
+      if(nevacloaded<=1){
+        glutAddMenuEntry("Unload",-1);
+      }
+       else{
+         glutAddSubMenu("Unload",unloadevacmenu);
+       }
   }
+    }
 
 /* --------------------------------unload and load vslice menus -------------------------- */
 
