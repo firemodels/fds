@@ -107,9 +107,13 @@ if(show_smoketest==0){\
 //      glColor4fv(smoke_shade4);                            
 #define DRAWVERTEXGPU(XX,YY,ZZ) \
   value[0]=alphaf_in[n11];\
+  bvalue[0]=(float)iblank_smoke3d[n11];\
   value[1]=alphaf_in[n12];\
+  bvalue[1]=(float)iblank_smoke3d[n12];\
   value[2]=alphaf_in[n22];\
+  bvalue[2]=(float)iblank_smoke3d[n22];\
   value[3]=alphaf_in[n21];\
+  bvalue[3]=(float)iblank_smoke3d[n21];\
   if(adjustalphaflag==2||adjustalphaflag==3){\
     if(iblank_smoke3d[n11]==0)value[0]=0;\
     if(iblank_smoke3d[n12]==0)value[1]=0;\
@@ -126,6 +130,7 @@ if(show_smoketest==0){\
   if(firecolor==NULL){\
     for(node=0;node<6;node++){                             \
       mm = xyzindex[node];                                 \
+      glVertexAttrib1f(GPU_blank,(float)bvalue[mm]); \
       glVertexAttrib1f(GPU_smokealpha,(float)value[mm]); \
       glVertex3f(XX,YY,ZZ);                                \
     }\
@@ -137,6 +142,7 @@ if(show_smoketest==0){\
     fvalue[3]=firecolor[n21];\
     for(node=0;node<6;node++){                             \
       mm = xyzindex[node];                                 \
+      glVertexAttrib1f(GPU_blank,(float)bvalue[mm]); \
       glVertexAttrib1f(GPU_smokealpha,(float)value[mm]);\
       glVertexAttrib1f(GPU_hrr,(float)fvalue[mm]);\
       glVertex3f(XX,YY,ZZ);                                \
@@ -2945,6 +2951,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   unsigned char *iblank_smoke3d;
 
   unsigned char value[4];
+  float bvalue[4];
   unsigned char fvalue[4];
 
   mesh *meshi;
@@ -4011,6 +4018,7 @@ void drawsmoke3dCULL(void){
   unsigned char *iblank_smoke3d;
 
   unsigned char value[4];
+  float bvalue[4];
   unsigned char fvalue[4];
 
   mesh *meshi, *mesh_old;
@@ -4044,13 +4052,7 @@ void drawsmoke3dCULL(void){
   xyzindex2[5]=3;
 
   glUniform1i(GPU_adjustalphaflag,adjustalphaflag);
-//  glUniform1f(GPU_eyex,xyzeyeorig[0]);
-//  glUniform1f(GPU_eyey,xyzeyeorig[1]);
-//  glUniform1f(GPU_eyez,xyzeyeorig[2]);
   glUniform3fv(GPU_eye,1,xyzeyeorig);
-//  glUniform1f(GPU_firered,(float)fire_red/256.0);
-//  glUniform1f(GPU_firegreen,(float)fire_green/256.0);
-//  glUniform1f(GPU_fireblue,(float)fire_blue/256.0);
   glUniform1f(GPU_smokeshade,(float)smoke_shade/256.0);
   glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
 
