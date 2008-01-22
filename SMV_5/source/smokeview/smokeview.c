@@ -3373,9 +3373,6 @@ void usage(char **argv){
 #ifdef pp_COLOR
     printf(", pp_COLOR");
 #endif
-#ifdef pp_COMPRESS_AUTOLOADED
-    printf(", pp_COMPRESS_AUTOLOADED");
-#endif
 #ifdef pp_COMPRESS
     printf(", pp_COMPRESS");
 #endif
