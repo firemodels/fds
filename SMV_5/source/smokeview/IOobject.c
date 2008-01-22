@@ -25,9 +25,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEZ    103
 #define SV_SCALEXYZ   104
 #define SV_SCALE      105
-#ifdef pp_AVATAR
 #define SV_GETUSERVALS    106
-#endif
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -35,9 +33,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEZ_NUMARGS    1
 #define SV_SCALEXYZ_NUMARGS   3
 #define SV_SCALE_NUMARGS      1
-#ifdef pp_AVATAR
 #define SV_GETUSERVALS_NUMARGS   2
-#endif
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -51,10 +47,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWHEXDISK   209
 #define SV_DRAWPOLYDISK  210
 #define SV_DRAWPOINT     211
-#ifdef pp_AVATAR
 #define SV_DRAWARC       212
-#endif
-
 
 #define SV_DRAWCUBE_NUMARGS      1
 #define SV_DRAWSPHERE_NUMARGS    1
@@ -68,9 +61,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWHEXDISK_NUMARGS   2
 #define SV_DRAWPOLYDISK_NUMARGS   3
 #define SV_DRAWPOINT_NUMARGS     0
-#ifdef pp_AVATAR
 #define SV_DRAWARC_NUMARGS       2
-#endif
 
 #define SV_PUSH       300
 #define SV_POP        301
@@ -78,12 +69,10 @@ char IOobject_revision[]="$Revision$";
 #define SV_SETBW      303
 #define SV_SETLINEWIDTH 304
 #define SV_SETPOINTSIZE 305
-#ifdef pp_AVATAR
 #define SV_IF_AGEB     306
 #define SV_IF_AGTB     307
 #define SV_IF_ALEB     308
 #define SV_IF_ALTB     309
-#endif
 
 #define SV_NO_OP      999
 
@@ -93,12 +82,10 @@ char IOobject_revision[]="$Revision$";
 #define SV_SETBW_NUMARGS      1
 #define SV_SETLINEWIDTH_NUMARGS 1
 #define SV_SETPOINTSIZE_NUMARGS 1
-#ifdef pp_AVATAR
 #define SV_IF_AGEB_NUMARGS     3
 #define SV_IF_AGTB_NUMARGS     3
 #define SV_IF_ALEB_NUMARGS     3
 #define SV_IF_ALTB_NUMARGS     3
-#endif
 
 #define SV_ERR -1
 
@@ -107,9 +94,7 @@ void reporterror(char *buffer, char *token, int numargs_found, int numargs_expec
 void drawcone(float d1, float height, float *rgbcolor);
 void drawtrunccone(float d1, float d2, float height, float *rgbcolor);
 void drawline(float *xyz1, float *xyz2, float *rgbcolor);
-#ifdef pp_AVATAR
 void drawarc(float angle, float diameter, float *rgbcolor);
-#endif
 void drawcircle(float diameter, float *rgbcolor);
 void drawpoint(float *rgbcolor);
 void drawsphere(float diameter, float *rgbcolor);
@@ -125,11 +110,7 @@ void free_object(sv_object *object);
 void remove_comment(char *buffer);
 void freecircle(void);
 void initcircle(unsigned int npoints);
-#ifdef pp_AVATAR
 void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int *use_displaylist);
-#else
-void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops);
-#endif
 
 static float *xcirc=NULL, *ycirc=NULL;
 static int ncirc;
@@ -242,16 +223,13 @@ void draw_SVOBJECT(sv_object *object, int iframe){
   iop = 0;
 
   if(framei->display_list_ID!=-1
-#ifdef pp_AVATAR
     &&object->use_displaylist==1
-#endif
     ){
     glCallList(framei->display_list_ID);
     glPopMatrix();
     return;
   }
 
-#ifdef pp_AVATAR
   if(object->use_displaylist==1){   
     displaylist_id = glGenLists(1);
     if(displaylist_id!=0){
@@ -259,13 +237,6 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       glNewList(displaylist_id,GL_COMPILE_AND_EXECUTE);
     }
   }
-#else
-  displaylist_id = glGenLists(1);
-  if(displaylist_id!=0){
-    framei->display_list_ID=displaylist_id;
-    glNewList(displaylist_id,GL_COMPILE_AND_EXECUTE);
-  }
-#endif
 
 	glEnable(GL_LIGHTING);
 
@@ -279,7 +250,6 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     arg = framei->args + iarg;
     op = framei->ops + iop;
     switch (*op){
-#ifdef pp_AVATAR
     case SV_GETUSERVALS:
       if(op_skip==0&&iarg+SV_GETUSERVALS_NUMARGS<=framei->nargs){
         int i, nargs, iargstart;
@@ -330,7 +300,6 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       }
       iarg+=3;
       break;
-#endif
     case SV_TRANSLATE:
       if(op_skip==0&&iarg+SV_TRANSLATE_NUMARGS<=framei->nargs)glTranslatef(arg[0],arg[1],arg[2]);
       iarg+=3;
@@ -410,13 +379,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       rgbptr=NULL;
       iarg++;
       break;
-#ifdef pp_AVATAR
     case SV_DRAWARC:
       if(op_skip==0&&iarg+SV_DRAWARC_NUMARGS<=framei->nargs)drawarc(arg[0],arg[1],rgbptr);
       rgbptr=NULL;
       iarg+=2;
       break;
-#endif
     case SV_DRAWPOINT:
       if(op_skip==0&&iarg+SV_DRAWPOINT_NUMARGS<=framei->nargs)drawpoint(rgbptr);
       rgbptr=NULL;
@@ -475,15 +442,9 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     iop++;
     if(op_skip>0)op_skip--;
   }
-#ifdef pp_AVATAR
   if(object->use_displaylist==1&&displaylist_id!=0){
     glEndList();
   }
-#else
-  if(displaylist_id!=0){
-    glEndList();
-  }
-#endif
 
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_LIGHTING);
@@ -558,7 +519,6 @@ void drawcircle(float diameter,float *rgbcolor){
   glEnd();
 }
 
-#ifdef pp_AVATAR
 /* ----------------------- drawarc ----------------------------- */
 
 void drawarc(float angle, float diameter,float *rgbcolor){
@@ -575,7 +535,6 @@ void drawarc(float angle, float diameter,float *rgbcolor){
   }
   glEnd();
 }
-#endif
 
 /* ----------------------- drawcube ----------------------------- */
 
@@ -1109,9 +1068,7 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
   sv_object_frame *framei;
 
   NewMemory( (void **)&object,sizeof(sv_object));
-#ifdef pp_AVATAR
   object->use_displaylist=1;
-#endif
   object->used=0;
   object->visible=visible;
   strcpy(object->label,label);
@@ -1121,11 +1078,7 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
   NewMemory((void **)&object->obj_frames,object->nframes*sizeof(sv_object_frame *));
 
   object->obj_frames[0]=framei;
-#ifdef pp_AVATAR
   getargsops(commands,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
-#else
-  getargsops(commands,&framei->args,&framei->nargs,&framei->ops,&framei->nops);
-#endif
   framei->display_list_ID=-1;
   framei->error=0;
 
@@ -1140,11 +1093,7 @@ void make_error_frame(void){
   error_frame=NULL;
   NewMemory((void **)&error_frame,sizeof(sv_object_frame));
   strcpy(buffer,"1.0 0.0 0.0 setcolor 0.1 drawsphere");
-#ifdef pp_AVATAR
   getargsops(buffer,&error_frame->args,&error_frame->nargs,&error_frame->ops,&error_frame->nops,NULL);
-#else
-  getargsops(buffer,&error_frame->args,&error_frame->nargs,&error_frame->ops,&error_frame->nops);
-#endif
   error_frame->display_list_ID=-1;
 }
 
@@ -1155,9 +1104,7 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
   int i;
 
   NewMemory( (void **)&object,sizeof(sv_object));
-#ifdef pp_AVATAR
   object->use_displaylist=1;
-#endif
   object->used=0;
   object->visible=visible;
   strcpy(object->label,label);
@@ -1172,21 +1119,13 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
       NewMemory((void **)&framei,sizeof(sv_object_frame));
       object->obj_frames[0]=framei;
       framei->error=0;
-#ifdef pp_AVATAR
       getargsops(commandsoff,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
-#else
-      getargsops(commandsoff,&framei->args,&framei->nargs,&framei->ops,&framei->nops);
-#endif
       framei->display_list_ID=-1;
     }
     else{
       NewMemory((void **)&framei,sizeof(sv_object_frame));
       object->obj_frames[1]=framei;
-#ifdef pp_AVATAR
       getargsops(commandson,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
-#else
-      getargsops(commandson,&framei->args,&framei->nargs,&framei->ops,&framei->nops);
-#endif
       framei->error=0;
       framei->display_list_ID=-1;
     }
@@ -1194,13 +1133,9 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
   return object;
 }
 
-
 /* ----------------------- getargsops ----------------------------- */
-#ifdef pp_AVATAR
+
 void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int *use_displaylist){
-#else
-void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
-#endif
   char *token;
   char buffer2[256];
   char buffer_save[256];
@@ -1279,7 +1214,6 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
         iop=SV_DRAWCUBE;
         reporterror(buffer_save,token,numargs,SV_DRAWCUBE_NUMARGS);
       }
-#ifdef pp_AVATAR
       else if(strcmp(token,"skipifge")==0){
         iop=SV_IF_AGEB;
         reporterror(buffer_save,token,numargs,SV_IF_AGEB_NUMARGS);
@@ -1296,7 +1230,6 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
         iop=SV_IF_ALTB;
         reporterror(buffer_save,token,numargs,SV_IF_ALTB_NUMARGS);
       }
-#endif
       else if(strcmp(token,"drawdisk")==0){
         iop=SV_DRAWDISK;
         reporterror(buffer_save,token,numargs,SV_DRAWDISK_NUMARGS);
@@ -1341,12 +1274,10 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
         iop=SV_DRAWCIRCLE;
         reporterror(buffer_save,token,numargs,SV_DRAWCIRCLE_NUMARGS);
       }
-#ifdef pp_AVATAR
       else if(strcmp(token,"drawarc")==0){
         iop=SV_DRAWARC;
         reporterror(buffer_save,token,numargs,SV_DRAWARC_NUMARGS);
       }
-#endif
       else if(strcmp(token,"setcolor")==0){
         iop=SV_SETCOLOR;
         reporterror(buffer_save,token,numargs,SV_SETCOLOR_NUMARGS);
@@ -1371,13 +1302,11 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops){
         iop=SV_POP;
         reporterror(buffer_save,token,numargs,SV_POP_NUMARGS);
       }
-#ifdef pp_AVATAR
       else if(strcmp(token,"getuservals")==0){
         iop=SV_GETUSERVALS;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_GETUSERVALS_NUMARGS);
       }
-#endif
       else{
         iop=SV_ERR;
       }
@@ -1423,23 +1352,17 @@ int read_device_defs(char *file){
     if(lenbuffer<1)continue;
 
 
-#ifdef pp_AVATAR
     if(match(buffer,"DEVICEDEF",9) == 1||
        match(buffer,"AVATARDEF",9) == 1
       ){
         int is_avatar=0;
-#else
-    if(match(buffer,"DEVICEDEF",9) == 1){
-#endif
       char *label;
 
       sv_object_frame *first_frame, *last_frame;
 
-#ifdef pp_AVATAR
       if(match(buffer,"AVATARDEF",9) == 1){
         is_avatar=1;
       }  
-#endif
       ndevices++;
       if(fgets(buffer,255,stream)==NULL)break;
       remove_comment(buffer);
@@ -1451,9 +1374,7 @@ int read_device_defs(char *file){
       }
   
       NewMemory((void **)&current_object,sizeof(sv_object));
-#ifdef pp_AVATAR
       current_object->use_displaylist=1;
-#endif
       strcpy(current_object->label,label);
       prev_object = device_def_last.prev;
       next_object = &device_def_last;
@@ -1469,9 +1390,7 @@ int read_device_defs(char *file){
 
       first_frame = &current_object->first_frame;
       last_frame = &current_object->last_frame;
-#ifdef pp_AVATAR
       current_object->type=is_avatar;
-#endif
 
       first_frame->next=last_frame;
       first_frame->prev=NULL;
@@ -1507,11 +1426,7 @@ int read_device_defs(char *file){
       firstdef=0;
       if(match(trim_buffer,"NEWFRAME",8)==1)continue;
     }
-#ifdef pp_AVATAR
     getargsops(buffer,&arglist, &nargs, &oplist, &nops, &current_object->use_displaylist);
-#else
-    getargsops(buffer,&arglist, &nargs, &oplist, &nops);
-#endif
     if(nargs>0){
       if(current_frame->nargs==0){
         current_frame->args=arglist;
@@ -1704,9 +1619,6 @@ void remove_comment(char *buffer){
 /* ----------------------- init_device_defs ----------------------------- */
 
 void init_device_defs(void){
-#ifndef pp_AVATAR
-  if(ndeviceinfo>0){
-#endif
     char com_buffer[1024];
     char com_buffer2[1024];
 
@@ -1729,9 +1641,7 @@ void init_device_defs(void){
       strcat(objectfile,".svo");
       read_device_defs(objectfile);
 
-#ifdef pp_AVATAR
       init_avatar();
-#endif
     }
 
     if(isZoneFireModel==1){
@@ -1772,14 +1682,7 @@ void init_device_defs(void){
     //   if(strcmp(device_defs[ii]->label,"sensor")==0)strcpy(device_defs[ii]->label,"target");
     //  }
     //}
-#ifndef pp_AVATAR
-  }
-  else{
-    ndevice_defs=0;
-  }
-#endif
 }
-#ifdef pp_AVATAR
   void init_avatar(void){
     int iavatar_types;
     sv_object *objecti,*object_start;
@@ -1810,4 +1713,3 @@ void init_device_defs(void){
     }
     iavatar_types=0;
   }
-#endif

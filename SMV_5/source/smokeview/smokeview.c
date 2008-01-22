@@ -913,9 +913,7 @@ void setClipPlanes(int mode){
   static GLdouble clipplane_x[4], clipplane_y[4], clipplane_z[4];
   static GLdouble clipplane_X[4], clipplane_Y[4], clipplane_Z[4];
 
-#ifdef pp_AVATAR
   if(mode==0&&xyz_clipplane==2)return;
-#endif
   if(mode==1&&xyz_clipplane!=2)return;
   if(xyz_clipplane==0){
     glDisable(GL_CLIP_PLANE0);
@@ -1131,11 +1129,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw smoke +++++++++++++++++++++++++ */
 
-#ifdef pp_AVATAR
     if(showsmoke==1){
-#else
-    if(showevac==1||showsmoke==1){
-#endif
       particle *parti;
 
       if(staticframe0==0||iframe!=0){
@@ -1991,18 +1985,12 @@ void updateShow(void){
     }
     if(ReadTargFile==1&&visTarg==1)showtarget=1;
   }
-#ifdef pp_AVATAR
   if(showsmoke==1||showevac==1||showpatch==1||showslice==1||showvslice==1||showzone==1||showiso==1||showevac==1)RenderTime=1;
-#else
-  if(showsmoke==1||showpatch==1||showslice==1||showvslice==1||showzone==1||showiso==1||showevac==1)RenderTime=1;
-#endif
   if(showtour==1||show3dsmoke==1)RenderTime=1;
   if(plotstate==STATIC_PLOTS&&ReadPlot3dFile==1&&plotn>0&&plotn<=numplot3dvars)showplot3d=1;
 
   numColorbars=0;
-#ifdef pp_AVATAR
   if(ReadEvacFile==1)numColorbars++;
-#endif
   if(ReadPartFile==1)numColorbars++;
   if(plotstate==DYNAMIC_PLOTS&&(sliceflag==1||vsliceflag==1))numColorbars++;
   if(plotstate==DYNAMIC_PLOTS&&patchflag==1)numColorbars++;
@@ -3385,9 +3373,6 @@ void usage(char **argv){
 #endif
 #ifdef ISO_DEBUG
     printf(", ISO_DEBUG");
-#endif
-#ifdef pp_AVATAR
-    printf(", pp_AVATAR");
 #endif
 #ifdef pp_CLIP
     printf(", pp_CLIP");

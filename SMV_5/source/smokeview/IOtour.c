@@ -28,9 +28,7 @@ float hermiteview(float t, int i, keyframe *kf1, keyframe *kf2, float *slope);
 #ifdef pp_TOUR
 float linearview(float t, int i, keyframe *kf1, keyframe *kf2);
 #endif
-#ifdef pp_AVATAR
 void draw_SVOBJECT(sv_object *object, int iframe);
-#endif
 
 /* ------------------ freetour ------------------------ */
 
@@ -52,10 +50,8 @@ void freetour(tourdata *touri){
 /* ------------------ inittour ------------------------ */
 
 void inittour(tourdata *touri){
-#ifdef pp_AVATAR
   touri->glui_avatar_index=0;
   touri->display2=0;
-#endif
   touri->global_tension=0.0;
   touri->global_tension_flag=1;
   touri->display=0;
@@ -290,10 +286,8 @@ void drawtours(void){
 
     /* keyframe avatar */
 
-#ifdef pp_AVATAR
   //show_tourlocus=1;
   //tourlocus_type=2;
-#endif
   if(show_tourlocus==1){
     switch (tourlocus_type){
       case 0:
@@ -304,10 +298,6 @@ void drawtours(void){
           touri = tourinfo + i;
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
-#ifndef pp_AVATAR
-          if(showtours_whenediting==0&&selectedtour_index!=i)continue;
-#endif
-
 
           iframe = touri->path_timeslist[itime];
           pj = touri->pathnodes + iframe;
@@ -329,10 +319,6 @@ void drawtours(void){
           touri = tourinfo + i;
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
-#ifndef pp_AVATAR
-          if(showtours_whenediting==0&&selectedtour_index!=i)continue;
-#endif
-
 
           iframe = touri->path_timeslist[itime];
           pj = touri->pathnodes + iframe;
@@ -344,7 +330,6 @@ void drawtours(void){
 
         }
         break;
-#ifdef pp_AVATAR
       case 2:
         for(i=0;i<ntours;i++){
           float *oview, az_angle, dxy[2];
@@ -377,7 +362,6 @@ void drawtours(void){
           glPopMatrix();
         }
         break;
-#endif
       default:
         ASSERT(FFALSE);
         break;

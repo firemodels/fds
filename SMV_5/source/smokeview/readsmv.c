@@ -130,11 +130,8 @@ int readsmv(char *file){
   int nn_plot3d=0;
   int nn_slice=0;
 
-
-#ifdef pp_AVATAR
   navatar_colors=0;
   FREEMEMORY(avatar_colors);
-#endif
 
   FREEMEMORY(treeinfo);
   ntreeinfo=0;
@@ -448,7 +445,6 @@ int readsmv(char *file){
       The keywords TRNX, TRNY, TRNZ, GRID, PDIM, OBST and VENT are not required 
       BUT if any one these keywords are present then the number of each MUST be equal 
     */
-#ifdef pp_AVATAR
     if(match(buffer,"AVATAR_COLOR",12) == 1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&navatar_colors);
@@ -473,7 +469,6 @@ int readsmv(char *file){
       }
       continue;
     }
-#endif
 
     if(match(buffer,"TERRAIN",7) == 1){
       nterraininfo++;
@@ -911,11 +906,7 @@ int readsmv(char *file){
   // read in device (.svo) definitions
 
 //  if(ndeviceinfo>0&&ndevice_defs==0){
-#ifdef pp_AVATAR
     init_device_defs();
-#else
-    if(ndeviceinfo>0)init_device_defs();
-#endif
 
 
 /* 
@@ -3036,7 +3027,6 @@ typedef struct {
       }
       if(len>lenkey+1){
         buffer3=buffer+lenkey;
-#ifdef pp_AVATAR
         if(parti->evac==1){
           float zoffset=0.0;
 
@@ -3046,9 +3036,6 @@ typedef struct {
         else{
           sscanf(buffer3,"%i",&blocknumber);
         }
-#else
-        sscanf(buffer3,"%i",&blocknumber);
-#endif
         blocknumber--;
       }
 
@@ -7368,21 +7355,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
         sscanf(buffer,"%i",&tour_constant_vel);
         continue;
       }
-#ifdef pp_AVATAR
       if(match(buffer,"TOUR_AVATAR",11)==1){
         if(fgets(buffer,255,stream)==NULL)break;
 //        sscanf(buffer,"%i %f %f %f %f",&tourlocus_type,tourcol_avatar,tourcol_avatar+1,tourcol_avatar+2,&tourrad_avatar);
 //        if(tourlocus_type!=0)tourlocus_type=1;
         continue;
       }
-#else
-      if(match(buffer,"TOURAVATAR",10)==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i %f %f %f %f",&tourlocus_type,tourcol_avatar,tourcol_avatar+1,tourcol_avatar+2,&tourrad_avatar);
-        if(tourlocus_type!=0)tourlocus_type=1;
-        continue;
-      }
-#endif
 
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -7682,9 +7660,7 @@ typedef struct {
           {
             keyframe *thisframe, *addedframe;
             tourdata *touri;
-#ifdef pp_AVATAR
             int glui_avatar_index;
-#endif
 
             for(i=1;i<ntours;i++){
               touri = tourinfo + i;
@@ -7696,7 +7672,6 @@ typedef struct {
               t_globaltension=touri->global_tension;
               t_globaltension_flag=touri->global_tension_flag;
               fgets(buffer,255,stream);
-#ifdef pp_AVATAR
               glui_avatar_index=0;
               sscanf(buffer,"%i %i %f %i %i",
                 &nkeyframes,&t_globaltension_flag,&t_globaltension,&glui_avatar_index,&touri->display2);
@@ -7704,9 +7679,6 @@ typedef struct {
               if(glui_avatar_index>navatar_types-1)glui_avatar_index=navatar_types-1;
               touri->glui_avatar_index=glui_avatar_index;
               if(touri->display2!=1)touri->display2=0;
-#else
-              sscanf(buffer,"%i %i %f",&nkeyframes,&t_globaltension_flag,&t_globaltension);
-#endif
               touri->global_tension_flag=t_globaltension_flag;
               touri->global_tension=t_globaltension;
               touri->nkeyframes=nkeyframes;
@@ -8519,19 +8491,11 @@ void writeini(int flag){
   fprintf(fileout," %i\n",show_path_knots);
   fprintf(fileout,"TOURCONSTANTVEL\n");
   fprintf(fileout," %i\n",tour_constant_vel);
-#ifdef pp_AVATAR
 //  fprintf(fileout,"TOUR_AVATAR\n");
 //  fprintf(fileout," %i %f %f %f %f\n",
 //    tourlocus_type,
 //    tourcol_avatar[0],tourcol_avatar[1],tourcol_avatar[2],
 //    tourrad_avatar);
-#else
-  fprintf(fileout,"TOURAVATAR\n");
-  fprintf(fileout," %i %f %f %f %f\n",
-    tourlocus_type,
-    tourcol_avatar[0],tourcol_avatar[1],tourcol_avatar[2],
-    tourrad_avatar);
-#endif
   {
     keyframe *framei;
     float *col;
@@ -8585,12 +8549,8 @@ void writeini(int flag){
 
           trim(touri->label);
           fprintf(fileout,"%s\n",touri->label);
-#ifdef pp_AVATAR
           fprintf(fileout," %i %i %f %i %i\n",
             touri->nkeyframes,touri->global_tension_flag,touri->global_tension,touri->glui_avatar_index,touri->display);
-#else
-          fprintf(fileout," %i %i %f\n",touri->nkeyframes,touri->global_tension_flag,touri->global_tension);
-#endif
           for(framei=&touri->first_frame;framei!=&touri->last_frame;framei=framei->next){
             if(framei==&touri->first_frame)continue;
             sprintf(buffer,"%f %f %f %f ",

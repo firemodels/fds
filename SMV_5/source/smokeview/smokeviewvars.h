@@ -28,10 +28,8 @@
 #include "smokeheaders.h"
 #endif
 
-#ifdef pp_AVATAR
 SVEXTERN int navatar_colors;
 SVEXTERN float *avatar_colors;
-#endif
 
 SVEXTERN int show_slice_in_obst;
 
@@ -740,7 +738,6 @@ SVEXTERN int keyframe_snap;
 SVEXTERN int tourviewtype;
 SVEXTERN int show_tourlocus;
 SVEXTERN int tourlocus_type;
-#ifdef pp_AVATAR
 SVEXTERN int iavatar_types, navatar_types;
 SVEXTERN int iavatar_evac;
 SVEXTERN sv_object **avatar_types;
@@ -750,7 +747,6 @@ SVEXTERN sv_object *avatar_defs_backup[2];
 SVEXTERN float valstack[SIZE_VALSTACK];
 SVEXTERN int nvalstack;
 SVEXTERN int topvalstack;
-#endif
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;
 SVEXTERN float *tour_t, *tour_t2, *tour_dist, *tour_dist2, *tour_dist3;

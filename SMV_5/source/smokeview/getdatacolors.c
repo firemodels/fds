@@ -215,7 +215,6 @@ void getPart5Colors(particle *parti, int nlevel){
         prop_id = get_part5prop(partclassi->labels[k].longlabel);
         if(prop_id==NULL)continue;
 
-#ifdef pp_AVATAR
         if(strcmp(partclassi->labels[k].longlabel,"HUMAN_COLOR")==0){
           for(m=0;m<datacopy->npoints;m++){
             float val;
@@ -229,7 +228,6 @@ void getPart5Colors(particle *parti, int nlevel){
           }
         }
         else{
-#endif
           valmin = prop_id->valmin;
           valmax = prop_id->valmax;
           dval = valmax - valmin;
@@ -245,9 +243,7 @@ void getPart5Colors(particle *parti, int nlevel){
             if(irval>255)irval=255;
             *irvals++=irval;
           }
-#ifdef pp_AVATAR
         }
-#endif
       }
       FREEMEMORY(datacopy->rvals);
       datacopy++;
@@ -858,11 +854,7 @@ void drawColorBars(void){
   bottom[1]=labeltop-2*dyfont;
   bottom[2]=labeltop-3*dyfont;
   bottom[3]=labeltop-4*dyfont;
-#ifdef pp_AVATAR
   if(showevac_colorbar==1||(showsmoke==1&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
-#else
-  if((showsmoke==1&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
-#endif
     sniffErrors("before colorbar");
     CheckMemory;
     glBegin(GL_QUADS);
@@ -914,11 +906,7 @@ void drawColorBars(void){
   leftslice=0;
   leftpatch=0;
   leftzone=0;
-#ifdef pp_AVATAR
   if(showevac_colorbar==1||showsmoke==1){
-#else
-  if(showsmoke==1){
-#endif
     if(parttype!=0){
       leftsmoke=ileft;
       ileft++;
@@ -933,18 +921,10 @@ void drawColorBars(void){
   }
   strcpy(partshortlabel2,"");
   strcpy(partunitlabel2,"");
-#ifdef pp_AVATAR
   if(showevac_colorbar==1||showsmoke==1){
-#else
-  if(showsmoke==1){
-#endif
     if(parttype!=0){
-#ifdef pp_AVATAR
       if(showsmoke==1&&showevac==0)outputBarText(right[leftsmoke],bottom[0],color1,"Part");
       if(showevac==1)outputBarText(right[leftsmoke],bottom[0],color1,"Human");
-#else
-      outputBarText(right[leftsmoke],bottom[0],color1,"Part");
-#endif
     }
     if(parttype==-1){
       strcpy(partshortlabel2,"temp");
@@ -1035,11 +1015,7 @@ void drawColorBars(void){
     outputBarText(right[leftzone],bottom[3],color1,zonescale);
 
   }
-#ifdef pp_AVATAR
   if(showevac_colorbar==1||(showsmoke==1&&parttype!=0)){
-#else
-  if(showsmoke==1&&parttype!=0){
-#endif
     float *partlevels256_ptr;
 
     partlevels256_ptr=partlevels256;
