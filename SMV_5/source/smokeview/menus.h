@@ -4934,25 +4934,27 @@ static int textureshowmenu=0;
     int particle_present=0;
     int ii;
 
-    for(ii=0;ii<npartinfo;ii++){
-      particle *parti;
+    if(npart5loaded>0){
+      for(ii=0;ii<npartinfo;ii++){
+        particle *parti;
 
-      parti = partinfo + ii;
-      if(parti->loaded==0)continue;
-      if(parti->evac==1)human_present=1;
-      if(parti->evac==0)particle_present=1;
-    }
-    if(particle_present==1){
-      glutAddSubMenu("Particles",particlepropshowmenu);
-    }
-    if(human_present==1){
-      glutAddSubMenu("Humans",humanpropshowmenu);
-    }
-    if(streak5show==1){
-      glutAddSubMenu("*Streaks",particlestreakshowmenu);
-    }
-    else{
-      glutAddSubMenu("Streaks",particlestreakshowmenu);
+        parti = partinfo + ii;
+        if(parti->loaded==0)continue;
+        if(parti->evac==1)human_present=1;
+        if(parti->evac==0)particle_present=1;
+      }
+      if(particle_present==1){
+        glutAddSubMenu("Particles",particlepropshowmenu);
+      }
+      if(human_present==1){
+        glutAddSubMenu("Humans",humanpropshowmenu);
+      }
+      if(streak5show==1){
+        glutAddSubMenu("*Streaks",particlestreakshowmenu);
+      }
+      else{
+        glutAddSubMenu("Streaks",particlestreakshowmenu);
+      }
     }
   }
   if(nevac>0&&navatar_types>0){
