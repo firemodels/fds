@@ -1238,17 +1238,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   }
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
-#ifdef pp_CLIP
   if(xyz_clipplane==2){
     setClipPlanes(1);
   }
-#endif
   drawBlockages(mode,DRAW_SOLID);
-#ifdef pp_CLIP
   if(xyz_clipplane==2){
     unsetClipPlanes();
   }
-#endif
   sniffErrors("drawBlockages");
 
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
@@ -3373,9 +3369,6 @@ void usage(char **argv){
 #endif
 #ifdef ISO_DEBUG
     printf(", ISO_DEBUG");
-#endif
-#ifdef pp_CLIP
-    printf(", pp_CLIP");
 #endif
 #ifdef pp_COLOR
     printf(", pp_COLOR");
