@@ -67,9 +67,7 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
 #define CLOSE 98
 #define COMPRESS_FILES 97
 #define OVERWRITE 96
-#ifdef pp_COMPRESS_AUTOLOADED
 #define COMPRESS_AUTOLOADED 91
-#endif
 #define ERASE 95
 #define STARTUP 94
 #define SAVE_FILE_LIST 93
@@ -97,9 +95,7 @@ GLUI_RadioGroup *con_slice_setmin=NULL, *con_slice_setmax=NULL;
 GLUI_Checkbox *showchar_checkbox=NULL, *showonlychar_checkbox;
 GLUI_Checkbox *startup_checkbox=NULL;
 GLUI_Checkbox *check_overwrite_all=NULL;
-#ifdef pp_COMPRESS_AUTOLOADED
 GLUI_Checkbox *check_compress_autoloaded=NULL;
-#endif
 GLUI_Checkbox *check_erase_all=NULL;
 GLUI_Checkbox *check_multi_task=NULL;
 GLUI_Checkbox *con_slice_setchopmin=NULL;
@@ -394,10 +390,8 @@ extern "C" void glui_bounds_setup(int main_window){
       &erase_all,ERASE,Bound_CB);
     check_overwrite_all=glui_bounds->add_checkbox_to_panel(rollout_compress,"Overwrite compressed files",
       &overwrite_all,OVERWRITE,Bound_CB);
-#ifdef  pp_COMPRESS_AUTOLOADED
     check_compress_autoloaded=glui_bounds->add_checkbox_to_panel(rollout_compress,"Compress only autoloaded files",
       &compress_autoloaded,COMPRESS_AUTOLOADED,Bound_CB);
-#endif
 #ifdef _DEBUG
     check_multi_task=glui_bounds->add_checkbox_to_panel(rollout_compress,"Multi-thread Compression",
       &mt_compress);
@@ -827,11 +821,9 @@ void Bound_CB(int var){
   case COMPRESS_FILES:
     compress_svzip();
     break;
-#ifdef pp_COMPRESS_AUTOLOADED
   case COMPRESS_AUTOLOADED:
     updatemenu=1;
     break;
-#endif
   case OVERWRITE:
     if(overwrite_all==1){
       check_erase_all->set_int_val(0);
@@ -1342,9 +1334,7 @@ extern "C" void disable_boundary_glui(void){
 
 extern "C" void update_overwrite(void){
   if(check_overwrite_all!=NULL)check_overwrite_all->set_int_val(overwrite_all);
-#ifdef pp_COMPRESS_AUTOLOADED
   if(check_compress_autoloaded!=NULL)check_compress_autoloaded->set_int_val(compress_autoloaded);
-#endif
 }
 
 extern "C" void hide_glui_bounds(void){
