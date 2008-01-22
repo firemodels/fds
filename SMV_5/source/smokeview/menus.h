@@ -2034,13 +2034,11 @@ void ShowTourMenu(int value){
 void AvatarTourMenu(int value){
 }
 
-#ifdef pp_AVATAR
 void AvatarEvacMenu(int value){
   if(value==-999)return;
   iavatar_evac=value;
   updatemenu=1;
 }
-#endif
 
 /* ------------------ TourMenu ------------------------ */
 
@@ -2060,7 +2058,6 @@ void TourMenu(int value){
       show_glui_tour();
     }
     break;
-#ifdef pp_AVATAR
   case -13:               // clear all tours
     for(i=0;i<ntours;i++){
       touri = tourinfo + i;
@@ -2082,7 +2079,6 @@ void TourMenu(int value){
     }
     selected_tour=NULL;
     break;
-#endif
   case -2:               // clear all tours
     for(i=0;i<ntours;i++){
       touri = tourinfo + i;
@@ -2157,16 +2153,13 @@ void TourMenu(int value){
     break;
   case -11: // bird's eye
     break;
-#ifdef pp_AVATAR
   case -21:
     tourlocus_type=0;
     break;
   case -22:
     tourlocus_type=1;
     break;
-#endif
   default: 
-#ifdef pp_AVATAR
     if(value<-22){
       tourlocus_type=2;
       iavatar_types=(-value-23);
@@ -2174,12 +2167,10 @@ void TourMenu(int value){
         tourinfo[selectedtour_index].glui_avatar_index=iavatar_types;
       }
     }
-#endif
     
     //  show one tour
 
     if(value>=0&&value<ntours){
-#ifdef pp_AVATAR
       int j;
 
       touri = tourinfo + value;
@@ -2201,29 +2192,6 @@ void TourMenu(int value){
           break;
         }
       }
-#else
-      int current_val;
-
-      touri = tourinfo + value;
-      current_val = touri->display;
-
-      if(callfrom_tourglui==0){
-        for(i=0;i<ntours;i++){
-          touri = tourinfo + i;
-          touri->display=0;
-        }
-        viewtourfrompath=0;
-        edittour=0;
-      }
-      if(current_val==0){
-        touri = tourinfo + value;
-        touri->display=1;
-        selectedtour_index=value;
-        selected_frame=(tourinfo + value)->first_frame.next;
-        selected_tour=tourinfo+value;
-        if(callfrom_tourglui==0)viewtourfrompath=1;
-      }
-#endif
     }
     break;
   }
@@ -3506,9 +3474,7 @@ static int particle5showmenu=0;
 static int particlepropshowmenu=0,humanpropshowmenu=0;
 static int particlestreakshowmenu=0;
 static int tourmenu=0;
-#ifdef pp_AVATAR
 static int showtourmenu=0, avatartourmenu=0,avatarevacmenu=0;
-#endif
 static int trainerviewmenu=0,mainmenu=0,zoneshowmenu=0,particleshowmenu=0,evacshowmenu=0,targetmenu=0;
 static int showdevicesmenu=0;
 static int unloadplot3dmenu=0, unloadpatchmenu=0, unloadisomenu=0;
@@ -4866,7 +4832,7 @@ static int textureshowmenu=0;
   }
 
 /* -------------------------------- avatartour menu -------------------------- */
-#ifdef pp_AVATAR
+
   CREATEMENU(avatarevacmenu,AvatarEvacMenu);
   if(navatar_types>0){
     int i;
@@ -4911,9 +4877,9 @@ static int textureshowmenu=0;
       glutAddMenuEntry(menulabel,-23-i);
     }
   }
-#endif
-/* -------------------------------- showtour menu -------------------------- */
-#ifdef pp_AVATAR
+
+  /* -------------------------------- showtour menu -------------------------- */
+
   CREATEMENU(showtourmenu,TourMenu);
 
     for(i=0;i<ntours;i++){
@@ -4953,8 +4919,9 @@ static int textureshowmenu=0;
       strcat(menulabel,tourinfo[selectedtour_index].label);
       glutAddMenuEntry(menulabel,-5);
     }
-#endif
-/* --------------------------------tour menu -------------------------- */
+
+    /* --------------------------------tour menu -------------------------- */
+
     CREATEMENU(tourmenu,TourMenu);
       
     glutAddMenuEntry("New...",-12);
@@ -4969,24 +4936,9 @@ static int textureshowmenu=0;
       }
       if(trainer_mode==0||(trainer_mode==1&&ntours>0))glutAddMenuEntry("-",-999);
     }
-#ifndef pp_AVATAR
-    if(trainer_mode==0)glutAddMenuEntry("Default",-1);
-    for(i=0;i<ntours;i++){
-      if(tourinfo[i].display==1){
-        STRCPY(menulabel,check);
-        STRCAT(menulabel,tourinfo[i].menulabel);  
-      }
-      else{
-        STRCPY(menulabel,tourinfo[i].menulabel);
-      }
-      glutAddMenuEntry(menulabel,i);
-    }
-#endif
-#ifdef pp_AVATAR
   if(ntours>1){
     glutAddSubMenu("Show/Hide",showtourmenu);
   }
-#endif
 
 
 /* --------------------------------showhide menu -------------------------- */
@@ -5022,11 +4974,9 @@ static int textureshowmenu=0;
       glutAddSubMenu("Streaks",particlestreakshowmenu);
     }
   }
-#ifdef pp_AVATAR
   if(nevac>0&&navatar_types>0){
     glutAddSubMenu("Use Avatar:",avatarevacmenu);
   }
-#endif
 
   if(npart4loaded>0){
     if(havesprinkpart!=0||staticframe0!=0||npartloaded>1){
