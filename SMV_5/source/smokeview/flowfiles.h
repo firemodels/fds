@@ -499,9 +499,7 @@ typedef struct _tourdata {
   keyframe first_frame,last_frame;
   keyframe **keyframe_list;
   pathdata *pathnodes;
-#ifdef pp_AVATAR
   int glui_avatar_index, display2;
-#endif
   float *path_times,*keyframe_times;
   float global_dist, local_dist;
   int *path_timeslist;
@@ -540,14 +538,10 @@ typedef struct _sv_object_frame {
 
 typedef struct _sv_object {
   char label[256];
-#ifdef pp_AVATAR
   int type;
-#endif
   int visible;
   int used;
-#ifdef pp_AVATAR
   int use_displaylist;
-#endif
   int nframes;
   sv_object_frame **obj_frames, first_frame, last_frame;
  struct _sv_object *prev, *next;
@@ -644,10 +638,8 @@ typedef struct {
   float time;
   int npoints,n_rtypes, n_itypes;
   short *sx, *sy, *sz;
-#ifdef pp_AVATAR
   float *avatar_angle, *avatar_width, *avatar_depth, *avatar_height;
   int humancolor_varindex;
-#endif
   int *tags,*sort_tags;
   unsigned char *vis_part;
   float *rvals;
@@ -666,9 +658,7 @@ typedef struct {
   int compression_type;
   int loaded, display;
   int evac;
-#ifdef pp_AVATAR
   float zoffset;
-#endif
   int blocknumber;
   int num_memblocks;
   float *ptimes;

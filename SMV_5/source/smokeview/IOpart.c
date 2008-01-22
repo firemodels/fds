@@ -14,9 +14,7 @@
 #else
 #include <GL/glut.h>
 #endif
-#ifdef pp_AVATAR
 #include <math.h>
-#endif
 #include "MALLOC.h"
 #include "ASSERT.h"
 #include "smokeviewdefs.h"
@@ -28,9 +26,7 @@ char IOpart_revision[]="$Revision$";
 
 int tagscompare( const void *arg1, const void *arg2 );
 
-#ifdef pp_AVATAR
 void draw_SVOBJECT(sv_object *object, int iframe);
-#endif
 void ParticlePropShowMenu(int val);
 void PART_CB_INIT(void);
 void update_all_partvis(particle *parti);
@@ -70,12 +66,10 @@ void freepart5data(part5data *datacopy){
   FREEMEMORY(datacopy->sx);
   FREEMEMORY(datacopy->sy);
   FREEMEMORY(datacopy->sz);
-#ifdef pp_AVATAR
   FREEMEMORY(datacopy->avatar_angle);
   FREEMEMORY(datacopy->avatar_width);
   FREEMEMORY(datacopy->avatar_height);
   FREEMEMORY(datacopy->avatar_depth);
-#endif
   FREEMEMORY(datacopy->tags);
   FREEMEMORY(datacopy->sort_tags);
   FREEMEMORY(datacopy->vis_part);
@@ -108,12 +102,10 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
   datacopy->sx=NULL;
   datacopy->sy=NULL;
   datacopy->sz=NULL;
-#ifdef pp_AVATAR
   datacopy->avatar_angle=NULL;
   datacopy->avatar_width=NULL;
   datacopy->avatar_height=NULL;
   datacopy->avatar_depth=NULL;
-#endif
   datacopy->tags=NULL;
   datacopy->vis_part=NULL;
   datacopy->sort_tags=NULL;
@@ -205,21 +197,15 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
       if(doit==1){
         short *sx, *sy, *sz;
         float *xyz;
-#ifdef pp_AVATAR
         float *angle, *width, *depth, *height;
-#endif
         int j;
 
-#ifdef pp_AVATAR
         if(parti->evac==1){
           FORTPART5READ(partclassi->xyz,XYZ_EXTRA*nparts);
         }
         else{
           FORTPART5READ(partclassi->xyz,3*nparts);
         }
-#else
-        FORTPART5READ(partclassi->xyz,3*nparts);
-#endif
         CheckMemory;
         if(nparts>0){
           if(returncode==0)goto wrapup;
@@ -227,14 +213,12 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
           sx = datacopy->sx;
           sy = datacopy->sy;
           sz = datacopy->sz;
-#ifdef pp_AVATAR
           if(parti->evac==1){
             angle=datacopy->avatar_angle;
             width=datacopy->avatar_width;
             depth=datacopy->avatar_depth;
             height=datacopy->avatar_height;
           }
-#endif
           for(j=0;j<nparts;j++){
             float xx, yy, zz;
 
@@ -250,29 +234,23 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
             sx[j] = factor*xx;
             sy[j] = factor*yy;
             sz[j] = factor*zz;
-#ifdef pp_AVATAR
             if(parti->evac==1){
               angle[j] =xyz[j+3*nparts];
               width[j] =xyz[j+4*nparts];
               depth[j] =xyz[j+5*nparts];
               height[j]=xyz[j+6*nparts];
             }
-#endif
           }
           CheckMemory;
         }
       }
       else{
-#ifdef pp_AVATAR
         if(parti->evac==1){
           skip = 4 + XYZ_EXTRA*4*nparts + 4;  
         }
         else{
           skip = 4 + 3*4*nparts + 4;  
         }
-#else
-        skip = 4 + 3*4*nparts + 4;  
-#endif
       }
       CheckMemory;
       if(doit==1){
@@ -644,7 +622,6 @@ void getpart5header(particle *parti, int partframestep){
         trim(size_file);
         lenreg=strlen(reg_file);
         lensize=strlen(size_file);
-#ifdef pp_AVATAR
         if(parti->evac==1){
           angle_flag=1;
           FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
@@ -653,10 +630,6 @@ void getpart5header(particle *parti, int partframestep){
           angle_flag=0;
           FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
         }
-#else
-        FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, 
-          lenreg,lensize);
-#endif
       }
   }
   
@@ -725,14 +698,12 @@ void getpart5header(particle *parti, int partframestep){
           NewMemory((void **)&datacopy->sx,npoints*sizeof(short));
           NewMemory((void **)&datacopy->sy,npoints*sizeof(short));
           NewMemory((void **)&datacopy->sz,npoints*sizeof(short));
-#ifdef pp_AVATAR
           if(parti->evac==1){
             NewMemory((void **)&datacopy->avatar_angle,npoints*sizeof(float));
             NewMemory((void **)&datacopy->avatar_width,npoints*sizeof(float));
             NewMemory((void **)&datacopy->avatar_depth,npoints*sizeof(float));
             NewMemory((void **)&datacopy->avatar_height,npoints*sizeof(float));
           }
-#endif
           ntypes = datacopy->partclassbase->ntypes;
           if(ntypes>0){ //xxx need to check this fix (was ntypes>2)
             NewMemory((void **)&datacopy->rvals,(ntypes-0)*npoints*sizeof(float));  //xxx need to check this fix
@@ -755,16 +726,12 @@ void getpart5header(particle *parti, int partframestep){
 
     partclassi = parti->partclassptr[i];
     if(partclassi->maxpoints>0){
-#ifdef pp_AVATAR
       if(parti->evac==1){
         NewMemory((void **)&partclassi->xyz,XYZ_EXTRA*partclassi->maxpoints*sizeof(float));
       }
       else{
         NewMemory((void **)&partclassi->xyz,3*partclassi->maxpoints*sizeof(float));
       }
-#else
-      NewMemory((void **)&partclassi->xyz,3*partclassi->maxpoints*sizeof(float));
-#endif
     }
   }
 
@@ -1292,15 +1259,9 @@ void drawPart5(const particle *parti){
   CheckMemory;
   if(part5show==1){
     if(streak5show==0||(streak5show==1&&showstreakhead==1)){
-#ifndef pp_AVATAR
-      glPointSize(partpointsize);
-      glBegin(GL_POINTS);
-#endif
       for(i=0;i<parti->nclasses;i++){
         short *sx, *sy, *sz;
-#ifdef pp_AVATAR
         float *angle, *width, *depth, *height;
-#endif
         unsigned char *vis, *color;
         part5class *partclassi;
         int partclass_index, itype, vistype, class_vis;
@@ -1322,7 +1283,6 @@ void drawPart5(const particle *parti){
         sy = datacopy->sy;
         sz = datacopy->sz;
         vis = datacopy->vis_part;
-#ifdef pp_AVATAR
         if(parti->evac==1){
           part5data *data1, *data2;
           int avatar_type=0;
@@ -1417,29 +1377,9 @@ void drawPart5(const particle *parti){
           }
           glEnd();
         }
-#else
-        if(itype==-1){
-          glColor4fv(datacopy->partclassbase->rgb);
-          for(j=0;j<datacopy->npoints;j++){
-            if(vis[j]==1)glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
-          }
-        }
-        else{
-          color=datacopy->irvals+itype*datacopy->npoints;
-          for(j=0;j<datacopy->npoints;j++){
-            if(vis[j]==1){
-              glColor4fv(rgb_full[color[j]]);
-              glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
-            }
-          }
-        }
-#endif
 
         datacopy++;
       }
-#ifndef pp_AVATAR
-      glEnd();
-#endif
     }
   }
 
@@ -1502,22 +1442,6 @@ void drawPart5(const particle *parti){
       }
 
       // draw the dot at the end of the streak line
-#ifndef pp_AVATAR
-      if(showstreakhead==1){
-        sx = datacopy->sx;
-        sy = datacopy->sy;
-        sz = datacopy->sz;
-        vis = datacopy->vis_part;
-        glPointSize(6.0);
-        glColor4fv(datacopy->partclassbase->rgb);
-        glBegin(GL_POINTS);
-        for(j=0;j<datacopy->npoints;j++){
-          if(vis[j]==0)continue;
-          glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
-        }
-        glEnd();
-      }
-#endif
     }
     else{
       unsigned char *color;

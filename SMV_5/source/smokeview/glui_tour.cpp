@@ -165,7 +165,6 @@ extern "C" void glui_tour_setup(int main_window){
   glui_tour->add_button_to_panel(panel_settings,"Update Tour Label",TOUR_UPDATELABEL,TOUR_CB);
   EDITlabel=glui_tour->add_edittext_to_panel(panel_settings,"Tour Label",GLUI_EDITTEXT_TEXT,tour_label,TOUR_LABEL,TOUR_CB);
   EDITlabel->set_w(240);
-#ifdef pp_AVATAR
   if(navatar_types>0){
     LISTBOX_avatar=glui_tour->add_listbox_to_panel(panel_settings,"Avatar:",&glui_avatar_index,TOUR_AVATAR,TOUR_CB);
 
@@ -185,8 +184,6 @@ extern "C" void glui_tour_setup(int main_window){
 
      LISTBOX_avatar->set_int_val(glui_avatar_index);
   }
-
-#endif
 
   panel_keyframe = glui_tour->add_panel("Keyframe");
   
@@ -365,11 +362,9 @@ extern "C" void set_glui_keyframe(){
     tour_hide=1-ti->display;
   }
   if(selected_tour!=NULL)strcpy(tour_label,selected_tour->label);
-#ifdef pp_AVATAR
   glui_avatar_index=ti->glui_avatar_index;
   TOUR_CB(TOUR_AVATAR);
   LISTBOX_avatar->set_int_val(glui_avatar_index);
-#endif
   eye = selected_frame->nodeval.eye;
   aview = selected_frame->nodeval.aview;
 
@@ -996,7 +991,6 @@ void TOUR_CB(int var){
       }
     }
     break;
-#ifdef pp_AVATAR
   case TOUR_AVATAR:
     selected_tour->glui_avatar_index=glui_avatar_index;
     if(glui_avatar_index==-1){
@@ -1011,7 +1005,6 @@ void TOUR_CB(int var){
     }
     updatemenu=1;
     break;
-#endif
   case TOUR_UPDATELABEL:
     // supposed to fall through to TOUR_LIST
   case TOUR_LIST:
@@ -1026,17 +1019,10 @@ void TOUR_CB(int var){
       TOURMENU(-3); // show all tours
       set_glui_keyframe();
       break;
-#ifdef pp_AVATAR
     case -1:
       edittour=0;
       TOURMENU(-13);  // reset tour vis to ini values
       break;
-#else
-    case -1:
-      edittour=0;
-      TOURMENU(-2);  // hide all tours
-      break;
-#endif
     case -4:
       TOURMENU(-1);  // default tour
       break;

@@ -45,7 +45,6 @@
 #define EGZ
 #define USE_ZLIB
 
-#define pp_AVATAR
 #define pp_CLIP
 #define pp_COMPRESS_AUTOLOADED
 #define pp_MEM2
