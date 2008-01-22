@@ -23,11 +23,7 @@ extern "C" char glui_clip_revision[]="$Revision$";
 
 #define LOCAL_INI 2
 
-#ifdef pp_CLIP
 GLUI_RadioGroup *radio_clip=NULL;
-#else
-GLUI_Checkbox *CHECKBOX_clip=NULL;
-#endif
 GLUI *glui_clip=NULL;
 GLUI_Spinner *SPINNER_clip_xupper=NULL, *SPINNER_clip_xlower=NULL;
 GLUI_Spinner *SPINNER_clip_yupper=NULL, *SPINNER_clip_ylower=NULL;
@@ -124,14 +120,10 @@ extern "C" void glui_clip_setup(int main_window){
     }
   }
   */
-#ifdef pp_CLIP
     radio_clip = glui_clip->add_radiogroup_to_panel(panel_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
     glui_clip->add_radiobutton_to_group(radio_clip,"Clipping Disabled");
     glui_clip->add_radiobutton_to_group(radio_clip,"Clip Blockages + Data");
     glui_clip->add_radiobutton_to_group(radio_clip,"Clip Blockages");
-#else
-  CHECKBOX_clip=glui_clip->add_checkbox_to_panel(panel_clip,"Activate Clipping",&xyz_clipplane,CLIP_all,CLIP_CB);
-#endif
 
   glui_clip->add_column_to_panel(panel_clip,false);
 
@@ -299,11 +291,7 @@ void CLIP_CB(int var){
 
 extern "C" void update_clip_all(void){
   CLIP_CB(CLIP_all);
-#ifdef pp_CLIP
   radio_clip->set_int_val(xyz_clipplane);
-#else
-  CHECKBOX_clip->set_int_val(xyz_clipplane);
-#endif
 }
 
 /* ------------------ set_clip_controls ------------------------ */
