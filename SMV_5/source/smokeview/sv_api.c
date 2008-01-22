@@ -200,9 +200,7 @@ void svWINAPI sv_unload(void){
     readsmv(NULL);
     glutSetWindow(mainwindow_id);
     glutHideWindow();
-#ifdef pp_MEM2
     FreeAllMemory();
-#endif
     return;
 }
 

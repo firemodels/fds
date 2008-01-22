@@ -13,8 +13,6 @@
 typedef int mallocflag;
 typedef char bbyte;
 
-#ifdef pp_MEM2
-
 #ifdef CPP
 #define MMCCC "C"
 #else
@@ -35,7 +33,6 @@ typedef struct {
 
 MMEXTERN MMdata MMfirst, MMlast;
 MMEXTERN MMdata *MMfirstptr, *MMlastptr;
-#endif
 
 #define debugByte 0xE1
 #define markerByte 0xE1
@@ -115,9 +112,7 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew);
 mallocflag _NewMemory(void **ppv, size_t size);
 void FreeMemory(void *pv);
 void initMM(void);
-#ifdef pp_MEM2
 void FreeAllMemory(void);
-#endif
 mallocflag ValidPointer(void *pv, size_t size);
 
 #endif

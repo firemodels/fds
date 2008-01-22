@@ -25,16 +25,14 @@ char main_revision[]="$Revision$";
 int main(int argc, char **argv){
   char **argv_sv;
 
-#ifdef pp_MEM2
   initMM();
-#endif
   initvars0();
   initcolors();
   initvars1();
   if(argc==1){
     version();
   }
-  #ifdef WIN32
+#ifdef WIN32
   copy_args(&argc, argv, &argv_sv);
   if(argc==1){
     exit(0);

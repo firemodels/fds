@@ -45,8 +45,6 @@
 #define EGZ
 #define USE_ZLIB
 
-#define pp_MEM2
-
 #ifdef pp_ALPHA2
 #define pp_TOUR
 #define pp_LIGHT
@@ -69,9 +67,7 @@
 #ifdef _DEBUG
 #define pp_OPEN
 #endif
-#ifdef pp_MEM2
 #define pp_OPEN
-#endif
 #endif
 
 
