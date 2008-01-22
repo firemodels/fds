@@ -290,11 +290,9 @@ void compress_svzip2(void){
   if(erase_all==1){
     strcat(shellcommand," -c ");
   }
-#ifdef pp_COMPRESS_AUTOLOADED
   if(compress_autoloaded==1){
     strcat(shellcommand," -auto ");
   }
-#endif
   strcat(shellcommand," ");
   strcat(shellcommand,smvfilename);
 
