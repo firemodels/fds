@@ -183,7 +183,7 @@ TYPE HUMAN_TYPE
    CHARACTER(60) :: NODE_NAME
    CHARACTER(30) :: FFIELD_NAME
    REAL(EB) :: X,Y,Z,U,V,W,F_X,F_Y,X_old,Y_old,X_group,Y_group
-   REAL(EB) :: U_Center, V_Center, UBAR_Center, VBAR_Center
+   REAL(EB) :: UBAR, VBAR, UBAR_Center, VBAR_Center
    REAL(EB) :: Speed, Radius, Mass, Tpre, Tau, Eta, Ksi, Tdet
    REAL(EB) :: r_torso, r_shoulder, d_shoulder, angle, torque, m_iner
    REAL(EB) :: tau_iner, angle_old, omega
