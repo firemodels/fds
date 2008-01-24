@@ -58,15 +58,11 @@ EPSX => WORK1
 EPSY => WORK2
 EPSZ => WORK3
 
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         EPSX(I,J,K) = PMDT*UU(I,J,K)*RDXN(I)
-         EPSY(I,J,K) = PMDT*VV(I,J,K)*RDYN(J)
-         EPSZ(I,J,K) = PMDT*WW(I,J,K)*RDZN(K)
-      ENDDO
-   ENDDO
-ENDDO
+FORALL (K=0:KBAR,J=0:JBAR,I=0:IBAR)
+   EPSX(I,J,K) = PMDT*UU(I,J,K)*RDXN(I)
+   EPSY(I,J,K) = PMDT*VV(I,J,K)*RDYN(J)
+   EPSZ(I,J,K) = PMDT*WW(I,J,K)*RDZN(K)
+END FORALL
  
 ! Compute spatial differences for density equation
  
@@ -76,15 +72,11 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
    VDRHODY => WORK5
    WDRHODZ => WORK6
    
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
+   FORALL (K=0:KBAR,J=0:JBAR,I=0:IBAR)
             UDRHODX(I,J,K) = UU(I,J,K)*(RHOP(I+1,J,K)-RHOP(I,J,K))*RDXN(I)
             VDRHODY(I,J,K) = VV(I,J,K)*(RHOP(I,J+1,K)-RHOP(I,J,K))*RDYN(J)
             WDRHODZ(I,J,K) = WW(I,J,K)*(RHOP(I,J,K+1)-RHOP(I,J,K))*RDZN(K)
-         ENDDO
-      ENDDO
-   ENDDO
+   END FORALL
  
    WLOOP: DO IW=1,NWC
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WLOOP
@@ -140,16 +132,11 @@ IF (N_SPECIES > 0) THEN
 ENDIF
  
 SPECIES_LOOP: DO N=1,N_SPECIES
- 
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
+   FORALL (K=0:KBAR,J=0:JBAR,I=0:IBAR)
             UDRHODX(I,J,K) = UU(I,J,K)*( RHOP(I+1,J,K)*YYP(I+1,J,K,N) - RHOP(I,J,K)*YYP(I,J,K,N) )*RDXN(I)
             VDRHODY(I,J,K) = VV(I,J,K)*( RHOP(I,J+1,K)*YYP(I,J+1,K,N) - RHOP(I,J,K)*YYP(I,J,K,N) )*RDYN(J)
             WDRHODZ(I,J,K) = WW(I,J,K)*( RHOP(I,J,K+1)*YYP(I,J,K+1,N) - RHOP(I,J,K)*YYP(I,J,K,N) )*RDZN(K)
-         ENDDO
-      ENDDO
-   ENDDO
+   END FORALL
  
    ! Correct U d(RHO*Y)/dx etc. on boundaries
  
@@ -181,9 +168,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
  
   ! Sum up the convective and diffusive terms in the transport equation and store in DEL_RHO_D_DEL_Y
  
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
+   FORALL (K=1:KBAR,J=1:JBAR,I=1:IBAR)
             FXYZ   = .5_EB*(UDRHODX(I,J,K)  *(1._EB-EPSX(I,J,K))   +  &
                             UDRHODX(I-1,J,K)*(1._EB+EPSX(I-1,J,K)) +  &
                             VDRHODY(I,J,K)  *(1._EB-EPSY(I,J,K))   +  &
@@ -191,10 +176,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                             WDRHODZ(I,J,K)  *(1._EB-EPSZ(I,J,K))   +  &
                             WDRHODZ(I,J,K-1)*(1._EB+EPSZ(I,J,K-1)) ) 
             DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N) + FXYZ + RHOP(I,J,K)*YYP(I,J,K,N)*DP(I,J,K) 
-         ENDDO
-      ENDDO
-   ENDDO
- 
+   END FORALL 
 ENDDO SPECIES_LOOP
  
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
@@ -227,50 +209,24 @@ PREDICTOR_STEP: SELECT CASE (PREDICTOR)
 CASE(.TRUE.) PREDICTOR_STEP
 
    IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
-      DO N=1,N_SPECIES
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  YYS(I,J,K,N) = RHO(I,J,K)*YY(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N)
-               ENDDO 
-            ENDDO
-         ENDDO
-      ENDDO
+      FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) &
+          YYS(I,J,K,N) = RHO(I,J,K)*YY(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N)
    ELSE
       DTRATIO   = DT/DTOLD
       OMDTRATIO = 1._EB - DTRATIO
-      DO N=1,N_SPECIES
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
+      FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) &
                   YYS(I,J,K,N) = OMDTRATIO*RHO(I,J,K) *YY(I,J,K,N) +  DTRATIO*RHOS(I,J,K)*YYS(I,J,K,N)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
    ENDIF
 
    ! Predict the density at the next time step (RHOS or RHO^*)
 
    IF (.NOT.ISOTHERMAL) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               RHOS(I,J,K) = RHO(I,J,K)-DT*FRHO(I,J,K)
-            ENDDO 
-         ENDDO
-      ENDDO
+      FORALL (K=1:KBAR,J=1:JBAR,I=1:IBAR) RHOS(I,J,K) = RHO(I,J,K)-DT*FRHO(I,J,K)
    ELSE
       FORALL (I=0:IBP1,J=0:JBP1,K=0:KBP1) RHOS(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(TMPA*SPECIES(0)%RCON)
       DO N=1,N_SPECIES
          WFAC = 1._EB - SPECIES(N)%RCON/SPECIES(0)%RCON
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  RHOS(I,J,K) = RHOS(I,J,K) + WFAC*YYS(I,J,K,N)
-               ENDDO 
-            ENDDO
-         ENDDO
+         FORALL (K=1:KBAR,J=1:JBAR,I=1:IBAR) RHOS(I,J,K) = RHOS(I,J,K) + WFAC*YYS(I,J,K,N)
       ENDDO
    ENDIF
  
@@ -279,16 +235,8 @@ CASE(.TRUE.) PREDICTOR_STEP
    CALL CHECK_DENSITY
 
    ! Extract mass fraction from RHO * YY
-
-   DO N=1,N_SPECIES
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
-            ENDDO 
-         ENDDO
-      ENDDO
-   ENDDO
+   FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) &
+      YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
 
    ! Correct mass fractions above or below clip limits
 
@@ -330,9 +278,9 @@ CASE(.TRUE.) PREDICTOR_STEP
    ENDIF
 
    IF (MIXTURE_FRACTION) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
+      DO K = 1, KBAR
+         DO J = 1, JBAR
+            DO I = 1, IBAR
                IF (CO_PRODUCTION) THEN
                   Z_2 = YYS(I,J,K,I_PROG_CO)
                ElSE
@@ -340,9 +288,9 @@ CASE(.TRUE.) PREDICTOR_STEP
                ENDIF
                CALL GET_MOLECULAR_WEIGHT2(YYS(I,J,K,I_FUEL),Z_2,YYS(I,J,K,I_PROG_F),Y_SUM(I,J,K),RSUM(I,J,K))
                RSUM(I,J,K) = R0/RSUM(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
+            END DO
+         END DO
+      END DO
       IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
    ENDIF
 
@@ -363,26 +311,13 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Correct species mass fraction at next time step (YY here actually means YY*RHO)
 
-   DO N=1,N_SPECIES
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               YY(I,J,K,N) = .5_EB*(RHO(I,J,K)*YY(I,J,K,N) + RHOS(I,J,K)*YYS(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N) ) 
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
+   FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) &
+       YY(I,J,K,N) = .5_EB*(RHO(I,J,K)*YY(I,J,K,N) + RHOS(I,J,K)*YYS(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N) ) 
 
    ! Correct density at next time step
 
    IF (.NOT.ISOTHERMAL) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               RHO(I,J,K) = .5_EB*(RHO(I,J,K)+RHOS(I,J,K)-DT*FRHO(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
+     FORALL (K=1:KBAR,J=1:JBAR,I=1:IBAR) RHO(I,J,K) = .5_EB*(RHO(I,J,K)+RHOS(I,J,K)-DT*FRHO(I,J,K))
    ELSE
       FORALL (I=0:IBP1,J=0:JBP1,K=0:KBP1) RHO(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*TMPA)
       DO N=1,N_SPECIES
@@ -397,15 +332,8 @@ CASE(.FALSE.) PREDICTOR_STEP
  
    ! Extract Y_n from rho*Y_n
 
-   DO N=1,N_SPECIES
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               YY(I,J,K,N) = YY(I,J,K,N)/RHO(I,J,K)
-            ENDDO 
-         ENDDO
-      ENDDO
-   ENDDO
+   FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) &
+      YY(I,J,K,N) = YY(I,J,K,N)/RHO(I,J,K)
 
    ! Correct mass fractions above or below clip limits
 
@@ -447,9 +375,9 @@ CASE(.FALSE.) PREDICTOR_STEP
    ENDIF
 
    IF (MIXTURE_FRACTION) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
+      DO K = 1, KBAR
+         DO J = 1, JBAR
+            DO I = 1, IBAR
                IF (CO_PRODUCTION) THEN
                   Z_2 = YY(I,J,K,I_PROG_CO)
                ElSE
@@ -457,9 +385,9 @@ CASE(.FALSE.) PREDICTOR_STEP
                ENDIF
                CALL GET_MOLECULAR_WEIGHT2(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),RSUM(I,J,K))
                RSUM(I,J,K) = R0/RSUM(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
+            END DO
+         END DO
+      END DO
       IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
    ENDIF
 
@@ -654,7 +582,6 @@ LOGICAL  :: LC(-3:3)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: YYDELTA
 
 YYDELTA => WORK1
-YYDELTA = 0._EB
 IF (PREDICTOR) THEN
    RHOP    => RHOS
    YYP     => YYS
@@ -908,8 +835,6 @@ END SUBROUTINE CHECK_MASS_FRACTION
  
 END SUBROUTINE DENSITY
 
-
-
 SUBROUTINE GET_REV_mass(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
 CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
@@ -919,4 +844,3 @@ WRITE(MODULE_DATE,'(A)') massdate
 END SUBROUTINE GET_REV_mass
  
 END MODULE MASS
-
