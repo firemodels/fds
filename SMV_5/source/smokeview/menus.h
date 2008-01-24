@@ -2370,7 +2370,23 @@ void ParticlePropShowMenu(int value){
       part5prop *propi;
 
       propi = part5propinfo + i;
-      propi->display=0;
+      if(propi->particle_property==1){
+        propi->display=0;
+      }
+    }
+    part5show=0;
+    parttype=0;
+  }
+  else if(value==-5){
+    int i;
+
+    for(i=0;i<npart5prop;i++){
+      part5prop *propi;
+
+      propi = part5propinfo + i;
+      if(propi->human_property==1){
+        propi->display=0;
+      }
     }
     part5show=0;
     parttype=0;
@@ -4379,8 +4395,8 @@ static int textureshowmenu=0;
         glutAddMenuEntry(menulabel,i);
       }
     
-      if(part5show==0)glutAddMenuEntry("  *Hide",-4);
-      if(part5show==1)glutAddMenuEntry("  Hide",-4);
+      if(part5show==0)glutAddMenuEntry("  *Hide",-5);
+      if(part5show==1)glutAddMenuEntry("  Hide",-5);
       glutAddMenuEntry("-",-1);
 
       glutAddMenuEntry("Type:",-1);
@@ -5522,10 +5538,10 @@ static int textureshowmenu=0;
 
       i = partorderindex[ii];
       parti = partinfo + i;
-      if(parti->loaded==0)continue;
-      if(parti->evac==1)continue;
-      STRCPY(menulabel,parti->menulabel);  
-      glutAddMenuEntry(menulabel,i);
+      if(parti->loaded==1&&parti->evac==0){
+        STRCPY(menulabel,parti->menulabel);  
+        glutAddMenuEntry(menulabel,i);
+      }
     }
     glutAddMenuEntry("Unload All",-1);
 
@@ -5538,8 +5554,7 @@ static int textureshowmenu=0;
       if(nmeshes>1){
         if(npartinfo>0){
           if(partinfo->version==1){
-            strcpy(menulabel,"Particles");
-            strcat(menulabel," - All meshes");
+            strcpy(menulabel,"Particles - All meshes");
             glutAddMenuEntry(menulabel,-11);
             glutAddMenuEntry("-",-2);
           }
@@ -5596,10 +5611,10 @@ static int textureshowmenu=0;
 
       i = partorderindex[ii];
       parti = partinfo + i;
-      if(parti->loaded==0)continue;
-      if(parti->evac==0)continue;
-      STRCPY(menulabel,parti->menulabel);  
-      glutAddMenuEntry(menulabel,i);
+      if(parti->loaded==1&&parti->evac==0){
+        STRCPY(menulabel,parti->menulabel);  
+        glutAddMenuEntry(menulabel,i);
+      }
     }
     glutAddMenuEntry("Unload All",-1);
 
