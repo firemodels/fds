@@ -270,58 +270,44 @@ ENDDO WALL_CELL_LOOP
 ! Compute the RHS of the Poisson equation
  
 IF (CYLINDRICAL) THEN
-   DO K=1,KBAR
-      DO I=1,IBAR
-         TRM1 = (R(I-1)*FVX(I-1,1,K)-R(I)*FVX(I,1,K))*RDX(I)*RRN(I)
-         TRM3 = (FVZ(I,1,K-1)-FVZ(I,1,K))*RDZ(K)
-         TRM4 = -DDDT(I,1,K)
-         PRHS(I,1,K) = TRM1 + TRM3 + TRM4
-      ENDDO
-   ENDDO
+   FORALL(K=1:KBAR,I=1:IBAR)
+      TRM1 = (R(I-1)*FVX(I-1,1,K)-R(I)*FVX(I,1,K))*RDX(I)*RRN(I)
+      TRM3 = (FVZ(I,1,K-1)-FVZ(I,1,K))*RDZ(K)
+      TRM4 = -DDDT(I,1,K)
+      PRHS(I,1,K) = TRM1 + TRM3 + TRM4
+   END FORALL
 ENDIF
  
 IF ( (IPS<=1 .OR. IPS==4 .OR. IPS==7) .AND. .NOT.CYLINDRICAL) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            TRM1 = (FVX(I-1,J,K)-FVX(I,J,K))*RDX(I)
-            TRM2 = (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J) 
-            TRM3 = (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K)
-            TRM4 = -DDDT(I,J,K)
-            PRHS(I,J,K) = TRM1 + TRM2 + TRM3 + TRM4
-         ENDDO
-      ENDDO
-   ENDDO
+   FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR)
+      TRM1 = (FVX(I-1,J,K)-FVX(I,J,K))*RDX(I)
+      TRM2 = (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J) 
+      TRM3 = (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K)
+      TRM4 = -DDDT(I,J,K)
+      PRHS(I,J,K) = TRM1 + TRM2 + TRM3 + TRM4
+   END FORALL
 END IF
  
 IF (IPS==2) THEN  ! Switch x and y
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            TRM1 = (FVX(I-1,J,K)-FVX(I,J,K))*RDX(I)
-            TRM2 = (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J)
-            TRM3 = (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K)
-            TRM4 = -DDDT(I,J,K)
-            PRHS(J,I,K) = TRM1 + TRM2 + TRM3 + TRM4
-         ENDDO
-      ENDDO
-   ENDDO
+   FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR)
+      TRM1 = (FVX(I-1,J,K)-FVX(I,J,K))*RDX(I)
+      TRM2 = (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J)
+      TRM3 = (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K)
+      TRM4 = -DDDT(I,J,K)
+      PRHS(J,I,K) = TRM1 + TRM2 + TRM3 + TRM4
+   END FORALL
    BZST = TRANSPOSE(BZS)
    BZFT = TRANSPOSE(BZF)
 ENDIF
  
 IF (IPS==3 .OR. IPS==6) THEN  ! Switch x and z
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            TRM1 = (FVX(I-1,J,K)-FVX(I,J,K))*RDX(I)
-            TRM2 = (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J)
-            TRM3 = (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K)
-            TRM4 = -DDDT(I,J,K)
-            PRHS(K,J,I) = TRM1 + TRM2 + TRM3 + TRM4
-         ENDDO
-      ENDDO
-   ENDDO
+   FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR)
+      TRM1 = (FVX(I-1,J,K)-FVX(I,J,K))*RDX(I)
+      TRM2 = (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J)
+      TRM3 = (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K)
+      TRM4 = -DDDT(I,J,K)
+      PRHS(K,J,I) = TRM1 + TRM2 + TRM3 + TRM4
+   END FORALL
    BXST = TRANSPOSE(BXS)
    BXFT = TRANSPOSE(BXF)
    BYST = TRANSPOSE(BYS)
@@ -331,17 +317,13 @@ IF (IPS==3 .OR. IPS==6) THEN  ! Switch x and z
 END IF
  
 IF (IPS==5) THEN  ! Switch y and z
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            TRM1 = (FVX(I-1,J,K)-FVX(I,J,K))*RDX(I)
-            TRM2 = (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J)
-            TRM3 = (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K)
-            TRM4 = -DDDT(I,J,K)
-            PRHS(I,K,J) = TRM1 + TRM2 + TRM3 + TRM4
-         ENDDO
-      ENDDO
-   ENDDO
+   FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR)
+      TRM1 = (FVX(I-1,J,K)-FVX(I,J,K))*RDX(I)
+      TRM2 = (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J)
+      TRM3 = (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K)
+      TRM4 = -DDDT(I,J,K)
+      PRHS(I,K,J) = TRM1 + TRM2 + TRM3 + TRM4
+   END FORALL
    BXST = TRANSPOSE(BXS)
    BXFT = TRANSPOSE(BXF)
 END IF
@@ -375,47 +357,16 @@ IF (IPS==6) CALL H3CSSS(BZST,BZFT,BYST,BYFT,BXST,BXFT,ITRN,JTRN,PRHS,POIS_PTB,SA
 IF (IPS==7) CALL H2CZSS(BXS,BXF,BYS,BYF,ITRN,PRHS,POIS_PTB,SAVE,WORK,HX)
  
 ! Put output of Poisson solver into the H array
-
-IF (IPS<=1 .OR. IPS==4 .OR. IPS==7) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            H(I,J,K) = PRHS(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
- 
-IF (IPS==2) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            H(I,J,K) = PRHS(J,I,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
- 
-IF (IPS==3 .OR. IPS==6) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            H(I,J,K) = PRHS(K,J,I)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
- 
-IF (IPS==5) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            H(I,J,K) = PRHS(I,K,J)
-         ENDDO
-      ENDDO
-   ENDDO
-END IF
- 
+SELECT CASE(IPS)
+   CASE(:1,4,7)
+      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) H(I,J,K) = PRHS(I,J,K)
+   CASE(2)  
+      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) H(I,J,K) = PRHS(J,I,K)
+   CASE(3,6)
+      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) H(I,J,K) = PRHS(K,J,I)
+   CASE(5) 
+      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) H(I,J,K) = PRHS(I,K,J)
+END SELECT 
 ! Apply boundary conditions to H
  
 DO K=1,KBAR
@@ -450,19 +401,15 @@ ENDDO
  
 IF (CHECK_POISSON) THEN     
    POIS_ERR = 0.
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            RHSS = (R(I-1)*FVX(I-1,J,K)-R(I)*FVX(I,J,K))*RDX(I)*RRN(I) + (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J) + &
-                   (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K) - DDDT(I,J,K)
-            LHSS = ((H(I+1,J,K)-H(I,J,K))*RDXN(I)*R(I) - (H(I,J,K)-H(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
-                   +((H(I,J+1,K)-H(I,J,K))*RDYN(J) -  (H(I,J,K)-H(I,J-1,K))*RDYN(J-1) )*RDY(J) &
-                   +((H(I,J,K+1)-H(I,J,K))*RDZN(K) - (H(I,J,K)-H(I,J,K-1))*RDZN(K-1) )*RDZ(K)
-            RES = ABS(RHSS-LHSS)
-            POIS_ERR = MAX(RES,POIS_ERR)
-         ENDDO
-      ENDDO
-   ENDDO
+   FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR)
+      RHSS = (R(I-1)*FVX(I-1,J,K)-R(I)*FVX(I,J,K))*RDX(I)*RRN(I) + (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J) + &
+               (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K) - DDDT(I,J,K)
+      LHSS = ((H(I+1,J,K)-H(I,J,K))*RDXN(I)*R(I) - (H(I,J,K)-H(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
+               +((H(I,J+1,K)-H(I,J,K))*RDYN(J) -  (H(I,J,K)-H(I,J-1,K))*RDYN(J-1) )*RDY(J) &
+               +((H(I,J,K+1)-H(I,J,K))*RDZN(K) - (H(I,J,K)-H(I,J,K-1))*RDZN(K-1) )*RDZ(K)
+      RES = ABS(RHSS-LHSS)
+      POIS_ERR = MAX(RES,POIS_ERR)
+   END FORALL
 ENDIF
  
 ! **********************************************************************
