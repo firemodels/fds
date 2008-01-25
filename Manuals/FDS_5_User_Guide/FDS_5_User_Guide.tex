@@ -8783,19 +8783,18 @@ sprinklers is mounted a specified distance above an array of catch
 bins, the water flows for a given period of time, and the water
 flux distribution is calculated from the accumulated water mass in
 each bin. In the test case {\bf bucket\_test}, a single sprinkler is
-mounted 10~cm below a 5~m ceiling. Water flows for 5~s at a constant
-rate of 60~L/min.  The simulation continues for another 5~s to allow
+mounted 10~cm below a 5~m ceiling. Water flows for 30~s at a constant
+rate of 180~L/min (ramped up and down in 1~s).  The simulation continues for another 10~s to allow
 water drops time to reach the floor. The total mass of water discharged is
 \be
-  \mathrm{ 60 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 5 \; s = 5 \; kg }
+  \mathrm{ 180 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 30 \; s = 90 \; kg }
 \ee
 In the simulation, the boundary quantity {\ct water\_drops\_AMPUA}
 (Accumulated Mass Per Unit Area) records the total water mass per
 unit area (kg/m$^2$), analogous to actual buckets the size of a grid cell.
 Summing the values of {\ct water\_drops\_AMPUA} over the entire
-floor yields 4.96~kg. Where is the missing water? Some droplets evaporate, and some droplets
-fly beyond the computational domain. Also, there remain a small
-number of suspended drops at the end of the simulation. Note that
+floor yields 88.3~kg. Where is the missing water? Some droplets evaporate, and some droplets
+fly beyond the computational domain. Note that
 there are no actual ``buckets'' in the simulation.
 
 The accumulated water mass at the floor is extracted from
@@ -8822,7 +8821,7 @@ y
 -5 5 -5 5 0 1
   1   MESH  1, water_drops_AMPUA
   Enter starting and ending time for averaging (s)
-9 10
+35 36
   Enter orientation: (plus or minus 1, 2 or 3)
 3
   Enter number of variables
@@ -8835,7 +8834,12 @@ bucket_test_fds2ascii.csv
 \end{verbatim}
 
 \normalsize \noindent
+Note that there really is no need to time-average the results. The quantity is inherently accumulating. Also, the
+``orientation'' refers to direction of the surface. In this case, we're interested in the positive $z$ direction, or 3.
 
+
+
+\clearpage
 
 \subsection{Complex Spray Patterns (\texorpdfstring{{\bf bucket\_test\_2}}{bucket\_test\_2}) }
 \label{bucket_test_2}
