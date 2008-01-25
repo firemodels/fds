@@ -73,9 +73,9 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
    WDRHODZ => WORK6
    
    FORALL (K=0:KBAR,J=0:JBAR,I=0:IBAR)
-            UDRHODX(I,J,K) = UU(I,J,K)*(RHOP(I+1,J,K)-RHOP(I,J,K))*RDXN(I)
-            VDRHODY(I,J,K) = VV(I,J,K)*(RHOP(I,J+1,K)-RHOP(I,J,K))*RDYN(J)
-            WDRHODZ(I,J,K) = WW(I,J,K)*(RHOP(I,J,K+1)-RHOP(I,J,K))*RDZN(K)
+      UDRHODX(I,J,K) = UU(I,J,K)*(RHOP(I+1,J,K)-RHOP(I,J,K))*RDXN(I)
+      VDRHODY(I,J,K) = VV(I,J,K)*(RHOP(I,J+1,K)-RHOP(I,J,K))*RDYN(J)
+      WDRHODZ(I,J,K) = WW(I,J,K)*(RHOP(I,J,K+1)-RHOP(I,J,K))*RDZN(K)
    END FORALL
  
    WLOOP: DO IW=1,NWC
@@ -133,9 +133,9 @@ ENDIF
  
 SPECIES_LOOP: DO N=1,N_SPECIES
    FORALL (K=0:KBAR,J=0:JBAR,I=0:IBAR)
-            UDRHODX(I,J,K) = UU(I,J,K)*( RHOP(I+1,J,K)*YYP(I+1,J,K,N) - RHOP(I,J,K)*YYP(I,J,K,N) )*RDXN(I)
-            VDRHODY(I,J,K) = VV(I,J,K)*( RHOP(I,J+1,K)*YYP(I,J+1,K,N) - RHOP(I,J,K)*YYP(I,J,K,N) )*RDYN(J)
-            WDRHODZ(I,J,K) = WW(I,J,K)*( RHOP(I,J,K+1)*YYP(I,J,K+1,N) - RHOP(I,J,K)*YYP(I,J,K,N) )*RDZN(K)
+      UDRHODX(I,J,K) = UU(I,J,K)*( RHOP(I+1,J,K)*YYP(I+1,J,K,N) - RHOP(I,J,K)*YYP(I,J,K,N) )*RDXN(I)
+      VDRHODY(I,J,K) = VV(I,J,K)*( RHOP(I,J+1,K)*YYP(I,J+1,K,N) - RHOP(I,J,K)*YYP(I,J,K,N) )*RDYN(J)
+      WDRHODZ(I,J,K) = WW(I,J,K)*( RHOP(I,J,K+1)*YYP(I,J,K+1,N) - RHOP(I,J,K)*YYP(I,J,K,N) )*RDZN(K)
    END FORALL
  
    ! Correct U d(RHO*Y)/dx etc. on boundaries
@@ -214,13 +214,12 @@ PREDICTOR_STEP: SELECT CASE (PREDICTOR)
 CASE(.TRUE.) PREDICTOR_STEP
 
    IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
-      FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) &
-          YYS(I,J,K,N) = RHO(I,J,K)*YY(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N)
+      FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) YYS(I,J,K,N) = RHO(I,J,K)*YY(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N)
    ELSE
       DTRATIO   = DT/DTOLD
       OMDTRATIO = 1._EB - DTRATIO
-      FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) &
-                  YYS(I,J,K,N) = OMDTRATIO*RHO(I,J,K) *YY(I,J,K,N) +  DTRATIO*RHOS(I,J,K)*YYS(I,J,K,N)
+      FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) YYS(I,J,K,N) = OMDTRATIO*RHO(I,J,K) *YY(I,J,K,N) +  &
+                                                                         DTRATIO*RHOS(I,J,K)*YYS(I,J,K,N)
    ENDIF
 
    ! Predict the density at the next time step (RHOS or RHO^*)
@@ -231,13 +230,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       FORALL (I=0:IBP1,J=0:JBP1,K=0:KBP1) RHOS(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(TMPA*SPECIES(0)%RCON)
       DO N=1,N_SPECIES
          WFAC = 1._EB - SPECIES(N)%RCON/SPECIES(0)%RCON
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  RHOS(I,J,K) = RHOS(I,J,K) + WFAC*YYS(I,J,K,N)
-               ENDDO 
-            ENDDO
-         ENDDO
+         FORALL (K=1:KBAR,J=1:JBAR,I=1:IBAR) RHOS(I,J,K) = RHOS(I,J,K) + WFAC*YYS(I,J,K,N)
       ENDDO
    ENDIF
  
@@ -246,8 +239,8 @@ CASE(.TRUE.) PREDICTOR_STEP
    CALL CHECK_DENSITY
 
    ! Extract mass fraction from RHO * YY
-   FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) &
-      YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
+
+   FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
 
    ! Correct mass fractions above or below clip limits
 
@@ -349,8 +342,7 @@ CASE(.FALSE.) PREDICTOR_STEP
  
    ! Extract Y_n from rho*Y_n
 
-   FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) &
-      YY(I,J,K,N) = YY(I,J,K,N)/RHO(I,J,K)
+   FORALL (N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) YY(I,J,K,N) = YY(I,J,K,N)/RHO(I,J,K)
 
    ! Correct mass fractions above or below clip limits
 
