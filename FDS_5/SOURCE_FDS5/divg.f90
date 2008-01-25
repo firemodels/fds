@@ -197,17 +197,15 @@ SPECIES_LOOP: DO N=1,N_SPECIES
  
       CYLINDER: SELECT CASE(CYLINDRICAL)
          CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
-            FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) &
-               DP(I,J,K) = DP(I,J,K) + & 
-                           (H_RHO_D_DYDX(I,J,K)-H_RHO_D_DYDX(I-1,J,K))*RDX(I) + &
-                           (H_RHO_D_DYDY(I,J,K)-H_RHO_D_DYDY(I,J-1,K))*RDY(J) + &
-                           (H_RHO_D_DYDZ(I,J,K)-H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+            FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) DP(I,J,K) = DP(I,J,K) + & 
+                                                           (H_RHO_D_DYDX(I,J,K)-H_RHO_D_DYDX(I-1,J,K))*RDX(I) + &
+                                                           (H_RHO_D_DYDY(I,J,K)-H_RHO_D_DYDY(I,J-1,K))*RDY(J) + &
+                                                           (H_RHO_D_DYDZ(I,J,K)-H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
          CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
             J = 1
-            FORALL(K=1:KBAR,I=1:IBAR) &
-               DP(I,J,K) = DP(I,J,K) + &
-               (R(I)*H_RHO_D_DYDX(I,J,K)-R(I-1)*H_RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                     (H_RHO_D_DYDZ(I,J,K)-       H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+            FORALL(K=1:KBAR,I=1:IBAR) DP(I,J,K) = DP(I,J,K) + &
+                                                  (R(I)*H_RHO_D_DYDX(I,J,K)-R(I-1)*H_RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                                  (     H_RHO_D_DYDZ(I,J,K)-       H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
       END SELECT CYLINDER
     
    ENDIF SPECIES_DIFFUSION
@@ -216,17 +214,15 @@ SPECIES_LOOP: DO N=1,N_SPECIES
  
    CYLINDER2: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
-         FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) &
-            DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + &
-                           (RHO_D_DYDX(I,J,K)-RHO_D_DYDX(I-1,J,K))*RDX(I) + &
-                           (RHO_D_DYDY(I,J,K)-RHO_D_DYDY(I,J-1,K))*RDY(J) + &
-                           (RHO_D_DYDZ(I,J,K)-RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+         FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + &
+                                                                       (RHO_D_DYDX(I,J,K)-RHO_D_DYDX(I-1,J,K))*RDX(I) + &
+                                                                       (RHO_D_DYDY(I,J,K)-RHO_D_DYDY(I,J-1,K))*RDY(J) + &
+                                                                       (RHO_D_DYDZ(I,J,K)-RHO_D_DYDZ(I,J,K-1))*RDZ(K)
       CASE(.TRUE.) CYLINDER2  ! 2D Cylindrical Coords
          J=1
-         FORALL(K=1:KBAR,I=1:IBAR) &
-            DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + &
-            (R(I)*RHO_D_DYDX(I,J,K)-R(I-1)*RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                  (RHO_D_DYDZ(I,J,K)-       RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+         FORALL(K=1:KBAR,I=1:IBAR) DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + &
+                                                              (R(I)*RHO_D_DYDX(I,J,K)-R(I-1)*RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                                              (     RHO_D_DYDZ(I,J,K)-       RHO_D_DYDZ(I,J,K-1))*RDZ(K)
    END SELECT CYLINDER2
 
    ! Compute -Sum h_n del dot rho*D del Y_n
@@ -461,22 +457,21 @@ ENDIF
 ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Y_n
 
 SPECIES_DIFFUSION_3: IF (.NOT.MIXTURE_FRACTION) THEN
-   FORALL(N=1:N_SPECIES,K=1:KBAR,J=1:JBAR,I=1:IBAR) &
-       DP(I,J,K) = DP(I,J,K) + (SPECIES(N)%RCON-SPECIES(0)%RCON)/(RSUM(I,J,K)*RHOP(I,J,K))*DEL_RHO_D_DEL_Y(I,J,K,N)
+   DO N=1,N_SPECIES
+      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) & 
+         DP(I,J,K) = DP(I,J,K) + (SPECIES(N)%RCON-SPECIES(0)%RCON)/(RSUM(I,J,K)*RHOP(I,J,K))*DEL_RHO_D_DEL_Y(I,J,K,N)
+   ENDDO
 ENDIF SPECIES_DIFFUSION_3
 
 ! Add contribution of evaporating droplets
  
-IF (NLP>0 .AND. N_EVAP_INDICIES > 0) THEN
-   FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) DP(I,J,K) = DP(I,J,K) + D_VAP(I,J,K)
-ENDIF
+IF (NLP>0 .AND. N_EVAP_INDICIES > 0) FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) DP(I,J,K) = DP(I,J,K) + D_VAP(I,J,K)
  
 ! Atmospheric Stratification Term
 
-IF (STRATIFICATION) THEN
+IF (STRATIFICATION) &
    FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) &
       DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,PRESSURE_ZONE(I,J,K)))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*GVEC(3)*RHO_0(K)
-ENDIF
 
 ! Compute normal component of velocity at boundaries, UWS
 
