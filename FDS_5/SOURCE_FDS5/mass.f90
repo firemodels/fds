@@ -168,7 +168,9 @@ SPECIES_LOOP: DO N=1,N_SPECIES
  
   ! Sum up the convective and diffusive terms in the transport equation and store in DEL_RHO_D_DEL_Y
  
-   FORALL (K=1:KBAR,J=1:JBAR,I=1:IBAR)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
             FXYZ   = .5_EB*(UDRHODX(I,J,K)  *(1._EB-EPSX(I,J,K))   +  &
                             UDRHODX(I-1,J,K)*(1._EB+EPSX(I-1,J,K)) +  &
                             VDRHODY(I,J,K)  *(1._EB-EPSY(I,J,K))   +  &
@@ -176,7 +178,10 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                             WDRHODZ(I,J,K)  *(1._EB-EPSZ(I,J,K))   +  &
                             WDRHODZ(I,J,K-1)*(1._EB+EPSZ(I,J,K-1)) ) 
             DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N) + FXYZ + RHOP(I,J,K)*YYP(I,J,K,N)*DP(I,J,K) 
-   END FORALL 
+         ENDDO
+      ENDDO
+   ENDDO
+ 
 ENDDO SPECIES_LOOP
  
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
@@ -226,7 +231,13 @@ CASE(.TRUE.) PREDICTOR_STEP
       FORALL (I=0:IBP1,J=0:JBP1,K=0:KBP1) RHOS(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(TMPA*SPECIES(0)%RCON)
       DO N=1,N_SPECIES
          WFAC = 1._EB - SPECIES(N)%RCON/SPECIES(0)%RCON
-         FORALL (K=1:KBAR,J=1:JBAR,I=1:IBAR) RHOS(I,J,K) = RHOS(I,J,K) + WFAC*YYS(I,J,K,N)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  RHOS(I,J,K) = RHOS(I,J,K) + WFAC*YYS(I,J,K,N)
+               ENDDO 
+            ENDDO
+         ENDDO
       ENDDO
    ENDIF
  
@@ -278,9 +289,9 @@ CASE(.TRUE.) PREDICTOR_STEP
    ENDIF
 
    IF (MIXTURE_FRACTION) THEN
-      DO K = 1, KBAR
-         DO J = 1, JBAR
-            DO I = 1, IBAR
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
                IF (CO_PRODUCTION) THEN
                   Z_2 = YYS(I,J,K,I_PROG_CO)
                ElSE
@@ -288,9 +299,9 @@ CASE(.TRUE.) PREDICTOR_STEP
                ENDIF
                CALL GET_MOLECULAR_WEIGHT2(YYS(I,J,K,I_FUEL),Z_2,YYS(I,J,K,I_PROG_F),Y_SUM(I,J,K),RSUM(I,J,K))
                RSUM(I,J,K) = R0/RSUM(I,J,K)
-            END DO
-         END DO
-      END DO
+            ENDDO
+         ENDDO
+      ENDDO
       IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
    ENDIF
 
@@ -317,7 +328,13 @@ CASE(.FALSE.) PREDICTOR_STEP
    ! Correct density at next time step
 
    IF (.NOT.ISOTHERMAL) THEN
-     FORALL (K=1:KBAR,J=1:JBAR,I=1:IBAR) RHO(I,J,K) = .5_EB*(RHO(I,J,K)+RHOS(I,J,K)-DT*FRHO(I,J,K))
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               RHO(I,J,K) = .5_EB*(RHO(I,J,K)+RHOS(I,J,K)-DT*FRHO(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
    ELSE
       FORALL (I=0:IBP1,J=0:JBP1,K=0:KBP1) RHO(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*TMPA)
       DO N=1,N_SPECIES
@@ -375,9 +392,9 @@ CASE(.FALSE.) PREDICTOR_STEP
    ENDIF
 
    IF (MIXTURE_FRACTION) THEN
-      DO K = 1, KBAR
-         DO J = 1, JBAR
-            DO I = 1, IBAR
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
                IF (CO_PRODUCTION) THEN
                   Z_2 = YY(I,J,K,I_PROG_CO)
                ElSE
@@ -385,9 +402,9 @@ CASE(.FALSE.) PREDICTOR_STEP
                ENDIF
                CALL GET_MOLECULAR_WEIGHT2(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),RSUM(I,J,K))
                RSUM(I,J,K) = R0/RSUM(I,J,K)
-            END DO
-         END DO
-      END DO
+            ENDDO
+         ENDDO
+      ENDDO
       IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
    ENDIF
 

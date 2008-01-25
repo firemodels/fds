@@ -75,10 +75,14 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    RHO_D => WORK4
     
    IF (DNS .AND. SPECIES(N)%MODE==GAS_SPECIES) THEN
-      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR)
-            ITMP = 0.1_EB*TMP(I,J,K)
-            RHO_D(I,J,K) = RHOP(I,J,K)*SPECIES(N)%D(ITMP)
-      END FORALL
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ITMP = 0.1_EB*TMP(I,J,K)
+               RHO_D(I,J,K) = RHOP(I,J,K)*SPECIES(N)%D(ITMP)
+            ENDDO 
+         ENDDO
+      ENDDO
    ENDIF
     
    IF (DNS .AND. SPECIES(N)%MODE==MIXTURE_FRACTION_SPECIES) THEN
@@ -100,14 +104,19 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    IF (LES) RHO_D = MU*RSC
  
    ! Compute rho*D del Y
-   FORALL(K=0:KBAR,J=0:JBAR,I=0:IBAR)
-      DYDX = (YYP(I+1,J,K,N)-YYP(I,J,K,N))*RDXN(I)
-      RHO_D_DYDX(I,J,K) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DYDX
-      DYDY = (YYP(I,J+1,K,N)-YYP(I,J,K,N))*RDYN(J)
-      RHO_D_DYDY(I,J,K) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DYDY
-      DYDZ = (YYP(I,J,K+1,N)-YYP(I,J,K,N))*RDZN(K)
-      RHO_D_DYDZ(I,J,K) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DYDZ
-   END FORALL
+ 
+   DO K=0,KBAR
+      DO J=0,JBAR
+         DO I=0,IBAR
+            DYDX = (YYP(I+1,J,K,N)-YYP(I,J,K,N))*RDXN(I)
+            RHO_D_DYDX(I,J,K) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DYDX
+            DYDY = (YYP(I,J+1,K,N)-YYP(I,J,K,N))*RDYN(J)
+            RHO_D_DYDY(I,J,K) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DYDY
+            DYDZ = (YYP(I,J,K+1,N)-YYP(I,J,K,N))*RDZN(K)
+            RHO_D_DYDZ(I,J,K) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DYDZ
+         ENDDO
+      ENDDO
+   ENDDO
  
    ! Correct rho*D del Y at boundaries and store rho*D at boundaries
  
@@ -143,17 +152,22 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       H_RHO_D_DYDX => WORK4
       H_RHO_D_DYDY => WORK5
       H_RHO_D_DYDZ => WORK6
-      FORALL(K=0:KBAR,J=0:JBAR,I=0:IBAR)
-         ITMP = .05_EB*(TMP(I+1,J,K)+TMP(I,J,K))
-         HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
-         H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
-         ITMP = .05_EB*(TMP(I,J+1,K)+TMP(I,J,K))
-         HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
-         H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
-         ITMP = .05_EB*(TMP(I,J,K+1)+TMP(I,J,K))
-         HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
-         H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
-      END FORALL
+    
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               ITMP = .05_EB*(TMP(I+1,J,K)+TMP(I,J,K))
+               HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
+               H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
+               ITMP = .05_EB*(TMP(I,J+1,K)+TMP(I,J,K))
+               HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
+               H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
+               ITMP = .05_EB*(TMP(I,J,K+1)+TMP(I,J,K))
+               HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
+               H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
 
       WALL_LOOP2: DO IW=1,NWC
          IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2
@@ -218,11 +232,15 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    ! Compute -Sum h_n del dot rho*D del Y_n
  
    SPECIES_DIFFUSION_2: IF (.NOT.MIXTURE_FRACTION) THEN
-      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR)
-         ITMP = 0.1_EB*TMP(I,J,K)
-         HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
-         DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
-      END FORALL
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ITMP = 0.1_EB*TMP(I,J,K)
+               HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
+               DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
+            ENDDO
+         ENDDO
+      ENDDO
    ENDIF SPECIES_DIFFUSION_2
  
 ENDDO SPECIES_LOOP
@@ -303,14 +321,19 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
    ENDIF K_DNS_OR_LES
  
    ! Compute k*dT/dx, etc
-   FORALL(K=0:KBAR,J=0:JBAR,I=0:IBAR)
-      DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
-      KDTDX(I,J,K) = .5_EB*(KP(I+1,J,K)+KP(I,J,K))*DTDX
-      DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
-      KDTDY(I,J,K) = .5_EB*(KP(I,J+1,K)+KP(I,J,K))*DTDY
-      DTDZ = (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
-      KDTDZ(I,J,K) = .5_EB*(KP(I,J,K+1)+KP(I,J,K))*DTDZ
-   END FORALL
+
+   DO K=0,KBAR
+      DO J=0,JBAR
+         DO I=0,IBAR
+            DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+            KDTDX(I,J,K) = .5_EB*(KP(I+1,J,K)+KP(I,J,K))*DTDX
+            DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+            KDTDY(I,J,K) = .5_EB*(KP(I,J+1,K)+KP(I,J,K))*DTDY
+            DTDZ = (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+            KDTDZ(I,J,K) = .5_EB*(KP(I,J,K+1)+KP(I,J,K))*DTDZ
+         ENDDO
+      ENDDO
+   ENDDO
 
    ! Correct thermal gradient (k dT/dn) at boundaries
  
@@ -345,20 +368,27 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
  
    CYLINDER3: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
-         FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
                   DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
                              (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
                              (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
                   DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
-         END FORALL
+               ENDDO 
+            ENDDO
+         ENDDO
       CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
-         J = 1
-         FORALL(K=1:KBAR,I=1:IBAR)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
                   DELKDELT = & 
                   (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
                        (KDTDZ(I,J,K)-       KDTDZ(I,J,K-1))*RDZ(K)
                   DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
-         END FORALL
+               ENDDO 
+            ENDDO
+         ENDDO
    END SELECT CYLINDER3
  
 ENDIF ENERGY
@@ -416,12 +446,16 @@ IF (.NOT.MIXTURE_FRACTION .AND. N_SPECIES>0) THEN
    ENDDO
 ENDIF
 IF (.NOT.MIXTURE_FRACTION .AND. N_SPECIES==0) THEN
-   FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
             ITMP = 0.1_EB*TMP(I,J,K)
             CP_SUM = SPECIES(0)%CP(ITMP)
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*SPECIES(0)%RCON/CP_SUM
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
-    END FORALL
+         ENDDO
+      ENDDO
+   ENDDO
 ENDIF
 
 ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Y_n
