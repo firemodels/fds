@@ -181,26 +181,27 @@ CALC_MU: IF (PREDICTOR) THEN
 ENDIF CALC_MU
  
 ! Compute vorticity and stress tensor components
-FORALL(K=0:KBAR,J=0:JBAR,I=0:IBAR)
-   DUDY = RDYN(J)*(UU(I,J+1,K)-UU(I,J,K))
-   DVDX = RDXN(I)*(VV(I+1,J,K)-VV(I,J,K))
-   OMZ(I,J,K) = DVDX - DUDY
-   TXY(I,J,K) = MUZ*(DVDX + DUDY)
-   
-   DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
-   DWDX = RDXN(I)*(WW(I+1,J,K)-WW(I,J,K))
-   OMY(I,J,K) = DUDZ - DWDX
-   TXZ(I,J,K) = MUY*(DUDZ + DWDX)
-   
-   DVDZ = RDZN(K)*(VV(I,J,K+1)-VV(I,J,K))
-   DWDY = RDYN(J)*(WW(I,J+1,K)-WW(I,J,K))
-   OMX(I,J,K) = DWDY - DVDZ
-   TYZ(I,J,K) = MUX*(DVDZ + DWDY)
-   
-   MUX = 0.25_EB*(MU(I,J+1,K)+MU(I,J,K)+MU(I,J,K+1)+MU(I,J+1,K+1))
-   MUY = 0.25_EB*(MU(I+1,J,K)+MU(I,J,K)+MU(I,J,K+1)+MU(I+1,J,K+1))
-   MUZ = 0.25_EB*(MU(I+1,J,K)+MU(I,J,K)+MU(I,J+1,K)+MU(I+1,J+1,K))                     
-END FORALL
+DO K=0,KBAR
+   DO J=0,JBAR
+      DO I=0,IBAR
+         DUDY = RDYN(J)*(UU(I,J+1,K)-UU(I,J,K))
+         DVDX = RDXN(I)*(VV(I+1,J,K)-VV(I,J,K))
+         DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
+         DWDX = RDXN(I)*(WW(I+1,J,K)-WW(I,J,K))
+         DVDZ = RDZN(K)*(VV(I,J,K+1)-VV(I,J,K))
+         DWDY = RDYN(J)*(WW(I,J+1,K)-WW(I,J,K))
+         OMX(I,J,K) = DWDY - DVDZ
+         OMY(I,J,K) = DUDZ - DWDX
+         OMZ(I,J,K) = DVDX - DUDY
+         MUX = 0.25_EB*(MU(I,J+1,K)+MU(I,J,K)+MU(I,J,K+1)+MU(I,J+1,K+1))
+         MUY = 0.25_EB*(MU(I+1,J,K)+MU(I,J,K)+MU(I,J,K+1)+MU(I+1,J,K+1))
+         MUZ = 0.25_EB*(MU(I+1,J,K)+MU(I,J,K)+MU(I,J+1,K)+MU(I+1,J+1,K))
+         TXY(I,J,K) = MUZ*(DVDX + DUDY)
+         TXZ(I,J,K) = MUY*(DUDZ + DWDX)
+         TYZ(I,J,K) = MUX*(DVDZ + DWDY)
+      ENDDO
+   ENDDO
+ENDDO
 
 ! Correct vorticity and stress tensor components at solid edges
 
@@ -239,91 +240,99 @@ ELSE
 ENDIF
  
 ! Compute x-direction flux term FVX
-FORALL(K=1:KBAR,J=1:JBAR,I=0:IBAR) 
-   WP    = WW(I,J,K)   + WW(I+1,J,K)
-   EPSWP = 1._EB + WP*MPDT*RDZN(K)
-   WM    = WW(I,J,K-1) + WW(I+1,J,K-1)
-   EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
-   WOMY  = EPSWP*WP*OMY(I,J,K) + EPSWM*WM*OMY(I,J,K-1)
-                     
-   VP    = VV(I,J,K)   + VV(I+1,J,K)
-   EPSVP = 1._EB + VP*MPDT*RDYN(J)
-   VM    = VV(I,J-1,K) + VV(I+1,J-1,K)
-   EPSVM = 1._EB + VM*PMDT*RDYN(J-1)         
-   VOMZ  = EPSVP*VP*OMZ(I,J,K) + EPSVM*VM*OMZ(I,J-1,K)
-   
-   RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
-   AH    = RHO_0(K)*RRHO - 1._EB   
-   DVDY  = (VV(I+1,J,K)-VV(I+1,J-1,K))*RDY(J)
-   DWDZ  = (WW(I+1,J,K)-WW(I+1,J,K-1))*RDZ(K)
-   TXXP  = MU(I+1,J,K)*( FOTH*DP(I+1,J,K) - 2._EB*(DVDY+DWDZ) )
-   DVDY  = (VV(I,J,K)-VV(I,J-1,K))*RDY(J)
-   DWDZ  = (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
-   TXXM  = MU(I,J,K)  *( FOTH*DP(I,J,K)   - 2._EB*(DVDY+DWDZ) )
-   DTXXDX= RDXN(I)*(TXXP      -TXXM)
-   DTXYDY= RDY(J) *(TXY(I,J,K)-TXY(I,J-1,K))
-   DTXZDZ= RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,K-1))
-   VTRM  = RRHO*(DTXXDX + DTXYDY + DTXZDZ)
-   FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) + GX*AH - VTRM 
-END FORALL
+ 
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         WP    = WW(I,J,K)   + WW(I+1,J,K)
+         WM    = WW(I,J,K-1) + WW(I+1,J,K-1)
+         VP    = VV(I,J,K)   + VV(I+1,J,K)
+         VM    = VV(I,J-1,K) + VV(I+1,J-1,K)
+         EPSWP = 1._EB + WP*MPDT*RDZN(K)
+         EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
+         EPSVP = 1._EB + VP*MPDT*RDYN(J)
+         EPSVM = 1._EB + VM*PMDT*RDYN(J-1)
+         WOMY  = EPSWP*WP*OMY(I,J,K) + EPSWM*WM*OMY(I,J,K-1)
+         VOMZ  = EPSVP*VP*OMZ(I,J,K) + EPSVM*VM*OMZ(I,J-1,K)
+         RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
+         AH    = RHO_0(K)*RRHO - 1._EB   
+         DVDY  = (VV(I+1,J,K)-VV(I+1,J-1,K))*RDY(J)
+         DWDZ  = (WW(I+1,J,K)-WW(I+1,J,K-1))*RDZ(K)
+         TXXP  = MU(I+1,J,K)*( FOTH*DP(I+1,J,K) - 2._EB*(DVDY+DWDZ) )
+         DVDY  = (VV(I,J,K)-VV(I,J-1,K))*RDY(J)
+         DWDZ  = (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
+         TXXM  = MU(I,J,K)  *( FOTH*DP(I,J,K)   - 2._EB*(DVDY+DWDZ) )
+         DTXXDX= RDXN(I)*(TXXP      -TXXM)
+         DTXYDY= RDY(J) *(TXY(I,J,K)-TXY(I,J-1,K))
+         DTXZDZ= RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,K-1))
+         VTRM  = RRHO*(DTXXDX + DTXYDY + DTXZDZ)
+         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) + GX*AH - VTRM 
+      ENDDO 
+   ENDDO   
+ENDDO   
  
 ! Compute y-direction flux term FVY
-FORALL(K=1:KBAR,J=0:JBAR,I=1:IBAR)
-   UP    = UU(I,J,K)   + UU(I,J+1,K)
-   EPSUP = 1._EB + UP*MPDT*RDXN(I)
-   UM    = UU(I-1,J,K) + UU(I-1,J+1,K)
-   UOMZ  = EPSUP*UP*OMZ(I,J,K) + EPSUM*UM*OMZ(I-1,J,K)
-
-   EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
-   WP    = WW(I,J,K)   + WW(I,J+1,K)
-   EPSWP = 1._EB + WP*MPDT*RDZN(K)
-   WM    = WW(I,J,K-1) + WW(I,J+1,K-1)
-   EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
-   WOMX  = EPSWP*WP*OMX(I,J,K) + EPSWM*WM*OMX(I,J,K-1)
-
-   RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J+1,K))
-   AH    = RHO_0(K)*RRHO - 1._EB
-   DUDX  = (UU(I,J+1,K)-UU(I-1,J+1,K))*RDX(I)
-   DWDZ  = (WW(I,J+1,K)-WW(I,J+1,K-1))*RDZ(K)
-   TYYP  = MU(I,J+1,K)*( FOTH*DP(I,J+1,K) - 2._EB*(DUDX+DWDZ) )
-   DUDX  = (UU(I,J,K)-UU(I-1,J,K))*RDX(I)
-   DWDZ  = (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
-   TYYM  = MU(I,J,K)  *( FOTH*DP(I,J,K)   - 2._EB*(DUDX+DWDZ) )
-   DTXYDX= RDX(I) *(TXY(I,J,K)-TXY(I-1,J,K))
-   DTYYDY= RDYN(J)*(TYYP      -TYYM)
-   DTYZDZ= RDZ(K) *(TYZ(I,J,K)-TYZ(I,J,K-1))
-   VTRM  = RRHO*(DTXYDX + DTYYDY + DTYZDZ)
-   FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) + GY*AH - VTRM 
-END FORALL
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         UP    = UU(I,J,K)   + UU(I,J+1,K)
+         UM    = UU(I-1,J,K) + UU(I-1,J+1,K)
+         WP    = WW(I,J,K)   + WW(I,J+1,K)
+         WM    = WW(I,J,K-1) + WW(I,J+1,K-1)
+         EPSUP = 1._EB + UP*MPDT*RDXN(I)
+         EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
+         EPSWP = 1._EB + WP*MPDT*RDZN(K)
+         EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
+         WOMX  = EPSWP*WP*OMX(I,J,K) + EPSWM*WM*OMX(I,J,K-1)
+         UOMZ  = EPSUP*UP*OMZ(I,J,K) + EPSUM*UM*OMZ(I-1,J,K)
+         RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J+1,K))
+         AH    = RHO_0(K)*RRHO - 1._EB
+         DUDX  = (UU(I,J+1,K)-UU(I-1,J+1,K))*RDX(I)
+         DWDZ  = (WW(I,J+1,K)-WW(I,J+1,K-1))*RDZ(K)
+         TYYP  = MU(I,J+1,K)*( FOTH*DP(I,J+1,K) - 2._EB*(DUDX+DWDZ) )
+         DUDX  = (UU(I,J,K)-UU(I-1,J,K))*RDX(I)
+         DWDZ  = (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
+         TYYM  = MU(I,J,K)  *( FOTH*DP(I,J,K)   - 2._EB*(DUDX+DWDZ) )
+         DTXYDX= RDX(I) *(TXY(I,J,K)-TXY(I-1,J,K))
+         DTYYDY= RDYN(J)*(TYYP      -TYYM)
+         DTYZDZ= RDZ(K) *(TYZ(I,J,K)-TYZ(I,J,K-1))
+         VTRM  = RRHO*(DTXYDX + DTYYDY + DTYZDZ)
+         FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) + GY*AH - VTRM 
+      ENDDO
+   ENDDO   
+ENDDO   
  
 ! Compute z-direction flux term FVZ
-FORALL(K=0:KBAR,J=1:JBAR,I=1:IBAR)
-   UP    = UU(I,J,K)   + UU(I,J,K+1)
-   EPSUP = 1._EB + UP*MPDT*RDXN(I)
-   UM    = UU(I-1,J,K) + UU(I-1,J,K+1)
-   EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
-   UOMY  = EPSUP*UP*OMY(I,J,K) + EPSUM*UM*OMY(I-1,J,K)
-
-   VP    = VV(I,J,K)   + VV(I,J,K+1)
-   EPSVP = 1._EB + VP*MPDT*RDYN(J)
-   VM    = VV(I,J-1,K) + VV(I,J-1,K+1)
-   EPSVM = 1._EB + VM*PMDT*RDYN(J-1)
-   VOMX  = EPSVP*VP*OMX(I,J,K) + EPSVM*VM*OMX(I,J-1,K)
-
-   RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
-   AH    = 0.5_EB*(RHO_0(K)+RHO_0(K+1))*RRHO - 1._EB
-   DUDX  = (UU(I,J,K+1)-UU(I-1,J,K+1))*RDX(I)
-   DVDY  = (VV(I,J,K+1)-VV(I,J-1,K+1))*RDY(J)
-   TZZP  = MU(I,J,K+1)*( FOTH*DP(I,J,K+1) - 2._EB*(DUDX+DVDY) )
-   DUDX  = (UU(I,J,K)-UU(I-1,J,K))*RDX(I)
-   DVDY  = (VV(I,J,K)-VV(I,J-1,K))*RDY(J)
-   TZZM  = MU(I,J,K)  *( FOTH*DP(I,J,K)   - 2._EB*(DUDX+DVDY) )
-   DTXZDX= RDX(I) *(TXZ(I,J,K)-TXZ(I-1,J,K))
-   DTYZDY= RDY(J) *(TYZ(I,J,K)-TYZ(I,J-1,K))
-   DTZZDZ= RDZN(K)*(TZZP      -TZZM)
-   VTRM  = RRHO*(DTXZDX + DTYZDY + DTZZDZ)
-   FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) + GZ*AH - VTRM       
-END FORALL
+ 
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         UP    = UU(I,J,K)   + UU(I,J,K+1)
+         UM    = UU(I-1,J,K) + UU(I-1,J,K+1)
+         VP    = VV(I,J,K)   + VV(I,J,K+1)
+         VM    = VV(I,J-1,K) + VV(I,J-1,K+1)
+         EPSUP = 1._EB + UP*MPDT*RDXN(I)
+         EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
+         EPSVP = 1._EB + VP*MPDT*RDYN(J)
+         EPSVM = 1._EB + VM*PMDT*RDYN(J-1)
+         UOMY  = EPSUP*UP*OMY(I,J,K) + EPSUM*UM*OMY(I-1,J,K)
+         VOMX  = EPSVP*VP*OMX(I,J,K) + EPSVM*VM*OMX(I,J-1,K)
+         RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
+         AH    = 0.5_EB*(RHO_0(K)+RHO_0(K+1))*RRHO - 1._EB
+         DUDX  = (UU(I,J,K+1)-UU(I-1,J,K+1))*RDX(I)
+         DVDY  = (VV(I,J,K+1)-VV(I,J-1,K+1))*RDY(J)
+         TZZP  = MU(I,J,K+1)*( FOTH*DP(I,J,K+1) - 2._EB*(DUDX+DVDY) )
+         DUDX  = (UU(I,J,K)-UU(I-1,J,K))*RDX(I)
+         DVDY  = (VV(I,J,K)-VV(I,J-1,K))*RDY(J)
+         TZZM  = MU(I,J,K)  *( FOTH*DP(I,J,K)   - 2._EB*(DUDX+DVDY) )
+         DTXZDX= RDX(I) *(TXZ(I,J,K)-TXZ(I-1,J,K))
+         DTYZDY= RDY(J) *(TYZ(I,J,K)-TYZ(I,J-1,K))
+         DTZZDZ= RDZN(K)*(TZZP      -TZZM)
+         VTRM  = RRHO*(DTXZDX + DTYZDY + DTZZDZ)
+         FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) + GZ*AH - VTRM       
+      ENDDO
+   ENDDO   
+ENDDO   
  
 ! Baroclinic torque correction
  
@@ -365,17 +374,22 @@ OMY => WORK5
 OMZ => WORK6
  
 ! Compute vorticity and stress tensor components
-FORALL(K=0:KBAR,J=0:JBAR,I=0:IBAR)
-   DUDY = RDYN(J)*(UU(I,J+1,K)-UU(I,J,K))
-   DVDX = RDXN(I)*(VV(I+1,J,K)-VV(I,J,K))
-   DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
-   DWDX = RDXN(I)*(WW(I+1,J,K)-WW(I,J,K))
-   DVDZ = RDZN(K)*(VV(I,J,K+1)-VV(I,J,K))
-   DWDY = RDYN(J)*(WW(I,J+1,K)-WW(I,J,K))
-   OMX(I,J,K) = DWDY - DVDZ
-   OMY(I,J,K) = DUDZ - DWDX
-   OMZ(I,J,K) = DVDX - DUDY
-END FORALL
+ 
+DO K=0,KBAR
+   DO J=0,JBAR
+      DO I=0,IBAR
+         DUDY = RDYN(J)*(UU(I,J+1,K)-UU(I,J,K))
+         DVDX = RDXN(I)*(VV(I+1,J,K)-VV(I,J,K))
+         DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
+         DWDX = RDXN(I)*(WW(I+1,J,K)-WW(I,J,K))
+         DVDZ = RDZN(K)*(VV(I,J,K+1)-VV(I,J,K))
+         DWDY = RDYN(J)*(WW(I,J+1,K)-WW(I,J,K))
+         OMX(I,J,K) = DWDY - DVDZ
+         OMY(I,J,K) = DUDZ - DWDX
+         OMZ(I,J,K) = DVDX - DUDY
+      ENDDO
+   ENDDO
+ENDDO
  
 ! Correct vorticity and stress tensor components at solid edges
  
@@ -405,51 +419,66 @@ ELSE
 ENDIF
  
 ! Compute x-direction flux term FVX
-FORALL(K=1:KBAR,J=1:JBAR,I=0:IBAR)
-   WP    = WW(I,J,K)   + WW(I+1,J,K)
-   WM    = WW(I,J,K-1) + WW(I+1,J,K-1)
-   VP    = VV(I,J,K)   + VV(I+1,J,K)
-   VM    = VV(I,J-1,K) + VV(I+1,J-1,K)
-   EPSWP = 1._EB + WP*MPDT*RDZN(K)
-   EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
-   EPSVP = 1._EB + VP*MPDT*RDYN(J)
-   EPSVM = 1._EB + VM*PMDT*RDYN(J-1)
-   WOMY  = EPSWP*WP*OMY(I,J,K) + EPSWM*WM*OMY(I,J,K-1)
-   VOMZ  = EPSVP*VP*OMZ(I,J,K) + EPSVM*VM*OMZ(I,J-1,K)
-   VTRM  = RREDZ(K)*(OMY(I,J,K)-OMY(I,J,K-1)) - RREDY(J)*(OMZ(I,J,K)-OMZ(I,J-1,K))
-   FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) - VTRM
-END FORALL
+ 
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         WP    = WW(I,J,K)   + WW(I+1,J,K)
+         WM    = WW(I,J,K-1) + WW(I+1,J,K-1)
+         VP    = VV(I,J,K)   + VV(I+1,J,K)
+         VM    = VV(I,J-1,K) + VV(I+1,J-1,K)
+         EPSWP = 1._EB + WP*MPDT*RDZN(K)
+         EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
+         EPSVP = 1._EB + VP*MPDT*RDYN(J)
+         EPSVM = 1._EB + VM*PMDT*RDYN(J-1)
+         WOMY  = EPSWP*WP*OMY(I,J,K) + EPSWM*WM*OMY(I,J,K-1)
+         VOMZ  = EPSVP*VP*OMZ(I,J,K) + EPSVM*VM*OMZ(I,J-1,K)
+         VTRM  = RREDZ(K)*(OMY(I,J,K)-OMY(I,J,K-1)) - RREDY(J)*(OMZ(I,J,K)-OMZ(I,J-1,K))
+         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) - VTRM
+      ENDDO
+   ENDDO
+ENDDO
 ! Compute y-direction flux term FVY
-FORALL(K=1:KBAR,J=0:JBAR,I=1:IBAR)
-   UP    = UU(I,J,K)   + UU(I,J+1,K)
-   UM    = UU(I-1,J,K) + UU(I-1,J+1,K)
-   WP    = WW(I,J,K)   + WW(I,J+1,K)
-   WM    = WW(I,J,K-1) + WW(I,J+1,K-1)
-   EPSUP = 1._EB + UP*MPDT*RDXN(I)
-   EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
-   EPSWP = 1._EB + WP*MPDT*RDZN(K)
-   EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
-   WOMX  = EPSWP*WP*OMX(I,J,K) + EPSWM*WM*OMX(I,J,K-1)
-   UOMZ  = EPSUP*UP*OMZ(I,J,K) + EPSUM*UM*OMZ(I-1,J,K)
-   VTRM  = RREDX(I)*(OMZ(I,J,K)-OMZ(I-1,J,K)) - RREDZ(K)*(OMX(I,J,K)-OMX(I,J,K-1))
-   FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) - VTRM
-END FORALL
+ 
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         UP    = UU(I,J,K)   + UU(I,J+1,K)
+         UM    = UU(I-1,J,K) + UU(I-1,J+1,K)
+         WP    = WW(I,J,K)   + WW(I,J+1,K)
+         WM    = WW(I,J,K-1) + WW(I,J+1,K-1)
+         EPSUP = 1._EB + UP*MPDT*RDXN(I)
+         EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
+         EPSWP = 1._EB + WP*MPDT*RDZN(K)
+         EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
+         WOMX  = EPSWP*WP*OMX(I,J,K) + EPSWM*WM*OMX(I,J,K-1)
+         UOMZ  = EPSUP*UP*OMZ(I,J,K) + EPSUM*UM*OMZ(I-1,J,K)
+         VTRM  = RREDX(I)*(OMZ(I,J,K)-OMZ(I-1,J,K)) - RREDZ(K)*(OMX(I,J,K)-OMX(I,J,K-1))
+         FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) - VTRM
+      ENDDO
+   ENDDO
+ENDDO
  
 ! Compute z-direction flux term FVZ
-FORALL(K=0:KBAR,J=1:JBAR,I=1:IBAR)
-   UP    = UU(I,J,K)   + UU(I,J,K+1)
-   UM    = UU(I-1,J,K) + UU(I-1,J,K+1)
-   VP    = VV(I,J,K)   + VV(I,J,K+1)
-   VM    = VV(I,J-1,K) + VV(I,J-1,K+1)
-   EPSUP = 1._EB + UP*MPDT*RDXN(I)
-   EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
-   EPSVP = 1._EB + VP*MPDT*RDYN(J)
-   EPSVM = 1._EB + VM*PMDT*RDYN(J-1)
-   UOMY  = EPSUP*UP*OMY(I,J,K) + EPSUM*UM*OMY(I-1,J,K)
-   VOMX  = EPSVP*VP*OMX(I,J,K) + EPSVM*VM*OMX(I,J-1,K)
-   VTRM  = RREDY(J)*(OMX(I,J,K)-OMX(I,J-1,K)) - RREDX(I)*(OMY(I,J,K)-OMY(I-1,J,K))
-   FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) - VTRM
-END FORALL
+ 
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         UP    = UU(I,J,K)   + UU(I,J,K+1)
+         UM    = UU(I-1,J,K) + UU(I-1,J,K+1)
+         VP    = VV(I,J,K)   + VV(I,J,K+1)
+         VM    = VV(I,J-1,K) + VV(I,J-1,K+1)
+         EPSUP = 1._EB + UP*MPDT*RDXN(I)
+         EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
+         EPSVP = 1._EB + VP*MPDT*RDYN(J)
+         EPSVM = 1._EB + VM*PMDT*RDYN(J-1)
+         UOMY  = EPSUP*UP*OMY(I,J,K) + EPSUM*UM*OMY(I-1,J,K)
+         VOMX  = EPSVP*VP*OMX(I,J,K) + EPSVM*VM*OMX(I,J-1,K)
+         VTRM  = RREDY(J)*(OMX(I,J,K)-OMX(I,J-1,K)) - RREDX(I)*(OMY(I,J,K)-OMY(I-1,J,K))
+         FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) - VTRM
+      ENDDO
+   ENDDO
+ENDDO
  
 ! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
  
@@ -563,13 +592,18 @@ CALC_MU: IF (PREDICTOR) THEN
 ENDIF CALC_MU
  
 ! Compute vorticity and stress tensor components
-FORALL(K=0:KBAR,J=0:JBAR,I=0:IBAR)
+ 
+DO K=0,KBAR
+   DO J=0,JBAR
+      DO I=0,IBAR
          DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
          DWDX = RDXN(I)*(WW(I+1,J,K)-WW(I,J,K))
          OMY(I,J,K) = DUDZ - DWDX
          MUY = 0.25_EB*(MU(I+1,J,K)+MU(I,J,K)+MU(I,J,K+1)+MU(I+1,J,K+1))
          TXZ(I,J,K) = MUY*(DUDZ + DWDX)
-END FORALL
+      ENDDO
+   ENDDO
+ENDDO
  
 ! Correct vorticity and stress tensor components at solid edges
  
@@ -609,45 +643,49 @@ ELSE
 ENDIF
  
 J = 1
-FORALL(K=1:KBAR,I=I0:IBAR)
-   WP    = WW(I,J,K)   + WW(I+1,J,K)
-   WM    = WW(I,J,K-1) + WW(I+1,J,K-1)
-   EPSWP = 1._EB + WP*MPDT*RDZN(K)
-   EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
-   WOMY  = EPSWP*WP*OMY(I,J,K) + EPSWM*WM*OMY(I,J,K-1)
-   RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
-   AH    = RHO_0(K)*RRHO - 1._EB   
-   DWDZ  = (WW(I+1,J,K)-WW(I+1,J,K-1))*RDZ(K)
-   TXXP  = MU(I+1,J,K)*( FOTH*DP(I+1,J,K) - 2._EB*DWDZ )
-   DWDZ  = (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
-   TXXM  = MU(I,J,K)  *( FOTH*DP(I,J,K) -2._EB*DWDZ )
-   DTXXDX= RDXN(I)*(TXXP      -TXXM)
-   DTXZDZ= RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,K-1))
-   DMUDX = (MU(I+1,J,K)-MU(I,J,K))*RDXN(I)
-   VTRM  = RRHO*( DTXXDX + DTXZDZ - 2._EB*UU(I,J,K)*DMUDX/R(I) ) 
-   FVX(I,J,K) = 0.25_EB*WOMY + GX*AH - VTRM 
-END FORALL
+DO K= 1,KBAR
+   DO I=I0,IBAR
+      WP    = WW(I,J,K)   + WW(I+1,J,K)
+      WM    = WW(I,J,K-1) + WW(I+1,J,K-1)
+      EPSWP = 1._EB + WP*MPDT*RDZN(K)
+      EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
+      WOMY  = EPSWP*WP*OMY(I,J,K) + EPSWM*WM*OMY(I,J,K-1)
+      RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
+      AH    = RHO_0(K)*RRHO - 1._EB   
+      DWDZ  = (WW(I+1,J,K)-WW(I+1,J,K-1))*RDZ(K)
+      TXXP  = MU(I+1,J,K)*( FOTH*DP(I+1,J,K) - 2._EB*DWDZ )
+      DWDZ  = (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
+      TXXM  = MU(I,J,K)  *( FOTH*DP(I,J,K) -2._EB*DWDZ )
+      DTXXDX= RDXN(I)*(TXXP      -TXXM)
+      DTXZDZ= RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,K-1))
+      DMUDX = (MU(I+1,J,K)-MU(I,J,K))*RDXN(I)
+      VTRM  = RRHO*( DTXXDX + DTXZDZ - 2._EB*UU(I,J,K)*DMUDX/R(I) ) 
+      FVX(I,J,K) = 0.25_EB*WOMY + GX*AH - VTRM 
+   ENDDO
+ENDDO   
  
 ! Compute z-direction flux term FVZ
  
 J = 1
-FORALL(K=0:KBAR,I=1:IBAR)
-   UP    = UU(I,J,K)   + UU(I,J,K+1)
-   UM    = UU(I-1,J,K) + UU(I-1,J,K+1)
-   EPSUP = 1._EB + UP*MPDT*RDXN(I)
-   EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
-   UOMY  = EPSUP*UP*OMY(I,J,K) + EPSUM*UM*OMY(I-1,J,K)
-   RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
-   AH    = 0.5_EB*(RHO_0(K)+RHO_0(K+1))*RRHO - 1._EB
-   DUDX  = (R(I)*UU(I,J,K+1)-R(I-1)*UU(I-1,J,K+1))*RDX(I)*RRN(I)
-   TZZP  = MU(I,J,K+1)*( FOTH*DP(I,J,K+1) - 2._EB*DUDX )
-   DUDX  = (R(I)*UU(I,J,K)-R(I-1)*UU(I-1,J,K))*RDX(I)*RRN(I)
-   TZZM  = MU(I,J,K)  *( FOTH*DP(I,J,K)   - 2._EB*DUDX )
-   DTXZDX= RDX(I) *(R(I)*TXZ(I,J,K)-R(I-1)*TXZ(I-1,J,K))*RRN(I)
-   DTZZDZ= RDZN(K)*(TZZP      -TZZM)
-   VTRM  = RRHO*(DTXZDX + DTZZDZ)
-   FVZ(I,J,K) = -0.25_EB*UOMY + GZ*AH - VTRM 
-END FORALL 
+DO K=0,KBAR
+   DO I=1,IBAR
+      UP    = UU(I,J,K)   + UU(I,J,K+1)
+      UM    = UU(I-1,J,K) + UU(I-1,J,K+1)
+      EPSUP = 1._EB + UP*MPDT*RDXN(I)
+      EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
+      UOMY  = EPSUP*UP*OMY(I,J,K) + EPSUM*UM*OMY(I-1,J,K)
+      RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
+      AH    = 0.5_EB*(RHO_0(K)+RHO_0(K+1))*RRHO - 1._EB
+      DUDX  = (R(I)*UU(I,J,K+1)-R(I-1)*UU(I-1,J,K+1))*RDX(I)*RRN(I)
+      TZZP  = MU(I,J,K+1)*( FOTH*DP(I,J,K+1) - 2._EB*DUDX )
+      DUDX  = (R(I)*UU(I,J,K)-R(I-1)*UU(I-1,J,K))*RDX(I)*RRN(I)
+      TZZM  = MU(I,J,K)  *( FOTH*DP(I,J,K)   - 2._EB*DUDX )
+      DTXZDX= RDX(I) *(R(I)*TXZ(I,J,K)-R(I-1)*TXZ(I-1,J,K))*RRN(I)
+      DTZZDZ= RDZN(K)*(TZZP      -TZZM)
+      VTRM  = RRHO*(DTXZDX + DTZZDZ)
+      FVZ(I,J,K) = -0.25_EB*UOMY + GZ*AH - VTRM 
+   ENDDO
+ENDDO   
  
 ! Baroclinic torque correction terms
  
@@ -778,20 +816,32 @@ IF (SOLID_PHASE_ONLY) RETURN
  
 TNOW=SECOND() 
 CALL POINT_TO_MESH(NM)
-FORALL(K=1:KBAR,J=1:JBAR,I=0:IBAR)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
          RHS = -FVX(I,J,K) - RDXN(I)*(H(I+1,J,K)-H(I,J,K))
          US(I,J,K) = U(I,J,K) + DT*RHS
-END FORALL
+      ENDDO 
+   ENDDO 
+ENDDO 
 
-FORALL(K=1:KBAR,J=0:JBAR,I=1:IBAR)
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
          RHS = -FVY(I,J,K) - RDYN(J)*(H(I,J+1,K)-H(I,J,K))
          VS(I,J,K) = V(I,J,K) + DT*RHS
-END FORALL
+      ENDDO 
+   ENDDO 
+ENDDO 
  
-FORALL(K=0:KBAR,J=1:JBAR,I=1:IBAR)
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
          RHS = -FVZ(I,J,K) - RDZN(K)*(H(I,J,K+1)-H(I,J,K))
          WS(I,J,K) = W(I,J,K) + DT*RHS
-END FORALL
+      ENDDO 
+   ENDDO 
+ENDDO 
 ! Check the stability criteria
  
 DTOLD = DT
@@ -821,20 +871,31 @@ IF (SOLID_PHASE_ONLY) RETURN
 TNOW=SECOND() 
 CALL POINT_TO_MESH(NM)
 
-FORALL(K=1:KBAR,J=1:JBAR,I=0:IBAR)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
          RHS = -FVX(I,J,K) - RDXN(I)*(H(I+1,J,K)-H(I,J,K))
          U(I,J,K) = .5_EB*(U(I,J,K) + US(I,J,K) + DT*RHS)
-END FORALL
-
-FORALL(K=1:KBAR,J=0:JBAR,I=1:IBAR)
+      ENDDO 
+   ENDDO 
+ENDDO 
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
          RHS = -FVY(I,J,K) - RDYN(J)*(H(I,J+1,K)-H(I,J,K))
          V(I,J,K) = .5_EB*(V(I,J,K) + VS(I,J,K) + DT*RHS)
-END FORALL
+      ENDDO 
+   ENDDO 
+ENDDO 
  
-FORALL(K=0:KBAR,J=1:JBAR,I=1:IBAR)
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
          RHS = -FVZ(I,J,K) - RDZN(K)*(H(I,J,K+1)-H(I,J,K))
          W(I,J,K) = .5_EB*(W(I,J,K) + WS(I,J,K) + DT*RHS)
-END FORALL 
+      ENDDO 
+   ENDDO 
+ENDDO 
 
 CALL VELOCITY_BC(T,NM)
  
@@ -1296,57 +1357,84 @@ ENDDO
 RHO_AVG = 2._EB*RMIN*RMAX/(RMIN+RMAX)
 RRAT = RHO_AVG_OLD/RHO_AVG
 RTRM = (1._EB-RHO_AVG/RHOP)*RRAT
-FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR)
-   U2 = 0.25_EB*(UU(I,J,K)+UU(I-1,J,K))**2
-   V2 = 0.25_EB*(VV(I,J,K)+VV(I,J-1,K))**2
-   W2 = 0.25_EB*(WW(I,J,K)+WW(I,J,K-1))**2
-   HQS(I,J,K) = 0.5_EB*(U2+V2+W2)
-END FORALL
  
-
-FORALL(K=1:KBAR,J=1:JBAR)
-   U2 = (1.5_EB*UU(0,J,K)-0.5_EB*UU(1,J,K))**2
-   V2 = 0.25_EB*(VV(1,J,K)+VV(1,J-1,K))**2
-   W2 = 0.25_EB*(WW(1,J,K)+WW(1,J,K-1))**2
-   HQS(0,J,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DX(1)+HQS(1,J,K))
-   U2 = (1.5_EB*UU(IBAR,J,K)-0.5_EB*UU(IBM1,J,K))**2
-   V2 = 0.25_EB*(VV(IBAR,J,K)+VV(IBAR,J-1,K))**2
-   W2 = 0.25_EB*(WW(IBAR,J,K)+WW(IBAR,J,K-1))**2
-   HQS(IBP1,J,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DX(IBAR)+HQS(IBAR,J,K))
-END FORALL
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         U2 = 0.25_EB*(UU(I,J,K)+UU(I-1,J,K))**2
+         V2 = 0.25_EB*(VV(I,J,K)+VV(I,J-1,K))**2
+         W2 = 0.25_EB*(WW(I,J,K)+WW(I,J,K-1))**2
+         HQS(I,J,K) = 0.5_EB*(U2+V2+W2)
+      ENDDO
+   ENDDO
+ENDDO
+ 
+DO K=1,KBAR
+   DO J=1,JBAR
+      U2 = (1.5_EB*UU(0,J,K)-0.5_EB*UU(1,J,K))**2
+      V2 = 0.25_EB*(VV(1,J,K)+VV(1,J-1,K))**2
+      W2 = 0.25_EB*(WW(1,J,K)+WW(1,J,K-1))**2
+      HQS(0,J,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DX(1)+HQS(1,J,K))
+      U2 = (1.5_EB*UU(IBAR,J,K)-0.5_EB*UU(IBM1,J,K))**2
+      V2 = 0.25_EB*(VV(IBAR,J,K)+VV(IBAR,J-1,K))**2
+      W2 = 0.25_EB*(WW(IBAR,J,K)+WW(IBAR,J,K-1))**2
+      HQS(IBP1,J,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DX(IBAR)+HQS(IBAR,J,K))
+   ENDDO
+ENDDO
  
 IF (.NOT.TWO_D) THEN
-   FORALL(K=1:KBAR,I=1:IBAR)
-      U2 = 0.25_EB*(UU(I,1,K)+UU(I-1,1,K))**2
-      V2 = (1.5_EB*VV(I,0,K)-0.5_EB*VV(I,1,K))**2
-      W2 = 0.25_EB*(WW(I,1,K)+WW(I,1,K-1))**2
-      HQS(I,0,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DY(1)+HQS(I,1,K))
-      U2 = 0.25_EB*(UU(I,JBAR,K)+UU(I-1,JBAR,K))**2
-      V2 = (1.5_EB*VV(I,JBAR,K)-0.5_EB*VV(I,JBM1,K))**2
-      W2 = 0.25_EB*(WW(I,JBAR,K)+WW(I,JBAR,K-1))**2
-      HQS(I,JBP1,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DY(JBAR)+HQS(I,JBAR,K))
-   END FORALL
+   DO K=1,KBAR
+      DO I=1,IBAR
+         U2 = 0.25_EB*(UU(I,1,K)+UU(I-1,1,K))**2
+         V2 = (1.5_EB*VV(I,0,K)-0.5_EB*VV(I,1,K))**2
+         W2 = 0.25_EB*(WW(I,1,K)+WW(I,1,K-1))**2
+         HQS(I,0,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DY(1)+HQS(I,1,K))
+         U2 = 0.25_EB*(UU(I,JBAR,K)+UU(I-1,JBAR,K))**2
+         V2 = (1.5_EB*VV(I,JBAR,K)-0.5_EB*VV(I,JBM1,K))**2
+         W2 = 0.25_EB*(WW(I,JBAR,K)+WW(I,JBAR,K-1))**2
+         HQS(I,JBP1,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DY(JBAR)+HQS(I,JBAR,K))
+      ENDDO
+   ENDDO
 ENDIF
  
-FORALL(J=1:JBAR,I=1:IBAR)
-   U2 = 0.25_EB*(UU(I,J,1)+UU(I-1,J,1))**2
-   V2 = 0.25_EB*(VV(I,J,1)+VV(I,J-1,1))**2
-   W2 = (1.5_EB*WW(I,J,0)-0.5_EB*WW(I,J,1))**2
-   HQS(I,J,0) = MIN(0.5_EB*(U2+V2+W2),10._EB*DZ(1)+HQS(I,J,1))
-   U2 = 0.25_EB*(UU(I,J,KBAR)+UU(I-1,J,KBAR))**2
-   V2 = 0.25_EB*(VV(I,J,KBAR)+VV(I,J-1,KBAR))**2
-   W2 = (1.5_EB*WW(I,J,KBAR)-0.5_EB*WW(I,J,KBM1))**2
-   HQS(I,J,KBP1) = MIN(0.5_EB*(U2+V2+W2),10._EB*DZ(KBAR)+HQS(I,J,KBAR))
-END FORALL
+DO J=1,JBAR
+   DO I=1,IBAR
+      U2 = 0.25_EB*(UU(I,J,1)+UU(I-1,J,1))**2
+      V2 = 0.25_EB*(VV(I,J,1)+VV(I,J-1,1))**2
+      W2 = (1.5_EB*WW(I,J,0)-0.5_EB*WW(I,J,1))**2
+      HQS(I,J,0) = MIN(0.5_EB*(U2+V2+W2),10._EB*DZ(1)+HQS(I,J,1))
+      U2 = 0.25_EB*(UU(I,J,KBAR)+UU(I-1,J,KBAR))**2
+      V2 = 0.25_EB*(VV(I,J,KBAR)+VV(I,J-1,KBAR))**2
+      W2 = (1.5_EB*WW(I,J,KBAR)-0.5_EB*WW(I,J,KBM1))**2
+      HQS(I,J,KBP1) = MIN(0.5_EB*(U2+V2+W2),10._EB*DZ(KBAR)+HQS(I,J,KBAR))
+   ENDDO
+ENDDO
  
-FORALL(K=1:KBAR,J=1:JBAR,I=0:IBAR) &
-   FVX(I,J,K) = FVX(I,J,K) - 0.5_EB*(RTRM(I+1,J,K)+RTRM(I,J,K))*(H(I+1,J,K)-H(I,J,K)-HQS(I+1,J,K)+HQS(I,J,K))*RDXN(I)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         FVX(I,J,K) = FVX(I,J,K) - 0.5_EB*(RTRM(I+1,J,K)+RTRM(I,J,K))*(H(I+1,J,K)-H(I,J,K)-HQS(I+1,J,K)+HQS(I,J,K))*RDXN(I)
+      ENDDO
+   ENDDO
+ENDDO
  
-IF (.NOT.TWO_D) FORALL(K=1:KBAR,J=0:JBAR,I=1:IBAR) &
-   FVY(I,J,K) = FVY(I,J,K) - 0.5_EB*(RTRM(I,J+1,K)+RTRM(I,J,K))*(H(I,J+1,K)-H(I,J,K)-HQS(I,J+1,K)+HQS(I,J,K))*RDYN(J)
+IF (.NOT.TWO_D) THEN
+   DO K=1,KBAR
+      DO J=0,JBAR
+         DO I=1,IBAR
+            FVY(I,J,K) = FVY(I,J,K) - 0.5_EB*(RTRM(I,J+1,K)+RTRM(I,J,K))*(H(I,J+1,K)-H(I,J,K)-HQS(I,J+1,K)+HQS(I,J,K))*RDYN(J)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
  
-FORALL(K=0:KBAR,J=1:JBAR,I=1:IBAR) &
-   FVZ(I,J,K) = FVZ(I,J,K) - 0.5_EB*(RTRM(I,J,K+1)+RTRM(I,J,K))*(H(I,J,K+1)-H(I,J,K)-HQS(I,J,K+1)+HQS(I,J,K))*RDZN(K)
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         FVZ(I,J,K) = FVZ(I,J,K) - 0.5_EB*(RTRM(I,J,K+1)+RTRM(I,J,K))*(H(I,J,K+1)-H(I,J,K)-HQS(I,J,K+1)+HQS(I,J,K))*RDZN(K)
+      ENDDO
+   ENDDO
+ENDDO
  
 END SUBROUTINE BAROCLINIC_CORRECTION
 
