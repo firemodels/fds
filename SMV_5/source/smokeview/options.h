@@ -47,11 +47,11 @@
 
 #ifdef pp_ALPHA2
 #define pp_TOUR
-#define pp_LIGHT
 #endif
 
 
 #ifdef pp_ALPHA
+#define pp_LIGHT
 #define pp_GPU
 #define pp_CULL
 #define pp_SHOWLIGHT

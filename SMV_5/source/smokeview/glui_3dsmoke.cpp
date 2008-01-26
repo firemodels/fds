@@ -195,6 +195,21 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     GLUI_SPINNER_INT,&smoke3d_thick,SMOKE_THICK,SMOKE_3D_CB);
   SPINNER_smoke3d_thick->set_int_limits(0,7);
 #endif
+#ifdef pp_LIGHT
+  {
+    int use_light_checkbox=0;
+
+    for(i=0;i<nsmoke3d;i++){
+      smoke3d *smoke3di;
+
+      smoke3di = smoke3dinfo + i;
+      if(smoke3di->use_lighting_file==1)use_light_checkbox=1;
+    }
+    if(use_light_checkbox==1){
+      glui_3dsmoke->add_checkbox_to_panel(panel6,"Lighting",&show_smokelighting);
+    }
+  }
+#endif
 #ifdef _DEBUG
   CHECKBOX_smoke3d_external=glui_3dsmoke->add_checkbox_to_panel(panel6,"View smoke externally (ONLY)",&smoke3d_external);
 #endif

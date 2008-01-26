@@ -5993,6 +5993,14 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       if(trainerview!=2&&trainerview!=3)trainerview=1;
       continue;
     }
+#ifdef pp_LIGHT
+    if(match(buffer,"SMOKELIGHTING",13)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&show_smokelighting);
+      if(show_smokelighting!=0)show_smokelighting=1;
+      continue;
+    }
+#endif
     if(match(buffer,"COLORBAND",9)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&colorband);
@@ -8432,6 +8440,10 @@ void writeini(int flag){
   fprintf(fileout," %i %i %i\n",fire_red,fire_green,fire_blue);
   fprintf(fileout,"FIREDEPTH\n");
   fprintf(fileout," %f\n",fire_halfdepth);
+#ifdef pp_LIGHT
+  fprintf(fileout,"SMOKELIGHTING\n");
+  fprintf(fileout," %i\n",show_smokelighting);
+#endif
 
   /*
   GENCOLORBAR
