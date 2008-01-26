@@ -102,9 +102,69 @@ if(show_smoketest==0){\
 }\
   }
 
-//      if(firecolor[mm]!=0)printf("mm=%i fire color =%f\n",mm,(float)firecolor[mm]);
- // if(firecolor[j]>i_hrrpuv_cutoff){
-//      glColor4fv(smoke_shade4);                            
+#ifdef pp_LIGHT
+#define DRAWVERTEXGPU(XX,YY,ZZ) \
+  value[0]=alphaf_in[n11];\
+  value[1]=alphaf_in[n12];\
+  value[2]=alphaf_in[n22];\
+  value[3]=alphaf_in[n21];\
+  if(adjustalphaflag==2||adjustalphaflag==3){\
+    if(iblank_smoke3d[n11]==0)value[0]=0;\
+    if(iblank_smoke3d[n12]==0)value[1]=0;\
+    if(iblank_smoke3d[n22]==0)value[2]=0;\
+    if(iblank_smoke3d[n21]==0)value[3]=0;\
+  }\
+  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
+  bvalue[0]=(float)iblank_smoke3d[n11];\
+  bvalue[1]=(float)iblank_smoke3d[n12];\
+  bvalue[2]=(float)iblank_smoke3d[n22];\
+  bvalue[3]=(float)iblank_smoke3d[n21];\
+  if(smoke3di->use_lighting_file==1&&show_smokelighting){\
+    lvalue[0]=(float)light_color[n11];\
+    lvalue[1]=(float)light_color[n12];\
+    lvalue[2]=(float)light_color[n22];\
+    lvalue[3]=(float)light_color[n21];\
+  }\
+  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
+    xyzindex=xyzindex1;                                  \
+  }                                                      \
+  else{                                                  \
+    xyzindex=xyzindex2;                                  \
+}                                                        \
+  if(firecolor==NULL){\
+    if(smoke3di->use_lighting_file==1&&show_smokelighting==1){\
+      for(node=0;node<6;node++){                             \
+        mm = xyzindex[node];                                 \
+        glVertexAttrib1f(GPU_blank,(float)bvalue[mm]); \
+        glVertexAttrib1f(GPU_smokecolor,(float)lvalue[mm]); \
+        glVertexAttrib1f(GPU_smokealpha,(float)value[mm]); \
+        glVertex3f(XX,YY,ZZ);                                \
+      }\
+    }\
+    else{\
+      glVertexAttrib1f(GPU_smokecolor,(float)smoke_shade/255.0); \
+      for(node=0;node<6;node++){                             \
+        mm = xyzindex[node];                                 \
+        glVertexAttrib1f(GPU_blank,(float)bvalue[mm]); \
+        glVertexAttrib1f(GPU_smokealpha,(float)value[mm]); \
+        glVertex3f(XX,YY,ZZ);                                \
+      }\
+    }\
+  }\
+  else{\
+    fvalue[0]=firecolor[n11];\
+    fvalue[1]=firecolor[n12];\
+    fvalue[2]=firecolor[n22];\
+    fvalue[3]=firecolor[n21];\
+    for(node=0;node<6;node++){                             \
+      mm = xyzindex[node];                                 \
+      glVertexAttrib1f(GPU_blank,(float)bvalue[mm]); \
+      glVertexAttrib1f(GPU_smokealpha,(float)value[mm]);\
+      glVertexAttrib1f(GPU_hrr,(float)fvalue[mm]);\
+      glVertex3f(XX,YY,ZZ);                                \
+    }\
+}
+#else
 #define DRAWVERTEXGPU(XX,YY,ZZ) \
   value[0]=alphaf_in[n11];\
   bvalue[0]=(float)iblank_smoke3d[n11];\
@@ -148,6 +208,7 @@ if(show_smoketest==0){\
       glVertex3f(XX,YY,ZZ);                                \
     }\
 }
+#endif
 
 /* ------------------ readsmoke3d ------------------------ */
 
@@ -994,7 +1055,7 @@ void mergesmoke3dcolors(void){
     if(sootcolor!=NULL){
       if(firecolor==NULL&&watercolor==NULL){
 #ifdef pp_LIGHT
-        if(smoke3dref->use_lighting_file==1){
+        if(smoke3dref->use_lighting_file==1&&show_smokelighting==1){
           smokeptr = smoke3dref->lightframe_in;
           for(j=0;j<smoke3di->nchars_uncompressed;j++){
             *mergecolor++=*smokeptr;
@@ -1182,9 +1243,6 @@ void drawsmoke3d(smoke3d *smoke3di){
   unsigned char mergealpha,*mergealphaptr,*mergecolorptr;
   int nx,ny,nz;
   unsigned char *alphaf_in,*alphaf_out,*alphaf_ptr;
-#ifdef pp_LIGHT
-  unsigned char *color_in, *color_out;
-#endif
   float alphaval;
   unsigned char alphabyte;
   unsigned char *colorptr;
@@ -1221,12 +1279,6 @@ void drawsmoke3d(smoke3d *smoke3di){
   iblank_smoke3d = meshi->iblank_smoke3d;
   alphaf_in=smoke3di->smokeframe_in;
   alphaf_out=smoke3di->smokeframe_out;
-#ifdef pp_LIGHT
-  if(smoke3di->use_lighting_file==1){
-    color_in=smoke3di->lightframe_in;
-    color_out=smoke3di->lightframe_out;
-  }
-#endif
 
   switch (demo_mode){
   case 0:
@@ -2934,7 +2986,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   int nx,ny,nz;
   unsigned char *alphaf_in;
 #ifdef pp_LIGHT
-  unsigned char *color_in, *color_out;
+  unsigned char *light_color=NULL;
 #endif
   int xyzindex1[6],xyzindex2[6],*xyzindex,node,mm;
   float xnode[4],znode[4],ynode[4];
@@ -2952,6 +3004,9 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 
   unsigned char value[4];
   float bvalue[4];
+#ifdef pp_LIGHT
+  float lvalue[4];
+#endif
   unsigned char fvalue[4];
 
   mesh *meshi;
@@ -2986,8 +3041,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   alphaf_in=smoke3di->smokeframe_in;
 #ifdef pp_LIGHT
   if(smoke3di->use_lighting_file==1){
-    color_in=smoke3di->lightframe_in;
-    color_out=smoke3di->lightframe_out;
+    light_color=smoke3di->lightframe_in;
   }
 #endif
 
@@ -3033,7 +3087,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
     fire_color[3]=fire_alpha/256.0;
     glUniform4fv(GPU_firecolor,1,fire_color);
   }
-  glUniform1f(GPU_smokeshade,(float)smoke_shade/256.0);
+  glUniform1f(GPU_smokeshade,(float)smoke_shade);
  // glUniform1i(GPU_skip,skip);
   glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
   if(firecolor==NULL){
@@ -4002,7 +4056,7 @@ void drawsmoke3dCULL(void){
   int nx,ny;
   unsigned char *alphaf_in;
 #ifdef pp_LIGHT
-  unsigned char *color_in, *color_out;
+  unsigned char *light_color=NULL;
 #endif
   int xyzindex1[6],xyzindex2[6],*xyzindex,node,mm;
   float xnode[4],znode[4],ynode[4];
@@ -4019,6 +4073,9 @@ void drawsmoke3dCULL(void){
 
   unsigned char value[4];
   float bvalue[4];
+#ifdef pp_LIGHT
+  float lvalue[4];
+#endif
   unsigned char fvalue[4];
 
   mesh *meshi, *mesh_old;
@@ -4053,7 +4110,7 @@ void drawsmoke3dCULL(void){
 
   glUniform1i(GPU_adjustalphaflag,adjustalphaflag);
   glUniform3fv(GPU_eye,1,xyzeyeorig);
-  glUniform1f(GPU_smokeshade,(float)smoke_shade/256.0);
+  glUniform1f(GPU_smokeshade,(float)smoke_shade);
   glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
 
   glBegin(GL_TRIANGLES);
@@ -4101,8 +4158,7 @@ void drawsmoke3dCULL(void){
       iblank_smoke3d = meshi->iblank_smoke3d;
 #ifdef pp_LIGHT
       if(smoke3di->use_lighting_file==1){
-        color_in=smoke3di->lightframe_in;
-        color_out=smoke3di->lightframe_out;
+        light_color=smoke3di->lightframe_in;
       }
 #endif
 
@@ -4116,12 +4172,6 @@ void drawsmoke3dCULL(void){
       ny = js2 + 1 - js1;
       nxy = nx*ny;
 
-//      glUniform1f(GPU_normx,meshi->norm[0]);
-//      glUniform1f(GPU_normy,meshi->norm[1]);
-//      glUniform1f(GPU_normz,meshi->norm[2]);
-      glUniform3fv(GPU_norm,1,meshi->norm);
-//      glUniform1f(GPU_firealpha,fire_alpha/256.0);
-
       if(firecolor==NULL){
         i_hrrcutoff=-1;
       }
@@ -4130,6 +4180,7 @@ void drawsmoke3dCULL(void){
         if(i_hrrcutoff<0)i_hrrcutoff=0;
         if(i_hrrcutoff>254)i_hrrcutoff=254;
       }
+      glUniform3fv(GPU_norm,1,meshi->norm);
       glUniform1f(GPU_hrrcutoff,(float)i_hrrcutoff);
       switch (meshi->smokedir){
       case 1:

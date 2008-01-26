@@ -28,17 +28,19 @@ int setSmokeShaders() {
     "varying float fblank;"
     "void main(){"
 
-     "float a,base;"
-     "if(fblank>0.95)discard;"
-     "if(fblank>0.001){"
-     "  a=1.0-fblank;"
-     "  base=1.0-newcolor.a/a;"
-     "  if(base>0.0){"
-     "    newcolor.a=(1.0-pow(base,a));"
-     "  }"
-     "  if(base==0.0)newcolor.a=0.0;"
-     "}"
-     "gl_FragColor = newcolor;"
+    // "float a,base;"
+    // "if(fblank>0.95)discard;"
+    // "if(fblank>0.001){"
+    // "  a=1.0-fblank;"
+    // "  base=1.0-newcolor.a/a;"
+    // "  if(base>0.0){"
+    // "    newcolor.a=(1.0-pow(base,a));"
+    // "  }"
+    // "  else{"
+    // "    newcolor.a=0.0;"
+    // "  }"
+    // "}"
+      "gl_FragColor = newcolor;"
     "}"
   };
 
@@ -48,6 +50,9 @@ int setSmokeShaders() {
     "uniform float aspectratio;"
     "uniform float hrrcutoff;"
     "uniform float smoke_shade;"
+#ifdef pp_LIGHT
+    "attribute float smoke_color;"
+#endif
     "uniform float smoke3d_rthick;"
     "uniform int adjustalphaflag;"
     "varying vec4 newcolor;"
@@ -57,6 +62,11 @@ int setSmokeShaders() {
     "{"
     "  float bottom,top,alpha,r;"
     "  float term1, term2, term3, term4;"
+#ifdef pp_LIGHT
+    "  float s_color;"
+#else
+    "  float s_shade;"
+#endif
     "  vec3 rel_pos;"
     "  if(hrrcutoff>0.0&&hrr>hrrcutoff){"
     "    newcolor = firecolor;"
@@ -76,7 +86,13 @@ int setSmokeShaders() {
     "    }"
     // newcolor.a *= (1.0 - pow(1.0-gl_Color.a,aspectratio*top/bottom));
     "    alpha /= smoke3d_rthick;"
-    "    newcolor = vec4(smoke_shade,smoke_shade,smoke_shade,alpha);"
+#ifdef pp_LIGHT
+    "    s_color = smoke_color/255.0;"
+    "    newcolor = vec4(s_color,s_color,s_color,alpha);"
+#else
+    "    s_shade = smoke_shade/255.0;"
+    "    newcolor = vec4(s_shade,s_shade,s_shade,alpha);"
+#endif
     "  }"
     "  fblank=blank;"
     "  gl_Position = ftransform();"
@@ -129,6 +145,9 @@ int setSmokeShaders() {
 #endif
   GPU_hrrcutoff = glGetUniformLocation(p_smoke,"hrrcutoff");
   GPU_hrr = glGetAttribLocation(p_smoke,"hrr");
+#ifdef pp_LIGHT
+  GPU_smokecolor = glGetAttribLocation(p_smoke,"smoke_color");
+#endif
   GPU_smokealpha = glGetAttribLocation(p_smoke,"smoke_alpha");
   GPU_blank = glGetAttribLocation(p_smoke,"blank");
   GPU_skip = glGetUniformLocation(p_smoke,"skip");
