@@ -920,6 +920,9 @@ void InitOpenGL(void){
 
 void initvars1(void){
 
+#ifdef pp_LIGHT
+  show_smokelighting=0;
+#endif
   navatar_types=0;
   avatar_types=NULL;
   navatar_colors=0;
