@@ -87,7 +87,7 @@ REAL(EB) :: T_BEGIN,T_END,TIME_SHRINK_FACTOR,RELAXATION_FACTOR
 ! Combustion parameters
  
 REAL(EB), PARAMETER :: MW_O2=32._EB,MW_H2=2._EB,MW_CO2=44._EB,MW_H2O=18._EB,MW_N2=28._EB,MW_CO=28._EB, &
-                       MW_C=12._EB,MW_H=1_EB,MW_O=16._EB,MW_N=14._EB, &
+                       MW_C=12._EB,MW_H=1._EB,MW_O=16._EB,MW_N=14._EB, &
                        !HEAT_OF_FORMATION kJ/mol Drysdale, Fire Dynamics
                        CO_HEAT_OF_FORMATION = 110.523E3_EB, CO2_HEAT_OF_FORMATION = 393.513E3_EB, &
                        H2O_HEAT_OF_FORMATION = 241.826E3_EB 
