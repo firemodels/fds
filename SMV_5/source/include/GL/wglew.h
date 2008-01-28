@@ -1,7 +1,7 @@
 /*
 ** The OpenGL Extension Wrangler Library
-** Copyright (C) 2002-2007, Milan Ikits <milan ikits[]ieee org>
-** Copyright (C) 2002-2007, Marcelo E. Magallon <mmagallo[]debian org>
+** Copyright (C) 2002-2008, Milan Ikits <milan ikits[]ieee org>
+** Copyright (C) 2002-2008, Marcelo E. Magallon <mmagallo[]debian org>
 ** Copyright (C) 2002, Lev Povalahev
 ** All rights reserved.
 ** 
@@ -27,6 +27,29 @@
 ** CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ** ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 ** THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/*
+** Copyright (c) 2007 The Khronos Group Inc.
+** 
+** Permission is hereby granted, free of charge, to any person obtaining a
+** copy of this software and/or associated documentation files (the
+** "Materials"), to deal in the Materials without restriction, including
+** without limitation the rights to use, copy, modify, merge, publish,
+** distribute, sublicense, and/or sell copies of the Materials, and to
+** permit persons to whom the Materials are furnished to do so, subject to
+** the following conditions:
+** 
+** The above copyright notice and this permission notice shall be included
+** in all copies or substantial portions of the Materials.
+** 
+** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+** IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+** CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 */
 
 #ifndef __wglew_h__
@@ -135,6 +158,9 @@ typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC) (HDC hdc);
 
 #ifndef WGL_ARB_make_current_read
 #define WGL_ARB_make_current_read 1
+
+#define ERROR_INVALID_PIXEL_TYPE_ARB 0x2043
+#define ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_ARB 0x2054
 
 typedef HDC (WINAPI * PFNWGLGETCURRENTREADDCARBPROC) (VOID);
 typedef BOOL (WINAPI * PFNWGLMAKECONTEXTCURRENTARBPROC) (HDC hDrawDC, HDC hReadDC, HGLRC hglrc);
@@ -401,6 +427,8 @@ typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGEXTPROC) (void);
 
 #ifndef WGL_EXT_make_current_read
 #define WGL_EXT_make_current_read 1
+
+#define ERROR_INVALID_PIXEL_TYPE_EXT 0x2043
 
 typedef HDC (WINAPI * PFNWGLGETCURRENTREADDCEXTPROC) (VOID);
 typedef BOOL (WINAPI * PFNWGLMAKECONTEXTCURRENTEXTPROC) (HDC hDrawDC, HDC hReadDC, HGLRC hglrc);
