@@ -2117,5 +2117,6 @@ int getmaxrevision(void){
   MAXREV(startup_revision);
   MAXREV(string_util_revision);
   MAXREV(sv_api_revision);
+  MAXREV(shaders_revision);
   return max_revision;
 }
