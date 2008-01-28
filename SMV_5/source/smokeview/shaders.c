@@ -143,6 +143,7 @@ int setSmokeShaders() {
   }
   printInfoLog(p_smoke);
 #endif
+  if(error_code!=1)return error_code;
   GPU_hrrcutoff = glGetUniformLocation(p_smoke,"hrrcutoff");
   GPU_hrr = glGetAttribLocation(p_smoke,"hrr");
 #ifdef pp_LIGHT
@@ -177,8 +178,25 @@ void UnloadSmokeShaders(void){
 /* ------------------ init_shaders ------------------------ */
 
 void init_shaders(void){
+  char version_label[256];
+  int i, major, minor;
+
 	glewInit();
   gpuactive=0;
+  strcpy(version_label,(char *)glGetString(GL_VERSION));
+  for(i=0;i<strlen(version_label);i++){
+    if(version_label[i]=='.')version_label[i]=' ';
+  }
+  sscanf(version_label,"%i %i",&major,&minor);
+  if(major<2){
+    trim(version_label);
+    printf("Smokeview is running on a system using OpenGL %s\n",version_label);
+    printf("OpenGL 2.0 or later is required to use the GPU.\n");
+		printf("GPU smoke shader not supported.\n");
+    usegpu=0;
+    return;
+  }
+
   if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader){
     if(setSmokeShaders()==1){
   		printf("***GPU smoke shader successfully compiled, linked and loaded.\n");
