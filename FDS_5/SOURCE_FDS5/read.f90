@@ -838,7 +838,7 @@ EVAC_DT_STEADY_STATE = 0.05_EB
 SYNCHRONIZE          = .FALSE.
 TIME_SHRINK_FACTOR   = 1._EB
 T_BEGIN              = 0._EB
-T_END                = -9999999_EB
+T_END                = -9999999._EB
 TWFIN                = -99999999._EB
 WALL_INCREMENT       = 2
  
@@ -1648,7 +1648,7 @@ H                           = 8._EB
 O                           = 0._EB
 N                           = 0._EB
 OTHER                       = 0._EB
-MW_OTHER                    = 28_EB        ! Nitrogen MW
+MW_OTHER                    = 28._EB        ! Nitrogen MW
 MASS_EXTINCTION_COEFFICIENT = 8700._EB     ! m2/kg
 MAXIMUM_VISIBILITY          = 30._EB       ! m
 VISIBILITY_FACTOR           = 3._EB
