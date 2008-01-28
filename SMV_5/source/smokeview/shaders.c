@@ -14,6 +14,8 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 
+char shaders_revision[]="$Revision$";
+
 GLhandleARB v,f,p_smoke, p_slice ;
 char *textFileRead(char *fn);
 void printInfoLog(GLhandleARB obj);

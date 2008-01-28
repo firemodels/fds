@@ -47,6 +47,7 @@ extern char readsmv_revision[];
 extern char renderfile_revision[];
 extern char scontour2d_revision[];
 extern char segtri_revision[];
+extern char shaders_revision[];
 extern char skybox_revision[];
 extern char smokeview_revision[];
 extern char smoothlabel_revision[];
