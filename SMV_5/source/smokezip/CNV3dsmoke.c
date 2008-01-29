@@ -18,7 +18,7 @@ char CNV3dsmoke_revision[]="$Revision$";
 #define ijknode(i,j,k) ((i)+(j)*nx+(k)*nxy)
 
 #ifdef pp_LIGHT
-void light_smoke(smoke3d *smoke3di,unsigned char *full_lightingbufer, float *val_buffer, unsigned char *alpha_buffer);
+void light_smoke(smoke3d *smoke3di,unsigned char *full_lightingbuffer, float *val_buffer, unsigned char *alpha_buffer);
 #endif
 
 #define FORTREAD(read) fseek(BOUNDARYFILE,4,SEEK_CUR);returncode=read;fseek(BOUNDARYFILE,4,SEEK_CUR);
@@ -193,14 +193,14 @@ void convert_3dsmoke(smoke3d *smoke3di){
 #endif
     ){
     if(smoke3dstream==NULL){
-      printf("  %s could not be opened for output\n",smoke3dfile_svz);
+      printf("  3dsmoke file, %s, could not be opened for output\n",smoke3dfile_svz);
     }
     if(smoke3dsizestream==NULL){
-      printf("  %s could not be opened for output\n",smoke3dsizefile_svz);
+      printf("  3dsmoke size file, %s, could not be opened for output\n",smoke3dsizefile_svz);
     }
 #ifdef pp_LIGHT
     if(make_lighting_file==1&&light3dstream==NULL){
-      printf("  %s could not be opened for output\n",smoke3dfile_lvz);
+      printf("  3dsmoke lighting file, %s, could not be opened for output\n",smoke3dfile_lvz);
     }
 #endif
     if(smoke3dsizestream!=NULL)fclose(smoke3dsizestream);
@@ -435,84 +435,31 @@ void light_smoke(smoke3d *smoke3di, unsigned char *lightingbuffer, float *val_bu
     val_buffer[i]=1.0;
   }
 
-  // set interior to  0.0 (hence outside boundary is 1.0)
+  // light from below
 
-  for(k=1;k<nz-1;k++){
-    for(j=1;j<ny-1;j++){
-      for(i=1;i<nx-1;i++){
-        ijk = ijknode(i,j,k);
-        val_buffer[ijk]=0.0;
-      }
-    }
-  }
+  // set planes above k=0 to 0.0
 
-  // light from left
-
-  for(k=0;k<nz;k++){
+  for(k=1;k<nz;k++){
     for(j=0;j<ny;j++){
-      for(i=1;i<nx;i++){
-        ijk = ijknode(i,j,k);
-        ijkm1 = ijknode(i-1,j,k);
-        factor = (255.0-(float)alpha_buffer[ijkm1])/255.0;
-        val=val_buffer[ijkm1]*factor;
-        if(val>val_buffer[ijk])val_buffer[ijk]=val;
-      }
-    }
-  }
-
-  // light from right
-
-  for(k=0;k<nz;k++){
-    for(j=0;j<ny;j++){
-      for(i=nx-1;i>0;i--){
-        ijk = ijknode(i,j,k);
-        ijkm1 = ijknode(i-1,j,k);
-        factor = (255.0-(float)alpha_buffer[ijk])/255.0;
-        val=val_buffer[ijk]*factor;
-        if(val>val_buffer[ijkm1])val_buffer[ijkm1]=val;
-      }
-    }
-  }
-
-  // light from front
-
-  for(k=0;k<nz;k++){
-    for(j=1;j<ny;j++){
+      ijk = ijknode(0,j,k);
       for(i=0;i<nx;i++){
-        ijk = ijknode(i,j,k);
-        ijkm1 = ijknode(i,j-1,k);
+        val_buffer[ijk]=0.0;
+        ijk++;
+      }
+    }
+  }
+
+  // light from below
+
+  for(k=1;k<nz;k++){
+    for(j=0;j<ny;j++){
+      ijk = ijknode(0,j,k);
+      for(i=0;i<nx;i++){
+        ijkm1 = ijk - nxy;
         factor = (255.0-(float)alpha_buffer[ijkm1])/255.0;
         val = factor*val_buffer[ijkm1];
         if(val>val_buffer[ijk])val_buffer[ijk]=val;
-      }
-    }
-  }
-
-  // light from back
-
-  for(k=0;k<nz;k++){
-    for(j=ny-1;j>0;j--){
-      for(i=0;i<nx;i++){
-        ijk = ijknode(i,j,k);
-        ijkm1 = ijknode(i,j-1,k);
-        factor = (255.0-(float)alpha_buffer[ijk])/255.0;
-        val = factor*val_buffer[ijk];
-        if(val>val_buffer[ijkm1])val_buffer[ijkm1]=val;
-      }
-    }
-  }
-
-
-  // light from above
-
-  for(k=nz-1;k>0;k--){
-    for(j=0;j<ny;j++){
-      for(i=1;i<nx;i++){
-        ijk = ijknode(i,j,k);
-        ijkm1 = ijknode(i,j,k-1);
-        factor = (255.0-(float)alpha_buffer[ijk])/255.0;
-        val = factor*val_buffer[ijk];
-        if(val>val_buffer[ijkm1])val_buffer[ijkm1]=val;
+        ijk++;
       }
     }
   }
