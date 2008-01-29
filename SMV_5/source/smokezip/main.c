@@ -114,7 +114,7 @@ int main(int argc, char **argv){
         break;
       case 'a':
         arg2=argv[i+1];
-        if(strcmp(arg2,"auto"){
+        if(strcmp(arg2,"auto")==0){
           autozip=1;
         }
         else{

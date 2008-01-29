@@ -327,7 +327,7 @@ int getmaxrevision(void){
 /* ------------------ getSMVversion ------------------------ */
 
 void getSMZversion(char *SMZversion){
-  strcpy(SMZversion,"1.2.1");
+  strcpy(SMZversion,SMZVERSION);
 }
 
 /* ------------------ getrevision ------------------------ */
