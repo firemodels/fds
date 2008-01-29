@@ -29,20 +29,29 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#define EGZ
+#define USE_ZLIB
 
+#undef pp_release
+#define pp_release
 
-#ifndef pp_RELEASE
-#undef _DEBUG
-#define _DEBUG
+#ifdef pp_ALPHA
+#undef pp_release
+#define pp_LIGHT
+#define SMZVERSION "experimental"
 #endif
+
+#ifdef pp_BETA
+#undef pp_release
+#define pp_RLETEST
+#define SMZVERSION "test"
+#endif
+
 #ifdef WIN32
 #define pp_noappend
 #define pp_cvf
 #endif
 
-#define EGZ
-#define USE_ZLIB
-
-#ifdef pp_TEST
-#define pp_RLETEST
+#ifdef pp_release
+#define SMZVERSION "1.2.1"
 #endif
