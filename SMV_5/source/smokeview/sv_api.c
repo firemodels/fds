@@ -1,3 +1,7 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
 #include "options.h"
 #ifdef WIN32
 #include <Winsock2.h>
@@ -12,10 +16,6 @@
 #include <GL/glut.h>
 #endif
 #include <sys/types.h>
-// $Date$ 
-// $Revision$
-// $Author$
-
 #include <sys/stat.h>
 #include "isodefs.h"
 #include "smokeheaders.h"
