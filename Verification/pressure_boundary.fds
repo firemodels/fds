@@ -1,6 +1,6 @@
 This case just demonstrates how to do a time-dependent pressure boundary
 
-&HEAD CHID='pressure_boundary', TITLE='Simple tunnel with pressure boundary, SVN $Revision: 935 $' /
+&HEAD CHID='pressure_boundary', TITLE='Simple tunnel with pressure boundary, SVN $Revision$' /
 
 &MESH IJK=100,10,10, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
 
