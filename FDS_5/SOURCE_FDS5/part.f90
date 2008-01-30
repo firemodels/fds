@@ -132,6 +132,8 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
       ELSE
          DR%SHOW = .FALSE.    
       ENDIF
+      DR%SPLAT   = .FALSE.
+      DR%WALL_INDEX = 0
  
       IF (PC%DIAMETER>0._EB) THEN
          IF (PC%MONODISPERSE) THEN
@@ -213,6 +215,8 @@ TREE_LOOP: DO NCT=1,N_TREES
             ENDIF
          DR=>DROPLET(NLP)
          DR%TAG = PARTICLE_TAG
+         DR%SPLAT   = .FALSE.
+         DR%WALL_INDEX = 0
          BLK_LOOP:  DO
             CALL RANDOM_NUMBER(RN)
             DR%Z = ZC_MIN + RN*(ZC_MAX-ZC_MIN)
@@ -375,7 +379,9 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for spr
       ELSE
          DR%SHOW = .FALSE.
       ENDIF
- 
+      DR%SPLAT   = .FALSE.
+      DR%WALL_INDEX = 0
+
       ! Randomly choose theta and phi
  
       CHOOSE_COORDS: DO
@@ -628,6 +634,8 @@ WALL_INSERT_LOOP: DO IW=1,NWC
       ELSE
          DR%SHOW = .FALSE.
       ENDIF
+      DR%SPLAT   = .FALSE.
+      DR%WALL_INDEX = 0
       DR%R   = 0.0_EB
       DR%TMP = PC%TMP_INITIAL
       DR%T   = T
