@@ -3468,7 +3468,7 @@ Contains
     !
     ! Initialize group lists, known doors, etc
     !
-    Real(EB) RN, TNOW
+    Real(EB) RN
     Real(EB) x1_old, y1_old
     Integer I,J,II,JJ,KK, IZERO, ie, nom, j1
     Logical PP_see_door
