@@ -735,7 +735,7 @@ END SUBROUTINE UPDATE_PARTICLES
 
 SUBROUTINE MOVE_PARTICLES(T,NM)
 
-! Momentum and heat transfer from all particles and droplets
+! Momentum transfer from all particles and droplets
  
 USE COMP_FUNCTIONS, ONLY : SECOND  
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP, AFILL2
@@ -1176,11 +1176,11 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,NM)
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION2
 
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN,DROP_RAD,DROP_TMP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN,DROP_RAD,DROP_TMP,MVAP_TOT
 REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS
 REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
             RVC,WGT,OMWGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
-            T,PR_AIR,M_VAP,XI,YJ,ZK,RDT,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD, &
+            T,PR_AIR,M_VAP,M_VAP_MAX,XI,YJ,ZK,RDT,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP
@@ -1218,6 +1218,8 @@ IF (N_EVAP_INDICIES>0) THEN
    DROP_DEN => WORK4
    DROP_RAD => WORK5
    DROP_TMP => WORK6
+   MVAP_TOT => WORK7
+   MVAP_TOT = 0._EB
 ENDIF
 
 ! Loop over all types of evaporative species
@@ -1306,6 +1308,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             RHO_G  = RHO(II,JJ,KK)
             MU_AIR = SPECIES(0)%MU(MIN(500,NINT(0.1_EB*TMP_G)))
             M_GAS  = RHO_G/RVC        
+            M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT!limit to avoid diveregence errors
+            IF (M_VAP_MAX <= 0._EB) CYCLE DROPLET_LOOP
             K_AIR  = CPOPR*MU_AIR
             IF (IGAS>0) THEN
                Y_GAS = YY(II,JJ,KK,IGAS)
@@ -1401,7 +1405,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ! Compute the total amount of liquid evaporated
   
             M_VAP = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
-            M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP))
+            M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP,M_VAP_MAX))
 
             ! Evaporate completely small droplets
 
@@ -1423,7 +1427,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ! If the droplet temperature reaches boiling, use only enough energy from gas to vaporize liquid
 
             IF (PC%EVAPORATE .AND. TMP_DROP_NEW>=TMP_BOIL) THEN  
-               M_VAP  = MIN(M_DROP,M_VAP + (TMP_DROP_NEW - TMP_BOIL)*C_DROP*M_DROP/H_V)
+               M_VAP  = MIN(M_VAP_MAX,M_DROP,M_VAP + (TMP_DROP_NEW - TMP_BOIL)*C_DROP*M_DROP/H_V)
                TMP_DROP_NEW = TMP_BOIL
                Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
                IF (Q_TOT>0._EB) THEN
@@ -1471,6 +1475,9 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ! Add new mass from vaporized droplet to the grid cell
 
             RHO(II,JJ,KK) = RHO(II,JJ,KK) + WGT*M_VAP*RVC
+            
+            !Track total mass evaporate in cell
+            MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
 
             ! Get out of the loop if the droplet has evaporated completely
 
