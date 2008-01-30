@@ -2523,6 +2523,8 @@ details.
 As with exterior temperature, to change the exterior mass fraction of a particular gas species, set {\ct MASS\_FRACTION(N)} on the {\ct VENT} line, where {\ct N} denotes the
 species index. See Section~\ref{info:SPEC} for more information about gas species.
 
+If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
+
 \begin{warning}
 Vents to the outside of the computational domain ({\ct OPEN} vents)
 may {\bf not} be opened or closed during a simulation. See Section~\ref{info:activate_deactivate} for details.
@@ -2997,6 +2999,36 @@ mass flux of species.  To obtain a guaranteed mass flux of a species, you should
 \end{warning}
 
 
+
+\subsection{Special Topic: Pressure Boundary Conditions}
+\label{info:pressure_boundary}
+\index{VENT!DYNAMIC\_PRESSURE}
+\index{VENT!PRESSURE\_RAMP}
+
+In some situations, it is more convenient to specify a pressure, rather than a velocity, at a boundary. Suppose, for example, that you are modeling the
+interior of a tunnel, and a wind is blowing at one of the portals that affects the overall flow within the tunnel. If (and only if) the portal is defined using an
+{\ct OPEN} vent, then the {\em dynamic pressure} at the boundary can be specified like this:
+
+\footnotesize
+\begin{verbatim}
+&VENT XB=..., SURF_ID='OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind' /
+&RAMP ID='wind', T= 0.0, F=1.0 /
+&RAMP ID='wind', T=30.0, F=0.5 /
+            .
+            .
+\end{verbatim}
+\normalsize
+
+\noindent
+The dynamic pressure is taken as $\rho_\infty U^2/2$ in units of Pa. The term $\rho_\infty$ is the ambient density outside, and $U$ is a characteristic
+velocity outside, like the free-stream wind speed, in units of m/s. The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
+need to ramp the pressure up or down starting at zero, like you do for various other ramps.
+The net effect of a positive dynamic pressure at an otherwise quiescent boundary is to
+drive a flow into the domain. However, a fire-driven flow of sufficient strength can push back against this incoming flow. A simple example demonstrating this
+effect is given in Section~\ref{pressure_boundary}.
+
+
+
 \subsection{Special Topic: Fires and Flows in the Outdoors}
 \label{info:stratification}
 \index{outdoor fires}
@@ -3067,6 +3099,8 @@ For example, the lines
 &VENT XB=0.0,5.0,1.5,9.5,0.0,0.0, SURF_ID='FIRE', XYZ=1.5,4.0,0.0, SPREAD_RATE=0.03 /
 \end{verbatim}
 \normalsize
+
+\noindent
 create a rectangular patch at $z=0$ on which the fire starts at the
 point (1.5,4.0,0.0) and spreads outwards at a rate of 0.03~m/s. Each surface cell
 burns for 30~s as the fire spreads outward, creating a widening ring of fire. Note that the {\ct RAMP\_Q} is used in this
@@ -7657,6 +7691,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR    }             & Character         & See Section~\ref{info:colors}                                 &             &                     \\ \hline
 {\ct CTRL\_ID }             & Character         & {\ct ID} of Control Function                                  &             &                     \\ \hline
 {\ct DEVC\_ID }             & Character         & {\ct ID} of Controlling Device                                &             &                     \\ \hline
+{\ct DYNAMIC\_PRESSURE}     & Real              & See Section~\ref{info:pressure_boundary}                      & Pa          &  0.0                \\ \hline
 %{\ct EVACUATION    }        & Logical           & Vent to be used in Evac calc                                  &             &  {\ct .FALSE.}      \\ \hline
 {\ct FYI}                   & Character         & Comment String (has no effect)                                &             &                     \\ \hline
 {\ct IOR}                   & Integer           & Orientation Index                                             &             &                     \\ \hline
@@ -7665,6 +7700,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct MESH\_ID    }          & Character         & Name of the controlling mesh                                  &             &                     \\ \hline
 {\ct OUTLINE}               & Logical           & Draw vent as outline                                          &             &  {\ct .FALSE.}      \\ \hline
 {\ct PBX, PBY, PBZ  }       & Real              & Coordinate Plane                                              &             &                     \\ \hline
+{\ct PRESSURE\_RAMP}        & Character         & See Section~\ref{info:pressure_boundary}                      &             &                     \\ \hline
 {\ct RGB(3)   }             & Integer Triplet   & See Section~\ref{info:colors}                                 &             &                     \\ \hline
 {\ct SPREAD\_RATE}          & Real              & See Section~\ref{info:spread}                                 & m/s         &  0.0                \\ \hline
 {\ct SURF\_ID}              & Character         & Associated Surface                                            &             &  {\ct 'INERT'}      \\ \hline
@@ -8637,8 +8673,51 @@ the air velocity on the bottom set of obstructions is not affected as much by th
 \clearpage
 
 
+\subsection{Pressure Boundaries (\texorpdfstring{{\bf pressure\_boundary}}{pressure\_boundary})}
+\label{pressure_boundary}
 
 
+This case just demonstrates how to do a time-dependent pressure boundary. It is a 10~m long, 1~m wide, 1~m tall tunnel with a fire in the middle and a pressure boundary
+imposed on the right side ($x=10$).
+
+\scriptsize
+\begin{verbatim}
+&HEAD CHID='pressure_boundary', TITLE='Simple tunnel with pressure boundary, SVN $Revision$' /
+
+&MESH IJK=100,10,10, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
+
+&TIME TWFIN=60. /
+
+&SURF ID='FIRE', HRRPUA=2000., COLOR='RED' /
+&VENT XB=4.7,5.3,0.2,0.8,0.0,0.0, SURF_ID='FIRE' /
+
+&VENT MB = 'XMIN' SURF_ID = 'OPEN' /
+&VENT MB = 'XMAX' SURF_ID = 'OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind_ramp' /
+
+&RAMP ID='wind_ramp', T= 0., F= 1. /
+&RAMP ID='wind_ramp', T=30., F= 1. /
+&RAMP ID='wind_ramp', T=31., F=-1. /
+
+&SLCF PBY=0.5, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBY=0.5, QUANTITY='H' /
+&SLCF PBY=0.5, QUANTITY='PRESSURE' /
+&SLCF PBY=0.5, QUANTITY='TEMPERATURE' /
+
+&TAIL /
+\end{verbatim}\normalsize
+
+\noindent
+This snapshot from Smokeview was taken during the time period when there was a positive pressure imposed at the right portal of the tunnel. The fire leans to the
+left because of the preferential flow in that direction.
+\begin{center}
+\includegraphics[width=\textwidth]{FIGURES/pressure_boundary}
+\end{center}
+
+
+
+
+
+\clearpage
 
 \section{Combustion}
 
