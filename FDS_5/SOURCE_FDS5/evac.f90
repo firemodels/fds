@@ -2524,7 +2524,7 @@ Contains
     L_eff_read = Btest(I_EVAC,2)
     L_eff_save = Btest(I_EVAC,0)
 
-    n_cols = n_egrids + n_corrs + n_exits + n_doors + 1
+    n_cols = n_egrids + n_corrs + n_exits + n_doors + 1 + n_exits + n_doors
     ! Initialize the FED counters:
     icyc_old = -1
     n_dead = -1
@@ -2765,16 +2765,22 @@ Contains
                ('Corridor', i=1,n_corrs), &
                ('Exit', i=1,n_exits), &
                ('Door', i=1,n_doors), &
+               ('Exit', i=1,n_exits), &
+               ('Door', i=1,n_doors), &
                'Fed','Fed','Fed'
           Write (LU_EVACCSV,tcform) 'Time','Inside', &
                ('Inside', i=1,n_egrids), &
                ('Inside', i=1,n_corrs), &
                ('Counter', i=1,n_exits), &
                ('Counter', i=1,n_doors), &
+               ('Target', i=1,n_exits), &
+               ('Target', i=1,n_doors), &
                'Counter','Fed','Fed'
           Write (LU_EVACCSV,tcform) 's','All Nodes', &
                (Trim(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
                (Trim(EVAC_CORRS(i)%ID_NAME), i=1,n_corrs), &
+               (Trim(EVAC_EXITS(i)%ID_NAME), i=1,n_exits), &
+               (Trim(EVAC_DOORS(i)%ID_NAME), i=1,n_doors), &
                (Trim(EVAC_EXITS(i)%ID_NAME), i=1,n_exits), &
                (Trim(EVAC_DOORS(i)%ID_NAME), i=1,n_doors), &
                'Deads','FED_max','FED_max_alive'
@@ -2787,15 +2793,21 @@ Contains
                ('Floor', i=1,n_egrids), &
                ('Corridor', i=1,n_corrs), &
                ('Exit', i=1,n_exits), &
+               ('Door', i=1,n_doors), &
+               ('Exit', i=1,n_exits), &
                ('Door', i=1,n_doors)
           Write (LU_EVACCSV,tcform) 'Time','Inside', &
                ('Inside', i=1,n_egrids), &
                ('Inside', i=1,n_corrs), &
                ('Counter', i=1,n_exits), &
-               ('Counter', i=1,n_doors)
+               ('Counter', i=1,n_doors), &
+               ('Target', i=1,n_exits), &
+               ('Target', i=1,n_doors)
           Write (LU_EVACCSV,tcform) 's','All Nodes', &
                (Trim(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
                (Trim(EVAC_CORRS(i)%ID_NAME), i=1,n_corrs), &
+               (Trim(EVAC_EXITS(i)%ID_NAME), i=1,n_exits), &
+               (Trim(EVAC_DOORS(i)%ID_NAME), i=1,n_doors), &
                (Trim(EVAC_EXITS(i)%ID_NAME), i=1,n_exits), &
                (Trim(EVAC_DOORS(i)%ID_NAME), i=1,n_doors)
        End If
