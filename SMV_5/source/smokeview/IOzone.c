@@ -55,14 +55,10 @@ void readzone(char *file, int ifile, int flag, int *errorcode){
     updatemenu=1;
     return;
   }
- // if(ReadZoneFile == 1){
     zonefilelen = strlen(file);
     FORTgetzonesize(file,&nzonet,&nrooms2,&nfires2,&endian,&error,zonefilelen);
     CheckMemory;
-//  }
-//  if(error!=0||ReadZoneFile==0||nrooms!=nrooms2||nzonet==0){
   if(error!=0||nrooms!=nrooms2||nzonet==0){
-    /* sd->nsteps=0;*/
     showzone=0;
     updatetimes();
     ReadZoneFile=0;
@@ -147,7 +143,6 @@ void readzone(char *file, int ifile, int flag, int *errorcode){
           }
         }
       }
-      //zoneylay[ii]=(zoneylay[ii]-zbar0)/xyzmaxdiff;
       zoneylay[ii]/=xyzmaxdiff;
       ii++;
     }
@@ -188,11 +183,6 @@ void readzone(char *file, int ifile, int flag, int *errorcode){
   getZoneColors(zonetu, ntotal, izonetu,&zonemin, &zonemax, nrgb, nrgb_full, 
     colorlabelzone, zonescale, zonelevels256);
 
-//  if(loadpatchbysteps==0)getBoundaryColors(meshi->pqq, npqq, meshi->ipqq, 
-//                 setpatchmin,&patchmin, setpatchmax,&patchmax, 
-//                 &patchmin_global, &patchmax_global,
-//                 nrgb_full,nrgb, colorlabelpatch,patchscale,boundarylevels256);
-//  FREEMEMORY(zonetu);
   ReadZoneFile=1;
   visZone=1;
   showzone=1;
@@ -515,11 +505,6 @@ void drawventdata(void){
           else{
             float dyy;
 
-          // dy1 yelev[j]
-          // 0.0 dyy
-          // dy2 yelev[j+1]
-          // (dyy-yelev[j])/(yelev[j+1]-yelev[j]) = -dy1/(dy2-dy1)
-          // dyy =  yelev[j] - dy1*(yelev[j+1]-yelev[j])/(dy2-dy1)
             dyy =  yelev[j] - dy1*(yelev[j+1]-yelev[j])/(dy2-dy1);
             glColor3fv(vcolor1);
             glVertex3f(yy,    x1,yelev[j]);

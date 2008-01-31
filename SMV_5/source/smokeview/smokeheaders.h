@@ -464,7 +464,6 @@ EXTERNCPP void update_plot3dtitle(void);
 EXTERNCPP void LoadPlot3dMenu(int value);
 EXTERNCPP void init_plot3dtimelist(void);
 EXTERNCPP void update_framenumber(int changetime);
-EXTERNCPP void update_visSmokePart(void);
 EXTERNCPP void update_iso_showlevels(void);
 EXTERNCPP void update_current_mesh(mesh *meshi);
 EXTERNCPP void DialogMenu(int value);

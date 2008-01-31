@@ -380,8 +380,8 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
           comp_buffer+=nbuffer;
           full_buffer+=nfull;
         }
-        if(settmin_i==1&&time<tmin_i)continue; //xxx
-        if(settmax_i==1&&time>tmax_i)continue; //xxx
+        if(settmin_i==1&&time<tmin_i)continue;
+        if(settmax_i==1&&time>tmax_i)continue;
 
 
         asurface->dataflag=ib->dataflag;
@@ -426,7 +426,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 	      if(EGZ_FEOF(isostream)!=0)break;
 	      EGZ_FREAD(&ntriangles_i,4,1,isostream);
 	      if(EGZ_FEOF(isostream)!=0)break;
-        if(jj%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)){   //xxx
+        if(jj%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)){
           skip=0;
           if(nvertices_i<=0||ntriangles_i<=0)continue;
           skip += (6*nvertices_i);
@@ -602,8 +602,6 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
         asurface++;
       }
     }
-    // *****
-
     if(ib->compression_type==1){
       i++;
       if(i>=meshi->nisosteps)break;
@@ -930,7 +928,6 @@ void drawiso(const mesh *meshi,int tranflag){
       icolor=i;
       if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
       glColor3fv(iso_colors+4*icolor);
-      glColor3f(0.0,0.0,1.0);   // debug
       nvertices=asurface->nvertices;
       ntriangles=asurface->ntriangles/3;
       vertices_i=asurface->vertices;

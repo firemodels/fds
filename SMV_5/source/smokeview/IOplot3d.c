@@ -38,7 +38,6 @@ int plot3dcompare( const void *arg1, const void *arg2 ){
   if(plot3di->blocknumber>plot3dj->blocknumber)return 1;
   return 0;
 }
-//int plot3dlistcompare( const void *arg1, const void *arg2 );
 
 #define ijknode(i,j,k) ((i)+(j)*nx+(k)*nxy)
 #define ijkn(i,j,k,n) ((i)+(j)*nx+(k)*nxy+(n)*nxyz)
@@ -363,7 +362,6 @@ void update_plot3dtitle(void){
 void drawplot3d_texture(mesh *meshi){
   int i,j,k;
   int colorindex;
-//  int *color1, *color2;
   float *color1t, *color2t;
   float dx, dy, dz;
   int plotx, ploty, plotz;
@@ -459,7 +457,6 @@ void drawplot3d_texture(mesh *meshi){
         plotx=ibar;
         updateplotslice(1);
       }
-   //      glTexCoord1f(r11);glVertex3f(x1,yy1,constval);
       if(plotx>ibar){plotx=0;updateplotslice(1);}
       glBegin(GL_TRIANGLES);
       for(j=0; j<jbar; j++){
@@ -1666,14 +1663,11 @@ void updateshowstep(int slicedir){
       if(current_mesh->visy==1)nplanes++;
       if(current_mesh->visz==1)nplanes++;
       if(nplanes<=1){
-//        transparentflagVOL=1-transparentflagSAVE;
         transparentflagVOL=1;
       }
       else{
         transparentflagVOL=0;
       }
-     // ShadeMenu(3);
-
     }
   }
 }
