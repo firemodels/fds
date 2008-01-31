@@ -3,6 +3,8 @@
 // $Author$
 
 #include "options.h"
+char shaders_revision[]="$Revision$";
+
 #ifdef pp_GPU
 #include <stdlib.h>
 #include <math.h>
@@ -13,8 +15,6 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
-
-char shaders_revision[]="$Revision$";
 
 GLhandleARB v,f,p_smoke, p_slice ;
 char *textFileRead(char *fn);
