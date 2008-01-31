@@ -102,6 +102,11 @@ int initcase_c(int argc, char **argv){
     ASSERT(FFALSE);
   }
   readini(0);
+
+  if(sb_atstart==1){
+    smooth_blockages();
+  }
+
   if(ntours==0)setup_tour();
   glui_colorbar_setup(mainwindow_id);
   glui_motion_setup(mainwindow_id);
@@ -923,6 +928,7 @@ void initvars1(void){
 #ifdef pp_LIGHT
   show_smokelighting=0;
 #endif
+  sb_atstart=1;
   navatar_types=0;
   avatar_types=NULL;
   navatar_colors=0;
