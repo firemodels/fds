@@ -122,7 +122,6 @@ void readvslice(int ivslice, int flag, int *errorcode){
   if(vd->iu!=-1){
     u = sliceinfo + vd->iu;
     vd->u=u;
-//    if(u->loaded==0||u->reload==1)readslice(u->file,vd->iu,LOAD,errorcode);
     readslice(u->file,vd->iu,LOAD,errorcode);
     if(*errorcode!=0){
       vd->loaded=1;
@@ -140,7 +139,6 @@ void readvslice(int ivslice, int flag, int *errorcode){
   if(vd->iv!=-1){
     v = sliceinfo + vd->iv;
     vd->v=v;
-//    if(v->loaded==0||v->reload==1)readslice(v->file,vd->iv,LOAD,errorcode);
     readslice(v->file,vd->iv,LOAD,errorcode);
     if(*errorcode!=0){
       printf("error loading %s, vector load aborted\n",v->file);
@@ -159,7 +157,6 @@ void readvslice(int ivslice, int flag, int *errorcode){
   if(vd->iw!=-1){
     w = sliceinfo + vd->iw;
     vd->w=w;
-//    if(w->loaded==0||w->reload==1)readslice(w->file,vd->iw,LOAD,errorcode);
     readslice(w->file,vd->iw,LOAD,errorcode);
     if(*errorcode!=0){
       printf("error loading %s, vector load aborted\n",w->file);
@@ -179,7 +176,6 @@ void readvslice(int ivslice, int flag, int *errorcode){
   if(vd->ival!=-1){
     val = sliceinfo + vd->ival;
     vd->val=val;
-//    if(val->loaded==0||val->reload==1)readslice(val->file,vd->ival,LOAD,errorcode);
     readslice(val->file,vd->ival,LOAD,errorcode);
     if(*errorcode!=0){
       printf("error loading %s, vector load aborted\n",val->file);
@@ -573,7 +569,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       for(j=sd->js1;j<sd->js2;j++){
         for(k=sd->ks1;k<sd->ks2;k++){
           for(i=sd->is1;i<sd->is1+sd->nslicei;i++){
-//            sd->iblank[ii++]=meshi->iblank_x[ijk(sd->is1,j,k)];
             sd->iblank[ii++]=meshi->iblank_x[ijk(i,j,k)];
           }
         }
@@ -585,7 +580,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         for(k=sd->ks1;k<sd->ks2;k++){
           for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
             sd->iblank[ii++]=meshi->iblank_y[ijk(i,j,k)];
-           // sd->iblank[ii++]=meshi->iblank_y[ijk(i,sd->js1,k)];
           }
         }
       }
@@ -595,7 +589,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       for(i=sd->is1;i<sd->is2;i++){
         for(j=sd->js1;j<sd->js2;j++){
           for(k=sd->ks1;k<sd->ks1+sd->nslicek;k++){
-//          sd->iblank[ii++]=meshi->iblank_z[ijk(i,j,sd->ks1)];
             sd->iblank[ii++]=meshi->iblank_z[ijk(i,j,k)];
           }
         }
@@ -1882,10 +1875,6 @@ void drawslice_texture(const slice *sd){
 
   mesh *meshi;
 
-  //float *rgb_ptr;
-
-  //rgb_ptr = rgb_slice;
-
   meshi = meshinfo + sd->blocknumber;
 
   xplt=meshi->xplt;
@@ -2063,10 +2052,6 @@ void drawvolslice_texture(const slice *sd){
   int *iblank_x, *iblank_y, *iblank_z;
 
   mesh *meshi;
-
-  //float *rgb_ptr;
-
-  //rgb_ptr = rgb_slice;
 
   meshi = meshinfo + sd->blocknumber;
 
@@ -3110,7 +3095,6 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
                    int *nx, int *ny, int *nz, int *nsteps, int *ntotal, float *valmin, float *valmax){
   FILE *stream;
   int i1, i2, j1, j2, k1, k2;
-//  float valmin, valmax;
   float time;
   int ncompressed;
   int count;
@@ -3204,7 +3188,6 @@ int getslicerledata(char *file,
   FILE *stream;
   int count, ns;
   unsigned char *cd;
-//  int skip;
   float minmax[2];
   int ijkbar[6];
   int one;
@@ -3247,7 +3230,6 @@ int getslicerledata(char *file,
 
   count=0;
   ns=0;
-//  skip=0;
   while(!feof(stream)){
     float ttime;
     int nncomp;
@@ -3289,7 +3271,6 @@ int getslicezlibdata(char *file,
   FILE *stream;
   int count, ns;
   unsigned char *cd;
-//  int skip;
   int endian;
   float minmax[2];
   int fileversion, version; 
@@ -3335,7 +3316,6 @@ int getslicezlibdata(char *file,
 
   count=0;
   ns=0;
-//  skip=0;
   while(!feof(stream)){
     float ttime;
     int nncomp;
@@ -3449,13 +3429,6 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
       fprintf(sizestream,"%f %i %i\n",time,0,ncompressed);
       count++;
     }
-
-//#define FORTRLESLICEREAD(var,size) fseek(RLESLICEFILE,4,SEEK_CUR);\
-//                           returncode=fread(var,4,size,RLESLICEFILE);\
-//                           if(endianswitch==1)endian_switch(var,size);\
-//                           fseek(RLESLICEFILE,4,SEEK_CUR)
-
-
   }
   fclose(stream);
   fclose(sizestream);
@@ -3478,7 +3451,6 @@ void uncompress_slicedataframe(slice *sd,int iframe){
     uncompress(sd->slicecomplevel,&countout,compressed_data,countin);
   }
   else if(sd->compression_type==2){
-//    irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out){
     irle(compressed_data, countin, sd->slicecomplevel);
   }
 

@@ -58,9 +58,6 @@ void drawtrees(void){
   int i;
 
  glEnable(GL_LIGHTING);
- //glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
- //glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
- //glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
 
  glEnable(GL_COLOR_MATERIAL);
 

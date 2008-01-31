@@ -1340,7 +1340,6 @@ void ParticleShowMenu(int value){
     value--;
     parti = partinfo + value;
     parti->display = 1 - parti->display;
-    update_visSmokePart();
     updatemenu=1;  
     glutPostRedisplay();
     plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -4448,7 +4447,6 @@ static int textureshowmenu=0;
       glutAddMenuEntry(menulabel,-1-i);
     }
     glutAddMenuEntry("-",999);
-    update_visSmokePart();
     if(plotstate==DYNAMIC_PLOTS&&visSmokePart!=0){
       if(visSmokePart==2)glutAddMenuEntry("*Particles",1);
       if(visSmokePart==1)glutAddMenuEntry("#Particles",1);

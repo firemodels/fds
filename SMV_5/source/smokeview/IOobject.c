@@ -130,10 +130,6 @@ void draw_devices(void){
   for(i=0;i<ndeviceinfo;i++){
     devicei = deviceinfo + i;
 
-    //if((visSensor==1&&ntc_total>0)||
-    //   (visSprink==1&&nspr_total>0)||
-    //   (visHeat==1&&nheat_total>0)){
-
     if(devicei->object->visible==0)continue;
     if(isZoneFireModel==1&&strcmp(devicei->object->label,"target")==0&&visSensor==0)continue;
     xyz = devicei->xyz;
@@ -1610,7 +1606,6 @@ void free_object(sv_object *object){
 
 void remove_comment(char *buffer){
   char *comment;
-// test
   comment = strstr(buffer,"//");
   if(comment!=NULL)comment[0]=0;
   return;
@@ -1676,40 +1671,37 @@ void init_device_defs(void){
       device_defs[2] = device_defs_backup[2];
       device_defs[3] = device_defs_backup[3];
     }
-    //if(isZoneFireModel==1){
-    //  int ii;
-    //  for(ii=0;ii<ndevice_defs;ii++){
-    //   if(strcmp(device_defs[ii]->label,"sensor")==0)strcpy(device_defs[ii]->label,"target");
-    //  }
-    //}
 }
-  void init_avatar(void){
-    int iavatar_types;
-    sv_object *objecti,*object_start;
-    char com_buffer[1024];
-    
-    object_start = device_def_first.next;
-    navatar_types=2;
-    for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
-      if(objecti->type==1)navatar_types++;
-    }
-    NewMemory((void **)&avatar_types,navatar_types*sizeof(sv_object *));
 
-    strcpy(com_buffer,"0.0 0.0 1.0 translate 1.0 0.0 0.0 setcolor 0.03 0.1 drawdisk 0.0 0.0 1.0 setcolor 90.0 rotatey 0.03 0.2 drawdisk");
-    avatar_defs_backup[0] = init_SVOBJECT1("Avatar_1", com_buffer,1);
-    avatar_defs_backup[0]->type=1;
+/* ----------------------- init_avatar ----------------------------- */
 
-    strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.02 0.05 drawdisk");
-    avatar_defs_backup[1] = init_SVOBJECT1("Avatar_2", com_buffer,1);
-    avatar_defs_backup[1]->type=1;
-
-    avatar_types[0]=avatar_defs_backup[0];
-    avatar_types[1]=avatar_defs_backup[1];
-
-    iavatar_types=2;
-    for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
-      if(objecti->type==0)continue;
-      avatar_types[iavatar_types++]=objecti;
-    }
-    iavatar_types=0;
+void init_avatar(void){
+  int iavatar_types;
+  sv_object *objecti,*object_start;
+  char com_buffer[1024];
+  
+  object_start = device_def_first.next;
+  navatar_types=2;
+  for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
+    if(objecti->type==1)navatar_types++;
   }
+  NewMemory((void **)&avatar_types,navatar_types*sizeof(sv_object *));
+
+  strcpy(com_buffer,"0.0 0.0 1.0 translate 1.0 0.0 0.0 setcolor 0.03 0.1 drawdisk 0.0 0.0 1.0 setcolor 90.0 rotatey 0.03 0.2 drawdisk");
+  avatar_defs_backup[0] = init_SVOBJECT1("Avatar_1", com_buffer,1);
+  avatar_defs_backup[0]->type=1;
+
+  strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.02 0.05 drawdisk");
+  avatar_defs_backup[1] = init_SVOBJECT1("Avatar_2", com_buffer,1);
+  avatar_defs_backup[1]->type=1;
+
+  avatar_types[0]=avatar_defs_backup[0];
+  avatar_types[1]=avatar_defs_backup[1];
+
+  iavatar_types=2;
+  for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
+    if(objecti->type==0)continue;
+    avatar_types[iavatar_types++]=objecti;
+  }
+  iavatar_types=0;
+}
