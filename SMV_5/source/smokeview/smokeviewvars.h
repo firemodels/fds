@@ -40,6 +40,7 @@ SVEXTERN int usetexturebar;
 #ifdef pp_LIGHT
 SVEXTERN int show_smokelighting;
 #endif
+SVEXTERN int sb_atstart;
 #ifdef pp_CULL
 SVEXTERN int cullactive, show_cullports, cull_portsize;
 SVEXTERN int cullsmoke, ncullplaneinfo;

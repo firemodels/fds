@@ -3179,6 +3179,9 @@ void VentMenu(int value){
    case SMOOTH_BLOCKAGES:
      menusmooth=1;
      break;
+   case SMOOTH_ATSTART:
+     sb_atstart=1-sb_atstart;
+     break;
    default:
      ASSERT(FFALSE);
      break;
@@ -3732,6 +3735,12 @@ static int textureshowmenu=0;
 /* --------------------------------blockage menu -------------------------- */
   CREATEMENU(blockagemenu,BlockageMenu);
   if(use_menusmooth==1){
+    if(sb_atstart==1){
+      glutAddMenuEntry("*Smooth blockages at startup",SMOOTH_ATSTART);
+    }
+    else{
+      glutAddMenuEntry("Smooth blockages at startup",SMOOTH_ATSTART);
+    }
     glutAddMenuEntry("Smooth Blockages Now",SMOOTH_BLOCKAGES);
   }
   glutAddMenuEntry("View Method:",999);

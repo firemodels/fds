@@ -104,6 +104,7 @@ void _sniffErrors(char *whereat);
 #define BLOCKlocation_cad 7
 #define BLOCKtexture_cad 31
 #define SMOOTH_BLOCKAGES 101
+#define SMOOTH_ATSTART 102
 
 #define WALL_1 0
 #define WALL_3 1
