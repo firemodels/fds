@@ -267,7 +267,6 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
             sort_tags[2*j+1]=j;
           }
           qsort( sort_tags, (size_t)nparts, 2*sizeof(int), tagscompare );
-      //  update_partvis(first_frame,datacopy,nclasses);
         }
       }
       else{
@@ -705,9 +704,9 @@ void getpart5header(particle *parti, int partframestep){
             NewMemory((void **)&datacopy->avatar_height,npoints*sizeof(float));
           }
           ntypes = datacopy->partclassbase->ntypes;
-          if(ntypes>0){ //xxx need to check this fix (was ntypes>2)
-            NewMemory((void **)&datacopy->rvals,(ntypes-0)*npoints*sizeof(float));  //xxx need to check this fix
-            NewMemory((void **)&datacopy->irvals,(ntypes-0)*npoints*sizeof(unsigned char)); //xxx need to check this fix
+          if(ntypes>0){
+            NewMemory((void **)&datacopy->rvals,(ntypes-0)*npoints*sizeof(float));
+            NewMemory((void **)&datacopy->irvals,(ntypes-0)*npoints*sizeof(unsigned char));
           }
         }
         datacopy++;
@@ -1532,7 +1531,6 @@ void drawPart(const particle *parti){
       }
       else{
         for (n = 0; n < nsmokepoints; n++) {
-      //  glColor4fv(rgb_full[itpoint[n]]);
           rgb_ismoke = rgb_smoke + 4*itpoint[n];
           if(rgb_ismoke[3]>0.5){
             glColor4fv(rgb_ismoke);
@@ -1682,33 +1680,4 @@ void updatepartmenulabels(void){
   }
 
 
-}
-
-/* ------------------ update_visSmokePart ------------------------ */
-
-void update_visSmokePart(void){
-//  int smoke_all=1;
-//  int smoke_some=0;
-//  int i;
-//  particle *parti;
-
-  /*
-  for(i=0;i<npart;i++){
-    parti = partinfo + i;
-    if(parti->loaded==0||parti->evac==1)continue;
-    if(parti->display_smoke==0)smoke_all=0;
-    if(parti->display_smoke==1)smoke_some=1;
-  }
-  if(smoke_all==1){
-    visSmokePart=2;
-  }
-  else{
-    if(smoke_some==1){
-      visSmokePart=1;
-    }
-    else{
-      visSmokePart=0;
-    }
-  }
-  */
 }

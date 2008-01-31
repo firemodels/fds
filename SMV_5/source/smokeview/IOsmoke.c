@@ -46,11 +46,6 @@ char *textFileRead(char *fn);
               alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE);\
             }
 
-//  if(iblank_x[n]!=2||iblank_y[n]!=2||iblank_z[n]!=2)continue;
- // if((k==ks1||k==ks2))continue;
-//  if((j==js1||j==js2))continue;
-//  if((i==is1||i==is2))continue;
-
 #define DRAWVERTEX(XX,YY,ZZ)        \
 if(show_smoketest==0){\
   value[0]=alphaf_ptr[n11]; \
@@ -1064,7 +1059,6 @@ void mergesmoke3dcolors(void){
             mergecolor++;
             *mergealpha=sootcolor[j]>>smoke3d_thick;
             mergealpha++;
-//          *mergealpha++=14;
           }
         }
         else{
@@ -1075,7 +1069,6 @@ void mergesmoke3dcolors(void){
             mergecolor++;
             *mergealpha=sootcolor[j]>>smoke3d_thick;
             mergealpha++;
-//          *mergealpha++=14;
           }
         }
 #else

@@ -26,10 +26,8 @@ char IOboundary_revision[]="$Revision$";
 
 
 int getpatchfacedir(mesh *gb, int i1, int i2, int j1, int j2, int k1, int k2, 
-//                    int *patchfacevis, 
                     int *blockonpatch, mesh **meshonpatch);
 int getpatchface2dir(mesh *gb, int i1, int i2, int j1, int j2, int k1, int k2, int patchdir,
-//                    int *patchfacevis, 
                     int *blockonpatch, mesh **meshonpatch);
 int getpatchindex(const patch *patchi);
 
@@ -96,7 +94,6 @@ void readpatch(int ifile, int flag, int *errorcode){
   *errorcode=0;
   FREEMEMORY(meshi->blockonpatch);
   FREEMEMORY(meshi->meshonpatch);
-//  FREEMEMORY(meshi->patchfacevis);
   FREEMEMORY(meshi->patchdir);
   FREEMEMORY(meshi->patch_surfindex);
   FREEMEMORY(meshi->pi1);
@@ -200,7 +197,6 @@ void readpatch(int ifile, int flag, int *errorcode){
   }
   if(meshi->npatches>0){
     if(
- //      NewMemory((void **)&meshi->patchfacevis,7*nbb*sizeof(int)   )==0||
        NewMemory((void **)&meshi->meshonpatch,sizeof(mesh *)*meshi->npatches)==0||
        NewMemory((void **)&meshi->blockonpatch,sizeof(int)*meshi->npatches)==0||
        NewMemory((void **)&meshi->patchdir    ,sizeof(int)*meshi->npatches)==0||
@@ -302,11 +298,6 @@ void readpatch(int ifile, int flag, int *errorcode){
   xyzpatch_ignitecopy = meshi->xyzpatch_ignited;
   patchblankcopy = meshi->patchblank;
   meshi->blockstart[0]=0;
- // for(n=0;n<nbb;n++){
- //   for(j=0;j<6;j++){
- //     meshi->patchfacevis[7*n+j]=1;
- //   }
- // }
   for(n=0;n<meshi->nbptrs;n++){
     bc=meshi->blockageinfoptrs[n];
     for(j=0;j<6;j++){
@@ -323,7 +314,6 @@ void readpatch(int ifile, int flag, int *errorcode){
     k1=meshi->pk1[n]; k2=meshi->pk2[n];
     if(pi->version==0){
       meshi->patchdir[n]=getpatchfacedir(meshi,i1,i2,j1,j2,k1,k2,
-   //     meshi->patchfacevis,
         meshi->blockonpatch+n,meshi->meshonpatch+n);
     }
     else{
@@ -629,13 +619,6 @@ void readpatch(int ifile, int flag, int *errorcode){
   }
 
   meshi->patchfacevis2=0;
-//  for(n=0;n<nbb;n++){
-//    meshi->patchfacevis[7*n+6]=0;
-//    for(j=0;j<6;j++){
-//      meshi->patchfacevis[7*n+6]+=meshi->patchfacevis[7*n+j];
-//    }
-//    if(meshi->patchfacevis[7*n+6]!=0)meshi->patchfacevis2=1;
-//  }
   for(n=0;n<meshi->nbptrs;n++){
     bc=meshi->blockageinfoptrs[n];
     bc->patchvis[6]=0;
@@ -756,7 +739,6 @@ void readpatch(int ifile, int flag, int *errorcode){
           nsize=meshi->patchrow[n]*meshi->patchcol[n];
           ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
           if(iblock!=-1&&meshblock!=NULL){
-//            bc=meshi->blockageinfoptrs[iblock];
             bc=meshblock->blockageinfoptrs[iblock];
             surf_index = meshi->patch_surfindex[n];
             surfi = bc->surf[surf_index];
@@ -865,9 +847,6 @@ void readpatch(int ifile, int flag, int *errorcode){
       return;
     }
   }
-//  if(ifile>=0&&ifile<npatch_files){
-//    global2localpatchbounds(patchinfo[ifile].label.shortlabel);
-// }
   patchi = patchinfo + ifile;
   patchscale = patchi->scale;
   patchbase = patchinfo + getpatchindex(patchi);
@@ -1053,10 +1032,8 @@ void nodein_extvent(
   int imin, jmin, kmin, imax, jmax, kmax;
   int i, j, k;
   int dir;
-//  int temp;
   int imesh, iblockage;
   mesh *meshblock;
-//  blockagedata *bc;
 
   dir=0;
   if(i1==i2)dir=1;
@@ -1136,7 +1113,6 @@ void nodein_extvent(
       break;
     }
   }
-//  return;
   switch (dir){
   case 1:
     for(k=k1;k<=k2;k++){
@@ -1144,17 +1120,10 @@ void nodein_extvent(
         iii=(k-k1)*(j2+1-j1) + (j-j1);
         if(patchblank[iii]==1)continue;
         patchblank[iii] = nodeinblockage(meshi,i1,j,k,&imesh,&iblockage);
-        if(imesh!=-1){
-    //      meshblock = meshinfo+imesh;
-    //      meshi->blockonpatch[ipatch]=iblockage;
-    //      meshi->meshonpatch[ipatch]=meshblock;
-    //      bc = meshblock->blockageinfoptrs[iblockage];
-        }
       }
     }
     break;
   case 2:
-//    temp=0;
     for(k=k1;k<=k2;k++){
       for(i=i1;i<=i2;i++){
         iii=(k-k1)*(i2+1-i1) + (i-i1);
@@ -1165,24 +1134,16 @@ void nodein_extvent(
           ASSERT(iblockage>=0&&iblockage<meshblock->nbptrs);
           meshi->blockonpatch[ipatch]=iblockage;
           meshi->meshonpatch[ipatch]=meshblock;
-//          bc = meshblock->blockageinfoptrs[iblockage];
         }
       }
     }
     break;
   case 3:
-//    temp=0;
     for(j=j1;j<=j2;j++){
       for(i=i1;i<=i2;i++){
         iii=(j-j1)*(i2+1-i1) + (i-i1);
         if(patchblank[iii]==1)continue;
         patchblank[iii]=nodeinblockage(meshi,i,j,k1,&imesh,&iblockage);
-        if(imesh!=-1){
-    //      meshblock = meshinfo+imesh;
-    //      meshi->blockonpatch[ipatch]=iblockage;
-    //      meshi->meshonpatch[ipatch]=meshblock;
-    //      bc = meshblock->blockageinfoptrs[iblockage];
-        }
       }
     }
     break;
@@ -1365,7 +1326,6 @@ void drawpatch_texture(const mesh *meshi){
     iblock = meshi->blockonpatch[n];
     meshblock=meshi->meshonpatch[n];
     if(iblock!=-1){
-      //bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -1545,7 +1505,6 @@ void drawpatch_texture_char(const mesh *meshi){
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
     if(iblock!=-1&&meshblock!=NULL){
-//      bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -1629,7 +1588,6 @@ void drawpatch_texture_char(const mesh *meshi){
     iblock = meshi->blockonpatch[n];
     meshblock=meshi->meshonpatch[n];
     if(iblock!=-1){
-      //bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -1711,7 +1669,6 @@ void drawpatch_texture_char(const mesh *meshi){
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
     if(iblock!=-1&&meshblock!=NULL){
-//      bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -1847,7 +1804,6 @@ void drawpatch(const mesh *meshi){
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
     if(iblock!=-1&&meshblock!=NULL){
-//      bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -1938,7 +1894,6 @@ void drawpatch(const mesh *meshi){
     iblock = meshi->blockonpatch[n];
     meshblock=meshi->meshonpatch[n];
     if(iblock!=-1){
-      //bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -2029,7 +1984,6 @@ void drawpatch(const mesh *meshi){
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
     if(iblock!=-1&&meshblock!=NULL){
-//      bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -2099,7 +2053,6 @@ void drawpatch(const mesh *meshi){
               glVertex3fv(xyzp2);
 
               glColor4fv(color22); 
-//              glVertex3f(*(xp2+1),*(yp2+1),*(zp2+1));
               glVertex3fv(xyzp2+3);
             }
           }
@@ -2172,7 +2125,6 @@ void drawonlyignited(const mesh *meshi){
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
     if(iblock!=-1&&meshblock!=NULL){
-//      bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -2253,7 +2205,6 @@ void drawonlyignited(const mesh *meshi){
     iblock = meshi->blockonpatch[n];
     meshblock=meshi->meshonpatch[n];
     if(iblock!=-1){
-      //bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -2333,7 +2284,6 @@ void drawonlyignited(const mesh *meshi){
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
     if(iblock!=-1&&meshblock!=NULL){
-//      bc=meshi->blockageinfoptrs[iblock];
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
         nn += patchrow[n]*patchcol[n];
@@ -2407,10 +2357,8 @@ void drawonlyignited(const mesh *meshi){
 /* ------------------ getpatchfacedir ------------------------ */
 
 int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2, 
-//                    int *patchfacevis, 
                     int *blockonpatch, mesh **meshonpatch){
   int i;
-//  int ib;
   blockagedata *bc;
   mesh *meshblock;
   int imesh;
@@ -2422,13 +2370,11 @@ int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2,
       if(j1==bc->ijk[JMIN]&&j2==bc->ijk[JMAX]&&
          k1==bc->ijk[KMIN]&&k2==bc->ijk[KMAX]){
         if(i1==bc->ijk[IMIN]){
-//          patchfacevis[7*i]=0;
           bc->patchvis[0]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
         }
         if(i1==bc->ijk[IMAX]){
-//          patchfacevis[7*i+1]=0;
           bc->patchvis[1]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
@@ -2451,13 +2397,11 @@ int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2,
       if(i1==bc->ijk[IMIN]&&i2==bc->ijk[IMAX]&&
          k1==bc->ijk[KMIN]&&k2==bc->ijk[KMAX]){
         if(j1==bc->ijk[JMIN]){
-//          patchfacevis[7*i+2]=0;
           bc->patchvis[2]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
         }
         if(j1==bc->ijk[JMAX]){
-//          patchfacevis[7*i+3]=0;
           bc->patchvis[3]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
@@ -2473,13 +2417,11 @@ int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2,
       if(i1==bc->ijk[IMIN]&&i2==bc->ijk[IMAX]&&
          j1==bc->ijk[JMIN]&&j2==bc->ijk[JMAX]){
         if(k1==bc->ijk[KMIN]){
-//          patchfacevis[7*i+4]=0;
           bc->patchvis[4]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
         }
         if(k1==bc->ijk[KMAX]){
-//          patchfacevis[7*i+5]=0;
           bc->patchvis[5]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
@@ -2522,10 +2464,8 @@ int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2,
 /* ------------------ getpatchfacedir ------------------------ */
 
 int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2, int patchdir,
-//                    int *patchfacevis, 
                     int *blockonpatch, mesh **meshonpatch){
   int i;
-//  int ib;
   blockagedata *bc;
   mesh *meshblock;
   int imesh;
@@ -2537,14 +2477,12 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
       if(j1==bc->ijk[JMIN]&&j2==bc->ijk[JMAX]&&
          k1==bc->ijk[KMIN]&&k2==bc->ijk[KMAX]){
         if(i1==bc->ijk[IMIN]&&patchdir==-1){
-//          patchfacevis[7*i]=0;
           bc->patchvis[0]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
           return(-1);
         }
         if(i1==bc->ijk[IMAX]&&patchdir==1){
-//          patchfacevis[7*i+1]=0;
           bc->patchvis[1]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
@@ -2566,14 +2504,12 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
       if(i1==bc->ijk[IMIN]&&i2==bc->ijk[IMAX]&&
          k1==bc->ijk[KMIN]&&k2==bc->ijk[KMAX]){
         if(j1==bc->ijk[JMIN]&&patchdir==-2){
-//          patchfacevis[7*i+2]=0;
           bc->patchvis[2]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
           return(2);
         }
         if(j1==bc->ijk[JMAX]&&patchdir==2){
-//          patchfacevis[7*i+3]=0;
           bc->patchvis[3]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
@@ -2588,14 +2524,12 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
       if(i1==bc->ijk[IMIN]&&i2==bc->ijk[IMAX]&&
          j1==bc->ijk[JMIN]&&j2==bc->ijk[JMAX]){
         if(k1==bc->ijk[KMIN]&&patchdir==-3){
-//          patchfacevis[7*i+4]=0;
           bc->patchvis[4]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
           return(-3);
         }
         if(k1==bc->ijk[KMAX]&&patchdir==3){
-//          patchfacevis[7*i+5]=0;
           bc->patchvis[5]=0;
           *blockonpatch=i;
           *meshonpatch=meshi;
@@ -3037,7 +2971,6 @@ void uncompress_patchdataframe(mesh *meshi,int local_iframe){
   uLongf countout;
   unsigned char *compressed_data;
 
-//  iframe = meshi->ipatch;
   compressed_data = meshi->ipqq_zlib+meshi->zipoffset[local_iframe];
   countin = meshi->zipsize[local_iframe];
   countout=meshi->npatchsize;
