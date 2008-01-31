@@ -2727,7 +2727,10 @@ typedef struct {
             updateindexcolors=1;
           }
         }
-        if(bc->type==BLOCK_smooth)ntotal_smooth_blockages++;
+        if(bc->type==BLOCK_smooth){
+          ntotal_smooth_blockages++;
+          use_menusmooth=1;
+        }
 
       }
       CheckMemoryOn;
@@ -4067,7 +4070,7 @@ typedef struct {
       bc=meshi->blockageinfoptrs[nn];
       bc->nshowtime++;
       meshi->nsmoothblockages_list++;
-      if(meshi->nsmoothblockages_list>20)use_menusmooth=1;
+      if(meshi->nsmoothblockages_list>0)use_menusmooth=1;
       continue;
     }
   /*
@@ -4749,8 +4752,10 @@ typedef struct {
   /* if we have to create smooth block structures do it now,
      otherwise postpone job until we view all blockages as smooth */
 
-  smooth_blockages();
-  //updatesmoothblocks=1;
+//  the code below was moved to after readini in startup (so that sb_atstart will be defined)
+//  if(sb_atstart==1){
+//    smooth_blockages();
+//  }
 
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
@@ -5942,6 +5947,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
+    if(match(buffer,"SBATSTART",9)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&sb_atstart);
+      if(sb_atstart!=0)sb_atstart=1;
+      continue;
+    }
 #ifdef pp_GPU
     if(match(buffer,"USEGPU",6)==1){
       fgets(buffer,255,stream);
@@ -8146,6 +8157,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",visBlocks);
   fprintf(fileout,"SHOWNORMALWHENSMOOTH\n");
   fprintf(fileout," %i\n",visSmoothAsNormal);
+  fprintf(fileout,"SBATSTART\n");
+  fprintf(fileout," %i\n",sb_atstart);
   fprintf(fileout,"SHOWTRANSPARENT\n");
   fprintf(fileout," %i\n",visTransparentBlockage);
   fprintf(fileout,"SHOWVENTS\n");
