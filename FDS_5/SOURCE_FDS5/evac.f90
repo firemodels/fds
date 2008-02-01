@@ -2843,6 +2843,8 @@ Contains
                    MFF%W(i,j,:) = 0.0_EB
                 End Do
              End Do
+             MFF%UVW_GHOST(:,1)=-1.E6_EB
+             MFF%UVW_GHOST(:,2)=-1.E6_EB
           End If
        End Do
     End If
@@ -4507,7 +4509,7 @@ Contains
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
              If (ios.Ne.0) Then
                 Write(MESSAGE,'(A)') 'ERROR: Evac Mesh Exchange: FED READ ERROR'
-                Close (LU_EVACEFF)
+                Close (LU_EVACFED)
                 Call SHUTDOWN(MESSAGE)
              End If
              EVAC_DOORS(i)%FED_CO_CO2_O2 = tmpout1
@@ -4592,7 +4594,7 @@ Contains
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
              If (ios.Ne.0) Then
                 Write(MESSAGE,'(A)') 'ERROR: Evac Mesh Exchange: FED READ ERROR'
-                Close (LU_EVACEFF)
+                Close (LU_EVACFED)
                 Call SHUTDOWN(MESSAGE)
              End If
              EVAC_EXITS(i)%FED_CO_CO2_O2 = tmpout1
