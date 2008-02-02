@@ -8628,6 +8628,10 @@ void writeini(int flag){
 
   {
     int svn_num;
+    char version_label[256];
+
+    strcpy(version_label,"OpenGL Version: "); 
+    strcat(version_label,(char *)glGetString(GL_VERSION));
 
     svn_num=getmaxrevision();    // get svn revision number
     fprintf(fileout,"\n\n# Development Environment\n");
@@ -8635,6 +8639,7 @@ void writeini(int flag){
     fprintf(fileout,"# Smokeview Version: %s\n",SMVVERSION);
     fprintf(fileout,"# Smokeview Revision Number: %i\n",svn_num);
     fprintf(fileout,"# Smokeview Compile Date: %s\n",__DATE__);
+    fprintf(fileout,"# %s\n",version_label);
     if(revision_fds>0){
       fprintf(fileout,"# FDS Revision Number: %i\n",revision_fds);
     }

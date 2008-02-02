@@ -5430,6 +5430,7 @@ static int textureshowmenu=0;
   CREATEMENU(helpmenu,HelpMenu);
   glutAddMenuEntry(TITLERELEASE,1);
   {
+    char version_label[256];
     char menulabel[256];
 
     sprintf(menulabel,"  Smokeview revision:%i",revision_smv);
@@ -5439,6 +5440,9 @@ static int textureshowmenu=0;
       glutAddMenuEntry(menulabel,1);
     }
 #ifdef pp_GPU
+    strcpy(version_label,"  OpenGL Version: "); 
+    strcat(version_label,(char *)glGetString(GL_VERSION));
+    glutAddMenuEntry(version_label,1);
     if(gpuactive==1){
       if(usegpu==1){
         strcpy(menulabel,"  GPU activated. (Press G to deactivate)");
