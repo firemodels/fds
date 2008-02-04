@@ -268,16 +268,20 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                Y_F_CORR  = RN%Y_F_LFL*(RN%CRIT_FLAME_TMP-TMP_F_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
                IF (Y_O2_MAX < Y_O2_CORR .OR. Y_F_MAX*RN%Y_F_INLET < Y_F_CORR) CYCLE ILOOPB
                DYF = MIN(YFU0,YO20/RN%O2_F_RATIO)
-               Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F)
+               IF (EDDY_BREAKUP) THEN
+                  Q_NEW = MIN(7.5E6_EB*MU(I,J,K)*RDX(I)**2,DYF*RHO(I,J,K)*HFAC_F)
+               ELSE
+                  Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F)
+               ENDIF
                DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
                Q(I,J,K) = Q_NEW
-               YY(I,J,K,I_FUEL) = YY(I,J,K,I_FUEL) - DYF
+               YY(I,J,K,I_FUEL)   = YY(I,J,K,I_FUEL)   - DYF
                YY(I,J,K,I_PROG_F) = YY(I,J,K,I_PROG_F) + DYF
             ENDDO ILOOPB
          ENDDO
       ENDDO
       
-   ELSE SUPPRESSIONIF !No suppression
+   ELSE SUPPRESSIONIF  ! No suppression
       DO K=1,KBAR
          DO J=1,JBAR
             ILOOPC: DO I=1,IBAR
