@@ -615,12 +615,16 @@ SVEXTERN char *targfilename;
 SVEXTERN int pass_through;
 SVEXTERN int *sorted_surfidlist,*inv_sorted_surfidlist,nsorted_surfidlist;
 SVEXTERN char *trainer_filename;
+#ifdef pp_ISOOUT
+SVEXTERN char *sb_filename;
+SVEXTERN int read_sb_filename;
+SVEXTERN FILE *stream_sb_filename;
+#endif
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
 SVEXTERN char *flushfile, *chidfilebase;
 SVEXTERN char *hrrfilename;
 SVEXTERN hrrdata *hrrinfo;
 SVEXTERN char *smokezippath;
-SVEXTERN char *shellfilename;
 SVEXTERN char *INI_fds_filein, *fds_filein, *fds_fileout,*fds_fileout2;
 SVEXTERN char *casefilename;
 SVEXTERN char *zonelonglabels, *zoneshortlabels, *zoneunits;
