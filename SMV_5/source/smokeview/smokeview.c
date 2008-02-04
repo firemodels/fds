@@ -3177,7 +3177,9 @@ void Args(int argc, char **argv){
   STRCPY(fdsprefix,argi);
   FREEMEMORY(smvfilename);
   FREEMEMORY(trainer_filename);
-  FREEMEMORY(shellfilename);
+#ifdef pp_ISOOUT
+  FREEMEMORY(sb_filename)
+#endif
 
   strcpy(inputfilename_ext,"");
 
@@ -3238,12 +3240,13 @@ void Args(int argc, char **argv){
     STRCPY(trainer_filename,fdsprefix);
     STRCAT(trainer_filename,".svd");
   }
-  if(shellfilename==NULL){
-    NewMemory((void **)&shellfilename,(unsigned int)(len+6));
-    STRCPY(shellfilename,fdsprefix);
-    STRCAT(shellfilename,".shl");
+#ifdef pp_ISOOUT
+  if(sb_filename==NULL){
+    NewMemory((void **)&sb_filename,(unsigned int)(len+6));
+    STRCPY(sb_filename,fdsprefix);
+    STRCAT(sb_filename,".sb");
   }
-
+#endif
 
   set_no_part=0;
   for (i=1;i<argc;i++){

@@ -2840,17 +2840,36 @@ void update_smooth_blockages(void){
 
   blocktotal=0;
 
+#ifdef pp_ISOOUT
+  stream_sb_filename=fread(sb_filename,"rb");
+  if(stream_sb_filename!=NULL){
+    int version, count;
+    read_sb_filename=1;
+    count=fread(&version,4,1,stream_sb_filename);
+    if(count==1){
+      rewind(stream_sb_filename);
+    }
+    else{
+      read_sb_filename=0;
+    }
+  }
+  else{
+    read_sb_filename=0;
+    stream_sb_filename=fread(sb_filename,"wb");
+  }
+#endif
+
   for(i=0;i<nmeshes;i++){
     meshi = meshinfo + i;
     blocktotal += meshi->nbptrs;
   }
   if(blocktotal>0){
-    printf("initializing smooth blockage data - ");
+    printf("Initializing smooth blockage data - ");
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
 
       for(j=0;j<meshi->nsmoothblockages_list;j++){
-        printf("Smoothing blockage %i of %i in mesh %i\n",j,meshi->nsmoothblockages_list,i+1);
+        printf("Smoothing blockage %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
         sb=meshi->smoothblockages_list+j;
 
         getsmoothblockparms(meshi,sb);
@@ -2980,7 +2999,19 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
     }
   }
 }
+#ifdef pp_ISOOUT
+/* ------------------ ReadSmoothIsoSurface ------------------------ */
 
+void ReadSmoothIsoSurface(isosurface *asurface){
+  // use stream_sb_filename
+}
+
+/* ------------------ WriteSmoothIsoSurface ------------------------ */
+
+void WriteSmoothIsoSurface(isosurface *asurface){
+  // use stream_sb_filename
+}
+#endif
 
 /* ------------------ MakeIsoBlockages ------------------------ */
 
@@ -3038,106 +3069,126 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
   meshi->blockagesurfaces=sb->smoothblockagesurfaces;
 
   for(iblockcolor=0;iblockcolor<meshi->nsmoothblockagecolors;iblockcolor++){
+    int readiso=0;
+
     rgbtemp=meshi->smoothblockagecolors + 4*iblockcolor;
-    cellcopy=cell;
-    nodecopy=node;
-    for(i=0;i<(ibar+2)*(jbar+2)*(kbar+2);i++){
-      *cellcopy++=0.0;
-    }
-    for(ib=0;ib<meshi->nbptrs;ib++){
-      bc=meshi->blockageinfoptrs[ib];
-      if(bc->type!=BLOCK_smooth||bc->del==1)continue;
-      if(isblockagevisible(bc,sb->time)!=1)continue;
-      rgbtemp2=bc->color;
-      if(fabs(rgbtemp[0]-rgbtemp2[0])<0.0001&&
-         fabs(rgbtemp[1]-rgbtemp2[1])<0.0001&&
-         fabs(rgbtemp[2]-rgbtemp2[2])<0.0001&&
-         fabs(rgbtemp[3]-rgbtemp2[3])<0.0001
-         ){
-        imin = bc->ijk[IMIN];
-        imax = bc->ijk[IMAX];
-        jmin = bc->ijk[JMIN];
-        jmax = bc->ijk[JMAX];
-        kmin = bc->ijk[KMIN];
-        kmax = bc->ijk[KMAX];
-        for(k=kmin;k<kmax;k++){
-          for(j=jmin;j<jmax;j++){
-            for(i=imin;i<imax;i++){
-              cell[cellindex(i+1,j+1,k+1)]=1.0;
+#ifdef pp_ISOOUT
+    if(readiso==0){
+#endif
+      cellcopy=cell;
+      nodecopy=node;
+      for(i=0;i<(ibar+2)*(jbar+2)*(kbar+2);i++){
+        *cellcopy++=0.0;
+      }
+      for(ib=0;ib<meshi->nbptrs;ib++){
+        bc=meshi->blockageinfoptrs[ib];
+        if(bc->type!=BLOCK_smooth||bc->del==1)continue;
+        if(isblockagevisible(bc,sb->time)!=1)continue;
+        rgbtemp2=bc->color;
+        if(fabs(rgbtemp[0]-rgbtemp2[0])<0.0001&&
+           fabs(rgbtemp[1]-rgbtemp2[1])<0.0001&&
+           fabs(rgbtemp[2]-rgbtemp2[2])<0.0001&&
+           fabs(rgbtemp[3]-rgbtemp2[3])<0.0001
+           ){
+          imin = bc->ijk[IMIN];
+          imax = bc->ijk[IMAX];
+          jmin = bc->ijk[JMIN];
+          jmax = bc->ijk[JMAX];
+          kmin = bc->ijk[KMIN];
+          kmax = bc->ijk[KMAX];
+          for(k=kmin;k<kmax;k++){
+            for(j=jmin;j<jmax;j++){
+              for(i=imin;i<imax;i++){
+                cell[cellindex(i+1,j+1,k+1)]=1.0;
+              }
             }
           }
         }
       }
-    }
-    for(i=0;i<(ibar+3)*(jbar+3)*(kbar+3);i++){
-      *nodecopy++=0.0;
-    }
-    for(kk=1;kk<kbar+2;kk++){
-      if(kk==1){
-        km1=kk;
-        k=kk;
+      for(i=0;i<(ibar+3)*(jbar+3)*(kbar+3);i++){
+        *nodecopy++=0.0;
       }
-      else if(kk==kbar+1){
-        km1=kk-1;
-        k=kk-1;
-      }
-      else{
-        k=kk; 
-        km1=kk-1;
-      }
-      for(jj=1;jj<jbar+2;jj++){
-        if(jj==1){
-          jm1=jj;
-          j=jj;
+      for(kk=1;kk<kbar+2;kk++){
+        if(kk==1){
+          km1=kk;
+          k=kk;
         }
-        else if(jj==jbar+1){
-          jm1=jj-1;
-          j=jj-1;
+        else if(kk==kbar+1){
+          km1=kk-1;
+          k=kk-1;
         }
         else{
-          j=jj; 
-          jm1=jj-1;
+          k=kk; 
+          km1=kk-1;
         }
-        for(ii=1;ii<ibar+2;ii++){
-          if(ii==1){
-            im1=ii;
-            i=ii;
+        for(jj=1;jj<jbar+2;jj++){
+          if(jj==1){
+            jm1=jj;
+            j=jj;
           }
-          else if(ii==ibar+1){
-            im1=ii-1;
-            i=ii-1;
+          else if(jj==jbar+1){
+            jm1=jj-1;
+            j=jj-1;
           }
           else{
-            i=ii; 
-            im1=ii-1;
+            j=jj; 
+            jm1=jj-1;
           }
-          vals[0]=cell[cellindex(im1,jm1,km1)];
-          vals[1]=cell[cellindex(im1,jm1,k)];
-          vals[2]=cell[cellindex(im1,j  ,km1)];
-          vals[3]=cell[cellindex(im1,j  ,k)];
-          vals[4]=cell[cellindex(i  ,jm1,km1)];
-          vals[5]=cell[cellindex(i  ,jm1,k)];
-          vals[6]=cell[cellindex(i  ,j  ,km1)];
-          vals[7]=cell[cellindex(i  ,j  ,k)];
-
-          val = (vals[0]+vals[1]+vals[2]+vals[3]+vals[4]+vals[5]+vals[6]+vals[7]+0.01)/8.0;
-          node[nodeindex(ii,jj,kk)]=val;
+          for(ii=1;ii<ibar+2;ii++){
+            if(ii==1){
+              im1=ii;
+              i=ii;
+            }
+            else if(ii==ibar+1){
+              im1=ii-1;
+              i=ii-1;
+            }
+            else{
+              i=ii; 
+              im1=ii-1;
+            }
+            vals[0]=cell[cellindex(im1,jm1,km1)];
+            vals[1]=cell[cellindex(im1,jm1,k)];
+            vals[2]=cell[cellindex(im1,j  ,km1)];
+            vals[3]=cell[cellindex(im1,j  ,k)];
+            vals[4]=cell[cellindex(i  ,jm1,km1)];
+            vals[5]=cell[cellindex(i  ,jm1,k)];
+            vals[6]=cell[cellindex(i  ,j  ,km1)];
+            vals[7]=cell[cellindex(i  ,j  ,k)];
+  
+            val = (vals[0]+vals[1]+vals[2]+vals[3]+vals[4]+vals[5]+vals[6]+vals[7]+0.01)/8.0;
+            node[nodeindex(ii,jj,kk)]=val;
+          }
         }
       }
+      level=0.250;
+#ifdef pp_ISOOUT
     }
-    level=0.250;
+#endif
     asurface=NULL;
     NewMemory((void **)&asurface,sizeof(isosurface));
     InitIsosurface(asurface, level, rgbtemp,0);
-    GetIsosurface(asurface, node, NULL, NULL, level,
-                   xplt2, ibar+3, yplt2, jbar+3, zplt2, kbar+3,
-                   1);
-    GetNormalSurface(asurface);
-    CompressIsosurface(asurface,1,
-        xplt2[0],xplt2[ibar+2],
-        yplt2[0],yplt2[jbar+2],
-        zplt2[0],zplt2[kbar+2]);
-    SmoothIsoSurface(asurface);
+#ifdef pp_ISOOUT
+    if(readiso==0){
+#endif
+      GetIsosurface(asurface, node, NULL, NULL, level,
+                     xplt2, ibar+3, yplt2, jbar+3, zplt2, kbar+3,
+                     1);
+      GetNormalSurface(asurface);
+      CompressIsosurface(asurface,1,
+          xplt2[0],xplt2[ibar+2],
+          yplt2[0],yplt2[jbar+2],
+          zplt2[0],zplt2[kbar+2]);
+      SmoothIsoSurface(asurface);
+#ifdef pp_ISOOUT
+      // write out smoothed iso info here
+      WriteSmoothIsoSurface(asurface);
+    }
+    if(readiso==1){
+      // read in smoothed iso info here
+      ReadSmoothIsoSurface(asurface);
+    }
+#endif
 
     if(meshi->blockagesurfaces!=NULL)meshi->blockagesurfaces[iblockcolor]=asurface;
     meshi->blockagesurface=asurface;

@@ -2028,12 +2028,16 @@ void initvars0(void){
   targfilename=NULL;
   sorted_surfidlist=NULL,inv_sorted_surfidlist=NULL;
   trainer_filename=NULL;
+#ifdef pp_ISOOUT
+  sb_filename=NULL;
+  stream_sb_filename=NULL;
+  read_sb_filename=0;
+#endif
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
   flushfile=NULL, chidfilebase=NULL;
   hrrfilename=NULL;
   hrrinfo=NULL;
   smokezippath=NULL;
-  shellfilename=NULL;
   INI_fds_filein=NULL, fds_filein=NULL, fds_fileout=NULL,fds_fileout2=NULL;
   casefilename=NULL;
   zonelonglabels=NULL, zoneshortlabels=NULL, zoneunits=NULL;
