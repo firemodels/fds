@@ -1451,7 +1451,8 @@ void isoout(FILE *isostream,float t, int timeindex, isosurface *surface, int *er
 	}
 }
 
-/* ------------------ isosurface2file ------------------------ */
+/* ------------------ CCisosurface2file ------------------------ */
+
 void CCisosurface2file(char *isofile, float *t, float *data, int *iblank, 
 						float *level, int *nlevels,
                    float *xplt, int *nx, 
@@ -1499,6 +1500,8 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
   PrintMemoryInfo;
 #endif
 }
+
+/* ------------------ CCisosurface2file ------------------------ */
 
 void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, float *data2, int *iblank, 
 						float *level, int *nlevels,
