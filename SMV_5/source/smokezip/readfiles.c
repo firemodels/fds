@@ -87,6 +87,10 @@ int readsmv(char *smvfile){
       smoke3di = smoke3dinfo + i;
       smoke3di->file=NULL;
       smoke3di->filebase=NULL;
+#ifdef pp_LIGHT
+      smoke3di->hrr=NULL;
+      smoke3di->smoke_mesh=NULL;
+#endif
     }
   }
 
@@ -279,8 +283,17 @@ int readsmv(char *smvfile){
       smoke3d *smoke3di;
       int filesize;
       int filelen;
+      int blocknumber;
 
       smoke3di = smoke3dinfo + ismoke3d;
+#ifdef pp_LIGHT
+      if(strlen(buffer)>8){
+        blocknumber=1;
+        sscanf(buffer+8,"%i",&blocknumber);
+        blocknumber--;
+        smoke3di->smoke_mesh=meshinfo + blocknumber;
+      }
+#endif
       ismoke3d_seq++;
       smoke3di->seq_id = ismoke3d_seq;
       smoke3di->autozip = 0;
@@ -545,6 +558,9 @@ int readsmv(char *smvfile){
   {
     int i;
 
+#ifdef pp_LIGHT
+    if(meshinfo!=NULL)light_delta=meshinfo->dx;
+#endif
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
 
@@ -552,6 +568,11 @@ int readsmv(char *smvfile){
       meshi->dx = (meshi->xbar-meshi->xbar0)/meshi->ibar;
       meshi->dy = (meshi->ybar-meshi->ybar0)/meshi->jbar;
       meshi->dz = (meshi->zbar-meshi->zbar0)/meshi->kbar;
+#ifdef pp_LIGHT
+      if(meshi->dx<light_delta)light_delta=meshi->dx;
+      if(meshi->dy<light_delta)light_delta=meshi->dy;
+      if(meshi->dz<light_delta)light_delta=meshi->dz;
+#endif
       meshi->dxx = (meshi->xbar-meshi->xbar0)/65535;
       meshi->dyy = (meshi->ybar-meshi->ybar0)/65535;
       meshi->dzz = (meshi->zbar-meshi->zbar0)/65535;
@@ -572,7 +593,6 @@ char dirseparator[]="\\";
 char dirseparator[]="/";
 #endif
 
-
   smoketemp = getenv("SMOKEVIEWINI");
   if(smoketemp==NULL)smoketemp=getenv("smokeviewini");
   if(smoketemp==NULL)smoketemp=getenv("svini");
@@ -586,6 +606,16 @@ char dirseparator[]="/";
   if(globalini!=NULL)readini2(globalini);
   readini2("smokeview.ini");
   readini2(casenameini);
+#ifdef pp_LIGHT
+  {
+    char lightini[256];
+
+    strcpy(lightini,casenameini);
+    lightini[strlen(lightini)-4]=0;
+    strcat(lightini,".lit");
+    readini2(lightini);
+  }
+#endif
 }
 
 /* ------------------ readini2 ------------------------ */
@@ -599,9 +629,91 @@ void readini2(char *inifile){
   stream=fopen(inifile,"r");
   if(stream==NULL)return;
 
+#ifdef pp_LIGHT
+  FREEMEMORY(lightinfo);
+  nlightinfo=0;
+
+  // pass 1
+
   while(!feof(stream)){
     if(fgets(buffer,255,stream)==NULL)break;
 
+    if(match(buffer,"L_POINT",7)==1){
+      fgets(buffer,255,stream);
+      nlightinfo++;
+      continue;
+    }
+    if(match(buffer,"L_LINE",7)==1){
+      fgets(buffer,255,stream);
+      nlightinfo++;
+      continue;
+    }
+    if(match(buffer,"L_REGION",7)==1){
+      fgets(buffer,255,stream);
+      nlightinfo++;
+      continue;
+    }
+  }
+  if(nlightinfo>0){
+    NewMemory((void **)&lightinfo,nlightinfo*sizeof(lightdata));
+  }
+  nlightinfo=0;
+  rewind(stream);
+
+  // pass 2
+
+#endif
+  while(!feof(stream)){
+    if(fgets(buffer,255,stream)==NULL)break;
+
+#ifdef pp_LIGHT
+    if(match(buffer,"L_POINT",7)==1){
+      lightdata *lighti;
+      float *xyz, *hrr;
+
+      lighti = lightinfo + nlightinfo;
+      lighti->type=0;
+      xyz = lighti->xyz1;
+      hrr = &lighti->hrr;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f",xyz,xyz+1,xyz+2,hrr);
+      nlightinfo++;
+      continue;
+    }
+    if(match(buffer,"L_LINE",7)==1){
+      lightdata *lighti;
+      float *xyz1, *xyz2, *hrr;
+
+      lighti = lightinfo + nlightinfo;
+      lighti->type=1;
+      xyz1 = lighti->xyz1;
+      xyz2 = lighti->xyz2;
+      hrr = &lighti->hrr;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f %f %f %f",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,hrr);
+      nlightinfo++;
+      continue;
+    }
+    if(match(buffer,"L_REGION",7)==1){
+      lightdata *lighti;
+      float *xyz1, *xyz2, *hrr;
+
+      lighti = lightinfo + nlightinfo;
+      lighti->type=2;
+      xyz1 = lighti->xyz1;
+      xyz2 = lighti->xyz2;
+      hrr = &lighti->hrr;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f %f %f %f",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,hrr);
+      nlightinfo++;
+      continue;
+    }
+    if(match(buffer,"L_DELTA",7)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f",&light_delta);
+      continue;
+    }
+#endif
     if(match(buffer,"V_SLICE",7)==1){
       int setslicemin, setslicemax;
       float slicemin, slicemax;

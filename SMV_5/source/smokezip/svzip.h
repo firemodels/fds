@@ -17,6 +17,11 @@
 
 #define NBUCKETS 100000 
 
+#ifdef pp_LIGHT
+#define NRAD 10
+#define NTHETA 10
+#define NPSI 10
+#endif
 
 #ifdef pp_PART
 #define rgb_white 12
@@ -84,6 +89,7 @@ typedef struct {
   float dx, dy, dz;
   float dxx, dyy, dzz;
 } mesh;
+
 typedef struct {
   float normal[3];
 } vert;
@@ -95,10 +101,13 @@ typedef struct {
   char *file,*filebase;
   int seq_id, autozip;
   int nx, ny, nz, filesize;
+#ifdef pp_LIGHT
+  mesh *smoke_mesh;
+#endif
   unsigned char *compressed_lightingbuffer;
+  float *hrr;
   uLongf ncompressed_lighting_zlib;
 } smoke3d;
-
 
 #ifdef pp_PART
 /* --------------------------  part ------------------------------------ */
@@ -112,6 +121,13 @@ typedef struct {
   flowlabels label;
   int dup;
 } part;
+#endif
+
+#ifdef pp_LIGHT
+typedef struct {
+  int type;
+  float xyz1[3], xyz2[3], hrr;
+} lightdata;
 #endif
 
 #define PDFMAX 100000
@@ -176,6 +192,9 @@ EXTERN smoke3d *smoke3dinfo;
 EXTERN int npatch_files;
 #ifdef pp_LIGHT
 EXTERN int make_lighting_file;
+EXTERN int nlightinfo;
+EXTERN lightdata *lightinfo;
+EXTERN float light_delta, *light_hrr;
 #endif
 EXTERN slice *sliceinfo;
 EXTERN int nslice_files;
