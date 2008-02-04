@@ -59,6 +59,10 @@ int main(int argc, char **argv){
 #ifdef pp_LIGHT
   make_lighting_file=0;
   albedo=(float)0.3;
+  nlightinfo=0;
+  lightinfo=NULL;
+  light_hrr=NULL;
+  light_delta = 0.3;
 #endif
   overwrite_slice=0;
   endian_info=0;
