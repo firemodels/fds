@@ -430,7 +430,7 @@ EXTERNCPP void drawiso(const mesh *gb,int tranflag);
 EXTERNCPP int getendian(void);
 EXTERNCPP void drawplot3d(mesh *gb);
 EXTERNCPP void drawplot3d_texture(mesh *gb);
-EXTERNCPP void updateshowstep(int slicedir);
+EXTERNCPP void updateshowstep(int val, int slicedir);
 EXTERNCPP void updateclip(int slicedir);
 EXTERNCPP void updateclipbounds(int set_i0, int *i0, int set_i1, int *i1, int maxi);
 EXTERNCPP void ClearBuffers(int mode);

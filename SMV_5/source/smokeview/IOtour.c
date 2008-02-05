@@ -454,7 +454,7 @@ void createtourpaths(void){
   int nframes;
 
   // construct keyframe list for selecting keyframes
-  updatemenu=1;
+
   if(ntours==0)return;
 
   for(i=0;i<ntours;i++){
