@@ -313,16 +313,13 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   visGrid=0;
   meshi->visInteriorPatches=0;
   if(meshi->visx==1){
-    meshi->visx=0;
-    updateshowstep(1);
+    updateshowstep(1,DIRX);
   }
   if(meshi->visy==1){
-    meshi->visy=0;
-    updateshowstep(2);
+    updateshowstep(1,DIRY);
   }
   if(meshi->visz==1){
-    meshi->visz=0;
-    updateshowstep(3);
+    updateshowstep(1,DIRZ);
   }
   if(visiso==1){
     updatesurface();
@@ -1380,6 +1377,9 @@ void updateplotslice(int slicedir){
     updateplotslice_mesh(meshjj,slicedir);
   }
 }
+
+/* ------------------ updateplotslice_mesh ------------------------ */
+
 void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   int i, j, k;
   int plotx, ploty, plotz;
@@ -1590,25 +1590,27 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
 
 /* ------------------ updateshowstep ------------------------ */
 
-void updateshowstep(int slicedir){
+void updateshowstep(int val, int slicedir){
 
-  if(ReadPlot3dFile==0&&visGrid==0
-    &&ReadVolSlice==0
-    )return;
+  if(ReadPlot3dFile==0&&visGrid==0&&ReadVolSlice==0)return;
   current_mesh->slicedir=slicedir;
   switch (slicedir){
   case 1:
-    current_mesh->visx = 1 - current_mesh->visx;
+    if(current_mesh->visx!=val)updatemenu=1;
+    current_mesh->visx = val;
     break;
   case 2:
-    current_mesh->visy = 1 - current_mesh->visy;
+    if(current_mesh->visy!=val)updatemenu=1;
+    current_mesh->visy = val;
     break;
   case 3:
-    current_mesh->visz = 1 - current_mesh->visz;
+    if(current_mesh->visz!=val)updatemenu=1;
+    current_mesh->visz = val;
     break;
   case 4:
     if(ReadPlot3dFile==1){
-      visiso = 1 - visiso;
+      if(visiso!=val)updatemenu=1;
+      visiso = val;
     }
     break;
   default:

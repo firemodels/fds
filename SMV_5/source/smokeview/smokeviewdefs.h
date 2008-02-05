@@ -14,6 +14,11 @@ void _sniffErrors(char *whereat);
 #define DOUBLE_BUFFER 2
 #define SINGLE_BUFFER 1
 
+#define DIRX 1
+#define DIRY 2
+#define DIRZ 3
+#define ISO 4
+
 
 #define PARTICLES 0
 #define HUMANS 1

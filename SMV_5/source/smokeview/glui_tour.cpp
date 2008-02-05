@@ -546,26 +546,9 @@ void TOUR_CB(int var){
   case SHOWTOURROUTE:
     edittour = 1 - edittour;
     TOURMENU(-4);
-    /*
-    if(panel_keyframe!=NULL){
-      if(edittour==1){
-        panel_keyframe->enable();
-      }
-      else{
-        panel_keyframe->disable();
-      }
-    }
-    if(panel_advanced!=NULL){
-      if(edittour==1){
-        panel_advanced->enable();
-      }
-      else{
-        panel_advanced->disable();
-      }
-    }
-    */
     update_tourcontrols();
     TOUR_CB(VIEW1);
+    updatemenu=0;
     break;
   case VIEWSNAP:
     if(viewtourfrompath==1&&keyframe_snap==1){
@@ -573,6 +556,7 @@ void TOUR_CB(int var){
       view_checkbox->set_int_val(viewtourfrompath);
     }
     TOUR_CB(VIEWTOURFROMPATH);
+    updatemenu=0;
     break;
   case VIEWTOURFROMPATH:
     if(viewtourfrompath==1&&keyframe_snap==1){
@@ -992,7 +976,10 @@ void TOUR_CB(int var){
     }
     break;
   case TOUR_AVATAR:
-    selected_tour->glui_avatar_index=glui_avatar_index;
+    if(selected_tour->glui_avatar_index!=glui_avatar_index){
+      selected_tour->glui_avatar_index=glui_avatar_index;
+      updatemenu=1;
+    }
     if(glui_avatar_index==-1){
       tourlocus_type=0;
     }
@@ -1003,7 +990,6 @@ void TOUR_CB(int var){
       tourlocus_type=2;
       iavatar_types=glui_avatar_index;
     }
-    updatemenu=1;
     break;
   case TOUR_UPDATELABEL:
     // supposed to fall through to TOUR_LIST
