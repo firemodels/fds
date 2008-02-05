@@ -465,7 +465,7 @@ void keyboard(unsigned char key, int x, int y){
   glutPostRedisplay();
   updatemenu=1;
   key2 = (char)key;
-  if(key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'
+  if(key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='M'
 #ifdef pp_CULL
     &&key2!='C'
 #endif
@@ -620,11 +620,11 @@ void keyboard(unsigned char key, int x, int y){
       DialogMenu(-2); // close all dialogs
       break;
     case GLUT_ACTIVE_CTRL:
-      updateshowstep(1);
+      updateshowstep(1-current_mesh->visx,DIRX);
       break;
     case GLUT_ACTIVE_SHIFT:
       current_mesh->visx2 = 1-current_mesh->visx2;
-      updateshowstep(1);
+      updateshowstep(1-current_mesh->visx,DIRX);
       break;
     default:
       for(i=0;i<nmeshes;i++){
@@ -632,12 +632,12 @@ void keyboard(unsigned char key, int x, int y){
         meshi = meshinfo + i;
         meshi->visx2 = 1 - current_mesh->visx;
       }
-      updateshowstep(1);
+      updateshowstep(1-current_mesh->visx,DIRX);
     }
       return;
   }
   if(strncmp((const char *)&key2,"y",1)==0){
-      updateshowstep(2);
+      updateshowstep(1-current_mesh->visy,DIRY);
        return;
   }
   if(strncmp((const char *)&key2,"z",1)==0){
@@ -652,7 +652,7 @@ void keyboard(unsigned char key, int x, int y){
     case GLUT_ACTIVE_CTRL:
     case GLUT_ACTIVE_SHIFT:
     default:
-      updateshowstep(3);
+      updateshowstep(1-current_mesh->visz,DIRZ);
     }
       return;
   }
@@ -745,6 +745,10 @@ void keyboard(unsigned char key, int x, int y){
     if(highlight_flag>2&&noutlineinfo>0)highlight_flag=0;
     if(highlight_flag>1&&noutlineinfo==0)highlight_flag=0;
     printf("outline mode=%i\n",highlight_flag);
+    return;
+  }
+  if(strncmp((const char *)&key2,"M",1)==0){
+    updatemenu=1;
     return;
   }
   if(strncmp((const char *)&key2,"m",1)==0){
@@ -1089,7 +1093,7 @@ void update_clipplanes(void){
 
 void handleiso(void){
     if(ReadPlot3dFile==1){
-      updateshowstep(4);
+      updateshowstep(1-visiso,ISO);
       if(visiso==1){
         updatesurface();
         plotstate=STATIC_PLOTS;
@@ -1170,8 +1174,7 @@ void handle_plot3d_keys(int  key){
         }
       }
     }
-    current_mesh->visx=0;
-    updateshowstep(1);
+    updateshowstep(1,DIRX);
     if(key==GLUT_KEY_LEFT){
       current_mesh->plotx -= skip;
     }
@@ -1182,8 +1185,7 @@ void handle_plot3d_keys(int  key){
     break;
   case GLUT_KEY_DOWN:
   case GLUT_KEY_UP:
-    current_mesh->visy=0;
-    updateshowstep(2);
+    updateshowstep(1,DIRY);
     if(key==GLUT_KEY_UP){
       current_mesh->ploty += skip;
     }
@@ -1194,8 +1196,7 @@ void handle_plot3d_keys(int  key){
     break;
   case GLUT_KEY_PAGE_UP:
   case GLUT_KEY_PAGE_DOWN:
-    current_mesh->visz=0;
-    updateshowstep(3);
+    updateshowstep(1,DIRZ);
     if(key==GLUT_KEY_PAGE_UP){
       current_mesh->plotz += skip;
     }
@@ -1237,7 +1238,7 @@ void handle_plot3d_keys(int  key){
     break;
   }
   plotstate=getplotstate(STATIC_PLOTS);
-  updatemenu=1;
+  //updatemenu=1;
 
 } 
 
@@ -1554,6 +1555,9 @@ void Display(void){
       glutAttachMenu(GLUT_RIGHT_BUTTON);
     }
     else{
+#ifdef _DEBUG
+      printf("menus in use, will not be updated\n");
+#endif
       /* 
       menus are being used used so keep re-displaying scene until
       user does something to cause menus to not be used
@@ -1976,7 +1980,7 @@ void togglegridstate(int visg){
       meshi=meshinfo + i;
       if(meshi->visx!=0||meshi->visy!=0||meshi->visz!=0)return;
     }
-    updateshowstep(2);
+    updateshowstep(1-current_mesh->visy,DIRY);
   }
 }
 

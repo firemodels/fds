@@ -119,13 +119,21 @@ void StaticVariableMenu(int value){
   plotstate=STATIC_PLOTS;
   visGrid=0;
   if(visiso==1){
-    visiso=0;updateshowstep(4);
+    updateshowstep(1,ISO);
   }
   updatesurface();
-  if(meshi->visx==1){meshi->visx=0;updateshowstep(1);}
-  if(meshi->visy==1){meshi->visy=0;updateshowstep(2);}
-  if(meshi->visz==1){meshi->visz=0;updateshowstep(3);}
-  if(meshi->visx==0&&meshi->visy==0&&meshi->visz==0){updateshowstep(2);}
+  if(meshi->visx==1){
+    updateshowstep(1,DIRX);
+  }
+  if(meshi->visy==1){
+    updateshowstep(1,DIRY);
+  }
+  if(meshi->visz==1){
+    updateshowstep(1,DIRZ);
+  }
+  if(meshi->visx==0&&meshi->visy==0&&meshi->visz==0){
+    updateshowstep(1,DIRY);
+  }
   updateallplotslices();
   updatemenu=1;  
   glutPostRedisplay();  
@@ -139,10 +147,10 @@ void IsoVariableMenu(int value){
   meshi=current_mesh;
   if(ReadPlot3dFile==1){
     plotn=value;
-    if(meshi->visx==1){meshi->visx=0;updateshowstep(1);}
-    if(meshi->visy==1){meshi->visy=0;updateshowstep(2);}
-    if(meshi->visz==1){meshi->visz=0;updateshowstep(3);}
-    visiso=0;updateshowstep(4);
+    if(meshi->visx==1){updateshowstep(1,DIRX);}
+    if(meshi->visy==1){updateshowstep(1,DIRY);}
+    if(meshi->visz==1){updateshowstep(1,DIRZ);}
+    updateshowstep(1,ISO);
     updatesurface();
     plotstate=STATIC_PLOTS;
     updateplotslice(1);
@@ -1530,12 +1538,11 @@ void IsoSurfaceTypeMenu(int value){
 
 void IsoBlockMenu(int value){
   if(ReadPlot3dFile==1){
-    visiso = 0;
     isooffset=value;
     if(isooffset<1)isooffset=offsetmax;
     if(isooffset>offsetmax)isooffset=1;
     updatesurface();
-    updateshowstep(4);
+    updateshowstep(1,ISO);
     updatemenu=1;  
     glutPostRedisplay();
   }
@@ -1548,8 +1555,7 @@ void IsoSurfaceMenu(int value){
     updatemenu=1;  
     glutPostRedisplay();
     if(value==1){
-      visiso = 1;
-      updateshowstep(4);
+      updateshowstep(0,ISO);
     }
     if(value==2){
       p3dsurfacesmooth = 1 - p3dsurfacesmooth;
@@ -1562,8 +1568,7 @@ void IsoSurfaceMenu(int value){
 void LevelMenu(int value){
   if(ReadPlot3dFile==1){
     plotiso[plotn-1]=value-1;
-    visiso=0;
-    updateshowstep(4);
+    updateshowstep(1,ISO);
     updatesurface();
     updatemenu=1;  
     glutPostRedisplay();
@@ -1656,13 +1661,13 @@ void Plot3DShowMenu(int value){
   meshi=current_mesh;
   switch (value){
    case 1:
-    updateshowstep(3);
+    updateshowstep(1-meshi->visz,DIRZ);
     break;
    case 2:
-    updateshowstep(2);
+    updateshowstep(1-meshi->visy,DIRY);
     break;
    case 3:
-    updateshowstep(1);
+    updateshowstep(1-meshi->visx,DIRX);
     break;
    case 4:
     switch (p3cont2d){
@@ -1732,15 +1737,15 @@ void GridSliceMenu(int value){
   visGrid=1;
   switch (value){
   case 1:
-    updateshowstep(3);
+    updateshowstep(1-meshi->visz,DIRZ);
     if(meshi->visz==1)visGrid=1;
     break;
   case 2:
-    updateshowstep(2);
+    updateshowstep(1-meshi->visy,DIRY);
     if(meshi->visy==1)visGrid=1;
     break;
   case 3:
-    updateshowstep(1);
+    updateshowstep(1-meshi->visx,DIRX);
     if(meshi->visx==1)visGrid=1;
     break;
   case 4:
@@ -3479,9 +3484,16 @@ static int showdevicesmenu=0;
 static int unloadplot3dmenu=0, unloadpatchmenu=0, unloadisomenu=0;
 static int showmultislicemenu=0;
 static int textureshowmenu=0;
+#ifdef _DEBUG
+static int menu_count=0;
+static int in_menu=0;
+#endif
 
 
-
+#ifdef _DEBUG
+  printf("Updating Menus %i In menu %i\n",menu_count++,in_menu);
+  in_menu=1;
+#endif
   update_showhidebuttons();
   glutPostRedisplay();
   cmesh=current_mesh;
@@ -6645,6 +6657,9 @@ static int textureshowmenu=0;
     }
   glutAddMenuEntry("Quit",3);
   updatemenu=0;
+#ifdef _DEBUG
+  in_menu=0;
+#endif
 
 }
 
