@@ -3178,7 +3178,7 @@ void Args(int argc, char **argv){
   FREEMEMORY(smvfilename);
   FREEMEMORY(trainer_filename);
 #ifdef pp_ISOOUT
-  FREEMEMORY(sb_filename)
+  FREEMEMORY(filename_sb)
 #endif
 
   strcpy(inputfilename_ext,"");
@@ -3241,10 +3241,10 @@ void Args(int argc, char **argv){
     STRCAT(trainer_filename,".svd");
   }
 #ifdef pp_ISOOUT
-  if(sb_filename==NULL){
-    NewMemory((void **)&sb_filename,(unsigned int)(len+6));
-    STRCPY(sb_filename,fdsprefix);
-    STRCAT(sb_filename,".sb");
+  if(filename_sb==NULL){
+    NewMemory((void **)&filename_sb,(unsigned int)(len+6));
+    STRCPY(filename_sb,fdsprefix);
+    STRCAT(filename_sb,".sb");
   }
 #endif
 
