@@ -345,7 +345,7 @@ Contains
     Logical :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA,&
          OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE
     Integer, Dimension(3) :: RGB_DEAD
-    Character(26) :: VENT_FFIELD, MESH_ID
+    Character(26) :: VENT_FFIELD, MESH_ID, EVAC_MESH
     Real(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED
 
     Character(26), Dimension(51) :: KNOWN_DOOR_NAMES
@@ -361,16 +361,16 @@ Contains
     Namelist /EXIT/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, FYI, COUNT_ONLY, WIDTH, XYZ, VENT_FFIELD, &
          MESH_ID, COLOR_INDEX, XYZ_SMOKE, &
-         TIME_OPEN, TIME_CLOSE
+         TIME_OPEN, TIME_CLOSE, EVAC_MESH
     Namelist /DOOR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, XYZ, VENT_FFIELD, &
          EXIT_SIGN, MESH_ID, COLOR_INDEX, XYZ_SMOKE, KEEP_XY, &
-         TIME_OPEN, TIME_CLOSE
+         TIME_OPEN, TIME_CLOSE, EVAC_MESH
     Namelist /ENTR/ ID, XB, IOR, FLOW_FIELD_ID, MAX_FLOW, &
          FYI, WIDTH, QUANTITY, PERS_ID, T_START, &
          T_STOP, AFTER_REACTION_TIME, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, &
-         MESH_ID, COLOR_INDEX
+         MESH_ID, COLOR_INDEX, EVAC_MESH
     Namelist /CORR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, WIDTH1, WIDTH2, &
          EFF_WIDTH, EFF_LENGTH, MAX_HUMANS_INSIDE, FAC_SPEED, &
@@ -379,11 +379,11 @@ Contains
          ID, DTSAM, XB, FLOW_FIELD_ID, PERS_ID, &
          T_START, T_STOP, IOR, MAX_FLOW, WIDTH, ANGLE, &
          AFTER_REACTION_TIME, GN_MIN, GN_MAX, &
-         KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, MESH_ID, COLOR_INDEX
-    Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID
+         KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, MESH_ID, COLOR_INDEX, EVAC_MESH
+    Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH
 
     Namelist /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
-         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, ESC_SPEED
+         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, ESC_SPEED, EVAC_MESH
 
     Namelist /PERS/ FYI,ID,DIAMETER_DIST,VELOCITY_DIST, &
          PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST, &
@@ -982,7 +982,8 @@ Contains
        IOR           = 0
        FLOW_FIELD_ID = 'null'
        VENT_FFIELD   = 'null'
-       MESH_ID     = 'null'
+       MESH_ID       = 'null'
+       EVAC_MESH     = 'null'
        CHECK_FLOW    = .False.
        COUNT_ONLY    = .False.
        MAX_FLOW      = 0.0_EB
@@ -997,6 +998,13 @@ Contains
        If (IOS == 1) Exit READ_EXIT_LOOP
        Read(LU_INPUT,Exit,End=26,IOSTAT=IOS)
        !
+       If (EVAC_MESH /= 'null') Then
+          MESH_ID = EVAC_MESH
+          Write (LU_ERR,'(A,A)') &
+               ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EXIT line ',&
+               Trim(ID)
+       End If
+       
        Do I=1,5,2
           If (XB(I) > XB(I+1)) Then
              DUMMY   = XB(I)
@@ -1202,7 +1210,8 @@ Contains
        IOR           = 0
        FLOW_FIELD_ID = 'null'
        VENT_FFIELD   = 'null'
-       MESH_ID     = 'null'
+       MESH_ID       = 'null'
+       EVAC_MESH     = 'null'
        TO_NODE       = 'null'
        CHECK_FLOW    = .False.
        EXIT_SIGN     = .False.
@@ -1219,6 +1228,13 @@ Contains
        If (IOS == 1) Exit READ_DOOR_LOOP
        Read(LU_INPUT,DOOR,End=27,IOSTAT=IOS)
        !
+       If (EVAC_MESH /= 'null') Then
+          MESH_ID = EVAC_MESH
+          Write (LU_ERR,'(A,A)') &
+               ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at DOOR line ',&
+               Trim(ID)
+       End If
+       
        Do I=1,5,2
           If (XB(I) > XB(I+1)) Then
              DUMMY   = XB(I)
@@ -1694,7 +1710,8 @@ Contains
        XB            = 0.0_EB
        IOR           = 0
        FLOW_FIELD_ID = 'null'
-       MESH_ID     = 'null'
+       MESH_ID       = 'null'
+       EVAC_MESH     = 'null'
        TO_NODE       = 'null'
        PERS_ID       = 'null'
        QUANTITY      = 'null'
@@ -1711,9 +1728,16 @@ Contains
        If (IOS == 1) Exit READ_ENTR_LOOP
        Read(LU_INPUT,ENTR,End=28,IOSTAT=IOS)
 
+       If (EVAC_MESH /= 'null') Then
+          MESH_ID = EVAC_MESH
+          Write (LU_ERR,'(A,A)') &
+               ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at ENTR line ',&
+               Trim(ID)
+       End If
+       
        If (Trim(KNOWN_DOOR_NAMES(51)) /= 'null') Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EVAC line ',Trim(HPT%ID_NAME), &
+               'ERROR: ENTR line ',Trim(PNX%ID_NAME), &
                ' problem with KNOWN_DOOR_NAMES'
           Call SHUTDOWN(MESSAGE)
        End If
@@ -1929,7 +1953,8 @@ Contains
        ID                       = 'null'
        QUANTITY                 = 'null'
        FLOW_FIELD_ID            = 'null'
-       MESH_ID                = 'null'
+       MESH_ID                  = 'null'
+       EVAC_MESH                = 'null'
        PERS_ID                  = 'null'
        SAMPLING_FACTOR          = 1      
        NUMBER_INITIAL_PERSONS   = 0
@@ -1950,6 +1975,13 @@ Contains
        If (IOS == 1) Exit READ_EVAC_LOOP
        Read(LU_INPUT,EVAC,End=25,IOSTAT=IOS)
 
+       If (EVAC_MESH /= 'null') Then
+          MESH_ID = EVAC_MESH
+          Write (LU_ERR,'(A,A)') &
+               ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVAC line ',&
+               Trim(ID)
+       End If
+       
        If (Trim(KNOWN_DOOR_NAMES(51)) /= 'null') Then
           Write(MESSAGE,'(A,A,A)') &
                'ERROR: EVAC line ',Trim(HPT%ID_NAME), &
@@ -2130,7 +2162,8 @@ Contains
        XB            = 0.0_EB
        EVAC_ID       = 'null'
        PERS_ID       = 'null'
-       MESH_ID     = 'null'
+       MESH_ID       = 'null'
+       EVAC_MESH     = 'null'
        !
        Call CHECKREAD('EVHO',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_EVHO_LOOP
@@ -2143,6 +2176,13 @@ Contains
              XB(I+1) = DUMMY
           End If
        End Do
+       If (EVAC_MESH /= 'null') Then
+          MESH_ID = EVAC_MESH
+          Write (LU_ERR,'(A,A)') &
+               ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVHO line ',&
+               Trim(ID)
+       End If
+       
        !
        EHX%X1 = XB(1)
        EHX%X2 = XB(2)
@@ -2192,7 +2232,8 @@ Contains
        !
        ID            = 'null'
        XB            = 0.0_EB
-       MESH_ID     = 'null'
+       MESH_ID       = 'null'
+       EVAC_MESH     = 'null'
        IOR           = 0
        HEIGHT        = 0.0_EB
        HEIGHT0       = 0.0_EB
@@ -2212,6 +2253,13 @@ Contains
              XB(I+1) = DUMMY
           End If
        End Do
+       If (EVAC_MESH /= 'null') Then
+          MESH_ID = EVAC_MESH
+          Write (LU_ERR,'(A,A)') &
+               ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVSS line ',&
+               Trim(ID)
+       End If
+       
        !
        ESS%X1 = XB(1)
        ESS%X2 = XB(2)
@@ -2365,6 +2413,20 @@ Contains
        End If
     End Do
 
+    Select Case (COLOR_METHOD)
+    Case (-1:2,4:5)
+       Continue
+    Case (7)
+       COLOR_METHOD = -1
+       Write (LU_ERR,'(A)') &
+            ' WARNING: COLOR_METHOD=7 is not defined anymore, the default (-1) is used.'
+    Case Default
+       Write(MESSAGE,'(A,I3,A)') &
+            'ERROR: READ_EVAC COLOR METHOD',COLOR_METHOD, &
+            ' is not defined'
+       Call SHUTDOWN(MESSAGE)
+    End Select
+
     If (COLOR_METHOD >= 0) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
     If (OUTPUT_MOTIVE_FORCE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
     If (OUTPUT_FED) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
@@ -2503,6 +2565,7 @@ Contains
          EVAC_MODULE_REV
     Write(LU_OUTPUT,'(A,i0/)')  ' FDS+Evac SVN Revision No.: ', &
          EVAC_MODULE_REV    
+
 
     Write(LU_ERR,fmt='(/a,i2)')  ' FDS+Evac Color_Method    :', &
          COLOR_METHOD
@@ -2885,8 +2948,6 @@ Contains
     tnow=second()
 
     If ( .Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) ) Return
-!!$    EVAC_MESH_ONLY: If ( EVACUATION_ONLY(NM) .And. &
-!!$         EVACUATION_GRID(NM) ) Then
     !
     GTrunFlag = 0
     GaussFlag = 0
@@ -3096,11 +3157,15 @@ Contains
 
                 If (i_endless_loop >= (8.0_EB*Max(1.0_EB,Log10(2.5_EB*VOL2))) / &
                      Max(1.0_EB,Log10((2.5_EB*VOL2)/(2.5_EB*VOL2-1))) ) Then
-                   Write(LU_ERR,'(A,I4,A,I4,A,I6)') &
-                        'ERROR: Initialize_Humans, EVAC line ', &
+                   Write (LU_ERR,fmt='(A,I4,A,I4,A,I6)') &
+                        ' ERROR: Initialize_Humans, EVAC line ', &
                         IPC, ', Mesh ', NM, ', i_human ', n_humans
-                   Write(LU_OUTPUT,'(A,I4,A,I4,A,I6)') &
-                        'ERROR: Initialize_Humans, EVAC line ', &
+                   Write (LU_ERR,fmt='(a)') &
+                        '      x       y       z     Rd      Rt      Rs      ds  '
+                   Write (LU_ERR,fmt='(3f8.2,4f8.4)') HR%X, HR%Y, HR%Z, &
+                        2.0_EB*HR%Radius, HR%r_torso, HR%r_shoulder, HR%d_shoulder
+                   Write (LU_OUTPUT,fmt='(A,I4,A,I4,A,I6)') &
+                        ' ERROR: Initialize_Humans, EVAC line ', &
                         IPC, ', Mesh ', NM, ', i_human ', n_humans
                    ISTOP = 3
                    HR%SHOW = .True.    
@@ -3458,7 +3523,6 @@ Contains
     Write (LU_OUTPUT,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', &
          0.0_EB,' mesh ',nm,' number of humans ',n_humans
     !
-!!$    End If EVAC_MESH_ONLY
     !
     TUSED(12,NM)=TUSED(12,NM)+SECOND()-TNOW
     !
@@ -3488,10 +3552,9 @@ Contains
     Type (MESH_TYPE), Pointer :: M
     !
     If (.NOT.Any(EVACUATION_GRID)) RETURN
+    If (PROCESS_STOP_STATUS > 0) RETURN
 
-    !! TNOW=SECOND()
     !
-!!!If (Any(EVACUATION_GRID)) Then
     !
     !
     ilh_dim = ilh           ! lonely humans dimension
@@ -4087,10 +4150,8 @@ Contains
                HR%Speed, HR%Tau, HR%GROUP_ID, HR%i_ffield, &
                Abs(HR%I_Target)+n_egrids+n_entrys
        End Do
-!!$          End If
     End Do
 
-    !! End If ! any evacuation grid
     !
   End Subroutine INIT_EVAC_GROUPS
 !
@@ -4166,7 +4227,6 @@ Contains
        ! saves it to the disk. Or it reads FED+soot from the disk.
        MESH_LOOP: Do NM=1,NMESHES
           If ( .Not.(EVACUATION_GRID(NM) .And. EVACUATION_ONLY(NM)) ) Cycle
-!!$          If ( EVACUATION_GRID(NM) .And. EVACUATION_ONLY(NM) ) Then
           !
           Call POINT_TO_MESH(NM)
           !             Call POINT_TO_EVAC_MESH(NM)
@@ -4275,7 +4335,6 @@ Contains
              End Do     ! j=1,JBAR
           End Do       ! i=1,IBAR
 
-!!$          End If          ! Main evac grid
 
        End Do MESH_LOOP
 
@@ -4605,7 +4664,6 @@ Contains
        End Do EXIT_LOOP
 
     End If                    ! l_use_fed
-    !    Goto 325
 
 324 Continue
     If (ios < 0) Then 
@@ -4615,7 +4673,6 @@ Contains
        T_Save = 1.0E15
     End If
 
-    !325 Continue
 
   End Subroutine EVAC_MESH_EXCHANGE
 !
@@ -4731,8 +4788,6 @@ Contains
     !
     TNOW=SECOND()
     If ( .Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) ) Return
-!!$    EVAC_MESH_ONLY: If ( EVACUATION_ONLY(NM) .And. &
-!!$         EVACUATION_GRID(NM) ) Then
     !
     t_flow_relax   = 0.0_EB
     t_init_timo    = 0.0_EB + t_flow_relax
@@ -7286,7 +7341,6 @@ Contains
     ! ========================================================
     ! Evacuation routine ends here
     ! ========================================================
-!!$    End If EVAC_MESH_ONLY
     !
     TUSED(12,NM)=TUSED(12,NM)+SECOND()-TNOW
 
