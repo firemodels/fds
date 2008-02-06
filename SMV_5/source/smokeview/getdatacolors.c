@@ -267,6 +267,8 @@ void getPart5Colors(particle *parti, int nlevel){
     labels=propi->partlabels;
     ppartlevels256=propi->ppartlevels256;
 
+    strcpy(scale,"");
+
     frexp10(local_tmax, &expmax);
     frexp10(local_tmin, &expmin);
     if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<EXPMIN||expmin>EXPMAX)){
