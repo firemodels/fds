@@ -2029,9 +2029,9 @@ void initvars0(void){
   sorted_surfidlist=NULL,inv_sorted_surfidlist=NULL;
   trainer_filename=NULL;
 #ifdef pp_ISOOUT
-  sb_filename=NULL;
-  stream_sb_filename=NULL;
-  read_sb_filename=0;
+  filename_sb=NULL;
+  STREAM_SB=NULL;
+  read_smoothobst=0;
 #endif
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
   flushfile=NULL, chidfilebase=NULL;
