@@ -2841,21 +2841,20 @@ void update_smooth_blockages(void){
   blocktotal=0;
 
 #ifdef pp_ISOOUT
-  stream_sb_filename=fread(sb_filename,"rb");
-  if(stream_sb_filename!=NULL){
-    int version, count;
-    read_sb_filename=1;
-    count=fread(&version,4,1,stream_sb_filename);
-    if(count==1){
-      rewind(stream_sb_filename);
+  STREAM_SB=fopen(filename_sb,"rb");
+  if(STREAM_SB!=NULL){
+    int version;
+    read_smoothobst=1;
+    if(fread(&version,4,1,STREAM_SB)==1){
+      rewind(STREAM_SB);
     }
     else{
-      read_sb_filename=0;
+      read_smoothobst=0;
     }
   }
   else{
-    read_sb_filename=0;
-    stream_sb_filename=fread(sb_filename,"wb");
+    read_smoothobst=0;
+    STREAM_SB=fopen(filename_sb,"wb");
   }
 #endif
 
@@ -3003,13 +3002,69 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
 /* ------------------ ReadSmoothIsoSurface ------------------------ */
 
 void ReadSmoothIsoSurface(isosurface *asurface){
-  // use stream_sb_filename
+  // use STREAM_SB
+  int one;
+  float color[4];
+
+  if(STREAM_SB==NULL)return;
+
+  fread(&one,4,1,STREAM_SB);
+
+  fread(&asurface->nvertices,4,1,STREAM_SB);
+  fread(&asurface->ntriangles,4,1,STREAM_SB);
+
+  fread(&asurface->xmin,4,1,STREAM_SB);
+  fread(&asurface->ymin,4,1,STREAM_SB);
+  fread(&asurface->zmin,4,1,STREAM_SB);
+  fread(&asurface->xyzmaxdiff,4,1,STREAM_SB);
+
+  fread(color,4,4,STREAM_SB);
+  asurface->color=getcolorptr(color);
+
+  asurface->vertices=NULL;
+  asurface->vertexnorm=NULL;
+  if(asurface->nvertices>0){
+    NewMemory((void **)&asurface->vertices,3*asurface->nvertices*sizeof(short));
+    NewMemory((void **)&asurface->vertexnorm,3*asurface->nvertices*sizeof(short));
+    fread(asurface->vertices,2,3*asurface->nvertices,STREAM_SB); // vertices scaled between 0 and 2**16-1
+    fread(asurface->vertexnorm,2,3*asurface->nvertices,STREAM_SB); // norms scaled between 0 and 2**16-1
+  }
+  asurface->triangles=NULL;
+  if(asurface->ntriangles>0){
+    NewMemory((void **)&asurface->triangles,asurface->ntriangles*sizeof(int));
+    fread(asurface->triangles,4,asurface->ntriangles,STREAM_SB); // triangle indices
+  }
+
 }
 
 /* ------------------ WriteSmoothIsoSurface ------------------------ */
 
 void WriteSmoothIsoSurface(isosurface *asurface){
-  // use stream_sb_filename
+  // use STREAM_SB
+  int one=1;
+
+  if(STREAM_SB==NULL)return;
+
+  fwrite(&one,4,1,STREAM_SB);
+
+  fwrite(&asurface->nvertices,4,1,STREAM_SB);
+  fwrite(&asurface->ntriangles,4,1,STREAM_SB);
+
+  fwrite(&asurface->xmin,4,1,STREAM_SB);
+  fwrite(&asurface->ymin,4,1,STREAM_SB);
+  fwrite(&asurface->zmin,4,1,STREAM_SB);
+  fwrite(&asurface->xyzmaxdiff,4,1,STREAM_SB);
+
+  fwrite(asurface->color,4,4,STREAM_SB);
+
+  if(asurface->nvertices>0){
+    fwrite(asurface->vertices,2,3*asurface->nvertices,STREAM_SB); // vertices scaled between 0 and 2**16-1
+    fwrite(asurface->vertexnorm,2,3*asurface->nvertices,STREAM_SB); // norms scaled between 0 and 2**16-1
+  }
+  if(asurface->ntriangles>0){
+    fwrite(asurface->triangles,4,asurface->ntriangles,STREAM_SB); // triangle indices
+  }
+
 }
 #endif
 
@@ -3069,11 +3124,10 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
   meshi->blockagesurfaces=sb->smoothblockagesurfaces;
 
   for(iblockcolor=0;iblockcolor<meshi->nsmoothblockagecolors;iblockcolor++){
-    int readiso=0;
 
     rgbtemp=meshi->smoothblockagecolors + 4*iblockcolor;
 #ifdef pp_ISOOUT
-    if(readiso==0){
+    if(read_smoothobst==0){
 #endif
       cellcopy=cell;
       nodecopy=node;
@@ -3169,7 +3223,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
     NewMemory((void **)&asurface,sizeof(isosurface));
     InitIsosurface(asurface, level, rgbtemp,0);
 #ifdef pp_ISOOUT
-    if(readiso==0){
+    if(read_smoothobst==0){
 #endif
       GetIsosurface(asurface, node, NULL, NULL, level,
                      xplt2, ibar+3, yplt2, jbar+3, zplt2, kbar+3,
@@ -3184,7 +3238,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
       // write out smoothed iso info here
       WriteSmoothIsoSurface(asurface);
     }
-    if(readiso==1){
+    if(read_smoothobst==1){
       // read in smoothed iso info here
       ReadSmoothIsoSurface(asurface);
     }

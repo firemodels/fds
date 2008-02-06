@@ -1116,6 +1116,8 @@ void freesurface(isosurface *surfacedata){
   surfacedata->defined=0;
 }
 
+/* ------------------ SmoothIsoSurface ------------------------ */
+
 void SmoothIsoSurface(isosurface *surfacedata){
   int *triangles_i;
   unsigned short *vertices_i,*v1,*v2,*v3;

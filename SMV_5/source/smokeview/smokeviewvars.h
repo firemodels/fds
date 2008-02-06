@@ -616,9 +616,9 @@ SVEXTERN int pass_through;
 SVEXTERN int *sorted_surfidlist,*inv_sorted_surfidlist,nsorted_surfidlist;
 SVEXTERN char *trainer_filename;
 #ifdef pp_ISOOUT
-SVEXTERN char *sb_filename;
-SVEXTERN int read_sb_filename;
-SVEXTERN FILE *stream_sb_filename;
+SVEXTERN char *filename_sb;
+SVEXTERN int read_smoothobst;
+SVEXTERN FILE *STREAM_SB;
 #endif
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
 SVEXTERN char *flushfile, *chidfilebase;
