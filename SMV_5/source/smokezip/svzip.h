@@ -103,9 +103,9 @@ typedef struct {
   int nx, ny, nz, filesize;
 #ifdef pp_LIGHT
   mesh *smoke_mesh;
+  float *light_q_rect;
 #endif
   unsigned char *compressed_lightingbuffer;
-  float *hrr;
   uLongf ncompressed_lighting_zlib;
 } smoke3d;
 
@@ -126,7 +126,7 @@ typedef struct {
 #ifdef pp_LIGHT
 typedef struct {
   int type;
-  float xyz1[3], xyz2[3], hrr;
+  float xyz1[3], xyz2[3], q;
 } lightdata;
 #endif
 
@@ -194,7 +194,7 @@ EXTERN int npatch_files;
 EXTERN int make_lighting_file;
 EXTERN int nlightinfo;
 EXTERN lightdata *lightinfo;
-EXTERN float light_delta, *light_hrr;
+EXTERN float light_delta, *light_q_polar;
 #endif
 EXTERN slice *sliceinfo;
 EXTERN int nslice_files;
