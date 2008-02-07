@@ -2870,7 +2870,7 @@ void update_smooth_blockages(void){
       for(j=0;j<meshi->nsmoothblockages_list;j++){
 #ifdef pp_ISOOUT
         if(read_smoothobst==1){
-          printf("Reading blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
+          printf("Reading smooth blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
         }
         else{
           printf("Smoothing blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
