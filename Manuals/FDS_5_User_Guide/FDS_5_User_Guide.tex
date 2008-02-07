@@ -2402,6 +2402,12 @@ created or removed at pre-determined times. See Section~\ref{info:create_remove}
 To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID}
 parameter respectively, to the {\ct HOLE} line.\index{HOLE!CTRL\_ID} \index{HOLE!DEVC\_ID}
 
+\begin{warning}
+\noindent
+Note that while single {\ct DEVC} or {\ct CTRL} can be used to control multiple items, a {\ct DEVC} or {\ct CTRL}
+that is being used for a {\ct HOLE} should not be used for anything else other than additional {\ct HOLE}s.
+\end{warning}
+
 If it is desired that the obstruction(s) to be cut out should have a different color
 than the original obstruction, set the {\ct COLOR} \index{HOLE!COLOR} or integer triplet
 {\ct RGB} \index{HOLE!RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}).
@@ -5527,12 +5533,6 @@ the device changes state to {\ct .FALSE.} or {\ct .TRUE.}, respectively. For exa
 \noindent
 will cause the given obstruction to be removed when the specified {\ct DEVC} changes state.
 
-\begin{warning}
-\noindent
-Note that while single {\ct DEVC} can be used to control multiple items, a {\ct DEVC}
-that is being used for a {\ct HOLE} should not be used for anything else other than additional {\ct HOLE}s.
-\end{warning}
-
 \noindent
 Creation or removal at a predetermined time can be performed using a {\ct DEVC} that has {\ct TIME} as
 its measured quantity. For example, the following instructions will cause the specified {\ct HOLE}s and {\ct OBST}structions to
@@ -5629,6 +5629,8 @@ In this manner, complicated behaviors can be simulated by making functions of ot
 control function types, the logical value output of the devices and control functions and the time they last changed
 state are used as the inputs.
 
+For any input that a  {\ct DEVC\_ID} can be specified for (such as {\ct OBST} or {\ct VENT}), a {\ct CTRL\_ID} can be
+specified instead. 
 
 \begin{table}[h!]
 \index{Controls!Function List}
