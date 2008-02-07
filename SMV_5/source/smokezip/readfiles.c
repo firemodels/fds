@@ -88,7 +88,7 @@ int readsmv(char *smvfile){
       smoke3di->file=NULL;
       smoke3di->filebase=NULL;
 #ifdef pp_LIGHT
-      smoke3di->hrr=NULL;
+      smoke3di->light_q_rect=NULL;
       smoke3di->smoke_mesh=NULL;
 #endif
     }
@@ -669,14 +669,13 @@ void readini2(char *inifile){
 #ifdef pp_LIGHT
     if(match(buffer,"L_POINT",7)==1){
       lightdata *lighti;
-      float *xyz, *hrr;
+      float *xyz;
 
       lighti = lightinfo + nlightinfo;
       lighti->type=0;
       xyz = lighti->xyz1;
-      hrr = &lighti->hrr;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",xyz,xyz+1,xyz+2,hrr);
+      sscanf(buffer,"%f %f %f %f",xyz,xyz+1,xyz+2,&lighti->q);
       nlightinfo++;
       continue;
     }
@@ -688,9 +687,8 @@ void readini2(char *inifile){
       lighti->type=1;
       xyz1 = lighti->xyz1;
       xyz2 = lighti->xyz2;
-      hrr = &lighti->hrr;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %f",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,hrr);
+      sscanf(buffer,"%f %f %f %f %f %f %f",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,&lighti->q);
       nlightinfo++;
       continue;
     }
@@ -702,9 +700,8 @@ void readini2(char *inifile){
       lighti->type=2;
       xyz1 = lighti->xyz1;
       xyz2 = lighti->xyz2;
-      hrr = &lighti->hrr;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %f",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,hrr);
+      sscanf(buffer,"%f %f %f %f %f %f %f",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,&lighti->q);
       nlightinfo++;
       continue;
     }

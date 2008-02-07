@@ -14,6 +14,7 @@
 
 // svn revision character string
 char CNV3dsmoke_revision[]="$Revision$";
+unsigned char *full_alphabuffer;
 
 #define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
 
@@ -27,7 +28,7 @@ void set_lightfield(smoke3d *smoke3di,float xyz[3], float hrr);
 /* ------------------ convert_3dsmoke ------------------------ */
 
 void convert_3dsmoke(smoke3d *smoke3di){
-  unsigned char *full_smokebuffer,*compressed_smokebuffer;
+  unsigned char *compressed_alphabuffer;
   FILE *smoke3dstream=NULL,*smoke3dsizestream=NULL;
   EGZ_FILE *SMOKE3DFILE=NULL;
   char smoke3dfile_svz[1024], smoke3dsizefile_svz[1024];
@@ -84,8 +85,8 @@ void convert_3dsmoke(smoke3d *smoke3di){
 
   strcpy(pp,"%");
   strcpy(xxx,"X");
-  full_smokebuffer=NULL;
-  compressed_smokebuffer=NULL;
+  full_alphabuffer=NULL;
+  compressed_alphabuffer=NULL;
 #ifdef pp_LIGHT
   full_lightingbuffer=NULL;
   val_buffer=NULL;
@@ -248,10 +249,10 @@ void convert_3dsmoke(smoke3d *smoke3di){
   smoke3di->nz=nz;
   smoke3di->ncompressed_lighting_zlib=buffersize;
 
-  full_smokebuffer=NULL;
-  NewMemory((void **)&full_smokebuffer,buffersize);
-  compressed_smokebuffer=NULL;
-  NewMemory((void **)&compressed_smokebuffer,buffersize);
+  full_alphabuffer=NULL;
+  NewMemory((void **)&full_alphabuffer,buffersize);
+  compressed_alphabuffer=NULL;
+  NewMemory((void **)&compressed_alphabuffer,buffersize);
 
 #ifdef pp_LIGHT
   if(make_lighting_file==1){
@@ -283,7 +284,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
 
     // read compressed frame
 
-    EGZ_FREAD(compressed_smokebuffer,ncompressed_rle,1,SMOKE3DFILE);
+    EGZ_FREAD(compressed_alphabuffer,ncompressed_rle,1,SMOKE3DFILE);
 
     count++;
 
@@ -296,21 +297,21 @@ void convert_3dsmoke(smoke3d *smoke3di){
 
     // uncompress frame data (from RLE format)
 
-    nfull2=irle(compressed_smokebuffer, ncompressed_rle, full_smokebuffer);
+    nfull2=irle(compressed_alphabuffer, ncompressed_rle, full_alphabuffer);
     if(nfull!=nfull2){
       printf("  ***warning frame size expected: %i actual: %i\n",nfull,nfull2);
     }
 
 #ifdef pp_LIGHT
     for(i=0;i<nfull2;i++){
-      full_smokebuffer[i]=mapalpha[full_smokebuffer[i]];
+      full_alphabuffer[i]=mapalpha[full_alphabuffer[i]];
     }
 #endif
 
     // compress frame data (into ZLIB format)
 
     ncompressed_zlib=buffersize;
-    returncode=compress(compressed_smokebuffer, &ncompressed_zlib, full_smokebuffer, nfull2);
+    returncode=compress(compressed_alphabuffer, &ncompressed_zlib, full_alphabuffer, nfull2);
     if(returncode!=0){
       printf("  ***warning zlib compressor failed - frame %f\n",time);
     }
@@ -328,7 +329,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
     if(make_lighting_file==1){
       int return_code;
 
-      light_smoke(smoke3di,full_lightingbuffer,val_buffer, full_smokebuffer);
+      light_smoke(smoke3di,full_lightingbuffer,val_buffer, full_alphabuffer);
 
       buffersize=1.01*nx*ny*nz+600;
       smoke3di->ncompressed_lighting_zlib=buffersize;
@@ -347,7 +348,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
     nchars[1]=ncompressed_zlib;
     fwrite(&time,4,1,smoke3dstream);
     fwrite(nchars,4,2,smoke3dstream);
-    if(ncompressed_zlib>0)fwrite(compressed_smokebuffer,1,ncompressed_zlib,smoke3dstream);
+    if(ncompressed_zlib>0)fwrite(compressed_alphabuffer,1,ncompressed_zlib,smoke3dstream);
     sizeafter+=12+ncompressed_zlib;
 
 #ifdef pp_LIGHT
@@ -395,8 +396,8 @@ void convert_3dsmoke(smoke3d *smoke3di){
 #ifdef pp_LIGHT
   if(make_lighting_file==1)fclose(light3dstream);
 #endif
-  FREEMEMORY(full_smokebuffer);
-  FREEMEMORY(compressed_smokebuffer);
+  FREEMEMORY(full_alphabuffer);
+  FREEMEMORY(compressed_alphabuffer);
 }
 
 /* ------------------ convert_smoke3ds ------------------------ */
@@ -420,29 +421,28 @@ void compress_smoke3ds(void){
 /* ------------------ init_lightfield ------------------------ */
 
 void init_lightfield(void){
-  NewMemory((void **)&light_hrr,NRAD*NTHETA*NPSI);
+  NewMemory((void **)&light_q_polar,NRAD*NTHETA*NPSI);
 }
-
 
 /* ------------------ update_lightfield ------------------------ */
 
-void update_lightfield(smoke3d *smoke3di){
+void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
   int ilight;
-  int nhrr;
+  int nlight_q_rect;
   int i, j, k;
 
   if(smoke3di->smoke_mesh==NULL)return;
-  nhrr = smoke3di->nx*smoke3di->ny*smoke3di->nz;
-  if(smoke3di->hrr==NULL){
-    if(nhrr>0){
-      NewMemory((void **)&smoke3di->hrr,nhrr);
+  nlight_q_rect = smoke3di->nx*smoke3di->ny*smoke3di->nz;
+  if(smoke3di->light_q_rect==NULL){
+    if(nlight_q_rect>0){
+      NewMemory((void **)&smoke3di->light_q_rect,nlight_q_rect*sizeof(float));
     }
     else{
       return;
     }
   }
-  for(i=0;i<nhrr;i++){
-    smoke3di->hrr[i]=0.0;
+  for(i=0;i<nlight_q_rect;i++){
+    smoke3di->light_q_rect[i]=0.0;
   }
 
   // accumulate hrr for each light
@@ -459,7 +459,7 @@ void update_lightfield(smoke3d *smoke3di){
       float xyz[3];
 
       case 0:      // point
-        set_lightfield(smoke3di,lighti->xyz1,lighti->hrr);
+        set_lightfield(smoke3di,lighti->xyz1,lighti->q);
         break;
       case 1:      // line
         xyz1 = lighti->xyz1;
@@ -474,7 +474,7 @@ void update_lightfield(smoke3d *smoke3di){
           xyz[0] = ((float)(npoint-1-i)*xyz1[0] + (float)i*xyz2[0])/(float)(npoint-1);
           xyz[1] = ((float)(npoint-1-i)*xyz1[1] + (float)i*xyz2[1])/(float)(npoint-1);
           xyz[2] = ((float)(npoint-1-i)*xyz1[2] + (float)i*xyz2[2])/(float)(npoint-1);
-          set_lightfield(smoke3di,xyz,lighti->hrr/(float)npoint);
+          set_lightfield(smoke3di,xyz,lighti->q/(float)npoint);
         }
         break;
       case 2:      // region
@@ -504,7 +504,7 @@ void update_lightfield(smoke3d *smoke3di){
             xyz[1] = xyz1[1] + j*dyy;
             for(i=0;i<nx;i++){
               xyz[0] = xyz1[0] + i*dxx;
-              set_lightfield(smoke3di,xyz,lighti->hrr/(float)(nx*ny*nz));
+              set_lightfield(smoke3di,xyz,lighti->q/(float)(nx*ny*nz));
             }
           }
         }
@@ -532,19 +532,41 @@ float getldist(float ldist,float *xyz, float x, float y, float z){
 /* ------------------ getalpha ------------------------ */
 
 float getalpha(mesh *smoke_mesh, float *xyz2){
+  int i, j, k;
+  int nx, ny, nxy;
+  int ialpha;
+
   if(xyz2[0]<smoke_mesh->xbar0||xyz2[0]>smoke_mesh->xbar)return 1.0;
   if(xyz2[1]<smoke_mesh->ybar0||xyz2[1]>smoke_mesh->ybar)return 1.0;
   if(xyz2[2]<smoke_mesh->zbar0||xyz2[2]>smoke_mesh->zbar)return 1.0;
-  return 0.0; // change to correct alpha
+
+  nx = smoke_mesh->ibar;
+  ny = smoke_mesh->jbar;
+  nxy = nx*ny;
+
+  i = (xyz2[0]-smoke_mesh->xbar0)/(smoke_mesh->xbar-smoke_mesh->xbar0)*smoke_mesh->ibar;
+  if(i<0)i=0;
+  if(i>smoke_mesh->ibar)i=smoke_mesh->ibar;
+
+  j = (xyz2[1]-smoke_mesh->ybar0)/(smoke_mesh->ybar-smoke_mesh->ybar0)*smoke_mesh->jbar;
+  if(j<0)j=0;
+  if(j>smoke_mesh->jbar)j=smoke_mesh->jbar;
+
+  k = (xyz2[2]-smoke_mesh->zbar0)/(smoke_mesh->zbar-smoke_mesh->zbar0)*smoke_mesh->kbar;
+  if(k<0)k=0;
+  if(k>smoke_mesh->kbar)k=smoke_mesh->kbar;
+
+  ialpha = full_alphabuffer[IJKNODE(i,j,k)];
+  return (float)ialpha/255.0;
 }
 
 /* ------------------ atan3 ------------------------ */
 
 float atan3(float dy,float dx){
-  if(dx<0.0)dx=-dx;
-  if(dx!=0.0){
-    return atan(dy/dx);
-  }
+  if(dx!=0.0)return atan(dy/dx);
+
+  // dx is zero so atan(dy/dx) is PI/2 or -PI/2 depending on sign dy
+
   if(dy>0.0)return 2.0*atan(1.0);
   if(dy<0.0)return -2.0*atan(1.0);
   return 0.0;
@@ -552,7 +574,7 @@ float atan3(float dy,float dx){
 
 /* ------------------ set_lightfield ------------------------ */
 
-void set_lightfield(smoke3d *smoke3di,float xyz[3], float hrr){
+void set_lightfield(smoke3d *smoke3di,float xyz[3], float light_q_source){
   int i,j,k;
   mesh *smoke_mesh;
   float rads[NRAD+1], area[NRAD+1];
@@ -620,7 +642,7 @@ void set_lightfield(smoke3d *smoke3di,float xyz[3], float hrr){
   // set polar hrr field to zero
 
   for(i=0;i<NRAD*NTHETA*NPSI;i++){
-    light_hrr[i]=0.0;
+    light_q_polar[i]=0.0;
   }
 
   // set center of field to hrr/area then
@@ -631,20 +653,20 @@ void set_lightfield(smoke3d *smoke3di,float xyz[3], float hrr){
   for(ipsi=0;ipsi<NPSI;ipsi++){
     for(itheta=0;itheta<NTHETA;itheta++){
       inode=GETPOLARNODE(ipsi,itheta,0);
-      light_hrr[inode]=hrr/area[0];
+      light_q_polar[inode]=light_q_source/area[0];
       for(irad=1;irad<NRAD;irad++){
         float xyz2[3];
         float alpha;
 
-        if(light_hrr[inode-1]==0.0){
-          light_hrr[inode]=0.0;
+        if(light_q_polar[inode-1]==0.0){
+          light_q_polar[inode]=0.0;
         }
         else{
           xyz2[0] = xyz[0] + rads[irad]*cos_theta[itheta]*cos_psi[ipsi];
           xyz2[1] = xyz[1] + rads[irad]*sin_theta[itheta]*cos_psi[ipsi];
           xyz2[2] = xyz[2] + rads[irad]*sin_psi[ipsi];
           alpha = getalpha(smoke_mesh,xyz2);
-          light_hrr[inode]=light_hrr[inode-1]*area[irad-1]/area[irad]*(1.0-alpha);
+          light_q_polar[inode]=light_q_polar[inode-1]*area[irad-1]/area[irad]*(1.0-alpha);
         }
         inode++;
       }
@@ -687,7 +709,7 @@ void set_lightfield(smoke3d *smoke3di,float xyz[3], float hrr){
 
         polarnode = GETPOLARNODE(ipsi,itheta,irad);
         ijknode = IJKNODE(i,j,k);
-        smoke3di->hrr[ijknode]+=light_hrr[polarnode];
+        smoke3di->light_q_rect[ijknode]+=light_q_polar[polarnode];
       }
     }
   }
@@ -721,7 +743,7 @@ void light_smoke(smoke3d *smoke3di, unsigned char *lightingbuffer, float *val_bu
 
   for(k=1;k<nz;k++){
     for(j=0;j<ny;j++){
-      ijk = ijknode(0,j,k);
+      ijk = IJKNODE(0,j,k);
       for(i=0;i<nx;i++){
         val_buffer[ijk]=0.0;
         ijk++;
@@ -733,7 +755,7 @@ void light_smoke(smoke3d *smoke3di, unsigned char *lightingbuffer, float *val_bu
 
   for(k=1;k<nz;k++){
     for(j=0;j<ny;j++){
-      ijk = ijknode(0,j,k);
+      ijk = IJKNODE(0,j,k);
       for(i=0;i<nx;i++){
         ijkm1 = ijk - nxy;
         factor = (255.0-(float)alpha_buffer[ijkm1])/255.0;
