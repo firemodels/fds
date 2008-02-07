@@ -8254,7 +8254,7 @@ Contains
                            jjj = Floor(MFF%CELLSJ(Floor((y_now-MFF%YS)* &
                                 MFF%RDYINT))+1.0_EB)
                            ave_K = ave_K + MASS_EXTINCTION_COEFFICIENT* &
-                                1.0E-6_EB*HUMAN_GRID(iii,jjj)%SOOT_DENS / &
+                                1.0E-6_EB*MFF%HUMAN_GRID(iii,jjj)%SOOT_DENS / &
                                 ( iie-1 - (iio+1) + 1)
                            If (max_fed < &
                                 MFF%HUMAN_GRID(iii,jjj)%FED_CO_CO2_O2) Then
@@ -8290,7 +8290,7 @@ Contains
                            iii = Floor(MFF%CELLSI(Floor((x_now-MFF%XS)* &
                                 MFF%RDXINT))+1.0_EB)
                            ave_K = ave_K + MASS_EXTINCTION_COEFFICIENT* &
-                                1.0E-6_EB*HUMAN_GRID(iii,jjj)%SOOT_DENS / &
+                                1.0E-6_EB*MFF%HUMAN_GRID(iii,jjj)%SOOT_DENS / &
                                 ( jje-1 - (jjo+1) + 1)
                            If (max_fed < &
                                 MFF%HUMAN_GRID(iii,jjj)%FED_CO_CO2_O2) Then
@@ -8320,7 +8320,7 @@ Contains
                         FED_max_Door(ie) = &
                              MFF%HUMAN_GRID(iie,jje)%FED_CO_CO2_O2 
                         K_ave_Door(ie) = MASS_EXTINCTION_COEFFICIENT* &
-                             1.0E-6_EB*HUMAN_GRID(iie,jje)%SOOT_DENS
+                             1.0E-6_EB*MFF%HUMAN_GRID(iie,jje)%SOOT_DENS
                      End If
                   End If            ! correct floor
                End Do              ! doors and exits
