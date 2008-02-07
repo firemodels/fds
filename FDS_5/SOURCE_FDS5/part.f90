@@ -678,7 +678,7 @@ WALL_INSERT_LOOP: DO IW=1,NWC
    ENDIF
 
 ENDDO WALL_INSERT_LOOP
-WRITE(*,*) 'INS',INSERT_RATE,INSERT_COUNT
+
 ! Reset particle/droplet insertion clock
  
 DO IPC=1,N_PART
