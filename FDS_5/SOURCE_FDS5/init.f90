@@ -262,6 +262,15 @@ M%DDDT  = 0._EB
 M%D     = 0._EB
 M%DS    = 0._EB
 M%Q     = 0._EB
+IF (EVACUATION_ONLY(NM)) THEN
+   M%U       = 0._EB
+   M%V       = 0._EB
+   M%W       = 0._EB
+   M%US      = 0._EB
+   M%VS      = 0._EB
+   M%WS      = 0._EB
+   M%H       = 0._EB
+ENDIF
 IF (N_SPECIES > 0) M%DEL_RHO_D_DEL_Y = 0._EB
  
 ! Upper bounds on local HRR per unit volume
@@ -1660,7 +1669,8 @@ IF (ABS(IOR)==3) THEN
    M%YW(IW) = 0.5_EB*(M%Y(J)+M%Y(J-1))
    M%AW(IW) = M%DX(I)*M%RC(I)*M%DY(J)
 ENDIF
- 
+IF (EVACUATION_ONLY(NM)) M%UW(IW) = 0._EB
+
 IF (M%AW(IW)>0._EB) M%RAW(IW) = 1._EB/M%AW(IW)
 
 ! Gas phase cell abutting boundary cell
