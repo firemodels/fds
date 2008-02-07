@@ -2866,7 +2866,7 @@ QUANTITY=>WORK7
  
 IF (PLOT3D) THEN  ! Write out information to .smv file
    ITM  = INT(T)
-   ITM1 = ABS(T-ITM)*100
+   ITM1 = ABS(T-ITM)*100*TIME_SHRINK_FACTOR
    IF (T_END < 10000._EB) THEN
       IF (ITM < 0) THEN
          IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I2.2,A1,I5.4,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
