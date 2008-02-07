@@ -50,13 +50,14 @@ ENDIF
  
 RFODT = RELAXATION_FACTOR/DT
 HFAC  = 1._EB-RHOA/RHO_AVG
-H0RR  = 0.
+H0RR  = 0._EB
 IF (U0>=0._EB) H0RR(1) = H0*RHOA/RHO_AVG
 IF (U0<=0._EB) H0RR(2) = H0*RHOA/RHO_AVG
 IF (V0>=0._EB) H0RR(3) = H0*RHOA/RHO_AVG
 IF (V0<=0._EB) H0RR(4) = H0*RHOA/RHO_AVG
 IF (W0>=0._EB) H0RR(5) = H0*RHOA/RHO_AVG
 IF (W0<=0._EB) H0RR(6) = H0*RHOA/RHO_AVG
+IF (EVACUATION_ONLY(NM)) H0RR(1:6) = 0._EB
  
 ! Apply pressure boundary conditions at external cells.
 ! If Neumann, BXS, BXF, etc., contain dH/dx(x=XS), dH/dx(x=XF), etc.
