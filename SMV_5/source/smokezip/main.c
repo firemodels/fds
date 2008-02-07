@@ -61,7 +61,7 @@ int main(int argc, char **argv){
   albedo=(float)0.3;
   nlightinfo=0;
   lightinfo=NULL;
-  light_hrr=NULL;
+  light_q_polar=NULL;
   light_delta = 0.3;
 #endif
   overwrite_slice=0;
