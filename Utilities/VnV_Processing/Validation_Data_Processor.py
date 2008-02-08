@@ -3,7 +3,7 @@ from pyx import *
 
 ### Set Global Variables
 
-data_directory = "VALIDATION_DATA/"
+data_directory = "../../Validation/"
 config_file_name = "Validation_Data_Config_File.csv"
 
 scatter_data_dict = {}
