@@ -681,7 +681,7 @@ void readini2(char *inifile){
     }
     if(match(buffer,"L_LINE",7)==1){
       lightdata *lighti;
-      float *xyz1, *xyz2, *hrr;
+      float *xyz1, *xyz2;
 
       lighti = lightinfo + nlightinfo;
       lighti->type=1;
@@ -694,7 +694,7 @@ void readini2(char *inifile){
     }
     if(match(buffer,"L_REGION",7)==1){
       lightdata *lighti;
-      float *xyz1, *xyz2, *hrr;
+      float *xyz1, *xyz2;
 
       lighti = lightinfo + nlightinfo;
       lighti->type=2;

@@ -185,7 +185,14 @@ void compress_smoke3ds(void);
 int match(const char *buffer, const char *key, unsigned int lenkey);
 void trim(char *line);
 void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *normal, float *area);
+float atan3(float y, float x);
+#ifdef pp_LIGHT
+void light_smoke(smoke3d *smoke3di,unsigned char *full_lightingbuffer, float *val_buffer, unsigned char *alpha_buffer);
+void set_lightfield(smoke3d *smoke3di,float xyz[3], float hrr);
+void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer);
+#endif
 
+EXTERN unsigned char *full_alphabuffer;
 EXTERN patch *patchinfo;
 EXTERN mesh *meshinfo;
 EXTERN smoke3d *smoke3dinfo;
