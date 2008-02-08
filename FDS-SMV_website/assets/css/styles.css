@@ -184,7 +184,32 @@ ol.upper-roman {
 ol.lower-roman {
 	list-style-type: lower-roman;
 }
+div.figure_right {
+	float: right;
+	width: 250px;
+	border: thin silver solid;
+	margin: 1em;
+}
+div.figure_right  p {
+  text-align: center;
+  font-style: italic;
+  font-size: smaller;
+  text-indent: 0;
+}
 
+/* @end */
+div.figure_left {
+	float: left;
+	width: 250px;
+	border: thin silver solid;
+	margin: 1em;
+}
+div.figure_left p {
+	text-align: center;
+	font-style: italic;
+	font-size: smaller;
+	text-indent: 0;
+}
 
 /* @end */
 
@@ -1351,5 +1376,3 @@ p.exif-user-comment {
 
 .form-input-button {
 }
-
-/* @end */
