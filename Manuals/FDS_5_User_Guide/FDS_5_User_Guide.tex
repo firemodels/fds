@@ -1979,7 +1979,7 @@ and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE
 \item[{\ct RADIATION}] A logical parameter indicating whether radiation transport ought to be calculated. The default is {\ct .TRUE.}
 \item[{\ct SUPPRESSION}] A logical parameter indicating whether FDS should include gas phase flame extinction. The default is {\ct .TRUE.}
 \item[{\ct SURF\_DEFAULT}] The {\ct SURF} line that is to be applied to all boundaries, unless otherwise specified.
-The default is {\ct 'INERT'}, a cold, non-reacting solid boundary. You do not need to define {\ct 'INERT'} via a {\ct SURF} line.
+The default is {\ct 'INERT'},non-reacting solid boundary fixed at TMPA. You do not need to define {\ct 'INERT'} via a {\ct SURF} line.
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
 \item[{\ct U0, V0, W0}] Initial values of the gas velocity in each of the coordinate directions. Normally, these are all 0~m/s, but there are a few applications where it is
 convenient to start the flow immediately, like in an outdoor simulation involving wind.
@@ -2675,7 +2675,7 @@ prescribed by referencing the appropriate {\ct SURF} line(s) whose
 parameters are described in this section.
 
 The default boundary condition for all solid surfaces is that of a
-cold, inert wall, and is referred to as {\ct 'INERT'}. If only this
+inert wall with the temperature fixed at TMPA, and is referred to as {\ct 'INERT'}. If only this
 boundary condition is needed, there is no need to add any {\ct SURF} lines
 to the input file. If additional boundary conditions are desired,
 they are to be listed one boundary condition at a time.
