@@ -15,4 +15,4 @@ extern char endian_revision[];
 extern char main_revision[];
 extern char readfiles_revision[];
 extern char stats_revision[];
-//extern char utilities_revision[];
+extern char lightsmoke_revision[];
