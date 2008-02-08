@@ -320,6 +320,7 @@ int getmaxrevision(void){
   MAXREV(readfiles_revision);
   MAXREV(stats_revision);
   MAXREV(utilities_revision);
+  MAXREV(lightsmoke_revision);
   return max_revision;
 }
 
@@ -350,3 +351,17 @@ int getrevision(char *svn){
   return return_val;
 
 }
+
+/* ------------------ atan3 ------------------------ */
+
+float atan3(float dy,float dx){
+  if(dx!=0.0)return atan(dy/dx);
+
+  // dx is zero so atan(dy/dx) is PI/2 or -PI/2 depending on sign dy
+
+  if(dy>0.0)return 2.0*atan(1.0);
+  if(dy<0.0)return -2.0*atan(1.0);
+  return 0.0;
+}
+
+
