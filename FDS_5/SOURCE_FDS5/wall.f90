@@ -213,25 +213,16 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
                DO IIO=IJKW(10,IW),IJKW(13,IW)
                   SELECT CASE(ABS(IOR))
                      CASE(1)
-                 !!     ARO = MIN(1._EB , RDY(JJ)*RDZ(KK)*MM%DY(JJO)*MM%DZ(KKO)) * DX(II)*MM%RDX(IIO)
                         ARO = MIN(1._EB , RDY(JJ)*RDZ(KK)*MM%DY(JJO)*MM%DZ(KKO)) * 2.*DX(II)/(MM%DX(IIO)+DX(II))
                         UWO = -SIGN(1,IOR)*( OM%U(IIO,JJO,KKO)*INT_FAC + OM%U(IIO-1,JJO,KKO)*(1._EB-INT_FAC) )
                      CASE(2)
-                 !!     ARO = MIN(1._EB , RDX(II)*RDZ(KK)*MM%DX(IIO)*MM%DZ(KKO)) * DY(JJ)*MM%RDY(JJO)
                         ARO = MIN(1._EB , RDX(II)*RDZ(KK)*MM%DX(IIO)*MM%DZ(KKO)) * 2.*DY(JJ)/(MM%DY(JJO)+DY(JJ))
                         UWO = -SIGN(1,IOR)*( OM%V(IIO,JJO,KKO)*INT_FAC + OM%V(IIO,JJO-1,KKO)*(1._EB-INT_FAC) )
                      CASE(3)
-                 !!     ARO = MIN(1._EB , RDX(II)*RDY(JJ)*MM%DX(IIO)*MM%DY(JJO)) * DZ(KK)*MM%RDZ(KKO)
                         ARO = MIN(1._EB , RDX(II)*RDY(JJ)*MM%DX(IIO)*MM%DY(JJO)) * 2.*DZ(KK)/(MM%DZ(KKO)+DZ(KK))
                         UWO = -SIGN(1,IOR)*( OM%W(IIO,JJO,KKO)*INT_FAC + OM%W(IIO,JJO,KKO-1)*(1._EB-INT_FAC) )
                   END SELECT
-               !  IF (UWP(IW)/=0._EB) THEN
-               !     RHO_W(IW) = RHO_W(IW) + UWO/UWP(IW)*ARO*(OM_RHOP(IIO,JJO,KKO)-RHO_G)
-               !  ELSE
- !if (nm==1 .and. ii==0 .and. jj==24 .and. kk==2) write(0,'(7i4,3f8.2)') nm,ijkw(10:15,iw),aro,rho_w(iw),OM_RHOP(IIO,JJO,KKO) 
- !if (nm==3 .and. ii==56 .and. jj==6 .and. kk==1) write(0,'(7i4,3f8.2)') nm,ijkw(10:15,iw),aro,rho_w(iw),OM_RHOP(IIO,JJO,KKO) 
-                     RHO_W(IW) = RHO_W(IW) +             ARO*(OM_RHOP(IIO,JJO,KKO)-RHO_G)
-               !  ENDIF
+                  RHO_W(IW) = RHO_W(IW) + ARO*(OM_RHOP(IIO,JJO,KKO)-RHO_G)
                ENDDO
             ENDDO
          ENDDO
@@ -454,25 +445,17 @@ WALL_CELL_LOOP: DO IW=1,NWC
                DO IIO=IJKW(10,IW),IJKW(13,IW)
                   SELECT CASE(ABS(IOR))
                      CASE(1)
-               !!       ARO = MIN(1._EB , RDY(JJ)*RDZ(KK)*MM%DY(JJO)*MM%DZ(KKO)) * DX(II)*MM%RDX(IIO)
                         ARO = MIN(1._EB , RDY(JJ)*RDZ(KK)*MM%DY(JJO)*MM%DZ(KKO)) * 2.*DX(II)/(MM%DX(IIO)+DX(II))
                         UWO = -SIGN(1,IOR)*( OM%U(IIO,JJO,KKO)*INT_FAC + OM%U(IIO-1,JJO,KKO)*(1._EB-INT_FAC) )
                      CASE(2)
-               !!       ARO = MIN(1._EB , RDX(II)*RDZ(KK)*MM%DX(IIO)*MM%DZ(KKO)) * DY(JJ)*MM%RDY(JJO)
                         ARO = MIN(1._EB , RDX(II)*RDZ(KK)*MM%DX(IIO)*MM%DZ(KKO)) * 2.*DY(JJ)/(MM%DY(JJO)+DY(JJ))
                         UWO = -SIGN(1,IOR)*( OM%V(IIO,JJO,KKO)*INT_FAC + OM%V(IIO,JJO-1,KKO)*(1._EB-INT_FAC) )
                      CASE(3)
-               !!       ARO = MIN(1._EB , RDX(II)*RDY(JJ)*MM%DX(IIO)*MM%DY(JJO)) * DZ(KK)*MM%RDZ(KKO)
                         ARO = MIN(1._EB , RDX(II)*RDY(JJ)*MM%DX(IIO)*MM%DY(JJO)) * 2.*DZ(KK)/(MM%DZ(KKO)+DZ(KK))
                         UWO = -SIGN(1,IOR)*( OM%W(IIO,JJO,KKO)*INT_FAC + OM%W(IIO,JJO,KKO-1)*(1._EB-INT_FAC) )
                   END SELECT
-              !   IF (UWP(IW)/=0._EB) THEN
-              !      RHO_YY_OTHER(1:N_SPECIES) = RHO_YY_OTHER(1:N_SPECIES) + &
-              !         UWO/UWP(IW)*ARO*(OM_RHOP(IIO,JJO,KKO)*OM_YYP(IIO,JJO,KKO,1:N_SPECIES)-RHO_G*YY_G(1:N_SPECIES))
-              !   ELSE
-                     RHO_YY_OTHER(1:N_SPECIES) = RHO_YY_OTHER(1:N_SPECIES) + &
-                                    ARO*(OM_RHOP(IIO,JJO,KKO)*OM_YYP(IIO,JJO,KKO,1:N_SPECIES)-RHO_G*YY_G(1:N_SPECIES))
-              !   ENDIF
+                  RHO_YY_OTHER(1:N_SPECIES) = RHO_YY_OTHER(1:N_SPECIES) + &
+                                 ARO*(OM_RHOP(IIO,JJO,KKO)*OM_YYP(IIO,JJO,KKO,1:N_SPECIES)-RHO_G*YY_G(1:N_SPECIES))
                ENDDO
             ENDDO
          ENDDO
