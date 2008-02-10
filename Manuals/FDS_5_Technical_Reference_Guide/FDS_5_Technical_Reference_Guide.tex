@@ -141,7 +141,8 @@ Kevin McGrattan \\
 Simo Hostikka \\
 Jason Floyd \\
 Howard Baum \\
-Ronald Rehm}
+Ronald Rehm \\
+Randall McDermott}
 
 \vspace{0.5in}
 
@@ -179,6 +180,7 @@ VTT Technical Research Centre of Finland  }
 Kevin McGrattan \\
 Howard Baum \\
 Ronald Rehm \\
+Randall McDermott \\
 {\em Fire Research Division} \\
 {\em Building and Fire Research Laboratory}  \\
 \hspace{1.in} \\
@@ -3343,8 +3345,7 @@ When implemented as part of a predictor-corrector updating scheme,
 the no-flux condition at solid surfaces is maintained remarkably well.
 
 At open boundaries (say $i=I$),
-$\cal H$ is prescribed depending on whether the
-flow is incoming or outgoing
+$\cal H$ is prescribed depending on whether the flow is incoming or outgoing
 \be
 \begin{array}{ll}
      {\cal H}_{I+\ha,jk} = (u_{I,jk}^2 + v_{I,j-\ha,k}^2 + w_{I,j-\ha,k}^2)/2  & u_{I,jk} > 0    \\
@@ -3355,34 +3356,20 @@ $u_{I,jk}$ is the $x$ component of velocity at the boundary.
 The value of $\cal H$ in the ghost cell is
 \be {\cal H}_{I+1,jk} = 2 {\cal H}_{I+\ha,jk} - {\cal H}_{I,jk} \ee
 
+At the interface of two abutting meshes, the following (Dirichlet) boundary condition is applied (in this example, the interface $x=x_{\max}$):
+\be \cH_{I+\ha,j,k,m} = \frac{ \cH_{I,j,k,m} + \cH_{1,jo,ko,mo} }{2}  \ee
+Note the additional subscripts $m$ and $mo$ that indicate the mesh for which the Poisson equation is to be solved, and the ``other'' or ``opposing'' mesh, respectively. In a
+parallel calculation, the values of $\cH$ in both meshes is taken from the previous Poisson solve, half a time step in the past.
+
+
 \subsubsection{Multiple Mesh Considerations (On-Going Research)}
 
-Solving the Poisson equation on muliple meshes is considerably more difficult than on a single
-mesh. On a single mesh, the linear system of equations involves a simple block tri-diagonal
-matrix for which efficient solvers have been developed. For multiple mesh calculations, the same
-solver is used for each mesh as described above, with the following (Dirichlet) boundary conditions applied at mesh
-interfaces (in this case, the interface $x=x_{\max}=x^+$):
-\be
-\begin{array}{ll}
-     {\cal H}_{I+\ha,jk} = \cH_{I,jk} - \frac{\dx}{2} \left(\frac{u^+_{0,jk}-u_{I,jk}}{\dt}+F_{x,Ijk} \right) & u_{I,jk} > 0    \\
-     {\cal H}_{I+\ha,jk} = {\cal H}_{-\ha,jk}^+      & u_{I,jk} < 0
-     \end{array} \ee
-Here, the term $u^+$ indicates that the value is from the other mesh. In short, if the flow is incoming, then
-$\cH$ is taken from the other mesh, if the flow is outgoing, then $\cH$ is chosen so that the value of $u$
-at the next time step is driven
-towards the value of its counterpart ($u^+$) in the other mesh. For abutting meshes of the same cell size,
-$u_{I,jk}$ and $u^+_{0,jk}$ overlap each other, and the goal is to keep their values as close as possible.
-
-This procedure is fairly stable, and provides a reasonable exchange of momentum mesh to mesh.
+The procedure for obtaining the pressure that was described in the previous section is fairly stable, and provides a reasonable exchange of momentum mesh to mesh.
 However, there is no guarantee that the individual solutions
-of the Poisson equation on each mesh lead to consistent flows into and out of neighboring meshes. Using
-similar boundary conditions as described above for open boundaries, it is possible to ensure a continuous
-solution of the pressure term, ${\cal H}$, across mesh boundaries, but it is not possible to ensure a
-continuous gradient. Thus, it is not possible to ensure that the flow out of one mesh is the same as the
-flow into the next.
+of the Poisson equation on each mesh conserve volume. That is, $\dot{V}=\int \bu \cdot \dS$ is not necessarily the same at the interfaces between meshes.
 
 The strategy of approximating the solution of the Poisson equation on multiple meshes is as follows. First,
-decompose the pressure term ${\cal H}={\cal H}^0 + {\cal H}'$. Solve
+decompose the pressure term $\cH=\cH^0 + \cH'$. Solve
 \be \nabla^2 {\cal H}^0 = -\nabla \cdot \bF - \dod{}{t} (\nabla \cdot \bu) \ee
 on each mesh, the same way as described above. At this point, each mesh has a pressure field, but when
 the velocity is updated in each mesh, the normal components will not match at mesh interfaces. At the very
@@ -3397,24 +3384,28 @@ Introduce a single scalar $\overline{\cH}_m$ for each coarse grid cell that sati
 \be \frac{\overline{\cH}_{m+}  - \overline{\cH}_{m} }{\dx} A_{x^+} -
     \frac{\overline{\cH}_{m  } - \overline{\cH}_{m-}}{\dx} A_{x^-} + \; \cdots =
     -\int_{x^+} F_x \, dy \, dz  + \int_{x^-} F_x \, dy \, dz  + \;  \cdots
-    - \int_{\Omega_m} \dod{(\nabla \cdot \bu)}{t} dV   \ee
-The subscripts $m^+$ and $m^-$ refer to coarse neighboring cells, and $A_{x^+}$ and $A_{x^-}$ and so on
+    - \int_{\Omega_m} \dod{(\nabla \cdot \bu)}{t} dV   \label{coarse_pois} \ee
+The subscripts $m^+$ and $m^-$ refer to neighboring meshes, and $A_{x^+}$ and $A_{x^-}$ and so on
 refer to the area of the coarse cell interfaces. At a mesh interface, say an $x$ interface, there are two values of $F_x$.
 Denote the average of the two values $\overline{F}_x$, and use this in the coarse Poisson solve.
 
-Solve the coarse grid Poisson equation with whatever sparse method that is best. At the interface between two
-neighboring meshes, we now have an estimate of the rate of change of the volume flux. For example, at an $x$ interface:
-\be \left. \frac{d\dot{V}}{dt}  \right|_{x^+} = -\int_{x^+} \overline{F}_x \, dy \, dz
+Solve the coarse grid Poisson equation (\ref{coarse_pois}) with a direct (non-iterative) solver. Note that at open boundaries,
+the ``ghost'' value of the coarse pressure is simply minus the value of the coarse pressure in the mesh adjacent to
+the open boundary.
+
+Following the solution of the coarse pressure equation, at the interface between two
+neighboring meshes, we now have an estimate of the rate of change of the volume flux. For example, at the $x=x_{\max}$ interface:
+\be \frac{d\dot{V}}{dt}  = -\int_{x=x_{\max}} \overline{F}_x \, dy \, dz
 - \frac{\overline{\cH}_{m+} - \overline{\cH}_m}{\dx} A_{x^+} \ee
 We want the fine grid solution of the Poisson equation on the individual abutting meshes to satisfy this
 constraint at their interface. To force this, solve
 \be \nabla^2 {\cal H}' = 0 \ee
 with Neumann boundary conditions on each of the abutting meshes
-such that at the interface the gradient of $\cH'$ is constant. For example, at the $x^+$ interface, the gradient of
+such that at the interface the gradient of $\cH'$ is constant. For example, at the $x=x_{\max}$ interface, the gradient of
 $\cH'$ on the mesh to the left must satisfy:
-\be \left. \frac{d\dot{V}}{dt} \right|_{x^+} =
-    \int_{x^+} \left( F_{x,Ijk}  + \frac{\cH^0_{I+1,jk}-\cH^0_{Ijk}}{\dx} \right) \; dy \, dz +
-   \int_{x^+} \dod{\cH'}{x} \; dy \, dz \label{constraint} \ee
+\be  \frac{d\dot{V}}{dt} =
+    - \int_{x=x_{\max}} \left( F_{x,I,jk,m}  + \frac{\cH^0_{I+1,jk,m}-\cH^0_{I,jk,m}}{\dx} \right) \; dy \, dz -
+   \int_{x=x_{\max}} \dod{\cH'}{x} \; dy \, dz \label{constraint} \ee
 A similar constraint must be satisfied by the mesh to the right.
 In this way, the resulting volume fluxes at the next time step $\dot{V}=\int \bu \cdot \dS$ into and
 out of each mesh match. It does not
