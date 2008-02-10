@@ -426,9 +426,22 @@ MAIN_LOOP: DO
    ! If evacuation, set up special time iteration parameters
 
    IF (MYID==EVAC_PROCESS) CALL EVAC_MAIN_LOOP
+
+   !============================================================================================================================
+   !                                          Start of Predictor part of time step
+   !============================================================================================================================
  
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
+
+   ! Force normal components of velocity to match at interpolated boundaries
+
+   IF (NMESHES>1) THEN
+      DO NM=1,NMESHES
+         IF (PROCESS(NM)/=MYID) CYCLE
+         CALL MATCH_VELOCITY(NM)
+      ENDDO
+   ENDIF
 
    ! Diagnostic calls
 
@@ -442,7 +455,7 @@ MAIN_LOOP: DO
       ENDIF
    ENDDO
  
-   ! Begin the PREDICTOR step
+   ! Begin the finite differencing of the PREDICTOR step
  
    COMPUTE_FINITE_DIFFERENCES_1: DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID)    CYCLE COMPUTE_FINITE_DIFFERENCES_1
@@ -470,24 +483,8 @@ MAIN_LOOP: DO
 
       ! Exchange density and species mass fractions in interpolated boundaries
 
-      DO NM=1,NMESHES
-         IF (PROCESS(NM)/=MYID) CYCLE
-         IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(NM)) THEN
-            MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
-            WRITE(LU_ERR,'(A,I3,A,F12.4)')  ' Mesh ',NM,' enters Mesh Exchange 1 at ', MPI_WALL_TIME
-         ENDIF
-      ENDDO
-
       CALL POST_RECEIVES(1)
       CALL MESH_EXCHANGE(1)
-
-      DO NM=1,NMESHES
-         IF (PROCESS(NM)/=MYID) CYCLE
-         IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(NM)) THEN
-            MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
-            WRITE(LU_ERR,'(A,I3,A,F12.4)')  ' Mesh ',NM,' exits  Mesh Exchange 1 at ', MPI_WALL_TIME
-         ENDIF
-      ENDDO
 
       ! Do mass and energy boundary conditions, and begin divergence calculation
 
@@ -517,8 +514,21 @@ MAIN_LOOP: DO
       PREDICT_VELOCITY_LOOP: DO NM=1,NMESHES
          IF (PROCESS(NM)/=MYID)    CYCLE PREDICT_VELOCITY_LOOP
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE PREDICT_VELOCITY_LOOP
-         CALL VELOCITY_PREDICTOR(T(NM),NM,MESH_STOP_STATUS(NM))
+         CALL VELOCITY_PREDICTOR(NM,MESH_STOP_STATUS(NM))
       ENDDO PREDICT_VELOCITY_LOOP
+
+      ! Exchange velocity and pressures at interpolated boundaries
+
+      CALL POST_RECEIVES(2)
+      CALL MESH_EXCHANGE(2)
+
+      ! Apply tangential velocity boundary conditions
+
+      VELOCITY_BC_LOOP: DO NM=1,NMESHES
+         IF (PROCESS(NM)/=MYID)    CYCLE VELOCITY_BC_LOOP
+         IF (.NOT.ACTIVE_MESH(NM)) CYCLE VELOCITY_BC_LOOP
+         CALL VELOCITY_BC(T(NM),NM)
+      ENDDO VELOCITY_BC_LOOP
 
       ! Exchange information about the time step status, and if need be, repeat the CHANGE_TIME_STEP_LOOP
  
@@ -579,37 +589,26 @@ MAIN_LOOP: DO
    ENDDO UPDATE_TIME
  
    !============================================================================================================================
- 
-   ! Exchange information among meshes
- 
-   DO NM=1,NMESHES
-      IF (PROCESS(NM)/=MYID) CYCLE 
-      IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(NM)) THEN
-         MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
-         WRITE(LU_ERR,'(A,I3,A,F12.4)')  ' Mesh ',NM,' enters Mesh Exchange 2 at ', MPI_WALL_TIME
-      ENDIF
-   ENDDO
- 
-   CALL POST_RECEIVES(2)
-   CALL MESH_EXCHANGE(2)
- 
-   DO NM=1,NMESHES
-      IF (PROCESS(NM)/=MYID) CYCLE 
-      IF (MOD(ICYC,3)==0.AND.TIMING.AND.ACTIVE_MESH(NM)) THEN
-         MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
-         WRITE(LU_ERR,'(A,I3,A,F12.4)')  ' Mesh ',NM,' exits  Mesh Exchange 2 at ', MPI_WALL_TIME
-      ENDIF
-   ENDDO
- 
+   !                                          Start of Corrector part of time step
    !============================================================================================================================
  
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
  
+   ! Force normal components of velocity to match at interpolated boundaries
+
+   IF (NMESHES>1) THEN
+      DO NM=1,NMESHES
+         IF (PROCESS(NM)/=MYID) CYCLE
+         CALL MATCH_VELOCITY(NM)
+      ENDDO
+   ENDIF
+
    COMPUTE_FINITE_DIFFERENCES_2: DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID)    CYCLE COMPUTE_FINITE_DIFFERENCES_2
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_FINITE_DIFFERENCES_2
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM)
+      CALL UPDATE_PARTICLES(T(NM),NM)
       IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
          CALL MASS_FINITE_DIFFERENCES(NM)
          CALL DENSITY(NM)
@@ -618,24 +617,10 @@ MAIN_LOOP: DO
 
    ! Exchange density and mass species
 
-   DO NM=1,NMESHES
-      IF (PROCESS(NM)/=MYID) CYCLE 
-      IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(NM)) THEN
-         MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
-         WRITE(LU_ERR,'(A,I3,A,F12.4)')  ' Mesh ',NM,' enters Mesh Exchange 3 at ', MPI_WALL_TIME
-      ENDIF
-   ENDDO
-
    CALL POST_RECEIVES(3) 
    CALL MESH_EXCHANGE(3)
 
-   DO NM=1,NMESHES
-      IF (PROCESS(NM)/=MYID) CYCLE 
-      IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(NM)) THEN
-         MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
-         WRITE(LU_ERR,'(A,I3,A,F12.4)')  ' Mesh ',NM,' exits  Mesh Exchange 3 at ', MPI_WALL_TIME
-      ENDIF
-   ENDDO
+   ! Apply mass and species boundary conditions, update radiation, particles, and re-compute divergence
 
    COMPUTE_DIVERGENCE_2: DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID)    CYCLE COMPUTE_DIVERGENCE_2
@@ -645,7 +630,6 @@ MAIN_LOOP: DO
          CALL WALL_BC(T(NM),NM)
          CALL COMPUTE_RADIATION(NM)
       ENDIF
-      CALL UPDATE_PARTICLES(T(NM),NM)
       CALL DIVERGENCE_PART_1(T(NM),NM)
    ENDDO COMPUTE_DIVERGENCE_2
 
@@ -663,38 +647,24 @@ MAIN_LOOP: DO
       IF (PROCESS(NM)/=MYID)    CYCLE CORRECT_VELOCITY_LOOP
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE CORRECT_VELOCITY_LOOP
       CALL OPEN_AND_CLOSE(T(NM),NM)   ! Doors, windows, etc.
-      CALL VELOCITY_CORRECTOR(T(NM),NM)
-      CALL UPDATE_OUTPUTS(T(NM),NM)
-      CALL DUMP_MESH_OUTPUTS(T(NM),NM)
-      IF (DIAGNOSTICS) CALL CHECK_DIVERGENCE(NM)
+      CALL VELOCITY_CORRECTOR(NM)
    ENDDO CORRECT_VELOCITY_LOOP
  
-   !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
-   ! Exchange information among meshes
- 
-   DO NM=1,NMESHES
-      IF (PROCESS(NM)/=MYID) CYCLE
-      IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(NM)) THEN
-         MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
-         WRITE(LU_ERR,'(A,I3,A,F12.4)')  ' Mesh ',NM,' enters Mesh Exchange 4 at ', MPI_WALL_TIME
-      ENDIF
-   ENDDO
+   ! Exchange velocity and pressure at interpolated boundaries
  
    CALL POST_RECEIVES(4)  
    CALL MESH_EXCHANGE(4)
    IF (MYID==EVAC_PROCESS) CALL EVAC_MESH_EXCHANGE(T_EVAC,T_EVAC_SAVE,I_EVAC,ICYC)
 
-   DO NM=1,NMESHES
-      IF (PROCESS(NM)/=MYID) CYCLE
-      IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(NM)) THEN
-         MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
-         WRITE(LU_ERR,'(A,I3,A,F12.4)')  ' Mesh ',NM,' exits  Mesh Exchange 4 at ', MPI_WALL_TIME
-      ENDIF
-   ENDDO
- 
-   !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+   VELOCITY_BC_LOOP_2: DO NM=1,NMESHES
+      IF (PROCESS(NM)/=MYID)    CYCLE VELOCITY_BC_LOOP_2
+      IF (.NOT.ACTIVE_MESH(NM)) CYCLE VELOCITY_BC_LOOP_2
+      CALL VELOCITY_BC(T(NM),NM)
+      CALL UPDATE_OUTPUTS(T(NM),NM)
+      CALL DUMP_MESH_OUTPUTS(T(NM),NM)
+      IF (DIAGNOSTICS) CALL CHECK_DIVERGENCE(NM)
+   ENDDO VELOCITY_BC_LOOP_2
+
    ! Write character strings out to the .smv file
  
    IF (DIAGNOSTICS) CALL WRITE_STRINGS
@@ -724,6 +694,8 @@ MAIN_LOOP: DO
          IF (PROCESS(NM)==MYID) CALL FLUSH_LOCAL_BUFFERS(NM)
       ENDDO
    ENDIF
+
+   ! Diagnostic print out
 
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
@@ -1116,8 +1088,14 @@ INTEGER :: NN1,NN2
 TNOW = SECOND()
  
 SENDING_MESH_LOOP: DO NM=1,NMESHES
+
    IF (PROCESS(NM)/=MYID) CYCLE SENDING_MESH_LOOP
    IF (EVACUATION_ONLY(NM)) CYCLE SENDING_MESH_LOOP ! Issue 257 bug fix
+ 
+   IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(NM)) THEN
+      MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+      WRITE(LU_ERR,'(A,I3,A,I1,A,F12.4)')  ' Mesh ',NM,' enters Mesh Exchange ',CODE,' at ', MPI_WALL_TIME
+   ENDIF
 
 ! Information about Mesh NM is packed into SEND packages and shipped out to the other meshes (machines) via MPI
  
@@ -1646,6 +1624,11 @@ RECV_MESH_LOOP: DO NM=1,NMESHES
    ENDIF IF_RECEIVE_DROPLETS
  
 ENDDO RECV_MESH_LOOP
+
+IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(NOM)) THEN
+   MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
+   WRITE(LU_ERR,'(A,I3,A,I1,A,F12.4)')  ' Mesh ',NOM,' exits  Mesh Exchange ',CODE,' at ', MPI_WALL_TIME
+ENDIF
 
 ENDDO SEND_MESH_LOOP
  

@@ -6471,6 +6471,10 @@ OUTPUT_QUANTITY(21)%NAME = 'RELATIVE HUMIDITY'
 OUTPUT_QUANTITY(21)%UNITS = '%'
 OUTPUT_QUANTITY(21)%SHORT_NAME = 'rel_humid'
 
+OUTPUT_QUANTITY(22)%NAME = 'HP'                       
+OUTPUT_QUANTITY(22)%UNITS = '(m/s)^2'                 
+OUTPUT_QUANTITY(22)%SHORT_NAME = 'head_pert'
+
 ! Strain and Vorticity
  
 OUTPUT_QUANTITY(24)%NAME = 'STRAIN_RATE_X'           
