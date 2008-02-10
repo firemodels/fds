@@ -5,6 +5,7 @@ MODULE VELO
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
+USE COMP_FUNCTIONS, ONLY: SECOND
 
 IMPLICIT NONE
 
@@ -13,13 +14,13 @@ CHARACTER(255), PARAMETER :: veloid='$Id$'
 CHARACTER(255), PARAMETER :: velorev='$Revision$'
 CHARACTER(255), PARAMETER :: velodate='$Date$'
 
-PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,GET_REV_velo
+PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,GET_REV_velo,MATCH_VELOCITY,VELOCITY_BC
 PRIVATE VELOCITY_FLUX,VELOCITY_FLUX_ISOTHERMAL,VELOCITY_FLUX_CYLINDRICAL
  
 CONTAINS
  
 SUBROUTINE COMPUTE_VELOCITY_FLUX(T,NM)
-USE COMP_FUNCTIONS, ONLY: SECOND
+
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: TNOW
 INTEGER, INTENT(IN) :: NM
@@ -803,116 +804,92 @@ ENDDO WALL_LOOP
 END SUBROUTINE NO_FLUX
  
  
-SUBROUTINE VELOCITY_PREDICTOR(T,NM,STOP_STATUS)
-USE COMP_FUNCTIONS, ONLY: SECOND 
+
+SUBROUTINE VELOCITY_PREDICTOR(NM,STOP_STATUS)
+
 ! Estimates the velocity components at the next time step
- 
-REAL(EB), INTENT(IN) :: T
-REAL(EB) :: TNOW,RHS
+
+REAL(EB) :: TNOW
 INTEGER  :: STOP_STATUS,I,J,K
 INTEGER, INTENT(IN) :: NM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HT
 
 IF (SOLID_PHASE_ONLY) RETURN
- 
 TNOW=SECOND() 
 CALL POINT_TO_MESH(NM)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         RHS = -FVX(I,J,K) - RDXN(I)*(H(I+1,J,K)-H(I,J,K))
-         US(I,J,K) = U(I,J,K) + DT*RHS
-      ENDDO 
-   ENDDO 
-ENDDO 
 
-DO K=1,KBAR
-   DO J=0,JBAR
-      DO I=1,IBAR
-         RHS = -FVY(I,J,K) - RDYN(J)*(H(I,J+1,K)-H(I,J,K))
-         VS(I,J,K) = V(I,J,K) + DT*RHS
-      ENDDO 
-   ENDDO 
-ENDDO 
- 
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         RHS = -FVZ(I,J,K) - RDZN(K)*(H(I,J,K+1)-H(I,J,K))
-         WS(I,J,K) = W(I,J,K) + DT*RHS
-      ENDDO 
-   ENDDO 
-ENDDO 
-! Check the stability criteria
+IF (PRESSURE_CORRECTION) THEN
+   HT => WORK1
+   HT = H + HP
+ELSE
+   HT => H
+ENDIF
+
+FORALL(I=0:IBAR,J=1:JBAR,K=1:KBAR) US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(HT(I+1,J,K)-HT(I,J,K)) )
+FORALL(I=1:IBAR,J=0:JBAR,K=1:KBAR) VS(I,J,K) = V(I,J,K) - DT*( FVY(I,J,K) + RDYN(J)*(HT(I,J+1,K)-HT(I,J,K)) )
+FORALL(I=1:IBAR,J=1:JBAR,K=0:KBAR) WS(I,J,K) = W(I,J,K) - DT*( FVZ(I,J,K) + RDZN(K)*(HT(I,J,K+1)-HT(I,J,K)) )
+
+! Check the stability criteria, and if the time step is too small, send back a signal to kill the job
  
 DTOLD = DT
 CALL CHECK_STABILITY(NM)
  
-IF (DT < DTINT*1.E-4) THEN  ! The time step has gotten too small. Kill the job.
-   STOP_STATUS = INSTABILITY_STOP
-   RETURN
-ENDIF
- 
-IF (.NOT.CHANGE_TIME_STEP(NM)) CALL VELOCITY_BC(T,NM)
+IF (DT<DTINT*1.E-4) STOP_STATUS = INSTABILITY_STOP
  
 TUSED(4,NM)=TUSED(4,NM)+SECOND()-TNOW
 END SUBROUTINE VELOCITY_PREDICTOR
  
  
-SUBROUTINE VELOCITY_CORRECTOR(T,NM)
-USE COMP_FUNCTIONS, ONLY: SECOND
+
+SUBROUTINE VELOCITY_CORRECTOR(NM)
+
 ! Correct the velocity components
-REAL(EB), INTENT(IN) :: T 
-REAL(EB) :: TNOW,RHS
+
+REAL(EB) :: TNOW
 INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HT
  
 IF (SOLID_PHASE_ONLY) RETURN
-
 TNOW=SECOND() 
 CALL POINT_TO_MESH(NM)
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         RHS = -FVX(I,J,K) - RDXN(I)*(H(I+1,J,K)-H(I,J,K))
-         U(I,J,K) = .5_EB*(U(I,J,K) + US(I,J,K) + DT*RHS)
-      ENDDO 
-   ENDDO 
-ENDDO 
-DO K=1,KBAR
-   DO J=0,JBAR
-      DO I=1,IBAR
-         RHS = -FVY(I,J,K) - RDYN(J)*(H(I,J+1,K)-H(I,J,K))
-         V(I,J,K) = .5_EB*(V(I,J,K) + VS(I,J,K) + DT*RHS)
-      ENDDO 
-   ENDDO 
-ENDDO 
- 
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         RHS = -FVZ(I,J,K) - RDZN(K)*(H(I,J,K+1)-H(I,J,K))
-         W(I,J,K) = .5_EB*(W(I,J,K) + WS(I,J,K) + DT*RHS)
-      ENDDO 
-   ENDDO 
-ENDDO 
+IF (PRESSURE_CORRECTION) THEN
+   HT => WORK1
+   HT = H + HP
+ELSE
+   HT => H
+ENDIF
 
-CALL VELOCITY_BC(T,NM)
- 
+FORALL(I=0:IBAR,J=1:JBAR,K=1:KBAR) U(I,J,K) = .5_EB*( U(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + RDXN(I)*(HT(I+1,J,K)-HT(I,J,K))) )
+FORALL(I=1:IBAR,J=0:JBAR,K=1:KBAR) V(I,J,K) = .5_EB*( V(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + RDYN(J)*(HT(I,J+1,K)-HT(I,J,K))) )
+FORALL(I=1:IBAR,J=1:JBAR,K=0:KBAR) W(I,J,K) = .5_EB*( W(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + RDZN(K)*(HT(I,J,K+1)-HT(I,J,K))) )
+
 TUSED(4,NM)=TUSED(4,NM)+SECOND()-TNOW
 END SUBROUTINE VELOCITY_CORRECTOR
  
+
  
 SUBROUTINE VELOCITY_BC(T,NM)
 
 ! Assert tangential velocity boundary conditions
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
-REAL(EB) :: BC,MUA,T,FVT,UP,UM,VP,VM,WP,WM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,TSI,WGT
-INTEGER  :: I,J,K,IBC,NOM1,NOM2,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2,NM,IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y
+REAL(EB), INTENT(IN) :: T
+REAL(EB) :: BC,MUA,FVT,UP,UM,VP,VM,WP,WM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,TSI,WGT,TNOW
+INTEGER  :: I,J,K,IBC,NOM1,NOM2,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2,IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC
+INTEGER, INTENT(IN) :: NM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,OM_UU,OM_VV,OM_WW
 TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (OMESH_TYPE), POINTER :: OM
+
+IF (SOLID_PHASE_ONLY) RETURN
+
+TNOW = SECOND()
+
+! Assign local names to variables
+
+CALL POINT_TO_MESH(NM)
 
 ! Point to the appropriate velocity field
 
@@ -1022,15 +999,25 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
             OM => OMESH(ABS(NOM1)) 
+            IF (PREDICTOR) THEN
+               OM_VV => OM%VS
+            ELSE
+               OM_VV => OM%V
+            ENDIF
             WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
-            IF (NOM1<0) VM = WGT*OM%V(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%V(IIO1,JJO1-1,KKO1) 
-            IF (NOM1>0) VP = WGT*OM%V(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%V(IIO1,JJO1-1,KKO1) 
+            IF (NOM1<0) VM = WGT*OM_VV(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_VV(IIO1,JJO1-1,KKO1) 
+            IF (NOM1>0) VP = WGT*OM_VV(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_VV(IIO1,JJO1-1,KKO1) 
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
             OM => OMESH(ABS(NOM2)) 
+            IF (PREDICTOR) THEN
+               OM_WW => OM%WS
+            ELSE
+               OM_WW => OM%W
+            ENDIF
             WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
-            IF (NOM2<0) WM = WGT*OM%W(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%W(IIO2,JJO2,KKO2-1)
-            IF (NOM2>0) WP = WGT*OM%W(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%W(IIO2,JJO2,KKO2-1) 
+            IF (NOM2<0) WM = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1)
+            IF (NOM2>0) WP = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
          ENDIF
 
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
@@ -1094,15 +1081,25 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
             OM => OMESH(ABS(NOM1)) 
+            IF (PREDICTOR) THEN
+               OM_UU => OM%US
+            ELSE
+               OM_UU => OM%U
+            ENDIF
             WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
-            IF (NOM1<0) UM = WGT*OM%U(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%U(IIO1-1,JJO1,KKO1)
-            IF (NOM1>0) UP = WGT*OM%U(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%U(IIO1-1,JJO1,KKO1)
+            IF (NOM1<0) UM = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+            IF (NOM1>0) UP = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
             OM => OMESH(ABS(NOM2)) 
+            IF (PREDICTOR) THEN
+               OM_WW => OM%WS
+            ELSE
+               OM_WW => OM%W
+            ENDIF
             WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
-            IF (NOM2<0) WM = WGT*OM%W(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%W(IIO2,JJO2,KKO2-1) 
-            IF (NOM2>0) WP = WGT*OM%W(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%W(IIO2,JJO2,KKO2-1) 
+            IF (NOM2<0) WM = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
+            IF (NOM2>0) WP = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
          ENDIF
 
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
@@ -1166,15 +1163,25 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
             OM => OMESH(ABS(NOM1)) 
+            IF (PREDICTOR) THEN
+               OM_UU => OM%US
+            ELSE
+               OM_UU => OM%U
+            ENDIF
             WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
-            IF (NOM1<0) UM = WGT*OM%U(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%U(IIO1-1,JJO1,KKO1)
-            IF (NOM1>0) UP = WGT*OM%U(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM%U(IIO1-1,JJO1,KKO1)
+            IF (NOM1<0) UM = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+            IF (NOM1>0) UP = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
          ENDIF
          IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
             OM => OMESH(ABS(NOM2)) 
+            IF (PREDICTOR) THEN
+               OM_VV => OM%VS
+            ELSE
+               OM_VV => OM%V
+            ENDIF
             WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
-            IF (NOM2<0) VM = WGT*OM%V(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%V(IIO2,JJO2-1,KKO2) 
-            IF (NOM2>0) VP = WGT*OM%V(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM%V(IIO2,JJO2-1,KKO2) 
+            IF (NOM2<0) VM = WGT*OM_VV(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_VV(IIO2,JJO2-1,KKO2) 
+            IF (NOM2>0) VP = WGT*OM_VV(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_VV(IIO2,JJO2-1,KKO2) 
          ENDIF
 
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
@@ -1230,9 +1237,112 @@ IF (CORRECTOR) THEN
    ENDDO
 ENDIF
 
+TUSED(4,NM)=TUSED(4,NM)+SECOND()-TNOW
 END SUBROUTINE VELOCITY_BC 
  
  
+ 
+SUBROUTINE MATCH_VELOCITY(NM)
+
+! Force normal component of velocity to match at interpolated boundaries
+
+INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
+INTEGER, INTENT(IN) :: NM
+REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,TNOW
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,OM_UU,OM_VV,OM_WW
+TYPE (OMESH_TYPE), POINTER :: OM
+
+IF (SOLID_PHASE_ONLY .OR. NMESHES==1) RETURN
+
+TNOW = SECOND()
+
+! Assign local variable names
+
+CALL POINT_TO_MESH(NM)
+
+! Point to the appropriate velocity field
+
+IF (PREDICTOR) THEN
+   UU => U
+   VV => V
+   WW => W
+ELSE
+   UU => US
+   VV => VS
+   WW => WS
+ENDIF
+
+! Zero out D_CORR
+
+IF (PREDICTOR) D_CORR = 0._EB
+
+! Loop over all cell edges and determine the appropriate velocity BCs
+
+EXTERNAL_WALL_LOOP: DO IW=1,NEWC
+
+   IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
+
+   II  = IJKW( 1,IW)
+   JJ  = IJKW( 2,IW)
+   KK  = IJKW( 3,IW)
+   IOR = IJKW( 4,IW)
+   NOM = IJKW( 9,IW)
+   IIO = IJKW(10,IW)
+   JJO = IJKW(11,IW)
+   KKO = IJKW(12,IW)
+   OM => OMESH(NOM)
+   SELECT CASE(ABS(IOR))
+      CASE(1)
+         IF (PREDICTOR) OM_UU => OM%U
+         IF (CORRECTOR) OM_UU => OM%US
+      CASE(2)
+         IF (PREDICTOR) OM_VV => OM%V
+         IF (CORRECTOR) OM_VV => OM%VS
+      CASE(3)
+         IF (PREDICTOR) OM_WW => OM%W
+         IF (CORRECTOR) OM_WW => OM%WS
+   END SELECT
+
+   SELECT CASE(IOR)
+      CASE( 1)
+         UU_AVG = 0.5_EB*(UU(0,JJ,KK)+OM_UU(IIO,JJO,KKO))
+         IF (PREDICTOR) D_CORR(IW) = (UU_AVG-UU(0,JJ,KK))*RDX(1)
+         IF (CORRECTOR) D_CORR(IW) = D_CORR(IW) + 0.5*(UU_AVG-UU(0,JJ,KK))*RDX(1)
+         UU(0,JJ,KK)    = UU_AVG
+      CASE(-1)
+         UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK)+OM_UU(IIO-1,JJO,KKO))
+         IF (PREDICTOR) D_CORR(IW) = -(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
+         IF (CORRECTOR) D_CORR(IW) = D_CORR(IW) - 0.5*(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
+         UU(IBAR,JJ,KK) = UU_AVG
+      CASE( 2)
+         VV_AVG = 0.5_EB*(VV(II,0,KK)+OM_VV(IIO,JJO,KKO))
+         IF (PREDICTOR) D_CORR(IW) = (VV_AVG-VV(II,0,KK))*RDY(1)
+         IF (CORRECTOR) D_CORR(IW) = D_CORR(IW) + 0.5*(VV_AVG-VV(II,0,KK))*RDY(1)
+         VV(II,0,KK)    = VV_AVG
+      CASE(-2)
+         VV_AVG = 0.5_EB*(VV(II,JBAR,KK)+OM_VV(IIO,JJO-1,KKO))
+         IF (PREDICTOR) D_CORR(IW) = -(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
+         IF (CORRECTOR) D_CORR(IW) = D_CORR(IW) - 0.5*(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
+         VV(II,JBAR,KK) = VV_AVG
+      CASE( 3)
+         WW_AVG = 0.5_EB*(WW(II,JJ,0)+OM_WW(IIO,JJO,KKO))
+         IF (PREDICTOR) D_CORR(IW) = (WW_AVG-WW(II,JJ,0))*RDZ(1)
+         IF (CORRECTOR) D_CORR(IW) = D_CORR(IW) + 0.5*(WW_AVG-WW(II,JJ,0))*RDZ(1)
+         WW(II,JJ,0)    = WW_AVG
+      CASE(-3)
+         WW_AVG = 0.5_EB*(WW(II,JJ,KBAR)+OM_WW(IIO,JJO,KKO-1))
+         IF (PREDICTOR) D_CORR(IW) = -(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
+         IF (CORRECTOR) D_CORR(IW) = D_CORR(IW) - 0.5*(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
+         WW(II,JJ,KBAR) = WW_AVG
+   END SELECT
+
+ENDDO EXTERNAL_WALL_LOOP
+
+TUSED(4,NM)=TUSED(4,NM)+SECOND()-TNOW
+END SUBROUTINE MATCH_VELOCITY
+
+
+
 SUBROUTINE CHECK_STABILITY(NM)
  
 ! Checks the Courant and Von Neumann stability criteria, and if necessary, reduces the time step accordingly
