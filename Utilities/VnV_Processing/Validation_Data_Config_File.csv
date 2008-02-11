@@ -1,22 +1,23 @@
-q,"Index","Comparison_Quantities","Scatter_Plot_Title","X_Title","Y_Title","Plot_Min","Plot_Max","%error","Title_Quadrant","Key_Quadrant","Plot_Width"
-q,1,"HGL_Temperature","FDS Hot Gas Layer Temperature","Measured Temperature Rise (C)","Predicted Temperature Rise (C)",0,800,13,1,4,8
-q,2,"HGL_Depth","FDS Hot Gas Layer Depth","Measured Layer Depth (m)","Predicted Layer Depth (m)",0,16,13,1,4,8
-q,3,"Ceiling_Jet_Temperature","FDS Ceiling Jet Temperature","Measured Temperature Rise (C)","Predicted Temperature Rise (C)",0,400,16,1,4,8
-q,4,"Plume_Temperature","FDS Plume Temperature","Measured Temperature Rise (C)","Predicted Temperature Rise (C)",0,400,14,1,4,8
-q,5,"Flame_Height","FDS Flame Height","Measured Flame Height (m)","Predicted Flame Height (m)",0,8,20,1,4,8
-q,6,"Oxygen_Concentration","FDS Oxygen Concentration","Measured Change in Volume Fraction","Predicted Change in Volume Fraction",0,0.12,9,1,4,8
-q,7,"Carbon_Dioxide_Concentration","FDS Carbon Dioxide Concentration","Measured Change in Volume Fraction","Predicted Change in Volume Fraction",0,0.12,9,1,4,8
-q,8,"Compartment_Pressure","FDS Compartment Over-Pressure","Measured Pressure (Pa)","Predicted Pressure (Pa)",-5,300,40,1,4,8
-q,9,"Radiation_Heat_Flux","FDS Radiative Flux to Targets","Measured Heat Flux (kW/m$^2$)","Predicted Heat Flux (kW/m$^2$)",0,20,20,1,4,8
-q,10,"Total_Heat_Flux","FDS Total Heat Flux to Targets","Measured Heat Flux (kW/m$^2$)","Predicted Heat Flux (kW/m$^2$)",0,50,20,1,4,8
-q,11,"Target_Temperature","FDS Target Temperature","Measured Temperature Rise (C)","Predicted Temperature Rise (C)",0,800,14,1,4,8
-q,12,"Wall_Heat_Flux","FDS Total Heat Flux to Walls","Measured Heat Flux (kW/m$^2$)","Predicted Heat Flux (kW/m$^2$)",0,16,20,1,4,8
-q,13,"Surface_Temperature","FDS Wall Surface Temperature","Measured Temperature Rise (C)","Predicted Temperature Rise (C)",0,800,14,1,4,8
-q,14,"Smoke_Concentration","FDS Smoke Concentration","Measured Density (mg/m$^3$)","Predicted Density (mg/m$^3$)",0,400,33,1,4,8
-d,"Quantity","Dataname","Exp_Filename","Exp_Col_Name","Exp_Key","Exp_Start_(min.)","Exp_End_(min.)","Exp_Comp_Start_(min.)","Exp_Comp_End_(min.)","Exp_Intitial_Value","Model_Filename","Model_Col_Name","Mod_Key","Mod_Start_(min.)","Mod_End_(min.)","Mod_Comp_Start_(min.)","Mod_Comp_End_(min.)","Mod_Intitial_Value","max/min","Plot_Title","X_Title","Y_Title","Min_X","Max_X","Min_Y","Max_Y","Title_Quadrant","Key_Quadrant","Plot_Width"
-d,1,"FM_SNL_04","FM_SNL/Experimental_data/FM_Test_4_layer.csv","T_upper","Experiment (T\_Upper)",0,20,7,12,21,"FM_SNL/FDS_Input_Files/FM_SNL_04_v5_HGL.csv","T_upper","FDS Model (T\_Upper)",0,15,7,12,21,"max","HGL Temperature,FM/SNL Test 4","Time (min)","Temperature (C)",0,30,0,100,1,4,8
-d,1,"FM_SNL_05","FM_SNL/Experimental_data/FM_Test_5_layer.csv","T_upper","Experiment (T\_Upper)",0,13,7,12,21,"FM_SNL/FDS_Input_Files/FM_SNL_05_v5_HGL.csv","T_upper","FDS Model (T\_Upper)",0,15,7,12,21,"max","HGL Temperature,FM/SNL Test 5","Time (min)","Temperature (C)",0,30,0,100,1,4,8
-d,1,"FM_SNL_21","FM_SNL/Experimental_data/FM_Test_21_layer.csv","T_upper","Experiment (T\_Upper)",0,29,16,22,17,"FM_SNL/FDS_Input_Files/FM_SNL_21_v5_HGL.csv","T_upper","FDS Model (T\_Upper)",0,29,16,22,17,"max","HGL Temperature,FM/SNL Test 21","Time (min)","Temperature (C)",0,30,0,100,1,4,8
-d,2,"FM_SNL_04","FM_SNL/Experimental_data/FM_Test_4_layer.csv","Height","Experiment (Height)",1,20,4,10,6.1,"FM_SNL/FDS_Input_Files/FM_SNL_04_v5_HGL.csv","Height","FDS Model (Height)",2,14,4,10,6.1,"min","HGL Height,FM/SNL Test 4","Time (min)","Height (m)",0,30,0,6,2,4,8
-d,2,"FM_SNL_05","FM_SNL/Experimental_data/FM_Test_5_layer.csv","Height","Experiment (Height)",4,13,10,13,6.1,"FM_SNL/FDS_Input_Files/FM_SNL_05_v5_HGL.csv","Height","FDS Model (Height)",2,14,10,14,6.1,"min","HGL Height,FM/SNL Test 4","Time (min)","Height (m)",0,30,0,6,2,4,8
-d,2,"FM_SNL_21","FM_SNL/Experimental_data/FM_Test_21_layer.csv","Height","Experiment (Height)",2,20,4,13,6.1,"FM_SNL/FDS_Input_Files/FM_SNL_21_v5_HGL.csv","Height","FDS Model (Height)",2,14,3,14,6.1,"min","HGL Height,FM/SNL Test 4","Time (min)","Height (m)",0,30,0,6,2,4,8
+q,Index,Comparison_Quantities,Scatter_Plot_Title,X_Title,Y_Title,Plot_Min,Plot_Max,%error,Title_Quadrant,Key_Quadrant,Plot_Width(cm),,,,,,,,,,,,,,,,,,,
+q,1,HGL_Temperature,FDS Hot Gas Layer Temperature,Measured Temperature Rise (C),Predicted Temperature Rise (C),0,800,13,2,4,8,,,,,,,,,,,,,,,,,,,
+q,2,HGL_Depth,FDS Hot Gas Layer Depth,Measured Layer Depth (m),Predicted Layer Depth (m),0,16,13,1,4,8,,,,,,,,,,,,,,,,,,,
+q,3,Ceiling_Jet_Temperature,FDS Ceiling Jet Temperature,Measured Temperature Rise (C),Predicted Temperature Rise (C),0,400,16,1,4,8,,,,,,,,,,,,,,,,,,,
+q,4,Plume_Temperature,FDS Plume Temperature,Measured Temperature Rise (C),Predicted Temperature Rise (C),0,400,14,1,4,8,,,,,,,,,,,,,,,,,,,
+q,5,Flame_Height,FDS Flame Height,Measured Flame Height (m),Predicted Flame Height (m),0,8,20,1,4,8,,,,,,,,,,,,,,,,,,,
+q,6,Oxygen_Concentration,FDS Oxygen Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.12,9,1,4,8,,,,,,,,,,,,,,,,,,,
+q,7,Carbon_Dioxide_Concentration,FDS Carbon Dioxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.12,9,1,4,8,,,,,,,,,,,,,,,,,,,
+q,8,Compartment_Pressure,FDS Compartment Over-Pressure,Measured Pressure (Pa),Predicted Pressure (Pa),-5,300,40,1,4,8,,,,,,,,,,,,,,,,,,,
+q,9,Radiation_Heat_Flux,FDS Radiative Flux to Targets,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,20,20,1,4,8,,,,,,,,,,,,,,,,,,,
+q,10,Total_Heat_Flux,FDS Total Heat Flux to Targets,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,50,20,1,4,8,,,,,,,,,,,,,,,,,,,
+q,11,Target_Temperature,FDS Target Temperature,Measured Temperature Rise (C),Predicted Temperature Rise (C),0,800,14,1,4,8,,,,,,,,,,,,,,,,,,,
+q,12,Wall_Heat_Flux,FDS Total Heat Flux to Walls,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,16,20,1,4,8,,,,,,,,,,,,,,,,,,,
+q,13,Surface_Temperature,FDS Wall Surface Temperature,Measured Temperature Rise (C),Predicted Temperature Rise (C),0,800,14,1,4,8,,,,,,,,,,,,,,,,,,,
+q,14,Smoke_Concentration,FDS Smoke Concentration,Measured Density (mg/m$^3$),Predicted Density (mg/m$^3$),0,400,33,1,4,8,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+d,Quantity,Dataname,Exp_Filename,Exp_Col_Name,Exp_Key,Exp_Start_(min.),Exp_End_(min.),Exp_Comp_Start_(min.),Exp_Comp_End_(min.),Exp_Intitial_Value,Model_Filename,Model_Col_Name,Mod_Key,Mod_Start_(min.),Mod_End_(min.),Mod_Comp_Start_(min.),Mod_Comp_End_(min.),Mod_Intitial_Value,max/min,Plot_Title,X_Title,Y_Title,Min_X,Max_X,Min_Y,Max_Y,Title_Quadrant,Key_Quadrant,Plot_Width,Plot_Filename
+d,1,FM_SNL_04,FM_SNL/Experimental_data/FM_Test_4_layer.csv,T_upper,Experiment (T\_Upper),0,20,7,12,21,FM_SNL/FDS_Input_Files/FM_SNL_04_v5_HGL.csv,T_upper,FDS Model (T\_Upper),0,15,7,12,21,max,"HGL Temperature,FM/SNL Test 4",Time (min),Temperature ($^\circ$C),0,30,0,100,1,4,8,FM_SNL/FM_SNL_04_v5_Ceiling_Jet.PDF
+d,1,FM_SNL_05,FM_SNL/Experimental_data/FM_Test_5_layer.csv,T_upper,Experiment (T\_Upper),0,13,7,12,21,FM_SNL/FDS_Input_Files/FM_SNL_05_v5_HGL.csv,T_upper,FDS Model (T\_Upper),0,15,7,12,21,max,"HGL Temperature,FM/SNL Test 5",Time (min),Temperature ($^\circ$C),0,30,0,100,1,4,8,FM_SNL/FM_SNL_04_v5_Ceiling_Jet.PDF
+d,1,FM_SNL_21,FM_SNL/Experimental_data/FM_Test_21_layer.csv,T_upper,Experiment (T\_Upper),0,29,16,22,17,FM_SNL/FDS_Input_Files/FM_SNL_21_v5_HGL.csv,T_upper,FDS Model (T\_Upper),0,29,16,22,17,max,"HGL Temperature,FM/SNL Test 21",Time (min),Temperature ($^\circ$C),0,30,0,100,1,4,8,FM_SNL/FM_SNL_04_v5_Ceiling_Jet.PDF
+d,2,FM_SNL_04,FM_SNL/Experimental_data/FM_Test_4_layer.csv,Height,Experiment (Height),1,20,4,10,6.1,FM_SNL/FDS_Input_Files/FM_SNL_04_v5_HGL.csv,Height,FDS Model (Height),2,14,4,10,6.1,min,"HGL Height,FM/SNL Test 4",Time (min),Height (m),0,30,0,6,2,4,8,FM_SNL/FM_SNL_04_v5_Ceiling_Jet.PDF
+d,2,FM_SNL_05,FM_SNL/Experimental_data/FM_Test_5_layer.csv,Height,Experiment (Height),4,13,10,13,6.1,FM_SNL/FDS_Input_Files/FM_SNL_05_v5_HGL.csv,Height,FDS Model (Height),2,14,10,14,6.1,min,"HGL Height,FM/SNL Test 4",Time (min),Height (m),0,30,0,6,2,4,8,FM_SNL/FM_SNL_04_v5_Ceiling_Jet.PDF
+d,2,FM_SNL_21,FM_SNL/Experimental_data/FM_Test_21_layer.csv,Height,Experiment (Height),2,20,4,13,6.1,FM_SNL/FDS_Input_Files/FM_SNL_21_v5_HGL.csv,Height,FDS Model (Height),2,14,3,14,6.1,min,"HGL Height,FM/SNL Test 4",Time (min),Height (m),0,30,0,6,2,4,8,FM_SNL/FM_SNL_04_v5_Ceiling_Jet.PDF
