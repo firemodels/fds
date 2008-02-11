@@ -6,6 +6,7 @@ from decimal import Decimal
 ### Set Global Variables
 
 data_directory = "../../Validation/"
+output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES"
 config_file_name = "Validation_Data_Config_File.csv"
 
 scatter_data_dict = {}
@@ -31,8 +32,10 @@ def extract_config_data(config_file):
             quantities_dict[each_list[1]] = each_list[2:]
         elif each_list[0] == 'd':
             data_dict[each_list[2]+"-"+each_list[4]] = each_list[1:]
+            #variable = data_dict['FM_SNL_04-T_Upper']['Exp_Start_(min.)']
         else:
-            print """No information was found for quantities or data./nDouble check config file name."""
+            print """No d or q in first cell, blank line or bad config file name."""
+    #variable = data_dict['FM_SNL_04-T_Upper']['Exp_Start_(min.)']
     
     # Remove header entries from Dictionaries, maybe pop these out to lists for use later.
     quant_header = quantities_dict.pop('Index')
@@ -430,7 +433,7 @@ for data_record in config_and_data_dicts[3]:
     mod_plot_data = comp_data_to_plot[1]
     
     # Create plots
-    #comparison_plot(config_and_data_dicts[3][data_record],exp_plot_data,mod_plot_data)
+    comparison_plot(config_and_data_dicts[3][data_record],exp_plot_data,mod_plot_data)
 
 
 ## Create scatter plots
