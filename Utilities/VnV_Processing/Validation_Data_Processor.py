@@ -1,5 +1,7 @@
 import csv
+from re import *
 from pyx import *
+from decimal import Decimal
 
 ### Set Global Variables
 
@@ -7,6 +9,7 @@ data_directory = "../../Validation/"
 config_file_name = "Validation_Data_Config_File.csv"
 
 scatter_data_dict = {}
+combined_scatter_data = {}
 
 ### Define Functions
 
@@ -59,8 +62,8 @@ def extract_comp_data(comp_file_info):
     
     exp_data_filename = comp_file_info[2] #String of filename
     exp_column_name = comp_file_info[3] #Experimental Data Column Name
-    mod_data_filename = comp_file_info[9] #String of filename
-    mod_column_name = comp_file_info[10] #Experimental Data Column Name
+    mod_data_filename = comp_file_info[10] #String of filename
+    mod_column_name = comp_file_info[11] #Experimental Data Column Name
     
     scatter_data_label = comp_file_info[0]+"-"+comp_file_info[1]+"-"+comp_file_info[3]
     
@@ -68,13 +71,15 @@ def extract_comp_data(comp_file_info):
     exp_stop_time_data_val = comp_file_info[6]  #String in minutes to stop exp plot data
     exp_start_time_comp_val = comp_file_info[7] #String in minutes to start exp compare data
     exp_stop_time_comp_val = comp_file_info[8]  #String in minutes to start exp compare data
+    exp_initial_value = comp_file_info[9]       #Initial Value for Quantity
     
-    mod_start_time_data_val = comp_file_info[12] #String in minutes to start mod plot data
-    mod_stop_time_data_val = comp_file_info[13]  #String in minutes to stop mod plot data
-    mod_start_time_comp_val = comp_file_info[14] #String in minutes to start mod compare data
-    mod_stop_time_comp_val = comp_file_info[15]  #String in minutes to start mod compare data
+    mod_start_time_data_val = comp_file_info[13] #String in minutes to start mod plot data
+    mod_stop_time_data_val = comp_file_info[14]  #String in minutes to stop mod plot data
+    mod_start_time_comp_val = comp_file_info[15] #String in minutes to start mod compare data
+    mod_stop_time_comp_val = comp_file_info[16]  #String in minutes to start mod compare data
+    mod_initial_value = comp_file_info[17]       #Initial Value for Quantity
     
-    min_max = comp_file_info[16]
+    min_max = comp_file_info[18] #String indicating if min or max value is required.
 
     def find_start_stop_index(data_dict,col_name,start_time_data,stop_time_data,start_time_comp,stop_time_comp):
         #This function is used to find index numbers for start and stop points in plotting and min-max values.
@@ -165,33 +170,41 @@ def extract_comp_data(comp_file_info):
     #print mod_comp_ranges
     
     ##Find max or min values.
+    
     #Exp min_max value
     exp_data_values_comp = exp_data_dict[exp_column_name][exp_comp_ranges[2]:exp_comp_ranges[3]]
 
     if  min_max == 'max':
         #print min_max, str(max(exp_data_values_comp))
-        exp_min_max_value = max(exp_data_values_comp)
+        exp_peak_value = max(exp_data_values_comp)
     elif min_max == 'min':
         #print min_max, str(min(exp_data_values_comp))
-        exp_min_max_value = min(exp_data_values_comp)
+        exp_peak_value = min(exp_data_values_comp)
     else:
     	print "Min or Max is undefined in the input file."
-
+    
     #Mod min_max value
     mod_data_values_comp = mod_data_dict[mod_column_name][mod_comp_ranges[2]:mod_comp_ranges[3]]
     #print mod_data_values_comp
 	
     if  min_max == 'max':
         #print min_max, str(max(mod_data_values_comp))
-        mod_min_max_value = max(mod_data_values_comp)
+        mod_peak_value = max(mod_data_values_comp)
     elif min_max == 'min':
         #print min_max, str(min(mod_data_values_comp))
-        mod_min_max_value = min(mod_data_values_comp)
+        mod_peak_value = min(mod_data_values_comp)
     else:
     	print "Min or Max is undefined in the input file."
+    
+    #print mod_peak_value
+    #print mod_initial_value
+    #print exp_peak_value
+    #print exp_initial_value
+    
+    relative_difference = compute_difference(mod_peak_value,mod_initial_value,exp_peak_value,exp_initial_value)
     	
     #Append Min_Max Values to Global Scatter Data Dictionary.
-    scatter_data_dict[scatter_data_label] = [exp_min_max_value,mod_min_max_value]
+    scatter_data_dict[scatter_data_label] = [exp_peak_value,mod_peak_value,relative_difference]
     
     #Create data lists based on specified ranges
     exp_data_seconds = zip(exp_data_dict[exp_time_col_name][exp_comp_ranges[0]:exp_comp_ranges[1]], exp_data_dict[exp_column_name][exp_comp_ranges[0]:exp_comp_ranges[1]])
@@ -212,37 +225,15 @@ def extract_comp_data(comp_file_info):
     #mod_data=[[mod_time,mod_quantity_value],[mod_time,mod_quantity_value]]
     
     return [exp_data,mod_data]
- 
 
-#def gather_scatter_data(exp_info,mod_info,min_max):
-#    
-#    #Comparison Data Info
-#    quantity
-#    exp_filename
-#    exp_col_name
-#    exp_start
-#    exp_end
-#    exp_comp_start
-#    exp_comp_end
-#    model_filename
-#    model_col_name
-#    mod_start
-#    mod_end
-#    mod_comp_start
-#    mod_comp_end
-#    max/min
-#    
-#    return 
-
-#def compute_difference(M_p,M_o,E_p,E_o):
-#    # Equation to compute relative difference of model and experimental data.
-#    M_p = 2.0 #Peak value of Model Prediction
-#    M_o = 1.0 #Original value of Model Prediction
-#    E_p = 3.0 #Peak value of Experimental Measurement
-#    E_o = 1.0 #Original value of Experimental Measurement
-#    e = (((M_p-M_o)-(E_p-E_o))/(E_p-E_o))
-#    
-#    print str(e)
+def compute_difference(m_p,m_o,e_p,e_o):
+    # Equation to compute relative difference of model and experimental data.
+    M_p = float(m_p) #Peak value of Model Prediction to float
+    M_o = float(m_o) #Original value of Model Prediction to float
+    E_p = float(e_p) #Peak value of Experimental Measurement to float
+    E_o = float(e_o) #Original value of Experimental Measurement to float
+    e = (((M_p-M_o)-(E_p-E_o))/(E_p-E_o))
+    return e
 
 
 ## Plot Validation Data to PDF files
@@ -252,20 +243,20 @@ def comparison_plot(plot_data,exp_data,mod_data):
     #plot_data is the items from the 'd' rows of the config file.
     
     # Variables for plot.
-    plot_title = plot_data[17]
-    x_title = plot_data[18]
-    y_title = plot_data[19]   
-    min_x = int(plot_data[20])
-    max_x = int(plot_data[21])
-    min_y = int(plot_data[22])
-    max_y = int(plot_data[23])
-    title_quadrant = int(plot_data[24])
-    key_quadrant = int(plot_data[25])
-    plot_width = int(plot_data[26])
+    plot_title = plot_data[19]
+    x_title = plot_data[20]
+    y_title = plot_data[21]   
+    min_x = float(plot_data[22])
+    max_x = float(plot_data[23])
+    min_y = float(plot_data[24])
+    max_y = float(plot_data[25])
+    title_quadrant = int(plot_data[26])
+    key_quadrant = int(plot_data[27])
+    plot_width = int(plot_data[28])
     
     #Set plot legend key text.
     exp_key = plot_data[4]
-    mod_key = plot_data[11] 
+    mod_key = plot_data[12] 
     
     #Create filename from fields in input file record.
     plot_file_name = plot_data[1]+"-"+plot_data[3]+".pdf"
@@ -322,70 +313,107 @@ def comparison_plot(plot_data,exp_data,mod_data):
     g.writePDFfile(plot_file_name)
 
 
-#def scatter_plot(plot_info,data_set):
-#    #Plot_Info is details about the overall plot layout and text.
-#    #data_set is a dictionary keyed by test name containing lists of X and Y data points.
-#    
-#    # Set variables for Plot extracted from the first group 
-#    # of lines in config file starting with 'q'.
-#    Plot_Title = Plot_Info[17]
-#    X_Title = Plot_Info[18]
-#    Y_Title = Plot_Info[19]
-#    Axis_Min = Plot_Info[20]
-#    Axis_Max = Plot_Info[21]
-#    Percent_Error = Plot_Info[22]
-#    Title_Quadrant = Plot_Info[23]
-#    Key_Quadrant = Plot_Info[24]
-#    
-#    ## Begin Plotting
-#    
-#    # Initialize graph object
-#    g = graph.graphxy(width=8, key=graph.key.key(), 
-#                        x=graph.axis.linear(title=X_Title, min=Axis_Min, max=Axis_Max), 
-#                        y=graph.axis.linear(title=Y_Title, min=Axis_Min, max=Axis_Max))
-#
-#    # Create point for each list in Data_Set.
-#    for data in Data_Set:
-#        DataName = data[0]
-#        X_Measured_Data = data[1]
-#        Y_Predicted_Data = data[2]
-#        Datapoints = [DataName,X_Measured_Data,Y_Predicted_Data]
-#        
-#    #One point at a time added to plot from data.
-#    g.plot(graph.data.points(Datapoints, title=fdsDataRows[1][ColNums], x=1, y=ColNums+1),
-#        [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
-#    
-#                        
-#    increm = 0
-#    for Nums in fdsDataColumnNumbers:
-#        ColNums = fdsDataColumnNumbers[increm]
-#        if ColNums > 0:
-#            print ColNums
-#            g.plot(graph.data.points(fdsDataNum, title=fdsDataRows[1][ColNums], x=1, y=ColNums+1),
-#                [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
-#        increm = increm + 1
-#        
-#    #Plot Midline and Error bounds lines.
-#    errorLineCenterPoints = [[Axis_Min,Axis_Min],[Axis_Max,Axis_Max]]
-#    errorLineLowerPoints = [[Axis_Min,Axis_Min],[Axis_Max,(Axis_Max-(Axis_Max*(Percent_Error/100)))]]
-#    errorLineUpperPoints = [[Axis_Min,Axis_Min],[Axis_Max,(Axis_Max+(Axis_Max*(Percent_Error/100)))]]
-#    
-#    g.plot(graph.data.points(errorLineCenterPoints, title=None, x=1, y=2),
-#            [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
-#            
-#    g.plot(graph.data.points(errorLineLowerPoints, title=None, x=1, y=2),
-#            [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
-#            
-#    g.plot(graph.data.points(errorLineUpperPoints, title=None, x=1, y=2),
-#            [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
-#    
-#    # Now plot the Title text, alignment based on title quadrant setting.
-#    g.text(g.width/2, g.height - 0.2, Plot_Title, 
-#           [text.halign.center, text.valign.top, text.size.normalsize])
-#    
-#    # Write the output
-#    g.writePDFfile("testOfVnVPlotter")
-#    #return increm+1
+def scatter_plot(plot_info,data_set):
+    #plot_info is details about the overall plot layout and text.
+    #data_set is a dictionary keyed by test name containing lists of X and Y data points.
+    print plot_info
+    print data_set
+    
+    for quantity_number in plot_info:
+        # Set variables for Plot extracted from the first group of lines in config file starting with 'q'.
+        
+        # Variables for plot.
+        plot_title = plot_info[int(quantity_number)][1]
+        print plot_title
+        x_title = plot_info[int(quantity_number)][2]
+        y_title = plot_info[int(quantity_number)][3]
+        min_x = float(plot_info[int(quantity_number)][4])
+        print min_x
+        max_x = float(plot_info[int(quantity_number)][5])
+        print max_x
+        min_y = float(plot_info[int(quantity_number)][4])
+        max_y = float(plot_info[int(quantity_number)][5])
+        percent_error = int(plot_info[int(quantity_number)][6])
+        title_quadrant = int(plot_info[int(quantity_number)][7])
+        key_quadrant = int(plot_info[int(quantity_number)][8])
+        plot_width = int(plot_info[int(quantity_number)][9])
+        
+        #Create filename from fields in input file record.
+        plot_file_name = plot_info[int(quantity_number)][0]+".pdf"
+        print plot_file_name
+        
+        # Determine the location for the key, alignment based on key_quadrant setting.
+        if key_quadrant == 1:
+            key_pos = "tl"
+            key_dist = 0.00
+        elif key_quadrant == 2:
+            key_pos = "tr"
+            key_dist = 0.00
+        elif key_quadrant == 3:
+            key_pos = "bl"
+            key_dist = 0.00
+        elif key_quadrant == 4:
+            key_pos = "br"
+            key_dist = 0.00
+        else:
+            print "A quadrant for the key location was not specified./nUsing the default top left quadrant."
+            key_pos = "tl"
+            key_dist = 0.00
+        
+        #Begin Plotting
+        #print exp_data
+        #print mod_data
+        # Initialize graph object
+        g = graph.graphxy(width=plot_width, ratio=1/1, key=graph.key.key(pos=key_pos, dist=key_dist), 
+                            x=graph.axis.linear(title=x_title, min=min_x, max=max_x), 
+                            y=graph.axis.linear(title=y_title, min=min_y, max=max_y))
+        
+        #Plot Midline and Error bounds lines.
+        errorLineCenterPoints = [[min_x,min_y],[max_x,max_y]]
+        print errorLineCenterPoints
+        lower_bound = max_y - max_y * percent_error / 100
+        print lower_bound
+        errorLineLowerPoints = [[min_x,min_y],[max_x,lower_bound]]
+        print errorLineLowerPoints
+        upper_bound = max_y + max_y * percent_error / 100.0
+        print upper_bound
+        errorLineUpperPoints = [[min_x,min_y],[max_x,upper_bound]]
+        print errorLineUpperPoints
+        
+        g.plot(graph.data.points(errorLineCenterPoints, title=None, x=1, y=2),
+                [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
+                
+        g.plot(graph.data.points(errorLineLowerPoints, title=None, x=1, y=2),
+                [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
+                
+        g.plot(graph.data.points(errorLineUpperPoints, title=None, x=1, y=2),
+                [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
+    
+        #One line at a time added to plot from each data set.
+        # Iterate over items in data dictionary key for keys that are not [].
+        for data in data_set[quantity_number]:
+        # Plot Experimental data
+            print data[0]
+            print data[1]
+            #g.plot(graph.data.points(data[1], title=data[0], x=1, y=2))
+            #    [graph.style.symbol()])
+  
+        # Now plot the Title text, alignment based on title quadrant setting.
+        if title_quadrant == 1:
+            g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
+        elif title_quadrant == 2:
+            g.text(g.width-0.1, g.height - 0.2, plot_title, [text.halign.right, text.valign.top, text.size.normalsize])
+        elif title_quadrant == 3:
+            g.text(0.1, 0.2, plot_title, [text.halign.left, text.valign.bottom, text.size.normalsize])
+        elif title_quadrant == 4:
+            g.text(g.width-0.1, 0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
+        else:
+            print "A quadrant for the title location was not specified./nUsing the default top left quadrant."
+            g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
+            
+        # Write the output
+        g.writePDFfile(plot_file_name)
+    
 
 ### Start of Main Code
 
@@ -394,29 +422,44 @@ config_and_data_dicts = extract_config_data(config_file_name)
 print "There are "+str(len(config_and_data_dicts[1]))+" quantities to process."
 print "There are "+str(len(config_and_data_dicts[3]))+" data sets to plot."
 
-#print config_and_data_dicts[3]
-
+## Create comparison plots
 for data_record in config_and_data_dicts[3]:
-    #print config_and_data_dicts[3][data_record]
     # Extract relevant portions of comparison data as defined in config file.
     comp_data_to_plot = extract_comp_data(config_and_data_dicts[3][data_record])
     exp_plot_data = comp_data_to_plot[0]
     mod_plot_data = comp_data_to_plot[1]
     
+    # Create plots
+    #comparison_plot(config_and_data_dicts[3][data_record],exp_plot_data,mod_plot_data)
+
+
+## Create scatter plots
+scatter_quantity = 1
+temp_scatter_data_list = []
+
+for scatter_plot_record in config_and_data_dicts[1]:
+    #print "s record", scatter_plot_record
+    #print "Quantity:", config_and_data_dicts[1][scatter_plot_record][0]
+    for scatter_data_key in sorted(scatter_data_dict):
+    	#print scatter_quantity
+        split_key = split("-",scatter_data_key)
+        if scatter_data_key[0] == str(scatter_plot_record) and scatter_plot_record != []:
+            #print "Test name:", split_key[1]
+            #print scatter_data_dict[scatter_data_key][:2]
+            temp_scatter_data_list.append([split_key[1], scatter_data_dict[scatter_data_key][:2]])
+            
+    combined_scatter_data[scatter_quantity] = temp_scatter_data_list
+    temp_scatter_data_list = []
+    scatter_quantity = scatter_quantity + 1
+        
+    #scatter_plot_info = config_and_data_dicts[1][scatter_plot_record]
+    #print scatter_plot_info	print scatter_data_key, scatter_data_dict[scatter_data_key]
+
+#print combined_scatter_data
     
-    # Create comparison plots
-    comparison_plot(config_and_data_dicts[3][data_record],exp_plot_data,mod_plot_data)
-
-
-# Compute min/max values
-
-# Assemble scatter plot values
-
-# Create scatter plots
-#print scatter_data_dict.keys()
-for key in sorted(scatter_data_dict):
-	print key, scatter_data_dict[key]
-
+# Create plots
+scatter_plot(config_and_data_dicts[1],combined_scatter_data)
+    
 ## Write Summary Data to File.
 #NRC Comparisons Output
 
