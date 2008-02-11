@@ -300,7 +300,8 @@ Module EVAC
        NOISEME, NOISETH, NOISECM, RADIUS_COMPLETE_0, &
        RADIUS_COMPLETE_1, GROUP_EFF, FED_DOOR_CRIT, &
        TDET_SMOKE_DENS, DENS_INIT, EVAC_DT_MAX, GROUP_DENS, &
-       FC_DAMPING, EVAC_DT_MIN, V_MAX, V_ANGULAR_MAX, V_ANGULAR
+       FC_DAMPING, EVAC_DT_MIN, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
+       SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY
   !
   Real(EB), Dimension(:), Allocatable :: Tsteps
   !
@@ -404,7 +405,8 @@ Contains
          FC_DAMPING, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
          OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA,&
          OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, &
-         COLOR_INDEX, RGB_DEAD, RGB_REVA
+         COLOR_INDEX, RGB_DEAD, RGB_REVA, &
+         SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY
     !
     NPPS = 30000 ! Number Persons Per Set (dump to a file)
     !
@@ -671,6 +673,8 @@ Contains
     EVAC_DT_MAX     = 0.01_EB
     EVAC_DT_MIN     = 0.001_EB
     GROUP_DENS      = 0.0_EB
+    SMOKE_MIN_SPEED = 0.1_EB
+    SMOKE_MIN_SPEED_VISIBILITY = 0.0_EB
     OUTPUT_SPEED         = .FALSE.
     OUTPUT_MOTIVE_FORCE  = .FALSE.
     OUTPUT_FED           = .FALSE.
@@ -935,6 +939,11 @@ Contains
     If (GROUP_DENS .Gt. 3.50_EB) GROUP_DENS = 3.50_EB
     DENS_INIT = Max(GROUP_DENS,DENS_INIT)
     If (TDET_SMOKE_DENS < 0.0_EB) TDET_SMOKE_DENS = Huge(TDET_SMOKE_DENS)
+
+    If(SMOKE_MIN_SPEED < 0.0_EB ) SMOKE_MIN_SPEED = 0.0_EB
+    If(SMOKE_MIN_SPEED_VISIBILITY < 0.01_EB) Then
+       SMOKE_MIN_SPEED_VISIBILITY = 0.01_EB  ! No divisions by zero
+    End If
 
     If (.Not. NOT_RANDOM ) Then    ! Initialize the generator randomly
        Call Random_Seed(size=size_rnd)
@@ -5687,7 +5696,13 @@ Contains
              smoke_speed_fac = 1.0_EB + (smoke_beta/smoke_alpha)* &
                   MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB* &
                   HUMAN_GRID(II,JJ)%SOOT_DENS
-             smoke_speed_fac = Max(smoke_speed_fac, 0.1_EB)
+             If (MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS > &
+                  3.0_EB/SMOKE_MIN_SPEED_VISIBILITY) Then
+                smoke_speed_fac = Min(smoke_speed_fac, smoke_speed_fac*( 2.0_EB - &
+                     ( MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS - & 
+                     3.0_EB/SMOKE_MIN_SPEED_VISIBILITY ) / (3.0_EB/SMOKE_MIN_SPEED_VISIBILITY) ) )
+             End If
+             smoke_speed_fac = Max(smoke_speed_fac, SMOKE_MIN_SPEED)
           End If
           HR%v0_fac = smoke_speed_fac
 
