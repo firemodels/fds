@@ -3,7 +3,7 @@
 <TITLE>Readme file for Blockaid, an FDS blockage converter</TITLE>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
-<h2>Blockaid Release Notes - December 5, 2007</h2>
+<h2>Blockaid Release Notes - February 12, 2008</h2>
 
 <ul>
 <li><a href="#overview">Overview</a>
@@ -23,11 +23,23 @@ It then can replicate them one or more times while applying a specified rotation
 <hr size="1">
 
 <p>Blockaid reads in a file containing regular FDS &keywords plus additional
-keywords (&BGRP, &EGRP, &GRP and &INCL) known only to Blockaid.
+keywords, &BGRP, &EGRP, &GRP and &INCL, known only to Blockaid.
 It uses these keywords
 to output an FDS input file where specified
   groups of blockages, holes and vents are replicated, translated and/or rotated.
-  These groups are surrounded by <tt>&BGRP</tt> and <tt>&EGRP</tt> as in:<br />
+  
+<p><tt>blockaid</tt> is run at a command line and has the following usage:
+<pre>
+ blockaid [-f] [-h] [-l libpath] casename 
+          -f - overwrite output file casename.fds
+          -h - display this message
+          -l libdir - optional directory path containing &INCL files
+</pre>
+where <tt>casename</tt> is the name of the input file to be converted.  By convension this file has an extension <tt>.fof</tt>.
+
+<h3>Grouping &OBST and other FDS keywords</h3>
+One or more FDS  input lines are grouped together by surrounding them with
+  <tt>&BGRP</tt> and <tt>&EGRP</tt> keywords, as in:<br />
   <p><tt>
       &BGRP ID='group label' /<br />
  </tt>
@@ -35,21 +47,42 @@ to output an FDS input file where specified
 <tt>          
       <p>&EGRP /<br />
  </tt>
-<p>and expanded using <tt>&GRP /</tt> .  A library of objects may be stored in a separate file and included 
-using <tt>&INCL file='file name' /</tt>
-<p>Notes:
 <ul>
-<li>A group may be expanded using:
-<tt> &GRP ID='group label' XYZ=x,y,z ROTATE=angle /</tt>
-where <em>x,y,z</em> is the translation amount and <em>angle</em> is the rotation amount snapped to the 
-  nearest 90 degrees. 
+<li>The group is given a name specifed with the <tt>ID</tt> keyword.
+<li>A library of objects may be stored in a separate file and included 
+using <tt>&INCL file='file name' /</tt>
 <li>Blockage/hole positions are stored in a group relative to a point defined by the <tt>ORIGIN=x,y,z</tt> parameter found on the <tt>&BGRP</tt> line.
 <li>Text substitions may be performed by placing one or more
 <tt>#keyword='value'</tt> terms on a <tt>&GRP</tt> 
 or a <tt>&BGRP</tt> line.
 Default keyword values may be specified on the <tt>&BGRP</tt> line.
 These parameters may be over-ridden on the <tt>&GRP</tt> line.
-<li>A hollow blockage may be defined using <tt>&SHELL</tt>.
+<li>A group may be defined recurseivly in terms of other groups.
+</ul>
+
+<p><h3>Expanding Groups</h3>
+A group may be expanded with a specified rotation and translation using:
+<tt> &GRP ID='group label' XYZ=x,y,z ROTATE=angle /</tt>
+where <em>x,y,z</em> and <em>angle</em> are the translation and rotation amount snapped to the 
+  nearest 90 degrees respetively. 
+   
+<h3>Repeating &OBST's</h3>
+A blockage may be repeated by adding the keywords <tt>COPIES</tt> and <tt>DXYZ</tt> to an <tt>&OBST</tt> line.  
+<tt>COPIES</tt> specifies the number of final <tt>&OBST</tt> lines and <tt>DXYZ</tt> specifies the geometrical offset between each copy.
+<p>Example: blockaid converts the following line
+<pre>
+&OBST XB=0.0,2.0, 0.0,0.4, 0.0,0.1 COPIES=3 DXYZ=0.0,0.0, 0.3, 0.3, 0.1,0.1 /
+</pre>
+to
+<pre>
+&OBST XB=0.0,2.0, 0.0,0.4, 0.0,0.1 /
+&OBST XB=0.0, 2.0, 0.0, 0.4, 0.0, 0.1 /
+&OBST XB=0.0, 2.0, 0.3, 0.7, 0.1, 0.2 /
+</pre>
+Note that <tt>blockaid</tt> removes the <tt>COPIES</tt> and <tt>DXYZ</tt> keywords.
+
+<h3>Creating Hollow BLockages</h3>
+A hollow blockage may be defined using <tt>&SHELL</tt>.
   This keyword
 has all the same options and parameters
 as <tt>&OBST</tt>.  In addition <tt>DELTA</tt> 
@@ -64,11 +97,10 @@ into an <tt>&OBST</tt> and <tt>&HOLE</tt> line given by:
 &HOLE XB=xmin+del,xmax-del,ymin+del,ymax-del,zmin+del,zmin-del /
 </pre>
 
-<li>A collection of groups may be defined and stored in a file.  This file
+<h3>Creating Libraries</h3>
+A collection of groups may be defined and stored in a file.  This file
   is referenced using the <tt>&INCL</tt> keyword as in<br />
   <tt>&INCL FILE='file name' /</tt>
-<li>A group may be defined recurseivly in terms of other groups.
-</UL>
 
 <a name="software"></a>
 <h2>Software</h2>
