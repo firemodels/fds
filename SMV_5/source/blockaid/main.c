@@ -22,6 +22,13 @@ int main(int argc, char **argv){
   char *arg, *prog;
   char *in_file_base=NULL;
 
+#ifdef WIN32
+  strcpy(dirsep,"\\");
+#else
+  strcpy(dirsep,"/");
+#endif
+  libdir=NULL;
+
   prog=argv[0];
   in_file_base=NULL;
   if(argc==1){
@@ -45,6 +52,20 @@ int main(int argc, char **argv){
         usage();
         return 1;
         break;
+      case 'l':
+        if(i+1<argc){
+          int lenarg;
+
+          lenarg=strlen(argv[i+1]);
+          NewMemory((void **)&libdir,lenarg+2);
+          strcpy(libdir,argv[i+1]);
+          if(libdir[lenarg-1]!=dirsep){
+            strcat(libdir,dirsep);
+          }
+          i++;
+        }
+        break;
+
       default:
         usage();
         return 1;
