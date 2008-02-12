@@ -29,4 +29,3 @@ obj = main.o assert.o dmalloc.o readfds.o utilities.o
 
 $(bin)/$(exe) : $(obj)
 	gcc -o $(bin)/$(exe) -lm $(obj)
-\c
