@@ -27,9 +27,10 @@ void usage(void){
 
     printf("\n");
     printf("Usage:\n");
-    printf(" blockaid [-f] [-h] casename \n");
+    printf(" blockaid [-f] [-h] [-l libpath] casename \n");
     printf("          -f - overwrite output file casename.fds\n");
-    printf("          -h - display this message\n\n");
+    printf("          -h - display this message\n");
+    printf("          -l libdir - optional directory path containing &INCL files\n\n");
     printf("  This program reads in casename.fof and outputs casename.fds where specified\n");
     printf("  groups of blockages, holes and vents are replicated, translated and rotated.\n");
     printf("  These groups are surrounded with &BGRP and &EGRP as in:\n");
