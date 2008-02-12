@@ -77,6 +77,8 @@ void get_keywords(blockaiddata *blockaidi, char *buffer);
 void subst_keys(char *line_after,int recurse_level);
 char *get_val(char *key, int recurse_level);
 
+EXTERN char dirsep[2];
+EXTERN char *libdir;
 EXTERN blockaiddata *blockaid_first, *blockaid_last, ba_first, ba_last;
 EXTERN blockaiddata **grouplist;
 EXTERN keyvaldata keyvalstack[MAXRECURSE];
