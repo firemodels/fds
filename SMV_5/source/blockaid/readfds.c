@@ -166,8 +166,21 @@ int read_pass1(char *in_file, int recurse_level){
 
   stream_in=fopen(in_file,"r");
   if(stream_in==NULL){
-    printf("ERROR: The input file %s could not be opened for input.\n",in_file);
-    return 1;
+    if(libdir!=NULL){
+      char libfile[1024];
+
+      strcpy(libfile,libdir);
+      strcat(libfile,in_file);
+      stream_in=fopen(libfile,"r");
+      if(stream_in==NULL){
+        printf("ERROR: The input files %s or %s could not be opened for input.\n",in_file,libfile);
+        return 1;
+      }
+    }
+    else{
+      printf("ERROR: The input file %s could not be opened for input.\n",in_file);
+      return 1;
+    }
   }
 
 // pass 1
