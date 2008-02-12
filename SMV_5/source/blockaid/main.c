@@ -59,7 +59,7 @@ int main(int argc, char **argv){
           lenarg=strlen(argv[i+1]);
           NewMemory((void **)&libdir,lenarg+2);
           strcpy(libdir,argv[i+1]);
-          if(libdir[lenarg-1]!=dirsep){
+          if(libdir[lenarg-1]!=dirsep[0]){
             strcat(libdir,dirsep);
           }
           i++;
