@@ -82,7 +82,7 @@ EXTERN char *libdir;
 EXTERN blockaiddata *blockaid_first, *blockaid_last, ba_first, ba_last;
 EXTERN blockaiddata **grouplist;
 EXTERN keyvaldata keyvalstack[MAXRECURSE];
-EXTERN nkeyvalstack;
+EXTERN int nkeyvalstack;
 EXTERN int ngroup;
 EXTERN float *offset_rotate;
 EXTERN int nblockaid, force_write;
