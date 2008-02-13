@@ -18,6 +18,8 @@ def extract_config_data(config_file):
     # Collect Data from Config File
     quantities_dict = {}
     data_dict = {}
+    quantity_counter=0
+    data_counter=0
     
     fh = file(config_file, 'U')
     data_array = csv.reader(fh)
@@ -25,11 +27,15 @@ def extract_config_data(config_file):
     config_lists = [list(sublist) for sublist in data_array]
     #print config_test_lists
     print str(len(config_lists)) + " lines read from Configuration file\n"
+    
 
     for each_list in config_lists:
         #print "First field is "+each_list[0]
         if each_list[0] == 'q':
-            quantities_dict[each_list[1]] = each_list[2:]
+            if quantity_counter < 1:
+                quantity_header = each_list[2:]
+            if quantity_counter >= 1:
+                quantities_dict[each_list[1]] = each_list[2:]
         elif each_list[0] == 'd':
             data_dict[each_list[2]+"-"+each_list[4]] = each_list[1:]
             #variable = data_dict['FM_SNL_04-T_Upper']['Exp_Start_(min.)']
