@@ -930,243 +930,14 @@ results in a  4x speedup of these actions. } \\ \hline
 \end{center}
 \end{table}
 
-\chapter{Manipulating the Scene Automatically - The Touring
-Option}
 
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=4.4444in]{FIGURES/figTOUREXAMPLE}\\
-\end{center}
-\caption[Overhead view of the townhouse example showing the
-default {\em Circle}\ tour and a user defined tour.]{Overhead view of
-townhouse example showing the default {\em Circle}\ tour and a user
-defined tour.  The square dots indicate the keyframe locations.
-Keyframes may be edited using the Touring or Advanced Touring
-dialog boxes.}
- \label{figTOUREXAMPLE}
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[width=2.159722in]{FIGURES/figTOUR}&
-\includegraphics[width=1.93055in]{FIGURES/figADVANCEDTOUR}\\
-a) basic options&b) advanced options\\
-\end{tabular}
-\end{center}
-\caption[Touring dialog boxes.]{The Touring dialog boxes may be
-used to select tours or keyframes, change the position or view
-direction at each keyframe and change the tension of the tour
-path. }
- \label{figTOUR}
-\end{figure}
-
-The touring option allows one to specify arbitrary paths or tours
-through or around a Smokeview scene.  One may then view the
-scenario from the vantage point of an observer moving along one of
-these paths.    A tour
-may also be used to observe time dependent portions of the
-scenario such as blockage/vent openings and closings.  The default
-view direction is towards the direction of motion.  The path tension and start and stop times may be changed with the {\bf Advanced
-Settings}\ dialog box illustrated in Figure \ref{figTOUR}b.
-
-When Smokeview starts up it creates a tour, called the {\em circle
-tour}\ which surrounds the scene.  The {\em circle}\ tour and a user
-defined tour are illustrated in Figure \ref{figTOUREXAMPLE}. The
-circle tour is similar to the \tourmenu\ menu option found in
-earlier versions of Smokeview. The user may modify the {\em circle}\
-tour or define their own tours by using the {\em Tour}\ dialog box
-illustrated in Figure \ref{figTOUR}. The user places several
-points or keyframes in or around the scene. Smokeview creates a
-smooth path going through these points.
-
-\section{Tour Settings}
-An existing tour may be modified by selecting it from the {\bf
-Select Tour:}\ listbox found in the {\em Edit Tour}\ dialog box illustrated in Figure \ref{figTOUR}a.  A new tour
-may be created by clicking the {\bf New Tour} button. A newly
-created tour goes through the middle of the Smokeview scene
-starting at the front left and finishing at the back right. A tour
-may also be modified by editing the text entries found in the
-{\em local}\ preference file, casename.ini under the {\bf TOUR}\
-keyword.
-
-The speed traversed along the tour is determined by the time value
-assigned to each keyframe.   If the {\bf Constant Speed}\ checkbox
-is checked then these times are determined given the distance
-between keyframes and the velocity required to traverse the entire
-path in the specified time as given by the {\em start time}\ and
-{\em stop time}\ entries found in the {\em Advanced Settings}\ dialog
-box illustrated in Figure \ref{figTOUR}b.
-
-
-Three different methods for viewing the scene may be selected.  To
-view the scene from the point of view of the selected tour, check
-the {\bf View From Tour Path}\ checkbox. To view the scene from a
-keyframe (to see the effect of editing changes), select the {\bf
-View From Selected Keyframe}\ checkbox. Unchecking these boxes
-returns control of scene movement to the user.
-
-\section{Keyframe Settings}
-A tour is created from a series of keyframes.  Each keyframe is specified using time, position and view direction.  Smokeview interpolates between keyframes using cubic splines to generate the path or tour.  An initial tour is created by pressing the {\em Add Tour} button.  This tour has two keyframes located at opposite ends of the Smokeview scene.  Additional keyframes may be created by selected the {\em Add}\ button.
-
-The position and viewepoint of a keyframe may be adjusted.  First it must be selected.  A keyframe may be selected by either clicking it with
-the left mouse button or by {\em moving}\ through the keyframes using the {\bf Next} or {\bf Previous} buttons.  The active keyframe changes color from red to green.  In Figure \ref{figTOUREXAMPLE}, the active or selected keyframe is at time 40 s.
-Keyframe positions may then be modified by changing data in the t,
-X, Y or Z edit boxes. A different view direction may also be set.
-
-A new keyframe is created by clicking the {\bf Add}\ button. It is
-formed by averaging the positions and view directions of the
-current and next keyframes. If the selected keyframe is the last
-one in the tour then a new keyframe  is added beyond the last
-keyframe.
-
-A keyframe may be deleted by clicking the {\bf Delete}\ button.
-There is no {\bf Delete Tour}\ button. A tour may be deleted by
-either deleting all of its keyframes or by deleting its entry in
-the casename.ini file.
-
-\section{Advanced Settings}
-The {\em Advanced Settings}\ dialog box is only necessary if one
-wishes to override Smokeview's choice of tension settings.  This dialog box is
-opened by clicking the {\bf Advanced Settings}\ button contained
-in the {\em Edit Tours} dialog box.
-
-A view direction may be defined at each keyframe by either setting
-direction angles relative to the path (an azimuth and an elevation
-angle) or by setting a direction relative to the scene geometry (a
-cartesian (X,Y,Z) view direction).
-
-Path relative view directions are enabled by default.  To define a
-cartesian view direction, select the {\bf X,Y,Z View}\ check box
-and edit the X, Y and Z View edit boxes to change the view
-location. To define an path relative view direction, uncheck the
-{\bf X,Y,Z View}\ check box and edit the Azimuth and Elevation
-edit boxes. Checking the {\bf View From Selected Keyframe}
-checkbox in the {\em Edit Tours}\ dialog box allows one to see the effects of the  view changes
-from the keyframe being edited. To see the effect of a change in
-one of the keyframe's parameters, uncheck the {\bf View From
-Selected Keyframe}\ checkbox and position the tour locator
-(vertical and horizontal red lines) near the keyframe.  The
-horizontal red line always points in the view direction.
-
-Spline tension settings may also be changed using the {\em
-Advanced Settings}\ dialog box, though normally this is not
-necessary except when one wishes abrupt rather than smooth path
-changes. Kochanek-Bartels\cite{Moller:02} splines (piecewise cubic
-Hermite polynomials) are used to represent the tour paths.
-
-The cubic Hermite polynomials for each interval are uniquely
-specified using a function and a derivative at both endpoints of
-the interval ({\em i.e. 4 data values}).  These derivatives are
-computed in terms of three parameters referred to as {\em bias},
-{\em continuity} and {\em tension}. Each of these parameters range
-from -1 to 1 with a default value of 0. The tension value may be
-set for all keyframes at once (by checking the {\bf Global}\
-checkbox) or for each keyframe separately.  The bias and
-continuity values are set to zero internally by Smokeview.  A
-tension value of 0 is set by default, a value of 1 results in a
-linear spline.
-
-
-\section{Setting up a tour}
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[height=\figheightA]{figures/figTOUR_1}&
-\includegraphics[height=\figheightA]{figures/figTOUR_2}\\
-a) Initial tour&b) First and last step set with 5 keyframes\\
-\includegraphics[height=\figheightA]{figures/figTOUR_3}&
-\includegraphics[height=\figheightA]{figures/figTOUR_4}\\
-c) All keyframe positions set (tension=0.0)&d) Tension set to 0.75
-\end{tabular}
-\end{center}
-\caption [Tutorial examples for Tour option.] {Tutorial examples for Tour option.}
-\label{figTutorial}%
-\end{figure}
-
-
-The following steps give a simple example of setting up a tour in the
-townhouse scenario.  The tour will begin at the back of the house,
-go towards the front door and then end at the top of the stairs.
-These steps are illustrated in Figure \ref{figTutorial}.
-
-\begin{enumerate}
-\item Start by clicking the \fbox{Dialog$>$Tours...}\ menu item
-which opens up the {\em Edit Tours}\ dialog box.
-
-\item  Click on the \frameit{New Tour}\ button in the {\em Edit Tour}\ dialog
-box. This creates a tour, illustrated in Figure
-\ref{figTutorial}a, starting at the front left of the scene and
-ending at the back right. This tour has two keyframes.  The
-elevation of each keyframe is halfway between the bottom and top
-of the scene.
-
-\item Click on the \frameit{Edit Tour Path} checkbox. This
-activates buttons that allows the user to edit the properties of
-each individual keyframe. Click on the square dot at the back of
-the townhouse. This is the first keyframe.
-Change the ``Z'' value to 1.0.  Click on the second dot and change
-its ``Z'' value to 1.0.
-
-
-\item  Click on the \frameit{Add}\ button, found inside the {\em Edit
-Keyframe's Position}\ panel, three times. This will add three more
-key frames to the tour which will be needed so that the path bends
-up the stairs. You should now have five keyframes.
-
-\item Move the first keyframe at the back of the townhouse near the
-double door by setting X, Y, Z positions to (3.8,-1.0,1.6).
-Move the last keyframe to the top
-of the steps by setting X, Y, Z positions to (6.0,3.6,4.1).
-The path should now look like
-Figure \ref{figTutorial}b.
-
-\item Move the second, third and fourth keyframes to positions
-(4.0,4.0,1.6), (4.0,6.8,1.6) and (6.0,6.8,1.6).  The path should
-now look like Figure \ref{figTutorial}c.
-
-\item Click on the \frameit{Advanced Settings}\ button. Check the
-\frameit{Global} checkbox and set the \frameit{All keyframes} edit
-box to 0.5. This {\em tightens}\ up the spline curve reducing the dip
-near the stairs that occurs with the tension=0.0 setting. The path
-should now look like Figure \ref{figTutorial}d.
-
-\item Click on the \frameit{Save Settings}\ button to save the results
-of your editing changes.
-
-\item To see the results of the tour, click on the {\em View From
-Tour Path}\ check box.
-\end{enumerate}
-
-The point of view of the observer on this path is towards the
-direction of motion. Next the view direction will be changed to
-point to the side while the observer is on the first floor.
-
-\begin{enumerate}
-\item Click on the \frameit{Advanced Settings} button if it is not already open.
-
-\item Uncheck the {\em View From Tour Path}\ checkbox in the {\em tour}\
-dialog box and make sure that the \frameit{X,Y,Z View} checkbox is
-unchecked.
-
-\item Click on the dot representing the first keyframe. Then
-change {\em Azimuth}\ setting to 90 degrees.  To see the results of
-the change, go back and check the {\em View From Tour Path}\
-checkbox.
-
-\item Uncheck the {\em View From Tour Path}\ checkbox again. Now
-select the second and third keyframes and change their azimuth
-settings to 90 degrees.
-\end{enumerate}
-
-With this second set of changes, the observer will look to the
-side as they pass through the kitchen and living room.  The
-observer will look straight ahead as they go up the stairs.
-
-\chapter{Creating Custom Devices}
+\chapter{Creating Custom Devices and Avatars}
 Smokeview draws devices such as heat and smoke detectors,
 sprinklers, sensors {\em etc.} using instructions contained in a
-data file.  These instructions correspond to OpenGL library calls,
+data file.  Smokeview also uses these instructions to define avatars, objects drawn
+at a tour locus or to represent people in an FDS-EVAC simulation.  
+
+The instructions in a device file correspond to OpenGL library calls,
 the same type of calls Smokeview uses to visualize FDS cases.
 Smokeview then acts as an OpenGL interpreter executing OpenGL
 commands as specified in the device definition file. Efficiency is
@@ -1538,11 +1309,11 @@ translate}\ as translating the origin by (-x,-y,-z).
 \elist
 
 \section{Conditionals}
-Conditional commands ({\tt skipif}\ statements) may be used to exclude portions of a device 
+Conditional commands ({\tt skipif}\ statements) may be used to exclude portions of a device
 definition  based upon variable values
 obtained using the {\tt getusers}\ command .  For example, a tree trunk may be drawn black if a temperature exceeds a specified value.  Four forms of the {\tt skipif}\ command are
 implemented: {\tt skipifle, skipiflt, skipifge} and {\tt skipifgt}.
-The notation {\tt , gt, le} and {\tt lt} has the usual meaning of greater than or equal to, greater than, {\em etc.}.  
+The notation {\tt , gt, le} and {\tt lt} has the usual meaning of greater than or equal to, greater than, {\em etc.}.
 
 
 \blist
@@ -1555,9 +1326,244 @@ The notation {\tt , gt, le} and {\tt lt} has the usual meaning of greater than o
 \hitem{skip if $a>=b$} The command, {\tt a b n skipifge} skips the {\tt n} commands following
 {\tt skipifge}\ if the floating point values {\em a} and {\em b} satisfy $a\ge b$.
 
-\hitem{skip if $a>b$} The command, {\tt a b n skipifgt} skips the {\tt n} commands following 
+\hitem{skip if $a>b$} The command, {\tt a b n skipifgt} skips the {\tt n} commands following
 {\tt skipifgt}\ if the floating point values {\em a} and {\em b} satisfy $a> b$.
 \elist
+
+
+\chapter{Manipulating the Scene Automatically - The Touring
+Option}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.4444in]{FIGURES/figTOUREXAMPLE}\\
+\end{center}
+\caption[Overhead view of the townhouse example showing the
+default {\em Circle}\ tour and a user defined tour.]{Overhead view of
+townhouse example showing the default {\em Circle}\ tour and a user
+defined tour.  The square dots indicate the keyframe locations.
+Keyframes may be edited using the Touring or Advanced Touring
+dialog boxes.}
+ \label{figTOUREXAMPLE}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=2.159722in]{FIGURES/figTOUR}&
+\includegraphics[width=1.93055in]{FIGURES/figADVANCEDTOUR}\\
+a) basic options&b) advanced options\\
+\end{tabular}
+\end{center}
+\caption[Touring dialog boxes.]{The Touring dialog boxes may be
+used to select tours or keyframes, change the position or view
+direction at each keyframe and change the tension of the tour
+path. }
+ \label{figTOUR}
+\end{figure}
+
+The touring option allows one to specify arbitrary paths or tours
+through or around a Smokeview scene.  One may then view the
+scenario from the vantage point of an observer moving along one of
+these paths.    A tour
+may also be used to observe time dependent portions of the
+scenario such as blockage/vent openings and closings.  The default
+view direction is towards the direction of motion.  The path tension and start and stop times may be changed with the {\bf Advanced
+Settings}\ dialog box illustrated in Figure \ref{figTOUR}b.
+
+When Smokeview starts up it creates a tour, called the {\em circle
+tour}\ which surrounds the scene.  The {\em circle}\ tour and a user
+defined tour are illustrated in Figure \ref{figTOUREXAMPLE}. The
+circle tour is similar to the \tourmenu\ menu option found in
+earlier versions of Smokeview. The user may modify the {\em circle}\
+tour or define their own tours by using the {\em Tour}\ dialog box
+illustrated in Figure \ref{figTOUR}. The user places several
+points or keyframes in or around the scene. Smokeview creates a
+smooth path going through these points.
+
+\section{Tour Settings}
+An existing tour may be modified by selecting it from the {\bf
+Select Tour:}\ listbox found in the {\em Edit Tour}\ dialog box illustrated in Figure \ref{figTOUR}a.  A new tour
+may be created by clicking the {\bf New Tour} button. A newly
+created tour goes through the middle of the Smokeview scene
+starting at the front left and finishing at the back right. A tour
+may also be modified by editing the text entries found in the
+{\em local}\ preference file, casename.ini under the {\bf TOUR}\
+keyword.
+
+The speed traversed along the tour is determined by the time value
+assigned to each keyframe.   If the {\bf Constant Speed}\ checkbox
+is checked then these times are determined given the distance
+between keyframes and the velocity required to traverse the entire
+path in the specified time as given by the {\em start time}\ and
+{\em stop time}\ entries found in the {\em Advanced Settings}\ dialog
+box illustrated in Figure \ref{figTOUR}b.
+
+
+Three different methods for viewing the scene may be selected.  To
+view the scene from the point of view of the selected tour, check
+the {\bf View From Tour Path}\ checkbox. To view the scene from a
+keyframe (to see the effect of editing changes), select the {\bf
+View From Selected Keyframe}\ checkbox. Unchecking these boxes
+returns control of scene movement to the user.
+
+\section{Keyframe Settings}
+A tour is created from a series of keyframes.  Each keyframe is specified using time, position and view direction.  Smokeview interpolates between keyframes using cubic splines to generate the path or tour.  An initial tour is created by pressing the {\em Add Tour} button.  This tour has two keyframes located at opposite ends of the Smokeview scene.  Additional keyframes may be created by selected the {\em Add}\ button.
+
+The position and viewepoint of a keyframe may be adjusted.  First it must be selected.  A keyframe may be selected by either clicking it with
+the left mouse button or by {\em moving}\ through the keyframes using the {\bf Next} or {\bf Previous} buttons.  The active keyframe changes color from red to green.  In Figure \ref{figTOUREXAMPLE}, the active or selected keyframe is at time 40 s.
+Keyframe positions may then be modified by changing data in the t,
+X, Y or Z edit boxes. A different view direction may also be set.
+
+A new keyframe is created by clicking the {\bf Add}\ button. It is
+formed by averaging the positions and view directions of the
+current and next keyframes. If the selected keyframe is the last
+one in the tour then a new keyframe  is added beyond the last
+keyframe.
+
+A keyframe may be deleted by clicking the {\bf Delete}\ button.
+There is no {\bf Delete Tour}\ button. A tour may be deleted by
+either deleting all of its keyframes or by deleting its entry in
+the casename.ini file.
+
+\section{Advanced Settings}
+The {\em Advanced Settings}\ dialog box is only necessary if one
+wishes to override Smokeview's choice of tension settings.  This dialog box is
+opened by clicking the {\bf Advanced Settings}\ button contained
+in the {\em Edit Tours} dialog box.
+
+A view direction may be defined at each keyframe by either setting
+direction angles relative to the path (an azimuth and an elevation
+angle) or by setting a direction relative to the scene geometry (a
+cartesian (X,Y,Z) view direction).
+
+Path relative view directions are enabled by default.  To define a
+cartesian view direction, select the {\bf X,Y,Z View}\ check box
+and edit the X, Y and Z View edit boxes to change the view
+location. To define an path relative view direction, uncheck the
+{\bf X,Y,Z View}\ check box and edit the Azimuth and Elevation
+edit boxes. Checking the {\bf View From Selected Keyframe}
+checkbox in the {\em Edit Tours}\ dialog box allows one to see the effects of the  view changes
+from the keyframe being edited. To see the effect of a change in
+one of the keyframe's parameters, uncheck the {\bf View From
+Selected Keyframe}\ checkbox and position the tour locator
+(vertical and horizontal red lines) near the keyframe.  The
+horizontal red line always points in the view direction.
+
+Spline tension settings may also be changed using the {\em
+Advanced Settings}\ dialog box, though normally this is not
+necessary except when one wishes abrupt rather than smooth path
+changes. Kochanek-Bartels\cite{Moller:02} splines (piecewise cubic
+Hermite polynomials) are used to represent the tour paths.
+
+The cubic Hermite polynomials for each interval are uniquely
+specified using a function and a derivative at both endpoints of
+the interval ({\em i.e. 4 data values}).  These derivatives are
+computed in terms of three parameters referred to as {\em bias},
+{\em continuity} and {\em tension}. Each of these parameters range
+from -1 to 1 with a default value of 0. The tension value may be
+set for all keyframes at once (by checking the {\bf Global}\
+checkbox) or for each keyframe separately.  The bias and
+continuity values are set to zero internally by Smokeview.  A
+tension value of 0 is set by default, a value of 1 results in a
+linear spline.
+
+
+\section{Setting up a tour}
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=\figheightA]{figures/figTOUR_1}&
+\includegraphics[height=\figheightA]{figures/figTOUR_2}\\
+a) Initial tour&b) First and last step set with 5 keyframes\\
+\includegraphics[height=\figheightA]{figures/figTOUR_3}&
+\includegraphics[height=\figheightA]{figures/figTOUR_4}\\
+c) All keyframe positions set (tension=0.0)&d) Tension set to 0.75
+\end{tabular}
+\end{center}
+\caption [Tutorial examples for Tour option.] {Tutorial examples for Tour option.}
+\label{figTutorial}%
+\end{figure}
+
+
+The following steps give a simple example of setting up a tour in the
+townhouse scenario.  The tour will begin at the back of the house,
+go towards the front door and then end at the top of the stairs.
+These steps are illustrated in Figure \ref{figTutorial}.
+
+\begin{enumerate}
+\item Start by clicking the \fbox{Dialog$>$Tours...}\ menu item
+which opens up the {\em Edit Tours}\ dialog box.
+
+\item  Click on the \frameit{New Tour}\ button in the {\em Edit Tour}\ dialog
+box. This creates a tour, illustrated in Figure
+\ref{figTutorial}a, starting at the front left of the scene and
+ending at the back right. This tour has two keyframes.  The
+elevation of each keyframe is halfway between the bottom and top
+of the scene.
+
+\item Click on the \frameit{Edit Tour Path} checkbox. This
+activates buttons that allows the user to edit the properties of
+each individual keyframe. Click on the square dot at the back of
+the townhouse. This is the first keyframe.
+Change the ``Z'' value to 1.0.  Click on the second dot and change
+its ``Z'' value to 1.0.
+
+
+\item  Click on the \frameit{Add}\ button, found inside the {\em Edit
+Keyframe's Position}\ panel, three times. This will add three more
+key frames to the tour which will be needed so that the path bends
+up the stairs. You should now have five keyframes.
+
+\item Move the first keyframe at the back of the townhouse near the
+double door by setting X, Y, Z positions to (3.8,-1.0,1.6).
+Move the last keyframe to the top
+of the steps by setting X, Y, Z positions to (6.0,3.6,4.1).
+The path should now look like
+Figure \ref{figTutorial}b.
+
+\item Move the second, third and fourth keyframes to positions
+(4.0,4.0,1.6), (4.0,6.8,1.6) and (6.0,6.8,1.6).  The path should
+now look like Figure \ref{figTutorial}c.
+
+\item Click on the \frameit{Advanced Settings}\ button. Check the
+\frameit{Global} checkbox and set the \frameit{All keyframes} edit
+box to 0.5. This {\em tightens}\ up the spline curve reducing the dip
+near the stairs that occurs with the tension=0.0 setting. The path
+should now look like Figure \ref{figTutorial}d.
+
+\item Click on the \frameit{Save Settings}\ button to save the results
+of your editing changes.
+
+\item To see the results of the tour, click on the {\em View From
+Tour Path}\ check box.
+\end{enumerate}
+
+The point of view of the observer on this path is towards the
+direction of motion. Next the view direction will be changed to
+point to the side while the observer is on the first floor.
+
+\begin{enumerate}
+\item Click on the \frameit{Advanced Settings} button if it is not already open.
+
+\item Uncheck the {\em View From Tour Path}\ checkbox in the {\em tour}\
+dialog box and make sure that the \frameit{X,Y,Z View} checkbox is
+unchecked.
+
+\item Click on the dot representing the first keyframe. Then
+change {\em Azimuth}\ setting to 90 degrees.  To see the results of
+the change, go back and check the {\em View From Tour Path}\
+checkbox.
+
+\item Uncheck the {\em View From Tour Path}\ checkbox again. Now
+select the second and third keyframes and change their azimuth
+settings to 90 degrees.
+\end{enumerate}
+
+With this second set of changes, the observer will look to the
+side as they pass through the kitchen and living room.  The
+observer will look straight ahead as they go up the stairs.
+
 
 \part{Visualization}
 \chapter{Realistic or Qualitative Visualization - 3D Smoke}
