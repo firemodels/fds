@@ -5,24 +5,35 @@
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Smokeview Release Notes</h2>
 <p><hr size="1">
-<p>December 30, 2007
+<p>February 12, 2008
 
 <p>Latest FDS and Smokeview available at 
 <a href="http://fire.nist.gov/fds">http://fire.nist.gov/fds</a>
 <ul>
+<li>5.1 (build xxxx) - February 12, 2008
+<ol>
+<li>enhancement - add demo mode, activated by copying casename.smv to casename.svd .  
+This mode is used to demonstrate a FDS/Smokeview case by presenting a simplified dialog box with pre-defined tours
+and viewpoints (defined in an .ini file).
+<li>enhancement - add avatars to FDS-EVAC visualizations and Smokeview tours.  Avatars are defined in the device.svo file.
+<li>enhancement - add option to clip ONLY scene geometry allowing FDS data to remain visible.
+<li>enhancement - add option to smooth blockages (or not) at startup.
+<li>fix - fix problem with menu disconnects (issues 263).
+<li>fix - add missing scaling info to PART5 colorbar label (issue 269).
+</ol>
 <li>5.0.7 (build 1136) - December 30, 2007
 <ol>
 <li>fix - Hide blockages when using the <tt>Hide All</tt> Geometry menu item so that all geometry is hidden.
 </ol>
 <li>5.0.6 (build 1042) - November 30, 2007
 <ol>
-<li>fix - fix error in colorbar when displaying CFAST zone data. (issue 234)
+<li>fix - fix error in colorbar when displaying CFAST zone data (issue 234).
 </ol>
 <li>5.0.5 (build 940) - November 6, 2007
 <ol>
-<li>enhancement - add hrr cutoff parameter to .ini file
+<li>enhancement - add hrr cutoff parameter to .ini file.
 <li>fix - fix errors in device file input that occur when smokeview is run from a command line
-(smokeview bin directory was defined improperly). (issue 217)
+(smokeview bin directory was defined improperly) (issue 217).
 </ol>
 <li>5.0.4 (build 875) - October 25, 2007
 <ol>
@@ -30,19 +41,19 @@
 (Show/Hide>Geometry>Vents)
 <li>enhancement - Add option to highlight data with values outside of colorbar range<br>
 (Options>Shades>Colorbars)
-<li>fix - colorbar selection (issue 126)
-<li>fix - vent transparency (issue 27)
+<li>fix - colorbar selection (issue 126).
+<li>fix - vent transparency (issue 27).
 </ol>
 <li>5.0.3 (build 863) - October 18, 2007
 <ol>
-<li>fix - missing slice file menu entries (Issue 209)
-<li>fix - crash when particle file reloading (Issue 203)
-<li>maintenance - internal source clean up to remove more un-needed compiler directives
+<li>fix - missing slice file menu entries (Issue 209).
+<li>fix - crash when particle file reloading (Issue 203).
+<li>maintenance - internal source clean up to remove more un-needed compiler directives.
 </ol>
 <li>5.0.2 (build 826) - October 10, 2007
 <ol>
 <li>enhancement - changed default color of first iso-surface to purple to address fire colorization detailed in Issue 196.
-<li>maintenance - internal source clean up to remove un-needed compiler directives
+<li>maintenance - internal source clean up to remove un-needed compiler directives.
 </ol>
 
 <li>5.0.1 (build 730) - October 1, 2007<br>
