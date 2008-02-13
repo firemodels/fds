@@ -383,14 +383,11 @@ MAIN_LOOP: DO
    CALL MESH_EXCHANGE(4)
 
    ! Apply tangential velocity boundary conditions and start dumping output data
-
-   OUTPUT_LOOP: DO NM=1,NMESHES
-      IF (.NOT.ACTIVE_MESH(NM)) CYCLE OUTPUT_LOOP
+   VELOCITY_BC_LOOP_2: DO NM=1,NMESHES
+      IF (.NOT.ACTIVE_MESH(NM)) CYCLE VELOCITY_BC_LOOP_2
       CALL VELOCITY_BC(T(NM),NM)
       CALL UPDATE_OUTPUTS(T(NM),NM)      
-      CALL DUMP_MESH_OUTPUTS(T(NM),NM)
-   ENDDO OUTPUT_LOOP
-
+   ENDDO VELOCITY_BC_LOOP_2
    ! Exchange EVAC information among meshes
 
    CALL EVAC_EXCHANGE
@@ -405,9 +402,12 @@ MAIN_LOOP: DO
 
    ! Dump global quantities like HRR, MASS, and DEViCes. 
    
-   CALL DUMP_GLOBAL_OUTPUTS(MINVAL(T))
    CALL UPDATE_CONTROLS(T)
- 
+   DO NM=1,NMESHES
+      IF (ACTIVE_MESH(NM)) CALL DUMP_MESH_OUTPUTS(T(NM),NM) 
+   ENDDO
+   CALL DUMP_GLOBAL_OUTPUTS(MINVAL(T))
+   
    ! Dump out diagnostics
  
    IF (DIAGNOSTICS) CALL WRITE_DIAGNOSTICS(T)
