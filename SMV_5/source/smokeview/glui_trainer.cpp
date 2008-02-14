@@ -260,6 +260,8 @@ void ROTATE_CB(int var){
 void TRAINER_CB(int var){
 
   switch (var){
+    int i;
+
   case TRAINER_PAUSE:
     stept=trainer_pause;
     keyboard('t',0,0);
@@ -306,6 +308,12 @@ void TRAINER_CB(int var){
       if(eyeview!=1){
         eyeview=1;
         handle_eyeview(0);
+      }
+      for(i=0;i<ntours;i++){
+        tourdata *touri;
+
+        touri = tourinfo + i;
+        touri->display=0;
       }
       TourMenu(trainer_path);
     }
