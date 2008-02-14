@@ -44,6 +44,7 @@ char callbacks_revision[]="$Revision$";
 void print_gpu_cull_state(void);
 #endif
 
+void update_glui_viewlist(void);
 float gmod(float x, float y);
 void  OBJECT_CB(int flag);
 /* ------------------ WindowStatus ------------------------ */
@@ -74,6 +75,9 @@ void mouse(int button, int state, int x, int y){
   int i;
   float *eye_xyz;
 
+  if(trainer_mode==1){
+    update_glui_viewlist();
+  }
   eye_xyz = camera_current->eye;
   if(selected_view!=-999){
     selected_view=-999;
