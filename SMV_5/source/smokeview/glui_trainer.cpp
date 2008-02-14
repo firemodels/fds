@@ -54,6 +54,12 @@ GLUI_Translation *TRANS_az_elev=NULL;
 GLUI_StaticText *STATIC_alert=NULL;
 GLUI *glui_alert=NULL;
 
+extern "C" void update_glui_viewlist(void){
+  if(trainer_viewpoints!=-11){
+    LIST_viewpoint->set_int_val(-11);
+  }
+}
+
 extern "C" void show_load_alert(void){
   showalert=1;
   if(glui_alert!=NULL)glui_alert->show();
@@ -148,9 +154,7 @@ extern "C" void glui_trainer_setup(int main_window){
   if(AnySlices("TEMPERATURE")==0)BUTTON_temp->disable();
   BUTTON_oxy = glui_trainer->add_button_to_panel(panel_smokeview,"Oxygen",LOAD_OXY,TRAINER_CB);
   if(AnySlices("oxygen")==0)BUTTON_oxy->disable();
-  CHECKBOX_pause=glui_trainer->add_checkbox_to_panel(panel_smokeview,"Pause",&trainer_pause,TRAINER_PAUSE,TRAINER_CB);
-
-
+  
   panel_explore = glui_trainer->add_panel("Explore",true);
 
   trainer_path=-1;
@@ -185,7 +189,9 @@ extern "C" void glui_trainer_setup(int main_window){
       }
     }
   }
+
   CHECKBOX_outline = glui_trainer->add_checkbox_to_panel(panel_explore,"Show walls",&trainer_outline,TRAINEROUTLINE,TRAINER_CB);
+  CHECKBOX_pause = glui_trainer->add_checkbox_to_panel(panel_explore,"Pause",&trainer_pause,TRAINER_PAUSE,TRAINER_CB);
 
   update_trainer_outline();
   panel_move = glui_trainer->add_panel_to_panel(panel_explore,"Move",false);
@@ -203,6 +209,7 @@ extern "C" void glui_trainer_setup(int main_window){
   update_trainer_moves();
 
   TRAINER_CB(MOVETYPE);
+  TRAINER_CB(TRAINERVIEWPOINTS);
 
 }
 #define ANGLE_LEFT -1
@@ -229,7 +236,7 @@ void ROTATE_CB(int var){
     ResetView(RESTORE_EXTERIOR_VIEW);
   }
 
-  if(trainer_viewpoints!=11){
+  if(trainer_viewpoints!=-11){
     LIST_viewpoint->set_int_val(-11);
   }
   if(trainer_path!=-1){
@@ -271,8 +278,15 @@ void TRAINER_CB(int var){
       ResetMenu(trainer_viewpoints);
     }
     if(trainer_path!=-1){
+      int viewpoint_save;
+
+      viewpoint_save=trainer_viewpoints;
       LIST_trainerpath->set_int_val(-1);
       TRAINER_CB(TRAINERPATH);
+      if(viewpoint_save!=-11){
+        LIST_viewpoint->set_int_val(viewpoint_save);
+        ResetMenu(viewpoint_save);
+      }
     }
     break;
   case TRAINEROUTLINE:
