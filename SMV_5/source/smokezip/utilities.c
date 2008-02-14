@@ -320,7 +320,9 @@ int getmaxrevision(void){
   MAXREV(readfiles_revision);
   MAXREV(stats_revision);
   MAXREV(utilities_revision);
+#ifdef pp_LIGHT
   MAXREV(lightsmoke_revision);
+#endif
   return max_revision;
 }
 
