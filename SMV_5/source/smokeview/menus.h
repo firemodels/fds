@@ -2166,7 +2166,7 @@ void TourMenu(int value){
         selected_tour=touri;
       }
       else{
-        for(j=0;i<ntours;i++){
+        for(j=0;j<ntours;j++){
           tourdata *tourj;
 
           tourj = tourinfo + j;
