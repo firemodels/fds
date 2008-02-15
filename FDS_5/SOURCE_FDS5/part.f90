@@ -1486,7 +1486,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
 
             ! Get out of the loop if the droplet has evaporated completely
-            IF (DR%R< =0._EB) CYCLE DROPLET_LOOP
+            IF (DR%R<=0._EB) CYCLE DROPLET_LOOP
 
          ENDDO TIME_ITERATION_LOOP
 
