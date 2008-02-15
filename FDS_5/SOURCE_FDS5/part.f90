@@ -1197,7 +1197,6 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
 
 ! Initializations
-
 RDT    = 1._EB/DT
 OMRAF  = 1._EB - RUN_AVG_FAC
 FUEL_DROPLET_MLR(NM) = 0._EB
@@ -1318,7 +1317,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             MU_AIR = SPECIES(0)%MU(MIN(500,NINT(0.1_EB*TMP_G)))
             M_GAS  = RHO_G/RVC        
             M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT!limit to avoid diveregence errors
-            IF (M_VAP_MAX <= 0._EB) CYCLE DROPLET_LOOP
             K_AIR  = CPOPR*MU_AIR
             IF (IGAS>0) THEN
                Y_GAS = YY(II,JJ,KK,IGAS)
@@ -1415,7 +1413,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
   
             M_VAP = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
             M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP,M_VAP_MAX))
-
             ! Evaporate completely small droplets
 
             IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  
@@ -1489,8 +1486,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
 
             ! Get out of the loop if the droplet has evaporated completely
-
-            IF (DR%R<=0._EB) CYCLE DROPLET_LOOP
+            IF (DR%R< =0._EB) CYCLE DROPLET_LOOP
 
          ENDDO TIME_ITERATION_LOOP
 
@@ -1504,7 +1500,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          ENDIF
          
       ENDDO DROPLET_LOOP
-
       ! Calculate cumulative quantities for droplet "clouds"
 
       WGT   = .5_EB
