@@ -29,18 +29,26 @@ def extract_config_data(config_file):
     print str(len(config_lists)) + " lines read from Configuration file\n"
     
 
-    for each_list in config_lists:
-        #print "First field is "+each_list[0]
-        if each_list[0] == 'q':
+    for list_item in config_lists:
+        #print "First field is "+list_item[0]
+        if list_item[0] == 'q':
             if quantity_counter < 1:
-                quantity_header = each_list[2:]
+                quantity_header = list_item[2:]
             if quantity_counter >= 1:
-                quantities_dict[each_list[1]] = each_list[2:]
-        elif each_list[0] == 'd':
-            data_dict[each_list[2]+"-"+each_list[4]] = each_list[1:]
+                quantities_dict[list_item[1]] = list_item[2:]
+            quantity_counter =+ 1
+        elif list_item[0] == 'd':
+            if data_counter < quantity_counter:
+                data_counter = quantity_counter - 1
+            if data_counter == quantity_counter:
+                data_header = list_item[2:]
+            if data_counter > quantity_counter:
+                data_dict[list_item[2]+"-"+list_item[4]] = list_item[1:]
             #variable = data_dict['FM_SNL_04-T_Upper']['Exp_Start_(min.)']
+            data_counter =+ 1
         else:
             print """No d or q in first cell, blank line or bad config file name."""
+        
     #variable = data_dict['FM_SNL_04-T_Upper']['Exp_Start_(min.)']
     
     # Remove header entries from Dictionaries, maybe pop these out to lists for use later.
