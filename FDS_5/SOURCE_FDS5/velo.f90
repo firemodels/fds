@@ -1248,9 +1248,10 @@ SUBROUTINE MATCH_VELOCITY(NM)
 
 INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,TNOW
+REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,TNOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,OM_UU,OM_VV,OM_WW
 TYPE (OMESH_TYPE), POINTER :: OM
+TYPE (MESH_TYPE), POINTER :: M2
 
 IF (SOLID_PHASE_ONLY .OR. NMESHES==1) RETURN
 
@@ -1288,50 +1289,124 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
    KK  = IJKW( 3,IW)
    IOR = IJKW( 4,IW)
    NOM = IJKW( 9,IW)
-   IIO = IJKW(10,IW)
-   JJO = IJKW(11,IW)
-   KKO = IJKW(12,IW)
    OM => OMESH(NOM)
+   M2 => MESHES(NOM)
+   DA_OTHER = 0._EB
+
    SELECT CASE(ABS(IOR))
       CASE(1)
          IF (PREDICTOR) OM_UU => OM%U
          IF (CORRECTOR) OM_UU => OM%US
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  DA_OTHER = DA_OTHER + M2%DY(JJO)*M2%DZ(KKO)
+               ENDDO
+            ENDDO
+         ENDDO
       CASE(2)
          IF (PREDICTOR) OM_VV => OM%V
          IF (CORRECTOR) OM_VV => OM%VS
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  DA_OTHER = DA_OTHER + M2%DX(IIO)*M2%DZ(KKO)
+               ENDDO
+            ENDDO
+         ENDDO
       CASE(3)
          IF (PREDICTOR) OM_WW => OM%W
          IF (CORRECTOR) OM_WW => OM%WS
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  DA_OTHER = DA_OTHER + M2%DX(IIO)*M2%DY(JJO)
+               ENDDO
+            ENDDO
+         ENDDO
    END SELECT
 
    SELECT CASE(IOR)
       CASE( 1)
-         UU_AVG = 0.5_EB*(UU(0,JJ,KK)+OM_UU(IIO,JJO,KKO))
+         UU_OTHER = 0._EB
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  UU_OTHER = UU_OTHER + OM_UU(IIO,JJO,KKO)*M2%DY(JJO)*M2%DZ(KKO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         UU_AVG = 0.5_EB*(UU(0,JJ,KK) + UU_OTHER)
          IF (PREDICTOR) DS_CORR(IW) = (UU_AVG-UU(0,JJ,KK))*RDX(1)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(UU_AVG-UU(0,JJ,KK))*RDX(1)
          UU(0,JJ,KK)    = UU_AVG
+
       CASE(-1)
-         UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK)+OM_UU(IIO-1,JJO,KKO))
+         UU_OTHER = 0._EB
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  UU_OTHER = UU_OTHER + OM_UU(IIO-1,JJO,KKO)*M2%DY(JJO)*M2%DZ(KKO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK) + UU_OTHER)
          IF (PREDICTOR) DS_CORR(IW) = -(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
          UU(IBAR,JJ,KK) = UU_AVG
+
       CASE( 2)
-         VV_AVG = 0.5_EB*(VV(II,0,KK)+OM_VV(IIO,JJO,KKO))
+         VV_OTHER = 0._EB
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  VV_OTHER = VV_OTHER + OM_VV(IIO,JJO,KKO)*M2%DX(IIO)*M2%DZ(KKO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         VV_AVG = 0.5_EB*(VV(II,0,KK) + VV_OTHER)
          IF (PREDICTOR) DS_CORR(IW) = (VV_AVG-VV(II,0,KK))*RDY(1)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(VV_AVG-VV(II,0,KK))*RDY(1)
          VV(II,0,KK)    = VV_AVG
+
       CASE(-2)
-         VV_AVG = 0.5_EB*(VV(II,JBAR,KK)+OM_VV(IIO,JJO-1,KKO))
+         VV_OTHER = 0._EB
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  VV_OTHER = VV_OTHER + OM_VV(IIO,JJO-1,KKO)*M2%DX(IIO)*M2%DZ(KKO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         VV_AVG = 0.5_EB*(VV(II,JBAR,KK) + VV_OTHER)
          IF (PREDICTOR) DS_CORR(IW) = -(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
          VV(II,JBAR,KK) = VV_AVG
+
       CASE( 3)
-         WW_AVG = 0.5_EB*(WW(II,JJ,0)+OM_WW(IIO,JJO,KKO))
+         WW_OTHER = 0._EB
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  WW_OTHER = WW_OTHER + OM_WW(IIO,JJO,KKO)*M2%DX(IIO)*M2%DY(JJO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         WW_AVG = 0.5_EB*(WW(II,JJ,0) + WW_OTHER)
          IF (PREDICTOR) DS_CORR(IW) = (WW_AVG-WW(II,JJ,0))*RDZ(1)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(WW_AVG-WW(II,JJ,0))*RDZ(1)
          WW(II,JJ,0)    = WW_AVG
+
       CASE(-3)
-         WW_AVG = 0.5_EB*(WW(II,JJ,KBAR)+OM_WW(IIO,JJO,KKO-1))
+         WW_OTHER = 0._EB
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  WW_OTHER = WW_OTHER + OM_WW(IIO,JJO,KKO-1)*M2%DX(IIO)*M2%DY(JJO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         WW_AVG = 0.5_EB*(WW(II,JJ,KBAR) + WW_OTHER)
          IF (PREDICTOR) DS_CORR(IW) = -(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
          WW(II,JJ,KBAR) = WW_AVG

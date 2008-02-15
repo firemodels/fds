@@ -443,7 +443,7 @@ SUBROUTINE COMPUTE_A_B(A,B,NM)
 ! Set up linear system of equations for the coarse grid HBAR
 
 USE GLOBAL_CONSTANTS, ONLY: NCGC, SOLID_BOUNDARY, OPEN_BOUNDARY, PREDICTOR
-REAL(EB) :: A(NCGC,NCGC),B(NCGC),FVX_AVG,FVY_AVG,FVZ_AVG
+REAL(EB) :: A(NCGC,NCGC),B(NCGC),FVX_OTHER,FVY_OTHER,FVZ_OTHER
 TYPE (MESH_TYPE), POINTER :: M2
 TYPE (OMESH_TYPE), POINTER :: OM
 INTEGER :: I,J,K,NM,II,JJ,KK,IIO,JJO,KKO,NOM,IW,IC,JC,KC,N,NO
@@ -479,8 +479,16 @@ K_COARSE: DO KC=1,KBAR2
                      A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)/DX_M(N,NO)
                   !  A(N,N)  = A(N,N)  - DY(JJ)*DZ(KK)*RDXN(II)
                   !  A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)*RDXN(II)
-                     FVX_AVG = 0.5_EB*(OM%FVX(M2%IBAR,JJO,KKO)+FVX(II,JJ,KK))
-                     B(N)    = B(N)    + DY(JJ)*DZ(KK)*FVX_AVG 
+                     FVX_OTHER = 0._EB
+                     DO KKO=IJKW(12,IW),IJKW(15,IW)
+                        DO JJO=IJKW(11,IW),IJKW(14,IW)
+                           DO IIO=IJKW(10,IW),IJKW(13,IW)
+                              FVX_OTHER = FVX_OTHER + OM%FVX(IIO,JJO,KKO)*MIN(1._EB,M2%DY(JJO)*M2%DZ(KKO)/(DY(JJ)*DZ(KK)))
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                     FVX_AVG(IW) = 0.5_EB*(FVX_OTHER+FVX(II,JJ,KK))
+                     B(N)        = B(N)    + DY(JJ)*DZ(KK)*FVX_AVG(IW)
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DY(JJ)*DZ(KK)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
@@ -516,8 +524,16 @@ K_COARSE: DO KC=1,KBAR2
                      A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)/DX_M(N,NO)
                   !  A(N,N)  = A(N,N)  - DY(JJ)*DZ(KK)*RDXN(II)
                   !  A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)*RDXN(II)
-                     FVX_AVG = 0.5_EB*(OM%FVX(0,JJO,KKO)+FVX(II,JJ,KK))
-                     B(N)    = B(N)    - DY(JJ)*DZ(KK)*FVX_AVG
+                     FVX_OTHER = 0._EB
+                     DO KKO=IJKW(12,IW),IJKW(15,IW)
+                        DO JJO=IJKW(11,IW),IJKW(14,IW)
+                           DO IIO=IJKW(10,IW),IJKW(13,IW)
+                              FVX_OTHER = FVX_OTHER + OM%FVX(IIO-1,JJO,KKO)*MIN(1._EB,M2%DY(JJO)*M2%DZ(KKO)/(DY(JJ)*DZ(KK)))
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                     FVX_AVG(IW) = 0.5_EB*(FVX_OTHER+FVX(II,JJ,KK))
+                     B(N)        = B(N)    - DY(JJ)*DZ(KK)*FVX_AVG(IW)
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DY(JJ)*DZ(KK)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
@@ -553,8 +569,16 @@ K_COARSE: DO KC=1,KBAR2
                      A(N,NO) = A(N,NO) + DX(II)*DZ(KK)/DY_M(N,NO)
                   !  A(N,N)  = A(N,N)  - DX(II)*DZ(KK)*RDYN(JJ)
                   !  A(N,NO) = A(N,NO) + DX(II)*DZ(KK)*RDYN(JJ)
-                     FVY_AVG = 0.5_EB*(OM%FVY(IIO,M2%JBAR,KKO)+FVY(II,JJ,KK))
-                     B(N)    = B(N)    + DX(II)*DZ(KK)*FVY_AVG
+                     FVY_OTHER = 0._EB
+                     DO KKO=IJKW(12,IW),IJKW(15,IW)
+                        DO JJO=IJKW(11,IW),IJKW(14,IW)
+                           DO IIO=IJKW(10,IW),IJKW(13,IW)
+                              FVY_OTHER = FVY_OTHER + OM%FVY(IIO,JJO,KKO)*MIN(1._EB,M2%DX(IIO)*M2%DZ(KKO)/(DX(II)*DZ(KK)))
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                     FVY_AVG(IW) = 0.5_EB*(FVY_OTHER+FVY(II,JJ,KK))
+                     B(N)        = B(N)    + DX(II)*DZ(KK)*FVY_AVG(IW)
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DX(II)*DZ(KK)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
@@ -590,8 +614,16 @@ K_COARSE: DO KC=1,KBAR2
                      A(N,NO) = A(N,NO) + DX(II)*DZ(KK)/DY_M(N,NO)
                   !  A(N,N)  = A(N,N)  - DX(II)*DZ(KK)*RDYN(JJ)
                   !  A(N,NO) = A(N,NO) + DX(II)*DZ(KK)*RDYN(JJ)
-                     FVY_AVG  = 0.5_EB*(OM%FVY(IIO,0,KKO)+FVY(II,JJ,KK))
-                     B(N)     = B(N)   - DX(II)*DZ(KK)*FVY_AVG
+                     FVY_OTHER = 0._EB
+                     DO KKO=IJKW(12,IW),IJKW(15,IW)
+                        DO JJO=IJKW(11,IW),IJKW(14,IW)
+                           DO IIO=IJKW(10,IW),IJKW(13,IW)
+                              FVY_OTHER = FVY_OTHER + OM%FVY(IIO,JJO-1,KKO)*MIN(1._EB,M2%DX(IIO)*M2%DZ(KKO)/(DX(II)*DZ(KK)))
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                     FVY_AVG(IW)  = 0.5_EB*(FVY_OTHER+FVY(II,JJ,KK))
+                     B(N)         = B(N)   - DX(II)*DZ(KK)*FVY_AVG(IW)
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DX(II)*DZ(KK)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
@@ -627,8 +659,16 @@ K_COARSE: DO KC=1,KBAR2
                      A(N,NO) = A(N,NO) + DX(II)*DY(JJ)/DZ_M(N,NO) 
                   !  A(N,N)  = A(N,N)  - DX(II)*DY(JJ)*RDZN(KK)
                   !  A(N,NO) = A(N,NO) + DX(II)*DY(JJ)*RDZN(KK)
-                     FVZ_AVG = 0.5_EB*(OM%FVZ(IIO,JJO,M2%KBAR)+FVZ(II,JJ,KK))
-                     B(N)    = B(N)    + DX(II)*DY(JJ)*FVZ_AVG
+                     FVZ_OTHER = 0._EB
+                     DO KKO=IJKW(12,IW),IJKW(15,IW)
+                        DO JJO=IJKW(11,IW),IJKW(14,IW)
+                           DO IIO=IJKW(10,IW),IJKW(13,IW)
+                              FVZ_OTHER = FVZ_OTHER + OM%FVZ(IIO,JJO,KKO)*MIN(1._EB,M2%DX(IIO)*M2%DY(JJO)/(DX(II)*DY(JJ)))
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                     FVZ_AVG(IW) = 0.5_EB*(FVZ_OTHER+FVZ(II,JJ,KK))
+                     B(N)        = B(N)    + DX(II)*DY(JJ)*FVZ_AVG(IW)
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DX(II)*DY(JJ)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
@@ -664,8 +704,16 @@ K_COARSE: DO KC=1,KBAR2
                      A(N,NO) = A(N,NO) + DX(II)*DY(JJ)/DZ_M(N,NO) 
                   !  A(N,N)  = A(N,N)  - DX(II)*DY(JJ)*RDZN(KK)
                   !  A(N,NO) = A(N,NO) + DX(II)*DY(JJ)*RDZN(KK)
-                     FVZ_AVG = 0.5_EB*(OM%FVZ(IIO,JJO,0)+FVZ(II,JJ,KK))
-                     B(N)    = B(N)    - DX(II)*DY(JJ)*FVZ_AVG
+                     FVZ_OTHER = 0._EB
+                     DO KKO=IJKW(12,IW),IJKW(15,IW)
+                        DO JJO=IJKW(11,IW),IJKW(14,IW)
+                           DO IIO=IJKW(10,IW),IJKW(13,IW)
+                              FVZ_OTHER = FVZ_OTHER + OM%FVZ(IIO,JJO,KKO-1)*MIN(1._EB,M2%DX(IIO)*M2%DY(JJO)/(DX(II)*DY(JJ)))
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                     FVZ_AVG(IW) = 0.5_EB*(FVZ_OTHER+FVZ(II,JJ,KK))
+                     B(N)        = B(N)    - DX(II)*DY(JJ)*FVZ_AVG(IW)
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DX(II)*DY(JJ)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
@@ -700,7 +748,7 @@ USE GLOBAL_CONSTANTS, ONLY: NCGC, SOLID_BOUNDARY, OPEN_BOUNDARY, PREDICTOR, TWO_
 USE POIS, ONLY: H3CZSS, H2CZSS
 REAL(EB) :: B(NCGC),DHDX_F,DHDX_S,DHDY_F,DHDY_S,DHDZ_F,DHDZ_S,DA, &
             AREA_XS,AREA_XF,AREA_YS,AREA_YF,AREA_ZS,AREA_ZF, &
-            DUDT,DVDT,DWDT,RDT,B_OTHER,FVX_AVG,FVY_AVG,FVZ_AVG, &
+            DUDT,DVDT,DWDT,RDT,B_OTHER, &
             AREA_XS_CLOSED,AREA_XF_CLOSED, &
             AREA_YS_CLOSED,AREA_YF_CLOSED, &
             AREA_ZS_CLOSED,AREA_ZF_CLOSED
@@ -803,7 +851,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
             AREA_ZF = 0._EB 
 
             ! Loop over all external wall cells and compute (Sum dH/dn) for each face of mesh
- 
+
             WALL_CELL_LOOP: DO IW=1,NEWC
  
                II  = IJKW(1,IW)
@@ -814,9 +862,9 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                IF (II<II_LOW .OR. II>II_HIGH) CYCLE WALL_CELL_LOOP
                IF (JJ<JJ_LOW .OR. JJ>JJ_HIGH) CYCLE WALL_CELL_LOOP
                IF (KK<KK_LOW .OR. KK>KK_HIGH) CYCLE WALL_CELL_LOOP
-               NOM = IJKW(9,IW)
 
-               IF_INTERPOLATED_BOUNDARY: IF (NOM>0) THEN
+               IF_INTERPOLATED_BOUNDARY: IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                  NOM = IJKW(9,IW)
                   OM  => OMESH(NOM)
                   M2  => MESHES(NOM)
                   IIO = IJKW(10,IW)
@@ -826,44 +874,38 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                   SELECT CASE(IOR)
                      CASE( 1) 
                         DA      = DY(JJ)*DZ(KK)
-                        FVX_AVG = 0.5_EB*(OM%FVX(M2%IBAR,JJO,KKO)+FVX(0,JJ,KK))
-                     !  DHDX_S = DHDX_S + DA* (  FVX_AVG-FVX(0,JJ,KK) + (B(N)-B(NO))*RDXN(0) &
-                        DHDX_S = DHDX_S + DA* (  FVX_AVG-FVX(0,JJ,KK) + (B(N)-B(NO))/DX_M(N,NO) &
+                     !  DHDX_S = DHDX_S + DA* (  FVX_AVG(IW)-FVX(0,JJ,KK) + (B(N)-B(NO))*RDXN(0) &
+                        DHDX_S = DHDX_S + DA* (  FVX_AVG(IW)-FVX(0,JJ,KK) + (B(N)-B(NO))/DX_M(N,NO) &
                               - (H(1,JJ,KK)-H(0,JJ,KK))*RDXN(0) )
                         AREA_XS = AREA_XS + DA
                      CASE(-1)
                         DA      = DY(JJ)*DZ(KK)
-                        FVX_AVG = 0.5_EB*(OM%FVX(0,JJO,KKO)+FVX(IBAR,JJ,KK))
-                      ! DHDX_F = DHDX_F + DA* (  FVX_AVG-FVX(IBAR,JJ,KK) + (B(NO)-B(N))*RDXN(IBAR) &
-                        DHDX_F = DHDX_F + DA* (  FVX_AVG-FVX(IBAR,JJ,KK) + (B(NO)-B(N))/DX_M(N,NO) &
+                      ! DHDX_F = DHDX_F + DA* (  FVX_AVG(IW)-FVX(IBAR,JJ,KK) + (B(NO)-B(N))*RDXN(IBAR) &
+                        DHDX_F = DHDX_F + DA* (  FVX_AVG(IW)-FVX(IBAR,JJ,KK) + (B(NO)-B(N))/DX_M(N,NO) &
                               - (H(IBP1,JJ,KK)-H(IBAR,JJ,KK))*RDXN(IBAR) )
                         AREA_XF = AREA_XF + DA
                      CASE( 2)
                         DA      = DX(II)*DZ(KK)
-                        FVY_AVG = 0.5_EB*(OM%FVY(IIO,M2%JBAR,KKO)+FVY(II,0,KK))
-                     !  DHDY_S = DHDY_S + DA* (  FVY_AVG-FVY(II,0,KK) + (B(N)-B(NO))*RDYN(0) &
-                        DHDY_S = DHDY_S + DA* (  FVY_AVG-FVY(II,0,KK) + (B(N)-B(NO))/DY_M(N,NO) &
+                     !  DHDY_S = DHDY_S + DA* (  FVY_AVG(IW)-FVY(II,0,KK) + (B(N)-B(NO))*RDYN(0) &
+                        DHDY_S = DHDY_S + DA* (  FVY_AVG(IW)-FVY(II,0,KK) + (B(N)-B(NO))/DY_M(N,NO) &
                               - (H(II,1,KK)-H(II,0,KK))*RDYN(0) )
                         AREA_YS = AREA_YS + DA
                      CASE(-2)
                         DA      = DX(II)*DZ(KK)
-                        FVY_AVG = 0.5_EB*(OM%FVY(IIO,0,KKO)+FVY(II,JBAR,KK))
-                     !  DHDY_F = DHDY_F + DA* (  FVY_AVG-FVY(II,JBAR,KK) + (B(NO)-B(N))*RDYN(JBAR) &
-                        DHDY_F = DHDY_F + DA* (  FVY_AVG-FVY(II,JBAR,KK) + (B(NO)-B(N))/DY_M(N,NO) &
+                     !  DHDY_F = DHDY_F + DA* (  FVY_AVG(IW)-FVY(II,JBAR,KK) + (B(NO)-B(N))*RDYN(JBAR) &
+                        DHDY_F = DHDY_F + DA* (  FVY_AVG(IW)-FVY(II,JBAR,KK) + (B(NO)-B(N))/DY_M(N,NO) &
                               - (H(II,JBP1,KK)-H(II,JBAR,KK))*RDYN(JBAR) )
                         AREA_YF = AREA_YF + DA
                      CASE( 3)
                         DA      = DX(II)*DY(JJ)
-                        FVZ_AVG = 0.5_EB*(OM%FVZ(IIO,JJO,M2%KBAR)+FVZ(II,JJ,0))
-                     !  DHDZ_S = DHDZ_S + DA* (  FVZ_AVG-FVZ(II,JJ,0) + (B(N)-B(NO))*RDZN(0) &
-                        DHDZ_S = DHDZ_S + DA* (  FVZ_AVG-FVZ(II,JJ,0) + (B(N)-B(NO))/DZ_M(N,NO) &
+                     !  DHDZ_S = DHDZ_S + DA* (  FVZ_AVG(IW)-FVZ(II,JJ,0) + (B(N)-B(NO))*RDZN(0) &
+                        DHDZ_S = DHDZ_S + DA* (  FVZ_AVG(IW)-FVZ(II,JJ,0) + (B(N)-B(NO))/DZ_M(N,NO) &
                               - (H(II,JJ,1)-H(II,JJ,0))*RDZN(0) )
                         AREA_ZS = AREA_ZS + DA
                      CASE(-3)
                         DA      = DX(II)*DY(JJ)
-                        FVZ_AVG = 0.5_EB*(OM%FVZ(IIO,JJO,0)+FVZ(II,JJ,KBAR))
-                     !  DHDZ_F = DHDZ_F + DA* (  FVZ_AVG-FVZ(II,JJ,KBAR) + (B(NO)-B(N))*RDZN(KBAR) &
-                        DHDZ_F = DHDZ_F + DA* (  FVZ_AVG-FVZ(II,JJ,KBAR) + (B(NO)-B(N))/DZ_M(N,NO)    &
+                     !  DHDZ_F = DHDZ_F + DA* (  FVZ_AVG(IW)-FVZ(II,JJ,KBAR) + (B(NO)-B(N))*RDZN(KBAR) &
+                        DHDZ_F = DHDZ_F + DA* (  FVZ_AVG(IW)-FVZ(II,JJ,KBAR) + (B(NO)-B(N))/DZ_M(N,NO)    &
                               - (H(II,JJ,KBP1)-H(II,JJ,KBAR))*RDZN(KBAR) )
                         AREA_ZF = AREA_ZF + DA
                   END SELECT
