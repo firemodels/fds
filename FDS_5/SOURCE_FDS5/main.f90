@@ -852,7 +852,7 @@ ENDDO
 
 DO NM=1,NMESHES
    DO NOM=1,NMESHES
-      IF (VDOT(NM,NOM)/=0._EB) WRITE(LU_ERR,'(A,I2,A,I2,A,F12.6)') 'Volume Flow from ',NM,' to ',NOM,' = ',VDOT(NM,NOM)
+      IF (VDOT(NM,NOM)/=0._EB) WRITE(LU_ERR,'(A,I2,A,I2,A,E12.6)') 'Volume Flow from ',NM,' to ',NOM,' = ',VDOT(NM,NOM)
    ENDDO
 ENDDO
  
