@@ -6,7 +6,7 @@ from decimal import Decimal
 ### Set Global Variables
 
 data_directory = "../../Validation/"
-output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES"
+output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
 config_file_name = "Validation_Data_Config_File.csv"
 
 scatter_data_dict = {}
@@ -18,94 +18,90 @@ def extract_config_data(config_file):
     # Collect Data from Config File
     quantities_dict = {}
     data_dict = {}
-    quantity_counter=0
-    data_counter=0
+    keyed_quantities = {}
+    keyed_data = {}
+    quantity_counter = 0
+    data_counter = 0
     
     fh = file(config_file, 'U')
     data_array = csv.reader(fh)
     
     config_lists = [list(sublist) for sublist in data_array]
-    #print config_test_lists
+    #print config_lists
     print str(len(config_lists)) + " lines read from Configuration file\n"
     
-
+    #Build Quantity and Data Dictionaries, with values keyed by config column name.
     for list_item in config_lists:
-        #print "First field is "+list_item[0]
         if list_item[0] == 'q':
             if quantity_counter < 1:
                 quantity_header = list_item[2:]
             if quantity_counter >= 1:
-                quantities_dict[list_item[1]] = list_item[2:]
-            quantity_counter =+ 1
+                for x in range(len(quantity_header)):
+                    keyed_quantities[quantity_header[x]] = list_item[x+2]
+                quantities_dict[list_item[1]] = keyed_quantities
+                keyed_quantities = {}
+            quantity_counter += 1
         elif list_item[0] == 'd':
             if data_counter < quantity_counter:
                 data_counter = quantity_counter - 1
-            if data_counter == quantity_counter:
-                data_header = list_item[2:]
-            if data_counter > quantity_counter:
-                data_dict[list_item[2]+"-"+list_item[4]] = list_item[1:]
-            #variable = data_dict['FM_SNL_04-T_Upper']['Exp_Start_(min.)']
-            data_counter =+ 1
+                data_header = list_item[1:]
+            if data_counter >= quantity_counter:
+                for x in range(len(data_header)):
+                    keyed_data[data_header[x]] = list_item[x+1]
+                data_key_name = list_item[2]+"-"+list_item[4]
+                data_dict[data_key_name] = keyed_data
+                keyed_data = {}
+            data_counter += 1
         else:
-            print """No d or q in first cell, blank line or bad config file name."""
-        
-    #variable = data_dict['FM_SNL_04-T_Upper']['Exp_Start_(min.)']
-    
-    # Remove header entries from Dictionaries, maybe pop these out to lists for use later.
-    quant_header = quantities_dict.pop('Index')
-    data_header = data_dict.pop('Dataname-Exp_Col_Name')
+            print """No d or q in first cell, skip to next row."""
     
     #Convert quantities keys from string to integer.
     tempdict = dict((int(k), v) for k,v in quantities_dict.iteritems())
     quantities_dict = tempdict
     
-    #Diagnostics:
-    #print sorted(quantities_dict)
-    #print quant_header
-    #print data_header
-    
     # Return a single list object containing the dictionaries.
-    return [quant_header,quantities_dict,data_header,data_dict]
+    return [quantities_dict,data_dict]
+
+def compute_difference(m_p,m_o,e_p,e_o):
+    # Equation to compute relative difference of model and experimental data.
+    M_p = float(m_p) #Peak value of Model Prediction to float
+    M_o = float(m_o) #Original value of Model Prediction to float
+    E_p = float(e_p) #Peak value of Experimental Measurement to float
+    E_o = float(e_o) #Original value of Experimental Measurement to float
+    e = (((M_p-M_o)-(E_p-E_o))/(E_p-E_o))
+    return e
 
 def extract_comp_data(comp_file_info):
     ## Read in from config file and Process data from Source .csv files.
-    
-    #print comp_file_info
     
     exp_data_dict = {}
     mod_data_dict = {}
     
     #List of variables from configuration file
     
-    exp_data_filename = comp_file_info[2] #String of filename
-    exp_column_name = comp_file_info[3] #Experimental Data Column Name
-    mod_data_filename = comp_file_info[10] #String of filename
-    mod_column_name = comp_file_info[11] #Experimental Data Column Name
+    exp_data_filename = comp_file_info['Exp_Filename'] #String of filename
+    exp_column_name = comp_file_info['Exp_Col_Name'] #Experimental Data Column Name
+    mod_data_filename = comp_file_info['Mod_Filename'] #String of filename
+    mod_column_name = comp_file_info['Mod_Col_Name'] #Experimental Data Column Name
     
-    scatter_data_label = comp_file_info[0]+"-"+comp_file_info[1]+"-"+comp_file_info[3]
+    scatter_data_label = comp_file_info['Quantity']+"-"+comp_file_info['Dataname']+"-"+comp_file_info['Exp_Col_Name']
     
-    exp_start_time_data_val = comp_file_info[5] #String in minutes to start exp plot data
-    exp_stop_time_data_val = comp_file_info[6]  #String in minutes to stop exp plot data
-    exp_start_time_comp_val = comp_file_info[7] #String in minutes to start exp compare data
-    exp_stop_time_comp_val = comp_file_info[8]  #String in minutes to start exp compare data
-    exp_initial_value = comp_file_info[9]       #Initial Value for Quantity
+    exp_start_time_data_val = comp_file_info['Exp_Start_(min.)'] #String in minutes to start exp plot data
+    exp_stop_time_data_val = comp_file_info['Exp_End_(min.)']  #String in minutes to stop exp plot data
+    exp_start_time_comp_val = comp_file_info['Exp_Comp_Start_(min.)'] #String in minutes to start exp compare data
+    exp_stop_time_comp_val = comp_file_info['Exp_Comp_End_(min.)']  #String in minutes to start exp compare data
+    exp_initial_value = comp_file_info['Exp_Intitial_Value']       #Initial Value for Quantity
     
-    mod_start_time_data_val = comp_file_info[13] #String in minutes to start mod plot data
-    mod_stop_time_data_val = comp_file_info[14]  #String in minutes to stop mod plot data
-    mod_start_time_comp_val = comp_file_info[15] #String in minutes to start mod compare data
-    mod_stop_time_comp_val = comp_file_info[16]  #String in minutes to start mod compare data
-    mod_initial_value = comp_file_info[17]       #Initial Value for Quantity
+    mod_start_time_data_val = comp_file_info['Mod_Start_(min.)'] #String in minutes to start mod plot data
+    mod_stop_time_data_val = comp_file_info['Mod_End_(min.)']  #String in minutes to stop mod plot data
+    mod_start_time_comp_val = comp_file_info['Mod_Comp_Start_(min.)'] #String in minutes to start mod compare data
+    mod_stop_time_comp_val = comp_file_info['Mod_Comp_End_(min.)']  #String in minutes to start mod compare data
+    mod_initial_value = comp_file_info['Mod_Intitial_Value']       #Initial Value for Quantity
     
-    min_max = comp_file_info[18] #String indicating if min or max value is required.
+    min_max = comp_file_info['max/min'] #String indicating if min or max value is required.
 
     def find_start_stop_index(data_dict,col_name,start_time_data,stop_time_data,start_time_comp,stop_time_comp):
         #This function is used to find index numbers for start and stop points in plotting and min-max values.
-        
-        ##Echo Input Values Diagnostic.
-        #print start_time_data
-        #print stop_time_data
-        #print start_time_comp
-        #print stop_time_comp
         
         rowcounter1 = 0
         for time_value1 in data_dict[col_name]:
@@ -243,15 +239,6 @@ def extract_comp_data(comp_file_info):
     
     return [exp_data,mod_data]
 
-def compute_difference(m_p,m_o,e_p,e_o):
-    # Equation to compute relative difference of model and experimental data.
-    M_p = float(m_p) #Peak value of Model Prediction to float
-    M_o = float(m_o) #Original value of Model Prediction to float
-    E_p = float(e_p) #Peak value of Experimental Measurement to float
-    E_o = float(e_o) #Original value of Experimental Measurement to float
-    e = (((M_p-M_o)-(E_p-E_o))/(E_p-E_o))
-    return e
-
 
 ## Plot Validation Data to PDF files
 ## Two kinds of plots... Comparison and Scatter
@@ -260,24 +247,23 @@ def comparison_plot(plot_data,exp_data,mod_data):
     #plot_data is the items from the 'd' rows of the config file.
     
     # Variables for plot.
-    plot_title = plot_data[19]
-    x_title = plot_data[20]
-    y_title = plot_data[21]   
-    min_x = float(plot_data[22])
-    max_x = float(plot_data[23])
-    min_y = float(plot_data[24])
-    max_y = float(plot_data[25])
-    title_quadrant = int(plot_data[26])
-    key_quadrant = int(plot_data[27])
-    plot_width = int(plot_data[28])
+    plot_title = plot_data['Plot_Title']
+    x_title = plot_data['X_Title']
+    y_title = plot_data['Y_Title']   
+    min_x = float(plot_data['Min_X'])
+    max_x = float(plot_data['Max_X'])
+    min_y = float(plot_data['Min_Y'])
+    max_y = float(plot_data['Max_Y'])
+    title_quadrant = int(plot_data['Title_Quadrant'])
+    key_quadrant = int(plot_data['Key_Quadrant'])
+    plot_width = int(plot_data['Plot_Width'])
     
     #Set plot legend key text.
-    exp_key = plot_data[4]
-    mod_key = plot_data[12] 
+    exp_key = plot_data['Exp_Key']
+    mod_key = plot_data['Mod_Key'] 
     
     #Create filename from fields in input file record.
-    plot_file_name = plot_data[1]+"-"+plot_data[3]+".pdf"
-    print plot_file_name
+    plot_file_name = plot_data["Plot_Filename"]
     
     # Determine the location for the key, alignment based on key_quadrant setting.
     if key_quadrant == 1:
@@ -327,36 +313,38 @@ def comparison_plot(plot_data,exp_data,mod_data):
         g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
         
     # Write the output
-    g.writePDFfile(plot_file_name)
+    plot_file_path = output_directory+plot_file_name
+    g.writePDFfile(plot_file_path)
+    print "Plot to: \n", plot_file_path+".PDF"
 
 
 def scatter_plot(plot_info,data_set):
     #plot_info is details about the overall plot layout and text.
     #data_set is a dictionary keyed by test name containing lists of X and Y data points.
-    print plot_info
-    print data_set
+    #print plot_info
+    #print data_set
     
     for quantity_number in plot_info:
         # Set variables for Plot extracted from the first group of lines in config file starting with 'q'.
         
         # Variables for plot.
-        plot_title = plot_info[int(quantity_number)][1]
-        print plot_title
-        x_title = plot_info[int(quantity_number)][2]
-        y_title = plot_info[int(quantity_number)][3]
-        min_x = float(plot_info[int(quantity_number)][4])
-        print min_x
-        max_x = float(plot_info[int(quantity_number)][5])
-        print max_x
-        min_y = float(plot_info[int(quantity_number)][4])
-        max_y = float(plot_info[int(quantity_number)][5])
-        percent_error = int(plot_info[int(quantity_number)][6])
-        title_quadrant = int(plot_info[int(quantity_number)][7])
-        key_quadrant = int(plot_info[int(quantity_number)][8])
-        plot_width = int(plot_info[int(quantity_number)][9])
+        plot_title = plot_info[int(quantity_number)]['Scatter_Plot_Title']
+        #print plot_title
+        x_title = plot_info[int(quantity_number)]['X_Title']
+        y_title = plot_info[int(quantity_number)]['Y_Title']
+        min_x = float(plot_info[int(quantity_number)]['Plot_Min'])
+        #print min_x
+        max_x = float(plot_info[int(quantity_number)]['Plot_Max'])
+        #print max_x
+        min_y = float(plot_info[int(quantity_number)]['Plot_Min'])
+        max_y = float(plot_info[int(quantity_number)]['Plot_Max'])
+        percent_error = int(plot_info[int(quantity_number)]['%error'])
+        title_quadrant = int(plot_info[int(quantity_number)]['Title_Quadrant'])
+        key_quadrant = int(plot_info[int(quantity_number)]['Key_Quadrant'])
+        plot_width = int(plot_info[int(quantity_number)]['Plot_Width'])
         
         #Create filename from fields in input file record.
-        plot_file_name = plot_info[int(quantity_number)][0]+".pdf"
+        plot_file_name = plot_info[int(quantity_number)]['Plot_Filename']
         print plot_file_name
         
         # Determine the location for the key, alignment based on key_quadrant setting.
@@ -387,15 +375,15 @@ def scatter_plot(plot_info,data_set):
         
         #Plot Midline and Error bounds lines.
         errorLineCenterPoints = [[min_x,min_y],[max_x,max_y]]
-        print errorLineCenterPoints
+        #print errorLineCenterPoints
         lower_bound = max_y - max_y * percent_error / 100
-        print lower_bound
+        #print lower_bound
         errorLineLowerPoints = [[min_x,min_y],[max_x,lower_bound]]
-        print errorLineLowerPoints
+        #print errorLineLowerPoints
         upper_bound = max_y + max_y * percent_error / 100.0
-        print upper_bound
+        #print upper_bound
         errorLineUpperPoints = [[min_x,min_y],[max_x,upper_bound]]
-        print errorLineUpperPoints
+        #print errorLineUpperPoints
         
         g.plot(graph.data.points(errorLineCenterPoints, title=None, x=1, y=2),
                 [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
@@ -410,8 +398,9 @@ def scatter_plot(plot_info,data_set):
         # Iterate over items in data dictionary key for keys that are not [].
         for data in data_set[quantity_number]:
         # Plot Experimental data
-            print data[0]
-            print data[1]
+            print "Hi"
+            #print data[0]
+            #print data[1]
             #g.plot(graph.data.points(data[1], title=data[0], x=1, y=2))
             #    [graph.style.symbol()])
   
@@ -429,45 +418,50 @@ def scatter_plot(plot_info,data_set):
             g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
             
         # Write the output
-        g.writePDFfile(plot_file_name)
+        plot_file_path = output_directory+plot_file_name
+        print plot_file_path
+        #g.writePDFfile(plot_file_path)
     
 
 ### Start of Main Code
 
 #Get information from config file.
 config_and_data_dicts = extract_config_data(config_file_name)
-print "There are "+str(len(config_and_data_dicts[1]))+" quantities to process."
-print "There are "+str(len(config_and_data_dicts[3]))+" data sets to plot."
+print "There are "+str(len(config_and_data_dicts[0]))+" quantities to process."
+print "There are "+str(len(config_and_data_dicts[1]))+" data sets to plot."
 
 ## Create comparison plots
-for data_record in config_and_data_dicts[3]:
+for data_record in config_and_data_dicts[1]:
     # Extract relevant portions of comparison data as defined in config file.
-    comp_data_to_plot = extract_comp_data(config_and_data_dicts[3][data_record])
+    comp_data_to_plot = extract_comp_data(config_and_data_dicts[1][data_record])
+    
+    #Seperate experimental and model data lists.
     exp_plot_data = comp_data_to_plot[0]
     mod_plot_data = comp_data_to_plot[1]
     
-    # Create plots
-    comparison_plot(config_and_data_dicts[3][data_record],exp_plot_data,mod_plot_data)
+    # Create plot for data_record.
+    comparison_plot(config_and_data_dicts[1][data_record],exp_plot_data,mod_plot_data)
 
 
-## Create scatter plots
-scatter_quantity = 1
-temp_scatter_data_list = []
-
-for scatter_plot_record in config_and_data_dicts[1]:
-    #print "s record", scatter_plot_record
-    #print "Quantity:", config_and_data_dicts[1][scatter_plot_record][0]
-    for scatter_data_key in sorted(scatter_data_dict):
-    	#print scatter_quantity
-        split_key = split("-",scatter_data_key)
-        if scatter_data_key[0] == str(scatter_plot_record) and scatter_plot_record != []:
-            #print "Test name:", split_key[1]
-            #print scatter_data_dict[scatter_data_key][:2]
-            temp_scatter_data_list.append([split_key[1], scatter_data_dict[scatter_data_key][:2]])
-            
-    combined_scatter_data[scatter_quantity] = temp_scatter_data_list
-    temp_scatter_data_list = []
-    scatter_quantity = scatter_quantity + 1
+### Create scatter plots
+#scatter_quantity = 1
+#temp_scatter_data_list = []
+#
+##Grouping Scatter Data by Quantity
+#for scatter_plot_record in sorted(config_and_data_dicts[0]):
+#    print "s record", scatter_plot_record
+#    print "Quantity:", config_and_data_dicts[0][scatter_plot_record]['Comparison_Quantities']
+#    for scatter_data_key in sorted(scatter_data_dict):
+#    	print scatter_data_key
+#        split_key = split("-",scatter_data_key)
+#        if scatter_data_key[0] == str(scatter_plot_record) and scatter_plot_record != []:
+#            #print "Test name:", split_key[1]
+#            #print scatter_data_dict[scatter_data_key][:2]
+#            temp_scatter_data_list.append([split_key[1], scatter_data_dict[scatter_data_key][:2]])
+#            
+#    combined_scatter_data[scatter_quantity] = temp_scatter_data_list
+#    temp_scatter_data_list = []
+#    scatter_quantity = scatter_quantity + 1
         
     #scatter_plot_info = config_and_data_dicts[1][scatter_plot_record]
     #print scatter_plot_info	print scatter_data_key, scatter_data_dict[scatter_data_key]
@@ -475,7 +469,7 @@ for scatter_plot_record in config_and_data_dicts[1]:
 #print combined_scatter_data
     
 # Create plots
-scatter_plot(config_and_data_dicts[1],combined_scatter_data)
+#scatter_plot(config_and_data_dicts[1],combined_scatter_data)
     
 ## Write Summary Data to File.
 #NRC Comparisons Output
