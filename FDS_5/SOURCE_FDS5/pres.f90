@@ -462,8 +462,6 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II,JJ,KK)
                   A(N,N)  = A(N,N)  - DY(JJ)*DZ(KK)/DX_M(N,NO)
                   A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)/DX_M(N,NO)
-                ! A(N,N)  = A(N,N)  - DY(JJ)*DZ(KK)*RDXN(II)
-                ! A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)*RDXN(II)
                   B(N)    = B(N)    + DY(JJ)*DZ(KK)*FVX(II,JJ,KK)
                ELSE 
                   IW = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),-1)
@@ -477,8 +475,6 @@ K_COARSE: DO KC=1,KBAR2
                      NO  = M2%CGI(IIO,JJO,KKO)
                      A(N,N)  = A(N,N)  - DY(JJ)*DZ(KK)/DX_M(N,NO)
                      A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)/DX_M(N,NO)
-                  !  A(N,N)  = A(N,N)  - DY(JJ)*DZ(KK)*RDXN(II)
-                  !  A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)*RDXN(II)
                      FVX_OTHER = 0._EB
                      DO KKO=IJKW(12,IW),IJKW(15,IW)
                         DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -492,8 +488,7 @@ K_COARSE: DO KC=1,KBAR2
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DY(JJ)*DZ(KK)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
-                     A(N,N) = A(N,N) - 2._EB/DX_M(N,N)   *DY(JJ)*DZ(KK)
-                   ! A(N,N) = A(N,N) - 2._EB*RDXN(II)   *DY(JJ)*DZ(KK)
+                     A(N,N) = A(N,N) - 2._EB/DX_M(N,N)*DY(JJ)*DZ(KK)
                      B(N)   = B(N)   + FVX(II,JJ,KK) *DY(JJ)*DZ(KK)- DY(JJ)*DZ(KK)*(H(II,JJ,KK)+H(II+1,JJ,KK))/DX_M(N,N)
                   ENDIF
                ENDIF
@@ -507,8 +502,6 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II+1,JJ,KK)
                   A(N,N)  = A(N,N)  - DY(JJ)*DZ(KK)/DX_M(N,NO)
                   A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)/DX_M(N,NO)
-               !  A(N,N)  = A(N,N)  - DY(JJ)*DZ(KK)*RDXN(II)
-               !  A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)*RDXN(II)
                   B(N)    = B(N)    - DY(JJ)*DZ(KK)*FVX(II,JJ,KK)
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),1)
@@ -522,8 +515,6 @@ K_COARSE: DO KC=1,KBAR2
                      NO  = M2%CGI(IIO,JJO,KKO)
                      A(N,N)  = A(N,N)  - DY(JJ)*DZ(KK)/DX_M(N,NO)
                      A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)/DX_M(N,NO)
-                  !  A(N,N)  = A(N,N)  - DY(JJ)*DZ(KK)*RDXN(II)
-                  !  A(N,NO) = A(N,NO) + DY(JJ)*DZ(KK)*RDXN(II)
                      FVX_OTHER = 0._EB
                      DO KKO=IJKW(12,IW),IJKW(15,IW)
                         DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -537,8 +528,7 @@ K_COARSE: DO KC=1,KBAR2
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DY(JJ)*DZ(KK)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
-                     A(N,N) = A(N,N) - 2._EB/DX_M(N,N)  *DY(JJ)*DZ(KK)
-                  !  A(N,N) = A(N,N) - 2._EB*RDXN(II)  *DY(JJ)*DZ(KK)
+                     A(N,N) = A(N,N) - 2._EB/DX_M(N,N)*DY(JJ)*DZ(KK)
                      B(N)   = B(N)   - FVX(II,JJ,KK)*DY(JJ)*DZ(KK) - DY(JJ)*DZ(KK)*(H(II,JJ,KK)+H(II+1,JJ,KK))/DX_M(N,N)
                   ENDIF
                ENDIF
@@ -552,8 +542,6 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II,JJ,KK)
                   A(N,N)  = A(N,N)  - DX(II)*DZ(KK)/DY_M(N,NO) 
                   A(N,NO) = A(N,NO) + DX(II)*DZ(KK)/DY_M(N,NO) 
-               !  A(N,N)  = A(N,N)  - DX(II)*DZ(KK)*RDYN(JJ)
-               !  A(N,NO) = A(N,NO) + DX(II)*DZ(KK)*RDYN(JJ)
                   B(N)    = B(N)    + DX(II)*DZ(KK)*FVY(II,JJ,KK)
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),-2)
@@ -567,8 +555,6 @@ K_COARSE: DO KC=1,KBAR2
                      NO  = M2%CGI(IIO,JJO,KKO)
                      A(N,N)  = A(N,N)  - DX(II)*DZ(KK)/DY_M(N,NO)
                      A(N,NO) = A(N,NO) + DX(II)*DZ(KK)/DY_M(N,NO)
-                  !  A(N,N)  = A(N,N)  - DX(II)*DZ(KK)*RDYN(JJ)
-                  !  A(N,NO) = A(N,NO) + DX(II)*DZ(KK)*RDYN(JJ)
                      FVY_OTHER = 0._EB
                      DO KKO=IJKW(12,IW),IJKW(15,IW)
                         DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -582,8 +568,7 @@ K_COARSE: DO KC=1,KBAR2
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DX(II)*DZ(KK)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
-                     A(N,N) = A(N,N) - 2._EB/DY_M(N,N)   *DX(II)*DZ(KK)
-                  !  A(N,N) = A(N,N) - 2._EB*RDYN(JJ)  *DX(II)*DZ(KK)
+                     A(N,N) = A(N,N) - 2._EB/DY_M(N,N)*DX(II)*DZ(KK)
                      B(N)   = B(N)   + FVY(II,JJ,KK)*DX(II)*DZ(KK) - DX(II)*DZ(KK)*(H(II,JJ,KK)+H(II,JJ+1,KK))/DY_M(N,N)
                   ENDIF
                ENDIF
@@ -597,8 +582,6 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II,JJ+1,KK)
                   A(N,N)  = A(N,N)  - DX(II)*DZ(KK)/DY_M(N,NO)
                   A(N,NO) = A(N,NO) + DX(II)*DZ(KK)/DY_M(N,NO)
-               !  A(N,N)  = A(N,N)  - DX(II)*DZ(KK)*RDYN(JJ)
-               !  A(N,NO) = A(N,NO) + DX(II)*DZ(KK)*RDYN(JJ)
                   B(N)    = B(N)    - DX(II)*DZ(KK)*FVY(II,JJ,KK)
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),2)
@@ -612,8 +595,6 @@ K_COARSE: DO KC=1,KBAR2
                      NO  = M2%CGI(IIO,JJO,KKO)
                      A(N,N)  = A(N,N)  - DX(II)*DZ(KK)/DY_M(N,NO)
                      A(N,NO) = A(N,NO) + DX(II)*DZ(KK)/DY_M(N,NO)
-                  !  A(N,N)  = A(N,N)  - DX(II)*DZ(KK)*RDYN(JJ)
-                  !  A(N,NO) = A(N,NO) + DX(II)*DZ(KK)*RDYN(JJ)
                      FVY_OTHER = 0._EB
                      DO KKO=IJKW(12,IW),IJKW(15,IW)
                         DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -627,8 +608,7 @@ K_COARSE: DO KC=1,KBAR2
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DX(II)*DZ(KK)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
-                     A(N,N) = A(N,N) - 2._EB/DY_M(N,N)   *DX(II)*DZ(KK)
-                  !  A(N,N) = A(N,N) - 2._EB*RDYN(JJ)  *DX(II)*DZ(KK)
+                     A(N,N) = A(N,N) - 2._EB/DY_M(N,N)*DX(II)*DZ(KK)
                      B(N)   = B(N)   - FVY(II,JJ,KK)*DX(II)*DZ(KK) - DX(II)*DZ(KK)*(H(II,JJ,KK)+H(II,JJ+1,KK))/DY_M(N,N)
                   ENDIF
                ENDIF
@@ -642,8 +622,6 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II,JJ,KK)
                   A(N,N)  = A(N,N)  - DX(II)*DY(JJ)/DZ_M(N,NO) 
                   A(N,NO) = A(N,NO) + DX(II)*DY(JJ)/DZ_M(N,NO) 
-               !  A(N,N)  = A(N,N)  - DX(II)*DY(JJ)*RDZN(KK)
-               !  A(N,NO) = A(N,NO) + DX(II)*DY(JJ)*RDZN(KK)
                   B(N)    = B(N)    + DX(II)*DY(JJ)*FVZ(II,JJ,KK)
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),-3)
@@ -657,8 +635,6 @@ K_COARSE: DO KC=1,KBAR2
                      NO  = M2%CGI(IIO,JJO,KKO)
                      A(N,N)  = A(N,N)  - DX(II)*DY(JJ)/DZ_M(N,NO)
                      A(N,NO) = A(N,NO) + DX(II)*DY(JJ)/DZ_M(N,NO) 
-                  !  A(N,N)  = A(N,N)  - DX(II)*DY(JJ)*RDZN(KK)
-                  !  A(N,NO) = A(N,NO) + DX(II)*DY(JJ)*RDZN(KK)
                      FVZ_OTHER = 0._EB
                      DO KKO=IJKW(12,IW),IJKW(15,IW)
                         DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -672,8 +648,7 @@ K_COARSE: DO KC=1,KBAR2
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DX(II)*DY(JJ)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
-                     A(N,N) = A(N,N) - 2._EB/DZ_M(N,N)   *DX(II)*DY(JJ)
-                  !  A(N,N) = A(N,N) - 2._EB*RDZN(KK)  *DX(II)*DY(JJ)
+                     A(N,N) = A(N,N) - 2._EB/DZ_M(N,N)*DX(II)*DY(JJ)
                      B(N)   = B(N)   + FVZ(II,JJ,KK)*DX(II)*DY(JJ) - DX(II)*DY(JJ)*(H(II,JJ,KK)+H(II,JJ,KK+1))/DZ_M(N,N)
                   ENDIF
                ENDIF
@@ -687,8 +662,6 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II,JJ,KK+1)
                   A(N,N)  = A(N,N)  - DX(II)*DY(JJ)/DZ_M(N,NO) 
                   A(N,NO) = A(N,NO) + DX(II)*DY(JJ)/DZ_M(N,NO) 
-               !  A(N,N)  = A(N,N)  - DX(II)*DY(JJ)*RDZN(KK)
-               !  A(N,NO) = A(N,NO) + DX(II)*DY(JJ)*RDZN(KK)
                   B(N)    = B(N)    - DX(II)*DY(JJ)*FVZ(II,JJ,KK)
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),3)
@@ -702,8 +675,6 @@ K_COARSE: DO KC=1,KBAR2
                      NO  = M2%CGI(IIO,JJO,KKO)
                      A(N,N)  = A(N,N)  - DX(II)*DY(JJ)/DZ_M(N,NO) 
                      A(N,NO) = A(N,NO) + DX(II)*DY(JJ)/DZ_M(N,NO) 
-                  !  A(N,N)  = A(N,N)  - DX(II)*DY(JJ)*RDZN(KK)
-                  !  A(N,NO) = A(N,NO) + DX(II)*DY(JJ)*RDZN(KK)
                      FVZ_OTHER = 0._EB
                      DO KKO=IJKW(12,IW),IJKW(15,IW)
                         DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -717,8 +688,7 @@ K_COARSE: DO KC=1,KBAR2
                   ENDIF
                   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DX(II)*DY(JJ)
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
-                     A(N,N) = A(N,N) - 2._EB/DZ_M(N,N)   *DX(II)*DY(JJ)
-                  !  A(N,N) = A(N,N) - 2._EB*RDZN(KK)  *DX(II)*DY(JJ)
+                     A(N,N) = A(N,N) - 2._EB/DZ_M(N,N)*DX(II)*DY(JJ)
                      B(N)   = B(N)   - FVZ(II,JJ,KK)*DX(II)*DY(JJ) - DX(II)*DY(JJ)*(H(II,JJ,KK)+H(II,JJ,KK+1))/DZ_M(N,N)
                   ENDIF
                ENDIF
@@ -874,37 +844,31 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                   SELECT CASE(IOR)
                      CASE( 1) 
                         DA      = DY(JJ)*DZ(KK)
-                     !  DHDX_S = DHDX_S + DA* (  FVX_AVG(IW)-FVX(0,JJ,KK) + (B(N)-B(NO))*RDXN(0) &
                         DHDX_S = DHDX_S + DA* (  FVX_AVG(IW)-FVX(0,JJ,KK) + (B(N)-B(NO))/DX_M(N,NO) &
                               - (H(1,JJ,KK)-H(0,JJ,KK))*RDXN(0) )
                         AREA_XS = AREA_XS + DA
                      CASE(-1)
                         DA      = DY(JJ)*DZ(KK)
-                      ! DHDX_F = DHDX_F + DA* (  FVX_AVG(IW)-FVX(IBAR,JJ,KK) + (B(NO)-B(N))*RDXN(IBAR) &
                         DHDX_F = DHDX_F + DA* (  FVX_AVG(IW)-FVX(IBAR,JJ,KK) + (B(NO)-B(N))/DX_M(N,NO) &
                               - (H(IBP1,JJ,KK)-H(IBAR,JJ,KK))*RDXN(IBAR) )
                         AREA_XF = AREA_XF + DA
                      CASE( 2)
                         DA      = DX(II)*DZ(KK)
-                     !  DHDY_S = DHDY_S + DA* (  FVY_AVG(IW)-FVY(II,0,KK) + (B(N)-B(NO))*RDYN(0) &
                         DHDY_S = DHDY_S + DA* (  FVY_AVG(IW)-FVY(II,0,KK) + (B(N)-B(NO))/DY_M(N,NO) &
                               - (H(II,1,KK)-H(II,0,KK))*RDYN(0) )
                         AREA_YS = AREA_YS + DA
                      CASE(-2)
                         DA      = DX(II)*DZ(KK)
-                     !  DHDY_F = DHDY_F + DA* (  FVY_AVG(IW)-FVY(II,JBAR,KK) + (B(NO)-B(N))*RDYN(JBAR) &
                         DHDY_F = DHDY_F + DA* (  FVY_AVG(IW)-FVY(II,JBAR,KK) + (B(NO)-B(N))/DY_M(N,NO) &
                               - (H(II,JBP1,KK)-H(II,JBAR,KK))*RDYN(JBAR) )
                         AREA_YF = AREA_YF + DA
                      CASE( 3)
                         DA      = DX(II)*DY(JJ)
-                     !  DHDZ_S = DHDZ_S + DA* (  FVZ_AVG(IW)-FVZ(II,JJ,0) + (B(N)-B(NO))*RDZN(0) &
                         DHDZ_S = DHDZ_S + DA* (  FVZ_AVG(IW)-FVZ(II,JJ,0) + (B(N)-B(NO))/DZ_M(N,NO) &
                               - (H(II,JJ,1)-H(II,JJ,0))*RDZN(0) )
                         AREA_ZS = AREA_ZS + DA
                      CASE(-3)
                         DA      = DX(II)*DY(JJ)
-                     !  DHDZ_F = DHDZ_F + DA* (  FVZ_AVG(IW)-FVZ(II,JJ,KBAR) + (B(NO)-B(N))*RDZN(KBAR) &
                         DHDZ_F = DHDZ_F + DA* (  FVZ_AVG(IW)-FVZ(II,JJ,KBAR) + (B(NO)-B(N))/DZ_M(N,NO)    &
                               - (H(II,JJ,KBP1)-H(II,JJ,KBAR))*RDZN(KBAR) )
                         AREA_ZF = AREA_ZF + DA
@@ -924,7 +888,6 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               BXF(JJ,KK) = DUDT - DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
                               B_OTHER = -B(N) + H(IBP1,JJ,KK)+H(IBAR,JJ,KK)
-                            !  DHDX_F = DHDX_F + DA* (  (B_OTHER-B(N))*RDXN(IBAR) - (H(IBP1,JJ,KK)-H(IBAR,JJ,KK))*RDXN(IBAR))
                               DHDX_F = DHDX_F + DA* (  (B_OTHER-B(N))/DX_M(N,N) - (H(IBP1,JJ,KK)-H(IBAR,JJ,KK))*RDXN(IBAR))
                         END SELECT
                      CASE( 1)
@@ -937,7 +900,6 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               BXS(JJ,KK) = DUDT + DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
                               B_OTHER = -B(N) + H(0,JJ,KK)+H(1,JJ,KK)
-                            !  DHDX_S = DHDX_S + DA* (  (B(N)-B_OTHER)*RDXN(0) - (H(1,JJ,KK)-H(0,JJ,KK))*RDXN(0) )
                               DHDX_S = DHDX_S + DA* (  (B(N)-B_OTHER)/DX_M(N,N) - (H(1,JJ,KK)-H(0,JJ,KK))*RDXN(0) )
                         END SELECT
                      CASE(-2)
@@ -950,7 +912,6 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               BYF(II,KK) = DVDT - DUWDT(IW)
                            CASE (OPEN_BOUNDARY)
                               B_OTHER = -B(N) + H(II,JBP1,KK)+H(II,JBAR,KK)
-                          !    DHDY_F = DHDY_F + DA* (  (B_OTHER-B(N))*RDYN(JBAR) - (H(II,JBP1,KK)-H(II,JBAR,KK))*RDYN(JBAR))
                               DHDY_F = DHDY_F + DA* (  (B_OTHER-B(N))/DY_M(N,N) - (H(II,JBP1,KK)-H(II,JBAR,KK))*RDYN(JBAR))
                            END SELECT
                      CASE( 2)
@@ -963,7 +924,6 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               BYS(II,KK) = DVDT + DUWDT(IW)
                            CASE (OPEN_BOUNDARY)
                               B_OTHER = -B(N) + H(II,0,KK)+H(II,1,KK)
-                        !      DHDY_S = DHDY_S + DA* (  (B(N)-B_OTHER)*RDYN(0) - (H(II,1,KK)-H(II,0,KK))*RDYN(0) )
                               DHDY_S = DHDY_S + DA* (  (B(N)-B_OTHER)/DY_M(N,N) - (H(II,1,KK)-H(II,0,KK))*RDYN(0) )
                            END SELECT
                      CASE(-3)
@@ -976,7 +936,6 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               BZF(II,JJ) = DWDT - DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
                               B_OTHER = -B(N) + H(II,JJ,KBP1)+H(II,JJ,KBAR)
-                       !       DHDZ_F = DHDZ_F + DA* (  (B_OTHER-B(N))*RDZN(KBAR) - (H(II,JJ,KBP1)-H(II,JJ,KBAR))*RDZN(KBAR))
                               DHDZ_F = DHDZ_F + DA* (  (B_OTHER-B(N))/DZ_M(N,N)    - (H(II,JJ,KBP1)-H(II,JJ,KBAR))*RDZN(KBAR))
                            END SELECT
                      CASE( 3)
@@ -989,7 +948,6 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               BZS(II,JJ) = DWDT + DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
                               B_OTHER = -B(N) + H(II,JJ,0)+H(II,JJ,1)
-                     !         DHDZ_S = DHDZ_S + DA* (  (B(N)-B_OTHER)*RDZN(0) - (H(II,JJ,1)-H(II,JJ,0))*RDZN(0) )
                               DHDZ_S = DHDZ_S + DA* (  (B(N)-B_OTHER)/DZ_M(N,N) - (H(II,JJ,1)-H(II,JJ,0))*RDZN(0) )
                            END SELECT
                   END SELECT
