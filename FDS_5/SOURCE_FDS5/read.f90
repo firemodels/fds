@@ -293,6 +293,10 @@ MESH_LOOP: DO NM=1,NMESHES
       WRITE(MESSAGE,'(A)') 'ERROR: IJK(2) must be 1 for all grids in 2D Calculation'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
+   IF (EVACUATION .AND. M%KBAR/=1) THEN
+      WRITE(MESSAGE,'(A)') 'ERROR: IJK(3) must be 1 for all evacuation grids'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
    
    ! Mesh boundary colors
    
