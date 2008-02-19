@@ -77,7 +77,7 @@ def extract_comp_data(comp_file_info):
     exp_data_dict = {}
     mod_data_dict = {}
     
-    #List of variables from configuration file
+    #List of variables from configuration file column names.
     
     exp_data_filename = comp_file_info['Exp_Filename'] #String of filename
     exp_column_name = comp_file_info['Exp_Col_Name'] #Experimental Data Column Name
@@ -194,12 +194,12 @@ def extract_comp_data(comp_file_info):
         #print min_max, str(min(exp_data_values_comp))
         exp_peak_value = min(exp_data_values_comp)
     else:
-    	print "Min or Max is undefined in the input file."
+        print "Min or Max is undefined in the input file."
     
     #Mod min_max value
     mod_data_values_comp = mod_data_dict[mod_column_name][mod_comp_ranges[2]:mod_comp_ranges[3]]
     #print mod_data_values_comp
-	
+    
     if  min_max == 'max':
         #print min_max, str(max(mod_data_values_comp))
         mod_peak_value = max(mod_data_values_comp)
@@ -207,7 +207,7 @@ def extract_comp_data(comp_file_info):
         #print min_max, str(min(mod_data_values_comp))
         mod_peak_value = min(mod_data_values_comp)
     else:
-    	print "Min or Max is undefined in the input file."
+        print "Min or Max is undefined in the input file."
     
     #print mod_peak_value
     #print mod_initial_value
@@ -215,7 +215,7 @@ def extract_comp_data(comp_file_info):
     #print exp_initial_value
     
     relative_difference = compute_difference(mod_peak_value,mod_initial_value,exp_peak_value,exp_initial_value)
-    	
+        
     #Append Min_Max Values to Global Scatter Data Dictionary.
     scatter_data_dict[scatter_data_label] = [exp_peak_value,mod_peak_value,relative_difference]
     
@@ -245,6 +245,8 @@ def extract_comp_data(comp_file_info):
 
 def comparison_plot(plot_data,exp_data,mod_data):
     #plot_data is the items from the 'd' rows of the config file.
+    #Variables from configuration file column names.
+
     
     # Variables for plot.
     plot_title = plot_data['Plot_Title']
@@ -256,7 +258,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
     max_y = float(plot_data['Max_Y'])
     title_quadrant = int(plot_data['Title_Quadrant'])
     key_quadrant = int(plot_data['Key_Quadrant'])
-    plot_width = int(plot_data['Plot_Width'])
+    plot_width = int(plot_data['Plot_Width(cm)'])
     
     #Set plot legend key text.
     exp_key = plot_data['Exp_Key']
@@ -284,8 +286,6 @@ def comparison_plot(plot_data,exp_data,mod_data):
         key_dist = 0.00
     
     #Begin Plotting
-    #print exp_data
-    #print mod_data
     # Initialize graph object
     g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist), 
                         x=graph.axis.linear(title=x_title, min=min_x, max=max_x), 
@@ -297,7 +297,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
         [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
     # Plot Predicted/Model data
     g.plot(graph.data.points(mod_data, title=mod_key, x=1, y=2),
-        [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
+        [graph.style.line([color.rgb.red, style.linewidth.Thin, style.linestyle.dashed])])
     
     # Now plot the Title text, alignment based on title quadrant setting.
     if title_quadrant == 1:
@@ -325,102 +325,103 @@ def scatter_plot(plot_info,data_set):
     #print data_set
     
     for quantity_number in plot_info:
-        # Set variables for Plot extracted from the first group of lines in config file starting with 'q'.
-        
-        # Variables for plot.
-        plot_title = plot_info[int(quantity_number)]['Scatter_Plot_Title']
-        #print plot_title
-        x_title = plot_info[int(quantity_number)]['X_Title']
-        y_title = plot_info[int(quantity_number)]['Y_Title']
-        min_x = float(plot_info[int(quantity_number)]['Plot_Min'])
-        #print min_x
-        max_x = float(plot_info[int(quantity_number)]['Plot_Max'])
-        #print max_x
-        min_y = float(plot_info[int(quantity_number)]['Plot_Min'])
-        max_y = float(plot_info[int(quantity_number)]['Plot_Max'])
-        percent_error = int(plot_info[int(quantity_number)]['%error'])
-        title_quadrant = int(plot_info[int(quantity_number)]['Title_Quadrant'])
-        key_quadrant = int(plot_info[int(quantity_number)]['Key_Quadrant'])
-        plot_width = int(plot_info[int(quantity_number)]['Plot_Width'])
-        
-        #Create filename from fields in input file record.
-        plot_file_name = plot_info[int(quantity_number)]['Plot_Filename']
-        print plot_file_name
-        
-        # Determine the location for the key, alignment based on key_quadrant setting.
-        if key_quadrant == 1:
-            key_pos = "tl"
-            key_dist = 0.00
-        elif key_quadrant == 2:
-            key_pos = "tr"
-            key_dist = 0.00
-        elif key_quadrant == 3:
-            key_pos = "bl"
-            key_dist = 0.00
-        elif key_quadrant == 4:
-            key_pos = "br"
-            key_dist = 0.00
-        else:
-            print "A quadrant for the key location was not specified./nUsing the default top left quadrant."
-            key_pos = "tl"
-            key_dist = 0.00
-        
-        #Begin Plotting
-        #print exp_data
-        #print mod_data
-        # Initialize graph object
-        g = graph.graphxy(width=plot_width, ratio=1/1, key=graph.key.key(pos=key_pos, dist=key_dist), 
-                            x=graph.axis.linear(title=x_title, min=min_x, max=max_x), 
-                            y=graph.axis.linear(title=y_title, min=min_y, max=max_y))
-        
-        #Plot Midline and Error bounds lines.
-        errorLineCenterPoints = [[min_x,min_y],[max_x,max_y]]
-        #print errorLineCenterPoints
-        lower_bound = max_y - max_y * percent_error / 100
-        #print lower_bound
-        errorLineLowerPoints = [[min_x,min_y],[max_x,lower_bound]]
-        #print errorLineLowerPoints
-        upper_bound = max_y + max_y * percent_error / 100.0
-        #print upper_bound
-        errorLineUpperPoints = [[min_x,min_y],[max_x,upper_bound]]
-        #print errorLineUpperPoints
-        
-        g.plot(graph.data.points(errorLineCenterPoints, title=None, x=1, y=2),
-                [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
-                
-        g.plot(graph.data.points(errorLineLowerPoints, title=None, x=1, y=2),
-                [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
-                
-        g.plot(graph.data.points(errorLineUpperPoints, title=None, x=1, y=2),
-                [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
-    
-        #One line at a time added to plot from each data set.
-        # Iterate over items in data dictionary key for keys that are not [].
-        for data in data_set[quantity_number]:
-        # Plot Experimental data
-            print "Hi"
-            #print data[0]
-            #print data[1]
-            #g.plot(graph.data.points(data[1], title=data[0], x=1, y=2))
-            #    [graph.style.symbol()])
-  
-        # Now plot the Title text, alignment based on title quadrant setting.
-        if title_quadrant == 1:
-            g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
-        elif title_quadrant == 2:
-            g.text(g.width-0.1, g.height - 0.2, plot_title, [text.halign.right, text.valign.top, text.size.normalsize])
-        elif title_quadrant == 3:
-            g.text(0.1, 0.2, plot_title, [text.halign.left, text.valign.bottom, text.size.normalsize])
-        elif title_quadrant == 4:
-            g.text(g.width-0.1, 0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
-        else:
-            print "A quadrant for the title location was not specified./nUsing the default top left quadrant."
-            g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
+        if data_set[quantity_number] != []:
+            # Set variables for Plot extracted from the first group of lines in config file starting with 'q'.
             
-        # Write the output
-        plot_file_path = output_directory+plot_file_name
-        print plot_file_path
-        #g.writePDFfile(plot_file_path)
+            # Variables for plot.
+            plot_title = plot_info[int(quantity_number)]['Scatter_Plot_Title']
+            print plot_title
+            x_title = plot_info[int(quantity_number)]['X_Title']
+            y_title = plot_info[int(quantity_number)]['Y_Title']
+            min_x = float(plot_info[int(quantity_number)]['Plot_Min'])
+            #print min_x
+            max_x = float(plot_info[int(quantity_number)]['Plot_Max'])
+            #print max_x
+            min_y = float(plot_info[int(quantity_number)]['Plot_Min'])
+            max_y = float(plot_info[int(quantity_number)]['Plot_Max'])
+            percent_error = int(plot_info[int(quantity_number)]['%error'])
+            title_quadrant = int(plot_info[int(quantity_number)]['Title_Quadrant'])
+            key_quadrant = int(plot_info[int(quantity_number)]['Key_Quadrant'])
+            plot_width = int(plot_info[int(quantity_number)]['Plot_Width(cm)'])
+            
+            #Create filename from fields in input file record.
+            plot_file_name = plot_info[int(quantity_number)]['Plot_Filename']
+            #print plot_file_name
+            
+            # Determine the location for the key, alignment based on key_quadrant setting.
+            if key_quadrant == 1:
+                key_pos = "tl"
+                key_dist = 0.00
+            elif key_quadrant == 2:
+                key_pos = "tr"
+                key_dist = 0.00
+            elif key_quadrant == 3:
+                key_pos = "bl"
+                key_dist = 0.00
+            elif key_quadrant == 4:
+                key_pos = "br"
+                key_dist = 0.00
+            else:
+                print "A quadrant for the key location was not specified./nUsing the default top left quadrant."
+                key_pos = "tl"
+                key_dist = 0.00
+            
+            #Begin Plotting
+            #print exp_data
+            #print mod_data
+            # Initialize graph object
+            g = graph.graphxy(width=plot_width, ratio=1/1, key=graph.key.key(pos=key_pos, dist=key_dist), 
+                                x=graph.axis.linear(title=x_title, min=min_x, max=max_x), 
+                                y=graph.axis.linear(title=y_title, min=min_y, max=max_y))
+            
+            #Plot Midline and Error bounds lines.
+            errorLineCenterPoints = [[min_x,min_y],[max_x,max_y]]
+            #print errorLineCenterPoints
+            lower_bound = max_y - max_y * percent_error / 100
+            #print lower_bound
+            errorLineLowerPoints = [[min_x,min_y],[max_x,lower_bound]]
+            #print errorLineLowerPoints
+            upper_bound = max_y + max_y * percent_error / 100.0
+            #print upper_bound
+            errorLineUpperPoints = [[min_x,min_y],[max_x,upper_bound]]
+            #print errorLineUpperPoints
+            
+            g.plot(graph.data.points(errorLineCenterPoints, title=None, x=1, y=2),
+                    [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
+                    
+            g.plot(graph.data.points(errorLineLowerPoints, title=None, x=1, y=2),
+                    [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
+                    
+            g.plot(graph.data.points(errorLineUpperPoints, title=None, x=1, y=2),
+                    [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
+        
+            #One line at a time added to plot from each data set.
+            # Iterate over items in data dictionary key for keys that are not [].
+            for data in data_set[quantity_number]:
+                print "Data to Plot:", data
+                #print data[0]
+                #print data[1]
+                #g.plot(graph.data.points(data[1], title=data[0], x=1, y=2))
+                #    [graph.style.symbol()])
+      
+            # Now plot the Title text, alignment based on title quadrant setting.
+            if title_quadrant == 1:
+                g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
+            elif title_quadrant == 2:
+                g.text(g.width-0.1, g.height - 0.2, plot_title, [text.halign.right, text.valign.top, text.size.normalsize])
+            elif title_quadrant == 3:
+                g.text(0.1, 0.2, plot_title, [text.halign.left, text.valign.bottom, text.size.normalsize])
+            elif title_quadrant == 4:
+                g.text(g.width-0.1, 0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
+            else:
+                print "A quadrant for the title location was not specified./nUsing the default top left quadrant."
+                g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
+                
+            # Write the output
+            plot_file_path = output_directory+plot_file_name
+            #print plot_file_path
+            g.writePDFfile(plot_file_path)
+            print "Plot to: \n", plot_file_path+".PDF"
     
 
 ### Start of Main Code
@@ -443,33 +444,32 @@ for data_record in config_and_data_dicts[1]:
     comparison_plot(config_and_data_dicts[1][data_record],exp_plot_data,mod_plot_data)
 
 
-### Create scatter plots
-#scatter_quantity = 1
-#temp_scatter_data_list = []
-#
-##Grouping Scatter Data by Quantity
-#for scatter_plot_record in sorted(config_and_data_dicts[0]):
-#    print "s record", scatter_plot_record
-#    print "Quantity:", config_and_data_dicts[0][scatter_plot_record]['Comparison_Quantities']
-#    for scatter_data_key in sorted(scatter_data_dict):
-#    	print scatter_data_key
-#        split_key = split("-",scatter_data_key)
-#        if scatter_data_key[0] == str(scatter_plot_record) and scatter_plot_record != []:
-#            #print "Test name:", split_key[1]
-#            #print scatter_data_dict[scatter_data_key][:2]
-#            temp_scatter_data_list.append([split_key[1], scatter_data_dict[scatter_data_key][:2]])
-#            
-#    combined_scatter_data[scatter_quantity] = temp_scatter_data_list
-#    temp_scatter_data_list = []
-#    scatter_quantity = scatter_quantity + 1
+## Create scatter plots
+scatter_quantity = 1
+temp_scatter_data_list = []
+
+#Grouping Scatter Data by Quantity
+for scatter_plot_record in sorted(config_and_data_dicts[0]):
+    #print "Scatter record:", scatter_plot_record
+    #print "Quantity:", config_and_data_dicts[0][scatter_plot_record]['Comparison_Quantities']
+    for scatter_data_key in sorted(scatter_data_dict):
+        split_key = split("-",scatter_data_key)
+        if scatter_data_key[0] == str(scatter_plot_record) and scatter_plot_record != []:
+            #print "Test name:", split_key[1]
+            #print "Scatter Data:", scatter_data_dict[scatter_data_key][:2]
+            temp_scatter_data_list.append([split_key[1], scatter_data_dict[scatter_data_key][:2]])
+            
+    combined_scatter_data[scatter_quantity] = temp_scatter_data_list
+    temp_scatter_data_list = []
+    scatter_quantity = scatter_quantity + 1
         
     #scatter_plot_info = config_and_data_dicts[1][scatter_plot_record]
-    #print scatter_plot_info	print scatter_data_key, scatter_data_dict[scatter_data_key]
+    #print scatter_plot_info    print scatter_data_key, scatter_data_dict[scatter_data_key]
 
 #print combined_scatter_data
     
 # Create plots
-#scatter_plot(config_and_data_dicts[1],combined_scatter_data)
+scatter_plot(config_and_data_dicts[0],combined_scatter_data)
     
 ## Write Summary Data to File.
 #NRC Comparisons Output
