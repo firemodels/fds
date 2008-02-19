@@ -1,7 +1,7 @@
 import csv
 from re import *
 from pyx import *
-from decimal import Decimal
+
 
 ### Set Global Variables
 
@@ -466,11 +466,10 @@ for scatter_plot_record in sorted(config_and_data_dicts[0]):
     #scatter_plot_info = config_and_data_dicts[1][scatter_plot_record]
     #print scatter_plot_info    print scatter_data_key, scatter_data_dict[scatter_data_key]
 
-#print combined_scatter_data
-    
 # Create plots
 scatter_plot(config_and_data_dicts[0],combined_scatter_data)
-    
+
+
 ## Write Summary Data to File.
 #NRC Comparisons Output
 
