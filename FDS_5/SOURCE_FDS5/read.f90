@@ -297,7 +297,7 @@ MESH_LOOP: DO NM=1,NMESHES
       WRITE(MESSAGE,'(A)') 'ERROR: IJK(3) must be 1 for all evacuation grids'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-   
+
    ! Mesh boundary colors
    
    IF (ANY(RGB<0) .AND. COLOR=='null') COLOR = 'BLACK'
@@ -2294,6 +2294,11 @@ READ_PART_LOOP: DO N=1,N_PART
    IF (SAMPLING_FACTOR<=0 .AND.      MASSLESS)  SAMPLING_FACTOR         = 1
    IF (SAMPLING_FACTOR<=0 .AND. .NOT.MASSLESS)  SAMPLING_FACTOR         = 10
    IF (NUMBER_INITIAL_DROPLETS>0 .AND. RESTART) NUMBER_INITIAL_DROPLETS =  0
+
+   IF (SPEC_ID/='null' .AND. MASSLESS) THEN
+      WRITE(MESSAGE,'(A)') 'ERROR: Cannot have MASSLESS=.TRUE. with evaporating droplets'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
 
    PC%QUANTITIES = QUANTITIES
    ! Set up arrays in case the domain is to be seeded with droplets/particles
