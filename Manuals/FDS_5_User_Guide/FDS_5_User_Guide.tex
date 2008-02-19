@@ -9047,20 +9047,24 @@ related to convection, combustion, and apparatus-specific phenomena.
 
 
 \clearpage
-\section{Thermoplastics}
-
-The term ``thermoplastic'' is often applied to materials that essentially heat up and gasify without leaving any solid
-residue. The term is used here merely to indicate the class of materials for which the pyrolysis can be modeled with a single
-reaction that converts solid to gaseous fuel.
-
+\section{Pyrolysis samples}
 
 \subsection{A Simple Thermoplastic (\texorpdfstring{{\bf thermoplastic}}{thermoplastic}) }
 \label{thermoplastic}
 
-The purpose of this example is to demonstrate how the solid phase pyrolysis model works in
-FDS. Essentially, the gas phase calculation is shut off except for the imposition
-of a 50~kW/m$^2$ ``virtual'' heat flux. The solid in this example is a
-slab of plastic, similar in composition to PMMA. The solid is described by the following {\ct SURF} line:
+The term ``thermoplastic'' is often applied to materials that
+essentially heat up and gasify without leaving any solid residue. The
+term is used here merely to indicate the class of materials for which
+the pyrolysis can be modeled with a single reaction that converts
+solid to gaseous fuel.
+
+
+The purpose of this example is to demonstrate how the solid phase
+pyrolysis model works in FDS. Essentially, the gas phase calculation
+is shut off except for the imposition of a 50~kW/m$^2$ ``virtual''
+heat flux. The solid in this example is a slab of plastic, similar in
+composition to PMMA. The solid is described by the following {\ct
+SURF} line:
 
 \scriptsize
 \begin{verbatim}
@@ -9072,8 +9076,10 @@ slab of plastic, similar in composition to PMMA. The solid is described by the f
 \end{verbatim} \normalsize
 
 \noindent
-The {\ct COLOR} is meaningless except to distinguish it in Smokeview. The {\ct EXTERNAL\_FLUX} is a virtual heat source that is only used for these types of
-diagnostic exercises. The properties of the material are conveyed via the {\ct MATL} line:
+The {\ct COLOR} is meaningless except to distinguish it in
+Smokeview. The {\ct EXTERNAL\_FLUX} is a virtual heat source that is
+only used for these types of diagnostic exercises. The properties of
+the material are conveyed via the {\ct MATL} line:
 
 \scriptsize
 \begin{verbatim}
@@ -9089,15 +9095,23 @@ diagnostic exercises. The properties of the material are conveyed via the {\ct M
 \end{verbatim} \normalsize
 
 \noindent
-Notice that in addition to $k$, $\rho$ and $c$, there is one reaction specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_FUEL=1.}).
-The phase change from solid to gas {\em consumes} energy at a rate of 1,578~kJ/kg. Although not relevant in this example, the burning of these fuel gases would {\em produce}
-energy at a rate of 25,200~kJ/kg. The reaction nominally takes place at 330~$^\circ$C, a necessary parameter for the pyrolysis model described in Section~\ref{info:solid_pyrolysis}.
+Notice that in addition to $k$, $\rho$ and $c$, there is one reaction
+specified, the {\em yield} of which is 100~\% fuel gas ({\ct
+NU\_FUEL=1.}).  The phase change from solid to gas {\em consumes}
+energy at a rate of 1,578~kJ/kg. Although not relevant in this
+example, the burning of these fuel gases would {\em produce} energy at
+a rate of 25,200~kJ/kg. The reaction nominally takes place at
+330~$^\circ$C, a necessary parameter for the pyrolysis model described
+in Section~\ref{info:solid_pyrolysis}.
 
-The plots below show the surface temperature and heat flux as functions of time.
-Note that the default emissivity of the material surface is 0.9, meaning that only
-45~kW/m$^2$ out of the initial 50~kW/m$^2$ is actually heating the solid. Some of this energy
-heats up the solid to about 350~$^\circ$C at the surface, some is radiated away (about 8~kW/m$^2$), some is
-used to convert the solid material into a gas, and is plotted here as the product of the burning rate and the heat of reaction.
+The plots below show the surface temperature and heat flux as
+functions of time.  Note that the default emissivity of the material
+surface is 0.9, meaning that only 45~kW/m$^2$ out of the initial
+50~kW/m$^2$ is actually heating the solid. Some of this energy heats
+up the solid to about 350~$^\circ$C at the surface, some is radiated
+away (about 8~kW/m$^2$), some is used to convert the solid material
+into a gas, and is plotted here as the product of the burning rate and
+the heat of reaction.
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
@@ -9119,9 +9133,11 @@ burning rate (about 0.018~kg/m$^2$/s) yields a burning time of about 700~s. Afte
 \subsection{A Charring Solid (\texorpdfstring{{\bf charring\_solid}}{charring\_solid}) }
 \label{charring_solid}
 
-This example just exercises the solid phase algorithm in FDS. Essentially, the gas phase is shut off except for the imposition of a 50~kW/m$^2$ ``virtual''
-heat flux. The reaction mechanism is fairly complicated, as it includes various solids like cellulose, char, and ash. Each are input via {\ct MATL} lines
-as follows:
+This example just exercises the solid phase algorithm in
+FDS. Essentially, the gas phase is shut off except for the imposition
+of a 50~kW/m$^2$ ``virtual'' heat flux. The reaction mechanism is
+fairly complicated, as it includes various solids like cellulose,
+char, and ash. Each are input via {\ct MATL} lines as follows:
 
 \scriptsize
 \begin{verbatim}
@@ -9197,19 +9213,22 @@ as follows:
 \end{verbatim} \normalsize
 
 \noindent
-Note the edition of the parameter {\ct EXTERNAL\_FLUX} on the {\ct SURF} line. This produces a 50~kW/m$^2$ flux on the sample, without any
-additional input lines in the file. It is just to test the solid phase model and should not be copied into an actual fire simulation.
+Note the edition of the parameter {\ct EXTERNAL\_FLUX} on the {\ct
+SURF} line. This produces a 50~kW/m$^2$ flux on the sample, without
+any additional input lines in the file. It is just to test the solid
+phase model and should not be copied into an actual fire simulation.
 
-The figures below show the surface temperature and burning rate of the wood under the 50~kW/m$^2$ external heat flux. The burning rate peaks at the
-start of the simulation, decreases throughout the burning phase, and then peaks again at the end due to presence of an external backing material. The
-initial peak is typical of char-forming solids.
+The figures below show the surface temperature and burning rate 
+under the 50~kW/m$^2$ external heat flux. The burning rate peaks
+at the start of the simulation, decreases throughout the burning
+phase, and then peaks again at the end due to presence of an external
+backing material. The initial peak is typical of char-forming solids.
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{FIGURES/charring_solid_Surface_Temperature} &
 \includegraphics[width=3.2in]{FIGURES/charring_solid_Burning_Rate}
 \end{tabular*}
-
 
 
 
