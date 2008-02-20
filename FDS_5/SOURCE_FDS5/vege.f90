@@ -31,8 +31,8 @@ INTEGER NCT,NLP_TREE,NXB,NYB,NZB,NZBINS,IPC
 INTEGER I
 INTEGER, INTENT(IN) :: NM
 
-IF (.NOT. TREE) RETURN !Exit if there are no trees anywhere
-IF (.NOT. TREE_MESH(NM)) RETURN !Exit if raised veg is not present in mesh
+!IF (.NOT. TREE) RETURN !Exit if there are no trees anywhere
+!IF (.NOT. TREE_MESH(NM)) RETURN !Exit if raised veg is not present in mesh
 IF (EVACUATION_ONLY(NM)) RETURN  ! Don't waste time if an evac mesh
 CALL POINT_TO_MESH(NM)
 
@@ -44,6 +44,7 @@ CALL ChkMemErr('VEGE','CELL_TAKEN_FLAG',IZERO)
 TREE_LOOP: DO NCT=1,N_TREES
 
 !  IF (TREE_MESH(NCT)/=NM) CYCLE TREE_LOOP
+   TREE = .TRUE.
    VEG_PRESENT_FLAG = .FALSE. ; CELL_TAKEN_FLAG = .FALSE.
    IPC = TREE_PARTICLE_CLASS(NCT)
    PC=>PARTICLE_CLASS(IPC)
