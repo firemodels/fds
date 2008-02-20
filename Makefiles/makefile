@@ -28,6 +28,8 @@ no_target:
 	@echo Please read the comments at the top of the makefile
 
 setup:
+%.o : %.mod
+
 .SUFFIXES: .c .f90 .o
 
 .f90.o:
