@@ -263,13 +263,7 @@ void drawterrain(terraindata *terri){
 
 }
 
-/*
-typedef struct {
-  int nallocated, nstates;
-  float *time, *tcurrent;
-  unsigned char *state;
-} terraincell;
-*/
+/* ------------------ get_terraincolor ------------------------ */
 
 float *get_terraincolor(terraincell *ti){
   int index;
@@ -547,14 +541,6 @@ int getterrain_data(char *file,terraindata *terri){
 
 
 }
-
-/*
-typedef struct {
-  int nallocated, nstates;
-  float *time, *tcurrent;
-  unsigned char *state;
-} terraincell;
-*/
 
 /* ------------------ init_terraincell ------------------------ */
 
