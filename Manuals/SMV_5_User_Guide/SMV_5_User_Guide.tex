@@ -2228,7 +2228,7 @@ clipped scene is illustrated in Figure \ref{figCLIPPED}.
 
 \chapter{Smokeview - Demonstrator Mode}
 A simplified version of Smokeview may be invoked in order to present a fire scenario for training or demonstration
-purposes.  When invoked in this way, Smokeview loads data at startup and has pre-defined tours and viewpoints that
+purposes.  When used in this way, Smokeview loads data at startup and has pre-defined tours and viewpoints that
 highlight the fire scenario.  Data, tours, and viewpoints are selected using one dialog box opened when Smokeview starts up.  The scene may also be manipulated using this same dialog box.  The intent is to allow one not using Smokeview daily to more easily make use of Smokeview's capabilities.
 
 In order to setup this demonstration mode, several tasks need to be performed.  The results of these tasks are
@@ -2238,22 +2238,22 @@ These tasks are detailed below.
 \begin{enumerate}
   \item Define one or more tours that give the user an overview of the data or that highlight important
   aspects of the scenario.   Tours are setup using the {\em Touring}\ dialog box.
-  \item Define one or more viewpoints that also highlight some important
-  aspect of the simulation scenario.  The viewpoint is defined by manipulating the scene as desired and then selecting the {\em View>Save}\ menu item.  The viewpoint name may be changed by using the {\em Motion/View}\ dialog box.
-  \item Pick the data to be viewed from a set of temperature and Oxygen slice files and a set of 3D smoke and HRRPUV files.
+  \item Define one or more viewpoints that highlight some important
+  aspect of the simulation scenario.  The viewpoint is defined by manipulating the scene as desired and then selecting the {\em View>Save}\ menu item.  The viewpoint label may be changed by using the {\em Motion/View}\ dialog box.
+  \item Pick the data to be viewed from a set of temperature and oxygen slice files and a set of 3D smoke and HRRPUV files.
   \begin{enumerate}
     \item Load the desired files into Smokeview.
     \item Select these files for {\em auto-loading} by selecting the {\em Auto Load Now}\ panel
     in the {\em File/Bounds}\ dialog box and pressing the {\em Save Auto Load File List}\ button.
     \item Compress these files with Smokezip using the {\tt -auto}\ option .  This option will only compress files selected with Smokeview for {\em autoloading}.
       \end{enumerate}
-  \item Save the {\em casename.ini} file for the case.
+  \item Save the settings and choices selected by saving a {\em casename.ini} configuration file for the case.
   \item Create a {\tt .svd} file by copying the {\tt casename.smv}\ to {\tt casename.svd} .
-  \item Copy all the compressed files and the files: {\tt casename.ini}, {\tt casename.end}\ and {\tt casename.svd} file to a separate directory.
+  \item Copy all the compressed files and the files: {\tt casename.ini}, {\tt casename.end}\ and {\tt casename.svd} file to a separate directory.  This directory is then is what one would distribute to be demonstrated.
 \end{enumerate}
 
-The demonstrator mode of Smokeview is then activated by double-clicking on {\tt casename.svd}.  Smokeview treats this file just like the {\tt casename.smv}\ except that it opens up the {\tt Demonstrator Mode}\ dialog box and hides the standard Smokeview menus.  Smokeview then
-loads the slice and 3D smoke and HRR files selected above and opens the dialog box illustrated in
+The demonstrator mode of Smokeview is activated by double-clicking on {\tt casename.svd}.  Smokeview treats this file just like {\tt casename.smv}\ except that it opens up the {\tt Demonstrator Mode}\ dialog box and hides the standard Smokeview menus.  Smokeview then
+loads the selected slice, 3D smoke and HRR files and opens the dialog box illustrated in
 Figure \ref{figDEMO}.
 
 
@@ -2263,11 +2263,11 @@ Figure \ref{figDEMO}.
 \end{center}
 \caption[{\em Demonstrator}\ dialog box.]{{\em Demonstrator}\ dialog box.
 This dialog box allows the user to 1) switch between temperature, oxygen and realistic views of the data,
-select tours and viewpoints 
+select tours and viewpoints
  and to manipulate the scene using translations and rotations.} \label{figDEMO}
 \end{figure}
 
-The data viewed may then be toggled using the dialog box by pressing the {\tt Smoke/Fire},
+This dialog box is used to toggle the data viewed by pressing the {\tt Smoke/Fire},
 {\tt Temperature}\ or {\tt Oxygen}\ buttons.  The scene may be manipulated by clicking the mouse in one of the
 {\em arrow}\ buttons and dragging.  The scene may also
 be manipulated as before by pressing the mouse within the scene and dragging.  Views and/or tours may be selected
