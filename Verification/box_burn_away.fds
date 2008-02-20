@@ -1,12 +1,16 @@
 &HEAD CHID='box_burn_away', TITLE='Test BURN_AWAY feature, SVN $Revision$' / 
 
-&MESH IJK=20,20,40 XB=0.0,1.0,0.0,1.0,0.0,2.0 /
+The FOAM box is evaporated away by the high thermal radiation
+from HOT surfaces. The mass of the box is 0.4^3 m3 * 20 kg/m3 = 1.28 kg.
+This should be compared to the integral of BURN_RATE column 
+of box_burn_away_hrr.csv file.
 
-&TIME TWFIN=120. /
+&MESH IJK=20,20,20 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&TIME TWFIN=60. /
 
 &MATL ID                   = 'FOAM'
       HEAT_OF_REACTION     = 500.
-      HEAT_OF_COMBUSTION   = 20000.
       CONDUCTIVITY         = 0.2
       SPECIFIC_HEAT        = 1.0
       DENSITY              = 20.
@@ -21,22 +25,28 @@
       BURN_AWAY            = .TRUE.
       BACKING              = 'EXPOSED' /
 
-&SURF ID = 'FIRE', HRRPUA=1000., COLOR='RED' /
-&VENT XB=0.30,0.40,0.45,0.55,0.00,0.00, SURF_ID='FIRE' /
-&OBST XB=0.40,0.80,0.30,0.70,0.00,0.40, SURF_ID='FOAM SLAB' /
+&REAC ID='NO REACTION', Y_O2_INFTY=0.01 /  
 
+&DUMP SMOKE3D = .FALSE. DT_PL3D = 10000. /
 
-&VENT MB='XMIN', SURF_ID='OPEN' /
-&VENT MB='XMAX', SURF_ID='OPEN' /
-&VENT MB='YMIN', SURF_ID='OPEN' /
-&VENT MB='YMAX', SURF_ID='OPEN' /
+&OBST XB=0.30,0.70,0.30,0.70,0.30,0.70, SURF_ID='FOAM SLAB' /
+
+&SURF ID = 'HOT' TMP_FRONT = 1000. /
+
+&VENT MB='XMIN', SURF_ID='HOT' /
+&VENT MB='XMAX', SURF_ID='HOT' /
+&VENT MB='YMIN', SURF_ID='HOT' /
+&VENT MB='YMAX', SURF_ID='HOT' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
 
 &BNDF QUANTITY='WALL_TEMPERATURE' /
 &BNDF QUANTITY='BURNING_RATE' /
 &BNDF QUANTITY='HEAT_FLUX' /
 
-&SLCF PBY=0.5, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
-&SLCF PBY=0.5, QUANTITY='HRRPUV' /
+&SLCF PBY=0.5, QUANTITY='TEMPERATURE' /
+&SLCF PBY=0.5, QUANTITY='RADIANT_INTENSITY' /
+&SLCF PBY=0.5, QUANTITY='fuel' /
 
 &TAIL /
 
