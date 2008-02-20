@@ -174,7 +174,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \vspace{.25in}
 
 
-\flushright{January 2008\\
+\flushright{February 2008\\
 $SVN Repository$~$Revision$}
 %
 \vfill
@@ -221,7 +221,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1017-1 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-1, 134 pages (January 2008) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-1, 134 pages (February 2008) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -935,7 +935,11 @@ results in a  4x speedup of these actions. } \\ \hline
 Smokeview draws devices such as heat and smoke detectors,
 sprinklers, sensors {\em etc.} using instructions contained in a
 data file.  Smokeview also uses these instructions to define avatars, objects drawn
-at a tour locus or to represent people in an FDS-EVAC simulation.  
+at a tour locus or to represent people in an FDS-EVAC simulation.
+
+Devices and avatars are defined with the same set of instructions with the following exception.
+An avatar's definition begins using {\tt AVATARDEF}\ while a device definition
+begins using {\tt DEVICEDEF}.
 
 The instructions in a device file correspond to OpenGL library calls,
 the same type of calls Smokeview uses to visualize FDS cases.
@@ -2221,6 +2225,52 @@ selecting the \fbox{Dialogs$>$Clip Geometry}\ menu item. Figure
 \ref{figCLIP} shows this dialog box with all planes active and
 values selected for mesh 4 of the scene.  The corresponding
 clipped scene is illustrated in Figure \ref{figCLIPPED}.
+
+\chapter{Smokeview - Demonstrator Mode}
+A simplified version of Smokeview may be invoked in order to present a fire scenario for training or demonstration
+purposes.  When invoked in this way, Smokeview loads data at startup and has pre-defined tours and viewpoints that
+highlight the fire scenario.  Data, tours, and viewpoints are selected using one dialog box opened when Smokeview starts up.  The scene may also be manipulated using this same dialog box.  The intent is to allow one not using Smokeview daily to more easily make use of Smokeview's capabilities.
+
+In order to setup this demonstration mode, several tasks need to be performed.  The results of these tasks are
+recorded in the {\tt casename.ini}\ file.
+These tasks are detailed below.
+
+\begin{enumerate}
+  \item Define one or more tours that give the user an overview of the data or that highlight important
+  aspects of the scenario.   Tours are setup using the {\em Touring}\ dialog box.
+  \item Define one or more viewpoints that also highlight some important
+  aspect of the simulation scenario.  The viewpoint is defined by manipulating the scene as desired and then selecting the {\em View>Save}\ menu item.  The viewpoint name may be changed by using the {\em Motion/View}\ dialog box.
+  \item Pick the data to be viewed from a set of temperature and Oxygen slice files and a set of 3D smoke and HRRPUV files.
+  \begin{enumerate}
+    \item Load the desired files into Smokeview.
+    \item Select these files for {\em auto-loading} by selecting the {\em Auto Load Now}\ panel
+    in the {\em File/Bounds}\ dialog box and pressing the {\em Save Auto Load File List}\ button.
+    \item Compress these files with Smokezip using the {\tt -auto}\ option .  This option will only compress files selected with Smokeview for {\em autoloading}.
+      \end{enumerate}
+  \item Save the {\em casename.ini} file for the case.
+  \item Create a {\tt .svd} file by copying the {\tt casename.smv}\ to {\tt casename.svd} .
+  \item Copy all the compressed files and the files: {\tt casename.ini}, {\tt casename.end}\ and {\tt casename.svd} file to a separate directory.
+\end{enumerate}
+
+The demonstrator mode of Smokeview is then activated by double-clicking on {\tt casename.svd}.  Smokeview treats this file just like the {\tt casename.smv}\ except that it opens up the {\tt Demonstrator Mode}\ dialog box and hides the standard Smokeview menus.  Smokeview then
+loads the slice and 3D smoke and HRR files selected above and opens the dialog box illustrated in 
+Figure \ref{figDEMO}.
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=1.67777in]{FIGURES/figDEMO}
+\end{center}
+\caption[{\em Demonstrator}\ dialog box.]{{\em Demonstrator}\ dialog box.  
+This dialog box allows the user to 1) switch between temperature, oxygen and realistic views of the data
+ and to manipulate the scene using translations and rotations.} \label{figDEMO}
+\end{figure}
+
+The data viewed may then be toggled using the dialog box by pressing the {\tt Smoke/Fire}, 
+{\tt Temperature}\ or {\tt Oxygen}\ buttons.  The scene may be manipulated by clicking the mouse in one of the 
+{\em arrow}\ buttons and dragging.  The scene may also
+be manipulated as before by pressing the mouse within the scene and dragging.  Views and/or tours may be selected
+using the corresponding {\em pull down} box.
 
 \chapter{Texture Maps} Texture mapping is a technique used by
 Smokeview to make a scene appear more realistic by pasting images
