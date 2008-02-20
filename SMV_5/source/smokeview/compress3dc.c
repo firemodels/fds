@@ -282,8 +282,12 @@ void compress_svzip2(void){
   compress_onoff(0);
 
   writeini(LOCAL_INI);
-  strcpy(shellcommand,smokezippath);
-  strcat(shellcommand," ");
+
+// surround smokezip path name with "'s so that the system call can handle imbedded blanks
+
+  strcpy(shellcommand,"\"");
+  strcat(shellcommand,smokezippath);
+  strcat(shellcommand,"\" ");
   if(overwrite_all==1){
     strcat(shellcommand," -f ");
   }

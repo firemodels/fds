@@ -8629,9 +8629,13 @@ void writeini(int flag){
   {
     int svn_num;
     char version_label[256];
+    char *glversion;
 
-    strcpy(version_label,"OpenGL Version: "); 
-    strcat(version_label,(char *)glGetString(GL_VERSION));
+    glversion=(char *)glGetString(GL_VERSION);
+    if(glversion!=NULL){
+      strcpy(version_label,"OpenGL Version: "); 
+      strcat(version_label,glversion);
+    }
 
     svn_num=getmaxrevision();    // get svn revision number
     fprintf(fileout,"\n\n# Development Environment\n");
