@@ -1391,7 +1391,6 @@ void initvars1(void){
   strcpy(TITLE2,"");
   strcpy(TITLERELEASE,"");
   strcpy(TITLE,"");
-  strcpy(TRAINERTITLE,"");
   strcpy(FULLTITLE,"");
   strcpy(emptylabel,"");
   large_font=GLUT_BITMAP_HELVETICA_12;
@@ -1679,19 +1678,8 @@ void initvars1(void){
     strcat(TITLEBASE,")");
 #endif
     strcat(TITLEBASE," - ");
-    strcpy(TRAINERTITLEBASE,"Fire Flow Demonstrator ");
 
-    strcat(TRAINERTITLEBASE,version);
-#ifdef pp_BETA
-    strcat(TRAINERTITLEBASE,"Test ");
-    strcat(TRAINERTITLEBASE,"(");
-    strcat(TRAINERTITLEBASE,svn_version);
-    strcat(TRAINERTITLEBASE,")");
-#endif
-    strcat(TRAINERTITLEBASE," - ");
   }
-  STRCPY(TRAINERTITLE,TRAINERTITLEBASE);
-  STRCAT(TRAINERTITLEBASE,__DATE__);
 #ifdef _DEBUG
   STRCPY(TITLE,TITLEBASE);
   STRCAT(TITLE,__DATE__);
