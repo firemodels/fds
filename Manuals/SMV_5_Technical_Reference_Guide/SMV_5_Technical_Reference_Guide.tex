@@ -361,7 +361,7 @@ the OpenGL Programming Guide (Red book)\cite{OpenGLRed} or the SuperBible\cite{S
 % -------------------  Objects ------------------------
 %
 
-\chapter{Objects} Smokeview defines object locations in terms of a right handed coordinate system with the x axis pointing to the right, the y axis pointing to the back and the z axis pointing up (see Figure \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents {\em etc.}\ are transformed internally within Smokeview to lie between 0.0 and 1.0.
+\chapter{Defining Objects} Smokeview defines object locations in terms of a right handed coordinate system with the x axis pointing to the right, the y axis pointing to the back and the z axis pointing up (see Figure \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents {\em etc.}\ are transformed internally within Smokeview to lie between 0.0 and 1.0.
 All Smokeview objects are drawn by grouping appropriately {\em OpenGL} vertices.
 \begin{figure}[\figoptions]
 \begin{center}
@@ -500,7 +500,7 @@ and {\tt height}\ are the width and height of the viewport.
 % -------------------  Color, Shading and Blending ------------------------
 %
 
-\chapter{Color, Shading and Blending}
+\chapter{Coloring, Shading and Blending Objects}
 Color, shading and blending are three aspects of the same process used to draw objects residing in a three dimensional environment.  Smokeview uses color to display and more importantly to distinguish between two or more geometric or data elements.  Shading adds a further depth cue (besides perspective projections discussed earlier) to present an illusion of 3 dimensions.  Using a virtual light source, colors are changed subtly based upon the relative orientation of the light source and the surface being drawn.  Portions of the surface oriented away from the light are drawn darker than portions oriented towards the light.  Blending is the process of combining the colors of two or more objects in such a way that objects in the background may be seen through semi-transparent objects drawn in the foreground.  Together, color, shading and blending add to the illusion that the image drawn on a two dimensional terminal screen is three dimensional.
 
 \section{Color}
@@ -678,7 +678,7 @@ techniques are required and are discussed next.
 % -------------------  Motion ------------------------
 %
 
-\chapter{Motion} The previous sections discussed how appearance
+\chapter{Moving Objects} The previous sections discussed how appearance
 is important in visualization.  Motion may also be used to gain insight
 into fire phenomena.
 Motion may be thought of in two equivalent ways - keeping the
@@ -782,7 +782,7 @@ where {\tt xcen, ycen, zcen}\ are the coordinates of the scene center, YZ\_AXIS\
 %
 
 \chapter{Overview}
-Smokeview displays fire dynamics data allowing quantitative assessment using
+Smokeview displays fire dynamics data allowing quantitative assessment to be performed using
 visualization techniques such as animated tracer
 particles that follow the flow, animated shaded 2D and 3D contours
 that display flow quantities and animated flow vectors that
@@ -793,7 +793,7 @@ Each of these visualization
 techniques highlight different aspects of the underlying flow
 phenomena.
 
-This part of the document discusses some of the technical procedures visualizing data quantitatively, in particular, techniques for coloring data, visualizing particle systems and creating contours for 2 and 3 dimensions.
+This part of the document discusses some of the technical procedures for visualizing data quantitatively, in particular, techniques for coloring data, visualizing particle systems and creating contours for 2 and 3 dimensions.
 
 %
 % -------------------  Coloring Data ------------------------
@@ -1085,7 +1085,7 @@ b) Colored flow vectors.\\
 \end{center}
 \caption{Snapshot of shaded temperature contours and flow vectors
 through the stove center of a townhouse kitchen fire.
-The region below 100 \degC (212 \degF)\ is hidden
+The region below 100 \degC\ (212 \degF)\ is hidden
 in the contour plot.
   }
 \label{figslice}%
@@ -1135,7 +1135,7 @@ Do this by removing triangle vertices, replacing them with the average of the th
 \begin{center}
 \includegraphics[height=8.5in]{figures/plume5a_iso_full}\\
 \end{center}
-\caption{Snapshot of an isosurface for temperature at 100 \degC (212 \degF).
+\caption{Snapshot of an isosurface for temperature at 100 \degC\ (212 \degF).
   }
 \label{figiso}%
 \end{figure}
@@ -1149,7 +1149,7 @@ line view\\
 solid view
 \end{tabular}
 \end{center}
-\caption{Snapshot of an isosurface for temperature at 100 \degC (212 \degF).
+\caption{Snapshot of an isosurface for temperature at 100 \degC\ (212 \degF).
   }
 \label{figiso}%
 \end{figure}
@@ -1374,7 +1374,7 @@ skipped, $\Delta\hat{x}/\Delta x=2$, so that equation (\ref{eq:alphahat}) simpli
 \hat{\alpha}=1-(1-\alpha)^2=2\alpha-\alpha^2
 \end{eqnarray*}
 
-The video hardware uses $\alpha$ values contained in the smoke planes to obscure the background much like a camera uses a neutral density filter to darken a scene.  Extending the analogy, Smokeview uses one neutral density filter (numerically) for each plane of smoke data.  On a node by node basis then, each smoke plane obscures the current image stored in the OpenGL back buffer by the amount $(1-\alpha)$ to form a new back buffer image.  Figure \ref{figplume} illustrates this process showing several snapshots of a fire plume. The final image in the lower right is the most realistic.
+The video hardware uses $\alpha$ values contained in the smoke planes to obscure the background much like a camera uses a neutral density filter to darken a scene.  Extending the analogy, Smokeview uses one spatial/time varying {\em numerical}\ neutral density filter for each plane of smoke data.  On a node by node basis then, each smoke plane obscures the current image stored in the OpenGL back buffer by the amount $(1-\alpha)$ to form a new back buffer image.  Figure \ref{figplume} illustrates this process showing several snapshots of a fire plume. The final image in the lower right is the most realistic.
 A simplistic description of one step of this process is given by
 
 \begin{eqnarray*}
@@ -1433,42 +1433,11 @@ all possible plane orientations.
 \end{figure}
 
 %
-% -------------------  Compression ------------------------
+% -------------------  Lighting Smoke ------------------------
 %
 
-\chapter{Compression}
+\chapter{Lighting Smoke}
 
-The opacity parameters are computed at each node for all time
-steps. As noted earlier, the space required to store these values can easily exceed the 2GB file size limit found on 32
-bit operating systems such as Linux or Windows.  Compression
-techniques are required to reduce storage requirements.
-
-Compression for this application occurs in two steps.  First, a four to one compression level is achieved by using Beer's
-law to convert soot density, a four byte quantity, to opacity, a one byte quantity.  Video cards presently use only one byte to represent opacity.
-Next, the sequence of opacity values are compressed using run-length encoding.
-Run length encoding works as follows.
-
-\begin{enumerate}
-\item Represent four or more consecutive identical characters as $\# n c$
-where $\#$ is a special character denoting the beginning of a
-repeated sequence, $n$ is the number of repeats and $c$ is the
-character repeated.  $n$ can be up to 254 (255 is used to represent the {\em special}\ character).
-\item Represent characters not repeated four or more times as is.
-\end{enumerate}
-
-So, the character string {\tt aaaaaabbbbcc}\ would be encoded {\tt \#6b\#4bcc}.
-
-Run length encoding provides a reasonably good compression ratio, is simple to implement and most importantly can be decompressed quickly.
-This last property is important for any compression scheme chosen because it is a rate limiting step in the process that Smokeview uses to display smoke data.
-The CPU time required to compute the
-smoke flow can easily exceed one minute of CPU time per outputted
-time step, so extra time used to produce a more compact file is
-affordable. However, each data frame is decompressed {\em on the
-fly}\ so a compression format that can be rapidly decompressed is
-critical.
-
-Smokezip is a software program developed as a companion to Smokeview and FDS to compress FDS daa files.
-A second compression scheme is used by Smokezip to compress FDS files even more compactly.  Smokezip uses the ZLIB compression library available at (\hhref{http://zlib.net/}).
 
 %
 % -------------------  Orienting smoke planes ------------------------
@@ -1515,6 +1484,45 @@ oriented so that are {\em most perpendicular}\ to the line of sight }
 and smoke plane normal vector.  View planes are chosen to minimize
 this angle.} \label{figDIRB}
 \end{figure}
+
+%
+% -------------------  Compression ------------------------
+%
+
+\chapter{Compressing Smoke Data}
+
+The opacity parameters are computed at each node for all time
+steps. As noted earlier, the space required to store these values can easily exceed the 2GB file size limit found on 32
+bit operating systems such as Linux or Windows.  Compression
+techniques are required to reduce storage requirements.
+
+Compression for this application occurs in two steps.  First, a four to one compression level is achieved by using Beer's
+law to convert soot density, a four byte quantity, to opacity, a one byte quantity.  Video cards presently use only one byte to represent opacity.
+Next, the sequence of opacity values are compressed using run-length encoding.
+Run length encoding works as follows.
+
+\begin{enumerate}
+\item Represent four or more consecutive identical characters as $\# n c$
+where $\#$ is a special character denoting the beginning of a
+repeated sequence, $n$ is the number of repeats and $c$ is the
+character repeated.  $n$ can be up to 254 (255 is used to represent the {\em special}\ character).
+\item Represent characters not repeated four or more times as is.
+\end{enumerate}
+
+So, the character string {\tt aaaaaabbbbcc}\ would be encoded {\tt \#6b\#4bcc}.
+
+Run length encoding provides a reasonably good compression ratio, is simple to implement and most importantly can be decompressed quickly.
+This last property is important for any compression scheme chosen because it is a rate limiting step in the process that Smokeview uses to display smoke data.
+The CPU time required to compute the
+smoke flow can easily exceed one minute of CPU time per outputted
+time step, so extra time used to produce a more compact file is
+affordable. However, each data frame is decompressed {\em on the
+fly}\ so a compression format that can be rapidly decompressed is
+critical.
+
+Smokezip is a software program developed as a companion to Smokeview and FDS to compress FDS daa files.
+A second compression scheme is used by Smokezip to compress FDS files even more compactly.  Smokezip uses the ZLIB compression library available at (\hhref{http://zlib.net/}).
+
 %
 % -------------------  Appendices ------------------------
 %

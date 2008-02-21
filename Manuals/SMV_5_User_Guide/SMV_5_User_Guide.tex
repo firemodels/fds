@@ -2228,8 +2228,19 @@ clipped scene is illustrated in Figure \ref{figCLIPPED}.
 
 \chapter{Smokeview - Demonstrator Mode}
 A simplified version of Smokeview may be invoked in order to present a fire scenario for training or demonstration
-purposes.  When used in this way, Smokeview loads data at startup and has pre-defined tours and viewpoints that
-highlight the fire scenario.  Data, tours, and viewpoints are selected using one dialog box opened when Smokeview starts up.  The scene may also be manipulated using this same dialog box.  The intent is to allow one not using Smokeview daily to more easily make use of Smokeview's capabilities.
+purposes.  All actions are performed using one unified dialog box, illustrated in Figure \ref{figDEMO}.  This dialog box is opened for the user at startup and allows the user to select data to be viewed, tours to travel along, viewpoints to observe and scene manipulation to perform.  Smokeview loads data when it starts up.
+The intent is to allow one not using Smokeview daily to more easily make use of Smokeview's capabilities.
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=1.67777in]{FIGURES/figDEMO}
+\end{center}
+\caption[{\em Demonstrator}\ dialog box.]{{\em Demonstrator}\ dialog box.
+This dialog box allows the user to 1) switch between temperature, oxygen and realistic views of the data,
+select tours and viewpoints
+ and to manipulate the scene using translations and rotations.} \label{figDEMO}
+\end{figure}
 
 In order to setup this demonstration mode, several tasks need to be performed.  The results of these tasks are
 recorded in the {\tt casename.ini}\ file.
@@ -2245,7 +2256,7 @@ These tasks are detailed below.
     \item Load the desired files into Smokeview.
     \item Select these files for {\em auto-loading} by selecting the {\em Auto Load Now}\ panel
     in the {\em File/Bounds}\ dialog box and pressing the {\em Save Auto Load File List}\ button.
-    \item Compress these files with Smokezip using the {\tt -auto}\ option .  This option will only compress files selected with Smokeview for {\em autoloading}.
+    \item Compress these files with Smokezip using the {\tt -auto}\ option .  This option will only compress files selected with Smokeview for {\em autoloading}.  Note that compression can either be performed at a command line by typing {\tt smokezip -auto casename}\ or by using the {\em Load/Unload>Compression}\ menu item.
       \end{enumerate}
   \item Save the settings and choices selected by saving a {\em casename.ini} configuration file for the case.
   \item Create a {\tt .svd} file by copying the {\tt casename.smv}\ to {\tt casename.svd} .
@@ -2255,17 +2266,6 @@ These tasks are detailed below.
 The demonstrator mode of Smokeview is activated by double-clicking on {\tt casename.svd}.  Smokeview treats this file just like {\tt casename.smv}\ except that it opens up the {\tt Demonstrator Mode}\ dialog box and hides the standard Smokeview menus.  Smokeview then
 loads the selected slice, 3D smoke and HRR files and opens the dialog box illustrated in
 Figure \ref{figDEMO}.
-
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=1.67777in]{FIGURES/figDEMO}
-\end{center}
-\caption[{\em Demonstrator}\ dialog box.]{{\em Demonstrator}\ dialog box.
-This dialog box allows the user to 1) switch between temperature, oxygen and realistic views of the data,
-select tours and viewpoints
- and to manipulate the scene using translations and rotations.} \label{figDEMO}
-\end{figure}
 
 This dialog box is used to toggle the data viewed by pressing the {\tt Smoke/Fire},
 {\tt Temperature}\ or {\tt Oxygen}\ buttons.  The scene may be manipulated by clicking the mouse in one of the
