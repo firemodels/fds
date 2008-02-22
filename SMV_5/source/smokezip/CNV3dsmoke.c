@@ -54,20 +54,9 @@ void convert_3dsmoke(smoke3d *smoke3di){
   char *smoke3dfile;
 #ifdef pp_LIGHT
   int light_info[2]={1,0};
-  unsigned char mapalpha[256];
   int i;
 #endif
  
-#ifdef pp_LIGHT
-  for(i=0;i<256;i++){
-//    float xx;
-
-  //  xx = 1.0 - (float)i/255.0;
-    mapalpha[i]=i;
-//    mapalpha[i]=255*(1.0-pow(xx,1.0-albedo));
-  }
-#endif
-
   smoke3dfile=smoke3di->file;
 
 
@@ -295,12 +284,6 @@ void convert_3dsmoke(smoke3d *smoke3di){
       printf("  ***warning frame size expected: %i actual: %i\n",nfull,nfull2);
     }
 
-#ifdef pp_LIGHT
-    for(i=0;i<nfull2;i++){
-      full_alphabuffer[i]=mapalpha[full_alphabuffer[i]];
-    }
-#endif
-
     // compress frame data (into ZLIB format)
 
     ncompressed_zlib=buffersize;
@@ -322,7 +305,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
     if(make_lighting_file==1){
       int return_code;
 
-//      light_smoke(smoke3di,full_lightingbuffer,val_buffer, full_alphabuffer);
+      init_lightfield();
       update_lightfield(smoke3di, full_lightingbuffer);
 
       buffersize=1.01*nx*ny*nz+600;

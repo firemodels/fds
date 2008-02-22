@@ -16,7 +16,7 @@
 // svn revision character string
 char lightsmoke_revision[]="$Revision$";
 
-float getlight_dist(float light_dist,float *xyz, float x, float y, float z);
+float max_lightdist(float light_dist,float *xyz, float x, float y, float z);
 float getalpha(mesh *smoke_mesh, float *xyz2);
 
 #define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
@@ -24,7 +24,10 @@ float getalpha(mesh *smoke_mesh, float *xyz2);
 /* ------------------ init_lightfield ------------------------ */
 
 void init_lightfield(void){
-  NewMemory((void **)&light_q_polar,NRAD*NTHETA*NPSI);
+
+  // allocate memory for global light field (in spherical coordinates)
+
+  if(light_q_polar==NULL)NewMemory((void **)&light_q_polar,NRAD*NTHETA*NPSI*sizeof(float));
 }
 
 /* ------------------ update_lightfield ------------------------ */
@@ -33,6 +36,8 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
   int ilight;
   int nlight_q_rect;
   int i, j, k;
+  float logr;
+  float q_min, q_max;
 
   if(smoke3di->smoke_mesh==NULL)return;
   nlight_q_rect = smoke3di->nx*smoke3di->ny*smoke3di->nz;
@@ -115,7 +120,33 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
     }
   }
 
-  // convert hrr field to colors
+// convert hrr field to colors
+
+  logr = log(light_max/light_min)/254.0;
+
+  q_min = smoke3di->light_q_rect[0];
+  q_max=q_min;
+  for(i=0;i<nlight_q_rect;i++){
+    float q;
+    int j;
+
+    q = smoke3di->light_q_rect[i];
+    if(q<q_min)q_min=q;
+    if(q>q_max)q_max=q;
+
+    if(q<light_min){
+      lightingbuffer[i]=0;
+      continue;
+    }
+    if(q>light_max){
+      lightingbuffer[i]=254;
+      continue;
+    }
+    j = log(q/light_min)/logr;
+    if(j<0)j=0;
+    if(j>254)j=254;
+    lightingbuffer[i]=j;
+  }
 }
 
 /* ------------------ set_lightfield ------------------------ */
@@ -158,18 +189,19 @@ void set_lightfield(smoke3d *smoke3di,float xyz[3], float light_q_source){
   nxy = nx*ny;
 
   light_dist=0.0;
-  light_dist=getlight_dist(light_dist,xyz,xbar0,ybar0,zbar0);
-  light_dist=getlight_dist(light_dist,xyz, xbar,ybar0,zbar0);
-  light_dist=getlight_dist(light_dist,xyz,xbar0, ybar,zbar0);
-  light_dist=getlight_dist(light_dist,xyz, xbar, ybar,zbar0);
-  light_dist=getlight_dist(light_dist,xyz,xbar0,ybar0, zbar);
-  light_dist=getlight_dist(light_dist,xyz, xbar,ybar0, zbar);
-  light_dist=getlight_dist(light_dist,xyz,xbar0, ybar, zbar);
-  light_dist=getlight_dist(light_dist,xyz, xbar, ybar, zbar);
+  light_dist=max_lightdist(light_dist,xyz,xbar0,ybar0,zbar0);
+  light_dist=max_lightdist(light_dist,xyz, xbar,ybar0,zbar0);
+  light_dist=max_lightdist(light_dist,xyz,xbar0, ybar,zbar0);
+  light_dist=max_lightdist(light_dist,xyz, xbar, ybar,zbar0);
+  light_dist=max_lightdist(light_dist,xyz,xbar0,ybar0, zbar);
+  light_dist=max_lightdist(light_dist,xyz, xbar,ybar0, zbar);
+  light_dist=max_lightdist(light_dist,xyz,xbar0, ybar, zbar);
+  light_dist=max_lightdist(light_dist,xyz, xbar, ybar, zbar);
 
   PI=4.0*atan(1.0);
   for(i=0;i<NRAD;i++){
     float rad;
+
     rad=(float)(i+1)*light_dist/(float)NRAD;
     rads[i]=rad;
     area[i]=4.0*PI*rad*rad;
@@ -212,7 +244,7 @@ void set_lightfield(smoke3d *smoke3di,float xyz[3], float light_q_source){
           xyz2[1] = xyz[1] + rads[irad]*sin_theta[itheta]*cos_psi[ipsi];
           xyz2[2] = xyz[2] + rads[irad]*sin_psi[ipsi];
           alpha = getalpha(smoke_mesh,xyz2);
-          light_q_polar[inode]=light_q_polar[inode-1]*area[irad-1]/area[irad]*(1.0-alpha);
+          light_q_polar[inode+1]=light_q_polar[inode]*area[irad-1]/area[irad]*(1.0-alpha);
         }
         inode++;
       }
@@ -263,7 +295,7 @@ void set_lightfield(smoke3d *smoke3di,float xyz[3], float light_q_source){
 
 /* ------------------ getlight_dist ------------------------ */
 
-float getlight_dist(float light_dist,float *xyz, float x, float y, float z){
+float max_lightdist(float light_dist,float *xyz, float x, float y, float z){
   float dx, dy, dz;
   float dist;
 
@@ -281,6 +313,7 @@ float getalpha(mesh *smoke_mesh, float *xyz2){
   int i, j, k;
   int nx, ny, nxy;
   int ialpha;
+  float val;
 
   if(xyz2[0]<smoke_mesh->xbar0||xyz2[0]>smoke_mesh->xbar)return 1.0;
   if(xyz2[1]<smoke_mesh->ybar0||xyz2[1]>smoke_mesh->ybar)return 1.0;
@@ -302,8 +335,9 @@ float getalpha(mesh *smoke_mesh, float *xyz2){
   if(k<0)k=0;
   if(k>smoke_mesh->kbar)k=smoke_mesh->kbar;
 
-  ialpha = full_alphabuffer[IJKNODE(i,j,k)];
-  return (float)ialpha/255.0;
+  ialpha = (int)full_alphabuffer[IJKNODE(i,j,k)];
+  val = (float)ialpha/255.0;
+  return val;
 }
 #endif
 
