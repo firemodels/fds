@@ -225,7 +225,7 @@ EXTERN int smoke3dzipstep, boundzipstep, slicezipstep;
 EXTERN int isozipstep,doiso;
 EXTERN int filesremoved;
 #ifdef pp_LIGHT
-EXTERN float albedo;
+EXTERN float albedo, light_min, light_max;
 #endif
 EXTERN int endf, syst;
 EXTERN char endianfilebase[1024];

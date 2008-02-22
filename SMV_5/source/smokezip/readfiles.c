@@ -667,6 +667,27 @@ void readini2(char *inifile){
     if(fgets(buffer,255,stream)==NULL)break;
 
 #ifdef pp_LIGHT
+    if(match(buffer,"L_MINMAX",7)==1){
+      float l_min=light_min, l_max=light_max;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f",&l_min,&l_max);
+      if(l_min<=0.0||l_max<=0.0){
+        printf("*** error: light flux bounds must be positive\n");
+        printf("           using default values of:\n");
+        printf("  light_min=%f light_max=%f\n",light_min,light_max);
+        continue;
+      }
+      if(l_min>l_max){
+        printf("*** error: light min must be smaller than light max\n");
+        printf("           using default values of:\n");
+        printf("  light_min=%f light_max=%f\n",light_min,light_max);
+        continue;
+      }
+      light_min=l_min;
+      light_max=l_max;
+      continue;
+    }
     if(match(buffer,"L_POINT",7)==1){
       lightdata *lighti;
       float *xyz;
