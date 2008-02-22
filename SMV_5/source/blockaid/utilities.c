@@ -448,7 +448,7 @@ void int2string(int *ib, int nib, char *ibstring){
   strcpy(ibstring,"");
   for(i=0;i<nib;i++){
 
-    sprintf(charib,"%f",ib[i]);
+    sprintf(charib,"%i",ib[i]);
     trimzeros(charib);
     strcat(ibstring,charib);
     if(i!=nib-1){
