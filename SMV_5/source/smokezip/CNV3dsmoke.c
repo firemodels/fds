@@ -305,7 +305,6 @@ void convert_3dsmoke(smoke3d *smoke3di){
     if(make_lighting_file==1){
       int return_code;
 
-      init_lightfield();
       update_lightfield(smoke3di, full_lightingbuffer);
 
       buffersize=1.01*nx*ny*nz+600;

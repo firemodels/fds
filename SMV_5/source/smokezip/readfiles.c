@@ -563,6 +563,8 @@ int readsmv(char *smvfile){
 #endif
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
+      int ii, jj, kk;
+      float *xplt, *yplt, *zplt;
 
       meshi = meshinfo + i;
       meshi->dx = (meshi->xbar-meshi->xbar0)/meshi->ibar;
@@ -576,6 +578,31 @@ int readsmv(char *smvfile){
       meshi->dxx = (meshi->xbar-meshi->xbar0)/65535;
       meshi->dyy = (meshi->ybar-meshi->ybar0)/65535;
       meshi->dzz = (meshi->zbar-meshi->zbar0)/65535;
+
+      meshi->xplt=NULL;
+      NewMemory((void **)&meshi->xplt,(meshi->ibar+1)*sizeof(float));
+      xplt = meshi->xplt;
+      for(ii=0;ii<meshi->ibar;ii++){
+        xplt[ii] = meshi->xbar0 + ii*meshi->dx;
+      }
+      xplt[meshi->ibar]=meshi->xbar;
+
+      meshi->yplt=NULL;
+      NewMemory((void **)&meshi->yplt,(meshi->jbar+1)*sizeof(float));
+      yplt = meshi->yplt;
+      for(jj=0;jj<meshi->jbar;jj++){
+        yplt[jj] = meshi->ybar0 + jj*meshi->dy;
+      }
+      yplt[meshi->jbar]=meshi->ybar;
+
+      meshi->zplt=NULL;
+      NewMemory((void **)&meshi->zplt,(meshi->kbar+1)*sizeof(float));
+      zplt = meshi->zplt;
+      for(kk=0;kk<meshi->ibar;kk++){
+        zplt[kk] = meshi->zbar0 + kk*meshi->dz;
+      }
+      zplt[meshi->kbar]=meshi->zbar;
+
     }
   }
   return 0;
