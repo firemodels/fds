@@ -306,6 +306,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
       int return_code;
 
       update_lightfield(smoke3di, full_lightingbuffer);
+      CheckMemory;
 
       buffersize=1.01*nx*ny*nz+600;
       smoke3di->ncompressed_lighting_zlib=buffersize;
@@ -370,7 +371,10 @@ void convert_3dsmoke(smoke3d *smoke3di){
   fclose(smoke3dstream);
   fclose(smoke3dsizestream);
 #ifdef pp_LIGHT
-  if(make_lighting_file==1)fclose(light3dstream);
+  if(make_lighting_file==1){
+    fclose(light3dstream);
+    FREEMEMORY(full_lightingbuffer);
+  }
 #endif
   FREEMEMORY(full_alphabuffer);
   FREEMEMORY(compressed_alphabuffer);
