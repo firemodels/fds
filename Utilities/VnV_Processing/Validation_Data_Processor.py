@@ -401,8 +401,12 @@ def scatter_plot(plot_info,data_set):
                 print "Data to Plot:", data
                 print data[0]
                 print data[1]
-                g.plot(graph.data.points(data[1], title=data[0], x=1, y=2))
-                #[graph.style.symbol()])
+                scatter_plot_data = [data[1]]
+                print scatter_plot_data
+                #g.plot(graph.data.points(data[1], title=data[0], x=1, y=2))
+                #    [graph.style.symbol()])
+                mystyle = graph.style.symbol(graph.style.symbol.changetriangletwice, symbolattrs=[graph.style.symbol.changefilledstroked, attr.changelist([color.rgb.red, color.rgb.green])]) 
+                g.plot(graph.data.points(scatter_plot_data, title=data[0].replace('_',' '), x=1, y=2), [mystyle])
       
             # Now plot the Title text, alignment based on title quadrant setting.
             if title_quadrant == 1:
@@ -422,32 +426,7 @@ def scatter_plot(plot_info,data_set):
             #print plot_file_path
             g.writePDFfile(plot_file_path)
             print "Plot to: \n", plot_file_path+".PDF"
-            
-#4.3.5 How can I specify changing colors (or other attributes) for symbols or lines? 
-#In symbolattrs and/or lineattrs so-called changelist can be used. As an example 
-#mystyle = graph.style.symbol(symbolattrs= 
-#[attr.changelist([color.rgb.red, color.rgb.green])]) 
-#g.plot(graph.data.file("x.dat", x=1, y=2), [mystyle]) 
-#g.plot(graph.data.file("y.dat", x=1, y=2), [mystyle]) 
-#g.plot(graph.data.file("z.dat", x=1, y=2), [mystyle]) 
-#will switch between red and green symbols each time a new data set is plotted. Several changelists can be 
-#speciﬁed. They are cycled independently and need not be of the same length. It should be noted that the def- 
-#inition of mystyle in this example ensures that there is only one instance of the deﬁnition of symbolattrs. 
-#Putting an explicit deﬁnition of symbolattrs in each call to plot would not lead to the desired result 
-#because each time a new instance would be created which then starts with the ﬁrst item in the changelist. 
-#It may be necessary to repeat attributes in order that several changelists cooperate to produce the desired 
-#result. A common situation is that one would like to cycle through a list of symbols which should be used 
-#in alternating colors. This can be achieved with the following code: 
-#mystyle = graph.style.symbol( 
-#graph.style.symbol.changetriangletwice, 
-#symbolattrs=[attr.changelist([color.rgb.red, color.rgb.green])]) 
-#which will produce a red triangle, a green triangle, a red circle, a green circle and so on for diamond and 
-#square because changetriangletwice lists each symbol twice. If instead of changing between colors one 
-#would like to change between ﬁlled and open symbols, one can make use of a predeﬁned changelist 
-#mystyle = graph.style.symbol( 
-#graph.style.symbol.changetriangletwice, 
-#symbolattrs=[graph.style.symbol.changefilledstroked])
-
+    
 
 ### Start of Main Code
 
