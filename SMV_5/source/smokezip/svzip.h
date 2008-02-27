@@ -85,6 +85,7 @@ typedef struct {
 
 typedef struct {
   int ibar, jbar, kbar;
+  float *xplt, *yplt, *zplt;
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float dx, dy, dz;
   float dxx, dyy, dzz;
