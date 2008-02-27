@@ -61,7 +61,7 @@ int main(int argc, char **argv){
   albedo=(float)0.3;
   nlightinfo=0;
   lightinfo=NULL;
-  light_q_polar=NULL;
+  light_cdf=NULL;
   light_delta = 0.3;
   light_min=10.0;
   light_max=100.0;

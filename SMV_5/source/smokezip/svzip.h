@@ -89,6 +89,10 @@ typedef struct {
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float dx, dy, dz;
   float dxx, dyy, dzz;
+#ifdef pp_LIGHT
+  int *photon_bin;
+  float dxyzmax;
+#endif
 } mesh;
 
 typedef struct {
@@ -126,7 +130,7 @@ typedef struct {
 
 #ifdef pp_LIGHT
 typedef struct {
-  int type;
+  int type,dir;
   float xyz1[3], xyz2[3], q;
 } lightdata;
 #endif
@@ -139,6 +143,11 @@ typedef struct {
 } pdfdata;
 
 
+void rand_absdir(float xyz[3], int dir);
+void rand_dir(float xyz[3]);
+float rand_1d(float xmin, float xmax);
+void rand_2d(float xy[2], float xmin, float xmax, float ymin, float ymax);
+void rand_3d(float xyz[3], float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 void get_startup_slice(int seq_id);
 void get_startup_iso(int seq_id);
 void get_startup_smoke(int seq_id);
@@ -202,7 +211,8 @@ EXTERN int npatch_files;
 EXTERN int make_lighting_file;
 EXTERN int nlightinfo;
 EXTERN lightdata *lightinfo;
-EXTERN float light_delta, *light_q_polar;
+EXTERN float light_delta;
+EXTERN float *light_cdf;
 #endif
 EXTERN slice *sliceinfo;
 EXTERN int nslice_files;
