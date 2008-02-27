@@ -194,15 +194,15 @@ END SUBROUTINE READ_HEAD
  
 SUBROUTINE READ_MESH
 
-INTEGER :: IJK(3),NM,NOM
-INTEGER :: IBAR2,JBAR2,KBAR2,POISSON_BC(6),IC,JC,KC,RGB(3)
+INTEGER :: IJK(3),NM
+INTEGER :: IBAR2,JBAR2,KBAR2,POISSON_BC(6),RGB(3)
 LOGICAL :: EVACUATION, EVAC_HUMANS
 REAL(EB) :: EVAC_Z_OFFSET
 CHARACTER(25) :: COLOR
 REAL(EB) :: XB(6)
 NAMELIST /MESH/ IJK,FYI,ID,SYNCHRONIZE,EVACUATION,EVAC_HUMANS,POISSON_BC, &
                 IBAR2,JBAR2,KBAR2,CYLINDRICAL,XB,RGB,COLOR,EVAC_Z_OFFSET
-TYPE (MESH_TYPE), POINTER :: M,M2
+TYPE (MESH_TYPE), POINTER :: M
  
 NMESHES = 0
  
@@ -314,7 +314,7 @@ MESH_LOOP: DO NM=1,NMESHES
    
    IF (ID/='null') MESH_NAME(NM) = ID
    
-   ! Kevin's experimental Pressure code
+   ! Parameters needed by PRESSURE_CORRECTION scheme
    
    PBC(:,NM) = POISSON_BC(:)
    IF (MOD(M%IBAR,IBAR2)/=0 .OR. MOD(M%JBAR,JBAR2)/=0 .OR. MOD(M%KBAR,KBAR2)/=0) THEN
@@ -341,6 +341,7 @@ MESH_LOOP: DO NM=1,NMESHES
    ENDDO
 
    ! Process Physical Coordinates
+
    IF (XB(1) > XB(2)) THEN
       WRITE(MESSAGE,'(A,I2)') 'ERROR: XMIN > XMAX on MESH ', NM
       CALL SHUTDOWN(MESSAGE)
@@ -374,47 +375,6 @@ MESH_LOOP: DO NM=1,NMESHES
 ENDDO MESH_LOOP
 REWIND(LU_INPUT)
  
-! Set up coarse grid arrays for PRESSURE_CORRECTION scheme (still experimental)
- 
-NCGC = 0
-MESH_LOOP_2: DO NM=1,NMESHES
-   IF(EVACUATION_ONLY(NM)) CYCLE MESH_LOOP_2
-   M=>MESHES(NM)
-   ALLOCATE(M%CGI(M%IBAR,M%JBAR,M%KBAR))
-   ALLOCATE(M%CGI2(M%IBAR2,M%JBAR2,M%KBAR2))
-   DO KC=1,M%KBAR2
-      DO JC=1,M%JBAR2
-         DO IC=1,M%IBAR2
-            NCGC = NCGC+1
-            M%CGI2(IC,JC,KC) = NCGC
-            M%CGI(M%I_LO(IC):M%I_HI(IC), M%J_LO(JC):M%J_HI(JC), M%K_LO(KC):M%K_HI(KC)) = NCGC
-         ENDDO
-      ENDDO
-   ENDDO
-ENDDO MESH_LOOP_2
-
-! Generate coarse grid spacings to be used in PRESSURE_CORRECTION scheme
-
-ALLOCATE(DX_M(NMESHES,NMESHES),STAT=IZERO)
-CALL ChkMemErr('READ','DX_M',IZERO)
-ALLOCATE(DY_M(NMESHES,NMESHES),STAT=IZERO)
-CALL ChkMemErr('READ','DY_M',IZERO)
-ALLOCATE(DZ_M(NMESHES,NMESHES),STAT=IZERO)
-CALL ChkMemErr('READ','DZ_M',IZERO)
-DX_M = 0._EB
-DY_M = 0._EB
-DZ_M = 0._EB
-MESH_LOOP_3: DO NM=1,NMESHES
-   IF(EVACUATION_ONLY(NM)) CYCLE MESH_LOOP_3
-   M => MESHES(NM)
-   DO NOM=1,NMESHES
-      M2 => MESHES(NOM)
-      DX_M(NM,NOM) = 0.5_EB*(M%XF-M%XS+M2%XF-M2%XS)
-      DY_M(NM,NOM) = 0.5_EB*(M%YF-M%YS+M2%YF-M2%YS)
-      DZ_M(NM,NOM) = 0.5_EB*(M%ZF-M%ZS+M2%ZF-M2%ZS)
-   ENDDO
-ENDDO MESH_LOOP_3
- 
 ! Start the timing arrays
  
 TUSED      = 0._EB
@@ -426,9 +386,9 @@ END SUBROUTINE READ_MESH
 
 SUBROUTINE READ_TRAN
 USE MATH_FUNCTIONS, ONLY : GAUSSJ
-!
+ 
 ! Compute the polynomial transform function for the vertical coordinate
-!
+ 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: A,XX
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ND
 REAL(EB) :: PC,CC,COEF,XI,ETA,ZETA
@@ -438,15 +398,15 @@ TYPE (TRAN_TYPE), POINTER :: T
 NAMELIST /TRNX/ IDERIV,CC,PC,FYI,MESH_NUMBER
 NAMELIST /TRNY/ IDERIV,CC,PC,FYI,MESH_NUMBER
 NAMELIST /TRNZ/ IDERIV,CC,PC,FYI,MESH_NUMBER
-!
+ 
 ! Scan the input file, counting the number of NAMELIST entries
-!
+ 
 ALLOCATE(TRANS(NMESHES))
-!
+ 
 MESH_LOOP: DO NM=1,NMESHES
    M => MESHES(NM)
    T => TRANS(NM)
-!
+ 
    DO N=1,3
       T%NOC(N) = 0
       TRNLOOP: DO
@@ -475,7 +435,7 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDDO TRNLOOP
       17 REWIND(LU_INPUT)
    ENDDO
-!
+ 
    T%NOCMAX = MAX(T%NOC(1),T%NOC(2),T%NOC(3))
    ALLOCATE(A(T%NOCMAX+1,T%NOCMAX+1))
    ALLOCATE(XX(T%NOCMAX+1,3))
@@ -488,9 +448,9 @@ MESH_LOOP: DO NM=1,NMESHES
    ALLOCATE(T%CCSTORE(T%NOCMAX,3))
    ALLOCATE(T%PCSTORE(T%NOCMAX,3))
    ALLOCATE(T%IDERIVSTORE(T%NOCMAX,3))
-!
+ 
    T%ITRAN  = 0
-!
+ 
    DO IC=1,3
       NLOOP:  DO N=1,T%NOC(IC)
          IDERIV = -1
@@ -615,9 +575,9 @@ MESH_LOOP: DO NM=1,NMESHES
    DEALLOCATE(A)
    DEALLOCATE(XX)
    DEALLOCATE(ND)
-!
+ 
 ! Set up grid stretching arrays
-!
+ 
    ALLOCATE(M%R(0:M%IBAR),STAT=IZERO)
    CALL ChkMemErr('READ','R',IZERO)
    ALLOCATE(M%RC(0:M%IBAR+1),STAT=IZERO)
@@ -668,9 +628,9 @@ MESH_LOOP: DO NM=1,NMESHES
    CALL ChkMemErr('READ','DZN',IZERO)
    ALLOCATE(M%RDZN(0:M%KBAR),STAT=IZERO)
    CALL ChkMemErr('READ','RDZN',IZERO)
-!
+ 
 ! Define X grid stretching terms
-!
+ 
    M%DXMIN = 1000._EB
    DO I=1,M%IBAR
       XI    = (REAL(I,EB)-.5)*M%DXI
@@ -683,14 +643,14 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
       M%RDX(I) = 1._EB/M%DX(I)
    ENDDO
-!
+ 
    M%HX(0)    = M%HX(1)
    M%HX(M%IBP1) = M%HX(M%IBAR)
    M%DX(0)    = M%DX(1)
    M%DX(M%IBP1) = M%DX(M%IBAR)
    M%RDX(0)    = 1._EB/M%DX(1)
    M%RDX(M%IBP1) = 1._EB/M%DX(M%IBAR)
-!
+ 
    DO I=0,M%IBAR
       XI     = I*M%DXI
       M%X(I) = M%XS + G(XI,1,NM)
@@ -704,13 +664,13 @@ MESH_LOOP: DO NM=1,NMESHES
    ENDDO
    M%X(0)      = M%XS
    M%X(M%IBAR) = M%XF
-!
+ 
    DO I=1,M%IBAR
       M%XC(I) = 0.5_EB*(M%X(I)+M%X(I-1))
    ENDDO
    M%XC(0)      = M%XS - 0.5_EB*M%DX(0)
    M%XC(M%IBP1) = M%XF + 0.5_EB*M%DX(M%IBP1)
-!
+ 
    IF (CYLINDRICAL) THEN  
       DO I=1,M%IBAR
          M%RRN(I) = 2._EB/(M%R(I)+M%R(I-1))
@@ -719,9 +679,9 @@ MESH_LOOP: DO NM=1,NMESHES
       M%RRN(0)    = M%RRN(1)
       M%RRN(M%IBP1) = M%RRN(M%IBAR)
    ENDIF
-!
+ 
 ! Define Y grid stretching terms
-!
+ 
    M%DYMIN = 1000._EB
    DO J=1,M%JBAR
       ETA   = (REAL(J,EB)-.5)*M%DETA
@@ -734,32 +694,32 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
       M%RDY(J) = 1._EB/M%DY(J)
    ENDDO
-!
+ 
    M%HY(0)    = M%HY(1)
    M%HY(M%JBP1) = M%HY(M%JBAR)
    M%DY(0)    = M%DY(1)
    M%DY(M%JBP1) = M%DY(M%JBAR)
    M%RDY(0)    = 1._EB/M%DY(1)
    M%RDY(M%JBP1) = 1._EB/M%DY(M%JBAR)
-!
+ 
    DO J=0,M%JBAR
       ETA     = J*M%DETA
       M%Y(J)    = M%YS + G(ETA,2,NM)
       M%DYN(J)  = 0.5_EB*(M%DY(J)+M%DY(J+1))
       M%RDYN(J) = 1._EB/M%DYN(J)
    ENDDO
-!
+ 
    M%Y(0)      = M%YS
    M%Y(M%JBAR) = M%YF
-!
+ 
    DO J=1,M%JBAR
       M%YC(J) = 0.5_EB*(M%Y(J)+M%Y(J-1))
    ENDDO
    M%YC(0)      = M%YS - 0.5_EB*M%DY(0)
    M%YC(M%JBP1) = M%YF + 0.5_EB*M%DY(M%JBP1)
-!
+ 
 ! Define Z grid stretching terms
-!
+ 
    M%DZMIN = 1000._EB
    DO K=1,M%KBAR
       ZETA  = (REAL(K,EB)-.5)*M%DZETA
@@ -772,32 +732,32 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
       M%RDZ(K) = 1._EB/M%DZ(K)
    ENDDO
-!
+ 
    M%HZ(0)    = M%HZ(1)
    M%HZ(M%KBP1) = M%HZ(M%KBAR)
    M%DZ(0)    = M%DZ(1)
    M%DZ(M%KBP1) = M%DZ(M%KBAR)
    M%RDZ(0)    = 1._EB/M%DZ(1)
    M%RDZ(M%KBP1) = 1._EB/M%DZ(M%KBAR)
-!
+ 
    DO K=0,M%KBAR
       ZETA      = K*M%DZETA
       M%Z(K)    = M%ZS + G(ZETA,3,NM)
       M%DZN(K)  = 0.5_EB*(M%DZ(K)+M%DZ(K+1))
       M%RDZN(K) = 1._EB/M%DZN(K)
    ENDDO
-!
+ 
    M%Z(0)      = M%ZS
    M%Z(M%KBAR) = M%ZF
-!
+ 
    DO K=1,M%KBAR
       M%ZC(K) = 0.5_EB*(M%Z(K)+M%Z(K-1))
    ENDDO
    M%ZC(0)      = M%ZS - 0.5_EB*M%DZ(0)
    M%ZC(M%KBP1) = M%ZF + 0.5_EB*M%DZ(M%KBP1)
-!
+ 
 ! Set up arrays that will return coordinate positions
-!
+ 
    NIPX   = 100*M%IBAR
    NIPY   = 100*M%JBAR
    NIPZ   = 100*M%KBAR
@@ -810,14 +770,14 @@ MESH_LOOP: DO NM=1,NMESHES
    M%RDXINT = REAL(NIPX,EB)/(M%XF-M%XS)
    M%RDYINT = REAL(NIPY,EB)/(M%YF-M%YS)
    M%RDZINT = REAL(NIPZ,EB)/(M%ZF-M%ZS)
-!
+ 
    ALLOCATE(M%CELLSI(-NIPXS:NIPX+NIPXF),STAT=IZERO)
    CALL ChkMemErr('READ','CELLSI',IZERO)
    ALLOCATE(M%CELLSJ(-NIPYS:NIPY+NIPYF),STAT=IZERO)
    CALL ChkMemErr('READ','CELLSJ',IZERO)
    ALLOCATE(M%CELLSK(-NIPZS:NIPZ+NIPZF),STAT=IZERO)
    CALL ChkMemErr('READ','CELLSK',IZERO)
-!
+ 
    DO I=-NIPXS,NIPX+NIPXF
       M%CELLSI(I) = GINV(REAL(I,EB)/M%RDXINT,1,NM)*M%RDXI
       M%CELLSI(I) = MAX(M%CELLSI(I),-0.9_EB)
@@ -910,6 +870,8 @@ USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
  
 REAL(EB) :: X_H2O_TMPA,X_H2O_40_C,C_HORIZONTAL,C_VERTICAL,MW,VISCOSITY,CONDUCTIVITY
 CHARACTER(30) :: RAMP_GX,RAMP_GY,RAMP_GZ
+INTEGER :: IC,JC,KC,NM,NOM
+TYPE (MESH_TYPE), POINTER :: M2
 NAMELIST /MISC/ PR,SC,TMPA,GVEC,RELAXATION_FACTOR,FYI, &
                 CSMAG,RAMP_GX,RAMP_GY,RAMP_GZ,BAROCLINIC, &
                 LAPSE_RATE,ISOTHERMAL, &
@@ -1067,10 +1029,53 @@ C_FORCED = C_FORCED*(1012._EB)*(1.8E-5_EB)**0.2_EB / (0.7_EB)**(2._EB/3._EB)
 ASSUMED_GAS_TEMPERATURE = ASSUMED_GAS_TEMPERATURE + TMPM
 TEX_ORI = TEXTURE_ORIGIN
  
-IF (PRESSURE_CORRECTION) THEN
+! Do some set-up work for PRESSURE_CORRECTION scheme
+
+PRES_CORR_SETUP: IF (PRESSURE_CORRECTION) THEN
+
    SYNCHRONIZE = .TRUE.
    SYNC_TIME_STEP = .TRUE.
-ENDIF
+
+   NCGC = 0
+   MESH_LOOP_2: DO NM=1,NMESHES
+      IF(EVACUATION_ONLY(NM)) CYCLE MESH_LOOP_2
+      M=>MESHES(NM)
+      ALLOCATE(M%CGI(M%IBAR,M%JBAR,M%KBAR))
+      ALLOCATE(M%CGI2(M%IBAR2,M%JBAR2,M%KBAR2))
+      DO KC=1,M%KBAR2
+         DO JC=1,M%JBAR2
+            DO IC=1,M%IBAR2
+               NCGC = NCGC+1
+               M%CGI2(IC,JC,KC) = NCGC
+               M%CGI(M%I_LO(IC):M%I_HI(IC), M%J_LO(JC):M%J_HI(JC), M%K_LO(KC):M%K_HI(KC)) = NCGC
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO MESH_LOOP_2
+
+   ! Generate coarse grid spacings to be used in PRESSURE_CORRECTION scheme
+
+   ALLOCATE(DX_M(NMESHES,NMESHES),STAT=IZERO)
+   CALL ChkMemErr('READ','DX_M',IZERO)
+   ALLOCATE(DY_M(NMESHES,NMESHES),STAT=IZERO)
+   CALL ChkMemErr('READ','DY_M',IZERO)
+   ALLOCATE(DZ_M(NMESHES,NMESHES),STAT=IZERO)
+   CALL ChkMemErr('READ','DZ_M',IZERO)
+   DX_M = 0._EB
+   DY_M = 0._EB
+   DZ_M = 0._EB
+   MESH_LOOP_3: DO NM=1,NMESHES
+      IF(EVACUATION_ONLY(NM)) CYCLE MESH_LOOP_3
+      M => MESHES(NM)
+      DO NOM=1,NMESHES
+         M2 => MESHES(NOM)
+         DX_M(NM,NOM) = 0.5_EB*(M%XF-M%XS+M2%XF-M2%XS)
+         DY_M(NM,NOM) = 0.5_EB*(M%YF-M%YS+M2%YF-M2%YS)
+         DZ_M(NM,NOM) = 0.5_EB*(M%ZF-M%ZS+M2%ZF-M2%ZS)
+      ENDDO
+   ENDDO MESH_LOOP_3
+
+ENDIF PRES_CORR_SETUP
  
 ! Gravity ramp
  
