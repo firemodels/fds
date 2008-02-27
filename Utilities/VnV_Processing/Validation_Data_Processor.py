@@ -322,10 +322,12 @@ def scatter_plot(plot_info,data_set):
     #plot_info is details about the overall plot layout and text.
     #data_set is a dictionary keyed by test name containing lists of X and Y data points.
     #print plot_info
-    #print data_set
+    print data_set
     
     for quantity_number in plot_info:
-        if data_set[quantity_number] != []:
+        if data_set[quantity_number] == []:
+            print "No data in Scatter Plot Dataset."
+        else:
             # Set variables for Plot extracted from the first group of lines in config file starting with 'q'.
             
             # Variables for plot.
@@ -397,17 +399,18 @@ def scatter_plot(plot_info,data_set):
         
             #One line at a time added to plot from each data set.
             # Iterate over items in data dictionary key for keys that are not [].
+            # Append data sets to scatter_plot_data_list
+            scatter_plot_data_list = []
+            mystyle = graph.style.symbol(
+                            graph.style.symbol.changetriangletwice, 
+                            size=0.1*unit.v_cm, 
+                            symbolattrs=[graph.style.symbol.changefilledstroked, 
+                                        attr.changelist([color.rgb.red, color.rgb.green, color.rgb.blue])])
             for data in data_set[quantity_number]:
-                print "Data to Plot:", data
-                print data[0]
-                print data[1]
                 scatter_plot_data = [data[1]]
-                print scatter_plot_data
-                #g.plot(graph.data.points(data[1], title=data[0], x=1, y=2))
-                #    [graph.style.symbol()])
-                mystyle = graph.style.symbol(graph.style.symbol.changetriangletwice, symbolattrs=[graph.style.symbol.changefilledstroked, attr.changelist([color.rgb.red, color.rgb.green])]) 
-                g.plot(graph.data.points(scatter_plot_data, title=data[0].replace('_',' '), x=1, y=2), [mystyle])
-      
+                #print scatter_plot_data
+                g.plot(graph.data.points(scatter_plot_data, x=1, y=2, title=data[0].replace('_',' ')), [mystyle])
+
             # Now plot the Title text, alignment based on title quadrant setting.
             if title_quadrant == 1:
                 g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
