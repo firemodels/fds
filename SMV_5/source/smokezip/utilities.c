@@ -17,6 +17,8 @@
 // svn revision character string
 char utilities_revision[]="$Revision$";
 
+int iseed=0;
+
 #define MARK 255
 
 #define FORTREAD(read) fseek(BOUNDARYFILE,4,SEEK_CUR);returncode=read;fseek(BOUNDARYFILE,4,SEEK_CUR);
@@ -293,6 +295,8 @@ void version(void){
 
 }
 
+/* ------------------ imax ------------------------ */
+
 int imax(int a, int b){
   if(a>b){
     return a;
@@ -301,6 +305,8 @@ int imax(int a, int b){
     return b;
   }
 }
+
+/* ------------------ getmaxrev ------------------------ */
 
 #define MAXREV(cval) max_revision=imax(getrevision(cval),max_revision)
 int getmaxrevision(void){
@@ -326,7 +332,6 @@ int getmaxrevision(void){
   return max_revision;
 }
 
-
 /* ------------------ getSMVversion ------------------------ */
 
 void getSMZversion(char *SMZversion){
@@ -351,7 +356,6 @@ int getrevision(char *svn){
   trim(svn_ptr);
   sscanf(svn_ptr,"%i",&return_val);
   return return_val;
-
 }
 
 /* ------------------ atan3 ------------------------ */
@@ -367,3 +371,75 @@ float atan3(float dy,float dx){
 }
 
 
+/* ------------------ rand_absdir ------------------------ */
+
+void rand_absdir(float xyz[3], int dir){
+  float x=1.0, y=1.0, z=1.0;
+  float sum;
+
+  sum=x*x+y*y+z*z;
+  while(sum>1.0||sum==0.0){
+    x = rand_1d(0.0,1.0);
+    y = rand_1d(0.0,1.0);
+    z = rand_1d(0.0,1.0);
+    sum=x*x+y*y+z*z;
+  }
+  xyz[0]=x/sqrt(sum);
+  xyz[1]=y/sqrt(sum);
+  xyz[2]=z/sqrt(sum);
+  if(abs(dir)>=1&&abs(dir)<=3){
+    if(dir>0){
+      xyz[dir]=abs(xyz[dir]);
+    }
+    else{
+      xyz[-dir]=-abs(xyz[-dir]);
+    }
+  }
+}
+
+/* ------------------ rand_dir ------------------------ */
+
+void rand_dir(float xyz[3]){
+  float x=1.0, y=1.0, z=1.0;
+  float sum;
+
+  sum=x*x+y*y+z*z;
+  while(sum>1.0||sum==0.0){
+    x = rand_1d(0.0,1.0);
+    y = rand_1d(0.0,1.0);
+    z = rand_1d(0.0,1.0);
+    sum=x*x+y*y+z*z;
+  }
+  xyz[0]=x/sqrt(sum);
+  xyz[1]=y/sqrt(sum);
+  xyz[2]=z/sqrt(sum);
+}
+
+/* ------------------ rand_1d ------------------------ */
+
+float rand_1d(float xmin, float xmax){
+  float val;
+
+  if(iseed==0){
+    iseed=1;
+    srand(iseed);
+  }
+
+  val = xmin + (xmax-xmin)*(float)rand()/(float)RAND_MAX;
+  return val;
+}
+
+/* ------------------ rand_2d ------------------------ */
+
+void rand_2d(float xy[2], float xmin, float xmax, float ymin, float ymax){
+  xy[0]=rand_1d(xmin,xmax);
+  xy[1]=rand_1d(ymin,ymax);
+}
+
+/* ------------------ rand_3d ------------------------ */
+
+void rand_3d(float xyz[3], float xmin, float xmax, float ymin, float ymax, float zmin, float zmax){
+  xyz[0]=rand_1d(xmin,xmax);
+  xyz[1]=rand_1d(ymin,ymax);
+  xyz[2]=rand_1d(zmin,zmax);
+}

@@ -201,6 +201,7 @@ int readsmv(char *smvfile){
     patch *patchi;
 
     if(fgets(buffer,255,streamsmv)==NULL)break;
+    printf("buffer=%s\n",buffer);
     CheckMemory;
     if(strncmp(buffer," ",1)==0)continue;
 
@@ -565,12 +566,19 @@ int readsmv(char *smvfile){
       mesh *meshi;
       int ii, jj, kk;
       float *xplt, *yplt, *zplt;
+#ifdef pp_LIGHT
+      float dx, dy, dz;
+#endif
 
       meshi = meshinfo + i;
       meshi->dx = (meshi->xbar-meshi->xbar0)/meshi->ibar;
       meshi->dy = (meshi->ybar-meshi->ybar0)/meshi->jbar;
       meshi->dz = (meshi->zbar-meshi->zbar0)/meshi->kbar;
 #ifdef pp_LIGHT
+      dx = meshi->xbar - meshi->xbar0;
+      dy = meshi->ybar - meshi->ybar0;
+      dz = meshi->zbar - meshi->zbar0;
+      meshi->dxyzmax = sqrt(dx*dx+dy*dy+dz*dz);
       if(meshi->dx<light_delta)light_delta=meshi->dx;
       if(meshi->dy<light_delta)light_delta=meshi->dy;
       if(meshi->dz<light_delta)light_delta=meshi->dz;
@@ -586,6 +594,7 @@ int readsmv(char *smvfile){
         xplt[ii] = meshi->xbar0 + ii*meshi->dx;
       }
       xplt[meshi->ibar]=meshi->xbar;
+      CheckMemory;
 
       meshi->yplt=NULL;
       NewMemory((void **)&meshi->yplt,(meshi->jbar+1)*sizeof(float));
@@ -594,14 +603,29 @@ int readsmv(char *smvfile){
         yplt[jj] = meshi->ybar0 + jj*meshi->dy;
       }
       yplt[meshi->jbar]=meshi->ybar;
+      CheckMemory;
 
       meshi->zplt=NULL;
       NewMemory((void **)&meshi->zplt,(meshi->kbar+1)*sizeof(float));
       zplt = meshi->zplt;
-      for(kk=0;kk<meshi->ibar;kk++){
+      for(kk=0;kk<meshi->kbar;kk++){
         zplt[kk] = meshi->zbar0 + kk*meshi->dz;
       }
       zplt[meshi->kbar]=meshi->zbar;
+      CheckMemory;
+
+#ifdef pp_LIGHT
+      meshi->photon_bin=NULL;
+      if(make_lighting_file==1){
+        int nni, nnj, nnk;
+
+        nni = meshi->ibar;
+        nnj = meshi->jbar;
+        nnk = meshi->kbar;
+
+        NewMemory((void **)&meshi->photon_bin,nni*nnj*nnk*sizeof(int));
+      }
+#endif
 
     }
   }
@@ -683,6 +707,7 @@ void readini2(char *inifile){
   }
   if(nlightinfo>0){
     NewMemory((void **)&lightinfo,nlightinfo*sizeof(lightdata));
+    NewMemory((void **)&light_cdf,(nlightinfo+1)*sizeof(float));
   }
   nlightinfo=0;
   rewind(stream);
@@ -721,6 +746,7 @@ void readini2(char *inifile){
 
       lighti = lightinfo + nlightinfo;
       lighti->type=0;
+      lighti->dir=0;
       xyz = lighti->xyz1;
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f",xyz,xyz+1,xyz+2,&lighti->q);
@@ -733,6 +759,7 @@ void readini2(char *inifile){
 
       lighti = lightinfo + nlightinfo;
       lighti->type=1;
+      lighti->dir=0;
       xyz1 = lighti->xyz1;
       xyz2 = lighti->xyz2;
       fgets(buffer,255,stream);
@@ -743,13 +770,16 @@ void readini2(char *inifile){
     if(match(buffer,"L_REGION",7)==1){
       lightdata *lighti;
       float *xyz1, *xyz2;
+      int dir=0;
 
       lighti = lightinfo + nlightinfo;
       lighti->type=2;
       xyz1 = lighti->xyz1;
       xyz2 = lighti->xyz2;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %f",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,&lighti->q);
+      sscanf(buffer,"%f %f %f %f %f %f %f %i",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,&lighti->q,&dir);
+      if(abs(dir)<0||abs(dir)>3)dir=0;
+      lighti->dir=dir;
       nlightinfo++;
       continue;
     }
@@ -898,7 +928,25 @@ void readini2(char *inifile){
       }
       continue;
     }
-  } 
+  }
+#ifdef pp_LIGHT
+  {
+    int i;
+
+    if(nlightinfo>0){
+      light_cdf[0]=0.0;
+      for(i=1;i<nlightinfo+1;i++){
+        lightdata *lighti;
+
+        lighti = lightinfo + i - 1;
+        light_cdf[i]=light_cdf[i-1]+lighti->q;
+      }
+      for(i=0;i<nlightinfo+1;i++){
+        light_cdf[i]/=light_cdf[nlightinfo];
+      }
+    }
+  }
+#endif
   fclose(stream);
   return;
 
