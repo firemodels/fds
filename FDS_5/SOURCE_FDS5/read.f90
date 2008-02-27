@@ -5189,36 +5189,36 @@ MESH_LOOP: DO NM=1,NMESHES
          CASE(1)
             IF (I1>=1 .AND. I1<=IBM1) THEN
                IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN or MIRROR VENT ',N, ' must be on an exterior boundary.'
+                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN or MIRROR VENT ',VT%ORDINAL, ' must be on an exterior boundary.'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
                VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2+1,J2,K2)) .AND.  .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',N, ' must be attached to a solid obstruction'
+                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
             ENDIF
          CASE(2)
             IF (J1>=1 .AND. J1<=JBM1) THEN
                IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN or MIRROR VENT ',N, ' must be on an exterior boundary.'
+                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN or MIRROR VENT ',VT%ORDINAL, ' must be on an exterior boundary.'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
                VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2,J2+1,K2)) .AND.  .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',N, ' must be attached to a solid obstruction'
+                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
             ENDIF
          CASE(3)
             IF (K1>=1 .AND. K1<=KBM1) THEN
                IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN or MIRROR VENT ',N, ' must be on an exterior boundary.'
+                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN or MIRROR VENT ',VT%ORDINAL, ' must be on an exterior boundary.'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
                VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2,J2,K2+1)) .AND. .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',N, ' must be attached to a solid obstruction'
+                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
             ENDIF
