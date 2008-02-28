@@ -3146,9 +3146,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
       ELSE GAS_STATS
 
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
+         DO K=DV%K1,DV%K2
+            DO J=DV%J1,DV%J2
+               DO I=DV%I1,DV%I2
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   NOT_FOUND = .FALSE.
                   SELECT CASE(DV%STATISTICS)
@@ -3161,6 +3161,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
                         STAT_COUNT = STAT_COUNT + 1
                      CASE('VOLUME INTEGRAL')
                         STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DY(J)*DZ(K)
+                     CASE('AREA INTEGRAL')
+                        IF (DV%IOR==1) STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DY(J)*DZ(K)
+                        IF (DV%IOR==2) STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DZ(K)
+                        IF (DV%IOR==3) STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DY(J)
                      CASE('VOLUME MEAN')
                         STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DY(J)*DZ(K)
                         SUM_VALUE = SUM_VALUE + DX(I)*DY(J)*DZ(K)
