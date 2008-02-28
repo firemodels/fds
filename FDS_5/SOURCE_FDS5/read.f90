@@ -5884,6 +5884,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    ENDIF
 
    ! Check if the output QUANTITY exists and is appropriate
+
    IF (DV%QUANTITY /= 'null') THEN
       CALL GET_QUANTITY_INDEX(QUANTITY_INDEX,'DEVC',DV%QUANTITY)
       IF (OUTPUT_QUANTITY(QUANTITY_INDEX)%INTEGRATED .AND. DV%X1<=-1.E6_EB) THEN
@@ -5896,11 +5897,15 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       ENDIF
       IF (QUANTITY_INDEX < 0 .AND. (DV%STATISTICS=='MASS MEAN' .OR. DV%STATISTICS=='VOLUME MEAN' .OR. &
                                     DV%STATISTICS=='VOLUME INTEGRAL') ) THEN
-         WRITE(MESSAGE,'(A,I4)') 'ERROR: Invalid STATISTIC specified for wall DEVC ' ,N
+         WRITE(MESSAGE,'(A,I4)') 'ERROR: Invalid STATISTICS specified for wall DEVC ',N
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       IF (QUANTITY_INDEX > 0 .AND. DV%STATISTICS=='SURFACE INTEGRAL') THEN
-         WRITE(MESSAGE,'(A,I4)') 'ERROR: Invalid STATISTIC specified for gas DEVC ' ,N
+         WRITE(MESSAGE,'(A,I4)') 'ERROR: Invalid STATISTICS specified for gas DEVC ',N
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+      IF (QUANTITY_INDEX > 0 .AND. DV%STATISTICS/='null' .AND. DV%I1<0) THEN
+         WRITE(MESSAGE,'(A,I4)') 'ERROR: XB required when STATISTICS specified for gas DEVC ',N
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    ENDIF
