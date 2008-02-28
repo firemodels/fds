@@ -6109,21 +6109,34 @@ it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME MEAN'} produces the discrete analog of
 \be \frac{1}{V} \; \int \phi(x,y,z) \; dx \, dy \, dz \ee
 which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this
-statistic is only appropriate for gas phase quantities.
+statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
 \subsubsection{\ct MASS MEAN}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS MEAN'} produces the discrete analog of
 \be \frac{ \int \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
 which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this
-statistic is only appropriate for gas phase quantities.
+statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
 \subsubsection{\ct VOLUME INTEGRAL}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME INTEGRAL'} produces the discrete analog of
 \be \int \phi(x,y,z) \; dx \, dy \, dz \ee
 Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example,
-heat release rate per unit volume is an appropriate output quantity.
+heat release rate per unit volume is an appropriate output quantity. Note also that you must specify a volume to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+
+\subsubsection{\ct AREA INTEGRAL}
+
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='AREA INTEGRAL'} produces the discrete analog of
+\be \int \phi(x,y,z) \; dA \ee
+where $dA$ depends on the coordinates you specify for {\ct XB}.
+Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example,
+{\ct '[SPECIES]\_FLUX\_X'} is an appropriate output quantity if you want to know the mass flux of that species through an
+area normal to the $x$ direction. Note also that you must specify an area to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
 \subsubsection{\ct SURFACE INTEGRAL}
 
