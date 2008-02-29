@@ -1466,19 +1466,25 @@ mass fraction of an individual species and the mixture fraction is called its ``
 FDS versions 2 through 4 assumed that the gas mixture could be uniquely determined by the mixture fraction alone,
 an assumption that implies that fuel and oxygen react instantaneously upon mixing.
 
-For many applications, ``mixed is burned'' is a reasonable assumption. However, for fire scenarios where
-it cannot be assumed that fuel and oxygen react completely upon mixing, for example in under-ventilated
-compartments. The mixture fraction itself remains a valid quantity,
-but it can no longer be assumed that it completely defines the composition of the gas mixture. If fuel and oxygen are to mix
-and not burn, at least two scalar variables are needed to describe the extent to which the fuel and oxygen react.
-The strategy for moving beyond the ``mixed is burned'' model is as follows. Instead of solving a single
-transport equation for the mixture fraction $Z$, multiple transport equations are solved for components of the mixture
-fraction $Z_\alpha$. Fuel mass is still conserved, since $\sum Z_\alpha=Z$. For example, if $Z_1$ represents
-the (unburned) fuel mass fraction,
-$Y_\F$, and we define $Z_2 = Z-Z_1$, then $Z_2$ is the the mass fraction of burned fuel and is
-the component of $Z$ that originates from the combustion products.
-With this approach it is possible to account for the mixing of fuel and oxygen without burning. In the sections
-to follow, various multi-step reaction mechanisms are discussed using this system of accounting. First, however, the
+For many applications, ``mixed is burned'' is a reasonable
+assumption. However, for fire scenarios where it cannot be assumed
+that fuel and oxygen react completely upon mixing, for example in
+under-ventilated compartments. The mixture fraction itself remains a
+valid quantity, but it can no longer be assumed that it completely
+defines the composition of the gas mixture. If fuel and oxygen are to
+mix and not burn, at least two scalar variables are needed to describe
+the extent to which the fuel and oxygen react.  The strategy for
+moving beyond the ``mixed is burned'' model is as follows. Instead of
+solving a single transport equation for the mixture fraction $Z$,
+multiple transport equations are solved for components of the mixture
+fraction $Z_\alpha$. Fuel mass is still conserved, since $\sum
+Z_\alpha=Z$. For example, if $Z_1$ represents the (unburned) fuel mass
+fraction, $Y_\F$, and we define $Z_2 = Z-Z_1$, then $Z_2$ is the mass
+fraction of burned fuel and is the component of $Z$ that originates
+from the combustion products.  With this approach it is possible to
+account for the mixing of fuel and oxygen without burning. In the
+sections to follow, various multi-step reaction mechanisms are
+discussed using this system of accounting. First, however, the
 single-step mixture fraction model is described.
 
 
@@ -1890,20 +1896,22 @@ and the source term can be computed directly
     \kappa \, \sigma \, T^4/\pi                                           & \hbox{Outside flame zone} \\
     \max(\chi_r \, \dot{q}'''/4 \pi \; , \; \kappa \, \sigma \, T^4/\pi)  & \hbox{Inside flame zone}
     \end{array} \right.  \label{radapprox} \ee
-Here, $\dot{q}'''$ is the chemical heat release rate per unit volume and
-$\chi_r$ is an empirical estimate
-of the {\em local} fraction of that energy emitted as
-thermal radiation.\footnote{The radiative fraction, $\chi_r$, is a useful quantity in fire
-science. Usually, it is understood to be the fraction of the total heat release rate that takes the form of thermal radiation. For
-most combustibles, $\chi_r$ is between 0.3 and 0.4. However, in Eq.~(\ref{radapprox}), $\chi_r$ is interpreted as the fraction
-of energy radiated from the combustion region.
-For a small fire ($D<1$~m), the local $\chi_r$ is approximately equal to its
-global counterpart. However, as the fire increases in size, the global
-value will typically decrease due to a net re-absorption of the thermal
-radiation by the increasing smoke mantle.}
-Near the flame in large scale calculations, neither $\kappa$ nor $T$ can be computed
-reliably, hence the inclusion of the empirical radiation loss term which is designed to partition the fire's
-heat release rate in accordance with measured values.
+Here, $\dot{q}'''$ is the chemical heat release rate per unit volume
+and $\chi_r$ is an empirical estimate of the {\em local} fraction of
+that energy emitted as thermal radiation.\footnote{The radiative
+fraction, $\chi_r$, is a useful quantity in fire science. Usually, it
+is understood to be the fraction of the total heat release rate that
+takes the form of thermal radiation. For most combustibles, $\chi_r$
+is between 0.3 and 0.4. However, in Eq.~(\ref{radapprox}), $\chi_r$ is
+interpreted as the fraction of energy radiated from the combustion
+region.  For a small fire ($D<1$~m), the local $\chi_r$ is
+approximately equal to its global counterpart. However, as the fire
+increases in size, the global value will typically decrease due to a
+net re-absorption of the thermal radiation by the increasing smoke
+mantle.}  Near the flame in large scale calculations, neither $\kappa$
+nor $T$ can be computed reliably, hence the inclusion of the empirical
+radiation loss term which is designed to partition the fire's heat
+release rate in accordance with measured values.
 
 
 The boundary condition for the radiation intensity leaving
@@ -2623,7 +2631,7 @@ becomes
 \ee
 where the source function is based on the average droplet
 temperature within a cell. The droplet contribution to the radiative
-loss term in the energy equation is
+loss term is
 \be -\nabla \cdot \dbq_r''(\bx)(\mbox{droplets}) =
     \kappa_d(\bx) \, \left[ U(\bx) - 4 \pi \, I_{b,d}(\bx) \right]
 \ee
