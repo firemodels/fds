@@ -3781,7 +3781,7 @@ eaten away. If {\ct BURN\_AWAY} is prescribed as a {\ct SURF} parameter, then a 
 object with this {\ct SURF\_ID} disappears from a calculation as
 the mass of each of its mesh cells are consumed. The mass of each mesh
 cell is the volume of the mesh cell multiplied by the {\ct DENSITY} of the
-materials making up the the obstruction.
+materials making up the obstruction.
 
 \begin{warning}
 \noindent
@@ -6539,8 +6539,10 @@ space and direction ($\bs$ is a direction vector that ranges over $4\pi$ solid a
 \be
    U(\bx) = \int I(\bx,\bs)\, d\bs
 \ee
-Note that $U$ is used in Eq.~(\ref{TC}) to get the effective radiative flux to a small thermocouple bead so that its temperature, as opposed to the gas temperature,
-can be calculated. If you divide $U$ by $4\pi$, you get the the average intensity at a particular point in space:
+Note that $U$ is used in Eq.~(\ref{TC}) to get the effective radiative
+flux to a small thermocouple bead so that its temperature, as opposed
+to the gas temperature, can be calculated. If you divide $U$ by
+$4\pi$, you get the average intensity at a particular point in space:  
 \be
    \overline{I}(\bx) = \frac{U(\bx)}{4 \pi}
 \ee
