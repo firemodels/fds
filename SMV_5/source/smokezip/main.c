@@ -336,7 +336,9 @@ int main(int argc, char **argv){
 #ifdef pp_PART
   compress_parts();
 #endif
+#ifndef pp_ALPHA
   if(doiso==1)compress_isos();
+#endif
 
   if(cleanfiles==0&&destdir!=NULL){
     printf("Copying .smv, .ini and .end files to %s directory\n",destdir);

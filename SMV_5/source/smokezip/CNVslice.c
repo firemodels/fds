@@ -183,14 +183,14 @@ int convert_slice(slice *slicei){
     if(slicestream!=NULL){
       fclose(slicestream);
       printf("  Removing %s.\n",slicefile_svz);
-      unlink(slicefile_svz);
+      UNLINK(slicefile_svz);
       filesremoved++;
     }
     slicesizestream=fopen(slicesizefile_svz,"rb");
     if(slicesizestream!=NULL){
       fclose(slicesizestream);
       printf("  Removing %s.\n",slicesizefile_svz);
-      unlink(slicesizefile_svz);
+      UNLINK(slicesizefile_svz);
       filesremoved++;
     }
     return 0;

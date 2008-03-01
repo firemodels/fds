@@ -97,14 +97,14 @@ int convert_iso(iso *isoi){
     if(isostream!=NULL){
       fclose(isostream);
       printf("  Removing %s.\n",isofile_svz);
-      unlink(isofile_svz);
+      UNLINK(isofile_svz);
       filesremoved++;
     }
     isosizestream=fopen(isosizefile_svz,"rb");
     if(isosizestream!=NULL){
       fclose(isosizestream);
       printf("  Removing %s.\n",isosizefile_svz);
-      unlink(isosizefile_svz);
+      UNLINK(isosizefile_svz);
       filesremoved++;
     }
     return 0;
