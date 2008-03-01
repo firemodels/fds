@@ -16,13 +16,15 @@
 // svn revision character string
 char lightsmoke_revision[]="$Revision$";
 
+float average(int ijknode, int *celldata, mesh *smoke_mesh);
 float get_photon_step(smoke3d *smoke3di, float xyzpos[3], float xyzdir[3]);
 int in_mesh(mesh *smoke_mesh,float xyzpos[3]);
-float getalpha(mesh *smoke_mesh, float *xyz2);
+float getalpha(mesh *smoke_mesh, float *xyz);
 int get_interval(float val, float *array, int n);
-float interp_char(float xyz[3], mesh *smoke_mesh, unsigned char *full_alphabuffer);
+float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer);
 
 #define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
+#define IJKCELL(i,j,k) ((i)+(j)*nxcell+(k)*nxycell)
 
 /* ------------------ get_random_light ------------------------ */
 
@@ -51,25 +53,45 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
     float photon_step;
     mesh *smoke_mesh;
     int nx, ny, nz, nxy;
-    int binmax;
+    int nxcell, nycell, nzcell, nxycell;
+    float binmax,binsum;
+    float logindex[255];
 
-#define NPHOTONS 100000
+#define NPHOTONS 1000000
 
     // pick a random light weighted by HRR  
     //  (ie a high wattage light will be picked proportionately more often than
     //          a low wattage one)
 
+    CheckMemory;
     smoke_mesh=smoke3di->smoke_mesh;
-    nx = smoke_mesh->ibar;
-    ny = smoke_mesh->jbar;
-    nz = smoke_mesh->kbar;
+    nxcell = smoke_mesh->ibar;
+    nycell = smoke_mesh->jbar;
+    nzcell = smoke_mesh->kbar;
+    nxycell = nxcell*nycell;
+    nx = nxcell+1;
+    ny = nycell+1;
+    nz = nzcell+1;
     nxy = nx*ny;
 
 // zero out bin used to collect photons
 
     photon_bin = smoke3di->smoke_mesh->photon_bin;
-    for(i=0;i<nx*ny*nz;i++){
+    for(i=1;i<255;i++){
+      logindex[i]=log((float)i/255.0)/smoke_mesh->dx;
+    }
+    logindex[0]=log(0.001)/smoke_mesh->dx;
+
+    for(i=0;i<nxcell*nycell*nzcell;i++){
       photon_bin[i]=0;
+    }
+    for(i=0;i<nx*ny*nz;i++){
+      float val;
+      int ival;
+
+      ival = (int)full_alphabuffer[i];
+      val = logindex[255-ival];
+      full_logalphabuffer[i]=val;
     }
     CheckMemory;
 
@@ -113,16 +135,17 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
         int i1, j1, k1, ijk;
 
         photon_step=get_photon_step(smoke3di, xyzpos, xyzdir);
+        CheckMemory;
         xyzpos[0]+= photon_step*xyzdir[0];
         xyzpos[1]+= photon_step*xyzdir[1];
         xyzpos[2]+= photon_step*xyzdir[2];
         if(in_mesh(smoke_mesh,xyzpos)==0)break;
 
-        i1 = get_interval(xyzpos[0],smoke_mesh->xplt,smoke_mesh->ibar+1);
-        j1 = get_interval(xyzpos[1],smoke_mesh->yplt,smoke_mesh->jbar+1);
-        k1 = get_interval(xyzpos[2],smoke_mesh->zplt,smoke_mesh->kbar+1);
+        i1 = get_interval(xyzpos[0],smoke_mesh->xplt,nxcell);
+        j1 = get_interval(xyzpos[1],smoke_mesh->yplt,nycell);
+        k1 = get_interval(xyzpos[2],smoke_mesh->zplt,nzcell);
 
-        ijk = IJKNODE(i1,j1,k1);
+        ijk = IJKCELL(i1,j1,k1);
         photon_bin[ijk]++;                 // record location of photon
 
         if(rand_1d(0.0,1.0)>albedo)break;   // if this if is true then the photon is absorbed
@@ -131,12 +154,15 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
       CheckMemory;
     }
     binmax = 0;
+    binsum=0;
     for(i=0;i<nx*ny*nz;i++){
       if(photon_bin[i]>binmax)binmax=photon_bin[i];
+      binsum+=photon_bin[i];
     }
+    printf("binmax=%i binsum=%i\n",binmax,binsum);
     CheckMemory;
     for(i=0;i<nx*ny*nz;i++){
-      lightingbuffer[i]=(unsigned char)((float)photon_bin[i]/(float)binmax*254.0);
+      lightingbuffer[i]=(unsigned char)(average(i, photon_bin, smoke_mesh)/(float)binmax*254.0);
     }
     CheckMemory;
 }
@@ -158,7 +184,7 @@ float get_photon_step(smoke3d *smoke3di, float xyzpos[3], float xyzdir[3]){
   float photon_pdf[NPHOTON_PDF];
   int i;
   float xyz[3];
-  float alpha;
+  float logalpha;
   mesh *smoke_mesh;
   float var, dlength;
   int ivar, ibreak;
@@ -180,9 +206,8 @@ float get_photon_step(smoke3d *smoke3di, float xyzpos[3], float xyzdir[3]){
         ibreak=1;
         break;
       }
-      alpha = getalpha(smoke_mesh,xyz);
-      if(alpha>0.999)alpha=0.999;
-      photon_pdf[i]=photon_pdf[i-1]+log(1.0-alpha)/smoke_mesh->dx;
+      logalpha = getalpha(smoke_mesh,xyz);
+      photon_pdf[i]=photon_pdf[i-1]+dlength*logalpha;
     }
     else{
       photon_pdf[i]=photon_pdf[i-1]-10.0;
@@ -211,16 +236,15 @@ float getalpha(mesh *smoke_mesh, float *xyz){
   if(xyz[1]<smoke_mesh->ybar0||xyz[1]>smoke_mesh->ybar)return 1.0;
   if(xyz[2]<smoke_mesh->zbar0||xyz[2]>smoke_mesh->zbar)return 1.0;
 
-  val = interp_char(xyz, smoke_mesh, full_alphabuffer);
-  val /= 255.0;
+  val = interp(xyz, smoke_mesh, full_logalphabuffer);
   return val;
 }
 
-/* ------------------ interp_char ------------------------ */
+/* ------------------ interp ------------------------ */
 
-float interp_char(float xyz[3], mesh *smoke_mesh, unsigned char *full_alphabuffer){
-  int ialpha111, ialpha112, ialpha121, ialpha122;
-  int ialpha211, ialpha212, ialpha221, ialpha222;
+float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
+  int logalpha111, logalpha112, logalpha121, logalpha122;
+  int logalpha211, logalpha212, logalpha221, logalpha222;
   float x1, x2, y1, y2, z1, z2;
   float f1=0.0, f2=1.0, g1=0.0, g2=1.0, h1=0.0, h2=1.0;
   float val;
@@ -229,8 +253,8 @@ float interp_char(float xyz[3], mesh *smoke_mesh, unsigned char *full_alphabuffe
   int nx, ny, nxy;
   float dx, dy, dz;
 
-  nx = smoke_mesh->ibar;
-  ny = smoke_mesh->jbar;
+  nx = smoke_mesh->ibar+1;
+  ny = smoke_mesh->jbar+1;
   nxy = nx*ny;
 
   i1 = get_interval(xyz[0],smoke_mesh->xplt,smoke_mesh->ibar+1);
@@ -245,14 +269,14 @@ float interp_char(float xyz[3], mesh *smoke_mesh, unsigned char *full_alphabuffe
   if(k2>smoke_mesh->kbar)k2=smoke_mesh->kbar;
   
 
-  ialpha111 = (int)full_alphabuffer[IJKNODE(i1,j1,k1)];
-  ialpha112 = (int)full_alphabuffer[IJKNODE(i1,j1,k2)];
-  ialpha121 = (int)full_alphabuffer[IJKNODE(i1,j2,k1)];
-  ialpha122 = (int)full_alphabuffer[IJKNODE(i1,j2,k2)];
-  ialpha211 = (int)full_alphabuffer[IJKNODE(i2,j1,k1)];
-  ialpha212 = (int)full_alphabuffer[IJKNODE(i2,j1,k2)];
-  ialpha221 = (int)full_alphabuffer[IJKNODE(i2,j2,k1)];
-  ialpha222 = (int)full_alphabuffer[IJKNODE(i2,j2,k2)];
+  logalpha111 = (int)full_logalphabuffer[IJKNODE(i1,j1,k1)];
+  logalpha112 = (int)full_logalphabuffer[IJKNODE(i1,j1,k2)];
+  logalpha121 = (int)full_logalphabuffer[IJKNODE(i1,j2,k1)];
+  logalpha122 = (int)full_logalphabuffer[IJKNODE(i1,j2,k2)];
+  logalpha211 = (int)full_logalphabuffer[IJKNODE(i2,j1,k1)];
+  logalpha212 = (int)full_logalphabuffer[IJKNODE(i2,j1,k2)];
+  logalpha221 = (int)full_logalphabuffer[IJKNODE(i2,j2,k1)];
+  logalpha222 = (int)full_logalphabuffer[IJKNODE(i2,j2,k2)];
 
   x1 = smoke_mesh->xplt[i1];
   y1 = smoke_mesh->yplt[j1];
@@ -276,14 +300,74 @@ float interp_char(float xyz[3], mesh *smoke_mesh, unsigned char *full_alphabuffe
   if(dz!=0.0)h1/=dz;
   h2 = 1.0 - h1;
 
-  val  = f2*g2*h2*ialpha111;
-  val += f2*g2*h1*ialpha112;
-  val += f2*g1*h2*ialpha121;
-  val += f2*g1*h1*ialpha122;
-  val += f1*g2*h2*ialpha211;
-  val += f1*g2*h1*ialpha212;
-  val += f1*g1*h2*ialpha221;
-  val += f1*g1*h1*ialpha222;
+  val  = f2*g2*h2*logalpha111;
+  val += f2*g2*h1*logalpha112;
+  val += f2*g1*h2*logalpha121;
+  val += f2*g1*h1*logalpha122;
+  val += f1*g2*h2*logalpha211;
+  val += f1*g2*h1*logalpha212;
+  val += f1*g1*h2*logalpha221;
+  val += f1*g1*h1*logalpha222;
+  return val;
+}
+
+/* ------------------ average ------------------------ */
+
+float average(int ijknode, int *celldata, mesh *smoke_mesh){
+  int nx, ny, nxy;
+  int nxcell, nycell, nxycell;
+  int i1, j1, k1;
+  int i2, j2, k2;
+  int ijk;
+  int i111, i112, i121, i122;
+  int i211, i212, i221, i222;
+  int v111, v112, v121, v122;
+  int v211, v212, v221, v222;
+  float val;
+
+  nxcell = smoke_mesh->ibar;
+  nycell = smoke_mesh->jbar;
+  nxycell = nxcell*nycell;
+  nx = nxcell + 1;
+  ny = nycell + 1;
+  nxy = nx*ny;
+
+//#define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
+  ijk = ijknode;
+  k2 = ijk/nxy;
+  ijk-=k2*nxy;
+  j2 = ijk/nx;
+  i2 = ijk-j2*nx;
+
+  k1=k2-1;
+  if(k1<0)k1=0;
+
+  j1=j2-1;
+  if(j1<0)j1=0;
+
+  i1=i2-1;
+  if(i1<0)i1=0;
+  
+  i111 = IJKCELL(i1,j1,k1);
+  i112 = IJKCELL(i1,j1,k2);
+  i121 = IJKCELL(i1,j2,k1);
+  i122 = IJKCELL(i1,j2,k2);
+  i211 = IJKCELL(i2,j1,k1);
+  i212 = IJKCELL(i2,j1,k2);
+  i221 = IJKCELL(i2,j2,k1);
+  i222 = IJKCELL(i2,j2,k2);
+
+  v111 = celldata[i111];
+  v112 = celldata[i112];
+  v121 = celldata[i121];
+  v122 = celldata[i122];
+  v211 = celldata[i211];
+  v212 = celldata[i212];
+  v221 = celldata[i221];
+  v222 = celldata[i222];
+
+
+  val  = (v111 + v112 + v121 + v122 + v211 + v212 + v221 + v222)/8.0;
   return val;
 }
 
