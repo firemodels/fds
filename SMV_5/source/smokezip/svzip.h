@@ -15,7 +15,9 @@
 #define SET_MAX 1
 #define GLOBAL_MAX 2
 
-#define NBUCKETS 100000 
+#define NBUCKETS 100000
+
+#define UNLINK _unlink
 
 #ifdef pp_LIGHT
 #define NRAD 10
@@ -99,7 +101,6 @@ typedef struct {
   float normal[3];
 } vert;
 
-
 /* --------------------------  smoke3d ------------------------------------ */
 
 typedef struct {
@@ -109,6 +110,8 @@ typedef struct {
 #ifdef pp_LIGHT
   mesh *smoke_mesh;
   float *light_q_rect;
+  int type;
+  flowlabels label;
 #endif
   unsigned char *compressed_lightingbuffer;
   uLongf ncompressed_lighting_zlib;
@@ -203,6 +206,9 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer);
 #endif
 
 EXTERN unsigned char *full_alphabuffer;
+#ifdef pp_LIGHT
+EXTERN float *full_logalphabuffer;
+#endif
 EXTERN patch *patchinfo;
 EXTERN mesh *meshinfo;
 EXTERN smoke3d *smoke3dinfo;

@@ -112,14 +112,14 @@ int convert_boundary(patch *patchi,int pass){
     if(boundarystream!=NULL){
       fclose(boundarystream);
       printf("  Removing %s.\n",boundaryfile_svz);
-      unlink(boundaryfile_svz);
+      UNLINK(boundaryfile_svz);
       filesremoved++;
     }
     boundarysizestream=fopen(boundarysizefile_svz,"rb");
     if(boundarysizestream!=NULL){
       fclose(boundarysizestream);
       printf("  Removing %s.\n",boundarysizefile_svz);
-      unlink(boundarysizefile_svz);
+      UNLINK(boundarysizefile_svz);
       filesremoved++;
     }
     return 0;

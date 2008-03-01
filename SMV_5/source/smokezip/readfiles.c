@@ -317,12 +317,40 @@ int readsmv(char *smvfile){
           STRCPY(smoke3di->file,buffer);
         }
         smoke3di->filesize=filesize;
+#ifdef pp_LIGHT
+        if(readlabels(&smoke3di->label,streamsmv)!=2){
+          ismoke3d++;
+        }
+#else
         ismoke3d++;
+#endif
       }
       else{
         printf("*** Warning: the file, %s, does not exist.\n",buffer);
         nsmoke3d_files--;
       }
+#ifdef pp_LIGHT
+      {
+        flowlabels *label;
+
+        label=&smoke3di->label;
+        smoke3di->type=0;
+        if(label->shortlabel!=NULL){
+          if(label->shortlabel!=NULL&&strncmp(smoke3di->label.shortlabel,"soot",4)==0){
+            smoke3di->type=1;
+          }
+          else if(strncmp(smoke3di->label.shortlabel,"hrrpuv",6)==0){
+            smoke3di->type=2;
+          }
+          else if(strncmp(smoke3di->label.shortlabel,"water",5)==0){
+            smoke3di->type=3;
+          }
+          else{
+            smoke3di->type=1;
+          }
+        }
+      }
+#endif
       continue;
     }
 

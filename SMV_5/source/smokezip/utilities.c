@@ -101,6 +101,10 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   char buffer[255];
   unsigned int len;
 
+  flowlabel->longlabel=NULL;
+  flowlabel->shortlabel=NULL;
+  flowlabel->unit=NULL;
+
   if(fgets(buffer,255,stream)==NULL)return 2;
 
   len=strlen(buffer);
