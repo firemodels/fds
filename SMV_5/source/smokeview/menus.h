@@ -1864,6 +1864,12 @@ void ReloadMenu(int value){
   }
 }
 
+
+/* ------------------ DisclaimerMenu ------------------------ */
+
+void DisclaimerMenu(int value){
+}
+
 /* ------------------ LoadUnloadMenu ------------------------ */
 
 void LoadUnloadMenu(int value){
@@ -3461,7 +3467,7 @@ static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
 static int isoblockmenu=0, fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
 static int gridslicemenu=0, blockagemenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
-static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0;
+static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0;
 static int loadplot3dmenu=0, unloadvslicemenu=0, unloadslicemenu=0;
 static int loadterrainmenu=0, unloadterrainmenu=0;
 static int loadsmoke3dmenu=0;
@@ -5438,6 +5444,27 @@ static int in_menu=0;
     glutAddMenuEntry("-",MENU_DUMMY);
     glutAddMenuEntry("Time",MENU_TIMEVIEW);
   }
+
+/* -------------------------------- disclaimer menu -------------------------- */
+
+  CREATEMENU(disclaimermenu,DisclaimerMenu);
+  glutAddMenuEntry("The US Department of Commerce makes no warranty, expressed or",1);
+  glutAddMenuEntry("implied, to users of Smokeview, and accepts no responsibility",1);
+  glutAddMenuEntry("for its use. Users of Smokeview assume sole responsibility under",1);
+  glutAddMenuEntry("Federal law for determining the appropriateness of its use in any",1);
+  glutAddMenuEntry("particular application; for any conclusions drawn from the results",1); 
+  glutAddMenuEntry("of its use; and for any actions taken or not taken as a result of",1); 
+  glutAddMenuEntry("analysis performed using this tools.",1);
+  glutAddMenuEntry("",1);
+  glutAddMenuEntry("Smokeview and the companion program FDS is intended for use only",1);
+  glutAddMenuEntry("by those competent in the fields of fluid dynamics, thermodynamics,",1);
+  glutAddMenuEntry("combustion, and heat transfer, and is intended only to supplement",1);
+  glutAddMenuEntry("the informed judgment of the qualified user. These software packages",1);
+  glutAddMenuEntry("may or may not have predictive capability when applied to a specific",1);
+  glutAddMenuEntry("set of factual circumstances.  Lack of accurate predictions could lead",1);
+  glutAddMenuEntry("to erroneous conclusions with regard to fire safety.  All results",1);
+  glutAddMenuEntry("should be evaluated by an informed user.",1);
+
 /* --------------------------------help menu -------------------------- */
 
   CREATEMENU(helpmenu,HelpMenu);
@@ -5536,6 +5563,7 @@ static int in_menu=0;
   }
   glutAddMenuEntry("",1);
   glutAddMenuEntry("URL: http://fire.nist.gov/fds",1);
+  glutAddSubMenu("Disclaimer",disclaimermenu);
 
   /* -------------------------------- target menu -------------------------- */
 
