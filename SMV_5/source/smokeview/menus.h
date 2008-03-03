@@ -5448,26 +5448,6 @@ static int in_menu=0;
 /* -------------------------------- disclaimer menu -------------------------- */
 
   CREATEMENU(disclaimermenu,DisclaimerMenu);
-  glutAddMenuEntry("The US Department of Commerce makes no warranty, expressed or",1);
-  glutAddMenuEntry("implied, to users of Smokeview, and accepts no responsibility",1);
-  glutAddMenuEntry("for its use. Users of Smokeview assume sole responsibility under",1);
-  glutAddMenuEntry("Federal law for determining the appropriateness of its use in any",1);
-  glutAddMenuEntry("particular application; for any conclusions drawn from the results",1); 
-  glutAddMenuEntry("of its use; and for any actions taken or not taken as a result of",1); 
-  glutAddMenuEntry("analysis performed using this tools.",1);
-  glutAddMenuEntry("",1);
-  glutAddMenuEntry("Smokeview and the companion program FDS is intended for use only",1);
-  glutAddMenuEntry("by those competent in the fields of fluid dynamics, thermodynamics,",1);
-  glutAddMenuEntry("combustion, and heat transfer, and is intended only to supplement",1);
-  glutAddMenuEntry("the informed judgment of the qualified user. These software packages",1);
-  glutAddMenuEntry("may or may not have predictive capability when applied to a specific",1);
-  glutAddMenuEntry("set of factual circumstances.  Lack of accurate predictions could lead",1);
-  glutAddMenuEntry("to erroneous conclusions with regard to fire safety.  All results",1);
-  glutAddMenuEntry("should be evaluated by an informed user.",1);
-
-/* --------------------------------help menu -------------------------- */
-
-  CREATEMENU(helpmenu,HelpMenu);
   glutAddMenuEntry(TITLERELEASE,1);
   {
     char version_label[256];
@@ -5514,16 +5494,39 @@ static int in_menu=0;
     glutAddMenuEntry(menulabel,1);
 #endif
   }
+  glutAddMenuEntry("-",1);
+  glutAddMenuEntry("The US Department of Commerce makes no warranty, expressed or",1);
+  glutAddMenuEntry("implied, to users of Smokeview, and accepts no responsibility",1);
+  glutAddMenuEntry("for its use. Users of Smokeview assume sole responsibility under",1);
+  glutAddMenuEntry("Federal law for determining the appropriateness of its use in any",1);
+  glutAddMenuEntry("particular application; for any conclusions drawn from the results",1); 
+  glutAddMenuEntry("of its use; and for any actions taken or not taken as a result of",1); 
+  glutAddMenuEntry("analysis performed using this tools.",1);
+  glutAddMenuEntry("",1);
+  glutAddMenuEntry("Smokeview and the companion program FDS is intended for use only",1);
+  glutAddMenuEntry("by those competent in the fields of fluid dynamics, thermodynamics,",1);
+  glutAddMenuEntry("combustion, and heat transfer, and is intended only to supplement",1);
+  glutAddMenuEntry("the informed judgment of the qualified user. These software packages",1);
+  glutAddMenuEntry("may or may not have predictive capability when applied to a specific",1);
+  glutAddMenuEntry("set of factual circumstances.  Lack of accurate predictions could lead",1);
+  glutAddMenuEntry("to erroneous conclusions with regard to fire safety.  All results",1);
+  glutAddMenuEntry("should be evaluated by an informed user.",1);
+
+/* --------------------------------help menu -------------------------- */
+
+  {
+    int displayblank=0;
+  CREATEMENU(helpmenu,HelpMenu);
   if(plotstate==DYNAMIC_PLOTS){
-    glutAddMenuEntry("",1);
     glutAddMenuEntry("Animation keyboard commands",1);
     glutAddMenuEntry("  t: set/unset single time step mode",6);
     glutAddMenuEntry("  o: reset animation to the initial time",6);
     glutAddMenuEntry("  T: toggle texture method for drawing slice and boundary colors",6);
     glutAddMenuEntry("  u: reload files",6);
+    displayblank=1;
   }
   if(plotstate==STATIC_PLOTS){
-    glutAddMenuEntry("",1);
+    if(displayblank==1)glutAddMenuEntry("",1);
     glutAddMenuEntry("Plot3D keyboard commands",1);
     glutAddMenuEntry("  x,y,z: toggle contour plot visibility along x, y and z axis",3);
     glutAddMenuEntry("  p: increment plot3d variable",2);
@@ -5533,8 +5536,9 @@ static int in_menu=0;
     glutAddMenuEntry("  s: change interval between adjacent vectors",3);
     glutAddMenuEntry("  c: toggle between continuous and 2D stepped contours",3);
     glutAddMenuEntry("  i: toggle iso-surface visibility",2);
+    displayblank=1;
   }
-  glutAddMenuEntry("",1);
+  if(displayblank==1)glutAddMenuEntry("",1);
   glutAddMenuEntry("Misc keyboard commands",1);
   glutAddMenuEntry("  r: render the current scene as a jpeg or png image",7);
   glutAddMenuEntry("  R:   (same as r but at twice the resolution)",7);
@@ -5563,7 +5567,7 @@ static int in_menu=0;
   }
   glutAddMenuEntry("",1);
   glutAddMenuEntry("URL: http://fire.nist.gov/fds",1);
-  glutAddSubMenu("Disclaimer",disclaimermenu);
+  }
 
   /* -------------------------------- target menu -------------------------- */
 
@@ -6685,6 +6689,7 @@ static int in_menu=0;
       }
     }
   glutAddMenuEntry("Quit",3);
+  glutAddSubMenu("About Smokeview...",disclaimermenu);
   updatemenu=0;
 #ifdef _DEBUG
   in_menu=0;
