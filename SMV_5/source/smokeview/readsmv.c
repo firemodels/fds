@@ -425,7 +425,7 @@ int readsmv(char *file){
   STRCPY(LESendian,"");
 
   if( (stream=fopen(file,"r"))==NULL)return 1;
-  printf("reading: %s\n",file);
+  printf("\nReading: %s\n",file);
 
 /* 
    ************************************************************************
@@ -4126,7 +4126,6 @@ typedef struct {
    ************************ end of pass 3 ********************************* 
    ************************************************************************
  */
-  printf("pass 3 complete\n");
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     int nlist;

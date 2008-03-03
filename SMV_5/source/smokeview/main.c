@@ -76,7 +76,7 @@ int main(int argc, char **argv){
 
     get_smokezippath(smvprogdir,&smokezippath);
 
-    if(smokezippath!=NULL)printf(" Smokezip file: %s found\n",smokezippath);
+    if(smokezippath!=NULL)printf("Smokezip file: %s found\n",smokezippath);
 
     CheckMemory;
     Args(argc, argv_sv);

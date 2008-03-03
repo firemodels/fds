@@ -201,16 +201,16 @@ void init_shaders(void){
 
   if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader){
     if(setSmokeShaders()==1){
-  		printf("***GPU smoke shader successfully compiled, linked and loaded.\n");
+  		printf("GPU smoke shader successfully compiled, linked and loaded.\n");
       gpuactive=1;
     }
     else{
-  		printf("***GPU smoke shader failed to load.\n");
+  		printf("*** GPU smoke shader failed to load.\n");
       usegpu=0;
     }
   }
 	else {
-		printf("GPU smoke shader not supported.\n");
+		printf("*** GPU smoke shader not supported.\n");
     usegpu=0;
 	}
 }
