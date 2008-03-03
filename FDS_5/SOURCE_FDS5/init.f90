@@ -2575,7 +2575,7 @@ COMPONENT: SELECT CASE(IEC)
             IJKE(12,IE) = IIO
             IJKE(13,IE) = JJO
             MM => MESHES(NOM)
-            ZK  = MIN( REAL(MM%KBAR,EB)+0.999_EB , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
+            ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
             KKO = MAX(1,FLOOR(ZK))
             M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
             IJKE(14,IE) = KKO
@@ -2585,7 +2585,7 @@ COMPONENT: SELECT CASE(IEC)
             IF (IOR<0) IJKE( 7,IE) =  NOM
             IJKE( 8,IE) = IIO
             MM => MESHES(NOM)
-            YJ  = MIN( REAL(MM%JBAR,EB)+0.999_EB , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
+            YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
             JJO = MAX(1,FLOOR(YJ))
             M%EDGE_INTERPOLATION_FACTOR(IE,1) = YJ-JJO
             IJKE( 9,IE) = JJO
@@ -2608,7 +2608,7 @@ COMPONENT: SELECT CASE(IEC)
             IJKE(12,IE) = IIO
             IJKE(13,IE) = JJO
             MM => MESHES(NOM)
-            ZK  = MIN( REAL(MM%KBAR,EB)+0.999_EB , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
+            ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
             KKO = MAX(1,FLOOR(ZK))
             M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
             IJKE(14,IE) = KKO
@@ -2616,7 +2616,7 @@ COMPONENT: SELECT CASE(IEC)
             IF (IOR>0) IJKE( 7,IE) = -NOM
             IF (IOR<0) IJKE( 7,IE) =  NOM
             MM => MESHES(NOM)
-            XI  = MIN( REAL(MM%IBAR,EB)+0.999_EB , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
+            XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
             IIO = MAX(1,FLOOR(XI))
             M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
             IJKE( 8,IE) = IIO
@@ -2639,7 +2639,7 @@ COMPONENT: SELECT CASE(IEC)
             IF (IOR<0) IJKE(11,IE) =  NOM
             IJKE(12,IE) = IIO
             MM => MESHES(NOM)
-            YJ  = MIN( REAL(MM%JBAR,EB)+0.999_EB , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
+            YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
             JJO = MAX(1,FLOOR(YJ))
             M%EDGE_INTERPOLATION_FACTOR(IE,2) = YJ-JJO
             IJKE(13,IE) = JJO
@@ -2648,7 +2648,7 @@ COMPONENT: SELECT CASE(IEC)
             IF (IOR>0) IJKE( 7,IE) = -NOM
             IF (IOR<0) IJKE( 7,IE) =  NOM
             MM => MESHES(NOM)
-            XI  = MIN( REAL(MM%IBAR,EB)+0.999_EB , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
+            XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
             IIO = MAX(1,FLOOR(XI))
             M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
             IJKE( 8,IE) = IIO
