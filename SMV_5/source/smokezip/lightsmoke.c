@@ -16,10 +16,10 @@
 // svn revision character string
 char lightsmoke_revision[]="$Revision$";
 
-float average(int ijknode, int *celldata, mesh *smoke_mesh);
+float average(int ijknode, float *celldata, mesh *smoke_mesh);
 float get_photon_step(smoke3d *smoke3di, float xyzpos[3], float xyzdir[3]);
 int in_mesh(mesh *smoke_mesh,float xyzpos[3]);
-float getalpha(mesh *smoke_mesh, float *xyz);
+float getlog_1_m_alpha(mesh *smoke_mesh, float *xyz);
 int get_interval(float val, float *array, int n);
 float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer);
 
@@ -49,13 +49,13 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
     float xyzpos[3], xyzdir[3];
     float factor, *xyz1, *xyz2;
     int i;
-    int *photon_bin;
+    float *photon_cell;
     float photon_step;
     mesh *smoke_mesh;
     int nx, ny, nz, nxy;
     int nxcell, nycell, nzcell, nxycell;
     float binmax,binsum;
-    float logindex[255];
+    float logindex[256];
 
 #define NPHOTONS 1000000
 
@@ -76,14 +76,14 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
 
 // zero out bin used to collect photons
 
-    photon_bin = smoke3di->smoke_mesh->photon_bin;
-    for(i=1;i<255;i++){
+    photon_cell = smoke3di->smoke_mesh->photon_cell;
+    for(i=1;i<256;i++){
       logindex[i]=log((float)i/255.0)/smoke_mesh->dx;
     }
     logindex[0]=log(0.001)/smoke_mesh->dx;
 
     for(i=0;i<nxcell*nycell*nzcell;i++){
-      photon_bin[i]=0;
+      photon_cell[i]=0.0;
     }
     for(i=0;i<nx*ny*nz;i++){
       float val;
@@ -146,23 +146,27 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
         k1 = get_interval(xyzpos[2],smoke_mesh->zplt,nzcell);
 
         ijk = IJKCELL(i1,j1,k1);
-        photon_bin[ijk]++;                 // record location of photon
+        photon_cell[ijk]++;                 // record location of photon
 
         if(rand_1d(0.0,1.0)>albedo)break;   // if this if is true then the photon is absorbed
         rand_dir(xyzdir);
       }
       CheckMemory;
     }
-    binmax = 0;
-    binsum=0;
-    for(i=0;i<nx*ny*nz;i++){
-      if(photon_bin[i]>binmax)binmax=photon_bin[i];
-      binsum+=photon_bin[i];
+    binmax = 0.0;
+    binsum=0.0;
+    for(i=0;i<nxcell*nycell*nzcell;i++){
+      if(photon_cell[i]>binmax)binmax=photon_cell[i];
+      binsum+=photon_cell[i];
     }
-    printf("binmax=%i binsum=%i\n",binmax,binsum);
+    printf("binmax=%f binsum=%f\n",binmax,binsum);
     CheckMemory;
     for(i=0;i<nx*ny*nz;i++){
-      lightingbuffer[i]=(unsigned char)(average(i, photon_bin, smoke_mesh)/(float)binmax*254.0);
+      float val;
+    
+      val = average(i, photon_cell, smoke_mesh);
+      f_lightingbuffer[i]=val;
+      lightingbuffer[i]=(unsigned char)(val/(float)binmax*254.0);
     }
     CheckMemory;
 }
@@ -181,7 +185,7 @@ int in_mesh(mesh *smoke_mesh,float xyzpos[3]){
 
 float get_photon_step(smoke3d *smoke3di, float xyzpos[3], float xyzdir[3]){
 #define NPHOTON_PDF 50
-  float photon_pdf[NPHOTON_PDF];
+  float photon_pdf[NPHOTON_PDF], photon_cdf[NPHOTON_PDF];
   int i;
   float xyz[3];
   float logalpha;
@@ -197,6 +201,8 @@ float get_photon_step(smoke3d *smoke3di, float xyzpos[3], float xyzdir[3]){
   ibreak = 0;
 
   photon_pdf[0]=0.0;
+  photon_cdf[0]=0.0;
+  var = rand_1d(0.0,1.0);
   for(i=1;i<NPHOTON_PDF;i++){
     if(ibreak==0){
       xyz[0] = xyzpos[0] + i*dlength*xyzdir[0];
@@ -204,37 +210,36 @@ float get_photon_step(smoke3d *smoke3di, float xyzpos[3], float xyzdir[3]){
       xyz[2] = xyzpos[2] + i*dlength*xyzdir[2];
       if(in_mesh(smoke_mesh,xyz)==0){
         ibreak=1;
-        break;
       }
-      logalpha = getalpha(smoke_mesh,xyz);
+      logalpha = getlog_1_m_alpha(smoke_mesh,xyz);
       photon_pdf[i]=photon_pdf[i-1]+dlength*logalpha;
     }
     else{
       photon_pdf[i]=photon_pdf[i-1]-10.0;
     }
-  }
-  for(i=0;i<NPHOTON_PDF;i++){
     if(photon_pdf[i]<-50.0){
-      photon_pdf[i]=1.0;
+      photon_cdf[i]=1.0;
     }
     else{
-      photon_pdf[i]=1.0-exp(photon_pdf[i]);
+      photon_cdf[i]=1.0-exp(photon_pdf[i]);
+    }
+    if(photon_cdf[i-1]<var&&var<photon_cdf[i]){
+      step = (i-1)*dlength;
+      return step;
     }
   }
-  var = rand_1d(0.0,1.0);
-  ivar = get_interval(var,photon_pdf,NPHOTON_PDF);
-  step = ivar*dlength;
+  step = (NPHOTON_PDF-2)*dlength;
   return step;
 }
 
 /* ------------------ getalpha ------------------------ */
 
-float getalpha(mesh *smoke_mesh, float *xyz){
+float getlog_1_m_alpha(mesh *smoke_mesh, float *xyz){
   float val;
 
-  if(xyz[0]<smoke_mesh->xbar0||xyz[0]>smoke_mesh->xbar)return 1.0;
-  if(xyz[1]<smoke_mesh->ybar0||xyz[1]>smoke_mesh->ybar)return 1.0;
-  if(xyz[2]<smoke_mesh->zbar0||xyz[2]>smoke_mesh->zbar)return 1.0;
+  if(xyz[0]<smoke_mesh->xbar0||xyz[0]>smoke_mesh->xbar)return 0.0;
+  if(xyz[1]<smoke_mesh->ybar0||xyz[1]>smoke_mesh->ybar)return 0.0;
+  if(xyz[2]<smoke_mesh->zbar0||xyz[2]>smoke_mesh->zbar)return 0.0;
 
   val = interp(xyz, smoke_mesh, full_logalphabuffer);
   return val;
@@ -243,23 +248,24 @@ float getalpha(mesh *smoke_mesh, float *xyz){
 /* ------------------ interp ------------------------ */
 
 float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
-  int logalpha111, logalpha112, logalpha121, logalpha122;
-  int logalpha211, logalpha212, logalpha221, logalpha222;
+  float logalpha111, logalpha112, logalpha121, logalpha122;
+  float logalpha211, logalpha212, logalpha221, logalpha222;
   float x1, x2, y1, y2, z1, z2;
   float f1=0.0, f2=1.0, g1=0.0, g2=1.0, h1=0.0, h2=1.0;
   float val;
   int i1, j1, k1;
   int i2, j2, k2;
-  int nx, ny, nxy;
+  int nx, ny, nxy, nz;
   float dx, dy, dz;
 
   nx = smoke_mesh->ibar+1;
   ny = smoke_mesh->jbar+1;
+  nz = smoke_mesh->kbar+1;
   nxy = nx*ny;
 
-  i1 = get_interval(xyz[0],smoke_mesh->xplt,smoke_mesh->ibar+1);
-  j1 = get_interval(xyz[1],smoke_mesh->yplt,smoke_mesh->jbar+1);
-  k1 = get_interval(xyz[2],smoke_mesh->zplt,smoke_mesh->kbar+1);
+  i1 = get_interval(xyz[0],smoke_mesh->xplt,nx);
+  j1 = get_interval(xyz[1],smoke_mesh->yplt,ny);
+  k1 = get_interval(xyz[2],smoke_mesh->zplt,nz);
 
   i2=i1+1;
   if(i2>smoke_mesh->ibar)i2=smoke_mesh->ibar;
@@ -269,14 +275,14 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
   if(k2>smoke_mesh->kbar)k2=smoke_mesh->kbar;
   
 
-  logalpha111 = (int)full_logalphabuffer[IJKNODE(i1,j1,k1)];
-  logalpha112 = (int)full_logalphabuffer[IJKNODE(i1,j1,k2)];
-  logalpha121 = (int)full_logalphabuffer[IJKNODE(i1,j2,k1)];
-  logalpha122 = (int)full_logalphabuffer[IJKNODE(i1,j2,k2)];
-  logalpha211 = (int)full_logalphabuffer[IJKNODE(i2,j1,k1)];
-  logalpha212 = (int)full_logalphabuffer[IJKNODE(i2,j1,k2)];
-  logalpha221 = (int)full_logalphabuffer[IJKNODE(i2,j2,k1)];
-  logalpha222 = (int)full_logalphabuffer[IJKNODE(i2,j2,k2)];
+  logalpha111 = full_logalphabuffer[IJKNODE(i1,j1,k1)];
+  logalpha112 = full_logalphabuffer[IJKNODE(i1,j1,k2)];
+  logalpha121 = full_logalphabuffer[IJKNODE(i1,j2,k1)];
+  logalpha122 = full_logalphabuffer[IJKNODE(i1,j2,k2)];
+  logalpha211 = full_logalphabuffer[IJKNODE(i2,j1,k1)];
+  logalpha212 = full_logalphabuffer[IJKNODE(i2,j1,k2)];
+  logalpha221 = full_logalphabuffer[IJKNODE(i2,j2,k1)];
+  logalpha222 = full_logalphabuffer[IJKNODE(i2,j2,k2)];
 
   x1 = smoke_mesh->xplt[i1];
   y1 = smoke_mesh->yplt[j1];
@@ -313,7 +319,7 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
 
 /* ------------------ average ------------------------ */
 
-float average(int ijknode, int *celldata, mesh *smoke_mesh){
+float average(int ijknode, float *celldata, mesh *smoke_mesh){
   int nx, ny, nxy;
   int nxcell, nycell, nxycell;
   int i1, j1, k1;

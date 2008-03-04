@@ -409,9 +409,9 @@ void rand_dir(float xyz[3]){
 
   sum=x*x+y*y+z*z;
   while(sum>1.0||sum==0.0){
-    x = rand_1d(0.0,1.0);
-    y = rand_1d(0.0,1.0);
-    z = rand_1d(0.0,1.0);
+    x = rand_1d(-1.0,1.0);
+    y = rand_1d(-1.0,1.0);
+    z = rand_1d(-1.0,1.0);
     sum=x*x+y*y+z*z;
   }
   xyz[0]=x/sqrt(sum);
