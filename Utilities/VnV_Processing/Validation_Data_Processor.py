@@ -116,8 +116,8 @@ def extract_comp_data(comp_file_info):
         rowcounter2 = 0
         for time_value2 in data_dict[col_name]:
             if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_time_data)*60):
-                print "Specified end of plot time is greater than end of time in the data set. /nUsing last value in the time column./n"
-                print "Time used is:", float(data_dict[col_name][(len(data_dict[col_name])-1)])
+                print "Specified end of plot time is greater than end of time in the data set. \nUsing last value in the time column.\n"
+                print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
                 time_end_index = (len(data_dict[col_name])-1)
                 break
             else:
@@ -144,8 +144,8 @@ def extract_comp_data(comp_file_info):
         rowcounter4 = 0
         for time_value4 in data_dict[col_name]:
             if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_time_comp)*60):
-                print "Specified end of comparison time is greater than end of time in the data set. /nUsing last value in the time column./n"
-                print "Time used is:", float(data_dict[col_name][(len(data_dict[col_name])-1)])
+                print "Specified end of comparison time is greater than end of time in the data set. \nUsing last value in the time column."
+                print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
                 minmax_end_index = (len(data_dict[col_name])-1)
                 break
 
