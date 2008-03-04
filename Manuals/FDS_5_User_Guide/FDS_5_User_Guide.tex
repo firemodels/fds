@@ -265,7 +265,7 @@ VTT Technical Research Centre of Finland  }
 
 \vfill
 
-\flushright{\includegraphics[width=2.in]{figures/nistident_flright_300ppi}}
+\flushright{\includegraphics[width=2.in]{FIGURES/nistident_flright_300ppi.jpg}}
 
 
 \end{minipage}
@@ -308,7 +308,7 @@ $SVN Repository$~$Revision$}
 
 \vfill
 
-\flushright{\includegraphics[width=1in]{FIGURES/doc} }
+\flushright{\includegraphics[width=1in]{FIGURES/doc.pdf} }
 
 \small
 \flushright{U.S. Department of Commerce \\
@@ -1621,7 +1621,7 @@ An example of an axially-symmetric helium plume ({\bf helium\_2d}) is given in t
 \label{info:multimesh}\index{Multiple Meshes}
 
 \begin{figure}[ht!]
-\includegraphics[width=\textwidth]{FIGURES/hallways}
+\includegraphics[width=\textwidth]{FIGURES/hallways.jpg}
 \caption{\bf An example of a multiple-mesh geometry.}
 \label{fig:domain}
 \end{figure}
@@ -1801,14 +1801,14 @@ By default the mesh cells that fill the computational domain are uniform in size
 However, it is possible to specify that the cells be non-uniform in one or two
 \begin{figure}[ht]
 \begin{minipage}[t]{3.1in}
-\includegraphics[width=3.1in]{FIGURES/piece_wise_linear}
+\includegraphics[width=3.1in]{FIGURES/piece_wise_linear.PDF}
 \vspace{-.2in}
 \caption{\bf Piecewise-Linear Transformation.}
 \label{fig:grid2}
 \end{minipage}
 \hfill
 \begin{minipage}[t]{3.1in}
-\includegraphics[width=3.1in]{FIGURES/polygonal}
+\includegraphics[width=3.1in]{FIGURES/polygonal.PDF}
 \vspace{-.2in}
 \caption{\bf Polynomial Transformation.}
 \label{fig:grid1}
@@ -3244,7 +3244,7 @@ pressure difference the fan can operate upon. Figure~(\ref{fig:Fan_Curve} displa
 
 \begin{figure}[ht!]
 \begin{center}
-\includegraphics[width=3.5in]{FIGURES/Fan_Curve}
+\includegraphics[width=3.5in]{FIGURES/Fan_Curve.PDF}
 \caption{\bf Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}.}
 \label{fig:Fan_Curve}
 \end{center}
@@ -3799,7 +3799,7 @@ conform to the uniform mesh, FDS does {\bf not} adjust the burning
 rate to account for this as it does with various quantities associated
 with areas, like {\ct HRRPUA}.
 
-Examples of the use of {\ct BURN\_AWAY} feature are awailable in 
+Examples of the use of {\ct BURN\_AWAY} feature are awailable in
 verification test box\_burn\_away (Section~\ref{box_burn_away})
 and the couch sample fire (Section~\ref{couch}).
 
@@ -5634,7 +5634,7 @@ control function types, the logical value output of the devices and control func
 state are used as the inputs.
 
 For any input that a  {\ct DEVC\_ID} can be specified for (such as {\ct OBST} or {\ct VENT}), a {\ct CTRL\_ID} can be
-specified instead. 
+specified instead.
 
 \begin{table}[h!]
 \index{Controls!Function List}
@@ -6542,7 +6542,7 @@ space and direction ($\bs$ is a direction vector that ranges over $4\pi$ solid a
 Note that $U$ is used in Eq.~(\ref{TC}) to get the effective radiative
 flux to a small thermocouple bead so that its temperature, as opposed
 to the gas temperature, can be calculated. If you divide $U$ by
-$4\pi$, you get the average intensity at a particular point in space:  
+$4\pi$, you get the average intensity at a particular point in space:
 \be
    \overline{I}(\bx) = \frac{U(\bx)}{4 \pi}
 \ee
@@ -8052,10 +8052,10 @@ is seen from 60 s to 120 s, indicating that the current implementation adiabatic
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/pressure_rise_T} &
-\includegraphics[width=3.2in]{FIGURES/pressure_rise_P} \\
-\includegraphics[width=3.2in]{FIGURES/pressure_rise_R} &
-\includegraphics[width=3.2in]{FIGURES/pressure_rise_1000}
+\includegraphics[width=3.2in]{FIGURES/pressure_rise_T.pdf} &
+\includegraphics[width=3.2in]{FIGURES/pressure_rise_P.pdf} \\
+\includegraphics[width=3.2in]{FIGURES/pressure_rise_R.pdf} &
+\includegraphics[width=3.2in]{FIGURES/pressure_rise_1000.jpg}
 \end{tabular*}
 
 \clearpage
@@ -8090,8 +8090,8 @@ The two cases are summarized in the following plots:
 \vspace{0.1in}
 \noindent
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.1in]{FIGURES/leak_test_Pressure_Case_1} &
-\includegraphics[width=3.1in]{FIGURES/leak_test_Pressure_Case_2}
+\includegraphics[width=3.1in]{FIGURES/leak_test_Pressure_Case_1.PDF} &
+\includegraphics[width=3.1in]{FIGURES/leak_test_Pressure_Case_2.PDF}
 \end{tabular*}
 
 
@@ -8143,8 +8143,8 @@ coordinate direction. This convention can make these types of calculations a bit
 \vspace{0.1in}
 \noindent
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.1in]{FIGURES/fan_test_Pressure} &
-\includegraphics[width=3.1in]{FIGURES/fan_test_Volume_Flow}
+\includegraphics[width=3.1in]{FIGURES/fan_test_Pressure.PDF} &
+\includegraphics[width=3.1in]{FIGURES/fan_test_Volume_Flow.PDF}
 \end{tabular*}
 
 
@@ -8190,7 +8190,7 @@ This verification case tests the computation of three-dimensional
 configuration factor $\Phi$ inside a cube box with one hot wall and
 five cold (0~K) walls. An overview of the test geometry is shown here:
 \begin{center}
-\includegraphics[width=4.0in]{FIGURES/box}
+\includegraphics[width=4.0in]{FIGURES/box.pdf}
 \end{center}
 The configuration factors are calculated at the
 diagonal of the cold wall opposite to the hot wall. The exact values of the configuration factor
@@ -8214,8 +8214,8 @@ and the number of radiation angles (50, 100, 300, 1000, 2000).
 The exact and FDS results are shown here:
 
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/box_results_20} &
-\includegraphics[width=3.2in]{FIGURES/box_results_100}
+\includegraphics[width=3.2in]{FIGURES/box_results_20.pdf} &
+\includegraphics[width=3.2in]{FIGURES/box_results_100.pdf}
 \end{tabular*}
 
 
@@ -8333,10 +8333,10 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_A_Temperatures} &
-\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_B_Temperatures} \\
-\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_C_Temperatures} &
-\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_D_Temperatures}
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_A_Temperatures.PDF} &
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_B_Temperatures.PDF} \\
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_C_Temperatures.PDF} &
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_D_Temperatures.PDF}
 \end{tabular*}
 
 
@@ -8388,7 +8388,7 @@ geometry looks like:
 
 \noindent
 \begin{center}
-\includegraphics[width=4.5in]{FIGURES/heat_conduction_kc}
+\includegraphics[width=4.5in]{FIGURES/heat_conduction_kc.pdf}
 \end{center}
 
 
@@ -8415,7 +8415,7 @@ The analytical and  numerical solution
 for the parameters $K_{ab} = 0.389$ and $K_{bc} = 0.262$ are shown here:
 
 \begin{center}
-\includegraphics[width=4.5in]{FIGURES/two_step_solid_reaction_Mass_Fractions}
+\includegraphics[width=4.5in]{FIGURES/two_step_solid_reaction_Mass_Fractions.PDF}
 \end{center}
 
 
@@ -8636,7 +8636,7 @@ An example of an axially-symmetric helium plume is shown here, along with the in
 \scriptsize
 \noindent
 \begin{minipage}{1.1in}
-\includegraphics[height=2in]{FIGURES/helium_2d}
+\includegraphics[height=2in]{FIGURES/helium_2d.jpg}
 \end{minipage}
 \hfill
 \begin{minipage}{5.5in}
@@ -8732,7 +8732,7 @@ imposed on the right side ($x=10$).
 This snapshot from Smokeview was taken during the time period when there was a positive pressure imposed at the right portal of the tunnel. The fire leans to the
 left because of the preferential flow in that direction.
 \begin{center}
-\includegraphics[width=\textwidth]{FIGURES/pressure_boundary}
+\includegraphics[width=\textwidth]{FIGURES/pressure_boundary.jpg}
 \end{center}
 
 
@@ -8759,8 +8759,8 @@ door, increase the oxygen supply, at least near these openings, and the fuel-ric
 \vspace{0.1in}
 \noindent
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.1in]{FIGURES/door_crack_Pressure} &
-\includegraphics[width=3.1in]{FIGURES/door_crack_HRR}
+\includegraphics[width=3.1in]{FIGURES/door_crack_Pressure.PDF} &
+\includegraphics[width=3.1in]{FIGURES/door_crack_HRR.PDF}
 \end{tabular*}
 While this case has a number of interesting physical effects, and it {\em verifies} several features of FDS, it is very important to note the following:
 \begin{itemize}
@@ -8785,9 +8785,9 @@ calculation. The objective of the test is to check that the integrated
 burning rate is consistent with the material properties of the block.
 The block is 0.4~m on a side, with a density of 20~kg/m$^3$.  The
 integrated burning rate (written to box\_burn\_away\_hrr.csv) for a 60 s
-calculation ought to be: 
-\be 
-(0.4)^3 \; \hbox{m}^3 \times 20 \; \hbox{kg/m}^3 = 1.28 \; \hbox{kg} 
+calculation ought to be:
+\be
+(0.4)^3 \; \hbox{m}^3 \times 20 \; \hbox{kg/m}^3 = 1.28 \; \hbox{kg}
 \ee
 
 
@@ -8816,8 +8816,8 @@ Using the optical depth of 0.626~m$^{-1}$ and the path length of
 10~m, the expected total obscuration is 99.81~\%, which is the
 result computed by FDS for each of the three detectors.
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/beam_detector_nosmoke} &
-\includegraphics[width=3.2in]{FIGURES/beam_detector_smoke}
+\includegraphics[width=3.2in]{FIGURES/beam_detector_nosmoke.jpg} &
+\includegraphics[width=3.2in]{FIGURES/beam_detector_smoke.jpg}
 \end{tabular*}
 
 \clearpage
@@ -8863,7 +8863,7 @@ At this point the energy content of the box is 372,000~kJ or a 3~\% error.
 At 16.2~$^\circ$C, the expected evaporation is 0.0142~kg.
 
 \begin{center}
-\includegraphics[width=4.5in]{FIGURES/water_evaporation}
+\includegraphics[width=4.5in]{FIGURES/water_evaporation.jpg}
 \end{center}
 
 
@@ -8982,7 +8982,7 @@ is an example of holes and obstructions being created and removed.
 \tiny
 \noindent
 \begin{minipage}{1.4in}
-\includegraphics[height=1.4in]{FIGURES/create_remove}
+\includegraphics[height=1.4in]{FIGURES/create_remove.jpg}
 \end{minipage}
 \hfill
 \begin{minipage}{5.5in}
@@ -9132,16 +9132,16 @@ the heat of reaction.
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Surface_Temperature} &
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Fluxes}
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Surface_Temperature.PDF} &
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Fluxes.PDF}
 \end{tabular*}
 The slab is 0.025~m thick, with a density of 500~kg/m$^3$. This means there is 12.5~kg/m$^2$ of fuel present, which if divided by the
 burning rate (about 0.018~kg/m$^2$/s) yields a burning time of about 700~s. After this, the material is ``burned away.''
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Burning_Rate} &
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Thickness}
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Burning_Rate.PDF} &
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Thickness.PDF}
 \end{tabular*}
 
 
@@ -9235,7 +9235,7 @@ SURF} line. This produces a 50~kW/m$^2$ flux on the sample, without
 any additional input lines in the file. It is just to test the solid
 phase model and should not be copied into an actual fire simulation.
 
-The figures below show the surface temperature and burning rate 
+The figures below show the surface temperature and burning rate
 under the 50~kW/m$^2$ external heat flux. The burning rate peaks
 at the start of the simulation, decreases throughout the burning
 phase, and then peaks again at the end due to presence of an external
@@ -9243,8 +9243,8 @@ backing material. The initial peak is typical of char-forming solids.
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/charring_solid_Surface_Temperature} &
-\includegraphics[width=3.2in]{FIGURES/charring_solid_Burning_Rate}
+\includegraphics[width=3.2in]{FIGURES/charring_solid_Surface_Temperature.PDF} &
+\includegraphics[width=3.2in]{FIGURES/charring_solid_Burning_Rate.PDF}
 \end{tabular*}
 
 
@@ -9301,7 +9301,7 @@ are also shown, courtesy of Ian Thomas, Victoria University, Australia~\cite{Tho
 
 
 \begin{center}
-\includegraphics[width=4.5in]{FIGURES/ethanol_pan_HRR}
+\includegraphics[width=4.5in]{FIGURES/ethanol_pan_HRR.PDF}
 \end{center}
 
 
@@ -9476,7 +9476,7 @@ like this ought to be conducted just to ensure that this is the case.
 The HRR curve for this example is given here:
 
 \begin{center}
-\includegraphics[width=4.5in]{FIGURES/spray_burner_HRR}
+\includegraphics[width=4.5in]{FIGURES/spray_burner_HRR.PDF}
 \end{center}
 
 Note that in this example there is no need for a separate ignition source. The combustion model assumes fuel and oxygen burn
