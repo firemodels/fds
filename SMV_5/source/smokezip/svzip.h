@@ -92,7 +92,7 @@ typedef struct {
   float dx, dy, dz;
   float dxx, dyy, dzz;
 #ifdef pp_LIGHT
-  int *photon_bin;
+  float *photon_cell;
   float dxyzmax;
 #endif
 } mesh;

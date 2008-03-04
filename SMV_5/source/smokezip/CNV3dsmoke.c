@@ -297,14 +297,6 @@ void convert_3dsmoke(smoke3d *smoke3di){
       printf("  ***warning zlib compressor failed - frame %f\n",time);
     }
 
-    data_loc=EGZ_FTELL(SMOKE3DFILE);
-    percent_done=100.0*(float)data_loc/(float)smoke3di->filesize;
-    if(percent_done>percent_next){
-      printf(" %i%s",percent_next,pp);
-      fflush(stdout);
-      percent_next+=10;
-    }
-
 #ifdef pp_LIGHT
     // compress frame of lighting data (into ZLIB format)
     if(make_lighting_file==1){
@@ -323,6 +315,15 @@ void convert_3dsmoke(smoke3d *smoke3di){
     }
 
 #endif
+
+    data_loc=EGZ_FTELL(SMOKE3DFILE);
+    percent_done=100.0*(float)data_loc/(float)smoke3di->filesize;
+    if(percent_done>percent_next){
+      printf(" %i%s",percent_next,pp);
+      fflush(stdout);
+      percent_next+=10;
+    }
+
 
     // write out new entries in the size (sz) file
 

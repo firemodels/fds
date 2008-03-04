@@ -201,7 +201,6 @@ int readsmv(char *smvfile){
     patch *patchi;
 
     if(fgets(buffer,255,streamsmv)==NULL)break;
-    printf("buffer=%s\n",buffer);
     CheckMemory;
     if(strncmp(buffer," ",1)==0)continue;
 
@@ -643,7 +642,7 @@ int readsmv(char *smvfile){
       CheckMemory;
 
 #ifdef pp_LIGHT
-      meshi->photon_bin=NULL;
+      meshi->photon_cell=NULL;
       if(make_lighting_file==1){
         int nni, nnj, nnk;
 
@@ -651,7 +650,7 @@ int readsmv(char *smvfile){
         nnj = meshi->jbar;
         nnk = meshi->kbar;
 
-        NewMemory((void **)&meshi->photon_bin,nni*nnj*nnk*sizeof(int));
+        NewMemory((void **)&meshi->photon_cell,nni*nnj*nnk*sizeof(float));
       }
 #endif
 
