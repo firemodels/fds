@@ -455,6 +455,9 @@ K_COARSE: DO KC=1,KBAR2
       I_COARSE: DO IC=1,IBAR2
  
          N = CGI2(IC,JC,KC)
+
+         ! Lower x face
+
          II = I_LO(IC)-1
          DO KK=K_LO(KC),K_HI(KC)
             DO JJ=J_LO(JC),J_HI(JC)
@@ -466,8 +469,8 @@ K_COARSE: DO KC=1,KBAR2
                   B(N)    = B(N)    + DA*FVX(II,JJ,KK)
                ELSE 
                   IW = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),-1)
-                  NOM = IJKW(9,IW)
-                  IF (NOM>0) THEN
+                  IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                     NOM = IJKW(9,IW)
                      OM  => OMESH(NOM)
                      M2  => MESHES(NOM)
                      IIO = IJKW(10,IW)
@@ -495,6 +498,8 @@ K_COARSE: DO KC=1,KBAR2
                ENDIF
             ENDDO
          ENDDO
+
+         ! Upper x face
  
          II = I_HI(IC)
          DO KK=K_LO(KC),K_HI(KC)
@@ -507,8 +512,8 @@ K_COARSE: DO KC=1,KBAR2
                   B(N)    = B(N)    - DA*FVX(II,JJ,KK)
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),1)
-                  NOM = IJKW(9,IW)
-                  IF (NOM>0) THEN
+                  IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                     NOM = IJKW(9,IW)
                      OM  => OMESH(NOM)
                      M2  => MESHES(NOM)
                      IIO = IJKW(10,IW)
@@ -536,6 +541,8 @@ K_COARSE: DO KC=1,KBAR2
                ENDIF
             ENDDO
          ENDDO
+
+         ! Lower y face
  
          JJ = J_LO(JC)-1
          DO KK=K_LO(KC),K_HI(KC)
@@ -548,8 +555,8 @@ K_COARSE: DO KC=1,KBAR2
                   B(N)    = B(N)    + DA*FVY(II,JJ,KK)
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),-2)
-                  NOM = IJKW(9,IW)
-                  IF (NOM>0) THEN
+                  IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                     NOM = IJKW(9,IW)
                      OM  => OMESH(NOM)
                      M2  => MESHES(NOM)
                      IIO = IJKW(10,IW)
@@ -577,6 +584,8 @@ K_COARSE: DO KC=1,KBAR2
                ENDIF
             ENDDO
          ENDDO
+
+         ! Upper y face
  
          JJ = J_HI(JC)
          DO KK=K_LO(KC),K_HI(KC)
@@ -589,8 +598,8 @@ K_COARSE: DO KC=1,KBAR2
                   B(N)    = B(N)    - DA*FVY(II,JJ,KK)
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),2)
-                  NOM = IJKW(9,IW)
-                  IF (NOM>0) THEN
+                  IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                     NOM = IJKW(9,IW)
                      OM  => OMESH(NOM)
                      M2  => MESHES(NOM)
                      IIO = IJKW(10,IW)
@@ -619,7 +628,7 @@ K_COARSE: DO KC=1,KBAR2
             ENDDO
          ENDDO
  
-         ! Lower z
+         ! Lower z face
 
          KK = K_LO(KC)-1
          DO JJ=J_LO(JC),J_HI(JC)
@@ -632,8 +641,8 @@ K_COARSE: DO KC=1,KBAR2
                   B(N)    = B(N)    + DA*FVZ(II,JJ,KK)
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),-3)
-                  NOM = IJKW(9,IW)
-                  IF (NOM>0) THEN
+                  IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                     NOM = IJKW(9,IW)
                      OM  => OMESH(NOM)
                      M2  => MESHES(NOM)
                      IIO = IJKW(10,IW)
@@ -661,6 +670,8 @@ K_COARSE: DO KC=1,KBAR2
                ENDIF
             ENDDO
          ENDDO
+
+         ! Upper z face
  
          KK = K_HI(KC)
          DO JJ=J_LO(JC),J_HI(JC)
@@ -673,8 +684,8 @@ K_COARSE: DO KC=1,KBAR2
                   B(N)    = B(N)    - DA*FVZ(II,JJ,KK)
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),3)
-                  NOM = IJKW(9,IW)
-                  IF (NOM>0) THEN
+                  IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                     NOM = IJKW(9,IW)
                      OM  => OMESH(NOM)
                      M2  => MESHES(NOM)
                      IIO = IJKW(10,IW)
@@ -702,6 +713,8 @@ K_COARSE: DO KC=1,KBAR2
                ENDIF
             ENDDO
          ENDDO
+
+         ! Add integral of dD/dt to RHS
  
          DO K=K_LO(KC),K_HI(KC)
             DO J=J_LO(JC),J_HI(JC)
@@ -883,14 +896,14 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                   END SELECT
                ENDIF IF_INTERPOLATED_BOUNDARY
  
-               NON_INTERPOLATED: IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
+               NON_INTERPOLATED: IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
  
                   SELECT CASE(IOR)
                      CASE(-1)
                         DA      = DY(JJ)*DZ(KK)
                         AREA_XF = AREA_XF + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
-                           CASE (SOLID_BOUNDARY)
+                           CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DUUDT = -FVX(IBAR,JJ,KK) - RDXN(IBAR)*(H(IBP1,JJ,KK)-H(IBAR,JJ,KK))
                               AREA_XF_CLOSED = AREA_XF_CLOSED + DA
                               BXF(JJ,KK) = DUUDT - DUWDT(IW)
@@ -902,7 +915,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                         DA      = DY(JJ)*DZ(KK)
                         AREA_XS = AREA_XS + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
-                           CASE (SOLID_BOUNDARY)
+                           CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DUUDT = -FVX(0,JJ,KK) - RDXN(0)*(H(1,JJ,KK)-H(0,JJ,KK))
                               AREA_XS_CLOSED = AREA_XS_CLOSED + DA
                               BXS(JJ,KK) = DUUDT + DUWDT(IW)
@@ -914,7 +927,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                         DA      = DX(II)*DZ(KK)
                         AREA_YF = AREA_YF + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
-                           CASE (SOLID_BOUNDARY)
+                           CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DVVDT = -FVY(II,JBAR,KK) - RDYN(JBAR)*(H(II,JBP1,KK)-H(II,JBAR,KK))
                               AREA_YF_CLOSED = AREA_YF_CLOSED + DA
                               BYF(II,KK) = DVVDT - DUWDT(IW)
@@ -926,7 +939,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                         DA      = DX(II)*DZ(KK)
                         AREA_YS = AREA_YS + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
-                           CASE (SOLID_BOUNDARY)
+                           CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DVVDT = -FVY(II,0,KK) - RDYN(0)*(H(II,1,KK)-H(II,0,KK))
                               AREA_YS_CLOSED = AREA_YS_CLOSED + DA
                               BYS(II,KK) = DVVDT + DUWDT(IW)
@@ -938,7 +951,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                         DA      = DX(II)*DY(JJ)
                         AREA_ZF = AREA_ZF + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
-                           CASE (SOLID_BOUNDARY)
+                           CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DWWDT = -FVZ(II,JJ,KBAR) - RDZN(KBAR)*(H(II,JJ,KBP1)-H(II,JJ,KBAR))
                               AREA_ZF_CLOSED = AREA_ZF_CLOSED + DA
                               BZF(II,JJ) = DWWDT - DUWDT(IW)
@@ -950,7 +963,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                         DA      = DX(II)*DY(JJ)
                         AREA_ZS = AREA_ZS + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
-                           CASE (SOLID_BOUNDARY)
+                           CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DWWDT  = -FVZ(II,JJ,0) - RDZN(0)*(H(II,JJ,1)-H(II,JJ,0))
                               AREA_ZS_CLOSED = AREA_ZS_CLOSED + DA
                               BZS(II,JJ) = DWWDT + DUWDT(IW)
@@ -960,10 +973,10 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                            END SELECT
                   END SELECT
                ENDIF NON_INTERPOLATED
- 
+
             ENDDO WALL_CELL_LOOP
  
-            ! AREA_XX is only for the OPEN or INTERPOLATED boundary cells
+            ! AREA_** is only for the OPEN or INTERPOLATED boundary cells
 
             AREA_XS = AREA_XS - AREA_XS_CLOSED
             AREA_XF = AREA_XF - AREA_XF_CLOSED
@@ -992,7 +1005,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                IF (JJ<JJ_LOW .OR. JJ>JJ_HIGH) CYCLE BC_LOOP
                IF (KK<KK_LOW .OR. KK>KK_HIGH) CYCLE BC_LOOP
  
-               BOUNDARY_SELECT: IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
+               BOUNDARY_SELECT: IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) THEN
  
                   SELECT CASE(IOR)
                      CASE( 1) 
@@ -1013,17 +1026,17 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
  
                   SELECT CASE(IOR)
                      CASE( 1) 
-                        BXS(JJ,KK) = HX(0)   *(BXS(JJ,KK)+DHDX_S/AREA_XS)
+                        BXS(JJ,KK) = HX(0)   *DHDX_S/AREA_XS
                      CASE(-1) 
-                        BXF(JJ,KK) = HX(IBP1)*(BXF(JJ,KK)+DHDX_F/AREA_XF)
+                        BXF(JJ,KK) = HX(IBP1)*DHDX_F/AREA_XF
                      CASE( 2) 
-                        BYS(II,KK) = HY(0)   *(BYS(II,KK)+DHDY_S/AREA_YS)
+                        BYS(II,KK) = HY(0)   *DHDY_S/AREA_YS
                      CASE(-2) 
-                        BYF(II,KK) = HY(JBP1)*(BYF(II,KK)+DHDY_F/AREA_YF)
+                        BYF(II,KK) = HY(JBP1)*DHDY_F/AREA_YF
                      CASE( 3) 
-                        BZS(II,JJ) = HZ(0)   *(BZS(II,JJ)+DHDZ_S/AREA_ZS)
+                        BZS(II,JJ) = HZ(0)   *DHDZ_S/AREA_ZS
                      CASE(-3) 
-                        BZF(II,JJ) = HZ(KBP1)*(BZF(II,JJ)+DHDZ_F/AREA_ZF)
+                        BZF(II,JJ) = HZ(KBP1)*DHDZ_F/AREA_ZF
                   END SELECT
  
                ENDIF BOUNDARY_SELECT
