@@ -110,13 +110,16 @@ def extract_comp_data(comp_file_info):
                 #print "Time Starts at row #:", str(rowcounter1)
                 #print "With a value of:", str(time_value1)
                 time_start_index = rowcounter1
-                break
+                break                
             rowcounter1 += 1
         
         rowcounter2 = 0
         for time_value2 in data_dict[col_name]:
-            if time_value2 < (float(stop_time_data)*60):
-                rowcounter2 += 1
+            if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_time_data)*60):
+                print "Specified end of plot time is greater than end of time in the data set. /nUsing last value in the time column./n"
+                print "Time used is:", float(data_dict[col_name][(len(data_dict[col_name])-1)])
+                time_end_index = (len(data_dict[col_name])-1)
+                break
             else:
                 row_number2 = (rowcounter2 - 1)
                 #print "Set #2"
@@ -124,6 +127,9 @@ def extract_comp_data(comp_file_info):
                 #print "With a value of: "+str(data_dict[col_name][row_number2])
                 time_end_index = row_number2
                 break
+
+            if time_value2 < (float(stop_time_data)*60):
+                rowcounter2 += 1
                 
         rowcounter3 = 0                
         for time_value3 in data_dict[col_name]:
@@ -137,6 +143,12 @@ def extract_comp_data(comp_file_info):
         
         rowcounter4 = 0
         for time_value4 in data_dict[col_name]:
+            if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_time_comp)*60):
+                print "Specified end of comparison time is greater than end of time in the data set. /nUsing last value in the time column./n"
+                print "Time used is:", float(data_dict[col_name][(len(data_dict[col_name])-1)])
+                minmax_end_index = (len(data_dict[col_name])-1)
+                break
+
             if time_value4 < (float(stop_time_data)*60):
                 rowcounter4 += 1
             else:
@@ -145,7 +157,7 @@ def extract_comp_data(comp_file_info):
                 #print "Comparison Time Ends at row #: "+str(row_number4)
                 #print "With a value of: "+str(data_dict[col_name][row_number4])
                 minmax_end_index = row_number4
-                break        
+                break
 
         return (time_start_index, time_end_index, minmax_start_index, minmax_end_index)
 
