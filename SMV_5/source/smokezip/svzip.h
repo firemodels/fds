@@ -145,6 +145,9 @@ typedef struct {
   float pdfmin,pdfmax;
 } pdfdata;
 
+#define BOUND(x,xmin,xmax) (x<xmin)?xmin:(x>xmax)?xmax:x
+#define GET_INTERVAL(xyz,xyz0,dxyz) ((xyz)-(xyz0))/(dxyz)
+
 
 void rand_absdir(float xyz[3], int dir);
 void rand_dir(float xyz[3]);
