@@ -42,7 +42,7 @@ lightdata *get_random_light(void){
 
 /* ------------------ update_lightfield ------------------------ */
 
-void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
+void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuffer){
  // accumulate hrr for each light
 
     lightdata *lighti;
@@ -102,10 +102,38 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
       switch (lighti->type){
 
         case 0:      // point
-          xyzpos[0]=lighti->xyz1[0];
-          xyzpos[1]=lighti->xyz1[1];
-          xyzpos[2]=lighti->xyz1[2];
-          rand_dir(xyzdir);
+          if(lighti->move==0){
+            xyzpos[0]=lighti->xyz1[0];
+            xyzpos[1]=lighti->xyz1[1];
+            xyzpos[2]=lighti->xyz1[2];
+          }
+          else{
+            float f1, f2, dt;
+
+            dt = lighti->t2 - lighti->t1;
+            if(time<lighti->t1){
+              f1 = 0.0;
+            }
+            else if(time>lighti->t2){
+              f1 = 1.0;
+            }
+            else{
+              if(dt>0.0){
+                f1 = (time - lighti->t1)/dt;
+              }
+              else{
+                f1 = 0.0;
+              }
+            }
+            f2 = 1.0 - f1;
+            xyzpos[0]=f2*lighti->xyz1[0]+f1*lighti->xyz2[0];
+            xyzpos[1]=f2*lighti->xyz1[1]+f1*lighti->xyz2[1];
+            xyzpos[2]=f2*lighti->xyz1[2]+f1*lighti->xyz2[2];
+            if(i==0){
+              printf("(%f, %f) (%f, %f, %f)\n",f1,f2,xyzpos[0],xyzpos[1],xyzpos[2]);
+            }
+          }
+          rand_sphere_dir(xyzdir);
           break;
 
         case 1:      // line
@@ -115,7 +143,7 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
           xyzpos[0]= xyz1[0]*(1-factor) + xyz2[0]*factor;
           xyzpos[1]= xyz1[1]*(1-factor) + xyz2[1]*factor;
           xyzpos[2]= xyz1[2]*(1-factor) + xyz2[2]*factor;
-          rand_dir(xyzdir);
+          rand_sphere_dir(xyzdir);
           break;
 
         case 2:      // region
@@ -154,7 +182,7 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
         photon_cell[ijk]++;                 // record location of photon
 
         if(rand_1d(0.0,1.0)>albedo)break;   // if this if is true then the photon is absorbed
-        rand_dir(xyzdir);
+        rand_sphere_dir(xyzdir);
       }
       CheckMemory;
     }

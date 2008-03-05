@@ -134,6 +134,8 @@ typedef struct {
 #ifdef pp_LIGHT
 typedef struct {
   int type,dir;
+  int move;
+  float t1, t2;
   float xyz1[3], xyz2[3], q;
 } lightdata;
 #endif
@@ -150,7 +152,8 @@ typedef struct {
 
 
 void rand_absdir(float xyz[3], int dir);
-void rand_dir(float xyz[3]);
+void rand_cone_dir(float xyz[3], float dir[3], float mincosangle);
+void rand_sphere_dir(float xyz[3]);
 float rand_1d(float xmin, float xmax);
 void rand_2d(float xy[2], float xmin, float xmax, float ymin, float ymax);
 void rand_3d(float xyz[3], float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
@@ -205,7 +208,7 @@ float atan3(float y, float x);
 #ifdef pp_LIGHT
 void light_smoke(smoke3d *smoke3di,unsigned char *full_lightingbuffer, float *val_buffer, unsigned char *alpha_buffer);
 void set_lightfield(smoke3d *smoke3di,float xyz[3], float hrr);
-void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer);
+void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuffer);
 #endif
 
 EXTERN unsigned char *full_alphabuffer;
