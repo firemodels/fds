@@ -243,12 +243,102 @@ float get_photon_step(smoke3d *smoke3di, float xyzpos[3], float xyzdir[3]){
 
 float getlog_1_m_alpha(mesh *smoke_mesh, float *xyz){
   float val;
+  float logalpha111, logalpha112, logalpha121, logalpha122;
+  float logalpha211, logalpha212, logalpha221, logalpha222;
+  float x1, x2, y1, y2, z1, z2;
+  float f1=0.0, f2=1.0, g1=0.0, g2=1.0, h1=0.0, h2=1.0;
+  int i1, j1, k1;
+  int i2, j2, k2;
+  int i2mi1, j2mj1;
+  int nx, ny, nxy;
+  float dx, dy, dz;
+  int ijk111, ijk112, ijk121, ijk122;
+  int ijk211, ijk212, ijk221, ijk222;
 
   if(xyz[0]<smoke_mesh->xbar0||xyz[0]>smoke_mesh->xbar)return 0.0;
   if(xyz[1]<smoke_mesh->ybar0||xyz[1]>smoke_mesh->ybar)return 0.0;
   if(xyz[2]<smoke_mesh->zbar0||xyz[2]>smoke_mesh->zbar)return 0.0;
 
-  val = interp(xyz, smoke_mesh, full_logalphabuffer);
+  nx = smoke_mesh->ibar+1;
+  ny = smoke_mesh->jbar+1;
+  nxy = nx*ny;
+
+  i1 = GET_INTERVAL(xyz[0],smoke_mesh->xplt[0],smoke_mesh->dx);
+  j1 = GET_INTERVAL(xyz[1],smoke_mesh->yplt[0],smoke_mesh->dy);
+  k1 = GET_INTERVAL(xyz[2],smoke_mesh->zplt[0],smoke_mesh->dz);
+
+  i2=i1+1;
+  if(i2>smoke_mesh->ibar)i2=smoke_mesh->ibar;
+  i2mi1=i2-i1;
+
+  j2=j1+1;
+  if(j2>smoke_mesh->jbar)j2=smoke_mesh->jbar;
+  j2mj1 = j2 - j1;
+
+  k2=k1+1;
+  if(k2>smoke_mesh->kbar)k2=smoke_mesh->kbar;
+  
+//#define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
+
+  ijk111 = IJKNODE(i1,j1,k1);
+  ijk211 = ijk111 + i2mi1;
+
+  ijk121 = ijk111 + j2mj1*nx;
+  ijk221 = ijk121 + i2mi1;
+
+  if(k1!=k2){
+    ijk112 = ijk111 + nxy;
+    ijk212 = ijk211 + nxy;
+    ijk122 = ijk121 + nxy;
+    ijk222 = ijk221 + nxy;
+  }
+  else{
+    ijk112 = ijk111;
+    ijk212 = ijk211;
+    ijk122 = ijk121;
+    ijk222 = ijk221;
+  }
+
+  logalpha111 = full_logalphabuffer[ijk111];
+  logalpha211 = full_logalphabuffer[ijk211];
+
+  logalpha121 = full_logalphabuffer[ijk121];
+  logalpha221 = full_logalphabuffer[ijk221];
+
+  logalpha112 = full_logalphabuffer[ijk112];
+  logalpha212 = full_logalphabuffer[ijk212];
+
+  logalpha122 = full_logalphabuffer[ijk122];
+  logalpha222 = full_logalphabuffer[ijk222];
+
+  x1 = smoke_mesh->xplt[i1];
+  x2 = smoke_mesh->xplt[i2];
+  y1 = smoke_mesh->yplt[j1];
+  y2 = smoke_mesh->yplt[j2];
+  z1 = smoke_mesh->zplt[k1];
+  z2 = smoke_mesh->zplt[k2];
+
+  dx = x2 - x1;
+  dy = y2 - y1;
+  dz = z2 - z1;
+
+  if(dx!=0.0&&dy!=0.0&&dz!=0.0){
+    f1 = xyz[0]-x1;
+    f2 = x2 - xyz[0];
+
+    g1 = xyz[1]-y1;
+    g2 = y2 - xyz[1];
+
+    h1 = xyz[2]-z1;
+    h2 = z2 - xyz[2];
+
+    val  = f2*(g2*(h2*logalpha111 + h1*logalpha112) + g1*(h2*logalpha121 + h1*logalpha122));
+    val += f1*(g2*(h2*logalpha211 + h1*logalpha212) + g1*(h2*logalpha221 + h1*logalpha222));
+    val /= (dx*dy*dz);
+  }
+  else{
+    val = logalpha111;
+  }
   return val;
 }
 
@@ -312,19 +402,22 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
   }
 
   logalpha111 = full_logalphabuffer[ijk111];
-  logalpha112 = full_logalphabuffer[ijk112];
-  logalpha121 = full_logalphabuffer[ijk121];
-  logalpha122 = full_logalphabuffer[ijk122];
   logalpha211 = full_logalphabuffer[ijk211];
-  logalpha212 = full_logalphabuffer[ijk212];
+
+  logalpha121 = full_logalphabuffer[ijk121];
   logalpha221 = full_logalphabuffer[ijk221];
+
+  logalpha112 = full_logalphabuffer[ijk112];
+  logalpha212 = full_logalphabuffer[ijk212];
+
+  logalpha122 = full_logalphabuffer[ijk122];
   logalpha222 = full_logalphabuffer[ijk222];
 
   x1 = smoke_mesh->xplt[i1];
-  y1 = smoke_mesh->yplt[j1];
-  z1 = smoke_mesh->zplt[k1];
   x2 = smoke_mesh->xplt[i2];
+  y1 = smoke_mesh->yplt[j1];
   y2 = smoke_mesh->yplt[j2];
+  z1 = smoke_mesh->zplt[k1];
   z2 = smoke_mesh->zplt[k2];
 
   dx = x2 - x1;
