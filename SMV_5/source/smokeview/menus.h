@@ -324,6 +324,7 @@ void updateshowtitles(void){
 /* ------------------ LightingMenu ------------------------ */
 
 void LightingMenu(int value){
+    if(value<0)return;
     ASSERTFLAG(visLIGHT0);
     ASSERTFLAG(visLIGHT1);
     switch (value){
@@ -345,6 +346,12 @@ void LightingMenu(int value){
         visLIGHT0=0; 
         visLIGHT1=0; 
         break;
+#ifdef pp_LIGHT
+      case 6:
+        show_smokelighting=1-show_smokelighting;
+        update_showlight();
+        break;
+#endif
       default:
         ASSERT(FFALSE);
         break;
@@ -4552,13 +4559,18 @@ static int in_menu=0;
 
   if(showlightmenu==1){
     CREATEMENU(lightingmenu,LightingMenu);
-    if(visLIGHT0==1)glutAddMenuEntry("*Right",1);
-    if(visLIGHT0==0)glutAddMenuEntry("Right",1);
-    if(visLIGHT1==1)glutAddMenuEntry("*Left",2);
-    if(visLIGHT1==0)glutAddMenuEntry("Left",2);
-    glutAddMenuEntry("Flip",3);
-    glutAddMenuEntry("All",4);
-    glutAddMenuEntry("None",5);
+    glutAddMenuEntry("OpenGL Lighting",-1);
+    if(visLIGHT0==1)glutAddMenuEntry("  *Right",1);
+    if(visLIGHT0==0)glutAddMenuEntry("  Right",1);
+    if(visLIGHT1==1)glutAddMenuEntry("  *Left",2);
+    if(visLIGHT1==0)glutAddMenuEntry("  Left",2);
+    glutAddMenuEntry("  Flip",3);
+    glutAddMenuEntry("  All",4);
+    glutAddMenuEntry("  None",5);
+#ifdef pp_LIGHT
+    if(show_smokelighting==1)glutAddMenuEntry("*Smoke Lighting",6);
+    if(show_smokelighting==0)glutAddMenuEntry("Smoke Lighting",6);
+#endif
   }
 
   /* --------------------------------smoke3d showmenu -------------------------- */

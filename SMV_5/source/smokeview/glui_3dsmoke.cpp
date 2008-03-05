@@ -65,6 +65,9 @@ GLUI_RadioGroup *alphagroup=NULL,*skipframes;
 #ifdef pp_GPU
 GLUI_Checkbox *CHECKBOX_smokeGPU=NULL;
 #endif
+#ifdef pp_LIGHT
+GLUI_Checkbox *CHECKBOX_showlight=NULL;
+#endif
 GLUI_Checkbox *CHECKBOX_smokedrawtest=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest2=NULL;
 GLUI_Checkbox *CHECKBOX_smoke3d_external=NULL;
@@ -206,7 +209,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
       if(smoke3di->use_lighting_file==1)use_light_checkbox=1;
     }
     if(use_light_checkbox==1){
-      glui_3dsmoke->add_checkbox_to_panel(panel6,"Lighting",&show_smokelighting);
+      CHECKBOX_showlight=glui_3dsmoke->add_checkbox_to_panel(panel6,"Lighting",&show_smokelighting);
     }
   }
 #endif
@@ -301,6 +304,14 @@ extern "C" void show_glui_3dsmoke(void){
   if(glui_3dsmoke!=NULL)glui_3dsmoke->show();
 }
 
+
+#ifdef pp_LIGHT
+/* ------------------ update_showlight ------------------------ */
+
+extern "C" void update_showlight(void){
+  if(CHECKBOX_showlight!=NULL)CHECKBOX_showlight->set_int_val(show_smokelighting);
+}
+#endif
 
 /* ------------------ show_glui_3dsmoke ------------------------ */
 
