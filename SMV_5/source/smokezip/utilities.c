@@ -403,7 +403,19 @@ void rand_absdir(float xyz[3], int dir){
 
 /* ------------------ rand_dir ------------------------ */
 
-void rand_dir(float xyz[3]){
+void rand_cone_dir(float xyz[3], float conedir[3], float mincosangle){
+  float cosangle=2.0;
+
+  while(cosangle<mincosangle){
+    rand_sphere_dir(xyz);
+    cosangle = xyz[0]*conedir[0]+xyz[1]*conedir[1]+xyz[2]*conedir[2];
+  }
+
+  return;
+}
+/* ------------------ rand_dir ------------------------ */
+
+void rand_sphere_dir(float xyz[3]){
   float x=1.0, y=1.0, z=1.0;
   float sum;
 
