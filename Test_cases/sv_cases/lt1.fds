@@ -1,0 +1,30 @@
+&HEAD CHID='lt1',TITLE='light test' /
+
+ simple test case to generate smoke to test lighting algorithm in smokezip
+ soot yield is increased to exagerate smoke optical thickness
+ NFRAMES is set to a small value to shorten smokezip calculation time (for testing)
+
+ lighting input parameters are set in lt1.lit 
+
+&MESH IJK=80,24,24, XB=0.0,4.0,0.0,1.2,0.0,1.2 /
+&TIME TWFIN=10. /
+&DUMP NFRAMES=10 /
+
+&SURF ID='BURNER', HRRPUA=1000. /
+
+&REAC ID = ’PROPANE’
+SOOT_YIELD = 0.1
+C = 3.
+H = 8.
+HEAT_OF_COMBUSTION = 46460. /
+IDEAL = .TRUE. /
+
+
+&VENT XB=0.4,0.8,0.4,0.8,0.0,0.0,SURF_ID='BURNER' /
+&VENT XB=4.0,4.0,0.0,1.2,0.0,1.2,SURF_ID='OPEN' /
+
+
+&SLCF PBY=0.6,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBZ=1.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+
+&TAIL /
