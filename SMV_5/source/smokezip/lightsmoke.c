@@ -52,7 +52,7 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
     float *photon_cell;
     float photon_step;
     mesh *smoke_mesh;
-    int nx, ny, nz, nxy;
+    int nx, ny, nz;
     int nxcell, nycell, nzcell, nxycell;
     float binmax,binsum;
     float logindex[256];
@@ -72,7 +72,6 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
     nx = nxcell+1;
     ny = nycell+1;
     nz = nzcell+1;
-    nxy = nx*ny;
 
 // zero out bin used to collect photons
 
@@ -144,13 +143,10 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
 //        i1 = get_interval(xyzpos[0],smoke_mesh->xplt,nxcell);
 //        j1 = get_interval(xyzpos[1],smoke_mesh->yplt,nycell);
 //        k1 = get_interval(xyzpos[2],smoke_mesh->zplt,nzcell);
-#define GET_INTERVAL(xyz,xyz0,dxyz) ((xyz)-(xyz0))/(dxyz)
-        i1 = GET_INTERVAL(xyzpos[0],smoke_mesh->xplt[0],smoke_mesh->dx);
-        if(i1>nxcell-1)i1=nxcell-1;
-        j1 = GET_INTERVAL(xyzpos[1],smoke_mesh->yplt[0],smoke_mesh->dy);
-        if(j1>nycell-1)j1=nycell-1;
-        k1 = GET_INTERVAL(xyzpos[2],smoke_mesh->zplt[0],smoke_mesh->dz);
-        if(k1>nzcell-1)k1=nzcell-1;
+#define GET_INTERVAL(xyz,xyz0,dxyz,NX) min(max(0.0,((xyz)-(xyz0))/(dxyz)),(NX))
+        i1 = GET_INTERVAL(xyzpos[0],smoke_mesh->xplt[0],smoke_mesh->dx,nxcell-1);
+        j1 = GET_INTERVAL(xyzpos[1],smoke_mesh->yplt[0],smoke_mesh->dy,nycell-1);
+        k1 = GET_INTERVAL(xyzpos[2],smoke_mesh->zplt[0],smoke_mesh->dz,nzcell-1);
 
         ijk = IJKCELL(i1,j1,k1);
         photon_cell[ijk]++;                 // record location of photon
@@ -198,7 +194,7 @@ float get_photon_step(smoke3d *smoke3di, float xyzpos[3], float xyzdir[3]){
   float logalpha;
   mesh *smoke_mesh;
   float var, dlength;
-  int ivar, ibreak;
+  int ibreak;
   float step;
 
   smoke_mesh = smoke3di->smoke_mesh;
@@ -262,7 +258,7 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
   float val;
   int i1, j1, k1;
   int i2, j2, k2;
-  int i2mi1, j2mj1, k2mk1;
+  int i2mi1, j2mj1;
   int nx, ny, nxy, nz;
   float dx, dy, dz;
   int ijk111, ijk112, ijk121, ijk122;
@@ -272,37 +268,30 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
   ny = smoke_mesh->jbar+1;
   nz = smoke_mesh->kbar+1;
   nxy = nx*ny;
-#define GET_INTERVAL(xyz,xyz0,dxyz) ((xyz)-(xyz0))/(dxyz)
+//#define GET_INTERVAL(xyz,xyz0,dxyz,NX) min(max(0.0,((xyz)-(xyz0))/(dxyz)),(NX))
 
 //  i1 = get_interval(xyz[0],smoke_mesh->xplt,nx);
 //  j1 = get_interval(xyz[1],smoke_mesh->yplt,ny);
 //  k1 = get_interval(xyz[2],smoke_mesh->zplt,nz);
-  i1 = GET_INTERVAL(xyz[0],smoke_mesh->xplt[0],smoke_mesh->dx);
-  j1 = GET_INTERVAL(xyz[1],smoke_mesh->yplt[0],smoke_mesh->dy);
-  k1 = GET_INTERVAL(xyz[2],smoke_mesh->zplt[0],smoke_mesh->dz);
+
+  i1 = GET_INTERVAL(xyz[0],smoke_mesh->xplt[0],smoke_mesh->dx,nx-1);
+  j1 = GET_INTERVAL(xyz[1],smoke_mesh->yplt[0],smoke_mesh->dy,ny-1);
+  k1 = GET_INTERVAL(xyz[2],smoke_mesh->zplt[0],smoke_mesh->dz,nz-1);
 
   i2=i1+1;
-  i2mi1=1;
-  if(i2>smoke_mesh->ibar){
-    i2=smoke_mesh->ibar;
-    i2mi1=0;
-  }
+  if(i2>smoke_mesh->ibar)i2=smoke_mesh->ibar;
+  i2mi1=i2-i1;
+
   j2=j1+1;
-  j2mj1=1;
-  if(j2>smoke_mesh->jbar){
-    j2=smoke_mesh->jbar;
-    j2mj1=0;
-  }
+  if(j2>smoke_mesh->jbar)j2=smoke_mesh->jbar;
+  j2mj1 = j2 - j1;
+
   k2=k1+1;
-  k2mk1=1;
-  if(k2>smoke_mesh->kbar){
-    k2=smoke_mesh->kbar;
-    k2mk1=0;
-  }
+  if(k2>smoke_mesh->kbar)k2=smoke_mesh->kbar;
   
 //#define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
 
-  ijk111 = IJKNODE(i1,j1,k2);
+  ijk111 = IJKNODE(i1,j1,k1);
   ijk211 = ijk111 + i2mi1;
 
   ijk121 = ijk111 + j2mj1*nx;
@@ -337,29 +326,27 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
   y2 = smoke_mesh->yplt[j2];
   z2 = smoke_mesh->zplt[k2];
 
-  f1 = xyz[0]-x1;
   dx = x2 - x1;
-  if(dx!=0.0)f1/=dx;
-  f2 = 1.0 - f1;
-
-  g1 = xyz[1]-y1;
   dy = y2 - y1;
-  if(dy!=0.0)g1/=dy;
-  g2 = 1.0 - g1;
-
-  h1 = xyz[2]-z1;
   dz = z2 - z1;
-  if(dz!=0.0)h1/=dz;
-  h2 = 1.0 - h1;
 
-  val  = f2*g2*h2*logalpha111;
-  val += f2*g2*h1*logalpha112;
-  val += f2*g1*h2*logalpha121;
-  val += f2*g1*h1*logalpha122;
-  val += f1*g2*h2*logalpha211;
-  val += f1*g2*h1*logalpha212;
-  val += f1*g1*h2*logalpha221;
-  val += f1*g1*h1*logalpha222;
+  if(dx!=0.0&&dy!=0.0&&dz!=0.0){
+    f1 = xyz[0]-x1;
+    f2 = x2 - xyz[0];
+
+    g1 = xyz[1]-y1;
+    g2 = y2 - xyz[1];
+
+    h1 = xyz[2]-z1;
+    h2 = z2 - xyz[2];
+
+    val  = f2*(g2*(h2*logalpha111 + h1*logalpha112) + g1*(h2*logalpha121 + h1*logalpha122));
+    val += f1*(g2*(h2*logalpha211 + h1*logalpha212) + g1*(h2*logalpha221 + h1*logalpha222));
+    val /= (dx*dy*dz);
+  }
+  else{
+    val = logalpha111;
+  }
   return val;
 }
 
