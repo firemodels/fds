@@ -143,10 +143,12 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
 //        i1 = get_interval(xyzpos[0],smoke_mesh->xplt,nxcell);
 //        j1 = get_interval(xyzpos[1],smoke_mesh->yplt,nycell);
 //        k1 = get_interval(xyzpos[2],smoke_mesh->zplt,nzcell);
-#define GET_INTERVAL(xyz,xyz0,dxyz,NX) min(max(0.0,((xyz)-(xyz0))/(dxyz)),(NX))
-        i1 = GET_INTERVAL(xyzpos[0],smoke_mesh->xplt[0],smoke_mesh->dx,nxcell-1);
-        j1 = GET_INTERVAL(xyzpos[1],smoke_mesh->yplt[0],smoke_mesh->dy,nycell-1);
-        k1 = GET_INTERVAL(xyzpos[2],smoke_mesh->zplt[0],smoke_mesh->dz,nzcell-1);
+        i1 = GET_INTERVAL(xyzpos[0],smoke_mesh->xplt[0],smoke_mesh->dx);
+        i1 = BOUND(i1,0,nxcell-1);
+        j1 = GET_INTERVAL(xyzpos[1],smoke_mesh->yplt[0],smoke_mesh->dy);
+        j1 = BOUND(j1,0,nzcell-1);
+        k1 = GET_INTERVAL(xyzpos[2],smoke_mesh->zplt[0],smoke_mesh->dz);
+        k1 = BOUND(k1,0,nzcell-1);
 
         ijk = IJKCELL(i1,j1,k1);
         photon_cell[ijk]++;                 // record location of photon
@@ -261,10 +263,11 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
   int i1, j1, k1;
   int i2, j2, k2;
   int i2mi1, j2mj1;
-  int nx, ny, nxy, nz;
+  int nx, ny, nxy;
   float dx, dy, dz;
   int ijk111, ijk112, ijk121, ijk122;
   int ijk211, ijk212, ijk221, ijk222;
+  int nz;
 
   nx = smoke_mesh->ibar+1;
   ny = smoke_mesh->jbar+1;
@@ -276,9 +279,12 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
 //  j1 = get_interval(xyz[1],smoke_mesh->yplt,ny);
 //  k1 = get_interval(xyz[2],smoke_mesh->zplt,nz);
 
-  i1 = GET_INTERVAL(xyz[0],smoke_mesh->xplt[0],smoke_mesh->dx,nx-1);
-  j1 = GET_INTERVAL(xyz[1],smoke_mesh->yplt[0],smoke_mesh->dy,ny-1);
-  k1 = GET_INTERVAL(xyz[2],smoke_mesh->zplt[0],smoke_mesh->dz,nz-1);
+  i1 = GET_INTERVAL(xyz[0],smoke_mesh->xplt[0],smoke_mesh->dx);
+  i1= BOUND(i1,0,smoke_mesh->ibar);
+  j1 = GET_INTERVAL(xyz[1],smoke_mesh->yplt[0],smoke_mesh->dy);
+  j1= BOUND(j1,0,smoke_mesh->ibar);
+  k1 = GET_INTERVAL(xyz[2],smoke_mesh->zplt[0],smoke_mesh->dz);
+  k1= BOUND(k1,0,smoke_mesh->ibar);
 
   i2=i1+1;
   if(i2>smoke_mesh->ibar)i2=smoke_mesh->ibar;
