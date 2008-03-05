@@ -167,6 +167,7 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
       binsum+=photon_cell[i];
     }
     printf("binmax=%f binsum=%f\n",binmax,binsum);
+    if(binmax<1)binmax=0;
     CheckMemory;
     for(i=0;i<nx*ny*nz;i++){
       float val;
