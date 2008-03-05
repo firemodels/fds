@@ -267,17 +267,10 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
   float dx, dy, dz;
   int ijk111, ijk112, ijk121, ijk122;
   int ijk211, ijk212, ijk221, ijk222;
-  int nz;
 
   nx = smoke_mesh->ibar+1;
   ny = smoke_mesh->jbar+1;
-  nz = smoke_mesh->kbar+1;
   nxy = nx*ny;
-//#define GET_INTERVAL(xyz,xyz0,dxyz,NX) min(max(0.0,((xyz)-(xyz0))/(dxyz)),(NX))
-
-//  i1 = get_interval(xyz[0],smoke_mesh->xplt,nx);
-//  j1 = get_interval(xyz[1],smoke_mesh->yplt,ny);
-//  k1 = get_interval(xyz[2],smoke_mesh->zplt,nz);
 
   i1 = GET_INTERVAL(xyz[0],smoke_mesh->xplt[0],smoke_mesh->dx);
   i1= BOUND(i1,0,smoke_mesh->ibar);
@@ -362,7 +355,7 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
 
 float average(int ijknode, float *celldata, mesh *smoke_mesh){
   int nx, ny, nxy;
-  int nxcell, nycell, nxycell;
+  int nxcell, nycell, nxycell, nzcell;
   int i1, j1, k1;
   int i2, j2, k2;
   int ijk;
@@ -374,6 +367,7 @@ float average(int ijknode, float *celldata, mesh *smoke_mesh){
 
   nxcell = smoke_mesh->ibar;
   nycell = smoke_mesh->jbar;
+  nzcell = smoke_mesh->kbar;
   nxycell = nxcell*nycell;
   nx = nxcell + 1;
   ny = nycell + 1;
@@ -386,6 +380,10 @@ float average(int ijknode, float *celldata, mesh *smoke_mesh){
   j2 = ijk/nx;
   i2 = ijk-j2*nx;
 
+  if(i2>nxcell-1)i2=nxcell-1;
+  if(j2>nycell-1)j2=nycell-1;
+  if(k2>nzcell-1)k2=nzcell-1;
+
   k1=k2-1;
   if(k1<0)k1=0;
 
@@ -396,13 +394,22 @@ float average(int ijknode, float *celldata, mesh *smoke_mesh){
   if(i1<0)i1=0;
   
   i111 = IJKCELL(i1,j1,k1);
-  i112 = IJKCELL(i1,j1,k2);
-  i121 = IJKCELL(i1,j2,k1);
-  i122 = IJKCELL(i1,j2,k2);
-  i211 = IJKCELL(i2,j1,k1);
-  i212 = IJKCELL(i2,j1,k2);
-  i221 = IJKCELL(i2,j2,k1);
-  i222 = IJKCELL(i2,j2,k2);
+  i211 = i111 + (i2-i1);
+  i121 = i111 + (j2-j1)*nxcell;
+  i221 = i121 + (i2-i1);
+
+  if(k1!=k2){
+    i112 = i111 + nxycell;
+    i212 = i211 + nxycell;
+    i122 = i121 + nxycell;
+    i222 = i221 + nxycell;
+  }
+  else{
+    i112 = i111;
+    i212 = i211;
+    i122 = i121;
+    i222 = i221;
+  }
 
   v111 = celldata[i111];
   v112 = celldata[i112];
