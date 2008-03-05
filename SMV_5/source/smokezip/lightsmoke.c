@@ -165,7 +165,6 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
       float val;
     
       val = average(i, photon_cell, smoke_mesh);
-      f_lightingbuffer[i]=val;
       lightingbuffer[i]=(unsigned char)(val/(float)binmax*254.0);
     }
     CheckMemory;
