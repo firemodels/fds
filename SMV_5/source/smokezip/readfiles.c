@@ -721,6 +721,11 @@ void readini2(char *inifile){
       nlightinfo++;
       continue;
     }
+    if(match(buffer,"L_MOVEPOINT",7)==1){
+      fgets(buffer,255,stream);
+      nlightinfo++;
+      continue;
+    }
     if(match(buffer,"L_LINE",7)==1){
       fgets(buffer,255,stream);
       nlightinfo++;
@@ -767,16 +772,32 @@ void readini2(char *inifile){
       light_max=l_max;
       continue;
     }
-    if(match(buffer,"L_POINT",7)==1){
+    if(match(buffer,"L_POINT",7)==1||match(buffer,"L_MOVEPOINT",11)==1){
       lightdata *lighti;
-      float *xyz;
 
       lighti = lightinfo + nlightinfo;
       lighti->type=0;
+      if(match(buffer,"L_MOVEPOINT",11)==1)lighti->move=1;
       lighti->dir=0;
-      xyz = lighti->xyz1;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",xyz,xyz+1,xyz+2,&lighti->q);
+      if(lighti->move==0){
+        float *xyz;
+  
+        xyz = lighti->xyz1;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f",xyz,xyz+1,xyz+2,&lighti->q);
+      }
+      else{
+        float *xyz, *xyz2;
+
+        xyz = lighti->xyz1;
+        xyz2 = lighti->xyz2;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f",&lighti->t1,  xyz,  xyz+1, xyz+2);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f",&lighti->t2, xyz2, xyz2+1,xyz2+2);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f",&lighti->q);
+      }
       nlightinfo++;
       continue;
     }
