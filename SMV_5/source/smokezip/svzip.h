@@ -17,7 +17,7 @@
 
 #define NBUCKETS 100000
 
-#define UNLINK _unlink
+#define UNLINK unlink
 
 #ifdef pp_LIGHT
 #define NRAD 10
