@@ -262,8 +262,11 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
   float val;
   int i1, j1, k1;
   int i2, j2, k2;
+  int i2mi1, j2mj1, k2mk1;
   int nx, ny, nxy, nz;
   float dx, dy, dz;
+  int ijk111, ijk112, ijk121, ijk122;
+  int ijk211, ijk212, ijk221, ijk222;
 
   nx = smoke_mesh->ibar+1;
   ny = smoke_mesh->jbar+1;
@@ -279,21 +282,53 @@ float interp(float xyz[3], mesh *smoke_mesh, float *full_logalphabuffer){
   k1 = GET_INTERVAL(xyz[2],smoke_mesh->zplt[0],smoke_mesh->dz);
 
   i2=i1+1;
-  if(i2>smoke_mesh->ibar)i2=smoke_mesh->ibar;
+  i2mi1=1;
+  if(i2>smoke_mesh->ibar){
+    i2=smoke_mesh->ibar;
+    i2mi1=0;
+  }
   j2=j1+1;
-  if(j2>smoke_mesh->jbar)j2=smoke_mesh->jbar;
+  j2mj1=1;
+  if(j2>smoke_mesh->jbar){
+    j2=smoke_mesh->jbar;
+    j2mj1=0;
+  }
   k2=k1+1;
-  if(k2>smoke_mesh->kbar)k2=smoke_mesh->kbar;
+  k2mk1=1;
+  if(k2>smoke_mesh->kbar){
+    k2=smoke_mesh->kbar;
+    k2mk1=0;
+  }
   
+//#define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
 
-  logalpha111 = full_logalphabuffer[IJKNODE(i1,j1,k1)];
-  logalpha112 = full_logalphabuffer[IJKNODE(i1,j1,k2)];
-  logalpha121 = full_logalphabuffer[IJKNODE(i1,j2,k1)];
-  logalpha122 = full_logalphabuffer[IJKNODE(i1,j2,k2)];
-  logalpha211 = full_logalphabuffer[IJKNODE(i2,j1,k1)];
-  logalpha212 = full_logalphabuffer[IJKNODE(i2,j1,k2)];
-  logalpha221 = full_logalphabuffer[IJKNODE(i2,j2,k1)];
-  logalpha222 = full_logalphabuffer[IJKNODE(i2,j2,k2)];
+  ijk111 = IJKNODE(i1,j1,k2);
+  ijk211 = ijk111 + i2mi1;
+
+  ijk121 = ijk111 + j2mj1*nx;
+  ijk221 = ijk121 + i2mi1;
+
+  if(k1!=k2){
+    ijk112 = ijk111 + nxy;
+    ijk212 = ijk211 + nxy;
+    ijk122 = ijk121 + nxy;
+    ijk222 = ijk221 + nxy;
+  }
+  else{
+    ijk112 = ijk111;
+    ijk212 = ijk211;
+    ijk122 = ijk121;
+    ijk222 = ijk221;
+  }
+
+  logalpha111 = full_logalphabuffer[ijk111];
+  logalpha112 = full_logalphabuffer[ijk112];
+  logalpha121 = full_logalphabuffer[ijk121];
+  logalpha122 = full_logalphabuffer[ijk122];
+  logalpha211 = full_logalphabuffer[ijk211];
+  logalpha212 = full_logalphabuffer[ijk212];
+  logalpha221 = full_logalphabuffer[ijk221];
+  logalpha222 = full_logalphabuffer[ijk222];
 
   x1 = smoke_mesh->xplt[i1];
   y1 = smoke_mesh->yplt[j1];
