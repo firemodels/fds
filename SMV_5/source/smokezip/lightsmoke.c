@@ -163,13 +163,15 @@ void update_lightfield(smoke3d *smoke3di, unsigned char *lightingbuffer){
       binsum+=photon_cell[i];
     }
     printf("binmax=%f binsum=%f\n",binmax,binsum);
-    if(binmax<1)binmax=0;
+    if(binmax<1.0)binmax=1.0;
     CheckMemory;
     for(i=0;i<nx*ny*nz;i++){
       float val;
+      int ival;
     
       val = average(i, photon_cell, smoke_mesh);
-      lightingbuffer[i]=(unsigned char)(val/(float)binmax*254.0);
+      ival = 254.0*val/(float)binmax;
+      lightingbuffer[i]=(unsigned char)ival;
     }
     CheckMemory;
 }
