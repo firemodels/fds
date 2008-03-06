@@ -1237,6 +1237,8 @@ void initvars1(void){
   partframeskip=0, sliceframeskip=0, boundframeskip=0;
   boundzipstep=1, boundzipskip=0;
   smoke3dzipstep=1, smoke3dzipskip=0;
+  isozipstep=1, isozipskip=0;
+  slicezipstep=1, slicezipskip=0;
   evacframeskip=0, evacframestep=1;
   partpointstep=1;
   partpointstep_old=0;

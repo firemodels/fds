@@ -113,6 +113,8 @@ GLUI_Spinner *SPINNER_partpointstep=NULL;
 GLUI_Spinner *SPINNER_isoframestep=NULL;
 GLUI_Spinner *SPINNER2_smoke3dframestep=NULL;
 GLUI_Spinner *SPINNER_smoke3dzipstep=NULL;
+GLUI_Spinner *SPINNER_slicezipstep=NULL;
+GLUI_Spinner *SPINNER_isozipstep=NULL;
 GLUI_Spinner *SPINNER_boundzipstep=NULL;
 GLUI_Spinner *SPINNER_partstreaklength=NULL;
 GLUI_Spinner *SPINNER_partpointsize=NULL;
@@ -396,6 +398,16 @@ extern "C" void glui_bounds_setup(int main_window){
     check_multi_task=glui_bounds->add_checkbox_to_panel(rollout_compress,"Multi-thread Compression",
       &mt_compress);
 #endif
+    if(nslice>0){
+      SPINNER_slicezipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"Slice Frame Skip",GLUI_SPINNER_INT,&slicezipskip,
+        FRAMELOADING,Slice_CB);
+      SPINNER_slicezipstep->set_int_limits(0,100);
+    }
+    if(niso>0){
+      SPINNER_isozipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"ISO Frame Skip",GLUI_SPINNER_INT,&isozipskip,
+        FRAMELOADING,Iso_CB);
+      SPINNER_isozipstep->set_int_limits(0,100);
+    }
     if(nsmoke3d>0){
       SPINNER_smoke3dzipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"3D Smoke Frame Skip",GLUI_SPINNER_INT,&smoke3dzipskip,
         FRAMELOADING,Smoke3D_CB);
@@ -702,6 +714,7 @@ void Iso_CB(int var){
   switch (var) {
   case FRAMELOADING:
     isoframestep=isoframeskip+1;
+    isozipstep=isozipskip+1;
     updatemenu=1;
     break;
   }
@@ -1080,6 +1093,7 @@ void Slice_CB(int var){
     break;
   case FRAMELOADING:
     sliceframestep=sliceframeskip+1;
+    slicezipstep=slicezipskip+1;
     updatemenu=1;
     break;
   case CHOPUPDATE:
