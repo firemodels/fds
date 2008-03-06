@@ -6446,6 +6446,20 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       smoke3dzipskip=smoke3dzipstep-1;
       continue;
     }
+    if(match(buffer,"SLICEZIPSTEP",12)==1){
+	    fgets(buffer,255,stream);
+	    sscanf(buffer,"%i",&slicezipstep);
+	    if(slicezipstep<1)slicezipstep=1;
+      slicezipskip=slicezipstep-1;
+      continue;
+    }
+    if(match(buffer,"ISOZIPSTEP",10)==1){
+	    fgets(buffer,255,stream);
+	    sscanf(buffer,"%i",&isozipstep);
+	    if(isozipstep<1)isozipstep=1;
+      isozipskip=isozipstep-1;
+      continue;
+    }
     if(match(buffer,"BOUNDFRAMESTEP",14)==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&boundframestep);
@@ -8109,6 +8123,10 @@ void writeini(int flag){
   fprintf(fileout," %i %f %i\n",slice_average_flag,slice_average_interval,vis_slice_average);
   fprintf(fileout,"SMOKE3DZIPSTEP\n");
   fprintf(fileout," %i\n",smoke3dzipstep);
+  fprintf(fileout,"ISOZIPSTEP\n");
+  fprintf(fileout," %i\n",isozipstep);
+  fprintf(fileout,"SLICEZIPSTEP\n");
+  fprintf(fileout," %i\n",slicezipstep);
   fprintf(fileout,"BOUNDFRAMESTEP\n");
   fprintf(fileout," %i\n",boundframestep);
   fprintf(fileout,"BOUNDZIPSTEP\n");
