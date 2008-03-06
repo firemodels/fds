@@ -47,6 +47,7 @@ int main(int argc, char **argv){
 #ifdef pp_LIGHT
   nphotons=NPHOTONS;
 #endif
+  frameskip=-1;
   autozip=0;
   endf=0;
   syst=0;
@@ -109,9 +110,7 @@ int main(int argc, char **argv){
   for(i=1;i<argc;i++){
     int lenarg;
     int lenarg2;
-#ifdef pp_LIGHT
     char *arg2;
-#endif
 
     arg=argv[i];
     lenarg=strlen(arg);
@@ -163,18 +162,31 @@ int main(int argc, char **argv){
         endian_info=1;
         break;
       case 's':
-        if(i+1<argc){
-          lenarg2=strlen(argv[i+1]);
-          NewMemory((void **)&sourcedir,lenarg2+2);
-          strcpy(sourcedir,argv[i+1]);
-          if(sourcedir[lenarg2-1]!=dirseparator[0]){
-            strcat(sourcedir,dirseparator);
+        if(i+1>=argc)break;
+        if(lenarg==2){
+            lenarg2=strlen(argv[i+1]);
+            NewMemory((void **)&sourcedir,lenarg2+2);
+            strcpy(sourcedir,argv[i+1]);
+            if(sourcedir[lenarg2-1]!=dirseparator[0]){
+              strcat(sourcedir,dirseparator);
+            }
+            lensourcedir=strlen(sourcedir);
+            if(getfileinfo(sourcedir,NULL,NULL)!=0){
+              printf("The source directory specified, %s, does not exist or cannot be accessed\n",sourcedir);
+              return 1;
+            }
+           i++;
+        }
+        else if(strcmp(arg,"-skip")==0){
+          frameskip=-1;
+          arg2=argv[i+1];
+          sscanf(arg2,"%i",&frameskip);
+          if(frameskip>0){
+            slicezipstep=frameskip;
+            isozipstep=frameskip;
+            smoke3dzipstep=frameskip;
+            boundzipstep=frameskip;
           }
-          lensourcedir=strlen(sourcedir);
-//          if(getfileinfo(sourcedir,NULL,NULL)!=0){
-//            printf("The source directory %s does not exist or cannot be accessed\n",sourcedir);
-//            return 1;
-//          }
           i++;
         }
         break;
@@ -339,9 +351,7 @@ int main(int argc, char **argv){
 #ifdef pp_PART
   compress_parts();
 #endif
-#ifndef pp_ALPHA
   if(doiso==1)compress_isos();
-#endif
 
   if(cleanfiles==0&&destdir!=NULL){
     printf("Copying .smv, .ini and .end files to %s directory\n",destdir);
@@ -414,7 +424,7 @@ void usage(char *prog){
   printf("  smokezip %s(%i) - %s\n\n",smv_version,svn_num,__DATE__);
   printf("  Compresses Smokeview 3D smoke, slice, iso-surface and boundary files\n\n");
   printf("  %s",prog);
-  printf(" [-c -f -3 -b -s -i]");
+  printf(" [-c -f -3 -b -s -i -skip skipval]");
 #ifdef pp_LIGHT
   printf("[-a val -l]");
 #endif
@@ -427,6 +437,7 @@ void usage(char *prog){
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 
   printf("  -s sourcedir - specifies directory containing source files\n");
+  printf("  -skip skipval - skip frames when compressing files\n");
   printf("  -auto - compress only files that are auto-loaded by Smokeview\n");
 #ifdef pp_LIGHT
   printf("  -l  - create lighting file used with 3d smoke\n");

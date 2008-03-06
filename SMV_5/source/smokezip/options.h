@@ -39,11 +39,11 @@
 #undef pp_release
 #define pp_LIGHT
 #define SMZVERSION "experimental"
+//#define pp_RLETEST
 #endif
 
 #ifdef pp_BETA
 #undef pp_release
-#define pp_RLETEST
 #define SMZVERSION "test"
 #endif
 
@@ -53,5 +53,5 @@
 #endif
 
 #ifdef pp_release
-#define SMZVERSION "1.2.1"
+#define SMZVERSION "1.2.2"
 #endif

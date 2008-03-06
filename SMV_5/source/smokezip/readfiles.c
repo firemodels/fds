@@ -880,25 +880,25 @@ void readini2(char *inifile){
       }
       continue;
     }
-    if(match(buffer,"SLICEZIPSTEP",12)==1){
+    if(frameskip<1&&match(buffer,"SLICEZIPSTEP",12)==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&slicezipstep);
 	    if(slicezipstep<1)slicezipstep=1;
       continue;
     }
-    if(match(buffer,"ISOZIPSTEP",10)==1){
+    if(frameskip<1&&match(buffer,"ISOZIPSTEP",10)==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&isozipstep);
 	    if(isozipstep<1)isozipstep=1;
       continue;
     }
-    if(match(buffer,"SMOKE3DZIPSTEP",14)==1){
+    if(frameskip<1&&match(buffer,"SMOKE3DZIPSTEP",14)==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&smoke3dzipstep);
 	    if(smoke3dzipstep<1)smoke3dzipstep=1;
       continue;
     }
-    if(match(buffer,"BOUNDZIPSTEP",12)==1){
+    if(frameskip<1&&match(buffer,"BOUNDZIPSTEP",12)==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&boundzipstep);
 	    if(boundzipstep<1)boundzipstep=1;

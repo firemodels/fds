@@ -212,6 +212,7 @@ void set_lightfield(smoke3d *smoke3di,float xyz[3], float hrr);
 void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuffer);
 #endif
 
+EXTERN int frameskip;
 EXTERN unsigned char *full_alphabuffer;
 #ifdef pp_LIGHT
 EXTERN float *full_logalphabuffer;
