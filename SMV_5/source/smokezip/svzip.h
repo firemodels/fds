@@ -20,6 +20,7 @@
 #define UNLINK unlink
 
 #ifdef pp_LIGHT
+#define NPHOTONS 100000
 #define NRAD 10
 #define NTHETA 10
 #define NPSI 10
@@ -214,6 +215,7 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
 EXTERN unsigned char *full_alphabuffer;
 #ifdef pp_LIGHT
 EXTERN float *full_logalphabuffer;
+EXTERN int nphotons;
 #endif
 EXTERN patch *patchinfo;
 EXTERN mesh *meshinfo;
