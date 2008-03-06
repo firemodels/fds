@@ -676,12 +676,14 @@ void compress_isos(void){
   int i;
   iso *isoi;
 
-  initspherepoints(&sphereinfo,14);
+  if(niso_files>0){
+    initspherepoints(&sphereinfo,14);
   // convert and compress files
-  for(i=0;i<niso_files;i++){
-    isoi = isoinfo + i;
-    if(autozip==1&&isoi->autozip==0)continue;
-    convert_iso(isoi);
+    for(i=0;i<niso_files;i++){
+      isoi = isoinfo + i;
+      if(autozip==1&&isoi->autozip==0)continue;
+      convert_iso(isoi);
+    }
   }
 }
 

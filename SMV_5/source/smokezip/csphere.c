@@ -130,7 +130,7 @@ void initspherepoints(spherepoints *sphereinfo, int n){
       yfrom = *xyzfrom++;
       zfrom = *xyzfrom++;
 
-      xyzto = sphereinfo->normals + 3*(sphereinfo->vallist[ibeg]-1);
+      xyzto = sphereinfo->normals + 3*(sphereinfo->vallist[ibeg]-sphereinfo->nlong[ibeg]);
       for(ii=ibeg;ii<=iend;ii++){
         for(jj=0;jj<sphereinfo->nlong[ii];jj++){
           if(xyzto==xyzfrom-3){
