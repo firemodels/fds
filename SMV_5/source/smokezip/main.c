@@ -44,6 +44,9 @@ int main(int argc, char **argv){
   int endian_fds;
   int endian_info;
 
+#ifdef pp_LIGHT
+  nphotons=NPHOTONS;
+#endif
   autozip=0;
   endf=0;
   syst=0;

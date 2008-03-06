@@ -751,6 +751,12 @@ void readini2(char *inifile){
     if(fgets(buffer,255,stream)==NULL)break;
 
 #ifdef pp_LIGHT
+    if(match(buffer,"L_PHOTONS",9)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&nphotons);
+      if(nphotons<1)nphotons=NPHOTONS;
+      continue;
+    }
     if(match(buffer,"L_MINMAX",7)==1){
       float l_min=light_min, l_max=light_max;
 

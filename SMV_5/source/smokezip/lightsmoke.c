@@ -57,8 +57,6 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     float binmax,binsum;
     float logindex[256];
 
-#define NPHOTONS 1000000
-
     // pick a random light weighted by HRR  
     //  (ie a high wattage light will be picked proportionately more often than
     //          a low wattage one)
