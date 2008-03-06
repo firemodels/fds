@@ -436,6 +436,8 @@ SVEXTERN int partframestep, sliceframestep, boundframestep;
 SVEXTERN int partframeskip, sliceframeskip, boundframeskip;
 SVEXTERN int boundzipstep, boundzipskip;
 SVEXTERN int smoke3dzipstep, smoke3dzipskip;
+SVEXTERN int slicezipstep, slicezipskip;
+SVEXTERN int isozipstep, isozipskip;
 SVEXTERN int evacframeskip, evacframestep;
 SVEXTERN int partpointstep;
 SVEXTERN int partpointstep_old;
