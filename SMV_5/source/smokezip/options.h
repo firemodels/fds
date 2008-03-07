@@ -5,6 +5,10 @@
 
  /* ------------------ options ------------------------ */
 #ifdef WIN32
+#ifdef _DEBUG
+#pragma float_control( precise, on)
+#pragma float_control( except, on )
+#endif
 #pragma warning (disable:4996)		
 #pragma warning (disable:4701)		
 #pragma warning (disable:4310)		

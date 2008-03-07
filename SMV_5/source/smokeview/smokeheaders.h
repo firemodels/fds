@@ -37,7 +37,7 @@ EXTERNCPP int log2(float xx);
 void readterrain(char *file, int ifile, int flag, int *errorcode);
 float getterrain_z(float x, float y);
 void initterrain(terraindata *terri);
-void drawterrain(terraindata *terri);
+void drawterrain(terraindata *terri, int only_geom);
 void drawtrees(void);
 int createnulllabel(flowlabels *flowlabel);
 #ifdef pp_CULL
