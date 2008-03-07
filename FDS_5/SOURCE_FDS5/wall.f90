@@ -304,6 +304,14 @@ WALL_CELL_LOOP: DO IW=1,NWC
    IIG = IJKW(6,IW)
    JJG = IJKW(7,IW)
    KKG = IJKW(8,IW)
+
+   ! Check if suppression by water is to be applied
+
+   IF (CORRECTOR .AND. SF%E_COEFFICIENT>0._EB) THEN
+      IF (SUM(WMPUA(IW,:))>0._EB .AND. T>TW(IW)) EW(IW) = EW(IW) + SF%E_COEFFICIENT*SUM(WMPUA(IW,:))*DT
+   ENDIF
+
+   ! Apply the different species boundary conditions to non-thermally thick solids
    
    METHOD_OF_MASS_TRANSFER: SELECT CASE(SF%SPECIES_BC_INDEX)
  
@@ -595,7 +603,6 @@ WALL_CELL_LOOP: DO IW=1,NWC
    IBC = IJKW(5,IW)
    SF  => SURFACE(IBC)
    IF (SF%THERMAL_BC_INDEX /= THERMALLY_THICK) CYCLE WALL_CELL_LOOP
-   IF (SUM(WMPUA(IW,:))>0._EB .AND. T>TW(IW)) EW(IW) = EW(IW) + SF%E_COEFFICIENT*SUM(WMPUA(IW,:))*DT_BC
    II  = IJKW(1,IW)
    JJ  = IJKW(2,IW)
    KK  = IJKW(3,IW)
@@ -605,7 +612,6 @@ WALL_CELL_LOOP: DO IW=1,NWC
    JJG = IJKW(7,IW)
    KKG = IJKW(8,IW)
    IF (WC%BURNAWAY) CYCLE WALL_CELL_LOOP
-
 
    SELECT CASE(SF%GEOMETRY)
    CASE(SURF_CARTESIAN)
