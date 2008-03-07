@@ -195,7 +195,7 @@ void initterrain(terraindata *terri){
 /* ------------------ drawterrain ------------------------ */
 
 #define ijnode2(i,j) ((nxcell+1)*(j) + (i))
-void drawterrain(terraindata *terri){
+void drawterrain(terraindata *terri, int only_geom){
   float *znode, *znormal;
   int nxcell;
   int i, j;
@@ -220,7 +220,7 @@ void drawterrain(terraindata *terri){
   x = terri->x;
   y = terri->y;
   ti = terri->tcell;
-  glColor4f(1.0,1.0,0.0,1.0);
+  glColor4fv(block_ambient2);
   for(j=0;j<terri->ny;j++){
     int jp1;
 
@@ -233,8 +233,10 @@ void drawterrain(terraindata *terri){
 
       ip1 = i + 1;
 
-      ter_rgbptr = get_terraincolor(ti);
-      glColor4fv(ter_rgbptr);
+      if(only_geom==0){
+        ter_rgbptr = get_terraincolor(ti);
+        glColor4fv(ter_rgbptr);
+      }
       zn = znormal+3*ijnode2(i,j);
       glNormal3fv(zn);
       glVertex3f(x[i],y[j],znode[ijnode2(i,j)]);
@@ -270,6 +272,9 @@ float *get_terraincolor(terraincell *ti){
   int i, ileft;
   float sv_time;
   float *ter_time;
+  float wuicolor[4]={1.0,0.0,0.0,1.0};
+
+  if(ti==NULL)return getcolorptr(wuicolor);
 
   if(times==NULL||ti->time==NULL){
     index = ti->state[0]%10;

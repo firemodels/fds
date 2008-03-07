@@ -1249,9 +1249,16 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
+      int only_geom;
 
       terri = terraininfo + i;
-      if(terri->loaded==1)drawterrain(terri);
+      if(terri->loaded==1){
+        only_geom=0;
+      }
+      else{
+        only_geom=1;
+      }
+      drawterrain(terri,only_geom);
     }
   }
 
