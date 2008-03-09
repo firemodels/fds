@@ -6935,6 +6935,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ \hline \hline
+%{\ct CHECK\_VOLUME\_FLOW}       & Logical      & See Section~\ref{info:MPI}        &           & {\ct .FALSE.}                      \\ \hline
 {\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
 {\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES} \\ \hline
 %{\ct DEBUG}                     & Logical      & General purpose diagnostic flag   &           & {\ct .FALSE.}                      \\ \hline
@@ -7121,6 +7122,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}          & Character                   & MESH IDentifier                             &    &                  \\ \hline
 {\ct IJK}         & Integer Triplet             & No. cells in $x$, $y$, and $z$ directions   &    & 10               \\ \hline
 {\ct FYI}         & Character                   & Comment String (has no effect)              &    &                  \\ \hline
+%{\ct MPI\_PROCESS} & Integer                    & See Section~\ref{info:MPI}                &    &    \\ \hline
 {\ct RGB}         & Integer Triplet             & Color indices (0-255)                       &    & 0,0,0            \\ \hline
 {\ct SYNCHRONIZE} & Logical                     & Sync. time steps of multiple meshes         &    & {\ct .TRUE.}     \\ \hline
 {\ct XB(6)}          & Real Sextuplet              & Min/Max Coordinates of the MESH             & m  & 0,1,0,1,0,1      \\ \hline
@@ -7182,7 +7184,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PR}                        & Real          & Prandtl number (LES only)                     &               & 0.5               \\ \hline
 {\ct P\_INF}                    & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
 {\ct POROUS\_FLOOR}             & Logical       & See Section~\ref{info:sprinklers}             &               & {\ct .TRUE.}      \\ \hline
-%{\ct PRESSURE\_CORRECTION}      & Logical       & Experimental pressure solver                  &               & {\ct .FALSE.}     \\ \hline
+%{\ct PRESSURE\_CORRECTION}      & Logical       & See Section~\ref{info:MPI}                    &               & {\ct .FALSE.}     \\ \hline
 {\ct RADIATION}                 & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
 {\ct RAMP\_GX}                  & Character     & Time function, $x$ comp. of gravity           &               &                   \\ \hline
 {\ct RAMP\_GY}                  & Character     & Time function, $y$ comp. of gravity           &               &                   \\ \hline
@@ -7190,7 +7192,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct RELAXATION\_FACTOR}        & Real          & Pressure solver parameter                     &               & 1.0               \\ \hline
 {\ct RESTART}                   & Logical       & Restart previous calculation                  &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}             & Character     & Restart file CHID                             &               & {\ct CHID}        \\ \hline
-%{\ct RESTRICT\_MESH\_ASSIGNMENT}& Character     & Enforce one mesh, one process rule                &               &  {\ct .TRUE.}                 \\ \hline
 {\ct SC}                        & Real          & Schmidt number (LES only)                     &               & 0.5               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}        & Logical       & See Section~\ref{solid_phase_verification}    &               & {\ct .FALSE.}     \\ \hline
 {\ct STRATIFICATION}            & Logical       & See Section~\ref{info:stratification}         &               & {\ct .TRUE.}      \\ \hline
