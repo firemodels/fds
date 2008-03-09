@@ -63,6 +63,7 @@
 \newcommand{\omz}{\omega_z}
 \newcommand{\erf}{\hbox{erf}}
 \newcommand{\bF}{{\bf F}}
+\newcommand{\bG}{{\bf G}}
 \newcommand{\bof}{{\bf f}}
 \newcommand{\bq}{{\bf q}}
 \newcommand{\br}{{\bf r}}
@@ -3376,35 +3377,35 @@ The procedure for obtaining the pressure that was described in the previous sect
 However, there is no guarantee that the individual solutions
 of the Poisson equation on each mesh conserve volume. That is, $\dot{V}=\int \bu \cdot \dS$ is not necessarily the same at the interfaces between meshes.
 
-The strategy of approximating the solution of the Poisson equation on multiple meshes is as follows. First,
-decompose the pressure term $\cH=\cH^0 + \cH'$. Solve
-\be \nabla^2 {\cal H}^0 = -\nabla \cdot \bF - \dod{}{t} (\nabla \cdot \bu) \ee
-on each mesh, the same way as described above. At this point, each mesh has a pressure field, but when
-the velocity is updated in each mesh, the normal components will not match at mesh interfaces. At the very
-least, we need ensure that the volume flux, $\dot{V} = \int \bu \cdot \dS  $,
-at each mesh interface is consistent mesh to mesh. What should the volume flux be? There is no way to
-get it locally. Instead, re-discretize the original Poisson equation over a coarse mesh spanning the entire
-domain, and apply the divergence theorem to the coarse grid cells:
-\be \int_{\partial \Omega_m} \nabla \cH \cdot \dS = -\int_{\partial \Omega_m} \bF \cdot \dS
+The strategy of approximating the solution of the Poisson equation on multiple meshes is to decompose the pressure term such that the velocity is
+updated according to:
+\be \dod{\bu}{t} + \bF + \nabla \cH^0 + \nabla \cH' = 0 \label{finepois} \ee
+such that
+\be \nabla^2 {\cal H}^0 = -\nabla \cdot \bF - \dod{}{t} (\nabla \cdot \bu) \quad ; \quad  \nabla^2 \cH' = 0  \ee
+The equation on the left is the same as that described above, with the same boundary conditions, as well.
+To get the boundary conditions for the second equation, we first solve a discretized form of the Poisson equation for the entire domain using the individual
+meshes themselves. This coarse Poisson equation is derived by integrating Eq.~(\ref{finepois}) over each mesh and applying the Divergence Theorem:
+\be \int_{\partial \Omega_m} \nabla \cH' \cdot \dS = -\int_{\partial \Omega_m} \left(\overline{\bF}+\nabla \overline{\cH^0} \right) \cdot \dS
     - \int_{\Omega_m} \dod{(\nabla \cdot \bu)}{t} \; dV \ee
-The subscript $m$ refers to individual cells of the coarse mesh.
-Introduce a single scalar $\overline{\cH}_m$ for each coarse grid cell that satisfies:
-\be \frac{\overline{\cH}_{m+}  - \overline{\cH}_{m} }{\dx} A_{x^+} -
-    \frac{\overline{\cH}_{m  } - \overline{\cH}_{m-}}{\dx} A_{x^-} + \; \cdots =
-    -\int_{x^+} F_x \, dy \, dz  + \int_{x^-} F_x \, dy \, dz  + \;  \cdots
+The subscript $m$ refers to individual cells of the coarse mesh. The overbar indicates that at mesh boundaries, the average of the quantity is to be used.
+
+Next, define
+\be \bG = \bF + \nabla \cH^0 \ee
+and introduce a single scalar quantity, $\tilde{\cH}_m$, for each mesh that satisfies:
+\be \frac{\overline{\cH}_{m+}'  - \overline{\cH}_{m}' }{\dx} A_{x^+} -
+    \frac{\overline{\cH}_{m }' - \overline{\cH}_{m-}'}{\dx} A_{x^-} + \; \cdots =
+    -\int_{x^+} \overline{G_x} \, dy \, dz  + \int_{x^-} G_x \, dy \, dz  + \;  \cdots
     - \int_{\Omega_m} \dod{(\nabla \cdot \bu)}{t} dV   \label{coarse_pois} \ee
 The subscripts $m^+$ and $m^-$ refer to neighboring meshes, and $A_{x^+}$ and $A_{x^-}$ and so on
-refer to the area of the coarse cell interfaces. At a mesh interface, say an $x$ interface, there are two values of $F_x$.
-Denote the average of the two values $\overline{F}_x$, and use this in the coarse Poisson solve.
-
+refer to the area of the coarse cell interfaces.
 Solve the coarse grid Poisson equation (\ref{coarse_pois}) with a direct (non-iterative) solver. Note that at open boundaries,
 the ``ghost'' value of the coarse pressure is simply minus the value of the coarse pressure in the mesh adjacent to
 the open boundary.
 
 Following the solution of the coarse pressure equation, at the interface between two
 neighboring meshes, we now have an estimate of the rate of change of the volume flux. For example, at the $x=x_{\max}$ interface:
-\be \frac{d\dot{V}}{dt}  = -\int_{x=x_{\max}} \overline{F}_x \, dy \, dz
-- \frac{\overline{\cH}_{m+} - \overline{\cH}_m}{\dx} A_{x^+} \ee
+\be \frac{d\dot{V}}{dt}  = -\int_{x=x_{\max}} \overline{G}_x \, dy \, dz
+- \frac{\overline{\cH}_{m+}' - \overline{\cH}_m'}{\dx} A_{x^+} \ee
 We want the fine grid solution of the Poisson equation on the individual abutting meshes to satisfy this
 constraint at their interface. To force this, solve
 \be \nabla^2 {\cal H}' = 0 \ee
@@ -3412,7 +3413,7 @@ with Neumann boundary conditions on each of the abutting meshes
 such that at the interface the gradient of $\cH'$ is constant. For example, at the $x=x_{\max}$ interface, the gradient of
 $\cH'$ on the mesh to the left must satisfy:
 \be  \frac{d\dot{V}}{dt} =
-    - \int_{x=x_{\max}} \left( F_{x,I,jk,m}  + \frac{\cH^0_{I+1,jk,m}-\cH^0_{I,jk,m}}{\dx} \right) \; dy \, dz -
+    - \int_{x=x_{\max}} G_{x,I,jk,m} \; dy \, dz -
    \int_{x=x_{\max}} \dod{\cH'}{x} \; dy \, dz \label{constraint} \ee
 A similar constraint must be satisfied by the mesh to the right.
 In this way, the resulting volume fluxes at the next time step $\dot{V}=\int \bu \cdot \dS$ into and
