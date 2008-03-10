@@ -3,7 +3,6 @@ MODULE TYPES
 ! Definitions of various derived data types
  
 USE PRECISION_PARAMETERS
-USE GLOBAL_CONSTANTS
 
 IMPLICIT NONE
 CHARACTER(255), PARAMETER :: typeid='$Id$'

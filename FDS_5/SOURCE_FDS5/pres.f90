@@ -442,7 +442,7 @@ SUBROUTINE COMPUTE_A_B(A,B,NM)
 
 ! Set up linear system of equations for the coarse grid HBAR
 
-USE GLOBAL_CONSTANTS, ONLY: NCGC, SOLID_BOUNDARY, OPEN_BOUNDARY, PREDICTOR
+USE GLOBAL_CONSTANTS, ONLY: NCGC,SOLID_BOUNDARY,OPEN_BOUNDARY,NULL_BOUNDARY,INTERPOLATED_BOUNDARY,PREDICTOR,DX_M,DY_M,DZ_M
 REAL(EB) :: A(NCGC,NCGC),B(NCGC),DUDT_OTHER,DVDT_OTHER,DWDT_OTHER,DA
 TYPE (MESH_TYPE), POINTER :: M2
 TYPE (OMESH_TYPE), POINTER :: OM
@@ -735,16 +735,12 @@ SUBROUTINE COMPUTE_CORRECTION_PRESSURE(B,NM)
 
 ! Set up and solve Laplace's Eq for the perturbation pressure HP
 
-USE GLOBAL_CONSTANTS, ONLY: NCGC, SOLID_BOUNDARY, OPEN_BOUNDARY, PREDICTOR, TWO_D, CYLINDRICAL
+USE GLOBAL_CONSTANTS, ONLY: NCGC,SOLID_BOUNDARY,OPEN_BOUNDARY,NULL_BOUNDARY,INTERPOLATED_BOUNDARY, &
+                            PREDICTOR,TWO_D,CYLINDRICAL,NMESHES,LU_ERR,DX_M,DY_M,DZ_M
 USE POIS, ONLY: H3CZSS, H2CZSS
-REAL(EB) :: B(NCGC),DHDX_F,DHDX_S,DHDY_F,DHDY_S,DHDZ_F,DHDZ_S,DA, &
-            AREA_XS,AREA_XF,AREA_YS,AREA_YF,AREA_ZS,AREA_ZF, &
-            DUUDT,DVVDT,DWWDT,RDT,B_OTHER, &
-            AREA_XS_CLOSED,AREA_XF_CLOSED, &
-            AREA_YS_CLOSED,AREA_YF_CLOSED, &
-            AREA_ZS_CLOSED,AREA_ZF_CLOSED
-INTEGER :: NM,II,JJ,KK,IW,IOR,I,J,K,IIO,JJO,KKO,NOM, &
-           IOR_PATCH,II_LOW,II_HIGH,JJ_LOW,JJ_HIGH, KK_LOW,KK_HIGH,IC,JC,KC,N,NO
+REAL(EB), DIMENSION(0:NMESHES) :: DHDX_F,DHDX_S,DHDY_F,DHDY_S,DHDZ_F,DHDZ_S,AREA_XS,AREA_XF,AREA_YS,AREA_YF,AREA_ZS,AREA_ZF
+REAL(EB) :: B(NCGC),DA,DUUDT,DVVDT,DWWDT,RDT,B_OTHER
+INTEGER :: NM,II,JJ,KK,IW,IOR,I,J,K,IIO,JJO,KKO,NOM,IOR_PATCH,II_LOW,II_HIGH,JJ_LOW,JJ_HIGH,KK_LOW,KK_HIGH,IC,JC,KC,N,NO
 TYPE (MESH_TYPE), POINTER :: M2
 TYPE (OMESH_TYPE), POINTER :: OM
  
@@ -827,13 +823,6 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
             DHDZ_S = 0._EB 
             DHDZ_F = 0._EB 
  
-            AREA_XS_CLOSED=0._EB
-            AREA_XF_CLOSED=0._EB
-            AREA_YS_CLOSED=0._EB
-            AREA_YF_CLOSED=0._EB
-            AREA_ZS_CLOSED=0._EB
-            AREA_ZF_CLOSED=0._EB
- 
             AREA_XS = 0._EB 
             AREA_XF = 0._EB 
             AREA_YS = 0._EB 
@@ -865,133 +854,110 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                   SELECT CASE(IOR)
                      CASE( 1) 
                         DA      = DY(JJ)*DZ(KK)
-                        DHDX_S = DHDX_S + DA* (-DUDT_AVG(IW)-FVX(0,JJ,KK) + (B(N)-B(NO))/DX_M(N,NO) &
+                        DHDX_S(NOM) = DHDX_S(NOM) + DA* (-DUDT_AVG(IW)-FVX(0,JJ,KK) + (B(N)-B(NO))/DX_M(N,NO) &
                               - (H(1,JJ,KK)-H(0,JJ,KK))*RDXN(0) )
-                        AREA_XS = AREA_XS + DA
+                        AREA_XS(NOM) = AREA_XS(NOM) + DA
                      CASE(-1)
                         DA      = DY(JJ)*DZ(KK)
-                        DHDX_F = DHDX_F + DA* (-DUDT_AVG(IW)-FVX(IBAR,JJ,KK) + (B(NO)-B(N))/DX_M(N,NO) &
+                        DHDX_F(NOM) = DHDX_F(NOM) + DA* (-DUDT_AVG(IW)-FVX(IBAR,JJ,KK) + (B(NO)-B(N))/DX_M(N,NO) &
                               - (H(IBP1,JJ,KK)-H(IBAR,JJ,KK))*RDXN(IBAR) )
-                        AREA_XF = AREA_XF + DA
+                        AREA_XF(NOM) = AREA_XF(NOM) + DA
                      CASE( 2)
                         DA      = DX(II)*DZ(KK)
-                        DHDY_S = DHDY_S + DA* (-DVDT_AVG(IW)-FVY(II,0,KK) + (B(N)-B(NO))/DY_M(N,NO) &
+                        DHDY_S(NOM) = DHDY_S(NOM) + DA* (-DVDT_AVG(IW)-FVY(II,0,KK) + (B(N)-B(NO))/DY_M(N,NO) &
                               - (H(II,1,KK)-H(II,0,KK))*RDYN(0) )
-                        AREA_YS = AREA_YS + DA
+                        AREA_YS(NOM) = AREA_YS(NOM) + DA
                      CASE(-2)
                         DA      = DX(II)*DZ(KK)
-                        DHDY_F = DHDY_F + DA* (-DVDT_AVG(IW)-FVY(II,JBAR,KK) + (B(NO)-B(N))/DY_M(N,NO) &
+                        DHDY_F(NOM) = DHDY_F(NOM) + DA* (-DVDT_AVG(IW)-FVY(II,JBAR,KK) + (B(NO)-B(N))/DY_M(N,NO) &
                               - (H(II,JBP1,KK)-H(II,JBAR,KK))*RDYN(JBAR) )
-                        AREA_YF = AREA_YF + DA
+                        AREA_YF(NOM) = AREA_YF(NOM) + DA
                      CASE( 3)
                         DA      = DX(II)*DY(JJ)
-                        DHDZ_S = DHDZ_S + DA* (-DWDT_AVG(IW)-FVZ(II,JJ,0) + (B(N)-B(NO))/DZ_M(N,NO) &
+                        DHDZ_S(NOM) = DHDZ_S(NOM) + DA* (-DWDT_AVG(IW)-FVZ(II,JJ,0) + (B(N)-B(NO))/DZ_M(N,NO) &
                               - (H(II,JJ,1)-H(II,JJ,0))*RDZN(0) )
-                        AREA_ZS = AREA_ZS + DA
+                        AREA_ZS(NOM) = AREA_ZS(NOM) + DA
                      CASE(-3)
                         DA      = DX(II)*DY(JJ)
-                        DHDZ_F = DHDZ_F + DA* (-DWDT_AVG(IW)-FVZ(II,JJ,KBAR) + (B(NO)-B(N))/DZ_M(N,NO)    &
+                        DHDZ_F(NOM) = DHDZ_F(NOM) + DA* (-DWDT_AVG(IW)-FVZ(II,JJ,KBAR) + (B(NO)-B(N))/DZ_M(N,NO)    &
                               - (H(II,JJ,KBP1)-H(II,JJ,KBAR))*RDZN(KBAR) )
-                        AREA_ZF = AREA_ZF + DA
+                        AREA_ZF(NOM) = AREA_ZF(NOM) + DA
                   END SELECT
-               ENDIF IF_INTERPOLATED_BOUNDARY
  
-               NON_INTERPOLATED: IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+               ELSE IF_INTERPOLATED_BOUNDARY
  
                   SELECT CASE(IOR)
                      CASE(-1)
-                        DA      = DY(JJ)*DZ(KK)
-                        AREA_XF = AREA_XF + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
                            CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DUUDT = -FVX(IBAR,JJ,KK) - RDXN(IBAR)*(H(IBP1,JJ,KK)-H(IBAR,JJ,KK))
-                              AREA_XF_CLOSED = AREA_XF_CLOSED + DA
                               BXF(JJ,KK) = DUUDT - DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
+                              DA      = DY(JJ)*DZ(KK)
+                              AREA_XF(0) = AREA_XF(0) + DA
                               B_OTHER = -B(N) 
-                              DHDX_F = DHDX_F + DA* (  (B_OTHER-B(N))/DX_M(N,N) )
+                              DHDX_F(0) = DHDX_F(0) + DA* (  (B_OTHER-B(N))/DX_M(N,N) )
                         END SELECT
                      CASE( 1)
-                        DA      = DY(JJ)*DZ(KK)
-                        AREA_XS = AREA_XS + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
                            CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DUUDT = -FVX(0,JJ,KK) - RDXN(0)*(H(1,JJ,KK)-H(0,JJ,KK))
-                              AREA_XS_CLOSED = AREA_XS_CLOSED + DA
                               BXS(JJ,KK) = DUUDT + DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
+                              DA      = DY(JJ)*DZ(KK)
+                              AREA_XS(0) = AREA_XS(0) + DA
                               B_OTHER = -B(N)
-                              DHDX_S = DHDX_S + DA* (  (B(N)-B_OTHER)/DX_M(N,N)  )
+                              DHDX_S(0) = DHDX_S(0) + DA* (  (B(N)-B_OTHER)/DX_M(N,N)  )
                         END SELECT
                      CASE(-2)
-                        DA      = DX(II)*DZ(KK)
-                        AREA_YF = AREA_YF + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
                            CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DVVDT = -FVY(II,JBAR,KK) - RDYN(JBAR)*(H(II,JBP1,KK)-H(II,JBAR,KK))
-                              AREA_YF_CLOSED = AREA_YF_CLOSED + DA
                               BYF(II,KK) = DVVDT - DUWDT(IW)
                            CASE (OPEN_BOUNDARY)
+                              DA      = DX(II)*DZ(KK)
+                              AREA_YF(0) = AREA_YF(0) + DA
                               B_OTHER = -B(N)
-                              DHDY_F = DHDY_F + DA* (  (B_OTHER-B(N))/DY_M(N,N) )
+                              DHDY_F(0) = DHDY_F(0) + DA* (  (B_OTHER-B(N))/DY_M(N,N) )
                            END SELECT
                      CASE( 2)
-                        DA      = DX(II)*DZ(KK)
-                        AREA_YS = AREA_YS + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
                            CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DVVDT = -FVY(II,0,KK) - RDYN(0)*(H(II,1,KK)-H(II,0,KK))
-                              AREA_YS_CLOSED = AREA_YS_CLOSED + DA
                               BYS(II,KK) = DVVDT + DUWDT(IW)
                            CASE (OPEN_BOUNDARY)
+                              DA      = DX(II)*DZ(KK)
+                              AREA_YS(0) = AREA_YS(0) + DA
                               B_OTHER = -B(N)
-                              DHDY_S = DHDY_S + DA* (  (B(N)-B_OTHER)/DY_M(N,N)  )
+                              DHDY_S(0) = DHDY_S(0) + DA* (  (B(N)-B_OTHER)/DY_M(N,N)  )
                            END SELECT
                      CASE(-3)
-                        DA      = DX(II)*DY(JJ)
-                        AREA_ZF = AREA_ZF + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
                            CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DWWDT = -FVZ(II,JJ,KBAR) - RDZN(KBAR)*(H(II,JJ,KBP1)-H(II,JJ,KBAR))
-                              AREA_ZF_CLOSED = AREA_ZF_CLOSED + DA
                               BZF(II,JJ) = DWWDT - DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
+                              DA      = DX(II)*DY(JJ)
+                              AREA_ZF(0) = AREA_ZF(0) + DA
                               B_OTHER = -B(N)
-                              DHDZ_F = DHDZ_F + DA* (  (B_OTHER-B(N))/DZ_M(N,N)    )
+                              DHDZ_F(0) = DHDZ_F(0) + DA* (  (B_OTHER-B(N))/DZ_M(N,N)    )
                            END SELECT
                      CASE( 3)
-                        DA      = DX(II)*DY(JJ)
-                        AREA_ZS = AREA_ZS + DA
                         SELECT CASE (BOUNDARY_TYPE(IW))
                            CASE (SOLID_BOUNDARY,NULL_BOUNDARY)
                               DWWDT  = -FVZ(II,JJ,0) - RDZN(0)*(H(II,JJ,1)-H(II,JJ,0))
-                              AREA_ZS_CLOSED = AREA_ZS_CLOSED + DA
                               BZS(II,JJ) = DWWDT + DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
+                              DA      = DX(II)*DY(JJ)
+                              AREA_ZS(0) = AREA_ZS(0) + DA
                               B_OTHER = -B(N) 
-                              DHDZ_S = DHDZ_S + DA* (  (B(N)-B_OTHER)/DZ_M(N,N) )
+                              DHDZ_S(0) = DHDZ_S(0) + DA* (  (B(N)-B_OTHER)/DZ_M(N,N) )
                            END SELECT
                   END SELECT
-               ENDIF NON_INTERPOLATED
+               ENDIF IF_INTERPOLATED_BOUNDARY
 
             ENDDO WALL_CELL_LOOP
  
-            ! AREA_** is only for the OPEN or INTERPOLATED boundary cells
-
-            AREA_XS = AREA_XS - AREA_XS_CLOSED
-            AREA_XF = AREA_XF - AREA_XF_CLOSED
-            AREA_YS = AREA_YS - AREA_YS_CLOSED
-            AREA_YF = AREA_YF - AREA_YF_CLOSED
-            AREA_ZS = AREA_ZS - AREA_ZS_CLOSED
-            AREA_ZF = AREA_ZF - AREA_ZF_CLOSED
-             
-            IF (AREA_XS==0._EB) AREA_XS=1._EB
-            IF (AREA_XF==0._EB) AREA_XF=1._EB
-            IF (AREA_YS==0._EB) AREA_YS=1._EB
-            IF (AREA_YF==0._EB) AREA_YF=1._EB
-            IF (AREA_ZS==0._EB) AREA_ZS=1._EB
-            IF (AREA_ZF==0._EB) AREA_ZF=1._EB
-
             ! Loop over external wall cells and compute dH/dn and assign to BXS, etc.
 
             BC_LOOP: DO IW=1,NEWC
@@ -1005,40 +971,46 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                IF (JJ<JJ_LOW .OR. JJ>JJ_HIGH) CYCLE BC_LOOP
                IF (KK<KK_LOW .OR. KK>KK_HIGH) CYCLE BC_LOOP
  
-               BOUNDARY_SELECT: IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) THEN
+               BOUNDARY_SELECT: IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY .OR. BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
+
+                  IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                     NOM = IJKW(9,IW)
+                  ELSE
+                     NOM = 0
+                  ENDIF
  
                   SELECT CASE(IOR)
                      CASE( 1) 
-                        BXS(JJ,KK) = HX(0)   *BXS(JJ,KK)
+                        BXS(JJ,KK) = HX(0)   *DHDX_S(NOM)/AREA_XS(NOM)
                      CASE(-1) 
-                        BXF(JJ,KK) = HX(IBP1)*BXF(JJ,KK)
+                        BXF(JJ,KK) = HX(IBP1)*DHDX_F(NOM)/AREA_XF(NOM)
                      CASE( 2) 
-                        BYS(II,KK) = HY(0)   *BYS(II,KK)
+                        BYS(II,KK) = HY(0)   *DHDY_S(NOM)/AREA_YS(NOM)
                      CASE(-2) 
-                        BYF(II,KK) = HY(JBP1)*BYF(II,KK)
+                        BYF(II,KK) = HY(JBP1)*DHDY_F(NOM)/AREA_YF(NOM)
                      CASE( 3) 
-                        BZS(II,JJ) = HZ(0)   *BZS(II,JJ)
+                        BZS(II,JJ) = HZ(0)   *DHDZ_S(NOM)/AREA_ZS(NOM)
                      CASE(-3) 
+                        BZF(II,JJ) = HZ(KBP1)*DHDZ_F(NOM)/AREA_ZF(NOM)
+                  END SELECT
+
+               ELSE BOUNDARY_SELECT
+
+                  SELECT CASE(IOR)
+                     CASE( 1)
+                        BXS(JJ,KK) = HX(0)   *BXS(JJ,KK)
+                     CASE(-1)
+                        BXF(JJ,KK) = HX(IBP1)*BXF(JJ,KK)
+                     CASE( 2)
+                        BYS(II,KK) = HY(0)   *BYS(II,KK)
+                     CASE(-2)
+                        BYF(II,KK) = HY(JBP1)*BYF(II,KK)
+                     CASE( 3)
+                        BZS(II,JJ) = HZ(0)   *BZS(II,JJ)
+                     CASE(-3)
                         BZF(II,JJ) = HZ(KBP1)*BZF(II,JJ)
                   END SELECT
- 
-               ELSE BOUNDARY_SELECT
- 
-                  SELECT CASE(IOR)
-                     CASE( 1) 
-                        BXS(JJ,KK) = HX(0)   *DHDX_S/AREA_XS
-                     CASE(-1) 
-                        BXF(JJ,KK) = HX(IBP1)*DHDX_F/AREA_XF
-                     CASE( 2) 
-                        BYS(II,KK) = HY(0)   *DHDY_S/AREA_YS
-                     CASE(-2) 
-                        BYF(II,KK) = HY(JBP1)*DHDY_F/AREA_YF
-                     CASE( 3) 
-                        BZS(II,JJ) = HZ(0)   *DHDZ_S/AREA_ZS
-                     CASE(-3) 
-                        BZF(II,JJ) = HZ(KBP1)*DHDZ_F/AREA_ZF
-                  END SELECT
- 
+
                ENDIF BOUNDARY_SELECT
  
             ENDDO BC_LOOP

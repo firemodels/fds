@@ -879,7 +879,16 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: XLEVEL,YLEVEL,ZLEVEL
 CHARACTER(30) LABEL
 LOGICAL :: EX
 CHARACTER(100) :: MESSAGE
+
+! If this is an MPI job and this is not the master node, open the .smv file only if this is not a RESTART case
+
+IF (MYID>0 .AND.      APPEND) RETURN
+IF (MYID>0 .AND. .NOT.APPEND) OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
+
+! Do the following printouts only for master node
  
+MASTER_NODE_IF: IF (MYID==0) THEN
+
 ! Open up the Smokeview ".smv" file
 
 INQUIRE(FILE=FN_SMV,EXIST=EX)
@@ -1286,10 +1295,43 @@ DEALLOCATE(SEGMENT)
  
 WRITE(LU_SMV,'(/A)') 'TOFFSET'
 WRITE(LU_SMV,'(3F13.5)') (TEX_ORI(I),I=1,3)
+
+! Write out threshold value for HRRPUV
+
+WRITE(LU_SMV,'(/A)') 'HRRPUVCUT'
+WRITE(LU_SMV,'(I5)') NMESHES
+DO NM=1,NMESHES
+WRITE(LU_SMV,'(F13.5)') HRRPUA_SHEET/(7._EB*MESHES(NM)%DXMIN)
+ENDDO
+
+! Write out RAMP info to .smv file
+
+WRITE(LU_SMV,'(/A)') 'RAMP'
+WRITE(LU_SMV,'(I5)') N_RAMP
+DO N=1,N_RAMP
+   WRITE(LU_SMV,'(A,A)')  'RAMP: ',RAMP_ID(N)
+   WRITE(LU_SMV,'(I5)') RAMPS(N)%NUMBER_DATA_POINTS
+   DO I=1,RAMPS(N)%NUMBER_DATA_POINTS
+      WRITE(LU_SMV,'(6F12.5)') RAMPS(N)%INDEPENDENT_DATA(I),RAMPS(N)%DEPENDENT_DATA(I)
+   ENDDO
+ENDDO
+
+! Write out DEVICE info to .smv file
+
+DO N=1,N_DEVC
+   DV => DEVICE(N)
+   WRITE(LU_SMV,'(/A)') 'DEVICE'
+   WRITE(LU_SMV,'(A)') TRIM(PROPERTY(DV%PROP_INDEX)%SMOKEVIEW_ID)
+   WRITE(LU_SMV,'(3F12.5,F13.5)') DV%X,DV%Y,DV%Z,DV%ORIENTATION(1:3)
+ENDDO
+
+ENDIF MASTER_NODE_IF
  
 ! Write grid info for each block
  
 MESH_LOOP: DO NM=1,NMESHES
+
+   IF (PROCESS(NM)/=MYID) CYCLE
 
    M => MESHES(NM)
    T => TRANS(NM)
@@ -1545,40 +1587,10 @@ MESH_LOOP: DO NM=1,NMESHES
    DEALLOCATE(KDV2)
 
 ENDDO MESH_LOOP
- 
-! Write out threshold value for HRRPUV
- 
-WRITE(LU_SMV,'(/A)') 'HRRPUVCUT'
-WRITE(LU_SMV,'(I5)') NMESHES
-DO NM=1,NMESHES
-WRITE(LU_SMV,'(F13.5)') HRRPUA_SHEET/(7._EB*MESHES(NM)%DXMIN)
-ENDDO
- 
-! Write out RAMP info to .smv file
- 
-WRITE(LU_SMV,'(/A)') 'RAMP'
-WRITE(LU_SMV,'(I5)') N_RAMP
-DO N=1,N_RAMP
-   WRITE(LU_SMV,'(A,A)')  'RAMP: ',RAMP_ID(N)
-   WRITE(LU_SMV,'(I5)') RAMPS(N)%NUMBER_DATA_POINTS
-   DO I=1,RAMPS(N)%NUMBER_DATA_POINTS
-      WRITE(LU_SMV,'(6F12.5)') RAMPS(N)%INDEPENDENT_DATA(I),RAMPS(N)%DEPENDENT_DATA(I)
-   ENDDO
-ENDDO
- 
-! Write out DEVICE info to .smv file
- 
-DO N=1,N_DEVC
-   DV => DEVICE(N)
-   WRITE(LU_SMV,'(/A)') 'DEVICE'
-   WRITE(LU_SMV,'(A)') TRIM(PROPERTY(DV%PROP_INDEX)%SMOKEVIEW_ID)
-   WRITE(LU_SMV,'(3F12.5,F13.5)') DV%X,DV%Y,DV%Z,DV%ORIENTATION(1:3)
-ENDDO
- 
+
 ! Flush the .smv file
 
 CLOSE(LU_SMV)
-OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
 
 
 CONTAINS
@@ -1701,8 +1713,8 @@ INTEGER :: NM,I,NN,N,NR,NL
  
 WRITE(LU_ERR,'(/A/)')      ' Fire Dynamics Simulator'
 WRITE(LU_ERR,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
-IF (SERIAL)   WRITE(LU_ERR,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
-IF (PARALLEL) WRITE(LU_ERR,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
+IF (.NOT.PARALLEL)   WRITE(LU_ERR,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
+IF (PARALLEL)        WRITE(LU_ERR,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
 WRITE(LU_ERR,'(A,I4/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
 WRITE(LU_ERR,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
 WRITE(LU_ERR,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
@@ -1711,8 +1723,8 @@ WRITE(LU_ERR,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
  
 WRITE(LU_OUTPUT,'(/A/)')      ' Fire Dynamics Simulator'
 WRITE(LU_OUTPUT,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
-IF (SERIAL)   WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
-IF (PARALLEL) WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
+IF (.NOT.PARALLEL)   WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
+IF (PARALLEL)        WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
 WRITE(LU_OUTPUT,'(A,I4/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
 WRITE(LU_OUTPUT,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
 WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
