@@ -25,6 +25,7 @@ Module EVAC
   Use MEMORY_FUNCTIONS
   Use MESH_POINTERS
 !  Use MESH_POINTERS, ONLY: DT,IJKW,BOUNDARY_TYPE,XW,YW,WALL_INDEX,POINT_TO_MESH
+!  Use EVAC_MESH_POINTERS
   Use PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION2
   !
   Implicit None
@@ -300,7 +301,7 @@ Module EVAC
        RADIUS_COMPLETE_1, GROUP_EFF, FED_DOOR_CRIT, &
        TDET_SMOKE_DENS, DENS_INIT, EVAC_DT_MAX, GROUP_DENS, &
        FC_DAMPING, EVAC_DT_MIN, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
-       SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY
+       SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, TAU_CHANGE_DOOR
   !
   Real(EB), Dimension(:), Allocatable :: Tsteps
   !
@@ -405,7 +406,8 @@ Contains
          OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA,&
          OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, &
          COLOR_INDEX, RGB_DEAD, RGB_REVA, &
-         SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY
+         SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, &
+         TAU_CHANGE_DOOR
     !
     NPPS = 30000 ! Number Persons Per Set (dump to a file)
     !
@@ -416,9 +418,16 @@ Contains
     i33 = 0
     ilh = 0
 
-    Allocate(Tsteps(NMESHES),STAT=IZERO)
-    Call ChkMemErr('READ','Tsteps',IZERO) 
-    Tsteps(:) = EVAC_DT_FLOWFIELD
+    If (MYID==Max(0,EVAC_PROCESS)) Then
+       Allocate(Tsteps(NMESHES),STAT=IZERO)
+       Call ChkMemErr('READ','Tsteps',IZERO) 
+       Tsteps(:) = EVAC_DT_FLOWFIELD
+       If (append) Then
+          Open (LU_EVACOUT,file=FN_EVACOUT,form='formatted',status='old', position='append')
+       Else 
+          Open (LU_EVACOUT,file=FN_EVACOUT,form='formatted', status='replace')
+       End If
+    End If
 
 
     !
@@ -653,7 +662,6 @@ Contains
     NOISETH     = 0.01_EB
     NOISECM     = 3.0_EB
     I_FRIC_SW   = 1
-    FC_DAMPING        = 500.0_EB
     V_MAX             = 20.0_EB
     V_ANGULAR_MAX     = 8.0_EB  ! rps
     V_ANGULAR         = 2.0_EB  ! rps
@@ -674,6 +682,7 @@ Contains
     GROUP_DENS      = 0.0_EB
     SMOKE_MIN_SPEED = 0.1_EB
     SMOKE_MIN_SPEED_VISIBILITY = 0.0_EB
+    TAU_CHANGE_DOOR = 1.0_EB
     OUTPUT_SPEED         = .FALSE.
     OUTPUT_MOTIVE_FORCE  = .FALSE.
     OUTPUT_FED           = .FALSE.
@@ -727,6 +736,7 @@ Contains
        C_YOUNG  = 120000.0_EB
        GAMMA    = 16000.0_EB
        KAPPA    = 40000.0_EB
+       FC_DAMPING        = 500.0_EB
        ! Rotational freedom constants
        D_TORSO_MEAN = 0.30_EB
        D_SHOULDER_MEAN = 0.19_EB
@@ -944,7 +954,7 @@ Contains
        SMOKE_MIN_SPEED_VISIBILITY = 0.01_EB  ! No divisions by zero
     End If
 
-    If (.Not. NOT_RANDOM ) Then    ! Initialize the generator randomly
+    If (.Not. NOT_RANDOM .AND. MYID==Max(0,EVAC_PROCESS)) Then    ! Initialize the generator randomly
        Call Random_Seed(size=size_rnd)
        Allocate(seed_rnd(size_rnd),STAT=IZERO)
        Call ChkMemErr('READ_EVAC','seed_rnd',IZERO)
@@ -1008,7 +1018,7 @@ Contains
        !
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
-          Write (LU_ERR,'(A,A)') &
+          If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EXIT line ',&
                Trim(ID)
        End If
@@ -1184,7 +1194,7 @@ Contains
        !   No mesh found
        If (PEX%FED_MESH == 0) PEX%FED_MESH = -1
 
-       If (PEX%FED_MESH > 0) Then 
+       If (PEX%FED_MESH > 0 .And. MYID==PROCESS(Max(0,PEX%FED_MESH))) Then 
           M => MESHES(PEX%FED_MESH)
           II = Floor(M%CELLSI(Floor((PEX%Xsmoke-M%XS)*M%RDXINT))+ 1.0_EB)
           JJ = Floor(M%CELLSJ(Floor((PEX%Ysmoke-M%YS)*M%RDYINT))+ 1.0_EB)
@@ -1238,7 +1248,7 @@ Contains
        !
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
-          Write (LU_ERR,'(A,A)') &
+          If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at DOOR line ',&
                Trim(ID)
        End If
@@ -1415,7 +1425,7 @@ Contains
        !   No mesh found
        If (PDX%FED_MESH == 0) PDX%FED_MESH = -1
 
-       If (PDX%FED_MESH > 0) Then 
+       If (PDX%FED_MESH > 0 .And. MYID==PROCESS(Max(0,PDX%FED_MESH))) Then 
           M => MESHES(PDX%FED_MESH)
           II = Floor(M%CELLSI(Floor((PDX%Xsmoke-M%XS)*M%RDXINT))+ 1.0_EB)
           JJ = Floor(M%CELLSJ(Floor((PDX%Ysmoke-M%YS)*M%RDYINT))+ 1.0_EB)
@@ -1598,7 +1608,7 @@ Contains
        !   No mesh found
        If (PCX%FED_MESH == 0) PCX%FED_MESH = -1
 
-       If (PCX%FED_MESH > 0) Then 
+       If (PCX%FED_MESH > 0 .And. MYID==PROCESS(Max(0,PCX%FED_MESH))) Then 
           M => MESHES(PCX%FED_MESH)
           II = Floor( M%CELLSI(Floor((PCX%X1-M%XS)*M%RDXINT)) + 1.0_EB  )
           JJ = Floor( M%CELLSJ(Floor((PCX%Y1-M%YS)*M%RDYINT)) + 1.0_EB  )
@@ -1633,7 +1643,7 @@ Contains
        If (PCX%FED_MESH2 == 0) PCX%FED_MESH2 = -1
 
        If (PCX%FED_MESH2 > 0) Then 
-          M => MESHES(PCX%FED_MESH2)
+          M => MESHES(PCX%FED_MESH2 .And. MYID==PROCESS(Max(0,PCX%FED_MESH2)))
           II = Floor( M%CELLSI(Floor((PCX%X2-M%XS)*M%RDXINT)) + 1.0_EB  )
           JJ = Floor( M%CELLSJ(Floor((PCX%Y2-M%YS)*M%RDYINT)) + 1.0_EB  )
           KK = Floor( M%CELLSK(Floor((PCX%Z2-M%ZS)*M%RDZINT)) + 1.0_EB  )
@@ -1738,7 +1748,7 @@ Contains
 
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
-          Write (LU_ERR,'(A,A)') &
+          If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at ENTR line ',&
                Trim(ID)
        End If
@@ -1985,7 +1995,7 @@ Contains
 
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
-          Write (LU_ERR,'(A,A)') &
+         If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVAC line ',&
                Trim(ID)
        End If
@@ -2186,7 +2196,7 @@ Contains
        End Do
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
-          Write (LU_ERR,'(A,A)') &
+          If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVHO line ',&
                Trim(ID)
        End If
@@ -2263,7 +2273,7 @@ Contains
        End Do
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
-          Write (LU_ERR,'(A,A)') &
+          If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVSS line ',&
                Trim(ID)
        End If
@@ -2426,7 +2436,7 @@ Contains
        Continue
     Case (7)
        COLOR_METHOD = -1
-       Write (LU_ERR,'(A)') &
+       If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A)') &
             ' WARNING: COLOR_METHOD=7 is not defined anymore, the default (-1) is used.'
     Case Default
        Write(MESSAGE,'(A,I3,A)') &
@@ -2534,6 +2544,7 @@ Contains
   Subroutine Initialize_Evac_Dumps
     Implicit None
     !
+    !
     Character(50) tcform
     Integer n_cols, i, j, nm
     Logical L_fed_read, L_fed_save, L_eff_read, L_eff_save, &
@@ -2544,6 +2555,7 @@ Contains
     !
     Type (MESH_TYPE), Pointer :: MFF
     !
+
     ! Logical unit numbers
     ! LU_EVACCSV: CHID_evac.csv, number of persons
     ! LU_EVACEFF: CHID_evac.eff, evacflow fields, binary
@@ -2553,42 +2565,44 @@ Contains
     !              1b. row: n_egrids,4,n_corrs=0,4 (New Format, version 1.11)
     !
     WRITE(EVAC_COMPILE_DATE,'(A)') evacrev(INDEX(evacrev,':')+1:LEN_TRIM(evacrev)-2)
-    WRITE(LU_ERR,*) evacrev(INDEX(evacrev,':')+1:LEN_TRIM(evacrev)-2)
+    ! WRITE(LU_ERR,*) evacrev(INDEX(evacrev,':')+1:LEN_TRIM(evacrev)-2)
     READ (EVAC_COMPILE_DATE,'(I5)') EVAC_MODULE_REV
     WRITE(EVAC_COMPILE_DATE,'(A)') evacdate
     Call GET_REV_evac(EVAC_MODULE_REV,EVAC_COMPILE_DATE)
-!    WRITE(EVAC_COMPILE_DATE,'(A)') EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1)
+    !    WRITE(EVAC_COMPILE_DATE,'(A)') EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1)
     !
-    Write(LU_ERR,'(A)')          ' FDS+Evac Evacuation Module'
-    Write(LU_OUTPUT,'(A)')          ' FDS+Evac Evacuation Module'
-    Write(LU_ERR,'(A,A)')        ' FDS+Evac Compilation Date: ', &
+    Write(LU_EVACOUT,'(A)')          ' FDS+Evac Evacuation Module'
+    ! Write(LU_OUTPUT,'(A)')          ' FDS+Evac Evacuation Module'
+    Write(LU_EVACOUT,'(A,A)')        ' FDS+Evac Compilation Date: ', &
          Trim(EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1))
-    Write(LU_OUTPUT,'(A,A)')        ' FDS+Evac Compilation Date: ', &
-         Trim(EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1))
-    Write(LU_ERR,'(A,A)')  ' FDS+Evac Version         : ', &
+    ! Write(LU_OUTPUT,'(A,A)')        ' FDS+Evac Compilation Date: ', &
+    !      Trim(EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1))
+    Write(LU_EVACOUT,'(A,A)')  ' FDS+Evac Version         : ', &
          Trim(EVAC_VERSION)
-    Write(LU_OUTPUT,'(A,A)')  ' FDS+Evac Version         : ', &
-         Trim(EVAC_VERSION)
-    Write(LU_ERR,'(A,i0/)')  ' FDS+Evac SVN Revision No.: ', &
+    ! Write(LU_OUTPUT,'(A,A)')  ' FDS+Evac Version         : ', &
+    !      Trim(EVAC_VERSION)
+    Write(LU_EVACOUT,'(A,i0/)')  ' FDS+Evac SVN Revision No.: ', &
          EVAC_MODULE_REV
-    Write(LU_OUTPUT,'(A,i0/)')  ' FDS+Evac SVN Revision No.: ', &
-         EVAC_MODULE_REV    
+    ! Write(LU_OUTPUT,'(A,i0/)')  ' FDS+Evac SVN Revision No.: ', &
+    !      EVAC_MODULE_REV    
 
-
-    Write(LU_ERR,fmt='(/a,i2)')  ' FDS+Evac Color_Method    :', &
+    Write(LU_EVACOUT,fmt='(/a,i2)')  ' FDS+Evac Color_Method    :', &
          COLOR_METHOD
     If (Fed_Door_Crit >= 0) Then
-       Write(LU_ERR,fmt='(a,f14.8)') &
-                              ' FDS+Evac Fed_Door_Crit   :', FED_DOOR_CRIT
+       Write(LU_EVACOUT,fmt='(a,f14.8)') &
+            ' FDS+Evac Fed_Door_Crit   :', FED_DOOR_CRIT
     Else
        ! Visibility S = 3/K, K is extinction coeff.
-       Write(LU_ERR,fmt='(a,f14.8,a)') &
-                              ' FDS+Evac Vis_Door_Crit   :', &
+       Write(LU_EVACOUT,fmt='(a,f14.8,a)') &
+            ' FDS+Evac Vis_Door_Crit   :', &
             Abs(FED_DOOR_CRIT), ' m'
+    End If
+    If (NOT_RANDOM ) Write(LU_EVACOUT,fmt='(a)') &
+         ' FDS+Evac Random seed is not used.'
+    If (Fed_Door_Crit < 0) Then
+       ! Visibility S = 3/K, K is extinction coeff.
        FED_DOOR_CRIT = 3.0_EB/FED_DOOR_CRIT ! Extinction coeff (1/m)
     End If
-    If (NOT_RANDOM ) Write(LU_ERR,fmt='(a)') &
-                              ' FDS+Evac Random seed is not used.'
     !
     L_fed_read = Btest(I_EVAC,3)
     L_fed_save = Btest(I_EVAC,1)
@@ -2615,10 +2629,10 @@ Contains
        If (L_fed_read) Then
           Inquire (file=FN_EVACFED,exist=L_status)
           If (.Not. L_status) Then
-             Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
+             Write (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
                   Trim(FN_EVACFED), ', FED and soot not used'
-             Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
-                  Trim(FN_EVACFED), ', FED and soot not used'
+             ! Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
+             !      Trim(FN_EVACFED), ', FED and soot not used'
              l_fed_read = .False.
              l_fed_save = .False.
              I_EVAC = Ibclr(I_EVAC,3)  ! do not read FED
@@ -2643,10 +2657,10 @@ Contains
        If (L_eff_read) Then
           Inquire (file=FN_EVACEFF,exist=L_status)
           If (L_status) Then
-             Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             Write (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                   Trim(FN_EVACEFF), ' is used'
-             Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-                  Trim(FN_EVACEFF), ' is used'
+             ! Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             !      Trim(FN_EVACEFF), ' is used'
              l_eff_save = .False.
              I_EVAC = Ibclr(I_EVAC,0)  ! do not save EFF
              Open (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', &
@@ -2696,10 +2710,10 @@ Contains
           Write (LU_EVACFED) ntmp1
           Write (LU_EVACFED) n_egrids_tmp, ntmp2, ntmp3, ntmp4, &
                ntmp5, ntmp6
-          Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
+          Write (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
                Trim(FN_EVACFED), ' is calculated and used'
-          Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
-               Trim(FN_EVACFED), ' is calculated and used'
+          ! Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
+          !      Trim(FN_EVACFED), ' is calculated and used'
        End If
        !
        ! Number of evac flow fields is same as the number of all evac grids.
@@ -2710,19 +2724,19 @@ Contains
                status='replace')
           n_egrids_tmp = Count(EVACUATION_ONLY)
           Write (LU_EVACEFF) n_egrids_tmp
-          Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+          Write (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                Trim(FN_EVACEFF), ' is calculated and used'
-          Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-               Trim(FN_EVACEFF), ' is calculated and used'
+          ! Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+          !      Trim(FN_EVACEFF), ' is calculated and used'
        End If
        ! 
        If (L_fed_read) Then
           Inquire (file=FN_EVACFED,exist=L_status)
           If (.Not. L_status) Then
-             Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
+             Write (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
                   Trim(FN_EVACFED), ', FED and soot not used'
-             Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
-                  Trim(FN_EVACFED), ', FED and soot not used'
+             ! Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', &
+             !      Trim(FN_EVACFED), ', FED and soot not used'
              l_fed_read = .False.
              l_fed_save = .False.
              I_EVAC = Ibclr(I_EVAC,3)  ! do not read FED
@@ -2755,9 +2769,7 @@ Contains
              If ( ntmp2 /= 4 .Or. ntmp3 /= n_corrs .Or. ntmp1 >= 0 &
                   .Or. ntmp4 /= 8  .Or. &
                   ntmp5 /= n_doors+n_exits .Or. ntmp6 /= 4) Then
-                Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', &
-                     Trim(FN_EVACFED), ', FED and soot not used'
-                Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', &
+                Write (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', &
                      Trim(FN_EVACFED), ', FED and soot not used'
                 l_fed_read = .False.
                 l_fed_save = .False.
@@ -2765,18 +2777,18 @@ Contains
                 I_EVAC = Ibclr(I_EVAC,1) ! do not save FED
                 Close (LU_EVACFED)
              End If
-
-             If ( l_fed_read .Or. l_fed_save ) Then
-                Write (LU_ERR,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
-                     Trim(FN_EVACFED), ' is used'
-                Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
-                     Trim(FN_EVACFED), ' is used'
-             End If
              If (n_egrids_tmp /= n_egrids) Then
                 Write(MESSAGE,'(A,2I4)') &
                      'ERROR: Init Evac Dumps: FED ',n_egrids_tmp, n_egrids
                 Close (LU_EVACFED)
                 Call SHUTDOWN(MESSAGE)
+             End If
+
+             If (l_fed_read .Or. l_fed_save) Then
+                Write (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
+                     Trim(FN_EVACFED), ' is used'
+                ! Write (LU_OUTPUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', &
+                !      Trim(FN_EVACFED), ' is used'
              End If
           End If
        End If
@@ -2795,10 +2807,10 @@ Contains
                   status='replace')
              n_egrids_tmp = Count(EVACUATION_ONLY)
              Write (LU_EVACEFF) n_egrids_tmp
-             Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             Write (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
                   Trim(FN_EVACEFF), ' is (re)calculated'
-             Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-                  Trim(FN_EVACEFF), ' is (re)calculated'
+             ! Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             !      Trim(FN_EVACEFF), ' is (re)calculated'
           Else
              l_eff_save = .False.
              I_EVAC = Ibclr(I_EVAC,0) ! do not save EFF
@@ -2810,10 +2822,6 @@ Contains
                 Close (LU_EVACEFF)
                 Call SHUTDOWN(MESSAGE)
              End If
-             Write (LU_ERR,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-                  Trim(FN_EVACEFF), ' is used'
-             Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
-                  Trim(FN_EVACEFF), ' is used'
              If (n_egrids_tmp /= Count(EVACUATION_ONLY) ) Then
                 Write(MESSAGE,'(A,2I4)') &
                      'ERROR: Init Evac Dumps: EFF ',n_egrids_tmp, &
@@ -2821,6 +2829,10 @@ Contains
                 Close (LU_EVACEFF)
                 Call SHUTDOWN(MESSAGE)
              End If
+             Write (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+                  Trim(FN_EVACEFF), ' is used'
+             ! Write (LU_OUTPUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', &
+             !      Trim(FN_EVACEFF), ' is used'
           End If
        End If
 
@@ -2994,6 +3006,7 @@ Contains
 
           If (.Not. SOLID(CELL_INDEX(i,j,1)) ) Then
              MESH_LOOP: Do NOM=1,NMESHES
+                If (MYID /= PROCESS(NOM)) Cycle MESH_LOOP
                 M=>MESHES(NOM)
                 If (.Not. EVACUATION_ONLY(NOM)) Then
                    If (X1 >= M%XS .And. X1 <= M%XF .And. &
@@ -3165,16 +3178,16 @@ Contains
 
                 If (i_endless_loop >= (8.0_EB*Max(1.0_EB,Log10(2.5_EB*VOL2))) / &
                      Max(1.0_EB,Log10((2.5_EB*VOL2)/(2.5_EB*VOL2-1))) ) Then
-                   Write (LU_ERR,fmt='(A,I4,A,I4,A,I6)') &
+                   Write (LU_EVACOUT,fmt='(A,I4,A,I4,A,I6)') &
                         ' ERROR: Initialize_Humans, EVAC line ', &
                         IPC, ', Mesh ', NM, ', i_human ', n_humans
-                   Write (LU_ERR,fmt='(a)') &
+                   Write (LU_EVACOUT,fmt='(a)') &
                         '      x       y       z     Rd      Rt      Rs      ds  '
-                   Write (LU_ERR,fmt='(3f8.2,4f8.4)') HR%X, HR%Y, HR%Z, &
+                   Write (LU_EVACOUT,fmt='(3f8.2,4f8.4)') HR%X, HR%Y, HR%Z, &
                         2.0_EB*HR%Radius, HR%r_torso, HR%r_shoulder, HR%d_shoulder
-                   Write (LU_OUTPUT,fmt='(A,I4,A,I4,A,I6)') &
-                        ' ERROR: Initialize_Humans, EVAC line ', &
-                        IPC, ', Mesh ', NM, ', i_human ', n_humans
+                   ! Write (LU_OUTPUT,fmt='(A,I4,A,I4,A,I6)') &
+                   !      ' ERROR: Initialize_Humans, EVAC line ', &
+                   !      IPC, ', Mesh ', NM, ', i_human ', n_humans
                    ISTOP = 3
                    HR%SHOW = .True.    
                    HR%COLOR_INDEX = 6  ! Cyan
@@ -3526,10 +3539,10 @@ Contains
        ! 
     End Do EVAC_CLASS_LOOP ! ipc, number of evac-lines
 
-    Write (LU_ERR,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', &
+    Write (LU_EVACOUT,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', &
          0.0_EB,' mesh ',nm,' number of humans ',n_humans
-    Write (LU_OUTPUT,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', &
-         0.0_EB,' mesh ',nm,' number of humans ',n_humans
+    ! Write (LU_OUTPUT,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', &
+    !      0.0_EB,' mesh ',nm,' number of humans ',n_humans
     !
     !
     TUSED(12,NM)=TUSED(12,NM)+SECOND()-TNOW
@@ -3577,8 +3590,8 @@ Contains
        Group_List(i)%GROUP_I_FFIELDS(:) = 0
     End Do
 
-    Write (LU_ERR,fmt='(/a)') ' EVAC: Initial positions of the humans'
-    Write (LU_ERR,fmt='(a,a)') &
+    Write (LU_EVACOUT,fmt='(/a)') ' EVAC: Initial positions of the humans'
+    Write (LU_EVACOUT,fmt='(a,a)') &
          ' person     x       y       z    Tpre    Tdet  ', &
          ' dia    v0   tau   i_gr i_ff'
 
@@ -4153,7 +4166,7 @@ Contains
           j = Max(0,HR%GROUP_ID)
           Group_List(j)%IEL = HR%IEL
 
-          Write (LU_ERR,fmt='(i6,5f8.2,3f6.2,i6,i3,i2)') HR%ILABEL, &
+          Write (LU_EVACOUT,fmt='(i6,5f8.2,3f6.2,i6,i3,i2)') HR%ILABEL, &
                HR%X, HR%Y, HR%Z, HR%Tpre, HR%Tdet,2.0_EB*HR%Radius, &
                HR%Speed, HR%Tau, HR%GROUP_ID, HR%i_ffield, &
                Abs(HR%I_Target)+n_egrids+n_entrys
@@ -4163,11 +4176,12 @@ Contains
     !
   End Subroutine INIT_EVAC_GROUPS
 !
-  Subroutine EVAC_MESH_EXCHANGE(T,T_Save,I_mode, ICYC)
+  Subroutine EVAC_MESH_EXCHANGE(T,T_Save,I_mode, ICYC, EXCHANGE_EVACUATION, MODE)
     Implicit None
     !
     Real(EB), Intent(IN) :: T
-    Integer, Intent(IN) :: I_mode, ICYC
+    Integer, Intent(IN) :: I_mode, ICYC, MODE
+    Logical, Intent(OUT) :: EXCHANGE_EVACUATION
     Real(EB) T_Save
     !
     Integer nm, nom, i, j, i1, j1, k1
@@ -4180,8 +4194,8 @@ Contains
     Real(FB) tmpout5, tmpout6, tmpout7, tmpout8
     Real(EB) Z_1,Z_2,Z_3
     !
+    If (.Not. Any(EVACUATION_GRID)) RETURN
     If (ICYC < 1) Return
-    If (.NOT.Any(EVACUATION_GRID)) RETURN
     !
     ! I_mode: 'binary' index:
     ! xxxxx = (0,1)*16 + (0,1)*8 + (0,1)*4 + (0,1)*2 + (0,1)
@@ -4217,11 +4231,14 @@ Contains
     !
     ! Change information: Fire meshes ==> Evac meshes
     If ( T >= 0.0_EB .And. Real(T,FB) >= Real(T_Save,FB) ) Then
-       T_Save = T + DT_Save
+       If (MODE > 0) T_Save = T + DT_Save
        L_use_fed = .True.
     End If
 
     L_use_fed = L_use_fed .And. (L_fed_read .Or. L_fed_save)
+
+    If (MODE < 1 .And. L_use_fed) EXCHANGE_EVACUATION = .True.
+    If (MODE < 2) Return
 
     If (L_use_fed) Then
        If (L_fed_save) Then
@@ -4675,9 +4692,9 @@ Contains
 
 324 Continue
     If (ios < 0) Then 
-       Write (LU_ERR,fmt='(a,f12.4,a)') 'FED file EOF: time ', &
+       Write (LU_EVACOUT,fmt='(a,f12.4,a)') 'FED file EOF: time ', &
             T_Save-DT_Save, ' not found'
-       Write (LU_ERR,fmt='(a)') 'FED file EOF: use previous values'
+       Write (LU_EVACOUT,fmt='(a)') 'FED file EOF: use previous values'
        T_Save = 1.0E15
     End If
 
@@ -4806,7 +4823,7 @@ Contains
     Omega_0        = V_ANGULAR*2.0_EB*Pi     ! 2 rounds per second
     Dt_sum         = 0.0_EB
     Delta_min      = Huge(Delta_min)
-    dt_group_door  = 1.0_EB
+    dt_group_door  = TAU_CHANGE_DOOR
     !
     Call POINT_TO_MESH(NM)
     !       Call POINT_TO_EVAC_MESH(NM)
@@ -5564,7 +5581,7 @@ Contains
                          HR%FFIELD_NAME = Trim(name_new_ffield)
                          If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
                          If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
-                         Write (LU_ERR,fmt='(a,i5,a,a,a,a)') &
+                         Write (LU_EVACOUT,fmt='(a,i5,a,a,a,a)') &
                               ' EVAC: Human ',ie,', new ffield: ', &
                               Trim(name_new_ffield), ', old ffield: ', &
                               Trim(name_old_ffield)
@@ -5576,7 +5593,7 @@ Contains
                          If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
                          If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
                          If (j > 0) Color_Tmp(j) = color_index
-                         Write (LU_ERR,fmt='(a,i5,a,a,a,a)') &
+                         Write (LU_EVACOUT,fmt='(a,i5,a,a,a,a)') &
                               ' EVAC: Group ',j,', new ffield: ', &
                               Trim(name_new_ffield), ', old ffield: ', &
                               Trim(name_old_ffield)
@@ -7487,7 +7504,7 @@ Contains
                End If
             End Select
             If (HR%IOR > 0) Then
-               Write (LU_ERR,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
+               Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
                     ' EVAC: Person n:o', &
                     HR%ILABEL, ' out at ', T, &
                     ' s, exit ', Trim(PEX%ID_NAME), ' fed ', HR%IntDose
@@ -7671,7 +7688,7 @@ Contains
                   PDX%ICOUNT = PDX%ICOUNT + 1
                   If (PDX%T_first <= 0.0_EB) PDX%T_first = T
 
-                  Write (LU_ERR,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
+                  Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
                        ' EVAC: Person n:o', &
                        HR%ILABEL, ' out at ', T, &
                        ' s, door ', Trim(PDX%ID_NAME), ' fed ', HR%IntDose
@@ -7824,21 +7841,21 @@ Contains
                      End If
                      MESHES(imesh2)%N_HUMANS = MESHES(imesh2)%N_HUMANS + 1
                      MESHES(imesh2)%HUMAN(MESHES(imesh2)%N_HUMANS) = HR
-                     Write (LU_ERR,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
+                     Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
                           ' EVAC: Person n:o', &
                           HR%ILABEL, ' out at ', T, &
                           ' s, corr ', Trim(PCX%ID_NAME), ' fed ', HR%IntDose
                   End If            ! target is door or entry
 
                   If (ior_new == 3) Then ! corridor
-                     Write (LU_ERR,fmt='(a,i6,a,f8.2,a,a,f8.4)') &
+                     Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,f8.4)') &
                           ' EVAC: Person n:o', &
                           HR%ILABEL, ' change corr ', T, &
                           ' s, corr ', Trim(PCX%ID_NAME), HR%IntDose
                   End If
 
                   If (ior_new == 5) Then ! exit
-                     Write (LU_ERR,fmt='(a,i6,a,f8.2,a,a,f8.4)') &
+                     Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,f8.4)') &
                           ' EVAC: Person n:o', &
                           HR%ILABEL, ' exits ', T, &
                           ' s, corr ', Trim(PCX%ID_NAME), HR%IntDose
@@ -8877,7 +8894,7 @@ Contains
          HR%Eta       = 0.0_EB
          HR%Ksi       = 0.0_EB
          HR%NewRnd    = .True.
-         Write (LU_ERR,fmt='(a,i6,a,f8.2,a,3a)') &
+         Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,3a)') &
               ' EVAC: Person n:o', &
               HR%ILABEL, ' inserted ', Tin, &
               ' s, entry ', Trim(PNX%ID_NAME),' ffield ', &
