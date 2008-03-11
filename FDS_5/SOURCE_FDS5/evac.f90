@@ -1194,7 +1194,7 @@ Contains
        !   No mesh found
        If (PEX%FED_MESH == 0) PEX%FED_MESH = -1
 
-       If (PEX%FED_MESH > 0 .And. MYID==PROCESS(Max(0,PEX%FED_MESH))) Then 
+       If (PEX%FED_MESH > 0 .And. MYID==PROCESS(Max(1,PEX%FED_MESH))) Then 
           M => MESHES(PEX%FED_MESH)
           II = Floor(M%CELLSI(Floor((PEX%Xsmoke-M%XS)*M%RDXINT))+ 1.0_EB)
           JJ = Floor(M%CELLSJ(Floor((PEX%Ysmoke-M%YS)*M%RDYINT))+ 1.0_EB)
@@ -1425,7 +1425,7 @@ Contains
        !   No mesh found
        If (PDX%FED_MESH == 0) PDX%FED_MESH = -1
 
-       If (PDX%FED_MESH > 0 .And. MYID==PROCESS(Max(0,PDX%FED_MESH))) Then 
+       If (PDX%FED_MESH > 0 .And. MYID==PROCESS(Max(1,PDX%FED_MESH))) Then 
           M => MESHES(PDX%FED_MESH)
           II = Floor(M%CELLSI(Floor((PDX%Xsmoke-M%XS)*M%RDXINT))+ 1.0_EB)
           JJ = Floor(M%CELLSJ(Floor((PDX%Ysmoke-M%YS)*M%RDYINT))+ 1.0_EB)
@@ -1608,7 +1608,7 @@ Contains
        !   No mesh found
        If (PCX%FED_MESH == 0) PCX%FED_MESH = -1
 
-       If (PCX%FED_MESH > 0 .And. MYID==PROCESS(Max(0,PCX%FED_MESH))) Then 
+       If (PCX%FED_MESH > 0 .And. MYID==PROCESS(Max(1,PCX%FED_MESH))) Then 
           M => MESHES(PCX%FED_MESH)
           II = Floor( M%CELLSI(Floor((PCX%X1-M%XS)*M%RDXINT)) + 1.0_EB  )
           JJ = Floor( M%CELLSJ(Floor((PCX%Y1-M%YS)*M%RDYINT)) + 1.0_EB  )
@@ -1643,7 +1643,7 @@ Contains
        If (PCX%FED_MESH2 == 0) PCX%FED_MESH2 = -1
 
        If (PCX%FED_MESH2 > 0) Then 
-          M => MESHES(PCX%FED_MESH2 .And. MYID==PROCESS(Max(0,PCX%FED_MESH2)))
+          M => MESHES(PCX%FED_MESH2 .And. MYID==PROCESS(Max(1,PCX%FED_MESH2)))
           II = Floor( M%CELLSI(Floor((PCX%X2-M%XS)*M%RDXINT)) + 1.0_EB  )
           JJ = Floor( M%CELLSJ(Floor((PCX%Y2-M%YS)*M%RDYINT)) + 1.0_EB  )
           KK = Floor( M%CELLSK(Floor((PCX%Z2-M%ZS)*M%RDZINT)) + 1.0_EB  )
