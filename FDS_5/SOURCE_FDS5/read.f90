@@ -4187,11 +4187,11 @@ MESH_LOOP: DO NM=1,NMESHES
          XB(3) = YF
          XB(4) = YF
       ENDIF
-      IF (XB(6)>=ZS-0.5_EB*DZ(0)    .AND. XB(6)<ZS) THEN
+      IF (XB(6)>=ZS-0.5_EB*DZ(0)    .AND. XB(6)<ZS .AND. .NOT.EVACUATION_ONLY(NM)) THEN
          XB(5) = ZS
          XB(6) = ZS
       ENDIF
-      IF (XB(5)< ZF+0.5_EB*DZ(KBP1) .AND. XB(5)>ZF) THEN
+      IF (XB(5)< ZF+0.5_EB*DZ(KBP1) .AND. XB(5)>ZF .AND. .NOT.EVACUATION_ONLY(NM)) THEN
          XB(5) = ZF
          XB(6) = ZF
       ENDIF
