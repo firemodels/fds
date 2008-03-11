@@ -127,7 +127,7 @@ DISPLS_TIMERS = DISPLS*N_TIMERS
 COUNTS_MASS   = COUNTS*(MAX_SPECIES+1)
 DISPLS_MASS   = DISPLS*(MAX_SPECIES+1)
  
-! Open and write to Smokeview file (Master Node Only)
+! Open and write to Smokeview and status file (Master Node Only)
  
 CALL ASSIGN_FILE_NAMES
 
@@ -139,8 +139,11 @@ DO N=0,NUMPROCS-1
    CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 ENDDO
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
-IF (MYID==0) OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
- 
+IF (MYID==0) THEN
+   OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
+   CALL WRITE_STATUS_FILES
+ENDIF
+
 ! Stop all the processes if this is just a set-up run
  
 IF (SET_UP) CALL SHUTDOWN('Stop FDS, Set-up only')
@@ -773,6 +776,7 @@ IF (MYID==0) THEN
    SELECT CASE(STOP_STATUS)
       CASE(NO_STOP)
          WRITE(LU_ERR,'(A)') 'STOP: FDS completed successfully'
+         IF (STATUS_FILES) CLOSE(LU_NOTREADY,STATUS='DELETE')
       CASE(INSTABILITY_STOP) 
          WRITE(LU_ERR,'(A)') 'STOP: Numerical Instability'
       CASE(USER_STOP) 
