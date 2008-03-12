@@ -3204,6 +3204,12 @@ void Args(int argc, char **argv){
     }
   }
 
+  FREEMEMORY(logfilename);
+  NewMemory((void **)&logfilename,len+4+1);
+  STRCPY(logfilename,fdsprefix);
+  STRCAT(logfilename,".log");
+  LOGFILE=fopen(logfilename,"w");
+
   FREEMEMORY(casefilename);
   NewMemory((void **)&casefilename,len+strlen(ini_ext)+1);
   STRCPY(casefilename,fdsprefix);
