@@ -904,6 +904,7 @@ void InitOpenGL(void){
 
 void initvars1(void){
 
+  LOGFILE=NULL;
 #ifdef pp_LIGHT
   show_smokelighting=0;
 #endif
@@ -2003,6 +2004,7 @@ void initvars0(void){
   read_smoothobst=0;
 #endif
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
+  logfilename=NULL;
   flushfile=NULL, chidfilebase=NULL;
   hrrfilename=NULL;
   hrrinfo=NULL;
