@@ -30,6 +30,7 @@ int SUB_portfrustum(int quad,
 
 EXTERNCPP void add_new_tour(void);
 
+void log_print(char *output);
 void init_avatar(void);
 #ifdef pp_GPU
 EXTERNCPP int log2(float xx);

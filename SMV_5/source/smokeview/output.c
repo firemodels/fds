@@ -263,3 +263,12 @@ void drawLabels(void){
   }
 }
 
+/* ------------------ log_print ------------------------ */
+
+void log_print(char *output){
+  if(output!=NULL){
+    printf("%s",output);
+    if(LOGFILE!=NULL)fprintf(LOGFILE,"%s",output);
+  }
+}
+

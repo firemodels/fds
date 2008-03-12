@@ -413,6 +413,7 @@ SVEXTERN int visHRRlabel;
 #ifdef pp_memstatus
 SVEXTERN int visAvailmemory;
 #endif
+SVEXTERN FILE *LOGFILE;
 SVEXTERN int revision_smv, revision_fds;
 SVEXTERN int visBlocklabel;
 SVEXTERN int visOpenVents,visDummyVents;
@@ -621,6 +622,7 @@ SVEXTERN int read_smoothobst;
 SVEXTERN FILE *STREAM_SB;
 #endif
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
+SVEXTERN char *logfilename;
 SVEXTERN char *flushfile, *chidfilebase;
 SVEXTERN char *hrrfilename;
 SVEXTERN hrrdata *hrrinfo;
