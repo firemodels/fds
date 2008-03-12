@@ -1169,7 +1169,7 @@ DO I=1,N
       RETURN
       ENDIF
    PIVINV = 1._EB/A(ICOL,ICOL)
-   A(ICOL,ICOL) = 1.
+   A(ICOL,ICOL) = 1._EB
    A(ICOL,1:N) = A(ICOL,1:N) * PIVINV
    B(ICOL,1:M) = B(ICOL,1:M) * PIVINV
    DO LL=1,N
