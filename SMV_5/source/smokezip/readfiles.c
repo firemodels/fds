@@ -586,9 +586,6 @@ int readsmv(char *smvfile){
   {
     int i;
 
-#ifdef pp_LIGHT
-    if(meshinfo!=NULL)light_delta=meshinfo->dx;
-#endif
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
       int ii, jj, kk;
@@ -606,9 +603,6 @@ int readsmv(char *smvfile){
       dy = meshi->ybar - meshi->ybar0;
       dz = meshi->zbar - meshi->zbar0;
       meshi->dxyzmax = sqrt(dx*dx+dy*dy+dz*dz);
-      if(meshi->dx<light_delta)light_delta=meshi->dx;
-      if(meshi->dy<light_delta)light_delta=meshi->dy;
-      if(meshi->dz<light_delta)light_delta=meshi->dz;
 #endif
       meshi->dxx = (meshi->xbar-meshi->xbar0)/65535;
       meshi->dyy = (meshi->ybar-meshi->ybar0)/65535;
@@ -643,6 +637,7 @@ int readsmv(char *smvfile){
 
 #ifdef pp_LIGHT
       meshi->photon_cell=NULL;
+      meshi->light_flux=NULL;
       if(make_lighting_file==1){
         int nni, nnj, nnk;
 
@@ -651,6 +646,7 @@ int readsmv(char *smvfile){
         nnk = meshi->kbar;
 
         NewMemory((void **)&meshi->photon_cell,nni*nnj*nnk*sizeof(float));
+        NewMemory((void **)&meshi->light_flux,(nni+1)*(nnj+1)*(nnk+1)*sizeof(float));
       }
 #endif
 
@@ -726,7 +722,7 @@ void readini2(char *inifile){
       nlightinfo++;
       continue;
     }
-    if(match(buffer,"L_LINE",7)==1){
+    if(match(buffer,"L_LINE",6)==1){
       fgets(buffer,255,stream);
       nlightinfo++;
       continue;
@@ -783,6 +779,7 @@ void readini2(char *inifile){
 
       lighti = lightinfo + nlightinfo;
       lighti->type=0;
+      lighti->move=0;
       if(match(buffer,"L_MOVEPOINT",11)==1)lighti->move=1;
       lighti->dir=0;
       if(lighti->move==0){
@@ -807,7 +804,7 @@ void readini2(char *inifile){
       nlightinfo++;
       continue;
     }
-    if(match(buffer,"L_LINE",7)==1){
+    if(match(buffer,"L_LINE",6)==1){
       lightdata *lighti;
       float *xyz1, *xyz2;
 
@@ -987,6 +984,7 @@ void readini2(char *inifile){
   {
     int i;
 
+    CheckMemory;
     if(nlightinfo>0){
       light_cdf[0]=0.0;
       for(i=1;i<nlightinfo+1;i++){
@@ -998,6 +996,27 @@ void readini2(char *inifile){
       for(i=0;i<nlightinfo+1;i++){
         light_cdf[i]/=light_cdf[nlightinfo];
       }
+      printf("before light setup\n");
+      for(i=0;i<nlightinfo;i++){
+        lightdata *lighti;
+        
+        lighti = lightinfo + i;
+        switch (lighti->type){
+          float dist, dx, dy, dz;
+          int nstep;
+
+          case 1:
+            dx = lighti->xyz1[0] - lighti->xyz2[0];
+            dy = lighti->xyz1[1] - lighti->xyz2[1];
+            dz = lighti->xyz1[2] - lighti->xyz2[2];
+            dist = sqrt(dx*dx + dy*dy + dz*dz);
+            nstep = dist/light_delta+1;
+            if(nstep<2)nstep=2;
+            lighti->nstep=nstep;
+            break;
+        }
+      }
+      CheckMemory;
     }
   }
 #endif
