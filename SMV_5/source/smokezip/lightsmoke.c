@@ -40,9 +40,196 @@ lightdata *get_random_light(void){
   return light;
 }
 
+/* ------------------ integrate_alpha ------------------------ */
+
+float integrate_alpha(mesh *smoke_mesh,float *xyz_light,float *xyz2){
+  float dx, dy, dz, dist, dint, xyz[3];
+  int i, n;
+  float f1, sum;
+  float returnval;
+
+  dx = xyz2[0]-xyz_light[0];
+  dy = xyz2[1]-xyz_light[1];
+  dz = xyz2[2]-xyz_light[2];
+  dist = dx*dx + dy*dy + dz*dz;
+  dist = sqrt(dist);
+  n = dist/smoke_mesh->dx + 2;
+  dint = dist/n;
+
+  sum = 0.0;
+  for(i=0;i<n+1;i++){
+    float val;
+
+    f1 = (float)(n-i)/(float)n;
+    xyz[0] = xyz_light[0]*f1 + xyz2[0]*(1.0-f1);
+    xyz[1] = xyz_light[1]*f1 + xyz2[1]*(1.0-f1);
+    xyz[2] = xyz_light[2]*f1 + xyz2[2]*(1.0-f1);
+    val = getlog_1_m_alpha(smoke_mesh, xyz);
+    if(i==0||i==n-1){
+      sum += val/2.0;
+    }
+    else{
+      sum += val;
+    }
+    if(sum<-5.0)return 0.0;
+  }
+  sum *= dint;
+  returnval = exp(sum);
+  if(returnval>1.0)returnval=1.0;
+  if(returnval<0.0)returnval=0.0;
+  return returnval;
+}
+
 /* ------------------ update_lightfield ------------------------ */
 
 void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuffer){
+ // accumulate hrr for each light
+
+    lightdata *lighti;
+    int ilight;
+    int i, j, k;
+    mesh *smoke_mesh;
+    int nx, ny, nz;
+    int nxcell, nycell, nzcell;
+    float *xplt, *yplt, *zplt;
+    float xyz_pos[3];
+    float logindex[256];
+    float *light_flux;
+    int ijk;
+    float four_pi;
+    float fluxmin, fluxmax;
+    float factor;
+    float fluxmean, fluxdev;
+
+    // pick a random light weighted by HRR  
+    //  (ie a high wattage light will be picked proportionately more often than
+    //          a low wattage one)
+
+    four_pi = 16.0*atan(1.0);
+    CheckMemory;
+    smoke_mesh=smoke3di->smoke_mesh;
+    xplt = smoke_mesh->xplt;
+    yplt = smoke_mesh->yplt;
+    zplt = smoke_mesh->zplt;
+    light_flux = smoke_mesh->light_flux;
+
+    nxcell = smoke_mesh->ibar;
+    nycell = smoke_mesh->jbar;
+    nzcell = smoke_mesh->kbar;
+    nx = nxcell+1;
+    ny = nycell+1;
+    nz = nzcell+1;
+
+    for(i=1;i<256;i++){
+      logindex[i]=log((float)i/255.0)/smoke_mesh->dx;
+    }
+    logindex[0]=log(0.001)/smoke_mesh->dx;
+
+    for(i=0;i<nx*ny*nz;i++){
+      full_logalphabuffer[i] = logindex[255-full_alphabuffer[i]];
+      lightingbuffer[i]=0;
+      light_flux[i]=0.0;
+    }
+
+    ijk = 0;
+    for(k=0;k<nz;k++){
+      xyz_pos[2]=zplt[k];
+      for(j=0;j<ny;j++){
+        xyz_pos[1]=yplt[j];
+        for(i=0;i<nx;i++){
+          float val2;
+
+          xyz_pos[0] = xplt[i];
+          val2 = getlog_1_m_alpha(smoke_mesh, xyz_pos);
+          if(val2<0.0){
+            for(ilight=0;ilight<nlightinfo;ilight++){
+              float flux, area, dx, dy, dz;
+              float *xyz_e1, *xyz_e2;
+              float *xyz_light;
+              int ilight2;
+
+              lighti = lightinfo + ilight;
+              switch (lighti->type){
+                case 0:
+                xyz_light=lighti->xyz1;
+                dx = xyz_light[0]-xyz_pos[0];
+                dy = xyz_light[1]-xyz_pos[1];
+                dz = xyz_light[2]-xyz_pos[2];
+                area = four_pi*(dx*dx+dy*dy+dz*dz);
+                if(area<=smoke_mesh->dx*smoke_mesh->dx)area=smoke_mesh->dx*smoke_mesh->dx;
+
+                flux = lighti->q*integrate_alpha(smoke_mesh,xyz_light,xyz_pos)/area;
+                light_flux[ijk] += flux;
+                break;
+
+                case 1:
+
+                xyz_e1=lighti->xyz1;
+                xyz_e2=lighti->xyz2;
+
+                for(ilight2=0;ilight2<lighti->nstep;ilight2++){
+                  float f1;
+                  float xyz_pos[3];
+
+                  f1 = (float)(lighti->nstep-1-ilight2)/(float)(lighti->nstep-1);
+                  xyz_light[0] = f1*xyz_e1[0] + (1.0-f1)*xyz_e2[0];
+                  xyz_light[1] = f1*xyz_e1[1] + (1.0-f1)*xyz_e2[1];
+                  xyz_light[2] = f1*xyz_e1[2] + (1.0-f1)*xyz_e2[2];
+
+                  dx = xyz_light[0]-xyz_pos[0];
+                  dy = xyz_light[1]-xyz_pos[1];
+                  dz = xyz_light[2]-xyz_pos[2];
+                  area = four_pi*(dx*dx+dy*dy+dz*dz);
+                  if(area<=smoke_mesh->dx*smoke_mesh->dx)area=smoke_mesh->dx*smoke_mesh->dx;
+
+                  flux = lighti->q*integrate_alpha(smoke_mesh,xyz_light,xyz_pos)/area;  
+                  light_flux[ijk] += flux;
+                }
+                break;
+              }
+            }
+          }
+
+          ijk++;
+        }
+      }
+    }
+    fluxmin=light_flux[0];
+    fluxmax=fluxmin;
+    fluxmean=0.0;
+    factor = 1.0/log(light_max/light_min);
+    for(i=0;i<nx*ny*nz;i++){
+      fluxmean += albedo*light_flux[i];
+    }
+    fluxmean /= (nx*ny*nz);
+
+    fluxdev=0.0;
+    for(i=0;i<nx*ny*nz;i++){
+      float dd;
+
+      dd = albedo*light_flux[i] - fluxmean;
+      fluxdev += dd*dd;
+    }
+    fluxdev = sqrt(fluxdev/(nx*ny*nz));
+//    printf("fluxmean=%f fluxdev=%f", fluxmean, fluxdev);
+
+    for(i=0;i<nx*ny*nz;i++){
+      float flux;
+
+      if(light_flux[i]<fluxmin)fluxmin=light_flux[i];
+      if(light_flux[i]>fluxmax)fluxmax=light_flux[i];
+      flux = albedo*light_flux[i];
+      if(flux<light_min)flux=light_min;
+      if(flux>light_max)flux=light_max;
+      lightingbuffer[i]=254*log(flux/light_min)*factor;
+
+    }
+  //  printf("fluxmin=%f fluxmax=%f\n",fluxmin,fluxmax);
+    CheckMemory;
+}
+/* ------------------ update_lightfield ------------------------ */
+
+void update_lightfield2(float time, smoke3d *smoke3di, unsigned char *lightingbuffer){
  // accumulate hrr for each light
 
     lightdata *lighti;

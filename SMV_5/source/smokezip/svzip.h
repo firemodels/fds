@@ -94,6 +94,7 @@ typedef struct {
   float dxx, dyy, dzz;
 #ifdef pp_LIGHT
   float *photon_cell;
+  float *light_flux;
   float dxyzmax;
 #endif
 } mesh;
@@ -135,6 +136,7 @@ typedef struct {
 #ifdef pp_LIGHT
 typedef struct {
   int type,dir;
+  int nstep;
   int move;
   float t1, t2;
   float xyz1[3], xyz2[3], q;
