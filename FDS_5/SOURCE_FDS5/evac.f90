@@ -1642,8 +1642,8 @@ Contains
        !   No mesh found
        If (PCX%FED_MESH2 == 0) PCX%FED_MESH2 = -1
 
-       If (PCX%FED_MESH2 > 0) Then 
-          M => MESHES(PCX%FED_MESH2 .And. MYID==PROCESS(Max(1,PCX%FED_MESH2)))
+       If (PCX%FED_MESH2 > 0 .AND. MYID==PROCESS(Max(1,PCX%FED_MESH2))) Then 
+          M => MESHES(PCX%FED_MESH2)
           II = Floor( M%CELLSI(Floor((PCX%X2-M%XS)*M%RDXINT)) + 1.0_EB  )
           JJ = Floor( M%CELLSJ(Floor((PCX%Y2-M%YS)*M%RDYINT)) + 1.0_EB  )
           KK = Floor( M%CELLSK(Floor((PCX%Z2-M%ZS)*M%RDZINT)) + 1.0_EB  )
