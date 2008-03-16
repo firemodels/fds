@@ -3377,54 +3377,46 @@ The procedure for obtaining the pressure that was described in the previous sect
 However, there is no guarantee that the individual solutions
 of the Poisson equation on each mesh conserve volume. That is, $\dot{V}=\int \bu \cdot \dS$ is not necessarily the same at the interfaces between meshes.
 
-The strategy of approximating the solution of the Poisson equation on multiple meshes is to decompose the pressure term such that the velocity is
+The strategy for solving the Poisson equation on multiple meshes is to decompose the pressure term such that the velocity is
 updated according to:
 \be \dod{\bu}{t} + \bF + \nabla \cH^0 + \nabla \cH' = 0 \label{finepois} \ee
 such that
 \be \nabla^2 {\cal H}^0 = -\nabla \cdot \bF - \dod{}{t} (\nabla \cdot \bu) \quad ; \quad  \nabla^2 \cH' = 0  \ee
-The equation on the left is the same as that described above, with the same boundary conditions, as well.
-To get the boundary conditions for the second equation, we first solve a discretized form of the Poisson equation for the entire domain using the individual
-meshes themselves. This coarse Poisson equation is derived by integrating Eq.~(\ref{finepois}) over each mesh and applying the Divergence Theorem:
-\be \int_{\partial \Omega_m} \nabla \cH' \cdot \dS = -\int_{\partial \Omega_m} \left(\overline{\bF}+\nabla \overline{\cH^0} \right) \cdot \dS
-    - \int_{\Omega_m} \dod{(\nabla \cdot \bu)}{t} \; dV \ee
-The subscript $m$ refers to individual cells of the coarse mesh. The overbar indicates that at mesh boundaries, the average of the quantity is to be used.
-
-Next, define
-\be \bG = \bF + \nabla \cH^0 \ee
-and introduce a single scalar quantity, $\tilde{\cH}_m$, for each mesh that satisfies:
-\be \frac{\overline{\cH}_{m+}'  - \overline{\cH}_{m}' }{\dx} A_{x^+} -
-    \frac{\overline{\cH}_{m }' - \overline{\cH}_{m-}'}{\dx} A_{x^-} + \; \cdots =
-    -\int_{x^+} \overline{G_x} \, dy \, dz  + \int_{x^-} G_x \, dy \, dz  + \;  \cdots
-    - \int_{\Omega_m} \dod{(\nabla \cdot \bu)}{t} dV   \label{coarse_pois} \ee
-The subscripts $m^+$ and $m^-$ refer to neighboring meshes, and $A_{x^+}$ and $A_{x^-}$ and so on
-refer to the area of the coarse cell interfaces.
-Solve the coarse grid Poisson equation (\ref{coarse_pois}) with a direct (non-iterative) solver. Note that at open boundaries,
-the ``ghost'' value of the coarse pressure is simply minus the value of the coarse pressure in the mesh adjacent to
-the open boundary.
+The equation on the left is the same as that described above, with the same boundary conditions, as well. However, $\nabla \cH^0$ only enforces continuity of pressure
+across the mesh boundaries. We need the additional perturbation term, $\nabla \cH'$, to enforce volume conservation at mesh boundaries.
+To get the boundary conditions for the Laplace equation, we first solve a discretized form of the Poisson equation for the entire domain using the individual
+meshes themselves. This is much like the strategy adopted by zone and lumped parameter models, which assume that each compartment in a building has a uniform pressure found
+by solving a system of equations based on mass balances at compartment boundaries.
+This coarse Poisson equation is derived by integrating Eq.~(\ref{finepois}) over each mesh and applying the Divergence Theorem:
+\be \int_{\partial \Omega_m} \nabla \cH' \cdot \dS = -\int_{\partial \Omega_m} \overline{\bG} \cdot \dS
+    - \int_{\Omega_m} \dod{(\nabla \cdot \bu)}{t} \; dV  \quad ; \quad \bG = \bF + \nabla \cH^0  \label{poisdiv} \ee
+The subscript $m$ refers to a given mesh. The overbar indicates that at mesh boundaries, the average of the quantity from the 
+abutting meshes is to be used. Next, introduce a single scalar quantity, $\widehat{\cH'}_m$, for each mesh such that at each mesh boundary
+\be \int \nabla \cH' \cdot \dS = \frac{\widehat{\cH'}_{m_2}  - \widehat{\cH'}_{m_1} }{L_{12}} A_{12} \ee
+where $L_{12}$ is the distance between the mesh centers in the coordinate direction normal to the mesh boundary, and $A_{12}$ is the area of the boundary. In discretized form,
+Eq.~(\ref{poisdiv}) forms a sparse linear system of equations for $\widehat{\cH'}$ that can be solved
+with a direct (non-iterative) solver. 
 
 Following the solution of the coarse pressure equation, at the interface between two
-neighboring meshes, we now have an estimate of the rate of change of the volume flux. For example, at the $x=x_{\max}$ interface:
-\be \frac{d\dot{V}}{dt}  = -\int_{x=x_{\max}} \overline{G}_x \, dy \, dz
-- \frac{\overline{\cH}_{m+}' - \overline{\cH}_m'}{\dx} A_{x^+} \ee
+neighboring meshes, we now have an estimate of the rate of change of the volume flux. For example, assume that meshes 1 and 2 abut at a plane $x=x_0$, and that mesh 2 is
+to the positive side of the interface. Then the change in volume flow with time is:
+\be \frac{d\dot{V}_{12}}{dt}  = -\int_{x=x_0} \overline{G}_x \, dy \, dz
+- \frac{\widehat{\cH'}_{m_2} - \widehat{\cH'}_{m_1}}{L_{12}} A_{12} \ee
 We want the fine grid solution of the Poisson equation on the individual abutting meshes to satisfy this
 constraint at their interface. To force this, solve
 \be \nabla^2 {\cal H}' = 0 \ee
 with Neumann boundary conditions on each of the abutting meshes
-such that at the interface the gradient of $\cH'$ is constant. For example, at the $x=x_{\max}$ interface, the gradient of
-$\cH'$ on the mesh to the left must satisfy:
+such that at the interface the gradient of $\cH'$ is used to add or subtract the necessary volume flow to enforce conservation mesh to mesh. 
+For example, at the $x=x_0$ interface, the gradient of
+$\cH'$ at the boundary of each mesh is assumed constant and chosen so that:
 \be  \frac{d\dot{V}}{dt} =
-    - \int_{x=x_{\max}} G_{x,I,jk,m} \; dy \, dz -
-   \int_{x=x_{\max}} \dod{\cH'}{x} \; dy \, dz \label{constraint} \ee
-A similar constraint must be satisfied by the mesh to the right.
-In this way, the resulting volume fluxes at the next time step $\dot{V}=\int \bu \cdot \dS$ into and
+    - \int_{x=x_0} G_x \; dy \, dz -  \int_{x=x_0} \dod{\cH'}{x} \; dy \, dz \label{constraint} \ee
+In this way, the resulting volume flow at the next time step $\dot{V}=\int \bu \cdot \dS$ into and
 out of each mesh match. It does not
 guarantee, however, that the normal component of velocity at each cell matches its counterpart in the other
 mesh.
 
-The question now is -- what values should be assigned to $\nabla \cH'$ at each cell of each mesh interface?
-The only constraint is that the
-integral $\int \nabla \cH' \cdot \dS$ at each face satisfy an equation like (\ref{constraint}) above. Various strategies
-have been tried, but as yet no stable, robust strategy has been found. The research on this problem is on-going.
+
 
 
 
