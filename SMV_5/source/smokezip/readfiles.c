@@ -592,6 +592,7 @@ int readsmv(char *smvfile){
       float *xplt, *yplt, *zplt;
 #ifdef pp_LIGHT
       float dx, dy, dz;
+      float pi, rad;
 #endif
 
       meshi = meshinfo + i;
@@ -603,6 +604,12 @@ int readsmv(char *smvfile){
       dy = meshi->ybar - meshi->ybar0;
       dz = meshi->zbar - meshi->zbar0;
       meshi->dxyzmax = sqrt(dx*dx+dy*dy+dz*dz);
+
+      meshi->cell_volume=dx*dy*dz/(meshi->ibar*meshi->jbar*meshi->kbar);
+      pi=4.0*atan(1.0);
+      rad = pow(3.0*meshi->cell_volume/(4.0*pi),1.0/3.0);
+      meshi->cell_cross_sectional_area = pi*rad*rad;
+      meshi->cell_surface_area = 4.0*meshi->cell_cross_sectional_area;
 #endif
       meshi->dxx = (meshi->xbar-meshi->xbar0)/65535;
       meshi->dyy = (meshi->ybar-meshi->ybar0)/65535;
@@ -637,7 +644,7 @@ int readsmv(char *smvfile){
 
 #ifdef pp_LIGHT
       meshi->photon_cell=NULL;
-      meshi->light_flux=NULL;
+      meshi->light_cell_radiance=NULL;
       if(make_lighting_file==1){
         int nni, nnj, nnk;
 
@@ -646,7 +653,7 @@ int readsmv(char *smvfile){
         nnk = meshi->kbar;
 
         NewMemory((void **)&meshi->photon_cell,nni*nnj*nnk*sizeof(float));
-        NewMemory((void **)&meshi->light_flux,(nni+1)*(nnj+1)*(nnk+1)*sizeof(float));
+        NewMemory((void **)&meshi->light_cell_radiance,nni*nnj*nnk*sizeof(float));
       }
 #endif
 
@@ -776,18 +783,20 @@ void readini2(char *inifile){
     }
     if(match(buffer,"L_POINT",7)==1||match(buffer,"L_MOVEPOINT",11)==1){
       lightdata *lighti;
+      float pi;
 
       lighti = lightinfo + nlightinfo;
       lighti->type=0;
       lighti->move=0;
       if(match(buffer,"L_MOVEPOINT",11)==1)lighti->move=1;
       lighti->dir=0;
+      lighti->radius=1.0/39.37;
       if(lighti->move==0){
         float *xyz;
   
         xyz = lighti->xyz1;
         fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",xyz,xyz+1,xyz+2,&lighti->q);
+        sscanf(buffer,"%f %f %f %f %f",xyz,xyz+1,xyz+2,&lighti->q,&lighti->radius);
       }
       else{
         float *xyz, *xyz2;
@@ -795,18 +804,24 @@ void readini2(char *inifile){
         xyz = lighti->xyz1;
         xyz2 = lighti->xyz2;
         fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",&lighti->t1,  xyz,  xyz+1, xyz+2);
+        sscanf(buffer,"%f %f %f %f %f",&lighti->t1,  xyz,  xyz+1, xyz+2,&lighti->radius);
         fgets(buffer,255,stream);
         sscanf(buffer,"%f %f %f %f",&lighti->t2, xyz2, xyz2+1,xyz2+2);
         fgets(buffer,255,stream);
         sscanf(buffer,"%f",&lighti->q);
       }
+
+      if(lighti->radius<0.1/39.37)lighti->radius=0.1/39.37;
+      pi=4.0*atan(1.0);
+      lighti->area=4.0*pi*lighti->radius*lighti->radius;
+
       nlightinfo++;
       continue;
     }
     if(match(buffer,"L_LINE",6)==1){
       lightdata *lighti;
       float *xyz1, *xyz2;
+      float dx, dy, dz, dist;
 
       lighti = lightinfo + nlightinfo;
       lighti->type=1;
@@ -814,7 +829,16 @@ void readini2(char *inifile){
       xyz1 = lighti->xyz1;
       xyz2 = lighti->xyz2;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %f",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,&lighti->q);
+      lighti->radius=0.5/39.37;
+      sscanf(buffer,"%f %f %f %f %f %f %f %f",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,&lighti->q,&lighti->radius);
+      if(lighti->radius<0.05/39.37)lighti->radius=0.05/39.37;
+      dx = xyz1[0]-xyz2[0];
+      dy = xyz1[1]-xyz2[1];
+      dz = xyz1[2]-xyz2[2];
+      dist = sqrt(dx*dx+dy*dy+dz*dz);
+      lighti->area=2.0*4.0*atan(1.0)*lighti->radius*dist;
+      lighti->qflux=lighti->q/lighti->area;
+
       nlightinfo++;
       continue;
     }
@@ -822,15 +846,33 @@ void readini2(char *inifile){
       lightdata *lighti;
       float *xyz1, *xyz2;
       int dir=0;
+      float dx, dy, dz;
 
       lighti = lightinfo + nlightinfo;
       lighti->type=2;
       xyz1 = lighti->xyz1;
       xyz2 = lighti->xyz2;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %f %i",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,&lighti->q,&dir);
-      if(abs(dir)<0||abs(dir)>3)dir=0;
+      sscanf(buffer,"%f %f %f %f %f %f %f %i",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,&lighti->qflux,&dir);
+      if(abs(dir)>3)dir=0;
       lighti->dir=dir;
+      dx = abs(xyz1[0]-xyz2[0]);
+      dy = abs(xyz1[1]-xyz2[1]);
+      dz = abs(xyz1[2]-xyz2[2]);
+      switch (abs(dir)){
+        case 1:
+        lighti->area=dy*dz;
+        break;
+        case 2:
+        lighti->area=dx*dz;
+        break;
+        case 3:
+        lighti->area=dx*dy;
+        break;
+      }
+      if(lighti->area<0.01)lighti->area=0.01;
+      lighti->q=lighti->qflux*lighti->area;
+
       nlightinfo++;
       continue;
     }

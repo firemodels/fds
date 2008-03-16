@@ -94,12 +94,12 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     float *xplt, *yplt, *zplt;
     float xyz_pos[3];
     float logindex[256];
-    float *light_flux;
+    float *light_cell_radiance;
     int ijk;
     float four_pi;
-    float fluxmin, fluxmax;
+    float radiance_min, radiance_max;
     float factor;
-    float fluxmean, fluxdev;
+    float radiance_mean, radiance_dev;
 
     // pick a random light weighted by HRR  
     //  (ie a high wattage light will be picked proportionately more often than
@@ -111,7 +111,7 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     xplt = smoke_mesh->xplt;
     yplt = smoke_mesh->yplt;
     zplt = smoke_mesh->zplt;
-    light_flux = smoke_mesh->light_flux;
+    light_cell_radiance = smoke_mesh->light_cell_radiance;
 
     nxcell = smoke_mesh->ibar;
     nycell = smoke_mesh->jbar;
@@ -125,28 +125,30 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     }
     logindex[0]=log(0.001)/smoke_mesh->dx;
 
-    for(i=0;i<nx*ny*nz;i++){
+    for(i=0;i<nxcell*nycell*nzcell;i++){
       full_logalphabuffer[i] = logindex[255-full_alphabuffer[i]];
       lightingbuffer[i]=0;
-      light_flux[i]=0.0;
+      light_cell_radiance[i]=0.0;
     }
 
     ijk = 0;
-    for(k=0;k<nz;k++){
-      xyz_pos[2]=zplt[k];
-      for(j=0;j<ny;j++){
-        xyz_pos[1]=yplt[j];
-        for(i=0;i<nx;i++){
+    for(k=0;k<nzcell;k++){
+      xyz_pos[2]=(zplt[k]+zplt[k+1])/2.0;
+      for(j=0;j<nycell;j++){
+        xyz_pos[1]=(yplt[j]+yplt[j+1])/2.0;
+        for(i=0;i<nxcell;i++){
           float val2;
 
-          xyz_pos[0] = xplt[i];
+          xyz_pos[0]=(xplt[i]+zplt[i+1])/2.0;
           val2 = getlog_1_m_alpha(smoke_mesh, xyz_pos);
           if(val2<0.0){
             for(ilight=0;ilight<nlightinfo;ilight++){
-              float flux, area, dx, dy, dz;
+              float radiance, dx, dy, dz;
               float *xyz_e1, *xyz_e2;
               float *xyz_light;
               int ilight2;
+              float light_dist2, solid_angle;
+              float qcell;
 
               lighti = lightinfo + ilight;
               switch (lighti->type){
@@ -155,11 +157,14 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
                 dx = xyz_light[0]-xyz_pos[0];
                 dy = xyz_light[1]-xyz_pos[1];
                 dz = xyz_light[2]-xyz_pos[2];
-                area = four_pi*(dx*dx+dy*dy+dz*dz);
-                if(area<=smoke_mesh->dx*smoke_mesh->dx)area=smoke_mesh->dx*smoke_mesh->dx;
+                light_dist2 = dx*dx+dy*dy+dz*dz;
+                if(light_dist2<0.1)light_dist2=0.1;
+                solid_angle = smoke_mesh->cell_cross_sectional_area/(4.0*light_dist2);
+                if(solid_angle>four_pi/2.0)solid_angle=four_pi/2.0;
 
-                flux = lighti->q*integrate_alpha(smoke_mesh,xyz_light,xyz_pos)/area;
-                light_flux[ijk] += flux;
+                qcell = lighti->q*(solid_angle/four_pi)*integrate_alpha(smoke_mesh,xyz_light,xyz_pos);
+                radiance = qcell*albedo/smoke_mesh->cell_surface_area/four_pi;
+                light_cell_radiance[ijk] += radiance;
                 break;
 
                 case 1:
@@ -179,11 +184,15 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
                   dx = xyz_light[0]-xyz_pos[0];
                   dy = xyz_light[1]-xyz_pos[1];
                   dz = xyz_light[2]-xyz_pos[2];
-                  area = four_pi*(dx*dx+dy*dy+dz*dz);
-                  if(area<=smoke_mesh->dx*smoke_mesh->dx)area=smoke_mesh->dx*smoke_mesh->dx;
 
-                  flux = lighti->q*integrate_alpha(smoke_mesh,xyz_light,xyz_pos)/area;  
-                  light_flux[ijk] += flux;
+                  light_dist2 = dx*dx+dy*dy+dz*dz;
+                  if(light_dist2<0.1)light_dist2=0.1;
+                  solid_angle = smoke_mesh->cell_cross_sectional_area/(4.0*light_dist2);
+                  if(solid_angle>four_pi/2.0)solid_angle=four_pi/2.0;
+
+                  qcell = lighti->q*(solid_angle/four_pi)*integrate_alpha(smoke_mesh,xyz_light,xyz_pos);
+                  radiance = qcell*albedo/smoke_mesh->cell_surface_area/four_pi;
+                  light_cell_radiance[ijk] += radiance;
                 }
                 break;
               }
@@ -194,34 +203,34 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
         }
       }
     }
-    fluxmin=light_flux[0];
-    fluxmax=fluxmin;
-    fluxmean=0.0;
+    radiance_min=light_cell_radiance[0];
+    radiance_max=radiance_min;
+    radiance_mean=0.0;
     factor = 1.0/log(light_max/light_min);
     for(i=0;i<nx*ny*nz;i++){
-      fluxmean += albedo*light_flux[i];
+      radiance_mean += albedo*light_cell_radiance[i];
     }
-    fluxmean /= (nx*ny*nz);
+    radiance_mean /= (nx*ny*nz);
 
-    fluxdev=0.0;
+    radiance_dev=0.0;
     for(i=0;i<nx*ny*nz;i++){
       float dd;
 
-      dd = albedo*light_flux[i] - fluxmean;
-      fluxdev += dd*dd;
+      dd = albedo*light_cell_radiance[i] - radiance_mean;
+      radiance_dev += dd*dd;
     }
-    fluxdev = sqrt(fluxdev/(nx*ny*nz));
+    radiance_dev = sqrt(radiance_dev/(nx*ny*nz));
 //    printf("fluxmean=%f fluxdev=%f", fluxmean, fluxdev);
 
     for(i=0;i<nx*ny*nz;i++){
-      float flux;
+      float radiance;
 
-      if(light_flux[i]<fluxmin)fluxmin=light_flux[i];
-      if(light_flux[i]>fluxmax)fluxmax=light_flux[i];
-      flux = albedo*light_flux[i];
-      if(flux<light_min)flux=light_min;
-      if(flux>light_max)flux=light_max;
-      lightingbuffer[i]=254*log(flux/light_min)*factor;
+      if(light_cell_radiance[i]<radiance_min)radiance_min=light_cell_radiance[i];
+      if(light_cell_radiance[i]>radiance_max)radiance_max=light_cell_radiance[i];
+      radiance = albedo*light_cell_radiance[i];
+      if(radiance<light_min)radiance=light_min;
+      if(radiance>light_max)radiance=light_max;
+      lightingbuffer[i]=254*log(radiance/light_min)*factor;
 
     }
   //  printf("fluxmin=%f fluxmax=%f\n",fluxmin,fluxmax);
