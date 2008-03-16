@@ -93,8 +93,9 @@ typedef struct {
   float dx, dy, dz;
   float dxx, dyy, dzz;
 #ifdef pp_LIGHT
+  float cell_volume, cell_surface_area, cell_cross_sectional_area;
   float *photon_cell;
-  float *light_flux;
+  float *light_cell_radiance;
   float dxyzmax;
 #endif
 } mesh;
@@ -139,7 +140,8 @@ typedef struct {
   int nstep;
   int move;
   float t1, t2;
-  float xyz1[3], xyz2[3], q;
+  float radius, area;
+  float xyz1[3], xyz2[3], q, qflux;
 } lightdata;
 #endif
 
