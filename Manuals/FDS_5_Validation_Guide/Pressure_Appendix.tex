@@ -1,0 +1,54 @@
+\chapter{Pressure}
+
+The pressure within the compartment was measured at a single point, near the floor.
+In the simulations of the closed door tests, the compartment is assumed to leak via a small uniform flow spread
+over the walls and ceiling.  The flow rate is calculated based on the assumption that the leakage rate is proportional
+to the measured leakage area times the square root of compartment over-pressure.
+
+
+\section{NIST/NRC Test Series}
+
+Comparisons between measured and predicted pressures for the NIST/NRC Test Series are shown
+in Figs.~\ref{NIST_NRC_Pressure_Closed} and \ref{NIST_NRC_Pressure_Open}.
+For those tests in which the door to the compartment is
+open, the over-pressures are only a few Pascals, whereas when the door is closed, the over-pressures are several hundred Pascals.
+Note that in the closed door tests, there is often a dramatic drop in the predicted compartment pressure.
+This is the result of the assumption in FDS that the heat release rate is decreased to zero in one second at the time
+in the experiment when the fuel flow was stopped for safety reasons.  In reality, the fire did not extinguish
+immediately because there was an excess of fuel in the pan following the flow stoppage.
+For the purpose of model comparison, the peak over-pressures are differenced in the closed door tests,
+and the peak (albeit small) under-pressures are compared in the open door tests.
+
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_01_v5_Compartment_Pressure} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_07_v5_Compartment_Pressure} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_02_v5_Compartment_Pressure} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_08_v5_Compartment_Pressure} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_04_v5_Compartment_Pressure} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_10_v5_Compartment_Pressure} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_13_v5_Compartment_Pressure} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_16_v5_Compartment_Pressure}
+\end{tabular*}
+\caption{Compartment pressures for the NIST/NRC Series, closed door tests.}
+\label{NIST_NRC_Pressure_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_17_v5_Compartment_Pressure} &
+   \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_03_v5_Compartment_Pressure} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_09_v5_Compartment_Pressure} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_05_v5_Compartment_Pressure} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_14_v5_Compartment_Pressure} \\
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_15_v5_Compartment_Pressure} &
+\includegraphics[width=2.6in]{FIGURES/NIST_NRC/NIST_NRC_18_v5_Compartment_Pressure}
+\end{tabular*}
+\caption{Compartment pressures for the NIST/NRC Series, open door tests.}
+\label{NIST_NRC_Pressure_Open}
+\end{figure}
+
+\clearpage
