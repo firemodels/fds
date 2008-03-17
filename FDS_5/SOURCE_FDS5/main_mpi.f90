@@ -67,7 +67,7 @@ CALL MPI_COMM_SIZE(MPI_COMM_WORLD, NUMPROCS, IERR)
 CALL MPI_GET_PROCESSOR_NAME(PNAME, PNAMELEN, IERR)
 MPI_WALL_TIME_START = MPI_WTIME()
  
-WRITE(LU_ERR,'(A,I2,A,I2,A,A)') 'Process ',MYID,' of ',NUMPROCS-1,' is running on ',PNAME(1:PNAMELEN)
+WRITE(LU_ERR,'(A,I3,A,I3,A,A)') 'Process ',MYID,' of ',NUMPROCS-1,' is running on ',PNAME(1:PNAMELEN)
 
 ! Start wall clock timing
 
@@ -350,7 +350,7 @@ MAIN_LOOP: DO
  
    IF (MOD(ICYC,3)==0 .AND. TIMING) THEN
       MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
-      WRITE(LU_ERR,'(A,I2,A,I6,A,F12.4)')  ' Process ',MYID,' starts iteration',ICYC,' at ', MPI_WALL_TIME
+      WRITE(LU_ERR,'(A,I3,A,I6,A,F12.4)')  ' Process ',MYID,' starts iteration',ICYC,' at ', MPI_WALL_TIME
    ENDIF
 
    ! Determine if radiation or evacuation info is to be exchanged this time step
@@ -992,7 +992,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
    IF (DEBUG) THEN
       WRITE(LU_ERR,'(I3,A,I3,A,I2)') NM,' posting receives from ',NOM,' code=',code
-      IF (CODE==0) WRITE(LU_ERR,'(A,I2,A,I2,A,I5)') 'NIC(',NM,',',NOM,')=',NIC(NM,NOM)
+      IF (CODE==0) WRITE(LU_ERR,'(A,I3,A,I3,A,I5)') 'NIC(',NM,',',NOM,')=',NIC(NM,NOM)
    ENDIF
  
    M =>MESHES(NM)
@@ -2005,7 +2005,7 @@ IF (MYID==0) THEN
       DO NOM=1,NMESHES
          ERROR = 2._EB*ABS(VDOT(NM,NOM)-VDOT(NOM,NM))/(ABS(VDOT(NM,NOM)+VDOT(NOM,NM))+1.E-10_EB)
          IF (NM<NOM .AND. ERROR>1.E-5_EB) THEN
-            WRITE(LU_ERR,'(A,I2,A,I2,A,E12.6)') 'Volume Flow Error, Meshes ',NM,' and ',NOM,' = ',ERROR
+            WRITE(LU_ERR,'(A,I3,A,I3,A,E12.6)') 'Volume Flow Error, Meshes ',NM,' and ',NOM,' = ',ERROR
          ENDIF
       ENDDO
    ENDDO

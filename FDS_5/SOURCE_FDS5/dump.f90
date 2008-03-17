@@ -274,17 +274,17 @@ MESH_LOOP: DO NM=1,NMESHES
 
    LU_XYZ(NM)  = 13
    LU_PL3D(NM) = 14
-   IF (NMESHES >1) WRITE(FN_XYZ(NM),'(A,A,I2.2,A)') TRIM(CHID),'_',NM,'.xyz'
+   IF (NMESHES >1) WRITE(FN_XYZ(NM),'(A,A,I3.3,A)') TRIM(CHID),'_',NM,'.xyz'
    IF (NMESHES==1) WRITE(FN_XYZ(NM),'(A,A)')        TRIM(CHID),       '.xyz'
 
    DO N=1,N_ISOF
-      IF (NMESHES >1) WRITE(FN_ISOF(N,NM),'(A,A,I2.2,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.iso'
+      IF (NMESHES >1) WRITE(FN_ISOF(N,NM),'(A,A,I3.3,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.iso'
       IF (NMESHES==1) WRITE(FN_ISOF(N,NM),'(A,A,I2.2,A)')        TRIM(CHID),'_',N,'.iso'
    ENDDO
 
-   IF (NMESHES >1) WRITE(FN_SMOKE3D(1,NM),'(A,A,I2.2,A)') TRIM(CHID),'_',NM,'_01.s3d'
+   IF (NMESHES >1) WRITE(FN_SMOKE3D(1,NM),'(A,A,I3.3,A)') TRIM(CHID),'_',NM,'_01.s3d'
    IF (NMESHES==1) WRITE(FN_SMOKE3D(1,NM),'(A,A)')        TRIM(CHID),       '_01.s3d'
-   IF (NMESHES >1) WRITE(FN_SMOKE3D(2,NM),'(A,A,I2.2,A)') TRIM(CHID),'_',NM,'_02.s3d'
+   IF (NMESHES >1) WRITE(FN_SMOKE3D(2,NM),'(A,A,I3.3,A)') TRIM(CHID),'_',NM,'_02.s3d'
    IF (NMESHES==1) WRITE(FN_SMOKE3D(2,NM),'(A,A)')        TRIM(CHID),       '_02.s3d'
 
    ! Slice Files
@@ -292,8 +292,8 @@ MESH_LOOP: DO NM=1,NMESHES
    DO N=1,M%N_SLCF
       LU_SLCF(N,NM) = 2000 + N_SLCF_MAX*(NM-1)  + N
       IF (NMESHES>1) THEN
-         IF (M%N_SLCF <100) CFORM = '(A,2(A,I2.2),A)'
-         IF (M%N_SLCF>=100) CFORM = '(A,A,I2.2,A,I3.3,A)'
+         IF (M%N_SLCF <100) CFORM = '(A,A,I3.3,A,I2.2,A)'
+         IF (M%N_SLCF>=100) CFORM = '(A,A,I3.3,A,I3.3,A)'
          WRITE(FN_SLCF(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf'
       ELSE
          IF (M%N_SLCF <100) CFORM = '(A,A,I2.2,A)'
@@ -307,7 +307,7 @@ MESH_LOOP: DO NM=1,NMESHES
    DO N=1,N_BNDF
       LU_BNDF(N,NM) = 3000 + N_BNDF*(NM-1) + N
       IF (NMESHES>1) THEN
-         WRITE(FN_BNDF(N,NM),'(A,A,I2.2,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf'
+         WRITE(FN_BNDF(N,NM),'(A,A,I3.3,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf'
       ELSE
          WRITE(FN_BNDF(N,NM),'(A,A,I2.2,A)') TRIM(CHID),'_',N,'.bf'
       ENDIF
@@ -317,7 +317,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    LU_PART(NM) = 7000 + NM
    IF (NMESHES>1) THEN
-      WRITE(FN_PART(NM),'(A,I2.2,A)') TRIM(CHID)//'_',NM,'.prt5'
+      WRITE(FN_PART(NM),'(A,I3.3,A)') TRIM(CHID)//'_',NM,'.prt5'
    ELSE
       WRITE(FN_PART(NM),'(A,A)') TRIM(CHID),'.prt5'
    ENDIF
@@ -325,9 +325,9 @@ MESH_LOOP: DO NM=1,NMESHES
    ! Restart Files
 
    LU_RESTART(NM) = 90
-   WRITE(FN_RESTART(NM),'(A,A,I2.2,A)') TRIM(RESTART_CHID),'_',NM,'.restart'
+   WRITE(FN_RESTART(NM),'(A,A,I3.3,A)') TRIM(RESTART_CHID),'_',NM,'.restart'
    LU_CORE(NM)    = 91
-   WRITE(FN_CORE(NM),   '(A,A,I2.2,A)') TRIM(CHID),'_',NM,'.restart'
+   WRITE(FN_CORE(NM),   '(A,A,I3.3,A)') TRIM(CHID),'_',NM,'.restart'
 
 ENDDO MESH_LOOP
 
@@ -1753,11 +1753,11 @@ IF (APPEND) RETURN
  
 MESH_LOOP: DO NM=1,NMESHES
    M => MESHES(NM)
-   WRITE(LU_OUTPUT,'(/A,I2/)') ' Grid Dimensions, Mesh ',NM
+   WRITE(LU_OUTPUT,'(/A,I3/)') ' Grid Dimensions, Mesh ',NM
    WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the X Direction      ',M%IBAR
    WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Y Direction      ',M%JBAR
    WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Z Direction      ',M%KBAR
-   WRITE(LU_OUTPUT,'(//A,I2/)')' Physical Dimensions, Mesh ',NM
+   WRITE(LU_OUTPUT,'(//A,I3/)')' Physical Dimensions, Mesh ',NM
    WRITE(LU_OUTPUT,'(A,F9.3)')   '   Length (m)                    ',M%XF-M%XS
    WRITE(LU_OUTPUT,'(A,F9.3)')   '   Width  (m)                    ',M%YF-M%YS
    WRITE(LU_OUTPUT,'(A,F9.3)')   '   Height (m)                    ',M%ZF-M%ZS
@@ -2034,7 +2034,7 @@ ENDDO SURFLOOP
 MESH_LOOP_2: DO NM=1,NMESHES
    M => MESHES(NM)
    IF (M%N_OBST>0) THEN
-      WRITE(LU_OUTPUT,'(//A,I2/)') ' Obstruction Information, Mesh ',NM
+      WRITE(LU_OUTPUT,'(//A,I3/)') ' Obstruction Information, Mesh ',NM
       DO N=1,M%N_OBST
          OB=>M%OBSTRUCTION(N)
          WRITE(LU_OUTPUT,72) N,OB%I1,OB%I2,OB%J1,OB%J2,OB%K1,OB%K2, &
@@ -2049,7 +2049,7 @@ ENDDO MESH_LOOP_2
 MESH_LOOP_3: DO NM=1,NMESHES
    M => MESHES(NM)
    IF (M%N_VENT>0) THEN
-      WRITE(LU_OUTPUT,'(//A,I2/)') ' Vent Information, Mesh ',NM
+      WRITE(LU_OUTPUT,'(//A,I3/)') ' Vent Information, Mesh ',NM
       DO N=1,M%N_VENT
          VT=>M%VENTS(N)
          WRITE(LU_OUTPUT,73) N,VT%I1,VT%I2,VT%J1,VT%J2,VT%K1,VT%K2,VT%IBC
@@ -2125,7 +2125,7 @@ ENDIF
 MESH_LOOP_4: DO NM=1,NMESHES
    M => MESHES(NM)
    IF (M%N_SLCF>0) THEN
-      WRITE(LU_OUTPUT,'(//A,I2/)')   ' Slice File Information, Mesh ',NM
+      WRITE(LU_OUTPUT,'(//A,I3/)')   ' Slice File Information, Mesh ',NM
       WRITE(LU_OUTPUT,'(A,F8.3/)')'   Sampling Interval (s)          ',DT_SLCF
       DO N=1,M%N_SLCF
          SL=> M%SLICE(N)
@@ -2476,7 +2476,7 @@ WRITE(LU_OUTPUT,'(7X,A,I7,3X,A,I3,A,I4,2X,I2.2,A,I2.2,A,I2.2)')  &
 WRITE(LU_OUTPUT,'(7X,A)') '----------------------------------------------'
 
 DO NM=1,NMESHES
-   IF (NMESHES>1) WRITE(LU_OUTPUT,'(6X,A,I2,A,I7)') ' Mesh ',NM,', Cycle ',NTCYC(NM)
+   IF (NMESHES>1) WRITE(LU_OUTPUT,'(6X,A,I3,A,I7)') ' Mesh ',NM,', Cycle ',NTCYC(NM)
    M => MESHES(NM)
    IF (T_ACCUM(NM)<60._EB) WRITE(LU_OUTPUT,110) T_PER_STEP(NM),T_ACCUM(NM)
    IF (T_ACCUM(NM)>=60._EB .AND. T_ACCUM(NM)<3600._EB) WRITE(LU_OUTPUT,112) T_PER_STEP(NM),T_ACCUM(NM)/60._EB
@@ -2901,18 +2901,18 @@ IF (PLOT3D) THEN  ! Write out information to .smv file
    ITM1 = ABS(T-ITM)*100*TIME_SHRINK_FACTOR
    IF (T_END < 10000._EB) THEN
       IF (ITM < 0) THEN
-         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I2.2,A1,I5.4,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
+         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I3.3,A1,I5.4,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
          IF (NMESHES==1) WRITE(FN_PL3D(NM),'(A,A1,I5.4,A,I2.2,A2)')        TRIM(CHID),'_',ITM,'_',ITM1,'.q'
       ELSE
-         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I2.2,A1,I4.4,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
+         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I3.3,A1,I4.4,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
          IF (NMESHES==1) WRITE(FN_PL3D(NM),'(A,A1,I4.4,A,I2.2,A2)')        TRIM(CHID),'_',ITM,'_',ITM1,'.q'
       ENDIF
    ELSE
       IF (ITM <0 ) THEN
-         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I2.2,A1,I6.5,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
+         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I3.3,A1,I6.5,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
          IF (NMESHES==1) WRITE(FN_PL3D(NM),'(A,A1,I6.5,A,I2.2,A2)')        TRIM(CHID),'_',ITM,'_',ITM1,'.q'
       ELSE
-         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I2.2,A1,I5.5,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
+         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I3.3,A1,I5.5,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
          IF (NMESHES==1) WRITE(FN_PL3D(NM),'(A,A1,I5.5,A,I2.2,A2)')        TRIM(CHID),'_',ITM,'_',ITM1,'.q'
       ENDIF
    ENDIF
