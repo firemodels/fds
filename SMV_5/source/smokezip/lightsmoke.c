@@ -91,8 +91,9 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     mesh *smoke_mesh;
     int nx, ny, nz;
     int nxcell, nycell, nzcell;
+    int nxycell;
     float *xplt, *yplt, *zplt;
-    float xyz_pos[3];
+    float xyz_cell_pos[3];
     float logindex[256];
     float *light_cell_radiance;
     int ijk;
@@ -100,6 +101,7 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     float radiance_min, radiance_max;
     float factor;
     float radiance_mean, radiance_dev;
+    int ijk_node;
 
     // pick a random light weighted by HRR  
     //  (ie a high wattage light will be picked proportionately more often than
@@ -115,6 +117,7 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
 
     nxcell = smoke_mesh->ibar;
     nycell = smoke_mesh->jbar;
+    nxycell = nxcell*nycell;
     nzcell = smoke_mesh->kbar;
     nx = nxcell+1;
     ny = nycell+1;
@@ -133,14 +136,14 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
 
     ijk = 0;
     for(k=0;k<nzcell;k++){
-      xyz_pos[2]=(zplt[k]+zplt[k+1])/2.0;
+      xyz_cell_pos[2]=(zplt[k]+zplt[k+1])/2.0;
       for(j=0;j<nycell;j++){
-        xyz_pos[1]=(yplt[j]+yplt[j+1])/2.0;
+        xyz_cell_pos[1]=(yplt[j]+yplt[j+1])/2.0;
         for(i=0;i<nxcell;i++){
           float val2;
 
-          xyz_pos[0]=(xplt[i]+zplt[i+1])/2.0;
-          val2 = getlog_1_m_alpha(smoke_mesh, xyz_pos);
+          xyz_cell_pos[0]=(xplt[i]+zplt[i+1])/2.0;
+          val2 = getlog_1_m_alpha(smoke_mesh, xyz_cell_pos);
           if(val2<0.0){
             for(ilight=0;ilight<nlightinfo;ilight++){
               float radiance, dx, dy, dz;
@@ -154,15 +157,15 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
               switch (lighti->type){
                 case 0:
                 xyz_light=lighti->xyz1;
-                dx = xyz_light[0]-xyz_pos[0];
-                dy = xyz_light[1]-xyz_pos[1];
-                dz = xyz_light[2]-xyz_pos[2];
+                dx = xyz_light[0]-xyz_cell_pos[0];
+                dy = xyz_light[1]-xyz_cell_pos[1];
+                dz = xyz_light[2]-xyz_cell_pos[2];
                 light_dist2 = dx*dx+dy*dy+dz*dz;
                 if(light_dist2<0.1)light_dist2=0.1;
                 solid_angle = smoke_mesh->cell_cross_sectional_area/(4.0*light_dist2);
                 if(solid_angle>four_pi/2.0)solid_angle=four_pi/2.0;
 
-                qcell = lighti->q*(solid_angle/four_pi)*integrate_alpha(smoke_mesh,xyz_light,xyz_pos);
+                qcell = lighti->q*(solid_angle/four_pi)*integrate_alpha(smoke_mesh,xyz_light,xyz_cell_pos);
                 radiance = qcell*albedo/smoke_mesh->cell_surface_area/four_pi;
                 light_cell_radiance[ijk] += radiance;
                 break;
@@ -207,31 +210,108 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     radiance_max=radiance_min;
     radiance_mean=0.0;
     factor = 1.0/log(light_max/light_min);
-    for(i=0;i<nx*ny*nz;i++){
-      radiance_mean += albedo*light_cell_radiance[i];
-    }
-    radiance_mean /= (nx*ny*nz);
-
-    radiance_dev=0.0;
-    for(i=0;i<nx*ny*nz;i++){
-      float dd;
-
-      dd = albedo*light_cell_radiance[i] - radiance_mean;
-      radiance_dev += dd*dd;
-    }
-    radiance_dev = sqrt(radiance_dev/(nx*ny*nz));
-//    printf("fluxmean=%f fluxdev=%f", fluxmean, fluxdev);
-
-    for(i=0;i<nx*ny*nz;i++){
-      float radiance;
-
+    for(i=0;i<nxcell*nycell*nzcell;i++){
+      radiance_mean += light_cell_radiance[i];
       if(light_cell_radiance[i]<radiance_min)radiance_min=light_cell_radiance[i];
       if(light_cell_radiance[i]>radiance_max)radiance_max=light_cell_radiance[i];
-      radiance = albedo*light_cell_radiance[i];
-      if(radiance<light_min)radiance=light_min;
-      if(radiance>light_max)radiance=light_max;
-      lightingbuffer[i]=254*log(radiance/light_min)*factor;
+    }
+    radiance_mean /= (nxcell*nycell*nzcell);
 
+    radiance_dev=0.0;
+    for(i=0;i<nxcell*nycell*nzcell;i++){
+      float dd;
+
+      dd = light_cell_radiance[i] - radiance_mean;
+      radiance_dev += dd*dd;
+    }
+    radiance_dev = sqrt(radiance_dev/(nxcell*nycell*nzcell));
+    //printf("radiance min=%f mean=%f dev=%f max=%f\n", radiance_min, radiance_mean, radiance_dev, radiance_max);
+
+    ijk_node=0;
+    for(k=0;k<nz;k++){
+      int k1, k2;
+
+      k1=k-1;
+      if(k1<0)k1=0;
+      k2=k;
+      if(k2==nz-1)k2=k1;
+
+      for(j=0;j<ny;j++){
+        int j1, j2;
+
+        j1=j-1;
+        if(j1<0)j1=0;
+        j2=j;
+        if(j2==ny-1)j2=j1;
+
+        for(i=0;i<nx;i++){
+          int i1, i2;
+          float val_111, val_112, val_121, val_122;
+          float val_211, val_212, val_221, val_222;
+          int cell_111, cell_112, cell_121, cell_122;
+          int cell_211, cell_212, cell_221, cell_222;
+          float radiance;
+
+          i1=i-1;
+          if(i1<0)i1=0;
+          i2=i;
+          if(i2==nx-1)i2=i1;
+
+          //#define IJKCELL(i,j,k) ((i)+(j)*nxcell+(k)*nxycell)
+
+          cell_111 = IJKCELL(i1,j1,k1);
+          if(i2==i1){
+            cell_211 = cell_111;
+          }
+          else{
+            cell_211 = cell_111 + 1;
+          }
+          if(j2==j1){
+            cell_121 = cell_111;
+          }
+          else{
+            cell_121 = cell_111 + nxcell;
+          }
+          if(i2==i1){
+            cell_221 = cell_121;
+          }
+          else{
+            cell_221 = cell_121 + 1;
+          }
+
+          if(k2==k1){
+            cell_112 = cell_111;
+            cell_122 = cell_121;
+            cell_212 = cell_211;
+            cell_222 = cell_221;
+          }
+          else{
+            cell_112 = cell_111 + nxycell;
+            cell_122 = cell_121 + nxycell;
+            cell_212 = cell_211 + nxycell;
+            cell_222 = cell_221 + nxycell;
+          }
+
+          val_111 = light_cell_radiance[cell_111];
+          val_112 = light_cell_radiance[cell_112];
+          val_121 = light_cell_radiance[cell_121];
+          val_122 = light_cell_radiance[cell_122];
+          val_211 = light_cell_radiance[cell_211];
+          val_212 = light_cell_radiance[cell_212];
+          val_221 = light_cell_radiance[cell_221];
+          val_222 = light_cell_radiance[cell_222];
+
+          radiance  = (val_111+val_112+val_121+val_122);
+          radiance += (val_211+val_212+val_221+val_222);
+          radiance /=8.0;
+          if(radiance<light_min)radiance=light_min;
+          if(radiance>light_max)radiance=light_max;
+          lightingbuffer[ijk_node]=254*log(radiance/light_min)*factor;
+
+          ijk_node++;
+
+        }
+      }
     }
   //  printf("fluxmin=%f fluxmax=%f\n",fluxmin,fluxmax);
     CheckMemory;
