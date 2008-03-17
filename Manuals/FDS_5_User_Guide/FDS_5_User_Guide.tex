@@ -2069,6 +2069,34 @@ made a function of time using ``ramps'' for the individual components, {\ct RAMP
 {\ct RAMP}s can be found in Section~\ref{info:RAMP}.
 
 
+\subsection{Special Topic: Improving the Pressure Solver}
+\label{info:pressurecorrection}
+\index{MISC:PRESSURE\_CORRECTION}
+\index{DUMP:CHECK\_VOLUME\_FLOW}
+
+FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is
+assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of
+this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same
+as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel
+instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for 
+the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because the Poisson
+equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerics can be found in the 
+FDS Technical Reference Guide. 
+
+A new feature has been added in FDS 5 to improve the accuracy of the multi-mesh pressure solver. Briefly, a correction is made to the local solutions of the Poisson
+equation by way of a global solution for an ``average'' pressure in each mesh. This can be thought of as the pressure that one would obtain from a zone or lumped parameter
+model where each compartment in a building has its own bulk pressure obtained via mass balance estimates at compartment boundaries. Currently, this
+pressure correction is still an option because it requires additional testing and it requires additional CPU time. To invoke it, add \\
+{\ct PRESSURE\_CORRECTION=.TRUE.} \\
+to the {\ct MISC} line. Run your case with and without the option to determine how much additional CPU time is required, and also how much of an improvement in 
+accuracy it yields. This can be done in two ways. First, examine vector slice files of various quantities at the mesh boundaries to see if there are noticeable changes
+in the flow field due to the boundary. Second, add \\
+{\ct CHECK\_VOLUME\_FLOW=.TRUE.} \\
+to the {\ct DUMP} line, just for debugging purposes. This will prompt FDS to compute the volume flow at each mesh boundary to determine if the pressure correction
+scheme is working properly. If error messages appear on the screen or in the standard error file, post the case to the Issue Tracker.
+ 
+
+
 \subsection{Special Topic: Restoring the Baroclinic Vorticity}
 \index{baroclinic torque}
 
@@ -6011,11 +6039,11 @@ machines that ocassionally a runtime error occurs because of file
 access problems related to the buffer flushing. If this happens, set
 this parameter to {\ct .FALSE.}, but be aware that it may not be
 possible to look at output in Smokeview until after the calculation is
-finished. 
+finished.
 \item[{\ct STATUS\_FILES}] If {\ct .TRUE.}, produces an output file
 {\bf CHID.notready} which is deleted, if the simulation is completed
 successfully. This file can be used as an error indicator. It is {\ct
-.FALSE.} by default. 
+.FALSE.} by default.
 \end{description}
 
 
@@ -6493,9 +6521,7 @@ height. Compute the quantities:
 \begin{eqnarray*} (H-z_{int})\; T_u + z_{int} \; T_l = \int_0^H \; T(z) \; dz &=& I_1 \\
                   (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2 \end{eqnarray*}
 Solve for $z_{int}$:
-\be z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l
-\, H} 
-\ee 
+\be z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H} \ee
 Let $T_l$ be the temperature in the lowest mesh cell and, using
 Simpson's Rule, perform the numerical integration of $I_1$ and
 $I_2$. $T_u$ is defined as the average upper layer temperature via
@@ -6506,7 +6532,7 @@ The quantities {\ct LAYER HEIGHT}, {\ct UPPER TEMPERATURE} and {\ct
 LOWER TEMPERATURE} can be designated via ``device'' ({\ct DEVC}) lines
 in the input file\footnote{Note that in FDS 5 and beyond, these
 quantities are no longer available as slice files.}. For example, the
-entry 
+entry
 
 \footnotesize
 \begin{verbatim}
@@ -6627,8 +6653,7 @@ proposed by Ulf Wickstrom~\cite{Wickstrom:Interflam2007}, the
 following equation can be solved via a simple iterative technique to
 determine an effective gas temperature, $T_{\hbox{\tiny AST}}$:
 \be \dot{q}_r'' + \dot{q}_c'' = \epsilon \sigma \, \left(
-T_{\hbox{\tiny AST}}^4 - T_w^4 \right) + h (T_{\hbox{\tiny AST}} - T_w
-)  \ee 
+T_{\hbox{\tiny AST}}^4 - T_w^4 \right) + h (T_{\hbox{\tiny AST}} - T_w)  \ee
 The sum $\dot{q}_r'' + \dot{q}_c''$ is the {\em net} heat flux onto
 the solid surface, whose temperature is $T_w$. The heat fluxes and
 surface temperature are computed in FDS, and they are
@@ -6672,7 +6697,7 @@ outputs the net integrated mass flux through the given planar area, oriented in 
 and {\ct 'HEAT FLOW'} are defined:
 \begin{eqnarray*} \dot{V} &=& \int \bu \cdot \dS  \\
                   \dot{m} &=& \int \rho \bu \cdot \dS \\
-                  \dot{q} &=& \int c_p \rho (T-T_\infty) \bu \cdot \dS  
+                  \dot{q} &=& \int c_p \rho (T-T_\infty) \bu \cdot \dS
 \end{eqnarray*}
 The addition of a {\ct +} or {\ct -} to the {\ct QUANTITY} names
 yields the integral of the flow in the positive or negative direction
@@ -6987,7 +7012,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ \hline \hline
-%{\ct CHECK\_VOLUME\_FLOW}       & Logical      & See Section~\ref{info:MPI}        &           & {\ct .FALSE.}                      \\ \hline
+{\ct CHECK\_VOLUME\_FLOW}       & Logical      & See Section~\ref{info:pressurecorrection}        &           & {\ct .FALSE.}                      \\ \hline
 {\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
 {\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES} \\ \hline
 %{\ct DEBUG}                     & Logical      & General purpose diagnostic flag   &           & {\ct .FALSE.}                      \\ \hline
@@ -7237,7 +7262,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PR}                        & Real          & Prandtl number (LES only)                     &               & 0.5               \\ \hline
 {\ct P\_INF}                    & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
 {\ct POROUS\_FLOOR}             & Logical       & See Section~\ref{info:sprinklers}             &               & {\ct .TRUE.}      \\ \hline
-%{\ct PRESSURE\_CORRECTION}      & Logical       & See Section~\ref{info:MPI}                    &               & {\ct .FALSE.}     \\ \hline
+{\ct PRESSURE\_CORRECTION}      & Logical       & See Section~\ref{info:pressurecorrection}                    &               & {\ct .FALSE.}     \\ \hline
 {\ct RADIATION}                 & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
 {\ct RAMP\_GX}                  & Character     & Time function, $x$ comp. of gravity           &               &                   \\ \hline
 {\ct RAMP\_GY}                  & Character     & Time function, $y$ comp. of gravity           &               &                   \\ \hline
