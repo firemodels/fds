@@ -1,0 +1,51 @@
+\chapter{Fire Plumes}
+
+Plume temperature measurements are available from the VTT Large Hall and the FM/SNL series.
+For all the other series of experiments, the temperature above the fire is not reported, or the fire plume
+leans because of the flow pattern within the compartment, or the fire is positioned against a wall.
+Only for the VTT and the FM/SNL series are the plumes relatively free from perturbations.
+
+\section{VTT Large Hall Test Series}
+
+These experiments consist of liquid fuel pan fires conducted in the middle of a large fire test hall.
+Plume temperatures are measured at two heights above the fire, 6 m and 12 m.
+The flames extend to about 4 m above the fire pan.
+
+Photographs from the VTT tests are available. It is difficult to precisely measure the flame height,
+but the photos and videos allow one to make estimates accurate to within a pan diameter.
+Similarly, flame height in FDS is assessed using the visualization program Smokeview.
+There are various ways to render the fire in Smokeview.  The
+most direct method is to show, via three dimensional surface plots, the volume within which the energy from the fire is being released.
+The other method is to show the stoichiometric iso-surface of the mixture fraction.
+FDS tracks the fuel and oxygen via a single scalar variable called the mixture fraction.
+The stoichiometric iso-surface is essentially a sheet on which combustion occurs.  The average vertical extent of either the volume
+in which energy is being released or the stoichiometric mixture fraction iso-surface is the FDS predicted flame height.
+Shown in Figure~\ref{FDS_Flame} are snapshots from the simulation of the 1.6 m diameter heptane pan fire.
+The pan has been approximated as a square because of the requirement by FDS of rectangular geometry.
+Figure~\ref{Simo_Photos} contains photographs of the actual fire.
+The height of the visible flame in the photographs has been estimated to be between 2.4 and 3 pan diameters (3.8 m to 4.8 m).
+The height of the simulated fire fluctuates from 5 m to 6 m during the peak heat release rate phase.
+
+
+\section{FM/SNL Test Series}
+
+In Tests 4 and 5, thermocouples are positioned near the ceiling directly over the fire pan.
+In Test 21, the fire is located within an empty electrical cabinet, and the closest near ceiling thermocouple
+is used to assess the plume temperature.  Note that in Test 5, the FDS plume temperature curve has been smoothed
+to better assess the relative difference between the peak values of the model and the measurement.
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=2.6in]{FIGURES/VTT/VTT_01_v5_Plume_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/FM_SNL/FM_SNL_04_v5_Plume_Temperature} \\
+\includegraphics[width=2.6in]{FIGURES/VTT/VTT_02_v5_Plume_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/FM_SNL/FM_SNL_05_v5_Plume_Temperature} \\
+\includegraphics[width=2.6in]{FIGURES/VTT/VTT_03_v5_Plume_Temperature} &
+\includegraphics[width=2.6in]{FIGURES/FM_SNL/FM_SNL_21_v5_Plume_Temperature}
+\end{tabular*}
+\caption{Plume Temperatures from the VTT Large Hall (Left) and FM/SNL Tests (Right).}
+\label{VTT_FM_SNL_Plume}
+\end{figure}
+
+\clearpage
