@@ -81,8 +81,13 @@ def extract_comp_data(comp_file_info):
     
     exp_data_filename = comp_file_info['Exp_Filename'] #String of filename
     exp_column_name = comp_file_info['Exp_Col_Name'] #Experimental Data Column Name
+    exp_column_name_row_num = int(comp_file_info['Exp_Col_Name_Row'])-1 #Experimental Data Column Name Row Number
+    exp_data_row_num = int(comp_file_info['Exp_Data_Row'])-1 #Experimental Data Starting Row Number
+    
     mod_data_filename = comp_file_info['Mod_Filename'] #String of filename
-    mod_column_name = comp_file_info['Mod_Col_Name'] #Experimental Data Column Name
+    mod_column_name = comp_file_info['Mod_Col_Name'] #Modeling Data Column Name
+    mod_column_name_row_num = int(comp_file_info['Mod_Col_Name_Row'])-1 #Modeling Data Column Name Row Number
+    mod_data_row_num = int(comp_file_info['Mod_Data_Row'])-1 #Modeling Data Starting Row Number
     
     scatter_data_label = comp_file_info['Quantity']+"-"+comp_file_info['Dataname']+"-"+comp_file_info['Exp_Col_Name']
     
@@ -170,24 +175,25 @@ def extract_comp_data(comp_file_info):
     exp_data_cols = zip(*csv.reader(exp_file_object))
     #Convert tuples to lists.
     exp_data_list = [list(sublist) for sublist in exp_data_cols]
-    #Pull the time Column name out and strip whitespace from ends of string.
-    exp_time_col_name = (exp_data_list[0][0]).strip()
+    #Pull the Time column name out and strip whitespace from ends of string.
+    exp_time_col_name = (exp_data_list[0][exp_column_name_row_num]).strip()
     
     #Build Experimental Data Dictionary
     for exp_list in exp_data_list:
-        exp_data_dict[(exp_list[0]).strip()] = map(float, exp_list[1:])
+        exp_data_dict[(exp_list[exp_column_name_row_num]).strip()] = map(float, exp_list[exp_data_row_num:])
+        #print "Exp. Data Dict:", exp_data_dict[(exp_list[exp_column_name_row_num]).strip()]
     
     #Read in model data and flip lists from rows to columns.
     mod_data_cols = zip(*csv.reader(mod_file_object))
     #Convert tuples to lists.
     mod_data_list = [list(sublist) for sublist in mod_data_cols]
-    #Pull the time Column name out and strip whitespace from ends of string.
-    mod_time_col_name = (mod_data_list[0][0]).strip()
+    #Pull the Time column name out and strip whitespace from ends of string.
+    mod_time_col_name = (mod_data_list[0][mod_column_name_row_num]).strip()
     
     #Build Prediction/Model Data Dictionary
     for mod_list in mod_data_list:
-        print "Model Data List:", mod_list
-        mod_data_dict[(mod_list[0]).strip()] = map(float, mod_list[1:])
+        mod_data_dict[(mod_list[mod_column_name_row_num]).strip()] = map(float, mod_list[mod_data_row_num:])
+        #print "Model Data Dict:", mod_data_dict[(mod_list[mod_column_name_row_num]).strip()]
 
     exp_comp_ranges = find_start_stop_index(exp_data_dict,exp_time_col_name,exp_start_time_data_val,exp_stop_time_data_val,exp_start_time_comp_val,exp_stop_time_comp_val)
     #print exp_comp_ranges
