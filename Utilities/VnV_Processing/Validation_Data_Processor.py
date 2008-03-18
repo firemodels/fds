@@ -186,6 +186,7 @@ def extract_comp_data(comp_file_info):
     
     #Build Prediction/Model Data Dictionary
     for mod_list in mod_data_list:
+        print "Model Data List:", mod_list
         mod_data_dict[(mod_list[0]).strip()] = map(float, mod_list[1:])
 
     exp_comp_ranges = find_start_stop_index(exp_data_dict,exp_time_col_name,exp_start_time_data_val,exp_stop_time_data_val,exp_start_time_comp_val,exp_stop_time_comp_val)
