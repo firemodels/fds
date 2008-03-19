@@ -48,7 +48,8 @@ def extract_config_data(config_file):
             if data_counter >= quantity_counter:
                 for x in range(len(data_header)):
                     keyed_data[data_header[x]] = list_item[x+1]
-                data_key_name = list_item[2]+"-"+list_item[4]
+                data_key_name = list_item[2]+"-"+list_item[6]
+                print data_key_name
                 data_dict[data_key_name] = keyed_data
                 keyed_data = {}
             data_counter += 1
@@ -121,8 +122,8 @@ def extract_comp_data(comp_file_info):
         rowcounter2 = 0
         for time_value2 in data_dict[col_name]:
             if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_time_data)*60):
-                print "Specified end of plot time is greater than end of time in the data set. \nUsing last value in the time column.\n"
-                print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
+                #print "Specified end of plot time is greater than end of time in the data set. \nUsing last value in the time column.\n"
+                #print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
                 time_end_index = (len(data_dict[col_name])-1)
                 break
             else:
@@ -149,8 +150,8 @@ def extract_comp_data(comp_file_info):
         rowcounter4 = 0
         for time_value4 in data_dict[col_name]:
             if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_time_comp)*60):
-                print "Specified end of comparison time is greater than end of time in the data set. \nUsing last value in the time column."
-                print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
+                #print "Specified end of comparison time is greater than end of time in the data set. \nUsing last value in the time column."
+                #print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
                 minmax_end_index = (len(data_dict[col_name])-1)
                 break
 
@@ -269,6 +270,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
     
     # Variables for plot.
     plot_title = plot_data['Plot_Title']
+    print plot_title
     x_title = plot_data['X_Title']
     y_title = plot_data['Y_Title']   
     min_x = float(plot_data['Min_X'])
@@ -313,10 +315,10 @@ def comparison_plot(plot_data,exp_data,mod_data):
     #One line at a time added to plot from each data set.
     # Plot Experimental data
     g.plot(graph.data.points(exp_data, title=exp_key, x=1, y=2),
-        [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
+        [graph.style.line([style.linewidth.Thick, style.linestyle.solid])])
     # Plot Predicted/Model data
     g.plot(graph.data.points(mod_data, title=mod_key, x=1, y=2),
-        [graph.style.line([color.rgb.red, style.linewidth.Thin, style.linestyle.dashed])])
+        [graph.style.line([color.rgb.red, style.linewidth.Thick, style.linestyle.dotted])])
     
     # Now plot the Title text, alignment based on title quadrant setting.
     if title_quadrant == 1:
@@ -341,11 +343,12 @@ def scatter_plot(plot_info,data_set):
     #plot_info is details about the overall plot layout and text.
     #data_set is a dictionary keyed by test name containing lists of X and Y data points.
     #print plot_info
-    print data_set
+    #print data_set
     
     for quantity_number in plot_info:
         if data_set[quantity_number] == []:
-            print "No data in Scatter Plot Dataset."
+            continue
+            #print "No data in Scatter Plot Dataset."
         else:
             # Set variables for Plot extracted from the first group of lines in config file starting with 'q'.
             
