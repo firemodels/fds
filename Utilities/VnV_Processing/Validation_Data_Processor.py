@@ -272,7 +272,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
     
     # Variables for plot.
     plot_title = plot_data['Plot_Title']
-    print plot_title
+    #print plot_title
     x_title = plot_data['X_Title']
     y_title = plot_data['Y_Title']   
     min_x = float(plot_data['Min_X'])
@@ -280,7 +280,8 @@ def comparison_plot(plot_data,exp_data,mod_data):
     min_y = float(plot_data['Min_Y'])
     max_y = float(plot_data['Max_Y'])
     title_quadrant = int(plot_data['Title_Quadrant'])
-    key_quadrant = int(plot_data['Key_Quadrant'])
+    key_pos = plot_data['Key_Position']
+    key_dist = 0.2*unit.v_cm
     plot_width = int(plot_data['Plot_Width(cm)'])
     
     #Set plot legend key text.
@@ -292,22 +293,12 @@ def comparison_plot(plot_data,exp_data,mod_data):
     
     # Determine the location for the key, alignment based on key_quadrant setting.
     # Replace quad code with actual position letters
-    if key_quadrant == 1:
-        key_pos = "tl"
-        key_dist = 0.2*unit.v_cm
-    elif key_quadrant == 2:
-        key_pos = "tr"
-        key_dist = 0.2*unit.v_cm
-    elif key_quadrant == 3:
-        key_pos = "bl"
-        key_dist = 0.2*unit.v_cm
-    elif key_quadrant == 4:
-        key_pos = "br"
-        key_dist = 0.2*unit.v_cm
+    if key_pos == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br":
+        ()
+        #print "Key Position =", key_pos
     else:
-        print "A quadrant for the key location was not specified./nUsing the default top left quadrant."
-        key_pos = "tl"
-        key_dist = 0.2*unit.v_cm
+        print "The key position was not specified./nUsing the default bottom right position."
+        key_pos = "br"
     
     #Begin Plotting
     # Initialize graph object
