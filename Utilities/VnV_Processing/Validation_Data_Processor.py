@@ -173,6 +173,7 @@ def extract_comp_data(comp_file_info):
     ## Start File Processing
     
     #Read in experimental data and flip lists from rows to columns.
+    print "Reading in:", exp_data_filename
     exp_data_cols = zip(*csv.reader(exp_file_object))
     #Convert tuples to lists.
     exp_data_list = [list(sublist) for sublist in exp_data_cols]
@@ -185,6 +186,7 @@ def extract_comp_data(comp_file_info):
         #print "Exp. Data Dict:", exp_data_dict[(exp_list[exp_column_name_row_num]).strip()]
     
     #Read in model data and flip lists from rows to columns.
+    print "Reading in:", mod_data_filename
     mod_data_cols = zip(*csv.reader(mod_file_object))
     #Convert tuples to lists.
     mod_data_list = [list(sublist) for sublist in mod_data_cols]
