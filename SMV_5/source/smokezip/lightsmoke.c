@@ -96,12 +96,11 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     float xyz_cell_pos[3];
     float logindex[256];
     float *light_cell_radiance;
-    int ijk;
     float four_pi;
     float radiance_min, radiance_max;
     float factor;
     float radiance_mean, radiance_dev;
-    int ijk_node;
+    int ijk_node, ijk_cell;
 
     // pick a random light weighted by HRR  
     //  (ie a high wattage light will be picked proportionately more often than
@@ -134,7 +133,7 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
       light_cell_radiance[i]=0.0;
     }
 
-    ijk = 0;
+    ijk_cell = 0;
     for(k=0;k<nzcell;k++){
       xyz_cell_pos[2]=(zplt[k]+zplt[k+1])/2.0;
       for(j=0;j<nycell;j++){
@@ -146,14 +145,17 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
           val2 = getlog_1_m_alpha(smoke_mesh, xyz_cell_pos);
           if(val2<0.0){
             for(ilight=0;ilight<nlightinfo;ilight++){
-              float radiance, dx, dy, dz;
+              float radiance, qgas, dx, dy, dz;
               float *xyz_e1, *xyz_e2;
               float *xyz_light;
               int ilight2;
-              float light_dist2, solid_angle;
-              float qcell;
+              float light_dist2;
 
               lighti = lightinfo + ilight;
+
+              // for now, lights do not light smoke in other meshes
+              if(in_mesh(smoke_mesh,lighti->xyz1)==0)continue;
+
               switch (lighti->type){
                 case 0:
                 xyz_light=lighti->xyz1;
@@ -162,12 +164,13 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
                 dz = xyz_light[2]-xyz_cell_pos[2];
                 light_dist2 = dx*dx+dy*dy+dz*dz;
                 if(light_dist2<0.1)light_dist2=0.1;
-                solid_angle = smoke_mesh->cell_cross_sectional_area/(4.0*light_dist2);
-                if(solid_angle>four_pi/2.0)solid_angle=four_pi/2.0;
+//
+// qgas = qlight*optical_thickness*(cell_cross_section/(4*pi*lightdist))*albedo
+// radiance = qgas/(cell_area*pi)
+//
 
-                qcell = lighti->q*(solid_angle/four_pi)*integrate_alpha(smoke_mesh,xyz_light,xyz_cell_pos);
-                radiance = qcell*albedo/smoke_mesh->cell_surface_area/four_pi;
-                light_cell_radiance[ijk] += radiance;
+                radiance = lighti->q*integrate_alpha(smoke_mesh,xyz_light,xyz_cell_pos)*albedo/(four_pi*four_pi*light_dist2);
+                light_cell_radiance[ijk_cell] += radiance;
                 break;
 
                 case 1:
@@ -177,32 +180,27 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
 
                 for(ilight2=0;ilight2<lighti->nstep;ilight2++){
                   float f1;
-                  float xyz_pos[3];
 
                   f1 = (float)(lighti->nstep-1-ilight2)/(float)(lighti->nstep-1);
                   xyz_light[0] = f1*xyz_e1[0] + (1.0-f1)*xyz_e2[0];
                   xyz_light[1] = f1*xyz_e1[1] + (1.0-f1)*xyz_e2[1];
                   xyz_light[2] = f1*xyz_e1[2] + (1.0-f1)*xyz_e2[2];
 
-                  dx = xyz_light[0]-xyz_pos[0];
-                  dy = xyz_light[1]-xyz_pos[1];
-                  dz = xyz_light[2]-xyz_pos[2];
-
+                  dx = xyz_light[0]-xyz_cell_pos[0];
+                  dy = xyz_light[1]-xyz_cell_pos[1];
+                  dz = xyz_light[2]-xyz_cell_pos[2];
                   light_dist2 = dx*dx+dy*dy+dz*dz;
                   if(light_dist2<0.1)light_dist2=0.1;
-                  solid_angle = smoke_mesh->cell_cross_sectional_area/(4.0*light_dist2);
-                  if(solid_angle>four_pi/2.0)solid_angle=four_pi/2.0;
 
-                  qcell = lighti->q*(solid_angle/four_pi)*integrate_alpha(smoke_mesh,xyz_light,xyz_pos);
-                  radiance = qcell*albedo/smoke_mesh->cell_surface_area/four_pi;
-                  light_cell_radiance[ijk] += radiance;
+                  radiance = lighti->q*integrate_alpha(smoke_mesh,xyz_light,xyz_cell_pos)*albedo/(four_pi*four_pi*light_dist2);
+                  light_cell_radiance[ijk_cell] += radiance;
                 }
                 break;
               }
             }
           }
 
-          ijk++;
+          ijk_cell++;
         }
       }
     }
@@ -225,7 +223,7 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
       radiance_dev += dd*dd;
     }
     radiance_dev = sqrt(radiance_dev/(nxcell*nycell*nzcell));
-    //printf("radiance min=%f mean=%f dev=%f max=%f\n", radiance_min, radiance_mean, radiance_dev, radiance_max);
+    printf("radiance min=%f mean=%f dev=%f max=%f\n", radiance_min, radiance_mean, radiance_dev, radiance_max);
 
     ijk_node=0;
     for(k=0;k<nz;k++){
@@ -306,7 +304,8 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
           radiance /=8.0;
           if(radiance<light_min)radiance=light_min;
           if(radiance>light_max)radiance=light_max;
-          lightingbuffer[ijk_node]=254*log(radiance/light_min)*factor;
+//          lightingbuffer[ijk_node]=254*log(radiance/light_min)*factor;
+          lightingbuffer[ijk_node]=254*(radiance-light_min)/(light_max-light_min);
 
           ijk_node++;
 

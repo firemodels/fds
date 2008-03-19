@@ -67,8 +67,8 @@ int main(int argc, char **argv){
   lightinfo=NULL;
   light_cdf=NULL;
   light_delta = 0.3;
-  light_min=10.0;
-  light_max=100.0;
+  light_min=1.0;
+  light_max=5.0;
 #endif
   overwrite_slice=0;
   endian_info=0;
