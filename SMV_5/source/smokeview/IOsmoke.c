@@ -389,7 +389,12 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 #ifdef EGZ
   SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"rb",0,2);
 #ifdef pp_LIGHT
-  LIGHTFILE=EGZ_FOPEN(smoke3di->light_file,"rb",0,2);
+  if(smoke3di->use_lighting_file==1){
+    LIGHTFILE=EGZ_FOPEN(smoke3di->light_file,"rb",0,2);
+  }
+  else{
+    LIGHTFILE=NULL;
+  }
 #endif
 #endif
 #ifndef EGZ
@@ -766,7 +771,7 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
 
     EGZ_FCLOSE(SMOKE3DFILE);
 #ifdef pp_LIGHT
-    EGZ_FCLOSE(LIGHTFILE);
+    if(LIGHTFILE!=NULL)EGZ_FCLOSE(LIGHTFILE);
 #endif
     fclose(TEXTFILE);
     TEXTFILE=fopen(textfilename,"r");
