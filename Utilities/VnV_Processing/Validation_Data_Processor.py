@@ -291,22 +291,23 @@ def comparison_plot(plot_data,exp_data,mod_data):
     plot_file_name = plot_data["Plot_Filename"]
     
     # Determine the location for the key, alignment based on key_quadrant setting.
+    # Replace quad code with actual position letters
     if key_quadrant == 1:
         key_pos = "tl"
-        key_dist = 0.00
+        key_dist = 0.2*unit.v_cm
     elif key_quadrant == 2:
         key_pos = "tr"
-        key_dist = 0.00
+        key_dist = 0.2*unit.v_cm
     elif key_quadrant == 3:
         key_pos = "bl"
-        key_dist = 0.00
+        key_dist = 0.2*unit.v_cm
     elif key_quadrant == 4:
         key_pos = "br"
-        key_dist = 0.00
+        key_dist = 0.2*unit.v_cm
     else:
         print "A quadrant for the key location was not specified./nUsing the default top left quadrant."
         key_pos = "tl"
-        key_dist = 0.00
+        key_dist = 0.2*unit.v_cm
     
     #Begin Plotting
     # Initialize graph object
@@ -320,7 +321,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
         [graph.style.line([style.linewidth.Thick, style.linestyle.solid])])
     # Plot Predicted/Model data
     g.plot(graph.data.points(mod_data, title=mod_key, x=1, y=2),
-        [graph.style.line([color.rgb.red, style.linewidth.Thick, style.linestyle.dotted])])
+        [graph.style.line([color.rgb.black, style.linewidth(0.06*unit.w_cm), style.linestyle.dotted])])
     
     # Now plot the Title text, alignment based on title quadrant setting.
     if title_quadrant == 1:
