@@ -48,7 +48,7 @@ def extract_config_data(config_file):
             if data_counter >= quantity_counter:
                 for x in range(len(data_header)):
                     keyed_data[data_header[x]] = list_item[x+1]
-                data_key_name = list_item[2]+"-"+list_item[6]
+                data_key_name = list_item[2].strip()+"-"+list_item[6].strip()
                 print data_key_name
                 data_dict[data_key_name] = keyed_data
                 keyed_data = {}
@@ -81,12 +81,12 @@ def extract_comp_data(comp_file_info):
     #List of variables from configuration file column names.
     
     exp_data_filename = comp_file_info['Exp_Filename'] #String of filename
-    exp_column_name = comp_file_info['Exp_Col_Name'] #Experimental Data Column Name
+    exp_column_name = comp_file_info['Exp_Col_Name'].strip() #Experimental Data Column Name
     exp_column_name_row_num = int(comp_file_info['Exp_Col_Name_Row'])-1 #Experimental Data Column Name Row Number
     exp_data_row_num = int(comp_file_info['Exp_Data_Row'])-1 #Experimental Data Starting Row Number
     
     mod_data_filename = comp_file_info['Mod_Filename'] #String of filename
-    mod_column_name = comp_file_info['Mod_Col_Name'] #Modeling Data Column Name
+    mod_column_name = comp_file_info['Mod_Col_Name'].strip() #Modeling Data Column Name
     mod_column_name_row_num = int(comp_file_info['Mod_Col_Name_Row'])-1 #Modeling Data Column Name Row Number
     mod_data_row_num = int(comp_file_info['Mod_Data_Row'])-1 #Modeling Data Starting Row Number
     
@@ -167,8 +167,8 @@ def extract_comp_data(comp_file_info):
 
         return (time_start_index, time_end_index, minmax_start_index, minmax_end_index)
 
-    exp_file_object = open(data_directory+exp_data_filename, "rb")
-    mod_file_object = open(data_directory+mod_data_filename, "rb")
+    exp_file_object = open(data_directory+exp_data_filename, "U")
+    mod_file_object = open(data_directory+mod_data_filename, "U")
     
     ## Start File Processing
     
@@ -178,11 +178,11 @@ def extract_comp_data(comp_file_info):
     #Convert tuples to lists.
     exp_data_list = [list(sublist) for sublist in exp_data_cols]
     #Pull the Time column name out and strip whitespace from ends of string.
-    exp_time_col_name = (exp_data_list[0][exp_column_name_row_num]).strip()
+    exp_time_col_name = exp_data_list[0][exp_column_name_row_num].strip()
     
     #Build Experimental Data Dictionary
     for exp_list in exp_data_list:
-        exp_data_dict[(exp_list[exp_column_name_row_num]).strip()] = map(float, exp_list[exp_data_row_num:])
+        exp_data_dict[exp_list[exp_column_name_row_num].strip()] = map(float, exp_list[exp_data_row_num:])
         #print "Exp. Data Dict:", exp_data_dict[(exp_list[exp_column_name_row_num]).strip()]
     
     #Read in model data and flip lists from rows to columns.
@@ -191,11 +191,11 @@ def extract_comp_data(comp_file_info):
     #Convert tuples to lists.
     mod_data_list = [list(sublist) for sublist in mod_data_cols]
     #Pull the Time column name out and strip whitespace from ends of string.
-    mod_time_col_name = (mod_data_list[0][mod_column_name_row_num]).strip()
+    mod_time_col_name = mod_data_list[0][mod_column_name_row_num].strip()
     
     #Build Prediction/Model Data Dictionary
     for mod_list in mod_data_list:
-        mod_data_dict[(mod_list[mod_column_name_row_num]).strip()] = map(float, mod_list[mod_data_row_num:])
+        mod_data_dict[mod_list[mod_column_name_row_num].strip()] = map(float, mod_list[mod_data_row_num:])
         #print "Model Data Dict:", mod_data_dict[(mod_list[mod_column_name_row_num]).strip()]
 
     exp_comp_ranges = find_start_stop_index(exp_data_dict,exp_time_col_name,exp_start_time_data_val,exp_stop_time_data_val,exp_start_time_comp_val,exp_stop_time_comp_val)
@@ -339,6 +339,7 @@ def scatter_plot(plot_info,data_set):
     #print plot_info
     #print data_set
     
+    # Need quantity and group iterations.  Also need way to make key based on groups.
     for quantity_number in plot_info:
         if data_set[quantity_number] == []:
             continue
@@ -359,7 +360,8 @@ def scatter_plot(plot_info,data_set):
             max_y = float(plot_info[int(quantity_number)]['Plot_Max'])
             percent_error = int(plot_info[int(quantity_number)]['%error'])
             title_quadrant = int(plot_info[int(quantity_number)]['Title_Quadrant'])
-            key_quadrant = int(plot_info[int(quantity_number)]['Key_Quadrant'])
+            key_pos = plot_info[int(quantity_number)]['Key_Position']
+            key_dist = 0.2*unit.v_cm
             plot_width = int(plot_info[int(quantity_number)]['Plot_Width(cm)'])
             
             #Create filename from fields in input file record.
@@ -367,22 +369,12 @@ def scatter_plot(plot_info,data_set):
             #print plot_file_name
             
             # Determine the location for the key, alignment based on key_quadrant setting.
-            if key_quadrant == 1:
-                key_pos = "tl"
-                key_dist = 0.00
-            elif key_quadrant == 2:
-                key_pos = "tr"
-                key_dist = 0.00
-            elif key_quadrant == 3:
-                key_pos = "bl"
-                key_dist = 0.00
-            elif key_quadrant == 4:
-                key_pos = "br"
-                key_dist = 0.00
+            if key_pos == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br":
+                ()
+                #print "Key Position =", key_pos
             else:
-                print "A quadrant for the key location was not specified./nUsing the default top left quadrant."
-                key_pos = "tl"
-                key_dist = 0.00
+                print "The key position was not specified./nUsing the default bottom right position."
+                key_pos = "br"
             
             #Begin Plotting
             #print exp_data
