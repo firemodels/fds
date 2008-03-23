@@ -1740,18 +1740,26 @@ void Plot3DShowMenu(int value){
 
 void GridSliceMenu(int value){
   mesh *meshi;
+  int justTurnedOn=0;
+
   meshi=current_mesh;
-  visGrid=1;
+  if(visGrid==0){
+    visGrid=1;
+    justTurnedOn=1;
+  }
   switch (value){
   case 1:
+    if(justTurnedOn==1&&meshi->visz==1)meshi->visz=0;
     updateshowstep(1-meshi->visz,DIRZ);
     if(meshi->visz==1)visGrid=1;
     break;
   case 2:
+    if(justTurnedOn==1&&meshi->visy==1)meshi->visy=0;
     updateshowstep(1-meshi->visy,DIRY);
     if(meshi->visy==1)visGrid=1;
     break;
   case 3:
+    if(justTurnedOn==1&&meshi->visx==1)meshi->visx=0;
     updateshowstep(1-meshi->visx,DIRX);
     if(meshi->visx==1)visGrid=1;
     break;
@@ -4056,26 +4064,41 @@ static int in_menu=0;
 /* --------------------------------grid slice menu -------------------------- */
 
   CREATEMENU(gridslicemenu,GridSliceMenu);
-  if(cmesh->visz==1&&visGrid==1){
-    glutAddMenuEntry("*xy plane",1);
+  if(cmesh->visz==1){
+    if(visGrid==1){
+      glutAddMenuEntry("*xy plane",1);
+    }
+    else{
+      glutAddMenuEntry("*xy plane (grid turned off)",1);
+    }
   }
   else{
     glutAddMenuEntry("xy plane",1);
   }
-  if(cmesh->visy==1&&visGrid==1){
-    glutAddMenuEntry("*xz  plane",2);
+  if(cmesh->visy==1){
+    if(visGrid==1){
+      glutAddMenuEntry("*xz plane",2);
+    }
+    else{
+      glutAddMenuEntry("*xz plane (grid turned off)",2);
+    }
   }
   else{
-    glutAddMenuEntry("xz  plane",2);
+    glutAddMenuEntry("xz plane",2);
   }
-  if(cmesh->visx==1&&visGrid==1){
-    glutAddMenuEntry("*yz  plane",3);
+  if(cmesh->visx==1){
+    if(visGrid==1){
+      glutAddMenuEntry("*yz plane",3);
+    }
+    else{
+      glutAddMenuEntry("*yz plane (grid turned off)",3);
+    }
   }
   else{
-    glutAddMenuEntry("yz  plane",3);
+    glutAddMenuEntry("yz plane",3);
   }
   glutAddMenuEntry("Show All",4);
-  glutAddMenuEntry("Hide All",5);
+  if(visGrid==1)glutAddMenuEntry("Hide All",5);
 
 /* --------------------------------vent menu -------------------------- */
 
