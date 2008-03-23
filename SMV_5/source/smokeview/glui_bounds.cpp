@@ -381,6 +381,8 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
 
     glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata,OUTPUTSLICEDATA,Slice_CB);
+    Slice_CB(FILETYPEINDEX);
+
 
 
   }
