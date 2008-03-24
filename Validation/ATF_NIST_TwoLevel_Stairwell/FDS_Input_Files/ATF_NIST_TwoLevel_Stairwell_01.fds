@@ -1,0 +1,137 @@
+## Global Information
+
+&HEAD CHID='ATF_NIST_TwoLevel_Stairwell_01', TITLE='ATF NIST Experiments with two corridors connected by a single stairwell' /
+
+&MESH IJK=168,36,50, XB= 2.80, 17.0, -0.10, 1.85, -0.10, 2.50 / Corridor_1
+&MESH IJK=168,36,50, XB= 2.80, 17.0, -0.10, 1.85,  2.50, 5.00 / Corridor_2
+&MESH IJK= 56,144,100, XB=-0.10, 2.80, -0.10, 6.10, -0.10, 5.00 / Stairwell
+
+&TIME T_END=1800.0/
+&MISC SURF_DEFAULT='GYPSUM BOARD' /
+&RADI RADIATIVE_FRACTION=0.20 /
+
+&REAC ID='METHANE'
+      FYI='Methane, C H_4'
+      C=1.
+      H=4.
+      SOOT_YIELD=0.01 /
+
+&MATL ID            = 'GYPSUM'
+      FYI           = 'NBSIR 88-3752'
+      CONDUCTIVITY  = 0.17
+      SPECIFIC_HEAT = 1.09
+      DENSITY       =  930. /
+
+&MATL ID            = 'CONCRETE' 
+      FYI           = 'NBSIR 88-3752'                                               
+      CONDUCTIVITY  = 1.8        
+      SPECIFIC_HEAT = 1.04       
+      DENSITY       =  2280. /
+
+&MATL ID            = 'STEEL'
+      FYI           = 'Drysdale, Intro to Fire Dynamics'
+      EMISSIVITY    = 0.95
+      SPECIFIC_HEAT = 0.46
+      CONDUCTIVITY  = 45.8
+      DENSITY       = 7850. /
+
+&SURF ID        = 'GYPSUM BOARD'
+      MATL_ID   = 'GYPSUM'
+      COLOR     = 'BEIGE'
+      THICKNESS = 0.013 /
+
+&SURF ID        = 'CONCRETE FLOOR'
+      MATL_ID   = 'CONCRETE'
+      COLOR     = 'GRAY 60'
+      THICKNESS = 0.102 /
+
+&SURF ID        = 'PAN'
+      MATL_ID   = 'STEEL'
+      COLOR     = 'BLACK'
+      THICKNESS = 0.005 /
+
+&SURF ID='burner', HRRPUA=1250., COLOR='RED' /
+
+## Geometric Information
+
+# Gas Burner
+&OBST XB= 14.2, 14.4, 0.7, 1.1, 0.0, 0.1, SURF_IDS='burner','PAN','PAN' /
+
+# Outer Walls
+&OBST XB=-0.10, 0.00,  0.00,  6.10, 0.00, 5.00, COLOR='GRAY 80' / Wall
+OBST XB=17.00, 17.10, 0.00,  1.75, 0.00, 5.00, COLOR='GRAY 80' / Corridor End Wall
+&OBST XB=-0.10, 17.10, -0.10, 0.00, 0.00, 5.00, COLOR='GRAY 80' / Wall
+&OBST XB=-0.10, 2.80,  6.10,  6.20, 0.00, 5.00, COLOR='GRAY 80' / Wall
+&OBST XB=2.70,  2.80,  1.85,  6.10, 0.00, 5.00, COLOR='GRAY 80' / Wall
+&OBST XB=2.70,  17.10, 1.75,  1.85, 0.00, 5.00, COLOR='GRAY 80' / Wall
+
+# Stairs Up to Landing
+&OBST XB=0.00, 1.13, 2.83, 3.10, 0.00, 0.15, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_1
+&OBST XB=0.00, 1.13, 3.10, 3.37, 0.00, 0.30, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_2
+&OBST XB=0.00, 1.13, 3.37, 3.64, 0.00, 0.46, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_3
+&OBST XB=0.00, 1.13, 3.64, 3.91, 0.00, 0.61, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_4
+&OBST XB=0.00, 1.13, 3.91, 4.18, 0.00, 0.76, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_5
+&OBST XB=0.00, 1.13, 4.18, 4.45, 0.00, 0.91, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_6
+&OBST XB=0.00, 1.13, 4.45, 4.72, 0.00, 1.06, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_7
+&OBST XB=0.00, 1.13, 4.70, 4.80, 0.00, 1.20, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_8
+
+# Landing
+&OBST XB=0.00, 2.70, 4.80, 6.10, 0.00, 1.20, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Landing
+
+# Stairs Up to Second Floor
+&OBST XB=1.60, 2.70, 4.53, 4.80, 0.00, 1.35, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_9
+&OBST XB=1.60, 2.70, 4.26, 4.53, 0.00, 1.50, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_10
+&OBST XB=1.60, 2.70, 3.99, 4.26, 0.00, 1.65, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_11
+&OBST XB=1.60, 2.70, 3.72, 3.99, 0.00, 1.80, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_12
+&OBST XB=1.60, 2.70, 3.45, 3.72, 0.00, 1.95, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_13
+&OBST XB=1.60, 2.70, 3.18, 3.45, 0.00, 2.10, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_14
+&OBST XB=1.60, 2.70, 2.91, 3.18, 0.00, 2.25, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_15
+&OBST XB=1.60, 2.70, 2.64, 2.91, 0.00, 2.40, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_16
+&OBST XB=1.60, 2.70, 1.75, 2.64, 0.00, 2.65, COLOR='BURLY WOOD 4' SURF_ID='INERT'/ Step_17
+
+# Hand Rails
+&OBST XB=1.13, 1.18, 2.83, 3.10, 0.00, 1.15, COLOR='GRAY 80' / Rail_1
+&OBST XB=1.13, 1.18, 3.10, 3.37, 0.00, 1.30, COLOR='GRAY 80' / Rail_2
+&OBST XB=1.13, 1.18, 3.37, 3.64, 0.00, 1.46, COLOR='GRAY 80' / Rail_3
+&OBST XB=1.13, 1.18, 3.64, 3.91, 0.00, 1.61, COLOR='GRAY 80' / Rail_4
+&OBST XB=1.13, 1.18, 3.91, 4.18, 0.00, 1.76, COLOR='GRAY 80' / Rail_5
+&OBST XB=1.13, 1.18, 4.18, 4.45, 0.00, 1.91, COLOR='GRAY 80' / Rail_6
+&OBST XB=1.13, 1.18, 4.45, 4.72, 0.00, 2.06, COLOR='GRAY 80' / Rail_7
+&OBST XB=1.13, 1.18, 4.70, 4.80, 0.00, 2.20, COLOR='GRAY 80' / Rail_8
+
+&OBST XB=1.13, 1.60, 4.75, 4.80, 0.00, 2.20, COLOR='GRAY 80' / Landing_Rail
+
+&OBST XB=1.55, 1.60, 4.53, 4.80, 0.00, 2.35, COLOR='GRAY 80' / Rail_9
+&OBST XB=1.55, 1.60, 4.26, 4.53, 0.00, 2.50, COLOR='GRAY 80' / Rail_10
+&OBST XB=1.55, 1.60, 3.99, 4.26, 0.00, 2.65, COLOR='GRAY 80' / Rail_11
+&OBST XB=1.55, 1.60, 3.72, 3.99, 0.00, 2.80, COLOR='GRAY 80' / Rail_12
+&OBST XB=1.55, 1.60, 3.45, 3.72, 0.00, 2.95, COLOR='GRAY 80' / Rail_13
+&OBST XB=1.55, 1.60, 3.18, 3.45, 0.00, 3.10, COLOR='GRAY 80' / Rail_14
+&OBST XB=1.55, 1.60, 2.91, 3.18, 0.00, 3.25, COLOR='GRAY 80' / Rail_15
+
+&OBST XB=1.16, 1.60, 2.86, 2.96, 2.65, 3.65, COLOR='GRAY 80' / Top_Stair_Rail
+
+&OBST XB=0.00,1.16,2.86,2.96,2.65,5.00, COLOR='GRAY 80' / Stub_Wall-Top_of_Stairs 
+
+# Floors
+&OBST XB=-0.10, 2.70,  -0.10, 6.20, -0.10, 0.00, COLOR='GRAY 60', SURF_IDS='CONCRETE FLOOR','INERT','INERT' / Floor1-Landing
+&OBST XB= 2.70, 17.00, -0.10, 1.85, -0.10, 0.00, COLOR='GRAY 60', SURF_IDS='CONCRETE FLOOR','INERT','INERT'/ Floor1-Corridor
+&OBST XB= 0.00, 1.60,   0.00, 2.96,  2.37, 2.65, COLOR='GRAY 60', SURF_IDS='CONCRETE FLOOR','GYPSUM BOARD','GYPSUM BOARD'/ Floor2-Landing
+&OBST XB= 1.60, 17.00,  0.00, 1.75,  2.37, 2.65, COLOR='GRAY 60', SURF_IDS='CONCRETE FLOOR','GYPSUM BOARD','GYPSUM BOARD'/ Floor2-Corridor
+&OBST XB=-0.10, 2.70,  -0.10, 6.20, 5.00, 5.10, COLOR='GRAY 60', SURF_IDS='CONCRETE FLOOR','GYPSUM BOARD','GYPSUM BOARD'/ Floor2-Landing_Ceiling
+&OBST XB= 2.70, 17.00, -0.10, 1.85, 5.00, 5.10, COLOR='GRAY 60', SURF_IDS='CONCRETE FLOOR','GYPSUM BOARD','GYPSUM BOARD'/ Floor2-Corridor_Ceiling
+
+
+# Second Floor Opening
+&VENT XB= 17.00, 17.00, 0.00, 1.75, 2.65, 4.682, SURF_ID='OPEN' / Opening at the south end of top hallway
+
+# Output Information
+
+&BNDF QUANTITY='GAUGE_HEAT_FLUX' /
+&BNDF QUANTITY='WALL_TEMPERATURE' /
+
+&SLCF PBY= 0.9,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /  
+&SLCF PBX=15.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. / 
+&SLCF PBX=16.4,QUANTITY='TEMPERATURE',VECTOR=.TRUE. / 
+
+&TAIL /
