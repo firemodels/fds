@@ -1,6 +1,7 @@
 ## Global Information
 
-&HEAD CHID='ATF_NIST_TwoLevel_Stairwell_01', TITLE='ATF NIST Experiments with two corridors connected by a single stairwell' /
+&HEAD CHID='ATF_NIST_Multi-Floor_01', 
+      TITLE='ATF NIST Experiments with corridors on two floors connected by a single stairwell' /
 
 &MESH IJK=168,36,50, XB= 2.80, 17.0, -0.10, 1.85, -0.10, 2.50 / Corridor_1
 &MESH IJK=168,36,50, XB= 2.80, 17.0, -0.10, 1.85,  2.50, 5.00 / Corridor_2
@@ -133,5 +134,7 @@ OBST XB=17.00, 17.10, 0.00,  1.75, 0.00, 5.00, COLOR='GRAY 80' / Corridor End Wa
 &SLCF PBY= 0.9,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /  
 &SLCF PBX=15.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. / 
 &SLCF PBX=16.4,QUANTITY='TEMPERATURE',VECTOR=.TRUE. / 
+
+&DEVC XYZ= X,Y,Z, QUANTITY='TEMPERATURE' /
 
 &TAIL /
