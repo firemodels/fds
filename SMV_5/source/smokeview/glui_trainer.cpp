@@ -342,10 +342,36 @@ void TRAINER_CB(int var){
     TrainerViewMenu(1);
     break;
   case LOAD_TEMP:
+// kind of a hack, having to put in code seg twice, but this is required to get data chopping to work
+    if(slicebounds!=NULL&&islicetype!=-1){
+      if(setslicechopmin==1||setslicechopmax==1){
+       setslicebounds(islicetype);
+      }
+    }
+    TrainerViewMenu(2);
+    updatechopcolors();
+    if(slicebounds!=NULL&&islicetype!=-1){
+      if(setslicechopmin==1||setslicechopmax==1){
+       setslicebounds(islicetype);
+      }
+    }
     TrainerViewMenu(2);
     updatechopcolors();
     break;
   case LOAD_OXY:
+// kind of a hack, having to put in code seg twice, but this is required to get data chopping to work
+    if(slicebounds!=NULL&&islicetype!=-1){
+      if(setslicechopmin==1||setslicechopmax==1){
+       setslicebounds(islicetype);
+      }
+    }
+    TrainerViewMenu(3);
+    updatechopcolors();
+    if(slicebounds!=NULL&&islicetype!=-1){
+      if(setslicechopmin==1||setslicechopmax==1){
+       setslicebounds(islicetype);
+      }
+    }
     TrainerViewMenu(3);
     updatechopcolors();
     break;
