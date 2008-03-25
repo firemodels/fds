@@ -1962,9 +1962,11 @@ equation is written
   \left(r^2k_s \dod{T_s}{r} \right)+\dq_s'''
   \label{1dheatcyl}
 \ee
-FDS offers the user these options, with the assumption that the obstruction is not actually recti-linear, but rather
-cylindrical or spherical in shape. This option is useful in describing the behavior of small, complicated ``targets''
-like cables or heat detection devices.}
+FDS offers the user these options, with the assumption that the
+obstruction is not actually recti-linear, but rather cylindrical or
+spherical in shape. This option is useful in describing the behavior
+of small, complicated ``targets'' like cables or heat detection
+devices.} 
 \be
   \rho_s c_s \; \dod{T_s}{t} = \dod{}{x} k_s \dod{T_s}{x} +
     \dq_s'''
@@ -2120,21 +2122,16 @@ mass fluxes are given by:
 \ee
 where $L$ is the thickness of the surface. The chemical source term of
 the heat conduction equation consists of the heats of reaction and the
-differences in latent heats between the original material and the
+differences in sensible heats between the original material and the
 products
 \be
-\dot{q}_{s,c}'''(x) = \rho_{s0}\;
+\dot{q}_{s,c}'''(x) = -\rho_{s0}\;
     \sum_{\alpha=1}^{N_m} \sum_{\beta=1}^{N_{r,\alpha}}
     r_{\alpha \beta}(x) \;
     \left[H_{r,\alpha \beta}-
     \int_{T_0}^{T(x)} \Delta c(\theta)d\theta \right]
 \ee
-It is possible to define a reaction where the sum of the residue, fuel
-and water yields is less than one. FDS then assumes that the solid is
-converted to a gas that is not tracked by the gas phase
-calculation. In the computation of $\Delta c(T)$, the
-specific heat of this dummy species is assumed to be equal to the
-specific heat of the original material $c_{s,\alpha}$
+where 
 \be
   \Delta c(T) = c_{s,\alpha}(T)
         - \nu_{s,\alpha \beta} \; c_{s,\alpha \beta}(T)
@@ -2143,11 +2140,18 @@ specific heat of the original material $c_{s,\alpha}$
         - (1-\sum_{\gamma=s,f,w} \nu_{\gamma,\alpha\beta}) \; c_{s,\alpha}(T)
 \ee
 $c_{s,\alpha \beta}$ is the specific heat of the residue of the
-$\beta$th reaction of material $\alpha$. The temperature integrals of the
-latent heat contents are computed in advance for all the reactions of
-each material and the values of $\dot{q}_{s,c}'''$ are tabulated
-between $T_0$ and $T_0 \;+\;2000$~K. During the pyrolysis calculation,
-the values are found from a ``look-up'' table.
+$\beta$th reaction of material $\alpha$. It is possible to define a
+reaction where the sum of the residue, fuel and water yields is less
+than one. FDS then assumes that the solid is converted to a gas that
+is not tracked by the gas phase calculation. In the computation of
+$\Delta c(T)$, the specific heat of this dummy species is assumed to
+be equal to the specific heat of the original material $c_{s,\alpha}$
+
+The temperature integrals of the sensible heat contents are computed
+in advance for all the reactions of each material and the values of 
+$\dot{q}_{s,c}'''$ are tabulated between $T_0$ and $T_0
+\;+\;2000$~K. During the pyrolysis calculation, the values are found
+from a ``look-up'' table.
 
 
 
@@ -3804,7 +3808,7 @@ front and back faces.  The smallest cells are chosen based on the
 criteria
 \be \dx < S_s\sqrt{\frac{k_s}{\rho_s c_s}} \ee
 where $S_s$ is a cell size factor defined by the user. By default,
-$F_s$ is 1.0.  Interior cells increase in size by a user-defined
+$S_s$ is 1.0.  Interior cells increase in size by a user-defined
 stretch factor when moving inwards from the surfaces. By default, the
 stretch factor is 2.0. The cell boundaries are located at points
 $x_i$. The temperature at the center of the $i$th cell is denoted $T_{s,i}$.
@@ -3820,10 +3824,14 @@ Crank-Nicolson scheme
 & & k_{s,i+\ha}\frac{T_{s,i+1}^{n+1}-T_{s,i}^{n+1}}{\dx_{i+\ha}} -
     \left.
     k_{s,i-\ha}\frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\dx_{i-\ha}}
-     \right) \end{eqnarray}
-for $1 \le i \le N$.
-The width of each cell is $\dx_i$. The distance from the center of cell $i$ to the center
-of cell $i+1$ is $\dx_{i+\ha}$.
+     \right) 
+    + \frac{\dq_s'''}{\rho_s c_s}
+\end{eqnarray}
+for $1 \le i \le N$. The width of each cell is $\dx_i$. The distance
+from the center of cell $i$ to the center of cell $i+1$ is
+$\dx_{i+\ha}$. However, the material properties $k_s$, $c_s$, $\rho_s$
+and source terms $\dq_s'''$ are updated in an explicit manner, using
+the temperature information from time step $n$.
 
 The boundary condition is discretized
 \be -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\dx_{\ha}} = \dq''_c{}^{(n+1)} + \dq''_r{}^{(n+1)} \ee
