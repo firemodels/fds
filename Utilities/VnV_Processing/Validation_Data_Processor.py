@@ -54,10 +54,10 @@ def extract_config_data(config_file):
                 keyed_data = {}
             data_counter += 1
         else:
-            print """No d or q in first cell, skip to next row."""
+            print """No d or q, skip row."""
     
     #Convert quantities keys from string to integer.
-    tempdict = dict((int(k), v) for k,v in quantities_dict.iteritems())
+    tempdict = dict((int(key), values) for key,values in quantities_dict.iteritems())
     quantities_dict = tempdict
     
     # Return a single list object containing the dictionaries.
@@ -236,8 +236,13 @@ def extract_comp_data(comp_file_info):
     #print exp_peak_value
     #print exp_initial_value
     
-    relative_difference = compute_difference(mod_peak_value,mod_initial_value,exp_peak_value,exp_initial_value)
-        
+    # This allows the d line Quantity value to be set to 0 when either model or experimental data is missing.
+    if comp_file_info['Quantity'] == 0:
+        print "Quantity set to 0, no comparison made."
+        relative_difference = 'NA'
+    else:
+        relative_difference = compute_difference(mod_peak_value,mod_initial_value,exp_peak_value,exp_initial_value)
+    
     #Append Min_Max Values to Global Scatter Data Dictionary.
     scatter_data_dict[scatter_data_label] = [exp_peak_value,mod_peak_value,relative_difference]
     
@@ -286,7 +291,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
     
     #Set plot legend key text.
     exp_key = plot_data['Exp_Key']
-    mod_key = plot_data['Mod_Key'] 
+    mod_key = plot_data['Mod_Key']
     
     #Create filename from fields in input file record.
     plot_file_name = plot_data["Plot_Filename"]
@@ -336,14 +341,13 @@ def comparison_plot(plot_data,exp_data,mod_data):
 def scatter_plot(plot_info,data_set):
     #plot_info is details about the overall plot layout and text.
     #data_set is a dictionary keyed by test name containing lists of X and Y data points.
-    #print plot_info
+    print plot_info
     #print data_set
     
     # Need quantity and group iterations.  Also need way to make key based on groups.
     for quantity_number in plot_info:
         if data_set[quantity_number] == []:
-            continue
-            #print "No data in Scatter Plot Dataset."
+            print "No Scatter Plot Data in Quantity "+str(quantity_number)+" Dataset."
         else:
             # Set variables for Plot extracted from the first group of lines in config file starting with 'q'.
             
@@ -415,6 +419,8 @@ def scatter_plot(plot_info,data_set):
                             symbolattrs=[graph.style.symbol.changefilledstroked, 
                                         attr.changelist([color.rgb.red, color.rgb.green, color.rgb.blue])])
             for data in data_set[quantity_number]:
+                #IF data[1] is a list of lists then loop over each group of data with a different symbol.
+                #ELSE 
                 scatter_plot_data = [data[1]]
                 #print scatter_plot_data
                 g.plot(graph.data.points(scatter_plot_data, x=1, y=2, title=data[0].replace('_',' ')), [mystyle])
