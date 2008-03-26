@@ -21,7 +21,7 @@
 char main_revision[]="$Revision$";
 
 /* ------------------ main ------------------------ */
-// dummy change to force update of the revision number
+
 int main(int argc, char **argv){
   char **argv_sv;
 
