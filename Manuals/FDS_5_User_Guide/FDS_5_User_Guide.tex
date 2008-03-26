@@ -6609,7 +6609,9 @@ Thus, you can use {\ct RADIATIVE\_INTENSITY}/4 as an approximation for the incid
 take into account the non-uniform nature of radiation. Also note that this is the {\em incident} heat flux. To get the {\em net} heat flux to the
 object or person whose surface temperature is $T_s$, you need to subtract $\epsilon \sigma T_s^4$, the outgoing heat flux.
 
-
+There is a second output quantity available called {\ct RADIATIVE\_FLUX\_GAS} which uses the additional input 
+of {\ct ORIENTATION}.  This quantity integrates the incomming radiative flux over $2\pi$ solid angles around the
+vector defined by {\ct ORIENTATION}.
 
 
 
@@ -6832,6 +6834,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct PRESSURE\_COEFFICIENT}                     & $C_p$ (Section~\ref{info:wind})               &                & B,D          \\ \hline
 {\ct RADIANT\_INTENSITY}                        & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct RADIATIVE\_FLUX}                           & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
+{\ct RADIATIVE\_FLUX\_GAS}                      & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D            \\ \hline
 {\ct RADIOMETER}                                & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Relative humidity                             & \%             & D,I,P,S      \\ \hline
 {\ct soot volume fraction}                      & $\rho Y_s(Z)/\rho_s$                          & mol/mol        & D,I,P,S      \\ \hline
