@@ -22,6 +22,7 @@ def extract_config_data(config_file):
     keyed_data = {}
     quantity_counter = 0
     data_counter = 0
+    group_counter = 0
     
     fh = file(config_file, 'U')
     data_array = csv.reader(fh)
@@ -38,7 +39,8 @@ def extract_config_data(config_file):
             if quantity_counter >= 1:
                 for x in range(len(quantity_header)):
                     keyed_quantities[quantity_header[x]] = list_item[x+2]
-                quantities_dict[list_item[1]] = keyed_quantities
+                #print "List item 1:",int(list_item[1])
+                quantities_dict[int(list_item[1])] = keyed_quantities
                 keyed_quantities = {}
             quantity_counter += 1
         elif list_item[0] == 'd':
@@ -53,13 +55,18 @@ def extract_config_data(config_file):
                 data_dict[data_key_name] = keyed_data
                 keyed_data = {}
             data_counter += 1
+        elif list_item[0] == 'g':
+            group_counter += 1
+            print "This is group line #"+str(group_counter)+"."
         else:
-            print """No d or q, skip row."""
+            print """No g, d or q, skip row."""
     
     #Convert quantities keys from string to integer.
-    tempdict = dict((int(key), values) for key,values in quantities_dict.iteritems())
-    quantities_dict = tempdict
-    
+    #tempdict = dict((int(key), values) for key,values in quantities_dict.iteritems())
+    #quantities_dict = tempdict
+
+    #print "Data Dictionary:",data_dict]
+            
     # Return a single list object containing the dictionaries.
     return [quantities_dict,data_dict]
 
@@ -341,11 +348,13 @@ def comparison_plot(plot_data,exp_data,mod_data):
 def scatter_plot(plot_info,data_set):
     #plot_info is details about the overall plot layout and text.
     #data_set is a dictionary keyed by test name containing lists of X and Y data points.
-    print plot_info
+    #print plot_info
     #print data_set
     
     # Need quantity and group iterations.  Also need way to make key based on groups.
     for quantity_number in plot_info:
+        #print "Dataset for quantity number "+str(quantity_number)+": ", data_set[quantity_number]
+        
         if data_set[quantity_number] == []:
             print "No Scatter Plot Data in Quantity "+str(quantity_number)+" Dataset."
         else:
@@ -475,7 +484,7 @@ for scatter_plot_record in sorted(config_and_data_dicts[0]):
     #print "Quantity:", config_and_data_dicts[0][scatter_plot_record]['Comparison_Quantities']
     for scatter_data_key in sorted(scatter_data_dict):
         split_key = split("-",scatter_data_key)
-        if scatter_data_key[0] == str(scatter_plot_record) and scatter_plot_record != []:
+        if split_key[0] == str(scatter_plot_record) and scatter_plot_record != []:
             #print "Test name:", split_key[1]
             #print "Scatter Data:", scatter_data_dict[scatter_data_key][:2]
             temp_scatter_data_list.append([split_key[1], scatter_data_dict[scatter_data_key][:2]])
