@@ -498,7 +498,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                ENDIF
                FDS_LEAK_AREA(IPZ,IOPZ) = FDS_LEAK_AREA(IPZ,IOPZ) + AW(IW)
             ENDIF
-            IF (TW(IW)==T_BEGIN) THEN
+            IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                TSI = T            
             ELSE
                TSI = T+DT-TW(IW)

@@ -134,7 +134,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
       CASE (SPECIFIED_TEMPERATURE) METHOD_OF_HEAT_TRANSFER
 
          TMP_G = TMP(IIG,JJG,KKG)
-         IF (TW(IW)==T_BEGIN) THEN
+         IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(TIME_TEMP)>=1) THEN
             TSI = T
          ELSE
             TSI = T - TW(IW)
@@ -181,7 +181,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
 
       CASE (SPECIFIED_HEAT_FLUX) METHOD_OF_HEAT_TRANSFER
 
-         IF (TW(IW)==T_BEGIN) THEN
+         IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(TIME_HEAT)>=1) THEN
             TSI = T
          ELSE
             TSI = T - TW(IW)
@@ -355,7 +355,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
  
       CASE (SPECIFIED_MASS_FRACTION) METHOD_OF_MASS_TRANSFER
 
-         IF (TW(IW)==T_BEGIN) THEN
+         IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(N)>=1) THEN
             IF (PREDICTOR) TSI = T + DT
             IF (CORRECTOR) TSI = T
          ELSE
@@ -391,7 +391,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
 
          SUM_MASSFLUX_LOOP: DO N=0,N_SPECIES
             IF (SF%MASS_FLUX(N) > 0._EB) THEN  ! Use user-specified ramp-up of mass flux
-               IF (TW(IW)==T_BEGIN) THEN
+               IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(N)>=1) THEN
                   TSI = T
                ELSE
                   TSI = T - TW(IW)
