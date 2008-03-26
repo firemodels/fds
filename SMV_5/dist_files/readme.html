@@ -5,20 +5,27 @@
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Smokeview Release Notes</h2>
 <p><hr size="1">
-<p>March 11, 2008
+<p>March 26, 2008
 
 <p>Latest FDS and Smokeview available at 
 <a href="http://fire.nist.gov/fds">http://fire.nist.gov/fds</a>
 <ul>
+<li>5.1.3 (build 1501) - March 26, 2008
+<ol>
+<li>enhancement -  redo grid show menu to make clearer which grid planes will be visible once grid drawing is turned on.  
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=308&can=1&sort=-id">Issue 308</a>)
+<li>fix - fix data chopping (<a href="http://code.google.com/p/fds-smv/issues/detail?id=303&can=1&sort=-id">Issue 303</a>).
+</ol>
+
 <li>5.1.2 (build 1426) - March 11, 2008
 <ol>
 <li>enhancement - add option to select frame skip for isosurface and slice files (in addition to boundary and 3D 
 smoke files) when compressing data with smokezip.
-</ol>
 <li>enhancement - add demo mode, activated by copying casename.smv to casename.svd .  
 This mode is used to demonstrate an FDS/Smokeview case by presenting a simplified dialog box with pre-defined tours
 <li>enhancement - add the command line option -skip val to the companion program <bold>smokezip</bold> to allow
 frame skipping specifiation when running this tool from a command shell.
+</ol>
 <li>5.1 (build 1345) - February 20, 2008
 <ol>
 <li>enhancement - add demo mode, activated by copying casename.smv to casename.svd .  
@@ -31,9 +38,10 @@ and viewpoints (defined in an .ini file).  Further details are found in the Smok
 <li>An option has been added to smooth blockages (or not) at startup.
 <li>Smooth blockages are now saved to a file the first time a case is loaded for quicker subsequent startups.
 </ol>
-<li>fix - fix problem with running smokezip (caused by imbedded blanks in the path name) from Smokeview (issue 283)
-<li>fix - fix problem with menu disconnects (issues 263).
-<li>fix - add missing scaling info to PART5 colorbar label (issue 269).
+<li>fix - fix problem with running smokezip (caused by imbedded blanks in the path name) from Smokeview 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=283&can=1&sort=-id">issue 283</a>)
+<li>fix - fix problem with menu disconnects (<a href="http://code.google.com/p/fds-smv/issues/detail?id=263&can=1&sort=-id">issues 263</a>).
+<li>fix - add missing scaling info to PART5 colorbar label (<a href="http://code.google.com/p/fds-smv/issues/detail?id=269&can=1&sort=-id">issue 269</a>).
 </ol>
 <li>5.0.7 (build 1136) - December 30, 2007
 <ol>
@@ -41,13 +49,14 @@ and viewpoints (defined in an .ini file).  Further details are found in the Smok
 </ol>
 <li>5.0.6 (build 1042) - November 30, 2007
 <ol>
-<li>fix - fix error in colorbar when displaying CFAST zone data (issue 234).
+<li>fix - fix error in colorbar when displaying CFAST zone data 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=234&can=1&sort=-id">issue 234</a>).
 </ol>
 <li>5.0.5 (build 940) - November 6, 2007
 <ol>
 <li>enhancement - add hrr cutoff parameter to .ini file.
 <li>fix - fix errors in device file input that occur when smokeview is run from a command line
-(smokeview bin directory was defined improperly) (issue 217).
+(smokeview bin directory was defined improperly) (<a href="http://code.google.com/p/fds-smv/issues/detail?id=217&can=1&sort=-id">issue 217</a>).
 </ol>
 <li>5.0.4 (build 875) - October 25, 2007
 <ol>
@@ -55,18 +64,19 @@ and viewpoints (defined in an .ini file).  Further details are found in the Smok
 (Show/Hide>Geometry>Vents)
 <li>enhancement - Add option to highlight data with values outside of colorbar range<br>
 (Options>Shades>Colorbars)
-<li>fix - colorbar selection (issue 126).
-<li>fix - vent transparency (issue 27).
+<li>fix - colorbar selection (<a href="http://code.google.com/p/fds-smv/issues/detail?id=126&can=1&sort=-id">issue 126</a>).
+<li>fix - vent transparency .
 </ol>
 <li>5.0.3 (build 863) - October 18, 2007
 <ol>
-<li>fix - missing slice file menu entries (Issue 209).
-<li>fix - crash when particle file reloading (Issue 203).
+<li>fix - missing slice file menu entries (<a href="http://code.google.com/p/fds-smv/issues/detail?id=209&can=1&sort=-id">Issue 209</a>).
+<li>fix - crash when particle file reloading (<a href="http://code.google.com/p/fds-smv/issues/detail?id=203&can=1&sort=-id">Issue 203</a>).
 <li>maintenance - internal source clean up to remove more un-needed compiler directives.
 </ol>
 <li>5.0.2 (build 826) - October 10, 2007
 <ol>
-<li>enhancement - changed default color of first iso-surface to purple to address fire colorization detailed in Issue 196.
+<li>enhancement - changed default color of first iso-surface to purple to address fire colorization detailed in 
+<a href="http://code.google.com/p/fds-smv/issues/detail?id=196&can=1&sort=-id">Issue 196</a>.
 <li>maintenance - internal source clean up to remove un-needed compiler directives.
 </ol>
 
@@ -84,4 +94,5 @@ Gaithersburg, MD 20899
 </address>
 
 
-</BODY></HTML>
+</BODY>
+</HTML>
