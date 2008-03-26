@@ -2827,7 +2827,7 @@ been incorporated into the divergence and ultimately are involved in
 the mass conservation equation. The temperature is found from the
 density and background pressure via the equation of state.
 
-\subsubsection{Temporal Discretization}
+\subsubsection{Temporal Discretization (Single Mesh Case)}
 
 All calculations start with ambient initial conditions.
 At the beginning of each time step, the density,
@@ -2842,8 +2842,6 @@ of the quantities at the $(n+1)$st time step.
 estimated at the next time step with an explicit Euler step. For
 example, the density is estimated by
 \be \rho^{(n+1)_e} = \rho^n - \dt (\bu^n \cdot \nabla \rho^n + \rho^n \nabla \cdot \bu^n) \ee
-Before boundary conditions for $\rho$ and $Y_\alpha$ are applied, values of these quantities at
-interpolated mesh boundaries are exchanged via MPI calls.
 
 \item The divergence $(\nabla \cdot \bu)^{(n+1)_e}$ is formed from these
 estimated thermodynamic quantities. The normal velocity components at
@@ -2868,16 +2866,13 @@ both constraints and the procedure returns to the beginning of the time step.
 If the time step satisfies the stability criteria, the procedure continues to the corrector step.
 See Section~\ref{stability} for more details on stability.
 
-This concludes the ``Predictor'' stage of the time step. At this point, mesh interface values of $\cal H$ are
-exchanged via MPI calls.
+This concludes the ``Predictor'' stage of the time step.
 
 \item The thermodynamic quantities $\rho$, $Y_\alpha$, and $\bp_m$ are
 ``corrected'' at the next time step. For example, the density is corrected
 \be \rho^{n+1} =
    \ha \left(\rho^n + \rho^{(n+1)_e} - \dt
     (\bu^{(n+1)_e} \cdot \nabla \rho^{(n+1)_e} + \rho^{(n+1)_e} \nabla \cdot \bu^{(n+1)_e}) \right)  \ee
-Before boundary conditions for $\rho$ and $Y_\alpha$ are applied, values of these quantities at
-interpolated mesh boundaries are exchanged via MPI calls.
 
 \item The corrected divergence $(\nabla \cdot \bu)^{n+1}$ is computed from the
 corrected thermodynamic quantities.
@@ -2893,9 +2888,6 @@ corrected thermodynamic quantities.
      - \dt \left( \bF^{(n+1)_e} + \nabla {\cal H}^{n+1} \right) \right] \ee
 Note again that the divergence of the corrected velocity field is
 identically equal to the corrected divergence.
-
-At the conclusion of the time step, values of $\cal H$ and the components of $\bu$ are exchanged at
-mesh boundaries via MPI calls.
 
 \end{enumerate}
 
@@ -3369,98 +3361,90 @@ $u_{nx,jk}$ is the $x$ component of velocity at the boundary.  The overbars on $
 \be {\cal H}_{nx+1,jk} = 2 {\cal H}_{nx+\ha,jk} - {\cal H}_{nx,jk} \ee
 
 
-\subsubsection{Multiple Mesh Considerations (On-Going Research)}
+\subsection{Multiple Mesh Considerations (On-Going Research)}
 
-Here we provide an overview of the ``pressure correction'' scheme used in FDS to enforce global volume conservation in multiple mesh (i.e. parallel) computations (a ``mesh'' refers to the computational domain which is mapped to an individual processor).  There are three critical components of the scheme which we discuss in further detail below: (1) the averaging of the normal velocity component at a mesh interface, (2) the Dirichlet boundary value for the hydrodynamic pressure, and (3) the Neumann boundary condition for the pressure correction.  The term ``pressure correction'' actually best identifies only the third component of the scheme which is ultimately responsible for enforcing volume conservation from mesh to mesh (and thus globally).  However, the first two components of the scheme are perhaps even more important for maintaining stability of the solution.
+In this section we provide an overview of the ``pressure correction'' scheme used in FDS to enforce global volume conservation in multiple mesh (i.e. parallel) computations (a ``mesh'' refers to the computational domain which is mapped to an individual processor).  There are three critical components of the scheme which we discuss in further detail below and in Appendix \ref{app_pressure_correction}: (1) the averaging of the normal velocity component at a mesh interface, (2) the Dirichlet boundary value for the hydrodynamic pressure, and (3) the Neumann boundary condition for the pressure correction.  The term ``pressure correction'' actually best identifies only the third component of the scheme which is ultimately responsible for enforcing volume conservation from mesh to mesh (and thus globally).  However, the first two components of the scheme are perhaps even more important for maintaining stability of the solution.
 
-The basic idea behind the scheme is the following.  First, we break up the hydrodynamic pressure $\cH$ into a fluctuating component $\cH^\prime$ and a small correction $\cal H^{\prime\prime}$.  We may then write the momentum equation as
+The basic idea behind the scheme is the following.  First, we break up the hydrodynamic pressure $\cH$ into a fluctuating component $\cH'$ and a small correction $\cal H''$.  We may then write the momentum equation as
 \begin{equation}
 \label{eqn_mom1}
-\frac{\partial \mathbf{u}}{\partial t} = - \left[ \mathbf{F} + \nabla \cH^\prime + \nabla \cH^{\prime\prime} \right] \,\mbox{.}
+\frac{\partial \mathbf{u}}{\partial t} = - \left[ \mathbf{F} + \nabla \cH' + \nabla \cH'' \right] \,\mbox{.}
 \end{equation}
 Equation (\ref{eqn_mom1}) is integrated in time under the constraints that the pressure fluctuation satisfies the Poisson equation,
 \begin{equation}
 \label{eqn_poisson}
-\nabla^2 \cH^\prime = - \left[ \frac{\partial}{\partial t} \left(\nabla\cdot \mathbf{u}\right) + \nabla\cdot \mathbf{F} \right] \,\mbox{,}
+\nabla^2 \cH' = - \left[ \frac{\partial}{\partial t} \left(\nabla\cdot \mathbf{u}\right) + \nabla\cdot \mathbf{F} \right] \,\mbox{,}
 \end{equation}
 and the pressure correction satisfies Laplace's equation,
 \begin{equation}
 \label{eqn_laplace}
-\nabla^2 \cH^{\prime\prime} = 0 \,\mbox{.}
+\nabla^2 \cH'' = 0 \,\mbox{.}
 \end{equation}
+Now, as opposed to conventional domain decomposition techniques where boundary conditions are prescribed only along the global boundary of the problem domain and the PDEs (\ref{eqn_poisson}) and (\ref{eqn_laplace}) are supposed to apply across mesh interfaces (a.k.a. patch or interpolated boundaries), in the FDS multiple mesh algorithm we impose a Dirichlet condition on $\cH^\prime$ and a Neumann condition on $\cH^{\prime\prime}$ at patch boundaries.  The Dirichlet condition for the pressure fluctuation is designed to provide stability and accuracy and the Neumann condition for the (ideally small) pressure correction field is designed to enforce volume conservation from mesh to mesh.  Once these boundary conditions are prescribed, calculations on each mesh may proceed independently, resulting in an algorithm which is embarrassingly parallel.  Note that this scheme may be viewed as a single iteration in an additive Schwarz method.
 
-Now, as opposed to conventional domain decomposition techniques where boundary conditions are prescribed only along the global boundary of the problem domain and the PDEs (\ref{eqn_poisson}) and (\ref{eqn_laplace}) are supposed to apply across mesh interfaces (a.k.a. patch boundaries), in the FDS pressure correction scheme we impose a Dirichlet condition on $\cH^\prime$ and we impose a Neumann condition on $\cH^{\prime\prime}$ at patch boundaries.  The Dirichlet condition for the pressure fluctuation is designed to provide stability and accuracy and the Neumann condition for the (ideally small) pressure correction field is designed to enforce volume conservation from mesh to mesh.  Once these boundary conditions are prescribed, calculations on each mesh may proceed independently, resulting in an algorithm which is embarrassingly parallel.  Note that this scheme may be viewed as a single iteration in an additive Schwarz method.
+Below we provide a summary of the multiple mesh algorithm, similar to the single mesh algorithm described above.  The key differences between the single and multiple mesh procedures are the averaging of the velocity field at mesh boundaries and the additional step of solving the Laplace equation in the multiple mesh case if the pressure correction scheme is invoked.
 
-The time advancement scheme for multiple meshes must now include averaging of the velocity components at a patch boundary in order to obey angular momentum conservation and hence maintain stability. It is extremely important to note that -- because of the staggered grid storage arrangement -- two values of the numerical solution for the velocity exist at a given point on a mesh interface.  Consider meshes $m$ (left) and $om$ (right) which are joined side by side in the $x$ direction.  The values $u^{(m)}_{nx,jk}$ and $u^{(om)}_{0,jk}$ live at the same physical location, but are advanced separately (and by different processors) during the course of the algorithm.  Obviously, in the ideal circumstance these velocities are identical, as is the case if the PDEs (\ref{eqn_poisson}) and (\ref{eqn_laplace}) are enforced at the mesh interface.  To improve the speed of our parallel algorithm, our strategy is instead to keep the difference between these values small while still enforcing global volume conservation.  Our strategy recovers the ideal case in the limit $\delta t \rightarrow 0$.  In fact, we observe that for reasonable time steps (CFL $\le$ 1) the difference between the two coincident velocities is extremely small.
+\subsubsection{Temporal Discretization (Multiple Mesh Case)}
 
-While the primitive variables $\mathbf{u}$ are indeed unique to a given mesh, for each mesh we may define the discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which includes ghost cell data and is identical at all overlapping mesh points.  To do this we simply average the coincident values of the velocity components at the mesh interfaces and inject the ghost cell values from the neighboring mesh.  For instance, considering the same side-by-side meshes $m$ and $om$ as before,
-\begin{equation}
-\label{eqn_patchave_ufield}
-\bar{u}^{(m)}_{ijk} \equiv \left\{ \begin{array}{ll} u^{(m)}_{ijk} & \mbox{for}\quad 0<i<nx^{(m)} \vspace{0.2cm}\\
-\frac{1}{2} \left[ u^{(m)}_{nx^{(m)},jk} + u^{(om)}_{0,jk} \right] & \mbox{for}\quad i=nx^{(m)} \vspace{0.2cm}\\
-u^{(om)}_{1,jk} & \mbox{for}\quad i=nx^{(m)}+1 \end{array} \right.
-\end{equation}
-for all patch boundary cells $j$ and $k$. The values of $\bar{u}^{(m)}$ for the index ranges not considered in (\ref{eqn_patchave_ufield}) depend on the specific boundary conditions for the other faces of mesh $m$.  The same ideas are used to define the patch-averaged fields for $\bar{v}$ and $\bar{w}$.
+\begin{enumerate}
+\item Compute the ``patch-average'' velocity field $\bar{\mathbf{u}}^n$ (see Appendix \ref{app_pressure_correction}).
 
-To illustrate how the new the patch-averaged fields are used, we consider the predictor step in the time advancement, which may now be written as
-\begin{equation}
-\label{eqn_RK1}
-\mathbf{u}^{(n+1)_e} = \bar{\mathbf{u}}^n - \delta t \left[ \mathbf{F}(\rho^n,\bar{\mathbf{u}}^n) + {\nabla\cH^\prime}^{(n+1)_e} + {\nabla\cH^{\prime\prime}}^{(n+1)_e} \right] \,\mbox{,}
-\end{equation}
-Note that (\ref{eqn_RK1}) updates the $\bar{\mathbf{u}}$ field to a $\mathbf{u}$ field.  Though this is perfectly legitimate, we should be aware of the following issues.  First, the patch-averaging procedure is slightly dissipative.  But as long as we are accurate, this numerical dissipation is minimal and acceptable (much smaller than physical dissipation).  Second, we must now think of the time update in terms of a projection scheme in order to repair the damage made to the divergence by the averaging procedure. In practical terms, this means that the Poisson equation for the pressure fluctuation in the predictor step, for example, is given by
-\begin{equation}
-\label{eqn_poisson_stg1}
-\nabla^2 {\cH^\prime}^{(n+1)_e} = -\left[\frac{ (\nabla\cdot\mathbf{u})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n}{\delta t}\right] -  \mathbf{F}(\rho^n,\bar{\mathbf{u}}^n) \,\mbox{.}
-\end{equation}
-In (\ref{eqn_poisson_stg1}), only the term $(\nabla\cdot\mathbf{u})^{(n+1)_e}$ is obtained from the equation of state.  The divergence of the patch-averaged field, $(\nabla\cdot\bar{\mathbf{u}})^n$, is obtained explicitly.  Similarly, in the corrector Poisson equation analogous to (\ref{eqn_corrector_poisson}), only the $(\nabla\cdot\mathbf{u})^{n+1}$ term is obtained from the equation of state; other divergences are obtained explicitly:
-\begin{equation}
-\label{eqn_poisson_stg2}
-\nabla^2 {\cH^\prime}^{\,n+1} = -\left[\frac{ 2(\nabla\cdot\mathbf{u})^{n+1} - (\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n}{\delta t}\right] -  \mathbf{F}(\rho^{(n+1)_e},\bar{\mathbf{u}}^{(n+1)_e}) \,\mbox{,}
-\end{equation}
-Finally, the velocity corrector step is
+\item The thermodynamic quantities $\rho$, $Y_\alpha$, and $\bp_m$ are
+estimated at the next time step with an explicit Euler step. For
+example, the density is estimated by
+\be \rho^{(n+1)_e} = \rho^n - \dt (\bar{\mathbf{u}}^n \cdot \nabla \rho^n + \rho^n \nabla \cdot \bar{\mathbf{u}}^n) \ee
+Before boundary conditions for $\rho$ and $Y_\alpha$ are applied, values of these quantities at
+interpolated mesh boundaries are exchanged via MPI calls.
+
+\item The divergence $(\nabla \cdot \bu)^{(n+1)_e}$ is formed from these
+estimated thermodynamic quantities. The normal velocity components at
+boundaries that are needed to form the divergence are assumed known.
+
+\item A Poisson equation for the pressure fluctuation is solved with a direct solver
+\be \nabla^2{\cal H'}^{(n+1)_e} = - \left[ \frac{ (\nabla \cdot \bu)^{(n+1)_e} -
+  (\nabla \cdot \bar{\mathbf{u}})^n }{\dt} \right] - \nabla \cdot \bar{\bF}^n  \ee
+Note that the vector $\bar{\bF}^n = \bF(\rho^n,\bar{\mathbf{u}}^n)$ is computed using patch-averaged velocities and that the divergence of the patch-averaged field is computed explicitly.
+
+\item If the `pressure correction' scheme is invoked then we solve the Laplace equation for ${\cH''}^{(n+1)_e}$ on each mesh with Neumann boundary conditions designed to enforce volume conservation from mesh to mesh (details are provided in Appendix \ref{app_pressure_correction}).  This procedure involves a mesh exchange via MPI.
+
+\item The velocity is estimated at the next time step
 \be
-\bu^{n+1} = \ha \left[ \bar{\bu}^n + \bar{\bu}^{(n+1)_e} - \dt \left( \mathbf{F}[\rho^{(n+1)_e},\bar{\mathbf{u}}^{(n+1)_e}] + \nabla{\cH^\prime}^{\,n+1} + \nabla{\cH^{\prime\prime}}^{\,n+1}\right) \right] \,\mbox{.}
+\bu^{(n+1)_e} = \bar{\mathbf{u}}^n - \dt \left( \bar{\bF}^n + \nabla {\cal H'}^{(n+1)_e} + \nabla {\cal H''}^{(n+1)_e}\right)
 \ee
-The benefit of the averaging procedure is that, since all force terms are determined using the patch-averaged field, for a given location along a mesh interface $\mathbf{F}$ is the same for each mesh.  This also means that stress tensors computed at a mesh interface will be symmetric which is a requirement for angular momentum conservation.
+Note that the divergence of the estimated velocity field is identically equal to the estimated divergence $(\nabla \cdot \bu)^{(n+1)_e}$ that was derived from the estimated thermodynamic quantities. The time step is checked for stability and the preceding steps are rerun with a smaller time step if necessary.
 
-At the interface of two abutting meshes the following Dirichlet boundary condition is applied (again, mesh $m$ is to the left of mesh $om$ in this example):
-\be \cH_{nx+\ha,jk}^{(m)} = \cH_{1-\ha,jk}^{(om)} = \frac{1}{2}\left[ \cH_{nx,jk}^{(m),*} + \cH_{1,jk}^{(om),*} \right]  \ee
-Again, the asterisk denotes the most recent value of the pressure.  The bracketed superscript indicates the mesh index.  Note that the pressure boundary values are identical for each mesh at the interface.  To a good approximation, this boundary condition maintains continuity of the pressure field from mesh to mesh without invoking an iterative procedure.  Roughly speaking, here we are committing the same level of error as we commit by using (\ref{sbc}) at solid obstacles within the mesh domain.
+This concludes the ``Predictor'' stage of the time step.  At this point, values of $\cal H'$ and the components of $\bu$ are exchanged at mesh boundaries via MPI calls.
 
-To get the boundary conditions for the Laplace equation, we first solve a discretized form of the Poisson equation for the entire domain using the individual
-meshes themselves. This is much like the strategy adopted by zone and lumped parameter models, which assume that each compartment in a building has a uniform pressure found
-by solving a system of equations based on mass balances at compartment boundaries.
-This coarse Poisson equation is derived by integrating Eq.~(\ref{finepois}) over each mesh and applying the Divergence Theorem:
-\be \int_{\partial \Omega_m} \nabla \cH' \cdot \dS = -\int_{\partial \Omega_m} \overline{\bG} \cdot \dS
-    - \int_{\Omega_m} \dod{(\nabla \cdot \bu)}{t} \; dV  \quad ; \quad \bG = \bF + \nabla \cH^0  \label{poisdiv} \ee
-The subscript $m$ refers to a given mesh. The overbar indicates that at mesh boundaries, the average of the quantity from the
-abutting meshes is to be used. Next, introduce a single scalar quantity, $\widehat{\cH'}_m$, for each mesh such that at each mesh boundary
-\be \int \nabla \cH' \cdot \dS = \frac{\widehat{\cH'}_{m_2}  - \widehat{\cH'}_{m_1} }{L_{12}} A_{12} \ee
-where $L_{12}$ is the distance between the mesh centers in the coordinate direction normal to the mesh boundary, and $A_{12}$ is the area of the boundary. In discretized form,
-Eq.~(\ref{poisdiv}) forms a sparse linear system of equations for $\widehat{\cH'}$ that can be solved
-with a direct (non-iterative) solver.
+\item We compute the ``patch-average'' velocity field $\bar{\mathbf{u}}^{(n+1)_e}$ (see Appendix \ref{app_pressure_correction}).
 
-Following the solution of the coarse pressure equation, at the interface between two
-neighboring meshes, we now have an estimate of the rate of change of the volume flux. For example, assume that meshes 1 and 2 abut at a plane $x=x_0$, and that mesh 2 is
-to the positive side of the interface. Then the change in volume flow with time is:
-\be \frac{d\dot{V}_{12}}{dt}  = -\int_{x=x_0} \overline{G}_x \, dy \, dz
-- \frac{\widehat{\cH'}_{m_2} - \widehat{\cH'}_{m_1}}{L_{12}} A_{12} \ee
-We want the fine grid solution of the Poisson equation on the individual abutting meshes to satisfy this
-constraint at their interface. To force this, solve
-\be \nabla^2 {\cal H}' = 0 \ee
-with Neumann boundary conditions on each of the abutting meshes
-such that at the interface the gradient of $\cH'$ is used to add or subtract the necessary volume flow to enforce conservation mesh to mesh.
-For example, at the $x=x_0$ interface, the gradient of
-$\cH'$ at the boundary of each mesh is assumed constant and chosen so that:
-\be  \frac{d\dot{V}}{dt} =
-    - \int_{x=x_0} G_x \; dy \, dz -  \int_{x=x_0} \dod{\cH'}{x} \; dy \, dz \label{constraint} \ee
-In this way, the resulting volume flow at the next time step $\dot{V}=\int \bu \cdot \dS$ into and
-out of each mesh match. It does not
-guarantee, however, that the normal component of velocity at each cell matches its counterpart in the other
-mesh.
+\item The thermodynamic quantities $\rho$, $Y_\alpha$, and $\bp_m$ are ``corrected'' at the next time step. For example, the density is corrected
+\be
+\rho^{n+1} = \ha \left[\rho^n + \rho^{(n+1)_e} - \dt \left(\bar{\mathbf{u}}^{(n+1)_e} \cdot \nabla \rho^{(n+1)_e} + \rho^{(n+1)_e} \nabla \cdot \bar{\mathbf{u}}^{(n+1)_e}\right) \right]
+\ee
+Before boundary conditions for $\rho$ and $Y_\alpha$ are applied, values of these quantities at
+interpolated mesh boundaries are exchanged via MPI calls.
 
+\item The corrected divergence $(\nabla \cdot \bu)^{n+1}$ is computed from the
+corrected thermodynamic quantities.
 
+\item The pressure fluctuation is recomputed using estimated quantities
+\be
+\label{eqn_corrector_poisson}
+\nabla^2{\cal H'}^{n+1} = - \left[ \frac{ 2(\nabla\cdot\bu)^{n+1} - (\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n }{\dt} \right] - \nabla \cdot \bar{\mathbf{F}}^{(n+1)_e}
+\ee
+Again, note that only $(\nabla\cdot\bu)^{n+1}$ is taken from the equation of state.  The divergences of the patch-averaged fields are computed explicitly.
 
+\item If the `pressure correction' scheme is invoked then we solve the Laplace equation for ${\cH''}^{n+1}$ on each mesh with Neumann boundary conditions designed to enforce volume conservation from mesh to mesh (details are provided in Appendix \ref{app_pressure_correction}).  This procedure involves a mesh exchange via MPI.
+
+\item The velocity is corrected
+\be
+\bu^{n+1} = \ha \left[ \bar{\mathbf{u}}^n + \bar{\mathbf{u}}^{(n+1)_e} - \dt \left( \bar{\mathbf{F}}^{(n+1)_e} + \nabla {\cal H'}^{n+1} + \nabla {\cal H''}^{n+1}\right) \right]
+\ee
+Note again that the divergence of the corrected velocity field is identically equal to the corrected divergence.
+
+At the conclusion of the time step, values of $\cal H'$ and the components of $\bu$ are exchanged at mesh boundaries via MPI calls.
+
+\end{enumerate}
 
 
 
@@ -3824,7 +3808,7 @@ Crank-Nicolson scheme
 & & k_{s,i+\ha}\frac{T_{s,i+1}^{n+1}-T_{s,i}^{n+1}}{\dx_{i+\ha}} -
     \left.
     k_{s,i-\ha}\frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\dx_{i-\ha}}
-     \right) 
+     \right)
     + \frac{\dq_s'''}{\rho_s c_s}
 \end{eqnarray}
 for $1 \le i \le N$. The width of each cell is $\dx_i$. The distance
@@ -4466,6 +4450,137 @@ and
 \end{eqnarray}
 
 
+\chapter{Domain Decomposition Strategy}
+\label{app_pressure_correction}
+
+\subsubsection{Randall McDermott, NIST Postdoctoral Fellow}
+
+The time advancement scheme for multiple meshes involves averaging of the velocity components at a patch boundary in order to maintain stability. It is extremely important to note that -- because of the staggered grid storage arrangement -- two values of the numerical solution for the velocity exist at a given point on a mesh interface.  Consider meshes $m$ (left) and $om$ (right) which are joined side by side in the $x$ direction.  The staggered $u$ velocity components are indexed from $\{0\!:\!nx\}$ (in the $x$ direction) on a given mesh. The values $u^{(m)}_{nx,jk}$ and $u^{(om)}_{0,jk}$ therefore live at the same physical location, but are advanced separately (and by different processors) during the course of the algorithm.  In the ideal circumstance these velocities are identical, as is the case if the PDEs (\ref{eqn_poisson}) and (\ref{eqn_laplace}) are enforced at the mesh interface.  To improve the speed of our parallel algorithm, our strategy is instead to keep the difference between these values small while still enforcing global volume conservation.  Our strategy recovers the ideal case in the limit $\delta t \rightarrow 0$. In fact, for reasonable time steps (CFL $\approx$ 0.5) we observe that the difference in the coincident velocities is negligible.  While the primitive velocity components are indeed unique to a given mesh, for each mesh we may define the discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which includes ghost cell data and is identical at all overlapping mesh points.  To do this we simply average the coincident values of the velocity components at the mesh interfaces and inject the ghost cell values from the neighboring mesh.  For instance, considering the same side-by-side meshes $m$ and $om$ as before,
+\begin{equation}
+\label{eqn_patchave_ufield}
+\bar{u}^{(m)}_{ijk} \equiv \left\{ \begin{array}{ll} u^{(m)}_{ijk} & \mbox{for}\quad 0<i<nx \vspace{0.2cm}\\
+\frac{1}{2} \left[ u^{(m)}_{nx,jk} + u^{(om)}_{0,jk} \right] & \mbox{for}\quad i=nx \vspace{0.2cm}\\
+u^{(om)}_{1,jk} & \mbox{for}\quad i=nx+1 \end{array} \right.
+\end{equation}
+for all patch boundary cells $j$ and $k$; $nx$ identifies the right-most boundary cells for mesh $m$. Here, for simplicity, we are only considering the case in which the cell sizes are equivalent for the adjoining meshes (coarse-fine mesh interfaces are currently handled by the code, but details will be documented at a later date).  The values of $\bar{u}^{(m)}$ for the index ranges not considered in (\ref{eqn_patchave_ufield}) depend on the specific boundary conditions for the other faces of mesh $m$.  The same ideas are used to define the patch-averaged fields for $\bar{v}$ and $\bar{w}$.
+
+To see how the new patch-averaged fields are used, consider the predictor step in the time advancement, which may now be written as
+\begin{equation}
+\label{eqn_RK1}
+\mathbf{u}^{(n+1)_e} = \bar{\mathbf{u}}^n - \delta t \left[ \mathbf{F}(\rho^n,\bar{\mathbf{u}}^n) + {\nabla\cH'}^{(n+1)_e} + {\nabla\cH''}^{(n+1)_e} \right] \,\mbox{.}
+\end{equation}
+Note that (\ref{eqn_RK1}) updates a $\bar{\mathbf{u}}$ field to a $\mathbf{u}$ field.  Though this is perfectly legitimate, we should be aware of the following issues.  First, the patch-averaging procedure is slightly dissipative.  But as long as we are accurate, this numerical dissipation is minimal and acceptable (much smaller than physical [molecular, viscous] dissipation).  Second, we must now think of the time update in terms of a projection scheme in order to repair the damage made to the divergence by the averaging procedure (after the averaging procedure, the divergence for mesh boundary cells no longer exactly matches the divergence obtained from the equation of state). In practical terms, this means that the Poisson equation for the pressure fluctuation (in the predictor step) is given by
+\begin{equation}
+\label{eqn_poisson_stg1}
+\nabla^2 {\cH'}^{(n+1)_e} = -\left[\frac{ (\nabla\cdot\mathbf{u})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n}{\delta t}\right] -  \mathbf{F}(\rho^n,\bar{\mathbf{u}}^n) \,\mbox{.}
+\end{equation}
+In (\ref{eqn_poisson_stg1}), note that $\mathbf{F}$ is computed using the patch-averaged velocity field. Further, only the $(\nabla\cdot\mathbf{u})^{(n+1)_e}$ term is obtained from the equation of state (\ref{eqn}).  The divergence of the patch-averaged field, $(\nabla\cdot\bar{\mathbf{u}})^n$, is obtained by explicitly applying the discrete divergence operator to $\bar{\mathbf{u}}^n$.  Similarly, in the corrector Poisson equation analogous to (\ref{eqn_corrector_poisson}), only the $(\nabla\cdot\mathbf{u})^{n+1}$ term is obtained from the equation of state; $(\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e}$ and $(\nabla\cdot\bar{\mathbf{u}})^n$ are obtained explicitly:
+\begin{equation}
+\label{eqn_poisson_stg2}
+\nabla^2 {\cH'}^{\,n+1} = -\left[\frac{ 2(\nabla\cdot\mathbf{u})^{n+1} - (\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n}{\delta t}\right] -  \mathbf{F}(\rho^{(n+1)_e},\bar{\mathbf{u}}^{(n+1)_e}) \,\mbox{.}
+\end{equation}
+Finally, the velocity corrector step is
+\be
+\label{eqn_RK2}
+\bu^{n+1} = \ha \left[ \bar{\bu}^n + \bar{\bu}^{(n+1)_e} - \dt \left( \mathbf{F}[\rho^{(n+1)_e},\bar{\mathbf{u}}^{(n+1)_e}] + \nabla{\cH'}^{\,n+1} + \nabla{\cH''}^{\,n+1}\right) \right] \,\mbox{.}
+\ee
+The benefit of the averaging procedure is that $\mathbf{F}$ is now the same on each mesh for a given location along a mesh interface, since all force terms are determined using the patch-averaged field.  This also means that stress tensors computed at a mesh interface (which are buried in $\mathbf{F}$) are symmetric; this symmetry is a requirement for angular momentum conservation.  Thus, the patch-averaging procedure prevents the production of spurious vorticity at mesh interfaces.
+
+It remains that we specify the boundary conditions for the Poisson and Laplace equations.  At the interface of two adjoining meshes we apply the following Dirichlet boundary condition for the pressure fluctuation (again, mesh $m$ is to the left of mesh $om$ in this example):
+\be {\cH'}_{nx+\ha,jk}^{(m)} = {\cH'}_{1-\ha,jk}^{(om)} = \frac{1}{2}\left[ {\cH'}_{nx,jk}^{(m),*} + {\cH'}_{1,jk}^{(om),*} \right] \,\mbox{.} \ee
+Again, the asterisk denotes the most recent value.  Note that the pressure boundary values are identical for each mesh at the interface.  To a good approximation, this boundary condition maintains continuity of the pressure field from mesh to mesh without invoking an iterative procedure.
+
+\subsubsection{Pressure Correction}
+
+To get the boundary conditions for the Laplace equation, we first need to solve a coarse-grained discrete Poisson equation over the global domain treating the individual meshes as coarse cells in an unstructured grid. This is much like the strategy adopted by zone and lumped parameter models, which assume that each compartment in a building has a uniform pressure found by solving a system of equations based on mass balances at compartment boundaries.  A key difference here is that we have a \emph{much} better initial estimate for the intermesh volume flow rates at the beginning of each time step. It is important to appreciate, therefore, that the accuracy of this method does not degenerate to that of a zone model.
+
+To see how we develop the Neumann condition for the pressure correction, in this section imagine for a moment that on each mesh we are updating the fine-grained velocity field with an explicit Euler step from time $t^k$ to $t^{k+1} = t^k + \delta t$ assuming $\cH'' = 0$.  Denote this intermediate velocity field $\mathbf{u}^+$.  Thus,
+\begin{equation}
+\label{eqn_intermediate_vel}
+\mathbf{u}^+ = \bar{\mathbf{u}}^k - \delta t \left[ \mathbf{F}(\rho^k,\bar{\mathbf{u}}^k) + \nabla{\cH'}^{k+1} \right] \,\mbox{.}
+\end{equation}
+Now, because our guess for the mesh boundary value for ${\cH'}^{k+1}$ is not perfect, the new field $\mathbf{u}^+$ does not conserve volume.  That is, at an interface between meshes $m$ and $n$ with surface area $S_{m,n}$ we have
+\begin{equation}
+\label{eqn_novolcons}
+\int_{S_{m,n}} \mathbf{u}^+_{m} \cdot\mathbf{n}_m\,\mbox{d}S \ne \int_{S_{m,n}} \mathbf{u}^+_{n} \cdot\mathbf{n}_m\,\mbox{d}S \,\mbox{,}
+\end{equation}
+where $\mathbf{n}_m$ is the unit vector normal to the surface pointing outward from mesh $m$. Consider now that there exists an interface velocity $\mathbf{U}^{k+1}_{m,n}$ such that
+\begin{equation}
+\label{eqn_interface_condition}
+\mathbf{U}^{k+1}_{m,n} = \frac{1}{S_{m,n}}\int_{S_{m,n}} \mathbf{u}^{k+1}_{m} \,\mbox{d} S = \frac{1}{S_{m,n}}\int_{S_{m,n}} \mathbf{u}^{k+1}_{n} \,\mbox{d} S \,\mbox{.}
+\end{equation}
+Also, note that we may rewrite (\ref{eqn_RK1}) as
+\begin{equation}
+\label{eqn_simple update}
+\mathbf{u}_{m}^{k+1} = \mathbf{u}_{m}^+ - \delta t \nabla {\cH_m''}^{k+1} \,\mbox{.}
+\end{equation}
+Substituting (\ref{eqn_simple update}) into (\ref{eqn_interface_condition}) yields
+\begin{equation}
+\label{eqn_gradH1}
+\mathbf{U}^{k+1}_{m,n} = \frac{1}{S_{m,n}}\int_{S_{m,n}} \left[\mathbf{u}_{m}^+ - \delta t \nabla {\cH_m''}^{k+1} \right]\,\mbox{d} S \,\mbox{.}
+\end{equation}
+Taking $\nabla {\cH''}$ to be uniform along a mesh interface, (\ref{eqn_gradH1}) may be rearranged to give
+\begin{equation}
+\label{eqn_gradH2}
+\left.\nabla {\cH_m''}^{k+1}\right|_{m,n} = \frac{1}{\delta t} \left[ \frac{1}{S_{m,n}} \int_{S_{m,n}} \mathbf{u}_{m}^+ \mbox{d} S - \mathbf{U}^{k+1}_{m,n} \right] \,\mbox{.}
+\end{equation}
+Equation (\ref{eqn_gradH2}) provides the pressure correction Neumann boundary condition for mesh $m$ at the interface between meshes $m$ and $n$ that enforces volume conservation, i.e., forces the constraint (\ref{eqn_interface_condition}) to be true.  It remains that we determine the intermesh velocity $\mathbf{U}^{k+1}_{m,n}$.
+
+The intermesh velocity is obtained from a projection method on the unstructured coarse mesh.  After the update (\ref{eqn_intermediate_vel}) we have two slightly different estimates of the intermesh velocity provided by the adjoining meshes.  The average of these estimates, denoted $\bar{\mathbf{U}}^+_{m,n}$, is used as the initial guess in the coarse projection,
+\begin{equation}
+\label{eqn_initavevel}
+\bar{\mathbf{U}}^+_{m,n} \equiv \frac{1}{2 S_{m,n}} \int_{S_{m,n}} \left[\mathbf{u}_{m}^+ + \mathbf{u}_{n}^+ \right] \,\mbox{d} S \,\mbox{.}
+\end{equation}
+This value is then projected to satisfy global divergence constraints as follows,
+\begin{equation}
+\label{eqn_coarseprojection}
+\mathbf{U}^{k+1}_{m,n} = \bar{\mathbf{U}}^+_{m,n} - \delta t \nabla_{m,n}\bar{\cH} \,\mbox{,}
+\end{equation}
+where $\nabla_{m,n}$ is the coarse-grid gradient operator (discussed below) and $\bar{\cH}$ is the coarse-grid pressure (yet to be determined). Multiplying (\ref{eqn_coarseprojection}) by the surface area and unit normal pointing from mesh $m$ to mesh $n$ and then summing over all surfaces $n$ which interface with $m$ via interpolated (i.e., adjoining mesh), inlet, or open boundaries (denoted $n \in m$), we form a linear system for $\bar{\cH}$,
+\begin{equation}
+\label{eqn_sumovermeshes}
+\sum_{n\in m} S_{m,n} \mathbf{U}^{k+1}_{m,n} \cdot \mathbf{n}_{m} = \sum_{n\in m} S_{m,n} \bar{\mathbf{U}}^+_{m,n} \cdot \mathbf{n}_{m} - \delta t \sum_{n\in m} S_{m,n} \nabla_{m,n}\bar{\cH} \cdot \mathbf{n}_{m} \,\mbox{.}
+\end{equation}
+For a given mesh $m$, the left-hand-side of (\ref{eqn_sumovermeshes}) may be determined by integrating $\mathbf{u}^+_{m}$ around the boundary $\partial \Omega_{m}$ of domain $\Omega_m$.  Using Gauss' theorem and Eqs. (\ref{eqn_mom1}) and (\ref{eqn_laplace}), the following are equivalent,
+\begin{equation}
+\label{eqn_boundaryintegral}
+\sum_{n\in m} S_{m,n} \mathbf{U}^{k+1}_{m,n} \cdot \mathbf{n}_{m} = \int_{\partial \Omega_{m}}\mathbf{u}^+_{m} \cdot \mathbf{n}_m \,\mbox{d}S  = \int_{\partial \Omega_{m}}\mathbf{u}^{k+1}_{m} \cdot \mathbf{n}_m \,\mbox{d}S = \int_{\Omega_{m}} \nabla\cdot\mathbf{u}^{k+1}_{m} \,\mbox{d}V \,\mbox{.}
+\end{equation}
+Using (\ref{eqn_initavevel}) and (\ref{eqn_boundaryintegral}), our linear system (\ref{eqn_sumovermeshes}) may be written as
+\begin{eqnarray}
+\label{eqn_linsystem1}
+- \sum_{n\in m} S_{m,n} \nabla_{m,n}\bar{\cH} \cdot \mathbf{n}_{m} &=& \frac{1}{\delta t} \left[ \int_{\partial \Omega_{m}}\mathbf{u}^+_{m} \cdot \mathbf{n}_m \,\mbox{d}S - \sum_{n\in m} S_{m,n} \bar{\mathbf{U}}^+_{m,n} \cdot \mathbf{n}_{m} \right] \,\mbox{,} \\
+\label{eqn_linsystem2}
+&=& \frac{1}{2 \delta t} \int_{\partial \Omega_{m}} \left[ \mathbf{u}^+_m - \mathbf{u}^+_n \right] \cdot \mathbf{n}_{m} \,\mbox{d}S \,\mbox{.}
+\end{eqnarray}
+
+The coarse-grid pressure gradient is approximated using a central difference, taking the coarse pressure to reside at the mesh centroid.  Let $L_{m,n}$ correspond to the length scale of mesh $m$ in the direction normal to the $m$--$n$ interface ($L_{n,m}$ is the length scale of mesh $n$).  Then the coarse gradient of the pressure is taken to be
+\begin{equation}
+\label{eqn_coarsegrad}
+-\nabla_{m,n}\bar{\cH} \cdot \mathbf{n}_{m} = \frac{ \bar{\cH}_m - \bar{\cH}_n }{\frac{1}{2}(L_{m,n} + L_{n,m})} \,\mbox{.}
+\end{equation}
+
+We now translate (\ref{eqn_linsystem2}) into matrix notation.  Let $M$ denote the number of meshes in the calculation, and let $\mathbf{x} = [\bar{\cH}_1,\bar{\cH}_2,...,\bar{\cH}_M]^T$ denote the solution vector for the mesh pressure.  The linear system may be written as $\mathbf{A}\mathbf{x} = \mathbf{b}$, where $\mathbf{A}$ is an $M \times M$ symmetric, positive-definite matrix (which is sparse for large $M$) with diagonal elements
+\begin{equation}
+\label{eqn_adiag}
+A(m,m) = \sum_{n\in m} \frac{2 S_{m,n}}{L_{m,n} + L_{n,m}} \,\mbox{,}
+\end{equation}
+and off-diagonal elements
+\begin{equation}
+\label{eqn_aoffdiag}
+A(m,n) = - \frac{2 S_{m,n}}{L_{m,n} + L_{n,m}} \,\mbox{.}
+\end{equation}
+The source $\mathbf{b}$ is an $M$-vector with elements
+\begin{equation}
+\label{eqn_belements}
+b(m) = \frac{1}{2 \delta t} \int_{\partial \Omega_{m}} \left[ \mathbf{u}^+_m - \mathbf{u}^+_n \right] \cdot \mathbf{n}_{m} \,\mbox{d}S \,\mbox{.}
+\end{equation}
+
+At an inlet boundary the coarse pressure gradient is set to zero, i.e. $\bar{\cH}_n = \bar{\cH}_m$, and the diagonal and off-diagonal elements of the $\mathbf{A}$ matrix are modified accordingly.  At an open boundary, at present we simply set $\bar{\cH}_n = 0$ and $L_{n,m} = 0$, which is not entirely consistent with the fine-scale open boundary condition, but seems to be robust and has the added benefit that no modification of the source vector $\mathbf{b}$ is required.
+
+At the present time, the coarse linear system is inverted directly using LU decomposition for simplicity.  This is permissible because we typically only employ order 10 meshes.  Eventually, we will want to implement the Conjugate Gradient method.
+
+With the coarse-grid pressure $\bar{\cH}$ now determined, we can perform the projection (\ref{eqn_coarseprojection}) and hence compute the Neumann condition for the Laplace equation for $\cH''$ via (\ref{eqn_gradH2}).  With a similar procedure used in the corrector step, the resulting velocity fields from the predictor (\ref{eqn_RK1}) and corrector (\ref{eqn_RK2}) steps obey the local divergence constraints and conserve volume from mesh to mesh.
 
 
 \chapter{A Simple Model of Flame Extinction}
