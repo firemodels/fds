@@ -187,7 +187,11 @@ WALL_CELL_LOOP: DO IW=1,NEWC
          H_EXTERNAL = 0._EB
          IF (VENT_INDEX(IW)>0) THEN
             VT => VENTS(VENT_INDEX(IW))
-            TSI = T - T_BEGIN
+            IF (TW(IW) == T_BEGIN .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
+               TSI = T
+            ELSE
+               TSI = T - T_BEGIN
+            ENDIF
             TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,DUMMY,VT%PRESSURE_RAMP_INDEX)
             H_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE/RHOA
          ENDIF
