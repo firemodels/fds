@@ -1194,28 +1194,23 @@ specified by the user, in which case $\bp_0$ and $\rho_0$ are derived from Eqs.~
 
 \subsection{Combination of the Mass and Energy Equations via the Divergence}
 
-Because of the low Mach number assumption, the divergence of the flow, $\nabla \cdot \bu$, plays a very important role in the overall
-solution scheme. The divergence is obtained by taking the material (total) derivative
+Because of the low Mach number assumption, the divergence of the flow, $\nabla \cdot \bu$, plays a very important role in the overall solution scheme. The divergence is obtained by taking the material (substantial) derivative
 of the modified Equation of State~(\ref{state}), and then substituting terms from the mass
-and energy conservation equations. A few assumptions are needed. First, define the constant-pressure
-specific heat of the mixture: $c_p = \sum_\alpha c_{p,\alpha} \, Y_\alpha$ where
-$c_{p,\alpha}$ is the temperature-dependent specific heat of species $\alpha$.
-Next, define the enthalpy $h = \sum_\alpha h_\alpha \, Y_\alpha$ where
-\be
-   h_\alpha = \int_{T_{\hbox{\tiny ref}}}^T c_{p,\alpha}(T') \; dT'
-\ee
-Finally, note that the material derivative of the background pressure, $\bp_m(z,t)$, is written:
-\be \frac{D\bp_m}{Dt} = \dod{\bp_m}{t} + w \, \dod{\bp_m}{z} = \dod{\bp_m}{t} - w \rho_m g   \ee
-The divergence can now be written:
-\be \nabla \cdot \bu = {\cal D} + {\cal P} \; \dod{\bp_m}{t}  \label{phi} \ee
+and energy conservation equations. As shown in Appendix \ref{app_divergence}, for the $m$th zone with background pressure $\bp_m$, the divergence may be written as
+\begin{equation}
+\nabla \cdot \bu = {\cal D} + {\cal P}\dod{\bp_m}{t} \,\mbox{,}  \label{phi}
+\end{equation}
 where
-\begin{eqnarray*}
-\cal{D}          &=& \frac{\dm_b'''}{\rho} \frac{\bW}{W_b} +  \frac{\R}{\bW c_p \bp_m} \; \Big( \dq''' - \dq_b''' - \nabla \cdot \dbq'' \Big) - {\cal P} \, w \rho_m g  \quad + \nonumber \\
-                 & & \frac{\bW}{\rho} \sum_\alpha \nabla \cdot \rho D_\alpha \nabla (Y_\alpha/W_\alpha) -
-\frac{\R}{\bW c_p \bp_m} \; \sum_\alpha h_\alpha \nabla \cdot \rho D_\alpha \nabla Y_\alpha +
- \frac{1}{\rho} \sum_\alpha \left( \frac{\bW}{W_\alpha} - \frac{h_\alpha}{c_p T} \right) \; \dm_\alpha''' \\
-\cal{P}          &=& \frac{1}{\bp_m} \; \left( \frac{\R}{\bW c_p} - 1 \right)
-\end{eqnarray*}
+\begin{equation}
+\label{eqn_fdsP1}
+\mathcal{P} = \frac{1}{\overline{p}_m}\left( \frac{\mathcal{R}}{\overline{W} c_p} - 1 \right)
+\end{equation}
+and
+\begin{eqnarray}
+\label{eqn_fdsD1}
+\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_m g \nonumber \vspace{0.3cm} \\
+&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_m} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha (\Delta h_\alpha^0 + h_{\alpha}) \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) \right] \,\mbox{.}\nonumber \vspace{0.3cm} \\
+\end{eqnarray}
 Contributions to the divergence of the flow include the heat release rate of the fire, $\dq'''$, heat losses to evaporating droplets, $\dm_b'''$,
 the net heat flux from thermal conduction and
 radiation, $\nabla \cdot \dbq''$, updrafts of air over considerable heights of the atmosphere,
@@ -1227,8 +1222,9 @@ increase (or decrease) in mass and thermal energy within
 the enclosure. The time derivative of the background pressure of the $m$th pressure zone, $\Omega_m$,
 is found by integrating Eq.~(\ref{phi}) over the
 zone volume:
-\be \dod{\bp_m}{t} = \left( \int_{\Omega_m} {\cal D} \, dV - \int_{\partial \Omega_m}
- \bu \cdot d\bS \right) \Big/ \int_{\Omega_m} {\cal P} \, dV  \label{concon} \ee
+\begin{equation}
+\dod{\bp_m}{t} = \left( \int_{\Omega_m} {\cal D} \, dV - \int_{\partial \Omega_m} \bu \cdot d\bS \right) \Big/ \int_{\Omega_m} {\cal P} \, dV  \label{concon}
+\end{equation}
 Equation~(\ref{concon}) is essentially a consistency condition, ensuring that blowing air or starting a fire within a sealed
 compartment leads to an appropriate decrease in the divergence within the volume.
 
@@ -4187,6 +4183,7 @@ $\bo=(\omx,\omy,\omz)$    \> vorticity vector \\
 
 
 \chapter{Derivation of the Velocity Divergence}
+\label{app_divergence}
 
 \subsubsection{Randall McDermott, NIST Postdoctoral Fellow}
 
@@ -4319,16 +4316,14 @@ h_s(\mathbf{Y},T) = \sum_\alpha Y_\alpha h_{\alpha}(T) \,\mbox{.}
 Neglecting viscous heating and the effect of the fluctuating pressure on dilation work (both assumptions are valid for low-Mach flows), the transport equation for the sensible enthalpy is
 \begin{equation}
 \label{eqn_enthalpytransport}
-\rho \frac{\mbox{D} h_s }{\mbox{D} t} = -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime}
-+ \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div \dot{\mathbf{q}}^{\prime\prime} + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s )
+\rho \frac{\mbox{D} h_s }{\mbox{D} t} = -\sum_\alpha \Delta h^0_\alpha ( \dot{m}_{\alpha}^{\tripleprime} - \nabla\cdot\mathbf{J}_\alpha) + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div \dot{\mathbf{q}}^{\prime\prime} - \dq_b''' + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s ) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2
 \end{equation}
-where $\Delta h^0_\alpha$ is the heat of formation of $\alpha$ at reference temperature $T_0$, $h_{s,b}$ is the specific sensible enthalpy of the bulk mass source,
-and $\dot{\mathbf{q}}^{\prime\prime}$ is the heat flux vector which contains contributions from conduction, molecular diffusion, and radiation,
+where $\Delta h^0_\alpha$ is the heat of formation of $\alpha$ at reference temperature $T_0$, $h_{s,b}$ is the specific sensible enthalpy of the bulk mass source, $\dot{q}_b^{\tripleprime}$ is a volumetric heat sink due to convective heat transfer to the bulk phase, and $\dot{\mathbf{q}}^{\prime\prime}$ is the heat flux vector which contains contributions from conduction, molecular diffusion, and radiation,
 \begin{equation}
 \label{eqn_heatflux}
-\dot{\mathbf{q}}^{\prime\prime} = -k \nabla T + \sum_\alpha h_{s,\alpha} \mathbf{J}_{\alpha} + \dot{\mathbf{q}}^{\prime\prime}_{r}
+\dot{\mathbf{q}}^{\prime\prime} = -k \nabla T + \sum_\alpha h_{\alpha} \mathbf{J}_{\alpha} + \dot{\mathbf{q}}^{\prime\prime}_{r}
 \end{equation}
-Here $k$ is the thermal conductivity of the mixture and $\dot{\mathbf{q}}^{\prime\prime}_{r}$ is the radiant heat flux.
+Here $k$ is the thermal conductivity of the mixture and $\dot{\mathbf{q}}^{\prime\prime}_{r}$ is the radiant heat flux.  The last term in (\ref{eqn_enthalpytransport}) accounts for the kinetic energy associated with the instantaneous mixing of the bulk and gas-phase momentum.
 
 
 \subsubsection{Relating Enthalpy, Temperature, and Species}
@@ -4359,17 +4354,16 @@ defining the specific heat of the mixture.  Thus, by rearranging (\ref{eqn_chain
 \end{equation}
 Utilizing (\ref{eqn_matdermassfrac}) and (\ref{eqn_enthalpytransport}) in (\ref{eqn_DTDt1}) yields
 \begin{eqnarray}
-\frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p}   \left[  -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} +
-\frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} - \dq_b''' + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s )  \right.   \nonumber \vspace{0.3cm} \\
-& &  \left.  - \sum_\alpha h_{s,\alpha} \Big\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \Big\}  \right]
+\frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p}   \left[  -\sum_\alpha \Delta h^0_\alpha ( \dot{m}_{\alpha}^{\tripleprime} - \nabla\cdot\mathbf{J}_\alpha) + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} - \dq_b''' + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s )  + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2\right.   \nonumber \vspace{0.3cm} \\
+& &  \quad\quad\,\, \left. - \sum_\alpha h_{\alpha} \Big\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \Big\}  \right]
 \label{eqn_DTDt2}
 \end{eqnarray}
-Note that $\sum_\alpha h_{s,\alpha} \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] = \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s )$ and hence these terms cancel, leaving
-\begin{eqnarray}
+Note that $\sum_\alpha h_{\alpha} \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s ) = \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} (h_\alpha[T_b] - h_\alpha[T]) \approx \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T)$, leaving
+\begin{equation}
 \label{eqn_DTDt}
-\frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p} \left[ -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t}
-- \Div\dot{\mathbf{q}}^{\prime\prime} - \dq_b'''  - \sum_\alpha h_{\alpha} \Big\{  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \Big\} \right]
-\end{eqnarray}
+\frac{\mbox{D} T}{\mbox{D} t} = \frac{1}{\rho c_p} \left[\frac{\mbox{D} \overline{p}_i }{\mbox{D} t}
+- \Div\dot{\mathbf{q}}^{\prime\prime} - \dq_b''' - \sum_\alpha (\Delta h^0_\alpha + h_\alpha)\left\{  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right\} + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right] \,\mbox{.} \nonumber \vspace{0.3cm} \\
+\end{equation}
 
 \subsubsection{Assembling Terms}
 \label{putting_it_all_together}
@@ -4389,19 +4383,15 @@ Using (\ref{eqn_transportexpression}) and (\ref{eqn_DTDt}) in (\ref{eqn_divconst
 \Div\mathbf{u} &=& \frac{1}{\rho} \,\dot{m}_b^{\tripleprime} -  \frac{1}{\overline{p}_i} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} \nonumber \vspace{0.3cm}\\
 &+& \overline{W} \left[\frac{1}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime}
 + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
-&+&  \frac{1}{T} \left[ \frac{1}{\rho c_p} \left\{-\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} +
-\frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} -\dq_b''' - \sum_\alpha h_{\alpha} \Big(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \Big) \right\} \right]
+&+&  \frac{1}{T} \left[ \frac{1}{\rho c_p} \left\{ \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} -\dq_b''' - \sum_\alpha ( \Delta h^0_\alpha + h_{\alpha} ) \left\{  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right\} + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right\} \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
 \end{eqnarray}
-
 Note that $\overline{W} \sum_\alpha (Y_\alpha/W_\alpha) = 1$ and also $\overline{W} \sum_\alpha (Y_{b,\alpha}/W_\alpha) = \overline{W}/\overline{W}_b$,
 where $\overline{W}_b$ is the molecular weight of the bulk mixture prior to its introduction into the fluid mixture.  Equation (\ref{eqn_divconstraint3}) thus simplifies to
 \begin{eqnarray}
 \label{eqn_divconstraint_final}
-\Div\mathbf{u}  &=& \left(\frac{1}{\rho c_p T}  -  \frac{1}{\overline{p}_i}\right) \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} \nonumber \vspace{0.3cm}\\
-&+& \frac{1}{\rho} \left[ \dot{m}_b^{\tripleprime} \frac{\overline{W}}{\overline{W}_b} +  \overline{W}\sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime}
+\Div\mathbf{u}  &=& \left(\frac{1}{\rho c_p T}  -  \frac{1}{\overline{p}_i}\right) \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} + \frac{1}{\rho} \left[ \dot{m}_b^{\tripleprime} \frac{\overline{W}}{\overline{W}_b} +  \overline{W}\sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime}
 - \Div\mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
-&+&  \frac{1}{\rho c_p T} \left[ -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} -
-\Div \dot{\mathbf{q}}^{\prime\prime} -\dq_b''' - \sum_\alpha h_{\alpha} \left\{  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right\} \right]
+&+&  \frac{1}{\rho c_p T} \left[ -\sum_\alpha (\Delta h^0_\alpha + h_{\alpha})\left\{  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right\} - \Div \dot{\mathbf{q}}^{\prime\prime} -\dq_b''' + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
 \end{eqnarray}
 
 
@@ -4409,18 +4399,16 @@ where $\overline{W}_b$ is the molecular weight of the bulk mixture prior to its 
 \label{fds_notation}
 
 The following relationships are used to rearrange (\ref{eqn_divconstraint_final}) into
-the form shown in the FDS Technical Reference Guide.
-
-We employ the binary form of Fick's law using mixture-averaged diffusivities $D_\alpha$ as a constitutive relation for the diffusive flux,
+the form shown in the FDS Technical Reference Guide. We employ the binary form of Fick's law using mixture-averaged diffusivities $D_\alpha$ as a constitutive relation for the diffusive flux,
 \begin{equation}
 \label{eqn_fickslaw}
-\mathbf{J}_{\alpha} = - \rho D_\alpha \nabla Y_\alpha
+\mathbf{J}_{\alpha} = - \rho D_\alpha \nabla Y_\alpha \,\mbox{.}
 \end{equation}
 Note that summation is not implied over repeated suffixes.
 The heat release rate per unit volume is defined by
 \begin{equation}
 \label{eqn_heatrelease}
-\dot{q}^\tripleprime \equiv -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^\tripleprime
+\dot{q}^\tripleprime \equiv -\sum_\alpha \dot{m}_{\alpha}^\tripleprime \Delta h^0_\alpha \,\mbox{.}
 \end{equation}
 Taking the $z$ direction to be aligned with the gravity vector we have $\partial \overline{p}_i/\partial z = -\rho_i g$, where $g = 9.8$ m/s$^2$ and $\rho_i$ is a specified background density for the $i$th zone.
 Thus, the material derivative of the background pressure may be written as
@@ -4435,20 +4423,17 @@ for the $i$th zone we may write the divergence (\ref{eqn_divconstraint_final}) a
 \Div \mathbf{u} = \mathcal{D} + \mathcal{P} \frac{\partial \overline{p}_i}{\partial t}
 \end{equation}
 where
-\be
+\begin{equation}
 \label{eqn_fdsP}
 \mathcal{P} = \frac{1}{\overline{p}_i}\left( \frac{\overline{p}_i}{\rho \,c_p T} - 1 \right) = \frac{1}{\overline{p}_i}\left( \frac{\mathcal{R}}{\overline{W} c_p} - 1 \right)
-\ee
+\end{equation}
 and
 \begin{eqnarray}
 \label{eqn_fdsD}
-\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho} \frac{\overline{W}}{\overline{W}_b} + \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left( \dot{q}^\tripleprime - \dq_b'''
-- \Div \dot{\mathbf{q}}^{\prime\prime} \right) - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
-&+& \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) -
-\frac{\mathcal{R}}{\overline{W}c_p \overline{p}_i} \sum_\alpha h_{\alpha} \Div\left( \rho D_\alpha \nabla Y_\alpha \right)
-+ \frac{1}{\rho} \sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime
+\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
+&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha (\Delta h_\alpha^0 + h_{\alpha}) \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
 \end{eqnarray}
-
+Equations (\ref{eqn_fdsP}) and (\ref{eqn_fdsD}) correspond to (\ref{eqn_fdsP1}) and (\ref{eqn_fdsD1}) in the FDS Tech Guide.  Though, note that at present the bulk kinetic energy term is not included in the code.
 
 \chapter{Domain Decomposition Strategy}
 \label{app_pressure_correction}
