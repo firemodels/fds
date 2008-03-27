@@ -60,10 +60,6 @@ def extract_config_data(config_file):
             print "This is group line #"+str(group_counter)+"."
         else:
             print """No g, d or q, skip row."""
-    
-    #Convert quantities keys from string to integer.
-    #tempdict = dict((int(key), values) for key,values in quantities_dict.iteritems())
-    #quantities_dict = tempdict
 
     #print "Data Dictionary:",data_dict]
             
