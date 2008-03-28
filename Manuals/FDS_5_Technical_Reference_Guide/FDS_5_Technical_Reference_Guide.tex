@@ -1069,16 +1069,16 @@ and the various approximations employed is Anderson {\em et al.}~\cite{Anderson:
 \be \dod{}{t} (\rho \bu) + \nabla \cdot \rho \bu \bu
 + \nabla p = \rho \bg + \bof_b
 + \nabla \cdot \btau_{ij}   \label{momentum} \ee
-\leftline{\underline{Conservation of Energy (First Law of Thermodynamics)} }
-\be \dod{ }{t}(\rho h) + \nabla \cdot \rho h \bu = \frac{Dp}{Dt}  + \dq''' - \dq_b'''
-        - \nabla \cdot \dbq''  + \epsilon   \label{energy} \ee
+\leftline{\underline{Transport of Sensible Enthalpy} }
+\be \dod{ }{t}(\rho h_s) + \nabla \cdot \rho h_s \bu = \frac{\mbox{D}p}{\mbox{D}t}  + \dq''' - \dq_b'''
+        - \nabla \cdot \dbq'' + \epsilon \label{energy} \ee
 \leftline{\underline{Equation of State for a Perfect Gas}}
 \be p = \frac{\rho \R T}{\bW}  \label{basicstate} \ee
 Note that this is a set of partial differential equations consisting of
 six equations for six unknowns, all functions of three spatial dimensions and time:
 the density $\rho$, the three components
-of velocity $\bu=(u,v,w)$, the temperature $T$, and the pressure $p$.
-The sensible enthalpy $h$ is a function of the temperature: $h=\int_{T_0}^T c_p(T') \, dT'$.
+of velocity $\bu=[u,v,w]^T$, the temperature $T$, and the pressure $p$.
+The sensible enthalpy $h_s = \sum_\alpha Y_\alpha h_{s,\alpha}$ is a function of the temperature: $h_{s,\alpha}(T)=\int_{T_0}^T c_{p,\alpha}(T') \, dT'$.
 
 The notation adopted above is intended to render the equations in as
 simple and compact a form as possible. However, when all of the terms are expanded, the
@@ -1095,28 +1095,25 @@ $\sum Y_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{b,\alpha}'''=\dm_b
 assertion is not true, in general. However, transport equations are solved for total mass and all but one of the species, implying
 that the diffusion coefficient of the implicit species is chosen so that the sum of all the diffusive fluxes is zero.
 
-In the momentum equation,
-the term $\bu \bu$ is a diadic tensor formed by multiplying (in the sense of two 3$\times$1 matrices) the vectors
-$\bu^T$ and $\bu$. The term $\nabla \cdot \rho \bu \bu$ is thus a vector formed by applying
-the vector operator $\nabla = (\dod{}{x},\dod{}{y},\dod{}{z})$ to the tensor.
+In the momentum equation, the term $\bu \bu$ is a diadic tensor.  In matrix notation, with $\bu=[u,v,w]^T$, the diadic is given by the tensor product of the vectors $\bu$ and $\bu^T$. The term $\nabla \cdot \rho \bu \bu$ is thus a vector formed by applying the vector operator $\nabla = (\dod{}{x},\dod{}{y},\dod{}{z})$ to the tensor.
 The force term $\bof_b$ in the momentum equation represents external forces such as
 the drag exerted by liquid droplets. The stress tensor $\btau_{ij}$ is defined:
 \be \btau_{ij} = \mu \left( 2 \; \bS_{ij}
    - \frac{2}{3} \bdelta_{ij} (\nabla \cdot \bu) \right) \quad ; \quad
    \bdelta_{ij}=\left\{ \begin{array}{ll} 1 & i=j \\ 0 & i\ne j \end{array} \right.   \quad ; \quad
    \bS_{ij} = \frac{1}{2} \left( \dod{u_i}{x_j}+\dod{u_j}{x_i} \right) \quad i,j=1,2,3   \ee
-The term $\bS_{ij}$ is the strain tensor, written using conventional tensor notation.
+The term $\bS_{ij}$ is the symmetric rate-of-strain tensor, written using conventional tensor notation.
 The symbol $\mu$ is the dynamic viscosity of the fluid.
 
-In the energy equation,
+In the sensible enthalpy equation,
 note the use of the material derivative, $D(\,)/Dt=\partial(\,) /\partial t + \bu \cdot \nabla (\,)$. The term
 $\dq'''$ is the heat release rate per unit volume from a chemical reaction. The term $\dq_b'''$ is the energy transferred to the evaporating droplets.
 The term
 $\dbq''$ represents the conductive and radiative heat fluxes:
-\be \dbq'' = -k \nabla T - \sum_\alpha h_\alpha \rho D_\alpha \nabla Y_\alpha + \dbq_r'' \ee
+\be \dbq'' = -k \nabla T - \sum_\alpha h_{s,\alpha} \rho D_\alpha \nabla Y_\alpha + \dbq_r'' \ee
 where $k$ is the thermal conductivity.
 
-The term $\epsilon$ in the energy equation is known
+The term $\epsilon$ in the sensible enthalpy equation is known
 as the {\em dissipation rate}. It is the rate at which kinetic energy is transferred to thermal energy due to the
 viscosity of the fluid:
 \begin{eqnarray}
@@ -1208,20 +1205,10 @@ where
 and
 \begin{eqnarray}
 \label{eqn_fdsD1}
-\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_m g \nonumber \vspace{0.3cm} \\
-&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_m} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha (\Delta h_\alpha^0 + h_{\alpha}) \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) \right] \,\mbox{.}\nonumber \vspace{0.3cm} \\
+\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
+&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
 \end{eqnarray}
-Contributions to the divergence of the flow include the heat release rate of the fire, $\dq'''$, heat losses to evaporating droplets, $\dm_b'''$,
-the net heat flux from thermal conduction and
-radiation, $\nabla \cdot \dbq''$, updrafts of air over considerable heights of the atmosphere,
-the net mass flux from gas species diffusion and production, and global pressure changes.
-The change in the background pressure with time, $\partial \bp_m/\partial t$,
-is non-zero only if it assumed that the compartment is tightly sealed,
-in which case the background pressure, $\bp_m$, can no longer be assumed constant due to the
-increase (or decrease) in mass and thermal energy within
-the enclosure. The time derivative of the background pressure of the $m$th pressure zone, $\Omega_m$,
-is found by integrating Eq.~(\ref{phi}) over the
-zone volume:
+Contributions to the divergence of the flow include the heat release rate of the fire, $\dq'''$, heat losses to evaporating droplets, $\dm_b'''$, the net heat flux from thermal conduction and radiation, $\nabla \cdot \dbq''$, updrafts of air over considerable heights of the atmosphere, the net mass flux from gas species diffusion and production, and global pressure changes. The change in the background pressure with time, $\partial \bp_m/\partial t$, is non-zero only if it assumed that the compartment is tightly sealed, in which case the background pressure, $\bp_m$, can no longer be assumed constant due to the increase (or decrease) in mass and thermal energy within the enclosure. The time derivative of the background pressure of the $m$th pressure zone, $\Omega_m$, is found by integrating Eq.~(\ref{phi}) over the zone volume:
 \begin{equation}
 \dod{\bp_m}{t} = \left( \int_{\Omega_m} {\cal D} \, dV - \int_{\partial \Omega_m} \bu \cdot d\bS \right) \Big/ \int_{\Omega_m} {\cal P} \, dV  \label{concon}
 \end{equation}
@@ -1342,8 +1329,7 @@ the rate at which kinetic energy is converted to thermal energy by viscosity.
 To understand where this term originates, form an evolution equation for the kinetic energy of the fluid by
 taking the dot product of the momentum equation (\ref{momentum}) with the velocity vector\footnote{In this section
 it is convenient to work with the Lagrangian form of the conservation equations. }:
-\be \rho \, \DoD{\bu}{t} \cdot \bu = \rho  \, \DoD{\left(|\bu|^2/2\right)}{t} = \rho \bof_b \cdot \bu -
-\nabla p \cdot \bu + \nabla \cdot (\btau_{ij} \cdot \bu) - \epsilon \ee
+\be \rho \, \frac{\mbox{D}\bu}{\mbox{D}t} \cdot \bu = \rho  \, \frac{\mbox{D}\left(|\bu|^2/2\right)}{\mbox{D}t} = \rho \bof_b \cdot \bu - \nabla p \cdot \bu + \nabla \cdot (\btau_{ij} \cdot \bu) - \epsilon \ee
 As mentioned above $\epsilon$ is a neglible quantity in the energy equation. However, its functional form
 is useful in representing the dissipation of kinetic energy from the resolved flow field.
 Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the viscosity $\mu$ is modeled
@@ -1351,8 +1337,8 @@ Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the viscosity $\mu$ 
    \left(2 \; \overline{\bS}_{ij} \cdot \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
 where $C_s$ is an empirical constant and $\Delta$ is a length on the
 order of the size of a grid cell.
-The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning
-that they are computed on a numerical grid.
+The bar above the various quantities denotes that these are the resolved values, meaning
+that they are computed from the numerical solution sampled on a coarse grid (relative to DNS).
 The other diffusive parameters,
 the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
 \be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
@@ -1962,7 +1948,7 @@ FDS offers the user these options, with the assumption that the
 obstruction is not actually recti-linear, but rather cylindrical or
 spherical in shape. This option is useful in describing the behavior
 of small, complicated ``targets'' like cables or heat detection
-devices.} 
+devices.}
 \be
   \rho_s c_s \; \dod{T_s}{t} = \dod{}{x} k_s \dod{T_s}{x} +
     \dq_s'''
@@ -2127,7 +2113,7 @@ products
     \left[H_{r,\alpha \beta}-
     \int_{T_0}^{T(x)} \Delta c(\theta)d\theta \right]
 \ee
-where 
+where
 \be
   \Delta c(T) = c_{s,\alpha}(T)
         - \nu_{s,\alpha \beta} \; c_{s,\alpha \beta}(T)
@@ -2144,7 +2130,7 @@ $\Delta c(T)$, the specific heat of this dummy species is assumed to
 be equal to the specific heat of the original material $c_{s,\alpha}$
 
 The temperature integrals of the sensible heat contents are computed
-in advance for all the reactions of each material and the values of 
+in advance for all the reactions of each material and the values of
 $\dot{q}_{s,c}'''$ are tabulated between $T_0$ and $T_0
 \;+\;2000$~K. During the pyrolysis calculation, the values are found
 from a ``look-up'' table.
@@ -4300,28 +4286,28 @@ which is needed in the second term on the RHS of (\ref{eqn_DEOS2}).
 The specific sensible enthalpy of species $\alpha$ relative to reference temperature $T_0$ is
 \begin{equation}
 \label{eqn_sensible}
-h_{\alpha}(T) = \int_{T_0}^{T} c_{p,\alpha}(T^\prime) \,\dif T^\prime \,\mbox{,}
+h_{s,\alpha}(T) = \int_{T_0}^{T} c_{p,\alpha}(T^\prime) \,\dif T^\prime \,\mbox{,}
 \end{equation}
 where the specific heat of $\alpha$ is
 \begin{equation}
 \label{eqn_specificheat}
-c_{p,\alpha} \equiv \frac{\partial h_{\alpha}}{\partial T} \,\mbox{.}
+c_{p,\alpha} \equiv \frac{\partial h_{s,\alpha}}{\partial T} \,\mbox{.}
 \end{equation}
 The specific sensible enthalpy of the mixture is then given by
 \begin{equation}
 \label{eqn_chemsensmix}
-h_s(\mathbf{Y},T) = \sum_\alpha Y_\alpha h_{\alpha}(T) \,\mbox{.}
+h_s(\mathbf{Y},T) = \sum_\alpha Y_\alpha h_{s,\alpha}(T) \,\mbox{.}
 \end{equation}
 
 Neglecting viscous heating and the effect of the fluctuating pressure on dilation work (both assumptions are valid for low-Mach flows), the transport equation for the sensible enthalpy is
 \begin{equation}
 \label{eqn_enthalpytransport}
-\rho \frac{\mbox{D} h_s }{\mbox{D} t} = -\sum_\alpha \Delta h^0_\alpha ( \dot{m}_{\alpha}^{\tripleprime} - \nabla\cdot\mathbf{J}_\alpha) + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div \dot{\mathbf{q}}^{\prime\prime} - \dq_b''' + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s ) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2
+\rho \frac{\mbox{D} h_s }{\mbox{D} t} = -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div \dot{\mathbf{q}}^{\prime\prime} - \dq_b''' + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s ) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2
 \end{equation}
-where $\Delta h^0_\alpha$ is the heat of formation of $\alpha$ at reference temperature $T_0$, $h_{s,b}$ is the specific sensible enthalpy of the bulk mass source, $\dot{q}_b^{\tripleprime}$ is a volumetric heat sink due to convective heat transfer to the bulk phase, and $\dot{\mathbf{q}}^{\prime\prime}$ is the heat flux vector which contains contributions from conduction, molecular diffusion, and radiation,
+where $\Delta h^0_\alpha$ is the heat of formation of $\alpha$ at reference temperature $T_0$, $h_{s,b}$ is the specific sensible enthalpy of the bulk mass source, $\dot{q}_b^{\tripleprime}$ is a volumetric heat sink due to convective heat transfer to the bulk phase, and $\dot{\mathbf{q}}^{\prime\prime}$ is the heat flux vector which contains contributions from conduction, molecular diffusion of sensible enthalpy, and radiation,
 \begin{equation}
 \label{eqn_heatflux}
-\dot{\mathbf{q}}^{\prime\prime} = -k \nabla T + \sum_\alpha h_{\alpha} \mathbf{J}_{\alpha} + \dot{\mathbf{q}}^{\prime\prime}_{r}
+\dot{\mathbf{q}}^{\prime\prime} = -k \nabla T + \sum_\alpha h_{s,\alpha} \mathbf{J}_{\alpha} + \dot{\mathbf{q}}^{\prime\prime}_{r}
 \end{equation}
 Here $k$ is the thermal conductivity of the mixture and $\dot{\mathbf{q}}^{\prime\prime}_{r}$ is the radiant heat flux.  The last term in (\ref{eqn_enthalpytransport}) accounts for the kinetic energy associated with the instantaneous mixing of the bulk and gas-phase momentum.
 
@@ -4335,34 +4321,34 @@ Using the chain rule of calculus, we may expand the derivative of the sensible e
 \frac{\mbox{D} h_s}{\mbox{D} t} = \left(\frac{\partial h_s}{\partial T}\right) \frac{\mbox{D} T }{\mbox{D} t} +
 \sum_\alpha \left( \frac{\partial h_s}{\partial Y_\alpha} \right) \frac{\mbox{D} Y_\alpha }{\mbox{D} t}
 \end{equation}
-Note that since $h_s = \sum_\alpha Y_\alpha h_{\alpha}$ we have
+Note that since $h_s = \sum_\alpha Y_\alpha h_{s,\alpha}$ we have
 \begin{equation}
 \label{eqn_dhdY}
-\frac{\partial h_s}{\partial Y_\alpha} = \frac{\partial}{\partial Y_\alpha} \sum_\beta (Y_\beta h_{\beta} )
-= \sum_\beta h_{\beta} \,\delta_{\alpha \beta} = h_{\alpha}
+\frac{\partial h_s}{\partial Y_\alpha} = \frac{\partial}{\partial Y_\alpha} \sum_\beta (Y_\beta h_{s,\beta} )
+= \sum_\beta h_{s,\beta} \,\delta_{\alpha \beta} = h_{s,\alpha}
 \end{equation}
 where $\delta_{\alpha \beta}$ is the Kronecker delta. Also,
 \begin{equation}
 \label{eqn_dhdT}
-\frac{\partial h_s}{\partial T} = \frac{\partial}{\partial T} \sum_\alpha Y_\alpha h_{\alpha} =
-\sum_\alpha Y_\alpha \left(\frac{\partial h_{\alpha}}{\partial T}\right) = \sum_\alpha Y_\alpha c_{p,\alpha} \equiv c_p
+\frac{\partial h_s}{\partial T} = \frac{\partial}{\partial T} \sum_\alpha Y_\alpha h_{s,\alpha} =
+\sum_\alpha Y_\alpha \left(\frac{\partial h_{s,\alpha}}{\partial T}\right) = \sum_\alpha Y_\alpha c_{p,\alpha} \equiv c_p
 \end{equation}
 defining the specific heat of the mixture.  Thus, by rearranging (\ref{eqn_chainrule}) and utilizing (\ref{eqn_dhdY}) and (\ref{eqn_dhdT}) we obtain
 \begin{equation}
 \label{eqn_DTDt1}
-\frac{\mbox{D} T}{\mbox{D} t} = \frac{1}{c_p} \left[ \frac{\mbox{D} h_s}{\mbox{D} t} - \sum_\alpha h_{\alpha} \frac{\mbox{D} Y_\alpha}{\mbox{D} t} \right]
+\frac{\mbox{D} T}{\mbox{D} t} = \frac{1}{c_p} \left[ \frac{\mbox{D} h_s}{\mbox{D} t} - \sum_\alpha h_{s,\alpha} \frac{\mbox{D} Y_\alpha}{\mbox{D} t} \right]
 \end{equation}
 Utilizing (\ref{eqn_matdermassfrac}) and (\ref{eqn_enthalpytransport}) in (\ref{eqn_DTDt1}) yields
 \begin{eqnarray}
-\frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p}   \left[  -\sum_\alpha \Delta h^0_\alpha ( \dot{m}_{\alpha}^{\tripleprime} - \nabla\cdot\mathbf{J}_\alpha) + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} - \dq_b''' + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s )  + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2\right.   \nonumber \vspace{0.3cm} \\
-& &  \quad\quad\,\, \left. - \sum_\alpha h_{\alpha} \Big\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \Big\}  \right]
+\frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p}   \left[  -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} - \dq_b''' + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s )  + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2\right.   \nonumber \vspace{0.3cm} \\
+& &  \quad\quad\,\, \left. - \sum_\alpha h_{s,\alpha} \Big\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \Big\}  \right]
 \label{eqn_DTDt2}
 \end{eqnarray}
-Note that $\sum_\alpha h_{\alpha} \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s ) = \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} (h_\alpha[T_b] - h_\alpha[T]) \approx \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T)$, leaving
+Note that $\sum_\alpha h_{s,\alpha} \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s ) = \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} (h_{s,\alpha}[T_b] - h_{s,\alpha}[T]) \approx \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T)$, leaving
 \begin{equation}
 \label{eqn_DTDt}
 \frac{\mbox{D} T}{\mbox{D} t} = \frac{1}{\rho c_p} \left[\frac{\mbox{D} \overline{p}_i }{\mbox{D} t}
-- \Div\dot{\mathbf{q}}^{\prime\prime} - \dq_b''' - \sum_\alpha (\Delta h^0_\alpha + h_\alpha)\left\{  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right\} + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right] \,\mbox{.} \nonumber \vspace{0.3cm} \\
+- \Div\dot{\mathbf{q}}^{\prime\prime} - \dq_b''' - \sum_\alpha \Delta h^0_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right] \,\mbox{.} \nonumber \vspace{0.3cm} \\
 \end{equation}
 
 \subsubsection{Assembling Terms}
@@ -4380,10 +4366,8 @@ where in the second step the EOS (\ref{eqn_idealgaslaw}) is used to simplify the
 Using (\ref{eqn_transportexpression}) and (\ref{eqn_DTDt}) in (\ref{eqn_divconstraint2}) yields
 \begin{eqnarray}
 \label{eqn_divconstraint3}
-\Div\mathbf{u} &=& \frac{1}{\rho} \,\dot{m}_b^{\tripleprime} -  \frac{1}{\overline{p}_i} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} \nonumber \vspace{0.3cm}\\
-&+& \overline{W} \left[\frac{1}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime}
-+ \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
-&+&  \frac{1}{T} \left[ \frac{1}{\rho c_p} \left\{ \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} -\dq_b''' - \sum_\alpha ( \Delta h^0_\alpha + h_{\alpha} ) \left\{  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right\} + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right\} \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
+\Div\mathbf{u} &=& \frac{1}{\rho} \,\dot{m}_b^{\tripleprime} -  \frac{1}{\overline{p}_i} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} + \overline{W} \left[\frac{1}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
+&+&  \frac{1}{T} \left[ \frac{1}{\rho c_p} \left\{ \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} -\dq_b''' - \sum_\alpha \Delta h^0_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right\} \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
 \end{eqnarray}
 Note that $\overline{W} \sum_\alpha (Y_\alpha/W_\alpha) = 1$ and also $\overline{W} \sum_\alpha (Y_{b,\alpha}/W_\alpha) = \overline{W}/\overline{W}_b$,
 where $\overline{W}_b$ is the molecular weight of the bulk mixture prior to its introduction into the fluid mixture.  Equation (\ref{eqn_divconstraint3}) thus simplifies to
@@ -4391,7 +4375,7 @@ where $\overline{W}_b$ is the molecular weight of the bulk mixture prior to its 
 \label{eqn_divconstraint_final}
 \Div\mathbf{u}  &=& \left(\frac{1}{\rho c_p T}  -  \frac{1}{\overline{p}_i}\right) \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} + \frac{1}{\rho} \left[ \dot{m}_b^{\tripleprime} \frac{\overline{W}}{\overline{W}_b} +  \overline{W}\sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime}
 - \Div\mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
-&+&  \frac{1}{\rho c_p T} \left[ -\sum_\alpha (\Delta h^0_\alpha + h_{\alpha})\left\{  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right\} - \Div \dot{\mathbf{q}}^{\prime\prime} -\dq_b''' + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
+&+&  \frac{1}{\rho c_p T} \left[ - \sum_\alpha \Delta h^0_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) - \Div \dot{\mathbf{q}}^{\prime\prime} -\dq_b''' + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
 \end{eqnarray}
 
 
@@ -4430,10 +4414,12 @@ where
 and
 \begin{eqnarray}
 \label{eqn_fdsD}
-\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
-&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha (\Delta h_\alpha^0 + h_{\alpha}) \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
+\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
+&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
 \end{eqnarray}
 Equations (\ref{eqn_fdsP}) and (\ref{eqn_fdsD}) correspond to (\ref{eqn_fdsP1}) and (\ref{eqn_fdsD1}) in the FDS Tech Guide.  Though, note that at present the bulk kinetic energy term is not included in the code.
+
+A brief remark on the of the sensible enthalpy $h_{s,\alpha}$ vs. the [chemical + sensible] enthalpy $h_\alpha = \Delta h_\alpha^0 + h_{s,\alpha}$: The definition of the heat flux vector $\dot{\mathbf{q}}^{\prime\prime}$ can be a key source of confusion.  When transporting the sensible enthalpy only, as we are doing here, the heat flux vector does not account for the molecular transport of the chemical enthalpy (the enthalpy of formation).  If we were working in terms of the [chemical + sensible] enthalpy we would not have a ``heat of reaction'' $\dot{q}^{\tripleprime}$, the heat flux vector would account for the transport of both the chemical and the sensible enthalpies, and the sensible enthalpies in (\ref{eqn_fdsD}) would be replaced by the [chemical + sensible] enthalpy $h_{\alpha}$.
 
 \chapter{Domain Decomposition Strategy}
 \label{app_pressure_correction}
