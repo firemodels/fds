@@ -33,7 +33,7 @@ IMPLICIT NONE
 CHARACTER(255), PARAMETER :: mainmpiid='$Id$'
 CHARACTER(255), PARAMETER :: mainmpirev='$Revision$'
 CHARACTER(255), PARAMETER :: mainmpidate='$Date$'
-LOGICAL  :: EX,DIAGNOSTICS,EXCHANGE_RADIATION=.TRUE.,EXCHANGE_EVACUATION=.FALSE.
+LOGICAL  :: EX,DIAGNOSTICS,EXCHANGE_RADIATION=.TRUE.,EXCHANGE_EVACUATION=.FALSE.,FIRST_PASS
 INTEGER  :: LO10,NM,IZERO,REVISION_NUMBER,IOS
 CHARACTER(255) :: REVISION_DATE
 REAL(EB) :: T_MAX,T_MIN
@@ -450,7 +450,7 @@ MAIN_LOOP: DO
 
    IF (NMESHES>1) THEN
       DO NM=1,NMESHES
-         IF (PROCESS(NM)/=MYID) CYCLE
+         IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE
          CALL MATCH_VELOCITY(NM)
       ENDDO
    ENDIF
@@ -482,6 +482,8 @@ MAIN_LOOP: DO
    ENDDO COMPUTE_FINITE_DIFFERENCES_1
 
    ! Estimate quantities at next time step, and decrease/increase time step if necessary based on CFL condition
+
+   FIRST_PASS = .TRUE.
  
    CHANGE_TIME_STEP_LOOP: DO
 
@@ -495,8 +497,10 @@ MAIN_LOOP: DO
 
       ! Exchange density and species mass fractions in interpolated boundaries
 
-      CALL POST_RECEIVES(1)
-      CALL MESH_EXCHANGE(1)
+      IF (FIRST_PASS .OR. SYNCHRONIZE) THEN
+         CALL POST_RECEIVES(1)
+         CALL MESH_EXCHANGE(1)
+      ENDIF
 
       ! Do mass and energy boundary conditions, and begin divergence calculation
 
@@ -523,7 +527,7 @@ MAIN_LOOP: DO
 
       ! Optional pressure correction
 
-      IF (PRESSURE_CORRECTION) THEN
+      IF (PRESSURE_CORRECTION .AND. (FIRST_PASS .OR. SYNCHRONIZE)) THEN
          CALL POST_RECEIVES(2)
          CALL MESH_EXCHANGE(2)
          CALL CORRECT_PRESSURE
@@ -536,19 +540,6 @@ MAIN_LOOP: DO
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE PREDICT_VELOCITY_LOOP
          CALL VELOCITY_PREDICTOR(NM,MESH_STOP_STATUS(NM))
       ENDDO PREDICT_VELOCITY_LOOP
-
-      ! Exchange velocity and pressures at interpolated boundaries
-
-      CALL POST_RECEIVES(3)
-      CALL MESH_EXCHANGE(3)
-
-      ! Apply tangential velocity boundary conditions
-
-      VELOCITY_BC_LOOP: DO NM=1,NMESHES
-         IF (PROCESS(NM)/=MYID)    CYCLE VELOCITY_BC_LOOP
-         IF (.NOT.ACTIVE_MESH(NM)) CYCLE VELOCITY_BC_LOOP
-         CALL VELOCITY_BC(T(NM),NM)
-      ENDDO VELOCITY_BC_LOOP
 
       ! Exchange information about the time step status, and if need be, repeat the CHANGE_TIME_STEP_LOOP
  
@@ -595,10 +586,25 @@ MAIN_LOOP: DO
  
       IF (.NOT.ANY(CHANGE_TIME_STEP)) EXIT CHANGE_TIME_STEP_LOOP
  
+      FIRST_PASS = .FALSE.
+
    ENDDO CHANGE_TIME_STEP_LOOP
  
    CHANGE_TIME_STEP = .FALSE.
  
+   ! Exchange velocity and pressures at interpolated boundaries
+
+   CALL POST_RECEIVES(3)
+   CALL MESH_EXCHANGE(3)
+
+   ! Apply tangential velocity boundary conditions
+
+   VELOCITY_BC_LOOP: DO NM=1,NMESHES
+      IF (PROCESS(NM)/=MYID)    CYCLE VELOCITY_BC_LOOP
+      IF (.NOT.ACTIVE_MESH(NM)) CYCLE VELOCITY_BC_LOOP
+      CALL VELOCITY_BC(T(NM),NM)
+   ENDDO VELOCITY_BC_LOOP
+
    ! Advance the time to start the CORRECTOR step
  
    UPDATE_TIME: DO NM=1,NMESHES
@@ -618,7 +624,7 @@ MAIN_LOOP: DO
 
    IF (NMESHES>1) THEN
       DO NM=1,NMESHES
-         IF (PROCESS(NM)/=MYID) CYCLE
+         IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE
          CALL MATCH_VELOCITY(NM)
       ENDDO
    ENDIF
@@ -991,7 +997,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    SNODE = PROCESS(NOM)
    IF (PROCESS(NM)==SNODE) CYCLE OTHER_MESH_LOOP
    IF (NIC(NM,NOM)==0 .AND. NIC(NOM,NM)==0) CYCLE OTHER_MESH_LOOP
-   IF (CODE>0 .AND. .NOT.ACTIVE_MESH(NOM)) CYCLE OTHER_MESH_LOOP
+   IF (CODE>0 .AND. (.NOT.ACTIVE_MESH(NOM).OR..NOT.ACTIVE_MESH(NM))) CYCLE OTHER_MESH_LOOP
  
    IF (DEBUG) THEN
       WRITE(LU_ERR,'(I3,A,I3,A,I2)') NM,' posting receives from ',NOM,' code=',code
