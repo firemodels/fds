@@ -376,13 +376,37 @@ IF (IPS==7) CALL H2CZSS(BXS,BXF,BYS,BYF,ITRN,PRHS,POIS_PTB,SAVE,WORK,HX)
 
 SELECT CASE(IPS)
    CASE(:1,4,7)
-      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) H(I,J,K) = PRHS(I,J,K)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               H(I,J,K) = PRHS(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
    CASE(2)  
-      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) H(I,J,K) = PRHS(J,I,K)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               H(I,J,K) = PRHS(J,I,K)
+            ENDDO
+         ENDDO
+      ENDDO
    CASE(3,6)
-      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) H(I,J,K) = PRHS(K,J,I)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               H(I,J,K) = PRHS(K,J,I)
+            ENDDO
+         ENDDO
+      ENDDO
    CASE(5) 
-      FORALL(K=1:KBAR,J=1:JBAR,I=1:IBAR) H(I,J,K) = PRHS(I,K,J)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               H(I,J,K) = PRHS(I,K,J)
+            ENDDO
+         ENDDO
+      ENDDO
 END SELECT 
 
 ! Apply boundary conditions to H
@@ -1035,7 +1059,13 @@ IF (TWO_D .AND. .NOT. CYLINDRICAL) CALL H2CZSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PT
  
 IF (ABS(POIS_PTB)>1.E-5_EB) WRITE(LU_ERR,*) ' POIS_PTB=',POIS_PTB, ' MESH=',NM
  
-FORALL(I=1:IBAR,J=1:JBAR,K=1:KBAR) HP(I,J,K) = PRHS(I,J,K)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         HP(I,J,K) = PRHS(I,J,K)
+      ENDDO
+   ENDDO
+ENDDO
  
 ! Assign ghost cell values of HP
 
