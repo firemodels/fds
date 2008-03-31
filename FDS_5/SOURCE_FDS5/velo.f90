@@ -825,9 +825,29 @@ ELSE
    HT => H
 ENDIF
 
-FORALL(I=0:IBAR,J=1:JBAR,K=1:KBAR) US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(HT(I+1,J,K)-HT(I,J,K)) )
-FORALL(I=1:IBAR,J=0:JBAR,K=1:KBAR) VS(I,J,K) = V(I,J,K) - DT*( FVY(I,J,K) + RDYN(J)*(HT(I,J+1,K)-HT(I,J,K)) )
-FORALL(I=1:IBAR,J=1:JBAR,K=0:KBAR) WS(I,J,K) = W(I,J,K) - DT*( FVZ(I,J,K) + RDZN(K)*(HT(I,J,K+1)-HT(I,J,K)) )
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(HT(I+1,J,K)-HT(I,J,K)) )
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         VS(I,J,K) = V(I,J,K) - DT*( FVY(I,J,K) + RDYN(J)*(HT(I,J+1,K)-HT(I,J,K)) )
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         WS(I,J,K) = W(I,J,K) - DT*( FVZ(I,J,K) + RDZN(K)*(HT(I,J,K+1)-HT(I,J,K)) )
+      ENDDO
+   ENDDO
+ENDDO
 
 ! Check the stability criteria, and if the time step is too small, send back a signal to kill the job
  
@@ -861,9 +881,29 @@ ELSE
    HT => H
 ENDIF
 
-FORALL(I=0:IBAR,J=1:JBAR,K=1:KBAR) U(I,J,K) = .5_EB*( U(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + RDXN(I)*(HT(I+1,J,K)-HT(I,J,K))) )
-FORALL(I=1:IBAR,J=0:JBAR,K=1:KBAR) V(I,J,K) = .5_EB*( V(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + RDYN(J)*(HT(I,J+1,K)-HT(I,J,K))) )
-FORALL(I=1:IBAR,J=1:JBAR,K=0:KBAR) W(I,J,K) = .5_EB*( W(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + RDZN(K)*(HT(I,J,K+1)-HT(I,J,K))) )
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         U(I,J,K) = .5_EB*( U(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + RDXN(I)*(HT(I+1,J,K)-HT(I,J,K))) )
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         V(I,J,K) = .5_EB*( V(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + RDYN(J)*(HT(I,J+1,K)-HT(I,J,K))) )
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         W(I,J,K) = .5_EB*( W(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + RDZN(K)*(HT(I,J,K+1)-HT(I,J,K))) )
+      ENDDO
+   ENDDO
+ENDDO
 
 TUSED(4,NM)=TUSED(4,NM)+SECOND()-TNOW
 END SUBROUTINE VELOCITY_CORRECTOR
