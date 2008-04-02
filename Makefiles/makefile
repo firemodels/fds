@@ -210,6 +210,15 @@ pgi_linux : obj = fds5_pgi_Opteron64
 pgi_linux : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
+#AIX, JUMP, MPI-Version
+aix_mpi : FFLAGS  = -O3 -q64
+aix_mpi : CFLAGS  = -O3 -Dpp_noappend -q64
+aix_mpi : FCOMPL  = mpxlf90
+aix_mpi : CCOMPL  = mpcc
+aix_mpi : obj     = fds5_jump_mpi_64
+aix_mpi : $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+
 #*** End Compiler Specific Rules ***
 
 # *** Object Dependencies ***
