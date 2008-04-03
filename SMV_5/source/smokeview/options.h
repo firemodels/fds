@@ -41,6 +41,7 @@
 #include "pragmas.h"
 #endif
 
+#define pp_ISOOUT
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB
@@ -51,7 +52,6 @@
 
 
 #ifdef pp_ALPHA
-#define pp_ISOOUT
 #define pp_LIGHT
 #define pp_GPU
 #define pp_CULL
