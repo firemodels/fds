@@ -49,6 +49,7 @@ int main(int argc, char **argv){
 #endif
   frameskip=-1;
   autozip=0;
+  make_demo=0;
   endf=0;
   syst=0;
   endianfile=NULL;
@@ -191,6 +192,11 @@ int main(int argc, char **argv){
         }
         break;
       case 'd':
+        if(strcmp(arg,"-demo")==0){
+          autozip=1;
+          make_demo=1;
+          break;
+        }
         if(i+1<argc){
           lenarg2=strlen(argv[i+1]);
           NewMemory((void **)&destdir,lenarg2+2);
@@ -362,6 +368,9 @@ int main(int argc, char **argv){
   if(cleanfiles==1&&filesremoved==0){
     printf("No compressed files were removed\n");
   }
+  if(make_demo==1){
+    makesvd(destdir,smvfile);
+  }
 
   return 0;
 }
@@ -409,6 +418,54 @@ void filecopy(char *destdir, char *file, char *filebase){
   }
 }
        
+       
+/* ------------------ makesvd ------------------------ */
+
+void makesvd(char *destdir, char *smvfile){
+  char buffer[SIZEBUFFER];
+  FILE *streamin;
+  FILE *streamout;
+  char *fileout=NULL;
+  size_t chars_in;
+  char *svd;
+
+  if(smvfile==NULL)return;
+  streamin=fopen(smvfile,"rb");
+  if(streamin==NULL)return;
+
+  fileout=NULL;
+  if(destdir==NULL){
+    NewMemory((void **)&fileout,strlen(smvfile)+2+1);
+    strcpy(fileout,".");
+    strcat(fileout,dirseparator);
+  }
+  else{
+    NewMemory((void **)&fileout,strlen(smvfile)+strlen(destdir)+1);
+    strcpy(fileout,destdir);
+  }
+  strcat(fileout,smvfile);
+  svd = fileout + strlen(fileout) - 4;
+  strcpy(svd,".svd");
+
+  streamout=fopen(fileout,"wb");
+  if(streamout==NULL){
+    fclose(streamin);
+    return;
+  }
+  printf("  Copying %s to %s\n",smvfile,fileout);
+  for(;;){
+    int eof;
+       
+    eof=0;
+    chars_in=fread(buffer,1,SIZEBUFFER,streamin);
+    if(chars_in!=SIZEBUFFER)eof=1;
+    if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
+    if(eof==1)break;
+  }
+  fclose(streamout);
+  fclose(streamin);
+}
+       
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
@@ -436,6 +493,10 @@ void usage(char *prog){
   printf("  -f  - overwrites all compressed files\n");
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 
+  printf("  -demo - Creates the files (compressed and .svd ) needed by the\n");
+  printf("          Smokeview demonstrator mode.  Compresses files that are autoloaded, \n");
+  printf("          uses (20.0,620.0) and (0.0,0.23) for temperature and oxygen bounds and\n");
+  printf("          creates the .svd file which activates the Smokeview demonstrator mode.\n");
   printf("  -s sourcedir - specifies directory containing source files\n");
   printf("  -skip skipval - skip frames when compressing files\n");
   printf("  -auto - compress only files that are auto-loaded by Smokeview\n");
