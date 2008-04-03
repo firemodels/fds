@@ -1195,6 +1195,7 @@ Because of the low Mach number assumption, the divergence of the flow, $\nabla \
 of the modified Equation of State~(\ref{state}), and then substituting terms from the mass
 and energy conservation equations. As shown in Appendix \ref{app_divergence}, for the $m$th zone with background pressure $\bp_m$, the divergence may be written as
 \begin{equation}
+\label{eqn_divfromeos}
 \nabla \cdot \bu = {\cal D} + {\cal P}\dod{\bp_m}{t} \,\mbox{,}  \label{phi}
 \end{equation}
 where
@@ -4445,7 +4446,7 @@ Note that (\ref{eqn_RK1}) updates a $\bar{\mathbf{u}}$ field to a $\mathbf{u}$ f
 \label{eqn_poisson_stg1}
 \nabla^2 {\cH'}^{(n+1)_e} = -\left[\frac{ (\nabla\cdot\mathbf{u})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n}{\delta t}\right] -  \mathbf{F}(\rho^n,\bar{\mathbf{u}}^n) \,\mbox{.}
 \end{equation}
-In (\ref{eqn_poisson_stg1}), note that $\mathbf{F}$ is computed using the patch-averaged velocity field. Further, only the $(\nabla\cdot\mathbf{u})^{(n+1)_e}$ term is obtained from the equation of state (\ref{eqn}).  The divergence of the patch-averaged field, $(\nabla\cdot\bar{\mathbf{u}})^n$, is obtained by explicitly applying the discrete divergence operator to $\bar{\mathbf{u}}^n$.  Similarly, in the corrector Poisson equation analogous to (\ref{eqn_corrector_poisson}), only the $(\nabla\cdot\mathbf{u})^{n+1}$ term is obtained from the equation of state; $(\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e}$ and $(\nabla\cdot\bar{\mathbf{u}})^n$ are obtained explicitly:
+In (\ref{eqn_poisson_stg1}), note that $\mathbf{F}$ is computed using the patch-averaged velocity field. Further, only the $(\nabla\cdot\mathbf{u})^{(n+1)_e}$ term is obtained from the equation of state (\ref{eqn_divfromeos}).  The divergence of the patch-averaged field, $(\nabla\cdot\bar{\mathbf{u}})^n$, is obtained by explicitly applying the discrete divergence operator to $\bar{\mathbf{u}}^n$.  Similarly, in the corrector Poisson equation analogous to (\ref{eqn_corrector_poisson}), only the $(\nabla\cdot\mathbf{u})^{n+1}$ term is obtained from the equation of state; $(\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e}$ and $(\nabla\cdot\bar{\mathbf{u}})^n$ are obtained explicitly:
 \begin{equation}
 \label{eqn_poisson_stg2}
 \nabla^2 {\cH'}^{\,n+1} = -\left[\frac{ 2(\nabla\cdot\mathbf{u})^{n+1} - (\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n}{\delta t}\right] -  \mathbf{F}(\rho^{(n+1)_e},\bar{\mathbf{u}}^{(n+1)_e}) \,\mbox{.}
