@@ -3263,6 +3263,9 @@ void Args(int argc, char **argv){
     else if(strncmp(argv[i],"-part",5)==0){
       set_no_part=0; 
     }
+    else if(strncmp(argv[i],"-demo",5)==0){
+      demo_option=1;
+    }
     else if(strncmp(argv[i],"-nopart",7)==0){
       set_no_part=1; 
     }
@@ -3351,11 +3354,12 @@ void usage(char **argv){
   printf("%s\n",TITLERELEASE);
   printf("Visualize fire/smoke flow simulations.  All parameters are optional.\n\n");
   printf("Usage:\n\n");
-  printf("%s casename -points m -frames n -ini -part -nopart -stereo\n\n",argv[0]);
+  printf("%s casename -points m -frames n -ini -part -nopart -stereo -demo\n\n",argv[0]);
   printf("where \n\n");
   printf("  casename = project id (file names without the extension)\n");
   printf("         m = maximum number of particles.  Default=%i\n",MAXPOINTS);
   printf("         n = maximum number of particle frames.  Default=%i\n",MAXFRAMES);
+  printf("     -demo = activate demonstrator mode of Smokeview\n");
   printf("     -help = display this message\n");
   printf("      -ini = output default smokeview parameters to smokeview.ini\n");
   printf("     -part = load particle file if present \n");

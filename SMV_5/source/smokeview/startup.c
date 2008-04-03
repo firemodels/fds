@@ -59,6 +59,7 @@ void to_lower(char *string){
 int initcase_c(int argc, char **argv){
   int return_code;
   int input_type=0;
+  char *input_file;
 
   /* 
   warning: the following line was commented out!! (perhaps it broke something)
@@ -66,40 +67,40 @@ int initcase_c(int argc, char **argv){
   */
   Args(argc, argv); 
   return_code=-1;
-  if(strcmp(inputfilename_ext,".svd")==0){
+  if(strcmp(inputfilename_ext,".svd")==0||demo_option==1){
+    if(strcmp(inputfilename_ext,".svd")==0){
+      input_file=trainer_filename;
+    }
+    else{
+      input_file=smvfilename;
+    }
     input_type=1;
-    return_code=readsmv(trainer_filename);
+    return_code=readsmv(input_file);
     if(return_code==0){
       trainer_mode=1;
       trainer_active=1;
-      if(trainer_mode==1){
-        show_trainer();
-        show_load_alert();
-      }
+      show_trainer();
+      show_load_alert();
     }
   }
   else{
     input_type=2;
-    return_code=readsmv(smvfilename);
+    input_file=smvfilename;
+    return_code=readsmv(input_file);
   }
   switch (return_code){
-  case 1:
-    if(input_type==1){
-      printf("Training input files %s not found.\n",trainer_filename);
-    }
-    else{
-      printf("Smokeview input files %s not found.\n",smvfilename);
-    }
-    pauseSV();
-    return 1;
-  case 2:
+    case 1:
+      printf("Input file %s not found.\n",input_file);
+      pauseSV();
+      return 1;
+    case 2:
       printf("*** Fatal error: unable to allocate necessary memory\n");
       pauseSV();
       return 2;
-  case 0:
-    break;
-  default:
-    ASSERT(FFALSE);
+    case 0:
+      break;
+    default:
+      ASSERT(FFALSE);
   }
   readini(0);
 
@@ -1891,6 +1892,7 @@ void initvars0(void){
   GPU_depthtexture=0;
 #endif
 
+  demo_option=0;
   current_mesh=NULL;
   camera_current=NULL, camera_save=NULL, camera_last=NULL;
   camera_external=NULL, camera_internal=NULL, camera_ini=NULL;
