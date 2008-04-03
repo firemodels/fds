@@ -566,19 +566,36 @@ void compress_slices(void){
     slicei->count=0;
   }
   for(i=0;i<nslice_files;i++){
+    char *label;
+
     slicei = sliceinfo + i;
     if(autozip==1&&slicei->autozip==0)continue;
     slicei->doit=1;
 
     sb=getslice(slicei->label.shortlabel);
     if(sb==NULL)slicei->doit=0;
-    if(sb!=NULL){
-      if(sb->setvalmax!=1||sb->setvalmin!=1)slicei->doit=0;
+    label = slicei->label.longlabel;
+    if(make_demo==1&&(strcmp(label,"TEMPERATURE")==0||strcmp(label,"oxygen")==0)){
+      slicei->setvalmax=1;
+      slicei->setvalmin=1;
+      if(strcmp(label,"TEMPERATURE")==0){
+        slicei->valmax=620.0;
+        slicei->valmin=20.0;
+      }
+      else{
+        slicei->valmax=0.23;
+        slicei->valmin=0.0;
+      }
     }
-    slicei->setvalmax=sb->setvalmax;
-    slicei->setvalmin=sb->setvalmin;
-    slicei->valmax=sb->valmax;
-    slicei->valmin=sb->valmin;
+    else{
+      if(sb!=NULL){
+        if(sb->setvalmax!=1||sb->setvalmin!=1)slicei->doit=0;
+      }
+      slicei->setvalmax=sb->setvalmax;
+      slicei->setvalmin=sb->setvalmin;
+      slicei->valmax=sb->valmax;
+      slicei->valmin=sb->valmin;
+    }
     sb->count++;
   }
 
