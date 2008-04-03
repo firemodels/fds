@@ -175,6 +175,8 @@ ENDIF
 
 IF (PROCESS_STOP_STATUS > 0) CALL END_FDS
 
+WALL_CLOCK_START_ITERATIONS = WALL_CLOCK_TIME()
+
 !***********************************************************************************************************************************
 !                                                     MAIN TIMESTEPPING LOOP
 !***********************************************************************************************************************************
@@ -831,9 +833,11 @@ END SUBROUTINE EXCHANGE_DIAGNOSTICS
 SUBROUTINE CORRECT_PRESSURE
  
 USE MATH_FUNCTIONS, ONLY : GAUSSJ
-REAL(EB) :: A(NCGC,NCGC),B(NCGC)
+REAL(EB) :: A(NCGC,NCGC),B(NCGC),TNOW
 INTEGER :: IERROR,NM
  
+TNOW = SECOND()
+
 A = 0._EB
 B = 0._EB
  
@@ -849,6 +853,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
 CALL COMPUTE_CORRECTION_PRESSURE(B,NM)
 ENDDO MESH_LOOP_3
  
+TUSED(5,:) = TUSED(5,:) + SECOND() - TNOW
 END SUBROUTINE CORRECT_PRESSURE
 
 
