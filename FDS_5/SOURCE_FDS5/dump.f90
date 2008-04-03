@@ -2036,35 +2036,6 @@ SURFLOOP: DO N=0,N_SURF-1
  
 ENDDO SURFLOOP
  
-! Print out information about obstacles
- 
-MESH_LOOP_2: DO NM=1,NMESHES
-   M => MESHES(NM)
-   IF (M%N_OBST>0) THEN
-      WRITE(LU_OUTPUT,'(//A,I3/)') ' Obstruction Information, Mesh ',NM
-      DO N=1,M%N_OBST
-         OB=>M%OBSTRUCTION(N)
-         WRITE(LU_OUTPUT,72) N,OB%I1,OB%I2,OB%J1,OB%J2,OB%K1,OB%K2, &
-            OB%IBC(-1),OB%IBC(1),OB%IBC(-2),OB%IBC(2),OB%IBC(-3),OB%IBC(3)
-      ENDDO
-   ENDIF
-ENDDO MESH_LOOP_2
-72 FORMAT(I6,' Nodes:',6I4,', Surface IDs:',6I4)
- 
-! Print out information about vents
- 
-MESH_LOOP_3: DO NM=1,NMESHES
-   M => MESHES(NM)
-   IF (M%N_VENT>0) THEN
-      WRITE(LU_OUTPUT,'(//A,I3/)') ' Vent Information, Mesh ',NM
-      DO N=1,M%N_VENT
-         VT=>M%VENTS(N)
-         WRITE(LU_OUTPUT,73) N,VT%I1,VT%I2,VT%J1,VT%J2,VT%K1,VT%K2,VT%IBC
-      ENDDO
-   ENDIF
-ENDDO MESH_LOOP_3
-73 FORMAT(I6,' Nodes:',6I4,', Surface ID:',I2)
- 
 ! Print out information about all Devices
  
 IF (N_PROP > 0) WRITE(LU_OUTPUT,'(//A,I2)')  ' Device Properties'
@@ -4504,7 +4475,8 @@ ENDDO
          (7X,A6,2F11.2))
  
 WALL_CLOCK_END = WALL_CLOCK_TIME()
-WRITE(LU_OUTPUT,'(//A,F12.3)') ' Elapsed Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START
+WRITE(LU_OUTPUT,'(//A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START
+WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START_ITERATIONS
 
 END SUBROUTINE TIMINGS
 

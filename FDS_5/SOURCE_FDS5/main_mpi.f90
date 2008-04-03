@@ -339,6 +339,10 @@ IF (ANY(EVACUATION_GRID)) THEN
    CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 ENDIF
 
+! Start the clock for time stepping
+
+WALL_CLOCK_START_ITERATIONS = WALL_CLOCK_TIME()
+
 !***********************************************************************************************************************************
 !                                                           MAIN TIMESTEPPING LOOP
 !***********************************************************************************************************************************
@@ -986,6 +990,9 @@ USE RADCONS, ONLY: NRA,NSB
  
 INTEGER, INTENT(IN) :: CODE
 INTEGER :: SNODE
+REAL(EB) :: TNOW
+
+TNOW = SECOND()
 
 MESH_LOOP: DO NM=1,NMESHES
    IF (PROCESS(NM)/=MYID) CYCLE MESH_LOOP
@@ -1125,6 +1132,7 @@ DO NOM=1,NMESHES
    ENDIF
 ENDDO
  
+TUSED(11,:)=TUSED(11,:) + SECOND() - TNOW
 END SUBROUTINE POST_RECEIVES
  
  
@@ -1940,8 +1948,10 @@ END SUBROUTINE EXCHANGE_DIAGNOSTICS
 SUBROUTINE CORRECT_PRESSURE
 
 USE MATH_FUNCTIONS, ONLY : GAUSSJ
-REAL(EB) :: A_LOC(NCGC,NCGC),A(NCGC,NCGC),B_LOC(NCGC),B(NCGC)
+REAL(EB) :: A_LOC(NCGC,NCGC),A(NCGC,NCGC),B_LOC(NCGC),B(NCGC),TNOW
 INTEGER :: IERROR,NM
+
+TNOW = SECOND()
 
 A     = 0._EB
 B     = 0._EB
@@ -1965,6 +1975,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
    CALL COMPUTE_CORRECTION_PRESSURE(B,NM)
 ENDDO MESH_LOOP_3
 
+TUSED(5,:) = TUSED(5,:) + SECOND() - TNOW
 END SUBROUTINE CORRECT_PRESSURE
 
 
