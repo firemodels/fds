@@ -210,6 +210,16 @@ pgi_linux : obj = fds5_pgi_Opteron64
 pgi_linux : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
+# AMD Opteron 64Bit PC on hercules.nist.gov
+pgi_linux_mpi : FFLAGS = -fast -tp k8-64 -Mstandard
+pgi_linux_mpi : CFLAGS = -fast -tp k8-64
+pgi_linux_mpi : FCOMPL = mpif77
+pgi_linux_mpi : CCOMPL = mpicc
+pgi_linux_mpi : LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
+pgi_linux_mpi : obj = fds5_mpi_pgi_Opteron64
+pgi_linux_mpi : $(obj_mpi)
+       $(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+
 #AIX, JUMP, MPI-Version
 aix_mpi : FFLAGS  = -O3 -q64
 aix_mpi : CFLAGS  = -O3 -Dpp_noappend -q64
