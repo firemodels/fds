@@ -500,7 +500,7 @@ Sung Chan Kim                           & School of Mechanical Engineering, Chun
 Pierre-Louis Lamballais                 & Flashover-Backdraft, France                                                                  \\ \hline
 A.~Leonardi                             & StIL (Studio di Ingegneria Leonardi), Italy                         \\ \hline
 Davy Leroy                              & Arup Fire, UK                 \\ \hline
-Jason Liu                               & Warrington Fire Research, Australia                  \\ \hline
+Yunlong Liu                             & Parsons Brinckerhof, Australia                   \\ \hline
 Timothy Liu                             & Locke Carey Fire Consultants, UK                  \\ \hline
 Dave McGill                             & Seneca College, Ontario, Canada                  \\ \hline
 Ken Miller                              & Las Vegas Fire \& Rescue, USA                  \\ \hline
@@ -1512,6 +1512,7 @@ For example if you were testing a {\ct VENT} that is to open at 10 s whose {\ct 
  {\ct T\_BEGIN} should be set slightly less than 10 s.
 \end{warning}
 
+\noindent
 The initial time step size can be specified with
 {\ct DT}\index{TIME!DT}. This parameter is normally set automatically by dividing the size of a mesh cell by the
 characteristic velocity of the flow.
@@ -1534,6 +1535,12 @@ logical flag ({\ct .TRUE.} or {\ct .FALSE.}) indicating that in a
 multi-mesh computation the time step for each mesh should be the same, thus
 ensuring that each mesh is processed each iteration. More details can
 be found in Section~\ref{info:multimesh}. The default value of {\ct SYNCHRONIZE} is {\ct .TRUE.}
+
+Finally, if you want to prevent FDS from automatically changing the time step, set \\
+{\ct LOCK\_TIME\_STEP=.FALSE.} \\
+on the {\ct TIME} line, in which case the specified
+time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
+numerical instabilities if the initial time step is set too high.
 
 \newpage
 
@@ -2078,23 +2085,23 @@ FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of th
 assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of
 this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same
 as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel
-instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for 
+instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for
 the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because the Poisson
-equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerics can be found in the 
-FDS Technical Reference Guide. 
+equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerics can be found in the
+FDS Technical Reference Guide.
 
 A new feature has been added in FDS 5 to improve the accuracy of the multi-mesh pressure solver. Briefly, a correction is made to the local solutions of the Poisson
 equation by way of a global solution for an ``average'' pressure in each mesh. This can be thought of as the pressure that one would obtain from a zone or lumped parameter
 model where each compartment in a building has its own bulk pressure obtained via mass balance estimates at compartment boundaries. Currently, this
 pressure correction is still an option because it requires additional testing and it requires additional CPU time. To invoke it, add \\
 {\ct PRESSURE\_CORRECTION=.TRUE.} \\
-to the {\ct MISC} line. Run your case with and without the option to determine how much additional CPU time is required, and also how much of an improvement in 
+to the {\ct MISC} line. Run your case with and without the option to determine how much additional CPU time is required, and also how much of an improvement in
 accuracy it yields. This can be done in two ways. First, examine vector slice files of various quantities at the mesh boundaries to see if there are noticeable changes
 in the flow field due to the boundary. Second, add \\
 {\ct CHECK\_VOLUME\_FLOW=.TRUE.} \\
 to the {\ct DUMP} line, just for debugging purposes. This will prompt FDS to compute the volume flow at each mesh boundary to determine if the pressure correction
 scheme is working properly. If error messages appear on the screen or in the standard error file, post the case to the Issue Tracker.
- 
+
 
 
 \subsection{Special Topic: Restoring the Baroclinic Vorticity}
@@ -2195,6 +2202,11 @@ calculations with mesh cells smaller than 5~mm.
 Resetting the stability parameters is not recommended except in very special circumstances, as they can lead to
 simulations failing due to numerical instabilities.
 \end{warning}
+
+\noindent
+If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP=.FALSE.} on the {\ct TIME} line, in which case the specified
+time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
+numerical instabilities if the initial time step is set too high.
 
 
 \clearpage
@@ -6609,7 +6621,7 @@ Thus, you can use {\ct RADIATIVE\_INTENSITY}/4 as an approximation for the incid
 take into account the non-uniform nature of radiation. Also note that this is the {\em incident} heat flux. To get the {\em net} heat flux to the
 object or person whose surface temperature is $T_s$, you need to subtract $\epsilon \sigma T_s^4$, the outgoing heat flux.
 
-There is a second output quantity available called {\ct RADIATIVE\_FLUX\_GAS} which uses the additional input 
+There is a second output quantity available called {\ct RADIATIVE\_FLUX\_GAS} which uses the additional input
 of {\ct ORIENTATION}.  This quantity integrates the incomming radiative flux over $2\pi$ solid angles around the
 vector defined by {\ct ORIENTATION}.
 
@@ -7723,6 +7735,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\ \hline \hline
 {\ct DT}                   & Real       & Initial time step                   & s           &               \\ \hline
 {\ct FYI}                  & Character  & Comment String (has no effect)      &             &               \\ \hline
+{\ct LOCK\_TIME\_STEP}     & Logical    & Do not allow time step changes      &             & {\ct .FALSE.}  \\ \hline
 {\ct SYNCHRONIZE}          & Logical    & Sync time step of multiple meshes   &             & {\ct .TRUE.}  \\ \hline
 {\ct T\_BEGIN}             & Real       & Starting time for calculation       & s           & 0.            \\ \hline
 {\ct T\_END}or{\ct TWFIN } & Real       & Ending time for calculation         & s           & 1             \\ \hline
