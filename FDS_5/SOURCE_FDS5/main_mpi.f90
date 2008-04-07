@@ -491,6 +491,8 @@ MAIN_LOOP: DO
  
    CHANGE_TIME_STEP_LOOP: DO
 
+      IF (FIRST_PASS .OR. SYNCHRONIZE) CALL POST_RECEIVES(1)  !!!!
+
       ! Predict density and mass fractions at next time step, and then start the divergence calculation
  
       COMPUTE_DENSITY_LOOP: DO NM=1,NMESHES
@@ -502,8 +504,9 @@ MAIN_LOOP: DO
       ! Exchange density and species mass fractions in interpolated boundaries
 
       IF (FIRST_PASS .OR. SYNCHRONIZE) THEN
-         CALL POST_RECEIVES(1)
+   !!!   CALL POST_RECEIVES(1)
          CALL MESH_EXCHANGE(1)
+         IF (PRESSURE_CORRECTION) CALL POST_RECEIVES(2)  !!!!
       ENDIF
 
       ! Do mass and energy boundary conditions, and begin divergence calculation
@@ -532,7 +535,7 @@ MAIN_LOOP: DO
       ! Optional pressure correction
 
       IF (PRESSURE_CORRECTION .AND. (FIRST_PASS .OR. SYNCHRONIZE)) THEN
-         CALL POST_RECEIVES(2)
+   !!!   CALL POST_RECEIVES(2)
          CALL MESH_EXCHANGE(2)
          CALL CORRECT_PRESSURE
       ENDIF
@@ -624,6 +627,8 @@ MAIN_LOOP: DO
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
  
+   CALL POST_RECEIVES(4) !!!
+
    ! Force normal components of velocity to match at interpolated boundaries
 
    IF (NMESHES>1) THEN
@@ -647,8 +652,9 @@ MAIN_LOOP: DO
 
    ! Exchange density and mass species
 
-   CALL POST_RECEIVES(4) 
+!!!CALL POST_RECEIVES(4) 
    CALL MESH_EXCHANGE(4)
+   IF (PRESSURE_CORRECTION) CALL POST_RECEIVES(5)   !!!
 
    ! Apply mass and species boundary conditions, update radiation, particles, and re-compute divergence
 
@@ -676,10 +682,12 @@ MAIN_LOOP: DO
    ! Optional pressure correction
 
    IF (PRESSURE_CORRECTION) THEN
-      CALL POST_RECEIVES(5) 
+  !!! CALL POST_RECEIVES(5) 
       CALL MESH_EXCHANGE(5)
       CALL CORRECT_PRESSURE
    ENDIF
+
+   CALL POST_RECEIVES(6)  !!!
 
    ! Check for changes in geometry, then correct the velocity
 
@@ -695,7 +703,7 @@ MAIN_LOOP: DO
    ! Exchange velocity and pressure at interpolated boundaries
  
    CALL EVAC_MESH_EXCHANGE(T_EVAC,T_EVAC_SAVE,I_EVAC,ICYC,EXCHANGE_EVACUATION,0)
-   CALL POST_RECEIVES(6)  
+!!!CALL POST_RECEIVES(6)  
    CALL MESH_EXCHANGE(6)
    IF (MYID/=EVAC_PROCESS) CALL EVAC_MESH_EXCHANGE(T_EVAC,T_EVAC_SAVE,I_EVAC,ICYC,EXCHANGE_EVACUATION,1)
    IF (MYID==EVAC_PROCESS) CALL EVAC_MESH_EXCHANGE(T_EVAC,T_EVAC_SAVE,I_EVAC,ICYC,EXCHANGE_EVACUATION,2)
@@ -1856,10 +1864,9 @@ REAL(EB) :: T_SUM, TNOW
 TNOW = SECOND()
 
 DO NM=1,NMESHES
-IF (PROCESS(NM)/=MYID) CYCLE
+   IF (PROCESS(NM)/=MYID) CYCLE
    T_SUM = 0.
    SUM_LOOP: DO I=2,N_TIMERS
-      IF (I==9 .OR. I==10) CYCLE SUM_LOOP
       T_SUM = T_SUM + TUSED(I,NM)
    ENDDO SUM_LOOP
 ENDDO

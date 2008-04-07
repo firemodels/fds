@@ -4462,21 +4462,22 @@ DO NM=1,NMESHES
    DO I=1,N_TIMERS
       TPCNT(I) = 100._EB*TUSED(I,NM)/TUSED(1,NM)
    ENDDO
-   If (EVACUATION_GRID(NM)) THEN
+   IF (EVACUATION_GRID(NM)) THEN
       WRITE(LU_OUTPUT,443) NM,(NAME(I),TUSED(I,NM),TPCNT(I),I=1,N_TIMERS)
-   Else
+   ELSE
       WRITE(LU_OUTPUT,443) NM,(NAME(I),TUSED(I,NM),TPCNT(I),I=1,N_TIMERS-4)
-   End If
+      WRITE(LU_OUTPUT,'(7X,A6,2F11.2)') 'SubTot',SUM(TUSED(2:N_TIMERS-4,NM)),SUM(TPCNT(2:N_TIMERS-4))
+   ENDIF 
 ENDDO
  
 443 FORMAT(//' CPU Time Usage, Mesh ',I3// &
-         '                 CPU s      %  '/ &
-         '       ------------------------'/ &
+         '                 CPU (s)        %  '/ &
+         '       ----------------------------'/ &
          (7X,A6,2F11.2))
  
 WALL_CLOCK_END = WALL_CLOCK_TIME()
-WRITE(LU_OUTPUT,'(//A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START
 WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START_ITERATIONS
+WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START
 
 END SUBROUTINE TIMINGS
 
