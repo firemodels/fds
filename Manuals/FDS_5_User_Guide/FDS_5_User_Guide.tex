@@ -993,7 +993,7 @@ systems of the various machines.
 
 \subsubsection{LAM-MPI}
 \index{Running FDS!Parallel!LAM-MPI}
-On the Linux cluster in the Building and Fire Research Lab at NIST, LAM-MPI, a free implemenation from Indiana University,
+On the Linux cluster in the Building and Fire Research Lab at NIST, LAM-MPI, a free implementation from Indiana University,
 is installed.\footnote{\href{http://www.lam-mpi.org}{{\ct http://www.lam-mpi.org}}}
 With LAM/MPI, the computers to be used are linked prior to the actual execution of FDS with a separate
 command called a ``lamboot.''
@@ -1158,7 +1158,7 @@ input file until the error goes away. This process usually brings to light some 
 calculation responsible for the problem and helps in the debugging.
 
 \item[{\bf File Writing Errors}:] \index{Support!Error Statements!READONLY}
-Ocassionally, especially on Windows machines, FDS fails because it is not permitted to write to a file. A typical error statement reads:
+Occassionally, especially on Windows machines, FDS fails because it is not permitted to write to a file. A typical error statement reads:
 \footnotesize
 \begin{verbatim}
 forrtl: severe (47): write to READONLY file, unit 8598, file C:\Users\...\
@@ -1403,7 +1403,7 @@ table containing all of the keywords for each group.
 \vspace{\baselineskip}
 \begin{table}[ht]
 \begin{center}
-\caption{Namelist Group Reference Table}\index{Namlist Groups Table}
+\caption{Namelist Group Reference Table}\index{Namelist Groups Table}
 \label{tbl:namelistgroups}
 \begin{tabular}{|c|l|c|c|}
 \hline
@@ -1494,7 +1494,7 @@ For example, the following line will instruct FDS to run the simulation for 5400
 If {\ct T\_END} is set to zero, only the set-up work is performed,
 allowing you to quickly check the geometry in Smokeview.
 
-If you want the timeline to start at a number other than zero, you can ues the parameter
+If you want the timeline to start at a number other than zero, you can use the parameter
 {\ct T\_BEGIN} (Time Begin)\index{TIME!T\_BEGIN} to specify the time written to file for the first timestep.
 This would be useful for matching timelines of experimental data or or video recordings.
 
@@ -1685,7 +1685,7 @@ the calculation is to be run on a single processor, or on multiple processors,
 the rules of prescribing multiple meshes are similar, with some issues to keep in mind. The most important rule of mesh alignment is that
 abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}. The requirement of integral mesh
 alignment is new starting with FDS version 5.1. It is a more restrictive requirement than in previous versions because it was becoming too
-difficult to maintain complete flexiblity in alignment while trying to improve the accuracy of the methodology.
+difficult to maintain complete flexibility in alignment while trying to improve the accuracy of the methodology.
 
 \begin{figure}[p]
 \begin{picture}(325,600)(0,-20)
@@ -3839,7 +3839,7 @@ conform to the uniform mesh, FDS does {\bf not} adjust the burning
 rate to account for this as it does with various quantities associated
 with areas, like {\ct HRRPUA}.
 
-Examples of the use of {\ct BURN\_AWAY} feature are awailable in
+Examples of the use of {\ct BURN\_AWAY} feature are available in
 verification test box\_burn\_away (Section~\ref{box_burn_away})
 and the couch sample fire (Section~\ref{couch}).
 
@@ -4596,12 +4596,12 @@ conditions for the gas species.
 
 \item The {\ct REAC} namelist group is used to designate the fuel and the reaction rate
 parameters.  For a finite-rate reaction you can specify multiple {\ct REAC}lines.  Note that
-FDS will evalute the reactions in the order they are listed in the input file. %Jason add tech man ref
+FDS will evaluate the reactions in the order they are listed in the input file. %Jason add tech man ref
 \begin{description}
 \item[{\ct FUEL}] Character string indicating which of the listed
 optional gas species is the fuel.
 \item[{\ct OXIDIZER}] Character string indicating which of the listed
-optional gas species is the oxidizerl.
+optional gas species is the oxidizer.
 \item[{\ct BOF}] Pre-exponential factor in one-step chemical reaction in
 units of cm$^3$/mole/s.
 \item[{\ct E}] Activation energy for one-step chemical reaction in
@@ -5871,11 +5871,11 @@ will lead to the job being stopped gracefully, with restart files output, when t
 
 For most of the control function types, the logical (true/false) output of
 the devices and control functions and the time they last changed
-state are taken as inputs.  A {\ct CUSTOM} function uses the numberical output of a {\ct DEVC} along with
+state are taken as inputs.  A {\ct CUSTOM} function uses the numerical output of a {\ct DEVC} along with
 a {\ct RAMP} to determine the output of the function.  When the {\ct RAMP} output for the {\ct DEVC} value is negative, the
 {\ct CTRL} will have the value of its {\ct INITIAL\_STATE}.  When the {\ct RAMP} output for the {\ct DEVC} value is positive, the
 {\ct CTRL} will have the opposite value of its {\ct INITIAL\_STATE}. In the case below, the {\ct CUSTOM} \index{CTRL!FUNCTION\_TYPE!CUSTOM}
-control function uses the numerical output of a timer device as its input.  The function returns true (the default vaule for
+control function uses the numerical output of a timer device as its input.  The function returns true (the default value for
 {\ct INITIAL\_STATE} is {\ct .FALSE.}) when the {\ct F} parameter
 in the ramp specified with {\ct RAMP\_ID}\index{CTRL!RAMP\_ID} is a positive value and
 false when the {\ct RAMP} {\ct F} value is negative.
@@ -6882,7 +6882,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 
 \chapter{Alphabetical List of Input Parameters}
 
-This Appendix lists all of the input parameters for FDS in seperate tables grouped by Namelist,
+This Appendix lists all of the input parameters for FDS in separate tables grouped by Namelist,
 these tables are in alphabetical order along with the parameters within them.
 This is intended to be used as a quick reference and does not replace reading
 the detailed description of the parameters in the main body of this guide.
