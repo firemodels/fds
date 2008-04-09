@@ -3662,7 +3662,9 @@ process, so why is it specified here? The answer is that there can be only one {
 dozens of {\em solid phase} reactions. To ensure that the fuel vapors from
 different materials combust to produce the proper amount of energy, it is very important to specify a {\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss rate
 of fuel gases is automatically adjusted so that the effective mass loss rate multiplied by the single, global, gas phase heat of combustion produces the expected heat release rate.
-\index{MATL!HEAT\_OF\_COMBUSTION}
+\index{MATL!HEAT\_OF\_COMBUSTION}.  If, for example, the {\ct HEAT\_OF\_COMBUSTION} specified on the {\ct REAC} line is twice that
+specified on the {\ct MATL} line, the mass of contained within wall cell will be decremented by that determined by the 
+pyrolysis model, but the mass added to gas phase would be reduced by 50 \%.
 
 Several other examples of solid phase reactions can be found in various Verification examples. See Sections~\ref{thermoplastic} and \ref{charring_solid}.
 
