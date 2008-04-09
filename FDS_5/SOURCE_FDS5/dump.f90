@@ -2543,6 +2543,7 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
       XP(NPP) = DR%X
       YP(NPP) = DR%Y
       ZP(NPP) = DR%Z
+!!! if (dr%x<xs .or. dr%x>xf .or. dr%y<ys .or. dr%y>yf .or. dr%z<zs .or. dr%z>zf) write(0,*) nm,dr%tag,dr%x,dr%y,dr%z
       DO NN=1,PC%N_QUANTITIES
          SELECT CASE(PC%QUANTITIES_INDEX(NN))
             CASE(34)  ! DROPLET_DIAMETER
