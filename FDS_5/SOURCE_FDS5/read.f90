@@ -1533,15 +1533,34 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
    REACTION%MW_OTHER        = MW_OTHER
    REACTION%MW_FUEL         = C * MW_C + H * MW_H + O * MW_O + N * MW_N + OTHER * MW_OTHER
    REACTION%Y_O2_INFTY      = Y_O2_INFTY
+   REACTION%Y_N2_INFTY      = 1._EB-Y_O2_INFTY
    REACTION%Y_O2_LL         = X_O2_LL*MW_O2/ (X_O2_LL*MW_O2+(1._EB-X_O2_LL)*MW_N2)
    REACTION%Y_F_LFL         = Y_F_LFL
    REACTION%CRIT_FLAME_TMP  = CRITICAL_FLAME_TEMPERATURE + TMPM
    REACTION%Y_F_INLET       = Y_F_INLET
+   REACTION%Y_N2_INLET      = 1._EB-Y_F_INLET   
    REACTION%MODE            = MIXTURE_FRACTION_REACTION
    REACTION%NAME            = ID
-   
-   SET_THREE_PARAMETER: IF (CO_PRODUCTION) THEN !Set reaction variables for three parameter mixture fraction 
+   ALLOCATE(Z2Y_C(9))
+   Z2Y_C(N2_INDEX) = REACTION(1)%Y_N2_INFTY   
+   Z2Y_C(O2_INDEX) = REACTION(1)%Y_O2_INFTY
+   ALLOCATE(Z2MW_C(9))
+   Z2MW_C(N2_INDEX) = REACTION(1)%Y_N2_INFTY/MW_N2   
+   Z2MW_C(O2_INDEX) = REACTION(1)%Y_O2_INFTY/MW_O2
+   CP_C = 0._EB
+   MW_AVG_C = REACTION(1)%Y_O2_INFTY/MW_O2 + REACTION(1)%Y_N2_INFTY/MW_N2
 
+   SET_THREE_PARAMETER: IF (CO_PRODUCTION) THEN !Set reaction variables for three parameter mixture fraction 
+      ALLOCATE(Z2Y(9,3))
+      Z2Y = 0._EB
+      ALLOCATE(CP_Z(3))
+      CP_Z = 0._EB      
+      ALLOCATE(Z2MW(9,3))
+      Z2MW = 0._EB
+      ALLOCATE(MW_AVG_Z(3))
+      MW_AVG_Z = 0._EB      
+      ALLOCATE(Y_MF_SUM_Z(3))
+      Y_MF_SUM_Z = 0._EB
       !Set reaction variables for complete reaction
       RN => REACTION(2) 
       RN%IDEAL      = IDEAL
@@ -1611,9 +1630,71 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
       RN%HEAT_OF_COMBUSTION = REACTION(2)%HEAT_OF_COMBUSTION - 1.E3_EB * REACTION(2)%NU_CO2 /RN%MW_FUEL * &
                              (CO2_HEAT_OF_FORMATION - CO_HEAT_OF_FORMATION)
       NN = 3
+      !Set Z2Y + MW_Z array
+      Z2Y(FUEL_INDEX,1) = RN%Y_F_INLET
+
+      Z2Y(N2_INDEX,1) = RN%Y_N2_INLET                                - RN%Y_N2_INFTY
+      Z2Y(N2_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_N2 * RN%NU_N2 - RN%Y_N2_INFTY
+      Z2Y(N2_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_N2 * RN%NU_N2 - RN%Y_N2_INFTY
       
+      Z2Y(O2_INDEX,1) =                                                        - RN%Y_O2_INFTY
+      Z2Y(O2_INDEX,2) = -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(1)%NU_O2 - RN%Y_O2_INFTY
+      Z2Y(O2_INDEX,3) = -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(2)%NU_O2 - RN%Y_O2_INFTY &
+                        -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(2)%NU_CO * 0.5_EB
+
+      Z2Y(CO_INDEX,2)  = RN%Y_F_INLET / RN%MW_FUEL * MW_CO  * REACTION(1)%NU_CO
+      Z2Y(CO2_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_CO2 * (REACTION(2)%NU_CO2 + REACTION(2)%NU_CO)
+
+      Z2Y(H2O_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2O * REACTION(1)%NU_H2O
+      Z2Y(H2O_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2O * REACTION(2)%NU_H2O
+
+      Z2Y(H2_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2 * REACTION(1)%NU_H2
+      Z2Y(H2_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2 * REACTION(2)%NU_H2
+
+      Z2Y(SOOT_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_SOOT * REACTION(1)%NU_SOOT
+      Z2Y(SOOT_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_SOOT * REACTION(2)%NU_SOOT
+
+      Z2Y(OTHER_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_OTHER * REACTION(1)%NU_OTHER
+      Z2Y(OTHER_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_OTHER * REACTION(2)%NU_OTHER
+      
+      Z2MW(FUEL_INDEX,:)  = Z2Y(FUEL_INDEX,:)  / RN%MW_FUEL
+      Z2MW(N2_INDEX,:)    = Z2Y(N2_INDEX,:)    / MW_N2
+      Z2MW(O2_INDEX,:)    = Z2Y(O2_INDEX,:)    / MW_O2
+      Z2MW(CO_INDEX,:)    = Z2Y(CO_INDEX,:)    / MW_CO
+      Z2MW(CO2_INDEX,:)   = Z2Y(CO2_INDEX,:)   / MW_CO2
+      Z2MW(H2O_INDEX,:)   = Z2Y(H2O_INDEX,:)   / MW_H2O
+      Z2MW(H2_INDEX,:)    = Z2Y(H2_INDEX,:)    / MW_H2
+      Z2MW(SOOT_INDEX,:)  = Z2Y(SOOT_INDEX,:)  / MW_SOOT
+      Z2MW(OTHER_INDEX,:) = Z2Y(OTHER_INDEX,:) / MW_OTHER
+      
+      Y_MF_SUM_C = SUM(Z2Y_C)
+      Y_MF_SUM_Z(1) = SUM(Z2Y(:,1))
+      Y_MF_SUM_Z(2) = SUM(Z2Y(:,2))
+      Y_MF_SUM_Z(3) = SUM(Z2Y(:,3))
+
+      MW_AVG_Z(1) = Z2Y(FUEL_INDEX,1) / RN%MW_FUEL + Z2Y(N2_INDEX,1)  / MW_N2 +  Z2Y(O2_INDEX,1)    / MW_O2 + &
+                    Z2Y(CO_INDEX,1)   / MW_CO      + Z2Y(CO2_INDEX,1) / MW_CO2 + Z2Y(SOOT_INDEX,1)  / MW_SOOT + &
+                    Z2Y(H2_INDEX,1)   / MW_H2      + Z2Y(H2O_INDEX,1) / MW_H2O + Z2Y(OTHER_INDEX,1) / MW_OTHER
+
+      MW_AVG_Z(2) = Z2Y(FUEL_INDEX,2) / RN%MW_FUEL + Z2Y(N2_INDEX,2)  / MW_N2 +  Z2Y(O2_INDEX,2)    / MW_O2 + &
+                    Z2Y(CO_INDEX,2)   / MW_CO      + Z2Y(CO2_INDEX,2) / MW_CO2 + Z2Y(SOOT_INDEX,2)  / MW_SOOT + &
+                    Z2Y(H2_INDEX,2)   / MW_H2      + Z2Y(H2O_INDEX,2) / MW_H2O + Z2Y(OTHER_INDEX,2) / MW_OTHER
+
+      MW_AVG_Z(3) = Z2Y(FUEL_INDEX,3) / RN%MW_FUEL + Z2Y(N2_INDEX,3)  / MW_N2 +  Z2Y(O2_INDEX,3)    / MW_O2 + &
+                    Z2Y(CO_INDEX,3)   / MW_CO      + Z2Y(CO2_INDEX,3) / MW_CO2 + Z2Y(SOOT_INDEX,3)  / MW_SOOT + &
+                    Z2Y(H2_INDEX,3)   / MW_H2      + Z2Y(H2O_INDEX,3) / MW_H2O + Z2Y(OTHER_INDEX,3) / MW_OTHER
+
    ELSE SET_THREE_PARAMETER !Set reaction variables for two parameter mixture fraction 
-   
+      ALLOCATE(Z2Y(9,2))
+      Z2Y = 0._EB
+      ALLOCATE(CP_Z(2))
+      CP_Z = 0._EB
+      ALLOCATE(Z2MW(9,2))
+      Z2MW = 0._EB
+      ALLOCATE(MW_AVG_Z(2))
+      MW_AVG_Z = 0._EB
+      ALLOCATE(Y_MF_SUM_Z(2))
+      Y_MF_SUM_Z = 0._EB
       !Set reaction variables for complete reaction
       RN => REACTION(1) 
       RN%IDEAL      = IDEAL
@@ -1646,6 +1727,50 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
                                                          RN%NU_H2O * H2O_HEAT_OF_FORMATION) * 1000._EB /RN%MW_FUEL
       ENDIF
       NN = 2
+
+      !Set Z2Y + MW_Z array
+      Z2Y(FUEL_INDEX,1) =  RN%Y_F_INLET
+
+      Z2Y(N2_INDEX,1) =    RN%Y_N2_INLET                                   - RN%Y_N2_INFTY
+      Z2Y(N2_INDEX,2) =    RN%Y_F_INLET / RN%MW_FUEL * MW_N2 *    RN%NU_N2 - RN%Y_N2_INFTY
+      
+      Z2Y(O2_INDEX,1) =                                                     - RN%Y_O2_INFTY
+      Z2Y(O2_INDEX,2) =    -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 *    RN%NU_O2 - RN%Y_O2_INFTY
+
+      Z2Y(CO_INDEX,2)  =   RN%Y_F_INLET / RN%MW_FUEL * MW_CO  *   RN%NU_CO
+      
+      Z2Y(CO2_INDEX,2) =   RN%Y_F_INLET / RN%MW_FUEL * MW_CO2 *   RN%NU_CO2      
+
+      Z2Y(H2O_INDEX,2) =   RN%Y_F_INLET / RN%MW_FUEL * MW_H2O *   RN%NU_H2O
+
+      Z2Y(H2_INDEX,2) =    RN%Y_F_INLET / RN%MW_FUEL * MW_H2 *    RN%NU_H2
+
+      Z2Y(SOOT_INDEX,2) =  RN%Y_F_INLET / RN%MW_FUEL * MW_SOOT *  RN%NU_SOOT
+
+      Z2Y(OTHER_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_OTHER * RN%NU_OTHER
+
+      Z2MW(FUEL_INDEX,:)  = Z2Y(FUEL_INDEX,:)  / RN%MW_FUEL
+      Z2MW(N2_INDEX,:)    = Z2Y(N2_INDEX,:)    / MW_N2
+      Z2MW(O2_INDEX,:)    = Z2Y(O2_INDEX,:)    / MW_O2
+      Z2MW(CO_INDEX,:)    = Z2Y(CO_INDEX,:)    / MW_CO
+      Z2MW(CO2_INDEX,:)   = Z2Y(CO2_INDEX,:)   / MW_CO2
+      Z2MW(H2O_INDEX,:)   = Z2Y(H2O_INDEX,:)   / MW_H2O
+      Z2MW(H2_INDEX,:)    = Z2Y(H2_INDEX,:)    / MW_H2
+      Z2MW(SOOT_INDEX,:)  = Z2Y(SOOT_INDEX,:)  / MW_SOOT
+      Z2MW(OTHER_INDEX,:) = Z2Y(OTHER_INDEX,:) / MW_OTHER
+      
+      Y_MF_SUM_C = SUM(Z2Y_C)
+      Y_MF_SUM_Z(1) = SUM(Z2Y(:,1))
+      Y_MF_SUM_Z(2) = SUM(Z2Y(:,2))
+
+      MW_AVG_Z(1) = Z2Y(FUEL_INDEX,1) / RN%MW_FUEL + Z2Y(N2_INDEX,1)  / MW_N2 +  Z2Y(O2_INDEX,1)    / MW_O2 + &
+                    Z2Y(CO_INDEX,1)   / MW_CO      + Z2Y(CO2_INDEX,1) / MW_CO2 + Z2Y(SOOT_INDEX,1)  / MW_SOOT + &
+                    Z2Y(H2_INDEX,1)   / MW_H2      + Z2Y(H2O_INDEX,1) / MW_H2O + Z2Y(OTHER_INDEX,1) / MW_OTHER
+
+      MW_AVG_Z(2) = Z2Y(FUEL_INDEX,2) / RN%MW_FUEL + Z2Y(N2_INDEX,2)  / MW_N2 +  Z2Y(O2_INDEX,2)    / MW_O2 + &
+                    Z2Y(CO_INDEX,2)   / MW_CO      + Z2Y(CO2_INDEX,2) / MW_CO2 + Z2Y(SOOT_INDEX,2)  / MW_SOOT + &
+                    Z2Y(H2_INDEX,2)   / MW_H2      + Z2Y(H2O_INDEX,2) / MW_H2O + Z2Y(OTHER_INDEX,2) / MW_OTHER
+
    ENDIF SET_THREE_PARAMETER
    
    !Set reaction variables for extinction reaction   
