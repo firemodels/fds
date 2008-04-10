@@ -1,3 +1,6 @@
+
+!  ------------------ endian_open ------------------------ 
+
 integer function endian_open(file,lunit,endian)
 character(len=*), intent(in) :: file
 integer, intent(in) :: lunit, endian
@@ -39,6 +42,8 @@ if(one.eq.1)then
 endif
 return
 end function endian_open
+
+!  ------------------ fcreate_part5sizefile ------------------------ 
 
 subroutine fcreate_part5sizefile(part5file, part5sizefile, angle_flag, error)
 #ifdef pp_cvf
@@ -858,7 +863,7 @@ integer :: nxsp, nysp, nzsp
 integer :: i, j, k
 
 integer :: lu11
-real :: time
+real :: time, time_max
 real, dimension(:,:,:), pointer :: qq
 character(len=30) :: longlbl, shortlbl, unitlbl
 logical :: connected, load
@@ -920,13 +925,15 @@ nslicek = nzsp + koff
 framesize = 4*(1+nxsp*nysp*nzsp)+16
 if(settmin_s.ne.0.or.settmax_s.ne.0.or.statfile.ne.0)then
   count=-1
+  time_max=-1000000.0
   do
     read(lu11,iostat=error)time
     if(error.ne.0)exit
-    if(settmin_s.ne.0.and.time.lt.tmin_s)then
+    if((settmin_s.ne.0.and.time.lt.tmin_s).or.time.le.time_max)then
       load=.false.
      else
       load = .true.
+      time_max=time
     endif
     if(settmax_s.ne.0.and.time.gt.tmax_s)then
       close(lu11)

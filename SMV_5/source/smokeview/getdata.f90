@@ -50,8 +50,6 @@ end do
 close(lu26)
 end subroutine getzonedata
 
-
-
 !  ------------------ getxyzdata ------------------------ 
 
 subroutine getxyzdata(iblank,nx,ny,nz,error)
@@ -317,6 +315,8 @@ end do
 
 end subroutine getdata2b
 
+!  ------------------ getdata2 ------------------------ 
+
 subroutine getdata2(xs,ys,zs,&
                     t,&
                     sprinkflag,isprink,tspr,bframe,sframe,sprframe,stimes,nspr,nmax,mxframes,nframes,&
@@ -512,6 +512,8 @@ close(lu10)
 return
 end subroutine getdata2
 
+!  ------------------ getdirval ------------------------ 
+
 subroutine getdirval(is1,is2,js1,js2,ks1,ks2,idir,joff,koff)
 implicit none
 integer :: nxsp, nysp, nzsp
@@ -573,7 +575,8 @@ real, intent(out), dimension(*) :: qdata
 real, intent(out), dimension(*) :: times
 integer, intent(out) :: idir
 integer, intent(out) :: is1, is2, js1, js2, ks1, ks2
-integer, intent(in) :: endian, nstepsmax
+integer, intent(in) :: endian
+integer, intent(inout) :: nstepsmax
 integer, intent(in) :: settmin_s, settmax_s, sliceframestep
 real, intent(in) :: tmin_s, tmax_s
 
@@ -585,7 +588,7 @@ logical :: exists
 integer :: ip1, ip2, jp1, jp2, kp1, kp2
 integer :: nxsp, nysp, nzsp
 integer :: error, istart, irowstart
-real :: time
+real :: time, time_max
 character(len=30) :: longlbl, shortlbl, unitlbl
 integer :: lenshort, lenunits
 character(len=3) :: blank
@@ -665,13 +668,15 @@ allocate(qq(nxsp,nysp+joff,nzsp+koff))
 qmin = 1.0e30
 qmax = -1.0e30
 count=-1
+time_max=-1000000.0
 do
   read(lu11,iostat=error)time
   if(error.ne.0)exit
-  if(settmin_s.ne.0.and.time<tmin_s)then
+  if((settmin_s.ne.0.and.time<tmin_s).or.time.le.time_max)then
     load = .false.
    else
     load = .true.
+    time_max = time
   endif
   if(settmax_s.ne.0.and.time>tmax_s)exit
   read(lu11,iostat=error)(((qq(i,j,k),i=1,nxsp),j=1,nysp),k=1,nzsp)
@@ -729,6 +734,7 @@ end do
 999 continue
 ks2 = ks2 + koff
 js2 = js2 + joff
+nstepsmax=nsteps
 deallocate(qq)
 close(lu11)
 
