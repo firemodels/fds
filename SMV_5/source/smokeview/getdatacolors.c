@@ -750,7 +750,33 @@ float frexp10(float x, int *exp10){
   return mantissa;
 }
 
-/* ------------------ drawColorBars ------------------------ */
+#define DYFONT (-0.5)
+
+/* ------------------ get_label_position ------------------------ */
+
+int get_label_position(float position, float dyfont, float barbot){
+  float diff_position, min_diff;
+  int iposition;
+  int i;
+
+  iposition=-1;
+  min_diff = 1000.0;
+  for (i=0; i<nrgb-1; i++){
+    float vert_position;
+
+    vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+    diff_position = position - vert_position;
+    if(diff_position<0.0)diff_position=-diff_position;
+    if(diff_position<min_diff){
+      iposition=i;
+      min_diff=diff_position;
+    }
+  }
+  if(min_diff>0.2)iposition=-1;
+  return iposition;
+}
+
+      /* ------------------ drawColorBars ------------------------ */
 
 void drawColorBars(void){
   float dyfont;
@@ -850,7 +876,6 @@ void drawColorBars(void){
     ASSERT(FFALSE);
     break;
   }
-#define DYFONT (-0.5)
 
   bottom[0]=labeltop-dyfont;
   bottom[1]=labeltop-2*dyfont;
@@ -1038,14 +1063,14 @@ void drawColorBars(void){
         partcolorlabel_ptr=partcolorlabel;
       }
       position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
-      iposition=(int)position;
+      iposition = get_label_position(position,dyfont,barbot);
       outputBarText(right[leftsmoke],position,color2,partcolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
       float vert_position;
 
       vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
-//      if(iposition==i-1)continue;
+      if(iposition==i)continue;
       if(prop_index>=0&&prop_index<npart5prop){
         partcolorlabel_ptr=&part5propinfo[prop_index].partlabels[i+1][0];
       }
@@ -1076,14 +1101,14 @@ void drawColorBars(void){
         slicecolorlabel_ptr=slicecolorlabel;
       }
       position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
-      iposition=(int)position;
+      iposition = get_label_position(position,dyfont,barbot);
       outputBarText(right[leftslice],position,color2,slicecolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
       float vert_position;
 
       vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
-      //if(iposition==i)continue;
+      if(iposition==i)continue;
       slicecolorlabel_ptr=&(sb->colorlabels[i+1][0]);
       if(sliceflag==1){
         val = tttmin + i*slicerange/(nrgb-2);
@@ -1103,7 +1128,7 @@ void drawColorBars(void){
       tttval = boundarylevels256[valindex];
       num2string(boundarylabel,tttval,tttmax-tttmin);
       position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
-      iposition=(int)position;
+      iposition = get_label_position(position,dyfont,barbot);
       patchcolorlabel_ptr=&(boundarylabel[0]);
       if(patchflag==1){
         scalefloat2string(tttval,patchcolorlabel, patchfactor, patchrange);
@@ -1116,7 +1141,7 @@ void drawColorBars(void){
 
       vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
 
-      //if(iposition==i-1)continue;
+      if(iposition==i)continue;
       patchcolorlabel_ptr=&colorlabelpatch[i+1][0];
       if(patchflag==1){
         val = tttmin + i*patchrange/(nrgb-2);
@@ -1135,7 +1160,7 @@ void drawColorBars(void){
       tttval = zonelevels256[valindex];
       num2string(zonelabel,tttval,tttmax-tttmin);
       position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
-      iposition=(int)position;
+      iposition = get_label_position(position,dyfont,barbot);
       zonecolorlabel_ptr=&(zonelabel[0]);
       if(zoneflag==1){
         scalefloat2string(tttval,zonecolorlabel, zonefactor, zonerange);
@@ -1147,7 +1172,7 @@ void drawColorBars(void){
       float vert_position;
 
       vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
-      //if(iposition==i-1)continue;
+      if(iposition==i)continue;
       zonecolorlabel_ptr=&colorlabelzone[i+1][0];
       if(zoneflag==1){
         val = tttmin + (i-1)*zonerange/(nrgb-2);
@@ -1182,7 +1207,7 @@ void drawColorBars(void){
         yy2 = (barbot*(nrgb-1-i)+(i+1)*(nrgb+DYFONT+barbot))/nrgb;
         position = (yy+yy2)/2.0;
       }
-      iposition=(int)position;
+      iposition = get_label_position(position,dyfont,barbot);
       outputBarText(right[0],position,color2,plot3dcolorlabel_ptr);
     }
     if(visiso==0){
@@ -1201,7 +1226,7 @@ void drawColorBars(void){
           yy2 = (barbot*(nrgb-1-ii)+(ii+1)*(nrgb+DYFONT+barbot))/nrgb;
           vert_position = (yy+yy2)/2.0-dyfont/2.0;
         }
-//        if(iposition==i)continue;
+        if(iposition==i)continue;
         plot3dcolorlabel_ptr=&colorlabelp3[plotn-1][i+1][0];
         if(plot3dflag==1){
           val = tttmin + i*plot3drange/(nrgb-2);
@@ -1216,7 +1241,7 @@ void drawColorBars(void){
     else
     {
       for (i=1; i<nrgb; i++){
-        if(iposition==i-1)continue;
+        if(iposition==i)continue;
         plot3dcolorlabel_ptr=&colorlabelp3[plotn-1][i][0];
         if(plot3dflag==1){
           val = tttmin + (i-1)*plot3drange/(nrgb-2);
