@@ -227,7 +227,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   int nchars[2];
   int nframes_found=0;
 
-  float time;
+  float time, time_max;
   char compstring[128];
   mesh *meshi;
 
@@ -436,6 +436,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
   ii=-1;
   nframes_found=0;
+  time_max=-1000000.0;
   for(i=0;i<smoke3di->n_times_full;i++){
     size_t time_read;
 
@@ -449,7 +450,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     if(time_read==0){
       printf("ut oh\n");
     }
-    if(i%smoke3dframestep==0){
+    if(i%smoke3dframestep==0&&time>time_max){
       printf("3D smoke/fire time=%.2f",time);
     }
     EGZ_FREAD(nchars,4,2,SMOKE3DFILE);
@@ -458,9 +459,10 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       smoke3di->n_times=nframes_found;
       break;
     }
-    if(i%smoke3dframestep==0){
+    if(i%smoke3dframestep==0&&time>time_max){
       float complevel;
 
+      time_max=time;
       ii++;
       nframes_found++;
       EGZ_FREAD(smoke3di->smokeframe_comp_list[ii],1,smoke3di->nchars_compressed_smoke[ii],SMOKE3DFILE);
@@ -479,6 +481,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       printf("%s\n",compstring);
     }
     else{
+      if(time<=time_max)i--;
       EGZ_FSEEK(SMOKE3DFILE,smoke3di->nchars_compressed_smoke_full[i],SEEK_CUR);
       if(EGZ_FEOF(SMOKE3DFILE)!=0){
         smoke3di->n_times_full=i;
@@ -657,7 +660,7 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
   EGZ_FILE *LIGHTFILE=NULL;
 #endif
   int nframes_found;
-  float time,*timeptr=NULL;
+  float time,time_max,*timeptr=NULL;
   int nch_uncompressed,nch_smoke_compressed;
 #ifdef pp_LIGHT
   int nch_light_compressed;
@@ -780,9 +783,13 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
 
   nframes_found=0;
   iframe=-1;
+  time_max=-1000000.0;
   fgets(buffer,255,TEXTFILE);
   while(!feof(TEXTFILE)){
     if(fgets(buffer,255,TEXTFILE)==NULL)break;
+    sscanf(buffer,"%f",&time);
+    if(time<=time_max)continue;
+    time_max=time;
     iframe++;
     if(iframe%smoke3dframestep==0)nframes_found++;
   }
