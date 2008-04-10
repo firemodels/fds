@@ -52,6 +52,7 @@
 
 
 #ifdef pp_ALPHA
+#define pp_LOGFILE
 #define pp_LIGHT
 #define pp_GPU
 #define pp_CULL

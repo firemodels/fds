@@ -905,7 +905,9 @@ void InitOpenGL(void){
 
 void initvars1(void){
 
+#ifdef pp_LOGFILE
   LOGFILE=NULL;
+#endif
 #ifdef pp_LIGHT
   show_smokelighting=0;
 #endif

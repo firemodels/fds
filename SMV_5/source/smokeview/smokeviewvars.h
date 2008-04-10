@@ -414,7 +414,9 @@ SVEXTERN int visHRRlabel;
 #ifdef pp_memstatus
 SVEXTERN int visAvailmemory;
 #endif
+#ifdef pp_LOGFILE
 SVEXTERN FILE *LOGFILE;
+#endif
 SVEXTERN int revision_smv, revision_fds;
 SVEXTERN int visBlocklabel;
 SVEXTERN int visOpenVents,visDummyVents;
