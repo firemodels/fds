@@ -2804,6 +2804,7 @@ void getpatchsizeinfo(patch *patchi, int *nframes, int *buffersize){
   int i;
   char sizefile[1024];
   int local_count;
+  float time_max;
 
   // endian
   // completion (0/1)
@@ -2874,12 +2875,23 @@ void getpatchsizeinfo(patch *patchi, int *nframes, int *buffersize){
   }
 
   local_count=-1;
+  time_max=-1000000.0;
   for(;;){
+    int frame_skip;
+
     if(fgets(buffer,255,streamsize)==NULL)break;
+
+    sscanf(buffer,"%f %i %i",&local_time,&full_size,&compressed_size);
+    frame_skip=1;
+    if(local_time>time_max){
+      time_max=local_time;
+      frame_skip=0;
+    }
+    if(frame_skip==1)continue;
+
     local_count++;
     if(local_count%boundframestep!=0)continue;
 
-    sscanf(buffer,"%f %i %i",&local_time,&full_size,&compressed_size);
     nf++;
     bsize+=compressed_size;
   }
@@ -2903,6 +2915,7 @@ void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata,
   unsigned char *datacopy;
   unsigned int offset;
   int local_count;
+  float time_max;
 
   // endian
   // completion (0/1)
@@ -2938,19 +2951,27 @@ void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata,
   offset=0;
   local_count=-1;
   i=-1;
+  time_max=-1000000.0;
   CheckMemory;
   for(;;){
-    local_count++;
+    int skip_frame;
+
     if(EGZ_FREAD(&local_time,4,1,stream)==0)break;
+    skip_frame=1;
+    if(local_time>time_max){
+      time_max=local_time;
+      skip_frame=0;
+      local_count++;
+    }
     if(EGZ_FREAD(&compressed_size,4,1,stream)==0)break;
-    if(local_count%boundframestep==0){
+    if(skip_frame==0&&local_count%boundframestep==0){
       if(EGZ_FREAD(datacopy,1,compressed_size,stream)==0)break;
     }
     else{
       EGZ_FSEEK(stream,compressed_size,SEEK_CUR);
     }
                
-    if(local_count%boundframestep!=0)continue;
+    if(skip_frame==1||local_count%boundframestep!=0)continue;
     i++;
     if(i>=ntimes)break;
     printf("boundary time=%.2f\n",local_time);
