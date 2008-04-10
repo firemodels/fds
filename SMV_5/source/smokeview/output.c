@@ -262,7 +262,7 @@ void drawLabels(void){
     }
   }
 }
-
+#ifdef pp_LOGFILE
 /* ------------------ log_print ------------------------ */
 
 void log_print(char *output){
@@ -271,4 +271,5 @@ void log_print(char *output){
     if(LOGFILE!=NULL)fprintf(LOGFILE,"%s",output);
   }
 }
+#endif
 
