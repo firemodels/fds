@@ -2203,6 +2203,7 @@ void updatetimes(void){
   FREEMEMORY(times);
   NewMemory((void **)&times,ntimes*sizeof(float));
   timescopy=times;
+  dt_MIN=100000.0;
   if(visTerrain==1){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
@@ -2210,52 +2211,72 @@ void updatetimes(void){
       terri = terraininfo + i;
       if(terri->loaded==0)continue;
       for(n=0;n<terri->ntimes;n++){
+        float t_diff;
+
         *timescopy++=terri->times[n];
-        if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
-          dt_MIN=timescopy[-1]-timescopy[-2];
+        t_diff = fabs(timescopy[-1]-timescopy[-2]);
+        if(n>1&&t_diff<dt_MIN){
+          dt_MIN=t_diff;
         }
       }
     }
   }
+  dt_MIN=100000.0;
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
     if(touri->display==0)continue;
     for(n=0;n<touri->npath;n++){
+      float t_diff;
+
       *timescopy++=touri->path_times[n];
-      if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
-        dt_MIN=timescopy[-1]-timescopy[-2];
+      t_diff = fabs(timescopy[-1]-timescopy[-2]);
+      if(n>1&&t_diff<dt_MIN){
+        dt_MIN=t_diff;
       }
     }
   }
+  dt_MIN=100000.0;
   for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
     if(parti->loaded==0)continue;
     for(n=0;n<parti->nframes;n++){
+      float t_diff;
+
       *timescopy++=parti->ptimes[n];
-      if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
-        dt_MIN=timescopy[-1]-timescopy[-2];
+      t_diff = fabs(timescopy[-1]-timescopy[-2]);
+      if(n>1&&t_diff<dt_MIN){
+        dt_MIN=t_diff;
       }
     }
   }
+  dt_MIN=100000.0;
   for(i=0;i<nslice;i++){
     sd = sliceinfo + i;
     if(sd->loaded==1||sd->vloaded==1){
-        for(n=0;n<sd->nsteps;n++){
-          *timescopy++=sd->slicetimes[n];
-          if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
-            dt_MIN=timescopy[-1]-timescopy[-2];
-          }
+      for(n=0;n<sd->nsteps;n++){
+        float t_diff;
+
+        *timescopy++=sd->slicetimes[n];
+        t_diff = fabs(timescopy[-1]-timescopy[-2]);
+        if(n>1&&t_diff<dt_MIN){
+          dt_MIN=t_diff;
         }
-    }
-  }
-  if(ReadTargFile==1&&visTarg==1){
-    for(n=0;n<ntargtimes;n++){
-      *timescopy++=targtimes[n];
-      if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
-        dt_MIN=timescopy[-1]-timescopy[-2];
       }
     }
   }
+  dt_MIN=100000.0;
+  if(ReadTargFile==1&&visTarg==1){
+    for(n=0;n<ntargtimes;n++){
+      float t_diff;
+
+      *timescopy++=targtimes[n];
+      t_diff = fabs(timescopy[-1]-timescopy[-2]);
+      if(n>1&&t_diff<dt_MIN){
+        dt_MIN=t_diff;
+      }
+    }
+  }
+  dt_MIN=100000.0;
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo + i;
     filenum=meshi->patchfilenum;
@@ -2263,31 +2284,42 @@ void updatetimes(void){
       patchi = patchinfo + filenum;
       if(patchi->loaded==1){
         for(n=0;n<meshi->npatch_frames;n++){
+          float t_diff;
+
           *timescopy++=meshi->patchtimes[n];
-          if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
-            dt_MIN=timescopy[-1]-timescopy[-2];
+          t_diff = fabs(timescopy[-1]-timescopy[-2]);
+          if(n>1&&t_diff<dt_MIN){
+            dt_MIN=t_diff;
           }
         }
       }
     }
   }
   if(ReadZoneFile==1&&visZone==1){
+    dt_MIN=100000.0;
     for(n=0;n<nzonet;n++){
+      float t_diff;
+
       *timescopy++=zonet[n];
-      if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
-        dt_MIN=timescopy[-1]-timescopy[-2];
+      t_diff = fabs(timescopy[-1]-timescopy[-2]);
+      if(n>1&&t_diff<dt_MIN){
+        dt_MIN=t_diff;
       }
     }
   }
   if(ReadIsoFile==1&&visAIso!=0){
+    dt_MIN=100000.0;
     for(i=0;i<niso;i++){
       ib = isoinfo+i;
       if(ib->loaded==0)continue;
       meshi=meshinfo + ib->blocknumber;
       for(n=0;n<meshi->nisosteps;n++){
+        float t_diff;
+
         *timescopy++=meshi->isotimes[n];
-        if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
-          dt_MIN=timescopy[-1]-timescopy[-2];
+        t_diff = fabs(timescopy[-1]-timescopy[-2]);
+        if(n>1&&t_diff<dt_MIN){
+          dt_MIN=t_diff;
         }
       }
     }
@@ -2296,13 +2328,17 @@ void updatetimes(void){
     smoke3d *smoke3di;
 
     if(Read3DSmoke3DFile==1&&vis3DSmoke3D==1){
+      dt_MIN=100000.0;
       for(i=0;i<nsmoke3d;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0)continue;
         for(n=0;n<smoke3di->n_times;n++){
+          float t_diff;
+
           *timescopy++=smoke3di->times[n];
-          if(n>1&&timescopy[-1]-timescopy[-2]<dt_MIN){
-            dt_MIN=timescopy[-1]-timescopy[-2];
+          t_diff = fabs(timescopy[-1]-timescopy[-2]);
+          if(n>1&&t_diff<dt_MIN){
+            dt_MIN=t_diff;
           }
         }
       }
