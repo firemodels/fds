@@ -5,6 +5,7 @@
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
+#include <string.h>
 #include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -355,6 +356,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   asurface=meshi->animatedsurfaces;
   jj=0;
   i=0;
+  time_max = -1000000.0;
   for(;;){
     int skip_frame;
 
