@@ -58,6 +58,7 @@ EXTERNCPP void init_shaders(void);
 EXTERNCPP void LoadSmokeShaders(void);
 EXTERNCPP void UnloadSmokeShaders(void);
 #endif
+EXTERNCPP void update_camera_ypos(camera *camera_data);
 EXTERNCPP void to_lower(char *string);
 EXTERNCPP void init_device_defs(void);
 EXTERNCPP void make_error_frame(void);

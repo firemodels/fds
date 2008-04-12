@@ -967,6 +967,7 @@ void ZoomMenu(int value){
     }
     if(projection_type!=0){
       projection_type=0;
+      camera_current->projection_type=projection_type;
       ResetView(RESTORE_EXTERIOR_VIEW);
       update_projection_type();
     }
@@ -979,8 +980,16 @@ void ZoomMenu(int value){
     else{
       projection_type=0;
     }
+    camera_current->projection_type=projection_type;
     update_projection_type();
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    if(projection_type==0){
+      update_camera_ypos(camera_current);
+      //ResetView(RESTORE_EXTERIOR_VIEW);
+    }
+    else{
+      camera_current->eye[1]=camera_current->isometric_y;
+    }
+
   }
   else{
     if(zoomindex<0)zoomindex=2;
@@ -989,6 +998,7 @@ void ZoomMenu(int value){
     if(projection_type!=0){
       projection_type=0;
       ResetView(RESTORE_EXTERIOR_VIEW_ZOOM);
+      camera_current->projection_type=projection_type;
       update_projection_type();
     }
   }
@@ -5360,8 +5370,8 @@ static int in_menu=0;
   if(zoomindex==4)glutAddMenuEntry("*4.0",4);
   if(zoomindex!=4)glutAddMenuEntry("4.0",4);
   glutAddMenuEntry("-",999);
-  if(projection_type==1)glutAddMenuEntry("*Isometric",-2);
-  if(projection_type==0)glutAddMenuEntry("Isometric",-2);
+  if(projection_type==1)glutAddMenuEntry("*Size Preserving",-2);
+  if(projection_type==0)glutAddMenuEntry("Size Preserving",-2);
 
 
 
@@ -5434,7 +5444,6 @@ static int in_menu=0;
   glutAddSubMenu("Render",rendermenu);
   if(showfontmenu==1)glutAddSubMenu("Font Size",fontmenu);
 //  glutAddSubMenu("Aperture",aperturemenu);
-  glutAddSubMenu("Zoom",zoommenu);
 #ifdef pp_ALPHA
   glutAddMenuEntry("Benchmark",1);
 #endif
@@ -5458,6 +5467,7 @@ static int in_menu=0;
     if(trainer_mode==0){
       glutAddMenuEntry("Save",MENU_SAVEVIEW);
       glutAddMenuEntry("Set as Startup",MENU_STARTUPVIEW);
+      glutAddSubMenu("Zoom",zoommenu);
       glutAddMenuEntry("-",MENU_DUMMY);
     }
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
@@ -6710,8 +6720,6 @@ static int in_menu=0;
       glutAddSubMenu("Options",optionmenu);
       glutAddSubMenu("Dialogs",dialogmenu);
       glutAddSubMenu("Tours",tourmenu);
-    }
-    if(trainer_mode==0){
       glutAddSubMenu("View",resetmenu);
       glutAddSubMenu("Help",helpmenu);
     }

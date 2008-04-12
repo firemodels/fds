@@ -139,6 +139,7 @@ void init_camera(camera *camera_data,char *name){
   camera_data->prev=NULL;
   camera_data->view_id=-1;
   camera_data->zoom=1.0;
+  camera_data->projection_type=projection_type;
   camera_data->dirty=0;
 }
 
