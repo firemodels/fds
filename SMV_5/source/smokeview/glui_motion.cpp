@@ -581,16 +581,15 @@ void TRANSLATE_CB(int var){
       break;
 
     case PROJECTION:
-//      if(projection_type==1)ResetView(RESTORE_EXTERIOR_VIEW);
       if(projection_type==0){
         projection_type=1;
-        ZoomMenu(2);
       }
       else{
         projection_type=0;
-        ZoomMenu(-2);
       }
-//      update_projection_type();
+      ZoomMenu(-2);
+      camera_current->projection_type=projection_type;
+      return;
       break;
     case EYELEVEL:
       desired_view_height=1.5;

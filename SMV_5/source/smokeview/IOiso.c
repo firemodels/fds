@@ -85,7 +85,7 @@ void getisoheader(const char *isofile, EGZ_FILE **isostreamptr,
       if(mfullbuffer>(*maxfullbuffer))*maxfullbuffer=mfullbuffer;
       if(mcompbuffer>(*maxcompbuffer))*maxcompbuffer=mcompbuffer;
     }
-      if(skip_frame==0)istep++;
+    istep++;
   }
 
 #ifdef EGZ
@@ -160,7 +160,7 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
   for(;;){
     int skip_frame;
 
-	  EGZ_FREAD(&time,4,1,*isostreamptr);
+    EGZ_FREAD(&time,4,1,*isostreamptr);
     skip_frame=1;
     if(time>time_max){
       skip_frame=0;
@@ -453,9 +453,9 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       for(j=0;j<meshi->nisolevels;j++){
         asurface->dataflag=ib->dataflag;
         EGZ_FREAD(&nvertices_i,4,1,isostream);
-	      if(EGZ_FEOF(isostream)!=0)break;
-	      EGZ_FREAD(&ntriangles_i,4,1,isostream);
-	      if(EGZ_FEOF(isostream)!=0)break;
+        if(EGZ_FEOF(isostream)!=0)break;
+        EGZ_FREAD(&ntriangles_i,4,1,isostream);
+        if(EGZ_FEOF(isostream)!=0)break;
         if(jj%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)||skip_frame==1){
           skip=0;
           if(nvertices_i<=0||ntriangles_i<=0)continue;
@@ -636,7 +636,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       continue;
     }
     if(skip_frame==1||jj%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)){
-      if(skip_frame==1)jj--;
+     // if(skip_frame==1)jj--;
     }
     else{
       i++;

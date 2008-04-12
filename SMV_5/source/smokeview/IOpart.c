@@ -948,11 +948,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   FREEMEMORY(parti->bframe);
   FREEMEMORY(parti->sprframe)
 
-  if(colorlabelpart!=NULL){
-    for(n=0;n<MAXRGB;n++){FREEMEMORY(colorlabelpart[n]);}
-    FREEMEMORY(colorlabelpart);
-  }
-
   if(flag==UNLOAD){
     updatetimes();
     updatemenu=1;
@@ -961,6 +956,12 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     PrintMemoryInfo;
 #endif
     return;
+  }
+
+  if(colorlabelpart!=NULL){
+    printf("freeing colorlabelpart\n");
+    for(n=0;n<MAXRGB;n++){FREEMEMORY(colorlabelpart[n]);}
+    FREEMEMORY(colorlabelpart);
   }
 
   lenfile = strlen(file);
@@ -1513,6 +1514,7 @@ void drawPart(const particle *parti){
     xpoints = parti->xparts + parti->bframe[ipframe];
     ypoints = parti->yparts + parti->bframe[ipframe];
     zpoints = parti->zparts + parti->bframe[ipframe];
+
   /* isprinkframe = isprink + bframe[ipframe];*/
 
   itpoint = parti->itpart + parti->bframe[ipframe];

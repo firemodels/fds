@@ -7141,7 +7141,9 @@ int readini2(char *inifile, int loaddatafile, int localfile){
     if(match(buffer,"VIEWPOINT3",10)==1
       ||match(buffer,"VIEWPOINT4",10)==1
       ){
-        if(match(buffer,"VIEWPOINT4",10)==1)is_viewpoint4=1;
+        int p_type;
+
+          if(match(buffer,"VIEWPOINT4",10)==1)is_viewpoint4=1;
         eye=camera_ini->eye;
         mat=camera_ini->modelview;
         angle_zx=camera_ini->angle_zx;
@@ -7183,11 +7185,15 @@ int readini2(char *inifile, int loaddatafile, int localfile){
 
         }
 
+        p_type=0;
 		    fgets(buffer,255,stream);
-		    sscanf(buffer,"%f %f %f",
+		    sscanf(buffer,"%f %f %f %i",
           &camera_ini->view_angle, 
           &camera_ini->direction_angle,
-          &camera_ini->elevation_angle);
+          &camera_ini->elevation_angle,
+          &p_type);
+        if(p_type!=1)p_type=0;
+        camera_ini->projection_type=p_type;
 
 		    fgets(buffer,255,stream);
 		    sscanf(buffer,"%f %f %f",&camera_ini->xcen,&camera_ini->ycen,&camera_ini->zcen);
@@ -8421,10 +8427,11 @@ void writeini(int flag){
         eye[2],
         zoom,
         zoomindex);
-		  fprintf(fileout," %f %f %f\n",
+		  fprintf(fileout," %f %f %f %i\n",
         ca->view_angle, 
         ca->direction_angle,
-        ca->elevation_angle);
+        ca->elevation_angle,
+        ca->projection_type);
 		  fprintf(fileout," %f %f %f\n",
         ca->xcen,
         ca->ycen,
