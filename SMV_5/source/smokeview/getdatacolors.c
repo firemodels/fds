@@ -1075,7 +1075,12 @@ void drawColorBars(void){
         partcolorlabel_ptr=&part5propinfo[prop_index].partlabels[i+1][0];
       }
       else{
-        partcolorlabel_ptr=&colorlabelpart[i+1][0];
+        if(colorlabelpart!=NULL){
+          partcolorlabel_ptr=&colorlabelpart[i+1][0];
+        }
+        else{
+          partcolorlabel_ptr=NULL;
+        }
       }
       if(partflag==1){
         val = tttmin + i*partrange/(nrgb-2);

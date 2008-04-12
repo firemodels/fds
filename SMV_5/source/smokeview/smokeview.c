@@ -117,7 +117,7 @@ int SUB_portfrustum(int quad,
     glViewport(i_left,i_down,i_width,i_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    if(projection_type==0){
+    if(camera_current->projection_type==0){
       glFrustum(
         (double)x_left,(double)x_right,
         (double)x_down,(double)x_top,
@@ -163,7 +163,7 @@ int SUB_portfrustum(int quad,
     glViewport(n_left,n_down,n_width,n_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    if(projection_type==0){
+    if(camera_current->projection_type==0){
       glFrustum(
         (double)nx_left,(double)nx_right,
         (double)nx_down,(double)nx_top,
@@ -1047,6 +1047,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(force_isometric==1){
     force_isometric=0;
     projection_type=0;
+    camera_current->projection_type=projection_type;
     ZoomMenu(-2);
   }
 
@@ -2203,7 +2204,7 @@ void updatetimes(void){
   FREEMEMORY(times);
   NewMemory((void **)&times,ntimes*sizeof(float));
   timescopy=times;
-  dt_MIN=100000.0;
+
   if(visTerrain==1){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
@@ -2215,13 +2216,13 @@ void updatetimes(void){
 
         *timescopy++=terri->times[n];
         t_diff = fabs(timescopy[-1]-timescopy[-2]);
-        if(n>1&&t_diff<dt_MIN){
+        if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
           dt_MIN=t_diff;
         }
       }
     }
   }
-  dt_MIN=100000.0;
+
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
     if(touri->display==0)continue;
@@ -2230,12 +2231,12 @@ void updatetimes(void){
 
       *timescopy++=touri->path_times[n];
       t_diff = fabs(timescopy[-1]-timescopy[-2]);
-      if(n>1&&t_diff<dt_MIN){
+      if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
         dt_MIN=t_diff;
       }
     }
   }
-  dt_MIN=100000.0;
+
   for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
     if(parti->loaded==0)continue;
@@ -2244,12 +2245,12 @@ void updatetimes(void){
 
       *timescopy++=parti->ptimes[n];
       t_diff = fabs(timescopy[-1]-timescopy[-2]);
-      if(n>1&&t_diff<dt_MIN){
+      if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
         dt_MIN=t_diff;
       }
     }
   }
-  dt_MIN=100000.0;
+
   for(i=0;i<nslice;i++){
     sd = sliceinfo + i;
     if(sd->loaded==1||sd->vloaded==1){
@@ -2258,25 +2259,25 @@ void updatetimes(void){
 
         *timescopy++=sd->slicetimes[n];
         t_diff = fabs(timescopy[-1]-timescopy[-2]);
-        if(n>1&&t_diff<dt_MIN){
+        if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
           dt_MIN=t_diff;
         }
       }
     }
   }
-  dt_MIN=100000.0;
+
   if(ReadTargFile==1&&visTarg==1){
     for(n=0;n<ntargtimes;n++){
       float t_diff;
 
       *timescopy++=targtimes[n];
       t_diff = fabs(timescopy[-1]-timescopy[-2]);
-      if(n>1&&t_diff<dt_MIN){
+      if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
         dt_MIN=t_diff;
       }
     }
   }
-  dt_MIN=100000.0;
+
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo + i;
     filenum=meshi->patchfilenum;
@@ -2288,7 +2289,7 @@ void updatetimes(void){
 
           *timescopy++=meshi->patchtimes[n];
           t_diff = fabs(timescopy[-1]-timescopy[-2]);
-          if(n>1&&t_diff<dt_MIN){
+          if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
             dt_MIN=t_diff;
           }
         }
@@ -2296,19 +2297,17 @@ void updatetimes(void){
     }
   }
   if(ReadZoneFile==1&&visZone==1){
-    dt_MIN=100000.0;
     for(n=0;n<nzonet;n++){
       float t_diff;
 
       *timescopy++=zonet[n];
       t_diff = fabs(timescopy[-1]-timescopy[-2]);
-      if(n>1&&t_diff<dt_MIN){
+      if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
         dt_MIN=t_diff;
       }
     }
   }
   if(ReadIsoFile==1&&visAIso!=0){
-    dt_MIN=100000.0;
     for(i=0;i<niso;i++){
       ib = isoinfo+i;
       if(ib->loaded==0)continue;
@@ -2318,7 +2317,7 @@ void updatetimes(void){
 
         *timescopy++=meshi->isotimes[n];
         t_diff = fabs(timescopy[-1]-timescopy[-2]);
-        if(n>1&&t_diff<dt_MIN){
+        if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
           dt_MIN=t_diff;
         }
       }
@@ -2328,7 +2327,6 @@ void updatetimes(void){
     smoke3d *smoke3di;
 
     if(Read3DSmoke3DFile==1&&vis3DSmoke3D==1){
-      dt_MIN=100000.0;
       for(i=0;i<nsmoke3d;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0)continue;
@@ -2337,7 +2335,7 @@ void updatetimes(void){
 
           *timescopy++=smoke3di->times[n];
           t_diff = fabs(timescopy[-1]-timescopy[-2]);
-          if(n>1&&t_diff<dt_MIN){
+          if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
             dt_MIN=t_diff;
           }
         }
@@ -2346,7 +2344,7 @@ void updatetimes(void){
   }
 
   qsort( (float *)times, (size_t)ntimes, sizeof( float ), compare );
-
+  printf("dt_MIN=%f\n",dt_MIN);
   n2=1;ntimes2=ntimes;
   for(n=1;n<ntimes;n++){
     if(fabs(times[n]-times[n-1])>dt_MIN/10.0){
@@ -2744,7 +2742,9 @@ void ResetView(int option){
     eyeview_save = camera_current->eyeview;
     copy_camera(camera_current,camera_external);
     camera_current->eyeview=eyeview_save;
-    if(projection_type==1)camera_current->eye[1]=camera_current->isometric_y;
+    if(camera_current->projection_type==1){
+      camera_current->eye[1]=camera_current->isometric_y;
+    }
     break;
   case RESTORE_INTERIOR_VIEW:
     eyeview_save = camera_current->eyeview;

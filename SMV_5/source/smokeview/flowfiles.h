@@ -584,6 +584,7 @@ typedef struct {
 
 typedef struct _camera {
   int defined,dirty;
+  int projection_type;
   int eyeview, rotation_index;
   float eye[3], view[3], up[3];
   float isometric_y;
