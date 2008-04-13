@@ -1563,6 +1563,13 @@ void Display(void){
      updatezoommenu=0;
     ZoomMenu(zoomindex);
   }
+  if(update_makeiblank_smoke3d==1){
+    makeiblank_smoke3d();
+  }
+#ifdef pp_CULL
+    if(update_initcull==1)initcull(cullsmoke);
+#endif
+
   if(updatemenu==1){
     if(menustatus==GLUT_MENU_NOT_IN_USE){
       glutDetachMenu(GLUT_RIGHT_BUTTON);

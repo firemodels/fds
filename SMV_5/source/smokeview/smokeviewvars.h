@@ -405,6 +405,7 @@ SVEXTERN int slicefilenum;
 SVEXTERN int partfilenum,zonefilenum;
 SVEXTERN int targfilenum;
 
+SVEXTERN int update_makeiblank_smoke3d, update_initcull;
 SVEXTERN int setPDIM;
 SVEXTERN int menustatus;
 SVEXTERN int visTimeZone, visTimeSmoke, visTimeSlice, visTimePatch, visTimeIso, visTimeEvac;
@@ -426,6 +427,7 @@ SVEXTERN int ntitles,ititle;
 SVEXTERN int visSmoke, visZone;
 SVEXTERN int visEvac;
 SVEXTERN int visBlocks;
+SVEXTERN int smooth_block_solid;
 SVEXTERN int visSmoothAsNormal,visTransparentBlockage;
 SVEXTERN int visBlocksSave;
 SVEXTERN int blocklocation;
