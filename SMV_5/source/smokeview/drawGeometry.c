@@ -3598,9 +3598,7 @@ void drawBlockages(int mode, int trans_flag){
          smoothnorms=1;
          if(meshi->blockagesurface!=NULL){
            bsurface=meshi->blockagesurfaces[j];
-           if((drawing_blockage_transparent==0&&trans_flag==DRAW_SOLID)||(drawing_blockage_transparent==1&&trans_flag==DRAW_TRANSPARENT)){
-             drawstaticiso(bsurface,1,smoothnorms,trans_flag,1);
-           }
+           drawstaticiso(bsurface,1,smoothnorms,trans_flag,1);
          }
        }
      }

@@ -911,6 +911,8 @@ void initvars1(void){
 #ifdef pp_LIGHT
   show_smokelighting=0;
 #endif
+  update_makeiblank_smoke3d=0;
+  update_initcull=0;
   sb_atstart=1;
   navatar_types=0;
   avatar_types=NULL;
@@ -1225,6 +1227,7 @@ void initvars1(void){
   ntitles=0,ititle=0;
   visSmoke=1, visZone=0;
   visEvac=1;
+  smooth_block_solid=0;
   visBlocks=visBLOCKAsInput;
   visSmoothAsNormal=1;
   visTransparentBlockage=0;

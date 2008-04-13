@@ -3193,6 +3193,9 @@ void VentMenu(int value){
      update_trainer_outline();
      
      break;
+   case visSmoothBLOCKSolid:
+     smooth_block_solid = 1 - smooth_block_solid;
+     break;
    case visBLOCKNormal:
    case visBLOCKOutline:
    case visBLOCKHide:
@@ -3794,6 +3797,14 @@ static int in_menu=0;
    else{
     glutAddMenuEntry("   Defined In Input File",visBLOCKAsInput);
   }
+  if(use_menusmooth==1){
+    if(smooth_block_solid==1){
+      glutAddMenuEntry("       *Smooth blockages drawn opaque",visSmoothBLOCKSolid);
+    }
+    else{
+      glutAddMenuEntry("       Smooth blockages drawn opaque",visSmoothBLOCKSolid);
+    }
+  }
   if(visBlocks==visBLOCKNormal){
     glutAddMenuEntry("   *Solid",visBLOCKNormal);
     if(nsmoothblocks>0){
@@ -3813,10 +3824,10 @@ static int in_menu=0;
       }
     }
   }
-   else{
-     glutAddMenuEntry("   Solid",visBLOCKNormal);
-   }
-  if(visBlocks==visBLOCKOutline){
+  else{
+    glutAddMenuEntry("   Solid",visBLOCKNormal);
+  }
+if(visBlocks==visBLOCKOutline){
     glutAddMenuEntry("   *Outline",visBLOCKOutline);
   }
    else{

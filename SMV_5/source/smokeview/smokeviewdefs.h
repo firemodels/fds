@@ -103,6 +103,7 @@ void _sniffErrors(char *whereat);
 #define visBLOCKHide 0
 #define visBLOCKSmoothAsNormal 9
 #define visBLOCKTransparent 10
+#define visSmoothBLOCKSolid 11
 
 #define BLOCKlocation_grid 5
 #define BLOCKlocation_exact 6

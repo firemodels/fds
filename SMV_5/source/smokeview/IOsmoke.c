@@ -261,10 +261,9 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
         break;
       }
     }
-
-    makeiblank_smoke3d();
+    update_makeiblank_smoke3d=1;
 #ifdef pp_CULL
-    if(cullactive==1)initcull(cullsmoke);
+    if(cullactive==1)update_initcull=1;
 #endif
     return;
   }
@@ -5098,6 +5097,7 @@ void makeiblank_smoke3d(void){
   float x, y, z;
   float dx, dy, dz;
 
+  update_makeiblank_smoke3d=0;
   for(i=0;i<nmeshes;i++){
     smokemesh = meshinfo + i;
     smokemesh->smokeloaded=0;
@@ -5971,6 +5971,7 @@ void initcull(int cullflag){
   int iskip, jskip, kskip;
   cullplanedata *cpx, *cpy, *cpz;
 
+  update_initcull=0;
   update_initcullplane=1;
   FREEMEMORY(cullplaneinfo);
   FREEMEMORY(sort_cullplaneinfo);

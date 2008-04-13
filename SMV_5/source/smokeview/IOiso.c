@@ -1175,6 +1175,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
   static int jjj=0;
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
   int drawing_smooth;
+  int transparenton_flag=0;
 
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
@@ -1202,7 +1203,14 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
       rgbtemp[2]=col[2];
     }
 
-    rgbtemp[3]=asurface->color[3];
+    if(smooth_block_solid==0){
+      rgbtemp[3]=asurface->color[3];
+    }
+    else{
+      rgbtemp[3]=1.0;
+    }
+    if(rgbtemp[3]<1.0&&trans_flag!=DRAW_TRANSPARENT)return;
+    if(rgbtemp[3]>=1.0&&trans_flag==DRAW_TRANSPARENT)return;
     if(
       trans_flag==DRAW_TRANSPARENT&&
       (
@@ -1213,6 +1221,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
         if(rgbtemp[3]<0.99){
           drawing_transparent=1;
           drawing_blockage_transparent=1;
+          transparenton_flag=1;
           transparenton();
         }
     }
@@ -1226,7 +1235,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,asurface->color);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
 
-    if(drawing_blockage_transparent==1){
+    if(transparenton_flag==1){
 	    glColor4fv(rgbtemp);
     }
     else{
@@ -1273,7 +1282,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
 	  glDisable(GL_LIGHTING);
 
     glPopAttrib();
-    if(drawing_blockage_transparent==1)transparentoff();  
+    if(transparenton_flag==1)transparentoff();  
   }
 
   if(surfacetype==2){

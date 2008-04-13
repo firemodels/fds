@@ -6011,6 +6011,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       continue;
     }
 #endif
+    if(match(buffer,"SMOOTHBLOCKSOLID",16)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&smooth_block_solid);
+      if(smooth_block_solid!=1)smooth_block_solid=0;
+      continue;
+    }
     if(match(buffer,"COLORBAND",9)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&colorband);
@@ -8180,6 +8186,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",visBlocks);
   fprintf(fileout,"SHOWNORMALWHENSMOOTH\n");
   fprintf(fileout," %i\n",visSmoothAsNormal);
+  fprintf(fileout,"SMOOTHBLOCKSOLID\n");
+  fprintf(fileout," %i\n",smooth_block_solid);
   fprintf(fileout,"SBATSTART\n");
   fprintf(fileout," %i\n",sb_atstart);
   fprintf(fileout,"SHOWTRANSPARENT\n");
