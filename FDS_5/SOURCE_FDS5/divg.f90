@@ -570,7 +570,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                KKG = IJKW(8,IW) 
                UWS(IW) = UWS(IW)*2._EB*RHOA / (RHO_W(IW)+RHOP(IIG,JJG,KKG))
             ENDIF
-         CASE(OPEN_BOUNDARY)
+         CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
             II = IJKW(1,IW)
             JJ = IJKW(2,IW)
             KK = IJKW(3,IW)
@@ -588,8 +588,6 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                CASE(-3)
                   UWS(IW) =  W(II,JJ,KK-1)
             END SELECT
-         CASE(INTERPOLATED_BOUNDARY)
-            UWS(IW) = 0._EB
       END SELECT WALL_CELL_TYPE
    ENDDO WALL_LOOP3
 
