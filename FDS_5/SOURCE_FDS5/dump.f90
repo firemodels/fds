@@ -2053,14 +2053,16 @@ PROPERTY_LOOP: DO N=1,N_PROP
       CASE('LINK TEMPERATURE')
          WRITE(LU_OUTPUT,'(A,F8.1)') '     RTI (m-s)^1/2               ', PY%RTI
          WRITE(LU_OUTPUT,'(A,F8.1)') '     Activation Temperature (C)  ', PY%ACTIVATION_TEMPERATURE
-         WRITE(LU_OUTPUT,'(A,A   )') '     Detector ID                 ', TRIM(PY%ID)         
+      CASE('CABLE TEMPERATURE')
+         WRITE(LU_OUTPUT,'(A,F8.4)') '     Diameter (m)                ', PY%CABLE_DIAMETER
+         WRITE(LU_OUTPUT,'(A,F8.3)') '     Mass per unit length (kg/m) ', PY%CABLE_MASS_PER_LENGTH
+         WRITE(LU_OUTPUT,'(A,F8.1)') '     Failure Temperature (C)     ', PY%CABLE_FAILURE_TEMPERATURE
       CASE('spot obscuration')
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Activation Obscuration (%/m)', PY%ACTIVATION_OBSCURATION 
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Alpha_c or L                ', PY%ALPHA_C
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Beta_c                      ', PY%BETA_C
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Alpha_e                     ', PY%ALPHA_E
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Beta_e                      ', PY%BETA_E
-         WRITE(LU_OUTPUT,'(A,A   )') '     Detector ID                 ', TRIM(PY%ID)                  
    END SELECT
    WRITE(LU_OUTPUT,'(A,A   )') '     Smokeview ID                ', TRIM(PY%SMOKEVIEW_ID)
 ENDDO PROPERTY_LOOP
@@ -3641,26 +3643,34 @@ SELECT CASE(IND)
             DV%YY_SOOT(N,100) = (DV%YY_SOOT(N,100) * (T - DV%TIME_ARRAY(99) - DT) +  DT * DV2%INSTANT_VALUE*1.E-6_EB) / &
                                 (T - DV%TIME_ARRAY(99))
          END IF
-         ! Sum soot densities weighted by flow rat
+         ! Sum soot densities weighted by flow rate
          CALL INTERPOLATE1D(DV%TIME_ARRAY,DV%YY_SOOT(N,:),T-DV2%DELAY,Y_E)
          GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT + DV2%FLOWRATE * Y_E
       END DO
       ! Complete weighting and compute % obs
       GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT / DV%TOTAL_FLOWRATE
       GAS_PHASE_OUTPUT = (1._EB-EXP(-MASS_EXTINCTION_COEFFICIENT*GAS_PHASE_OUTPUT))*100._EB  ! Obscuration
+
    CASE(163) ! gas cell radiative flux
       GAS_PHASE_OUTPUT = SUM(DV%ILW)*0.001_EB
+
+   CASE(164) ! CABLE TEMPERATURE
+
    CASE(171:179) ! [PART_ID]_MPUV
       GAS_PHASE_OUTPUT = AVG_DROP_DEN(II,JJ,KK,IND-170)
+
    CASE(181:189) ! {PART_ID}_ADD
       GAS_PHASE_OUTPUT = AVG_DROP_RAD(II,JJ,KK,IND-180)*2.E6_EB
+
    CASE(191:199) ! {PART_ID}_ADT
       GAS_PHASE_OUTPUT = AVG_DROP_TMP(II,JJ,KK,IND-190) - TMPM
 
    CASE(201:209) ! {PART_ID}_FLUX_X
       GAS_PHASE_OUTPUT = WFX(II,JJ,KK)
+
    CASE(211:219) ! {PART_ID}_FLUX_Y
       GAS_PHASE_OUTPUT = WFY(II,JJ,KK)
+
    CASE(221:229) ! {PART_ID}_FLUX_Z
       GAS_PHASE_OUTPUT = WFZ(II,JJ,KK)
 
