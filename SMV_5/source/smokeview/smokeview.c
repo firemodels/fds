@@ -3566,7 +3566,7 @@ int getplotstate(int choice){
         return DYNAMIC_PLOTS;
       }
       if(visGrid==0)stept = 1;
-      if(visGrid==1)stept = 0;
+      //if(visGrid==1)stept = 0;
       if(visTerrain==1){
         for(i=0;i<nterraininfo;i++){
           terraindata *terri;
