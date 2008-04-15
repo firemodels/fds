@@ -4468,13 +4468,13 @@ NAME(12) = 'EVAC'
 NAME(13) = 'EVA1'
 NAME(14) = 'EVA2'
 NAME(15) = 'EVA3'
-! Pressure correction timing
-NAME(16) = 'COAB'
-NAME(17) = 'GATA'
-NAME(18) = 'GATB'
-NAME(19) = 'MATM'
-NAME(20) = 'BCAS'
-NAME(21) = 'PCOR'
+! Additional timings
+NAME(16) = 'MEX1'
+NAME(17) = 'MEX2'
+NAME(18) = 'MEX3'
+NAME(19) = 'MEX4'
+NAME(20) = 'MEX5'
+NAME(21) = 'MEX6'
  
 DO NM=1,NMESHES
    DO I=1,N_TIMERS_DIM
