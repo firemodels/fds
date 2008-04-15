@@ -18,7 +18,7 @@ CONTAINS
 SUBROUTINE DIVERGENCE_PART_1(T,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_CP2,GET_D2,GET_K2
+USE PHYSICAL_FUNCTIONS, ONLY: GET_CP,GET_D,GET_K
 
 ! Compute contributions to the divergence term
  
@@ -94,7 +94,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                IZ   = MAX(0,MIN(IZ,100))
                Z_2 = 0._EB
                IF (CO_PRODUCTION) Z_2 = YYP(I,J,K,I_PROG_CO)
-               CALL GET_D2(YYP(I,J,K,I_FUEL),Z_2,YYP(I,J,K,I_PROG_F),Y_SUM(I,J,K),RHO_D(I,J,K),ITMP)
+               CALL GET_D(YYP(I,J,K,I_FUEL),Z_2,YYP(I,J,K,I_PROG_F),Y_SUM(I,J,K),RHO_D(I,J,K),ITMP)
                RHO_D(I,J,K) = RHOP(I,J,K)*RHO_D(I,J,K)
             ENDDO
          ENDDO
@@ -292,7 +292,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                DO I=1,IBAR
                   ITMP = 0.1_EB*TMP(I,J,K)
                   IF(CO_PRODUCTION) THEN
-                     CALL GET_CP2(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)
+                     CALL GET_CP(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)
                      IF (N_SPECIES > 3) THEN
                         CP_SUM = 0._EB
                         DO N=1,N_SPECIES
@@ -302,7 +302,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                         CP_MF = CP_SUM+(1._EB-Y_SUM(I,J,K))*CP_MF
                      ENDIF
                   ELSE
-                     CALL GET_CP2(YY(I,J,K,I_FUEL),0._EB,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)                  
+                     CALL GET_CP(YY(I,J,K,I_FUEL),0._EB,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)                  
                      IF (N_SPECIES > 2) THEN
                         CP_SUM = 0._EB
                         DO N=1,N_SPECIES
@@ -417,7 +417,7 @@ IF (MIXTURE_FRACTION) THEN
          DO I=1,IBAR
             ITMP = 0.1_EB*TMP(I,J,K)
             IF(CO_PRODUCTION) THEN
-               CALL GET_CP2(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)
+               CALL GET_CP(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)
                IF (N_SPECIES > 3) THEN
                   CP_SUM = 0._EB
                   DO N=1,N_SPECIES
@@ -427,7 +427,7 @@ IF (MIXTURE_FRACTION) THEN
                   END DO
                ENDIF
             ELSE
-               CALL GET_CP2(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)  
+               CALL GET_CP(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)  
                IF (N_SPECIES > 2) THEN
                   CP_SUM = 0._EB
                   DO N=1,N_SPECIES
