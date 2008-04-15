@@ -321,7 +321,7 @@ ELSE PRODUCE_CO  ! Combustion with suppression and CO production
    YO2Z   => WORK1
    YO2Z   = 0._EB
    MIX_TIME => WORK2
-   MIX_TIME = 0._EB
+   MIX_TIME = DT
 !   IGNITE => LOGICAL_WORK
 !   IGNITE = .FALSE.
    QT     => WORK3
