@@ -41,7 +41,7 @@ END SUBROUTINE COMPUTE_VELOCITY_FLUX
 
 SUBROUTINE VELOCITY_FLUX(T,NM)
 ! Compute convective and diffusive terms
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MU2
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MU
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: T,MUX,MUY,MUZ,UP,UM,VP,VM,WP,WM,VTRM, &
@@ -137,9 +137,9 @@ CALC_MU: IF (PREDICTOR) THEN
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IVLOOP2
                   ITMP = 0.1_EB*TMP(I,J,K)
                   IF(CO_PRODUCTION) THEN
-                     CALL GET_MU2(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)
+                     CALL GET_MU(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)
                   ELSE
-                     CALL GET_MU2(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
+                     CALL GET_MU(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
                   ENDIF
                   MU_SUM = MU(I,J,K)*(1-Y_SUM(I,J,K))
                   DO N=1,N_SPECIES
@@ -490,7 +490,7 @@ END SUBROUTINE VELOCITY_FLUX_ISOTHERMAL
  
 SUBROUTINE VELOCITY_FLUX_CYLINDRICAL(T,NM)
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MU2
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MU
 ! Compute convective and diffusive terms for 2D axisymmetric
  
 REAL(EB) :: T,DMUDX
@@ -568,9 +568,9 @@ CALC_MU: IF (PREDICTOR) THEN
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IVLOOP2
                ITMP = 0.1_EB*TMP(I,J,K)
                IF(CO_PRODUCTION) THEN
-                  CALL GET_MU2(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)
+                  CALL GET_MU(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)
                ELSE
-                  CALL GET_MU2(YY(I,J,K,I_FUEL),0._EB,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
+                  CALL GET_MU(YY(I,J,K,I_FUEL),0._EB,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
                ENDIF
             ENDDO IVLOOP2
          ENDDO
