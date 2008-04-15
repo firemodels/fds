@@ -146,7 +146,7 @@ SUBROUTINE RAISED_VEG_MASS_ENERGY_TRANSFER(T,NM)
     
 ! Mass and energy transfer between gas and raised vegetation fuel elements 
 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION2
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION
 USE MATH_FUNCTIONS, ONLY : AFILL2
 
 !arrays for debugging
