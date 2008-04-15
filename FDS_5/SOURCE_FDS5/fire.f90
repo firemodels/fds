@@ -43,7 +43,7 @@ CONTAINS
 SUBROUTINE COMBUSTION_MF
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_MOLECULAR_WEIGHT
 REAL(EB) :: YFU0,A,ETRM,YCOMIN,YO2MIN,YFUMIN,YO2W,YO20,YCO0,Y_SUM_W,&
-            DYF,DX_FDT,HFAC_F,DTT,C,CDXDYDZTT,& 
+            DYF,DX_FDT,HFAC_F,DTT,DELTA2,& 
             Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,&
             F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,Z_2,RHOX, &
             X_FU,X_O,X_FU_0,X_O_0,X_FU_S,X_O_S,X_FU_N,X_O_N,X_O_MIN,X_FU_MIN,COTOO2, &
@@ -53,7 +53,6 @@ INTEGER :: NODETS,N,I,J,K,II,IC,IW,IWA(-3:3)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: YO2Z,QT,R_SUM_DILUENTS,MIX_TIME
 !LOGICAL, POINTER, DIMENSION(:,:,:) :: IGNITE
 
-C = (0.5_EB*CSMAG)**2
 PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and destruction
    YO2Z => WORK1
    YO2Z = 0._EB
@@ -274,22 +273,23 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                DYF = MIN(YFU0,YO20/RN%O2_F_RATIO)
                IF (LES .AND. EDDY_BREAKUP) THEN
                   IF (.NOT.TWO_D) THEN
-                     CDXDYDZTT = C*(DX(I)*DY(J)*DZ(K))**TWTH
+                     DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
                   ELSE
-                     CDXDYDZTT = C*DX(I)*DZ(K)
+                     DELTA2 = DX(I)*DZ(K)
                   ENDIF
-                  MIX_TIME(I,J,K) = RHO(I,J,K)*CDXDYDZTT/MU(I,J,K)
+                  MIX_TIME(I,J,K) = SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
                ENDIF
                Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K)))
                DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
                Q(I,J,K) = Q_NEW
-               YY(I,J,K,I_FUEL) = YY(I,J,K,I_FUEL) - DYF
+               YY(I,J,K,I_FUEL)   = YY(I,J,K,I_FUEL)   - DYF
                YY(I,J,K,I_PROG_F) = YY(I,J,K,I_PROG_F) + DYF
             ENDDO ILOOPB
          ENDDO
       ENDDO
       
-   ELSE SUPPRESSIONIF !No suppression
+   ELSE SUPPRESSIONIF  ! No suppression
+
       DO K=1,KBAR
          DO J=1,JBAR
             ILOOPC: DO I=1,IBAR
@@ -298,25 +298,26 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                YFU0  = MAX(0._EB,MIN(1._EB,YY(I,J,K,I_FUEL)))*RN%Y_F_INLET
                IF (YFU0<=YFUMIN .OR. YO20<=YO2MIN) CYCLE ILOOPC
                DYF = MIN(YFU0,YO20/RN%O2_F_RATIO)
-               Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K)))
-               DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
                IF (LES .AND. EDDY_BREAKUP) THEN
                   IF (.NOT.TWO_D) THEN
-                     CDXDYDZTT = C*(DX(I)*DY(J)*DZ(K))**TWTH
+                     DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
                   ELSE
-                     CDXDYDZTT = C*DX(I)*DZ(K)
+                     DELTA2 = DX(I)*DZ(K)
                   ENDIF
-                  MIX_TIME(I,J,K) = RHO(I,J,K)*CDXDYDZTT/MU(I,J,K)
+                  MIX_TIME(I,J,K) = SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
                ENDIF
+               Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K)))
+               DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
                Q(I,J,K) = Q_NEW
-               YY(I,J,K,I_FUEL) = YY(I,J,K,I_FUEL) - DYF
+               YY(I,J,K,I_FUEL)   = YY(I,J,K,I_FUEL)   - DYF
                YY(I,J,K,I_PROG_F) = YY(I,J,K,I_PROG_F) + DYF
             ENDDO ILOOPC
          ENDDO
       ENDDO
    ENDIF SUPPRESSIONIF
        
-ELSE PRODUCE_CO !Combustion with suppression and CO production
+ELSE PRODUCE_CO  ! Combustion with suppression and CO production
+
    YO2Z   => WORK1
    YO2Z   = 0._EB
    MIX_TIME => WORK2
@@ -547,11 +548,11 @@ ELSE PRODUCE_CO !Combustion with suppression and CO production
             DYF = MIN(YFU0,YO20/RN%O2_F_RATIO)
             IF (LES .AND. EDDY_BREAKUP) THEN
                IF (.NOT.TWO_D) THEN
-                  CDXDYDZTT = C*(DX(I)*DY(J)*DZ(K))**TWTH
+                  DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
                ELSE
-                  CDXDYDZTT = C*DX(I)*DZ(K)
+                  DELTA2 = DX(I)*DZ(K)
                ENDIF
-               MIX_TIME(I,J,K) = RHO(I,J,K)*CDXDYDZTT/MU(I,J,K)
+               MIX_TIME(I,J,K) = SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
             ENDIF
             Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K)))
             DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
