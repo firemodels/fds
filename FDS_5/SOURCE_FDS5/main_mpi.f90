@@ -383,8 +383,8 @@ MAIN_LOOP: DO
  
    INQUIRE(FILE=TRIM(CHID)//'.stop',EXIST=EX)
    IF (EX) MESH_STOP_STATUS = USER_STOP
-   CALL MPI_ALLGATHERV(MESH_STOP_STATUS(DISPLS(MYID)+1),COUNTS(MYID),MPI_INTEGER,MESH_STOP_STATUS,COUNTS,DISPLS,MPI_INTEGER, &
-                      MPI_COMM_WORLD,IERR)
+!! CALL MPI_ALLGATHERV(MESH_STOP_STATUS(DISPLS(MYID)+1),COUNTS(MYID),MPI_INTEGER,MESH_STOP_STATUS,COUNTS,DISPLS,MPI_INTEGER, &
+!!                    MPI_COMM_WORLD,IERR)
  
    ! Figure out fastest and slowest meshes
  
@@ -446,8 +446,8 @@ MAIN_LOOP: DO
 
    ! Give every processor the full ACTIVE_MESH array
 
-   CALL MPI_ALLGATHERV(ACTIVE_MESH(DISPLS(MYID)+1),COUNTS(MYID),MPI_LOGICAL,ACTIVE_MESH,COUNTS,DISPLS,MPI_LOGICAL, &
-        MPI_COMM_WORLD,IERR)
+!! CALL MPI_ALLGATHERV(ACTIVE_MESH(DISPLS(MYID)+1),COUNTS(MYID),MPI_LOGICAL,ACTIVE_MESH,COUNTS,DISPLS,MPI_LOGICAL, &
+!!      MPI_COMM_WORLD,IERR)
 
    !============================================================================================================================
    !                                          Start of Predictor part of time step
@@ -2098,8 +2098,10 @@ SUBROUTINE DUMP_GLOBAL_OUTPUTS(T)
 
 ! Dump HRR data to CHID_hrr.csv, MASS data to CHID_mass.csv, DEVICE data to _devc.csv
 
-REAL(EB) :: T
+REAL(EB) :: T,TNOW
 INTEGER :: N,CNT
+
+TNOW = SECOND()
 
 ! Dump out HRR info  after first "gathering" data to node 0
 
@@ -2230,6 +2232,7 @@ IF (T>=CTRL_CLOCK .AND. N_CTRL>0) THEN
    CTRL_CLOCK = CTRL_CLOCK + DT_CTRL
 ENDIF
 
+TUSED(7,:) = TUSED(7,:) + SECOND() - TNOW
 END SUBROUTINE DUMP_GLOBAL_OUTPUTS
 
 
