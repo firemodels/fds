@@ -186,7 +186,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
     }
     for(i=0;i<nclasses;i++){
       part5class *partclassi;
-      int factor=256*128;
+      int factor=256*128-1;
 
       partclassi = parti->partclassptr[i];
       FORTPART5READ(&nparts,1);
