@@ -11,7 +11,7 @@ representative of any particular material.
 
 &MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
-&TIME TWFIN=900., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
+&TIME T_END=900., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
 
 &MISC SOLID_PHASE_ONLY=.TRUE., H_FIXED=0.0 /  No convective heat transfer
 

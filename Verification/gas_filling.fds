@@ -5,7 +5,7 @@ Ensure that the right amount of mass has been added.
 
 &MESH IJK=32,32,15, XB=-3.2,3.2,-3.2,3.2,0.0,3.0 /
 
-&TIME TWFIN=300.0 /
+&TIME T_END=300.0 /
 
 &DUMP MASS_FILE=.TRUE. /
 

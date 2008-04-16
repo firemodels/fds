@@ -5,7 +5,7 @@ The case is meant as a teaching tool and to test functionality.
 
 &MESH IJK=24,10,24, XB=1.1,3.5,3.6,4.6,0.0,2.4 /
 
-&TIME TWFIN=900. /
+&TIME T_END=900. /
 
 &MISC SURF_DEFAULT='WALL' /
 

@@ -7,7 +7,7 @@ of box_burn_away_hrr.csv file.
 
 &MESH IJK=20,20,20 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
-&TIME TWFIN=60. /
+&TIME T_END=60. /
 
 &MATL ID                   = 'FOAM'
       HEAT_OF_REACTION     = 500.

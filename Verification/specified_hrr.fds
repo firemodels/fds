@@ -4,7 +4,7 @@ A test of the simple "heat up and burn" pyrolysis model.
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
 
-&TIME TWFIN=30. /
+&TIME T_END=30. /
 
 &DUMP DT_PL3D=10000000./
 

@@ -5,7 +5,7 @@ The purpose of this case is to test functionality of the droplet routine.
 
 &MESH IJK=16,16,56, XB=-2.0,2.0,-2.0,2.0,0.0,14.0 /
 
-&TIME TWFIN=60.0 /
+&TIME T_END=60.0 /
 
 &OBST XB=-1.5, 1.5,-1.5, 1.5, 1.0, 3.0, COLOR='TAN'  /  
 &OBST XB=-1.5, 1.5,-1.5, 1.5, 4.0, 6.0, COLOR='TAN'  /  
