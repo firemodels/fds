@@ -4,7 +4,7 @@
 &MESH IJK=21,10,10, XB=0.0,2.1,0.0,1.0,0.0,1.0 /
 
 * initial time step = 0.05 s, time when finished = 20 s
-&TIME DT=0.05, TWFIN=20. /
+&TIME DT=0.05, T_END=20. /
 
 * names vents, supply velocity = -.2 m/s, particles are individually identified for each surface 
 &SURF ID='BLOW 1', VEL=-0.2, COLOR='PURPLE', PART_ID='TRACER 1' /

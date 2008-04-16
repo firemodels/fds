@@ -11,7 +11,7 @@ curve after 80 degC.
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
 
-&TIME TWFIN=7 DT = 0.05 WALL_INCREMENT = 1/
+&TIME T_END=7 DT = 0.05 WALL_INCREMENT = 1/
 
 &MISC H_FIXED = 0. /
 

@@ -5,7 +5,7 @@ This case tests conservation of mass and energy.
 
 &MESH IJK=20,20,20, XB=0.0,1.0,0.0,1.0,0.0,1.0 / 
 
-&TIME DT=0.01, TWFIN=10.0 / 
+&TIME DT=0.01, T_END=10.0 / 
 
 &MISC SURF_DEFAULT='WALL', GVEC=0,0,0, RADIATION=.FALSE. /
 

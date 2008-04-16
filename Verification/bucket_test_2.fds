@@ -2,7 +2,7 @@
 
 &MESH IJK=50,50,25, XB=-5.0,5.0,-5.0,5.0,0.0,5.0 /
 
-&TIME TWFIN=10. /
+&TIME T_END=10. /
 
 &MISC RADIATION=.FALSE./
 

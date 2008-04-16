@@ -11,7 +11,7 @@ The exact solution is a linear function changing from 1.0 to 0.0 when time goes 
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
 
-&TIME TWFIN=10 DT = 0.1 WALL_INCREMENT = 1/
+&TIME T_END=10 DT = 0.1 WALL_INCREMENT = 1/
 
 &MISC H_FIXED = 0. /
 

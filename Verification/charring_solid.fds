@@ -12,7 +12,7 @@ representative of any particular type of wood.
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
-&TIME TWFIN=600., WALL_INCREMENT = 1, DT = 0.01 /  Force FDS to do solid phase calc every time step
+&TIME T_END=600., WALL_INCREMENT = 1, DT = 0.01 /  Force FDS to do solid phase calc every time step
 
 &MISC H_FIXED=0.0 /  No convective heat transfer
 
