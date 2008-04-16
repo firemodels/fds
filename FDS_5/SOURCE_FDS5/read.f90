@@ -2608,7 +2608,7 @@ DO N=1,N_PROP
       DO IPC=1,N_PART
          PC=>PARTICLE_CLASS(IPC)
          IF (PC%ID==PY%PART_ID) PY%PART_INDEX = IPC
-         IF (PC%MASSLESS) THEN
+         IF (PC%ID==PY%PART_ID .AND. PC%MASSLESS) THEN
             WRITE(MESSAGE,'(A,I4,A)') 'ERROR: PART_ID for PROP ' ,N,' cannot refer to MASSLESS particles'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
