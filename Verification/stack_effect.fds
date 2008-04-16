@@ -4,7 +4,7 @@ A simple two-dimensional case demonstrating how to model stack effect in buildin
 
 &MESH IJK=100,1,400, XB=0.0,100.0,-1.0,1.0,0.0,400.0 /
 
-&TIME TWFIN=100.0 / 
+&TIME T_END=100.0 / 
 
 &MISC RADIATION=.FALSE., LAPSE_RATE=0.0, TMPA=10. /
 &INIT XB=20.0,80.0,-2.0,2.0,0.0,304.0, TEMPERATURE=20. /

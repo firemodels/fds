@@ -89,7 +89,7 @@ I = 1,2,3 in any of the internal wall points.
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
 
-&TIME TWFIN=50, WALL_INCREMENT = 1, DT = 0.01/
+&TIME T_END=50, WALL_INCREMENT = 1, DT = 0.01/
 
 &MISC SOLID_PHASE_ONLY = .TRUE. /
 

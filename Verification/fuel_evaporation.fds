@@ -4,7 +4,7 @@ A sealed box is filled with fuel droplets that evaporate rapidly and burn.
 
 &MESH IJK=20,20,20, XB=0.0,1.0,0.0,1.0,0.0,1.0 / 
 
-&TIME TWFIN=10.0 / 
+&TIME T_END=10.0 / 
 
 &MISC SURF_DEFAULT='WALL', GVEC=0,0,0 /
 

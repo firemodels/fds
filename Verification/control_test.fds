@@ -7,7 +7,7 @@ Test of control functions:
 &HEAD CHID='control_test', TITLE='Control function testing, SVN $Revision$'/
 
 &MESH XB=-1,1,-1,1,0,2, IJK=20,20,20 /
-&TIME TWFIN=10/
+&TIME T_END=10/
 &SURF ID='FIRE', HRRPUA=1000. /
 
 &OBST XB=-1,-0.5,-1,-0.5,1.5,2.0, CTRL_ID='all test', COLOR='CYAN' /

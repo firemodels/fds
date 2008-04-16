@@ -3,7 +3,7 @@ A model of a liquid fuel spray burner used for fire tests at NIST.
 &HEAD CHID='spray_burner', TITLE='Test Simulation of 2 MW Heptane Spray Burner, SVN $Revision$' /
 
 &MESH IJK=20,30,40, XB=3.0,5.0,-1.5,1.5,0.0,4.0 /
-&TIME TWFIN=90. /
+&TIME T_END=90. /
 
 &MISC SURF_DEFAULT='GYPSUM BOARD', POROUS_FLOOR=.FALSE. /
 

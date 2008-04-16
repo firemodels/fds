@@ -6,7 +6,7 @@ Case 2 adds the extra leak to the great beyond.
 
 &MESH IJK=50,40,32, XB=-2.5, 2.5,-2.0, 2.0, 0.0, 3.2 /
 
-&TIME TWFIN=300.0 /
+&TIME T_END=300.0 /
 
 &SURF ID='DOOR CRACK', LEAK_PATH=1,2 /
  SURF ID='VENT CRACK', LEAK_PATH=0,2 / <--- Case 2

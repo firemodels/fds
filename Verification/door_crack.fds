@@ -4,7 +4,7 @@ An ISO 9701 compartment with a fan blowing into it, a small fire, and a crack un
 
 &MESH IJK=50,40,32, XB=-2.5, 2.5,-2.0, 2.0, 0.0, 3.2 /
 
-&TIME TWFIN=300.0 /
+&TIME T_END=300.0 /
 
 &SURF ID='DOOR CRACK', LEAK_PATH=1,0, POROUS=.TRUE. /
 &SURF ID='FAN GRILL',  VEL=0.1, MAX_PRESSURE=1000., DUCT_PATH=1,0, POROUS=.TRUE. /
