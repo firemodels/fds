@@ -138,6 +138,11 @@ int initcase_c(int argc, char **argv){
     show_trainer();
     show_load_alert();
   }
+  if(visTerrain==1){
+    visTerrain=1-visTerrain;
+    GeometryMenu(17);
+  }
+
   return 0;
 }
 
@@ -1228,6 +1233,7 @@ void initvars1(void){
   visSmoke=1, visZone=0;
   visEvac=1;
   smooth_block_solid=0;
+  autoterrain=0;
   visBlocks=visBLOCKAsInput;
   visSmoothAsNormal=1;
   visTransparentBlockage=0;
