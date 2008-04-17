@@ -3184,7 +3184,7 @@ void VentMenu(int value){
 //     visSmoothAsNormal
 //     visTransparentBlockage
 
-     void BlockageMenu(int value){
+void BlockageMenu(int value){
   switch (value){
 //   case visBLOCKFacet:
 //   case visBLOCKSmooth:
@@ -3386,6 +3386,14 @@ void GeometryMenu(int value){
     break;
   case 17:
     visTerrain=1 - visTerrain;
+    if(visTerrain==1){
+      visBlocksSave=visBlocks;
+      BlockageMenu(visBLOCKHide);
+    }
+    else{
+      BlockageMenu(visBlocksSave);
+    }
+
     break;
   case 11:
     if(isZoneFireModel)visFrame=1;
@@ -5992,9 +6000,9 @@ if(visBlocks==visBLOCKOutline){
 
       terri = terraininfo + i;
       strcpy(menulabel,"");
-      if(terri->loaded==1)strcat(menulabel,"*");
-      strcat(menulabel,terri->file);
-      glutAddMenuEntry(menulabel,i);
+    //xxx  if(terri->loaded==1)strcat(menulabel,"*");
+     //xxx strcat(menulabel,terri->file);
+     //xxx glutAddMenuEntry(menulabel,i);
     }
     if(nterrainloaded==1){
       glutAddMenuEntry("-",-1);

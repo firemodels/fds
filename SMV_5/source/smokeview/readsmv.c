@@ -35,6 +35,8 @@ char readsmv_revision[]="$Revision$";
 #define DEVICE_SPRK 3
 #define DEVICE_SMOKE 4
 
+int GeometryMenu(int var);
+
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(char *file){
@@ -484,6 +486,13 @@ int readsmv(char *file){
       continue;
    
     }
+    if(match(buffer,"AUTOTERRAIN",11) == 1){
+      autoterrain=1;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&visTerrain);
+      if(visTerrain!=1)visTerrain=0;
+      continue;
+    }
     if(
       (match(buffer,"DEVICE",6) == 1)&&
       (match(buffer,"DEVICE_ACT",10) != 1)
@@ -929,197 +938,30 @@ int readsmv(char *file){
 
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++ CLASS_OF_PARTICLES +++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ TERRAIN +++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
 
-  /*
-  typedef struct {
-  char *name;
-  float *rgb;
-  int ntypes;
-  flowlabels *labels;
-} partclass;
-
-  CLASS_OF_PARTICLES
-  name
-  red green blue
-  ntypes
-    long label    for each type
-    short label
-    units
-    .....
-
-
-*/
-
-    /*
-typedef struct {
-  int nallocated, nstates;
-  float *time, *tcurrent;
-  unsigned char *state;
-} terraincell;
-
-typedef struct {
-  char *file;
-  int loaded, display;
-  int autoload;
-  texture *ter_texture;
-  int nx, ny;
-  float xmin, xmax, ymin, ymax;
-  float *x, *y;
-  float *zcell, *znode, *znormal;
-  float *times;
-  terraincell *tcell;
-  int ntimes;
-} terraindata;
-*/
-    if(match(buffer,"TERRAIN",7) == 1){
+ 
+     if(match(buffer,"TERRAIN",7) == 1){
       terraindata *terri;
       float xmin, xmax, ymin, ymax;
       int nx, ny;
-      float dx, dy;
-      float *x, *y;
-      int init_terrain=0;
-      float *znode, *zcell;
-      int nxcell;
-      float *znormal;
 
       terri = terraininfo + nterraininfo;
 
-      NewMemory((void **)&terri->file,(unsigned int)(len+1));
-      STRCPY(terri->file,buffer);
-      terri->x=NULL;
-      terri->y=NULL;
-      terri->display=0;
-      terri->loaded=0;
-      terri->autoload=0;
-      terri->times=NULL;
-      terri->ntimes=0;
-      terri->times=NULL;
-      terri->zcell=NULL;
-      terri->znode=NULL;
-      terri->znormal=NULL;
-      terri->tcell=NULL;
-      terri->ter_texture=NULL;
-      terri->state=NULL;
-      terri->timeslist=NULL;
-
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %i %f %f %i",&xmin, &xmax, &nx, &ymin, &ymax, &ny);
-      terri->xmin=xmin;
-      terri->xmax=xmax;
-      terri->ymin=ymin;
-      terri->ymax=ymax;
-      terri->ny=ny;
-      terri->zcell=NULL;
-      terri->znode=NULL;
-      terri->znormal=NULL;
-      if(nx<0){
-        nx=-nx;
-        init_terrain=1;
-      }
-      terri->nx=nx;
-      NewMemory((void **)&terri->x,(nx+1)*sizeof(float));
-      NewMemory((void **)&terri->y,(ny+1)*sizeof(float));
-      NewMemory((void **)&terri->zcell,nx*ny*sizeof(float));
-      NewMemory((void **)&terri->state,nx*ny);
-      NewMemory((void **)&terri->znode,(nx+1)*(ny+1)*sizeof(float));
-      NewMemory((void **)&terri->znormal,3*(nx+1)*(ny+1)*sizeof(float));
 
-      x = terri->x;
-      y = terri->y;
-      dx = (xmax-xmin)/nx;
-      dy = (ymax-ymin)/ny;
-      for(i=0;i<nx;i++){
-        x[i] = xmin + dx*i;
-      }
-      x[nx] = xmax;
-      for(i=0;i<ny;i++){
-        y[i] = ymin + dy*i;
-      }
-      y[ny] = ymax;
-      if(init_terrain==1){
-        initterrain(terri);
-      }
-      else{
-        float *z;
+      initterrain(stream, NULL, terri, xmin, xmax, nx, ymin, ymax, ny);
 
-        z=terri->zcell;
-        for(i=0;i<nx*ny;i++){
-          fgets(buffer,255,stream);
-          sscanf(buffer,"%f",z);
-          z++;
-        }
-
-      }
-#define ijcell2(i,j) nxcell*(j) + (i)
-      znode = terri->znode;
-      zcell = terri->zcell;
-      nxcell = terri->nx;
-      for(j=0;j<=terri->ny;j++){
-        int jm1, im1, ii, jj;
-        float zz;
-
-        jm1 = j - 1;
-        if(jm1<0)jm1=0;
-        jj = j;
-        if(jj==terri->ny)jj--;
-
-        for(i=0;i<=terri->nx;i++){
-          im1 = i - 1;
-          if(im1<0)im1 = 0;
-          ii = i;
-          if(ii==terri->nx)ii--;
-
-          zz =  zcell[ijcell2(im1,jm1)];
-          zz += zcell[ijcell2(im1,jj)];
-          zz += zcell[ijcell2(ii,jm1)];
-          zz += zcell[ijcell2(ii,jj)];
-          zz *= 0.25;
-          *znode++=zz;
-        }
-      }
-#define ijnode2(i,j) ((nxcell+1)*(j) + (i))
-      znormal = terri->znormal;  ;
-      znode = terri->znode;
-      for(j=0;j<=terri->ny;j++){
-        int jp1, ip1;
-        float dzdx, dzdy;
-        float sum;
-
-        jp1 = j + 1;
-        if(jp1>terri->ny)jp1=terri->ny;
-
-        for(i=0;i<=terri->nx;i++){
-          ip1 = i + 1;
-          if(ip1>terri->nx)ip1=terri->nx;
-          dzdx = (znode[ijnode2(ip1,j)] - znode[ijnode2(i,j)])/dx;
-          dzdy = (znode[ijnode2(i,jp1)] - znode[ijnode2(i,j)])/dy;
-
-     //     i  j  k
-     //     1  0 dzdx
-     //     0  1 dzdy
-
-     //     -dzdx -dzdy 1
-
-          
-          znormal = terri->znormal + 3*ijnode2(i,j);
-          znormal[0] = -dzdx;
-          znormal[1] = -dzdy;
-          znormal[2] = 1.0;
-
-          sum  = znormal[0]*znormal[0];
-          sum += znormal[1]*znormal[1];
-          sum += znormal[2]*znormal[2];
-          sum = sqrt(sum);
-          znormal[0]/=sum;
-          znormal[1]/=sum;
-          znormal[2]/=sum;
-        }
-      }
       nterraininfo++;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++ CLASS_OF_PARTICLES +++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"CLASS_OF_PARTICLES",18) == 1||
        match(buffer,"CLASS_OF_HUMANS",15) == 1){
       float rgb_class[4];
@@ -4899,6 +4741,7 @@ typedef struct {
 
 
   fclose(stream);
+  stream=NULL;
   update_selectfaces();
   updateslicetypes();
   updatesliceboundlabels();
@@ -4941,7 +4784,30 @@ typedef struct {
   if(cullactive==1)initcull(cullsmoke);
 #endif
 
+  if(autoterrain==1&&nterraininfo==0){
 
+    nterraininfo = nmeshes;
+    NewMemory((void **)&terraininfo,nterraininfo*sizeof(terraindata));
+
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      terraindata *terri;
+      float xmin, xmax, ymin, ymax;
+      int nx, ny;
+
+      meshi=meshinfo + i;
+      terri = terraininfo + i;
+
+      nx = meshi->ibar;
+      ny = meshi->jbar;
+      xmin = meshi->xplt_orig[0];
+      xmax = meshi->xplt_orig[nx-1];
+      ymin = meshi->yplt_orig[0];
+      ymax = meshi->yplt_orig[ny-1];
+
+      initterrain(NULL, meshi, terri, xmin, xmax, nx, ymin, ymax, ny);
+    }
+  }
 
   printf("wrap up completed\n");
 
@@ -5946,6 +5812,16 @@ int readini2(char *inifile, int loaddatafile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
+    if(match(buffer,"SHOWTERRAIN",11)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&visTerrain);
+      if(visTerrain!=0)visTerrain=1;
+      if(visTerrain==1){
+        visTerrain=1-visTerrain;
+        GeometryMenu(17);
+      }
+      continue;
+    }
     if(match(buffer,"SBATSTART",9)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&sb_atstart);
@@ -8236,6 +8112,8 @@ void writeini(int flag){
   fprintf(fileout," %i %i\n",show_bothsides_int,show_bothsides_ext);
   fprintf(fileout,"TRAINERVIEW\n");
   fprintf(fileout," %i\n",trainerview);
+  fprintf(fileout,"SHOWTERRAIN\n");
+  fprintf(fileout," %i\n",visTerrain);
 
   fprintf(fileout,"\nMISC\n");
   fprintf(fileout,"----\n\n");

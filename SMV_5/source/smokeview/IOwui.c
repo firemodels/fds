@@ -171,23 +171,164 @@ float getterrain_z(float x, float y){
 }
 
 /* ------------------ initterrain ------------------------ */
+#define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
 
-void initterrain(terraindata *terri){
-  float *zcell;
-  float xx, yy;
-  int i, j;
+void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny){
+  char buffer[1024];
   float dx, dy;
-  float pi;
+  float *x, *y, *z;
+  float *znode, *zcell;
+  int nxcell;
+  float *znormal;
+  int i,j,k;
+  int nz;
+  int ibar, jbar;
 
+  terri->x=NULL;
+  terri->y=NULL;
+  terri->display=0;
+  terri->loaded=0;
+  terri->autoload=0;
+  terri->times=NULL;
+  terri->ntimes=0;
+  terri->times=NULL;
+  terri->zcell=NULL;
+  terri->znode=NULL;
+  terri->znormal=NULL;
+  terri->tcell=NULL;
+  terri->ter_texture=NULL;
+  terri->state=NULL;
+  terri->timeslist=NULL;
+  terri->zcell=NULL;
+  terri->znode=NULL;
+  terri->znormal=NULL;
+
+  terri->xmin=xmin;
+  terri->xmax=xmax;
+  terri->ymin=ymin;
+  terri->ymax=ymax;
+  terri->ny=ny;
+  if(nx<0){
+    nx=-nx;
+  }
+  terri->nx=nx;
+
+  NewMemory((void **)&terri->x,(nx+1)*sizeof(float));
+  NewMemory((void **)&terri->y,(ny+1)*sizeof(float));
+  NewMemory((void **)&terri->zcell,nx*ny*sizeof(float));
+  NewMemory((void **)&terri->state,nx*ny);
+  NewMemory((void **)&terri->znode,(nx+1)*(ny+1)*sizeof(float));
+  NewMemory((void **)&terri->znormal,3*(nx+1)*(ny+1)*sizeof(float));
+
+  x = terri->x;
+  y = terri->y;
+  dx = (xmax-xmin)/nx;
+  dy = (ymax-ymin)/ny;
+  for(i=0;i<nx;i++){
+    x[i] = xmin + dx*i;
+  }
+  x[nx] = xmax;
+
+  for(i=0;i<ny;i++){
+    y[i] = ymin + dy*i;
+  }
+  y[ny] = ymax;
+
+#define ijcell2(i,j) nxcell*(j) + (i)
+  z=terri->zcell;
+  if(stream==NULL){
+    int *iblank_cell;
+    int ijkcell;
+    int ij;
+
+    iblank_cell = meshi->iblank_cell;
+    ibar = nx;
+    jbar = ny;
+    nxcell = nx;
+    nz = meshi->kbar;
+    for(j=0;j<ny;j++){
+      for(i=0;i<nx;i++){
+        ij = ijcell2(i,j);
+        z[ij]=meshi->zplt_orig[0];
+        for(k=nz-1;k>=0;k--){
+          ijkcell = IJKCELL(i,j,k);
+          if(iblank_cell==NULL||iblank_cell[ijkcell]==0){
+            z[ij]=meshi->zplt_orig[k];
+            break;
+          }
+        }
+      }
+    }
+  }
+  else{
+    for(i=0;i<nx*ny;i++){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f",z);
+      z++;
+    }
+  }
+  znode = terri->znode;
   zcell = terri->zcell;
-  dx = terri->xmax - terri->xmin;
-  dy = terri->ymax - terri->ymin;
-  pi=4.0*atan(1.0);
-  for(j=0;j<terri->ny;j++){
-    yy = pi*((terri->y[j]-terri->ymin)/dy - 0.5);
-    for(i=0;i<terri->nx;i++){
-      xx = pi*((terri->x[i]-terri->xmin)/dx - 0.5);
-      *zcell++ = sin(xx*xx+yy*yy);
+  nxcell = terri->nx;
+  for(j=0;j<=terri->ny;j++){
+    int jm1, im1, ii, jj;
+    float zz;
+
+    jm1 = j - 1;
+    if(jm1<0)jm1=0;
+    jj = j;
+    if(jj==terri->ny)jj--;
+
+    for(i=0;i<=terri->nx;i++){
+      im1 = i - 1;
+      if(im1<0)im1 = 0;
+      ii = i;
+      if(ii==terri->nx)ii--;
+
+      zz =  zcell[ijcell2(im1,jm1)];
+      zz += zcell[ijcell2(im1,jj)];
+      zz += zcell[ijcell2(ii,jm1)];
+      zz += zcell[ijcell2(ii,jj)];
+      zz *= 0.25;
+      *znode++=zz;
+    }
+  }
+#define ijnode2(i,j) ((nxcell+1)*(j) + (i))
+  znormal = terri->znormal;  ;
+  znode = terri->znode;
+  for(j=0;j<=terri->ny;j++){
+    int jp1, ip1;
+    float dzdx, dzdy;
+    float sum;
+
+    jp1 = j + 1;
+    if(jp1>terri->ny)jp1=terri->ny;
+
+    for(i=0;i<=terri->nx;i++){
+      ip1 = i + 1;
+      if(ip1>terri->nx)ip1=terri->nx;
+      dzdx = (znode[ijnode2(ip1,j)] - znode[ijnode2(i,j)])/dx;
+      dzdy = (znode[ijnode2(i,jp1)] - znode[ijnode2(i,j)])/dy;
+
+     //     i  j  k
+     //     1  0 dzdx
+     //     0  1 dzdy
+
+     //     -dzdx -dzdy 1
+
+          
+      znormal = terri->znormal + 3*ijnode2(i,j);
+      znormal[0] = -dzdx;
+      znormal[1] = -dzdy;
+      znormal[2] = 1.0;
+
+      sum  = znormal[0]*znormal[0];
+      sum += znormal[1]*znormal[1];
+      sum += znormal[2]*znormal[2];
+      sum = sqrt(sum);
+      znormal[0]/=sum;
+      znormal[1]/=sum;
+      znormal[2]/=sum;
     }
   }
 }
@@ -201,6 +342,12 @@ void drawterrain(terraindata *terri, int only_geom){
   int i, j;
   float *x, *y;
   terraincell *ti;
+  float terrain_color[4];
+
+  terrain_color[0]=0.47843;
+  terrain_color[1]=0.45882;
+  terrain_color[2]=0.18824; 
+  terrain_color[3]=1.0;
 
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
@@ -209,7 +356,8 @@ void drawterrain(terraindata *terri, int only_geom){
   glColor4f(1.0,0.0,0.0,1.0);
   glEnable(GL_LIGHTING);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
-  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+//  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,terrain_color);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
   glEnable(GL_COLOR_MATERIAL);
 
@@ -220,7 +368,8 @@ void drawterrain(terraindata *terri, int only_geom){
   x = terri->x;
   y = terri->y;
   ti = terri->tcell;
-  glColor4fv(block_ambient2);
+//  glColor4fv(block_ambient2);
+  glColor4fv(terrain_color);
   for(j=0;j<terri->ny;j++){
     int jp1;
 
