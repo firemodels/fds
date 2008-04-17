@@ -69,9 +69,11 @@ CALL READ_DATA
 
 ! Allocate inverse of coarse A matrix and save array for PRESSURE_CORRECTION
 
-ALLOCATE(AINV(NCGC,NCGC))
-CALL ChkMemErr('MAIN','AINV',IZERO)
-AINV = 0._EB
+IF (PRESSURE_CORRECTION) THEN
+   ALLOCATE(AINV(NCGC,NCGC))
+   CALL ChkMemErr('MAIN','AINV',IZERO)
+   AINV = 0._EB
+ENDIF
  
 ! Open and write to Smokeview file 
  
