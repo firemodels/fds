@@ -103,8 +103,11 @@ ENDIF
 
 ! Allocate save array for PRESSURE_CORRECTION
 
-ALLOCATE(AINV(NCGC,NCGC))
-AINV = 0._EB
+IF (PRESSURE_CORRECTION) THEN
+   ALLOCATE(AINV(NCGC,NCGC))
+   CALL ChkMemErr('MAIN','AINV',IZERO)
+   AINV = 0._EB
+ENDIF
 
 ! Set up send and receive buffer counts and displacements
 
