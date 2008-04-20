@@ -277,7 +277,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                   ELSE
                      DELTA2 = DX(I)*DZ(K)
                   ENDIF
-                  MIX_TIME(I,J,K) = SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
+                  MIX_TIME(I,J,K) = MIX_TIME_FACTOR*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
                ENDIF
                Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K)))
                DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
@@ -304,7 +304,7 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and d
                   ELSE
                      DELTA2 = DX(I)*DZ(K)
                   ENDIF
-                  MIX_TIME(I,J,K) = SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
+                  MIX_TIME(I,J,K) = MIX_TIME_FACTOR*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
                ENDIF
                Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K)))
                DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
@@ -552,7 +552,7 @@ ELSE PRODUCE_CO  ! Combustion with suppression and CO production
                ELSE
                   DELTA2 = DX(I)*DZ(K)
                ENDIF
-               MIX_TIME(I,J,K) = SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
+               MIX_TIME(I,J,K) = MIX_TIME_FACTOR*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
             ENDIF
             Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K)))
             DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
