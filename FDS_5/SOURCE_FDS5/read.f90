@@ -5676,6 +5676,13 @@ IF (SEALED .AND. N_ZONE==0) THEN
    READ_ZONE_LINES = .FALSE.
 ENDIF
 
+! Make sure that there are no leak paths to undefined pressure ZONEs
+
+DO N=0,N_SURF
+   SF => SURFACE(N)
+   IF (SF%LEAK_PATH(1)>N_ZONE .OR. SF%LEAK_PATH(2)>N_ZONE) SF%LEAK_PATH = -1
+ENDDO
+
 ! If there are no ZONE lines, return
 
 IF (N_ZONE==0) RETURN
