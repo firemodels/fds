@@ -1541,22 +1541,30 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
    REACTION%Y_N2_INLET      = 1._EB-Y_F_INLET   
    REACTION%MODE            = MIXTURE_FRACTION_REACTION
    REACTION%NAME            = ID
-   ALLOCATE(Z2Y_C(9))
+   ALLOCATE(Z2Y_C(9),STAT=IZERO)
+   CALL ChkMemErr('READ','Z2Y_C',IZERO)    
+   Z2Y_C = 0._EB
    Z2Y_C(N2_INDEX) = REACTION(1)%Y_N2_INFTY   
    Z2Y_C(O2_INDEX) = REACTION(1)%Y_O2_INFTY
-   ALLOCATE(Z2MW_C(9))
+   ALLOCATE(Z2MW_C(9),STAT=IZERO)
+   CALL ChkMemErr('READ','Z2MW_C',IZERO)    
+   Z2MW_C = 0._EB   
    Z2MW_C(N2_INDEX) = REACTION(1)%Y_N2_INFTY/MW_N2   
    Z2MW_C(O2_INDEX) = REACTION(1)%Y_O2_INFTY/MW_O2
    MW_AVG_C = REACTION(1)%Y_O2_INFTY/MW_O2 + REACTION(1)%Y_N2_INFTY/MW_N2
 
    SET_THREE_PARAMETER: IF (CO_PRODUCTION) THEN !Set reaction variables for three parameter mixture fraction 
-      ALLOCATE(Z2Y(9,3))
+      ALLOCATE(Z2Y(9,3),STAT=IZERO)
+      CALL ChkMemErr('READ','Z2Y',IZERO) 
       Z2Y = 0._EB
-      ALLOCATE(Z2MW(9,3))
+      ALLOCATE(Z2MW(9,3),STAT=IZERO)
+      CALL ChkMemErr('READ','Z2MW',IZERO) 
       Z2MW = 0._EB
-      ALLOCATE(MW_AVG_Z(3))
+      ALLOCATE(MW_AVG_Z(3),STAT=IZERO)
+      CALL ChkMemErr('READ','MW_AVG',IZERO) 
       MW_AVG_Z = 0._EB      
-      ALLOCATE(Y_MF_SUM_Z(3))
+      ALLOCATE(Y_MF_SUM_Z(3),STAT=IZERO)
+      CALL ChkMemErr('READ','Y_MF_SUM_Z',IZERO) 
       Y_MF_SUM_Z = 0._EB
       !Set reaction variables for complete reaction
       RN => REACTION(2) 
@@ -1682,13 +1690,17 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
                     Z2Y(H2_INDEX,3)   / MW_H2      + Z2Y(H2O_INDEX,3) / MW_H2O + Z2Y(OTHER_INDEX,3) / MW_OTHER
 
    ELSE SET_THREE_PARAMETER !Set reaction variables for two parameter mixture fraction 
-      ALLOCATE(Z2Y(9,2))
+      ALLOCATE(Z2Y(9,2),STAT=IZERO)
+      CALL ChkMemErr('READ','Z2Y',IZERO) 
       Z2Y = 0._EB
-      ALLOCATE(Z2MW(9,2))
+      ALLOCATE(Z2MW(9,2),STAT=IZERO)
+      CALL ChkMemErr('READ','Z2MW',IZERO) 
       Z2MW = 0._EB
-      ALLOCATE(MW_AVG_Z(2))
+      ALLOCATE(MW_AVG_Z(2),STAT=IZERO)
+      CALL ChkMemErr('READ','MW_AVG_Z',IZERO) 
       MW_AVG_Z = 0._EB
-      ALLOCATE(Y_MF_SUM_Z(2))
+      ALLOCATE(Y_MF_SUM_Z(2),STAT=IZERO)
+      CALL ChkMemErr('READ','Y_MF_SUM_Z',IZERO) 
       Y_MF_SUM_Z = 0._EB
       !Set reaction variables for complete reaction
       RN => REACTION(1) 
