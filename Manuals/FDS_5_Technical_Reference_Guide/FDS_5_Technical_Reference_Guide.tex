@@ -4513,7 +4513,7 @@ where $\nabla_{m,n}$ is the coarse-grid gradient operator (discussed below) and 
 \label{eqn_sumovermeshes}
 \sum_{n\in m} S_{m,n} \mathbf{U}^{k+1}_{m,n} \cdot \mathbf{n}_{m} = \sum_{n\in m} S_{m,n} \bar{\mathbf{U}}^+_{m,n} \cdot \mathbf{n}_{m} - \delta t \sum_{n\in m} S_{m,n} \nabla_{m,n}\bar{\cH} \cdot \mathbf{n}_{m} \,\mbox{.}
 \end{equation}
-For a given mesh $m$, the left-hand-side of (\ref{eqn_sumovermeshes}) may be determined by integrating $\mathbf{u}^+_{m}$ around the boundary $\partial \Omega_{m}$ of domain $\Omega_m$.  Using Gauss' theorem and Eqs. (\ref{eqn_mom1}) and (\ref{eqn_laplace}), the following are equivalent,
+For a given mesh $m$, the left-hand-side of (\ref{eqn_sumovermeshes}) may be determined by integrating $\mathbf{u}^+_{m}$ around the boundary $\partial \Omega_{m}$ of domain $\Omega_m$.  Using Gauss' theorem and Eqs. (\ref{eqn_simple update}) and (\ref{eqn_laplace}), the following are equivalent,
 \begin{equation}
 \label{eqn_boundaryintegral}
 \sum_{n\in m} S_{m,n} \mathbf{U}^{k+1}_{m,n} \cdot \mathbf{n}_{m} = \int_{\partial \Omega_{m}}\mathbf{u}^+_{m} \cdot \mathbf{n}_m \,\mbox{d}S  = \int_{\partial \Omega_{m}}\mathbf{u}^{k+1}_{m} \cdot \mathbf{n}_m \,\mbox{d}S = \int_{\Omega_{m}} \nabla\cdot\mathbf{u}^{k+1}_{m} \,\mbox{d}V \,\mbox{.}
@@ -4550,7 +4550,7 @@ b(m) = \frac{1}{2 \delta t} \int_{\partial \Omega_{m}} \left[ \mathbf{u}^+_m - \
 
 At an inlet boundary the coarse pressure gradient is set to zero, i.e. $\bar{\cH}_n = \bar{\cH}_m$, and the diagonal and off-diagonal elements of the $\mathbf{A}$ matrix are modified accordingly.  At an open boundary, at present we simply set $\bar{\cH}_n = 0$ and $L_{n,m} = 0$, which is not entirely consistent with the fine-scale open boundary condition, but seems to be robust and has the added benefit that no modification of the source vector $\mathbf{b}$ is required.
 
-At the present time, the coarse linear system is inverted directly using LU decomposition for simplicity.  This is permissible because we typically only employ order 10 meshes.  Eventually, we will want to implement the Conjugate Gradient method.
+At the present time, the coarse linear system is inverted directly using LU decomposition for simplicity.  The $\mathbf{A}$ matrix is computed for the initial time step and for any subsequent changes in geometry during the simulation.  We then perform the LU decomposition and store the inverse of $\mathbf{A}$.  In subsequent calls to the pressure correction routine, the coarse grid linear solve is obtained from a simple matrix-vector multiply which is $\mathcal{O}(M^2)$ operations.
 
 With the coarse-grid pressure $\bar{\cH}$ now determined, we can perform the projection (\ref{eqn_coarseprojection}) and hence compute the Neumann condition for the Laplace equation for $\cH''$ via (\ref{eqn_gradH2}).  With a similar procedure used in the corrector step, the resulting velocity fields from the predictor (\ref{eqn_RK1}) and corrector (\ref{eqn_RK2}) steps obey the local divergence constraints and conserve volume from mesh to mesh.
 
