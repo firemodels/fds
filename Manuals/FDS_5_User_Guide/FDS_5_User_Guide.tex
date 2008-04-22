@@ -1,5 +1,5 @@
 \documentclass[11pt]{book}
-\usepackage{times,mathptmx}
+\usepackage{times,mathptm}
 \usepackage[pdftex]{graphicx}
 \usepackage[pdftex,
         colorlinks=true,
@@ -2108,7 +2108,9 @@ scheme is working properly. If error messages appear on the screen or in the sta
 \index{baroclinic torque}
 
 There is an approximation made when solving for the pressure where it is assumed that
-\be \nabla \cdot \frac{1}{\rho} \nabla \tp = \frac{1}{\rho_\infty} \nabla^2 \tp \label{Happrox} \ee
+\be
+ \nabla \cdot \frac{1}{\rho} \nabla \tp = \frac{1}{\rho_\infty} \nabla^2 \tp \,\mbox{.}\label{Happrox}
+\ee
 The consequence of this approximation is that the vorticity generated
 due to the non-alignment of the density and pressure gradients, or the
 baroclinic torque, is neglected. For most large scale applications,
@@ -2118,13 +2120,12 @@ By neglecting the baroclinic torque the
 solution of the elliptic partial differential equation obtained by
 taking the divergence of the momentum equation is greatly simplified.
 However, an option exists in the code to restore the baroclinic torque by
-decomposing the relevant term in the pressure equation
-\be \nabla \cdot \frac{1}{\rho^n} \nabla \tp^n = \nabla \cdot \frac{1}{\overline{\rho}^n} \nabla \tp^n +
-   \nabla \cdot \left( \frac{1}{\rho^n} - \frac{1}{\overline{\rho}^n} \right) \nabla \tp^{n-1}   \ee
-and evaluating the second term on the right hand side with values of
-pressure from the
-previous time step. The expression $\overline{\rho}$ is an average density,
-equal to $2 \rho_{\min} \rho_{\max} / (\rho_{\min} + \rho_{\max})$.
+decomposing the relevant term in the pressure equation as follows,
+\be
+   \label{eqn_baroclinic_torque}
+   \nabla \cdot \frac{1}{\rho^{n+1}} \nabla \tp^{n+1} \approx \nabla \cdot \frac{1}{\overline{\rho}^{n+1}} \nabla \tp^{n+1} +    \nabla \cdot \left( \frac{1}{\rho^{n+1}} - \frac{1}{\overline{\rho}^{n+1}} \right) \nabla \tp^{n} \,\mbox{.}
+\ee
+The first term on the right hand side of (\ref{eqn_baroclinic_torque}) is absorbed in $\nabla^2 {\cal H}$.  In the second term, which becomes part of $\nabla\cdot \mathbf{F}$, we must use the most recent value of the pressure $\tp^n$. The expression $\overline{\rho}$ is an average density, equal to $2 \rho_{\min} \rho_{\max} / (\rho_{\min} + \rho_{\max})$.
 To make this correction, simply include the statement {\ct BAROCLINIC=.TRUE.}
 on the {\ct MISC} line. In a DNS calculation ({\ct DNS=.TRUE.}), the
 correction is made by default. However, for an LES calculation (the default mode in FDS),
