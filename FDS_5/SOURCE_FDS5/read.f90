@@ -1224,9 +1224,11 @@ ENDDO PLOOP
 IF (TWO_D .OR. SOLID_PHASE_ONLY)                           SMOKE3D = .FALSE.
 IF (.NOT. MIXTURE_FRACTION .AND. SMOKE3D_QUANTITY=='null') SMOKE3D = .FALSE.
 IF (      MIXTURE_FRACTION .AND. SMOKE3D_QUANTITY=='null') SMOKE3D_QUANTITY = 'soot mass fraction'
-IF (SMOKE3D) CALL GET_QUANTITY_INDEX(SMOKE3D_QUANTITY_INDEX,'SMOKE3D',SMOKE3D_QUANTITY)
-SMOKE3D_SPECIES_INDEX = 0
-IF (SMOKE3D_QUANTITY_INDEX>50 .AND. SMOKE3D_QUANTITY_INDEX<=60) SMOKE3D_SPECIES_INDEX = SMOKE3D_QUANTITY_INDEX - 50
+IF (SMOKE3D) THEN
+   CALL GET_QUANTITY_INDEX(SMOKE3D_QUANTITY_INDEX,'SMOKE3D',SMOKE3D_QUANTITY)
+   SMOKE3D_SPECIES_INDEX = 0
+   IF (SMOKE3D_QUANTITY_INDEX>50 .AND. SMOKE3D_QUANTITY_INDEX<=60) SMOKE3D_SPECIES_INDEX = SMOKE3D_QUANTITY_INDEX - 50
+ENDIF
 
 END SUBROUTINE READ_DUMP
 
@@ -1500,7 +1502,6 @@ ALLOCATE(REACTION(N_REACTIONS),STAT=IZERO)
 CALL ChkMemErr('READ','REACTION',IZERO)
 
 ! Read the input file looking for REAC lines
- 
 REWIND(LU_INPUT)
 READ_REACTION_LOOP: DO NN=1,N_REAC_READ
    RN => REACTION(NN)
@@ -1811,14 +1812,12 @@ SUBROUTINE SET_REAC_DEFAULTS
 BOF                         = 0._EB       ! cm**3/mol-s
 CO_YIELD                    = 0._EB
 CRITICAL_FLAME_TEMPERATURE  = 1427._EB    ! C
-DIMENSION_SHEET             = 2._EB       ! Fractal dimension of the flame sheet
 E                           = 0._EB       ! kJ/kmol
 EPUMO2                      = 13100._EB   ! kJ/kg
 FUEL                        = 'null'
 FYI                         = 'null'
 H2_YIELD                    = 0._EB
 HEAT_OF_COMBUSTION          = -1._EB
-HRRPUA_SHEET                = 200._EB     ! Heat Release Rate per Unit Area of flame sheet (kW/m2)
 ID                          = 'null'
 Y_F_INLET                   = 1._EB
 N_S                         = -999._EB
@@ -2470,7 +2469,6 @@ READ_PART_LOOP: DO N=1,N_PART
    WATER                    = .FALSE.
    STATIC                   = .FALSE.
    MASSLESS                 = .FALSE.
-   TREE                     = .FALSE.
    VERTICAL_VELOCITY        = 0.5_EB
    HORIZONTAL_VELOCITY      = 0.2_EB
 !rm ->
