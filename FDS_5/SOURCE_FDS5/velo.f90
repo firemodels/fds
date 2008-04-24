@@ -207,6 +207,7 @@ ENDDO
 ! Correct vorticity and stress tensor components at solid edges
 
 EDGE_LOOP: DO IE=1,N_EDGES
+   IF (EDGE_TYPE(IE)==NULL_EDGE) CYCLE EDGE_LOOP
    II  = IJKE(1,IE)
    JJ  = IJKE(2,IE)
    KK  = IJKE(3,IE)
@@ -395,6 +396,7 @@ ENDDO
 ! Correct vorticity and stress tensor components at solid edges
  
 EDGE_LOOP: DO IE=1,N_EDGES
+   IF (EDGE_TYPE(IE)==NULL_EDGE) CYCLE EDGE_LOOP
    II  = IJKE(1,IE)
    JJ  = IJKE(2,IE)
    KK  = IJKE(3,IE)
@@ -609,6 +611,7 @@ ENDDO
 ! Correct vorticity and stress tensor components at solid edges
  
 EDGE_LOOP: DO IE=1,N_EDGES
+   IF (EDGE_TYPE(IE)==NULL_EDGE) CYCLE EDGE_LOOP
    II  = IJKE(1,IE)
    JJ  = IJKE(2,IE)
    KK  = IJKE(3,IE)
@@ -965,6 +968,8 @@ ENDIF
 
 EDGE_LOOP: DO IE=1,N_EDGES
 
+   IF (EDGE_TYPE(IE)==NULL_EDGE) CYCLE EDGE_LOOP
+
    II   = IJKE( 1,IE)
    JJ   = IJKE( 2,IE)
    KK   = IJKE( 3,IE)
@@ -1005,61 +1010,64 @@ EDGE_LOOP: DO IE=1,N_EDGES
          WP   = WW(II,JJ+1,KK)
          WM   = WW(II,JJ,KK)
 
-         IF (NOM1==NM) THEN
-            IWM = WALL_INDEX(ICMM, 3) 
-            IWP = WALL_INDEX(ICPM, 3) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) VP = BC*VM
-               IF (BC>1.5_EB) VP = FVT*SF%VEL_T(2)*PROF
-            ENDIF
-         ENDIF
-         IF (NOM1==-NM) THEN
-            IWM = WALL_INDEX(ICMP,-3) 
-            IWP = WALL_INDEX(ICPP,-3) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) VM = BC*VP
-               IF (BC>1.5_EB) VM = FVT*SF%VEL_T(2)*PROF
-            ENDIF
-         ENDIF
+         IF (EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
 
-         IF (NOM2==NM) THEN
-            IWM = WALL_INDEX(ICMM, 2) 
-            IWP = WALL_INDEX(ICMP, 2) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) WP = BC*WM
-               IF (BC>1.5_EB) WP = FVT*SF%VEL_T(2)
-            ENDIF
-         ENDIF
-         IF (NOM2==-NM) THEN
-            IWM = WALL_INDEX(ICPM,-2) 
-            IWP = WALL_INDEX(ICPP,-2) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) WM = BC*WP
-               IF (BC>1.5_EB) WM = FVT*SF%VEL_T(2)
-            ENDIF
-         ENDIF
+            SELECT CASE(IOR)
+               CASE(-3)
+                  IWM = WALL_INDEX(ICMM, 3) 
+                  IWP = WALL_INDEX(ICPM, 3) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) VP = BC*VM
+                     IF (BC>1.5_EB) VP = FVT*SF%VEL_T(2)*PROF
+                  ENDIF
+               CASE( 3)
+                  IWM = WALL_INDEX(ICMP,-3) 
+                  IWP = WALL_INDEX(ICPP,-3) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) VM = BC*VP
+                     IF (BC>1.5_EB) VM = FVT*SF%VEL_T(2)*PROF
+                  ENDIF
+               CASE(-2)
+                  IWM = WALL_INDEX(ICMM, 2) 
+                  IWP = WALL_INDEX(ICMP, 2) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) WP = BC*WM
+                     IF (BC>1.5_EB) WP = FVT*SF%VEL_T(2)
+                  ENDIF
+               CASE( 2)
+                  IWM = WALL_INDEX(ICPM,-2) 
+                  IWP = WALL_INDEX(ICPP,-2) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) WM = BC*WP
+                     IF (BC>1.5_EB) WM = FVT*SF%VEL_T(2)
+                  ENDIF
+            END SELECT
+        
+         ELSE
 
-         IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
-            OM => OMESH(ABS(NOM1)) 
-            IF (PREDICTOR) THEN
-               OM_VV => OM%VS
-            ELSE
-               OM_VV => OM%V
+            IF (NOM1/=0) THEN
+               OM => OMESH(ABS(NOM1)) 
+               IF (PREDICTOR) THEN
+                  OM_VV => OM%VS
+               ELSE
+                  OM_VV => OM%V
+               ENDIF
+               WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
+               IF (NOM1<0) VM = WGT*OM_VV(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_VV(IIO1,JJO1-1,KKO1) 
+               IF (NOM1>0) VP = WGT*OM_VV(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_VV(IIO1,JJO1-1,KKO1) 
             ENDIF
-            WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
-            IF (NOM1<0) VM = WGT*OM_VV(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_VV(IIO1,JJO1-1,KKO1) 
-            IF (NOM1>0) VP = WGT*OM_VV(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_VV(IIO1,JJO1-1,KKO1) 
-         ENDIF
-         IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
-            OM => OMESH(ABS(NOM2)) 
-            IF (PREDICTOR) THEN
-               OM_WW => OM%WS
-            ELSE
-               OM_WW => OM%W
+            IF (NOM2/=0) THEN
+               OM => OMESH(ABS(NOM2)) 
+               IF (PREDICTOR) THEN
+                  OM_WW => OM%WS
+               ELSE
+                  OM_WW => OM%W
+               ENDIF
+               WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
+               IF (NOM2<0) WM = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1)
+               IF (NOM2>0) WP = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
             ENDIF
-            WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
-            IF (NOM2<0) WM = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1)
-            IF (NOM2>0) WP = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
+
          ENDIF
 
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
@@ -1087,61 +1095,64 @@ EDGE_LOOP: DO IE=1,N_EDGES
          WP   = WW(II+1,JJ,KK)
          WM   = WW(II,JJ,KK)
 
-         IF (NOM1==NM) THEN
-            IWM = WALL_INDEX(ICMM, 3) 
-            IWP = WALL_INDEX(ICPM, 3) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) UP = BC*UM
-               IF (BC>1.5_EB) UP = FVT*SF%VEL_T(1)*PROF
-            ENDIF
-         ENDIF
-         IF (NOM1==-NM) THEN
-            IWM = WALL_INDEX(ICMP,-3) 
-            IWP = WALL_INDEX(ICPP,-3) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) UM = BC*UP
-               IF (BC>1.5_EB) UM = FVT*SF%VEL_T(1)*PROF
-            ENDIF
-         ENDIF
+         IF (EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
 
-         IF (NOM2==NM) THEN
-            IWM = WALL_INDEX(ICMM, 1) 
-            IWP = WALL_INDEX(ICMP, 1) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) WP = BC*WM
-               IF (BC>1.5_EB) WP = FVT*SF%VEL_T(2)
-            ENDIF
-         ENDIF
-         IF (NOM2==-NM) THEN
-            IWM = WALL_INDEX(ICPM,-1) 
-            IWP = WALL_INDEX(ICPP,-1) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) WM = BC*WP
-               IF (BC>1.5_EB) WM = FVT*SF%VEL_T(2)
-            ENDIF
-         ENDIF
+            SELECT CASE(IOR)
+               CASE(-3)
+                  IWM = WALL_INDEX(ICMM, 3) 
+                  IWP = WALL_INDEX(ICPM, 3) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) UP = BC*UM
+                     IF (BC>1.5_EB) UP = FVT*SF%VEL_T(1)*PROF
+                  ENDIF
+               CASE( 3)
+                  IWM = WALL_INDEX(ICMP,-3) 
+                  IWP = WALL_INDEX(ICPP,-3) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) UM = BC*UP
+                     IF (BC>1.5_EB) UM = FVT*SF%VEL_T(1)*PROF
+                  ENDIF
+               CASE(-1)
+                  IWM = WALL_INDEX(ICMM, 1) 
+                  IWP = WALL_INDEX(ICMP, 1) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) WP = BC*WM
+                     IF (BC>1.5_EB) WP = FVT*SF%VEL_T(2)
+                  ENDIF
+               CASE( 1)
+                  IWM = WALL_INDEX(ICPM,-1) 
+                  IWP = WALL_INDEX(ICPP,-1) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) WM = BC*WP
+                     IF (BC>1.5_EB) WM = FVT*SF%VEL_T(2)
+                  ENDIF
+            END SELECT
+         
+         ELSE
 
-         IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
-            OM => OMESH(ABS(NOM1)) 
-            IF (PREDICTOR) THEN
-               OM_UU => OM%US
-            ELSE
-               OM_UU => OM%U
+            IF (NOM1/=0) THEN
+               OM => OMESH(ABS(NOM1)) 
+               IF (PREDICTOR) THEN
+                  OM_UU => OM%US
+               ELSE
+                  OM_UU => OM%U
+               ENDIF
+               WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
+               IF (NOM1<0) UM = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+               IF (NOM1>0) UP = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
             ENDIF
-            WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
-            IF (NOM1<0) UM = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
-            IF (NOM1>0) UP = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
-         ENDIF
-         IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
-            OM => OMESH(ABS(NOM2)) 
-            IF (PREDICTOR) THEN
-               OM_WW => OM%WS
-            ELSE
-               OM_WW => OM%W
+            IF (NOM2/=0) THEN
+               OM => OMESH(ABS(NOM2)) 
+               IF (PREDICTOR) THEN
+                  OM_WW => OM%WS
+               ELSE
+                  OM_WW => OM%W
+               ENDIF
+               WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
+               IF (NOM2<0) WM = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
+               IF (NOM2>0) WP = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
             ENDIF
-            WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
-            IF (NOM2<0) WM = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
-            IF (NOM2>0) WP = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
+
          ENDIF
 
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
@@ -1169,63 +1180,66 @@ EDGE_LOOP: DO IE=1,N_EDGES
          VP   = VV(II+1,JJ,KK)
          VM   = VV(II,JJ,KK)
 
-         IF (NOM1==NM) THEN
-            IWM = WALL_INDEX(ICMM, 2) 
-            IWP = WALL_INDEX(ICPM, 2) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) UP = BC*UM
-               IF (BC>1.5_EB) UP = FVT*SF%VEL_T(1)*PROF
-            ENDIF
-         ENDIF
-         IF (NOM1==-NM) THEN
-            IWM = WALL_INDEX(ICMP,-2) 
-            IWP = WALL_INDEX(ICPP,-2) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) UM = BC*UP
-               IF (BC>1.5_EB) UM = FVT*SF%VEL_T(1)*PROF
-            ENDIF
-         ENDIF
+         IF (EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
 
-         IF (NOM2==NM) THEN
-            IWM = WALL_INDEX(ICMM, 1) 
-            IWP = WALL_INDEX(ICMP, 1) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) VP = BC*VM
-               IF (BC>1.5_EB) VP = FVT*SF%VEL_T(1)*PROF
-            ENDIF
-         ENDIF
-         IF (NOM2==-NM) THEN
-            IWM = WALL_INDEX(ICPM,-1) 
-            IWP = WALL_INDEX(ICPP,-1) 
-            IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-               IF (BC<1.5_EB) VM = BC*VP
-               IF (BC>1.5_EB) VM = FVT*SF%VEL_T(1)*PROF
-            ENDIF
-         ENDIF
+            SELECT CASE(IOR)
+               CASE(-2)
+                  IWM = WALL_INDEX(ICMM, 2) 
+                  IWP = WALL_INDEX(ICPM, 2) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) UP = BC*UM
+                     IF (BC>1.5_EB) UP = FVT*SF%VEL_T(1)*PROF
+                  ENDIF
+               CASE( 2)
+                  IWM = WALL_INDEX(ICMP,-2) 
+                  IWP = WALL_INDEX(ICPP,-2) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) UM = BC*UP
+                     IF (BC>1.5_EB) UM = FVT*SF%VEL_T(1)*PROF
+                  ENDIF
+               CASE( -1)
+                  IWM = WALL_INDEX(ICMM, 1) 
+                  IWP = WALL_INDEX(ICMP, 1) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) VP = BC*VM
+                     IF (BC>1.5_EB) VP = FVT*SF%VEL_T(1)*PROF
+                  ENDIF
+               CASE( 1)
+                  IWM = WALL_INDEX(ICPM,-1) 
+                  IWP = WALL_INDEX(ICPP,-1) 
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                     IF (BC<1.5_EB) VM = BC*VP
+                     IF (BC>1.5_EB) VM = FVT*SF%VEL_T(1)*PROF
+                  ENDIF
+            END SELECT
 
-         IF (ABS(NOM1)/=NM .AND. NOM1/=0) THEN
-            OM => OMESH(ABS(NOM1)) 
-            IF (PREDICTOR) THEN
-               OM_UU => OM%US
-            ELSE
-               OM_UU => OM%U
-            ENDIF
-            WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
-            IF (NOM1<0) UM = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
-            IF (NOM1>0) UP = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
-         ENDIF
-         IF (ABS(NOM2)/=NM .AND. NOM2/=0) THEN
-            OM => OMESH(ABS(NOM2)) 
-            IF (PREDICTOR) THEN
-               OM_VV => OM%VS
-            ELSE
-               OM_VV => OM%V
-            ENDIF
-            WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
-            IF (NOM2<0) VM = WGT*OM_VV(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_VV(IIO2,JJO2-1,KKO2) 
-            IF (NOM2>0) VP = WGT*OM_VV(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_VV(IIO2,JJO2-1,KKO2) 
-         ENDIF
+         ELSE
 
+            IF (NOM1/=0) THEN
+               OM => OMESH(ABS(NOM1)) 
+               IF (PREDICTOR) THEN
+                  OM_UU => OM%US
+               ELSE
+                  OM_UU => OM%U
+               ENDIF
+               WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
+               IF (NOM1<0) UM = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+               IF (NOM1>0) UP = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+            ENDIF
+            IF (NOM2/=0) THEN
+               OM => OMESH(ABS(NOM2)) 
+               IF (PREDICTOR) THEN
+                  OM_VV => OM%VS
+               ELSE
+                  OM_VV => OM%V
+               ENDIF
+               WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
+               IF (NOM2<0) VM = WGT*OM_VV(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_VV(IIO2,JJO2-1,KKO2) 
+               IF (NOM2>0) VP = WGT*OM_VV(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_VV(IIO2,JJO2-1,KKO2) 
+            ENDIF
+
+         ENDIF
+   
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
          DVDX = RDXN(II)*(VP-VM)
          DUDY = RDYN(JJ)*(UP-UM)
@@ -1271,9 +1285,6 @@ IF (CORRECTOR) THEN
             IF (W_X(I,J+1,K)>-1.E5_EB) UVW_GHOST(IC,3) = W_X(I,J+1,K) 
             IF (W_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I,J,K) 
             IF (W_Y(I+1,J,K)>-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I+1,J,K) 
-       !!!  UVW_GHOST(IC,1) = 0.25_EB*(U_Y(I,J,K)+U_Y(I,J,K+1)+U_Z(I,J,K)+U_Z(I,J+1,K)) 
-       !!!  UVW_GHOST(IC,2) = 0.25_EB*(V_X(I,J,K)+V_X(I,J,K+1)+V_Z(I,J,K)+V_Z(I+1,J,K)) 
-       !!!  UVW_GHOST(IC,3) = 0.25_EB*(W_X(I,J,K)+W_X(I,J+1,K)+W_Y(I,J,K)+W_Y(I+1,J,K)) 
          ENDDO I_LOOP
       ENDDO
    ENDDO

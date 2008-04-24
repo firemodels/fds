@@ -832,9 +832,9 @@ M%OME_E = 0._EB
 ALLOCATE(M%TAU_E(N_EDGES_DIM),STAT=IZERO)
 CALL ChkMemErr('INIT','TAU_E',IZERO)  
 M%TAU_E = 0._EB
-ALLOCATE(M%ACTIVE_EDGE(N_EDGES_DIM),STAT=IZERO)
-CALL ChkMemErr('INIT','ACTIVE_EDGE',IZERO)  
-M%ACTIVE_EDGE = .TRUE.
+ALLOCATE(M%EDGE_TYPE(N_EDGES_DIM),STAT=IZERO)
+CALL ChkMemErr('INIT','EDGE_TYPE',IZERO)  
+M%EDGE_TYPE = SOLID_EDGE
 ALLOCATE(M%EDGE_INTERPOLATION_FACTOR(N_EDGES_DIM,2),STAT=IZERO)
 CALL ChkMemErr('INIT','EDGE_INTERPOLATION_FACTOR',IZERO)  
 M%EDGE_INTERPOLATION_FACTOR = 1._EB
@@ -1717,10 +1717,14 @@ M%WALL_INDEX(ICG,-IOR) = IW
 
 ! Use BOUNDARY_TYPE to indicate whether the boundary cell is blocked or on an obstruction that is HIDDEN
 
-M%BOUNDARY_TYPE(IW) = SOLID_BOUNDARY
-IF (M%SOLID(ICG)) M%BOUNDARY_TYPE(IW) = NULL_BOUNDARY
-IF (I_OBST > 0 .AND. M%OBSTRUCTION(I_OBST)%HIDDEN) M%BOUNDARY_TYPE(IW) = NULL_BOUNDARY
+IF (IW<=M%NEWC .AND. I_OBST==0) M%BOUNDARY_TYPE(IW) = SOLID_BOUNDARY
 
+IF (I_OBST>0) THEN
+   IF (IW>M%NEWC .AND.      M%OBSTRUCTION(I_OBST)%HIDDEN) M%BOUNDARY_TYPE(IW) = NULL_BOUNDARY
+   IF (                .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) M%BOUNDARY_TYPE(IW) = SOLID_BOUNDARY
+ENDIF
+
+IF (M%SOLID(ICG)) M%BOUNDARY_TYPE(IW) = NULL_BOUNDARY
 IF (SURFACE(IBC)%POROUS .AND. M%BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) M%BOUNDARY_TYPE(IW) = POROUS_BOUNDARY
 
 ! Assign the ZONE number to all boundary cells
@@ -2104,13 +2108,13 @@ OBST_LOOP: DO N=1,N_OBST
   IF (CREATE_OBST .AND. OB%HIDDEN) THEN
      OB%HIDDEN = .FALSE.
      SV_LABEL  = 'SHOW_OBST'
-     CALL CREATE_OR_REMOVE_OBST(NM,OB%I1+1,OB%I2,OB%J1+1,OB%J2,OB%K1+1,OB%K2,1,N,T)
+     CALL CREATE_OR_REMOVE_OBST(NM,OB%I1,OB%I2,OB%J1,OB%J2,OB%K1,OB%K2,1,N,T)
   ENDIF
 
    IF (REMOVE_OBST .AND. (.NOT. OB%HIDDEN)) THEN
       OB%HIDDEN = .TRUE.
       SV_LABEL  = 'HIDE_OBST'
-      CALL CREATE_OR_REMOVE_OBST(NM,OB%I1+1,OB%I2,OB%J1+1,OB%J2,OB%K1+1,OB%K2,0,N,T)
+      CALL CREATE_OR_REMOVE_OBST(NM,OB%I1,OB%I2,OB%J1,OB%J2,OB%K1,OB%K2,0,N,T)
    ENDIF
 
    ! Write a message to the Smokeview .smv file that the obstruction has been created or removed
@@ -2208,13 +2212,14 @@ ENDDO VENT_LOOP
  
 END SUBROUTINE OPEN_AND_CLOSE
  
+
  
 SUBROUTINE CREATE_OR_REMOVE_OBST(NM,I1,I2,J1,J2,K1,K2,CR_INDEX,OBST_INDEX,T)
 
-! Create or remove the obstruction whose CELLS (not nodes) are given by I1, I2, etc.
+! Create or remove the obstruction whose NODES (not cells) are given by I1, I2, etc.
 
 USE GEOMETRY_FUNCTIONS, ONLY : BLOCK_CELL
-INTEGER :: I1,I2,J1,J2,K1,K2,I,J,K,IE,IW,IC,ICG
+INTEGER :: I1,I2,J1,J2,K1,K2,I,J,K,IW,ICG,IC
 INTEGER, INTENT(IN) :: NM,CR_INDEX,OBST_INDEX
 REAL(EB) :: T
 LOGICAL :: CREATE,REMOVE
@@ -2228,220 +2233,164 @@ IF (CR_INDEX==1) CREATE = .TRUE.
  
 ! Blank or unblank cells that make up the OBSTruction
  
-CALL BLOCK_CELL(NM,I1,I2,J1,J2,K1,K2,CR_INDEX,OBST_INDEX)
+CALL BLOCK_CELL(NM,I1+1,I2,J1+1,J2,K1+1,K2,CR_INDEX,OBST_INDEX)
  
 ! Process the x boundaries of the OBSTruction
-DO K=K1,K2
-   DO J=J1,J2
 
-      ! Nullify and/or uncover wall cells on the x=x1 side of the OBSTruction
-
-      IF (I1>1 .AND. I1<IBP1) THEN
-         ICG = CELL_INDEX(I1-1,J,K)
-         IW  = WALL_INDEX(ICG,1)
-         IF (REMOVE) BOUNDARY_TYPE(IW) = NULL_BOUNDARY
-         IF (CREATE .AND. .NOT.SOLID(ICG)) THEN
-            CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-            IF (TW(IW)<T) TW(IW)=T
-         ENDIF
-         IF (CREATE .AND. SOLID(ICG)) BOUNDARY_TYPE(IW) = NULL_BOUNDARY
-      ENDIF
-      IC = CELL_INDEX(I1,J,K)
-      IW = WALL_INDEX(IC,-1)
-      IF (IW > 0 .AND. REMOVE) THEN
-         IF (IBC_ORIG(IW)>0) CALL RESTORE_ORIGINAL_BC(IW)
-         CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-      ENDIF
-
-      ! Nullify and/or uncover wall cells on the x=x2 side of the OBSTruction
-
-      IF (I2<IBAR .AND. I2>0) THEN
-         ICG = CELL_INDEX(I2+1,J,K)
-         IW  = WALL_INDEX(ICG,-1)
-         IF (REMOVE) BOUNDARY_TYPE(IW) = NULL_BOUNDARY
-         IF (CREATE .AND. .NOT.SOLID(ICG)) CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-         IF (CREATE .AND. .NOT.SOLID(ICG)) THEN
-            CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-            IF (TW(IW)<T) TW(IW)=T
-         ENDIF
-      ENDIF
-      IC = CELL_INDEX(I2,J,K)
-      IW = WALL_INDEX(IC,1)
-      IF (IW > 0 .AND. REMOVE) THEN
-         IF (IBC_ORIG(IW)>0) CALL RESTORE_ORIGINAL_BC(IW)
-         CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-      ENDIF
+DO K=K1+1,K2
+   DO J=J1+1,J2
+      IC  = CELL_INDEX(I1+1,J,K)
+      ICG = CELL_INDEX(I1  ,J,K)
+      IW  = WALL_INDEX(ICG,1)
+      IF (I1>0)    CALL GET_BOUNDARY_TYPE
+      IC  = CELL_INDEX(I1  ,J,K)
+      ICG = CELL_INDEX(I1+1,J,K)
+      IW  = WALL_INDEX(ICG,-1)
+      IF (I1<IBAR) CALL GET_BOUNDARY_TYPE
+      IC  = CELL_INDEX(I2  ,J,K)
+      ICG = CELL_INDEX(I2+1,J,K)
+      IW  = WALL_INDEX(ICG,-1)
+      IF (I2<IBAR) CALL GET_BOUNDARY_TYPE
+      IC  = CELL_INDEX(I2+1,J,K)
+      ICG = CELL_INDEX(I2  ,J,K)
+      IW  = WALL_INDEX(ICG, 1)
+      IF (I2>0)    CALL GET_BOUNDARY_TYPE
    ENDDO
 ENDDO
 
 ! Process the y boundaries of the OBSTruction
 
-DO K=K1,K2
-   DO I=I1,I2
-
-      ! Nullify and/or uncover wall cells on the y=y1 side of the OBSTruction
-
-      IF (J1>1 .AND. J1<JBP1) THEN
-         ICG = CELL_INDEX(I,J1-1,K)
-         IW  = WALL_INDEX(ICG,2)
-         IF (REMOVE) BOUNDARY_TYPE(IW) = NULL_BOUNDARY
-         IF (CREATE .AND. .NOT.SOLID(ICG)) CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-         IF (CREATE .AND. .NOT.SOLID(ICG)) THEN
-            CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-            IF (TW(IW)<T) TW(IW)=T
-         ENDIF
-      ENDIF
-      IC = CELL_INDEX(I,J1,K)
-      IW = WALL_INDEX(IC,-2)
-      IF (IW > 0 .AND. REMOVE) THEN 
-         IF (IBC_ORIG(IW)>0) CALL RESTORE_ORIGINAL_BC(IW)
-         CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-      ENDIF
-
-      ! Nullify and/or uncover wall cells on the y=y2 side of the OBSTruction
-
-      IF (J2<JBAR .AND. J2>0) THEN
-         ICG = CELL_INDEX(I,J2+1,K)
-         IW  = WALL_INDEX(ICG,-2)
-         IF (REMOVE) BOUNDARY_TYPE(IW) = NULL_BOUNDARY
-         IF (CREATE .AND. .NOT.SOLID(ICG)) CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-         IF (CREATE .AND. .NOT.SOLID(ICG)) THEN
-            CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-            IF (TW(IW)<T) TW(IW)=T
-         ENDIF
-      ENDIF
-      IC = CELL_INDEX(I,J2,K)
-      IW = WALL_INDEX(IC,2)
-      IF (IW > 0 .AND. REMOVE) THEN
-         IF (IBC_ORIG(IW)>0) CALL RESTORE_ORIGINAL_BC(IW)
-         CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-      ENDIF
+DO K=K1+1,K2
+   DO I=I1+1,I2
+      IC  = CELL_INDEX(I,J1+1,K)
+      ICG = CELL_INDEX(I,J1  ,K)
+      IW  = WALL_INDEX(ICG, 2)
+      IF (J1>0)    CALL GET_BOUNDARY_TYPE
+      IC  = CELL_INDEX(I,J1  ,K)
+      ICG = CELL_INDEX(I,J1+1,K)
+      IW  = WALL_INDEX(ICG,-2)
+      IF (J1<JBAR) CALL GET_BOUNDARY_TYPE
+      IC  = CELL_INDEX(I,J2  ,K)
+      ICG = CELL_INDEX(I,J2+1,K)
+      IW  = WALL_INDEX(ICG,-2)
+      IF (J2<JBAR) CALL GET_BOUNDARY_TYPE
+      IC  = CELL_INDEX(I,J2+1,K)
+      ICG = CELL_INDEX(I,J2  ,K)
+      IW  = WALL_INDEX(ICG, 2)
+      IF (J2>0)    CALL GET_BOUNDARY_TYPE
    ENDDO
 ENDDO
 
 ! Process the z boundaries of the OBSTruction
 
-DO J=J1,J2
-   DO I=I1,I2
-
-      ! Nullify and/or uncover wall cells on the z=z1 side of the OBSTruction
-
-      IF (K1>1 .AND. K1<KBP1) THEN
-         ICG = CELL_INDEX(I,J,K1-1)
-         IW  = WALL_INDEX(ICG,3)
-         IF (REMOVE) BOUNDARY_TYPE(IW) = NULL_BOUNDARY
-         IF (CREATE .AND. .NOT.SOLID(ICG)) CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-         IF (CREATE .AND. .NOT.SOLID(ICG)) THEN
-            CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-            IF (TW(IW)<T) TW(IW)=T
-         ENDIF
-      ENDIF
-      IC = CELL_INDEX(I,J,K1)
-      IW = WALL_INDEX(IC,-3)
-      IF (IW > 0 .AND. REMOVE) THEN
-         IF (IBC_ORIG(IW)>0) CALL RESTORE_ORIGINAL_BC(IW)
-         CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-      ENDIF
-
-      ! Nullify and/or uncover wall cells on the z=z2 side of the OBSTruction
-
-      IF (K2<KBAR .AND. K2>0) THEN
-         ICG = CELL_INDEX(I,J,K2+1)
-         IW  = WALL_INDEX(ICG,-3)
-         IF (REMOVE) BOUNDARY_TYPE(IW) = NULL_BOUNDARY
-         IF (CREATE .AND. .NOT.SOLID(ICG)) CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-         IF (CREATE .AND. .NOT.SOLID(ICG)) THEN
-            CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-            IF (TW(IW)<T) TW(IW)=T
-         ENDIF
-      ENDIF
-      IC = CELL_INDEX(I,J,K2)
-      IW = WALL_INDEX(IC,3)
-      IF (IW > 0 .AND. REMOVE) THEN
-         IF (IBC_ORIG(IW)>0) CALL RESTORE_ORIGINAL_BC(IW)
-         CALL GET_BOUNDARY_TYPE( IW , IJKW(5,IW) , BOUNDARY_TYPE(IW) )
-      ENDIF
+DO J=J1+1,J2
+   DO I=I1+1,I2
+      IC  = CELL_INDEX(I,J,K1+1)
+      ICG = CELL_INDEX(I,J,K1  )
+      IW  = WALL_INDEX(ICG, 3)
+      IF (K1>0)    CALL GET_BOUNDARY_TYPE
+      IC  = CELL_INDEX(I,J,K1  )
+      ICG = CELL_INDEX(I,J,K1+1)
+      IW  = WALL_INDEX(ICG,-3)
+      IF (K1<KBAR) CALL GET_BOUNDARY_TYPE
+      IC  = CELL_INDEX(I,J,K2  )
+      ICG = CELL_INDEX(I,J,K2+1)
+      IW  = WALL_INDEX(ICG,-3)
+      IF (K2<KBAR) CALL GET_BOUNDARY_TYPE
+      IC  = CELL_INDEX(I,J,K2+1)
+      ICG = CELL_INDEX(I,J,K2  )
+      IW  = WALL_INDEX(ICG, 3)
+      IF (K2>0)    CALL GET_BOUNDARY_TYPE
    ENDDO
 ENDDO
 
 
 ! Nullify block edges on blockage that is to be removed
  
-REMOVE_ONLY: IF (REMOVE) THEN
-
-DO K=K1-1,K2
-   DO J=J1-1,J2
-      DO I=I1  ,I2
-         IE = EDGE_INDEX(CELL_INDEX(I,J,K),4)
-         IF (IE>0 .AND. J/=0 .AND. J/=JBAR .AND. K/=0 .AND. K/=KBAR) IJKE(4,IE) = 0
-         IF (IE>0) THEN 
-            IF (IJKE(7,IE) > 0) IJKE(5,IE) = INTERPOLATED_SURF_INDEX
-         ENDIF
-      ENDDO
-   ENDDO
-ENDDO
-DO K=K1-1,K2
-   DO J=J1  ,J2
-      DO I=I1-1,I2
-         IE = EDGE_INDEX(CELL_INDEX(I,J,K),8)
-         IF (IE>0 .AND. I/=0 .AND. I/=IBAR .AND. K/=0 .AND. K/=KBAR) IJKE(4,IE) = 0
-         IF (IE>0) THEN 
-            IF (IJKE(7,IE) > 0) IJKE(5,IE) = INTERPOLATED_SURF_INDEX
-         ENDIF
-      ENDDO
-   ENDDO
-ENDDO
-DO K=K1  ,K2
-   DO J=J1-1,J2
-      DO I=I1-1,I2
-         IE = EDGE_INDEX(CELL_INDEX(I,J,K),12)
-         IF (IE>0 .AND. I/=0 .AND. I/=IBAR .AND. J/=0 .AND. J/=JBAR) IJKE(4,IE) = 0
-         IF (IE>0) THEN 
-            IF (IJKE(7,IE) > 0) IJKE(5,IE) = INTERPOLATED_SURF_INDEX
-         ENDIF
-      ENDDO
+DO K=K1,K2
+   DO J=J1,J2
+      IF (J>J1) CALL REDEFINE_EDGE(I1,J,K,2)
+      IF (J>J1) CALL REDEFINE_EDGE(I2,J,K,2)
+      IF (K>K1) CALL REDEFINE_EDGE(I1,J,K,3)
+      IF (K>K1) CALL REDEFINE_EDGE(I2,J,K,3)
    ENDDO
 ENDDO
 
-ENDIF REMOVE_ONLY
- 
- 
+DO K=K1,K2
+   DO I=I1,I2
+      IF (I>I1) CALL REDEFINE_EDGE(I,J1,K,1)
+      IF (I>I1) CALL REDEFINE_EDGE(I,J2,K,1)
+      IF (K>K1) CALL REDEFINE_EDGE(I,J1,K,3)
+      IF (K>K1) CALL REDEFINE_EDGE(I,J2,K,3)
+   ENDDO
+ENDDO
+
+DO J=J1,J2
+   DO I=I1,I2
+      IF (I>I1) CALL REDEFINE_EDGE(I,J,K1,1)
+      IF (I>I1) CALL REDEFINE_EDGE(I,J,K2,1)
+      IF (J>J1) CALL REDEFINE_EDGE(I,J,K1,2)
+      IF (J>J1) CALL REDEFINE_EDGE(I,J,K2,2)
+   ENDDO
+ENDDO
+
 CONTAINS
 
+SUBROUTINE GET_BOUNDARY_TYPE
 
-SUBROUTINE RESTORE_ORIGINAL_BC(IW)
-INTEGER, INTENT(IN) :: IW
-IJKW(5,IW) = IBC_ORIG(IW)
-OBST_INDEX_W(IW) = 0
-END SUBROUTINE RESTORE_ORIGINAL_BC
+INTEGER :: I_OBST,IBC
 
-SUBROUTINE GET_BOUNDARY_TYPE( IW , IBC , BOUND_TYPE )
+IF (IW==0) RETURN
 
-INTEGER :: I_OBST
-INTEGER, INTENT(IN) :: IBC,IW
-INTEGER, INTENT(OUT) :: BOUND_TYPE
-
-I_OBST = OBST_INDEX_W(IW)
-IF (I_OBST>0 .AND. OBSTRUCTION(I_OBST)%HIDDEN) THEN
-   BOUND_TYPE = NULL_BOUNDARY
-   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) RECOMPUTE_A = .TRUE.
-   RETURN
+IF (IW<=NEWC .AND. REMOVE) THEN
+   BOUNDARY_TYPE(IW) = SOLID_BOUNDARY
+   IF (IBC_ORIG(IW)==MIRROR_SURF_INDEX)       BOUNDARY_TYPE(IW) = MIRROR_BOUNDARY
+   IF (IBC_ORIG(IW)==OPEN_SURF_INDEX)         BOUNDARY_TYPE(IW) = OPEN_BOUNDARY
+   IF (IBC_ORIG(IW)==INTERPOLATED_SURF_INDEX) THEN
+      BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      RECOMPUTE_A = .TRUE.
+   ENDIF
 ENDIF
 
-BOUND_TYPE = SOLID_BOUNDARY
-IF (IBC==MIRROR_SURF_INDEX)       BOUND_TYPE = MIRROR_BOUNDARY
-IF (IBC==OPEN_SURF_INDEX)         BOUND_TYPE = OPEN_BOUNDARY
-IF (IBC==INTERPOLATED_SURF_INDEX) THEN
-   BOUND_TYPE = INTERPOLATED_BOUNDARY
-   RECOMPUTE_A = .TRUE.
+IF (IW>NEWC) THEN
+   I_OBST = OBST_INDEX_W(IW)
+   IF (I_OBST>0 .AND. OBSTRUCTION(I_OBST)%HIDDEN .AND. .NOT.SOLID(IC)) BOUNDARY_TYPE(IW) = NULL_BOUNDARY
+   IF (SOLID(ICG)) BOUNDARY_TYPE(IW) = NULL_BOUNDARY
 ENDIF
-IF (SURFACE(IBC)%POROUS)          BOUND_TYPE = POROUS_BOUNDARY
 
-! For the PRESSURE_CORRECTION, we need to recompute/regather the matrix A for the coarse linear solve if the boundary changes
-
-IF (BOUND_TYPE==INTERPOLATED_BOUNDARY .NEQV. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) RECOMPUTE_A = .TRUE.
+IF (CREATE) THEN
+   IF (IW<=NEWC .AND. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) RECOMPUTE_A = .TRUE.
+   IF (SOLID(ICG)) THEN
+      BOUNDARY_TYPE(IW) = NULL_BOUNDARY
+   ELSE
+      BOUNDARY_TYPE(IW) = SOLID_BOUNDARY
+      IBC = IJKW(5,IW)
+      IF (SURFACE(IBC)%POROUS) BOUNDARY_TYPE(IW) = POROUS_BOUNDARY
+      IF (TW(IW)<T) TW(IW)=T
+   ENDIF
+ENDIF
 
 END SUBROUTINE GET_BOUNDARY_TYPE
+
+SUBROUTINE REDEFINE_EDGE(II,JJ,KK,IEC)
+
+! Change a few properties of the EDGEs that have been exposed or covered up by a blockage
+
+INTEGER :: IE,II,JJ,KK,IEC
+
+SELECT CASE(IEC)
+   CASE(1)
+      IE = EDGE_INDEX(CELL_INDEX(II,JJ,KK), 4)
+   CASE(2)
+      IE = EDGE_INDEX(CELL_INDEX(II,JJ,KK), 8)
+   CASE(3)
+      IE = EDGE_INDEX(CELL_INDEX(II,JJ,KK),12)
+END SELECT
+
+IF (REMOVE .AND. (IJKE(7,IE)/=0 .OR. IJKE(11,IE)/=0)) EDGE_TYPE(IE) = INTERPOLATED_EDGE
+IF (CREATE .AND. (IJKE(7,IE)/=0 .OR. IJKE(11,IE)/=0)) EDGE_TYPE(IE) = SOLID_EDGE
+
+END SUBROUTINE REDEFINE_EDGE
 
 END SUBROUTINE CREATE_OR_REMOVE_OBST
 
@@ -2451,7 +2400,7 @@ SUBROUTINE DEFINE_EDGE(II,JJ,KK,IOR,IEC,NM,I_OBST,IERR)
 ! Set up edge arrays for velocity boundary conditions
  
 INTEGER, INTENT(IN) :: II,JJ,KK,IOR,IEC,NM
-INTEGER :: NOM,ICMM,ICMP,ICPM,ICPP,IBC,I_OBST,IE,IW,IIO,JJO,KKO,IW1,IW2,IERR
+INTEGER :: NOM,ICMM,ICMP,ICPM,ICPP,I_OBST,IE,IW,IIO,JJO,KKO,IW1,IW2,IERR
 REAL(EB) :: XI,YJ,ZK
 TYPE (MESH_TYPE), POINTER :: MM
  
@@ -2542,20 +2491,19 @@ ENDIF
  
 ! Determine the wall index of the adjacent wall tile
  
-NOM = NM
+NOM = 0
 IIO = 0
 JJO = 0
 KKO = 0
-IBC = IJKW(5,IW)
  
-! Look for interpolated boundary cells
-
-IF (IJKW(9,IW)>0 .AND. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+IF (IJKW(9,IW)>0) THEN
    NOM = IJKW( 9,IW)
    IIO = IJKW(10,IW)
    JJO = IJKW(11,IW)
    KKO = IJKW(12,IW)
 ENDIF
+
+IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) EDGE_TYPE(IE) = INTERPOLATED_EDGE
  
 ! Fill up array IJKE with edge parameters
  
@@ -2563,7 +2511,7 @@ IJKE(1,IE) = II
 IJKE(2,IE) = JJ
 IJKE(3,IE) = KK
 IJKE(4,IE) = IEC
-IJKE(5,IE) = IBC
+IJKE(5,IE) = IJKW(5,IW)
 IJKE(6,IE) = IOR
  
 ! Special "free-slip" cases
@@ -2587,29 +2535,31 @@ COMPONENT: SELECT CASE(IEC)
       EDGE_INDEX(ICMP,2) = IE
       EDGE_INDEX(ICPM,3) = IE
       EDGE_INDEX(ICMM,4) = IE
-      SELECT CASE(ABS(IOR))
-         CASE(2)
-            IF (IOR>0) IJKE(11,IE) = -NOM
-            IF (IOR<0) IJKE(11,IE) =  NOM
-            IJKE(12,IE) = IIO
-            IJKE(13,IE) = JJO
-            MM => MESHES(NOM)
-            ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
-            KKO = MAX(1,FLOOR(ZK))
-            M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
-            IJKE(14,IE) = KKO
-
-         CASE(3)
-            IF (IOR>0) IJKE( 7,IE) = -NOM
-            IF (IOR<0) IJKE( 7,IE) =  NOM
-            IJKE( 8,IE) = IIO
-            MM => MESHES(NOM)
-            YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
-            JJO = MAX(1,FLOOR(YJ))
-            M%EDGE_INTERPOLATION_FACTOR(IE,1) = YJ-JJO
-            IJKE( 9,IE) = JJO
-            IJKE(10,IE) = KKO
-      END SELECT
+      IF (NOM/=0) THEN
+         SELECT CASE(ABS(IOR))
+            CASE(2)
+               IF (IOR>0) IJKE(11,IE) = -NOM
+               IF (IOR<0) IJKE(11,IE) =  NOM
+               IJKE(12,IE) = IIO
+               IJKE(13,IE) = JJO
+               MM => MESHES(NOM)
+               ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
+               KKO = MAX(1,FLOOR(ZK))
+               M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
+               IJKE(14,IE) = KKO
+   
+            CASE(3)
+               IF (IOR>0) IJKE( 7,IE) = -NOM
+               IF (IOR<0) IJKE( 7,IE) =  NOM
+               IJKE( 8,IE) = IIO
+               MM => MESHES(NOM)
+               YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
+               JJO = MAX(1,FLOOR(YJ))
+               M%EDGE_INTERPOLATION_FACTOR(IE,1) = YJ-JJO
+               IJKE( 9,IE) = JJO
+               IJKE(10,IE) = KKO
+         END SELECT
+      ENDIF
  
    CASE (2) COMPONENT
     
@@ -2620,29 +2570,31 @@ COMPONENT: SELECT CASE(IEC)
       EDGE_INDEX(ICMP,6) = IE
       EDGE_INDEX(ICPM,7) = IE
       EDGE_INDEX(ICMM,8) = IE
-      SELECT CASE(ABS(IOR))
-         CASE( 1)
-            IF (IOR>0) IJKE(11,IE) = -NOM
-            IF (IOR<0) IJKE(11,IE) =  NOM
-            IJKE(12,IE) = IIO
-            IJKE(13,IE) = JJO
-            MM => MESHES(NOM)
-            ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
-            KKO = MAX(1,FLOOR(ZK))
-            M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
-            IJKE(14,IE) = KKO
-         CASE( 3)
-            IF (IOR>0) IJKE( 7,IE) = -NOM
-            IF (IOR<0) IJKE( 7,IE) =  NOM
-            MM => MESHES(NOM)
-            XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
-            IIO = MAX(1,FLOOR(XI))
-            M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
-            IJKE( 8,IE) = IIO
-            IJKE( 9,IE) = JJO
-            IJKE(10,IE) = KKO
-      END SELECT 
- 
+      IF (NOM/=0) THEN
+         SELECT CASE(ABS(IOR))
+            CASE( 1)
+               IF (IOR>0) IJKE(11,IE) = -NOM
+               IF (IOR<0) IJKE(11,IE) =  NOM
+               IJKE(12,IE) = IIO
+               IJKE(13,IE) = JJO
+               MM => MESHES(NOM)
+               ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
+               KKO = MAX(1,FLOOR(ZK))
+               M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
+               IJKE(14,IE) = KKO
+            CASE( 3)
+               IF (IOR>0) IJKE( 7,IE) = -NOM
+               IF (IOR<0) IJKE( 7,IE) =  NOM
+               MM => MESHES(NOM)
+               XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
+               IIO = MAX(1,FLOOR(XI))
+               M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
+               IJKE( 8,IE) = IIO
+               IJKE( 9,IE) = JJO
+               IJKE(10,IE) = KKO
+         END SELECT 
+      ENDIF
+    
    CASE (3) COMPONENT
  
       ICPM = CELL_INDEX(II+1,JJ,KK)
@@ -2652,28 +2604,30 @@ COMPONENT: SELECT CASE(IEC)
       EDGE_INDEX(ICMP,10) = IE
       EDGE_INDEX(ICPM,11) = IE
       EDGE_INDEX(ICMM,12) = IE
-      SELECT CASE(ABS(IOR))
-         CASE( 1)
-            IF (IOR>0) IJKE(11,IE) = -NOM
-            IF (IOR<0) IJKE(11,IE) =  NOM
-            IJKE(12,IE) = IIO
-            MM => MESHES(NOM)
-            YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
-            JJO = MAX(1,FLOOR(YJ))
-            M%EDGE_INTERPOLATION_FACTOR(IE,2) = YJ-JJO
-            IJKE(13,IE) = JJO
-            IJKE(14,IE) = KKO
-         CASE( 2)
-            IF (IOR>0) IJKE( 7,IE) = -NOM
-            IF (IOR<0) IJKE( 7,IE) =  NOM
-            MM => MESHES(NOM)
-            XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
-            IIO = MAX(1,FLOOR(XI))
-            M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
-            IJKE( 8,IE) = IIO
-            IJKE( 9,IE) = JJO
-            IJKE(10,IE) = KKO
-      END SELECT
+      IF (NOM/=0) THEN
+         SELECT CASE(ABS(IOR))
+            CASE( 1)
+               IF (IOR>0) IJKE(11,IE) = -NOM
+               IF (IOR<0) IJKE(11,IE) =  NOM
+               IJKE(12,IE) = IIO
+               MM => MESHES(NOM)
+               YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
+               JJO = MAX(1,FLOOR(YJ))
+               M%EDGE_INTERPOLATION_FACTOR(IE,2) = YJ-JJO
+               IJKE(13,IE) = JJO
+               IJKE(14,IE) = KKO
+            CASE( 2)
+               IF (IOR>0) IJKE( 7,IE) = -NOM
+               IF (IOR<0) IJKE( 7,IE) =  NOM
+               MM => MESHES(NOM)
+               XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
+               IIO = MAX(1,FLOOR(XI))
+               M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
+               IJKE( 8,IE) = IIO
+               IJKE( 9,IE) = JJO
+               IJKE(10,IE) = KKO
+         END SELECT
+      ENDIF
  
 END SELECT COMPONENT
 
