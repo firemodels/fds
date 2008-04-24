@@ -92,7 +92,7 @@ intel_osx_mpi_32 : obj = fds5_mpi_osx_intel_32
 intel_osx_mpi_32 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-intel_osx_db_32 : FFLAGS = -FR  -O0 -m32 -heap-arrays -WB -traceback -g -fpe0 -fltconsistency
+intel_osx_db_32 : FFLAGS = -FR -O0 -m32 -heap-arrays -WB -traceback -g -fpe3 -fltconsistency
 intel_osx_db_32 : CFLAGS = -m32 -Dpp_noappend -Dpp_OSX
 intel_osx_db_32 : FCOMPL = ifort
 intel_osx_db_32 : CCOMPL = icc
