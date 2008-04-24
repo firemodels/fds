@@ -229,6 +229,25 @@ aix_mpi : obj     = fds5_jump_mpi_64
 aix_mpi : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
+#*** GNU Compilers ***
+
+#GCC and gfortran Version
+gnu_32 : FFLAGS  = -O1
+gnu_32 : CFLAGS  = -O1 -D pp_noappend
+gnu_32 : FCOMPL  = gfortran
+gnu_32 : CCOMPL  = gcc
+gnu_32 : obj     = fds5_gnu_32
+gnu_32 : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+
+gnu_mpi_32 : FFLAGS  = -O1
+gnu_mpi_32 : CFLAGS  = -O1 -D pp_noappend
+gnu_mpi_32 : FCOMPL  = mpif90
+gnu_mpi_32 : CCOMPL  = mpicc
+gnu_mpi_32 : obj = fds5_gnu_mpi_32
+gnu_mpi_32 : $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+
 #*** End Compiler Specific Rules ***
 
 # *** Object Dependencies ***
