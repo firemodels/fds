@@ -514,7 +514,7 @@ K_COARSE: DO KC=1,KBAR2
                      DUDT_AVG(IW) = 0.5_EB*(DUDT_OTHER-FVX(II,JJ,KK)-RDXN(0)*(H(1,JJ,KK)-H(0,JJ,KK)))
                      B(N)         = B(N) - DA*DUDT_AVG(IW)
                   ENDIF
-                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
+                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
                      A(N,N) = A(N,N) - 2._EB*DA/DX_M(N,N)
                      B(N)   = B(N)   + (FVX(II,JJ,KK)+(H(II+1,JJ,KK)-H(II,JJ,KK))*RDXN(0))*DA
@@ -557,7 +557,7 @@ K_COARSE: DO KC=1,KBAR2
                      DUDT_AVG(IW) = 0.5_EB*(DUDT_OTHER-FVX(II,JJ,KK)-RDXN(IBAR)*(H(IBP1,JJ,KK)-H(IBAR,JJ,KK)))
                      B(N)         = B(N) + DA*DUDT_AVG(IW)
                   ENDIF
-                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
+                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
                      A(N,N) = A(N,N) - 2._EB*DA/DX_M(N,N)
                      B(N)   = B(N)   - (FVX(II,JJ,KK)+(H(II+1,JJ,KK)-H(II,JJ,KK))*RDXN(IBAR))*DA
@@ -600,7 +600,7 @@ K_COARSE: DO KC=1,KBAR2
                      DVDT_AVG(IW) = 0.5_EB*(DVDT_OTHER-FVY(II,JJ,KK)-RDYN(0)*(H(II,1,KK)-H(II,0,KK)))
                      B(N)         = B(N) - DA*DVDT_AVG(IW)
                   ENDIF
-                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
+                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
                      A(N,N) = A(N,N) - 2._EB*DA/DY_M(N,N)
                      B(N)   = B(N)   + (FVY(II,JJ,KK)+(H(II,JJ+1,KK)-H(II,JJ,KK))*RDYN(0))*DA
@@ -643,7 +643,7 @@ K_COARSE: DO KC=1,KBAR2
                      DVDT_AVG(IW)  = 0.5_EB*(DVDT_OTHER-FVY(II,JJ,KK)-RDYN(0)*(H(II,JBP1,KK)-H(II,JBAR,KK)))
                      B(N)          = B(N) + DA*DVDT_AVG(IW)
                   ENDIF
-                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
+                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
                      A(N,N) = A(N,N) - 2._EB*DA/DY_M(N,N)
                      B(N)   = B(N)   - (FVY(II,JJ,KK)+(H(II,JJ+1,KK)-H(II,JJ,KK))*RDYN(JBAR))*DA
@@ -686,7 +686,7 @@ K_COARSE: DO KC=1,KBAR2
                      DWDT_AVG(IW) = 0.5_EB*(DWDT_OTHER-FVZ(II,JJ,KK)-RDZN(0)*(H(II,JJ,1)-H(II,JJ,0)))
                      B(N)         = B(N) - DA*DWDT_AVG(IW)
                   ENDIF
-                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
+                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
                      A(N,N) = A(N,N) - 2._EB*DA/DZ_M(N,N)
                      B(N)   = B(N)   + (FVZ(II,JJ,KK)+(H(II,JJ,KK+1)-H(II,JJ,KK))*RDZN(0))*DA
@@ -729,7 +729,7 @@ K_COARSE: DO KC=1,KBAR2
                      DWDT_AVG(IW) = 0.5_EB*(DWDT_OTHER-FVZ(II,JJ,KK)-RDZN(KBAR)*(H(II,JJ,KBP1)-H(II,JJ,KBAR)))
                      B(N)         = B(N) + DA*DWDT_AVG(IW)
                   ENDIF
-                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
+                  IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(N) = B(N) + DUWDT(IW)*DA
                   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
                      A(N,N) = A(N,N) - 2._EB*DA/DZ_M(N,N)
                      B(N)   = B(N)   - (FVZ(II,JJ,KK)+(H(II,JJ,KK+1)-H(II,JJ,KK))*RDZN(KBAR))*DA
