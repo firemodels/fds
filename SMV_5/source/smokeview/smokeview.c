@@ -2216,7 +2216,7 @@ void updatetimes(void){
 
         *timescopy++=terri->times[n];
         t_diff = timescopy[-1]-timescopy[-2];
-        if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
+        if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
           dt_MIN=t_diff;
         }
       }
@@ -2231,7 +2231,7 @@ void updatetimes(void){
 
       *timescopy++=touri->path_times[n];
       t_diff = timescopy[-1]-timescopy[-2];
-      if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
+      if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
         dt_MIN=t_diff;
       }
     }
@@ -2245,7 +2245,7 @@ void updatetimes(void){
 
       *timescopy++=parti->ptimes[n];
       t_diff = timescopy[-1]-timescopy[-2];
-      if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
+      if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
         dt_MIN=t_diff;
       }
     }
@@ -2259,7 +2259,7 @@ void updatetimes(void){
 
         *timescopy++=sd->slicetimes[n];
         t_diff = timescopy[-1]-timescopy[-2];
-        if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
+        if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
           dt_MIN=t_diff;
         }
       }
@@ -2272,7 +2272,7 @@ void updatetimes(void){
 
       *timescopy++=targtimes[n];
       t_diff = timescopy[-1]-timescopy[-2];
-      if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
+      if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
         dt_MIN=t_diff;
       }
     }
@@ -2289,7 +2289,7 @@ void updatetimes(void){
 
           *timescopy++=meshi->patchtimes[n];
           t_diff = timescopy[-1]-timescopy[-2];
-          if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
+          if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
             dt_MIN=t_diff;
           }
         }
@@ -2302,7 +2302,7 @@ void updatetimes(void){
 
       *timescopy++=zonet[n];
       t_diff = timescopy[-1]-timescopy[-2];
-      if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
+      if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
         dt_MIN=t_diff;
       }
     }
@@ -2317,7 +2317,7 @@ void updatetimes(void){
 
         *timescopy++=meshi->isotimes[n];
         t_diff = timescopy[-1]-timescopy[-2];
-        if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
+        if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
           dt_MIN=t_diff;
         }
       }
@@ -2335,7 +2335,7 @@ void updatetimes(void){
 
           *timescopy++=smoke3di->times[n];
           t_diff = timescopy[-1]-timescopy[-2];
-          if(n>1&&t_diff<dt_MIN&&t_diff>0.0){
+          if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
             dt_MIN=t_diff;
           }
         }
