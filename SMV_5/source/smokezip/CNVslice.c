@@ -93,6 +93,7 @@ int convert_slice(slice *slicei){
   int count=0;
   int ncol, nrow, idir;
   int endian_rle_switch;
+  float time_max;
 
   FILE *SLICEFILE;
   FILE *slicestream,*slicesizestream;
@@ -394,6 +395,7 @@ int convert_slice(slice *slicei){
     nj = ijkbar[3]+1-ijkbar[2];
     nk = ijkbar[5]+1-ijkbar[4];
 
+    time_max=-1000000.0;
     for(;;){
       int i;
       int ncomp_rle;
@@ -430,6 +432,9 @@ int convert_slice(slice *slicei){
 
 
       }
+      if(time<time_max)continue;
+      time_max=time;
+
       count++;
    
       data_loc=ftell(SLICEFILE);

@@ -55,6 +55,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
 #ifdef pp_LIGHT
   int light_info[2]={1,0};
 #endif
+  float time_max;
  
   smoke3dfile=smoke3di->file;
 
@@ -259,6 +260,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
   lightafter=0;
 #endif
   printf("  Compressing: ");
+  time_max=-1000000.0;
   for(;;){
     EGZ_FREAD(&time,4,1,SMOKE3DFILE);
     if(EGZ_FEOF(SMOKE3DFILE)!=0)break;
@@ -271,6 +273,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
 
     EGZ_FREAD(compressed_alphabuffer,ncompressed_rle,1,SMOKE3DFILE);
 
+    if(time<time_max)continue;
     count++;
 
     sizebefore+=12+ncompressed_rle;
@@ -279,6 +282,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
 #endif
 
     if(count%smoke3dzipstep!=0)continue;
+    time_max=time;
 
     // uncompress frame data (from RLE format)
 
