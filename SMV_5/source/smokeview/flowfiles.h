@@ -849,6 +849,7 @@ typedef struct _smoke3d {
   flowlabels label;
   char menulabel[128];
   float *times;
+  int *use_smokeframe;
   int fire_alpha;
   int *timeslist;
   int n_times,iframe,lastiframe,n_times_full;
