@@ -222,12 +222,12 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   int ncomp_light_total;
   int ncomp_light_total_skipped;
 #endif
-  int ii,i,j;
+  int iii,ii,i,j;
   int nxyz[8];
   int nchars[2];
   int nframes_found=0;
 
-  float time, time_max;
+  float time;
   char compstring[128];
   mesh *meshi;
 
@@ -271,7 +271,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 #ifdef pp_LIGHT
   if(getsmoke3d_sizes(smoke3di->file,
     smoke3di->light_file,smoke3di->use_lighting_file,
-    smoke3di->version,&smoke3di->times, 
+    smoke3di->version,&smoke3di->times, &smoke3di->use_smokeframe,
                  &smoke3di->nchars_uncompressed, 
                  &smoke3di->nchars_compressed_smoke,
                  &smoke3di->nchars_compressed_smoke_full,
@@ -281,7 +281,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
                  &smoke3di->n_times_full
                  )==1){
 #else
-  if(getsmoke3d_sizes(smoke3di->file,smoke3di->version,&smoke3di->times, 
+  if(getsmoke3d_sizes(smoke3di->file,smoke3di->version,&smoke3di->times, &smoke3di->use_smokeframe,
                  &smoke3di->nchars_uncompressed, 
                  &smoke3di->nchars_compressed_smoke,
                  &smoke3di->nchars_compressed_smoke_full,
@@ -294,7 +294,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     return;
   }
   CheckMemory;
-  if(NewMemory((void **)&smoke3di->smokeframe_comp_list,smoke3di->n_times*sizeof(unsigned char *))==0||
+  if(NewMemory((void **)&smoke3di->smokeframe_comp_list,smoke3di->n_times_full*sizeof(unsigned char *))==0||
      NewMemory((void **)&smoke3di->smokeframe_in,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeview_tmp,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeframe_out,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
@@ -308,7 +308,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
 #ifdef pp_LIGHT
   if(smoke3di->use_lighting_file==1){
-    if(NewMemory((void **)&smoke3di->lightframe_comp_list,smoke3di->n_times*sizeof(unsigned char *))==0||
+    if(NewMemory((void **)&smoke3di->lightframe_comp_list,smoke3di->n_times_full*sizeof(unsigned char *))==0||
        NewMemory((void **)&smoke3di->lightframe_in,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
        NewMemory((void **)&smoke3di->lightview_tmp,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
        NewMemory((void **)&smoke3di->lightframe_out,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0){
@@ -327,8 +327,10 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   ncomp_light_total_skipped=0;
 #endif
   for(i=0;i<smoke3di->n_times_full;i++){
+    float time;
+
     ncomp_smoke_total+=smoke3di->nchars_compressed_smoke_full[i];
-    if(i%smoke3dframestep==0){
+    if(smoke3di->use_smokeframe[i]==1){
       ncomp_smoke_total_skipped+=smoke3di->nchars_compressed_smoke_full[i];
     }
   }
@@ -344,7 +346,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   if(smoke3di->use_lighting_file==1){
     for(i=0;i<smoke3di->n_times_full;i++){
       ncomp_light_total+=smoke3di->nchars_compressed_light_full[i];
-      if(i%smoke3dframestep==0){
+      if(smoke3di->use_smokeframe[i]==1){
         ncomp_light_total_skipped+=smoke3di->nchars_compressed_light_full[i];
       }
     }
@@ -360,24 +362,24 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 #endif
 
   ncomp_smoke_total=0;
-  i=-1;
+  i=0;
   for(ii=0;ii<smoke3di->n_times_full;ii++){
-    if(ii%smoke3dframestep==0){
-      i++;
+    if(smoke3di->use_smokeframe[ii]==1){
       smoke3di->smokeframe_comp_list[i]=smoke3di->smoke_comp_all+ncomp_smoke_total;
       ncomp_smoke_total+=smoke3di->nchars_compressed_smoke[i];
+      i++;
     }
   }
 
 #ifdef pp_LIGHT
   if(smoke3di->use_lighting_file==1){
     ncomp_light_total=0;
-    i=-1;
+    i=0;
     for(ii=0;ii<smoke3di->n_times_full;ii++){
-      if(ii%smoke3dframestep==0){
-        i++;
+      if(smoke3di->load_frames[ii]==1){
         smoke3di->lightframe_comp_list[i]=smoke3di->light_comp_all+ncomp_light_total;
         ncomp_light_total+=smoke3di->nchars_compressed_light[i];
+        i++;
       }
     }
   }
@@ -433,23 +435,19 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
   // read smoke data
 
-  ii=-1;
+  iii=0;
   nframes_found=0;
-  time_max=-1000000.0;
   for(i=0;i<smoke3di->n_times_full;i++){
     size_t time_read;
 
-	  time_read=EGZ_FREAD(&time,4,1,SMOKE3DFILE);
+	time_read=EGZ_FREAD(&time,4,1,SMOKE3DFILE);
     if(EGZ_FEOF(SMOKE3DFILE)!=0){
       smoke3di->n_times_full=i;
       smoke3di->n_times=nframes_found;
       break;
     }
 
-    if(time_read==0){
-      printf("ut oh\n");
-    }
-    if(i%smoke3dframestep==0&&time>time_max){
+    if(smoke3di->use_smokeframe[i]==1){
       printf("3D smoke/fire time=%.2f",time);
     }
     EGZ_FREAD(nchars,4,2,SMOKE3DFILE);
@@ -458,13 +456,14 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       smoke3di->n_times=nframes_found;
       break;
     }
-    if(i%smoke3dframestep==0&&time>time_max){
+    if(smoke3di->use_smokeframe[i]==1){
       float complevel;
+      int nvals;
 
-      time_max=time;
-      ii++;
       nframes_found++;
-      EGZ_FREAD(smoke3di->smokeframe_comp_list[ii],1,smoke3di->nchars_compressed_smoke[ii],SMOKE3DFILE);
+      nvals=EGZ_FREAD(smoke3di->smokeframe_comp_list[iii],1,smoke3di->nchars_compressed_smoke[iii],SMOKE3DFILE);
+      iii++;
+      CheckMemory;
       if(EGZ_FEOF(SMOKE3DFILE)!=0){
         smoke3di->n_times_full=i;
         smoke3di->n_times=nframes_found;
@@ -480,7 +479,6 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       printf("%s\n",compstring);
     }
     else{
-      if(time<=time_max)i--;
       EGZ_FSEEK(SMOKE3DFILE,smoke3di->nchars_compressed_smoke_full[i],SEEK_CUR);
       if(EGZ_FEOF(SMOKE3DFILE)!=0){
         smoke3di->n_times_full=i;
@@ -637,7 +635,7 @@ void setsmokecolorflags(void){
 #ifdef pp_LIGHT
 int getsmoke3d_sizes(char *smokefile, 
                      char *lightfile, int uselight,
-                     int version, float **timelist, 
+                     int version, float **timelist, int **use_smokeframe,
                       int *nchars_smoke_uncompressed, 
                       int **nchars_smoke_compressed,
                       int **nchars_smoke_compressedfull,
@@ -645,7 +643,7 @@ int getsmoke3d_sizes(char *smokefile,
                       int **nchars_light_compressedfull,
                       int *n_times,int *n_times_full){
 #else
-int getsmoke3d_sizes(char *smokefile, int version, float **timelist, 
+int getsmoke3d_sizes(char *smokefile, int version, float **timelist, int **use_smokeframe,
                       int *nchars_smoke_uncompressed, 
                       int **nchars_smoke_compressed,
                       int **nchars_smoke_compressedfull,
@@ -659,7 +657,8 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
   EGZ_FILE *LIGHTFILE=NULL;
 #endif
   int nframes_found;
-  float time,time_max,*timeptr=NULL;
+  float time,time_max,*timeptr=NULL,*timefullptr;
+  int *use_smokeframeptr;
   int nch_uncompressed,nch_smoke_compressed;
 #ifdef pp_LIGHT
   int nch_light_compressed;
@@ -677,6 +676,7 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
   int dummy;
   int n_times_full2;
   size_t lentext;
+  int iii;
 
   // try .sz
   strcpy(textfilename,smokefile);
@@ -735,6 +735,7 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
     if(version!=1)version=0;
     fprintf(TEXTFILE,"%i\n",version);
 
+    time_max=-1000000.0;
     for(;;){
 #ifdef pp_LIGHT
       int light_size;
@@ -784,13 +785,17 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
   iframe=-1;
   time_max=-1000000.0;
   fgets(buffer,255,TEXTFILE);
+  iii=0;
   while(!feof(TEXTFILE)){
     if(fgets(buffer,255,TEXTFILE)==NULL)break;
     sscanf(buffer,"%f",&time);
-    if(time<=time_max)continue;
-    time_max=time;
     iframe++;
-    if(iframe%smoke3dframestep==0)nframes_found++;
+    if(time<=time_max)continue;
+    if(iii%smoke3dframestep==0){
+      nframes_found++;
+      time_max=time;
+    }
+    iii++;
   }
   rewind(TEXTFILE);
   if(nframes_found<=0){
@@ -802,6 +807,7 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
   *n_times=nframes_found;
   *n_times_full=iframe+1;
   if(nframes_found>0){
+    NewMemory((void **)&use_smokeframeptr,*n_times_full*sizeof(float));
     NewMemory((void **)&timeptr,nframes_found*sizeof(float));
     NewMemory((void **)&nch_smoke_compressedfullptr,(*n_times_full)*sizeof(int));
     NewMemory((void **)&nch_smoke_compressedptr,(*n_times)*sizeof(int));
@@ -812,6 +818,7 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
     }
 #endif
   }
+  *use_smokeframe=use_smokeframeptr;
   *timelist=timeptr;
   *nchars_smoke_compressedfull=nch_smoke_compressedfullptr;
   *nchars_smoke_compressed=nch_smoke_compressedptr;
@@ -823,8 +830,9 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
 #endif
 
   fgets(buffer,255,TEXTFILE);
-  iframe=-1;
   n_times_full2=0;
+  time_max=-1000000.0;
+  iii=0;
   while(!feof(TEXTFILE)){
 
     if(fgets(buffer,255,TEXTFILE)==NULL)break;
@@ -855,23 +863,32 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist,
       sscanf(buffer,"%f %i %i %i",&time,&nch_uncompressed,&dummy,&nch_smoke_compressed);
     }
 #endif
+    *nch_smoke_compressedfullptr++=nch_smoke_compressed;
+#ifdef pp_LIGHT
     // variables for nch_light_compressed
-    iframe++;
-    if(iframe%smoke3dframestep==0){
+    if(uselight==1){
+      *nch_light_compressedfullptr++=nch_light_compressed;
+    }
+#endif
+    *use_smokeframeptr=0;
+    if(time<=time_max){
+      use_smokeframeptr++;
+      continue;
+    }
+
+    if(iii%smoke3dframestep==0){
+      *use_smokeframeptr=1;
       *timeptr++=time;
+      time_max=time;
       *nch_smoke_compressedptr++=nch_smoke_compressed;
 #ifdef pp_LIGHT
       if(uselight==1){
         *nch_light_compressedptr++=nch_light_compressed;
       }
 #endif
+      use_smokeframeptr++;
     }
-    *nch_smoke_compressedfullptr++=nch_smoke_compressed;
-#ifdef pp_LIGHT
-    if(uselight==1){
-      *nch_light_compressedfullptr++=nch_light_compressed;
-    }
-#endif
+    iii++;
   }
   *nchars_smoke_uncompressed=nch_uncompressed;
   fclose(TEXTFILE);
@@ -887,6 +904,7 @@ void freesmoke3d(smoke3d *smoke3di){
   FREEMEMORY(smoke3di->smokeframe_out);
   FREEMEMORY(smoke3di->timeslist);
   FREEMEMORY(smoke3di->times);
+  FREEMEMORY(smoke3di->use_smokeframe);
   FREEMEMORY(smoke3di->nchars_compressed_smoke_full);
   FREEMEMORY(smoke3di->nchars_compressed_smoke);
 #ifdef pp_LIGHT

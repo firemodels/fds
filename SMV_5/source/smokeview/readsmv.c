@@ -1372,6 +1372,7 @@ typedef struct {
         smoke3di->smoke_comp_all=NULL;
         smoke3di->smokeview_tmp=NULL;
         smoke3di->times=NULL;
+        smoke3di->use_smokeframe=NULL;
         smoke3di->nchars_compressed_smoke=NULL;
         smoke3di->nchars_compressed_smoke_full=NULL,
 #ifdef pp_LIGHT
