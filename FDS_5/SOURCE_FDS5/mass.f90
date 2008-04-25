@@ -14,7 +14,7 @@ CHARACTER(255), PARAMETER :: massdate='$Date$'
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,DP
 
-PUBLIC MASS_FINITE_DIFFERENCES,DENSITY,GET_REV_mass
+PUBLIC MASS_FINITE_DIFFERENCES,DENSITY,GET_REV_mass,DENSITY_TVD
  
  
 CONTAINS
@@ -975,6 +975,567 @@ RETURN
 END SUBROUTINE CHECK_MASS_FRACTION
  
 END SUBROUTINE DENSITY
+
+
+!===========================================================================
+! The following are experimental scalar transport routines which are invoked
+! by setting FLUX_LIMITER = {0,1,2,3,4} on the MISC line.  See the function
+! SCALAR_FACE_VALUE below for a description of the FLUX_LIMITER value. ~RJM
+!===========================================================================
+
+SUBROUTINE DENSITY_TVD(NM)
+
+! Update the density and species mass fractions
+
+USE COMP_FUNCTIONS, ONLY: SECOND 
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT
+USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
+                            CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_SPEC_DILUENTS, N_ZONE,MIXTURE_FRACTION_SPECIES, &
+                            GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,FLUX_LIMITER
+ 
+REAL(EB) :: WFAC,DTRATIO,OMDTRATIO,Z_2,TNOW
+INTEGER  :: I,J,K,N
+INTEGER, INTENT(IN) :: NM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: R_SUM_DILUENTS
+
+REAL(EB) :: YY_MIN,YY_MAX,RHO_MIN,RHO_MAX
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHON
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYN,RHOYYP
+
+
+ 
+IF (EVACUATION_ONLY(NM)) RETURN
+IF (SOLID_PHASE_ONLY) RETURN
+
+TNOW=SECOND()
+CALL POINT_TO_MESH(NM)
+
+CALL SCALARF ! Computes FRHOYY and FRHO and populates SCALAR_WORK
+
+RHON => SCALAR_WORK1
+IF (N_SPECIES>0) THEN
+   YYN    => SCALAR_WORK2
+   RHOYYP => SCALAR_WORK3
+ENDIF
+
+SELECT_SUBSTEP: IF (PREDICTOR) THEN
+   
+   ! Not used yet...
+   !IF (N_SPECIES>0) THEN
+   !   YY_MIN = MINVAL(YY)
+   !   YY_MAX = MAXVAL(YY)
+   !ENDIF
+   !RHO_MIN = MINVAL(RHO)
+   !RHO_MAX = MAXVAL(RHO)
+   
+   ! Update mass fractions
+   
+   DO N=1,N_SPECIES
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               YYN(I,J,K,N) = RHOYYP(I,J,K,N)
+               YYS(I,J,K,N) = YYN(I,J,K,N) - DT*FRHOYY(I,J,K,N)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Update the density
+   
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            RHON(I,J,K) = RHO(I,J,K)
+            RHOS(I,J,K) = RHON(I,J,K) - DT*FRHO(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   ! Check boundedness here !!
+
+   ! Extract REALIZABLE YY from REALIZABLE RHO*YY
+   
+   DO N=1,N_SPECIES
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Predict background pressure at next time step
+
+   DO I=1,N_ZONE
+      PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
+   ENDDO
+
+   ! Compute mixture fraction and diluent sums: Y_SUM=Sum(Y_i), Z_SUM=Sum(Z_i)
+
+   IF (MIXTURE_FRACTION) THEN
+      Z_SUM  =  0._EB
+      Y_SUM  =  0._EB
+      IF (N_SPEC_DILUENTS > 0) THEN
+         R_SUM_DILUENTS => WORK4
+         R_SUM_DILUENTS =  0._EB
+      ENDIF
+      DO N=1,N_SPECIES
+         IF (SPECIES(N)%MODE==MIXTURE_FRACTION_SPECIES) Z_SUM = Z_SUM + YYS(:,:,:,N)
+         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
+            Y_SUM = Y_SUM + YYS(:,:,:,N)
+            R_SUM_DILUENTS(:,:,:) = R_SUM_DILUENTS(:,:,:) + SPECIES(N)%RCON*YYS(:,:,:,N)
+         ENDIF
+      ENDDO
+   ENDIF
+
+   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+ 
+   IF (N_SPECIES>0 .AND. .NOT.MIXTURE_FRACTION) THEN
+      RSUM = SPECIES(0)%RCON
+      DO N=1,N_SPECIES
+         WFAC = SPECIES(N)%RCON - SPECIES(0)%RCON
+         RSUM(:,:,:) = RSUM(:,:,:) + WFAC*YYS(:,:,:,N)
+      ENDDO
+      IF (ISOTHERMAL) THEN
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  RHOS(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(TMPA*RSUM(I,J,K))
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
+   ENDIF
+
+   IF (MIXTURE_FRACTION) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (CO_PRODUCTION) THEN
+                  Z_2 = YYS(I,J,K,I_PROG_CO)
+               ElSE
+                  Z_2 = 0._EB
+               ENDIF
+               CALL GET_MOLECULAR_WEIGHT(YYS(I,J,K,I_FUEL),Z_2,YYS(I,J,K,I_PROG_F),Y_SUM(I,J,K),RSUM(I,J,K))
+               RSUM(I,J,K) = R0/RSUM(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+      IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
+   ENDIF
+
+   ! Extract predicted temperature at next time step from Equation of State
+
+   IF (.NOT.ISOTHERMAL) THEN
+      IF (N_SPECIES==0) THEN
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*RHOS(I,J,K))
+               ENDDO
+            ENDDO
+         ENDDO
+      ELSE
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
+      TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
+   ENDIF
+
+! The CORRECTOR step   
+ELSEIF (CORRECTOR) THEN
+
+   YY_MIN = MINVAL(YYS)
+   YY_MAX = MAXVAL(YYS)
+   
+   RHO_MIN = MINVAL(RHOS)
+   RHO_MAX = MAXVAL(RHOS)
+
+   ! Update mass fractions
+   
+   DO N=1,N_SPECIES
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               YY(I,J,K,N) = RHOYYP(I,J,K,N) - DT*FRHOYY(I,J,K,N)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Update the density
+   
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            RHO(I,J,K) = RHOS(I,J,K)-DT*FRHO(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   ! Check boundedness here !!
+   
+   ! Corrector step
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            RHO(I,J,K) = 0.5_EB*( RHON(I,J,K) + RHO(I,J,K) )
+         ENDDO
+      ENDDO
+   ENDDO
+   DO N=1,N_SPECIES
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               YY(I,J,K,N)  = 0.5_EB*( YYN(I,J,K,N) + YY(I,J,K,N) )/RHO(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Correct background pressure
+
+   DO I=1,N_ZONE
+      PBAR(:,I) = .5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_S_DT(I)*DT)
+   ENDDO
+ 
+   ! Compute mixture fraction and diluent sums: Y_SUM=Sum(Y_i), Z_SUM=Sum(Z_i)
+
+   IF (MIXTURE_FRACTION) THEN
+      Z_SUM  =  0._EB
+      Y_SUM  =  0._EB
+      IF (N_SPEC_DILUENTS > 0) THEN
+         R_SUM_DILUENTS => WORK4
+         R_SUM_DILUENTS =  0._EB
+         ENDIF
+      DO N=1,N_SPECIES
+         IF (SPECIES(N)%MODE==MIXTURE_FRACTION_SPECIES) Z_SUM = Z_SUM + YY(:,:,:,N)
+         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
+            Y_SUM = Y_SUM + YY(:,:,:,N)
+            R_SUM_DILUENTS(:,:,:) = R_SUM_DILUENTS(:,:,:) + SPECIES(N)%RCON*YY(:,:,:,N)
+         ENDIF
+      ENDDO
+   ENDIF
+
+   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+ 
+   IF (N_SPECIES>0 .AND. .NOT. MIXTURE_FRACTION) THEN
+      RSUM = SPECIES(0)%RCON
+      DO N=1,N_SPECIES
+         WFAC = SPECIES(N)%RCON - SPECIES(0)%RCON
+         RSUM(:,:,:) = RSUM(:,:,:) + WFAC*YY(:,:,:,N)
+      ENDDO
+      IF (ISOTHERMAL) THEN
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  RHO(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(TMPA*RSUM(I,J,K))
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
+   ENDIF
+
+   IF (MIXTURE_FRACTION) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (CO_PRODUCTION) THEN
+                  Z_2 = YY(I,J,K,I_PROG_CO)
+               ElSE
+                  Z_2 = 0._EB
+               ENDIF
+               CALL GET_MOLECULAR_WEIGHT(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),RSUM(I,J,K))
+               RSUM(I,J,K) = R0/RSUM(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+      IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
+   ENDIF
+
+   ! Extract temperature from the Equation of State
+
+   IF (.NOT.ISOTHERMAL) THEN
+      IF (N_SPECIES==0) THEN
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*RHO(I,J,K))
+               ENDDO
+            ENDDO
+         ENDDO
+      ELSE
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
+      TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
+   ENDIF
+
+ENDIF SELECT_SUBSTEP
+
+TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
+ 
+END SUBROUTINE DENSITY_TVD
+
+
+SUBROUTINE SCALARF
+
+USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER
+
+! Computes the divergence of the scalar advective flux + diffusion + reaction
+
+!INTEGER, PARAMETER :: LIMITER=2
+INTEGER  :: I,J,K,N
+REAL(EB) :: ZZ(4)
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW,FX,FY,FZ
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP, RHOYYP
+
+FX => WORK1
+FY => WORK2
+FZ => WORK3
+IF (N_SPECIES>0) RHOYYP => SCALAR_WORK3
+
+IF (PREDICTOR) THEN
+   UU => U
+   VV => V
+   WW => W
+   RHOP => RHO
+   IF (N_SPECIES > 0) YYP => YY
+ELSEIF (CORRECTOR) THEN
+   UU => US
+   VV => VS
+   WW => WS
+   RHOP => RHOS
+   IF (N_SPECIES > 0) YYP => YYS
+ENDIF
+
+! Density flux
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         IF (I==0) ZZ(1) = RHOP(I,J,K)
+         IF (I>0)  ZZ(1) = RHOP(I-1,J,K)
+         ZZ(2) = RHOP(I,J,K)
+         ZZ(3) = RHOP(I+1,J,K)
+         IF (I<IBAR)  ZZ(4) = RHOP(I+2,J,K)
+         IF (I==IBAR) ZZ(4) = RHOP(I+1,J,K)
+         FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         IF (J==0) ZZ(1) = RHOP(I,J,K)
+         IF (J>0)  ZZ(1) = RHOP(I,J-1,K)
+         ZZ(2) = RHOP(I,J,K)
+         ZZ(3) = RHOP(I,J+1,K)
+         IF (J<JBAR)  ZZ(4) = RHOP(I,J+2,K)
+         IF (J==JBAR) ZZ(4) = RHOP(I,J+1,K)
+         FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (K==0) ZZ(1) = RHOP(I,J,K)
+         IF (K>0)  ZZ(1) = RHOP(I,J,K-1)
+         ZZ(2) = RHOP(I,J,K)
+         ZZ(3) = RHOP(I,J,K+1)
+         IF (K<KBAR)  ZZ(4) = RHOP(I,J,K+2)
+         IF (K==KBAR) ZZ(4) = RHOP(I,J,K+1)
+         FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+
+! Compute divergence of advective flux for density
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         FRHO(I,J,K) = RDX(I)*(FX(I,J,K)-FX(I-1,J,K)) &
+                     + RDY(J)*(FY(I,J,K)-FY(I,J-1,K)) &
+                     + RDZ(K)*(FZ(I,J,K)-FZ(I,J,K-1))
+      ENDDO
+   ENDDO
+ENDDO
+
+! Species flux
+
+SPECIES_LOOP: DO N=1,N_SPECIES
+
+   DO K=0,KBAR+1
+      DO J=0,JBAR+1
+         DO I=0,IBAR+1
+            RHOYYP(I,J,K,N) = RHOP(I,J,K)*YYP(I,J,K,N)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            IF (I==0) ZZ(1) = RHOYYP(I,J,K,N)
+            IF (I>0)  ZZ(1) = RHOYYP(I-1,J,K,N)
+            ZZ(2) = RHOYYP(I,J,K,N)
+            ZZ(3) = RHOYYP(I+1,J,K,N)
+            IF (I<IBAR)  ZZ(4) = RHOYYP(I+2,J,K,N)
+            IF (I==IBAR) ZZ(4) = RHOYYP(I+1,J,K,N)
+            FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO K=1,KBAR
+      DO J=0,JBAR
+         DO I=1,IBAR
+            IF (J==0) ZZ(1) = RHOYYP(I,J,K,N)
+            IF (J>0)  ZZ(1) = RHOYYP(I,J-1,K,N)
+            ZZ(2) = RHOYYP(I,J,K,N)
+            ZZ(3) = RHOYYP(I,J+1,K,N)
+            IF (J<JBAR)  ZZ(4) = RHOYYP(I,J+2,K,N)
+            IF (J==JBAR) ZZ(4) = RHOYYP(I,J+1,K,N)
+            FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (K==0) ZZ(1) = RHOYYP(I,J,K,N)
+            IF (K>0)  ZZ(1) = RHOYYP(I,J,K-1,N)
+            ZZ(2) = RHOYYP(I,J,K,N)
+            ZZ(3) = RHOYYP(I,J,K+1,N)
+            IF (K<KBAR)  ZZ(4) = RHOYYP(I,J,K+2,N)
+            IF (K==KBAR) ZZ(4) = RHOYYP(I,J,K+1,N)
+            FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Compute divergence of advective flux for species, then add diffusion term
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            FRHOYY(I,J,K,N) = RDX(I)*(FX(I,J,K)-FX(I-1,J,K)) &
+                            + RDY(J)*(FY(I,J,K)-FY(I,J-1,K)) &
+                            + RDZ(K)*(FZ(I,J,K)-FZ(I,J,K-1)) &
+                            - DEL_RHO_D_DEL_Y(I,J,K,N)
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO SPECIES_LOOP
+
+END SUBROUTINE SCALARF
+
+
+REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
+
+REAL(EB) :: A,U(4)
+INTEGER :: LIMITER
+
+! local
+REAL(EB) :: R,B,DU_UP,DU_LOC
+
+! This function computes the scalar value on a face.
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across 
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+! 
+! LIMITER = 0 implements central differencing
+! LIMITER = 1 implements first-order upwinding (monotone)
+! LIMITER = 2 implements the SUPERBEE (SB) LIMITER of Roe
+! LIMITER = 3 implements the MINMOD LIMITER
+! LIMITER = 4 implements the CHARM LIMITER
+!
+!                    location of face
+!                            
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!                            A
+!         U(1)        U(2)        U(3)        U(4)
+
+IF (A>0) THEN
+    
+   ! the flow is left to right
+   DU_UP  = U(2)-U(1)
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+
+   SELECT CASE(LIMITER)
+      CASE(0) ! central differencing
+         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
+      CASE(1) ! first-order upwinding
+         SCALAR_FACE_VALUE = U(2)
+      CASE(2) ! SUPERBEE, Roe (1986)
+         IF (ABS(DU_LOC)>0) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*(U(3)-U(2))
+      CASE(3) ! MINMOD
+         IF (ABS(DU_LOC)>0) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(1._EB,R))
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*(U(3)-U(2))
+      CASE(4) ! CHARM
+         IF (ABS(DU_UP)>0) R = DU_LOC/DU_UP
+         IF (R>0) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*(U(2)-U(1))
+   END SELECT
+    
+ELSE
+
+   ! the flow is right to left
+   DU_UP  = U(4)-U(3)
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+
+   SELECT CASE(LIMITER)
+      CASE(0) ! central differencing
+         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
+      CASE(1) ! first-order upwinding
+         SCALAR_FACE_VALUE = U(3)
+      CASE(2) ! SUPERBEE, Roe (1986)
+         IF (ABS(DU_LOC)>0) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+         SCALAR_FACE_VALUE = U(3) + 0.5_EB*B*(U(2)-U(3))
+      CASE(3) ! MINMOD
+         IF (ABS(DU_LOC)>0) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(1._EB,R))
+         SCALAR_FACE_VALUE = U(3) + 0.5_EB*B*(U(2)-U(3))
+      CASE(4) ! CHARM
+         IF (ABS(DU_UP)>0) R = DU_LOC/DU_UP
+         IF (R>0) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         SCALAR_FACE_VALUE = U(3) + 0.5_EB*B*(U(3)-U(4))
+    END SELECT
+    
+ENDIF
+
+END FUNCTION SCALAR_FACE_VALUE
+
+!---------------------------------------------------------------------------
 
 SUBROUTINE GET_REV_mass(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
