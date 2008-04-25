@@ -57,6 +57,7 @@ int convert_boundary(patch *patchi,int pass){
   int percent_next=10;
   long data_loc;
   int zero=0;
+  float time_max;
 
   boundary_file=patchi->file;
   version=patchi->version;
@@ -269,6 +270,7 @@ int convert_boundary(patch *patchi,int pass){
     if(NewMemory((void **)&full_boundarybuffer,npatchfull)==0)goto wrapup;
     if(NewMemory((void **)&compressed_boundarybuffer,ncompressed_zlibSAVE)==0)goto wrapup;
     printf("  Compressing: ");
+    time_max=-1000000.0;
     while(feof(BOUNDARYFILE)==0){
       int j ;
 
@@ -296,9 +298,11 @@ int convert_boundary(patch *patchi,int pass){
 
 //      patchi = patchinfo + i;
 
+      if(time<time_max)continue;
       count++;
 
       if(count%boundzipstep!=0)continue;
+      time_max=time;
 
       for(i=0;i<npatchfull;i++){
         unsigned char ival;
