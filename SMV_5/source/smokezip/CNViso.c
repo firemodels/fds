@@ -54,6 +54,7 @@ int convert_iso(iso *isoi){
   int percent_next=10;
   vert *vertinfo;
   int one=1;
+  float time_max;
 //  float *isolevels;
 
 
@@ -174,11 +175,12 @@ int convert_iso(iso *isoi){
 
   jj=0;
   iframe=0;
+  time_max=-1000000.0;
   for(;;){
     int memory_fail=0;
 
     jj++;
-	  EGZ_FREAD(&time,4,1,ISOFILE);
+	EGZ_FREAD(&time,4,1,ISOFILE);
     if(EGZ_FEOF(ISOFILE)!=0)goto wrapup;
     fprintf(isosizestream," %f\n",time);
     sizebefore+=4;
@@ -192,7 +194,8 @@ int convert_iso(iso *isoi){
 	    if(EGZ_FEOF(ISOFILE)!=0)goto wrapup;
 
       sizebefore+=4;
-      if(jj%isozipstep!=0){
+      if(jj%isozipstep!=0||time<time_max){
+        if(jj%isozipstep==0&&time<time_max)jj--;
         skip=0;
         if(nvertices_i<=0||ntriangles_i<=0)continue;
         skip += (6*nvertices_i);
@@ -209,6 +212,7 @@ int convert_iso(iso *isoi){
         EGZ_FSEEK(ISOFILE,skip,SEEK_CUR);
         continue;
       }
+      time_max=time;
 
 #define FREELOCAL_ISO FREEMEMORY(vertexnorm);FREEMEMORY(vertices_i);FREEMEMORY(vertinfo);\
                       FREEMEMORY(triangles1_i);FREEMEMORY(triangles2_i);FREEMEMORY(triangles_i);;
