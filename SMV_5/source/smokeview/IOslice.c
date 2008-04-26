@@ -1699,7 +1699,7 @@ void drawslice(const slice *sd){
 
   if(transparentflag==1)transparenton();
   if(sd->idir==1){
-   constval = xplt[sd->is1]+sd->sliceoffset;
+   constval = xplt[sd->is1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
    if(sd->js1+1>maxj){
@@ -1754,7 +1754,7 @@ void drawslice(const slice *sd){
    glEnd();
   }
   else if(sd->idir==2){
-   constval = yplt[sd->js1]+sd->sliceoffset;
+   constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
 
@@ -1805,7 +1805,7 @@ void drawslice(const slice *sd){
    glEnd();
   }
   else if(sd->idir==3){
-   constval = zplt[sd->ks1]+sd->sliceoffset;
+   constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
      n = (i-sd->is1)*sd->nslicej -1;
@@ -1896,7 +1896,7 @@ void drawslice_texture(const slice *sd){
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   if(sd->idir==1){
-   constval = xplt[sd->is1]+sd->sliceoffset;
+   constval = xplt[sd->is1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
    if(sd->js1+1>maxj){
@@ -1945,7 +1945,7 @@ void drawslice_texture(const slice *sd){
    glEnd();
   }
   else if(sd->idir==2){
-   constval = yplt[sd->js1]+sd->sliceoffset;
+   constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
      float xmid;
@@ -1988,7 +1988,7 @@ void drawslice_texture(const slice *sd){
    glEnd();
   }
   else if(sd->idir==3){
-   constval = zplt[sd->ks1]+sd->sliceoffset;
+   constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
      float xmid;
@@ -2077,7 +2077,7 @@ void drawvolslice_texture(const slice *sd){
    int iislice;
 
    iislice = meshi->plotx;
-   constval = xplt[iislice]+sd->sliceoffset;
+   constval = xplt[iislice]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
    if(sd->js1+1>maxj){
@@ -2135,7 +2135,7 @@ void drawvolslice_texture(const slice *sd){
    glEnd();
   }
   if(meshi->visy==1){
-   constval = yplt[sd->js1+meshi->ploty]+sd->sliceoffset;
+   constval = yplt[sd->js1+meshi->ploty]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
      float xmid;
@@ -2192,7 +2192,7 @@ void drawvolslice_texture(const slice *sd){
    glEnd();
   }
   if(meshi->visz==1){
-   constval = zplt[meshi->plotz]+sd->sliceoffset;
+   constval = zplt[meshi->plotz]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
      float xmid;
@@ -2294,7 +2294,7 @@ void drawvolslice(const slice *sd){
    int iislice;
 
    iislice = meshi->plotx;
-   constval = xplt[iislice]+sd->sliceoffset;
+   constval = xplt[iislice]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
    if(sd->js1+1>maxj){
@@ -2345,7 +2345,7 @@ void drawvolslice(const slice *sd){
    glEnd();
   }
   if(meshi->visy==1){
-   constval = yplt[sd->js1+meshi->ploty]+sd->sliceoffset;
+   constval = yplt[sd->js1+meshi->ploty]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
      n = (i-sd->is1)*sd->nslicej*sd->nslicek -1;
@@ -2395,7 +2395,7 @@ void drawvolslice(const slice *sd){
    glEnd();
   }
   if(meshi->visz==1){
-   constval = zplt[meshi->plotz]+sd->sliceoffset;
+   constval = zplt[meshi->plotz]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
      n = (i-sd->is1)*sd->nslicej*sd->nslicek -sd->nslicek;
@@ -2482,7 +2482,7 @@ void drawvvolslice(const vslice *vd){
   v = vd->v;
   w = vd->w;
   if(meshi->visx==1){
-   constval = xplttemp[meshi->plotx]+sd->sliceoffset;
+   constval = xplttemp[meshi->plotx]+offset_slice*sd->sliceoffset;
    glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    maxj = sd->js2;
@@ -2537,7 +2537,7 @@ void drawvvolslice(const vslice *vd){
 
   }
   if(meshi->visy==1){
-   constval = yplttemp[meshi->ploty]+sd->sliceoffset;
+   constval = yplttemp[meshi->ploty]+offset_slice*sd->sliceoffset;
    glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
@@ -2589,7 +2589,7 @@ void drawvvolslice(const vslice *vd){
    sniffErrors("after drawvslice:points dir=2");
   }
   if(meshi->visz==1){
-   constval = zplttemp[meshi->plotz]+sd->sliceoffset;
+   constval = zplttemp[meshi->plotz]+offset_slice*sd->sliceoffset;
    glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
@@ -2677,7 +2677,7 @@ void drawvslice(const vslice *vd){
   v = vd->v;
   w = vd->w;
   if(sd->idir==1){
-   constval = xplttemp[sd->is1]+sd->sliceoffset;
+   constval = xplttemp[sd->is1]+offset_slice*sd->sliceoffset;
    glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    maxj = sd->js2;
@@ -2730,7 +2730,7 @@ void drawvslice(const vslice *vd){
 
   }
   else if(sd->idir==2){
-   constval = yplttemp[sd->js1]+sd->sliceoffset;
+   constval = yplttemp[sd->js1]+offset_slice*sd->sliceoffset;
    glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    for(i=sd->is1; i<sd->is2+1; i+=vectorskip){
@@ -2778,7 +2778,7 @@ void drawvslice(const vslice *vd){
    sniffErrors("after drawvslice:points dir=2");
   }
   else if(sd->idir==3){
-   constval = zplttemp[sd->ks1]+sd->sliceoffset;
+   constval = zplttemp[sd->ks1]+offset_slice*sd->sliceoffset;
    glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    for(i=sd->is1; i<sd->is2+1; i+=vectorskip){

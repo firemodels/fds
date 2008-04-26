@@ -622,6 +622,10 @@ void ShowVSliceMenu(int value){
     show_slice_in_obst=1-show_slice_in_obst;
     return;
   }
+  if(value==-12){
+    offset_slice=1-offset_slice;
+    return;
+  }
   vd = vsliceinfo + value;
   ASSERTFLAG(vd->display);
   if(islicetype==sliceinfo[vd->ival].type){
@@ -681,6 +685,9 @@ void ShowHideSliceMenu(int value){
     case -11:
       show_slice_in_obst=1-show_slice_in_obst;
       break;
+    case -12:
+      offset_slice=1-offset_slice;
+      break;
     default:
       ASSERT(FFALSE);
     }
@@ -708,8 +715,8 @@ void ShowHideSliceMenu(int value){
   updateslicefilenum();
   plotstate=getplotstate(DYNAMIC_PLOTS);
 
-    updateglui();
-    updateslicelistindex(slicefilenum);
+  updateglui();
+  updateslicelistindex(slicefilenum);
   updateShow();
 }
 
@@ -730,6 +737,9 @@ void ShowMultiSliceMenu(int value){
     return;
   case -11:
     show_slice_in_obst=1-show_slice_in_obst;
+    break;
+  case -12:
+    offset_slice=1-offset_slice;
     break;
   default:
     mslicei = multisliceinfo + value;
@@ -4846,6 +4856,8 @@ if(visBlocks==visBLOCKOutline){
     }
     if(show_slice_in_obst==1)glutAddMenuEntry("*Show vector slice in blockage",-11);
     if(show_slice_in_obst==0)glutAddMenuEntry("Show vector slice in blockage",-11);
+    if(offset_slice==1)glutAddMenuEntry("*Offset vector slice",-12);
+    if(offset_slice==0)glutAddMenuEntry("Offset vector slice",-12);
     if(vd2!=NULL&&nvsliceloaded0!=0){
       glutAddMenuEntry("",-10);
       STRCPY(menulabel,"Show All ");
@@ -4880,6 +4892,8 @@ if(visBlocks==visBLOCKOutline){
     }
     if(show_slice_in_obst==1)glutAddMenuEntry("*Show multi slice in blockage",-11);
     if(show_slice_in_obst==0)glutAddMenuEntry("Show multi slice in blockage",-11);
+    if(offset_slice==1)glutAddMenuEntry("*Offset slice",-12);
+    if(offset_slice==0)glutAddMenuEntry("Offset slice",-12);
   }
 
 /* --------------------------------showslice menu -------------------------- */
@@ -4905,6 +4919,8 @@ if(visBlocks==visBLOCKOutline){
     glutAddMenuEntry("-",-10);
     if(show_slice_in_obst==1)glutAddMenuEntry("*Show slice in blockage",-11);
     if(show_slice_in_obst==0)glutAddMenuEntry("Show slice in blockage",-11);
+    if(offset_slice==1)glutAddMenuEntry("*Offset slice",-12);
+    if(offset_slice==0)glutAddMenuEntry("Offset slice",-12);
     if(nsliceloaded>0&&sd2!=NULL){
       glutAddMenuEntry("-",-10);
       STRCPY(menulabel,"Show All ");
