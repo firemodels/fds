@@ -37,6 +37,7 @@ void glui_stereo_setup(int main_window);
 void glui_trainer_setup(int main_window);
 void glui_3dsmoke_setup(int main_window);
 void RenderMenu(int value);
+void GeometryMenu(int val);
 //void InitOpenGL(void);
 
 /* ------------------ initcase_c ------------------------ */
@@ -993,6 +994,7 @@ void initvars1(void){
   hrrpuv_loaded=0;
   show_bothsides_ext=0;
   show_slice_in_obst=0;
+  offset_slice=0;
   updategluiview=1;
   trainer_pause=0;
   trainee_location=0;

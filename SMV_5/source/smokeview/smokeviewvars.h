@@ -31,7 +31,7 @@
 SVEXTERN int navatar_colors;
 SVEXTERN float *avatar_colors;
 
-SVEXTERN int show_slice_in_obst;
+SVEXTERN int show_slice_in_obst, offset_slice;
 
 SVEXTERN int force_isometric;
 SVEXTERN int updategluiview;
