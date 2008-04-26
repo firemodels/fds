@@ -5813,6 +5813,12 @@ int readini2(char *inifile, int loaddatafile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
+    if(match(buffer,"OFFSETSLICE",11)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&offset_slice);
+      if(offset_slice!=0)offset_slice=1;
+      continue;
+    }
     if(match(buffer,"SHOWTERRAIN",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visTerrain);
@@ -8115,6 +8121,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",trainerview);
   fprintf(fileout,"SHOWTERRAIN\n");
   fprintf(fileout," %i\n",visTerrain);
+  fprintf(fileout,"OFFSETSLICE\n");
+  fprintf(fileout," %i\n",offset_slice);
 
   fprintf(fileout,"\nMISC\n");
   fprintf(fileout,"----\n\n");
