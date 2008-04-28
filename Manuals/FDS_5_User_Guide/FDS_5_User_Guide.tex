@@ -36,6 +36,7 @@
 \usepackage{lastpage} % Automatic last page number reference.
 \usepackage[T1]{fontenc}
 \usepackage{upquote}
+\usepackage{array,eqnarray}
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}{\tt\small}
 %\newfont{\ct}{cmtt10 at 9pt}
@@ -3067,8 +3068,12 @@ interior of a tunnel, and a wind is blowing at one of the portals that affects t
 \normalsize
 
 \noindent
-The dynamic pressure is taken as $\rho_\infty U^2/2$ in units of Pa. The term $\rho_\infty$ is the ambient density outside, and $U$ is a characteristic
-velocity outside, like the free-stream wind speed, in units of m/s. The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
+The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cal H$ is specified as
+\begin{equationarray}{lclcl}
+{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 &\quad& \mbox{(outgoing)}  \nonumber\\
+{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty &\quad& \mbox{(incoming)} 
+\end{equationarray}
+where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary. The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
 need to ramp the pressure up or down starting at zero, like you do for various other ramps.
 The net effect of a positive dynamic pressure at an otherwise quiescent boundary is to
 drive a flow into the domain. However, a fire-driven flow of sufficient strength can push back against this incoming flow. A simple example demonstrating this
