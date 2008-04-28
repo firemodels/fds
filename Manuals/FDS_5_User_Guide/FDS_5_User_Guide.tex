@@ -6835,6 +6835,8 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct MIXTURE\_FRACTION}                         & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct nitrogen}                                  & $X_{N_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
 {\ct optical depth}                             & $OD=K/2.3$ (Section~\ref{info:visibility})    & 1/m            & D,I,P,S      \\ \hline
+{\ct other}                                     & $X_{other}(Z)$                                & mol/mol        & D,I,P,S      \\ \hline
+{\ct other mass fraction}                       & $Y_{other}(Z)$                                & mol/mol        & D,I,P,S      \\ \hline
 {\ct oxygen}                                    & $X_{O_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
 {\ct oxygen mass fraction}                      & $Y_{O_2}(Z)$                                  & kg/kg          & D,I,P,S      \\ \hline
 {\ct [PART\_ID]\_AMPUA}                         & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
@@ -6869,6 +6871,15 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct W-VELOCITY}                                & $w$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct UPPER TEMPERATURE}                         & See Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
 {\ct VELOCITY}                                  & $\sqrt{u^2+v^2+w^2}$                          & m/s            & D,I,P,S      \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
 {\ct VISCOSITY}                                 & $\mu$                                         & kg/m/s         & D,I,P,S      \\ \hline
 {\ct visibility}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & See Section~\ref{info:flows}                  & m$^3$/s        & D            \\ \hline
