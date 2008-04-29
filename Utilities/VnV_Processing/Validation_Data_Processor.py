@@ -583,7 +583,7 @@ for data_record in group_quantity_data_dicts[2]:
     #print "Mod Plot Data:", mod_plot_data
     
     # Create plot for data_record.
-    #comparison_plot(group_quantity_data_dicts[2][data_record],exp_plot_data,mod_plot_data)
+    comparison_plot(group_quantity_data_dicts[2][data_record],exp_plot_data,mod_plot_data)
     print "\n"
 
 ## Create scatter plots
