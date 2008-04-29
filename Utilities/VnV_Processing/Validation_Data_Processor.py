@@ -490,13 +490,15 @@ def scatter_plot(group_info,scatter_info,data_set):
             g.plot(graph.data.points(errorLineUpperPoints, title=None, x=1, y=2),
                     [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
             
-            mystyle = graph.style.symbol(graph.style.symbol.changetriangletwice, size=0.1*unit.v_cm, 
-                            symbolattrs=[graph.style.symbol.changefilledstroked, 
-                                        attr.changelist([color.rgb.red, color.rgb.green, color.rgb.blue])])
+            # mystyle = graph.style.symbol(graph.style.symbol.changetriangletwice, size=0.1*unit.v_cm, 
+            #                 symbolattrs=[graph.style.symbol.changefilledstroked, 
+            #                             attr.changelist([color.rgb.red, color.rgb.green, color.rgb.blue])])
         
             #One point at a time added to plot from each data set.
             # Iterate over items in scatter data dictionary key for items that are not [].
             # Append data sets to scatter_plot_data_list
+            # colors for symbols are from http://pyx.sourceforge.net/manual/colorname.html
+            
             scatter_plot_data_list = []
             
             grouped_data = {}
@@ -515,13 +517,41 @@ def scatter_plot(group_info,scatter_info,data_set):
                     grouped_data_list[int(data_set_item[0])].append(data_set_item[1])
                 print "Grouped data list:", grouped_data_list
                 
+                #g.plot(graph.data.points(scatter_plot_data, x=1, y=2, title=group_info[int(data_set[quantity_number][0][0])]["Group_Title"]), [mystyle])
+                
                 group_counter = 0
                 for j in grouped_data_list:
                     print "J =", j
                     if j != []:
-                        #print group_counter
-                        print group_info[group_counter]["Group_Title"]
-                        g.plot(graph.data.points(j, x=1, y=2, title=group_info[group_counter]["Group_Title"]), [mystyle])
+                        print group_counter
+                        
+                        # Pull group symbol specifications from config file.
+                        config_group_symbol = group_info[group_counter]["Symbol"]
+                        #print config_group_symbol
+                        group_symbol = "graph.style.symbol."+config_group_symbol
+                        #print group_symbol
+                        
+                        config_group_symbol_color = group_info[group_counter]["Color"]
+                        #print config_group_symbol_color
+                        #group_color = "color.rgb."+config_group_symbol_color
+                        
+                        config_group_symbol_filled = group_info[group_counter]["Filled"]
+                        #print config_group_symbol_filled
+                        
+                        if config_group_symbol_filled == 'yes':
+                            fillstyle = "deco.filled([color.rgb."+config_group_symbol_color+"])"
+                        else:
+                            fillstyle = "deco.stroked([color.rgb."+config_group_symbol_color+"])"
+                        print group_symbol, fillstyle     
+                        
+                        #Create temporary symbol style.
+                        tempstyle = "graph.style.symbol("+group_symbol+", size=0.1*unit.v_cm, symbolattrs=["+fillstyle+"])"
+                        print "TempStyle:", tempstyle
+                        
+                        scatterpointstyle = eval(tempstyle)
+                        
+                        #print group_info[group_counter]["Group_Title"]
+                        g.plot(graph.data.points(j, x=1, y=2, title=group_info[group_counter]["Group_Title"]), [scatterpointstyle])
                     else:
                         pass
                     group_counter = group_counter + 1
@@ -532,8 +562,7 @@ def scatter_plot(group_info,scatter_info,data_set):
                 scatter_plot_data = []
                 scatter_plot_data.append(data_set[quantity_number][0][1])
                 print scatter_plot_data
-                g.plot(graph.data.points(scatter_plot_data, x=1, y=2, title=group_info[int(data_set[quantity_number][0][0])]["Group_Title"]), [mystyle])
-            
+                
             #print grouped_data_list
             
             # Now plot the Title text, alignment based on title quadrant setting.
