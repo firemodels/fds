@@ -117,7 +117,7 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
 
 /* ------------------ getpart5data ------------------------ */
 
-void getpart5data(particle *parti, int partframestep, int partpointstep){
+void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_all){
   FILE *PART5FILE;
   int one;
   int endianswitch=0;
@@ -132,8 +132,8 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
   int numtypes_temp[2];
   char *reg_file;
   part5data *datacopy;
-  int count=-1;
-  int count2=-1;
+  int count;
+  int count2;
   int first_frame=1;
 
   reg_file=parti->reg_file;
@@ -164,12 +164,13 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
   CheckMemory;
 
   datacopy = parti->data5;
+  count=0;
+  count2=-1;
   for(;;){
     int doit;
 
     CheckMemory;
-    count++;
-    if(count>=parti->nframes)break;
+    if(count>=nf_all)break;
     if(count%partframestep==0){
       count2++;
       doit=1;
@@ -177,11 +178,12 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
     else{
       doit=0;
     }
+    count++;
 
     FORTPART5READ(&time,1);
     if(returncode==0)break;
-    printf("particle time=%.2f",time);
     if(doit==1){
+      printf("particle time=%.2f",time);
       parti->ptimes[count2]=time;
     }
     for(i=0;i<nclasses;i++){
@@ -246,10 +248,10 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
       }
       else{
         if(parti->evac==1){
-          skip = 4 + XYZ_EXTRA*4*nparts + 4;  
+          skip += 4 + XYZ_EXTRA*4*nparts + 4;  
         }
         else{
-          skip = 4 + 3*4*nparts + 4;  
+          skip += 4 + 3*4*nparts + 4;  
         }
       }
       CheckMemory;
@@ -270,13 +272,20 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
         }
       }
       else{
-        skip = 4 + 4*nparts + 4;  // skip over tag for now
+        skip += 4 + 4*nparts + 4;  // skip over tag for now
       }
       CheckMemory;
-      if(numtypes[2*i]>0){
+      if(doit==1){
+        if(numtypes[2*i]>0){
         //skip += 4 + 4*nparts*numtypes[2*i] + 4;  // skip over vals for now
-        FORTPART5READ(datacopy->rvals,nparts*numtypes[2*i]);
-        if(returncode==0)goto wrapup;
+          FORTPART5READ(datacopy->rvals,nparts*numtypes[2*i]);
+          if(returncode==0)goto wrapup;
+        }
+      }
+      else{
+        if(numtypes[2*i]>0){
+          skip += 4 + 4*nparts*numtypes[2*i] + 4;  // skip over vals for now
+        }
       }
       CheckMemory;
       if(numtypes[2*i+1]>0){
@@ -290,11 +299,11 @@ void getpart5data(particle *parti, int partframestep, int partpointstep){
         if(returncode!=0)goto wrapup;
       }
       CheckMemory;
-      datacopy++;
+      if(doit==1)datacopy++;
     }
     CheckMemory;
     if(first_frame==1)first_frame=0;
-    printf(" completed\n");
+    if(doit==1)printf(" completed\n");
 
   }
 wrapup:
@@ -587,15 +596,16 @@ int get_tagindex(part5data *data, int tagval){
 
 /* ------------------ getpart5header ------------------------ */
 
-void getpart5header(particle *parti, int partframestep){
+void getpart5header(particle *parti, int partframestep, int *nf_all){
   FILE *stream;
   char buffer[256];
   float time;
-  int count=-1;
+  int count;
   char *reg_file, *size_file;
   int i,j;
   int stat_sizefile, stat_regfile;
   struct stat stat_sizefile_buffer, stat_regfile_buffer;
+  int nframes_all;
 
   reg_file=parti->reg_file;
   size_file=parti->size_file;
@@ -636,15 +646,27 @@ void getpart5header(particle *parti, int partframestep){
   if(stream==NULL)return;
 
     // pass 1: count frames
-
+  
+  nframes_all=0;
   for(;;){
+    int exitloop;
+
     if(fgets(buffer,255,stream)==NULL)break;
-    count++;
-    if(count%partframestep!=0)continue;
     sscanf(buffer,"%f",&time);
+    exitloop=0;
+    for(i=0;i<parti->nclasses;i++){
+      if(fgets(buffer,255,stream)==NULL){
+        exitloop=1;
+        break;
+      }
+    }
+    if(exitloop==1)break;
+    nframes_all++;
+    if((nframes_all-1)%partframestep!=0)continue;
     (parti->nframes)++;
   }
   rewind(stream);
+  *nf_all = nframes_all;
 
   // allocate memory for number of time steps * number of classes
 
@@ -669,18 +691,38 @@ void getpart5header(particle *parti, int partframestep){
     int fail;
 
     fail=0;
+    count=-1;
     datacopy=parti->data5;
-    for(i=0;i<parti->nframes;i++){
+    for(i=0;i<nframes_all;i++){
+      int j;
+
+      count++;
+      fail=0;
+      if(count%partframestep!=0){
+        if(fgets(buffer,255,stream)==NULL){
+          fail=1;
+          break;
+        }
+        for(j=0;j<parti->nclasses;j++){
+          if(fgets(buffer,255,stream)==NULL){
+            fail=1;
+            break;
+          }
+        }
+        if(fail==1)break;
+        continue;
+      }
       if(fgets(buffer,255,stream)==NULL){
         fail=1;
         break;
       }
-      sscanf(buffer,"%f",&datacopy->time);
+      sscanf(buffer,"%f",&time);
       for(j=0;j<parti->nclasses;j++){
         int npoints ,ntypes;
 
         part5class *partclassj;
 
+        datacopy->time = time;
         partclassj = parti->partclassptr[j];
         initpart5data(datacopy,partclassj);
         if(fgets(buffer,255,stream)==NULL){
@@ -705,8 +747,8 @@ void getpart5header(particle *parti, int partframestep){
           }
           ntypes = datacopy->partclassbase->ntypes;
           if(ntypes>0){
-            NewMemory((void **)&datacopy->rvals,(ntypes-0)*npoints*sizeof(float));
-            NewMemory((void **)&datacopy->irvals,(ntypes-0)*npoints*sizeof(unsigned char));
+            NewMemory((void **)&datacopy->rvals, ntypes*npoints*sizeof(float));
+            NewMemory((void **)&datacopy->irvals,ntypes*npoints*sizeof(unsigned char));
           }
         }
         datacopy++;
@@ -745,6 +787,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   particle *parti;
   int blocknumber;
   mesh *meshi;
+  int nf_all;
 
   parti=partinfo+ifile;
 
@@ -801,7 +844,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   }
   
   printf("Sizing particle data: %s\n",file);
-  getpart5header(parti, partframestep);
+  getpart5header(parti, partframestep, &nf_all);
 
   offsetmax=5;
   if(offsetmax>ibar/4)offsetmax=ibar/4;
@@ -809,7 +852,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   if(offsetmax>kbar/4)offsetmax=kbar/4;
   
   printf("Loading particle data: %s\n",file);
-  getpart5data(parti,partframestep,partpointstep);
+  getpart5data(parti,partframestep,partpointstep, nf_all);
   updateglui();
 
 #ifdef _DEBUG
