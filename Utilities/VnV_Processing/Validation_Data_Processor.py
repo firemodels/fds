@@ -24,18 +24,19 @@ def extract_config_data(config_file):
     quantity_counter = 0
     data_counter = 0
     group_counter = 0
+    skip_counter = 0
     
     #Create File Object
     try:
         fh = file(config_file, 'U')
     except:
-	    print"The Config File does not exist or the path defined in the script is incorrect."
+	    print"The Config File "+config_file_name+" does not exist or the path defined in the script is incorrect."
 	
     #Read file with csv module.
     data_array = csv.reader(fh)
     #Convert into List object
     config_lists = [list(sublist) for sublist in data_array]
-    print str(len(config_lists)) + " lines read from Configuration file\n"
+    print str(len(config_lists))+" lines read in from "+config_file_name+"\n"
     
     #Build Quantity and Data Dictionaries, with values keyed by config column name.
     for list_item in config_lists:
@@ -74,8 +75,10 @@ def extract_config_data(config_file):
                 keyed_data = {}
             data_counter += 1
         else:
-            pass
+            skip_counter = skip_counter + 1
             #print """No g, d or q, skip row."""
+            
+    print "There were "+str(skip_counter)+" lines skipped, out of the "+str(len(config_lists))+" lines read in."
     
     # Return a single list object containing the dictionaries.
     #print groups_dict
@@ -97,7 +100,6 @@ def find_start_stop_index(data_dict,col_name,start_time_data,stop_time_data,star
     rowcounter1 = 0
     for time_value1 in data_dict[col_name]:
         if time_value1 >= (float(start_time_data)*60):
-            #print "Set #1"
             #print "Time Starts at row #:", str(rowcounter1)
             #print "With a value of:", str(time_value1)
             time_start_index = rowcounter1
@@ -112,7 +114,6 @@ def find_start_stop_index(data_dict,col_name,start_time_data,stop_time_data,star
             break
         else:
             row_number2 = (rowcounter2 - 1)
-            #print "Set #2"
             #print "Time Ends at row #: "+str(row_number2)
             #print "With a value of: "+str(data_dict[col_name][row_number2])
             time_end_index = row_number2
@@ -122,7 +123,6 @@ def find_start_stop_index(data_dict,col_name,start_time_data,stop_time_data,star
     rowcounter3 = 0
     for time_value3 in data_dict[col_name]:
         if time_value3 >= (float(start_time_comp)*60):
-            #print "Set #3"
             #print "Comparison Time Starts at row #:", str(rowcounter3)
             #print "With a value of:", str(time_value3)
             minmax_start_index = rowcounter3
@@ -139,7 +139,6 @@ def find_start_stop_index(data_dict,col_name,start_time_data,stop_time_data,star
             rowcounter4 += 1
         else:
             row_number4 = (rowcounter4 - 1)
-            #print "Set #4"
             #print "Comparison Time Ends at row #: "+str(row_number4)
             #print "With a value of: "+str(data_dict[col_name][row_number4])
             minmax_end_index = row_number4
@@ -312,25 +311,14 @@ def extract_comp_data(comp_file_info):
         #print mod_data
         scatter_counter =+ 1
         
-    #print "Scatter Data Dict:", scatter_data_dict
     # Close files
     exp_file_object.close()
     mod_file_object.close()
     
-    # if len(exp_data) > 1:
-    #     print "Exp. Group list, that has a length of:", len(exp_data)
-    # if len(mod_data) > 1:
-    #     print "Mod. Group list, that has a length of:", len(mod_data)
-    
     return [exp_data,mod_data]
 
-
-## Plot Validation Data to PDF files
-## Two kinds of plots... Comparison and Scatter
-
 def comparison_plot(plot_data,exp_data,mod_data):
-    #plot_data is the items from the 'd' rows of the config file.
-    #Variables from configuration file column names.
+    #plot_data is a list of values from the 'd' row of the config file being processed.
     
     # Variables for plot.
     plot_title = plot_data['Plot_Title']
@@ -364,12 +352,12 @@ def comparison_plot(plot_data,exp_data,mod_data):
                         x=graph.axis.linear(title=x_title, min=min_x, max=max_x), 
                         y=graph.axis.linear(title=y_title, min=min_y, max=max_y))
     
-    expPlotStyle = graph.style.line(lineattrs=[color.gradient.Rainbow, style.linestyle.solid, style.linewidth(0.06*unit.w_cm)])
-    modPlotStyle = graph.style.line(lineattrs=[color.gradient.Rainbow, style.linestyle.dotted, style.linewidth(0.06*unit.w_cm)])
-    #attr.changelist([color.rgb.black, color.rgb.green]), 
+    # Create line styles that have predetermined color order for each pair in series.  
+    # All Experimental data is plotted with solid lines while Model data is dotted.
+    expPlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Black, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.06*unit.w_cm)])
+    modPlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Black, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.dotted, style.linewidth(0.06*unit.w_cm)])
     
-    
-    # Create loop strcuture here to process compound colum name d lines.
+    # Loop strcuture to process compound colum names in d line.
     if len(exp_data) > 1 :
         #Set plot legend key text.
         exp_key_list = eval(plot_data['Exp_Key'])
@@ -392,7 +380,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
         #Set plot legend key text.
         exp_key = plot_data['Exp_Key']
         mod_key = plot_data['Mod_Key']
-        #One line at a time added to plot from each data set.
+        
         # Plot Experimental data
         g.plot(graph.data.points(exp_data[0], title=exp_key, x=1, y=2),
             [graph.style.line([color.rgb.black, style.linewidth(0.06*unit.w_cm), style.linestyle.solid])])
@@ -416,10 +404,10 @@ def comparison_plot(plot_data,exp_data,mod_data):
     # Write the output
     plot_file_path = output_directory+plot_file_name
     g.writePDFfile(plot_file_path)
-    print "Plot to: \n", plot_file_path+".PDF"
+    print "Comparison Plot to: \n", plot_file_path+".PDF"
 
 def scatter_plot(group_info,scatter_info,data_set):
-    #data_set is a dictionary keyed by quantity containing lists of groups and X and Y data points.
+    #data_set is a dictionary keyed by quantity, containing lists of groups and X and Y data points.
     #print "Group Info:", group_info
     
     for quantity_number in scatter_info:
@@ -443,7 +431,7 @@ def scatter_plot(group_info,scatter_info,data_set):
             #print max_x
             min_y = float(scatter_info[int(quantity_number)]['Plot_Min'])
             max_y = float(scatter_info[int(quantity_number)]['Plot_Max'])
-            percent_error = int(scatter_info[int(quantity_number)]['%error'])
+            percent_error = float(scatter_info[int(quantity_number)]['%error'])
             title_quadrant = int(scatter_info[int(quantity_number)]['Title_Quadrant'])
             key_pos = scatter_info[int(quantity_number)]['Key_Position']
             key_dist = 0.2*unit.v_cm
@@ -458,7 +446,7 @@ def scatter_plot(group_info,scatter_info,data_set):
                 ()
                 #print "Key Position =", key_pos
             else:
-                print "The key position was not specified./nUsing the default bottom right position."
+                print "The key position was not specified.\nUsing the default bottom right position."
                 key_pos = "br"
             
             #Begin Plotting
@@ -471,29 +459,40 @@ def scatter_plot(group_info,scatter_info,data_set):
             
             #Plot Midline and Error bounds lines.
             errorLineCenterPoints = [[min_x,min_y],[max_x,max_y]]
-            #print errorLineCenterPoints
-            lower_bound = max_y - max_y * percent_error / 100
-            #print lower_bound
-            errorLineLowerPoints = [[min_x,min_y],[max_x,lower_bound]]
-            #print errorLineLowerPoints
-            upper_bound = max_y + max_y * percent_error / 100.0
-            #print upper_bound
-            errorLineUpperPoints = [[min_x,min_y],[max_x,upper_bound]]
-            #print errorLineUpperPoints
+            
+            if min_x < 0:
+                #print errorLineCenterPoints
+                lower_bound = ((min_y)+((min_y)*(percent_error / 100)))
+                #print "Lower Bound:", lower_bound
+                errorLineLowerPoints = [[min_x,lower_bound],[max_x,max_y]]
+                #print "Lower Error Line Points:", errorLineLowerPoints
+                upper_bound = ((min_y)-((min_y)*(percent_error/100)))
+                #print "Upper Bound:", 
+                errorLineUpperPoints = [[min_x,upper_bound],[max_x,max_y]]
+                #print "Upper Error Line Points:", errorLineUpperPoints
+            else:
+                #print errorLineCenterPoints
+                lower_bound = max_y - max_y * percent_error / 100
+                #print lower_bound
+                errorLineLowerPoints = [[min_x,min_y],[max_x,lower_bound]]
+                #print errorLineLowerPoints
+                upper_bound = max_y + max_y * percent_error / 100.0
+                #print upper_bound
+                errorLineUpperPoints = [[min_x,min_y],[max_x,upper_bound]]
+                #print errorLineUpperPoints
             
             g.plot(graph.data.points(errorLineCenterPoints, title=None, x=1, y=2),
                     [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
                     
-            g.plot(graph.data.points(errorLineLowerPoints, title=None, x=1, y=2),
-                    [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
+            if percent_error == 0:
+                print "No Error Bars Drawn"
+            else:
+                g.plot(graph.data.points(errorLineLowerPoints, title=None, x=1, y=2),
+                        [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
                     
-            g.plot(graph.data.points(errorLineUpperPoints, title=None, x=1, y=2),
-                    [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
+                g.plot(graph.data.points(errorLineUpperPoints, title=None, x=1, y=2),
+                        [graph.style.line([style.linewidth.Thin, style.linestyle.dashed])])
             
-            # mystyle = graph.style.symbol(graph.style.symbol.changetriangletwice, size=0.1*unit.v_cm, 
-            #                 symbolattrs=[graph.style.symbol.changefilledstroked, 
-            #                             attr.changelist([color.rgb.red, color.rgb.green, color.rgb.blue])])
-        
             #One point at a time added to plot from each data set.
             # Iterate over items in scatter data dictionary key for items that are not [].
             # Append data sets to scatter_plot_data_list
@@ -515,15 +514,13 @@ def scatter_plot(group_info,scatter_info,data_set):
                     #print data_set_item
                     #print "Data for group "+data_set_item[0]+":", data_set_item[1]
                     grouped_data_list[int(data_set_item[0])].append(data_set_item[1])
-                print "Grouped data list:", grouped_data_list
-                
-                #g.plot(graph.data.points(scatter_plot_data, x=1, y=2, title=group_info[int(data_set[quantity_number][0][0])]["Group_Title"]), [mystyle])
-                
+                #print "Grouped data list:", grouped_data_list
+                                
                 group_counter = 0
                 for j in grouped_data_list:
-                    print "J =", j
+                    #print "J =", j
                     if j != []:
-                        print group_counter
+                        #print group_counter
                         
                         # Pull group symbol specifications from config file.
                         config_group_symbol = group_info[group_counter]["Symbol"]
@@ -539,14 +536,14 @@ def scatter_plot(group_info,scatter_info,data_set):
                         #print config_group_symbol_filled
                         
                         if config_group_symbol_filled == 'yes':
-                            fillstyle = "deco.filled([color.rgb."+config_group_symbol_color+"])"
+                            fillstyle = "deco.filled([color.cmyk."+config_group_symbol_color+"])"
                         else:
-                            fillstyle = "deco.stroked([color.rgb."+config_group_symbol_color+"])"
-                        print group_symbol, fillstyle     
+                            fillstyle = "deco.stroked([color.cmyk."+config_group_symbol_color+"])"
+                        #print group_symbol, fillstyle     
                         
                         #Create temporary symbol style.
                         tempstyle = "graph.style.symbol("+group_symbol+", size=0.1*unit.v_cm, symbolattrs=["+fillstyle+"])"
-                        print "TempStyle:", tempstyle
+                        #print "TempStyle:", tempstyle
                         
                         scatterpointstyle = eval(tempstyle)
                         
@@ -558,10 +555,10 @@ def scatter_plot(group_info,scatter_info,data_set):
                     
             else:
                 print "Non-Grouped Scatter Data:"
-                print data_set[quantity_number]
+                #print data_set[quantity_number]
                 scatter_plot_data = []
                 scatter_plot_data.append(data_set[quantity_number][0][1])
-                print scatter_plot_data
+                #print scatter_plot_data
                 
             #print grouped_data_list
             
@@ -569,36 +566,43 @@ def scatter_plot(group_info,scatter_info,data_set):
             if title_quadrant == 1:
                 g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
             elif title_quadrant == 2:
-                g.text(g.width-0.1, g.height - 0.2, plot_title, [text.halign.right, text.valign.top, text.size.normalsize])
+                g.text(g.width-0.1, g.height - 0.2, plot_title, [text.halign.right, text.valign.top, text.size.small])
             elif title_quadrant == 3:
-                g.text(0.1, 0.2, plot_title, [text.halign.left, text.valign.bottom, text.size.normalsize])
+                g.text(0.1, 0.2, plot_title, [text.halign.left, text.valign.bottom, text.size.small])
             elif title_quadrant == 4:
-                g.text(g.width-0.1, 0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
+                g.text(g.width-0.1, 0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.small])
             else:
                 print "A title location was not specified./nUsing the default top left quadrant."
                 g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
-                
+            
+            #Make %error text on plot by error bars.
+            # pos_percent_error = str(percent_error)+"%"
+            # neg_percent_error = "-"+str(percent_error)+"%"
+            # g.text(g.width - 0.4, g.height - 0.3, pos_percent_error, [text.halign.center, text.valign.middle, text.size.tiny])
+            # g.text(g.width - 0.2, g.height - 0.4, neg_percent_error, [text.halign.center, text.valign.middle, text.size.tiny])
+            
             # Write the output
             plot_file_path = output_directory+plot_file_name
             #print plot_file_path
             g.writePDFfile(plot_file_path)
-            print "Plot to: \n", plot_file_path+".PDF\n"
+            print "Scatter Plot to: \n", plot_file_path+".PDF\n"
 
 
 ### Start of Main Code
+print "**** READING CONFIGURATION FILE ****"
 
-#Get information from config file.
+##Get information from config file.
 group_quantity_data_dicts = extract_config_data(config_file_name)
-print "\nThere are "+str(len(group_quantity_data_dicts[0]))+" scatter data groups.\n"
+print "\nThere are "+str(len(group_quantity_data_dicts[0]))+" scatter data groups, (g lines).\n"
 #print group_quantity_data_dicts[0]
-print "There are "+str(len(group_quantity_data_dicts[1]))+" quantities defined.\n"
+print "There are "+str(len(group_quantity_data_dicts[1]))+" quantities defined, (q lines).\n"
 #print group_quantity_data_dicts[1]
-print "There are "+str(len(group_quantity_data_dicts[2]))+" comparison data sets to plot.\n"
+print "There are "+str(len(group_quantity_data_dicts[2]))+" comparison data sets to plot, (d lines).\n"
 
-# Create comparison plots
+## Create comparison plots
+print "**** CREATING COMPARISON PLOTS ****"
 for data_record in group_quantity_data_dicts[2]:
     # Each d line, data_record, may contain compound column names from the config file.
-    #print data_record
     
     # Extract relevant portions of comparison data as defined in config file.
     comp_data_to_plot = extract_comp_data(group_quantity_data_dicts[2][data_record])
@@ -616,11 +620,10 @@ for data_record in group_quantity_data_dicts[2]:
     print "\n"
 
 ## Create scatter plots
+print "**** CREATING SCATTER PLOTS ****"
 scatter_quantity = 1
 scatter_group = 1
 temp_scatter_data_list = []
-
-#print sorted(scatter_data_dict)
 
 #Grouping Scatter Data by Quantity
 for scatter_plot_record in sorted(group_quantity_data_dicts[1]):
@@ -643,8 +646,6 @@ for scatter_plot_record in sorted(group_quantity_data_dicts[1]):
 #print "Data to Scatter Plot:", combined_scatter_data
 scatter_plot(group_quantity_data_dicts[0],group_quantity_data_dicts[1],combined_scatter_data)
 
-print "Finished, thank you for waiting."
-
 ## Write Summary Data to File.
 #NRC Comparisons Output
 # Output for each data set 
@@ -657,3 +658,5 @@ print "Finished, thank you for waiting."
 #*DeltaE
 #*DeltaM
 #*Rel Diff
+
+print "Processing finished, thank you for your patience."
