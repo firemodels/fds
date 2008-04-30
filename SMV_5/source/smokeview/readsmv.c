@@ -6157,10 +6157,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       float vmin, vmax;
       char short_label[256],*s1;
 
-
-#ifdef _DEBUG
-      printf("in V5_PARTICLES\n");
-#endif
       strcpy(short_label,"");
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i %f %s",&ivmin,&vmin,&ivmax,&vmax,short_label);
@@ -6283,14 +6279,14 @@ int readini2(char *inifile, int loaddatafile, int localfile){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&partframestep);
 	    if(partframestep<1)partframestep=1;
-      partframeskip=partframeskip-1;
+      partframeskip=partframestep-1;
       continue;
     }
     if(match(buffer,"EVACFRAMESTEP",13)==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&evacframestep);
 	    if(evacframestep<1)evacframestep=1;
-      evacframeskip=evacframeskip-1;
+      evacframeskip=evacframestep-1;
       continue;
     }
     if(match(buffer,"USENISTLOGO",11)==1){
