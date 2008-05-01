@@ -993,7 +993,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TM
                             CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_SPEC_DILUENTS, N_ZONE,MIXTURE_FRACTION_SPECIES, &
                             GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,FLUX_LIMITER,CHECK_BOUNDEDNESS
  
-REAL(EB) :: WFAC,DTRATIO,OMDTRATIO,Z_2,TNOW
+REAL(EB) :: WFAC,Z_2,TNOW
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: R_SUM_DILUENTS
@@ -1281,13 +1281,12 @@ END SUBROUTINE DENSITY_TVD
 
 SUBROUTINE SCALARF
 
-USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER
+USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN_BOUNDARY
 
 ! Computes the divergence of the scalar advective flux + diffusion
 
-INTEGER  :: I,J,K,N
+INTEGER  :: I,J,K,N,II,JJ,KK,IOR,IW,IIG,JJG,KKG
 REAL(EB) :: ZZ(4)
-
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW,FX,FY,FZ
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP, RHOYYP
 
@@ -1302,7 +1301,7 @@ IF (PREDICTOR) THEN
    WW => W
    RHOP => RHO
    IF (N_SPECIES > 0) YYP => YY
-ELSEIF (CORRECTOR) THEN
+ELSE
    UU => US
    VV => VS
    WW => WS
@@ -1326,46 +1325,70 @@ DTBX = 1.2_EB*DT
 
 DO K=1,KBAR
    DO J=1,JBAR
-      DO I=0,IBAR
-         IF (I==0) ZZ(1) = RHOP(I,J,K)
-         IF (I>0)  ZZ(1) = RHOP(I-1,J,K)
-         ZZ(2) = RHOP(I,J,K)
-         ZZ(3) = RHOP(I+1,J,K)
-         IF (I<IBAR)  ZZ(4) = RHOP(I+2,J,K)
-         IF (I==IBAR) ZZ(4) = RHOP(I+1,J,K)
+      DO I=1,IBM1
+         ZZ(1:4)   = RHOP(I-1:I+2,J,K)
          FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)
       ENDDO
    ENDDO
 ENDDO
 
 DO K=1,KBAR
-   DO J=0,JBAR
+   DO J=1,JBM1
       DO I=1,IBAR
-         IF (J==0) ZZ(1) = RHOP(I,J,K)
-         IF (J>0)  ZZ(1) = RHOP(I,J-1,K)
-         ZZ(2) = RHOP(I,J,K)
-         ZZ(3) = RHOP(I,J+1,K)
-         IF (J<JBAR)  ZZ(4) = RHOP(I,J+2,K)
-         IF (J==JBAR) ZZ(4) = RHOP(I,J+1,K)
+         ZZ(1:4)   = RHOP(I,J-1:J+2,K)
          FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
       ENDDO
    ENDDO
 ENDDO
 
-DO K=0,KBAR
+DO K=1,KBM1
    DO J=1,JBAR
       DO I=1,IBAR
-         IF (K==0) ZZ(1) = RHOP(I,J,K)
-         IF (K>0)  ZZ(1) = RHOP(I,J,K-1)
-         ZZ(2) = RHOP(I,J,K)
-         ZZ(3) = RHOP(I,J,K+1)
-         IF (K<KBAR)  ZZ(4) = RHOP(I,J,K+2)
-         IF (K==KBAR) ZZ(4) = RHOP(I,J,K+1)
+         ZZ(1:4)   = RHOP(I,J,K-1:K+2)
          FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
       ENDDO
    ENDDO
 ENDDO
 
+! Compute mass fluxes at boundaries
+
+WALL_LOOP: DO IW=1,NWC
+   IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP
+   II  = IJKW(1,IW)
+   JJ  = IJKW(2,IW)
+   KK  = IJKW(3,IW)
+   IIG = IJKW(6,IW)
+   JJG = IJKW(7,IW)
+   KKG = IJKW(8,IW)
+   IOR = IJKW(4,IW)
+   SELECT CASE(IOR)
+      CASE( 1)
+         ZZ(2)   = RHO_W(IW)
+         ZZ(3:4) = RHOP(1:2,JJ,KK)
+         FX(II,JJ,KK) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)
+      CASE(-1)
+         ZZ(1:2) = RHOP(IBM1:IBAR,JJ,KK)
+         ZZ(3)   = RHO_W(IW)
+         FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1)
+      CASE( 2)
+         ZZ(2)   = RHO_W(IW)
+         ZZ(3:4) = RHOP(II,1:2,KK)
+         FY(II,JJ,KK) = VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
+      CASE(-2)
+         ZZ(1:2) = RHOP(II,JBM1:JBAR,KK)
+         ZZ(3)   = RHO_W(IW)
+         FY(II,JJ-1,KK) = VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
+      CASE( 3)
+         ZZ(2)   = RHO_W(IW)
+         ZZ(3:4) = RHOP(II,JJ,1:2)
+         FZ(II,JJ,KK) = WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
+      CASE(-3)
+         ZZ(1:2) = RHOP(II,JJ,KBM1:KBAR)
+         ZZ(3)   = RHO_W(IW)
+         FZ(II,JJ,KK-1) = WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
+   END SELECT
+ENDDO WALL_LOOP
+         
 ! Compute divergence of advective flux for density
 
 DO K=1,KBAR
@@ -1385,13 +1408,13 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-! Species flux
+! Compute species fluxes at interior cell faces
 
 SPECIES_LOOP: DO N=1,N_SPECIES
 
-   DO K=0,KBAR+1
-      DO J=0,JBAR+1
-         DO I=0,IBAR+1
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
             RHOYYP(I,J,K,N) = RHOP(I,J,K)*YYP(I,J,K,N)
          ENDDO
       ENDDO
@@ -1399,45 +1422,69 @@ SPECIES_LOOP: DO N=1,N_SPECIES
 
    DO K=1,KBAR
       DO J=1,JBAR
-         DO I=0,IBAR
-            IF (I==0) ZZ(1) = RHOYYP(I,J,K,N)
-            IF (I>0)  ZZ(1) = RHOYYP(I-1,J,K,N)
-            ZZ(2) = RHOYYP(I,J,K,N)
-            ZZ(3) = RHOYYP(I+1,J,K,N)
-            IF (I<IBAR)  ZZ(4) = RHOYYP(I+2,J,K,N)
-            IF (I==IBAR) ZZ(4) = RHOYYP(I+1,J,K,N)
+         DO I=1,IBM1
+            ZZ(1:4)   = RHOYYP(I-1:I+2,J,K,N)
             FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)
          ENDDO
       ENDDO
    ENDDO
 
    DO K=1,KBAR
-      DO J=0,JBAR
+      DO J=1,JBM1
          DO I=1,IBAR
-            IF (J==0) ZZ(1) = RHOYYP(I,J,K,N)
-            IF (J>0)  ZZ(1) = RHOYYP(I,J-1,K,N)
-            ZZ(2) = RHOYYP(I,J,K,N)
-            ZZ(3) = RHOYYP(I,J+1,K,N)
-            IF (J<JBAR)  ZZ(4) = RHOYYP(I,J+2,K,N)
-            IF (J==JBAR) ZZ(4) = RHOYYP(I,J+1,K,N)
+            ZZ(1:4)   = RHOYYP(I,J-1:J+2,K,N)
             FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
          ENDDO
       ENDDO
    ENDDO
 
-   DO K=0,KBAR
+   DO K=1,KBM1
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (K==0) ZZ(1) = RHOYYP(I,J,K,N)
-            IF (K>0)  ZZ(1) = RHOYYP(I,J,K-1,N)
-            ZZ(2) = RHOYYP(I,J,K,N)
-            ZZ(3) = RHOYYP(I,J,K+1,N)
-            IF (K<KBAR)  ZZ(4) = RHOYYP(I,J,K+2,N)
-            IF (K==KBAR) ZZ(4) = RHOYYP(I,J,K+1,N)
+            ZZ(1:4)   = RHOYYP(I,J,K-1:K+2,N)
             FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
          ENDDO
       ENDDO
    ENDDO
+
+   ! Compute species fluxes at boundaries
+
+   WALL_LOOP2: DO IW=1,NWC
+      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2
+      II  = IJKW(1,IW)
+      IIG = IJKW(6,IW)
+      JJ  = IJKW(2,IW)
+      JJG = IJKW(7,IW)
+      KK  = IJKW(3,IW)
+      KKG = IJKW(8,IW)
+      IOR = IJKW(4,IW)
+      SELECT CASE(IOR)
+      CASE( 1)
+         ZZ(2)   = RHO_W(IW)*YY_W(IW,N)
+         ZZ(3:4) = RHOYYP(1:2,JJ,KK,N)
+         FX(II,JJ,KK) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)
+      CASE(-1)
+         ZZ(1:2) = RHOYYP(IBM1:IBAR,JJ,KK,N)
+         ZZ(3)   = RHO_W(IW)*YY_W(IW,N)
+         FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1)
+      CASE( 2)
+         ZZ(2)   = RHO_W(IW)*YY_W(IW,N)
+         ZZ(3:4) = RHOYYP(II,1:2,KK,N)
+         FY(II,JJ,KK) = VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
+      CASE(-2)
+         ZZ(1:2) = RHOYYP(II,JBM1:JBAR,KK,N)
+         ZZ(3)   = RHO_W(IW)*YY_W(IW,N)
+         FY(II,JJ-1,KK) = VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
+      CASE( 3)
+         ZZ(2)   = RHO_W(IW)*YY_W(IW,N)
+         ZZ(3:4) = RHOYYP(II,JJ,1:2,N)
+         FZ(II,JJ,KK) = WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
+      CASE(-3)
+         ZZ(1:2) = RHOYYP(II,JJ,KBM1:KBAR,N)
+         ZZ(3)   = RHO_W(IW)*YY_W(IW,N)
+         FZ(II,JJ,KK-1) = WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
+      END SELECT
+   ENDDO WALL_LOOP2
 
    ! Compute divergence of advective flux for species, then add diffusion term
 
