@@ -6792,7 +6792,7 @@ The column ``File Type'' lists the allowed output files for the quantities. ``B'
 ``S'' is for Slice ({\ct SLCF}). Be careful
 when specifying complicated quantities for Iso-surface or Plot3D files, as it requires computation in every gas phase cell.
 
-\begin{table}[h!]
+\begin{table}[p]
 \begin{center}
 \caption{Summary of all Output Quantities}
 \label{tab:output}
@@ -6827,15 +6827,6 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct LAYER HEIGHT}                              & See Section~\ref{info:layerheight}            & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & See Section~\ref{info:heat_detectors}         & $^\circ$C      & D            \\ \hline
 {\ct LOWER TEMPERATURE}                         & See Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-\begin{table}[h!]
-\begin{center}
-\begin{tabular}{|l|c|c|c|}
-\hline
-Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
 {\ct MASS FLOW}                                 & See Section~\ref{info:flows}                  & kg/s           & D            \\ \hline
 {\ct MIXTURE\_FRACTION}                         & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct nitrogen}                                  & $X_{N_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
@@ -6844,6 +6835,15 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct other mass fraction}                       & $Y_{other}(Z)$                                & mol/mol        & D,I,P,S      \\ \hline
 {\ct oxygen}                                    & $X_{O_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
 {\ct oxygen mass fraction}                      & $Y_{O_2}(Z)$                                  & kg/kg          & D,I,P,S      \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[p]
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
 {\ct [PART\_ID]\_AMPUA}                         & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
 {\ct [PART\_ID]\_CPUA}                          & See Section~\ref{info:part_output}            & kW/m$^2$       & B,D          \\ \hline
 {\ct [PART\_ID]\_FLUX\_X}                       & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
@@ -6876,15 +6876,6 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct W-VELOCITY}                                & $w$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct UPPER TEMPERATURE}                         & See Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
 {\ct VELOCITY}                                  & $\sqrt{u^2+v^2+w^2}$                          & m/s            & D,I,P,S      \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-\begin{table}[h!]
-\begin{center}
-\begin{tabular}{|l|c|c|c|}
-\hline
-Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
 {\ct VISCOSITY}                                 & $\mu$                                         & kg/m/s         & D,I,P,S      \\ \hline
 {\ct visibility}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & See Section~\ref{info:flows}                  & m$^3$/s        & D            \\ \hline
