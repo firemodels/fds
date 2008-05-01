@@ -991,14 +991,13 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
                             CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_SPEC_DILUENTS, N_ZONE,MIXTURE_FRACTION_SPECIES, &
-                            GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,FLUX_LIMITER
+                            GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,FLUX_LIMITER,CHECK_BOUNDEDNESS
  
 REAL(EB) :: WFAC,DTRATIO,OMDTRATIO,Z_2,TNOW
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: R_SUM_DILUENTS
 
-REAL(EB) :: YY_MIN,YY_MAX,RHO_MIN,RHO_MAX
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHON
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYN,RHOYYP
 
@@ -1010,31 +1009,27 @@ IF (SOLID_PHASE_ONLY) RETURN
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
 
-CALL SCALARF ! Computes FRHOYY and FRHO and populates SCALAR_WORK
+CALL SCALAR_BOUNDS(1) ! sets SMIN_SAVE and SMAX_SAVE
 
-RHON => SCALAR_WORK1
+CALL SCALARF ! Computes FRHOYY and FRHO and populates SCALAR_SAVE3
+
+RHON => SCALAR_SAVE1
 IF (N_SPECIES>0) THEN
-   YYN    => SCALAR_WORK2
-   RHOYYP => SCALAR_WORK3
+   YYN    => SCALAR_SAVE2
+   RHOYYP => SCALAR_SAVE3
 ENDIF
 
 SELECT_SUBSTEP: IF (PREDICTOR) THEN
    
-   ! Not used yet...
-   !IF (N_SPECIES>0) THEN
-   !   YY_MIN = MINVAL(YY)
-   !   YY_MAX = MAXVAL(YY)
-   !ENDIF
-   !RHO_MIN = MINVAL(RHO)
-   !RHO_MAX = MAXVAL(RHO)
+   IF (N_SPECIES>0) YYN = RHOYYP
+   RHON = RHO
    
    ! Update mass fractions
-   
+    
    DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
-            DO I=1,IBAR
-               YYN(I,J,K,N) = RHOYYP(I,J,K,N)
+            DO I=1,IBAR             
                YYS(I,J,K,N) = YYN(I,J,K,N) - DT*FRHOYY(I,J,K,N)
             ENDDO
          ENDDO
@@ -1046,14 +1041,14 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            RHON(I,J,K) = RHO(I,J,K)
             RHOS(I,J,K) = RHON(I,J,K) - DT*FRHO(I,J,K)
          ENDDO
       ENDDO
    ENDDO
    
-   ! Check boundedness here !!
+   IF (CHECK_BOUNDEDNESS) CALL SCALAR_BOUNDS(2)
 
+  
    ! Extract REALIZABLE YY from REALIZABLE RHO*YY
    
    DO N=1,N_SPECIES
@@ -1152,12 +1147,16 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
 ! The CORRECTOR step   
 ELSEIF (CORRECTOR) THEN
 
-   YY_MIN = MINVAL(YYS)
-   YY_MAX = MAXVAL(YYS)
+   ! Update the density
    
-   RHO_MIN = MINVAL(RHOS)
-   RHO_MAX = MAXVAL(RHOS)
-
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            RHO(I,J,K) = RHOS(I,J,K) - DT*FRHO(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
+   
    ! Update mass fractions
    
    DO N=1,N_SPECIES
@@ -1169,18 +1168,8 @@ ELSEIF (CORRECTOR) THEN
          ENDDO
       ENDDO
    ENDDO
-
-   ! Update the density
    
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            RHO(I,J,K) = RHOS(I,J,K)-DT*FRHO(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-   
-   ! Check boundedness here !!
+   IF (CHECK_BOUNDEDNESS) CALL SCALAR_BOUNDS(2)
    
    ! Corrector step
    DO K=1,KBAR
@@ -1294,18 +1283,18 @@ SUBROUTINE SCALARF
 
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER
 
-! Computes the divergence of the scalar advective flux + diffusion + reaction
+! Computes the divergence of the scalar advective flux + diffusion
 
-!INTEGER, PARAMETER :: LIMITER=2
 INTEGER  :: I,J,K,N
 REAL(EB) :: ZZ(4)
+
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW,FX,FY,FZ
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP, RHOYYP
 
 FX => WORK1
 FY => WORK2
 FZ => WORK3
-IF (N_SPECIES>0) RHOYYP => SCALAR_WORK3
+IF (N_SPECIES>0) RHOYYP => SCALAR_SAVE3
 
 IF (PREDICTOR) THEN
    UU => U
@@ -1320,6 +1309,18 @@ ELSEIF (CORRECTOR) THEN
    RHOP => RHOS
    IF (N_SPECIES > 0) YYP => YYS
 ENDIF
+
+! DTBX stands for 'dt bounds crossing'.  The idea is that for a given scalar field Y
+! and a given 'scalar force' field F, there is some length of time that it would take
+! for the scalar to go out of bounds with a linear Forward Euler (FE) step.  Since our
+! time update is of the form Y(n+1) = Y(n)-DT*F(n), if Y(n) is in bounds, then Y(n+1)
+! can only have a min bounds violation if F(n)>0 and can only have a max bounds
+! violation if F(n)<0 (hence the 'if' statement in the loops below).  As long as Y(n)
+! is in bounds and DT is less than DTBX we are GUARANTEED not to violate boundedness
+! for this FE step.  We need this extra check because the TVD schemes we use for the
+! spatial discretization are only guaranteed to be TVD in 1D. ~RJM
+DTBX = 1.2_EB*DT
+      
 
 ! Density flux
 
@@ -1373,6 +1374,13 @@ DO K=1,KBAR
          FRHO(I,J,K) = RDX(I)*(FX(I,J,K)-FX(I-1,J,K)) &
                      + RDY(J)*(FY(I,J,K)-FY(I,J-1,K)) &
                      + RDZ(K)*(FZ(I,J,K)-FZ(I,J,K-1))
+                     
+         IF (FRHO(I,J,K)>0._EB) THEN
+            DTBX = MIN( DTBX,(RHOP(I,J,K)-SMIN_SAVE(0))/FRHO(I,J,K) )
+         ELSEIF (FRHO(I,J,K)<0._EB) THEN
+            DTBX = MIN( DTBX,(RHOP(I,J,K)-SMAX_SAVE(0))/FRHO(I,J,K) )
+         ENDIF
+         
       ENDDO
    ENDDO
 ENDDO
@@ -1440,19 +1448,30 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                             + RDY(J)*(FY(I,J,K)-FY(I,J-1,K)) &
                             + RDZ(K)*(FZ(I,J,K)-FZ(I,J,K-1)) &
                             - DEL_RHO_D_DEL_Y(I,J,K,N)
+                            
+            IF (FRHOYY(I,J,K,N)>0._EB) THEN
+               DTBX = MIN( DTBX,(RHOYYP(I,J,K,N)-SMIN_SAVE(N))/FRHOYY(I,J,K,N) )
+            ELSEIF (FRHOYY(I,J,K,N)<0._EB) THEN
+               DTBX = MIN( DTBX,(RHOYYP(I,J,K,N)-SMAX_SAVE(N))/FRHOYY(I,J,K,N) )
+            ENDIF
+            
          ENDDO
       ENDDO
    ENDDO
 
 ENDDO SPECIES_LOOP
 
+
+DT = MAX(1.E-6_EB,MIN(1.01_EB*DT,DTBX))
+
+
 END SUBROUTINE SCALARF
 
 
 REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
 
-REAL(EB) :: A,U(4)
-INTEGER :: LIMITER
+REAL(EB), INTENT(IN) :: A,U(4)
+INTEGER, INTENT(IN) :: LIMITER
 
 ! local
 REAL(EB) :: R,B,DU_UP,DU_LOC
@@ -1534,6 +1553,208 @@ ELSE
 ENDIF
 
 END FUNCTION SCALAR_FACE_VALUE
+
+
+SUBROUTINE SCALAR_BOUNDS(CODE)
+
+USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,CORRECTOR,BTOL,N_SPECIES
+
+INTEGER, INTENT(IN) :: CODE
+
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP
+
+INTEGER :: N,NOB,IERR
+INTEGER :: IMIN(0:N_SPECIES),JMIN(0:N_SPECIES),KMIN(0:N_SPECIES)
+INTEGER :: IMAX(0:N_SPECIES),JMAX(0:N_SPECIES),KMAX(0:N_SPECIES)
+REAL(EB) :: SMIN(0:N_SPECIES),SMAX(0:N_SPECIES)
+REAL(EB) :: BV,SAVBV
+LOGICAL :: MINBV,MAXBV
+
+CODE_CASE: SELECT CASE (CODE)
+   
+   CASE(1) ! Determine global min and max for each scalar
+
+      !RHOYYP => SCALAR_SAVE3
+      IF (PREDICTOR) THEN
+         RHOP => RHO
+      ELSE
+         RHOP => RHOS
+      ENDIF
+
+      SMIN_SAVE(0) = 0._EB
+      SMAX_SAVE(0) = (1._EB+BTOL)*MAXVAL_GASPHASE(RHOP,IMAX(0),JMAX(0),KMAX(0))
+      
+      ! For now, I want to keep the mass fraction bounds set explicitly...
+      SMIN_SAVE(1:N_SPECIES) = 0._EB
+      SMAX_SAVE(1:N_SPECIES) = SMAX_SAVE(0) ! because RHO*Y, YMAX=1
+      
+      !DO N=0,N_SPECIES
+      !   PRINT *,SMIN_SAVE(N),SMAX_SAVE(N)
+      !ENDDO
+      !PAUSE
+      
+      IERR = 0
+      
+   CASE(2) ! Check for bounds violation
+   
+      IF (PREDICTOR) THEN
+         RHOYYP => YYS
+         RHOP => RHOS
+      ELSE
+         RHOYYP => YY
+         RHOP => RHO
+      ENDIF
+      
+      SMIN(0) = MINVAL_GASPHASE(RHOP,IMIN(0),JMIN(0),KMIN(0))
+      SMAX(0) = MAXVAL_GASPHASE(RHOP,IMAX(0),JMAX(0),KMAX(0))
+      DO N=1,N_SPECIES
+         SMIN(N) = MINVAL_GASPHASE(RHOYYP(:,:,:,N),IMIN(N),JMIN(N),KMIN(N))
+         SMAX(N) = MAXVAL_GASPHASE(RHOYYP(:,:,:,N),IMAX(N),JMAX(N),KMAX(N))
+      ENDDO
+      
+      IERR = 0
+      NOB = -1
+      BV = 0._EB
+      SAVBV = 0._EB
+      MINBV = .FALSE.
+      MAXBV = .FALSE.
+      
+      ! determine if any scalars are out of bounds, and if so, which one is worst case (NOB)
+      DO N=0,N_SPECIES
+         BV = MAX(0._EB,SMAX(N)-SMAX_SAVE(N))
+         IF (BV>SAVBV) THEN
+            MAXBV = .TRUE.
+            MINBV = .FALSE.
+            NOB = N
+            SAVBV = BV
+         ENDIF
+         BV = MAX(0._EB,SMIN_SAVE(N)-SMIN(N))
+         IF (BV>SAVBV) THEN
+            MINBV = .TRUE.
+            MAXBV = .FALSE.
+            NOB = N
+            SAVBV = BV
+         ENDIF
+      ENDDO
+      
+      IF (SAVBV<BTOL) RETURN
+      
+      IF (MINBV .AND. MAXBV) THEN
+         IERR = 999
+         RETURN
+      ENDIF
+      
+      BOUNDS_VIOLATION: IF (MAXBV .AND. NOB==0) THEN
+         
+         IF (FRHO(IMAX(0),JMAX(0),KMAX(0))>=0._EB) THEN
+            IERR = 1
+            RETURN
+         ENDIF
+         IERR=10   
+         PRINT *,'MAX VIOLATION:',IERR,NOB,SMAX(0),SMAX_SAVE(0)
+         PRINT *,IMAX(0),JMAX(0),KMAX(0),FRHO(IMAX(0),JMAX(0),KMAX(0)) 
+         RETURN
+         
+      ELSEIF (MAXBV .AND. NOB>0) THEN
+      
+         IF (FRHOYY(IMAX(NOB),JMAX(NOB),KMAX(NOB),NOB)>=0._EB) THEN
+            IERR = 2
+            RETURN
+         ENDIF
+         IERR=20
+         PRINT *,'MAX VIOLATION:',IERR,NOB,SMAX(NOB),SMAX_SAVE(NOB)
+         PRINT *,IMAX(NOB),JMAX(NOB),KMAX(NOB),FRHOYY(IMAX(NOB),JMAX(NOB),KMAX(NOB),NOB) 
+         RETURN
+         
+      ELSEIF (MINBV .AND. NOB==0) THEN
+            
+         IF (FRHO(IMIN(0),JMIN(0),KMIN(0))<=0._EB) THEN
+            IERR = 3
+            RETURN
+         ENDIF
+         IERR=30
+         PRINT *,'MIN VIOLATION:',IERR,NOB,SMIN(0),SMIN_SAVE(0)
+         PRINT *,IMIN(0),JMIN(0),KMIN(0),FRHO(IMIN(0),JMIN(0),KMIN(0)) 
+         RETURN
+         
+      ELSEIF (MINBV .AND. NOB>0) THEN
+      
+         IF (FRHOYY(IMIN(NOB),JMIN(NOB),KMIN(NOB),NOB)<=0._EB) THEN
+            IERR = 4
+            RETURN
+         ENDIF
+         IERR=40
+         PRINT *,'MIN VIOLATION:',IERR,NOB,SMIN(NOB),SMIN_SAVE(NOB)
+         PRINT *,IMIN(NOB),JMIN(NOB),KMIN(NOB),FRHOYY(IMIN(NOB),JMIN(NOB),KMIN(NOB),NOB) 
+         RETURN
+         
+      ENDIF BOUNDS_VIOLATION
+   
+END SELECT CODE_CASE
+
+END SUBROUTINE SCALAR_BOUNDS
+
+
+REAL(EB) FUNCTION MINVAL_GASPHASE(PHI,IMIN,JMIN,KMIN)
+
+INTEGER, INTENT(OUT) :: IMIN,JMIN,KMIN
+REAL(EB), INTENT(IN) :: PHI(0:IBP1,0:JBP1,0:KBP1)
+
+! local
+INTEGER :: I,J,K
+
+MINVAL_GASPHASE = HUGE(1._EB)
+IMIN=-1
+JMIN=-1
+KMIN=-1
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (.NOT.SOLID(CELL_INDEX(I,J,K))) THEN
+            IF (PHI(I,J,K)<MINVAL_GASPHASE) THEN
+               MINVAL_GASPHASE = PHI(I,J,K)
+               IMIN=I
+               JMIN=J
+               KMIN=K
+            ENDIF
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+
+END FUNCTION MINVAL_GASPHASE
+
+
+REAL(EB) FUNCTION MAXVAL_GASPHASE(PHI,IMAX,JMAX,KMAX)
+
+INTEGER, INTENT(OUT) :: IMAX,JMAX,KMAX
+REAL(EB), INTENT(IN) :: PHI(0:IBP1,0:JBP1,0:KBP1)
+
+! local
+INTEGER :: I,J,K
+
+MAXVAL_GASPHASE = -HUGE(1._EB)
+IMAX=-1
+JMAX=-1
+KMAX=-1
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (.NOT.SOLID(CELL_INDEX(I,J,K))) THEN
+            IF (PHI(I,J,K)>MAXVAL_GASPHASE) THEN
+               MAXVAL_GASPHASE = PHI(I,J,K)
+               IMAX=I
+               JMAX=J
+               KMAX=K
+            ENDIF
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+
+END FUNCTION MAXVAL_GASPHASE
+
 
 !---------------------------------------------------------------------------
 
