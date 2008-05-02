@@ -32,7 +32,8 @@ def extract_config_data(config_file):
     try:
         fh = file(config_file, 'U')
     except:
-	    print"The Config File "+config_file_name+" does not exist or the path defined in the script is incorrect."
+	    print"!!! The Config File "+config_file_name+" does not exist or the path defined in the script is incorrect. !!!"
+	    exit()
 	
     #Read file with csv module.
     data_array = csv.reader(fh)
@@ -214,12 +215,14 @@ def extract_comp_data(comp_file_info):
     try:
         exp_file_object = open(data_directory+exp_data_filename, "U")
     except:
-        print "Error: Experimental "+exp_data_filename+" Data File will not open."
+        print "!!! Experimental "+exp_data_filename+" Data File will not open. !!!"
+        exit()
         
     try:
         mod_file_object = open(data_directory+mod_data_filename, "U")
     except:
-        print "Error: Modeling "+mod_data_filename+" Data File will not open."
+        print "!!! Modeling "+mod_data_filename+" Data File will not open. !!!"
+        exit()
     
     ## Start File Processing
     
@@ -238,6 +241,7 @@ def extract_comp_data(comp_file_info):
             exp_data_dict[exp_list[exp_column_name_row_index].strip()] = map(float, exp_list[exp_data_row_index:])
         except:
             print "Error: Exp Data Conversion in Column Name ", exp_list[exp_column_name_row_index].strip()
+            exit()
     
     #Read in model data and flip lists from rows to columns.
     print "Reading in:", mod_data_filename
@@ -253,7 +257,8 @@ def extract_comp_data(comp_file_info):
         try:
             mod_data_dict[mod_list[mod_column_name_row_index].strip()] = map(float, mod_list[mod_data_row_index:])
         except:
-            print "Error: Mod Data Conversion in Column Name ", mod_list[mod_column_name_row_index].strip()
+            print "!!! Mod Data Conversion in Column Name "+mod_list[mod_column_name_row_index].strip()+". !!!"
+            exit()
     
     # Assuming that all column time ranges are the same.  Passing in the first Column Name.
     exp_comp_ranges = find_start_stop_index(exp_data_dict,exp_time_col_name,exp_start_time_data_val,exp_stop_time_data_val,exp_start_time_comp_val,exp_stop_time_comp_val)
@@ -298,7 +303,7 @@ def extract_comp_data(comp_file_info):
                 relative_difference = compute_difference(mod_peak_value,mod_initial_value,exp_peak_value,exp_initial_value)
                 print "Relative Difference is:", relative_difference
             except:
-                print "!!!Computation of relative_difference failed.!!!\nCheck source data for columns listed above."
+                print "!!! Computation of relative_difference failed. !!!\nCheck source data for columns listed above."
                 exit()
             
             #Append Min_Max Values to Global Scatter Data Dictionary.
