@@ -741,14 +741,6 @@ MAIN_LOOP: DO
       IF (DIAGNOSTICS) CALL CHECK_DIVERGENCE(NM)
    ENDDO VELOCITY_BC_LOOP_2
 
-   ! Write character strings out to the .smv file
- 
-   IF (DIAGNOSTICS) CALL WRITE_STRINGS
- 
-   ! Exchange info for diagnostic print out
- 
-   IF (DIAGNOSTICS) CALL EXCHANGE_DIAGNOSTICS
-
    ! Check for dumping end of timestep outputs
 
    CALL UPDATE_CONTROLS(T)
@@ -759,7 +751,11 @@ MAIN_LOOP: DO
  
    ! Dump out diagnostics
 
-   IF (MYID==0 .AND. DIAGNOSTICS) CALL WRITE_DIAGNOSTICS(T)
+   IF (DIAGNOSTICS) THEN
+      CALL WRITE_STRINGS
+      CALL EXCHANGE_DIAGNOSTICS
+      IF (MYID==0) CALL WRITE_DIAGNOSTICS(T)
+   ENDIF
  
    ! Stop the run
 
