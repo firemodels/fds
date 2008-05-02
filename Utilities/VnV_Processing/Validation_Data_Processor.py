@@ -237,7 +237,7 @@ def extract_comp_data(comp_file_info):
         try:
             exp_data_dict[exp_list[exp_column_name_row_index].strip()] = map(float, exp_list[exp_data_row_index:])
         except:
-            print "Error: Exp Data Conversion in Column Name:", exp_list[exp_column_name_row_index].strip()
+            print "Error: Exp Data Conversion in Column Name ", exp_list[exp_column_name_row_index].strip()
     
     #Read in model data and flip lists from rows to columns.
     print "Reading in:", mod_data_filename
@@ -253,7 +253,7 @@ def extract_comp_data(comp_file_info):
         try:
             mod_data_dict[mod_list[mod_column_name_row_index].strip()] = map(float, mod_list[mod_data_row_index:])
         except:
-            print "Error: Mod Data Conversion in Column Name:", mod_list[mod_column_name_row_index].strip()
+            print "Error: Mod Data Conversion in Column Name ", mod_list[mod_column_name_row_index].strip()
     
     # Assuming that all column time ranges are the same.  Passing in the first Column Name.
     exp_comp_ranges = find_start_stop_index(exp_data_dict,exp_time_col_name,exp_start_time_data_val,exp_stop_time_data_val,exp_start_time_comp_val,exp_stop_time_comp_val)
@@ -274,33 +274,36 @@ def extract_comp_data(comp_file_info):
         mod_data_values_comp = mod_data_dict[mod_label_temp[3]][mod_comp_ranges[2]:mod_comp_ranges[3]]
         
         if  min_max == 'max':
-            exp_peak_value = max(exp_data_values_comp)
-            mod_peak_value = max(mod_data_values_comp)
+            print "*** Rise Computed ***"
+            exp_peak_value = max(exp_data_values_comp) - float(exp_initial_value)
+            mod_peak_value = max(mod_data_values_comp) - float(mod_initial_value)
         elif min_max == 'min':
-            exp_peak_value = min(exp_data_values_comp)
-            mod_peak_value = min(mod_data_values_comp)
+            print "*** Drop Computed ***"
+            exp_peak_value = float(exp_initial_value) - min(exp_data_values_comp)
+            mod_peak_value = float(mod_initial_value) - min(mod_data_values_comp)
         else:
             print "Min or Max is undefined in the input file."
         
         # This allows the d line Quantity value to be set to 0 when either model or experimental data is missing.
-        if comp_file_info['Quantity'] == 0:
+        if comp_file_info['Quantity'] == str(0):
             print "Quantity set to 0, no comparison made."
-            relative_difference = 'NA'
         else:
-            print "Model Peak Value is:", mod_peak_value
-            print "Model Initial Value is:", mod_initial_value
-            print "Experimental Peak Value is:", exp_peak_value
             print "Experimental Initial Value is:", exp_initial_value
+            print "Experimental Peak Value is:", exp_peak_value
+            print "Model Initial Value is:", mod_initial_value
+            print "Model Peak Value is:", mod_peak_value
+                                    
+            print "\n*** Computing Relative Difference ***"
+            try:
+                relative_difference = compute_difference(mod_peak_value,mod_initial_value,exp_peak_value,exp_initial_value)
+                print "Relative Difference is:", relative_difference
+            except:
+                print "!!!Computation of relative_difference failed.!!!\nCheck source data for columns listed above."
+                exit()
             
-            print "\n***Computing Relative Difference***"
-            relative_difference = compute_difference(mod_peak_value,mod_initial_value,exp_peak_value,exp_initial_value)
-            print "Relative Difference is:", relative_difference
-        
-        #Append Min_Max Values to Global Scatter Data Dictionary.
-        
-        scatter_data_dict[combined_scatter_data[0][scatter_counter]] = [exp_peak_value,mod_peak_value,relative_difference]
-        
-        
+            #Append Min_Max Values to Global Scatter Data Dictionary.
+            scatter_data_dict[combined_scatter_data[0][scatter_counter]] = [exp_peak_value,mod_peak_value,relative_difference]
+                
         #Create data lists based on specified ranges
         exp_data_seconds = zip(exp_data_dict[exp_time_col_name][exp_comp_ranges[0]:exp_comp_ranges[1]], exp_data_dict[exp_label_temp[3]][exp_comp_ranges[0]:exp_comp_ranges[1]])
         #print exp_data_seconds
@@ -599,7 +602,7 @@ print "**** READING CONFIGURATION FILE ****"
 group_quantity_data_dicts = extract_config_data(config_file_name)
 print "\nThere are "+str(len(group_quantity_data_dicts[0]))+" scatter data groups, (g lines).\n"
 #print group_quantity_data_dicts[0]
-print "There are "+str(len(group_quantity_data_dicts[1]))+" quantities defined, (q lines).\n"
+print "There are "+str(len(group_quantity_data_dicts[1]))+" scatter data quantities to plot, (q lines).\n"
 #print group_quantity_data_dicts[1]
 print "There are "+str(len(group_quantity_data_dicts[2]))+" comparison data sets to plot, (d lines).\n"
 
