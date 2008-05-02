@@ -89,15 +89,6 @@ def extract_config_data(config_file):
     #print data_dict
     return [groups_dict,quantities_dict,data_dict]
 
-def compute_difference(m_p,m_o,e_p,e_o):
-    # Equation to compute relative difference of model and experimental data.
-    M_p = float(m_p) #Peak value of Model Prediction to float
-    M_o = float(m_o) #Original value of Model Prediction to float
-    E_p = float(e_p) #Peak value of Experimental Measurement to float
-    E_o = float(e_o) #Original value of Experimental Measurement to float
-    e = (((M_p-M_o)-(E_p-E_o))/(E_p-E_o))
-    return e
-
 def find_start_stop_index(data_dict,col_name,start_time_data,stop_time_data,start_time_comp,stop_time_comp):
     #This function is used to find index numbers for start and stop points in plotting and min-max values.
     rowcounter1 = 0
@@ -278,36 +269,47 @@ def extract_comp_data(comp_file_info):
         exp_data_values_comp = exp_data_dict[exp_label_temp[3]][exp_comp_ranges[2]:exp_comp_ranges[3]]
         mod_data_values_comp = mod_data_dict[mod_label_temp[3]][mod_comp_ranges[2]:mod_comp_ranges[3]]
         
-        if  min_max == 'max':
-            print "*** Rise Computed ***"
-            exp_peak_value = max(exp_data_values_comp) - float(exp_initial_value)
-            mod_peak_value = max(mod_data_values_comp) - float(mod_initial_value)
-        elif min_max == 'min':
-            print "*** Drop Computed ***"
-            exp_peak_value = float(exp_initial_value) - min(exp_data_values_comp)
-            mod_peak_value = float(mod_initial_value) - min(mod_data_values_comp)
-        else:
-            print "Min or Max is undefined in the input file."
-        
         # This allows the d line Quantity value to be set to 0 when either model or experimental data is missing.
         if comp_file_info['Quantity'] == str(0):
             print "Quantity set to 0, no comparison made."
         else:
-            print "Experimental Initial Value is:", exp_initial_value
-            print "Experimental Peak Value is:", exp_peak_value
-            print "Model Initial Value is:", mod_initial_value
-            print "Model Peak Value is:", mod_peak_value
-                                    
-            print "\n*** Computing Relative Difference ***"
-            try:
-                relative_difference = compute_difference(mod_peak_value,mod_initial_value,exp_peak_value,exp_initial_value)
-                print "Relative Difference is:", relative_difference
-            except:
-                print "!!! Computation of relative_difference failed. !!!\nCheck source data for columns listed above."
+            if  min_max == 'max':
+                print "*** Rise Computed ***"
+                exp_rise_value = max(exp_data_values_comp) - float(exp_initial_value)
+                mod_rise_value = max(mod_data_values_comp) - float(mod_initial_value)
+                print "Experimental Initial Value is:", exp_initial_value
+                print "Experimental Rise Value is:", exp_rise_value
+                print "Model Initial Value is:", mod_initial_value
+                print "Model Rise Value is:", mod_rise_value
+                print "\n*** Computing Relative Difference ***"
+                try:
+                    relative_difference = ((mod_rise_value-exp_rise_value)/exp_rise_value)
+                    print "Relative Difference is:", relative_difference
+                    #Append Rise Values to Global Scatter Data Dictionary.
+                    scatter_data_dict[combined_scatter_data[0][scatter_counter]] = [exp_rise_value,mod_rise_value,relative_difference]
+                except:
+                    print "!!! Computation of relative_difference failed. !!!\nCheck source data for columns listed above."
+                    exit()
+            elif min_max == 'min':
+                print "*** Drop Computed ***"
+                exp_drop_value = float(exp_initial_value) - min(exp_data_values_comp)
+                mod_drop_value = float(mod_initial_value) - min(mod_data_values_comp)
+                print "Experimental Initial Value is:", exp_initial_value
+                print "Experimental Drop Value is:", exp_drop_value
+                print "Model Initial Value is:", mod_initial_value
+                print "Model Drop Value is:", mod_drop_value
+                print "\n*** Computing Relative Difference ***"
+                try:
+                    relative_difference = ((mod_drop_value-exp_drop_value)/exp_drop_value)
+                    print "Relative Difference is:", relative_difference
+                    #Append Drop Values to Global Scatter Data Dictionary.
+                    scatter_data_dict[combined_scatter_data[0][scatter_counter]] = [exp_drop_value,mod_drop_value,relative_difference]
+                except:
+                    print "!!! Computation of relative_difference failed. !!!\nCheck source data for columns listed above."
+                    exit()
+            else:
+                print "!!! Min or Max is undefined in the input file. !!!"
                 exit()
-            
-            #Append Min_Max Values to Global Scatter Data Dictionary.
-            scatter_data_dict[combined_scatter_data[0][scatter_counter]] = [exp_peak_value,mod_peak_value,relative_difference]
                 
         #Create data lists based on specified ranges
         exp_data_seconds = zip(exp_data_dict[exp_time_col_name][exp_comp_ranges[0]:exp_comp_ranges[1]], exp_data_dict[exp_label_temp[3]][exp_comp_ranges[0]:exp_comp_ranges[1]])
