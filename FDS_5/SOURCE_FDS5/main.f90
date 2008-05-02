@@ -310,7 +310,10 @@ MAIN_LOOP: DO
 
       ! Time step logic
 
-      IF (PROCESS_STOP_STATUS/=NO_STOP) EXIT CHANGE_TIME_STEP_LOOP
+      IF (PROCESS_STOP_STATUS/=NO_STOP) THEN
+         DIAGNOSTICS = .TRUE.
+         EXIT CHANGE_TIME_STEP_LOOP
+      ENDIF
 
       IF (SYNCHRONIZE .AND. ANY(CHANGE_TIME_STEP)) THEN
          CHANGE_TIME_STEP = .TRUE.
@@ -409,7 +412,6 @@ MAIN_LOOP: DO
      
    CORRECT_VELOCITY_LOOP: DO NM=1,NMESHES
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE CORRECT_VELOCITY_LOOP
-   !! CALL OPEN_AND_CLOSE(T(NM),NM)
       CALL VELOCITY_CORRECTOR(NM)
       IF (DIAGNOSTICS) CALL CHECK_DIVERGENCE(NM)
    ENDDO CORRECT_VELOCITY_LOOP
@@ -432,25 +434,27 @@ MAIN_LOOP: DO
 
    CALL EVAC_EXCHANGE
 
-   ! Write character strings out to the .smv file
- 
-   CALL WRITE_STRINGS
-
-   ! Exchange info for diagnostic print out
- 
-   IF (DIAGNOSTICS) CALL EXCHANGE_DIAGNOSTICS
-
-   ! Dump global quantities like HRR, MASS, and DEViCes. 
+   ! Dump outputs that are tied to individual meshes, like SLCF and BNDF files
    
    CALL UPDATE_CONTROLS(T)
    DO NM=1,NMESHES
       IF (ACTIVE_MESH(NM)) CALL DUMP_MESH_OUTPUTS(T(NM),NM) 
    ENDDO
+
+   ! Dump global quantities like HRR, MASS, and DEViCes. 
+
    CALL DUMP_GLOBAL_OUTPUTS(MINVAL(T))
+
+   ! Write character strings out to the .smv file
+ 
+   CALL WRITE_STRINGS
    
    ! Dump out diagnostics
  
-   IF (DIAGNOSTICS) CALL WRITE_DIAGNOSTICS(T)
+   IF (DIAGNOSTICS) THEN
+      CALL EXCHANGE_DIAGNOSTICS
+      CALL WRITE_DIAGNOSTICS(T)
+   ENDIF
  
    ! Stop the run
    
