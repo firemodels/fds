@@ -14,6 +14,8 @@ combined_scatter_data = {}
 ### Define Functions
 
 def extract_config_data(config_file):
+    print "*** Extracting Configuration Data and Building Dictionaries ***"
+    
     # Collect Data from Config File
     groups_dict = {}
     quantities_dict = {}
@@ -183,20 +185,20 @@ def extract_comp_data(comp_file_info):
         print "Exp Column Name List Detected"
         exp_compound_col_names = eval(exp_column_name_value)
         for name in exp_compound_col_names:
-            #print "Exp Sub-Column Name:", name
+            print "Exp Sub-Column Name:", name
             exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
     else:
-        #print "Single Exp Column Name:", exp_column_name_value
+        print "Single Exp. Column Name:", exp_column_name_value
         exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+exp_column_name_value)        
     
     if mod_column_name_value[0] == '[':
         print "Mod Column Name List Detected"
         mod_compound_col_names = eval(mod_column_name_value)
         for name in mod_compound_col_names:
-            #print "Mod Sub-Column Name:", name
+            print "Mod Sub-Column Name:", name
             mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
     else:
-        #print "Single Mod Column Name:", mod_column_name_value
+        print "Single Mod. Column Name:", mod_column_name_value
         mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+mod_column_name_value)
     
     #print "Exp Data Labels:\n", exp_scatter_data_labels
@@ -280,17 +282,19 @@ def extract_comp_data(comp_file_info):
         else:
             print "Min or Max is undefined in the input file."
         
-        #print mod_peak_value
-        #print mod_initial_value
-        #print exp_peak_value
-        #print exp_initial_value
-        
         # This allows the d line Quantity value to be set to 0 when either model or experimental data is missing.
         if comp_file_info['Quantity'] == 0:
             print "Quantity set to 0, no comparison made."
             relative_difference = 'NA'
         else:
+            print "Model Peak Value is:", mod_peak_value
+            print "Model Initial Value is:", mod_initial_value
+            print "Experimental Peak Value is:", exp_peak_value
+            print "Experimental Initial Value is:", exp_initial_value
+            
+            print "\n***Computing Relative Difference***"
             relative_difference = compute_difference(mod_peak_value,mod_initial_value,exp_peak_value,exp_initial_value)
+            print "Relative Difference is:", relative_difference
         
         #Append Min_Max Values to Global Scatter Data Dictionary.
         
@@ -404,7 +408,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
     # Write the output
     plot_file_path = output_directory+plot_file_name
     g.writePDFfile(plot_file_path)
-    print "Comparison Plot to: \n", plot_file_path+".PDF"
+    print "\n*** Comparison Plot to: ***\n", plot_file_path+".PDF"
 
 def scatter_plot(group_info,scatter_info,data_set):
     #data_set is a dictionary keyed by quantity, containing lists of groups and X and Y data points.
@@ -601,9 +605,10 @@ print "There are "+str(len(group_quantity_data_dicts[2]))+" comparison data sets
 
 ## Create comparison plots
 print "**** CREATING COMPARISON PLOTS ****"
+d_count = 1
 for data_record in group_quantity_data_dicts[2]:
     # Each d line, data_record, may contain compound column names from the config file.
-    
+    print "*** #"+str(d_count)+" of "+str(len(group_quantity_data_dicts[2]))+" comparison records. ***\n"
     # Extract relevant portions of comparison data as defined in config file.
     comp_data_to_plot = extract_comp_data(group_quantity_data_dicts[2][data_record])
     #print "Comparison Data to Plot:", comp_data_to_plot
@@ -617,6 +622,7 @@ for data_record in group_quantity_data_dicts[2]:
     
     # Create plot for data_record.
     comparison_plot(group_quantity_data_dicts[2][data_record],exp_plot_data,mod_plot_data)
+    d_count = d_count + 1
     print "\n"
 
 ## Create scatter plots
