@@ -645,7 +645,6 @@ typedef struct {
   unsigned char *vis_part;
   float *rvals;
   unsigned char *irvals;
-  int **ivals;
   unsigned char **cvals;
 } part5data;
 
