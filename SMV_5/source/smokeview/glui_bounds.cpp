@@ -278,9 +278,11 @@ extern "C" void glui_bounds_setup(int main_window){
         SPINNER_partframestep=glui_bounds->add_spinner_to_panel(panel_part,"Frame Skip",GLUI_SPINNER_INT,
           &partframeskip,FRAMELOADING,PART_CB);
         SPINNER_partframestep->set_int_limits(0,100);
-        SPINNER_partpointstep=glui_bounds->add_spinner_to_panel(panel_part,"Point Skip",GLUI_SPINNER_INT,
-          &partpointskip,FRAMELOADING,PART_CB);
-        SPINNER_partpointstep->set_int_limits(0,100);
+        if(partinfo!=NULL&&partinfo->version==0){
+          SPINNER_partpointstep=glui_bounds->add_spinner_to_panel(panel_part,"Point Skip",GLUI_SPINNER_INT,
+            &partpointskip,FRAMELOADING,PART_CB);
+          SPINNER_partpointstep->set_int_limits(0,100);
+        }
         SPINNER_partpointsize=glui_bounds->add_spinner_to_panel(panel_part,"Particle size",GLUI_SPINNER_FLOAT,
           &partpointsize);
         SPINNER_partpointsize->set_float_limits(1.0,10.0);
