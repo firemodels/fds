@@ -62,7 +62,6 @@ if(returncode==READPASS){\
 
 void freepart5data(part5data *datacopy){
   FREEMEMORY(datacopy->cvals);
-  FREEMEMORY(datacopy->ivals);
   FREEMEMORY(datacopy->sx);
   FREEMEMORY(datacopy->sy);
   FREEMEMORY(datacopy->sz);
@@ -75,7 +74,6 @@ void freepart5data(part5data *datacopy){
   FREEMEMORY(datacopy->vis_part);
   FREEMEMORY(datacopy->rvals);
   FREEMEMORY(datacopy->irvals);
-  FREEMEMORY(datacopy->ivals);
 }
 
 /* ------------------ freeallpart5data ------------------------ */
@@ -97,7 +95,6 @@ void freeallpart5data(particle *parti){
 
 void initpart5data(part5data *datacopy, part5class *partclassi){
   datacopy->cvals=NULL;
-  datacopy->ivals=NULL;
   datacopy->partclassbase=partclassi;
   datacopy->sx=NULL;
   datacopy->sy=NULL;
@@ -111,7 +108,6 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
   datacopy->sort_tags=NULL;
   datacopy->rvals=NULL;
   datacopy->irvals=NULL;
-  datacopy->ivals=NULL;
 }
 
 
@@ -277,7 +273,6 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
       CheckMemory;
       if(doit==1){
         if(numtypes[2*i]>0){
-        //skip += 4 + 4*nparts*numtypes[2*i] + 4;  // skip over vals for now
           FORTPART5READ(datacopy->rvals,nparts*numtypes[2*i]);
           if(returncode==0)goto wrapup;
         }
