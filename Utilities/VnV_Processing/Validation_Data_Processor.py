@@ -229,9 +229,16 @@ def extract_comp_data(comp_file_info):
     #Catch errors if conversion of data from string to float fails.
     for exp_list in exp_data_list:
         try:
-            exp_data_dict[exp_list[exp_column_name_row_index].strip()] = map(float, exp_list[exp_data_row_index:])
+            temp_list = []
+            for x in exp_list[exp_data_row_index:]:
+                if x == 'Null':
+                    list_value = 'Null'
+                else:
+                    list_value = float(x)
+                temp_list.append(list_value)
+            exp_data_dict[exp_list[exp_column_name_row_index].strip()] = temp_list
         except:
-            print "Error: Exp Data Conversion in Column Name ", exp_list[exp_column_name_row_index].strip()
+            print "!!! Exp Data Conversion in Column Name "+mod_list[mod_column_name_row_index].strip()+". !!!"
             exit()
     
     #Read in model data and flip lists from rows to columns.
@@ -246,7 +253,14 @@ def extract_comp_data(comp_file_info):
     #Catch errors if conversion of data from string to float fails.
     for mod_list in mod_data_list:
         try:
-            mod_data_dict[mod_list[mod_column_name_row_index].strip()] = map(float, mod_list[mod_data_row_index:])
+            temp_list = []
+            for x in mod_list[mod_data_row_index:]:
+                if x == 'Null' or '':
+                    list_value = 'Null'
+                else:
+                    list_value = float(x)
+                temp_list.append(list_value)
+            mod_data_dict[mod_list[mod_column_name_row_index].strip()] = temp_list
         except:
             print "!!! Mod Data Conversion in Column Name "+mod_list[mod_column_name_row_index].strip()+". !!!"
             exit()
