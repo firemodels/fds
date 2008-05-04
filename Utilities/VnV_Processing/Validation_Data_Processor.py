@@ -228,18 +228,18 @@ def extract_comp_data(comp_file_info):
     #Build Experimental Data Dictionary. 
     #Catch errors if conversion of data from string to float fails.
     for exp_list in exp_data_list:
-        try:
-            temp_list = []
-            for x in exp_list[exp_data_row_index:]:
-                if x == 'Null':
-                    list_value = 'Null'
-                else:
-                    list_value = float(x)
-                temp_list.append(list_value)
-            exp_data_dict[exp_list[exp_column_name_row_index].strip()] = temp_list
-        except:
-            print "!!! Exp Data Conversion in Column Name "+mod_list[mod_column_name_row_index].strip()+". !!!"
-            exit()
+        # try:
+        temp_list = []
+        for x in exp_list[exp_data_row_index:]:
+            if x == 'Null' or x == '':
+                list_value = 'Null'
+            else:
+                list_value = float(x)
+            temp_list.append(list_value)
+        exp_data_dict[exp_list[exp_column_name_row_index].strip()] = temp_list
+        # except:
+        #     print "!!! Exp Data Conversion in Column Name "+exp_list[exp_column_name_row_index].strip()+". !!!"
+        #     exit()
     
     #Read in model data and flip lists from rows to columns.
     print "Reading in:", mod_data_filename
@@ -255,7 +255,7 @@ def extract_comp_data(comp_file_info):
         try:
             temp_list = []
             for x in mod_list[mod_data_row_index:]:
-                if x == 'Null' or '':
+                if x == 'Null' or x =='':
                     list_value = 'Null'
                 else:
                     list_value = float(x)
@@ -289,8 +289,10 @@ def extract_comp_data(comp_file_info):
         else:
             if  min_max == 'max':
                 print "*** Rise Computed ***"
-                exp_rise_value = max(exp_data_values_comp) - float(exp_initial_value)
-                mod_rise_value = max(mod_data_values_comp) - float(mod_initial_value)
+                temp_exp_data_values = [x for x in exp_data_values_comp if x != 'Null']
+                exp_rise_value = max(temp_exp_data_values) - float(exp_initial_value)
+                temp_mod_data_values = [x for x in mod_data_values_comp if x != 'Null']
+                mod_rise_value = max(temp_mod_data_values) - float(mod_initial_value)
                 print "Experimental Initial Value is:", exp_initial_value
                 print "Experimental Rise Value is:", exp_rise_value
                 print "Model Initial Value is:", mod_initial_value
@@ -306,8 +308,10 @@ def extract_comp_data(comp_file_info):
                     exit()
             elif min_max == 'min':
                 print "*** Drop Computed ***"
-                exp_drop_value = float(exp_initial_value) - min(exp_data_values_comp)
-                mod_drop_value = float(mod_initial_value) - min(mod_data_values_comp)
+                temp_exp_data_values = [x for x in exp_data_values_comp if x != 'Null']
+                exp_drop_value = float(temp_exp_data_values) - min(exp_data_values_comp)
+                temp_mod_data_values = [x for x in mod_data_values_comp if x != 'Null']
+                mod_drop_value = float(temp_mod_data_values) - min(mod_data_values_comp)
                 print "Experimental Initial Value is:", exp_initial_value
                 print "Experimental Drop Value is:", exp_drop_value
                 print "Model Initial Value is:", mod_initial_value
