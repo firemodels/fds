@@ -309,9 +309,9 @@ def extract_comp_data(comp_file_info):
             elif min_max == 'min':
                 print "*** Drop Computed ***"
                 temp_exp_data_values = [x for x in exp_data_values_comp if x != 'Null']
-                exp_drop_value = float(temp_exp_data_values) - min(exp_data_values_comp)
+                exp_drop_value = float(exp_initial_value) - min(temp_exp_data_values)
                 temp_mod_data_values = [x for x in mod_data_values_comp if x != 'Null']
-                mod_drop_value = float(temp_mod_data_values) - min(mod_data_values_comp)
+                mod_drop_value = float(mod_initial_value) - min(temp_mod_data_values)
                 print "Experimental Initial Value is:", exp_initial_value
                 print "Experimental Drop Value is:", exp_drop_value
                 print "Model Initial Value is:", mod_initial_value
