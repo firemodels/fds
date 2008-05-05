@@ -57,5 +57,5 @@
 #endif
 
 #ifdef pp_release
-#define SMZVERSION "1.2.2"
+#define SMZVERSION "1.2.3"
 #endif
