@@ -228,18 +228,18 @@ def extract_comp_data(comp_file_info):
     #Build Experimental Data Dictionary. 
     #Catch errors if conversion of data from string to float fails.
     for exp_list in exp_data_list:
-        # try:
-        temp_list = []
-        for x in exp_list[exp_data_row_index:]:
-            if x == 'Null' or x == '':
-                list_value = 'Null'
-            else:
-                list_value = float(x)
-            temp_list.append(list_value)
-        exp_data_dict[exp_list[exp_column_name_row_index].strip()] = temp_list
-        # except:
-        #     print "!!! Exp Data Conversion in Column Name "+exp_list[exp_column_name_row_index].strip()+". !!!"
-        #     exit()
+        try:
+            temp_list = []
+            for x in exp_list[exp_data_row_index:]:
+                if x == 'Null' or x == '' or x == 'NaN' or x == 'inf' or x == '-inf':
+                    list_value = 'Null'
+                else:
+                    list_value = float(x)
+                temp_list.append(list_value)
+            exp_data_dict[exp_list[exp_column_name_row_index].strip()] = temp_list
+        except:
+            print "!!! Exp Data Conversion in Column Name "+exp_list[exp_column_name_row_index].strip()+". !!!"
+            exit()
     
     #Read in model data and flip lists from rows to columns.
     print "Reading in:", mod_data_filename
@@ -255,7 +255,7 @@ def extract_comp_data(comp_file_info):
         try:
             temp_list = []
             for x in mod_list[mod_data_row_index:]:
-                if x == 'Null' or x =='':
+                if x == 'Null' or x == '' or x == 'NaN' or x == 'inf' or x == '-inf':
                     list_value = 'Null'
                 else:
                     list_value = float(x)
@@ -332,7 +332,6 @@ def extract_comp_data(comp_file_info):
         #Create data lists based on specified ranges
         exp_data_seconds = zip(exp_data_dict[exp_time_col_name][exp_comp_ranges[0]:exp_comp_ranges[1]], exp_data_dict[exp_label_temp[3]][exp_comp_ranges[0]:exp_comp_ranges[1]])
         #print exp_data_seconds
-        
         mod_data_seconds = zip(mod_data_dict[mod_time_col_name][mod_comp_ranges[0]:mod_comp_ranges[1]], mod_data_dict[mod_label_temp[3]][mod_comp_ranges[0]:mod_comp_ranges[1]])
         #print mod_data_seconds
         
