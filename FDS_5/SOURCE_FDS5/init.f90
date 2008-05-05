@@ -38,6 +38,7 @@ INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR, NDWC, N_EDGES, NWC
 REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
 TYPE (INITIALIZATION_TYPE), POINTER :: IN
 TYPE (P_ZONE_TYPE), POINTER :: PZ
+TYPE (DEVICE_TYPE), POINTER :: DV
  
 IERR = 0
 M => MESHES(NM)
@@ -457,7 +458,20 @@ OBST_LOOP_1: DO N=1,M%N_OBST
    ENDIF
 ENDDO OBST_LOOP_1
 
-NDWC = NDWC + M%NEWC
+! Add wall cells for VIRTUAL devices
+
+M%NVWC = 0
+DO N=1,N_DEVC
+   DV => DEVICE(N)
+   IF (DV%MESH/=NM) CYCLE
+   IF (DV%QUANTITY/='CABLE TEMPERATURE') CYCLE
+   M%NVWC = M%NVWC + 1
+ENDDO
+
+! Allocate arrays indexed by wall cells (IW)
+
+NDWC = NDWC + M%NEWC + M%NVWC
+
 ALLOCATE(M%WALL(1:NDWC),STAT=IZERO)
 CALL ChkMemErr('INIT','WALL',IZERO)
  
@@ -804,6 +818,22 @@ OBST_LOOP_2: DO N=1,M%N_OBST
    ENDDO   
  
 ENDDO OBST_LOOP_2
+
+! Set up wall cell arrays for VIRTUAL boundaries
+
+IW = M%NWC
+DEVICE_LOOP: DO N=1,N_DEVC
+   DV => DEVICE(N)
+   IF (DV%MESH/=NM) CYCLE DEVICE_LOOP
+   IF (DV%QUANTITY/='CABLE TEMPERATURE') CYCLE DEVICE_LOOP
+   IW = IW + 1
+   DV%VIRTUAL_WALL_INDEX = IW 
+   I = DV%I
+   J = DV%J
+   K = DV%K
+   IBC = DV%SURF_INDEX
+   CALL INIT_WALL_CELL(NM,I,J,K,0,IW,0,IBC,IERR)
+ENDDO DEVICE_LOOP
 
 ! Determine back wall index for exposed surfaces
 
@@ -1354,33 +1384,49 @@ TYPE (DEVICE_TYPE), POINTER :: DV
  
 DEVICE_LOOP: DO N=1,N_DEVC
    DV => DEVICE(N)
-   IF (NM/=DV%MESH .OR. DV%OUTPUT_INDEX>0)  CYCLE DEVICE_LOOP
-   II  = GINV(DV%X-M%XS,1,NM)*M%RDXI   + 1._EB
-   JJ  = GINV(DV%Y-M%YS,2,NM)*M%RDETA  + 1._EB
-   KK  = GINV(DV%Z-M%ZS,3,NM)*M%RDZETA + 1._EB
-   IOR = DV%IOR
-   CALL GET_IW(II,JJ,KK,IOR,IW)
-   IF (IW>0) THEN
-      DV%IW = IW
-      IF (DV%OUTPUT_INDEX==-6) THEN
-         IBC = M%IJKW(5,IW)
-         IF (SURFACE(IBC)%THERMAL_BC_INDEX /= THERMALLY_THICK) THEN
-            WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEViCe ',N, ' must be associated with a heat-conducting surface'
-            PROCESS_STOP_STATUS = SETUP_STOP
-            IERR = 1
-            RETURN
+   IF (NM/=DV%MESH) CYCLE DEVICE_LOOP
+
+   SOLID_OR_GAS: IF (DV%OUTPUT_INDEX<0)  THEN
+
+      II  = GINV(DV%X-M%XS,1,NM)*M%RDXI   + 1._EB
+      JJ  = GINV(DV%Y-M%YS,2,NM)*M%RDETA  + 1._EB
+      KK  = GINV(DV%Z-M%ZS,3,NM)*M%RDZETA + 1._EB
+      IOR = DV%IOR
+      CALL GET_IW(II,JJ,KK,IOR,IW)
+      IF (IW>0) THEN
+         DV%IW = IW
+         IF (DV%OUTPUT_INDEX==-6) THEN
+            IBC = M%IJKW(5,IW)
+            IF (SURFACE(IBC)%THERMAL_BC_INDEX /= THERMALLY_THICK) THEN
+               WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEViCe ',N, ' must be associated with a heat-conducting surface'
+               PROCESS_STOP_STATUS = SETUP_STOP
+               IERR = 1
+               RETURN
+            ENDIF
+            DV%I_DEPTH = SURFACE(IBC)%N_CELLS
+            DO III=SURFACE(IBC)%N_CELLS,1,-1
+               IF (DV%DEPTH<=SURFACE(IBC)%X_S(III)) DV%I_DEPTH = III
+            ENDDO
          ENDIF
-         DV%I_DEPTH = SURFACE(IBC)%N_CELLS
-         DO III=SURFACE(IBC)%N_CELLS,1,-1
-            IF (DV%DEPTH<=SURFACE(IBC)%X_S(III)) DV%I_DEPTH = III
-         ENDDO
+      ELSE
+         WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL, '. FDS cannot determine which boundary cell to assign'
+         PROCESS_STOP_STATUS = SETUP_STOP
+         IERR = 1
+         RETURN
       ENDIF
-   ELSE
-      WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL, '. FDS cannot determine which boundary cell to assign'
-      PROCESS_STOP_STATUS = SETUP_STOP
-      IERR = 1
-      RETURN
-   ENDIF
+
+   ELSE SOLID_OR_GAS
+
+      IF (DV%VIRTUAL_WALL_INDEX<1) CYCLE DEVICE_LOOP
+      IW  = DV%VIRTUAL_WALL_INDEX
+      IBC = M%IJKW(5,IW)
+      DV%I_DEPTH = SURFACE(IBC)%N_CELLS
+      DO III=SURFACE(IBC)%N_CELLS,1,-1
+         IF (DV%DEPTH<=SURFACE(IBC)%X_S(III)) DV%I_DEPTH = III
+      ENDDO
+
+   ENDIF SOLID_OR_GAS
+
 ENDDO DEVICE_LOOP
  
 END SUBROUTINE INITIALIZE_DEVC
@@ -1731,9 +1777,18 @@ IF (ABS(IOR)==3) THEN
    M%YW(IW) = 0.5_EB*(M%Y(J)+M%Y(J-1))
    M%AW(IW) = M%DX(I)*M%RC(I)*M%DY(J)
 ENDIF
-IF (EVACUATION_ONLY(NM)) M%UW(IW) = 0._EB
+ 
+IF (IOR==0) THEN
+   M%IJKW(6,IW) = I
+   M%IJKW(7,IW) = J
+   M%IJKW(8,IW) = K
+ENDIF
 
 IF (M%AW(IW)>0._EB) M%RAW(IW) = 1._EB/M%AW(IW)
+
+! Do not assign normal velocities at boundaries of evacuation meshes
+
+IF (EVACUATION_ONLY(NM)) M%UW(IW) = 0._EB
 
 ! Gas phase cell abutting boundary cell
 
@@ -1759,6 +1814,7 @@ ENDIF
 
 IF (M%SOLID(ICG)) M%BOUNDARY_TYPE(IW) = NULL_BOUNDARY
 IF (SURFACE(IBC)%POROUS .AND. M%BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) M%BOUNDARY_TYPE(IW) = POROUS_BOUNDARY
+IF (IOR==0) M%BOUNDARY_TYPE(IW) = VIRTUAL_BOUNDARY
 
 ! Assign the ZONE number to all boundary cells
 
@@ -1844,7 +1900,7 @@ ENDIF CHECK_MESHES
  
 ! Assign internal values of temp, density, and mass fraction
  
-IF (N_SPECIES>0) THEN
+IF (N_SPECIES>0 .AND. M%BOUNDARY_TYPE(IW)/=VIRTUAL_BOUNDARY) THEN
    M%RSUM_W(IW)= M%RSUM(IIG,JJG,KKG)
    M%RSUM(I,J,K) = M%RSUM(IIG,JJG,KKG)
    M%YY_W(IW,1:N_SPECIES)  = M%YY(IIG,JJG,KKG,1:N_SPECIES)
