@@ -5,10 +5,40 @@
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Smokeview Release Notes</h2>
 <p><hr size="1">
-<p>March 26, 2008
+<p>May 5, 2008
 
 <p>Latest FDS and Smokeview available at 
 <a href="http://fire.nist.gov/fds">http://fire.nist.gov/fds</a>
+<ul>
+<li>5.1.4 (build 1501) - May 5, 2008
+<h3>Enhancements</h3>
+<ol>
+<li>enhancement - save smooth blockages to a file so that their definition may be read in rather than re-calculated.  
+<li>enhancement - add an option to simplify file compression by compressing only files that were selected for auto-loading.
+<li>enhancement - save the size preserving or perspective projection state in the .ini file
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=331&can=1&sort=-id">Issue 331</a>).
+<li>enhancement - implement the "AUTOTERRAIN" keyword for WUI applications of FDS.  If all blockages are used to implement terrain
+(ie no blockages are used to represent buildings on the terrain), then AUTOTERRAIN is used to signal Smokeview to draw a smooth 
+surface representing the terrain.
+<li>enhancement -  add option to toggle slice file offset - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=348&can=1&sort=-id">Issue 348</a>).
+<li>enhancement - add support for skipping particle frames created by FDS 5 or later.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=350&can=1&sort=-id">Issue 350</a>).
+<li>fix - For particle files created by FDS 5, remove the particle skip option as it is no longer supported. (<a href="http://code.google.com/p/fds-smv/issues/detail?id=350&can=1&sort=-id">Issue 350</a>).
+<li>fix - change a conversion factor from 256*128 to 256*128-1 to avoid a "short int" overflow.   Otherwise, some
+particles may be drawn outside the solution domain.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=323&can=1&sort=-id">Issue 323</a>).
+<li>fix - fix the 't' toggle when the grid is turned on.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=334&can=1&sort=-id">Issue 334</a>).
+<li>fix - force smooth blockages to be drawn opaquely to prevent drawing artifact errors when drawn with smoke.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=329&can=1&sort=-id">Issue 329</a>).
+<li>fix - Fix drawing when smoke, iso and slice routines have non-increasing time steps.
+This could occur when FDS is restarted to an earlier time than was saved in these data files.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=317&can=1&sort=-id">Issue 317</a>).
+<li>fix - fix drawing of text on the colorbar 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=325&can=1&sort=-id">Issue 325</a>).
+</ol>
+</ul>
 <ul>
 <li>5.1.3 (build 1501) - March 26, 2008
 <ol>
