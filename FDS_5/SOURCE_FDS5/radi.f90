@@ -331,7 +331,7 @@ SPECIES_LOOP: DO NS=1,N_SPECIES
             T_LOOP_MF2: DO K = 0,SS%NKAP_TEMP
                RCT(1) = 300._EB + K*(2400._EB-300._EB)/SS%NKAP_TEMP
                Z_LOOP_MF2: DO J=0,SS%NKAP_MASS
-                  YY = SS%MAXMASS*(REAL(J)/REAL(SS%NKAP_MASS))**4._EB
+                  YY = SS%MAXMASS*(REAL(J)/REAL(SS%NKAP_MASS))**4
                   MTOT = YY/MW_RADCAL+(1._EB-YY)/MW_N2
                   SPECIE = 0._EB
                   SPECIE(I_RADCAL) = YY
@@ -374,7 +374,7 @@ SPECIES_LOOP: DO NS=1,N_SPECIES
             T_LOOP_MF3: DO K = 0,SS%NKAP_TEMP
                RCT(1) = 300._EB + K*(2400._EB-300._EB)/SS%NKAP_TEMP
                Z_LOOP_MF3: DO J=0,SS%NKAP_MASS
-                  YY = SS%MAXMASS*(REAL(J)/REAL(SS%NKAP_MASS))**4._EB
+                  YY = SS%MAXMASS*(REAL(J)/REAL(SS%NKAP_MASS))**4
                   RCRHO = 29._EB * P_INF/(R0*RCT(1)) !Good enough
                   SPECIE = 0._EB               
                   P(:,1) = 0._EB               
@@ -1043,11 +1043,14 @@ ENDIF
 
 END SUBROUTINE RADIATION_FVM
 
-
 END SUBROUTINE COMPUTE_RADIATION
 
+
+
 REAL(EB) FUNCTION YY2KAPPA(YY_IN,TYY,IBND,NS)
- ! Calculate KAPPA as a function of YY
+
+! Calculate KAPPA as a function of YY
+
 REAL(EB), INTENT(IN) :: YY_IN
 REAL(EB) :: MAX_MASS,YY_K,INT_FAC
 INTEGER, INTENT(IN) :: TYY,IBND,NS
@@ -1070,6 +1073,7 @@ YY2KAPPA = KAPPA(LBND,TYY,IBND)
 YY2KAPPA = YY2KAPPA + INT_FAC*(KAPPA(UBND,TYY,IBND)-YY2KAPPA)
 
 END FUNCTION YY2KAPPA
+
  
 REAL(EB) FUNCTION BLACKBODY_FRACTION(L1,L2,TEMP)
  
