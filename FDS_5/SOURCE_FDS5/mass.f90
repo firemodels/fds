@@ -990,10 +990,10 @@ SUBROUTINE DENSITY_TVD(NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
-                            CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_SPEC_DILUENTS, N_ZONE,MIXTURE_FRACTION_SPECIES, &
-                            GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,FLUX_LIMITER,CHECK_BOUNDEDNESS
+                            CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_SPEC_DILUENTS, N_ZONE,MIXTURE_FRACTION_SPECIES, LU_ERR, &
+                            GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,FLUX_LIMITER,CHECK_BOUNDEDNESS,BTOL
  
-REAL(EB) :: WFAC,Z_2,TNOW
+REAL(EB) :: WFAC,Z_2,TNOW,DSMIN,DSMAX
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: R_SUM_DILUENTS
@@ -1009,8 +1009,6 @@ IF (SOLID_PHASE_ONLY) RETURN
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
 
-CALL SCALAR_BOUNDS(1) ! sets SMIN_SAVE and SMAX_SAVE
-
 CALL SCALARF ! Computes FRHOYY and FRHO and populates SCALAR_SAVE3
 
 RHON => SCALAR_SAVE1
@@ -1024,6 +1022,24 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
    IF (N_SPECIES>0) YYN = RHOYYP
    RHON = RHO
    
+   ! Update the density
+   
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            RHOS(I,J,K) = RHON(I,J,K) - DT*FRHO(I,J,K)
+            
+            IF (CHECK_BOUNDEDNESS) THEN
+               DSMIN = RHOS(I,J,K)-SMIN_SAVE(0)
+               DSMAX = RHOS(I,J,K)-SMAX_SAVE(0)
+               IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv pred (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
+               IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv pred (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
+            ENDIF
+            
+         ENDDO
+      ENDDO
+   ENDDO
+   
    ! Update mass fractions
     
    DO N=1,N_SPECIES
@@ -1031,22 +1047,18 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
          DO J=1,JBAR
             DO I=1,IBAR             
                YYS(I,J,K,N) = YYN(I,J,K,N) - DT*FRHOYY(I,J,K,N)
+               
+               IF (CHECK_BOUNDEDNESS) THEN
+                  DSMIN = YYS(I,J,K,N)-SMIN_SAVE(N)
+                  DSMAX = YYS(I,J,K,N)-SMAX_SAVE(N)
+                  IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv pred (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
+                  IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv pred (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
+               ENDIF
+               
             ENDDO
          ENDDO
       ENDDO
    ENDDO
-
-   ! Update the density
-   
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            RHOS(I,J,K) = RHON(I,J,K) - DT*FRHO(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-   
-   IF (CHECK_BOUNDEDNESS) CALL SCALAR_BOUNDS(2)
 
   
    ! Extract REALIZABLE YY from REALIZABLE RHO*YY
@@ -1153,6 +1165,14 @@ ELSEIF (CORRECTOR) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             RHO(I,J,K) = RHOS(I,J,K) - DT*FRHO(I,J,K)
+            
+            IF (CHECK_BOUNDEDNESS) THEN
+               DSMIN = RHO(I,J,K)-SMIN_SAVE(0)
+               DSMAX = RHO(I,J,K)-SMAX_SAVE(0)
+               IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
+               IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
+            ENDIF
+            
          ENDDO
       ENDDO
    ENDDO
@@ -1164,18 +1184,27 @@ ELSEIF (CORRECTOR) THEN
          DO J=1,JBAR
             DO I=1,IBAR
                YY(I,J,K,N) = RHOYYP(I,J,K,N) - DT*FRHOYY(I,J,K,N)
+               
+               IF (CHECK_BOUNDEDNESS) THEN
+                  DSMIN = YY(I,J,K,N)-SMIN_SAVE(N)
+                  DSMAX = YY(I,J,K,N)-SMAX_SAVE(N)
+                  IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
+                  IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
+               ENDIF
+               
             ENDDO
          ENDDO
       ENDDO
    ENDDO
-   
-   IF (CHECK_BOUNDEDNESS) CALL SCALAR_BOUNDS(2)
    
    ! Corrector step
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             RHO(I,J,K) = 0.5_EB*( RHON(I,J,K) + RHO(I,J,K) )
+            
+            ! IF (CLIP_SCALAR) THEN...
+            !RHO(I,J,K) = MAX(RHO(I,J,K),0._EB)
          ENDDO
       ENDDO
    ENDDO
@@ -1183,7 +1212,11 @@ ELSEIF (CORRECTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               YY(I,J,K,N)  = 0.5_EB*( YYN(I,J,K,N) + YY(I,J,K,N) )/RHO(I,J,K)
+               YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YY(I,J,K,N) )/RHO(I,J,K)
+               
+               ! IF (CLIP_SCALAR) THEN...
+               !YY(I,J,K,N) = MAX(YY(I,J,K,N),0._EB)
+               !YY(I,J,K,N) = MIN(YY(I,J,K,N),1._EB)
             ENDDO
          ENDDO
       ENDDO
@@ -1281,14 +1314,19 @@ END SUBROUTINE DENSITY_TVD
 
 SUBROUTINE SCALARF
 
-USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN_BOUNDARY
+USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN_BOUNDARY, &
+                            LU_ERR,CHECK_BOUNDEDNESS,BTOL
 
 ! Computes the divergence of the scalar advective flux + diffusion
 
-INTEGER  :: I,J,K,N,II,JJ,KK,IOR,IW,IIG,JJG,KKG
+INTEGER :: I,J,K,N,II,JJ,KK,IOR,IW,IIG,JJG,KKG
 REAL(EB) :: ZZ(4)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW,FX,FY,FZ
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP, RHOYYP
+
+INTEGER :: IMIN(0:N_SPECIES),JMIN(0:N_SPECIES),KMIN(0:N_SPECIES)
+INTEGER :: IMAX(0:N_SPECIES),JMAX(0:N_SPECIES),KMAX(0:N_SPECIES)
+REAL(EB) :: DSMIN,DSMAX
 
 FX => WORK1
 FY => WORK2
@@ -1309,6 +1347,16 @@ ELSE
    IF (N_SPECIES > 0) YYP => YYS
 ENDIF
 
+IF (CHECK_BOUNDEDNESS) THEN
+   SMIN_SAVE(0) = 0._EB
+   SMAX_SAVE(0) = MAXVAL_GASPHASE(RHOP)
+      
+   ! For now, I want to keep the mass fraction bounds set explicitly...
+   SMIN_SAVE(1:N_SPECIES) = 0._EB
+   SMAX_SAVE(1:N_SPECIES) = SMAX_SAVE(0)
+ENDIF
+
+
 ! DTBX stands for 'dt bounds crossing'.  The idea is that for a given scalar field Y
 ! and a given 'scalar force' field F, there is some length of time that it would take
 ! for the scalar to go out of bounds with a linear Forward Euler (FE) step.  Since our
@@ -1318,8 +1366,7 @@ ENDIF
 ! is in bounds and DT is less than DTBX we are GUARANTEED not to violate boundedness
 ! for this FE step.  We need this extra check because the TVD schemes we use for the
 ! spatial discretization are only guaranteed to be TVD in 1D. ~RJM
-DTBX = 1.2_EB*DT
-      
+!IF (CHECK_BOUNDEDNESS) DTBX = 2._EB*DT
 
 ! Density flux
 
@@ -1398,10 +1445,14 @@ DO K=1,KBAR
                      + RDY(J)*(FY(I,J,K)-FY(I,J-1,K)) &
                      + RDZ(K)*(FZ(I,J,K)-FZ(I,J,K-1))
                      
-         IF (FRHO(I,J,K)>0._EB) THEN
-            DTBX = MIN( DTBX,(RHOP(I,J,K)-SMIN_SAVE(0))/FRHO(I,J,K) )
-         ELSEIF (FRHO(I,J,K)<0._EB) THEN
-            DTBX = MIN( DTBX,(RHOP(I,J,K)-SMAX_SAVE(0))/FRHO(I,J,K) )
+         IF (CHECK_BOUNDEDNESS) THEN
+             
+            DSMIN = RHOP(I,J,K)-SMIN_SAVE(0)
+            DSMAX = RHOP(I,J,K)-SMAX_SAVE(0)
+           
+            FRHO(I,J,K) = MAX(FRHO(I,J,K),DSMAX/DT)
+            FRHO(I,J,K) = MIN(FRHO(I,J,K),DSMIN/DT)
+            
          ENDIF
          
       ENDDO
@@ -1495,11 +1546,15 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                             + RDY(J)*(FY(I,J,K)-FY(I,J-1,K)) &
                             + RDZ(K)*(FZ(I,J,K)-FZ(I,J,K-1)) &
                             - DEL_RHO_D_DEL_Y(I,J,K,N)
-                            
-            IF (FRHOYY(I,J,K,N)>0._EB) THEN
-               DTBX = MIN( DTBX,(RHOYYP(I,J,K,N)-SMIN_SAVE(N))/FRHOYY(I,J,K,N) )
-            ELSEIF (FRHOYY(I,J,K,N)<0._EB) THEN
-               DTBX = MIN( DTBX,(RHOYYP(I,J,K,N)-SMAX_SAVE(N))/FRHOYY(I,J,K,N) )
+            
+            IF (CHECK_BOUNDEDNESS) THEN
+                          
+               DSMIN = RHOYYP(I,J,K,N)-SMIN_SAVE(N)
+               DSMAX = RHOYYP(I,J,K,N)-SMAX_SAVE(N)
+               
+               FRHOYY(I,J,K,N) = MAX(FRHOYY(I,J,K,N),DSMAX/DT)
+               FRHOYY(I,J,K,N) = MIN(FRHOYY(I,J,K,N),DSMIN/DT)
+               
             ENDIF
             
          ENDDO
@@ -1508,8 +1563,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
 
 ENDDO SPECIES_LOOP
 
-
-DT = MAX(1.E-6_EB,MIN(1.01_EB*DT,DTBX))
+!IF (CHECK_BOUNDEDNESS) DT = MIN(DT,DTBX)
+   
 
 
 END SUBROUTINE SCALARF
@@ -1602,168 +1657,21 @@ ENDIF
 END FUNCTION SCALAR_FACE_VALUE
 
 
-SUBROUTINE SCALAR_BOUNDS(CODE)
 
-USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,CORRECTOR,BTOL,N_SPECIES,LU_ERR
+REAL(EB) FUNCTION MINVAL_GASPHASE(PHI)
 
-INTEGER, INTENT(IN) :: CODE
-
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP
-
-INTEGER :: N,NOB,IERR
-INTEGER :: IMIN(0:N_SPECIES),JMIN(0:N_SPECIES),KMIN(0:N_SPECIES)
-INTEGER :: IMAX(0:N_SPECIES),JMAX(0:N_SPECIES),KMAX(0:N_SPECIES)
-REAL(EB) :: SMIN(0:N_SPECIES),SMAX(0:N_SPECIES)
-REAL(EB) :: BV,SAVBV
-LOGICAL :: MINBV,MAXBV
-
-CODE_CASE: SELECT CASE (CODE)
-   
-   CASE(1) ! Determine global min and max for each scalar
-
-      !RHOYYP => SCALAR_SAVE3
-      IF (PREDICTOR) THEN
-         RHOP => RHO
-      ELSE
-         RHOP => RHOS
-      ENDIF
-
-      SMIN_SAVE(0) = 0._EB
-      SMAX_SAVE(0) = (1._EB+BTOL)*MAXVAL_GASPHASE(RHOP,IMAX(0),JMAX(0),KMAX(0))
-      
-      ! For now, I want to keep the mass fraction bounds set explicitly...
-      SMIN_SAVE(1:N_SPECIES) = 0._EB
-      SMAX_SAVE(1:N_SPECIES) = SMAX_SAVE(0) ! because RHO*Y, YMAX=1
-      
-      !DO N=0,N_SPECIES
-      !   WRITE(LU_ERR,*)'SMIN_SAVE(N),SMAX_SAVE(N)'
-      !ENDDO
-      !PAUSE
-      
-      IERR = 0
-      
-   CASE(2) ! Check for bounds violation
-   
-      IF (PREDICTOR) THEN
-         RHOYYP => YYS
-         RHOP => RHOS
-      ELSE
-         RHOYYP => YY
-         RHOP => RHO
-      ENDIF
-      
-      SMIN(0) = MINVAL_GASPHASE(RHOP,IMIN(0),JMIN(0),KMIN(0))
-      SMAX(0) = MAXVAL_GASPHASE(RHOP,IMAX(0),JMAX(0),KMAX(0))
-      DO N=1,N_SPECIES
-         SMIN(N) = MINVAL_GASPHASE(RHOYYP(:,:,:,N),IMIN(N),JMIN(N),KMIN(N))
-         SMAX(N) = MAXVAL_GASPHASE(RHOYYP(:,:,:,N),IMAX(N),JMAX(N),KMAX(N))
-      ENDDO
-      
-      IERR = 0
-      NOB = -1
-      BV = 0._EB
-      SAVBV = 0._EB
-      MINBV = .FALSE.
-      MAXBV = .FALSE.
-      
-      ! determine if any scalars are out of bounds, and if so, which one is worst case (NOB)
-      DO N=0,N_SPECIES
-         BV = MAX(0._EB,SMAX(N)-SMAX_SAVE(N))
-         IF (BV>SAVBV) THEN
-            MAXBV = .TRUE.
-            MINBV = .FALSE.
-            NOB = N
-            SAVBV = BV
-         ENDIF
-         BV = MAX(0._EB,SMIN_SAVE(N)-SMIN(N))
-         IF (BV>SAVBV) THEN
-            MINBV = .TRUE.
-            MAXBV = .FALSE.
-            NOB = N
-            SAVBV = BV
-         ENDIF
-      ENDDO
-      
-      IF (SAVBV<BTOL) RETURN
-      
-      IF (MINBV .AND. MAXBV) THEN
-         IERR = 999
-         RETURN
-      ENDIF
-      
-      BOUNDS_VIOLATION: IF (MAXBV .AND. NOB==0) THEN
-         
-         IF (FRHO(IMAX(0),JMAX(0),KMAX(0))>=0._EB) THEN
-            IERR = 1
-            RETURN
-         ENDIF
-         IERR=10   
-         WRITE(LU_ERR,*)'MAX VIOLATION:',IERR,NOB,SMAX(0),SMAX_SAVE(0)
-         WRITE(LU_ERR,*)IMAX(0),JMAX(0),KMAX(0),FRHO(IMAX(0),JMAX(0),KMAX(0)) 
-         RETURN
-         
-      ELSEIF (MAXBV .AND. NOB>0) THEN
-      
-         IF (FRHOYY(IMAX(NOB),JMAX(NOB),KMAX(NOB),NOB)>=0._EB) THEN
-            IERR = 2
-            RETURN
-         ENDIF
-         IERR=20
-         WRITE(LU_ERR,*)'MAX VIOLATION:',IERR,NOB,SMAX(NOB),SMAX_SAVE(NOB)
-         WRITE(LU_ERR,*)IMAX(NOB),JMAX(NOB),KMAX(NOB),FRHOYY(IMAX(NOB),JMAX(NOB),KMAX(NOB),NOB) 
-         RETURN
-         
-      ELSEIF (MINBV .AND. NOB==0) THEN
-            
-         IF (FRHO(IMIN(0),JMIN(0),KMIN(0))<=0._EB) THEN
-            IERR = 3
-            RETURN
-         ENDIF
-         IERR=30
-         WRITE(LU_ERR,*)'MIN VIOLATION:',IERR,NOB,SMIN(0),SMIN_SAVE(0)
-         WRITE(LU_ERR,*)IMIN(0),JMIN(0),KMIN(0),FRHO(IMIN(0),JMIN(0),KMIN(0)) 
-         RETURN
-         
-      ELSEIF (MINBV .AND. NOB>0) THEN
-      
-         IF (FRHOYY(IMIN(NOB),JMIN(NOB),KMIN(NOB),NOB)<=0._EB) THEN
-            IERR = 4
-            RETURN
-         ENDIF
-         IERR=40
-         WRITE(LU_ERR,*)'MIN VIOLATION:',IERR,NOB,SMIN(NOB),SMIN_SAVE(NOB)
-         WRITE(LU_ERR,*)IMIN(NOB),JMIN(NOB),KMIN(NOB),FRHOYY(IMIN(NOB),JMIN(NOB),KMIN(NOB),NOB) 
-         RETURN
-         
-      ENDIF BOUNDS_VIOLATION
-   
-END SELECT CODE_CASE
-
-END SUBROUTINE SCALAR_BOUNDS
-
-
-REAL(EB) FUNCTION MINVAL_GASPHASE(PHI,IMIN,JMIN,KMIN)
-
-INTEGER, INTENT(OUT) :: IMIN,JMIN,KMIN
 REAL(EB), INTENT(IN) :: PHI(0:IBP1,0:JBP1,0:KBP1)
 
 ! local
 INTEGER :: I,J,K
 
 MINVAL_GASPHASE = HUGE(1._EB)
-IMIN=-1
-JMIN=-1
-KMIN=-1
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
          IF (.NOT.SOLID(CELL_INDEX(I,J,K))) THEN
             IF (PHI(I,J,K)<MINVAL_GASPHASE) THEN
                MINVAL_GASPHASE = PHI(I,J,K)
-               IMIN=I
-               JMIN=J
-               KMIN=K
             ENDIF
          ENDIF
       ENDDO
@@ -1773,27 +1681,20 @@ ENDDO
 END FUNCTION MINVAL_GASPHASE
 
 
-REAL(EB) FUNCTION MAXVAL_GASPHASE(PHI,IMAX,JMAX,KMAX)
+REAL(EB) FUNCTION MAXVAL_GASPHASE(PHI)
 
-INTEGER, INTENT(OUT) :: IMAX,JMAX,KMAX
 REAL(EB), INTENT(IN) :: PHI(0:IBP1,0:JBP1,0:KBP1)
 
 ! local
 INTEGER :: I,J,K
 
 MAXVAL_GASPHASE = -HUGE(1._EB)
-IMAX=-1
-JMAX=-1
-KMAX=-1
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
          IF (.NOT.SOLID(CELL_INDEX(I,J,K))) THEN
             IF (PHI(I,J,K)>MAXVAL_GASPHASE) THEN
                MAXVAL_GASPHASE = PHI(I,J,K)
-               IMAX=I
-               JMAX=J
-               KMAX=K
             ENDIF
          ENDIF
       ENDDO
