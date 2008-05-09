@@ -54,10 +54,6 @@ int readsmv(char *file){
   int *ijk;
   int s_type;
   int s_num[6];
-//  int nobstshowhide=0;
-//  int nventshowhide=0;
-  unsigned char *floortex;
-  int texwid, texht;
   int errorcode;
   int noGRIDpresent=1,startpass;
 
@@ -413,6 +409,7 @@ int readsmv(char *file){
 
   FREEMEMORY(textureinfo);
   FREEMEMORY(surfaceinfo);
+  FREEMEMORY(terrain_texture);
 
   if(cadgeominfo!=NULL)freecadinfo();
 
@@ -487,10 +484,25 @@ int readsmv(char *file){
    
     }
     if(match(buffer,"AUTOTERRAIN",11) == 1){
+      int len_buffer;
+      texture *tt;
+      char *buffer2;
+
+      NewMemory((void **)&terrain_texture,sizeof(texture));
+      tt = terrain_texture;
       autoterrain=1;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visTerrain);
       if(visTerrain!=1)visTerrain=0;
+  
+      fgets(buffer,255,stream);
+      buffer2 = trim_front(buffer);
+      trim(buffer2);
+      len_buffer = strlen(buffer2);
+
+      NewMemory((void **)&tt->file,(len_buffer+1)*sizeof(char));
+      strcpy(tt->file,buffer2);
+
       continue;
     }
     if(
@@ -1804,10 +1816,11 @@ typedef struct {
     meshi->zbar =zbar;
     meshi->zcen=(zbar+zbar0)/2.0;
   }
-  /* 
-     define textures by constructing a list of unique file names 
-     from surfaceinfo   
-  */
+  
+
+  // define texture data structures by constructing a list of unique file names from surfaceinfo   
+
+  // get texture filename from SURF info
 
   ntextures = 0;
   for(i=0;i<nsurfaces;i++){
@@ -1824,11 +1837,13 @@ typedef struct {
     surfi->textureinfo=textureinfo+ntextures-1;
   }
 
-  /*
-   Now check to see if texture files exist .
-   If so, then convert to OpenGL format 
-  */
+  // check to see if texture files exist .
+  // If so, then convert to OpenGL format 
+
   for(i=0;i<ntextures;i++){
+    unsigned char *floortex;
+    int texwid, texht;
+
     texti = textureinfo + i;
     texti->loaded=0;
     if(texti->file!=NULL){
@@ -1873,8 +1888,9 @@ typedef struct {
     printf(" - completed\n");
   }
   if(ntextures==0)FREEMEMORY(textureinfo);
-  // define texture for colorbar
-  // texture_colorbar_id
+
+  // define colobar textures
+
   printf("      Loading colorbar texture: ");
 
   glGenTextures(1,&texture_colorbar_id);
@@ -1903,7 +1919,42 @@ typedef struct {
   createDepthTexture();
 #endif
 
-  /* 
+  if(autoterrain==1){
+    texture *tt;
+    unsigned char *floortex;
+    int texwid, texht;
+
+    printf("      Loading terrain texture: ");
+    tt = terrain_texture;
+    tt->loaded=0;
+    tt->used=0;
+    tt->display=0;
+
+    glGenTextures(1,&tt->name);
+    glBindTexture(GL_TEXTURE_2D,tt->name);
+    floortex=NULL;
+    errorcode=1;
+    if(tt->file!=NULL){
+      floortex=readpicture(tt->file,&texwid,&texht);
+    }
+    if(floortex!=NULL){
+      errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
+    }
+    if(errorcode!=0){
+      printf(" - failed\n");
+    }
+    FREEMEMORY(floortex);
+    if(errorcode==0){
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      tt->loaded=1;
+      printf(" - completed\n");
+    }
+  }
+
+/* 
     Initialize blockage labels and blockage surface labels
 
     Define default surface for each block.

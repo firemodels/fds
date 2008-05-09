@@ -41,6 +41,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode);
 float getterrain_z(float x, float y);
 void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny);
 void drawterrain(terraindata *terri, int only_geom);
+void drawterrain_texture(terraindata *terri, int only_geom);
 void drawtrees(void);
 int createnulllabel(flowlabels *flowlabel);
 #ifdef pp_CULL

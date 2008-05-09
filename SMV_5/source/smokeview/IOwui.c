@@ -414,6 +414,82 @@ void drawterrain(terraindata *terri, int only_geom){
 
 }
 
+/* ------------------ drawterrain ------------------------ */
+
+void drawterrain_texture(terraindata *terri, int only_geom){
+  float *znode, *znormal;
+  int nxcell;
+  int i, j;
+  float *x, *y;
+  terraincell *ti;
+
+  glPushMatrix();
+  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+
+  glEnable(GL_LIGHTING);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+  glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D,terrain_texture->name);
+
+  glBegin(GL_QUADS);
+  znormal = terri->znormal;  ;
+  znode = terri->znode;
+  nxcell = terri->nx;
+  x = terri->x;
+  y = terri->y;
+  ti = terri->tcell;
+  for(j=0;j<terri->ny;j++){
+    int jp1;
+    float ty,typ1;
+
+    jp1 = j + 1;
+    ty = (y[j]-ybar0ORIG)/(ybarORIG-ybar0ORIG);
+    typ1 = (y[j+1]-ybar0ORIG)/(ybarORIG-ybar0ORIG);
+
+    for(i=0;i<terri->nx;i++){
+      float *zn;
+      int ip1;
+      float *ter_rgbptr;
+      float tx,txp1;
+
+      ip1 = i + 1;
+      tx = (x[i]-xbar0ORIG)/(xbarORIG-xbar0ORIG);
+      txp1 = (x[i+1]-xbar0ORIG)/(xbarORIG-xbar0ORIG);
+
+      zn = znormal+3*ijnode2(i,j);
+      glNormal3fv(zn);
+      glTexCoord2f(tx,ty);
+      glVertex3f(x[i],y[j],znode[ijnode2(i,j)]);
+
+      zn = znormal+3*ijnode2(ip1,j);
+      glNormal3fv(zn);
+      glTexCoord2f(txp1,ty);
+      glVertex3f(x[i+1],y[j],znode[ijnode2(ip1,j)]);
+
+      zn = znormal+3*ijnode2(ip1,jp1);
+      glNormal3fv(zn);
+      glTexCoord2f(txp1,typ1);
+      glVertex3f(x[i+1],y[j+1],znode[ijnode2(ip1,jp1)]);
+
+      zn = znormal+3*ijnode2(i,jp1);
+      glNormal3fv(zn);
+      glTexCoord2f(tx,typ1);
+      glVertex3f(x[i],y[j+1],znode[ijnode2(i,jp1)]);
+
+      ti++;
+    }
+  }
+  glEnd();
+
+  glDisable(GL_TEXTURE_2D);
+   
+  glDisable(GL_LIGHTING);
+
+  glPopMatrix();
+
+}
 /* ------------------ get_terraincolor ------------------------ */
 
 float *get_terraincolor(terraincell *ti){

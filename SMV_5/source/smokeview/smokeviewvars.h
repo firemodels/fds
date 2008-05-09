@@ -780,7 +780,7 @@ SVEXTERN blockagedata **selectblockinfo;
 SVEXTERN tickdata *tickinfo;
 SVEXTERN int nticks,ntickssmv;
 SVEXTERN int visTicks;
-SVEXTERN int visCadTextures;
+SVEXTERN int visCadTextures, visTerrainTexture;
 #ifdef pp_COLOR
 SVEXTERN int viscolorbarpath;
 SVEXTERN int showzerosplit;
@@ -798,7 +798,7 @@ SVEXTERN char surfacedefaultlabel[256];
 SVEXTERN int nsurfaces;
 SVEXTERN int ntotalfaces;
 SVEXTERN colordata *firstcolor;
-SVEXTERN texture *textureinfo;
+SVEXTERN texture *textureinfo, *terrain_texture;
 SVEXTERN GLuint texture_colorbar_id, texture_slice_colorbar_id, texture_plot3d_colorbar_id;
 SVEXTERN float mscale[3];
 SVEXTERN float xclip_min, yclip_min, zclip_min;

@@ -1259,7 +1259,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       else{
         only_geom=1;
       }
-      drawterrain(terri,only_geom);
+      if(terrain_texture!=NULL&&terrain_texture->loaded==1&&visTerrainTexture==1){
+        drawterrain_texture(terri,only_geom);
+      }
+      else{
+        drawterrain(terri,only_geom);
+      }
     }
   }
 
