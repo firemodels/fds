@@ -3405,6 +3405,9 @@ void GeometryMenu(int value){
     }
 
     break;
+   case 18:
+     visTerrainTexture = 1 - visTerrainTexture;
+     break;
   case 11:
     if(isZoneFireModel)visFrame=1;
     /*
@@ -4187,6 +4190,10 @@ if(visBlocks==visBLOCKOutline){
   if(nterraininfo>0){
     if(visTerrain==1)glutAddMenuEntry("*Terrain",17);
     if(visTerrain==0)glutAddMenuEntry("Terrain",17);
+    if(terrain_texture!=NULL&&terrain_texture->loaded==1){
+      if(visTerrainTexture==1)glutAddMenuEntry("  *Terrain Texture",18);
+      if(visTerrainTexture==0)glutAddMenuEntry("  Terrain Texture",18);
+    }
   }
  glutAddSubMenu("Vents",ventmenu);
  if(ntotal_blockages>0||isZoneFireModel==0){
