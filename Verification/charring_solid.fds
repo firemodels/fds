@@ -1,4 +1,4 @@
-Solid phase heat conduction and reaction calculation of a 10 cm thick 
+Solid phase heat conduction and reaction calculation of a 10 mm thick 
 slab of wood pyrolyzing under a heat flux of 50 kW/m2. 
 The calculation is purely for the solid phase. There is no gas phase 
 coupling -- just a fixed external heat flux of 50 kW/m2.
