@@ -1169,8 +1169,8 @@ ELSEIF (CORRECTOR) THEN
             IF (CHECK_BOUNDEDNESS) THEN
                DSMIN = RHO(I,J,K)-SMIN_SAVE(0)
                DSMAX = RHO(I,J,K)-SMAX_SAVE(0)
-               IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
-               IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
+               IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
+               IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
             ENDIF
             
          ENDDO
@@ -1188,8 +1188,8 @@ ELSEIF (CORRECTOR) THEN
                IF (CHECK_BOUNDEDNESS) THEN
                   DSMIN = YY(I,J,K,N)-SMIN_SAVE(N)
                   DSMAX = YY(I,J,K,N)-SMAX_SAVE(N)
-                  IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
-                  IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
+                  IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
+                  IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
                ENDIF
                
             ENDDO
@@ -1347,26 +1347,30 @@ ELSE
    IF (N_SPECIES > 0) YYP => YYS
 ENDIF
 
+DO N=1,N_SPECIES
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+            RHOYYP(I,J,K,N) = RHOP(I,J,K)*YYP(I,J,K,N)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+
 IF (CHECK_BOUNDEDNESS) THEN
-   SMIN_SAVE(0) = 0._EB
+   SMIN_SAVE(0) = MINVAL_GASPHASE(RHOP)
    SMAX_SAVE(0) = MAXVAL_GASPHASE(RHOP)
       
-   ! For now, I want to keep the mass fraction bounds set explicitly...
-   SMIN_SAVE(1:N_SPECIES) = 0._EB
-   SMAX_SAVE(1:N_SPECIES) = SMAX_SAVE(0)
+   DO N=1,N_SPECIES
+      SMIN_SAVE(N) = MINVAL_GASPHASE(RHOYYP(:,:,:,N))
+      SMAX_SAVE(N) = MAXVAL_GASPHASE(RHOYYP(:,:,:,N))
+   ENDDO
 ENDIF
 
-
-! DTBX stands for 'dt bounds crossing'.  The idea is that for a given scalar field Y
-! and a given 'scalar force' field F, there is some length of time that it would take
-! for the scalar to go out of bounds with a linear Forward Euler (FE) step.  Since our
-! time update is of the form Y(n+1) = Y(n)-DT*F(n), if Y(n) is in bounds, then Y(n+1)
-! can only have a min bounds violation if F(n)>0 and can only have a max bounds
-! violation if F(n)<0 (hence the 'if' statement in the loops below).  As long as Y(n)
-! is in bounds and DT is less than DTBX we are GUARANTEED not to violate boundedness
-! for this FE step.  We need this extra check because the TVD schemes we use for the
-! spatial discretization are only guaranteed to be TVD in 1D. ~RJM
-!IF (CHECK_BOUNDEDNESS) DTBX = 2._EB*DT
+!DO N=0,N_SPECIES
+!   PRINT *,SMIN_SAVE(N),SMAX_SAVE(N)
+!ENDDO
+!PAUSE
 
 ! Density flux
 
@@ -1463,14 +1467,6 @@ ENDDO
 
 SPECIES_LOOP: DO N=1,N_SPECIES
 
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            RHOYYP(I,J,K,N) = RHOP(I,J,K)*YYP(I,J,K,N)
-         ENDDO
-      ENDDO
-   ENDDO
-
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBM1
@@ -1563,10 +1559,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
 
 ENDDO SPECIES_LOOP
 
-!IF (CHECK_BOUNDEDNESS) DT = MIN(DT,DTBX)
-   
-
-
 END SUBROUTINE SCALARF
 
 
@@ -1596,7 +1588,7 @@ REAL(EB) :: R,B,DU_UP,DU_LOC
 !                            A
 !         U(1)        U(2)        U(3)        U(4)
 
-IF (A>0) THEN
+IF (A>0._EB) THEN
     
    ! the flow is left to right
    DU_UP  = U(2)-U(1)
@@ -1611,16 +1603,16 @@ IF (A>0) THEN
       CASE(1) ! first-order upwinding
          SCALAR_FACE_VALUE = U(2)
       CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>0) R = DU_UP/DU_LOC
+         IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
          SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*(U(3)-U(2))
       CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>0) R = DU_UP/DU_LOC
+         IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(1._EB,R))
          SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*(U(3)-U(2))
       CASE(4) ! CHARM
-         IF (ABS(DU_UP)>0) R = DU_LOC/DU_UP
-         IF (R>0) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         IF (ABS(DU_UP)>0._EB) R = DU_LOC/DU_UP
+         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
          SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*(U(2)-U(1))
    END SELECT
     
@@ -1639,16 +1631,16 @@ ELSE
       CASE(1) ! first-order upwinding
          SCALAR_FACE_VALUE = U(3)
       CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>0) R = DU_UP/DU_LOC
+         IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
          SCALAR_FACE_VALUE = U(3) + 0.5_EB*B*(U(2)-U(3))
       CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>0) R = DU_UP/DU_LOC
+         IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(1._EB,R))
          SCALAR_FACE_VALUE = U(3) + 0.5_EB*B*(U(2)-U(3))
       CASE(4) ! CHARM
-         IF (ABS(DU_UP)>0) R = DU_LOC/DU_UP
-         IF (R>0) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         IF (ABS(DU_UP)>0._EB) R = DU_LOC/DU_UP
+         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
          SCALAR_FACE_VALUE = U(3) + 0.5_EB*B*(U(3)-U(4))
     END SELECT
     
