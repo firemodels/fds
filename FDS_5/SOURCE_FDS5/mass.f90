@@ -1032,8 +1032,8 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
             IF (CHECK_BOUNDEDNESS) THEN
                DSMIN = RHOS(I,J,K)-SMIN_SAVE(0)
                DSMAX = RHOS(I,J,K)-SMAX_SAVE(0)
-               IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'min bv pred (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
-               IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'max bv pred (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
+               IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'min bv pre (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
+               IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'max bv pre (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
             ENDIF
             
          ENDDO
@@ -1051,8 +1051,8 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
                IF (CHECK_BOUNDEDNESS) THEN
                   DSMIN = YYS(I,J,K,N)-SMIN_SAVE(N)
                   DSMAX = YYS(I,J,K,N)-SMAX_SAVE(N)
-                  IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'min bv pred (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
-                  IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'max bv pred (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
+                  IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'min bv pre (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
+                  IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'max bv pre (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
                ENDIF
                
             ENDDO
@@ -1169,8 +1169,8 @@ ELSEIF (CORRECTOR) THEN
             IF (CHECK_BOUNDEDNESS) THEN
                DSMIN = RHO(I,J,K)-SMIN_SAVE(0)
                DSMAX = RHO(I,J,K)-SMAX_SAVE(0)
-               IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
-               IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
+               IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
+               IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
             ENDIF
             
          ENDDO
@@ -1188,8 +1188,8 @@ ELSEIF (CORRECTOR) THEN
                IF (CHECK_BOUNDEDNESS) THEN
                   DSMIN = YY(I,J,K,N)-SMIN_SAVE(N)
                   DSMAX = YY(I,J,K,N)-SMAX_SAVE(N)
-                  IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
-                  IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
+                  IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
+                  IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
                ENDIF
                
             ENDDO
@@ -1204,7 +1204,7 @@ ELSEIF (CORRECTOR) THEN
             RHO(I,J,K) = 0.5_EB*( RHON(I,J,K) + RHO(I,J,K) )
             
             ! IF (CLIP_SCALAR) THEN...
-            !RHO(I,J,K) = MAX(RHO(I,J,K),0._EB)
+            RHO(I,J,K) = MAX(RHO(I,J,K),0._EB)
          ENDDO
       ENDDO
    ENDDO
@@ -1215,8 +1215,8 @@ ELSEIF (CORRECTOR) THEN
                YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YY(I,J,K,N) )/RHO(I,J,K)
                
                ! IF (CLIP_SCALAR) THEN...
-               !YY(I,J,K,N) = MAX(YY(I,J,K,N),0._EB)
-               !YY(I,J,K,N) = MIN(YY(I,J,K,N),1._EB)
+               YY(I,J,K,N) = MAX(YY(I,J,K,N),0._EB)
+               YY(I,J,K,N) = MIN(YY(I,J,K,N),1._EB)
             ENDDO
          ENDDO
       ENDDO
@@ -1358,19 +1358,14 @@ DO N=1,N_SPECIES
 ENDDO
 
 IF (CHECK_BOUNDEDNESS) THEN
-   SMIN_SAVE(0) = MINVAL_GASPHASE(RHOP)
+   SMIN_SAVE(0) = 0._EB !MINVAL_GASPHASE(RHOP)
    SMAX_SAVE(0) = MAXVAL_GASPHASE(RHOP)
       
    DO N=1,N_SPECIES
-      SMIN_SAVE(N) = MINVAL_GASPHASE(RHOYYP(:,:,:,N))
+      SMIN_SAVE(N) = 0._EB !MINVAL_GASPHASE(RHOYYP(:,:,:,N))
       SMAX_SAVE(N) = MAXVAL_GASPHASE(RHOYYP(:,:,:,N))
    ENDDO
 ENDIF
-
-!DO N=0,N_SPECIES
-!   PRINT *,SMIN_SAVE(N),SMAX_SAVE(N)
-!ENDDO
-!PAUSE
 
 ! Density flux
 
