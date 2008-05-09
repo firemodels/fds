@@ -1032,8 +1032,8 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
             IF (CHECK_BOUNDEDNESS) THEN
                DSMIN = RHOS(I,J,K)-SMIN_SAVE(0)
                DSMAX = RHOS(I,J,K)-SMAX_SAVE(0)
-               IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv pred (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
-               IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv pred (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
+               IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'min bv pred (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
+               IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'max bv pred (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
             ENDIF
             
          ENDDO
@@ -1051,8 +1051,8 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
                IF (CHECK_BOUNDEDNESS) THEN
                   DSMIN = YYS(I,J,K,N)-SMIN_SAVE(N)
                   DSMAX = YYS(I,J,K,N)-SMAX_SAVE(N)
-                  IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv pred (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
-                  IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv pred (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
+                  IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'min bv pred (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
+                  IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'max bv pred (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
                ENDIF
                
             ENDDO
@@ -1169,8 +1169,8 @@ ELSEIF (CORRECTOR) THEN
             IF (CHECK_BOUNDEDNESS) THEN
                DSMIN = RHO(I,J,K)-SMIN_SAVE(0)
                DSMAX = RHO(I,J,K)-SMAX_SAVE(0)
-               IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
-               IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
+               IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
+               IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
             ENDIF
             
          ENDDO
@@ -1188,8 +1188,8 @@ ELSEIF (CORRECTOR) THEN
                IF (CHECK_BOUNDEDNESS) THEN
                   DSMIN = YY(I,J,K,N)-SMIN_SAVE(N)
                   DSMAX = YY(I,J,K,N)-SMAX_SAVE(N)
-                  IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
-                  IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
+                  IF (DSMIN<0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
+                  IF (DSMAX>0._EB) WRITE(LU_ERR,'(A,4I3.1,2E12.6)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
                ENDIF
                
             ENDDO
