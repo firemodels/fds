@@ -721,8 +721,6 @@ void readcad2geom(cadgeom *cd){
   for(i=0;i<cd->ncadlookinfo;i++){
     cadlook *cdi;
     texture *texti;
-    unsigned char *floortex;
-    int texwid, texht;
     int errorcode;
     int ii;
     size_t lenbuffer,len;
@@ -762,6 +760,9 @@ void readcad2geom(cadgeom *cd){
     texti->name=0;
 
     if(texti->file!=NULL){
+      int texwid, texht;
+      unsigned char *floortex;
+
       printf("    Loading texture: ");
       glGenTextures(1,&texti->name);
       glBindTexture(GL_TEXTURE_2D,texti->name);

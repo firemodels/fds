@@ -1544,6 +1544,7 @@ void initvars1(void){
   nticks=0,ntickssmv=0;
   visTicks=0;
   visCadTextures=1;
+  visTerrainTexture=1;
   cb_hidesv=0;
 #ifdef pp_COLOR
   viscolorbarpath=0;
@@ -1936,6 +1937,7 @@ void initvars0(void){
   tickinfo=NULL;
   firstcolor=NULL;
   textureinfo=NULL;
+  terrain_texture=NULL;
 
   sortedblocklist=NULL,changed_idlist=NULL;
   surfaceinfo=NULL;
