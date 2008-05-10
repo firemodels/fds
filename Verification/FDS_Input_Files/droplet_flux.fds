@@ -1,0 +1,26 @@
+A test of the insertion of solid, non-evaporating droplets.
+
+&HEAD CHID='droplet_flux', TITLE='Simple test of droplet mass flux from a surface, SVN $Revision$' /
+
+&MESH IJK=50,50,25, XB=-5.0,5.0,-5.0,5.0,0.0,5.0 /
+
+&TIME DT=0.05, T_END=30. /
+
+&PART ID='drops', QUANTITIES(1:3)='DROPLET_DIAMETER','DROPLET_TEMPERATURE','DROPLET_AGE',
+      DIAMETER=750., SAMPLING_FACTOR=1, COLOR='RED', EVAPORATE=.FALSE. /
+
+&SURF ID='HOLE', PART_ID='drops', VEL=-5., PARTICLE_MASS_FLUX=0.1, COLOR='RED' /
+
+&OBST XB=-0.2, 0.2,-0.2, 0.2, 4.0, 4.4, SURF_IDS='INERT','HOLE','INERT' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+
+&SLCF PBY=0.0,QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBZ=1.0,QUANTITY='drops_FLUX_Z' /
+
+&BNDF QUANTITY='drops_AMPUA' /  Accumulated Mass Per Unit Area, i.e., the Buckets
+
+&TAIL /

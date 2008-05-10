@@ -1,0 +1,32 @@
+&HEAD CHID='bucket_test', TITLE='Single Sprinkler Test Case, SVN $Revision$' /
+
+&MESH IJK=50,50,25, XB=-5.0,5.0,-5.0,5.0,0.0,5.0 /
+
+&TIME DT=0.05, T_END=40. /
+
+&PART ID='water_drops', WATER=.TRUE., QUANTITIES(1:3)='DROPLET_DIAMETER','DROPLET_TEMPERATURE','DROPLET_AGE',
+      DROPLETS_PER_SECOND=2000, DIAMETER=750., SAMPLING_FACTOR=1 /
+
+&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10, PART_ID='water_drops', 
+      FLOW_RATE=180., FLOW_RAMP='spray', DROPLET_VELOCITY=10., SPRAY_ANGLE=30.,80., SMOKEVIEW_ID='sprinkler_upright' /
+&RAMP ID='spray',T= 0., F=0. /
+&RAMP ID='spray',T= 1., F=1. /
+&RAMP ID='spray',T=30., F=1. /
+&RAMP ID='spray',T=31., F=0. /
+
+&DEVC XYZ=0.0,0.0,4.9, PROP_ID='K-11', ID='Spr_1', QUANTITY='TIME', SETPOINT=0.  /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+
+&SLCF PBY=0.0,QUANTITY='TEMPERATURE' /
+&SLCF PBY=0.0,QUANTITY='WATER VAPOR' /
+&SLCF PBY=0.0,QUANTITY='water_drops_MPUV' /
+&SLCF PBZ=0.1,QUANTITY='water_drops_FLUX_Z' /
+&SLCF PBZ=2.5,QUANTITY='water_drops_FLUX_Z' /
+
+&BNDF QUANTITY='water_drops_AMPUA' /  Accumulated Mass Per Unit Area, i.e., the Buckets
+
+&TAIL /
