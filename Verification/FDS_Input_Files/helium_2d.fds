@@ -1,0 +1,25 @@
+A simple axially-symmetric simulation of a helium plume.
+This tests DNS and axial symmetry.
+
+&HEAD CHID='helium_2d',TITLE='Axisymmetric Helium Plume, SVN $Revision$' /
+
+&MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
+
+&TIME T_END=5.0 /
+
+&MISC DNS=.TRUE., ISOTHERMAL=.TRUE. /
+
+&SPEC ID='HELIUM'  /
+
+&SURF ID='HELIUM', VEL=-0.673, MASS_FRACTION(1)=1.0, TAU_MF(1)=0.3 /
+
+&VENT MB='XMAX' ,SURF_ID='OPEN' /
+&VENT MB='ZMAX' ,SURF_ID='OPEN' /
+
+&OBST XB= 0.0,0.036,-0.001,0.001,0.00,0.02, SURF_IDS='HELIUM','INERT','INERT' /
+
+&DUMP PLOT3D_QUANTITY(1)='PRESSURE',PLOT3D_QUANTITY(5)='HELIUM' /
+&SLCF PBY=0.000,QUANTITY='DENSITY', VECTOR=.TRUE. /
+&SLCF PBY=0.000,QUANTITY='HELIUM' /
+
+&TAIL /

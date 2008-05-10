@@ -1,0 +1,24 @@
+This case just demonstrates how to do a time-dependent pressure boundary
+
+&HEAD CHID='pressure_boundary', TITLE='Simple tunnel with pressure boundary, SVN $Revision$' /
+
+&MESH IJK=100,10,10, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=60. /
+
+&SURF ID='FIRE', HRRPUA=2000., COLOR='RED' /
+&VENT XB=4.7,5.3,0.2,0.8,0.0,0.0, SURF_ID='FIRE' /
+
+&VENT MB = 'XMIN' SURF_ID = 'OPEN' /
+&VENT MB = 'XMAX' SURF_ID = 'OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind_ramp' /
+
+&RAMP ID='wind_ramp', T= 0., F= 1. /
+&RAMP ID='wind_ramp', T=30., F= 1. /
+&RAMP ID='wind_ramp', T=31., F=-1. /
+
+&SLCF PBY=0.5, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBY=0.5, QUANTITY='H' /
+&SLCF PBY=0.5, QUANTITY='PRESSURE' /
+&SLCF PBY=0.5, QUANTITY='TEMPERATURE' /
+
+&TAIL /
