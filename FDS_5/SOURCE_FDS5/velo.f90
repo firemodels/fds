@@ -1018,8 +1018,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          WP   = WW(II,JJ+1,KK)
          WM   = WW(II,JJ,KK)
 
-         IF (EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
-
+         IF (NOM1==0 .OR. EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
             SELECT CASE(IOR)
                CASE(-3)
                   IWM = WALL_INDEX(ICMM, 3) 
@@ -1035,6 +1034,21 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (BC<1.5_EB) VM = BC*VP
                      IF (BC>1.5_EB) VM = FVT*SF%VEL_T(2)*PROF
                   ENDIF
+            END SELECT
+         ELSE
+            OM => OMESH(ABS(NOM1))
+            IF (PREDICTOR) THEN
+               OM_VV => OM%VS
+            ELSE
+               OM_VV => OM%V
+            ENDIF
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,1)
+            IF (NOM1<0) VM = WGT*OM_VV(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_VV(IIO1,JJO1-1,KKO1)
+            IF (NOM1>0) VP = WGT*OM_VV(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_VV(IIO1,JJO1-1,KKO1)
+         ENDIF
+
+         IF (NOM2==0 .OR. EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
+            SELECT CASE(IOR)
                CASE(-2)
                   IWM = WALL_INDEX(ICMM, 2) 
                   IWP = WALL_INDEX(ICMP, 2) 
@@ -1050,32 +1064,16 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (BC>1.5_EB) WM = FVT*SF%VEL_T(2)
                   ENDIF
             END SELECT
-        
          ELSE
-
-            IF (NOM1/=0) THEN
-               OM => OMESH(ABS(NOM1)) 
-               IF (PREDICTOR) THEN
-                  OM_VV => OM%VS
-               ELSE
-                  OM_VV => OM%V
-               ENDIF
-               WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
-               IF (NOM1<0) VM = WGT*OM_VV(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_VV(IIO1,JJO1-1,KKO1) 
-               IF (NOM1>0) VP = WGT*OM_VV(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_VV(IIO1,JJO1-1,KKO1) 
+            OM => OMESH(ABS(NOM2)) 
+            IF (PREDICTOR) THEN
+               OM_WW => OM%WS
+            ELSE
+               OM_WW => OM%W
             ENDIF
-            IF (NOM2/=0) THEN
-               OM => OMESH(ABS(NOM2)) 
-               IF (PREDICTOR) THEN
-                  OM_WW => OM%WS
-               ELSE
-                  OM_WW => OM%W
-               ENDIF
-               WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
-               IF (NOM2<0) WM = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1)
-               IF (NOM2>0) WP = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
-            ENDIF
-
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
+            IF (NOM2<0) WM = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1)
+            IF (NOM2>0) WP = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
          ENDIF
 
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
@@ -1103,8 +1101,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          WP   = WW(II+1,JJ,KK)
          WM   = WW(II,JJ,KK)
 
-         IF (EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
-
+         IF (NOM1==0 .OR. EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
             SELECT CASE(IOR)
                CASE(-3)
                   IWM = WALL_INDEX(ICMM, 3) 
@@ -1120,6 +1117,21 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (BC<1.5_EB) UM = BC*UP
                      IF (BC>1.5_EB) UM = FVT*SF%VEL_T(1)*PROF
                   ENDIF
+            END SELECT
+         ELSE
+            OM => OMESH(ABS(NOM1))
+            IF (PREDICTOR) THEN
+               OM_UU => OM%US
+            ELSE
+               OM_UU => OM%U
+            ENDIF
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,1)
+            IF (NOM1<0) UM = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+            IF (NOM1>0) UP = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+         ENDIF
+
+         IF (NOM2==0 .OR. EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
+            SELECT CASE(IOR)
                CASE(-1)
                   IWM = WALL_INDEX(ICMM, 1) 
                   IWP = WALL_INDEX(ICMP, 1) 
@@ -1135,34 +1147,18 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (BC>1.5_EB) WM = FVT*SF%VEL_T(2)
                   ENDIF
             END SELECT
-         
          ELSE
-
-            IF (NOM1/=0) THEN
-               OM => OMESH(ABS(NOM1)) 
-               IF (PREDICTOR) THEN
-                  OM_UU => OM%US
-               ELSE
-                  OM_UU => OM%U
-               ENDIF
-               WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
-               IF (NOM1<0) UM = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
-               IF (NOM1>0) UP = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+            OM => OMESH(ABS(NOM2))
+            IF (PREDICTOR) THEN
+               OM_WW => OM%WS
+            ELSE
+               OM_WW => OM%W
             ENDIF
-            IF (NOM2/=0) THEN
-               OM => OMESH(ABS(NOM2)) 
-               IF (PREDICTOR) THEN
-                  OM_WW => OM%WS
-               ELSE
-                  OM_WW => OM%W
-               ENDIF
-               WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
-               IF (NOM2<0) WM = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
-               IF (NOM2>0) WP = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1) 
-            ENDIF
-
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,2)
+            IF (NOM2<0) WM = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1)
+            IF (NOM2>0) WP = WGT*OM_WW(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_WW(IIO2,JJO2,KKO2-1)
          ENDIF
-
+         
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
          DUDZ = RDZN(KK)*(UP-UM)
          DWDX = RDXN(II)*(WP-WM)
@@ -1188,8 +1184,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          VP   = VV(II+1,JJ,KK)
          VM   = VV(II,JJ,KK)
 
-         IF (EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
-
+         IF (NOM1==0 .OR. EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
             SELECT CASE(IOR)
                CASE(-2)
                   IWM = WALL_INDEX(ICMM, 2) 
@@ -1205,6 +1200,21 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (BC<1.5_EB) UM = BC*UP
                      IF (BC>1.5_EB) UM = FVT*SF%VEL_T(1)*PROF
                   ENDIF
+            END SELECT
+         ELSE
+            OM => OMESH(ABS(NOM1))
+              IF (PREDICTOR) THEN
+                 OM_UU => OM%US
+              ELSE
+                 OM_UU => OM%U
+              ENDIF
+              WGT = EDGE_INTERPOLATION_FACTOR(IE,1)
+              IF (NOM1<0) UM = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+              IF (NOM1>0) UP = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+         ENDIF
+
+         IF (NOM2==0 .OR. EDGE_TYPE(IE)/=INTERPOLATED_EDGE) THEN
+            SELECT CASE(IOR)
                CASE( -1)
                   IWM = WALL_INDEX(ICMM, 1) 
                   IWP = WALL_INDEX(ICMP, 1) 
@@ -1220,32 +1230,16 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (BC>1.5_EB) VM = FVT*SF%VEL_T(1)*PROF
                   ENDIF
             END SELECT
-
          ELSE
-
-            IF (NOM1/=0) THEN
-               OM => OMESH(ABS(NOM1)) 
-               IF (PREDICTOR) THEN
-                  OM_UU => OM%US
-               ELSE
-                  OM_UU => OM%U
-               ENDIF
-               WGT = EDGE_INTERPOLATION_FACTOR(IE,1) 
-               IF (NOM1<0) UM = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
-               IF (NOM1>0) UP = WGT*OM_UU(IIO1,JJO1,KKO1) + (1._EB-WGT)*OM_UU(IIO1-1,JJO1,KKO1)
+            OM => OMESH(ABS(NOM2)) 
+            IF (PREDICTOR) THEN
+               OM_VV => OM%VS
+            ELSE
+               OM_VV => OM%V
             ENDIF
-            IF (NOM2/=0) THEN
-               OM => OMESH(ABS(NOM2)) 
-               IF (PREDICTOR) THEN
-                  OM_VV => OM%VS
-               ELSE
-                  OM_VV => OM%V
-               ENDIF
-               WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
-               IF (NOM2<0) VM = WGT*OM_VV(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_VV(IIO2,JJO2-1,KKO2) 
-               IF (NOM2>0) VP = WGT*OM_VV(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_VV(IIO2,JJO2-1,KKO2) 
-            ENDIF
-
+            WGT = EDGE_INTERPOLATION_FACTOR(IE,2) 
+            IF (NOM2<0) VM = WGT*OM_VV(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_VV(IIO2,JJO2-1,KKO2) 
+            IF (NOM2>0) VP = WGT*OM_VV(IIO2,JJO2,KKO2) + (1._EB-WGT)*OM_VV(IIO2,JJO2-1,KKO2) 
          ENDIF
    
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
