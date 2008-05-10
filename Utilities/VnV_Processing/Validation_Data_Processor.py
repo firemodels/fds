@@ -2,11 +2,17 @@ import csv
 from re import *
 from pyx import *
 
-### Set Global Variables
+### Set Global Variables for Validation
 
 data_directory = "../../Validation/"
 output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
 config_file_name = "Validation_Data_Config_File.csv"
+
+### Set Global Variables for Verification
+
+#data_directory = "../../Verification/"
+#output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
+#config_file_name = "Verification_Data_Config_File.csv"
 
 scatter_data_dict = {}
 combined_scatter_data = {}
