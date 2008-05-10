@@ -28,7 +28,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
-/* ksksksk */
+/* dummy change to bump revision number to 5.1.5 */
 
 #ifdef WIN32
 #include <Commdlg.h>
