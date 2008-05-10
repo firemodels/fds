@@ -1053,42 +1053,6 @@ int readsmv(char *file){
 
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ HRRPUVCUT ++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-
-    if(match(buffer,"HRRPUVCUT",9) == 1){
-      {
-        int nhrrpuvcut;
-        float hrrpuvcut;
-
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&nhrrpuvcut);
-        if(nhrrpuvcut>=1){
-          fgets(buffer,255,stream);
-          sscanf(buffer,"%f",&hrrpuvcut);
-          for(i=0;i<nmeshes;i++){
-            mesh *meshi;
-
-            meshi=meshinfo+i;
-            meshi->hrrpuv_cutoff=hrrpuvcut;
-          }
-        }
-        for(i=0;i<nhrrpuvcut;i++){
-          mesh *meshi;
-
-          fgets(buffer,255,stream);
-          if(i>=nmeshes)continue;
-          sscanf(buffer,"%f",&hrrpuvcut);
-          meshi=meshinfo+i;
-          meshi->hrrpuv_cutoff=hrrpuvcut;
-        }
-      }
-      continue;
-    }
-
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ LABEL ++++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
@@ -2021,6 +1985,41 @@ typedef struct {
       }
     }
     CheckMemory;
+
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ HRRPUVCUT ++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+
+    if(match(buffer,"HRRPUVCUT",9) == 1){
+      int nhrrpuvcut;
+      float hrrpuvcut;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&nhrrpuvcut);
+      if(nhrrpuvcut>=1){
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f",&hrrpuvcut);
+        for(i=0;i<nmeshes;i++){
+          mesh *meshi;
+
+          meshi=meshinfo+i;
+          meshi->hrrpuv_cutoff=hrrpuvcut;
+        }
+        for(i=1;i<nhrrpuvcut;i++){
+          mesh *meshi;
+
+          fgets(buffer,255,stream);
+          if(i>=nmeshes)continue;
+          sscanf(buffer,"%f",&hrrpuvcut);
+          meshi=meshinfo+i;
+          meshi->hrrpuv_cutoff=hrrpuvcut;
+        }
+      }
+      continue;
+    }
+
     /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
@@ -4853,9 +4852,9 @@ typedef struct {
       nx = meshi->ibar;
       ny = meshi->jbar;
       xmin = meshi->xplt_orig[0];
-      xmax = meshi->xplt_orig[nx-1];
+      xmax = meshi->xplt_orig[nx];
       ymin = meshi->yplt_orig[0];
-      ymax = meshi->yplt_orig[ny-1];
+      ymax = meshi->yplt_orig[ny];
 
       initterrain(NULL, meshi, terri, xmin, xmax, nx, ymin, ymax, ny);
     }
