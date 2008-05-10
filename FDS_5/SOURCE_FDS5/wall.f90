@@ -1033,12 +1033,6 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
       K_S(I)  = 1.0_EB / ( DX_WGT_S(I)/K_S(I) + (1.-DX_WGT_S(I))/K_S(I+1) )
    ENDDO
 
-   !RCP_W for part
-   IF (N_EVAP_INDICIES>0) THEN
-      RCP_W(IW) = RHOCBAR(1)*DX_S(1)
-   ENDIF
-
-
    ! Calculate internal radiation
       
    IF (SF%INTERNAL_RADIATION) THEN
