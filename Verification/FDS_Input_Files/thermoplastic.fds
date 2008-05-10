@@ -1,0 +1,65 @@
+Solid phase heat conduction and reaction calculation of a 2.5 cm thick 
+slab of plastic pyrolyzing under a heat flux of 50 kW/m2. 
+The calculation is purely for the solid phase. There is no gas phase 
+coupling -- just a fixed external heat flux of 50 kW/m2.
+
+WARNING: The material properties contained in this file are for 
+demonstration purposes only!  They may or may not be 
+representative of any particular material.
+
+&HEAD CHID='thermoplastic', TITLE='Demo of a thermoplastic material, No Gas Phase Reaction, SVN $Revision$' /
+
+&MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
+
+&TIME T_END=900., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
+
+&MISC SOLID_PHASE_ONLY=.TRUE., H_FIXED=0.0 /  No convective heat transfer
+
+&REAC ID='NO REACTION', Y_O2_INFTY=0.01 /  No gas phase reaction with 1% O2 concentration
+
+&DUMP DT_PL3D=10000000. /  No Plot3D output
+
+The plastic properties and surface designation
+
+&MATL ID='PMMA'
+      CONDUCTIVITY=0.25
+      SPECIFIC_HEAT=1.0
+      DENSITY=500.
+      N_REACTIONS=1
+      NU_FUEL=1.
+      HEAT_OF_REACTION=1578.
+      HEAT_OF_COMBUSTION=25200.
+      REFERENCE_TEMPERATURE=330. /
+
+&SURF ID='PMMA SLAB'
+      COLOR='BLACK'
+      MATL_ID='PMMA'
+      THICKNESS=0.025 
+      BURN_AWAY=.TRUE.
+      EXTERNAL_FLUX=50. /  External Flux is ONLY for this simple demo exercise
+
+The actual designation of the material in the FDS domain
+
+&VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
+
+Open up the domain on all sides except the bottom (ZMIN)
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+Output
+
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='HEAT_FLUX',        ID='flux' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL_TEMPERATURE', ID='temp' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING_RATE',     ID='burn' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='GAUGE_HEAT_FLUX',  ID='gauge' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL_THICKNESS',   ID='thick' /
+
+&PROF XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='TEMPERATURE',      ID='Temperature' / 
+
+&TAIL / 
+
+

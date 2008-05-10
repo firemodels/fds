@@ -1,0 +1,84 @@
+Radiation from a plane layer
+============================
+
+This verification case tests the computation of three-dimensional radiation
+from a homogenous, infinitelly wide layer of radiating material. 
+The temperature of the layer is 1273.15 K and absorption coefficients are
+varied. The thickness of the layer is fixed to 1.0 m, and the 
+optical depth is 1 * kappa (KAPPA0). Wall temperatures are set to 0 K.
+
+
+The results are compared against the exact solution presented in [1]
+
+Flux = Sb*[1-2*E_3(tau)]
+
+where Sb is the blackbody radiation flux from an object at the plane 
+temperature Sb = 5.67E-8 * T**4 (W/m^2) and E_3(tau) is exponential 
+integral function (order 3) of optical depth tau. 
+
+The FDS results are calculated at two mesh discretizations in x-directions
+For I=20, both one-band and 6-band versions are included to test the correct 
+integration of heat fluxes. For I=20, also a 2D-versions (J=1) is computed.
+
+A special case with KAPPA0 = 0 and opposite wall temperature = 1273.15 K
+is computed to test the wall heat flux computation.
+
+Fluxes (kW/m^2)
+===============
+Kappa Exact	FDS5 (I=20,J=20)	FDS5(I=20,J=1)		FDS5 (I=150)
+		1 band	  6  bands	1 band	 6 bands	1 band
+
+0     148.9709  148.9709  148.4037	147.9426 147.3793 	148.9709
+0.01  2.8970	2.9180	  2.9069	2.8364	 2.8256		2.9258
+0.1   24.9403	25.5501	  25.4529	25.1078	 25.0122	25.7045
+0.5   82.9457   83.1309	  82.8144	84.3719	 84.0506 	84.0264
+1.0   116.2891	115.4051  114.9656	117.801	 117.353	116.7751
+10.   148.9698  148.9616  148.3947	148.9677 148.4005	148.9695
+
+
+References
+
+[1]	Zel'dovich, Y.B. & Raizer, Y.P. Physics of shock waves and
+high-temperature hydrodynamic phenomena. (translated from the Russian
+and then edited by W.D.Hayes and R.F. Probstein); Dover Publications,
+New York, 2002, 944 pp.
+
+-----------------------------------------------------------------------
+
+&HEAD CHID='radiation_plane_layer', TITLE='Test wall heat transfer from a plane layer, SVN $Revision$'/
+
+&MESH IJK = 20,20,20, XB= 0.0, 1.0,-10.0, 10.0, -10.0, 10.0 /
+
+&MISC TMPA = 1000.0, H_FIXED=0. / 
+
+&TIME T_END=0.0001, DT = 0.0001  /
+
+&RADI NUMBER_RADIATION_ANGLES=100 , 
+      TIME_STEP_INCREMENT = 1
+      ANGLE_INCREMENT = 1 
+      KAPPA0 = 1. /
+
+&DUMP NFRAMES = 500,
+      SMOKE3D = .FALSE.
+      DT_PL3D = 10000. /
+      DT_DEVC = 0. /
+
+&SURF ID = 'HOT',  TMP_FRONT = 1000.00, TAU_T = 0., EMISSIVITY = 1.0 /
+&SURF ID = 'COLD', TMP_FRONT = -273.15, TAU_T = 0., EMISSIVITY = 1.0 /
+
+For KAPPA0 = 0
+ VENT MB='XMIN',SURF_ID='HOT' /
+
+&VENT MB='XMIN',SURF_ID='COLD' /
+&VENT MB='XMAX',SURF_ID='COLD' /
+
+&VENT MB='YMIN',SURF_ID='COLD' /
+&VENT MB='YMAX',SURF_ID='COLD' /
+&VENT MB='ZMIN',SURF_ID='COLD' /
+&VENT MB='ZMAX',SURF_ID='COLD' /
+
+&BNDF QUANTITY = 'INCIDENT_HEAT_FLUX' /
+
+&DEVC QUANTITY = 'INCIDENT_HEAT_FLUX', XYZ = 1.0,0.0,0.0, IOR=-1  /
+
+&TAIL /
