@@ -1,0 +1,16 @@
+g,Group_Number,Group_Title,Symbol,Color,Filled,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,1,VTT,diamond,Red,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,2,NIST/NRC,circle,Black,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+s,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,Quantity,Comparison_Quantities,Scatter_Plot_Title,X_Title,Y_Title,Plot_Min,Plot_Max,%error,Title_Quadrant,Key_Position,Plot_Width(cm),Plot_Filename,,,,,,,,,,,,,,,,,,,,,,,
+q,1,HGL_Temperature,FDS Hot Gas Layer Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,13,1,tl,8,ScatterPlots/HGL_Temperature,,,,,,,,,,,,,,,,,,,,,,,
+q,2,HGL_Depth,FDS Hot Gas Layer Depth,Measured Layer Depth (m),Predicted Layer Depth (m),0,16,13,1,tl,8,ScatterPlots/HGL_Depth,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+d,Quantity,Dataname,Group,Exp_Filename,Exp_Col_Name_Row,Exp_Col_Name,Exp_Data_Row,Exp_Key,Exp_Start_(min.),Exp_End_(min.),Exp_Comp_Start_(min.),Exp_Comp_End_(min.),Exp_Intitial_Value,Mod_Filename,Mod_Col_Name_Row,Mod_Col_Name,Mod_Data_Row,Mod_Key,Mod_Start_(min.),Mod_End_(min.),Mod_Comp_Start_(min.),Mod_Comp_End_(min.),Mod_Intitial_Value,max/min,Plot_Title,X_Title,Y_Title,Min_X,Max_X,Min_Y,Max_Y,Title_Quadrant,Key_Position,Plot_Width(cm),Plot_Filename
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+d,0,activate_vents,1,Experimental_Data/activate_vents.csv,1,"['controller 1','controller 3','controller 4']",2,"['Specified (controller 1)','Specified (controller 3)','Specified (controller 4)']",0,5,0,30,0,FDS_Output_Files/activate_vents_ctrl.csv,2,"['controller 1','controller 3','controller 4']",3,"['FDS (controller 1)','FDS (controller 3)','FDS (controller 4)']",0,30,0,30,0,max,Vent Control (activate\_vents),Time (min),Control Index,0,0.5,-1.5,1.5,1,br,8,activate_vents_ctrl
+d,0,aspiration_detector,1,Experimental_Data/aspiration_detector.csv,1,ideal,2,Ideal Value,0,5,0,30,0,FDS_Output_Files/aspiration_detector_devc.csv,2,asp1,3,FDS (asp1),0,30,0,30,0,max,Obscuration (aspiration\_detector),Time (min),Control Index,0,0.02,0,25,1,br,8,aspiration_detector
+d,0,spray_burner,1,Experimental_Data/spray_burner.csv,1,HRR,2,Specified (HRR),0,5,0,30,0,FDS_Output_Files/spray_burner_hrr.csv,2,HRR,3,FDS (HRR),0,30,0,30,0,max,Heat Release Rate (spray\_burner),Time (min),Heat Release Rate (kW),0,1,0,2500,1,br,8,spray_burner_HRR
