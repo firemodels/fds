@@ -7,7 +7,7 @@ Values of 40, 150, and 1000 m**-1 are tested.
 &MESH IJK=24,24,48, XB=-0.6,0.6,-0.6,0.6,0.0,2.4 /
 
 &TIME T_END=500. / 
-&DUMP DT_HRR=10., DT_DEVC=10. /
+&DUMP DT_HRR=10., DT_DEVC=10., DT_PL3D = 10000. /
 
 &RADI RADIATIVE_FRACTION=0.0 /
 
