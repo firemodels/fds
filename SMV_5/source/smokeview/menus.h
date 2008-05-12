@@ -5537,7 +5537,9 @@ if(visBlocks==visBLOCKOutline){
   CREATEMENU(disclaimermenu,DisclaimerMenu);
   glutAddMenuEntry(TITLERELEASE,1);
   {
+#ifdef pp_GPU
     char version_label[256];
+#endif
     char menulabel[256];
 
     sprintf(menulabel,"  Smokeview revision:%i",revision_smv);

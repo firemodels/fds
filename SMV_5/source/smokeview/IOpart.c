@@ -597,7 +597,7 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
   float time;
   int count;
   char *reg_file, *size_file;
-  int i,j;
+  int i;
   int stat_sizefile, stat_regfile;
   struct stat stat_sizefile_buffer, stat_regfile_buffer;
   int nframes_all;
@@ -1286,7 +1286,7 @@ void drawEvac(const particle *parti){
 
 void drawPart5(const particle *parti){
   int ipframe;
-  part5data *datacopy,*datapast,*dataforward;
+  part5data *datacopy,*datapast;
   int nclasses;
   int i,j;
 
@@ -1322,7 +1322,6 @@ void drawPart5(const particle *parti){
         sz = datacopy->sz;
         vis = datacopy->vis_part;
         if(parti->evac==1){
-          part5data *data1, *data2;
           int avatar_type=0;
 
           angle=datacopy->avatar_angle;
