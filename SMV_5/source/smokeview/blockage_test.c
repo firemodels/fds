@@ -592,7 +592,6 @@ float getblockdist0(float x, float y, float z){
 /* ------------------ init_blockdist  ------------------------ */
 
 void init_blockdist(void){
-  int is;
   int ig,jg;
   float *b_zdist;
   mesh *meshi,*meshj;
@@ -707,7 +706,6 @@ int makeiblank(void){
   int ibar,jbar,kbar;
   int nx, ny, nxy;
   int *iblank,*iblank_cell,*iblank_x,*iblank_y,*iblank_z;
-  int is;
 
   for(ig=0;ig<nmeshes;ig++){
     meshi = meshinfo+ig;

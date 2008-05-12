@@ -189,13 +189,13 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
   }
 #endif
 
-    this_ptr=(char *)(*ppold)-infoblocksize;
+    this_ptr=(MMdata *)((char *)(*ppold)-infoblocksize);
     prev_ptr=this_ptr->prev;
     next_ptr=this_ptr->next;
   pbNew = realloc((char *)(*ppold)-infoblocksize, infoblocksize+sizeNew+sizeofDebugByte);
   if(pbNew != NULL){
   if(pbNew!=(char *)(*ppold)-infoblocksize){
-    this_ptr=pbNew;
+    this_ptr=(MMdata *)pbNew;
     prev_ptr->next=this_ptr;
     next_ptr->prev=this_ptr;
     this_ptr->next=next_ptr;

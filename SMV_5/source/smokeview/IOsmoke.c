@@ -327,8 +327,6 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   ncomp_light_total_skipped=0;
 #endif
   for(i=0;i<smoke3di->n_times_full;i++){
-    float time;
-
     ncomp_smoke_total+=smoke3di->nchars_compressed_smoke_full[i];
     if(smoke3di->use_smokeframe[i]==1){
       ncomp_smoke_total_skipped+=smoke3di->nchars_compressed_smoke_full[i];
@@ -657,7 +655,7 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist, int **use_s
   EGZ_FILE *LIGHTFILE=NULL;
 #endif
   int nframes_found;
-  float time,time_max,*timeptr=NULL,*timefullptr;
+  float time,time_max,*timeptr=NULL;
   int *use_smokeframeptr;
   int nch_uncompressed,nch_smoke_compressed;
 #ifdef pp_LIGHT

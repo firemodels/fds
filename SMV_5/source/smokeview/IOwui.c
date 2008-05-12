@@ -776,7 +776,6 @@ void drawterrain_texture(terraindata *terri, int only_geom){
     for(i=0;i<terri->nx;i++){
       float *zn;
       int ip1;
-      float *ter_rgbptr;
       float tx,txp1;
 
       ip1 = i + 1;
