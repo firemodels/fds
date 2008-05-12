@@ -1028,7 +1028,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            RHOS(I,J,K) = RHON(I,J,K) - DT*FRHO(I,J,K)
+            IF (.NOT.SOLID(CELL_INDEX(I,J,K))) RHOS(I,J,K) = RHON(I,J,K) - DT*FRHO(I,J,K)
             
             !IF (CHECK_BOUNDEDNESS) THEN
             !   DSMIN = RHOS(I,J,K)-SMIN_SAVE(0)
@@ -1047,7 +1047,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR             
-               YYS(I,J,K,N) = YYN(I,J,K,N) - DT*FRHOYY(I,J,K,N)
+               IF (.NOT.SOLID(CELL_INDEX(I,J,K))) YYS(I,J,K,N) = YYN(I,J,K,N) - DT*FRHOYY(I,J,K,N)
                
                !IF (CHECK_BOUNDEDNESS) THEN
                !   DSMIN = YYS(I,J,K,N)-SMIN_SAVE(N)
@@ -1068,7 +1068,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
+               IF (.NOT.SOLID(CELL_INDEX(I,J,K))) YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
             ENDDO
          ENDDO
       ENDDO
@@ -1165,7 +1165,7 @@ ELSEIF (CORRECTOR) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            RHO(I,J,K) = RHOS(I,J,K) - DT*FRHO(I,J,K)
+            IF (.NOT.SOLID(CELL_INDEX(I,J,K))) RHO(I,J,K) = RHOS(I,J,K) - DT*FRHO(I,J,K)
             
             !IF (CHECK_BOUNDEDNESS) THEN
             !   DSMIN = RHO(I,J,K)-SMIN_SAVE(0)
@@ -1184,7 +1184,7 @@ ELSEIF (CORRECTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               YY(I,J,K,N) = RHOYYP(I,J,K,N) - DT*FRHOYY(I,J,K,N)
+               IF (.NOT.SOLID(CELL_INDEX(I,J,K))) YY(I,J,K,N) = RHOYYP(I,J,K,N) - DT*FRHOYY(I,J,K,N)
                
                !IF (CHECK_BOUNDEDNESS) THEN
                !   DSMIN = YY(I,J,K,N)-SMIN_SAVE(N)
@@ -1202,7 +1202,7 @@ ELSEIF (CORRECTOR) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            RHO(I,J,K) = 0.5_EB*( RHON(I,J,K) + RHO(I,J,K) )
+            IF (.NOT.SOLID(CELL_INDEX(I,J,K))) RHO(I,J,K) = 0.5_EB*( RHON(I,J,K) + RHO(I,J,K) )
             
             ! IF (CLIP_SCALAR) THEN...
             RHO(I,J,K) = MAX(RHO(I,J,K),0._EB)
@@ -1213,7 +1213,8 @@ ELSEIF (CORRECTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YY(I,J,K,N) )/RHO(I,J,K)
+!! if (rho(i,j,k)==0._EB) write(0,*) nm,i,j,k,n
+               IF (.NOT.SOLID(CELL_INDEX(I,J,K))) YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YY(I,J,K,N) )/RHO(I,J,K)
                
                ! IF (CLIP_SCALAR) THEN...
                YY(I,J,K,N) = MAX(YY(I,J,K,N),0._EB)
@@ -1316,7 +1317,7 @@ END SUBROUTINE DENSITY_TVD
 SUBROUTINE SCALARF
 
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN_BOUNDARY, &
-                            LU_ERR,CHECK_BOUNDEDNESS,BTOL
+                            LU_ERR,CHECK_BOUNDEDNESS,BTOL,INTERPOLATED_BOUNDARY
 
 ! Computes the divergence of the scalar advective flux + diffusion
 
@@ -1408,29 +1409,53 @@ WALL_LOOP: DO IW=1,NWC
    IOR = IJKW(4,IW)
    SELECT CASE(IOR)
       CASE( 1)
-         ZZ(2)   = RHO_W(IW)
-         ZZ(3:4) = RHOP(1:2,JJ,KK)
-         FX(II,JJ,KK) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)
+         ZZ(2) = RHO_W(IW)
+         ZZ(3) = RHOP(IIG,JJG,KKG)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FX(II,JJ,KK) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)
+         ELSE
+            FX(II,JJ,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       CASE(-1)
-         ZZ(1:2) = RHOP(IBM1:IBAR,JJ,KK)
-         ZZ(3)   = RHO_W(IW)
-         FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1)
+         ZZ(2) = RHOP(IIG,JJG,KKG)
+         ZZ(3) = RHO_W(IW)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1)
+         ELSE
+            FX(II-1,JJ,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       CASE( 2)
-         ZZ(2)   = RHO_W(IW)
-         ZZ(3:4) = RHOP(II,1:2,KK)
-         FY(II,JJ,KK) = VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
+         ZZ(2) = RHO_W(IW)
+         ZZ(3) = RHOP(IIG,JJG,KKG)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FY(II,JJ,KK) = VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
+         ELSE
+            FY(II,JJ,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       CASE(-2)
-         ZZ(1:2) = RHOP(II,JBM1:JBAR,KK)
-         ZZ(3)   = RHO_W(IW)
-         FY(II,JJ-1,KK) = VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
+         ZZ(2) = RHOP(IIG,JJG,KKG)
+         ZZ(3) = RHO_W(IW)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FY(II,JJ-1,KK) = VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
+         ELSE
+            FY(II,JJ-1,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       CASE( 3)
-         ZZ(2)   = RHO_W(IW)
-         ZZ(3:4) = RHOP(II,JJ,1:2)
-         FZ(II,JJ,KK) = WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
+         ZZ(2) = RHO_W(IW)
+         ZZ(3) = RHOP(IIG,JJG,KKG)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FZ(II,JJ,KK) = WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
+         ELSE
+            FZ(II,JJ,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       CASE(-3)
-         ZZ(1:2) = RHOP(II,JJ,KBM1:KBAR)
-         ZZ(3)   = RHO_W(IW)
-         FZ(II,JJ,KK-1) = WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
+         ZZ(2) = RHOP(IIG,JJG,KKG)
+         ZZ(3) = RHO_W(IW)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FZ(II,JJ,KK-1) = WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
+         ELSE
+            FZ(II,JJ,KK-1) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
    END SELECT
 ENDDO WALL_LOOP
          
@@ -1493,37 +1518,62 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    WALL_LOOP2: DO IW=1,NWC
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2
       II  = IJKW(1,IW)
-      IIG = IJKW(6,IW)
       JJ  = IJKW(2,IW)
-      JJG = IJKW(7,IW)
       KK  = IJKW(3,IW)
+      IIG = IJKW(6,IW)
+      JJG = IJKW(7,IW)
       KKG = IJKW(8,IW)
       IOR = IJKW(4,IW)
       SELECT CASE(IOR)
       CASE( 1)
-         ZZ(2)   = RHO_W(IW)*YY_W(IW,N)
-         ZZ(3:4) = RHOYYP(1:2,JJ,KK,N)
-         FX(II,JJ,KK) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)
+         ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+         ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FX(II,JJ,KK) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)
+    !!      FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZ,1)
+         ELSE
+            FX(II,JJ,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       CASE(-1)
-         ZZ(1:2) = RHOYYP(IBM1:IBAR,JJ,KK,N)
-         ZZ(3)   = RHO_W(IW)*YY_W(IW,N)
-         FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1)
+         ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
+         ZZ(3) = RHO_W(IW)*YY_W(IW,N)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1)
+         ELSE
+            FX(II-1,JJ,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       CASE( 2)
-         ZZ(2)   = RHO_W(IW)*YY_W(IW,N)
-         ZZ(3:4) = RHOYYP(II,1:2,KK,N)
-         FY(II,JJ,KK) = VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
+         ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+         ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FY(II,JJ,KK) = VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
+         ELSE
+            FY(II,JJ,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       CASE(-2)
-         ZZ(1:2) = RHOYYP(II,JBM1:JBAR,KK,N)
-         ZZ(3)   = RHO_W(IW)*YY_W(IW,N)
-         FY(II,JJ-1,KK) = VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
+         ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
+         ZZ(3) = RHO_W(IW)*YY_W(IW,N)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FY(II,JJ-1,KK) = VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
+         ELSE
+            FY(II,JJ-1,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       CASE( 3)
-         ZZ(2)   = RHO_W(IW)*YY_W(IW,N)
-         ZZ(3:4) = RHOYYP(II,JJ,1:2,N)
-         FZ(II,JJ,KK) = WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
+         ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+         ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FZ(II,JJ,KK) = WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
+         ELSE
+            FZ(II,JJ,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       CASE(-3)
-         ZZ(1:2) = RHOYYP(II,JJ,KBM1:KBAR,N)
-         ZZ(3)   = RHO_W(IW)*YY_W(IW,N)
-         FZ(II,JJ,KK-1) = WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
+         ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
+         ZZ(3) = RHO_W(IW)*YY_W(IW,N)
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+            FZ(II,JJ,KK-1) = WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
+         ELSE
+            FZ(II,JJ,KK-1) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         ENDIF
       END SELECT
    ENDDO WALL_LOOP2
 
