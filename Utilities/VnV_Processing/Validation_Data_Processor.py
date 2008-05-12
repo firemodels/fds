@@ -4,15 +4,15 @@ from pyx import *
 
 ### Set Global Variables for Validation
 
-data_directory = "../../Validation/"
-output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
-config_file_name = "Validation_Data_Config_File.csv"
+#data_directory = "../../Validation/"
+#output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
+#config_file_name = "Validation_Data_Config_File.csv"
 
 ### Set Global Variables for Verification
 
-#data_directory = "../../Verification/"
-#output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
-#config_file_name = "Verification_Data_Config_File.csv"
+data_directory = "../../Verification/"
+output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
+config_file_name = "Verification_Data_Config_File.csv"
 
 scatter_data_dict = {}
 combined_scatter_data = {}
@@ -199,8 +199,8 @@ def extract_comp_data(comp_file_info):
         print "Single Mod. Column Name:", mod_column_name_value
         mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+mod_column_name_value)
     
-    #print "Exp Data Labels:\n", exp_scatter_data_labels
-    #print "Mod Data Labels:\n", mod_scatter_data_labels
+    print "Exp Data Labels:\n", exp_scatter_data_labels
+    print "Mod Data Labels:\n", mod_scatter_data_labels
     
     combined_scatter_data = [exp_scatter_data_labels,mod_scatter_data_labels]
     #print "Combined Scatter Data:",combined_scatter_data
@@ -392,9 +392,10 @@ def comparison_plot(plot_data,exp_data,mod_data):
     # Create line styles that have predetermined color order for each pair in series.  
     # All Experimental data is plotted with solid lines while Model data is dotted.
     expPlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Black, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.06*unit.w_cm)])
-    modPlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Black, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.dotted, style.linewidth(0.06*unit.w_cm)])
+    modPlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Grey, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.03*unit.w_cm)])
     
     # Loop strcuture to process compound colum names in d line.
+    print "Exp. Data:",exp_data
     if len(exp_data) > 1 :
         #Set plot legend key text.
         exp_key_list = eval(plot_data['Exp_Key'])
@@ -420,10 +421,10 @@ def comparison_plot(plot_data,exp_data,mod_data):
         
         # Plot Experimental data
         g.plot(graph.data.points(exp_data[0], title=exp_key, x=1, y=2),
-            [graph.style.line([color.rgb.black, style.linewidth(0.06*unit.w_cm), style.linestyle.solid])])
+            [expPlotStyle])
         # Plot Predicted/Model data
         g.plot(graph.data.points(mod_data[0], title=mod_key, x=1, y=2),
-            [graph.style.line([color.rgb.black, style.linewidth(0.06*unit.w_cm), style.linestyle.dotted])])
+            [modPlotStyle])
     
     # Now plot the Title text, alignment based on title quadrant setting.
     if title_quadrant == 1:
@@ -650,8 +651,8 @@ for data_record in group_quantity_data_dicts[2]:
     exp_plot_data = comp_data_to_plot[0]
     mod_plot_data = comp_data_to_plot[1]
     
-    #print "Exp Plot Data:", exp_plot_data
-    #print "Mod Plot Data:", mod_plot_data
+    print "Exp Plot Data:", exp_plot_data
+    print "Mod Plot Data:", mod_plot_data
     
     # Create plot for data_record.
     comparison_plot(group_quantity_data_dicts[2][data_record],exp_plot_data,mod_plot_data)
