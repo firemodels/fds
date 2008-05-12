@@ -14,6 +14,7 @@ data_directory = "../../Verification/"
 output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
 config_file_name = "Verification_Data_Config_File.csv"
 
+### Set General Global Variables
 scatter_data_dict = {}
 combined_scatter_data = {}
 
@@ -88,7 +89,6 @@ def extract_config_data(config_file):
             #print """No g, d or q, skip row."""
             
     print "There were "+str(skip_counter)+" lines skipped, out of the "+str(len(config_lists))+" lines read in."
-    
     # Return a single list object containing the dictionaries.
     #print groups_dict
     #print quantities_dict
@@ -182,6 +182,7 @@ def extract_comp_data(comp_file_info):
     if exp_column_name_value[0] == '[':
         print "Exp Column Name List Detected"
         exp_compound_col_names = eval(exp_column_name_value)
+        print "Exp Compound Column Names:", exp_compound_col_names
         for name in exp_compound_col_names:
             print "Exp Sub-Column Name:", name
             exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
