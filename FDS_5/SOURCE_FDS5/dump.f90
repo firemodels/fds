@@ -3302,7 +3302,7 @@ INTEGER, INTENT(IN) :: II,JJ,KK,IND
 REAL(EB) :: FLOW,HMFAC,F1,F2,H_TC,SRAD,TMP_TC,MU_AIR,RE_D,K_AIR,NUSSELT,NU_FAC,PR,AREA,VEL, &
             Q_SUM,TMP_G,UU,VV,WW,VEL2,Y_MF_INT,DENS,EXT_COEF,MASS_EXT_COEF,UIIINT, &
             Z_1,Z_2,Z_3,VELSR,WATER_VOL_FRAC,RHS,Y_E,DT_C,DT_E,T_RATIO,Y_E_LAG, &
-            DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL
+            DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON
 REAL(FB) :: KAPUP,TMPUP,TMPLOW,ZINT
 INTEGER :: ITER,INDX,N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW
 
@@ -3678,18 +3678,33 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = WFZ(II,JJ,KK)
 
    CASE(231)     ! PDPA
-      IF (.NOT.PDPA_COUNTED(DV%PDPA_GROUP)) THEN
+      GAS_PHASE_OUTPUT = 0._EB
+      IF ( (PY%PDPA_START<=T) .AND.(PY%PDPA_END>=T) ) THEN
          DLOOP: DO I=1,NLP
             DR=>DROPLET(I)
             IPC=DR%CLASS
             PC=>PARTICLE_CLASS(IPC)
-            IF (DV%PART_ID/=PC%ID .AND. DV%PART_ID/='ALL') CYCLE DLOOP
-            IF (DR%X**2+DR%Y**2+DR%Z**2>DV%PDPA_RADIUS**2) CYCLE DLOOP
-            ! Do what you want here
+            IF (PY%PART_ID/=PC%ID .AND. PY%PART_ID/='ALL') CYCLE DLOOP
+            IF ((DR%X-DV%X)**2+(DR%Y-DV%Y)**2+(DR%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP
+            ! Compute mean diameter numerator and denumerator
+            IF (PY%PDPA_COUNT) THEN
+               DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT
+               DV%PDPA_DENUM = 1.0_EB
+            ELSE
+               VEL = 1.0_EB
+               IF (PY%PDPA_U) VEL = DR%U
+               IF (PY%PDPA_V) VEL = DR%V
+               IF (PY%PDPA_W) VEL = DR%W
+               DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M*VEL
+               DV%PDPA_DENUM = DV%PDPA_DENUM + DR%PWT*(2._EB*DR%R)**PY%PDPA_N
+            ENDIF      
          ENDDO DLOOP
-         PDPA_COUNTED(DV%PDPA_GROUP) = .TRUE.
+         EXPON = 1._EB
+         IF ((PY%PDPA_M-PY%PDPA_N) /= 0) EXPON = 1._EB/(PY%PDPA_M-PY%PDPA_N)
+         IF (DV%PDPA_DENUM > 0._EB) THEN
+            GAS_PHASE_OUTPUT = (DV%PDPA_NUMER/DV%PDPA_DENUM)**EXPON
+         ENDIF
       ENDIF
-      GAS_PHASE_OUTPUT = 0._EB
 
   END SELECT
 
