@@ -3249,12 +3249,12 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
           }
         }
       }
-      level=0.250;
 #ifdef pp_ISOOUT
     }
 #endif
     asurface=NULL;
     NewMemory((void **)&asurface,sizeof(isosurface));
+    level=0.250;
     InitIsosurface(asurface, level, rgbtemp,0);
 #ifdef pp_ISOOUT
     if(read_smoothobst==1){
