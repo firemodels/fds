@@ -182,7 +182,7 @@ def extract_comp_data(comp_file_info):
     if exp_column_name_value[0] == '[':
         print "Exp Column Name List Detected"
         exp_compound_col_names = eval(exp_column_name_value)
-        print "Exp Compound Column Names:", exp_compound_col_names
+        #print "Exp Compound Column Names:", exp_compound_col_names
         for name in exp_compound_col_names:
             print "Exp Sub-Column Name:", name
             exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
@@ -193,6 +193,7 @@ def extract_comp_data(comp_file_info):
     if mod_column_name_value[0] == '[':
         print "Mod Column Name List Detected"
         mod_compound_col_names = eval(mod_column_name_value)
+        #print "Mod Compound Column Names:", mod_column_name_value
         for name in mod_compound_col_names:
             print "Mod Sub-Column Name:", name
             mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
@@ -200,11 +201,11 @@ def extract_comp_data(comp_file_info):
         print "Single Mod. Column Name:", mod_column_name_value
         mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+mod_column_name_value)
     
-    print "Exp Data Labels:\n", exp_scatter_data_labels
-    print "Mod Data Labels:\n", mod_scatter_data_labels
+    #print "Exp Data Labels:\n", exp_scatter_data_labels
+    #print "Mod Data Labels:\n", mod_scatter_data_labels
     
-    combined_scatter_data = [exp_scatter_data_labels,mod_scatter_data_labels]
-    #print "Combined Scatter Data:",combined_scatter_data
+    combined_scatter_data_labels = [exp_scatter_data_labels,mod_scatter_data_labels]
+    #print "Combined Scatter Data:",combined_scatter_data_labels
     
     min_max = comp_file_info['max/min'] #String indicating if min or max value is required.
     
@@ -281,14 +282,25 @@ def extract_comp_data(comp_file_info):
     #### Begin Column specific operations.
     scatter_counter = 0
     
-    for scatter_label in combined_scatter_data[0]:
+    for scatter_label in combined_scatter_data_labels[0]:
         
-        exp_label_temp = split("~",combined_scatter_data[0][scatter_counter])
-        mod_label_temp = split("~",combined_scatter_data[1][scatter_counter])
+        #print scatter_counter
+        
+        exp_label_temp = []
+        mod_label_temp = []
+        
+        exp_label_temp = split("~",combined_scatter_data_labels[0][scatter_counter])
+        mod_label_temp = split("~",combined_scatter_data_labels[1][scatter_counter])
+        
+        #print "Exp. Label Split:", exp_label_temp
+        #print "Mod. Label Split:", mod_label_temp
         
         ##Find max or min values.
         exp_data_values_comp = exp_data_dict[exp_label_temp[3]][exp_comp_ranges[2]:exp_comp_ranges[3]]
         mod_data_values_comp = mod_data_dict[mod_label_temp[3]][mod_comp_ranges[2]:mod_comp_ranges[3]]
+        
+        #print "Exp data values:", exp_data_values_comp
+        #print "Mod data values:", mod_data_values_comp
         
         # This allows the d line Quantity value to be set to 0 when either model or experimental data is missing.
         if comp_file_info['Quantity'] == str(0):
@@ -347,7 +359,9 @@ def extract_comp_data(comp_file_info):
         #print exp_data
         mod_data.append([[x[0] / 60, x[1]] for x in mod_data_seconds])
         #print mod_data
-        scatter_counter =+ 1
+        
+        #print "\nUpdating the Scatter Counter.\n"
+        scatter_counter = scatter_counter + 1
         
     # Close files
     exp_file_object.close()
@@ -396,7 +410,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
     modPlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Grey, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.03*unit.w_cm)])
     
     # Loop strcuture to process compound colum names in d line.
-    print "Exp. Data:",exp_data
+    #print "Exp. Data:",exp_data
     if len(exp_data) > 1 :
         #Set plot legend key text.
         exp_key_list = eval(plot_data['Exp_Key'])
@@ -408,13 +422,13 @@ def comparison_plot(plot_data,exp_data,mod_data):
         for exp_data_item in exp_data:
             g.plot(graph.data.points(exp_data_item, title=exp_key_list[exp_plot_counter], x=1, y=2),
                   [expPlotStyle])
-            exp_plot_counter =+ 1
+            exp_plot_counter = exp_plot_counter + 1
             
         # Loop through and plot Experimental data
         for mod_data_item in mod_data:
             g.plot(graph.data.points(mod_data_item, title=mod_key_list[mod_plot_counter], x=1, y=2),
                   [modPlotStyle])
-            mod_plot_counter =+ 1
+            mod_plot_counter = mod_plot_counter + 1
     else:
         #Set plot legend key text.
         exp_key = plot_data['Exp_Key']
@@ -652,8 +666,8 @@ for data_record in group_quantity_data_dicts[2]:
     exp_plot_data = comp_data_to_plot[0]
     mod_plot_data = comp_data_to_plot[1]
     
-    print "Exp Plot Data:", exp_plot_data
-    print "Mod Plot Data:", mod_plot_data
+    #print "Exp Plot Data:", exp_plot_data
+    #print "Mod Plot Data:", mod_plot_data
     
     # Create plot for data_record.
     comparison_plot(group_quantity_data_dicts[2][data_record],exp_plot_data,mod_plot_data)
