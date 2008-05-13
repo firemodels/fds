@@ -747,17 +747,26 @@ void drawterrain_texture(terraindata *terri, int only_geom){
   int i, j;
   float *x, *y;
   terraincell *ti;
+  float terrain_color[4];
+
+  terrain_color[0]=1.0;
+  terrain_color[1]=1.0;
+  terrain_color[2]=1.0; 
+  terrain_color[3]=1.0;
 
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(mscale[0]/xyzmaxdiff,mscale[1]/xyzmaxdiff,mscale[2]/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   glEnable(GL_LIGHTING);
+  glEnable(GL_NORMALIZE);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D,terrain_texture->name);
 
+  glEnable(GL_COLOR_MATERIAL);
+  glColor4fv(terrain_color);
   glBegin(GL_QUADS);
   znormal = terri->znormal;  ;
   znode = terri->znode;
@@ -809,6 +818,8 @@ void drawterrain_texture(terraindata *terri, int only_geom){
 
   glDisable(GL_TEXTURE_2D);
    
+  glDisable(GL_COLOR_MATERIAL);
+  glDisable(GL_NORMALIZE);
   glDisable(GL_LIGHTING);
 
   glPopMatrix();
