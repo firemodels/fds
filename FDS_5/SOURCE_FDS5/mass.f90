@@ -1028,15 +1028,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (.NOT.SOLID(CELL_INDEX(I,J,K))) RHOS(I,J,K) = RHON(I,J,K) - DT*FRHO(I,J,K)
-            
-            !IF (CHECK_BOUNDEDNESS) THEN
-            !   DSMIN = RHOS(I,J,K)-SMIN_SAVE(0)
-            !   DSMAX = RHOS(I,J,K)-SMAX_SAVE(0)
-            !   IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'min bv pre (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
-            !   IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'max bv pre (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
-            !ENDIF
-            
+            RHOS(I,J,K) = RHON(I,J,K) - DT*FRHO(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -1047,15 +1039,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR             
-               IF (.NOT.SOLID(CELL_INDEX(I,J,K))) YYS(I,J,K,N) = YYN(I,J,K,N) - DT*FRHOYY(I,J,K,N)
-               
-               !IF (CHECK_BOUNDEDNESS) THEN
-               !   DSMIN = YYS(I,J,K,N)-SMIN_SAVE(N)
-               !   DSMAX = YYS(I,J,K,N)-SMAX_SAVE(N)
-               !   IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'min bv pre (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
-               !   IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'max bv pre (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
-               !ENDIF
-               
+               YYS(I,J,K,N) = YYN(I,J,K,N) - DT*FRHOYY(I,J,K,N)
             ENDDO
          ENDDO
       ENDDO
@@ -1068,7 +1052,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               IF (.NOT.SOLID(CELL_INDEX(I,J,K))) YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
+               YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
             ENDDO
          ENDDO
       ENDDO
@@ -1165,15 +1149,7 @@ ELSEIF (CORRECTOR) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (.NOT.SOLID(CELL_INDEX(I,J,K))) RHO(I,J,K) = RHOS(I,J,K) - DT*FRHO(I,J,K)
-            
-            !IF (CHECK_BOUNDEDNESS) THEN
-            !   DSMIN = RHO(I,J,K)-SMIN_SAVE(0)
-            !   DSMAX = RHO(I,J,K)-SMAX_SAVE(0)
-            !   IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMIN,FRHO(I,J,K)
-            !   IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,0,DSMAX,FRHO(I,J,K)
-            !ENDIF
-            
+            RHO(I,J,K) = RHOS(I,J,K) - DT*FRHO(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -1184,15 +1160,7 @@ ELSEIF (CORRECTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               IF (.NOT.SOLID(CELL_INDEX(I,J,K))) YY(I,J,K,N) = RHOYYP(I,J,K,N) - DT*FRHOYY(I,J,K,N)
-               
-               !IF (CHECK_BOUNDEDNESS) THEN
-               !   DSMIN = YY(I,J,K,N)-SMIN_SAVE(N)
-               !   DSMAX = YY(I,J,K,N)-SMAX_SAVE(N)
-               !   IF (DSMIN<-BTOL) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'min bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMIN,FRHOYY(I,J,K,N)
-               !   IF (DSMAX>+BTOL) WRITE(LU_ERR,'(A,4I3.1,2E14.6)') 'max bv cor (i,j,k,n,ds,f):',I,J,K,N,DSMAX,FRHOYY(I,J,K,N)
-               !ENDIF
-               
+               YY(I,J,K,N) = RHOYYP(I,J,K,N) - DT*FRHOYY(I,J,K,N)
             ENDDO
          ENDDO
       ENDDO
@@ -1202,7 +1170,7 @@ ELSEIF (CORRECTOR) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (.NOT.SOLID(CELL_INDEX(I,J,K))) RHO(I,J,K) = 0.5_EB*( RHON(I,J,K) + RHO(I,J,K) )
+            RHO(I,J,K) = 0.5_EB*( RHON(I,J,K) + RHO(I,J,K) )
             
             ! IF (CLIP_SCALAR) THEN...
             RHO(I,J,K) = MAX(RHO(I,J,K),0._EB)
@@ -1213,8 +1181,7 @@ ELSEIF (CORRECTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-!! if (rho(i,j,k)==0._EB) write(0,*) nm,i,j,k,n
-               IF (.NOT.SOLID(CELL_INDEX(I,J,K))) YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YY(I,J,K,N) )/RHO(I,J,K)
+               YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YY(I,J,K,N) )/RHO(I,J,K)
                
                ! IF (CLIP_SCALAR) THEN...
                YY(I,J,K,N) = MAX(YY(I,J,K,N),0._EB)
@@ -1326,11 +1293,12 @@ REAL(EB) :: ZZ(4)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW,FX,FY,FZ
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP, RHOYYP
 
-!REAL(EB) :: DSMIN,DSMAX
-
 FX => WORK1
 FY => WORK2
 FZ => WORK3
+FX = 0._EB
+FY = 0._EB
+FZ = 0._EB
 IF (N_SPECIES>0) RHOYYP => SCALAR_SAVE3
 
 IF (PREDICTOR) THEN
@@ -1356,16 +1324,6 @@ DO N=1,N_SPECIES
       ENDDO
    ENDDO
 ENDDO
-
-!IF (CHECK_BOUNDEDNESS) THEN
-!   SMIN_SAVE(0) = 0._EB !MINVAL_GASPHASE(RHOP)
-!   SMAX_SAVE(0) = MAXVAL_GASPHASE(RHOP)
-!      
-!   DO N=1,N_SPECIES
-!      SMIN_SAVE(N) = 0._EB !MINVAL_GASPHASE(RHOYYP(:,:,:,N))
-!      SMAX_SAVE(N) = SMAX_SAVE(0) !MAXVAL_GASPHASE(RHOYYP(:,:,:,N))
-!   ENDDO
-!ENDIF
 
 ! Density flux
 
@@ -1467,17 +1425,6 @@ DO K=1,KBAR
          FRHO(I,J,K) = RDX(I)*(FX(I,J,K)-FX(I-1,J,K)) &
                      + RDY(J)*(FY(I,J,K)-FY(I,J-1,K)) &
                      + RDZ(K)*(FZ(I,J,K)-FZ(I,J,K-1))
-                     
-         !IF (.FALSE.) THEN
-         !    
-         !   DSMIN = RHOP(I,J,K)-SMIN_SAVE(0)
-         !   DSMAX = RHOP(I,J,K)-SMAX_SAVE(0)
-         !  
-         !   FRHO(I,J,K) = MAX(FRHO(I,J,K),DSMAX/DT)
-         !   FRHO(I,J,K) = MIN(FRHO(I,J,K),DSMIN/DT)
-         !   
-         !ENDIF
-         
       ENDDO
    ENDDO
 ENDDO
@@ -1530,7 +1477,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
          IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
             FX(II,JJ,KK) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)
-    !!      FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZ,1)
          ELSE
             FX(II,JJ,KK) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
          ENDIF
@@ -1586,17 +1532,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                             + RDY(J)*(FY(I,J,K)-FY(I,J-1,K)) &
                             + RDZ(K)*(FZ(I,J,K)-FZ(I,J,K-1)) &
                             - DEL_RHO_D_DEL_Y(I,J,K,N)
-            
-            !IF (.FALSE.) THEN
-            !              
-            !   DSMIN = RHOYYP(I,J,K,N)-SMIN_SAVE(N)
-            !   DSMAX = RHOYYP(I,J,K,N)-SMAX_SAVE(N)
-            !   
-            !   FRHOYY(I,J,K,N) = MAX(FRHOYY(I,J,K,N),DSMAX/DT)
-            !   FRHOYY(I,J,K,N) = MIN(FRHOYY(I,J,K,N),DSMIN/DT)
-            !   
-            !ENDIF
-            
          ENDDO
       ENDDO
    ENDDO
