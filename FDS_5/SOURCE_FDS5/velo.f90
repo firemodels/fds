@@ -1498,20 +1498,28 @@ R_DX2  = 1.E-9_EB
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
-         UODX = ABS(US(I,J,K))*RDXN(I)
-         VODY = ABS(VS(I,J,K))*RDYN(J)
-         WODZ = ABS(WS(I,J,K))*RDZN(K)
-         UVW  = MAX(UODX,VODY,WODZ)
-         IF (UVW>=UVWMAX) THEN
-            UVWMAX = UVW 
-            ICFL=I
-            JCFL=J
-            KCFL=K
+         
+         IF (FLUX_LIMITER<0) THEN
+            UODX = ABS(US(I,J,K))*RDXN(I)
+            VODY = ABS(VS(I,J,K))*RDYN(J)
+            WODZ = ABS(WS(I,J,K))*RDZN(K)
+            UVW  = MAX(UODX,VODY,WODZ)
+         ELSE
+            UVW = US(I,J,K)**2 + VS(I,J,K)**2 + WS(I,J,K)**2
          ENDIF
+         
+         IF (UVW>=UVWMAX) THEN
+               UVWMAX = UVW 
+               ICFL=I
+               JCFL=J
+               KCFL=K
+         ENDIF
+         
       ENDDO 
    ENDDO   
 ENDDO   
- 
+
+IF (FLUX_LIMITER>=0) UVWMAX = SQRT(UVWMAX)*MAX(RDXN(ICFL),RDYN(JCFL),RDZN(KCFL))
 CFL = DT*UVWMAX
  
 ! Determine max Von Neumann Number for fine grid calcs
