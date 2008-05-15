@@ -516,16 +516,13 @@ DO IPZ=1,N_ZONE
    PSUM_ALL = 0._EB
    USUM_ALL = 0._EB
    DO NM=1,NMESHES
-      IF(EVACUATION_ONLY(NM)) CYCLE  ! Issue 257 bug fix
+      IF(EVACUATION_ONLY(NM)) CYCLE  
       DSUM_ALL = DSUM_ALL + DSUM(IPZ,NM)
       PSUM_ALL = PSUM_ALL + PSUM(IPZ,NM)
       USUM_ALL = USUM_ALL + USUM(IPZ,NM)
    ENDDO
-!!$   DSUM(IPZ,1:NMESHES) = DSUM_ALL
-!!$   PSUM(IPZ,1:NMESHES) = PSUM_ALL
-!!$   USUM(IPZ,1:NMESHES) = USUM_ALL
    DO NM=1,NMESHES
-      IF(EVACUATION_ONLY(NM)) CYCLE  ! Issue 257 bug fix
+      IF(EVACUATION_ONLY(NM)) CYCLE 
       DSUM(IPZ,NM) = DSUM_ALL
       PSUM(IPZ,NM) = PSUM_ALL
       USUM(IPZ,NM) = USUM_ALL
@@ -869,9 +866,9 @@ ENDDO MESH_LOOP_2
 
 IF (RECOMPUTE_A) THEN
    CALL GAUSSJ(A,NCGC,NCGC,B,1,1,IERROR)
-   IF (IERROR>0) WRITE(LU_ERR,*) ' COMPUTE B IERROR= ',IERROR
+   IF (IERROR>0) WRITE(LU_ERR,*) ' Warning: Problem with coarse pressure computation'
    AINV = A  ! store inverse of A matrix
-   RECOMPUTE_A = .FALSE.
+   IF (N_ZONE==0) RECOMPUTE_A = .FALSE.  ! Redo linear solve if the domain is sealed
 ELSE
    B = MATMUL(AINV,B)
 ENDIF

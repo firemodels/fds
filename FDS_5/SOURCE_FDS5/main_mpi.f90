@@ -2031,7 +2031,7 @@ IF (MYID==0) THEN
    ENDIF
 ENDIF
 
-RECOMPUTE_A = .FALSE.  ! Don't recompute/regather A unless the domain changes
+IF (N_ZONE==0) RECOMPUTE_A = .FALSE.  ! Don't recompute/regather A unless the domain changes or the domain is sealed
 
 !TUSED(19,:) = TUSED(19,:) + MPI_WTIME() - TMPI
 !TMPI = MPI_WTIME()
