@@ -1288,7 +1288,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER,NULL_BOUN
 
 ! Computes the divergence of the scalar advective flux + diffusion
 
-INTEGER :: I,J,K,N,II,JJ,KK,IOR,IW,IIG,JJG,KKG
+INTEGER :: I,J,K,N,II,JJ,KK,IOR,IW,IIG,JJG,KKG,ICM,ICP
 REAL(EB) :: ZZ(4)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW,FX,FY,FZ
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP, RHOYYP
@@ -1331,7 +1331,13 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBM1
          ZZ(1:4)   = RHOP(I-1:I+2,J,K)
-         FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)
+         ICM = CELL_INDEX(I,J,K)
+         ICP = CELL_INDEX(I+1,J,K)
+         IF (WALL_INDEX(ICM,-1)==0 .AND. WALL_INDEX(ICP,1)==0) THEN
+            FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)
+         ELSE
+            FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,1)
+         ENDIF
       ENDDO
    ENDDO
 ENDDO
@@ -1340,7 +1346,13 @@ DO K=1,KBAR
    DO J=1,JBM1
       DO I=1,IBAR
          ZZ(1:4)   = RHOP(I,J-1:J+2,K)
-         FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
+         ICM = CELL_INDEX(I,J,K)
+         ICP = CELL_INDEX(I,J+1,K)
+         IF (WALL_INDEX(ICM,-2)==0 .AND. WALL_INDEX(ICP,2)==0) THEN
+            FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
+         ELSE
+            FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,1)
+         ENDIF
       ENDDO
    ENDDO
 ENDDO
@@ -1349,7 +1361,13 @@ DO K=1,KBM1
    DO J=1,JBAR
       DO I=1,IBAR
          ZZ(1:4)   = RHOP(I,J,K-1:K+2)
-         FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
+         ICM = CELL_INDEX(I,J,K)
+         ICP = CELL_INDEX(I,J,K+1)
+         IF (WALL_INDEX(ICM,-3)==0 .AND. WALL_INDEX(ICP,3)==0) THEN
+            FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
+         ELSE
+            FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,1)
+         ENDIF
       ENDDO
    ENDDO
 ENDDO
@@ -1437,7 +1455,13 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO J=1,JBAR
          DO I=1,IBM1
             ZZ(1:4)   = RHOYYP(I-1:I+2,J,K,N)
-            FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)
+            ICM = CELL_INDEX(I,J,K)
+            ICP = CELL_INDEX(I+1,J,K)
+            IF (WALL_INDEX(ICM,-1)==0 .AND. WALL_INDEX(ICP,1)==0) THEN
+               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)
+            ELSE
+               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,1)
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
@@ -1446,7 +1470,13 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO J=1,JBM1
          DO I=1,IBAR
             ZZ(1:4)   = RHOYYP(I,J-1:J+2,K,N)
-            FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
+            ICM = CELL_INDEX(I,J,K)
+            ICP = CELL_INDEX(I,J+1,K)
+            IF (WALL_INDEX(ICM,-2)==0 .AND. WALL_INDEX(ICP,2)==0) THEN
+               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
+            ELSE
+               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,1)
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
@@ -1455,7 +1485,13 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO J=1,JBAR
          DO I=1,IBAR
             ZZ(1:4)   = RHOYYP(I,J,K-1:K+2,N)
-            FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
+            ICM = CELL_INDEX(I,J,K)
+            ICP = CELL_INDEX(I,J,K+1)
+            IF (WALL_INDEX(ICM,-3)==0 .AND. WALL_INDEX(ICP,3)==0) THEN
+               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
+            ELSE
+               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,1)
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
