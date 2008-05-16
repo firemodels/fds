@@ -8,7 +8,7 @@
 ! appeared in an ACM publication and it is subject to their algorithms policy,
 ! see the comments at the start of the DCDFLIB in ieva.f90.
 !
-! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007
+! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2008
 !
 !!!!!!!!!!!!!!
 !
@@ -2255,9 +2255,9 @@ Contains
        IOR           = 0
        HEIGHT        = 0.0_EB
        HEIGHT0       = 0.0_EB
-       FAC_V0_UP     = 0.0_EB
-       FAC_V0_DOWN   = 0.0_EB
-       FAC_V0_HORI   = 0.0_EB
+       FAC_V0_UP     = 1.0_EB
+       FAC_V0_DOWN   = 1.0_EB
+       FAC_V0_HORI   = 1.0_EB
        ESC_SPEED     = 0.0_EB
        !
        Call CHECKREAD('EVSS',LU_INPUT,IOS)
@@ -5659,6 +5659,9 @@ Contains
              A_Wall = 0.0_EB
              If (HR%Tpre /= Huge(HR%Tpre)) Then
                 n_dead = n_dead+1
+                Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,i6)') &
+                     ' EVAC: Person n:o', HR%ILABEL, ' dead at ', T, &
+                     ' s, number of casualties ', n_dead
              End If
              HR%Tpre = Huge(HR%Tpre)
              HR%Tdet = Huge(HR%Tdet)
@@ -5698,7 +5701,7 @@ Contains
           HR%W = 0.0_EB
 
           ! Check the smoke density for Tdet
-          If (HUMAN_GRID(ii,jj)%SOOT_DENS > TDET_SMOKE_DENS) Then
+          If (.Not.L_Dead .And. HUMAN_GRID(ii,jj)%SOOT_DENS > TDET_SMOKE_DENS) Then
              HR%Tdet = Min(HR%Tdet,T)
           End If
 
@@ -5756,6 +5759,10 @@ Contains
                 UBAR = HR%U/EVEL
                 VBAR = HR%V/EVEL
              End If
+          End If
+          If (L_Dead) Then
+             UBAR = 0.0_EB
+             VBAR = 0.0_EB
           End If
           ! ========================================================
           !
@@ -5833,12 +5840,13 @@ Contains
           Else
              Tpre = HR%Tdet
           End If
+          If (L_Dead) Tpre = Huge(Tpre)
 
           If (Group_List(j)%GROUP_SIZE >= 2) Then
              HR%UBAR_Center = (Group_List(j)%GROUP_X - HR%X)
              HR%VBAR_Center = (Group_List(j)%GROUP_Y - HR%Y)
              EVEL = Sqrt(HR%UBAR_Center**2 + HR%VBAR_Center**2)
-             If ( EVEL > 0.0_EB ) Then
+             If ( EVEL > 0.0_EB .And. .Not. L_Dead ) Then
                 HR%UBAR_Center = HR%UBAR_Center / EVEL
                 HR%VBAR_Center = HR%VBAR_Center / EVEL
              Else
@@ -6224,8 +6232,14 @@ Contains
              GaTh = 0.0_EB
              ! No psychological force terms for a dead person.
              A_Wall = 0.0_EB
-             HR%Tpre = Huge(HR%Tpre)
+             If (HR%Tpre /= Huge(HR%Tpre)) Then
+                n_dead = n_dead+1
+                Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,i6)') &
+                     ' EVAC: Person n:o', HR%ILABEL, ' dead at ', T, &
+                     ' s, number of casualties ', n_dead
+             End If
              HR%Tdet = Huge(HR%Tdet)
+             HR%Tpre = Huge(HR%Tpre)
              HR%Tau  = HR%Tau
              HR%Mass = HR%Mass
              HR%COLOR_INDEX = 6
@@ -6294,7 +6308,10 @@ Contains
                 VBAR = HR%V/EVEL
              End If
           End If
-
+          If (L_Dead) Then
+             UBAR = 0.0_EB
+             VBAR = 0.0_EB
+          End If
           ! ========================================================
           ! Update the Block_Grid array search ranges
           BLOCK_LIST = 0
@@ -7176,13 +7193,14 @@ Contains
           Else
              Tpre = HR%Tdet
           End If
+          If (L_Dead) Tpre = Huge(Tpre)
 
 
           If (Group_List(j)%GROUP_SIZE >= 2) Then
              HR%UBAR_Center = (Group_List(j)%GROUP_X - HR%X)
              HR%VBAR_Center = (Group_List(j)%GROUP_Y - HR%Y)
              EVEL = Sqrt(HR%UBAR_Center**2 + HR%VBAR_Center**2)
-             If ( EVEL > 0.0_EB ) Then
+             If ( EVEL > 0.0_EB .And. .Not. L_Dead ) Then
                 HR%UBAR_Center = HR%UBAR_Center / EVEL
                 HR%VBAR_Center = HR%VBAR_Center / EVEL
              Else
@@ -7766,6 +7784,7 @@ Contains
                If (HR%Tpre /= Huge(HR%Tpre)) Then
                   n_dead = n_dead+1
                   HR%Tpre = Huge(HR%Tpre)
+                  HR%Tdet = Huge(HR%Tdet)
                   HR%Tau  = HR%Tau
                   HR%Mass = HR%Mass
                End If
