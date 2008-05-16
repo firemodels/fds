@@ -822,7 +822,10 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HT
 
 IF (SOLID_PHASE_ONLY) RETURN
-IF (FREEZE_VELOCITY) RETURN
+IF (FREEZE_VELOCITY) THEN
+   CALL CHECK_STABILITY(NM)
+   RETURN
+ENDIF
 
 TNOW=SECOND() 
 CALL POINT_TO_MESH(NM)
@@ -1484,7 +1487,7 @@ SUBROUTINE CHECK_STABILITY(NM)
  
 ! Checks the Courant and Von Neumann stability criteria, and if necessary, reduces the time step accordingly
  
-REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM
+REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,DMAX,RDMAX
 INTEGER  :: NM,I,J,K
  
 CHANGE_TIME_STEP(NM) = .FALSE.
@@ -1494,32 +1497,67 @@ MUTRM  = 1.E-9_EB
 R_DX2  = 1.E-9_EB
  
 ! Determine max CFL number from all grid cells
- 
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         
-         IF (FLUX_LIMITER<0) THEN
-            UODX = ABS(US(I,J,K))*RDXN(I)
-            VODY = ABS(VS(I,J,K))*RDYN(J)
-            WODZ = ABS(WS(I,J,K))*RDZN(K)
-            UVW  = MAX(UODX,VODY,WODZ)
-         ELSE
-            UVW = US(I,J,K)**2 + VS(I,J,K)**2 + WS(I,J,K)**2
-         ENDIF
-         
-         IF (UVW>=UVWMAX) THEN
-               UVWMAX = UVW 
-               ICFL=I
-               JCFL=J
-               KCFL=K
-         ENDIF
-         
-      ENDDO 
-   ENDDO   
-ENDDO   
 
-IF (FLUX_LIMITER>=0) UVWMAX = SQRT(UVWMAX)*MAX(RDXN(ICFL),RDYN(JCFL),RDZN(KCFL))
+SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
+
+   CASE(0)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               UODX = ABS(US(I,J,K))*RDXN(I)
+               VODY = ABS(VS(I,J,K))*RDYN(J)
+               WODZ = ABS(WS(I,J,K))*RDZN(K)
+               UVW  = MAX(UODX,VODY,WODZ)
+               IF (UVW>=UVWMAX) THEN
+                  UVWMAX = UVW 
+                  ICFL=I
+                  JCFL=J
+                  KCFL=K
+               ENDIF
+            ENDDO 
+         ENDDO   
+      ENDDO
+      
+   CASE(1)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               UVW = (ABS(US(I,J,K)) + ABS(VS(I,J,K)) + ABS(WS(I,J,K)))**2
+               IF (UVW>=UVWMAX) THEN
+                  UVWMAX = UVW 
+                  ICFL=I
+                  JCFL=J
+                  KCFL=K
+               ENDIF
+            ENDDO 
+         ENDDO   
+      ENDDO
+      
+   CASE(2)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               UVW = US(I,J,K)**2 + VS(I,J,K)**2 + WS(I,J,K)**2
+               IF (UVW>=UVWMAX) THEN
+                  UVWMAX = UVW 
+                  ICFL=I
+                  JCFL=J
+                  KCFL=K
+               ENDIF
+            ENDDO 
+         ENDDO   
+      ENDDO
+      
+END SELECT SELECT_VELOCITY_NORM
+
+! Find minimum time step allowed by divergence constraint
+RDMAX = HUGE(1._EB)
+IF (CFL_VELOCITY_NORM>0) THEN
+   UVWMAX = SQRT(UVWMAX)*MAX(RDXN(ICFL),RDYN(JCFL),RDZN(KCFL))
+   DMAX = MAXVAL(D)
+   IF (DMAX>0._EB) RDMAX = 1._EB/DMAX
+ENDIF
+
 CFL = DT*UVWMAX
  
 ! Determine max Von Neumann Number for fine grid calcs
@@ -1562,12 +1600,12 @@ ENDIF PARABOLIC_IF
  
 ! Adjust time step size if necessary
  
-IF ((CFL<CFL_MAX.AND.VN<VN_MAX) .OR. LOCK_TIME_STEP) THEN
+IF ((CFL<CFL_MAX.AND.VN<VN_MAX.AND.DT<RDMAX) .OR. LOCK_TIME_STEP) THEN
    DTNEXT = DT
    IF (CFL<=CFL_MIN .AND. VN<VN_MIN .AND. .NOT.LOCK_TIME_STEP) DTNEXT = MIN(1.1_EB*DT,DTINT)
 ELSE
    IF (UVWMAX==0._EB) UVWMAX = 1._EB
-   DT = 0.9_EB*MIN( CFL_MAX/UVWMAX , VN_MAX/(2._EB*R_DX2*MUTRM) )
+   DT = 0.9_EB*MIN( CFL_MAX/UVWMAX , VN_MAX/(2._EB*R_DX2*MUTRM), RDMAX )
    CHANGE_TIME_STEP(NM) = .TRUE.
 ENDIF
  
