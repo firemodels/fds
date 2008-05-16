@@ -5835,6 +5835,13 @@ IF (SEALED .AND. N_ZONE==0) THEN
    READ_ZONE_LINES = .FALSE.
 ENDIF
 
+! Stop the calculation if the user has declared ISOTHERMAL=.TRUE.
+
+IF (ISOTHERMAL .AND. N_ZONE>0) THEN
+   WRITE(MESSAGE,'(A)')  ' ERROR: ISOTHERMAL=.TRUE. must not be declared if there are sealed compartments'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+
 ! Make sure that there are no leak paths to undefined pressure ZONEs
 
 DO N=0,N_SURF
