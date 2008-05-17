@@ -1209,8 +1209,10 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
     else{
       rgbtemp[3]=1.0;
     }
-    if(rgbtemp[3]<1.0&&trans_flag!=DRAW_TRANSPARENT)return;
-    if(rgbtemp[3]>=1.0&&trans_flag==DRAW_TRANSPARENT)return;
+    if(data_type!=0){
+      if(rgbtemp[3]<1.0&&trans_flag!=DRAW_TRANSPARENT)return;
+      if(rgbtemp[3]>=1.0&&trans_flag==DRAW_TRANSPARENT)return;
+    }
     if(
       trans_flag==DRAW_TRANSPARENT&&
       (
