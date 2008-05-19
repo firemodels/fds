@@ -1995,7 +1995,7 @@ Contains
 
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
-         If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
+          If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVAC line ',&
                Trim(ID)
        End If
@@ -2953,19 +2953,19 @@ Contains
     Real(EB) RN, RN1, simoDX, simoDY, TNOW
     Real(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, &
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
-    integer i,j,ii,jj,kk,ipc, izero, n_tmp, ie, nom
-    integer i11, i22, group_size
-    logical pp_see_group, is_solid
-    integer iie, jje, iio, jjo, jjj, tim_ic, iii, i44
-    real(eb) y_o, x_o, delta_y, delta_x, x_now, y_now, &
+    Integer i,j,ii,jj,kk,ipc, izero, n_tmp, ie, nom
+    Integer i11, i22, group_size
+    Logical pp_see_group, is_solid
+    Integer iie, jje, iio, jjo, jjj, tim_ic, iii, i44
+    Real(eb) y_o, x_o, delta_y, delta_x, x_now, y_now, &
          xi, yj, x11, y11, group_x_sum, group_y_sum, &
-         group_x_center, group_y_center
-    integer :: i_endless_loop
-    real(eb), dimension(6) :: y_tmp, x_tmp, r_tmp
+         group_x_center, group_y_center, dens_fac
+    Integer :: i_endless_loop
+    Real(eb), Dimension(6) :: y_tmp, x_tmp, r_tmp
     ! 
-    type (mesh_type), pointer :: m
+    Type (mesh_type), Pointer :: m
     !
-    tnow=second()
+    tnow=SECOND()
 
     If ( .Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) ) Return
     !
@@ -3043,8 +3043,10 @@ Contains
        !
        HPT=>EVACUATION(IPC)
        !
-       ! If there is an initial number of humans, initialize
+       ! Check the mesh
+       If (HPT%IMESH /= NM) Cycle EVAC_CLASS_LOOP
        !
+       ! If there is an initial number of humans, initialize
        If (HPT%N_INITIAL == 0) Cycle EVAC_CLASS_LOOP
        ! 
        If (HPT%X1 == 0.0_EB .And. HPT%X2 == 0.0_EB .And. &
@@ -3176,8 +3178,17 @@ Contains
                    HR%Angle = HR%Angle + 2.0_EB*Pi
                 End Do
 
-                If (i_endless_loop >= (8.0_EB*Max(1.0_EB,Log10(2.5_EB*VOL2))) / &
-                     Max(1.0_EB,Log10((2.5_EB*VOL2)/(2.5_EB*VOL2-1))) ) Then
+                !Check, that a person is not put on top of some other person
+                If (DENS_INIT > 2.0_EB) Then
+                   ! High density is wanted
+                   d_max = 0.0_EB
+                Else
+                   d_max = 1.0_EB*HR%B
+                End If
+                dens_fac = Max(1.0_EB,DENS_INIT)
+                   
+                If (i_endless_loop >= Int(dens_fac*(16.0_EB*Max(1.0_EB,Log10(2.5_EB*VOL2))) / &
+                     Max(1.0_EB,Log10((2.5_EB*VOL2)/(2.5_EB*VOL2-1)))) ) Then
                    Write (LU_EVACOUT,fmt='(A,I4,A,I4,A,I6)') &
                         ' ERROR: Initialize_Humans, EVAC line ', &
                         IPC, ', Mesh ', NM, ', i_human ', n_humans
@@ -3194,14 +3205,6 @@ Contains
                    Exit INITIALIZATION_LOOP
                 End If
 
-
-                !Check, that a person is not put on top of some other person
-                If (DENS_INIT > 2.0_EB) Then
-                   ! High density is wanted
-                   d_max = 0.0_EB
-                Else
-                   d_max = 1.0_EB*HR%B
-                End If
 
                 Is_Solid = .False.
                 KK = Floor( CELLSK(Floor((HR%Z-ZS)*RDZINT)) + 1.0_EB )
