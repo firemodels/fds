@@ -1048,12 +1048,18 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          ENDDO
          KAPPA_S(I) = 2.*KAPPA_S(I)*DX_S(I)/VOLSUM    ! kappa = 2*dx*kappa
       ENDDO
+      DO I=0,NWP
+         IF (SF%GEOMETRY==SURF_CYLINDRICAL) THEN
+            R_S(I) = SF%THICKNESS-SF%X_S(I)
+         ELSE
+            R_S(I) = 1._EB
+         ENDIF
+      ENDDO
       ! solution inwards
       RFLUX_UP = QRADIN(IW) + (1.-E_WALL(IW))*QRADOUT(IW)
       DO I=1,NWP
          RFLUX_DOWN =  ( RFLUX_UP + KAPPA_S(I)*SIGMA*WC%TMP_S(I)**4 ) / (1. + KAPPA_S(I))
-     !!! Q_S(I) = Q_S(I) + ((SF%THICKNESS-SF%X_S(I-1))*RFLUX_UP - (SF%THICKNESS-SF%X_S(I))*RFLUX_DOWN)*RDX_S(I)
-         Q_S(I) = Q_S(I) + (RFLUX_UP - RFLUX_DOWN)/DX_S(I)
+         Q_S(I) = Q_S(I) + (R_S(I-1)*RFLUX_UP - R_S(I)*RFLUX_DOWN)*RDX_S(I)
          RFLUX_UP = RFLUX_DOWN
       ENDDO
       IF (SF%BACKING==EXPOSED) THEN
@@ -1063,10 +1069,11 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
       RFLUX_UP = QRADINB + (1.-E_WALLB)*RFLUX_UP
       DO I=NWP,1,-1
          RFLUX_DOWN =  ( RFLUX_UP + KAPPA_S(I)*SIGMA*WC%TMP_S(I)**4 ) / (1. + KAPPA_S(I))
-         Q_S(I) = Q_S(I) + (RFLUX_UP - RFLUX_DOWN)/DX_S(I)
+         Q_S(I) = Q_S(I) + (R_S(I)*RFLUX_UP - R_S(I-1)*RFLUX_DOWN)*RDX_S(I)
          RFLUX_UP = RFLUX_DOWN
       ENDDO
-      QRADOUT(IW) = E_WALL(IW)*RFLUX_DOWN
+  !!! QRADOUT(IW) = E_WALL(IW)*RFLUX_DOWN
+      QRADOUT(IW) = RFLUX_DOWN
    ENDIF
 
    ! Update the 1-D heat transfer equation 
