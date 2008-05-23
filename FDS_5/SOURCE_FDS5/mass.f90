@@ -1029,6 +1029,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             RHOS(I,J,K) = RHON(I,J,K) - DT*FRHO(I,J,K)
+            RHOS(I,J,K) = MAX(0._EB,RHOS(I,J,K))
          ENDDO
       ENDDO
    ENDDO
@@ -1053,6 +1054,8 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
          DO J=1,JBAR
             DO I=1,IBAR
                YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
+               YYS(I,J,K,N) = MIN(1._EB,YYS(I,J,K,N))
+               YYS(I,J,K,N) = MAX(0._EB,YYS(I,J,K,N))
             ENDDO
          ENDDO
       ENDDO
@@ -1126,6 +1129,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
             DO J=0,JBP1
                DO I=0,IBP1
                   TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*RHOS(I,J,K))
+                  TMP(I,J,K) = MAX(TMPMIN,MIN(TMPMAX,TMP(I,J,K)))
                ENDDO
             ENDDO
          ENDDO
@@ -1134,11 +1138,12 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
             DO J=0,JBP1
                DO I=0,IBP1
                   TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
+                  TMP(I,J,K) = MAX(TMPMIN,MIN(TMPMAX,TMP(I,J,K)))
                ENDDO
             ENDDO
          ENDDO
       ENDIF
-      TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
+      !TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
    ENDIF
 
 ! The CORRECTOR step   
@@ -1150,6 +1155,7 @@ ELSEIF (CORRECTOR) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             RHO(I,J,K) = RHOS(I,J,K) - DT*FRHO(I,J,K)
+            RHO(I,J,K) = MAX(0._EB,RHO(I,J,K))
          ENDDO
       ENDDO
    ENDDO
@@ -1173,7 +1179,7 @@ ELSEIF (CORRECTOR) THEN
             RHO(I,J,K) = 0.5_EB*( RHON(I,J,K) + RHO(I,J,K) )
             
             ! IF (CLIP_SCALAR) THEN...
-            RHO(I,J,K) = MAX(RHO(I,J,K),0._EB)
+            !RHO(I,J,K) = MAX(RHO(I,J,K),0._EB)
          ENDDO
       ENDDO
    ENDDO
@@ -1259,6 +1265,7 @@ ELSEIF (CORRECTOR) THEN
             DO J=0,JBP1
                DO I=0,IBP1
                   TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*RHO(I,J,K))
+                  TMP(I,J,K) = MAX(TMPMIN,MIN(TMPMAX,TMP(I,J,K)))
                ENDDO
             ENDDO
          ENDDO
@@ -1267,11 +1274,12 @@ ELSEIF (CORRECTOR) THEN
             DO J=0,JBP1
                DO I=0,IBP1
                   TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
+                  TMP(I,J,K) = MAX(TMPMIN,MIN(TMPMAX,TMP(I,J,K)))
                ENDDO
             ENDDO
          ENDDO
       ENDIF
-      TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
+      !TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
    ENDIF
 
 ENDIF SELECT_SUBSTEP
