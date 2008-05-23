@@ -521,7 +521,7 @@ IF (PREDICTOR) THEN
    RHOP => RHOS
 ELSE 
    PBAR_P => PBAR
-    RHOP => RHO
+   RHOP => RHO
 ENDIF
 
 WALL_CELL_LOOP: DO IW=1,NWC
@@ -572,11 +572,14 @@ WALL_CELL_LOOP: DO IW=1,NWC
  
 ! Compute ghost cell density
 
-   IF (N_SPECIES==0) THEN
-      RHO_W(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(SPECIES(0)%RCON*TMP_W(IW))
-   ELSE
-      RHO_W(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM_W(IW)*TMP_W(IW))
+   IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+      IF (N_SPECIES==0) THEN
+         RHO_W(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(SPECIES(0)%RCON*TMP_W(IW))
+      ELSE
+         RHO_W(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM_W(IW)*TMP_W(IW))
+      ENDIF
    ENDIF
+
 ! Actually set the ghost cell value of density in the ghost cell if it is a solid wall
 
    IF ( (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) .OR.  &
