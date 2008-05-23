@@ -624,6 +624,7 @@ typedef struct {
   float ppartlevels256[256];
   float valmin, valmax;
   float global_min, global_max;
+  int set_global_bounds;
   float percentile_min, percentile_max;
   float user_min, user_max;
   int setvalmin, setvalmax;
