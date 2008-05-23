@@ -430,6 +430,7 @@ void init_part5prop(void){
 
           propi->setvalmin=0;
           propi->setvalmax=0;
+          propi->set_global_bounds=1;
           propi->global_min=100000000.0;
           propi->global_max=-propi->global_min;
           propi->valmin=1.0;

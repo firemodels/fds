@@ -86,8 +86,10 @@ void adjustpart5bounds(particle *parti){
 
     propi = part5propinfo + i;
 
-    propi->global_min =  1000000000.0;
-    propi->global_max = -1000000000.0;
+    if(propi->set_global_bounds==1){
+      propi->global_min =  1000000000.0;
+      propi->global_max = -1000000000.0;
+    }
 
     NewMemory((void **)&propi->buckets,NBUCKETS*sizeof(int));
     buckets = propi->buckets;
@@ -95,6 +97,9 @@ void adjustpart5bounds(particle *parti){
       buckets[n]=0;
     }
   }
+
+  // compute global min and max
+
   datacopy = parti->data5;
   for(i=0;i<parti->nframes;i++){
     for(j=0;j<parti->nclasses;j++){
@@ -111,17 +116,16 @@ void adjustpart5bounds(particle *parti){
         prop_id = get_part5prop(partclassi->labels[k].longlabel);
         if(prop_id==NULL)continue;
 
-        
         valmin = &prop_id->global_min;
         valmax = &prop_id->global_max;
 
-        if(valmin!=NULL||valmax!=NULL){
+        if(prop_id->set_global_bounds==1&&(valmin!=NULL||valmax!=NULL)){
           for(m=0;m<datacopy->npoints;m++){
             float val;
 
             val=*rvals++;
-            if(val<*valmin)*valmin=val;
-            if(val>*valmax)*valmax=val;
+            if(valmin!=NULL&&val<*valmin)*valmin=val;
+            if(valmax!=NULL&&val>*valmax)*valmax=val;
           }
         }
       }
@@ -148,7 +152,6 @@ void adjustpart5bounds(particle *parti){
         prop_id = get_part5prop(partclassi->labels[k].longlabel);
         if(prop_id==NULL)continue;
 
-        
         valmin = &prop_id->global_min;
         valmax = &prop_id->global_max;
         dg = (*valmax-*valmin)/(float)NBUCKETS;
@@ -183,35 +186,38 @@ void adjustpart5bounds(particle *parti){
     propi = part5propinfo + i;
     buckets = propi->buckets;
 
-    total = 0;
-    for(n=0;n<NBUCKETS;n++){
-      total+=buckets[n];
-    }
-    alpha05 = (int)(percentile_level*total);
+    if(propi->set_global_bounds==1){
+      total = 0;
+      for(n=0;n<NBUCKETS;n++){
+        total+=buckets[n];
+      }
+      alpha05 = (int)(percentile_level*total);
 
-    total = 0;
-    nsmall=0;
-    nbig = NBUCKETS-1;
-    for (n=0;n<NBUCKETS;n++){
-      total += buckets[n];
-      if(total>alpha05){
-        nsmall=n;
-        break;
+      total = 0;
+      nsmall=0;
+      nbig = NBUCKETS-1;
+      for (n=0;n<NBUCKETS;n++){
+        total += buckets[n];
+        if(total>alpha05){
+          nsmall=n;
+          break;
+        }
       }
-    }
-    total = 0;
-    for (n=NBUCKETS;n>0;n--){
-      total += buckets[n-1];
-      if(total>alpha05){
-        nbig=n-1;
-        break;
+      total = 0;
+      for (n=NBUCKETS;n>0;n--){
+        total += buckets[n-1];
+        if(total>alpha05){
+          nbig=n-1;
+          break;
+        }
       }
+      gmin = propi->global_min;
+      gmax = propi->global_max;
+      dg = (gmax-gmin)/(float)NBUCKETS;
+      propi->percentile_min = gmin + nsmall*dg;
+      propi->percentile_max = gmin + nbig*dg;
     }
-    gmin = propi->global_min;
-    gmax = propi->global_max;
-    dg = (gmax-gmin)/(float)NBUCKETS;
-    propi->percentile_min = gmin + nsmall*dg;
-    propi->percentile_max = gmin + nbig*dg;
+    if(propi->global_min<1000000000.0)propi->set_global_bounds=0;
 
     FREEMEMORY(propi->buckets);
   }

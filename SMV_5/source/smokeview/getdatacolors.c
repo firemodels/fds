@@ -190,7 +190,6 @@ void getBoundaryLabels(
   num2string(&labels[nlevel-1][0],tval,range);
 }
 
-
 /* ------------------ getPart5Colors ------------------------ */
 
 void getPart5Colors(particle *parti, int nlevel){
