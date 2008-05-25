@@ -182,21 +182,26 @@ FN_OUTPUT = TRIM(CHID)//'.out'
 
 ! Mass and HRR Files
 
-LU_MASS  = GET_FILE_NUMBER()
-FN_MASS  = TRIM(CHID)//'_mass.csv'
+IF (MASS_FILE) THEN
+   LU_MASS  = GET_FILE_NUMBER()
+   FN_MASS  = TRIM(CHID)//'_mass.csv'
+ENDIF
+
 LU_HRR   = GET_FILE_NUMBER()
 FN_HRR   = TRIM(CHID)//'_hrr.csv'
 
 ! Evacuation files
 
-LU_EVACCSV = GET_FILE_NUMBER()
-FN_EVACCSV = TRIM(CHID)//'_evac.csv'
-LU_EVACEFF = GET_FILE_NUMBER()
-FN_EVACEFF = TRIM(CHID)//'_evac.eff'
-LU_EVACFED = GET_FILE_NUMBER()
-FN_EVACFED = TRIM(CHID)//'_evac.fed'
-LU_EVACOUT = GET_FILE_NUMBER()
-FN_EVACOUT = TRIM(CHID)//'_evac.out'
+IF (ANY(EVACUATION_ONLY)) THEN
+   LU_EVACCSV = GET_FILE_NUMBER()
+   FN_EVACCSV = TRIM(CHID)//'_evac.csv'
+   LU_EVACEFF = GET_FILE_NUMBER()
+   FN_EVACEFF = TRIM(CHID)//'_evac.eff'
+   LU_EVACFED = GET_FILE_NUMBER()
+   FN_EVACFED = TRIM(CHID)//'_evac.fed'
+   LU_EVACOUT = GET_FILE_NUMBER()
+   FN_EVACOUT = TRIM(CHID)//'_evac.out'
+ENDIF
 
 ! Device and Control Files
 
@@ -241,11 +246,12 @@ ENDDO
 
 ! State Relation File(s)
 
-ALLOCATE(LU_STATE(1))
-ALLOCATE(FN_STATE(1))
-
-LU_STATE(1) = GET_FILE_NUMBER()
-WRITE(FN_STATE(1),'(A,A)') TRIM(CHID),'_state.csv'
+IF (STATE_FILE) THEN
+   ALLOCATE(LU_STATE(1))
+   ALLOCATE(FN_STATE(1))
+   LU_STATE(1) = GET_FILE_NUMBER()
+   WRITE(FN_STATE(1),'(A,A)') TRIM(CHID),'_state.csv'
+ENDIF
 
 ! Plot3D
 
@@ -320,11 +326,13 @@ MESH_LOOP: DO NM=1,NMESHES
 
    ! Particle Files
 
-   LU_PART(NM) = GET_FILE_NUMBER()
-   IF (NMESHES>1) THEN
-      WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
-   ELSE
-      WRITE(FN_PART(NM),'(A,A)') TRIM(CHID),'.prt5'
+   IF (DROPLET_FILE) THEN
+      LU_PART(NM) = GET_FILE_NUMBER()
+      IF (NMESHES>1) THEN
+         WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
+      ELSE
+         WRITE(FN_PART(NM),'(A,A)') TRIM(CHID),'.prt5'
+      ENDIF
    ENDIF
 
    ! Restart Files
@@ -525,8 +533,9 @@ ENDIF IF_DUMP_SPECIES_INFO
 ! Special output dump for UL pan test data
 
 IF (UL_PAN_DATA) THEN
-   OPEN(999,FILE=TRIM(CHID)//'_awmpua.csv',FORM='FORMATTED',STATUS='REPLACE')
-   WRITE(999,'(A)') 'T, XW(IW), YW(IW), ZW(IW), PP(I-J)'
+   LU_UL_PAN_DATA = GET_FILE_NUMBER()
+   OPEN(LU_UL_PAN_DATA,FILE=TRIM(CHID)//'_awmpua.csv',FORM='FORMATTED',STATUS='REPLACE')
+   WRITE(LU_UL_PAN_DATA,'(A)') 'T, XW(IW), YW(IW), ZW(IW), PP(I-J)'
 ENDIF
 
 TUSED(7,:) = TUSED(7,:) + SECOND() - TNOW
@@ -4252,7 +4261,7 @@ FLOOP: DO NF=1,N_BNDF
                   PP(I,J) = SOLID_PHASE_OUTPUT(IW,IND)
                   ! Special dump of UL pan test data
                   IF (UL_PAN_DATA .AND. IOR==3 .AND. IND==71 .AND. MOD(INT(T),100)==0) &
-                     WRITE(999,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
+                     WRITE(LU_UL_PAN_DATA,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
                   IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,J,KG))) IBK(I,J)=1
                ENDDO
             ENDDO
@@ -4359,7 +4368,7 @@ FLOOP: DO NF=1,N_BNDF
                      PP(I,J) = SOLID_PHASE_OUTPUT(IW,IND)
                      ! Special dump of UL pan test data
                      IF (UL_PAN_DATA .AND. IOR==3 .AND. IND==71 .AND. MOD(INT(T),100)==0) &
-                        WRITE(999,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
+                        WRITE(LU_UL_PAN_DATA,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
                      IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY) IBK(I,J)=1
                   ENDDO
                ENDDO
