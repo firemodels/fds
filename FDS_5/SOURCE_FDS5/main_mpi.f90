@@ -388,6 +388,7 @@ MAIN_LOOP: DO
  
    INQUIRE(FILE=TRIM(CHID)//'.stop',EXIST=EX)
    IF (EX) MESH_STOP_STATUS = USER_STOP
+   IF (EX) WRITE(LU_ERR,'(A,A)') PNAME(1:PNAMELEN),' read the stop file'
 
    TUSED(11,:) = TUSED(11,:) + SECOND() - TNOW2
  
