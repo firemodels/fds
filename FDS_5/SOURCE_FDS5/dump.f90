@@ -326,7 +326,18 @@ MESH_LOOP: DO NM=1,NMESHES
 
    ! Particle Files
 
-   IF (DROPLET_FILE) THEN
+   IF (DROPLET_FILE .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+      LU_PART(NM) = GET_FILE_NUMBER()
+      IF (NMESHES>1) THEN
+         WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
+      ELSE
+         WRITE(FN_PART(NM),'(A,A)') TRIM(CHID),'.prt5'
+      ENDIF
+   ENDIF
+
+   ! Particle Files for Evacuation
+
+   IF (EVACUATION_GRID(NM)) THEN
       LU_PART(NM) = GET_FILE_NUMBER()
       IF (NMESHES>1) THEN
          WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
