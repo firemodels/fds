@@ -10214,12 +10214,12 @@ These files are written out from {\bf dump.f} with the following lines:
       WRITE(LUSF) UNITS
       WRITE(LUSF) I1,I2,J1,J2,K1,K2
       WRITE(LUSF) TIME
-      WRITE(LUSF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
+      WRITE(LUSF) (((QQ(I,J,K),I=I1,I2),J=J1,J2),K=K1,K2)
               .
               .
               .
       WRITE(LUSF) TIME
-      WRITE(LUSF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
+      WRITE(LUSF) (((QQ(I,J,K),I=I1,I2),J=J1,J2),K=K1,K2)
 \end{verbatim}
 \normalsize
 {\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are
