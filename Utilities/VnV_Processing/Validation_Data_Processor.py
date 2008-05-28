@@ -4,19 +4,21 @@ from pyx import *
 
 ### Set Global Variables for Validation
 
-#data_directory = "../../Validation/"
-#output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
-#config_file_name = "Validation_Data_Config_File.csv"
+data_directory = "../../Validation/"
+output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
+config_file_name = "Validation_Data_Config_File.csv"
 
 ### Set Global Variables for Verification
 
-data_directory = "../../Verification/"
-output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
-config_file_name = "Verification_Data_Config_File.csv"
+#data_directory = "../../Verification/"
+#output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
+#config_file_name = "Verification_Data_Config_File.csv"
 
 ### Set General Global Variables
 scatter_data_dict = {}
 combined_scatter_data = {}
+X_Scale_Factor = 9999
+Y_Scale_Factor = 9999
 
 ### Define Functions
 
@@ -78,8 +80,8 @@ def extract_config_data(config_file):
             if data_counter >= quantity_counter:
                 for x in range(len(data_header)):
                     keyed_data[data_header[x].strip()] = list_item[x+1]
-                data_key_name = keyed_data['Quantity'].strip()+"~"+keyed_data['Group'].strip()+"~"+keyed_data['Dataname'].strip()+"~"+keyed_data['Exp_Col_Name'].strip()
-                print "Key Name:", data_key_name
+                data_key_name = keyed_data['Quantity'].strip()+"~"+keyed_data['Group'].strip()+"~"+keyed_data['Dataname'].strip()+"~"+keyed_data['Exp_Y_Col_Name'].strip()
+                #print "Key Name:", data_key_name
                 data_dict[data_key_name] = keyed_data
                 #print data_dict[data_key_name]
                 keyed_data = {}
@@ -95,19 +97,21 @@ def extract_config_data(config_file):
     #print data_dict
     return [groups_dict,quantities_dict,data_dict]
 
-def find_start_stop_index(data_dict,col_name,start_time_data,stop_time_data,start_time_comp,stop_time_comp):
+def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,stop_comp):
     #This function is used to find index numbers for start and stop points in plotting and min-max values.
+    print "X Scale Factor:", X_Scale_Factor
+    # LOH
     rowcounter1 = 0
-    for time_value1 in data_dict[col_name]:
-        if time_value1 >= (float(start_time_data)*60):
+    for value1 in data_dict[col_name]:
+        if value1 >= (float(start_data)*float(X_Scale_Factor)):
             #print "Time Starts at row #:", str(rowcounter1)
-            #print "With a value of:", str(time_value1)
+            #print "With a value of:", str(value1)
             time_start_index = rowcounter1
             break                
         rowcounter1 += 1
     rowcounter2 = 0
-    for time_value2 in data_dict[col_name]:
-        if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_time_data)*60):
+    for value2 in data_dict[col_name]:
+        if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_data)*float(X_Scale_Factor)):
             #print "Specified end of plot time is greater than end of time in the data set. \nUsing last value in the time column.\n"
             #print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
             time_end_index = (len(data_dict[col_name])-1)
@@ -118,24 +122,24 @@ def find_start_stop_index(data_dict,col_name,start_time_data,stop_time_data,star
             #print "With a value of: "+str(data_dict[col_name][row_number2])
             time_end_index = row_number2
             break
-        if time_value2 < (float(stop_time_data)*60):
+        if value2 < (float(stop_data)*float(X_Scale_Factor)):
             rowcounter2 += 1
     rowcounter3 = 0
-    for time_value3 in data_dict[col_name]:
-        if time_value3 >= (float(start_time_comp)*60):
+    for value3 in data_dict[col_name]:
+        if value3 >= (float(start_comp)*float(X_Scale_Factor)):
             #print "Comparison Time Starts at row #:", str(rowcounter3)
-            #print "With a value of:", str(time_value3)
+            #print "With a value of:", str(value3)
             minmax_start_index = rowcounter3
             break
         rowcounter3 += 1  
     rowcounter4 = 0
-    for time_value4 in data_dict[col_name]:
-        if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_time_comp)*60):
+    for value4 in data_dict[col_name]:
+        if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_comp)*float(X_Scale_Factor)):
             #print "Specified end of comparison time is greater than end of time in the data set. \nUsing last value in the time column."
             #print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
             minmax_end_index = (len(data_dict[col_name])-1)
             break
-        if time_value4 < (float(stop_time_data)*60):
+        if value4 < (float(stop_data)*float(X_Scale_Factor)):
             rowcounter4 += 1
         else:
             row_number4 = (rowcounter4 - 1)
@@ -160,46 +164,50 @@ def extract_comp_data(comp_file_info):
     exp_data_filename = comp_file_info['Exp_Filename'] #String of filename
     exp_column_name_row_index = int(comp_file_info['Exp_Col_Name_Row'])-1 #Experimental Data Column Name Row Number
     exp_data_row_index = int(comp_file_info['Exp_Data_Row'])-1 #Experimental Data Starting Row Number
-    exp_start_time_data_val = comp_file_info['Exp_Start_(min.)'] #String in minutes to start exp plot data
-    exp_stop_time_data_val = comp_file_info['Exp_End_(min.)'] #String in minutes to stop exp plot data
-    exp_start_time_comp_val = comp_file_info['Exp_Comp_Start_(min.)'] #String in minutes to start exp compare data
-    exp_stop_time_comp_val = comp_file_info['Exp_Comp_End_(min.)'] #String in minutes to start exp compare data
+    exp_start_data_val = comp_file_info['Exp_Start_(min.)'] #String in minutes to start exp plot data
+    exp_stop_data_val = comp_file_info['Exp_End_(min.)'] #String in minutes to stop exp plot data
+    exp_start_comp_val = comp_file_info['Exp_Comp_Start_(min.)'] #String in minutes to start exp compare data
+    exp_stop_comp_val = comp_file_info['Exp_Comp_End_(min.)'] #String in minutes to start exp compare data
     exp_initial_value = comp_file_info['Exp_Intitial_Value'] #Initial Value for Quantity
-    exp_column_name_value = comp_file_info['Exp_Col_Name'].strip() #Experimental Data Column Name
+    exp_X_column_name_value = comp_file_info['Exp_X_Col_Name'].strip() #Experimental Data X Column Name
+    exp_Y_column_name_value = comp_file_info['Exp_Y_Col_Name'].strip() #Experimental Data Y Column Name
+    X_Scale_Factor = int(comp_file_info['Scale_X'])
+    Y_Scale_Factor = int(comp_file_info['Scale_Y'])
         
     mod_data_filename = comp_file_info['Mod_Filename'] #String of filename
     mod_column_name_row_index = int(comp_file_info['Mod_Col_Name_Row'])-1 #Modeling Data Column Name Row Number
     mod_data_row_index = int(comp_file_info['Mod_Data_Row'])-1 #Modeling Data Starting Row Number
-    mod_start_time_data_val = comp_file_info['Mod_Start_(min.)'] #String in minutes to start mod plot data
-    mod_stop_time_data_val = comp_file_info['Mod_End_(min.)']  #String in minutes to stop mod plot data
-    mod_start_time_comp_val = comp_file_info['Mod_Comp_Start_(min.)'] #String in minutes to start mod compare data
-    mod_stop_time_comp_val = comp_file_info['Mod_Comp_End_(min.)']  #String in minutes to start mod compare data
+    mod_start_data_val = comp_file_info['Mod_Start_(min.)'] #String in minutes to start mod plot data
+    mod_stop_data_val = comp_file_info['Mod_End_(min.)']  #String in minutes to stop mod plot data
+    mod_start_comp_val = comp_file_info['Mod_Comp_Start_(min.)'] #String in minutes to start mod compare data
+    mod_stop_comp_val = comp_file_info['Mod_Comp_End_(min.)']  #String in minutes to start mod compare data
     mod_initial_value = comp_file_info['Mod_Intitial_Value']       #Initial Value for Quantity
-    mod_column_name_value = comp_file_info['Mod_Col_Name'].strip() #Modeling Data Column Name
+    mod_X_column_name_value = comp_file_info['Mod_X_Col_Name'].strip() #Modeling Data X Column Name
+    mod_Y_column_name_value = comp_file_info['Mod_Y_Col_Name'].strip() #Modeling Data Y Column Name
     
     # Create Scatter Data Labels for the comparison results.
     
-    if exp_column_name_value[0] == '[':
+    if exp_Y_column_name_value[0] == '[':
         print "Exp Column Name List Detected"
-        exp_compound_col_names = eval(exp_column_name_value)
+        exp_compound_col_names = eval(exp_Y_column_name_value)
         #print "Exp Compound Column Names:", exp_compound_col_names
         for name in exp_compound_col_names:
             print "Exp Sub-Column Name:", name
             exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
     else:
-        print "Single Exp. Column Name:", exp_column_name_value
-        exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+exp_column_name_value)        
+        print "Single Exp. Column Name:", exp_Y_column_name_value
+        exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+exp_Y_column_name_value)        
     
-    if mod_column_name_value[0] == '[':
+    if mod_Y_column_name_value[0] == '[':
         print "Mod Column Name List Detected"
-        mod_compound_col_names = eval(mod_column_name_value)
-        #print "Mod Compound Column Names:", mod_column_name_value
+        mod_compound_col_names = eval(mod_Y_column_name_value)
+        #print "Mod Compound Column Names:", mod_Y_column_name_value
         for name in mod_compound_col_names:
             print "Mod Sub-Column Name:", name
             mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
     else:
-        print "Single Mod. Column Name:", mod_column_name_value
-        mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+mod_column_name_value)
+        print "Single Mod. Column Name:", mod_Y_column_name_value
+        mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+mod_Y_column_name_value)
     
     #print "Exp Data Labels:\n", exp_scatter_data_labels
     #print "Mod Data Labels:\n", mod_scatter_data_labels
@@ -228,10 +236,23 @@ def extract_comp_data(comp_file_info):
     #Read in experimental data and flip lists from rows to columns.
     print "Reading in:", exp_data_filename
     exp_data_cols = zip(*csv.reader(exp_file_object))
+    #print "exp_data_cols: ",exp_data_cols
+    
+    #Find X_Axis index number and confirm Col_Name based on Exp_X_Col_Name value in config file.
+    column_counter = 0
+    for column in exp_data_cols:
+        if column[exp_column_name_row_index].strip() == exp_X_column_name_value:
+            print "Exp. X Col name is: ",column[exp_column_name_row_index].strip()
+            #print "The Index Value is:",column_counter
+            exp_Xaxis_column_name = column[exp_column_name_row_index].strip()
+        else:
+            column_counter = column_counter + 1
+            if column_counter == len(exp_data_cols):
+                print "!!! Problem with Exp_X_Col_Name value in Config File !!!"
+                exit()
+            
     #Convert tuples to lists.
     exp_data_list = [list(sublist) for sublist in exp_data_cols]
-    #Pull the Time column name out and strip whitespace. Assumes that Time is in first column.
-    exp_time_col_name = exp_data_list[0][exp_column_name_row_index].strip()
     
     #Build Experimental Data Dictionary. 
     #Catch errors if conversion of data from string to float fails.
@@ -252,10 +273,23 @@ def extract_comp_data(comp_file_info):
     #Read in model data and flip lists from rows to columns.
     print "Reading in:", mod_data_filename
     mod_data_cols = zip(*csv.reader(mod_file_object))
+    #print "mod_data_cols: ",mod_data_cols
+    
+    #Find X_Axis index number and confirm Col_Name based on Mod_X_Col_Name value in config file.
+    column_counter = 0
+    for column in mod_data_cols:
+        if column[mod_column_name_row_index].strip() == mod_X_column_name_value:
+            print "Mod. X Col name is: ",column[mod_column_name_row_index].strip()
+            #print "The Index Value is:",column_counter
+            mod_Xaxis_column_name = column[mod_column_name_row_index].strip()
+        else:
+            column_counter = column_counter + 1
+            if column_counter == len(mod_data_cols):
+                print "!!! Problem with Mod_X_Col_Name value in Config File !!!"
+                exit()
+    
     #Convert tuples to lists.
     mod_data_list = [list(sublist) for sublist in mod_data_cols]
-    #Pull the Time column name out and strip whitespace from ends of string.
-    mod_time_col_name = mod_data_list[0][mod_column_name_row_index].strip()
     
     #Build Prediction/Model Data Dictionary
     #Catch errors if conversion of data from string to float fails.
@@ -273,12 +307,12 @@ def extract_comp_data(comp_file_info):
             print "!!! Mod Data Conversion in Column Name "+mod_list[mod_column_name_row_index].strip()+". !!!"
             exit()
     
-    # Assuming that all column time ranges are the same.  Passing in the first Column Name.
-    exp_comp_ranges = find_start_stop_index(exp_data_dict,exp_time_col_name,exp_start_time_data_val,exp_stop_time_data_val,exp_start_time_comp_val,exp_stop_time_comp_val)
-    mod_comp_ranges = find_start_stop_index(mod_data_dict,mod_time_col_name,mod_start_time_data_val,mod_stop_time_data_val,mod_start_time_comp_val,mod_stop_time_comp_val)
-    #print exp_comp_ranges
-    #print mod_comp_ranges
-    
+    # Passing in the X_Axis Column Name.
+    exp_comp_ranges = find_start_stop_index(exp_data_dict,exp_Xaxis_column_name,exp_start_data_val,exp_stop_data_val,exp_start_comp_val,exp_stop_comp_val)
+    mod_comp_ranges = find_start_stop_index(mod_data_dict,mod_Xaxis_column_name,mod_start_data_val,mod_stop_data_val,mod_start_comp_val,mod_stop_comp_val)
+    print "EXP COMP RANGES",exp_comp_ranges
+    print "MOD COMP RANGES",mod_comp_ranges
+    exit() # LOH
     #### Begin Column specific operations.
     scatter_counter = 0
     
@@ -349,9 +383,9 @@ def extract_comp_data(comp_file_info):
                 exit()
                 
         #Create data lists based on specified ranges
-        exp_data_seconds = zip(exp_data_dict[exp_time_col_name][exp_comp_ranges[0]:exp_comp_ranges[1]], exp_data_dict[exp_label_temp[3]][exp_comp_ranges[0]:exp_comp_ranges[1]])
+        exp_data_seconds = zip(exp_data_dict[exp_Xaxis_column_name][exp_comp_ranges[0]:exp_comp_ranges[1]], exp_data_dict[exp_label_temp[3]][exp_comp_ranges[0]:exp_comp_ranges[1]])
         #print exp_data_seconds
-        mod_data_seconds = zip(mod_data_dict[mod_time_col_name][mod_comp_ranges[0]:mod_comp_ranges[1]], mod_data_dict[mod_label_temp[3]][mod_comp_ranges[0]:mod_comp_ranges[1]])
+        mod_data_seconds = zip(mod_data_dict[mod_Xaxis_column_name][mod_comp_ranges[0]:mod_comp_ranges[1]], mod_data_dict[mod_label_temp[3]][mod_comp_ranges[0]:mod_comp_ranges[1]])
         #print mod_data_seconds
         
         #Convert time to minutes from seconds.
