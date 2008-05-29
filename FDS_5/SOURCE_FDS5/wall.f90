@@ -683,7 +683,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
             KKB = IJKW(8,IWB)
             TMP_G_B  = TMP(IIB,JJB,KKB)
             DTMP = TMP_G_B - TMP_B(IW)
-            HTCB = HEAT_TRANSFER_COEFFICIENT(IWB,IIB,JJB,KKB,IOR,TMP_G_B,DTMP)            
+            HTCB = HEAT_TRANSFER_COEFFICIENT(IWB,IIB,JJB,KKB,IOR,TMP_G_B,DTMP)     
             HEAT_TRANS_COEF(IWB) = HTCB
             QRADINB  = QRADIN(IWB)
             IF (NLP>0) Q_WATER_B = -SUM(WCPUA(IWB,:))
@@ -1060,7 +1060,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          ENDIF
       ENDDO
       ! solution inwards
-      RFLUX_UP = QRADIN(IW) + (1.-E_WALL(IW))*QRADOUT(IW)
+      RFLUX_UP = QRADIN(IW) + (1.-E_WALL(IW))*QRADOUT(IW)/(E_WALL(IW)+1.0E-10_EB)
       DO I=1,NWP
       !! RFLUX_DOWN =  ( RFLUX_UP + KAPPA_S(I)*SIGMA*WC%TMP_S(I)**4 ) / (1. + KAPPA_S(I))
          RFLUX_DOWN =  ( R_S(I-1)*RFLUX_UP + KAPPA_S(I)*SIGMA*WC%TMP_S(I)**4 ) / (R_S(I) + KAPPA_S(I))
@@ -1071,7 +1071,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
       IF (SF%BACKING==EXPOSED) THEN
          IF (BOUNDARY_TYPE(IWB)==SOLID_BOUNDARY) QRADOUT(IWB) = E_WALLB*RFLUX_UP
       ENDIF
-      ! solution outwards   
+      ! solution outwards
       RFLUX_UP = QRADINB + (1.-E_WALLB)*RFLUX_UP
       DO I=NWP,1,-1
       !! RFLUX_DOWN =  ( RFLUX_UP + KAPPA_S(I)*SIGMA*WC%TMP_S(I)**4 ) / (1. + KAPPA_S(I))
@@ -1080,8 +1080,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          Q_S(I) = Q_S(I) + (R_S(I)*RFLUX_UP - R_S(I-1)*RFLUX_DOWN)*RDX_S(I)
          RFLUX_UP = RFLUX_DOWN
       ENDDO
-  !!! QRADOUT(IW) = E_WALL(IW)*RFLUX_DOWN
-      QRADOUT(IW) = RFLUX_DOWN
+      QRADOUT(IW) = E_WALL(IW)*RFLUX_DOWN
    ENDIF
 
    ! Update the 1-D heat transfer equation 
