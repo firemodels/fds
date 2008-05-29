@@ -19,16 +19,19 @@ PUBLIC COMBUSTION, GET_REV_fire
  
 CONTAINS
  
+
 SUBROUTINE COMBUSTION(NM)
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW
 
-IF( EVACUATION_ONLY(NM)) RETURN
+IF (EVACUATION_ONLY(NM)) RETURN
 
 TNOW=SECOND()
 
 CALL POINT_TO_MESH(NM)
+
+! Choose between mixture fraction formulation or finite-rate chemistry
 
 IF (MIXTURE_FRACTION) THEN
    CALL COMBUSTION_MF
@@ -36,286 +39,132 @@ ELSE
    CALL COMBUSTION_FR
 ENDIF
 
+! Mirror Q across external boundaries -- for Smokeview visualization only
+
+CALL COMBUSTION_BC
+
 TUSED(10,NM)=TUSED(10,NM)+SECOND()-TNOW
 
 CONTAINS
 
+
 SUBROUTINE COMBUSTION_MF
+
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_MOLECULAR_WEIGHT
-REAL(EB) :: YFU0,A,ETRM,YCOMIN,YO2MIN,YFUMIN,YO2W,YO20,YCO0,Y_SUM_W,&
+REAL(EB) :: YFU0,A,ETRM,YCOMIN,YO2W,YO20,YCO0,Y_SUM_W,&
             DYF,DX_FDT,HFAC_F,DTT,DELTA2,& 
             Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,&
             F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,Z_2,RHOX, &
             X_FU,X_O,X_FU_0,X_O_0,X_FU_S,X_O_S,X_FU_N,X_O_N,X_O_MIN,X_FU_MIN,COTOO2, &
-            Y_F_MAX,TMP_F_MIN,Y_F_CORR,Z2_MIN
-INTEGER :: NODETS,N,I,J,K,II,IC,IW,IWA(-3:3)
-!LOGICAL :: BURN
+            Y_F_MAX,TMP_F_MIN,Y_F_CORR,Z2_MIN,WGT,OMWGT
+REAL(EB), PARAMETER :: YFUMIN=1.E-10_EB,YO2MIN=1.E-10_EB
+INTEGER :: NODETS,N,I,J,K,II,JJ,KK,IOR,IC,IW,IWA(-3:3)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: YO2Z,QT,R_SUM_DILUENTS,MIX_TIME
 !LOGICAL, POINTER, DIMENSION(:,:,:) :: IGNITE
 
-PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN !Combustion without CO formation and destruction
+! Weighting factor for time-averaging of local HRR
+
+WGT   = MIN(1._EB,DT/Q_AVG_TIME)
+OMWGT = 1._EB - WGT
+
+PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN  ! Combustion without CO formation and destruction
+
    YO2Z => WORK1
    YO2Z = 0._EB
    MIX_TIME => WORK2
    MIX_TIME = DT
-   Q =  0._EB
+   Q   = 0._EB
    Z_2 = 0._EB
    DO K=1,KBAR
       DO J=1,JBAR
-         ILOOPA: DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOPA
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             CALL GET_MASS_FRACTION(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),O2_INDEX,Y_SUM(I,J,K),YO2Z(I,J,K))   
-         ENDDO ILOOPA
+         ENDDO
       ENDDO
    ENDDO
-   YO2MIN = 1.E-10_EB
-   YFUMIN = 1.E-10_EB
-   !Loop and do F -> CO
-   RN => REACTION(1)
-   HFAC_F   = RN%HEAT_OF_COMBUSTION/DT
-   SUPPRESSIONIF: IF (SUPPRESSION) THEN !TMP and Y_O2 dependent combustion
-      DO K=1,KBAR
-         DO J=1,JBAR
-            ILOOPB: DO I=1,IBAR
-               IC = CELL_INDEX(I,J,K)
-               IF (SOLID(IC)) CYCLE ILOOPB
-               IWA = WALL_INDEX(IC,:)
-               YO20  = YO2Z(I,J,K)
-               YFU0  = MAX(0._EB,MIN(1._EB,YY(I,J,K,I_FUEL)))*RN%Y_F_INLET
-               IF (YFU0<=YFUMIN .OR. YO20<=YO2MIN) CYCLE ILOOPB
 
-               !Get min O2
-               Y_O2_MAX = YO20
-               Y_F_MAX = YFU0/RN%Y_F_INLET
-               TMP_MIN = TMP(I,J,K)
-               TMP_F_MIN = TMP(I,J,K)
-               !Check neighboring cells for fuel and oxygen
-               !X direction
-               IF (IWA(-1)==0) THEN
-                  IF (YO2Z(I-1,J,K)>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2Z(I-1,J,K)
-                     TMP_MIN = TMP(I-1,J,K)
-                  ENDIF
-                  IF (YY(I-1,J,K,I_FUEL)>Y_F_MAX) THEN
-                     Y_F_MAX = YY(I-1,J,K,I_FUEL)
-                     TMP_F_MIN = TMP(I-1,J,K)
-                  ENDIF
-               ELSE
-                  IW = IWA(-1)
-                  IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN
-                     Y_SUM_W = 0._EB           
-                     DO N=1,N_SPECIES
-                        IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                           Y_SUM_W = Y_SUM_W + YY_W(IW,N)
-                        ENDIF
-                     ENDDO
-                     CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                     IF (YO2W>Y_O2_MAX) THEN
-                        Y_O2_MAX = YO2W
-                        TMP_MIN = TMP_F(IW)
+   RN => REACTION(1)
+   HFAC_F  = RN%HEAT_OF_COMBUSTION/DT
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         ILOOPB: DO I=1,IBAR
+            IC = CELL_INDEX(I,J,K)
+            IF (SOLID(IC)) CYCLE ILOOPB
+            YFU0  = MAX(0._EB,MIN(1._EB,YY(I,J,K,I_FUEL)))*RN%Y_F_INLET
+            IF (YFU0<=YFUMIN) CYCLE ILOOPB
+            YO20  = YO2Z(I,J,K)
+            IF (YO20<=YO2MIN) CYCLE ILOOPB
+
+            IF_SUPPRESSION: IF (SUPPRESSION) THEN  ! Get maximum O2 in the current and neighboring cells to see if flame viable
+
+               Y_O2_MAX  = 0._EB
+               Y_F_MAX   = 0._EB
+               TMP_MIN   = TMPA
+               TMP_F_MIN = TMPA
+
+               SEARCH_LOOP: DO IOR=-3,3
+
+                  II = I
+                  JJ = J
+                  KK = K
+                  SELECT CASE(IOR)
+                     CASE(-1)
+                        II = I-1
+                     CASE( 1)
+                        II = I+1
+                     CASE(-2)
+                        JJ = J-1
+                     CASE( 2)
+                        JJ = J+1
+                     CASE(-3)
+                        KK = K-1
+                     CASE( 3)
+                        KK = K+1
+                  END SELECT
+
+                  IW = WALL_INDEX(IC,IOR)
+                  IF (IW==0 .OR. BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                     IF (YO2Z(II,JJ,KK)>Y_O2_MAX) THEN
+                        Y_O2_MAX = YO2Z(II,JJ,KK)
+                        TMP_MIN  = TMP(II,JJ,KK)
                      ENDIF
-                     IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                        Y_F_MAX = YY_W(IW,I_FUEL)
-                        TMP_F_MIN = TMP_F(IW)
-                     ENDIF
-                  ENDIF
-               ENDIF
-               IF (IWA(1)==0) THEN
-                  IF (YO2Z(I+1,J,K)>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2Z(I+1,J,K)
-                     TMP_MIN = TMP(I+1,J,K)
-                  ENDIF
-                  IF (YY(I+1,J,K,I_FUEL)>Y_F_MAX) THEN
-                     Y_F_MAX = YY(I+1,J,K,I_FUEL)
-                     TMP_F_MIN = TMP(I+1,J,K)
-                  ENDIF
-               ELSE
-                  IW = IWA(1)
-                  IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN    
-                     Y_SUM_W = 0._EB           
-                     DO N=1,N_SPECIES
-                        IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                           Y_SUM_W = Y_SUM_W + YY_W(IW,N)
-                        ENDIF
-                     ENDDO
-                     CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                     IF (YO2W>Y_O2_MAX) THEN
-                        Y_O2_MAX = YO2W
-                        TMP_MIN = TMP_F(IW)
-                     ENDIF
-                     IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                        Y_F_MAX = YY_W(IW,I_FUEL)
-                        TMP_F_MIN = TMP_F(IW)
+                     IF (YY(II,JJ,KK,I_FUEL)>Y_F_MAX) THEN
+                        Y_F_MAX   = YY(II,JJ,KK,I_FUEL)
+                        TMP_F_MIN = TMP(II,JJ,KK)
                      ENDIF
                   ENDIF
-               ENDIF
-               !Y direction            
-               IF (IWA(-2)==0) THEN
-                  IF (YO2Z(I,J-1,K)>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2Z(I,J-1,K)
-                     TMP_MIN = TMP(I,J-1,K)
-                  ENDIF
-                  IF (YY(I,J-1,K,I_FUEL)>Y_F_MAX) THEN
-                     Y_F_MAX = YY(I,J-1,K,I_FUEL)
-                     TMP_F_MIN = TMP(I,J-1,K)
-                  ENDIF
-               ELSE
-                  IW = IWA(-2)
-                  IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
-                     Y_SUM_W = 0._EB           
-                     DO N=1,N_SPECIES
-                        IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                           Y_SUM_W = Y_SUM_W + YY_W(IW,N)
-                        ENDIF
-                     ENDDO
-                     CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                     IF (YO2W>Y_O2_MAX) THEN
-                        Y_O2_MAX = YO2W
-                        TMP_MIN = TMP_F(IW)
-                     ENDIF
-                     IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                        Y_F_MAX = YY_W(IW,I_FUEL)
-                        TMP_F_MIN = TMP_F(IW)
-                     ENDIF
-                  ENDIF
-               ENDIF
-               IF (IWA(2)==0) THEN
-                  IF (YO2Z(I,J+1,K)>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2Z(I,J+1,K)
-                     TMP_MIN = TMP(I,J+1,K)
-                  ENDIF
-                  IF (YY(I,J+1,K,I_FUEL)>Y_F_MAX) THEN
-                     Y_F_MAX = YY(I,J+1,K,I_FUEL)
-                     TMP_F_MIN = TMP(I,J+1,K)
-                  ENDIF
-               ELSE
-                  IW = IWA(2)
-                  IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
-                     Y_SUM_W = 0._EB           
-                     DO N=1,N_SPECIES
-                        IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                           Y_SUM_W = Y_SUM_W + YY_W(IW,N)
-                        ENDIF
-                     ENDDO
-                     CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                     IF (YO2W>Y_O2_MAX) THEN
-                        Y_O2_MAX = YO2W
-                        TMP_MIN = TMP_F(IW)
-                     ENDIF
-                     IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                        Y_F_MAX = YY_W(IW,I_FUEL)
-                        TMP_F_MIN = TMP_F(IW)
-                     ENDIF
-                  ENDIF
-               ENDIF                        
-               !Z direction
-               IF (IWA(-3)==0) THEN
-                  IF (YO2Z(I,J,K-1)>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2Z(I,J,K-1)
-                     TMP_MIN = TMP(I,J,K-1)
-                  ENDIF
-                  IF (YY(I,J,K-1,I_FUEL)>Y_F_MAX) THEN
-                     Y_F_MAX = YY(I,J,K-1,I_FUEL)
-                     TMP_F_MIN = TMP(I,J,K-1)
-                  ENDIF
-               ELSE
-                  IW = IWA(-3)
-                  IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
-                     Y_SUM_W = 0._EB           
-                     DO N=1,N_SPECIES
-                        IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                           Y_SUM_W = Y_SUM_W + YY_W(IW,N)
-                        ENDIF
-                     ENDDO
-                     CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                     IF (YO2W>Y_O2_MAX) THEN
-                        Y_O2_MAX = YO2W
-                        TMP_MIN = TMP_F(IW)
-                     ENDIF
-                     IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                        Y_F_MAX = YY_W(IW,I_FUEL)
-                        TMP_F_MIN = TMP_F(IW)
-                     ENDIF
-                  ENDIF
-               ENDIF
-               IF (IWA(3)==0) THEN
-                  IF (YO2Z(I,J,K+1)>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2Z(I,J,K+1)
-                     TMP_MIN = TMP(I,J,K+1)
-                  ENDIF
-                  IF (YY(I,J,K+1,I_FUEL)>Y_F_MAX) THEN
-                     Y_F_MAX = YY(I,J,K+1,I_FUEL)
-                     TMP_F_MIN = TMP(I,J,K+1)
-                  ENDIF
-               ELSE
-                  IW = IWA(3)
-                  IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN
-                     Y_SUM_W = 0._EB           
-                     DO N=1,N_SPECIES
-                        IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                           Y_SUM_W = Y_SUM_W + YY_W(IW,N)
-                        ENDIF
-                     ENDDO
-                     CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                     IF (YO2W>Y_O2_MAX) THEN
-                        Y_O2_MAX = YO2W
-                        TMP_MIN = TMP_F(IW)
-                     ENDIF
-                     IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                        Y_F_MAX = YY_W(IW,I_FUEL)
-                        TMP_F_MIN = TMP_F(IW)
-                     ENDIF
-                  ENDIF
-               ENDIF
+
+               ENDDO SEARCH_LOOP
+
+               ! Evaluate empirical extinction criteria
+
                Y_O2_CORR = RN%Y_O2_LL*(RN%CRIT_FLAME_TMP-TMP_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
                Y_F_CORR  = RN%Y_F_LFL*(RN%CRIT_FLAME_TMP-TMP_F_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
                IF (Y_O2_MAX < Y_O2_CORR .OR. Y_F_MAX*RN%Y_F_INLET < Y_F_CORR) CYCLE ILOOPB
-               DYF = MIN(YFU0,YO20/RN%O2_F_RATIO)
-               IF (LES .AND. EDDY_BREAKUP) THEN
-                  IF (.NOT.TWO_D) THEN
-                     DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
-                  ELSE
-                     DELTA2 = DX(I)*DZ(K)
-                  ENDIF
-                  MIX_TIME(I,J,K) = MIX_TIME_FACTOR*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
-               ENDIF
-               Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K)))
-               DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
-               Q(I,J,K) = Q_NEW
-               YY(I,J,K,I_FUEL)   = YY(I,J,K,I_FUEL)   - DYF
-               YY(I,J,K,I_PROG_F) = YY(I,J,K,I_PROG_F) + DYF
-            ENDDO ILOOPB
-         ENDDO
-      ENDDO
-      
-   ELSE SUPPRESSIONIF  ! No suppression
 
-      DO K=1,KBAR
-         DO J=1,JBAR
-            ILOOPC: DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOPC
-               YO20  = YO2Z(I,J,K)
-               YFU0  = MAX(0._EB,MIN(1._EB,YY(I,J,K,I_FUEL)))*RN%Y_F_INLET
-               IF (YFU0<=YFUMIN .OR. YO20<=YO2MIN) CYCLE ILOOPC
-               DYF = MIN(YFU0,YO20/RN%O2_F_RATIO)
-               IF (LES .AND. EDDY_BREAKUP) THEN
-                  IF (.NOT.TWO_D) THEN
-                     DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
-                  ELSE
-                     DELTA2 = DX(I)*DZ(K)
-                  ENDIF
-                  MIX_TIME(I,J,K) = MIX_TIME_FACTOR*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
+            ENDIF IF_SUPPRESSION
+
+            DYF = MIN(YFU0,YO20/RN%O2_F_RATIO)
+            IF (LES .AND. EDDY_BREAKUP) THEN
+               IF (.NOT.TWO_D) THEN
+                  DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
+               ELSE
+                  DELTA2 = DX(I)*DZ(K)
                ENDIF
-               Q_NEW = MIN(Q_UPPER,DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K)))
-               DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
-               Q(I,J,K) = Q_NEW
-               YY(I,J,K,I_FUEL)   = YY(I,J,K,I_FUEL)   - DYF
-               YY(I,J,K,I_PROG_F) = YY(I,J,K,I_PROG_F) + DYF
-            ENDDO ILOOPC
-         ENDDO
+               MIX_TIME(I,J,K) = MIX_TIME_FACTOR*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
+            ENDIF
+            Q_NEW = MIN((Q_AVG_MAX-OMWGT*Q_AVG(I,J,K))/WGT,Q_UPPER,DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K)))
+            Q_AVG(I,J,K) = OMWGT*Q_AVG(I,J,K) + WGT*Q_NEW
+            DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
+            Q(I,J,K) = Q_NEW
+            YY(I,J,K,I_FUEL)   = YY(I,J,K,I_FUEL)   - DYF
+            YY(I,J,K,I_PROG_F) = YY(I,J,K,I_PROG_F) + DYF
+         ENDDO ILOOPB
       ENDDO
-   ENDIF SUPPRESSIONIF
-       
+   ENDDO
+      
 ELSE PRODUCE_CO  ! Combustion with suppression and CO production
 
    YO2Z   => WORK1
@@ -347,8 +196,6 @@ ELSE PRODUCE_CO  ! Combustion with suppression and CO production
    RN => REACTION(1)
    HFAC_F   = RN%HEAT_OF_COMBUSTION/DT
    F_TO_CO = RN%MW_FUEL/(RN%NU_CO*MW_CO)  
-   YO2MIN = 1.E-10_EB
-   YFUMIN = 1.E-10_EB
    !Loop and do F -> CO
    DO K=1,KBAR
       DO J=1,JBAR
@@ -639,6 +486,9 @@ ELSE PRODUCE_CO  ! Combustion with suppression and CO production
       ENDDO
    ENDDO
 ENDIF PRODUCE_CO
+
+! Sum up diluent mass fractions
+
 IF (N_SPEC_DILUENTS > 0) THEN
    R_SUM_DILUENTS => WORK4
    R_SUM_DILUENTS =  0._EB
@@ -646,6 +496,9 @@ IF (N_SPEC_DILUENTS > 0) THEN
       IF (SPECIES(N)%MODE==GAS_SPECIES) R_SUM_DILUENTS(:,:,:) = R_SUM_DILUENTS(:,:,:) + SPECIES(N)%RCON*YY(:,:,:,N)
    ENDDO
 ENDIF
+
+! Compute new mixture molecular weight
+
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -664,7 +517,12 @@ IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
 
 END SUBROUTINE COMBUSTION_MF
 
+
+
 SUBROUTINE COMBUSTION_FR
+
+! Finite-Rate Combustion
+
 REAL(EB) :: TMPD,ETRM,&
             DX_FDT,DTT,YYNEW,WFAC,QFAC,&
             X_O_MIN,X_FU_MIN,X_FU_S,X_O_S
@@ -673,7 +531,9 @@ REAL(EB), DIMENSION(1:N_REACTIONS) :: HFAC_F, A, ETRM1, X_FU,X_O,&
            DYF,Q_NR,X_FU_N,X_O_N
 INTEGER :: NODETS,N,I,J,K,II,NR
 LOGICAL :: NO_REACTION
+
 Q =  0._EB
+
 DO NR=1,N_REACTIONS
    RN => REACTION(NR)
    HFAC_F(NR) = RN%HEAT_OF_COMBUSTION/DT
@@ -718,14 +578,16 @@ DO K=1,KBAR
                ENDIF
                ETRM = ETRM1(NR)
 
-! Local flame extinction criteria
+               ! Local flame extinction criteria
+
                SPEC_LOOP: DO N=1,N_SPECIES
                   IF (N==RN%I_FUEL .OR. N==RN%I_OXIDIZER .OR. RN%N(N)==-999._EB) CYCLE SPEC_LOOP
                   IF (YY(I,J,K,N) < 1.E-20_EB) CYCLE SPEC_LOOP
                   ETRM = ETRM * (YY(I,J,K,N)*1000._EB*RHO(I,J,K)/SPECIES(N)%MW*1.E-6_EB)**RN%N(N)
                ENDDO SPEC_LOOP
 
-! Solve the simple ODE to deplete fuel and oxidizer due to reaction
+               ! Solve the simple ODE to deplete fuel and oxidizer due to reaction
+
                DX_FDT= -ETRM*X_FU(NR)**RN%N_F*X_O(NR)**RN%N_O
                X_FU_S = X_FU(NR) + DTT*DX_FDT
                X_O_S = X_O(NR) + DTT*DX_FDT*RN%NU(RN%I_OXIDIZER)/RN%NU(RN%I_FUEL)
@@ -761,7 +623,6 @@ DO K=1,KBAR
             IF (NO_REACTION) EXIT ODE_LOOP
             NO_REACTION = .FALSE.
 
-! Update HRR and species mass fractions
          ENDDO ODE_LOOP
       ENDDO ILOOP3
    ENDDO
@@ -776,11 +637,29 @@ SLOOP: DO N=1,N_SPECIES
    RSUM(:,:,:) = RSUM(:,:,:) + WFAC*YY(:,:,:,N)
 ENDDO SLOOP
 
-RETURN
-
 END SUBROUTINE COMBUSTION_FR
 
+
+SUBROUTINE COMBUSTION_BC
+
+INTEGER :: II,JJ,KK,IIG,JJG,KKG,IW
+
+DO IW=1,NEWC
+   IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) CYCLE
+   II  = IJKW(1,IW)
+   JJ  = IJKW(2,IW)
+   KK  = IJKW(3,IW)
+   IIG = IJKW(6,IW)
+   JJG = IJKW(7,IW)
+   KKG = IJKW(8,IW)
+   Q(II,JJ,KK) = Q(IIG,JJG,KKG)
+ENDDO
+
+END SUBROUTINE COMBUSTION_BC
+
 END SUBROUTINE COMBUSTION
+
+
 
 SUBROUTINE GET_REV_fire(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
@@ -793,5 +672,4 @@ WRITE(MODULE_DATE,'(A)') firedate
 END SUBROUTINE GET_REV_fire
  
 END MODULE FIRE
-
 
