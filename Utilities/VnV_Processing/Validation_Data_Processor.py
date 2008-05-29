@@ -2,6 +2,10 @@ import csv
 from re import *
 from pyx import *
 
+### Gather Processing Preferences from User
+## Validation, Verification or BOTH
+## Plot Comparison, Scatter or BOTH
+
 ### Set Global Variables for Validation
 
 data_directory = "../../Validation/"
@@ -17,8 +21,6 @@ config_file_name = "Validation_Data_Config_File.csv"
 ### Set General Global Variables
 scatter_data_dict = {}
 combined_scatter_data = {}
-X_Scale_Factor = 9999
-Y_Scale_Factor = 9999
 
 ### Define Functions
 
@@ -97,13 +99,12 @@ def extract_config_data(config_file):
     #print data_dict
     return [groups_dict,quantities_dict,data_dict]
 
-def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,stop_comp):
+def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,stop_comp,x_scale):
     #This function is used to find index numbers for start and stop points in plotting and min-max values.
-    print "X Scale Factor:", X_Scale_Factor
-    # LOH
+    print "X Scale Factor:", x_scale
     rowcounter1 = 0
     for value1 in data_dict[col_name]:
-        if value1 >= (float(start_data)*float(X_Scale_Factor)):
+        if value1 >= (float(start_data)*float(x_scale)):
             #print "Time Starts at row #:", str(rowcounter1)
             #print "With a value of:", str(value1)
             time_start_index = rowcounter1
@@ -111,7 +112,7 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
         rowcounter1 += 1
     rowcounter2 = 0
     for value2 in data_dict[col_name]:
-        if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_data)*float(X_Scale_Factor)):
+        if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_data)*float(x_scale)):
             #print "Specified end of plot time is greater than end of time in the data set. \nUsing last value in the time column.\n"
             #print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
             time_end_index = (len(data_dict[col_name])-1)
@@ -122,11 +123,11 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
             #print "With a value of: "+str(data_dict[col_name][row_number2])
             time_end_index = row_number2
             break
-        if value2 < (float(stop_data)*float(X_Scale_Factor)):
+        if value2 < (float(stop_data)*float(x_scale)):
             rowcounter2 += 1
     rowcounter3 = 0
     for value3 in data_dict[col_name]:
-        if value3 >= (float(start_comp)*float(X_Scale_Factor)):
+        if value3 >= (float(start_comp)*float(x_scale)):
             #print "Comparison Time Starts at row #:", str(rowcounter3)
             #print "With a value of:", str(value3)
             minmax_start_index = rowcounter3
@@ -134,12 +135,12 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
         rowcounter3 += 1  
     rowcounter4 = 0
     for value4 in data_dict[col_name]:
-        if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_comp)*float(X_Scale_Factor)):
+        if float(data_dict[col_name][(len(data_dict[col_name])-1)]) < (float(stop_comp)*float(x_scale)):
             #print "Specified end of comparison time is greater than end of time in the data set. \nUsing last value in the time column."
             #print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
             minmax_end_index = (len(data_dict[col_name])-1)
             break
-        if value4 < (float(stop_data)*float(X_Scale_Factor)):
+        if value4 < (float(stop_data)*float(x_scale)):
             rowcounter4 += 1
         else:
             row_number4 = (rowcounter4 - 1)
@@ -209,8 +210,8 @@ def extract_comp_data(comp_file_info):
         print "Single Mod. Column Name:", mod_Y_column_name_value
         mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+mod_Y_column_name_value)
     
-    #print "Exp Data Labels:\n", exp_scatter_data_labels
-    #print "Mod Data Labels:\n", mod_scatter_data_labels
+    print "Exp Data Labels:\n", exp_scatter_data_labels
+    print "Mod Data Labels:\n", mod_scatter_data_labels
     
     combined_scatter_data_labels = [exp_scatter_data_labels,mod_scatter_data_labels]
     #print "Combined Scatter Data:",combined_scatter_data_labels
@@ -308,11 +309,11 @@ def extract_comp_data(comp_file_info):
             exit()
     
     # Passing in the X_Axis Column Name.
-    exp_comp_ranges = find_start_stop_index(exp_data_dict,exp_Xaxis_column_name,exp_start_data_val,exp_stop_data_val,exp_start_comp_val,exp_stop_comp_val)
-    mod_comp_ranges = find_start_stop_index(mod_data_dict,mod_Xaxis_column_name,mod_start_data_val,mod_stop_data_val,mod_start_comp_val,mod_stop_comp_val)
+    exp_comp_ranges = find_start_stop_index(exp_data_dict,exp_Xaxis_column_name,exp_start_data_val,exp_stop_data_val,exp_start_comp_val,exp_stop_comp_val,X_Scale_Factor)
+    mod_comp_ranges = find_start_stop_index(mod_data_dict,mod_Xaxis_column_name,mod_start_data_val,mod_stop_data_val,mod_start_comp_val,mod_stop_comp_val,X_Scale_Factor)
     print "EXP COMP RANGES",exp_comp_ranges
     print "MOD COMP RANGES",mod_comp_ranges
-    exit() # LOH
+    
     #### Begin Column specific operations.
     scatter_counter = 0
     
@@ -341,7 +342,7 @@ def extract_comp_data(comp_file_info):
             print "Quantity set to 0, no comparison made."
         else:
             if  min_max == 'max':
-                print "*** Rise Computed ***"
+                print "*** Compute Rise ***"
                 temp_exp_data_values = [x for x in exp_data_values_comp if x != 'Null']
                 exp_rise_value = max(temp_exp_data_values) - float(exp_initial_value)
                 temp_mod_data_values = [x for x in mod_data_values_comp if x != 'Null']
@@ -350,17 +351,18 @@ def extract_comp_data(comp_file_info):
                 print "Experimental Rise Value is:", exp_rise_value
                 print "Model Initial Value is:", mod_initial_value
                 print "Model Rise Value is:", mod_rise_value
-                print "\n*** Computing Relative Difference ***"
+                print "\n*** Computing Rise Relative Difference ***"
                 try:
                     relative_difference = ((mod_rise_value-exp_rise_value)/exp_rise_value)
-                    print "Relative Difference is:", relative_difference
-                    #Append Rise Values to Global Scatter Data Dictionary.
-                    scatter_data_dict[combined_scatter_data[0][scatter_counter]] = [exp_rise_value,mod_rise_value,relative_difference]
+                    print "Rise Relative Difference is:", relative_difference
                 except:
-                    print "!!! Computation of relative_difference failed. !!!\nCheck source data for columns listed above."
+                    print "!!! Computation of Rise relative_difference failed. !!!\nCheck source data for columns listed above."
                     exit()
+                #Append Rise Values to Global Scatter Data Dictionary.
+                print combined_scatter_data_labels[0][scatter_counter]
+                scatter_data_dict[combined_scatter_data_labels[0][scatter_counter]] = [exp_rise_value,mod_rise_value,relative_difference]
             elif min_max == 'min':
-                print "*** Drop Computed ***"
+                print "*** Compute Drop ***"
                 temp_exp_data_values = [x for x in exp_data_values_comp if x != 'Null']
                 exp_drop_value = float(exp_initial_value) - min(temp_exp_data_values)
                 temp_mod_data_values = [x for x in mod_data_values_comp if x != 'Null']
@@ -369,15 +371,15 @@ def extract_comp_data(comp_file_info):
                 print "Experimental Drop Value is:", exp_drop_value
                 print "Model Initial Value is:", mod_initial_value
                 print "Model Drop Value is:", mod_drop_value
-                print "\n*** Computing Relative Difference ***"
+                print "\n*** Computing Drop Relative Difference ***"
                 try:
                     relative_difference = ((mod_drop_value-exp_drop_value)/exp_drop_value)
-                    print "Relative Difference is:", relative_difference
-                    #Append Drop Values to Global Scatter Data Dictionary.
-                    scatter_data_dict[combined_scatter_data[0][scatter_counter]] = [exp_drop_value,mod_drop_value,relative_difference]
+                    print "Min Relative Difference is:", relative_difference
                 except:
-                    print "!!! Computation of relative_difference failed. !!!\nCheck source data for columns listed above."
+                    print "!!! Computation of Min relative_difference failed. !!!\nCheck source data for columns listed above."
                     exit()
+                #Append Drop Values to Global Scatter Data Dictionary.
+                scatter_data_dict[combined_scatter_data_labels[0][scatter_counter]] = [exp_drop_value,mod_drop_value,relative_difference]
             else:
                 print "!!! Min or Max is undefined in the input file. !!!"
                 exit()
