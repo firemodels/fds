@@ -105,6 +105,8 @@ ALLOCATE( M%MU(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
 CALL ChkMemErr('INIT','MU',IZERO)
 ALLOCATE(   M%Q(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
 CALL ChkMemErr('INIT','Q',IZERO)
+ALLOCATE(   M%Q_AVG(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+CALL ChkMemErr('INIT','Q_AVG',IZERO)
 
 ! Background pressure, temperature, density as a function of height (Z coordinate)
 
@@ -288,6 +290,7 @@ M%DDDT  = 0._EB
 M%D     = 0._EB
 M%DS    = 0._EB
 M%Q     = 0._EB
+M%Q_AVG = 0._EB
 IF (EVACUATION_ONLY(NM)) THEN
    M%U       = 0._EB
    M%V       = 0._EB
