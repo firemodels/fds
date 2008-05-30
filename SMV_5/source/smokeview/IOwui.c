@@ -185,6 +185,9 @@ void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, floa
   int nz;
   int ibar, jbar;
 
+  if(meshi!=NULL){
+    meshi->terrain=terri;
+  }
   terri->x=NULL;
   terri->y=NULL;
   terri->display=0;
@@ -219,6 +222,7 @@ void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, floa
   NewMemory((void **)&terri->zcell,nx*ny*sizeof(float));
   NewMemory((void **)&terri->state,nx*ny);
   NewMemory((void **)&terri->znode,(nx+1)*(ny+1)*sizeof(float));
+  NewMemory((void **)&terri->znode_scaled,(nx+1)*(ny+1)*sizeof(float));
   NewMemory((void **)&terri->znormal,3*(nx+1)*(ny+1)*sizeof(float));
 
   x = terri->x;

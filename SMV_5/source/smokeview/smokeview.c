@@ -1449,7 +1449,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
           drawvolslice_texture(sd);
        }
         else{
-          drawslice_texture(sd);
+          if(sd->terrain==1){
+            drawslice_terrain(sd);
+          }
+          else{
+            drawslice_texture(sd);
+          }
         }
       }
       else{

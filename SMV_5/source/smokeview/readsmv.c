@@ -658,7 +658,9 @@ int readsmv(char *file){
       npartinfo++;
       continue;
     }
-    if(match(buffer,"SLCF",4) == 1){
+    if( (match(buffer,"SLCF",4) == 1)||
+        (match(buffer,"SLCT",4) == 1)
+      ){
       nslice++;
       continue;
     }
@@ -3222,8 +3224,15 @@ typedef struct {
     ++++++++++++++++++++++ SLCF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"SLCF",4) == 1){
+    if( (match(buffer,"SLCF",4) == 1)||
+        (match(buffer,"SLCT",4) == 1)
+      ){
+      int terrain=0;
+
       nn_slice++;
+      if(match(buffer,"SLCT",4) == 1){
+        terrain=1;
+      }
       trim(buffer);
       len=strlen(buffer);
       if(nmeshes>1){
@@ -3275,6 +3284,7 @@ typedef struct {
         sd->file=sd->reg_file;
       }
 
+      sd->terrain=terrain;
       sd->seq_id=nn_slice;
       sd->autoload=0;
       sd->display=0;
@@ -4859,6 +4869,27 @@ typedef struct {
       initterrain(NULL, meshi, terri, xmin, xmax, nx, ymin, ymax, ny);
     }
   }
+  if(nterraininfo>0){
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      terraindata *terri;
+      float *znode, *znode_scaled;
+      int i, j;
+
+      meshi=meshinfo + i;
+      terri = meshi->terrain;
+      if(terri==NULL)continue;
+      znode = terri->znode;
+      znode_scaled = terri->znode_scaled;
+
+      for(j=0;j<=terri->ny;j++){
+        for(i=0;i<=terri->nx;i++){
+          *znode_scaled++ = (*znode++-zbar0)/xyzmaxdiff;
+        }
+      }
+
+    }
+  }
 
   printf("wrap up completed\n");
 
@@ -5452,6 +5483,7 @@ void initmesh(mesh *meshi){
   meshi->cull_smoke3d=NULL;
   meshi->smokedir_old=-100;
 #endif
+  meshi->terrain=NULL;
   meshi->meshrgb[0]=0.0;
   meshi->meshrgb[1]=0.0;
   meshi->meshrgb[2]=0.0;
