@@ -391,9 +391,9 @@ def extract_comp_data(comp_file_info):
         #print mod_data_seconds
         
         #Convert time to minutes from seconds.
-        exp_data.append([[x[0] / 60, x[1]] for x in exp_data_seconds])
+        exp_data.append([[x[0] / X_Scale_Factor, x[1]] for x in exp_data_seconds])
         #print exp_data
-        mod_data.append([[x[0] / 60, x[1]] for x in mod_data_seconds])
+        mod_data.append([[x[0] / X_Scale_Factor, x[1]] for x in mod_data_seconds])
         #print mod_data
         
         #print "\nUpdating the Scatter Counter.\n"
