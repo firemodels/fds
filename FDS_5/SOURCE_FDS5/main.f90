@@ -50,7 +50,7 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date, version number, revision number
 
-WRITE(VERSION_STRING,'(A)') '5.1.6'
+WRITE(VERSION_STRING,'(A)') '5.2.0'
 
 IF (INDEX(mainrev,':',BACK=.TRUE.)>0) THEN
    WRITE(REVISION_DATE,'(A)',IOSTAT=IOS,ERR=5) mainrev(INDEX(mainrev,':')+1:LEN_TRIM(mainrev)-2)
