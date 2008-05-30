@@ -106,7 +106,7 @@ typedef struct {
   int nx, ny;
   float xmin, xmax, ymin, ymax;
   float *x, *y;
-  float *zcell, *znode, *znormal;
+  float *zcell, *znode, *znormal, *znode_scaled;
   float *times;
   terraincell *tcell;
   int ntimes;
@@ -306,6 +306,7 @@ typedef struct {
 /* --------------------------  mesh ------------------------------------ */
 
 typedef struct mesh_ {
+  terraindata *terrain;
   int mesh_type;
   float meshrgb[3], *meshrgb_ptr;
   float cellsize;
@@ -729,6 +730,7 @@ typedef struct {
   char *file;
   char *size_file;
   char *rle_file, *comp_file, *reg_file;
+  int terrain;
   int compression_type;
   int ncompressed;
   float qval256[256];
