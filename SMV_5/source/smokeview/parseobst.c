@@ -55,6 +55,7 @@ void convert_fdsfile(const char *filein, const char *fileout, const char *fileou
   int fdsobstcount=0,smvobstcount=0;
   int copyback;
   int checkhead=1;
+  int iftail=0;
 
   if(filein==NULL||fileout==NULL||fileout2==NULL)return;
   stream_in = fopen(filein,"r");
@@ -83,12 +84,16 @@ void convert_fdsfile(const char *filein, const char *fileout, const char *fileou
 
   while(!feof(stream_in)){
     if(fgets(buffer,1000,stream_in)==NULL)break;
-//    trim(buffer);
 
     /* output non &OBST lines without change */
+
     if(checkhead==1&&STRSTR(buffer,"&HEAD")!=NULL){
       checkhead=0;
       headsubst(buffer,stream_out);
+      continue;
+    }
+    if(STRSTR(buffer,"&TAIL")!=NULL){
+      iftail=1;
       continue;
     }
 
@@ -128,6 +133,7 @@ void convert_fdsfile(const char *filein, const char *fileout, const char *fileou
   if(fdsobstcount==0)output_obst(buffer,&smvobstcount,0,stream_out,stream_out2);
   output_new_obst(stream_out, stream_out2);
 
+  if(iftail==1)fprintf(stream_out,"%s\n","&TAIL /");
 
   FREEMEMORY(buffer2);
   fclose(stream_in);
