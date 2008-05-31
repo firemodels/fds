@@ -2048,9 +2048,6 @@ void drawslice_terrain(const slice *sd){
   int maxj;
 
   float *xplt, *yplt, *zplt;
-  int ibar,jbar;
-  int nx,ny,nxy;
-  int *iblank_x, *iblank_y, *iblank_z;
   terraindata *terri;
   float *znode;
   int nxcell;
@@ -2066,14 +2063,6 @@ void drawslice_terrain(const slice *sd){
   xplt=meshi->xplt;
   yplt=meshi->yplt;
   zplt=meshi->zplt;
-  ibar=meshi->ibar;
-  jbar=meshi->jbar;
-  iblank_x=meshi->iblank_x;
-  iblank_y=meshi->iblank_y;
-  iblank_z=meshi->iblank_z;
-  nx = ibar + 1;
-  ny = jbar + 1;
-  nxy = nx*ny;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
@@ -2927,6 +2916,91 @@ void drawvslice(const vslice *vd){
    }
    glEnd();
    sniffErrors("after drawvslice:points dir=3");
+  }
+}
+
+/* ------------------ drawvslice_terrain ------------------------ */
+
+void drawvslice_terrain(const vslice *vd){
+  int i,j,k,n;
+  int i11;
+  float constval,x1,yy1,z1;
+  int maxj;
+  slice *u, *v, *w,*sd;
+  float dx, dy, dz;
+  float vrange;
+  mesh *meshi;
+  float *xplttemp,*yplttemp,*zplttemp;
+  float *rgb_ptr;
+  terraindata *terri;
+  float *znode;
+  int nxcell;
+
+  sd = sliceinfo + vd->ival;
+  meshi=meshinfo+sd->blocknumber;
+  terri = meshi->terrain;
+  if(terri==NULL)return;
+  znode = terri->znode_scaled;
+  nxcell = terri->nx;
+
+  xplttemp=meshi->xplt;
+  yplttemp=meshi->yplt;
+  zplttemp=meshi->zplt;
+
+  vrange = velocity_range;
+  if(vrange<=0.0)vrange=1.0;
+  u = vd->u;
+  v = vd->v;
+  w = vd->w;
+  if(sd->idir==3){
+   constval = zplttemp[sd->ks1]+offset_slice*sd->sliceoffset - znode[0];;
+   glLineWidth(vectorlinewidth);
+   glBegin(GL_LINES);
+   for(i=sd->is1; i<sd->is2+1; i+=vectorskip){
+     n = (i-sd->is1)*sd->nslicej - vectorskip;
+     x1 = xplttemp[i];
+     for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
+       float zz;
+
+       n+=vectorskip;
+       i11 = sd->slicepoint[n];
+       rgb_ptr = rgb_slice + 4*i11;
+
+       yy1 = yplttemp[j];
+       zz = znode[ijnode2(i,j)];
+       GET_VEC_DXYZ(u,dx)
+       GET_VEC_DXYZ(v,dy)
+       GET_VEC_DXYZ(w,dz)
+       glColor4fv(rgb_ptr);
+       glVertex3f(x1-dx,yy1-dy,constval-dz + zz);
+       glVertex3f(x1+dx,yy1+dy,constval+dz + zz);
+     }
+   }
+   glEnd();
+   sniffErrors("after drawvslice_texture:lines dir=3");
+
+   glPointSize(vectorpointsize);
+   glBegin(GL_POINTS);
+   for(i=sd->is1; i<sd->is2+1; i+=vectorskip){
+     n = (i-sd->is1)*sd->nslicej - vectorskip;
+     x1 = xplttemp[i];
+     for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
+       float zz;
+
+       n+=vectorskip;
+       i11 = sd->slicepoint[n];
+       rgb_ptr = rgb_slice + 4*i11;
+       yy1 = yplttemp[j];
+       zz = znode[ijnode2(i,j)];
+       GET_VEC_DXYZ(u,dx)
+       GET_VEC_DXYZ(v,dy)
+       GET_VEC_DXYZ(w,dz)
+       glColor4fv(rgb_ptr);
+       glVertex3f(x1+dx,yy1+dy,constval+dz+zz);
+     }
+   }
+   glEnd();
+   sniffErrors("after drawvslice_texture:points dir=3");
   }
 }
 
