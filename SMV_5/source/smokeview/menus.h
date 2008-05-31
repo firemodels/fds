@@ -1915,9 +1915,10 @@ void LoadUnloadMenu(int value){
   if(value==999)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value==UNLOADALL){
-    for(i=0;i<nterraininfo;i++){
-      readterrain("",i,UNLOAD,&errorcode);
-    }
+   // leaving code here commented in case I later decide to unload terrain files
+   // for(i=0;i<nterraininfo;i++){
+   //   readterrain("",i,UNLOAD,&errorcode);
+   // }
     for(i=0;i<nslice;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
@@ -6018,6 +6019,8 @@ if(visBlocks==visBLOCKOutline){
       glutAddMenuEntry("All Terrains",-9);
       glutAddMenuEntry("-",-1);
     }
+    /*
+    leaving code commented in case I later decide to load/unload terrain files
     for(i=0;i<nterraininfo;i++){
       char menulabel[256];
 
@@ -6025,10 +6028,11 @@ if(visBlocks==visBLOCKOutline){
 
       terri = terraininfo + i;
       strcpy(menulabel,"");
-    //xxx  if(terri->loaded==1)strcat(menulabel,"*");
-     //xxx strcat(menulabel,terri->file);
-     //xxx glutAddMenuEntry(menulabel,i);
+      if(terri->loaded==1)strcat(menulabel,"*");
+      strcat(menulabel,terri->file);
+      glutAddMenuEntry(menulabel,i);
     }
+    */
     if(nterrainloaded==1){
       glutAddMenuEntry("-",-1);
       glutAddMenuEntry("Unload Terrain",-10);
