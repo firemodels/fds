@@ -1,0 +1,291 @@
+\documentclass{article}
+\usepackage{times,mathptm}
+%\usepackage{wrapfig}
+\usepackage[pdftex]{graphicx}
+\usepackage{hyperref}
+\pdfcompresslevel=9
+\DeclareGraphicsExtensions{.jpg,.pdf,.png}
+\usepackage{setspace,moreverb}
+
+\usepackage{color}
+
+\pagestyle{myheadings}
+%
+% ----------------------  first cover/title page --------------------------
+%
+
+%
+\newcommand{\ttitle}{
+Smokeview Version 5.0 - Source Code Listing
+}
+
+\setlength{\textwidth}{6.5in} \setlength{\textheight}{8.50in}
+\setlength{\topmargin}{0.00in} \setlength{\parindent}{0.25in}
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in}
+
+\setlength{\headheight}{0.00in}
+\setlength{\headsep}{0.5in}
+\setlength{\paperheight}{11.0in}
+\setlength{\paperwidth}{8.5in}
+%
+% new commands for this paper
+%
+\newcommand{\smvinput}[1]{
+{
+\markboth{#1}{#1}
+\scriptsize
+%\paragraph{\mbox{#1}}
+\verbatiminput{../../SMV_5/source/smokeview/#1}
+}
+}
+\newcommand{\szipinput}[1]{
+{
+\markboth{#1}{#1}
+\scriptsize
+%\paragraph{\mbox{#1}}
+\verbatiminput{../../SMV_5/source/smokezip/#1}
+}
+}
+\newcommand{\vvinput}[2]{
+{
+\markboth{#2}{#2}
+\scriptsize
+%\paragraph{\mbox{#1}}
+\verbatiminput{#1}
+}
+}
+
+\newcommand{\ssection}[1]{\newpage\section{#1}}
+\newcommand{\ssubsection}[1]{\newpage\subsection{#1}}
+\newcommand{\ssubsubsection}[1]{\newpage\subsubsection{#1}}
+\newcommand{\figheight}{1.5in}
+\newcommand{\figwidth}{3.333333in}
+\newcommand{\figwidthb}{2.0in}
+\newcommand{\FDS}{{FDS}}
+\newcommand{\fds}{{FDS}}
+\newcommand{\Smokeview}{{Smokeview}}
+\newcommand{\smokeview}{{Smokeview}}
+\newcommand{\parma}{.75}
+\newcommand{\parmb}{.5}
+\newcommand{\parmc}{0.25}
+\newcommand{\bold}[1]{{\bf #1}}
+\newcommand{\etc}{{\em etc}}
+\newcommand{\ie}{{\em i.e.}}
+\newcommand{\eg}{{\em e.g.}}
+\newcommand{\via}{{\em via\ }}
+\newcommand{\loadmenu}{{\tt Load/Unload}}
+\newcommand{\blist}{
+\begin{list}
+{}{
+\setlength{\leftmargin}{\parma in}
+\setlength{\labelwidth}{\parmb in}
+\setlength{\labelsep}{\parmc in}
+\setlength{\listparindent}{0.3in}
+\setlength{\topsep}{.3in}
+\setlength{\parsep}{.0in}
+}}
+\newcommand{\elist}{\end{list}}
+\newcommand{\hitem}[1]{\item[{\bf #1} \hfill]}
+
+\bibliographystyle{unsrt}
+
+\begin{document}
+\date{}
+%\pubnumber{xxxx}
+\title{\ttitle}
+\author{Glenn P. Forney}
+
+%\pubdate{February 2001}
+%\makecover{1}
+
+\setlength{\parindent}{0.25in}
+
+%\pagestyle{plain}
+\pagenumbering{roman}
+
+
+\newpage
+\tableofcontents
+\newpage
+%\listoffigures
+%\listoftables
+\newpage
+\maketitle
+\pagenumbering{arabic}
+\begin{abstract}
+\Smokeview\ annotated source code listing.
+\end{abstract}
+%
+% .............. new section ..............................
+%
+
+
+\section{Drawing}
+\subsection{Overview - smokeview.c}
+\smvinput{smokeview.c}
+\subsection{Drawing the Geometry - drawgeometry.c}
+\smvinput{drawgeometry.c}
+\subsubsection{Particles - IOpart.c}
+\smvinput{IOpart.c}
+\subsubsection{3D Smoke - IOsmoke.c, compress3dc.c}
+\smvinput{IOsmoke.c}
+\smvinput{compress3dc.c}
+\subsubsection{Isosurfaces - IOiso.c}
+\smvinput{IOiso.c}
+\smvinput{isob.c}
+\smvinput{isodefs.h}
+\subsubsection{Boundaries - IOboundary.c}
+\smvinput{IOboundary.c}
+\subsubsection{Static Plots - PLOT3D files - IOplot3d.c}
+\smvinput{IOplot3d.c}
+\subsubsection{Zone Fire Models - IOzone.c}
+\smvinput{IOzone.c}
+\subsubsection{Targets - IOtarget.c}
+\smvinput{IOtarget.c}
+\subsubsection{Tours - IOtour.c}
+\smvinput{IOtarget.c}
+\subsubsection{Objects - IOobject.c}
+\smvinput{IOobject.c}
+
+\section{Startup - Initializations}
+\subsection{startup.c}
+\smvinput{startup.c}
+\subsection{Data Definitions - smokeviewdefs.h}
+\smvinput{smokeviewdefs.h}
+
+
+\section{Data Structures}
+\subsection{Global Data - smokeviewvars.h}
+\smvinput{smokeviewvars.h}
+\subsection{C Headers}
+\smvinput{smokeheaders.h}
+\subsection{Structure Definitions}
+\smvinput{flowfiles.h}
+\subsection{Headers for Fortran Routines}
+\smvinput{smokeviewfortheaders.h}
+
+\section{Compiler Pre-Processing Definitions - options.h}
+\smvinput{options.h}
+
+\section{Reading the .smv file - readsmv.c}
+\smvinput{readsmv.c}
+
+\section{Callbacks - callbacks.c}
+\smvinput{callbacks.c}
+
+\section{Utilities}
+\subsection{Smoothing Labels - smoothlabel.c}
+\smvinput{smoothlabel.c}
+\subsection{Data to Colors}
+\subsubsection{Data bounds - getdatabounds.c}
+\smvinput{getdatabounds.c}
+\subsection{Bounded Data to Colors - getdatacolors.c}
+\smvinput{getdatacolors.c}
+\subsection{Debugging}
+\subsubsection{ASSERT - assert.h, assert.c}
+\smvinput{assert.h}
+\smvinput{assert.c}
+\subsubsection{Memory Allocation - malloc.h, dmalloc.c}
+\smvinput{malloc.h}
+\smvinput{dmalloc.c}
+\subsection{Reading Endian Data  egz\_stdio.h, egz\_stdio.c}
+\smvinput{egzstdio.h}
+\smvinput{egzstdio.c}
+\subsection{Defining camera views \- camera.c}
+\smvinput{camera.c}
+\subsection{Skybox - skybox.c}
+\smvinput{skybox.c}
+
+\section{Compression - Smokezip}
+\subsection{3d Smoke}
+\szipinput{CNV3dsmoke.c}
+\subsection{Boundary}
+\szipinput{CNVboundary.c}
+\subsection{Iso-surface}
+\szipinput{CNViso.c}
+\subsection{Slice}
+\szipinput{CNVslice.c}
+\subsection{File Input}
+\szipinput{readfiles.c}
+
+
+\subsection{Sphere Point Distribution}
+\szipinput{csphere.c}
+\szipinput{csphere.h}
+\subsection{Memory Allocation}
+\szipinput{dmalloc.c}
+\szipinput{MALLOC.h}
+\subsection{GZIP File I/O}
+\szipinput{egzstdio.c}
+\szipinput{egzstdio.h}
+\subsection{Debug Assertions}
+\szipinput{assert.c}
+\szipinput{ASSERT.h}
+\subsection{Misc}
+\szipinput{endian.c}
+\szipinput{utilities.c}
+\szipinput{stats.c}
+
+\subsection{Compiler Settings}
+\szipinput{options.h}
+\subsection{Smokezip Header}
+\szipinput{svzip.h}
+
+
+\section{External Access - sv\_api.c}
+\smvinput{svapi.c}
+
+\section{Dialogs}
+\subsection{Smoke3D Parameters - glui\_3dsmoke.cpp}
+\smvinput{glui3dsmoke.cpp}
+
+\subsection{Editing Blockages - glui\_blockedit.cpp, objectedit.c, parseobst.c}
+\smvinput{gluiblockedit.cpp}
+\newpage
+\smvinput{objectedit.c}
+\smvinput{parseobst.c}
+
+\subsection{Setting Bounds - glui\_bounds.cpp}
+\smvinput{gluibounds.cpp}
+
+\subsection{Clipping Parameters - glui\_clip.cpp}
+\smvinput{gluiclip.cpp}
+
+\subsection{Color Bar - glui\_colorbar.cpp}
+\smvinput{gluicolorbar.cpp}
+
+\subsection{Labels - glui\_labels.cpp}
+\smvinput{gluilabels.cpp}
+
+\subsection{Moving the Scene - glui\_motion.cpp}
+\smvinput{gluimotion.cpp}
+
+\subsection{Stereo Parameters - glui\_stereo.cpp}
+\smvinput{gluistereo.cpp}
+
+\subsection{Tour - glui\_tour.cpp}
+\smvinput{gluitour.cpp}
+
+\subsection{Trainer - glui\_trainer.cpp}
+\smvinput{gluitrainer.cpp}
+
+\section{Data}
+\subsection{Sizing the Data - getsizes.f90}
+\smvinput{getsizes.f90}
+\subsection{Reading the Data - getdata.f90}
+\smvinput{getdata.f90}
+
+\section{Contours}
+\subsection{2D}
+\smvinput{scontour2d.c - scontour2d.c}
+
+\section{Menus - menus.h}
+\smvinput{menus.h}
+
+\section{Rendering - renderfile.c}
+\smvinput{renderfile.c}
+
+\bibliography{math,forney,nfpa}
+
+\end{document}
