@@ -2060,7 +2060,7 @@ void drawslice_terrain(const slice *sd){
   meshi = meshinfo + sd->blocknumber;
   terri = meshi->terrain;
   if(terri==NULL)return;
-  znode = terri->znode;
+  znode = terri->znode_scaled;
   nxcell = terri->nx;
 
   xplt=meshi->xplt;
@@ -2098,15 +2098,16 @@ void drawslice_terrain(const slice *sd){
        float ymid, rmid;
 
        n++; n2++; 
-       if(show_slice_in_obst==0&&iblank_z[ijk(i,j,sd->ks1)]!=2)continue;
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
        r33 = (float)sd->slicepoint[n2+1]/255.0;
+
        z11 = constval + znode[ijnode2(i,j)];
        z31 = constval + znode[ijnode2(i+1,j)];
        z13 = constval + znode[ijnode2(i,j+1)];
        z33 = constval + znode[ijnode2(i+1,j+1)];
+
        zmid = (z11 + z31 + z13 + z33)/4.0;
        rmid = (r11+r31+r13+r33)/4.0;
 
@@ -2125,7 +2126,7 @@ void drawslice_terrain(const slice *sd){
        glTexCoord1f(rmid); glVertex3f(xmid, ymid, zmid);
 
        glTexCoord1f( r33); glVertex3f(  x3,  y3, z33);
-       glTexCoord1f( r13); glVertex3f(  x1,  y3, z31);
+       glTexCoord1f( r13); glVertex3f(  x1,  y3, z13);
        glTexCoord1f(rmid); glVertex3f(xmid,ymid, zmid);
 
        glTexCoord1f( r13); glVertex3f(  x1,  y3,  z13);

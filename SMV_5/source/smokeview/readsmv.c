@@ -4870,13 +4870,15 @@ typedef struct {
     }
   }
   if(nterraininfo>0){
-    for(i=0;i<nmeshes;i++){
+    int imesh;
+
+    for(imesh=0;imesh<nmeshes;imesh++){
       mesh *meshi;
       terraindata *terri;
       float *znode, *znode_scaled;
       int i, j;
 
-      meshi=meshinfo + i;
+      meshi=meshinfo + imesh;
       terri = meshi->terrain;
       if(terri==NULL)continue;
       znode = terri->znode;
