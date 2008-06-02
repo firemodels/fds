@@ -56,8 +56,9 @@ REAL(EB) :: YFU0,A,ETRM,YCOMIN,YO2W,YO20,YCO0,Y_SUM_W,&
             Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,&
             F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,Z_2,RHOX, &
             X_FU,X_O,X_FU_0,X_O_0,X_FU_S,X_O_S,X_FU_N,X_O_N,X_O_MIN,X_FU_MIN,COTOO2, &
-            Y_F_MAX,TMP_F_MIN,Y_F_CORR,Z2_MIN,WGT,OMWGT
+            Y_F_MAX,TMP_F_MIN,Y_F_CORR,Z2_MIN,WGT,OMWGT,MF_TOTAL,YY_SUM
 REAL(EB), PARAMETER :: YFUMIN=1.E-10_EB,YO2MIN=1.E-10_EB
+REAL(EB) :: SURFACE_MASS_FRACTION(0:N_SPECIES)
 INTEGER :: NODETS,N,I,J,K,II,JJ,KK,IOR,IC,IW,IWA(-3:3)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: YO2Z,QT,R_SUM_DILUENTS,MIX_TIME
 !LOGICAL, POINTER, DIMENSION(:,:,:) :: IGNITE
@@ -125,7 +126,8 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN  ! Combustion without CO formation and
                   END SELECT
 
                   IW = WALL_INDEX(IC,IOR)
-                  IF (IW==0 .OR. BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                  IF (IW==0) CYCLE SEARCH_LOOP
+                  IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
                      IF (YO2Z(II,JJ,KK)>Y_O2_MAX) THEN
                         Y_O2_MAX = YO2Z(II,JJ,KK)
                         TMP_MIN  = TMP(II,JJ,KK)
@@ -134,8 +136,46 @@ PRODUCE_CO: IF (.NOT. CO_PRODUCTION) THEN  ! Combustion without CO formation and
                         Y_F_MAX   = YY(II,JJ,KK,I_FUEL)
                         TMP_F_MIN = TMP(II,JJ,KK)
                      ENDIF
+                  ELSEIF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
+                     IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX) THEN
+                        IF (ANY(SURFACE(IJKW(5,IW))%MASS_FLUX > 0._EB)) THEN
+                           SURFACE_MASS_FRACTION(0:N_SPECIES) = SURFACE(IJKW(5,IW))%MASS_FLUX
+                           MF_TOTAL = SUM(SURFACE_MASS_FRACTION)
+                           YY_SUM = 0._EB
+                           DO N = 1, N_SPECIES
+                              IF(SPECIES(N)%MODE==GAS_SPECIES) YY_SUM = YY_SUM + SURFACE_MASS_FRACTION(N)
+                           ENDDO
+                           SURFACE_MASS_FRACTION = SURFACE_MASS_FRACTION / MF_TOTAL
+                           YY_SUM = YY_SUM / MF_TOTAL
+                           CALL GET_MASS_FRACTION(SURFACE_MASS_FRACTION(I_FUEL),Z_2, &
+                                                  SURFACE_MASS_FRACTION(I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)  
+                           IF (SURFACE_MASS_FRACTION(I_FUEL)>Y_F_MAX) THEN
+                              Y_F_MAX = SURFACE_MASS_FRACTION(I_FUEL)
+                              TMP_F_MIN = TMP_F(IW)
+                           ENDIF
+                           IF (YO2W>Y_O2_MAX) THEN
+                              Y_O2_MAX = YO2W
+                              TMP_F_MIN = TMP_F(IW)
+                           ENDIF                           
+                        ENDIF
+                     ELSEIF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX==SPECIFIED_MASS_FRACTION) THEN
+                        SURFACE_MASS_FRACTION(0:N_SPECIES) = SURFACE(IJKW(5,IW))%MASS_FRACTION
+                        YY_SUM = 0._EB
+                        DO N = 1, N_SPECIES
+                           IF(SPECIES(N)%MODE==GAS_SPECIES) YY_SUM = YY_SUM + SURFACE_MASS_FRACTION(N)
+                        ENDDO
+                        CALL GET_MASS_FRACTION(SURFACE_MASS_FRACTION(I_FUEL),Z_2, &
+                                               SURFACE_MASS_FRACTION(I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)  
+                        IF (SURFACE_MASS_FRACTION(I_FUEL)>Y_F_MAX) THEN
+                           Y_F_MAX = SURFACE_MASS_FRACTION(I_FUEL)
+                           TMP_F_MIN = TMP_F(IW)
+                        ENDIF
+                        IF (YO2W>Y_O2_MAX) THEN
+                           Y_O2_MAX = YO2W
+                           TMP_F_MIN = TMP_F(IW)
+                        ENDIF                           
+                     ENDIF
                   ENDIF
-
                ENDDO SEARCH_LOOP
 
                ! Evaluate empirical extinction criteria
@@ -213,182 +253,78 @@ ELSE PRODUCE_CO  ! Combustion with suppression and CO production
             TMP_F_MIN = TMP(I,J,K)
             !Check neighboring cells for fuel and oxygen
             !X direction
-            IF (IWA(-1)==0) THEN
-               IF (YO2Z(I-1,J,K)>Y_O2_MAX) THEN
-                  Y_O2_MAX = YO2Z(I-1,J,K)
-                  TMP_MIN = TMP(I-1,J,K)
-               ENDIF
-               IF (YY(I-1,J,K,I_FUEL)>Y_F_MAX) THEN
-                  Y_F_MAX = YY(I-1,J,K,I_FUEL)
-                  TMP_F_MIN = TMP(I-1,J,K)
-               ENDIF
-            ELSE
-               IW = IWA(-1)
-               IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN
-                  Y_SUM_W = 0._EB           
-                  DO N=1,N_SPECIES
-                     IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                        Y_SUM_W = Y_SUM_W + YY_W(IW,N)
+            
+            SEARCH_LOOP2: DO IOR=-3,3
+               II = I
+               JJ = J
+               KK = K
+               SELECT CASE(IOR)
+                  CASE(-1)
+                     II = I-1
+                  CASE( 1)
+                     II = I+1
+                  CASE(-2)
+                     JJ = J-1
+                  CASE( 2)
+                     JJ = J+1
+                  CASE(-3)
+                     KK = K-1
+                  CASE( 3)
+                     KK = K+1
+               END SELECT
+
+               IF (IW==0) CYCLE SEARCH_LOOP2
+               IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                  IF (YO2Z(II,JJ,KK)>Y_O2_MAX) THEN
+                     Y_O2_MAX = YO2Z(II,JJ,KK)
+                     TMP_MIN  = TMP(II,JJ,KK)
+                  ENDIF
+                  IF (YY(II,JJ,KK,I_FUEL)>Y_F_MAX) THEN
+                     Y_F_MAX   = YY(II,JJ,KK,I_FUEL)
+                     TMP_F_MIN = TMP(II,JJ,KK)
+                  ENDIF
+               ELSEIF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
+                  IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX) THEN
+                     IF (ANY(SURFACE(IJKW(5,IW))%MASS_FLUX > 0._EB)) THEN
+                        SURFACE_MASS_FRACTION(0:N_SPECIES) = SURFACE(IJKW(5,IW))%MASS_FLUX
+                        MF_TOTAL = SUM(SURFACE_MASS_FRACTION)
+                        YY_SUM = 0._EB
+                        DO N = 1, N_SPECIES
+                           IF(SPECIES(N)%MODE==GAS_SPECIES) YY_SUM = YY_SUM + SURFACE_MASS_FRACTION(N)
+                        ENDDO
+                        SURFACE_MASS_FRACTION = SURFACE_MASS_FRACTION / MF_TOTAL
+                        YY_SUM = YY_SUM / MF_TOTAL
+                        CALL GET_MASS_FRACTION(SURFACE_MASS_FRACTION(I_FUEL),SURFACE_MASS_FRACTION(I_PROG_CO), &
+                                                SURFACE_MASS_FRACTION(I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)  
+                        IF (SURFACE_MASS_FRACTION(I_FUEL)>Y_F_MAX) THEN
+                           Y_F_MAX = SURFACE_MASS_FRACTION(I_FUEL)
+                           TMP_F_MIN = TMP_F(IW)
+                        ENDIF
+                        IF (YO2W>Y_O2_MAX) THEN
+                           Y_O2_MAX = YO2W
+                           TMP_F_MIN = TMP_F(IW)
+                        ENDIF                           
                      ENDIF
-                  ENDDO
-                  CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                  IF (YO2W>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2W
-                     TMP_MIN = TMP_F(IW)
-                  ENDIF
-                  IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                     Y_F_MAX = YY_W(IW,I_FUEL)
-                     TMP_F_MIN = TMP_F(IW)
-                  ENDIF
-               ENDIF
-            ENDIF
-            IF (IWA(1)==0) THEN
-               IF (YO2Z(I+1,J,K)>Y_O2_MAX) THEN
-                  Y_O2_MAX = YO2Z(I+1,J,K)
-                  TMP_MIN = TMP(I+1,J,K)
-               ENDIF
-               IF (YY(I+1,J,K,I_FUEL)>Y_F_MAX) THEN
-                  Y_F_MAX = YY(I+1,J,K,I_FUEL)
-                  TMP_F_MIN = TMP(I+1,J,K)
-               ENDIF
-            ELSE
-               IW = IWA(1)
-               IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
-                  Y_SUM_W = 0._EB           
-                  DO N=1,N_SPECIES
-                     IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                        Y_SUM_W = Y_SUM_W + YY_W(IW,N)
+                  ELSEIF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX==SPECIFIED_MASS_FRACTION) THEN
+                     SURFACE_MASS_FRACTION(0:N_SPECIES) = SURFACE(IJKW(5,IW))%MASS_FRACTION
+                     YY_SUM = 0._EB
+                     DO N = 1, N_SPECIES
+                        IF(SPECIES(N)%MODE==GAS_SPECIES) YY_SUM = YY_SUM + SURFACE_MASS_FRACTION(N)
+                     ENDDO
+                     CALL GET_MASS_FRACTION(SURFACE_MASS_FRACTION(I_FUEL),SURFACE_MASS_FRACTION(I_PROG_CO), &
+                                             SURFACE_MASS_FRACTION(I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)  
+                     IF (SURFACE_MASS_FRACTION(I_FUEL)>Y_F_MAX) THEN
+                        Y_F_MAX = SURFACE_MASS_FRACTION(I_FUEL)
+                        TMP_F_MIN = TMP_F(IW)
                      ENDIF
-                  ENDDO
-                  CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                  IF (YO2W>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2W
-                     TMP_MIN = TMP_F(IW)
-                  ENDIF
-                  IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                     Y_F_MAX = YY_W(IW,I_FUEL)
-                     TMP_F_MIN = TMP_F(IW)
+                     IF (YO2W>Y_O2_MAX) THEN
+                        Y_O2_MAX = YO2W
+                        TMP_F_MIN = TMP_F(IW)
+                     ENDIF                           
                   ENDIF
                ENDIF
-            ENDIF
-            !Y direction            
-            IF (IWA(-2)==0) THEN
-               IF (YO2Z(I,J-1,K)>Y_O2_MAX) THEN
-                  Y_O2_MAX = YO2Z(I,J-1,K)
-                  TMP_MIN = TMP(I,J-1,K)
-               ENDIF
-               IF (YY(I,J-1,K,I_FUEL)>Y_F_MAX) THEN
-                  Y_F_MAX = YY(I,J-1,K,I_FUEL)
-                  TMP_F_MIN = TMP(I,J-1,K)
-               ENDIF
-            ELSE
-               IW = IWA(-2)
-               IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
-                  Y_SUM_W = 0._EB           
-                  DO N=1,N_SPECIES
-                     IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                        Y_SUM_W = Y_SUM_W + YY_W(IW,N)
-                     ENDIF
-                  ENDDO
-                  CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                  IF (YO2W>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2W
-                     TMP_MIN = TMP_F(IW)
-                  ENDIF
-                  IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                     Y_F_MAX = YY_W(IW,I_FUEL)
-                     TMP_F_MIN = TMP_F(IW)
-                  ENDIF
-               ENDIF
-            ENDIF
-            IF (IWA(2)==0) THEN
-               IF (YO2Z(I,J+1,K)>Y_O2_MAX) THEN
-                  Y_O2_MAX = YO2Z(I,J+1,K)
-                  TMP_MIN = TMP(I,J+1,K)
-               ENDIF
-               IF (YY(I,J+1,K,I_FUEL)>Y_F_MAX) THEN
-                  Y_F_MAX = YY(I,J+1,K,I_FUEL)
-                  TMP_F_MIN = TMP(I,J+1,K)
-               ENDIF
-            ELSE
-               IW = IWA(2)
-               IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
-                  Y_SUM_W = 0._EB           
-                  DO N=1,N_SPECIES
-                     IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                        Y_SUM_W = Y_SUM_W + YY_W(IW,N)
-                     ENDIF
-                  ENDDO
-                  CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                  IF (YO2W>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2W
-                     TMP_MIN = TMP_F(IW)
-                  ENDIF
-                  IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                     Y_F_MAX = YY_W(IW,I_FUEL)
-                     TMP_F_MIN = TMP_F(IW)
-                  ENDIF
-               ENDIF
-            ENDIF       
-            !Z direction
-            IF (IWA(-3)==0) THEN
-               IF (YO2Z(I,J,K-1)>Y_O2_MAX) THEN
-                  Y_O2_MAX = YO2Z(I,J,K-1)
-                  TMP_MIN = TMP(I,J,K-1)
-               ENDIF
-               IF (YY(I,J,K-1,I_FUEL)>Y_F_MAX) THEN
-                  Y_F_MAX = YY(I,J,K-1,I_FUEL)
-                  TMP_F_MIN = TMP(I,J,K-1)
-               ENDIF
-            ELSE
-               IW = IWA(-3)
-               IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN               
-                  Y_SUM_W = 0._EB           
-                  DO N=1,N_SPECIES
-                     IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                        Y_SUM_W = Y_SUM_W + YY_W(IW,N)
-                     ENDIF
-                  ENDDO
-                  CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                  IF (YO2W>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2W
-                     TMP_MIN = TMP_F(IW)
-                  ENDIF
-                  IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                     Y_F_MAX = YY_W(IW,I_FUEL)
-                     TMP_F_MIN = TMP_F(IW)
-                  ENDIF
-               ENDIF
-            ENDIF
-            IF (IWA(3)==0) THEN
-               IF (YO2Z(I,J,K+1)>Y_O2_MAX) THEN
-                  Y_O2_MAX = YO2Z(I,J,K+1)
-                  TMP_MIN = TMP(I,J,K+1)
-               ENDIF
-               IF (YY(I,J,K+1,I_FUEL)>Y_F_MAX) THEN
-                  Y_F_MAX = YY(I,J,K+1,I_FUEL)
-                  TMP_F_MIN = TMP(I,J,K+1)
-               ENDIF
-            ELSE
-               IW = IWA(3)
-               IF (SURFACE(IJKW(5,IW))%SPECIES_BC_INDEX/=NO_MASS_FLUX) THEN
-                  Y_SUM_W = 0._EB           
-                  DO N=1,N_SPECIES
-                     IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-                        Y_SUM_W = Y_SUM_W + YY_W(IW,N)
-                     ENDIF
-                  ENDDO
-                  CALL GET_MASS_FRACTION(YY_W(IW,I_FUEL),YY_W(IW,I_PROG_CO),YY_W(IW,I_PROG_F),O2_INDEX,Y_SUM_W,YO2W)   
-                  IF (YO2W>Y_O2_MAX) THEN
-                     Y_O2_MAX = YO2W
-                     TMP_MIN = TMP_F(IW)
-                  ENDIF
-                  IF (MAX(0._EB,MIN(1._EB,YY_W(IW,I_FUEL)))>Y_F_MAX) THEN
-                     Y_F_MAX = YY_W(IW,I_FUEL)
-                     TMP_F_MIN = TMP_F(IW)
-                  ENDIF
-               ENDIF
-            ENDIF
+            ENDDO SEARCH_LOOP2
+               
             Y_O2_CORR = RN%Y_O2_LL*(RN%CRIT_FLAME_TMP-TMP_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
             Y_F_CORR  = RN%Y_F_LFL*(RN%CRIT_FLAME_TMP-TMP_F_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
             IF (Y_O2_MAX < Y_O2_CORR .OR. Y_F_MAX*RN%Y_F_INLET < Y_F_CORR) CYCLE ILOOPY
