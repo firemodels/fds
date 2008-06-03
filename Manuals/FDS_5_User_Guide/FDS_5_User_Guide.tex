@@ -124,6 +124,19 @@
 \newcommand{\NU}{\hbox{Nu}}
 \newcommand{\SC}{\hbox{Sc}}
 \newcommand{\WE}{\hbox{We}}
+\newcommand{\COTWO}{{\tiny \hbox{CO}_2}}
+\newcommand{\HTWOO}{{\tiny \hbox{H}_2\hbox{O}}}
+\newcommand{\OTWO}{{\tiny \hbox{O}_2}}
+\newcommand{\NTWO}{{\tiny \hbox{N}_2}}
+\newcommand{\CO}{{\tiny \hbox{CO}}}
+\newcommand{\F}{{\tiny \hbox{F}}}
+\newcommand{\C}{{\tiny \hbox{C}}}
+\newcommand{\Hy}{{\tiny \hbox{H}}}
+\newcommand{\So}{{\tiny \hbox{S}}}
+\newcommand{\M}{{\tiny \hbox{M}}}
+\newcommand{\xx}{{\tiny \hbox{x}}}
+\newcommand{\yy}{{\tiny \hbox{y}}}
+\newcommand{\zz}{{\tiny \hbox{z}}}
 
 \newcommand{\figheight}{1.5in}
 \newcommand{\figwidth}{3.333333in}
@@ -305,6 +318,7 @@ Jason Floyd \\
 \vspace{.25in}
 
 \flushright{\today \\
+FDS Version 5.2 \\
 $SVN Repository$~$Revision$}
 
 \vfill
@@ -359,8 +373,10 @@ Mail: Stop SSOP, Washington, DC 20402-0001 }
 
 \chapter{Preface}
 
-This guide describes how to use the Fire Dynamics Simulator (FDS), Version 5.
-It does not provide the background theory. A companion document, called the FDS
+This Guide describes how to use the Fire Dynamics Simulator (FDS). Most of the content pertains to version 5, although some features
+have been added since the release of FDS 5.0. The current version is 5.2.
+
+Note that this Guide does not provide the background theory for FDS. A companion document, called the FDS
 Technical Reference Guide~\cite{FDS_Tech_Guide_5}, contains details about the governing
 equations and numerical methods.
 The FDS User's Guide contains limited information on how to operate Smokeview, the companion
@@ -3071,7 +3087,7 @@ interior of a tunnel, and a wind is blowing at one of the portals that affects t
 The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cal H$ is specified as
 \begin{equationarray}{lclcl}
 {\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 &\quad& \mbox{(outgoing)}  \nonumber\\
-{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty &\quad& \mbox{(incoming)} 
+{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty &\quad& \mbox{(incoming)}
 \end{equationarray}
 where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary. The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
 need to ramp the pressure up or down starting at zero, like you do for various other ramps.
@@ -3669,7 +3685,7 @@ dozens of {\em solid phase} reactions. To ensure that the fuel vapors from
 different materials combust to produce the proper amount of energy, it is very important to specify a {\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss rate
 of fuel gases is automatically adjusted so that the effective mass loss rate multiplied by the single, global, gas phase heat of combustion produces the expected heat release rate.
 \index{MATL!HEAT\_OF\_COMBUSTION}.  If, for example, the {\ct HEAT\_OF\_COMBUSTION} specified on the {\ct REAC} line is twice that
-specified on the {\ct MATL} line, the mass of contained within wall cell will be decremented by that determined by the 
+specified on the {\ct MATL} line, the mass of contained within wall cell will be decremented by that determined by the
 pyrolysis model, but the mass added to gas phase would be reduced by 50 \%.
 
 Several other examples of solid phase reactions can be found in various Verification examples. See Sections~\ref{thermoplastic} and \ref{charring_solid}.
@@ -4277,6 +4293,8 @@ In both cases, the mixture fraction combustion model is used. In fact, the mere 
 parameters automatically invokes the mixture fraction model. Do not specify explicitly gas species like
 oxygen if you have also specified heat release rates or solid phase reaction rates.
 
+\subsection{The Basics}
+
 A single {\ct REAC} line is used with the mixture fraction model. If the {\ct REAC} line is not found in the input file, propane will
 be used as the surrogate fuel, and all burning rates will be adjusted accordingly.
 If you only specify the fire's heat release
@@ -4288,22 +4306,22 @@ specifying, at the very least, the basic stoichiometry via the {\ct REAC} line.
 Using the mixture fraction model, each reaction is assumed to be of the form:
 \be \mathrm{C_xH_yO_zN_vOther_w + \nu_{O_2} \; O_2 \rightarrow
     \nu_{CO_2} \; CO_2 + \nu_{H_2O} \; H_2O +
-    \nu_{CO}   \; CO   + \nu_{Soot} \; Soot + \nu_{N_2} \; N_2 + \nu_{Other} \; Other } \ee
+    \nu_{CO}   \; CO   + \nu_{soot} \; Soot + \nu_{N_2} \; N_2 + \nu_{Other} \; Other } \ee
 You need only specify the chemical formula of the fuel along with
 the yields of CO, soot, and H$_2$, and the amount of hydrogen in the soot, H$_{frac}$.
 For completeness you can specify the N$_2$ content of
 the fuel and the presence of other species. FDS will use that information internally to
 determine the amount of combustion products that are formed:
 \begin{eqnarray*}
-\nu_{O_2} &=& \nu_{CO_2} + \frac{\nu_{CO}}{2} + \frac{\nu_{H_2O}}{2} - \frac{\hbox{z}}{2} \\
-\nu_{CO_2} &=& \hbox{x} - \nu_{CO} - (1-H_{frac}) \nu_{soot}  \\
-\nu_{H_2O} &=& \frac{\hbox{y}}{2} - \frac{H_{frac}}{2} \nu_{soot} - \nu_{H_2} \\
-\nu_{CO}   &=& \frac{W_f}{W_{CO}} y_{CO} \\
-\nu_{H_2}  &=& \frac{W_f}{W_{H_2}} y_{H_2} \\
-\nu_{soot} &=& \frac{W_f}{W_S} y_s \\
-\nu_{N_2} &=& \frac{\hbox{v}}{2} \\
-\nu_{other} &=& w\\
-W_s &=& H_{frac} W_H + (1-H_{frac}) W_C
+\mathrm{ \nu_{O_2}  }    &=& \mathrm{ \nu_{CO_2} + \frac{\nu_{CO}}{2} + \frac{\nu_{H_2O}}{2} - \frac{\hbox{z}}{2}  } \\
+\mathrm{ \nu_{CO_2} }    &=& \mathrm{ \hbox{x} - \nu_{CO} - (1-H_{frac}) \nu_{soot} }  \\
+\mathrm{ \nu_{H_2O} }    &=& \mathrm{ \frac{\hbox{y}}{2} - \frac{H_{frac}}{2} \nu_{soot} - \nu_{H_2} } \\
+\mathrm{ \nu_{CO}   }    &=& \mathrm{ \frac{W_f}{W_{CO}} y_{CO} } \\
+\mathrm{ \nu_{H_2}  }    &=& \mathrm{ \frac{W_f}{W_{H_2}} y_{H_2} } \\
+\mathrm{ \nu_{soot} }    &=& \mathrm{ \frac{W_f}{W_s} y_s } \\
+\mathrm{ \nu_{N_2}  }    &=& \mathrm{ \frac{\hbox{v}}{2} } \\
+\mathrm{ \nu_{other}}    &=& \mathrm{ w } \\
+\mathrm{ W_s        }    &=& \mathrm{ H_{frac} \, W_H + (1-H_{frac}) \, W_C }
 \end{eqnarray*}
 The following parameters may be prescribed on the {\ct REAC} line.
 Note that the various {\ct YIELD}s are for well-ventilated, post-flame conditions. There are options to
@@ -4381,20 +4399,10 @@ A few sample {\ct REAC} lines are given here. The values are for demonstration o
 
 
 
-\subsection{Important Issues Related to the Mixture Fraction Models}
+\subsection{Special Topic: Heat of Combustion}
 \label{info:combustion}
 
-This section explains the various approximations that
-affect both the gas phase parameters ({\ct REAC} line) and the
-solid (or liquid) phase parameters ({\ct SURF} line). These
-approximations are needed either to compensate for less than
-desirable mesh resolution or limitations of the mixture fraction
-combustion model.
-
-
-\vspace{\baselineskip}
-\noindent
-{\bf Heat of Combustion:} By default the {\ct EPUMO2} value is combined with
+By default the {\ct EPUMO2} value is combined with
 the stoichiometric parameters listed
 on the {\ct REAC} line to compute the heat of combustion.  Specifying the
 {\ct HEAT\_OF\_COMBUSTION} will override that computation.
@@ -4413,11 +4421,8 @@ differs from the global reaction, the {\ct HEAT\_OF\_COMBUSTION} is
 used to ensure that an equivalent amount of fuel is injected into the
 flow domain from the burning object.
 
+\subsection{Special Topic: Flame Extinction}
 
-
-\vspace{\baselineskip}
-\noindent
-{\bf Gas Phase Fire Suppression:} \index{Flame Extinction}
 Modeling suppression of a fire due to the introduction of a suppression
 agent like CO$_2$ or water mist, or due to the exhaustion of oxygen
 within a compartment is challenging because
@@ -4435,9 +4440,9 @@ The default values are 0.15 (volume fraction) and 1427~$^\circ$C, respectively.
 To eliminate any gas phase suppression, set {\ct X\_O2\_LL} to 0. To turn off suppression completely,
 set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
 
-\vspace{\baselineskip}
-\noindent
-{\bf CO Production:} \index{CO Production}
+
+\subsection{Special Topic: CO Production} 
+\index{CO Production}
 An algorithm has been implemented that computes the combustion as a two step reaction that
 predicts the formation and destruction of CO.  The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
 contains more details about how the mechanism works. This algorithm is used when
@@ -4455,6 +4460,33 @@ increase run times and memory usage accordingly.  If the simulation you are
 performing will not result in an under-ventilated fire, then there will be of
 little if any benefit to enabling the CO production algorithm.
 \end{warning}
+
+
+\subsection{Special Topic: Turbulent Combustion} 
+\label{info:turbulent_combustion}
+
+Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate of fuel and oxygen is not based on the diffusion of
+fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules are invoked by FDS to determine the rate of mixing of fuel and oxygen within
+a given mesh cell at a given time step. This section provides a brief explanation of these rules and the parameters that control them.
+
+In an LES simulation, the heat release rate is computed as
+\be \dq''' = \frac{ \max \left( \rho Y_\F , s \rho Y_\OTWO \right) }{\tau} \, \Delta H  \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }   \ee
+Here, $\tau$ is a mixing time scale~\cite{Raman:CF} given by
+\be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \ee
+The coefficient, $C$, is taken as 0.1 in FDS by default, based on comparisons to various flame height correlations. It is given by
+{\ct MIX\_TIME\_FACTOR} on the {\ct REAC} line. If you do not want to use this model, set {\ct EDDY\_BREAKUP=.FALSE.} on the {\ct REAC} line, in which
+case $\tau$ becomes the time step, $\dt$.
+
+There are two additional bounds on the local heat release rate per unit volume. One is based on an empirically determined maximum heat release rate
+per unit area of flame sheet:
+\be \dq_{\max,1}''' = \frac{ \dq_{\max}''}{(\dx \, \dy \, \dz)^\ot }  \ee 
+The parameter $\dq_{\max}''$ is called {\ct HRRPUA\_SHEET} on the {\ct REAC} line and its default value is 200~kW/m$^2$.
+The second bound is based on an empirical estimate of the average volumetric heat release rate of a fire.
+\be \dq_{\max,2}''' = \frac{ \overline{\dq_{\max}'''} - (1-\dt/\tau') \; \overline{\dq'''} }{\dt/\tau'} \ee
+Orloff and De Ris~\cite{Orloff:19th_Symposium} suggest a value of 1200~kW/m$^3$, and FDS uses by default a value of 2000~kW/m$^3$ as an upper bound ({\ct HRRPUV\_AVERAGE} on the
+{\ct REAC} line).
+Here, $\tau'$ is an averaging time that should be larger than the pulsation period of the fire. It is given by
+{\ct HRRPUV\_AVERAGE\_TIME} on the {\ct REAC} line. It is 1~s by default.
 
 
 
@@ -4627,7 +4659,7 @@ cannot participate in the reaction.
 \end{enumerate}
 
 
-
+\clearpage
 
 \section{Radiation Transport: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
 \label{info:RADI}\index{RADI}
@@ -7541,36 +7573,40 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\ \hline \hline
-{\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)      &   cm$^3$/mol/s    &     \\ \hline
-{\ct C}                                   & Real        & Carbon atoms in fuel                      &                   & 3    \\ \hline
-{\ct CO\_YIELD}                           & Real        & Fraction of CO from the fuel              & kg/kg             & 0        \\ \hline
-{\ct \tiny CRITICAL\_FLAME\_TEMPERATURE}  & Real        & Suppression criterion                     &   $^\circ$C       & 1427    \\ \hline
-{\ct E}                                   & Real        & Activation Energy (Finite Rate)           &   kJ/kmol         &     \\ \hline
-{\ct EPUMO2}                              & Real        & Energy per Unit Mass Oxygen               &   kJ/kg           & 13100    \\ \hline
-{\ct FUEL}                                & Character   & Name of Fuel (Finite Rate)                &                   &     \\ \hline
-{\ct FYI}                                 & Character   & Comment String (has no effect)            &                   &     \\ \hline
-{\ct H}                                   & Real        & Hydrogen atoms in fuel                    &                   & 8    \\ \hline
-{\ct H2\_YIELD}                           & Real        & Fraction of H$_2$ from the fuel           & kg/kg             & 0        \\ \hline
-{\ct HEAT\_OF\_COMBUSTION}                & Real        & Energy per Unit Mass Fuel                 & kJ/kg             &         \\ \hline
-{\ct HRRPUA\_SHEET}                       & Real        & Upper limit on flame HRR                  & kW/m$^2$          & 200.    \\ \hline
-{\ct ID}                                  & Character   & Identifier                                &                   &     \\ \hline
-{\ct IDEAL}                               & Logical     & Adjust for minor product yields           &                   & {\ct .FALSE.}    \\ \hline
-{\ct \tiny MASS\_EXTINCTION\_COEFFICIENT} & Real        & Visibility parameter                      &  m$^2$/kg         & 8700.    \\ \hline
-{\ct MAXIMUM\_VISIBILITY}                 & Real        & Visibility parameter                      &  m                &     30   \\ \hline
-{\ct MW\_OTHER}                           & Real        & Molecular Weight of {\ct OTHER}           &  g/mol            & 28      \\ \hline
-{\ct N}                                   & Real        & Nitrogen atoms in the fuel                &                   & 0    \\ \hline
-{\ct N\_S(N)}                             & Real        & Arrhenius Exponents (Finite Rate)         &                   &     \\ \hline
-{\ct NU(N)}                               & Real        & Reaction stoichiometry (Finite Rate)      &                   &     \\ \hline
-{\ct O}                                   & Real        & Oxygen atoms in the fuel                  &                   & 0    \\ \hline
-{\ct OTHER}                               & Real        & Other atoms in the fuel                   &                   & 0    \\ \hline
-{\ct OXIDIZER}                            & Character   & Name of Oxidizer (Finite Rate)            &                   &         \\ \hline
-{\ct SOOT\_YIELD}                         & Real        & Fraction of soot from the fuel            & kg/kg             & 0.01    \\ \hline
-{\ct SOOT\_H\_FRACTION}                   & Real        & Atom fraction of hydrogen in soot         &                   & 0.1    \\ \hline
-{\ct VISIBILITY\_FACTOR}                  & Real        & Visibility parameter                      &                   &     3   \\ \hline
-{\ct X\_O2\_LL}                           & Real        & Lower Oxygen Limit                        &  mol/mol          & 0.15    \\ \hline
-{\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner              &  kg/kg            & 1.0     \\ \hline
-{\ct Y\_F\_LFL}                           & Real        & Lower Fuel limit (mass fraction)          &  kg/kg            & 0.0     \\ \hline
-{\ct Y\_O2\_INFTY}                        & Real        & Ambient Oxygen Mass Frac.                 &  kg/kg            & 0.23    \\ \hline
+{\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)          &   cm$^3$/mol/s    &     \\ \hline
+{\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
+{\ct CO\_YIELD}                           & Real        & Fraction of CO from the fuel                  & kg/kg             & 0        \\ \hline
+{\ct \tiny CRITICAL\_FLAME\_TEMPERATURE}  & Real        & Suppression criterion                         &   $^\circ$C       & 1427    \\ \hline
+{\ct E}                                   & Real        & Activation Energy (Finite Rate)               &   kJ/kmol         &     \\ \hline
+{\ct EDDY\_BREAKUP}                       & Logical     & See Section~\ref{info:turbulent_combustion}   &                   & {\ct .TRUE.}    \\ \hline
+{\ct EPUMO2}                              & Real        & Energy per Unit Mass Oxygen                   &   kJ/kg           & 13100    \\ \hline
+{\ct FUEL}                                & Character   & Name of Fuel (Finite Rate)                    &                   &     \\ \hline
+{\ct FYI}                                 & Character   & Comment String (has no effect)                &                   &     \\ \hline
+{\ct H}                                   & Real        & Hydrogen atoms in fuel                        &                   & 8    \\ \hline
+{\ct H2\_YIELD}                           & Real        & Fraction of H$_2$ from the fuel               & kg/kg             & 0        \\ \hline
+{\ct HEAT\_OF\_COMBUSTION}                & Real        & Energy per Unit Mass Fuel                     & kJ/kg             &         \\ \hline
+{\ct HRRPUA\_SHEET}                       & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^2$          & 200.    \\ \hline
+{\ct HRRPUV\_AVERAGE}                     & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^3$          & 2000.    \\ \hline
+{\ct HRRPUV\_AVERAGE\_TIME}               & Real        & See Section~\ref{info:turbulent_combustion}   & s                 & 1.    \\ \hline
+{\ct ID}                                  & Character   & Identifier                                    &                   &     \\ \hline
+{\ct IDEAL}                               & Logical     & Adjust for minor product yields               &                   & {\ct .FALSE.}    \\ \hline
+{\ct \tiny MASS\_EXTINCTION\_COEFFICIENT} & Real        & Visibility parameter                          &  m$^2$/kg         & 8700.    \\ \hline
+{\ct MAXIMUM\_VISIBILITY}                 & Real        & Visibility parameter                          &  m                &     30   \\ \hline
+{\ct MIX\_TIME\_FACTOR}                   & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 0.1    \\ \hline
+{\ct MW\_OTHER}                           & Real        & Molecular Weight of {\ct OTHER}               &  g/mol            & 28      \\ \hline
+{\ct N}                                   & Real        & Nitrogen atoms in the fuel                    &                   & 0    \\ \hline
+{\ct N\_S(N)}                             & Real        & Arrhenius Exponents (Finite Rate)             &                   &     \\ \hline
+{\ct NU(N)}                               & Real        & Reaction stoichiometry (Finite Rate)          &                   &     \\ \hline
+{\ct O}                                   & Real        & Oxygen atoms in the fuel                      &                   & 0    \\ \hline
+{\ct OTHER}                               & Real        & Other atoms in the fuel                       &                   & 0    \\ \hline
+{\ct OXIDIZER}                            & Character   & Name of Oxidizer (Finite Rate)                &                   &         \\ \hline
+{\ct SOOT\_YIELD}                         & Real        & Fraction of soot from the fuel                & kg/kg             & 0.01    \\ \hline
+{\ct SOOT\_H\_FRACTION}                   & Real        & Atom fraction of hydrogen in soot             &                   & 0.1    \\ \hline
+{\ct VISIBILITY\_FACTOR}                  & Real        & Visibility parameter                          &                   &     3   \\ \hline
+{\ct X\_O2\_LL}                           & Real        & Lower Oxygen Limit                            &  mol/mol          & 0.15    \\ \hline
+{\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner                  &  kg/kg            & 1.0     \\ \hline
+{\ct Y\_F\_LFL}                           & Real        & Lower Fuel limit (mass fraction)              &  kg/kg            & 0.0     \\ \hline
+{\ct Y\_O2\_INFTY}                        & Real        & Ambient Oxygen Mass Frac.                     &  kg/kg            & 0.23    \\ \hline
 \end{tabular*}
 \end{table}
 %NAMELIST /REAC/ E,BOF,HEAT_OF_COMBUSTION,FYI,FUEL,OXIDIZER,EPUMO2,ID, N_S,Y_O2_INFTY,Y_F_INLET,HRRPUA_SHEET,
