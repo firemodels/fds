@@ -312,8 +312,8 @@ degree from Purdue University in 1960 and a doctorate from the Massachusetts Ins
 formulated the original numerical scheme that evolved over 25 years into the current FDS solver.
 \item[Randall McDermott] joined the research staff of the Building and Fire Research Lab in 2008. He received a B.S. degree from the University of Tulsa in
 Chemical Engineering in 1994 and a doctorate at the University of Utah in 2005. His research interests include domain decomposition, Lagrangian particle methods, and
-adaptive mesh refinement. 
-\item[William (Ruddy) Mell] is an applied mathematician in BFRL. He holds a B.S. degree from the University of Minnesota (1994) and doctorate from the 
+adaptive mesh refinement.
+\item[William (Ruddy) Mell] is an applied mathematician in BFRL. He holds a B.S. degree from the University of Minnesota (1994) and doctorate from the
 University of Washington (1994). His research interests include the development of large eddy simulation methods and sub-models applicable to the
 physics of large fires in buildings, vegetation, and the wildland-urban interface.
 \end{description}
@@ -3348,7 +3348,7 @@ $u_{nx,jk}$ is the $x$ component of velocity at the boundary.  The overbars on $
 \be {\cal H}_{nx+1,jk} = 2 {\cal H}_{nx+\ha,jk} - {\cal H}_{nx,jk} \ee
 
 
-\subsection{Multiple Mesh Considerations (On-Going Research)}
+\subsection{Multiple Mesh Considerations}
 
 In this section we provide an overview of the ``pressure correction'' scheme used in FDS to enforce global volume conservation in multiple mesh (i.e. parallel) computations (a ``mesh'' refers to the computational domain which is mapped to an individual processor).  There are three critical components of the scheme which we discuss in further detail below and in Appendix \ref{app_pressure_correction}: (1) the averaging of the normal velocity component at a mesh interface, (2) the Dirichlet boundary value for the hydrodynamic pressure, and (3) the Neumann boundary condition for the pressure correction.  The term ``pressure correction'' actually best identifies only the third component of the scheme which is ultimately responsible for enforcing volume conservation from mesh to mesh (and thus globally).  However, the first two components of the scheme are perhaps even more important for maintaining stability of the solution.
 
@@ -3458,16 +3458,21 @@ variables one can determine the amount of fuel and oxygen present in a grid cell
 in a finite-rate computation to determine the heat release rate; however, for most computations, the
 grid resolution is too coarse to resolve the flame.  Thus, flame temperatures will not be realized and a
 finite-rate computation will not succeed.
-
 Instead, if any grid cell surrounding one containing both fuel and oxygen satisfies the ``Burn'' criteria depicted in Fig.~\ref{plotsupp},
 combustion is assumed to occur.  The heat release rate is computed as
-\be \dq''' = \min \left[ \frac{ \max \left( \rho Y_\F , s \rho Y_\OTWO \right) }{\dt} \, \Delta H \; , \; \dq_{\max}'''  \right]
-  \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }   \ee
-where $\dq_{\max}'''$ provides an upper bound of the volumetric heat release rate.
-It is an empirical parameter that is tied to the resolution of the
-underlying grid:
-\be \dq_{\max}''' = \frac{ \dq_{\max}''}{(\dx \dy \dz)^\ot }  \quad ; \quad  \dq_{\max}'' = 200 \; \; \hbox{kW/m}^2  \ee
-The 200~kW/m$^2$ value is a user-controlled parameter.  It is an estimate of the maximum heat release rate per unit area of flame sheet.
+\be \dq''' = \frac{ \max \left( \rho Y_\F , s \rho Y_\OTWO \right) }{\tau} \, \Delta H  \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }   \ee
+Here, $\tau$ is a mixing time scale~\cite{Raman:CF} given by
+\be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \ee
+The coefficient, $C$, is taken as 0.1 in FDS by default, based on comparisons to various flame height correlations.
+
+There are two additional bounds on the local heat release rate per unit volume. One is based on an empirically determined maximum heat release rate
+per unit area of flame sheet:
+\be \dq_{\max,1}''' = \frac{ \dq_{\max}''}{(\dx \, \dy \, \dz)^\ot }  \quad ; \quad  \dq_{\max}'' = 200 \; \; \hbox{kW/m}^2  \ee
+The second bound is based on an empirical estimate of the average volumetric heat release rate
+of a fire. Orloff and De Ris~\cite{Orloff:19th_Symposium} suggest a value of 1200~kW/m$^3$, and FDS uses by default a value of 2000~kW/m$^3$ as an upper bound.
+\be \dq_{\max,2}''' = \frac{ \overline{\dq_{\max}'''} - (1-\dt/\tau') \; \overline{\dq'''} }{\dt/\tau'} \quad ; \quad  \overline{\dq_{\max}'''}=2000 \; \; \hbox{kW/m}^3   \ee
+Here, $\tau'$ is an averaging time that should be larger than the pulsation period of the fire.\footnote{
+All of these parameters are accessible to the model user. See the FDS User's Guide~\cite{FDS_Users_Guide_5} for more details.}
 
 Once the heat release rate is computed, the mixture fraction variables are updated:
 \be {Z_1}^{n+1} = {Z_1}^n - \frac {\dq''' {\Delta t}}{\rho  \Delta H}  \quad ; \quad  {Z_2}^{n+1} =
