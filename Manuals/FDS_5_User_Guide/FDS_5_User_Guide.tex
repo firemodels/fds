@@ -4441,7 +4441,7 @@ To eliminate any gas phase suppression, set {\ct X\_O2\_LL} to 0. To turn off su
 set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
 
 
-\subsection{Special Topic: CO Production} 
+\subsection{Special Topic: CO Production}
 \index{CO Production}
 An algorithm has been implemented that computes the combustion as a two step reaction that
 predicts the formation and destruction of CO.  The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
@@ -4462,7 +4462,7 @@ little if any benefit to enabling the CO production algorithm.
 \end{warning}
 
 
-\subsection{Special Topic: Turbulent Combustion} 
+\subsection{Special Topic: Turbulent Combustion}
 \label{info:turbulent_combustion}
 
 Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate of fuel and oxygen is not based on the diffusion of
@@ -4479,7 +4479,7 @@ case $\tau$ becomes the time step, $\dt$.
 
 There are two additional bounds on the local heat release rate per unit volume. One is based on an empirically determined maximum heat release rate
 per unit area of flame sheet:
-\be \dq_{\max,1}''' = \frac{ \dq_{\max}''}{(\dx \, \dy \, \dz)^\ot }  \ee 
+\be \dq_{\max,1}''' = \frac{ \dq_{\max}''}{(\dx \, \dy \, \dz)^\ot }  \ee
 The parameter $\dq_{\max}''$ is called {\ct HRRPUA\_SHEET} on the {\ct REAC} line and its default value is 200~kW/m$^2$.
 The second bound is based on an empirical estimate of the average volumetric heat release rate of a fire.
 \be \dq_{\max,2}''' = \frac{ \overline{\dq_{\max}'''} - (1-\dt/\tau') \; \overline{\dq'''} }{\dt/\tau'} \ee
@@ -6834,6 +6834,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct ABSORPTION\_COEFFICIENT}                   & $\kappa$                                      & 1/m            & D,I,P,S      \\ \hline
 {\ct ADIABATIC\_SURFACE\_TEMPERATURE}           & See Section~\ref{info:AST}                    & $^\circ$C      & B,D          \\ \hline
 {\ct aspiration}                                & See Section~\ref{info:aspiration_detector}    & \%             & D            \\ \hline
+{\ct BACK\_WALL\_TEMPERATURE}                   & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING\_RATE}                             & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
 {\ct carbon dioxide}                            & $X_{CO_2}(Z)$                                 & mol/mol        & D,I,P,S      \\ \hline
 {\ct carbon monoxide}                           & $X_{CO}(Z)$                                   & mol/mol        & D,I,P,S      \\ \hline
