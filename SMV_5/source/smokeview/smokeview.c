@@ -1544,7 +1544,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         w->qslice = w->qslicedata + w->islice*w->nsliceii;
       }
       if(vd->volslice==1){
-        drawvvolslice(vd);
+        if(val->terrain==1){
+          drawvvolslice_terrain(vd);
+        }
+        else{
+          drawvvolslice(vd);
+        }
       }
       else{
         if(val->terrain==1){
