@@ -2347,6 +2347,285 @@ void drawvolslice_texture(const slice *sd){
 
 }
 
+/* ------------------ interp3dsliceval ------------------------ */
+
+float interp3dsliceval(unsigned char *data, float *zplt, int nz, int n0, float z){
+  int k1, k2;
+  int n1, n2;
+  float dz;
+  float val1, val2;
+  float dz1, dz2;
+  float z1, z2;
+  float val;
+
+  dz = zplt[1] - zplt[0];
+
+  k1 = (z-zplt[0])/dz;
+  if(k1<0)k1=0;
+  if(k1>nz-1)k1=nz-1;
+  k2 = k1 + 1;
+
+  val1 = data[n0+k1];
+  val2 = data[n0+k2];
+  z1 = zplt[k1];
+  z2 = zplt[k2];
+  val = ((z-z1)*val2 + (z2-z)*val1)/dz;
+  return val/255.0;
+}
+
+/* ------------------ drawvolslice_terrain ------------------------ */
+
+void drawvolslice_terrain(const slice *sd){
+  int i,j,k,n,n2;
+  float r11, r31, r13, r33;
+  float constval,x1,x3,yy1,y3,z1,z3;
+  int maxj;
+
+  float *xplt, *yplt, *zplt;
+  int ibar,jbar;
+  int nx,ny,nxy;
+  int *iblank_x, *iblank_y, *iblank_z;
+  terraindata *terri;
+  float *znode;
+  int nxcell;
+
+  mesh *meshi;
+
+  meshi = meshinfo + sd->blocknumber;
+
+  terri = meshi->terrain;
+  if(terri==NULL)return;
+  znode = terri->znode_scaled;
+  nxcell = terri->nx;
+
+  xplt=meshi->xplt;
+  yplt=meshi->yplt;
+  zplt=meshi->zplt;
+  ibar=meshi->ibar;
+  jbar=meshi->jbar;
+  iblank_x=meshi->iblank_x;
+  iblank_y=meshi->iblank_y;
+  iblank_z=meshi->iblank_z;
+  nx = ibar + 1;
+  ny = jbar + 1;
+  nxy = nx*ny;
+
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
+
+  if(transparentflag==1&&transparentflagVOL==1)transparenton();
+  glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+  glEnable(GL_TEXTURE_1D);
+  glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
+  if(meshi->visx==1){
+   int iislice;
+
+   iislice = meshi->plotx;
+   constval = xplt[iislice]+offset_slice*sd->sliceoffset;
+   glBegin(GL_TRIANGLES);
+   maxj = sd->js2;
+   if(sd->js1+1>maxj){
+     maxj=sd->js1+1;
+   }
+   for(j=sd->js1; j<maxj; j++){
+     float ymid;
+
+     n = (j-sd->js1)*sd->nslicek -1;
+     if(meshi->plotx<sd->is1)break;
+     if(meshi->plotx>=sd->is1+sd->nslicei)break;
+     n += (meshi->plotx-sd->is1)*sd->nslicej*sd->nslicek;
+     n2 = n + sd->nslicek;
+     yy1 = yplt[j];
+     y3 = yplt[j+1];
+     ymid = (yy1+y3)/2.0;
+
+     // val(i,j,k) = di*nj*nk + dj*nk + dk
+     for(k=sd->ks1; k<sd->ks2; k++){
+       float rmid, zmid;
+
+       n++; n2++; 
+       if(iblank_x[ijk(iislice,j,k)]!=2)continue;
+       r11 = (float)sd->slicepoint[n]/255.0;
+       r31 = (float)sd->slicepoint[n2]/255.0;
+       r13 = (float)sd->slicepoint[n+1]/255.0;
+       r33 = (float)sd->slicepoint[n2+1]/255.0;
+       rmid = (r11+r31+r13+r33)/4.0;
+
+       z1 = zplt[k];
+       z3 = zplt[k+1];
+       zmid = (z1+z3)/2.0;
+
+       /*
+       n+1 (y1,z3) n2+1 (y3,z3)
+         n (y1,z1)     n2 (y3,z1)
+       */
+       //  (yy1,z3,r13)                    (y3,z3,r33)
+       //                (ymid,zmid,rmid)
+       //  (yy1,z1,r11)                    (y3,z1,r31)
+       glTexCoord1f( r11); glVertex3f(constval, yy1,  z1);
+       glTexCoord1f( r31); glVertex3f(constval,  y3,  z1);
+       glTexCoord1f(rmid); glVertex3f(constval,ymid,zmid);
+       glTexCoord1f( r31); glVertex3f(constval,  y3,  z1);
+       glTexCoord1f( r33); glVertex3f(constval,  y3,  z3);
+       glTexCoord1f(rmid); glVertex3f(constval,ymid,zmid);
+       glTexCoord1f( r33); glVertex3f(constval,  y3,  z3);
+       glTexCoord1f( r13); glVertex3f(constval, yy1,  z3);
+       glTexCoord1f(rmid); glVertex3f(constval,ymid,zmid);
+       glTexCoord1f( r13); glVertex3f(constval, yy1,  z3);
+       glTexCoord1f( r11); glVertex3f(constval, yy1,  z1);
+       glTexCoord1f(rmid); glVertex3f(constval,ymid,zmid);
+     }
+   }
+   glEnd();
+  }
+  if(meshi->visy==1){
+   constval = yplt[sd->js1+meshi->ploty]+offset_slice*sd->sliceoffset;
+   glBegin(GL_TRIANGLES);
+   for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+     float xmid;
+
+     n = (i-sd->is1)*sd->nslicej*sd->nslicek -1;
+     n += (meshi->ploty-sd->js1)*sd->nslicek;
+     n2 = n + sd->nslicej*sd->nslicek;
+
+     if(meshi->ploty<sd->js1)break;
+     if(meshi->ploty>=sd->js1+sd->nslicej)break;
+
+     x1 = xplt[i];
+     x3 = xplt[i+1];
+     xmid = (x1+x3)/2.0;
+
+     for(k=sd->ks1; k<sd->ks2; k++){
+       float rmid, zmid;
+
+       n++; n2++; 
+       if(iblank_y[ijk(i,sd->js1,k)]!=2)continue;
+       r11 = (float)sd->slicepoint[n]/255.0;
+       r31 = (float)sd->slicepoint[n2]/255.0;
+       r13 = (float)sd->slicepoint[n+1]/255.0;
+       r33 = (float)sd->slicepoint[n2+1]/255.0;
+       rmid = (r11+r31+r13+r33)/4.0;
+
+       z1 = zplt[k];
+       z3 = zplt[k+1];
+       zmid = (z1+z3)/2.0;
+
+       /*
+       n+1 (x1,z3)   n2+1 (x3,z3)
+         n (x1,z1)     n2 (x3,z1)
+
+        val(i,j,k) = di*nj*nk + dj*nk + dk
+       */
+       //  (x1,z3,r13)                    (x3,z3,r33)
+       //                (xmid,zmid,rmid)
+       //  (x1,z1,r11)                    (x3,z1,r31)
+       glTexCoord1f( r11); glVertex3f(  x1,constval,  z1);
+       glTexCoord1f( r31); glVertex3f(  x3,constval,  z1);
+       glTexCoord1f(rmid); glVertex3f(xmid,constval,zmid);
+       glTexCoord1f( r31); glVertex3f(  x3,constval,  z1);
+       glTexCoord1f( r33); glVertex3f(  x3,constval,  z3);
+       glTexCoord1f(rmid); glVertex3f(xmid,constval,zmid);
+       glTexCoord1f( r33); glVertex3f(  x3,constval,  z3);
+       glTexCoord1f( r13); glVertex3f(  x1,constval,  z3);
+       glTexCoord1f(rmid); glVertex3f(xmid,constval,zmid);
+       glTexCoord1f( r13); glVertex3f(  x1,constval,  z3);
+       glTexCoord1f( r11); glVertex3f(  x1,constval,  z1);
+       glTexCoord1f(rmid); glVertex3f(xmid,constval,zmid);
+     }
+   }
+   glEnd();
+  }
+  if(meshi->visz==1){
+   float z11, z31, z13, z33, zmid, zmax;
+
+   constval = zplt[meshi->plotz]+offset_slice*sd->sliceoffset-znode[0];
+   zmax = zplt[meshi->kbar];
+   glBegin(GL_TRIANGLES);
+   for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+     float xmid;
+
+     n = (i-sd->is1)*sd->nslicej*sd->nslicek -sd->nslicek;
+     n += (meshi->plotz-sd->ks1);
+     n2 = n + sd->nslicej*sd->nslicek;
+
+     if(meshi->plotz<sd->ks1)break;
+     if(meshi->plotz>=sd->ks1+sd->nslicek)break;
+     x1 = xplt[i];
+     x3 = xplt[i+1];
+     xmid = (x1+x3)/2.0;
+
+     for(j=sd->js1; j<sd->js2; j++){
+       float ymid, rmid;
+       int n11, n31, n13, n33;
+
+        n+=sd->nslicek; 
+       n2+=sd->nslicek; 
+
+       z11 = constval + znode[ijnode2(i,j)];
+       if(z11>zmax)z11=zmax;
+       z31 = constval + znode[ijnode2(i+1,j)];
+       if(z31>zmax)z31=zmax;
+       z13 = constval + znode[ijnode2(i,j+1)];
+       if(z13>zmax)z13=zmax;
+       z33 = constval + znode[ijnode2(i+1,j+1)];
+       if(z33>zmax)z33=zmax;
+       zmid = (z11 + z31 + z13 + z33)/4.0;
+
+       if(iblank_z[ijk(i,j,meshi->plotz)]!=2)continue;
+//float interp3dsliceval(unsigned char *data, float *zplt, int nz, int n0, float z){
+       n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
+       r11 = interp3dsliceval(sd->slicepoint,zplt,meshi->kbar,n11,z11);//(float)sd->slicepoint[n]/255.0;
+
+       n31=n11 + sd->nslicej*sd->nslicek;
+       r31 = interp3dsliceval(sd->slicepoint,zplt,meshi->kbar,n31,z31);//(float)sd->slicepoint[n2]/255.0;
+
+       n13=n11 + sd->nslicek;
+       r13 = interp3dsliceval(sd->slicepoint,zplt,meshi->kbar,n13,z13);//(float)sd->slicepoint[ n+sd->nslicek]/255.0;
+
+       n33=n13 + sd->nslicej*sd->nslicek;
+       r33 = interp3dsliceval(sd->slicepoint,zplt,meshi->kbar,n33,z33);//(float)sd->slicepoint[n2+sd->nslicek]/255.0;
+
+       rmid = (r11+r31+r13+r33)/4.0;
+
+
+       yy1 = yplt[j];
+       y3 = yplt[j+1];
+       ymid = (yy1+y3)/2.0;
+
+       /*
+       n+nk (x1,y3)   n2+nk (x3,y3)
+          n (x1,y1)      n2 (x3,y1)
+
+        val(i,j,k) = di*nj*nk + dj*nk + dk
+       */
+       //  (x1,y3,r13,z13)                    (x3,y3,r33,z33)
+       //                (xmid,ymid,rmid,zmid)
+       //  (x1,yy1,r11,z11)                    (x3,yy1,r31,z31)
+
+       glTexCoord1f( r11); glVertex3f(  x1,  yy1, z11);
+       glTexCoord1f( r31); glVertex3f(  x3,  yy1, z31);
+       glTexCoord1f(rmid); glVertex3f(xmid,ymid, zmid);
+
+       glTexCoord1f( r31); glVertex3f(  x3,  yy1, z31);
+       glTexCoord1f( r33); glVertex3f(  x3,  y3, z33);
+       glTexCoord1f(rmid); glVertex3f(xmid,ymid, zmid);
+
+       glTexCoord1f( r33); glVertex3f(  x3,  y3, z33);
+       glTexCoord1f( r13); glVertex3f(  x1,  y3, z13);
+       glTexCoord1f(rmid); glVertex3f(xmid,ymid, zmid);
+
+       glTexCoord1f( r13); glVertex3f(  x1,  y3, z13);
+       glTexCoord1f( r11); glVertex3f(  x1,  yy1, z11);
+       glTexCoord1f(rmid); glVertex3f(xmid,ymid, zmid);
+     }
+   }
+   glEnd();
+  }
+  glDisable(GL_TEXTURE_1D);
+  if(transparentflag==1&&transparentflagVOL==1)transparentoff();
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
+
+}
+
 /* ------------------ drawvolslice ------------------------ */
 
 void drawvolslice(const slice *sd){
