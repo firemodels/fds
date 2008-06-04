@@ -67,7 +67,7 @@ REAL(EB) :: Y_FU_0,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DELTA2,&
             Y_FU_MAX,TMP_F_MIN,Y_F_CORR,Z_2_MIN,WGT,OMWGT,Q_BOUND_1,Q_BOUND_2,Q_BOUND_3
 REAL(EB), PARAMETER :: Y_FU_MIN=1.E-10_EB,Y_O2_MIN=1.E-10_EB,X_O2_MIN=1.E-16_EB,X_FU_MIN=1.E-16_EB,Y_CO_MIN=1.E-10_EB
 INTEGER :: NODETS,N,I,J,K,II,JJ,KK,IOR,IC,IW,IWA(-3:3)
-REAL(EB), POINTER, DIMENSION(:,:,:) :: Y_O2,R_SUM_DILUENTS,MIX_TIME
+REAL(EB), POINTER, DIMENSION(:,:,:) :: Y_O2,Y_O2_NEW,R_SUM_DILUENTS,MIX_TIME
 
 ! Weighting factor for time-averaging of local HRR
 
@@ -94,6 +94,8 @@ IF (.NOT.CO_PRODUCTION) THEN
       ENDDO
    ENDDO
 ELSE
+   Y_O2_NEW => WORK2
+   Y_O2_NEW =  0._EB
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
@@ -102,6 +104,7 @@ ELSE
          ENDDO
       ENDDO
    ENDDO
+   Y_O2_NEW = Y_O2
 ENDIF
 
 ! Compute the (fast) reaction of fuel to either CO or CO2
@@ -191,6 +194,7 @@ DO K=1,KBAR
          YY(I,J,K,I_FUEL) = YY(I,J,K,I_FUEL) - DYF
          IF (CO_PRODUCTION) THEN
             YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) + DYF
+            Y_O2_NEW(I,J,K) = Y_O2_NEW(I,J,K) - DYF * RN%O2_F_RATIO
          ELSE
             YY(I,J,K,I_PROG_F)  = YY(I,J,K,I_PROG_F)  + DYF
          ENDIF
@@ -201,7 +205,6 @@ ENDDO
 ! Optional second (slow) reaction to convert CO to CO_2
    
 CONVERT_CO: IF (CO_PRODUCTION) THEN 
-
    RN => REACTION(2)
    DELTAH_CO = (REACTION(2)%HEAT_OF_COMBUSTION - REACTION(1)%HEAT_OF_COMBUSTION) * &
                 REACTION(1)%MW_FUEL/((REACTION(1)%NU_CO-REACTION(2)%NU_CO)*MW_CO)
@@ -217,7 +220,7 @@ CONVERT_CO: IF (CO_PRODUCTION) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-            Y_O2_0  = Y_O2(I,J,K)
+            Y_O2_0  = Y_O2_NEW(I,J,K)
             Y_CO_0  = MAX(0._EB,YY(I,J,K,I_PROG_CO))*RN%Y_F_INLET / F_TO_CO 
             IF (Y_CO_0<=Y_CO_MIN .OR. Y_O2_0<=Y_O2_MIN) CYCLE
 
