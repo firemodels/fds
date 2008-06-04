@@ -5076,7 +5076,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
  
          NDO=0
  
-         IF ((OB%I1<I1.AND.I1<OB%I2) .OR. (XB(1)>=XS.AND.I1==0)) THEN
+         IF ((OB%I1<I1.AND.I1<OB%I2) .OR. (XB(1)>=XS.AND.I1==0.AND.OB%I1==0)) THEN
             NDO=NDO+1
             TEMP_OBST(NDO)=OBSTRUCTION(NN)
             TEMP_OBST(NDO)%I1 = OB%I1
@@ -5085,7 +5085,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
             TEMP_OBST(NDO)%X2 = X1
          ENDIF
  
-         IF ((OB%I1<I2.AND.I2<OB%I2) .OR. (XB(2)<=XF.AND.I2==IBAR)) THEN
+         IF ((OB%I1<I2.AND.I2<OB%I2) .OR. (XB(2)<=XF.AND.I2==IBAR.AND.OB%I2==IBAR)) THEN
             NDO=NDO+1
             TEMP_OBST(NDO)=OBSTRUCTION(NN)
             TEMP_OBST(NDO)%I1 = I2
@@ -5094,7 +5094,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
             TEMP_OBST(NDO)%X2 = OB%X2
          ENDIF
  
-         IF ((OB%J1<J1.AND.J1<OB%J2) .OR. (XB(3)>=YS.AND.J1==0)) THEN
+         IF ((OB%J1<J1.AND.J1<OB%J2) .OR. (XB(3)>=YS.AND.J1==0.AND.OB%J1==0)) THEN
             NDO=NDO+1
             TEMP_OBST(NDO)=OBSTRUCTION(NN)
             TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
@@ -5107,7 +5107,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
             TEMP_OBST(NDO)%Y2 = Y1
          ENDIF
  
-         IF ((OB%J1<J2.AND.J2<OB%J2) .OR. (XB(4)<=YF.AND.J2==JBAR)) THEN
+         IF ((OB%J1<J2.AND.J2<OB%J2) .OR. (XB(4)<=YF.AND.J2==JBAR.AND.OB%J2==JBAR)) THEN
             NDO=NDO+1
             TEMP_OBST(NDO)=OBSTRUCTION(NN)
             TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
@@ -5120,7 +5120,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
             TEMP_OBST(NDO)%Y2 = OB%Y2
          ENDIF
  
-         IF ((OB%K1<K1.AND.K1<OB%K2) .OR. (XB(5)>=ZS.AND.K1==0)) THEN
+         IF ((OB%K1<K1.AND.K1<OB%K2) .OR. (XB(5)>=ZS.AND.K1==0.AND.OB%K1==0)) THEN
             NDO=NDO+1
             TEMP_OBST(NDO)=OBSTRUCTION(NN)
             TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
@@ -5137,7 +5137,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
             TEMP_OBST(NDO)%Z2 = Z1
          ENDIF
  
-         IF ((OB%K1<K2.AND.K2<OB%K2) .OR. (XB(6)<=ZF.AND.K2==KBAR)) THEN
+         IF ((OB%K1<K2.AND.K2<OB%K2) .OR. (XB(6)<=ZF.AND.K2==KBAR.AND.OB%K2==KBAR)) THEN
             NDO=NDO+1
             TEMP_OBST(NDO)=OBSTRUCTION(NN)
             TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
