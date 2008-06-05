@@ -172,13 +172,13 @@ DO K=1,KBAR
          ENDIF IF_SUPPRESSION
 
          DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)
-         IF (LES .AND. EDDY_BREAKUP) THEN
+         IF (LES .AND. EDDY_DISSIPATION) THEN
             IF (.NOT.TWO_D) THEN
                DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
             ELSE
                DELTA2 = DX(I)*DZ(K)
             ENDIF
-            MIX_TIME(I,J,K) = MIX_TIME_FACTOR*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
+            MIX_TIME(I,J,K) = C_EDC*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
          ENDIF
          Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
          Q_BOUND_2 = Q_UPPER
