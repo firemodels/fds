@@ -63,7 +63,21 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
              DU = U->qslice[n];               \
            }                                  \
          }                                   \
-         DU *= 0.05*vecfactor/vrange;
+         DU *= 0.05*vecfactor/vrange
+
+#define GET_VEC_DXYZ_TERRAIN(U,DU) \
+         DU=0.0;           \
+         if(U!=NULL){       \
+           int i11a;  \
+           if(U->compression_type==1){\
+             i11a=f1*U->slicepoint[n1]+f2*U->slicepoint[n2];\
+             DU=U->qval256[i11a];\
+           }                                  \
+           else{                              \
+             DU=f1*U->qslice[n1]+f2*U->qslice[n2];               \
+           }                                  \
+         }                                   \
+         DU *= 0.05*vecfactor/vrange
 
 
 /* ------------------ readvslice ------------------------ */
@@ -2344,7 +2358,26 @@ void drawvolslice_texture(const slice *sd){
   glDisable(GL_TEXTURE_1D);
   if(transparentflag==1&&transparentflagVOL==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
+}
 
+/* ------------------ get_z_interp_factors ------------------------ */
+
+void get_z_interp_factors(float *zplt, int nz, float z, int *k1, int *k2, float *f1, float *f2){
+  float dz;
+  int ileft, iright;
+
+  dz = zplt[1] - zplt[0];
+
+  ileft = (z-zplt[0])/dz;
+  if(ileft<0)ileft=0;
+  if(ileft>nz-1)ileft=nz-1;
+  iright = ileft + 1;
+
+  *k1 = ileft;
+  *k2 = iright;
+  *f1 = (z-zplt[ileft])/dz;
+  *f2 = (zplt[iright]-z)/dz;
+  return;
 }
 
 /* ------------------ interp3dsliceindex ------------------------ */
@@ -2864,9 +2897,9 @@ void drawvvolslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(iblank[ijk(meshi->plotx,j,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(constval-dx,yy1-dy,z1-dz);
          glVertex3f(constval+dx,yy1+dy,z1+dz);
@@ -2890,9 +2923,9 @@ void drawvvolslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(iblank[ijk(meshi->plotx,j,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(constval+dx,yy1+dy,z1+dz);
        }
@@ -2919,9 +2952,9 @@ void drawvvolslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(iblank[ijk(i,meshi->ploty,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(x1-dx,constval-dy,z1-dz);
          glVertex3f(x1+dx,constval+dy,z1+dz);
@@ -2944,9 +2977,9 @@ void drawvvolslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(iblank[ijk(i,meshi->ploty,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(x1+dx,constval+dy,z1+dz);
        }
@@ -2971,9 +3004,9 @@ void drawvvolslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(iblank[ijk(i,j,meshi->plotz)]==1&&rgb_ptr[3]>0.5){
          yy1 = yplttemp[j];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(x1-dx,yy1-dy,constval-dz);
          glVertex3f(x1+dx,yy1+dy,constval+dz);
@@ -2997,9 +3030,9 @@ void drawvvolslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(iblank[ijk(i,j,meshi->plotz)]==1&&rgb_ptr[3]>0.5){
          yy1 = yplttemp[j];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(x1+dx,yy1+dy,constval+dz);
        }
@@ -3039,7 +3072,6 @@ void drawvvolslice_terrain(const vslice *vd){
   ny = meshi->jbar+1;
   nxy = nx*ny;
 
-
   terri = meshi->terrain;
   if(terri==NULL)return;
   znode = terri->znode_scaled;
@@ -3066,9 +3098,9 @@ void drawvvolslice_terrain(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(iblank[ijk(meshi->plotx,j,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(constval-dx,yy1-dy,z1-dz);
          glVertex3f(constval+dx,yy1+dy,z1+dz);
@@ -3092,9 +3124,9 @@ void drawvvolslice_terrain(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(iblank[ijk(meshi->plotx,j,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(constval+dx,yy1+dy,z1+dz);
        }
@@ -3121,9 +3153,9 @@ void drawvvolslice_terrain(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(iblank[ijk(i,meshi->ploty,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(x1-dx,constval-dy,z1-dz);
          glVertex3f(x1+dx,constval+dy,z1+dz);
@@ -3146,9 +3178,9 @@ void drawvvolslice_terrain(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(iblank[ijk(i,meshi->ploty,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(x1+dx,constval+dy,z1+dz);
        }
@@ -3166,19 +3198,31 @@ void drawvvolslice_terrain(const vslice *vd){
    glBegin(GL_LINES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
      x1 = xplttemp[i];
+     n = (i-sd->is1)*sd->nslicej*sd->nslicek - vectorskip*sd->nslicek;
+     n += (meshi->plotz-sd->ks1);
      for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
        int n11;
        float z11;
+       int ij2;
 
-       z11 = constval + znode[ijnode2(i,j)];
+       n+=vectorskip*sd->nslicek; 
+       ij2 = ijnode2(i,j);
+       z11 = constval + znode[ij2];
        if(z11>zmax)z11=zmax;
        n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->slicepoint,meshi->zplt,meshi->kbar,n11,z11);
-       if(iblank[ijk(i,j,meshi->plotz)]==1&&rgb_ptr[3]>0.5){
+       if(rgb_ptr[3]>0.5){
+         float f1, f2;
+         int k1, k2;
+         int n1, n2;
+
+         get_z_interp_factors(meshi->zplt,meshi->kbar,z11,&k1,&k2,&f1,&f2);
+         n1 = n11 + k1;
+         n2 = n11 + k2;
          yy1 = yplttemp[j];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ_TERRAIN(u,dx);
+         GET_VEC_DXYZ_TERRAIN(v,dy);
+         GET_VEC_DXYZ_TERRAIN(w,dz);
 
          glColor4fv(rgb_ptr);
          glVertex3f(x1-dx,yy1-dy,z11-dz);
@@ -3197,17 +3241,31 @@ void drawvvolslice_terrain(const vslice *vd){
 
      x1 = xplttemp[i];
      for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
+       int n11;
+       float z11;
+       int ij2;
+
        n+=vectorskip*sd->nslicek; 
 
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
-       if(iblank[ijk(i,j,meshi->plotz)]==1&&rgb_ptr[3]>0.5){
+       ij2 = ijnode2(i,j);
+       z11 = constval + znode[ij2];
+       if(z11>zmax)z11=zmax;
+       n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
+       rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->slicepoint,meshi->zplt,meshi->kbar,n11,z11);
+       if(rgb_ptr[3]>0.5){
+         float f1, f2;
+         int k1, k2;
+         int n1, n2;
+
+         get_z_interp_factors(meshi->zplt,meshi->kbar,z11,&k1,&k2,&f1,&f2);
+         n1 = n11 + k1;
+         n2 = n11 + k2;
          yy1 = yplttemp[j];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ_TERRAIN(u,dx);
+         GET_VEC_DXYZ_TERRAIN(v,dy);
+         GET_VEC_DXYZ_TERRAIN(w,dz);
          glColor4fv(rgb_ptr);
-         glVertex3f(x1+dx,yy1+dy,constval+dz);
+         glVertex3f(x1+dx,yy1+dy,z11);
        }
      }
    }
@@ -3263,9 +3321,9 @@ void drawvslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(show_slice_in_obst==1||(iblank[ijk(sd->is1,j,k)]==1&&rgb_ptr[3]>0.5)){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(constval-dx,yy1-dy,z1-dz);
          glVertex3f(constval+dx,yy1+dy,z1+dz);
@@ -3288,9 +3346,9 @@ void drawvslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(show_slice_in_obst==1||(iblank[ijk(sd->is1,j,k)]==1&&rgb_ptr[3]>0.5)){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(constval+dx,yy1+dy,z1+dz);
        }
@@ -3315,9 +3373,9 @@ void drawvslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(show_slice_in_obst==1||(iblank[ijk(i,sd->js1,k)]==1&&rgb_ptr[3]>0.5)){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(x1-dx,constval-dy,z1-dz);
          glVertex3f(x1+dx,constval+dy,z1+dz);
@@ -3338,9 +3396,9 @@ void drawvslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(show_slice_in_obst==1||(iblank[ijk(i,sd->js1,k)]==1&&rgb_ptr[3]>0.5)){
          z1 = zplttemp[k];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(x1+dx,constval+dy,z1+dz);
        }
@@ -3362,9 +3420,9 @@ void drawvslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(show_slice_in_obst==1||(iblank[ijk(i,j,sd->ks1)]==1&&rgb_ptr[3]>0.5)){
          yy1 = yplttemp[j];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(x1-dx,yy1-dy,constval-dz);
          glVertex3f(x1+dx,yy1+dy,constval+dz);
@@ -3385,9 +3443,9 @@ void drawvslice(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        if(show_slice_in_obst==1||(iblank[ijk(i,j,sd->ks1)]==1&&rgb_ptr[3]>0.5)){
          yy1 = yplttemp[j];
-         GET_VEC_DXYZ(u,dx)
-         GET_VEC_DXYZ(v,dy)
-         GET_VEC_DXYZ(w,dz)
+         GET_VEC_DXYZ(u,dx);
+         GET_VEC_DXYZ(v,dy);
+         GET_VEC_DXYZ(w,dz);
          glColor4fv(rgb_ptr);
          glVertex3f(x1+dx,yy1+dy,constval+dz);
        }
@@ -3447,9 +3505,9 @@ void drawvslice_terrain(const vslice *vd){
 
        yy1 = yplttemp[j];
        zz = znode[ijnode2(i,j)];
-       GET_VEC_DXYZ(u,dx)
-       GET_VEC_DXYZ(v,dy)
-       GET_VEC_DXYZ(w,dz)
+       GET_VEC_DXYZ(u,dx);
+       GET_VEC_DXYZ(v,dy);
+       GET_VEC_DXYZ(w,dz);
        glColor4fv(rgb_ptr);
        glVertex3f(x1-dx,yy1-dy,constval-dz + zz);
        glVertex3f(x1+dx,yy1+dy,constval+dz + zz);
@@ -3471,9 +3529,9 @@ void drawvslice_terrain(const vslice *vd){
        rgb_ptr = rgb_slice + 4*i11;
        yy1 = yplttemp[j];
        zz = znode[ijnode2(i,j)];
-       GET_VEC_DXYZ(u,dx)
-       GET_VEC_DXYZ(v,dy)
-       GET_VEC_DXYZ(w,dz)
+       GET_VEC_DXYZ(u,dx);
+       GET_VEC_DXYZ(v,dy);
+       GET_VEC_DXYZ(w,dz);
        glColor4fv(rgb_ptr);
        glVertex3f(x1+dx,yy1+dy,constval+dz+zz);
      }
