@@ -418,7 +418,7 @@ SVEXTERN int visAvailmemory;
 #ifdef pp_LOGFILE
 SVEXTERN FILE *LOGFILE;
 #endif
-SVEXTERN int autoterrain;
+SVEXTERN int autoterrain,manual_terrain;
 SVEXTERN int revision_smv, revision_fds;
 SVEXTERN int visBlocklabel;
 SVEXTERN int visOpenVents,visDummyVents;
