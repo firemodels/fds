@@ -5416,11 +5416,7 @@ if(visBlocks==visBLOCKOutline){
   if(projection_type==1)glutAddMenuEntry("*Size Preserving",-2);
   if(projection_type==0)glutAddMenuEntry("Size Preserving",-2);
 
-
-
-
-
-/* -------------------------------- font menu -------------------------- */
+  /* -------------------------------- font menu -------------------------- */
 
   if(showfontmenu==1){
     CREATEMENU(fontmenu,FontMenu);
@@ -5491,6 +5487,7 @@ if(visBlocks==visBLOCKOutline){
   glutAddMenuEntry("Benchmark",1);
 #endif
   if(trainer_active==1)glutAddMenuEntry("Trainer Menu",2);
+  
   /* --------------------------------reset menu -------------------------- */
 
   CREATEMENU(resetmenu,ResetMenu);
@@ -6633,7 +6630,7 @@ if(visBlocks==visBLOCKOutline){
         }
         glutAddSubMenu(loadmenulabel,loadsmoke3dmenu);
       }
-      if(nterraininfo>0){
+      if(manual_terrain==1&&nterraininfo>0){
         glutAddSubMenu("Terrain",loadterrainmenu);
       }
       if(nslice>0&&nmultislices<nslice){
