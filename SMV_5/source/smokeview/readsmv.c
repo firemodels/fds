@@ -962,6 +962,8 @@ int readsmv(char *file){
       float xmin, xmax, ymin, ymax;
       int nx, ny;
 
+      manual_terrain=1;
+
       terri = terraininfo + nterraininfo;
 
       fgets(buffer,255,stream);
@@ -3310,7 +3312,12 @@ typedef struct {
         sd->mesh_type=meshi->mesh_type;
       }
       if(stat(sd->file,&statbuffer)==0){
-        if(readlabels(&sd->label,stream)==2)return 2;
+        if(sd->terrain==1){
+          if(readlabels_terrain(&sd->label,stream)==2)return 2;
+        }
+        else{
+          if(readlabels(&sd->label,stream)==2)return 2;
+        }
         islice++;
       }
       else{
@@ -5693,6 +5700,50 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
+
+
+  if(fgets(buffer,255,stream)==NULL){
+    strcpy(buffer,"**");
+  }
+
+  len=strlen(buffer);
+  buffer[len-1]='\0';
+  trim(buffer);
+  len=strlen(buffer);
+  if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
+  STRCPY(flowlabel->shortlabel,buffer);
+
+  if(fgets(buffer,255,stream)==NULL){
+    strcpy(buffer,"***");
+  }
+
+  len=strlen(buffer);
+  buffer[len-1]='\0';
+  trim(buffer);
+  len=strlen(buffer);
+  if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
+  STRCPY(flowlabel->unit,buffer);
+  return 0;
+}
+
+/* ------------------ readlabels_terrain ------------------------ */
+
+int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
+  char buffer[255];
+  size_t len;
+
+  if(fgets(buffer,255,stream)==NULL){
+    strcpy(buffer,"*");
+  }
+
+
+  len=strlen(buffer);
+  buffer[len-1]='\0';
+  trim(buffer);
+  len=strlen(buffer);
+  if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1+9))==0)return 2;
+  STRCPY(flowlabel->longlabel,buffer);
+  STRCAT(flowlabel->longlabel,"(terrain)");
 
 
   if(fgets(buffer,255,stream)==NULL){

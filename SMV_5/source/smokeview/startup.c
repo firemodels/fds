@@ -1236,6 +1236,7 @@ void initvars1(void){
   visEvac=1;
   smooth_block_solid=0;
   autoterrain=0;
+  manual_terrain=0;
   visBlocks=visBLOCKAsInput;
   visSmoothAsNormal=1;
   visTransparentBlockage=0;
