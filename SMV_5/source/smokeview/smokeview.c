@@ -3590,6 +3590,7 @@ int getplotstate(int choice){
         if(slicei->volslice==0&&visGrid==0)stept = 1; 
         return DYNAMIC_PLOTS;
       }
+      if(visGrid==0)stept = 1;
       if(visTerrain==1){
         for(i=0;i<nterraininfo;i++){
           terraindata *terri;
@@ -3644,8 +3645,6 @@ int getplotstate(int choice){
       }
 
       if(choice!=DYNAMIC_PLOTS_NORECURSE)return getplotstate(STATIC_PLOTS_NORECURSE);
-      if(visGrid==0)stept = 1;
-      //if(visGrid==1)stept = 0;
       break;
     default:
       ASSERT(FFALSE);

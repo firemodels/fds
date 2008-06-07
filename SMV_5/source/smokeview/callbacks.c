@@ -1161,6 +1161,7 @@ void specialkeyboard(int key, int x, int y){
   switch (keymode){
     case P3_MODE:
       handle_plot3d_keys(key);
+      stept=0;
       break;
     case EYE_MODE:
       handle_move_keys(key);
