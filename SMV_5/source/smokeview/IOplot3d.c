@@ -1618,6 +1618,7 @@ void updateshowstep(int val, int slicedir){
     break;
   }
   plotstate=getplotstate(STATIC_PLOTS);
+  stept=0;
   if(ReadVolSlice==0&&plotstate==DYNAMIC_PLOTS&&visGrid==0)updatetimes();
   {
     int i;
