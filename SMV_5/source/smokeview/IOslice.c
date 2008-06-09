@@ -1175,6 +1175,8 @@ void getsliceparams(void){
         sprintf(sd->slicedir,"Y=%f",position);
       }
       if(sd->ks1==sd->ks2){
+        terraindata *terri;
+
         sd->idir=3;
         position = meshi->zplt_orig[ks1];
         if(ks1>0){
@@ -1183,7 +1185,17 @@ void getsliceparams(void){
         else{
           sd->delta=(meshi->zplt_orig[ks1+1]-meshi->zplt_orig[ks1])/2.0;
         }
-        sprintf(sd->slicedir,"Z=%f",position);
+        terri = meshi->terrain;
+        if(sd->terrain==1&&terri!=NULL){
+          float *znode;
+
+          znode = terri->znode;
+          position-=znode[0];
+          sprintf(sd->slicedir,"AGL=%f",position);
+        }
+        else{
+          sprintf(sd->slicedir,"Z=%f",position);
+        }
       }
       sd->position=position;
       trimzeros(sd->slicedir);

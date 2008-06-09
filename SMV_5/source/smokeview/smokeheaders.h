@@ -503,6 +503,7 @@ EXTERNCPP void Idle(void);
 EXTERNCPP void RenderFrame(int view_mode);
 EXTERNCPP int readlabels(flowlabels *label, FILE *stream);
 EXTERNCPP int readlabels_terrain(flowlabels *label, FILE *stream);
+EXTERNCPP void update_terrain(void);
 EXTERNCPP void PART_CB_INIT(void);
 EXTERNCPP void RenderMenu(int value);
 EXTERNCPP void LoadSmoke3DMenu(int value);
