@@ -1240,3 +1240,58 @@ void init_tnorm(terraindata *terri){
     }
   }
 }
+
+/* ------------------ update_terrain ------------------------ */
+
+void update_terrain(void){
+  int i, j;
+
+  if(autoterrain==1&&nterraininfo==0){
+
+    nterraininfo = nmeshes;
+    NewMemory((void **)&terraininfo,nterraininfo*sizeof(terraindata));
+
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      terraindata *terri;
+      float xmin, xmax, ymin, ymax;
+      int nx, ny;
+
+      meshi=meshinfo + i;
+      terri = terraininfo + i;
+
+      nx = meshi->ibar;
+      ny = meshi->jbar;
+      xmin = meshi->xplt_orig[0];
+      xmax = meshi->xplt_orig[nx];
+      ymin = meshi->yplt_orig[0];
+      ymax = meshi->yplt_orig[ny];
+
+      initterrain(NULL, meshi, terri, xmin, xmax, nx, ymin, ymax, ny);
+    }
+  }
+  if(nterraininfo>0){
+    int imesh;
+
+    for(imesh=0;imesh<nmeshes;imesh++){
+      mesh *meshi;
+      terraindata *terri;
+      float *znode, *znode_scaled;
+      int i, j;
+
+      meshi=meshinfo + imesh;
+      terri = meshi->terrain;
+      if(terri==NULL)continue;
+      znode = terri->znode;
+      znode_scaled = terri->znode_scaled;
+
+      for(j=0;j<=terri->ny;j++){
+        for(i=0;i<=terri->nx;i++){
+          *znode_scaled++ = (*znode++-zbar0)/xyzmaxdiff;
+        }
+      }
+
+    }
+  }
+}
+
