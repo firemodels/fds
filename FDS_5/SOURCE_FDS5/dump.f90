@@ -2098,8 +2098,18 @@ IF (N_DEVC>0) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' Device Coordinates'
    DO N=1,N_DEVC
       DV => DEVICE(N)
-      WRITE(LU_OUTPUT,'(I4,A,3F9.2,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
-         ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY)
+      IF (DV%SPEC_INDEX>0) THEN
+         WRITE(LU_OUTPUT,'(I4,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
+            ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
+            ', Species: ',TRIM(SPECIES(DV%SPEC_INDEX)%NAME)
+      ELSEIF (DV%PART_INDEX>0) THEN
+         WRITE(LU_OUTPUT,'(I4,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
+            ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
+            ', Particle Class: ',TRIM(PARTICLE_CLASS(DV%PART_INDEX)%ID)
+      ELSE
+         WRITE(LU_OUTPUT,'(I4,A,3F9.2,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
+            ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY)
+      ENDIF
    ENDDO
 ENDIF
  
@@ -2109,7 +2119,12 @@ IF (DT_PL3D<T_END) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' PLOT3D Information'
    WRITE(LU_OUTPUT,'(A,F8.1/)')'   Sampling Interval (s)          ',DT_PL3D
    DO N=1,5
-      WRITE(LU_OUTPUT,'(I4,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N))
+      IF (PLOT3D_SPEC_INDEX(N)>0) THEN
+         WRITE(LU_OUTPUT,'(I4,A,A,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N)), &
+            ', Species: ',TRIM(SPECIES(PLOT3D_SPEC_INDEX(N))%NAME)
+      ELSE
+         WRITE(LU_OUTPUT,'(I4,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N))
+      ENDIF
    ENDDO
 ENDIF
  
@@ -2134,8 +2149,18 @@ MESH_LOOP_4: DO NM=1,NMESHES
       WRITE(LU_OUTPUT,'(A,F8.3/)')'   Sampling Interval (s)          ',DT_SLCF
       DO N=1,M%N_SLCF
          SL=> M%SLICE(N)
-         WRITE(LU_OUTPUT,'(I4,A,6I4,A,A)') N,' Nodes:', &
-            SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2,', Quantity: ',TRIM(OUTPUT_QUANTITY(SL%INDEX)%NAME)
+         IF (SL%SPEC_INDEX>0) THEN
+            WRITE(LU_OUTPUT,'(I4,A,6I4,A,A,A,A)') N,' Nodes:', &
+               SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2,', Quantity: ',TRIM(OUTPUT_QUANTITY(SL%INDEX)%NAME), &
+               ', Species: ',TRIM(SPECIES(SL%SPEC_INDEX)%NAME)
+         ELSEIF (SL%PART_INDEX>0) THEN
+            WRITE(LU_OUTPUT,'(I4,A,6I4,A,A,A,A)') N,' Nodes:', &
+               SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2,', Quantity: ',TRIM(OUTPUT_QUANTITY(SL%INDEX)%NAME), &
+               ', Particle Class: ',TRIM(PARTICLE_CLASS(SL%PART_INDEX)%ID)
+         ELSE
+            WRITE(LU_OUTPUT,'(I4,A,6I4,A,A)') N,' Nodes:', &
+               SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2,', Quantity: ',TRIM(OUTPUT_QUANTITY(SL%INDEX)%NAME)
+         ENDIF
       ENDDO
    ENDIF
 ENDDO MESH_LOOP_4
@@ -2147,7 +2172,15 @@ IF (N_BNDF>0) THEN
    WRITE(LU_OUTPUT,'(A,F8.3/)')'   Sampling Interval (s)          ',DT_BNDF
    DO N=1,N_BNDF
       BF => BOUNDARY_FILE(N)
-      WRITE(LU_OUTPUT,'(I4,A,A)') N,' Quantity: ',TRIM(OUTPUT_QUANTITY(BF%INDEX)%NAME)
+      IF (BF%SPEC_INDEX>0) THEN
+         WRITE(LU_OUTPUT,'(I4,A,A,A,A)') N,' Quantity: ',TRIM(OUTPUT_QUANTITY(BF%INDEX)%NAME), &
+            ', Species: ',TRIM(SPECIES(BF%SPEC_INDEX)%NAME)
+      ELSEIF (BF%PART_INDEX>0) THEN
+         WRITE(LU_OUTPUT,'(I4,A,A,A,A)') N,' Quantity: ',TRIM(OUTPUT_QUANTITY(BF%INDEX)%NAME), &
+            ', Particle Class: ',TRIM(PARTICLE_CLASS(BF%PART_INDEX)%ID)
+      ELSE
+         WRITE(LU_OUTPUT,'(I4,A,A)') N,' Quantity: ',TRIM(OUTPUT_QUANTITY(BF%INDEX)%NAME)
+      ENDIF
    ENDDO
 ENDIF
  
@@ -2666,7 +2699,7 @@ ISOF_LOOP: DO N=1,N_ISOF
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IS%INDEX,T)
+            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IS%INDEX,IS%SPEC_INDEX,0,T)
          ENDDO
       ENDDO
    ENDDO
@@ -2696,7 +2729,7 @@ ISOF_LOOP: DO N=1,N_ISOF
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
-               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IS%INDEX2,T)
+               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IS%INDEX2,IS%SPEC_INDEX,0,T)
             ENDDO
          ENDDO
       ENDDO
@@ -2737,7 +2770,7 @@ CALL POINT_TO_MESH(NM)
  
 STIME   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
 MASS_EXT_COEF = MASS_EXTINCTION_COEFFICIENT
-IF (SMOKE3D_SPECIES_INDEX>0) MASS_EXT_COEF = SPECIES(SMOKE3D_SPECIES_INDEX)%MASS_EXTINCTION_COEFFICIENT
+IF (SMOKE3D_SPEC_INDEX>0) MASS_EXT_COEF = SPECIES(SMOKE3D_SPEC_INDEX)%MASS_EXTINCTION_COEFFICIENT
 DXX     = DX(1)
 FF => WORK3
  
@@ -2748,7 +2781,7 @@ DATA_LOOP: DO DATAFLAG=1,2
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
-                  FF(I,J,K) = RHO(I,J,K)*GAS_PHASE_OUTPUT(I,J,K,SMOKE3D_QUANTITY_INDEX,T)
+                  FF(I,J,K) = RHO(I,J,K)*GAS_PHASE_OUTPUT(I,J,K,SMOKE3D_QUANTITY_INDEX,SMOKE3D_SPEC_INDEX,0,T)
                ENDDO
             ENDDO
          ENDDO
@@ -2784,7 +2817,8 @@ USE MATH_FUNCTIONS, ONLY : RLE_COMPRESSION,TWO_BYTE_REAL
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: SUM,XI,YJ,ZK,DROPMASS,RVC
-INTEGER :: IFRMT,I,J,K,IPC,II,JJ,KK,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQQ,IND,NQ,NRLE,II1,II2,JJ1,JJ2,KK1,KK2,IC
+INTEGER :: IFRMT,I,J,K,IPC,II,JJ,KK,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQQ,IND,NQ,NRLE,II1,II2,JJ1,JJ2,KK1,KK2, &
+           IC,SPEC_INDEX,PART_INDEX
 REAL(EB), POINTER, DIMENSION(:,:,:) :: C,B,S,QUANTITY
 REAL(FB) :: ZERO,STIME
 LOGICAL :: D_FLUX,PLOT3D
@@ -2952,6 +2986,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
  
    IF (PLOT3D) THEN
       IND = PLOT3D_QUANTITY_INDEX(IQ)
+      SPEC_INDEX = PLOT3D_SPEC_INDEX(IQ)
+      PART_INDEX = 0
       I1  = 0
       I2  = IBAR
       J1  = 0
@@ -2961,6 +2997,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
    ELSE
       SL => SLICE(IQ)
       IND = SL%INDEX
+      SPEC_INDEX = SL%SPEC_INDEX
+      PART_INDEX = SL%PART_INDEX
       I1  = SL%I1
       I2  = SL%I2
       J1  = SL%J1
@@ -2993,7 +3031,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
    DO K=KK1,KK2
       DO J=JJ1,JJ2
          DO I=II1,II2
-            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IND,T)
+            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IND,SPEC_INDEX,PART_INDEX,T)
          ENDDO
       ENDDO
    ENDDO
@@ -3146,7 +3184,7 @@ SUBROUTINE UPDATE_DEVICES(T,NM)
 
 USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_STRINGS
 REAL(EB), INTENT(IN) :: T
-REAL(EB) :: VALUE,STAT_VALUE,SUM_VALUE
+REAL(EB) :: VALUE,STAT_VALUE,SUM_VALUE,VOL
 INTEGER :: NM,N,I,J,K,STAT_COUNT,IW,IBC
 LOGICAL :: NOT_FOUND
  
@@ -3181,7 +3219,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
       GAS_STATS: IF (DV%STATISTICS=='null') THEN
 
-         VALUE = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,T)
+         VALUE = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T)
 
       ELSE GAS_STATS
 
@@ -3192,24 +3230,31 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   NOT_FOUND = .FALSE.
                   SELECT CASE(DV%STATISTICS)
                      CASE('MAX')
-                        STAT_VALUE = MAX(STAT_VALUE, GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T))
+                        STAT_VALUE = MAX(STAT_VALUE, GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T))
                      CASE('MIN')
-                        STAT_VALUE = MIN(STAT_VALUE, GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T))
+                        STAT_VALUE = MIN(STAT_VALUE, GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T))
                      CASE('MEAN')
-                        STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)
+                        STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T)
                         STAT_COUNT = STAT_COUNT + 1
                      CASE('VOLUME INTEGRAL')
-                        STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DY(J)*DZ(K)
+                        VOL = DX(I)*DY(J)*DZ(K)
+                        STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T)*VOL
                      CASE('AREA INTEGRAL')
-                        IF (DV%IOR==1) STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DY(J)*DZ(K)
-                        IF (DV%IOR==2) STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DZ(K)
-                        IF (DV%IOR==3) STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DY(J)
+                        IF (DV%IOR==1) STAT_VALUE = STAT_VALUE + &
+                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T)*DY(J)*DZ(K)
+                        IF (DV%IOR==2) STAT_VALUE = STAT_VALUE + &
+                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T)*DX(I)*DZ(K)
+                        IF (DV%IOR==3) STAT_VALUE = STAT_VALUE + &
+                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T)*DX(I)*DY(J)
                      CASE('VOLUME MEAN')
-                        STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DY(J)*DZ(K)
+                        VOL = DX(I)*DY(J)*DZ(K)
+                        STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T)*VOL
                         SUM_VALUE = SUM_VALUE + DX(I)*DY(J)*DZ(K)
                      CASE('MASS MEAN')
-                        STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,T)*DX(I)*DY(J)*DZ(K)*RHO(I,J,K)
-                        SUM_VALUE = SUM_VALUE + DX(I)*DY(J)*DZ(K)*RHO(I,J,K)
+                        VOL = DX(I)*DY(J)*DZ(K)
+                        STAT_VALUE = STAT_VALUE + &
+                                     GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T)*VOL*RHO(I,J,K)
+                        SUM_VALUE = SUM_VALUE + VOL*RHO(I,J,K)
                   END SELECT
                ENDDO
             ENDDO
@@ -3221,7 +3266,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
       SOLID_STATS: IF (DV%STATISTICS=='null') THEN
 
-         VALUE = SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX))
+         VALUE = SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)
 
       ELSE SOLID_STATS
 
@@ -3232,14 +3277,14 @@ DEVICE_LOOP: DO N=1,N_DEVC
                NOT_FOUND = .FALSE.
                SELECT CASE(DV%STATISTICS)
                   CASE('MAX')
-                     STAT_VALUE = MAX(STAT_VALUE,SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX)))
+                     STAT_VALUE = MAX(STAT_VALUE,SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX))
                   CASE('MIN')
-                     STAT_VALUE = MIN(STAT_VALUE,SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX)))
+                     STAT_VALUE = MIN(STAT_VALUE,SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX))
                   CASE('MEAN')
-                     STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX))
+                     STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)
                      STAT_COUNT = STAT_COUNT + 1
                   CASE('SURFACE INTEGRAL')
-                     STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX))*AW(IW) 
+                     STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)*AW(IW) 
                END SELECT
             ENDIF
          ENDDO WALL_CELL_LOOP
@@ -3314,7 +3359,7 @@ END SUBROUTINE UPDATE_DEVICES
  
 
 
-REAL(EB) FUNCTION GAS_PHASE_OUTPUT(II,JJ,KK,IND,T)
+REAL(EB) FUNCTION GAS_PHASE_OUTPUT(II,JJ,KK,IND,SPEC_INDEX,PART_INDEX,T)
 
 ! Compute Gas Phase Output Quantities
 
@@ -3329,7 +3374,7 @@ REAL(EB) :: FLOW,HMFAC,F1,F2,H_TC,SRAD,TMP_TC,MU_AIR,RE_D,K_AIR,NUSSELT,NU_FAC,P
             Z_1,Z_2,Z_3,VELSR,WATER_VOL_FRAC,RHS,Y_E,DT_C,DT_E,T_RATIO,Y_E_LAG, &
             DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON
 REAL(FB) :: KAPUP,TMPUP,TMPLOW,ZINT
-INTEGER :: ITER,INDX,N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW
+INTEGER :: ITER,INDX,N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW,SPEC_INDEX,PART_INDEX
 
 SELECT CASE(IND)
    CASE DEFAULT  ! SMOKE/WATER
@@ -3421,10 +3466,10 @@ SELECT CASE(IND)
    CASE(29)  ! VORTICITY_Z
       KKK = MAX(1,MIN(KK,KBAR))
       GAS_PHASE_OUTPUT = (V(II+1,JJ,KKK)-V(II,JJ,KKK))*RDXN(II) - (U(II,JJ+1,KKK)-U(II,JJ,KKK))*RDYN(JJ)
-   CASE(41:49,141:149,151:154,162) ! Mixture Fraction Related Quantities
-      IF (IND<100) INDX = IND- 40
-      IF (IND>100) INDX = IND-140
-      IF (IND>150) INDX = SOOT_INDEX
+   CASE(41:65) ! Mixture Fraction Related Quantities
+      IF (IND<50) INDX = IND- 40
+      IF (IND>50 .AND. IND<60) INDX = IND-50
+      IF (IND>60) INDX = SOOT_INDEX
       Z_1 = YY(II,JJ,KK,I_FUEL)            
       IF (CO_PRODUCTION) THEN
          Z_2 = YY(II,JJ,KK,I_PROG_CO)
@@ -3436,31 +3481,31 @@ SELECT CASE(IND)
       SELECT CASE(IND)
          CASE(41:49)   ! Species volume fractions
             GAS_PHASE_OUTPUT = RCON_MF(INDX)*Y_MF_INT/RSUM(II,JJ,KK)
-         CASE(141:149) ! Species mass fractions
+         CASE(51:59) ! Species mass fractions
             GAS_PHASE_OUTPUT = Y_MF_INT
-         CASE(151)     ! soot density
+         CASE(61)     ! soot density
             GAS_PHASE_OUTPUT = Y_MF_INT*RHO(II,JJ,KK)*1.E6_EB
-         CASE(152)     ! soot volume fraction
+         CASE(62)     ! soot volume fraction
             GAS_PHASE_OUTPUT = Y_MF_INT*RHO(II,JJ,KK)/RHO_SOOT
-         CASE(153)     ! extinction coefficient
+         CASE(63)     ! extinction coefficient
             GAS_PHASE_OUTPUT = Y_MF_INT*RHO(II,JJ,KK)*MASS_EXTINCTION_COEFFICIENT
-         CASE(154)     ! visibility
+         CASE(64)     ! visibility
             EXT_COEF = Y_MF_INT*RHO(II,JJ,KK)*MASS_EXTINCTION_COEFFICIENT
             GAS_PHASE_OUTPUT = VISIBILITY_FACTOR/MAX(EC_LL,EXT_COEF)
-         CASE(162)     ! optical depth
+         CASE(65)     ! optical depth
             GAS_PHASE_OUTPUT = Y_MF_INT*RHO(II,JJ,KK)*MASS_EXTINCTION_COEFFICIENT/2.3_EB
       END SELECT
       
-   CASE(51:60)  ! SPECIES(IND-50)%NAME
-      GAS_PHASE_OUTPUT = YY(II,JJ,KK,IND-50)
-   CASE(61:70)  ! SPECIES(IND-50)%NAME_FLUX_X
-      GAS_PHASE_OUTPUT = 0.5_EB*(RHO(II,JJ,KK)*YY(II,JJ,KK,IND-60)+RHO(II+1,JJ,KK)*YY(II+1,JJ,KK,IND-60))*U(II,JJ,KK)
-   CASE(71:80)  ! SPECIES(IND-50)%NAME_FLUX_Y
-      GAS_PHASE_OUTPUT = 0.5_EB*(RHO(II,JJ,KK)*YY(II,JJ,KK,IND-70)+RHO(II,JJ+1,KK)*YY(II,JJ+1,KK,IND-70))*V(II,JJ,KK)
-   CASE(81:90)  ! SPECIES(IND-50)%NAME_FLUX_Z
-      GAS_PHASE_OUTPUT = 0.5_EB*(RHO(II,JJ,KK)*YY(II,JJ,KK,IND-80)+RHO(II,JJ,KK+1)*YY(II,JJ,KK+1,IND-80))*W(II,JJ,KK)
-   CASE(91:100) ! SPECIES(IND-50)%NAME_VF
-      GAS_PHASE_OUTPUT = SPECIES(IND-90)%RCON*YY(II,JJ,KK,IND-90)/RSUM(II,JJ,KK)
+   CASE(90)  ! MASS_FRACTION
+      GAS_PHASE_OUTPUT = YY(II,JJ,KK,SPEC_INDEX)
+   CASE(91)  ! MASS_FLUX_X
+      GAS_PHASE_OUTPUT = 0.5_EB*(RHO(II,JJ,KK)*YY(II,JJ,KK,SPEC_INDEX)+RHO(II+1,JJ,KK)*YY(II+1,JJ,KK,SPEC_INDEX))*U(II,JJ,KK)
+   CASE(92)  ! MASS_FLUX_Y
+      GAS_PHASE_OUTPUT = 0.5_EB*(RHO(II,JJ,KK)*YY(II,JJ,KK,SPEC_INDEX)+RHO(II,JJ+1,KK)*YY(II,JJ+1,KK,SPEC_INDEX))*V(II,JJ,KK)
+   CASE(93)  ! MASS_FLUX_Z
+      GAS_PHASE_OUTPUT = 0.5_EB*(RHO(II,JJ,KK)*YY(II,JJ,KK,SPEC_INDEX)+RHO(II,JJ,KK+1)*YY(II,JJ,KK+1,SPEC_INDEX))*W(II,JJ,KK)
+   CASE(94)  ! VOLUME_FRACTION
+      GAS_PHASE_OUTPUT = SPECIES(SPEC_INDEX)%RCON*YY(II,JJ,KK,SPEC_INDEX)/RSUM(II,JJ,KK)
 
    CASE(104)    ! HRR
       Q_SUM = 0._EB
@@ -3684,25 +3729,28 @@ SELECT CASE(IND)
       IW = DV%VIRTUAL_WALL_INDEX
       GAS_PHASE_OUTPUT = WALL(IW)%TMP_S(DV%I_DEPTH) - TMPM
 
-   CASE(171:179) ! [PART_ID]_MPUV
-      GAS_PHASE_OUTPUT = AVG_DROP_DEN(II,JJ,KK,IND-170)
+   CASE(170) ! MPUV
+      PC => PARTICLE_CLASS(PART_INDEX)
+      GAS_PHASE_OUTPUT = AVG_DROP_DEN(II,JJ,KK,PC%EVAP_INDEX)
 
-   CASE(181:189) ! {PART_ID}_ADD
-      GAS_PHASE_OUTPUT = AVG_DROP_RAD(II,JJ,KK,IND-180)*2.E6_EB
+   CASE(171) ! ADD
+      PC => PARTICLE_CLASS(PART_INDEX)
+      GAS_PHASE_OUTPUT = AVG_DROP_RAD(II,JJ,KK,PC%EVAP_INDEX)*2.E6_EB
 
-   CASE(191:199) ! {PART_ID}_ADT
-      GAS_PHASE_OUTPUT = AVG_DROP_TMP(II,JJ,KK,IND-190) - TMPM
+   CASE(172) ! ADT
+      PC => PARTICLE_CLASS(PART_INDEX)
+      GAS_PHASE_OUTPUT = AVG_DROP_TMP(II,JJ,KK,PC%EVAP_INDEX) - TMPM
 
-   CASE(201:209) ! {PART_ID}_FLUX_X
+   CASE(173) ! DROPLET_FLUX_X
       GAS_PHASE_OUTPUT = WFX(II,JJ,KK)
 
-   CASE(211:219) ! {PART_ID}_FLUX_Y
+   CASE(174) ! DROPLET_FLUX_Y
       GAS_PHASE_OUTPUT = WFY(II,JJ,KK)
 
-   CASE(221:229) ! {PART_ID}_FLUX_Z
+   CASE(175) ! DROPLET_FLUX_Z
       GAS_PHASE_OUTPUT = WFZ(II,JJ,KK)
 
-   CASE(231)     ! PDPA
+   CASE(231) ! PDPA
       GAS_PHASE_OUTPUT = 0._EB
       IF ( (PY%PDPA_START<=T) .AND.(PY%PDPA_END>=T) ) THEN
          DLOOP: DO I=1,NLP
@@ -3737,11 +3785,11 @@ END FUNCTION GAS_PHASE_OUTPUT
 
 
 
-REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(IWX,INDX)
+REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(IWX,INDX,SPEC_INDEX,PART_INDEX)
 
 ! Compute Solid Phase DEVICE Output Quantities
  
-INTEGER, INTENT(IN) :: IWX,INDX
+INTEGER, INTENT(IN) :: IWX,INDX,SPEC_INDEX,PART_INDEX
 REAL(EB) :: CONCORR,U2,V2,W2,HQ2,FLUX,DFLUXDT,SOLID_PHASE_OUTPUT_OLD
 INTEGER :: IOR,II1,II2,II,JJ,KK,IIG,JJG,KKG
  
@@ -3821,8 +3869,8 @@ SELECT CASE(INDX)
       SOLID_PHASE_OUTPUT = MASS_LOSS(IWX)
    CASE(19) ! INCIDENT_HEAT_FLUX
       SOLID_PHASE_OUTPUT = ( QRADIN(IWX)/(E_WALL(IWX)+1.0E-10_EB) + QCONF(IWX) )*0.001_EB
-   CASE(21:29) ! SPECIES(N-20)%NAME_FLUX
-      SOLID_PHASE_OUTPUT = MASSFLUX(IWX,INDX-20)
+   CASE(20) ! MASS_FLUX
+      SOLID_PHASE_OUTPUT = MASSFLUX(IWX,SPEC_INDEX)
    CASE(30) ! HEAT_TRANSFER_COEFFICENT
       SOLID_PHASE_OUTPUT = HEAT_TRANS_COEF(IWX)
    CASE(31) ! RADIOMETER
@@ -3857,12 +3905,15 @@ SELECT CASE(INDX)
          ENDIF
       ENDIF
 
-   CASE(51:59) ! Particle Output
-      SOLID_PHASE_OUTPUT = WMPUA(IWX,INDX-50)
-   CASE(61:69) 
-      SOLID_PHASE_OUTPUT = WCPUA(IWX,INDX-60)*0.001_EB
-   CASE(71:79) 
-      SOLID_PHASE_OUTPUT = AWMPUA(IWX,INDX-70)
+   CASE(50) ! MPUA
+      PC => PARTICLE_CLASS(PART_INDEX)
+      SOLID_PHASE_OUTPUT = WMPUA(IWX,PC%EVAP_INDEX)
+   CASE(60) ! CPUA
+      PC => PARTICLE_CLASS(PART_INDEX)
+      SOLID_PHASE_OUTPUT = WCPUA(IWX,PC%EVAP_INDEX)*0.001_EB
+   CASE(70) ! AMPUA
+      PC => PARTICLE_CLASS(PART_INDEX)
+      SOLID_PHASE_OUTPUT = AWMPUA(IWX,PC%EVAP_INDEX)
 END SELECT
 
 END FUNCTION SOLID_PHASE_OUTPUT
@@ -4183,7 +4234,7 @@ FLOOP: DO NF=1,N_BNDF
    WRITE(LU_BNDF(NF,NM)) STIME
    IND  = ABS(BF%INDEX)
  
-! Exterior walls
+   ! Exterior walls
  
    WLOOP: DO IOR=-3,3
  
@@ -4205,7 +4256,7 @@ FLOOP: DO NF=1,N_BNDF
                DO J=J1,J2
                   IC = CELL_INDEX(IG,J,K)
                   IW = WALL_INDEX(IC,-IOR)
-                  PP(J,K) = SOLID_PHASE_OUTPUT(IW,IND)
+                  PP(J,K) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                   IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(IG,J,K))) IBK(J,K)=1
                ENDDO
             ENDDO
@@ -4219,7 +4270,7 @@ FLOOP: DO NF=1,N_BNDF
                   IF (ISUM>0) THEN
                   PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
                   ELSE
-                  PPN(J,K) = SOLID_PHASE_OUTPUT(0,IND)
+                  PPN(J,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                   ENDIF
                ENDDO
             ENDDO
@@ -4236,7 +4287,7 @@ FLOOP: DO NF=1,N_BNDF
                DO I=I1,I2
                   IC = CELL_INDEX(I,JG,K)
                   IW = WALL_INDEX(IC,-IOR)
-                  PP(I,K) = SOLID_PHASE_OUTPUT(IW,IND)
+                  PP(I,K) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                   IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,JG,K))) IBK(I,K)=1
                ENDDO
             ENDDO
@@ -4250,7 +4301,7 @@ FLOOP: DO NF=1,N_BNDF
                   IF (ISUM>0) THEN
                      PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
                   ELSE
-                     PPN(I,K) = SOLID_PHASE_OUTPUT(0,IND)
+                     PPN(I,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                   ENDIF
                ENDDO
             ENDDO
@@ -4267,7 +4318,7 @@ FLOOP: DO NF=1,N_BNDF
                DO I=I1,I2
                   IC = CELL_INDEX(I,J,KG)
                   IW = WALL_INDEX(IC,-IOR)
-                  PP(I,J) = SOLID_PHASE_OUTPUT(IW,IND)
+                  PP(I,J) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                   ! Special dump of UL pan test data
                   IF (UL_PAN_DATA .AND. IOR==3 .AND. IND==71 .AND. MOD(INT(T),100)==0) &
                      WRITE(LU_UL_PAN_DATA,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
@@ -4284,7 +4335,7 @@ FLOOP: DO NF=1,N_BNDF
                   IF (ISUM>0) THEN
                      PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
                   ELSE
-                     PPN(I,J) = SOLID_PHASE_OUTPUT(0,IND)
+                     PPN(I,J) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                   ENDIF
                ENDDO
             ENDDO
@@ -4320,7 +4371,7 @@ FLOOP: DO NF=1,N_BNDF
                   DO J=J1,J2
                      IC = CELL_INDEX(I,J,K)
                      IW = WALL_INDEX(IC,-IOR)
-                     PP(J,K) = SOLID_PHASE_OUTPUT(IW,IND)
+                     PP(J,K) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY) IBK(J,K)=1
                   ENDDO
                ENDDO
@@ -4334,7 +4385,7 @@ FLOOP: DO NF=1,N_BNDF
                      IF (ISUM>0) THEN
                         PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
                      ELSE
-                        PPN(J,K) = SOLID_PHASE_OUTPUT(0,IND)
+                        PPN(J,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      ENDIF
                   ENDDO
                ENDDO
@@ -4347,7 +4398,7 @@ FLOOP: DO NF=1,N_BNDF
                   DO I=I1,I2
                      IC = CELL_INDEX(I,J,K)
                      IW = WALL_INDEX(IC,-IOR)
-                     PP(I,K) = SOLID_PHASE_OUTPUT(IW,IND)
+                     PP(I,K) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY) IBK(I,K)=1
                   ENDDO
                   ENDDO
@@ -4361,7 +4412,7 @@ FLOOP: DO NF=1,N_BNDF
                      IF (ISUM>0) THEN
                         PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
                      ELSE
-                        PPN(I,K) = SOLID_PHASE_OUTPUT(0,IND)
+                        PPN(I,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      ENDIF
                   ENDDO
                ENDDO
@@ -4374,7 +4425,7 @@ FLOOP: DO NF=1,N_BNDF
                   DO I=I1,I2
                      IC = CELL_INDEX(I,J,K)
                      IW = WALL_INDEX(IC,-IOR)
-                     PP(I,J) = SOLID_PHASE_OUTPUT(IW,IND)
+                     PP(I,J) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      ! Special dump of UL pan test data
                      IF (UL_PAN_DATA .AND. IOR==3 .AND. IND==71 .AND. MOD(INT(T),100)==0) &
                         WRITE(LU_UL_PAN_DATA,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
@@ -4391,7 +4442,7 @@ FLOOP: DO NF=1,N_BNDF
                      IF (ISUM>0) THEN
                         PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
                      ELSE
-                        PPN(I,J) = SOLID_PHASE_OUTPUT(0,IND)
+                        PPN(I,J) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      ENDIF
                   ENDDO
                ENDDO
