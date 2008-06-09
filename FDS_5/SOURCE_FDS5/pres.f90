@@ -27,7 +27,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:) :: UWP
 INTEGER :: I,J,K,IW,IOR,BC_TYPE,NOM,N_INT_CELLS,IIO,JJO,KKO
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,DWWDT,DVVDT,DUUDT,HQ2,RFODT,U2,V2,W2,HFAC,H0RR(6),TNOW,DUMMY=0._EB, &
-            TSI,TIME_RAMP_FACTOR,H_EXTERNAL
+            TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER
 TYPE (VENTS_TYPE), POINTER :: VT
  
 IF (SOLID_PHASE_ONLY) RETURN
@@ -166,17 +166,23 @@ WALL_CELL_LOOP: DO IW=1,NEWC
 
          SELECT CASE(IOR)
             CASE( 1)
-                  BXS(J,K) = 0.5*(H(1,J,K)+H_OTHER)
+                  DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
+                  BXS(J,K) = (DX_OTHER*H(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER)
             CASE(-1) 
-                  BXF(J,K) = 0.5*(H(IBAR,J,K)+H_OTHER) 
+                  DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
+                  BXF(J,K) = (DX_OTHER*H(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)
             CASE( 2) 
-                  BYS(I,K) = 0.5*(H(I,1,K)+H_OTHER) 
+                  DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
+                  BYS(I,K) = (DY_OTHER*H(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER)
             CASE(-2) 
-                  BYF(I,K) = 0.5*(H(I,JBAR,K)+H_OTHER) 
+                  DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
+                  BYF(I,K) = (DY_OTHER*H(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)
             CASE( 3) 
-                  BZS(I,J) = 0.5*(H(I,J,1)+H_OTHER)
+                  DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
+                  BZS(I,J) = (DZ_OTHER*H(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)
             CASE(-3) 
-                  BZF(I,J) = 0.5*(H(I,J,KBAR)+H_OTHER) 
+                  DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
+                  BZF(I,J) = (DZ_OTHER*H(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)
          END SELECT
  
       ENDIF INTERPOLATED_ONLY
