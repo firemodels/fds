@@ -101,21 +101,29 @@ def extract_config_data(config_file):
 
 def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,stop_comp,x_scale):
     #This function is used to find index numbers for start and stop points in plotting and min-max values.
-    #print "X Scale Factor:", x_scale
+    print "\n*** Find Start/End Indexes for X Column."
+    print "X Scale Factor:", x_scale
+    print "Stop Data:", stop_data
+    print "X Column name:", col_name
+    #print "X Column Data:", data_dict[col_name]
     rowcounter1 = 0
+    print "*** Finding X Column Start Index ***"
     for value1 in data_dict[col_name]:
+        #print "Value 1:", value1, " : ", rowcounter1
         if value1 == 'Null':
             continue
         else:
             if value1 >= (float(start_data)*float(x_scale)):
-                #print "Time Starts at row #:", str(rowcounter1)
-                #print "With a value of:", str(value1)
-                time_start_index = rowcounter1
+                print "X Column Starts at row #:", str(rowcounter1)
+                print "With a value of:", str(value1)
+                Xcol_start_index = rowcounter1
                 break
-        rowcounter1 += 1
+        rowcounter1 = rowcounter1 + 1
     rowcounter2 = 0
     end_index = 0
     index_count = 0
+    
+    print "*** Finding Index of last good value in X Column ***"    
     for end_data_index in data_dict[col_name]:
         #print end_data_index, " : ", index_count
         if end_data_index == 'Null':
@@ -125,49 +133,68 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
             index_count = index_count + 1
     if end_index == 0:
         end_index = index_count - 1
+    print "Length of X Column:", end_index + 1
+    print "Last value in X Column:", data_dict[col_name][end_index]
+    print "Index of Last Numeric Value:", end_index
+    
+    print "*** Finding X Column End Index ***"
     for value2 in data_dict[col_name]:
-        #print "Stop Data:", stop_data
-        #print "X Column name:", col_name
-        #print "X Column Data:", data_dict[col_name]
-        #print "Length of X Column:", end_index + 1
-        #print "Last value in X Column:", data_dict[col_name][end_index]
+        #print "Value 2:", value2, " : ", rowcounter2
         if float(data_dict[col_name][end_index]) < (float(stop_data)*float(x_scale)):
-            #print "Specified end of plot time is greater than end of time in the data set. \nUsing last value in the time column.\n"
-            #print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
-            time_end_index = (end_index)
-            break
-        else:
-            row_number2 = (rowcounter2 - 1)
-            #print "Time Ends at row #: "+str(row_number2)
-            #print "With a value of: "+str(data_dict[col_name][row_number2])
-            time_end_index = row_number2
+            print "Specified end of X Column Data is greater than end of time in the data set. \nUsing last value in the time column.\n"
+            print "Value used is: "+str(float(data_dict[col_name][end_index]))+"\n"
+            Xcol_end_index = (end_index)
             break
         if value2 < (float(stop_data)*float(x_scale)):
-            rowcounter2 += 1
+            rowcounter2 = rowcounter2 + 1
+        else:
+            row_number2 = (rowcounter2)
+            print "X Column Ends at Index #: "+str(row_number2)
+            print "With a value of: "+str(data_dict[col_name][row_number2])
+            Xcol_end_index = row_number2
+            break
     rowcounter3 = 0
+    print "*** Finding X Column Comp Start Index ***"
     for value3 in data_dict[col_name]:
         if value3 >= (float(start_comp)*float(x_scale)):
-            #print "Comparison Time Starts at row #:", str(rowcounter3)
-            #print "With a value of:", str(value3)
+            print "Comparison Starts at Index #:", str(rowcounter3), "with a value of:", str(value3)
             minmax_start_index = rowcounter3
             break
-        rowcounter3 += 1  
+        rowcounter3 = rowcounter3 + 1 
+    
     rowcounter4 = 0
+    print "*** Finding X Column Comp End Index ***"
     for value4 in data_dict[col_name]:
-        if float(data_dict[col_name][end_index]) < (float(stop_comp)*float(x_scale)):
-            #print "Specified end of comparison time is greater than end of time in the data set. \nUsing last value in the time column."
-            #print "Time used is: "+str(float(data_dict[col_name][(len(data_dict[col_name])-1)]))+"\n"
+        scaled_stop_value = (float(stop_comp)*float(x_scale))
+        end_index_value = float(data_dict[col_name][end_index])
+        print "Scaled Stop Value and End Index Value:", scaled_stop_value, " : ",end_index_value
+        if end_index_value < scaled_stop_value:
+            print "Specified end of comparison is greater than last value in the data set. \nUsing last value in the X column."
+            print "Time used is: "+str(float(end_index_value))+"\n"
             minmax_end_index = end_index
             break
-        if value4 < (float(stop_data)*float(x_scale)):
-            rowcounter4 += 1
         else:
-            row_number4 = (rowcounter4 - 1)
-            #print "Comparison Time Ends at row #: "+str(row_number4)
-            #print "With a value of: "+str(data_dict[col_name][row_number4])
-            minmax_end_index = row_number4
-            break
-    return (time_start_index, time_end_index, minmax_start_index, minmax_end_index)
+            print "Value 4:",value4
+            if value4 < scaled_stop_value:
+                rowcounter4 = rowcounter4 + 1
+                print "increment rowcounter4:", rowcounter4
+            if value4 >= scaled_stop_value:
+                if value4 == scaled_stop_value:
+                    row_number4 = rowcounter4
+                    print "Comparison Ends at Index #:", str(row_number4), "with a value of: ", str(data_dict[col_name][row_number4])
+                    minmax_end_index = row_number4
+                    break
+                else:
+                    row_number4 = rowcounter4 - 1
+                    print "Comparison Ends at Index #:", str(row_number4), "with a value of: ", str(data_dict[col_name][row_number4])
+                    minmax_end_index = row_number4
+                    break
+    print "\n*** Start/End Indexes Found ***"
+    print "XCol Start Index:", Xcol_start_index
+    print "XCol End Index:", Xcol_end_index
+    print "minmax Start Index:", minmax_start_index
+    print "minmax End Index:", minmax_end_index, "\n"
+    return (Xcol_start_index, Xcol_end_index, minmax_start_index, minmax_end_index)
 
 def extract_comp_data(comp_file_info):
     ## Read in d line dict from config file and Process data from source .csv files.
@@ -405,9 +432,9 @@ def extract_comp_data(comp_file_info):
                 
         #Create data lists based on specified ranges
         exp_data_seconds = zip(exp_data_dict[exp_Xaxis_column_name][exp_comp_ranges[0]:(exp_comp_ranges[1]+1)], exp_data_dict[exp_label_temp[3]][exp_comp_ranges[0]:(exp_comp_ranges[1]+1)])
-        #print exp_data_seconds
+        #print "Exp_data_seconds", exp_data_seconds
         mod_data_seconds = zip(mod_data_dict[mod_Xaxis_column_name][mod_comp_ranges[0]:(mod_comp_ranges[1]+1)], mod_data_dict[mod_label_temp[3]][mod_comp_ranges[0]:(mod_comp_ranges[1]+1)])
-        #print mod_data_seconds
+        #print "Mod_data_seconds", mod_data_seconds
         
         #Convert time to minutes from seconds.
         exp_data.append([[x[0] / X_Scale_Factor, x[1]] for x in exp_data_seconds])
@@ -426,6 +453,9 @@ def extract_comp_data(comp_file_info):
 
 def comparison_plot(plot_data,exp_data,mod_data):
     #plot_data is a list of values from the 'd' row of the config file being processed.
+    
+    #print "Exp. Data to Plot:", exp_data
+    #print "Mod. Data to Plot:", mod_data
     
     # Variables for plot.
     plot_title = plot_data['Plot_Title']
@@ -488,6 +518,9 @@ def comparison_plot(plot_data,exp_data,mod_data):
         #Set plot legend key text.
         exp_key = plot_data['Exp_Key']
         mod_key = plot_data['Mod_Key']
+        
+        #print "Exp. Data to Plot:", exp_data[0]
+        #print "Mod. Data to Plot:", mod_data[0]
         
         # Plot Experimental data
         g.plot(graph.data.points(exp_data[0], title=exp_key, x=1, y=2),
