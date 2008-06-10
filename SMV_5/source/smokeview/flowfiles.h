@@ -757,6 +757,7 @@ typedef struct {
   int nsteps,islice;
   float *slicedata;
   unsigned char *slicepoint;
+  float above_ground_level;
   int volslice;
   int is1, is2, js1, js2, ks1, ks2;
   int nsliceii;
