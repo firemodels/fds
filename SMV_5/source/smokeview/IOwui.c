@@ -446,17 +446,26 @@ void initterrain_all(void){
     znode = terri->znode;
     for(j=0;j<=terri->ny;j++){
       int jp1, ip1;
+      int jp0, ip0;
       float dzdx, dzdy;
       float sum;
 
       jp1 = j + 1;
-      if(jp1>terri->ny)jp1=terri->ny;
+      jp0 = j;
+      if(jp1>terri->ny){
+        jp1=terri->ny;
+        jp0=jp1-1;
+      }
 
       for(i=0;i<=terri->nx;i++){
         ip1 = i + 1;
-        if(ip1>terri->nx)ip1=terri->nx;
-        dzdx = (znode[ijnode2(ip1,j)] - znode[ijnode2(i,j)])/dx;
-        dzdy = (znode[ijnode2(i,jp1)] - znode[ijnode2(i,j)])/dy;
+        ip0 = i;
+        if(ip1>terri->nx){
+          ip1=terri->nx;
+          ip0=ip1-1;
+        }
+        dzdx = (znode[ijnode2(ip1,jp0)] - znode[ijnode2(ip0,jp0)])/dx;
+        dzdy = (znode[ijnode2(ip0,jp1)] - znode[ijnode2(ip0,jp0)])/dy;
 
      //     i  j  k
      //     1  0 dzdx

@@ -1185,12 +1185,8 @@ void getsliceparams(void){
         else{
           sd->delta=(meshi->zplt_orig[ks1+1]-meshi->zplt_orig[ks1])/2.0;
         }
-        terri = meshi->terrain;
-        if(sd->terrain==1&&terri!=NULL){
-          float *znode;
-
-          znode = terri->znode;
-          position-=znode[0];
+        if(sd->terrain==1){
+          position=sd->above_ground_level;
           sprintf(sd->slicedir,"AGL=%f",position);
         }
         else{
@@ -2073,7 +2069,7 @@ void drawslice_terrain(const slice *sd){
   float constval,x1,x3,yy1,y3,z1,z3;
   int maxj;
 
-  float *xplt, *yplt, *zplt;
+  float *xplt, *yplt;
   terraindata *terri;
   float *znode;
   int nxcell;
@@ -2088,7 +2084,6 @@ void drawslice_terrain(const slice *sd){
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
-  zplt=meshi->zplt;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
@@ -2097,7 +2092,7 @@ void drawslice_terrain(const slice *sd){
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   if(sd->idir==3){
-   constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset-znode[0];
+   constval = sd->above_ground_level/xyzmaxdiff+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
      float xmid;
@@ -3479,7 +3474,7 @@ void drawvslice_terrain(const vslice *vd){
   float dx, dy, dz;
   float vrange;
   mesh *meshi;
-  float *xplttemp,*yplttemp,*zplttemp;
+  float *xplttemp,*yplttemp;
   float *rgb_ptr;
   terraindata *terri;
   float *znode;
@@ -3494,7 +3489,6 @@ void drawvslice_terrain(const vslice *vd){
 
   xplttemp=meshi->xplt;
   yplttemp=meshi->yplt;
-  zplttemp=meshi->zplt;
 
   vrange = velocity_range;
   if(vrange<=0.0)vrange=1.0;
@@ -3502,7 +3496,7 @@ void drawvslice_terrain(const vslice *vd){
   v = vd->v;
   w = vd->w;
   if(sd->idir==3){
-   constval = zplttemp[sd->ks1]+offset_slice*sd->sliceoffset - znode[0];;
+   constval = sd->above_ground_level/xyzmaxdiff + offset_slice*sd->sliceoffset;
    glLineWidth(vectorlinewidth);
    glBegin(GL_LINES);
    for(i=sd->is1; i<sd->is2+1; i+=vectorskip){

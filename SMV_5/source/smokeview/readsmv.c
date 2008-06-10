@@ -3230,6 +3230,7 @@ typedef struct {
         (match(buffer,"SLCT",4) == 1)
       ){
       int terrain=0;
+      float above_ground_level=0.0;
 
       nn_slice++;
       if(match(buffer,"SLCT",4) == 1){
@@ -3245,7 +3246,7 @@ typedef struct {
       }
       if(len>5){
         buffer3=buffer+4;
-        sscanf(buffer3,"%i",&blocknumber);
+        sscanf(buffer3,"%i %f",&blocknumber,&above_ground_level);
         blocknumber--;
       }
       if(fgets(buffer,255,stream)==NULL){
@@ -3287,6 +3288,7 @@ typedef struct {
       }
 
       sd->terrain=terrain;
+      sd->above_ground_level=above_ground_level;
       sd->seq_id=nn_slice;
       sd->autoload=0;
       sd->display=0;
