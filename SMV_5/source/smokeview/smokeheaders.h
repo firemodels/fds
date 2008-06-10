@@ -31,21 +31,21 @@ int SUB_portfrustum(int quad,
 EXTERNCPP void add_new_tour(void);
 
 #ifdef pp_LOGFILE
-void log_print(char *output);
+EXTERNCPP void log_print(char *output);
 #endif
-void init_avatar(void);
+EXTERNCPP void init_avatar(void);
 #ifdef pp_GPU
 EXTERNCPP int log2(float xx);
 #endif
-void readterrain(char *file, int ifile, int flag, int *errorcode);
-float getterrain_z(float x, float y);
-void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny);
-void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny);
-void initterrain_all(void);
-void drawterrain(terraindata *terri, int only_geom);
-void drawterrain_texture(terraindata *terri, int only_geom);
-void drawtrees(void);
-int createnulllabel(flowlabels *flowlabel);
+EXTERNCPP void readterrain(char *file, int ifile, int flag, int *errorcode);
+EXTERNCPP float getterrain_z(float x, float y);
+EXTERNCPP void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny);
+EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny);
+EXTERNCPP void initterrain_all(void);
+EXTERNCPP void drawterrain(terraindata *terri, int only_geom);
+EXTERNCPP void drawterrain_texture(terraindata *terri, int only_geom);
+EXTERNCPP void drawtrees(void);
+EXTERNCPP int createnulllabel(flowlabels *flowlabel);
 #ifdef pp_CULL
 EXTERNCPP void initcull(int cullflag);
 EXTERNCPP void initcullplane(int cullflag);

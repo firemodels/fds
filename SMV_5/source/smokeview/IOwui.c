@@ -345,7 +345,7 @@ void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, floa
 
 /* ------------------ get_zcell ------------------------ */
 
-float get_zcell(mesh *meshi,float xval, float yval, int *loc){
+float get_zcell_val(mesh *meshi,float xval, float yval, int *loc){
   terraindata *terri;
   mesh *meshj;
   int ival, jval;
@@ -403,6 +403,8 @@ void initterrain_all(void){
   mesh *meshi;
   int imesh;
   terraindata *terri;
+  float *xplt, *yplt;
+  float denom;
 
   for(imesh=0;imesh<nmeshes;imesh++){
     
@@ -415,6 +417,9 @@ void initterrain_all(void){
 
     znode = terri->znode;
     nxcell = terri->nx;
+
+    znormal = terri->znormal;
+    znode = terri->znode;
     for(j=0;j<=terri->ny;j++){
       int jm1, im1, ii, jj;
       float zz;
@@ -426,46 +431,106 @@ void initterrain_all(void){
         float xnode;
         int count, loc1, loc2, loc3, loc4;
         float val1, val2, val3, val4;
+        float valx1, valx2, valx3, valx4;
+        float valx1a, valx2a, valx3a, valx4a;
+        float valx1b, valx2b, valx3b, valx4b;
+        float valy1a, valy2a, valy3a, valy4a;
+        float valy1b, valy2b, valy3b, valy4b;
         float zval;
+        float zvalxa, zvalxb;
+        float zvalya, zvalyb;
+        float dxa, dxb, dya, dyb;
+        float dzdx, dzdy;
+        float sum;
 
         xnode = terri->x[i];
 
-        val1 =  get_zcell(meshi,xnode-dx/2.0,ynode-dy/2.0,&loc1);
-        val2 =  get_zcell(meshi,xnode+dx/2.0,ynode-dy/2.0,&loc2);
-        val3 =  get_zcell(meshi,xnode+dx/2.0,ynode+dy/2.0,&loc3);
-        val4 =  get_zcell(meshi,xnode-dx/2.0,ynode+dy/2.0,&loc4);
+        val1 =  get_zcell_val(meshi,xnode-dx/2.0,ynode-dy/2.0,&loc1);
+        val2 =  get_zcell_val(meshi,xnode+dx/2.0,ynode-dy/2.0,&loc2);
+        val3 =  get_zcell_val(meshi,xnode+dx/2.0,ynode+dy/2.0,&loc3);
+        val4 =  get_zcell_val(meshi,xnode-dx/2.0,ynode+dy/2.0,&loc4);
         count = loc1 + loc2 + loc3 + loc4;
         zval = val1*loc1 + val2*loc2 + val3*loc3 + val4*loc4;
         if(count==0)count=1;
         zval /= (float)count;
 
         *znode++=zval;
-      }
-    }
-    znormal = terri->znormal;  ;
-    znode = terri->znode;
-    for(j=0;j<=terri->ny;j++){
-      int jp1, ip1;
-      int jp0, ip0;
-      float dzdx, dzdy;
-      float sum;
 
-      jp1 = j + 1;
-      jp0 = j;
-      if(jp1>terri->ny){
-        jp1=terri->ny;
-        jp0=jp1-1;
-      }
+ // compute (f(x+dx,y) - f(x-dx,y))/(2*dx)
 
-      for(i=0;i<=terri->nx;i++){
-        ip1 = i + 1;
-        ip0 = i;
-        if(ip1>terri->nx){
-          ip1=terri->nx;
-          ip0=ip1-1;
+        valx1a =  get_zcell_val(meshi,xnode-dx-dx/2.0,ynode-dy/2.0,&loc1);
+        valx2a =  get_zcell_val(meshi,xnode-dx+dx/2.0,ynode-dy/2.0,&loc2);
+        valx3a =  get_zcell_val(meshi,xnode-dx+dx/2.0,ynode+dy/2.0,&loc3);
+        valx4a =  get_zcell_val(meshi,xnode-dx-dx/2.0,ynode+dy/2.0,&loc4);
+        count = loc1 + loc2 + loc3 + loc4;
+        zvalxa = valx1a*loc1 + valx2a*loc2 + valx3a*loc3 + valx4a*loc4;
+        if(count==0){
+          zvalxa = zval;
+          dxa = 0.0;
         }
-        dzdx = (znode[ijnode2(ip1,jp0)] - znode[ijnode2(ip0,jp0)])/dx;
-        dzdy = (znode[ijnode2(ip0,jp1)] - znode[ijnode2(ip0,jp0)])/dy;
+        else{
+          zvalxa /= (float)count;
+          dxa = dx;
+        }
+        valx1b =  get_zcell_val(meshi,xnode+dx-dx/2.0,ynode-dy/2.0,&loc1);
+        valx2b =  get_zcell_val(meshi,xnode+dx+dx/2.0,ynode-dy/2.0,&loc2);
+        valx3b =  get_zcell_val(meshi,xnode+dx+dx/2.0,ynode+dy/2.0,&loc3);
+        valx4b =  get_zcell_val(meshi,xnode+dx-dx/2.0,ynode+dy/2.0,&loc4);
+        count = loc1 + loc2 + loc3 + loc4;
+        zvalxb = valx1b*loc1 + valx2b*loc2 + valx3b*loc3 + valx4b*loc4;
+        if(count==0){
+          zvalxb = zval;
+          dxb = 0.0;
+        }
+        else{
+          zvalxb /= (float)count;
+          dxb = dx;
+        }
+        denom = dxa+dxb;
+        if(denom==0.0){
+          dzdx=1.0;
+        }
+        else{
+          dzdx = (zvalxb - zvalxa)/denom;
+        }
+
+ // compute (f(x,y+dy) - f(x,y-dy))/(2*dy)
+
+        valy1a =  get_zcell_val(meshi,xnode-dx/2.0,ynode-dy-dy/2.0,&loc1);
+        valy2a =  get_zcell_val(meshi,xnode+dx/2.0,ynode-dy-dy/2.0,&loc2);
+        valy3a =  get_zcell_val(meshi,xnode+dx/2.0,ynode-dy+dy/2.0,&loc3);
+        valy4a =  get_zcell_val(meshi,xnode-dx/2.0,ynode-dy+dy/2.0,&loc4);
+        count = loc1 + loc2 + loc3 + loc4;
+        zvalya = valy1a*loc1 + valy2a*loc2 + valy3a*loc3 + valy4a*loc4;
+        if(count==0){
+          zvalya = zval;
+          dya = 0.0;
+        }
+        else{
+          zvalya /= (float)count;
+          dya = dy;
+        }
+        valy1b =  get_zcell_val(meshi,xnode-dx/2.0,ynode+dy-dy/2.0,&loc1);
+        valy2b =  get_zcell_val(meshi,xnode+dx/2.0,ynode+dy-dy/2.0,&loc2);
+        valy3b =  get_zcell_val(meshi,xnode+dx/2.0,ynode+dy+dy/2.0,&loc3);
+        valy4b =  get_zcell_val(meshi,xnode-dx/2.0,ynode+dy+dy/2.0,&loc4);
+        count = loc1 + loc2 + loc3 + loc4;
+        zvalyb = valy1b*loc1 + valy2b*loc2 + valy3b*loc3 + valy4b*loc4;
+        if(count==0){
+          zvalyb = zval;
+          dyb = 0.0;
+        }
+        else{
+          zvalyb /= (float)count;
+          dyb = dy;
+        }
+        denom = dya + dyb;
+        if(denom==0.0){
+          dzdy=1.0;
+        }
+        else{
+          dzdy = (zvalyb - zvalya)/denom;
+        }
 
      //     i  j  k
      //     1  0 dzdx
@@ -473,7 +538,6 @@ void initterrain_all(void){
 
      //     -dzdx -dzdy 1
 
-          
         znormal = terri->znormal + 3*ijnode2(i,j);
         znormal[0] = -dzdx;
         znormal[1] = -dzdy;
