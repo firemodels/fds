@@ -30,6 +30,7 @@ void endian_switch(void *val, int nval);
 
 #define ijcell2(i,j) nxcell*(j) + (i)
 #define ijnode2(i,j) ((nxcell+1)*(j) + (i))
+#define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
 #define FORTWUIREAD(var,size) fseek(WUIFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,WUIFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
@@ -118,7 +119,6 @@ void drawtrees(void){
 
 }
 
-#define ijnode2(i,j) ((nxcell+1)*(j) + (i))
 
 /* ------------------ getterrain_z ------------------------ */
 
@@ -171,8 +171,6 @@ float getterrain_z(float x, float y){
 }
 
 /* ------------------ initterrain ------------------------ */
-
-#define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
 
 void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny){
   char buffer[1024];
@@ -239,7 +237,6 @@ void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, floa
   }
   y[ny] = ymax;
 
-#define ijcell2(i,j) nxcell*(j) + (i)
   z=terri->zcell;
   if(stream==NULL){
     int *iblank_cell;
@@ -298,22 +295,30 @@ void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, floa
       *znode++=zz;
     }
   }
-#define ijnode2(i,j) ((nxcell+1)*(j) + (i))
   znormal = terri->znormal;  ;
   znode = terri->znode;
   for(j=0;j<=terri->ny;j++){
     int jp1, ip1;
+    int jp0, ip0;
     float dzdx, dzdy;
     float sum;
 
     jp1 = j + 1;
-    if(jp1>terri->ny)jp1=terri->ny;
+    jp0 = j;
+    if(jp1>terri->ny){
+      jp1=terri->ny;
+      jp0=jp1-1;
+    }
 
     for(i=0;i<=terri->nx;i++){
       ip1 = i + 1;
-      if(ip1>terri->nx)ip1=terri->nx;
-      dzdx = (znode[ijnode2(ip1,j)] - znode[ijnode2(i,j)])/dx;
-      dzdy = (znode[ijnode2(i,jp1)] - znode[ijnode2(i,j)])/dy;
+      ip0 = i;
+      if(ip1>terri->nx){
+        ip1=terri->nx;
+        ip0=ip1-1;
+      }
+      dzdx = (znode[ijnode2(ip1,jp0)] - znode[ijnode2(ip0,jp0)])/dx;
+      dzdy = (znode[ijnode2(ip0,jp1)] - znode[ijnode2(ip0,jp0)])/dy;
 
      //     i  j  k
      //     1  0 dzdx
@@ -338,13 +343,58 @@ void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, floa
   }
 }
 
+/* ------------------ get_zcell ------------------------ */
+
+float get_zcell(mesh *meshi,float xval, float yval, int *loc){
+  terraindata *terri;
+  mesh *meshj;
+  int ival, jval;
+  float *xplt, *yplt;
+  int ibar, jbar;
+  float dx, dy;
+  float *znode;
+  int nxcell;
+  float *zcell,zval;
+  int imesh;
+
+  for(imesh=-1;imesh<nmeshes;imesh++){
+    if(imesh==-1){
+      meshj=meshi;
+    }
+    else{
+      meshj=meshinfo+imesh;
+      if(meshi==meshj)continue;
+    }
+    xplt = meshj->xplt_orig;
+    yplt = meshj->yplt_orig;
+    ibar = meshj->ibar;
+    jbar = meshj->jbar;
+    if(xplt[0]<=xval&&xval<=xplt[ibar]&&yplt[0]<=yval&&yval<=yplt[jbar]){
+      dx = xplt[1]-xplt[0];
+      dy = yplt[1]-yplt[0];
+      ival = (xval-xplt[0])/dx;
+      if(ival>=ibar)ival=ibar-1;
+      jval = (yval-yplt[0])/dy;
+      if(jval>=jbar)jval=jbar-1;
+      terri=meshj->terrain;
+      nxcell = terri->nx;
+      zcell = terri->zcell;
+      zval = zcell[ijcell2(ival,jval)];
+      *loc=1;
+      return zval;
+    }
+  }
+  *loc=0;
+  return 0.0;
+}
+
 /* ------------------ initterrain_all ------------------------ */
 
 void initterrain_all(void){
   char buffer[1024];
   float dx, dy;
-  float *x, *y, *z;
-  float *znode, *zcell;
+  float *x, *y;
+  float *znode;
   int nxcell;
   float *znormal;
   int i,j,k;
@@ -358,55 +408,55 @@ void initterrain_all(void){
     
     meshi = meshinfo + imesh;
 
-  terri = meshi->terrain;
+    terri = meshi->terrain;
 
-  dx = terri->x[1]-terri->x[0];
-  dy = terri->y[1]-terri->y[0];
+    dx = terri->x[1]-terri->x[0];
+    dy = terri->y[1]-terri->y[0];
 
-#define ijcell2(i,j) nxcell*(j) + (i)
-  z=terri->zcell;
-  znode = terri->znode;
-  zcell = terri->zcell;
-  nxcell = terri->nx;
-  for(j=0;j<=terri->ny;j++){
-    int jm1, im1, ii, jj;
-    float zz;
+    znode = terri->znode;
+    nxcell = terri->nx;
+    for(j=0;j<=terri->ny;j++){
+      int jm1, im1, ii, jj;
+      float zz;
+      float ynode;
 
-    jm1 = j - 1;
-    if(jm1<0)jm1=0;
-    jj = j;
-    if(jj==terri->ny)jj--;
+      ynode = terri->y[j];
 
-    for(i=0;i<=terri->nx;i++){
-      im1 = i - 1;
-      if(im1<0)im1 = 0;
-      ii = i;
-      if(ii==terri->nx)ii--;
+      for(i=0;i<=terri->nx;i++){
+        float xnode;
+        int count, loc1, loc2, loc3, loc4;
+        float val1, val2, val3, val4;
+        float zval;
 
-      zz =  zcell[ijcell2(im1,jm1)];
-      zz += zcell[ijcell2(im1,jj)];
-      zz += zcell[ijcell2(ii,jm1)];
-      zz += zcell[ijcell2(ii,jj)];
-      zz *= 0.25;
-      *znode++=zz;
+        xnode = terri->x[i];
+
+        val1 =  get_zcell(meshi,xnode-dx/2.0,ynode-dy/2.0,&loc1);
+        val2 =  get_zcell(meshi,xnode+dx/2.0,ynode-dy/2.0,&loc2);
+        val3 =  get_zcell(meshi,xnode+dx/2.0,ynode+dy/2.0,&loc3);
+        val4 =  get_zcell(meshi,xnode-dx/2.0,ynode+dy/2.0,&loc4);
+        count = loc1 + loc2 + loc3 + loc4;
+        zval = val1*loc1 + val2*loc2 + val3*loc3 + val4*loc4;
+        if(count==0)count=1;
+        zval /= (float)count;
+
+        *znode++=zval;
+      }
     }
-  }
-#define ijnode2(i,j) ((nxcell+1)*(j) + (i))
-  znormal = terri->znormal;  ;
-  znode = terri->znode;
-  for(j=0;j<=terri->ny;j++){
-    int jp1, ip1;
-    float dzdx, dzdy;
-    float sum;
+    znormal = terri->znormal;  ;
+    znode = terri->znode;
+    for(j=0;j<=terri->ny;j++){
+      int jp1, ip1;
+      float dzdx, dzdy;
+      float sum;
 
-    jp1 = j + 1;
-    if(jp1>terri->ny)jp1=terri->ny;
+      jp1 = j + 1;
+      if(jp1>terri->ny)jp1=terri->ny;
 
-    for(i=0;i<=terri->nx;i++){
-      ip1 = i + 1;
-      if(ip1>terri->nx)ip1=terri->nx;
-      dzdx = (znode[ijnode2(ip1,j)] - znode[ijnode2(i,j)])/dx;
-      dzdy = (znode[ijnode2(i,jp1)] - znode[ijnode2(i,j)])/dy;
+      for(i=0;i<=terri->nx;i++){
+        ip1 = i + 1;
+        if(ip1>terri->nx)ip1=terri->nx;
+        dzdx = (znode[ijnode2(ip1,j)] - znode[ijnode2(i,j)])/dx;
+        dzdy = (znode[ijnode2(i,jp1)] - znode[ijnode2(i,j)])/dy;
 
      //     i  j  k
      //     1  0 dzdx
@@ -415,20 +465,20 @@ void initterrain_all(void){
      //     -dzdx -dzdy 1
 
           
-      znormal = terri->znormal + 3*ijnode2(i,j);
-      znormal[0] = -dzdx;
-      znormal[1] = -dzdy;
-      znormal[2] = 1.0;
+        znormal = terri->znormal + 3*ijnode2(i,j);
+        znormal[0] = -dzdx;
+        znormal[1] = -dzdy;
+        znormal[2] = 1.0;
 
-      sum  = znormal[0]*znormal[0];
-      sum += znormal[1]*znormal[1];
-      sum += znormal[2]*znormal[2];
-      sum = sqrt(sum);
-      znormal[0]/=sum;
-      znormal[1]/=sum;
-      znormal[2]/=sum;
+        sum  = znormal[0]*znormal[0];
+        sum += znormal[1]*znormal[1];
+        sum += znormal[2]*znormal[2];
+        sum = sqrt(sum);
+        znormal[0]/=sum;
+        znormal[1]/=sum;
+        znormal[2]/=sum;
+      }
     }
-  }
   }
 }
 
@@ -502,9 +552,7 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
   }
   y[ny] = ymax;
 
-#define ijcell2(i,j) nxcell*(j) + (i)
   z=terri->zcell;
-
 
   iblank_cell = meshi->iblank_cell;
   ibar = nx;
@@ -527,7 +575,6 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
 }
 /* ------------------ drawterrain ------------------------ */
 
-#define ijnode2(i,j) ((nxcell+1)*(j) + (i))
 void drawterrain(terraindata *terri, int only_geom){
   float *znode, *znormal;
   int nxcell;
