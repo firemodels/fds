@@ -1912,6 +1912,7 @@ void LoadUnloadMenu(int value){
   size_t len;
   int i;
   int ii;
+
   if(value==999)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value==UNLOADALL){
@@ -1919,6 +1920,9 @@ void LoadUnloadMenu(int value){
    // for(i=0;i<nterraininfo;i++){
    //   readterrain("",i,UNLOAD,&errorcode);
    // }
+    if(hrrfilename!=NULL){
+      readhrr(UNLOAD, &errorcode);
+    }
     for(i=0;i<nslice;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
@@ -1947,6 +1951,9 @@ void LoadUnloadMenu(int value){
   }
   if(value==RELOADALL){
     LOCK_COMPRESS
+    if(hrrfilename!=NULL){
+      readhrr(LOAD, &errorcode);
+    }
     islicetype_save=islicetype;
     for(i=0;i<nslice;i++){
       sliceinfo[i].reload=1;
