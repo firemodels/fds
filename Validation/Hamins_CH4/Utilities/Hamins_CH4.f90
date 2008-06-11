@@ -46,13 +46,13 @@ R = (/7.8, 10.0, 12.8, 15.0, 17.5, 20.6/)
 Z = (/0.2, 1.1, 2.2, 3.3, 4.4, 6.6, 8.8, 12.2, 15.2, 20.3, 30.0, 39.3/)
 
 ! Hamins_CH4_1
-infile = 'Hamins_CH4_1_devc.csv'
-outfile = 'Hamins_CH4_1_devc_ave.csv'
+infile = 'Hamins_CH4_01_devc.csv'
+outfile = 'Hamins_CH4_01_devc_avg.csv'
 call ReadCH4(infile,outfile,mintime,ncol,nR,nV,ncd,M,Ra1,Ra2,RaR,RaV,R,Z)
 
 ! Hamins_CH4_5
-infile = 'Hamins_CH4_5_devc.csv'
-outfile = 'Hamins_CH4_5_devc_ave.csv'
+infile = 'Hamins_CH4_05_devc.csv'
+outfile = 'Hamins_CH4_05_devc_avg.csv'
 call ReadCH4(infile,outfile,mintime,ncol,nR,nV,ncd,M,Ra1,Ra2,RaR,RaV,R,Z)
 
 !
@@ -67,12 +67,12 @@ Z = Z*100.0
 
 ! Hamins_CH4_21
 infile = 'Hamins_CH4_21_devc.csv'
-outfile = 'Hamins_CH4_21_devc_ave.csv'
+outfile = 'Hamins_CH4_21_devc_avg.csv'
 call ReadCH4(infile,outfile,mintime,ncol,nR,nV,ncd,M,Ra1,Ra2,RaR,RaV,R,Z)
 
 ! Hamins_CH4_23
 infile = 'Hamins_CH4_23_devc.csv'
-outfile = 'Hamins_CH4_23_devc_ave.csv'
+outfile = 'Hamins_CH4_23_devc_avg.csv'
 call ReadCH4(infile,outfile,mintime,ncol,nR,nV,ncd,M,Ra1,Ra2,RaR,RaV,R,Z)
 
 !
@@ -87,13 +87,13 @@ R = R*100.0
 Z = Z*100.0
 
 ! Hamins_CH4_7
-infile = 'Hamins_CH4_7_devc.csv'
-outfile = 'Hamins_CH4_7_devc_ave.csv'
+infile = 'Hamins_CH4_07_devc.csv'
+outfile = 'Hamins_CH4_07_devc_avg.csv'
 call ReadCH4(infile,outfile,mintime,ncol,nR,nV,ncd,M,Ra1,Ra2,RaR,RaV,R,Z)
 
 ! Hamins_CH4_19
 infile = 'Hamins_CH4_19_devc.csv'
-outfile = 'Hamins_CH4_19_devc_ave.csv'
+outfile = 'Hamins_CH4_19_devc_avg.csv'
 call ReadCH4(infile,outfile,mintime,ncol,nR,nV,ncd,M,Ra1,Ra2,RaR,RaV,R,Z)
 
 end program NIST_Hamins
@@ -154,17 +154,16 @@ Else
 Endif
 
 open(FID,file=trim(outfile),form='formatted',status='replace')
+write(FID,"(a)") '"Radius","Radial Flux","Height","Vertical Flux"'
+
 !write radial data
-write(form,'(A,I3,A)') "(",nR-1,"(A,'R_r',I2.2,A,','),A,'R_r',I2.2,A))"
-write(FID,form) ('"',i,'"',i=1,nR)
-write(form,'(A,I3,A)') "(",nR-1,"(e10.4,','),e10.4)"
-write(FID,form) (R(i),i=1,nR)
-write(FID,form) (RaR(i),i=1,nR)
-!write vertical data
-write(form,'(A,I3,A)') "(",nV-1,"(A,'R_v',I2.2,A,','),A,'R_v',I2.2,A))"
-write(FID,form) ('"',i,'"',i=1,nV)
-write(form,'(A,I3,A)') "(",nV-1,"(e10.4,','),e10.4)"
-write(FID,form) (Z(i),i=1,nV)
-write(FID,form) (RaV(i),i=1,nV)
+do i=1,nV
+   if (i<=nR) then
+      write(FID,"(3(e10.4,','),e10.4)") R(i),RaR(i),Z(i),RaV(i)
+   else
+      write(FID,"(A,1(e10.4,','),e10.4)") ',,',Z(i),RaV(i)
+   endif
+enddo
 close(FID)
+
 End subroutine ReadCH4

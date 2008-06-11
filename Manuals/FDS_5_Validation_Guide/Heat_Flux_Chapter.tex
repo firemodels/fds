@@ -78,24 +78,57 @@ After applying the correction, it is easier to compare total heat fluxes that ar
 
 \section{Hamins Methane Burner Radiation Measurements}
 
-Predicted and measured radial and vertical heat flux profiles from six experiments conducted by Anthony Hamins at NIST are shown on the following pages.
-The radiative fluxes were measured during steady state burning and averaged over a long time period.
+Predicted and measured radial and vertical heat flux profiles from six experiments conducted by Anthony Hamins at NIST are shown on the following pages. The
+relevant information about the fires is included in Table~\ref{Hamins_Table}. These are challenging simulations because the neither the gray gas assumption
+nor the radiative fraction is assumed. Rather, the model is calculating the temperature and species concentrations necessary to predict the radiant energy from the fire.
 
-\begin{figure}
+\begin{table}[ht]
+\label{Hamins_Table}
 \begin{center}
-\includegraphics[width=6.0in]{FIGURES/Hamins_CH4/Hamins_CH4_Radial}
-\caption{NIST Flame Radiation Test Series, radial heat flux distributions.}
+\caption{Summary of Hamins methane burner experiments. }
+\vspace{\baselineskip}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Case     & Test     & D    & $\dot{Q}$   &  $\dot{Q}''$   & $Q^*$   \\
+         & Number   & (m)  & (kW)        &  (kW/m$^2$)    &         \\ \hline \hline
+A        & 1        & 0.10 & 0.42        &  53.8          & 0.12    \\ \hline
+B        & 5        & 0.10 & 1.88        &  240           & 0.53    \\ \hline
+C        & 23       & 0.38 & 33.5        &  295           & 0.34    \\ \hline
+D        & 21       & 0.38 & 175         &  1550          & 1.8     \\ \hline
+E        & 7        & 1.0  & 49.0        &  62.4          & 0.044   \\ \hline
+F        & 19       & 1.0  & 162         &  206           & 0.14    \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_01_Radial_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_05_Radial_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_23_Radial_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_21_Radial_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_07_Radial_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_19_Radial_Heat_Flux}
+\end{tabular*}
 \label{Hamins_CH4_Radial}
-\end{center}
+\caption{Comparison of predicted and measured heat fluxes to the ``floor'' as a function of radial distance from a methane burner.} 
+\end{figure}
 
-\end{figure}
-\begin{figure}
-\begin{center}
-\includegraphics[width=6.0in]{FIGURES/Hamins_CH4/Hamins_CH4_Vertical}
-\caption{NIST Flame Radiation Test Series, vertical heat flux distributions.}
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_01_Vertical_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_05_Vertical_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_23_Vertical_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_21_Vertical_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_07_Vertical_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/Hamins_CH4/Hamins_CH4_19_Vertical_Heat_Flux}
+\end{tabular*}
 \label{Hamins_CH4_Vertical}
-\end{center}
+\caption{Comparison of predicted and measured heat fluxes from a methane burner to a ``wall'' as a function of the height from the burner surface.} 
 \end{figure}
+
+
+
 
 
 \clearpage
