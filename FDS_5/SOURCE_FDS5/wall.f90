@@ -799,8 +799,8 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          VOLSUM = VOLSUM + WC%RHO_S(I,N)/ML%RHO_S
       ENDDO MATERIAL_LOOP1b
 
+      ! In points that actuall shrink, increase the density to account for filled material
       VOLSUM = MIN(VOLSUM,1._EB)
-      IF (SF%SHRINK) X_S_NEW(I) = X_S_NEW(I-1)+(WC%X_S(I)-WC%X_S(I-1))*VOLSUM
       IF (POINT_SHRINK) THEN
          IF (VOLSUM<1.0_EB) THEN
             WC%SHRINKING=.TRUE.
@@ -810,7 +810,13 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
                ENDDO MATERIAL_LOOP1c
             ENDIF
          ENDIF
+      ELSE
+         ! In points that do not shrink, do not change the cell size.
+         VOLSUM = 1._EB
       ENDIF
+      ! Compute new co-ordinates
+      IF (SF%SHRINK) X_S_NEW(I) = X_S_NEW(I-1)+(WC%X_S(I)-WC%X_S(I-1))*VOLSUM
+
    ENDDO POINT_LOOP1
 
    ! If the fuel or water massflux is non-zero, set the ignition time
