@@ -10,7 +10,7 @@ from pyx import *
 
 data_directory = "../../Validation/"
 output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
-config_file_name = "Validation_Data_Config_File_Test.csv"
+config_file_name = "Validation_Data_Config_File.csv"
 
 ### Set Global Variables for Verification
 
@@ -101,9 +101,9 @@ def extract_config_data(config_file):
 
 def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,stop_comp,x_scale):
     #This function is used to find index numbers for start and stop points in plotting and min-max values.
-    print "\n*** Find Start/End Indexes for X Column."
-    print "X Scale Factor:", x_scale
-    print "Stop Data:", stop_data
+    print "\n*** Find Start/End Indexes for X Column ***"
+    #print "X Scale Factor:", x_scale
+    #print "Stop Data:", stop_data
     print "X Column name:", col_name
     #print "X Column Data:", data_dict[col_name]
     rowcounter1 = 0
@@ -114,15 +114,14 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
             continue
         else:
             if value1 >= (float(start_data)*float(x_scale)):
-                print "X Column Starts at row #:", str(rowcounter1)
-                print "With a value of:", str(value1)
+                #print "X Column Starts at row #:", str(rowcounter1)
+                #print "With a value of:", str(value1)
                 Xcol_start_index = rowcounter1
                 break
         rowcounter1 = rowcounter1 + 1
     rowcounter2 = 0
     end_index = 0
     index_count = 0
-    
     print "*** Finding Index of last good value in X Column ***"    
     for end_data_index in data_dict[col_name]:
         #print end_data_index, " : ", index_count
@@ -133,9 +132,9 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
             index_count = index_count + 1
     if end_index == 0:
         end_index = index_count - 1
-    print "Length of X Column:", end_index + 1
-    print "Last value in X Column:", data_dict[col_name][end_index]
-    print "Index of Last Numeric Value:", end_index
+    #print "Length of X Column:", end_index + 1
+    #print "Last value in X Column:", data_dict[col_name][end_index]
+    #print "Index of Last Numeric Value:", end_index
     
     print "*** Finding X Column End Index ***"
     for value2 in data_dict[col_name]:
@@ -149,8 +148,7 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
             rowcounter2 = rowcounter2 + 1
         else:
             row_number2 = (rowcounter2)
-            print "X Column Ends at Index #: "+str(row_number2)
-            print "With a value of: "+str(data_dict[col_name][row_number2])
+            print "X Column Ends at Index #: ", str(row_number2), "with a value of: ", str(data_dict[col_name][row_number2])
             Xcol_end_index = row_number2
             break
     rowcounter3 = 0
@@ -167,17 +165,17 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
     for value4 in data_dict[col_name]:
         scaled_stop_value = (float(stop_comp)*float(x_scale))
         end_index_value = float(data_dict[col_name][end_index])
-        print "Scaled Stop Value and End Index Value:", scaled_stop_value, " : ",end_index_value
+        #print "Scaled Stop Value and End Index Value:", scaled_stop_value, " : ",end_index_value
         if end_index_value < scaled_stop_value:
-            print "Specified end of comparison is greater than last value in the data set. \nUsing last value in the X column."
-            print "Time used is: "+str(float(end_index_value))+"\n"
+            print "Specified end of comparison is greater than last value in the data set."
+            print "Comparison Ends at Index #:", str(end_index), "with a value of: ", str(end_index_value)
             minmax_end_index = end_index
             break
         else:
-            print "Value 4:",value4
+            #print "Value 4:",value4
             if value4 < scaled_stop_value:
                 rowcounter4 = rowcounter4 + 1
-                print "increment rowcounter4:", rowcounter4
+                #print "increment rowcounter4:", rowcounter4
             if value4 >= scaled_stop_value:
                 if value4 == scaled_stop_value:
                     row_number4 = rowcounter4
@@ -404,7 +402,7 @@ def extract_comp_data(comp_file_info):
                 except:
                     print "!!! Computation of Rise relative_difference failed. !!!\nCheck source data for columns listed above."
                     exit()
-                #Append Rise Values to Global Scatter Data Dictionary.
+                    #Append Rise Values to Global Scatter Data Dictionary.
                 print combined_scatter_data_labels[0][scatter_counter]
                 scatter_data_dict[combined_scatter_data_labels[0][scatter_counter]] = [exp_rise_value,mod_rise_value,relative_difference]
             elif min_max == 'min':
@@ -494,7 +492,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
     expPlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Black, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.06*unit.w_cm)])
     modPlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Grey, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.03*unit.w_cm)])
     
-    # Loop strcuture to process compound colum names in d line.
+    #Loop strcuture to process compound colum names in d line.
     #print "Exp. Data:",exp_data
     if len(exp_data) > 1 :
         #Set plot legend key text.
@@ -734,11 +732,11 @@ print "**** READING CONFIGURATION FILE ****"
 
 ##Get information from config file.
 group_quantity_data_dicts = extract_config_data(config_file_name)
-print "\nThere are "+str(len(group_quantity_data_dicts[0]))+" scatter data groups, (g lines).\n"
+print "\nThere are "+str(len(group_quantity_data_dicts[0]))+" scatter data groups, (g lines)."
 #print group_quantity_data_dicts[0]
-print "There are "+str(len(group_quantity_data_dicts[1]))+" scatter data quantities to plot, (q lines).\n"
+print "There are "+str(len(group_quantity_data_dicts[1]))+" scatter data quantities to plot, (q lines)."
 #print group_quantity_data_dicts[1]
-print "There are "+str(len(group_quantity_data_dicts[2]))+" comparison data sets to plot, (d lines).\n"
+print "There are "+str(len(group_quantity_data_dicts[2]))+" comparison data sets to plot, (d lines)."
 
 ## Create comparison plots
 print "**** CREATING COMPARISON PLOTS ****"
@@ -802,4 +800,4 @@ scatter_plot(group_quantity_data_dicts[0],group_quantity_data_dicts[1],combined_
 #*DeltaM
 #*Rel Diff
 
-print "Processing finished, thank you for your patience."
+print "***  Processing finished, thank you for your patience.  ***"
