@@ -54,7 +54,10 @@ int readsmv(char *smvfile){
       continue;
     }
 #endif
-    if(match(buffer,"SLCF",4) == 1){
+    if(
+      match(buffer,"SLCF",4) == 1||
+      match(buffer,"SLCT",4) == 1
+      ){
       nslice_files++;
       continue;
     }
@@ -449,7 +452,10 @@ int readsmv(char *smvfile){
       }
       continue;
     }
-    if(match(buffer,"SLCF",4) == 1){
+    if(
+      match(buffer,"SLCF",4) == 1||
+      match(buffer,"SLCT",4) == 1)
+    {
       int version=0,dummy;
       char *buffer2;
       int len;
