@@ -6286,6 +6286,11 @@ measured from the current surface, and the measurement point is
 measurement point may get out of the solid, in which case it starts to
 show ambient temperature.
 
+Two additional quantities are useful for monitoring the of reacting
+surfaces: {\ct WALL\_THICKNESS} gives the overall thickness of the surface
+element. {\ct SURFACE DENSITY} (no underscore) gives the oveall mass per unit area for the
+surface element, computed as an integral of material density over wall
+thickness. Both quantities are available both as {\ct DEVC} and {\ct BNDF}.
 
 \subsection{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}
 \label{info:SLCF}\index{SLCF}
@@ -6901,6 +6906,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct [SPEC\_ID]\_FLUX\_Z}                       & $\rho w Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
 {\ct spot obscuration}                          & See Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
 {\ct SPRINKLER LINK TEMPERATURE}                & See Section~\ref{info:sprinklers}             & $^\circ$C      & D            \\ \hline
+{\ct SURFACE DENSITY}                           & $\sum\int\rho_i dx$                           & kg/m$^2$       & B,D          \\ \hline
 {\ct TEMPERATURE}                               & $T$ (Section~\ref{info:THERMOCOUPLE})         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & $T_{TC}$ (Section~\ref{info:THERMOCOUPLE})    & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct TIME}                                      & $t$ (Section~\ref{info:DEVC})                 & s              & D            \\ \hline
