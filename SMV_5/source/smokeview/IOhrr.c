@@ -63,9 +63,11 @@ void readhrr(int flag, int *errorcode){
   int ntimes, nfirst;
   char buffer[1024];
   float *hrrtime, *hrrval;
+  int display=0;
 
   *errorcode=0;
   if(hrrinfo!=NULL){
+    display = hrrinfo->display;
     FREEMEMORY(hrrinfo->times_csv);
     FREEMEMORY(hrrinfo->times);
     FREEMEMORY(hrrinfo->hrrval_csv);
@@ -84,7 +86,7 @@ void readhrr(int flag, int *errorcode){
   hrrinfo->hrrval=NULL;
   hrrinfo->ntimes_csv=0;
   hrrinfo->loaded=1;
-  hrrinfo->display=0;
+  hrrinfo->display=display;
   hrrinfo->itime=0;
 
   HRRFILE=fopen(hrrinfo->file,"r");
