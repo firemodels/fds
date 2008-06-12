@@ -69,6 +69,7 @@ SVEXTERN int small_font_height, large_font_height;
 SVEXTERN float cb_valmin, cb_valmax, cb_val;
 SVEXTERN int cb_colorindex;
 SVEXTERN float rgb_plot3d[4*MAXRGB];
+SVEXTERN float rgbterrain[4*MAXRGB];
 
 SVEXTERN char inputfilename_ext[4];
 
@@ -419,6 +420,7 @@ SVEXTERN int visAvailmemory;
 SVEXTERN FILE *LOGFILE;
 #endif
 SVEXTERN int autoterrain,manual_terrain;
+SVEXTERN float zterrain_max, zterrain_min;
 SVEXTERN int revision_smv, revision_fds;
 SVEXTERN int visBlocklabel;
 SVEXTERN int visOpenVents,visDummyVents;
