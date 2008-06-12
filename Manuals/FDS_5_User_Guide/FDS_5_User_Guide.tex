@@ -419,7 +419,7 @@ York University in 1991. He joined the NIST staff in 1992 and has
 since worked on the development of fire models, most notably the Fire
 Dynamics Simulator.
 \item[Simo Hostikka] is a Senior Research Scientist at VTT Technical
-Research Centre of Finland. He received a master of science 
+Research Centre of Finland. He received a master of science
 (technology) degree in 1997 and a doctorate in 2008 from
 the Department of Engineering Physics and Mathematics of the
 Helsinki University of Technology.  He is the principal developer of the
@@ -4309,7 +4309,7 @@ specifying, at the very least, the basic stoichiometry via the {\ct REAC} line.
 Using the mixture fraction model, each reaction is assumed to be of the form:
 \be \mathrm{C_xH_yO_zN_vOther_w + \nu_{O_2} \; O_2 \rightarrow
     \nu_{CO_2} \; CO_2 + \nu_{H_2O} \; H_2O +
-    \nu_{CO}   \; CO   + \nu_{soot} \; Soot + \nu_{N_2} \; N_2 + \nu_{H_2} \; H_2 + 
+    \nu_{CO}   \; CO   + \nu_{soot} \; Soot + \nu_{N_2} \; N_2 + \nu_{H_2} \; H_2 +
     \nu_{Other} \; Other } \ee
 You need only specify the chemical formula of the fuel along with
 the yields of CO, soot, and H$_2$, and the amount of hydrogen in the soot, H$_{frac}$.
@@ -4478,7 +4478,7 @@ In an LES simulation, the heat release rate is computed as
 Here, $\tau$ is a mixing time scale~\cite{Raman:CF} given by
 \be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \ee
 The coefficient, $C$, is taken as 0.1 in FDS by default, based on comparisons to various flame height correlations. It is given by
-{\ct MIX\_TIME\_FACTOR} on the {\ct REAC} line. If you do not want to use this model, set {\ct EDDY\_BREAKUP=.FALSE.} on the {\ct REAC} line, in which
+{\ct C\_EDC} on the {\ct REAC} line. If you do not want to use this model, set {\ct EDDY\_DISSIPATION=.FALSE.} on the {\ct REAC} line, in which
 case $\tau$ becomes the time step, $\dt$.
 
 There are two additional bounds on the local heat release rate per unit volume. One is based on an empirically determined maximum heat release rate
@@ -7319,7 +7319,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct GAMMA}                     & Real          & Ratio of specific heats                       &               & 1.4               \\ \hline
 {\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}         & m             & 0.                  \\ \hline
 {\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
-{\ct H\_FIXED}                  & Real          & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
+{\ct H\_FIXED}                  & Real          & See Section~\ref{solid_phase_verification}    & W/m$^2$/K     &                   \\ \hline
 {\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
 {\ct ISOTHERMAL}                & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}         &  $^\circ$C/m  & 0                 \\ \hline
@@ -7586,10 +7586,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\ \hline \hline
 {\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)          &   cm$^3$/mol/s    &     \\ \hline
 {\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
+{\ct C\_EDC}                              & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 0.1    \\ \hline
 {\ct CO\_YIELD}                           & Real        & Fraction of CO from the fuel                  & kg/kg             & 0        \\ \hline
 {\ct \tiny CRITICAL\_FLAME\_TEMPERATURE}  & Real        & Suppression criterion                         &   $^\circ$C       & 1427    \\ \hline
 {\ct E}                                   & Real        & Activation Energy (Finite Rate)               &   kJ/kmol         &     \\ \hline
-{\ct EDDY\_BREAKUP}                       & Logical     & See Section~\ref{info:turbulent_combustion}   &                   & {\ct .TRUE.}    \\ \hline
+{\ct EDDY\_DISSIPATION}                   & Logical     & See Section~\ref{info:turbulent_combustion}   &                   & {\ct .TRUE.}    \\ \hline
 {\ct EPUMO2}                              & Real        & Energy per Unit Mass Oxygen                   &   kJ/kg           & 13100    \\ \hline
 {\ct FUEL}                                & Character   & Name of Fuel (Finite Rate)                    &                   &     \\ \hline
 {\ct FYI}                                 & Character   & Comment String (has no effect)                &                   &     \\ \hline
@@ -7603,7 +7604,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct IDEAL}                               & Logical     & Adjust for minor product yields               &                   & {\ct .FALSE.}    \\ \hline
 {\ct \tiny MASS\_EXTINCTION\_COEFFICIENT} & Real        & Visibility parameter                          &  m$^2$/kg         & 8700.    \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                 & Real        & Visibility parameter                          &  m                &     30   \\ \hline
-{\ct MIX\_TIME\_FACTOR}                   & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 0.1    \\ \hline
 {\ct MW\_OTHER}                           & Real        & Molecular Weight of {\ct OTHER}               &  g/mol            & 28      \\ \hline
 {\ct N}                                   & Real        & Nitrogen atoms in the fuel                    &                   & 0    \\ \hline
 {\ct N\_S(N)}                             & Real        & Arrhenius Exponents (Finite Rate)             &                   &     \\ \hline
@@ -7673,6 +7673,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CONDUCTIVITY}                  & Real        & Conductivity $k$                            & W/m/K             &     \\ \hline
 {\ct DIFFUSIVITY}                   & Real        & Diffusivity   $D$                           & m$^2$/s           &     \\ \hline
 {\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
+{\ct FORMULA }                      & Character   & Chemical formula for Smokeview Label        &                   &     \\ \hline
 {\ct FYI}                           & Character   & Comment String                              &                   &     \\ \hline
 {\ct ID }                           & Character   & Name of species                             &                   &     \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0   \\ \hline
@@ -9184,7 +9185,7 @@ convective heat flux from gas to surface and vis verse. The heat flux
 to the solid is specified via {\ct EXTERNAL\_FLUX} (kW/m$^2$) on the
 {\ct SURF} line that is assigned to the solid surface. If you want to specify a particular
 convective heat flux to the solid surface, you can set {\ct ASSUMED\_GAS\_TEMPERATURE} on the
-{\ct MISC} line, along with a non-zero value of {\ct H\_FIXED}.
+{\ct MISC} line, along with a non-zero value of {\ct H\_FIXED} in units of W/m$^2$/K.
 \item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.}
 on the {\ct MISC} line. This will also speed
 up the computations significantly. If the gas phase computations are
