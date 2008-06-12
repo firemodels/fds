@@ -405,6 +405,45 @@ void initterrain_all(void){
   terraindata *terri;
   float *xplt, *yplt;
   float denom;
+  float terrain_zmin[4];
+  float terrain_zmax[4];
+
+  terrain_zmin[0]=0.35;
+  terrain_zmin[1]=0.20;
+  terrain_zmin[2]=0.05; 
+  terrain_zmin[3]=1.0;
+
+  terrain_zmax[0]=0.80;
+  terrain_zmax[1]=0.80;
+  terrain_zmax[2]=0.80;
+  terrain_zmax[3]=1.0;
+
+  for(i=0;i<MAXRGB;i++){
+    float f1;
+
+    f1 = (float)i/(float)(MAXRGB-1);
+    rgbterrain[4*i+0]=(1.0-f1)*terrain_zmin[0] + f1*terrain_zmax[0];
+    rgbterrain[4*i+1]=(1.0-f1)*terrain_zmin[1] + f1*terrain_zmax[1];
+    rgbterrain[4*i+2]=(1.0-f1)*terrain_zmin[2] + f1*terrain_zmax[2];
+    rgbterrain[4*i+3]=1.0;
+  }
+  /*
+  // contours
+  for(i=0;i<10;i++){
+    int j;
+    for(j=0;j<5;j++){
+      int jj;
+
+      jj=i*255/10+j;
+      rgbterrain[4*jj+0]=0.0;
+      rgbterrain[4*jj+1]=0.0;
+      rgbterrain[4*jj+2]=0.0;
+    }
+  }
+  */
+
+  zterrain_min=1000000000.0;
+  zterrain_max=-zterrain_min;
 
   for(imesh=0;imesh<nmeshes;imesh++){
     
@@ -455,6 +494,8 @@ void initterrain_all(void){
         zval /= (float)count;
 
         *znode++=zval;
+        if(zval>zterrain_max)zterrain_max=zval;
+        if(zval<zterrain_min)zterrain_min=zval;
 
  // compute (f(x+dx,y) - f(x-dx,y))/(2*dx)
 
@@ -640,6 +681,7 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
         ijkcell = IJKCELL(i,j,k);
         if(iblank_cell==NULL||iblank_cell[ijkcell]==0){
           z[ij]=meshi->zplt_orig[k];
+          z[ij]*=2.0;
           break;
         }
       }
@@ -655,6 +697,8 @@ void drawterrain(terraindata *terri, int only_geom){
   float *x, *y;
   terraincell *ti;
   float terrain_color[4];
+  float terrain_shininess=100.0;
+  float terrain_specular[4]={0.8,0.8,0.8,1.0};
 
   terrain_color[0]=0.47843;
   terrain_color[1]=0.45882;
@@ -667,10 +711,9 @@ void drawterrain(terraindata *terri, int only_geom){
 
   glColor4f(1.0,0.0,0.0,1.0);
   glEnable(GL_LIGHTING);
-  glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
-//  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
-  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,terrain_color);
-  glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&terrain_shininess);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,rgbterrain);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,terrain_specular);
   glEnable(GL_COLOR_MATERIAL);
 
   glBegin(GL_QUADS);
@@ -691,6 +734,8 @@ void drawterrain(terraindata *terri, int only_geom){
       float *zn;
       int ip1;
       float *ter_rgbptr;
+      float zval;
+      unsigned char izval;
 
       ip1 = i + 1;
 
@@ -700,19 +745,31 @@ void drawterrain(terraindata *terri, int only_geom){
       }
       zn = znormal+3*ijnode2(i,j);
       glNormal3fv(zn);
-      glVertex3f(x[i],y[j],znode[ijnode2(i,j)]);
+      zval = znode[ijnode2(i,j)];
+      izval = (MAXRGB-1)*(zval-zterrain_min)/(zterrain_max-zterrain_min);
+      glColor4fv(rgbterrain+4*izval);
+      glVertex3f(x[i],y[j],zval);
 
       zn = znormal+3*ijnode2(ip1,j);
       glNormal3fv(zn);
-      glVertex3f(x[i+1],y[j],znode[ijnode2(ip1,j)]);
+      zval = znode[ijnode2(ip1,j)];
+      izval = (MAXRGB-1)*(zval-zterrain_min)/(zterrain_max-zterrain_min);
+      glColor4fv(rgbterrain+4*izval);
+      glVertex3f(x[i+1],y[j],zval);
 
       zn = znormal+3*ijnode2(ip1,jp1);
       glNormal3fv(zn);
-      glVertex3f(x[i+1],y[j+1],znode[ijnode2(ip1,jp1)]);
+      zval = znode[ijnode2(ip1,jp1)];
+      izval = (MAXRGB-1)*(zval-zterrain_min)/(zterrain_max-zterrain_min);
+      glColor4fv(rgbterrain+4*izval);
+      glVertex3f(x[i+1],y[j+1],zval);
 
       zn = znormal+3*ijnode2(i,jp1);
       glNormal3fv(zn);
-      glVertex3f(x[i],y[j+1],znode[ijnode2(i,jp1)]);
+      zval = znode[ijnode2(i,jp1)];
+      izval = (MAXRGB-1)*(zval-zterrain_min)/(zterrain_max-zterrain_min);
+      glColor4fv(rgbterrain+4*izval);
+      glVertex3f(x[i],y[j+1],zval);
 
       ti++;
     }
