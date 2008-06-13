@@ -40,7 +40,7 @@ void WUI_CB(int var);
 extern "C" void glui_wui_setup(int main_window){
 
   if(glui_wui!=NULL)glui_wui->close();
-  glui_wui = GLUI_Master.create_glui("WUI",0,0,0);
+  glui_wui = GLUI_Master.create_glui("WUI Display Properties",0,0,0);
   if(showwui==0)glui_wui->hide();
 
   panel_wui = glui_wui->add_panel("",GLUI_PANEL_NONE);
@@ -89,7 +89,7 @@ extern "C" void show_glui_wui(void){
   if(glui_wui!=NULL)glui_wui->show();
 }
 
-/* ------------------ CLIP_CB ------------------------ */
+/* ------------------ WUI_CB ------------------------ */
 
 void WUI_CB(int var){
   int i;

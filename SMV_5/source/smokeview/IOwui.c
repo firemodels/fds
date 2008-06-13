@@ -381,6 +381,7 @@ float get_zcell_val(mesh *meshi,float xval, float yval, int *loc){
       zcell = terri->zcell;
       zval = zcell[ijcell2(ival,jval)];
       *loc=1;
+      zval = zterrain_min+vertical_factor*(zval-zterrain_min);
       return zval;
     }
   }
@@ -431,9 +432,6 @@ void initterrain_all(void){
   }
   */
 
-  zterrain_min=1000000000.0;
-  zterrain_max=-zterrain_min;
-
   for(imesh=0;imesh<nmeshes;imesh++){
     
     meshi = meshinfo + imesh;
@@ -483,8 +481,6 @@ void initterrain_all(void){
         zval /= (float)count;
 
         *znode++=zval;
-        if(zval>zterrain_max)zterrain_max=zval;
-        if(zval<zterrain_min)zterrain_min=zval;
 
  // compute (f(x+dx,y) - f(x-dx,y))/(2*dx)
 
@@ -588,7 +584,7 @@ void initterrain_all(void){
 /* ------------------ initterrain_znode ------------------------ */
 
 void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
-                       int allocate_memory, float vertical_factor){
+                       int allocate_memory){
   char buffer[1024];
   float dx, dy;
   float *x, *y, *z;
@@ -675,8 +671,12 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
       for(k=nz-1;k>=0;k--){
         ijkcell = IJKCELL(i,j,k);
         if(iblank_cell==NULL||iblank_cell[ijkcell]==0){
-          z[ij]=meshi->zplt_orig[k];
-          z[ij]*=vertical_factor;
+          float zval;
+
+          zval=meshi->zplt_orig[k];
+          if(zval<zterrain_min)zterrain_min=zval;
+          if(zval>zterrain_max)zterrain_max=zval;
+          z[ij]=zval;
           break;
         }
       }
@@ -694,6 +694,10 @@ void drawterrain(terraindata *terri, int only_geom){
   float terrain_color[4];
   float terrain_shininess=100.0;
   float terrain_specular[4]={0.8,0.8,0.8,1.0};
+  float zt_min, zt_max;
+
+  zt_min = zterrain_min;
+  zt_max = zterrain_min + vertical_factor*(zterrain_max-zterrain_min);
 
   terrain_color[0]=0.47843;
   terrain_color[1]=0.45882;
@@ -741,28 +745,28 @@ void drawterrain(terraindata *terri, int only_geom){
       zn = znormal+3*ijnode2(i,j);
       glNormal3fv(zn);
       zval = znode[ijnode2(i,j)];
-      izval = (MAXRGB-1)*(zval-zterrain_min)/(zterrain_max-zterrain_min);
+      izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i],y[j],zval);
 
       zn = znormal+3*ijnode2(ip1,j);
       glNormal3fv(zn);
       zval = znode[ijnode2(ip1,j)];
-      izval = (MAXRGB-1)*(zval-zterrain_min)/(zterrain_max-zterrain_min);
+      izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i+1],y[j],zval);
 
       zn = znormal+3*ijnode2(ip1,jp1);
       glNormal3fv(zn);
       zval = znode[ijnode2(ip1,jp1)];
-      izval = (MAXRGB-1)*(zval-zterrain_min)/(zterrain_max-zterrain_min);
+      izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i+1],y[j+1],zval);
 
       zn = znormal+3*ijnode2(i,jp1);
       glNormal3fv(zn);
       zval = znode[ijnode2(i,jp1)];
-      izval = (MAXRGB-1)*(zval-zterrain_min)/(zterrain_max-zterrain_min);
+      izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i],y[j+1],zval);
 
@@ -1283,6 +1287,9 @@ void update_terrain(int allocate_memory, float vertical_factor){
 
   if(autoterrain==1){
 
+    zterrain_min=1000000000.0;
+    zterrain_max=-zterrain_min;
+
     nterraininfo = nmeshes;
     if(allocate_memory==1){
       NewMemory((void **)&terraininfo,nterraininfo*sizeof(terraindata));
@@ -1304,7 +1311,7 @@ void update_terrain(int allocate_memory, float vertical_factor){
       ymin = meshi->yplt_orig[0];
       ymax = meshi->yplt_orig[ny];
 
-      initterrain_znode(meshi, terri, xmin, xmax, nx, ymin, ymax, ny, allocate_memory, vertical_factor);
+      initterrain_znode(meshi, terri, xmin, xmax, nx, ymin, ymax, ny, allocate_memory);
     }
     initterrain_all();
   }

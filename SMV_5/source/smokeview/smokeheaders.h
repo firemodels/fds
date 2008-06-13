@@ -41,7 +41,7 @@ EXTERNCPP void readterrain(char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP float getterrain_z(float x, float y);
 EXTERNCPP void initterrain(FILE *stream, mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny);
 EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
-                                 int allocate_memory, float vertical_factor);
+                                 int allocate_memory);
 EXTERNCPP void initterrain_all(void);
 EXTERNCPP void drawterrain(terraindata *terri, int only_geom);
 EXTERNCPP void drawterrain_texture(terraindata *terri, int only_geom);
