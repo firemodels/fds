@@ -228,6 +228,8 @@ unsigned int getnormalindex2(spherepoints *sphereinfo, float *normal){
   return returnval;
 }
 
+/* ------------------ getnormalindex ------------------------ */
+
 unsigned int getnormalindex(spherepoints *sphereinfo, float *normal){
   float norm;
   float x, y, z;
