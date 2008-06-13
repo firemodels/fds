@@ -6,7 +6,9 @@
 
 Heat flux gauges and thermocouples were attached to the compartment walls, floor, and ceiling of the NIST/NRC test compartment. Following is a list of the
 coordinates of each, relative to the floor in the southwest corner of the compartment. The compartment was 21.66~m by 7.04~m by 3.82~m high. All coordinates are
-accurate to the nearest centimeter.
+accurate to the nearest centimeter. The fire pan was located in the center of the compartment for most of the experiments.
+
+\vspace{\baselineskip}
 
 \begin{figure}[h!]
 \begin{center}
@@ -172,7 +174,10 @@ TC Ceiling U-8-2  & 18.71 & 3.54 & 3.82 \\ \hline
 \section{WTC Ceiling Temperatures}
 
 The following pages contain comparisons of predicted and measured ceiling temperatures, both at the surface and beneath a layer of
-marinite board.
+marinite board. Table below lists the coordinates of the measurement locations relative to the lower center of the west wall. The center of the
+fire pan was located at $x=3.94$~m, $y=0$~m, and $z=0$~m.
+
+\vspace{\baselineskip}
 
 \begin{figure}[h!]
 \begin{center}
@@ -385,6 +390,12 @@ TCW4IN              & 3.99  & 0.00 & 3.83 \\ \hline
 
 \section{WTC Steel Temperatures}
 
+The compartment for the WTC experiments contained a hollow box column roughly 0.5~m from the fire pan, two trusses over the top
+of the pan, and one or two steel bars resting on the lower truss flanges. In Tests 1, 2 and 3, the steel was bare, and in Tests 4, 5 and 6, the 
+steel was coated with various thicknesses of sprayed fire-resistive materials.
+
+In FDS, these elements were modeled using thin sheet obstructions with a resolution of 10~cm.
+
 % WTC Column Steel Temps
 
 \begin{figure}[h!]
@@ -527,7 +538,15 @@ TCW4IN              & 3.99  & 0.00 & 3.83 \\ \hline
 \clearpage
 
 
-\section{WTC Calibrated Nickel ''Slug'' Temperatures}
+\section{WTC Calibrated Nickel ``Slug'' Calorimeters}
+
+Five cylinders of nickel 200 ($\ge$ 99~\% nickel), 25.4~cm long and 10.2~cm in diameter, were positioned
+50~cm north of the centerline in the WTC experiments. Slugs 1 through 5 were 2.92~m, 1.82~m, 0.57~m, 0.05~m, and 1.56~m, respectively, from the
+longitudinal axis of the fire pan. All the slugs were 50~cm north of the lateral axis. The fire pan measured 2~m by 1~m. Four thermocouples were
+inserted into each slug at various locations. All four temperatures for each slug were virtually indistinguishable. 
+
+In FDS, rectangular obstructions were used to model the slugs, but the one-dimensional heat conduction calculation was performed using 
+cylindrical coordinates.  
 
 
 % WTC Slug Temps
