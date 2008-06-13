@@ -20,6 +20,7 @@ extern char glui_3dsmoke_revision[];
 extern char glui_blockedit_revision[];
 extern char glui_bounds_revision[];
 extern char glui_clip_revision[];
+extern char glui_wui_revision[];
 extern char glui_colorbar_revision[];
 extern char glui_labels_revision[];
 extern char glui_motion_revision[];

@@ -405,26 +405,15 @@ void initterrain_all(void){
   terraindata *terri;
   float *xplt, *yplt;
   float denom;
-  float terrain_zmin[4];
-  float terrain_zmax[4];
 
-  terrain_zmin[0]=0.35;
-  terrain_zmin[1]=0.20;
-  terrain_zmin[2]=0.05; 
-  terrain_zmin[3]=1.0;
-
-  terrain_zmax[0]=0.80;
-  terrain_zmax[1]=0.80;
-  terrain_zmax[2]=0.80;
-  terrain_zmax[3]=1.0;
 
   for(i=0;i<MAXRGB;i++){
     float f1;
 
     f1 = (float)i/(float)(MAXRGB-1);
-    rgbterrain[4*i+0]=(1.0-f1)*terrain_zmin[0] + f1*terrain_zmax[0];
-    rgbterrain[4*i+1]=(1.0-f1)*terrain_zmin[1] + f1*terrain_zmax[1];
-    rgbterrain[4*i+2]=(1.0-f1)*terrain_zmin[2] + f1*terrain_zmax[2];
+    rgbterrain[4*i+0]=(1.0-f1)*terrain_rgba_zmin[0] + f1*terrain_rgba_zmax[0];
+    rgbterrain[4*i+1]=(1.0-f1)*terrain_rgba_zmin[1] + f1*terrain_rgba_zmax[1];
+    rgbterrain[4*i+2]=(1.0-f1)*terrain_rgba_zmin[2] + f1*terrain_rgba_zmax[2];
     rgbterrain[4*i+3]=1.0;
   }
   /*
@@ -598,7 +587,8 @@ void initterrain_all(void){
 
 /* ------------------ initterrain_znode ------------------------ */
 
-void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny){
+void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
+                       int allocate_memory, float vertical_factor){
   char buffer[1024];
   float dx, dy;
   float *x, *y, *z;
@@ -615,24 +605,27 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
   if(meshi!=NULL){
     meshi->terrain=terri;
   }
-  terri->x=NULL;
-  terri->y=NULL;
-  terri->display=0;
-  terri->loaded=0;
-  terri->autoload=0;
-  terri->times=NULL;
-  terri->ntimes=0;
-  terri->times=NULL;
-  terri->zcell=NULL;
-  terri->znode=NULL;
-  terri->znormal=NULL;
-  terri->tcell=NULL;
-  terri->ter_texture=NULL;
-  terri->state=NULL;
-  terri->timeslist=NULL;
-  terri->zcell=NULL;
-  terri->znode=NULL;
-  terri->znormal=NULL;
+
+  if(allocate_memory==1){
+    terri->display=0;
+    terri->loaded=0;
+    terri->autoload=0;
+    terri->ntimes=0;
+    terri->x=NULL;
+    terri->y=NULL;
+    terri->times=NULL;
+    terri->times=NULL;
+    terri->zcell=NULL;
+    terri->znode=NULL;
+    terri->znormal=NULL;
+    terri->tcell=NULL;
+    terri->ter_texture=NULL;
+    terri->state=NULL;
+    terri->timeslist=NULL;
+    terri->zcell=NULL;
+    terri->znode=NULL;
+    terri->znormal=NULL; 
+  }
 
   terri->xmin=xmin;
   terri->xmax=xmax;
@@ -644,13 +637,15 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
   }
   terri->nx=nx;
 
-  NewMemory((void **)&terri->x,(nx+1)*sizeof(float));
-  NewMemory((void **)&terri->y,(ny+1)*sizeof(float));
-  NewMemory((void **)&terri->zcell,nx*ny*sizeof(float));
-  NewMemory((void **)&terri->state,nx*ny);
-  NewMemory((void **)&terri->znode,(nx+1)*(ny+1)*sizeof(float));
-  NewMemory((void **)&terri->znode_scaled,(nx+1)*(ny+1)*sizeof(float));
-  NewMemory((void **)&terri->znormal,3*(nx+1)*(ny+1)*sizeof(float));
+  if(allocate_memory==1){
+    NewMemory((void **)&terri->x,(nx+1)*sizeof(float));
+    NewMemory((void **)&terri->y,(ny+1)*sizeof(float));
+    NewMemory((void **)&terri->zcell,nx*ny*sizeof(float));
+    NewMemory((void **)&terri->state,nx*ny);
+    NewMemory((void **)&terri->znode,(nx+1)*(ny+1)*sizeof(float));
+    NewMemory((void **)&terri->znode_scaled,(nx+1)*(ny+1)*sizeof(float));
+    NewMemory((void **)&terri->znormal,3*(nx+1)*(ny+1)*sizeof(float));
+  }
 
   x = terri->x;
   y = terri->y;
@@ -681,7 +676,7 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
         ijkcell = IJKCELL(i,j,k);
         if(iblank_cell==NULL||iblank_cell[ijkcell]==0){
           z[ij]=meshi->zplt_orig[k];
-          z[ij]*=2.0;
+          z[ij]*=vertical_factor;
           break;
         }
       }
@@ -1283,13 +1278,15 @@ void init_tnorm(terraindata *terri){
 
 /* ------------------ update_terrain ------------------------ */
 
-void update_terrain(void){
+void update_terrain(int allocate_memory, float vertical_factor){
   int i, j;
 
-  if(autoterrain==1&&nterraininfo==0){
+  if(autoterrain==1){
 
     nterraininfo = nmeshes;
-    NewMemory((void **)&terraininfo,nterraininfo*sizeof(terraindata));
+    if(allocate_memory==1){
+      NewMemory((void **)&terraininfo,nterraininfo*sizeof(terraindata));
+    }
 
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
@@ -1307,8 +1304,7 @@ void update_terrain(void){
       ymin = meshi->yplt_orig[0];
       ymax = meshi->yplt_orig[ny];
 
-      initterrain_znode(meshi, terri, xmin, xmax, nx, ymin, ymax, ny);
-      //initterrain(NULL, meshi, terri, xmin, xmax, nx, ymin, ymax, ny);
+      initterrain_znode(meshi, terri, xmin, xmax, nx, ymin, ymax, ny, allocate_memory, vertical_factor);
     }
     initterrain_all();
   }
