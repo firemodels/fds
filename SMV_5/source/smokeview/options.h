@@ -41,6 +41,7 @@
 #include "pragmas.h"
 #endif
 
+#define pp_SPHERE
 #define pp_ISOOUT
 #define pp_DRAWISO
 #define EGZ
