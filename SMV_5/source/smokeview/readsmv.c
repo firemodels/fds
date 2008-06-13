@@ -4817,7 +4817,7 @@ typedef struct {
   updatesliceboundlabels();
   updateisotypes();
   updatepatchtypes();
-  update_terrain();
+  update_terrain(1,vertical_factor);
   updatevslices();
   updatesmoke3dmenulabels();
   updatevslicetypes();

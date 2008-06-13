@@ -31,6 +31,7 @@ void glui_bounds_setup(int main_window);
 void glui_labels_setup(int main_window);
 void glui_edit_setup(int main_window);
 void glui_clip_setup(int main_window);
+void glui_wui_setup(int main_window);
 void glui_tour_setup(int main_window);
 void glui_advancedtour_setup(int main_window);
 void glui_stereo_setup(int main_window);
@@ -115,6 +116,7 @@ int initcase_c(int argc, char **argv){
   glui_bounds_setup(mainwindow_id);
   glui_edit_setup(mainwindow_id);
   glui_clip_setup(mainwindow_id);
+  glui_wui_setup(mainwindow_id);
   glui_labels_setup(mainwindow_id);
   glui_tour_setup(mainwindow_id);
   glui_alert_setup(mainwindow_id);
@@ -1162,7 +1164,7 @@ void initvars1(void){
   parttype=0;
   allexterior=1,showexterior=1;
   allinterior=1;
-  showbounds=0,showmotion=0,showedit=0, showclip=0, showgluistereo=0, showtour=0, showlabels=0, showcolorbar=0;
+  showbounds=0,showmotion=0,showedit=0, showclip=0, showgluistereo=0, showtour=0, showlabels=0, showcolorbar=0, showwui=0;
   showterrain=0;
   showgluitrainer=0;
   colorbarcycle=0;
@@ -1223,6 +1225,18 @@ void initvars1(void){
   visTimeZone=1, visTimeSmoke=1, visTimeSlice=1, visTimePatch=1, visTimeIso=1, visTimeEvac=1;
   vishmsTimelabel=0, visTimeLabels=1, visColorLabels=1;
   visTitle=1, visFullTitle=1, visFramerate=0, visFramelabel=1, visTimelabel=1;
+
+  vertical_factor=2.0;
+  terrain_rgba_zmin[0]=0.35;
+  terrain_rgba_zmin[1]=0.20;
+  terrain_rgba_zmin[2]=0.05; 
+  terrain_rgba_zmin[3]=1.0;
+
+  terrain_rgba_zmax[0]=0.80;
+  terrain_rgba_zmax[1]=0.80;
+  terrain_rgba_zmax[2]=0.80;
+  terrain_rgba_zmax[3]=1.0;
+
 #ifdef pp_memstatus
   visAvailmemory=0;
 #endif
@@ -2083,6 +2097,7 @@ int getmaxrevision(void){
   MAXREV(glui_blockedit_revision);
   MAXREV(glui_bounds_revision);
   MAXREV(glui_clip_revision);
+  MAXREV(glui_wui_revision);
   MAXREV(glui_colorbar_revision);
   MAXREV(glui_labels_revision);
   MAXREV(glui_motion_revision);
