@@ -7,6 +7,28 @@ Only for the VTT and the FM/SNL series are the plumes relatively free from pertu
 
 \section{McCaffrey's Plume Correlation}
 
+For simulations involving buoyant plumes, a measure of how well the flow field is resolved is given by the
+non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic
+fire diameter
+\be D^* = \left(
+     \frac{\dQ}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} }
+     \right)^\frac{2}{5}  \ee
+and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic
+fire diameter is related to the characteristic fire size via the
+relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the
+fire.}. The quantity $D^*/\dx$ can be thought of as the number of computational cells
+spanning the characteristic (not necessarily the physical) diameter of the fire.
+The more cells spanning the fire, the better the resolution of the
+calculation. It is better to assess the quality of the mesh in terms
+of this non-dimensional parameter, rather than an absolute mesh cell size.
+For example, a cell size of 10~cm may be ``adequate,'' in some sense,
+for evaluating the spread of smoke and heat through a building from a
+sizable fire, but may not be appropriate to study a very small, smoldering source.
+
+The following pages show the results of simulations of McCaffrey's five fires with a grid resolution 
+such that $D^*/\dx=10$. The mesh cells were all cubes, and no stretching was used.
+
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_14_kW} &
