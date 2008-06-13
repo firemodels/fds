@@ -2111,38 +2111,12 @@ mass fluxes are given by:
    \dm_w'' = \int_0^L \dm_w'''(x) \, dx
 \ee
 where $L$ is the thickness of the surface. The chemical source term of
-the heat conduction equation consists of the heats of reaction and the
-differences in sensible heats between the original material and the
-products
+the heat conduction equation consists of the heats of reaction 
 \be
 \dot{q}_{s,c}'''(x) = -\rho_{s0}\;
     \sum_{\alpha=1}^{N_m} \sum_{\beta=1}^{N_{r,\alpha}}
-    r_{\alpha \beta}(x) \;
-    \left[H_{r,\alpha \beta}-
-    \int_{T_0}^{T(x)} \Delta c(\theta)d\theta \right]
+    r_{\alpha \beta}(x) H_{r,\alpha \beta}
 \ee
-where
-\be
-  \Delta c(T) = c_{s,\alpha}(T)
-        - \nu_{s,\alpha \beta} \; c_{s,\alpha \beta}(T)
-        - \nu_{f,\alpha \beta} \; c_{f}(T)
-        - \nu_{w,\alpha \beta} \; c_{w}(T)
-        - (1-\sum_{\gamma=s,f,w} \nu_{\gamma,\alpha\beta}) \; c_{s,\alpha}(T)
-\ee
-$c_{s,\alpha \beta}$ is the specific heat of the residue of the
-$\beta$th reaction of material $\alpha$. It is possible to define a
-reaction where the sum of the residue, fuel and water yields is less
-than one. FDS then assumes that the solid is converted to a gas that
-is not tracked by the gas phase calculation. In the computation of
-$\Delta c(T)$, the specific heat of this dummy species is assumed to
-be equal to the specific heat of the original material $c_{s,\alpha}$
-
-The temperature integrals of the sensible heat contents are computed
-in advance for all the reactions of each material and the values of
-$\dot{q}_{s,c}'''$ are tabulated between $T_0$ and $T_0
-\;+\;2000$~K. During the pyrolysis calculation, the values are found
-from a ``look-up'' table.
-
 
 
 \subsubsection{Liquid Fuels}
