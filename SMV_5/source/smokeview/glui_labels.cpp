@@ -336,7 +336,7 @@ extern "C" void update_showhidebuttons(void){
   }
 }
 
-/* ------------------ hide_glui_clip ------------------------ */
+/* ------------------ hide_glui_labels ------------------------ */
 
 extern "C" void hide_glui_labels(void){
   if(glui_labels!=NULL)glui_labels->hide();
@@ -344,7 +344,7 @@ extern "C" void hide_glui_labels(void){
   updatemenu=1;
 }
 
-/* ------------------ show_glui_clip ------------------------ */
+/* ------------------ show_glui_labels ------------------------ */
 
 extern "C" void show_glui_labels(void){
   if(glui_labels!=NULL)glui_labels->show();
