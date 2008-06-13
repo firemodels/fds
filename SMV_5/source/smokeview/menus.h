@@ -899,6 +899,11 @@ void DialogMenu(int value){
     if(showgluistereo==1)show_glui_stereo();
     if(showgluistereo==0)hide_glui_stereo();
     break;
+  case 26:
+    showwui=1-showwui;
+    if(showwui==1)show_glui_wui();
+    if(showwui==0)hide_glui_wui();
+    break;
 #ifdef pp_COLOR
   case 23:
     showcolorbar=1-showcolorbar;
@@ -944,6 +949,8 @@ void DialogMenu(int value){
     hide_glui_tour();
     showclip=0;
     hide_glui_clip();
+    showwui=0;
+    hide_glui_wui();
     showgluistereo=0;
     hide_glui_stereo();
     showcolorbar=0;
@@ -5357,6 +5364,10 @@ if(visBlocks==visBLOCKOutline){
 
 
   CREATEMENU(dialogmenu,DialogMenu);
+  if(nterraininfo>0){
+    if(showwui==1)glutAddMenuEntry("*WUI Display Properties...",26);
+    if(showwui==0)glutAddMenuEntry("WUI Display Properties...",26);
+  }
   if(showclip==1)glutAddMenuEntry("*Clip Geometry...  ALT+c",18);
   if(showclip==0)glutAddMenuEntry("Clip Geometry...  ALT+c",18);
 #ifdef pp_COMPRESS

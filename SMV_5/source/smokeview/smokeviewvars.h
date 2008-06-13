@@ -70,6 +70,9 @@ SVEXTERN float cb_valmin, cb_valmax, cb_val;
 SVEXTERN int cb_colorindex;
 SVEXTERN float rgb_plot3d[4*MAXRGB];
 SVEXTERN float rgbterrain[4*MAXRGB];
+SVEXTERN float terrain_rgba_zmin[4];
+SVEXTERN float terrain_rgba_zmax[4];
+SVEXTERN float vertical_factor;
 
 SVEXTERN char inputfilename_ext[4];
 
@@ -350,7 +353,7 @@ SVEXTERN int p3dsurfacetype;
 SVEXTERN int parttype;
 SVEXTERN int allexterior,showexterior;
 SVEXTERN int allinterior;
-SVEXTERN int showbounds,showmotion,showedit, showclip, showgluistereo, showtour, showlabels, showcolorbar;
+SVEXTERN int showbounds,showmotion,showedit, showclip, showgluistereo, showtour, showlabels, showcolorbar, showwui;
 SVEXTERN int showgluitrainer;
 SVEXTERN int colorbarcycle;
 SVEXTERN int colorbartype;
