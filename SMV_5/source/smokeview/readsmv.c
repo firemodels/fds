@@ -968,8 +968,8 @@ int readsmv(char *file){
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %i %f %f %i",&xmin, &xmax, &nx, &ymin, &ymax, &ny);
-
-      initterrain(stream, NULL, terri, xmin, xmax, nx, ymin, ymax, ny);
+      // must implement new form for defining terrain surfaces
+      //initterrain(stream, NULL, terri, xmin, xmax, nx, ymin, ymax, ny);
 
       nterraininfo++;
     }
