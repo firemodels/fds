@@ -1,12 +1,24 @@
 
-\chapter{Overview}
+\chapter{What is Model Validation?}
 
-This document is a compilation of past and present validation exercises for the Fire Dynamics Simulator (FDS).
-Validation typically involves comparing model simulations with experimental measurements. To say that FDS is
+This supplement to the Fire Dynamimcs Simulator (FDS) Technical Reference Guide~\cite{FDS_Tech_Guide_5}
+is a compilation of past and present validation studies of FDS. Although there are various definitions of model validation, for example in
+ASTM E 1355~\cite{ASTM:E1355}, most define it as the process of determining how well the mathematical model predicts the actual physical phenomena of
+interest.
+Validation typically involves (1) comparing model predictions with experimental measurements, (2) quantifying the differences in light of uncertainties in
+both the measurements and the model inputs, and (3) deciding if the model is appropriate for the given application. This Guide only does (1) and (2). Number (3) is
+the responsibility of the model user.
+
+A common question asked of any mathematical model is whether it is validated. To say that FDS is
 ``validated'' means that the model has been shown to be of a given level of accuracy for a given range of parameters for a given
 type of fire scenario. Although the FDS developers continuously perform validation studies, it is ultimately the end user of the model who
 decides if the model is adequate for the job at hand. Thus, this Guide provides the raw material for a validation study, but it does not
 and cannot be considered comprehensive.
+
+The following sections discuss key issues that you must consider when deciding whether or not FDS has been validated. It depends on (a) the scenarios
+of interest, (b) the predicted quantities, and (c) the desired level of accuracy. Keep in mind that FDS can be used to model most any fire scenario and predict almost
+any quantity of interest, but the prediction may not be accurate because of limitations in the description of the fire physics, and also because of limited
+information about the fuels, geometry, and so on.
 
 
 
@@ -17,7 +29,7 @@ point of view of validation it is useful to divide them into two classes -- thos
 is {\em predicted} by the model. The former is often the case for a design application, the latter for a forensic reconstruction. Consider each in turn.
 
 Design  applications  typically  involve  an existing  building  or  a
-building  under  design. A  so-called  ``design  fire'' is  prescribed
+building  under  design. A  so-called  ``design  fire'' is  specified
 either by  a regulatory authority  or by the engineers  performing the
 analysis. Because the  fire's heat release rate is  specified, the role of
 the model is to predict  the transport of heat and combustion products
@@ -77,39 +89,48 @@ It is a challenge to sort out all the plots and graphs of all the different quan
 is organized by output quantity, not by individual experiment or fire scenario. In this way, it is possible to assess, over a range of different experiments
 and scenarios, the performance of the model in predicting a given quantity. Overall trends and biases become much more clear when the data is organized this way.
 
+Keep in mind that for any fire experiment, FDS might predict something very well, say within the experimental uncertainty bounds, but something else not well by
+any measure. For example, in the a series of 15 full-scale fire experiments conducted at NIST in 2003, sponsored by the U.S.~Nuclear Regulatory Commission, the 
+average hot gas layer (HGL) temperature predictions were within the accuracy of the experiments themselves, yet the smoke concentration predictions differed from the
+measurements by as much as a factor of 3. Why? Consider the following issues associated with various types of measurements:
+\begin{itemize}
+\item Is the measurement taken at a single point, or averaged over many points? In the example above, the HGL temperature is an average of many
+thermocouple measurements, whereas the smoke concentration is based on the extinction of laser light over a short length span. Model error tends to be
+reduced by the averaging process, plus most fire models, including FDS, are based on global mass and energy conservation laws that are expressed as 
+spatial averages.
+\item Is the measured quantity time-averaged or instantaneous? For example, a surface temperature prediction is less prone to error in comparison to a 
+heat flux prediction because the former is, in some sense, a time-integral of the latter.
+\item In the case of a point measurement, how close to the fire is it? The terms ``near-field'' and ``far-field'' are used throughout this Guide to describe 
+the relative distance from the fire. In general, predictions of near-field phenomena are more prone to error than far-field. There are exceptions, however. For example,
+a prediction of the temperature directly within the flaming region may be more accurate than that made just a fire diameter away because of the fact that temperatures
+tend to stabilize at about 1000~$^\circ$C within the fire itself, but then rapidly decrease away from the flames. Less accurate predictions typically occur in regions
+of steep gradients (rapid changes, both in space and time).
+\end{itemize}
 
 
 
-\subsection{Model Accuracy}
 
-The degree of  accuracy for each output variable  required by the user
-is  highly  dependent on  the  technical  issues  associated with  the
-analysis.  The user  must ask: How accurate does  the analysis have to
-be  to  answer  the  technical  question posed?  Thus,  a  generalized
-definition of the  accuracy required for each quantity  with no regard
-as  to the specifics  of a  particular analysis  is not  practical and
-would be limited in its usefulness.
+\section{Model Accuracy}
 
+The desired accuracy for each predicted quantity depends on the  technical  issues  associated with  the
+analysis.  You must ask the question: How accurate does  the analysis have to
+be  to  answer  the  technical  question posed?  
 Returning   to    the   earlier   definitions    of   ``design''   and
 ``reconstruction,''  design applications  typically are  more accurate
-because the heat release rate is prescribed rather than predicted, and
-the    initial    and    boundary    conditions   are    far    better
-characterized. Mathematically, a design calculation is an example of a
+because the heat release rate is typically specified rather than predicted, and
+the    initial    and    boundary    conditions   are    better
+characterized -- at least in the analysis. Mathematically, a design calculation is an example of a
 ``well-posed''  problem  in  which   the  solution  of  the  governing
 equations is  advanced in  time starting from  a known set  of initial
 conditions and constrained by a known set of boundary conditions.  The
 accuracy of the results is a function of the fidelity of the numerical
 solution, which is  mainly dependent on the size  of the computational
-grid. The FDS Validation Guide~\cite{FDS_Validation_Guide_5} describes
-efforts to date involving well-characterized geometries and prescribed
-fires. These studies show that  FDS predictions vary from being within
-experimental   uncertainty  to  being   about  20~\%   different  than
-measurements of temperature, heat flux, gas concentration, {\em etc}.
+grid. 
 
 A reconstruction is an example of an ``ill-posed'' problem because the
-outcome  is known  whereas  the initial  and  boundary conditions  are
+outcome  is known  whereas  the initial  and  boundary conditions  are usually
 not. There is  no single, unique solution to the  problem, that is, it
-is possible to simulate numerous fires that produce the given outcome.
+is possible to simulate numerous fires that produce the same general outcome.
 There is no right or wrong answer, but rather a small set of plausible
 fire scenarios that are  consistent with the collected evidence. These
 simulations are then used to demonstrate to fire service personnel why
