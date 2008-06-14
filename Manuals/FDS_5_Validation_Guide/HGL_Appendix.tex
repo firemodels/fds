@@ -1,4 +1,19 @@
-\chapter{Hot Gas Layer Temperature and Depth}
+\chapter{HGL Temperature and Depth Graphs}
+
+\label{HGL:Appendix}
+
+FDS, like any CFD model, does not perform a direct calculation of the HGL temperature or height. These are constructs unique to two-zone models. 
+Nevertheless, FDS does make predictions of gas temperature at the same locations as the thermocouples in the experiments, and these
+values can be reduced in the same manner as the experimental measurements to produce an ``average'' HGL temperature and height.  Regardless of the
+validity of the reduction method, the FDS predictions of the HGL temperature and height ought to be representative of the accuracy of its predictions
+of the individual thermocouple measurements that are used in the HGL reduction. The temperature measurements from all six test series are used to
+compute an HGL temperature and height with which to compare to FDS.  The same layer reduction method is used for five of the six test series. Only
+the NBS Multi-Room series uses another method.
+
+A brief description of each test series is included below, followed by graphs comparing the predicted and measured HGL temperature and layer height.
+
+
+\section{HGL Reduction Method}
 
 Fire protection engineers often need to estimate the location of the
 interface between the hot, smoke-laden upper layer and the cooler
@@ -26,6 +41,8 @@ $I_2$. $T_u$ is defined as the average upper layer temperature via
 \be (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; dz \ee
 Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
+\section{WTC Test Series}
+
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -51,6 +68,11 @@ Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
 \clearpage
 
+\section{VTT Test Series}
+
+The HGL temperature and depth are calculated from the averaged gas temperatures from three vertical thermocouple arrays using the standard reduction
+method. There are 10 thermocouples in each vertical array, spaced 2 m apart in the lower two-thirds of the hall, and 1 m apart near the ceiling.
+
 
 
 \begin{figure}[p]
@@ -68,6 +90,29 @@ Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
 \clearpage
 
+\section{NIST/NRC Test Series}
+
+The NIST/NRC series consisted of 15 liquid spray fire tests with different heat release rates, pan locations, and ventilation conditions. The basic
+geometry, including the numerical grid, is shown in Figure~\ref{NIST_NRC_Overview}. Gas temperatures were measured using seven floor-to-ceiling
+thermocouple arrays (or ``trees'') distributed throughout the compartment.  The average hot gas layer temperature and height are calculated using
+thermocouple Trees 1, 2, 3, 5, 6 and 7. Tree 4 was not used because one of its thermocouples (4-9) malfunctioned during most of the experiments.
+
+A few observations about the simulations:
+\begin{itemize}
+\item During Tests 4, 5, 10 and 16 a fan blew air into the compartment through a vent in the south wall.
+The measured velocity profile of the fan is not uniform, with the bulk of the air blowing from the lower third of the duct towards the ceiling at a
+roughly 45? angle.  The exact flow pattern is difficult to replicate in the model, thus, the results for Tests 4, 5, 10 and 16 should be evaluated
+with this in mind. The effect of the fan on the hot gas layer is small, but it does have a some effect on target temperatures near the vent.
+\item For all of the tests involving a fan, the predicted HGL height rises after the fire is extinguished,
+while the measured HGL drops.  This appears to be a curious artifact of the layer reduction algorithm. It is not included in the calculation of the
+relative difference.
+\item In the closed door tests, the hot gas layer descends all the way to the floor.
+However, the reduction method, used on both the measured and predicted temperatures, does not account for the formation of a single layer, and
+therefore does not indicate that the layer drops all the way to the floor. This is neither a flaw in the measurements nor in FDS, but rather in the
+layer reduction method.
+\item The HGL reduction method produces spurious results in the first few minutes of each test because no clear layer has yet formed.
+These early times are not included in the relative difference calculation.
+\end{itemize}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -123,6 +168,21 @@ Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
 \clearpage
 
+\section{FM/SNL Test Series}
+
+Tests 4, 5, and 21 from the FM/SNL test series were selected for comparison. The hot gas layer temperature and height are calculated using the
+standard method. The thermocouple arrays that are referred to as Sectors 1, 2 and 3 are averaged (with an equal weighting for each) for Tests 4 and
+5. For Test 21, only Sectors 1 and 3 are used, as Sector 2 falls within the smoke plume.
+
+Note the following:
+\begin{itemize}
+\item The HGL heights, both the measured and predicted, are somewhat noisy due to the effect of ventilation ducts in the upper layer.
+\item The ventilation was turned off after 9 min in Test 5,
+the effect of which was a slight increase in both the measured and predicted HGL temperature.
+\item The measured HGL temperature is noticeably greater than the prediction in Test 21.
+This is possibly due to an increase in the HRR towards the end of the test.  The simulations all used fixed HRRs after the 4 min ramp up.
+\end{itemize}
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_04_v5_HGL_Temp} &
@@ -135,6 +195,18 @@ Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 \end{figure}
 
 \clearpage
+
+\section{NBS Multi-Room Test Series}
+
+This series of experiments consists of two relatively small rooms connected by a long corridor. The fire is located in one of the rooms.  Eight
+vertical arrays of thermocouples are positioned throughout the test space: one in the burn room, one near the door of the burn room, three in the
+corridor, one in the exit to the outside at the far end of the corridor, one near the door of the other or ``target'' room, and one inside the target
+room.  Four of the eight arrays have been selected for comparison with model prediction: the array in the burn room (BR), the array in the middle of
+the corridor (18 ft from the BR), the array at the far end of the corridor (38 ft from the BR), and the array in the target room (TR).  In Tests 100A
+and 100O, the target room is closed, in which case the array in the exit (EXI) doorway is used. The test director reduced the layer information
+individually for the eight thermocouple arrays using an alternative method. These results are included in the original data sets. However, for the
+current validation study, the selected TC trees were reduced using the conventional method common to all the experiments considered.  The results are
+presented below.
 
 
 \begin{figure}[p]
