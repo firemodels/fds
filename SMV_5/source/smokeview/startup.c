@@ -1226,7 +1226,7 @@ void initvars1(void){
   vishmsTimelabel=0, visTimeLabels=1, visColorLabels=1;
   visTitle=1, visFullTitle=1, visFramerate=0, visFramelabel=1, visTimelabel=1;
 
-  vertical_factor=2.0;
+  vertical_factor=1.0;
   terrain_rgba_zmin[0]=0.35;
   terrain_rgba_zmin[1]=0.20;
   terrain_rgba_zmin[2]=0.05; 
@@ -1942,6 +1942,7 @@ void initvars0(void){
 
 #ifdef pp_SPHERE
   sphereinfo=NULL;
+  wui_sphereinfo=NULL;
 #endif
 
   tour_t=NULL, tour_t2=NULL, tour_dist=NULL, tour_dist2=NULL, tour_dist3=NULL;
