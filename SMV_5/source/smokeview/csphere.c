@@ -169,7 +169,6 @@ void freespherepoints(spherepoints *sphereinfo){
 float *getnormalvectorptr(spherepoints *sphereinfo, unsigned int index){
   float *normptr;
 
-  if(index<0)index=0;
   if(index>sphereinfo->npoints)index=sphereinfo->npoints;
   normptr=sphereinfo->normals+3*index;
   return normptr;
@@ -180,7 +179,6 @@ float *getnormalvectorptr(spherepoints *sphereinfo, unsigned int index){
 void getnormalvector(spherepoints *sphereinfo, unsigned int index, float *normal){
   float *normptr;
 
-  if(index<0)index=0;
   if(index>sphereinfo->npoints)index=sphereinfo->npoints;
   normptr=sphereinfo->normals+3*index;
   normal[0]=normptr[0];
@@ -188,7 +186,7 @@ void getnormalvector(spherepoints *sphereinfo, unsigned int index, float *normal
   normal[2]=normptr[2];
 }
 
-/* ------------------ getnormalindex ------------------------ */
+/* ------------------ getnormalindex2 ------------------------ */
 
 unsigned int getnormalindex2(spherepoints *sphereinfo, float *normal){
   float norm;
@@ -225,26 +223,22 @@ unsigned int getnormalindex2(spherepoints *sphereinfo, float *normal){
   else{
     j=theta/sphereinfo->dtheta[k]+0.5;
     returnval=sphereinfo->vallist[k-1]+j;
-    if(returnval<0)returnval=0;
     if(returnval>sphereinfo->npoints)returnval=sphereinfo->npoints;
   }
   return returnval;
 }
 
+/* ------------------ getnormalindex ------------------------ */
+
 unsigned int getnormalindex(spherepoints *sphereinfo, float *normal){
   float norm;
   float x, y, z;
-//  float pi;
   int i;
-//  int n;
   unsigned int returnval;
   float mindist2;
   float dist2;
   float *xyznorm;
 
-
-  //pi=sphereinfo->pi;
-//  n=sphereinfo->n;
   x = normal[0];
   y = normal[1];
   z = normal[2];
@@ -282,12 +276,8 @@ void drawspherepoints(spherepoints *spherei){
   float pi;
   int i,j,k;
   int index=-1;
-  float center[3];
   float rad;
 
-  center[0]=0.5;
-  center[1]=0.5;
-  center[2]=0.5;
   rad=spherei->dphi/2.0;
 
   pi=4.0*atan(1.0);
