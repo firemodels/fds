@@ -3,20 +3,6 @@
 \usepackage[pdftex]{graphicx}
 \usepackage{hyperref}
 
-%\usepackage{eso-pic}
-%\usepackage{graphicx}
-%\usepackage{color}
-%\usepackage{type1cm}
-
-%\makeatletter
-%   \AddToShipoutPicture{%
-%     \setlength{\@tempdimb}{.5\paperwidth}%
-%    \setlength{\@tempdimc}{.5\paperheight}%
-%   \setlength{\unitlength}{1pt}%
-%  \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
-%     \makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}{8cm}\selectfont{DRAFT}}}}}}
-%\makeatother
-
 \setlength{\textwidth}{6.5in}
 \setlength{\textheight}{9.0in}
 \setlength{\topmargin}{0.in}
@@ -26,9 +12,7 @@
 \setlength{\oddsidemargin}{0.0in}
 \setlength{\evensidemargin}{0.0in}
 
-\includeonly{Overview_Chapter,Survey_Chapter,Experiment_Chapter,
-HGL_Chapter, Plume_Chapter, Ceiling_Jet_Chapter, Species_Chapter, Pressure_Chapter, Surface_Temperature_Chapter, Heat_Flux_Chapter,
-HGL_Appendix,Plume_Appendix,Ceiling_Jet_Appendix,Species_Appendix,Pressure_Appendix,Surface_Temperature_Appendix,Heat_Flux_Appendix}
+\includeonly{Overview_Chapter,Survey_Chapter,Experiment_Chapter, HGL_Chapter, Plume_Chapter, Ceiling_Jet_Chapter, Species_Chapter, Pressure_Chapter, Surface_Temperature_Chapter, Heat_Flux_Chapter}
 
 
 
@@ -127,10 +111,9 @@ Technical Reference Guide \\ \LARGE Supplement: Experimental Validation }
 \large
 \flushright{
 Kevin McGrattan \\
-Anthony Hamins \\
 Simo Hostikka \\
 Jason Floyd \\
-Bryan Klein  }
+Bryan Klein}
 
 \vfill
 
@@ -160,22 +143,22 @@ Technical Reference Guide \\ \LARGE Supplement: Experimental Validation }
 \normalsize
 \flushright{
 Kevin McGrattan \\
-Anthony Hamins \\
 Bryan Klein \\
 {\em Fire Research Division} \\
 {\em Building and Fire Research Laboratory}  \\
 \hspace{1.in} \\
 Simo Hostikka \\
 {\em VTT Technical Research Centre of Finland}\\
-Espoo, Finland \\
+{\em Espoo, Finland} \\
 \hspace{1.in} \\
 Jason Floyd \\
-{\em Hughes Associates, Inc. }  \\
-Baltimore, Maryland, USA }
+{\em Hughes Associates, Inc.}  \\
+{\em Baltimore, Maryland}}
 
 \vspace{.25in}
 
 \flushright{\today \\
+FDS Version 5.2 \\
 $SVN Repository$~$Revision$}
 
 
@@ -225,10 +208,6 @@ both at NIST and beyond. This Supplement provides a survey of validation work co
 Documentation of FDS Verification is contained in the FDS User's Guide~\cite{FDS_Users_Guide_5}.
 
 
-
-
-
-
 \chapter{Acknowledgments}
 
 \label{acksection}
@@ -240,9 +219,11 @@ Mark Salley and Jason Dreisbach for their efforts.
 
 Alex Maranghides oversees the Large Fire Laboratory at NIST where
 these tests were conducted, and has helped to design the
-experiments. Thanks also to technicians Laurean Delauter, Jay McElroy,
-and Jack Lee who constructed and conducted the validation experiments
-at NIST.
+experiments for the NIST/NRC and WTC  Test Series.
+
+Anthony Hamins directed the NIST/NRC and WTC experiments, conducted smaller methane burner
+measurements, and quantified the experimental uncertainty of these and other
+experiments used in this study.
 
 Rick Peacock of NIST assisted in the interpretation of results from
 the ``NBS Multi-Room Test Series,'' a set of three room
@@ -255,38 +236,19 @@ referred to in this document as the ``VTT Large Hall Experiments.''
 At the University of Maryland, Professor Fred~Mowrer and Phil Friday
 were the first to apply FDS to the NRC-sponsored experiments referred
 to in this document as the ``FM/SNL Test Series'' (Factory Mutual and
-Sandia National Laboratories conducted these experiments).
-
-Also at NIST, Dan Madrzykowski, Doug Walton, Bob Vettori, Dave Stroup,
-Steve Kerber, and Nelson Bryner have applied FDS to the reconstruction
-of several real fire incidents that led to the death of fire fighters.
+Sandia National Laboratories conducted these experiments). Thanks also to
+Steve Nowlen, the test director, for additional information.
 
 At VTT, Finland, Jukka Hietaniemi, Jukka Vaari and Timo Korhonen have
 performed validation studies of various sub-models. The VTT Fire
 Research group continues to work on model development and
 validation of the model for various applications.
 
-At the University of Canterbury, Christchurch, New Zealand,
-Prof.~Charles Fleischmann and his students have provided an extensive
-set of material properties of upholstered furnishings, plus performed
-validation studies. Doctoral student Jason Clement spent a semester at
-NIST validating the hydrodynamics of FDS against salt water data.
-
-Several postdoctoral fellows at NIST have made contributions to model
-development. Francine Battaglia studied the extension of the model to
-look at fire whirls, Javier Trelles extended the large eddy simulation
-technique to large, wind-blown fire plumes, Amy Musser considered
-indoor air quality applications along with her advisor Steve Emmerich
-of the Building Environment Division of BFRL.
-
-
 
 
 \tableofcontents
 
 \mainmatter
-
-
 
 \include{Overview_Chapter}
 \include{Survey_Chapter}
@@ -300,21 +262,10 @@ of the Building Environment Division of BFRL.
 \include{Surface_Temperature_Chapter}
 \include{Heat_Flux_Chapter}
 
-%\backmatter
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
 \addcontentsline{toc}{chapter}{References}
 
-\appendix
-
-\include{HGL_Appendix}
-\include{Plume_Appendix}
-\include{Ceiling_Jet_Appendix}
-%\include{Velocity_Appendix}
-\include{Species_Appendix}
-\include{Pressure_Appendix}
-\include{Surface_Temperature_Appendix}
-\include{Heat_Flux_Appendix}
 
 \end{document}
