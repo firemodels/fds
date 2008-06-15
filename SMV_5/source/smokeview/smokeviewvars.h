@@ -92,7 +92,7 @@ SVEXTERN char INIfile[1024];
 SVEXTERN char WRITEINIfile[1024];
 
 #ifdef pp_SPHERE
-SVEXTERN spherepoints *sphereinfo;
+SVEXTERN spherepoints *sphereinfo, *wui_sphereinfo;
 #endif
 
 SVEXTERN float tourcol_selectedpathline[3];

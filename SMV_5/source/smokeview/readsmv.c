@@ -141,7 +141,7 @@ int readsmv(char *file){
     FREEMEMORY(terri->y);
     FREEMEMORY(terri->zcell);
     FREEMEMORY(terri->znode);
-    FREEMEMORY(terri->znormal);
+//    FREEMEMORY(terri->znormal);
   }
   FREEMEMORY(terraininfo);
   nterraininfo=0;
@@ -150,6 +150,10 @@ int readsmv(char *file){
   if(sphereinfo==NULL){
     NewMemory((void **)&sphereinfo,sizeof(spherepoints));
     initspherepoints(sphereinfo,14);
+  }
+  if(wui_sphereinfo==NULL){
+    NewMemory((void **)&wui_sphereinfo,sizeof(spherepoints));
+    initspherepoints(wui_sphereinfo,14);
   }
 #endif
 
@@ -958,13 +962,13 @@ int readsmv(char *file){
 
  
      if(match(buffer,"TERRAIN",7) == 1){
-      terraindata *terri;
+//      terraindata *terri;
       float xmin, xmax, ymin, ymax;
       int nx, ny;
 
       manual_terrain=1;
 
-      terri = terraininfo + nterraininfo;
+  //    terri = terraininfo + nterraininfo;
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %i %f %f %i",&xmin, &xmax, &nx, &ymin, &ymax, &ny);
