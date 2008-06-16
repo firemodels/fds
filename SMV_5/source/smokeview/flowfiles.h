@@ -314,6 +314,7 @@ typedef struct mesh_ {
   float cellsize;
   float *xplt, *yplt, *zplt;
   float *xplt_orig, *yplt_orig, *zplt_orig;
+  float *zcell;
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float xcen, ycen, zcen;
   float offset[3];
@@ -327,7 +328,7 @@ typedef struct mesh_ {
   int visx2, visy2, visz2;
   int slicedir;
   int plotn;
-  int *iblank,*iblank_cell,*iblank_x,*iblank_y,*iblank_z;
+  char *c_iblank,*c_iblank_cell,*c_iblank_x,*c_iblank_y,*c_iblank_z;
   float *block_zdist;
   int zdist_flag;
   unsigned char *iblank_smoke3d;
@@ -345,7 +346,7 @@ typedef struct mesh_ {
   float *dx_xy, *dy_xy, *dz_xy;
   float *dx_xz, *dy_xz, *dz_xz;
   float *dx_yz, *dy_yz, *dz_yz;
-  int *iblank_xy, *iblank_xz, *iblank_yz;
+  char *c_iblank_xy, *c_iblank_xz, *c_iblank_yz;
   float plot3d_speedmax;
   contour plot3dcontour1,plot3dcontour2,plot3dcontour3;
   isosurface currentsurf,currentsurf2;
@@ -740,7 +741,7 @@ typedef struct {
   int loaded, display, benchvis;
   int num_memblocks;
   float position;
-  int *iblank;
+  char *c_iblank;
   int blocknumber;
   int firstshort;
   int vec_comp;

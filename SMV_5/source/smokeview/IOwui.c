@@ -424,9 +424,6 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
   int nxcell;
   float *znormal;
   int i,j,k;
-  int nz;
-  int ibar, jbar;
-  int *iblank_cell;
   int ijkcell;
   int ij;
 
@@ -442,17 +439,13 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
     terri->x=NULL;
     terri->y=NULL;
     terri->times=NULL;
-    terri->times=NULL;
     terri->zcell=NULL;
     terri->znode=NULL;
-//    terri->znormal=NULL;
     terri->uc_znormal=NULL;
     terri->tcell=NULL;
     terri->ter_texture=NULL;
     terri->state=NULL;
     terri->timeslist=NULL;
-    terri->zcell=NULL;
-    terri->znode=NULL;
   }
 
   terri->xmin=xmin;
@@ -472,7 +465,6 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
     NewMemory((void **)&terri->state,nx*ny);
     NewMemory((void **)&terri->znode,(nx+1)*(ny+1)*sizeof(float));
     NewMemory((void **)&terri->znode_scaled,(nx+1)*(ny+1)*sizeof(float));
-//    NewMemory((void **)&terri->znormal,3*(nx+1)*(ny+1)*sizeof(float));
     NewMemory((void **)&terri->uc_znormal,(nx+1)*(ny+1)*sizeof(unsigned char));
   }
 
@@ -492,30 +484,20 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
 
   z=terri->zcell;
 
-  iblank_cell = meshi->iblank_cell;
-  ibar = nx;
-  jbar = ny;
   nxcell = nx;
-  nz = meshi->kbar;
   for(j=0;j<ny;j++){
     for(i=0;i<nx;i++){
-      ij = ijcell2(i,j);
-      z[ij]=meshi->zplt_orig[0];
-      for(k=nz-1;k>=0;k--){
-        ijkcell = IJKCELL(i,j,k);
-        if(iblank_cell==NULL||iblank_cell[ijkcell]==0){
-          float zval;
+      float zval;
 
-          zval=meshi->zplt_orig[k];
-          if(zval<zterrain_min)zterrain_min=zval;
-          if(zval>zterrain_max)zterrain_max=zval;
-          z[ij]=zval;
-          break;
-        }
-      }
+      ij = ijcell2(i,j);
+      zval=meshi->zcell[ij];
+      if(zval<zterrain_min)zterrain_min=zval;
+      if(zval>zterrain_max)zterrain_max=zval;
+      z[ij]=zval;
     }
   }
 }
+
 /* ------------------ drawterrain ------------------------ */
 
 void drawterrain(terraindata *terri, int only_geom){

@@ -529,7 +529,8 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   int *iq;
   plot3d *p;
   mesh *meshi;
-  int *iblank,i;
+  char *iblank;
+  int i;
   int ntotal;
 
   tmin2=*ttmin;
@@ -543,7 +544,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
     if(p->loaded==0||p->display==0)continue;
     meshi = meshinfo+p->blocknumber;
     ntotal=(meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
-    iblank=meshi->iblank;
+    iblank=meshi->c_iblank;
     q=meshi->qdata+plot3dvar*ntotal;
     for(n=0;n<ntotal;n++){
       if(*iblank++==1){

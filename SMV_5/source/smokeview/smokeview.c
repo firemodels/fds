@@ -1309,7 +1309,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw animated isosurfaces +++++++++++++++++++++++++ */
 
 #ifdef pp_SPHERE
-    if(isoinfo!=NULL)drawspherepoints(sphereinfo);
+    //if(isoinfo!=NULL)drawspherepoints(sphereinfo);
 #endif
   if(showiso==1){
     iso *isoi;

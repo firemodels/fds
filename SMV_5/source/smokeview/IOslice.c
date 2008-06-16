@@ -296,7 +296,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     }
     FREEMEMORY(sd->slicetimes  );
     FREEMEMORY(sd->slicelevel  );
-    FREEMEMORY(sd->iblank);
+    FREEMEMORY(sd->c_iblank);
     FREEMEMORY(sd->compindex);
     FREEMEMORY(sd->qslicedata_compressed);
     FREEMEMORY(sd->slicecomplevel);
@@ -553,7 +553,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     sd->nsliceii = sd->nslicei*sd->nslicej*sd->nslicek;
     sd->nslicetotal=sd->nsteps*sd->nsliceii;
-    if(NewMemory((void **)&sd->iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(int))==0){
+    if(NewMemory((void **)&sd->c_iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(char))==0){
       readslice("",ifile,UNLOAD,&error);
       *errorcode=1;
       return;
@@ -583,7 +583,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       for(j=sd->js1;j<sd->js2;j++){
         for(k=sd->ks1;k<sd->ks2;k++){
           for(i=sd->is1;i<sd->is1+sd->nslicei;i++){
-            sd->iblank[ii++]=meshi->iblank_x[ijk(i,j,k)];
+            sd->c_iblank[ii++]=meshi->c_iblank_x[ijk(i,j,k)];
           }
         }
       }
@@ -593,7 +593,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       for(i=sd->is1;i<sd->is2;i++){
         for(k=sd->ks1;k<sd->ks2;k++){
           for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
-            sd->iblank[ii++]=meshi->iblank_y[ijk(i,j,k)];
+            sd->c_iblank[ii++]=meshi->c_iblank_y[ijk(i,j,k)];
           }
         }
       }
@@ -603,7 +603,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       for(i=sd->is1;i<sd->is2;i++){
         for(j=sd->js1;j<sd->js2;j++){
           for(k=sd->ks1;k<sd->ks1+sd->nslicek;k++){
-            sd->iblank[ii++]=meshi->iblank_z[ijk(i,j,k)];
+            sd->c_iblank[ii++]=meshi->c_iblank_z[ijk(i,j,k)];
           }
         }
       }
@@ -1597,7 +1597,7 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
   for (n=0;n<ndata;n++){
     frame_number = n/(sd->nsliceii);
     point = n - frame_number*sd->nsliceii;
-    if(sd->iblank[point]==0){
+    if(sd->c_iblank[point]==0){
       continue;
     }
     if(first==1){
@@ -1695,7 +1695,7 @@ void drawslice(const slice *sd){
   float *xplt, *yplt, *zplt;
   int ibar,jbar;
   int nx,ny,nxy;
-  int *iblank_x, *iblank_y, *iblank_z;
+  char *iblank_x, *iblank_y, *iblank_z;
 
   mesh *meshi;
 
@@ -1710,9 +1710,9 @@ void drawslice(const slice *sd){
   zplt=meshi->zplt;
   ibar=meshi->ibar;
   jbar=meshi->jbar;
-  iblank_x=meshi->iblank_x;
-  iblank_y=meshi->iblank_y;
-  iblank_z=meshi->iblank_z;
+  iblank_x=meshi->c_iblank_x;
+  iblank_y=meshi->c_iblank_y;
+  iblank_z=meshi->c_iblank_z;
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -1893,7 +1893,7 @@ void drawslice_texture(const slice *sd){
   float *xplt, *yplt, *zplt;
   int ibar,jbar;
   int nx,ny,nxy;
-  int *iblank_x, *iblank_y, *iblank_z;
+  char *iblank_x, *iblank_y, *iblank_z;
 
   mesh *meshi;
 
@@ -1904,9 +1904,9 @@ void drawslice_texture(const slice *sd){
   zplt=meshi->zplt;
   ibar=meshi->ibar;
   jbar=meshi->jbar;
-  iblank_x=meshi->iblank_x;
-  iblank_y=meshi->iblank_y;
-  iblank_z=meshi->iblank_z;
+  iblank_x=meshi->c_iblank_x;
+  iblank_y=meshi->c_iblank_y;
+  iblank_z=meshi->c_iblank_z;
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -2163,7 +2163,7 @@ void drawvolslice_texture(const slice *sd){
   float *xplt, *yplt, *zplt;
   int ibar,jbar;
   int nx,ny,nxy;
-  int *iblank_x, *iblank_y, *iblank_z;
+  char *iblank_x, *iblank_y, *iblank_z;
 
   mesh *meshi;
 
@@ -2174,9 +2174,9 @@ void drawvolslice_texture(const slice *sd){
   zplt=meshi->zplt;
   ibar=meshi->ibar;
   jbar=meshi->jbar;
-  iblank_x=meshi->iblank_x;
-  iblank_y=meshi->iblank_y;
-  iblank_z=meshi->iblank_z;
+  iblank_x=meshi->c_iblank_x;
+  iblank_y=meshi->c_iblank_y;
+  iblank_z=meshi->c_iblank_z;
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -2426,7 +2426,7 @@ void drawvolslice_terrain(const slice *sd){
   float *xplt, *yplt, *zplt;
   int ibar,jbar;
   int nx,ny,nxy;
-  int *iblank_x, *iblank_y, *iblank_z;
+  char *iblank_x, *iblank_y, *iblank_z;
   terraindata *terri;
   float *znode;
   int nxcell;
@@ -2445,9 +2445,9 @@ void drawvolslice_terrain(const slice *sd){
   zplt=meshi->zplt;
   ibar=meshi->ibar;
   jbar=meshi->jbar;
-  iblank_x=meshi->iblank_x;
-  iblank_y=meshi->iblank_y;
-  iblank_z=meshi->iblank_z;
+  iblank_x=meshi->c_iblank_x;
+  iblank_y=meshi->c_iblank_y;
+  iblank_z=meshi->c_iblank_z;
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -2672,7 +2672,7 @@ void drawvolslice(const slice *sd){
   float *xplt, *yplt, *zplt;
   int ibar,jbar;
   int nx,ny,nxy;
-  int *iblank_x, *iblank_y, *iblank_z;
+  char *iblank_x, *iblank_y, *iblank_z;
 
   mesh *meshi;
 
@@ -2687,9 +2687,9 @@ void drawvolslice(const slice *sd){
   zplt=meshi->zplt;
   ibar=meshi->ibar;
   jbar=meshi->jbar;
-  iblank_x=meshi->iblank_x;
-  iblank_y=meshi->iblank_y;
-  iblank_z=meshi->iblank_z;
+  iblank_x=meshi->c_iblank_x;
+  iblank_y=meshi->c_iblank_y;
+  iblank_z=meshi->c_iblank_z;
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -2868,7 +2868,7 @@ void drawvvolslice(const vslice *vd){
   float vrange;
   mesh *meshi;
   float *xplttemp,*yplttemp,*zplttemp;
-  int *iblank;
+  char *iblank;
   int nx, ny, nxy;
   float *rgb_ptr;
 
@@ -2877,7 +2877,7 @@ void drawvvolslice(const vslice *vd){
   xplttemp=meshi->xplt;
   yplttemp=meshi->yplt;
   zplttemp=meshi->zplt;
-  iblank = meshi->iblank;
+  iblank = meshi->c_iblank;
   nx = meshi->ibar+1;
   ny = meshi->jbar+1;
   nxy = nx*ny;
@@ -3062,7 +3062,7 @@ void drawvvolslice_terrain(const vslice *vd){
   float vrange;
   mesh *meshi;
   float *xplttemp,*yplttemp,*zplttemp;
-  int *iblank;
+  char *iblank;
   int nx, ny, nxy;
   float *rgb_ptr;
   terraindata *terri;
@@ -3074,7 +3074,7 @@ void drawvvolslice_terrain(const vslice *vd){
   xplttemp=meshi->xplt;
   yplttemp=meshi->yplt;
   zplttemp=meshi->zplt;
-  iblank = meshi->iblank;
+  iblank = meshi->c_iblank;
   nx = meshi->ibar+1;
   ny = meshi->jbar+1;
   nxy = nx*ny;
@@ -3293,7 +3293,7 @@ void drawvslice(const vslice *vd){
   float vrange;
   mesh *meshi;
   float *xplttemp,*yplttemp,*zplttemp;
-  int *iblank;
+  char *iblank;
   int nx, ny, nxy;
   float *rgb_ptr;
 
@@ -3302,7 +3302,7 @@ void drawvslice(const vslice *vd){
   xplttemp=meshi->xplt;
   yplttemp=meshi->yplt;
   zplttemp=meshi->zplt;
-  iblank = meshi->iblank;
+  iblank = meshi->c_iblank;
   nx = meshi->ibar+1;
   ny = meshi->jbar+1;
   nxy = nx*ny;
