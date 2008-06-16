@@ -377,7 +377,7 @@ void drawplot3d_texture(mesh *meshi){
   float *dx_xzcopy, *dy_xzcopy, *dz_xzcopy;
   float *dx_xycopy, *dy_xycopy, *dz_xycopy;
   int nx, ny, nz,nxy;
-  int *iblank_x, *iblank_y, *iblank_z, *iblank;
+  char *iblank_x, *iblank_y, *iblank_z, *iblank;
   float *vector_color;
 
   plotx = meshi->plotx;
@@ -393,10 +393,10 @@ void drawplot3d_texture(mesh *meshi){
   xplt = meshi->xplt;
   yplt = meshi->yplt;
   zplt = meshi->zplt;
-  iblank_x = meshi->iblank_x;
-  iblank_y = meshi->iblank_y;
-  iblank_z = meshi->iblank_z;
-  iblank = meshi->iblank;
+  iblank_x = meshi->c_iblank_x;
+  iblank_y = meshi->c_iblank_y;
+  iblank_z = meshi->c_iblank_z;
+  iblank = meshi->c_iblank;
 
 
   nx = ibar+1;
@@ -791,7 +791,7 @@ void drawplot3d(mesh *meshi){
   float *dx_xzcopy, *dy_xzcopy, *dz_xzcopy;
   float *dx_xycopy, *dy_xycopy, *dz_xycopy;
   int nx, ny, nz,nxy;
-  int *iblank_x, *iblank_y, *iblank_z, *iblank;
+  char *iblank_x, *iblank_y, *iblank_z, *iblank;
   float *vector_color;
 
   plotx = meshi->plotx;
@@ -807,10 +807,10 @@ void drawplot3d(mesh *meshi){
   xplt = meshi->xplt;
   yplt = meshi->yplt;
   zplt = meshi->zplt;
-  iblank_x = meshi->iblank_x;
-  iblank_y = meshi->iblank_y;
-  iblank_z = meshi->iblank_z;
-  iblank = meshi->iblank;
+  iblank_x = meshi->c_iblank_x;
+  iblank_y = meshi->c_iblank_y;
+  iblank_z = meshi->c_iblank_z;
+  iblank = meshi->c_iblank;
 
 
   nx = ibar+1;
@@ -1183,7 +1183,7 @@ void updatesurface(void){
   float *xplt, *yplt, *zplt;
   isosurface *currentsurfptr,*currentsurf2ptr;
   float *qdata;
-  int *iblank_cell;
+  char *iblank_cell;
   mesh *meshi;
   int plot3dsize;
   int i;
@@ -1199,7 +1199,7 @@ void updatesurface(void){
     xplt=meshi->xplt;
     yplt=meshi->yplt;
     zplt=meshi->zplt;
-    iblank_cell=meshi->iblank_cell;
+    iblank_cell=meshi->c_iblank_cell;
 
     currentsurfptr = &meshi->currentsurf;
     currentsurf2ptr = &meshi->currentsurf2;
@@ -1398,9 +1398,9 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   float *dx_xycopy, *dy_xycopy, *dz_xycopy;
   float *qdata;
   int *iqdata;
-  int *iblank_xy=NULL, *iblank_xz=NULL, *iblank_yz=NULL;
+  char *iblank_xy=NULL, *iblank_xz=NULL, *iblank_yz=NULL;
   int nx, ny, nz, nxy, nxyz;
-  int *iblank_x, *iblank_y, *iblank_z;
+  char *iblank_x, *iblank_y, *iblank_z;
 
   meshi = mesh_in;
   plotx = meshi->plotx;
@@ -1412,9 +1412,9 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   xplt = meshi->xplt;
   yplt = meshi->yplt;
   zplt = meshi->zplt;
-  iblank_x = meshi->iblank_x;
-  iblank_y = meshi->iblank_y;
-  iblank_z = meshi->iblank_z;
+  iblank_x = meshi->c_iblank_x;
+  iblank_y = meshi->c_iblank_y;
+  iblank_z = meshi->c_iblank_z;
 
   yzcolorbase=meshi->yzcolorbase;
   xzcolorbase=meshi->xzcolorbase;
@@ -1492,7 +1492,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     dx_yzcopy=dx_yz;
     dy_yzcopy=dy_yz;
     dz_yzcopy=dz_yz;
-    NewMemory((void **)&iblank_yz,jbar*kbar*sizeof(int));
+    NewMemory((void **)&iblank_yz,jbar*kbar*sizeof(char));
     for(j=0;j<jbar;j++){for(k=0;k<kbar;k++){
       iblank_yz[k+j*kbar]=iblank_x[ijknode(plotx,j,k)];
     }}
@@ -1527,7 +1527,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     dx_xzcopy=dx_xz;
     dy_xzcopy=dy_xz;
     dz_xzcopy=dz_xz;
-    NewMemory((void **)&iblank_xz,ibar*kbar*sizeof(int));
+    NewMemory((void **)&iblank_xz,ibar*kbar*sizeof(char));
     for(i=0;i<ibar;i++){for(k=0;k<kbar;k++){
       iblank_xz[k+i*kbar]=iblank_y[ijknode(i,ploty,k)];
     }}
@@ -1562,7 +1562,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     dx_xycopy=dx_xy;
     dy_xycopy=dy_xy;
     dz_xycopy=dz_xy;
-    NewMemory((void **)&iblank_xy,ibar*jbar*sizeof(int));
+    NewMemory((void **)&iblank_xy,ibar*jbar*sizeof(char));
     for(i=0;i<ibar;i++){for(j=0;j<jbar;j++){
       iblank_xy[j+i*jbar]=iblank_z[ijknode(i,j,plotz)];
     }}

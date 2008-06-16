@@ -478,12 +478,12 @@ void ReduceToUnit(float *v){
   v[2] /= length;
 }
 
-/* ------------------ GetIsoSurface ------------------------ */
+/* ------------------ GetIsosurface ------------------------ */
 
 int GetIsosurface(isosurface *surface, 
                   const float *data, 
                   const float *tdata, 
-                  const int *iblank_cell, 
+                  const char *iblank_cell, 
                   float level,
                   const float *xplt, int nx, 
                   const float *yplt, int ny, 

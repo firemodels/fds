@@ -530,12 +530,12 @@ float getblockdist(float x, float y, float z){
   int ii, jj, kk;
   int ijknode,ijkcell;
   float view_height;
-  int *iblank_cell;
+  char *iblank_cell;
 
   for(i=0;i<nmeshes;i++){
     meshi = meshinfo+i;
 
-    iblank_cell = meshi->iblank_cell;
+    iblank_cell = meshi->c_iblank_cell;
 
     ibar = meshi->ibar;
     jbar = meshi->jbar;
@@ -603,7 +603,7 @@ void init_blockdist(void){
   float *xplt, *yplt, *zplt;
   float xx, yy, zz;
   int ijkm1cell, ijknode, ijkm1node;
-  int *iblank_cell;
+  char *iblank_cell;
 
     for(ig=0;ig<nmeshes;ig++){
       meshi = meshinfo+ig;
@@ -637,7 +637,7 @@ void init_blockdist(void){
       xplt = meshi->xplt_orig;
       yplt = meshi->yplt_orig;
       zplt = meshi->zplt_orig;
-      iblank_cell = meshi->iblank_cell;
+      iblank_cell = meshi->c_iblank_cell;
 
       dz = zplt[1]-zplt[0];
 
@@ -701,11 +701,11 @@ int makeiblank(void){
   int ijksize,i,j,k;
   int ii,ig;
   int test;
-  int *ib, *ib_x, *ib_y, *ib_z, *ib_c;
+  char *ib, *ib_x, *ib_y, *ib_z, *ib_c;
   mesh *meshi;
   int ibar,jbar,kbar;
   int nx, ny, nxy;
-  int *iblank,*iblank_cell,*iblank_x,*iblank_y,*iblank_z;
+  char *iblank,*iblank_cell,*iblank_x,*iblank_y,*iblank_z;
 
   for(ig=0;ig<nmeshes;ig++){
     meshi = meshinfo+ig;
@@ -718,16 +718,16 @@ int makeiblank(void){
     ib_x=NULL;
     ib_y=NULL;
     ib_z=NULL;
-    if(NewMemory((void **)&ib,ijksize*sizeof(int))==0)return 1;
-    if(NewMemory((void **)&ib_c,ibar*jbar*kbar*sizeof(int))==0)return 1;
-    if(NewMemory((void **)&ib_x,ijksize*sizeof(int))==0)return 1;
-    if(NewMemory((void **)&ib_y,ijksize*sizeof(int))==0)return 1;
-    if(NewMemory((void **)&ib_z,ijksize*sizeof(int))==0)return 1;
-    meshi->iblank=ib;
-    meshi->iblank_cell=ib_c;
-    meshi->iblank_x=ib_x;
-    meshi->iblank_y=ib_y;
-    meshi->iblank_z=ib_z;
+    if(NewMemory((void **)&ib,ijksize*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&ib_c,ibar*jbar*kbar*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&ib_x,ijksize*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&ib_y,ijksize*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&ib_z,ijksize*sizeof(char))==0)return 1;
+    meshi->c_iblank=ib;
+    meshi->c_iblank_cell=ib_c;
+    meshi->c_iblank_x=ib_x;
+    meshi->c_iblank_y=ib_y;
+    meshi->c_iblank_z=ib_z;
 
     iblank=ib;
     iblank_cell=ib_c;
