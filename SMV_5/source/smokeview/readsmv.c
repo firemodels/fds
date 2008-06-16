@@ -2446,6 +2446,10 @@ typedef struct {
     ++++++++++++++++++++++ OBST ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
+
+    // note - OBST lines for autoterran==1 are processed in pass 4
+    //        because Smokeview needs info from pass 3
+
     if(autoterrain==0&&match(buffer,"OBST",4) == 1){
       mesh *meshi;
 
@@ -4055,7 +4059,7 @@ typedef struct {
         NewMemory((void **)&meshi->zcell,ibar*jbar*sizeof(float));
         zcell = meshi->zcell;
         for(j=0;j<ibar*jbar;j++){
-          zcell[j]=meshi->zbar0;
+          zcell[j]=meshi->zbar0; // assume initially that zcell (terrain height) is at base of the domain
         }
       }
     }
@@ -5660,8 +5664,6 @@ void initmesh(mesh *meshi){
   meshi->ventinfo=NULL;
   meshi->select_min=0;
   meshi->select_max=0;
-  meshi->outline_blank=NULL;
-  meshi->outline_list=NULL;
 }
 
 /* ------------------ freelabels ------------------------ */
