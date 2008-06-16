@@ -35,6 +35,7 @@ char readsmv_revision[]="$Revision$";
 #define DEVICE_SPRK 3
 #define DEVICE_SMOKE 4
 
+#define ijcell2(i,j) nxcell*(j) + (i)
 int GeometryMenu(int var);
 
 /* ------------------ readsmv ------------------------ */
@@ -2276,11 +2277,6 @@ typedef struct {
     }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ GRID ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ PDIM ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
@@ -2450,7 +2446,7 @@ typedef struct {
     ++++++++++++++++++++++ OBST ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"OBST",4) == 1){
+    if(autoterrain==0&&match(buffer,"OBST",4) == 1){
       mesh *meshi;
 
       CheckMemoryOff;
@@ -3307,7 +3303,7 @@ typedef struct {
       sd->slicepoint=NULL;
       sd->slicedata=NULL;
       sd->slicetimeslist=NULL;
-      sd->iblank=NULL;
+      sd->c_iblank=NULL;
       sd->blocknumber=blocknumber;
       sd->vloaded=0;
       sd->reload=0;
@@ -4042,6 +4038,29 @@ typedef struct {
    ************************ end of pass 3 ********************************* 
    ************************************************************************
  */
+
+  if(autoterrain==1){
+    nobst=0;
+    iobst=0;
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      int ibar, jbar, kbar;
+
+      meshi = meshinfo + i;
+      ibar = meshi->ibar;
+      jbar = meshi->jbar;
+      if(ibar>0&&jbar>0){
+        float *zcell;
+
+        NewMemory((void **)&meshi->zcell,ibar*jbar*sizeof(float));
+        zcell = meshi->zcell;
+        for(j=0;j<ibar*jbar;j++){
+          zcell[j]=meshi->zbar0;
+        }
+      }
+    }
+  }
+
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     int nlist;
@@ -4066,10 +4085,7 @@ typedef struct {
     meshi->nsmoothblockages_list++;
   }
 
-
-
-
-/* 
+  /* 
    ************************************************************************
    ************************ start of pass 4 ********************************* 
    ************************************************************************
@@ -4077,11 +4093,55 @@ typedef struct {
 
   rewind(stream);
   printf("   pass 3 completed\n");
-  if(do_pass4==1)printf("   pass 4\n");
+  if(do_pass4==1||autoterrain==1)printf("   pass 4\n");
 
-  while(do_pass4==1&&!feof(stream)){
+  while((autoterrain==1||do_pass4==1)&&!feof(stream)){
     if(fgets(buffer,255,stream)==NULL)break;
     if(strncmp(buffer," ",1)==0)continue;
+
+    if(autoterrain==1&&match(buffer,"OBST",4) == 1){
+      mesh *meshi;
+      int nxcell;
+
+      nobst++;
+      iobst++;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&tempval);
+
+
+      if(tempval<=0)tempval=0;
+      if(tempval==0)continue;
+      nbtemp=tempval;
+
+      meshi=meshinfo+iobst-1;
+
+      for(nn=0;nn<nbtemp;nn++){
+        fgets(buffer,255,stream);
+      }
+      nxcell = meshi->ibar;
+      for(nn=0;nn<nbtemp;nn++){
+        int ijk[5],kmax;
+        int ii, jj;
+        float zval;
+
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i %i %i %i",ijk,ijk+1,ijk+2,ijk+3,ijk+4,&kmax);
+        zval = meshi->zplt[kmax];
+        for(ii=ijk[0];ii<ijk[1];ii++){
+          for(jj=ijk[2];jj<ijk[3];jj++){
+            int ij;
+            float zcell;
+
+            ij = ijcell2(ii,jj);
+            zcell = meshi->zcell[ij];
+            if(zval>zcell){
+              meshi->zcell[ij]=zval;
+            }
+          }
+        }
+      }
+      continue;
+    }
 
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -5452,6 +5512,7 @@ void initmesh(mesh *meshi){
   meshi->cull_smoke3d=NULL;
   meshi->smokedir_old=-100;
 #endif
+  meshi->zcell=NULL;
   meshi->terrain=NULL;
   meshi->meshrgb[0]=0.0;
   meshi->meshrgb[1]=0.0;
@@ -5490,7 +5551,7 @@ void initmesh(mesh *meshi){
   meshi->dx_xy=NULL;       meshi->dy_xy=NULL;       meshi->dz_xy=NULL;
   meshi->dx_xz=NULL;       meshi->dy_xz=NULL;       meshi->dz_xz=NULL;
   meshi->dx_yz=NULL;       meshi->dy_yz=NULL;       meshi->dz_yz=NULL;
-  meshi->iblank_xy=NULL;   meshi->iblank_xz=NULL;   meshi->iblank_yz=NULL;
+  meshi->c_iblank_xy=NULL; meshi->c_iblank_xz=NULL; meshi->c_iblank_yz=NULL;
   meshi->iblank_smoke3d=NULL;
   meshi->animatedsurfaces=NULL;
   meshi->blockagesurface=NULL;
@@ -5572,10 +5633,10 @@ void initmesh(mesh *meshi){
   meshi->xplt_orig=NULL;
   meshi->yplt_orig=NULL;
   meshi->zplt_orig=NULL;
-  meshi->iblank_cell=NULL;
-  meshi->iblank_x=NULL;
-  meshi->iblank_y=NULL;
-  meshi->iblank_z=NULL;
+  meshi->c_iblank_cell=NULL;
+  meshi->c_iblank_x=NULL;
+  meshi->c_iblank_y=NULL;
+  meshi->c_iblank_z=NULL;
 
   meshi->xbar=1.0;
   meshi->xbar0=0.0;
@@ -5595,7 +5656,7 @@ void initmesh(mesh *meshi){
   meshi->plotz=1;
 
   meshi->boxoffset=0.0;
-  meshi->iblank=NULL;
+  meshi->c_iblank=NULL;
   meshi->ventinfo=NULL;
   meshi->select_min=0;
   meshi->select_max=0;

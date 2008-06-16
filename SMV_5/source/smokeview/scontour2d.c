@@ -168,7 +168,7 @@ void setcontourslice(contour *ci,int idir,float xyz){
 /*  ------------------ getcontours ------------------------ */
 
 void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,  
-                 const float *vals, const int *iblank, const float *levels,
+                 const float *vals, const char *iblank, const float *levels,
                  int minfill, int maxfill,
                  const contour *ci){
   int n,i,j;
