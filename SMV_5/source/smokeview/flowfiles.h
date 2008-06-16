@@ -415,8 +415,6 @@ typedef struct mesh_ {
   float vent_offset[3];
   int select_min, select_max;
 
-  int *outline_blank;
-  float *outline_list;
   unsigned char *merge_color,*merge_alpha;
 
   char *label;
