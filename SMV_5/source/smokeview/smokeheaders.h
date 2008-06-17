@@ -38,10 +38,10 @@ EXTERNCPP void init_avatar(void);
 EXTERNCPP int log2(float xx);
 #endif
 EXTERNCPP void readterrain(char *file, int ifile, int flag, int *errorcode);
-EXTERNCPP float getterrain_z(float x, float y);
 EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
                                  int allocate_memory);
 EXTERNCPP void initterrain_all(void);
+EXTERNCPP void update_terrain_colors(void);
 EXTERNCPP void drawterrain(terraindata *terri, int only_geom);
 EXTERNCPP void drawterrain_texture(terraindata *terri, int only_geom);
 EXTERNCPP void drawtrees(void);
