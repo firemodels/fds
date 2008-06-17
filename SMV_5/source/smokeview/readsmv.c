@@ -6032,6 +6032,7 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       terrain_rgba_zmax[3]=1.0;
       if(vertical_factor<0.25)vertical_factor=0.25;
       if(vertical_factor>4.0)vertical_factor=4.0;
+      update_terrain(0,vertical_factor);
       update_terrain_colors();
     
       continue;
