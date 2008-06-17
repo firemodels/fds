@@ -4885,7 +4885,30 @@ typedef struct {
   updatesliceboundlabels();
   updateisotypes();
   updatepatchtypes();
+  if(autoterrain==1){
+    int i;
+
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      int j;
+      float *zcell;
+
+      meshi = meshinfo + i;
+      zcell = meshi->zcell;
+
+      zterrain_min = zcell[0];
+      zterrain_max = zterrain_min;
+      for(j=1;j<meshi->ibar*meshi->jbar;j++){
+        float zval;
+
+        zval=*zcell++;
+        if(zval<zterrain_min)zterrain_min=zval;
+        if(zval>zterrain_max)zterrain_max=zval;
+      }
+    }
+  }
   update_terrain(1,vertical_factor);
+  update_terrain_colors();
   updatevslices();
   updatesmoke3dmenulabels();
   updatevslicetypes();
@@ -5985,6 +6008,32 @@ int readini2(char *inifile, int loaddatafile, int localfile){
         visTerrain=1-visTerrain;
         GeometryMenu(17);
       }
+      continue;
+    }
+    if(match(buffer,"TERRAINPARMS",12)==1){
+      int i;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f",terrain_rgba_zmin,terrain_rgba_zmin+1,terrain_rgba_zmin+2);
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f",terrain_rgba_zmax,terrain_rgba_zmax+1,terrain_rgba_zmax+2);
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f",&vertical_factor);
+
+      for(i=0;i<3;i++){
+        if(terrain_rgba_zmin[i]<0.0)terrain_rgba_zmin[i]=0.0;
+        if(terrain_rgba_zmin[i]>1.0.0)terrain_rgba_zmin[i]=1.0;
+        if(terrain_rgba_zmax[i]<0.0)terrain_rgba_zmax[i]=0.0;
+        if(terrain_rgba_zmax[i]>1.0)terrain_rgba_zmax[i]=1.0;
+      }
+      terrain_rgba_zmin[3]=1.0;
+      terrain_rgba_zmax[3]=1.0;
+      if(vertical_factor<0.25)vertical_factor=0.25;
+      if(vertical_factor>4.0)vertical_factor=4.0;
+      update_terrain_colors();
+    
       continue;
     }
     if(match(buffer,"SBATSTART",9)==1){
@@ -8275,6 +8324,10 @@ void writeini(int flag){
   fprintf(fileout," %i\n",trainerview);
   fprintf(fileout,"SHOWTERRAIN\n");
   fprintf(fileout," %i\n",visTerrain);
+  fprintf(fileout,"TERRAINPARMS\n");
+  fprintf(fileout,"%f %f %f\n",terrain_rgba_zmin[0],terrain_rgba_zmin[1],terrain_rgba_zmin[2]);
+  fprintf(fileout,"%f %f %f\n",terrain_rgba_zmax[0],terrain_rgba_zmax[1],terrain_rgba_zmax[2]);
+  fprintf(fileout,"%f\n",vertical_factor);
   fprintf(fileout,"OFFSETSLICE\n");
   fprintf(fileout," %i\n",offset_slice);
 

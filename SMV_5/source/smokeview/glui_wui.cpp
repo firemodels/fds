@@ -20,9 +20,13 @@
 
 // svn revision character string
 extern "C" char glui_wui_revision[]="$Revision: 1222 $";
-GLUI_Panel *panel_terrain_color=NULL;
+GLUI_Panel *panel_terrain=NULL;
 
 #define TERRAIN_COLORS 35
+#define TERRAIN_VERT 34
+#define WUI_CLOSE 99
+#define SAVE_SETTINGS 98
+
 
 GLUI *glui_wui=NULL;
 GLUI_Panel *panel_wui=NULL;
@@ -46,18 +50,18 @@ extern "C" void glui_wui_setup(int main_window){
   panel_wui = glui_wui->add_panel("",GLUI_PANEL_NONE);
 
   if(nterraininfo>0){
-    panel_terrain_color = glui_wui->add_panel("Terrain Colors");
-    SPINNER_red_min=glui_wui->add_spinner_to_panel(panel_terrain_color,"min red",GLUI_SPINNER_FLOAT,
+    panel_terrain = glui_wui->add_panel("Terrain Colors");
+    SPINNER_red_min=glui_wui->add_spinner_to_panel(panel_terrain,"min red",GLUI_SPINNER_FLOAT,
       terrain_rgba_zmin,TERRAIN_COLORS,WUI_CB);
-    SPINNER_green_min=glui_wui->add_spinner_to_panel(panel_terrain_color,"min green",GLUI_SPINNER_FLOAT,
+    SPINNER_green_min=glui_wui->add_spinner_to_panel(panel_terrain,"min green",GLUI_SPINNER_FLOAT,
       terrain_rgba_zmin+1,TERRAIN_COLORS,WUI_CB);
-    SPINNER_blue_min=glui_wui->add_spinner_to_panel(panel_terrain_color,"min blue",GLUI_SPINNER_FLOAT,
+    SPINNER_blue_min=glui_wui->add_spinner_to_panel(panel_terrain,"min blue",GLUI_SPINNER_FLOAT,
       terrain_rgba_zmin+2,TERRAIN_COLORS,WUI_CB);
-    SPINNER_red_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"max red",GLUI_SPINNER_FLOAT,
+    SPINNER_red_max=glui_wui->add_spinner_to_panel(panel_terrain,"max red",GLUI_SPINNER_FLOAT,
       terrain_rgba_zmax,TERRAIN_COLORS,WUI_CB);
-    SPINNER_green_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"max green",GLUI_SPINNER_FLOAT,
+    SPINNER_green_max=glui_wui->add_spinner_to_panel(panel_terrain,"max green",GLUI_SPINNER_FLOAT,
       terrain_rgba_zmax+1,TERRAIN_COLORS,WUI_CB);
-    SPINNER_blue_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"max blue",GLUI_SPINNER_FLOAT,
+    SPINNER_blue_max=glui_wui->add_spinner_to_panel(panel_terrain,"max blue",GLUI_SPINNER_FLOAT,
       terrain_rgba_zmax+2,TERRAIN_COLORS,WUI_CB);
       SPINNER_red_min->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
     SPINNER_green_min->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
@@ -66,9 +70,14 @@ extern "C" void glui_wui_setup(int main_window){
     SPINNER_green_max->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
      SPINNER_blue_max->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
-    SPINNER_vertical_factor=glui_wui->add_spinner_to_panel(panel_terrain_color,"vertical factor",GLUI_SPINNER_FLOAT,
-      &vertical_factor,TERRAIN_COLORS,WUI_CB);
+    SPINNER_vertical_factor=glui_wui->add_spinner_to_panel(panel_terrain,"vertical factor",GLUI_SPINNER_FLOAT,
+      &vertical_factor,TERRAIN_VERT,WUI_CB);
      SPINNER_vertical_factor->set_float_limits(0.25,4.0,GLUI_LIMIT_CLAMP);
+
+    glui_wui->add_button_to_panel(panel_terrain,"Save Settings",SAVE_SETTINGS,WUI_CB);
+
+    glui_wui->add_button_to_panel(panel_terrain,"Close",WUI_CLOSE,WUI_CB);
+
   }
 
 
@@ -96,8 +105,18 @@ void WUI_CB(int var){
 
   switch (var){
     case TERRAIN_COLORS:
+      update_terrain_colors();
+      break;
+    case TERRAIN_VERT:
       update_terrain(0,vertical_factor);
       break;
+  case SAVE_SETTINGS:
+    writeini(LOCAL_INI);
+    break;
+  case WUI_CLOSE:
+    hide_glui_wui();
+    break;
+
   default:
     ASSERT(0);
     break;
