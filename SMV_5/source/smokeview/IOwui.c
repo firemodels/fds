@@ -119,57 +119,6 @@ void drawtrees(void){
 
 }
 
-
-/* ------------------ getterrain_z ------------------------ */
-
-float getterrain_z(float x, float y){
-  int i;
-  float returnval=0.0;
-  int ii, jj;
-  int iip1, jjp1;
-  float dx, dy;
-  float z11, z12, z21, z22;
-  int nxcell;
-  float *xnode, *ynode, *znode;
-
-  for(i=0;i<nterraininfo;i++){
-    terraindata *terri;
-
-    terri = terraininfo + i;
-    if(x<terri->xmin||x>terri->xmax)continue;
-    if(y<terri->ymin||y>terri->ymax)continue;
-    nxcell = terri->nx;
-
-    dx = (terri->xmax-terri->xmin)/terri->nx;
-    dy = (terri->ymax-terri->ymin)/terri->ny;
-    ii = (x-terri->xmin)/dx;
-    if(ii<0)ii=0;
-    if(ii>terri->nx-1)ii=terri->nx-1;
-
-    jj = (y-terri->ymin)/dy;
-    if(jj<0)jj=0;
-    if(jj>terri->ny-1)jj=terri->ny-1;
-    iip1 = ii+1;
-    jjp1 = jj+1;
-
-    znode = terri->znode;
-    xnode = terri->x;
-    ynode = terri->y;
-
-    z11 = znode[ijnode2(  ii,  jj)];
-    z12 = znode[ijnode2(  ii,jjp1)];
-    z21 = znode[ijnode2(iip1,  jj)];
-    z22 = znode[ijnode2(iip1,jjp1)];
-
-    returnval  =  (xnode[iip1]-x)*(ynode[jjp1]-y)*z11;
-    returnval  += (xnode[iip1]-x)*(y-ynode[jj])*z12;
-    returnval  += (x-xnode[ii])  *(ynode[jjp1]-y)*z21;
-    returnval  += (x-xnode[ii])  *(y-ynode[jj])*z22;
-    returnval /= (dx*dy);
-  }
-  return returnval;
-}
-
 /* ------------------ get_zcell ------------------------ */
 
 float get_zcell_val(mesh *meshi,float xval, float yval, int *loc){
@@ -216,6 +165,22 @@ float get_zcell_val(mesh *meshi,float xval, float yval, int *loc){
   return 0.0;
 }
 
+/* ------------------ update_terrain_colors ------------------------ */
+
+void update_terrain_colors(void){
+  int i;
+
+  for(i=0;i<MAXRGB;i++){
+    float f1;
+
+    f1 = (float)i/(float)(MAXRGB-1);
+    rgbterrain[4*i+0]=(1.0-f1)*terrain_rgba_zmin[0] + f1*terrain_rgba_zmax[0];
+    rgbterrain[4*i+1]=(1.0-f1)*terrain_rgba_zmin[1] + f1*terrain_rgba_zmax[1];
+    rgbterrain[4*i+2]=(1.0-f1)*terrain_rgba_zmin[2] + f1*terrain_rgba_zmax[2];
+    rgbterrain[4*i+3]=1.0;
+  }
+}
+
 /* ------------------ initterrain_all ------------------------ */
 
 void initterrain_all(void){
@@ -236,31 +201,6 @@ void initterrain_all(void){
   float denom;
   unsigned char *uc_znormal;
 
-
-  for(i=0;i<MAXRGB;i++){
-    float f1;
-
-    f1 = (float)i/(float)(MAXRGB-1);
-    rgbterrain[4*i+0]=(1.0-f1)*terrain_rgba_zmin[0] + f1*terrain_rgba_zmax[0];
-    rgbterrain[4*i+1]=(1.0-f1)*terrain_rgba_zmin[1] + f1*terrain_rgba_zmax[1];
-    rgbterrain[4*i+2]=(1.0-f1)*terrain_rgba_zmin[2] + f1*terrain_rgba_zmax[2];
-    rgbterrain[4*i+3]=1.0;
-  }
-  /*
-  // contours
-  for(i=0;i<10;i++){
-    int j;
-    for(j=0;j<5;j++){
-      int jj;
-
-      jj=i*255/10+j;
-      rgbterrain[4*jj+0]=0.0;
-      rgbterrain[4*jj+1]=0.0;
-      rgbterrain[4*jj+2]=0.0;
-    }
-  }
-  */
-
   for(imesh=0;imesh<nmeshes;imesh++){
     
     meshi = meshinfo + imesh;
@@ -273,7 +213,6 @@ void initterrain_all(void){
     znode = terri->znode;
     nxcell = terri->nx;
 
-    //znormal = terri->znormal;
     uc_znormal = terri->uc_znormal;
     znode = terri->znode;
     for(j=0;j<=terri->ny;j++){
@@ -284,6 +223,7 @@ void initterrain_all(void){
       ynode = terri->y[j];
 
       for(i=0;i<=terri->nx;i++){
+        int ii, jj;
         float xnode;
         int count, loc1, loc2, loc3, loc4;
         float val1, val2, val3, val4;
@@ -748,28 +688,6 @@ float *get_terraincolor(terraincell *ti){
 }
 
 /* ------------------ readterrain ------------------------ */
-
-/*
-typedef struct {
-  int nallocated, nstates;
-  float *time, *tcurrent;
-  unsigned char *state;
-} terraincell;
-
-typedef struct {
-  char *file;
-  int loaded, display;
-  int autoload;
-  texture *ter_texture;
-  int nx, ny;
-  float xmin, xmax, ymin, ymax;
-  float *x, *y;
-  float *zcell, *znode, *znormal;
-  float *times;
-  terraincell *tcell;
-  int ntimes;
-} terraindata;
-*/
 
 void readterrain(char *file, int ifile, int flag, int *errorcode){
   terraindata *terri=NULL;
