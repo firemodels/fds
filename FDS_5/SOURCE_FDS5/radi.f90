@@ -14,7 +14,7 @@ CHARACTER(255), PARAMETER :: radiid='$Id$'
 CHARACTER(255), PARAMETER :: radirev='$Revision$'
 CHARACTER(255), PARAMETER :: radidate='$Date$'
 
-PUBLIC INIT_RADIATION,COMPUTE_RADIATION,NSB,NRA,UIIDIM,NRT,RSA,NRP,GET_REV_radi
+PUBLIC INIT_RADIATION,COMPUTE_RADIATION,NSB,NRA,UIIDIM,NRT,RSA,NRP,RTMPMAX,RTMPMIN,GET_REV_radi
  
 CONTAINS
  
@@ -198,10 +198,18 @@ ENDDO
  
 !-----------------------------------------------------
 !
-!            Spectral information
+!            Radiative properties computation
 !
 !-----------------------------------------------------
 
+!
+! General parameters
+!
+RTMPMAX = 300._EB       ! Maximum temperature for property tables
+RTMPMIN = 2400._EB      ! Minimum temperature for property tables
+! 
+! Setup spectral information
+!
 INIT_WIDE_BAND: IF (WIDE_BAND_MODEL) THEN
  
 ! Fraction of blackbody emission in a wavelength interval
@@ -329,7 +337,7 @@ SPECIES_LOOP: DO NS=1,N_SPECIES
             ENDIF
             CALL INIT_RADCAL
             T_LOOP_MF2: DO K = 0,SS%NKAP_TEMP
-               RCT(1) = 300._EB + K*(2400._EB-300._EB)/SS%NKAP_TEMP
+               RCT(1) = RTMPMIN + K*(RTMPMAX-RTMPMIN)/SS%NKAP_TEMP
                Z_LOOP_MF2: DO J=0,SS%NKAP_MASS
                   YY = SS%MAXMASS*(REAL(J)/REAL(SS%NKAP_MASS))**4
                   MTOT = YY/MW_RADCAL+(1._EB-YY)/MW_N2
@@ -350,7 +358,7 @@ SPECIES_LOOP: DO NS=1,N_SPECIES
                      ENDIF
                      SS%KAPPA(J,K,IBND) = AP0/BBF
                   ENDIF
-               ENDDO Z_LOOP_MF2
+              ENDDO Z_LOOP_MF2
             ENDDO T_LOOP_MF2
          ENDDO BAND_LOOP_FR1
 
@@ -372,7 +380,7 @@ SPECIES_LOOP: DO NS=1,N_SPECIES
             CALL INIT_RADCAL
             I_RADCAL=5
             T_LOOP_MF3: DO K = 0,SS%NKAP_TEMP
-               RCT(1) = 300._EB + K*(2400._EB-300._EB)/SS%NKAP_TEMP
+               RCT(1) = RTMPMIN + K*(RTMPMAX-RTMPMIN)/SS%NKAP_TEMP
                Z_LOOP_MF3: DO J=0,SS%NKAP_MASS
                   YY = SS%MAXMASS*(REAL(J)/REAL(SS%NKAP_MASS))**4
                   RCRHO = 29._EB * P_INF/(R0*RCT(1)) !Good enough
@@ -423,7 +431,7 @@ IF (MIXTURE_FRACTION) THEN
       ENDIF
       CALL INIT_RADCAL 
       T_LOOP_Z: DO K = 0,Z2KAPPA_T
-         RCT(1) = 300._EB + K*(2400._EB-300._EB)/Z2KAPPA_T
+         RCT(1) = RTMPMIN + K*(RTMPMAX-RTMPMIN)/Z2KAPPA_T         
          IF (NSB>1) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),RCT(1))
          Y_LOOP_Z: DO J=0,Z2KAPPA_M
             YY = (REAL(J,EB)/REAL(Z2KAPPA_M,EB))**4
@@ -669,13 +677,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             SUM_SPECIES: DO NS=1,N_SPECIES
                IF (SPECIES(NS)%MODE == MIXTURE_FRACTION_SPECIES) CYCLE SUM_SPECIES
                IF (.NOT. SPECIES(NS)%ABSORBING)                  CYCLE SUM_SPECIES
-               TYY = NINT(SPECIES(NS)%NKAP_TEMP*(TMP(I,J,K)-300._EB)/2100._EB)
+               TYY = NINT(SPECIES(NS)%NKAP_TEMP*(TMP(I,J,K)-RTMPMIN)/(RTMPMAX-RTMPMIN))
                TYY = MAX(0,MIN(SPECIES(NS)%NKAP_TEMP,TYY))
                ZZ = MIN(1._EB,MAX(0._EB,YY(I,J,K,NS)))
                KAPPA(I,J,K) = KAPPA(I,J,K) + YY2KAPPA(ZZ,TYY,IBND,NS)
             ENDDO SUM_SPECIES
             IF (MIXTURE_FRACTION) THEN
-               TYY = NINT(Z2KAPPA_T*(TMP(I,J,K)-300._EB)/2100._EB)
+               TYY = NINT(Z2KAPPA_T*(TMP(I,J,K)-RTMPMIN)/(RTMPMAX-RTMPMIN))
                TYY = MAX(0,MIN(Z2KAPPA_T,TYY))
                IF (CO_PRODUCTION) THEN
                   Z_2 = YY(I,J,K,I_PROG_CO)

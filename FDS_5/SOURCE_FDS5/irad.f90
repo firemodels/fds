@@ -1762,7 +1762,7 @@ REAL(EB) DGROUP_A, DGROUP_B
 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RSA, DLX, DLY, DLZ, DLB
-REAL(EB) :: DPHI0, W_AXI, FOUR_SIGMA, RPI_SIGMA, LTSTEP
+REAL(EB) :: DPHI0, W_AXI, FOUR_SIGMA, RPI_SIGMA, LTSTEP, RTMPMAX, RTMPMIN
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: DLM
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: NRP
 INTEGER :: NSB,NRA,NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
@@ -1791,6 +1791,8 @@ INTEGER :: NSB,NRA,NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 !     PHILOW    Lower limit of solid angle component PHI
 !     RADTMP    Radiation temperature for absorption properties (Mie)
 !     RSA       Array of solid angles
+!     RTMPMAX   Maximum temperature for tabulation of radiative properties
+!     RTMPMIN   Minimum temperature for tabulation of radiative properties
 !     THETAUP   Upper limit of solid angle component THETA
 !     THETALOW  Lower limit of solid angle component THETA
 !     UII       Integrated intensity
