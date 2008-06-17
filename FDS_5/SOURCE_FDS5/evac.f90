@@ -40,7 +40,7 @@ Module EVAC
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_evac
   ! Public variables (needed in the main program):
   !
-  Character(255):: EVAC_VERSION = '1.10'
+  Character(255):: EVAC_VERSION = '2.0.0'
   Character(255) :: EVAC_COMPILE_DATE
   INTEGER :: EVAC_MODULE_REV
   !
@@ -338,7 +338,7 @@ Contains
          C_YOUNG,GAMMA,KAPPA, ANGLE, &
          D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA
     Integer :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX
-    Real(EB) :: MAX_FLOW, WIDTH, T_START, T_STOP, WIDTH1, &
+    Real(EB) :: MAX_FLOW, WIDTH, TIME_START, TIME_STOP, WIDTH1, &
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED, &
          TIME_OPEN, TIME_CLOSE
     Logical :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, &
@@ -368,8 +368,8 @@ Contains
          EXIT_SIGN, MESH_ID, COLOR_INDEX, XYZ_SMOKE, KEEP_XY, &
          TIME_OPEN, TIME_CLOSE, EVAC_MESH
     Namelist /ENTR/ ID, XB, IOR, FLOW_FIELD_ID, MAX_FLOW, &
-         FYI, WIDTH, QUANTITY, PERS_ID, T_START, &
-         T_STOP, AFTER_REACTION_TIME, &
+         FYI, WIDTH, QUANTITY, PERS_ID, TIME_START, &
+         TIME_STOP, AFTER_REACTION_TIME, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, &
          MESH_ID, COLOR_INDEX, EVAC_MESH
     Namelist /CORR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
@@ -378,7 +378,7 @@ Contains
          XB1, XB2
     Namelist /EVAC/ NUMBER_INITIAL_PERSONS, QUANTITY, FYI, &
          ID, DTSAM, XB, FLOW_FIELD_ID, PERS_ID, &
-         T_START, T_STOP, IOR, MAX_FLOW, WIDTH, ANGLE, &
+         TIME_START, TIME_STOP, IOR, MAX_FLOW, WIDTH, ANGLE, &
          AFTER_REACTION_TIME, GN_MIN, GN_MAX, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, MESH_ID, COLOR_INDEX, EVAC_MESH
     Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH
@@ -439,6 +439,7 @@ Contains
     If (.Not. All(EVACUATION_ONLY) ) Then
        ! There are fire grids ==> save fed and evac flow fields
        I_EVAC = 16*1 + 8*0 + 4*0 + 2*1 + 1*1
+       If (N_REACTIONS == 0) I_EVAC = 16*1 + 8*0 + 4*0 + 2*0 + 1*1
     Else
        ! There are no fire grids ==> try to read fed and evac flow fields
        I_EVAC = 16*0 + 8*1 + 4*1 + 2*0 + 1*0
@@ -1006,7 +1007,7 @@ Contains
        COUNT_ONLY    = .False.
        MAX_FLOW      = 0.0_EB
        WIDTH         = 0.0_EB
-       TIME_OPEN     = 0.0_EB
+       TIME_OPEN     = -Huge(TIME_OPEN)
        TIME_CLOSE    = Huge(TIME_CLOSE)
        XYZ(:)        = Huge(XYZ)
        XYZ_SMOKE(:)  = Huge(XYZ_SMOKE)
@@ -1235,7 +1236,7 @@ Contains
        EXIT_SIGN     = .False.
        MAX_FLOW      = 0.0_EB
        WIDTH         = 0.0_EB
-       TIME_OPEN     = 0.0_EB
+       TIME_OPEN     = -Huge(TIME_OPEN)
        TIME_CLOSE    = Huge(TIME_CLOSE)
        XYZ(:)        = Huge(XYZ)
        XYZ_SMOKE(:)  = Huge(XYZ_SMOKE)
@@ -1735,9 +1736,9 @@ Contains
        QUANTITY      = 'null'
        MAX_FLOW      = 0.0_EB
        WIDTH         = 0.0_EB
-       AFTER_REACTION_TIME      = .False.
-       T_START                  = -99.0_EB
-       T_STOP                   = -99.0_EB
+       AFTER_REACTION_TIME = .False.
+       TIME_START          = -Huge(TIME_START)
+       TIME_STOP           =  Huge(TIME_STOP)
        KNOWN_DOOR_NAMES         = 'null'
        KNOWN_DOOR_PROBS         = 1.0_EB
        !
@@ -1815,6 +1816,8 @@ Contains
        PNX%T_last     = 0.0_EB
        PNX%ICOUNT     = 0
        PNX%Flow       = MAX_FLOW
+       PNX%T_Start    = TIME_START
+       PNX%T_Stop     = TIME_STOP
 
        Select Case (IOR)
        Case (-1,+1)
@@ -1980,8 +1983,8 @@ Contains
        ANGLE                    = -1000.0_EB
        EVACFILE                 = .False.
        AFTER_REACTION_TIME      = .False.
-       T_START                  = -99.0_EB
-       T_STOP                   = -99.0_EB
+       TIME_START               = -99.0_EB
+       TIME_STOP                = -99.0_EB
        GN_MIN                   = 1
        GN_MAX                   = 1      
 
@@ -2031,7 +2034,7 @@ Contains
        !
        HPT%ID_NAME    = ID
        HPT%CLASS_NAME = PERS_ID
-       HPT%T_START    = T_START
+       HPT%T_START    = TIME_START
 
        HPT%GN_MIN = GN_MIN
        HPT%GN_MAX = GN_MAX
@@ -2571,9 +2574,9 @@ Contains
     Call GET_REV_evac(EVAC_MODULE_REV,EVAC_COMPILE_DATE)
     !    WRITE(EVAC_COMPILE_DATE,'(A)') EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1)
     !
-    Write(LU_EVACOUT,'(A)')          ' FDS+Evac Evacuation Module'
-    ! Write(LU_OUTPUT,'(A)')          ' FDS+Evac Evacuation Module'
-    Write(LU_EVACOUT,'(A,A)')        ' FDS+Evac Compilation Date: ', &
+    Write(LU_EVACOUT,'(/A)')          ' FDS+Evac Evacuation Module'
+    ! Write(LU_OUTPUT,'(/A)')          ' FDS+Evac Evacuation Module'
+    Write(LU_EVACOUT,'(/A,A)')        ' FDS+Evac Compilation Date: ', &
          Trim(EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1))
     ! Write(LU_OUTPUT,'(A,A)')        ' FDS+Evac Compilation Date: ', &
     !      Trim(EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1))
@@ -2581,9 +2584,9 @@ Contains
          Trim(EVAC_VERSION)
     ! Write(LU_OUTPUT,'(A,A)')  ' FDS+Evac Version         : ', &
     !      Trim(EVAC_VERSION)
-    Write(LU_EVACOUT,'(A,i0/)')  ' FDS+Evac SVN Revision No.: ', &
+    Write(LU_EVACOUT,'(A,i0)')  ' FDS+Evac SVN Revision No.: ', &
          EVAC_MODULE_REV
-    ! Write(LU_OUTPUT,'(A,i0/)')  ' FDS+Evac SVN Revision No.: ', &
+    ! Write(LU_OUTPUT,'(A,i0)')  ' FDS+Evac SVN Revision No.: ', &
     !      EVAC_MODULE_REV    
 
     Write(LU_EVACOUT,fmt='(/a,i2)')  ' FDS+Evac Color_Method    :', &
@@ -8734,6 +8737,8 @@ Contains
       PNX => EVAC_ENTRYS(I_entry)
       If (PNX%IMESH /= NM ) Return
       If (PNX%Flow <= 0.0_EB ) Return
+      If (PNX%T_Start > Tin) Return
+      If (PNX%T_Stop < Tin) Return
       MFF => MESHES(NM)
       If ( (Tin-PNX%T_last) < (1.0_EB/PNX%Flow) ) Return
       X1  = PNX%X1
