@@ -4723,15 +4723,19 @@ is 15.
 
 \index{RADI!WIDE\_BAND\_MODEL}
 \index{RADI!CH4\_BANDS}
+\index{ABSORPTION\_COEFFICIENT}
 If the optional six band model is desired,
 set {\ct WIDE\_BAND\_MODEL=.TRUE.}. It is recommended that this option
 only be used when the fuel is relatively non-sooting because it
 adds significantly to the cost of the calculation. To add three
 additional fuel bands, set {\ct CH4\_BANDS=.TRUE.}. See FDS Technical
-Reference Guide for more details.
+Reference Guide for more details. Note also that when 
+{\ct WIDE\_BAND\_MODEL=.TRUE.}, the {\ct ABSORPTION\_COEFFICIENT}
+output quantity becomes practically useless, because it then
+corresponds to one individual band of the spectrum.
 
 \index{MISC!RADIATION}
-Note also that it is possible to turn off the radiation transport
+It is possible to turn off the radiation transport
 solver (saving roughly 20 \% in CPU time) by adding the statement
 {\ct RADIATION=.FALSE.} to the {\ct MISC} line. For isothermal
 calculations, the radiation is turned off automatically. If burning
@@ -4741,6 +4745,10 @@ input on the {\ct RADI} line. This radiated energy completely
 disappears from the calculation. More on this feature can be found in
 Section~\ref{info:combustion}.
 
+\index{RADI!KAPPA0}
+In simulations with no combustion nor radiating species, it is
+possible to use a constant absorption coefficient by specifying {\ct
+KAPPA0} on the {\ct RADI} line.
 
 
 
