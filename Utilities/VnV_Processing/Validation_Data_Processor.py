@@ -403,7 +403,7 @@ def extract_comp_data(comp_file_info):
                     print "!!! Computation of Rise relative_difference failed. !!!\nCheck source data for columns listed above."
                     exit()
                     #Append Rise Values to Global Scatter Data Dictionary.
-                print combined_scatter_data_labels[0][scatter_counter]
+                #print combined_scatter_data_labels[0][scatter_counter]
                 scatter_data_dict[combined_scatter_data_labels[0][scatter_counter]] = [exp_rise_value,mod_rise_value,relative_difference]
             elif min_max == 'min':
                 print "*** Compute Drop ***"
@@ -451,9 +451,6 @@ def extract_comp_data(comp_file_info):
 
 def comparison_plot(plot_data,exp_data,mod_data):
     #plot_data is a list of values from the 'd' row of the config file being processed.
-    
-    #print "Exp. Data to Plot:", exp_data
-    #print "Mod. Data to Plot:", mod_data
     
     # Variables for plot.
     plot_title = plot_data['Plot_Title']
@@ -547,7 +544,6 @@ def comparison_plot(plot_data,exp_data,mod_data):
 
 def scatter_plot(group_info,scatter_info,data_set):
     #data_set is a dictionary keyed by quantity, containing lists of groups and X and Y data points.
-    #print "Group Info:", group_info
     
     for quantity_number in scatter_info:
         #print "Dataset for quantity number "+str(quantity_number)+": ", data_set[quantity_number]
@@ -572,9 +568,10 @@ def scatter_plot(group_info,scatter_info,data_set):
             max_y = float(scatter_info[int(quantity_number)]['Plot_Max'])
             percent_error = float(scatter_info[int(quantity_number)]['%error'])
             title_quadrant = int(scatter_info[int(quantity_number)]['Title_Quadrant'])
-            key_pos = scatter_info[int(quantity_number)]['Key_Position']
-            key_dist = 0.2*unit.v_cm
             plot_width = int(scatter_info[int(quantity_number)]['Plot_Width(cm)'])
+            # Specify the position and line spacing of the plot key.
+            key_pos = scatter_info[int(quantity_number)]['Key_Position']
+            key_dist = 0.15*unit.v_cm
             
             #Create filename from fields in input file record.
             plot_file_name = scatter_info[int(quantity_number)]['Plot_Filename']
