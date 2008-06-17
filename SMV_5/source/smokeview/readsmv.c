@@ -6024,7 +6024,7 @@ int readini2(char *inifile, int loaddatafile, int localfile){
 
       for(i=0;i<3;i++){
         if(terrain_rgba_zmin[i]<0.0)terrain_rgba_zmin[i]=0.0;
-        if(terrain_rgba_zmin[i]>1.0.0)terrain_rgba_zmin[i]=1.0;
+        if(terrain_rgba_zmin[i]>1.0)terrain_rgba_zmin[i]=1.0;
         if(terrain_rgba_zmax[i]<0.0)terrain_rgba_zmax[i]=0.0;
         if(terrain_rgba_zmax[i]>1.0)terrain_rgba_zmax[i]=1.0;
       }
