@@ -1,0 +1,272 @@
+\documentclass[11pt]{book}
+\usepackage{times,mathptm}
+\usepackage[pdftex]{graphicx}
+\usepackage[pdftex,
+        colorlinks=true,
+        urlcolor=linkblue,     % \href{...}{...} external (URL)
+        citecolor=linkred,     % citation number colors
+        linkcolor=linknavy,    % \ref{...} and \pageref{...}
+        pdftitle={Fire Dynamics Simulator (Version 5) User's Guide},
+        pdfauthor={Kevin McGrattan, Bryan Klein, Simo Hostikka, Jason Floyd},
+        pdfsubject={User Guide},
+        pdfkeywords={FDS, Fire Model, NIST, BFRL},
+        pdfproducer={pdflatex},
+        pagebackref,
+        pdfpagemode=UseNone,
+        bookmarksopen=true,
+        plainpages=false]{hyperref}
+\usepackage{color}
+\definecolor{linknavy}{rgb}{0,0,0.50196}
+\definecolor{linkred}{rgb}{1,0,0}
+\definecolor{linkblue}{rgb}{0,0,1}
+\usepackage{caption}
+\usepackage{graphpap}
+\usepackage{rotating}
+\usepackage{epsfig,psfrag}
+%\usepackage{wrapfig}
+%\usepackage{picins}
+\usepackage{geometry}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{lscape}
+\usepackage{amssymb}
+\usepackage{makeidx} % Create index at end of document
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography and index in the ToC
+\usepackage{float}
+\usepackage{lastpage} % Automatic last page number reference.
+\usepackage[T1]{fontenc}
+\usepackage{upquote}
+\usepackage{array,eqnarray}
+\newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
+\newcommand{\ct}{\tt\small}
+
+% The Following commented code makes the ``Draft'' watermark on each page.
+%\usepackage{eso-pic}
+%\usepackage{type1cm}
+%\makeatletter
+%   \AddToShipoutPicture{
+%     \setlength{\@tempdimb}{.5\paperwidth}
+%     \setlength{\@tempdimc}{.5\paperheight}
+%     \setlength{\unitlength}{1pt}
+%     \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){
+%     \makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}\selectfont{RC6}}}}}
+% }
+%\makeatother
+
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9.0in}
+\setlength{\topmargin}{0.in}
+\setlength{\headheight}{0.in}
+\setlength{\headsep}{0.in}
+\setlength{\parindent}{0.25in}
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in}
+
+
+
+
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+
+
+
+\begin{document}
+\bibliographystyle{unsrt}
+
+\pagestyle{empty}
+\pagenumbering{alph}
+
+\begin{minipage}[t][9in][s]{6.25in}
+
+\huge
+\flushright{NIST Special Publication XXXX}
+
+\vspace{1in}
+
+\Huge \flushright{Fire Dynamics Simulator and Smokeview \\ Training Guide }
+
+\vspace{.5in}
+
+\normalsize
+
+\large
+\flushright{
+Glenn Forney \\
+Kevin McGrattan \\
+Daniel Madrzykowski \\
+Stephen Kerber \\
+ }
+
+
+\vfill
+
+\flushright{\includegraphics[width=2.in]{FIGURES/nistident_flright_300ppi.jpg}}
+
+
+\end{minipage}
+
+\newpage
+\hspace{5in}
+\newpage
+
+\begin{minipage}[t][9in][s]{6.25in}
+
+\huge
+\flushright{NIST Special Publication XXXX}
+
+\vspace{.75in}
+
+\Huge
+\flushright{Fire Dynamics Simulator and Smokeview \\ Training Guide}
+
+\vspace{.25in}
+
+\normalsize
+\flushright{
+Glenn Forney \\
+Kevin McGrattan \\
+Daniel Madrzykowski \\
+Stephen Kerber \\
+{\em NIST Building and Fire Research Laboratory} \\
+{\em Gaithersburg, Maryland, USA}}
+
+\vspace{.25in}
+
+\flushright{\today \\
+FDS Version 5.2 \\
+Smokeview Version 5.2 \\
+$SVN Repository$~$Revision: 1815 $}
+
+\vfill
+
+\flushright{\includegraphics[width=1in]{FIGURES/doc.pdf} }
+
+\small
+\flushright{U.S. Department of Commerce \\
+{\em Carlos M. Gutierrez, Secretary} \\
+\hspace{1in} \\
+National Institute of Standards and Technology \\
+{\em James M. Turner, Acting Director} }
+
+
+\end{minipage}
+
+\newpage
+
+\begin{minipage}[t][9in][s]{6.25in}
+
+\flushright{Certain commercial entities, equipment, or materials may be identified in this \\
+document in order to describe an experimental procedure or concept adequately. Such \\
+identification is not intended to imply recommendation or endorsement by the \\
+National Institute of Standards and Technology, nor is it intended to imply that the \\
+entities, materials, or equipment are necessarily the best available for the purpose.
+}
+
+\vspace{3in}
+
+\large
+\flushright{\bf National Institute of Standards and Technology Special Publication XXXX \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~XXXX, \pageref{LastPage} pages (October 2008) \\
+CODEN: NSPUE2 }
+
+\vfill
+
+\flushright{U.S. GOVERNMENT PRINTING OFFICE \\
+WASHINGTON: 2007 \\
+\rule{3.5in}{0.01in} \\
+For sale by the Superintendent of Documents, U.S. Government Printing Office \\
+Internet: bookstore.gpo.gov -- Phone: (202) 512-1800 -- Fax: (202) 512-2250 \\
+Mail: Stop SSOP, Washington, DC 20402-0001 }
+\end{minipage}
+
+\clearpage
+
+\frontmatter
+
+\pagestyle{plain}
+\pagenumbering{roman}
+
+
+\chapter{Preface}
+
+This Guide contains a description of the numerical simulation of a variety of full-scale fire experiments
+using the Fire Dynamics Simulator and its visualization program, Smokeview. 
+
+Note that this Guide does not provide the background theory for FDS nor a detailed description of Smokeview. The FDS
+Technical Reference Guide~\cite{FDS_Tech_Guide_5} contains details about the governing
+equations and numerical methods. The FDS User's Guide~\cite{FDS_Users_Guide_5} describes how to run FDS. Smokeview is described in the ``User's Guide for
+Smokeview Version~5''~\cite{Smokeview_Users_Guide_5}.
+
+
+\chapter{Disclaimer}
+
+The US Department of Commerce makes no warranty, expressed or implied, to
+users of the Fire Dynamics Simulator (FDS) or Smokeview, and accepts no responsibility for their
+use. Users of FDS and Smokeview assume sole responsibility under Federal law for
+determining the appropriateness of its use in any particular application;
+for any conclusions drawn from the results of its use; and for any actions
+taken or not taken as a result of analyses performed using these tools.
+
+Users are warned that FDS and Smokeview are intended for use only by those competent in
+the fields of fluid dynamics, thermodynamics, combustion, and heat transfer,
+and is intended only to supplement the
+informed judgment of the qualified user. The software package is a
+computer model that may or may not have predictive capability when applied
+to a specific set of factual circumstances. Lack of accurate predictions by
+the model could lead to erroneous conclusions with regard to fire safety.
+All results should be evaluated by an informed user.
+
+Throughout this document, the mention of computer hardware or
+commercial software does not constitute endorsement by NIST, nor does
+it indicate that the products are necessarily those best suited for the
+intended purpose.
+
+
+\chapter{About the Authors}
+
+\begin{description}
+\item[Glenn Forney] is a computer scientist in the Building and Fire
+Research Laboratory (BFRL) of NIST.
+\item[Kevin McGrattan] is a mathematician in BFRL. He received a bachelors of science degree
+from the School of Engineering and Applied Science of Columbia
+University in 1987 and a doctorate at the Courant Institute of New
+York University in 1991. He joined the NIST staff in 1992 and has
+since worked on the development of fire models, most notably the Fire
+Dynamics Simulator.
+\item[Daniel Madrzykowski] is ...
+\item[Stephen Kerber] is ...
+\end{description}
+
+
+
+\chapter{Acknowledgments}
+
+
+
+
+
+
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\mainmatter
+
+
+\chapter{Introduction}
+
+The software described in this document, Fire Dynamics Simulator (FDS), is a computational
+fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the
+Navier-Stokes equations\index{Navier-Stokes} appropriate for low-speed, thermally-driven flow
+with an emphasis on smoke and heat transport from fires.
+
+
+
+
+\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+
+
+\end{document}
+
+
