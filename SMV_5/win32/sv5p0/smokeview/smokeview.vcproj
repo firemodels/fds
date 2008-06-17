@@ -236,7 +236,7 @@
 				AdditionalDependencies="opengl32.lib smokeview_fort.lib glut32.lib glui.lib gd.lib png.lib pthreadVC.lib jpeg.lib zlib.lib"
 				OutputFile="c:\program files\nist\smokeview\smokeview.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\Intel\Compiler\Fortran\10.0.025\IA32\Lib&quot;;..\..\lib"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\Intel\Compiler\Fortran\10.1.011\IA32\Lib&quot;;..\..\lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -767,6 +767,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\source\smokeview\glui_wui.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\source\smokeview\IOboundary.c"
 				>
 				<FileConfiguration
@@ -1215,6 +1219,10 @@
 						DebugInformationFormat="0"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\source\smokeview\shaders.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\source\smokeview\skybox.c"
