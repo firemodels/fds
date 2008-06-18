@@ -1,17 +1,23 @@
 \chapter{Compartment Pressure}
 
-The pressure within the compartment was measured at a single point, near the floor.
-In the simulations of the closed door tests, the compartment is assumed to leak via a small uniform flow spread
-over the walls and ceiling.  The flow rate is calculated based on the assumption that the leakage rate is proportional
-to the measured leakage area times the square root of compartment over-pressure.
+In FDS, the pressure is decomposed into a temporally-varying background pressure and a spatially-varying perturbation that drives the flow. The former can
+be thought of as the ``over-pressure,'' and it is essentially a check on global mass and energy balances; whereas the latter has most to do with momentum conservation.
+In real buildings, leakage and ventilation affect the compartment ``over-pressure'' along with the fire, which also affects the pressure perturbation.
+
+
 
 
 \section{NIST/NRC Test Series}
 
 Comparisons between measured and predicted pressures for the NIST/NRC Test Series are shown
-in Figs.~\ref{NIST_NRC_Pressure_Closed} and \ref{NIST_NRC_Pressure_Open}.
+in on the following pages.
 For those tests in which the door to the compartment is
 open, the over-pressures are only a few Pascals, whereas when the door is closed, the over-pressures are several hundred Pascals.
+The pressure within the compartment was measured at a single point, near the floor.
+In the simulations of the closed door tests, the compartment was assumed to leak via a small uniform flow spread
+over the walls and ceiling.  The flow rate was calculated based on the assumption that the leakage rate is proportional
+to the measured leakage area times the square root of compartment over-pressure.
+
 Note that in the closed door tests, there is often a dramatic drop in the predicted compartment pressure.
 This is the result of the assumption in FDS that the heat release rate is decreased to zero in one second at the time
 in the experiment when the fuel flow was stopped for safety reasons.  In reality, the fire did not extinguish
@@ -55,7 +61,8 @@ and the peak (albeit small) under-pressures are compared in the open door tests.
 \includegraphics[width=4.0in]{FIGURES/ScatterPlots/Open_Compartment_Pressure} \\
 \vspace{0.25in}
 \end{tabular}
-\caption{Summary of Pressure Results.}
+\caption{Summary of Pressure Results. The top graph shows the compartment ``over-pressure'' in closed door tests; the lower graph
+shows the small pressure perturbation in the open door tests.}
 \end{center}
 \end{figure}
 
