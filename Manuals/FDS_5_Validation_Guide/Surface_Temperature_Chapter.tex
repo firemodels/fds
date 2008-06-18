@@ -219,8 +219,8 @@ cylindrical coordinates.
 \includegraphics[width=4.0in]{FIGURES/ScatterPlots/Steel_Temperature} \\
 \vspace{0.25in}
 \end{tabular}
-\caption{Summary of Steel Temperature Results.}
 \end{center}
+\caption{Summary of Steel Temperature Results.}
 \end{figure}
 
 
@@ -353,8 +353,8 @@ temperatures can often be explained in terms of comparable errors in the predict
 \includegraphics[width=4.0in]{FIGURES/ScatterPlots/Cable_Temperature} \\
 \vspace{0.25in}
 \end{tabular}
-\caption{Summary of Wall Temperature Results.}
 \end{center}
+\caption{Summary of Wall Temperature Results.}
 \end{figure}
 
 
@@ -363,29 +363,30 @@ temperatures can often be explained in terms of comparable errors in the predict
 \section{WTC Ceiling Surface and Inner Temperatures}
 
 The following pages contain comparisons of predicted and measured ceiling temperatures, both at the surface and beneath a layer of
-marinite board. Table below lists the coordinates of the measurement locations relative to the lower center of the west wall. The center of the
-fire pan was located at $x=3.94$~m, $y=0$~m, and $z=0$~m.
+marinite board. Table~\ref{WTC_Ceiling} below lists the coordinates of the measurement locations relative to the center of the fire pan. 
 
+
+\begin{table}[h!]
+\caption{Locations of ceiling surface temperature measurements relative to the fire pan in the WTC series.}
 \vspace{\baselineskip}
-
-\begin{figure}[h!]
 \begin{center}
 \begin{tabular}{|l|c|c|c|}
 \hline
-Name              & $x$   & $y$  & $z$ \\ \hline \hline
-TCC               & 4.56  & 0.00 & 3.82 \\ \hline
-TCN3              & 4.56  & 0.60 & 3.82 \\ \hline
-TCS3              & 4.56  & -0.60 & 3.82 \\ \hline
-TCE7              & 6.12  & 0.00 & 3.82 \\ \hline
-TCW7              & 2.79  & 0.00 & 3.82 \\ \hline \hline
-TCCIN               & 4.56  & 0.00 & 3.83 \\ \hline
-TCN3IN              & 4.56  & 0.60 & 3.83 \\ \hline
-TCS3IN              & 4.56  & -0.60 & 3.83 \\ \hline
-TCE4IN              & 5.22  & 0.00 & 3.83 \\ \hline
-TCW4IN              & 3.99  & 0.00 & 3.83 \\ \hline
+Name                & $x$ (m)   & $y$ (m)   & $z$ (m)   \\ \hline \hline
+TCC                 & 0.62      & 0.07      & 3.82      \\ \hline
+TCN3                & 0.62      & 0.67      & 3.82      \\ \hline
+TCS3                & 0.62      & -0.53     & 3.82      \\ \hline
+TCE7                & 2.18      & 0.07      & 3.82      \\ \hline
+TCW7                & -1.15     & 0.07      & 3.82      \\ \hline \hline
+TCCIN               & 0.62      & 0.07      & 3.83      \\ \hline
+TCN3IN              & 0.62      & 0.67      & 3.83      \\ \hline
+TCS3IN              & 0.62      & -0.53     & 3.83      \\ \hline
+TCE4IN              & 1.28      & 0.07      & 3.83      \\ \hline
+TCW4IN              & 0.05      & 0.07      & 3.83      \\ \hline
 \end{tabular}
 \end{center}
-\end{figure}
+\label{WTC_Ceiling}
+\end{table}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -461,10 +462,9 @@ Table~\ref{NIST_NRC_Wall_Coords} lists the locations for each test.
 \vspace{\baselineskip}
 
 \begin{table}[h!]
-\label{NIST_NRC_Wall_Coords}
-\begin{center}
 \caption{Wall thermocouple positions for the NIST/NRC series}
 \vspace{\baselineskip}
+\begin{center}
 \begin{tabular}{|l|c|c|c|}
 \hline
 Name              & $x$   & $y$  & $z$ \\ \hline \hline
@@ -502,6 +502,7 @@ TC Ceiling C-7-2  & 12.84 & 5.98 & 3.82 \\ \hline
 TC Ceiling U-8-2  & 18.71 & 3.54 & 3.82 \\ \hline
 \end{tabular}
 \end{center}
+\label{NIST_NRC_Wall_Coords}
 \end{table}
 
 
@@ -616,8 +617,8 @@ TC Ceiling U-8-2  & 18.71 & 3.54 & 3.82 \\ \hline
 \begin{tabular}{c}
 \includegraphics[width=4.0in]{FIGURES/ScatterPlots/Wall_Temperature}
 \end{tabular}
-\caption{Summary of Wall Temperature Results.}
 \end{center}
+\caption{Summary of Wall Temperature Results.}
 \end{figure}
 
 
