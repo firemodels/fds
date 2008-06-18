@@ -1,7 +1,44 @@
 \documentclass[11pt]{book}
 \usepackage{mathptm,times}
 \usepackage[pdftex]{graphicx}
-\usepackage{hyperref}
+%\usepackage{hyperref}
+
+\usepackage[pdftex,
+        colorlinks=true,
+        urlcolor=linkblue,     % \href{...}{...} external (URL)
+        citecolor=linkred,     % citation number colors
+        linkcolor=linknavy,    % \ref{...} and \pageref{...}
+        pdftitle={Fire Dynamics Simulator (Version 5) User's Guide},
+        pdfauthor={Kevin McGrattan, Bryan Klein, Simo Hostikka, Jason Floyd},
+        pdfsubject={User Guide},
+        pdfkeywords={FDS, Fire Model, NIST, BFRL},
+        pdfproducer={pdflatex},
+        pagebackref,
+        pdfpagemode=UseNone,
+        bookmarksopen=true,
+        plainpages=false]{hyperref}
+\usepackage{color}
+\definecolor{linknavy}{rgb}{0,0,0.50196}
+\definecolor{linkred}{rgb}{1,0,0}
+\definecolor{linkblue}{rgb}{0,0,1}
+\usepackage{caption}
+\usepackage{graphpap}
+\usepackage{rotating}
+\usepackage{epsfig,psfrag}
+\usepackage{geometry}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{lscape}
+\usepackage{amssymb}
+\usepackage{makeidx} % Create index at end of document
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography and index in the ToC
+\usepackage{float}
+\usepackage{lastpage} % Automatic last page number reference.
+\usepackage[T1]{fontenc}
+\usepackage{upquote}
+\usepackage{array,eqnarray}
+\newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
+
 
 \setlength{\textwidth}{6.5in}
 \setlength{\textheight}{9.0in}
@@ -247,6 +284,8 @@ validation of the model for various applications.
 
 
 \tableofcontents
+\listoffigures
+\listoftables
 
 \mainmatter
 
