@@ -840,7 +840,7 @@ find measurements of local velocities and/or temperatures from fire experiments 
 have reported error estimates that are less than 10~\%. Thus, the most accurate
 calculations using FDS do not introduce significantly greater errors in these quantities
 than the vast majority of fire experiments.}.
-However, for fire scenarios where the heat release rate is {\em predicted} rather than {\em prescribed},
+However, for fire scenarios where the heat release rate is {\em predicted} rather than {\em specified},
 the uncertainty of the model is higher.
 There are several reasons for this: (1) properties of real materials
 and real fuels are often unknown or difficult to obtain, (2) the physical processes of combustion,
@@ -848,7 +848,7 @@ radiation and solid phase heat transfer are more complicated than their mathemat
 in FDS, (3) the results of calculations are sensitive to both the numerical and physical parameters.
 Current research is aimed at improving this situation, but it is safe to say that
 modeling fire growth and spread will always require a higher level of
-user skill and judgment than that required for modeling the transport of smoke and heat from prescribed fires.
+user skill and judgment than that required for modeling the transport of smoke and heat from specified fires.
 \item[Combustion]
 For most applications, FDS uses a mixture fraction-based combustion model.
 The mixture fraction is a conserved scalar quantity that is defined as the
@@ -1294,11 +1294,11 @@ Fast Fourier Transforms (FFT).
 No-flux or forced-flow boundary conditions are specified by asserting that
 \be \dod{{\cal H}}{n} = -F_n - \dod{u_n}{t} \label{bc} \ee
 where $F_n$ is the normal component of $\bF$ at the vent or solid wall,
-and $\partial u_n/\partial t$ is the prescribed rate of change
+and $\partial u_n/\partial t$ is the specified rate of change
 in the normal component of
 velocity at a forced vent. Initially, the velocity is zero everywhere.
 
-At open external boundaries the pressure-like term $\cal H$ is prescribed
+At open external boundaries the pressure term $\cal H$ is specified
 depending on whether the flow is outgoing or incoming
 \be \begin{array}{ll}
      {\cal H} = |\bu|^2/2  & \hbox{outgoing}    \\
@@ -2235,7 +2235,7 @@ If the internal radiation is solved for a solid, the radiation
 boundary condition $\dq''_r$ is not used.
 
 On the back surface, two possible boundary condition types may be
-prescribed by the user. (1) If the back surface is assumed to be open
+specified by the user. (1) If the back surface is assumed to be open
 either to an ambient
 void or to another part of the computational domain,
 the back side boundary condition is similar to that of
@@ -2351,7 +2351,7 @@ The SFPE Handbook has references to various works on smoke detection and suggest
 characteristic length $L$. FDS includes the one parameter Heskestad model as a special case of the four parameter
 Cleary model. For the Cleary model, one must set
 $\alpha_e$, $\beta_e$, $\alpha_c$, and $\beta_c$, whereas for the Heskestad model only $L=\alpha_c$ needs to be
-prescribed. Eq.~(\ref{Yoeq})
+specified. Eq.~(\ref{Yoeq})
 is still used, with $\alpha_e=0$ and $\beta_e=\beta_c=-1$.
 Proponents of the four-parameter model claim that the two filling times are needed to
 better capture the behavior of detectors in a very
