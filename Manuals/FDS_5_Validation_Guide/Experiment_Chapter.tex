@@ -1,5 +1,7 @@
 \chapter{Description of Experiments}
 
+\label{Experiments_Chapter}
+
 This chapter contains a brief description of the experiments that were used for model validation. Only enough detail is included here to provide a
 general understanding of the model simulations. Anyone wishing to use the experimental measurements for validation ought to consult the cited test reports for a
 comprehensive description.
@@ -10,36 +12,36 @@ comprehensive description.
 
 The experiments are described in Ref.~\cite{Hostikka:VTT2104}. The series consisted of 8 experiments, but because of replicates only three unique fire
 scenarios. The experiments were undertaken to study the movement of smoke in a large hall with a sloped ceiling. The tests were conducted inside the
-VTT Fire Test Hall, with dimensions of 19~m high by 27~m long by 14~m wide. Each test involved a single heptane pool fire, ranging from 2~MW to 4~MW.  
+VTT Fire Test Hall, with dimensions of 19~m high by 27~m long by 14~m wide. Each test involved a single heptane pool fire, ranging from 2~MW to 4~MW.
 Four types of predicted output were used in the present evaluation -- the HGL temperature and depth, average flame height and the plume
 temperature. Three vertical arrays of thermocouples (TC), plus two thermocouples in the plume, were compared to FDS predictions. The HGL
-temperature and height were reduced from an average of the three TC arrays using the standard algorithm described in Appendix~ref{HGL:Appendix}. The ceiling jet temperature was not
+temperature and height were reduced from an average of the three TC arrays using the standard algorithm described in Chapter~ref{HGL:Chapter}. The ceiling jet temperature was not
 considered, because the ceiling in the test hall is not flat, and the standard model algorithm is not appropriate for this geometry.
 
 The VTT test report lacks some information needed to model the experiments, which is why some information was based on private communications with the
-principal investigator, Simo Hostikka. 
+principal investigator, Simo Hostikka.
 \begin{description}
 \item[Surface Materials:] The walls and ceiling of the test hall consist of a 1~mm thick layer of sheet metal on top of a 5~cm layer of
-mineral wool. The floor was constructed of concrete. The report does not provide thermal properties of these materials. 
+mineral wool. The floor was constructed of concrete. The report does not provide thermal properties of these materials.
 \item[Natural Ventilation:] In Cases~1 and 2, all doors were closed, and ventilation was restricted to infiltration through the building envelope. Precise
-information on air infiltration during these tests is not available. The scientists who conducted the experiments recommend a leakage area of about 2~m$^2$, 
+information on air infiltration during these tests is not available. The scientists who conducted the experiments recommend a leakage area of about 2~m$^2$,
 distributed uniformly throughout the enclosure. By contrast, in Case~3, the doors located in each end wall (Doors 1 and 2, respectively)
 were open to the external ambient environment. These doors are each 0.8~m wide by 4~m high, and are located such that their centers
 are 9.3~m from the south wall.
 \item[Mechanical Ventilation:] The test hall has a single mechanical exhaust duct, located in the roof space, running along the center of the building. This
-duct had a circular section with a diameter of 1~m, and opened horizontally to the hall at a distance of 12~m from the floor and 10.5~m from the west wall. 
+duct had a circular section with a diameter of 1~m, and opened horizontally to the hall at a distance of 12~m from the floor and 10.5~m from the west wall.
 Mechanical exhaust ventilation was operational for Case~3, with a constant volume flow rate of 11~m$^3$/s drawn through
-the 1~m diameter exhaust duct. 
+the exhaust duct.
 \item[Heat Release Rate:] Each test used a single liquid fuel pan with its center located 16~m from the west
 wall and 7.4~m from the south wall. For all tests, the fuel was heptane in a circular steel pan that was partially filled with water. The
 pan had a diameter of 1.17~m for Case~1 and 1.6~m for Cases~2 and 3. In each case, the fuel surface was 1~m above the
 floor. The trays were placed on load cells, and the HRR was calculated from the mass loss rate. For the three cases,
 the fuel mass loss rate was averaged from individual replicate tests. In the HRR estimation, the heat of combustion (taken as 44,600~kJ/kg) and the
-combustion efficiency for n-heptane was used. Hostikka suggests a value of 0.8 for the combustion efficiency.  
+combustion efficiency for n-heptane was used. Hostikka suggests a value of 0.8 for the combustion efficiency.
 Tewarson reports a value of 0.93 for a 10~cm pool fire~\cite{SFPE:Tewarson}. For the calculations reported in the current
 study, a combustion efficiency of 0.85 is assumed. In general, an uncertainty of 15~\% has been assumed for the reported HRR of most of the large
 scale fire experiments used.
-\item[Radiative Fraction:] The radiative fraction was assumed to be 0.35, similar to many smoky hydrocarbons. 
+\item[Radiative Fraction:] The radiative fraction was assumed to be 0.35, similar to many smoky hydrocarbons.
 \end{description}
 
 
@@ -123,12 +125,12 @@ as 1--9. The same pattern is followed at Positions C and D, with thermocouples 2
 \begin{description}
 \item[Ceiling:] The ceiling was raised to a height of 7.6~m and instrumented with thermocouples and other measurement devices. The ceiling was constructed of
 0.6~m by 1.2~m by 1.6~cm UL fire-rated Armstrong Ceramaguard (Item 602B) ceiling tiles. The manufacturer reported the
-thermal properties of the material to be: specific heat 753 J/kg$\cdot$K, thermal conductivity
-0.0611~W/m$\cdot$K, and density 313~kg/m$^3$.
-\item[Draft Curtains:] Sheets of 18 gauge sheet metal, 1.8~m deep, were installed for 16 of the 22 tests, enclosing an area of about 450~m$^2$ and 49 sprinklers.
+thermal properties of the material to be: specific heat 753 J/(kg$\cdot$K), thermal conductivity
+0.0611~W/(m$\cdot$K), and density 313~kg/m$^3$.
+\item[Draft Curtains:] Sheet metal, 1.2~mm thick and 1.8~m deep, was suspended from the ceiling for 16 of the 22 tests, enclosing an area of about 450~m$^2$ and 49 sprinklers.
 \item[Sprinklers:] Central ELO-231 (Extra Large Orifice) uprights were used for all the tests. The orifice diameter of this sprinkler is reported by the manufacturer to be
-nominally 0.64~in, the reference actuation temperature is reported by the manufacturer to be 74$^\circ$C (165$^\circ$F). The RTI (Response Time
-Index) and C-factor (Conductivity factor) were reported by UL to be 148~(m$\cdot$s)$^\ha$ and 0.7~(m/s)$^\ha$, respectively~\cite{Sheppard:1}. 
+nominally 1.6~cm (0.64~in), the reference actuation temperature is reported by the manufacturer to be 74$^\circ$C (165$^\circ$F). The RTI (Response Time
+Index) and C-factor (Conductivity factor) were reported by UL to be 148~(m$\cdot$s)$^\ha$ and 0.7~(m/s)$^\ha$, respectively~\cite{Sheppard:1}.
 When installed, the sprinkler deflector was located 8~cm below the ceiling. The thermal
 element of the sprinkler was located 11~cm below the ceiling. The sprinklers were installed with nominal 3~m by 3~m (exact 10~ft by 10~ft) spacing in a
 system designed to deliver a constant 0.34~L/(s$\cdot$m$^2$) (0.50 gpm/ft$^2$) discharge density when supplied by a 131~kPa (19~psi) discharge
@@ -144,10 +146,10 @@ steady state, {\em i.e.} the temperatures recorded near the ceilings remained st
 The heat release rate from the burner was confirmed by placing it under the large product calorimeter at UL, ramping up the flow of heptane in the
 same manner as in the tests, and measuring the total and convective heat release rates. It was found that the convective heat release rate was
 0.65$\pm$0.02 of the total.
-\item[Instrumentation]: The instrumentation for the tests consisted of thermocouples, gas analysis equipment, and pressure transducers. The locations of the instrumentation
+\item[Instrumentation:] The instrumentation for the tests consisted of thermocouples, gas analysis equipment, and pressure transducers. The locations of the instrumentation
 are referenced in the plan view of the facility (Fig.~\ref{layout}).
 Temperature measurements were recorded at 104 locations. Type K 0.0625~in diameter Inconel sheathed thermocouples were positioned to measure (i)
-temperatures near the ceiling, (ii) temperatures of the ceiling jet, and (iii) temperatures near the vent. 
+temperatures near the ceiling, (ii) temperatures of the ceiling jet, and (iii) temperatures near the vent.
 \end{description}
 
 
@@ -196,16 +198,16 @@ uncertainty were reported as 0.44 and 0.40 for heptane and toluene, respectively
 As part of its investigation of the World Trade Center disaster, the Building and Fire Research Laboratory at NIST conducted several series of fire experiments to both gain insight into the
 observed fire behavior and also to validate FDS for use in reconstructing the fires. The first series of experiments involved a relatively simple compartment with a liquid spray burner and
 various structural elements with varying amounts of sprayed fire-resistive materials (SFRM).
-A complete description of the spray fire experiments can be found in the NIST WTC report NCSTAR~1-5B~\cite{NIST_NCSTAR_1-5B}. 
-The overall enclosure was rectangular, as were the vents and most of the obstructions. The compartment walls and ceiling were made of 2.54~cm thick marinite. The manufacturer provided the thermal properties of the material used in the calculation. The density was 737~kg/m$^3$, conductivity 0.12~W/m/K. The specific heat ranged from 1.17~kJ/kg/K at 93~$^\circ$C to 
+A complete description of the experiments can be found in the NIST WTC report NCSTAR~1-5B~\cite{NIST_NCSTAR_1-5B}.
+The overall enclosure was rectangular, as were the vents and most of the obstructions. The compartment walls and ceiling were made of 2.54~cm thick marinite. The manufacturer provided the thermal properties of the material used in the calculation. The density was 737~kg/m$^3$, conductivity 0.12~W/m/K. The specific heat ranged from 1.17~kJ/kg/K at 93~$^\circ$C to
 1.42~kJ/kg/K at 425~$^\circ$C. This value was assumed for higher temperatures.
-The steel used to construct the column and truss flanges was 0.64~cm thick.  The density of the steel was assumed to be 7,860~kg/m$^3$; its specific heat 0.45~kJ/kg/K. 
+The steel used to construct the column and truss flanges was 0.64~cm thick.  The density of the steel was assumed to be 7,860~kg/m$^3$; its specific heat 0.45~kJ/kg/K.
 
-Two fuels were used in the tests. The properties of the fuels were obtained from measurements made on a series of unconfined burns that are referenced in the test report. 
-The first fuel was a blend of heptane isomers, C$_7$H$_{16}$. Its soot yield was set at a constant 1.5~\%. The second fuel was a mixture (40~\% - 60~\% by volume) of toluene, C$_7$H$_8$, 
-and heptane. Because FDS only considers the burning of a single hydrocarbon fuel, the mixture was taken to be C$_7$H$_{12}$ with a soot yield of 11.2~\%. 
-The radiative fraction for the heptane blend was 0.44; for the heptane/toluene mixture it was 0.39. 
-The heat release rate of the simulated burner was set to that which was measured in the experiments. The spray burner was modeled using reported properties of the nozzle and 
+Two fuels were used in the tests. The properties of the fuels were obtained from measurements made on a series of unconfined burns that are referenced in the test report.
+The first fuel was a blend of heptane isomers, C$_7$H$_{16}$. Its soot yield was set at a constant 1.5~\%. The second fuel was a mixture (40~\% - 60~\% by volume) of toluene, C$_7$H$_8$,
+and heptane. Because FDS only considers the burning of a single hydrocarbon fuel, the mixture was taken to be C$_7$H$_{12}$ with a soot yield of 11.2~\%.
+The radiative fraction for the heptane blend was 0.44; for the heptane/toluene mixture it was 0.39.
+The heat release rate of the simulated burner was set to that which was measured in the experiments. The spray burner was modeled using reported properties of the nozzle and
 liquid fuel droplets.
 
 
@@ -218,7 +220,7 @@ The Factory Mutual and Sandia National Laboratories (FM/SNL) test series was a s
 tests conducted in 1985 for the U.S. Nuclear Regulatory Commission (NRC) by Factory Mutual Research Corporation (FMRC), under
 the direction of Sandia National Laboratories (SNL)~\cite{Nowlen:NUREG4681,Nowlen:NUREG4527}. The primary purpose of these tests was to
 provide data with which to validate computer models for various types of compartments typical of nuclear power plants. The
-experiments were conducted in an enclosure measuring approximately 18~m long x 12~m wide x 6~m high, constructed at the FMRC fire test facility in Rhode Island. 
+experiments were conducted in an enclosure measuring approximately 18~m long x 12~m wide x 6~m high, constructed at the FMRC fire test facility in Rhode Island.
 All of the tests involved forced ventilation to simulate typical power plant operations. Four of
 the tests were conducted with a full-scale control room mockup in place. Parameters varied
 during the experiments included fire intensity, enclosure ventilation rate, and fire location.
@@ -227,7 +229,7 @@ The current study used data from three experiments (Tests 4, 5, and 21). In thes
 source was a propylene gas burner with a diameter of approximately 0.9 m, with its rim
 located approximately 0.1 m above the floor. For Tests 4 and 5, the burner was positioned on the longitudinal axis centerline, 6.1 m from
 the nearest wall. For Test 21, the fire source was placed within a simulated electrical
-cabinet. 
+cabinet.
 
 Following is supplemental information provided by the test director, Steve Nowlen of Sandia National Laboratory:
 \begin{description}
@@ -236,20 +238,20 @@ a correction applied for the carbon dioxide in the upper layer of the compartmen
 uncertainty of the fuel mass flow was not documented. All three tests selected for this study had
 the same target peak heat release rate of 516~kW following a 4~min ``t-squared'' growth
 profile. The test report contains time histories of the measured HRR, for which the average,
-sustained HRR following the ramp up for Tests 4, 5, and 21 have been estimated as 510~kW, 480~kW, and 470~kW, respectively. 
+sustained HRR following the ramp up for Tests 4, 5, and 21 have been estimated as 510~kW, 480~kW, and 470~kW, respectively.
 Once reached, the peak HRR was maintained essentially constant
 during a steady-burn period of 6~min in Tests~4 and 5, and 16~min in Test~21. Note that in Test 21, Nowlen reports a
-``significant'' loss of effluent from the exhaust hood that could lead to an under-estimate of the HRR towards the end of the experiment. 
+``significant'' loss of effluent from the exhaust hood that could lead to an under-estimate of the HRR towards the end of the experiment.
 \item[Radiative Fraction:] The radiative fraction was not measured during the experiment, but
 in this study it is assumed to equal 0.35, which is typical for a smoky hydrocarbons.
 It was further assumed that the radiative fraction was about the same in
 Test~21 as the other tests, as fuel burning must have occurred outside of the electrical cabinet in
-which the burner was placed. 
+which the burner was placed.
 \item[Measurements:] Four types of measurements were conducted during the FM/SNL test series that are used in the
 current model evaluation study, including the HGL temperature and depth, and the ceiling jet and
 plume temperatures. Aspirated thermocouples (TCs) were used to make all of the temperature
 measurements. Generally, aspirated TC measurements are preferable to bare-bead TC measurements,
-as systematic radiative exchange measurement error is reduced. 
+as systematic radiative exchange measurement error is reduced.
 \item[HGL Depth and Temperature:] Data from all of the vertical TC trees were used when reducing
 the HGL height and temperature. For the FM/SNL Tests 4 and 5, Sectors 1, 2, and 3 were used,
 all weighted evenly. For Test 21, Sectors 1 and 3 were used, evenly weighted. Sector 2 was
@@ -268,12 +270,12 @@ conducted in 1985 and are described in detail in Ref.~\cite{Peacock:NBS_Multi-Ro
 small rooms, connected via a relatively long corridor. The fire source, a gas burner, was located
 against the rear wall of one of the small compartments.
 Fire tests of 100~kW, 300~kW and 500~kW were conducted. For the current study, only three 100~kW fire experiments have been used,
-including Test~100A from Set~1, Test~100O from Set~2, and Test~100Z from Set~4. These tests 
+including Test~100A from Set~1, Test~100O from Set~2, and Test~100Z from Set~4. These tests
 were selected because they had been used in prior validation studies, and because these tests had the
-steadiest values of measured heat release rate during the steady-burn period. 
+steadiest values of measured heat release rate during the steady-burn period.
 
 Following is additional information provided by the test director, Richard Peacock of NIST:
-\begin{description} 
+\begin{description}
 \item[Heat Release Rate:] In the two tests for which
 the door was open, the HRR during the steady-burn period measured via oxygen consumption
 calorimetry was 110~kW with an uncertainty of about 15~\%, consistent with the replicate
@@ -285,7 +287,7 @@ Test~100A. In Tests~100O and 100Z, acetylene was added to the natural gas to inc
 smoke yield, and as a consequence, the radiative fraction increased. The radiative fraction of
 natural gas has been studied previously, whereas the radiative fraction of the acetylene/natural
 gas mixture has not been studied. The radiative fraction for the natural gas fire was assigned a
-value of 0.20, whereas a value of 0.30 was assigned for the natural gas/acetylene fires. 
+value of 0.20, whereas a value of 0.30 was assigned for the natural gas/acetylene fires.
 \item[Measurements:] Only two types of measurements conducted during the NBS test series were used in the
 evaluation considered here, because there was less confidence in the other measurements.
 The measurements considered here were the HGL temperature and depth, in which bare bead
@@ -306,7 +308,7 @@ refractory burner. There were five distinct heat release rates, ranging from 14~
 The results of the experiments are reported in Reference~\cite{McCaffrey:NBSIR_79-1910}.
 
 
-\section{Smyth Diffusion Flame Experiments}
+\section{Smyth Slot Burner Experiment}
 
 Kermit Smyth {\em et al.} conducted diffusion flame experiments at NIST using a methane/air Wolfhard-Parker slot burner.  The experiments are described in
 detail in Refs.~\cite{Norton:1,Smyth:1}.  The Wolfhard-Parker slot burner consists of an 8~mm wide
@@ -343,4 +345,4 @@ Anthony Hamins {\em et al.} performed a series of tests on circular gas
 burners measuring the radial and vertical radiative heat flux profiles
 outside the flame region. The tests are described
 in~\cite{Hostikka:3}. Tests at three burner diameters, 0.10 m, 0.38 m
-and 1.0 m are used for validation. 
+and 1.0 m are used for validation.
