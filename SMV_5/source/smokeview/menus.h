@@ -606,6 +606,7 @@ void ShowVSliceMenu(int value){
       if(vd->loaded==0)continue;
       vd->display=1;
     }
+    show_all_slices=1;
     updatetimes();
     return;
   }
@@ -615,6 +616,7 @@ void ShowVSliceMenu(int value){
       if(vd->loaded==0)continue;
       vd->display=0;
     }
+    show_all_slices=0;
     updatetimes();
     return;
   }
@@ -666,7 +668,6 @@ void ShowVSliceMenu(int value){
 
 void ShowHideSliceMenu(int value){
   int i;
-  //slice *sd;
 
   updatemenu=1;  
   glutPostRedisplay();
@@ -676,11 +677,13 @@ void ShowHideSliceMenu(int value){
       for(i=0;i<nslice;i++){
         sliceinfo[i].display=1;
       }
+      show_all_slices=1;
       break;
     case HIDE_ALL:
       for(i=0;i<nslice;i++){
         sliceinfo[i].display=0;
       }
+      show_all_slices=0;
       break;
     case -11:
       show_slice_in_obst=1-show_slice_in_obst;
@@ -3506,9 +3509,6 @@ void InitMenus(int unload){
   int nvsliceloaded1;
   char check[]="*";
   slice *sd;
-//  vslice *vd;
-  slice *sd2;
-  vslice *vd2;
   iso *iso2;
   multislice *mslicei;
   multivslice *mvslicei;
@@ -4857,11 +4857,12 @@ if(visBlocks==visBLOCKOutline){
   }
 
 /* --------------------------------showVslice menu -------------------------- */
-
+  if(nvsliceloaded==0){
+    vd_shown=NULL;
+  }
   if(nvslice>0&&nvsliceloaded>0){
     CREATEMENU(showvslicemenu,ShowVSliceMenu);
     nvsliceloaded0=0;
-    vd2=NULL;
     for(i=0;i<nvslice;i++){
       vslice *vd;
 
@@ -4870,7 +4871,7 @@ if(visBlocks==visBLOCKOutline){
       nvsliceloaded0++;
       STRCPY(menulabel,"");
       if(plotstate==DYNAMIC_PLOTS&&sliceinfo[vd->ival].type==islicetype&&vd->display==1){
-        vd2=vd;
+        vd_shown=vd;
         STRCPY(menulabel,"*");
       }
       STRCAT(menulabel,sliceinfo[vd->ival].menulabel2);
@@ -4880,14 +4881,14 @@ if(visBlocks==visBLOCKOutline){
     if(show_slice_in_obst==0)glutAddMenuEntry("Show vector slice in blockage",-11);
     if(offset_slice==1)glutAddMenuEntry("*Offset vector slice",-12);
     if(offset_slice==0)glutAddMenuEntry("Offset vector slice",-12);
-    if(vd2!=NULL&&nvsliceloaded0!=0){
+    if(vd_shown!=NULL&&nvsliceloaded0!=0){
       glutAddMenuEntry("",-10);
       STRCPY(menulabel,"Show All ");
-      STRCAT(menulabel,sliceinfo[vd2->ival].label.longlabel);
+      STRCAT(menulabel,sliceinfo[vd_shown->ival].label.longlabel);
       STRCAT(menulabel," vector slices");
       glutAddMenuEntry(menulabel,SHOW_ALL);
       STRCPY(menulabel,"Hide All ");
-      STRCAT(menulabel,sliceinfo[vd2->ival].label.longlabel);
+      STRCAT(menulabel,sliceinfo[vd_shown->ival].label.longlabel);
       STRCAT(menulabel," vector slices");
       glutAddMenuEntry(menulabel,HIDE_ALL);
     }
@@ -4919,17 +4920,19 @@ if(visBlocks==visBLOCKOutline){
   }
 
 /* --------------------------------showslice menu -------------------------- */
+  if(nsliceloaded==0){
+    sd_shown=NULL;
+  }
   if(nslice>0&&nsliceloaded>0){
     CREATEMENU(showhideslicemenu,ShowHideSliceMenu);
-    sd2=NULL;
     for(ii=0;ii<nslice_loaded;ii++){
       i = slice_loaded_list[ii];
       sd = sliceinfo + i;
-      if(sd2==NULL&&sd->type==islicetype){
-        sd2 = sd;
+      if(sd_shown==NULL&&sd->type==islicetype){
+        sd_shown = sd;
       }
       if(plotstate==DYNAMIC_PLOTS&&sd->display==1&&sd->type==islicetype){
-        sd2=sd;
+        sd_shown=sd;
         STRCPY(menulabel,check);
         STRCAT(menulabel,sd->menulabel2);  
       }
@@ -4943,14 +4946,14 @@ if(visBlocks==visBLOCKOutline){
     if(show_slice_in_obst==0)glutAddMenuEntry("Show slice in blockage",-11);
     if(offset_slice==1)glutAddMenuEntry("*Offset slice",-12);
     if(offset_slice==0)glutAddMenuEntry("Offset slice",-12);
-    if(nsliceloaded>0&&sd2!=NULL){
+    if(nsliceloaded>0&&sd_shown!=NULL){
       glutAddMenuEntry("-",-10);
       STRCPY(menulabel,"Show All ");
-      STRCAT(menulabel,sd2->label.longlabel);
+      STRCAT(menulabel,sd_shown->label.longlabel);
       STRCAT(menulabel," slices");
       glutAddMenuEntry(menulabel,SHOW_ALL);
       STRCPY(menulabel,"Hide All ");
-      STRCAT(menulabel,sd2->label.longlabel);
+      STRCAT(menulabel,sd_shown->label.longlabel);
       STRCAT(menulabel," slices");
       glutAddMenuEntry(menulabel,HIDE_ALL);
     }

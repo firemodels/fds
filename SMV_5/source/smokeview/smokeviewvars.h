@@ -422,6 +422,9 @@ SVEXTERN int visAvailmemory;
 #ifdef pp_LOGFILE
 SVEXTERN FILE *LOGFILE;
 #endif
+SVEXTERN slice *sd_shown;
+SVEXTERN vslice *vd_shown;
+SVEXTERN int show_all_slices;
 SVEXTERN int autoterrain,manual_terrain;
 SVEXTERN float zterrain_max, zterrain_min;
 SVEXTERN int revision_smv, revision_fds;
