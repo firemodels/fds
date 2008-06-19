@@ -496,6 +496,10 @@ MAIN_LOOP: DO
    ! Estimate quantities at next time step, and decrease/increase time step if necessary based on CFL condition
 
    FIRST_PASS = .TRUE.
+   
+   ! Initialize density limits
+   RHO_LOWER = RHOA
+   RHO_UPPER = RHOA
  
    CHANGE_TIME_STEP_LOOP: DO
 

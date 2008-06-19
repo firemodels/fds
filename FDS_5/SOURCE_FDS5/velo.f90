@@ -103,12 +103,15 @@ CALC_MU: IF (PREDICTOR) THEN
                DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
                DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
                DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
-               DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1)) 
-               S2   = 2._EB*(DUDX*DUDX + DVDY*DVDY + DWDZ*DWDZ ) + (DUDY+DVDX)**2 + (DUDZ+DWDX)**2 + &
-                      (DVDZ+DWDY)**2-TWTH*DP(I,J,K)**2
-               S2   = MAX(0._EB,S2)
+               DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
+               S2   = 2._EB*(DUDX*DUDX + DVDY*DVDY + DWDZ*DWDZ) &
+                    + (DUDY+DVDX)**2 + (DUDZ+DWDX)**2 + (DVDZ+DWDY)**2
+               !!     - TWTH*(DUDX+DVDY+DWDZ)**2
+               !!     - TWTH*DP(I,J,K)**2
+               !! S2   = MAX(0._EB,S2)
                ITMP = 0.1_EB*TMP(I,J,K)
-               MU(I,J,K) = MAX(SPECIES(0)%MU(ITMP), RHOP(I,J,K)*CDXDYDZTT*SQRT(S2))
+               !MU(I,J,K) = MAX(SPECIES(0)%MU(ITMP), RHOP(I,J,K)*CDXDYDZTT*SQRT(S2))
+               MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*CDXDYDZTT*SQRT(S2)
             ENDDO ILOOP
          ENDDO JLOOP
       ENDDO KLOOP
@@ -1615,7 +1618,7 @@ END SUBROUTINE CHECK_STABILITY
 SUBROUTINE BAROCLINIC_CORRECTION
  
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HQS,RTRM,RHOP
-REAL(EB) :: RHO_AVG_OLD,RMIN,RMAX,RRAT,U2,V2,W2
+REAL(EB) :: RHO_AVG_OLD,RRAT,U2,V2,W2
 INTEGER  :: I,J,K
  
 HQS  => WORK1
@@ -1634,20 +1637,7 @@ ELSE
 ENDIF
  
 RHO_AVG_OLD = RHO_AVG
-RMIN =  1000._EB
-RMAX = -1000._EB
-DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (.NOT.SOLID(CELL_INDEX(I,J,K))) THEN
-               RMIN = MIN(RHOP(I,J,K),RMIN)
-               RMAX = MAX(RHOP(I,J,K),RMAX)
-            ENDIF
-         ENDDO
-      ENDDO
-ENDDO
- 
-RHO_AVG = 2._EB*RMIN*RMAX/(RMIN+RMAX)
+RHO_AVG = 2._EB*RHO_LOWER*RHO_UPPER/(RHO_LOWER+RHO_UPPER)
 RRAT = RHO_AVG_OLD/RHO_AVG
 RTRM = (1._EB-RHO_AVG/RHOP)*RRAT
  
