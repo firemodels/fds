@@ -268,6 +268,10 @@ MAIN_LOOP: DO
    ! Predict various flow quantities at next time step, and repeat process if there is a time step change
 
    FIRST_PASS = .TRUE.
+   
+   ! Initialize density limits
+   RHO_LOWER = RHOA
+   RHO_UPPER = RHOA
 
    CHANGE_TIME_STEP_LOOP: DO
 
