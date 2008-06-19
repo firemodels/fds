@@ -44,4 +44,4 @@ for data_row in config_lists:
 
 print "*** Finished ***"
 # Script Written on 06.19.08 by bryan.klein@nist.gov
-# For usage instructions, see: 
+# For usage instructions, see: http://code.google.com/p/fds-smv/wiki/fds2asciiBatchProcess
