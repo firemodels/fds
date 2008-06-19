@@ -1,2 +1,4 @@
-"../../Verification/activate_vents/","activate_vents",2,1,"n",0,60,1,1,"activate_vents_ascii.csv"
-"../../Verification/activate_vents/","activate_vents",2,1,"n",0,60,1,1,"activate_vents_ascii_2.csv"
+"/Users/bwklein/Development/FDS-SMV/Verification/activate_vents/","activate_vents",2,1,"n",0,60,1,1,"activate_vents_ascii.csv",
+"/Users/bwklein/Development/FDS-SMV/Verification/activate_vents/","activate_vents",2,1,"n",0,60,1,1,"activate_vents_ascii_2.csv",
+"/Users/bwklein/Development/FDS-SMV/Verification/FDS_Input_Files/ethanol_pan","ethanol_pan",2,1,"n",0,60,1,1,"ethanol_pan_slice_ascii.csv",
+"/Users/bwklein/Development/FDS-SMV/Verification/FDS_Input_Files/ethanol_pan","ethanol_pan",3,1,"n",0,60,1,1,1,"ethanol_pan_bndf_ascii.csv"
