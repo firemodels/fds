@@ -469,7 +469,7 @@ void keyboard(unsigned char key, int x, int y){
   glutPostRedisplay();
   updatemenu=1;
   key2 = (char)key;
-  if(key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='M'
+  if(key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='M'
 #ifdef pp_CULL
     &&key2!='C'
 #endif
@@ -903,6 +903,39 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"v",1)==0){
     visVector=1-visVector;
     if(vectorspresent==0)visVector=0;
+    return;
+  }
+  if(strncmp((const char *)&key2,"H",1)==0){
+    int nslice_loaded=0, nvslice_loaded=0;
+
+    for(i=0;i<nslice;i++){
+      slice *sd;
+
+      sd = sliceinfo + i;
+      if(sd->loaded==1)nslice_loaded++;
+    }
+    for(i=0;i<nvslice;i++){
+      vslice *vd;
+
+      vd = vsliceinfo + i;
+      if(vd->loaded==1)nvslice_loaded++;
+    }
+    if(nvslice_loaded>0){
+      if(show_all_slices==0){
+        ShowVSliceMenu(SHOW_ALL);
+      }
+      else{
+        ShowVSliceMenu(HIDE_ALL);
+      }
+    }
+    if(nvslice_loaded==0&&nslice_loaded>0){
+      if(show_all_slices==0){
+        ShowHideSliceMenu(SHOW_ALL);
+      }
+      else{
+        ShowHideSliceMenu(HIDE_ALL);
+      }
+    }
     return;
   }
   if(strncmp((const char *)&key2,"P",1)==0){
