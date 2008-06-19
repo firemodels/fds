@@ -205,8 +205,8 @@ ENDDO
 !
 ! General parameters
 !
-RTMPMAX = 300._EB       ! Maximum temperature for property tables
-RTMPMIN = 2400._EB      ! Minimum temperature for property tables
+RTMPMAX = 2400._EB       ! Maximum temperature for property tables
+RTMPMIN = 300._EB      ! Minimum temperature for property tables
 ! 
 ! Setup spectral information
 !
