@@ -2,7 +2,7 @@ import subprocess
 import csv
 import os
 
-config_file_name = "fds2ascii_Config_File.csv"
+config_file_name = "fds2ascii_batch_Config_File.csv"
 #path_fds2ascii = "/Applications/NIST/FDS/Utilities/fds2ascii"
 
 #Open Config File Object
