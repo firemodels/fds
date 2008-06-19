@@ -920,19 +920,24 @@ void keyboard(unsigned char key, int x, int y){
       vd = vsliceinfo + i;
       if(vd->loaded==1)nvslice_loaded++;
     }
+    stept=1;
     if(nvslice_loaded>0){
       if(show_all_slices==0){
         ShowVSliceMenu(SHOW_ALL);
+        force_redisplay=1;
       }
       else{
+        itime_save=itime;
         ShowVSliceMenu(HIDE_ALL);
       }
     }
     if(nvslice_loaded==0&&nslice_loaded>0){
       if(show_all_slices==0){
         ShowHideSliceMenu(SHOW_ALL);
+        force_redisplay=1;
       }
       else{
+        itime_save=itime;
         ShowHideSliceMenu(HIDE_ALL);
       }
     }
@@ -1822,15 +1827,7 @@ void Idle(void){
             ){
             elapsed_time = gmod(elapsed_time,times[ntimes-1]-times[0])+times[0];
           }
-
-         // if(reset_time_flag==0){
-            itime = interval_search(times,ntimes,elapsed_time,itime);
-         // }
-         // else{
-         //   reset_time_flag=0;
-         //   itime=0;
-         //   reset_gltime();
-         // }
+          itime = interval_search(times,ntimes,elapsed_time,itime);
         }
         else{
           itime+=FlowDir;
@@ -1838,6 +1835,17 @@ void Idle(void){
       }
       if(stept==1&&timedrag==0&&RenderGif!=0){
         itime+=RenderSkip*FlowDir;
+      }
+
+// if toggling time display with H then show the frame that was visible
+
+      if(stept==0){
+        itime_save=-1;
+      }
+      else{
+        if(itime_save>=0){
+          itime=itime_save;
+        }
       }
       checktimebound();
       UpdateTimeLabels();

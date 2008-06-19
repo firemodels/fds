@@ -1195,7 +1195,7 @@ void initvars1(void){
   ntarg_files=0;
   showallslicevectors=0;
   framerate=-1.0;
-  ntimes=0, itime=0, itimeold=-999, seqnum=0,RenderTime=0;
+  ntimes=0, itime=0, itimeold=-999, seqnum=0,RenderTime=0; itime_save=-1;
   npqq=0, nopart=1;
   uindex=-1, vindex=-1, windex=-1;
 
