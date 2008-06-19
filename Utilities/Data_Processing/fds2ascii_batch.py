@@ -1,4 +1,4 @@
-import popen2
+import subprocess
 import csv
 import os
 
@@ -18,26 +18,30 @@ data_array = csv.reader(fh)
 config_lists = [list(sublist) for sublist in data_array]
 print str(len(config_lists))+" lines read in from "+config_file_name+"\n"
 
-print config_lists
-
 def extract_ascii_data(input_data):
     # change to working directory, the first string in each row of the config file.
-    print input_data[0]
+    #print input_data[0]
     os.chdir(input_data[0])
     print "Working Directory:",os.getcwd()
     # Open fds2ascii and create a seperate output and input stream.
-    [theoutput, theinput] = popen2.popen2('fds2ascii')
+    proc = subprocess.Popen('fds2ascii',
+                           shell=True,
+                           stdin=subprocess.PIPE,
+                           stdout=subprocess.PIPE,
+                           )
     # Loop through input fields (columns) for the line passed in from the fds2ascii_Config_File.csv file.
     for field in input_data[1:]:
         if field != '':
-            theinput.write(field+"\n")
-            #print theoutput.readlines()
             print "Input:",field
+            proc.stdin.write('%s\n' % field)
         else:
             pass
+    proc.communicate()[0]
 
 # Pass each line in the config file to the extraction function.
 for data_row in config_lists:
     extract_ascii_data(data_row)
 
 print "*** Finished ***"
+# Script Written on 06.19.08 by bryan.klein@nist.gov
+# For usage instructions, see: 
