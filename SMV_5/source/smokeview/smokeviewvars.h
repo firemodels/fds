@@ -384,7 +384,7 @@ SVEXTERN int nlabels,visLabels,nlabelssmv;
 SVEXTERN int ntarg_files;
 SVEXTERN int showallslicevectors;
 SVEXTERN float framerate;
-SVEXTERN int ntimes, itime, itimeold, seqnum,RenderTime;
+SVEXTERN int ntimes, itime, itime_save, itimeold, seqnum,RenderTime;
 SVEXTERN int npqq, nopart;
 SVEXTERN int uindex, vindex, windex;
 
