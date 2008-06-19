@@ -103,15 +103,12 @@ CALC_MU: IF (PREDICTOR) THEN
                DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
                DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
                DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
-               DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
-               S2   = 2._EB*(DUDX*DUDX + DVDY*DVDY + DWDZ*DWDZ) &
-                    + (DUDY+DVDX)**2 + (DUDZ+DWDX)**2 + (DVDZ+DWDY)**2
-               !!     - TWTH*(DUDX+DVDY+DWDZ)**2
-               !!     - TWTH*DP(I,J,K)**2
-               !! S2   = MAX(0._EB,S2)
+               DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1)) 
+               S2   = 2._EB*(DUDX*DUDX + DVDY*DVDY + DWDZ*DWDZ ) + (DUDY+DVDX)**2 + (DUDZ+DWDX)**2 + &
+                      (DVDZ+DWDY)**2-TWTH*DP(I,J,K)**2
+               S2   = MAX(0._EB,S2)
                ITMP = 0.1_EB*TMP(I,J,K)
-               !MU(I,J,K) = MAX(SPECIES(0)%MU(ITMP), RHOP(I,J,K)*CDXDYDZTT*SQRT(S2))
-               MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*CDXDYDZTT*SQRT(S2)
+               MU(I,J,K) = MAX(SPECIES(0)%MU(ITMP), RHOP(I,J,K)*CDXDYDZTT*SQRT(S2))
             ENDDO ILOOP
          ENDDO JLOOP
       ENDDO KLOOP
