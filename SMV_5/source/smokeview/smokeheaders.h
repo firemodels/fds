@@ -29,7 +29,9 @@ int SUB_portfrustum(int quad,
                    );
 
 EXTERNCPP void add_new_tour(void);
-
+#ifdef pp_SCRIPT
+EXTERNCPP void start_script(void);
+#endif
 #ifdef pp_LOGFILE
 EXTERNCPP void log_print(char *output);
 #endif
