@@ -46,6 +46,7 @@
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB
+#define pp_SCRIPT
 
 #ifdef pp_ALPHA2
 #define pp_TOUR

@@ -636,6 +636,9 @@ SVEXTERN int read_smoothobst;
 SVEXTERN FILE *STREAM_SB;
 #endif
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
+#ifdef pp_SCRIPT
+SVEXTERN char *scriptfilename;
+#endif
 SVEXTERN char *logfilename;
 SVEXTERN char *flushfile, *chidfilebase;
 SVEXTERN char *hrrfilename;
