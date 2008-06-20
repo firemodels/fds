@@ -121,7 +121,6 @@ DO K=1,KBAR
          IF (Y_FU_0<=Y_FU_MIN) CYCLE
          Y_O2_0  = Y_O2(I,J,K)
          IF (Y_O2_0<=Y_O2_MIN) CYCLE
-
          IF_SUPPRESSION: IF (SUPPRESSION) THEN  ! Get maximum O2 in the current and neighboring cells to see if flame viable
 
             Y_O2_MAX  = 0._EB
@@ -164,13 +163,12 @@ DO K=1,KBAR
             ENDDO SEARCH_LOOP
 
             ! Evaluate empirical extinction criteria
-
+            
             Y_O2_CORR = RN%Y_O2_LL*(RN%CRIT_FLAME_TMP-TMP_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
             Y_F_CORR  = RN%Y_F_LFL*(RN%CRIT_FLAME_TMP-TMP_F_MIN)/(RN%CRIT_FLAME_TMP-TMPA)
             IF (Y_O2_MAX < Y_O2_CORR .OR. Y_FU_MAX*RN%Y_F_INLET < Y_F_CORR) CYCLE
 
          ENDIF IF_SUPPRESSION
-
          DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)
          IF (LES .AND. EDDY_DISSIPATION) THEN
             IF (.NOT.TWO_D) THEN
@@ -188,7 +186,6 @@ DO K=1,KBAR
          ELSE
             Q_NEW = MIN(Q_BOUND_1,Q_BOUND_2)
          ENDIF
-         IF (LES) Q_AVG(I,J,K) = OMWGT*Q_AVG(I,J,K) + WGT*Q_NEW
          DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
          Q(I,J,K)   = Q_NEW
          YY(I,J,K,I_FUEL) = YY(I,J,K,I_FUEL) - DYF
@@ -229,7 +226,12 @@ CONVERT_CO: IF (CO_PRODUCTION) THEN
 
             Z_2_MIN = Z_2_MIN_FAC * (YY(I,J,K,I_PROG_CO)+YY(I,J,K,I_PROG_F))
             IF (YY(I,J,K,I_PROG_CO) < Z_2_MIN) CYCLE
-            IF((TMP(I,J,K) < 500._EB .AND. Q(I,J,K)==0._EB) .OR. Q(I,J,K)>=Q_UPPER) CYCLE
+            IF (LES) THEN
+               Q_BOUND_2 = MIN((HRRPUV_AVERAGE-OMWGT*Q_AVG(I,J,K))/WGT,Q_UPPER)
+            ELSE
+               Q_BOUND_2 = Q_UPPER
+            ENDIF
+            IF((TMP(I,J,K) < 500._EB .AND. Q(I,J,K)==0._EB) .OR. Q(I,J,K)>=Q_BOUND_2) CYCLE
 
             ! Compute slow reaction
 
@@ -272,7 +274,7 @@ CONVERT_CO: IF (CO_PRODUCTION) THEN
                DYCO = MIN(X_FU_0,X_FU_0 - X_FU)*MW_CO/RHOX*1.E6
             ENDIF
             Q_OLD = Q(I,J,K)
-            Q_NEW = MIN(Q_UPPER-Q_OLD,DYCO*RHO(I,J,K)*HFAC_CO)
+            Q_NEW = MIN(Q_BOUND_2-Q_OLD,DYCO*RHO(I,J,K)*HFAC_CO)
             DYCO = Q_NEW/(RHO(I,J,K)*HFAC_CO*RN%Y_F_INLET) * F_TO_CO
             IF (YY(I,J,K,I_PROG_CO) - DYCO < Z_2_MIN) THEN
                Q_NEW = Q_NEW*(YY(I,J,K,I_PROG_CO)-Z_2_MIN)/DYCO
@@ -286,6 +288,8 @@ CONVERT_CO: IF (CO_PRODUCTION) THEN
    ENDDO
 
 ENDIF CONVERT_CO
+
+IF (LES) Q_AVG = OMWGT*Q_AVG + WGT*Q
 
 ! Sum up diluent mass fractions
 
