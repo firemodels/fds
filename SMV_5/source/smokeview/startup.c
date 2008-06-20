@@ -2041,6 +2041,9 @@ void initvars0(void){
   read_smoothobst=0;
 #endif
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
+#ifdef pp_SCRIPT
+  scriptfilename=NULL;
+#endif
   logfilename=NULL;
   flushfile=NULL, chidfilebase=NULL;
   hrrfilename=NULL;

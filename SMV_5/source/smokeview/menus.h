@@ -2063,6 +2063,11 @@ void LoadUnloadMenu(int value){
     updatetourmenulabels();
     updateplot3dmenulabels();
   }
+#ifdef pp_SCRIPT
+  if(value==RUNSCRIPT){
+    printf("running script\n");
+  }
+#endif
   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
 }
 
@@ -6747,6 +6752,11 @@ if(visBlocks==visBLOCKOutline){
       }
       glutAddMenuEntry("-",999);
       glutAddSubMenu("Configuration files",smokeviewinimenu);
+#ifdef pp_SCRIPT
+      if(scriptfilename!=NULL){
+        glutAddMenuEntry("Run Script",RUNSCRIPT);
+      }
+#endif
 #ifdef pp_COMPRESS
       if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice>0)){
         glutAddSubMenu("Compression",compressmenu);

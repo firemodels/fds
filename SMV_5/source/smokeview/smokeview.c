@@ -3278,11 +3278,23 @@ void Args(int argc, char **argv){
   STRCAT(casefilename,ini_ext);
 
   if(smvfilename==NULL){
+#ifdef pp_SCRIPT
+    struct stat statbuffer;
+#endif
+
     NewMemory((void **)&smvfilename,(unsigned int)(len+6));
     FREEMEMORY(smvmenufile);
     NewMemory((void **)&smvmenufile,(unsigned int)(len+15));
     STRCPY(smvfilename,fdsprefix);
     STRCAT(smvfilename,".smv");
+#ifdef pp_SCRIPT
+    NewMemory((void **)&scriptfilename,(unsigned int)(len+6));
+    STRCPY(scriptfilename,fdsprefix);
+    STRCAT(scriptfilename,".scr");
+    if(stat(scriptfilename,&statbuffer)!=0){
+      FREEMEMORY(scriptfilename);
+    }
+#endif
     STRCPY(smvmenufile,"Reload ");
     temp = strrchr(smvfilename,(int)(*dirseparator));
     if(temp!=NULL){
