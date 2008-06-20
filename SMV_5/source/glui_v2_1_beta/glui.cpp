@@ -94,7 +94,11 @@ void    GLUI_Main::create_standalone_window( char *name, int x, int y )
   if ( x >= 0 OR y >= 0 )
     glutInitWindowPosition( x, y );
   glutInitDisplayMode( GLUT_RGB | GLUT_SINGLE ); /* | GLUT_DOUBLE );          */
+#ifdef pp_NOCLOSE
   glut_window_id = glutCreateNoCloseWindow( name );
+#else
+  glut_window_id = glutCreateWindow( name );
+#endif
   glDisable( GL_DEPTH_TEST );
   glCullFace( GL_BACK );
   glDisable( GL_CULL_FACE );
@@ -107,7 +111,11 @@ void    GLUI_Main::create_standalone_window( char *name, int x, int y )
 
 void     GLUI_Main::create_subwindow( int parent_window, int window_alignment )
 {
+#ifdef pp_NOCLOSE
   glut_window_id = glutCreateNoCloseSubWindow( parent_window, 0,0, 100, 100 );
+#else
+  glut_window_id = glutCreateSubWindow( parent_window, 0,0, 100, 100 );
+#endif
   glDisable( GL_DEPTH_TEST );
   glCullFace( GL_BACK );
   glDisable( GL_CULL_FACE );
