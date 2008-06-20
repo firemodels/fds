@@ -6234,29 +6234,41 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    ! Check if the output QUANTITY exists and is appropriate
 
    IF (DV%QUANTITY /= 'null') THEN
+
       CALL GET_QUANTITY_INDEX(DV%SMOKEVIEW_LABEL,DV%SMOKEVIEW_BAR_LABEL,QUANTITY_INDEX,DV%SPEC_INDEX,DV%PART_INDEX, &
                               'DEVC',DV%QUANTITY,DV%SPEC_ID,DV%PART_ID)
+
       IF (OUTPUT_QUANTITY(QUANTITY_INDEX)%INTEGRATED .AND. DV%X1<=-1.E6_EB) THEN
          WRITE(MESSAGE,'(3A)')  ' ERROR: DEVC QUANTITY ',TRIM(DV%QUANTITY),' requires coordinates using XB'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
+
+      IF (.NOT.OUTPUT_QUANTITY(QUANTITY_INDEX)%INTEGRATED .AND. DV%STATISTICS=='null' .AND. DV%X1>-1.E6_EB) THEN
+         WRITE(MESSAGE,'(3A)')  ' ERROR: DEVC QUANTITY ',TRIM(DV%QUANTITY),' requires coordinates using XYZ, not XB'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+
       IF (QUANTITY_INDEX<0 .AND. DV%IOR==0) THEN
          WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Specify orientation of DEVC ' ,N,' using the parameter IOR'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
+
       IF (QUANTITY_INDEX < 0 .AND. (DV%STATISTICS=='MASS MEAN' .OR. DV%STATISTICS=='VOLUME MEAN' .OR. &
                                     DV%STATISTICS=='VOLUME INTEGRAL') ) THEN
          WRITE(MESSAGE,'(A,I4)') 'ERROR: Invalid STATISTICS specified for wall DEVC ',N
          CALL SHUTDOWN(MESSAGE)
       ENDIF
+
       IF (QUANTITY_INDEX > 0 .AND. DV%STATISTICS=='SURFACE INTEGRAL') THEN
          WRITE(MESSAGE,'(A,I4)') 'ERROR: Invalid STATISTICS specified for gas DEVC ',N
          CALL SHUTDOWN(MESSAGE)
       ENDIF
+
       IF (QUANTITY_INDEX > 0 .AND. DV%STATISTICS/='null' .AND. DV%I1<0) THEN
          WRITE(MESSAGE,'(A,I4)') 'ERROR: XB required when STATISTICS specified for gas DEVC ',N
          CALL SHUTDOWN(MESSAGE)
       ENDIF
+
    ENDIF
    
   ! Assign properties to the DEVICE array
@@ -6900,6 +6912,10 @@ OUTPUT_QUANTITY(13)%MASS_FRACTION = .TRUE.
 OUTPUT_QUANTITY(14)%NAME = 'DIVERGENCE'              
 OUTPUT_QUANTITY(14)%UNITS = '1/s'                     
 OUTPUT_QUANTITY(14)%SHORT_NAME = 'div'
+
+OUTPUT_QUANTITY(15)%NAME = 'MIXING TIME'              
+OUTPUT_QUANTITY(15)%UNITS = 's'                     
+OUTPUT_QUANTITY(15)%SHORT_NAME = 'mix'
 
 OUTPUT_QUANTITY(16)%NAME = 'ABSORPTION_COEFFICIENT'  
 OUTPUT_QUANTITY(16)%UNITS = '1/m'                     
