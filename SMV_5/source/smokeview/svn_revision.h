@@ -34,6 +34,7 @@ extern char IOobject_revision[];
 extern char IOpart_revision[];
 extern char IOplot3d_revision[];
 extern char IOslice_revision[];
+extern char IOscript_revision[];
 extern char IOsmoke_revision[];
 extern char IOtarget_revision[];
 extern char IOtour_revision[];

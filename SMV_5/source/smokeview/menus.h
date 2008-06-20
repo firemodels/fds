@@ -2065,7 +2065,7 @@ void LoadUnloadMenu(int value){
   }
 #ifdef pp_SCRIPT
   if(value==RUNSCRIPT){
-    printf("running script\n");
+    start_script();
   }
 #endif
   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
