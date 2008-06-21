@@ -7,6 +7,17 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 
+/* --------------------------  scriptdata ------------------------------------ */
+
+#ifdef pp_SCRIPT
+typedef struct {
+  int command;
+  int ival;
+  char *cval;
+  float fval;
+} scriptdata;
+#endif
+
 /* --------------------------  treedata ------------------------------------ */
 
 typedef struct {
