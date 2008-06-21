@@ -24,7 +24,7 @@ char IOscript_revision[]="$Revision$";
 //
 // script commands
 //
-// RENDERONE
+// RENDERONCE
 // RENDERALL 
 //  skip (int)
 // RENDERTYPE
@@ -38,18 +38,10 @@ char IOscript_revision[]="$Revision$";
 // VIEWPOINT
 //  viewpoint (char)
 
-#define RENDERONE 101
-#define RENDERALL 102
-#define RENDERTYPE 103
-#define LOADFILE 104
-#define SETTIME 105
-#define SETFRAME 106
-#define VIEWPOINT 107
-
 /* ------------------ start_script ------------------------ */
 
 void start_script(void){
-  printf("starting script\n");
+  current_script_command=scriptinfo;
 }
 
 /* ------------------ free_script ------------------------ */
@@ -70,6 +62,21 @@ void free_script(void){
 
 }
 
+
+/* ------------------ get_file_type ------------------------ */
+
+int get_file_type(char *file){
+  int i;
+
+  for(i=0;i<nfileinfo;i++){
+    filedata *filei;
+
+    filei = fileinfo + i;
+    if(strcmp(filei->file,file)==0)return filei->type;
+  }
+  return -1;
+}
+
 /* ------------------ init_scripti ------------------------ */
 
 void init_scripti(scriptdata *scripti, int command){
@@ -81,14 +88,24 @@ void init_scripti(scriptdata *scripti, int command){
 
 /* ------------------ compile_script ------------------------ */
 
-void compile_script(char *scriptfile){
+int compile_script(char *scriptfile){
   FILE *stream;
   char buffer[1024];
   scriptdata *scripti;
+  int return_val;
 
-  if(scriptfile==NULL)return;
+  return_val=1;
+  if(scriptfile==NULL){
+    printf("*** internal smokeview error, scriptfile name is NULL\n");
+    return return_val;
+  }
   stream=fopen(scriptfile,"r");
-  if(stream==NULL)return;
+  if(stream==NULL){
+    printf("*** scriptfile, %s, could not be opened for input\n",scriptfile);
+    return return_val;
+  }
+
+  return_val=0;
   
   /* 
    ************************************************************************
@@ -104,7 +121,7 @@ void compile_script(char *scriptfile){
     if(fgets(buffer,255,stream)==NULL)break;
     if(strncmp(buffer," ",1)==0)continue;
 
-    if(match(buffer,"RENDERONE",9) == 1){
+    if(match(buffer,"RENDERONCE",10) == 1){
       nscriptinfo++;
       continue;
     }
@@ -130,7 +147,10 @@ void compile_script(char *scriptfile){
     }
   }
 
-  if(nscriptinfo==0)return;
+  if(nscriptinfo==0){
+    printf("*** warning: scriptfile has no usable commands\n");
+    return 1;
+  }
 
   NewMemory((void **)&scriptinfo,nscriptinfo*sizeof(scriptdata));
 
@@ -146,9 +166,9 @@ void compile_script(char *scriptfile){
     if(fgets(buffer,255,stream)==NULL)break;
     if(strncmp(buffer," ",1)==0)continue;
 
-    if(match(buffer,"RENDERONE",9) == 1){
+    if(match(buffer,"RENDERONCE",10) == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,RENDERONE);
+      init_scripti(scripti,RENDERONCE);
 
       nscriptinfo++;
       continue;
@@ -166,6 +186,7 @@ void compile_script(char *scriptfile){
     }
     if(match(buffer,"LOADFILE",8) == 1){
       int len;
+      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,LOADFILE);
@@ -174,6 +195,8 @@ void compile_script(char *scriptfile){
       len=strlen(buffer);
       NewMemory((void **)&scripti->cval,len+1);
       strcpy(scripti->cval,buffer);
+      filetype = get_file_type(buffer);
+      scripti->ival = filetype;
 
       nscriptinfo++;
       continue;
@@ -214,11 +237,42 @@ void compile_script(char *scriptfile){
       continue;
     }
   }
+  return return_val;
 }
+
 
 /* ------------------ run_script ------------------------ */
 
 void run_script(void){
+  scriptdata *scripti;
+
+  if(current_script_command>scriptinfo+nscriptinfo-1){
+    current_script_command=NULL;
+    return;
+  }
+  scripti = current_script_command;
+#ifdef _DEBUG
+  printf("executing script command %i\n",scripti->command);
+#endif
+  switch (scripti->command){
+    case RENDERONCE:
+      keyboard('r',0,0);
+      break;
+    case RENDERALL:
+      RenderMenu(1);
+      break;
+    case RENDERTYPE:
+      break;
+    case LOADFILE:
+      break;
+    case SETTIME:
+      break;
+    case SETFRAME:
+      break;
+    case VIEWPOINT:
+      break;
+  }
+  current_script_command++;
 }
 
 #endif
