@@ -1597,7 +1597,11 @@ void handle_move_keys(int  key){
 void Display(void){
   float *angle_zx;
 
-
+#ifdef pp_SCRIPT
+  if(nscriptinfo>0&&current_script_command!=NULL){
+    run_script();
+  }
+#endif
   if(updatezoommenu==1){
      updatezoommenu=0;
     ZoomMenu(zoomindex);

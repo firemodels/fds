@@ -211,6 +211,19 @@ int readsmv(char *file){
     e_surfacedefault.color=mat_ambient2;
   }
 
+#ifdef pp_SCRIPT
+  if(nfileinfo>0){
+    for(i=0;i<nfileinfo;i++){
+      filedata *filei;
+
+      filei = fileinfo + i;
+      FREEMEMORY(filei->file);
+    }
+    FREEMEMORY(fileinfo);
+    nfileinfo=0;
+  }
+#endif
+
   // free memory for particle class
 
   /*
@@ -661,24 +674,39 @@ int readsmv(char *file){
       ||match(buffer,"PRT5",4)==1||match(buffer,"EVA5",4)==1
       ){
       npartinfo++;
+#ifdef pp_SCRIPT
+      nfileinfo++;
+#endif
       continue;
     }
     if( (match(buffer,"SLCF",4) == 1)||
         (match(buffer,"SLCT",4) == 1)
       ){
       nslice++;
+#ifdef pp_SCRIPT
+      nfileinfo++;
+#endif
       continue;
     }
     if(match(buffer,"SMOKE3D",7) == 1){
       nsmoke3d++;
+#ifdef pp_SCRIPT
+      nfileinfo++;
+#endif
       continue;
     }
     if(match(buffer,"BNDF",4) == 1){
       npatch_files++;
+#ifdef pp_SCRIPT
+      nfileinfo++;
+#endif
       continue;
     }
     if(match(buffer,"ISOF",4) == 1||match(buffer,"TISOF",5)==1){
       niso++;
+#ifdef pp_SCRIPT
+      nfileinfo++;
+#endif
       continue;
     }
     if(match(buffer,"ROOM",4) == 1){
@@ -713,6 +741,13 @@ int readsmv(char *file){
    ************************ end of pass 1 ********************************* 
    ************************************************************************
  */
+
+#ifdef pp_SCRIPT
+ if(nfileinfo>0){
+   NewMemory((void **)&fileinfo,nfileinfo*sizeof(filedata));
+   nfileinfo=0;
+ }
+#endif
 
  if(nterraininfo>0){
    NewMemory((void **)&terraininfo,nterraininfo*sizeof(terraindata));
@@ -1391,6 +1426,19 @@ typedef struct {
         else{
           smoke3di->file=smoke3di->reg_file;
         }
+#ifdef pp_SCRIPT
+        {
+          filedata *filei;
+          int len;
+
+          filei = fileinfo + nfileinfo;
+          len = strlen(smoke3di->file);
+          NewMemory((void **)&filei->file,len+1);
+          STRCPY(filei->file,smoke3di->file);
+          filei->type=SMOKE3D_FILE;
+          nfileinfo++;
+        }
+#endif
 
         if(stat(smoke3di->file,&statbuffer)==0){
           if(readlabels(&smoke3di->label,stream)==2)return 2;
@@ -2984,6 +3032,19 @@ typedef struct {
           parti->file=NULL;
         }
       }
+#ifdef pp_SCRIPT
+        {
+          filedata *filei;
+          int len;
+
+          filei = fileinfo + nfileinfo;
+          len = strlen(parti->reg_file);
+          NewMemory((void **)&filei->file,len+1);
+          STRCPY(filei->file,parti->reg_file);
+          filei->type=PART_FILE;
+          nfileinfo++;
+        }
+#endif
       parti->compression_type=0;
       parti->sort_tags_loaded=0;
       parti->loaded=0;
@@ -3290,7 +3351,19 @@ typedef struct {
       if(sd->compression_type==0){
         sd->file=sd->reg_file;
       }
+#ifdef pp_SCRIPT
+        {
+          filedata *filei;
+          int len;
 
+          filei = fileinfo + nfileinfo;
+          len = strlen(sd->reg_file);
+          NewMemory((void **)&filei->file,len+1);
+          STRCPY(filei->file,sd->reg_file);
+          filei->type=SLICE_FILE;
+          nfileinfo++;
+        }
+#endif
       sd->terrain=terrain;
       sd->above_ground_level=above_ground_level;
       sd->seq_id=nn_slice;
@@ -3389,6 +3462,19 @@ typedef struct {
         patchi->compression_type=0;
         patchi->file=patchi->reg_file;
       }
+#ifdef pp_SCRIPT
+        {
+          filedata *filei;
+          int len;
+
+          filei = fileinfo + nfileinfo;
+          len = strlen(patchi->reg_file);
+          NewMemory((void **)&filei->file,len+1);
+          STRCPY(filei->file,patchi->reg_file);
+          filei->type=BOUNDARY_FILE;
+          nfileinfo++;
+        }
+#endif
       patchi->blocknumber=blocknumber;
       patchi->seq_id=nn_patch;
       patchi->autoload=0;
@@ -3476,6 +3562,19 @@ typedef struct {
       STRCPY(isoi->size_file,buffer);
       STRCAT(isoi->size_file,".sz");
 
+#ifdef pp_SCRIPT
+        {
+          filedata *filei;
+          int len;
+
+          filei = fileinfo + nfileinfo;
+          len = strlen(isoi->reg_file);
+          NewMemory((void **)&filei->file,len+1);
+          STRCPY(filei->file,isoi->reg_file);
+          filei->type=ISO_FILE;
+          nfileinfo++;
+        }
+#endif
       if(stat(isoi->comp_file,&statbuffer)==0){
         isoi->compression_type=1;
         niso_compressed++;

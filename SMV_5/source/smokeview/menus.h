@@ -2065,7 +2065,15 @@ void LoadUnloadMenu(int value){
   }
 #ifdef pp_SCRIPT
   if(value==RUNSCRIPT){
-    start_script();
+    int error_code;
+    
+    error_code=compile_script(scriptfilename);
+    if(error_code==0){
+      start_script();
+    }
+    else{
+      printf("*** error: problem encountered while trying to compile script file\n");
+    }
   }
 #endif
   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
