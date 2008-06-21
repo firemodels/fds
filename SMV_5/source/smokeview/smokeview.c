@@ -3290,7 +3290,7 @@ void Args(int argc, char **argv){
 #ifdef pp_SCRIPT
     NewMemory((void **)&scriptfilename,(unsigned int)(len+6));
     STRCPY(scriptfilename,fdsprefix);
-    STRCAT(scriptfilename,".scr");
+    STRCAT(scriptfilename,".mac");
     if(stat(scriptfilename,&statbuffer)!=0){
       FREEMEMORY(scriptfilename);
     }
