@@ -1,0 +1,57 @@
+&HEAD CHID='NRL_HAI_5', TITLE='Back, Beyler, DiNenno and Tatem Wall Heat Flux Measurements, Test 5' /
+
+&MESH IJK=32,32,96, XB=0.00,1.376,-0.688,0.688,-0.086,4.042 /
+
+&TIME TWFIN=60. /
+
+&SURF ID='burner', HRRPUA=590., TMP_FRONT=100., COLOR='TAN' /
+&OBST XB=0.00,0.48,-.24,0.24,-.10,0.00,SURF_IDS='burner','STEEL WALL','STEEL WALL' /
+
+&MATL ID            = 'GYPSUM PLASTER'
+      FYI           = 'Quintiere, Fire Behavior'
+      CONDUCTIVITY  = 0.48
+      SPECIFIC_HEAT = 0.84
+      DENSITY       = 1440. /
+&MATL ID            = 'STEEL'
+      FYI           = 'Drysdale, Intro to Fire Dynamics'
+      EMISSIVITY    = 0.95
+      SPECIFIC_HEAT = 0.46
+      CONDUCTIVITY  = 45.8
+      DENSITY       = 7850. /
+&MATL ID            = 'CONCRETE'
+      FYI           = 'Drysdale, Intro to Fire Dynamics'
+      SPECIFIC_HEAT = 0.90
+      DENSITY       = 2000.
+      EMISSIVITY    = 0.95
+      CONDUCTIVITY  = 1.0  /
+
+&SURF ID         = 'FLOOR'
+      MATL_ID    = 'CONCRETE'
+      THICKNESS  = 0.1
+      COLOR      = 'GRAY' /
+&SURF ID         = 'STEEL WALL'
+      MATL_ID    = 'STEEL'
+      THICKNESS  = 0.002
+      COLOR      = 'BLACK' /
+&SURF ID            = 'GYPSUM BOARD'
+      MATL_ID       = 'GYPSUM PLASTER'
+      COLOR         = 'ANTIQUE WHITE'
+      THICKNESS     = 0.0127 /
+
+&VENT MB='XMIN', SURF_ID='GYPSUM BOARD' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='FLOOR' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&SLCF XB=0.0125,0.0125,0.00,0.00,0.00,10.00,QUANTITY='TEMPERATURE' /
+&SLCF PBY=0.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBY=0.0,QUANTITY='MIXTURE_FRACTION'  /
+&SLCF PBY=0.0,QUANTITY='HRRPUV'  /
+
+&BNDF QUANTITY='GAUGE_HEAT_FLUX'  /
+&BNDF QUANTITY='WALL_TEMPERATURE'  /
+
+&TAIL /
+
