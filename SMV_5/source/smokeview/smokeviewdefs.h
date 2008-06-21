@@ -14,6 +14,22 @@ void _sniffErrors(char *whereat);
 #define DOUBLE_BUFFER 2
 #define SINGLE_BUFFER 1
 
+#ifdef pp_SCRIPT
+#define RENDERONCE 101
+#define RENDERALL 102
+#define RENDERTYPE 103
+#define LOADFILE 104
+#define SETTIME 105
+#define SETFRAME 106
+#define VIEWPOINT 107
+
+#define SLICE_FILE 0
+#define BOUNDARY_FILE 1
+#define SMOKE3D_FILE 2
+#define PART_FILE 3
+#define ISO_FILE 4
+#endif
+
 #define DIRX 1
 #define DIRY 2
 #define DIRZ 3
