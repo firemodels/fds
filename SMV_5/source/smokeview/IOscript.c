@@ -31,11 +31,11 @@ char IOscript_revision[]="$Revision$";
 //  type (char - jpeg or png)
 // LOADFILE 
 //  file (char)
-// SETTIME
+// SETTIMEVAL
 //  time (float)
-// SETFRAME
+// SETIMEFRAME
 //  frame (int)
-// VIEWPOINT
+// SETVIEWPOINT
 //  viewpoint (char)
 
 /* ------------------ start_script ------------------------ */
@@ -133,15 +133,15 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"SETTIME",7) == 1){
+    if(match(buffer,"SETTIMEVAL",10) == 1){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"SETFRAME",8) == 1){
+    if(match(buffer,"SETTIMEFRAME",12) == 1){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"VIEWPOINT",9) == 1){
+    if(match(buffer,"SETVIEWPOINT",12) == 1){
       nscriptinfo++;
       continue;
     }
@@ -201,9 +201,9 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"SETTIME",7) == 1){
+    if(match(buffer,"SETTIMEVAL",10) == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SETTIME);
+      init_scripti(scripti,SETTIMEVAL);
       if(fgets(buffer,255,stream)==NULL)break;
       sscanf(buffer,"%f",&scripti->fval);
       if(scripti->fval<0.0)scripti->fval=0.0;
@@ -212,9 +212,9 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"SETFRAME",8) == 1){
+    if(match(buffer,"SETTIMEFRAME",12) == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SETFRAME);
+      init_scripti(scripti,SETTIMEFRAME);
       if(fgets(buffer,255,stream)==NULL)break;
       sscanf(buffer,"%i",&scripti->ival);
       if(scripti->ival<0)scripti->ival=0.0;
@@ -222,11 +222,11 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"VIEWPOINT",9) == 1){
+    if(match(buffer,"SETVIEWPOINT",12) == 1){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,VIEWPOINT);
+      init_scripti(scripti,SETVIEWPOINT);
       if(fgets(buffer,255,stream)==NULL)break;
       trim(buffer);
       len=strlen(buffer);
@@ -237,9 +237,100 @@ int compile_script(char *scriptfile){
       continue;
     }
   }
+  fclose(stream);
   return return_val;
 }
 
+/* ------------------ run_renderall ------------------------ */
+
+void script_renderall(scriptdata *scripti){
+  int skip;
+
+  skip=scripti->ival;
+  if(skip<1)skip=1;
+  printf("Script: Rendering every %i frames",skip);
+  printf("\n");
+  RenderMenu(skip);
+}
+
+/* ------------------ script_rendertype ------------------------ */
+
+void script_rendertype(scriptdata *scripti){
+  printf("Script: rendertype=%s",scripti->cval);
+  printf(" *** not implemented ***");
+  printf("\n");
+}
+
+/* ------------------ script_loadfile ------------------------ */
+
+void script_loadfile(scriptdata *scripti){
+  int i;
+  int errorcode;
+
+  printf("Script: loading file %s",scripti->cval);
+  printf("\n");
+  for(i=0;i<nslice;i++){
+    slice *sd;
+
+    sd = sliceinfo + i;
+    if(strcmp(sd->reg_file,scripti->cval)==0){
+      readslice(sd->reg_file,i,LOAD,&errorcode);
+      return;
+    }
+
+  }
+}
+
+/* ------------------ script_settimeval ------------------------ */
+
+void script_settimeval(scriptdata *scripti){
+  float timeval;
+  int i;
+
+  timeval = scripti->fval;
+  printf("Script: set time to %f",timeval);
+  printf("\n");
+  if(times!=NULL&&ntimes>0){
+    if(timeval<times[0])timeval=times[0];
+    if(timeval>times[ntimes-1])timeval=times[ntimes-1];
+    for(i=0;i<ntimes-1;i++){
+      if(times[i]<=timeval&&timeval<=times[i+1]){
+        itime=i;
+        stept=1;
+        force_redisplay=1;
+
+      }
+    }
+  }
+}
+
+/* ------------------ script_settimeframe ------------------------ */
+
+void script_settimeframe(scriptdata *scripti){
+  int timeframe;
+
+  timeframe = scripti->ival;
+  printf("Script: set time frame to %i",timeframe);
+  printf(" *** not implemented ***");
+  printf("\n");
+}
+
+/* ------------------ script_setviewpoint ------------------------ */
+
+void script_setviewpoint(scriptdata *scripti){
+  char *viewpoint;
+  camera *ca;
+
+  viewpoint = scripti->cval;
+  printf("Script: set viewpoint to %s",viewpoint);
+  printf("\n");
+  for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
+    if(strcmp(scripti->cval,ca->name)==0){
+      ResetMenu(ca->view_id);
+      break;
+    }
+  }
+}
 
 /* ------------------ run_script ------------------------ */
 
@@ -259,17 +350,22 @@ void run_script(void){
       keyboard('r',0,0);
       break;
     case RENDERALL:
-      RenderMenu(1);
+      script_renderall(scripti);
       break;
     case RENDERTYPE:
+      script_rendertype(scripti);
       break;
     case LOADFILE:
+      script_loadfile(scripti);
       break;
-    case SETTIME:
+    case SETTIMEVAL:
+      script_settimeval(scripti);
       break;
-    case SETFRAME:
+    case SETTIMEFRAME:
+      script_settimeframe(scripti);
       break;
-    case VIEWPOINT:
+    case SETVIEWPOINT:
+      script_setviewpoint(scripti);
       break;
   }
   current_script_command++;
