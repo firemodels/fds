@@ -19,9 +19,9 @@ void _sniffErrors(char *whereat);
 #define RENDERALL 102
 #define RENDERTYPE 103
 #define LOADFILE 104
-#define SETTIME 105
-#define SETFRAME 106
-#define VIEWPOINT 107
+#define SETTIMEVAL 105
+#define SETTIMEFRAME 106
+#define SETVIEWPOINT 107
 
 #define SLICE_FILE 0
 #define BOUNDARY_FILE 1
