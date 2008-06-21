@@ -1921,6 +1921,10 @@ void initvars0(void){
   GPU_depthtexture=0;
 #endif
 
+#ifdef pp_SCRIPT
+  scriptinfo=NULL;
+  nscriptinfo=0;
+#endif
   demo_option=0;
   current_mesh=NULL;
   camera_current=NULL, camera_save=NULL, camera_last=NULL;
