@@ -25,10 +25,11 @@ char IOscript_revision[]="$Revision$";
 // script commands
 //
 // RENDERONCE
+// RENDERDOUBLEONCE
 // RENDERALL 
 //  skip (int)
-// RENDERTYPE
-//  type (char - jpeg or png)
+// SETJPEG
+// SETPNG
 // LOADFILE 
 //  file (char)
 // SETTIMEVAL
@@ -125,6 +126,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match(buffer,"RENDERDOUBLEONCE",16) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match(buffer,"RENDERALL",9) == 1){
       nscriptinfo++;
       continue;
@@ -134,10 +139,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match(buffer,"SETTIMEVAL",10) == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match(buffer,"SETTIMEFRAME",12) == 1){
       nscriptinfo++;
       continue;
     }
@@ -169,6 +170,13 @@ int compile_script(char *scriptfile){
     if(match(buffer,"RENDERONCE",10) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,RENDERONCE);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match(buffer,"RENDERDOUBLEONCE",16) == 1){
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,RENDERDOUBLEONCE);
 
       nscriptinfo++;
       continue;
@@ -212,16 +220,6 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"SETTIMEFRAME",12) == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SETTIMEFRAME);
-      if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%i",&scripti->ival);
-      if(scripti->ival<0)scripti->ival=0.0;
-
-      nscriptinfo++;
-      continue;
-    }
     if(match(buffer,"SETVIEWPOINT",12) == 1){
       int len;
 
@@ -251,14 +249,6 @@ void script_renderall(scriptdata *scripti){
   printf("Script: Rendering every %i frames",skip);
   printf("\n");
   RenderMenu(skip);
-}
-
-/* ------------------ script_rendertype ------------------------ */
-
-void script_rendertype(scriptdata *scripti){
-  printf("Script: rendertype=%s",scripti->cval);
-  printf(" *** not implemented ***");
-  printf("\n");
 }
 
 /* ------------------ script_loadfile ------------------------ */
@@ -349,11 +339,17 @@ void run_script(void){
     case RENDERONCE:
       keyboard('r',0,0);
       break;
+    case RENDERDOUBLEONCE:
+      keyboard('R',0,0);
+      break;
     case RENDERALL:
       script_renderall(scripti);
       break;
-    case RENDERTYPE:
-      script_rendertype(scripti);
+    case SETJPEG:
+      RenderMenu(RenderJPEG);
+      break;
+    case SETPNG:
+      RenderMenu(RenderPNG);
       break;
     case LOADFILE:
       script_loadfile(scripti);
@@ -361,13 +357,11 @@ void run_script(void){
     case SETTIMEVAL:
       script_settimeval(scripti);
       break;
-    case SETTIMEFRAME:
-      script_settimeframe(scripti);
-      break;
     case SETVIEWPOINT:
       script_setviewpoint(scripti);
       break;
   }
+  glutPostRedisplay();
   current_script_command++;
 }
 
