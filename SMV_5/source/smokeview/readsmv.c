@@ -1435,7 +1435,7 @@ typedef struct {
           len = strlen(smoke3di->file);
           NewMemory((void **)&filei->file,len+1);
           STRCPY(filei->file,smoke3di->file);
-          filei->type=SMOKE3D_FILE;
+          filei->type=SCRIPT_SMOKE3D_FILE;
           nfileinfo++;
         }
 #endif
@@ -3041,7 +3041,7 @@ typedef struct {
           len = strlen(parti->reg_file);
           NewMemory((void **)&filei->file,len+1);
           STRCPY(filei->file,parti->reg_file);
-          filei->type=PART_FILE;
+          filei->type=SCRIPT_PART_FILE;
           nfileinfo++;
         }
 #endif
@@ -3360,7 +3360,7 @@ typedef struct {
           len = strlen(sd->reg_file);
           NewMemory((void **)&filei->file,len+1);
           STRCPY(filei->file,sd->reg_file);
-          filei->type=SLICE_FILE;
+          filei->type=SCRIPT_SLICE_FILE;
           nfileinfo++;
         }
 #endif
@@ -3471,7 +3471,7 @@ typedef struct {
           len = strlen(patchi->reg_file);
           NewMemory((void **)&filei->file,len+1);
           STRCPY(filei->file,patchi->reg_file);
-          filei->type=BOUNDARY_FILE;
+          filei->type=SCRIPT_BOUNDARY_FILE;
           nfileinfo++;
         }
 #endif
@@ -3571,7 +3571,7 @@ typedef struct {
           len = strlen(isoi->reg_file);
           NewMemory((void **)&filei->file,len+1);
           STRCPY(filei->file,isoi->reg_file);
-          filei->type=ISO_FILE;
+          filei->type=SCRIPT_ISO_FILE;
           nfileinfo++;
         }
 #endif
