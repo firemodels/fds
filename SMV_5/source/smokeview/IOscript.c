@@ -45,6 +45,9 @@ void remove_comment(char *buffer);
 // LOAD3DSMOKE
 //  type (char)
 
+// LOADISO
+//  type (char)
+
 // SETIMEFRAME
 //  frame (int)
 
@@ -170,6 +173,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"LOADISO",7) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"SETTIMEVAL",10) == 1){
       nscriptinfo++;
       continue;
@@ -287,6 +294,22 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"LOADISO",7) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADISO);
+      if(fgets(buffer,255,stream)==NULL)break;
+      remove_comment(buffer);
+      trim(buffer);
+      len=strlen(buffer);
+      NewMemory((void **)&scripti->cval,len+1);
+      strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"SETTIMEVAL",10) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_SETTIMEVAL);
@@ -329,13 +352,34 @@ void script_renderall(scriptdata *scripti){
   RenderMenu(skip);
 }
 
-/* ------------------ script_3dsmoke ------------------------ */
+/* ------------------ script_loadiso ------------------------ */
+
+void script_loadiso(scriptdata *scripti){
+  int i;
+  int errorcode;
+
+  printf("Script: loading isosurface files of type: %s",scripti->cval);
+  printf("\n");
+
+  for(i=0;i<niso;i++){
+    iso *isoi;
+
+    isoi = isoinfo + i;
+    if(match_upper(isoi->label.longlabel,scripti->cval,strlen(scripti->cval))==1){
+      readiso(isoi->file,i,LOAD,&errorcode);
+    }
+  }
+  force_redisplay=1;
+  updatemenu=1;
+
+}
+/* ------------------ script_load3dsmoke ------------------------ */
 
 void script_load3dsmoke(scriptdata *scripti){
   int i;
   int errorcode;
 
-  printf("Script: loading boundary files of type: %s",scripti->cval);
+  printf("Script: loading smoke3d files of type: %s",scripti->cval);
   printf("\n");
 
   for(i=0;i<nsmoke3d;i++){
@@ -485,8 +529,8 @@ void run_script(void){
     case SCRIPT_LOADBOUNDARY:
       script_loadboundary(scripti);
       break;
-    case SCRIPT_LOAD3DSMOKE:
-      script_load3dsmoke(scripti);
+    case SCRIPT_LOADISO:
+      script_loadiso(scripti);
       break;
     case SCRIPT_SETTIMEVAL:
       script_settimeval(scripti);
