@@ -24,6 +24,7 @@ void _sniffErrors(char *whereat);
 #define SCRIPT_SETTIMEVAL 107
 #define SCRIPT_SETVIEWPOINT 108
 #define SCRIPT_UNLOADALL 109
+#define SCRIPT_LOADBOUNDARY 110
 
 #define SCRIPT_SLICE_FILE 0
 #define SCRIPT_BOUNDARY_FILE 1

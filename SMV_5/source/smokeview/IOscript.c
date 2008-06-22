@@ -38,6 +38,9 @@ char IOscript_revision[]="$Revision$";
 // LOADFILE 
 //  file (char)
 
+// LOADBOUNDARY
+//   type (char)
+
 // SETIMEFRAME
 //  frame (int)
 
@@ -98,7 +101,7 @@ void init_scripti(scriptdata *scripti, int command){
 
 int compile_script(char *scriptfile){
   FILE *stream;
-  char buffer[1024];
+  char buffer[1024], buffer2[1024];
   scriptdata *scripti;
   int return_val;
 
@@ -125,35 +128,45 @@ int compile_script(char *scriptfile){
 
   while(!feof(stream)){
     scriptdata *scripti;
+    char *buff_ptr;
 
-    if(fgets(buffer,255,stream)==NULL)break;
+    if(fgets(buffer2,255,stream)==NULL)break;
+    remove_comment(buffer2);
+    buff_ptr = trim_front(buffer2);
+    trim(buff_ptr);
+    strcpy(buffer,buff_ptr);
+
     if(strncmp(buffer," ",1)==0)continue;
 
-    if(match(buffer,"UNLOADALL",9) == 1){
+    if(match_upper(buffer,"UNLOADALL",9) == 1){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"RENDERONCE",10) == 1){
+    if(match_upper(buffer,"RENDERONCE",10) == 1){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"RENDERDOUBLEONCE",16) == 1){
+    if(match_upper(buffer,"RENDERDOUBLEONCE",16) == 1){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"RENDERALL",9) == 1){
+    if(match_upper(buffer,"RENDERALL",9) == 1){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"LOADFILE",8) == 1){
+    if(match_upper(buffer,"LOADFILE",8) == 1){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"SETTIMEVAL",10) == 1){
+    if(match_upper(buffer,"LOADBOUNDARY",12) == 1){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"SETVIEWPOINT",12) == 1){
+    if(match_upper(buffer,"SETTIMEVAL",10) == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"SETVIEWPOINT",12) == 1){
       nscriptinfo++;
       continue;
     }
@@ -175,31 +188,37 @@ int compile_script(char *scriptfile){
   nscriptinfo=0;
   rewind(stream);
   while(!feof(stream)){
-    if(fgets(buffer,255,stream)==NULL)break;
+    char *buff_ptr;
+
+    if(fgets(buffer2,255,stream)==NULL)break;
+    remove_comment(buffer2);
+    buff_ptr = trim_front(buffer2);
+    trim(buff_ptr);
+    strcpy(buffer,buff_ptr);
     if(strncmp(buffer," ",1)==0)continue;
 
-    if(match(buffer,"UNLOADALL",9) == 1){
+    if(match_upper(buffer,"UNLOADALL",9) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_UNLOADALL);
 
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"RENDERONCE",10) == 1){
+    if(match_upper(buffer,"RENDERONCE",10) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_RENDERONCE);
 
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"RENDERDOUBLEONCE",16) == 1){
+    if(match_upper(buffer,"RENDERDOUBLEONCE",16) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_RENDERDOUBLEONCE);
 
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"RENDERALL",9) == 1){
+    if(match_upper(buffer,"RENDERALL",9) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_RENDERALL);
       if(fgets(buffer,255,stream)==NULL)break;
@@ -210,13 +229,14 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"LOADFILE",8) == 1){
+    if(match_upper(buffer,"LOADFILE",8) == 1){
       int len;
       int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADFILE);
       if(fgets(buffer,255,stream)==NULL)break;
+      remove_comment(buffer);
       trim(buffer);
       len=strlen(buffer);
       NewMemory((void **)&scripti->cval,len+1);
@@ -227,7 +247,23 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"SETTIMEVAL",10) == 1){
+    if(match_upper(buffer,"LOADBOUNDARY",12) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADBOUNDARY);
+      if(fgets(buffer,255,stream)==NULL)break;
+      remove_comment(buffer);
+      trim(buffer);
+      len=strlen(buffer);
+      NewMemory((void **)&scripti->cval,len+1);
+      strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"SETTIMEVAL",10) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_SETTIMEVAL);
       if(fgets(buffer,255,stream)==NULL)break;
@@ -237,12 +273,13 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match(buffer,"SETVIEWPOINT",12) == 1){
+    if(match_upper(buffer,"SETVIEWPOINT",12) == 1){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_SETVIEWPOINT);
       if(fgets(buffer,255,stream)==NULL)break;
+      remove_comment(buffer);
       trim(buffer);
       len=strlen(buffer);
       NewMemory((void **)&scripti->cval,len+1);
@@ -266,6 +303,31 @@ void script_renderall(scriptdata *scripti){
   printf("Script: Rendering every %i frames",skip);
   printf("\n");
   RenderMenu(skip);
+}
+
+/* ------------------ script_loadfile ------------------------ */
+
+void script_loadboundary(scriptdata *scripti){
+  int i;
+  int errorcode;
+
+  printf("Script: loading boundary files of type: %s",scripti->cval);
+  printf("\n");
+
+  for(i=0;i<npatch_files;i++){
+    patch *patchi;
+
+    patchi = patchinfo + i;
+    if(strcmp(patchi->label.longlabel,scripti->cval)==0){
+      LOCK_COMPRESS
+      readpatch(i,LOAD,&errorcode);
+      UNLOCK_COMPRESS
+    }
+  }
+  force_redisplay=1;
+  updatemenu=1;
+  update_framenumber(0);
+
 }
 
 /* ------------------ script_loadfile ------------------------ */
@@ -373,6 +435,9 @@ void run_script(void){
       break;
     case SCRIPT_LOADFILE:
       script_loadfile(scripti);
+      break;
+    case SCRIPT_LOADBOUNDARY:
+      script_loadboundary(scripti);
       break;
     case SCRIPT_SETTIMEVAL:
       script_settimeval(scripti);
