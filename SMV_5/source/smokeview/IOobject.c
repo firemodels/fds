@@ -582,8 +582,6 @@ void drawcube(float size, float *rgbcolor){
 
 }
 
-
-
 /* ----------------------- drawring ----------------------------- */
 
 void drawring(float diam_inner, float diam_outer, float height, float *rgbcolor){
@@ -678,7 +676,6 @@ void drawdisk(float diameter, float height, float *rgbcolor){
   glEnd();
 
 }
-
 
 /* ----------------------- drawhexdisk ----------------------------- */
 
@@ -785,7 +782,6 @@ void drawhexdisk(float diameter, float height, float *rgbcolor){
   }
   glEnd();
 }
-
 
 /* ----------------------- drawnotchplate ----------------------------- */
 
@@ -960,7 +956,6 @@ void drawcone(float d1, float height, float *rgbcolor){
   }
   glEnd();
 }
-
 
 /* ----------------------- drawtrunccone ----------------------------- */
 
@@ -1317,7 +1312,6 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
     token=strtok(NULL," ");
   }
 }
-
 
 /* ----------------------- read_device_defs ----------------------------- */
 
