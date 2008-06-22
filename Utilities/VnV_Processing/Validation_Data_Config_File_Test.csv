@@ -41,12 +41,6 @@ q,15,Carbon_Monoxide_Concentration,FDS Carbon Monoxide Concentration,Measured Ch
 q,16,Velocity,FDS Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0,5,10,1,tl,8,ScatterPlots/Velocity,,,,,,,,,,,,,,,,,,,,,,,,,,,
 q,17,Open_Compartment_Pressure,FDS Open Compartment Over-Pressure,Measured Pressure Drop (Pa),Predicted Pressure Drop (Pa),0,5,40,1,tl,8,ScatterPlots/Open_Compartment_Pressure,,,,,,,,,,,,,,,,,,,,,,,,,,,
 q,18,Steel_Temperature,FDS Steel Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,14,1,tl,8,ScatterPlots/Steel_Temperature,,,,,,,,,,,,,,,,,,,,,,,,,,,
-
-
 s,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 d,Quantity,Dataname,Group,Exp_Filename,Exp_Col_Name_Row,Exp_X_Col_Name,Exp_Y_Col_Name,Exp_Data_Row,Exp_Key,Exp_Start_(min.),Exp_End_(min.),Exp_Comp_Start_(min.),Exp_Comp_End_(min.),Exp_Intitial_Value,Mod_Filename,Mod_Col_Name_Row,Mod_X_Col_Name,Mod_Y_Col_Name,Mod_Data_Row,Mod_Key,Mod_Start_(min.),Mod_End_(min.),Mod_Comp_Start_(min.),Mod_Comp_End_(min.),Mod_Intitial_Value,max/min,Plot_Title,X_Title,Y_Title,Min_X,Max_X,Scale_X,Min_Y,Max_Y,Scale_Y,Title_Quadrant,Key_Position,Plot_Width(cm),Plot_Filename
-
-
-
-
 d,0,NRL_HAI_1,1,NRL_HAI/Experimental_Data/NRL_HAI.csv,1,Test 1 Height,Test 1 Flux,2,Experiment (Test 1 Flux),0,500,0,500,0,NRL_HAI/FDS_Output_Files/NRL_HAI_1_fds2ascii.csv,2,Z,GAUGE_HEAT_FLUX,4,FDS (GAUGE\_HEAT\_FLUX),0,500,0,500,0,max,"NRL/HAI Wall Fires, Test 1",Height (m),Heat Flux (kW/m$^2$),0,2,1,0,80,1,2,br,8,NRL_HAI/NRL_HAI_1_Heat_Flux
