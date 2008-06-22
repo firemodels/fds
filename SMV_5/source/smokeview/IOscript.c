@@ -25,19 +25,26 @@ char IOscript_revision[]="$Revision$";
 // script commands
 //
 // RENDERONCE
+
 // RENDERDOUBLEONCE
+
 // RENDERALL 
 //  skip (int)
+
 // SETJPEG
+
 // SETPNG
+
 // LOADFILE 
 //  file (char)
-// SETTIMEVAL
-//  time (float)
+
 // SETIMEFRAME
 //  frame (int)
+
 // SETVIEWPOINT
 //  viewpoint (char)
+
+// UNLOADALL
 
 /* ------------------ start_script ------------------------ */
 
@@ -122,6 +129,10 @@ int compile_script(char *scriptfile){
     if(fgets(buffer,255,stream)==NULL)break;
     if(strncmp(buffer," ",1)==0)continue;
 
+    if(match(buffer,"UNLOADALL",9) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match(buffer,"RENDERONCE",10) == 1){
       nscriptinfo++;
       continue;
@@ -167,23 +178,30 @@ int compile_script(char *scriptfile){
     if(fgets(buffer,255,stream)==NULL)break;
     if(strncmp(buffer," ",1)==0)continue;
 
+    if(match(buffer,"UNLOADALL",9) == 1){
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_UNLOADALL);
+
+      nscriptinfo++;
+      continue;
+    }
     if(match(buffer,"RENDERONCE",10) == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,RENDERONCE);
+      init_scripti(scripti,SCRIPT_RENDERONCE);
 
       nscriptinfo++;
       continue;
     }
     if(match(buffer,"RENDERDOUBLEONCE",16) == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,RENDERDOUBLEONCE);
+      init_scripti(scripti,SCRIPT_RENDERDOUBLEONCE);
 
       nscriptinfo++;
       continue;
     }
     if(match(buffer,"RENDERALL",9) == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,RENDERALL);
+      init_scripti(scripti,SCRIPT_RENDERALL);
       if(fgets(buffer,255,stream)==NULL)break;
       sscanf(buffer,"%i",&scripti->ival);
       if(scripti->ival<1)scripti->ival=1;
@@ -197,7 +215,7 @@ int compile_script(char *scriptfile){
       int filetype;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,LOADFILE);
+      init_scripti(scripti,SCRIPT_LOADFILE);
       if(fgets(buffer,255,stream)==NULL)break;
       trim(buffer);
       len=strlen(buffer);
@@ -211,11 +229,10 @@ int compile_script(char *scriptfile){
     }
     if(match(buffer,"SETTIMEVAL",10) == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SETTIMEVAL);
+      init_scripti(scripti,SCRIPT_SETTIMEVAL);
       if(fgets(buffer,255,stream)==NULL)break;
       sscanf(buffer,"%f",&scripti->fval);
       if(scripti->fval<0.0)scripti->fval=0.0;
-
 
       nscriptinfo++;
       continue;
@@ -224,7 +241,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SETVIEWPOINT);
+      init_scripti(scripti,SCRIPT_SETVIEWPOINT);
       if(fgets(buffer,255,stream)==NULL)break;
       trim(buffer);
       len=strlen(buffer);
@@ -336,28 +353,31 @@ void run_script(void){
   printf("executing script command %i\n",scripti->command);
 #endif
   switch (scripti->command){
-    case RENDERONCE:
+    case SCRIPT_UNLOADALL:
+      LoadUnloadMenu(UNLOADALL);
+      break;
+    case SCRIPT_RENDERONCE:
       keyboard('r',0,0);
       break;
-    case RENDERDOUBLEONCE:
+    case SCRIPT_RENDERDOUBLEONCE:
       keyboard('R',0,0);
       break;
-    case RENDERALL:
+    case SCRIPT_RENDERALL:
       script_renderall(scripti);
       break;
-    case SETJPEG:
+    case SCRIPT_SETJPEG:
       RenderMenu(RenderJPEG);
       break;
-    case SETPNG:
+    case SCRIPT_SETPNG:
       RenderMenu(RenderPNG);
       break;
-    case LOADFILE:
+    case SCRIPT_LOADFILE:
       script_loadfile(scripti);
       break;
-    case SETTIMEVAL:
+    case SCRIPT_SETTIMEVAL:
       script_settimeval(scripti);
       break;
-    case SETVIEWPOINT:
+    case SCRIPT_SETVIEWPOINT:
       script_setviewpoint(scripti);
       break;
   }
