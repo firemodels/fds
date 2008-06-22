@@ -5929,7 +5929,7 @@ int match_upper(char *buffer, const char *key, unsigned int lenkey){
   for(i=0;i<lenkey;i++){
     if(toupper(buffer[i])!=toupper(key[i]))return 0;
   }
-  if(buffer[lenkey]!=' ')return 0;
+  if(lenbuffer>lenkey&&buffer[lenkey]!=' ')return 0;
   return 1;
 }
 
