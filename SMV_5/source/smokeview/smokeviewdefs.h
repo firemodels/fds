@@ -27,6 +27,7 @@ void _sniffErrors(char *whereat);
 #define SCRIPT_LOADBOUNDARY 110
 #define SCRIPT_LOAD3DSMOKE 111
 #define SCRIPT_LOADISO 112
+#define SCRIPT_LOADPARTICLES 113
 
 #define SCRIPT_SLICE_FILE 0
 #define SCRIPT_BOUNDARY_FILE 1
