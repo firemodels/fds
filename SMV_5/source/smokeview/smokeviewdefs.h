@@ -16,12 +16,13 @@ void _sniffErrors(char *whereat);
 
 #ifdef pp_SCRIPT
 #define RENDERONCE 101
-#define RENDERALL 102
-#define RENDERTYPE 103
-#define LOADFILE 104
-#define SETTIMEVAL 105
-#define SETTIMEFRAME 106
-#define SETVIEWPOINT 107
+#define RENDERDOUBLEONCE 102
+#define RENDERALL 103
+#define SETJPEG 104
+#define SETPNG 105
+#define LOADFILE 106
+#define SETTIMEVAL 107
+#define SETVIEWPOINT 110
 
 #define SLICE_FILE 0
 #define BOUNDARY_FILE 1
