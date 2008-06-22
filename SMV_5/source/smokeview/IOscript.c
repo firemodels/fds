@@ -21,6 +21,7 @@
 // svn revision character string
 char IOscript_revision[]="$Revision$";
 #ifdef pp_SCRIPT
+void remove_comment(char *buffer);
 //
 // script commands
 //
@@ -40,6 +41,9 @@ char IOscript_revision[]="$Revision$";
 
 // LOADBOUNDARY
 //   type (char)
+
+// LOAD3DSMOKE
+//  type (char)
 
 // SETIMEFRAME
 //  frame (int)
@@ -162,6 +166,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"LOAD3DSMOKE",11) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"SETTIMEVAL",10) == 1){
       nscriptinfo++;
       continue;
@@ -263,6 +271,22 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"LOAD3DSMOKE",11) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOAD3DSMOKE);
+      if(fgets(buffer,255,stream)==NULL)break;
+      remove_comment(buffer);
+      trim(buffer);
+      len=strlen(buffer);
+      NewMemory((void **)&scripti->cval,len+1);
+      strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"SETTIMEVAL",10) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_SETTIMEVAL);
@@ -305,7 +329,29 @@ void script_renderall(scriptdata *scripti){
   RenderMenu(skip);
 }
 
-/* ------------------ script_loadfile ------------------------ */
+/* ------------------ script_3dsmoke ------------------------ */
+
+void script_load3dsmoke(scriptdata *scripti){
+  int i;
+  int errorcode;
+
+  printf("Script: loading boundary files of type: %s",scripti->cval);
+  printf("\n");
+
+  for(i=0;i<nsmoke3d;i++){
+    smoke3d *smoke3di;
+
+    smoke3di = smoke3dinfo + i;
+    if(match_upper(smoke3di->label.longlabel,scripti->cval,strlen(scripti->cval))==1){
+      readsmoke3d(i,LOAD,&errorcode);
+    }
+  }
+  force_redisplay=1;
+  updatemenu=1;
+
+}
+
+/* ------------------ script_loadboundary ------------------------ */
 
 void script_loadboundary(scriptdata *scripti){
   int i;
@@ -438,6 +484,9 @@ void run_script(void){
       break;
     case SCRIPT_LOADBOUNDARY:
       script_loadboundary(scripti);
+      break;
+    case SCRIPT_LOAD3DSMOKE:
+      script_load3dsmoke(scripti);
       break;
     case SCRIPT_SETTIMEVAL:
       script_settimeval(scripti);
