@@ -45,6 +45,8 @@ void remove_comment(char *buffer);
 // LOAD3DSMOKE
 //  type (char)
 
+// LOADPARTICLES
+
 // LOADISO
 //  type (char)
 
@@ -174,6 +176,10 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADISO",7) == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADPARTICLES",13) == 1){
       nscriptinfo++;
       continue;
     }
@@ -310,6 +316,16 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"LOADPARTICLES",13) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADPARTICLES);
+
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"SETTIMEVAL",10) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_SETTIMEVAL);
@@ -352,6 +368,29 @@ void script_renderall(scriptdata *scripti){
   RenderMenu(skip);
 }
 
+/* ------------------ script_loadparticles ------------------------ */
+
+void script_loadparticles(scriptdata *scripti){
+  int i;
+  int errorcode;
+
+  printf("Script: loading particles files");
+  printf("\n");
+
+  for(i=0;i<npartinfo;i++){
+    particle *parti;
+
+    parti = partinfo + i;
+    if(parti->evac==1)continue;
+    if(parti->version==1){
+      readpart(parti->file,i,LOAD,&errorcode);
+    }
+  }
+  force_redisplay=1;
+  update_framenumber(0);
+  updatemenu=1;
+}
+
 /* ------------------ script_loadiso ------------------------ */
 
 void script_loadiso(scriptdata *scripti){
@@ -373,6 +412,7 @@ void script_loadiso(scriptdata *scripti){
   updatemenu=1;
 
 }
+
 /* ------------------ script_load3dsmoke ------------------------ */
 
 void script_load3dsmoke(scriptdata *scripti){
@@ -531,6 +571,9 @@ void run_script(void){
       break;
     case SCRIPT_LOADISO:
       script_loadiso(scripti);
+      break;
+    case SCRIPT_LOADPARTICLES:
+      script_loadparticles(scripti);
       break;
     case SCRIPT_SETTIMEVAL:
       script_settimeval(scripti);
