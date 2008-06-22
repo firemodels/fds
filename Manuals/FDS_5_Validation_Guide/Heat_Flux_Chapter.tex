@@ -21,7 +21,7 @@ up to about 150~kW/m$^2$ in full-scale compartment fires.
 
 
 
-\section{Hamins Methane Burner Radiation Measurements}
+\section{Hamins Methane Burner Heat Flux Measurements}
 
 Predicted and measured radial and vertical heat flux profiles from six experiments conducted by Anthony Hamins at NIST are shown on the following pages. The
 relevant information about the fires is included in Table~\ref{Hamins_Table}. These are challenging simulations because the neither the gray gas assumption
@@ -29,11 +29,10 @@ nor the radiative fraction is assumed. Rather, the model is calculating the temp
 
 \begin{table}[ht]
 \caption{Summary of Hamins methane burner experiments. }
-\vspace{\baselineskip}
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
-Case     & Test     & D    & $\dot{Q}$   &  $\dot{Q}''$   & $Q^*$   \\
+Case     & Test     & $D$  & $\dot{Q}$   &  $\dot{Q}''$   & $Q^*$   \\
          & Number   & (m)  & (kW)        &  (kW/m$^2$)    &         \\ \hline \hline
 A        & 1        & 0.10 & 0.42        &  53.8          & 0.12    \\ \hline
 B        & 5        & 0.10 & 1.88        &  240           & 0.53    \\ \hline
@@ -72,7 +71,35 @@ F        & 19       & 1.0  & 162         &  206           & 0.14    \\ \hline
 \caption{Comparison of predicted and measured heat fluxes from a methane burner to a ``wall'' as a function of the height from the burner surface.}
 \end{figure}
 
+\clearpage
 
+
+\section{NRL/HAI Wall Heat Flux Measurements}
+
+Predicted and measured vertical heat flux profiles from 9 propane sand burner fires are shown on the following pages. The parameters for each
+experiment are listed in Table~\ref{NRL/HAI_Parameters} below. Note that all the FDS simulations were performed with a grid resolution such that
+$D^*/\dx=10$.
+
+\begin{table}[ht]
+\caption{Summary of the NRL/HAI Wall Heat Flux Measurements. }
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Test     & $D$     & $D^*$      & $\dot{Q}$   & $Q^*$   & Observed  Flame \\
+Number   & (m)     & (m)        & (kW)        &         & Height (m)      \\ \hline \hline
+1        & 0.28    & 0.42       &  53         & 0.10    & 0.79            \\ \hline
+2        & 0.70    & 0.42       &  56         & 0.10    & 0.36            \\ \hline
+3        & 0.48    & 0.42       &  68         & 0.10    & 0.60            \\ \hline
+4        & 0.37    & 0.42       &  106        & 0.10    & 1.00            \\ \hline
+5        & 0.48    & 0.42       &  136        & 0.10    & 0.87            \\ \hline
+6        & 0.48    & 0.42       &  204        & 0.10    & 1.45            \\ \hline
+7        & 0.70    & 0.42       &  220        & 0.10    & 1.20            \\ \hline
+8        & 0.57    & 0.42       &  313        & 0.10    & 2.20            \\ \hline
+9        & 0.70    & 0.42       &  523        & 0.10    & --              \\ \hline
+\end{tabular}
+\end{center}
+\label{NRL/HAI_Parameters}
+\end{table}
 
 
 \clearpage
