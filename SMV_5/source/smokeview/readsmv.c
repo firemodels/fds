@@ -5917,6 +5917,24 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
 
 /* ------------------ match ------------------------ */
 
+int match_upper(char *buffer, const char *key, unsigned int lenkey){
+  size_t lenbuffer;
+  int i;
+
+  ASSERT(strlen(key)==lenkey);
+  trim(buffer);
+  lenbuffer=strlen(buffer);
+
+  if(lenbuffer<lenkey)return 0;
+  for(i=0;i<lenkey;i++){
+    if(toupper(buffer[i])!=toupper(key[i]))return 0;
+  }
+  if(buffer[lenkey]!=' ')return 0;
+  return 1;
+}
+
+/* ------------------ match ------------------------ */
+
 int match(char *buffer, const char *key, unsigned int lenkey){
   size_t lenbuffer;
 
@@ -5931,14 +5949,6 @@ int match(char *buffer, const char *key, unsigned int lenkey){
       if(buffer[lenkey]==' ')return 1;
     }
     return 0;
-
-
-//  if(strncmp(buffer,key,lenkey) == 0){
-//    lenbuffer=strlen(buffer);
-//    if(lenbuffer-1==lenkey)return(1); /* key is same length as buffer */
-//    if(strncmp(lenkey+buffer," ",1)==0)return(1); /* blank after match */
-//  }
-//  return(0);
 }
 
 /* ------------------ readini ------------------------ */
