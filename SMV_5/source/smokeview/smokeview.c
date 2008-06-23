@@ -3294,6 +3294,9 @@ void Args(int argc, char **argv){
     if(stat(scriptfilename,&statbuffer)!=0){
       FREEMEMORY(scriptfilename);
     }
+    NewMemory((void **)&scriptoutfilename,(unsigned int)(len+10));
+    STRCPY(scriptoutfilename,fdsprefix);
+    STRCAT(scriptoutfilename,"_new.ssf");
 #endif
     STRCPY(smvmenufile,"Reload ");
     temp = strrchr(smvfilename,(int)(*dirseparator));

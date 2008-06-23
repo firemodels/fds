@@ -1161,6 +1161,12 @@ void ResetMenu(int value){
   default:
     if(value<100000){
       reset_glui_view(value);
+#ifdef pp_SCRIPT
+      if(scriptoutstream!=NULL){
+        fprintf(scriptoutstream,"SETVIEWPOINT\n");
+        fprintf(scriptoutstream," %s\n",camera_current->name);
+      }
+#endif
     }
     break;
   }
@@ -1887,6 +1893,32 @@ void PeriodicReloads(int value){
   }
 }
 
+/* ------------------ ScriptMenu ------------------------ */
+
+#ifdef pp_SCRIPT
+void ScriptMenu(int value){
+  int error_code;
+
+  switch (value){
+    case RUN_SCRIPT:
+      error_code=compile_script(scriptfilename);
+      if(error_code==0){
+        start_script();
+      }
+      else{
+        printf("*** error: problem encountered while trying to compile script file\n");
+      }
+    case START_RECORDING_SCRIPT:
+      scriptoutstream=fopen(scriptoutfilename,"w");
+      break;
+    case STOP_RECORDING_SCRIPT:
+      fclose(scriptoutstream);
+      scriptoutstream=NULL;
+      break;
+  }
+}
+#endif
+
 /* ------------------ ReLoadMenu ------------------------ */
 
 void ReloadMenu(int value){
@@ -1930,6 +1962,11 @@ void LoadUnloadMenu(int value){
    // for(i=0;i<nterraininfo;i++){
    //   readterrain("",i,UNLOAD,&errorcode);
    // }
+#ifdef pp_SCRIPT
+    if(scriptoutstream!=NULL){
+      fprintf(scriptoutstream,"UNLOADALL\n");
+    }
+#endif
     if(hrrfilename!=NULL){
       readhrr(UNLOAD, &errorcode);
     }
@@ -2063,19 +2100,6 @@ void LoadUnloadMenu(int value){
     updatetourmenulabels();
     updateplot3dmenulabels();
   }
-#ifdef pp_SCRIPT
-  if(value==RUNSCRIPT){
-    int error_code;
-    
-    error_code=compile_script(scriptfilename);
-    if(error_code==0){
-      start_script();
-    }
-    else{
-      printf("*** error: problem encountered while trying to compile script file\n");
-    }
-  }
-#endif
   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
 }
 
@@ -2771,6 +2795,12 @@ void LoadSmoke3DMenu(int value){
   if(value<=-10){
     value = -(value + 10);
     smoke3dj = smoke3dinfo + value;
+#ifdef pp_SCRIPT
+    if(scriptoutstream!=NULL){
+      fprintf(scriptoutstream,"LOAD3DSMOKE\n");
+      fprintf(scriptoutstream," %s\n",smoke3dj->label.longlabel);
+    }
+#endif
     for(i=0;i<nsmoke3d;i++){
       smoke3di = smoke3dinfo + i;
       if(strcmp(smoke3di->label.shortlabel,smoke3dj->label.shortlabel)==0){
@@ -3545,6 +3575,9 @@ static int isoblockmenu=0, fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
 static int gridslicemenu=0, blockagemenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0;
+#ifdef pp_SCRIPT
+static int scriptmenu=0;
+#endif
 static int loadplot3dmenu=0, unloadvslicemenu=0, unloadslicemenu=0;
 static int loadterrainmenu=0, unloadterrainmenu=0;
 static int loadsmoke3dmenu=0;
@@ -6646,6 +6679,14 @@ if(visBlocks==visBLOCKOutline){
     if(periodic_value!=10)glutAddMenuEntry("Reload every 10 min",10);
     glutAddMenuEntry("Cancel",-1);
 
+#ifdef pp_SCRIPT
+    CREATEMENU(scriptmenu,ScriptMenu);
+    glutAddMenuEntry("Start Recording",START_RECORDING_SCRIPT);
+    glutAddMenuEntry("Stop Recording",STOP_RECORDING_SCRIPT);
+    glutAddMenuEntry("Run Script",RUN_SCRIPT);
+#endif
+
+
 /* --------------------------------loadunload menu -------------------------- */
     {
       char loadmenulabel[100];
@@ -6762,7 +6803,7 @@ if(visBlocks==visBLOCKOutline){
       glutAddSubMenu("Configuration files",smokeviewinimenu);
 #ifdef pp_SCRIPT
       if(scriptfilename!=NULL){
-        glutAddMenuEntry("Run Script",RUNSCRIPT);
+        glutAddSubMenu("Script Options",scriptmenu);
       }
 #endif
 #ifdef pp_COMPRESS
