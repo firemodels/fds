@@ -171,7 +171,10 @@ void _sniffErrors(char *whereat);
 #define RELOADALL 4
 #define UNLOADALL 1
 #define SHOWFILES 5
-#define RUNSCRIPT 6
+
+#define RUN_SCRIPT 101
+#define START_RECORDING_SCRIPT 102
+#define STOP_RECORDING_SCRIPT 103
 
 #define RENDER 1
 #define SELECT 2

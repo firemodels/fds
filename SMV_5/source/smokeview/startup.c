@@ -2049,6 +2049,8 @@ void initvars0(void){
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
 #ifdef pp_SCRIPT
   scriptfilename=NULL;
+  scriptoutfilename=NULL;
+  scriptoutstream=NULL;
 #endif
   logfilename=NULL;
   flushfile=NULL, chidfilebase=NULL;
