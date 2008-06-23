@@ -583,6 +583,44 @@ void script_loadfile(scriptdata *scripti){
     }
 
   }
+  for(i=0;i<npatch_files;i++){
+    patch *patchi;
+
+    patchi = patchinfo + i;
+    if(strcmp(patchi->reg_file,scripti->cval)==0){
+      readpatch(i,LOAD,&errorcode);
+      return;
+    }
+  }
+  for(i=0;i<npartinfo;i++){
+    particle *parti;
+
+    parti = partinfo + i;
+    if(strcmp(parti->reg_file,scripti->cval)==0){
+      readpart(parti->reg_file,i,LOAD,&errorcode);
+      return;
+    }
+  }
+  for(i=0;i<niso;i++){
+    iso *isoi;
+
+    isoi = isoinfo + i;
+    if(strcmp(isoi->reg_file,scripti->cval)==0){
+      readiso(isoi->reg_file,i,LOAD,&errorcode);
+      return;
+    }
+  }
+  for(i=0;i<nsmoke3d;i++){
+    smoke3d *smoke3di;
+
+    smoke3di = smoke3dinfo + i;
+    if(strcmp(smoke3di->reg_file,scripti->cval)==0){
+      readsmoke3d(i,UNLOAD,&errorcode);
+      return;
+    }
+  }
+  printf("file %s was not loaded\n",scripti->cval);
+
 }
 
 /* ------------------ script_settimeval ------------------------ */
