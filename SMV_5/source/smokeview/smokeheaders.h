@@ -146,6 +146,7 @@ EXTERNCPP void update_all_partvis2(void);
 EXTERNCPP void ParticleMenu(int value);
 EXTERNCPP void LoadPatchMenu(int value);
 EXTERNCPP void LoadSliceMenu(int value);
+EXTERNCPP void LoadVSliceMenu(int value);
 
 EXTERNCPP void initvars1(void);
 EXTERNCPP void initvars0(void);
