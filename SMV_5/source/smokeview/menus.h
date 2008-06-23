@@ -96,6 +96,7 @@ void MainMenu(int value){
   if(value==3){
 #ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
+      fprintf(scriptoutstream,"EXIT\n");
       ScriptMenu(STOP_RECORDING_SCRIPT);
     }
 #endif
@@ -1927,7 +1928,6 @@ void ScriptMenu(int value){
       break;
     case STOP_RECORDING_SCRIPT:
       if(scriptoutstream!=NULL){
-        fprintf(scriptoutstream,"EXIT\n");
         fclose(scriptoutstream);
         scriptoutstream=NULL;
         printf("Smokeview script recording off\n");
