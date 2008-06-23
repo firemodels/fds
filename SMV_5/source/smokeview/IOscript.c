@@ -80,6 +80,9 @@ void cleanbuffer(char *buffer, char *buffer2){
 /* ------------------ start_script ------------------------ */
 
 void start_script(void){
+  if(scriptinfo==NULL){
+    printf("*** warning: Smokeview script does not exist\n");
+  }
   current_script_command=scriptinfo;
 }
 
