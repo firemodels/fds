@@ -10,7 +10,7 @@ from pyx import *
 
 data_directory = "../../Validation/"
 output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
-config_file_name = "Validation_Data_Config_File.csv"
+config_file_name = "Validation_Data_Config_File_Test.csv"
 
 ### Set Global Variables for Verification
 
@@ -278,18 +278,20 @@ def extract_comp_data(comp_file_info):
     
     ## Start File Processing
     
-    #Read in experimental data and flip lists from rows to columns.
+    # Read in experimental data and flip lists from rows to columns.
     print "Reading in:", exp_data_filename
+    for x in range(exp_column_name_row_index):
+        exp_file_object.next()
     exp_data_cols = zip(*csv.reader(exp_file_object))
     #print "exp_data_cols: ",exp_data_cols
     
-    #Find X_Axis index number and confirm Col_Name based on Exp_X_Col_Name value in config file.
+    # Find X_Axis index number and confirm Col_Name based on Exp_X_Col_Name value in config file.
     column_counter = 0
     for column in exp_data_cols:
-        if column[exp_column_name_row_index].strip() == exp_X_column_name_value:
-            print "Exp. X Col name is: ",column[exp_column_name_row_index].strip()
+        if column[0].strip() == exp_X_column_name_value:
+            print "Exp. X Col name is: ",column[0].strip()
             #print "The Index Value is:",column_counter
-            exp_Xaxis_column_name = column[exp_column_name_row_index].strip()
+            exp_Xaxis_column_name = column[0].strip()
         else:
             column_counter = column_counter + 1
             if column_counter == len(exp_data_cols):
@@ -304,29 +306,31 @@ def extract_comp_data(comp_file_info):
     for exp_list in exp_data_list:
         try:
             temp_list = []
-            for x in exp_list[exp_data_row_index:]:
+            for x in exp_list[(exp_data_row_index-exp_column_name_row_index):]:
                 if x == 'Null' or x == '' or x == 'NaN' or x == 'inf' or x == '-inf':
                     list_value = 'Null'
                 else:
                     list_value = float(x)
                 temp_list.append(list_value)
-            exp_data_dict[exp_list[exp_column_name_row_index].strip()] = temp_list
+            exp_data_dict[exp_list[0].strip()] = temp_list
         except:
-            print "!!! Exp Data Conversion in Column Name "+exp_list[exp_column_name_row_index].strip()+". !!!"
+            print "!!! Exp Data Conversion in Column Name "+exp_list[0].strip()+". !!!"
             exit()
     
     #Read in model data and flip lists from rows to columns.
     print "Reading in:", mod_data_filename
+    for x in range(mod_column_name_row_index):
+        mod_file_object.next()
     mod_data_cols = zip(*csv.reader(mod_file_object))
     #print "mod_data_cols: ",mod_data_cols
     
     #Find X_Axis index number and confirm Col_Name based on Mod_X_Col_Name value in config file.
     column_counter = 0
     for column in mod_data_cols:
-        if column[mod_column_name_row_index].strip() == mod_X_column_name_value:
-            print "Mod. X Col name is: ",column[mod_column_name_row_index].strip()
+        if column[0].strip() == mod_X_column_name_value:
+            print "Mod. X Col name is: ",column[0].strip()
             #print "The Index Value is:",column_counter
-            mod_Xaxis_column_name = column[mod_column_name_row_index].strip()
+            mod_Xaxis_column_name = column[0].strip()
         else:
             column_counter = column_counter + 1
             if column_counter == len(mod_data_cols):
@@ -341,15 +345,15 @@ def extract_comp_data(comp_file_info):
     for mod_list in mod_data_list:
         try:
             temp_list = []
-            for x in mod_list[mod_data_row_index:]:
+            for x in mod_list[(mod_data_row_index-mod_column_name_row_index):]:
                 if x == 'Null' or x == '' or x == 'NaN' or x == 'inf' or x == '-inf':
                     list_value = 'Null'
                 else:
                     list_value = float(x)
                 temp_list.append(list_value)
-            mod_data_dict[mod_list[mod_column_name_row_index].strip()] = temp_list
+            mod_data_dict[mod_list[0].strip()] = temp_list
         except:
-            print "!!! Mod Data Conversion in Column Name "+mod_list[mod_column_name_row_index].strip()+". !!!"
+            print "!!! Mod Data Conversion in Column Name "+mod_list[0].strip()+". !!!"
             exit()
     
     # Passing in the X_Axis Column Name.
