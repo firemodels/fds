@@ -9028,7 +9028,7 @@ Contains
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Speed = rnd_vec(1)
     Case(8)   ! Weibull  (alpha=1: Exponential)
-       ! Parameters: (ave,alpha,lambda)
+       ! Parameters: (ave,alpha,lambda) ave not used
        n_par = 3
        Randomtype = 8
        RandomPara(1) = PCP%V_mean
@@ -9037,7 +9037,7 @@ Contains
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Speed = rnd_vec(1)
     Case(9)   ! Gumbel
-       ! Parameters: (ave,alpha)
+       ! Parameters: (ave,alpha) ave not used
        n_par = 2
        Randomtype = 9
        RandomPara(1) = PCP%V_mean
