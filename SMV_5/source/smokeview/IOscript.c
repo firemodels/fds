@@ -50,6 +50,14 @@ void remove_comment(char *buffer);
 // LOADISO
 //  type (char)
 
+// LOADSLICE
+//  type (char)
+//  1/2/3 (int)  val (float)
+
+// LOADVSLICE
+//  type (char)
+//  1/2/3 (int)  val (float)
+
 // SETIMEFRAME
 //  frame (int)
 
@@ -175,6 +183,14 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"LOADSLICE",9) == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADVSLICE",10) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"LOADISO",7) == 1){
       nscriptinfo++;
       continue;
@@ -296,6 +312,52 @@ int compile_script(char *scriptfile){
       len=strlen(buffer);
       NewMemory((void **)&scripti->cval,len+1);
       strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADSLICE",9) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADSLICE);
+      if(fgets(buffer,255,stream)==NULL)break;
+      remove_comment(buffer);
+      trim(buffer);
+      len=strlen(buffer);
+      NewMemory((void **)&scripti->cval,len+1);
+      strcpy(scripti->cval,buffer);
+
+      if(fgets(buffer,255,stream)==NULL)break;
+      remove_comment(buffer);
+      trim(buffer);
+      sscanf(buffer,"%i %f",&scripti->ival,&scripti->fval);
+      if(scripti->ival<1)scripti->ival=1;
+      if(scripti->ival>3)scripti->ival=3;
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADVSLICE",10) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADVSLICE);
+      if(fgets(buffer,255,stream)==NULL)break;
+      remove_comment(buffer);
+      trim(buffer);
+      len=strlen(buffer);
+      NewMemory((void **)&scripti->cval,len+1);
+      strcpy(scripti->cval,buffer);
+
+      if(fgets(buffer,255,stream)==NULL)break;
+      remove_comment(buffer);
+      trim(buffer);
+      sscanf(buffer,"%i %f",&scripti->ival,&scripti->fval);
+      if(scripti->ival<1)scripti->ival=1;
+      if(scripti->ival>3)scripti->ival=3;
 
       nscriptinfo++;
       continue;
@@ -433,6 +495,71 @@ void script_load3dsmoke(scriptdata *scripti){
   force_redisplay=1;
   updatemenu=1;
 
+}
+
+/* ------------------ script_loadslice ------------------------ */
+
+void script_loadslice(scriptdata *scripti){
+  int i;
+  int errorcode;
+
+  printf("Script: loading slice files of type: %s",scripti->cval);
+  printf("\n");
+
+  for(i=0;i<nmultislices;i++){
+    multislice *mslicei;
+    slice *slicei;
+    int j;
+    float delta;
+
+    mslicei = multisliceinfo + i;
+    if(mslicei->nslices<=0)continue;
+    slicei = sliceinfo + mslicei->islices[0];
+    if(match_upper(slicei->label.longlabel,scripti->cval,strlen(scripti->cval))==0)continue;
+    if(slicei->idir!=scripti->ival)continue;
+    delta = slicei->position - scripti->fval;
+    if(delta<0.0)delta = -delta;
+    if(delta>slicei->delta)continue;
+
+    for(j=0;j<mslicei->nslices;j++){
+      LoadSliceMenu(mslicei->islices[j]);
+    } 
+    break;
+  }
+
+
+}
+
+
+/* ------------------ script_loadvslice ------------------------ */
+
+void script_loadvslice(scriptdata *scripti){
+  int i;
+  int errorcode;
+  float delta;
+
+  printf("Script: loading vector slice files of type: %s",scripti->cval);
+  printf("\n");
+
+  for(i=0;i<nmultivslices;i++){
+    multivslice *mvslicei;
+    int j;
+    slice *slicei;
+
+    mvslicei = multivsliceinfo + i;
+    if(mvslicei->nvslices<=0)continue;
+    slicei = sliceinfo + mvslicei->ivslices[0];
+    if(match_upper(slicei->label.longlabel,scripti->cval,strlen(scripti->cval))==0)continue;
+    if(slicei->idir!=scripti->ival)continue;
+    delta = slicei->position - scripti->fval;
+    if(delta<0.0)delta = -delta;
+    if(delta>slicei->delta)continue;
+
+    for(j=0;j<mvslicei->nvslices;j++){
+      LoadVSliceMenu(mvslicei->ivslices[j]);
+    } 
+    break;
+  }
 }
 
 /* ------------------ script_loadboundary ------------------------ */
@@ -574,6 +701,12 @@ void run_script(void){
       break;
     case SCRIPT_LOADPARTICLES:
       script_loadparticles(scripti);
+      break;
+    case SCRIPT_LOADSLICE:
+      script_loadslice(scripti);
+      break;
+    case SCRIPT_LOADVSLICE:
+      script_loadvslice(scripti);
       break;
     case SCRIPT_SETTIMEVAL:
       script_settimeval(scripti);
