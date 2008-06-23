@@ -13455,10 +13455,10 @@ Contains
        Call Triang_rnd(n_rnd, RandomPara(1), RandomPara(2), &
             RandomPara(3), rnd_vec)
     Case(8)    ! Weibull  (alpha=1: Exponential)
-       ! Parameters: (ave,alpha,lambda)
+       ! Parameters: (ave,alpha,lambda) ave not used
        Call Weibull_rnd(n_rnd, RandomPara(2), RandomPara(3), rnd_vec)
     Case(9)    ! Gumbel
-       ! Parameters: (ave,alpha)
+       ! Parameters: (ave,alpha) ave not used
        Call Gumbel_rnd(n_rnd, RandomPara(2), rnd_vec)
     Case Default
        ! Character(80) MESSAGE, Call SHUTDOWN(MESSAGE)
