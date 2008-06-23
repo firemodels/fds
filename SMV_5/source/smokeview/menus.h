@@ -86,7 +86,7 @@ void TrainerViewMenu(int value){
     ASSERT(FFALSE);
   }
   updatemenu=1;
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ MainMenu ------------------------ */
@@ -109,7 +109,7 @@ void MainMenu(int value){
     trainer_mode=1-trainer_mode;
   }
   updatemenu=1;  
-  glutPostRedisplay();  
+  GLUTPOSTREDISPLAY  
 }
 
 /* ------------------ sv_MainMenu ------------------------ */
@@ -144,7 +144,7 @@ void StaticVariableMenu(int value){
   }
   updateallplotslices();
   updatemenu=1;  
-  glutPostRedisplay();  
+  GLUTPOSTREDISPLAY  
   updateplot3dlistindex();
 }
 
@@ -165,7 +165,7 @@ void IsoVariableMenu(int value){
     updateplotslice(2);
     updateplotslice(3);
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     updateplot3dlistindex();
   }
 }
@@ -174,7 +174,7 @@ void IsoVariableMenu(int value){
 
 void LabelMenu(int value){
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   ASSERTFLAG(visColorLabels);
   ASSERTFLAG(visTimeLabels);
   ASSERTFLAG(visTitle0);
@@ -366,7 +366,7 @@ void LightingMenu(int value){
     }
     UpdateLIGHTS=1;
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
 }
 
 /* ------------------ ColorBarMenu ------------------------ */
@@ -374,7 +374,7 @@ void LightingMenu(int value){
 void ColorBarMenu(int value){
   if(value==-999)return;
   updatemenu=1;
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value<0){
     switch (value){
     case -2:
@@ -420,7 +420,7 @@ void ColorBarMenu(int value){
 
 void ShadeMenu(int value){
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   switch (value){
    case 1:
     flip = 1-flip;
@@ -472,7 +472,7 @@ void Smoke3DShowMenu(int value){
   int i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value<0){
     switch (value){
     case SHOW_ALL:
@@ -597,7 +597,7 @@ void IsoShowMenu(int value){
   update_iso_showlevels();
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ ShowVSliceMenu ------------------------ */
@@ -607,7 +607,7 @@ void ShowVSliceMenu(int value){
   slice *sd;
   int i;
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value==SHOW_ALL){
     for(i=0;i<nvslice;i++){
       vd = vsliceinfo + i;
@@ -678,7 +678,7 @@ void ShowHideSliceMenu(int value){
   int i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value<0){
     switch (value){
     case SHOW_ALL:
@@ -740,7 +740,7 @@ void ShowMultiSliceMenu(int value){
   int i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   switch (value){
   case SHOW_ALL:
   case HIDE_ALL:
@@ -788,7 +788,7 @@ void ShowMultiSliceMenu(int value){
 
 void ShowHideMenu(int value){
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   switch (value){
   case 13:
     if(plotstate==DYNAMIC_PLOTS){
@@ -844,7 +844,7 @@ void ShowHideMenu(int value){
 void ViewpointMenu(int value){
   if(value==999)return;
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   switch (value){
   case TOGGLE_TITLE_SAFE:
     if(titlesafe_offset==0){
@@ -982,7 +982,9 @@ void DialogMenu(int value){
 void ZoomMenu(int value){
   if(value==999)return;
   updatemenu=1;  
-  if(opengldefined==1)glutPostRedisplay();
+  if(opengldefined==1){
+    GLUTPOSTREDISPLAY
+  }
   zoomindex=value;
   if(zoomindex==-1){
     if(zoom<zooms[0]){
@@ -1038,7 +1040,9 @@ void ZoomMenu(int value){
 
 void ApertureMenu(int value){
   updatemenu=1;  
-  if(opengldefined==1)glutPostRedisplay();
+  if(opengldefined==1){
+    GLUTPOSTREDISPLAY
+  }
   apertureindex=value;
   if(apertureindex<0)apertureindex=0;
   if(apertureindex>4)apertureindex=4;
@@ -1049,7 +1053,9 @@ void ApertureMenu(int value){
 
 void FontMenu(int value){
   updatemenu=1;  
-  if(opengldefined==1)glutPostRedisplay();
+  if(opengldefined==1){
+    GLUTPOSTREDISPLAY
+  }
   switch (value){
   case SMALL_FONT:
     fontindex=SMALL_FONT;
@@ -1107,7 +1113,7 @@ void UnitsMenu(int value){
 
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ OptionMenu ------------------------ */
@@ -1115,7 +1121,7 @@ void UnitsMenu(int value){
 void OptionMenu(int value){
   if(value==999)return;
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value==17){
     if(showstereo!=0){
       glDrawBuffer(GL_BACK_LEFT);
@@ -1180,7 +1186,7 @@ void ResetMenu(int value){
   }
   updatezoommenu=1;
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ RenderState ------------------------ */
@@ -1220,7 +1226,9 @@ void RenderMenu(int value){
 
   updatemenu=1;
   if(value>=10000)return;
-  if(opengldefined==1)glutPostRedisplay();
+  if(opengldefined==1){
+    GLUTPOSTREDISPLAY
+  }
   switch (value){
   case Render320:
     render_option=value;
@@ -1333,7 +1341,7 @@ void EvacShowMenu(int value){
     parti = partinfo + value;
     parti->display = 1 - parti->display;
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     plotstate=getplotstate(DYNAMIC_PLOTS);
     return;
   }
@@ -1377,7 +1385,7 @@ void EvacShowMenu(int value){
   }
   updatemenu=1;  
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 
 }
 
@@ -1400,7 +1408,7 @@ void ParticleShowMenu(int value){
     parti = partinfo + value;
     parti->display = 1 - parti->display;
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     plotstate=getplotstate(DYNAMIC_PLOTS);
     return;
   }
@@ -1504,7 +1512,7 @@ void ParticleShowMenu(int value){
   }
   updatemenu=1;  
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ FrameRateMenu ------------------------ */
@@ -1547,7 +1555,9 @@ void FrameRateMenu(int value){
   }
   frameratevalue=value;
   updatemenu=1;  
-  if(opengldefined==1)glutPostRedisplay();
+  if(opengldefined==1){
+    GLUTPOSTREDISPLAY
+  }
   reset_gltime();
 }
 
@@ -1581,7 +1591,7 @@ void IsoSurfaceTypeMenu(int value){
       break;
     }
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
   }
 }
 
@@ -1595,7 +1605,7 @@ void IsoBlockMenu(int value){
     updatesurface();
     updateshowstep(1,ISO);
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
   }
 }
 
@@ -1604,7 +1614,7 @@ void IsoBlockMenu(int value){
 void IsoSurfaceMenu(int value){
   if(ReadPlot3dFile==1){
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     if(value==1){
       updateshowstep(0,ISO);
     }
@@ -1622,7 +1632,7 @@ void LevelMenu(int value){
     updateshowstep(1,ISO);
     updatesurface();
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
   }
 }
 
@@ -1640,13 +1650,13 @@ void VectorSkipMenu(int value){
     visVector=1-visVector;
     if(vectorspresent==0)visVector=0;
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     return;
   }
   vectorskip=value;
   visVector=1;
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ TextureShowMenu ------------------------ */
@@ -1699,7 +1709,7 @@ void TextureShowMenu(int value){
   }
   if(texturedisplay==1)BlockageMenu(visBLOCKAsInput);
   updatemenu=1;
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 
 }
 
@@ -1776,7 +1786,7 @@ void Plot3DShowMenu(int value){
     updatesurface();
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 
@@ -1827,7 +1837,7 @@ void GridSliceMenu(int value){
   }
   togglegridstate(visGrid);
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 #ifdef pp_COMPRESS
@@ -1888,7 +1898,7 @@ void SmokeviewiniMenu(int value){
     break;
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 
@@ -2012,7 +2022,7 @@ void LoadUnloadMenu(int value){
     //plotstate=DYNAMIC_PLOTS;
     //visSmoke=1;
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
   }
   if(value==RELOADALL){
     LOCK_COMPRESS
@@ -2070,7 +2080,7 @@ void LoadUnloadMenu(int value){
   //  plotstate=DYNAMIC_PLOTS;
   //  visSmoke=1;
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
   }
   if(value==2&&smvfilename!=NULL){
 #ifdef _DEBUG
@@ -2105,7 +2115,7 @@ void LoadUnloadMenu(int value){
   }
 #endif
   if(value==SHOWFILES){
-    glutPostRedisplay();  
+    GLUTPOSTREDISPLAY  
     showfiles=1-showfiles;
     updatemenu=1;
     updateslicemenulabels();
@@ -2148,7 +2158,7 @@ void TourMenu(int value){
   if(value==-999)return;
   touring=0;
   updatemenu=1;
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   switch (value){
   case -12:
     add_new_tour();
@@ -2329,7 +2339,7 @@ void TargetMenu(int value){
     }
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ EvacMenu ------------------------ */
@@ -2364,7 +2374,7 @@ void EvacMenu(int value){
     }
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -2420,7 +2430,7 @@ void ParticleStreakShowMenu(int value){
 
   }
   updatemenu=1;
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ Particle5ShowMenu ------------------------ */
@@ -2524,7 +2534,7 @@ void ParticlePropShowMenu(int value){
 
   }
   updatemenu=1;
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ ParticleMenu ------------------------ */
@@ -2576,7 +2586,7 @@ void ParticleMenu(int value){
     }
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -2594,7 +2604,7 @@ void ZoneMenu(int value){
     }
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ UnloadVSliceMenu ------------------------ */
@@ -2603,7 +2613,7 @@ void UnloadVSliceMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value>=0){
     readvslice(value,UNLOAD,&errorcode);
   }
@@ -2620,7 +2630,7 @@ void UnloadPatchMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value>=0){
     readpatch(value,UNLOAD,&errorcode);
   }
@@ -2637,7 +2647,7 @@ void UnloadIsoMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value>=0){
     readiso("",value,UNLOAD,&errorcode);
   }
@@ -2654,7 +2664,7 @@ void UnloadPlot3dMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value>=0){
     readplot("",value,UNLOAD,&errorcode);
   }
@@ -2671,7 +2681,7 @@ void UnloadEvacMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value>=0){
     readpart("",value,UNLOAD,&errorcode);
   }
@@ -2689,7 +2699,7 @@ void UnloadPartMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value>=0){
     readpart("",value,UNLOAD,&errorcode);
   }
@@ -2718,7 +2728,7 @@ void LoadVSliceMenu(int value){
   if(value==-20){
     showallslicevectors=1-showallslicevectors;
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
   }
   if(value>=0){
 #ifdef pp_SCRIPT
@@ -2748,7 +2758,7 @@ void UnloadSliceMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value>=0){
     readslice("",value,UNLOAD,&errorcode);
   }
@@ -2868,7 +2878,7 @@ void LoadSmoke3DMenu(int value){
     }
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -2901,7 +2911,7 @@ void HideAllSlices(void){
     sliceinfo[i].display=0;
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -2955,7 +2965,7 @@ void ShowAllSlices(char *type){
     islicetype=sliceinfo[i].type;
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -2983,7 +2993,7 @@ void LoadTerrainMenu(int value){
     }
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ UnLoadTerrainMenu ------------------------ */
@@ -3001,7 +3011,7 @@ void UnloadTerrainMenu(int value){
     }
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 
 }
 
@@ -3030,7 +3040,7 @@ void LoadSliceMenu(int value){
     }
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3044,7 +3054,7 @@ void LoadMultiVSliceMenu(int value){
   if(value==-20){
     showallslicevectors=1-showallslicevectors;
     updatemenu=1;  
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     return;
   }
   if(value>=0){
@@ -3139,7 +3149,7 @@ void LoadPlot3dMenu(int value){
     Plot3DListMenu(value);
   }
   updatemenu=1; 
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3188,7 +3198,7 @@ void LoadIsoMenu(int value){
     }
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3251,7 +3261,7 @@ void LoadPatchMenu(int value){
     }
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3266,7 +3276,7 @@ void ShowPatchMenu(int value){
 
   updatemenu=1;  
   updatefacelists=1;
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(value>=1000){
     patchi=patchinfo+value-1000;
     if(patchi->type==ipatchtype){
@@ -3375,7 +3385,7 @@ void VentMenu(int value){
   }
   updatefacelists=1;
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ BlockageMenu ------------------------ */
@@ -3430,7 +3440,7 @@ void BlockageMenu(int value){
  // updatefaces=1;
   updatefacelists=1;
   updatehiddenfaces=1;
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ sv_BlockageMenu ------------------------ */
@@ -3445,14 +3455,14 @@ void svWINAPI sv_BlockageMenu(int value){
 void RotateTypeMenu(int value){
   eyeview = value;
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ TitleMenu ------------------------ */
 
 void TitleMenu(int value){
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   ASSERTFLAG(visTitle0);
   ASSERTFLAG(visTitle1);
   ASSERTFLAG(visTitle2);
@@ -3505,7 +3515,7 @@ void ShowDevicesMenu(int value){
     }
   }
   updatemenu=1;
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ ZoneShowMenu ------------------------ */
@@ -3564,7 +3574,7 @@ void ZoneShowMenu(int value){
     ASSERT(FFALSE);
   }
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ GeometryMenu ------------------------ */
@@ -3623,7 +3633,7 @@ void GeometryMenu(int value){
   }
   updatefacelists=1;
   updatemenu=1;  
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ MENU_vslice ------------------------ */
@@ -3741,7 +3751,7 @@ static int in_menu=0;
   in_menu=1;
 #endif
   update_showhidebuttons();
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   cmesh=current_mesh;
 
   menulabel = a_menulabel;

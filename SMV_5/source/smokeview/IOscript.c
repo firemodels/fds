@@ -789,7 +789,7 @@ void run_script(void){
       script_setviewpoint(scripti);
       break;
   }
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   current_script_command++;
 }
 

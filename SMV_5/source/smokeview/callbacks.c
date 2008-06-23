@@ -87,7 +87,7 @@ void mouse(int button, int state, int x, int y){
     updatemenu=1;
   }
   glui_move_mode=-1;
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(state==GLUT_UP){
     eye_xyz0[0]=eye_xyz[0];
     eye_xyz0[1]=eye_xyz[1];
@@ -231,7 +231,7 @@ void mouse(int button, int state, int x, int y){
       glEnable(GL_LIGHTING);
 
     }
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     if( showtime==1 || showplot3d==1){
       int temp;
       int yy;
@@ -307,7 +307,7 @@ void mouse(int button, int state, int x, int y){
     xm0=x; 
     ym0=y;
   }
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if(blockageSelect==1){
     Display();
   }
@@ -324,7 +324,7 @@ void motion(int xm, int ym){
   eye_xyz = camera_current->eye;
   angle_zx = camera_current->angle_zx;
 
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   if( colordrag==1&&(showtime==1 || showplot3d==1)){
     int temp;
     int ifactor;
@@ -469,7 +469,7 @@ void keyboard(unsigned char key, int x, int y){
   mesh *gbsave,*gbi;
   int i;
 
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
   updatemenu=1;
   key2 = (char)key;
   if(key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='M'
@@ -1195,7 +1195,7 @@ void specialkeyboard(int key, int x, int y){
 #define P3_MODE 1
   int keymode=EYE_MODE;
 
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 
   switch (cursorPlot3D){
     case 0:
@@ -1392,7 +1392,7 @@ void training_move(int  mode){
   eye_xyz0[1]=eye_xyz[1];
   eye_xyz0[2]=eye_xyz[2];
   update_translate();
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 
 } 
 
@@ -1765,7 +1765,7 @@ void Display(void){
       camera_current->cos_direction_angle = cos(PI*camera_current->direction_angle/180.0);
       camera_current->sin_direction_angle = sin(PI*camera_current->direction_angle/180.0);
     }
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
   }
 
 }
@@ -1892,7 +1892,9 @@ void Idle(void){
   }
 
   update_framenumber(changetime);
-  if(redisplay==1)glutPostRedisplay();
+  if(redisplay==1){
+    GLUTPOSTREDISPLAY
+  }
 }
 
 /* ------------------ update_framenumber ------------------------ */
