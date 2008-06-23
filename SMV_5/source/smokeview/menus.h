@@ -6810,8 +6810,10 @@ if(visBlocks==visBLOCKOutline){
 
 #ifdef pp_SCRIPT
     CREATEMENU(scriptmenu,ScriptMenu);
-    glutAddMenuEntry("Run Script",RUN_SCRIPT);
-    glutAddMenuEntry("-",999);
+    if(scriptfilename!=NULL){
+      glutAddMenuEntry("Run Script",RUN_SCRIPT);
+      glutAddMenuEntry("-",999);
+    }
     glutAddMenuEntry("Start Recording",START_RECORDING_SCRIPT);
     glutAddMenuEntry("Stop Recording",STOP_RECORDING_SCRIPT);
 #endif
@@ -6932,9 +6934,7 @@ if(visBlocks==visBLOCKOutline){
       glutAddMenuEntry("-",999);
       glutAddSubMenu("Configuration files",smokeviewinimenu);
 #ifdef pp_SCRIPT
-      if(scriptfilename!=NULL){
-        glutAddSubMenu("Script Options",scriptmenu);
-      }
+      glutAddSubMenu("Script Options",scriptmenu);
 #endif
 #ifdef pp_COMPRESS
       if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice>0)){
