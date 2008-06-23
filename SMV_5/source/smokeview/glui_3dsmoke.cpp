@@ -116,7 +116,7 @@ extern "C" void update_smoke3dflags(void){
 #ifdef pp_CULL
   SMOKE_3D_CB(CULL_SMOKE);
 #endif
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ glui_3dsmoke_setup ------------------------ */
@@ -380,7 +380,7 @@ void SMOKE_3D_CB(int var){
   case FIRE_CUTOFF:
   case FIRE_ALPHA:
   case SMOKE_SHADE:
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     force_redisplay=1;
     IDLE();
     break;
@@ -388,13 +388,13 @@ void SMOKE_3D_CB(int var){
   case SMOKE_RTHICK:
   
     smoke3d_thick = log2(smoke3d_rthick);
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     force_redisplay=1;
     IDLE();
     break;
 #else
   case SMOKE_THICK:
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     force_redisplay=1;
     IDLE();
     break;

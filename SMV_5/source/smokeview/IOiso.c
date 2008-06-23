@@ -669,7 +669,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 #endif
   IDLE();
 
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ unloadiso ------------------------ */

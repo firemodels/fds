@@ -906,7 +906,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   PrintMemoryInfo;
 #endif
   IDLE();
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ nodeinblockage ------------------------ */
