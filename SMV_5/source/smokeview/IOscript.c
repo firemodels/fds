@@ -90,21 +90,6 @@ void free_script(void){
 
 }
 
-
-/* ------------------ get_file_type ------------------------ */
-
-int get_file_type(char *file){
-  int i;
-
-  for(i=0;i<nfileinfo;i++){
-    filedata *filei;
-
-    filei = fileinfo + i;
-    if(strcmp(filei->file,file)==0)return filei->type;
-  }
-  return -1;
-}
-
 /* ------------------ init_scripti ------------------------ */
 
 void init_scripti(scriptdata *scripti, int command){
@@ -278,8 +263,6 @@ int compile_script(char *scriptfile){
       len=strlen(buffer);
       NewMemory((void **)&scripti->cval,len+1);
       strcpy(scripti->cval,buffer);
-      filetype = get_file_type(buffer);
-      scripti->ival = filetype;
 
       nscriptinfo++;
       continue;
