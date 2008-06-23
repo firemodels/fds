@@ -406,7 +406,7 @@ int compile_script(char *scriptfile){
     if(match_upper(buffer,"SETTIMEVAL",10) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_SETTIMEVAL);
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       sscanf(buffer,"%f",&scripti->fval);
       if(scripti->fval<0.0)scripti->fval=0.0;
@@ -702,21 +702,12 @@ void script_settimeval(scriptdata *scripti){
         itime=i;
         stept=1;
         force_redisplay=1;
-
+        update_framenumber(0);
+        UpdateTimeLabels();
+        break;
       }
     }
   }
-}
-
-/* ------------------ script_settimeframe ------------------------ */
-
-void script_settimeframe(scriptdata *scripti){
-  int timeframe;
-
-  timeframe = scripti->ival;
-  printf("Script: set time frame to %i",timeframe);
-  printf(" *** not implemented ***");
-  printf("\n");
 }
 
 /* ------------------ script_setviewpoint ------------------------ */
@@ -778,6 +769,9 @@ void run_script(void){
       break;
     case SCRIPT_LOADISO:
       script_loadiso(scripti);
+      break;
+    case SCRIPT_LOAD3DSMOKE:
+      script_load3dsmoke(scripti);
       break;
     case SCRIPT_LOADPARTICLES:
       script_loadparticles(scripti);
