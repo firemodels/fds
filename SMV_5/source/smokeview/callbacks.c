@@ -964,7 +964,29 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"r",1)==0
     ||strncmp((const char *)&key2,"R",1)==0
     ){
-    if(strncmp((const char *)&key2,"R",1)==0)render_double=2;
+      int rflag=0;
+
+      if(strncmp((const char *)&key2,"R",1)==0){
+        render_double=2;
+        rflag=1;
+      }
+#ifdef pp_SCRIPT
+    if(scriptoutstream!=NULL){
+      if(ntimes>0){
+        float timeval;
+
+        timeval=times[itime];
+        fprintf(scriptoutstream,"SETTIMEVAL\n");
+        fprintf(scriptoutstream," %f\n",timeval);
+      }
+      if(rflag==0){
+        fprintf(scriptoutstream,"RENDERONCE\n");
+      }
+      else{
+        fprintf(scriptoutstream,"RENDERDOUBLEONCE\n");
+      }
+    }
+#endif
     RenderOnceNow=1;
     if(showstereo!=0){
       RenderOnceNowL=1;
