@@ -3382,6 +3382,11 @@ void Args(int argc, char **argv){
       usage(argv);
       exit(0);
     }
+#ifdef pp_SCRIPT
+    else if(strncmp(argv[i],"-runscript",10)==0){
+      runscript=1;
+    }
+#endif
     else if(strncmp(argv[i],"-build",6)==0){
       showbuild=1;
       usage(argv);
@@ -3441,6 +3446,9 @@ void usage(char **argv){
   printf("      -ini = output default smokeview parameters to smokeview.ini\n");
   printf("     -part = load particle file if present \n");
   printf("   -nopart = do not load particle file \n");
+#ifdef pp_SCRIPT
+  printf("-runscript = run the script file, casename.ssf, at startup\n");
+#endif
   printf("   -stereo = activate stereo mode (if supported)\n");
   printf("  -version = display version information\n");
   printf("    -build = show pre-preprocessing directives used to build smokeview\n");

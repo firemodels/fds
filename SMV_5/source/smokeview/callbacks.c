@@ -43,6 +43,9 @@ char callbacks_revision[]="$Revision$";
 #ifdef pp_GPU_CULL_STATE
 void print_gpu_cull_state(void);
 #endif
+#ifdef pp_SCRIPT
+void ScriptMenu(int var);
+#endif
 
 void update_glui_viewlist(void);
 float gmod(float x, float y);
@@ -1620,6 +1623,10 @@ void Display(void){
   float *angle_zx;
 
 #ifdef pp_SCRIPT
+  if(runscript==1){
+    ScriptMenu(RUN_SCRIPT);
+    runscript=0;
+  }
   if(nscriptinfo>0&&current_script_command!=NULL){
     run_script();
   }
