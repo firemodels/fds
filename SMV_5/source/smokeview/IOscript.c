@@ -32,11 +32,10 @@ void remove_comment(char *buffer);
 // RENDERALL 
 //  skip (int)
 
-// SETJPEG
-
-// SETPNG
-
 // LOADFILE 
+//  file (char)
+
+// LOADVFILE
 //  file (char)
 
 // LOADBOUNDARY
@@ -65,6 +64,8 @@ void remove_comment(char *buffer);
 //  viewpoint (char)
 
 // UNLOADALL
+
+// EXIT
 
 /* ------------------ cleanbuffer ------------------------ */
 
@@ -154,6 +155,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"EXIT",4) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"RENDERONCE",10) == 1){
       nscriptinfo++;
       continue;
@@ -167,6 +172,10 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADFILE",8) == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADVFILE",9) == 1){
       nscriptinfo++;
       continue;
     }
@@ -268,6 +277,31 @@ int compile_script(char *scriptfile){
       len=strlen(buffer);
       NewMemory((void **)&scripti->cval,len+1);
       strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADVFILE",9) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADVFILE);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len=strlen(buffer);
+      NewMemory((void **)&scripti->cval,len+1);
+      strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"EXIT",4) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_EXIT);
 
       nscriptinfo++;
       continue;
@@ -618,11 +652,36 @@ void script_loadfile(scriptdata *scripti){
 
     smoke3di = smoke3dinfo + i;
     if(strcmp(smoke3di->reg_file,scripti->cval)==0){
-      readsmoke3d(i,UNLOAD,&errorcode);
+      readsmoke3d(i,LOAD,&errorcode);
       return;
     }
   }
   printf("file %s was not loaded\n",scripti->cval);
+
+}
+
+/* ------------------ script_loadvfile ------------------------ */
+
+void script_loadvfile(scriptdata *scripti){
+  int i;
+  int errorcode;
+
+  printf("Script: loading vector slice file %s",scripti->cval);
+  printf("\n");
+  for(i=0;i<nvslice;i++){
+    slice *val;
+    vslice *vslicei;
+
+    vslicei = vsliceinfo + i;
+    val = sliceinfo + vslicei->ival;
+    if(val==NULL)continue;
+    if(strcmp(val->reg_file,scripti->cval)==0){
+      LoadVSliceMenu(i);
+      return;
+    }
+
+  }
+  printf("vector slice file %s was not loaded\n",scripti->cval);
 
 }
 
@@ -703,17 +762,19 @@ void run_script(void){
     case SCRIPT_RENDERALL:
       script_renderall(scripti);
       break;
-    case SCRIPT_SETJPEG:
-      RenderMenu(RenderJPEG);
-      break;
-    case SCRIPT_SETPNG:
-      RenderMenu(RenderPNG);
-      break;
     case SCRIPT_LOADFILE:
       script_loadfile(scripti);
       break;
+    case SCRIPT_LOADVFILE:
+      script_loadvfile(scripti);
+      break;
     case SCRIPT_LOADBOUNDARY:
       script_loadboundary(scripti);
+      break;
+    case SCRIPT_EXIT:
+#ifndef _DEBUG
+      exit(0);
+#endif
       break;
     case SCRIPT_LOADISO:
       script_loadiso(scripti);
