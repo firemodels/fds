@@ -334,7 +334,7 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   updatetimes();
   IDLE();
 
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ update_plot3dtitle ------------------------ */

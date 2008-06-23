@@ -908,7 +908,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   updatemenu=1;
   IDLE();
 
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ update_all_partvis2 ------------------------ */
@@ -1273,7 +1273,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   updatemenu=1;
   IDLE();
 
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ drawEvac ------------------------ */

@@ -675,7 +675,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     FREEMEMORY(sd->qslicedata);
   }
 
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 /* ------------------ outputslicebounds ------------------------ */
 /*

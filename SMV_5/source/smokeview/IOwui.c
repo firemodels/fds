@@ -764,7 +764,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
   PrintMemoryInfo;
 #endif
   IDLE();
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
 
 /* ------------------ getterrain_size ------------------------ */

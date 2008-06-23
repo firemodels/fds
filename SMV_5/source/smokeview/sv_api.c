@@ -150,7 +150,7 @@ void ResizeWindow(int width, int height){
   if(render_double!=0)return;
   glutSetWindow(mainwindow_id);
   glutReshapeWindow(width,height);
-  glutPostRedisplay();
+  GLUTPOSTREDISPLAY
 }
     
 /* ------------------ sv_update ------------------------ */

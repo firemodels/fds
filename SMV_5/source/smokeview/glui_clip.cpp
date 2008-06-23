@@ -261,7 +261,7 @@ void CLIP_CB(int var){
       CHECKBOX_clip_yupper->disable();
       CHECKBOX_clip_zupper->disable();
     }
-    glutPostRedisplay();
+    GLUTPOSTREDISPLAY
     break;
   case SPINNER_xlower:
     SPINNER_clip_xupper->set_float_limits(clip_x_val,xclip_max,GLUI_LIMIT_CLAMP);
