@@ -1,4 +1,4 @@
-&HEAD CHID='script_test', TITLE='plume fire'  / 
+&HEAD CHID='script_test2', TITLE='plume fire'  / 
 
 &MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,0.0,0.8 / 
 &MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,0.8,1.6 / 
