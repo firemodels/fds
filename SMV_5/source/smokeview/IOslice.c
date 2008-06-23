@@ -968,9 +968,16 @@ void updateslicemenulabels(void){
       sprintf(label,", Mesh %i",1+sd->blocknumber);
       STRCAT(sd->menulabel,label);
       meshi = meshinfo + sd->blocknumber;
-      sprintf(label,", type: %i",meshi->mesh_type);
-      STRCAT(mslicei->menulabel2,label);
-      STRCAT(mslicei->menulabel,label);
+      if(nevac>0){
+        if(meshi->mesh_type==0){
+          strcpy(label,", FDS mesh");
+        }
+        else{
+          strcpy(label,", Evacuation mesh");
+        }
+        STRCAT(mslicei->menulabel2,label);
+        STRCAT(mslicei->menulabel,label);
+      }
     }
     if(showfiles==1){
       STRCAT(sd->menulabel,", ");
@@ -1002,9 +1009,16 @@ void updateslicemenulabels(void){
         STRCAT(mslicei->menulabel2,", ");
         STRCAT(mslicei->menulabel2,sd->menulabel);
         meshi = meshinfo + sd->blocknumber;
-        sprintf(label,", type: %i",meshi->mesh_type);
-        STRCAT(mslicei->menulabel2,label);
-        STRCAT(mslicei->menulabel,label);
+        if(nevac>0){
+          if(meshi->mesh_type==0){
+            strcpy(label,", FDS mesh");
+          }
+          else{
+            strcpy(label,", Evacuation mesh");
+          }
+          STRCAT(mslicei->menulabel2,label);
+          STRCAT(mslicei->menulabel,label);
+        }
       }
       if(nmeshes>1){
         sprintf(label,", Mesh %i",1+sd->blocknumber);
