@@ -639,7 +639,6 @@ SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
 #ifdef pp_SCRIPT
 SVEXTERN char *scriptfilename;
 SVEXTERN scriptdata *scriptinfo, *current_script_command;
-SVEXTERN filedata *fileinfo;
 SVEXTERN int nscriptinfo, nfileinfo;
 #endif
 SVEXTERN char *logfilename;

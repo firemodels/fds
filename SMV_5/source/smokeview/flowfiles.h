@@ -16,12 +16,6 @@ typedef struct {
   char *cval;
   float fval;
 } scriptdata;
-
-typedef struct {
-  char *file;
-  int type;
-} filedata;
-
 #endif
 
 /* --------------------------  treedata ------------------------------------ */
