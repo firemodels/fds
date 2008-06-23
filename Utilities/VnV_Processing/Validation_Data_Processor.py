@@ -10,7 +10,7 @@ from pyx import *
 
 data_directory = "../../Validation/"
 output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
-config_file_name = "Validation_Data_Config_File_Test.csv"
+config_file_name = "Validation_Data_Config_File.csv"
 
 ### Set Global Variables for Verification
 
