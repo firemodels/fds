@@ -1,10 +1,12 @@
 &HEAD CHID='NRL_HAI_8', TITLE='Back, Beyler, DiNenno and Tatem Wall Heat Flux Measurements, Test 8' /
 
+&REAC HRRPUV_AVERAGE=20000., C_EDC=0.2 /
+
 &MESH IJK=32,32,96, XB=0.00,1.92,-0.96,0.96,-0.12,5.64 /
 
 &TIME TWFIN=60. /
 
-&SURF ID='burner', HRRPUA=963., TMP_FRONT=100., COLOR='TAN' /
+&SURF ID='burner', HRRPUA=963., TMP_FRONT=400., COLOR='TAN' /
 &OBST XB=0.00,0.57,-.285,0.285,-.10,0.00,SURF_IDS='burner','STEEL WALL','STEEL WALL' /
 
 &MATL ID            = 'GYPSUM PLASTER'
