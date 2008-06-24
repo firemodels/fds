@@ -3081,7 +3081,7 @@ void LoadMultiVSliceMenu(int value){
     for(i=0;i<mvslicei->nvslices;i++){
       LoadVSliceMenu(mvslicei->ivslices[i]);
     }
-    script_multivslice=0
+    script_multivslice=0;
   }
   else{
     LoadVSliceMenu(-1);
@@ -3179,7 +3179,7 @@ void LoadIsoMenu(int value){
     ReadIsoFile=1;
     file=isoinfo[value].file;
 #ifdef pp_SCRIPT
-    if(scriptoutstream!=NULL){
+    if(script_iso==0&&scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
@@ -3197,6 +3197,7 @@ void LoadIsoMenu(int value){
     isoii = isoinfo + ii;
 #ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
+      script_iso=1;
       fprintf(scriptoutstream,"LOADISO\n");
       fprintf(scriptoutstream," %s\n",isoii->label.longlabel);
     }
@@ -3206,6 +3207,7 @@ void LoadIsoMenu(int value){
       if(isoii->type!=isoi->type)continue;
       LoadIsoMenu(i);
     }
+    script_iso=0;
   }
   updatemenu=1;  
   GLUTPOSTREDISPLAY
