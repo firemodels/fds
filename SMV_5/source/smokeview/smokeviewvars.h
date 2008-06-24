@@ -641,7 +641,7 @@ SVEXTERN char *scriptfilename,*scriptoutfilename;
 SVEXTERN scriptdata *scriptinfo, *current_script_command;
 SVEXTERN int nscriptinfo, nfileinfo;
 SVEXTERN int runscript;
-SVEXTERN int script_multislice, script_multivslice;
+SVEXTERN int script_multislice, script_multivslice, script_iso;
 SVEXTERN FILE *scriptoutstream;
 #endif
 SVEXTERN char *logfilename;
