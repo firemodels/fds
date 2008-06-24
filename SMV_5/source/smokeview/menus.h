@@ -1322,6 +1322,12 @@ void RenderMenu(int value){
     for(n=0;n<ntimes;n++){
       render_frame[n]=0;
     }
+#ifdef pp_SCRIPT
+    if(scriptoutstream!=NULL){
+      fprintf(scriptoutstream,"RENDERALL\n");
+      fprintf(scriptoutstream," %i\n",RenderSkip);
+    }
+#endif
     break;
   }
 }
@@ -2740,7 +2746,7 @@ void LoadVSliceMenu(int value){
 #ifdef pp_SCRIPT
     vslicei = vsliceinfo + value;
     slicei = vslicei->val;
-    if(slicei!=NULL&&scriptoutstream!=NULL){
+    if(script_multivslice==0&&slicei!=NULL&&scriptoutstream!=NULL){
       char *file;
 
       file=slicei->file;
@@ -3027,7 +3033,7 @@ void LoadSliceMenu(int value){
 
     file = sliceinfo[value].file;
 #ifdef pp_SCRIPT
-    if(scriptoutstream!=NULL){
+    if(script_multislice==0&&scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
@@ -3068,12 +3074,14 @@ void LoadMultiVSliceMenu(int value){
         fprintf(scriptoutstream,"LOADVSLICE\n");
         fprintf(scriptoutstream," %s\n",slicei->label.longlabel);
         fprintf(scriptoutstream," %i %f\n",slicei->idir,slicei->position);
+        script_multivslice=1;
       }
     }
 #endif
     for(i=0;i<mvslicei->nvslices;i++){
       LoadVSliceMenu(mvslicei->ivslices[i]);
-    } 
+    }
+    script_multivslice=0
   }
   else{
     LoadVSliceMenu(-1);
@@ -3099,12 +3107,14 @@ void LoadMultiSliceMenu(int value){
         fprintf(scriptoutstream,"LOADSLICE\n");
         fprintf(scriptoutstream," %s\n",slicei->label.longlabel);
         fprintf(scriptoutstream," %i %f\n",slicei->idir,slicei->position);
+        script_multislice=1;
       }
     }
 #endif
     for(i=0;i<mslicei->nslices;i++){
       LoadSliceMenu(mslicei->islices[i]);
     } 
+    script_multislice=0;
   }
   else{
     LoadSliceMenu(-1);

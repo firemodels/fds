@@ -2052,6 +2052,8 @@ void initvars0(void){
   scriptoutfilename=NULL;
   scriptoutstream=NULL;
   runscript=0;
+  script_multislice=0;
+  script_multivslice=0;
 #endif
   logfilename=NULL;
   flushfile=NULL, chidfilebase=NULL;
