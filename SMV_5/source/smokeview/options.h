@@ -47,7 +47,7 @@
 #define EGZ
 #define USE_ZLIB
 #define pp_SCRIPT
-#define NO_GLUTPOSTDISPLAY
+//#define NO_GLUTPOSTDISPLAY
 
 #ifdef pp_ALPHA2
 #define pp_TOUR
