@@ -57,6 +57,9 @@ void remove_comment(char *buffer);
 //  type (char)
 //  1/2/3 (int)  val (float)
 
+// LOADTOUR
+//  type (char)
+
 // SETIMEFRAME
 //  frame (int)
 
@@ -180,6 +183,10 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADBOUNDARY",12) == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADTOUR",8) == 1){
       nscriptinfo++;
       continue;
     }
@@ -312,6 +319,21 @@ int compile_script(char *scriptfile){
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADBOUNDARY);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len=strlen(buffer);
+      NewMemory((void **)&scripti->cval,len+1);
+      strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADTOUR",8) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADTOUR);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -577,6 +599,31 @@ void script_loadvslice(scriptdata *scripti){
   }
 }
 
+/* ------------------ script_loadtour ------------------------ */
+
+void script_loadtour(scriptdata *scripti){
+  int i;
+  int errorcode;
+
+  printf("Script: loading tour %s",scripti->cval);
+  printf("\n");
+
+  for(i=0;i<ntours;i++){
+    tourdata *touri;
+
+    touri = tourinfo + i;
+    if(strcmp(touri->label,scripti->cval)==0){
+      TourMenu(i);
+      viewtourfrompath=0;
+      TourMenu(-5);
+      break;
+    }
+  }
+
+  force_redisplay=1;
+  updatemenu=1;
+}
+
 /* ------------------ script_loadboundary ------------------------ */
 
 void script_loadboundary(scriptdata *scripti){
@@ -761,6 +808,9 @@ void run_script(void){
       break;
     case SCRIPT_LOADBOUNDARY:
       script_loadboundary(scripti);
+      break;
+    case SCRIPT_LOADTOUR:
+      script_loadtour(scripti);
       break;
     case SCRIPT_EXIT:
 #ifndef _DEBUG
