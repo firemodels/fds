@@ -1,4 +1,5 @@
-LOADFILE
+UNLOADALL     // start out with a clean slate
+LOADFILE      // load one file in each mesh
  script_test_001_01.s3d
 LOADFILE
  script_test_002_05.sf
@@ -10,21 +11,37 @@ LOADFILE
  script_test_005.prt5
 LOADFILE
  script_test_001_01.bf
-SETVIEWPOINT
+
+// create 4 images, setting a viewpoint and time value for each
+//   note, if line after RENDERONCE is blank then Smokeview will use CHID for 
+//         filename base
+
+SETVIEWPOINT  
  view_1
-SETTIMEFRAME
+SETTIMEVAL
  2.0
 RENDERONCE
+  script_test_view_1_2secs
+
 SETVIEWPOINT
  view_2
-SETTIMEFRAME
+SETTIMEVAL
  4.0
+RENDERONCE
+  script_test_view_2_4secs
+
 SETVIEWPOINT
  view_3
-SETTIMEFRAME
+SETTIMEVAL
  6.0
+RENDERONCE
+  script_test_view_3_6secs
+
 SETVIEWPOINT
  view_2
-SETTIMEFRAME
+SETTIMEVAL
  8.0
+RENDERONCE
+  script_test_view_2_8secs
+
 
