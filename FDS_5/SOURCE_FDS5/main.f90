@@ -958,12 +958,12 @@ TNOW = SECOND()
 IF (T>=HRR_CLOCK .AND. MINVAL(HRR_COUNT,MASK=.NOT.EVACUATION_ONLY)>0._EB) THEN
    CALL DUMP_HRR(T)
    HRR_CLOCK = HRR_CLOCK + DT_HRR
-   HRR_SUM   = 0.
-   RHRR_SUM  = 0.
-   CHRR_SUM  = 0.
-   FHRR_SUM  = 0.
-   MLR_SUM   = 0.
-   HRR_COUNT = 0.
+   HRR_SUM   = 0._EB
+   RHRR_SUM  = 0._EB
+   CHRR_SUM  = 0._EB
+   FHRR_SUM  = 0._EB
+   MLR_SUM   = 0._EB
+   HRR_COUNT = 0._EB
 ENDIF
 
 ! Dump out Evac info

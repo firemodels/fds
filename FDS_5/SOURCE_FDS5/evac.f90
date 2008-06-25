@@ -312,7 +312,6 @@ Contains
   !
   Subroutine READ_EVAC
     Implicit None
-
     !
     Integer :: NUMBER_INITIAL_PERSONS, &
          SAMPLING_FACTOR, IPC, n_tmp, GN_MIN, GN_MAX
@@ -354,7 +353,7 @@ Contains
 
     Type (MESH_Type), Pointer :: M
     Integer :: ii,jj,kk
-    
+
     Integer :: size_rnd
     Integer, Dimension(8) :: t_rnd
     Integer, Dimension(:), Allocatable :: seed_rnd
@@ -415,6 +414,29 @@ Contains
     EVAC_CLOCK = 0.0_EB    ! clock for the CHID_evac.csv file
     EVAC_N_QUANTITIES = 0
 
+    N_EVAC = 1
+    Allocate(EVAC_CLASS_NAME(N_EVAC),STAT=IZERO)
+    Call ChkMemErr('READ_EVAC','EVAC_CLASS_NAME',IZERO)
+    Allocate(EVAC_CLASS_RGB(3,N_EVAC),STAT=IZERO)
+    Call ChkMemErr('READ_EVAC','EVAC_CLASS_RGB',IZERO)
+
+    EVAC_CLASS_NAME(1) = 'Human'
+    Do N = 1, N_EVAC
+       EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE4
+    End Do
+
+    EVAC_AVATAR_NCOLOR = 7
+    Allocate(EVAC_AVATAR_RGB(3,MAX(7,EVAC_AVATAR_NCOLOR)),STAT=IZERO)
+    Call ChkMemErr('READ_EVAC','EVAC_AVATAR_RGB',IZERO)
+    ! Default values for Avatar color index array
+    EVAC_AVATAR_RGB(1:3,1) = (/  0,  0,  0/)  ! black
+    EVAC_AVATAR_RGB(1:3,2) = (/255,255,  0/)  ! yellow
+    EVAC_AVATAR_RGB(1:3,3) = (/  0,  0,255/)  ! blue
+    EVAC_AVATAR_RGB(1:3,4) = (/255,  0,  0/)  ! red
+    EVAC_AVATAR_RGB(1:3,5) = (/  0,255,  0/)  ! green
+    EVAC_AVATAR_RGB(1:3,6) = (/255,  0,255/)  ! magenta
+    EVAC_AVATAR_RGB(1:3,7) = (/  0,255,255/)  ! cyan
+
     i33 = 0
     ilh = 0
 
@@ -450,6 +472,7 @@ Contains
     ! identification number, which is ILABEL_last + 1
     ILABEL_last = 0
     !
+
     !
     ! Determine total number of EVAC lines in the input file
     !
@@ -551,108 +574,110 @@ Contains
     !
     ! Allocate quantities for EVAC, PERS, EXIT types
     !
-    If (npc_evac > 0 ) Then
-       Allocate(EVACUATION(NPC_EVAC),STAT=IZERO)
-       Call ChkMemErr('READ','EVACUATION',IZERO) 
-    End If
-
-    If (n_holes > 0 ) Then
-       Allocate(EVAC_HOLES(N_HOLES),STAT=IZERO)
-       Call ChkMemErr('READ','EVAC_HOLES',IZERO) 
-    End If
-
-    If (n_sstands > 0 ) Then
-       Allocate(EVAC_SSTANDS(N_SSTANDS),STAT=IZERO)
-       Call ChkMemErr('READ','EVAC_SSTANDS',IZERO) 
-    End If
-
-    If (n_exits > 0 ) Then
-       Allocate(EVAC_EXITS(N_EXITS),STAT=IZERO)
-       Call ChkMemErr('READ','EVAC_EXITS',IZERO) 
-    End If
-
-    If (n_doors > 0 ) Then
-       Allocate(EVAC_DOORS(N_DOORS),STAT=IZERO)
-       Call ChkMemErr('READ','EVAC_DOORS',IZERO) 
-    End If
-
-    If (n_entrys > 0 ) Then
-       Allocate(EVAC_ENTRYS(N_ENTRYS),STAT=IZERO)
-       Call ChkMemErr('READ','EVAC_ENTRYS',IZERO) 
-    End If
-
-    If (n_corrs > 0 ) Then
-       Allocate(EVAC_CORRS(N_CORRS),STAT=IZERO)
-       Call ChkMemErr('READ','EVAC_CORRS',IZERO) 
-    End If
-
-    Allocate(EVAC_PERSON_CLASSES(0:NPC_PERS),STAT=IZERO)
-    Call ChkMemErr('READ','EVAC_PERSON_CLASSES',IZERO) 
-
-    n_egrids = 0
-    Do n = 1, nmeshes
-       If (evacuation_only(n) .And. evacuation_grid(n) ) Then
-          n_egrids = n_egrids + 1
+    EVAC_PROC_IF: If (MYID==Max(0,EVAC_PROCESS)) Then
+       If (npc_evac > 0 ) Then
+          Allocate(EVACUATION(NPC_EVAC),STAT=IZERO)
+          Call ChkMemErr('READ','EVACUATION',IZERO) 
        End If
-    End  Do
 
-    n_nodes = n_entrys + n_exits + n_doors + n_corrs + n_egrids
-    If (n_nodes > 0 ) Then
-       Allocate(EVAC_Node_List(1:n_nodes),STAT=IZERO)
-       Call ChkMemErr('READ','EVAC_NODE_LIST',IZERO) 
-    End If
+       If (n_holes > 0 ) Then
+          Allocate(EVAC_HOLES(N_HOLES),STAT=IZERO)
+          Call ChkMemErr('READ','EVAC_HOLES',IZERO) 
+       End If
 
-    If (npc_evac > 0 ) Then
-       EVACUATION(1:NPC_EVAC)%COLOR_INDEX = 0
-       EVACUATION(1:NPC_EVAC)%GRID_NAME   = 'null'
-       EVACUATION(1:NPC_EVAC)%CLASS_NAME  = 'null'
-       EVACUATION(1:NPC_EVAC)%IMESH       = 0
-       EVACUATION(1:NPC_EVAC)%ID_NAME     = 'null'
-    End If
-    If (n_holes > 0 ) Then
-       EVAC_HOLES(1:N_HOLES)%GRID_NAME   = 'null'
-       EVAC_HOLES(1:N_HOLES)%PERS_ID     = 'null'
-       EVAC_HOLES(1:N_HOLES)%EVAC_ID     = 'null'
-       EVAC_HOLES(1:N_HOLES)%IMESH       = 0
-       EVAC_HOLES(1:N_HOLES)%ID_NAME     = 'null'
-    End If
+       If (n_sstands > 0 ) Then
+          Allocate(EVAC_SSTANDS(N_SSTANDS),STAT=IZERO)
+          Call ChkMemErr('READ','EVAC_SSTANDS',IZERO) 
+       End If
 
-    EVAC_PERSON_CLASSES(0:NPC_PERS)%ID_NAME = 'null'
+       If (n_exits > 0 ) Then
+          Allocate(EVAC_EXITS(N_EXITS),STAT=IZERO)
+          Call ChkMemErr('READ','EVAC_EXITS',IZERO) 
+       End If
 
-    If (n_exits > 0 ) Then
-       EVAC_EXITS(1:N_EXITS)%ID_NAME   = 'null'
-       EVAC_EXITS(1:N_EXITS)%TO_NODE   = 'null'
-       EVAC_EXITS(1:N_EXITS)%GRID_NAME = 'null'
-       EVAC_EXITS(1:N_EXITS)%IMESH     = 0
-       EVAC_EXITS(1:N_EXITS)%COLOR_INDEX = 0
-    End If
+       If (n_doors > 0 ) Then
+          Allocate(EVAC_DOORS(N_DOORS),STAT=IZERO)
+          Call ChkMemErr('READ','EVAC_DOORS',IZERO) 
+       End If
 
-    If (n_doors > 0 ) Then
-       EVAC_DOORS(1:N_DOORS)%ID_NAME   = 'null'
-       EVAC_DOORS(1:N_DOORS)%TO_NODE   = 'null'
-       EVAC_DOORS(1:N_DOORS)%GRID_NAME = 'null'
-       EVAC_DOORS(1:N_DOORS)%IMESH     = 0
-       EVAC_DOORS(1:N_DOORS)%IMESH2    = 0
-       EVAC_DOORS(1:N_DOORS)%COLOR_INDEX = 0
-    End If
+       If (n_entrys > 0 ) Then
+          Allocate(EVAC_ENTRYS(N_ENTRYS),STAT=IZERO)
+          Call ChkMemErr('READ','EVAC_ENTRYS',IZERO) 
+       End If
 
-    If (n_corrs > 0 ) Then
-       EVAC_CORRS(1:N_CORRS)%ID_NAME   = 'null'
-       EVAC_CORRS(1:N_CORRS)%TO_NODE   = 'null'
-       EVAC_CORRS(1:N_CORRS)%GRID_NAME = 'null'
-       EVAC_CORRS(1:N_CORRS)%IMESH     = 0
-       EVAC_CORRS(1:N_CORRS)%IMESH2    = 0
-    End If
+       If (n_corrs > 0 ) Then
+          Allocate(EVAC_CORRS(N_CORRS),STAT=IZERO)
+          Call ChkMemErr('READ','EVAC_CORRS',IZERO) 
+       End If
 
-    If (n_entrys > 0 ) Then
-       EVAC_ENTRYS(1:N_ENTRYS)%ID_NAME     = 'null'
-       EVAC_ENTRYS(1:N_ENTRYS)%TO_NODE     = 'null'
-       EVAC_ENTRYS(1:N_ENTRYS)%GRID_NAME   = 'null'
-       EVAC_ENTRYS(1:N_ENTRYS)%CLASS_NAME  = 'null'
-       EVAC_ENTRYS(1:N_ENTRYS)%IMESH       = 0
-       EVAC_ENTRYS(1:N_ENTRYS)%COLOR_INDEX = 0
-    End If
+       Allocate(EVAC_PERSON_CLASSES(0:NPC_PERS),STAT=IZERO)
+       Call ChkMemErr('READ','EVAC_PERSON_CLASSES',IZERO) 
 
+       n_egrids = 0
+       Do n = 1, nmeshes
+          If (evacuation_only(n) .And. evacuation_grid(n) ) Then
+             n_egrids = n_egrids + 1
+          End If
+       End  Do
+
+       n_nodes = n_entrys + n_exits + n_doors + n_corrs + n_egrids
+       If (n_nodes > 0 ) Then
+          Allocate(EVAC_Node_List(1:n_nodes),STAT=IZERO)
+          Call ChkMemErr('READ','EVAC_NODE_LIST',IZERO) 
+       End If
+
+       If (npc_evac > 0 ) Then
+          EVACUATION(1:NPC_EVAC)%COLOR_INDEX = 0
+          EVACUATION(1:NPC_EVAC)%GRID_NAME   = 'null'
+          EVACUATION(1:NPC_EVAC)%CLASS_NAME  = 'null'
+          EVACUATION(1:NPC_EVAC)%IMESH       = 0
+          EVACUATION(1:NPC_EVAC)%ID_NAME     = 'null'
+       End If
+       If (n_holes > 0 ) Then
+          EVAC_HOLES(1:N_HOLES)%GRID_NAME   = 'null'
+          EVAC_HOLES(1:N_HOLES)%PERS_ID     = 'null'
+          EVAC_HOLES(1:N_HOLES)%EVAC_ID     = 'null'
+          EVAC_HOLES(1:N_HOLES)%IMESH       = 0
+          EVAC_HOLES(1:N_HOLES)%ID_NAME     = 'null'
+       End If
+
+       EVAC_PERSON_CLASSES(0:NPC_PERS)%ID_NAME = 'null'
+
+       If (n_exits > 0 ) Then
+          EVAC_EXITS(1:N_EXITS)%ID_NAME   = 'null'
+          EVAC_EXITS(1:N_EXITS)%TO_NODE   = 'null'
+          EVAC_EXITS(1:N_EXITS)%GRID_NAME = 'null'
+          EVAC_EXITS(1:N_EXITS)%IMESH     = 0
+          EVAC_EXITS(1:N_EXITS)%COLOR_INDEX = 0
+       End If
+
+       If (n_doors > 0 ) Then
+          EVAC_DOORS(1:N_DOORS)%ID_NAME   = 'null'
+          EVAC_DOORS(1:N_DOORS)%TO_NODE   = 'null'
+          EVAC_DOORS(1:N_DOORS)%GRID_NAME = 'null'
+          EVAC_DOORS(1:N_DOORS)%IMESH     = 0
+          EVAC_DOORS(1:N_DOORS)%IMESH2    = 0
+          EVAC_DOORS(1:N_DOORS)%COLOR_INDEX = 0
+       End If
+
+       If (n_corrs > 0 ) Then
+          EVAC_CORRS(1:N_CORRS)%ID_NAME   = 'null'
+          EVAC_CORRS(1:N_CORRS)%TO_NODE   = 'null'
+          EVAC_CORRS(1:N_CORRS)%GRID_NAME = 'null'
+          EVAC_CORRS(1:N_CORRS)%IMESH     = 0
+          EVAC_CORRS(1:N_CORRS)%IMESH2    = 0
+       End If
+
+       If (n_entrys > 0 ) Then
+          EVAC_ENTRYS(1:N_ENTRYS)%ID_NAME     = 'null'
+          EVAC_ENTRYS(1:N_ENTRYS)%TO_NODE     = 'null'
+          EVAC_ENTRYS(1:N_ENTRYS)%GRID_NAME   = 'null'
+          EVAC_ENTRYS(1:N_ENTRYS)%CLASS_NAME  = 'null'
+          EVAC_ENTRYS(1:N_ENTRYS)%IMESH       = 0
+          EVAC_ENTRYS(1:N_ENTRYS)%COLOR_INDEX = 0
+       End If
+
+    End If EVAC_PROC_IF
     !
     ! NEXT PARAMETERS ARE SAME FOR ALL HUMANS. THE LAST
     ! VALUES READ IN FROM 'PERS' LINES ARE VALID.
@@ -695,7 +720,6 @@ Contains
     ! Read the PERS lines (no read for default n=0 case)
     !
     READ_PERS_LOOP: Do N=0,NPC_PERS
-       PCP=>EVAC_PERSON_CLASSES(N)
        !
        ID  = 'null'
        ! Default: No distributions for human properties
@@ -887,7 +911,11 @@ Contains
        TAU_EVAC_DIST = Max(0,TAU_EVAC_DIST)
        !
        !
-       ! 
+       !
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_PERS_LOOP
+       !
+       PCP=>EVAC_PERSON_CLASSES(N)
+       !
        PCP%ID_NAME = ID
        !
        PCP%D_mean = DIA_MEAN
@@ -965,35 +993,119 @@ Contains
        Deallocate(seed_rnd)
     End If
 
+    Select Case (COLOR_METHOD)
+    Case (-1:2,4:5)
+       Continue
+    Case (7)
+       COLOR_METHOD = -1
+       If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A)') &
+            ' WARNING: COLOR_METHOD=7 is not defined anymore, the default (-1) is used.'
+    Case Default
+       Write(MESSAGE,'(A,I3,A)') &
+            'ERROR: READ_EVAC COLOR METHOD',COLOR_METHOD, &
+            ' is not defined'
+       Call SHUTDOWN(MESSAGE)
+    End Select
+
+    If (COLOR_METHOD >= 0) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
+    If (OUTPUT_MOTIVE_FORCE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
+    If (OUTPUT_FED) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
+    If (OUTPUT_SPEED) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
+    If (OUTPUT_OMEGA) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
+    If (OUTPUT_ANGLE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
+    If (OUTPUT_CONTACT_FORCE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
+    If (OUTPUT_TOTAL_FORCE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
+
+    If (EVAC_N_QUANTITIES > 0) Then
+       Allocate(EVAC_QUANTITIES_INDEX(EVAC_N_QUANTITIES),STAT=IZERO)
+       Call ChkMemErr('READ','EVAC_QUANTITIES_INDEX',IZERO)
+
+       OUTPUT_QUANTITY(240)%NAME       = 'HUMAN_MOTIVE_ACCELERATION'
+       OUTPUT_QUANTITY(240)%UNITS      = 'm/s2'
+       OUTPUT_QUANTITY(240)%SHORT_NAME = 'motiveAcc'
+
+       OUTPUT_QUANTITY(241)%NAME       = 'HUMAN_FED_DOSE'
+       OUTPUT_QUANTITY(241)%UNITS      = '  '
+       OUTPUT_QUANTITY(241)%SHORT_NAME = 'FED'
+
+       OUTPUT_QUANTITY(242)%NAME       = 'HUMAN_SPEED'
+       OUTPUT_QUANTITY(242)%UNITS      = 'm/s'
+       OUTPUT_QUANTITY(242)%SHORT_NAME = 'speed'
+
+       OUTPUT_QUANTITY(243)%NAME       = 'HUMAN_ANGULAR_SPEED'
+       OUTPUT_QUANTITY(243)%UNITS      = 'rad/s'
+       OUTPUT_QUANTITY(243)%SHORT_NAME = 'omega'
+
+       OUTPUT_QUANTITY(244)%NAME       = 'HUMAN_ACCELERATION'
+       OUTPUT_QUANTITY(244)%UNITS      = 'm/s2'
+       OUTPUT_QUANTITY(244)%SHORT_NAME = 'acc'
+
+       OUTPUT_QUANTITY(245)%NAME       = 'HUMAN_CONTACT_LINEFORCE'
+       OUTPUT_QUANTITY(245)%UNITS      = 'N/m'
+       OUTPUT_QUANTITY(245)%SHORT_NAME = 'force_c'
+
+       OUTPUT_QUANTITY(246)%NAME       = 'HUMAN_TOTAL_LINEFORCE'
+       OUTPUT_QUANTITY(246)%UNITS      = 'N/m'
+       OUTPUT_QUANTITY(246)%SHORT_NAME = 'force_tot'
+
+       OUTPUT_QUANTITY(247)%NAME       = 'HUMAN_COLOR'
+       OUTPUT_QUANTITY(247)%UNITS      = '  '
+       OUTPUT_QUANTITY(247)%SHORT_NAME = 'color'
+
+       OUTPUT_QUANTITY(248)%NAME       = 'HUMAN_ANGULAR_ACCELERATION'
+       OUTPUT_QUANTITY(248)%UNITS      = 'rad/s2'
+       OUTPUT_QUANTITY(248)%SHORT_NAME = 'acc'
+
+       n = 1
+       If (COLOR_METHOD >= 0) Then
+          EVAC_QUANTITIES_INDEX(n)=247  ! HUMAN_COLOR
+          n = n + 1
+       End If
+       If (OUTPUT_MOTIVE_FORCE) Then
+          EVAC_QUANTITIES_INDEX(n)=240
+          n = n + 1
+       End If
+       If (OUTPUT_FED) Then
+          EVAC_QUANTITIES_INDEX(n)=241
+          n = n + 1
+       End If
+       If (OUTPUT_SPEED) Then
+          EVAC_QUANTITIES_INDEX(n)=242
+          n = n + 1
+       End If
+       If (OUTPUT_OMEGA) Then
+          EVAC_QUANTITIES_INDEX(n)=243
+          n = n + 1
+       End If
+       If (OUTPUT_ANGLE) Then
+          EVAC_QUANTITIES_INDEX(n)=244
+          n = n + 1
+       End If
+       If (OUTPUT_CONTACT_FORCE) Then
+          EVAC_QUANTITIES_INDEX(n)=245
+          n = n + 1
+       End If
+       If (OUTPUT_TOTAL_FORCE) Then
+          EVAC_QUANTITIES_INDEX(n)=246
+          n = n + 1
+       End If
+
+       If ( n-1 .ne. EVAC_N_QUANTITIES ) Then
+          Write(MESSAGE,'(A,2I4,A)') &
+               'ERROR: Evac output quantities ',EVAC_N_QUANTITIES,n-1, &
+               ' Some bug in the program.'
+          Call SHUTDOWN(MESSAGE)
+       End If
+    End If
+
+
     ! Add the number of the evacuation classes
-    N_EVAC = 1
-
-    Allocate(EVAC_CLASS_NAME(N_EVAC),STAT=IZERO)
-    Call ChkMemErr('READ_EVAC','EVAC_CLASS_NAME',IZERO)
-    Allocate(EVAC_CLASS_RGB(3,N_EVAC),STAT=IZERO)
-    Call ChkMemErr('READ_EVAC','EVAC_CLASS_RGB',IZERO)
-
-    EVAC_CLASS_NAME(1) = 'Human'
-    Do N = 1, N_EVAC
-       EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE4
-    End Do
-
-    EVAC_AVATAR_NCOLOR = 7
-    Allocate(EVAC_AVATAR_RGB(3,MAX(7,EVAC_AVATAR_NCOLOR)),STAT=IZERO)
-    Call ChkMemErr('READ_EVAC','EVAC_AVATAR_RGB',IZERO)
-    ! Default values for Avatar color index array
-    EVAC_AVATAR_RGB(1:3,1) = (/  0,  0,  0/)  ! black
-    EVAC_AVATAR_RGB(1:3,2) = (/255,255,  0/)  ! yellow
-    EVAC_AVATAR_RGB(1:3,3) = (/  0,  0,255/)  ! blue
-    EVAC_AVATAR_RGB(1:3,4) = (/255,  0,  0/)  ! red
-    EVAC_AVATAR_RGB(1:3,5) = (/  0,255,  0/)  ! green
-    EVAC_AVATAR_RGB(1:3,6) = (/255,  0,255/)  ! magenta
-    EVAC_AVATAR_RGB(1:3,7) = (/  0,255,255/)  ! cyan
 
     !
     ! Read the EXIT lines
     !
     READ_EXIT_LOOP: Do N = 1, N_EXITS
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EXIT_LOOP
        PEX=>EVAC_EXITS(N)
        !
        ID            = 'null'
@@ -1023,7 +1135,7 @@ Contains
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EXIT line ',&
                Trim(ID)
        End If
-       
+
        Do I=1,5,2
           If (XB(I) > XB(I+1)) Then
              DUMMY   = XB(I)
@@ -1195,7 +1307,7 @@ Contains
        !   No mesh found
        If (PEX%FED_MESH == 0) PEX%FED_MESH = -1
 
-       If (PEX%FED_MESH > 0 .And. MYID==PROCESS(Max(1,PEX%FED_MESH))) Then 
+       If (PEX%FED_MESH > 0) Then 
           M => MESHES(PEX%FED_MESH)
           II = Floor(M%CELLSI(Floor((PEX%Xsmoke-M%XS)*M%RDXINT))+ 1.0_EB)
           JJ = Floor(M%CELLSJ(Floor((PEX%Ysmoke-M%YS)*M%RDYINT))+ 1.0_EB)
@@ -1222,6 +1334,7 @@ Contains
     ! Read the DOOR lines
     !
     READ_DOOR_LOOP: Do N = 1, N_DOORS
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_DOOR_LOOP
        PDX=>EVAC_DOORS(N)
        !
        ID            = 'null'
@@ -1253,7 +1366,7 @@ Contains
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at DOOR line ',&
                Trim(ID)
        End If
-       
+
        Do I=1,5,2
           If (XB(I) > XB(I+1)) Then
              DUMMY   = XB(I)
@@ -1300,9 +1413,9 @@ Contains
        End If
 
        If (XYZ_SMOKE(1) < Huge(XYZ_SMOKE)) Then
-          PDX%Xsmoke = XYZ(1)
-          PDX%Ysmoke = XYZ(2)
-          PDX%Zsmoke = XYZ(3)
+          PDX%Xsmoke = XYZ_SMOKE(1)
+          PDX%Ysmoke = XYZ_SMOKE(2)
+          PDX%Zsmoke = XYZ_SMOKE(3)
        Else
           PDX%Xsmoke = PDX%X
           PDX%Ysmoke = PDX%Y
@@ -1426,7 +1539,7 @@ Contains
        !   No mesh found
        If (PDX%FED_MESH == 0) PDX%FED_MESH = -1
 
-       If (PDX%FED_MESH > 0 .And. MYID==PROCESS(Max(1,PDX%FED_MESH))) Then 
+       If (PDX%FED_MESH > 0) Then 
           M => MESHES(PDX%FED_MESH)
           II = Floor(M%CELLSI(Floor((PDX%Xsmoke-M%XS)*M%RDXINT))+ 1.0_EB)
           JJ = Floor(M%CELLSJ(Floor((PDX%Ysmoke-M%YS)*M%RDYINT))+ 1.0_EB)
@@ -1454,6 +1567,7 @@ Contains
     !
     n_max_in_corrs = 0
     READ_CORR_LOOP: Do N = 1, N_CORRS
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_CORR_LOOP
        PCX=>EVAC_CORRS(N)
        !
        ID            = 'null'
@@ -1609,7 +1723,7 @@ Contains
        !   No mesh found
        If (PCX%FED_MESH == 0) PCX%FED_MESH = -1
 
-       If (PCX%FED_MESH > 0 .And. MYID==PROCESS(Max(1,PCX%FED_MESH))) Then 
+       If (PCX%FED_MESH > 0) Then 
           M => MESHES(PCX%FED_MESH)
           II = Floor( M%CELLSI(Floor((PCX%X1-M%XS)*M%RDXINT)) + 1.0_EB  )
           JJ = Floor( M%CELLSJ(Floor((PCX%Y1-M%YS)*M%RDYINT)) + 1.0_EB  )
@@ -1643,7 +1757,7 @@ Contains
        !   No mesh found
        If (PCX%FED_MESH2 == 0) PCX%FED_MESH2 = -1
 
-       If (PCX%FED_MESH2 > 0 .AND. MYID==PROCESS(Max(1,PCX%FED_MESH2))) Then 
+       If (PCX%FED_MESH2 > 0) Then 
           M => MESHES(PCX%FED_MESH2)
           II = Floor( M%CELLSI(Floor((PCX%X2-M%XS)*M%RDXINT)) + 1.0_EB  )
           JJ = Floor( M%CELLSJ(Floor((PCX%Y2-M%YS)*M%RDYINT)) + 1.0_EB  )
@@ -1663,7 +1777,6 @@ Contains
           PCX%JJ(2) = 0
           PCX%KK(2) = 0
        End If
-
        ! 
        n_max_in_corrs = Max(n_max_in_corrs,PCX%MAX_HUMANS_INSIDE)
 
@@ -1674,9 +1787,8 @@ Contains
     End Do READ_CORR_LOOP
 29  Rewind(LU_INPUT)
 
-
     ! Now exits, doors, and corrs are already read in
-    If (n_nodes > 0 ) Then
+    If (n_nodes > 0 .And. MYID==Max(0,EVAC_PROCESS)) Then
        n_tmp = 0
        Do n = 1, nmeshes
           If (evacuation_only(n).And.evacuation_grid(n)) Then
@@ -1723,6 +1835,7 @@ Contains
     ! Read the ENTR lines
     !
     READ_ENTR_LOOP: Do N = 1, N_ENTRYS
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_ENTR_LOOP
        PNX=>EVAC_ENTRYS(N)
        !
        ID            = 'null'
@@ -1753,7 +1866,7 @@ Contains
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at ENTR line ',&
                Trim(ID)
        End If
-       
+
        If (Trim(KNOWN_DOOR_NAMES(51)) /= 'null') Then
           Write(MESSAGE,'(A,A,A)') &
                'ERROR: ENTR line ',Trim(PNX%ID_NAME), &
@@ -1940,7 +2053,7 @@ Contains
     End Do READ_ENTR_LOOP
 28  Rewind(LU_INPUT)
 
-    If (n_nodes > 0 ) Then
+    If (n_nodes > 0 .And. MYID==Max(0,EVAC_PROCESS)) Then
        n_tmp = n_egrids
        Do n = 1, n_entrys
           n_tmp = n_tmp + 1
@@ -1949,11 +2062,11 @@ Contains
        End Do
     End If
     ! Check that door/corr/entry/exit have unique names
-    If (n_nodes > 0 ) Then
+    If (n_nodes > 0 .And. MYID==Max(0,EVAC_PROCESS)) Then
        Do n = 1, n_nodes - 1
           Do i = n + 1, n_nodes
              If (Trim(EVAC_Node_List(n)%ID_NAME) == Trim(EVAC_Node_List(i)%ID_NAME)) Then
-                
+
                 Write(MESSAGE,'(8A)') &
                      'ERROR: ', Trim(EVAC_Node_List(n)%Node_Type), ': ', &
                      Trim(EVAC_Node_List(n)%ID_NAME), ' has same ID as ', &
@@ -1969,6 +2082,7 @@ Contains
     ! Read the EVAC lines
     ! 
     READ_EVAC_LOOP: Do N=1,NPC_EVAC
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EVAC_LOOP
        HPT=>EVACUATION(N)
        !
        ID                       = 'null'
@@ -2002,7 +2116,7 @@ Contains
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVAC line ',&
                Trim(ID)
        End If
-       
+
        If (Trim(KNOWN_DOOR_NAMES(51)) /= 'null') Then
           Write(MESSAGE,'(A,A,A)') &
                'ERROR: EVAC line ',Trim(HPT%ID_NAME), &
@@ -2177,6 +2291,7 @@ Contains
     ! Read the EVHO lines
     !
     READ_EVHO_LOOP: Do N = 1, N_HOLES
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EVHO_LOOP
        EHX=>EVAC_HOLES(N)
        !
        ID            = 'null'
@@ -2203,7 +2318,7 @@ Contains
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVHO line ',&
                Trim(ID)
        End If
-       
+
        !
        EHX%X1 = XB(1)
        EHX%X2 = XB(2)
@@ -2249,6 +2364,7 @@ Contains
     ! Read the EVSS lines
     !
     READ_EVSS_LOOP: Do N = 1, N_SSTANDS
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EVSS_LOOP
        ESS => EVAC_SSTANDS(N)
        !
        ID            = 'null'
@@ -2280,7 +2396,7 @@ Contains
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVSS line ',&
                Trim(ID)
        End If
-       
+
        !
        ESS%X1 = XB(1)
        ESS%X2 = XB(2)
@@ -2365,6 +2481,7 @@ Contains
 
 
     Close (LU_INPUT)    
+    If (MYID /= Max(0,EVAC_PROCESS)) Return
     !
     ! Set the IMESH and IMESH2 for corridors
     Do n = 1, n_corrs
@@ -2433,112 +2550,6 @@ Contains
           End If
        End If
     End Do
-
-    Select Case (COLOR_METHOD)
-    Case (-1:2,4:5)
-       Continue
-    Case (7)
-       COLOR_METHOD = -1
-       If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A)') &
-            ' WARNING: COLOR_METHOD=7 is not defined anymore, the default (-1) is used.'
-    Case Default
-       Write(MESSAGE,'(A,I3,A)') &
-            'ERROR: READ_EVAC COLOR METHOD',COLOR_METHOD, &
-            ' is not defined'
-       Call SHUTDOWN(MESSAGE)
-    End Select
-
-    If (COLOR_METHOD >= 0) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
-    If (OUTPUT_MOTIVE_FORCE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
-    If (OUTPUT_FED) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
-    If (OUTPUT_SPEED) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
-    If (OUTPUT_OMEGA) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
-    If (OUTPUT_ANGLE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
-    If (OUTPUT_CONTACT_FORCE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
-    If (OUTPUT_TOTAL_FORCE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
-
-    If (EVAC_N_QUANTITIES > 0) Then
-       Allocate(EVAC_QUANTITIES_INDEX(EVAC_N_QUANTITIES),STAT=IZERO)
-       Call ChkMemErr('READ','EVAC_QUANTITIES_INDEX',IZERO)
- 
-       OUTPUT_QUANTITY(240)%NAME       = 'HUMAN_MOTIVE_ACCELERATION'
-       OUTPUT_QUANTITY(240)%UNITS      = 'm/s2'
-       OUTPUT_QUANTITY(240)%SHORT_NAME = 'motiveAcc'
-       
-       OUTPUT_QUANTITY(241)%NAME       = 'HUMAN_FED_DOSE'
-       OUTPUT_QUANTITY(241)%UNITS      = '  '
-       OUTPUT_QUANTITY(241)%SHORT_NAME = 'FED'
-       
-       OUTPUT_QUANTITY(242)%NAME       = 'HUMAN_SPEED'
-       OUTPUT_QUANTITY(242)%UNITS      = 'm/s'
-       OUTPUT_QUANTITY(242)%SHORT_NAME = 'speed'
-       
-       OUTPUT_QUANTITY(243)%NAME       = 'HUMAN_ANGULAR_SPEED'
-       OUTPUT_QUANTITY(243)%UNITS      = 'rad/s'
-       OUTPUT_QUANTITY(243)%SHORT_NAME = 'omega'
-       
-       OUTPUT_QUANTITY(244)%NAME       = 'HUMAN_ACCELERATION'
-       OUTPUT_QUANTITY(244)%UNITS      = 'm/s2'
-       OUTPUT_QUANTITY(244)%SHORT_NAME = 'acc'
-       
-       OUTPUT_QUANTITY(245)%NAME       = 'HUMAN_CONTACT_LINEFORCE'
-       OUTPUT_QUANTITY(245)%UNITS      = 'N/m'
-       OUTPUT_QUANTITY(245)%SHORT_NAME = 'force_c'
-       
-       OUTPUT_QUANTITY(246)%NAME       = 'HUMAN_TOTAL_LINEFORCE'
-       OUTPUT_QUANTITY(246)%UNITS      = 'N/m'
-       OUTPUT_QUANTITY(246)%SHORT_NAME = 'force_tot'
-       
-       OUTPUT_QUANTITY(247)%NAME       = 'HUMAN_COLOR'
-       OUTPUT_QUANTITY(247)%UNITS      = '  '
-       OUTPUT_QUANTITY(247)%SHORT_NAME = 'color'
-
-       OUTPUT_QUANTITY(248)%NAME       = 'HUMAN_ANGULAR_ACCELERATION'
-       OUTPUT_QUANTITY(248)%UNITS      = 'rad/s2'
-       OUTPUT_QUANTITY(248)%SHORT_NAME = 'acc'
-       
-       n = 1
-       If (COLOR_METHOD >= 0) Then
-          EVAC_QUANTITIES_INDEX(n)=247  ! HUMAN_COLOR
-          n = n + 1
-       End If
-       If (OUTPUT_MOTIVE_FORCE) Then
-          EVAC_QUANTITIES_INDEX(n)=240
-          n = n + 1
-       End If
-       If (OUTPUT_FED) Then
-          EVAC_QUANTITIES_INDEX(n)=241
-          n = n + 1
-       End If
-       If (OUTPUT_SPEED) Then
-          EVAC_QUANTITIES_INDEX(n)=242
-          n = n + 1
-       End If
-       If (OUTPUT_OMEGA) Then
-          EVAC_QUANTITIES_INDEX(n)=243
-          n = n + 1
-       End If
-       If (OUTPUT_ANGLE) Then
-          EVAC_QUANTITIES_INDEX(n)=244
-          n = n + 1
-       End If
-       If (OUTPUT_CONTACT_FORCE) Then
-          EVAC_QUANTITIES_INDEX(n)=245
-          n = n + 1
-       End If
-       If (OUTPUT_TOTAL_FORCE) Then
-          EVAC_QUANTITIES_INDEX(n)=246
-          n = n + 1
-       End If
-
-       If ( n-1 .ne. EVAC_N_QUANTITIES ) Then
-          Write(MESSAGE,'(A,2I4,A)') &
-               'ERROR: Evac output quantities ',EVAC_N_QUANTITIES,n-1, &
-               ' Some bug in the program.'
-          Call SHUTDOWN(MESSAGE)
-       End If
- 
-    End If
 
 
 
@@ -2971,6 +2982,8 @@ Contains
     tnow=SECOND()
 
     If ( .Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) ) Return
+    ! Next means that only EVAC_PROCESS is doing something
+    If (MYID /= PROCESS(NM)) Return
     !
     GTrunFlag = 0
     GaussFlag = 0
@@ -2997,9 +3010,11 @@ Contains
           HUMAN_GRID(i,j)%X = x1
           HUMAN_GRID(i,j)%Y = y1
           HUMAN_GRID(i,j)%Z = z1
-          HUMAN_GRID(i,j)%SOOT_DENS  = 0.0_EB
-          HUMAN_GRID(i,j)%FED_CO_CO2_O2  = 0.0_EB
-          HUMAN_GRID(i,j)%IMESH = 0
+          HUMAN_GRID(i,j)%SOOT_DENS     = 0.0_EB
+          HUMAN_GRID(i,j)%FED_CO_CO2_O2 = 0.0_EB
+          HUMAN_GRID(i,j)%TMP_G         = 0.0_EB
+          HUMAN_GRID(i,j)%RADINT        = 0.0_EB
+          HUMAN_GRID(i,j)%IMESH         = 0
           HUMAN_GRID(i,j)%II = i
           HUMAN_GRID(i,j)%JJ = j
           HUMAN_GRID(i,j)%KK = 1
@@ -3009,7 +3024,6 @@ Contains
 
           If (.Not. SOLID(CELL_INDEX(i,j,1)) ) Then
              MESH_LOOP: Do NOM=1,NMESHES
-                If (MYID /= PROCESS(NOM)) Cycle MESH_LOOP
                 M=>MESHES(NOM)
                 If (.Not. EVACUATION_ONLY(NOM)) Then
                    If (X1 >= M%XS .And. X1 <= M%XF .And. &
