@@ -83,6 +83,21 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
     break;
   }
 
+#ifdef pp_SCRIPT
+  if(scriptoutstream!=NULL&&current_script_command!=NULL&&current_script_command->cval!=NULL){
+    strcpy(renderfile2,current_script_command->cval);
+  }
+  else{
+    strcpy(renderfile2,fdsprefix);
+  }
+  if(RenderTime==1){
+      sprintf(renderfile,"%s_%04i",renderfile2,itime/RenderSkip);
+  }
+  if(RenderTime==0){
+      sprintf(renderfile,"%s_s%04i",renderfile2,seqnum);
+      seqnum++;
+  }
+#else
   if(RenderTime==1){
       sprintf(renderfile,"%s_%04i",fdsprefix,itime/RenderSkip);
   }
@@ -90,6 +105,7 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
       sprintf(renderfile,"%s_s%04i",fdsprefix,seqnum);
       seqnum++;
   }
+#endif
   strcat(renderfile,ext);
 
   // if there is a tempdir see if we need to use it
