@@ -1,4 +1,4 @@
-SETVIEWPOINT
+SETVIEWPOINT  // load smoke, fire, render at view_1 at 1.0 seconds
  view_1
 LOAD3DSMOKE
  soot mass fraction
@@ -7,32 +7,79 @@ LOAD3DSMOKE
 SETTIMEVAL
  1.0
 RENDERONCE
+ script2_smoke
 
-UNLOADALL
+UNLOADALL      // load iso, render at view_2 at 5.0 seconds
 SETVIEWPOINT
  view_2
 LOADISO
  TEMPERATURE
 SETTIMEVAL
- 2.254267
+ 5.0
 RENDERONCE
+ script2_iso
 
-UNLOADALL
+UNLOADALL      // load temperture slice at view_3 , render at 1, ..., 10 seconds
 SETVIEWPOINT
  view_3
 LOADSLICE
  TEMPERATURE
  1 0.800000
 SETTIMEVAL
- 8.753982
+ 0.0
 RENDERONCE
+ script2_slice
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ script2_slice
+SETTIMEVAL
+ 2.0
+RENDERONCE
+ script2_slice
+SETTIMEVAL
+ 3.0
+RENDERONCE
+ script2_slice
+SETTIMEVAL
+ 4.0
+RENDERONCE
+ script2_slice
+SETTIMEVAL
+ 5.0
+RENDERONCE
+ script2_slice
+SETTIMEVAL
+ 6.0
+RENDERONCE
+ script2_slice
+SETTIMEVAL
+ 7.0
+RENDERONCE
+ script2_slice
+SETTIMEVAL
+ 8.0
+RENDERONCE
+ script2_slice
+SETTIMEVAL
+ 9.0
+RENDERONCE
+ script2_slice
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ script2_slice
 
-UNLOADALL
+UNLOADALL        // load particles and boundary file, view at external viewpoint, render at 3.0 seconds
 SETVIEWPOINT
  external
 LOADPARTICLES
 LOADBOUNDARY
  WALL_TEMPERATURE
 SETTIMEVAL
- 1.750502
+ 3.0
 RENDERONCE
+ script2_partbound
+EXIT
+
+\c
