@@ -988,6 +988,7 @@ void keyboard(unsigned char key, int x, int y){
       else{
         fprintf(scriptoutstream,"RENDERDOUBLEONCE\n");
       }
+      fprintf(scriptoutstream,"\n");
     }
 #endif
     RenderOnceNow=1;
@@ -1628,7 +1629,10 @@ void Display(void){
     runscript=0;
   }
   if(nscriptinfo>0&&current_script_command!=NULL){
-    run_script();
+    if(RenderGif==0){  // don't advance command if Smokeview is executing a RENDERALL command
+      current_script_command++;
+      run_script();
+    }
   }
 #endif
   if(updatezoommenu==1){

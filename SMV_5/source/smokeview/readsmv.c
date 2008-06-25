@@ -661,39 +661,24 @@ int readsmv(char *file){
       ||match(buffer,"PRT5",4)==1||match(buffer,"EVA5",4)==1
       ){
       npartinfo++;
-#ifdef pp_SCRIPT
-      nfileinfo++;
-#endif
       continue;
     }
     if( (match(buffer,"SLCF",4) == 1)||
         (match(buffer,"SLCT",4) == 1)
       ){
       nslice++;
-#ifdef pp_SCRIPT
-      nfileinfo++;
-#endif
       continue;
     }
     if(match(buffer,"SMOKE3D",7) == 1){
       nsmoke3d++;
-#ifdef pp_SCRIPT
-      nfileinfo++;
-#endif
       continue;
     }
     if(match(buffer,"BNDF",4) == 1){
       npatch_files++;
-#ifdef pp_SCRIPT
-      nfileinfo++;
-#endif
       continue;
     }
     if(match(buffer,"ISOF",4) == 1||match(buffer,"TISOF",5)==1){
       niso++;
-#ifdef pp_SCRIPT
-      nfileinfo++;
-#endif
       continue;
     }
     if(match(buffer,"ROOM",4) == 1){

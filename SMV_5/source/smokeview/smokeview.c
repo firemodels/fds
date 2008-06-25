@@ -3088,6 +3088,17 @@ void RenderFrame(int view_mode){
   char renderfile[1024],renderfile2[1024];
   FILE *stream;
   char *ext;
+  char *renderfile_prefix;
+
+  renderfile_prefix=fdsprefix;
+#ifdef pp_SCRIPT
+  if(scriptoutstream!=NULL&&current_script_command!=NULL){
+    if(current_script_command->cval!=NULL){
+      strcpy(renderfile2,current_script_command->cval);
+      renderfile_prefix=renderfile2;
+    }
+  }
+#endif
 
   if(view_mode==VIEW_LEFT&&showstereo==2)return;
   switch (renderfiletype){
@@ -3112,17 +3123,17 @@ void RenderFrame(int view_mode){
   if(RenderTime==1){
     switch (view_mode){
     case VIEW_CENTER:
-      sprintf(renderfile,"%s_%04i",fdsprefix,itime/RenderSkip);
+      sprintf(renderfile,"%s_%04i",renderfile_prefix,itime/RenderSkip);
       break;
     case VIEW_LEFT:
-      sprintf(renderfile,"%s_%04i_L",fdsprefix,itime/RenderSkip);
+      sprintf(renderfile,"%s_%04i_L",renderfile_prefix,itime/RenderSkip);
       break;
     case VIEW_RIGHT:
       if(showstereo==2){
-        sprintf(renderfile,"%s_%04i",fdsprefix,itime/RenderSkip);
+        sprintf(renderfile,"%s_%04i",renderfile_prefix,itime/RenderSkip);
       }
       else{
-        sprintf(renderfile,"%s_%04i_R",fdsprefix,itime/RenderSkip);
+        sprintf(renderfile,"%s_%04i_R",renderfile_prefix,itime/RenderSkip);
       }
       break;
     default:
@@ -3133,18 +3144,18 @@ void RenderFrame(int view_mode){
   if(RenderTime==0){
     switch (view_mode){
     case VIEW_CENTER:
-      sprintf(renderfile,"%s_s%04i",fdsprefix,seqnum);
+      sprintf(renderfile,"%s_s%04i",renderfile_prefix,seqnum);
       seqnum++;
       break;
     case VIEW_LEFT:
-      sprintf(renderfile,"%s_s%04i_L",fdsprefix,seqnum);
+      sprintf(renderfile,"%s_s%04i_L",renderfile_prefix,seqnum);
       break;
     case VIEW_RIGHT:
       if(showstereo==2){
-        sprintf(renderfile,"%s_s%04i",fdsprefix,seqnum);
+        sprintf(renderfile,"%s_s%04i",renderfile_prefix,seqnum);
       }
       else{
-        sprintf(renderfile,"%s_s%04i_R",fdsprefix,seqnum);
+        sprintf(renderfile,"%s_s%04i_R",renderfile_prefix,seqnum);
       }
       seqnum++;
       break;

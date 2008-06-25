@@ -25,12 +25,32 @@ void remove_comment(char *buffer);
 //
 // script commands
 //
+
+// ---------- rendering images -----------
+
+// default image file names are CHID_seq
+//   where CHID is the base file name and seq is the frame number.
+//   Smokeview will automatically add an .jpg or .png extension
+//   depending on what kind of files are rendered.
+
 // RENDERONCE
+// file name base (char) (or blank to use smokeview default)
 
 // RENDERDOUBLEONCE
+// file name base (char) (or blank to use smokeview default)
 
 // RENDERALL 
 //  skip (int)
+// file name base (char) (or blank to use smokeview default)
+
+// ---------- loading, unloading files -----------
+//
+//  Use LOADFILE to load a particular file.  Smokeview will figure
+//  out what kind of file it is (3d smoke, slice etc.)  and call the
+//  appropriate routine.
+//
+//  Use other LOAD commands to load files of the specified type for 
+//  all meshes.
 
 // LOADFILE 
 //  file (char)
@@ -57,16 +77,24 @@ void remove_comment(char *buffer);
 //  type (char)
 //  1/2/3 (int)  val (float)
 
+// UNLOADALL
+
+// ---------- controlling scene -----------
+//
+// tours and viewpoints are referenced using names defined
+// previously in a Smokeview session.  These names are
+// stored in the .ini file.
+
 // LOADTOUR
 //  type (char)
 
-// SETIMEFRAME
-//  frame (int)
+// UNLOADTOUR
+
+// SETTIMEVAL
+//  time (float)
 
 // SETVIEWPOINT
 //  viewpoint (char)
-
-// UNLOADALL
 
 // EXIT
 
@@ -87,7 +115,7 @@ void start_script(void){
   if(scriptinfo==NULL){
     printf("*** warning: Smokeview script does not exist\n");
   }
-  current_script_command=scriptinfo;
+  current_script_command=scriptinfo-1;
 }
 
 /* ------------------ free_script ------------------------ */
@@ -190,6 +218,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"UNLOADTOUR",10) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"LOAD3DSMOKE",11) == 1){
       nscriptinfo++;
       continue;
@@ -248,20 +280,40 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"RENDERONCE",10) == 1){
+      int len;
+
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_RENDERONCE);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len = strlen(buffer);
+      if(len>0){
+        NewMemory((void **)&scripti->cval,len+1);
+        strcpy(scripti->cval,buffer);
+      }
 
       nscriptinfo++;
       continue;
     }
     if(match_upper(buffer,"RENDERDOUBLEONCE",16) == 1){
+      int len;
+
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_RENDERDOUBLEONCE);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len = strlen(buffer);
+      if(len>0){
+        NewMemory((void **)&scripti->cval,len+1);
+        strcpy(scripti->cval,buffer);
+      }
 
       nscriptinfo++;
       continue;
     }
     if(match_upper(buffer,"RENDERALL",9) == 1){
+      int len;
+
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_RENDERALL);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -269,6 +321,15 @@ int compile_script(char *scriptfile){
       sscanf(buffer,"%i",&scripti->ival);
       if(scripti->ival<1)scripti->ival=1;
       if(scripti->ival>10)scripti->ival=10;
+
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len = strlen(buffer);
+      if(len>0){
+        NewMemory((void **)&scripti->cval,len+1);
+        strcpy(scripti->cval,buffer);
+      }
+
 
       nscriptinfo++;
       continue;
@@ -339,6 +400,16 @@ int compile_script(char *scriptfile){
       len=strlen(buffer);
       NewMemory((void **)&scripti->cval,len+1);
       strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"UNLOADTOUR",10) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_UNLOADTOUR);
 
       nscriptinfo++;
       continue;
@@ -812,6 +883,9 @@ void run_script(void){
     case SCRIPT_LOADTOUR:
       script_loadtour(scripti);
       break;
+    case SCRIPT_UNLOADTOUR:
+      TourMenu(-2);
+      break;
     case SCRIPT_EXIT:
 #ifndef _DEBUG
       exit(0);
@@ -840,7 +914,6 @@ void run_script(void){
       break;
   }
   GLUTPOSTREDISPLAY
-  current_script_command++;
 }
 
 #endif

@@ -1326,6 +1326,7 @@ void RenderMenu(int value){
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"RENDERALL\n");
       fprintf(scriptoutstream," %i\n",RenderSkip);
+      fprintf(scriptoutstream,"\n");
     }
 #endif
     break;
@@ -2207,6 +2208,11 @@ void TourMenu(int value){
     from_glui_trainer=0;
 //    viewtourfrompath=0;
     selected_tour=NULL;
+#ifdef pp_SCRIPT
+    if(scriptoutstream!=NULL){
+      fprintf(scriptoutstream,"UNLOADTOUR\n");
+    }
+#endif
     break;
   case -4:
     edittour=1-edittour;
