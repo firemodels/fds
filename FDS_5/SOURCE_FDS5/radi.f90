@@ -576,7 +576,8 @@ USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 USE DEVICE_VARIABLES, ONLY : DEVICE_TYPE,DEVICE, GAS_CELL_RAD_FLUX, GAS_CELL_RAD_DEVC_INDEX, N_GAS_CELL_RAD_DEVC
 REAL(EB) :: ZZ, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
-            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT, WAXIDLN , KAPPA_1, Z_2, COSINE
+            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT, WAXIDLN, KAPPA_1, Z_2, COSINE, &
+            Q_SUM,K_SUM,U_SUM,KAPPA_CORRECTOR,VOL
 INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
@@ -625,7 +626,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    KFST4W = 0._EB
    SCAEFF = 0._EB
  
-! Calculate fraction on ambient black body radiation
+   ! Calculate fraction on ambient black body radiation
  
    IF (NUMBER_SPECTRAL_BANDS==1) THEN
       BBFA = 1._EB
@@ -633,7 +634,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       BBFA = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMPA)
    ENDIF      
 
-! Generate water absorption and scattering coefficients
+   ! Generate water absorption and scattering coefficients
  
    IF_DROPLETS_INCLUDED: IF (NLP>0 .AND. N_EVAP_INDICIES>0) THEN
       IF (NUMBER_SPECTRAL_BANDS==1) THEN
@@ -666,10 +667,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       QR_W = 0._EB
    ENDIF IF_DROPLETS_INCLUDED
  
-! Compute absorption coefficient KAPPA and source term KAPPA*4*SIGMA*TMP**4
+   ! Compute absorption coefficient KAPPA and source term KAPPA*4*SIGMA*TMP**4
  
-   BBF = 1._EB
-   KAPPA=KAPPA0
+   BBF   = 1._EB
+   KAPPA = KAPPA0
+   U_SUM = 0._EB
+   K_SUM = 0._EB
+   Q_SUM = 0._EB
+
    DO K=1,KBAR
       DO J=1,JBAR
          ZLOOP: DO I=1,IBAR
@@ -695,21 +700,35 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDIF
             IF (WIDE_BAND_MODEL)  BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
             KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-            IF (LES) THEN
-               IF (BBF*RADIATIVE_FRACTION*Q(I,J,K) > KFST4(I,J,K)) THEN
-                  KFST4(I,J,K) = BBF*RADIATIVE_FRACTION*Q(I,J,K)
-                  KAPPA(I,J,K) = 0._EB
-               ENDIF
+            IF (RADIATIVE_FRACTION*Q(I,J,K)>0._EB) THEN
+               KFST4(I,J,K) = MAX(KFST4(I,J,K),BBF*RADIATIVE_FRACTION*Q(I,J,K))
+               VOL = R(I)*DX(I)*DY(J)*DZ(K)
+               U_SUM = U_SUM + KAPPA(I,J,K)*UII(I,J,K)*VOL
+               K_SUM = K_SUM + KFST4(I,J,K)*VOL
+               Q_SUM = Q_SUM + BBF*RADIATIVE_FRACTION*Q(I,J,K)*VOL
             ENDIF
          ENDDO ZLOOP
       ENDDO
    ENDDO
 
-! Calculate extinction coefficient
+   ! Add a corrective factor to the radiative source term to achieve desired RADIATIVE_FRACTION
+
+   IF (RADIATIVE_FRACTION>0._EB .AND. K_SUM>0._EB) THEN
+      KAPPA_CORRECTOR = (Q_SUM+U_SUM)/K_SUM
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (Q(I,J,K)>0._EB) KFST4(I,J,K) = KFST4(I,J,K)*KAPPA_CORRECTOR
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+   ! Calculate extinction coefficient
  
    EXTCOE = KAPPA + KAPPAW + SCAEFF*RSA_RAT
 
-! Update intensity field
+   ! Update intensity field
  
    INTENSITY_UPDATE: IF (UPDATE_INTENSITY) THEN
  
@@ -720,8 +739,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ENDIF
       UII = 0._EB
 
-! Compute boundary condition intensity emissivity*sigma*Tw**4/pi 
-!     or emissivity*QRADOUT/pi for wall with internal radiation
+      ! Compute boundary condition intensity emissivity*sigma*Tw**4/pi or emissivity*QRADOUT/pi for wall with internal radiation
  
       BBF = 1.0_EB
       DO IW = 1,NWC
@@ -733,7 +751,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDIF
          OUTRAD_W(IW) = BBF*RPI*QRADOUT(IW)
       ENDDO
-! Compute boundary condition term incoming radiation integral
+
+      ! Compute boundary condition term incoming radiation integral
  
       DO IW = 1,NWC
          IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE
@@ -741,14 +760,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          INRAD_W(IW) = SUM(-W_AXI*DLN(IOR,:)* WALL(IW)%ILW(:,IBND),1, DLN(IOR,:)<0._EB)
       ENDDO
  
-! If updating intensities first time, sweep ALL angles
+      ! If updating intensities first time, sweep ALL angles
  
       N_UPDATES = 1
       IF (RAD_CALL_COUNTER==1) N_UPDATES = ANGLE_INCREMENT
 
       UPDATE_LOOP: DO I_UIID = 1,N_UPDATES
  
-! Update counters inside the radiation routine
+      ! Update counters inside the radiation routine
  
          ANGLE_INC_COUNTER = MOD(ANGLE_INC_COUNTER,ANGLE_INCREMENT) + 1
          IF (WIDE_BAND_MODEL) THEN
@@ -757,8 +776,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             UIID(:,:,:,ANGLE_INC_COUNTER) = 0._EB
          ENDIF
  
-! Set the bounds and increment for the angleloop. Step downdard because in cylindrical case the Nth angle 
-! boundary condition comes from (N+1)th angle.
+         ! Set the bounds and increment for the angleloop. Step downdard because in cylindrical case the Nth angle 
+         ! boundary condition comes from (N+1)th angle.
  
          NSTART    = NRA - ANGLE_INC_COUNTER + 1
          NEND      = 1
@@ -767,7 +786,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
          ANGLE_LOOP: DO N = NSTART,NEND,NSTEP  ! Sweep through control angles
  
-! Boundary conditions: Intensities leaving the boundaries.
+            ! Boundary conditions: Intensities leaving the boundaries.
  
             WALL_LOOP1: DO IW=1,NWC
                IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP1
@@ -794,7 +813,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDIF
             ENDDO WALL_LOOP1
  
-! Determine sweep direction in physical space
+            ! Determine sweep direction in physical space
  
             ISTART = 1
             JSTART = 1
@@ -946,7 +965,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
             ENDIF GEOMETRY
  
-! Boundary values: Incoming radiation
+            ! Boundary values: Incoming radiation
  
             WALL_LOOP2: DO IW=1,NWC
                IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY)   CYCLE WALL_LOOP2     
@@ -964,7 +983,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                INRAD_W(IW) = INRAD_W(IW) + WAXIDLN * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 2
             ENDDO WALL_LOOP2
  
-! Copy the Y-downwind intensities to Y-upwind in cylindrical case
+            ! Copy the Y-downwind intensities to Y-upwind in cylindrical case
  
             IF (CYLINDRICAL) THEN
                J=1
@@ -977,7 +996,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO
             ENDIF
  
-! Calculate integrated intensity UIID
+            ! Calculate integrated intensity UIID
  
             IF (WIDE_BAND_MODEL) THEN
                UIID(:,:,:,IBND) = UIID(:,:,:,IBND) + W_AXI*RSA(N)*IL
@@ -985,7 +1004,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                UIID(:,:,:,ANGLE_INC_COUNTER) = UIID(:,:,:,ANGLE_INC_COUNTER) + W_AXI*RSA(N)*IL
             ENDIF
  
-! Interpolate boundary intensities onto other meshes
+            ! Interpolate boundary intensities onto other meshes
  
             INTERPOLATION_LOOP: DO NOM=1,NMESHES
                IF (NM==NOM) CYCLE INTERPOLATION_LOOP
@@ -1011,6 +1030,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ENDDO UPDATE_LOOP
  
       ! Compute incoming flux on walls 
+
       DO IW=1,NWC
          IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE 
          IBC = IJKW(5,IW)
@@ -1019,6 +1039,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    ENDIF INTENSITY_UPDATE
  
    ! Save source term for the energy equation (QR = -DIV Q)
+
    IF (WIDE_BAND_MODEL) THEN
       QR = QR + KAPPA*UIID(:,:,:,IBND)-KFST4
       IF (NLP>0 .AND. N_EVAP_INDICIES>0) QR_W = QR_W + KAPPAW*UIID(:,:,:,IBND) - KFST4W
