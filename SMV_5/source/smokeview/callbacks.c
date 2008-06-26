@@ -1626,12 +1626,15 @@ void Display(void){
 #ifdef pp_SCRIPT
   if(runscript==1){
     ScriptMenu(RUN_SCRIPT);
-    runscript=0;
+    runscript=2;
   }
   if(nscriptinfo>0&&current_script_command!=NULL){
     if(RenderGif==0){  // don't advance command if Smokeview is executing a RENDERALL command
       current_script_command++;
       run_script();
+      if(runscript==2&&noexit==0&&current_script_command==NULL){
+        exit(0);
+      }
     }
   }
 #endif

@@ -3397,6 +3397,9 @@ void Args(int argc, char **argv){
     else if(strncmp(argv[i],"-runscript",10)==0){
       runscript=1;
     }
+    else if(strncmp(argv[i],"-noexit",6)==0){
+      noexit=1;
+    }
 #endif
     else if(strncmp(argv[i],"-build",6)==0){
       showbuild=1;

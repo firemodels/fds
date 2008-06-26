@@ -640,7 +640,7 @@ SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
 SVEXTERN char *scriptfilename,*scriptoutfilename;
 SVEXTERN scriptdata *scriptinfo, *current_script_command;
 SVEXTERN int nscriptinfo;
-SVEXTERN int runscript;
+SVEXTERN int runscript, noexit;
 SVEXTERN int script_multislice, script_multivslice, script_iso;
 SVEXTERN FILE *scriptoutstream;
 #endif
