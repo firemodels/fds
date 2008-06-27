@@ -10,6 +10,13 @@
 /* --------------------------  scriptdata ------------------------------------ */
 
 #ifdef pp_SCRIPT
+typedef struct _scriptfiledata {
+  struct _scriptfiledata *prev, *next;
+  int id;
+  int recording;
+  char *file;
+} scriptfiledata;
+
 typedef struct {
   int command;
   int ival;
