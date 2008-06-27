@@ -7151,6 +7151,13 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       sscanf(buffer,"%i",&eyeview);
       continue;
       }
+    if(localfile==1&&match(buffer,"SCRIPTFILE",10)==1){
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      insert_scriptfile(buffer);
+      updatemenu=1;
+      continue;
+      }
     if(localfile==1&&match(buffer,"XYZCLIP",7)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&xyz_clipplane);
@@ -8752,6 +8759,19 @@ void writeini(int flag){
     }
   }
   
+  if(flag==LOCAL_INI){
+    scriptfiledata *scriptfile;
+
+    for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
+      char *file;
+
+      file=scriptfile->file;
+      if(file!=NULL){
+        fprintf(fileout,"SCRIPTFILE\n");
+        fprintf(fileout," %s\n",file);
+      }
+    }
+  }
   {
   GLint nred, ngreen, nblue, ndepth, nalpha;
   glGetIntegerv(GL_RED_BITS,&nred);    

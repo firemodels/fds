@@ -2047,9 +2047,17 @@ void initvars0(void){
 #endif
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
 #ifdef pp_SCRIPT
-  scriptfilename=NULL;
-  scriptoutfilename=NULL;
+  default_script=NULL;
+  first_scriptfile.id=-1;
+  first_scriptfile.prev=NULL;
+  first_scriptfile.next=&last_scriptfile;
+
+  last_scriptfile.id=-1;
+  last_scriptfile.prev=&first_scriptfile;
+  last_scriptfile.next=NULL;
+
   scriptoutstream=NULL;
+  script_recording=NULL;
   runscript=0;
   noexit=0;
   script_multislice=0;

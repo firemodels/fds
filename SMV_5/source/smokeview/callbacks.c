@@ -1624,8 +1624,8 @@ void Display(void){
   float *angle_zx;
 
 #ifdef pp_SCRIPT
-  if(runscript==1){
-    ScriptMenu(RUN_SCRIPT);
+  if(runscript==1&&default_script!=NULL){
+    ScriptMenu(default_script->id);
     runscript=2;
   }
   if(nscriptinfo>0&&current_script_command!=NULL){

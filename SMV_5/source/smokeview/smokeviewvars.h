@@ -637,9 +637,10 @@ SVEXTERN FILE *STREAM_SB;
 #endif
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
 #ifdef pp_SCRIPT
-SVEXTERN char *scriptfilename,*scriptoutfilename;
+SVEXTERN scriptfiledata first_scriptfile, last_scriptfile, *default_script;
 SVEXTERN scriptdata *scriptinfo, *current_script_command;
 SVEXTERN int nscriptinfo;
+SVEXTERN scriptfiledata *script_recording;
 SVEXTERN int runscript, noexit;
 SVEXTERN int script_multislice, script_multivslice, script_iso;
 SVEXTERN FILE *scriptoutstream;
