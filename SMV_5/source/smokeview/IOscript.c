@@ -22,6 +22,7 @@
 char IOscript_revision[]="$Revision$";
 #ifdef pp_SCRIPT
 void remove_comment(char *buffer);
+void ParticlePropShowMenu(int var);
 //
 // script commands
 //
@@ -65,6 +66,12 @@ void remove_comment(char *buffer);
 //  type (char)
 
 // LOADPARTICLES
+
+// PARTCLASSCOLOR
+//   color (char)
+
+// PARTCLASSTYPE
+//   type (char)
 
 // LOADISO
 //  type (char)
@@ -279,6 +286,14 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"PARTCLASSCOLOR",14) == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"PARTCLASSTYPE",13) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"LOADTOUR",8) == 1){
       nscriptinfo++;
       continue;
@@ -445,6 +460,36 @@ int compile_script(char *scriptfile){
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADBOUNDARY);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len=strlen(buffer);
+      NewMemory((void **)&scripti->cval,len+1);
+      strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"PARTCLASSCOLOR",14) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_PARTCLASSCOLOR);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len=strlen(buffer);
+      NewMemory((void **)&scripti->cval,len+1);
+      strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"PARTCLASSTYPE",13) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_PARTCLASSTYPE);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -785,6 +830,48 @@ void script_loadboundary(scriptdata *scripti){
 
 }
 
+/* ------------------ script_partclasscolor ------------------------ */
+
+void script_partclasscolor(scriptdata *scripti){
+  int i;
+
+  for(i=0;i<npart5prop;i++){
+    part5prop *propi;
+
+    propi = part5propinfo + i;
+    if(propi->particle_property==0)continue;
+    if(strcmp(propi->label->longlabel,scripti->cval)==0){
+      ParticlePropShowMenu(i);
+    }
+  }
+}
+
+
+
+/* ------------------ script_partclasstype ------------------------ */
+
+void script_partclasstype(scriptdata *scripti){
+  int i;
+
+  for(i=0;i<npart5prop;i++){
+    part5prop *propi;
+    int j;
+
+    propi = part5propinfo + i;
+    if(propi->display==0)continue;
+    for(j=0;j<npartclassinfo;j++){
+      part5class *partclassj;
+
+      if(propi->class_present[j]==0)continue;
+      partclassj = partclassinfo + j;
+      if(partclassj->kind==HUMANS)continue;
+      if(strcmp(partclassj->name,scripti->cval)==0){
+        ParticlePropShowMenu(-10-j);
+      }
+    }
+  }
+}
+
 /* ------------------ script_loadfile ------------------------ */
 
 void script_loadfile(scriptdata *scripti){
@@ -944,6 +1031,12 @@ void run_script(void){
       break;
     case SCRIPT_LOADBOUNDARY:
       script_loadboundary(scripti);
+      break;
+    case SCRIPT_PARTCLASSCOLOR:
+      script_partclasscolor(scripti);
+      break;
+    case SCRIPT_PARTCLASSTYPE:
+      script_partclasstype(scripti);
       break;
     case SCRIPT_LOADTOUR:
       script_loadtour(scripti);
