@@ -3299,15 +3299,15 @@ void Args(int argc, char **argv){
     STRCPY(smvfilename,fdsprefix);
     STRCAT(smvfilename,".smv");
 #ifdef pp_SCRIPT
-    NewMemory((void **)&scriptfilename,(unsigned int)(len+6));
-    STRCPY(scriptfilename,fdsprefix);
-    STRCAT(scriptfilename,".ssf");
-    if(stat(scriptfilename,&statbuffer)!=0){
-      FREEMEMORY(scriptfilename);
+    {
+      char scriptbuffer[1024];
+
+      STRCPY(scriptbuffer,fdsprefix);
+      STRCAT(scriptbuffer,".ssf");
+      if(default_script==NULL&&stat(scriptbuffer,&statbuffer)==0){
+        default_script = insert_scriptfile(scriptbuffer);
+      }
     }
-    NewMemory((void **)&scriptoutfilename,(unsigned int)(len+10));
-    STRCPY(scriptoutfilename,fdsprefix);
-    STRCAT(scriptoutfilename,"_new.ssf");
 #endif
     STRCPY(smvmenufile,"Reload ");
     temp = strrchr(smvfilename,(int)(*dirseparator));
@@ -3397,6 +3397,18 @@ void Args(int argc, char **argv){
     else if(strncmp(argv[i],"-runscript",10)==0){
       runscript=1;
     }
+    else if(strncmp(argv[i],"-script",7)==0){
+      ++i;
+      if(i<argc){
+        char scriptbuffer[256];
+        scriptfiledata *sfd;
+
+        strcpy(scriptbuffer,argv[i]);
+        sfd = insert_scriptfile(scriptbuffer);
+        if(sfd!=NULL)default_script=sfd;
+        runscript=1;
+      }
+    }
     else if(strncmp(argv[i],"-noexit",6)==0){
       noexit=1;
     }
@@ -3450,7 +3462,8 @@ void usage(char **argv){
   printf("%s\n",TITLERELEASE);
   printf("Visualize fire/smoke flow simulations.  All parameters are optional.\n\n");
   printf("Usage:\n\n");
-  printf("%s casename -points m -frames n -ini -part -nopart -stereo -demo\n\n",argv[0]);
+  printf("%s casename -points m -frames n -ini -part -nopart -stereo -demo\n",argv[0]);
+  printf("            -runscript -script scriptname\n\n");
   printf("where \n\n");
   printf("  casename = project id (file names without the extension)\n");
   printf("         m = maximum number of particles.  Default=%i\n",MAXPOINTS);
@@ -3460,11 +3473,12 @@ void usage(char **argv){
   printf("      -ini = output default smokeview parameters to smokeview.ini\n");
   printf("     -part = load particle file if present \n");
   printf("   -nopart = do not load particle file \n");
-#ifdef pp_SCRIPT
-  printf("-runscript = run the script file, casename.ssf, at startup\n");
-#endif
   printf("   -stereo = activate stereo mode (if supported)\n");
   printf("  -version = display version information\n");
+#ifdef pp_SCRIPT
+  printf("-runscript = run the script file, casename.ssf, at startup\n");
+  printf("-script scriptfile = run the script file, scriptfile, at startup\n");
+#endif
   printf("    -build = show pre-preprocessing directives used to build smokeview\n");
   if(showbuild==1){
     printf("  \n");

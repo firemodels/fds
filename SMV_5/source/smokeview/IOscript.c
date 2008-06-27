@@ -98,6 +98,71 @@ void remove_comment(char *buffer);
 
 // EXIT
 
+/* ------------------ insert_scriptfile ------------------------ */
+
+void get_newscriptfilename(char *newscriptfilename){
+  char buffer[1024];
+  char filebase[1024];
+  int i;
+  int nexti;
+  scriptfiledata *scriptfile;
+
+
+
+  for(i=1;i<1000;i++){
+    sprintf(buffer,"%s_%03i.ssf",fdsprefix,i);
+    nexti=0;
+    for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
+      if(strcmp(scriptfile->file,buffer)==0){
+        nexti=1;
+        break;
+      }
+    }
+    if(nexti==0){
+      strcpy(newscriptfilename,buffer);
+      return;
+    }
+  }
+  strcpy(newscriptfilename,"");
+}
+
+/* ------------------ insert_scriptfile ------------------------ */
+
+scriptfiledata *insert_scriptfile(char *file){
+  scriptfiledata *thisptr,*prevptr,*nextptr;
+  int len;
+  scriptfiledata *scriptfile;
+  int idmax=-1;
+
+  for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
+    if(scriptfile->id>idmax)idmax=scriptfile->id;
+    if(scriptfile->file==NULL)continue;
+    if(strcmp(file,scriptfile->file)==0)return NULL;
+  }
+
+
+  NewMemory((void **)&thisptr,sizeof(scriptfiledata));
+  nextptr = &last_scriptfile;
+  prevptr = nextptr->prev;
+  nextptr->prev=thisptr;
+  prevptr->next=thisptr;
+
+  thisptr->next=nextptr;
+  thisptr->prev=prevptr;
+  thisptr->file=NULL;
+  thisptr->recording=0;
+  thisptr->id=idmax+1;
+
+  if(file!=NULL){
+    len = strlen(file);
+    if(len>0){
+      NewMemory((void **)&thisptr->file,len+1);
+      strcpy(thisptr->file,file);
+    }
+  }
+  return thisptr;
+}
+
 /* ------------------ cleanbuffer ------------------------ */
 
 void cleanbuffer(char *buffer, char *buffer2){

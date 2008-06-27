@@ -30,9 +30,12 @@ int SUB_portfrustum(int quad,
 
 EXTERNCPP void add_new_tour(void);
 #ifdef pp_SCRIPT
+EXTERNCPP void cleanbuffer(char *buffer, char *buffer2);
 EXTERNCPP void start_script(void);
 EXTERNCPP void run_script(void);
 EXTERNCPP int compile_script(char *scriptfile);
+EXTERNCPP scriptfiledata *insert_scriptfile(char *file);
+EXTERNCPP void get_newscriptfilename(char *newscriptfilename);
 #endif
 #ifdef pp_LOGFILE
 EXTERNCPP void log_print(char *output);

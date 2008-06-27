@@ -96,7 +96,6 @@ void MainMenu(int value){
   if(value==3){
 #ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
-      fprintf(scriptoutstream,"EXIT\n");
       ScriptMenu(STOP_RECORDING_SCRIPT);
     }
 #endif
@@ -1923,31 +1922,50 @@ void PeriodicReloads(int value){
 #ifdef pp_SCRIPT
 void ScriptMenu(int value){
   int error_code;
+  scriptfiledata *scriptfile;
+  char newscriptfilename[1024];
 
   if(value==999)return;
+  updatemenu=1;
+  GLUTPOSTREDISPLAY
   switch (value){
-    case RUN_SCRIPT:
-      error_code=compile_script(scriptfilename);
-      if(error_code==0){
-        start_script();
-      }
-      else{
-        printf("*** error: problem encountered while trying to compile script file\n");
-      }
     case START_RECORDING_SCRIPT:
-      scriptoutstream=fopen(scriptoutfilename,"w");
+      get_newscriptfilename(newscriptfilename);
+      script_recording = insert_scriptfile(newscriptfilename);
+      scriptoutstream=fopen(newscriptfilename,"w");
       if(scriptoutstream!=NULL){
-        printf("Smokeview script recording on\n");
+        printf("Script recorder on\n");
+        script_recording->recording=1;
       }
       else{
-        printf("*** warning: The script file %s could not be opened for writing\n",scriptoutfilename);
+        script_recording->recording=0;
+        script_recording=NULL;
+        printf("*** warning: The script file %s could not be opened for writing\n",newscriptfilename);
       }
       break;
     case STOP_RECORDING_SCRIPT:
+      if(script_recording!=NULL){
+        script_recording->recording=0;
+        script_recording=NULL;
+      }
       if(scriptoutstream!=NULL){
         fclose(scriptoutstream);
         scriptoutstream=NULL;
-        printf("Smokeview script recording off\n");
+        printf("Script recorder off\n");
+      }
+      break;
+    default:
+      for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
+        char *file;
+
+        file=scriptfile->file;
+        if(file==NULL)continue;
+        if(scriptfile->id!=value)continue;
+        error_code=compile_script(file);
+        if(error_code==0){
+          start_script();
+        }
+        break;
       }
       break;
   }
@@ -6838,12 +6856,49 @@ if(visBlocks==visBLOCKOutline){
 
 #ifdef pp_SCRIPT
     CREATEMENU(scriptmenu,ScriptMenu);
-    if(scriptfilename!=NULL){
-      glutAddMenuEntry("Run Script",RUN_SCRIPT);
-      glutAddMenuEntry("-",999);
+
+    if(script_recording==NULL){
+      scriptfiledata *scriptfile;
+      struct stat statbuffer;
+      int nscripts=0;
+
+      nscripts=0;
+      for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
+        char *file;
+        int len;
+
+        file=scriptfile->file;
+        if(file==NULL)continue;
+        len = strlen(file);
+        if(len<=0)continue;
+
+        if(stat(file,&statbuffer)!=0)continue;
+
+        nscripts++;
+      }
+
+      if(nscripts>0){
+        glutAddMenuEntry("Run Script:",-999);
+        for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
+          char *file;
+          int len;
+
+          file=scriptfile->file;
+          if(file==NULL)continue;
+          if(stat(file,&statbuffer)!=0)continue;
+          len = strlen(file);
+          if(len<=0)continue;
+          strcpy(menulabel,"  ");
+          strcat(menulabel,file);
+          glutAddMenuEntry(menulabel,scriptfile->id);
+        }
+      }
+
+      glutAddMenuEntry("-",-999);
     }
-    glutAddMenuEntry("Start Recording",START_RECORDING_SCRIPT);
-    glutAddMenuEntry("Stop Recording",STOP_RECORDING_SCRIPT);
+    glutAddMenuEntry("Create Script:",-999);
+    if(script_recording==NULL)glutAddMenuEntry("  Start Recording",START_RECORDING_SCRIPT);
+    glutAddMenuEntry("  Stop Recording",STOP_RECORDING_SCRIPT);
 #endif
 
 
