@@ -3525,6 +3525,9 @@ void usage(char **argv){
 #ifdef pp_OSX
     printf(", pp_OSX");
 #endif
+#ifdef pp_SCRIPT
+    printf(", pp_SCRIPT");
+#endif
 #ifdef pp_SMOKETEST
     printf(", pp_SMOKETEST");
 #endif

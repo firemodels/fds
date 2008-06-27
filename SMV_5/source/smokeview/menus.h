@@ -2490,6 +2490,12 @@ void ParticlePropShowMenu(int value){
     
     propi = part5propinfo + iprop;
     propi->display=1;
+#ifdef pp_SCRIPT
+    if(scriptoutstream!=NULL){
+      fprintf(scriptoutstream,"PARTCLASSCOLOR\n");
+      fprintf(scriptoutstream," %s\n",propi->label->longlabel);
+    }
+#endif
     current_property = propi;
     if(iprop!=0){
       parttype=1;
@@ -2560,6 +2566,12 @@ void ParticlePropShowMenu(int value){
 
       vis = current_property->class_vis;
       vis[iclass] = 1 - vis[iclass];
+#ifdef pp_SCRIPT
+      if(scriptoutstream!=NULL){
+        fprintf(scriptoutstream,"PARTCLASSTYPE\n");
+        fprintf(scriptoutstream," %s\n",current_property->label->longlabel);
+      }
+#endif
     }
 
   }
@@ -6871,7 +6883,6 @@ if(visBlocks==visBLOCKOutline){
         if(file==NULL)continue;
         len = strlen(file);
         if(len<=0)continue;
-
         if(stat(file,&statbuffer)!=0)continue;
 
         nscripts++;
@@ -6885,16 +6896,17 @@ if(visBlocks==visBLOCKOutline){
 
           file=scriptfile->file;
           if(file==NULL)continue;
-          if(stat(file,&statbuffer)!=0)continue;
           len = strlen(file);
           if(len<=0)continue;
+          if(stat(file,&statbuffer)!=0)continue;
+
           strcpy(menulabel,"  ");
           strcat(menulabel,file);
           glutAddMenuEntry(menulabel,scriptfile->id);
         }
+        glutAddMenuEntry("-",-999);
       }
 
-      glutAddMenuEntry("-",-999);
     }
     glutAddMenuEntry("Create Script:",-999);
     if(script_recording==NULL)glutAddMenuEntry("  Start Recording",START_RECORDING_SCRIPT);
