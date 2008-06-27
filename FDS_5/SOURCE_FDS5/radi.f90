@@ -703,7 +703,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             IF (RADIATIVE_FRACTION*Q(I,J,K)>0._EB) THEN
                KFST4(I,J,K) = MAX(KFST4(I,J,K),BBF*RADIATIVE_FRACTION*Q(I,J,K))
                VOL = R(I)*DX(I)*DY(J)*DZ(K)
-               U_SUM = U_SUM + KAPPA(I,J,K)*UII(I,J,K)*VOL
+               IF (WIDE_BAND_MODEL) THEN
+                  U_SUM = U_SUM + KAPPA(I,J,K)*UIID(I,J,K,IBND)*VOL
+               ELSE
+                  U_SUM = U_SUM + KAPPA(I,J,K)*UII(I,J,K)*VOL
+               ENDIF
                K_SUM = K_SUM + KFST4(I,J,K)*VOL
                Q_SUM = Q_SUM + BBF*RADIATIVE_FRACTION*Q(I,J,K)*VOL
             ENDIF
