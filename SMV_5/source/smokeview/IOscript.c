@@ -116,8 +116,14 @@ void get_newscriptfilename(char *newscriptfilename){
 
 
 
-  for(i=1;i<1000;i++){
-    sprintf(buffer,"%s_%03i.ssf",fdsprefix,i);
+  for(i=0;i<1000;i++){
+    if(i==0){
+      strcpy(buffer,fdsprefix);
+      strcat(buffer,".ssf");
+    }
+    else{
+      sprintf(buffer,"%s_%03i.ssf",fdsprefix,i);
+    }
     nexti=0;
     for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
       if(strcmp(scriptfile->file,buffer)==0){
