@@ -7090,6 +7090,8 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ \hline \hline
 {\ct CHECK\_VOLUME\_FLOW}       & Logical      & See Section~\ref{info:pressurecorrection}        &           & {\ct .FALSE.}                      \\ \hline
 {\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
+{\ct CTRL\_DUMP\_LIMIT}         & Integer      & Number of columns in {\ct CTRL} file &           & 254                      \\ \hline
+{\ct DEVC\_DUMP\_LIMIT}         & Integer      & Number of columns in {\ct DEVC} file &           & 254                      \\ \hline
 {\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES} \\ \hline
 %{\ct DEBUG}                     & Logical      & General purpose diagnostic flag   &           & {\ct .FALSE.}                      \\ \hline
 {\ct DT\_CTRL}                  & Real         & Control status dump interval      &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
