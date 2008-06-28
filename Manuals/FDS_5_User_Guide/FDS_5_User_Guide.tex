@@ -6568,6 +6568,12 @@ The gas phase output quantity {\ct extinction coefficient} is $K$.
 The visibility $S$ is output via the keyword {\ct visibility}. Note
 that each is tied to the mixture fraction formulation of combustion.
 
+\begin{warning}
+Note that you can specify the output quantity {\ct 'VISIBILITY'} (capital letters matter) along with a {\ct SPEC\_ID} to produce an estimate of the visibility calculated using
+the specified species instead of smoke. This does not require that you do a mixture fraction calculation; only that you have specified the given species. You can
+specify a unique {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line, as well.
+\end{warning}
+
 
 \subsection{Layer Height and the Average Upper and Lower Layer Temperatures}
 \label{info:layerheight}
@@ -6929,6 +6935,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct UPPER TEMPERATURE}                         & See Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
 {\ct VELOCITY}                                  & $\sqrt{u^2+v^2+w^2}$                          & m/s            & D,I,P,S      \\ \hline
 {\ct VISCOSITY}                                 & $\mu$                                         & kg/m/s         & D,I,P,S      \\ \hline
+{\ct VISIBILITY}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
 {\ct visibility}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & See Section~\ref{info:flows}                  & m$^3$/s        & D            \\ \hline
 {\ct WALL\_TEMPERATURE}                         & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
