@@ -6090,9 +6090,11 @@ control function data are saved every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds un
 using {\ct DT\_DEVC}, {\ct DT\_SLCF}, {\ct DT\_PART}, {\ct DT\_ISOF}, {\ct DT\_BNDF}, {\ct DT\_PROF},
 or {\ct DT\_CTRL} Note that {\ct DT\_SLCF} controls Smoke3D output. {\ct DT\_HRR} controls the
 output of heat release rate and associated quantities.
-\item[{\ct MASS\_FILE}] If {\ct .TRUE.}, produce an output file listing the total masses of all gas species as a function of time. It is {\ct .FALSE.} by default because the calculation
+\item[{\ct MASS\_FILE}] If {\ct .TRUE.}, produce an output file listing the total masses of all gas species as a function of time.
+It is {\ct .FALSE.} by default because the calculation
 of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} controls the frequency of output.
-\item[{\ct STATE\_FILE}] If {\ct .TRUE.}, produce an output file listing the species mass fractions associated with the mixture fraction, assuming complete combustion. It is {\ct .FALSE.} by default,
+\item[{\ct STATE\_FILE}] If {\ct .TRUE.}, produce an output file listing the species mass fractions associated with the mixture fraction,
+assuming complete combustion. It is {\ct .FALSE.} by default,
 and only makes sense for calculations involving the mixture fraction model.
 \item[{\ct MAXIMUM\_DROPLETS}] Maximum number of Lagrangian particles that can be included on any
 mesh at any given time. (Default 500000)
@@ -6236,7 +6238,8 @@ For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='AREA INTE
 \be \int \phi(x,y,z) \; dA \ee
 where $dA$ depends on the coordinates you specify for {\ct XB}.
 Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example,
-{\ct '[SPECIES]\_FLUX\_X'} is an appropriate output quantity if you want to know the mass flux of that species through an
+{\ct MASS\_FLUX\_X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that
+you have named {\ct 'my gas'} through an
 area normal to the $x$ direction. Note also that you must specify an area to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
@@ -6695,20 +6698,20 @@ vector defined by {\ct ORIENTATION}.
 \label{info:part_output}
 
 It is possible to record various properties of evaporating droplets. Some of the output quantities are associated with solid boundaries. For example,
-{\ct [PART\_ID]\_MPUA} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named
-{\ct PART\_ID}. Likewise, {\ct [PART\_ID]\_AMPUA} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea. Both of these
+{\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named
+{\ct PART\_ID}. Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea. Both of these
 are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area, and the accumulated total, respectively. The
 accumulated total is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time
-period. The cooling of a solid surface by droplets of a given type is given by {\ct [PART\_ID]\_CPUA}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea
+period. The cooling of a solid surface by droplets of a given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea
 in units of kW/m$^2$.
 
 Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the
 {\ct MISC} line). \index{POROUS\_FLOOR!output issues}
-In this case, {\ct [PART\_ID]\_MPUA} will be zero, but {\ct [PART\_ID]\_AMPUA} will not. FDS stores the droplet mass just before removing the droplet from
+In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from
 the simulation for the purpose of saving CPU time.
 
-Away from solid surfaces, {\ct [PART\_ID]\_MPUV} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of the droplets as they fly through
-the air, in units of kg/m$^3$.  {\ct [PART\_ID]\_FLUX\_X},  {\ct [PART\_ID]\_FLUX\_Y}, and {\ct [PART\_ID]\_FLUX\_Z} produce {\em only} slice and Plot3D files
+Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of the droplets as they fly through
+the air, in units of kg/m$^3$.  {\ct 'DROPLET\_FLUX\_X'},  {\ct 'DROPLET\_FLUX\_Y'}, and {\ct 'DROPLET\_FLUX\_Z'} produce {\em only} slice and Plot3D files
 of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
 
 
@@ -6836,93 +6839,107 @@ with the name {\bf CHID\_fds2ascii.csv}.
 \label{info:outputquantities} \index{Output!Summary of Quantities}
 
 Table~\ref{tab:output}, spread over the following pages, summarizes the various Output Quantities.
-Note that lower case quantities are appropriate only for calculations involving the mixture fraction, $Z$. If
-individual species are listed via {\ct SPEC} namelist lines, the quantity for mass and volume
-fractions are {\ct [SPEC\_ID]} and {\ct [SPEC\_ID]\_VF}, respectively. For example, the quantities
-{\ct water vapor} and {\ct WATER VAPOR} denote the volume fraction of water vapor
-generated by combustion and the {\em mass} fraction of water vapor from evaporated sprinkler
-droplets, respectively.
+Note that lower case quantities are appropriate only for calculations involving the mixture fraction, $Z$.
+For example, the quantity
+{\ct visibility} pertains to the obscuration of visible light due to the implicitly defined smoke in a mixture fraction calculation, whereas
+{\ct VISIBILITY} pertains to the obscuration of visible light due to the explicitly defined species denoted by {\ct SPEC\_ID}.
 
 The column ``File Type'' lists the allowed output files for the quantities. ``B'' is for Boundary ({\ct BNDF}),
 ``D'' is for Device ({\ct DEVC}), ``I'' is for Iso-surface ({\ct ISOF}), ``P'' is for Plot3D, ``PA'' for PArticle ({\ct PART}),
 ``S'' is for Slice ({\ct SLCF}). Be careful
 when specifying complicated quantities for Iso-surface or Plot3D files, as it requires computation in every gas phase cell.
 
-\begin{table}[p]
+\begin{warning}
+The format of certain output quantities changed, starting with FDS version 5.2, but the older names originating with version
+5.0 will still be accepted. The new convention is that when an output
+quantity is related to a particular gas species or particle type, then you must specify the appropriate {\ct SPEC\_ID} or
+{\ct PART\_ID} on the same input line. % Also, the use of unnecessary underscores in output quantity names has been eliminated.
+\end{warning}
+
+\clearpage
+
+\begin{table}[ht!]
 \begin{center}
 \caption{Summary of all Output Quantities}
 \label{tab:output}
 \begin{tabular}{|l|c|c|c|}
 \hline
 Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
-{\ct ABSORPTION\_COEFFICIENT}                   & $\kappa$                                      & 1/m            & D,I,P,S      \\ \hline
-{\ct ADIABATIC\_SURFACE\_TEMPERATURE}           & See Section~\ref{info:AST}                    & $^\circ$C      & B,D          \\ \hline
+{\ct ABSORPTION COEFFICIENT}                    & $\kappa$                                      & 1/m            & D,I,P,S      \\ \hline
+{\ct ADIABATIC SURFACE TEMPERATURE}             & See Section~\ref{info:AST}                    & $^\circ$C      & B,D          \\ \hline
+{\ct AMPUA}$^{**}$                              & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
 {\ct aspiration}                                & See Section~\ref{info:aspiration_detector}    & \%             & D            \\ \hline
-{\ct BACK\_WALL\_TEMPERATURE}                   & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
-{\ct BURNING\_RATE}                             & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
+{\ct BACK WALL TEMPERATURE}                     & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
+{\ct BURNING RATE}                              & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
 {\ct carbon dioxide}                            & $X_{CO_2}(Z)$                                 & mol/mol        & D,I,P,S      \\ \hline
 {\ct carbon monoxide}                           & $X_{CO}(Z)$                                   & mol/mol        & D,I,P,S      \\ \hline
 {\ct CONTROL}                                   & See Section~\ref{info:CTRL}                   &                & D            \\ \hline
-{\ct CONVECTIVE\_FLUX}                          & $\dq_c''$ (Section~\ref{info:heat_flux})      & kW/m$^2$       & B,D          \\ \hline
+{\ct CONVECTIVE HEAT FLUX}                      & $\dq_c''$ (Section~\ref{info:heat_flux})      & kW/m$^2$       & B,D          \\ \hline
+{\ct CPUA}$^{**}$                               & See Section~\ref{info:part_output}            & kW/m$^2$       & B,D          \\ \hline
 {\ct DENSITY}                                   & $\rho$                                        & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & s$^{-1}$       & D,I,P,S      \\ \hline
-{\ct DROPLET\_DIAMETER}                         & $2 r_d$                                       & $\mu$m         & PA           \\ \hline
-{\ct DROPLET\_VELOCITY}                         & $|\bu_d|$                                     & m/s            & PA           \\ \hline
-{\ct DROPLET\_TEMPERATURE}                      & $T_d$                                         & $^\circ$C      & PA           \\ \hline
-{\ct DROPLET\_MASS}                             & $m_d$                                         & kg             & PA           \\ \hline
-{\ct DROPLET\_AGE}                              & $t_d$                                         & s              & PA           \\ \hline
+{\ct DROPLET FLUX X}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
+{\ct DROPLET FLUX Y}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
+{\ct DROPLET FLUX Z}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
+{\ct DROPLET DIAMETER}                          & $2 r_d$                                       & $\mu$m         & PA           \\ \hline
+{\ct DROPLET VELOCITY}                          & $|\bu_d|$                                     & m/s            & PA           \\ \hline
+{\ct DROPLET TEMPERATURE}                       & $T_d$                                         & $^\circ$C      & PA           \\ \hline
+{\ct DROPLET MASS}                              & $m_d$                                         & kg             & PA           \\ \hline
+{\ct DROPLET AGE}                               & $t_d$                                         & s              & PA           \\ \hline
 {\ct extinction coefficient}                    & $K$ (Section~\ref{info:visibility})           & 1/m            & D,I,P,S      \\ \hline
 {\ct fuel}                                      & $X_F(Z)$                                      & mol/mol        & D,I,P,S      \\ \hline
-{\ct GAUGE\_HEAT\_FLUX}                         & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
+{\ct GAUGE HEAT FLUX}                           & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct H}                                         & $H=|\bu|^2/2 + \tp/\rho_0$                    & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT FLOW}                                 & See Section~\ref{info:flows}                  & kW             & D            \\ \hline
-{\ct HEAT\_FLUX}                                & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
+{\ct NET HEAT FLUX}                             & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct HRR}                                       & $\int \dq''' \; dV$                           & kW             & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
-{\ct INCIDENT\_HEAT\_FLUX}                      & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
-{\ct INSIDE\_WALL\_TEMPERATURE}                 & See Section~\ref{info:PROF}                   & $^\circ$C      & D            \\ \hline
+{\ct INCIDENT HEAT FLUX}                        & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
+{\ct INSIDE WALL TEMPERATURE}                   & See Section~\ref{info:PROF}                   & $^\circ$C      & D            \\ \hline
 {\ct LAYER HEIGHT}                              & See Section~\ref{info:layerheight}            & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & See Section~\ref{info:heat_detectors}         & $^\circ$C      & D            \\ \hline
 {\ct LOWER TEMPERATURE}                         & See Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
 {\ct MASS FLOW}                                 & See Section~\ref{info:flows}                  & kg/s           & D            \\ \hline
-{\ct MIXTURE\_FRACTION}                         & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
+{\ct MASS FLUX}$^*$                             & Mass flux at solid surface                    & kg/m$^2$/s     & B,D          \\ \hline
+{\ct MASS FLUX X}$^*$                           & $\rho u Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
+{\ct MASS FLUX Y}$^*$                           & $\rho v Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
+{\ct MASS FLUX Z}$^*$                           & $\rho w Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+\noindent
+\begin{tabbing}
+$^*$    \hspace{0.2in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+$^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}.
+\end{tabbing}
+
+\clearpage
+
+\begin{table}[ht!]
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
+{\ct MASS FRACTION}$^*$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
+{\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
+{\ct MPUA}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
+{\ct MPUV}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct nitrogen}                                  & $X_{N_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
 {\ct optical depth}                             & $OD=K/2.3$ (Section~\ref{info:visibility})    & 1/m            & D,I,P,S      \\ \hline
 {\ct other}                                     & $X_{other}(Z)$                                & mol/mol        & D,I,P,S      \\ \hline
 {\ct other mass fraction}                       & $Y_{other}(Z)$                                & mol/mol        & D,I,P,S      \\ \hline
 {\ct oxygen}                                    & $X_{O_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
 {\ct oxygen mass fraction}                      & $Y_{O_2}(Z)$                                  & kg/kg          & D,I,P,S      \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-\begin{table}[p]
-\begin{center}
-\begin{tabular}{|l|c|c|c|}
-\hline
-Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
-{\ct [PART\_ID]\_AMPUA}                         & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
-{\ct [PART\_ID]\_CPUA}                          & See Section~\ref{info:part_output}            & kW/m$^2$       & B,D          \\ \hline
-{\ct [PART\_ID]\_FLUX\_X}                       & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
-{\ct [PART\_ID]\_FLUX\_Y}                       & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
-{\ct [PART\_ID]\_FLUX\_Z}                       & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
-{\ct [PART\_ID]\_MPUA}                          & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
-{\ct [PART\_ID]\_MPUV}                          & See Section~\ref{info:part_output}            & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct path obscuration}                          & See Section~\ref{info:beam_detector}          & \%             & D            \\ \hline
 {\ct PRESSURE}                                  & $\tp$                                         & Pa             & D,I,P,S      \\ \hline
-{\ct PRESSURE\_COEFFICIENT}                     & $C_p$ (Section~\ref{info:wind})               &                & B,D          \\ \hline
-{\ct RADIANT\_INTENSITY}                        & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
-{\ct RADIATIVE\_FLUX}                           & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
-{\ct RADIATIVE\_FLUX\_GAS}                      & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D            \\ \hline
+{\ct PRESSURE COEFFICIENT}                      & $C_p$ (Section~\ref{info:wind})               &                & B,D          \\ \hline
+{\ct RADIANT INTENSITY}                         & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
+{\ct RADIATIVE HEAT FLUX}                       & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
+{\ct RADIATIVE HEAT FLUX GAS}                   & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D            \\ \hline
 {\ct RADIOMETER}                                & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Relative humidity                             & \%             & D,I,P,S      \\ \hline
 {\ct soot volume fraction}                      & $\rho Y_s(Z)/\rho_s$                          & mol/mol        & D,I,P,S      \\ \hline
 {\ct soot density}                              & $\rho Y_s(Z)$                                 & mg/m$^3$       & D,I,P,S      \\ \hline
-{\ct [SPEC\_ID]}                                & $Y$                                           & kg/kg          & D,I,P,S      \\ \hline
-{\ct [SPEC\_ID]\_VF}                            & $X$                                           & mol/mol        & D,I,P,S      \\ \hline
-{\ct [SPEC\_ID]\_FLUX\_X}                       & $\rho u Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
-{\ct [SPEC\_ID]\_FLUX\_Y}                       & $\rho v Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
-{\ct [SPEC\_ID]\_FLUX\_Z}                       & $\rho w Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
 {\ct spot obscuration}                          & See Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
 {\ct SPRINKLER LINK TEMPERATURE}                & See Section~\ref{info:sprinklers}             & $^\circ$C      & D            \\ \hline
 {\ct SURFACE DENSITY}                           & $\sum\int\rho_i dx$                           & kg/m$^2$       & B,D          \\ \hline
@@ -6938,13 +6955,19 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct VISIBILITY}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
 {\ct visibility}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & See Section~\ref{info:flows}                  & m$^3$/s        & D            \\ \hline
-{\ct WALL\_TEMPERATURE}                         & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
-{\ct WALL\_THICKNESS}                           & $\Delta x_w$                                  & m              & B,D          \\ \hline
+{\ct VOLUME FRACTION}$^*$                       & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
+{\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
+{\ct WALL THICKNESS}                            & $\Delta x_w$                                  & m              & B,D          \\ \hline
 {\ct water vapor}                               & $X_{H_2O}(Z)$                                 & mol/mol        & D,I,P,S      \\ \hline
-{\ct WATER VAPOR}                               & $X_{H_2O}$                                    & mol/mol        & D,I,P,S      \\ \hline
+{\ct water vapor mass fraction}                 & $Y_{H_2O}(Z)$                                 & kg/kg          & D,I,P,S      \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
+\noindent
+\begin{tabbing}
+$^*$    \hspace{0.2in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+$^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}.
+\end{tabbing}
 
 
 
