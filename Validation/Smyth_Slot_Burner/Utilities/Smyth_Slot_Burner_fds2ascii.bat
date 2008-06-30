@@ -1,0 +1,3 @@
+fds2ascii <Smyth_Slot_Burner_7mm_fds2ascii.inp
+fds2ascii <Smyth_Slot_Burner_9mm_fds2ascii.inp
+fds2ascii <Smyth_Slot_Burner_11mm_fds2ascii.inp
