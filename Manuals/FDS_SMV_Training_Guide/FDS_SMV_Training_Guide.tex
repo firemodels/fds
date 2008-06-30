@@ -6,8 +6,8 @@
         urlcolor=linkblue,     % \href{...}{...} external (URL)
         citecolor=linkred,     % citation number colors
         linkcolor=linknavy,    % \ref{...} and \pageref{...}
-        pdftitle={Fire Dynamics Simulator (Version 5) User's Guide},
-        pdfauthor={Kevin McGrattan, Bryan Klein, Simo Hostikka, Jason Floyd},
+        pdftitle={Fire Fighter Trainer Scenario Guide},
+        pdfauthor={Glenn Forney, Kevin McGrattan, Daniel Madrykowski and Stephen Kerber},
         pdfsubject={User Guide},
         pdfkeywords={FDS, Fire Model, NIST, BFRL},
         pdfproducer={pdflatex},
@@ -62,13 +62,9 @@
 \setlength{\oddsidemargin}{0.0in}
 \setlength{\evensidemargin}{0.0in}
 
-
-
-
 \newcommand{\be}{\begin{equation}}
 \newcommand{\ee}{\end{equation}}
-
-
+\newcommand{\note}{{\bf Note:}}
 
 \begin{document}
 \bibliographystyle{unsrt}
@@ -83,7 +79,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator and Smokeview \\ Training Guide }
+\Huge \flushright{Fire Fighter Trainer \\ Scenario Guide }
 
 \vspace{.5in}
 
@@ -117,7 +113,7 @@ Stephen Kerber \\
 \vspace{.75in}
 
 \Huge
-\flushright{Fire Dynamics Simulator and Smokeview \\ Training Guide}
+\flushright{Fire Fighter Trainer \\ Scenario Guide }
 
 \vspace{.25in}
 
@@ -133,8 +129,6 @@ Stephen Kerber \\
 \vspace{.25in}
 
 \flushright{\today \\
-FDS Version 5.2 \\
-Smokeview Version 5.2 \\
 $SVN Repository$~$Revision: 1815 $}
 
 \vfill
@@ -189,8 +183,12 @@ Mail: Stop SSOP, Washington, DC 20402-0001 }
 
 \chapter{Preface}
 
-This Guide contains a description of the numerical simulation of a variety of full-scale fire experiments
-using the Fire Dynamics Simulator and its visualization program, Smokeview. 
+This Guide contains a description of experiments and corresponding numerical simulations performed in
+facilities used  to train fire fighters.  It also contains descriptions of demonstration
+numerical simulations designed to illustrate fundamental fire phenomena encountered while
+fighting fire, phenomena such as how smoke layers behave in the presense or absence of
+door openings.  These simulations are performed by the Fire Dynamics Simulator (FDS)
+and visualized  by the visualization program, Smokeview.
 
 Note that this Guide does not provide the background theory for FDS nor a detailed description of Smokeview. The FDS
 Technical Reference Guide~\cite{FDS_Tech_Guide_5} contains details about the governing
@@ -233,18 +231,15 @@ University in 1987 and a doctorate at the Courant Institute of New
 York University in 1991. He joined the NIST staff in 1992 and has
 since worked on the development of fire models, most notably the Fire
 Dynamics Simulator.
-\item[Daniel Madrzykowski] is ...
-\item[Stephen Kerber] is ...
+\item[Daniel Madrzykowski] is a fire protection engineer
+in BFRL of NIST.
+\item[Stephen Kerber] is a fire protection engineer
+in BFRL of NIST.
 \end{description}
 
 
 
 \chapter{Acknowledgments}
-
-
-
-
-
 
 
 \tableofcontents
@@ -255,14 +250,90 @@ Dynamics Simulator.
 
 
 \chapter{Introduction}
+The most effective method for learning how to fight fire is to fight fire.  This however is expensive and
+particularly dangerous for the trainee.   In particular, some fire situations that must be trained for are too
+large and dangerous to re-create in a training setting involving real fires.  Environmental concerns are
+limiting the amount and kind of live fire training available in many areas of the country.  Methods are then
+needed to allow fire fighters to gain valuable experience using virtual reality techniques already applied in
+other fields so that they may learn without the possibility of harming themselves or others.  It is a challenge
+to simulate fire fighter training scenarios that are accurate and to present them in a form that are realistic
+and practical due to the large amounts of computational resources required.   Presently, fire fighter trainers
+either concentrate on incident command issues or depend on an {\em expert}\ to alter the fire.
+The trainer developed
+here will be Physics based so that the fire and smoke visualized will be closer to what one would expect to find
+when fighting real fires.
 
-The software described in this document, Fire Dynamics Simulator (FDS), is a computational
-fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the
-Navier-Stokes equations\index{Navier-Stokes} appropriate for low-speed, thermally-driven flow
+Presently, fire fighters train in the classroom and in live fire training using real fires in real
+facilities.  Visual based training presently relies on experts to run the fire and are not physics based.
+This project will continue to develop a computer based fire fighting training tool to improve training
+opportunities while lowering the cost and risk of death and injury.   Two methods are being used to create a
+training tool.   The first and simpler method  is to use FDS and Smokeview to create animations of fire
+scenarios.  These animations will be viewable in a standard DVD player.  The DVD menus will be used to walk a
+fire fighter through a series of decisions.  The second method will be more interactive.  Using Smokeview,
+the trainee will {\em walk}\ through an FDS generated fire scene observing and making decisions.  Several  scenarios
+will be simulated with FDS.  These scenarios involve cases where experimental data is available; the Maryland
+Fire Research Institute's (MFRI) training tower and the Montgomery County's flashover trainer.  In subsequent
+years, more generic scenarios will be modeled; a ranch house (one level) and a townhouse
+(multi-level).
+
+NIST is uniquely positioned to apply research to this problem that it developed for modeling fire and smoke
+movement.  The fire science software tools, NIST FDS and Smokeview will be used as a basis for developing a
+virtual reality based fire fighting training tool.  As a fire simulation unfolds a series of natural break point
+will be encountered where the trainee will be asked questions such as: Should the window be opened?  Should the
+door be closed? Should the hose stream be opened?  The simulation will continue based on the answers provided.
+These questions will be designed to teach the trainee about tactics relevant to fire fighting such as the
+effect ventilation on fire spread.    Since FDS cannot yet perform calculations in real time, simulations
+will be pre-computed for all possible question outcomes.  Smokeview will be enhanced to be able to {\em jump}
+from one scenario to another according to the trainee's responses.
+
+
+\section{Numerical Fire Fighting Training Tools}
+Two software tools are used to generate the Physics based fire fighter training scenarios
+described in this document.  The first tool is the Fire Dynamics Simulator (FDS).
+It performs numerical simulations and is a computational
+fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves a form of the
+Navier-Stokes equations appropriate for low-speed, thermally-driven flow
 with an emphasis on smoke and heat transport from fires.
+These approximations allow the computations to be performed both accurately and efficiently.
 
+The second tool is called Smokeview.  Smokeview {\em translates}\ data simulated by FDS into
+various types of moving or animated images.  These images range in complexity from simple tracer particles,
+to 2D shaded contours, 3D level surfaces or realistic looking smoke and fire.  It cannot be emphasized enough
+that these images are not cartoons. they are drawn based on numerical results generated by FDS.
 
+\section{Overview}
+This publication documents a series of FDS test cases used as a basis for fire fighter training.
+These test cases fall into two logical groups, those that are based on a full scale experiments and those that are meant to be demonstrations of fire phenomena encountered by fire fighters.
 
+The FDS scenarios that are experimentally based are documented by 1) briefly describing the experiment with references to a more complete description, 2) briefly describing the numerical modeling that was performed giving the relevant input files and 3) giving a comparison of some of the experimental data collected with the corresponding numerical results.
+
+\part{Demonstration Cases}
+\chapter{Two Room}
+\section{Description of Test Cases}
+\section{Results}
+
+\part{Experimental Cases}
+\chapter{Flashover Trainer}
+\section{Description of Experiment}
+\note\ Need the following:
+\begin{enumerate}
+\item drawings containing measurements of facility,
+\item photos,
+\item test report describing
+measurements taken, where they were taken
+\item a cross-walk between measurements taken and where these measurements are recored (ie
+in what column of a spread sheet file).
+\end{enumerate}
+\section{Description of FDS setup}
+\section{Comparisons}
+\chapter{Training Tower}
+\section{Description of Experiment}
+\section{Description of FDS setup}
+\section{Comparisons}
+\chapter{Ranch House}
+\section{Description of Experiment (\note\ to be performed about 9/2008)}
+\section{Description of FDS setup}
+\section{Comparisons}
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
