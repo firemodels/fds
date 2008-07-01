@@ -216,8 +216,8 @@ def extract_comp_data(comp_file_info):
     exp_initial_value = comp_file_info['Exp_Intitial_Value'] #Initial Value for Quantity
     exp_X_column_name_value = comp_file_info['Exp_X_Col_Name'].strip() #Experimental Data X Column Name
     exp_Y_column_name_value = comp_file_info['Exp_Y_Col_Name'].strip() #Experimental Data Y Column Name
-    X_Scale_Factor = int(comp_file_info['Scale_X'])
-    Y_Scale_Factor = int(comp_file_info['Scale_Y'])
+    X_Scale_Factor = float(comp_file_info['Scale_X'])
+    Y_Scale_Factor = float(comp_file_info['Scale_Y'])
         
     mod_data_filename = comp_file_info['Mod_Filename'] #String of filename
     mod_column_name_row_index = int(comp_file_info['Mod_Col_Name_Row'])-1 #Modeling Data Column Name Row Number
