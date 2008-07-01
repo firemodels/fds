@@ -468,6 +468,8 @@ def comparison_plot(plot_data,exp_data,mod_data):
     title_quadrant = int(plot_data['Title_Quadrant'])
     key_pos = plot_data['Key_Position']
     key_dist = 0.2*unit.v_cm
+    v_dist   = 0.7*unit.v_cm
+    h_dist   = 0.4*unit.v_cm
     plot_width = int(plot_data['Plot_Width(cm)'])
     
     #Create filename from fields in input file record.
@@ -484,7 +486,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
     
     #Begin Plotting
     # Initialize graph object
-    g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist), 
+    g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
                         x=graph.axis.linear(title=x_title, min=min_x, max=max_x), 
                         y=graph.axis.linear(title=y_title, min=min_y, max=max_y))
     
@@ -530,16 +532,16 @@ def comparison_plot(plot_data,exp_data,mod_data):
     
     # Now plot the Title text, alignment based on title quadrant setting.
     if title_quadrant == 1:
-        g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
+        g.text(        0.2, g.height - 0.2, plot_title, [text.halign.left,  text.valign.top,    text.size.normalsize])
     elif title_quadrant == 2:
-        g.text(g.width-0.1, g.height - 0.2, plot_title, [text.halign.right, text.valign.top, text.size.normalsize])
+        g.text(g.width-0.2, g.height - 0.2, plot_title, [text.halign.right, text.valign.top,    text.size.normalsize])
     elif title_quadrant == 3:
-        g.text(0.1, 0.2, plot_title, [text.halign.left, text.valign.bottom, text.size.normalsize])
+        g.text(        0.2,            0.2, plot_title, [text.halign.left,  text.valign.bottom, text.size.normalsize])
     elif title_quadrant == 4:
-        g.text(g.width-0.1, 0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
+        g.text(g.width-0.2,            0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
     else:
         print "A quadrant for the title location was not specified./nUsing the default top left quadrant."
-        g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
+        g.text(        0.2, g.height - 0.2, plot_title, [text.halign.left,  text.valign.top,    text.size.normalsize])
         
     # Write the output
     plot_file_path = output_directory+plot_file_name
@@ -574,8 +576,10 @@ def scatter_plot(group_info,scatter_info,data_set):
             title_quadrant = int(scatter_info[int(quantity_number)]['Title_Quadrant'])
             plot_width = int(scatter_info[int(quantity_number)]['Plot_Width(cm)'])
             # Specify the position and line spacing of the plot key.
-            key_pos = scatter_info[int(quantity_number)]['Key_Position']
-            key_dist = 0.15*unit.v_cm
+            key_pos  = scatter_info[int(quantity_number)]['Key_Position']
+            key_dist = 0.1*unit.v_cm
+            v_dist   = 0.7*unit.v_cm
+            h_dist   = 0.4*unit.v_cm
             
             #Create filename from fields in input file record.
             plot_file_name = scatter_info[int(quantity_number)]['Plot_Filename']
@@ -593,7 +597,7 @@ def scatter_plot(group_info,scatter_info,data_set):
             #print exp_data
             #print mod_data
             # Initialize graph object
-            g = graph.graphxy(width=plot_width, ratio=1/1, key=graph.key.key(pos=key_pos, dist=key_dist), 
+            g = graph.graphxy(width=plot_width, ratio=1/1, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist, textattrs=[text.size.footnotesize]), 
                                 x=graph.axis.linear(title=x_title, min=min_x, max=max_x), 
                                 y=graph.axis.linear(title=y_title, min=min_y, max=max_y))
             
@@ -704,16 +708,16 @@ def scatter_plot(group_info,scatter_info,data_set):
             
             # Now plot the Title text, alignment based on title quadrant setting.
             if title_quadrant == 1:
-                g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
+                g.text(        0.2, g.height - 0.2, plot_title, [text.halign.left,  text.valign.top,    text.size.normalsize])
             elif title_quadrant == 2:
-                g.text(g.width-0.1, g.height - 0.2, plot_title, [text.halign.right, text.valign.top, text.size.small])
+                g.text(g.width-0.2, g.height - 0.2, plot_title, [text.halign.right, text.valign.top,    text.size.normalsize])
             elif title_quadrant == 3:
-                g.text(0.1, 0.2, plot_title, [text.halign.left, text.valign.bottom, text.size.small])
+                g.text(        0.2,            0.2, plot_title, [text.halign.left,  text.valign.bottom, text.size.normalsize])
             elif title_quadrant == 4:
-                g.text(g.width-0.1, 0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.small])
+                g.text(g.width-0.2,            0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
             else:
                 print "A title location was not specified./nUsing the default top left quadrant."
-                g.text(0.1, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.small])
+                g.text(        0.2, g.height - 0.2, plot_title, [text.halign.left,  text.valign.top,    text.size.normalsize])
             
             #Make %error text on plot by error bars.
             # pos_percent_error = str(percent_error)+"%"
