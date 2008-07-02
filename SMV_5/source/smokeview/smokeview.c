@@ -876,7 +876,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
         getPixelCount();
         sniffErrors("after getPixelCount");
       }
-      if(update_initcullplane==1)initcullplane(cullsmoke);
+      if(cullactive==1&&update_initcullplane==1)initcullplane(cullsmoke);
       sniffErrors("after initcullplane");
 #endif
     }
