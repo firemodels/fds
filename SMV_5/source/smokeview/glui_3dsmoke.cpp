@@ -412,17 +412,21 @@ void SMOKE_3D_CB(int var){
     if(usegpu==1){
       skipframes->set_int_val(0);
       skipframes->disable();
+#ifdef pp_CULL
       if(cullactive==1){
         CHECKBOX_smokecullflag->enable();
       }
       SPINNER_cull_portsize->enable();
       CHECKBOX_show_cullports->enable();
+#endif
     }
     else{
       skipframes->enable();
+#ifdef pp_CULL
       CHECKBOX_smokecullflag->disable();
       SPINNER_cull_portsize->disable();
       CHECKBOX_show_cullports->disable();
+#endif
     }
     break;
 #endif

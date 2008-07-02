@@ -613,7 +613,7 @@ EXTERNCPP void readsmoke3d(int ifile,int flag, int *errorcode);
 #ifdef pp_LIGHT
 EXTERNCPP void update_showlight(void);
 EXTERNCPP int getsmoke3d_sizes(char *smokefile, char *lightfile, int uselight, int version, 
-                      float **timelist, int *use_smokeframe,
+                      float **timelist, int **use_smokeframe,
                       int *nchars_uncompressed, 
                       int **nchars_compressed,
                       int **nchars_compressed_full,
