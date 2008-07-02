@@ -490,7 +490,7 @@ void keyboard(unsigned char key, int x, int y){
   }
 #endif
 #ifdef _DEBUG 
-  if(strncmp((const char *)&key2,"l",1)==0){
+  if(nsmoke3d>0&&strncmp((const char *)&key2,"l",1)==0){
     smokecullflag=1-smokecullflag;
     if(smokecullflag==0){
       smokedrawtest=1-smokedrawtest;
@@ -499,7 +499,7 @@ void keyboard(unsigned char key, int x, int y){
     update_smoke3dflags();
     return;
   }
-  if(strncmp((const char *)&key2,"n",1)==0){
+  if(nsmoke3d>0&&strncmp((const char *)&key2,"n",1)==0){
     adjustalphaflag++;
     if(adjustalphaflag>3)adjustalphaflag=0;
     printf("adjustalphaflag=%i\n",adjustalphaflag);
@@ -580,16 +580,16 @@ void keyboard(unsigned char key, int x, int y){
   }
 #ifdef pp_CULL
   if(strncmp((const char *)&key2,"C",1)==0){
-    if(cullactive==1){
+    if(nsmoke3d>0&&cullactive==1){
       cullsmoke=1-cullsmoke;
       update_smoke3dflags();
       initcull(cullsmoke);
+      print_gpu_cull_state();
     }
-    print_gpu_cull_state();
   }
 #endif
 #ifdef pp_GPU
-  if(strncmp((const char *)&key2,"G",1)==0){
+  if(nsmoke3d>0&&strncmp((const char *)&key2,"G",1)==0){
     if(gpuactive==1)usegpu=1-usegpu;
     update_smoke3dflags();
     print_gpu_cull_state();
