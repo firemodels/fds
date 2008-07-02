@@ -4048,11 +4048,13 @@ case -2:
 
 void init_cull_exts(void){
   char version_label[256];
+  char version_label2[256];
   int i, major,  minor;
   float version;
 
   cullactive=0;
   strcpy(version_label,(char *)glGetString(GL_VERSION));
+  strcpy(version_label2,version_label);
   for(i=0;i<strlen(version_label);i++){
     if(version_label[i]=='.')version_label[i]=' ';
   }
@@ -4062,7 +4064,7 @@ void init_cull_exts(void){
   }
   if(cullactive==0){
     trim(version_label);
-    printf("Smokeview is running on a system using OpenGL %s\n",version_label);
+    printf("Smokeview is running on a system using OpenGL %s\n",version_label2);
     printf("OpenGL 1.5 or later in order to implement smoke culling.\n");
     cullsmoke=0;
   }
