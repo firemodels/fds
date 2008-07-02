@@ -42,7 +42,7 @@ EXTERNCPP void log_print(char *output);
 #endif
 EXTERNCPP void init_avatar(void);
 #ifdef pp_GPU
-EXTERNCPP int log2(float xx);
+EXTERNCPP int log_base2(float xx);
 #endif
 EXTERNCPP void readterrain(char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
