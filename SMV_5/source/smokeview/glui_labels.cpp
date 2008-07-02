@@ -26,6 +26,7 @@ int nevacloaded,nplot3dloaded,nsmoke3dloaded,nisoloaded,nsliceloaded,nvsliceload
 
 GLUI *glui_labels=NULL;
 
+GLUI_Spinner *SPINNER_sensorrelsize=NULL;
 GLUI_Panel *panel_transparency=NULL;
 GLUI_Spinner *SPINNER_labels_transparency=NULL;
 GLUI_Checkbox *CHECKBOX_labels_colorbar=NULL;
@@ -146,10 +147,12 @@ extern "C" void glui_labels_setup(int main_window){
 
   CHECKBOX_labels_hms=glui_labels->add_checkbox("hms time label",&vishmsTimelabel,LABELS_HMS,Labels_CB);
 
-
   RADIO_fontsize = glui_labels->add_radiogroup(&fontindex,LABELS_fontsize,Labels_CB);
   glui_labels->add_radiobutton_to_group(RADIO_fontsize,"small font");
   glui_labels->add_radiobutton_to_group(RADIO_fontsize,"large font");
+
+  SPINNER_sensorrelsize=glui_labels->add_spinner("Sensor Scaling",GLUI_SPINNER_FLOAT,&sensorrelsize);
+  SPINNER_sensorrelsize->set_float_limits(0.1,10.0,GLUI_LIMIT_CLAMP);
 
   if((npartinfo>0)||nslice>0||nvslice>0||niso>0||npatch_files||nsmoke3d>0||nplot3d>0){
     glui_labels->add_column(true);

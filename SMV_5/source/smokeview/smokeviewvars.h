@@ -468,6 +468,7 @@ SVEXTERN int stepclip_X,stepclip_Y,stepclip_Z;
 SVEXTERN float partpointsize,vectorpointsize,streaklinewidth;
 SVEXTERN float vectorlinewidth;
 SVEXTERN float sprinklerabssize, sensorabssize, heatabssize;
+SVEXTERN float sensorrelsize;
 
 SVEXTERN float linewidth, ventlinewidth, highlight_linewidth;
 SVEXTERN float sliceoffset_factor, ventoffset_factor;

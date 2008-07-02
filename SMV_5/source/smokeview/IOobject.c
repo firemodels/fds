@@ -142,7 +142,9 @@ void draw_devices(void){
     if(devicei->angle_elev!=0.0){
       glRotatef(-devicei->angle_elev,0.0,1.0,0.0);
     }
-
+    if(sensorrelsize!=1.0){
+      glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
+    }
     if(showtime==1&&itime>=0&&itime<ntimes&&
       times!=NULL&&devicei->act_time>=0.0&&times[itime]>=devicei->act_time&&
       devicei->object->nframes>1){
