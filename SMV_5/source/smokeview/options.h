@@ -48,6 +48,9 @@
 #define USE_ZLIB
 #define pp_SCRIPT
 //#define NO_GLUTPOSTDISPLAY
+#define pp_GPU
+#define pp_CULL
+// #define pp_GPU_BLANK
 
 #ifdef pp_ALPHA2
 #define pp_TOUR
@@ -63,8 +66,6 @@
 #ifdef pp_ALPHA
 #define pp_LOGFILE
 #define pp_LIGHT
-#define pp_GPU
-#define pp_CULL
 #define pp_SHOWLIGHT
 #define pp_COLOR
 #endif

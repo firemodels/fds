@@ -27,21 +27,24 @@ int setSmokeShaders() {
 
   const GLchar *FragmentShaderSource[]={
     "varying vec4 newcolor;"
+#ifdef pp_GPU_BLANK
     "varying float fblank;"
+#endif
     "void main(){"
-
-    // "float a,base;"
-    // "if(fblank>0.95)discard;"
-    // "if(fblank>0.001){"
-    // "  a=1.0-fblank;"
-    // "  base=1.0-newcolor.a/a;"
-    // "  if(base>0.0){"
-    // "    newcolor.a=(1.0-pow(base,a));"
-    // "  }"
-    // "  else{"
-    // "    newcolor.a=0.0;"
-    // "  }"
-    // "}"
+#ifdef pp_GPU_BLANK
+     "float a,base;"
+     "if(fblank>0.95)discard;"
+     "if(fblank>0.001){"
+     "  a=1.0-fblank;"
+     "  base=1.0-newcolor.a/a;"
+     "  if(base>0.0){"
+     "    newcolor.a=(1.0-pow(base,a));"
+     "  }"
+     "  else{"
+     "    newcolor.a=0.0;"
+     "  }"
+     "}"
+#endif
       "gl_FragColor = newcolor;"
     "}"
   };
@@ -58,8 +61,11 @@ int setSmokeShaders() {
     "uniform float smoke3d_rthick;"
     "uniform int adjustalphaflag;"
     "varying vec4 newcolor;"
+#ifdef pp_GPU_BLANK
     "varying float fblank;"
-    "attribute float hrr, smoke_alpha, blank;"
+    "attribute float blank;"
+#endif
+    "attribute float hrr, smoke_alpha;"
     "void main()"
     "{"
     "  float bottom,top,alpha,r;"
@@ -96,7 +102,9 @@ int setSmokeShaders() {
     "    newcolor = vec4(s_shade,s_shade,s_shade,alpha);"
 #endif
     "  }"
+#ifdef pp_GPU_BLANK
     "  fblank=blank;"
+#endif
     "  gl_Position = ftransform();"
     "}"
   };
