@@ -189,18 +189,20 @@ void UnloadSmokeShaders(void){
 
 void init_shaders(void){
   char version_label[256];
+  char version_label2[256];
   int i, major, minor;
 
 	glewInit();
   gpuactive=0;
   strcpy(version_label,(char *)glGetString(GL_VERSION));
+  strcpy(version_label2,version_label);
   for(i=0;i<strlen(version_label);i++){
     if(version_label[i]=='.')version_label[i]=' ';
   }
   sscanf(version_label,"%i %i",&major,&minor);
   if(major<2){
     trim(version_label);
-    printf("Smokeview is running on a system using OpenGL %s\n",version_label);
+    printf("Smokeview is running on a system using OpenGL %s\n",version_label2);
     printf("OpenGL 2.0 or later is required to use the GPU.\n");
 		printf("GPU smoke shader not supported.\n");
     usegpu=0;
