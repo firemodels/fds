@@ -192,7 +192,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   SPINNER_smoke3d_rthick=glui_3dsmoke->add_spinner_to_panel(panel6,"Thickness",
     GLUI_SPINNER_FLOAT,&smoke3d_rthick,SMOKE_RTHICK,SMOKE_3D_CB);
   SPINNER_smoke3d_rthick->set_float_limits(1.0,255.0);
-  smoke3d_thick = log2(smoke3d_rthick);
+  smoke3d_thick = log_base2(smoke3d_rthick);
 #else
   SPINNER_smoke3d_thick=glui_3dsmoke->add_spinner_to_panel(panel6,"Thickness",
     GLUI_SPINNER_INT,&smoke3d_thick,SMOKE_THICK,SMOKE_3D_CB);
@@ -387,7 +387,7 @@ void SMOKE_3D_CB(int var){
 #ifdef pp_GPU
   case SMOKE_RTHICK:
   
-    smoke3d_thick = log2(smoke3d_rthick);
+    smoke3d_thick = log_base2(smoke3d_rthick);
     GLUTPOSTREDISPLAY
     force_redisplay=1;
     IDLE();

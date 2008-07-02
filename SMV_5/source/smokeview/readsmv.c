@@ -7455,7 +7455,7 @@ int readini2(char *inifile, int loaddatafile, int localfile){
         sscanf(buffer,"%f",&smoke3d_rthick);
         if(smoke3d_rthick<1.0)smoke3d_rthick=1.0;
         if(smoke3d_rthick>255.0)smoke3d_rthick=255.0;
-        smoke3d_thick=log2(smoke3d_rthick);
+        smoke3d_thick=log_base2(smoke3d_rthick);
         continue;
       }
 #endif
