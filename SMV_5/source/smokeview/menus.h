@@ -2637,7 +2637,15 @@ void ParticleMenu(int value){
 void ZoneMenu(int value){
   int i,errorcode;
   if(value>=0){
-//    ReadZoneFile=1;
+#ifdef pp_SCRIPT
+    if(scriptoutstream!=NULL){
+      char *file;
+
+      file = zoneinfo[value].file;
+      fprintf(scriptoutstream,"LOADFILE\n");
+      fprintf(scriptoutstream," %s\n",file);
+    }
+#endif
     readzone(zoneinfo[value].file,value,LOAD,&errorcode);
   }
   else{
