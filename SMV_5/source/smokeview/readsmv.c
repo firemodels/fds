@@ -6911,6 +6911,13 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       sscanf(buffer,"%f ",&sensorabssize);
       continue;
       }
+    if(match(buffer,"SENSORRELSIZE",13)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f ",&sensorrelsize);
+      if(sensorrelsize<=0.1)sensorrelsize=0.1;
+      if(sensorrelsize>10.0)sensorrelsize=10.0;
+      continue;
+      }
     if(match(buffer,"SETBW",5)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&setbw);
@@ -8078,6 +8085,8 @@ void writeini(int flag){
   fprintf(fileout," %f\n",VECFRACTION);
   fprintf(fileout,"SENSORABSSIZE\n");
   fprintf(fileout," %f\n",sensorabssize);
+  fprintf(fileout,"SENSORRELSIZE\n");
+  fprintf(fileout," %f\n",sensorrelsize);
   fprintf(fileout,"SPRINKLERABSSIZE\n");
   fprintf(fileout," %f\n",sprinklerabssize);
   if(screenWidth == glutGet(GLUT_SCREEN_WIDTH)||
