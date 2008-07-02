@@ -114,8 +114,6 @@ void get_newscriptfilename(char *newscriptfilename){
   int nexti;
   scriptfiledata *scriptfile;
 
-
-
   for(i=0;i<1000;i++){
     if(i==0){
       strcpy(buffer,fdsprefix);
@@ -152,7 +150,6 @@ scriptfiledata *insert_scriptfile(char *file){
     if(scriptfile->file==NULL)continue;
     if(strcmp(file,scriptfile->file)==0)return NULL;
   }
-
 
   NewMemory((void **)&thisptr,sizeof(scriptfiledata));
   nextptr = &last_scriptfile;
@@ -415,7 +412,6 @@ int compile_script(char *scriptfile){
         NewMemory((void **)&scripti->cval,len+1);
         strcpy(scripti->cval,buffer);
       }
-
 
       nscriptinfo++;
       continue;
@@ -750,10 +746,7 @@ void script_loadslice(scriptdata *scripti){
     } 
     break;
   }
-
-
 }
-
 
 /* ------------------ script_loadvslice ------------------------ */
 
@@ -932,6 +925,17 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
+  for(i=0;i<nzone;i++){
+    zone *zonei;
+    char *file;
+
+    zonei = zoneinfo + i;
+    file = zonei->file;
+    if(strcmp(file,scripti->cval)==0){
+      readzone(file,i,LOAD,&errorcode);
+    }
+  }
+
   printf("file %s was not loaded\n",scripti->cval);
 
 }
@@ -955,7 +959,6 @@ void script_loadvfile(scriptdata *scripti){
       LoadVSliceMenu(i);
       return;
     }
-
   }
   printf("vector slice file %s was not loaded\n",scripti->cval);
 
