@@ -324,9 +324,9 @@ char *get_chid(char *file){
 }
 #ifdef pp_GPU
 
-/* ------------------ log2 ------------------------ */
+/* ------------------ log_base2 ------------------------ */
 
-int log2(float xx){
+int log_base2(float xx){
   int r = 0;
   int x;
   x=xx;
