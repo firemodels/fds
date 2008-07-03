@@ -39,6 +39,7 @@ REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
 TYPE (INITIALIZATION_TYPE), POINTER :: IN
 TYPE (P_ZONE_TYPE), POINTER :: PZ
 TYPE (DEVICE_TYPE), POINTER :: DV
+REAL(EB) :: UU,WW
  
 IERR = 0
 M => MESHES(NM)
@@ -303,7 +304,9 @@ ANALYTIC_SOLN: IF (PERIODIC_TEST .AND. .TRUE.) THEN
    DO K=0,M%KBP1
       DO J=0,M%JBP1
          DO I=0,M%IBP1
-            M%H(I,J,K) = -( COS(2._EB*M%XC(I)) + COS(2._EB*M%ZC(K)) )
+            UU = 1._EB - 2._EB*COS(M%XC(I))*SIN(M%ZC(K))
+            WW = 1._EB + 2._EB*SIN(M%XC(I))*COS(M%ZC(K))
+            M%H(I,J,K) = -( COS(2._EB*M%XC(I)) + COS(2._EB*M%ZC(K)) ) + 0.5_EB*(UU**2+WW**2)
          ENDDO
       ENDDO
    ENDDO
