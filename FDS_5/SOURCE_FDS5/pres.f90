@@ -498,7 +498,7 @@ K_COARSE: DO KC=1,KBAR2
          II = I_LO(IC)-1
          DO KK=K_LO(KC),K_HI(KC)
             DO JJ=J_LO(JC),J_HI(JC)
-               DA = DY(JJ)*DZ(KK)
+               DA = R(II)*DY(JJ)*DZ(KK)
                IF (II>0) THEN
                   NO = CGI(II,JJ,KK)
                   A(N,N)  = A(N,N)  - DA/DX_M(N,NO)
@@ -520,7 +520,7 @@ K_COARSE: DO KC=1,KBAR2
                      DO KKO=IJKW(12,IW),IJKW(15,IW)
                         DO JJO=IJKW(11,IW),IJKW(14,IW)
                            DO IIO=IJKW(10,IW),IJKW(13,IW)
-                              DUDT_OTHER = DUDT_OTHER + OM%DUDT(IIO,JJO,KKO)*MIN(1._EB,M2%DY(JJO)*M2%DZ(KKO)/DA)
+                              DUDT_OTHER = DUDT_OTHER + OM%DUDT(IIO,JJO,KKO)*MIN(1._EB,M2%R(IIO)*M2%DY(JJO)*M2%DZ(KKO)/DA)
                            ENDDO
                         ENDDO
                      ENDDO
@@ -541,7 +541,7 @@ K_COARSE: DO KC=1,KBAR2
          II = I_HI(IC)
          DO KK=K_LO(KC),K_HI(KC)
             DO JJ=J_LO(JC),J_HI(JC)
-               DA = DY(JJ)*DZ(KK)
+               DA = R(II)*DY(JJ)*DZ(KK)
                IF (II<IBAR) THEN
                   NO = CGI(II+1,JJ,KK)
                   A(N,N)  = A(N,N)  - DA/DX_M(N,NO)
@@ -563,7 +563,7 @@ K_COARSE: DO KC=1,KBAR2
                      DO KKO=IJKW(12,IW),IJKW(15,IW)
                         DO JJO=IJKW(11,IW),IJKW(14,IW)
                            DO IIO=IJKW(10,IW),IJKW(13,IW)
-                              DUDT_OTHER = DUDT_OTHER + OM%DUDT(IIO-1,JJO,KKO)*MIN(1._EB,M2%DY(JJO)*M2%DZ(KKO)/DA)
+                              DUDT_OTHER = DUDT_OTHER + OM%DUDT(IIO-1,JJO,KKO)*MIN(1._EB,M2%R(IIO-1)*M2%DY(JJO)*M2%DZ(KKO)/DA)
                            ENDDO
                         ENDDO
                      ENDDO
@@ -670,7 +670,7 @@ K_COARSE: DO KC=1,KBAR2
          KK = K_LO(KC)-1
          DO JJ=J_LO(JC),J_HI(JC)
             DO II=I_LO(IC),I_HI(IC)
-               DA = DX(II)*DY(JJ)
+               DA = RC(II)*DX(II)*DY(JJ)
                IF (KK>0) THEN
                   NO = CGI(II,JJ,KK)
                   A(N,N)  = A(N,N)  - DA/DZ_M(N,NO) 
@@ -692,7 +692,7 @@ K_COARSE: DO KC=1,KBAR2
                      DO KKO=IJKW(12,IW),IJKW(15,IW)
                         DO JJO=IJKW(11,IW),IJKW(14,IW)
                            DO IIO=IJKW(10,IW),IJKW(13,IW)
-                              DWDT_OTHER = DWDT_OTHER + OM%DWDT(IIO,JJO,KKO)*MIN(1._EB,M2%DX(IIO)*M2%DY(JJO)/DA)
+                              DWDT_OTHER = DWDT_OTHER + OM%DWDT(IIO,JJO,KKO)*MIN(1._EB,M2%RC(IIO)*M2%DX(IIO)*M2%DY(JJO)/DA)
                            ENDDO
                         ENDDO
                      ENDDO
@@ -713,7 +713,7 @@ K_COARSE: DO KC=1,KBAR2
          KK = K_HI(KC)
          DO JJ=J_LO(JC),J_HI(JC)
             DO II=I_LO(IC),I_HI(IC)
-               DA = DX(II)*DY(JJ)
+               DA = RC(II)*DX(II)*DY(JJ)
                IF (KK<KBAR) THEN
                   NO = CGI(II,JJ,KK+1)
                   A(N,N)  = A(N,N)  - DA/DZ_M(N,NO) 
@@ -735,7 +735,7 @@ K_COARSE: DO KC=1,KBAR2
                      DO KKO=IJKW(12,IW),IJKW(15,IW)
                         DO JJO=IJKW(11,IW),IJKW(14,IW)
                            DO IIO=IJKW(10,IW),IJKW(13,IW)
-                              DWDT_OTHER = DWDT_OTHER + OM%DWDT(IIO,JJO,KKO-1)*MIN(1._EB,M2%DX(IIO)*M2%DY(JJO)/DA)
+                              DWDT_OTHER = DWDT_OTHER + OM%DWDT(IIO,JJO,KKO-1)*MIN(1._EB,M2%RC(IIO)*M2%DX(IIO)*M2%DY(JJO)/DA)
                            ENDDO
                         ENDDO
                      ENDDO
@@ -890,12 +890,12 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                   NO = M2%CGI(IIO,JJO,KKO)
                   SELECT CASE(IOR)
                      CASE( 1) 
-                        DA      = DY(JJ)*DZ(KK)
+                        DA      = R(II)*DY(JJ)*DZ(KK)
                         DHDX_S(NOM) = DHDX_S(NOM) + DA* (-DUDT_AVG(IW)-FVX(0,JJ,KK) + (B(N)-B(NO))/DX_M(N,NO) &
                               - (H(1,JJ,KK)-H(0,JJ,KK))*RDXN(0) )
                         AREA_XS(NOM) = AREA_XS(NOM) + DA
                      CASE(-1)
-                        DA      = DY(JJ)*DZ(KK)
+                        DA      = R(II-1)*DY(JJ)*DZ(KK)
                         DHDX_F(NOM) = DHDX_F(NOM) + DA* (-DUDT_AVG(IW)-FVX(IBAR,JJ,KK) + (B(NO)-B(N))/DX_M(N,NO) &
                               - (H(IBP1,JJ,KK)-H(IBAR,JJ,KK))*RDXN(IBAR) )
                         AREA_XF(NOM) = AREA_XF(NOM) + DA
@@ -910,12 +910,12 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               - (H(II,JBP1,KK)-H(II,JBAR,KK))*RDYN(JBAR) )
                         AREA_YF(NOM) = AREA_YF(NOM) + DA
                      CASE( 3)
-                        DA      = DX(II)*DY(JJ)
+                        DA      = RC(II)*DX(II)*DY(JJ)
                         DHDZ_S(NOM) = DHDZ_S(NOM) + DA* (-DWDT_AVG(IW)-FVZ(II,JJ,0) + (B(N)-B(NO))/DZ_M(N,NO) &
                               - (H(II,JJ,1)-H(II,JJ,0))*RDZN(0) )
                         AREA_ZS(NOM) = AREA_ZS(NOM) + DA
                      CASE(-3)
-                        DA      = DX(II)*DY(JJ)
+                        DA      = RC(II)*DX(II)*DY(JJ)
                         DHDZ_F(NOM) = DHDZ_F(NOM) + DA* (-DWDT_AVG(IW)-FVZ(II,JJ,KBAR) + (B(NO)-B(N))/DZ_M(N,NO)    &
                               - (H(II,JJ,KBP1)-H(II,JJ,KBAR))*RDZN(KBAR) )
                         AREA_ZF(NOM) = AREA_ZF(NOM) + DA
@@ -930,7 +930,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               DUUDT = -FVX(IBAR,JJ,KK) - RDXN(IBAR)*(H(IBP1,JJ,KK)-H(IBAR,JJ,KK))
                               BXF(JJ,KK) = DUUDT - DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
-                              DA      = DY(JJ)*DZ(KK)
+                              DA      = R(II-1)*DY(JJ)*DZ(KK)
                               AREA_XF(0) = AREA_XF(0) + DA
                               B_OTHER = -B(N) 
                               DHDX_F(0) = DHDX_F(0) + DA* (  (B_OTHER-B(N))/DX_M(N,N) )
@@ -941,7 +941,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               DUUDT = -FVX(0,JJ,KK) - RDXN(0)*(H(1,JJ,KK)-H(0,JJ,KK))
                               BXS(JJ,KK) = DUUDT + DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
-                              DA      = DY(JJ)*DZ(KK)
+                              DA      = R(II)*DY(JJ)*DZ(KK)
                               AREA_XS(0) = AREA_XS(0) + DA
                               B_OTHER = -B(N)
                               DHDX_S(0) = DHDX_S(0) + DA* (  (B(N)-B_OTHER)/DX_M(N,N)  )
@@ -974,7 +974,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               DWWDT = -FVZ(II,JJ,KBAR) - RDZN(KBAR)*(H(II,JJ,KBP1)-H(II,JJ,KBAR))
                               BZF(II,JJ) = DWWDT - DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
-                              DA      = DX(II)*DY(JJ)
+                              DA      = RC(II)*DX(II)*DY(JJ)
                               AREA_ZF(0) = AREA_ZF(0) + DA
                               B_OTHER = -B(N)
                               DHDZ_F(0) = DHDZ_F(0) + DA* (  (B_OTHER-B(N))/DZ_M(N,N)    )
@@ -985,7 +985,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               DWWDT  = -FVZ(II,JJ,0) - RDZN(0)*(H(II,JJ,1)-H(II,JJ,0))
                               BZS(II,JJ) = DWWDT + DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
-                              DA      = DX(II)*DY(JJ)
+                              DA      = RC(II)*DX(II)*DY(JJ)
                               AREA_ZS(0) = AREA_ZS(0) + DA
                               B_OTHER = -B(N) 
                               DHDZ_S(0) = DHDZ_S(0) + DA* (  (B(N)-B_OTHER)/DZ_M(N,N) )
