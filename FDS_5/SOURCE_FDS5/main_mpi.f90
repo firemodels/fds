@@ -2084,17 +2084,17 @@ DO NM=1,NMESHES
          IOR = M%IJKW(4,IW)
          SELECT CASE(IOR)
             CASE( 1)
-               VDOT_LOC(NM,NOM) = VDOT_LOC(NM,NOM) + M%DY(JJ)*M%DZ(KK)*M%U(0,JJ,KK)
+               VDOT_LOC(NM,NOM) = VDOT_LOC(NM,NOM) + M%R(II)*M%DY(JJ)*M%DZ(KK)*M%U(0,JJ,KK)
             CASE(-1)
-               VDOT_LOC(NM,NOM) = VDOT_LOC(NM,NOM) + M%DY(JJ)*M%DZ(KK)*M%U(M%IBAR,JJ,KK)
+               VDOT_LOC(NM,NOM) = VDOT_LOC(NM,NOM) + M%R(II-1)*M%DY(JJ)*M%DZ(KK)*M%U(M%IBAR,JJ,KK)
             CASE( 2)
                VDOT_LOC(NM,NOM) = VDOT_LOC(NM,NOM) + M%DX(II)*M%DZ(KK)*M%V(II,0,KK)
             CASE(-2)
                VDOT_LOC(NM,NOM) = VDOT_LOC(NM,NOM) + M%DX(II)*M%DZ(KK)*M%V(II,M%JBAR,KK)
             CASE( 3)
-               VDOT_LOC(NM,NOM) = VDOT_LOC(NM,NOM) + M%DX(II)*M%DY(JJ)*M%W(II,JJ,0)
+               VDOT_LOC(NM,NOM) = VDOT_LOC(NM,NOM) + M%RC(II)*M%DX(II)*M%DY(JJ)*M%W(II,JJ,0)
             CASE(-3)
-               VDOT_LOC(NM,NOM) = VDOT_LOC(NM,NOM) + M%DX(II)*M%DY(JJ)*M%W(II,JJ,M%KBAR)
+               VDOT_LOC(NM,NOM) = VDOT_LOC(NM,NOM) + M%RC(II)*M%DX(II)*M%DY(JJ)*M%W(II,JJ,M%KBAR)
          END SELECT
       ENDIF
    ENDDO
