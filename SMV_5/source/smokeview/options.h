@@ -39,6 +39,9 @@
 #define pp_COMPRESS
 #define pp_noappend
 #include "pragmas.h"
+#define pp_GPU
+#define pp_CULL
+// #define pp_GPU_BLANK
 #endif
 
 #define pp_SPHERE
@@ -48,9 +51,6 @@
 #define USE_ZLIB
 #define pp_SCRIPT
 //#define NO_GLUTPOSTDISPLAY
-#define pp_GPU
-#define pp_CULL
-// #define pp_GPU_BLANK
 
 #ifdef pp_ALPHA2
 #define pp_TOUR
