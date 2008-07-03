@@ -53,6 +53,7 @@
 % }
 %\makeatother
 
+\newcommand{\figheightA}{1.5in}
 \newcommand{\fdsinput}[1]{
 {
 \scriptsize
@@ -186,6 +187,7 @@ Mail: Stop SSOP, Washington, DC 20402-0001 }
 \pagestyle{plain}
 \pagenumbering{roman}
 
+% ---------------------------- Preface -----------------------------------
 
 \chapter{Preface}
 
@@ -201,6 +203,7 @@ Technical Reference Guide~\cite{FDS_Tech_Guide_5} contains details about the gov
 equations and numerical methods. The FDS User's Guide~\cite{FDS_Users_Guide_5} describes how to run FDS. Smokeview is described in the ``User's Guide for
 Smokeview Version~5''~\cite{Smokeview_Users_Guide_5}.
 
+% ---------------------------- Disclaimer -----------------------------------
 
 \chapter{Disclaimer}
 
@@ -225,9 +228,9 @@ commercial software does not constitute endorsement by NIST, nor does
 it indicate that the products are necessarily those best suited for the
 intended purpose.
 
+% ---------------------------- Acknowledments -----------------------------------
 
 \chapter{Acknowledgments}
-
 
 \tableofcontents
 \listoffigures
@@ -235,6 +238,7 @@ intended purpose.
 
 \mainmatter
 
+% ---------------------------- Introduction -----------------------------------
 
 \chapter{Introduction}
 The most effective method for learning how to fight fire is to fight fire.  This however is expensive and
@@ -273,7 +277,6 @@ effect ventilation on fire spread.    Since FDS cannot yet perform calculations 
 will be pre-computed for all possible question outcomes.  Smokeview will be enhanced to be able to {\em jump}
 from one scenario to another according to the trainee's responses.
 
-
 \section{Numerical Fire Fighting Training Tools}
 Two software tools are used to generate the Physics based fire fighter training scenarios
 described in this document.  The first tool is the Fire Dynamics Simulator (FDS).
@@ -297,16 +300,45 @@ These test cases fall into two logical groups, those that are based on a full sc
 
 The FDS scenarios that are experimentally based are documented by 1) briefly describing the experiment with references to a more complete description, 2) briefly describing the numerical modeling that was performed giving the relevant input files and 3) giving a comparison of some of the experimental data collected with the corresponding numerical results.
 
+% +++++++++++++++++++++++++++++ Demonstration Cases +++++++++++++++++++++++++++
+
 \part{Demonstration Cases}
+
+% ---------------------------- Two Room -----------------------------------
+
 \chapter{Two Room}
+
 \section{Description of Test Cases}
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=4.0in]{figures/layout_placeholder}
+\end{center}
+\caption {Schematic of two room test case}
+\label{figMCFRStrainer}%
+\end{figure}
+
 \subsection{FDS input file}
 \fdsinput{demonstrations/2room_ranch/ranch_00.fds}
+
 \section{Results}
 
+% +++++++++++++++++++++++++++++ Experimental Cases +++++++++++++++++++++++++++
+
 \part{Experimental Cases}
+
+% ---------------------------- Flashover Trainer -----------------------------------
+
 \chapter{Flashover Trainer}
+
 \section{Description of Experiment}
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=4.0in]{figures/layout_placeholder}
+\end{center}
+\caption {Schematic of flashover trainer layout}
+\label{figMCFRStrainer}%
+\end{figure}
+
 \note\ Need the following (remove from check list when we get it):
 \begin{enumerate}
 \item drawings containing measurements of facility,
@@ -316,13 +348,34 @@ measurements taken, where they were taken
 \item a cross-walk between measurements taken and where these measurements are recorded (ie
 in what column of a spread sheet file).
 \end{enumerate}
+
 \section{Description of FDS setup}
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=4.0in]{figures/mcfrs_flashover}
+\end{center}
+\caption {Flashover trainer at MCFRS}
+\label{figMCFRStrainer}%
+\end{figure}
+
 \subsection{FDS input file}
 \fdsinput{MCFRS/MCFRS_flashover/mcfrs_flashover_00.fds}
+
 \section{Comparisons}
+
+% ---------------------------- Training Tower -----------------------------------
 
 \chapter{Training Tower}
+
 \section{Description of Experiment}
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=4.0in]{figures/layout_placeholder}
+\end{center}
+\caption {Schematic of training tower layout}
+\label{figMCFRStrainer}%
+\end{figure}
+
 \note\ Need the following (remove from check list when we get it):
 \begin{enumerate}
 \item drawings containing measurements of facility,
@@ -332,13 +385,27 @@ measurements taken, where they were taken
 \item a cross-walk between measurements taken and where these measurements are recorded (ie
 in what column of a spread sheet file).
 \end{enumerate}
+
 \section{Description of FDS setup}
+
 \subsection{FDS input file}
 \fdsinput{MFRI/training_tower/mfri_tower_00a.fds}
+
 \section{Comparisons}
 
+% ---------------------------- Ranch House -----------------------------------
+
 \chapter{Ranch House}
+
 \section{Description of Experiment (\note\ to be performed about 9/2008)}
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=4.0in]{figures/layout_placeholder}
+\end{center}
+\caption {Schematic of ranch house layout}
+\label{figMCFRStrainer}%
+\end{figure}
+
 \note\ Need the following (remove from check list when we get it):
 \begin{enumerate}
 \item drawings containing measurements of facility,
@@ -350,8 +417,10 @@ in what column of a spread sheet file).
 \end{enumerate}
 
 \section{Description of FDS setup}
+
 \subsection{FDS input file}
 \fdsinput{MCFRS/MCFRS_ranch/mcfrs_ranch_00.fds}
+
 \section{Comparisons}
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
