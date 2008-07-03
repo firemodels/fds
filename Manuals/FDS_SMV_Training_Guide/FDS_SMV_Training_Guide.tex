@@ -1,5 +1,5 @@
 \documentclass[11pt]{book}
-\usepackage{times,mathptm}
+\usepackage{times,mathptm,moreverb}
 \usepackage[pdftex]{graphicx}
 \usepackage[pdftex,
         colorlinks=true,
@@ -53,6 +53,12 @@
 % }
 %\makeatother
 
+\newcommand{\fdsinput}[1]{
+{
+\scriptsize
+\verbatiminput{../../Training_Test/#1}
+}
+}
 \setlength{\textwidth}{6.5in}
 \setlength{\textheight}{9.0in}
 \setlength{\topmargin}{0.in}
@@ -294,6 +300,8 @@ The FDS scenarios that are experimentally based are documented by 1) briefly des
 \part{Demonstration Cases}
 \chapter{Two Room}
 \section{Description of Test Cases}
+\subsection{FDS input file}
+\fdsinput{demonstrations/2room_ranch/ranch_00.fds}
 \section{Results}
 
 \part{Experimental Cases}
@@ -309,6 +317,8 @@ measurements taken, where they were taken
 in what column of a spread sheet file).
 \end{enumerate}
 \section{Description of FDS setup}
+\subsection{FDS input file}
+\fdsinput{MCFRS/MCFRS_flashover/mcfrs_flashover_00.fds}
 \section{Comparisons}
 
 \chapter{Training Tower}
@@ -323,6 +333,8 @@ measurements taken, where they were taken
 in what column of a spread sheet file).
 \end{enumerate}
 \section{Description of FDS setup}
+\subsection{FDS input file}
+\fdsinput{MFRI/training_tower/mfri_tower_00a.fds}
 \section{Comparisons}
 
 \chapter{Ranch House}
@@ -338,6 +350,8 @@ in what column of a spread sheet file).
 \end{enumerate}
 
 \section{Description of FDS setup}
+\subsection{FDS input file}
+\fdsinput{MCFRS/MCFRS_ranch/mcfrs_ranch_00.fds}
 \section{Comparisons}
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
