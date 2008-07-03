@@ -282,6 +282,33 @@ M%FVX   = 0._EB
 M%FVY   = 0._EB
 M%FVZ   = 0._EB
 M%H     = H0
+
+ANALYTIC_SOLN: IF (PERIODIC_TEST .AND. .TRUE.) THEN
+   ! initialize velocity with analytical solution !! RJM
+   DO K=1,M%KBAR
+      DO J=1,M%JBAR
+         DO I=0,M%IBAR
+            M%U(I,J,K) = 1._EB - 2._EB*COS(M%X(I))*SIN(M%ZC(K))
+         ENDDO
+      ENDDO
+   ENDDO
+   DO K=0,M%KBAR
+      DO J=1,M%JBAR
+         DO I=1,M%IBAR
+            M%W(I,J,K) = 1._EB + 2._EB*SIN(M%XC(I))*COS(M%Z(K))
+         ENDDO
+      ENDDO
+   ENDDO
+   ! initialize pressure
+   DO K=0,M%KBP1
+      DO J=0,M%JBP1
+         DO I=0,M%IBP1
+            M%H(I,J,K) = -( COS(2._EB*M%XC(I)) + COS(2._EB*M%ZC(K)) )
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF ANALYTIC_SOLN
+
 IF (PRESSURE_CORRECTION) M%HP    = 0._EB
 M%DDDT  = 0._EB
 M%D     = 0._EB
@@ -1891,6 +1918,111 @@ CHECK_MESHES: IF (IW<=M%NEWC .AND.  .NOT.EVACUATION_ONLY(NM)) THEN
    ENDIF FOUND_OTHER_MESH
  
 ENDIF CHECK_MESHES
+
+! periodic b.c. test
+IF_PERIODIC: IF (PERIODIC_TEST) THEN
+   !! z direction periodicity, ABS(IOR)==3
+   IF (NM==1 .AND. IOR==3) THEN
+      NOM = 2
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = I
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = MESHES(NOM)%KBAR
+      M%IJKW(13,IW) = I
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = MESHES(NOM)%KBAR
+   ENDIF
+   IF (NM==2 .AND. IOR==-3) THEN
+      NOM = 1
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = I
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = 1
+      M%IJKW(13,IW) = I
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = 1
+   ENDIF
+
+   IF (NM==3 .AND. IOR==3) THEN
+      NOM = 4
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = I
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = MESHES(NOM)%KBAR
+      M%IJKW(13,IW) = I
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = MESHES(NOM)%KBAR
+   ENDIF
+   IF (NM==4 .AND. IOR==-3) THEN
+      NOM = 3
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = I
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = 1
+      M%IJKW(13,IW) = I
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = 1
+   ENDIF
+
+   !! x direction periodicity, ABS(IOR)==1
+   IF (NM==1 .AND. IOR==1) THEN
+      NOM = 3
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = MESHES(NOM)%IBAR
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = K
+      M%IJKW(13,IW) = MESHES(NOM)%IBAR
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = K
+   ENDIF
+   IF (NM==3 .AND. IOR==-1) THEN
+      NOM = 1
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = 1
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = K
+      M%IJKW(13,IW) = 1
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = K
+   ENDIF
+
+   IF (NM==2 .AND. IOR==1) THEN
+      NOM = 4
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = MESHES(NOM)%IBAR
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = K
+      M%IJKW(13,IW) = MESHES(NOM)%IBAR
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = K
+   ENDIF
+   IF (NM==4 .AND. IOR==-1) THEN
+      NOM = 2
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = 1
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = K
+      M%IJKW(13,IW) = 1
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = K
+   ENDIF
+ENDIF IF_PERIODIC
  
 ! Assign internal values of temp, density, and mass fraction
  

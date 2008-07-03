@@ -570,20 +570,22 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
       NIC(NOM,NM) = NIC(NOM,NM) + 1
       FOUND = .TRUE.
       IOR = M%IJKW(4,IW)
-      SELECT CASE(IOR)
-         CASE( 1)
-            IMIN=MAX(IMIN,M%IJKW(10,IW)-1)
-         CASE(-1) 
-            IMAX=MIN(IMAX,M%IJKW(13,IW))
-         CASE( 2) 
-            JMIN=MAX(JMIN,M%IJKW(11,IW)-1)
-         CASE(-2) 
-            JMAX=MIN(JMAX,M%IJKW(14,IW))
-         CASE( 3) 
-            KMIN=MAX(KMIN,M%IJKW(12,IW)-1)
-         CASE(-3) 
-            KMAX=MIN(KMAX,M%IJKW(15,IW))
-      END SELECT
+      NOT_PERIODIC: IF (.NOT.PERIODIC_TEST) THEN
+         SELECT CASE(IOR)
+            CASE( 1)
+               IMIN=MAX(IMIN,M%IJKW(10,IW)-1)
+            CASE(-1) 
+               IMAX=MIN(IMAX,M%IJKW(13,IW))
+            CASE( 2) 
+               JMIN=MAX(JMIN,M%IJKW(11,IW)-1)
+            CASE(-2) 
+               JMAX=MIN(JMAX,M%IJKW(14,IW))
+            CASE( 3) 
+               KMIN=MAX(KMIN,M%IJKW(12,IW)-1)
+            CASE(-3)
+               KMAX=MIN(KMAX,M%IJKW(15,IW))
+         END SELECT
+      ENDIF NOT_PERIODIC
    ENDDO SEARCH_LOOP
  
    IF ( M2%XS>=M%XS .AND. M2%XF<=M%XF .AND. M2%YS>=M%YS .AND. M2%YF<=M%YF .AND. M2%ZS>=M%ZS .AND. M2%ZF<=M%ZF ) FOUND = .TRUE.
