@@ -2116,6 +2116,22 @@ Contains
                ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVAC line ',&
                Trim(ID)
        End If
+       If (Trim(PERS_ID) == 'null') Then
+          Write(MESSAGE,'(A,A,A)') &
+               'ERROR: EVAC line ',Trim(ID),' no PERS_ID given'
+          Call SHUTDOWN(MESSAGE)
+       Else
+          ii = 1
+          Do i = 1,NPC_PERS
+             If (Trim(EVAC_PERSON_CLASSES(i)%ID_NAME) == Trim(PERS_ID)) Cycle
+             ii = ii + 1
+          End Do
+          If (ii > NPC_PERS) Then
+             Write(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',Trim(ID), &
+                  ' prblem with PERS_ID'
+             Call SHUTDOWN(MESSAGE)
+       End If
+       End If
 
        If (Trim(KNOWN_DOOR_NAMES(51)) /= 'null') Then
           Write(MESSAGE,'(A,A,A)') &
@@ -2146,7 +2162,6 @@ Contains
        If (NUMBER_INITIAL_PERSONS > 0) EVACFILE = .True.
        !
        !
-       HPT%ID_NAME    = ID
        HPT%CLASS_NAME = PERS_ID
        HPT%T_START    = TIME_START
 
@@ -2202,6 +2217,7 @@ Contains
        HPT%Z2 = XB(6)
        HPT%N_INITIAL = NUMBER_INITIAL_PERSONS
        HPT%EVACFILE = EVACFILE
+       HPT%IMESH = 0
 
        ! Check which evacuation floor
        ii = 0
