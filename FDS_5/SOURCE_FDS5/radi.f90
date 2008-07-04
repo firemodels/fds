@@ -31,7 +31,7 @@ TYPE(SPECIES_TYPE), POINTER :: SS
 TYPE(PARTICLE_CLASS_TYPE), POINTER :: PC
  
 ! Determine the number of polar angles (theta)
- 
+
 NRA = NUMBER_RADIATION_ANGLES
 IF (CYLINDRICAL) THEN
    NRT = NINT(SQRT(REAL(NRA)))
@@ -118,10 +118,16 @@ DO I=1,NRT
       ENDIF
       RSA(N) = (PHIUP-PHILOW)*(COS(THETALOW)-COS(THETAUP))
       IF (CYLINDRICAL) THEN
-         DLX(N) = 2._EB*SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW)) *F_THETA
+         DLX(N) =  (SIN(PHIUP)-SIN(PHILOW)) *F_THETA
          DLY(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  +COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
          DLB(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  -COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
          DLZ(N)    = 0.5_EB*(PHIUP-PHILOW)   * ((SIN(THETAUP))**2-(SIN(THETALOW))**2)
+         ! In axially symmetric case, each angle represents two symmetric angles. So weight the intensities by two.
+         DLX(N) = 2._EB*DLX(N)
+         DLY(N) = 2._EB*DLY(N)
+         DLB(N) = 2._EB*DLB(N)
+         DLZ(N) = 2._EB*DLZ(N)
+         RSA(N) = 2._EB*RSA(N)
       ELSEIF (TWO_D) THEN
          DLX(N) = (SIN(PHIUP)-SIN(PHILOW))*F_THETA
          DLY(N) = 0._EB
@@ -133,7 +139,7 @@ DO I=1,NRT
       ENDIF
    ENDDO
 ENDDO
- 
+
 ! Set (wall normal)*(angle vector) value
  
 DO N = 1,NRA
@@ -537,11 +543,7 @@ ENDIF DROPLETS
 FOUR_SIGMA = 4._EB*SIGMA
 RPI_SIGMA  = RPI*SIGMA
  
-! In axially symmetric case, each angle represents two symmetric angles. So weight the intensities by two.
 
-W_AXI = 1._EB
-IF (CYLINDRICAL) W_AXI = 2._EB
- 
 END SUBROUTINE INIT_RADIATION
 
 
@@ -576,7 +578,7 @@ USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 USE DEVICE_VARIABLES, ONLY : DEVICE_TYPE,DEVICE, GAS_CELL_RAD_FLUX, GAS_CELL_RAD_DEVC_INDEX, N_GAS_CELL_RAD_DEVC
 REAL(EB) :: ZZ, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
-            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT, WAXIDLN, KAPPA_1, Z_2, COSINE, &
+            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT, KAPPA_1, Z_2, COSINE, &
             Q_SUM,K_SUM,U_SUM,KAPPA_CORRECTOR,VOL
 INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
@@ -761,7 +763,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       DO IW = 1,NWC
          IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE
          IOR = IJKW(4,IW)
-         INRAD_W(IW) = SUM(-W_AXI*DLN(IOR,:)* WALL(IW)%ILW(:,IBND),1, DLN(IOR,:)<0._EB)
+         INRAD_W(IW) = SUM(-DLN(IOR,:)* WALL(IW)%ILW(:,IBND),1, DLN(IOR,:)<0._EB)
       ENDDO
  
       ! If updating intensities first time, sweep ALL angles
@@ -863,8 +865,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      ENDIF
                      RP  = SQRT(0.5_EB*(RU**2+RD**2))
                      VC  = DX(I)  * RP*DPHI0 * DZ(K)
-                     AXU =          RU       * DZ(K) * ABS(DLX(N))
-                     AXD =          RD       * DZ(K) * ABS(DLX(N))
+                     AXU = 2._EB*SIN(DPHI0/2.)*RU       * DZ(K) * ABS(DLX(N))
+                     AXD = 2._EB*SIN(DPHI0/2.)*RD       * DZ(K) * ABS(DLX(N))
                      AYU = DX(I)             * DZ(K) * ABS(DLB(N))
                      AYD = DX(I)             * DZ(K) * ABS(DLY(N))
                      AZ  = DX(I)  * RP*DPHI0         * ABS(DLZ(N))
@@ -978,13 +980,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IOR = IJKW(4,IW)
                IF (TWO_D .AND. .NOT.CYLINDRICAL  .AND. ABS(IOR)==2) CYCLE WALL_LOOP2  ! 2-D non cylindrical
                IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP2     ! outgoing
-               WAXIDLN = - W_AXI*DLN(IOR,N)
                IIG = IJKW(6,IW)
                JJG = IJKW(7,IW)
                KKG = IJKW(8,IW)
-               INRAD_W(IW) = INRAD_W(IW) - WAXIDLN * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 1
+               INRAD_W(IW) = INRAD_W(IW) + DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 1
                WALL(IW)%ILW(N,IBND) = IL(IIG,JJG,KKG)
-               INRAD_W(IW) = INRAD_W(IW) + WAXIDLN * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 2
+               INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 2
             ENDDO WALL_LOOP2
  
             ! Copy the Y-downwind intensities to Y-upwind in cylindrical case
@@ -995,7 +996,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   DO I=1,IBAR
                      IWUP   = WALL_INDEX(CELL_INDEX(I,J,K),-2)
                      IWDOWN = WALL_INDEX(CELL_INDEX(I,J,K), 2)
-                     WALL(IWUP)%ILW(MAX(1,N-1),IBND) = WALL(IWDOWN)%ILW(N,IBND)
+                     IF (MODULO(N,NRP(1))==1) THEN
+                        WALL(IWUP)%ILW(N,IBND) = WALL(IWDOWN)%ILW(N,IBND)
+                     ELSE
+                        WALL(IWUP)%ILW(N-1,IBND) = WALL(IWDOWN)%ILW(N,IBND)
+                     ENDIF
                   ENDDO
                ENDDO
             ENDIF
@@ -1003,9 +1008,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ! Calculate integrated intensity UIID
  
             IF (WIDE_BAND_MODEL) THEN
-               UIID(:,:,:,IBND) = UIID(:,:,:,IBND) + W_AXI*RSA(N)*IL
+               UIID(:,:,:,IBND) = UIID(:,:,:,IBND) + RSA(N)*IL
             ELSE
-               UIID(:,:,:,ANGLE_INC_COUNTER) = UIID(:,:,:,ANGLE_INC_COUNTER) + W_AXI*RSA(N)*IL
+               UIID(:,:,:,ANGLE_INC_COUNTER) = UIID(:,:,:,ANGLE_INC_COUNTER) + RSA(N)*IL
             ENDIF
  
             ! Interpolate boundary intensities onto other meshes
