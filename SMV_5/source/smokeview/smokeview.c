@@ -3091,14 +3091,12 @@ void RenderFrame(int view_mode){
   char *renderfile_prefix;
 
   renderfile_prefix=fdsprefix;
-#ifdef pp_SCRIPT
   if(scriptoutstream!=NULL&&current_script_command!=NULL){
     if(current_script_command->cval!=NULL){
       strcpy(renderfile2,current_script_command->cval);
       renderfile_prefix=renderfile2;
     }
   }
-#endif
 
   if(view_mode==VIEW_LEFT&&showstereo==2)return;
   switch (renderfiletype){
@@ -3279,26 +3277,25 @@ void Args(int argc, char **argv){
   NewMemory((void **)&logfilename,len+4+1);
   STRCPY(logfilename,fdsprefix);
   STRCAT(logfilename,".log");
-#ifdef pp_LOGFILE
-  LOGFILE=fopen(logfilename,"w");
-#endif
 
-  FREEMEMORY(casefilename);
-  NewMemory((void **)&casefilename,len+strlen(ini_ext)+1);
-  STRCPY(casefilename,fdsprefix);
-  STRCAT(casefilename,ini_ext);
+  FREEMEMORY(caseinifilename);
+  NewMemory((void **)&caseinifilename,len+strlen(ini_ext)+1);
+  STRCPY(caseinifilename,fdsprefix);
+  STRCAT(caseinifilename,ini_ext);
+
+  FREEMEMORY(scriptinifilename);
+  NewMemory((void **)&scriptinifilename,len+4+1);
+  STRCPY(scriptinifilename,fdsprefix);
+  STRCAT(scriptinifilename,".spf");
 
   if(smvfilename==NULL){
-#ifdef pp_SCRIPT
     struct stat statbuffer;
-#endif
 
     NewMemory((void **)&smvfilename,(unsigned int)(len+6));
     FREEMEMORY(smvmenufile);
     NewMemory((void **)&smvmenufile,(unsigned int)(len+15));
     STRCPY(smvfilename,fdsprefix);
     STRCAT(smvfilename,".smv");
-#ifdef pp_SCRIPT
     {
       char scriptbuffer[1024];
 
@@ -3308,7 +3305,6 @@ void Args(int argc, char **argv){
         default_script = insert_scriptfile(scriptbuffer);
       }
     }
-#endif
     STRCPY(smvmenufile,"Reload ");
     temp = strrchr(smvfilename,(int)(*dirseparator));
     if(temp!=NULL){
@@ -3393,7 +3389,6 @@ void Args(int argc, char **argv){
       usage(argv);
       exit(0);
     }
-#ifdef pp_SCRIPT
     else if(strncmp(argv[i],"-runscript",10)==0){
       runscript=1;
     }
@@ -3412,7 +3407,6 @@ void Args(int argc, char **argv){
     else if(strncmp(argv[i],"-noexit",6)==0){
       noexit=1;
     }
-#endif
     else if(strncmp(argv[i],"-build",6)==0){
       showbuild=1;
       usage(argv);
@@ -3475,10 +3469,8 @@ void usage(char **argv){
   printf("   -nopart = do not load particle file \n");
   printf("   -stereo = activate stereo mode (if supported)\n");
   printf("  -version = display version information\n");
-#ifdef pp_SCRIPT
   printf("-runscript = run the script file, casename.ssf, at startup\n");
   printf("-script scriptfile = run the script file, scriptfile, at startup\n");
-#endif
   printf("    -build = show pre-preprocessing directives used to build smokeview\n");
   if(showbuild==1){
     printf("  \n");
@@ -3524,9 +3516,6 @@ void usage(char **argv){
 #endif
 #ifdef pp_OSX
     printf(", pp_OSX");
-#endif
-#ifdef pp_SCRIPT
-    printf(", pp_SCRIPT");
 #endif
 #ifdef pp_SMOKETEST
     printf(", pp_SMOKETEST");

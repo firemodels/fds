@@ -20,7 +20,6 @@
 
 // svn revision character string
 char IOscript_revision[]="$Revision$";
-#ifdef pp_SCRIPT
 void remove_comment(char *buffer);
 void ParticlePropShowMenu(int var);
 //
@@ -883,8 +882,8 @@ void script_loadfile(scriptdata *scripti){
     slice *sd;
 
     sd = sliceinfo + i;
-    if(strcmp(sd->reg_file,scripti->cval)==0){
-      readslice(sd->reg_file,i,LOAD,&errorcode);
+    if(strcmp(sd->file,scripti->cval)==0){
+      readslice(sd->file,i,LOAD,&errorcode);
       return;
     }
 
@@ -893,7 +892,7 @@ void script_loadfile(scriptdata *scripti){
     patch *patchi;
 
     patchi = patchinfo + i;
-    if(strcmp(patchi->reg_file,scripti->cval)==0){
+    if(strcmp(patchi->file,scripti->cval)==0){
       readpatch(i,LOAD,&errorcode);
       return;
     }
@@ -902,8 +901,8 @@ void script_loadfile(scriptdata *scripti){
     particle *parti;
 
     parti = partinfo + i;
-    if(strcmp(parti->reg_file,scripti->cval)==0){
-      readpart(parti->reg_file,i,LOAD,&errorcode);
+    if(strcmp(parti->file,scripti->cval)==0){
+      readpart(parti->file,i,LOAD,&errorcode);
       return;
     }
   }
@@ -911,8 +910,8 @@ void script_loadfile(scriptdata *scripti){
     iso *isoi;
 
     isoi = isoinfo + i;
-    if(strcmp(isoi->reg_file,scripti->cval)==0){
-      readiso(isoi->reg_file,i,LOAD,&errorcode);
+    if(strcmp(isoi->file,scripti->cval)==0){
+      readiso(isoi->file,i,LOAD,&errorcode);
       return;
     }
   }
@@ -920,7 +919,7 @@ void script_loadfile(scriptdata *scripti){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;
-    if(strcmp(smoke3di->reg_file,scripti->cval)==0){
+    if(strcmp(smoke3di->file,scripti->cval)==0){
       readsmoke3d(i,LOAD,&errorcode);
       return;
     }
@@ -1082,5 +1081,3 @@ void run_script(void){
   }
   GLUTPOSTREDISPLAY
 }
-
-#endif

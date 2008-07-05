@@ -5852,7 +5852,7 @@ int match(char *buffer, const char *key, unsigned int lenkey){
 
 /* ------------------ readini ------------------------ */
 
-int readini(int loaddatafile){
+int readini(int scriptconfigfile){
   struct stat statbuff1, statbuff2, statbuff3, statbuff4;
   int statfile1=-1, statfile2=-1, statfile3=-1, statfile4=-1;
   char smvprogini[1024];
@@ -5879,7 +5879,7 @@ int readini(int loaddatafile){
     if(statfile2!=0)smvprogini_ptr=NULL;
   }
   if(INIfile!=NULL)statfile3=stat(INIfile,&statbuff3);
-  if(casefilename!=NULL)statfile4=stat(casefilename,&statbuff4);
+  if(caseinifilename!=NULL)statfile4=stat(caseinifilename,&statbuff4);
 
   // check if config files read in earlier were modifed later
 
@@ -5890,18 +5890,18 @@ int readini(int loaddatafile){
     printf("*** warning: The initialization file, %s, is newer than %s \n",smokeviewini,INIfile);
   }
   if(statfile1==0&&statfile4==0&&statbuff1.st_mtime>statbuff4.st_mtime){
-    printf("*** warning: The initialization file, %s, is newer than %s \n",smokeviewini,casefilename);
+    printf("*** warning: The initialization file, %s, is newer than %s \n",smokeviewini,caseinifilename);
   }
 
   if(statfile2==0&&statfile3==0&&statbuff2.st_mtime>statbuff3.st_mtime){
     printf("*** warning: The initialization file, %s, is newer than %s \n",smvprogini_ptr,INIfile);
   }
   if(statfile2==0&&statfile4==0&&statbuff2.st_mtime>statbuff4.st_mtime){
-    printf("*** warning: The initialization file, %s, is newer than %s \n",smvprogini_ptr,casefilename);
+    printf("*** warning: The initialization file, %s, is newer than %s \n",smvprogini_ptr,caseinifilename);
   }
 
   if(statfile3==0&&statfile4==0&&statbuff3.st_mtime>statbuff4.st_mtime){
-    printf("*** warning: The initialization file, %s, is newer than  %s \n",INIfile,casefilename);
+    printf("*** warning: The initialization file, %s, is newer than  %s \n",INIfile,caseinifilename);
   }
 
   // read in config files if they exist
@@ -5909,26 +5909,33 @@ int readini(int loaddatafile){
   // smokeview.ini ini in install directory
 
   if(statfile1==0&&smokeviewini!=NULL){
-    if(readini2(smokeviewini,loaddatafile,0)==2)return 2;
+    if(readini2(smokeviewini,0)==2)return 2;
   }
 
   // smokeview.ini in smokeview directory (could be different than above)
 
   if(statfile2==0&&smvprogini_ptr!=NULL){
-    if(readini2(smvprogini_ptr,loaddatafile,0)==2)return 2;
+    if(readini2(smvprogini_ptr,0)==2)return 2;
   }
 
   // smokeview.ini in case directory
 
   if(statfile3==0&&INIfile!=NULL){
-    if(readini2(INIfile,loaddatafile,0)==2)return 2;
+    if(readini2(INIfile,0)==2)return 2;
   }
 
   // read in casename.ini
 
-  if(statfile4==0&&casefilename!=NULL){
-    if(readini2(casefilename,loaddatafile,1)==2)return 2;
+  if(statfile4==0&&caseinifilename!=NULL){
+    if(readini2(caseinifilename,1)==2)return 2;
   }
+
+  // read in casename.spf if asked to do so
+
+  if(scriptinifilename!=NULL&&scriptconfigfile==1){
+    if(readini2(scriptinifilename,1)==2)return 2;
+  }
+
   updateglui();
   if(unitclasses_ini!=NULL){
     unitclasses=unitclasses_ini;
@@ -5945,20 +5952,9 @@ int readini(int loaddatafile){
   return 0;
 }
 
-/* ------------------ readini2a ------------------------ */
-/*
-int readini2a(int loaddatafile){
-  if(smokeviewini!=NULL){
-    if(readini2(smokeviewini,loaddatafile)==2)return 2;
-  }
-  if(readini2(INIfile,loaddatafile)==2)return 2;
-  return 0;
-}
-*/
-
 /* ------------------ readini2 ------------------------ */
 
-int readini2(char *inifile, int loaddatafile, int localfile){
+int readini2(char *inifile, int localfile){
   char buffer[255],buffer2[255];
 
   int tours_flag;
@@ -6637,20 +6633,6 @@ int readini2(char *inifile, int loaddatafile, int localfile){
       }
       CheckMemory;
     }
-
-    if(loaddatafile==1)continue;
-
-/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
-/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
-/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
-/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
-/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
-/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
-
-    /* if we are loading a data file (particle, slice boundary, plot3d) then 
-       don't process any commands below .  That is, only process commands that
-       effect the data being read in
-    */
 
     if(match(buffer,"COLORBAR",8) == 1 && match(buffer,"COLORBARFLIP",12)!=1){
       float *rgb_ini_copy;
@@ -7332,9 +7314,13 @@ int readini2(char *inifile, int loaddatafile, int localfile){
           trim(buffer);
           strcpy(camera_ini->name,buffer);
           init_camera_list();
-          {camera *cam;
+          {
+            camera *cam;
+
             cam=insert_camera(&camera_list_first,camera_ini,buffer);
-            cam->view_id=camera_ini->view_id;
+            if(cam!=NULL){
+              cam->view_id=camera_ini->view_id;
+            }
           }
         }
 
@@ -7965,21 +7951,25 @@ void writeini(int flag){
 
   fileout=NULL;
   switch (flag) {
-  case 0:
+  case GLOBAL_INI:
     fileout=fopen(INIfile,"w");
     break;
-  case 1:
+  case STDOUT_INI:
     fileout=stdout;
     break;
-  case 2:
-    fileout=fopen(casefilename,"w");
+  case LOCAL_INI:
+    fileout=fopen(caseinifilename,"w");
+    break;
+  case SCRIPT_INI:
+    fileout=fopen(scriptinifilename,"w");
     break;
   default:
     ASSERT(FFALSE);
     break;
   }
+  if(flag==SCRIPT_INI)flag=LOCAL_INI;
   if(fileout==NULL){
-    printf("error: unable to open %s for writing\n",casefilename);
+    printf("error: unable to open %s for writing\n",caseinifilename);
     return;
   }
 
@@ -8535,42 +8525,38 @@ void writeini(int flag){
       float *eye, *angle_zx, *mat;
       camera *ca;
 
-      ca = camera_save;
-      ca=camera_list_first.next;
-      ca=ca->next;
-      for(ca=ca->next;ca->next!=NULL;ca=ca->next){
-      fprintf(fileout,"VIEWPOINT4\n");
-      eye = ca->eye;
-      angle_zx = ca->angle_zx;
-      mat = ca->modelview;
+      for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
+        if(strcmp(ca->name,"internal")==0)continue;
+        if(strcmp(ca->name,"external")==0)continue;
+        fprintf(fileout,"VIEWPOINT4\n");
+        eye = ca->eye;
+        angle_zx = ca->angle_zx;
+        mat = ca->modelview;
 
-		  fprintf(fileout," %i %i %i\n",
-        ca->eyeview,
-        ca->rotation_index,
-        ca->view_id);
-		  fprintf(fileout," %f %f %f %f %i\n",
-        eye[0],
-        eye[1],
-        eye[2],
-        zoom,
-        zoomindex);
-		  fprintf(fileout," %f %f %f %i\n",
-        ca->view_angle, 
-        ca->direction_angle,
-        ca->elevation_angle,
-        ca->projection_type);
-		  fprintf(fileout," %f %f %f\n",
-        ca->xcen,
-        ca->ycen,
-        ca->zcen);
+		    fprintf(fileout," %i %i %i\n",
+          ca->eyeview,
+          ca->rotation_index,
+          ca->view_id);
+		    fprintf(fileout," %f %f %f %f %i\n",
+          eye[0],eye[1],eye[2],
+          zoom,zoomindex);
+  		  fprintf(fileout," %f %f %f %i\n",
+          ca->view_angle, 
+          ca->direction_angle,
+          ca->elevation_angle,
+          ca->projection_type);
+		    fprintf(fileout," %f %f %f\n",
+          ca->xcen,
+          ca->ycen,
+          ca->zcen);
 
-      fprintf(fileout," %f %f\n",angle_zx[0],angle_zx[1]);
-      fprintf(fileout," %f %f %f %f\n",mat[0],mat[1],mat[2],mat[3]);
-      fprintf(fileout," %f %f %f %f\n",mat[4],mat[5],mat[6],mat[7]);
-      fprintf(fileout," %f %f %f %f\n",mat[8],mat[9],mat[10],mat[11]);
-      fprintf(fileout," %f %f %f %f\n",mat[12],mat[13],mat[14],mat[15]);
+        fprintf(fileout," %f %f\n",angle_zx[0],angle_zx[1]);
+        fprintf(fileout," %f %f %f %f\n",mat[0],mat[1],mat[2],mat[3]);
+        fprintf(fileout," %f %f %f %f\n",mat[4],mat[5],mat[6],mat[7]);
+        fprintf(fileout," %f %f %f %f\n",mat[8],mat[9],mat[10],mat[11]);
+        fprintf(fileout," %f %f %f %f\n",mat[12],mat[13],mat[14],mat[15]);
 
-      fprintf(fileout,"%s\n",ca->name);
+        fprintf(fileout,"%s\n",ca->name);
       }
     }
   }

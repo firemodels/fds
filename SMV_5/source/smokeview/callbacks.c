@@ -43,9 +43,7 @@ char callbacks_revision[]="$Revision$";
 #ifdef pp_GPU_CULL_STATE
 void print_gpu_cull_state(void);
 #endif
-#ifdef pp_SCRIPT
 void ScriptMenu(int var);
-#endif
 
 void update_glui_viewlist(void);
 float gmod(float x, float y);
@@ -973,7 +971,6 @@ void keyboard(unsigned char key, int x, int y){
         render_double=2;
         rflag=1;
       }
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       if(ntimes>0){
         float timeval;
@@ -990,7 +987,6 @@ void keyboard(unsigned char key, int x, int y){
       }
       fprintf(scriptoutstream,"\n");
     }
-#endif
     RenderOnceNow=1;
     if(showstereo!=0){
       RenderOnceNowL=1;
@@ -1623,7 +1619,6 @@ void handle_move_keys(int  key){
 void Display(void){
   float *angle_zx;
 
-#ifdef pp_SCRIPT
   if(runscript==1&&default_script!=NULL){
     ScriptMenu(default_script->id);
     runscript=2;
@@ -1636,8 +1631,8 @@ void Display(void){
         exit(0);
       }
     }
+    GLUTPOSTREDISPLAY
   }
-#endif
   if(updatezoommenu==1){
      updatezoommenu=0;
     ZoomMenu(zoomindex);

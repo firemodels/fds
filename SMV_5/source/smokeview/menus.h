@@ -11,9 +11,7 @@
 // svn revision character string
 char menu_revision[]="$Revision$";
 /* ------------------ OpenSMVFile ------------------------ */
-#ifdef pp_SCRIPT
 void ScriptMenu(int var);
-#endif
 #ifdef WIN32
 void OpenSMVFile(char *filebuffer,int filebufferlength,int *openfile){
   char stringFilter[]="Smokeview Files (*.smv)\0*.smv\0\0\0";
@@ -94,11 +92,9 @@ void TrainerViewMenu(int value){
 void MainMenu(int value){
 
   if(value==3){
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       ScriptMenu(STOP_RECORDING_SCRIPT);
     }
-#endif
     exit(0);
   }
   if(value==1){
@@ -1174,12 +1170,10 @@ void ResetMenu(int value){
   default:
     if(value<100000){
       reset_glui_view(value);
-#ifdef pp_SCRIPT
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"SETVIEWPOINT\n");
         fprintf(scriptoutstream," %s\n",camera_current->name);
       }
-#endif
     }
     break;
   }
@@ -1321,13 +1315,11 @@ void RenderMenu(int value){
     for(n=0;n<ntimes;n++){
       render_frame[n]=0;
     }
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"RENDERALL\n");
       fprintf(scriptoutstream," %i\n",RenderSkip);
       fprintf(scriptoutstream,"\n");
     }
-#endif
     break;
   }
 }
@@ -1919,7 +1911,6 @@ void PeriodicReloads(int value){
 
 /* ------------------ ScriptMenu ------------------------ */
 
-#ifdef pp_SCRIPT
 void ScriptMenu(int value){
   int error_code;
   scriptfiledata *scriptfile;
@@ -1951,6 +1942,7 @@ void ScriptMenu(int value){
       if(scriptoutstream!=NULL){
         fclose(scriptoutstream);
         scriptoutstream=NULL;
+        writeini(SCRIPT_INI);
         printf("Script recorder off\n");
       }
       break;
@@ -1963,6 +1955,7 @@ void ScriptMenu(int value){
         if(scriptfile->id!=value)continue;
         error_code=compile_script(file);
         if(error_code==0){
+//          readini(1);
           start_script();
         }
         break;
@@ -1970,7 +1963,6 @@ void ScriptMenu(int value){
       break;
   }
 }
-#endif
 
 /* ------------------ ReLoadMenu ------------------------ */
 
@@ -2015,11 +2007,9 @@ void LoadUnloadMenu(int value){
    // for(i=0;i<nterraininfo;i++){
    //   readterrain("",i,UNLOAD,&errorcode);
    // }
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"UNLOADALL\n");
     }
-#endif
     if(hrrfilename!=NULL){
       readhrr(UNLOAD, &errorcode);
     }
@@ -2226,11 +2216,9 @@ void TourMenu(int value){
     from_glui_trainer=0;
 //    viewtourfrompath=0;
     selected_tour=NULL;
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"UNLOADTOUR\n");
     }
-#endif
     break;
   case -4:
     edittour=1-edittour;
@@ -2490,12 +2478,11 @@ void ParticlePropShowMenu(int value){
     
     propi = part5propinfo + iprop;
     propi->display=1;
-#ifdef pp_SCRIPT
+
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"PARTCLASSCOLOR\n");
       fprintf(scriptoutstream," %s\n",propi->label->longlabel);
     }
-#endif
     current_property = propi;
     if(iprop!=0){
       parttype=1;
@@ -2566,12 +2553,10 @@ void ParticlePropShowMenu(int value){
 
       vis = current_property->class_vis;
       vis[iclass] = 1 - vis[iclass];
-#ifdef pp_SCRIPT
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"PARTCLASSTYPE\n");
         fprintf(scriptoutstream," %s\n",current_property->label->longlabel);
       }
-#endif
     }
 
   }
@@ -2592,12 +2577,10 @@ void ParticleMenu(int value){
 
     ReadPartFile=1;
     partfile = partinfo[value].file;
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",partfile);
     }
-#endif
     readpart(partfile,value,LOAD,&errorcode);
   }
   else{
@@ -2611,11 +2594,9 @@ void ParticleMenu(int value){
       ReadPartFile=1;
       whichpart=-(10+value);
       partj = partinfo + whichpart;
-#ifdef pp_SCRIPT
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADPARTICLES\n");
       }
-#endif
       for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->evac==1)continue;
@@ -2637,7 +2618,6 @@ void ParticleMenu(int value){
 void ZoneMenu(int value){
   int i,errorcode;
   if(value>=0){
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       char *file;
 
@@ -2645,7 +2625,6 @@ void ZoneMenu(int value){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-#endif
     readzone(zoneinfo[value].file,value,LOAD,&errorcode);
   }
   else{
@@ -2781,13 +2760,10 @@ void LoadVSliceMenu(int value){
     GLUTPOSTREDISPLAY
   }
   if(value>=0){
-#ifdef pp_SCRIPT
     vslice *vslicei;
     slice *slicei;
-#endif
 
     readvslice(value, LOAD, &errorcode);
-#ifdef pp_SCRIPT
     vslicei = vsliceinfo + value;
     slicei = vslicei->val;
     if(script_multivslice==0&&slicei!=NULL&&scriptoutstream!=NULL){
@@ -2797,7 +2773,6 @@ void LoadVSliceMenu(int value){
       fprintf(scriptoutstream,"LOADVFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-#endif
   }
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
@@ -2885,7 +2860,6 @@ void LoadSmoke3DMenu(int value){
 
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       char *file;
 
@@ -2893,7 +2867,6 @@ void LoadSmoke3DMenu(int value){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-#endif
   readsmoke3d(value,LOAD,&errorcode);
 
   }
@@ -2914,12 +2887,10 @@ void LoadSmoke3DMenu(int value){
   if(value<=-10){
     value = -(value + 10);
     smoke3dj = smoke3dinfo + value;
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOAD3DSMOKE\n");
       fprintf(scriptoutstream," %s\n",smoke3dj->label.longlabel);
     }
-#endif
     for(i=0;i<nsmoke3d;i++){
       smoke3di = smoke3dinfo + i;
       if(strcmp(smoke3di->label.shortlabel,smoke3dj->label.shortlabel)==0){
@@ -3076,12 +3047,10 @@ void LoadSliceMenu(int value){
     char *file;
 
     file = sliceinfo[value].file;
-#ifdef pp_SCRIPT
     if(script_multislice==0&&scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-#endif
     readslice(file,value,LOAD,&errorcode);
   }
   else{
@@ -3109,7 +3078,6 @@ void LoadMultiVSliceMenu(int value){
   }
   if(value>=0){
     mvslicei = multivsliceinfo + value;
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       if(mvslicei->nvslices>0){
         slice *slicei;
@@ -3121,7 +3089,6 @@ void LoadMultiVSliceMenu(int value){
         script_multivslice=1;
       }
     }
-#endif
     for(i=0;i<mvslicei->nvslices;i++){
       LoadVSliceMenu(mvslicei->ivslices[i]);
     }
@@ -3142,7 +3109,6 @@ void LoadMultiSliceMenu(int value){
   if(value==-999)return;
   if(value>=0){
     mslicei = multisliceinfo + value;
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       if(mslicei->nslices>0){
         slice *slicei;
@@ -3154,7 +3120,6 @@ void LoadMultiSliceMenu(int value){
         script_multislice=1;
       }
     }
-#endif
     for(i=0;i<mslicei->nslices;i++){
       LoadSliceMenu(mslicei->islices[i]);
     } 
@@ -3222,12 +3187,10 @@ void LoadIsoMenu(int value){
 
     ReadIsoFile=1;
     file=isoinfo[value].file;
-#ifdef pp_SCRIPT
     if(script_iso==0&&scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-#endif
     readiso(file,value,LOAD,&errorcode);
   }
   if(value==-1){
@@ -3239,13 +3202,11 @@ void LoadIsoMenu(int value){
   if(value<=-10){
     ii = -(value + 10);
     isoii = isoinfo + ii;
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       script_iso=1;
       fprintf(scriptoutstream,"LOADISO\n");
       fprintf(scriptoutstream," %s\n",isoii->label.longlabel);
     }
-#endif
     for(i=0;i<niso;i++){
       isoi = isoinfo + i;
       if(isoii->type!=isoi->type)continue;
@@ -3276,7 +3237,6 @@ void LoadPatchMenu(int value){
         if(patchi->type!=patchtypenew)readpatch(i,UNLOAD,&errorcode);
       }
     }
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       char *file;
 
@@ -3284,7 +3244,6 @@ void LoadPatchMenu(int value){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-#endif
     LOCK_COMPRESS
     readpatch(value,LOAD,&errorcode);
     UNLOCK_COMPRESS
@@ -3294,12 +3253,10 @@ void LoadPatchMenu(int value){
 
     value = -(value + 10);
     patchj = patchinfo + value;
-#ifdef pp_SCRIPT
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADBOUNDARY\n");
       fprintf(scriptoutstream," %s\n",patchj->label.longlabel);
     }
-#endif
     for(i=0;i<npatch_files;i++){
       patchi = patchinfo + i;
       if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)==0){
@@ -3770,9 +3727,7 @@ static int isoblockmenu=0, fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
 static int gridslicemenu=0, blockagemenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0;
-#ifdef pp_SCRIPT
 static int scriptmenu=0;
-#endif
 static int loadplot3dmenu=0, unloadvslicemenu=0, unloadslicemenu=0;
 static int loadterrainmenu=0, unloadterrainmenu=0;
 static int loadsmoke3dmenu=0;
@@ -6840,7 +6795,7 @@ if(visBlocks==visBLOCKOutline){
       glutAddMenuEntry("Read preference files",1);
       fclose(stream);
     }
-    if( readinifile==0 && (stream2=fopen(casefilename,"r"))!=NULL ){
+    if( readinifile==0 && (stream2=fopen(caseinifilename,"r"))!=NULL ){
       readinifile=1;
       glutAddMenuEntry("Read ini files",1);
       fclose(stream2);
@@ -6855,7 +6810,7 @@ if(visBlocks==visBLOCKOutline){
     glutAddMenuEntry(WRITEINIfile,2);
 
     STRCPY(caselabel,"Write ");
-    STRCAT(caselabel,casefilename);
+    STRCAT(caselabel,caseinifilename);
 
     glutAddMenuEntry(caselabel,3);
 
@@ -6874,7 +6829,6 @@ if(visBlocks==visBLOCKOutline){
     if(periodic_value!=10)glutAddMenuEntry("Reload every 10 min",10);
     glutAddMenuEntry("Cancel",-1);
 
-#ifdef pp_SCRIPT
     CREATEMENU(scriptmenu,ScriptMenu);
 
     if(script_recording==NULL){
@@ -6919,10 +6873,8 @@ if(visBlocks==visBLOCKOutline){
     glutAddMenuEntry("Create Script:",-999);
     if(script_recording==NULL)glutAddMenuEntry("  Start Recording",START_RECORDING_SCRIPT);
     glutAddMenuEntry("  Stop Recording",STOP_RECORDING_SCRIPT);
-#endif
 
-
-/* --------------------------------loadunload menu -------------------------- */
+  /* --------------------------------loadunload menu -------------------------- */
     {
       char loadmenulabel[100];
       char steplabel[100];
@@ -7036,9 +6988,7 @@ if(visBlocks==visBLOCKOutline){
       }
       glutAddMenuEntry("-",999);
       glutAddSubMenu("Configuration files",smokeviewinimenu);
-#ifdef pp_SCRIPT
       glutAddSubMenu("Script Options",scriptmenu);
-#endif
 #ifdef pp_COMPRESS
       if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice>0)){
         glutAddSubMenu("Compression",compressmenu);

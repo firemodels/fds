@@ -9,7 +9,6 @@
 
 /* --------------------------  scriptdata ------------------------------------ */
 
-#ifdef pp_SCRIPT
 typedef struct _scriptfiledata {
   struct _scriptfiledata *prev, *next;
   int id;
@@ -23,7 +22,6 @@ typedef struct {
   char *cval;
   float fval;
 } scriptdata;
-#endif
 
 /* --------------------------  treedata ------------------------------------ */
 

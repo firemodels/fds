@@ -419,9 +419,6 @@ SVEXTERN int visHRRlabel;
 #ifdef pp_memstatus
 SVEXTERN int visAvailmemory;
 #endif
-#ifdef pp_LOGFILE
-SVEXTERN FILE *LOGFILE;
-#endif
 SVEXTERN slice *sd_shown;
 SVEXTERN vslice *vd_shown;
 SVEXTERN int show_all_slices;
@@ -637,7 +634,6 @@ SVEXTERN int read_smoothobst;
 SVEXTERN FILE *STREAM_SB;
 #endif
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
-#ifdef pp_SCRIPT
 SVEXTERN scriptfiledata first_scriptfile, last_scriptfile, *default_script;
 SVEXTERN scriptdata *scriptinfo, *current_script_command;
 SVEXTERN int nscriptinfo;
@@ -645,14 +641,14 @@ SVEXTERN scriptfiledata *script_recording;
 SVEXTERN int runscript, noexit;
 SVEXTERN int script_multislice, script_multivslice, script_iso;
 SVEXTERN FILE *scriptoutstream;
-#endif
+SVEXTERN char *scriptinifilename;
 SVEXTERN char *logfilename;
 SVEXTERN char *flushfile, *chidfilebase;
 SVEXTERN char *hrrfilename;
 SVEXTERN hrrdata *hrrinfo;
 SVEXTERN char *smokezippath;
 SVEXTERN char *INI_fds_filein, *fds_filein, *fds_fileout,*fds_fileout2;
-SVEXTERN char *casefilename;
+SVEXTERN char *caseinifilename;
 SVEXTERN char *zonelonglabels, *zoneshortlabels, *zoneunits;
 SVEXTERN char *smokeviewini;
 SVEXTERN int overwrite_all,erase_all;

@@ -931,9 +931,11 @@ void add_list_view(char *label_in){
     cam1=cex;
   }
   cam2 = insert_camera(cam1,camera_current,label);
-  view_lists->add_item(cam2->view_id,cam2->name);
-  view_lists->set_int_val(cam2->view_id);
-  selected_view=cam2->view_id;
+  if(cam2!=NULL){
+    view_lists->add_item(cam2->view_id,cam2->name);
+    view_lists->set_int_val(cam2->view_id);
+    selected_view=cam2->view_id;
+  }
   enable_disable_views();
 }
 
