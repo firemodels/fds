@@ -1955,7 +1955,7 @@ void ScriptMenu(int value){
         if(scriptfile->id!=value)continue;
         error_code=compile_script(file);
         if(error_code==0){
-//          readini(1);
+          readini(1);
           start_script();
         }
         break;
