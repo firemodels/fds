@@ -913,9 +913,6 @@ void InitOpenGL(void){
 
 void initvars1(void){
 
-#ifdef pp_LOGFILE
-  LOGFILE=NULL;
-#endif
 #ifdef pp_LIGHT
   show_smokelighting=0;
 #endif
@@ -1922,11 +1919,9 @@ void initvars0(void){
   GPU_depthtexture=0;
 #endif
 
-#ifdef pp_SCRIPT
   current_script_command=NULL;
   scriptinfo=NULL;
   nscriptinfo=0;
-#endif
   demo_option=0;
   current_mesh=NULL;
   camera_current=NULL, camera_save=NULL, camera_last=NULL;
@@ -2047,7 +2042,6 @@ void initvars0(void){
   read_smoothobst=0;
 #endif
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
-#ifdef pp_SCRIPT
   default_script=NULL;
   first_scriptfile.id=-1;
   first_scriptfile.prev=NULL;
@@ -2064,14 +2058,14 @@ void initvars0(void){
   script_multislice=0;
   script_multivslice=0;
   script_iso=0;
-#endif
   logfilename=NULL;
   flushfile=NULL, chidfilebase=NULL;
   hrrfilename=NULL;
   hrrinfo=NULL;
   smokezippath=NULL;
   INI_fds_filein=NULL, fds_filein=NULL, fds_fileout=NULL,fds_fileout2=NULL;
-  casefilename=NULL;
+  caseinifilename=NULL;
+  scriptinifilename=NULL;
   zonelonglabels=NULL, zoneshortlabels=NULL, zoneunits=NULL;
   smokeviewini=NULL;
   surfids=NULL;

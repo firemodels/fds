@@ -14,7 +14,6 @@ void _sniffErrors(char *whereat);
 #define DOUBLE_BUFFER 2
 #define SINGLE_BUFFER 1
 
-#ifdef pp_SCRIPT
 #define SCRIPT_RENDERONCE 101
 #define SCRIPT_RENDERDOUBLEONCE 102
 #define SCRIPT_RENDERALL 103
@@ -42,7 +41,6 @@ void _sniffErrors(char *whereat);
 #define SCRIPT_SMOKE3D_FILE 2
 #define SCRIPT_PART_FILE 3
 #define SCRIPT_ISO_FILE 4
-#endif
 
 #define DIRX 1
 #define DIRY 2
@@ -56,6 +54,7 @@ void _sniffErrors(char *whereat);
 #define GLOBAL_INI 0
 #define STDOUT_INI 1
 #define LOCAL_INI  2
+#define SCRIPT_INI 3
 
 #define RESTORE_SAVED_VIEW 2
 #define RESTORE_EXTERIOR_VIEW 0

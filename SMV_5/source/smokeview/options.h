@@ -49,7 +49,6 @@
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB
-#define pp_SCRIPT
 //#define NO_GLUTPOSTDISPLAY
 
 #ifdef pp_ALPHA2
@@ -64,7 +63,6 @@
 
 
 #ifdef pp_ALPHA
-#define pp_LOGFILE
 #define pp_LIGHT
 #define pp_SHOWLIGHT
 #define pp_COLOR

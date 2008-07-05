@@ -29,17 +29,12 @@ int SUB_portfrustum(int quad,
                    );
 
 EXTERNCPP void add_new_tour(void);
-#ifdef pp_SCRIPT
 EXTERNCPP void cleanbuffer(char *buffer, char *buffer2);
 EXTERNCPP void start_script(void);
 EXTERNCPP void run_script(void);
 EXTERNCPP int compile_script(char *scriptfile);
 EXTERNCPP scriptfiledata *insert_scriptfile(char *file);
 EXTERNCPP void get_newscriptfilename(char *newscriptfilename);
-#endif
-#ifdef pp_LOGFILE
-EXTERNCPP void log_print(char *output);
-#endif
 EXTERNCPP void init_avatar(void);
 #ifdef pp_GPU
 EXTERNCPP int log_base2(float xx);
@@ -547,7 +542,7 @@ EXTERNCPP void setventdirs(void);
 EXTERNCPP int nodeinblockage(const mesh *meshi, int i,int j,int k, int *imesh, int *iblockage);
 EXTERNCPP int nodeinvent(const mesh *gb, int i,int j,int k, int dir);
 EXTERNCPP void MenuStatus(int status, int x, int y);
-EXTERNCPP int readini2(char *inifile,int loaddatafile, int localfile);
+EXTERNCPP int readini2(char *inifile, int localfile);
 EXTERNCPP int match(char *buffer, const char *key, unsigned int lenkey);
 EXTERNCPP int match_upper(char *buffer, const char *key, unsigned int lenkey);
 EXTERNCPP void obst_or_vent2faces(const mesh *gb,blockagedata *bc, ventdata *vi, facedata *faceptr,int facetype);
@@ -573,7 +568,7 @@ EXTERNCPP void updatecolors(int colorindex);
 EXTERNCPP void initrgb(void);
 EXTERNCPP void updatechopcolors(void);
 EXTERNCPP void freelabels(flowlabels *label);
-EXTERNCPP int readini(int loaddatafile);
+EXTERNCPP int readini(int scriptconfigfile);
 EXTERNCPP void writeini(int flag);
 EXTERNCPP void DrawCone(float radius, float height);
 EXTERNCPP int ispatchtype(int type);
