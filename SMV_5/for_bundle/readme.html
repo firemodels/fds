@@ -8,6 +8,24 @@
 <p>Latest FDS and Smokeview available at 
 <a href="http://fire.nist.gov/fds">http://fire.nist.gov/fds</a>
 <ul>
+<li>5.2 (build xxxx) - July 6, 2008
+<ol>
+<li>fix - fix bug that occurs when drawing smoke on a computer without a GPU enabled video card.
+<li>fix - force terrain normals to be smooth across mesh boundaries so that seams 
+are not visible
+<li>fix - fix time advance when adjusting 3D slice/vector files.
+<li>enhancement - add option to speed up smoke drawing using the GPU 
+(note: not supported on Linux or Mac OSX releases).  The option is turned off
+by default and may be toggled on and off by pressing the 'G' key.
+<li>enhancement - add a scripting option to allow one to load data, set views and render 
+one or more images using commands in the script. 
+Scripts are created by turning on the <em>script recorder</em> found in the 
+Load/Unload>Script Options menu.
+<li>enhancment - internal change in smokeview resulting in reduced memory 
+requirements when loading large cases.
+<li>enhancement - allow slice and vector slice files to conform to the terrain.
+
+</ol>
 <li>5.1.6 (build 1736) - May 31, 2008
 <ol>
 <li>enhancement - allow slice and vector slice files to conform to terrain (for WUI applications)
