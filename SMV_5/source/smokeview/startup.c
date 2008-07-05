@@ -60,7 +60,6 @@ void to_lower(char *string){
 
 int initcase_c(int argc, char **argv){
   int return_code;
-  int input_type=0;
   char *input_file;
 
   /* 
@@ -76,7 +75,6 @@ int initcase_c(int argc, char **argv){
     else{
       input_file=smvfilename;
     }
-    input_type=1;
     return_code=readsmv(input_file);
     if(return_code==0){
       trainer_mode=1;
@@ -86,7 +84,6 @@ int initcase_c(int argc, char **argv){
     }
   }
   else{
-    input_type=2;
     input_file=smvfilename;
     return_code=readsmv(input_file);
   }
@@ -1635,7 +1632,7 @@ void initvars1(void){
   smoke3d_thick=0;
 #ifdef pp_GPU
   smoke3d_rthick=1.0;
-  usegpu=1;
+  usegpu=0;
 #endif
   smokedrawtest_nummin=1;
   smokedrawtest_nummax=1;
