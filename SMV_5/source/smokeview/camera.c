@@ -226,6 +226,10 @@ void set_camera_current(float angles[2], float eye[3], float zzoom){
 camera *insert_camera(camera *cb,camera *source, char *name){
   camera *cam,*ca;
 
+  for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
+    if(strcmp(ca->name,name)==0)return NULL;
+  }
+
   if(NewMemory((void **)&cam,sizeof(camera))==0)return NULL;
   init_camera(cam,name);
   if(source!=NULL){
