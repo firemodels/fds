@@ -1,4 +1,4 @@
-&HEAD CHID='ranch_04',TITLE='2 room ranch, ceiling vented, SVN $Revision: 1959 $'/
+&HEAD CHID='ranch_04',TITLE='2 room ranch, ceiling vented, SVN $Revision$'/
 
 &MESH IJK=36,18,24, XB=0.0,3.6,-0.8,1.0,0.0,2.4 /
 &MESH IJK=36,18,24, XB=0.0,3.6, 1.0,2.8,0.0,2.4 /
