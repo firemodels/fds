@@ -1,0 +1,137 @@
+&HEAD CHID='flash1a',TITLE='MontoCo Flashover Simulator SVN $Revision: 935 $' /
+&MESH IJK=32,48,18, XB=-0.4,2.8,-0.4,4.4,0.0, 1.8/
+&MESH IJK=32,48,18, XB=-0.4,2.8,-0.4,4.4,1.8, 3.6/
+&MESH IJK=32,48,18, XB=-0.4,2.8, 4.4,9.2,0.0, 1.8/
+&MESH IJK=32,48,18, XB=-0.4,2.8, 4.4,9.2,1.8, 3.6/
+
+
+&TIME TWFIN=300.0 /
+&DUMP NFRAMES=3000 /
+&MISC SURF_DEFAULT='METAL WALL'/
+
+&MATL ID                    = 'SHEETMETAL'
+      SPECIFIC_HEAT         = 0.47
+      CONDUCTIVITY          = 48.0
+      DENSITY               = 8000.0
+      /
+
+&SURF ID                 = 'METAL WALL'
+      FYI                = '18 guage sheet metal'
+      RGB                = 255,0,0,
+      MATL_ID            = 'SHEETMETAL'
+      THICKNESS          = 0.00635 /
+
+&MATL ID                    = 'MT_PARTBRD'
+      FYI='http://www.customthermoelectric.com/MaterialProperties5.htm'
+      SPECIFIC_HEAT         = 0.134
+      CONDUCTIVITY          = 0.17
+      DENSITY               = 1000.0
+      /
+
+&SURF ID='PARTBRD'
+      MATL_ID = 'MT_PARTBRD'
+      THICKNESS=0.016
+      IGNITION_TEMPERATURE=360. /
+
+&MATL ID                    = 'MT_CONCRETE'
+      SPECIFIC_HEAT         = 0.88
+      CONDUCTIVITY          = 1280.
+      DENSITY               = 2200.
+      /
+
+&SURF ID='CONCRETE'
+      MATL_ID = 'MT_CONCRETE'
+      THICKNESS=0.016
+      RGB=220,220,220/
+
+&SURF ID='FIRE_RAMP', HRRPUA=3125.0 /500 kW
+
+&OBST XB=0.0, 0.1, 6.1, 8.7, 1.1, 3.3, / small container
+&OBST XB=2.3, 2.4, 6.1, 8.7, 1.1, 3.3, / small container
+&OBST XB=0.0, 2.4, 6.0, 6.1, 1.1, 3.3, / small container
+&OBST XB=0.0, 2.4, 8.7, 8.8, 1.1, 3.3, / small container
+&OBST XB=0.0, 2.4, 6.0, 8.8, 1.0, 1.1, / small container
+&OBST XB=0.0, 2.4, 6.0, 8.8, 3.3, 3.4, / small container
+&OBST XB=0.1, 0.2, 6.2, 8.599999, 2.0, 3.2, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=2.2, 2.3, 6.2, 8.599999, 2.0, 3.2, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=0.1, 2.3, 6.1, 6.2, 2.0, 3.2, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=0.1, 2.3, 8.599999, 8.7, 2.0, 3.2, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=0.1, 2.3, 6.1, 8.7, 1.9, 2.0, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=0.1, 2.3, 6.1, 8.7, 3.2, 3.3, SURF_ID='PARTBRD' / liner in small container
+&HOLE  XB=0.2, 2.2, 6.2, 8.6, 1.8, 2.0 /
+&OBST XB=0.0, 0.1, 0.1, 5.9, 0.1, 2.3, /  large container
+&OBST XB=2.3, 2.4, 0.1, 5.9, 0.1, 2.3, /  large container
+&OBST XB=0.0, 2.4, 0.0, 0.1, 0.1, 2.3, /  large container
+&OBST XB=0.0, 2.4, 5.9, 6.0, 0.1, 2.3, /  large container
+&OBST XB=0.0, 2.4, 0.0, 6.0, 0.0, 0.1, /  large container
+&OBST XB=0.0, 2.4, 0.0, 6.0, 2.3, 2.4, /  large container
+&HOLE  XB=0.1, 2.3, 5.8, 6.2, 1.1, 2.3 /  opening between two containers
+&OBST  XB=0.1, 2.3, 3.6, 3.7, 1.7, 2.3 / baffle
+
+&OBST XB=0.1, 0.2, 2.1, 5.5, 0.2, 0.3, COLOR='BLACK' / left bench
+&OBST XB=0.4, 0.5, 2.1, 5.5, 0.2, 0.3, COLOR='BLACK' / left bench
+&OBST XB=0.1, 0.5, 2.0, 2.1, 0.2, 0.3, COLOR='BLACK' / left bench
+&OBST XB=0.1, 0.5, 5.5, 5.6, 0.2, 0.3, COLOR='BLACK' / left bench
+&OBST XB=0.1, 0.5, 2.0, 5.6, 0.1, 0.2, COLOR='BLACK' / left bench
+&OBST XB=0.1, 0.5, 2.0, 5.6, 0.3, 0.4, COLOR='BLACK' / left bench
+&OBST XB=1.9, 2.0, 2.1, 5.5, 0.2, 0.3, COLOR='BLACK' / right bench
+&OBST XB=2.2, 2.3, 2.1, 5.5, 0.2, 0.3, COLOR='BLACK' / right bench
+&OBST XB=1.9, 2.3, 2.0, 2.1, 0.2, 0.3, COLOR='BLACK' / right bench
+&OBST XB=1.9, 2.3, 5.5, 5.6, 0.2, 0.3, COLOR='BLACK' / right bench
+&OBST XB=1.9, 2.3, 2.0, 5.6, 0.1, 0.2, COLOR='BLACK' / right bench
+&OBST XB=1.9, 2.3, 2.0, 5.6, 0.3, 0.4, COLOR='BLACK' / right bench
+
+&OBST XB=0.9, 1.0, 7.2, 7.6, 1.2, 1.6,   COLOR='BLACK' /  metal drum
+&OBST XB=1.4, 1.5, 7.2, 7.6, 1.2, 1.6,   COLOR='BLACK' /  metal drum
+&OBST XB=0.9, 1.5, 7.1, 7.2, 1.2, 1.6,   COLOR='BLACK' /  metal drum
+&OBST XB=0.9, 1.5, 7.6, 7.7, 1.2, 1.6,   COLOR='BLACK' /  metal drum
+&OBST XB=0.9, 1.5, 7.1, 7.7, 1.1, 1.2,   COLOR='BLACK' /  metal drum
+&OBST XB=0.9, 1.5, 7.1, 7.7, 1.6, 1.7,   COLOR='BLACK' /  metal drum
+&HOLE  XB=1.0,1.4, 7.2,7.6,1.2,1.8 /
+&VENT XB= 1.0,1.4, 7.2,7.6,1.2,1.2 SURF_ID='FIRE_RAMP'/Fire Footprint
+
+&OBST XB=1.0, 1.4, 4.2, 4.6, 2.4, 2.6, / vent over large container
+&HOLE XB=1.1,1.3, 4.3,4.5, 2.2,2.7 /
+
+&HOLE XB=0.2,0.4,-0.1,0.2,0.2,0.4 / front hole
+
+&HOLE XB=-0.1,0.2, 0.7,1.0, 0.1,2.3 /
+
+
+&VENT XB=-0.4,-0.4,-0.4, 9.2,0.0,3.6, SURF_ID='OPEN' /
+&VENT XB= 2.8, 2.8,-0.4, 9.2,0.0,3.6, SURF_ID='OPEN' /
+&VENT XB=-0.4, 2.8,-0.4,-0.4,0.0,3.6, SURF_ID='OPEN' /
+&VENT XB=-0.4, 2.8, 9.2, 9.2,0.0,3.6, SURF_ID='OPEN' /
+&VENT XB=-0.4, 2.8,-0.4, 9.2,0.0,0.0, SURF_ID='CONCRETE' /
+&VENT XB=-0.4, 2.8,-0.4, 9.2,3.6,3.6, SURF_ID='OPEN' /
+
+&SLCF PBX=0.3 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / left bench
+&SLCF PBX=1.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center
+&SLCF PBX=2.1 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / right bench
+&SLCF PBY=4.4 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / top vent
+&SLCF PBY=0.7 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / left opening (crack)
+
+&SLCF PBZ=1.3 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / sitting eye level
+&SLCF PBZ=2.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  large container
+&SLCF PBZ=3.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  small cotainer
+
+&SLCF PBX=0.3 QUANTITY='oxygen' / left bench
+&SLCF PBX=1.2 QUANTITY='oxygen' / center
+&SLCF PBX=2.1 QUANTITY='oxygen' / right bench
+&SLCF PBY=4.4 QUANTITY='oxygen' / top vent
+&SLCF PBY=0.7 QUANTITY='oxygen' / left opening (crack)
+
+&SLCF PBZ=1.3 QUANTITY='oxygen' / sitting eye level
+&SLCF PBZ=2.2 QUANTITY='oxygen'  / below  large container
+&SLCF PBZ=3.2 QUANTITY='oxygen' /  below  small cotainer
+
+&BNDF QUANTITY='RADIATIVE_FLUX' /
+&BNDF QUANTITY='HEAT_FLUX' /
+&BNDF QUANTITY='WALL_TEMPERATURE' /
+&BNDF QUANTITY='BURNING_RATE' /
+
+&ISOF QUANTITY='TEMPERATURE',VALUE=100.0 /
+&ISOF QUANTITY='TEMPERATURE',VALUE=300.0 /
+&ISOF QUANTITY='TEMPERATURE',VALUE=600.0 /
+
+&TAIL /
