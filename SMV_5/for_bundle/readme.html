@@ -10,20 +10,34 @@
 <ul>
 <li>5.2 (build xxxx) - July 6, 2008
 <ol>
-<li>fix - fix bug that occurs when drawing smoke on a computer without a GPU enabled video card.
-<li>fix - force terrain normals to be smooth across mesh boundaries so that seams 
-are not visible
-<li>fix - fix time advance when adjusting 3D slice/vector files.
-<li>enhancement - add option to speed up smoke drawing using the GPU 
-(note: not supported on Linux or Mac OSX releases).  The option is turned off
+<li>enhancement - Add an option to speed up smoke visualization by using the 
+graphics programming unit (GPU) to perform some of the needed computations.
+This option is not supported on Linux or Mac OSX releases of Smokeview.  
+The option is turned off
 by default and may be toggled on and off by pressing the 'G' key.
-<li>enhancement - add a scripting option to allow one to load data, set views and render 
-one or more images using commands in the script. 
-Scripts are created by turning on the <em>script recorder</em> found in the 
+
+<li>enhancement - add the ability to run Smokeview in a <em>batch</em> or unattended
+mode.  This mode may be used to automatically load a data file, view it from 
+a prescribed direction and render the resulting image.  This may be repeated for other views
+and/or other data files.  A script named <em>casename.ssf</em> may be executed by typing
+<p><tt>smokeview -runscript casename </tt>
+<p>at a command line or from the <tt>Load/Unload>Script Options</tt> menu.
+Scripts are created by adding desired commands to a text file named casename.ssf 
+or by turning on the <em>script recorder</em> found in the 
 Load/Unload>Script Options menu.
+
 <li>enhancment - internal change in smokeview resulting in reduced memory 
 requirements when loading large cases.
-<li>enhancement - allow slice and vector slice files to conform to the terrain.
+
+<li>enhancement - When performing WUI computations, allow slice and vector slice files to conform to a 
+specified distance above the ground or terrain.
+
+<li>fix - fix bug that occurs when drawing smoke on a computer without a GPU enabled video card.
+
+<li>fix - force terrain normals to be smooth across mesh boundaries so that seams 
+are not visible
+
+<li>fix - fix time advance when adjusting 3D slice/vector files.
 
 </ol>
 <li>5.1.6 (build 1736) - May 31, 2008
