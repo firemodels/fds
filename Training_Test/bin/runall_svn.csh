@@ -13,10 +13,10 @@ setenv FDS5 ~/bin/fds5_intel
 #      of fds you want to run.
 #  3.  Change hostnames in each RUNFDS command to point to free 
 #      cluster nodes
-#  4.  Run script at top level of Trainer directory, ie one 
-#      level up from the bin directory
+#  4.  Run script from this directory (repository_root/bin)
 
-set RUNFDS=bin/runfds.csh
+set RUNFDS=./runfds.csh
+setenv JOBDIR `pwd`/..
 
 # syntax of RUNFDS
 # $RUNFDS  directory case host
