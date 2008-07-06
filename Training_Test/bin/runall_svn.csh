@@ -23,6 +23,10 @@ setenv JOBDIR `pwd`/..
 
 # demontration cases
 $RUNFDS demonstrations/2room_ranch ranch_00 fire72 &
+$RUNFDS demonstrations/2room_ranch ranch_01 fire72 &
+$RUNFDS demonstrations/2room_ranch ranch_02 fire72 &
+$RUNFDS demonstrations/2room_ranch ranch_03 fire72 &
+$RUNFDS demonstrations/2room_ranch ranch_04 fire72 &
 # MCFRS cases
 $RUNFDS MCFRS/MCFRS_flashover mcfrs_flashover_00 fire72 &
 $RUNFDS MCFRS/MCFRS_ranch mcfrs_ranch_00 fire72 &
