@@ -15,11 +15,11 @@ if(! -e $FDS5) then
   exit
 endif
 if(! -d $fulldir) then
-  echo "The directory $fulldir does not exit"
+  echo "The directory $fulldir does not exit. Run aborted."
   exit
 endif
 if(! -e $fulldir/$in) then
-  echo "The fds input  file, $fulldir/$in does not exit"
+  echo "The fds input  file, $fulldir/$in does not exit. Run aborted."
   exit
 endif
 if($?STOPFDS) then

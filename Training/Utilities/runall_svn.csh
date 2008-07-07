@@ -34,15 +34,15 @@ setenv JOBDIR `pwd`/..
 # $RUNFDS  directory case host
 
 # demonstration cases
-$RUNFDS demonstrations/2room_ranch ranch_00 fire72 &
-$RUNFDS demonstrations/2room_ranch ranch_01 fire72 &
-$RUNFDS demonstrations/2room_ranch ranch_02 fire72 &
-$RUNFDS demonstrations/2room_ranch ranch_03 fire72 &
-$RUNFDS demonstrations/2room_ranch ranch_04 fire73 &
+$RUNFDS Demonstrations/2room_ranch ranch_00 fire72 &
+$RUNFDS Demonstrations/2room_ranch ranch_01 fire72 &
+$RUNFDS Demonstrations/2room_ranch ranch_02 fire72 &
+$RUNFDS Demonstrations/2room_ranch ranch_03 fire72 &
+$RUNFDS Demonstrations/2room_ranch ranch_04 fire73 &
 # MCFRS cases
-$RUNFDS MCFRS/MCFRS_flashover mcfrs_flashover_00 fire73 &
-$RUNFDS MCFRS/MCFRS_ranch mcfrs_ranch_00 fire73 &
+$RUNFDS MCFRS/MCFRS_Flashover mcfrs_flashover_00 fire73 &
+$RUNFDS MCFRS/MCFRS_Ranch mcfrs_ranch_00 fire73 &
 # MFRI  cases
-$RUNFDS MFRI/training_tower mfri fire73 &
-$RUNFDS MFRI/training_tower mfri_tower_00a fire74 &
-$RUNFDS MFRI/training_tower mfri_tower_00b fire74 &
+$RUNFDS MFRI/MFRI_Training_Tower mfri fire73 &
+$RUNFDS MFRI/MFRI_Training_Tower mfri_tower_00a fire74 &
+$RUNFDS MFRI/MFRI_Training_Tower mfri_tower_00b fire74 &
