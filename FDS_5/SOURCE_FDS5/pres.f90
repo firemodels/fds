@@ -890,12 +890,12 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                   NO = M2%CGI(IIO,JJO,KKO)
                   SELECT CASE(IOR)
                      CASE( 1) 
-                        DA      = R(II)*DY(JJ)*DZ(KK)
+                        DA      = R(0)*DY(JJ)*DZ(KK)
                         DHDX_S(NOM) = DHDX_S(NOM) + DA* (-DUDT_AVG(IW)-FVX(0,JJ,KK) + (B(N)-B(NO))/DX_M(N,NO) &
                               - (H(1,JJ,KK)-H(0,JJ,KK))*RDXN(0) )
                         AREA_XS(NOM) = AREA_XS(NOM) + DA
                      CASE(-1)
-                        DA      = R(II-1)*DY(JJ)*DZ(KK)
+                        DA      = R(IBAR)*DY(JJ)*DZ(KK)
                         DHDX_F(NOM) = DHDX_F(NOM) + DA* (-DUDT_AVG(IW)-FVX(IBAR,JJ,KK) + (B(NO)-B(N))/DX_M(N,NO) &
                               - (H(IBP1,JJ,KK)-H(IBAR,JJ,KK))*RDXN(IBAR) )
                         AREA_XF(NOM) = AREA_XF(NOM) + DA
@@ -930,7 +930,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               DUUDT = -FVX(IBAR,JJ,KK) - RDXN(IBAR)*(H(IBP1,JJ,KK)-H(IBAR,JJ,KK))
                               BXF(JJ,KK) = DUUDT - DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
-                              DA      = R(II-1)*DY(JJ)*DZ(KK)
+                              DA      = R(IBAR)*DY(JJ)*DZ(KK)
                               AREA_XF(0) = AREA_XF(0) + DA
                               B_OTHER = -B(N) 
                               DHDX_F(0) = DHDX_F(0) + DA* (  (B_OTHER-B(N))/DX_M(N,N) )
@@ -941,7 +941,7 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                               DUUDT = -FVX(0,JJ,KK) - RDXN(0)*(H(1,JJ,KK)-H(0,JJ,KK))
                               BXS(JJ,KK) = DUUDT + DUWDT(IW)
                            CASE (OPEN_BOUNDARY) 
-                              DA      = R(II)*DY(JJ)*DZ(KK)
+                              DA      = R(0)*DY(JJ)*DZ(KK)
                               AREA_XS(0) = AREA_XS(0) + DA
                               B_OTHER = -B(N)
                               DHDX_S(0) = DHDX_S(0) + DA* (  (B(N)-B_OTHER)/DX_M(N,N)  )
