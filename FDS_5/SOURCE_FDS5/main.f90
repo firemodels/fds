@@ -168,7 +168,7 @@ IF (.NOT.RESTART) THEN
    ! Make an initial dump of ambient values
 
    DO NM=1,NMESHES
-      CALL UPDATE_OUTPUTS(T(NM),NM,0)      
+      CALL UPDATE_OUTPUTS(T(NM),NM)      
       CALL DUMP_MESH_OUTPUTS(T(NM),NM)
    ENDDO
    CALL UPDATE_CONTROLS(T)
@@ -431,7 +431,7 @@ MAIN_LOOP: DO
    VELOCITY_BC_LOOP_2: DO NM=1,NMESHES
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE VELOCITY_BC_LOOP_2
       CALL VELOCITY_BC(T(NM),NM)
-      CALL UPDATE_OUTPUTS(T(NM),NM,1)      
+      CALL UPDATE_OUTPUTS(T(NM),NM)      
    ENDDO VELOCITY_BC_LOOP_2
 
    ! Exchange EVAC information among meshes
