@@ -7,6 +7,7 @@ set host=$3
 set fulldir=$JOBDIR/$dir
 set in=$infile.fds
 set out=$infile.err
+set stopfile=$infile.stop
 
 set scriptfile=$bindir/script.$$
 if(! -e $FDS5) then
@@ -20,6 +21,14 @@ endif
 if(! -e $fulldir/$in) then
   echo "The fds input  file, $fulldir/$in does not exit"
   exit
+endif
+if($?STOPFDS) then
+ echo "stopping case: $infile"
+ touch $fulldir/$stopfile
+ exit
+endif
+if(-e $fulldir/$stopfile) then
+ rm $fulldir/$stopfile
 endif
 cat << EOF > $scriptfile
 #!/bin/csh -f
