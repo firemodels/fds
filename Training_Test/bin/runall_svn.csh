@@ -7,6 +7,9 @@
 # specify location of the fds5 executable
 setenv FDS5 ~/bin/fds5_intel
 
+# uncomment line below to stop all FDS jobs running via this script
+# setenv STOPFDS
+
 #  1.  To run this script, first copy runall_svn.csh to runall.csh  
 #      (only when runall_svn.csh changes)
 #  2.  define the FDS5 environment variable to point to the version 
@@ -14,6 +17,8 @@ setenv FDS5 ~/bin/fds5_intel
 #  3.  Change hostnames in each RUNFDS command to point to free 
 #      cluster nodes
 #  4.  Run script from this directory (repository_root/bin)
+
+# only edit hostnames below
 
 set RUNFDS=./runfds.csh
 setenv JOBDIR `pwd`/..
@@ -26,11 +31,11 @@ $RUNFDS demonstrations/2room_ranch ranch_00 fire72 &
 $RUNFDS demonstrations/2room_ranch ranch_01 fire72 &
 $RUNFDS demonstrations/2room_ranch ranch_02 fire72 &
 $RUNFDS demonstrations/2room_ranch ranch_03 fire72 &
-$RUNFDS demonstrations/2room_ranch ranch_04 fire72 &
+$RUNFDS demonstrations/2room_ranch ranch_04 fire73 &
 # MCFRS cases
-$RUNFDS MCFRS/MCFRS_flashover mcfrs_flashover_00 fire72 &
-$RUNFDS MCFRS/MCFRS_ranch mcfrs_ranch_00 fire72 &
+$RUNFDS MCFRS/MCFRS_flashover mcfrs_flashover_00 fire73 &
+$RUNFDS MCFRS/MCFRS_ranch mcfrs_ranch_00 fire73 &
 # MFRI  cases
-$RUNFDS MFRI/training_tower mfri fire72 &
-$RUNFDS MFRI/training_tower mfri_tower_00a fire72 &
-$RUNFDS MFRI/training_tower mfri_tower_00b fire72 &
+$RUNFDS MFRI/training_tower mfri fire73 &
+$RUNFDS MFRI/training_tower mfri_tower_00a fire74 &
+$RUNFDS MFRI/training_tower mfri_tower_00b fire74 &
