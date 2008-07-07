@@ -7,7 +7,14 @@
 # specify location of the fds5 executable
 setenv FDS5 ~/bin/fds5_intel
 
-# uncomment line below to stop all FDS jobs running via this script
+# To run a case in parallel, put the following line 
+# (filled out correctly) before the case to be run and
+#   reset back to the regular FDS5 value afterwards
+#
+# setenv FDS5 "mpirun n0 n0 n0 n0 ~/bin/fds5_mpi_intel"
+
+# Uncomment the setenv line below to stop all FDS jobs running 
+# via this script.
 # setenv STOPFDS
 
 #  1.  To run this script, first copy runall_svn.csh to runall.csh  
@@ -26,7 +33,7 @@ setenv JOBDIR `pwd`/..
 # syntax of RUNFDS
 # $RUNFDS  directory case host
 
-# demontration cases
+# demonstration cases
 $RUNFDS demonstrations/2room_ranch ranch_00 fire72 &
 $RUNFDS demonstrations/2room_ranch ranch_01 fire72 &
 $RUNFDS demonstrations/2room_ranch ranch_02 fire72 &
