@@ -1,4 +1,4 @@
-&HEAD CHID='MFRI_Training_Tower_00', TITLE='MFRI Fire Building SVN $Revision: 1959 $ '/
+&HEAD CHID='MFRI_Training_Tower_00', TITLE='MFRI Fire Building SVN $Revision$ '/
 # Based on HRR values from plot from Dan
 
 &MESH IJK=80,60,30, XB=-1.0, 7.0, -1.0, 5.0,0.0,3.00/
