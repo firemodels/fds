@@ -1395,7 +1395,7 @@ Validation Suite} removed for clarity.
 ...
 &SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 ...
-&BNDF QUANTITY='GAUGE_HEAT_FLUX' /
+&BNDF QUANTITY='GAUGE HEAT FLUX' /
 ...
 &DEVC XYZ=6.04,0.28,3.65, QUANTITY='oxygen', ID='EO2_FDS' /
 ...
@@ -6152,7 +6152,7 @@ Re-position the probe and try again. For example, the line
 
 \footnotesize
 \begin{verbatim}
-&DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL_TEMPERATURE', IOR=-2, ID='...' /
+&DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='...' /
 \end{verbatim}
 \normalsize
 
@@ -6278,8 +6278,7 @@ profiles within a given solid obstruction:
 \noindent
 \index{PROF!QUANTITY}
 Other possible quantities are the total density of the wall ({\ct
-QUANTITY = 'DENSITY'}) or densities of solid material components ({\ct
-QUANTITY = 'MATL\_ID'}), where {\ct MATL\_ID} is the name of the
+QUANTITY = 'DENSITY'}) or densities of solid material components ({\ct QUANTITY = 'MATL\_ID'}), where {\ct MATL\_ID} is the name of the
 material.
 
 Each {\ct PROF} line creates a separate file. This may be more than is
@@ -6289,7 +6288,7 @@ a device as follows:
 
 \footnotesize
 \begin{verbatim}
-&DEVC XYZ=..., QUANTITY='INSIDE_WALL_TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
+&DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
 \end{verbatim} \normalsize
 
 \noindent
@@ -6647,13 +6646,10 @@ heat transfer to a small sphere.
 
 There are various ways of recording the heat flux at a solid
 boundary. If you want to record the {\em net} heat flux to the
-surface, $\dq_c'' + \dq_r''$, use the {\ct QUANTITY} called {\ct
-HEAT\_FLUX}. The individual components, the {\em net} convective and
-radiative fluxes, are {\ct CONVECTIVE\_FLUX} and {\ct
-RADIATIVE\_FLUX}, respectively. If you want to compare predicted heat
-flux with a measurement, you often need to use {\ct
-GAUGE\_HEAT\_FLUX}.
-The difference between {\ct HEAT\_FLUX} and {\ct GAUGE\_HEAT\_FLUX} is that
+surface, $\dq_c'' + \dq_r''$, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and
+radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX'}, respectively. If you want to compare predicted heat
+flux with a measurement, you often need to use {\ct 'GAUGE HEAT FLUX'}.
+The difference between {\ct 'NET HEAT FLUX'} and {\ct 'GAUGE HEAT FLUX'} is that
 the former is the rate at which energy is absorbed by the solid surface;
 the latter is the amount of energy that would be absorbed if the surface were cold (or some specified temperature):
 $$\dq_r''/\epsilon +\dq_c'' + h(T_w-T_\infty) + \sigma (T_w^4-T_\infty^4)$$
@@ -6662,11 +6658,11 @@ than ambient, set {\ct GAUGE\_TEMPERATURE} on the {\ct PROP} line
 associated with the device.  When comparing against a radiometer
 measurement, use {\ct RADIOMETER}:
 $$\dq_r''/\epsilon + \sigma (T_w^4-T_\infty^4) $$
-For diagnostic purposes it is sometimes convenient to output the {\ct INCIDENT\_HEAT\_FLUX}:
+For diagnostic purposes it is sometimes convenient to output the {\ct 'INCIDENT HEAT FLUX'}:
 $$ \dq_r''/\epsilon + \sigma T_w^4 +\dq_c'' $$
 
 All of the above output quantities related to heat flux are defined at a solid surface. However,
-there is a gas phase output quantity called {\ct RADIANT\_INTENSITY} that is used mainly for diagnosing problems with the
+there is a gas phase output quantity called {\ct 'RADIANT INTENSITY'} that is used mainly for diagnosing problems with the
 radiation solver. Even though its units are kW/m$^2$, it should not be interpreted as the heat flux to an object that would
 occupy that particular point in space. Rather, it is the integral over all directions of the radiation intensity, $I(\bx,\bs)$, which is a function of both
 space and direction ($\bs$ is a direction vector that ranges over $4\pi$ solid angles):
@@ -6684,11 +6680,11 @@ The incident heat flux due to a constant intensity would be $\pi \, \overline{I}
 \be
    \overline{\dq_{r,inc}''} = \pi \, \overline{I} = \pi \; \frac{U}{4 \pi} = \frac{U}{4}
 \ee
-Thus, you can use {\ct RADIATIVE\_INTENSITY}/4 as an approximation for the incident radiative heat flux. However, this number can not
+Thus, you can use {\ct 'RADIATIVE INTENSITY'}/4 as an approximation for the incident radiative heat flux. However, this number can not
 take into account the non-uniform nature of radiation. Also note that this is the {\em incident} heat flux. To get the {\em net} heat flux to the
 object or person whose surface temperature is $T_s$, you need to subtract $\epsilon \sigma T_s^4$, the outgoing heat flux.
 
-There is a second output quantity available called {\ct RADIATIVE\_FLUX\_GAS} which uses the additional input
+There is a second output quantity available called {\ct 'RADIATIVE HEAT FLUX GAS'} which uses the additional input
 of {\ct ORIENTATION}.  This quantity integrates the incomming radiative flux over $2\pi$ solid angles around the
 vector defined by {\ct ORIENTATION}.
 
@@ -6711,7 +6707,7 @@ In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores 
 the simulation for the purpose of saving CPU time.
 
 Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of the droplets as they fly through
-the air, in units of kg/m$^3$.  {\ct 'DROPLET\_FLUX\_X'},  {\ct 'DROPLET\_FLUX\_Y'}, and {\ct 'DROPLET\_FLUX\_Z'} produce {\em only} slice and Plot3D files
+the air, in units of kg/m$^3$.  {\ct 'DROPLET FLUX X'},  {\ct 'DROPLET FLUX Y'}, and {\ct 'DROPLET FLUX Z'} produce {\em only} slice and Plot3D files
 of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
 
 
@@ -6802,8 +6798,8 @@ free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the
 
 \footnotesize
 \begin{verbatim}
-&BNDF QUANTITY='PRESSURE_COEFFICIENT', PROP_ID='whatever' /
-&DEVC ID='pressure tap', XYZ=..., IOR=2, QUANTITY='PRESSURE_COEFFICIENT', PROP_ID='whatever' /
+&BNDF QUANTITY='PRESSURE COEFFICIENT', PROP_ID='whatever' /
+&DEVC ID='pressure tap', XYZ=..., IOR=2, QUANTITY='PRESSURE COEFFICIENT', PROP_ID='whatever' /
 &PROP ID='whatever', CHARACTERISTIC_VELOCITY=3.4 /
 \end{verbatim}
 \normalsize
@@ -7446,7 +7442,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hspace{0.5in}
 
 \begin{table}[H]
-\caption[Lagrangian Particles/Droplets]{For more information see Section~\ref{info:PART}.}\label{tbl:PART}
+\caption[Lagrangian Particles/Droplets]{For more information see Section~\ref{info:PART}.}
+\label{tbl:PART}
 \noindent
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
@@ -7456,35 +7453,35 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DENSITY}                   & Real            & Droplet density                   & kg/m$^3$  & 1000.         \\ \hline
 {\ct DIAMETER}                  & Real            & Median Volumetric Diameter        & $\mu$m    & 500.          \\ \hline
 {\ct DROPLETS\_PER\_SECOND}     & Integer         & Drops per second per head         &           & 1000          \\ \hline
-{\ct DT\_INSERT}                & Real            & Time between particle insertions  & s         & 0.05          \\ \hline
+{\ct DT\_INSERT}                & Real            & Time between insertions           & s         & 0.05          \\ \hline
 {\ct EVAPORATE}                 & Logical         & Assume liquid evaporation         &           & {\ct .TRUE.}  \\ \hline
-{\ct FYI}                       & Character       & Comment String (has no effect)    &           &               \\ \hline
+{\ct FYI}                       & Character       & Comment String                    &           &               \\ \hline
 {\ct FUEL}                      & Logical         & Liquid Fuel                       &           & {\ct .FALSE.} \\ \hline
 %{\ct GAMMA}                     & Real            & Specific heat ratio for vapor     &           & 1.4           \\ \hline
-{\ct GAMMA\_D}                  & Real            & Parameter for size distribution   &           & 2.4           \\ \hline
+{\ct GAMMA\_D}                  & Real            & Size distribution parameter       &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}      & Real            & Heat of Combustion                & kJ/kg     &               \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}    & Real            & Latent Heat of Vaporization       & kJ/kg     & 2259.         \\ \hline
 {\ct HORIZONTAL\_VELOCITY}      & Real            & Droplet speed, horizontal         & m/s       &  0.2          \\ \hline
 {\ct ID}                        & Character       & Identifier                        &           &               \\ \hline
 {\ct INITIAL\_TEMPERATURE}      & Real            & Initial Temperature               & $^\circ$C & {\ct TMPA}    \\ \hline
 {\ct MASSLESS}                  & Logical         & Massless tracers                  &           & {\ct .FALSE.} \\ \hline
-{\ct MASS\_PER\_VOLUME}         & Real            & Droplet mass per unit volume      & kg/m$^3$  & 1.            \\ \hline
-{\ct MAXIMUM\_DIAMETER}         & Real            & Above which droplet breaks up     & $\mu$m    & $\infty$      \\ \hline
-{\ct MINIMUM\_DIAMETER}         & Real            & Below which droplet evaporates    & $\mu$m    & 20.           \\ \hline
+{\ct MASS\_PER\_VOLUME}         & Real            & Mass per unit volume              & kg/m$^3$  & 1.            \\ \hline
+{\ct MAXIMUM\_DIAMETER}         & Real            & Break-up bound                    & $\mu$m    & $\infty$      \\ \hline
+{\ct MINIMUM\_DIAMETER}         & Real            & Evaporation bound                 & $\mu$m    & 20.           \\ \hline
 {\ct MELTING\_TEMPERATURE}      & Real            & Melting Temperature               & $^\circ$C & 0.            \\ \hline
 {\ct MONODISPERSE}              & Logical         & Uniform droplet size              &           & {\ct .FALSE.} \\ \hline
 {\ct NUMBER\_INITIAL\_DROPLETS} & Integer         & Number of droplets at start       &           & 0             \\ \hline
 {\ct QUANTITIES(10)}            & Character       & Quantities for coloring           &           &               \\ \hline
 {\ct RGB(3)}                    & Integers        & Color indices (0-255)             &           &               \\ \hline
 {\ct SAMPLING\_FACTOR}          & Integer         & Filter for output file            &           & 1             \\ \hline
-{\ct SIGMA\_D}                  & Real            & Parameter for size distribution   &           &               \\ \hline
+{\ct SIGMA\_D}                  & Real            & Size distribution parameter       &           &               \\ \hline
 {\ct SPEC\_ID}                  & Character       & Name of gas species               &           &               \\ \hline
 {\ct SPECIFIC\_HEAT}            & Real            & Droplet specific heat             & kJ/kg/K   & 4.184         \\ \hline
 {\ct STATIC}                    & Logical         & Stationary Particles              &           & {\ct .FALSE.} \\ \hline
 %{\ct TREE}                      & Logical         & Particles are leaves              &           & {\ct .FALSE.} \\ \hline
 {\ct VAPORIZATION\_TEMPERATURE} & Real            & Liquid Droplet Boiling Temp       & $^\circ$C & 100.          \\ \hline
 {\ct VERTICAL\_VELOCITY}        & Real            & Droplet speed, vertical           & m/s       &  0.5          \\ \hline
-{\ct XB(6)}                     & Real Sextuplet            & Initial particle placement region & m         &               \\ \hline
+{\ct XB(6)}                     & Real array      & Initial particle location         & m         &               \\ \hline
 {\ct WATER}                     & Logical         & Water Droplet                     &           & {\ct .FALSE.} \\ \hline
 \end{tabular*}
 \end{table}
@@ -8121,7 +8118,7 @@ Point output via ``thermocouples'' ({\ct THCP}s) are now given by ``devices'' ({
 
 \footnotesize
 \begin{verbatim}
-&DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL_TEMPERATURE', IOR=-2, ID='probe_2' /
+&DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='probe_2' /
 \end{verbatim}
 \normalsize
 
@@ -9242,12 +9239,12 @@ of this as a perfect radiant panel or cone calorimeter.
 of the computational domain. Create {\ct OPEN} vents on all other
 faces.
 \item Finally, add solid phase output devices to the solid surface,
-like {\ct WALL\_TEMPERATURE}, {\ct HEAT\_FLUX}, {\ct BURNING\_RATE},
-{\ct GAUGE\_HEAT\_FLUX}, and {\ct WALL\_THICKNESS} (assuming the solid
+like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'BURNING RATE'},
+{\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'} (assuming the solid
 is to burn away). Use these to track the condition of the solid as a
 function of time. In particular, make sure that the {\ct
-BURNING\_RATE} is appropriate for the particular external heat flux
-applied. Make sure that the {\ct WALL\_TEMPERATURE} is
+'BURNING RATE'} is appropriate for the particular external heat flux
+applied. Make sure that the {\ct 'WALL TEMPERATURE'} is
 appropriate. Compare your results to measurements made in a
 bench-scale device, like the cone calorimeter. Keep in mind, however,
 that the calculation and the experiment are not necessarily perfectly
