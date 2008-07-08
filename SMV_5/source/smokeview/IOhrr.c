@@ -64,6 +64,7 @@ void readhrr(int flag, int *errorcode){
   char buffer[1024];
   float *hrrtime, *hrrval;
   int display=0;
+  int ntimes_saved;
 
   *errorcode=0;
   if(hrrinfo!=NULL){
@@ -105,6 +106,7 @@ void readhrr(int flag, int *errorcode){
     if(nfirst==-1&&strstr(buffer,".")!=NULL)nfirst=ntimes;
     ntimes++;
   }
+  ntimes_saved=ntimes;
   ntimes-=nfirst;
 
   rewind(HRRFILE);
@@ -117,7 +119,9 @@ void readhrr(int flag, int *errorcode){
   hrrval=hrrinfo->hrrval_csv;
   ntimes=0;
 
-  while(!feof(HRRFILE)){
+// read no more than the number of lines found during first pass
+
+  while(ntimes<ntimes_saved&&!feof(HRRFILE)){
     if(fgets(buffer,10245,HRRFILE)==NULL)break;
     if(ntimes<nfirst){
       ntimes++;
