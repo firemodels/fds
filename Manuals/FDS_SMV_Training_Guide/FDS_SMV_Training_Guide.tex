@@ -57,7 +57,7 @@
 \newcommand{\fdsinput}[1]{
 {
 \scriptsize
-\verbatiminput{../../Training_Test/#1}
+\verbatiminput{../../Training/#1}
 }
 }
 \setlength{\textwidth}{6.5in}
@@ -317,14 +317,11 @@ The FDS scenarios that are experimentally based are documented by 1) briefly des
 \label{figMCFRStrainer}%
 \end{figure}
 
-\subsection{FDS input file}
-\fdsinput{demonstrations/2room_ranch/ranch_00.fds}
-
 \section{Results}
 
 % +++++++++++++++++++++++++++++ Experimental Cases +++++++++++++++++++++++++++
 
-\part{Experimental Cases}
+\part{Experimental Based Cases}
 
 % ---------------------------- Flashover Trainer -----------------------------------
 
@@ -358,9 +355,6 @@ in what column of a spread sheet file).
 \label{figMCFRStrainer}%
 \end{figure}
 
-\subsection{FDS input file}
-\fdsinput{MCFRS/MCFRS_flashover/mcfrs_flashover_00.fds}
-
 \section{Comparisons}
 
 % ---------------------------- Training Tower -----------------------------------
@@ -388,8 +382,6 @@ in what column of a spread sheet file).
 
 \section{Description of FDS setup}
 
-\subsection{FDS input file}
-\fdsinput{MFRI/training_tower/mfri_tower_00a.fds}
 
 \section{Comparisons}
 
@@ -418,12 +410,26 @@ in what column of a spread sheet file).
 
 \section{Description of FDS setup}
 
-\subsection{FDS input file}
-\fdsinput{MCFRS/MCFRS_ranch/mcfrs_ranch_00.fds}
 
 \section{Comparisons}
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+
+\appendix
+
+\chapter{FDS Input Files}
+
+\section{Two Room Ranch - Demonstration Case}
+\fdsinput{Demonstrations/2Room_Ranch/ranch_00.fds}
+
+\section{Flashover Trainer - MCFRS Case}
+\fdsinput{MCFRS/MCFRS_Flashover/MCFRS_Flashover_00.fds}
+
+\section{Ranch House - MCFRS Case}
+\fdsinput{MCFRS/MCFRS_Ranch/MCFRS_Ranch_00.fds}
+
+\section{Training Tower - MFRI Case}
+\fdsinput{MFRI/MFRI_Training_Tower/MFRI_Training_Tower_00.fds}
 
 
 \end{document}
