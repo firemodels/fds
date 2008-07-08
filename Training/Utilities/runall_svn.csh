@@ -5,7 +5,7 @@
 # should be modified as test cases are added or removed.
 
 # specify location of the fds5 executable
-setenv FDS5 ~/bin/fds5_intel
+setenv FDS5 ~/bin/fds_5.1.6_linux
 
 # To run a case in parallel, put the following line 
 # (filled out correctly) before the case to be run and
