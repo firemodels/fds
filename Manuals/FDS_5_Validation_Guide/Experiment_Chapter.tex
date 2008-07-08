@@ -47,7 +47,16 @@ scale fire experiments used.
 \item[Radiative Fraction:] The radiative fraction was assumed to be 0.35, similar to many smoky hydrocarbons.
 \end{description}
 
+\begin{sidewaysfigure}[p]
+\begin{center}
+\includegraphics[height=6.5in]{FIGURES/VTT/VTT_Drawing}
+\end{center}
+\caption{Geometry of the VTT Large Fire Test Hall.}
+\label{VTT_Drawing}
+\end{sidewaysfigure}
 
+
+\clearpage
 
 
 \section{UL/NFPRF Sprinkler, Vent, and Draft Curtain Study}
@@ -357,4 +366,48 @@ Back, Beyler, DiNenno and Tatem~\cite{Back:IAFSS4} measured the heat flux from 9
 of gypsum board. The experiments were sponsored by the Naval Research Laboratory and conducted by Hughes Associates, Inc., of Baltimore, Maryland. The
 square sand burner ranged in size from 0.28~m to 0.70~m, and the fires ranged in size from 50~kW to 520~kW.
 
-  
+
+\clearpage
+
+\section{Experimental Uncertainty}
+
+The documentation of the experiments described in this chapter have varying descriptions of the uncertainty in the reported measurements. 
+However, in order to assess the accuracy of FDS, there must be some estimate of the combined effect of the uncertainty in the reported 
+input parameters, like the heat release rate of the fire, and the reported measurement of the quantity of interest, like the hot gas layer (HGL)
+temperature.   
+
+In the US Nuclear Regulatory Commission Verification and Validation study~\cite{NUREG_1824}, Hamins estimates the combined
+uncertainty of the quantities of interest for the large scale fire experiments under consideration (VTT, NIST/NRC, NBS Multi-Room, FM/SNL). The 
+results are summarized in Table~\ref{Uncertainty}. These values were obtained by estimating the uncertainty of the HRR in large scale fire
+experiments to be on the order of 15~\%. Using well-known empirical relationships between the predicted quantities and the HRR (and other relevant 
+input parameters), Hamins
+estimates the uncertainty in the predicted quantities based on the uncertainty of the reported HRR. For example, the HGL temperature rise is roughly
+proportional to the HRR raised to the two-thirds power, thus a 15~\% uncertainty in the HRR leads to a 10~\% uncertainty in the FDS prediction.
+Combining this value (via a quadrature) with the uncertainty in the HGL temperature measurement itself leads to a combined uncertainty of 
+14~\%.  
+
+\begin{table}[ht!]
+\caption{Summary of Hamins' uncertainty estimates. }
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+Quantity                    & Combined Uncertainty (\%)       \\ \hline \hline
+HGL Temperature             & 14    \\ \hline
+HGL Depth                   & 13    \\ \hline
+Ceiling Jet Temperature     & 16    \\ \hline
+Plume Temperature           & 14    \\ \hline
+Gas Concentrations          & 9     \\ \hline
+Smoke Concentration         & 33    \\ \hline
+Pressure with Ventilation   & 80    \\ \hline
+Pressure without Ventilation   & 40    \\ \hline
+Heat Flux                   & 20    \\ \hline
+Surface Temperature         & 14    \\ \hline
+\end{tabular}
+\end{center}
+\label{Uncertainty}
+\end{table}
+
+
+
+
+

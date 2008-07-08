@@ -8,7 +8,7 @@ computed. The first is the mass fraction of unburned fuel and
 the second is the mass fraction of burned fuel (i.e. the mass of the combustion products
 that originated as fuel). When the default model is used, O$_2$, CO$_2$ and smoke concentrations are obtained
 from the explicitly computed mixture fraction variables. Their yields are specified by the user and do not
-change. 
+change.
 
 FDS has an optional two-step chemical reaction with a three parameter
 mixture fraction decomposition with the first step being oxidation of fuel
@@ -169,11 +169,11 @@ The large differences between model and measurement seen in the smoke data do no
 \begin{figure}[p]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Smoke_Concentration} \\
+\includegraphics[width=5.0in]{FIGURES/ScatterPlots/Smoke_Concentration} \\
 \vspace{0.25in} \\
 \end{tabular}
 \end{center}
-\caption{Summary of Smoke Results.}
+\caption{Summary of smoke concentration predictions for the NIST/NRC test series.}
 \end{figure}
 
 
@@ -195,10 +195,10 @@ Figure~\ref{WP_CH4_Species} shows predicted and
 measured values of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the burner along with a contour plot of CO near the
 burner lip (black rectangle is burner).  Note, as discussed above, that the test data shows that a small quantity of oxygen exists along
 the burner centerline which is not captured in the simulation.  Along the centerline, the model predicts higher values of fuel and higher values of
-products than measured.  The species profiles are also slightly narrower than measured, consistent with the temperature prediction.  
+products than measured.  The species profiles are also slightly narrower than measured, consistent with the temperature prediction.
 The peak CH$_4$ values along the burner centerline have errors ranging from 6~\% to 13~\%,
 the peak CO$_2$ values in the flame have errors ranging from 3~\% to 10`\%, and the peak CO values in the flame have
-errors ranging from 9~\% to 25~\%.  The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%. 
+errors ranging from 9~\% to 25~\%.  The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%.
 
 The contour of CO illustrates the combustion model quite well.  At the burner lip, fuel and oxygen first meet.
 Since ambient levels of oxygen exist on the air side of the slot and the temperatures are relatively low at the
@@ -247,14 +247,14 @@ dotted lines show experimental uncertainty }
 
 \section{NIST Reduced Scale Enclosure (RSE) Test Series}
 
-The RSE natural gas experiments were selected to assess the CO production capability rather than soot production. 
+The RSE natural gas experiments were selected to assess the CO production capability rather than soot production.
 Nine fire sizes were simulated: 50~kW, 75~kW, 100~kW, 150~kW, 200~kW, 300~kW, 400~kW,
 500~kW, and 600~kW.  The experiments were modeled using properties of the natural gas supplied to the test facility.
 The model geometry included the compartment interior along with a 0.6~m deep region outside the door.
 Figure~\ref{RSE_Pitts_Species} shows the measured and predicted CO$_2$ and CO concentrations.  The measured values are
 from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.  The model matches the data up to a fire size of
 300~kW, including the location of the peak CO$_2$ concentration at 200~kW.  For larger fires the model predicts more
-CO surviving in the upper layer than measured, along with correspondingly lower CO$_2$ levels.  
+CO surviving in the upper layer than measured, along with correspondingly lower CO$_2$ levels.
 As the compartment becomes under-ventilated, the model under-predicts
 CO$_2$ and over-predicts CO. The relative error increases as the compartment becomes more under-ventilated.  However,
 note that the under-prediction of CO$_2$ concentration in the rear (1.5~\%) is equivalent to the
