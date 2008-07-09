@@ -3026,6 +3026,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   int ssmokedir;
   unsigned char *firecolor;
   unsigned char *iblank_smoke3d;
+  int is_smoke;
 
   unsigned char value[4];
   float bvalue[4];
@@ -3039,8 +3040,20 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 
   meshi = meshinfo + smoke3di->blocknumber;
   firecolor=smoke3di->hrrpuv_color;
- 
 
+  {
+    smoke3d *sooti=NULL;
+
+	if(smoke3di->soot_index>=0){
+	  sooti = smoke3dinfo + smoke3di->soot_index;
+	}
+	if(sooti!=NULL&&sooti->display==1){
+      is_smoke=1;
+    }
+    else{
+      is_smoke=0;
+    }
+  }
   iblank_smoke3d = meshi->iblank_smoke3d;
   if(fire_halfdepth<=0.0){
     fire_alpha=256.0;
@@ -3058,7 +3071,6 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   smoke_shade4[1]=smoke_shade/255.0;
   smoke_shade4[2]=smoke_shade/255.0;
   smoke_shade4[3]=1.0;
-
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -3102,6 +3114,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   glUniform1i(GPU_adjustalphaflag,adjustalphaflag);
+  glUniform1i(GPU_is_smoke,is_smoke);
   glUniform3fv(GPU_eye,1,xyzeyeorig);
   {
     float fire_color[4];
@@ -4097,6 +4110,7 @@ void drawsmoke3dCULL(void){
   unsigned char *firecolor;
   int ntemp;
   unsigned char *iblank_smoke3d;
+  int is_smoke;
 
   unsigned char value[4];
 #ifdef pp_GPU_BLANK
@@ -4247,7 +4261,21 @@ void drawsmoke3dCULL(void){
         aspectratio = meshi->dxz;
         break;
       }
+	  {
+	    smoke3d *sooti=NULL;
+
+		if(smoke3di->soot_index>=0){
+		  sooti = smoke3dinfo + smoke3di->soot_index;
+		}
+		if(sooti!=NULL&&sooti->display==1){
+          is_smoke=1;
+        }
+        else{
+          is_smoke=0;
+        }
+	  }
       glUniform1f(GPU_aspectratio,aspectratio);
+      glUniform1i(GPU_is_smoke,is_smoke);
       glBegin(GL_TRIANGLES);
     }
     switch (meshi->smokedir){

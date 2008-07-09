@@ -55,6 +55,7 @@ int setSmokeShaders() {
     "uniform float aspectratio;"
     "uniform float hrrcutoff;"
     "uniform float smoke_shade;"
+	"uniform int is_smoke;"
 #ifdef pp_LIGHT
     "attribute float smoke_color;"
 #endif
@@ -75,11 +76,21 @@ int setSmokeShaders() {
 #else
     "  float s_shade;"
 #endif
+	"  int draw_hrr;"
     "  vec3 rel_pos;"
     "  if(hrrcutoff>0.0&&hrr>hrrcutoff){"
+	"    draw_hrr=1;"
+	"  }"
+	"  else{"
+	"    draw_hrr=0;"
+	"  }"
+    "  if(draw_hrr==1){"
     "    newcolor = firecolor;"
     "  }"
-    "  else{"
+	"  else if(draw_hrr==0&&is_smoke==0){"
+	"    newcolor = vec4(vec3(firecolor),0.0);"
+	"  }"
+	"  else if(draw_hrr==0&&is_smoke==1){"
     "    alpha=smoke_alpha/256.0;"
     "    if(adjustalphaflag==1||adjustalphaflag==2){"
     "      rel_pos=vec3(gl_Vertex)-eye;"
@@ -165,6 +176,7 @@ int setSmokeShaders() {
   GPU_smoke3d_rthick = glGetUniformLocation(p_smoke,"smoke3d_rthick");
   GPU_smokeshade = glGetUniformLocation(p_smoke,"smoke_shade");
   GPU_firecolor = glGetUniformLocation(p_smoke,"firecolor");
+  GPU_is_smoke = glGetUniformLocation(p_smoke,"is_smoke");
   GPU_aspectratio = glGetUniformLocation(p_smoke,"aspectratio");
   GPU_norm = glGetUniformLocation(p_smoke,"norm");
   GPU_eye = glGetUniformLocation(p_smoke,"eye");
