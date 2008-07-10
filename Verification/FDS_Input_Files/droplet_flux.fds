@@ -19,8 +19,8 @@ A test of the insertion of solid, non-evaporating droplets.
 &VENT MB='YMAX', SURF_ID='OPEN' /
 
 &SLCF PBY=0.0,QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
-&SLCF PBZ=1.0,QUANTITY='drops_FLUX_Z' /
+&SLCF PBZ=1.0,QUANTITY='MASS_FLUX_Z', PART_ID='drops' /
 
-&BNDF QUANTITY='drops_AMPUA' /  Accumulated Mass Per Unit Area, i.e., the Buckets
+&BNDF QUANTITY='AMPUA', PART_ID='drops'  /  Accumulated Mass Per Unit Area, i.e., the Buckets
 
 &TAIL /
