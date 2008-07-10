@@ -52,11 +52,11 @@ Open up the domain on all sides except the bottom (ZMIN)
 
 Output
 
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='HEAT_FLUX',        ID='flux' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL_TEMPERATURE', ID='temp' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING_RATE',     ID='burn' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='GAUGE_HEAT_FLUX',  ID='gauge' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL_THICKNESS',   ID='thick' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NET HEAT FLUX',    ID='flux' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', ID='temp' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE',     ID='burn' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='GAUGE HEAT FLUX',  ID='gauge' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL THICKNESS',   ID='thick' /
 
 &PROF XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='TEMPERATURE',      ID='Temperature' / 
 

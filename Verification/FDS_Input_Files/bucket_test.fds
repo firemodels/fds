@@ -23,10 +23,10 @@
 
 &SLCF PBY=0.0,QUANTITY='TEMPERATURE' /
 &SLCF PBY=0.0,QUANTITY='WATER VAPOR' /
-&SLCF PBY=0.0,QUANTITY='water_drops_MPUV' /
-&SLCF PBZ=0.1,QUANTITY='water_drops_FLUX_Z' /
-&SLCF PBZ=2.5,QUANTITY='water_drops_FLUX_Z' /
+&SLCF PBY=0.0,QUANTITY='MPUV', PART_ID=water drops' /
+&SLCF PBZ=0.1,QUANTITY='MASS_FLUX_Z', PART_ID='water drops' /
+&SLCF PBZ=2.5,QUANTITY='MASS_FLUX_Z', PART_ID='water drops' /
 
-&BNDF QUANTITY='water_drops_AMPUA' /  Accumulated Mass Per Unit Area, i.e., the Buckets
+&BNDF QUANTITY='AMPUA', PART_ID='water drops' /  Accumulated Mass Per Unit Area, i.e., the Buckets
 
 &TAIL /
