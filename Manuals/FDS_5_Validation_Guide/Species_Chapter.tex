@@ -182,43 +182,62 @@ The large differences between model and measurement seen in the smoke data do no
 
 \section{Smyth Slot Burner Experiment}
 
-The two-step, CO production model in FDS was used to simulate a methane/air slot burner diffusion flame.  Figure~\ref{WP_CH4_Temp} shows predicted and
-measured temperatures at three elevations above the burner.  The model predicts a flame that is slightly narrower
-(5.5~mm vs. 6.5~mm or a 15~\% error) and cooler (1700~$^\circ$C vs. 1800~$^\circ$C or a 5~\% error) than measured.  The model
+The two-step, CO production model in FDS was used to simulate a methane/air slot burner diffusion flame.  
+Figures~\ref{Smyth_Slot_Burner_7} through \ref{Smyth_Slot_Burner_11}
+show predicted and measured temperatures at three elevations above the burner.  The model predicts a flame that is slightly narrower
+and cooler than measured.  The model
 also predicts higher centerline temperatures.  These results are not surprising.  The two-step combustion model considers
 the first step, F~$\longrightarrow$~CO, to be infinitely fast, assuming that the local oxygen concentration satisfies a
 flammability criterion.  This is true in the vicinity of the lip of the burner.  In reality, the cold fuel and air
 streams do not react infinitely fast at this location and some oxygen penetrates the flame at the base, resulting in cooler
 gases being entrained into the core of the flame with a resulting drop in the centerline temperature.
 
-Figure~\ref{WP_CH4_Species} shows predicted and
-measured values of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the burner along with a contour plot of CO near the
-burner lip (black rectangle is burner).  Note, as discussed above, that the test data shows that a small quantity of oxygen exists along
+Figures~\ref{Smyth_Slot_Burner_7} through \ref{Smyth_Slot_Burner_11} also show predicted and
+measured values of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the burner along.  
+Note that the test data shows a small quantity of oxygen along
 the burner centerline which is not captured in the simulation.  Along the centerline, the model predicts higher values of fuel and higher values of
 products than measured.  The species profiles are also slightly narrower than measured, consistent with the temperature prediction.
-The peak CH$_4$ values along the burner centerline have errors ranging from 6~\% to 13~\%,
-the peak CO$_2$ values in the flame have errors ranging from 3~\% to 10`\%, and the peak CO values in the flame have
-errors ranging from 9~\% to 25~\%.  The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%.
+The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%.
 
-The contour of CO illustrates the combustion model quite well.  At the burner lip, fuel and oxygen first meet.
-Since ambient levels of oxygen exist on the air side of the slot and the temperatures are relatively low at the
-burner lip, combustion occurs and converts $Z_1$ to $Z_2$.  This consumes the oxygen present and the CO does not have an
-opportunity to fully convert to $CO_2$.  As the CO rises in the flame, oxygen is entrained and the temperatures are high
-enough that the CO reacts with the entrained oxygen to form $CO_2$.  Eventually, at a point high enough in the flame,
-all of the fuel is consumed and all of the CO is oxidized.
 
-\begin{figure}
-\includegraphics[width=6in]{FIGURES/WP/WP_CH4_Temp}
-\caption{Predicted and measured temperature at three elevations (7 mm, 9mm and 11 mm) above a methane-air slot burner}
-\label{WP_CH4_Temp}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Temperature} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Fuel} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Dioxide} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Oxygen} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Monoxide} &
+\end{tabular*}
+\caption{Predicted and measured temperature and gas species 7~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_7}
 \end{figure}
 
-\begin{figure}
-\includegraphics[width=6in]{FIGURES/WP/WP_CH4_species}
-\caption{Predicted and measured mole fractions at three elevations (7 mm, 9mm and 11 mm) above a methane-air slot burner,
-along with contours of CO near the burner lip}
-\label{WP_CH4_Species}
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Temperature} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Fuel} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Carbon_Dioxide} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Oxygen} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Carbon_Monoxide} &
+\end{tabular*}
+\caption{Predicted and measured temperature and gas species 9~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_9}
 \end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Temperature} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Fuel} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Carbon_Dioxide} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Oxygen} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Carbon_Monoxide} &
+\end{tabular*}
+\caption{Predicted and measured temperature and gas species 11~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_11}
+\end{figure}
+
+
 
 \clearpage
 
