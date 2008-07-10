@@ -72,7 +72,7 @@ many different ways of representing a complicated fuel source.
       THICKNESS                 = 0.02 /
 
 
-&OBST XB=-0.05, 0.05,-0.05, 0.05, 0.35, 0.45, SURF_IDS='HEATER','SHEET METAL','SHEET METAL', DEVC_ID='timer' / Radiant Source
+&OBST XB=-0.05, 0.05,-0.10, 0.10, 0.35, 0.45, SURF_IDS='HEATER','SHEET METAL','SHEET METAL', DEVC_ID='timer' / Radiant Source
 &DEVC XYZ=-1.0,0.0,0.1, QUANTITY='TIME', ID='timer', SETPOINT=900., INITIAL_STATE=.TRUE. /
 
 &OBST XB=-2.00, 2.00,-0.14, 0.14, 0.51, 0.55, SURF_ID='Loose Cable' /  
