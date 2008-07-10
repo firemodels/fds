@@ -8,7 +8,7 @@ boundary conditions will be applied in such a way as to minimize the impact of
 
 &TIME T_END=60.0 / 
 
-&MISC ISOTHERMAL=.TRUE., SURF_DEFAULT='SLIP' /
+&MISC SURF_DEFAULT='SLIP' /
 
 &SURF ID='BLOW', VEL=-0.7071, SLIP_FACTOR=1.0 /
 &SURF ID='SUCK', VEL= 0.7071, SLIP_FACTOR=1.0 /
