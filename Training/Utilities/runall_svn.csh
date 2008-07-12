@@ -41,6 +41,9 @@ $RUNFDS Demonstrations/2Room_Ranch ranch_03 fire72 &
 $RUNFDS Demonstrations/2Room_Ranch ranch_04 fire73 &
 # MCFRS cases
 $RUNFDS MCFRS/MCFRS_Flashover MCFRS_Flashover_00 fire73 &
+$RUNFDS MCFRS/MCFRS_Flashover MCFRS_Flashover_01 fire73 &
+$RUNFDS MCFRS/MCFRS_Flashover MCFRS_Flashover_02 fire73 &
+$RUNFDS MCFRS/MCFRS_Flashover MCFRS_Flashover_03 fire73 &
 $RUNFDS MCFRS/MCFRS_Ranch MCFRS_Ranch_00 fire73 &
 # MFRI  cases
 $RUNFDS MFRI/MFRI_Training_Tower MFRI_Training_Tower_00 fire74 &
