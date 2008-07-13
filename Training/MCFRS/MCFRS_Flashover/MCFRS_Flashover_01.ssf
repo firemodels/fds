@@ -1,0 +1,26 @@
+UNLOADALL
+RENDERDIR
+ ../../../Manuals/FDS_SMV_Training_Guide/FIGURES/SCRIPT/
+LOADSLICE
+ TEMPERATURE
+ 1 1.200000
+SETVIEWPOINT
+ view 1
+SETTIMEVAL
+ 150.012939
+RENDERONCE
+ flashover_slice_temp_150
+UNLOADALL
+LOAD3DSMOKE
+ soot mass fraction
+LOAD3DSMOKE
+ HRRPUV
+SETVIEWPOINT
+ view 1
+SETTIMEVAL
+ 150.000000
+RENDERONCE
+ flashover_3dsmoke_fire_150
+UNLOADALL
+~                                                                               
+~

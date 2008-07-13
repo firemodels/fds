@@ -18,17 +18,15 @@ setenv SMV5 ~/bin/smv5_intel
 
 set RUNSMV=./runsmv.csh
 setenv JOBDIR `pwd`/..
-setenv REPORTFIGDIR `pwd`/../../Manuals/FDS_SMV_Training_Guide/FIGURES/SCRIPT
 
 # syntax of RUNFDS
 # $RUNFDS  directory case host
 
 # demonstration cases
-#$RUNSMV Demonstrations/2Room_Ranch ranch_00 
-#$RUNSMV Demonstrations/2Room_Ranch ranch_01
+$RUNSMV Demonstrations/2Room_Ranch ranch_01
 #$RUNSMV Demonstrations/2Room_Ranch ranch_02
-#$RUNSMV Demonstrations/2Room_Ranch ranch_03
-#$RUNSMV Demonstrations/2Room_Ranch ranch_04
+$RUNSMV Demonstrations/2Room_Ranch ranch_03
+$RUNSMV Demonstrations/2Room_Ranch ranch_04
 # MCFRS cases
 #$RUNSMV MCFRS/MCFRS_Flashover MCFRS_Flashover_00
 $RUNSMV MCFRS/MCFRS_Flashover MCFRS_Flashover_01

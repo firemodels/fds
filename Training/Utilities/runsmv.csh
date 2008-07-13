@@ -21,8 +21,3 @@ if(! -e $fulldir/$insmv) then
 endif
 cd $fulldir
 $SMV5 -runscript $in
-if(! -d $REPORTFIGDIR) then
-  echo "*** Warning, the directory $REPORTFIGDIR does not exist - "
-  echo "    Smokeview generated figures not copied."
-endif
-mv *.png $REPORTFIGDIR/.
