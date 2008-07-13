@@ -3091,11 +3091,9 @@ void RenderFrame(int view_mode){
   char *renderfile_prefix;
 
   renderfile_prefix=fdsprefix;
-  if(scriptoutstream!=NULL&&current_script_command!=NULL){
-    if(current_script_command->cval!=NULL){
-      strcpy(renderfile2,current_script_command->cval);
-      renderfile_prefix=renderfile2;
-    }
+  if(current_script_command!=NULL&&current_script_command->cval!=NULL){
+    strcpy(renderfile2,current_script_command->cval);
+    renderfile_prefix=renderfile2;
   }
 
   if(view_mode==VIEW_LEFT&&showstereo==2)return;
