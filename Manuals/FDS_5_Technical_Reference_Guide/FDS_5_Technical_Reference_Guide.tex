@@ -1,8 +1,7 @@
 \documentclass[11pt]{book}
 \usepackage{mathptm,times}
 \usepackage[pdftex]{graphicx}
-\usepackage{hyperref}
-\usepackage{lastpage} % Automatic last page number reference.
+%\usepackage{hyperref}
 
 %\usepackage{array,eqnarray}
 
@@ -19,6 +18,43 @@
 %  \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
 %     \makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}{8cm}\selectfont{DRAFT}}}}}}
 %\makeatother
+
+\usepackage[pdftex,
+        colorlinks=true,
+        urlcolor=linkblue,     % \href{...}{...} external (URL)
+        citecolor=linkred,     % citation number colors
+        linkcolor=linknavy,    % \ref{...} and \pageref{...}
+        pdftitle={Fire Dynamics Simulator (Version 5) User's Guide},
+        pdfauthor={Kevin McGrattan, Bryan Klein, Simo Hostikka, Jason Floyd},
+        pdfsubject={User Guide},
+        pdfkeywords={FDS, Fire Model, NIST, BFRL},
+        pdfproducer={pdflatex},
+        pagebackref,
+        pdfpagemode=UseNone,
+        bookmarksopen=true,
+        plainpages=false]{hyperref}
+\usepackage{color}
+\definecolor{linknavy}{rgb}{0,0,0.50196}
+\definecolor{linkred}{rgb}{1,0,0}
+\definecolor{linkblue}{rgb}{0,0,1}
+\usepackage{caption}
+\usepackage{graphpap}
+\usepackage{rotating}
+\usepackage{epsfig,psfrag}
+\usepackage{geometry}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{lscape}
+\usepackage{amssymb}
+\usepackage{makeidx} % Create index at end of document
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography and index in the ToC
+\usepackage{float}
+\usepackage{lastpage} % Automatic last page number reference.
+\usepackage[T1]{fontenc}
+\usepackage{upquote}
+\usepackage{array,eqnarray}
+\newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
+
 
 \setlength{\textwidth}{6.5in}
 \setlength{\textheight}{9.0in}
@@ -132,7 +168,7 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide }
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ \Large Volume 1: Mathematical Model}
 
 \vspace{.5in}
 
@@ -173,7 +209,7 @@ VTT Technical Research Centre of Finland  }
 
 \vspace{.75in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ \Large Volume 1: Mathematical Model}
 
 \vspace{.25in}
 
@@ -198,6 +234,7 @@ Jason Floyd \\
 \vspace{.25in}
 
 \flushright{\today \\
+FDS Version 5.2 \\
 $SVN Repository$~$Revision$}
 
 \vfill
@@ -525,9 +562,7 @@ spectrum one wants to capture directly, and which end is to be ignored or approx
 \chapter{Model Overview}
 
 This chapter presents general information about the Fire Dynamics Simulator, following the basic framework set forth in
-ASTM E 1355~\cite{ASTM:E1355}. This chapter also provides information about how the FDS software is developed and maintained, often referred to as a
-{\em Configuration Management Plan}. Formal guidelines for such a plan are detailed in IEEE Standard~828-1998.
-
+ASTM E 1355~\cite{ASTM:E1355}.
 
 \section{Basic Description of FDS}
 
@@ -551,27 +586,26 @@ Although not part of the FDS/Smokeview suite maintained at NIST, there are sever
 commercially or privately maintained by individual users. Most notably, there are several Graphical User Interfaces (GUIs) that can be used
 to create the input file containing all the necessary information needed to perform a simulation.
 
+
+
 \subsection{Version History}
 
-Version 1 of FDS was publicly released in February 2000, version 2
-in December 2001, version 3 in November 2002, and version 4 in July 2004.
-The present version of FDS is 5, first released in October, 2007.
+Version 1 of FDS was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, and version 4 in July 2004. The
+present version of FDS is 5, first released in October, 2007.
 
-Starting with FDS 5, a formal revision management system has been implemented to track changes to the FDS source
-code. The open-source program development tools are provided by an Internet-based organization known as Google Code (code.google.com).
+Starting with FDS 5, a formal revision management system has been implemented to track changes to the FDS source code. The open-source program
+development tools are provided by an Internet-based organization known as Google Code (code.google.com).
 
-The version number for FDS has three parts.  For example, FDS 5.2.12
-indicates that this is FDS 5, the fifth major release. The 2 indicates
-a significant upgrade, but still within the framework of FDS 5.  The
-12 indicates the twelveth minor upgrade of 5.2, mostly bug fixes and
-minor user requests.
+The version number for FDS has three parts.  For example, FDS 5.2.12 indicates that this is FDS 5, the fifth major release. The 2 indicates a
+significant upgrade, but still within the framework of FDS 5.  The 12 indicates the twelveth minor upgrade of 5.2, mostly bug fixes and minor user
+requests.
 
 
 \subsection{Model Developers}
 
 
-Currently, FDS is maintained by the Building and Fire Research Laboratory (BFRL) of National Institute of Standards and Technology. The developers
-at NIST have formed a loose collaboration of interested stakeholders, including:
+Currently, FDS is maintained by the Building and Fire Research Laboratory (BFRL) of National Institute of Standards and Technology. The developers at
+NIST have formed a loose collaboration of interested stakeholders, including:
 \begin{itemize}
 \item VTT Technical Research Centre of Finland, a research and testing
 laboratory similar to NIST
@@ -580,71 +614,24 @@ laboratory similar to NIST
 \item Engineering departments at various universities with a particular emphasis on fire
 \end{itemize}
 BFRL awards grants on a competitive basis to external organizations who conduct research in fire science and engineering. Some of these grants have
-been used to assist the development of FDS. The role of the grantee in supporting day to day development varies. Not all of the developers outside
-of NIST are grantees.
+been used to assist the development of FDS. The role of the grantee in supporting day to day development varies. Not all of the developers outside of
+NIST are grantees.
 
-Starting with Version 5, the FDS development team uses
-an Internet-based development
-environment called GoogleCode, a free service of the search engine company, Google. GoogleCode is a widely used service designed to assist
-open source software development by providing a repository for source
-code, revision control, program distribution, bug tracking, and
-various other very useful services.
+Starting with Version 5, the FDS development team uses an Internet-based development environment called GoogleCode, a free service of the search
+engine company, Google. GoogleCode is a widely used service designed to assist open source software development by providing a repository for source
+code, revision control, program distribution, bug tracking, and various other very useful services.
 
-Each member of the FDS development team has an account and password
-access to the FDS repository. In
-addition, anonymous access is available to all interested users, who
-can receive the latest versions of the source code, manuals, and other
-items. Anonymous users simply do not have the power to commit changes
-to any of these items. The power to commit changes to FDS or its
-manuals can be granted to anyone on a case by case basis.
+Each member of the FDS development team has an account and password access to the FDS repository. In addition, anonymous access is available to all
+interested users, who can receive the latest versions of the source code, manuals, and other items. Anonymous users simply do not have the power to
+commit changes to any of these items. The power to commit changes to FDS or its manuals can be granted to anyone on a case by case basis.
 
-The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX files are essentially text files that are under
-SVN (Subversion) control. The figures are either in the form of PDF or jpeg files, depending on whether they are vector or
-raster format. There are a variety of \LaTeX packages available, including MiKTeX. The FDS developers edit the manuals as part of the
-day to day upkeep of the model. Different editions of the manuals are distinguished by date.
+The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX files are essentially text files that are under SVN (Subversion)
+control. The figures are either in the form of PDF or jpeg files, depending on whether they are vector or raster format. There are a variety of
+\LaTeX packages available, including MiKTeX. The FDS developers edit the manuals as part of the day to day upkeep of the model. Different editions of
+the manuals are distinguished by date.
 
 
-\subsection{Development Process}
-
-Changes are made to the FDS source code daily, and tracked via
-revision control software. However, these
-daily changes do not constitute a change to the version number. After
-the developers determine that enough changes have been made to the
-source, they release a new minor upgrade, 5.2.12 to 5.2.13, for
-example. This happens every few weeks. A change from 5.2 to 5.3 might
-happen only a few times a year, when significant improvements have
-been made to the model physics.
-
-There is no formal process by which FDS is updated. Each developer
-works on various routines, and makes changes as warranted. Minor bugs
-are fixed without any communication (the developers are in different
-locations), but more significant changes are discussed via email or
-telephone calls. A suite of simple verification calculations (included
-in this document) are routinely run to ensure that the daily bug fixes
-have not altered any of the important algorithms. A suite of
-validation calculations (also included here) are run with each
-significant upgrade.
-Significant changes to FDS are made based on the following criteria, in no particular order:
-\begin{description}
-\item[Better Physics:] The goal of any model is to be {\em predictive}, but it also must be reliable. FDS is a blend of empirical and
-deterministic sub-models, chosen based on their robustness, consistency, and reliability. Any new sub-model must demonstrate that it is
-of comparable or superior accuracy to its empirical counterpart.
-\item[Modest CPU Increase:] If a proposed algorithm doubles the calculation time but yields only a marginal improvement in accuracy, it is
-likely to be rejected. Also, the various routines in FDS are expected to consume CPU time in proportion to their overall importance. For example,
-the radiation transport algorithm consumes about 25~\% of the CPU time, consistent with the fact that about one-fourth to one-third of the
-fire's energy is emitted as thermal radiation.
-\item[Simpler Algorithm:] If a new algorithm does what the old one did using less lines of code, it is almost always accepted, so long as
-it does not decrease functionality.
-\item[Increased or Comparable Accuracy:] The validation experiments that are part of this guide serve as the metric for new routines. It is
-not enough for a new algorithm to perform well in a few cases. It must show clear improvement across the suite of experiments. If the
-accuracy is only comparable to the previous version, then some other criteria must be satisfied.
-\item[Acceptance by the Fire Protection Community:] Especially in regard to fire-specific devices, like sprinklers and smoke detectors, the
-algorithms in FDS often are based on their acceptance among the practicing engineers.
-\end{description}
-
-
-
-\subsection{Intended Uses of FDS}
+\subsection{Intended Uses}
 
 Throughout its development, FDS has been aimed at solving practical
 fire problems in fire protection engineering, while at the same time
@@ -667,7 +654,7 @@ systems and sprinkler/detector activation studies.
 The other half consist of residential and industrial fire reconstructions.
 
 
-\subsection{Required Input for FDS}
+\subsection{Input Parameters}
 
 All of the input parameters required by FDS to describe a particular
 scenario are conveyed via a single text file created by the user.
@@ -696,9 +683,7 @@ recover information after the calculation is over if it was not requested at the
 A complete description of the input parameters required by FDS can be found in the FDS User's Guide~\cite{FDS_Users_Guide_5}.
 
 
-
-
-\subsection{FDS Output Quantities}
+\subsection{Output Quantities}
 
 FDS computes the temperature, density, pressure, velocity and chemical composition within each numerical
 grid cell at each discrete time step. There are typically hundreds of thousands to millions of grid
@@ -751,7 +736,7 @@ Details on the use of Smokeview are found in Ref.~\cite{Smokeview_Users_Guide_5}
 
 
 
-\subsection{FDS Governing Equations, Assumptions and Numerics}
+\subsection{Governing Equations, Assumptions and Numerics}
 
 Following is a brief description of
 the major components of FDS. Detailed information regarding the assumptions and governing equations associated
@@ -797,7 +782,7 @@ user prescribes rectangular obstructions that are forced to conform
 with the underlying grid.
 \item[Boundary Conditions]
 All solid surfaces are assigned thermal boundary conditions, plus
-information about the burning behavior of the material. 
+information about the burning behavior of the material.
 Heat and mass transfer to and from solid surfaces is
 usually handled with empirical correlations, although it is possible
 to compute directly the heat and mass transfer when performing a
@@ -810,7 +795,7 @@ water droplets ejected from the sprinkler.
 \end{description}
 
 
-\subsection{Limitations of FDS}
+\subsection{Limitations}
 
 Although FDS can address most fire scenarios, there are limitations in all of its various
 algorithms. Some of the more prominent limitations of the model are listed here. More
@@ -1022,6 +1007,37 @@ As a result, flaws in the theoretical development and the computer program itsel
 have been identified and corrected. As FDS continues to evolve, the user base will continue to
 serve as a means to evaluate the model. We consider this process as important to the development of FDS as the formal
 internal and external peer-review processes.
+
+
+\clearpage
+\section{Development Process}
+
+Changes are made to the FDS source code daily, and tracked via revision control software. However, these daily changes do not constitute a change to
+the version number. After the developers determine that enough changes have been made to the source, they release a new minor upgrade, 5.2.12 to
+5.2.13, for example. This happens every few weeks. A change from 5.2 to 5.3 might happen only a few times a year, when significant improvements have
+been made to the model physics.
+
+There is no formal process by which FDS is updated. Each developer works on various routines, and makes changes as warranted. Minor bugs are fixed
+without any communication (the developers are in different locations), but more significant changes are discussed via email or telephone calls. A
+suite of simple verification calculations (included in this document) are routinely run to ensure that the daily bug fixes have not altered any of
+the important algorithms. A suite of validation calculations (also included here) are run with each significant upgrade. Significant changes to FDS
+are made based on the following criteria, in no particular order:
+\begin{description}
+\item[Better Physics:] The goal of any model is to be {\em predictive}, but it also must be reliable. FDS is a blend of empirical and
+deterministic sub-models, chosen based on their robustness, consistency, and reliability. Any new sub-model must demonstrate that it is of comparable
+or superior accuracy to its empirical counterpart.
+\item[Modest CPU Increase:] If a proposed algorithm doubles the calculation time but yields only a marginal improvement in accuracy, it is
+likely to be rejected. Also, the various routines in FDS are expected to consume CPU time in proportion to their overall importance. For example, the
+radiation transport algorithm consumes about 25~\% of the CPU time, consistent with the fact that about one-fourth to one-third of the fire's energy
+is emitted as thermal radiation.
+\item[Simpler Algorithm:] If a new algorithm does what the old one did using less lines of code, it is almost always accepted, so long as
+it does not decrease functionality.
+\item[Increased or Comparable Accuracy:] The validation experiments that are part of this guide serve as the metric for new routines. It is
+not enough for a new algorithm to perform well in a few cases. It must show clear improvement across the suite of experiments. If the accuracy is
+only comparable to the previous version, then some other criteria must be satisfied.
+\item[Acceptance by the Fire Protection Community:] Especially in regard to fire-specific devices, like sprinklers and smoke detectors, the
+algorithms in FDS often are based on their acceptance among the practicing engineers.
+\end{description}
 
 
 
