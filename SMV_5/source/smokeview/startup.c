@@ -1917,6 +1917,7 @@ void initvars0(void){
 #endif
 
   current_script_command=NULL;
+  script_dir_path=NULL;
   scriptinfo=NULL;
   nscriptinfo=0;
   demo_option=0;
