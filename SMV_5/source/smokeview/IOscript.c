@@ -33,6 +33,9 @@ void ParticlePropShowMenu(int var);
 //   Smokeview will automatically add an .jpg or .png extension
 //   depending on what kind of files are rendered.
 
+// RENDERDIR
+//  directory name (char) (where rendered files will go)
+
 // RENDERONCE
 // file name base (char) (or blank to use smokeview default)
 
@@ -264,6 +267,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"RENDERDIR",9) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"RENDERONCE",10) == 1){
       nscriptinfo++;
       continue;
@@ -357,6 +364,36 @@ int compile_script(char *scriptfile){
     if(match_upper(buffer,"UNLOADALL",9) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_UNLOADALL);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"RENDERDIR",9) == 1){
+      int len;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_RENDERDIR);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len = strlen(buffer);
+      if(len>0){
+        int i;
+
+        NewMemory((void **)&scripti->cval,len+2);
+        for(i=0;i<len;i++){
+#ifdef WIN32
+          if(buffer[i]=='/')buffer[i]='\\';
+#else
+          if(buffer[i]=='\\')buffer[i]='/';
+#endif
+        }
+#ifdef WIN32
+        if(buffer[len-1]!='\\')strcat(buffer,dirseparator);        
+#else
+        if(buffer[len-1]!='/')strcat(buffer,dirseparator);        
+#endif
+        strcpy(scripti->cval,buffer);
+      }
 
       nscriptinfo++;
       continue;
@@ -1021,6 +1058,14 @@ void run_script(void){
   switch (scripti->command){
     case SCRIPT_UNLOADALL:
       LoadUnloadMenu(UNLOADALL);
+      break;
+    case SCRIPT_RENDERDIR:
+      if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+        script_dir_path=scripti->cval;
+      }
+      else{
+        script_dir_path=NULL;
+      }
       break;
     case SCRIPT_RENDERONCE:
       keyboard('r',0,0);
