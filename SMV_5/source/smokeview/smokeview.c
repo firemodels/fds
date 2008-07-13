@@ -3089,11 +3089,16 @@ void RenderFrame(int view_mode){
   FILE *stream;
   char *ext;
   char *renderfile_prefix;
+  int use_script_filename=0;
 
   renderfile_prefix=fdsprefix;
   if(current_script_command!=NULL&&current_script_command->cval!=NULL){
-    strcpy(renderfile2,current_script_command->cval);
-    renderfile_prefix=renderfile2;
+    strcpy(renderfile,"");
+    if(script_dir_path!=NULL){
+      strcat(renderfile,script_dir_path);
+    }
+    strcat(renderfile,current_script_command->cval);
+    use_script_filename=1;
   }
 
   if(view_mode==VIEW_LEFT&&showstereo==2)return;
@@ -3116,7 +3121,7 @@ void RenderFrame(int view_mode){
   }
 
   glFlush();
-  if(RenderTime==1){
+  if(use_script_filename==0&&RenderTime==1){
     switch (view_mode){
     case VIEW_CENTER:
       sprintf(renderfile,"%s_%04i",renderfile_prefix,itime/RenderSkip);
@@ -3137,7 +3142,7 @@ void RenderFrame(int view_mode){
       break;
     }
   }
-  if(RenderTime==0){
+  if(use_script_filename==0&&RenderTime==0){
     switch (view_mode){
     case VIEW_CENTER:
       sprintf(renderfile,"%s_s%04i",renderfile_prefix,seqnum);
@@ -3164,7 +3169,7 @@ void RenderFrame(int view_mode){
 
   // if there is a tempdir see if we need to use it
 
-  if(smokeviewtempdir!=NULL){
+  if(use_script_filename==0&&smokeviewtempdir!=NULL){
     stream=fopen(renderfile,"wb");
     if(stream==NULL){
       strcpy(renderfile2,smokeviewtempdir);

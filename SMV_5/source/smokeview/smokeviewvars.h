@@ -636,6 +636,7 @@ SVEXTERN FILE *STREAM_SB;
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
 SVEXTERN scriptfiledata first_scriptfile, last_scriptfile, *default_script;
 SVEXTERN scriptdata *scriptinfo, *current_script_command;
+SVEXTERN char *script_dir_path;
 SVEXTERN int nscriptinfo;
 SVEXTERN scriptfiledata *script_recording;
 SVEXTERN int runscript, noexit;
