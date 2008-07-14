@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include "MALLOC.h"
 #include "flowfiles.h"
 #include "smokeviewdefs.h"

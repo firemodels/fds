@@ -5,6 +5,7 @@
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
+#include <string.h>
 #include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
