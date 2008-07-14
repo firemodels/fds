@@ -8,13 +8,12 @@
 # specify location of the smokeview executable
 setenv SMV5 ~/bin/smv5_intel
 
-#  1.  To use this script, first copy makefigures_svn.csh to makefigures.csh  
-#      (only when makefigures_svn.csh changes)
+#  1.  To use this script, first make a local copy
+#          copy makefigures_svn.csh to makefigures.csh  
+#      (only necessary when makefigures_svn.csh changes)
 #  2.  define the SMV5 environment variable to point to the version 
 #      of smokeview you want to run.
 #  3.  Run script from this directory (repository_root/bin)
-
-# only edit hostnames below
 
 set RUNSMV=./runsmv.csh
 setenv JOBDIR `pwd`/..
@@ -24,7 +23,7 @@ setenv JOBDIR `pwd`/..
 
 # demonstration cases
 $RUNSMV Demonstrations/2Room_Ranch ranch_01
-#$RUNSMV Demonstrations/2Room_Ranch ranch_02
+$RUNSMV Demonstrations/2Room_Ranch ranch_02
 $RUNSMV Demonstrations/2Room_Ranch ranch_03
 $RUNSMV Demonstrations/2Room_Ranch ranch_04
 # MCFRS cases

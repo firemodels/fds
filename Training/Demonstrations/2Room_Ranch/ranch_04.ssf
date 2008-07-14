@@ -1,6 +1,6 @@
 UNLOADALL
 RENDERDIR
-../../../Manuals/FDS_SMV_Training_Guide/SMVFIGURES
+../../../Manuals/FDS_SMV_Training_Guide/SMV_FIGURES
 LOAD3DSMOKE
  soot mass fraction
 LOAD3DSMOKE
