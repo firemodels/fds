@@ -864,11 +864,11 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 \end{center}
 
 \noindent
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_A_Temperatures.PDF} &
-\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_B_Temperatures.PDF} \\
-\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_C_Temperatures.PDF} &
-\includegraphics[width=3.2in]{FIGURES/heat_conduction_Slab_D_Temperatures.PDF}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/heat_conduction_a} &
+\includegraphics[height=2.2in]{FIGURES/heat_conduction_b} \\
+\includegraphics[height=2.2in]{FIGURES/heat_conduction_c} &
+\includegraphics[height=2.2in]{FIGURES/heat_conduction_d}
 \end{tabular*}
 
 
@@ -878,8 +878,8 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 \label{heat_conduction_kc}
 
 This example demonstrates the 1-D heat conduction in cartesian, cylindrical and spherical geometries with temperature-dependent thermal properties.
-The reference results were computed using HEATING (version~7.3), a multi-dimensional, finite-difference, general purpose heat transfer
-model~\cite{Childs}. In cartesian and cylindrical cases, the results have also  been verified using a commercial finite-element solver, ABAQUS.
+The cartesian solution was computed using HEATING (version~7.3), a multi-dimensional, finite-difference, general purpose heat transfer
+model~\cite{Childs}. The cylindrical and spherical solutions were computed using a commercial finite-element solver, ABAQUS.
 
 The sample of homogenous material is initially at 0~$^\circ$C and at $t>0$ exposed to a gas at 700~$^\circ$C. A fixed heat transfer coefficient of
 10~W/m$^2$/K is assumed. The density of the material is 10000~kg/m$^3$. The conductivity and specific heat are functions of temperature with the
@@ -910,9 +910,11 @@ lines are FDS results and the dark lines are the HEATING results. An example inp
 \end{verbatim} \normalsize
 
 \noindent
-\begin{center}
-\includegraphics[width=4.5in]{FIGURES/heat_conduction_kc.pdf}
-\end{center}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/heat_conduction_kc_surf} &
+\includegraphics[height=2.2in]{FIGURES/heat_conduction_kc_back} 
+\end{tabular*}
+
 
 
 
