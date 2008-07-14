@@ -441,9 +441,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   iii=0;
   nframes_found=0;
   for(i=0;i<smoke3di->n_times_full;i++){
-    size_t time_read;
-
-	time_read=EGZ_FREAD(&time,4,1,SMOKE3DFILE);
+	  EGZ_FREAD(&time,4,1,SMOKE3DFILE);
     if(EGZ_FEOF(SMOKE3DFILE)!=0){
       smoke3di->n_times_full=i;
       smoke3di->n_times=nframes_found;
@@ -461,10 +459,9 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     }
     if(smoke3di->use_smokeframe[i]==1){
       float complevel;
-      int nvals;
 
       nframes_found++;
-      nvals=EGZ_FREAD(smoke3di->smokeframe_comp_list[iii],1,smoke3di->nchars_compressed_smoke[iii],SMOKE3DFILE);
+      EGZ_FREAD(smoke3di->smokeframe_comp_list[iii],1,smoke3di->nchars_compressed_smoke[iii],SMOKE3DFILE);
       iii++;
       CheckMemory;
       if(EGZ_FEOF(SMOKE3DFILE)!=0){
@@ -502,7 +499,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     ii=-1;
     nframes_found=0;
     for(i=0;i<smoke3di->n_times_full;i++){
-      int time_read;
+      size_t time_read;
       int nlight_chars;
 
 	    time_read=EGZ_FREAD(&time,4,1,LIGHTFILE);
