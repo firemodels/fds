@@ -1414,7 +1414,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
       CALL GET_IW(II,JJ,KK,IOR,IW)
       IF (IW>0) THEN
          DV%IW = IW
-         IF (DV%OUTPUT_INDEX==-6) THEN
+         IF (OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%INSIDE_SOLID) THEN
             IBC = M%IJKW(5,IW)
             IF (SURFACE(IBC)%THERMAL_BC_INDEX /= THERMALLY_THICK) THEN
                WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEViCe ',N, ' must be associated with a heat-conducting surface'
