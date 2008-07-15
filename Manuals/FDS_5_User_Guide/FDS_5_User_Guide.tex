@@ -3831,7 +3831,7 @@ the model.
 Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
 denotes the absorption in depth of thermal radiation. Liquids do not
 just absorb radiation at the surface, but rather over a thin layer
-near the surface. Its effect on the burning rate is significant. 
+near the surface. Its effect on the burning rate is significant.
 
 \subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
 \index{SURF!BURN\_AWAY}
@@ -6297,11 +6297,31 @@ measured from the current surface, and the measurement point is
 measurement point may get out of the solid, in which case it starts to
 show ambient temperature.
 
-Two additional quantities are useful for monitoring the of reacting
-surfaces: {\ct WALL\_THICKNESS} gives the overall thickness of the surface
-element. {\ct SURFACE DENSITY} (no underscore) gives the oveall mass per unit area for the
-surface element, computed as an integral of material density over wall
+
+\subsection{Additional Solid Outputs}
+\label{info:material_components} \index{Output!Material Components}
+
+In addition to the {\ct PROF}ile output, there are various additional quantities that are useful for monitoring reacting
+surfaces. For example, {\ct 'WALL THICKNESS'} gives the overall thickness of the solid surface
+element. {\ct 'SURFACE DENSITY'} gives the overall mass per unit area for the
+solid surface element, computed as an integral of material density over wall
 thickness. Both quantities are available both as {\ct DEVC} and {\ct BNDF}.
+
+To record the change in a material
+component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
+\end{verbatim} \normalsize
+
+\noindent
+This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density
+is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the
+density represents the mass of {\ct 'wood'} per unit volume of the mixture. Note also that {\ct 'SOLID DENSITY'} is only available as a
+{\ct DEVC} (device) quantity. 
+
+
 
 \subsection{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}
 \label{info:SLCF}\index{SLCF}
@@ -6934,7 +6954,8 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct soot density}                              & $\rho Y_s(Z)$                                 & mg/m$^3$       & D,I,P,S      \\ \hline
 {\ct spot obscuration}                          & See Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
 {\ct SPRINKLER LINK TEMPERATURE}                & See Section~\ref{info:sprinklers}             & $^\circ$C      & D            \\ \hline
-{\ct SURFACE DENSITY}                           & $\sum\int\rho_i dx$                           & kg/m$^2$       & B,D          \\ \hline
+{\ct SOLID DENSITY}                             & See Section~\ref{info:material_components}    & kg/m$^3$       & D            \\ \hline
+{\ct SURFACE DENSITY}                           & See Section~\ref{info:material_components}    & kg/m$^2$       & B,D          \\ \hline
 {\ct TEMPERATURE}                               & $T$ (Section~\ref{info:THERMOCOUPLE})         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & $T_{TC}$ (Section~\ref{info:THERMOCOUPLE})    & $^\circ$C      & D            \\ \hline
 {\ct TIME}                                      & $t$ (Section~\ref{info:DEVC})                 & s              & D            \\ \hline
