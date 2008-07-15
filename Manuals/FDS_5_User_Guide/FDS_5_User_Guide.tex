@@ -469,7 +469,6 @@ Prof.~David McGill of Seneca College, Ontario, Canada has conducted a remote-lea
 on the use of FDS, and he has also maintained a web site that has provided valuable suggestions from users.
 
 
-Thanks to Ian Thomas, Khalid Moinuddin, and Ian Bennetts for their description of and data for the ethanol pan fire example.
 Prof.~Ian Thomas of Victoria University has also presented short courses on the use of FDS in Australia.
 His students have also performed some validation work on compartment fires.
 
@@ -3782,7 +3781,7 @@ Guide for details). The only drawback of
 this approach is that the fuel gases burn regardless of any ignition
 source. Thus, if a liquid fuel is specified, the fuel
 begins burning at once. Here is an example of a steel pan filled with a thin layer of ethanol. Note that the material
-properties have not all been verified.
+properties are not all traceable to a measurement.
 
 \footnotesize
 \begin{verbatim}
@@ -3832,9 +3831,7 @@ the model.
 Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
 denotes the absorption in depth of thermal radiation. Liquids do not
 just absorb radiation at the surface, but rather over a thin layer
-near the surface. Its effect on the burning rate is significant. An
-example is given in Section~\ref{ethanol_pan}.
-
+near the surface. Its effect on the burning rate is significant. 
 
 \subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
 \index{SURF!BURN\_AWAY}
@@ -8909,43 +8906,6 @@ conceptual model.
 
 
 
-\section{A Liquid Pool Fire (\texorpdfstring{{\bf ethanol\_pan}}{ethanol\_pan}) }
-\label{ethanol_pan}
-
-In this example, a steel pan (0.7~m by 0.8~m) is filled with a thin layer (about 5~L, 9~mm) of ethanol, which burns out within about 10~min. This case tests a number of features -- burning
-liquids, multiple layers of solids/liquids, and, most importantly, the absorption coefficient of the liquid. The pyrolysis models in FDS prior to version 5
-assumed that radiative feedback from the fire and hot gases within a compartment were absorbed at the surface. In reality, this energy is absorbed in
-depth; the extent of which is characterized by the absorption coefficient, $\kappa$. This is a property of the liquid, as well as the gaseous vapors. FDS now uses
-an absorption coefficient for both the gas and solid/liquid phases. Here are the input lines that describe the properties of ethanol, and the pan in which it lies:
-
-\scriptsize
-\begin{verbatim}
-&MATL ID = 'ETHANOL LIQUID'
-      EMISSIVITY = 1.0
-      NU_FUEL =0.97
-      HEAT_OF_REACTION=880.
-      CONDUCTIVITY=0.17
-      SPECIFIC_HEAT= 2.45
-      DENSITY= 787.
-      ABSORPTION_COEFFICIENT = 40.
-      BOILING_TEMPERATURE=76. /
-
-&SURF ID='ETHANOL POOL'
-      FYI = '4 kg of ethanol in a 0.7 m x 0.8 m pan'
-      COLOR = 'YELLOW'
-      MATL_ID = 'ETHANOL LIQUID','STEEL','CONCRETE'
-      THICKNESS=0.0091,0.001,0.05
-      TMP_INNER = 18. /
-\end{verbatim} \normalsize
-
-\noindent
-The results of three calculations are shown below, each identical except for the value of the \\ {\ct ABSORPTION\_COEFFICIENT}. The results of a single experiment
-are also shown, courtesy of Ian Thomas, Victoria University, Australia~\cite{Thomas:JFPE}.
-
-
-\begin{center}
-\includegraphics[width=4.5in]{FIGURES/ethanol_pan_HRR.PDF}
-\end{center}
 
 
 
