@@ -243,7 +243,7 @@ The reported uncertainty in the species concentration measurements ranges from 1
 
 \section{Beyler Hood Experiments}
 
-Fig.~\ref{Beyler_Species} shows species predictions made by the two-step model compared with measured data for a
+Fig.~\ref{Beyler_Species} shows species predictions (using FDS 5.1.2) made by the two-step model compared with measured data for a
 range of fire sizes and burner positions.  The dotted lines indicate the estimated measurement uncertainty.  The
 model predicts the time-averaged species concentration at the hood exhaust vent.  CO$_2$ predictions are within the
 measurement uncertainty for all but one of the simulations performed.  For the well-ventilated fires (burner 10~cm below the edge of the hood), CO,
@@ -256,7 +256,12 @@ required to establish the conditions under which combustion in the first step, c
 allowed.
 
 \begin{figure}[p]
-\includegraphics[width=\textwidth]{FIGURES/Beyler_Hood/Beyler_species}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Beyler_Hood/Beyler_UHC} &
+\includegraphics[height=2.2in]{FIGURES/Beyler_Hood/Beyler_O2} \\
+\includegraphics[height=2.2in]{FIGURES/Beyler_Hood/Beyler_CO} &
+\includegraphics[height=2.2in]{FIGURES/Beyler_Hood/Beyler_CO2} \\
+\end{tabular*}
 \caption{Comparison of measured and predicted species concentrations in the Beyler hood experiments,
 dotted lines show experimental uncertainty }
 \label{Beyler_Species}
@@ -279,10 +284,18 @@ CO$_2$ and over-predicts CO. The relative error increases as the compartment bec
 note that the under-prediction of CO$_2$ concentration in the rear (1.5~\%) is equivalent to the
 over-prediction of CO (1.7~\%).  This implies that part of the model error results from the assumption of
 infinitely fast chemistry for the first step.  Furthermore, since the model as implemented performs the two steps
-sequentially, higher CO is predicted where the first step consumes all of the available oxygen.
+sequentially, higher CO is predicted where the first step consumes all of the available oxygen.  Note that 
+the figure below uses prediction made by FDS 5.1.3.
 
-\begin{figure}
-\includegraphics[width=6in]{FIGURES/RSE_Pitts/RSE_Pitts_Species}
-\caption{Predicted and measured CO2 and CO concentrations for the NIST RSE experiments of Bryner, Johnsson, and Pitts}
-\label{RSE_Pitts_Species}
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{FIGURES/RSE_Pitts/RSE_Pitts_CO} \\
+\vspace{0.25in} \\
+\includegraphics[width=4.0in]{FIGURES/RSE_Pitts/RSE_Pitts_CO2} \\
+\vspace{0.25in}
+\end{tabular}
+\end{center}
+\caption{Summary of the species predictions using FDS 5.1.3}
+\label{HGL_Summary}
 \end{figure}
