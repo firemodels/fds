@@ -614,15 +614,15 @@ a two-parameter mixture fraction model.  The mixture fraction is a conserved
 scalar quantity that represents the mass fraction of one or more components of the gas at
 a given point in the flow field.  By default, two components of the mixture fraction are explicitly
 computed. The first is the mass fraction of unburned fuel and
-the second is the mass fraction of burned fuel (i.e. the mass of the combustion products
-that originated as fuel.).  A two-step chemical reaction with a three parameter
+the second is the mass fraction of burned fuel ({\em i.e.} the mass of the combustion products
+that originated as fuel).  A two-step chemical reaction with a three parameter
 mixture fraction decomposition can also be used with the first step being oxidation of fuel
 to carbon monoxide and the second step the oxidation of carbon monoxide to carbon dioxide.
 The three mixture fraction components for the two step reaction
 are unburned fuel, mass of fuel that has completed the first reaction step, and the mass
 of fuel that has completed the second reaction step.  The mass fractions of all of the major
 reactants and products can be derived from the mixture fraction parameters by means of
-``state relations,''.  Lastly, a multiple-step finite rate model is also available.
+``state relations.''  Lastly, a multiple-step finite rate model is also available.
 
 \item[Radiation Transport] Radiative heat transfer is included in the
 model via the solution of the radiation transport equation for a
@@ -835,8 +835,8 @@ FDS can be run from the command prompt, or with a third party Graphical User Int
 In the discussion to follow, it is assumed that FDS is being run from the command prompt.
 FDS can be run on a single computer, using only one CPU, or it can be run on multiple
 computers and use multiple CPUs. For any operating system, there are two FDS executable files.
-The single CPU Windows executable is called {\bf fds\#.exe}.
-The parallel executable is called {\bf fds\#\_mpi.exe}. The letters ``mpi'' in the filename denote
+The single CPU Windows executable is called {\bf fds5.exe}.
+The parallel executable is called {\bf fds5\_mpi.exe}. The letters ``mpi'' in the filename denote
 Message Passing Interface (MPI), which will be discussed below.
 
 \begin{warning}
@@ -938,6 +938,7 @@ Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, where
 error statements from FDS or from MPI might refer to the meshes or processes by number. As an example, if a five mesh FDS case is run in parallel, the first printout (usually to the screen unless
 otherwise directed) is:
 
+\footnotesize
 \begin{verbatim}
 Process  4 of  4 is running on fire65
 Process  3 of  4 is running on fire64
@@ -949,7 +950,7 @@ Mesh   2 is assigned to Process   1
 Mesh   3 is assigned to Process   2
 Mesh   4 is assigned to Process   3
 Mesh   5 is assigned to Process   4
-\end{verbatim}
+\end{verbatim} \normalsize
 This means that 5 processes (numbered 0 to 4) have started on the computers named fire61, fire62, {\em etc}., and that each mesh is being computed as an individual process on the
 individual computers. Each computer has its own memory (RAM), and MPI is the protocol by which information is passed from process to process during the calculation. Note that these
 computers may have multiple processors, and each processor may have multiple ``cores.'' You have control over how many processes get assigned to each computer, but you may or may not
@@ -1082,7 +1083,7 @@ interest. Indeed, burning a roomful of ordinary furniture is one of the most cha
 of the model. So be patient, and learn to dissect a given scenario into its constitutive parts.
 For example, do not attempt to simulate a fire spreading through an entire floor of a
 building unless you have simulated the burning of the various combustibles with relatively small calculations.
-The examples described in Part~\ref{part:verification} should help
+The examples described in Part~\ref{part:samples} should help
 you to develop larger, more complicated simulations from smaller building blocks.
 
 Along with the FDS User's Guide, there are resources available on the Internet.
@@ -3328,8 +3329,8 @@ the simulation the computed pressure exceeds the specified {\ct
 MAX\_PRESSURE}, then there will be a backflow in the duct.
 \index{SURF!MAX\_PRESSURE}
 
-Here is an example how fans can be specified. The actual case ({\bf
-fan\_test}) is part of the FDS Verification Suite and is discussed in Section~\ref{fan_test}. In it, two simple
+Here is an example how fans can be specified. The actual case ({\bf fan\_test}) 
+is discussed in Section~\ref{fan_test}. In it, two simple
 compartments share a common wall. Both compartments are considered as
 separate ``pressure zones.'' Two fans are mounted in the Partition
 Wall, blowing in opposite directions.
@@ -3690,7 +3691,7 @@ of fuel gases is automatically adjusted so that the effective mass loss rate mul
 specified on the {\ct MATL} line, the mass of contained within wall cell will be decremented by that determined by the
 pyrolysis model, but the mass added to gas phase would be reduced by 50 \%.
 
-Several other examples of solid phase reactions can be found in various Verification examples. See Sections~\ref{thermoplastic} and \ref{charring_solid}.
+Several other examples of solid phase reactions can be found in various examples. See Sections~\ref{thermoplastic} and \ref{charring_solid}.
 
 
 
@@ -3863,9 +3864,7 @@ conform to the uniform mesh, FDS does {\bf not} adjust the burning
 rate to account for this as it does with various quantities associated
 with areas, like {\ct HRRPUA}.
 
-Examples of the use of {\ct BURN\_AWAY} feature are available in
-verification test box\_burn\_away (Section~\ref{box_burn_away})
-and the couch sample fire (Section~\ref{couch}).
+Examples of how to use the {\ct BURN\_AWAY} feature are given in Section~\ref{box_burn_away} and Section~\ref{couch}.
 
 \index{SURF!SHRINK} If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
 the surface is going to shrink when the surface reacts. The shrinking behavior can be prevented in the numerical model by setting {\ct SHRINK=.FALSE.}
@@ -5373,7 +5372,7 @@ the {\ct TABL} lines can be specified in any order.
 Nozzles are very much like sprinklers, only they do not activate based on the standard RTI model.
 To simulate a nozzle that activates at a given time, for example,
 specify a {\ct QUANTITY} and {\ct SETPOINT} directly on the {\ct DEVC} line.
-An example of a nozzle can be found in the verification case {\bf water\_fuel\_sprays.fds}
+Examples of nozzles can be found in Chapter~\ref{chapter:sprays}.
 
 The following lines:
 \footnotesize
@@ -6319,7 +6318,7 @@ component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in 
 This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density
 is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the
 density represents the mass of {\ct 'wood'} per unit volume of the mixture. Note also that {\ct 'SOLID DENSITY'} is only available as a
-{\ct DEVC} (device) quantity. 
+{\ct DEVC} (device) quantity.
 
 
 
@@ -8284,7 +8283,7 @@ start is 0.00718~kg. The total mass of air injected is 0.00244~kg. The domain is
 STRATIFICATION} is set to {\ct .FALSE.}. The domain is divided into three meshes each 1~m long with identical gridding.  We expect the pressure,
  temperature and density to rise during the 60~s injection period. Afterwards, the
 temperature, density, and pressure should remain constant. A hand computation is performed at 10 second intervals using the First Law of
-Thermodynamics and the equation of state.  The figures below show the results of this verification case.  As is seen density matches exactly showing
+Thermodynamics and the equation of state.  The figures below show the results of this calculation.  As is seen density matches exactly showing
 that FDS is injecting the appropriate quantity of mass and is properly initializing the domain. Pressure rise and temperature rise; however, are
 over-predicted by 3~\% and 12~\% respectively.  Also a slight drop in pressure is seen from 60 s to 120 s, indicating that the current implementation
 adiabatic boundary condition has a slight error in it.
@@ -8504,6 +8503,7 @@ in a detector obscuration of 0.000823~\%/m which is the same obscuration as pred
 
 
 \chapter{Droplets and Sprays}
+\label{chapter:sprays}
 
 This chapter considers cases involving evaporating droplets, both water and fuel.
 
