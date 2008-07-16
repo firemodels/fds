@@ -11,3 +11,4 @@ smokeview -runscript %infile%
 echo %infile%.smv does not exist
 )
 cd %curdir%
+
