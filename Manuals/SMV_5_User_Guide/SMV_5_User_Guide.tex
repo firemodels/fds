@@ -651,7 +651,7 @@ user's ability to visualize fire scenarios.
 \item[Scripting] Smokeview may be run in an unattended mode using
 instructions found in a script file.
 These instructions direct Smokeview to load data files, set
-view points and time values in order to document a case by render 
+view points and time values in order to document a case by render
 the Smokeview scene to one or more image files.
 The script file may be created by Smokeview itself by using a script recorder
 or may be created by editing a text file.
@@ -1637,7 +1637,7 @@ LOADFILE
 \end{verbatim}
 
 \hitem{LOADVFILE}
-Use LOADVFILE to load a particular vector slice file.  Smokeview will load the file 
+Use LOADVFILE to load a particular vector slice file.  Smokeview will load the file
 specified along with the corresponding U, V and W velocity slice files if they are available.
 Usage:
 \begin{verbatim}
@@ -1645,7 +1645,7 @@ LOADVFILE
   file (char)
 \end{verbatim}
 
-\hitem{LOADBOUNDARY} Load a boundary file of a particular type.  
+\hitem{LOADBOUNDARY} Load a boundary file of a particular type.
 The type is the same as what Smokeview displays in the Load menus for boundary files.
 Usage:
 \begin{verbatim}
@@ -1663,14 +1663,14 @@ LOAD3DSMOKE
   type (char)
 \end{verbatim}
 
-\hitem{LOADPARTICLES}Load particle files.  Only particle files created with FDS version 5 or 
+\hitem{LOADPARTICLES}Load particle files.  Only particle files created with FDS version 5 or
 later are supported.
 Usage:
 \begin{verbatim}
 LOADPARTICLES
 \end{verbatim}
 
-\hitem{PARTCLASSCOLOR}Show a particular particle class.  Class names supported for a given 
+\hitem{PARTCLASSCOLOR}Show a particular particle class.  Class names supported for a given
 run are displayed in the Particle Class Smokeview menu.
 Usage:
 \begin{verbatim}
@@ -1739,7 +1739,7 @@ SETTIMEVAL
 \end{verbatim}
 
 
-\hitem{SETVIEWPOINT}Set a view point .  The view point must have been previously defined and 
+\hitem{SETVIEWPOINT}Set a view point .  The view point must have been previously defined and
 saved in an .ini file.
 Usage:
 \begin{verbatim}
@@ -3419,20 +3419,16 @@ The option menu is illustrated in Figure
 \end{figure}
 \subsection{Shades}
 The shades menu is illustrated in Figure \ref{fig_shadesmenu}.
-This menu contains a new \frameit{colorbar} sub-menu which allows
-the user to choose and manipulate colorbars.
 %Colorbars are defined
 %in the user preference file (.ini file) using the {\bf GENCOLORBAR
 %keyword}.
 
 \blist
+\hitem{Colorbars}A sub-menu which allows the user to choose and manipulate colorbars.
 
 \hitem{Flip Background}Flip the background color between a dark and light shade.
 A dark background shade looks better on a computer monitor while
 a light shade looks better on the printed page.
-\hitem{Flip Colorbar}Reverse the order of the colors displayed in the colorbar.
-\hitem{Cycle Colorbar}Cycle the colors in the colorbar.
-\hitem{Reset Colorbar}Return the colorbar to the original display.
 
 \hitem{Color}Toggle scene colors between color and shades of gray.
 This option currently does not convert all scene colors to shades
@@ -3445,6 +3441,15 @@ giving the user a better sense of scale.  Transparent colors,
 however, may make the scene look too confusing when the geometry
 is complex.
 
+\elist
+\subsubsection{Colorbars}
+\blist
+\hitem{Narrow colorband}Causes a narrow (one pixel high) region of the colorbar to be changed to black when selected by the mouse.  Allows one to highlight data of interest.
+\hitem{Flip}Reverse the order of the colors displayed in the colorbar.
+\hitem{Cycle}Cycle the colors in the colorbar.
+\hitem{Reset}Return the colorbar to the original display.
+\hitem{Highlight out of range data}When activated causes
+data when out of range to be highlighted.
 \elist
 \subsection{Units}Select alternate temperature or velocity units.
 The {\tt UNIT} keyword described in
