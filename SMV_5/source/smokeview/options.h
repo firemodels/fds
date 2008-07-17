@@ -77,7 +77,6 @@
 #ifdef _DEBUG
 #define pp_OPEN
 #endif
-#define pp_OPEN
 #endif
 
 
