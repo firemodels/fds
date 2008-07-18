@@ -4619,8 +4619,9 @@ MESH_LOOP: DO NM=1,NMESHES
       ! Make obstruction invisible if it's within a finer mesh
  
       DO NOM=1,NM-1
-         IF (XB(1)>=MESHES(NOM)%XS .AND. XB(2)<=MESHES(NOM)%XF .AND. XB(3)>=MESHES(NOM)%YS .AND. XB(4)<=MESHES(NOM)%YF .AND. &
-             XB(5)>=MESHES(NOM)%ZS .AND. XB(6)<=MESHES(NOM)%ZF) OB%COLOR_INDICATOR=-2
+         IF (XB(1)>MESHES(NOM)%XS .AND. XB(2)<MESHES(NOM)%XF .AND. &
+             XB(3)>MESHES(NOM)%YS .AND. XB(4)<MESHES(NOM)%YF .AND. &
+             XB(5)>MESHES(NOM)%ZS .AND. XB(6)<MESHES(NOM)%ZF) OB%COLOR_INDICATOR=-2
       ENDDO
  
       ! Prevent drawing of boundary info if desired
