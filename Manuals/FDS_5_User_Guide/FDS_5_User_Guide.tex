@@ -3329,7 +3329,7 @@ the simulation the computed pressure exceeds the specified {\ct
 MAX\_PRESSURE}, then there will be a backflow in the duct.
 \index{SURF!MAX\_PRESSURE}
 
-Here is an example how fans can be specified. The actual case ({\bf fan\_test}) 
+Here is an example how fans can be specified. The actual case ({\bf fan\_test})
 is discussed in Section~\ref{fan_test}. In it, two simple
 compartments share a common wall. Both compartments are considered as
 separate ``pressure zones.'' Two fans are mounted in the Partition
@@ -6421,7 +6421,8 @@ Five quantities are written out to a file at one instant in time. The default sp
 It's best to leave the velocity components as is, because Smokeview
 uses them to draw velocity vectors. The first and fifth quantities can
 be changed with the parameters {\ct PLOT3D\_QUANTITY(1)} and {\ct PLOT3D\_QUANTITY(5)}
-on the {\ct DUMP} line.
+on the {\ct DUMP} line. If any of the specified quantities require the additional specification of a particular species,
+use {\ct PLOT3D\_SPEC\_ID(n)} to provide the {\ct SPEC\_ID} for {\ct PLOT3D\_QUANTITY(n)}.
 
 \begin{warning}
 Note that there can only be one {\ct DUMP} line.
@@ -6456,6 +6457,8 @@ are used in the visualization. You have the option of rendering any other specie
 {\ct MASS\_EXTINCTION\_COEFFICIENT} (either from the {\ct REAC} line, or over-ridden by the value on the {\ct SPEC} line) is appropriate in
 describing the attenuation of visible light by the specified gas species.
 The alternative gas species is given by {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line.
+If the specified quantity requires the additional specification of a particular species,
+use {\ct SMOKE3D\_SPEC\_ID} to provide the {\ct SPEC\_ID}.
 See the Smokeview User's Guide for more details on how these quantities are rendered.
 
 Here is an example of how to control the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default mixture fraction model.
@@ -6465,7 +6468,7 @@ Here is an example of how to control the smoke species. Normally, you do not nee
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=7600. /
 &SURF ID='NO FIRE', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, COLOR='RED' /
 &VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='NO FIRE' /
-&DUMP SMOKE3D_QUANTITY='MY SMOKE' /
+&DUMP SMOKE3D_QUANTITY='MASS FRACTION', SMOKE3D_SPEC_ID='MY SMOKE' /
 \end{verbatim}
 
 \normalsize
@@ -7012,8 +7015,10 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hline
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\ \hline \hline
 {\ct FYI}          & Character   & Comment String (has no effect)    &           &     \\ \hline
-{\ct PROP\_ID}     & Character   & Source of specific property info  &           &     \\ \hline
+{\ct PART\_ID}     & Character   & Particle identifier (if needed)   &           &     \\ \hline
+{\ct PROP\_ID}     & Character   & Property identifier (if needed)   &           &     \\ \hline
 {\ct QUANTITY}     & Character   & Quantity to visualize             &           &     \\ \hline
+{\ct SPEC\_ID}     & Character   & Species identifier (if needed)    &           &     \\ \hline
 \end{tabular*}
 \end{table}
 
@@ -7072,7 +7077,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct SETPOINT(2)}    & Real         & Lower and upper bound of a {\ct DEADBAND}   &    &                           \\ \hline
 \end{tabular*}
 \end{table}
-%NAMELIST /CTRL/ ID,LATCH,INITIAL_STATE,FUNCTION_TYPE,SETPOINT,DELAY,CYCLE_TIME,INPUT_ID,RAMP_ID,CYCLES,N,ON_BOUND
+
 
 \vspace{\baselineskip}
 
@@ -7100,11 +7105,14 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct ID}               & Character       & Identifying label for output                                     &       &         \\ \hline
 {\ct INITIAL\_STATE}   & Logical         & Initial state of device                                          &       & {\ct .FALSE.} \\ \hline
 {\ct LATCH}            & Logical         & Device cannot change state multiple times                        &       & {\ct .TRUE.}  \\ \hline
+{\ct MATL\_ID}         & Character       & Material identifier (if needed)                                  &       &         \\ \hline
 {\ct ORIENTATION}      & Real Triplet    & Direction vector                                                 &       & 0,0,-1  \\ \hline
+{\ct PART\_ID}         & Character       & Particle identifier (if needed)                                  &       &         \\ \hline
 {\ct PROP\_ID}         & Character       & Associated {\ct PROP}erty line                                   &       &         \\ \hline
 {\ct QUANTITY}         & Character       & Name of Quantity to output                                       &       &         \\ \hline
 {\ct ROTATION}         & Real Triplet    & Rotation Angle                                                   & deg   & 0       \\ \hline
 {\ct SETPOINT}         & Real            & Value at which device changes state                              &       &         \\ \hline
+{\ct SPEC\_ID}         & Character       & Species identifier (if needed)                                   &       &         \\ \hline
 {\ct STATISTICS}       & Character       & See Section~\ref{info:statistics}                                &       &         \\ \hline
 {\ct SURF\_ID}         & Character       & See Section~\ref{info:statistics}                                &       &         \\ \hline
 {\ct TRIP\_DIRECTION}  & Integer         & Sign of derivative at first state change                         &       &  1      \\ \hline
@@ -7113,8 +7121,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \end{tabular*}
 \normalsize
 \end{table}
-%NAMELIST /DEVC/ DEPTH,FYI,IOR,ID,ORIENTATION,PROP_ID,QUANTITY,ROTATION,XB,XYZ,INITIAL_STATE,
-%                LATCH,TRIP_DIRECTION,CTRL_ID,SETPOINT,DEVC_ID,FLOWRATE,DELAY,BYPASS_FLOWRATE
+
 
 \vspace{\baselineskip}
 
@@ -7151,10 +7158,12 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct MASS\_FILE}                & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                     \\ \hline
 {\ct MAXIMUM\_DROPLETS}         & Integer      & Max particles per mesh            &           & 500000                            \\ \hline
 {\ct NFRAMES}                   & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
-{\ct PLOT3D\_QUANTITY(5)}       & Char.~Quint  & Names of PLOT3D Quantities        &           & See Section~\ref{info:PL3D}       \\ \hline
+{\ct PLOT3D\_QUANTITY(5)}       & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
+{\ct PLOT3D\_SPEC\_ID(5)}       & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
 %{\ct RENDER\_FILE}              & Character    & Name of render file from dxf2fds  &           &                                   \\ \hline
 {\ct SMOKE3D}                   & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                      \\ \hline
 {\ct SMOKE3D\_QUANTITY}         & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
+{\ct SMOKE3D\_SPEC\_ID}         & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
 %{\ct SMOKE3D\_COMPRESSION}      & Character    & Type of compression for S3D file  &           & {\ct 'RLE'}                      \\ \hline
 {\ct STATE\_FILE}               & Logical      & Flag for state relation file      &           & {\ct .FALSE.}                     \\ \hline
 %{\ct TIMING}                    & Logical      & General purpose timing flag       &           & {\ct .FALSE.}                      \\ \hline
@@ -7697,11 +7706,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct MAXIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
 %{\ct MINIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Save only slices in this mesh          &           &     \\ \hline
+{\ct PART\_ID}          & Character         & Particle identifier (if needed)        &           &     \\ \hline
 {\ct PBX     }          & Real              & $x$-plane to save slice file           &           &     \\ \hline
 {\ct PBY     }          & Real              & $y$-plane to save slice file           &           &     \\ \hline
 {\ct PBZ     }          & Real              & $z$-plane to save slice file           &           &     \\ \hline
 {\ct QUANTITY}          & Character         & Name of Quantity to display            &           &     \\ \hline
 %{\ct RLE    }           & Logical           & Run Length Encoding                    &           & {\ct .FALSE.}    \\ \hline
+{\ct SPEC\_ID}          & Character         & Species identifier (if needed)         &           &     \\ \hline
 %{\ct TWO\_BYTE    }     & Logical           & Save as 2 byte real                    &           & {\ct .FALSE.}    \\ \hline
 {\ct VECTOR    }        & Logical           & Include flow vectors                   &           & {\ct .FALSE.}    \\ \hline
 {\ct XB(6)}             & Real Sextuplet    & Min/Max coordinates of region to save  & m         &     \\ \hline

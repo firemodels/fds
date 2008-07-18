@@ -248,6 +248,15 @@ gnu_mpi_32 : obj = fds5_gnu_mpi_32
 gnu_mpi_32 : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
+gnu_linux_mpi_64 : FFLAGS = -O3 -unroll -static -frecord-marker=4 
+gnu_linux_mpi_64 : CFLAGS = -O3 -unroll -static 
+gnu_linux_mpi_64 : FCOMPL = mpif90 
+gnu_linux_mpi_64 : CCOMPL = mpicc 
+gnu_linux_mpi_64 : obj = fds5_mpi_linux_64 
+gnu_linux_mpi_64 : setup $(obj_mpi) 
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
+
+
 #*** End Compiler Specific Rules ***
 
 # *** Object Dependencies ***
