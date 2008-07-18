@@ -5260,7 +5260,7 @@ if(visBlocks==visBLOCKOutline){
       }
       if(trainer_mode==0||(trainer_mode==1&&ntours>0))glutAddMenuEntry("-",-999);
     }
-  if(ntours>1){
+  if(ntours>0){
     glutAddSubMenu("Show/Hide",showtourmenu);
   }
 
