@@ -232,10 +232,11 @@ CASE(.TRUE.) PREDICTOR_STEP
       DO N=1,N_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
-              DO I=1,IBAR
-                 YYS(I,J,K,N) = RHO(I,J,K)*YY(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N)
-              ENDDO
-           ENDDO
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  YYS(I,J,K,N) = RHO(I,J,K)*YY(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N)
+               ENDDO
+            ENDDO
          ENDDO
       ENDDO
 
@@ -409,6 +410,7 @@ CASE(.FALSE.) PREDICTOR_STEP
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                YY(I,J,K,N) = .5_EB*(RHO(I,J,K)*YY(I,J,K,N) + RHOS(I,J,K)*YYS(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N) ) 
             ENDDO
          ENDDO

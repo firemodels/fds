@@ -269,6 +269,22 @@ DO NM=1,NMESHES
 ENDDO
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
  
+! Initialize the flow field with random noise to eliminate false symmetries
+
+IF (NOISE .OR. PERIODIC_TEST) THEN
+   DO NM=1,NMESHES
+      IF (PROCESS(NM)/=MYID) CYCLE
+      IF (NOISE) CALL INITIAL_NOISE(NM)
+      IF (PERIODIC_TEST) CALL ANALYTICAL_SOLUTION(NM)
+   ENDDO
+   PREDICTOR = .FALSE.
+   CORRECTOR = .TRUE.
+   DO NM=1,NMESHES
+      IF (PROCESS(NM)/=MYID) CYCLE
+      CALL VELOCITY_BC(T_BEGIN,NM)
+   ENDDO
+ENDIF
+
 ! Potentially read data from a previous calculation 
  
 DO NM=1,NMESHES

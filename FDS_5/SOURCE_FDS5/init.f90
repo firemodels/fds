@@ -17,7 +17,7 @@ CHARACTER(255), PARAMETER :: initid='$Id$'
 CHARACTER(255), PARAMETER :: initrev='$Revision$'
 CHARACTER(255), PARAMETER :: initdate='$Date$'
 
-PUBLIC INITIALIZE_MESH_VARIABLES,INITIALIZE_GLOBAL_VARIABLES, OPEN_AND_CLOSE, GET_REV_init
+PUBLIC INITIALIZE_MESH_VARIABLES,INITIALIZE_GLOBAL_VARIABLES, OPEN_AND_CLOSE, INITIAL_NOISE, ANALYTICAL_SOLUTION, GET_REV_init
 
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB
@@ -39,7 +39,6 @@ REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
 TYPE (INITIALIZATION_TYPE), POINTER :: IN
 TYPE (P_ZONE_TYPE), POINTER :: PZ
 TYPE (DEVICE_TYPE), POINTER :: DV
-REAL(EB) :: UU,WW
  
 IERR = 0
 M => MESHES(NM)
@@ -278,39 +277,10 @@ M%W       = W0
 M%US      = U0
 M%VS      = V0
 M%WS      = W0
-IF (NOISE) CALL INITIAL_NOISE
 M%FVX   = 0._EB
 M%FVY   = 0._EB
 M%FVZ   = 0._EB
 M%H     = H0
-
-ANALYTIC_SOLN: IF (PERIODIC_TEST .AND. .TRUE.) THEN
-   ! initialize velocity with analytical solution !! RJM
-   DO K=1,M%KBAR
-      DO J=1,M%JBAR
-         DO I=0,M%IBAR
-            M%U(I,J,K) = 1._EB - 2._EB*COS(M%X(I))*SIN(M%ZC(K))
-         ENDDO
-      ENDDO
-   ENDDO
-   DO K=0,M%KBAR
-      DO J=1,M%JBAR
-         DO I=1,M%IBAR
-            M%W(I,J,K) = 1._EB + 2._EB*SIN(M%XC(I))*COS(M%Z(K))
-         ENDDO
-      ENDDO
-   ENDDO
-   ! initialize pressure
-   DO K=0,M%KBP1
-      DO J=0,M%JBP1
-         DO I=0,M%IBP1
-            UU = 1._EB - 2._EB*COS(M%XC(I))*SIN(M%ZC(K))
-            WW = 1._EB + 2._EB*SIN(M%XC(I))*COS(M%ZC(K))
-            M%H(I,J,K) = -( COS(2._EB*M%XC(I)) + COS(2._EB*M%ZC(K)) ) + 0.5_EB*(UU**2+WW**2)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF ANALYTIC_SOLN
 
 IF (PRESSURE_CORRECTION) M%HP    = 0._EB
 M%DDDT  = 0._EB
@@ -901,7 +871,7 @@ DO N=1,M%N_OBST
    N_EDGES_DIM = N_EDGES_DIM + 4*(IPTS*JPTS+IPTS*KPTS+JPTS*KPTS)
 ENDDO
 
-ALLOCATE(M%IJKE(14,N_EDGES_DIM),STAT=IZERO)
+ALLOCATE(M%IJKE(16,N_EDGES_DIM),STAT=IZERO)
 CALL ChkMemErr('INIT','IJKE',IZERO)   
 M%IJKE  = 0
 ALLOCATE(M%OME_E(N_EDGES_DIM),STAT=IZERO)
@@ -910,7 +880,7 @@ M%OME_E = 0._EB
 ALLOCATE(M%TAU_E(N_EDGES_DIM),STAT=IZERO)
 CALL ChkMemErr('INIT','TAU_E',IZERO)  
 M%TAU_E = 0._EB
-ALLOCATE(M%EDGE_TYPE(N_EDGES_DIM),STAT=IZERO)
+ALLOCATE(M%EDGE_TYPE(N_EDGES_DIM,2),STAT=IZERO)
 CALL ChkMemErr('INIT','EDGE_TYPE',IZERO)  
 M%EDGE_TYPE = SOLID_EDGE
 ALLOCATE(M%EDGE_INTERPOLATION_FACTOR(N_EDGES_DIM,2),STAT=IZERO)
@@ -1338,62 +1308,6 @@ ENDIF
  
 END SUBROUTINE INITIALIZE_POISSON_SOLVER
  
- 
-SUBROUTINE INITIAL_NOISE
-
-! Generate random noise at the start of the simulation
- 
-REAL(EB) :: VFAC,RN
-INTEGER  :: I,J,K
- 
-IF (EVACUATION_ONLY(NM)) RETURN
- 
-VFAC = 0.005_EB
- 
-DO K=0,M%KBAR
-   DO J=0,M%JBAR
-      LOOP_1: DO I=1,M%IBAR
-         IF (M%SOLID(M%CELL_INDEX(I,J,K))   .OR. M%SOLID(M%CELL_INDEX(I,J,K+1)) .OR. &
-             M%SOLID(M%CELL_INDEX(I,J+1,K)) .OR. M%SOLID(M%CELL_INDEX(I,J+1,K+1)))  CYCLE LOOP_1
-         CALL RANDOM_NUMBER(RN)
-         RN = VFAC*(-1._EB + 2._EB*RN)*M%DXMIN
-         M%W(I,J,K)   = M%W(I,J,K)   - RN*M%RDY(J)
-         M%W(I,J+1,K) = M%W(I,J+1,K) + RN*M%RDY(J+1)
-         M%V(I,J,K)   = M%V(I,J,K)   + RN*M%RDZ(K)
-         M%V(I,J,K+1) = M%V(I,J,K+1) - RN*M%RDZ(K+1)
-      ENDDO LOOP_1
-   ENDDO
-ENDDO
-DO K=0,M%KBAR
-   DO J=1,M%JBAR
-      LOOP_2: DO I=0,M%IBAR
-         IF (M%SOLID(M%CELL_INDEX(I,J,K))   .OR. M%SOLID(M%CELL_INDEX(I,J,K+1)) .OR. &
-             M%SOLID(M%CELL_INDEX(I+1,J,K)) .OR. M%SOLID(M%CELL_INDEX(I+1,J,K+1)))  CYCLE LOOP_2
-         CALL RANDOM_NUMBER(RN)
-         RN = VFAC*(-1._EB + 2._EB*RN)*M%DXMIN
-         M%W(I,J,K)   = M%W(I,J,K)   - RN*M%RDX(I)*M%R(I)*M%RRN(I)
-         M%W(I+1,J,K) = M%W(I+1,J,K) + RN*M%RDX(I+1)*M%R(I)*M%RRN(I+1)
-         M%U(I,J,K)   = M%U(I,J,K)   + RN*M%RDZ(K)
-         M%U(I,J,K+1) = M%U(I,J,K+1) - RN*M%RDZ(K+1)
-      ENDDO LOOP_2
-   ENDDO
-ENDDO
-DO K=1,M%KBAR
-   DO J=0,M%JBAR
-      LOOP_3: DO I=0,M%IBAR
-         IF (M%SOLID(M%CELL_INDEX(I,J,K))   .OR. M%SOLID(M%CELL_INDEX(I,J+1,K)) .OR. &
-             M%SOLID(M%CELL_INDEX(I+1,J,K)) .OR. M%SOLID(M%CELL_INDEX(I+1,J+1,K)))  CYCLE LOOP_3
-         CALL RANDOM_NUMBER(RN)
-         RN = VFAC*(-1._EB + 2._EB*RN)*M%DXMIN
-         M%V(I,J,K)   = M%V(I,J,K)   - RN*M%RDX(I)
-         M%V(I+1,J,K) = M%V(I+1,J,K) + RN*M%RDX(I+1)
-         M%U(I,J,K)   = M%U(I,J,K)   + RN*M%RDY(J)
-         M%U(I,J+1,K) = M%U(I,J+1,K) - RN*M%RDY(J+1)
-      ENDDO LOOP_3
-   ENDDO
-ENDDO
- 
-END SUBROUTINE INITIAL_NOISE
  
  
 SUBROUTINE INITIALIZE_DEVC
@@ -2636,8 +2550,10 @@ SELECT CASE(IEC)
 END SELECT
 
 IF (IE>0) THEN
-   IF (REMOVE .AND. (IJKE(7,IE)/=0 .OR. IJKE(11,IE)/=0)) EDGE_TYPE(IE) = INTERPOLATED_EDGE
-   IF (CREATE .AND. (IJKE(7,IE)/=0 .OR. IJKE(11,IE)/=0)) EDGE_TYPE(IE) = SOLID_EDGE
+   IF (REMOVE .AND. IJKE( 9,IE)/=0) EDGE_TYPE(IE,1) = INTERPOLATED_EDGE
+   IF (REMOVE .AND. IJKE(13,IE)/=0) EDGE_TYPE(IE,2) = INTERPOLATED_EDGE
+   IF (CREATE .AND. IJKE( 9,IE)/=0) EDGE_TYPE(IE,1) = SOLID_EDGE
+   IF (CREATE .AND. IJKE(13,IE)/=0) EDGE_TYPE(IE,2) = SOLID_EDGE
 ENDIF
 
 END SUBROUTINE REDEFINE_EDGE
@@ -2661,8 +2577,8 @@ IF (I_OBST>0) OB=>OBSTRUCTION(I_OBST)
 IW1 = -1
 IW2 = -1
  
-COMP: SELECT CASE(IEC)
-   CASE(1) COMP
+EDGE_DIRECTION_1: SELECT CASE(IEC)
+   CASE(1) EDGE_DIRECTION_1
       SELECT CASE(IOR)
          CASE(-2)
             IW1 = WALL_INDEX(CELL_INDEX(II,JJ,KK)  ,2)
@@ -2677,7 +2593,7 @@ COMP: SELECT CASE(IEC)
             IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK+1),-3)
             IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK+1),-3)
       END SELECT
-   CASE(2) COMP
+   CASE(2) EDGE_DIRECTION_1
       SELECT CASE(IOR)
          CASE(-1)
             IW1 = WALL_INDEX(CELL_INDEX(II,JJ,KK)  ,1)
@@ -2692,7 +2608,7 @@ COMP: SELECT CASE(IEC)
             IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ,KK+1),-3)
             IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK+1),-3)
       END SELECT
-   CASE(3) COMP
+   CASE(3) EDGE_DIRECTION_1
       SELECT CASE(IOR)
          CASE(-1)
             IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK),1)
@@ -2707,7 +2623,7 @@ COMP: SELECT CASE(IEC)
             IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ+1,KK),-2)
             IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ+1,KK),-2)
       END SELECT
-END SELECT COMP
+END SELECT EDGE_DIRECTION_1
 
 ! Decide what to do based on whether or not adjacent tiles exist
 
@@ -2753,31 +2669,25 @@ IF (IJKW(9,IW)>0) THEN
    KKO = IJKW(12,IW)
 ENDIF
 
-IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) EDGE_TYPE(IE) = INTERPOLATED_EDGE
- 
 ! Fill up array IJKE with edge parameters
  
 IJKE(1,IE) = II
 IJKE(2,IE) = JJ
 IJKE(3,IE) = KK
 IJKE(4,IE) = IEC
-IJKE(5,IE) = IJKW(5,IW)
-IJKE(6,IE) = IOR
  
-! Special "free-slip" cases
+! Fill in EDGE_INDEX and the rest of IJKE
 
-IF (I_OBST>0) THEN
-   IF (.NOT.OB%SAWTOOTH) IJKE(6,IE) = 0
-ENDIF
-
-IF (EVACUATION_ONLY(NM)) IJKE(6,IE) = 0
-
-! Fill in EDGE_INDEX and IJKE(7-14,IE)
+EDGE_DIRECTION_2: SELECT CASE(IEC)
  
-COMPONENT: SELECT CASE(IEC)
+   CASE (1) EDGE_DIRECTION_2
  
-   CASE (1) COMPONENT
- 
+      IF (ABS(IOR)==2 .AND. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) EDGE_TYPE(IE,1) = INTERPOLATED_EDGE
+      IF (ABS(IOR)==3 .AND. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) EDGE_TYPE(IE,2) = INTERPOLATED_EDGE
+      IF (ABS(IOR)==2) IJKE(5,IE) = IJKW(5,IW)
+      IF (ABS(IOR)==2) IJKE(6,IE) = IOR
+      IF (ABS(IOR)==3) IJKE(7,IE) = IJKW(5,IW)
+      IF (ABS(IOR)==3) IJKE(8,IE) = IOR
       ICPM = CELL_INDEX(II,JJ+1,KK)
       ICPP = CELL_INDEX(II,JJ+1,KK+1)
       ICMP = CELL_INDEX(II,JJ,KK+1)
@@ -2788,31 +2698,37 @@ COMPONENT: SELECT CASE(IEC)
       IF (NOM/=0) THEN
          SELECT CASE(ABS(IOR))
             CASE(2)
-               IF (IOR>0) IJKE(11,IE) = -NOM
-               IF (IOR<0) IJKE(11,IE) =  NOM
-               IJKE(12,IE) = IIO
-               IJKE(13,IE) = JJO
+               IF (IOR>0) IJKE( 9,IE) = -NOM
+               IF (IOR<0) IJKE( 9,IE) =  NOM
+               IJKE(10,IE) = IIO
+               IJKE(11,IE) = JJO
                MM => MESHES(NOM)
                ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
                KKO = MAX(1,FLOOR(ZK))
                M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
-               IJKE(14,IE) = KKO
+               IJKE(12,IE) = KKO
    
             CASE(3)
-               IF (IOR>0) IJKE( 7,IE) = -NOM
-               IF (IOR<0) IJKE( 7,IE) =  NOM
-               IJKE( 8,IE) = IIO
+               IF (IOR>0) IJKE(13,IE) = -NOM
+               IF (IOR<0) IJKE(13,IE) =  NOM
+               IJKE(14,IE) = IIO
                MM => MESHES(NOM)
                YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
                JJO = MAX(1,FLOOR(YJ))
                M%EDGE_INTERPOLATION_FACTOR(IE,1) = YJ-JJO
-               IJKE( 9,IE) = JJO
-               IJKE(10,IE) = KKO
+               IJKE(15,IE) = JJO
+               IJKE(16,IE) = KKO
          END SELECT
       ENDIF
  
-   CASE (2) COMPONENT
+   CASE (2) EDGE_DIRECTION_2
     
+      IF (ABS(IOR)==3 .AND. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) EDGE_TYPE(IE,1) = INTERPOLATED_EDGE
+      IF (ABS(IOR)==1 .AND. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) EDGE_TYPE(IE,2) = INTERPOLATED_EDGE
+      IF (ABS(IOR)==3) IJKE(5,IE) = IJKW(5,IW)
+      IF (ABS(IOR)==3) IJKE(6,IE) = IOR
+      IF (ABS(IOR)==1) IJKE(7,IE) = IJKW(5,IW)
+      IF (ABS(IOR)==1) IJKE(8,IE) = IOR
       ICPM = CELL_INDEX(II+1,JJ,KK)
       ICPP = CELL_INDEX(II+1,JJ,KK+1)
       ICMP = CELL_INDEX(II,JJ,KK+1)
@@ -2823,30 +2739,36 @@ COMPONENT: SELECT CASE(IEC)
       IF (NOM/=0) THEN
          SELECT CASE(ABS(IOR))
             CASE( 1)
-               IF (IOR>0) IJKE(11,IE) = -NOM
-               IF (IOR<0) IJKE(11,IE) =  NOM
-               IJKE(12,IE) = IIO
-               IJKE(13,IE) = JJO
+               IF (IOR>0) IJKE(13,IE) = -NOM
+               IF (IOR<0) IJKE(13,IE) =  NOM
+               IJKE(14,IE) = IIO
+               IJKE(15,IE) = JJO
                MM => MESHES(NOM)
                ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
                KKO = MAX(1,FLOOR(ZK))
                M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
-               IJKE(14,IE) = KKO
+               IJKE(16,IE) = KKO
             CASE( 3)
-               IF (IOR>0) IJKE( 7,IE) = -NOM
-               IF (IOR<0) IJKE( 7,IE) =  NOM
+               IF (IOR>0) IJKE( 9,IE) = -NOM
+               IF (IOR<0) IJKE( 9,IE) =  NOM
                MM => MESHES(NOM)
                XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
                IIO = MAX(1,FLOOR(XI))
                M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
-               IJKE( 8,IE) = IIO
-               IJKE( 9,IE) = JJO
-               IJKE(10,IE) = KKO
+               IJKE(10,IE) = IIO
+               IJKE(11,IE) = JJO
+               IJKE(12,IE) = KKO
          END SELECT 
       ENDIF
     
-   CASE (3) COMPONENT
+   CASE (3) EDGE_DIRECTION_2
  
+      IF (ABS(IOR)==1 .AND. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) EDGE_TYPE(IE,1) = INTERPOLATED_EDGE
+      IF (ABS(IOR)==2 .AND. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) EDGE_TYPE(IE,2) = INTERPOLATED_EDGE
+      IF (ABS(IOR)==1) IJKE(5,IE) = IJKW(5,IW)
+      IF (ABS(IOR)==1) IJKE(6,IE) = IOR
+      IF (ABS(IOR)==2) IJKE(7,IE) = IJKW(5,IW)
+      IF (ABS(IOR)==2) IJKE(8,IE) = IOR
       ICPM = CELL_INDEX(II+1,JJ,KK)
       ICPP = CELL_INDEX(II+1,JJ+1,KK)
       ICMP = CELL_INDEX(II,JJ+1,KK)
@@ -2857,31 +2779,141 @@ COMPONENT: SELECT CASE(IEC)
       IF (NOM/=0) THEN
          SELECT CASE(ABS(IOR))
             CASE( 1)
-               IF (IOR>0) IJKE(11,IE) = -NOM
-               IF (IOR<0) IJKE(11,IE) =  NOM
-               IJKE(12,IE) = IIO
+               IF (IOR>0) IJKE( 9,IE) = -NOM
+               IF (IOR<0) IJKE( 9,IE) =  NOM
+               IJKE(10,IE) = IIO
                MM => MESHES(NOM)
                YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
                JJO = MAX(1,FLOOR(YJ))
                M%EDGE_INTERPOLATION_FACTOR(IE,2) = YJ-JJO
-               IJKE(13,IE) = JJO
-               IJKE(14,IE) = KKO
+               IJKE(11,IE) = JJO
+               IJKE(12,IE) = KKO
             CASE( 2)
-               IF (IOR>0) IJKE( 7,IE) = -NOM
-               IF (IOR<0) IJKE( 7,IE) =  NOM
+               IF (IOR>0) IJKE(13,IE) = -NOM
+               IF (IOR<0) IJKE(13,IE) =  NOM
                MM => MESHES(NOM)
                XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
                IIO = MAX(1,FLOOR(XI))
                M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
-               IJKE( 8,IE) = IIO
-               IJKE( 9,IE) = JJO
-               IJKE(10,IE) = KKO
+               IJKE(14,IE) = IIO
+               IJKE(15,IE) = JJO
+               IJKE(16,IE) = KKO
          END SELECT
       ENDIF
  
-END SELECT COMPONENT
+END SELECT EDGE_DIRECTION_2
+
+! Special "free-slip" cases
+
+IF (I_OBST>0) THEN
+   IF (.NOT.OB%SAWTOOTH) IJKE(6,IE) = 0
+   IF (.NOT.OB%SAWTOOTH) IJKE(8,IE) = 0
+ENDIF
+
+IF (EVACUATION_ONLY(NM)) IJKE(6,IE) = 0
+IF (EVACUATION_ONLY(NM)) IJKE(8,IE) = 0
 
 END SUBROUTINE DEFINE_EDGE
+
+
+
+SUBROUTINE INITIAL_NOISE(NM)
+
+! Generate random noise at the start of the simulation
+ 
+REAL(EB) :: VFAC,RN
+INTEGER  :: I,J,K
+INTEGER, INTENT(IN) :: NM
+ 
+IF (EVACUATION_ONLY(NM)) RETURN
+ 
+CALL POINT_TO_MESH(NM)
+
+VFAC = 0.005_EB
+ 
+DO K=0,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))   .OR. SOLID(CELL_INDEX(I,J,K+1)) .OR. &
+             SOLID(CELL_INDEX(I,J+1,K)) .OR. SOLID(CELL_INDEX(I,J+1,K+1)))  CYCLE 
+         CALL RANDOM_NUMBER(RN)
+         RN = VFAC*(-1._EB + 2._EB*RN)*DXMIN
+         W(I,J,K)   = W(I,J,K)   - RN*RDY(J)
+         W(I,J+1,K) = W(I,J+1,K) + RN*RDY(J+1)
+         V(I,J,K)   = V(I,J,K)   + RN*RDZ(K)
+         V(I,J,K+1) = V(I,J,K+1) - RN*RDZ(K+1)
+      ENDDO
+   ENDDO
+ENDDO
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))   .OR. SOLID(CELL_INDEX(I,J,K+1)) .OR. &
+             SOLID(CELL_INDEX(I+1,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K+1)))  CYCLE 
+         CALL RANDOM_NUMBER(RN)
+         RN = VFAC*(-1._EB + 2._EB*RN)*DXMIN
+         W(I,J,K)   = W(I,J,K)   - RN*RDX(I)*R(I)*RRN(I)
+         W(I+1,J,K) = W(I+1,J,K) + RN*RDX(I+1)*R(I)*RRN(I+1)
+         U(I,J,K)   = U(I,J,K)   + RN*RDZ(K)
+         U(I,J,K+1) = U(I,J,K+1) - RN*RDZ(K+1)
+      ENDDO 
+   ENDDO
+ENDDO
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=0,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))   .OR. SOLID(CELL_INDEX(I,J+1,K)) .OR. &
+             SOLID(CELL_INDEX(I+1,J,K)) .OR. SOLID(CELL_INDEX(I+1,J+1,K)))  CYCLE
+         CALL RANDOM_NUMBER(RN)
+         RN = VFAC*(-1._EB + 2._EB*RN)*DXMIN
+         V(I,J,K)   = V(I,J,K)   - RN*RDX(I)
+         V(I+1,J,K) = V(I+1,J,K) + RN*RDX(I+1)
+         U(I,J,K)   = U(I,J,K)   + RN*RDY(J)
+         U(I,J+1,K) = U(I,J+1,K) - RN*RDY(J+1)
+      ENDDO 
+   ENDDO
+ENDDO
+
+END SUBROUTINE INITIAL_NOISE
+ 
+
+SUBROUTINE ANALYTICAL_SOLUTION(NM)
+
+! Initialize flow variables with an analytical solution of the governing equations
+
+INTEGER  :: I,J,K
+INTEGER, INTENT(IN) :: NM
+REAL :: UU,WW
+
+CALL POINT_TO_MESH(NM)
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         U(I,J,K) = 1._EB - 2._EB*COS(X(I))*SIN(ZC(K))
+      ENDDO
+   ENDDO
+ENDDO
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         W(I,J,K) = 1._EB + 2._EB*SIN(XC(I))*COS(Z(K))
+      ENDDO
+   ENDDO
+ENDDO
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
+         UU = 1._EB - 2._EB*COS(XC(I))*SIN(ZC(K))
+         WW = 1._EB + 2._EB*SIN(XC(I))*COS(ZC(K))
+         H(I,J,K) = -( COS(2._EB*XC(I)) + COS(2._EB*ZC(K)) ) + 0.5_EB*(UU**2+WW**2)
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE ANALYTICAL_SOLUTION
+
+
 
 SUBROUTINE GET_REV_init(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV

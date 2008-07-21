@@ -3879,6 +3879,7 @@ SELECT CASE(INDX)
             IOR = IJKW(4,IWX)
             X_S_NEW(0:NWP) = THICKNESS-SURFACE(IJKW(5,IWX))%X_S(0:NWP)
          ENDIF
+         SOLID_PHASE_OUTPUT = 0._EB
          DO II2=1,NWP
             WGT = (X_S_NEW(II2-1)**(I_GRAD+1)-X_S_NEW(II2)**(I_GRAD+1))/SURFACE(IJKW(5,IWX))%THICKNESS**I_GRAD
             WGT = WGT/REAL(I_GRAD+1,EB)
