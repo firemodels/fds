@@ -96,6 +96,7 @@ IF (SET_UP) CALL SHUTDOWN('Stop FDS, Set-up only')
  
 ALLOCATE(ACTIVE_MESH(NMESHES),STAT=IZERO)
 CALL ChkMemErr('MAIN','ACTIVE_MESH',IZERO)
+ACTIVE_MESH = .TRUE.
 ALLOCATE(T(NMESHES),STAT=IZERO)
 CALL ChkMemErr('MAIN','T',IZERO)
 ALLOCATE(DT_SYNC(NMESHES),STAT=IZERO)
@@ -130,6 +131,10 @@ NIC   = TRANSPOSE(NIC)
 DO NM=1,NMESHES
    CALL DOUBLE_CHECK(NM)
 ENDDO
+
+! Initialize Mesh Exchange Arrays (All Nodes)
+
+CALL MESH_EXCHANGE(0)
  
 ! Initialize the flow field with random noise to eliminate false symmetries
 
@@ -138,6 +143,7 @@ IF (NOISE .OR. PERIODIC_TEST) THEN
      IF (NOISE) CALL INITIAL_NOISE(NM)
      IF (PERIODIC_TEST) CALL ANALYTICAL_SOLUTION(NM)
    ENDDO
+   CALL MESH_EXCHANGE(6)
    PREDICTOR = .FALSE.
    CORRECTOR = .TRUE.
    DO NM=1,NMESHES
@@ -176,7 +182,7 @@ CALL WRITE_STRINGS
 
 ! Initialize Mesh Exchange Arrays (All Nodes)
 
-CALL MESH_EXCHANGE(0)
+!!! CALL MESH_EXCHANGE(0)
 
 ! Initialize output files 
 
