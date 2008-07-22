@@ -29,6 +29,7 @@ INTEGER :: I,J,K,IW,IOR,BC_TYPE,NOM,N_INT_CELLS,IIO,JJO,KKO
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,DWWDT,DVVDT,DUUDT,HQ2,RFODT,U2,V2,W2,HFAC,H0RR(6),TNOW,DUMMY=0._EB, &
             TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER
 TYPE (VENTS_TYPE), POINTER :: VT
+LOGICAL :: HINTERP4=.FALSE.
  
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY) RETURN
@@ -163,32 +164,68 @@ WALL_CELL_LOOP: DO IW=1,NEWC
          ENDDO
          N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
          H_OTHER = H_OTHER/REAL(N_INT_CELLS,EB)
-
+         
+         IF (HINTERP4) THEN
+            IIO = IJKW(10,IW)
+            JJO = IJKW(11,IW)
+            KKO = IJKW(12,IW)
+         ENDIF
+         
          SELECT CASE(IOR)
             CASE( 1)
-                  DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
-                  BXS(J,K) = (DX_OTHER*H(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER)
-                  !BXS(J,K) = 0.5_EB*(H(1,J,K) + H_OTHER)
+                  !IF (IBAR>1 .AND. MESHES(NOM)%IBAR>1 .AND. HINTERP4) THEN
+                  !   BXS(J,K) = 0.5625_EB*(H(1,J,K) + MESHES(NOM)%H(IIO,  JJO,KKO)) & 
+                  !            - 0.0625_EB*(H(2,J,K) + MESHES(NOM)%H(IIO-1,JJO,KKO))
+                  !ELSE
+                     DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
+                     BXS(J,K) = (DX_OTHER*H(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER)
+                     !BXS(J,K) = 0.5_EB*(H(1,J,K) + H_OTHER)
+                  !ENDIF
             CASE(-1) 
-                  DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
-                  BXF(J,K) = (DX_OTHER*H(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)
-                  !BXF(J,K) = 0.5_EB*(H(IBAR,J,K) + H_OTHER)
+                  !IF (IBAR>1 .AND. MESHES(NOM)%IBAR>1 .AND. HINTERP4) THEN
+                  !   BXF(J,K) = 0.5625_EB*(H(IBAR,  J,K) + MESHES(NOM)%H(IIO,  JJO,KKO)) & 
+                  !            - 0.0625_EB*(H(IBAR-1,J,K) + MESHES(NOM)%H(IIO+1,JJO,KKO))
+                  !ELSE
+                     DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
+                     BXF(J,K) = (DX_OTHER*H(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)
+                     !BXF(J,K) = 0.5_EB*(H(IBAR,J,K) + H_OTHER)
+                  !ENDIF
             CASE( 2) 
-                  DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
-                  BYS(I,K) = (DY_OTHER*H(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER)
-                  !BYS(I,K) = 0.5_EB*(H(I,1,K) + H_OTHER)
+                  !IF (JBAR>1 .AND. MESHES(NOM)%JBAR>1 .AND. HINTERP4) THEN
+                  !   BYS(I,K) = 0.5625_EB*(H(I,1,K) + MESHES(NOM)%H(IIO,JJO,  KKO)) & 
+                  !            - 0.0625_EB*(H(I,2,K) + MESHES(NOM)%H(IIO,JJO-1,KKO))
+                  !ELSE
+                     DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
+                     BYS(I,K) = (DY_OTHER*H(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER)
+                     !BYS(I,K) = 0.5_EB*(H(I,1,K) + H_OTHER)
+                  !ENDIF
             CASE(-2) 
-                  DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
-                  BYF(I,K) = (DY_OTHER*H(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)
-                  !BYF(I,K) = 0.5_EB*(H(I,JBAR,K) + H_OTHER)
+                  !IF (JBAR>1 .AND. MESHES(NOM)%JBAR>1 .AND. HINTERP4) THEN
+                  !   BYF(I,K) = 0.5625_EB*(H(I,JBAR,  K) + MESHES(NOM)%H(IIO,JJO,  KKO)) & 
+                  !            - 0.0625_EB*(H(I,JBAR-1,K) + MESHES(NOM)%H(IIO,JJO+1,KKO))
+                  !ELSE
+                     DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
+                     BYF(I,K) = (DY_OTHER*H(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)
+                     !BYF(I,K) = 0.5_EB*(H(I,JBAR,K) + H_OTHER)
+                  !ENDIF
             CASE( 3) 
-                  DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
-                  BZS(I,J) = (DZ_OTHER*H(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)
-                  !BZS(I,J) = 0.5_EB*(H(I,J,1) + H_OTHER)
+                  !IF (KBAR>1 .AND. MESHES(NOM)%KBAR>1 .AND. HINTERP4) THEN
+                  !   BZS(I,J) = 0.5625_EB*(H(I,J,1) + MESHES(NOM)%H(IIO,JJO,KKO  )) & 
+                  !            - 0.0625_EB*(H(I,J,2) + MESHES(NOM)%H(IIO,JJO,KKO-1))
+                  !ELSE
+                     DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
+                     BZS(I,J) = (DZ_OTHER*H(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)
+                     !BZS(I,J) = 0.5_EB*(H(I,J,1) + H_OTHER)
+                  !ENDIF
             CASE(-3) 
-                  DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
-                  BZF(I,J) = (DZ_OTHER*H(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)
-                  !BZF(I,J) = 0.5_EB*(H(I,J,KBAR) + H_OTHER)
+                  !IF (KBAR>1 .AND. MESHES(NOM)%KBAR>1 .AND. HINTERP4) THEN
+                  !   BZF(I,J) = 0.5625_EB*(H(I,J,KBAR  ) + MESHES(NOM)%H(IIO,JJO,KKO  )) & 
+                  !            - 0.0625_EB*(H(I,J,KBAR-1) + MESHES(NOM)%H(IIO,JJO,KKO+1))
+                  !ELSE
+                     DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
+                     BZF(I,J) = (DZ_OTHER*H(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)
+                     !BZF(I,J) = 0.5_EB*(H(I,J,KBAR) + H_OTHER)
+                  !ENDIF
          END SELECT
  
       ENDIF INTERPOLATED_ONLY
@@ -427,6 +464,10 @@ DO K=1,KBAR
       IF (LBC==1 .OR. LBC==2)             H(0,J,K)    =-H(1,J,K)    + 2._EB*BXS(J,K)
       IF (LBC==1 .OR. LBC==4 .OR. LBC==5) H(IBP1,J,K) =-H(IBAR,J,K) + 2._EB*BXF(J,K)
       IF (LBC==5 .OR. LBC==6)             H(0,J,K) = H(1,J,K)
+      IF (LBC==0) THEN
+         H(0,J,K) = H(IBAR,J,K)
+         H(IBP1,J,K) = H(1,J,K)
+      ENDIF
    ENDDO
 ENDDO
  
@@ -436,6 +477,10 @@ DO K=1,KBAR
       IF (MBC==3 .OR. MBC==2) H(I,JBP1,K) = H(I,JBAR,K) + DETA*BYF(I,K)
       IF (MBC==1 .OR. MBC==2) H(I,0,K)    =-H(I,1,K)    + 2._EB*BYS(I,K)
       IF (MBC==1 .OR. MBC==4) H(I,JBP1,K) =-H(I,JBAR,K) + 2._EB*BYF(I,K)
+      IF (MBC==0) THEN
+         H(I,0,K) = H(I,JBAR,K)
+         H(I,JBP1,K) = H(I,1,K)
+      ENDIF
    ENDDO
 ENDDO
  
@@ -445,6 +490,10 @@ DO J=1,JBAR
       IF (NBC==3 .OR. NBC==2)  H(I,J,KBP1) = H(I,J,KBAR) + DZETA*BZF(I,J)
       IF (NBC==1 .OR. NBC==2)  H(I,J,0)    =-H(I,J,1)    + 2._EB*BZS(I,J)
       IF (NBC==1 .OR. NBC==4)  H(I,J,KBP1) =-H(I,J,KBAR) + 2._EB*BZF(I,J)
+      IF (NBC==0) THEN
+         H(I,J,0) = H(I,J,KBAR)
+         H(I,J,KBP1) = H(I,J,1)
+      ENDIF
    ENDDO
 ENDDO
 
