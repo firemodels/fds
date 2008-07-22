@@ -1242,6 +1242,12 @@ IF (PBC(5,NM)==0 .AND. PBC(6,NM)==0) NBC = 1
 IF (PBC(5,NM)==0 .AND. PBC(6,NM)==1) NBC = 2
 IF (PBC(5,NM)==1 .AND. PBC(6,NM)==1) NBC = 3
 IF (PBC(5,NM)==1 .AND. PBC(6,NM)==0) NBC = 4
+
+IF (PERIODIC_TEST .AND. NMESHES==1 .AND. .TRUE.) THEN
+   LBC = 0
+   MBC = 0
+   NBC = 0
+ENDIF
  
 ! Poisson solver with stretching in the 1st coordinate
  
@@ -1839,7 +1845,60 @@ CHECK_MESHES: IF (IW<=M%NEWC .AND.  .NOT.EVACUATION_ONLY(NM)) THEN
 ENDIF CHECK_MESHES
 
 ! periodic b.c. test
-IF_PERIODIC: IF (PERIODIC_TEST) THEN
+IF_PERIODIC1: IF (PERIODIC_TEST .AND. NMESHES==1) THEN
+   !! z direction periodicity, ABS(IOR)==3
+   IF (NM==1 .AND. IOR==3) THEN
+      NOM = 1
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = I
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = MESHES(NOM)%KBAR
+      M%IJKW(13,IW) = I
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = MESHES(NOM)%KBAR
+   ENDIF
+   IF (NM==1 .AND. IOR==-3) THEN
+      NOM = 1
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = I
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = 1
+      M%IJKW(13,IW) = I
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = 1
+   ENDIF
+
+   IF (NM==1 .AND. IOR==1) THEN
+      NOM = 1
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = MESHES(NOM)%IBAR
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = K
+      M%IJKW(13,IW) = MESHES(NOM)%IBAR
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = K
+   ENDIF
+   IF (NM==1 .AND. IOR==-1) THEN
+      NOM = 1
+      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
+      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
+      M%IJKW(9,IW)  = NOM
+      M%IJKW(10,IW) = 1
+      M%IJKW(11,IW) = J
+      M%IJKW(12,IW) = K
+      M%IJKW(13,IW) = 1
+      M%IJKW(14,IW) = J
+      M%IJKW(15,IW) = K
+   ENDIF
+ENDIF IF_PERIODIC1
+
+IF_PERIODIC4: IF (PERIODIC_TEST .AND. NMESHES==4) THEN
    !! z direction periodicity, ABS(IOR)==3
    IF (NM==1 .AND. IOR==3) THEN
       NOM = 2
@@ -1941,7 +2000,7 @@ IF_PERIODIC: IF (PERIODIC_TEST) THEN
       M%IJKW(14,IW) = J
       M%IJKW(15,IW) = K
    ENDIF
-ENDIF IF_PERIODIC
+ENDIF IF_PERIODIC4
  
 ! Assign internal values of temp, density, and mass fraction
  
