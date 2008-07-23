@@ -6203,7 +6203,7 @@ does not compute the maximum over the entire computational domain, just that par
 specification of a {\ct SURF\_ID} limits the search to only those surfaces. Use the {\ct STATISTICS} feature with caution because
 it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
 
-\subsubsection{\ct VOLUME MEAN}
+\subsubsection{Volume-Weighted Mean}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME MEAN'} produces the discrete analog of
 \be \frac{1}{V} \; \int \phi(x,y,z) \; dx \, dy \, dz \ee
@@ -6211,15 +6211,15 @@ which is very similar to {\ct 'MEAN'}, but it weights the values according to th
 statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
-\subsubsection{\ct MASS MEAN}
+\subsubsection{Mass-Weighted Mean}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS MEAN'} produces the discrete analog of
-\be \frac{ \int \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
+\be \frac{ \int \rho \, \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
 which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this
 statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
-\subsubsection{\ct VOLUME INTEGRAL}
+\subsubsection{Volume Integral}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME INTEGRAL'} produces the discrete analog of
 \be \int \phi(x,y,z) \; dx \, dy \, dz \ee
@@ -6227,7 +6227,7 @@ Note that this statistic is only appropriate for gas phase quantities, in partic
 heat release rate per unit volume is an appropriate output quantity. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
-\subsubsection{\ct AREA INTEGRAL}
+\subsubsection{Area Integral}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='AREA INTEGRAL'} produces the discrete analog of
 \be \int \phi(x,y,z) \; dA \ee
@@ -6238,7 +6238,7 @@ you have named {\ct 'my gas'} through an
 area normal to the $x$ direction. Note also that you must specify an area to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
-\subsubsection{\ct SURFACE INTEGRAL}
+\subsubsection{Surface Integral}
 
 For a given solid phase output quantity, $\phi$, {\ct STATISTICS='SURFACE INTEGRAL'} produces the discrete analog of
 \be \int \phi \; dA \ee
@@ -6890,7 +6890,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct CONTROL}                                   & See Section~\ref{info:CTRL}                   &                & D            \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & $\dq_c''$ (Section~\ref{info:heat_flux})      & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA}$^{**}$                               & See Section~\ref{info:part_output}            & kW/m$^2$       & B,D          \\ \hline
-{\ct DENSITY}                                   & $\rho$                                        & kg/m$^3$       & D,I,P,S      \\ \hline
+{\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$                     & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & s$^{-1}$       & D,I,P,S      \\ \hline
 {\ct DROPLET FLUX X}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
 {\ct DROPLET FLUX Y}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
