@@ -648,7 +648,6 @@ REAL(EB):: C2
 
 !                               INITIALIZATION ROUTINE FOR FFT SOLVERS
 
-PI = FSH19S()
 EPS = FSH20S()
 
 IF (L>1 .AND. LP==1) THEN
@@ -1325,26 +1324,6 @@ RETURN
 END SUBROUTINE FSH06S
 
 
-FUNCTION FSH19S()
-
-! +--------------------------------------------------------------------+
-! |                                                                    |
-! |                       COPYRIGHT (C) 1989 BY                        |
-! |                          ROLAND A. SWEET                           |
-! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
-! +--------------------------------------------------------------------+
-
-
-!                               THIS FUNCTION FURNISHES PI TO MACHINE
-!                               PREC
-
-!                               PI=3.14159265358979323846264338327950288
-REAL(EB) FSH19S
-FSH19S = 4._EB* ATAN(1._EB) !3.14159265358979323846264338327950288_EB
-RETURN
-END FUNCTION FSH19S
-
 
 FUNCTION FSH20S()
 
@@ -1666,7 +1645,6 @@ REAL(EB)    C(N), WSAVE(N+15)
 NOCOPY = .FALSE.
 TPOSE = .TRUE.
 
-PI = FSH19S()
 IF (N <= 3) RETURN
 NP1 = N+1
 NS2 = N/2
@@ -1881,7 +1859,7 @@ FAC(3) = 2
 107 IF (NL /= 1) GO TO 104
 FAC(1) = N
 FAC(2) = NF
-TPI = 2._EB*FSH19S()
+TPI = 2._EB*PI
 ARGH = TPI/REAL(N,EB)
 IS = 0
 NFM1 = NF-1
@@ -2054,7 +2032,6 @@ INTEGER                       :: N
 REAL(EB)    WSAVE(N+15)
 REAL(EB)   C1(N),C2(N)
 
-PI=FSH19S()
 DX=PI/(2*N)
 
 !     GENERATE A(I)+-B(I)
@@ -2365,7 +2342,6 @@ REAL(EB)   C4(N)
 REAL(EB)   WSAVE(N+15)
 REAL(EB)   C1(N),C2(N)
 
-PI=FSH19S()
 DX=PI/N
 SCALE=SQRT(.5_EB)
 
@@ -2569,7 +2545,6 @@ NOCOPY = .FALSE.
 TPOSE = .TRUE.
 
 IF (N <= 1) RETURN
-PI=FSH19S()
 NP1 = N+1
 NS2 = N/2
 DT = PI/REAL(NP1,EB)
@@ -3244,7 +3219,7 @@ INTEGER                   :: MDIMCH
 REAL(EB)  WA1(IDO)
 REAL(EB)   WA2(IDO)
 
-ARG=2._EB*FSH19S()/3._EB 
+ARG=2._EB*PI/3._EB 
 TAUR=COS(ARG)
 TAUI=SIN(ARG)
 DO  K=1,L1
@@ -3397,7 +3372,7 @@ REAL(EB)   WA2(IDO)
 REAL(EB)   WA3(IDO)
 REAL(EB)    WA4(IDO)
 
-ARG=2._EB*FSH19S()/5._EB 
+ARG=2._EB*PI/5._EB 
 TR11=COS(ARG)
 TI11=SIN(ARG)
 TR12=COS(2._EB*ARG)
@@ -3529,7 +3504,7 @@ REAL(EB)    WA(IDO)
 REAL(EB)    CH(MDIMCH,IDO,L1,IP) 
     
 
-TPI=2._EB*FSH19S()
+TPI=2._EB*PI
 ARG = TPI/REAL(IP,EB)
 DCP = COS(ARG)
 DSP = SIN(ARG)
@@ -3927,7 +3902,7 @@ REAL(EB)   WA1(IDO)
 REAL(EB)    WA2(IDO)
 REAL(EB)    CC(MDIMC,IDO,3,L1)   
 
-ARG=2._EB*FSH19S()/3._EB 
+ARG=2._EB*PI/3._EB 
 TAUR=COS(ARG)
 TAUI=SIN(ARG)
 DO  K=1,L1
@@ -4079,7 +4054,7 @@ REAL(EB)   WA3(IDO)
 REAL(EB)   WA4(IDO)
 REAL(EB)    CC(MDIMC,IDO,5,L1) 
 
-ARG=2._EB*FSH19S()/5._EB 
+ARG=2._EB*PI/5._EB 
 TR11=COS(ARG)
 TI11=SIN(ARG)
 TR12=COS(2._EB*ARG)
@@ -4192,7 +4167,7 @@ INTEGER                       :: IDL1
 INTEGER                   :: MDIMC
 INTEGER                   :: MDIMCH
 
-TPI=2._EB*FSH19S()
+TPI=2._EB*PI
 ARG = TPI/REAL(IP,EB)
 DCP = COS(ARG)
 DSP = SIN(ARG)
@@ -4511,8 +4486,6 @@ INTEGER                       :: NBDCND
 INTEGER                   :: LDIMF
 INTEGER                   :: MDIMF
 INTEGER                      :: IERROR
-
-PI = FSH19S()
 
 !                               CHECK FOR INVALID INPUT
 
@@ -5727,7 +5700,6 @@ ML = ML - 1
 
 NMAX = M
 NP = NPEROD + 1
-PI = FSH19S()
 
 !                               ALLOCATE SAVE ARRAY
 

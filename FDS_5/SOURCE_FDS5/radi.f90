@@ -24,8 +24,7 @@ USE MEMORY_FUNCTIONS, ONLY : CHKMEMERR
 USE MIEV
 USE RADCALV
 USE DEVICE_VARIABLES, ONLY : DEVICE, GAS_CELL_RAD_FLUX, GAS_CELL_RAD_DEVC_INDEX, N_GAS_CELL_RAD_DEVC
-REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,MW_RADCAL,PLANCK_C2,KSI,LT, &
-            RCRHO,YY,BBF,AP0,AMEAN,MTOT,XLENG,YLENG,ZLENG
+REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,MW_RADCAL,PLANCK_C2,KSI,LT,RCRHO,YY,BBF,AP0,AMEAN,MTOT
 INTEGER  :: N,I,J,K,IZERO,NN,NI,II,JJ,IIM,JJM,IBND,NS,I_RADCAL
 TYPE(SPECIES_TYPE), POINTER :: SS
 TYPE(PARTICLE_CLASS_TYPE), POINTER :: PC
@@ -283,20 +282,14 @@ ENDIF INIT_WIDE_BAND
 !
 !-------------------------------------------------------------------------
  
-CALL RCALLOC  ! Allocate arrays for RadCal
+! Allocate arrays for RadCal
+
+CALL RCALLOC
  
-! 20% of mean beam length, Eq 8-51, Holman, 7th Ed. Heat Transfer. Length = 3.6*Volume/Area
+! Set the Mean Beam Length to 5 times the smallest cell dimension unless the user desires otherwise
  
-XLENG = MESHES(1)%XF-MESHES(1)%XS
-YLENG = MESHES(1)%YF-MESHES(1)%YS
-ZLENG = MESHES(1)%ZF-MESHES(1)%ZS
-IF (PATH_LENGTH < 0.0_EB) THEN  ! default was -1.0
-   IF (TWO_D) THEN ! calculate based on the geometry
-      PATH_LENGTH = MIN( 10._EB , 0.1_EB*3.6_EB*XLENG*ZLENG/(XLENG+ZLENG) )
-   ELSE
-      PATH_LENGTH = MIN( 10._EB , 0.1_EB*3.6_EB*XLENG*YLENG*ZLENG/(XLENG*YLENG+XLENG*ZLENG+YLENG*ZLENG) )
-   ENDIF
-ENDIF
+IF (PATH_LENGTH < 0._EB) PATH_LENGTH = MIN( 10._EB , 5._EB*CHARACTERISTIC_CELL_SIZE )
+
 DD(1) = MAX(PATH_LENGTH,1.0E-4_EB)
  
 ! Using RadCal, create look-up tables for the absorption coefficients for all gas species, mixture fraction or aerosols
@@ -578,8 +571,7 @@ USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 USE DEVICE_VARIABLES, ONLY : DEVICE_TYPE,DEVICE, GAS_CELL_RAD_FLUX, GAS_CELL_RAD_DEVC_INDEX, N_GAS_CELL_RAD_DEVC
 REAL(EB) :: ZZ, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
-            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT, KAPPA_1, Z_2, COSINE, &
-            Q_SUM,K_SUM,U_SUM,KAPPA_CORRECTOR,VOL
+            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT, KAPPA_1, Z_2, COSINE, KFST4_ALTERNATIVE
 INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
@@ -603,7 +595,6 @@ KFST4W   => WORK7
 OUTRAD_W => WALL_WORK1
 INRAD_W  => WALL_WORK2
  
-
 ! Ratio of solid angle, used in scattering
  
 RSA_RAT = 1._EB/(1._EB-1._EB/NRA)
@@ -673,9 +664,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
    BBF   = 1._EB
    KAPPA = KAPPA0
-   U_SUM = 0._EB
-   K_SUM = 0._EB
-   Q_SUM = 0._EB
 
    DO K=1,KBAR
       DO J=1,JBAR
@@ -702,33 +690,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDIF
             IF (WIDE_BAND_MODEL)  BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
             KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-            IF (RADIATIVE_FRACTION*Q(I,J,K)>0._EB) THEN
-               KFST4(I,J,K) = MAX(KFST4(I,J,K),BBF*RADIATIVE_FRACTION*Q(I,J,K))
-               VOL = R(I)*DX(I)*DY(J)*DZ(K)
-               IF (WIDE_BAND_MODEL) THEN
-                  U_SUM = U_SUM + KAPPA(I,J,K)*UIID(I,J,K,IBND)*VOL
-               ELSE
-                  U_SUM = U_SUM + KAPPA(I,J,K)*UII(I,J,K)*VOL
-               ENDIF
-               K_SUM = K_SUM + KFST4(I,J,K)*VOL
-               Q_SUM = Q_SUM + BBF*RADIATIVE_FRACTION*Q(I,J,K)*VOL
+            IF (RADIATIVE_FRACTION>0._EB) THEN
+               KFST4_ALTERNATIVE = BBF*RADIATIVE_FRACTION*Q(I,J,K)
+               IF (KFST4_ALTERNATIVE > KFST4(I,J,K)) KFST4(I,J,K) = KFST4_ALTERNATIVE + KAPPA(I,J,K)*UII(I,J,K)
             ENDIF
          ENDDO ZLOOP
       ENDDO
    ENDDO
-
-   ! Add a corrective factor to the radiative source term to achieve desired RADIATIVE_FRACTION
-
-   IF (RADIATIVE_FRACTION>0._EB .AND. K_SUM>0._EB) THEN
-      KAPPA_CORRECTOR = (Q_SUM+U_SUM)/K_SUM
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (Q(I,J,K)>0._EB) KFST4(I,J,K) = KFST4(I,J,K)*KAPPA_CORRECTOR
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
 
    ! Calculate extinction coefficient
  
@@ -802,7 +770,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (.NOT.TWO_D .OR. ABS(IOR)/=2) THEN
                   SELECT CASE (BOUNDARY_TYPE(IW))
                      CASE (OPEN_BOUNDARY) 
-                           IL(II,JJ,KK) = BBFA*RPI_SIGMA*TMPA4
+                        IL(II,JJ,KK) = BBFA*RPI_SIGMA*TMPA4
                      CASE (MIRROR_BOUNDARY) 
                         WALL(IW)%ILW(N,IBND) = WALL(IW)%ILW(DLM(N,ABS(IOR)),IBND)
                         IL(II,JJ,KK) = WALL(IW)%ILW(N,IBND)
