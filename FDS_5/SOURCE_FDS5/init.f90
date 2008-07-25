@@ -2896,7 +2896,7 @@ DO K=0,KBAR
          IF (SOLID(CELL_INDEX(I,J,K))   .OR. SOLID(CELL_INDEX(I,J,K+1)) .OR. &
              SOLID(CELL_INDEX(I,J+1,K)) .OR. SOLID(CELL_INDEX(I,J+1,K+1)))  CYCLE 
          CALL RANDOM_NUMBER(RN)
-         RN = VFAC*(-1._EB + 2._EB*RN)*DXMIN
+         RN = VFAC*(-1._EB + 2._EB*RN)*CELL_SIZE
          W(I,J,K)   = W(I,J,K)   - RN*RDY(J)
          W(I,J+1,K) = W(I,J+1,K) + RN*RDY(J+1)
          V(I,J,K)   = V(I,J,K)   + RN*RDZ(K)
@@ -2910,7 +2910,7 @@ DO K=0,KBAR
          IF (SOLID(CELL_INDEX(I,J,K))   .OR. SOLID(CELL_INDEX(I,J,K+1)) .OR. &
              SOLID(CELL_INDEX(I+1,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K+1)))  CYCLE 
          CALL RANDOM_NUMBER(RN)
-         RN = VFAC*(-1._EB + 2._EB*RN)*DXMIN
+         RN = VFAC*(-1._EB + 2._EB*RN)*CELL_SIZE
          W(I,J,K)   = W(I,J,K)   - RN*RDX(I)*R(I)*RRN(I)
          W(I+1,J,K) = W(I+1,J,K) + RN*RDX(I+1)*R(I)*RRN(I+1)
          U(I,J,K)   = U(I,J,K)   + RN*RDZ(K)
@@ -2924,7 +2924,7 @@ DO K=1,KBAR
          IF (SOLID(CELL_INDEX(I,J,K))   .OR. SOLID(CELL_INDEX(I,J+1,K)) .OR. &
              SOLID(CELL_INDEX(I+1,J,K)) .OR. SOLID(CELL_INDEX(I+1,J+1,K)))  CYCLE
          CALL RANDOM_NUMBER(RN)
-         RN = VFAC*(-1._EB + 2._EB*RN)*DXMIN
+         RN = VFAC*(-1._EB + 2._EB*RN)*CELL_SIZE
          V(I,J,K)   = V(I,J,K)   - RN*RDX(I)
          V(I+1,J,K) = V(I+1,J,K) + RN*RDX(I+1)
          U(I,J,K)   = U(I,J,K)   + RN*RDY(J)

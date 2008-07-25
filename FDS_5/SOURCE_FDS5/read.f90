@@ -428,6 +428,7 @@ NAMELIST /TRNZ/ IDERIV,CC,PC,FYI,MESH_NUMBER
 ALLOCATE(TRANS(NMESHES))
  
 MESH_LOOP: DO NM=1,NMESHES
+
    M => MESHES(NM)
    T => TRANS(NM)
  
@@ -600,7 +601,7 @@ MESH_LOOP: DO NM=1,NMESHES
    DEALLOCATE(XX)
    DEALLOCATE(ND)
  
-! Set up grid stretching arrays
+   ! Set up grid stretching arrays
  
    ALLOCATE(M%R(0:M%IBAR),STAT=IZERO)
    CALL ChkMemErr('READ','R',IZERO)
@@ -653,7 +654,7 @@ MESH_LOOP: DO NM=1,NMESHES
    ALLOCATE(M%RDZN(0:M%KBAR),STAT=IZERO)
    CALL ChkMemErr('READ','RDZN',IZERO)
  
-! Define X grid stretching terms
+   ! Define X grid stretching terms
  
    M%DXMIN = 1000._EB
    DO I=1,M%IBAR
@@ -704,7 +705,7 @@ MESH_LOOP: DO NM=1,NMESHES
       M%RRN(M%IBP1) = M%RRN(M%IBAR)
    ENDIF
  
-! Define Y grid stretching terms
+   ! Define Y grid stretching terms
  
    M%DYMIN = 1000._EB
    DO J=1,M%JBAR
@@ -742,7 +743,7 @@ MESH_LOOP: DO NM=1,NMESHES
    M%YC(0)      = M%YS - 0.5_EB*M%DY(0)
    M%YC(M%JBP1) = M%YF + 0.5_EB*M%DY(M%JBP1)
  
-! Define Z grid stretching terms
+   ! Define Z grid stretching terms
  
    M%DZMIN = 1000._EB
    DO K=1,M%KBAR
@@ -780,7 +781,7 @@ MESH_LOOP: DO NM=1,NMESHES
    M%ZC(0)      = M%ZS - 0.5_EB*M%DZ(0)
    M%ZC(M%KBP1) = M%ZF + 0.5_EB*M%DZ(M%KBP1)
  
-! Set up arrays that will return coordinate positions
+   ! Set up arrays that will return coordinate positions
  
    NIPX   = 100*M%IBAR
    NIPY   = 100*M%JBAR
@@ -867,22 +868,33 @@ IF (T_END<=T_BEGIN) SET_UP = .TRUE.
 T_END = T_BEGIN + (T_END-T_BEGIN)/TIME_SHRINK_FACTOR
  
 IF (.NOT.SYNCHRONIZE) SYNC_TIME_STEP = .FALSE.
+
+! Get typical mesh cell sizes and starting time step
+
+CHARACTERISTIC_CELL_SIZE = 1.E6_EB
  
 MESH_LOOP: DO NM=1,NMESHES
+
    M=>MESHES(NM)
+
+   IF (TWO_D) THEN
+      M%CELL_SIZE = SQRT(M%DXMIN*M%DZMIN)
+   ELSE
+      M%CELL_SIZE = (M%DXMIN*M%DYMIN*M%DZMIN)**ONTH
+   ENDIF
+
+   CHARACTERISTIC_CELL_SIZE = MIN( CHARACTERISTIC_CELL_SIZE , M%CELL_SIZE )
+
    IF (DT>0._EB) THEN
       M%DT = DT
    ELSE
       VEL_CHAR = 0.2_EB*SQRT(10._EB*(M%ZF-M%ZS))
-      IF (TWO_D) THEN
-         M%DT=(M%DXMIN*M%DZMIN)**(1._EB/2._EB)/VEL_CHAR
-      ELSE
-         M%DT=(M%DXMIN*M%DYMIN*M%DZMIN)**(1._EB/3._EB)/VEL_CHAR
-      ENDIF
+      M%DT = M%CELL_SIZE/VEL_CHAR
    ENDIF
    IF (EVACUATION_ONLY(NM)) THEN
       M%DT = EVAC_DT_FLOWFIELD
    ENDIF
+
 ENDDO MESH_LOOP
  
 END SUBROUTINE READ_TIME
@@ -939,20 +951,6 @@ C_HORIZONTAL = 1.52_EB  ! Horizontal free convection
 C_FORCED     = 0.037_EB ! Forced convection coefficient
 H_FIXED                 = -1.      ! Fixed heat transfer coefficient, used for diagnostics
 ASSUMED_GAS_TEMPERATURE = -1000.   ! Assumed gas temperature, used for diagnostics
- 
-! Often used numbers
- 
-PI      = 4._EB*ATAN(1.0_EB)
-SQRTPI  = SQRT(PI)
-RPI     = 1._EB/PI
-TWOPI   = 2._EB*PI
-PIO2    = PI/2._EB
-ONTH    = 1._EB/3._EB
-THFO    = 3._EB/4._EB
-ONSI    = 1._EB/6._EB
-TWTH    = 2._EB/3._EB
-FOTH    = 4._EB/3._EB
-RFPI    = 1._EB/(4._EB*PI)
  
 ! Background parameters
  
