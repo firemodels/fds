@@ -14,7 +14,7 @@ CHARACTER(255), PARAMETER :: firerev='$Revision$'
 CHARACTER(255), PARAMETER :: firedate='$Date$'
 
 TYPE(REACTION_TYPE), POINTER :: RN
-REAL(EB) :: Q_UPPER,CELL_SIZE
+REAL(EB) :: Q_UPPER
 
 PUBLIC COMBUSTION, GET_REV_fire
  
@@ -34,11 +34,6 @@ CALL POINT_TO_MESH(NM)
 
 ! Upper bounds on local HRR per unit volume
 
-IF (TWO_D) THEN
-   CELL_SIZE = SQRT(DXMIN*DZMIN)
-ELSE
-   CELL_SIZE = (DXMIN*DYMIN*DZMIN)**ONTH
-ENDIF
 Q_UPPER = HRRPUA_SHEET/CELL_SIZE
 
 ! Choose between mixture fraction formulation or finite-rate chemistry
