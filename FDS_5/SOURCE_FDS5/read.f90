@@ -2396,7 +2396,7 @@ READ_PART_LOOP: DO N=1,N_PART
  
    PC=>PARTICLE_CLASS(N)
    DENSITY                  = 1000._EB     ! kg/m3
-   DT_INSERT                = 0.05_EB      ! s
+   DT_INSERT                = 0.01_EB      ! s
    MASS_PER_VOLUME          = 1._EB        ! kg/m3
    VAPORIZATION_TEMPERATURE = 100.0_EB     ! C
    INITIAL_TEMPERATURE      = TMPA - TMPM  ! C
@@ -2404,7 +2404,7 @@ READ_PART_LOOP: DO N=1,N_PART
    SPECIFIC_HEAT            = 4.184_EB     ! kJ/kg-K
    HEAT_OF_VAPORIZATION     = 2259._EB     ! kJ/kg
    HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
-   DROPLETS_PER_SECOND      = 1000
+   DROPLETS_PER_SECOND      = 5000
    GAMMA                    = 1.4          !Specific heat ratio
    DIAMETER                 = 500._EB      ! microns
    MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, meant to be infinitely large and not used
