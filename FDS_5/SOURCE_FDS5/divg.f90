@@ -290,6 +290,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = 0.1_EB*TMP(I,J,K)
                   IF(CO_PRODUCTION) THEN
                      CALL GET_CP(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)
@@ -415,8 +416,9 @@ IF (MIXTURE_FRACTION) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = 0.1_EB*TMP(I,J,K)
-            IF(CO_PRODUCTION) THEN
+            IF (CO_PRODUCTION) THEN
                CALL GET_CP(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)
                IF (N_SPECIES > 3) THEN
                   CP_SUM = 0._EB
@@ -447,6 +449,7 @@ IF (.NOT.MIXTURE_FRACTION .AND. N_SPECIES>0) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = 0.1_EB*TMP(I,J,K)
             CP_SUM = SPECIES(0)%CP(ITMP)
             DO N=1,N_SPECIES
@@ -462,6 +465,7 @@ IF (.NOT.MIXTURE_FRACTION .AND. N_SPECIES==0) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = 0.1_EB*TMP(I,J,K)
             CP_SUM = SPECIES(0)%CP(ITMP)
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*SPECIES(0)%RCON/CP_SUM
@@ -503,6 +507,7 @@ IF (STRATIFICATION) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,PRESSURE_ZONE(I,J,K)))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*GVEC(3)*RHO_0(K)
          ENDDO
       ENDDO
@@ -609,14 +614,14 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
  
    DO K=1,KBAR
       DO J=1,JBAR
-         INNER: DO I=1,IBAR
-            IF (PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE INNER
-            IF (SOLID(CELL_INDEX(I,J,K)))           CYCLE INNER
+         DO I=1,IBAR
+            IF (PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE
+            IF (SOLID(CELL_INDEX(I,J,K)))    CYCLE
             VC   = DX(I)*RC(I)*DY(J)*DZ(K)
             ZONE_VOLUME = ZONE_VOLUME + VC
             DSUM(IPZ,NM) = DSUM(IPZ,NM) + VC*DP(I,J,K)
             PSUM(IPZ,NM) = PSUM(IPZ,NM) + VC*(R_PBAR(K,IPZ)-RTRM(I,J,K))
-         ENDDO INNER
+         ENDDO
       ENDDO
    ENDDO
 
@@ -703,10 +708,11 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
 
    DO K=1,KBAR
       DO J=1,JBAR
-         INNER2: DO I=1,IBAR
-            IF (PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE INNER2
+         DO I=1,IBAR
+            IF (PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE 
+            IF (SOLID(CELL_INDEX(I,J,K)))    CYCLE
             DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,IPZ))*D_PBAR_DT_P(IPZ)
-         ENDDO INNER2
+         ENDDO
       ENDDO
    ENDDO
 
