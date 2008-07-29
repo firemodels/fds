@@ -7410,6 +7410,22 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & See Section~\ref{info:texture_map}            & m             & (0.,0.,0.)        \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST}                   &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
+%\end{tabular*}
+%\end{table}
+\end{longtable}
+
+\vspace{\baselineskip}
+
+\vfill
+
+\clearpage
+
+\begin{longtable}{|l|l|l|l|l|}
+%\begin{table}[H]
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\hline
+\multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters) Continued} \\ \hline \hline
 {\ct U0,V0,W0}                  & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
 {\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
@@ -7757,6 +7773,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vfill
 
+\clearpage
 
 \section{\texorpdfstring{{\tt SURF}}{SURF} (Surface Properties)}
 
@@ -7805,6 +7822,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHRINK}                          & Logical         & Shrinking material                &                     & {\ct .TRUE.}            \\ \hline
 {\ct SLIP\_FACTOR    }                & Real            & Velocity Slip Condition           &                     & 0.5                     \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
+%\end{tabular*}
+\end{longtable}
+
+\vspace{\baselineskip}
+
+\vfill
+
+\clearpage
+
+\begin{longtable}{|l|l|l|l|l|}
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\hline
+\multicolumn{5}{|c|}{{\ct SURF} (Surface Properties) Continued}\\ \hline \hline
 {\ct TAU\_MF(I)}                      & Real Array      & Ramp time for species {\ct I}     & s                   & 1.     \\ \hline
 {\ct TAU\_Q}                          & Real            & Ramp time for HRR                 & s                   & 1.     \\ \hline
 {\ct TAU\_T}                          & Real            & Ramp time for temp.               & s                   & 1.     \\ \hline
