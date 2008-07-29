@@ -3519,7 +3519,7 @@ the specific heat or conductivity. In this case, neither {\ct CONDUCTIVITY} nor 
 Prior to FDS5, the thermal radiation from the gas space was always
 absorbed at the surface of the solid material and the emission to the
 gas space took place on the surface. Starting in FDS5, the solid
-material can be given an {\ct ABSORPTION\_COEFFIENT} (1/m) that allows
+material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allows
 the radiation penetrate and absorb into the solid. Correspondingly,
 the emission of the material is based on the internal temperatures,
 not just the surface.
@@ -4743,8 +4743,7 @@ Section~\ref{info:combustion}.
 
 \index{RADI!KAPPA0}
 In simulations with no combustion nor radiating species, it is
-possible to use a constant absorption coefficient by specifying {\ct
-KAPPA0} on the {\ct RADI} line.
+possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
 
 
 
@@ -6250,7 +6249,7 @@ fluxes are appropriate output quantities.
 
 
 
-\subsection{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}%Simo
+\subsection{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF} \index{PROF}
 
 FDS uses a fine, non-uniform, one-dimensional mesh at each boundary
@@ -6294,7 +6293,29 @@ over time due to the solid phase reactions, the distance is
 measured from the current surface, and the measurement point is
 'moving' towards the back side of the solid. Eventually, the
 measurement point may get out of the solid, in which case it starts to
-show ambient temperature.
+show ambient temperature. If you just want to know the temperature of the back surface
+of the ``wall,'' then use
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=..., QUANTITY='BACK WALL TEMPERATURE', ID='Temp_b', IOR=3 /
+\end{verbatim} \normalsize
+
+\noindent
+Note that this quantity is only meaningful if the front or exposed surface of the ``wall'' has
+the attribute {\ct BACKING='EXPOSED'} on the {\ct SURF} line that defines it. The coordinates, {\ct XYZ}, and orientation, {\ct IOR}, refer to
+the front surface. To check that the heat conduction calculation is being done properly, you can add the additional line
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=..., QUANTITY='WALL TEMPERATURE', ID='Temp_f', IOR=-3 /
+\end{verbatim} \normalsize
+
+\noindent
+where now {\ct XYZ} and {\ct IOR} refer to the coordinates and orientation of the back side of the wall. These two wall temperatures ought to be
+the same. Remember that the ``wall'' in this case can only be at most one mesh cell thick, and its {\ct THICKNESS} need not be the same as the
+mesh cell width. Rather, the {\ct THICKNESS} ought to be the actual thickness of the ``wall'' through which FDS performs a 1-D heat conduction
+calculation.
 
 
 \subsection{Additional Solid Outputs}
@@ -6679,32 +6700,12 @@ $$\dq_r''/\epsilon + \sigma (T_w^4-T_\infty^4) $$
 For diagnostic purposes it is sometimes convenient to output the {\ct 'INCIDENT HEAT FLUX'}:
 $$ \dq_r''/\epsilon + \sigma T_w^4 +\dq_c'' $$
 
-All of the above output quantities related to heat flux are defined at a solid surface. However,
-there is a gas phase output quantity called {\ct 'RADIANT INTENSITY'} that is used mainly for diagnosing problems with the
-radiation solver. Even though its units are kW/m$^2$, it should not be interpreted as the heat flux to an object that would
-occupy that particular point in space. Rather, it is the integral over all directions of the radiation intensity, $I(\bx,\bs)$, which is a function of both
-space and direction ($\bs$ is a direction vector that ranges over $4\pi$ solid angles):
-\be
-   U(\bx) = \int I(\bx,\bs)\, d\bs
-\ee
-Note that $U$ is used in Eq.~(\ref{TC}) to get the effective radiative
-flux to a small thermocouple bead so that its temperature, as opposed
-to the gas temperature, can be calculated. If you divide $U$ by
-$4\pi$, you get the average intensity at a particular point in space:
-\be
-   \overline{I}(\bx) = \frac{U(\bx)}{4 \pi}
-\ee
-The incident heat flux due to a constant intensity would be $\pi \, \overline{I}$, thus, the average incident radiative heat flux would then be:
-\be
-   \overline{\dq_{r,inc}''} = \pi \, \overline{I} = \pi \; \frac{U}{4 \pi} = \frac{U}{4}
-\ee
-Thus, you can use {\ct 'RADIATIVE INTENSITY'}/4 as an approximation for the incident radiative heat flux. However, this number can not
-take into account the non-uniform nature of radiation. Also note that this is the {\em incident} heat flux. To get the {\em net} heat flux to the
-object or person whose surface temperature is $T_s$, you need to subtract $\epsilon \sigma T_s^4$, the outgoing heat flux.
-
-There is a second output quantity available called {\ct 'RADIATIVE HEAT FLUX GAS'} which uses the additional input
-of {\ct ORIENTATION}.  This quantity integrates the incomming radiative flux over $2\pi$ solid angles around the
-vector defined by {\ct ORIENTATION}.
+All of the above heat flux output quantities are defined at a solid surface. 
+However, {\ct 'RADIATIVE HEAT FLUX GAS'} acts like a radiometer that is not attached to a solid surface. 
+This quantity integrates the incoming radiative flux over $2\pi$ solid angles around the
+vector defined by {\ct ORIENTATION}, a triplet of real numbers that defines the orientation of the device. For example, \\ {\ct ORIENTATION=-1.0,0.0,0.0} \\
+means that the device points in the negative $x$ direction. Unlike {\ct IOR}, the {\ct ORIENTATION} can be in any direction, not just those associated with
+the three coordinate directions.  
 
 
 
@@ -6879,11 +6880,11 @@ quantity is related to a particular gas species or particle type, then you must 
 \begin{tabular}{|l|c|c|c|}
 \hline
 Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
-{\ct ABSORPTION COEFFICIENT}                    & $\kappa$                                      & 1/m            & D,I,P,S      \\ \hline
+{\ct ABSORPTION COEFFICIENT}                    & $\kappa$ (Section~\ref{info:RADI})            & 1/m            & D,I,P,S      \\ \hline
 {\ct ADIABATIC SURFACE TEMPERATURE}             & See Section~\ref{info:AST}                    & $^\circ$C      & B,D          \\ \hline
 {\ct AMPUA}$^{**}$                              & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
 {\ct aspiration}                                & See Section~\ref{info:aspiration_detector}    & \%             & D            \\ \hline
-{\ct BACK WALL TEMPERATURE}                     & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
+{\ct BACK WALL TEMPERATURE}                     & See Section~\ref{info:PROF}                   & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
 {\ct carbon dioxide}                            & $X_{CO_2}(Z)$                                 & mol/mol        & D,I,P,S      \\ \hline
 {\ct carbon monoxide}                           & $X_{CO}(Z)$                                   & mol/mol        & D,I,P,S      \\ \hline
@@ -6945,9 +6946,8 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct oxygen}                                    & $X_{O_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
 {\ct oxygen mass fraction}                      & $Y_{O_2}(Z)$                                  & kg/kg          & D,I,P,S      \\ \hline
 {\ct path obscuration}                          & See Section~\ref{info:beam_detector}          & \%             & D            \\ \hline
-{\ct PRESSURE}                                  & $\tp$                                         & Pa             & D,I,P,S      \\ \hline
+{\ct PRESSURE}                                  & Perturbation pressure, $\tp$                  & Pa             & D,I,P,S      \\ \hline
 {\ct PRESSURE COEFFICIENT}                      & $C_p$ (Section~\ref{info:wind})               &                & B,D          \\ \hline
-{\ct RADIANT INTENSITY}                         & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct RADIATIVE HEAT FLUX}                       & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RADIATIVE HEAT FLUX GAS}                   & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D            \\ \hline
 {\ct RADIOMETER}                                & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
