@@ -112,6 +112,8 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
             WDRHODZ(II,JJ,KK-1) = UDRHODN
       END SELECT
    ENDDO WLOOP
+
+   FRHO = 0._EB
    
    DO K=1,KBAR
       DO J=1,JBAR
@@ -308,6 +310,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
             ENDDO
          ENDDO
@@ -465,6 +468,7 @@ CASE(.FALSE.) PREDICTOR_STEP
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                YY(I,J,K,N) = YY(I,J,K,N)/RHO(I,J,K)
             ENDDO
          ENDDO
