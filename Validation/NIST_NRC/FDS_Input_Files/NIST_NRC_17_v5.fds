@@ -12,6 +12,7 @@
 &DUMP NFRAMES=600,DT_DEVC=10.,DT_HRR=10. /
 &ZONE LEAK_AREA(0)=0.0833 /
 
+&RADI RADIATIVE_FRACTION=0.40 /
 &REAC ID         = 'TOLUENE'
       FYI        = 'Toluene, C_7 H_8'
       C          = 7.
