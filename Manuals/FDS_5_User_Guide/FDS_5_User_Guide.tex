@@ -4483,7 +4483,7 @@ per unit area of flame sheet:
 The parameter $\dq_{\max}''$ is called {\ct HRRPUA\_SHEET} on the {\ct REAC} line and its default value is 200~kW/m$^2$.
 The second bound is based on an empirical estimate of the average volumetric heat release rate of a fire.
 \be \dq_{\max,2}''' = \frac{ \overline{\dq_{\max}'''} - (1-\dt/\tau') \; \overline{\dq'''} }{\dt/\tau'} \ee
-Orloff and De Ris~\cite{Orloff:19th_Symposium} suggest a value of 1200~kW/m$^3$, and FDS uses by default a value of 2000~kW/m$^3$ as an upper bound ({\ct HRRPUV\_AVERAGE} on the
+Orloff and De Ris~\cite{Orloff:19th_Symposium} suggest a value of 1200~kW/m$^3$, and FDS uses by default a value of 3000~kW/m$^3$ as an upper bound ({\ct HRRPUV\_AVERAGE} on the
 {\ct REAC} line).
 Here, $\tau'$ is an averaging time that should be larger than the pulsation period of the fire. It is given by
 {\ct HRRPUV\_AVERAGE\_TIME} on the {\ct REAC} line. It is 1~s by default.
@@ -7709,7 +7709,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct H2\_YIELD}                           & Real        & Fraction of H$_2$ from the fuel               & kg/kg             & 0        \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}                & Real        & Energy per Unit Mass Fuel                     & kJ/kg             &         \\ \hline
 {\ct HRRPUA\_SHEET}                       & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^2$          & 200.    \\ \hline
-{\ct HRRPUV\_AVERAGE}                     & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^3$          & 2000.    \\ \hline
+{\ct HRRPUV\_AVERAGE}                     & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^3$          & 3000.    \\ \hline
 {\ct HRRPUV\_AVERAGE\_TIME}               & Real        & See Section~\ref{info:turbulent_combustion}   & s                 & 1.    \\ \hline
 {\ct ID}                                  & Character   & Identifier                                    &                   &     \\ \hline
 {\ct IDEAL}                               & Logical     & Adjust for minor product yields               &                   & {\ct .FALSE.}    \\ \hline
