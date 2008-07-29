@@ -6700,12 +6700,12 @@ $$\dq_r''/\epsilon + \sigma (T_w^4-T_\infty^4) $$
 For diagnostic purposes it is sometimes convenient to output the {\ct 'INCIDENT HEAT FLUX'}:
 $$ \dq_r''/\epsilon + \sigma T_w^4 +\dq_c'' $$
 
-All of the above heat flux output quantities are defined at a solid surface. 
-However, {\ct 'RADIATIVE HEAT FLUX GAS'} acts like a radiometer that is not attached to a solid surface. 
+All of the above heat flux output quantities are defined at a solid surface.
+However, {\ct 'RADIATIVE HEAT FLUX GAS'} acts like a radiometer that is not attached to a solid surface.
 This quantity integrates the incoming radiative flux over $2\pi$ solid angles around the
 vector defined by {\ct ORIENTATION}, a triplet of real numbers that defines the orientation of the device. For example, \\ {\ct ORIENTATION=-1.0,0.0,0.0} \\
 means that the device points in the negative $x$ direction. Unlike {\ct IOR}, the {\ct ORIENTATION} can be in any direction, not just those associated with
-the three coordinate directions.  
+the three coordinate directions.
 
 
 
@@ -7006,38 +7006,43 @@ Only prescribe those parameters which are necessary to describe the desired scen
 
 \section{\texorpdfstring{{\tt BNDF}}{BNDF} (Boundary File Parameters)}
 
-\hspace{0.5in}
-
-\begin{table}[H]
-\caption[Boundary File Parameters]{For more information see Section~\ref{info:BNDF}.}\label{tbl:BNDF}
-\noindent
-\begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Boundary File Parameters]{For more information see Section~\ref{info:BNDF}.}
+\label{tbl:BNDF} \\
+%\noindent
+%\begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\ \hline \hline
+\endhead
 {\ct FYI}          & Character   & Comment String (has no effect)    &           &     \\ \hline
 {\ct PART\_ID}     & Character   & Particle identifier (if needed)   &           &     \\ \hline
 {\ct PROP\_ID}     & Character   & Property identifier (if needed)   &           &     \\ \hline
 {\ct QUANTITY}     & Character   & Quantity to visualize             &           &     \\ \hline
 {\ct SPEC\_ID}     & Character   & Species identifier (if needed)    &           &     \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 
 \section{\texorpdfstring{{\tt CLIP}}{CLIP} (MIN/MAX Clipping Parameters)}
 
-\hspace{0.5in}
-
-\begin{table}[H]
-\caption[MIN/MAX Clipping Parameters]{For more information see Section~\ref{info:CLIP}.}\label{tbl:CLIP}
-\noindent
-\begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[MIN/MAX Clipping Parameters]{For more information see Section~\ref{info:CLIP}.}
+\label{tbl:CLIP} \\
+%\noindent
+%\begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\ \hline \hline
+\endhead
 {\ct FYI}                     & Character      & Comment String (has no effect)   &            &     \\ \hline
 {\ct MAXIMUM\_DENSITY}        & Real           & Maximum Gas Density              & kg/m$^3$   &     \\ \hline
 {\ct MAXIMUM\_MASS\_FRACTION} & Real Array     & Maximum Gas Mass Fraction        & kg/kg      &     \\ \hline
@@ -7045,24 +7050,25 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct MINIMUM\_DENSITY}        & Real           & Minimum Gas Density              & kg/m$^3$   &     \\ \hline
 {\ct MINIMUM\_MASS\_FRACTION} & Real Array     & Minimum Gas Mass Fraction        & kg/kg      &     \\ \hline
 {\ct MINIMUM\_TEMPERATURE}    & Real           & Maximum Gas Temperature          & $^\circ$C  &     \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 \vspace{\baselineskip}
-
-\vfill
 
 
 \section{\texorpdfstring{{\tt CTRL}}{CTRL} (Control Function Parameters)}
 
-\hspace{0.5in}
-
-\begin{table}[H]
-\caption[Control Function Parameters]{For more information see Section~\ref{info:CTRL}.}\label{tbl:CTRL}
-\noindent
-\begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Control Function Parameters]{For more information see Section~\ref{info:CTRL}.}
+\label{tbl:CTRL} \\
+%\noindent
+%\begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\ \hline \hline
+\endhead
 %{\ct CYCLE\_TIME}    & Real         & Periodicity                                 & s  &                           \\ \hline
 %{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                           \\ \hline
 {\ct DELAY}          & Real         & Time delay                                  & s  &  0.                       \\ \hline
@@ -7075,25 +7081,28 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct ON\_BOUND}      & Character    & Active edge of a {\ct DEADBAND}             &    & {\ct LOWER}               \\ \hline
 {\ct RAMP\_ID}       & Character    & {\ct ID} for a {\ct CUSTOM} ramp controller &    &                           \\ \hline
 {\ct SETPOINT(2)}    & Real         & Lower and upper bound of a {\ct DEADBAND}   &    &                           \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 
 \section{\texorpdfstring{{\tt DEVC}}{DEVC} (Device Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Device Parameters]{For more information see Section~\ref{info:DEVC}.}\label{tbl:DEVC}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Device Parameters]{For more information see Section~\ref{info:DEVC}.}
+\label{tbl:DEVC} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\ \hline \hline
+\endhead
 {\ct BYPASS\_FLOWRATE} & Real            & Aspiration smoke detector parameter                              & kg/s  & 0       \\ \hline
 {\ct CTRL\_ID}         & Character       & Associated {\ct CTRL} line                                       &       &         \\ \hline
 {\ct DELAY}            & Real            & Transport time for an aspiration detector                        & s     & 0       \\ \hline
@@ -7118,26 +7127,27 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct TRIP\_DIRECTION}  & Integer         & Sign of derivative at first state change                         &       &  1      \\ \hline
 {\ct XB(6)}            & Real Sextuplet  & Coordinates of non-point measurement                             & m     &         \\ \hline
 {\ct XYZ}              & Real Triplet    & Physical coordinates                                             & m     &         \\ \hline
-\end{tabular*}
-\normalsize
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 
 \section{\texorpdfstring{{\tt DUMP}}{DUMP} (Output Parameters)}
 
-\hspace{0.5in}
-
-\begin{table}[H]
-\caption[Output Parameters]{For more information see Section~\ref{info:DUMP}.}\label{tbl:DUMP}
-\noindent
-\begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Output Parameters]{For more information see Section~\ref{info:DUMP}.}
+\label{tbl:DUMP} \\
+%\noindent
+%\begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ \hline \hline
+\endhead
 {\ct CHECK\_VOLUME\_FLOW}       & Logical      & See Section~\ref{info:pressurecorrection}        &           & {\ct .FALSE.}                      \\ \hline
 {\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
 {\ct CTRL\_DUMP\_LIMIT}         & Integer      & Number of columns in {\ct CTRL} file &           & 254                      \\ \hline
@@ -7169,9 +7179,8 @@ Only prescribe those parameters which are necessary to describe the desired scen
 %{\ct TIMING}                    & Logical      & General purpose timing flag       &           & {\ct .FALSE.}                      \\ \hline
 {\ct STATUS\_FILES}             & Logical      & Flag for status (notready) file   &           & {\ct .FALSE.}                     \\ \hline
 {\ct WRITE\_XYZ}                & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}                     \\ \hline
-\end{tabular*}
-\normalsize
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 \noindent
 $\Delta t$={\ct T\_END-T\_BEGIN}
@@ -7179,40 +7188,45 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\vfill
-
 
 \section{\texorpdfstring{{\tt HEAD}}{HEAD} (Header Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Header Parameters]{For more information see Section~\ref{info:HEAD}.}\label{tbl:HEAD}
-\noindent
-\begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Header Parameters]{For more information see Section~\ref{info:HEAD}.}
+\label{tbl:HEAD} \\
+%\noindent
+%\begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct HEAD} (Header Parameters)} \\ \hline \hline
+\endhead
 {\ct CHID}      & Character   & Job Identification String      &           & {\ct 'output'} \\ \hline
 {\ct FYI}       & Character   & Comment String (has no effect) &           &                            \\ \hline
 {\ct TITLE}     & Character   & Title for job                  &           &                            \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 \vspace{\baselineskip}
 
-\vfill
 
 
 \section{\texorpdfstring{{\tt HOLE}}{HOLE} (Obstruction Cutout Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Obstruction Cutout Parameters]{For more information see Section~\ref{info:HOLE}.}\label{tbl:HOLE}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Obstruction Cutout Parameters]{For more information see Section~\ref{info:HOLE}.}
+\label{tbl:HOLE} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\ \hline \hline
+\endhead
 {\ct COLOR    }    & Character         & Color name of obstruction color                           &       &           \\ \hline
 {\ct CTRL\_ID}     & Character         & {\ct ID} of {\ct ConTRoL} to control hole's existence     &       &           \\ \hline
 {\ct DEVC\_ID}     & Character         & {\ct ID} of {\ct DEViCe} to control hole's existence      &       &           \\ \hline
@@ -7220,46 +7234,52 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RGB(3)   }    & Integer Triplet   & Color indices (0 - 255) for resulting obstruction(s)      &       &           \\ \hline
 {\ct TRANSPARENCY} & Real              & Transparency of obstruction                               &       &           \\ \hline
 {\ct XB(6)    }    & Real Sextuplet    & Physical coordinates                                      & m     &           \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 \vspace{\baselineskip}
-
-\vfill
 
 
 \section{\texorpdfstring{{\tt INIT}}{INIT} (Initial Conditions)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Initial Conditions]{For more information see Section~\ref{info:INIT}.}\label{tbl:INIT}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Initial Conditions]{For more information see Section~\ref{info:INIT}.}
+\label{tbl:INIT} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\ \hline \hline
+\endhead
 {\ct DENSITY}               & Real              & Initial value of density                          & kg/m$^3$      & Ambient       \\ \hline
 {\ct MASS\_FRACTION(II)}    & Real Array        & Initial value of species {\ct II}                 & kg/kg         & Ambient       \\ \hline
 {\ct TEMPERATURE}           & Real              & Initial value of temperature                      & $^\circ$C     & {\ct TMPA}    \\ \hline
 {\ct XB(6)}                 & Real Sextuplet    & Coordinates                                       & m             &               \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-%\vfill
+
 
 \section{\texorpdfstring{{\tt ISOF}}{ISOF} (Isosurface Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Isosurface Parameters]{For more information see Section~\ref{info:ISOF}.}\label{tbl:ISOF}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Isosurface Parameters]{For more information see Section~\ref{info:ISOF}.}
+\label{tbl:ISOF} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\ \hline \hline
+\endhead
 {\ct FYI}                   & Character     & Comment String (has no effect)        &       &         \\ \hline
 %{\ct COLOR\_QUANTITY}       & Character     & Secondary quantity to color surface   &       &         \\ \hline
 %{\ct COLOR\_SPEC\_ID}       & Character     & Species indicator (if needed)         &       &         \\ \hline
@@ -7267,24 +7287,27 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct REDUCE\_TRIANGLES}     & Integer       & Smokeview parameter                   &       & 1       \\ \hline
 {\ct SPEC\_ID}              & Character     & Species indicator (if needed)         &       &         \\ \hline
 {\ct VALUE(I)}              & Real Array    & Contour value(s)                      &       &         \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 \section{\texorpdfstring{{\tt MATL}}{MATL} (Material Properties)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Material Properties]{For more information see Section~\ref{info:MATL}.}\label{tbl:MATL}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Material Properties]{For more information see Section~\ref{info:MATL}.}
+\label{tbl:MATL} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\ \hline \hline
+\endhead
 {\ct A}                       & Real        & Pre-exponential factor         &    1/s           & 1E13   \\ \hline
 {\ct ABSORPTION\_COEFFICIENT} & Real        & Absorption Coefficient         &    1/m           & 50000. \\ \hline
 {\ct BOILING\_TEMPERATURE}    & Real        & Boiling temperature            & $^\circ$C        & 5000.  \\ \hline
@@ -7309,24 +7332,27 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RESIDUE}                 & Character   & {\ct ID} of residue {\ct MATL} &                  &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat                  & kJ/kg/K          & 1.0    \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat      &                  &        \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 \vspace{\baselineskip}
 
-\vfill
 
-\clearpage
+
 \section{\texorpdfstring{{\tt MESH}}{MESH} (Mesh Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Mesh Parameters]{For more information see Section~\ref{info:MESH}.}\label{tbl:MESH}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Mesh Parameters]{For more information see Section~\ref{info:MESH}.}
+\label{tbl:MESH} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\ \hline \hline
+\endhead
 {\ct COLOR}       & Character                   & Mesh Line Color                             &    & {\ct 'BLACK'}    \\ \hline
 {\ct CYLINDRICAL} & Logical                     & 2-D Axi-symmetric calculation               &    & {\ct .FALSE.}    \\ \hline
 {\ct ID}          & Character                   & MESH IDentifier                             &    &                  \\ \hline
@@ -7341,20 +7367,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct JBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
 %{\ct KBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
 %{\ct EVAC_Z_OFFSET} & Real                      & Floor level vs evacuation mesh $z$&  m & 1.0  \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 
 \section{\texorpdfstring{{\tt MISC}}{MISC} (Miscellaneous Parameters)}
 
-\hspace{0.5in}
 
-\begin{longtable}{|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 %\begin{table}[H]
 \caption[Miscellaneous Parameters]{For more information see Section~\ref{info:MISC}.}
 \label{tbl:MISC} \\
@@ -7362,6 +7388,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\ \hline \hline
+\endhead
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE} & Real & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
 {\ct BACKGROUND\_SPECIES}       & Character     & See Section~\ref{info:SPEC}                   &               & {\ct 'AIR'}       \\ \hline
 {\ct BAROCLINIC}                & Logical       & Baroclinic torque correction                  &               & {\ct .FALSE.}     \\ \hline
@@ -7410,22 +7437,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & See Section~\ref{info:texture_map}            & m             & (0.,0.,0.)        \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST}                   &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
-%\end{tabular*}
-%\end{table}
-\end{longtable}
-
-\vspace{\baselineskip}
-
-\vfill
-
-\clearpage
-
-\begin{longtable}{|l|l|l|l|l|}
-%\begin{table}[H]
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-\hline
-\multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters) Continued} \\ \hline \hline
 {\ct U0,V0,W0}                  & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
 {\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
@@ -7437,19 +7448,22 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\vfill
 
 
 \section{\texorpdfstring{{\tt OBST}}{OBST} (Obstruction Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Obstruction Parameters]{For more information see Section~\ref{info:OBST}.}\label{tbl:OBST}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Obstruction Parameters]{For more information see Section~\ref{info:OBST}.}
+\label{tbl:OBST} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\ \hline \hline
+\endhead
 {\ct ALLOW\_VENT}         & Logical             & Allow vents on obstruction            &    & {\ct .TRUE.}  \\ \hline
 {\ct BNDF\_FACE(-3:3)}    & Logical Array       & See Section~\ref{info:BNDF}           &    & {\ct .TRUE.}  \\ \hline
 {\ct BNDF\_OBST}          & Logical             & See Section~\ref{info:BNDF}           &    & {\ct .TRUE.}  \\ \hline
@@ -7471,26 +7485,28 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_ORIGIN(3)}  & Real Triplet        & See Section~\ref{info:texture_map}    & m  & (0.,0.,0.)    \\ \hline
 {\ct TRANSPARENCY}        & Real                & Transparency indicator                &    &  1            \\ \hline
 {\ct XB(6) }              & Real Sextuplet      & Min/Max Physical coordinates          & m  &               \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 
 \section{\texorpdfstring{{\tt PART}}{PART} (Lagrangian Particles/Droplets)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
 \caption[Lagrangian Particles/Droplets]{For more information see Section~\ref{info:PART}.}
-\label{tbl:PART}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\label{tbl:PART} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\ \hline \hline
+\endhead
 {\ct AGE}                       & Real            & Droplet lifetime                  & s         & 100000.       \\ \hline
 {\ct COLOR}                     & Character       & Default color of droplets         &           & {\ct 'BLACK'} \\ \hline
 {\ct DENSITY}                   & Real            & Droplet density                   & kg/m$^3$  & 1000.         \\ \hline
@@ -7526,46 +7542,52 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VERTICAL\_VELOCITY}        & Real            & Droplet speed, vertical           & m/s       &  0.5          \\ \hline
 {\ct XB(6)}                     & Real array      & Initial particle location         & m         &               \\ \hline
 {\ct WATER}                     & Logical         & Water Droplet                     &           & {\ct .FALSE.} \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 \section{\texorpdfstring{{\tt PROF}}{PROF} (Wall Profile Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Wall Profile Parameters]{For more information see Section~\ref{info:PROF}.}\label{tbl:PROF}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Wall Profile Parameters]{For more information see Section~\ref{info:PROF}.}
+\label{tbl:PROF} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\ \hline \hline
+\endhead
 {\ct IOR}      & Real             & Orientation of wall surface      &            &     \\ \hline
 {\ct ID}       & Character        & Identifier                       &            &     \\ \hline
 {\ct FYI}      & Character        & Comment String (has no effect)   &            &     \\ \hline
 {\ct QUANTITY} & Character        & Name of output quantity          &            &     \\ \hline
 {\ct XYZ}      & Real Triplet     & Coordinates of wall surface      & m          &     \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 \vspace{\baselineskip}
 
-\vfill
 
 \section{\texorpdfstring{{\tt PROP}}{PROP} (Device Properties)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Device Properties]{For more information see Section~\ref{info:PROP}.}\label{tbl:PROP}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Device Properties]{For more information see Section~\ref{info:PROP}.}
+\label{tbl:PROP} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\ \hline \hline
+\endhead
 {\ct ACTIVATION\_TEMPERATURE}           & Real          & Threshold link temperature                & $^\circ$C             & 74        \\ \hline
 {\ct ACTIVATION\_OBSCURATION}           & Real          & Threshold value of obscuration            & \%/m                  & 3.28      \\ \hline
 {\ct ALPHA\_C}                          & Real          & Smoke detector parameter                  &                       & 1.8       \\ \hline
@@ -7594,24 +7616,26 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}                          & Character     & See Section~\ref{info:alternative_smoke}  &                       &           \\ \hline
 {\ct SPRAY\_ANGLE(2)}                   & Real          & Cone angles for water spray               & deg                   & 60.,75.   \\ \hline
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & {\ct TABL} for spray pattern              &                       &           \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 \section{\texorpdfstring{{\tt RADI}}{RADI} (Radiation Parameters)}
 
-\hspace{0.5in}
-
-\begin{table}[H]
-\caption[Radiation Parameters]{For more information see Section~\ref{info:RADI}.}\label{tbl:RADI}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Radiation Parameters]{For more information see Section~\ref{info:RADI}.}
+\label{tbl:RADI} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\ \hline \hline
+\endhead
 {\ct ANGLE\_INCREMENT}          & Integer  & Number of angles skipped per update &                   & 5             \\ \hline
 {\ct CH4\_BANDS          }      & Logical  & Include extra fuel bands            &                   & {\ct .FALSE.} \\ \hline
 {\ct KAPPA0                   } & Real     & Constant absorption coefficient     & 1/m               & 0             \\ \hline
@@ -7622,23 +7646,26 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RADTMP                   } & Real     & Assumed radiative source temp.      & $^\circ$C         & 900           \\ \hline
 {\ct TIME\_STEP\_INCREMENT}     & Integer  & Number time steps skipped           &                   & 3             \\ \hline
 {\ct WIDE\_BAND\_MODEL    }     & Logical  & Non-gray gas assumption             &                   & {\ct .FALSE.} \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 \vspace{\baselineskip}
 
-\vfill
 
 \section{\texorpdfstring{{\tt RAMP}}{RAMP} (Ramp Function Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Ramp Function Parameters]{For more information see Section~\ref{info:RAMP}.}\label{tbl:RAMP}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Ramp Function Parameters]{For more information see Section~\ref{info:RAMP}.}
+\label{tbl:RAMP} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\ \hline \hline
+\endhead
 %{\ct CTRL\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &     \\ \hline
 %{\ct DEVC\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &     \\ \hline
 {\ct FYI}                           & Character     & Comment String (has no effect)    &                       &     \\ \hline
@@ -7647,24 +7674,27 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Points in interpolation function  &                       &  5000   \\ \hline
 {\ct ID}                            & Character     & Identifier                        &                       &     \\ \hline
 {\ct T}                             & Real          & Time (or Temperature)             & s (or $^\circ$C)      &     \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 \section{\texorpdfstring{{\tt REAC}}{REAC} (Reaction Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Reaction Parameters]{For more information see Section~\ref{info:REAC}.}\label{tbl:REAC}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Reaction Parameters]{For more information see Section~\ref{info:REAC}.}
+\label{tbl:REAC} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\ \hline \hline
+\endhead
 {\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)          &   cm$^3$/mol/s    &     \\ \hline
 {\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
 {\ct C\_EDC}                              & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 0.1    \\ \hline
@@ -7699,27 +7729,26 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner                  &  kg/kg            & 1.0     \\ \hline
 {\ct Y\_F\_LFL}                           & Real        & Lower Fuel limit (mass fraction)              &  kg/kg            & 0.0     \\ \hline
 {\ct Y\_O2\_INFTY}                        & Real        & Ambient Oxygen Mass Frac.                     &  kg/kg            & 0.23    \\ \hline
-\end{tabular*}
-\end{table}
-%NAMELIST /REAC/ E,BOF,HEAT_OF_COMBUSTION,FYI,FUEL,OXIDIZER,EPUMO2,ID, N_S,Y_O2_INFTY,Y_F_INLET,HRRPUA_SHEET,
-%                H2_YIELD,SOOT_YIELD,CO_YIELD,Y_F_LFL,X_O2_LL,CRITICAL_FLAME_TEMPERATURE,
-%                NU,SOOT_H_FRACTION,C,H,N,O,OTHER,MW_OTHER,IDEAL,MASS_EXTINCTION_COEFFICIENT,VISIBILITY_FACTOR,
-%                MAXIMUM_VISIBILITY
+%\end{tabular*}
+\end{longtable}
+
 
 \vspace{\baselineskip}
 
-\vfill
-
 \section{\texorpdfstring{{\tt SLCF}}{SLCF} (Slice File Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Slice File Parameters]{For more information see Section~\ref{info:SLCF}.}\label{tbl:SLCF}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Slice File Parameters]{For more information see Section~\ref{info:SLCF}.}
+\label{tbl:SLCF} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\ \hline \hline
+\endhead
 {\ct FYI}               & Character         & Comment String (has no effect)         &           &     \\ \hline
 %{\ct MAXIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
 %{\ct MINIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
@@ -7734,24 +7763,27 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct TWO\_BYTE    }     & Logical           & Save as 2 byte real                    &           & {\ct .FALSE.}    \\ \hline
 {\ct VECTOR    }        & Logical           & Include flow vectors                   &           & {\ct .FALSE.}    \\ \hline
 {\ct XB(6)}             & Real Sextuplet    & Min/Max coordinates of region to save  & m         &     \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 \section{\texorpdfstring{{\tt SPEC}}{SPEC} (Species Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Species Parameters]{For more information see Section~\ref{info:SPEC}.}\label{tbl:SPEC}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Species Parameters]{For more information see Section~\ref{info:SPEC}.}
+\label{tbl:SPEC} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\ \hline \hline
+\endhead
 {\ct ABSORBING}                     & Logical     & Absorbs radiation                           &                   & {\ct .FALSE.} \\ \hline
 {\ct CONDUCTIVITY}                  & Real        & Conductivity $k$                            & W/m/K             &     \\ \hline
 {\ct DIFFUSIVITY}                   & Real        & Diffusivity   $D$                           & m$^2$/s           &     \\ \hline
@@ -7765,32 +7797,32 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.  \\ \hline
 {\ct SIGMALJ}                       & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
 {\ct VISCOSITY}                     & Real        & Dynamic Viscosity $mu$                      & kg/m/s            &     \\ \hline
-\end{tabular*}
-\end{table}
-%NAMELIST /SPEC/ MASS_FRACTION_0,MW,FYI,ID,SIGMALJ, EPSILONKLJ,CONDUCTIVITY, VISCOSITY,DIFFUSIVITY, ABSORBING
+%\end{tabular*}
+\end{longtable}
+
 
 \vspace{\baselineskip}
 
-\vfill
-
-\clearpage
 
 \section{\texorpdfstring{{\tt SURF}}{SURF} (Surface Properties)}
 
-\begin{longtable}{|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Surface Properties]{For more information see Section~\ref{info:SURF}.}
 \label{tbl:SURF} \\
 %\noindent
 %\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\ \hline \hline
+\endhead
 {\ct ADIABATIC}                       & Logical         & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                         & Character       & Back boundary condition           &                     & {\ct 'VOID'}            \\ \hline
 {\ct BURN\_AWAY}                      & Logical         & Object can vanish                 &                     & {\ct .FALSE.}           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}              & Real            & See Section~\ref{info:solid_phase_stability}  &         & 1.0                     \\ \hline
 {\ct COLOR    }                       & Character       & Surface Color                     &                     &                         \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Heat flux at surface              & kW/m$^2$            & 0.                      \\ \hline
-{\ct DUCT\_PATH}                      & Integer Pair    & Pressure Zones for fans           &                     & 0,0                     \\ \hline
+{\ct DUCT\_PATH}                      & Int.~Pair       & Pressure Zones for fans           &                     & 0,0                     \\ \hline
 {\ct E\_COEFFICIENT}                  & Real            & Extinguishing coefficient         & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct EMISSIVITY}                      & Real            & Emissivity                        &                     & 0.9                     \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
@@ -7800,42 +7832,28 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HRRPUA }                         & Real            & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
 {\ct ID     }                         & Character       & IDentifier                        &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Ignition temperature              & $^\circ$C           & 5000.                   \\ \hline
-{\ct LEAK\_PATH}                      & Integer Pair    & Pressure Zones for leakage        &                     &                         \\ \hline
+{\ct LEAK\_PATH}                      & Int.~Pair       & Pressure Zones for leakage        &                     &                         \\ \hline
 {\ct MASS\_FLUX(I)}                   & Real Array      & For species {\ct I}               & kg/m$^2$ s          & 0.                      \\ \hline
 {\ct MASS\_FLUX\_TOTAL}               & Real            & Total Mass Flux                   & kg/m$^2$ s          &                         \\ \hline
 {\ct MASS\_FRACTION(I)}               & Real Array      & For species {\ct I}               & kg/m$^2$ s          &                         \\ \hline
-{\ct MATL\_ID}                        & Char. 2D Array  & (Layer,Component)                 &                     &                         \\ \hline
-{\ct MATL\_MASS\_FRACTION}            & Real 2D Array   & (Layer,Component)                 &                     &                         \\ \hline
+{\ct MATL\_ID}                        & Char.~Array     & (Layer,Component)                 &                     &                         \\ \hline
+{\ct MATL\_MASS\_FRACTION}            & Real Array      & (Layer,Component)                 &                     &                         \\ \hline
 {\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 1E12                    \\ \hline
 {\ct MLRPUA }                         & Real            & Mass loss rate per unit area      & kg/m$^2$s           & 0.                      \\ \hline
 {\ct NPPC}                            & Integer         & Number of particles per cell      &                     & 1                       \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}            & Real            & See Section~\ref{info:particle_flux} & kg/m$^2$ s       & 0.                      \\ \hline
 {\ct PART\_ID}                        & Character       & Lagrangian Particle ID            &                     &                         \\ \hline
 {\ct POROUS}                          & Logical         & See Section~\ref{info:Velocity_BC}&                     & {\ct .FALSE.}           \\ \hline
-{\ct PLE}                             & Real            & Atmospheric profile exponent      &                     & 0.3                     \\ \hline
+{\ct PLE}                             & Real            & Atmospheric profile exp.          &                     & 0.3                     \\ \hline
 {\ct PROFILE}                         & Character       & Name of velocity profile          &                     &                         \\ \hline
 {\ct RAMP\_MF(I)}                     & Character       & Ramp ID for species I             &                     &                         \\ \hline
 {\ct RAMP\_Q}                         & Character       & Ramp ID for HRR                   &                     &                         \\ \hline
 {\ct RAMP\_T}                         & Character       & Ramp ID for temp.                 &                     &                         \\ \hline
 {\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
-{\ct RGB(3)}                          & Integer Triplet & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
+{\ct RGB(3)}                          & Int.~Triplet    & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
 {\ct SHRINK}                          & Logical         & Shrinking material                &                     & {\ct .TRUE.}            \\ \hline
 {\ct SLIP\_FACTOR    }                & Real            & Velocity Slip Condition           &                     & 0.5                     \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
-%\end{tabular*}
-\end{longtable}
-
-\vspace{\baselineskip}
-
-\vfill
-
-\clearpage
-
-\begin{longtable}{|l|l|l|l|l|}
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-\hline
-\multicolumn{5}{|c|}{{\ct SURF} (Surface Properties) Continued}\\ \hline \hline
 {\ct TAU\_MF(I)}                      & Real Array      & Ramp time for species {\ct I}     & s                   & 1.     \\ \hline
 {\ct TAU\_Q}                          & Real            & Ramp time for HRR                 & s                   & 1.     \\ \hline
 {\ct TAU\_T}                          & Real            & Ramp time for temp.               & s                   & 1.     \\ \hline
@@ -7857,39 +7875,45 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\vfill
 
 \section{\texorpdfstring{{\tt TABL}}{TABL} (Table Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Table Parameters]{For more information see Section~\ref{info:TABL}.}\label{tbl:TABL}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Table Parameters]{For more information see Section~\ref{info:TABL}.}
+\label{tbl:TABL} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct TABL} (Table Parameters)} \\ \hline \hline
+\endhead
 {\ct ID}          & Character   & IDentifier                         &             &     \\ \hline
 {\ct FYI}         & Character   & Comment String (has no effect)     &             &     \\ \hline
 {\ct TABLE\_DATA} & Real Array  & Data for one row of the table      &             &     \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 \section{\texorpdfstring{{\tt TIME}}{TIME} (Time Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Time Parameters]{For more information see Section~\ref{info:TIME}.}\label{tbl:TIME}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Time Parameters]{For more information see Section~\ref{info:TIME}.}
+\label{tbl:TIME} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\ \hline \hline
+\endhead
 {\ct DT}                   & Real       & Initial time step                   & s           &               \\ \hline
 {\ct FYI}                  & Character  & Comment String (has no effect)      &             &               \\ \hline
 {\ct LOCK\_TIME\_STEP}     & Logical    & Do not allow time step changes      &             & {\ct .FALSE.}  \\ \hline
@@ -7898,70 +7922,52 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct T\_END}or{\ct TWFIN } & Real       & Ending time for calculation         & s           & 1             \\ \hline
 %{\ct TIME\_SHRINK\_FACTOR} & Real       & Scaling factor for time ramps and specific heat & & 1.            \\ \hline
 {\ct WALL\_INCREMENT}      & Integer    & Time steps between 1D wall solution updates  &     & 2             \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 \vspace{\baselineskip}
 
-\vfill
-
-%\section{\texorpdfstring{{\tt TREE}}{TREE} (Conical Tree Parameters)}
-
-%\hspace{0.5in}
-
-%\begin{table}[H]
-%\caption[Conical Tree Parameters]{For more information see Section~\ref{info:TIME}.}\label{tbl:TIME}
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\hline
-%\multicolumn{5}{|c|}{{\ct TREE} (Conical Tree Parameters)} \\ \hline \hline
-%{\ct CANOPY\_BASE\_HEIGHT}  & Real          & Height of Tree Cone Base from ground   & m       &     \\ \hline
-%{\ct CANOPY\_WIDTH}         & Real          & Width of Tree Cone Base                & m       &     \\ \hline
-%{\ct PART\_ID}              & Character     & Name of associated PART line           &         &     \\ \hline
-%{\ct TREE\_HEIGHT}          & Real          & Height of Tree Cone Top from ground    & m       &     \\ \hline
-%{\ct XYZ(3) }               & Real Triplet  & Physical coordinates                   & m       &     \\ \hline
-%\end{tabular*}
-%\end{table}
-%NAMELIST /TREE/ XYZ,CANOPY_WIDTH,CANOPY_BASE_HEIGHT,TREE_HEIGHT,PART_ID
-
-%\vspace{\baselineskip}
-
-%\vfill
 
 
 \section{\texorpdfstring{{\tt TRNX, TRNY, TRNZ}}{TRNX, TRNY, TRNZ} (MESH Transformations)}
 
-\hspace{0.5in}
-
-\begin{table}[H]
-\caption[MESH Transformations]{For more information see Section~\ref{info:TRNX}.}\label{tbl:TRNX}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[MESH Transformations]{For more information see Section~\ref{info:TRNX}.}
+\label{tbl:TRNX} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct TRNX, TRNY, TRNZ} (MESH Transformations)} \\ \hline \hline
+\endhead
 {\ct CC    }            & Real          & Computational coordinate           & m            &     \\ \hline
 {\ct FYI}               & Character     & Comment String (has no effect)     &              &     \\ \hline
 {\ct IDERIV}            & Integer       & Order of polynomial transformation &              &     \\ \hline
 {\ct MESH\_NUMBER}      & Integer       & Number of mesh to transform        &              &     \\ \hline
 {\ct PC    }            & Real          & Physical coordinate or derivative  &              &     \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 \vspace{\baselineskip}
 
-\vfill
 
 
 \section{\texorpdfstring{{\tt VENT}}{VENT} (Vent Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Vent Parameters]{For more information see Section~\ref{info:VENT}.}\label{tbl:VENT}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Vent Parameters]{For more information see Section~\ref{info:VENT}.}
+\label{tbl:VENT} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\ \hline \hline
+\endhead
 {\ct COLOR    }             & Character         & See Section~\ref{info:colors}                                 &             &                     \\ \hline
 {\ct CTRL\_ID }             & Character         & {\ct ID} of Control Function                                  &             &                     \\ \hline
 {\ct DEVC\_ID }             & Character         & {\ct ID} of Controlling Device                                &             &                     \\ \hline
@@ -7983,32 +7989,35 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TRANSPARENCY}          & Real              & Transparency indicator                                        &             &   1.0               \\ \hline
 {\ct XB(6) }                & Real Sextuplet    & Min/Max physical coordinates                                  & m           &                     \\ \hline
 {\ct XYZ(3) }               & Real Triplet      & See Section~\ref{info:spread}                                 & m           &                     \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
 \vspace{\baselineskip}
 
-\vfill
 
 \section{\texorpdfstring{{\tt ZONE}}{ZONE} (Pressure Zone Parameters)}
 
-\hspace{0.5in}
 
-\begin{table}[H]
-\caption[Pressure Zone Parameters]{For more information see Section~\ref{info:ZONE}.}\label{tbl:ZONE}
-\noindent
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+%\begin{table}[H]
+\caption[Pressure Zone Parameters]{For more information see Section~\ref{info:ZONE}.}
+\label{tbl:ZONE} \\
+%\noindent
+%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\ \hline \hline
+\endhead
 {\ct ID}                    & Character         & {\ct ID}entifier                       &        &               \\ \hline
 {\ct LEAK\_AREA(N)}         & Real              & Leakage area to pressure zone {\ct N}  & m$^2$  & 0             \\ \hline
 {\ct XB(6)}                 & Real Sextuplet    & Coordinates of Zone                    & m      &               \\ \hline
-\end{tabular*}
-\end{table}
+%\end{tabular*}
+\end{longtable}
 
 
-\vfill
+
 
 
 
