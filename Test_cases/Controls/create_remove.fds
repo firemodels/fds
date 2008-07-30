@@ -2,7 +2,8 @@ Test functionality of obstruction creation and removal.
 
 &HEAD CHID='create_remove',TITLE='Test OBST and HOLE Creation and Removal, SVN $Revision$' / 
 
-&MESH IJK=20,20,20 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=20,10,20 XB=0.0,1.0,0.0,0.5,0.0,1.0 /
+&MESH IJK=20,10,20 XB=0.0,1.0,0.5,1.0,0.0,1.0 /
 
 &TIME T_END=5. /
 
