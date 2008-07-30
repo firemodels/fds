@@ -4,34 +4,31 @@
 # It contains entries for each test case to be run.  This script
 # should be modified as test cases are added or removed.
 
-# specify location of the fds5 executable
-setenv FDS5 ~/bin/fds_5.1.6_linux
+# specify location of the fds5 executables
+setenv FDS5 ~/bin/fds_linux
+setenv FDS5MPI ~/bin/fds5_mpi_linux
 
-# To run a case in parallel, put the following line 
-# (filled out correctly) before the case to be run and
-#   reset back to the regular FDS5 value afterwards
-#
-# setenv FDS5 "mpirun n0 n0 n0 n0 ~/bin/fds5_mpi_intel"
-
-# Uncomment the setenv line below to stop all FDS jobs running 
-# via this script.
+# Option:
+# Uncomment the setenv line below to stop all FDS jobs running via this script.
 # setenv STOPFDS
 
 #  1.  To run this script, first copy runall_svn.csh to runall.csh  
 #      (only when runall_svn.csh changes)
-#  2.  define the FDS5 environment variable to point to the version 
-#      of fds you want to run.
-#  3.  Change hostnames in each RUNFDS command to point to free 
+#  2.  define the FDS5 and/or FDS5MPI environment variables to point
+#      to the version of fds you want to run.
+#  3.  Change hostnames in each RUNFDS (or RUNFDS_MPI) command to point to free 
 #      cluster nodes
 #  4.  Run script from this directory (repository_root/bin)
-
-# only edit hostnames below
 
 set RUNFDS=./runfds.csh
 setenv JOBDIR `pwd`/..
 
 # syntax of RUNFDS
 # $RUNFDS  directory case host
+
+# mpi example
+# setenv LAMNODES n0 n0 n0 n0
+# $RUNFDS Demonstrations/2Room_ranch ranch_00 fire72 &
 
 # demonstration cases
 $RUNFDS Demonstrations/2Room_Ranch ranch_00 fire72 &
