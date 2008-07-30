@@ -30,6 +30,16 @@ endif
 if(-e $fulldir/$stopfile) then
  rm $fulldir/$stopfile
 endif
+if($?LAMNODES) then
+cat << EOF > $scriptfile
+#!/bin/csh -f
+cd $fulldir
+# note: The environment variable, FDS5, is defined 
+#       in the calling script, runall.csh
+mpirun $lamnodes $FDS5_MPI $in >& $out
+EOF
+unsetenv $LAMNODES
+else
 cat << EOF > $scriptfile
 #!/bin/csh -f
 cd $fulldir
@@ -37,6 +47,7 @@ cd $fulldir
 #       in the calling script, runall.csh
 $FDS5 $in >& $out
 EOF
+endif
 chmod +x $scriptfile
 echo Running $in on $host
 ssh -n $host $scriptfile
