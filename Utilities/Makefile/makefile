@@ -9,7 +9,7 @@
 #are necessary for your system configuration.
 
 #*** Begin User Defined Variables Section ***
-VPATH = ../../FDS_5/SOURCE_FDS5
+VPATH = ../../FDS_Source
 
 #*** End User Defined Variables Section***
 
