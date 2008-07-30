@@ -5,7 +5,7 @@
 # should be modified as test cases are added or removed.
 
 # specify location of the fds5 executables
-setenv FDS5 ~/bin/fds_linux
+setenv FDS5 ~/bin/fds5_linux
 setenv FDS5MPI ~/bin/fds5_mpi_linux
 
 # Option:
@@ -21,6 +21,7 @@ setenv FDS5MPI ~/bin/fds5_mpi_linux
 #  4.  Run script from this directory (repository_root/bin)
 
 set RUNFDS=./runfds.csh
+set RUNFDSMPI=./runfdsmpi.csh
 setenv JOBDIR `pwd`/..
 
 # syntax of RUNFDS
@@ -28,7 +29,7 @@ setenv JOBDIR `pwd`/..
 
 # mpi example
 # setenv LAMNODES n0 n0 n0 n0
-# $RUNFDS Demonstrations/2Room_ranch ranch_00 fire72 &
+# $RUNFDSMPI Demonstrations/2Room_ranch ranch_00 fire72 &
 
 # demonstration cases
 $RUNFDS Demonstrations/2Room_Ranch ranch_00 fire72 &
