@@ -90,6 +90,9 @@ IF (INDEX(mainmpirev,':',BACK=.TRUE.)>0) THEN
    10 IF (IOS>0) COMPILE_DATE = 'null'
 ENDIF
 
+! Set some constants
+CALL SET_OFTEN_USED
+
 ! Read input from CHID.data file (All Nodes)
  
 CALL READ_DATA
