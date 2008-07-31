@@ -10,8 +10,8 @@ set out=$infile.err
 set stopfile=$infile.stop
 
 set scriptfile=$bindir/script.$$
-if(! -e $FDS5MPI) then
-  echo "The file $FDS5MPI does not exit. Run aborted"
+if(! -e $FDSMPI) then
+  echo "The file $FDSMPI does not exit. Run aborted"
   exit
 endif
 if($?LAMNODES) then
@@ -38,7 +38,7 @@ endif
 cat << EOF > $scriptfile
 #!/bin/csh -f
 cd $fulldir
-mpirun $LAMNODES $FDS5MPI $in >& $out
+mpirun $LAMNODES $FDSMPI $in >& $out
 EOF
 chmod +x $scriptfile
 echo Running $in on $host
