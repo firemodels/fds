@@ -5,8 +5,11 @@
 # should be modified as test cases are added or removed.
 
 # specify location of the fds5 executables
-setenv FDS5 ~/bin/fds5_linux
-setenv FDS5MPI ~/bin/fds5_mpi_linux
+setenv FDS ~/bin/fds5_linux
+setenv FDSMPI ~/bin/fds5_mpi_linux
+
+# specify location of repository root
+setenv SVNROOT ~/FDS-SMV
 
 # Option:
 # Uncomment the setenv line below to stop all FDS jobs running via this script.
@@ -14,15 +17,16 @@ setenv FDS5MPI ~/bin/fds5_mpi_linux
 
 #  1.  To run this script, first copy runall_svn.csh to runall.csh  
 #      (only when runall_svn.csh changes)
-#  2.  define the FDS5 and/or FDS5MPI environment variables to point
+#  2.  define the FDS and/or FDSMPI environment variables to point
 #      to the version of fds you want to run.
 #  3.  Change hostnames in each RUNFDS (or RUNFDS_MPI) command to point to free 
 #      cluster nodes
-#  4.  Run script from this directory (repository_root/bin)
+#  4.  Run script in directory "above" directories listed 
+#      on RUNFDS/RUNFDSMPI commands.
 
-set RUNFDS=./runfds.csh
-set RUNFDSMPI=./runfdsmpi.csh
-setenv JOBDIR `pwd`/..
+set RUNFDS=$SVNROOT/Training/Utilities/runfds.csh
+set RUNFDSMPI=$SVNROOT/Training/runfdsmpi.csh
+setenv BASEDIR `pwd`
 
 # syntax of RUNFDS
 # $RUNFDS  directory case host

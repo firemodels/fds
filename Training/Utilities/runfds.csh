@@ -4,14 +4,14 @@ set dir=$1
 set infile=$2
 set host=$3
 
-set fulldir=$JOBDIR/$dir
+set fulldir=$BASEDIR/$dir
 set in=$infile.fds
 set out=$infile.err
 set stopfile=$infile.stop
 
 set scriptfile=$bindir/script.$$
-if(! -e $FDS5) then
-  echo "The file $FDS5 does not exit. Run aborted"
+if(! -e $FDS) then
+  echo "The file $FDS does not exit. Run aborted"
   exit
 endif
 if(! -d $fulldir) then
@@ -33,7 +33,7 @@ endif
 cat << EOF > $scriptfile
 #!/bin/csh -f
 cd $fulldir
-$FDS5 $in >& $out
+$FDS $in >& $out
 EOF
 chmod +x $scriptfile
 echo Running $in on $host
