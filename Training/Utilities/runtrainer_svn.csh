@@ -1,8 +1,11 @@
 #!/bin/csh -f
 
-# This script, runall_svn.csh, is a template under svn control.
-# It contains entries for each test case to be run.  This script
-# should be modified as test cases are added or removed.
+# This script, runtrainer_trainer.csh, is a template under svn control.
+# Before using, this template should first be copied and customized 
+# for each set test cases to be run.
+
+# This script is set up for the training cases.  It may however, be used for
+# any collection of test cases by changing below the directory and case names.
 
 # specify location of the fds5 executables
 setenv FDS ~/bin/fds5_linux
@@ -21,19 +24,27 @@ setenv SVNROOT ~/FDS-SMV
 #      to the version of fds you want to run.
 #  3.  Change hostnames in each RUNFDS (or RUNFDS_MPI) command to point to free 
 #      cluster nodes
-#  4.  Run script in directory "above" directories listed 
-#      on RUNFDS/RUNFDSMPI commands.
+#  4.  Run the script in the directory CONTAINING directories listed 
+#      on the various RUNFDS/RUNFDSMPI command lines.
 
-set RUNFDS=$SVNROOT/Training/Utilities/runfds.csh
-set RUNFDSMPI=$SVNROOT/Training/runfdsmpi.csh
+# VVVVVVVVVVV Do not change these line VVVVVVVVVVVVVV
+set RUNFDS=$SVNROOT/Utilities/runfds.csh
+set RUNFDSMPI=$SVNROOT/runfdsmpi.csh
 setenv BASEDIR `pwd`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # syntax of RUNFDS
 # $RUNFDS  directory case host
 
+# To use with MPI define the LAMNODES environment variable to point
+# the the symbolic names of the cluster nodes to be used.
+#
 # mpi example
+# -----------
 # setenv LAMNODES n0 n0 n0 n0
 # $RUNFDSMPI Demonstrations/2Room_ranch ranch_00 fire72 &
+
+# VVVVVVVVVVVV Change lines below to point to cases to be run VVVVVVVVVVVVV
 
 # demonstration cases
 $RUNFDS Demonstrations/2Room_Ranch ranch_00 fire72 &
@@ -49,3 +60,7 @@ $RUNFDS MCFRS/MCFRS_Flashover MCFRS_Flashover_03 fire73 &
 $RUNFDS MCFRS/MCFRS_Ranch MCFRS_Ranch_00 fire73 &
 # MFRI  cases
 $RUNFDS MFRI/MFRI_Training_Tower MFRI_Training_Tower_00 fire74 &
+
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+echo FDS cases submitted
