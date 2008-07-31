@@ -6,17 +6,17 @@
 
 <!-- Dublin Core Metadata -->
 <!-- InstanceBeginEditable name="DublinCoreMetadata" -->
-<meta name="DC.title" content="FDS-SMV Official Website | Library" />
-<meta name="DC.description" content="Library of resources related to the FDS-SMV project." />
+<meta name="DC.title" content="Webpage Title" />
+<meta name="DC.description" content="Webpage Description." />
 <meta name="DC.creator" content="US Department of Commerce, NIST, Building and Fire Research Laboratory" />
-<meta name="DC.date.created" scheme="ISO8601" content="2007-10-10" />
-<meta name="DC.date.reviewed" scheme="ISO8601" content="2007-10-10" />
+<meta name="DC.date.created" scheme="ISO8601" content="2007-01-01" />
+<meta name="DC.date.reviewed" scheme="ISO8601" content="2007-09-22" />
 <meta name="DC.language" scheme="DCTERMS.RFC1766" content="EN-US" />
 <!-- InstanceEndEditable -->
 
 <!-- InstanceBeginEditable name="doctitle" -->
-    <title>FDS-SMV Official Website | Library</title>
-    <!-- InstanceEndEditable -->
+<title>FDS-SMV Official Website | Home</title>
+<!-- InstanceEndEditable -->
 <link rel="stylesheet" type="text/css" media="screen" href="assets/css/styles.css"  />
 <link rel="stylesheet" type="text/css" media="screen" href="assets/css/colourtag.css"  />
 <!--[if IE]><style type="text/css" media="screen">body {behavior: url(assets/scripts/pngfix.js);}</style><![endif]-->
@@ -87,7 +87,7 @@
 <!-- InstanceBeginEditable name="Breadcrumb" -->
 <div id="breadcrumbcontainer">
   <ul>
-    <li><a href="index.html">Home</a>&nbsp;|&nbsp;<a href="documentation.html">Documentation</a>&nbsp;|&nbsp;<a href="library.html">Library</a></li>
+    <li><a href="index.html">Home</a>&nbsp;|&nbsp;<a href="examples.html">Examples</a>&nbsp;|&nbsp;<a href="visualizationFeatures.html">Visualization Features</a></li>
   </ul>
 </div>
 <!-- &nbsp;|&nbsp;-->
@@ -113,17 +113,47 @@
 
 <div id="contentContainer">
 <!-- InstanceBeginEditable name="MainContent" -->
-<h1>Library of Related Documents and Files</h1>
-<h3>Fire Dynamics Simulator (FDS)</h3>
-<p> <a href="assets/documents/McGrattan_8th_IAFSS.pdf">Plenury Lecture at the 8th IAFSS Symposium</a> Kevin's fire modeling manifesto</p>
-<h3>Smokeview (SMV)</h3>
-<p>SMV Library File Link <img src="assets/images/external_link_icon.gif" alt="External Link" /> (Coming Soon)</p>
-<h3>Experimental Test Reports</h3>
-<p> <a href="assets/documents/Hamins_NIST_SP_1013-1.pdf">NIST Special Publication 1013-1</a> Hamins et al. report of experimental results for the International Collaborative Fire Model Project (ICFMP) Benchmarking and Validation Exercise #3.</p>
-<p> <a href="assets/documents/Hostikka_VTT_T2104.pdf">VTT Research Notes 2104</a> Hostikka et al. report on smoke filling experiments performed in the VTT large fire test hall.</p>
-<p> <a href="assets/documents/McCaffrey_NBSIR_79-1910.pdf">NBS Internal Report 79-1910</a> McCaffrey's fire plume experiments and correlation.</p>
-<p> <a href="assets/documents/McGrattan_NISTIR_6196-1.pdf">NIST Internal Report 6196-1</a> NFPA Research Foundation study on sprinklers, vents, and draft curtains.</p>
-<p> <a href="assets/documents/Peacock_NBSIR_88-3752.pdf">NBS Internal Report 88-3752</a> Peacock et al. Multi-room fire experiments.</p>
+ <h1>Visualization Features</h1>
+<h3>3D Smoke and Fire Animation</h3>
+	<p>FDS computes soot density data on the entire 3D domain. It then converts and compresses this data to values used by Smokeview to draw a series of parallel, partially transparent planes.</p>
+	<div align="center">
+	  <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=7755226830793762384&hl=en" flashvars="" alt="Google Video Animation 1"></embed>
+	  <br />    
+	  <br />
+	  <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=6316142182134383084&hl=en" flashvars=""> </embed>
+	</div>
+    
+	<h3>Particle Animations</h3>
+    <p>FDS records the location and value of each particle at each selected time step. Particles are colored using criteria such as: temperature or whether they are water (sprinkler droplet). Particle animations are then drawn by Smokeview.</p>
+    <div align="center">
+      <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=3733796896937046003&hl=en" flashvars=""> </embed>
+      <br /><br />
+      <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=7630680021964402409&hl=en" flashvars=""> </embed>
+    </div>
+    
+    <h3>Slice Animations</h3>
+    <p>FDS records slice file data within a rectangular array of grid points at each selected time step. Shaded contours plots are then drawn by Smokeview for simulation quantities such as temperature, gas velocity or heat release rate.</p>
+    <div align="center">
+    <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=1308263133133208038&hl=en" flashvars=""> </embed>
+	</div>
+
+    <h3>Vector Slice Animations</h3>
+    <p>FDS records slice file data within a rectangular array of grid points at each selected time step for temperature and three components of velocity. Vector plots are then colored Smokeview using simulation quantities such as temperature, gas velocity or heat release rate. Vector lengths and directions are drawn using the recorded velocity data.</p>
+    <div align="center">
+    <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=7376579803957891971&hl=en" flashvars=""> </embed>
+	</div>
+    
+    <h3>Boundary Surface Animations</h3>
+    <p>Boundary files contain simulation data recorded at the surface or boundary of interior obstacles and the exterior bounding surfaces of the simulation at each recorded time step. Shaded contours are drawn for quantities such as wall surface temperature, radiative flux, etc.</p>
+    <div align="center">
+	<embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=-8861675363232792142&hl=en" flashvars=""> </embed>
+	</div>
+
+<h3>Virtual Tours - Automated Motion Through A Smokeview Scene</h3>
+    <p>The touring option allows one to specify arbitrary paths or tours through or around a Smokeview scene. One may then view the scenario from the vantage point of an observer moving along one of these paths as in the animation to the left or alternatively, one may observe the motion along all paths from an external vantage point.</p>
+    <div align="center">
+    <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=-7385748607842637032&hl=en" flashvars=""> </embed>
+	</div>
 <!-- InstanceEndEditable -->
 </div>
 

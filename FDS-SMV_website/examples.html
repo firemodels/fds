@@ -99,88 +99,28 @@
 <!-- Main Content Area Below Pageheader -->
   <div id="contentwrapper" class="clearfix">
 		<div id="sidebarContainer">
-		<!-- InstanceBeginEditable name="NavigationMenu" -->
 			<div id="navcontainer">
-            <ul>
-              <li><a href="index.html" rel="self">Home</a></li>
-              <li><a href="examples.html" rel="self" id="current">Examples</a>
-                  <ul>
-                    <li><a href="#General" rel="self" id="current">General Features</a></li>
-                    <li><a href="VnV_examples.html" rel="self">V&amp;V Examples</a></li>
-                    <li><a href="comparison_examples.html" rel="self">Visual Comparisons</a></li>
-                </ul></li>
-              <li><a href="documentation.html" rel="self">Documentation</a></li>
-              <li><a href="downloads.html" rel="self">Downloads</a></li>
-              <li><a href="support.html" rel="self">Support</a></li>
-              <li><a href="developer.html" rel="self">Developer</a></li>
-            </ul>
+				<!--#include virtual="navMenu.html" -->
             </div>
-          <!-- InstanceEndEditable -->
       <br />
 			<div id="sidebar">
 			    <!--#include virtual="sidebarlinks.html" -->
 	      </div>
           <br />
             <div align="left">Note: Throughout the site you will see &quot;external link&quot; icons (<img src="assets/images/external_link_icon.gif" alt="External Link" width="10" height="10" />) next to links that will take you to information not hosted on the nist.gov servers. These links should open in a new browser window or tab.
-          
 	        </div>
 	</div>
 			
 
 <div id="contentContainer">
 <!-- InstanceBeginEditable name="MainContent" -->
-<h1>Visualization Examples</h1>
-<p><strong>FDS</strong> results are visualized with <strong>Smokeview</strong> by displaying time dependant animations of particle flow, 2D slice contours, 2D vector slices, isosurfaces and surface boundary contours. Data at a particular time may also be visualized using 2D/3D contours and vector plots. Examples of these features are below in the <a href="#General">General Visualization Features</a> section.</p>
-<p>On the <a href="#VnV">Verification and Validation</a> page,  examples are taken from the Verification and Validation files for both FDS and Smokeview.  For these examples, there will be a link to the FDS Input file in the SVN repository and an image or video of the results visualized in Smokeview.  More information about these files may be found in the FDS User Guide for the Verification files and the FDS Validation Guide for the Validation files.</p>
-<p>In the <a href="#Comparisons">Visual Comparisons</a> page, images and videos are used to demonstrate interesting comparisons between real world tests and simulations.  Where possible, the FDS input file and/or test data or reports will be referenced.</p>
+<h1>Examples</h1>
+<p>The <a href="testCases.html">Test Cases</a> page provide links to  FDS Input file in the SVN repository and an image or video of the results visualized in Smokeview for each case.  More information about these files may be found in the FDS User Guide.</p>
+<p>Examples of FDS and Smokeview features are shown on the <a href="visualizationFeatures.html">Visualization Features</a> page. FDS results are visualized with Smokeview by displaying time dependant animations of particle flow, 2D slice contours, 2D vector slices, isosurfaces and surface boundary contours. Data at a particular time may also be visualized using 2D/3D contours and vector plots. </p>
+<p>In the <a href="#Comparisons">Case Studies</a> page, images and videos are used to demonstrate interesting comparisons between real world tests and simulations.  Where possible, the FDS input file and/or test data or reports will be referenced.</p>
+<!-- InstanceEndEditable --></div>
 
-<h3><a name="General" id="General"></a>General Visualization Features</h3>
-
-<h4>3D Smoke and Fire Animation</h4>
-	<p>FDS computes soot density data on the entire 3D domain. It then converts and compresses this data to values used by Smokeview to draw a series of parallel, partially transparent planes.</p>
-	<div align="center">
-	  <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=7755226830793762384&hl=en" flashvars="" alt="Google Video Animation 1"></embed>
-	  <br />    
-	  <br />
-	  <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=6316142182134383084&hl=en" flashvars=""> </embed>
-	</div>
-    
-	<h4>Particle Animations</h4>
-    <p>FDS records the location and value of each particle at each selected time step. Particles are colored using criteria such as: temperature or whether they are water (sprinkler droplet). Particle animations are then drawn by Smokeview.</p>
-    <div align="center">
-      <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=3733796896937046003&hl=en" flashvars=""> </embed>
-      <br /><br />
-      <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=7630680021964402409&hl=en" flashvars=""> </embed>
-    </div>
-    
-    <h4>Slice Animations</h4>
-    <p>FDS records slice file data within a rectangular array of grid points at each selected time step. Shaded contours plots are then drawn by Smokeview for simulation quantities such as temperature, gas velocity or heat release rate.</p>
-    <div align="center">
-    <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=1308263133133208038&hl=en" flashvars=""> </embed>
-	</div>
-
-    <h4>Vector Slice Animations</h4>
-    <p>FDS records slice file data within a rectangular array of grid points at each selected time step for temperature and three components of velocity. Vector plots are then colored Smokeview using simulation quantities such as temperature, gas velocity or heat release rate. Vector lengths and directions are drawn using the recorded velocity data.</p>
-    <div align="center">
-    <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=7376579803957891971&hl=en" flashvars=""> </embed>
-	</div>
-    
-    <h4>Boundary Surface Animations</h4>
-    <p>Boundary files contain simulation data recorded at the surface or boundary of interior obstacles and the exterior bounding surfaces of the simulation at each recorded time step. Shaded contours are drawn for quantities such as wall surface temperature, radiative flux, etc.</p>
-    <div align="center">
-	<embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=-8861675363232792142&hl=en" flashvars=""> </embed>
-	</div>
-
-<h4>Virtual Tours - Automated Motion Through A Smokeview Scene</h4>
-    <p>The touring option allows one to specify arbitrary paths or tours through or around a Smokeview scene. One may then view the scenario from the vantage point of an observer moving along one of these paths as in the animation to the left or alternatively, one may observe the motion along all paths from an external vantage point.</p>
-    <div align="center">
-    <embed style="width:400px; height:326px;" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=-7385748607842637032&hl=en" flashvars=""> </embed>
-	</div>
-
-<!-- InstanceEndEditable -->
-</div>
-
-    <br style="clear: both;" />
+<br style="clear: both;" />
 		<!-- Site Footer -->
 		<div id="footer">
 			All Information Presented is Public Domain, see <a href="disclaimer.html">Disclaimer</a> for more information. <a href="#" id="rw_email_contact">Contact</a><script type="text/javascript">var _rwObsfuscatedHref0 = "mai";var _rwObsfuscatedHref1 = "lto";var _rwObsfuscatedHref2 = ":br";var _rwObsfuscatedHref3 = "yan";var _rwObsfuscatedHref4 = ".kl";var _rwObsfuscatedHref5 = "ein";var _rwObsfuscatedHref6 = "@ni";var _rwObsfuscatedHref7 = "st.";var _rwObsfuscatedHref8 = "gov";var _rwObsfuscatedHref = _rwObsfuscatedHref0+_rwObsfuscatedHref1+_rwObsfuscatedHref2+_rwObsfuscatedHref3+_rwObsfuscatedHref4+_rwObsfuscatedHref5+_rwObsfuscatedHref6+_rwObsfuscatedHref7+_rwObsfuscatedHref8; document.getElementById('rw_email_contact').href = _rwObsfuscatedHref;</script><br />
