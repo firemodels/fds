@@ -98,31 +98,15 @@
 <!-- Main Content Area Below Pageheader -->
   <div id="contentwrapper" class="clearfix">
 		<div id="sidebarContainer">
-		<!-- InstanceBeginEditable name="NavigationMenu" -->
-		<div id="navcontainer">
-            <ul>
-              <li><a href="index.html" rel="self" id="current">Home</a>
-					<ul>
-                		<li><a href="searchresults.html" rel="self">Search FDS-SMV Sites</a></li>
-                        <li><a href="disclaimer.html" rel="self">Disclaimer</a></li>
-                      <li><a href="thirdparty.html" rel="self" id="current">Third Party Tools</a></li>
-				  </ul>
-              </li>
-              <li><a href="examples.html" rel="self">Examples</a></li>
-              <li><a href="documentation.html" rel="self">Documentation</a></li>
-              <li><a href="downloads.html" rel="self">Downloads</a></li>
-              <li><a href="support.html" rel="self">Support</a></li>
-              <li><a href="developer.html" rel="self">Developer</a></li>
-            </ul>
-        </div>
-            <!-- InstanceEndEditable -->
+			<div id="navcontainer">
+				<!--#include virtual="navMenu.html" -->
+            </div>
       <br />
 			<div id="sidebar">
 			    <!--#include virtual="sidebarlinks.html" -->
 	      </div>
           <br />
             <div align="left">Note: Throughout the site you will see &quot;external link&quot; icons (<img src="assets/images/external_link_icon.gif" alt="External Link" width="10" height="10" />) next to links that will take you to information not hosted on the nist.gov servers. These links should open in a new browser window or tab.
-          
 	        </div>
 	</div>
 			
@@ -146,7 +130,7 @@
 Where objects are constructed on separate layers such as walls, doors, furnitures, etc., 3dsolid2fds would pick up the layer name and use it as SURF_ID on each &OBST line. This is handy for later material specification in the FDS input file.</p>
 
 <h2>Spreadsheet and Text Editor Tools</h2>
-<h3><a href="http://koverholt.com/?page_id=5">FDS v5 MESH Size Calculator<img src="assets/images/external_link_icon.gif" alt="External Link" width="10" height="10" /></a> ( Excel ) - K. Overholt</h3>
+<h3><a href="http://koverholt.com/?page_id=5">FDS v5 MESH Size Calculator<img src="assets/images/external_link_icon.gif" alt="External Link" width="10" height="10" /></a> ( Web Service ) - K. Overholt</h3>
 <p>This free, online tool allows a user to easily generate a MESH line for input into FDS. It finds the optimal (Poisson-friendly) MESH division numbers and returns a complete mesh line to be pasted into an FDS input file. It works by calculating cell sizes of different resolutions that will accurately resolve your fire simulation based on the total heat release rate.</p>
 <h3><a href="http://fds-smv.googlegroups.com/web/fds.vim?gda=zNMafjgAAACnFVgua2OTVPeUuQnlbNTPxOn_GHTup3DMcyRvLzJawmG1qiJ7UbTIup-M2XPURDR2wcN46y2suJJXuZTOQc9k" target="_blank">FDS 5 Syntax File<img src="assets/images/external_link_icon.gif" alt="External Link" width="10" height="10" /></a> ( vim/gvim ) - J. Skaggs</h3>
 <p>Syntax highlighting file for Vim/gvim text editor. (See original <a href="http://groups.google.com/group/fds-smv/browse_thread/thread/6c1bba43f79a9fc0/cca6bd611077e505?#cca6bd611077e505" target="_blank">Group Message</a> for more information.)</p>
@@ -158,9 +142,10 @@ Where objects are constructed on separate layers such as walls, doors, furniture
 <h2>Post-Processing and Reporting Tools</h2>
 <h3><a href="http://www.sitis-soft.com/?menu=fdsreporter" target="_blank">FDS Reporter<img src="assets/images/external_link_icon.gif" alt="External Link" width="10" height="10" /></a>  (Win32) - SITIS Soft</h3>
 <p>FDS Reporter is an 'advanced post-processing tool, developed for Fire Dynamics Simulator (FDS) users who wish ease and to comfortably make text report.'</p>
-<!-- InstanceEndEditable --></div>
+<!-- InstanceEndEditable -->
+</div>
 
-<br style="clear: both;" />
+    <br style="clear: both;" />
 		<!-- Site Footer -->
 		<div id="footer">
 			All Information Presented is Public Domain, see <a href="disclaimer.html">Disclaimer</a> for more information. <a href="#" id="rw_email_contact">Contact</a><script type="text/javascript">var _rwObsfuscatedHref0 = "mai";var _rwObsfuscatedHref1 = "lto";var _rwObsfuscatedHref2 = ":br";var _rwObsfuscatedHref3 = "yan";var _rwObsfuscatedHref4 = ".kl";var _rwObsfuscatedHref5 = "ein";var _rwObsfuscatedHref6 = "@ni";var _rwObsfuscatedHref7 = "st.";var _rwObsfuscatedHref8 = "gov";var _rwObsfuscatedHref = _rwObsfuscatedHref0+_rwObsfuscatedHref1+_rwObsfuscatedHref2+_rwObsfuscatedHref3+_rwObsfuscatedHref4+_rwObsfuscatedHref5+_rwObsfuscatedHref6+_rwObsfuscatedHref7+_rwObsfuscatedHref8; document.getElementById('rw_email_contact').href = _rwObsfuscatedHref;</script><br />

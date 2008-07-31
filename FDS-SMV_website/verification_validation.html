@@ -6,8 +6,8 @@
 
 <!-- Dublin Core Metadata -->
 <!-- InstanceBeginEditable name="DublinCoreMetadata" -->
-<meta name="DC.title" content="FDS-SMV Official Website | Library" />
-<meta name="DC.description" content="Library of resources related to the FDS-SMV project." />
+<meta name="DC.title" content="FDS-SMV Official Website | V and V Examples" />
+<meta name="DC.description" content="Validation and Verification Examples." />
 <meta name="DC.creator" content="US Department of Commerce, NIST, Building and Fire Research Laboratory" />
 <meta name="DC.date.created" scheme="ISO8601" content="2007-10-10" />
 <meta name="DC.date.reviewed" scheme="ISO8601" content="2007-10-10" />
@@ -15,7 +15,12 @@
 <!-- InstanceEndEditable -->
 
 <!-- InstanceBeginEditable name="doctitle" -->
-    <title>FDS-SMV Official Website | Library</title>
+    <title>FDS-SMV Official Website | Verification &amp; Validation</title>
+    <style type="text/css">
+<!--
+.style1 {font-size: 9px}
+-->
+    </style>
     <!-- InstanceEndEditable -->
 <link rel="stylesheet" type="text/css" media="screen" href="assets/css/styles.css"  />
 <link rel="stylesheet" type="text/css" media="screen" href="assets/css/colourtag.css"  />
@@ -87,7 +92,7 @@
 <!-- InstanceBeginEditable name="Breadcrumb" -->
 <div id="breadcrumbcontainer">
   <ul>
-    <li><a href="index.html">Home</a>&nbsp;|&nbsp;<a href="documentation.html">Documentation</a>&nbsp;|&nbsp;<a href="library.html">Library</a></li>
+    <li><a href="index.html">Home</a>&nbsp;|&nbsp;<a href="verification_validation.html">Verification and Validation Cases</a></li>
   </ul>
 </div>
 <!-- &nbsp;|&nbsp;-->
@@ -113,21 +118,71 @@
 
 <div id="contentContainer">
 <!-- InstanceBeginEditable name="MainContent" -->
-<h1>Library of Related Documents and Files</h1>
-<h3>Fire Dynamics Simulator (FDS)</h3>
-<p> <a href="assets/documents/McGrattan_8th_IAFSS.pdf">Plenury Lecture at the 8th IAFSS Symposium</a> Kevin's fire modeling manifesto</p>
-<h3>Smokeview (SMV)</h3>
-<p>SMV Library File Link <img src="assets/images/external_link_icon.gif" alt="External Link" /> (Coming Soon)</p>
-<h3>Experimental Test Reports</h3>
-<p> <a href="assets/documents/Hamins_NIST_SP_1013-1.pdf">NIST Special Publication 1013-1</a> Hamins et al. report of experimental results for the International Collaborative Fire Model Project (ICFMP) Benchmarking and Validation Exercise #3.</p>
-<p> <a href="assets/documents/Hostikka_VTT_T2104.pdf">VTT Research Notes 2104</a> Hostikka et al. report on smoke filling experiments performed in the VTT large fire test hall.</p>
-<p> <a href="assets/documents/McCaffrey_NBSIR_79-1910.pdf">NBS Internal Report 79-1910</a> McCaffrey's fire plume experiments and correlation.</p>
-<p> <a href="assets/documents/McGrattan_NISTIR_6196-1.pdf">NIST Internal Report 6196-1</a> NFPA Research Foundation study on sprinklers, vents, and draft curtains.</p>
-<p> <a href="assets/documents/Peacock_NBSIR_88-3752.pdf">NBS Internal Report 88-3752</a> Peacock et al. Multi-room fire experiments.</p>
-<!-- InstanceEndEditable -->
-</div>
+<h1>Verification and Validation Cases</h1>
+<p>The terms <strong>Verification</strong> and <strong>Validation</strong> are often used 
+interchangeably to mean the process of checking the accuracy of a numerical model.  
+For many, this entails comparing model predictions with experimental measurements. 
+However, there is now a fairly broad-based consensus that comparing model and 
+experiment is largely what is considered Validation.</p>
 
-    <br style="clear: both;" />
+<h3>What's the difference between Verification and Validation?</h3>
+<p>ASTM E1355, &quot;Standard Guide for Evaluating the Predictive Capability 
+of Deterministic Fire Models,&quot; defines <strong>Verification</strong> as,</p>
+
+<blockquote>The process of determining that the implementation of a calculation method 
+accurately
+represents the developer's conceptual description of the calculation method 
+and the solution to the calculation method.</blockquote>
+
+<p>and it defines <strong>Validation</strong> as, </p>
+<blockquote>The process of determining the degree to which a calculation method is an 
+accurate representation of the real world from the perspective of the intended uses 
+of the calculation method.</blockquote>
+<p>Simply put, Verification is a check of the math, while Validation is a check of the physics. 
+If the model predictions closely match the results of experiments, using whatever metric is appropriate, 
+it is assumed by most that the model suitably describes, via its mathematical equations, what is happening. 
+It is also assumed that the solution of these equations must be correct.</p>
+<p>So why do we need to perform model Verification? Why not just skip to Validation and 
+be done with it? The reason is that rarely do model and measurement agree so well in all applications 
+that anyone would just accept its results unquestionably. Because there is inevitably differences between 
+model and experiment, we need to know if these differences are due to limitations or errors in
+the numerical solution, or the physical sub-models, or both.</p>
+<p>Validation typically involves:</p>
+
+<ol>
+<li>Comparing model predictions with experimental measurements.</li>
+<li>Quantifying the differences in light of uncertainties in both the measurements and the model inputs.</li>
+<li>Deciding if the model is appropriate for the given application.</li>
+</ol>
+
+<p>The Validation case studies in the repository only help with (1) and (2). 
+Number (3) is the responsibility of the model user. A common question asked of any 
+mathematical model is whether it is validated. To say that FDS is
+&quot;validated&quot; means that the model has been shown to be of a given level of 
+accuracy for a given range of parameters for a given type of fire scenario.</p>
+
+<p>Although the FDS developers continuously perform validation studies, it is ultimately 
+the end user of the model who decides if the model is adequate for the job at hand. 
+Thus, these case studies provide the raw material, but they do not in themselves
+constitute a complete and comprehensive validation study.</p>
+<h3>Online Resources</h3>
+<h4>Verification and Validation Documentation</h4>
+<p>The most recent versions of the Verification and Validation Guides can be found through the following links.</p>
+<p><a href="http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_5_Verification_Guide.pdf" title="Verification Guide Link">Verification Guide <img src="assets/images/external_link_icon.gif" alt="External Link" /></a> (.pdf) <span class="style1">Right-Click to Save</span></p>
+<p><a href="http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_5_Validation_Guide.pdf" title="Validation Guide Link">Validation Guide <img src="assets/images/external_link_icon.gif" alt="External Link" /></a> (.pdf) <span class="style1">Right-Click to Save</span></p>
+<h4>FDS Input Files, Output Files and Relevant Data</h4>
+<p>The entire set of Verification and Validation files are available in the SVN repository. For more information on how to checkout the FDS-SMV project to your local computer, see the <a href="http://code.google.com/p/fds-smv/wiki/AccessingSubversionRepository" target="_blank">Accessing the SVN Repository <img src="assets/images/external_link_icon.gif" alt="External Link" /></a> Wiki.</p>
+<p>For convinence  the following links take you to files and directories that contain analytical solutions for 
+  Verification cases and experimental data for Validation cases, along with the corresponding FDS 
+  input and output files. Descriptions of the case studies can be found in the FDS 
+  Verification and Validation Guides.</p>
+<p>Verification Directory:<br />
+  <a href="http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Verification" target="_blank">http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Verification  <img src="assets/images/external_link_icon.gif" alt="External Link" /></a><br /></p>
+<p>Validation Directory:<br />
+  <a href="http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Validation" target="_blank">http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Validation  <img src="assets/images/external_link_icon.gif" alt="External Link" /></a></p>
+<!-- InstanceEndEditable --></div>
+
+<br style="clear: both;" />
 		<!-- Site Footer -->
 		<div id="footer">
 			All Information Presented is Public Domain, see <a href="disclaimer.html">Disclaimer</a> for more information. <a href="#" id="rw_email_contact">Contact</a><script type="text/javascript">var _rwObsfuscatedHref0 = "mai";var _rwObsfuscatedHref1 = "lto";var _rwObsfuscatedHref2 = ":br";var _rwObsfuscatedHref3 = "yan";var _rwObsfuscatedHref4 = ".kl";var _rwObsfuscatedHref5 = "ein";var _rwObsfuscatedHref6 = "@ni";var _rwObsfuscatedHref7 = "st.";var _rwObsfuscatedHref8 = "gov";var _rwObsfuscatedHref = _rwObsfuscatedHref0+_rwObsfuscatedHref1+_rwObsfuscatedHref2+_rwObsfuscatedHref3+_rwObsfuscatedHref4+_rwObsfuscatedHref5+_rwObsfuscatedHref6+_rwObsfuscatedHref7+_rwObsfuscatedHref8; document.getElementById('rw_email_contact').href = _rwObsfuscatedHref;</script><br />

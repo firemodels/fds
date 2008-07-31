@@ -87,7 +87,7 @@
 <!-- InstanceBeginEditable name="Breadcrumb" -->
 <div id="breadcrumbcontainer">
 	<ul>
-        <li><a href="index.html">Home</a>&nbsp;|&nbsp;<a href="developer.html">Developer</a></li>
+        <li><a href="index.html">Home</a>&nbsp;|&nbsp;<a href="developer.html">Developer Resources</a></li>
     </ul>
 </div>
 <!-- &nbsp;|&nbsp;-->
@@ -98,26 +98,16 @@
 <!-- Main Content Area Below Pageheader -->
   <div id="contentwrapper" class="clearfix">
 		<div id="sidebarContainer">
-		<!-- InstanceBeginEditable name="NavigationMenu" -->
 			<div id="navcontainer">
-            <ul>
-              <li><a href="index.html" rel="self">Home</a></li>
-              <li><a href="examples.html" rel="self">Examples</a></li>
-              <li><a href="documentation.html" rel="self">Documentation</a></li>
-              <li><a href="downloads.html" rel="self">Downloads</a></li>
-              <li><a href="support.html" rel="self">Support</a></li>
-              <li><a href="developer.html" rel="self" id="current">Developer</a></li>
-            </ul>
+				<!--#include virtual="navMenu.html" -->
             </div>
-            <!-- InstanceEndEditable -->
-      <br />
+    <br />
 			<div id="sidebar">
 			    <!--#include virtual="sidebarlinks.html" -->
 	      </div>
           <br />
             <div align="left">Note: Throughout the site you will see &quot;external link&quot; icons (<img src="assets/images/external_link_icon.gif" alt="External Link" width="10" height="10" />) next to links that will take you to information not hosted on the nist.gov servers. These links should open in a new browser window or tab.
-          
-	        </div>
+          </div>
 	</div>
 			
 
@@ -126,18 +116,18 @@
 <h1>Developer Resources</h1>
     <h3>Version Numbers and Release Types</h3>
 	<p>Each release of FDS or Smokeview is identified by a version number such as 'FDS_5.0.1' or 'SMV_5.0.1', where the first number is the <strong>Major</strong> release (5), the second number (0) is the <strong>Minor</strong> release, and the third  (1) indicates the <strong>Maintenance</strong> release number.</p>
-	<p>As a general pattern <strong>Major</strong> releases will occur every year or so, and as the name implies dramatically changes the functionality or capabilities of the model. <strong>Minor</strong> releases occur every few months, and may cause minor changes in functionality. <strong>Maintenance</strong> releases are more frequent and are just bug fixes or small refinements, and should not affect code functionality. The <a href="http://code.google.com/p/fds-smv/wiki/FDSReleaseNotes" target="_blank">Release Notes</a> wiki page can help you decide whether the changes should effect the type of applications that you typically do.</p>
+	<p>As a general pattern <strong>Major</strong> releases will occur every year or so, and as the name implies dramatically changes the functionality or capabilities of the model. <strong>Minor</strong> releases occur every few months, and may cause minor changes in functionality. <strong>Maintenance</strong> releases are more frequent and are just bug fixes or small refinements, and should not affect code functionality. The <a href="http://code.google.com/p/fds-smv/wiki/FDSReleaseNotes" target="_blank">Release Notes<img src="assets/images/external_link_icon.gif" alt="External Link" /></a> wiki page can help you decide whether the changes should effect the type of applications that you typically do.</p>
 	<p>To check what version of FDS is available on your computer.  Type the fds executable name on the command line, <em>without</em> an input file name, and the relevant information will appear. Along with the version information you will see a date of compilation (useful to you) and a so-called SVN number (useful to us). The <strong>SVN number</strong> refers to the Subversion repository number of the source code. It allows us to go back in time and recover the exact source code files that were used to build that executable.</p>
 
     <h3>How to Use the Subversion (SVN) Repository</h3>
         <p>The FDS-SMV project provides source file revision management and access through the Subversion revision management system.</p>
-        <p>Information about connecting to the FDS-SMV  Subversion (SVN) repository is in the Project Wiki page titled, "<a href="http://code.google.com/p/fds-smv/wiki/AccessingSubversionRepository" target="_blank">AccessingSubversionRepository</a>". This Wiki page will be updated by the developer team, if changes are made to the method of accessing the repository. If the instructions on the page do not work for you, please create a new report in the FDS-SMV Project <a href="http://code.google.com/p/fds-smv/issues/list" target="_blank">Issue Tracker</a>.</p>
+        <p>Information about connecting to the FDS-SMV  Subversion (SVN) repository is in the Project Wiki page titled, "<a href="http://code.google.com/p/fds-smv/wiki/AccessingSubversionRepository" target="_blank">Accessing Subversion Repository<img src="assets/images/external_link_icon.gif" alt="External Link" /></a>". This Wiki page will be updated by the developer team, if changes are made to the method of accessing the repository. If the instructions on the page do not work for you, please create a new report in the FDS-SMV Project <a href="http://code.google.com/p/fds-smv/issues/list" target="_blank">Issue Tracker<img src="assets/images/external_link_icon.gif" alt="External Link" /></a>.</p>
       <h3>Compiling Instructions</h3>
-      <p>(Coming Soon)</p>
-<!-- InstanceEndEditable -->
-</div>
+      <p>For compilation on Windows, see the <a href="http://code.google.com/p/fds-smv/wiki/FDS_Compilation_for_Windows" target="_blank">FDS Compilation for Windows<img src="assets/images/external_link_icon.gif" alt="External Link" /></a> Wiki.</p>
+      <p>FDS compilation for Linux and OS X  is performed via a <a href="http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Utilities/Makefile/makefile" target="_blank">makefile<img src="assets/images/external_link_icon.gif" alt="External Link" /></a> in the 'Utilities/Makefile' directory within the SVN repository. There are instructions within the makefile that go over how to use it. See the link above to read an online version of the file within the repository.</p>
+<!-- InstanceEndEditable --></div>
 
-    <br style="clear: both;" />
+<br style="clear: both;" />
 		<!-- Site Footer -->
 		<div id="footer">
 			All Information Presented is Public Domain, see <a href="disclaimer.html">Disclaimer</a> for more information. <a href="#" id="rw_email_contact">Contact</a><script type="text/javascript">var _rwObsfuscatedHref0 = "mai";var _rwObsfuscatedHref1 = "lto";var _rwObsfuscatedHref2 = ":br";var _rwObsfuscatedHref3 = "yan";var _rwObsfuscatedHref4 = ".kl";var _rwObsfuscatedHref5 = "ein";var _rwObsfuscatedHref6 = "@ni";var _rwObsfuscatedHref7 = "st.";var _rwObsfuscatedHref8 = "gov";var _rwObsfuscatedHref = _rwObsfuscatedHref0+_rwObsfuscatedHref1+_rwObsfuscatedHref2+_rwObsfuscatedHref3+_rwObsfuscatedHref4+_rwObsfuscatedHref5+_rwObsfuscatedHref6+_rwObsfuscatedHref7+_rwObsfuscatedHref8; document.getElementById('rw_email_contact').href = _rwObsfuscatedHref;</script><br />
