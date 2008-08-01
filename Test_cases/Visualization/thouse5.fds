@@ -1,11 +1,6 @@
 &HEAD CHID='thouse5',TITLE='Town House Kitchen Fire' /
-  
-  update of the thouse4.data test case that was used in the SV4 user's guide to demsonstrate Smokeview features 
 
-&MESH IJK=48,40,24, XB=0.0,6.4,0.0,4.0,0.0,2.4 /
-&MESH IJK=48,40,24, XB=0.0,6.4,0.0,4.0,2.4,4.8 /
-&MESH IJK=48,40,24, XB=0.0,6.4,4.0,8.0,0.0,2.4 /
-&MESH IJK=48,40,24, XB=0.0,6.4,4.0,8.0,2.4,4.8 /
+&MESH IJK=48,80,48, XB=0.0,6.4,0.0,8.0,0.0,4.8 /
 
 &TIME TWFIN=300. /
 &DUMP NFRAMES=3000/
