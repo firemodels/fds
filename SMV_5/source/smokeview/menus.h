@@ -1927,6 +1927,8 @@ void ScriptMenu(int value){
       if(scriptoutstream!=NULL){
         printf("Script recorder on\n");
         script_recording->recording=1;
+        fprintf(scriptoutstream,"RENDERDIR\n");
+        fprintf(scriptoutstream," .\n");
       }
       else{
         script_recording->recording=0;
@@ -2395,6 +2397,8 @@ void EvacMenu(int value){
   GLUTPOSTREDISPLAY
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
+
+/* ------------------ update_streakvalue ------------------------ */
 
 void update_streakvalue(float value){
   particle *parti=NULL;

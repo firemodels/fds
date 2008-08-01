@@ -1643,6 +1643,12 @@ void Display(void){
 #ifdef pp_CULL
     if(update_initcull==1)initcull(cullsmoke);
 #endif
+   if(update_streaks==1&&ReadPartFile==1){
+     void ParticleStreakShowMenu(int var);
+
+     ParticleStreakShowMenu(streak_index);
+     update_streaks=0;
+   }
 
   if(updatemenu==1){
     if(menustatus==GLUT_MENU_NOT_IN_USE){
