@@ -26,7 +26,7 @@ setenv SVNROOT ~/FDS-SMV
 
 # VVVVVVVVVVV Do not change these line VVVVVVVVVVVVVV
 set RUNFDS=$SVNROOT/Utilities/Scripts/runfds.csh
-set RUNFDSMPI=$SVNROOT/Scripts/runfdsmpi.csh
+set RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.csh
 setenv BASEDIR `pwd`
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -44,11 +44,11 @@ setenv BASEDIR `pwd`
 # VVVVVVVVVVVV Change lines below to point to cases to be run VVVVVVVVVVVVV
 
 # plume cases
-$RUNFDS . plume5a fire64 &
-$RUNFDS . plume5b fire64 &
-$RUNFDS . plume5c fire65 &
-$RUNFDS . pplume5 fire65 &
-setenv LAMNODES n0 n0 n0 n0
-$RUNFDSMPI . thouse5 fire73 &
+#$RUNFDS . plume5a fire64 &
+#$RUNFDS . plume5b fire64 &
+#$RUNFDS . plume5c fire65 &
+#$RUNFDS . pplume5 fire65 &
+setenv LAMNODES "n6 n6 n6 n6"
+$RUNFDSMPI . thouse5 fire76 &
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
