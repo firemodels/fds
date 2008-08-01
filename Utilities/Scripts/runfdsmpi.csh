@@ -4,7 +4,7 @@ set dir=$1
 set infile=$2
 set host=$3
 
-set fulldir=$JOBDIR/$dir
+set fulldir=$BASEDIR/$dir
 set in=$infile.fds
 set out=$infile.err
 set stopfile=$infile.stop
