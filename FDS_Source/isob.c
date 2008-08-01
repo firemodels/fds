@@ -1,4 +1,5 @@
 #undef _DEBUG
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -1874,9 +1875,9 @@ void CCisoheader(char *isofile,
 
   isostream=fopen(isofile,"wb");
 
-  len[0]=strlen(isolonglabel)+1;
-  len[1]=strlen(isoshortlabel)+1;
-  len[2]=strlen(isounits)+1;
+  len[0]=(int)strlen(isolonglabel)+1;
+  len[1]=(int)strlen(isoshortlabel)+1;
+  len[2]=(int)strlen(isounits)+1;
 
   fwrite(&version,1,4,isostream);
   fwrite(len,4,3,isostream);
@@ -1904,9 +1905,9 @@ void CCtisoheader(char *isofile,
 
   isostream=fopen(isofile,"wb");
 
-  len[0]=strlen(isolonglabel)+1;
-  len[1]=strlen(isoshortlabel)+1;
-  len[2]=strlen(isounits)+1;
+  len[0]=(int)strlen(isolonglabel)+1;
+  len[1]=(int)strlen(isoshortlabel)+1;
+  len[2]=(int)strlen(isounits)+1;
 
   fwrite(&one,4,1,isostream);  
   fwrite(&version,4,1,isostream);
