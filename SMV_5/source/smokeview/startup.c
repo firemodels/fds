@@ -1579,6 +1579,7 @@ void initvars1(void){
   nskyboxinfo=0;
   part5show=1;
   streak5show=0;
+  update_streaks=0;
 //SVEXTERN int nstreak_value; // 5
 //SVEXTERN char *streak_values[5]; // "1","2","4","8","16"
 //SVEXTERN float streak_rvalue[5]; // 1.0, 2.0 4.0, 8.0, 16.0 
@@ -2064,6 +2065,7 @@ void initvars0(void){
   INI_fds_filein=NULL, fds_filein=NULL, fds_fileout=NULL,fds_fileout2=NULL;
   caseinifilename=NULL;
   scriptinifilename=NULL;
+  scriptinifilename2=NULL;
   zonelonglabels=NULL, zoneshortlabels=NULL, zoneunits=NULL;
   smokeviewini=NULL;
   surfids=NULL;
