@@ -48,5 +48,7 @@ $RUNFDS . plume5a fire64 &
 $RUNFDS . plume5b fire64 &
 $RUNFDS . plume5c fire65 &
 $RUNFDS . pplume5 fire65 &
+setenv LAMNODES n0 n0 n0 n0
+$RUNFDSMPI . thouse5 fire73 &
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
