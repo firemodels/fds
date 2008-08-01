@@ -1,6 +1,7 @@
 &HEAD CHID='pthouse5',TITLE='Town House Kitchen Fire' /
 
-  multi-mesh version of thouse5.fds .  This case has 4 meshes.  It demonstrates and tests the multi-mesh features of SV
+  multi-mesh version of thouse5.fds .  This case has 4 meshes.  
+  It demonstrates and tests the multi-mesh features of Smokeview.
 
 
 &MESH IJK=24,40,48, XB=0.0,3.2,0.0,4.0,0.0,4.8 /
