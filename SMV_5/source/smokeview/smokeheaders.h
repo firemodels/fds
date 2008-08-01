@@ -28,6 +28,8 @@ int SUB_portfrustum(int quad,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
 
+
+EXTERNCPP float get_vecfactor(int *iveclengths);
 EXTERNCPP void add_new_tour(void);
 EXTERNCPP void cleanbuffer(char *buffer, char *buffer2);
 EXTERNCPP void start_script(void);

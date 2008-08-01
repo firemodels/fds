@@ -6010,6 +6010,14 @@ int readini2(char *inifile, int localfile){
       if(offset_slice!=0)offset_slice=1;
       continue;
     }
+
+    if(match(buffer,"VECLENGTH",9)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %i %i %i",&iveclengths);
+      vecfactor = get_vecfactor(&iveclengths);
+      continue;
+    }
+
     if(match(buffer,"SHOWSTREAK",10)==1){
       void ParticleStreakShowMenu(int var);
 
@@ -8367,6 +8375,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",offset_slice);
   fprintf(fileout,"SHOWSTREAK\n");
   fprintf(fileout," %i %i %i %i\n",streak5show,streak5step,showstreakhead,streak_index);
+  fprintf(fileout,"VECLENGTH\n");
+  fprintf(fileout," %i\n",iveclengths);
 
   fprintf(fileout,"\nMISC\n");
   fprintf(fileout,"----\n\n");
