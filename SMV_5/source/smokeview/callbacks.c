@@ -458,6 +458,15 @@ void keyboard_up(unsigned char key, int x, int y){
   resetclock=1;
 }
 
+/* ------------------ get_vecfactor ------------------------ */
+
+float get_vecfactor(int *ivec){
+  float vec;
+  if(*ivec>NVECLENGTHS-1)*ivec=0;
+  if(*ivec<0)*ivec=NVECLENGTHS-1;
+  vec=VECFRACTION*veclengths[*ivec];
+  return vec;
+}
 /* ------------------ keyboard ------------------------ */
 
 void keyboard(unsigned char key, int x, int y){
@@ -822,10 +831,8 @@ void keyboard(unsigned char key, int x, int y){
     }
     else{
       iveclengths += FlowDir;
-      if(iveclengths>NVECLENGTHS-1)iveclengths=0;
-      if(iveclengths<0)iveclengths=NVECLENGTHS-1;
+      vecfactor = get_vecfactor(&iveclengths);
       printf("iveclengths=%i\n",iveclengths);
-      vecfactor=VECFRACTION*veclengths[iveclengths];
       if(visVector==1&&ReadPlot3dFile==1){
         gbsave=current_mesh;
         for(i=0;i<nmeshes;i++){
