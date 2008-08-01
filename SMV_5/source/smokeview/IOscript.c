@@ -56,6 +56,9 @@ void ParticlePropShowMenu(int var);
 //  Use other LOAD commands to load files of the specified type for 
 //  all meshes.
 
+// LOADINIFILE 
+//  file (char)
+
 // LOADFILE 
 //  file (char)
 
@@ -288,6 +291,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"LOADINIFILE",11) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"LOADVFILE",9) == 1){
       nscriptinfo++;
       continue;
@@ -449,6 +456,21 @@ int compile_script(char *scriptfile){
         NewMemory((void **)&scripti->cval,len+1);
         strcpy(scripti->cval,buffer);
       }
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADINIFILE",11) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADINIFILE);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len=strlen(buffer);
+      NewMemory((void **)&scripti->cval,len+1);
+      strcpy(scripti->cval,buffer);
 
       nscriptinfo++;
       continue;
@@ -908,6 +930,19 @@ void script_partclasstype(scriptdata *scripti){
   }
 }
 
+/* ------------------ script_loadinifile ------------------------ */
+
+void script_loadinifile(scriptdata *scripti){
+  int i;
+  int errorcode;
+
+  printf("Script: loading ini file %s",scripti->cval);
+  printf("\n");
+  scriptinifilename2=scripti->cval;
+  readini(2);
+  scriptinifilename2=NULL;
+
+}
 /* ------------------ script_loadfile ------------------------ */
 
 void script_loadfile(scriptdata *scripti){
@@ -1079,6 +1114,9 @@ void run_script(void){
       break;
     case SCRIPT_LOADFILE:
       script_loadfile(scripti);
+      break;
+    case SCRIPT_LOADINIFILE:
+      script_loadinifile(scripti);
       break;
     case SCRIPT_LOADVFILE:
       script_loadvfile(scripti);

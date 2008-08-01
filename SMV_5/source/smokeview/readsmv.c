@@ -5936,6 +5936,12 @@ int readini(int scriptconfigfile){
     if(readini2(scriptinifilename,1)==2)return 2;
   }
 
+  // read in ini file specified in script
+
+  if(scriptinifilename2!=NULL&&scriptconfigfile==2){
+    if(readini2(scriptinifilename2,1)==2)return 2;
+    scriptinifilename2=NULL;
+  }
   updateglui();
   if(unitclasses_ini!=NULL){
     unitclasses=unitclasses_ini;
@@ -6004,6 +6010,20 @@ int readini2(char *inifile, int localfile){
       if(offset_slice!=0)offset_slice=1;
       continue;
     }
+    if(match(buffer,"SHOWSTREAK",10)==1){
+      void ParticleStreakShowMenu(int var);
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %i %i %i",&streak5show,&streak5step,&showstreakhead,&streak_index);
+      if(streak5show!=1){
+        streak5show=0;
+        streak_index=-2;
+      }
+      if(showstreakhead!=1)showstreakhead=0;
+      update_streaks=1;
+      continue;
+    }
+
     if(match(buffer,"SHOWTERRAIN",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visTerrain);
@@ -8345,6 +8365,8 @@ void writeini(int flag){
   fprintf(fileout,"%f\n",vertical_factor);
   fprintf(fileout,"OFFSETSLICE\n");
   fprintf(fileout," %i\n",offset_slice);
+  fprintf(fileout,"SHOWSTREAK\n");
+  fprintf(fileout," %i %i %i %i\n",streak5show,streak5step,showstreakhead,streak_index);
 
   fprintf(fileout,"\nMISC\n");
   fprintf(fileout,"----\n\n");

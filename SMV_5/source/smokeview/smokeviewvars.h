@@ -642,7 +642,7 @@ SVEXTERN scriptfiledata *script_recording;
 SVEXTERN int runscript, noexit;
 SVEXTERN int script_multislice, script_multivslice, script_iso;
 SVEXTERN FILE *scriptoutstream;
-SVEXTERN char *scriptinifilename;
+SVEXTERN char *scriptinifilename, *scriptinifilename2;
 SVEXTERN char *logfilename;
 SVEXTERN char *flushfile, *chidfilebase;
 SVEXTERN char *hrrfilename;
@@ -835,7 +835,7 @@ SVEXTERN int streak5show,streak5value, streak5step, showstreakhead;
 SVEXTERN int nstreak_value; // 5
 SVEXTERN char *streak_values[5]; // "1","2","4","8","16"
 SVEXTERN float streak_rvalue[7]; // 1.0, 2.0 4.0, 8.0, 16.0 
-SVEXTERN int streak_index;       // 0
+SVEXTERN int streak_index, update_streaks;       // 0
 SVEXTERN float float_streak5value;// 1.0
 SVEXTERN part5class *partclassinfo;
 SVEXTERN int npartclassinfo;
