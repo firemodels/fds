@@ -1,0 +1,7 @@
+make clean
+make intel_osx_32
+make clean
+make intel_osx_mpi_32
+make clean
+make intel_osx_db_32
+make clean
