@@ -1,5 +1,7 @@
+ //RENDERDIR
+ // ..\..\Manuals\SMV_5_User_Guide\figures
 RENDERDIR
- ..\..\Manuals\SMV_5_User_Guide\figures
+ temp
 LOADINIFILE
  plume5b_part.ini
 LOADFILE
