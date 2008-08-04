@@ -939,6 +939,7 @@ void script_loadinifile(scriptdata *scripti){
   printf("Script: loading ini file %s",scripti->cval);
   printf("\n");
   scriptinifilename2=scripti->cval;
+  windowresized=0;
   readini(2);
   scriptinifilename2=NULL;
 
