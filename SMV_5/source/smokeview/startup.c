@@ -1169,7 +1169,7 @@ void initvars1(void){
 
   visTarg = 0, ReadTargFile;
   showtarget=0;
-  visAIso=0;
+  visAIso=1;
   surfincrement=0,visiso=0;
   isotest=0;
   isooffset=1,offsetmax=5;
