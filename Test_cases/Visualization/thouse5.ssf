@@ -1,5 +1,5 @@
 RENDERDIR
- ..\..\Manuals\SMV_5_User_Guide\figures
+ ..\..\Manuals\SMV_5_User_Guide\scriptfigures
 LOADINIFILE
  thouse5_part.ini
 UNLOADALL

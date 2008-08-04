@@ -1,16 +1,131 @@
-\chapter{Visualization Test Cases}
-\section{Particles}
 \newcommand{\figheightD}{1.3in}
+
+\chapter{Verifying Smokeview}
+
+
+\section{Data Presentation}
+\subsection{Boundary}
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cccc}
- \includegraphics[height=\figheightD]{figures/plume5b_part_01}&
- \includegraphics[height=\figheightD]{figures/plume5b_streak_01}& \includegraphics[height=\figheightD]{figures/plume5b_slice_01}&  \includegraphics[height=\figheightD]{figures/plume5b_iso_01}\\   \includegraphics[height=\figheightD]{figures/plume5b_part_02}&
- \includegraphics[height=\figheightD]{figures/plume5b_streak_02}& \includegraphics[height=\figheightD]{figures/plume5b_slice_02}&  \includegraphics[height=\figheightD]{figures/plume5b_iso_02}\\    \includegraphics[height=\figheightD]{figures/plume5b_part_03}&
- \includegraphics[height=\figheightD]{figures/plume5b_streak_03}& \includegraphics[height=\figheightD]{figures/plume5b_slice_03}&  \includegraphics[height=\figheightD]{figures/plume5b_iso_03}\\    \includegraphics[height=\figheightD]{figures/plume5b_part_04}&
- \includegraphics[height=\figheightD]{figures/plume5b_streak_04}& \includegraphics[height=\figheightD]{figures/plume5b_slice_04}&  \includegraphics[height=\figheightD]{figures/plume5b_iso_04}\\    \includegraphics[height=\figheightD]{figures/plume5b_part_05}&
- \includegraphics[height=\figheightD]{figures/plume5b_streak_05}& \includegraphics[height=\figheightD]{figures/plume5b_slice_05}&  \includegraphics[height=\figheightD]{figures/plume5b_iso_05}    \end{tabular}
+\begin{tabular}{rcc}
+ time (s)&normal&show ignited\
+ 5 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_bound_05}&
+ \includegraphics[height=\figheightD]{figures/thouse5_bound_ignited_05}&
+ 10 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_bound_10}&
+ \includegraphics[height=\figheightD]{figures/thouse5_bound_ignited_10}&
+ 30 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_bound_30}&
+ \includegraphics[height=\figheightD]{figures/thouse5_bound_ignited_30}&
+ 60 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_bound_60}&
+ \includegraphics[height=\figheightD]{figures/thouse5_bound_ignited_60}&
+ \end{tabular}
 \end{center}
  \caption[]{Test case illustrating particles.}
 \label{figpart_example}%
 \end{figure}
+\subsection{Isosurfaces}
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rcccc}
+ time (s)&solid&triangles&points\
+ 5 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_solid_05}&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_triangles_05}&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_points_05}\\
+ 10 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_solid_10}&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_triangles_10}&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_points_105}\\
+ 30 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_solid_30}&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_triangles_30}&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_points_30}\\
+ 60 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_solid_60}&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_triangles_60}&
+ \includegraphics[height=\figheightD]{figures/thouse5_iso_points_60}\\
+ \end{tabular}
+\end{center}
+ \caption[]{Test case illustrating particles.}
+\label{figpart_example}%
+\end{figure}
+\subsection{Particles}
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rcccc}
+ time (s)&points&1.0 s streak&2.0 s streak&4.0 s streak\
+ 5 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_05}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_01_05}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_02_05}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_04_05}&
+ 10 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_10}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_01_10}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_02_10}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_04_10}&
+ 30 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_30}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_01_30}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_02_30}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_04_30}&
+ 60 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_60}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_01_60}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_02_60}&
+ \includegraphics[height=\figheightD]{figures/thouse5_part_streak_04_60}&
+ \end{tabular}
+\end{center}
+ \caption[]{Test case illustrating particles.}
+\label{figpart_example}%
+\end{figure}
+\subsection{Slices}
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rcccc}
+ time (s)&points&1.0 s streak&2.0 s streak&4.0 s streak\
+ 5 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_slice_05}&
+ \includegraphics[height=\figheightD]{figures/thouse5_slice_chop_05}&
+ 10 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_slice_10}&
+ \includegraphics[height=\figheightD]{figures/thouse5_slice_chop_10}&
+ 30 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_slice_30}&
+ \includegraphics[height=\figheightD]{figures/thouse5_slice_chop_30}&
+ 60 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_slice_60}&
+ \includegraphics[height=\figheightD]{figures/thouse5_slice_chop_60}&
+ \end{tabular}
+\end{center}
+ \caption[]{Test case illustrating particles.}
+\label{figpart_example}%
+\end{figure}
+\subsection{Vector Slices}
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rcccc}
+ time (s)&points&1.0 s streak&2.0 s streak&4.0 s streak\
+ 5 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_vslice_05}&
+ \includegraphics[height=\figheightD]{figures/thouse5_vslice_chop_05}&
+ 10 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_vslice_10}&
+ \includegraphics[height=\figheightD]{figures/thouse5_vslice_chop_10}&
+ 30 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_vslice_30}&
+ \includegraphics[height=\figheightD]{figures/thouse5_vslice_chop_30}&
+ 60 s&
+ \includegraphics[height=\figheightD]{figures/thouse5_vslice_60}&
+ \includegraphics[height=\figheightD]{figures/thouse5_vslice_chop_60}&
+ \end{tabular}
+\end{center}
+ \caption[]{Test case illustrating particles.}
+\label{figpart_example}%
+\end{figure}
+\subsection{Smoke}
+\section{Geometry}
+\section{Other}
