@@ -6013,7 +6013,7 @@ int readini2(char *inifile, int localfile){
 
     if(match(buffer,"VECLENGTH",9)==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i",&iveclengths);
+      sscanf(buffer,"%i",&iveclengths);
       vecfactor = get_vecfactor(&iveclengths);
       continue;
     }
@@ -7141,6 +7141,14 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&render_option);
       RenderMenu(render_option);
+      continue;
+      }
+    if(match(buffer,"SHOWISO",7)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&visAIso);
+      if(visAIso<0||visAIso>3){
+        visAIso=1;
+      }
       continue;
       }
     if(trainer_mode==0&&windowresized==0){
@@ -8399,6 +8407,9 @@ void writeini(int flag){
   fprintf(fileout," %i\n",iveclengths);
   fprintf(fileout,"ISOTRANS\n");
   fprintf(fileout," %i\n",transparent_state);
+  fprintf(fileout,"SHOWISO\n");
+  fprintf(fileout," %i\n",visAIso);
+
 
   fprintf(fileout,"\nMISC\n");
   fprintf(fileout,"----\n\n");

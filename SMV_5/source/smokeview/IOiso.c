@@ -657,7 +657,6 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   ib->display=1;
   loaded_isomesh=meshinfo+ib->blocknumber;
   update_iso_showlevels();
-  visAIso=1;
   ReadIsoFile=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatemenu=1;
@@ -719,7 +718,6 @@ void unloadiso(mesh *meshi){
     if(meshi2->isofilenum!=-1)nloaded++;
   }
   if(nloaded==0){
-    visAIso=0;
     ReadIsoFile=0;
   }
 
