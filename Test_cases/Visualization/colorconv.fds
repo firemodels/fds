@@ -1,6 +1,6 @@
 A simple two-dimensional case testing data to color conversion 
 
-&HEAD CHID='colorconv', TITLE='Test data to color conversion, SVN $Revision: 2066 $' / 
+&HEAD CHID='colorconv', TITLE='Test data to color conversion, SVN $Revision$' / 
 &DUMP NFRAMES=5000 /
 
 &MESH IJK=100,1,100, XB=0.0,100.0,-1.0,1.0,0.0,100.0 /
