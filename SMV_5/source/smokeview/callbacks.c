@@ -1656,6 +1656,11 @@ void Display(void){
      ParticleStreakShowMenu(streak_index);
      update_streaks=0;
    }
+   if(update_screensize==1){
+     update_screensize=0;
+     update_windowsizelist();
+     ResizeWindow(screenWidth,screenHeight);
+   }
 
   if(updatemenu==1){
     if(menustatus==GLUT_MENU_NOT_IN_USE){
