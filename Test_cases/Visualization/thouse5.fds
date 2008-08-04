@@ -146,7 +146,7 @@ Conductivity ramps
 &RAMP ID='k_char', T= 20., F=0.08 /
 &RAMP ID='k_char', T=900., F=0.25 /
 
-&PART ID='smoke', MASSLESS=.TRUE., SAMPLING_FACTOR=10 /
+&PART ID='smoke', MASSLESS=.TRUE., SAMPLING_FACTOR=1 /
 
 &VENT XB=0.0,0.3,1.00,1.50,0.9,0.9,SURF_ID='BURNER' /
 
