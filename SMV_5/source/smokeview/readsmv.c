@@ -7143,22 +7143,36 @@ int readini2(char *inifile, int localfile){
       RenderMenu(render_option);
       continue;
       }
-    if(trainer_mode==0&&windowresized==0&&match(buffer,"WINDOWWIDTH",11)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&screenWidth);
-      if(screenWidth<=0){
-        screenWidth = glutGet(GLUT_SCREEN_WIDTH);
-      }
-      continue;
-      }
-    if(trainer_mode==0&&windowresized==0&&match(buffer,"WINDOWHEIGHT",12)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&screenHeight);
-      if(screenHeight<=0){
-        screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
-      }
-      continue;
-      }
+    if(trainer_mode==0&&windowresized==0){
+      if(match(buffer,"WINDOWWIDTH",11)==1){
+        int scrWidth;
+
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i",&scrWidth);
+        if(scrWidth<=0){
+          scrWidth = glutGet(GLUT_SCREEN_WIDTH);
+        }
+        if(scrWidth!=screenWidth){
+          screenWidth=scrWidth;
+          update_screensize=1;
+        }
+        continue;
+        }
+      if(match(buffer,"WINDOWHEIGHT",12)==1){
+        int scrHeight;
+
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i",&scrHeight);
+        if(scrHeight<=0){
+          scrHeight = glutGet(GLUT_SCREEN_HEIGHT);
+        }
+        if(scrHeight!=screenHeight){
+          screenHeight=scrHeight;
+          update_screensize=1;
+        }
+        continue;
+        }
+    }
     if(match(buffer,"SHOWTIMEBAR",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visTimeLabels);

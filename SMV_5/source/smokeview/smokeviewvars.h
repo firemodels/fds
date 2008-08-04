@@ -830,6 +830,7 @@ SVEXTERN zvent *zventinfo;
 SVEXTERN zone *zoneinfo;
 SVEXTERN zone *activezone;
 SVEXTERN particle *partinfo;
+SVEXTERN int update_screensize;
 SVEXTERN int part5show;
 SVEXTERN int streak5show,streak5value, streak5step, showstreakhead;
 SVEXTERN int nstreak_value; // 5
