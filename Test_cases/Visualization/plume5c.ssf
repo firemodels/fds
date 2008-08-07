@@ -1,0 +1,245 @@
+// put files in directory
+RENDERDIR
+ ..\..\Manuals\SMV_5_User_Guide\scriptfigures
+//RENDERDIR
+// temp
+// render slice files
+UNLOADALL
+LOADINIFILE
+ plume5c_slice.ini
+LOADFILE
+ plume5c_05.sf
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_slice_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_slice_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_slice_30
+// render slice files with chopping
+UNLOADALL
+LOADINIFILE
+ plume5c_slicechop.ini
+LOADFILE
+ plume5c_05.sf
+RENDERONCE
+ plume5c_slice_chop_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_slice_chop_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_slice_chop_30
+// render vslice files
+UNLOADALL
+LOADINIFILE
+ plume5c_vslice.ini
+LOADVFILE
+ plume5c_05.sf
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_vslice_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_vslice_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_vslice_30
+// render vslice files with chopping
+UNLOADALL
+LOADINIFILE
+ plume5c_vslicechop.ini
+LOADVFILE
+ plume5c_05.sf
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_vslicechop_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_vslicechop_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_vslicechop_30
+// render iso files
+UNLOADALL
+LOADINIFILE
+ plume5c_iso.ini
+LOADFILE
+ plume5c_01.iso
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_iso_solid_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_iso_solid_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_iso_solid_30
+// render iso files (outline)
+LOADINIFILE
+ plume5c_iso_outline.ini
+UNLOADALL
+LOADFILE
+ plume5c_01.iso
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_iso_outline_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_iso_outline_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_iso_outline_30
+// render iso files (points)
+LOADINIFILE
+ plume5c_iso_points.ini
+UNLOADALL
+LOADFILE
+ plume5c_01.iso
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_iso_points_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_iso_points_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_iso_points_30
+// render particle files
+LOADINIFILE
+ plume5c_part.ini
+UNLOADALL
+LOADFILE
+ plume5c.prt5
+PARTCLASSCOLOR
+ Uniform color
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_part_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_part_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_part_30
+// render particle streak files
+UNLOADALL
+LOADINIFILE
+ plume5c_part_streak.ini
+LOADFILE
+ plume5c.prt5
+PARTCLASSCOLOR
+ Uniform color
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_part_streak_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_part_streak_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_part_streak_30
+// render particle streak2 files
+UNLOADALL
+LOADINIFILE
+ plume5c_part_streak2.ini
+LOADFILE
+ plume5c.prt5
+PARTCLASSCOLOR
+ Uniform color
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_part_streak2_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_part_streak2_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_part_streak2_30
+// render boundary files
+UNLOADALL
+LOADINIFILE
+ plume5c_bound.ini
+LOADFILE
+ plume5c_03.bf
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_bound_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_bound_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_bound_30
+// render boundary files
+UNLOADALL
+LOADINIFILE
+ plume5c_bound_ign.ini
+LOADFILE
+ plume5c_03.bf
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_bound_ign_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_bound_ign_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_bound_ign_30
+// render smoke files
+UNLOADALL
+LOADFILE
+ plume5c_01.s3d
+LOADFILE
+ plume5c_02.s3d
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_smoke_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_smoke_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_smoke_30
+
+

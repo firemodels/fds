@@ -167,3 +167,23 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_streak_060
+UNLOADALL
+RENDERONCE
+ thouse5_solid
+LOADINIFILE
+ thouse5_outline.ini
+RENDERONCE
+ thouse5_outline
+LOADINIFILE
+ thouse5_hidden.ini
+RENDERONCE
+ thouse5_hidden
+LOADINIFILE
+ thouse5_noopen.ini
+RENDERONCE
+ thouse5_noopen
+LOADINIFILE
+ thouse5_novents.ini
+RENDERONCE
+ thouse5_novents
+
