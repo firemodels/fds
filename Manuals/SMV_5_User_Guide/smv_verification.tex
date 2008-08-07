@@ -1,109 +1,193 @@
 \newcommand{\figheightD}{2.75in}
+\newcommand{\figheightE}{2.5in}
 
 \chapter{Verifying Smokeview}
+This chapter presents FDS results in the form of Smokeview images used
+to verify that Smokeview is working as expected.  The FDS generated data is presumed
+to be correct.  FDS has its own set of verification cases to test the correctness of the data.
+The purpose of the cases here is to confirm that the data is drawn correctly.
+In particular these cases confirm
+that correct files are loaded, data is scaled and drawn correctly, geometry is drawn correctly
+{\em etc.}   Three types of verification cases are presented. The first set are the most important, those cases that verify that data is drawn correctly.  The second set of
+cases verify that various geometric elements are drawn correctly and the third set verifies
+that the various options and underlying features are implemented and perform properly.
+
 
 
 \section{Data Presentation}
-\subsection{Boundary}
+Figure \ref{figboundtest} shows a series of boundary file images drawn at 5.0, 10.0 and 30.0
+seconds.
+The first column of images colors data according to temperature using temperature while the second column of images
+highlights regions where ignition has occurred defined by wherever the surface temperature exceeds a specified value.
+Figure \ref{figisotest} shows a series of temperature isosurface file drawn images at 5.0, 10.0 and 30.0
+seconds.  The three columns of images present the isosurfaces drawn as a solid, outline and points.
+Figure \ref{figparttest} shows a series of particle file images drawn at 5.0, 10.0 and 30.0
+seconds.
+The first column shows particles while the second and third columns shows streaks of length 0.5 s and 1.0 s.
+Figure \ref{figslicetest} shows a series of slice file images drawn at 5.0, 10.0 and 30.0
+seconds.
+The first column draws all of the data.  The second data discards or chops data below 140~\degC.
+Figure \ref{figvslicetest} shows a series of vector slice file images drawn at 5.0, 10.0 and 30.0
+seconds.
+Similar to the slice file images, the first column draws all of the data while the second column discards or chops data below 140~\degC.
+Figure \ref{figsmoketest} shows a series of 3D smoke images drawn at 5.0, 10.0 and 30.0
+seconds.  The images contain both opacity slices derived from soot densities and heat release rate  per unit volume (HRRPUV).
+
+
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{rcc}
-&&show ignited\\
- 5 s&
+\begin{tabular}{rccl}
+ 1.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_01}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_ign_01}\\
- 10 s&
+ 10.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_10}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_ign_10}\\
- 30 s&
+ 30.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_30}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_ign_30}\\
+&&show ignited regions\\
+ &&&\raisebox{1.0in}[0pt]{\includegraphics[height=7.0in]{figures/colorbar_20_620}}\\
   \end{tabular}
 \end{center}
  \caption[]{Boundary file test.}
 \label{figboundtest}%
 \end{figure}
-\subsection{Isosurfaces}
+
+
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{rccc}
- &solid&outline&points\\
- 1 s&
+ 1.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_01}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_outline_01}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_points_01}\\
- 10 s&
+ 10.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_10}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_outline_10}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_points_10}\\
- 30 s&
+ 30.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_30}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_outline_30}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_points_30}\\
+ &solid&outline&points
   \end{tabular}
 \end{center}
  \caption[]{Isosurface file test.}
 \label{figisotest}%
 \end{figure}
-\subsection{Particles}
+
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{rccc}
- &points&0.5 s streaks&1.0 s streaks\\
- 5 s&
+ 1.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_01}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak_01}&
- \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak2_01}\\  10 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak2_01}\\  
+ 10.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_10}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak_10}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak2_10}\\
-  30 s&
+  30.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_30}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak_30}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak2_30}\\
+ &points&0.5 s streaks&1.0 s streaks\\
   \end{tabular}
 \end{center}
  \caption[]{Particle file test.}
 \label{figparttest}%
 \end{figure}
-\subsection{Slices}
+
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{rcc}
- &&data chopped below 140~\degC\\
- 5 s&
+\begin{tabular}{rccl}
+ 1.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_01}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_chop_01}\\
- 10 s&
+ 10.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_10}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_chop_10}\\
- 30 s&
+ 30.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_30}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_chop_30}\\
+ &&data chopped below 140~\degC\\
+ &&&\raisebox{1.0in}[0pt]{\includegraphics[height=7.0in]{figures/colorbar_20_620}}\\
  \end{tabular}
 \end{center}
  \caption[]{Slice file test.}
 \label{figslicetest}%
 \end{figure}
-\subsection{Vector Slices}
+
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{rcc}
- &&data below 140 chopped\\
- 5 s&
+\begin{tabular}{rccl}
+ 1.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslice_01}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslicechop_01}\\
- 10 s&
+ 10.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslice_10}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslicechop_10}\\
- 30 s&
+ 30.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslice_30}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslicechop_30}\\
+ &&data chopped below 140~\degC\\
+ &&&\raisebox{1.0in}[0pt]{\includegraphics[height=7.0in]{figures/colorbar_20_620}}\\
+
  \end{tabular}
 \end{center}
  \caption[]{Vector slice file test.}
 \label{figvslicetest}%
 \end{figure}
-\subsection{Smoke}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rc}
+ 1.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_01}\\
+ 10.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_10}\\
+ 30.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_30}\\
+
+ \end{tabular}
+\end{center}
+ \caption[]{3D smoke file test.}
+\label{figsmoketest}%
+\end{figure}
+
 \section{Geometry}
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=\figheightE]{scriptfigures/thouse5_solid}\\
+ solid\\
+ \includegraphics[height=\figheightE]{scriptfigures/thouse5_outline}\\
+ outline\\
+ \includegraphics[height=\figheightE]{scriptfigures/thouse5_hidden}\\
+ hidden\\
+
+ \end{tabular}
+\end{center}
+ \caption[]{Obstacle view test.}
+\label{figobstest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=\figheightE]{scriptfigures/thouse5_solid}\\
+ all vents\\
+ \includegraphics[height=\figheightE]{scriptfigures/thouse5_noopen}\\
+ no open vents\\
+ \includegraphics[height=\figheightE]{scriptfigures/thouse5_novents}\\
+ no vents\\
+
+ \end{tabular}
+\end{center}
+ \caption[]{Vent view test.}
+\label{figventest}%
+\end{figure}
+
+
 \section{Other}
