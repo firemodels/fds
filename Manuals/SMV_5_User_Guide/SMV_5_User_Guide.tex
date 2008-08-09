@@ -4387,6 +4387,11 @@ this rate but may display frames at a slower rate if the scene to be visualized 
 complex.
 (default: 1000000 (essentially unlimited))
 
+\hitem{ISOTRANS}Specifies transparency state for iso-surfaces. The choices
+are all iso-surface levels transparent (ALL\_TRANSPARENT=1), minimum
+iso-surface level solid (MIN\_SOLID=2), maximum iso-surface level solid (MAX\_SOLID=3)
+and all iso-surface levels transparent (ALL\_TRANSPARENT=4) (default: 3)
+
 \hitem{MSCALE} Specifies how dimensions along the X, Y
 and/or Z axes should be scaled. (default: 1.0 1.0 1.0)
 
@@ -4507,6 +4512,19 @@ sprinkler droplet particles (if present in the particle file)
 should be drawn (1) or not drawn (0).
 (default: 1)
 
+\hitem{SHOWSTREAK}Specify parameters that define streak properties.  This keyword
+has four integer parameters with format:
+\begin{verbatim}
+SHOWSTREAK
+streak5show,streak5step,showstreakhead,streakindex
+\end{verbatim}
+The {\tt streak5show}\ parameter may be 0 or 1 and indicates whether a
+streak is not (0) or is (1) shown. The {\tt streak5step}\ parameter
+indicates number of streaks skipped or not displayed.
+The {\tt showstreakhead}\ parameter may be 0 or 1 and indicates whether a streak head is not (0) or is (1) shown.
+The {\tt streakindex}\ parameter indicates the length of the streak.
+
+
 \hitem{SHOWTERRAIN} If terrain is present, specifies that terrain should be visualized as a {\em warped}\ sheet
 rather than as a set of FDS blockages.
 
@@ -4619,6 +4637,8 @@ f/s
 3.280833 0.0
 \end{verbatim}
 }
+
+\hitem{VECLENGTH} Specifies vector lengths.
 
 \hitem{VECTORSKIP}Specifies
 what vectors to draw.  For example, if this parameter is set to 2 then
@@ -4774,7 +4794,7 @@ thinner. Parameters may range from 0 to 7. (default: 0)
 
  \elist
 
-\subsection{Zone Fire Modeling Parmaeters}
+\subsection{Zone Fire Modeling Parameters}
 \blist
 \hitem{SHOWHZONE}Specifies whether upper layer temperatures should be (1) drawn horizontally
 or not (0).  (default: 0)
