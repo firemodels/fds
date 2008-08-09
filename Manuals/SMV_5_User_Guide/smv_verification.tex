@@ -1,5 +1,7 @@
 \newcommand{\figheightD}{2.75in}
 \newcommand{\figheightE}{2.5in}
+\newcommand{\figheightF}{2.25in}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
 
 \chapter{Verifying Smokeview}
 This chapter presents FDS results in the form of Smokeview images used
@@ -83,7 +85,7 @@ seconds.  The images contain both opacity slices derived from soot densities and
  1.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_01}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak_01}&
- \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak2_01}\\  
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak2_01}\\
  10.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_10}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak_10}&
@@ -156,6 +158,40 @@ seconds.  The images contain both opacity slices derived from soot densities and
 \label{figsmoketest}%
 \end{figure}
 
+\begin{figure}[\figoptions]
+\begin{center}
+ \centering
+\begin{tabular}{m{1in}m{3in}m{3in}}
+ &0.1 m grid&0.2 m grid\\
+ all planes&\includegraphics[height=\figheightF]{scriptfigures/smoke_test_all}&
+ \includegraphics[height=\figheightF]{scriptfigures/smoke_test2_all}\\
+ every 2nd plane&\includegraphics[height=\figheightF]{scriptfigures/smoke_test_every2}&
+ \includegraphics[height=\figheightF]{scriptfigures/smoke_test2_every2}\\
+ every 3rd plane&\includegraphics[height=\figheightF]{scriptfigures/smoke_test_every3}&
+  \includegraphics[height=\figheightF]{scriptfigures/smoke_test2_every3}\\
+ theoretical&\multicolumn{2}{c}{\includegraphics[height=1.0in]{figures/graysquares}}\\
+
+ \end{tabular}
+\end{center}
+ \caption[]{3D smoke file test 2.}
+\label{figsmoketest2}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=\figheightD]{scriptfigures/thouse5_smoke_005}&
+ \includegraphics[height=\figheightD]{scriptfigures/thouse5_smoke_gpu_005}\\
+ \includegraphics[height=\figheightD]{scriptfigures/thouse5_smoke_010}&
+ \includegraphics[height=\figheightD]{scriptfigures/thouse5_smoke_gpu_010}\\
+ \includegraphics[height=\figheightD]{scriptfigures/thouse5_smoke_030}&
+ \includegraphics[height=\figheightD]{scriptfigures/thouse5_smoke_gpu_030}\\
+ CPU corrected&GPU corrected\\
+ \end{tabular}
+\end{center}
+ \caption[]{3D smoke file test 3 - GPU Test}
+\label{figsmoketest}%
+\end{figure}
 \section{Geometry}
 \begin{figure}[\figoptions]
 \begin{center}
