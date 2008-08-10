@@ -3142,12 +3142,24 @@ void Plot3DListMenu(int value){
 
   if(value<0||value>=nplot3dtimelist)return;
   LoadPlot3dMenu(-1);
+  if(scriptoutstream!=NULL){
+    fprintf(scriptoutstream,"LOADPLOT3D\n");
+    fprintf(scriptoutstream," %f\n",plot3dtimelist[value]);
+  }
   for(i=0;i<nplot3d;i++){
     plot3di = plot3dinfo + i;
     if(fabs(plot3di->time-plot3dtimelist[value])<0.5){
       LoadPlot3dMenu(i);
     }
   }
+}
+
+/* ------------------ update_menu ------------------------ */
+
+void update_menu(void){
+  updatemenu=1; 
+  GLUTPOSTREDISPLAY
+  glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
 /* ------------------ LoadPlot3DMenu ------------------------ */
@@ -3159,8 +3171,15 @@ void LoadPlot3dMenu(int value){
   if(value==997)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
+    char *plot3dfile;
+
     ReadPlot3dFile=1;
-    readplot(plot3dinfo[value].file,value,LOAD,&errorcode);
+    plot3dfile = plot3dinfo[value].file;
+    if(scriptoutstream!=NULL&&loadplot3dall==0){
+      fprintf(scriptoutstream,"LOADFILE\n");
+      fprintf(scriptoutstream," %s\n",plot3dfile);
+    }
+    readplot(plot3dfile,value,LOAD,&errorcode);
   }
   else if(value==-1){
     for(i=0;i<nplot3d;i++){
@@ -3169,7 +3188,9 @@ void LoadPlot3dMenu(int value){
   }
   else{
     value+=100000;
+    loadplot3dall=1;
     Plot3DListMenu(value);
+    loadplot3dall=0;
   }
   updatemenu=1; 
   GLUTPOSTREDISPLAY

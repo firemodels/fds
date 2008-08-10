@@ -388,6 +388,7 @@ void drawplot3d_texture(mesh *meshi){
   visx = meshi->visx;
   visy = meshi->visy;
   visz = meshi->visz;
+  printf(" %i %i %i %i %i %i\n",visx,visy,visz,plotx,ploty,plotz);
   ibar = meshi->ibar;
   jbar = meshi->jbar;
   kbar = meshi->kbar;
@@ -455,7 +456,10 @@ void drawplot3d_texture(mesh *meshi){
         plotx=ibar;
         updateplotslice(1);
       }
-      if(plotx>ibar){plotx=0;updateplotslice(1);}
+      if(plotx>ibar){
+        plotx=0;
+        updateplotslice(1);
+      }
       glBegin(GL_TRIANGLES);
       for(j=0; j<jbar; j++){
         color1t=yzcolortbase + j*nz;

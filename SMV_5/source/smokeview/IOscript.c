@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <math.h>
 #include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -23,6 +24,8 @@
 char IOscript_revision[]="$Revision$";
 void remove_comment(char *buffer);
 void ParticlePropShowMenu(int var);
+void update_menu(void);
+
 //
 // script commands
 //
@@ -89,6 +92,9 @@ void ParticlePropShowMenu(int var);
 // LOADVSLICE
 //  type (char)
 //  1/2/3 (int)  val (float)
+
+// LOADPLOT3D
+//  time (float)
 
 // UNLOADALL
 
@@ -336,6 +342,10 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADPARTICLES",13) == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADPLOT3D",10) == 1){
       nscriptinfo++;
       continue;
     }
@@ -663,6 +673,19 @@ int compile_script(char *scriptfile){
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADPARTICLES);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADPLOT3D",10) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADPLOT3D);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      sscanf(buffer,"%f",&scripti->fval);
 
       nscriptinfo++;
       continue;
@@ -1006,11 +1029,43 @@ void script_loadfile(scriptdata *scripti){
     file = zonei->file;
     if(strcmp(file,scripti->cval)==0){
       readzone(file,i,LOAD,&errorcode);
+      return;
+    }
+  }
+  for(i=0;i<nplot3d;i++){
+    plot3d *plot3di;
+
+    plot3di = plot3dinfo + i;
+    if(strcmp(plot3di->file,scripti->cval)==0){
+      ReadPlot3dFile=1;
+      readplot(plot3di->file,i,LOAD,&errorcode);
+      update_menu();
+      return;
     }
   }
 
   printf("file %s was not loaded\n",scripti->cval);
 
+}
+
+
+/* ------------------ script_loadplot3d ------------------------ */
+
+void script_loadplot3d(scriptdata *scripti){
+  int i;
+  float time;
+
+  time = scripti->fval;
+
+  for(i=0;i<nplot3d;i++){
+    plot3d *plot3di;
+
+    plot3di = plot3dinfo + i;
+    if(fabs(plot3di->time-time)<0.5){
+      LoadPlot3dMenu(i);
+    }
+  }
+  update_menu();
 }
 
 /* ------------------ script_loadvfile ------------------------ */
@@ -1156,6 +1211,9 @@ void run_script(void){
       break;
     case SCRIPT_LOADVSLICE:
       script_loadvslice(scripti);
+      break;
+    case SCRIPT_LOADPLOT3D:
+      script_loadplot3d(scripti);
       break;
     case SCRIPT_SETTIMEVAL:
       script_settimeval(scripti);
