@@ -1,6 +1,6 @@
 UNLOADALL
 RENDERDIR
- ../../../Manuals/FDS_SMV_Training_Guide/SMV_FIGURES
+ ../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
 LOADSLICE
  TEMPERATURE
  1 1.200000
