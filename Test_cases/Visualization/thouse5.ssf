@@ -204,4 +204,34 @@ LOADINIFILE
  thouse5_novents.ini
 RENDERONCE
  thouse5_novents
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d.ini
+LOADFILE
+ thouse5_0060_00.q
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ thouse5_plot3d_step
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d2.ini
+LOADFILE
+ thouse5_0060_00.q
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ thouse5_plot3d_line
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d3.ini
+LOADFILE
+ thouse5_0060_00.q
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ thouse5_plot3d_cont
+
+
+
 
