@@ -160,6 +160,7 @@ SVEXTERN int demo_mode;
 SVEXTERN int update_demo;
 SVEXTERN int menu_view_number;
 SVEXTERN int mxplot3dvars;
+SVEXTERN int loadplot3dall;
 SVEXTERN char *shortp3label[MAXPLOT3DVARS], *unitp3label[MAXPLOT3DVARS];
 SVEXTERN char *LESsystem,*LESendian;
 

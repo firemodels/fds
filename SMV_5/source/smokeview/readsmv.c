@@ -7058,6 +7058,24 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&p3cont2d);
       continue;
       }
+    if(match(buffer,"P3VIEW",6)==1){
+      for(i=0;i<nmeshes;i++){
+        mesh *meshi;
+
+        meshi = meshinfo + i;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i %i %i %i",
+          &meshi->visx,&meshi->plotx,&meshi->visy,&meshi->ploty,&meshi->visz,&meshi->plotz);
+        if(meshi->visx!=0)meshi->visx=1;
+        if(meshi->visy!=0)meshi->visy=1;
+        if(meshi->visy!=0)meshi->visz=1;
+        if(meshi->plotx<0)meshi->plotx=0;
+        if(meshi->plotx>meshi->ibar)meshi->plotx=meshi->ibar;
+        if(meshi->ploty>meshi->jbar)meshi->ploty=meshi->jbar;
+        if(meshi->plotz>meshi->kbar)meshi->plotz=meshi->kbar;
+      }
+      continue;
+      }
     if(match(buffer,"P3CONT3DSMOOTH",14)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&p3cont3dsmooth);
@@ -8324,6 +8342,13 @@ void writeini(int flag){
   fprintf(fileout,"--------\n\n");
   fprintf(fileout,"P3CONT2D\n");
   fprintf(fileout," %i\n",p3cont2d);
+  fprintf(fileout,"P3VIEW\n");
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    fprintf(fileout," %i %i %i %i %i %i \n",meshi->visx,meshi->plotx,meshi->visy,meshi->ploty,meshi->visz,meshi->plotz);
+  }
   fprintf(fileout,"TRANSPARENT\n");
   fprintf(fileout," %i\n",transparentflag);
   fprintf(fileout,"SURFINC\n");
