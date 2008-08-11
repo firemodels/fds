@@ -15,7 +15,7 @@
       H          = 0.0
       O          = 0.0  /
 
-&INIT MASS_FRACTION(2)=0.00007967/
+&INIT MASS_FRACTION(2)=0.00007967 DENSITY=1.0/
 
 &OBST XB=0.0,1.0, 0.0,0.1,0.0,4.0, RGB=255,255,255 / 
 &OBST XB=0.0,2.5, 0.5,0.6,0.0,4.0, RGB=255,255,255 / 
@@ -25,7 +25,9 @@
 &OBST XB=0.0,8.5, 4.1,4.2,0.0,4.0, RGB=255,255,255 / 
 &OBST XB=0.0,10.0,5.1,5.2,0.0,4.0, RGB=255,255,255 / 
 
+&SLCF PBX=5.0, QUANTITY='soot density' /
 &SLCF PBY=5.0, QUANTITY='soot density' /
+&SLCF PBZ=2.0, QUANTITY='soot density' /
 
 &TAIL /
 
