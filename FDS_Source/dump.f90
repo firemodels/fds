@@ -4330,7 +4330,7 @@ FLOOP: DO NF=1,N_BNDF
                   IW = WALL_INDEX(IC,-IOR)
                   PP(I,J) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                   ! Special dump of UL pan test data
-                  IF (UL_PAN_DATA .AND. IOR==3 .AND. IND==71 .AND. MOD(INT(T),100)==0) &
+                  IF (UL_PAN_DATA .AND. IOR==3 .AND. OUTPUT_QUANTITY(-IND)%NAME=='AMPUA' .AND. MOD(INT(T),100)==0) &
                      WRITE(LU_UL_PAN_DATA,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
                   IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,J,KG))) IBK(I,J)=1
                ENDDO
@@ -4437,7 +4437,7 @@ FLOOP: DO NF=1,N_BNDF
                      IW = WALL_INDEX(IC,-IOR)
                      PP(I,J) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      ! Special dump of UL pan test data
-                     IF (UL_PAN_DATA .AND. IOR==3 .AND. IND==71 .AND. MOD(INT(T),100)==0) &
+                     IF (UL_PAN_DATA .AND. IOR==3 .AND. OUTPUT_QUANTITY(-IND)%NAME=='AMPUA' .AND. MOD(INT(T),100)==0) &
                         WRITE(LU_UL_PAN_DATA,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
                      IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY) IBK(I,J)=1
                   ENDDO
