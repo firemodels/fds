@@ -4,8 +4,6 @@
 
 &TIME T_END=1.0 /
 
-&MISC TMPA=77.82/
-
 &REAC ID         = 'CARBONSOOT'
       FYI        = 'ficticious fuel, 100% soot'
       SOOT_YIELD = 1.0
