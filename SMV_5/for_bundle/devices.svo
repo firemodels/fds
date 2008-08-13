@@ -3,6 +3,10 @@
 // $Author: gforney $
 
 DEVICEDEF
+ smokesensor
+ 1.0 1.0 1.0 setcolor
+ 0.15 drawsphere
+DEVICEDEF
  sensor
  0.0 1.0 0.0  setcolor
  0.038 drawsphere

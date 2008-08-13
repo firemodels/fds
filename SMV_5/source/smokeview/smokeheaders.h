@@ -29,6 +29,8 @@ int SUB_portfrustum(int quad,
                    );
 
 
+EXTERNCPP void draw_devices_val(void);
+EXTERNCPP void getsmokevisvals(void);
 EXTERNCPP float get_vecfactor(int *iveclengths);
 EXTERNCPP void add_new_tour(void);
 EXTERNCPP void cleanbuffer(char *buffer, char *buffer2);
