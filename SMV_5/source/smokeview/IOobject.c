@@ -115,8 +115,158 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
 static float *xcirc=NULL, *ycirc=NULL;
 static int ncirc;
 static float specular[4]={0.4,0.4,0.4,1.0};
+unsigned char *rgbimage=NULL;
+int rgbsize=0;
 
-/* ----------------------- draw_devices ----------------------------- */
+
+/* ----------------------- getsmokevisvals ----------------------------- */
+
+void getsmokevisvals(void){
+  int doit, i;
+  int index;
+  int width, height;
+  unsigned char rgbval[3];
+
+  width = screenWidth;
+  height = screenHeight;
+
+  doit=0;
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+    char *label;
+
+    devicei = deviceinfo + i;
+    label = devicei->object->label;
+    if(strcmp(label,"smokesensor")!=0)continue;
+    doit=1;
+  }
+  if(doit==0)return;
+
+  if(rgbimage==NULL||rgbsize!=width*height){
+    if(rgbimage!=NULL){
+      FREEMEMORY(rgbimage);
+    }
+    rgbsize=width*height;
+    NewMemory( (void **)&rgbimage,3*rgbsize*sizeof(GLubyte));
+  }
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
+  glReadPixels(0,0,width,height, GL_RGB, GL_UNSIGNED_BYTE, rgbimage);
+
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+    char *label;
+    int row, col;
+    int index,val;
+
+    devicei = deviceinfo + i;
+    label = devicei->object->label;
+
+    
+    if(strcmp(label,"smokesensor")!=0)continue;
+
+    col = devicei->screenijk[0];
+    row = height - devicei->screenijk[1];
+
+    if(col<0||col>width-1||row<0||row>height-1){
+      val=-1;
+    }
+    else{
+      index=row*width+col;
+      val=255-rgbimage[3*index];
+    }
+    devicei->visval=val;
+  }
+
+}
+
+/* ----------------------- getdevice_screencoords ----------------------------- */
+
+void getdevice_screencoords(void){
+  double mv_setup[16], projection_setup[16];
+  int viewport_setup[4];
+  double d_ijk[3];
+  int i;
+  int doit;
+
+  doit=0;
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+    char *label;
+
+    devicei = deviceinfo + i;
+    label = devicei->object->label;
+    if(strcmp(label,"smokesensor")!=0)continue;
+    doit=1;
+  }
+  if(doit==0)return;
+
+  glGetDoublev(GL_MODELVIEW_MATRIX,mv_setup);
+  glGetDoublev(GL_PROJECTION_MATRIX,projection_setup);
+  glGetIntegerv(GL_VIEWPORT, viewport_setup);
+  for(i=0;i<ndeviceinfo;i++){
+    float *xyz;
+    double d_ijk[3];
+    device *devicei;
+    int *ijk;
+    char *label;
+
+    devicei = deviceinfo + i;
+    label = devicei->object->label;
+    
+    if(strcmp(label,"smokesensor")!=0)continue;
+    xyz = devicei->xyz;
+    ijk = devicei->screenijk;
+    gluProject(xyz[0],xyz[1],xyz[2],mv_setup,projection_setup,viewport_setup,d_ijk,d_ijk+1,d_ijk+2);
+    ijk[0] = d_ijk[0];
+    ijk[1] = d_ijk[1];
+    ijk[2] = d_ijk[2];
+  }
+}
+
+/* ----------------------- draw_devices_val ----------------------------- */
+
+void draw_devices_val(void){
+  device *devicei;
+  int i;
+  float *xyz;
+  float white[3]={1.0,1.0,1.0};
+  float black[3]={0.0,0.0,0.0};
+  int doit=0;
+
+  glPushMatrix();
+  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+  if(show_smokevisvals==1){
+    getdevice_screencoords();
+  }
+  for(i=0;i<ndeviceinfo;i++){
+    devicei = deviceinfo + i;
+
+    if(devicei->object->visible==0)continue;
+    xyz = devicei->xyz;
+    if(show_smokevisvals==1&&strcmp(devicei->object->label,"smokesensor")==0){
+      char label[256];
+
+      if(doit==0){
+        glBlendFunc(GL_ONE,GL_ZERO);
+        doit=1;
+      }
+      sprintf(label,"%i",devicei->visval);
+      if(devicei->visval>128){
+        output3Text(white,xyz[0],xyz[1],xyz[2],label);
+      }
+      else{
+        output3Text(black,xyz[0],xyz[1],xyz[2],label);
+      }
+    }
+  }
+  if(doit==1){
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+  }
+  glPopMatrix();
+}
+
+  /* ----------------------- draw_devices ----------------------------- */
 
 void draw_devices(void){
   device *devicei;
@@ -132,6 +282,7 @@ void draw_devices(void){
 
     if(devicei->object->visible==0)continue;
     if(isZoneFireModel==1&&strcmp(devicei->object->label,"target")==0&&visSensor==0)continue;
+    if(show_smokevisvals==1&&strcmp(devicei->object->label,"smokesensor")==0)continue;
     xyz = devicei->xyz;
     glPushMatrix();
     glTranslatef(xyz[0],xyz[1],xyz[2]);
