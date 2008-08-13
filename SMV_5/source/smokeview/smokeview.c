@@ -600,7 +600,6 @@ void LOGO_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsize
 
     /* -------------------------- TITLE Viewport -------------------------- */
 
-
 void TITLE_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
   int left;
   float textdown;
@@ -1323,10 +1322,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       drawiso(meshi,DRAW_SOLID);
     }
 
-    /*  nothing transparent should be drawn before this portion of the code
-    (ie draw all opaque opbjects first then 
-        draw transparent objects
-        */
+    //  nothing transparent should be drawn before this portion of the code
+    //    (ie draw all opaque objects first then draw transparent objects
 
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
@@ -1403,6 +1400,10 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     sniffErrors("after drawsmoke");
   }
 
+  if(show_smokevisvals==1){
+    getsmokevisvals();
+    draw_devices_val();
+  }
 
 /* ++++++++++++++++++++++++ draw zone fire modeling info +++++++++++++++++++++++++ */
 
