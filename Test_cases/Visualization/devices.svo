@@ -1,3 +1,11 @@
+// $Date: 2008-01-18 14:27:20 -0500 (Fri, 18 Jan 2008) $ 
+// $Revision: 1210 $
+// $Author: gforney $
+
+DEVICEDEF
+ smokesensor
+ 1.0 1.0 1.0 setcolor
+ 0.15 drawsphere
 DEVICEDEF
  sensor
  0.0 1.0 0.0  setcolor
@@ -154,3 +162,65 @@ DEVICEDEF
  push 0.0 0.0 0.035052 translate 0.00635 drawsphere pop
  push 0.0 0.0 1.0 setcolor 
    0.0 0.0 0.0414 translate 0.012 drawsphere pop
+   
+   // ************ avatar definitions ********************
+
+   // stack frame definition
+      
+   //  0->2   class color
+   //  3->5   width, depth, 1.0 
+   //  6->8   1.0 1.0 height
+   //  9->11  data file color
+   //  12->14 0.0 0.0 height/2.0
+   
+AVATARDEF
+ human_fixed          // label, name of avatar
+ 90.0 rotatez
+ 0.82 0.70 0.55 setcolor // head color  TAN 210 180 140
+ 0.3 0.3 0.3 scalexyz 
+ 0.0 0.0 0.0 translate
+ push  0.0 0.0 5.2 translate 1.1 drawsphere 
+   0.0 0.0 1.0 setcolor // eye color BLUE
+   push -0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
+   push  0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
+   pop // head
+ 0.15 0.25 0.55 setcolor  // body color 
+ push  0.0 0.0 3.55 translate 0.5 0.3 1.0 scalexyz 2.5 drawsphere pop // trunk
+ 0.82 0.70 0.55 setcolor // arm color TAN 210 180 140
+ push -0.9 0.0 3.5 translate  35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
+ push  0.9 0.0 3.5 translate -35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
+ 0.15 0.25 0.55 setcolor // leg color ROYAL BLUE4: 39 64 139
+ push -0.5 0.0 1.3 translate  30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
+ push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
+AVATARDEF
+ human_altered_with_data         // label, name of avatar
+ 90.0 rotatez
+ 0.82 0.70 0.55 setcolor // head color  TAN 210 180 140
+ 6.0 3.0 getuservals 1.0 1.0 1.0 scalexyz //  scale by data height
+ 1.0 1.0 0.579 scalexyz 
+ 0.3 0.3 0.3 scalexyz 
+ push  0.0 0.0 5.2 translate 1.1 drawsphere 
+   0.0 0.0 1.0 setcolor // eye color BLUE
+   push -0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
+   push  0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
+   pop // head
+ 9.0 3.0 getuservals 0.93 0.87 0.51 setcolor  // body color 
+ push  0.0 0.0 3.55 translate 3.0 3.0 getuservals 1.0 1.0 1.0 scalexyz 1.334 1.33 1.0 scalexyz 2.5 drawsphere pop // trunk, scale by width and depth
+ 0.82 0.70 0.55 setcolor // arm color TAN 210 180 140
+ push -0.9 0.0 3.5 translate  35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
+ push  0.9 0.0 3.5 translate -35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
+ 0.15 0.25 0.55 setcolor // leg color ROYAL BLUE4: 39 64 139
+ push -0.5 0.0 1.3 translate  30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
+ push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
+AVATARDEF
+ ellipsoid         // label, name of device
+ 90.0 rotatez
+ 12.0 3.0 getuservals 0.0 0.0 2.0 translate 6.0 3.0 getuservals 1.0 1.0 1.0 scalexyz 3.0 3.0 getuservals 1.0 1.0 1.0 scalexyz 
+  push 0.0 -1.0 0.0 translate 1.0 5.0 0.5 scalexyz 0.0 0.0 1.0 setcolor 0.4 drawsphere pop 
+  9.0 3.0 getuservals 0.93 0.87 0.51 setcolor 1.0 drawsphere 
+AVATARDEF
+ disk         // label, name of device
+ 90.0 rotatez
+ 0.0 0.0 1.0 translate 3.0 3.0 getuservals 1.0 1.0 1.0 scalexyz 
+  push 0.0 -0.25 0.05 translate 0.3 2.5 0.3 scalexyz 0.0 1.0 1.0 setcolor 0.2 drawsphere pop 
+  9.0 3.0 getuservals 0.93 0.87 0.51 setcolor 1.0 0.05 drawdisk 
