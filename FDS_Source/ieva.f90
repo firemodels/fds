@@ -3,11 +3,12 @@
 !*****   FDS5-Evac: Modules and misc routines        *****
 !*********************************************************
 !
-! VTT Technical Research Centre of Finland            2007
+! VTT Technical Research Centre of Finland            2008
 !
 ! Author:  Timo Korhonen
-! Date:    1.3.2007
-! Version: 5.00
+! Date:    13.8.2008
+! FDS Version:  5.2.0
+! Evac Version: 2.0.0
 !
 ! This file (ieva.f90) contains:
 ! * dcdflib.f90 (Netlib cumulative density function library)
@@ -31,6 +32,9 @@ Module DCDFLIB
   !
   ! The Fortran90 version form:
   ! http://people.scs.fsu.edu/~burkardt/f_src/dcdflib/dcdflib.html
+  !
+  ! Assigned goto statements removed by Timo Korhonen, 2008.
+  ! Statement functions replaced with internal function by Timo Korhonen, 2008.
   !
   ! Original F77 version from Netlib: http://www.netlib.org/random:
   !
@@ -6429,7 +6433,7 @@ Contains
     Real ( kind = 8 ) cum
     Real ( kind = 8 ) df
     Real ( kind = 8 ) dfd2
-    Real ( kind = 8 ) dg
+    !Timo: Real ( kind = 8 ) dg
     Real ( kind = 8 ), Parameter :: eps = 0.00001D+00
     !    Real ( kind = 8 ) gamma_log
     Integer i
@@ -6444,7 +6448,7 @@ Contains
     Real ( kind = 8 ) pcent
     Real ( kind = 8 ) pnonc
     Real ( kind = 8 ) pterm
-    Logical qsmall
+    !Timo: Logical qsmall
     Real ( kind = 8 ) sum1
     Real ( kind = 8 ) sumadj
     Real ( kind = 8 ) term
@@ -6452,9 +6456,11 @@ Contains
     Real ( kind = 8 ) x
     Real ( kind = 8 ) xnonc
     Real ( kind = 8 ) xx
-    qsmall(xx) = sum1 < 1.0D-20 .Or. xx < eps * sum1
-    ! dg(ii) = df +  2.0D+00  * Real ( ii, kind = 8 )
-    dg(xi) = df +  2.0D+00  * xi
+    !Timo: Statement function qsmall converted to an internal function
+    !Timo qsmall(xx) = sum1 < 1.0D-20 .Or. xx < eps * sum1
+    !Timo: dg(ii) = df +  2.0D+00  * Real ( ii, kind = 8 )
+    !Timo: Statement function dg converted to an internal function
+    !Timo: dg(xi) = df +  2.0D+00  * xi
 
     If ( x <= 0.0D+00 ) Then
        cum = 0.0D+00
@@ -6584,6 +6590,20 @@ Contains
     ccum = 0.5D+00 + ( 0.5D+00 - cum )
 
     Return
+  Contains
+
+    Logical Function qsmall(xx)
+      Real ( kind = 8 ), Intent(In) :: xx
+      qsmall = sum1 < 1.0D-20 .Or. xx < eps * sum1
+      Return
+    End Function qsmall
+
+    Real ( kind = 8 ) Function dg(xi)
+      Real ( kind = 8 ), Intent(In) :: xi
+      dg = df +  2.0D+00  * xi
+      Return
+    End Function dg
+
   End Subroutine cumchn
 
   Subroutine cumf ( f, dfn, dfd, cum, ccum )
@@ -6729,7 +6749,7 @@ Contains
     Integer ierr
     Real ( kind = 8 ) pnonc
     Real ( kind = 8 ) prod
-    Logical qsmall
+    !Timo: Logical qsmall
     Real ( kind = 8 ) sum1
     Real ( kind = 8 ) upterm
     Real ( kind = 8 ) x
@@ -6738,7 +6758,8 @@ Contains
     Real ( kind = 8 ) xx
     Real ( kind = 8 ) yy
 
-    qsmall(x) = sum1 < 1.0D-20 .Or. x < eps * sum1
+    !Timo: Statement function qsmall converted to an internal function
+    !Timo: qsmall(x) = sum1 < 1.0D-20 .Or. x < eps * sum1
 
     If ( f <= 0.0D+00 ) Then
        cum = 0.0D+00
@@ -6866,6 +6887,14 @@ Contains
     ccum = 0.5D+00 + ( 0.5D+00 - cum )
 
     Return
+  Contains
+
+    Logical Function qsmall(x)
+      Real ( kind = 8 ), Intent(In) :: x
+      qsmall = sum1 < 1.0D-20 .Or. x < eps * sum1
+      Return
+    End Function qsmall
+
   End Subroutine cumfnc
 
   Subroutine cumgam ( x, a, cum, ccum )
@@ -7530,7 +7559,6 @@ Contains
     Real ( kind = 8 ) zstpmu
     Save
 
-    ! write(0,*) 'Subroutine dinvr'
     If ( 0 < status ) Then
        ! go to i99999
        Select Case(i99999)
@@ -7797,7 +7825,6 @@ Contains
     go to 250
 
     Entry dstinv ( zsmall, zbig, zabsst, zrelst, zstpmu, zabsto, zrelto )
-    ! write(0,*) 'Entry dstinv'
     !*****************************************************************************80
     !
     !! DSTINV SeT INverse finder - Reverse Communication
@@ -8158,7 +8185,7 @@ Contains
     Real ( kind = 8 ) fda
     Real ( kind = 8 ) fdb
     Logical first
-    Real ( kind = 8 ) ftol
+    !Timo: Real ( kind = 8 ) ftol
     Real ( kind = 8 ) fx
     Integer i99999
     Real ( kind = 8 ) m
@@ -8184,7 +8211,8 @@ Contains
     Real ( kind = 8 ) zxlo
 
     Save
-    ftol(zx) = 0.5D+00 * Max ( abstol, reltol * Abs ( zx ) )
+    !Timo: Statement function ftol converted to an internal function
+    !Timo: ftol(zx) = 0.5D+00 * Max ( abstol, reltol * Abs ( zx ) )
 
     ! write(0,*) 'Subroutine dzror'
     If ( 0 < status ) Then
@@ -8469,6 +8497,12 @@ Contains
        Case(200)
           Go To 200
     End Select
+
+  Contains
+    Real ( kind = 8 ) Function ftol(zx)
+      Real ( kind = 8 ), Intent(In) :: zx
+      ftol = 0.5D+00 * Max ( abstol, reltol * Abs ( zx ) )
+    End Function ftol
 
   End Subroutine dzror
 
@@ -13946,20 +13980,3 @@ Contains
   End Subroutine Interpolate1d
 
 End Module STAT
-
-!!$Module Evac_Inits
-!!$
-!!$  Use PRECISION_PARAMETERS                    ! prec.f90
-!!$  Use MESH_VARIABLES                          ! mesh.f90
-!!$  Use GLOBAL_CONSTANTS, GC_Gamma => Gamma     ! cons.f90
-!!$  Use TRAN                                    ! func.f90
-!!$  Use TYPES                                   ! type.f90
-!!$  Use COMP_FUNCTIONS, Only: SHUTDOWN, SECOND  ! func.f90
-!!$  Use MATH_FUNCTIONS, Only: AFILL             ! func.f90
-!!$  Use MEMORY_FUNCTIONS, Only: ChkMemErr       ! func.f90
-!!$  Use MESH_POINTERS                           ! mesh.f90
-!!$  Use Dcdflib
-!!$
-!!$Contains
-!!$
-!!$End Module Evac_Inits
