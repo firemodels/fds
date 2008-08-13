@@ -4,7 +4,11 @@
 
 &TIME T_END=1.0 /
 
-&MISC TMPA=77.82/
+ specify soot density using MASS_FRACTION(2)
+ 
+
+ define fuel so that it only contains carbon and yields 100% soot
+ so that MASS_FRACTION(2) may be used to define soot density directly
 
 &REAC ID         = 'CARBONSOOT'
       FYI        = 'ficticious fuel, 100% soot'
@@ -17,17 +21,25 @@
 
 &INIT MASS_FRACTION(2)=0.00007967 DENSITY=1.0/
 
-&OBST XB=0.0,1.0, 0.0,0.1,0.0,4.0, RGB=255,255,255 / 
-&OBST XB=0.0,2.5, 0.5,0.6,0.0,4.0, RGB=255,255,255 / 
-&OBST XB=0.0,4.0, 1.1,1.2,0.0,4.0, RGB=255,255,255 / 
-&OBST XB=0.0,5.5, 2.1,2.2,0.0,4.0, RGB=255,255,255 / 
-&OBST XB=0.0,7.0, 3.1,3.2,0.0,4.0, RGB=255,255,255 / 
+&OBST XB=0.0,2.5, 0.4,0.5,0.0,4.0, RGB=255,255,255 / 
+&OBST XB=0.0,4.0, 1.0,1.1,0.0,4.0, RGB=255,255,255 / 
+&OBST XB=0.0,5.5, 2.0,2.1,0.0,4.0, RGB=255,255,255 / 
+&OBST XB=0.0,7.0, 3.0,3.1,0.0,4.0, RGB=255,255,255 / 
 &OBST XB=0.0,8.5, 4.1,4.2,0.0,4.0, RGB=255,255,255 / 
-&OBST XB=0.0,10.0,5.1,5.2,0.0,4.0, RGB=255,255,255 / 
+&OBST XB=0.0,10.0,5.2,5.3,0.0,4.0, RGB=255,255,255 / 
 
 &SLCF PBX=5.0, QUANTITY='soot density' /
 &SLCF PBY=5.0, QUANTITY='soot density' /
 &SLCF PBZ=2.0, QUANTITY='soot density' /
+
+&PROP ID='smoketest' SMOKEVIEW_ID='smokesensor' /
+&DEVC XYZ=1.75,0.30,2.00, QUANTITY='visibility', ID='vis2' PROP_ID='smoketest' /
+&DEVC XYZ=3.25,0.90,2.00, QUANTITY='visibility', ID='vis3' PROP_ID='smoketest' /
+&DEVC XYZ=4.75,1.90,2.00, QUANTITY='visibility', ID='vis4' PROP_ID='smoketest' /
+&DEVC XYZ=6.25,2.90,2.00, QUANTITY='visibility', ID='vis5' PROP_ID='smoketest' /
+&DEVC XYZ=7.75,4.00,2.00, QUANTITY='visibility', ID='vis6' PROP_ID='smoketest' /
+&DEVC XYZ=9.25,5.10,2.00, QUANTITY='visibility', ID='vis7' PROP_ID='smoketest' /
+
 
 &TAIL /
 
