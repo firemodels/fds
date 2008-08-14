@@ -70,7 +70,7 @@ int setSmokeShaders() {
     "void main()"
     "{"
     "  float bottom,top,alpha,r;"
-    "  float term1, term2, term3, term4;"
+    "  float term1, term2, term3, term4, term5, term6;"
 #ifdef pp_LIGHT
     "  float s_color;"
 #else
@@ -101,7 +101,9 @@ int setSmokeShaders() {
     "      term2 = -term1*alpha*(r-1.0)/2.0;"
     "      term3 = -term2*alpha*(r-2.0)/3.0;"
     "      term4 = -term3*alpha*(r-3.0)/4.0;"
-    "      alpha = term1+term2+term3+term4;"
+    "      term5 = -term4*alpha*(r-4.0)/5.0;"
+    "      term6 = -term5*alpha*(r-5.0)/6.0;"
+    "      alpha = term1+term2+term3+term4+term5+term6;"
     "    }"
     // newcolor.a *= (1.0 - pow(1.0-gl_Color.a,aspectratio*top/bottom));
     "    alpha /= smoke3d_rthick;"
