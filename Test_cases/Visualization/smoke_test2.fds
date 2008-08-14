@@ -17,7 +17,9 @@
       N          = 0.0
       C          = 1.0
       H          = 0.0
-      O          = 0.0  /
+      O          = 0.0 
+      MASS_EXTINCTION_COEFFICIENT=8700.0
+ /
 
 &INIT MASS_FRACTION(2)=0.00007967 DENSITY=1.0/
 
