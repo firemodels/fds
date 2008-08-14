@@ -30,7 +30,7 @@ int SUB_portfrustum(int quad,
 
 
 EXTERNCPP void draw_devices_val(void);
-EXTERNCPP void getsmokevisvals(void);
+EXTERNCPP void getsmokesensors(void);
 EXTERNCPP float get_vecfactor(int *iveclengths);
 EXTERNCPP void add_new_tour(void);
 EXTERNCPP void cleanbuffer(char *buffer, char *buffer2);
@@ -234,6 +234,7 @@ EXTERNCPP void mergesmoke3dcolors(void);
 EXTERNCPP void setsmokecolorflags(void);
 EXTERNCPP void sort_transparent_faces(float *mm);
 EXTERNCPP void getsmokedir(float *mm);
+EXTERNCPP void get_world_eyepos(float *mm, float eyepos[3]);
 EXTERNCPP void ExtractFrustum(void);
 EXTERNCPP int RectangleInFrustum( float *x11, float *x12, float *x22, float *x21);
 EXTERNCPP unsigned char adjustalpha(unsigned char alpha, float *xe, float *xp, float factor, float *n1, int normtype);
@@ -278,6 +279,7 @@ EXTERNCPP void backup_blockage(blockagedata *bc);
 EXTERNCPP void update_blockpath(void);
 EXTERNCPP void getinverse(float *m, float *mi);
 EXTERNCPP void matmatmult(float *m1, float *m2, float *m3);
+EXTERNCPP void matvecmult(double *m1, float *v1, float *v2);
 EXTERNCPP void update_rotation_index(int val);
 EXTERNCPP void update_meshlist1(int val);
 EXTERNCPP void update_translate(void);

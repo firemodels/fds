@@ -570,7 +570,7 @@ typedef struct _sv_object {
 typedef struct {
   int active;
   int screenijk[3], visval;
-  float xyz[3];
+  float xyz[3], eyedist;
   float val;
   float xyzplot[3];
   float xyznorm[3];
