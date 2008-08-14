@@ -4812,6 +4812,7 @@ unsigned char adjustalpha(unsigned char alpha, float *xe, float *xp, float facto
   alpha=val;
   return alpha;
 }
+
 /* ------------------ getsmokedir ------------------------ */
 
 void getsmokedir(float *mm){

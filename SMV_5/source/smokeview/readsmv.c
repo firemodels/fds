@@ -4294,6 +4294,20 @@ typedef struct {
  */
 
   CheckMemory;
+
+  active_smokesensors=0;
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+    char *label;
+
+    devicei = deviceinfo + i;
+    label = devicei->object->label;
+    if(strcmp(label,"smokesensor")==0){
+      active_smokesensors=1;
+      break;
+    }
+  }
+
   if(meshinfo!=NULL&&meshinfo->jbar==1){
     force_isometric=1;
   }
@@ -6073,6 +6087,11 @@ int readini2(char *inifile, int localfile){
       update_terrain(0,vertical_factor);
       update_terrain_colors();
     
+      continue;
+    }
+    if(match(buffer,"SMOKESENSORS",12)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&show_smokesensors);
       continue;
     }
     if(match(buffer,"SBATSTART",9)==1){
@@ -8434,6 +8453,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",transparent_state);
   fprintf(fileout,"SHOWISO\n");
   fprintf(fileout," %i\n",visAIso);
+  fprintf(fileout,"SMOKESENSORS\n");
+  fprintf(fileout," %i\n",show_smokesensors);
 
 
   fprintf(fileout,"\nMISC\n");
