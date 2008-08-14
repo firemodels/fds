@@ -867,6 +867,9 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_scratch);
     matmatmult(inverse_modelview_setup,modelview_scratch,modelview_current);
 
+    if(active_smokesensors==1){
+      get_world_eyepos(modelview_scratch, world_eyepos);
+    }
     if(nsmoke3d>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
       sniffErrors("after getsmokedir");
@@ -1400,8 +1403,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     sniffErrors("after drawsmoke");
   }
 
-  if(show_smokevisvals==1){
-    getsmokevisvals();
+  if(active_smokesensors==10&&show_smokesensors!=0){
+    getsmokesensors();
     draw_devices_val();
   }
 

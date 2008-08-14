@@ -555,6 +555,7 @@ SVEXTERN pthread_t compress_thread_id;
 
 SVEXTERN int lock_allsmoke;
 
+SVEXTERN float world_eyepos[3];
 SVEXTERN int tour_usecurrent;
 SVEXTERN int visVentLines, visVentSolid;
 SVEXTERN int isZoneFireModel;
@@ -565,7 +566,7 @@ SVEXTERN mesh *meshinfo,*current_mesh, *mesh_save, *mesh_last, *loaded_isomesh;
 SVEXTERN float devicenorm_length;
 SVEXTERN int ndeviceinfo;
 SVEXTERN device *deviceinfo;
-SVEXTERN int show_smokevisvals;
+SVEXTERN int show_smokesensors,active_smokesensors;
 SVEXTERN sv_object **device_defs, *device_defs_backup[4];
 SVEXTERN sv_object device_def_first, device_def_last;
 SVEXTERN int ndevice_defs;
