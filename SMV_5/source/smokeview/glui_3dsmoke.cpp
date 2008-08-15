@@ -164,8 +164,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Hidden");
     glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Grey (0-255)");
     glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"I/I0 (0.0-1.0)");
-    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Unlit (C=3.0)");
-    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Lit (C=8.0)/L");
+    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Light reflecting (C=3.0)");
+    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Light emitting (C=8.0)");
   }
 
   panel_fire = glui_3dsmoke->add_panel_to_panel(panel_overall,"Fire");
