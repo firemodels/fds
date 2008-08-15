@@ -441,6 +441,7 @@ EXTERNCPP void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint 
 EXTERNCPP void updateShow(void);
 EXTERNCPP int  inblockage(const mesh *gb,float x, float y, float z);
 EXTERNCPP int inmesh_smoke(float x, float y, float z, int n, int flag);
+EXTERNCPP mesh *get_mesh(float xyz[3]);
 EXTERNCPP void initmesh(mesh *gb);
 EXTERNCPP void updateglui(void);
 EXTERNCPP void updateslicelist(int index);
