@@ -330,6 +330,7 @@ typedef struct mesh_ {
   float cellsize;
   float *xplt, *yplt, *zplt;
   float *xplt_orig, *yplt_orig, *zplt_orig;
+  float boxmin[3], boxmax[3];
   float *zcell;
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float xcen, ycen, zcen;
@@ -570,6 +571,7 @@ typedef struct _sv_object {
 typedef struct {
   int active;
   int screenijk[3], visval;
+  mesh *device_mesh;
   float xyz[3], eyedist;
   float val;
   float xyzplot[3];

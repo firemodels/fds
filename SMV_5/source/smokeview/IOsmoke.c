@@ -5324,7 +5324,7 @@ void makeiblank_smoke3d(void){
   }
 }
 
-/* ------------------ inmesh ------------------------ */
+/* ------------------ inmesh_smoke ------------------------ */
 
  int inmesh_smoke(float x, float y, float z, int nm, int flag){
   int i;

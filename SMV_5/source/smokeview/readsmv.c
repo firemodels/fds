@@ -3621,6 +3621,7 @@ typedef struct {
       devicei->xyznorm[1]=xyzn[1];
       devicei->xyznorm[2]=xyzn[2];
       devicei->act_time=-1.0;
+      devicei->device_mesh=NULL;
 
       ndeviceinfo++;
       continue;
@@ -4295,19 +4296,6 @@ typedef struct {
 
   CheckMemory;
 
-  active_smokesensors=0;
-  for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
-    char *label;
-
-    devicei = deviceinfo + i;
-    label = devicei->object->label;
-    if(strcmp(label,"smokesensor")==0){
-      active_smokesensors=1;
-      break;
-    }
-  }
-
   if(meshinfo!=NULL&&meshinfo->jbar==1){
     force_isometric=1;
   }
@@ -4578,8 +4566,28 @@ typedef struct {
       zplttemp[k]=(zplttemp[k]-zbar0)/xyzmaxdiff;
     }
     meshi->boxoffset=-(zplttemp[1]-zplttemp[0])/10.0;
+    meshi->boxmin[0]=xplt_origtemp[0];
+    meshi->boxmin[1]=yplt_origtemp[0];
+    meshi->boxmin[2]=zplt_origtemp[0];
+    meshi->boxmax[0]=xplt_origtemp[ibartemp];
+    meshi->boxmax[1]=yplt_origtemp[jbartemp];
+    meshi->boxmax[2]=zplt_origtemp[kbartemp];
 
   }
+
+  active_smokesensors=0;
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+    char *label;
+
+    devicei = deviceinfo + i;
+    devicei->device_mesh=get_mesh(devicei->xyz);
+    label = devicei->object->label;
+    if(strcmp(label,"smokesensor")==0){
+      active_smokesensors=1;
+    }
+  }
+
   nsmoothblocks=0;
   ntransparentblocks=0;
   ntransparentvents=0;
