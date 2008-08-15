@@ -90,6 +90,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ERR -1
 
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected);
+float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2[3]);
 
 void drawcone(float d1, float height, float *rgbcolor);
 void drawtrunccone(float d1, float d2, float height, float *rgbcolor);
@@ -117,6 +118,37 @@ static int ncirc;
 static float specular[4]={0.4,0.4,0.4,1.0};
 unsigned char *rgbimage=NULL;
 int rgbsize=0;
+
+/* ------------------ get_mesh ------------------------ */
+
+ mesh *get_mesh(float xyz[3]){
+  int i;
+  mesh *meshi;
+  int ibar, jbar, kbar;
+  float xmin, ymin, zmin;
+  float xmax, ymax, zmax;
+
+  for(i=0;i<nmeshes;i++){
+    meshi = meshinfo + i;
+
+    ibar=meshi->ibar;
+    jbar=meshi->jbar;
+    kbar=meshi->kbar;
+    xmin=meshi->xplt_orig[0];
+    ymin=meshi->yplt_orig[0];
+    zmin=meshi->zplt_orig[0];
+    xmax=meshi->xplt_orig[ibar];
+    ymax=meshi->yplt_orig[jbar];
+    zmax=meshi->zplt_orig[kbar];
+
+    if(xmin<=xyz[0]&&xyz[0]<=xmax&&
+       ymin<=xyz[1]&&xyz[1]<=ymax&&
+       zmin<=xyz[2]&&xyz[2]<=zmax){
+         return meshi;
+    }
+  }
+  return NULL;
+}
 
 /* ------------------ get_world_eyepos ------------------------ */
 
@@ -235,17 +267,15 @@ void getdevice_screencoords(void){
     device *devicei;
     int *ijk;
     char *label;
-    float dx, dy, dz;
+    mesh *device_mesh;
 
     devicei = deviceinfo + i;
     label = devicei->object->label;
     
     if(strcmp(label,"smokesensor")!=0)continue;
     xyz = devicei->xyz;
-    dx = xyz[0] - world_eyepos[0];
-    dy = xyz[1] - world_eyepos[1];
-    dz = xyz[2] - world_eyepos[2];
-    devicei->eyedist = sqrt(dx*dx + dy*dy + dz*dz);
+    device_mesh = devicei->device_mesh;
+    devicei->eyedist = get_point2box_dist(device_mesh->boxmin,device_mesh->boxmax,xyz,world_eyepos);
     ijk = devicei->screenijk;
     gluProject(xyz[0],xyz[1],xyz[2],mv_setup,projection_setup,viewport_setup,d_ijk,d_ijk+1,d_ijk+2);
     ijk[0] = d_ijk[0];
@@ -296,22 +326,28 @@ void draw_devices_val(void){
         case 3:
         case 4:
           ival = devicei->visval;
-          if(ival==255)ival=254;
-          val = ival/255.0;
-          val = -1.0/log(val)/devicei->eyedist;
-          if(show_smokesensors==3){
-            val*=3.0;
+          if(ival==255){
+            strcpy(label,"Inf");
           }
           else{
-            val*=8.0;
+            float light_extinct;
+
+            val = ival/255.0;
+            light_extinct = -log(val)/devicei->eyedist;
+            if(show_smokesensors==3){
+              val=3.0/light_extinct;
+            }
+            else{
+              val=8.0/light_extinct;
+            }
+            if(val<10.0){
+              sprintf(label,"%.1f",val);
+            }
+            else{
+              sprintf(label,"%.0f",val);
+            }
+            trimzeros(label);
           }
-          if(val<10.0){
-            sprintf(label,"%.1f",val);
-          }
-          else{
-            sprintf(label,"%.0f",val);
-          }
-          trimzeros(label);
           break;
       }
       if(devicei->visval>128){
@@ -1913,4 +1949,139 @@ void init_avatar(void){
     avatar_types[iavatar_types++]=objecti;
   }
   iavatar_types=0;
+}
+
+float dist(float p1[3], float p2[3]){
+  float dx, dy, dz;
+
+  dx = p1[0] - p2[0];
+  dy = p1[1] - p2[1];
+  dz = p1[2] - p2[2];
+  return sqrt(dx*dx+dy*dy+dz*dz);
+}
+
+/* ----------------------- init_avatar ----------------------------- */
+
+float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2orig[3]){
+  int i;
+  float tt;
+  int doit=0;
+  float dx, dy, dz;
+  float xx, yy, zz;
+  float p2[3];
+
+  // box - xmin, ymin, zmin, xmax, ymax, zmax
+
+  // if p1 is outside of box then return dist(p1,p2)
+
+  for(i=0;i<3;i++){
+    if(p1[i]<boxmin[i])return dist(p1,p2orig);
+    if(p1[i]>boxmax[i])return dist(p1,p2orig);
+    p2[i]=p2orig[i];
+  }
+
+  // if p1 and p2 are both inside box then return dist(p1,p2)
+
+  for(i=0;i<3;i++){
+    if(p2[i]<boxmin[i]){
+      doit=1;
+      break;
+    }
+    if(p2[i]>boxmax[i]){
+      doit=1;
+      break;
+    }
+  }
+  if(doit==0)return dist(p1,p2);
+
+  dx = p2[0]-p1[0];
+  dy = p2[1]-p1[1];
+  dz = p2[2]-p1[2];
+
+  if(p1[0]>=boxmin[0]&&boxmin[0]>=p2[0]){
+    if(dx!=0.0){
+      tt=(boxmin[0]-p1[0])/dx;
+      xx = boxmin[0];
+      yy = p1[1] + tt*dy;
+      zz = p1[2] + tt*dz;
+      if(boxmin[1]<=yy&&yy<=boxmax[1]&&boxmin[2]<=zz&&zz<=boxmax[2]){
+        p2[0]=xx;
+        p2[1]=yy;
+        p2[2]=zz;
+        return dist(p1,p2);
+      }
+    }
+  }
+  if(p1[0]<=boxmax[0]&&boxmax[0]<=p2[0]){
+    if(dx!=0.0){
+      tt=(boxmax[0]-p1[0])/dx;
+      xx = boxmax[0];
+      yy = p1[1] + tt*dy;
+      zz = p1[2] + tt*dz;
+      if(boxmin[1]<=yy&&yy<=boxmax[1]&&boxmin[2]<=zz&&zz<=boxmax[2]){
+        p2[0]=xx;
+        p2[1]=yy;
+        p2[2]=zz;
+        return dist(p1,p2);
+      }
+    }
+  }
+  if(p1[1]>=boxmin[1]&&boxmin[1]>=p2[1]){
+    if(dy!=0.0){
+      tt=(boxmin[1]-p1[1])/dy;
+      xx = p1[0] + tt*dx;
+      yy = boxmin[1];
+      zz = p1[2] + tt*dz;
+      if(boxmin[0]<=xx&&xx<=boxmax[0]&&boxmin[2]<=zz&&zz<=boxmax[2]){
+        p2[0]=xx;
+        p2[1]=yy;
+        p2[2]=zz;
+        return dist(p1,p2);
+      }
+    }
+  }
+  if(p1[1]<=boxmax[1]&&boxmax[1]<=p2[1]){
+    if(dy!=0.0){
+      tt=(boxmax[1]-p1[1])/dy;
+      xx = p1[0] + tt*dx;
+      yy = boxmax[1];
+      zz = p1[2] + tt*dz;
+      if(boxmin[0]<=xx&&xx<=boxmax[0]&&boxmin[2]<=zz&&zz<=boxmax[2]){
+        p2[0]=xx;
+        p2[1]=yy;
+        p2[2]=zz;
+        return dist(p1,p2);
+      }
+    }
+  }
+  if(p1[2]>=boxmin[2]&&boxmin[2]>=p2[2]){
+    if(dz!=0.0){
+      tt=(boxmin[2]-p1[2])/dz;
+      xx = p1[0] + tt*dx;
+      yy = p1[1] + tt*dy;
+      zz = boxmin[2];
+      if(boxmin[0]<=xx&&xx<=boxmax[0]&&boxmin[1]<=yy&&yy<=boxmax[1]){
+        p2[0]=xx;
+        p2[1]=yy;
+        p2[2]=zz;
+        return dist(p1,p2);
+      }
+    }
+  }
+  if(p1[2]<=boxmax[2]&&boxmax[2]<=p2[2]){
+    if(dz!=0.0){
+      tt=(boxmax[2]-p1[2])/dz;
+      xx = p1[0] + tt*dx;
+      yy = p1[1] + tt*dy;
+      zz = boxmin[2];
+      if(boxmin[0]<=xx&&xx<=boxmax[0]&&boxmin[1]<=yy&&yy<=boxmax[1]){
+        p2[0]=xx;
+        p2[1]=yy;
+        p2[2]=zz;
+        return dist(p1,p2);
+      }
+    }
+  }
+  ASSERT(FALSE);
+  return dist(p1,p2);
 }
