@@ -36,6 +36,8 @@ char IOsmoke_revision[]="$Revision$";
 
 char *textFileRead(char *fn);
 
+//              alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE);\
+
 #define ADJUSTALPHA(ALPHAIN,ASPECTRATIO,NORM,NORMTYPE) \
             alphaf_out[n]=0;\
             if(ALPHAIN==0)continue;\
@@ -44,7 +46,7 @@ char *textFileRead(char *fn);
               alphaf_out[n]=ALPHAIN;\
             }\
             else{\
-              alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE);\
+              alphaf_out[n]=adjustalpha(ALPHAIN, ASPECTRATIO);\
             }
 
 #define DRAWVERTEX(XX,YY,ZZ)        \
@@ -1260,8 +1262,7 @@ void drawsmoke3d(smoke3d *smoke3di){
   int is1, is2, js1, js2, ks1, ks2;
   int ii, jj, kk;
   int ibeg, iend, jbeg, jend, kbeg, kend;
-  float norm[3];
-
+  
   float *xplt, *yplt, *zplt;
   unsigned char mergealpha,*mergealphaptr,*mergecolorptr;
   int nx,ny,nz;
@@ -1272,8 +1273,7 @@ void drawsmoke3d(smoke3d *smoke3di){
   int xyzindex1[6],xyzindex2[6],*xyzindex,node,mm;
   float xnode[4],znode[4],ynode[4];
   int skip;
-  float xp[3];
-  int iterm, jterm, kterm,nxy;
+    int iterm, jterm, kterm,nxy;
   float x11[3], x12[3], x22[3], x21[3];
   int n11, n12, n22, n21;
   int ipj,jpk,ipk,jmi,kmi,kmj;
@@ -1365,8 +1365,7 @@ void drawsmoke3d(smoke3d *smoke3di){
       aspectratio=meshi->dx;
       for(i=is1;i<=is2;i++){
         iterm=(i-smoke3di->is1);
-        xp[0]=xplt[i];
-
+ 
         if(smokecullflag==1){
           x11[0]=xplt[i];
           x12[0]=xplt[i];
@@ -1387,7 +1386,6 @@ void drawsmoke3d(smoke3d *smoke3di){
         }
 
         for(k=ks1;k<=ks2;k++){
-          xp[2]=zplt[k];
           kterm=(k-ks1)*nxy;
 
           if(smokecullflag==1&&k!=ks2){
@@ -1400,7 +1398,6 @@ void drawsmoke3d(smoke3d *smoke3di){
 
           for(j=js1;j<=js2;j++){
             jterm = (j-js1)*nx;
-            xp[1]=yplt[j];
           //  jterm = (j-js1)*nx;
             n = iterm + jterm + kterm;
             ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
@@ -1516,7 +1513,7 @@ case -2:
       aspectratio=meshi->dy;         
       for(j=js1;j<=js2;j++){
         jterm = (j-js1)*nx;
-        xp[1]=yplt[j];
+    //    xp[1]=yplt[j];
 
         if(smokecullflag==1){
           x11[0]=xplt[is1];
@@ -1538,7 +1535,6 @@ case -2:
         }
 
         for(k=ks1;k<=ks2;k++){
-          xp[2]=zplt[k];
           kterm = (k-ks1)*nxy;
 
           if(smokecullflag==1&&k!=ks2){
@@ -1551,7 +1547,6 @@ case -2:
           }
 
           for(i=is1;i<=is2;i++){
-            xp[0]=xplt[i];
             iterm = (i-is1);
             n = iterm + jterm + kterm;
             ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
@@ -1670,7 +1665,6 @@ case -2:
     aspectratio=meshi->dz;
     if(adjustalphaflag!=0){
       for(k=ks1;k<=ks2;k++){
-        xp[2]=zplt[k];
         kterm = (k-ks1)*nxy;
 
         if(smokecullflag==1){
@@ -1693,7 +1687,6 @@ case -2:
         }
 
         for(j=js1;j<=js2;j++){
-          xp[1]=yplt[j];
           jterm = (j-js1)*nx;
 
           if(smokecullflag==1&&j!=js2){
@@ -1705,7 +1698,6 @@ case -2:
           }
 
           for(i=is1;i<=is2;i++){
-            xp[0]=xplt[i];
             iterm = (i-is1);
             n = iterm + jterm + kterm;
             ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
@@ -1813,9 +1805,6 @@ case -2:
 
     aspectratio=meshi->dxy;    
     if(adjustalphaflag!=0){
-      norm[0]=meshi->norm[0];
-      norm[1]=meshi->norm[1];
-      norm[2]=meshi->norm[2];
 
       for(iii=1;iii<nx+ny-2;iii+=skip){
         ipj = iii;
@@ -1855,7 +1844,6 @@ case -2:
 
         for(k=ks1;k<=ks2;k++){
           kterm = (k-ks1)*nxy;
-          xp[2]=zplt[k];
 
           if(smokecullflag==1&&k!=ks2){
             x11[2]=zplt[k];
@@ -1874,8 +1862,6 @@ case -2:
             j=js1+jj;
             jterm = (j-js1)*nx;
 
-            xp[1]=yplt[j];
-            xp[0]=xplt[i];
             n = iterm + jterm + kterm;
             ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
             mergealpha = mergealphaptr[n];
@@ -2008,9 +1994,6 @@ case -2:
 
     aspectratio=meshi->dxy;
     if(adjustalphaflag!=0){
-      norm[0]=meshi->norm[0];
-      norm[1]=meshi->norm[1];
-      norm[2]=meshi->norm[2];
 
       for(iii=1;iii<nx+ny-2;iii+=skip){
         jmi=iii;
@@ -2050,7 +2033,6 @@ case -2:
 
         for(k=ks1;k<=ks2;k++){
           kterm = (k-ks1)*nxy;
-          xp[2]=zplt[k];
 
           if(smokecullflag==1&&k!=ks2){
             x11[2]=zplt[k];
@@ -2068,9 +2050,6 @@ case -2:
             j = js1 + jj;
             jterm = (j-js1)*nx;
 
-
-            xp[1]=yplt[j];
-            xp[0]=xplt[i];
             n = iterm + jterm + kterm;
             ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
             mergealpha = mergealphaptr[n];
@@ -2208,9 +2187,6 @@ case -2:
 
     aspectratio=meshi->dyz;    
     if(adjustalphaflag!=0){
-      norm[0]=meshi->norm[0];
-      norm[1]=meshi->norm[1];
-      norm[2]=meshi->norm[2];
 
       for(iii=1;iii<ny+nz-2;iii+=skip){
         jpk = iii;
@@ -2250,7 +2226,6 @@ case -2:
 
         for(i=is1;i<=is2;i++){
           iterm = (i-is1);
-          xp[0]=xplt[i];
 
           if(smokecullflag==1&&i!=is2){
             x11[0]=xplt[i];
@@ -2269,8 +2244,6 @@ case -2:
             k=ks1+kk;
             kterm = (k-ks1)*nxy;
 
-            xp[2]=zplt[k];
-            xp[1]=yplt[j];
             n = iterm + jterm + kterm;
             ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
             mergealpha = mergealphaptr[n];
@@ -2401,9 +2374,6 @@ case -2:
     aspectratio=meshi->dyz;
 
     if(adjustalphaflag!=0){
-      norm[0]=meshi->norm[0];
-      norm[1]=meshi->norm[1];
-      norm[2]=meshi->norm[2];
 
       for(iii=1;iii<ny+nz-2;iii+=skip){
         kmj=iii;
@@ -2443,7 +2413,6 @@ case -2:
 
         for(i=is1;i<=is2;i++){
           iterm = (i-is1);
-          xp[0]=xplt[i];
 
           if(smokecullflag==1&&i!=is2){
             x11[0]=xplt[i];
@@ -2461,9 +2430,6 @@ case -2:
             k = ks1 + kk;
             kterm = (k-ks1)*nxy;
 
-
-            xp[2]=zplt[k];
-            xp[1]=yplt[j];
             n = iterm + jterm + kterm;
             ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
             mergealpha = mergealphaptr[n];
@@ -2602,9 +2568,6 @@ case -2:
 
     aspectratio=meshi->dxz;    
     if(adjustalphaflag!=0){
-      norm[0]=meshi->norm[0];
-      norm[1]=meshi->norm[1];
-      norm[2]=meshi->norm[2];
 
       for(iii=1;iii<nx+nz-2;iii+=skip){
         ipk = iii;
@@ -2644,7 +2607,6 @@ case -2:
 
         for(j=js1;j<=js2;j++){
           jterm = (j-js1)*nx;
-          xp[1]=yplt[j];
 
           if(smokecullflag==1&&j!=js2){
             x11[1]=yplt[j];
@@ -2663,8 +2625,6 @@ case -2:
             k=ks1+kk;
             kterm = (k-ks1)*nxy;
 
-            xp[2]=zplt[k];
-            xp[0]=xplt[i];
             n = iterm + jterm + kterm;
             ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
             mergealpha = mergealphaptr[n];
@@ -2795,9 +2755,6 @@ case -2:
     case -9:
     aspectratio=meshi->dxz;
     if(adjustalphaflag!=0){
-      norm[0]=meshi->norm[0];
-      norm[1]=meshi->norm[1];
-      norm[2]=meshi->norm[2];
 
       for(iii=1;iii<nx+nz-2;iii+=skip){
         kmi=iii;
@@ -2837,7 +2794,6 @@ case -2:
 
         for(j=js1;j<=js2;j++){
           jterm = (j-js1)*nx;
-          xp[1]=yplt[j];
 
           if(smokecullflag==1&&j!=js2){
             x11[1]=yplt[j];
@@ -2855,9 +2811,6 @@ case -2:
             k = ks1 + kk;
             kterm = (k-ks1)*nxy;
 
-
-            xp[2]=zplt[k];
-            xp[0]=xplt[i];
             n = iterm + jterm + kterm;
             ASSERT(n>=0&&n<smoke3di->nchars_uncompressed);
             mergealpha = mergealphaptr[n];
@@ -3113,7 +3066,6 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 
   glUniform1i(GPU_adjustalphaflag,adjustalphaflag);
   glUniform1i(GPU_is_smoke,is_smoke);
-  glUniform3fv(GPU_eye,1,xyzeyeorig);
   {
     float fire_color[4];
 
@@ -4151,7 +4103,6 @@ void drawsmoke3dCULL(void){
   xyzindex2[5]=3;
 
   glUniform1i(GPU_adjustalphaflag,adjustalphaflag);
-  glUniform3fv(GPU_eye,1,xyzeyeorig);
   glUniform1f(GPU_smokeshade,(float)smoke_shade);
   glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
 
@@ -4225,7 +4176,6 @@ void drawsmoke3dCULL(void){
         if(i_hrrcutoff<0)i_hrrcutoff=0;
         if(i_hrrcutoff>254)i_hrrcutoff=254;
       }
-      glUniform3fv(GPU_norm,1,meshi->norm);
       glUniform1f(GPU_hrrcutoff,(float)i_hrrcutoff);
       switch (meshi->smokedir){
       case 1:
@@ -4757,47 +4707,13 @@ void updatesmoke3dmenulabels(void){
 
 /* ------------------ adjustalpha ------------------------ */
 
-unsigned char adjustalpha(unsigned char alpha, float *xe, float *xp, float factor, float *n1, int normtype){
+unsigned char adjustalpha(unsigned char alpha, float factor){
   double val, term, top, bottom, rr;
   int i;
   float falpha;
   float term1, term2, term3, term4;
-  /*
-  xe == eyeview point
-  xp == point in smoke plane
-  d1 == n1 .dot. x for smoke plane
-  n1 == normalized vector normal to smoke plane
 
-  adjustalpha = ||xe-xp||/||n1 .dot. (xe-xp) ||
-
-  */
-  switch (normtype){
-  case 1:
-    bottom = xp[0]-xe[0];
-    break;
-  case 2:
-    bottom = xp[1]-xe[1];
-    break;
-  case 3:
-    bottom = xp[2]-xe[2];
-    break;
-  case 4:
-    bottom = (n1[0]*(xe[0]-xp[0]) + n1[1]*(xe[1]-xp[1]) + n1[2]*(xe[2]-xp[2]));
-    break;
-  default:
-    ASSERT(FFALSE);
-    break;
-  }
-  if(bottom<0.0)bottom=-bottom;
-  if(bottom==0.0)return alpha;
-  if(bottom<0.1)return alpha;
-  top = 0.0;
-  for(i=0;i<3;i++){
-    term = xe[i]-xp[i];
-    top += term*term;
-  }
-  top = sqrt(top);
-  rr = factor*top/bottom;
+  rr = factor;
   falpha = alpha/255.0;
 
   //val = 1.0 - pow(1.0-falpha,rr);
