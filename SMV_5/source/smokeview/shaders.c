@@ -51,7 +51,6 @@ int setSmokeShaders() {
 
   const GLchar *VertexShaderSource[]={
     "uniform vec4 firecolor;"
-    "uniform vec3 norm, eye;"
     "uniform float aspectratio;"
     "uniform float hrrcutoff;"
     "uniform float smoke_shade;"
@@ -69,15 +68,14 @@ int setSmokeShaders() {
     "attribute float hrr, smoke_alpha;"
     "void main()"
     "{"
-    "  float bottom,top,alpha,r;"
-    "  float term1, term2, term3, term4, term5, term6;"
+    "  float alpha,r;"
+    "  float term1, term2, term3, term4;"
 #ifdef pp_LIGHT
     "  float s_color;"
 #else
     "  float s_shade;"
 #endif
 	"  int draw_hrr;"
-    "  vec3 rel_pos;"
     "  if(hrrcutoff>0.0&&hrr>hrrcutoff){"
 	"    draw_hrr=1;"
 	"  }"
@@ -93,17 +91,12 @@ int setSmokeShaders() {
 	"  else if(draw_hrr==0&&is_smoke==1){"
     "    alpha=smoke_alpha/256.0;"
     "    if(adjustalphaflag==1||adjustalphaflag==2){"
-    "      rel_pos=vec3(gl_Vertex)-eye;"
-    "      bottom = abs(dot(rel_pos,norm));"
-    "      top=length(rel_pos);"
-    "      r=aspectratio*top/bottom;"
+    "      r=aspectratio;"
     "      term1 = alpha*r;"
     "      term2 = -term1*alpha*(r-1.0)/2.0;"
     "      term3 = -term2*alpha*(r-2.0)/3.0;"
     "      term4 = -term3*alpha*(r-3.0)/4.0;"
-    "      term5 = -term4*alpha*(r-4.0)/5.0;"
-    "      term6 = -term5*alpha*(r-5.0)/6.0;"
-    "      alpha = term1+term2+term3+term4+term5+term6;"
+    "      alpha = term1+term2+term3+term4;"
     "    }"
     // newcolor.a *= (1.0 - pow(1.0-gl_Color.a,aspectratio*top/bottom));
     "    alpha /= smoke3d_rthick;"
@@ -180,8 +173,6 @@ int setSmokeShaders() {
   GPU_firecolor = glGetUniformLocation(p_smoke,"firecolor");
   GPU_is_smoke = glGetUniformLocation(p_smoke,"is_smoke");
   GPU_aspectratio = glGetUniformLocation(p_smoke,"aspectratio");
-  GPU_norm = glGetUniformLocation(p_smoke,"norm");
-  GPU_eye = glGetUniformLocation(p_smoke,"eye");
   GPU_adjustalphaflag = glGetUniformLocation(p_smoke,"adjustalphaflag");
   return error_code;
 

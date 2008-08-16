@@ -237,7 +237,7 @@ EXTERNCPP void getsmokedir(float *mm);
 EXTERNCPP void get_world_eyepos(float *mm, float eyepos[3]);
 EXTERNCPP void ExtractFrustum(void);
 EXTERNCPP int RectangleInFrustum( float *x11, float *x12, float *x22, float *x21);
-EXTERNCPP unsigned char adjustalpha(unsigned char alpha, float *xe, float *xp, float factor, float *n1, int normtype);
+EXTERNCPP unsigned char adjustalpha(unsigned char alpha, float factor);
 EXTERNCPP unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
 EXTERNCPP void updatesmoke3d(smoke3d *smoke3di);
 EXTERNCPP void drawsmoke3d(smoke3d *smoke3di);
