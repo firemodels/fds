@@ -1,0 +1,15 @@
+RENDERDIR
+ ..\..\Manuals\SMV_5_User_Guide\scriptfigures
+SETVIEWPOINT
+ external
+RENDERONCE
+ smoke_sensor_c
+SETVIEWPOINT
+ view 1
+RENDERONCE
+ smoke_sensor_l
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ smoke_sensor_r
+
