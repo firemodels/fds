@@ -5,7 +5,7 @@
 DEVICEDEF
  smokesensor
  1.0 1.0 1.0 setcolor
- 0.15 drawsphere
+ 0.8 0.1 drawdisk
 DEVICEDEF
  sensor
  0.0 1.0 0.0  setcolor
