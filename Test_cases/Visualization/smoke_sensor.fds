@@ -1,0 +1,12 @@
+&HEAD CHID='smoke_sensor', TITLE='Test smokesensor device, SVN $Revision: 2168 $' /
+
+&MESH IJK=100,64,40, XB=0.0,10.0,0.0,6.4,0.0,4.0 /
+
+&TIME T_END=1.0 /
+
+&OBST XB=0.0,10.0,6.3,6.4,0.0,4.0 RGB=255,0,0 /
+&PROP ID='smoketest' SMOKEVIEW_ID='smokesensor' /
+&DEVC XYZ=4.75,2.0,2.00, ID='vis1' QUANTITY='TEMPERATURE' PROP_ID='smoketest' /
+
+&TAIL /
+
