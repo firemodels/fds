@@ -1,6 +1,6 @@
 &HEAD CHID='smoke_test', TITLE='Verify Smokeview Smoke3D Feature, SVN $Revision$' /
 
-&MESH IJK=100,100,40, XB=0.0,10.0,0.0,10.0,0.0,4.0 /
+&MESH IJK=100,64,40, XB=0.0,10.0,0.0,6.4,0.0,4.0 /
 
 &TIME T_END=1.0 /
 
@@ -30,18 +30,17 @@
 &OBST XB=0.0,8.5, 4.1,4.2,0.0,4.0, RGB=255,255,255 / 
 &OBST XB=0.0,10.0,5.2,5.3,0.0,4.0, RGB=255,255,255 / 
 
+&PROP ID='smoketest' SMOKEVIEW_ID='smokesensor' /
+&DEVC XYZ=1.75,0.4,2.00, QUANTITY='visibility', ID='vis1' PROP_ID='smoketest' /
+&DEVC XYZ=3.25,1.0,2.00, QUANTITY='visibility', ID='vis2' PROP_ID='smoketest' /
+&DEVC XYZ=4.75,2.0,2.00, QUANTITY='visibility', ID='vis3' PROP_ID='smoketest' /
+&DEVC XYZ=6.25,3.0,2.00, QUANTITY='visibility', ID='vis4' PROP_ID='smoketest' /
+&DEVC XYZ=7.75,4.1,2.00, QUANTITY='visibility', ID='vis5' PROP_ID='smoketest' /
+&DEVC XYZ=9.25,5.2,2.00, QUANTITY='visibility', ID='vis6' PROP_ID='smoketest' /
+
 &SLCF PBX=5.0, QUANTITY='soot density' /
 &SLCF PBY=5.0, QUANTITY='soot density' /
 &SLCF PBZ=2.0, QUANTITY='soot density' /
-
-&PROP ID='smoketest' SMOKEVIEW_ID='smokesensor' /
-&DEVC XYZ=1.75,0.30,2.00, QUANTITY='visibility', ID='vis2' PROP_ID='smoketest' /
-&DEVC XYZ=3.25,0.90,2.00, QUANTITY='visibility', ID='vis3' PROP_ID='smoketest' /
-&DEVC XYZ=4.75,1.90,2.00, QUANTITY='visibility', ID='vis4' PROP_ID='smoketest' /
-&DEVC XYZ=6.25,2.90,2.00, QUANTITY='visibility', ID='vis5' PROP_ID='smoketest' /
-&DEVC XYZ=7.75,4.00,2.00, QUANTITY='visibility', ID='vis6' PROP_ID='smoketest' /
-&DEVC XYZ=9.25,5.10,2.00, QUANTITY='visibility', ID='vis7' PROP_ID='smoketest' /
-
 
 &TAIL /
 
