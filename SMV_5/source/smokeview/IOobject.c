@@ -289,7 +289,7 @@ void getdevice_screencoords(void){
 void draw_devices_val(void){
   device *devicei;
   int i;
-  float *xyz;
+  float *xyz, *xyznorm;
   float white[3]={1.0,1.0,1.0};
   float black[3]={0.0,0.0,0.0};
   int doit=0;
@@ -305,6 +305,7 @@ void draw_devices_val(void){
 
     if(devicei->object->visible==0)continue;
     xyz = devicei->xyz;
+    xyznorm = devicei->xyznorm;
     if(active_smokesensors==1&&show_smokesensors!=0&&strcmp(devicei->object->label,"smokesensor")==0){
       char label[256];
       float val;
@@ -351,10 +352,10 @@ void draw_devices_val(void){
           break;
       }
       if(devicei->visval>128){
-        output3Text(black,xyz[0],xyz[1],xyz[2],label);
+        output3Text(black,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],label);
       }
       else{
-        output3Text(white,xyz[0],xyz[1],xyz[2],label);
+        output3Text(white,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],label);
       }
     }
   }
@@ -380,11 +381,20 @@ void draw_devices(void){
 
     if(devicei->object->visible==0)continue;
     if(isZoneFireModel==1&&strcmp(devicei->object->label,"target")==0&&visSensor==0)continue;
-    if(active_smokesensors==1&&show_smokesensors!=0&&strcmp(devicei->object->label,"smokesensor")==0)continue;
     xyz = devicei->xyz;
     glPushMatrix();
     glTranslatef(xyz[0],xyz[1],xyz[2]);
 
+    if(active_smokesensors==1&&show_smokesensors!=0&&strcmp(devicei->object->label,"smokesensor")==0){
+      float *xyznorm;
+
+      xyznorm = devicei->xyznorm;
+      xyznorm[0]=world_eyepos[0]-devicei->xyz[0];
+      xyznorm[1]=world_eyepos[1]-devicei->xyz[1];
+      xyznorm[2]=world_eyepos[2]-devicei->xyz[2];
+
+      get_elevaz(xyznorm,&devicei->angle_elev,&devicei->angle_az);
+    }
     if(devicei->angle_az!=0.0){
       glRotatef(devicei->angle_az,0.0,0.0,1.0);
     }
