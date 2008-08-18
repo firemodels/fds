@@ -8983,7 +8983,6 @@ void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
   coselev=-1.0*xyznorm[2]/norm;
   *angle_elev=180.0*acos(coselev)/pi;
 
-
   norm2 = sqrt(xyznorm[0]*xyznorm[0]+xyznorm[1]*xyznorm[1]);
   if(norm2<=0.001){
     *angle_az=0.0;
@@ -8991,6 +8990,8 @@ void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
   else{
     *angle_az=180.0*atan2(xyznorm[1],xyznorm[0])/pi;
   }
-
+  xyznorm[0]/=norm;
+  xyznorm[1]/=norm;
+  xyznorm[2]/=norm;
 
 }
