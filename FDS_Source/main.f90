@@ -263,7 +263,6 @@ MAIN_LOOP: DO
  
    IF (ALL(.NOT.ACTIVE_MESH)) ACTIVE_MESH = .TRUE.
    CALL EVAC_MAIN_LOOP
-
    !=============================================================================================================================
    !                                                     PREDICTOR Step
    !=============================================================================================================================
@@ -1059,7 +1058,7 @@ IMPLICIT NONE
  
 ! Initialize evacuation dumps
  
-T_EVAC  = - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS
+T_EVAC  = - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS + T_BEGIN
 T_EVAC_SAVE = T_EVAC
 IF (ANY(EVACUATION_GRID)) CALL INITIALIZE_EVAC_DUMPS
 
