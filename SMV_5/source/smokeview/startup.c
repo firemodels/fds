@@ -1168,6 +1168,7 @@ void initvars1(void){
   vectorspresent=0;
 
   show_smokesensors=1;
+  test_smokesensors=0;
   active_smokesensors=0;
   loadplot3dall=0;
   visTarg = 0, ReadTargFile;

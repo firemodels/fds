@@ -228,8 +228,42 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
     }
   }
+  if(test_smokesensor==1&&active_smokesensors==1&&show_smokesensors!=0){
+    int idev;
+
+    for(idev=0;idev<ndeviceinfo;idev++){
+      device *devicei;
+      int idev_col, idev_row;
+      int col_offset, row_offset;
+      unsigned int red=255<<16;
+
+      devicei = deviceinfo + idev;
+
+      if(devicei->object->visible==0)continue;
+      if(strcmp(devicei->object->label,"smokesensor")!=0)continue;
+      idev_row = devicei->screenijk[0];
+      idev_col = devicei->screenijk[1];
+      for(col_offset=-3;col_offset<4;col_offset++){
+        for(row_offset=-3;row_offset<4;row_offset++){
+          int irow, icol;
+
+          irow = idev_row+row_offset;
+          if(irow<0)irow=0;
+          if(irow>width-1)irow=width-1;
+
+          icol = height - 1 - (idev_col+col_offset);
+          if(icol<0)icol=0;
+          if(icol>height-1)icol=height-1;
+
+          gdImageSetPixel(RENDERimage,irow,icol,red);
+        }
+      }
+    }
+  }
+
 
   /* output the gif image */
+
   switch (rendertype){
   case PNG:
     gdImagePng(RENDERimage,RENDERfile);
