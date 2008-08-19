@@ -223,7 +223,7 @@ void getsmokesensors(void){
     if(strcmp(label,"smokesensor")!=0)continue;
 
     col = devicei->screenijk[0];
-    row = height - devicei->screenijk[1];
+    row = devicei->screenijk[1];
 
     if(col<0||col>width-1||row<0||row>height-1){
       val=-1;

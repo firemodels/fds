@@ -6099,7 +6099,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SMOKESENSORS",12)==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_smokesensors);
+      sscanf(buffer,"%i %i",&show_smokesensors,&test_smokesensors);
       continue;
     }
     if(match(buffer,"SBATSTART",9)==1){
@@ -8462,7 +8462,7 @@ void writeini(int flag){
   fprintf(fileout,"SHOWISO\n");
   fprintf(fileout," %i\n",visAIso);
   fprintf(fileout,"SMOKESENSORS\n");
-  fprintf(fileout," %i\n",show_smokesensors);
+  fprintf(fileout," %i %i\n",show_smokesensors,test_smokesensors);
 
 
   fprintf(fileout,"\nMISC\n");
