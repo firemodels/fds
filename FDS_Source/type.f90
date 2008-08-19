@@ -186,20 +186,24 @@ END TYPE RAMPS_TYPE
 TYPE (RAMPS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: RAMPS
 
 TYPE HUMAN_TYPE
-   CHARACTER(60) :: NODE_NAME
-   CHARACTER(30) :: FFIELD_NAME
-   REAL(EB) :: X,Y,Z,U,V,W,F_X,F_Y,X_old,Y_old,X_group,Y_group
-   REAL(EB) :: UBAR, VBAR, UBAR_Center, VBAR_Center
-   REAL(EB) :: Speed, Radius, Mass, Tpre, Tau, Eta, Ksi, Tdet
-   REAL(EB) :: r_torso, r_shoulder, d_shoulder, angle, torque, m_iner
-   REAL(EB) :: tau_iner, angle_old, omega
-   REAL(EB) :: A, B, C_Young, Gamma, Kappa, Lambda, Commitment
-   REAL(EB) :: SumForces, IntDose, DoseCrit1, DoseCrit2, SumForces2
-   REAL(EB) :: TempMax1, FluxMax1, TempMax2, FluxMax2
-   REAL(EB) :: P_detect_tot, v0_fac
-   INTEGER  :: IOR, ILABEL, COLOR_INDEX, INODE, IMESH, IPC, IEL, I_FFIELD
-   INTEGER  :: GROUP_ID, DETECT1, GROUP_SIZE, I_Target, I_DoorAlgo
-   LOGICAL  :: SHOW, NewRnd
+   CHARACTER(60) :: NODE_NAME='null'
+   CHARACTER(30) :: FFIELD_NAME='null'
+   REAL(EB) :: X=0._EB,Y=0._EB,Z=0._EB,U=0._EB,V=0._EB,W=0._EB,F_X=0._EB,F_Y=0._EB,&
+               X_old=0._EB,Y_old=0._EB,X_group=0._EB,Y_group=0._EB
+   REAL(EB) :: UBAR=0._EB, VBAR=0._EB, UBAR_Center=0._EB, VBAR_Center=0._EB
+   REAL(EB) :: Speed=1.25_EB, Radius=0.255_EB, Mass=80.0_EB, Tpre=1._EB, Tau=1._EB, &
+               Eta=0._EB, Ksi=0._EB, Tdet=0._EB
+   REAL(EB) :: r_torso=0.15_EB, r_shoulder=0.095_EB, d_shoulder=0.055_EB, angle=0._EB, &
+               torque=0._EB, m_iner=4._EB
+   REAL(EB) :: tau_iner=0.2_EB, angle_old=0._EB, omega=0._EB
+   REAL(EB) :: A=2000._EB, B=0.08_EB, C_Young=120000._EB, Gamma=16000._EB, Kappa=40000._EB, &
+               Lambda=0.5_EB, Commitment=0._EB
+   REAL(EB) :: SumForces=0._EB, IntDose=0._EB, DoseCrit1=0._EB, DoseCrit2=0._EB, SumForces2=0._EB
+   REAL(EB) :: TempMax1=0._EB, FluxMax1=0._EB, TempMax2=0._EB, FluxMax2=0._EB
+   REAL(EB) :: P_detect_tot=0._EB, v0_fac=1._EB
+   INTEGER  :: IOR=-1, ILABEL=0, COLOR_INDEX=0, INODE=0, IMESH=-1, IPC=0, IEL=0, I_FFIELD=0
+   INTEGER  :: GROUP_ID=0, DETECT1=0, GROUP_SIZE=0, I_Target=0, I_DoorAlgo=0
+   LOGICAL  :: SHOW=.TRUE., NewRnd=.TRUE.
 END TYPE HUMAN_TYPE
 
 TYPE HUMAN_GRID_TYPE
