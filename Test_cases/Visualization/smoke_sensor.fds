@@ -1,12 +1,33 @@
-&HEAD CHID='smoke_sensor', TITLE='Test smokesensor device, SVN $Revision: 2168 $' /
+&HEAD CHID='smoke_sensor', TITLE='Test smokesensor device, SVN $Revision$' /
+
+  A small white (255,255,255) smokesensor appears over top a grey (128,128,128) obstacle.
+  A red dot indicates where the smoke opacity is recorded and should appear in the middle of the
+  sensor.  Another check is that the sensor should display 255 (the color fo the sensor) not
+  128 (the color of the background).
 
 &MESH IJK=100,64,40, XB=0.0,10.0,0.0,6.4,0.0,4.0 /
 
 &TIME T_END=1.0 /
 
-&OBST XB=0.0,10.0,6.3,6.4,0.0,4.0 RGB=255,0,0 /
+ define fuel so that it only contains carbon and yields 100% soot
+ so that MASS_FRACTION(2) may be used to define soot density directly
+
+&REAC ID         = 'CARBONSOOT'
+      FYI        = 'ficticious fuel, 100% soot'
+      SOOT_YIELD = 1.0
+      SOOT_H_FRACTION = 0.0
+      N          = 0.0
+      C          = 1.0
+      H          = 0.0
+      O          = 0.0 
+      MASS_EXTINCTION_COEFFICIENT=8700.0
+ /
+
+&INIT MASS_FRACTION(2)=0.00007967 DENSITY=1.0/
+
+&OBST XB=0.0,10.0,6.3,6.4,0.0,4.0 RGB=128,128,128/
 &PROP ID='smoketest' SMOKEVIEW_ID='smokesensor' /
-&DEVC XYZ=4.75,2.0,2.00, ID='vis1' QUANTITY='TEMPERATURE' PROP_ID='smoketest' /
+&DEVC XYZ=8.5,6.0,0.50, ID='vis1' QUANTITY='TEMPERATURE' PROP_ID='smoketest' /
 
 &TAIL /
 
