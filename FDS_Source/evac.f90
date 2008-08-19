@@ -27,6 +27,7 @@ Module EVAC
 !  Use MESH_POINTERS, ONLY: DT,IJKW,BOUNDARY_TYPE,XW,YW,WALL_INDEX,POINT_TO_MESH
 !  Use EVAC_MESH_POINTERS
   Use PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION
+  Use READ_INPUT, ONLY : COLOR2RGB
   !
   Implicit None
   CHARACTER(255), PARAMETER :: evacid='$Id$'
@@ -53,9 +54,10 @@ Module EVAC
      Character(60) :: CLASS_NAME='null', ID_NAME='null'
      Character(30) :: GRID_NAME='null'
      Logical :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE.
-     Integer :: N_INITIAL=0,COLOR_INDEX=0,SAMPLING=0, IPC=0, IMESH=0
+     Integer :: N_INITIAL=0,SAMPLING=0, IPC=0, IMESH=0
      Integer :: GN_MIN=0, GN_MAX=0
-     Integer :: N_VENT_FFIELDS=0
+     Integer :: N_VENT_FFIELDS=0, Avatar_Color_Index=0
+     Integer, Dimension(3) :: RGB=-1, AVATAR_RGB=-1
      Integer, Pointer, Dimension(:) :: I_DOOR_NODES
      Integer, Pointer, Dimension(:) :: I_VENT_FFIELDS
      Real(EB), Pointer, Dimension(:) :: P_VENT_FFIELDS
@@ -68,6 +70,7 @@ Module EVAC
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB
      Character(60) :: ID_NAME='null', PERS_ID='null', EVAC_ID='null'
      Character(30) :: GRID_NAME='null'
+     Integer, Dimension(3) :: RGB=-1
      Integer :: IMESH=0
   End Type EVAC_HOLE_Type
   !
@@ -82,7 +85,10 @@ Module EVAC
      Real(EB) :: cos_x=1._EB, cos_y=1._EB, sin_x=0._EB, sin_y=0._EB
      Character(60) :: ID_NAME='null'
      Character(26) :: GRID_NAME='null'
+     Integer, Dimension(3) :: RGB=-1
      Integer :: IMESH=0, IOR=0
+     Real(EB) :: UBAR0=0._EB, VBAR0=0._EB
+     Logical :: Use_v0=.FALSE.
   End Type EVAC_SSTAND_TYPE
   !
   ! Humans belong to some small group (1 to about 5 persons).  This type
@@ -91,7 +97,8 @@ Module EVAC
      Real(EB) :: GROUP_X=0._EB, GROUP_Y=0._EB, MAX_DIST_CENTER=0._EB, LIMIT_COMP=0._EB
      Real(EB) :: GROUP_EFF=0._EB, RADIUS_COMPLETE_0=0._EB, RADIUS_COMPLETE_1=0._EB
      Real(EB) :: Speed=0._EB, IntDose=0._EB, Tpre=0._EB, Tdoor=0._EB, Tdet=0._EB
-     Integer :: GROUP_SIZE=0, GROUP_ID=0, COMPLETE=0, IEL=0
+     Integer :: GROUP_SIZE=0, GROUP_ID=0, COMPLETE=0, IEL=0, Avatar_Color_Index=0
+     Integer, Dimension(3) :: AVATAR_RGB=-1
      Integer, Pointer, Dimension(:) :: GROUP_I_FFIELDS
   End Type GROUP_TYPE
   
@@ -112,6 +119,8 @@ Module EVAC
      Real(EB) :: r_torso=0._EB,r_shoulder=0._EB,d_shoulder=0._EB,m_iner=0._EB, Tau_iner=0._EB
      Character(60) :: ID_NAME='null'
      Integer :: I_DIA_DIST=0, I_VEL_DIST=0, I_PRE_DIST=0, I_DET_DIST=0, I_TAU_DIST=0
+     Integer :: Avatar_Color_Index=0
+     Integer, Dimension(3) :: RGB=-1, AVATAR_RGB=-1
   End Type EVAC_PERS_Type
   !
   ! Exit door type: this just count the number of persons
@@ -125,13 +134,14 @@ Module EVAC
           TIME_OPEN=0._EB, TIME_CLOSE=0._EB
      Integer :: IOR=0, ICOUNT=0, IMESH=0, INODE=0, NTARGET=0
      Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADINT=0._EB
-     Integer :: II=0, JJ=0, KK=0, FED_MESH=0, COLOR_INDEX=0
+     Integer :: II=0, JJ=0, KK=0, FED_MESH=0
      Logical :: CHECK_FLOW=.FALSE., COUNT_ONLY=.FALSE.
      Character(60) :: ID_NAME='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
      Character(26) :: VENT_FFIELD='null'
-     Integer :: I_VENT_FFIELD=0
+     Integer :: I_VENT_FFIELD=0, Avatar_Color_Index=0
+     Integer, Dimension(3) :: RGB=-1
   End Type EVAC_EXIT_Type
   !
   ! Like exit, but door will always put the persons to some
@@ -144,13 +154,14 @@ Module EVAC
           TIME_OPEN=0._EB, TIME_CLOSE=0._EB
      Integer :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0, NTARGET=0
      Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADINT=0._EB
-     Integer :: II=0, JJ=0, KK=0, FED_MESH=0, COLOR_INDEX=0
+     Integer :: II=0, JJ=0, KK=0, FED_MESH=0
      Logical :: CHECK_FLOW=.FALSE., EXIT_SIGN=.FALSE., KEEP_XY=.FALSE.
      Character(60) :: ID_NAME='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
      Character(26) :: VENT_FFIELD='null'
-     Integer :: I_VENT_FFIELD=0
+     Integer :: I_VENT_FFIELD=0, Avatar_Color_Index=0
+     Integer, Dimension(3) :: RGB=-1
   End Type EVAC_DOOR_Type
   !
   ! Like door, but corr will model stairs (or corridors). 
@@ -169,6 +180,7 @@ Module EVAC
      Integer :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0
      Integer :: MAX_HUMANS_INSIDE=0, n_inside=0
      Logical :: CHECK_FLOW=.FALSE.
+     Integer, Dimension(3) :: RGB=-1
      Character(60) :: ID_NAME='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
@@ -182,16 +194,17 @@ Module EVAC
   Type EVAC_ENTR_Type
      Real(EB) :: T_first=0._EB, T_last=0._EB, Flow=0._EB, Width=0._EB, T_Start=0._EB, T_Stop=0._EB
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB
-     Integer :: IOR=0, ICOUNT=0, COLOR_INDEX=0, IPC=0, IMESH=0, INODE=0, &
+     Integer :: IOR=0, ICOUNT=0, IPC=0, IMESH=0, INODE=0, &
           TO_INODE=0, N_Initial=0
      Character(60) :: CLASS_NAME='null', ID_NAME='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
      Logical :: After_Tpre=.FALSE., No_Persons=.FALSE.
-     Integer :: N_VENT_FFIELDS=0
+     Integer :: N_VENT_FFIELDS=0, Avatar_Color_Index=0
      Integer, Pointer, Dimension(:) :: I_DOOR_NODES
      Integer, Pointer, Dimension(:) :: I_VENT_FFIELDS
      Real(EB), Pointer, Dimension(:) :: P_VENT_FFIELDS
+     Integer, Dimension(3) :: RGB=-1, AVATAR_RGB=-1
   End Type EVAC_ENTR_Type
   !
   ! coordinates. the person type ('soccer_fan' etc) are also
@@ -302,6 +315,7 @@ Module EVAC
        TDET_SMOKE_DENS, DENS_INIT, EVAC_DT_MAX, GROUP_DENS, &
        FC_DAMPING, EVAC_DT_MIN, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
        SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, TAU_CHANGE_DOOR
+  Integer, Dimension(3) :: DEAD_RGB
   !
   Real(EB), Dimension(:), Allocatable :: Tsteps
   !
@@ -313,7 +327,7 @@ Contains
   Subroutine READ_EVAC
     Implicit None
     !
-    Integer :: NUMBER_INITIAL_PERSONS, &
+    Integer :: NUMBER_INITIAL_PERSONS, COLOR_METHOD_TMP, &
          SAMPLING_FACTOR, IPC, n_tmp, GN_MIN, GN_MAX
     Real(EB) :: DTSAM
     Logical :: EVACFILE
@@ -324,7 +338,7 @@ Contains
     Integer :: IOS, IZERO, N, I, IOR, j
     Character(30) QUANTITY
     Character(60) FYI,ID,PERS_ID,TO_NODE,EVAC_ID, &
-         DEFAULT_PROPERTIES, RGB_REVA
+         DEFAULT_PROPERTIES
     Character(26) FLOW_FIELD_ID
     Integer :: DIAMETER_DIST,VELOCITY_DIST, &
          PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST
@@ -336,17 +350,19 @@ Contains
          FCONST_A,FCONST_B,L_NON_SP, &
          C_YOUNG,GAMMA,KAPPA, ANGLE, &
          D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA
-    Integer :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX
+    Integer :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, i_avatar_color
     Real(EB) :: MAX_FLOW, WIDTH, TIME_START, TIME_STOP, WIDTH1, &
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED, &
          TIME_OPEN, TIME_CLOSE
+    Real(EB) :: UBAR0, VBAR0
     Logical :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, &
-         EXIT_SIGN, KEEP_XY
+         EXIT_SIGN, KEEP_XY, USE_V0
     Logical :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA,&
          OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE
-    Integer, Dimension(3) :: RGB_DEAD
+    Integer, Dimension(3) :: RGB, AVATAR_RGB
     Character(26) :: VENT_FFIELD, MESH_ID, EVAC_MESH
     Real(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED
+    Character(25) :: COLOR, DEAD_COLOR, AVATAR_COLOR
 
     Character(26), Dimension(51) :: KNOWN_DOOR_NAMES
     Real(EB), Dimension(51) :: KNOWN_DOOR_PROBS
@@ -361,29 +377,33 @@ Contains
     Namelist /EXIT/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, FYI, COUNT_ONLY, WIDTH, XYZ, VENT_FFIELD, &
          MESH_ID, COLOR_INDEX, XYZ_SMOKE, &
-         TIME_OPEN, TIME_CLOSE, EVAC_MESH
+         TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR
     Namelist /DOOR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, XYZ, VENT_FFIELD, &
          EXIT_SIGN, MESH_ID, COLOR_INDEX, XYZ_SMOKE, KEEP_XY, &
-         TIME_OPEN, TIME_CLOSE, EVAC_MESH
+         TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR
     Namelist /ENTR/ ID, XB, IOR, FLOW_FIELD_ID, MAX_FLOW, &
          FYI, WIDTH, QUANTITY, PERS_ID, TIME_START, &
          TIME_STOP, AFTER_REACTION_TIME, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, &
-         MESH_ID, COLOR_INDEX, EVAC_MESH
+         MESH_ID, COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
+         AVATAR_COLOR, AVATAR_RGB
     Namelist /CORR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, WIDTH1, WIDTH2, &
          EFF_WIDTH, EFF_LENGTH, MAX_HUMANS_INSIDE, FAC_SPEED, &
-         XB1, XB2
+         XB1, XB2, RGB, COLOR
     Namelist /EVAC/ NUMBER_INITIAL_PERSONS, QUANTITY, FYI, &
          ID, DTSAM, XB, FLOW_FIELD_ID, PERS_ID, &
          TIME_START, TIME_STOP, IOR, MAX_FLOW, WIDTH, ANGLE, &
          AFTER_REACTION_TIME, GN_MIN, GN_MAX, &
-         KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, MESH_ID, COLOR_INDEX, EVAC_MESH
-    Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH
+         KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, MESH_ID, &
+         COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
+         AVATAR_COLOR, AVATAR_RGB
+    Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR
 
     Namelist /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
-         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, ESC_SPEED, EVAC_MESH
+         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, ESC_SPEED, EVAC_MESH, RGB, COLOR, &
+         UBAR0, VBAR0, USE_V0
 
     Namelist /PERS/ FYI,ID,DIAMETER_DIST,VELOCITY_DIST, &
          PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST, &
@@ -404,38 +424,16 @@ Contains
          FC_DAMPING, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
          OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA,&
          OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, &
-         COLOR_INDEX, RGB_DEAD, RGB_REVA, &
+         COLOR_INDEX, DEAD_RGB, DEAD_COLOR, &
          SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, &
-         TAU_CHANGE_DOOR
+         TAU_CHANGE_DOOR, RGB, COLOR, &
+         AVATAR_COLOR, AVATAR_RGB
     !
     NPPS = 30000 ! Number Persons Per Set (dump to a file)
     !
     EVAC_DT = EVAC_DT_FLOWFIELD     ! Initialize the clock
-    EVAC_CLOCK = 0.0_EB    ! clock for the CHID_evac.csv file
+    EVAC_CLOCK = T_BEGIN    ! clock for the CHID_evac.csv file
     EVAC_N_QUANTITIES = 0
-
-    N_EVAC = 1
-    Allocate(EVAC_CLASS_NAME(N_EVAC),STAT=IZERO)
-    Call ChkMemErr('READ_EVAC','EVAC_CLASS_NAME',IZERO)
-    Allocate(EVAC_CLASS_RGB(3,N_EVAC),STAT=IZERO)
-    Call ChkMemErr('READ_EVAC','EVAC_CLASS_RGB',IZERO)
-
-    EVAC_CLASS_NAME(1) = 'Human'
-    Do N = 1, N_EVAC
-       EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE4
-    End Do
-
-    EVAC_AVATAR_NCOLOR = 7
-    Allocate(EVAC_AVATAR_RGB(3,MAX(7,EVAC_AVATAR_NCOLOR)),STAT=IZERO)
-    Call ChkMemErr('READ_EVAC','EVAC_AVATAR_RGB',IZERO)
-    ! Default values for Avatar color index array
-    EVAC_AVATAR_RGB(1:3,1) = (/  0,  0,  0/)  ! black
-    EVAC_AVATAR_RGB(1:3,2) = (/255,255,  0/)  ! yellow
-    EVAC_AVATAR_RGB(1:3,3) = (/  0,  0,255/)  ! blue
-    EVAC_AVATAR_RGB(1:3,4) = (/255,  0,  0/)  ! red
-    EVAC_AVATAR_RGB(1:3,5) = (/  0,255,  0/)  ! green
-    EVAC_AVATAR_RGB(1:3,6) = (/255,  0,255/)  ! magenta
-    EVAC_AVATAR_RGB(1:3,7) = (/  0,255,255/)  ! cyan
 
     i33 = 0
     ilh = 0
@@ -473,23 +471,15 @@ Contains
     ILABEL_last = 0
     !
 
-    !
-    ! Determine total number of EVAC lines in the input file
-    !
-    Open(LU_INPUT,File=FN_INPUT)
 
-    NPC_EVAC = 0
-    COUNT_EVAC_LOOP: Do
-       Call CHECKREAD('EVAC',LU_INPUT,IOS) 
-       If (IOS == 1) Exit COUNT_EVAC_LOOP
-       Read(LU_INPUT,NML=EVAC,End=219,ERR=220,IOSTAT=IOS)
-       NPC_EVAC = NPC_EVAC + 1
-220    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EVAC line')
-    End Do COUNT_EVAC_LOOP
-219 Rewind(LU_INPUT)
+    Open(LU_INPUT,File=FN_INPUT)
     !
     ! Determine total number of PERS lines in the input file
     !
+    EVAC_AVATAR_NCOLOR = 0  ! Dimension of Avatar color table
+    i_avatar_color     = 0  ! Counter for avatar colors
+    COLOR_METHOD       = -1 ! Default is standard human colors in Smokeview
+    DEAD_RGB           = (/  0,255,255/) ! cyan
     NPC_PERS = 0
     COUNT_PERS_LOOP: Do
        Call CHECKREAD('PERS',LU_INPUT,IOS) 
@@ -499,15 +489,38 @@ Contains
 222    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with PERS line')
     End Do COUNT_PERS_LOOP
 221 Rewind(LU_INPUT)
+    If (COLOR_METHOD == 3) EVAC_AVATAR_NCOLOR = NPC_PERS + 1
+    COLOR_METHOD_TMP = COLOR_METHOD
+    !
+    ! Determine total number of EVAC lines in the input file
+    !
+    NPC_EVAC = 0
+    COUNT_EVAC_LOOP: Do
+       NUMBER_INITIAL_PERSONS = 0
+       Call CHECKREAD('EVAC',LU_INPUT,IOS) 
+       If (IOS == 1) Exit COUNT_EVAC_LOOP
+       Read(LU_INPUT,NML=EVAC,End=219,ERR=220,IOSTAT=IOS)
+       NPC_EVAC = NPC_EVAC + 1
+       If (COLOR_METHOD == 0 .And. NUMBER_INITIAL_PERSONS > 0) Then
+          EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
+       End If
+       !
+220    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EVAC line')
+    End Do COUNT_EVAC_LOOP
+219 Rewind(LU_INPUT)
     !
     ! Determine total number of EXIT lines in the input file
     !
     N_EXITS = 0
     COUNT_EXITS_LOOP: Do
+       COUNT_ONLY = .FALSE.
        Call CHECKREAD('EXIT',LU_INPUT,IOS) 
        If (IOS == 1) Exit COUNT_EXITS_LOOP
        Read(LU_INPUT,NML=Exit,End=223,ERR=224,IOSTAT=IOS)
        N_EXITS = N_EXITS + 1
+       If (COLOR_METHOD == 4 .And. .Not.COUNT_ONLY) Then
+          EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
+       End If
 224    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EXIT line')
     End Do COUNT_EXITS_LOOP
 223 Rewind(LU_INPUT)
@@ -520,6 +533,9 @@ Contains
        If (IOS == 1) Exit COUNT_DOORS_LOOP
        Read(LU_INPUT,NML=DOOR,End=225,ERR=226,IOSTAT=IOS)
        N_DOORS = N_DOORS + 1
+       If (COLOR_METHOD == 4) Then
+          EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
+       End If
 226    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with DOOR line')
     End Do COUNT_DOORS_LOOP
 225 Rewind(LU_INPUT)
@@ -528,10 +544,14 @@ Contains
     !
     N_ENTRYS = 0
     COUNT_ENTRYS_LOOP: Do
+       MAX_FLOW     = 0.0_EB
        Call CHECKREAD('ENTR',LU_INPUT,IOS) 
        If (IOS == 1) Exit COUNT_ENTRYS_LOOP
        Read(LU_INPUT,NML=ENTR,End=227,ERR=228,IOSTAT=IOS)
        N_ENTRYS = N_ENTRYS + 1
+       If (COLOR_METHOD == 0 .And. MAX_FLOW > 0) Then
+          EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
+       End If
 228    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with ENTR line')
     End Do COUNT_ENTRYS_LOOP
 227 Rewind(LU_INPUT)
@@ -571,6 +591,42 @@ Contains
 234    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EVSS line')
     End Do COUNT_EVSS_LOOP
 233 Rewind(LU_INPUT)
+
+    Select Case (COLOR_METHOD)
+    Case (-1)
+       EVAC_AVATAR_NCOLOR = 1
+    Case (0,3,4)
+       EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
+    Case (1,2,5)
+       EVAC_AVATAR_NCOLOR = 7
+    Case Default
+       EVAC_AVATAR_NCOLOR = 1
+    End Select
+
+    ! Allocate avatar color array for Smokeview file write
+    EVAC_AVATAR_NCOLOR = Max(1,EVAC_AVATAR_NCOLOR)
+    Allocate(EVAC_AVATAR_RGB(3,EVAC_AVATAR_NCOLOR),STAT=IZERO)
+    Call ChkMemErr('READ_EVAC','EVAC_AVATAR_RGB',IZERO)
+
+    Select Case (COLOR_METHOD)
+    Case (-1)
+       EVAC_AVATAR_RGB(1:3,1) = (/ 39, 64,139/)  ! ROYAL BLUE 4
+    Case (3)
+       EVAC_AVATAR_RGB(1:3,1) = (/ 39, 64,139/)  ! ROYAL BLUE 4
+       EVAC_AVATAR_RGB(1:3,EVAC_AVATAR_NCOLOR) = DEAD_RGB
+    Case (0,4)
+       EVAC_AVATAR_RGB(1:3,EVAC_AVATAR_NCOLOR) = DEAD_RGB
+    Case (1,2,5)
+       EVAC_AVATAR_RGB(1:3,1) = (/  0,  0,  0/)  ! black
+       EVAC_AVATAR_RGB(1:3,2) = (/255,255,  0/)  ! yellow
+       EVAC_AVATAR_RGB(1:3,3) = (/  0,  0,255/)  ! blue
+       EVAC_AVATAR_RGB(1:3,4) = (/255,  0,  0/)  ! red
+       EVAC_AVATAR_RGB(1:3,5) = (/  0,255,  0/)  ! green
+       EVAC_AVATAR_RGB(1:3,6) = (/255,  0,255/)  ! magenta
+       EVAC_AVATAR_RGB(1:3,7) = DEAD_RGB
+    Case Default
+       EVAC_AVATAR_RGB(1:3,1) = (/ 39, 64,139/)  ! ROYAL BLUE 4
+    End Select
     !
     ! Allocate quantities for EVAC, PERS, EXIT types
     !
@@ -627,7 +683,7 @@ Contains
        End If
 
        If (npc_evac > 0 ) Then
-          EVACUATION(1:NPC_EVAC)%COLOR_INDEX = 0
+          !          EVACUATION(1:NPC_EVAC)%COLOR_INDEX = 1
           EVACUATION(1:NPC_EVAC)%GRID_NAME   = 'null'
           EVACUATION(1:NPC_EVAC)%CLASS_NAME  = 'null'
           EVACUATION(1:NPC_EVAC)%IMESH       = 0
@@ -648,7 +704,7 @@ Contains
           EVAC_EXITS(1:N_EXITS)%TO_NODE   = 'null'
           EVAC_EXITS(1:N_EXITS)%GRID_NAME = 'null'
           EVAC_EXITS(1:N_EXITS)%IMESH     = 0
-          EVAC_EXITS(1:N_EXITS)%COLOR_INDEX = 0
+          !          EVAC_EXITS(1:N_EXITS)%COLOR_INDEX = 1
        End If
 
        If (n_doors > 0 ) Then
@@ -657,7 +713,7 @@ Contains
           EVAC_DOORS(1:N_DOORS)%GRID_NAME = 'null'
           EVAC_DOORS(1:N_DOORS)%IMESH     = 0
           EVAC_DOORS(1:N_DOORS)%IMESH2    = 0
-          EVAC_DOORS(1:N_DOORS)%COLOR_INDEX = 0
+          !          EVAC_DOORS(1:N_DOORS)%COLOR_INDEX = 1
        End If
 
        If (n_corrs > 0 ) Then
@@ -674,7 +730,7 @@ Contains
           EVAC_ENTRYS(1:N_ENTRYS)%GRID_NAME   = 'null'
           EVAC_ENTRYS(1:N_ENTRYS)%CLASS_NAME  = 'null'
           EVAC_ENTRYS(1:N_ENTRYS)%IMESH       = 0
-          EVAC_ENTRYS(1:N_ENTRYS)%COLOR_INDEX = 0
+          !          EVAC_ENTRYS(1:N_ENTRYS)%COLOR_INDEX = 1
        End If
 
     End If EVAC_PROC_IF
@@ -698,7 +754,6 @@ Contains
     ! Which doors are 'smoke free'
     FED_DOOR_CRIT = 0.000001_EB
     ! How to color humans?
-    COLOR_METHOD = -1 ! Default is standard human colors in Smokeview
     ! Smoke is detected, when its density is larger than, e.g. 1 mg/m3
     ! Default is no detection due to smoke.
     TDET_SMOKE_DENS = -999.9_EB  ! 
@@ -716,12 +771,17 @@ Contains
     OUTPUT_ANGLE         = .FALSE.
     OUTPUT_CONTACT_FORCE = .FALSE.
     OUTPUT_TOTAL_FORCE   = .FALSE.
+    DEAD_COLOR = 'null'
     ! 
     ! Read the PERS lines (no read for default n=0 case)
     !
     READ_PERS_LOOP: Do N=0,NPC_PERS
        !
-       ID  = 'null'
+       ID           = 'null'
+       RGB          = -1
+       COLOR        = 'null'
+       AVATAR_RGB   = -1
+       AVATAR_COLOR = 'null'
        ! Default: No distributions for human properties
        DEFAULT_PROPERTIES = 'null'
        DIAMETER_DIST = -1
@@ -912,10 +972,28 @@ Contains
        !
        !
        !
+       ! Avatar colors, integer RGB(3), e.g., (23,255,0)
+       If (DEAD_COLOR /= 'null') Then
+          Call COLOR2RGB(DEAD_RGB,DEAD_COLOR)
+          EVAC_AVATAR_RGB(1:3,EVAC_AVATAR_NCOLOR) = DEAD_RGB
+       End If
+       If (Any(AVATAR_RGB < 0) .And. AVATAR_COLOR=='null') AVATAR_COLOR = 'ROYAL BLUE 4'
+       If (AVATAR_COLOR /= 'null') Call COLOR2RGB(AVATAR_RGB,AVATAR_COLOR)
+       If (COLOR_METHOD_TMP == 3) Then
+          i_avatar_color = i_avatar_color + 1
+          EVAC_AVATAR_RGB(1:3,i_avatar_color) = AVATAR_RGB
+       End If
+       !
        If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_PERS_LOOP
        !
        PCP=>EVAC_PERSON_CLASSES(N)
        !
+       ! Colors, integer RGB(3), e.g., (23,255,0)
+       If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+       If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
+       PCP%RGB = RGB
+       PCP%AVATAR_RGB = AVATAR_RGB
+       If (COLOR_METHOD_TMP == 3) PCP%Avatar_Color_Index = i_avatar_color
        PCP%ID_NAME = ID
        !
        PCP%D_mean = DIA_MEAN
@@ -972,6 +1050,7 @@ Contains
        !
     End Do READ_PERS_LOOP
 24  Rewind(LU_INPUT)
+    COLOR_METHOD = COLOR_METHOD_TMP
 
     If (GROUP_DENS .Le. 0.01_EB) GROUP_DENS = 0.25_EB
     If (GROUP_DENS .Gt. 3.50_EB) GROUP_DENS = 3.50_EB
@@ -994,7 +1073,7 @@ Contains
     End If
 
     Select Case (COLOR_METHOD)
-    Case (-1:2,4:5)
+    Case (-1:5)
        Continue
     Case (7)
        COLOR_METHOD = -1
@@ -1097,18 +1176,14 @@ Contains
           Call SHUTDOWN(MESSAGE)
        End If
     End If
-
-
-    ! Add the number of the evacuation classes
-
     !
     ! Read the EXIT lines
     !
     READ_EXIT_LOOP: Do N = 1, N_EXITS
-       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EXIT_LOOP
-       PEX=>EVAC_EXITS(N)
        !
        ID            = 'null'
+       RGB   = -1
+       COLOR = 'null'
        XB            = 0.0_EB
        IOR           = 0
        FLOW_FIELD_ID = 'null'
@@ -1123,12 +1198,36 @@ Contains
        TIME_CLOSE    = Huge(TIME_CLOSE)
        XYZ(:)        = Huge(XYZ)
        XYZ_SMOKE(:)  = Huge(XYZ_SMOKE)
-       COLOR_INDEX   = 0
+       COLOR_INDEX   = -1
        !
        Call CHECKREAD('EXIT',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_EXIT_LOOP
        Read(LU_INPUT,Exit,End=26,IOSTAT=IOS)
        !
+       ! Old input used COLOR_INDEX, next lines are needed for that
+       If (COLOR_INDEX == 1) COLOR = 'BLACK'  
+       If (COLOR_INDEX == 2) COLOR = 'YELLOW' 
+       If (COLOR_INDEX == 3) COLOR = 'BLUE'   
+       If (COLOR_INDEX == 4) COLOR = 'RED'    
+       If (COLOR_INDEX == 5) COLOR = 'GREEN'  
+       If (COLOR_INDEX == 6) COLOR = 'MAGENTA'
+       If (COLOR_INDEX == 7) COLOR = 'CYAN'   
+
+       ! Colors, integer RGB(3), e.g., (23,255,0)
+       If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+       If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
+       If (COLOR_METHOD == 4 .And. .Not.COUNT_ONLY) Then
+          i_avatar_color = i_avatar_color + 1
+          EVAC_AVATAR_RGB(1:3,i_avatar_color) = RGB
+       End If
+
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EXIT_LOOP
+
+       PEX=>EVAC_EXITS(N)
+
+       PEX%RGB = RGB
+       If (COLOR_METHOD == 4 .And. .Not.COUNT_ONLY) PEX%Avatar_Color_Index = i_avatar_color
+
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
           If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
@@ -1156,8 +1255,8 @@ Contains
        PEX%CHECK_FLOW = CHECK_FLOW
        PEX%VENT_FFIELD= VENT_FFIELD
        PEX%INODE      = 0
-       PEX%T_first    = 0.0_EB
-       PEX%T_last     = 0.0_EB
+       PEX%T_first    = T_BEGIN
+       PEX%T_last     = T_BEGIN
        PEX%ICOUNT     = 0
        PEX%Flow_max   = 0.0_EB
        PEX%TIME_OPEN  = TIME_OPEN
@@ -1166,7 +1265,7 @@ Contains
        PEX%COUNT_ONLY = .False.
        If (COUNT_ONLY) PEX%COUNT_ONLY = .True.
 
-       PEX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX),8) ! 0-7 always
+       !       PEX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX-1),7) + 1 ! 1-7 always
 
        PEX%FED_MESH = 0
        If (XYZ(1) < Huge(XYZ)) Then
@@ -1334,10 +1433,10 @@ Contains
     ! Read the DOOR lines
     !
     READ_DOOR_LOOP: Do N = 1, N_DOORS
-       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_DOOR_LOOP
-       PDX=>EVAC_DOORS(N)
        !
        ID            = 'null'
+       RGB           = -1
+       COLOR         = 'null'
        XB            = 0.0_EB
        IOR           = 0
        FLOW_FIELD_ID = 'null'
@@ -1353,13 +1452,37 @@ Contains
        TIME_CLOSE    = Huge(TIME_CLOSE)
        XYZ(:)        = Huge(XYZ)
        XYZ_SMOKE(:)  = Huge(XYZ_SMOKE)
-       COLOR_INDEX   = 0
+       COLOR_INDEX   = -1
        KEEP_XY       = .False.
        !
        Call CHECKREAD('DOOR',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_DOOR_LOOP
        Read(LU_INPUT,DOOR,End=27,IOSTAT=IOS)
        !
+       ! Old input used COLOR_INDEX, next lines are needed for that
+       If (COLOR_INDEX == 1) COLOR = 'BLACK'  
+       If (COLOR_INDEX == 2) COLOR = 'YELLOW' 
+       If (COLOR_INDEX == 3) COLOR = 'BLUE'   
+       If (COLOR_INDEX == 4) COLOR = 'RED'    
+       If (COLOR_INDEX == 5) COLOR = 'GREEN'  
+       If (COLOR_INDEX == 6) COLOR = 'MAGENTA'
+       If (COLOR_INDEX == 7) COLOR = 'CYAN'   
+       !
+       ! Colors, integer RGB(3), e.g., (23,255,0)
+       If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+       If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
+       If (COLOR_METHOD == 4) Then
+          i_avatar_color = i_avatar_color + 1
+          EVAC_AVATAR_RGB(1:3,i_avatar_color) = RGB
+       End If
+
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_DOOR_LOOP
+
+       PDX=>EVAC_DOORS(N)
+
+       PDX%RGB = RGB
+       If (COLOR_METHOD == 4) PDX%Avatar_Color_Index = i_avatar_color
+
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
           If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
@@ -1391,15 +1514,15 @@ Contains
        PDX%TO_NODE    = TO_NODE
        PDX%INODE      = 0
        PDX%INODE2     = 0
-       PDX%T_first    = 0.0_EB
-       PDX%T_last     = 0.0_EB
+       PDX%T_first    = T_BEGIN
+       PDX%T_last     = T_BEGIN
        PDX%ICOUNT     = 0
        PDX%Flow_max   = 0.0_EB
        PDX%TIME_OPEN  = TIME_OPEN
        PDX%TIME_CLOSE = TIME_CLOSE
        If (CHECK_FLOW) PDX%Flow_max   = MAX_FLOW
 
-       PDX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX),8) ! 0-7 always
+       !       PDX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX-1),7) ! 1-7 always
 
        PDX%FED_MESH = 0
        If (XYZ(1) < Huge(XYZ)) Then
@@ -1571,6 +1694,8 @@ Contains
        PCX=>EVAC_CORRS(N)
        !
        ID            = 'null'
+       RGB           = -1
+       COLOR         = 'null'
        XB            = Huge(XB)
        XB1           = Huge(XB1)
        XB2           = Huge(XB2)
@@ -1657,8 +1782,8 @@ Contains
        PCX%TO_NODE    = TO_NODE
        PCX%INODE      = 0
        PCX%INODE2     = 0
-       PCX%T_first    = 0.0_EB
-       PCX%T_last     = 0.0_EB
+       PCX%T_first    = T_BEGIN
+       PCX%T_last     = T_BEGIN
        PCX%ICOUNT     = 0
 
        PCX%MAX_HUMANS_INSIDE = 0
@@ -1783,6 +1908,11 @@ Contains
        ! Initialize the linked lists of persons who are inside corridors.
        PCX%n_inside = 0
        Nullify(PCX%First)
+
+       ! Colors, integer RGB(3), e.g., (23,255,0)
+       If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+       If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
+       PCX%RGB = RGB
        !
     End Do READ_CORR_LOOP
 29  Rewind(LU_INPUT)
@@ -1835,10 +1965,12 @@ Contains
     ! Read the ENTR lines
     !
     READ_ENTR_LOOP: Do N = 1, N_ENTRYS
-       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_ENTR_LOOP
-       PNX=>EVAC_ENTRYS(N)
        !
        ID            = 'null'
+       RGB           = -1
+       COLOR         = 'null'
+       AVATAR_RGB    = -1
+       AVATAR_COLOR  = 'null'
        XB            = 0.0_EB
        IOR           = 0
        FLOW_FIELD_ID = 'null'
@@ -1859,6 +1991,32 @@ Contains
        Call CHECKREAD('ENTR',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_ENTR_LOOP
        Read(LU_INPUT,ENTR,End=28,IOSTAT=IOS)
+       ! 
+       ! Old input used QUANTITY, next lines are needed for that
+       If (QUANTITY == 'BLACK')   AVATAR_COLOR = 'BLACK'  
+       If (QUANTITY == 'YELLOW')  AVATAR_COLOR = 'YELLOW' 
+       If (QUANTITY == 'BLUE')    AVATAR_COLOR = 'BLUE'   
+       If (QUANTITY == 'RED')     AVATAR_COLOR = 'RED'    
+       If (QUANTITY == 'GREEN')   AVATAR_COLOR = 'GREEN'  
+       If (QUANTITY == 'MAGENTA') AVATAR_COLOR = 'MAGENTA'
+       If (QUANTITY == 'CYAN')    AVATAR_COLOR = 'CYAN'   
+       !
+       ! Colors, integer RGB(3), e.g., (23,255,0)
+       If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+       If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
+       If (Any(AVATAR_RGB < 0) .And. AVATAR_COLOR=='null') AVATAR_COLOR = 'ROYAL BLUE 4'
+       If (AVATAR_COLOR /= 'null') Call COLOR2RGB(AVATAR_RGB,AVATAR_COLOR)
+       If (COLOR_METHOD == 0 .And. MAX_FLOW > 0) Then
+          i_avatar_color = i_avatar_color + 1
+          EVAC_AVATAR_RGB(1:3,i_avatar_color) = AVATAR_RGB
+       End If
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_ENTR_LOOP
+
+       PNX=>EVAC_ENTRYS(N)
+
+       PNX%RGB = RGB
+       PNX%AVATAR_RGB =AVATAR_RGB
+       If (COLOR_METHOD == 0 .And. MAX_FLOW > 0) PNX%Avatar_Color_Index = i_avatar_color
 
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
@@ -1869,7 +2027,7 @@ Contains
 
        If (Trim(KNOWN_DOOR_NAMES(51)) /= 'null') Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: ENTR line ',Trim(PNX%ID_NAME), &
+               'ERROR: ENTR line ',Trim(ID), &
                ' problem with KNOWN_DOOR_NAMES'
           Call SHUTDOWN(MESSAGE)
        End If
@@ -1906,16 +2064,6 @@ Contains
        PNX%Z2 = XB(6)
        PNX%IOR = IOR
        ! 
-       PNX%COLOR_INDEX = 0
-       If (QUANTITY == 'BLACK')    PNX%COLOR_INDEX = 0
-       If (QUANTITY == 'YELLOW')   PNX%COLOR_INDEX = 1
-       If (QUANTITY == 'BLUE')     PNX%COLOR_INDEX = 2
-       If (QUANTITY == 'RED')      PNX%COLOR_INDEX = 3
-       If (QUANTITY == 'GREEN')    PNX%COLOR_INDEX = 4
-       If (QUANTITY == 'MAGENTA')  PNX%COLOR_INDEX = 5
-       If (QUANTITY == 'CYAN')     PNX%COLOR_INDEX = 6
-       If (QUANTITY == 'WHITE')    PNX%COLOR_INDEX = 7
-       ! 
        PNX%ID_NAME    = ID
        PNX%CLASS_NAME = PERS_ID
 
@@ -1925,8 +2073,8 @@ Contains
           If ( pcp%id_name == PERS_ID ) PNX%IPC = IPC
        End Do
        PNX%TO_NODE    = TO_NODE
-       PNX%T_first    = 0.0_EB
-       PNX%T_last     = 0.0_EB
+       PNX%T_first    = T_BEGIN
+       PNX%T_last     = T_BEGIN
        PNX%ICOUNT     = 0
        PNX%Flow       = MAX_FLOW
        PNX%T_Start    = TIME_START
@@ -2048,7 +2196,6 @@ Contains
                Trim(PNX%GRID_NAME),' not found'
           Call SHUTDOWN(MESSAGE)
        End If
-       !
        ! 
     End Do READ_ENTR_LOOP
 28  Rewind(LU_INPUT)
@@ -2082,10 +2229,12 @@ Contains
     ! Read the EVAC lines
     ! 
     READ_EVAC_LOOP: Do N=1,NPC_EVAC
-       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EVAC_LOOP
-       HPT=>EVACUATION(N)
        !
        ID                       = 'null'
+       RGB                      = -1
+       COLOR                    = 'null'
+       AVATAR_RGB               = -1
+       AVATAR_COLOR             = 'null'
        QUANTITY                 = 'null'
        FLOW_FIELD_ID            = 'null'
        MESH_ID                  = 'null'
@@ -2105,11 +2254,36 @@ Contains
        KNOWN_DOOR_NAMES         = 'null'
        KNOWN_DOOR_PROBS         = 1.0_EB
        !
-       !
        Call CHECKREAD('EVAC',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_EVAC_LOOP
        Read(LU_INPUT,EVAC,End=25,IOSTAT=IOS)
+       ! 
+       ! Old input used QUANTITY, next lines are needed for that
+       If (QUANTITY == 'BLACK')   AVATAR_COLOR = 'BLACK'  
+       If (QUANTITY == 'YELLOW')  AVATAR_COLOR = 'YELLOW' 
+       If (QUANTITY == 'BLUE')    AVATAR_COLOR = 'BLUE'   
+       If (QUANTITY == 'RED')     AVATAR_COLOR = 'RED'    
+       If (QUANTITY == 'GREEN')   AVATAR_COLOR = 'GREEN'  
+       If (QUANTITY == 'MAGENTA') AVATAR_COLOR = 'MAGENTA'
+       If (QUANTITY == 'CYAN')    AVATAR_COLOR = 'CYAN'   
+       !
+       ! Colors, integer RGB(3), e.g., (23,255,0)
+       If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+       If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
+       If (Any(AVATAR_RGB < 0) .And. AVATAR_COLOR=='null') AVATAR_COLOR = 'ROYAL BLUE 4'
+       If (AVATAR_COLOR /= 'null') Call COLOR2RGB(AVATAR_RGB,AVATAR_COLOR)
+       If (COLOR_METHOD == 0 .And. NUMBER_INITIAL_PERSONS > 0) Then
+          i_avatar_color = i_avatar_color + 1
+          EVAC_AVATAR_RGB(1:3,i_avatar_color) = AVATAR_RGB
+       End If
 
+       If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EVAC_LOOP
+
+       HPT=>EVACUATION(N)
+
+       HPT%RGB = RGB
+       HPT%AVATAR_RGB = AVATAR_RGB
+       If (COLOR_METHOD == 0 .And. NUMBER_INITIAL_PERSONS > 0) HPT%Avatar_Color_Index = i_avatar_color
        If (EVAC_MESH /= 'null') Then
           MESH_ID = EVAC_MESH
           If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
@@ -2135,7 +2309,7 @@ Contains
 
        If (Trim(KNOWN_DOOR_NAMES(51)) /= 'null') Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EVAC line ',Trim(HPT%ID_NAME), &
+               'ERROR: EVAC line ',Trim(ID), &
                ' problem with KNOWN_DOOR_NAMES'
           Call SHUTDOWN(MESSAGE)
        End If
@@ -2187,16 +2361,6 @@ Contains
           If ( Trim(pcp%id_name) == Trim(PERS_ID) ) HPT%IPC = IPC
        End Do
        ! 
-       HPT%COLOR_INDEX = 0
-       If (QUANTITY == 'BLACK')    HPT%COLOR_INDEX = 0
-       If (QUANTITY == 'YELLOW')   HPT%COLOR_INDEX = 1
-       If (QUANTITY == 'BLUE')     HPT%COLOR_INDEX = 2
-       If (QUANTITY == 'RED')      HPT%COLOR_INDEX = 3
-       If (QUANTITY == 'GREEN')    HPT%COLOR_INDEX = 4
-       If (QUANTITY == 'MAGENTA')  HPT%COLOR_INDEX = 5
-       If (QUANTITY == 'CYAN')     HPT%COLOR_INDEX = 6
-       If (QUANTITY == 'WHITE')    HPT%COLOR_INDEX = 7
-       ! 
        HPT%SAMPLING = SAMPLING_FACTOR
        !
        If (NUMBER_INITIAL_PERSONS > 0) Then
@@ -2218,6 +2382,7 @@ Contains
        HPT%N_INITIAL = NUMBER_INITIAL_PERSONS
        HPT%EVACFILE = EVACFILE
        HPT%IMESH = 0
+       HPT%ID_NAME = Trim(ID)
 
        ! Check which evacuation floor
        ii = 0
@@ -2281,7 +2446,7 @@ Contains
           End If
        End Do
        !
-       ! No knwon doors given, use the flow_field_id value
+       ! No known doors given, use the flow_field_id value
        ! 
        HPT%P_VENT_FFIELDS(0) = 1.0_EB
        HPT%I_VENT_FFIELDS(0) = 0
@@ -2311,6 +2476,8 @@ Contains
        EHX=>EVAC_HOLES(N)
        !
        ID            = 'null'
+       RGB           = -1
+       COLOR         = 'null'
        XB            = 0.0_EB
        EVAC_ID       = 'null'
        PERS_ID       = 'null'
@@ -2374,6 +2541,11 @@ Contains
                ' not an unique mesh found '
           Call SHUTDOWN(MESSAGE)
        End If
+
+       ! Colors, integer RGB(3), e.g., (23,255,0)
+       If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+       If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
+       EHX%RGB = RGB
     End Do READ_EVHO_LOOP
 30  Rewind(LU_INPUT)
     !
@@ -2384,6 +2556,8 @@ Contains
        ESS => EVAC_SSTANDS(N)
        !
        ID            = 'null'
+       RGB           = -1
+       COLOR         = 'null'
        XB            = 0.0_EB
        MESH_ID       = 'null'
        EVAC_MESH     = 'null'
@@ -2394,6 +2568,9 @@ Contains
        FAC_V0_DOWN   = 1.0_EB
        FAC_V0_HORI   = 1.0_EB
        ESC_SPEED     = 0.0_EB
+       UBAR0         = 0.0_EB
+       VBAR0         = 0.0_EB
+       USE_V0        = .FALSE.
        !
        Call CHECKREAD('EVSS',LU_INPUT,IOS)
        If (IOS == 1) Exit READ_EVSS_LOOP
@@ -2435,7 +2612,10 @@ Contains
           ESS%Esc_SpeedUp   = Max(0.0_EB,+ESC_SPEED)
           ESS%Esc_SpeedDn   = Max(0.0_EB,-ESC_SPEED)
        End If
-       ESS%IOR         = IOR
+       ESS%IOR    = IOR
+       ESS%UBAR0  = UBAR0
+       ESS%VBAR0  = VBAR0
+       ESS%Use_v0 = USE_V0
        ! 
        ! Check which evacuation floor
        ii = 0
@@ -2488,7 +2668,11 @@ Contains
                'ERROR: EVSS',N,' problem with IOR'
           Call SHUTDOWN(MESSAGE)
        End Select
-       ! 
+
+       ! Colors, integer RGB(3), e.g., (23,255,0)
+       If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+       If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
+       ESS%RGB = RGB
     End Do READ_EVSS_LOOP
 31  Rewind(LU_INPUT)
     !
@@ -2497,6 +2681,19 @@ Contains
 
 
     Close (LU_INPUT)    
+
+    N_EVAC = 1
+    Allocate(EVAC_CLASS_NAME(N_EVAC),STAT=IZERO)
+    Call ChkMemErr('READ_EVAC','EVAC_CLASS_NAME',IZERO)
+    Allocate(EVAC_CLASS_RGB(3,N_EVAC),STAT=IZERO)
+    Call ChkMemErr('READ_EVAC','EVAC_CLASS_RGB',IZERO)
+    EVAC_CLASS_NAME(1) = 'Human'
+    Do N = 1, N_EVAC
+       EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE 4
+    End Do
+
+    ! Default color table for agents
+
     If (MYID /= Max(0,EVAC_PROCESS)) Return
     !
     ! Set the IMESH and IMESH2 for corridors
@@ -3234,7 +3431,7 @@ Contains
                    !      IPC, ', Mesh ', NM, ', i_human ', n_humans
                    ISTOP = 3
                    HR%SHOW = .True.    
-                   HR%COLOR_INDEX = 6  ! Cyan
+                   HR%COLOR_INDEX = 7  ! Cyan
                    Exit INITIALIZATION_LOOP
                 End If
 
@@ -3431,21 +3628,23 @@ Contains
 
              Select Case (COLOR_METHOD)
              Case (-1)
-                HR%COLOR_INDEX = 0
+                HR%COLOR_INDEX = 1
              Case (0)
-                HR%COLOR_INDEX = HPT%COLOR_INDEX 
+                HR%COLOR_INDEX = HPT%Avatar_Color_Index
              Case (1)
-                HR%COLOR_INDEX = Mod(group_size-1,5)
+                HR%COLOR_INDEX = Mod(group_size-1,6) + 1
              Case (2)
                 If (HR%GROUP_ID > 0 ) Then
-                   HR%COLOR_INDEX = Mod(HR%GROUP_ID,5) + 1
+                   HR%COLOR_INDEX = Mod(HR%GROUP_ID,6) + 1
                 Else
-                   HR%COLOR_INDEX = 0 ! lonely human
+                   HR%COLOR_INDEX = 1 ! lonely human
                 End If
+             Case (3)
+                HR%COLOR_INDEX = evac_person_classes(HPT%IPC)%Avatar_Color_Index
              Case (4)
-                HR%COLOR_INDEX = HPT%COLOR_INDEX ! default
+                HR%COLOR_INDEX = 1
              Case (5)
-                HR%COLOR_INDEX = 0
+                HR%COLOR_INDEX = 1
              Case Default
                 Write(MESSAGE,'(A,I3,A)') &
                      'ERROR: READ_EVAC COLOR METHOD',COLOR_METHOD, &
@@ -3905,13 +4104,13 @@ Contains
 
 
              Do ie = 1, n_doors
-                If ( EVAC_DOORS(ie)%TIME_OPEN > 0.0_EB ) Then
+                If ( EVAC_DOORS(ie)%TIME_OPEN > T_BEGIN ) Then
                    Is_Visible_Door(ie) = .False.
                    Is_Known_Door(ie) = .False.
                 End If
              End Do
              Do ie = 1, n_exits
-                If ( EVAC_EXITS(ie)%TIME_OPEN > 0.0_EB .And. &
+                If ( EVAC_EXITS(ie)%TIME_OPEN > T_BEGIN .And. &
                      .Not. EVAC_EXITS(ie)%COUNT_ONLY ) Then
                    Is_Visible_Door(n_doors+ie) = .False.
                    Is_Known_Door(n_doors+ie) = .False.
@@ -3950,7 +4149,7 @@ Contains
                 End Do
                 If (i_tmp > 0 ) Then
                    ! Known and visible door, no smoke
-                   color_index = 0
+                   color_index = 1
                    If (EVAC_Node_List(n_egrids+n_entrys+i_tmp &
                         )%Node_Type == 'Door' ) Then
                       GROUP_FFIELD_NAME = &
@@ -3996,7 +4195,7 @@ Contains
                    End Do
                    If (i_tmp > 0 ) Then
                       ! Non-visible known door, no smoke
-                      color_index = 1
+                      color_index = 2
                       If (EVAC_Node_List( &
                            n_egrids+n_entrys+i_tmp)%Node_Type &
                            == 'Door' ) Then
@@ -4042,7 +4241,7 @@ Contains
                       End Do
                       If (i_tmp > 0 ) Then
                          ! No smoke, visible door (not known)
-                         color_index = 2
+                         color_index = 3
                          If (EVAC_Node_List( &
                               n_egrids+n_entrys+i_tmp)%Node_Type &
                               == 'Door' ) Then
@@ -4103,35 +4302,35 @@ Contains
                                     EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
                             End If
                             If (Is_Known_Door(i_tmp) .And. &
-                                 Is_Visible_Door(i_tmp)) color_index = 3
-                            If (Is_Known_Door(i_tmp) .And. .Not. &
                                  Is_Visible_Door(i_tmp)) color_index = 4
-                            If (.Not. Is_Known_Door(i_tmp) .And. &
+                            If (Is_Known_Door(i_tmp) .And. .Not. &
                                  Is_Visible_Door(i_tmp)) color_index = 5
+                            If (.Not. Is_Known_Door(i_tmp) .And. &
+                                 Is_Visible_Door(i_tmp)) color_index = 6
                          Else
                             ! No door found, use the main evac grid ffield or evac-line 
                             i_tmp = 0 ! no door found
                             GROUP_FFIELD_NAME = Trim(HPT%GRID_NAME)
                             GROUP_FFIELD_I    = HPT%I_VENT_FFIELDS(0)
-                            color_index = 6
+                            color_index = 7
                          End If  ! case 4
                       End If    ! case 3
                    End If      ! case 2
                 End If        ! case 1
                 If (Color_Method == 4 ) Then
-                   color_index =  6 ! default, cyan
+                   color_index = EVAC_AVATAR_NCOLOR ! default, cyan
                    If (i_tmp > 0 .And. i_tmp <= n_doors) &
-                        color_index = EVAC_DOORS(i_tmp)%COLOR_INDEX
+                        color_index = EVAC_DOORS(i_tmp)%Avatar_Color_Index
                    If (i_tmp > n_doors .And. i_tmp <=  n_doors + n_exits) &
-                        color_index = EVAC_EXITS(i_tmp-n_doors)%COLOR_INDEX
+                        color_index = EVAC_EXITS(i_tmp-n_doors)%Avatar_Color_Index
                 End If
 
              Else ! No known/visible door
                 i_tmp = 0 ! no door found
                 GROUP_FFIELD_NAME = Trim(HPT%GRID_NAME)
                 GROUP_FFIELD_I    = HPT%I_VENT_FFIELDS(0)
-                color_index = 6
-                If (Color_Method == 4) color_index = HPT%COLOR_INDEX
+                color_index = 7 ! default, cyan
+                If (Color_Method == 4) color_index = EVAC_AVATAR_NCOLOR 
              End If
 
              HR%I_Target = i_tmp
@@ -4202,10 +4401,10 @@ Contains
           j = Max(0,HR%GROUP_ID)
           Group_List(j)%IEL = HR%IEL
 
-          Write (LU_EVACOUT,fmt='(i6,5f8.2,3f6.2,i6,i3,i2)') HR%ILABEL, &
+          Write (LU_EVACOUT,fmt='(i6,5f8.2,3f6.2,i6,i4,i4)') HR%ILABEL, &
                HR%X, HR%Y, HR%Z, HR%Tpre, HR%Tdet,2.0_EB*HR%Radius, &
                HR%Speed, HR%Tau, HR%GROUP_ID, HR%i_ffield, &
-               Abs(HR%I_Target)+n_egrids+n_entrys
+               HR%COLOR_INDEX
        End Do
     End Do
 
@@ -4266,7 +4465,7 @@ Contains
 
     !
     ! Change information: Fire meshes ==> Evac meshes
-    If ( T >= 0.0_EB .And. Real(T,FB) >= Real(T_Save,FB) ) Then
+    If ( T >= T_BEGIN .And. Real(T,FB) >= Real(T_Save,FB) ) Then
        If (MODE > 0) T_Save = T + DT_Save
        L_use_fed = .True.
     End If
@@ -5371,7 +5570,7 @@ Contains
                             i_new_ffield = &
                                  EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
                          End If
-                         color_index = 0
+                         color_index = 1
                       Else
                          ! No visible known door available, try non-visible known doors
                          i_tmp   = 0
@@ -5429,7 +5628,7 @@ Contains
                                i_new_ffield = &
                                     EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
                             End If
-                            color_index = 1
+                            color_index = 2
                          Else
                             ! known doors with no smoke have not been found
                             i_tmp   = 0
@@ -5487,7 +5686,7 @@ Contains
                                   i_new_ffield = &
                                        EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
                                End If
-                               color_index = 2
+                               color_index = 3
                             Else
                                ! Now we have smoke and some visible or known doors
                                i_tmp   = 0
@@ -5557,32 +5756,32 @@ Contains
                                           EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
                                   End If
                                   If (Is_Known_Door(i_tmp) .And. &
-                                       Is_Visible_Door(i_tmp)) color_index = 3
-                                  If (Is_Known_Door(i_tmp) .And. .Not. &
                                        Is_Visible_Door(i_tmp)) color_index = 4
-                                  If (.Not. Is_Known_Door(i_tmp) .And. &
+                                  If (Is_Known_Door(i_tmp) .And. .Not. &
                                        Is_Visible_Door(i_tmp)) color_index = 5
+                                  If (.Not. Is_Known_Door(i_tmp) .And. &
+                                       Is_Visible_Door(i_tmp)) color_index = 6
                                Else    ! no match using cases 1-3
                                   ! No door found, use the main evac grid ffield
                                   i_tmp = 0
                                   name_new_ffield = Trim(MESH_NAME(nm))
                                   i_new_ffield    = nm
-                                  color_index = 6
+                                  color_index = 7
                                End If  ! case 4
                             End If    ! case 3
                          End If      ! case 2
                       End If        ! case 1
                       If (Color_Method .Eq. 4 ) Then
-                         color_index =  6 ! default, cyan
+                         color_index = EVAC_AVATAR_NCOLOR ! default, cyan
                          If (i_tmp > 0 .And. i_tmp <= n_doors ) &
-                              color_index = EVAC_DOORS(i_tmp)%COLOR_INDEX
+                              color_index = EVAC_DOORS(i_tmp)%Avatar_Color_Index
                          If (i_tmp > n_doors .And. i_tmp <= n_doors + n_exits) &
-                              color_index = EVAC_EXITS(i_tmp-n_doors)%COLOR_INDEX
+                              color_index = EVAC_EXITS(i_tmp-n_doors)%Avatar_Color_Index
                       End If
 
                    Else ! No known/visible door
                       i_tmp = 0 ! no door found
-                      color_index = 6
+                      color_index = 7
                       If (HR%IEL > 0 ) Then
                          If (HPT%IMESH == nm) Then
                             i_new_ffield    = HPT%I_VENT_FFIELDS(0)
@@ -5591,7 +5790,7 @@ Contains
                             name_new_ffield = Trim(MESH_NAME(nm))
                             i_new_ffield    = nm
                          End If
-                         If (Color_Method == 4) color_index = HPT%COLOR_INDEX
+                         If (Color_Method == 4) color_index = EVAC_AVATAR_NCOLOR
                       Else
                          If (PNX%IMESH == nm) Then
                             i_new_ffield    = PNX%I_VENT_FFIELDS(0)
@@ -5600,7 +5799,7 @@ Contains
                             name_new_ffield = Trim(MESH_NAME(nm))
                             i_new_ffield    = nm
                          End If
-                         If (Color_Method == 4) color_index = PNX%COLOR_INDEX
+                         If (Color_Method == 4) color_index = EVAC_AVATAR_NCOLOR
                       End If
                    End If ! Any known door
                    HR%I_Target = i_tmp
@@ -5703,7 +5902,7 @@ Contains
              HR%Tdet = Huge(HR%Tdet)
              HR%Tau  = HR%Tau
              HR%Mass = HR%Mass
-             HR%COLOR_INDEX = 6
+             HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           Else
              fed_max_alive = Max(fed_max_alive,HR%IntDose)
           End If
@@ -5711,7 +5910,7 @@ Contains
           hr_tau = HR%Tau
           !
           ! Check, if new random force is needed on next time step.
-          If ( GaTh > 0.0_EB .And. T > 0.0_EB ) Then
+          If ( GaTh > 0.0_EB .And. T > T_BEGIN ) Then
              Call Random_number(rn)
              If ( rn > Exp(-DTSP/(0.2_EB*hr_tau)) ) HR%NewRnd = .True.
              If ( HR%NewRnd ) Then
@@ -5743,7 +5942,7 @@ Contains
 
           ! Calculate Purser's fractional effective dose (FED)
           smoke_speed_fac = 1.0_EB
-          If (T > 0.0_EB) Then
+          If (T > T_BEGIN) Then
              HR%IntDose = DTSP*HUMAN_GRID(II,JJ)%FED_CO_CO2_O2 + &
                   HR%IntDose
              smoke_beta  = -0.057_EB
@@ -5761,17 +5960,17 @@ Contains
           End If
           HR%v0_fac = smoke_speed_fac
 
-
           ! ========================================================
           ! Calculate persons prefered walking direction
           ! ========================================================
-          NM_now = NM
-          MESH_ID_LOOP: Do nm_tim = 1, NMESHES
-             If (MESH_NAME(nm_tim) == HR%FFIELD_NAME) Then
-                NM_now = nm_tim
-                Exit MESH_ID_LOOP
-             End If
-          End Do MESH_ID_LOOP
+          NM_now = Max(1,HR%I_FFIELD)
+!!$          NM_now = NM
+!!$          MESH_ID_LOOP: Do nm_tim = 1, NMESHES
+!!$             If (Trim(MESH_NAME(nm_tim)) == Trim(HR%FFIELD_NAME)) Then
+!!$                NM_now = nm_tim
+!!$                Exit MESH_ID_LOOP
+!!$             End If
+!!$          End Do MESH_ID_LOOP
           ! 
           MFF=>MESHES(NM_now)
           UBAR = AFILL(MFF%U(II-1,JJY,KKZ),MFF%U(II,JJY,KKZ), &
@@ -5814,6 +6013,12 @@ Contains
              If (ESS%IMESH == nm .And. &
                   (ESS%X1 <= HR%X .And. ESS%X2 >= HR%X) .And. &
                   (ESS%Y1 <= HR%Y .And. ESS%Y2 >= HR%Y) ) Then
+
+                If (.Not.L_Dead .And. ESS%Use_v0) Then
+                   UBAR = ESS%UBAR0
+                   VBAR = ESS%VBAR0
+                End If
+
                 cos_x = ESS%cos_x
                 cos_y = ESS%cos_y
                 Select Case (ESS%IOR)
@@ -5848,6 +6053,7 @@ Contains
                 End Select
                 Exit SS_Loop1
              End If
+             HR%Z = 0.5_EB*(ZS+ZF)
           End Do SS_Loop1
           !
           ! SC-VV: The new velocities are calculated using the old forces.
@@ -5860,7 +6066,7 @@ Contains
           Omega_new = HR%Omega + 0.5_EB*DTSP*HR%Torque/HR%M_iner
 
           ! Add random force term
-          If ( GaTh > 0.0_EB .And. T > 0.0_EB ) Then
+          If ( GaTh > 0.0_EB .And. T > T_BEGIN ) Then
              U_new = U_new + 0.5_EB*DTSP*HR%v0_fac* &
                   HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
              V_new = V_new + 0.5_EB*DTSP*HR%v0_fac* &
@@ -5923,7 +6129,7 @@ Contains
              VBAR = 0.0_EB
              hr_tau = Max(0.1_EB,HR%Tau/10.0_EB)
           End If
-          If ( T <= 0.0_EB ) Then
+          If ( T <= T_BEGIN ) Then
              ! Initialization phase
              UBAR = 0.0_EB
              VBAR = 0.0_EB
@@ -6105,7 +6311,7 @@ Contains
        ! ========================================================
        ! Add persons (from doors and entrys)
        ! ========================================================
-       If (T > 0.0_EB ) Then
+       If (T > T_BEGIN ) Then
           Do i = 1, N_ENTRYS
              Call ENTRY_HUMAN(i,T,NM,istat)
           End Do
@@ -6278,7 +6484,7 @@ Contains
              HR%Tpre = Huge(HR%Tpre)
              HR%Tau  = HR%Tau
              HR%Mass = HR%Mass
-             HR%COLOR_INDEX = 6
+             HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           End If
           hr_tau = HR%Tau
           !
@@ -6314,12 +6520,13 @@ Contains
           ! (Now the 'flow field' is used.)
           ! ========================================================
           NM_now = NM
-          MESH_ID_LOOP2: Do nm_tim = 1, NMESHES
-             If (MESH_NAME(nm_tim) == HR%FFIELD_NAME) Then
-                NM_now = nm_tim
-                Exit MESH_ID_LOOP2
-             End If
-          End Do MESH_ID_LOOP2
+          NM_now = Max(1,HR%I_FFIELD)
+!!$          MESH_ID_LOOP2: Do nm_tim = 1, NMESHES
+!!$             If (MESH_NAME(nm_tim) == HR%FFIELD_NAME) Then
+!!$                NM_now = nm_tim
+!!$                Exit MESH_ID_LOOP2
+!!$             End If
+!!$          End Do MESH_ID_LOOP2
           ! 
           MFF=>MESHES(NM_now)
           UBAR = AFILL(MFF%U(IIN-1,JJY,KKZ),MFF%U(IIN,JJY,KKZ), &
@@ -6385,6 +6592,12 @@ Contains
              If (ESS%IMESH == nm .And. &
                   (ESS%X1 <= HR%X .And. ESS%X2 >= HR%X) .And. &
                   (ESS%Y1 <= HR%Y .And. ESS%Y2 >= HR%Y) ) Then
+
+                If (.Not.L_Dead .And. ESS%Use_v0) Then
+                   UBAR = ESS%UBAR0
+                   VBAR = ESS%VBAR0
+                End If
+
                 cos_x = ESS%cos_x
                 cos_y = ESS%cos_y
                 Select Case (ESS%IOR)
@@ -6419,6 +6632,7 @@ Contains
                 End Select
                 Exit SS_Loop2
              End If
+             HR%Z = 0.5_EB*(ZS+ZF)
           End Do SS_Loop2
 
           hr_a =  HR%A*Max(0.5_EB,(Sqrt(HR%U**2+HR%V**2)/HR%Speed))
@@ -7183,8 +7397,7 @@ Contains
           HR%Torque = P2P_Torque
           !
 
-
-          If ( T <= 0.0_EB ) Then
+          If ( T <= T_BEGIN ) Then
              If ( Abs(P2P_U)/HR%Mass > 550.0_EB ) &
                   P2P_U =550.0_EB*HR%Mass*P2P_U/Abs(P2P_U)
              If ( Abs(P2P_V)/HR%Mass > 550.0_EB ) &
@@ -7200,7 +7413,7 @@ Contains
           ! ========================================================
           ! Some random force here
           ! ========================================================
-          If (GaTh > 0.0_EB .And. T > 0.0_EB ) Then
+          If (GaTh > 0.0_EB .And. T > T_BEGIN ) Then
              U_new = U_new + 0.5_EB*DTSP*HR%v0_fac* &
                   HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
              V_new = V_new + 0.5_EB*DTSP*HR%v0_fac* &
@@ -7372,7 +7585,7 @@ Contains
           d_humans_min = Min(d_humans_min,d_humans)
           d_walls_min  = Min(d_walls_min, d_walls)
 
-          If ( T > 0.0_EB ) Then
+          If ( T > T_BEGIN ) Then
              ! Time step, do not move too close to other humans or 0.5*grid spacing
              dt_Loop: Do
                 u_tmp(2) = HR%U + 0.5_EB*DTSP_new*P2P_U/HR%Mass
@@ -7527,7 +7740,7 @@ Contains
                   If (.Not. PEX%COUNT_ONLY) HR%IOR = 1
                   PEX%T_last=T
                   PEX%ICOUNT = PEX%ICOUNT + 1
-                  If (PEX%T_first <= 0.0_EB) PEX%T_first = T
+                  If (PEX%T_first <= T_BEGIN) PEX%T_first = T
                End If
             Case (-1)
                If ((HR%X <= pex%x2 .And. x_old > pex%x2) .And. &
@@ -7536,7 +7749,7 @@ Contains
                   If (.Not. PEX%COUNT_ONLY) HR%IOR = 1
                   PEX%T_last=T
                   PEX%ICOUNT = PEX%ICOUNT + 1
-                  If (PEX%T_first <= 0.0_EB) PEX%T_first = T
+                  If (PEX%T_first <= T_BEGIN) PEX%T_first = T
                End If
             Case (+2)
                If ((HR%Y >= pex%y1 .And. y_old < pex%y1) .And. &
@@ -7545,7 +7758,7 @@ Contains
                   If (.Not. PEX%COUNT_ONLY) HR%IOR = 1
                   PEX%T_last=T
                   PEX%ICOUNT = PEX%ICOUNT + 1
-                  If (PEX%T_first <= 0.0_EB) PEX%T_first = T
+                  If (PEX%T_first <= T_BEGIN) PEX%T_first = T
                End If
             Case (-2)
                If ((HR%Y <= pex%y2 .And. y_old > pex%y2) .And. &
@@ -7554,7 +7767,7 @@ Contains
                   If (.Not. PEX%COUNT_ONLY) HR%IOR = 1
                   PEX%T_last=T
                   PEX%ICOUNT = PEX%ICOUNT + 1
-                  If (PEX%T_first <= 0.0_EB) PEX%T_first = T
+                  If (PEX%T_first <= T_BEGIN) PEX%T_first = T
                End If
             End Select
             If (HR%IOR > 0) Then
@@ -7740,7 +7953,7 @@ Contains
 
                   PDX%T_last=T
                   PDX%ICOUNT = PDX%ICOUNT + 1
-                  If (PDX%T_first <= 0.0_EB) PDX%T_first = T
+                  If (PDX%T_first <= T_BEGIN) PDX%T_first = T
 
                   Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
                        ' EVAC: Person n:o', &
@@ -7830,7 +8043,7 @@ Contains
             fed_max = Max(fed_max,HR%IntDose)
 
             ! Calculate Purser's fractional effective dose (FED)
-            If (T > 0.0_EB) Then
+            If (T > T_BEGIN) Then
                If ( PCX%FED_MESH2 > 0 ) Then
                   x_int = Min(1.0_EB,Max(0.0_EB,(Now_LL%T_out-T)) / &
                        (Now_LL%T_out - Now_LL%T_in))
@@ -8283,6 +8496,7 @@ Contains
                      End If
                      If ( Is_Visible_Door(i_tim) ) Then
                         ! Door/exit is on this floor
+                        ! Timo: BUG HERE? CHECK THIS 
                         If (PNX%P_VENT_FFIELDS(ie) < 0.5_EB) Then
                            Is_Known_Door(i_tim) = .False.
                         Else
@@ -8473,7 +8687,7 @@ Contains
                              Trim(EVAC_EXITS(irn-n_doors)%VENT_FFIELD)
                         new_ffield_i = &
                              EVAC_EXITS(irn-n_doors)%I_VENT_FFIELD
-                        color_index = 0
+                        color_index = 1
                      End If
                   Else
                      ! No visible known door available, try non-visible known doors
@@ -8525,7 +8739,7 @@ Contains
                            new_ffield_i = &
                                 EVAC_EXITS(irn-n_doors)%I_VENT_FFIELD
                         End If
-                        color_index = 1
+                        color_index = 2
                      Else
                         ! known doors with no smoke have not been found
                         irn   = 0
@@ -8575,7 +8789,7 @@ Contains
                               new_ffield_i = &
                                    EVAC_EXITS(irn-n_doors)%I_VENT_FFIELD
                            End If
-                           color_index = 2
+                           color_index = 3
                         Else
                            ! Now we have smoke and some visible or known doors
                            irn   = 0
@@ -8630,27 +8844,27 @@ Contains
                                       EVAC_EXITS(irn-n_doors)%I_VENT_FFIELD
                               End If
                               If (Is_Known_Door(irn) .And. &
-                                   Is_Visible_Door(irn)) color_index = 3
-                              If (Is_Known_Door(irn) .And. .Not. &
                                    Is_Visible_Door(irn)) color_index = 4
-                              If (.Not. Is_Known_Door(irn) .And. &
+                              If (Is_Known_Door(irn) .And. .Not. &
                                    Is_Visible_Door(irn)) color_index = 5
+                              If (.Not. Is_Known_Door(irn) .And. &
+                                   Is_Visible_Door(irn)) color_index = 6
                            Else        ! not case 1,2,3, i.e., no non-lethal door found
                               ! No door found, use the main evac grid ffield 
                               irn = 0
                               new_ffield_i    = imesh2
                               new_ffield_name = Trim(MESH_NAME(new_ffield_i))
-                              color_index = 6
+                              color_index = 7
                            End If      ! case 4
                         End If        ! case 3
                      End If          ! case 2
                   End If            ! case 1
                   If (Color_Method == 4 ) Then
-                     color_index =  6 ! default, cyan
+                     color_index = EVAC_AVATAR_NCOLOR ! default, cyan
                      If (irn > 0 .And. irn <= n_doors ) &
-                          color_index = EVAC_DOORS(irn)%COLOR_INDEX
+                          color_index = EVAC_DOORS(irn)%Avatar_Color_Index
                      If (irn > n_doors .And. irn <= n_doors + n_exits) &
-                          color_index = EVAC_EXITS(irn-n_doors)%COLOR_INDEX
+                          color_index = EVAC_EXITS(irn-n_doors)%Avatar_Color_Index
                   End If
                   I_Target = irn
                   If (irn > 0 .And. .Not. Is_Visible_Door(Max(1,irn)) ) Then
@@ -8790,6 +9004,7 @@ Contains
       HR  => MESHES(NM)%HUMAN(N_HUMANS+1)
       Call CLASS_PROPERTIES
       HR%Tpre = 0.0_EB
+      HR%Tdet = T_BEGIN
       HR%IPC  = PNX%IPC
       HR%IEL  = -I_entry
       HR%GROUP_ID = 0
@@ -8894,7 +9109,7 @@ Contains
       If (istat == 0 ) Then
          N_HUMANS = N_HUMANS + 1
          PNX%T_last = Tin
-         If (PNX%T_first <= 0.0_EB) PNX%T_first = Tin
+         If (PNX%T_first <= T_BEGIN) PNX%T_first = Tin
          HR%X = xx
          HR%Y = yy
          HR%Z = zz
@@ -8902,19 +9117,21 @@ Contains
          ILABEL_last = ILABEL_last + 1
          HR%ILABEL = ILABEL_last
          HR%SHOW = .True.    
-         HR%COLOR_INDEX = 0
+         HR%COLOR_INDEX = 1
          Select Case (COLOR_METHOD)
          Case (-1)
-            HR%COLOR_INDEX = 0
+            HR%COLOR_INDEX = 1
          Case (0)
-            HR%COLOR_INDEX = PNX%COLOR_INDEX
+            HR%COLOR_INDEX = PNX%Avatar_Color_Index
          Case (1,2)
-            HR%COLOR_INDEX = 0    ! lonely human
+            HR%COLOR_INDEX = 1    ! lonely human
+         Case (3)
+            HR%COLOR_INDEX = evac_person_classes(PNX%IPC)%Avatar_Color_Index
          Case (4)
-            HR%COLOR_INDEX = PNX%COLOR_INDEX
+            HR%COLOR_INDEX = 1
          Case (5)
             ! Correct color is put, where the flow fields are chosen.
-            HR%COLOR_INDEX = 0
+            HR%COLOR_INDEX = 1
          Case Default
             Write(MESSAGE,'(A,I3,A)') &
                  'ERROR: ENTRY_HUMAN COLOR METHOD',COLOR_METHOD, &
@@ -9515,8 +9732,8 @@ Contains
        NPLIM = 0
        Do I=1,N_HUMANS
           HR=>HUMAN(I)
-          If (HR%COLOR_INDEX < 0) HR%COLOR_INDEX = 0
-          If (HR%COLOR_INDEX > 7) HR%COLOR_INDEX = 7
+          If (HR%COLOR_INDEX < 1) HR%COLOR_INDEX = 1
+          If (HR%COLOR_INDEX > EVAC_AVATAR_NCOLOR) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           If (HR%SHOW .And. N_EVAC == 1) NPLIM = NPLIM + 1
        End Do
        NPLIM = Min(NPPS,NPLIM)
@@ -9573,7 +9790,7 @@ Contains
              CASE(246)  ! TOTAL_LINEFORCE, Human Pressure2: contact + social
                 QP(NPP,NN) = Real(HR%SumForces2 ,FB)
              CASE(247)  ! COLOR, Human color index
-                QP(NPP,NN) = Real(HR%COLOR_INDEX,FB)
+                QP(NPP,NN) = Real(HR%COLOR_INDEX - 1,FB)
              CASE(248)  ! ANGULAR_ACCELERATION, 
                 QP(NPP,NN) = Real(HR%Torque/HR%M_iner,FB)
              END SELECT
