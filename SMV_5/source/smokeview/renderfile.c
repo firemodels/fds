@@ -228,7 +228,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
     }
   }
-  if(test_smokesensor==1&&active_smokesensors==1&&show_smokesensors!=0){
+  if(test_smokesensors==1&&active_smokesensors==1&&show_smokesensors!=0){
     int idev;
 
     for(idev=0;idev<ndeviceinfo;idev++){
