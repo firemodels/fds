@@ -161,6 +161,23 @@ seconds.  The images contain both opacity slices derived from soot densities and
 \begin{figure}[\figoptions]
 \begin{center}
  \centering
+\begin{tabular}{c}
+\includegraphics[height=\figheightF]{scriptfigures/smoke_sensor_l}\\
+\includegraphics[height=\figheightF]{scriptfigures/smoke_sensor_c}\\
+\includegraphics[height=\figheightF]{scriptfigures/smoke_sensor_r}\\
+
+ \end{tabular}
+\end{center}
+\caption[Smoke sensor test.]{Smoke sensor test.
+A small white (255,255,255) smokesensor appears in front of a grey (128,128,128) obstacle.
+The red dot indicates where the smoke opacity is recorded.
+}
+\label{figsmokesensor}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+ \centering
 \begin{tabular}{m{1in}m{3in}m{3in}}
  &0.1 m grid&0.2 m grid\\
  all planes&\includegraphics[height=\figheightF]{scriptfigures/smoke_test_all}&
@@ -173,23 +190,16 @@ seconds.  The images contain both opacity slices derived from soot densities and
 
  \end{tabular}
 \end{center}
- \caption{3D smoke file test 2.}
+ \caption[3D smoke file test 2.]{3D smoke file test 2.
+ A quantitative test of the smoke opacity calculation in Smokeview.  This test simplifies
+  the general case by assuming a uniform distribution of smoke.  Smoke grey levels are computed
+  using $grey level (GL) = 255*exp(-K*S*\Delta X)$
+  where $K=8700$~m2/kg is the mass extinction value, $S=79.67$~mg/m3 is the soot density
+  and $\Delta x$ is the smoke path length.  Path lengths (smoke sensor locations) are chosen to obtain grey levels of 192, 128, 64, 32, 16 and 8.
+ }
 \label{figsmoketest2}%
 \end{figure}
 
-\begin{figure}[\figoptions]
-\begin{center}
- \centering
-\begin{tabular}{c}
-\includegraphics[height=\figheightF]{scriptfigures/smoke_sensor_l}\\
-\includegraphics[height=\figheightF]{scriptfigures/smoke_sensor_c}\\
-\includegraphics[height=\figheightF]{scriptfigures/smoke_sensor_r}\\
-
- \end{tabular}
-\end{center}
- \caption{Smoke sensor test.}
-\label{figsmokesensor}%
-\end{figure}
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -203,7 +213,7 @@ seconds.  The images contain both opacity slices derived from soot densities and
  CPU corrected&GPU corrected\\
  \end{tabular}
 \end{center}
- \caption{3D smoke file test 3 - GPU Test}
+ \caption[3D smoke file test 3 - GPU Test]{3D smoke file test 3 - GPU Test}
 \label{figsmoketest}%
 \end{figure}
 
