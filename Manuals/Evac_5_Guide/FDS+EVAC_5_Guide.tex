@@ -171,119 +171,120 @@ suited for the intended purpose.
 
 \chapter{Introduction}\label{Sec_Intro}
 
-This document describes, how one does an egress calculation by using
-the Fire Dynamics Simulator (FDS)~\cite{FDS_Manual, FDS_UserGuide}
-developed at National Institute of Standards and Technology (NIST) and
-the evacuation module~\cite{Korhonen05, Korhonen07a, Korhonen07b,
-  Korhonen08a, Korhonen08b} developed at VTT Technical Research Centre
-of Finland.  This combined fire and evacuation simulation program is
-called as FDS+Evac in this document.  FDS+Evac allows simultaneous
-simulation both the fire and evacuation processes.  FDS+Evac can also
-be run on a ``fire drill'' mode, \emph{i.e.}, used to calculate only
-the human egress process.
+This document describes, how to simulate human egress using the Fire
+Dynamics Simulator (FDS)~\cite{FDS_Manual, FDS_UserGuide} developed at
+National Institute of Standards and Technology (NIST), and in
+particular, the evacuation module~\cite{Korhonen05, Korhonen07a,
+Korhonen07b, Korhonen08a, Korhonen08b} developed at VTT Technical
+Research Centre of Finland.  This combined fire and evacuation
+simulation program is called FDS+Evac in this document.  FDS+Evac
+allows simultaneous simulation of the fire and evacuation processes.
+FDS+Evac can also be used to simulate only the human egress process
+without any fire effects.
 
-FDS+Evac treats each evacuee as a spearate entity, which has its own
-personal properties and escape strategies, \emph{i.e.}, FDS+Evac
-models the egress process using autonomous 'agents' to represent each
-escaping person.  The movement of the agents is treated using two
-dimensional planes to represent the floors of buildings.  The basic
-algorithm behind the egress movement is to follow each agent by an
-equation motion in a continuous 2D space and time, \emph{i.e.}, do
-some kind of an artificial molecular dynamics for the agents.  The
-forces acting on the agents are both physical forces, like contact
-forces and gravity, and psycholigical forces exerted by the
-environment and other agents.  The model behind the movement algorithm
-is the social force model introduced by Helbing's
-group~\cite{Helbing95, Helbing00, Helbing02, Werner03} and the
-modification of the model to a better description of a human body was
-introduced by Langston \em et al. \em ~\cite{Langston06}.
+FDS+Evac treats each evacuee as a separate entity, or 'agent', which
+has its own personal properties and escape strategies.  The movement
+of the agents is simulated using two-dimensional planes representing the
+floors of buildings.  The basic algorithm behind the egress movement
+solves an equation of motion for each agent in a continuous 2D space
+and time, \emph{i.e.}, doing some kind of an artificial molecular
+dynamics for the agents.  The forces acting on the agents consist of both
+physical forces, such as contact forces and gravity, and psycholigical
+forces exerted by the environment and other agents.  The model behind
+the movement algorithm is the social force model introduced by
+Helbing's group~\cite{Helbing95, Helbing00, Helbing02, Werner03}. 
+A modification of the model to a better describe a human body
+was introduced by Langston \em et al. \em ~\cite{Langston06}.
 
 This chapter contains some general information on FDS+Evac.  In
-Chapter 2 the model documentation is summarized. Chapter 3 presents
+Chapter 2, the model documentation is summarized. Chapter 3 presents
 the theorethical model behind the human movement algorithm and details
-on its implementation.  Chapter 4 is dedicated to various verification
+on the implementation.  Chapter 4 is dedicated to various verification
 tests of the programme and Chapter 5 deals with the sensitivity of the
-model to the various model parameters.  In Chapter 6 FDS+Evac is
-compared to other evacuation calculation methods and experimental
-human flows.  Chapters 7--11 contain the user manual, where the
+model to the model parameters.  In Chapter 6, FDS+Evac is validated
+by comparing to other evacuation calculation methods and experimental
+results.  Chapters 7--11 contain the user manual, where the
 inputs of FDS+Evac are explained.
 
 The user of FDS+Evac should read carefully every chapter of this
 manual before starting to use the programme.  The knowledge on the
-theorethical method is needed in order to build up the model correctly
-and that also helps to judge if the programme is applicable to the
-problem in question.  Because the evacuation calculation is
-implemented as a subroutine of FDS, the reader is recommended to read
-first the manual of FDS and learn how to do fire simulations.  Even if
-the user want to run the programme in the ``fire drill'' mode, she/he
-should be acquainted with the FDS in order to build up the simulation
-geometry. 
+theorethical method is needed in order to build up the model
+correctly.  It also helps making the judgement on the applicability
+and reliability of the programme in the problem in question.  Because
+the evacuation calculation is implemented as a subroutine of FDS, the
+reader is recommended to read first the manual of FDS and learn how to
+do fire simulations.  Even if the user wants to run the programme
+without fire, she/he should be acquainted with the FDS in order to
+build up the simulation geometry.
 
 
 \section{Getting Started}\label{Sec_GetStart}
 
-The evacuation calculation method developed at VTT is implemented as
+The evacuation module is implemented as
 subrutines of FDS.  Thus, the running of FDS+Evac evacuation
-simulation is done similarly as an ordinayry FDS fire simulation, see
-the FDS User's Guide~\cite{FDS_UserGuide} for details.  FDS+Evac uses
-also Smokeview~\cite{SV_UserGuide} to visualize the results and also
-the computer hardware requirements are similar with FDS.  The FDS fire
-calculation can be run parallel by using the MPI version of FDS.
+simulation is done similarly as an ordinary FDS fire simulation. See
+the FDS User's Guide~\cite{FDS_UserGuide} for details.  FDS+Evac
+results can be visualized using the Smokeview~\cite{SV_UserGuide}
+programme. Also, the computer hardware requirements are similar with
+FDS.  The FDS fire calculation can be run parallel by using the MPI
+version of FDS. 
 
 The evacuation module, FDS+Evac, is embedded in the FDS v.5,
-which could be obtained from the URL
+which can be obtained from the URL
 \begin{verbatim}
 http://fire.nist.gov/fds/
 \end{verbatim}
 Download the latest version of FDS-Smokeview and install it.  The
 resulting FDS executables are also the executables of the evacuation
 calculation module.  The source codes can also be obtained via the web
-pages.  This document refers to the FDS version 5.2.0.
+pages.  See the document cover page for detailed version information.
+
 
 The homepage of FDS+Evac is 
 \begin{verbatim}
 http://www.vtt.fi/fdsevac/
 \end{verbatim}
-and this page contains the combined Technical Reference and User's
+This page contains the combined Technical Reference and User's
 Guide of FDS+Evac and some examples on the use of FDS+Evac.  This web
 site is also used to store the validation and verification test cases
 including the input files.
 
 
 
-\section{Special Features}\label{Sec_SpecFeatures}
+\section{Limitations and Special Features to Consider}\label{Sec_SpecFeatures}
 
-FDS+Evac is under construction.  For now, it is best suited to do
-calculations of buildings, whose floors are horizontal.  Sports halls
-with spectator stands or concert halls can also be modelled if their
-geometry is not too complicated, but the user should note that there
-has not been any validation work done for these kind of inclines.  It
-is also assumed that the different levels of the building are
-separated from each other, \emph{i.e.}, they are connected to each
-other by stairs, escalators, doors, and similar objects.  Note, that
-FDS+Evac does not support the use of elevators during evacuation
-process.  Wide stairs or inclines can also be used to connect
-different floors, but this is not as straigthforward as to use the
-default stairscase model.  There are no merging flows allowed in the
-default staircase model, so FDS+Evac is not yet easy to use for tall
-buildings.  The default staircase algorithm is still very simple and
-it should not be trusted too much if the stairs get crowded.  At this
-point this is not a major problem, because there are no merging flows
-in the staircase model, \emph{i.e.}, the exit door restricts the flow
-to the staircase quite efficiently.  If merging flows in staircases
-are needed then the detailed geometry of the staircase should be
-modelled, but this is not usually very practical way of doing things.
+All the intended features of FDS+Evac are not yet fully functional.
+For now, FDS+Evac is best suited for doing calculations in buildings, whose
+floors are horizontal.  Sports halls with spectator stands or concert
+halls can also be modelled if their geometry is not too complicated,
+but the user should note that simulations in inclined geometries have
+not been validated.  It is also assumed that the different levels of
+the building are separated from each other, \emph{i.e.}, they are
+connected to each other by stairs, escalators, doors, and similar
+objects.  Note, that FDS+Evac does not yet support the use of
+elevators during evacuation process.  Wide stairs or inclines can also
+be used to connect different floors, but this is not as
+straigthforward as to use the default stairscase model.  There are no
+merging flows allowed in the default staircase model, so FDS+Evac is
+not yet easy to use for tall buildings.  The default staircase
+algorithm is still very simple and it should not be trusted too much
+if the stairs get crowded.  At this point this is not a major problem,
+because there are no merging flows in the staircase model,
+\emph{i.e.}, the exit door restricts the flow to the staircase quite
+efficiently.  If merging flows in staircases are needed then the
+detailed geometry of the staircase should be modelled, but this is not
+usually very practical way of doing things.
 
-The evacuation calculation needs in addition to the fire calculation
-meshes its own 2D evacuation meshes.  If no fire related data is
+The evacuation calculation needs, in addition to the fire calculation
+meshes, its own 2D evacuation meshes.  If no fire related data is
 needed in the evacuation calculation then there are no need for fire
-meshes and FDS+Evac can be run in an ``evacuation trial'' mode.  One
+meshes and FDS+Evac can be run in an ``evacuation drill'' mode.  One
 should choose the dimension and mesh cell sizes of these evacuation
 meshes such that the positions of different evacuation specific
 objects are easy to give.  This means that the $\Delta x$ and $\Delta
 y$ should be some nice round figures.  The present version of FDS+Evac
 does not move special evacuation objects to the mesh cell boundaries,
-like is done for the standard FDS fire simulation geometrical objects,
+as is done for the standard FDS fire simulation geometrical objects,
 \emph{e.g.} the namelists \Timtt{OBST}, \Timtt{HOLE}, and
 \Timtt{VENT}.  Evacuation meshes should not be too fine, because then
 one might face problems with the evacuation flow fields, which are
@@ -299,26 +300,26 @@ are not shown by Smokeview.  Note also that the spaces, where humans
 are allowed to move, should be at least about 0.7~m wide, because
 FDS+Evac is not able to move humans in narrower exit paths correctly.
 User should check the evacuation geometry by using the Smokeview
-programme and see that there are not too narrow ``holes'' in the
-geometry.
+programme and make sure that the ``holes'' in the geometry are not too
+narrow. 
 
-Note that the FDS fire calculation input could have time dependent
-geometry elements, like obstacles and holes which are created and
-removed by special control devices defined in the user input.  The
-evacuation calculation geometry is not supporting time dependent
-geometries.  It uses the initial geometry during the whole evacuation
-simulation.
+Note that while the FDS fire simulations can use time dependent
+geometry elements, such ase obstacles and holes which are created and
+removed by special control devices, the evacuation geometry does 
+not support the time dependent geometries.  For evacuation, the
+initial geometry is always used for the duration of the
+simulation. 
 
-A door should be defined such that it is a little bit inside a wall,
+A door should be defined such that it is slightly inside a wall,
 see Fig.~\ref{Fig_DoorGeom}.  This way the door casings will produce
-forces on humans.  One should make a small hole in the wall, where an
-exit (or a door) is put.  Note, that the width of the exit will depend
-on your mesh resolution.  One should define the exit such wide, that
-it will cover the whole width of the hole.  Because the obstacles are
-put in the mesh but the exits (or doors) are not, be sure that exits
-are wide enough.  (Use Smokeview and activate mesh lines.)  It does
-not matter if the end points of the exits (or doors) are somewhat
-inside solid obstacles.
+forces on humans.  One should define a small hole in the wall, where
+an exit (or a door) is placed.  Note, that the width of the exit will
+depend on the mesh resolution.  One should define the exit wide enough
+to cover the whole width of the hole.  Because the obstacles are
+aligned with the mesh but the exits (or doors) are not, be sure that
+exits are wide enough.  (Use Smokeview and activate mesh lines.)  It
+does not matter if the end points of the exits (or doors) are inside
+solid obstacles.
 
 %
 \begin{figure}[!tb]
@@ -328,72 +329,69 @@ inside solid obstacles.
 \end{figure}
 %
 
-For now, FDS+Evac has limitations on the number of humans, which can
-be in the same main evacuation mesh.  The program stops and writes out
-an error message if more than 10000 humans are tried to put on the
-same evacuation mesh.  Usually, one main evacuation
-mesh extends over a whole floor of the building.  There may be many
-main evacuation meshes, \emph{e.g.}, different floors of the building,
-in the FDS+Evac calculation and the total number of humans is not
-restricted by the program, the only limit is the available computer
-memory.  The user should know that if there is more than a couple of
-thousands humans on an evacuation floor then the calculation is going
-to be CPU expensive. 
+For now, the number of humans placed in the same main evacuation mesh
+is limited. The program stops and writes out an error message if more
+than 10000 humans are tried to place on the same evacuation mesh.
+Usually, one main evacuation mesh extends over a whole floor of the
+building.  Several main evacuation meshes may co-exist, \emph{e.g.},
+the different floors of the building, and the total number of humans
+is not restricted by the program. The available computer memory is the
+only factor limiting the total number of humans.  However,
+the calculation is going to be very CPU expensive if there are more
+than a few thousands humans in the same evacuation mesh.
 
-The initial density of humans can not be much larger than 4 persons
-per square metre.  Because the initial positions of humans are
-generated randomly, a simulation could start after a couple of
-unsuccessful initialization trials, if the human density is high.  If
-FDS+Evac is not able to put humans on their initial positions, an
-error message ``ERROR: FDS improperly set up.'' is printed on the
-standard error channel and more information is printed on the
-diagnostic output file of the evacuation calculation.
+The initial density of humans cannot be much larger than 4 persons
+per square metre.  In cases of high human density, the simulation may
+require a couple of initialization trials ecause the initial positions
+of humans are generated randomly. If FDS+Evac cannot place
+humans on their initial positions, an error message ``ERROR: FDS
+improperly set up.'' is printed on the standard error channel and more
+information is printed on the diagnostic output file of the evacuation
+calculation.
 
-FDS+Evac enables coupled fire and evacuation simulations.  The
-evacuation part uses smoke and gas consentrations from the fire
-calculation to affect the movement and decision making of the
-evacuating humans.  In principle, the coupling could be made also to
-the other direction, \emph{i.e.}, humans are influencing the fire
-calculation, \emph{e.g.}, by opening doors, but this feature is not
-yet implemented in FDS+Evac.  Concentrations of $\mathrm{O_2}$,
-$\mathrm{CO_2}$, and $\mathrm{CO}$ are used to calculate Purser's
-Fractional Effective Dose (FED) concept~\cite{Purser95}, which is used
-to incapasitate humans.  Smoke density is used both to slow down the
-walking speeds of humans and to affect the exit selection algorithm of
-humans.  Smoke density can also be used to detect the fire, but is
-should be kept in mind that human nose is a very delicate instrument
-and the levels of smoke consentration needed for a sensation of smoke
-are well below the prediction capabilities of the current FDS fire
-model.  Note that the effects of radiation and gas temperature on
-humans are not yet implemented in the programme, so humans are not
-avoiding a fire if the user does not explicitely define the evacuation
-geometry to take this in to account.
+FDS+Evac enables coupled fire and evacuation simulations.  The smoke
+and gas consentrations from the fire calculation affect the movement
+and decision making of the evacuating humans.  In principle, the
+coupling could also be made to the other direction, \emph{i.e.},
+humans could influence the fire calculation, \emph{e.g.}, by opening
+doors, but this feature is not yet implemented in FDS+Evac.  Gas phase
+concentrations of $\mathrm{O_2}$, $\mathrm{CO_2}$, and $\mathrm{CO}$
+are used to calculate Purser's Fractional Effective Dose (FED)
+index~\cite{Purser95}, indicating the human incapasitation.  Smoke
+density is used both to slow down the walking speeds of humans and to
+affect the exit selection algorithm of humans.  Smoke density can also
+be used to detect the fire, but is should be kept in mind that human
+nose is a very delicate instrument and the levels of smoke
+consentration needed for a smoke sensing may be below the accuracy of
+the current FDS predictions.  Note that the effects of radiation and
+gas temperature on humans are not yet implemented in the programme, so
+humans do not try to avoid a fire if the user does not explicitely define
+the evacuation geometry to take this in to account.
 
 The evacuation part of the FDS+Evac is stochastic, \emph{i.e.}, it
 uses random numbers to generate the initial positions and properties
-of humans and there are also a small random force on each human's
+of humans. In addition, there is a small random force on each human's
 equation of motion.  Thus, same results are not obtained for a given
 input file if multiple simulations are done.  For this reason, one
-should always do a dozen or so egress simulation to see the variation
-of the results.  Because of this, it is made posible to do many egress
-calculation per one fire simulation and the calculation of the
+should always do a dozen or so egress simulations to see the variation
+of the results. To speed up this process, several egress calculation
+can be done per one fire simulation and the calculation of the
 evacuation flow fields used to guide human movement need to be
-calculated only once to each given geometry, which will speed up the
-computation.
+calculated only once to each given geometry.
 
-The present version of FDS+Evac does not use optimally computer memory
+The present version of FDS+Evac does not use computer memory optimally
 and does not fully support parallel CPU calculations for the
 evacuation part.  In later versions of the program, the memory usage
-will be more optimal.  Using computer memory efficiently means that
-one defines the evacuation meshes as small as possible and put as few
-obstacles in the calculation as possible.  For now the only thing the
-user can do is to swicth from a 32 bit machine to a 64 bit machine in
-order to increase the available memory, if the FDS+Evac calculation
-takes too much memory.
+will be optimized.  Currently, an efficient use of the computer memory
+requires that the evacuation meshes are made as small as possible and
+as few obstacles as possible are placed in the calculation.  For now,
+if FDS+Evac calculation takes too much memory, the user must
+increase the amount of available memory. This may require
+swicthing from a 32 bit to a 64 bit operating system.
 
 
 
-\section{Intended User's of FDS+Evac}\label{Sec_IntUsers}
+\section{Intended Use of FDS+Evac}\label{Sec_IntUsers}
 
 FDS+Evac is primarly a research tool for studying evacuation processes
 in buildings.  While it seems to produce similar egress flows as found
