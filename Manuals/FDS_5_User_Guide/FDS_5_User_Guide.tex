@@ -6938,7 +6938,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct MASS FRACTION}$^*$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct MPUA}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
-{\ct MPUV}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^3$       & D,I,P,S      \\ \hline
+{\ct MPUV}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^3$       & D,P,S        \\ \hline
 {\ct nitrogen}                                  & $X_{N_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
 {\ct optical depth}                             & $OD=K/2.3$ (Section~\ref{info:visibility})    & 1/m            & D,I,P,S      \\ \hline
 {\ct other}                                     & $X_{other}(Z)$                                & mol/mol        & D,I,P,S      \\ \hline
@@ -9570,12 +9570,12 @@ These files are written out from {\bf dump.f} with the following lines:
 \end{verbatim}
 \normalsize
 {\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character
-strings of lengths 60, 30 and 30, respectively. 
+strings of lengths 60, 30 and 30, respectively.
 {\ct NPATCH} is the number of planes (or ``patches'') that make up the
 solid boundaries plus the external walls.
 The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell nodes of each
 patch. {\ct IOR} is an integer indicating the orientation of the
-patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these. 
+patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these.
 {\ct NB} is the number of the boundary (zero for external walls) and
 {\ct NM} is the number of the mesh.  Note that the data is planar,
 thus one pair of cell nodes is the same. Presently, Smokeview is the

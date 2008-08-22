@@ -6437,7 +6437,6 @@ Contains
     Real ( kind = 8 ), Parameter :: eps = 0.00001D+00
     !    Real ( kind = 8 ) gamma_log
     Integer i
-    Real ( kind = 8 ) xi
     Integer icent
     Integer iterb
     Integer iterf
@@ -6455,7 +6454,6 @@ Contains
     Real ( kind = 8 ) wt
     Real ( kind = 8 ) x
     Real ( kind = 8 ) xnonc
-    Real ( kind = 8 ) xx
     !Timo: Statement function qsmall converted to an internal function
     !Timo qsmall(xx) = sum1 < 1.0D-20 .Or. xx < eps * sum1
     !Timo: dg(ii) = df +  2.0D+00  * Real ( ii, kind = 8 )
@@ -6752,7 +6750,6 @@ Contains
     !Timo: Logical qsmall
     Real ( kind = 8 ) sum1
     Real ( kind = 8 ) upterm
-    Real ( kind = 8 ) x
     Real ( kind = 8 ) xmult
     Real ( kind = 8 ) xnonc
     Real ( kind = 8 ) xx
@@ -8206,7 +8203,6 @@ Contains
     Real ( kind = 8 ) :: xxlo = 0.0D+00
     Real ( kind = 8 ) zabstl
     Real ( kind = 8 ) zreltl
-    Real ( kind = 8 ) zx
     Real ( kind = 8 ) zxhi
     Real ( kind = 8 ) zxlo
 
