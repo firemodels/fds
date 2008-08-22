@@ -3602,8 +3602,7 @@ FVM very fast.  Iterations are needed only to account for the
 reflective boundaries. However, this is seldom necessary in
 practice, because the time step set by the flow solver is small.
 
-The grid used for the RTE solver is the same as for
-the fluid solver.
+The grid used for the RTE solver is the same as for the fluid solver.
 The coordinate system used to discretize the solid angle is
 shown in Figure~\ref{Angular}.
 \begin{figure}[ht]
@@ -3720,13 +3719,16 @@ Here $\bf i$, $\bf j$ and $\bf k$ are the base vectors of the
 Cartesian coordinate system. $\theta^+$, $\theta^-$, $\phi^+$ and
 $\phi^-$ are the upper and lower boundaries of the control angle in
 the polar and azimuthal directions, respectively, and $\Delta\theta =
-\theta^+ - \theta^-$ and $\Delta\phi = \phi^+ - \phi^-$. The solution
-method of (\ref{RTEdiscrete3}) is based on an explicit marching
-sequence~\cite{Kim}. The marching direction depends on the propagation
-direction of the radiation intensity. As the marching is done in the
-``downwind'' direction, the ``upwind'' intensities in all three
-spatial directions are known, and the intensity $I_{ijk}^l$ can be
-solved directly. Iterations may be needed only with the reflective
+\theta^+ - \theta^-$ and $\Delta\phi = \phi^+ - \phi^-$. In the cells
+next to a wall, the areas $A_m$ of the faces, that are perpendicular to
+the wall, are multiplied by 0.5.
+
+The solution method of (\ref{RTEdiscrete3}) is based on an explicit
+marching sequence~\cite{Kim}. The marching direction depends on the
+propagation direction of the radiation intensity. As the marching is
+done in the ``downwind'' direction, the ``upwind'' intensities in all
+three spatial directions are known, and the intensity $I_{ijk}^l$ can
+be solved directly. Iterations may be needed only with the reflective
 walls and optically thick situations.  Currently, no iterations are
 made.
 
