@@ -27,7 +27,6 @@ Module EVAC
 !  Use MESH_POINTERS, ONLY: DT,IJKW,BOUNDARY_TYPE,XW,YW,WALL_INDEX,POINT_TO_MESH
 !  Use EVAC_MESH_POINTERS
   Use PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION
-  Use READ_INPUT, ONLY : COLOR2RGB
   !
   Implicit None
   CHARACTER(255), PARAMETER :: evacid='$Id$'
@@ -4995,7 +4994,7 @@ Contains
          X1,Y1,XI,YJ,ZK
     Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ, &
          IBC, ICX, ICY
-    Integer  IE, tim_ic, tim_iw, nm_tim, NM_now, j1, tim_iwx, tim_iwy
+    Integer  IE, tim_ic, tim_iw, NM_now, j1, tim_iwx, tim_iwy
     Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, &
          EVEL, tim_dist
     Integer istat
