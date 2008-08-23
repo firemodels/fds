@@ -4022,13 +4022,13 @@ void init_cull_exts(void){
     if(version_label[i]=='.')version_label[i]=' ';
   }
   sscanf(version_label,"%i %i",&major,&minor);
-  if(major>1||(major==1&&minor>=5)){
+  if(major>1){
     cullactive=1;
   }
-  if(cullactive==0){
+  else{
     trim(version_label);
     printf("Smokeview is running on a system using OpenGL %s\n",version_label2);
-    printf("OpenGL 1.5 or later in order to implement smoke culling.\n");
+    printf("Smoke culling is not not supported, it requires OpenGL 2.0 or later.\n");
     cullsmoke=0;
   }
 }
