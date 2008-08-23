@@ -6700,7 +6700,7 @@ int readini2(char *inifile, int localfile){
       
       CheckMemory;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&nrgb_ini);
+      sscanf(buffer,"%i %i %i",&nrgb_ini,&usetexturebar,&colorbar_select_index);
       FREEMEMORY(rgb_ini);
       if(NewMemory((void **)&rgb_ini,4*nrgb_ini*sizeof(float))==0)return 2;
       rgb_ini_copy=rgb_ini;
@@ -6710,6 +6710,9 @@ int readini2(char *inifile, int localfile){
         rgb_ini_copy+=3;
       }
       initrgb();
+      if(colorbar_select_index>=0&&colorbar_select_index<=255){
+        update_colorbar_select_index=1;
+      }
       continue;
     }
     if(match(buffer,"COLOR2BAR",9) == 1){
@@ -8079,7 +8082,7 @@ void writeini(int flag){
   fprintf(fileout,"COLORS\n");
   fprintf(fileout,"------\n\n");
   fprintf(fileout,"COLORBAR\n");
-  fprintf(fileout," %i\n",nrgb);
+  fprintf(fileout," %i %i %i\n",nrgb,usetexturebar,colorbar_select_index);
   for(nn=0;nn<nrgb;nn++){
     fprintf(fileout," %f %f %f\n",rgb[nn][0],rgb[nn][1],rgb[nn][2]);
   }

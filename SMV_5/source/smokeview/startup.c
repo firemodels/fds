@@ -2059,6 +2059,8 @@ void initvars0(void){
   script_recording=NULL;
   runscript=0;
   noexit=0;
+  colorbar_select_index=-1;
+  update_colorbar_select_index=0;
   script_multislice=0;
   script_multivslice=0;
   script_iso=0;
