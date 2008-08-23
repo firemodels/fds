@@ -252,6 +252,7 @@ void mouse(int button, int state, int x, int y){
         else{
           ifactor=-1;
         }
+        colorbar_select_index=ifactor;
         updatecolors(ifactor);
         colordrag=1;
         return;
@@ -344,6 +345,7 @@ void motion(int xm, int ym){
       else{
         ifactor=-1;
       }
+      colorbar_select_index=ifactor;
       updatecolors(ifactor);
     }
     return;
@@ -1661,7 +1663,10 @@ void Display(void){
      update_windowsizelist();
      ResizeWindow(screenWidth,screenHeight);
    }
-
+   if(update_colorbar_select_index==1&&colorbar_select_index>=0&&colorbar_select_index<=255){
+     update_colorbar_select_index=0;
+     updatecolors(colorbar_select_index);
+   }
   if(updatemenu==1){
     if(menustatus==GLUT_MENU_NOT_IN_USE){
       glutDetachMenu(GLUT_RIGHT_BUTTON);
