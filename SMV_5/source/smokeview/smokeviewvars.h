@@ -554,6 +554,7 @@ SVEXTERN pthread_t compress_thread_id;
 
 SVEXTERN int lock_allsmoke;
 
+SVEXTERN int colorbar_select_index,update_colorbar_select_index;
 SVEXTERN float world_eyepos[3];
 SVEXTERN int tour_usecurrent;
 SVEXTERN int visVentLines, visVentSolid;
