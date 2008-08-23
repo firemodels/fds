@@ -1339,7 +1339,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw transparent faces +++++++++++++++++++++++++ */
 
-    draw_transparent_faces();
+  if(xyz_clipplane==2){
+    setClipPlanes(1);
+  }
+  draw_transparent_faces();
+  if(xyz_clipplane==2){
+    unsetClipPlanes();
+  }
 
 /* ++++++++++++++++++++++++ draw 3D smoke +++++++++++++++++++++++++ */
 
