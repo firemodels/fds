@@ -5510,10 +5510,10 @@ if(visBlocks==visBLOCKOutline){
      char renderwindow4[1024];
 
 
-     sprintf(renderwindow,"%i%s%i(win)",screenWidth,"x",screenHeight);
+     sprintf(renderwindow,"%i%s%i(current)",screenWidth,"x",screenHeight);
      strcpy(renderwindow2,"*");
      strcat(renderwindow2,renderwindow);
-     sprintf(renderwindow3,"%i%s%i(2x win)",2*screenWidth,"x",2*screenHeight);
+     sprintf(renderwindow3,"%i%s%i(2*current)",2*screenWidth,"x",2*screenHeight);
      strcpy(renderwindow4,"*");
      strcat(renderwindow4,renderwindow3);
 
