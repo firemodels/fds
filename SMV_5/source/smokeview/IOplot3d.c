@@ -388,7 +388,6 @@ void drawplot3d_texture(mesh *meshi){
   visx = meshi->visx;
   visy = meshi->visy;
   visz = meshi->visz;
-  printf(" %i %i %i %i %i %i\n",visx,visy,visz,plotx,ploty,plotz);
   ibar = meshi->ibar;
   jbar = meshi->jbar;
   kbar = meshi->kbar;
