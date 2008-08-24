@@ -1,0 +1,17 @@
+RENDERDIR
+ ..\..\Manuals\SMV_5_User_Guide\scriptfigures
+LOADFILE
+ plume5a_05.sf
+LOADINIFILE
+ plume5a_texturebar.ini
+SETTIMEVAL
+ 1.9
+RENDERONCE
+ plume5a_texturebar
+LOADINIFILE
+ plume5a_notexturebar.ini
+SETTIMEVAL
+ 1.9
+RENDERONCE
+ plume5a_notexturebar
+
