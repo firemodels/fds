@@ -1,0 +1,23 @@
+Smokeview 5.2.3 - Aug  8 2008
+Visualize fire/smoke flow simulations.  All parameters are optional.
+
+Usage:
+
+smokeview casename -points m -frames n -ini -part -nopart -stereo -demo
+            -runscript -script scriptname
+
+where 
+
+  casename = project id (file names without the extension)
+         m = maximum number of particles.  Default=50000000
+         n = maximum number of particle frames.  Default=5001
+     -demo = activate demonstrator mode of Smokeview
+     -help = display this message
+      -ini = output default smokeview parameters to smokeview.ini
+     -part = load particle file if present 
+   -nopart = do not load particle file 
+   -stereo = activate stereo mode (if supported)
+  -version = display version information
+-runscript = run the script file, casename.ssf, at startup
+-script scriptfile = run the script file, scriptfile, at startup
+    -build = show pre-preprocessing directives used to build smokeview
