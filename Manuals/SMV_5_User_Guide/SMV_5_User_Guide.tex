@@ -61,6 +61,13 @@
 %
 % new commands for this paper
 %
+\newcommand{\fdsinput}[1]{
+{
+\scriptsize
+\verbatiminput{../../Test_cases/Visualization/#1}
+}
+}
+
 \newcommand{\svini}{{\tt smokeview.ini}\ }
 \newcommand{\bverb}{
 \begin{Verbatim}[frame=single,rulecolor=\color{blue},
@@ -1960,13 +1967,13 @@ colorbar with the mouse. As before this causes a portion of the
 colorbar to turn black and the corresponding region in the scene
 to also turn black.  Now the black color is accurate to the pixel
 so this feature could be used to highlight regions of interest.
-The improved accuracy is a result of the way color interpolations are performed.  The new method uses a 1D texture map (the colorbar) to color data.  Colors are interpolated within the colorbar.  Color interpolations with the former method occured within the color cube.
+The improved accuracy is a result of the way color interpolations are performed.  The new method uses a 1D texture map (the colorbar) to color data.  Colors are interpolated within the colorbar.  Color interpolations with the former method occurred within the color cube.
 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{ccc}
-\includegraphics[height=\figheightA]{figures/plume5_sf_bad}&
-\includegraphics[height=\figheightA]{figures/plume5_sf_good}\\
+\includegraphics[width=3.5in]{scriptfigures/plume5a_notexturebar}&
+\includegraphics[width=3.5in]{scriptfigures/plume5a_texturebar}\\
 interpolate colors&interpolate 1D texture color bar\\
 \end{tabular}
 \caption [Slice file snapshots illustrating old and new method for
@@ -2436,29 +2443,36 @@ the video card supports shuttered stereo display then the {\em shuttered checkbo
 \begin{center}
 \includegraphics[width=4.2708333in]{figures/figCLIP}
 \end{center}
-\caption[{\em Clipping}\ dialog box.]{{\em Clipping}\ dialog box.  Clipping
-entries result in the view shown in Figure \ref{figCLIPPED}b.
-Clipping entries may be changed individually or selected by mesh
-number. } \label{figCLIP}
+\caption[{\em Clipping}\ dialog box.]{{\em Clipping}\ dialog box.  
+Minimum and maximum clip plane values for X, Y and Z planes are set 
+using the clipping dialog box.  One has the option when clipping of 
+hiding the geometry and data
+or just the geometry.
+}
+\label{figCLIP}
 \end{figure}
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cc}
-\includegraphics[width=3.4375in]{figures/sprinkhall4a}&\includegraphics[width=3.507in]{figures/sprinkhall4b}\\
-a) full scene&b) scene clipped to mesh 4\\
+\begin{tabular}{c}
+\includegraphics[width=3.25in]{scriptfigures/thouse5_smoke_noclip}\\
+a) no clipping\\
+\includegraphics[width=3.25in]{scriptfigures/thouse5_smoke_clip_blockages}\\
+b) clip blockages\\
+\includegraphics[width=3.25in]{scriptfigures/thouse5_smoke_clip_blockages_data}\\
+b) clip blockages and data\\
 \end{tabular}
 \end{center}
-\caption[Two views of a multi-mesh case.]{Two views of a
-multi-mesh case. The first view shows the entire scene, the second
-view shows the scene clipped to mesh 4. The clipping entries
-producing the second view are shown in Figure \ref{figCLIP}.}
+\caption[Clipping a scene.]{Three views of a
+scene. The first view is drawn without clipping, the second
+view shows the scene clipping only the geometry (blockages), the third view
+shows the scene slipping both the geometry and the data.}
 \label{figCLIPPED}
 \end{figure}
 
 It is difficult to view the interior of a scene when modelling
 complicated geometries.  To alleviate this problem, portions of
-the scene may be hidden or clipped by defining up to six clipping
+the scene may be hidden or clipped by setting up to six clipping
 planes. OpenGL draws the scene on one side of a clipping plane but
 not the other. In general, a clipping plane may have any
 orientation. Smokeview defines two clipping planes for each of the
@@ -2468,9 +2482,11 @@ value and larger than an `$x_{max}$' value. The y axis and z axis
 clipping planes behave similarly.  Clipping plane values are
 specified using the {\em Clipping}\ dialog box which is opened by
 selecting the \fbox{Dialogs$>$Clip Geometry}\ menu item. Figure
-\ref{figCLIP} shows this dialog box with all planes active and
-values selected for mesh 4 of the scene.  The corresponding
-clipped scene is illustrated in Figure \ref{figCLIPPED}.
+\ref{figCLIP} shows this dialog box with the $y_{max}$ plane active.  
+Figure \ref{figCLIPPED} shows three versions of a scene.  
+Figure \ref{figCLIPPED}a is drawn with no clipping.
+Figure \ref{figCLIPPED}b is drawn clipping just the geometry (blockages).
+Figure \ref{figCLIPPED}c is drawn clipping both the geometry and the data.
 
 \chapter{Smokeview - Demonstrator Mode}
 A simplified version of Smokeview may be invoked in order to present a fire scenario for training or demonstration
@@ -2552,7 +2568,7 @@ TEXTURE\_ORIGIN} is (0,0,0), and the global default can be changed
 by added a {\tt TEXTURE\_ORIGIN} statement to the {\tt MISC} line.
 
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=4.8125in]{figures/figTextures}
+\centerline{\includegraphics[width=4.8125in]{scriptfigures/sillytexture}
 } \caption [Texture map example.] {
 Texture map example.  The same texture was applied to two different
 blockages and a vent (with different widths) by assigning different {\tt TEXTURE\_WIDTH}\
@@ -2566,30 +2582,7 @@ could be stretched by differing amounts (using the {\tt
 TEXTURE\_WIDTH}\ parameter.)  The FDS data file used to create
 this Figure follows.
 
-\begin{verbatim}
-&HEAD CHID='sillytexture', TITLE='Silly Test Case' /
-&MISC TEXTURE_ORIGIN=0.1,0.1,0.1 /
-
-&MESH IJK=20,20,02, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-&TIME TWFIN=0. /
-&SURF ID     = 'TEXTURE 1'
-      TEXTURE_MAP= 'nistleft.jpg'
-      TEXTURE_WIDTH=0.6
-      TEXTURE_HEIGHT=0.2 /
-
-&SURF ID     = 'TEXTURE 2'
-      TEXTURE_MAP= 'nistleft.jpg'
-      TEXTURE_WIDTH=0.4
-      TEXTURE_HEIGHT=0.2 /
-&OBST XB=0.1,0.3,0.1,0.7,0.1,0.3, SURF_ID='TEXTURE 1'  /
-&OBST XB=0.5,0.9,0.3,0.7,0.1,0.5, SURF_ID='TEXTURE 2',
-      TEXTURE_ORIGIN=0.5,0.3,0.1  /
-
-&VENT XB=0.0,0.0,0.2,0.8,0.2,0.4, SURF_ID='TEXTURE 1',
-      TEXTURE_ORIGIN=0.0,0.2,0.2 /
-&VENT XB=0.3,0.9,0.0,0.0,0.3,0.5, SURF_ID='TEXTURE 1',
-      TEXTURE_ORIGIN=0.9,0.0,0.3 /
-\end{verbatim}
+\fdsinput{sillytexture.fds}
 
 
 \chapter{Using Smokeview to Debug FDS Input Files} One of the most difficult
@@ -2871,35 +2864,10 @@ compressed. Smokezip adds the extension svz to the corresponding
 compressed file name.
 
 The usage for Smokezip is
-\begin{verbatim}
- smokezip 1.2.4(1793) - Jul 17 2008
-
-  Compresses Smokeview 3D smoke, slice, iso-surface and boundary files
-
-  smokezip [-c -f -3 -b -s -i -skip skipval]  [-c -d destdir -s sourcedir] casename
-\end{verbatim}
-
-\blist
-
-\hitem{-2}  - overwrites 2d slice compressed files
-\hitem{-3}  - overwrites 3d smoke files
-\hitem{-b}  - overwrites boundary compressed files
-\hitem{-i}  - overwrites iso-surface compressed files
-\hitem{-f}  - overwrites all compressed files
-\hitem{-d destdir} - copies compressed files (and files needed by Smokeview
-               to view the case) to the directory destdir
-\hitem{-demo} - Creates the files (compressed and .svd ) needed by the
-          Smokeview demonstrator mode.  Compresses files that are autoloaded,
-          uses (20.0,620.0) and (0.0,0.23) for temperature and oxygen bounds and
-          creates the .svd file which activates the Smokeview demonstrator mode.
-\hitem{-s sourcedir} - specifies directory containing source files
-\hitem{-skip skipval} - skip frames when compressing files
-\hitem{-auto} - compress only files that are auto-loaded by Smokeview
-\hitem{-c}  - cleans or removes all compressed files
-\hitem{-h}  - display this message
-
-\hitem{casename} - Smokeview .smv file
-\elist
+{
+\scriptsize
+\verbatiminput{figures/smokezip.help}
+}
 
 Min and max bounds used to compress boundary files are obtained
 from the casename.ini file or calculated by smokezip if casename.ini
@@ -2982,25 +2950,10 @@ smokeview -help
 \end{verbatim}
 \noindent without any arguments which results in output similar to:\\
 
-\begin{verbatim}
-Smokeview 5.0.0_634 - Sep 19 2007
-Visualize fire/smoke flow simulations.  All parameters are optional.
-
-Usage:
-
-smokeview casename -points m -frames n -ini -part -nopart -stereo
-
-where
-
-  casename = project id (file names without the extension)
-         m = maximum number of particles.  Default=50000000
-         n = maximum number of particle frames.  Default=5001
-      -ini = output default smokeview parameters to smokeview.ini
-     -part = load particle file if present
-   -nopart = do not load particle file
-   -stereo = activate stereo mode (if supported)
-    -build = show pre-preprocessing directives used to build smokeview
-\end{verbatim}
+{
+\scriptsize
+\verbatiminput{figures/smokeview.help}
+}
 
 \noindent The {\tt -nopart} option is used to prevent a particle
 file from being loaded at startup. The {\tt -points} and {\tt
