@@ -243,7 +243,29 @@ SETVIEWPOINT
  view 2
 RENDERONCE
  thouse5_plot3d_cont
-
+UNLOADALL
+LOAD3DSMOKE
+ soot mass fraction
+LOAD3DSMOKE
+ HRRPUV
+SETVIEWPOINT
+ external
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_smoke_noclip
+LOADINIFILE
+ thouse5_clip_blockages.ini
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_smoke_clip_blockages
+LOADINIFILE
+ thouse5_clip_blockages_data.ini
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_smoke_clip_blockages_data
 
 
 
