@@ -1748,7 +1748,7 @@ END SUBROUTINE WRITE_STATUS_FILES
 SUBROUTINE INITIALIZE_DIAGNOSTIC_FILE
 USE RADCONS, ONLY: NRA,NRT,RSA,NRP,NSB,TIME_STEP_INCREMENT,ANGLE_INCREMENT,PATH_LENGTH
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP 
-INTEGER :: NM,I,NN,N,NR,NL
+INTEGER :: NM,I,NN,N,NR,NL,NS
  
 ! Write out preliminary stuff to error file (unit 0)
  
@@ -1931,8 +1931,10 @@ MATL_LOOP: DO N=1,N_MATL
       IF (ML%NU_RESIDUE(NN) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,I2,A,F6.3)') &
                             '        Residue: ',TRIM(ML%RESIDUE_MATL_NAME(NN)),', Material Index: ', &
                                                      ML%RESIDUE_MATL_INDEX(NN),', Yield: ',ML%NU_RESIDUE(NN)
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        Fuel Yield : ',ML%NU_FUEL(NN)
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        Water Yield: ',ML%NU_WATER(NN)
+      WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
+      DO NS = 1,N_SPECIES
+      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES(NS)%ID,': ',ML%NU_GAS(NN,NS)
+      ENDDO
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NN)
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (kJ/kmol): ',ML%E(NN)/1000.
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NN)/1000.
@@ -1945,8 +1947,10 @@ MATL_LOOP: DO N=1,N_MATL
    ENDIF
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
       WRITE(LU_OUTPUT,'(A)')      '     Liquid evaporation reaction'
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        Fuel Yield             : ',ML%NU_FUEL(1)
-      WRITE(LU_OUTPUT,'(A,F9.2)') '        Water Yield            : ',ML%NU_WATER(1)
+      WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
+      DO NS = 1,N_SPECIES
+      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES(NS)%ID,': ',ML%NU_GAS(1,NS)
+      ENDDO      
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL-TMPM
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1)/1000.
    ENDIF
