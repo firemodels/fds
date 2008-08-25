@@ -3404,6 +3404,10 @@ void Args(int argc, char **argv){
       usage(argv);
       exit(0);
     }
+    else if(strncmp(argv[i],"-version",8)==0){
+      version();
+      exit(0);
+    }
     else if(strncmp(argv[i],"-runscript",10)==0){
       runscript=1;
     }

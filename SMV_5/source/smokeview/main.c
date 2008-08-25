@@ -77,10 +77,9 @@ int main(int argc, char **argv){
 
     get_smokezippath(smvprogdir,&smokezippath);
 
-    if(smokezippath!=NULL)printf("Smokezip file: %s found\n",smokezippath);
-
     CheckMemory;
     Args(argc, argv_sv);
+    if(smokezippath!=NULL)printf("Smokezip file: %s found\n",smokezippath);
     sv_startup_c(argc,argv_sv);
     CheckMemory;
     startup_flag=initcase_c(argc,argv_sv);
