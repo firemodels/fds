@@ -1,35 +1,45 @@
 \documentclass[12pt,a4paper]{stylevk}
-%%% \usepackage{mathptm,times}
-%%%  \usepackage[pdftex]{graphicx}
-% \usepackage{hyperref}
+% \usepackage[dvips]{graphicx}
+\usepackage{times} 
+\usepackage[pdftex]{graphicx}
+
 %
 \usepackage[T1]{fontenc}
 \usepackage[latin1]{inputenc}
 \usepackage[english]{babel}
 \usepackage{fancyhdr}
 \usepackage{upquote}
-% upquote toimii vain verbatimissa. \char"0D antaa muualla
-% oikeanlaisen hipsun.
-
-%\usepackage{eso-pic}
-\usepackage[dvips]{graphicx}
-%\usepackage{graphicx}
-%\usepackage{ae,aecompl} 
-\usepackage{times} 
+% upquote works only for verbatim. \char"0D gives correct quote
+% character elsewhere.
+%
 \usepackage{amsmath}
-\usepackage{amssymb,amsfonts}
-%\usepackage{color}
-%\usepackage{type1cm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{array,eqnarray}
 
-%\makeatletter 
-%   \AddToShipoutPicture{%
-%     \setlength{\@tempdimb}{.5\paperwidth}%
-%    \setlength{\@tempdimc}{.5\paperheight}%
-%   \setlength{\unitlength}{1pt}%
-%  \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
-%     \makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{
-%     \fontsize{8cm}{8cm}\selectfont{DRAFT}}}}}} 
-%\makeatother
+% Next is not working for T.K.
+% \usepackage{hyperref}
+%
+% \usepackage{color}
+% \definecolor{linknavy}{rgb}{0,0,0.50196}
+% \definecolor{linkred}{rgb}{1,0,0}
+% \definecolor{linkblue}{rgb}{0,0,1}
+
+% \usepackage{caption}
+% \usepackage{graphpap}
+% \usepackage{rotating}
+%%% \usepackage{epsfig,psfrag}
+%\usepackage{wrapfig}
+%\usepackage{picins}
+\usepackage{geometry}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{lscape}
+\usepackage{makeidx} % Create index at end of document
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography and index in the ToC
+\usepackage{float}
+\usepackage{lastpage} % Automatic last page number reference.
+%
 
 % Page layout for the VTT Working Papers (A4 paper)
 % top margin 3.0 cm (including top header 1.0 cm)
@@ -55,29 +65,8 @@
 \setlength{\parskip}{16.0pt plus 3.5pt minus 1.0pt}
 \setlength{\baselineskip}{16.0pt plus 3.5pt minus 1.0pt}
 
-% \renewcommand{\refname}{\textbf{\normalsize REFERENCES}}
-% \renewcommand{\figurename}{\normalsize FIGURE}
-% \renewcommand{\tablename}{\normalsize TABLE}
-% \renewcommand{\refname}{\normalsize REFERENCES}
-
-%% The maximum number of floats on a page
-\setcounter{totalnumber}{3}
-
-%% The level of section numbering
-\setcounter{secnumdepth}{3}
-
-%
-% \def\linenumberfont{\normalfont\tiny\sffamily}
-% \def\linenumberfont{\normalfont\small\sffamily}
-
-
-% Title: Bold, 14 pt, Times Roman
-% {\fontsize{14}{17}
-% \selectfont
-% \bf FDS+Evac: Model}
-%
-%{\Large \bf\textsf{Time-Dependent}}
-
+% Heading styles for the VTT Working Papers (A4 paper)
+% These are (re)defined in stylevk.
 % Heading 1: Arial 18pt bold (large) (Arial ==> textsf Sans Serif)
 % Heading 2: Arial 14pt bold
 % Heading 3: Arial 12pt bold
@@ -85,26 +74,35 @@
 % Contents: Arial 18pt bold
 % Abstract: Arial 18pt bold
 % Acknowledgements: Arial 18pt bold
-%
+
+
+% \renewcommand{\refname}{\textbf{\normalsize REFERENCES}}
+% \renewcommand{\figurename}{\normalsize FIGURE}
+% \renewcommand{\tablename}{\normalsize TABLE}
+% \renewcommand{\refname}{\normalsize REFERENCES}
+
+%% The maximum number of floats on a page
+\setcounter{totalnumber}{3}
+%% The level of section numbering
+\setcounter{secnumdepth}{3}
+
+% How to use the low level font commands:
+% Title: Bold, 14 pt, Times Roman
+% {\fontsize{14}{17} \selectfont \bf FDS+Evac: Model}
 
 \pagestyle{plain}
 
 \begin{document}
 
-% \bibliographystyle{unsrt}
-
-% \newfont{\ct}{cmtt10 at 9pt}
+%% % \bibliographystyle{unsrt}
 
 
 \newcommand{\Timts}[1]{\textnormal{\texttt{\textsl{#1}}}}
-
-%\renewcommand\Large{\@setfontsize\Large\@xxxviiipt{23}}
-
-
-%\let`\textasciigrave
-%\let'\textquotesingle
 \newcommand{\Timtt}[1]{{\tt{#1}}}
-% \newcommand{\Timtt}[1]{\textnormal{\texttt{#1}}}
+%% % \newcommand{\Timtt}[1]{\textnormal{\texttt{#1}}}
+%% % \renewcommand\Large{\@setfontsize\Large\@xxxviiipt{23}}
+%% %\let`\textasciigrave
+%% %\let'\textquotesingle
 \newcommand{\QS}{\hbox{\textquotesingle}}
 
 \fancyhead{}
@@ -324,7 +322,7 @@ solid obstacles.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-    width=80mm]{FIGURES/door_geometry2.eps}}
+    width=80mm]{FIGURES/door_geometry2}}
   \caption{How to make an exit or a door.}\label{Fig_DoorGeom} 
 \end{figure}
 %
@@ -653,7 +651,7 @@ Elderly   & 0.250$\pm 0.020$ & 0.6000 & 0.3600 & 0.6400 & 0.80$\pm
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-    width=30mm]{FIGURES/body_shape.eps}}
+    width=30mm]{FIGURES/body_shape}}
   \caption{The shape of the human body is approximated by a
     combination of three overlapping circles.  Shown are also the
     definitions of the body size variables.}\label{Fig_HumanBody}
@@ -708,7 +706,7 @@ agent to a three-circle one, see the papers by Langston {\em et
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-    width=120mm]{FIGURES/voimakuvat_Poster.eps}}
+    width=120mm]{FIGURES/voimakuvat_Poster}}
   \caption{The concept of the social force.}\label{Fig_SocForce}
 \end{figure}
 %
@@ -821,7 +819,7 @@ preferred walking velocity field $ \mathbf{v}_i^0 $.
 %
 \begin{figure}[!bt]
   \centerline{\includegraphics[ clip=true, width=100mm
-  ]{FIGURES/body_shape_forces.eps} } 
+  ]{FIGURES/body_shape_forces} } 
 \caption{Definitions of the radial vectors $
   \mathbf{R}^c$ and $\mathbf{R}^{soc}$. }\label{Fig_BodySize}
 \end{figure}
@@ -919,7 +917,7 @@ much control on the process.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/evac_ffield.eps}}
+  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/evac_ffield}}
   \caption{A 2D flow field used to guide agents to the exit doors.  In
     this case, only the left exit has an ``outflow'' boundary
     condition, \emph{i.e.}, this fictitious agent flow field is used
@@ -945,7 +943,7 @@ done to see, which are the most important model parameters and further
 analysis was focused on those parameters.
 
 The first choice for the social force parameters of agent--agent
-interaction was $A_i = 2000~\textrm{N}$, $B_i = 0.04~\text{m}$, and
+interaction was $A_i = 2000~\textrm{N}$, $B_i = 0.04~\textrm{m}$, and
 $\lambda_i = 0.5$.  For the agent--wall interaction values $A_w =
 2000~\textrm{N}$, $B_w = 0.08~\textrm{m}$, and $\lambda_w = 0.2$ were
 used.  It was noticed that these values are not good for congested
@@ -1391,7 +1389,7 @@ eyes'' that the program is working as it should.
   calculation in FDS+Evac is implemented correctly.
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/FED_Test.eps}}
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/FED_Test}}
   \caption{A FED test}\label{Fig_FED_Test}
 \end{figure}
 %
@@ -1414,7 +1412,7 @@ eyes'' that the program is working as it should.
   accurately reproduces the anticipated reduction of walking speed.
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/Smoke_vs_speed.eps}}
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/Smoke_vs_speed}}
   \caption{A smoke vs speed test}\label{Fig_SmokeSpeedTest}
 \end{figure}
 %
@@ -1510,8 +1508,8 @@ where the results can not be checked as numbers but one should see
   were used.
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/DoorTestNoSmoke_Doors.eps}
-  \includegraphics[clip=true,width=60mm]{FIGURES/DoorTestNoSmokeAlgorithm.eps}}
+  \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/DoorTestNoSmoke_Doors}
+  \includegraphics[clip=true,width=60mm]{FIGURES/DoorTestNoSmokeAlgorithm}}
   \caption{An exit door selection test without
     smoke.  On the left, agents are coloured according to their exit
     doors. On the right, they are coloured according to their current
@@ -1522,7 +1520,7 @@ where the results can not be checked as numbers but one should see
   
 %
 \begin{figure}[!bt]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/DoorTestSmokeDens.eps}}
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/DoorTestSmokeDens}}
   \caption{The visibility at 10 s in the test case. Red and blue
     colours indicate good and very bad visibilities,
     respectively.}\label{Fig_ExitDoorSmokeDens} 
@@ -1566,8 +1564,8 @@ where the results can not be checked as numbers but one should see
   like intended.
 
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/DoorTestSmoke_Doors.eps}
-  x\includegraphics[clip=true,width=60mm]{FIGURES/DoorTestSmokeAlgorithm.eps}}
+  \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/DoorTestSmoke_Doors}
+  x\includegraphics[clip=true,width=60mm]{FIGURES/DoorTestSmokeAlgorithm}}
   \caption{An exit door selection test with
     smoke.  On the left, agents are coloured according to their exit
     doors. On the right, they are coloured according to their current
@@ -1646,8 +1644,8 @@ inputs.
 %
 \begin{figure}[!tb]
   \centerline{ \includegraphics[clip=true,
-    width=60mm]{FIGURES/Door_Geom.eps} ~~~~~~~~   
-    \includegraphics[clip=true,width=60mm]{FIGURES/CorrGeom2.eps} }
+    width=60mm]{FIGURES/Door_Geom} ~~~~~~~~   
+    \includegraphics[clip=true,width=60mm]{FIGURES/CorrGeom2} }
   \caption{Test geometries used to calculate the specific flows through
     doors and corridors.\protect\hspace{200mm}}\label{Fig_Geoms}
 \end{figure}
@@ -1681,8 +1679,8 @@ and they are shown in Fig.~\ref{Fig_RCC}.
 
 %
 \begin{figure}[!tb]
-  \centerline{ \includegraphics[clip=true, width=75mm]{FIGURES/RCC_DoorCorr_new1.eps} ~~
-               \includegraphics[clip=true, width=75mm]{FIGURES/RCC_DoorCorr_new2.eps} }
+  \centerline{ \includegraphics[clip=true, width=75mm]{FIGURES/RCC_DoorCorr_new1} ~~
+               \includegraphics[clip=true, width=75mm]{FIGURES/RCC_DoorCorr_new2} }
   \caption{Rank correlation coefficients (RCC) for specific flows through
     doors and corridors. Widths 0.8~m and 2.0~m were used for doors
     and human densities 1.0~$\mathrm{ \textrm{m}^\textrm{-2} } $ and
@@ -1693,12 +1691,12 @@ and they are shown in Fig.~\ref{Fig_RCC}.
 
 %
 \begin{figure}[!tb]
-  \centerline{ \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Anew.eps} 
-  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Bnew.eps}
-  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Lambdanew.eps} } 
-  \centerline{ \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_v0new.eps} 
-  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Taunew.eps}
-  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Bwallnew.eps} } 
+  \centerline{ \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Anew} 
+  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Bnew}
+  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Lambdanew} } 
+  \centerline{ \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_v0new} 
+  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Taunew}
+  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Bwallnew} } 
   \caption{Effects of different model parameters, $A_i$, $B_i$,
     $\lambda_i$, $v^0$, $\tau_i$, and $B_w$ on the specific flows
     through doors and corridors.  The corridor is 2.0~m wide, the
@@ -1795,7 +1793,7 @@ evacuation models.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/CorrFlowResults.eps}}
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/CorrFlowResults}}
   \caption{The specific flows in corridors.}\label{Fig_CorrResults} 
 \end{figure}
 %
@@ -1825,7 +1823,7 @@ evacuation models.
 
 %
 \begin{figure}[!bt]
-  \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/PorrasKuva.eps}}
+  \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/PorrasKuva}}
   \caption{A snapshot from a FDS+Evac simulation showing the geometry
   of the staircase.}\label{Fig_StairGeom} 
 \end{figure}
@@ -1849,8 +1847,8 @@ evacuation models.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/StairsType1Lam0p3.eps}
-  \includegraphics[clip=true,width=60mm]{FIGURES/StairsType1Lam0p5.eps}}
+  \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/StairsType1Lam0p3}
+  \includegraphics[clip=true,width=60mm]{FIGURES/StairsType1Lam0p5}}
   \caption{Comparison of FDS+Evac (staircase model type 1) and experimental
     observations of a staircase flow.  Values 0.3 (left) and 0.5
     (right) for the anisotropy parameter of the social force are used.
@@ -1861,8 +1859,8 @@ evacuation models.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/StairsType2Lam0p3.eps}
-  \includegraphics[clip=true,width=60mm]{FIGURES/StairsType2Lam0p5.eps}}
+  \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/StairsType2Lam0p3}
+  \includegraphics[clip=true,width=60mm]{FIGURES/StairsType2Lam0p5}}
   \caption{Comparison of FDS+Evac (staircase model type 2) and experimental
     observations of a staircase flow.  Values 0.3 (left) and 0.5
     (right) for the anisotropy parameter of the social force are used.
@@ -1890,7 +1888,7 @@ evacuation models.
 %
 
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/Library_Kuva2.eps}}
+  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/Library_Kuva2}}
   \caption{A snapshot from a FDS+Evac simulation shows the geometry of the
     FDS+Evac model for the second floor of the public
     library.}\label{Fig_Kirjasto}
@@ -1913,7 +1911,7 @@ evacuation models.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/KirjastoTulokset.eps}}
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/KirjastoTulokset}}
   \caption{Comparison of FDS+Evac simulation results and observations
     at the north and west doors of the public
     library.}\label{Fig_KirjastoResults} 
@@ -1957,10 +1955,10 @@ project~cite{Hostikka07a}.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/eeri_n60s15_v1_114s.eps}}
-  \caption{The geometry of the studied sports hall.  The open rectangle
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/SportHallGeom}}
+  \caption{The geometry of the studied sports hall.  The open grey
     shows the area, where the agents are at the start of the
-    simulations.  The gray rectangle shows the fire location, which is
+    simulations.  The red rectangle shows the fire location, which is
     close to door 3 and, thus, this door is not
     used.}\label{Fig_SportGeom}
 \end{figure}
@@ -1968,7 +1966,7 @@ project~cite{Hostikka07a}.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/EerikkilaResults.eps}}
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/EerikkilaResults}}
   \caption{The comparison of FDS+Evac to Simulex in a sport hall
     case.  Results of five different simulations are shown for each
     case.}\label{Fig_SportResults}
@@ -2021,7 +2019,7 @@ project~cite{Hostikka07a}.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/b_ave90s11rnd_d123_initpos.eps}}
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/b_ave90s11rnd_d123_initpos}}
   \caption{The geometry of the open floor office test
     case.}\label{Fig_OpenFloorGeom}
 \end{figure}
@@ -2029,7 +2027,7 @@ project~cite{Hostikka07a}.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/PankkiTulokset.eps}}
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/PankkiTulokset}}
   \caption{The comparison of FDS+Evac to Simulex in an open floor
     office case.}\label{Fig_OpenFloorResults} 
 \end{figure}
@@ -2063,7 +2061,7 @@ project~cite{Hostikka07a}.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/Kaytava_fig.eps}}
+  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/Kaytava_fig}}
   \caption{The geometry of the assembly space test
     case.}\label{Fig_AssemblyGeom} 
 \end{figure}
@@ -2083,7 +2081,7 @@ project~cite{Hostikka07a}.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/KaytavaTulokset.eps}}
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/KaytavaTulokset}}
   \caption{The comparison of FDS+Evac to buildingExodus
     and Simulex in an assembly space.}\label{Fig_AssemblyResults}
 \end{figure}
@@ -2091,8 +2089,8 @@ project~cite{Hostikka07a}.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/kaytava_u1s0p5_65s.eps}}
-  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/kaytava_simulex120s.eps}}
+  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/kaytava_u1s0p5_65s}}
+  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/kaytava_simulex120s}}
   \caption{A snapshot from (a) FDS+Evac, (b) Simulex
     calculation}\label{Fig_AssemblySnapshots} 
 \end{figure}
@@ -2136,14 +2134,14 @@ evacuation programmes is much better.  The calculated specific flows
   specific flows that are more relevant to a more relaxed egress.
 %
 %% \begin{figure}[!tb]
-%%   \centerline{\includegraphics[clip=true,width=120mm]{Door_Geom.eps}}
+%%   \centerline{\includegraphics[clip=true,width=120mm]{Door_Geom}}
 %%   \caption{The test geometry used to calculate specific human flows
 %%   through doors.}\label{Fig_DoorGeom}  
 %% \end{figure}
 %
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/OviFlowRersults.eps}}
+  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/OviFlowRersults}}
   \caption{The specific flows through doors.}\label{Fig_DoorResults}  
 \end{figure}
 %
@@ -2573,7 +2571,7 @@ which do not interact with each other.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-    width=120mm]{FIGURES/evac_grid2.eps}}
+    width=120mm]{FIGURES/evac_grid2}}
   \caption{A 2D evacuation mesh.}\label{Fig_EvacGrid} 
 \end{figure}
 %
@@ -3509,15 +3507,15 @@ examples below.
 
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-    width=80mm]{FIGURES/evac_example1_EvacGeom.eps}~~\includegraphics[clip=true,
-    width=80mm]{FIGURES/evac_example1_FireGeom.eps}}
+    width=80mm]{FIGURES/evac_example1_EvacGeom}~~\includegraphics[clip=true,
+    width=80mm]{FIGURES/evac_example1_FireGeom}}
   \caption{Example 1: Evacuation and fire calculation
     geometries.}\label{Fig_Ex1EvacGeom}
 \end{figure}
 
 %\begin{figure}[!tb]
 %  \centerline{\includegraphics[clip=true,
-%    width=120mm]{evac_example1_FireGeom.eps}}
+%    width=120mm]{evac_example1_FireGeom}}
 %  \caption{.}\label{Fig_Ex1FireGeom}  
 %\end{figure}
 
@@ -3763,7 +3761,7 @@ agents from the second floor are using.
 
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-    width=120mm]{FIGURES/evac_example2_EvacGeom.eps}}
+    width=120mm]{FIGURES/evac_example2_EvacGeom}}
   \caption{Example 2: Evacuation calculation
     geometry.}\label{Fig_Ex2EvacGeom}
 \end{figure}
@@ -4200,7 +4198,7 @@ and example cases than this manual.
 
 \clearpage
 
-\addcontentsline{toc}{section}{References}
+%\addcontentsline{toc}{section}{References}
 %\renewcommand{\bibname}{References}
 \begin{thebibliography}{99}
 %
@@ -4236,13 +4234,13 @@ and example cases than this manual.
   Evacuation Dynamics, February 27-29, 2008, Wuppertal, Germany.
 %
 \bibitem{Hostikka07a} Hostikka, S., Korhonen, T., Paloposki, T.,
-  Rinne, T., Heliövaara, S., and Matikainen, K., ``Development and
+  Rinne, T., Heli\"ovaara, S., and Matikainen, K., ``Development and
   Validation of FDS+Evac for Evacuation Simulations, Project Summary
   Report'', VTT Research Notes 2421, VTT Technical Research Centre of
   Finland, 2007, 64~p. (http://www.vtt.fi/publications/index.jsp)
 %
 \bibitem{Hostikka07b} Hostikka, S., Paloposki, T., Rinne, T., Saari,
-  J-M., Korhonen, T., Heliövaara, S., ``Experimental Observations of
+  J-M., Korhonen, T., Heli\"ovaara, S., ``Experimental Observations of
   Evacuation Situations'', VTT Working Papers 85, VTT Technical
   Research Centre of Finland, 2007, 52~p.
   (http://www.vtt.fi/publications/index.jsp)
@@ -4272,33 +4270,33 @@ and example cases than this manual.
 %
 \bibitem{SV_UserGuide} Forney, G.P., ``User's Guide for Smokeview
   Version 5 -- A Tool for Visualizing Fire Dynamics Simulation Data'',
-  NIST Special Publication 1017-1, U.S.\ Government Printing Office,
+  NIST Special Publication 1017-1, U.S.~Government Printing Office,
   Washington, 2007, 134~p.
 %
-\bibitem{Helbing95} Helbing, D. and Moln\'ar, P., ``Social force model
-  for pedestrian dynamics,'' \em Physical Review E \em 51: 4282-4286
+\bibitem{Helbing95} Helbing, D., and Moln\'ar, P., ``Social force model
+  for pedestrian dynamics'', \emph{Physical Review E} 51: 4282-4286
   (1995).
 %
-\bibitem{Helbing00} Helbing, D., Farkas, I., and Vicsek,T.,
-  ``Simulating dynamical features of escape panic,'' \em Nature \em
+\bibitem{Helbing00} Helbing, D., Farkas, I., and Vicsek, T.,
+  ``Simulating dynamical features of escape panic,'' \emph{Nature}
   407: 487-490 (2000).
 %
 % Next is for book
 \bibitem{Helbing02} Helbing, D., Farkas, I., Moln\'ar, P., and
   Vicsek,T., ``Simulating of Pedestrian Crowds in Normal and
-  Evacuation Situations,'' \em Pedestrian and Evacuation Dynamics, \em
+  Evacuation Situations,'' \emph{Pedestrian and Evacuation Dynamics},
   Schreckenberg, M. and Sharma, S.D. (eds.), Springer, Berlin, 2002,
   pp.~21-58.
 %
 \bibitem{Werner03} Werner, T. and Helbing, D., ``The social force
-  pedestrian model applied to real life scenarios,'' \em Pedestrian
+  pedestrian model applied to real life scenarios,'' \emph{Pedestrian
   and Evacuation Dynamics - Proceedings of the Seconnd
-  International Conference, \em University of Greenwich, London, 2003,
+  International Conference}, University of Greenwich, London, 2003,
   pp.~17-26.
 %
-\bibitem{Langston06} P.A.\ Langston, R.\ Masling, B.N.\ Asmar, ``Crowd
-  dynamics discrete element multi-circle model,'' \em Safety Science
-  \em 44: 395-417 (2006).
+\bibitem{Langston06} Langston, P.A., Masling, R., Asmar, B.N., ``Crowd
+  dynamics discrete element multi-circle model,'' \emph{Safety Science}
+  44: 395-417 (2006).
 %
 \bibitem{Simulex96} ``Simulex: Evacuation Modelling Software, User's
   Guide,'' Integrated Environmental Solutions Ltd., Glasgow, Scotland,
@@ -4327,7 +4325,7 @@ and example cases than this manual.
   Association, Quincy, MA, 1995.
 %
 \bibitem{Frantzich03} Frantzich, H.\ and Nilsson, D., ``Utrymning
-  genom tät rök: beteende och förflyttning'', 75~p., Report 3126,
+  genom tät r\"ok: beteende och f\"orflyttning'', 75~p., Report 3126,
   Department of Fire Safety Engineering, Lund University, Sweden,
   2003.
 %
@@ -4361,7 +4359,7 @@ and example cases than this manual.
   Transport Facilities'', 377~p., PhD Thesis, Delft University of
   Technology, The Netherlands, 2004 (ISBN 90-407-2521-7).
 %
-\bibitem{Paloposki02} Paloposki, T., Myllymäki, J., and Weckman, H.,
+\bibitem{Paloposki02} Paloposki, T., Myllym\"aki, J., and Weckman, H.,
   ``Application of reliability techniques for calculation of the
   evacuation safety of a sports hall'', VTT Research Notes 2281, VTT
   Building and Transport, Espoo, Finland, 2002, 53~p.+app.\ 13~p. (in
@@ -4370,14 +4368,14 @@ and example cases than this manual.
 \bibitem{Exodus3} Gwynne, S., Galea, E.R., Lawrence, P., and
   Filippidis, L., ``buildingEXODUS technical manual V4.00'', 2004.
 %
-\bibitem{Heliovaara07} Heliövaara, S., ``Computational Models for
+\bibitem{Heliovaara07} Heli\"ovaara, S., ``Computational Models for
   Human Behavior in Fire Evacuations'', M.Sc.\ Thesis, Department of
   Engineering Physics and Mathematics, Helsinki University of
   Technology, 2007 (http://www.sal.hut.fi/Publications/t-index.html).
 %
-\bibitem{Matikainen07} Matikainen, K., ``Käyttäytyminen
+\bibitem{Matikainen07} Matikainen, K., ``K\"aytt\"aytyminen
   uhkatilanteessa: Poistumisreitin valintaan vaikuttavat
-  sosiaalipsykologiset tekijät tulipalossa'', M.Sc.\ Thesis, Faculty
+  sosiaalipsykologiset tekij\"at tulipalossa'', M.Sc.\ Thesis, Faculty
   of Social Sciences, University of Helsinki, 2007 (in Finnish).
 %
 \end{thebibliography}
