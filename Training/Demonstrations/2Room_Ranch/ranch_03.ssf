@@ -1,6 +1,8 @@
 UNLOADALL
 RENDERDIR
 ../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
+LOADINIFILE
+ ranch_03.ini
 LOAD3DSMOKE
  soot mass fraction
 LOAD3DSMOKE
