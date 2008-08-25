@@ -1,6 +1,8 @@
 UNLOADALL
 RENDERDIR
  ../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
+LOADINIFILE
+ MCFRS_Flashover_01_slice.ini
 LOADSLICE
  TEMPERATURE
  1 1.200000
