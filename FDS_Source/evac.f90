@@ -50,7 +50,7 @@ Module EVAC
   ! (&EVAC lines)
   Type EVACUATION_Type
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB,T_START=0._EB, Angle=0._EB
-     Character(60) :: CLASS_NAME='null', ID_NAME='null'
+     Character(60) :: CLASS_NAME='null', ID='null'
      Character(30) :: GRID_NAME='null'
      Logical :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE.
      Integer :: N_INITIAL=0,SAMPLING=0, IPC=0, IMESH=0
@@ -67,7 +67,7 @@ Module EVAC
   ! (&EVHO lines)
   Type EVAC_HOLE_Type
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB
-     Character(60) :: ID_NAME='null', PERS_ID='null', EVAC_ID='null'
+     Character(60) :: ID='null', PERS_ID='null', EVAC_ID='null'
      Character(30) :: GRID_NAME='null'
      Integer, Dimension(3) :: RGB=-1
      Integer :: IMESH=0
@@ -82,7 +82,7 @@ Module EVAC
      Real(EB) :: Esc_SpeedUp=0._EB, Esc_SpeedDn=0._EB
      Real(EB) :: fac_v0_up=1._EB, fac_v0_down=1._EB, fac_v0_hori=1._EB
      Real(EB) :: cos_x=1._EB, cos_y=1._EB, sin_x=0._EB, sin_y=0._EB
-     Character(60) :: ID_NAME='null'
+     Character(60) :: ID='null'
      Character(26) :: GRID_NAME='null'
      Integer, Dimension(3) :: RGB=-1
      Integer :: IMESH=0, IOR=0
@@ -116,7 +116,7 @@ Module EVAC
      Real(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
      Real(EB) :: A=0._EB,B=0._EB,Lambda=0._EB,C_Young=0._EB,Gamma=0._EB,Kappa=0._EB
      Real(EB) :: r_torso=0._EB,r_shoulder=0._EB,d_shoulder=0._EB,m_iner=0._EB, Tau_iner=0._EB
-     Character(60) :: ID_NAME='null'
+     Character(60) :: ID='null'
      Integer :: I_DIA_DIST=0, I_VEL_DIST=0, I_PRE_DIST=0, I_DET_DIST=0, I_TAU_DIST=0
      Integer :: Avatar_Color_Index=0
      Integer, Dimension(3) :: RGB=-1, AVATAR_RGB=-1
@@ -135,7 +135,7 @@ Module EVAC
      Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADINT=0._EB
      Integer :: II=0, JJ=0, KK=0, FED_MESH=0
      Logical :: CHECK_FLOW=.FALSE., COUNT_ONLY=.FALSE.
-     Character(60) :: ID_NAME='null'
+     Character(60) :: ID='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
      Character(26) :: VENT_FFIELD='null'
@@ -155,7 +155,7 @@ Module EVAC
      Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADINT=0._EB
      Integer :: II=0, JJ=0, KK=0, FED_MESH=0
      Logical :: CHECK_FLOW=.FALSE., EXIT_SIGN=.FALSE., KEEP_XY=.FALSE.
-     Character(60) :: ID_NAME='null'
+     Character(60) :: ID='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
      Character(26) :: VENT_FFIELD='null'
@@ -180,11 +180,20 @@ Module EVAC
      Integer :: MAX_HUMANS_INSIDE=0, n_inside=0
      Logical :: CHECK_FLOW=.FALSE.
      Integer, Dimension(3) :: RGB=-1
-     Character(60) :: ID_NAME='null'
+     Character(60) :: ID='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
      Type (CORR_LL_Type), Pointer :: First
   End Type EVAC_CORR_Type
+  ! 
+  ! STRS is a construct to build a staircase. STRS consists of stairs and
+  ! landings. 
+  Type EVAC_STRS_Type
+      Real(EB) :: XB(6)
+      Integer :: ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0
+      Integer :: HAND
+      Character(60) :: ID, TO_NODE
+   End Type EVAC_STRS_Type
   !
   ! This produces more humans on the floor specified by the
   ! coordinates. the person type ('soccer_fan' etc) are also
@@ -195,7 +204,7 @@ Module EVAC
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB
      Integer :: IOR=0, ICOUNT=0, IPC=0, IMESH=0, INODE=0, &
           TO_INODE=0, N_Initial=0
-     Character(60) :: CLASS_NAME='null', ID_NAME='null'
+     Character(60) :: CLASS_NAME='null', ID='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
      Logical :: After_Tpre=.FALSE., No_Persons=.FALSE.
@@ -210,7 +219,7 @@ Module EVAC
   ! defined here for these persons.
   Type EVAC_NODE_Type
      Integer :: Node_Index=0, Mesh_Index=0
-     Character(60) :: ID_NAME='null', Node_Type='null'
+     Character(60) :: ID='null', Node_Type='null'
      Character(30) :: GRID_NAME='null'
   End Type EVAC_NODE_Type
   !
@@ -234,60 +243,51 @@ Module EVAC
   Type (EVAC_DOOR_Type),  Pointer :: PDX, PDX2
   Type (EVAC_ENTR_Type),  Pointer :: PNX, PNX2
   Type (EVAC_CORR_Type),  Pointer :: PCX, PCX2
+  Type (EVAC_STRS_Type),  Pointer :: STRP
   Type (EVAC_NODE_Type),  Pointer :: NODE
   Type (EVAC_HOLE_Type),  Pointer :: EHX
   Type (EVAC_SSTAND_Type),Pointer :: ESS
 
   !
   ! Next holds door information for groups
-  Type (KNOWN_DOOR_TYPE), Dimension(:), Allocatable, Target :: &
-       Group_Known_Doors
+  Type (KNOWN_DOOR_TYPE), Dimension(:), Allocatable, Target :: Group_Known_Doors
   ! Next holds door information for lonely humans (group_id=0)
-  Type (KNOWN_DOOR_TYPE), Dimension(:), Allocatable, Target :: &
-       Human_Known_Doors
+  Type (KNOWN_DOOR_TYPE), Dimension(:), Allocatable, Target :: Human_Known_Doors
   Integer :: ilh, ilh_dim
   
   ! Holds the list of the different human groups, i33 is a running index 
   ! for the groups, i33_dim is last index, i.e., the dimension of the array.
-  Type (GROUP_TYPE), Dimension(:), Allocatable, Target :: &
-       Group_List
+  Type (GROUP_TYPE), Dimension(:), Allocatable, Target :: Group_List
   Integer :: i33, i33_dim
 
   ! Holds the information of the nodes
-  Type (EVAC_NODE_Type), Dimension(:), Allocatable, Target ::  &
-       Evac_Node_List
+  Type (EVAC_NODE_Type), Dimension(:), Allocatable, Target ::  Evac_Node_List
 
   ! Holds the information of the EVAC-lines.
-  Type (EVACUATION_Type), Dimension(:), Allocatable, Target ::  &
-       EVACUATION
+  Type (EVACUATION_Type), Dimension(:), Allocatable, Target :: EVACUATION
 
   ! Holds the information of the EVHO-lines.
-  Type (EVAC_HOLE_Type), Dimension(:), Allocatable, Target ::  &
-       EVAC_HOLES
+  Type (EVAC_HOLE_Type), Dimension(:), Allocatable, Target ::  EVAC_HOLES
 
   ! Holds the information of the EVSS-lines.
-  Type (EVAC_SSTAND_TYPE), Dimension(:), Allocatable, Target :: &
-       EVAC_SSTANDS
+  Type (EVAC_SSTAND_TYPE), Dimension(:), Allocatable, Target :: EVAC_SSTANDS
 
   ! Holds the information of the EXIT-lines.
-  Type (EVAC_EXIT_Type), Dimension(:), Allocatable, Target ::  &
-       EVAC_EXITS
+  Type (EVAC_EXIT_Type), Dimension(:), Allocatable, Target ::  EVAC_EXITS
 
   ! Holds the information of the DOOR-lines.
-  Type (EVAC_DOOR_Type), Dimension(:), Allocatable, Target ::  &
-       EVAC_DOORS
+  Type (EVAC_DOOR_Type), Dimension(:), Allocatable, Target ::  EVAC_DOORS
 
   ! Holds the information of the ENTR-lines.
-  Type (EVAC_ENTR_Type), Dimension(:), Allocatable, Target ::  &
-       EVAC_ENTRYS
+  Type (EVAC_ENTR_Type), Dimension(:), Allocatable, Target ::  EVAC_ENTRYS
 
   ! Holds the information of the CORR-lines.
-  Type (EVAC_CORR_Type), Dimension(:), Allocatable, Target ::  &
-       EVAC_CORRS
+  Type (EVAC_CORR_Type), Dimension(:), Allocatable, Target ::  EVAC_CORRS
 
+  ! Holds the information on the STRS-lines.
+  Type (EVAC_STRS_Type), Dimension(:), Allocatable, Target :: EVAC_STRS
   ! Holds the information of the PERS-lines.
-  Type (EVAC_PERS_Type), Dimension(:), Allocatable, Target ::  &
-       EVAC_PERSON_CLASSES
+  Type (EVAC_PERS_Type), Dimension(:), Allocatable, Target ::  EVAC_PERSON_CLASSES
   !
   ! Next are needed for the Gaussian random numbers
   Integer GaussFlag
@@ -296,7 +296,7 @@ Module EVAC
   Real(EB) GTrunSet1, GTrunSet2
   !
   Integer :: NPC_EVAC, NPC_PERS, N_EXITS, N_DOORS, N_ENTRYS, &
-       N_CORRS, N_EGRIDS, N_NODES, N_HOLES, N_SSTANDS
+       N_CORRS, N_EGRIDS, N_NODES, N_HOLES, N_SSTANDS, N_STRS
   Integer :: NPPS
   Integer :: ILABEL_last
   Character(100) :: MESSAGE
@@ -358,6 +358,7 @@ Contains
          EXIT_SIGN, KEEP_XY, USE_V0
     Logical :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA,&
          OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE
+    Logical :: RIGHT_HANDED
     Integer, Dimension(3) :: RGB, AVATAR_RGB
     Character(26) :: VENT_FFIELD, MESH_ID, EVAC_MESH
     Real(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED
@@ -391,6 +392,7 @@ Contains
          MAX_FLOW, TO_NODE, FYI, WIDTH, WIDTH1, WIDTH2, &
          EFF_WIDTH, EFF_LENGTH, MAX_HUMANS_INSIDE, FAC_SPEED, &
          XB1, XB2, RGB, COLOR
+    Namelist /STRS/ ID, XB, TO_NODE, RIGHT_HANDED
     Namelist /EVAC/ NUMBER_INITIAL_PERSONS, QUANTITY, FYI, &
          ID, DTSAM, XB, FLOW_FIELD_ID, PERS_ID, &
          TIME_START, TIME_STOP, IOR, MAX_FLOW, WIDTH, ANGLE, &
@@ -590,6 +592,19 @@ Contains
 234    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EVSS line')
     End Do COUNT_EVSS_LOOP
 233 Rewind(LU_INPUT)
+    !
+    ! Determine total number of STRS lines in the input file
+    !
+    N_STRS = 0
+    COUNT_STRS_LOOP: Do
+       Call CHECKREAD('STRS',LU_INPUT,IOS) 
+       If (IOS == 1) Exit COUNT_STRS_LOOP
+       Read(LU_INPUT,NML=STRS,End=235,ERR=236,IOSTAT=IOS)
+       N_STRS = N_STRS + 1
+       write(*,*) N_STRS
+236    If (IOS > 0) Call SHUTDOWN('ERROR: Problem with STRS line')
+    End Do COUNT_STRS_LOOP
+235 Rewind(LU_INPUT)
 
     Select Case (COLOR_METHOD)
     Case (-1)
@@ -665,6 +680,11 @@ Contains
           Call ChkMemErr('READ','EVAC_CORRS',IZERO) 
        End If
 
+       If (N_STRS > 0 ) Then
+          Allocate(EVAC_STRS(N_STRS),STAT=IZERO)
+          Call ChkMemErr('READ','EVAC_STRS',IZERO)
+       End If
+      
        Allocate(EVAC_PERSON_CLASSES(0:NPC_PERS),STAT=IZERO)
        Call ChkMemErr('READ','EVAC_PERSON_CLASSES',IZERO) 
 
@@ -675,7 +695,7 @@ Contains
           End If
        End  Do
 
-       n_nodes = n_entrys + n_exits + n_doors + n_corrs + n_egrids
+       n_nodes = n_entrys + n_exits + n_doors + n_corrs + n_egrids + n_strs
        If (n_nodes > 0 ) Then
           Allocate(EVAC_Node_List(1:n_nodes),STAT=IZERO)
           Call ChkMemErr('READ','EVAC_NODE_LIST',IZERO) 
@@ -686,20 +706,20 @@ Contains
           EVACUATION(1:NPC_EVAC)%GRID_NAME   = 'null'
           EVACUATION(1:NPC_EVAC)%CLASS_NAME  = 'null'
           EVACUATION(1:NPC_EVAC)%IMESH       = 0
-          EVACUATION(1:NPC_EVAC)%ID_NAME     = 'null'
+          EVACUATION(1:NPC_EVAC)%ID          = 'null'
        End If
        If (n_holes > 0 ) Then
           EVAC_HOLES(1:N_HOLES)%GRID_NAME   = 'null'
           EVAC_HOLES(1:N_HOLES)%PERS_ID     = 'null'
           EVAC_HOLES(1:N_HOLES)%EVAC_ID     = 'null'
           EVAC_HOLES(1:N_HOLES)%IMESH       = 0
-          EVAC_HOLES(1:N_HOLES)%ID_NAME     = 'null'
+          EVAC_HOLES(1:N_HOLES)%ID          = 'null'
        End If
 
-       EVAC_PERSON_CLASSES(0:NPC_PERS)%ID_NAME = 'null'
+       EVAC_PERSON_CLASSES(0:NPC_PERS)%ID = 'null'
 
        If (n_exits > 0 ) Then
-          EVAC_EXITS(1:N_EXITS)%ID_NAME   = 'null'
+          EVAC_EXITS(1:N_EXITS)%ID        = 'null'
           EVAC_EXITS(1:N_EXITS)%TO_NODE   = 'null'
           EVAC_EXITS(1:N_EXITS)%GRID_NAME = 'null'
           EVAC_EXITS(1:N_EXITS)%IMESH     = 0
@@ -707,7 +727,7 @@ Contains
        End If
 
        If (n_doors > 0 ) Then
-          EVAC_DOORS(1:N_DOORS)%ID_NAME   = 'null'
+          EVAC_DOORS(1:N_DOORS)%ID        = 'null'
           EVAC_DOORS(1:N_DOORS)%TO_NODE   = 'null'
           EVAC_DOORS(1:N_DOORS)%GRID_NAME = 'null'
           EVAC_DOORS(1:N_DOORS)%IMESH     = 0
@@ -716,7 +736,7 @@ Contains
        End If
 
        If (n_corrs > 0 ) Then
-          EVAC_CORRS(1:N_CORRS)%ID_NAME   = 'null'
+          EVAC_CORRS(1:N_CORRS)%ID        = 'null'
           EVAC_CORRS(1:N_CORRS)%TO_NODE   = 'null'
           EVAC_CORRS(1:N_CORRS)%GRID_NAME = 'null'
           EVAC_CORRS(1:N_CORRS)%IMESH     = 0
@@ -724,7 +744,7 @@ Contains
        End If
 
        If (n_entrys > 0 ) Then
-          EVAC_ENTRYS(1:N_ENTRYS)%ID_NAME     = 'null'
+          EVAC_ENTRYS(1:N_ENTRYS)%ID          = 'null'
           EVAC_ENTRYS(1:N_ENTRYS)%TO_NODE     = 'null'
           EVAC_ENTRYS(1:N_ENTRYS)%GRID_NAME   = 'null'
           EVAC_ENTRYS(1:N_ENTRYS)%CLASS_NAME  = 'null'
@@ -993,7 +1013,7 @@ Contains
        PCP%RGB = RGB
        PCP%AVATAR_RGB = AVATAR_RGB
        If (COLOR_METHOD_TMP == 3) PCP%Avatar_Color_Index = i_avatar_color
-       PCP%ID_NAME = ID
+       PCP%ID = ID
        !
        PCP%D_mean = DIA_MEAN
        PCP%I_DIA_DIST  = DIAMETER_DIST
@@ -1249,7 +1269,7 @@ Contains
        PEX%Z1 = XB(5)
        PEX%Z2 = XB(6)
        PEX%IOR = IOR
-       PEX%ID_NAME    = Trim(ID)
+       PEX%ID    = Trim(ID)
        PEX%GRID_NAME  = Trim(FLOW_FIELD_ID)
        PEX%CHECK_FLOW = CHECK_FLOW
        PEX%VENT_FFIELD= VENT_FFIELD
@@ -1336,13 +1356,13 @@ Contains
        End Do PEX_MeshLoop
        If (PEX%IMESH == 0) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EXIT line ',Trim(PEX%ID_NAME), &
+               'ERROR: EXIT line ',Trim(PEX%ID), &
                ' problem with IMESH, no mesh found'
           Call SHUTDOWN(MESSAGE)
        End If
        If (ii > 1) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EXIT line ',Trim(PEX%ID_NAME), &
+               'ERROR: EXIT line ',Trim(PEX%ID), &
                ' not an unique mesh found '
           Call SHUTDOWN(MESSAGE)
        End If
@@ -1381,7 +1401,7 @@ Contains
        End Do PEX_Mesh3Loop
        If (ii == 0) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EXIT line ',Trim(PEX%ID_NAME), &
+               'ERROR: EXIT line ',Trim(PEX%ID), &
                ' problem with XYZ, no mesh found'
           Call SHUTDOWN(MESSAGE)
        End If
@@ -1504,7 +1524,7 @@ Contains
        PDX%Z1 = XB(5)
        PDX%Z2 = XB(6)
        PDX%IOR        = IOR
-       PDX%ID_NAME    = ID
+       PDX%ID    = ID
        PDX%GRID_NAME  = FLOW_FIELD_ID
        PDX%VENT_FFIELD= VENT_FFIELD
        PDX%CHECK_FLOW = CHECK_FLOW
@@ -1593,13 +1613,13 @@ Contains
        End Do PDX_MeshLoop
        If (PDX%IMESH == 0) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: DOOR line ',Trim(PDX%ID_NAME), &
+               'ERROR: DOOR line ',Trim(PDX%ID), &
                ' problem with IMESH, no mesh found'
           Call SHUTDOWN(MESSAGE)
        End If
        If (ii > 1) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: DOOR line ',Trim(PDX%ID_NAME), &
+               'ERROR: DOOR line ',Trim(PDX%ID), &
                ' not an unique mesh found '
           Call SHUTDOWN(MESSAGE)
        End If
@@ -1637,7 +1657,7 @@ Contains
        End Do PDX_Mesh3Loop
        If (ii == 0) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: DOOR line ',Trim(PDX%ID_NAME), &
+               'ERROR: DOOR line ',Trim(PDX%ID), &
                ' problem with XYZ, no mesh found'
           Call SHUTDOWN(MESSAGE)
        End If
@@ -1775,7 +1795,7 @@ Contains
        End If
 
        PCX%IOR        = IOR
-       PCX%ID_NAME    = ID
+       PCX%ID    = ID
        PCX%GRID_NAME  = FLOW_FIELD_ID
        PCX%CHECK_FLOW = CHECK_FLOW
        PCX%TO_NODE    = TO_NODE
@@ -1916,7 +1936,38 @@ Contains
     End Do READ_CORR_LOOP
 29  Rewind(LU_INPUT)
 
-    ! Now exits, doors, and corrs are already read in
+   !
+   ! Read the STRS line
+    READ_STRS_LOOP: Do N = 1,N_STRS
+       STRP=>EVAC_STRS(N)
+       !
+       ID           = 'null'
+       XB           = 0._EB
+       RIGHT_HANDED = .TRUE.
+       !
+       Call CHECKREAD('STRS',LU_INPUT,IOS)
+       If (IOS == 1) Exit READ_STRS_LOOP
+       Read(LU_INPUT,STRS,End=32,IOSTAT=IOS)
+       !
+       Do I=1,5,2
+          If (XB(I) > XB(I+1)) Then
+             DUMMY   = XB(I)
+             XB(I)   = XB(I+1)
+             XB(I+1) = DUMMY
+          End If
+       End Do
+       !
+       STRP%ID       = ID
+       STRP%XB       = XB
+       STRP%INODE    = 0
+       STRP%TO_NODE  = TO_NODE
+       STRP%HAND     = -1
+       IF (RIGHT_HANDED) STRP%HAND = +1
+
+    End Do READ_STRS_LOOP
+32  Rewind(LU_INPUT)
+
+    ! Now exits, doors, corrs  and strs are already read in
     If (n_nodes > 0 .And. MYID==Max(0,EVAC_PROCESS)) Then
        n_tmp = 0
        Do n = 1, nmeshes
@@ -1924,7 +1975,7 @@ Contains
              n_tmp = n_tmp + 1
              EVAC_Node_List(n_tmp)%Node_Index = n_tmp
              EVAC_Node_List(n_tmp)%Node_Type  = 'Floor'
-             EVAC_Node_List(n_tmp)%ID_NAME    = MESH_NAME(n)
+             EVAC_Node_List(n_tmp)%ID    = MESH_NAME(n)
              EVAC_Node_List(n_tmp)%GRID_NAME  = MESH_NAME(n)
              EVAC_Node_List(n_tmp)%Mesh_index = n
           End If
@@ -1940,7 +1991,7 @@ Contains
           evac_doors(n)%INODE              = n_tmp 
           EVAC_Node_List(n_tmp)%Node_Index = n
           EVAC_Node_List(n_tmp)%Node_Type  = 'Door'
-          EVAC_Node_List(n_tmp)%ID_NAME    = EVAC_DOORS(n)%ID_NAME
+          EVAC_Node_List(n_tmp)%ID         = EVAC_DOORS(n)%ID
           EVAC_Node_List(n_tmp)%Mesh_Index = EVAC_DOORS(n)%IMESH
        End Do
        Do n = 1, n_exits
@@ -1948,7 +1999,7 @@ Contains
           evac_exits(n)%INODE              = n_tmp 
           EVAC_Node_List(n_tmp)%Node_Index = n
           EVAC_Node_List(n_tmp)%Node_Type  = 'Exit'
-          EVAC_Node_List(n_tmp)%ID_NAME    = EVAC_EXITS(n)%ID_NAME
+          EVAC_Node_List(n_tmp)%ID         = EVAC_EXITS(n)%ID
           EVAC_Node_List(n_tmp)%Mesh_Index = EVAC_EXITS(n)%IMESH
        End Do
        Do n = 1, n_corrs
@@ -1956,7 +2007,15 @@ Contains
           evac_corrs(n)%INODE              = n_tmp 
           EVAC_Node_List(n_tmp)%Node_Index = n
           EVAC_Node_List(n_tmp)%Node_Type  = 'Corr'
-          EVAC_Node_List(n_tmp)%ID_NAME    = EVAC_CORRS(n)%ID_NAME
+          EVAC_Node_List(n_tmp)%ID    = EVAC_CORRS(n)%ID
+       End Do
+       Do n = 1, n_strs
+          write(*,*) n,EVAC_STRS(n)%ID
+          n_tmp = n_tmp + 1
+          EVAC_STRS(n)%INODE               = n_tmp
+          EVAC_Node_List(n_tmp)%Node_Index = n
+          EVAC_Node_List(n_tmp)%Node_Type  = 'Strs'
+          EVAC_Node_List(n_tmp)%ID         = EVAC_STRS(n)%ID
        End Do
     End If
 
@@ -2063,13 +2122,13 @@ Contains
        PNX%Z2 = XB(6)
        PNX%IOR = IOR
        ! 
-       PNX%ID_NAME    = ID
+       PNX%ID    = ID
        PNX%CLASS_NAME = PERS_ID
 
        PNX%IPC = 0
        Do ipc= 1, npc_pers
           pcp => evac_person_classes(ipc)
-          If ( pcp%id_name == PERS_ID ) PNX%IPC = IPC
+          If ( pcp%ID == PERS_ID ) PNX%IPC = IPC
        End Do
        PNX%TO_NODE    = TO_NODE
        PNX%T_first    = T_BEGIN
@@ -2131,13 +2190,13 @@ Contains
        End Do PNX_MeshLoop
        If (PNX%IMESH == 0) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: ENTR line ',Trim(PNX%ID_NAME), &
+               'ERROR: ENTR line ',Trim(PNX%ID), &
                ' problem with IMESH, no mesh found'
           Call SHUTDOWN(MESSAGE)
        End If
        If (ii > 1) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: ENTR line ',Trim(PNX%ID_NAME), &
+               'ERROR: ENTR line ',Trim(PNX%ID), &
                ' not an unique mesh found '
           Call SHUTDOWN(MESSAGE)
        End If
@@ -2154,14 +2213,14 @@ Contains
           PNX%I_VENT_FFIELDS(i) = 0
           PNX%I_DOOR_NODES(i) = 0
           Do j = 1, n_exits
-             If ( Trim(EVAC_EXITS(j)%ID_NAME) == &
+             If ( Trim(EVAC_EXITS(j)%ID) == &
                   Trim(KNOWN_DOOR_NAMES(i)) ) Then
                 PNX%I_VENT_FFIELDS(i) = EVAC_EXITS(j)%I_VENT_FFIELD
                 PNX%I_DOOR_NODES(i)   = EVAC_EXITS(j)%INODE
              End If
           End Do
           Do j = 1, n_doors
-             If ( Trim(EVAC_DOORS(j)%ID_NAME) == &
+             If ( Trim(EVAC_DOORS(j)%ID) == &
                   Trim(KNOWN_DOOR_NAMES(i)) ) Then
                 PNX%I_VENT_FFIELDS(i) = EVAC_DOORS(j)%I_VENT_FFIELD
                 PNX%I_DOOR_NODES(i)   = EVAC_DOORS(j)%INODE
@@ -2169,7 +2228,7 @@ Contains
           End Do
           If ( PNX%I_VENT_FFIELDS(i)*PNX%I_DOOR_NODES(i) == 0 ) Then
              Write(MESSAGE,'(A,A,A,A,A)') &
-                  'ERROR: ENTR line ',Trim(PNX%ID_NAME), &
+                  'ERROR: ENTR line ',Trim(PNX%ID), &
                   ' problem with door/exit names, ', &
                   Trim(KNOWN_DOOR_NAMES(i)),' not found'
              Call SHUTDOWN(MESSAGE)
@@ -2190,7 +2249,7 @@ Contains
        End Do PNX_Mesh2Loop
        If ( PNX%I_VENT_FFIELDS(0) == 0 ) Then
           Write(MESSAGE,'(A,A,A,A,A)') &
-               'ERROR: ENTR line ',Trim(PNX%ID_NAME), &
+               'ERROR: ENTR line ',Trim(PNX%ID), &
                ' problem with flow field name, ', &
                Trim(PNX%GRID_NAME),' not found'
           Call SHUTDOWN(MESSAGE)
@@ -2203,7 +2262,7 @@ Contains
        n_tmp = n_egrids
        Do n = 1, n_entrys
           n_tmp = n_tmp + 1
-          EVAC_Node_List(n_tmp)%ID_NAME    = EVAC_ENTRYS(n)%ID_NAME
+          EVAC_Node_List(n_tmp)%ID    = EVAC_ENTRYS(n)%ID
           EVAC_Node_List(n_tmp)%Mesh_Index = EVAC_ENTRYS(n)%IMESH
        End Do
     End If
@@ -2211,13 +2270,13 @@ Contains
     If (n_nodes > 0 .And. MYID==Max(0,EVAC_PROCESS)) Then
        Do n = 1, n_nodes - 1
           Do i = n + 1, n_nodes
-             If (Trim(EVAC_Node_List(n)%ID_NAME) == Trim(EVAC_Node_List(i)%ID_NAME)) Then
+             If (Trim(EVAC_Node_List(n)%ID) == Trim(EVAC_Node_List(i)%ID)) Then
 
                 Write(MESSAGE,'(8A)') &
                      'ERROR: ', Trim(EVAC_Node_List(n)%Node_Type), ': ', &
-                     Trim(EVAC_Node_List(n)%ID_NAME), ' has same ID as ', &
+                     Trim(EVAC_Node_List(n)%ID), ' has same ID as ', &
                      Trim(EVAC_Node_List(i)%Node_Type), ': ', &
-                     Trim(EVAC_Node_List(i)%ID_NAME)
+                     Trim(EVAC_Node_List(i)%ID)
                 Call SHUTDOWN(MESSAGE)
              End If
           End Do
@@ -2296,7 +2355,7 @@ Contains
        Else
           ii = 1
           Do i = 1,NPC_PERS
-             If (Trim(EVAC_PERSON_CLASSES(i)%ID_NAME) == Trim(PERS_ID)) Cycle
+             If (Trim(EVAC_PERSON_CLASSES(i)%ID) == Trim(PERS_ID)) Cycle
              ii = ii + 1
           End Do
           If (ii > NPC_PERS) Then
@@ -2357,7 +2416,7 @@ Contains
        HPT%IPC = 0
        Do ipc= 1, npc_pers
           pcp => evac_person_classes(ipc)
-          If ( Trim(pcp%id_name) == Trim(PERS_ID) ) HPT%IPC = IPC
+          If ( Trim(pcp%ID) == Trim(PERS_ID) ) HPT%IPC = IPC
        End Do
        ! 
        HPT%SAMPLING = SAMPLING_FACTOR
@@ -2381,7 +2440,7 @@ Contains
        HPT%N_INITIAL = NUMBER_INITIAL_PERSONS
        HPT%EVACFILE = EVACFILE
        HPT%IMESH = 0
-       HPT%ID_NAME = Trim(ID)
+       HPT%ID = Trim(ID)
 
        ! Check which evacuation floor
        ii = 0
@@ -2400,13 +2459,13 @@ Contains
        End Do HP_MeshLoop
        If (HPT%IMESH == 0) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EVAC line ',Trim(HPT%ID_NAME), &
+               'ERROR: EVAC line ',Trim(HPT%ID), &
                ' problem with IMESH, no mesh found'
           Call SHUTDOWN(MESSAGE)
        End If
        If (ii > 1) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EVAC line ',Trim(HPT%ID_NAME), &
+               'ERROR: EVAC line ',Trim(HPT%ID), &
                ' not an unique mesh found '
           Call SHUTDOWN(MESSAGE)
        End If
@@ -2423,14 +2482,14 @@ Contains
           HPT%I_VENT_FFIELDS(i) = 0
           HPT%I_DOOR_NODES(i) = 0
           Do j = 1, n_exits
-             If ( Trim(EVAC_EXITS(j)%ID_NAME) == &
+             If ( Trim(EVAC_EXITS(j)%ID) == &
                   Trim(KNOWN_DOOR_NAMES(i)) ) Then
                 HPT%I_VENT_FFIELDS(i) = EVAC_EXITS(j)%I_VENT_FFIELD
                 HPT%I_DOOR_NODES(i)   = EVAC_EXITS(j)%INODE
              End If
           End Do
           Do j = 1, n_doors
-             If ( Trim(EVAC_DOORS(j)%ID_NAME) == &
+             If ( Trim(EVAC_DOORS(j)%ID) == &
                   Trim(KNOWN_DOOR_NAMES(i)) ) Then
                 HPT%I_VENT_FFIELDS(i) = EVAC_DOORS(j)%I_VENT_FFIELD
                 HPT%I_DOOR_NODES(i)   = EVAC_DOORS(j)%INODE
@@ -2438,7 +2497,7 @@ Contains
           End Do
           If ( HPT%I_VENT_FFIELDS(i)*HPT%I_DOOR_NODES(i) == 0 ) Then
              Write(MESSAGE,'(A,A,A,A,A)') &
-                  'ERROR: EVAC line ',Trim(HPT%ID_NAME), &
+                  'ERROR: EVAC line ',Trim(HPT%ID), &
                   ' problem with door/exit names, ', &
                   Trim(KNOWN_DOOR_NAMES(i)),' not found'
              Call SHUTDOWN(MESSAGE)
@@ -2459,7 +2518,7 @@ Contains
        End Do HP_Mesh2Loop
        If ( HPT%I_VENT_FFIELDS(0) == 0 ) Then
           Write(MESSAGE,'(A,A,A,A,A)') &
-               'ERROR: EVAC line ',Trim(HPT%ID_NAME), &
+               'ERROR: EVAC line ',Trim(HPT%ID), &
                ' problem with flow field name, ', &
                Trim(HPT%GRID_NAME),' not found'
           Call SHUTDOWN(MESSAGE)
@@ -2508,7 +2567,7 @@ Contains
        EHX%Y2 = XB(4)
        EHX%Z1 = XB(5)
        EHX%Z2 = XB(6)
-       EHX%ID_NAME   = ID
+       EHX%ID = ID
        EHX%EVAC_ID   = EVAC_ID
        EHX%PERS_ID   = PERS_ID
        ! 
@@ -2530,13 +2589,13 @@ Contains
        End Do EHX_MeshLoop
        If (EHX%IMESH == 0) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EVHO line ',Trim(EHX%ID_NAME), &
+               'ERROR: EVHO line ',Trim(EHX%ID), &
                ' problem with IMESH, no mesh found'
           Call SHUTDOWN(MESSAGE)
        End If
        If (ii > 1) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EVHO line ',Trim(EHX%ID_NAME), &
+               'ERROR: EVHO line ',Trim(EHX%ID), &
                ' not an unique mesh found '
           Call SHUTDOWN(MESSAGE)
        End If
@@ -2596,7 +2655,7 @@ Contains
        ESS%Y2 = XB(4)
        ESS%Z1 = XB(5)
        ESS%Z2 = XB(6)
-       ESS%ID_NAME     = ID
+       ESS%ID     = ID
        ESS%H           = HEIGHT
        ESS%H0          = HEIGHT0
        ESS%FAC_V0_HORI = FAC_V0_HORI
@@ -2634,13 +2693,13 @@ Contains
        End Do ESS_MeshLoop
        If (ESS%IMESH == 0) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EVSS line ',Trim(ESS%ID_NAME), &
+               'ERROR: EVSS line ',Trim(ESS%ID), &
                ' problem with IMESH, no mesh found'
           Call SHUTDOWN(MESSAGE)
        End If
        If (ii > 1) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: EVSS line ',Trim(ESS%ID_NAME), &
+               'ERROR: EVSS line ',Trim(ESS%ID), &
                ' not an unique mesh found '
           Call SHUTDOWN(MESSAGE)
        End If
@@ -2687,18 +2746,18 @@ Contains
     Allocate(EVAC_CLASS_RGB(3,N_EVAC),STAT=IZERO)
     Call ChkMemErr('READ_EVAC','EVAC_CLASS_RGB',IZERO)
     EVAC_CLASS_NAME(1) = 'Human'
+
+    ! Default color for agents
     Do N = 1, N_EVAC
        EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE 4
     End Do
-
-    ! Default color table for agents
 
     If (MYID /= Max(0,EVAC_PROCESS)) Return
     !
     ! Set the IMESH and IMESH2 for corridors
     Do n = 1, n_corrs
        Nodeloop2: Do i = 1, n_nodes
-          If (EVAC_Node_List(i)%ID_NAME == EVAC_CORRS(n)%TO_NODE) Then
+          If (EVAC_Node_List(i)%ID == EVAC_CORRS(n)%TO_NODE) Then
              EVAC_CORRS(n)%INODE2 = i
              If ( Trim(EVAC_Node_List(i)%Node_Type) == 'Exit' .Or. &
                   Trim(EVAC_Node_List(i)%Node_Type) == 'Door' .Or. &
@@ -2721,10 +2780,36 @@ Contains
           Call SHUTDOWN(MESSAGE)
        End If
     End Do
+
+    ! Set the IMESH and IMESH2 for staircases
+    Do n = 1, n_strs
+       Nodeloop3: Do i = 1, n_nodes
+          If (EVAC_Node_List(i)%ID == EVAC_STRS(n)%TO_NODE) Then
+             EVAC_STRS(n)%INODE2 = i
+             If ( Trim(EVAC_Node_List(i)%Node_Type) == 'Exit' .Or. &
+                  Trim(EVAC_Node_List(i)%Node_Type) == 'Door' .Or. &
+                  Trim(EVAC_Node_List(i)%Node_Type) == 'Entry' ) Then
+                EVAC_STRS(n)%IMESH  = EVAC_Node_List(i)%Mesh_Index
+                EVAC_STRS(n)%IMESH2 = EVAC_Node_List(i)%Mesh_Index
+             Else
+                EVAC_STRS(n)%IMESH  = 0
+                EVAC_STRS(n)%IMESH2 = n_egrids
+             End If
+             EVAC_Node_List(EVAC_STRS(n)%INODE)%Mesh_Index = EVAC_STRS(n)%IMESH2
+             Exit Nodeloop3
+          End If
+       End Do Nodeloop3
+       If (EVAC_STRS(n)%INODE2 == 0 .Or. &
+            EVAC_STRS(n)%IMESH2 == 0) Then
+          Write(MESSAGE,'(A,I4,A)') 'ERROR: STRS',n,' problem with TO_NODE'
+          Call SHUTDOWN(MESSAGE)
+       End If
+    End Do
+
     !
     Do n = 1, n_doors
        NodeLoop: Do i = 1, n_nodes
-          If (EVAC_Node_List(i)%ID_NAME == EVAC_DOORS(n)%TO_NODE) Then
+          If (EVAC_Node_List(i)%ID == EVAC_DOORS(n)%TO_NODE) Then
              EVAC_DOORS(n)%INODE2 = i
              EVAC_DOORS(n)%IMESH2 = EVAC_Node_List(i)%Mesh_Index
              Exit NodeLoop
@@ -3087,11 +3172,11 @@ Contains
                'Counter','Fed','Fed'
           Write (LU_EVACCSV,tcform) 's','All Nodes', &
                (Trim(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
-               (Trim(EVAC_CORRS(i)%ID_NAME), i=1,n_corrs), &
-               (Trim(EVAC_EXITS(i)%ID_NAME), i=1,n_exits), &
-               (Trim(EVAC_DOORS(i)%ID_NAME), i=1,n_doors), &
-               (Trim(EVAC_EXITS(i)%ID_NAME), i=1,n_exits), &
-               (Trim(EVAC_DOORS(i)%ID_NAME), i=1,n_doors), &
+               (Trim(EVAC_CORRS(i)%ID), i=1,n_corrs), &
+               (Trim(EVAC_EXITS(i)%ID), i=1,n_exits), &
+               (Trim(EVAC_DOORS(i)%ID), i=1,n_doors), &
+               (Trim(EVAC_EXITS(i)%ID), i=1,n_exits), &
+               (Trim(EVAC_DOORS(i)%ID), i=1,n_doors), &
                'Deads','FED_max','FED_max_alive'
        Else
           ! Do not write the 'fed' columns
@@ -3114,11 +3199,11 @@ Contains
                ('Target', i=1,n_doors)
           Write (LU_EVACCSV,tcform) 's','All Nodes', &
                (Trim(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
-               (Trim(EVAC_CORRS(i)%ID_NAME), i=1,n_corrs), &
-               (Trim(EVAC_EXITS(i)%ID_NAME), i=1,n_exits), &
-               (Trim(EVAC_DOORS(i)%ID_NAME), i=1,n_doors), &
-               (Trim(EVAC_EXITS(i)%ID_NAME), i=1,n_exits), &
-               (Trim(EVAC_DOORS(i)%ID_NAME), i=1,n_doors)
+               (Trim(EVAC_CORRS(i)%ID), i=1,n_corrs), &
+               (Trim(EVAC_EXITS(i)%ID), i=1,n_exits), &
+               (Trim(EVAC_DOORS(i)%ID), i=1,n_doors), &
+               (Trim(EVAC_EXITS(i)%ID), i=1,n_exits), &
+               (Trim(EVAC_DOORS(i)%ID), i=1,n_doors)
        End If
 
     End If                  ! append
@@ -3313,7 +3398,7 @@ Contains
        End Do HP_MeshLoop
        If (n_tmp > n_egrids) Then
           Write(MESSAGE,'(A,A,A)') &
-               'ERROR: INIT_EVAC ',Trim(HPT%ID_NAME), &
+               'ERROR: INIT_EVAC ',Trim(HPT%ID), &
                ' problem with IMESH, no mesh found'
           Call SHUTDOWN(MESSAGE)
        End If
@@ -3511,7 +3596,7 @@ Contains
                       EHX => EVAC_HOLES(ie)
 
                       If ( Trim(EHX%EVAC_ID) /= 'null' .And. &
-                           Trim(EHX%EVAC_ID) /= Trim(HPT%ID_NAME)) Then
+                           Trim(EHX%EVAC_ID) /= Trim(HPT%ID)) Then
                          Cycle EH_Loop
                       End If
                       If ( Trim(EHX%PERS_ID) /= 'null' .And. &
@@ -7773,7 +7858,7 @@ Contains
                Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
                     ' EVAC: Person n:o', &
                     HR%ILABEL, ' out at ', T, &
-                    ' s, exit ', Trim(PEX%ID_NAME), ' fed ', HR%IntDose
+                    ' s, exit ', Trim(PEX%ID), ' fed ', HR%IntDose
                If (HR%IOR == 2) HR%IOR = 0
             End If
          End Do HumLoop
@@ -7957,7 +8042,7 @@ Contains
                   Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
                        ' EVAC: Person n:o', &
                        HR%ILABEL, ' out at ', T, &
-                       ' s, door ', Trim(PDX%ID_NAME), ' fed ', HR%IntDose
+                       ' s, door ', Trim(PDX%ID), ' fed ', HR%IntDose
 
                Else    ! istat = 1 ==> do not move to node
                   ! Can not move to the next node, so do not allow to move inside
@@ -8111,21 +8196,21 @@ Contains
                      Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
                           ' EVAC: Person n:o', &
                           HR%ILABEL, ' out at ', T, &
-                          ' s, corr ', Trim(PCX%ID_NAME), ' fed ', HR%IntDose
+                          ' s, corr ', Trim(PCX%ID), ' fed ', HR%IntDose
                   End If            ! target is door or entry
 
                   If (ior_new == 3) Then ! corridor
                      Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,f8.4)') &
                           ' EVAC: Person n:o', &
                           HR%ILABEL, ' change corr ', T, &
-                          ' s, corr ', Trim(PCX%ID_NAME), HR%IntDose
+                          ' s, corr ', Trim(PCX%ID), HR%IntDose
                   End If
 
                   If (ior_new == 5) Then ! exit
                      Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,f8.4)') &
                           ' EVAC: Person n:o', &
                           HR%ILABEL, ' exits ', T, &
-                          ' s, corr ', Trim(PCX%ID_NAME), HR%IntDose
+                          ' s, corr ', Trim(PCX%ID), HR%IntDose
                   End If
                Else
                   ! Can not move to the next node, so do not allow to move inside
@@ -9148,7 +9233,7 @@ Contains
          End Do Mesh2Loop
          If ( HR%I_FFIELD == 0 ) Then
             Write(MESSAGE,'(A,A,A,A)') &
-                 'ERROR: ENTR line ',Trim(PNX%ID_NAME), &
+                 'ERROR: ENTR line ',Trim(PNX%ID), &
                  ' problem with flow field name, ', &
                  Trim(PNX%GRID_NAME),' not found'
             Call SHUTDOWN(MESSAGE)
@@ -9170,7 +9255,7 @@ Contains
          Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,3a)') &
               ' EVAC: Person n:o', &
               HR%ILABEL, ' inserted ', Tin, &
-              ' s, entry ', Trim(PNX%ID_NAME),' ffield ', &
+              ' s, entry ', Trim(PNX%ID),' ffield ', &
               Trim(HR%FFIELD_NAME)
       End If
       ! 
