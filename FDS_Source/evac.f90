@@ -261,33 +261,34 @@ Module EVAC
   Integer :: i33, i33_dim
 
   ! Holds the information of the nodes
-  Type (EVAC_NODE_Type), Dimension(:), Allocatable, Target ::  Evac_Node_List
+  Type (EVAC_NODE_Type), Dimension(:), Allocatable, Target :: Evac_Node_List
 
   ! Holds the information of the EVAC-lines.
   Type (EVACUATION_Type), Dimension(:), Allocatable, Target :: EVACUATION
 
   ! Holds the information of the EVHO-lines.
-  Type (EVAC_HOLE_Type), Dimension(:), Allocatable, Target ::  EVAC_HOLES
+  Type (EVAC_HOLE_Type), Dimension(:), Allocatable, Target :: EVAC_HOLES
 
   ! Holds the information of the EVSS-lines.
   Type (EVAC_SSTAND_TYPE), Dimension(:), Allocatable, Target :: EVAC_SSTANDS
 
   ! Holds the information of the EXIT-lines.
-  Type (EVAC_EXIT_Type), Dimension(:), Allocatable, Target ::  EVAC_EXITS
+  Type (EVAC_EXIT_Type), Dimension(:), Allocatable, Target :: EVAC_EXITS
 
   ! Holds the information of the DOOR-lines.
-  Type (EVAC_DOOR_Type), Dimension(:), Allocatable, Target ::  EVAC_DOORS
+  Type (EVAC_DOOR_Type), Dimension(:), Allocatable, Target :: EVAC_DOORS
 
   ! Holds the information of the ENTR-lines.
-  Type (EVAC_ENTR_Type), Dimension(:), Allocatable, Target ::  EVAC_ENTRYS
+  Type (EVAC_ENTR_Type), Dimension(:), Allocatable, Target :: EVAC_ENTRYS
 
   ! Holds the information of the CORR-lines.
-  Type (EVAC_CORR_Type), Dimension(:), Allocatable, Target ::  EVAC_CORRS
+  Type (EVAC_CORR_Type), Dimension(:), Allocatable, Target :: EVAC_CORRS
 
   ! Holds the information on the STRS-lines.
   Type (EVAC_STRS_Type), Dimension(:), Allocatable, Target :: EVAC_STRS
+
   ! Holds the information of the PERS-lines.
-  Type (EVAC_PERS_Type), Dimension(:), Allocatable, Target ::  EVAC_PERSON_CLASSES
+  Type (EVAC_PERS_Type), Dimension(:), Allocatable, Target :: EVAC_PERSON_CLASSES
   !
   ! Next are needed for the Gaussian random numbers
   Integer GaussFlag
@@ -313,7 +314,8 @@ Module EVAC
        RADIUS_COMPLETE_1, GROUP_EFF, FED_DOOR_CRIT, &
        TDET_SMOKE_DENS, DENS_INIT, EVAC_DT_MAX, GROUP_DENS, &
        FC_DAMPING, EVAC_DT_MIN, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
-       SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, TAU_CHANGE_DOOR
+       SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, TAU_CHANGE_DOOR, &
+       HUMAN_SMOKE_HEIGHT
   Integer, Dimension(3) :: DEAD_RGB
   !
   Real(EB), Dimension(:), Allocatable :: Tsteps
@@ -428,7 +430,7 @@ Contains
          COLOR_INDEX, DEAD_RGB, DEAD_COLOR, &
          SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, &
          TAU_CHANGE_DOOR, RGB, COLOR, &
-         AVATAR_COLOR, AVATAR_RGB
+         AVATAR_COLOR, AVATAR_RGB, HUMAN_SMOKE_HEIGHT
     !
     NPPS = 30000 ! Number Persons Per Set (dump to a file)
     !
@@ -448,6 +450,8 @@ Contains
        Else 
           Open (LU_EVACOUT,file=FN_EVACOUT,form='formatted', status='replace')
        End If
+       If (Abs(TIME_SHRINK_FACTOR-1.D0) > 0.000000000001_EB ) &
+            Call SHUTDOWN('ERROR: Evac is not ready for TIME_SHRINK_FACTOR')
     End If
 
 
@@ -684,7 +688,7 @@ Contains
           Allocate(EVAC_STRS(N_STRS),STAT=IZERO)
           Call ChkMemErr('READ','EVAC_STRS',IZERO)
        End If
-      
+
        Allocate(EVAC_PERSON_CLASSES(0:NPC_PERS),STAT=IZERO)
        Call ChkMemErr('READ','EVAC_PERSON_CLASSES',IZERO) 
 
@@ -791,6 +795,10 @@ Contains
     OUTPUT_CONTACT_FORCE = .FALSE.
     OUTPUT_TOTAL_FORCE   = .FALSE.
     DEAD_COLOR = 'null'
+    ! Z_smoke = XB_z - EVACUATION_Z_OFFSET(NM) + HUMAN_SMOKE_HEIGHT, i.e. position
+    ! of the nose/eyes above the floor.  The smoke and gas densities are
+    ! taken from this level (FED calculation and visible doors etc.)
+    HUMAN_SMOKE_HEIGHT   = 1.60_EB  ! above floor level
     ! 
     ! Read the PERS lines (no read for default n=0 case)
     !
@@ -821,7 +829,7 @@ Contains
        VEL_LOW = 0.0_EB
        DIA_LOW = 0.0_EB
        PRE_LOW = 0.0_EB
-       DET_LOW = 0.0_EB
+       DET_LOW = T_BEGIN
        TAU_LOW = 0.0_EB
        VEL_HIGH = 999.0_EB
        DIA_HIGH = 999.0_EB
@@ -832,7 +840,7 @@ Contains
        VEL_MEAN = 1.25_EB
        DIA_MEAN = 0.51_EB
        PRE_MEAN = 10.0_EB
-       DET_MEAN = 0.0_EB
+       DET_MEAN = T_BEGIN
        TAU_MEAN = 1.0_EB
        FCONST_A = 2000.0_EB
        FCONST_B = 0.08_EB
@@ -978,11 +986,17 @@ Contains
           Case ('null')
              ! Do nothing, use the defaults
           Case Default
-             Write(MESSAGE,'(A,I4,A)') &
-                  'ERROR: PERS',N,' problem with DEFAULT_PROPERTIES'
+             Write(MESSAGE,'(A,A,A)') &
+                  'ERROR: PERS ',Trim(ID),' problem with DEFAULT_PROPERTIES'
              Call SHUTDOWN(MESSAGE)
           End Select
 
+       End If
+
+       If (PRE_MEAN < 0._EB .Or. PRE_LOW < 0._EB) Then
+          Write(MESSAGE,'(A,A,A)') 'ERROR: PERS ',Trim(ID),&
+               ' PRE-evacuation time should positive.'
+          Call SHUTDOWN(MESSAGE)
        End If
 
        DIAMETER_DIST = Max(0,DIAMETER_DIST)
@@ -1224,6 +1238,8 @@ Contains
        Read(LU_INPUT,Exit,End=26,IOSTAT=IOS)
        !
        ! Old input used COLOR_INDEX, next lines are needed for that
+       If (MYID==Max(0,EVAC_PROCESS) .And. COLOR_INDEX.Ne.-1) Write (LU_EVACOUT,'(A,A)') &
+            ' WARNING: keyword COLOR_INDEX is replaced by COLOR at EXIT line ',Trim(ID)
        If (COLOR_INDEX == 1) COLOR = 'BLACK'  
        If (COLOR_INDEX == 2) COLOR = 'YELLOW' 
        If (COLOR_INDEX == 3) COLOR = 'BLUE'   
@@ -1269,7 +1285,7 @@ Contains
        PEX%Z1 = XB(5)
        PEX%Z2 = XB(6)
        PEX%IOR = IOR
-       PEX%ID    = Trim(ID)
+       PEX%ID  = Trim(ID)
        PEX%GRID_NAME  = Trim(FLOW_FIELD_ID)
        PEX%CHECK_FLOW = CHECK_FLOW
        PEX%VENT_FFIELD= VENT_FFIELD
@@ -1285,27 +1301,6 @@ Contains
        If (COUNT_ONLY) PEX%COUNT_ONLY = .True.
 
        !       PEX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX-1),7) + 1 ! 1-7 always
-
-       PEX%FED_MESH = 0
-       If (XYZ(1) < Huge(XYZ)) Then
-          PEX%X = XYZ(1)
-          PEX%Y = XYZ(2)
-          PEX%Z = XYZ(3)
-       Else
-          PEX%X = 0.5_EB*(XB(1)+XB(2))
-          PEX%Y = 0.5_EB*(XB(3)+XB(4))
-          PEX%Z = 0.5_EB*(XB(5)+XB(6))
-       End If
-
-       If (XYZ_SMOKE(1) < Huge(XYZ_SMOKE)) Then
-          PEX%Xsmoke = XYZ_SMOKE(1)
-          PEX%Ysmoke = XYZ_SMOKE(2)
-          PEX%Zsmoke = XYZ_SMOKE(3)
-       Else
-          PEX%Xsmoke = PEX%X
-          PEX%Ysmoke = PEX%Y
-          PEX%Zsmoke = PEX%Z
-       End If
 
        Select Case (IOR)
        Case (-1,+1)
@@ -1386,6 +1381,17 @@ Contains
           PEX%I_VENT_FFIELD = PEX%IMESH
           PEX%VENT_FFIELD = Trim(MESH_NAME(PEX%IMESH))
        End If
+
+       PEX%FED_MESH = 0
+       If (XYZ(1) < Huge(XYZ)) Then
+          PEX%X = XYZ(1)
+          PEX%Y = XYZ(2)
+          PEX%Z = 0.5_EB*(XB(5)+XB(6))
+       Else
+          PEX%X = 0.5_EB*(XB(1)+XB(2))
+          PEX%Y = 0.5_EB*(XB(3)+XB(4))
+          PEX%Z = 0.5_EB*(XB(5)+XB(6))
+       End If
        ! 
        ! Check which evacuation floor
        ! Now there may be overlapping meshes.
@@ -1404,6 +1410,16 @@ Contains
                'ERROR: EXIT line ',Trim(PEX%ID), &
                ' problem with XYZ, no mesh found'
           Call SHUTDOWN(MESSAGE)
+       End If
+
+       If (XYZ_SMOKE(1) < Huge(XYZ_SMOKE)) Then
+          PEX%Xsmoke = XYZ_SMOKE(1)
+          PEX%Ysmoke = XYZ_SMOKE(2)
+          PEX%Zsmoke = XYZ_SMOKE(3)
+       Else
+          PEX%Xsmoke = PEX%X
+          PEX%Ysmoke = PEX%Y
+          PEX%Zsmoke = 0.5_EB*(XB(5)+XB(6)) - EVACUATION_Z_OFFSET(PEX%IMESH) + HUMAN_SMOKE_HEIGHT
        End If
        ! 
        ! Check, which fire grid and i,j,k (xyz)
@@ -1479,6 +1495,8 @@ Contains
        Read(LU_INPUT,DOOR,End=27,IOSTAT=IOS)
        !
        ! Old input used COLOR_INDEX, next lines are needed for that
+       If (MYID==Max(0,EVAC_PROCESS) .And. COLOR_INDEX.Ne.-1) Write (LU_EVACOUT,'(A,A)') &
+            ' WARNING: keyword COLOR_INDEX is replaced by COLOR at DOOR line ',Trim(ID)
        If (COLOR_INDEX == 1) COLOR = 'BLACK'  
        If (COLOR_INDEX == 2) COLOR = 'YELLOW' 
        If (COLOR_INDEX == 3) COLOR = 'BLUE'   
@@ -1524,7 +1542,7 @@ Contains
        PDX%Z1 = XB(5)
        PDX%Z2 = XB(6)
        PDX%IOR        = IOR
-       PDX%ID    = ID
+       PDX%ID         = ID
        PDX%GRID_NAME  = FLOW_FIELD_ID
        PDX%VENT_FFIELD= VENT_FFIELD
        PDX%CHECK_FLOW = CHECK_FLOW
@@ -1542,27 +1560,6 @@ Contains
        If (CHECK_FLOW) PDX%Flow_max   = MAX_FLOW
 
        !       PDX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX-1),7) ! 1-7 always
-
-       PDX%FED_MESH = 0
-       If (XYZ(1) < Huge(XYZ)) Then
-          PDX%X = XYZ(1)
-          PDX%Y = XYZ(2)
-          PDX%Z = XYZ(3)
-       Else
-          PDX%X = 0.5_EB*(XB(1)+XB(2))
-          PDX%Y = 0.5_EB*(XB(3)+XB(4))
-          PDX%Z = 0.5_EB*(XB(5)+XB(6))
-       End If
-
-       If (XYZ_SMOKE(1) < Huge(XYZ_SMOKE)) Then
-          PDX%Xsmoke = XYZ_SMOKE(1)
-          PDX%Ysmoke = XYZ_SMOKE(2)
-          PDX%Zsmoke = XYZ_SMOKE(3)
-       Else
-          PDX%Xsmoke = PDX%X
-          PDX%Ysmoke = PDX%Y
-          PDX%Zsmoke = PDX%Z
-       End If
 
        Select Case (IOR)
        Case (-1,+1)
@@ -1644,6 +1641,17 @@ Contains
           PDX%VENT_FFIELD = Trim(MESH_NAME(PDX%IMESH))
        End If
 
+       PDX%FED_MESH = 0
+       If (XYZ(1) < Huge(XYZ)) Then
+          PDX%X = XYZ(1)
+          PDX%Y = XYZ(2)
+          PDX%Z = 0.5_EB*(XB(5)+XB(6))
+       Else
+          PDX%X = 0.5_EB*(XB(1)+XB(2))
+          PDX%Y = 0.5_EB*(XB(3)+XB(4))
+          PDX%Z = 0.5_EB*(XB(5)+XB(6))
+       End If
+
        ! Check which evacuation floor
        ii = 0
        PDX_Mesh3Loop: Do i = 1, nmeshes
@@ -1660,6 +1668,16 @@ Contains
                'ERROR: DOOR line ',Trim(PDX%ID), &
                ' problem with XYZ, no mesh found'
           Call SHUTDOWN(MESSAGE)
+       End If
+
+       If (XYZ_SMOKE(1) < Huge(XYZ_SMOKE)) Then
+          PDX%Xsmoke = XYZ_SMOKE(1)
+          PDX%Ysmoke = XYZ_SMOKE(2)
+          PDX%Zsmoke = XYZ_SMOKE(3)
+       Else
+          PDX%Xsmoke = PDX%X
+          PDX%Ysmoke = PDX%Y
+          PDX%Zsmoke = 0.5_EB*(XB(5)+XB(6)) - EVACUATION_Z_OFFSET(PDX%IMESH) + HUMAN_SMOKE_HEIGHT
        End If
        ! 
        ! Check, which fire grid and i,j,k (xyz)
@@ -1795,7 +1813,7 @@ Contains
        End If
 
        PCX%IOR        = IOR
-       PCX%ID    = ID
+       PCX%ID         = ID
        PCX%GRID_NAME  = FLOW_FIELD_ID
        PCX%CHECK_FLOW = CHECK_FLOW
        PCX%TO_NODE    = TO_NODE
@@ -1967,7 +1985,7 @@ Contains
     End Do READ_STRS_LOOP
 32  Rewind(LU_INPUT)
 
-    ! Now exits, doors, corrs  and strs are already read in
+    ! Now exits, doors, corrs and strs are already read in
     If (n_nodes > 0 .And. MYID==Max(0,EVAC_PROCESS)) Then
        n_tmp = 0
        Do n = 1, nmeshes
@@ -2007,10 +2025,10 @@ Contains
           evac_corrs(n)%INODE              = n_tmp 
           EVAC_Node_List(n_tmp)%Node_Index = n
           EVAC_Node_List(n_tmp)%Node_Type  = 'Corr'
-          EVAC_Node_List(n_tmp)%ID    = EVAC_CORRS(n)%ID
+          EVAC_Node_List(n_tmp)%ID         = EVAC_CORRS(n)%ID
        End Do
        Do n = 1, n_strs
-          write(*,*) n,EVAC_STRS(n)%ID
+          write(lu_evacout,*)'*** ', n,EVAC_STRS(n)%ID
           n_tmp = n_tmp + 1
           EVAC_STRS(n)%INODE               = n_tmp
           EVAC_Node_List(n_tmp)%Node_Index = n
@@ -2051,6 +2069,8 @@ Contains
        Read(LU_INPUT,ENTR,End=28,IOSTAT=IOS)
        ! 
        ! Old input used QUANTITY, next lines are needed for that
+       If (MYID==Max(0,EVAC_PROCESS) .And. QUANTITY .Ne. 'null') Write (LU_EVACOUT,'(A,A)') &
+            ' WARNING: keyword QUANTITY is replaced by AVATAR_COLOR at ENTR line ',Trim(ID)
        If (QUANTITY == 'BLACK')   AVATAR_COLOR = 'BLACK'  
        If (QUANTITY == 'YELLOW')  AVATAR_COLOR = 'YELLOW' 
        If (QUANTITY == 'BLUE')    AVATAR_COLOR = 'BLUE'   
@@ -2122,13 +2142,13 @@ Contains
        PNX%Z2 = XB(6)
        PNX%IOR = IOR
        ! 
-       PNX%ID    = ID
+       PNX%ID         = ID
        PNX%CLASS_NAME = PERS_ID
 
        PNX%IPC = 0
        Do ipc= 1, npc_pers
           pcp => evac_person_classes(ipc)
-          If ( pcp%ID == PERS_ID ) PNX%IPC = IPC
+          If ( pcp%id == PERS_ID ) PNX%IPC = IPC
        End Do
        PNX%TO_NODE    = TO_NODE
        PNX%T_first    = T_BEGIN
@@ -2209,7 +2229,16 @@ Contains
        End If
 
        Do i = 1, PNX%N_VENT_FFIELDS
-          PNX%P_VENT_FFIELDS(i) = KNOWN_DOOR_PROBS(i)
+          ! P = 0 or 1 for entrys.
+          If ( .Not.( Abs(KNOWN_DOOR_PROBS(i)-1.0_EB) < 0.0001_EB .Or. &
+               Abs(KNOWN_DOOR_PROBS(i)) < 0.0001_EB ) )  Then
+             Write(MESSAGE,'(A,A,A,f12.6,A)') &
+                  'ERROR: ENTR line ',Trim(PNX%ID), &
+                  ' problem with probability, ', &
+                  KNOWN_DOOR_PROBS(i),' it should be zero or one.'
+             Call SHUTDOWN(MESSAGE)
+          End If
+          PNX%P_VENT_FFIELDS(i) = Max(0.0_EB,KNOWN_DOOR_PROBS(i))
           PNX%I_VENT_FFIELDS(i) = 0
           PNX%I_DOOR_NODES(i) = 0
           Do j = 1, n_exits
@@ -2317,6 +2346,8 @@ Contains
        Read(LU_INPUT,EVAC,End=25,IOSTAT=IOS)
        ! 
        ! Old input used QUANTITY, next lines are needed for that
+       If (MYID==Max(0,EVAC_PROCESS) .And. QUANTITY .Ne. 'null') Write (LU_EVACOUT,'(A,A)') &
+            ' WARNING: keyword QUANTITY is replaced by AVATAR_COLOR at EVAC line ',Trim(ID)
        If (QUANTITY == 'BLACK')   AVATAR_COLOR = 'BLACK'  
        If (QUANTITY == 'YELLOW')  AVATAR_COLOR = 'YELLOW' 
        If (QUANTITY == 'BLUE')    AVATAR_COLOR = 'BLUE'   
@@ -2416,7 +2447,7 @@ Contains
        HPT%IPC = 0
        Do ipc= 1, npc_pers
           pcp => evac_person_classes(ipc)
-          If ( Trim(pcp%ID) == Trim(PERS_ID) ) HPT%IPC = IPC
+          If ( Trim(pcp%id) == Trim(PERS_ID) ) HPT%IPC = IPC
        End Do
        ! 
        HPT%SAMPLING = SAMPLING_FACTOR
@@ -2478,7 +2509,7 @@ Contains
        End If
        !
        Do i = 1, HPT%N_VENT_FFIELDS
-          HPT%P_VENT_FFIELDS(i) = KNOWN_DOOR_PROBS(i)
+          HPT%P_VENT_FFIELDS(i) = Max(0.0_EB,KNOWN_DOOR_PROBS(i))
           HPT%I_VENT_FFIELDS(i) = 0
           HPT%I_DOOR_NODES(i) = 0
           Do j = 1, n_exits
@@ -2567,7 +2598,7 @@ Contains
        EHX%Y2 = XB(4)
        EHX%Z1 = XB(5)
        EHX%Z2 = XB(6)
-       EHX%ID = ID
+       EHX%ID        = ID
        EHX%EVAC_ID   = EVAC_ID
        EHX%PERS_ID   = PERS_ID
        ! 
@@ -2655,7 +2686,7 @@ Contains
        ESS%Y2 = XB(4)
        ESS%Z1 = XB(5)
        ESS%Z2 = XB(6)
-       ESS%ID     = ID
+       ESS%ID          = ID
        ESS%H           = HEIGHT
        ESS%H0          = HEIGHT0
        ESS%FAC_V0_HORI = FAC_V0_HORI
@@ -2746,11 +2777,11 @@ Contains
     Allocate(EVAC_CLASS_RGB(3,N_EVAC),STAT=IZERO)
     Call ChkMemErr('READ_EVAC','EVAC_CLASS_RGB',IZERO)
     EVAC_CLASS_NAME(1) = 'Human'
-
-    ! Default color for agents
     Do N = 1, N_EVAC
        EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE 4
     End Do
+
+    ! Default color table for agents
 
     If (MYID /= Max(0,EVAC_PROCESS)) Return
     !
@@ -3264,7 +3295,7 @@ Contains
     Real(EB) RN, RN1, simoDX, simoDY, TNOW
     Real(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, &
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
-    Integer i,j,ii,jj,kk,ipc, izero, n_tmp, ie, nom
+    Integer i,j,k,ii,jj,kk,ipc, izero, n_tmp, ie, nom
     Integer i11, i22, group_size
     Logical pp_see_group, is_solid
     Integer iie, jje, iio, jjo, jjj, tim_ic, iii, i44
@@ -3299,14 +3330,35 @@ Contains
     !
     ! Initialise HUMAN_GRID
     !
-    Do i = 1,IBAR
-       FED_INNER_LOOP: Do j= 1,JBAR
+    FED_I_LOOP: Do i = 1,IBAR
+       FED_J_LOOP: Do j= 1,JBAR
           x1 = XS + (i-1)*DXI + 0.5_EB*DXI
           y1 = YS + (j-1)*DETA + 0.5_EB*DETA
-          z1 = 0.5_EB*(ZF+ZS)
+          ! Timo: z1 = 0.5_EB*(ZF+ZS)
+          z1 = 0.5_EB*(ZF+ZS) - EVACUATION_Z_OFFSET(NM) + HUMAN_SMOKE_HEIGHT
+          SS_Loop: Do k = 1, n_sstands
+             ! Timo: Here should be loop over EVSS, one should take the smoke
+             ! Timo: at the correct height.
+             ESS => EVAC_SSTANDS(j)
+             If (ESS%IMESH == nm .And. &
+                  (ESS%X1 <= x1 .And. ESS%X2 >= x1) .And. &
+                  (ESS%Y1 <= y1 .And. ESS%Y2 >= y1) ) Then
+                Select Case (ESS%IOR)
+                Case(-1)
+                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
+                Case(+1)
+                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
+                Case(-2)
+                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                Case(+2)
+                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                End Select
+              End If
+              Exit SS_Loop
+           End Do SS_Loop
           HUMAN_GRID(i,j)%X = x1
           HUMAN_GRID(i,j)%Y = y1
-          HUMAN_GRID(i,j)%Z = z1
+          HUMAN_GRID(i,j)%Z = 0.5_EB*(ZF+ZS)
           HUMAN_GRID(i,j)%SOOT_DENS     = 0.0_EB
           HUMAN_GRID(i,j)%FED_CO_CO2_O2 = 0.0_EB
           HUMAN_GRID(i,j)%TMP_G         = 0.0_EB
@@ -3317,7 +3369,7 @@ Contains
           HUMAN_GRID(i,j)%KK = 1
 
           ! If there are no fire grids, skip this intialization part
-          If (.Not. Btest(I_EVAC,4) ) Cycle FED_INNER_LOOP
+          If (.Not. Btest(I_EVAC,4) ) Cycle FED_J_LOOP
 
           If (.Not. SOLID(CELL_INDEX(i,j,1)) ) Then
              MESH_LOOP: Do NOM=1,NMESHES
@@ -3350,8 +3402,8 @@ Contains
              ! This grid cell is solid ==> No humans in this cell
              HUMAN_GRID(i,j)%IMESH = 0
           End If
-       End Do FED_INNER_LOOP
-    End Do
+       End Do FED_J_LOOP
+    End Do FED_I_LOOP
 
     EVAC_CLASS_LOOP: Do IPC=1,NPC_EVAC
        !
@@ -3521,7 +3573,7 @@ Contains
 
 
                 Is_Solid = .False.
-                KK = Floor( CELLSK(Floor((HR%Z-ZS)*RDZINT)) + 1.0_EB )
+                KK = 1
 
                 r_tmp(1) = HR%r_shoulder ! right circle
                 r_tmp(2) = HR%r_torso     ! center circle
@@ -3766,7 +3818,7 @@ Contains
                      RDXINT)) + 1.0_EB )
                 JJ = Floor( CELLSJ(Floor((group_Y_center-YS)* &
                      RDYINT)) + 1.0_EB )
-                KK = Floor( CELLSK(Floor((HR%Z-ZS)*RDZINT)) + 1.0_EB )
+                KK = 1
                 x1_old = group_X_center
                 y1_old = group_Y_center
 
@@ -3955,7 +4007,6 @@ Contains
             Max(1,Group_List(1:)%GROUP_SIZE)
        Group_List(1:)%Speed   = Group_List(1:)%Speed / &
             Max(1,Group_List(1:)%GROUP_SIZE)
-
        Do i = 1, M%N_HUMANS
           HR => M%HUMAN(I)
           ! group_id > 0: +group_id
@@ -4029,7 +4080,7 @@ Contains
                    max_fed = 0.0_EB
                    II = Floor(M%CELLSI(Floor((X11-M%XS)*M%RDXINT)) + 1.0_EB  )
                    JJ = Floor(M%CELLSJ(Floor((Y11-M%YS)*M%RDYINT)) + 1.0_EB  )
-                   KK = Floor(M%CELLSK(Floor(( 0.5_EB*(M%ZF+M%ZS)-M%ZS)*M%RDZINT)) + 1.0_EB  )
+                   KK = 1  ! Evac mesh has only one cell in the z-direction
                    XI  = M%CELLSI(Floor((x1_old-M%XS)*M%RDXINT))
                    YJ  = M%CELLSJ(Floor((y1_old-M%YS)*M%RDYINT))
                    IIE = Floor(XI+1.0_EB)
@@ -5079,7 +5130,7 @@ Contains
          X1,Y1,XI,YJ,ZK
     Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ, &
          IBC, ICX, ICY
-    Integer  IE, tim_ic, tim_iw, NM_now, j1, tim_iwx, tim_iwy
+    Integer  IE, tim_ic, tim_iw, nm_tim, NM_now, j1, tim_iwx, tim_iwy
     Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, &
          EVEL, tim_dist
     Integer istat
@@ -5472,7 +5523,7 @@ Contains
                          ave_K   = 0.0_EB
                          II = Floor(CELLSI(Floor((X11-XS)*RDXINT)) + 1.0_EB  )
                          JJ = Floor(CELLSJ(Floor((Y11-YS)*RDYINT)) + 1.0_EB  )
-                         KK = Floor(CELLSK(Floor(( 0.5_EB*(ZF+ZS)-ZS)*RDZINT)) + 1.0_EB  )
+                         KK = 1
                          XI  = CELLSI(Floor((x1_old-XS)*RDXINT))
                          YJ  = CELLSJ(Floor((y1_old-YS)*RDYINT))
                          IIE = Floor(XI+1.0_EB)
@@ -6011,9 +6062,9 @@ Contains
           XI = CELLSI(Floor((HR%X-XS)*RDXINT))
           YJ = CELLSJ(Floor((HR%Y-YS)*RDYINT))
           ZK = CELLSK(Floor((HR_Z-ZS)*RDZINT))
-          II  = Floor(XI+1.0_EB)
-          JJ  = Floor(YJ+1.0_EB)
-          KK  = Floor(ZK+1.0_EB)
+          II = Floor(XI+1.0_EB)
+          JJ = Floor(YJ+1.0_EB)
+          KK = 1
           IIX = Floor(XI+0.5_EB)
           JJY = Floor(YJ+0.5_EB)
           KKZ = Floor(ZK+0.5_EB)
@@ -6323,7 +6374,7 @@ Contains
           ZK  = CELLSK(Floor((HR_Z-ZS)*RDZINT))
           IIN = Floor(XI+1.0_EB)
           JJN = Floor(YJ+1.0_EB)
-          KKN = Floor(ZK+1.0_EB)
+          KKN = 1
           ICN = CELL_INDEX(IIN,JJN,KKN)
           ICX = CELL_INDEX(IIN,JJ ,KKN)
           ICY = CELL_INDEX(II ,JJN,KKN)
@@ -6590,10 +6641,10 @@ Contains
           ZK = CELLSK(Floor((HR_Z-ZS)*RDZINT))
           IIN  = Floor(XI+1.0_EB)
           JJN  = Floor(YJ+1.0_EB)
-          KKN  = Floor(ZK+1.0_EB)
+          KKN = 1
           IIX = Floor(XI+0.5_EB)
           JJY = Floor(YJ+0.5_EB)
-          KKZ = Floor(ZK+0.5_EB)
+          KKZ = 1
           ICN = CELL_INDEX(IIN,JJN,KKN)
           X1 = HR%X 
           Y1 = HR%Y 
@@ -8397,7 +8448,7 @@ Contains
             zz = 0.5_EB*(z1+z2)
             II = Floor( MFF%CELLSI(Floor((xx-MFF%XS)*MFF%RDXINT)) + 1.0_EB )
             JJ = Floor( MFF%CELLSJ(Floor((yy-MFF%YS)*MFF%RDYINT)) + 1.0_EB )
-            KK = Floor( MFF%CELLSK(Floor((zz-MFF%ZS)*MFF%RDZINT)) + 1.0_EB )
+            KK = 1
 
             irn = irn + 1
 
@@ -8607,8 +8658,7 @@ Contains
                           + 1.0_EB )
                      JJ = Floor( MFF%CELLSJ(Floor((YY1-MFF%YS)*MFF%RDYINT)) &
                           + 1.0_EB )
-                     KK = Floor( MFF%CELLSK(Floor(( 0.5_EB*(MFF%ZF+MFF%ZS)-MFF%ZS)*MFF%RDZINT)) &
-                          + 1.0_EB  )
+                     KK = 1
                      XI  = MFF%CELLSI(Floor((xx-MFF%XS)*MFF%RDXINT))
                      YJ  = MFF%CELLSJ(Floor((yy-MFF%YS)*MFF%RDYINT))
                      IIE = Floor(XI+1.0_EB)
@@ -9134,7 +9184,7 @@ Contains
          zz  = 0.5_EB*(z1+z2)
          II = Floor( CELLSI(Floor((xx-XS)*RDXINT)) + 1.0_EB )
          JJ = Floor( CELLSJ(Floor((yy-YS)*RDYINT)) + 1.0_EB )
-         KK = Floor( CELLSK(Floor((zz-ZS)*RDZINT)) + 1.0_EB )
+         KK = 1
 
          irn = irn + 1
 
@@ -9652,7 +9702,7 @@ Contains
     Case(-1)
        Call SHUTDOWN('ERROR: Class_Properties: -1')
     Case(0)
-       HR%Tpre  = PCP%Tpre_mean
+       HR%Tpre  = Max(0._EB,PCP%Tpre_mean)
     Case(1)   ! Uniform
        ! Parameters: (ave,min,max) ave not used
        n_par = 3
@@ -9661,7 +9711,7 @@ Contains
        RandomPara(2) = PCP%Tpre_low
        RandomPara(3) = PCP%Tpre_high
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
-       HR%Tpre = rnd_vec(1)
+       HR%Tpre = Max(0._EB,rnd_vec(1))
     Case(2)   ! Truncated Normal
        ! Parameters: (ave,sigma,min,max)
        n_par = 4
@@ -9671,7 +9721,7 @@ Contains
        RandomPara(3) = PCP%Tpre_low
        RandomPara(4) = PCP%Tpre_high
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
-       HR%Tpre = rnd_vec(1)
+       HR%Tpre = Max(0._EB,rnd_vec(1))
     Case(3)   ! Gamma
        ! Parameters: (ave,alpha,beta) ave not used
        n_par = 3
@@ -9680,7 +9730,7 @@ Contains
        RandomPara(2) = PCP%Tpre_para
        RandomPara(3) = PCP%Tpre_para2
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
-       HR%Tpre = rnd_vec(1)
+       HR%Tpre = Max(0._EB,rnd_vec(1))
     Case(4)   ! Normal
        ! Parameters: (ave,sigma)
        n_par = 2
@@ -9688,7 +9738,7 @@ Contains
        RandomPara(1) = PCP%Tpre_mean
        RandomPara(2) = PCP%Tpre_para
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
-       HR%Tpre = rnd_vec(1)
+       HR%Tpre = Max(0._EB,rnd_vec(1))
     Case(5)   ! LogNormal
        ! mean and variance of log(x) should be given
        ! Parameters: (ave,sigma) of ln(x)
@@ -9697,7 +9747,7 @@ Contains
        RandomPara(1) = PCP%Tpre_mean
        RandomPara(2) = PCP%Tpre_para
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
-       HR%Tpre = rnd_vec(1)
+       HR%Tpre = Max(0._EB,rnd_vec(1))
     Case(6)   ! Beta
        ! Parameters: (ave,a,b) ave not used
        n_par = 3
@@ -9706,7 +9756,7 @@ Contains
        RandomPara(2) = PCP%Tpre_para
        RandomPara(3) = PCP%Tpre_para2
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
-       HR%Tpre = rnd_vec(1)
+       HR%Tpre = Max(0._EB,rnd_vec(1))
     Case(7)   ! Triangular
        ! Parameters: (peak,min,max)
        n_par = 3
@@ -9715,7 +9765,7 @@ Contains
        RandomPara(2) = PCP%Tpre_low
        RandomPara(3) = PCP%Tpre_high
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
-       HR%Tpre = rnd_vec(1)
+       HR%Tpre = Max(0._EB,rnd_vec(1))
     Case(8)   ! Weibull  (alpha=1: Exponential)
        ! Parameters: (ave,alpha,lambda)
        n_par = 3
@@ -9724,7 +9774,7 @@ Contains
        RandomPara(2) = PCP%Tpre_para
        RandomPara(3) = PCP%Tpre_para2
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
-       HR%Tpre = rnd_vec(1)
+       HR%Tpre = Max(0._EB,rnd_vec(1))
     Case(9)   ! Gumbel
        ! Parameters: (ave,alpha)
        n_par = 2
@@ -9732,7 +9782,7 @@ Contains
        RandomPara(1) = PCP%Tpre_mean
        RandomPara(2) = PCP%Tpre_para
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
-       HR%Tpre = rnd_vec(1)
+       HR%Tpre = Max(0._EB,rnd_vec(1))
     Case Default
        Call SHUTDOWN('ERROR: Class_Properties I_PRE_DIST')
     End Select
