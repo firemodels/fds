@@ -251,7 +251,7 @@ including the input files.
 
 
 
-\section{Limitations and Special Features to Consider}\label{Sec_SpecFeatures}
+\section{Features of Limited Functionality}\label{Sec_SpecFeatures}
 
 All the intended features of FDS+Evac are not yet fully functional.
 For now, FDS+Evac is best suited for doing calculations in buildings, whose
@@ -401,16 +401,12 @@ needs further considerations.  It is suggested that FDS+Evac is used
 together with some other (well) validated egress program to study
 evacuation.  If the two (or more) methods give similar results then
 the predictions of the calculational modelling should be quite good.
-For example, one could compare the calculations done with ``fire
-drill'' mode and used FDS+Evac to study the effects of smoke and toxic
-gases on the evacuation, if the other evacuation programme does not
-support importing the fire related data from FDS calculations.  Note
-that the underlaying assumptions on the fire and evacuation scenarios
-might still be far off. It is not the purpose of this document (nor
-FDS+Evac) to give instructions on how to define good scenarios and
-input data for egress simulations to be done when designing a safe
-building.  Fire regulators and designers should agreee on the relevant
-scenarios before any design by the engineering methods.
+
+It is not the purpose of this document (nor FDS+Evac) to give
+instructions on how to define the egress scenarios for the design
+purposes. Fire regulators and designers should agreee on the relevant
+scenarios and acceptance criteria before any design by the engineering
+methods. 
 
 
 \clearpage
@@ -427,32 +423,29 @@ features can be found in the next chapters.
 
 
 
-\section{Name and Version of the Model}
+\section{Name and Development Environment}
 
-The name of the underlaying fire simulation program is the NIST Fire
-Dynamics Simulator or FDS.  FDS is a Fortran 90 computer program that
-solves the governing equations of fluid dynamics, and Smokeview is a
-companion program written in C/OpenGL programming language that
-produces images and animations of the results.  The evacuation
-calculation module developed at VTT is implemented as subroutines of
-FDS and these subroutines together with the FDS are called as
-FDS+Evac.  Since the version 5 of FDS, the program development and
-maintenance has utilized a version cotrol system (SVN).  The source
-code is maintained at a public domain server.\footnote{The server is
-  hosted by Google Code (http://code.google.com/p/fds-smv/)} The
-present version of FDS+Evac is build on the FDS version 5.2.0 and it
-is the second version of the evacuation module and, thus, its version
-number is 2.0.0, \emph{i.e.}, FDS5.2.0+Evac2.0.0.  Changes in the
-version numbers correspond to major changes in the physical models or
-input parameters.  For minor changes and bug fixes, incremental
-versions are released, referenced according to fractions of the
-integer version numbers.  In addition, day-to-day bug fixes made in
-response to user feedback are referenced by a compilation date and a
-SVN revision number that are printed at the top of the diagnostic
-output file.  The latest official release version of FDS is obtainable
-on the web site http://fire.nist.gov/fds/.  The documentation on the
-evacuation part of FDS+Evac can be found on the web page
-http://www.vtt.fi/fdsevac/.
+The underlaying fire simulation program, Fire Dynamics Simulator
+(FDS), is a computational fluid dynamics (CFD) model of fire-driven
+fluid flow.  FDS is written using Fortran 90 programming language.
+The companion program Smokeview, written in C/OpenGL programming
+languages, is used for graphical presentation of the simulation
+results. The evacuation calculation module developed at VTT is
+implemented as subroutines of FDS and these subroutines together with
+the FDS are called as FDS+Evac.  Since the version 5 of FDS, the
+program development and maintenance has utilized a version cotrol
+system (SVN).  The source code is maintained at a public domain
+server.\footnote{The server is hosted by Google Code
+(http://code.google.com/p/fds-smv/)} Changes in the version numbers
+correspond to major changes in the physical models or input
+parameters.  For minor changes and bug fixes, incremental versions are
+released, referenced according to fractions of the integer version
+numbers.  In addition, day-to-day bug fixes made in response to user
+feedback are referenced by a compilation date and a SVN revision
+number that are printed at the top of the diagnostic output file.  The
+latest official release version of FDS is obtainable on the web site
+http://fire.nist.gov/fds/.  The documentation on the evacuation part
+of FDS+Evac can be found on the web page http://www.vtt.fi/fdsevac/.
 
 \section{Type of the Model}
 
@@ -507,14 +500,12 @@ FDS+Evac to describe a particular scenario are conveyed via one text
 file, which is the same one that is used for FDS, created by the user.
 For the fire-driven fluid flow related parameters, see the FDS
 documentation~\cite{FDS_UserGuide}.  The input file of FDS+Evac is
-such that it can be used with just a minor modifications to run an
-ordinary FDS calculation without evacuation calculation.  These minor
-modifications means that only the definitions of the evacuation meshes
-should be commented out, \emph{i.e.}, all the other evacuation related
-parameters are neglected by the FDS fire calculation.  Same is true
-for the other way also, \emph{i.e.}, by commenting out the fire meshes
-one can make easily test runs to see that the construction of the
-evacuation calculation part is done correctly.
+such that it can be used with just minor modifications (commenting out
+the evacuation meshes) to run an ordinary FDS calculation without
+evacuation calculation.  Same is true for the other way also,
+\emph{i.e.}, by commenting out the fire meshes one can make easily
+test runs to see that the construction of the evacuation calculation
+part is done correctly.
 
 A complete description of the input parameters required by the
 evacuation module of FDS can be found in the User's Guide part of this
@@ -536,8 +527,8 @@ positions and properties of the agents.
 \section{Uses and Limitations}\label{Sec_UsesAndLimit}
 
 Although FDS+Evac can address many egress scenarios, there are
-limitations in all of its algorithms.  Some of the more prominent
-limitations of the model are listed below.
+limitations in all of its algorithms.  The most prominent
+limitations are listed below.
 
 \underline{Geometry:} The efficiency of FDS is due to the simplicity
 of its rectilinear numerical mesh.  This can be a limitation in some
@@ -555,15 +546,15 @@ grid cell sizes.
 
 \underline{Reduced Visibility:} The smoke consentration calculated by
 the FDS is used to slow down the walking speeds of the agents using
-the results of a recent experiment by Frantzich and
+the results of an experiment by Frantzich and
 Nilsson~\cite{Frantzich03}, where larger smoke consentration were used
-than in the experiments by Jin~\cite{Jin78}.  There are large scatter
-in the experimental results and more experimental results are more
-than welcome.  Note also that there is a large scatter between
-different agents but the present version of the programme uses average
-values for each agenr.  The default model for stairs does not include
-the option for agents to turn back when the smoke consentration
-becomes too high.
+than in the experiments by Jin~\cite{Jin78}.  The scatter of the
+experimental results is wide and new experimental results would be
+more than welcome.  Note also that in reality there are differences
+between individuals in this respect, but the present version of the
+programme uses average values for each agenr.  The default model for
+stairs does not include the option for agents to turn back when the
+smoke consentration becomes too high.
 
 \underline{Incapacitation:} The incapacitation model is the FED
 consept introduced by Purser~\cite{Purser95}, but the large scatter
@@ -572,22 +563,24 @@ version of the programme.  Whereas FDS is doing well for the smoke
 transport and the prediction of O${}_2$ levels, it does much worse on
 the prediction of the CO concentration.  In the standard mixture
 fraction model of FDS, the amount of CO produced is mainly decided by
-the user input.  Note, that the effect of HCN is not modelled and that
-the toxic effects of CO${}_2$ are not modelled, only its
+the user.  Note also, that the effect of HCN is not modelled and that
+the toxic effects of CO${}_2$ are not modelled; only its
 hyperventilation factor is included.
 
 \underline{Exit Route Selection:} The exit door selection algorithm is
 still a relatively simple one.  It does not include any kind of social
-interactions, like herding behavior.  The user has also more or less
-full control on the doors which different agents will be using.  In
-some applications this can be listed as a benefit of the model, but
-this leaves too much trust on the user's expertise and/or intentions.
+interactions, like herding behavior.  The user has more or less full
+control on the doors which different agents will be using.  In some
+applications this can be listed as a benefit of the model, but the
+requirements for user's responsibility and expertise should be
+recognized.
 
 \underline{Detection and Reaction Times:} The pre-movement time of the
 evacuating humans is decided by the user input by giving distributions
 for the detection and reaction times.  In addition to the detection
 time given user input, the local smoke consentration can be used to
-trigger the detection of a fire.
+trigger the detection of a fire. Currently, the fire detection by
+humans can not be connected to the control logic of FDS.
 
 \underline{Applications:} There is no model for elevators in the
 current version of the FDS+Evac.  Nor there is any specific objects
@@ -601,23 +594,21 @@ fire meshes, the evacuation meshes are always treated as a single
 thread.  Thus, it is not possible to divide the evacuation calculation
 to different processors using the parallel version of FDS5.  This sets
 the upper limit on the complexity of geometry which can be modelled.
-Some of the memory limits can be avoided by changing from 32 bit
-machines to 64 bit machines.
 
-\clearpage
+%\clearpage
 
 \newpage
 
 \chapter{Theoretical Basis for the Evacuation Model}\label{Sec_BasisModel}
 
-This chapter describes the theoretical model behind the FDS+Evac
-evacuation simulations.  The model uses autonomous agents to treat the
-escaping persons and their individual properties and escape
-strategies.  The movement of the agents is is modelled on continuous
-space and time.  The building geometry is modelled as two-dimensional
-floors, which are connected to each others by staircases and
-inclines.  The geometry of the building is treated using rectilinear
-underlaying mesh, similarly as in the FDS fire simulations.
+%This chapter describes the theoretical model behind the FDS+Evac
+%evacuation simulations.  The model uses autonomous agents to treat the
+%escaping persons and their individual properties and escape
+%strategies.  The movement of the agents is modelled on continuous
+%space and time.  The building geometry is modelled as two-dimensional
+%floors, which are connected to each others by staircases and inclines.
+%The geometry of the building is treated using rectilinear underlaying
+%mesh, similarly as in the FDS fire simulations.
 
 \section{Introduction}
 
