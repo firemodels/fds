@@ -1,6 +1,9 @@
 @echo off
 echo creating some figures for the Smokeview User's guide
 erase scriptfigures\*.png
+smokeview -help figures\smokeview.help
+smokeview -version figures\smokeview.version
+smokezip -help figures\smokezip.help
 cd ..\..\Test_cases\Visualization
 smokeview -runscript thouse5
 smokeview -runscript plume5c
