@@ -126,7 +126,7 @@
 
     {\bf \huge Technical Reference and User's Guide}\\[0.2em]
 
-    {\large (FDS 5.2.0, Evac 2.0.0, SVN Revision 2186)}
+    {\large (FDS 5.2.0, Evac 2.0.1, SVN Revision 2225)}
   \end{center}
   \vspace{30pt}
   \begin{center}
@@ -2019,7 +2019,7 @@ project~cite{Hostikka07a}.
 
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/b_ave90s11rnd_d123_initpos}}
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/OpenFloorGeom}}
   \caption{The geometry of the open floor office test
     case.}\label{Fig_OpenFloorGeom}
 \end{figure}
@@ -2059,11 +2059,20 @@ project~cite{Hostikka07a}.
   why the Simulex results have larger scatter in the cases where a
   certain number of doors are operational.
 
+
+%% \begin{figure}[!tb]
+%%   \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/Kaytava_fig}}
+%%   \caption{The geometry of the assembly space test
+%%     case.}\label{Fig_AssemblyGeom} 
+%% \end{figure}
+
+
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/Kaytava_fig}}
-  \caption{The geometry of the assembly space test
-    case.}\label{Fig_AssemblyGeom} 
+  \centerline{\includegraphics[clip=true,width=130mm]{FIGURES/AssemblySpaceGeom}}
+  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/AssemblySpace_Simulex_60s}}
+  \caption{A snapshot from (a) FDS+Evac, (b) Simulex
+    calculation}\label{Fig_AssemblySnapshots} 
 \end{figure}
 %
 
@@ -2072,29 +2081,12 @@ project~cite{Hostikka07a}.
   assembly space having dimensions of 50$\times$60~$\mathrm{m^2}$ and
   1000 people initially inside.  There is only one 7.2~m wide corridor
   leading to the exit.  The geometry is shown in
-  Fig.~\ref{Fig_AssemblyGeom}.  The FDS+Evac results are compared to
-  those of Simulex and buildingExodus~\cite{Exodus3} in
+  Fig.~\ref{Fig_AssemblySnapshots}a.  The FDS+Evac results are
+  compared to those of Simulex and buildingExodus~\cite{Exodus3} in
   Fig.~\ref{Fig_AssemblyResults}.  Note, that the FDS+Evac simulations
   were also done using parameters describing more relaxed egress
   (labels ``FDS+EvacSlow''), where the value of the anisotropy
   parameter of the social force, $\lambda_i$, had a value of 0.3.
-
-%
-\begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/KaytavaTulokset}}
-  \caption{The comparison of FDS+Evac to buildingExodus
-    and Simulex in an assembly space.}\label{Fig_AssemblyResults}
-\end{figure}
-%
-
-%
-\begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/kaytava_u1s0p5_65s}}
-  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/kaytava_simulex120s}}
-  \caption{A snapshot from (a) FDS+Evac, (b) Simulex
-    calculation}\label{Fig_AssemblySnapshots} 
-\end{figure}
-%
   
 Considerable differences are shown between the results of FDS+Evac and
 the results of Simulex and buildingExodus codes.  These differences
@@ -2113,6 +2105,14 @@ of the room.  In this case, the agreement between the different
 evacuation programmes is much better.  The calculated specific flows
 (1/p/m) are: Simulex 1.48, Exodus 1.95, FDS+Evac 2.15 and FDS+EvacSlow
 1.73 (~$\lambda_i =0.3$).
+
+%
+\begin{figure}[!tb]
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/AssemblySpaceResults}}
+  \caption{The comparison of FDS+Evac to buildingExodus
+    and Simulex in an assembly space.}\label{Fig_AssemblyResults}
+\end{figure}
+%
 
 %
 \item Specific flows through doors: The fourth test geometry is shown
@@ -2547,7 +2547,9 @@ lines out.
   main evacuation mesh to the floor.  This parameter is used by
   Smokeview to show the bodies of the agents so that their feet are
   touching the floor (default is 1.0~m).  This needs to be given only
-  for the main evacuation meshes.
+  for the main evacuation meshes.  This parameter also defines the
+  reference floor level for the smoke and FED calculation, see the
+  parameter \Timts{HUMAN\_SMOKE\_HEIGHT} on the \Timtt{PERS} namelist.
 %
 \end{description}
 
@@ -2826,10 +2828,9 @@ distribution, see Table~\ref{Table_StatDists}.
 \item[\Timts{TAU\_EVAC\_DIST}] The distribution type used for the
   relaxation time of the agents, see Table~\ref{Table_StatDists}.
 %
-\end{description}
-
-
-\begin{description}
+%% \end{description}
+%%
+%% \begin{description}
 %
 \item[\Timtt{DET\_MEAN,DET\_PARA,DET\_PARA2,DET\_LOW,DET\_HIGH}]
   detection time, parameters of the distribution, see
@@ -2920,12 +2921,18 @@ distribution, see Table~\ref{Table_StatDists}.
   the dead agents seen in Smokeview.  Note, that \Timts{DEAD\_COLOR}
   overrides this option.  Default color for dead agents is cyan.
 %
-\item[\Timts{DENS\_INIT}] If > 2.0, then agents are tried to put on
-  the initial positions so that they can be touching.  The default is
-  to leave some space between agents and very large agent densities
-  are not possible.  Note that FDS+Evac puts agents randomly in their
-  initial positions and, thus, the initial density of agents can not
-  be much larger than four agents per square meter. (Default is 0.0.)
+\item[\Timts{DENS\_INIT}] If > 2.0~$\mathrm{\textrm{m}^\textrm{2}}$,
+  then agents are tried to put on the initial positions so that they
+  can be touching.  The default is to leave some space between agents
+  and very large agent densities are not possible.  Note that FDS+Evac
+  puts agents randomly in their initial positions and, thus, the
+  initial density of agents can not be much larger than four agents
+  per square meter. (Default is 0.0~$\mathrm{\textrm{m}^\textrm{2}}$.)
+%
+\item[\Timts{HUMAN\_SMOKE\_HEIGHT}] Specifies the level above the
+  floor, where the smoke and FED information is taken.  Note, that the
+  parameter \Timts{EVAC\_Z\_OFFSET} and the co-ordinates of the
+  evacuation meshes define the floor levels.  (Default is 1.6~m.)
 %
 \item[\Timts{TDET\_SMOKE\_DENS}] If > 0.0 then an agent detects the
   fire when the smoke density ($\mathrm{mg/m^3}$) is larger than the
