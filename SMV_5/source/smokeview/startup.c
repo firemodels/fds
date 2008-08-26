@@ -314,6 +314,7 @@ typedef struct {
 
 void InitOpenGL(void){
   int type;
+  int err;
   
   type = GLUT_RGB|GLUT_DEPTH;
   if(buffertype==GLUT_DOUBLE){
@@ -360,13 +361,31 @@ void InitOpenGL(void){
   glutVisibilityFunc(NULL);
   glutMenuStatusFunc(MenuStatus);
 //  glutWindowStatusFunc(WindowStatus);
+  err=0;
 
 #ifdef pp_GPU
-  init_shaders();
+  printf("Initializing GPU shaders\n");
+  err=init_shaders();
+  if(err==0){
+    printf("GPU shaders initialization successfully completed\n");
+  }
 #endif
 #ifdef pp_CULL
-  init_cull_exts();
+  if(err==0){
+    printf("Initializing OpenGL culling extensions\n");
+    err=init_cull_exts();
+    if(err==0){
+      printf("OpenGL culling extension initialization successfully completed\n");
+    }
+  }
+  else{
+    printf("*** warning: OpenGL culling initialization not attempted since\n");
+    printf("             the GPU shader initialization failed\n");
+  }
 #endif
+  if(err!=0){
+    printf("*** warning: unable to initialize GPU shaders and/or OpenGL culling extensions\n");
+  }
 
   light_position0[0]=1.0f;
   light_position0[1]=1.0f;
