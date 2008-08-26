@@ -4009,14 +4009,22 @@ case -2:
 
 /* ------------------ init_cull_exts ------------------------ */
 
-void init_cull_exts(void){
+int init_cull_exts(void){
   char version_label[256];
   char version_label2[256];
   int i, major,  minor;
   float version;
+  const GLubyte *version_string;
+  int err;
 
   cullactive=0;
-  strcpy(version_label,(char *)glGetString(GL_VERSION));
+  version_string=glGetString(GL_VERSION);
+  if(version_string==NULL){
+    printf("*** warning: GL_VERSION string is NULL in init_cull_exts()\n");
+    err = 1;
+    return err;
+  }
+  strcpy(version_label,(char *)version_string);
   strcpy(version_label2,version_label);
   for(i=0;i<strlen(version_label);i++){
     if(version_label[i]=='.')version_label[i]=' ';
@@ -4024,13 +4032,16 @@ void init_cull_exts(void){
   sscanf(version_label,"%i %i",&major,&minor);
   if(major>1){
     cullactive=1;
+    err=0;
   }
   else{
     trim(version_label);
     printf("Smokeview is running on a system using OpenGL %s\n",version_label2);
     printf("Smoke culling is not not supported, it requires OpenGL 2.0 or later.\n");
     cullsmoke=0;
+    err=1;
   }
+  return err;
 }
 
 /* ------------------ drawsmoke3dCULL ------------------------ */
