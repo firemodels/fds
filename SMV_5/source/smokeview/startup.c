@@ -216,14 +216,18 @@ void sv_startup_c(int argc, char **argv){
 #ifdef pp_OSX
   getcwd(workingdir,1000);
 #endif
+  printf("Initializing Glut\n");
   glutInit(&argc, argv);
+  printf("Glut initialized\n");
 #ifdef pp_OSX
   chdir(workingdir);
 #endif
 
   mxpoints=mxpoints_orig;
   mxframes=mxframes_orig;
+  printf("Initializing Smokeview graphics window\n");
   glutInitWindowSize(screenWidth, screenHeight);
+  printf("Smokeview graphics window initialized\n");
   max_screenWidth = glutGet(GLUT_SCREEN_WIDTH);
   max_screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
   if(trainer_mode==1){
@@ -315,6 +319,8 @@ typedef struct {
 void InitOpenGL(void){
   int type;
   int err;
+
+  printf("Initializing OpenGL\n");
   
   type = GLUT_RGB|GLUT_DEPTH;
   if(buffertype==GLUT_DOUBLE){
@@ -413,6 +419,7 @@ void InitOpenGL(void){
     if(nblueshift<0)nblueshift=0;
   }
   opengldefined=1;
+  printf("OpenGL initialized\n");
 }
 
 /* ------------------ set_3dsmoke_startup ------------------------ */
