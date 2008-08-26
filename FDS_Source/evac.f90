@@ -3334,24 +3334,21 @@ Contains
        FED_J_LOOP: Do j= 1,JBAR
           x1 = XS + (i-1)*DXI + 0.5_EB*DXI
           y1 = YS + (j-1)*DETA + 0.5_EB*DETA
-          ! Timo: z1 = 0.5_EB*(ZF+ZS)
           z1 = 0.5_EB*(ZF+ZS) - EVACUATION_Z_OFFSET(NM) + HUMAN_SMOKE_HEIGHT
           SS_Loop: Do k = 1, n_sstands
-             ! Timo: Here should be loop over EVSS, one should take the smoke
-             ! Timo: at the correct height.
              ESS => EVAC_SSTANDS(j)
              If (ESS%IMESH == nm .And. &
                   (ESS%X1 <= x1 .And. ESS%X2 >= x1) .And. &
                   (ESS%Y1 <= y1 .And. ESS%Y2 >= y1) ) Then
                 Select Case (ESS%IOR)
                 Case(-1)
-                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
+                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X1-x1)/Abs(ESS%X1-ESS%X2)
                 Case(+1)
-                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
+                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X2-x1)/Abs(ESS%X1-ESS%X2)
                 Case(-2)
-                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y1-y1)/Abs(ESS%Y1-ESS%Y2)
                 Case(+2)
-                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                   z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y2-y1)/Abs(ESS%Y1-ESS%Y2)
                 End Select
               End If
               Exit SS_Loop
@@ -8631,7 +8628,6 @@ Contains
                      End If
                      If ( Is_Visible_Door(i_tim) ) Then
                         ! Door/exit is on this floor
-                        ! Timo: BUG HERE? CHECK THIS 
                         If (PNX%P_VENT_FFIELDS(ie) < 0.5_EB) Then
                            Is_Known_Door(i_tim) = .False.
                         Else
