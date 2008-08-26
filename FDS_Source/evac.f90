@@ -40,7 +40,7 @@ Module EVAC
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_evac
   ! Public variables (needed in the main program):
   !
-  Character(255):: EVAC_VERSION = '2.0.0'
+  Character(255):: EVAC_VERSION = '2.0.1'
   Character(255) :: EVAC_COMPILE_DATE
   INTEGER :: EVAC_MODULE_REV
   !
@@ -3336,7 +3336,7 @@ Contains
           y1 = YS + (j-1)*DETA + 0.5_EB*DETA
           z1 = 0.5_EB*(ZF+ZS) - EVACUATION_Z_OFFSET(NM) + HUMAN_SMOKE_HEIGHT
           SS_Loop: Do k = 1, n_sstands
-             ESS => EVAC_SSTANDS(j)
+             ESS => EVAC_SSTANDS(k)
              If (ESS%IMESH == nm .And. &
                   (ESS%X1 <= x1 .And. ESS%X2 >= x1) .And. &
                   (ESS%Y1 <= y1 .And. ESS%Y2 >= y1) ) Then
@@ -3350,12 +3350,12 @@ Contains
                 Case(+2)
                    z1 = z1 + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y2-y1)/Abs(ESS%Y1-ESS%Y2)
                 End Select
-              End If
-              Exit SS_Loop
-           End Do SS_Loop
+             End If
+             Exit SS_Loop
+          End Do SS_Loop
           HUMAN_GRID(i,j)%X = x1
           HUMAN_GRID(i,j)%Y = y1
-          HUMAN_GRID(i,j)%Z = 0.5_EB*(ZF+ZS)
+          HUMAN_GRID(i,j)%Z = z1
           HUMAN_GRID(i,j)%SOOT_DENS     = 0.0_EB
           HUMAN_GRID(i,j)%FED_CO_CO2_O2 = 0.0_EB
           HUMAN_GRID(i,j)%TMP_G         = 0.0_EB
@@ -3369,10 +3369,10 @@ Contains
           If (.Not. Btest(I_EVAC,4) ) Cycle FED_J_LOOP
 
           If (.Not. SOLID(CELL_INDEX(i,j,1)) ) Then
-             MESH_LOOP: Do NOM=1,NMESHES
-                M=>MESHES(NOM)
+             MESH_LOOP: Do NOM = 1, NMESHES
                 If (.Not. EVACUATION_ONLY(NOM)) Then
-                   If (X1 >= M%XS .And. X1 <= M%XF .And. &
+                   M => MESHES(NOM)
+                   If ( X1 >= M%XS .And. X1 <= M%XF .And. &
                         Y1 >= M%YS .And. Y1 <= M%YF .And. &
                         Z1 >= M%ZS .And. Z1 <= M%ZF) Then
                       II = Floor( M%CELLSI(Floor((X1-M%XS)*M%RDXINT)) &
@@ -4973,6 +4973,8 @@ Contains
 
        EXIT_LOOP: Do i = 1, N_EXITS
           !
+          ! Do not save/read data for counters.
+          If (EVAC_EXITS(i)%COUNT_ONLY) Cycle EXIT_LOOP
           If (L_fed_save) Then
              If ( EVAC_EXITS(i)%FED_MESH > 0 ) Then
                 i1 = EVAC_EXITS(i)%II
