@@ -203,12 +203,12 @@ int init_shaders(void){
   usegpu=0;
   err=glewInit();
   if(err!=GLEW_OK){
-    printf("*** Warning: Initialization of GLEW extenstion library failed\n");
+    printf("   *** Warning: Initialization of GLEW extenstion library failed\n");
     return 1;
   }
   version_string=glGetString(GL_VERSION);
   if(version_string==NULL){
-    printf("*** warning: GL_VERSION string is NULL in init_shaders()\n");
+    printf("   *** warning: GL_VERSION string is NULL in init_shaders()\n");
     err = 1;
     return err;
   }
@@ -220,26 +220,26 @@ int init_shaders(void){
   sscanf(version_label,"%i %i",&major,&minor);
   if(major<2){
     trim(version_label);
-    printf("Smokeview is running on a system using OpenGL %s\n",version_label2);
-    printf("OpenGL 2.0 or later is required to use the GPU.\n");
-    printf("GPU smoke shader not supported.\n");
+    printf("   Smokeview is running on a system using OpenGL %s\n",version_label2);
+    printf("   OpenGL 2.0 or later is required to use the GPU.\n");
+    printf("   GPU smoke shader not supported.\n");
     return 1;
   }
 
   if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader){
     if(setSmokeShaders()==1){
-  		printf("GPU smoke shader successfully compiled, linked and loaded.\n");
+  		printf("   GPU smoke shader successfully compiled, linked and loaded.\n");
       gpuactive=1;
       err=0;
     }
     else{
-      printf("*** GPU smoke shader failed to load.\n");
+      printf("   *** GPU smoke shader failed to load.\n");
       usegpu=0;
       err=1;
     }
   }
 	else {
-    printf("*** GPU smoke shader not supported.\n");
+    printf("   *** GPU smoke shader not supported.\n");
     usegpu=0;
     err=1;
 	}
