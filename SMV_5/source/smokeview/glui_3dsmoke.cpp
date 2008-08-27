@@ -61,7 +61,8 @@ GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
 #endif
 GLUI_Checkbox *CHECKBOX_smokecullflag=NULL;
 GLUI *glui_3dsmoke=NULL;
-GLUI_RadioGroup *alphagroup=NULL,*skipframes,*radio_smokesensors;
+GLUI_RadioGroup *alphagroup=NULL,*skipframes,*radio_smokesensors=NULL;
+GLUI_Spinner *SPINNER_cvis=NULL;
 GLUI_Checkbox *CHECKBOX_test_smokesensors=NULL;
 #ifdef pp_GPU
 GLUI_Checkbox *CHECKBOX_smokeGPU=NULL;
@@ -165,9 +166,12 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Hidden");
     glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Grey (0-255)");
     glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"I/I0 (0.0-1.0)");
-    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Light reflecting (C=3.0)");
-    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Light emitting (C=8.0)");
+    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"C/K=C*L/Ln(I/I0) (0-Inf)");
+    SPINNER_cvis=glui_3dsmoke->add_spinner_to_panel(panel_smokesensor,"C",GLUI_SPINNER_FLOAT,&smoke3d_cvis);
+    SPINNER_cvis->set_float_limits(1.0,20.0);
+#ifdef _DEBUG
     CHECKBOX_test_smokesensors=glui_3dsmoke->add_checkbox_to_panel(panel_smokesensor,"Test visibility sensor",&test_smokesensors);
+#endif
   }
 
   panel_fire = glui_3dsmoke->add_panel_to_panel(panel_overall,"Fire");

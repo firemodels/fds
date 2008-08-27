@@ -1199,6 +1199,7 @@ void initvars1(void){
   colorbarpoint=0;
   vectorspresent=0;
 
+  smoke3d_cvis=1.0;
   show_smokesensors=1;
   test_smokesensors=0;
   active_smokesensors=0;
