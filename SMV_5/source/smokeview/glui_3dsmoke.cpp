@@ -166,7 +166,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Hidden");
     glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Grey (0-255)");
     glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"I/I0 (0.0-1.0)");
-    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"C/K=C*L/Ln(I/I0) (0-Inf)");
+    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Scaled optical depth (SCD)");
+    glui_3dsmoke->add_statictext_to_panel(panel_smokesensor,"SCD=C/K=C*L/Ln(I/I0) (0-Inf)");
     SPINNER_cvis=glui_3dsmoke->add_spinner_to_panel(panel_smokesensor,"C",GLUI_SPINNER_FLOAT,&smoke3d_cvis);
     SPINNER_cvis->set_float_limits(1.0,20.0);
 #ifdef _DEBUG
