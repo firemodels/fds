@@ -495,9 +495,9 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     }
   }
 
-	glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHTING);
 
-	glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
   glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
 
@@ -699,12 +699,13 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     iop++;
     if(op_skip>0)op_skip--;
   }
+  glDisable(GL_COLOR_MATERIAL);
+  glDisable(GL_LIGHTING);
+
   if(object->use_displaylist==1&&displaylist_id!=0){
     glEndList();
   }
 
-  glDisable(GL_COLOR_MATERIAL);
-  glDisable(GL_LIGHTING);
   glPopMatrix();
 
 }
