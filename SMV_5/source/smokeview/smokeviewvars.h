@@ -567,6 +567,7 @@ SVEXTERN float devicenorm_length;
 SVEXTERN int ndeviceinfo;
 SVEXTERN device *deviceinfo;
 SVEXTERN int show_smokesensors,active_smokesensors,test_smokesensors;
+SVEXTERN float smoke3d_cvis;
 SVEXTERN sv_object **device_defs, *device_defs_backup[4];
 SVEXTERN sv_object device_def_first, device_def_last;
 SVEXTERN int ndevice_defs;

@@ -335,12 +335,7 @@ void draw_devices_val(void){
 
             val = ival/255.0;
             light_extinct = -log(val)/devicei->eyedist;
-            if(show_smokesensors==3){
-              val=3.0/light_extinct;
-            }
-            else{
-              val=8.0/light_extinct;
-            }
+            val = smoke3d_cvis/light_extinct;
             if(val<10.0){
               sprintf(label,"%.1f",val);
             }
