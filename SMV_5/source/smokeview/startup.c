@@ -352,10 +352,15 @@ void InitOpenGL(void){
     stereo_off=1;
   }
 
+  printf("Initializing glut display mode\n");
   glutInitDisplayMode(type);
+  printf("glut display mode initialized\n");
 
+  printf("creating window\n");
   mainwindow_id=glutCreateWindow("");
+  printf("window created\n");
 
+  printf("defining callbacks\n");
   glutSpecialUpFunc(specialkeyboard_up);
   glutKeyboardUpFunc(keyboard_up);
   glutKeyboardFunc(keyboard);
@@ -366,6 +371,7 @@ void InitOpenGL(void){
   glutDisplayFunc(Display);
   glutVisibilityFunc(NULL);
   glutMenuStatusFunc(MenuStatus);
+  printf("callbacks initialized\n");
 //  glutWindowStatusFunc(WindowStatus);
   err=0;
 
