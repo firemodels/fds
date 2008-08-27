@@ -352,15 +352,16 @@ void InitOpenGL(void){
     stereo_off=1;
   }
 
-  printf("Initializing glut display mode\n");
+  printf("   Initializing Glut display mode\n");
   glutInitDisplayMode(type);
-  printf("glut display mode initialized\n");
+  printf("   Glut display mode initialized\n");
 
-  printf("creating window\n");
+  CheckMemory;
+  printf("   creating window\n");
   mainwindow_id=glutCreateWindow("");
-  printf("window created\n");
+  printf("   window created\n");
 
-  printf("defining callbacks\n");
+  printf("   defining callbacks\n");
   glutSpecialUpFunc(specialkeyboard_up);
   glutKeyboardUpFunc(keyboard_up);
   glutKeyboardFunc(keyboard);
@@ -371,23 +372,23 @@ void InitOpenGL(void){
   glutDisplayFunc(Display);
   glutVisibilityFunc(NULL);
   glutMenuStatusFunc(MenuStatus);
-  printf("callbacks initialized\n");
+  printf("   callbacks initialized\n");
 //  glutWindowStatusFunc(WindowStatus);
   err=0;
 
 #ifdef pp_GPU
-  printf("Initializing GPU shaders\n");
+  printf("   Initializing GPU shaders\n");
   err=init_shaders();
   if(err==0){
-    printf("GPU shaders initialization successfully completed\n");
+    printf("   GPU shaders initialization successfully completed\n");
   }
 #endif
 #ifdef pp_CULL
   if(err==0){
-    printf("Initializing OpenGL culling extensions\n");
+    printf("   Initializing OpenGL culling extensions\n");
     err=init_cull_exts();
     if(err==0){
-      printf("OpenGL culling extension initialization successfully completed\n");
+      printf("   OpenGL culling extension initialization successfully completed\n");
     }
   }
   else{
