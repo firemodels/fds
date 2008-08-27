@@ -8,6 +8,17 @@
 <p>Latest FDS and Smokeview available at 
 <a href="http://fire.nist.gov/fds">http://fire.nist.gov/fds</a>
 <ul>
+<li>5.2.4 (build 2236) - August 27, 2008
+<ol>
+<li>enhancement - add smoke sensor device used by Smokeview to detect opacity level or optical depth of intervening smoke.
+<li>enhancement - record colorbar state in the .ini file (use of texture color map, colorbar selection index)
+<li>enhancement - add PLOT3D state to .ini file and add scripting support for PLOT3D files.
+<li>fix - make requirements for GPU and smoke culling consistent.  Both options now require OpenGL 2.0 or greater.
+<li>fix - fix cad display option when displaying devices.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=449&can=1&sort=-id">Issue 449</a>).
+<li>fix - fix clipping for transparent blockages. 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=446&can=1&sort=-id">Issue 446</a>).
+</ol>
 <li>5.2.3 (build 2136) - August 8, 2008
 <ol>
 <li>enhancement - save isosurface state (hidden=0, solid=1, outline=2, points=3) in .ini file
