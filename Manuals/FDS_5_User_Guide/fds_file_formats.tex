@@ -166,46 +166,6 @@ at fixed time intervals but there is no requirement by
 \end{verbatim}
 where {\tt TIME} is the time in seconds when the data is ouput and {\tt QQ} are the data values.
 
-\subsection{Terrain File Format}
-
-Terrain files are unformatted and are output by the Wildland-Urban
-interface (WUI) version of FDS.  The terrain file header is
-written out using:
-\begin{verbatim}
-      WRITE(IUNIT) 1
-      WRITE(IUNIT) VERSION
-      WRITE(IUNIT) XMIN, XMAX, YMIN, YMAX
-      WRITE(IUNIT) NX, NY
-      WRITE(IUNIT) (ZELEV(I,J),I=1,NX),J=1,NY)
-      WRITE(IUNIT) (STATE(I,J),I=1,NX),J=1,NY)
-\end{verbatim}
-The first ``1'' is used by Smokeview to determine whether the file
-was written on a big or little endian computer.  {\tt VERSION} is
-an integer value representing the file version (initially 1), {\tt
-XMIN, XMAX, YMIN, YMAX} are floating point values defining the
-terrain boundary, {\tt NX} and {\tt NY} are integers defining the
-number of cells in the $x$ and $y$ direction, {\tt ZELEV} are
-floating point values defining the elevation at each grid cell and
-{\tt STATE} are one byte integers defining the states at each grid
-cell.
-
-The WUI \fds\ software outputs terrain frames at fixed time
-intervals but there is no requirement by \smokeview\ for this to
-happen. Because, cell states change infrequently, the cell states
-are only output when they change.  Each terrain frame is written
-using:
-\begin{verbatim}
-      WRITE(IUNIT) TIME
-      WRITE(IUNIT) NCHANGES
-      WRITE(IUNIT) (CELLINDEX(I),I=1,NCHANGES)
-      WRITE(IUNIT) (CELLSTATES(I),I=1,NCHANGES)
-\end{verbatim}
-where {\tt TIME} is the time in seconds when the data is output,
-CELLINDEX are the cell indices ($cellindex=(J-1)*NY + I - 1$) of
-the cells that have changed state and CELLSTATES are the value of
-the changed state.  The data for the very first time step (at
-$t=0.0$) is not output explicitly but is assumed from information
-previously output in the header.
 
 \subsection{Boundary Files}
 
@@ -268,45 +228,3 @@ The five channels {\tt N=1,5} are by default the temperature
 (C), the $u$, $v$ and
 $w$ components of the velocity (m/s), and the heat release rate
 per unit volume (kW/m$^3$).
-
-\subsection{CAD/GE1 file format}
-
-A program called DXF2FDS, written by David Sheppard of the US Bureau of Alcohol, Tobacco and Firearms (ATF), creates an FDS
-input file and a Smokeview geometric description file (.GE1) given
-a CAD description of the building being modelled.  The CAD
-description must be in a {\em dxf}\ format and created using {\em 3DFACE}\ commands.  The .GE1 file has a simple text format and is
-described below. Details of this program can be found at the FDS/Smokeview website, \hhref{http://fire.nist.gov/fds/}.
-
-\begin{verbatim}
-[APPEARANCE]
-nappearances
-string (material description)
-index r g b twidth, theight
-tfile
-:
-:   The above entry is repeated nappearances-1 more times
-:
-[FACES]
-nfaces
-x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4 index
-The above line is repeated nfaces-1 more times.
-\end{verbatim}
-
-\blist
-
-\hitem{nappearances} Number of appearance entries to follow
-Each appearance entry has 3 lines.
-\hitem{string} A material description is written out by DX2FDS but is ignored by Smokeview.
-\hitem{index} An index number starting at 0.
-\hitem{r, g, b} Red green and blue components of the CAD face used when a texture is not drawn.
-The values of r, g and b range from 0 to 255.  If a color is not used then use -1 for each color component.
-\hitem{twidth, theight} Textures are tiled or repeated.  The characteristic width and length of the
-texture file is twidth and theight respectively.
-\hitem{tfile} The name of the texture file.  If one is not used or available then leave this line blank.
-\hitem{nfaces} Number of face entries to follow.  Each face entry has one line.
-\hitem{x1/y1/z1/.../x4/y4/z4}x,y,z coordinates of a quadrilateral.  The four corners of the quad
-must lie in a plane or weird effects may result when Smokeview draws it.  (This is a requirement
-of OpenGL).  The four points should be in counter-clockwise order.
-\hitem{index} Points to a material in the [APPEARANCE] section.
-\elist
-
