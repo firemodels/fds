@@ -24,18 +24,18 @@ config_file_name = "Validation_Data_Config_File_Test.csv"
 
 
 ### Set Diagnostic Output Level
+
 ## Uncomment the level of diagnostics desired.
+##1 = Minimal, 2 = Normal, 3 = Maximum.
 
-#diagnostic_level = 1  # Minimal Diagnostic Output.
-diagnostic_level = 2  # Normal Diagnostic Output.
-#diagnostic_level = 3  # Maximum Diagnostic Output.
-
+diagnostic_level = 2
 print "**** Diagnostics Set at Level", diagnostic_level, "****"
+
 
 ### Set What Plots to Create: 
 ## BOTH (1), Comparison Only (2), Scatter Only (3)
 
-process_set = 3
+process_set = 1
 
 if diagnostic_level >= 1:
     if process_set == 1:
