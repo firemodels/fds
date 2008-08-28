@@ -29,6 +29,7 @@ config_file_name = "Validation_Data_Config_File_Test.csv"
 ##1 = Minimal, 2 = Normal, 3 = Maximum.
 
 diagnostic_level = 2
+
 print "**** Diagnostics Set at Level", diagnostic_level, "****"
 
 
@@ -113,7 +114,7 @@ def extract_config_data(config_file):
             if data_counter >= quantity_counter:
                 for x in range(len(data_header)):
                     keyed_data[data_header[x].strip()] = list_item[x+1]
-                data_key_name = keyed_data['Quantity'].strip()+"~"+keyed_data['Group'].strip()+"~"+keyed_data['Dataname'].strip()+"~"+keyed_data['Exp_Y_Col_Name'].strip()
+                data_key_name = keyed_data['Quantity'].strip()+"~"+keyed_data['Group'].strip()+"~"+keyed_data['Dataname'].strip()+"~"+keyed_data['Exp_Y_Col_Name'].strip()+"~"+keyed_data['Exp_X_Col_Name'].strip()
                 if diagnostic_level >= 3:
                     print "   <3> Key Name:", data_key_name
                 data_dict[data_key_name] = keyed_data
@@ -304,7 +305,7 @@ def extract_comp_data(comp_file_info):
     else:
         if diagnostic_level >= 2:
             print "Single Exp. Column Name:", exp_Y_column_name_value
-        exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+exp_Y_column_name_value)        
+        exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+exp_Y_column_name_value+"~"+exp_X_column_name_value)        
     
     if mod_Y_column_name_value[0] == '[':
         if diagnostic_level >= 2:
@@ -319,7 +320,7 @@ def extract_comp_data(comp_file_info):
     else:
         if diagnostic_level >= 2:
             print "Single Mod. Column Name:", mod_Y_column_name_value
-        mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+mod_Y_column_name_value)
+        mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+mod_Y_column_name_value+"~"+mod_X_column_name_value)
     
     if diagnostic_level >= 3:
         print "   <3> Exp Data Labels:\n", exp_scatter_data_labels
@@ -374,11 +375,15 @@ def extract_comp_data(comp_file_info):
             
     #Convert tuples to lists.
     exp_data_list = [list(sublist) for sublist in exp_data_cols]
+    if diagnostic_level >= 3:
+        print "   <3> Exp. Data List:", exp_data_list
     
     if diagnostic_level >= 2:
         print "*** Build Experimental Data Dictionary. ***" 
     #Catch errors if conversion of data from string to float fails.
     for exp_list in exp_data_list:
+        if diagnostic_level >= 3:
+            print "   <3> Exp. List:", exp_list
         try:
             temp_list = []
             for x in exp_list[(exp_data_row_index-exp_column_name_row_index):]:
@@ -387,6 +392,8 @@ def extract_comp_data(comp_file_info):
                 else:
                     list_value = float(x)
                 temp_list.append(list_value)
+                if diagnostic_level >= 3:
+                    print "   <3> Temp List:", temp_list
             exp_data_dict[exp_list[0].strip()] = temp_list
         except:
             print "!!! Exp Data Conversion in Column Name "+exp_list[0].strip()+". !!!"
@@ -400,7 +407,7 @@ def extract_comp_data(comp_file_info):
     mod_data_cols = zip(*csv.reader(mod_file_object))
     if diagnostic_level >= 3:
         print "   <3> Mod. Data Columns:", mod_data_cols
-    
+        
     #Find X_Axis index number and confirm Col_Name based on Mod_X_Col_Name value in config file.
     column_counter = 0
     for column in mod_data_cols:
