@@ -1590,7 +1590,8 @@ observer will look straight ahead as they go up the stairs.
 Smokeview may be run in an unattended mode using
 instructions found in a script file.  The default name of the script file
 is  {\tt casename.ssf}.
-These instructions direct Smokeview to perform actions such as loading data files, setting view points and time values and rendering the Smokeview generated scene to an image file. These actions may be repeated over and over for different data files, different time values {\em etc.}
+These instructions direct Smokeview to perform actions such as loading data files,
+setting view points and time values and rendering the Smokeview generated scene to an image file. These actions may be repeated over and over for different data files, different time values {\em etc.}
 The script file may be created by Smokeview itself by turning
 on a {\em Script recorder} and then performing the actions desired to be automated.  The script
 may also or may created by editing a text file using documentation found below.
@@ -1601,7 +1602,7 @@ the script may be re-run resulting in newly generated images guaranteed to corre
 ones.  Reiterating, the intent of this new feature is not to provide script commands for all possible Smokeview features but simply to provide an easy means to document cases.
 
 The script recorder is activated by using the
-{\em Load/Unload>Scripting Optiond}\ menu and selecting {\em Start Recording}.
+{\em Load/Unload>Scripting Option}\ menu and selecting {\em Start Recording}.
 Select {\em Stop Recording}\ to terminate the script recorder.
 While the recorder is on, each time Smokeview loads a file, sets a view point
 {\em etc.}\ Smokeview places a script command into a file.  The file is named
@@ -1612,28 +1613,23 @@ either {\tt casename.ssf}\ or if this file already exists is named {\tt casename
 \section{Script Syntax}
 
 This section contains documentations for the script commands.
-The script commands supported are documented below.  However, to make the job creating script easier, Smokeview has a {\em recorder}\ mode.  The user turns on the recorder, then performs the desired sequence of steps.  The following example script loads several data files, sets viewpoints and time values and renders images.
+The script commands supported are documented below.  However, to make the job creating script easier,
+Smokeview has a {\em recorder}\ mode.  The user turns on the recorder, then performs the
+desired sequence of steps.  The following example script loads two data files, sets a time
+value and renders images.  The resulting images are displayed in Figure \ref{figscriptexample}.
 
-\begin{verbatim}
-LOAD3DSMOKE
- soot mass fraction
-LOAD3DSMOKE
- HRRPUV
-SETVIEWPOINT
- view 1
-SETTIMEVAL
- 30.0
-RENDERONCE
- smokeview_30
-UNLOADALL
-LOADBOUNDARY
- WALL_TEMPERATURE
-SETTIMEVAL
- 30.0
-RENDERONCE
- boundaryfile_30
-\end{verbatim}
+\fdsinput{plume5b.ssf}
 
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[width=3.5in]{scriptfigures/plume5b_smoke_05}&
+ \includegraphics[width=3.5in]{scriptfigures/plume5b_slice_05}\\
+  \end{tabular}
+\end{center}
+ \caption{Scripting example.}
+\label{figscriptexample}%
+\end{figure}
 
 \subsection{Loading and Unloading  Files}
 
@@ -1647,6 +1643,14 @@ Use other LOAD commands to load files of the specified type for all meshes.
 Usage:
 \begin{verbatim}
 LOADFILE
+  file (char)
+\end{verbatim}
+
+\hitem{LOADINIFILE}
+Use LOADINIFILE to load a configuration of {\tt .ini}\ file.  
+Usage:
+\begin{verbatim}
+LOADINIFILE
   file (char)
 \end{verbatim}
 
