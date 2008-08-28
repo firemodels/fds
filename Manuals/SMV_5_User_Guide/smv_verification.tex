@@ -1,6 +1,7 @@
 \newcommand{\figheightD}{2.75in}
 \newcommand{\figheightE}{2.5in}
 \newcommand{\figheightF}{2.25in}
+\newcommand{\figheightG}{1.1in}
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
 
 \chapter{Verifying Smokeview}
@@ -41,6 +42,32 @@ seconds.
 Similar to the slice file images, the first column draws all of the data while the second column discards or chops data below 140~\degC.
 Figure \ref{figsmoketest} shows a series of 3D smoke images drawn at 5.0, 10.0 and 30.0
 seconds.  The images contain both opacity slices derived from soot densities and heat release rate  per unit volume (HRRPUV).
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccccl}
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00000}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00025}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00050}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00075}\\
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00100}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00125}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00150}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00175}\\
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00200}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00225}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00250}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00275}\\
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00300}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00325}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_00350}&
+ \includegraphics[height=\figheightG]{scriptfigures/colorconv_slice_10000}\\
+&&&&\raisebox{0.0in}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_100}}\\
+\end{tabular}
+\end{center}
+ \caption[Color conversion test.]{Color conversion test.}
+\label{figboundtest}%
+\end{figure}
 
 
 \begin{figure}[\figoptions]

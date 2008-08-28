@@ -1,7 +1,7 @@
 A simple two-dimensional case testing data to color conversion 
 
 &HEAD CHID='colorconv', TITLE='Test data to color conversion, SVN $Revision$' / 
-&DUMP NFRAMES=5000 /
+&DUMP NFRAMES=4000 /
 
 &MESH IJK=100,1,100, XB=0.0,100.0,-1.0,1.0,0.0,100.0 /
 &SURF ID='COOLWALL' TMP_FRONT=20.0 /
@@ -20,11 +20,6 @@ A simple two-dimensional case testing data to color conversion
 &OBST XB= 99.0, 100.0, -2.0, 2.0, 1.0, 99.0 SURF_ID='INSWALL' /
 
 &SLCF PBY=0.0, QUANTITY='TEMPERATURE' /
-&SLCF PBY=0.0, QUANTITY='DIVERGENCE' /
-&SLCF PBY=0.0, QUANTITY='DENSITY' /
-&SLCF PBY=0.0, QUANTITY='PRESSURE' /
-&SLCF PBY=0.0, QUANTITY='H' /
-&SLCF PBY=0.0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
         
 &TAIL /
 
