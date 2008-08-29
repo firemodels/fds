@@ -6,9 +6,9 @@ from pyx import *
 
 ## Validation Data
 
-data_directory = "../../Validation/"
-output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
-config_file_name = "Validation_Data_Config_File_Test.csv"
+#data_directory = "../../Validation/"
+#output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
+#config_file_name = "Validation_Data_Config_File_Test.csv"
 
 ## Verification Data
 
@@ -21,6 +21,12 @@ config_file_name = "Validation_Data_Config_File_Test.csv"
 #data_directory = "../../Verification/"
 #output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
 #config_file_name = "Examples_Data_Config_File.csv"
+
+### Set Global Variables for Training Examples
+
+#data_directory = "../../Training/"
+#output_directory = "../../Manuals/FDS_SMV_Training_Guide/datafigures/"
+#config_file_name = "Training_Examples_Data_Config_File.csv"
 
 
 ### Set Diagnostic Output Level
