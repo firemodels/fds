@@ -2598,6 +2598,7 @@ int compare( const void *arg1, const void *arg2 ){
 void drawTimeBar(void){
   float xleft=.175f, xright=1.0f, ybot=0.10f, ytop=.35f, xxright;
 
+  glDisable(GL_LIGHTING);
   xleft = xtimeleft;
   if(fontindex==LARGE_FONT)xleft=xtimeleft+0.11;
   xright = xtimeright;
