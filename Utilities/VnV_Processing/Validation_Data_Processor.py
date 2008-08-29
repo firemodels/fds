@@ -6,9 +6,9 @@ from pyx import *
 
 ## Validation Data
 
-#data_directory = "../../Validation/"
-#output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
-#config_file_name = "Validation_Data_Config_File_Test.csv"
+data_directory = "../../Validation/"
+output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
+config_file_name = "Validation_Data_Config_File_Test.csv"
 
 ## Verification Data
 
@@ -202,7 +202,7 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
         if value2 < (float(stop_data)*float(x_scale)):
             rowcounter2 = rowcounter2 + 1
         else:
-            row_number2 = (rowcounter2)
+            row_number2 = (rowcounter2) - 1
             if diagnostic_level >= 2:
                 print "X Column Ends at Index #: ", str(row_number2), "with a value of: ", str(data_dict[col_name][row_number2])
             Xcol_end_index = row_number2
