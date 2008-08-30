@@ -1,4 +1,4 @@
-&HEAD CHID='MCFRS_Flashover_03',TITLE='MontoCo Flashover Simulator' / no bench, thermocouples, 0.2 mm droplet diameter
+&HEAD CHID='MCFRS_Flashover_03',TITLE='MontoCo Flashover Simulator SVN $Revision$' / no bench, thermocouples, 0.2 mm droplet diameter
 
 &MESH IJK=32,48,18, XB=-0.4,2.8,-0.4,4.4,0.0, 1.8/
 &MESH IJK=32,48,18, XB=-0.4,2.8,-0.4,4.4,1.8, 3.6/
