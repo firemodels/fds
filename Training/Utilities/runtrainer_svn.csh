@@ -28,8 +28,8 @@ setenv SVNROOT ~/FDS-SMV
 #      on the various RUNFDS/RUNFDSMPI command lines.
 
 # VVVVVVVVVVV Do not change these line VVVVVVVVVVVVVV
-set RUNFDS=$SVNROOT/Utilities/runfds.csh
-set RUNFDSMPI=$SVNROOT/runfdsmpi.csh
+set RUNFDS=$SVNROOT/Utilities/Scripts/runfds.csh
+set RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.csh
 setenv BASEDIR `pwd`
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
