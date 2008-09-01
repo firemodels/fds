@@ -378,8 +378,7 @@ Contains
     Real(EB) VERTICAL_LANDING_SEPARATION, STR_Length, STR_Height
     Integer N_LANDINGS, NL
     Logical :: RIGHT_HANDED
-   
-
+ 
     Character(26), Dimension(51) :: KNOWN_DOOR_NAMES
     Real(EB), Dimension(51) :: KNOWN_DOOR_PROBS
 
@@ -466,7 +465,7 @@ Contains
        Else 
           Open (LU_EVACOUT,file=FN_EVACOUT,form='formatted', status='replace')
        End If
-       If (Abs(TIME_SHRINK_FACTOR-1.D0) > 0.000000000001_EB ) &
+       If (Abs(TIME_SHRINK_FACTOR-1.0_EB) > 0.000000000001_EB ) &
             Call SHUTDOWN('ERROR: Evac is not ready for TIME_SHRINK_FACTOR')
     End If
 
@@ -3480,9 +3479,8 @@ Contains
     Integer i,j,k,ii,jj,kk,ipc, izero, n_tmp, ie, nom
     Integer i11, i22, group_size
     Logical pp_see_group, is_solid
-    Integer iie, jje, iio, jjo, jjj, tim_ic, iii, i44
-    Real(eb) y_o, x_o, delta_y, delta_x, x_now, y_now, &
-         xi, yj, x11, y11, group_x_sum, group_y_sum, &
+    Integer jjj, iii, i44
+    Real(eb) x11, y11, group_x_sum, group_y_sum, &
          group_x_center, group_y_center, dens_fac
     Integer :: i_endless_loop
     Real(eb), Dimension(6) :: y_tmp, x_tmp, r_tmp
@@ -3844,72 +3842,12 @@ Contains
                    End Do EH_Loop
 
                    If (i22 > 1) Then
-                      ! Chech if the new member will see the first member of the group.
+                      ! Check if the new member will see the first member of the group.
                       X11 = HR%X
                       Y11 = HR%Y
 
-                      XI  = CELLSI(Floor((x1_old-XS)*RDXINT))
-                      YJ  = CELLSJ(Floor((y1_old-YS)*RDYINT))
-                      IIE = Floor(XI+1.0_EB)
-                      JJE = Floor(YJ+1.0_EB)
-                      PP_see_group = .True.  ! oletusarvo
-                      If (Abs(X1_OLD-X11) >= Abs(Y1_OLD-Y11)) Then
-                         If ( iie < ii) Then
-                            iio = iie
-                            jjo = jje
-                            iie = ii
-                            jje = jj
-                            y_o = Y1_OLD
-                            x_o = X1_OLD
-                            Delta_y = (Y11 - Y1_OLD)
-                         Else
-                            Delta_y = (Y1_OLD - Y11)
-                            iio = ii
-                            jjo = jj
-                            y_o = Y11
-                            x_o = X11
-                         End If
-                         Delta_x = Abs(X1_OLD - X11)
-                         x_now = 0.0_EB
-                         PP_see_loop_x: Do iii = iio+1, iie-1
-                            x_now = x_now + DX(iii)
-                            y_now = y_o + x_now*(Delta_y/Delta_x)
-                            jjj = Floor(CELLSJ(Floor((y_now-YS)*RDYINT))+1.0_EB)
-                            tim_ic = CELL_INDEX(iii,jjj,KK)
-                            If (SOLID(tim_ic)) Then
-                               PP_see_group = .False.
-                               Exit PP_see_loop_x
-                            End If
-                         End Do PP_see_loop_x
-                      Else 
-                         If ( jje < jj) Then
-                            iio = iie
-                            jjo = jje
-                            iie = ii
-                            jje = jj
-                            y_o = Y1_OLD
-                            x_o = X1_OLD
-                            Delta_x = (X11 - X1_OLD)
-                         Else
-                            Delta_x = (X1_OLD - X11)
-                            iio = ii
-                            jjo = jj
-                            y_o = Y11
-                            x_o = X11
-                         End If
-                         Delta_y = Abs(Y1_OLD - Y11)
-                         y_now = 0.0_EB
-                         PP_see_loop_y: Do jjj = jjo+1, jje-1
-                            y_now = y_now + DY(jjj)
-                            x_now = x_o + y_now*(Delta_x/Delta_y)
-                            iii = Floor(CELLSI(Floor((x_now-XS)*RDXINT))+1.0_EB)
-                            tim_ic = CELL_INDEX(iii,jjj,KK)
-                            If (SOLID(tim_ic)) Then
-                               PP_see_group = .False.
-                               Exit PP_see_loop_y
-                            End If
-                         End Do PP_see_loop_y
-                      End If
+                      PP_see_group = See_each_other(nm, x11, y11, x1_old, y1_old)
+
                    Else
                       PP_see_group = .True.
                    End If
@@ -3993,86 +3931,23 @@ Contains
                 group_X_center = group_X_sum / Max(1,group_size)
                 group_Y_center = group_Y_sum / Max(1,group_size)
                 !
-                II = Floor( CELLSI(Floor((group_X_center-XS)* &
-                     RDXINT)) + 1.0_EB )
-                JJ = Floor( CELLSJ(Floor((group_Y_center-YS)* &
-                     RDYINT)) + 1.0_EB )
+                II = Floor( CELLSI(Floor((group_X_center-XS)*RDXINT)) + 1.0_EB )
+                JJ = Floor( CELLSJ(Floor((group_Y_center-YS)*RDYINT)) + 1.0_EB )
                 KK = 1
                 x1_old = group_X_center
                 y1_old = group_Y_center
-
                 PP_see_group = .True.
                 Do i44 = 1,group_size
                    HR => HUMAN( N_HUMANS - group_size + i44 )
                    X11 = HR%X
                    Y11 = HR%Y
-                   XI  = CELLSI(Floor((x1_old-XS)*RDXINT))
-                   YJ  = CELLSJ(Floor((y1_old-YS)*RDYINT))
-                   IIE = Floor(XI+1.0_EB)
-                   JJE = Floor(YJ+1.0_EB)
-                   If (Abs(X1_OLD-X11) >= Abs(Y1_OLD-Y11)) Then
-                      If ( iie < ii) Then
-                         iio = iie
-                         jjo = jje
-                         iie = ii
-                         jje = jj
-                         y_o = Y1_OLD
-                         x_o = X1_OLD
-                         Delta_y = (Y11 - Y1_OLD)
-                      Else
-                         Delta_y = (Y1_OLD - Y11)
-                         iio = ii
-                         jjo = jj
-                         y_o = Y11
-                         x_o = X11
-                      End If
-                      Delta_x = Abs(X1_OLD - X11)
-                      x_now = 0.0_EB
-                      PP_see_loop_x2: Do iii = iio+1, iie-1
-                         x_now = x_now + DX(iii)
-                         y_now = y_o + x_now*(Delta_y/Delta_x)
-                         jjj = Floor(CELLSJ(Floor((y_now-YS)*RDYINT))+1.0_EB)
-                         tim_ic = CELL_INDEX(iii,jjj,KK)
-                         If (SOLID(tim_ic)) Then
-                            PP_see_group = .False.
-                            Exit PP_see_loop_x2
-                         End If
-                      End Do PP_see_loop_x2
-                   Else 
-                      If ( jje < jj) Then
-                         iio = iie
-                         jjo = jje
-                         iie = ii
-                         jje = jj
-                         y_o = Y1_OLD
-                         x_o = X1_OLD
-                         Delta_x = (X11 - X1_OLD)
-                      Else
-                         Delta_x = (X1_OLD - X11)
-                         iio = ii
-                         jjo = jj
-                         y_o = Y11
-                         x_o = X11
-                      End If
-                      Delta_y = Abs(Y1_OLD - Y11)
-                      y_now = 0.0_EB
-                      PP_see_loop_y2: Do jjj = jjo+1, jje-1
-                         y_now = y_now + DY(jjj)
-                         x_now = x_o + y_now*(Delta_x/Delta_y)
-                         iii = Floor(CELLSI(Floor((x_now-XS)*RDXINT))+1.0_EB)
-                         tim_ic = CELL_INDEX(iii,jjj,KK)
-                         If (SOLID(tim_ic)) Then
-                            PP_see_group = .False.
-                            Exit PP_see_loop_y2
-                         End If
-                      End Do PP_see_loop_y2
-                   End If
+                   PP_see_group = See_each_other(nm, x11, y11, x1_old, y1_old)
+
 
                    If ( .Not. PP_see_group ) Then 
                       i_endless_loop = i_endless_loop + 1
                       i22 = 0  ! Start at the beginning of the group
                       i33 = i33 - 1  ! group index
-                      ilh = ilh - 1  ! lonely human index
                       i11 = i11 - group_size ! human index (evac-line)
                       N_HUMANS = N_HUMANS - group_size ! total # of humans
                       Cycle GROUP_SIZE_LOOP
@@ -4165,7 +4040,6 @@ Contains
     i_egrid = 0
     Do nom = 1, NMESHES
        If ( .Not.(EVACUATION_ONLY(NoM) .And. EVACUATION_GRID(NoM)) ) Cycle
-!!$       If ( EVACUATION_ONLY(NoM) .And. EVACUATION_GRID(NoM) ) Then
        M => MESHES(NOM)
        Group_List(:)%GROUP_SIZE  = 0
        Group_List(:)%GROUP_X = 0.0_EB
@@ -4332,6 +4206,7 @@ Contains
                          End If
                       End Do PP_see_door_y
                    End If
+
 
                    If (PP_see_door) Then
                       If (EVAC_Node_List(n_egrids+n_entrys+ie &
@@ -4671,7 +4546,6 @@ Contains
              HR%I_Target = Group_Known_Doors(j)%I_Target
           End If            ! first member of a group or a lonely soul
        End Do              ! 1, n_humans
-!!$       End If                ! main evac grid
     End Do                  ! 1, nmeshes
     Deallocate(Color_Tmp)
     Deallocate(FED_max_Door)
@@ -4682,7 +4556,6 @@ Contains
     i_egrid = 0
     Do nom = 1, NMESHES
        If ( .Not.(EVACUATION_ONLY(NoM) .And. EVACUATION_GRID(NoM)) ) Cycle
-!!$       If ( EVACUATION_ONLY(NoM) .And. EVACUATION_GRID(NoM) ) Then
        M => MESHES(NOM)
        i_egrid = i_egrid+1
        Do i = 1, M%N_HUMANS
@@ -5310,8 +5183,8 @@ Contains
     Real(EB) DTSP,UBAR,VBAR, &
          X1,Y1,XI,YJ,ZK
     Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ, &
-         IBC, ICX, ICY, N, I1, I2, J1,J2
-    Integer  IE, tim_ic, tim_iw, nm_tim, NM_now, tim_iwx, tim_iwy
+         IBC, ICX, ICY, N, J1, J2
+    Integer  IE, tim_ic, tim_iw, NM_now, tim_iwx, tim_iwy
     Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, &
          EVEL, tim_dist
     Integer istat, STRS_INDX
@@ -5324,7 +5197,7 @@ Contains
          B_Wall, A_Wall, T, Contact_F, Social_F, &
          smoke_beta, smoke_alpha, smoke_speed_fac
     Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, i_o
-    Real(EB) y_o, x_o, Delta_x, Delta_y, x_now, y_now, &
+    Real(EB) y_o, x_o, x_now, y_now, &
          d_humans, d_walls, &
          DTSP_new, &
          fac_tim, dt_group_door, x1_old, y1_old, x11, y11, &
@@ -5361,7 +5234,7 @@ Contains
     Real(EB) TNOW, tnow13, tnow14, tnow15
     !
     Logical NM_STRS_MESH
- 
+
     Type (MESH_TYPE), Pointer :: MFF
     !
     TNOW=SECOND()
@@ -5387,33 +5260,6 @@ Contains
     !
     L_eff_read = Btest(I_EVAC,2)
     L_eff_save = Btest(I_EVAC,0)
-!!$       If ( ICYC == 0 .And. L_eff_save ) Then
-!!$          Do nm_tim = 1, NMESHES
-!!$             If (EVACUATION_ONLY(nm_tim)) Then
-!!$                MFF=>MESHES(nm_tim)
-!!$                ibar_tmp = MFF%IBAR
-!!$                jbar_tmp = MFF%JBAR
-!!$                kbar_tmp = 1
-!!$                Write (LU_EVACEFF) ibar_tmp, jbar_tmp, kbar_tmp
-!!$                Do  i = 0, MFF%IBAR+1
-!!$                   Do j= 0, MFF%JBAR+1
-!!$                      Write (LU_EVACEFF) Real(MFF%U(i,j,1),FB), &
-!!$                           Real(MFF%V(i,j,1),FB)
-!!$                   End Do
-!!$                End Do
-!!$             End If
-!!$          End Do
-!!$          ! Clear the save bit, save is done only once.
-!!$          L_eff_save = .False.
-!!$          I_EVAC = Ibclr(I_EVAC,0)
-!!$       End If
-!!$       !
-!!$       ! Initialize counters only once for each time step.
-!!$       If ( ICYC >= 0 .And. icyc_old < ICYC ) Then
-!!$          icyc_old = ICYC
-!!$          fed_max_alive = 0.0_EB
-!!$          fed_max       = 0.0_EB
-!!$       End If
 
     !
     ! Find the egrid index
@@ -5442,8 +5288,7 @@ Contains
 
     Allocate(BLOCK_GRID_N(1:IBAR,1:JBAR),STAT=IZERO)
     Call ChkMemErr('EVACUATE_HUMANS','BLOCK_GRID_N',IZERO)
-
-
+    ! 
     HUMAN_TIME_LOOP: Do While ( Dt_sum < DT )
        DTSP = Min( (DT-Dt_sum), Tsteps(nm) )
        evac_dt_min2 = EVAC_DT_MAX
@@ -5703,111 +5548,20 @@ Contains
                             X11 = EVAC_EXITS(i-n_doors)%X 
                             Y11 = EVAC_EXITS(i-n_doors)%Y
                          End If
-                         max_fed = 0.0_EB
-                         ave_K   = 0.0_EB
-                         II = Floor(CELLSI(Floor((X11-XS)*RDXINT)) + 1.0_EB  )
-                         JJ = Floor(CELLSJ(Floor((Y11-YS)*RDYINT)) + 1.0_EB  )
-                         KK = 1
-                         XI  = CELLSI(Floor((x1_old-XS)*RDXINT))
-                         YJ  = CELLSJ(Floor((y1_old-YS)*RDYINT))
-                         IIE = Floor(XI+1.0_EB)
-                         JJE = Floor(YJ+1.0_EB)
-                         PP_see_door = .True. ! oletusarvo
-                         If (Abs(X1_OLD-X11) >= Abs(Y1_OLD-Y11)) Then
-                            If ( iie < ii) Then
-                               iio = iie
-                               jjo = jje
-                               iie = ii
-                               jje = jj
-                               y_o = Y1_OLD
-                               x_o = X1_OLD
-                               Delta_y = (Y11 - Y1_OLD)
-                            Else
-                               Delta_y = (Y1_OLD - Y11)
-                               iio = ii
-                               jjo = jj
-                               y_o = Y11
-                               x_o = X11
-                            End If
-                            Delta_x = Abs(X1_OLD - X11)
-                            x_now = 0.0_EB
-                            PP_see_door_x: Do iii = iio+1, iie-1
-                               x_now = x_now + DX(iii)
-                               y_now = y_o + x_now*(Delta_y/Delta_x)
-                               jjj = Floor( CELLSJ(Floor((y_now-YS)*RDYINT)) &
-                                    + 1.0_EB )
-                               tim_ic = CELL_INDEX(iii,jjj,KK)
-                               If (SOLID(tim_ic) .And. .Not. HR%I_Target == i) Then
-                                  PP_see_door = .False.
-                                  Exit PP_see_door_x
-                               Else
-                                  ave_K = ave_K + MASS_EXTINCTION_COEFFICIENT* &
-                                       1.0E-6_EB*HUMAN_GRID(iii,jjj)%SOOT_DENS / &
-                                       ( iie-1 - (iio+1) + 1)
-                                  If (max_fed < &
-                                       HUMAN_GRID(iii,jjj)%FED_CO_CO2_O2) Then
-                                     max_fed = HUMAN_GRID(iii,jjj)%FED_CO_CO2_O2 
-                                  End If
-                               End If
-                            End Do PP_see_door_x
-                         Else 
-                            If ( jje < jj) Then
-                               iio = iie
-                               jjo = jje
-                               iie = ii
-                               jje = jj
-                               y_o = Y1_OLD
-                               x_o = X1_OLD
-                               Delta_x = (X11 - X1_OLD)
-                            Else
-                               Delta_x = (X1_OLD - X11)
-                               iio = ii
-                               jjo = jj
-                               y_o = Y11
-                               x_o = X11
-                            End If
-                            Delta_y = Abs(Y1_OLD - Y11)
-                            y_now = 0.0_EB
-                            PP_see_door_y: Do jjj = jjo+1, jje-1
-                               y_now = y_now + DY(jjj)
-                               x_now = x_o + y_now*(Delta_x/Delta_y)
-                               iii = Floor( CELLSI(Floor((x_now-XS)*RDXINT)) &
-                                    + 1.0_EB )
-                               tim_ic = CELL_INDEX(iii,jjj,KK)
-                               If (SOLID(tim_ic) .And. .Not. HR%I_Target == i) Then
-                                  PP_see_door = .False.
-                                  Exit PP_see_door_y
-                               Else
-                                  ave_K = ave_K + MASS_EXTINCTION_COEFFICIENT* &
-                                       1.0E-6_EB*HUMAN_GRID(iii,jjj)%SOOT_DENS / &
-                                       ( jje-1 - (jjo+1) + 1)
-                                  If (max_fed < &
-                                       HUMAN_GRID(iii,jjj)%FED_CO_CO2_O2) Then
-                                     max_fed = HUMAN_GRID(iii,jjj)%FED_CO_CO2_O2 
-                                  End If
-                               End If
-                            End Do PP_see_door_y
-                         End If
+                         PP_see_door = See_door(nm, i, HR%I_Target, x1_old, y1_old, x11, y11, ave_K, max_fed)
+                         FED_max_Door(i) = max_fed
+                         K_ave_Door(i) = ave_K 
 
                          If (PP_see_door) Then
-                            If (EVAC_Node_List(n_egrids+n_entrys+i &
-                                 )%Node_Type == 'Door') Then
-                               If (.Not. EVAC_DOORS(i)%EXIT_SIGN .And. &
-                                    .Not. HR%I_Target == i) Then
+                            If (EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type == 'Door') Then
+                               If (.Not. EVAC_DOORS(i)%EXIT_SIGN .And. .Not. HR%I_Target == i) Then
                                   Is_Visible_Door(i) = .False.
                                End If
                             End If
-                            FED_max_Door(i) = max_fed
-                            K_ave_Door(i) = ave_K 
                          Else
                             Is_Visible_Door(i) = .False.
-                            iie = Floor(CELLSI(Floor((x1_old-XS)*RDXINT)) + 1.0_EB)
-                            jje = Floor(CELLSJ(Floor((y1_old-YS)*RDYINT)) + 1.0_EB)
-                            FED_max_Door(i) = &
-                                 HUMAN_GRID(iie,jje)%FED_CO_CO2_O2 
-                            K_ave_Door(i) = MASS_EXTINCTION_COEFFICIENT* &
-                                 1.0E-6_EB*HUMAN_GRID(iie,jje)%SOOT_DENS
                          End If
+
                       End If ! correct floor
                    End Do ! doors and exits
 
@@ -6283,13 +6037,6 @@ Contains
           ! Calculate persons prefered walking direction
           ! ========================================================
           NM_now = Max(1,HR%I_FFIELD)
-!!$          NM_now = NM
-!!$          MESH_ID_LOOP: Do nm_tim = 1, NMESHES
-!!$             If (Trim(MESH_NAME(nm_tim)) == Trim(HR%FFIELD_NAME)) Then
-!!$                NM_now = nm_tim
-!!$                Exit MESH_ID_LOOP
-!!$             End If
-!!$          End Do MESH_ID_LOOP
           ! 
           ! 
           ! Determine if the mesh is a stairs-mesh
@@ -6337,8 +6084,6 @@ Contains
              UBAR = 0.0_EB
              VBAR = 0.0_EB
           End If
-
-!          HR%Z = 0.5_EB*(ZS+ZF)
           ! ========================================================
           !
           ! Check if human is on a spectator stand.
@@ -6360,6 +6105,7 @@ Contains
                 UBAR = ESS%UBAR0
                 VBAR = ESS%VBAR0
              End If
+             
              cos_x = ESS%cos_x
              cos_y = ESS%cos_y
              Select Case (ESS%IOR)
@@ -6393,8 +6139,8 @@ Contains
                      (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
              End Select
              Exit SS_Loop1
+             HR%Z = 0.5_EB*(ZS+ZF)
           End Do SS_Loop1
-
           ! Set height and speed for a human in stairs
           If (NM_STRS_MESH) Then 
              IF (I==1) write(101,*) HR%X,HR%Y,HR%Z
@@ -6924,12 +6670,6 @@ Contains
           ! ========================================================
           NM_now = NM
           NM_now = Max(1,HR%I_FFIELD)
-!!$          MESH_ID_LOOP2: Do nm_tim = 1, NMESHES
-!!$             If (MESH_NAME(nm_tim) == HR%FFIELD_NAME) Then
-!!$                NM_now = nm_tim
-!!$                Exit MESH_ID_LOOP2
-!!$             End If
-!!$          End Do MESH_ID_LOOP2
           ! 
           ! Determine if the mesh is a stairs-mesh
           NM_STRS_MESH = .FALSE.
@@ -7052,9 +6792,8 @@ Contains
                 End Select
                 Exit SS_Loop2
              End If
-!             HR%Z = 0.5_EB*(ZS+ZF)
+             HR%Z = 0.5_EB*(ZS+ZF)
           End Do SS_Loop2
-
 
           ! Set height and speed for a human in stairs
           If (NM_STRS_MESH) Then 
@@ -7134,69 +6873,7 @@ Contains
              !
              ! Check, that the persons are seeing each other, i.e., there
              ! are no walls between.
-             ! Where is the other person?
-             XI  = CELLSI(Floor((HRE%X-XS)*RDXINT))
-             YJ  = CELLSJ(Floor((HRE%Y-YS)*RDYINT))
-             IIE = Floor(XI+1.0_EB)
-             JJE = Floor(YJ+1.0_EB)
-             PP_see_each = .True.
-             If (Abs(HRE%X-X1) >= Abs(HRE%Y-Y1)) Then
-                If ( iie < iin) Then
-                   iio = iie
-                   jjo = jje
-                   iie = iin
-                   jje = jjn
-                   y_o = HRE%Y
-                   x_o = HRE%X
-                   Delta_y = (Y1 - HRE%Y)
-                Else
-                   Delta_y = (HRE%Y - Y1)
-                   iio = iin
-                   jjo = jjn
-                   y_o = Y1
-                   x_o = X1
-                End If
-                Delta_x = Abs(HRE%X - X1)
-                x_now = 0.0_EB
-                PP_see_loop_x: Do iii = iio+1, iie-1
-                   x_now = x_now + DX(iii)
-                   y_now = y_o + x_now*(Delta_y/Delta_x)
-                   jjj = Floor(CELLSJ(Floor((y_now-YS)*RDYINT)) + 1.0_EB)
-                   tim_ic = CELL_INDEX(iii,jjj,KKN)
-                   If (SOLID(tim_ic)) Then
-                      PP_see_each = .False.
-                      Exit PP_see_loop_x
-                   End If
-                End Do PP_see_loop_x
-             Else 
-                If ( jje < jjn) Then
-                   iio = iie
-                   jjo = jje
-                   iie = iin
-                   jje = jjn
-                   y_o = HRE%Y
-                   x_o = HRE%X
-                   Delta_x = (X1 - HRE%X)
-                Else
-                   Delta_x = (HRE%X - X1)
-                   iio = iin
-                   jjo = jjn
-                   y_o = Y1
-                   x_o = X1
-                End If
-                Delta_y = Abs(HRE%Y - Y1)
-                y_now = 0.0_EB
-                PP_see_loop_y: Do jjj = jjo+1, jje-1
-                   y_now = y_now + DY(jjj)
-                   x_now = x_o + y_now*(Delta_x/Delta_y)
-                   iii = Floor(CELLSI(Floor((x_now-XS)*RDXINT)) + 1.0_EB)
-                   tim_ic = CELL_INDEX(iii,jjj,KKN)
-                   If (SOLID(tim_ic)) Then
-                      PP_see_each = .False.
-                      Exit PP_see_loop_y
-                   End If
-                End Do PP_see_loop_y
-             End If
+             PP_see_each = See_each_other(nm, x1, y1, HRE%X, HRE%Y)
              If (.Not. PP_see_each) Cycle P2PLOOP
              !
              ! 
@@ -8390,10 +8067,12 @@ Contains
                      HR%Y_old = HR%Y
                      ! ior is the direction where the human is ejected.
                      If (EVAC_Node_List(INODE2)%Node_Type == 'Door') Then
-                        ior = - EVAC_DOORS(EVAC_Node_List(INODE2)%Node_Index)%IOR
+                        ior = - EVAC_DOORS( &
+                             EVAC_Node_List(INODE2)%Node_Index)%IOR
                      End If
                      If (EVAC_Node_List(INODE2)%Node_Type == 'Entry') Then
-                        ior = EVAC_ENTRYS(EVAC_Node_List(INODE2)%Node_Index)%IOR
+                        ior = EVAC_ENTRYS( &
+                             EVAC_Node_List(INODE2)%Node_Index)%IOR
                      End If
                      If ( Abs(ior) == 1 ) Then
                         HR%U = v*ior
@@ -8426,7 +8105,7 @@ Contains
                         MESHES(imesh2)%HUMAN(MESHES(imesh2)%N_HUMANS)%IOR = 0
                      End If
 
-                  End If            ! target is door or entry 
+                  End If            ! target is door or entry
 
                   PDX%T_last=T
                   PDX%ICOUNT = PDX%ICOUNT + 1
@@ -8671,7 +8350,7 @@ Contains
       ! If target node is door/entry, try to put person to the
       ! floor. 
       !
-      ! ior_new = 1: target is a door or entry 
+      ! ior_new = 1: target is a door or entry
       !           3: target is a corridor
       !           4: target is a floor
       !           5: target is an exit
@@ -8957,12 +8636,12 @@ Contains
                   End If
                Else
                   Do ie = 1, n_doors
-                     If ( EVAC_DOORS(ie)%IMESH == nm) Then
+                     If ( EVAC_DOORS(ie)%IMESH == imesh2) Then
                         Is_Visible_Door(ie) = .True.
                      End If
                   End Do
                   Do ie = 1, n_exits
-                     If ( EVAC_EXITS(ie)%IMESH == nm .And. &
+                     If ( EVAC_EXITS(ie)%IMESH == imesh2 .And. &
                           .Not. EVAC_EXITS(ie)%COUNT_ONLY ) Then
                         Is_Visible_Door(n_doors+ie) = .True.
                      End If
@@ -9001,91 +8680,9 @@ Contains
                         XX1 = EVAC_EXITS(ie-n_doors)%X 
                         YY1 = EVAC_EXITS(ie-n_doors)%Y
                      End If
-                     max_fed = 0.0_EB
-                     ave_K   = 0.0_EB
-                     II = Floor( MFF%CELLSI(Floor((XX1-MFF%XS)*MFF%RDXINT)) &
-                          + 1.0_EB )
-                     JJ = Floor( MFF%CELLSJ(Floor((YY1-MFF%YS)*MFF%RDYINT)) &
-                          + 1.0_EB )
-                     KK = 1
-                     XI  = MFF%CELLSI(Floor((xx-MFF%XS)*MFF%RDXINT))
-                     YJ  = MFF%CELLSJ(Floor((yy-MFF%YS)*MFF%RDYINT))
-                     IIE = Floor(XI+1.0_EB)
-                     JJE = Floor(YJ+1.0_EB)
-                     PP_see_door = .True. ! oletusarvo
-                     If (Abs(XX-XX1) >= Abs(YY-YY1)) Then
-                        If ( iie < ii) Then
-                           iio = iie
-                           jjo = jje
-                           iie = ii
-                           jje = jj
-                           y_o = YY
-                           x_o = XX
-                           Delta_y = (YY1 - YY)
-                        Else
-                           Delta_y = (YY - YY1)
-                           iio = ii
-                           jjo = jj
-                           y_o = YY1
-                           x_o = XX1
-                        End If
-                        Delta_x = Abs(XX - XX1)
-                        x_now = 0.0_EB
-                        PP_see_door_x: Do iii = iio+1, iie-1
-                           x_now = x_now + MFF%DX(iii)
-                           y_now = y_o + x_now*(Delta_y/Delta_x)
-                           jjj = Floor(MFF%CELLSJ(Floor((y_now-MFF%YS)* &
-                                MFF%RDYINT))+1.0_EB)
-                           ave_K = ave_K + MASS_EXTINCTION_COEFFICIENT* &
-                                1.0E-6_EB*MFF%HUMAN_GRID(iii,jjj)%SOOT_DENS / &
-                                ( iie-1 - (iio+1) + 1)
-                           If (max_fed < &
-                                MFF%HUMAN_GRID(iii,jjj)%FED_CO_CO2_O2) Then
-                              max_fed = MFF%HUMAN_GRID(iii,jjj)%FED_CO_CO2_O2 
-                           End If
-                           tim_ic = MFF%CELL_INDEX(iii,jjj,KK)
-                           If (MFF%SOLID(tim_ic)) Then
-                              PP_see_door = .False.
-                              Exit PP_see_door_x
-                           End If
-                        End Do PP_see_door_x
-                     Else 
-                        If ( jje < jj) Then
-                           iio = iie
-                           jjo = jje
-                           iie = ii
-                           jje = jj
-                           y_o = YY
-                           x_o = XX
-                           Delta_x = (XX1 - XX)
-                        Else
-                           Delta_x = (XX - XX1)
-                           iio = ii
-                           jjo = jj
-                           y_o = YY1
-                           x_o = XX1
-                        End If
-                        Delta_y = Abs(YY - YY1)
-                        y_now = 0.0_EB
-                        PP_see_door_y: Do jjj = jjo+1, jje-1
-                           y_now = y_now + MFF%DY(jjj)
-                           x_now = x_o + y_now*(Delta_x/Delta_y)
-                           iii = Floor(MFF%CELLSI(Floor((x_now-MFF%XS)* &
-                                MFF%RDXINT))+1.0_EB)
-                           ave_K = ave_K + MASS_EXTINCTION_COEFFICIENT* &
-                                1.0E-6_EB*MFF%HUMAN_GRID(iii,jjj)%SOOT_DENS / &
-                                ( jje-1 - (jjo+1) + 1)
-                           If (max_fed < &
-                                MFF%HUMAN_GRID(iii,jjj)%FED_CO_CO2_O2) Then
-                              max_fed = MFF%HUMAN_GRID(iii,jjj)%FED_CO_CO2_O2 
-                           End If
-                           tim_ic = MFF%CELL_INDEX(iii,jjj,KK)
-                           If (MFF%SOLID(tim_ic)) Then
-                              PP_see_door = .False.
-                              Exit PP_see_door_y
-                           End If
-                        End Do PP_see_door_y
-                     End If
+                     PP_see_door = See_door(imesh2, ie, HR%I_Target, xx, yy, xx1, yy1, ave_K, max_fed)
+                     FED_max_Door(ie) = max_fed
+                     K_ave_Door(ie) = ave_K 
 
                      If (PP_see_door) Then
                         If (EVAC_Node_List(n_egrids+n_entrys+ie)%Node_Type &
@@ -9094,17 +8691,10 @@ Contains
                               Is_Visible_Door(ie) = .False.
                            End If
                         End If
-                        FED_max_Door(ie) = max_fed
-                        K_ave_Door(ie) = ave_K 
                      Else
                         Is_Visible_Door(ie) = .False.
-                        iie = Floor(MFF%CELLSI(Floor((xx-MFF%XS)*MFF%RDXINT)) + 1.0_EB)
-                        jje = Floor(MFF%CELLSJ(Floor((yy-MFF%YS)*MFF%RDYINT)) + 1.0_EB)
-                        FED_max_Door(ie) = &
-                             MFF%HUMAN_GRID(iie,jje)%FED_CO_CO2_O2 
-                        K_ave_Door(ie) = MASS_EXTINCTION_COEFFICIENT* &
-                             1.0E-6_EB*MFF%HUMAN_GRID(iie,jje)%SOOT_DENS
                      End If
+
                   End If            ! correct floor
                End Do              ! doors and exits
 
@@ -10201,7 +9791,6 @@ Contains
     !
     If (.Not.Any(EVACUATION_GRID)) Return
     If (.Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM))) Return
-!!$    If (EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) Then
     Call POINT_TO_MESH(NM)
     !       Call POINT_TO_EVAC_MESH(NM)
 
@@ -10303,7 +9892,6 @@ Contains
 
     End Do HUMAN_CLASS_LOOP
 
-!!$    End If
     !
     TUSED(7,NM) = TUSED(7,NM) + SECOND() - TNOW
   End Subroutine DUMP_EVAC
@@ -10478,15 +10066,211 @@ Contains
     End If
     !
   End Subroutine DUMP_EVAC_CSV
-!
-SUBROUTINE GET_REV_evac(MODULE_REV,MODULE_DATE)
-INTEGER,INTENT(INOUT) :: MODULE_REV
-CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
 
-WRITE(MODULE_DATE,'(A)') evacrev(INDEX(evacrev,':')+1:LEN_TRIM(evacrev)-2)
-READ (MODULE_DATE,'(I5)') MODULE_REV
-WRITE(MODULE_DATE,'(A)') evacdate
+  Logical Function See_each_other(nm, r1_x, r1_y, r2_x, r2_y)
+    ! This function returns true, if the two points have a line-of-sight.
+    ! This function does not use smoke information, i.e., it just sees if
+    ! there are obstacles between the two points.
+    ! NOTE: This works only for thick OBSTs (at least one grid cell thick)
+    ! Inputs:  nm: mesh index, r1 an r2 should belong to the same mesh
+    !          (r1_x,r1_y): co-ordinates of the first agent
+    !          (r2_x,r2_y): co-ordinates of the second agent
 
-END SUBROUTINE GET_REV_evac
+    Integer, Intent(In) :: nm
+    Real(EB), Intent(In) :: r1_x, r1_y, r2_x, r2_y
+    Integer :: i, j, isx, isy, i_r1, i_r2, j_r1, j_r2
+    Integer :: i_old, j_old, ic, ic1, ic2
+    Real(EB) :: x, y
+    Type (Mesh_Type), Pointer :: M
 
+    M => MESHES(NM)
+    See_each_other = .True.  ! Default
+    
+    isx = Int(Sign(1.0_EB,r2_x - r1_x)) ! loop increment +1 or -1
+    isy = Int(Sign(1.0_EB,r2_y - r1_y)) ! loop increment +1 or -1
+    i_r1 = Floor(M%CELLSI(Floor((r1_x-M%XS)*M%RDXINT)) + 1.0_EB) ! II start
+    i_r2 = Floor(M%CELLSI(Floor((r2_x-M%XS)*M%RDXINT)) + 1.0_EB) ! II end
+    j_r1 = Floor(M%CELLSJ(Floor((r1_y-M%YS)*M%RDYINT)) + 1.0_EB) ! JJ start
+    j_r2 = Floor(M%CELLSJ(Floor((r2_y-M%YS)*M%RDYINT)) + 1.0_EB) ! JJ end
+    i_r1 = Max(1,Min(i_r1,M%IBAR)) ! To be sure that indices are always ok.
+    i_r2 = Max(1,Min(i_r2,M%IBAR))
+    j_r1 = Max(1,Min(j_r1,M%JBAR))
+    j_r2 = Max(1,Min(j_r2,M%JBAR))
+    ! Neighboring cells in x and y directions (and same cell)
+    If (Abs(i_r2-i_r1)+Abs(j_r2-j_r1) .Le. 1) Return
+    ! Neighboring cells in diagonal directions (and same cell)
+    ! One can not see through "sawtooth" walls (one grid cell thick
+    ! diagonal walls and "just touching obst" wall corners)
+    If (Abs(i_r2-i_r1)==1 .And. Abs(j_r2-j_r1)==1) Then
+       ic1 = M%CELL_INDEX(i_r1,j_r2,1)
+       ic2 = M%CELL_INDEX(i_r2,j_r1,1)
+       If ((M%Solid(ic1) .And. M%Solid(ic2))) See_each_other = .False.
+       Return
+    End If
+
+    ! Choose the main direction:
+    If (Abs(i_r2-i_r1) .Lt. Abs(j_r2-j_r1)) Then
+       ! Now y is the main direction
+       i_old = i_r1 ; j_old = j_r1
+       y = 0.0_EB
+       Do j = j_r1+isy, j_r2, isy
+          y = y + isy*M%DY(j)
+          x = Max(M%XS,Min(M%XF,r1_x + y*(r2_x - r1_x)/(r2_y - r1_y)))
+          i = Floor(M%CELLSI(Floor((x-M%XS)*M%RDXINT)) + 1.0_EB)
+          i = isx*Min(isx*i_r2,isx*i) ! i in interval j_r1...j_r2
+          ic  = M%CELL_INDEX(i,j,1)
+          ic1 = M%CELL_INDEX(i_old,j,1)
+          ic2 = M%CELL_INDEX(i,j_old,1)
+          If (M%Solid(ic) .Or. (M%Solid(ic1) .And. M%Solid(ic2))) Then
+             See_each_other = .False.
+             Exit 
+          End If
+          i_old = i ; j_old = j
+       End Do
+    Else
+       ! Now x is the main direction
+       i_old = i_r1 ; j_old = j_r1
+       x = 0.0_EB 
+       Do i = i_r1+isx, i_r2, isx
+          x = x + isx*M%DX(i)
+          y = Max(M%YS,Min(M%YF,r1_y + x*(r2_y - r1_y)/(r2_x - r1_x)))
+          j = Floor(M%CELLSJ(Floor((y-M%YS)*M%RDYINT)) + 1.0_EB)
+          j = isy*Min(isy*j_r2,isy*j) ! j in interval j_r1...j_r2
+          ic  = M%CELL_INDEX(i,j,1)
+          ic1 = M%CELL_INDEX(i_old,j,1)
+          ic2 = M%CELL_INDEX(i,j_old,1)
+          If (M%Solid(ic) .Or. (M%Solid(ic1) .And. M%Solid(ic2))) Then
+             See_each_other = .False.
+             Exit 
+          End If
+          i_old = i ; j_old = j
+       End Do
+    End If
+  End Function See_each_other
+  !
+  Logical Function See_door(nm, idoor, itarget, r1_x, r1_y, r2_x, r2_y, ave_K, max_fed)
+    ! This function returns true, if the two points have a line-of-sight.
+    ! This function does use smoke information, i.e., it sees if
+    ! there are obstacles and/or too much smoke between the two points.
+    ! NOTE: This works only for thick OBSTs (at least one grid cell thick)
+    ! Inputs:  nm: mesh index, r1 an r2 should belong to the same mesh
+    !          idoor: the index of the door (idoor_max = n_doors+n_exits)
+    !          itarget: the index of target door of the agent
+    !          (r1_x,r1_y): co-ordinates of the agent
+    !          (r2_x,r2_y): co-ordinates of the door
+    ! Outputs: ave_K: average extinction coefficient of the path
+    !          max_fed: maximum level of FED at the path
+
+    Integer, Intent(In) :: nm, idoor, itarget
+    Real(EB), Intent(In) :: r1_x, r1_y, r2_x, r2_y
+    Real(EB), Intent(Out) :: ave_K, max_fed
+    Integer :: i, j, isx, isy, i_r1, i_r2, j_r1, j_r2
+    Integer :: i_old, j_old, ic, ic1, ic2
+    Real(EB) :: x, y
+    Type (Mesh_Type), Pointer :: M
+
+    M => MESHES(NM)
+    See_door = .True.  ! Default
+    ave_K = 0.0_EB
+    max_fed = 0.0_EB
+    
+    isx = Int(Sign(1.0_EB,r2_x - r1_x)) ! loop increment +1 or -1
+    isy = Int(Sign(1.0_EB,r2_y - r1_y)) ! loop increment +1 or -1
+    i_r1 = Floor(M%CELLSI(Floor((r1_x-M%XS)*M%RDXINT)) + 1.0_EB) ! II start
+    i_r2 = Floor(M%CELLSI(Floor((r2_x-M%XS)*M%RDXINT)) + 1.0_EB) ! II end
+    j_r1 = Floor(M%CELLSJ(Floor((r1_y-M%YS)*M%RDYINT)) + 1.0_EB) ! JJ start
+    j_r2 = Floor(M%CELLSJ(Floor((r2_y-M%YS)*M%RDYINT)) + 1.0_EB) ! JJ end
+    i_r1 = Max(1,Min(i_r1,M%IBAR)) ! To be sure that indices are always ok.
+    i_r2 = Max(1,Min(i_r2,M%IBAR))
+    j_r1 = Max(1,Min(j_r1,M%JBAR))
+    j_r2 = Max(1,Min(j_r2,M%JBAR))
+
+    ! Neighboring cells in x and y directions (and same cell)
+    If (Abs(i_r2-i_r1)+Abs(j_r2-j_r1) .Le. 1) Then
+       ave_K = MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*(M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS + &
+            M%HUMAN_GRID(i_r2,j_r2)%SOOT_DENS)*0.5_EB  ! Average
+       max_fed = Max(M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2, &
+            M%HUMAN_GRID(i_r2,j_r2)%FED_CO_CO2_O2)
+       Return
+    End If
+
+    ! Neighboring cells in diagonal directions (and same cell)
+    ! One can not see through "sawtooth" walls (one grid cell thick
+    ! diagonal walls and "just touching obst" wall corners)
+    If (Abs(i_r2-i_r1)==1 .And. Abs(j_r2-j_r1)==1) Then
+       ic1 = M%CELL_INDEX(i_r1,j_r2,1)
+       ic2 = M%CELL_INDEX(i_r2,j_r1,1)
+       If ((M%Solid(ic1) .And. M%Solid(ic2))) See_door = .False.
+       ave_K = MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*(M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS + &
+            M%HUMAN_GRID(i_r2,j_r2)%SOOT_DENS)*0.5_EB  ! Average
+       max_fed = Max(M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2, &
+            M%HUMAN_GRID(i_r2,j_r2)%FED_CO_CO2_O2)
+       Return
+    End If
+
+    ! Choose the main direction:
+    If (Abs(i_r2-i_r1) .Lt. Abs(j_r2-j_r1)) Then
+       ! Now y is the main direction
+       ! Add the first cell (r1) to the average
+       ave_K = Mass_extinction_coefficient*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS/(Abs(j_r1-j_r2)+1)
+       max_fed =  M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
+
+       i_old = i_r1 ; j_old = j_r1
+       y = 0.0_EB
+       Do j = j_r1+isy, j_r2, isy
+          y = y + isy*M%DY(j)
+          x = Max(M%XS,Min(M%XF,r1_x + y*(r2_x - r1_x)/(r2_y - r1_y)))
+          i = Floor(M%CELLSI(Floor((x-M%XS)*M%RDXINT)) + 1.0_EB)
+          i = isx*Min(isx*i_r2,isx*i) ! i in interval j_r1...j_r2
+          ic  = M%CELL_INDEX(i,j,1)
+          ic1 = M%CELL_INDEX(i_old,j,1)
+          ic2 = M%CELL_INDEX(i,j_old,1)
+          If ((M%Solid(ic) .Or. (M%Solid(ic1) .And. M%Solid(ic2))) .And. (idoor .Ne. itarget)) Then
+             See_door = .False.
+             ave_K = MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS
+             max_fed = M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
+             Exit 
+          End If
+          ave_K = ave_K + MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i,j)%SOOT_DENS/(Abs(j_r1-j_r2)+1)
+          max_fed = Max(max_fed, M%HUMAN_GRID(i,j)%FED_CO_CO2_O2)
+          i_old = i ; j_old = j
+       End Do
+    Else
+       ! Now x is the main direction
+       ! Add the first cell (r1) to the average
+       ave_K = Mass_extinction_coefficient*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS/(Abs(i_r1-i_r2)+1)
+       max_fed =  M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
+       i_old = i_r1 ; j_old = j_r1
+       x = 0.0_EB 
+       Do i = i_r1+isx, i_r2, isx
+          x = x + isx*M%DX(i)
+          y = Max(M%YS,Min(M%YF,r1_y + x*(r2_y - r1_y)/(r2_x - r1_x)))
+          j = Floor(M%CELLSJ(Floor((y-M%YS)*M%RDYINT)) + 1.0_EB)
+          j = isy*Min(isy*j_r2,isy*j) ! j in interval j_r1...j_r2
+          ic  = M%CELL_INDEX(i,j,1)
+          ic1 = M%CELL_INDEX(i_old,j,1)
+          ic2 = M%CELL_INDEX(i,j_old,1)
+          If ((M%Solid(ic) .Or. (M%Solid(ic1) .And. M%Solid(ic2))) .And. (idoor .Ne. itarget)) Then
+             See_door = .False.
+             ave_K = MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS
+             max_fed = M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
+             Exit 
+          End If
+          ave_K = ave_K + MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i,j)%SOOT_DENS/(Abs(i_r1-i_r2)+1)
+          max_fed = Max(max_fed, M%HUMAN_GRID(i,j)%FED_CO_CO2_O2)
+          i_old = i ; j_old = j
+       End Do
+    End If
+  End Function See_door
+  !
+  SUBROUTINE GET_REV_evac(MODULE_REV,MODULE_DATE)
+    INTEGER,INTENT(INOUT) :: MODULE_REV
+    CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
+    
+    WRITE(MODULE_DATE,'(A)') evacrev(INDEX(evacrev,':')+1:LEN_TRIM(evacrev)-2)
+    READ (MODULE_DATE,'(I5)') MODULE_REV
+    WRITE(MODULE_DATE,'(A)') evacdate
+    
+  END SUBROUTINE GET_REV_evac
+  
 End Module EVAC
