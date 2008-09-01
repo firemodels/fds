@@ -1037,8 +1037,12 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          
       ENDDO MATERIAL_LOOP3
       
-      K_S(I) = K_S(I)/VOLSUM
-      IF (I.EQ.1) E_WALL(IW) = E_WALL(IW)/VOLSUM
+      IF (VOLSUM > 0._EB) THEN
+         K_S(I) = K_S(I)/VOLSUM
+         IF (I.EQ.1) E_WALL(IW) = E_WALL(IW)/VOLSUM
+      ELSE
+         write(*,*) I
+      ENDIF
    ENDDO POINT_LOOP3
   
    K_S(0)     = K_S(1)     ! Calculate average K_S between at grid cell boundaries. Store result in K_S
@@ -1061,7 +1065,8 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
             KAPPA_S(I) = KAPPA_S(I) + WC%RHO_S(I,N)*ML%KAPPA_S/ML%RHO_S
          ENDDO
      !!  KAPPA_S(I) = 2.*KAPPA_S(I)*DX_S(I)/VOLSUM    ! kappa = 2*dx*kappa
-         KAPPA_S(I) = 2.*KAPPA_S(I)/(RDX_S(I)*VOLSUM)    ! kappa = 2*dx*kappa or 2*r*dr*kappa
+   
+         IF (VOLSUM>0._EB) KAPPA_S(I) = 2.*KAPPA_S(I)/(RDX_S(I)*VOLSUM)    ! kappa = 2*dx*kappa or 2*r*dr*kappa
       ENDDO
       DO I=0,NWP
          IF (SF%GEOMETRY==SURF_CYLINDRICAL) THEN

@@ -3104,6 +3104,21 @@ READ_MATL_LOOP: DO N=1,N_MATL
       ENDDO
 
    ENDIF NOT_BOILING
+
+   ! Error checking for thermal properties
+   IF ( DENSITY == 0._EB ) THEN
+      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,': DENSITY=0' 
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+   IF ( CONDUCTIVITY == 0._EB .AND. CONDUCTIVITY_RAMP == 'null' ) THEN
+      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,': CONDUCTIVITY = 0' 
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+   IF ( SPECIFIC_HEAT == 0._EB .AND. SPECIFIC_HEAT_RAMP == 'null' ) THEN
+      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,': SPECIFIC_HEAT = 0' 
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+
  
    ! Pack MATL parameters into the MATERIAL derived type
  
@@ -3198,9 +3213,9 @@ SUBROUTINE SET_MATL_DEFAULTS
 A                      = 1.E13_EB    ! 1/s
 ABSORPTION_COEFFICIENT = 5.0E4_EB    ! 1/m, corresponds to 99.3% drop within 1E-4 m distance.
 BOILING_TEMPERATURE    = 5000._EB    ! C
-CONDUCTIVITY           = 0.1_EB      ! W/m/K
+CONDUCTIVITY           = 0.0_EB      ! W/m/K
 CONDUCTIVITY_RAMP      = 'null'
-DENSITY                = 500._EB     ! kg/m3
+DENSITY                = 0._EB       ! kg/m3
 E                      = -1._EB      ! kJ/kmol
 EMISSIVITY             = 0.9_EB
 FYI                    = 'null'
@@ -3218,7 +3233,7 @@ NU_WATER               = 0._EB
 REFERENCE_TEMPERATURE  = -1000._EB
 REFERENCE_RATE         = 0.1_EB
 RESIDUE                = 'null'
-SPECIFIC_HEAT          = 1.0_EB      ! kJ/kg/K
+SPECIFIC_HEAT          = 0.0_EB      ! kJ/kg/K
 SPECIFIC_HEAT_RAMP     = 'null'
  
 END SUBROUTINE SET_MATL_DEFAULTS
