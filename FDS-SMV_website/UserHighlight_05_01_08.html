@@ -129,71 +129,39 @@
 </div>
 <h3>Submission Resources:</h3>
 <p align="justify">FDS Input File: <a href="assets/user_submissions/vel_t.fds">vel_t.fds<br />
-</a>Original Hand Notes: <a href="assets/user_submissions/hand notes.PDF">Hand Written</a> (.pdf) <a href="assets/user_submissions/clean notes.PDF">Cleaned Up</a> (.pdf)<br />
+</a>Original Hand Notes: <a href="assets/user_submissions/hand_notes.PDF">Hand Written</a> (.pdf) <a href="assets/user_submissions/clean_notes.pdf">Cleaned Up</a> (.pdf)<br />
   High Quality Video File: <a href="assets/user_submissions/Vortex_1.mov" target="_blank">Quicktime (.mov)</a> <span class="style1">Right-Click to Save, requires <a href="http://www.apple.com/quicktime/download/" target="_blank">Apple Quicktime Player</a>.</span><br />
 </p>
 <h3>Personal Background:</h3>
 <p align="left">NAME: Brad Casterline<br />
   COMPANY: <a href="http://www.fsc-inc.com/" target="_blank">FSC, Inc</a> <img src="assets/images/external_link_icon.gif" alt="External Link" />  (Consulting Engineers) Kansas City, Kansas<br />
   OCCUPATION: Engineering Technician - Automatic Sprinkler Systems - NICET IV - Fire Protection Division</p>
-<p align="justify"> For over thirty years I have been preparing shop and/or consulting drawings, hydraulic calculations, 
-  and &quot;stocklists&quot; for approval and installation of sprinkler systems. I have not &quot;needed&quot; to know all
-  the math and science behind CFDs to do my job, but, when two years ago, Ali, the head of our Codes
-  Division, introduced me to FDS-SMV, I quickly realized how little I &quot;really knew&quot; about what I had
-  been doing for so long. I became hooked, as it turns out, it is good that I did not have a personal
-  computer at home at the time. My &quot;fix&quot; was reading all three Guides and all the examples several times
-  before I started &quot;typing&quot; much. At night I would say &quot;Sure, OK, I get it now, tomorrow at lunch time
-  I will do &quot;this&quot; and it will turn out &quot;that&quot; way&quot;. I was OK when it &quot;blew up in my face&quot; because it
-  gave me something to do that night, to find out where I had not followed the Guide to the &quot;T&quot;.</p>
-<p align="justify">Now while eating lunch I read the Discussions. I have learned a lot from this (except when the answers are
-  already in the guides!). I have not posted any questions yet because:</p>
+<p align="justify"> For over thirty years I have been preparing shop and consulting drawings, hydraulic calculations, and stocklists for approval and installation of fire sprinkler systems. I have not needed to know the math and science behind CFDs to do my job, but, when two years ago, Ali, the head of our Codes Division, introduced me to FDS-SMV, I quickly realized how little I really knew about what I had been doing for so long. I became hooked- as it turns out, it is good that I did not have a personal computer at home at the time- my fix was reading all three Guides and all the examples several times before I started typing much. At night I would say "Sure, OK, I get it now, tomorrow at lunch time I will do THIS and it will turn out THAT way”. I was OK when it blew up in my face because it gave me something to do that night- find out where I had not followed the Guide to the T.
+ Now while eating lunch I read the Discussions. I have learned a lot from this (except when the answers are already in the guides). I have not posted any questions yet because
+:</p>
 <ol>
-  <li>I  learn more trying to figure it out first. For example, late last year, Randy, FSC-MEP (Mechanical Division)
-    mentioned a project he was working on, a gymnasium with a glass wall. The Architect was concerned about
-    condensation (on the wall and floor). Randy asked if FDS could handle something like that. I said  &quot;FDS can do ANYTHING&quot;! This gave me something to do for several nights. I set inside and outside temperature
-    and humidity, sprayed water on a hot plate, tracked and directed the vapor on to the glass, and tried to pinpoint the time and conditions when the vapor condensed. I failed. Later I saw the condensation question
-    posted- the answer was &quot;no&quot;, but I had learned how to boil water!, a lot about particles, glass properties,
-    and all the applicable output quantities.</li>
-  <li>    I have &quot;taken&quot; so much already, I wanted to &quot;give&quot; (no matter how trite) before I take more.<br />
-  </li>
+  <li>I learn more trying to figure it out first, i.e. late last year, Randy, FSC-MEP (Mechanical Division) mentioned a project he was working on-- a gymnasium with a glass wall- the Architect was concerned about condensation (on the wall and floor). Randy asked if FDS could handle something like that. I said "FDS can do ANYTHING"! This gave me something to do for several nights. I set inside and outside temperature and humidity, sprayed water on a hot plate, tracked and directed the vapor onto the glass, and tried to pinpoint the time and conditions when the vapor condensed. I failed. Later I saw the condensation question posted- the answer was no- but I had learned how to boil water, a lot about particles, glass properties, and all the applicable output quantities.</li>
+  <li>I have taken so much already, I wanted to give something before I take more.</li>
   <li>I have been unwilling to reveal my ignorance.</li>
 </ol>
 <h3>Submission Background:</h3>
 <p align="justify">Just before last Christmas, Vish, a co-worker, sent me a link to a video of the new Mercedes Benz museum 
-  in Germany- a high class smoke removal system using air jets to swirl the smoke out. <a href="http://www.youtube.com/watch?v=iaazLTc0PCA" target="_blank">[Link]<img src="assets/images/external_link_icon.gif" alt="External Link" /></a> I was taking vacation
-  between Christmas and New year so I thought it would be fun and interesting to see if I could &quot;make a tornado&quot;.  
-  Maybe living in Kansas played a part also. I had not given much thought to VEL_T until then.  </p>
-<p align="justify">I knew Bernoulli's principle-&quot;Where the velocity of a fluid is high, the pressure is low
-  and, where the velocity of a fluid is low, the pressure is high&quot;. The change in pressure equals
-  half the density times the velocity squared- (Bernoulli's equation). So I wondered, is the velocity higher at the top or bottom? I thought the pressure must be
-  higher at the bottom, (to push the sides in to a point), so the velocity must be lower at the
-  bottom. I did the input file-- it did not work. When I turned it &quot;up-side-down&quot; it did work. 
-  I looked at some Z velocity slices thinking the velocity must be lower at the top,
-  but the velocity was the same throughout- DUH!- if it was not, the &quot;particles&quot; would fly apart.</p>
-<p align="justify">But if there is no change in velocity or density, there is no change in pressure. I thought I had gone as far as I could go- it was cool to look at and I know others figured it out<br />
-  hundreds of years ago, but I was born and raised in &quot;The Show Me State&quot;, and am hard-headed. Looking at all 5 Z slices, I saw what did change, the AREA OF SAME VELOCITY increased from
-  bottom to top. Since pressure is force divided by area, force is pressure times area- so I
-  could see the direction and magnitude of a &quot;Force&quot;. </p>
-<p align="justify">I showed it to a few people at work, my son, a friend, varied the background and species a little
-  (BTW, HELIUM does not &quot;get it together&quot; with the current fan strength) and let it go, until I found out
-  about the &quot;Simulation of the Month&quot; contest. (I'll bet that if there was a prize- say a mouse pad
-  with the author's &quot;image&quot;- like the Haiku contest on Poetry.com- you would get a lot more entries :) ).</p>
-<p align="justify">I input 100 fans at first, thinking I would have to vary the tangent direction smoothly- so the
-  potential is there to &quot;sharpen&quot; the whirlwind. I wonder if it is possible to make it &quot;lift off&quot;. It might be a little far-fetched, but I can see the whirlwind going in one end of the multiple mesh
-  diagram in the User's Guide and coming out the other! (I have way more ideas than the ability to model them).</p>
+  in Germany- a high class smoke removal system using air jets to swirl the smoke out. <a href="http://www.youtube.com/watch?v=iaazLTc0PCA" target="_blank">[Link]<img src="assets/images/external_link_icon.gif" alt="External Link" /></a> I was taking vacation between Christmas and New year and  thought it would be fun and interesting to see if I could "make a tornado". Maybe living in Kansas played a part also. I had not given much thought to VEL_T until then.  </p>
+<p align="justify">I knew Bernoulli's principle- "Where the velocity of a fluid is high, the pressure is low
+and, where the velocity of a fluid is low, the pressure is high". The change in pressure is half the density times the velocity squared- (Bernoulli's equation). So I wondered- is the velocity higher at the top or bottom? I thought the pressure must be higher at the bottom, (to push the sides in to a point), so the velocity must be lower at the bottom. I did the input file-- it did not work. When I turned it up-side-down it did work.  I looked at some Z velocity slices thinking the velocity must be lower at the top--but the velocity was the same throughout- DUH!- if it was not, the "particles" would fly apart.  But if there is no change in velocity or density, there is no change in pressure. I thought I had gone as far as I could go- it was cool to look at and I know others figured it out hundreds of years ago, but I was born and raised in "The Show Me State", and am hard-headed.
+ Looking at all 5 Z slices, I saw what did change-- the AREA OF SAME VELOCITY increased from bottom to top-- since pressure is force divided by area, force is pressure times area- so I could see the direction and magnitude of a Force.</p>
+<p align="justify">I showed it to a few people at work, my son, a friend, varied the background and species a little (HELIUM does not get it together with the current fan strength) and let it go--until I found out about the Simulation of the Month contest. (I'll bet that if there was a prize- say a mouse pad with the author's "image"- like the Haiku contest on Poetry.com- you would get a lot more entries:)).</p>
+<p align="justify">I input 100 fans at first, thinking I would have to vary the tangent direction smoothly- so the potential might be there to "sharpen" the whirlwind. I wonder if it is possible to make it "lift off". It might be a little far-fetched, but I can see the whirlwind going in one end of the multiple mesh diagram in the User's Guide and coming out the other! (I have way more ideas than the ability to model them yet).</p>
 <h3>The &quot;notes&quot; page:</h3>
 <div align="center"><img src="assets/user_submissions/hand notes.png" alt="Small Hand Written Notes Image" width="250" height="324" /><br /></div>
-<p align="justify">Original Hand Notes: <a href="assets/user_submissions/hand notes.PDF">Hand Written</a> (.pdf) <a href="assets/user_submissions/clean notes.PDF">Cleaned Up</a> (.pdf) </p>
-<p align="justify">This was not a pre-model concept. It was my attempt to fit Bernoulli's equation to the graphical
-  representation of the calculations. I knew even if I was all wrong I would always see that force now
-  making the &quot;particles&quot; of whirlwinds, twisters, and dust devils stand up. </p>
+<p align="justify">Original Hand Notes: <a href="assets/user_submissions/hand_notes.PDF">Hand Written</a> (.pdf) <a href="assets/user_submissions/clean_notes.pdf">Cleaned Up</a> (.pdf) </p>
+<p align="justify">This was not a pre-model concept. It was my attempt to fit Bernoulli's equation to the graphical representation of the calculations. I knew even if I was all wrong I would always see that force now making the "particles" of whirlwinds, twisters, and dust devils stand up. Still, I am hoping someone in the group will straighten me out on this.</p>
 <h3>Final Comments:</h3>
-<p align="justify">I cannot thank you all enough- it is incredible what a handful of people have created, make better,
-  and maintain. When I saw FDS-SMV_5 was out, I printed all the documentation, came straight home from work, and
-  immeadiately got teary-eyed with joy. I was &quot;expecting&quot; Thermostat and Beam Detector... but the Pressure Zones, Material layers, Multi-Reactions, Control Logic, etc., floored me. I thought &quot;this should have a name,
-  not just the next number&quot;.... phiV ....?</p>
-<p align="justify">Many, Many THANKS to all of you there at NIST/FDS-SMV and The Group,<br />
-  Brad Casterline</p>
+<p align="justify">I cannot thank you all enough- it is incredible what a handful of people have created, make better, and maintain. When I saw FDS-SMV_5 was out, I printed the User’s Guide,  came straight home from work, and immediately got teary-eyed with joy. I had wondered about  Thermostat and Beam Detector, but the Pressure Zones, Material layers, Multiple Reactions, Control Logic, etc., floored me. I thought "this should have a name, not just the next number".... phiV ....?</p>
+<p align="justify">Many, Many THANKS to all of you there at NIST,<br />
+  the FDS-SMV Development Team and The Discussion Group,<br />
+  <br />
+  <em>Brad Casterline</em></p>
 <!-- InstanceEndEditable --></div>
 
 <br style="clear: both;" />
