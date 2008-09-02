@@ -1282,22 +1282,16 @@ ENDDO EDGE_LOOP
 IF (CORRECTOR) THEN
    DO K=0,KBAR
       DO J=0,JBAR
-         I_LOOP: DO I=0,IBAR
+         DO I=0,IBAR
             IC = CELL_INDEX(I,J,K) 
-            IF (IC==0) CYCLE I_LOOP
+            IF (IC==0) CYCLE
             IF (U_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Y(I,J,K) 
-            IF (U_Y(I,J,K+1)>-1.E5_EB) UVW_GHOST(IC,1) = U_Y(I,J,K+1) 
             IF (U_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Z(I,J,K) 
-            IF (U_Z(I,J+1,K)>-1.E5_EB) UVW_GHOST(IC,1) = U_Z(I,J+1,K) 
             IF (V_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_X(I,J,K) 
-            IF (V_X(I,J,K+1)>-1.E5_EB) UVW_GHOST(IC,2) = V_X(I,J,K+1) 
             IF (V_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_Z(I,J,K) 
-            IF (V_Z(I+1,J,K)>-1.E5_EB) UVW_GHOST(IC,2) = V_Z(I+1,J,K) 
             IF (W_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_X(I,J,K) 
-            IF (W_X(I,J+1,K)>-1.E5_EB) UVW_GHOST(IC,3) = W_X(I,J+1,K) 
             IF (W_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I,J,K) 
-            IF (W_Y(I+1,J,K)>-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I+1,J,K) 
-         ENDDO I_LOOP
+         ENDDO
       ENDDO
    ENDDO
 ENDIF

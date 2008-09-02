@@ -1228,21 +1228,6 @@ DO IW=1,M%NEWC
    ENDIF
 ENDDO
  
-! User over-rides of Poisson boundary conditions
- 
-IF (PBC(1,NM)==0 .AND. PBC(2,NM)==0) LBC = 1
-IF (PBC(1,NM)==0 .AND. PBC(2,NM)==1) LBC = 2
-IF (PBC(1,NM)==1 .AND. PBC(2,NM)==1) LBC = 3
-IF (PBC(1,NM)==1 .AND. PBC(2,NM)==0) LBC = 4
-IF (PBC(3,NM)==0 .AND. PBC(4,NM)==0) MBC = 1
-IF (PBC(3,NM)==0 .AND. PBC(4,NM)==1) MBC = 2
-IF (PBC(3,NM)==1 .AND. PBC(4,NM)==1) MBC = 3
-IF (PBC(3,NM)==1 .AND. PBC(4,NM)==0) MBC = 4
-IF (PBC(5,NM)==0 .AND. PBC(6,NM)==0) NBC = 1
-IF (PBC(5,NM)==0 .AND. PBC(6,NM)==1) NBC = 2
-IF (PBC(5,NM)==1 .AND. PBC(6,NM)==1) NBC = 3
-IF (PBC(5,NM)==1 .AND. PBC(6,NM)==0) NBC = 4
-
 IF (PERIODIC_TEST .AND. NMESHES==1 .AND. .TRUE.) THEN
    LBC = 0
    MBC = 0

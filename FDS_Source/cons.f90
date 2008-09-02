@@ -129,7 +129,6 @@ INTEGER, DIMENSION(:,:), ALLOCATABLE ::  I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,NIC
 ! Miscellaneous integer constants
  
 INTEGER :: ICYC,WALL_INCREMENT,NFRAMES,NCGC
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: PBC
  
 ! Clocks for output file dumps
  
