@@ -493,6 +493,27 @@ Contains
 
 
     Open(LU_INPUT,File=FN_INPUT)
+
+    CALL COUNT_EVAC_NODES
+    CALL READ_PERS
+    CALL READ_EXIT
+    CALL READ_DOOR    
+    CALL READ_CORR
+    CALL READ_STRS
+    CALL DUMP_NODE_INFO
+    CALL READ_ENTRIES
+    CALL READ_EVAC_LINES
+    CALL READ_EVHO
+    CALL READ_EVSS
+
+    Close (LU_INPUT)    
+    If (MYID /= Max(0,EVAC_PROCESS)) Return
+
+    CALL CHECK_EVAC_NODES
+
+    CONTAINS
+
+    SUBROUTINE COUNT_EVAC_NODES
     !
     ! Determine total number of PERS lines in the input file
     !
@@ -771,6 +792,10 @@ Contains
        End If
 
     End If EVAC_PROC_IF
+
+    END SUBROUTINE COUNT_EVAC_NODES
+   
+    SUBROUTINE READ_PERS
     !
     ! NEXT PARAMETERS ARE SAME FOR ALL HUMANS. THE LAST
     ! VALUES READ IN FROM 'PERS' LINES ARE VALID.
@@ -1223,6 +1248,10 @@ Contains
           Call SHUTDOWN(MESSAGE)
        End If
     End If
+
+   END SUBROUTINE READ_PERS
+
+   SUBROUTINE READ_EXIT
     !
     ! Read the EXIT lines
     !
@@ -1478,6 +1507,10 @@ Contains
        !
     End Do READ_EXIT_LOOP
 26  Rewind(LU_INPUT)
+
+   END SUBROUTINE READ_EXIT
+
+   SUBROUTINE READ_DOOR    
     !
     ! Read the DOOR lines
     !
@@ -1736,6 +1769,10 @@ Contains
        ! 
     End Do READ_DOOR_LOOP
 27  Rewind(LU_INPUT)
+
+   END SUBROUTINE READ_DOOR
+
+   SUBROUTINE READ_CORR
     !
     ! Read the CORR line
     !
@@ -1968,6 +2005,9 @@ Contains
     End Do READ_CORR_LOOP
 29  Rewind(LU_INPUT)
 
+   END SUBROUTINE READ_CORR
+
+   SUBROUTINE READ_STRS
    !
    ! Read the STRS line
     READ_STRS_LOOP: Do N = 1,N_STRS
@@ -1976,6 +2016,7 @@ Contains
        ID                          = 'null'
        XB                          = 0._EB
        XB_CORE                     = 0._EB
+       XB_LANDINGS                 = 0._EB
        RIGHT_HANDED                = .TRUE.
        MESH_ID                     = 'null'
        N_LANDINGS                  = 0
@@ -2147,6 +2188,10 @@ Contains
        
     End Do READ_STRS_LOOP
 32  Rewind(LU_INPUT)
+   
+    END SUBROUTINE READ_STRS
+
+    SUBROUTINE DUMP_NODE_INFO
 
     ! Now exits, doors, corrs and strs are already read in
     If (n_nodes > 0 .And. MYID==Max(0,EVAC_PROCESS)) Then
@@ -2200,6 +2245,9 @@ Contains
        End Do
     End If
 
+    END SUBROUTINE DUMP_NODE_INFO
+
+    SUBROUTINE READ_ENTRIES
     !
     ! Read the ENTR lines
     !
@@ -2493,6 +2541,9 @@ Contains
        End Do
     End If
 
+    END SUBROUTINE READ_ENTRIES
+
+    SUBROUTINE READ_EVAC_LINES
     !
     ! Read the EVAC lines
     ! 
@@ -2738,6 +2789,20 @@ Contains
        !
     End Do READ_EVAC_LOOP
 25  Rewind(LU_INPUT)
+    
+    N_EVAC = 1
+    Allocate(EVAC_CLASS_NAME(N_EVAC),STAT=IZERO)
+    Call ChkMemErr('READ_EVAC','EVAC_CLASS_NAME',IZERO)
+    Allocate(EVAC_CLASS_RGB(3,N_EVAC),STAT=IZERO)
+    Call ChkMemErr('READ_EVAC','EVAC_CLASS_RGB',IZERO)
+    EVAC_CLASS_NAME(1) = 'Human'
+    Do N = 1, N_EVAC
+       EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE 4
+    End Do
+
+    END SUBROUTINE READ_EVAC_LINES
+
+    SUBROUTINE READ_EVHO
     !
     ! Read the EVHO lines
     !
@@ -2818,6 +2883,10 @@ Contains
        EHX%RGB = RGB
     End Do READ_EVHO_LOOP
 30  Rewind(LU_INPUT)
+
+    END SUBROUTINE READ_EVHO
+
+    SUBROUTINE READ_EVSS
     !
     ! Read the EVSS lines
     !
@@ -2945,26 +3014,10 @@ Contains
        ESS%RGB = RGB
     End Do READ_EVSS_LOOP
 31  Rewind(LU_INPUT)
-    !
-    ! Count the evacuation ramps and save their IDs.
 
+    END SUBROUTINE READ_EVSS
 
-
-    Close (LU_INPUT)    
-
-    N_EVAC = 1
-    Allocate(EVAC_CLASS_NAME(N_EVAC),STAT=IZERO)
-    Call ChkMemErr('READ_EVAC','EVAC_CLASS_NAME',IZERO)
-    Allocate(EVAC_CLASS_RGB(3,N_EVAC),STAT=IZERO)
-    Call ChkMemErr('READ_EVAC','EVAC_CLASS_RGB',IZERO)
-    EVAC_CLASS_NAME(1) = 'Human'
-    Do N = 1, N_EVAC
-       EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE 4
-    End Do
-
-    ! Default color table for agents
-
-    If (MYID /= Max(0,EVAC_PROCESS)) Return
+    SUBROUTINE CHECK_EVAC_NODES
     !
     ! Set the IMESH and IMESH2 for corridors
     Do n = 1, n_corrs
@@ -3043,8 +3096,7 @@ Contains
              PDX => EVAC_DOORS(EVAC_Node_List(i)%Node_Index)
              If ((EVAC_DOORS(n)%IOR /= -PDX%IOR) .Or. &
                   Abs(EVAC_DOORS(n)%Width-PDX%Width) > 0.1_EB ) Then
-                Write(MESSAGE,'(A,I4,A)') &
-                     'ERROR: DOOR',N,' KEEP_XY Problem'
+                Write(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' KEEP_XY Problem'
                 Call SHUTDOWN(MESSAGE)
              End If
           End If
@@ -3052,15 +3104,14 @@ Contains
              PNX => EVAC_ENTRYS(EVAC_Node_List(i)%Node_Index)
              If ((EVAC_DOORS(n)%IOR /= PNX%IOR) .Or. &
                   Abs(EVAC_DOORS(n)%Width-PNX%Width) > 0.1_EB ) Then
-                Write(MESSAGE,'(A,I4,A)') &
-                     'ERROR: DOOR',N,' KEEP_XY Problem'
+                Write(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' KEEP_XY Problem'
                 Call SHUTDOWN(MESSAGE)
              End If
           End If
        End If
     End Do
 
-
+  END SUBROUTINE CHECK_EVAC_NODES
 
   End Subroutine READ_EVAC
 
@@ -6143,7 +6194,7 @@ Contains
           End Do SS_Loop1
           ! Set height and speed for a human in stairs
           If (NM_STRS_MESH) Then 
-             IF (I==1) write(101,*) HR%X,HR%Y,HR%Z
+!             IF (I==1) write(101,*) HR%X,HR%Y,HR%Z
              If (HR%STR_SUB_INDX > 0) Then
                 J1 = MAX(HR%STR_SUB_INDX-1,1)
                 J2 = MIN(HR%STR_SUB_INDX+1,STRP%N_NODES)
@@ -6151,11 +6202,11 @@ Contains
                 J1 = 1
                 J2 = STRP%N_NODES
              End if
-             IF (I==1) write(101,*) J1,J2
+!             IF (I==1) write(101,*) J1,J2
              LoopSubIndx: Do J = J1,J2
-             IF (I==1) write(101,*) J,'x',STRP%XB_NODE(J,1:2)
-             IF (I==1) write(101,*) J,'y',STRP%XB_NODE(J,3:4)
-             IF (I==1) write(101,*) J,'z',STRP%XB_NODE(J,5:6)
+!             IF (I==1) write(101,*) J,'x',STRP%XB_NODE(J,1:2)
+!             IF (I==1) write(101,*) J,'y',STRP%XB_NODE(J,3:4)
+!             IF (I==1) write(101,*) J,'z',STRP%XB_NODE(J,5:6)
                 IF (HR%X < STRP%XB_NODE(J,1)) CYCLE                
                 IF (HR%X > STRP%XB_NODE(J,2)) CYCLE                
                 IF (HR%Y < STRP%XB_NODE(J,3)) CYCLE                
