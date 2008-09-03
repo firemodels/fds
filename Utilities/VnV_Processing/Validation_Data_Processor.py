@@ -3,46 +3,49 @@ from re import *
 from pyx import *
 
 ### Set Global Variables for Data to Process
+## Validation Data Set (1), Verification Data Set (2), Examples Data Set (3), Trainier Data Set (4)
+data_set = 1 # Input Value
 
 ## Validation Data
-
-data_directory = "../../Validation/"
-output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
-config_file_name = "Validation_Data_Config_File_Test.csv"
+if data_set == 1:
+    data_directory = "../../Validation/"
+    output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
+    config_file_name = "Validation_Data_Config_File.csv"
+    print "**** Processing Validation Data Set ****\n"
 
 ## Verification Data
-
-#data_directory = "../../Verification/"
-#output_directory = "../../Manuals/FDS_5_Verification_Guide/FIGURES/"
-#config_file_name = "Verification_Data_Config_File.csv"
+if data_set == 2:
+    data_directory = "../../Verification/"
+    output_directory = "../../Manuals/FDS_5_Verification_Guide/FIGURES/"
+    config_file_name = "Verification_Data_Config_File.csv"
+    print "**** Processing Verification Data Set ****\n"
 
 ## Examples Data
+if data_set == 3:
+    data_directory = "../../Verification/"
+    output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
+    config_file_name = "Examples_Data_Config_File.csv"
+    print "**** Processing Examples Data Set ****\n"
 
-#data_directory = "../../Verification/"
-#output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
-#config_file_name = "Examples_Data_Config_File.csv"
-
-### Set Global Variables for Training Examples
-
-#data_directory = "../../Training/"
-#output_directory = "../../Manuals/FDS_SMV_Training_Guide/datafigures/"
-#config_file_name = "Training_Examples_Data_Config_File.csv"
+## Trainier Data
+if data_set == 4:
+    data_directory = "../../Training/"
+    output_directory = "../../Manuals/FDS_SMV_Training_Guide/datafigures/"
+    config_file_name = "Training_Examples_Data_Config_File.csv"
+    print "**** Processing Training Data Set ****\n"
 
 
 ### Set Diagnostic Output Level
-
 ## Uncomment the level of diagnostics desired.
-##1 = Minimal, 2 = Normal, 3 = Maximum.
+## 1 = Minimal, 2 = Normal, 3 = Maximum.
+diagnostic_level = 2 # Input Value
 
-diagnostic_level = 2
-
-print "**** Diagnostics Set at Level", diagnostic_level, "****"
+print "**** Diagnostics Set at Level", diagnostic_level, "****\n"
 
 
 ### Set What Plots to Create: 
 ## BOTH (1), Comparison Only (2), Scatter Only (3)
-
-process_set = 1
+process_set = 1 # Input Value
 
 if diagnostic_level >= 1:
     if process_set == 1:
@@ -52,7 +55,15 @@ if diagnostic_level >= 1:
     if process_set == 3:
         print "**** Plotting Only Scatter Data ****\n"
 
-### Set General Global Variables to Zero or Null Sets.
+### Set character to be used for indicating the comparison data set in the config file.
+## The default character is 'd' if you change the value below to something else 
+## then only the lines starting with that character will be read in for processing.
+## NOTE: You must also change the line containing the d line column names to the same character string.
+data_line_char = 'd' # Input Value
+print "**** Data Character Set to '"+data_line_char+"' ****\n"
+
+
+### Set Global Variables to Zero or Null Sets.
 scatter_data_dict = {}
 combined_scatter_data = {}
 
@@ -113,14 +124,14 @@ def extract_config_data(config_file):
                 quantities_dict[int(list_item[1])] = keyed_quantities
                 keyed_quantities = {}
             quantity_counter += 1
-        elif list_item[0] == 'd':
+        elif list_item[0] == data_line_char:
             if data_counter < quantity_counter:
                 data_counter = quantity_counter - 1
                 data_header = list_item[1:]
             if data_counter >= quantity_counter:
                 for x in range(len(data_header)):
                     keyed_data[data_header[x].strip()] = list_item[x+1]
-                data_key_name = keyed_data['Quantity'].strip()+"~"+keyed_data['Group'].strip()+"~"+keyed_data['Dataname'].strip()+"~"+keyed_data['Exp_Y_Col_Name'].strip()+"~"+keyed_data['Exp_X_Col_Name'].strip()
+                data_key_name = keyed_data['Quantity'].strip()+"~"+keyed_data['Group'].strip()+"~"+keyed_data['Dataname'].strip()+"~"+keyed_data['d1_Dep_Col_Name'].strip()+"~"+keyed_data['d1_Ind_Col_Name'].strip()
                 if diagnostic_level >= 3:
                     print "   <3> Key Name:", data_key_name
                 data_dict[data_key_name] = keyed_data
@@ -131,7 +142,7 @@ def extract_config_data(config_file):
         else:
             skip_counter = skip_counter + 1
             if diagnostic_level >= 3:
-                print "   <3> No g, d or q, skip row."            
+                print "   <3> No g, q or "+data_line_char+", skipping row."            
     if diagnostic_level >= 2:
         print "There were "+str(skip_counter)+" lines skipped, out of the "+str(len(config_lists))+" lines read in."
     #Return a single list object containing the dictionaries.
@@ -141,39 +152,42 @@ def extract_config_data(config_file):
         print "   <3> Data Dictionary: ", data_dict
     return [groups_dict,quantities_dict,data_dict]
 
-def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,stop_comp,x_scale):
-    #This function is used to find index numbers for start and stop points in plotting and min-max values.
+def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,stop_comp,ind_scale):
+    #This function is used to find index numbers for start and stop points in plotting and metric values.
     if diagnostic_level >= 2:
-        print "\n*** Find Start/End Indexes for X Column ***"
+        print "\n*** Find Start/End Indexes for Independent Data Column ***"
     if diagnostic_level >= 3:
-        print "   <3> X Scale Factor:", x_scale
+        print "   <3> Start Data:", start_data
         print "   <3> Stop Data:", stop_data
-    if diagnostic_level >= 2:
-        print "X Column name:", col_name
-    if diagnostic_level >= 3:
-        print "   <3> X Column Data:", data_dict[col_name]
+        print "   <3> Independent Data Scale Factor:", ind_scale
         
+    if diagnostic_level >= 2:
+        print "Independent Data Column name:", col_name
+    if diagnostic_level >= 3:
+        print "   <3> Independent Data Column Data:", data_dict[col_name]
+    ## Find Start Value Index Number    
     rowcounter1 = 0
     if diagnostic_level >= 2:
-        print "*** Finding X Column Start Index ***"
+        print "*** Finding Independent Data Column Start Index ***"
     for value1 in data_dict[col_name]:
         if diagnostic_level >= 3:
             print "   <3> Value 1:", value1, " : ", rowcounter1
         if value1 == 'Null':
             continue
         else:
-            if value1 >= (float(start_data)*float(x_scale)):
+            if value1 >= (float(start_data)*float(ind_scale)):
                 if diagnostic_level >= 3:
-                    print "   <3> X Column Starts at row #:", str(rowcounter1)
+                    print "   <3> Independent Data Column Starts at row #:", str(rowcounter1)
                     print "   <3> With a value of:", str(value1)
-                Xcol_start_index = rowcounter1
+                ind_col_start_index = rowcounter1
                 break
         rowcounter1 = rowcounter1 + 1
+    ## Find End of Independent Data Column, then Index Value
     rowcounter2 = 0
     end_index = 0
     index_count = 0
     if diagnostic_level >= 2:
-        print "*** Finding Index of last good value in X Column ***"    
+        print "*** Finding Index of last good value in Independent Data Column ***"    
     for end_data_index in data_dict[col_name]:
         if diagnostic_level >= 3:
             print "   <3> ", end_data_index, " : ", index_count
@@ -185,214 +199,215 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
     if end_index == 0:
         end_index = index_count - 1
     if diagnostic_level >= 3:
-        print "   <3> Length of X Column:", end_index + 1
-        print "   <3> Last value in X Column:", data_dict[col_name][end_index]
+        print "   <3> Length of Independent Data Column:", end_index + 1
+        print "   <3> Last value in Independent Data Column:", data_dict[col_name][end_index]
         print "   <3> Index of Last Numeric Value:", end_index
-    
     if diagnostic_level >= 2:
-        print "*** Finding X Column End Index ***"
+        print "*** Finding Independent Data Column End Index ***"
     for value2 in data_dict[col_name]:
-        #print "Value 2:", value2, " : ", rowcounter2
-        if float(data_dict[col_name][end_index]) < (float(stop_data)*float(x_scale)):
+        if diagnostic_level >= 3:
+            print "Value 2:", value2, " : ", rowcounter2
+        if float(data_dict[col_name][end_index]) < (float(stop_data)*float(ind_scale)):
             if diagnostic_level >= 2:
-                print "Specified end of X Column Data is greater than end of time in the data set. \nUsing last value in the time column.\n"
+                print "Specified end of Independent Data Column Data is greater than end of time in the data set. \nUsing last value in the Independent Data Column.\n"
                 print "Value used is: "+str(float(data_dict[col_name][end_index]))+"\n"
-            Xcol_end_index = (end_index)
+            ind_col_end_index = (end_index)
             break
-        if value2 < (float(stop_data)*float(x_scale)):
+        if value2 < (float(stop_data)*float(ind_scale)):
             rowcounter2 = rowcounter2 + 1
         else:
             row_number2 = (rowcounter2) - 1
             if diagnostic_level >= 2:
-                print "X Column Ends at Index #: ", str(row_number2), "with a value of: ", str(data_dict[col_name][row_number2])
-            Xcol_end_index = row_number2
+                print "Independent Data Column Ends at Index #: ", str(row_number2), "with a value of: ", str(data_dict[col_name][row_number2])
+            ind_col_end_index = row_number2
             break
+    #Find Comparison Start Index for Independent Data
     rowcounter3 = 0
     if diagnostic_level >= 2:
-        print "*** Finding X Column Comp Start Index ***"
+        print "*** Finding Start Index for Metric Data ***"
     for value3 in data_dict[col_name]:
-        if value3 >= (float(start_comp)*float(x_scale)):
+        if diagnostic_level >= 3:
+            print "Value 3:", value3, " : ", rowcounter3
+        if value3 >= (float(start_comp)*float(ind_scale)):
             if diagnostic_level >= 2:
-                print "Comparison Starts at Index #:", str(rowcounter3), "with a value of:", str(value3)
-            minmax_start_index = rowcounter3
+                print "Metric Data starts at Index #:", str(rowcounter3), "with a value of:", str(value3)
+            metric_start_index = rowcounter3
             break
         rowcounter3 = rowcounter3 + 1 
-    
+    #Find Comparison End Index for Independent Data
     rowcounter4 = 0
     if diagnostic_level >= 2:
-        print "*** Finding X Column Comp End Index ***"
+        print "*** Finding End Index for Metric Data ***"
     for value4 in data_dict[col_name]:
-        scaled_stop_value = (float(stop_comp)*float(x_scale))
+        scaled_stop_value = (float(stop_comp)*float(ind_scale))
         end_index_value = float(data_dict[col_name][end_index])
         if diagnostic_level >= 3:
             print "   <3> Scaled Stop Value and End Index Value:", scaled_stop_value, " : ",end_index_value
         if end_index_value < scaled_stop_value:
             if diagnostic_level >= 2:
-                print "Specified end of comparison is greater than last value in the data set."
-                print "Comparison Ends at Index #:", str(end_index), "with a value of: ", str(end_index_value)
-            minmax_end_index = end_index
+                print "Specified end of Metric data is greater than last value in the Independent Data Column.\nUsing last value in the Independent Data Column.\n"
+                print "Metric Data ends at Index #:", str(end_index), "with a value of: ", str(end_index_value)
+            metric_end_index = end_index
             break
         else:
             if diagnostic_level >= 3:
-                print "   <3> Value 4:",value4
+                print "Value 4:", value4, " : ", rowcounter4
             if value4 < scaled_stop_value:
                 rowcounter4 = rowcounter4 + 1
-                if diagnostic_level >= 3:
-                    print "   <3> Increment rowcounter4:", rowcounter4
             if value4 >= scaled_stop_value:
                 if value4 == scaled_stop_value:
                     row_number4 = rowcounter4
                     if diagnostic_level >= 2:
                         print "Comparison Ends at Index #:", str(row_number4), "with a value of: ", str(data_dict[col_name][row_number4])
-                    minmax_end_index = row_number4
+                    metric_end_index = row_number4
                     break
                 else:
                     row_number4 = rowcounter4 - 1
                     if diagnostic_level >= 2:
                         print "Comparison Ends at Index #:", str(row_number4), "with a value of: ", str(data_dict[col_name][row_number4])
-                    minmax_end_index = row_number4
+                    metric_end_index = row_number4
                     break
     if diagnostic_level >= 2:
         print "\n*** Start/End Indexes Found ***"
-        print "XCol Start Index:", Xcol_start_index
-        print "XCol End Index:", Xcol_end_index
-        print "minmax Start Index:", minmax_start_index
-        print "minmax End Index:", minmax_end_index, "\n"
-    return (Xcol_start_index, Xcol_end_index, minmax_start_index, minmax_end_index)
+        print "Independent Data Col Start Index:", ind_col_start_index
+        print "Independent Data Col End Index:", ind_col_end_index
+        print "Metric Start Index:", metric_start_index
+        print "Metric End Index:", metric_end_index, "\n"
+    return (ind_col_start_index, ind_col_end_index, metric_start_index, metric_end_index)
 
 def extract_comp_data(comp_file_info):
     ## Read in d line dict from config file and Process data from source .csv files.
     
-    exp_data = []
-    mod_data = []
-    exp_data_dict = {}
-    mod_data_dict = {}
-    exp_scatter_data_labels = []
-    mod_scatter_data_labels = []
+    d1_data = []
+    d2_data = []
+    d1_data_dict = {}
+    d2_data_dict = {}
+    d1_scatter_data_labels = []
+    d2_scatter_data_labels = []
     
     #List of variables from configuration file column names.
     
-    exp_data_filename = comp_file_info['Exp_Filename'] #String of filename
-    exp_column_name_row_index = int(comp_file_info['Exp_Col_Name_Row'])-1 #Experimental Data Column Name Row Number
-    exp_data_row_index = int(comp_file_info['Exp_Data_Row'])-1 #Experimental Data Starting Row Number
-    exp_start_data_val = comp_file_info['Exp_Start_(min.)'] #String in minutes to start exp plot data
-    exp_stop_data_val = comp_file_info['Exp_End_(min.)'] #String in minutes to stop exp plot data
-    exp_start_comp_val = comp_file_info['Exp_Comp_Start_(min.)'] #String in minutes to start exp compare data
-    exp_stop_comp_val = comp_file_info['Exp_Comp_End_(min.)'] #String in minutes to start exp compare data
-    exp_initial_value = comp_file_info['Exp_Intitial_Value'] #Initial Value for Quantity
-    exp_X_column_name_value = comp_file_info['Exp_X_Col_Name'].strip() #Experimental Data X Column Name
-    exp_Y_column_name_value = comp_file_info['Exp_Y_Col_Name'].strip() #Experimental Data Y Column Name
-    X_Scale_Factor = float(comp_file_info['Scale_X'])
-    Y_Scale_Factor = float(comp_file_info['Scale_Y'])
+    d1_data_filename = comp_file_info['d1_Filename'] #String of filename
+    d1_column_name_row_index = int(comp_file_info['d1_Col_Name_Row'])-1 #Data 1, Column Name Row Number
+    d1_data_row_index = int(comp_file_info['d1_Data_Row'])-1 #Data 1, Starting Row Number
+    d1_start_data_val = comp_file_info['d1_Start'] #String value to start d1 plot data
+    d1_stop_data_val = comp_file_info['d1_End'] #String value to stop d1 plot data
+    d1_start_comp_val = comp_file_info['d1_Comp_Start'] #String value to start d1 compare data
+    d1_stop_comp_val = comp_file_info['d1_Comp_End'] #String value to start d1 compare data
+    d1_initial_value = comp_file_info['d1_Initial_Value'] #Initial Value for Quantity
+    d1_ind_column_name_value = comp_file_info['d1_Ind_Col_Name'].strip() #Data 1, Independent Data Column Name
+    d1_Dep_column_name_value = comp_file_info['d1_Dep_Col_Name'].strip() #Data 1, Dep Column Name
+    ind_Scale_Factor = float(comp_file_info['Scale_Ind'])
+    Dep_Scale_Factor = float(comp_file_info['Scale_Dep'])
         
-    mod_data_filename = comp_file_info['Mod_Filename'] #String of filename
-    mod_column_name_row_index = int(comp_file_info['Mod_Col_Name_Row'])-1 #Modeling Data Column Name Row Number
-    mod_data_row_index = int(comp_file_info['Mod_Data_Row'])-1 #Modeling Data Starting Row Number
-    mod_start_data_val = comp_file_info['Mod_Start_(min.)'] #String in minutes to start mod plot data
-    mod_stop_data_val = comp_file_info['Mod_End_(min.)']  #String in minutes to stop mod plot data
-    mod_start_comp_val = comp_file_info['Mod_Comp_Start_(min.)'] #String in minutes to start mod compare data
-    mod_stop_comp_val = comp_file_info['Mod_Comp_End_(min.)']  #String in minutes to start mod compare data
-    mod_initial_value = comp_file_info['Mod_Intitial_Value']       #Initial Value for Quantity
-    mod_X_column_name_value = comp_file_info['Mod_X_Col_Name'].strip() #Modeling Data X Column Name
-    mod_Y_column_name_value = comp_file_info['Mod_Y_Col_Name'].strip() #Modeling Data Y Column Name
+    d2_data_filename = comp_file_info['d2_Filename'] #String of filename
+    d2_column_name_row_index = int(comp_file_info['d2_Col_Name_Row'])-1 #Data Set 2, Data Column Name Row Number
+    d2_data_row_index = int(comp_file_info['d2_Data_Row'])-1 #Data Set 2, Data Starting Row Number
+    d2_start_data_val = comp_file_info['d2_Start'] #String value to start d2 plot data
+    d2_stop_data_val = comp_file_info['d2_End']  #String value to stop d2 plot data
+    d2_start_comp_val = comp_file_info['d2_Comp_Start'] #String value to start d2 compare data
+    d2_stop_comp_val = comp_file_info['d2_Comp_End']  #String value to start d2 compare data
+    d2_initial_value = comp_file_info['d2_Initial_Value']  #Initial value for Quantity
+    d2_ind_column_name_value = comp_file_info['d2_Ind_Col_Name'].strip() #Data Set 2, Independent Data Column Name
+    d2_Dep_column_name_value = comp_file_info['d2_Dep_Col_Name'].strip() #Data Set 2, Dep Column Name
     
     # Create Scatter Data Labels for the comparison results.
     
-    if exp_Y_column_name_value[0] == '[':
+    if d1_Dep_column_name_value[0] == '[':
         if diagnostic_level >= 2:
-            print "Exp Column Name List Detected"
-        exp_compound_col_names = eval(exp_Y_column_name_value)
+            print "Data Set 1, Column Name List Detected"
+        d1_compound_col_names = eval(d1_Dep_column_name_value)
         if diagnostic_level >= 3:
-            print "   <3> Exp Compound Column Names:", exp_compound_col_names
-        for name in exp_compound_col_names:
+            print "   <3> Data Set 1, Compound Column Names:", d1_compound_col_names
+        for name in d1_compound_col_names:
             if diagnostic_level >= 2:
-                print "Exp Sub-Column Name:", name
-            exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
+                print "Data Set 1, Sub-Column Name:", name
+            d1_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
     else:
         if diagnostic_level >= 2:
-            print "Single Exp. Column Name:", exp_Y_column_name_value
-        exp_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+exp_Y_column_name_value+"~"+exp_X_column_name_value)        
+            print "Single Data Set 1, Column Name:", d1_Dep_column_name_value
+        d1_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+d1_Dep_column_name_value+"~"+d1_ind_column_name_value)        
     
-    if mod_Y_column_name_value[0] == '[':
+    if d2_Dep_column_name_value[0] == '[':
         if diagnostic_level >= 2:
-            print "Mod Column Name List Detected"
-        mod_compound_col_names = eval(mod_Y_column_name_value)
+            print "Data Set 2, Column Name List Detected"
+        d2_compound_col_names = eval(d2_Dep_column_name_value)
         if diagnostic_level >= 3:
-            print "   <3> Mod Compound Column Names:", mod_Y_column_name_value
-        for name in mod_compound_col_names:
+            print "   <3> Data Set 2, Compound Column Names:", d2_Dep_column_name_value
+        for name in d2_compound_col_names:
             if diagnostic_level >= 2:
-                print "Mod Sub-Column Name:", name
-            mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
+                print "Data Set 2, Sub-Column Name:", name
+            d2_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+name)
     else:
         if diagnostic_level >= 2:
-            print "Single Mod. Column Name:", mod_Y_column_name_value
-        mod_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+mod_Y_column_name_value+"~"+mod_X_column_name_value)
+            print "Single Data Set 2, Column Name:", d2_Dep_column_name_value
+        d2_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+d2_Dep_column_name_value+"~"+d2_ind_column_name_value)
     
     if diagnostic_level >= 3:
-        print "   <3> Exp Data Labels:\n", exp_scatter_data_labels
-        print "   <3> Mod Data Labels:\n", mod_scatter_data_labels
+        print "   <3> Data Set 1, Data Labels:\n", d1_scatter_data_labels
+        print "   <3> Data Set 2, Data Labels:\n", d2_scatter_data_labels
     
-    combined_scatter_data_labels = [exp_scatter_data_labels,mod_scatter_data_labels]
+    combined_scatter_data_labels = [d1_scatter_data_labels,d2_scatter_data_labels]
     if diagnostic_level >= 3:
         print "   <3> Combined Scatter Data:",combined_scatter_data_labels
     
-    min_max = comp_file_info['max/min'] #String indicating if min or max value is required.
+    metric = comp_file_info['Metric'] #String indicating the type of metric required.
     
     group_value = int(comp_file_info['Group'])
     
     try:
-        exp_file_object = open(data_directory+exp_data_filename, "U")
+        d1_file_object = open(data_directory+d1_data_filename, "U")
     except:
-        print "!!! Experimental "+exp_data_filename+" Data File will not open. !!!"
+        print "!!! Data Set 1, filename "+d1_data_filename+" will not open. !!!"
         exit()
         
     try:
-        mod_file_object = open(data_directory+mod_data_filename, "U")
+        d2_file_object = open(data_directory+d2_data_filename, "U")
     except:
-        print "!!! Modeling "+mod_data_filename+" Data File will not open. !!!"
+        print "!!! Data Set 2, filename "+d2_data_filename+" will not open. !!!"
         exit()
     
     if diagnostic_level >= 1:
         print "*** Start File Processing ***"
     
-    # Read in experimental data and flip lists from rows to columns.
+    # Read in Data Set 1, data and flip lists from rows to columns.
     if diagnostic_level >= 2:
-        print "Reading in:", exp_data_filename
-    for x in range(exp_column_name_row_index):
-        exp_file_object.next()
-    exp_data_cols = zip(*csv.reader(exp_file_object))
+        print "Reading in:", d1_data_filename
+    for x in range(d1_column_name_row_index):
+        d1_file_object.next()
+    d1_data_cols = zip(*csv.reader(d1_file_object))
     if diagnostic_level >= 3:
-        print "   <3> Exp. Data Columns:",exp_data_cols
+        print "   <3> Data Set 1, Data Columns:",d1_data_cols
     
-    # Find X_Axis index number and confirm Col_Name based on Exp_X_Col_Name value in config file.
+    # Find Ind_Axis index number and confirm Col_Name based on d1_Ind_Col_Name value in config file.
     column_counter = 0
-    for column in exp_data_cols:
-        if column[0].strip() == exp_X_column_name_value:
+    for column in d1_data_cols:
+        if column[0].strip() == d1_ind_column_name_value:
             if diagnostic_level >= 2:
-                print "Exp. X Col name is: ",column[0].strip()
+                print "Data Set 1, Independent Data Col name is: ",column[0].strip()
             if diagnostic_level >= 3:
                 print "   <3> The Index Value is:",column_counter
-            exp_Xaxis_column_name = column[0].strip()
+            d1_ind_axis_column_name = column[0].strip()
         else:
             column_counter = column_counter + 1
-            if column_counter == len(exp_data_cols):
-                print "!!! Problem with Exp_X_Col_Name: "+column[0].strip()+" value in Config File !!!"
+            if column_counter == len(d1_data_cols):
+                print "!!! Problem with d1_Ind_Col_Name: "+column[0].strip()+" value in Config File !!!"
                 exit()
             
     #Convert tuples to lists.
-    exp_data_list = [list(sublist) for sublist in exp_data_cols]
+    d1_data_list = [list(sublist) for sublist in d1_data_cols]
     if diagnostic_level >= 3:
-        print "   <3> Exp. Data List:", exp_data_list
+        print "   <3> Data Set 1, Data List:", d1_data_list
     
     if diagnostic_level >= 2:
-        print "*** Build Experimental Data Dictionary. ***" 
+        print "*** Build Data Set 1 Dictionary. ***" 
     #Catch errors if conversion of data from string to float fails.
-    for exp_list in exp_data_list:
+    for d1_list in d1_data_list:
         if diagnostic_level >= 3:
-            print "   <3> Exp. List:", exp_list
+            print "   <3> Data Set 1, List:", d1_list
         try:
             temp_list = []
-            for x in exp_list[(exp_data_row_index-exp_column_name_row_index):]:
+            for x in d1_list[(d1_data_row_index-d1_column_name_row_index):]:
                 if x == 'Null' or x == '' or x == 'NaN' or x == 'inf' or x == '-inf':
                     list_value = 'Null'
                 else:
@@ -400,60 +415,60 @@ def extract_comp_data(comp_file_info):
                 temp_list.append(list_value)
                 if diagnostic_level >= 3:
                     print "   <3> Temp List:", temp_list
-            exp_data_dict[exp_list[0].strip()] = temp_list
+            d1_data_dict[d1_list[0].strip()] = temp_list
         except:
-            print "!!! Exp Data Conversion in Column Name "+exp_list[0].strip()+". !!!"
+            print "!!! Data Set 1, Conversion Error in Column Name "+d1_list[0].strip()+". !!!"
             exit()
     
-    #Read in model data and flip lists from rows to columns.
+    #Read in d2 data and flip lists from rows to columns.
     if diagnostic_level >= 2:
-        print "Reading in:", mod_data_filename
-    for x in range(mod_column_name_row_index):
-        mod_file_object.next()
-    mod_data_cols = zip(*csv.reader(mod_file_object))
+        print "Reading in:", d2_data_filename
+    for x in range(d2_column_name_row_index):
+        d2_file_object.next()
+    d2_data_cols = zip(*csv.reader(d2_file_object))
     if diagnostic_level >= 3:
-        print "   <3> Mod. Data Columns:", mod_data_cols
+        print "   <3> Data Set 2, Data Columns:", d2_data_cols
         
-    #Find X_Axis index number and confirm Col_Name based on Mod_X_Col_Name value in config file.
+    #Find Ind_Axis index number and confirm Col_Name based on d2_Ind_Col_Name value in config file.
     column_counter = 0
-    for column in mod_data_cols:
-        if column[0].strip() == mod_X_column_name_value:
+    for column in d2_data_cols:
+        if column[0].strip() == d2_ind_column_name_value:
             if diagnostic_level >= 2:
-                print "Mod. X Col name is: ",column[0].strip()
+                print "Data Set 2, Independent Data Col name is: ",column[0].strip()
             if diagnostic_level >= 3:
                 print "   <3> The Index Value is: ",column_counter
-            mod_Xaxis_column_name = column[0].strip()
+            d2_ind_axis_column_name = column[0].strip()
         else:
             column_counter = column_counter + 1
-            if column_counter == len(mod_data_cols):
-                print "!!! Problem with Mod_X_Col_Name value in Config File !!!"
+            if column_counter == len(d2_data_cols):
+                print "!!! Problem with d2_Ind_Col_Name value in Config File !!!"
                 exit()
     
     #Convert tuples to lists.
-    mod_data_list = [list(sublist) for sublist in mod_data_cols]
+    d2_data_list = [list(sublist) for sublist in d2_data_cols]
     
-    #Build Prediction/Model Data Dictionary
+    #Build Prediction/Data Set 2, Data Dictionary
     #Catch errors if conversion of data from string to float fails.
-    for mod_list in mod_data_list:
+    for d2_list in d2_data_list:
         try:
             temp_list = []
-            for x in mod_list[(mod_data_row_index-mod_column_name_row_index):]:
+            for x in d2_list[(d2_data_row_index-d2_column_name_row_index):]:
                 if x == 'Null' or x == '' or x == 'NaN' or x == 'inf' or x == '-inf':
                     list_value = 'Null'
                 else:
                     list_value = float(x)
                 temp_list.append(list_value)
-            mod_data_dict[mod_list[0].strip()] = temp_list
+            d2_data_dict[d2_list[0].strip()] = temp_list
         except:
-            print "!!! Mod Data Conversion in Column Name "+mod_list[0].strip()+". !!!"
+            print "!!! Data Set 2, Conversion Error in Column Name "+d2_list[0].strip()+". !!!"
             exit()
     
-    # Passing in the X_Axis Column Name.
-    exp_comp_ranges = find_start_stop_index(exp_data_dict,exp_Xaxis_column_name,exp_start_data_val,exp_stop_data_val,exp_start_comp_val,exp_stop_comp_val,X_Scale_Factor)
-    mod_comp_ranges = find_start_stop_index(mod_data_dict,mod_Xaxis_column_name,mod_start_data_val,mod_stop_data_val,mod_start_comp_val,mod_stop_comp_val,X_Scale_Factor)
+    # Passing in the Ind_Axis Column Name.
+    d1_comp_ranges = find_start_stop_index(d1_data_dict,d1_ind_axis_column_name,d1_start_data_val,d1_stop_data_val,d1_start_comp_val,d1_stop_comp_val,ind_Scale_Factor)
+    d2_comp_ranges = find_start_stop_index(d2_data_dict,d2_ind_axis_column_name,d2_start_data_val,d2_stop_data_val,d2_start_comp_val,d2_stop_comp_val,ind_Scale_Factor)
     if diagnostic_level >= 3:
-        print "   <3> EXP COMP RANGES: ",exp_comp_ranges
-        print "   <3> MOD COMP RANGES: ",mod_comp_ranges
+        print "   <3> D1 COMP RANGES: ",d1_comp_ranges
+        print "   <3> D2 COMP RANGES: ",d2_comp_ranges
     
     #### Begin Column specific operations.
     scatter_counter = 0
@@ -463,43 +478,43 @@ def extract_comp_data(comp_file_info):
         if diagnostic_level >= 3:
             print "   <3> Scatter Counter Value:", scatter_counter
         
-        exp_label_temp = []
-        mod_label_temp = []
+        d1_label_temp = []
+        d2_label_temp = []
         
-        exp_label_temp = split("~",combined_scatter_data_labels[0][scatter_counter])
-        mod_label_temp = split("~",combined_scatter_data_labels[1][scatter_counter])
-        
-        if diagnostic_level >= 3:
-            print "   <3> Exp. Label Split:", exp_label_temp
-            print "   <3> Mod. Label Split:", mod_label_temp
-        
-        ##Find max or min values.
-        exp_data_values_comp = exp_data_dict[exp_label_temp[3]][exp_comp_ranges[2]:(exp_comp_ranges[3]+1)]
-        mod_data_values_comp = mod_data_dict[mod_label_temp[3]][mod_comp_ranges[2]:(mod_comp_ranges[3]+1)]
+        d1_label_temp = split("~",combined_scatter_data_labels[0][scatter_counter])
+        d2_label_temp = split("~",combined_scatter_data_labels[1][scatter_counter])
         
         if diagnostic_level >= 3:
-            print "   <3> Exp data values:", exp_data_values_comp
-            print "   <3> Mod data values:", mod_data_values_comp
+            print "   <3> Data Set 1, Label Split:", d1_label_temp
+            print "   <3> Data Set 2, Label Split:", d2_label_temp
         
-        # This allows the d line Quantity value to be set to 0 when either model or experimental data is missing.
+        ##Find metric values.
+        d1_data_values_comp = d1_data_dict[d1_label_temp[3]][d1_comp_ranges[2]:(d1_comp_ranges[3]+1)]
+        d2_data_values_comp = d2_data_dict[d2_label_temp[3]][d2_comp_ranges[2]:(d2_comp_ranges[3]+1)]
+        
+        if diagnostic_level >= 3:
+            print "   <3> Data Set 1, data values:", d1_data_values_comp
+            print "   <3> Data Set 2, data values:", d2_data_values_comp
+        
+        # This allows the d line Quantity value to be set to 0 when either d1 or d2 data is missing.
         if comp_file_info['Quantity'] == str(0):
             print "Quantity set to 0, no comparison made."
         else:
-            if  min_max == 'max':
+            if  metric == 'max':
                 if diagnostic_level >= 2:
                     print "*** Compute Rise ***"
-                temp_exp_data_values = [x for x in exp_data_values_comp if x != 'Null']
-                exp_rise_value = max(temp_exp_data_values) - float(exp_initial_value)
-                temp_mod_data_values = [x for x in mod_data_values_comp if x != 'Null']
-                mod_rise_value = max(temp_mod_data_values) - float(mod_initial_value)
+                temp_d1_data_values = [x for x in d1_data_values_comp if x != 'Null']
+                d1_rise_value = max(temp_d1_data_values) - float(d1_initial_value)
+                temp_d2_data_values = [x for x in d2_data_values_comp if x != 'Null']
+                d2_rise_value = max(temp_d2_data_values) - float(d2_initial_value)
                 if diagnostic_level >= 2:
-                    print "Experimental Initial Value is:", exp_initial_value
-                    print "Experimental Rise Value is:", exp_rise_value
-                    print "Model Initial Value is:", mod_initial_value
-                    print "Model Rise Value is:", mod_rise_value
+                    print "Data Set 1, Initial Value is:", d1_initial_value
+                    print "Data Set 1, Rise Value is:", d1_rise_value
+                    print "Data Set 2, Initial Value is:", d2_initial_value
+                    print "Data Set 2, Rise Value is:", d2_rise_value
                     print "\n*** Computing Rise Relative Difference ***"
                 try:
-                    relative_difference = ((mod_rise_value-exp_rise_value)/exp_rise_value)
+                    relative_difference = ((d2_rise_value-d1_rise_value)/d1_rise_value)
                     if diagnostic_level >= 2:
                         print "Rise Relative Difference is:", relative_difference
                 except:
@@ -508,86 +523,85 @@ def extract_comp_data(comp_file_info):
                     #Append Rise Values to Global Scatter Data Dictionary.
                 if diagnostic_level >= 3:
                     print "   <3> Scatter Data Labels:", combined_scatter_data_labels[0][scatter_counter]
-                scatter_data_dict[combined_scatter_data_labels[0][scatter_counter]] = [exp_rise_value,mod_rise_value,relative_difference]
-            elif min_max == 'min':
+                scatter_data_dict[combined_scatter_data_labels[0][scatter_counter]] = [d1_rise_value,d2_rise_value,relative_difference]
+            elif metric == 'min':
                 if diagnostic_level >= 2:
                     print "*** Compute Drop ***"
-                temp_exp_data_values = [x for x in exp_data_values_comp if x != 'Null']
-                exp_drop_value = float(exp_initial_value) - min(temp_exp_data_values)
-                temp_mod_data_values = [x for x in mod_data_values_comp if x != 'Null']
-                mod_drop_value = float(mod_initial_value) - min(temp_mod_data_values)
+                temp_d1_data_values = [x for x in d1_data_values_comp if x != 'Null']
+                d1_drop_value = float(d1_initial_value) - min(temp_d1_data_values)
+                temp_d2_data_values = [x for x in d2_data_values_comp if x != 'Null']
+                d2_drop_value = float(d2_initial_value) - min(temp_d2_data_values)
                 if diagnostic_level >= 2:
-                    print "Experimental Initial Value is:", exp_initial_value
-                    print "Experimental Drop Value is:", exp_drop_value
-                    print "Model Initial Value is:", mod_initial_value
-                    print "Model Drop Value is:", mod_drop_value
+                    print "Data Set 1, Initial Value is:", d1_initial_value
+                    print "Data Set 1, Drop Value is:", d1_drop_value
+                    print "Data Set 2, Initial Value is:", d2_initial_value
+                    print "Data Set 2, Drop Value is:", d2_drop_value
                     print "\n*** Computing Drop Relative Difference ***"
                 try:
-                    relative_difference = ((mod_drop_value-exp_drop_value)/exp_drop_value)
+                    relative_difference = ((d2_drop_value-d1_drop_value)/d1_drop_value)
                     if diagnostic_level >= 2:
                         print "Min Relative Difference is:", relative_difference
                 except:
                     print "!!! Computation of Min relative_difference failed. !!!\nCheck source data for columns listed above."
                     exit()
                 #Append Drop Values to Global Scatter Data Dictionary.
-                scatter_data_dict[combined_scatter_data_labels[0][scatter_counter]] = [exp_drop_value,mod_drop_value,relative_difference]
+                scatter_data_dict[combined_scatter_data_labels[0][scatter_counter]] = [d1_drop_value,d2_drop_value,relative_difference]
             else:
-                print "!!! Min or Max is undefined in the input file. !!!"
+                print "!!! Metric is undefined in the input file. !!!"
                 exit()
                 
         #Create data lists based on specified ranges
-        exp_data_seconds = zip(exp_data_dict[exp_Xaxis_column_name][exp_comp_ranges[0]:(exp_comp_ranges[1]+1)], exp_data_dict[exp_label_temp[3]][exp_comp_ranges[0]:(exp_comp_ranges[1]+1)])
+        d1_data_seconds = zip(d1_data_dict[d1_ind_axis_column_name][d1_comp_ranges[0]:(d1_comp_ranges[1]+1)], d1_data_dict[d1_label_temp[3]][d1_comp_ranges[0]:(d1_comp_ranges[1]+1)])
         if diagnostic_level >= 3:
-            print "   <3> Exp. Data:", exp_data_seconds
-        mod_data_seconds = zip(mod_data_dict[mod_Xaxis_column_name][mod_comp_ranges[0]:(mod_comp_ranges[1]+1)], mod_data_dict[mod_label_temp[3]][mod_comp_ranges[0]:(mod_comp_ranges[1]+1)])
+            print "   <3> Data Set 1, Data:", d1_data_seconds
+        d2_data_seconds = zip(d2_data_dict[d2_ind_axis_column_name][d2_comp_ranges[0]:(d2_comp_ranges[1]+1)], d2_data_dict[d2_label_temp[3]][d2_comp_ranges[0]:(d2_comp_ranges[1]+1)])
         if diagnostic_level >= 3:
-            print "   <3> Mod. Data:", mod_data_seconds
+            print "   <3> Data Set 2, Data:", d2_data_seconds
         
-        #Scale X_Axis Data.
-        exp_data.append([[x[0] / X_Scale_Factor, x[1]] for x in exp_data_seconds])
+        #Scale Ind_Axis Data.
+        d1_data.append([[x[0] / ind_Scale_Factor, x[1]] for x in d1_data_seconds])
         if diagnostic_level >= 3:
-            print "   <3> Scaled Experimental Data:", exp_data
-        mod_data.append([[x[0] / X_Scale_Factor, x[1]] for x in mod_data_seconds])
+            print "   <3> Scaled Data Set 1, Data:", d1_data
+        d2_data.append([[x[0] / ind_Scale_Factor, x[1]] for x in d2_data_seconds])
         if diagnostic_level >= 3:
-            print "   <3> Scaled Prediction Data:", mod_data
+            print "   <3> Scaled Prediction Data:", d2_data
             
-        #Need to Scale Y_Axis Data...
+        #Need to Scale Dep_Axis Data...
         
         scatter_counter = scatter_counter + 1
         if diagnostic_level >= 3:
             print "\n   <3> Scatter Counter:", scatter_counter, "\n"
     
     # Close files
-    exp_file_object.close()
-    mod_file_object.close()
+    d1_file_object.close()
+    d2_file_object.close()
     
-    return [exp_data,mod_data]
+    return [d1_data,d2_data]
 
-def comparison_plot(plot_data,exp_data,mod_data):
+def comparison_plot(plot_data,d1_data,d2_data):
     #plot_data is a list of values from the 'd' row of the config file being processed.
     
     # Variables for plot.
     plot_title = plot_data['Plot_Title']
     if diagnostic_level >= 3:
         print "   <3> Plot Title:", plot_title
-    x_title = plot_data['X_Title']
-    y_title = plot_data['Y_Title']   
-    min_x = float(plot_data['Min_X'])
-    max_x = float(plot_data['Max_X'])
-    min_y = float(plot_data['Min_Y'])
-    max_y = float(plot_data['Max_Y'])
-    title_quadrant = int(plot_data['Title_Quadrant'])
+    ind_title = plot_data['Ind_Title']
+    dep_title = plot_data['Dep_Title']   
+    min_ind = float(plot_data['Min_Ind'])
+    max_ind = float(plot_data['Max_Ind'])
+    min_dep = float(plot_data['Min_Dep'])
+    max_dep = float(plot_data['Max_Dep'])
+    title_position = plot_data['Title_Position']
     key_pos = plot_data['Key_Position']
     key_dist = 0.2*unit.v_cm
     v_dist   = 0.7*unit.v_cm
     h_dist   = 0.4*unit.v_cm
-    plot_width = int(plot_data['Plot_Width(cm)'])
+    plot_width = float(plot_data['Plot_Width(cm)'])
     
     #Create filename from fields in input file record.
     plot_file_name = plot_data["Plot_Filename"]
     
-    # Determine the location for the key, alignment based on key_quadrant setting.
-    # Replace quad code with actual position letters
+    # Determine the location for the key, alignment based on key_pos setting.
     if key_pos == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br":
         ()
         if diagnostic_level >= 3:
@@ -596,66 +610,88 @@ def comparison_plot(plot_data,exp_data,mod_data):
         print "The key position was not specified.\nUsing the default bottom right position."
         key_pos = "br"
     
+    # Determine the location for the title, alignment based on Title_Position setting.
+    if title_position == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br":
+        ()
+        if diagnostic_level >= 3:
+            print "   <3> Title Position =", title_position
+    else:
+        if diagnostic_level >= 2:
+            print "The Title position was not specified.\nUsing the default top left position."
+        key_pos = "tl"
+
     #Begin Plotting
     # Initialize graph object
     g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
-                        x=graph.axis.linear(title=x_title, min=min_x, max=max_x), 
-                        y=graph.axis.linear(title=y_title, min=min_y, max=max_y))
+                        x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
+                        y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
     
     # Create line styles that have predetermined color order for each pair in series.  
-    # All Experimental data is plotted with solid lines while Model data is dotted.
-    expPlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Black, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.06*unit.w_cm)])
-    modPlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Grey, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.03*unit.w_cm)])
+    # All Data Set 1, data is plotted with thick solid lines while Data Set 2, data is thin solid lines.
+    # Colors are from http://pyx.sourceforge.net/manual/colorname.html
+    d1PlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Black, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.06*unit.w_cm)])
+    d2PlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Grey, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.03*unit.w_cm)])
     
     #Loop strcuture to process compound colum names in d line.
     if diagnostic_level >= 3:
-        print "   <3> Exp. Data:",exp_data
-    if len(exp_data) > 1 : # or len(mod_data) > 1:
+        print "   <3> Data Set 1, Data:",d1_data
+    if len(d1_data) > 1 : # or len(d2_data) > 1:
         #Set plot legend key text.
-        exp_key_list = eval(plot_data['Exp_Key'])
-        mod_key_list = eval(plot_data['Mod_Key'])
-        exp_plot_counter = 0
-        mod_plot_counter = 0
+        d1_key_list = eval(plot_data['d1_Key'])
+        d2_key_list = eval(plot_data['d2_Key'])
+        d1_plot_counter = 0
+        d2_plot_counter = 0
         
-        # Loop through and plot Experimental data
-        for exp_data_item in exp_data:
-            g.plot(graph.data.points(exp_data_item, title=exp_key_list[exp_plot_counter], x=1, y=2),
-                  [expPlotStyle])
-            exp_plot_counter = exp_plot_counter + 1
+        # Loop through and plot Data Set 1, data
+        for d1_data_item in d1_data:
+            g.plot(graph.data.points(d1_data_item, title=d1_key_list[d1_plot_counter], x=1, y=2),
+                  [d1PlotStyle])
+            d1_plot_counter = d1_plot_counter + 1
             
-        # Loop through and plot Experimental data
-        for mod_data_item in mod_data:
-            g.plot(graph.data.points(mod_data_item, title=mod_key_list[mod_plot_counter], x=1, y=2),
-                  [modPlotStyle])
-            mod_plot_counter = mod_plot_counter + 1
+        # Loop through and plot Data Set 1, data
+        for d2_data_item in d2_data:
+            g.plot(graph.data.points(d2_data_item, title=d2_key_list[d2_plot_counter], x=1, y=2),
+                  [d2PlotStyle])
+            d2_plot_counter = d2_plot_counter + 1
     else:
         #Set plot legend key text.
-        exp_key = plot_data['Exp_Key']
-        mod_key = plot_data['Mod_Key']
+        d1_key = plot_data['d1_Key']
+        d2_key = plot_data['d2_Key']
         
         if diagnostic_level >= 3:
-            print "   <3> Exp. Data to Plot:", exp_data[0]
-            print "   <3> Mod. Data to Plot:", mod_data[0]
+            print "   <3> Data Set 1, Data to Plot:", d1_data[0]
+            print "   <3> Data Set 2, Data to Plot:", d2_data[0]
         
-        # Plot Experimental data
-        g.plot(graph.data.points(exp_data[0], title=exp_key, x=1, y=2),
-            [expPlotStyle])
-        # Plot Predicted/Model data
-        g.plot(graph.data.points(mod_data[0], title=mod_key, x=1, y=2),
-            [modPlotStyle])
+        # Plot Data Set 1, data
+        g.plot(graph.data.points(d1_data[0], title=d1_key, x=1, y=2),
+            [d1PlotStyle])
+        # Plot Predicted/Data Set 2, data
+        g.plot(graph.data.points(d2_data[0], title=d2_key, x=1, y=2),
+            [d2PlotStyle])
     
-    # Now plot the Title text, alignment based on title quadrant setting.
-    if title_quadrant == 1:
-        g.text(        0.2, g.height - 0.2, plot_title, [text.halign.left,  text.valign.top,    text.size.normalsize])
-    elif title_quadrant == 2:
-        g.text(g.width-0.2, g.height - 0.2, plot_title, [text.halign.right, text.valign.top,    text.size.normalsize])
-    elif title_quadrant == 3:
-        g.text(        0.2,            0.2, plot_title, [text.halign.left,  text.valign.bottom, text.size.normalsize])
-    elif title_quadrant == 4:
-        g.text(g.width-0.2,            0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
+    # Now plot the Title text, alignment based on Title_Position setting.
+    # "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br"
+    if title_position == 'tl':
+        g.text(0.2, g.height - 0.2, plot_title, [text.halign.left,  text.valign.top, text.size.normalsize])
+    elif title_position == 'tc':
+        g.text(g.width/2, g.height - 0.2, plot_title, [text.halign.center, text.valign.top, text.size.normalsize])
+    elif title_position == 'tr':
+        g.text(g.width-0.2, g.height - 0.2, plot_title, [text.halign.right, text.valign.top, text.size.normalsize])
+    elif title_position == 'ml':
+        g.text(0.2, g.height/2, plot_title, [text.halign.left, text.valign.middle, text.size.normalsize])
+    elif title_position == 'mc':
+        g.text(g.width/2, g.height/2, plot_title, [text.halign.center, text.valign.middle, text.size.normalsize])
+    elif title_position == 'mr':
+        g.text(g.width-0.2, g.height/2, plot_title, [text.halign.right, text.valign.middle, text.size.normalsize])
+    elif title_position == 'bl':
+        g.text(0.2, 0.2, plot_title, [text.halign.left, text.valign.bottom, text.size.normalsize])
+    elif title_position == 'bc':
+        g.text(g.width/2, 0.2, plot_title, [text.halign.center, text.valign.bottom, text.size.normalsize])
+    elif title_position == 'br':
+        g.text(g.width-0.2, 0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
     else:
-        print "A quadrant for the title location was not specified.\nUsing the default top left quadrant."
-        g.text(        0.2, g.height - 0.2, plot_title, [text.halign.left,  text.valign.top,    text.size.normalsize])
+        print "A title location was not specified.\nUsing the default top left position."
+        g.text(0.2, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.normalsize])
         
     # Write the output
     plot_file_path = output_directory+plot_file_name
@@ -664,7 +700,7 @@ def comparison_plot(plot_data,exp_data,mod_data):
         print "\n*** Comparison Plot to: ***\n", plot_file_path+".PDF"
 
 def scatter_plot(group_info,scatter_info,data_set):
-    #data_set is a dictionary keyed by quantity, containing lists of groups and X and Y data points.
+    #data_set is a dictionary keyed by quantity, containing lists of groups and Independent Data and Dep data points.
     
     for quantity_number in scatter_info:
         #print "Dataset for quantity number "+str(quantity_number)+": ", data_set[quantity_number]
@@ -682,15 +718,15 @@ def scatter_plot(group_info,scatter_info,data_set):
             if diagnostic_level >= 2:
                 print "Plot Title:", plot_title
             
-            x_title = scatter_info[int(quantity_number)]['X_Title']
-            y_title = scatter_info[int(quantity_number)]['Y_Title']
-            min_x = float(scatter_info[int(quantity_number)]['Plot_Min'])
-            max_x = float(scatter_info[int(quantity_number)]['Plot_Max'])
-            min_y = float(scatter_info[int(quantity_number)]['Plot_Min'])
-            max_y = float(scatter_info[int(quantity_number)]['Plot_Max'])
+            ind_title = scatter_info[int(quantity_number)]['Ind_Title']
+            dep_title = scatter_info[int(quantity_number)]['Dep_Title']
+            min_ind = float(scatter_info[int(quantity_number)]['Plot_Min'])
+            max_ind = float(scatter_info[int(quantity_number)]['Plot_Max'])
+            min_dep = float(scatter_info[int(quantity_number)]['Plot_Min'])
+            max_dep = float(scatter_info[int(quantity_number)]['Plot_Max'])
             percent_error = float(scatter_info[int(quantity_number)]['%error'])
-            title_quadrant = int(scatter_info[int(quantity_number)]['Title_Quadrant'])
-            plot_width = int(scatter_info[int(quantity_number)]['Plot_Width(cm)'])
+            title_position = scatter_info[int(quantity_number)]['Title_Position']
+            plot_width = float(scatter_info[int(quantity_number)]['Plot_Width(cm)'])
             
             # Specify the position and line spacing of the plot key.
             key_pos  = scatter_info[int(quantity_number)]['Key_Position']
@@ -703,9 +739,9 @@ def scatter_plot(group_info,scatter_info,data_set):
             if diagnostic_level >= 3:
                 print "   <3> Plot File Name:", plot_file_name
             
-            # Determine the location for the key, alignment based on key_quadrant setting.
+            # Determine the location for the key, alignment based on Key_Position setting.
             if key_pos == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br":
-                ()
+                pass
                 if diagnostic_level >= 3:
                     print "   <3> Key Position =", key_pos
             else:
@@ -713,23 +749,33 @@ def scatter_plot(group_info,scatter_info,data_set):
                     print "The key position was not specified.\nUsing the default bottom right position."
                 key_pos = "br"
             
+            # Determine the location for the title, alignment based on Title_Position setting.
+            if title_position == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br":
+                ()
+                if diagnostic_level >= 3:
+                    print "   <3> Title Position =", title_position
+            else:
+                if diagnostic_level >= 2:
+                    print "The Title position was not specified.\nUsing the default top left position."
+                key_pos = "tl"
+            
             #Begin Plotting
             
             # Initialize graph object
             g = graph.graphxy(width=plot_width, ratio=1/1, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist, textattrs=[text.size.footnotesize]), 
-                                x=graph.axis.linear(title=x_title, min=min_x, max=max_x), 
-                                y=graph.axis.linear(title=y_title, min=min_y, max=max_y))
+                                x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
+                                y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
             
             #Plot Midline and Error bounds lines.
-            errorLineCenterPoints = [[min_x,min_y],[max_x,max_y]]
+            errorLineCenterPoints = [[min_ind,min_dep],[max_ind,max_dep]]
             if diagnostic_level >= 3:
                 print "   <3> Error Line Center Points:", errorLineCenterPoints
             
-            if min_x < 0:       
-                lower_bound = ((min_y)+((min_y)*(percent_error / 100)))
-                errorLineLowerPoints = [[min_x,lower_bound],[max_x,max_y]]
-                upper_bound = ((min_y)-((min_y)*(percent_error/100)))
-                errorLineUpperPoints = [[min_x,upper_bound],[max_x,max_y]]
+            if min_ind < 0:       
+                lower_bound = ((min_dep)+((min_dep)*(percent_error / 100)))
+                errorLineLowerPoints = [[min_ind,lower_bound],[max_ind,max_dep]]
+                upper_bound = ((min_dep)-((min_dep)*(percent_error/100)))
+                errorLineUpperPoints = [[min_ind,upper_bound],[max_ind,max_dep]]
                 if diagnostic_level >= 3:
                     print "   <3> Error Line Center Points:", errorLineCenterPoints
                     print "   <3> Lower Bound:", lower_bound
@@ -738,10 +784,10 @@ def scatter_plot(group_info,scatter_info,data_set):
                     print "   <3> Upper Error Line Points:", errorLineUpperPoints
                                  
             else:
-                lower_bound = max_y - max_y * percent_error / 100
-                errorLineLowerPoints = [[min_x,min_y],[max_x,lower_bound]]
-                upper_bound = max_y + max_y * percent_error / 100.0
-                errorLineUpperPoints = [[min_x,min_y],[max_x,upper_bound]]
+                lower_bound = max_dep - max_dep * percent_error / 100
+                errorLineLowerPoints = [[min_ind,min_dep],[max_ind,lower_bound]]
+                upper_bound = max_dep + max_dep * percent_error / 100.0
+                errorLineUpperPoints = [[min_ind,min_dep],[max_ind,upper_bound]]
                 if diagnostic_level >= 3:
                     print "   <3> Error Line Center Points:", errorLineCenterPoints
                     print "   <3> Lower Bound:", lower_bound
@@ -838,17 +884,28 @@ def scatter_plot(group_info,scatter_info,data_set):
             if diagnostic_level >= 3:
                 print "   <3> Grouped Data List:", grouped_data_list
             
-            # Now plot the Title text, alignment based on title quadrant setting.
-            if title_quadrant == 1:
+            # Now plot the Title text, alignment based on Title_Position setting.
+            # "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br"
+            if title_position == 'tl':
                 g.text(0.2, g.height - 0.2, plot_title, [text.halign.left,  text.valign.top, text.size.normalsize])
-            elif title_quadrant == 2:
+            elif title_position == 'tc':
+                g.text(g.width/2, g.height - 0.2, plot_title, [text.halign.center, text.valign.top, text.size.normalsize])
+            elif title_position == 'tr':
                 g.text(g.width-0.2, g.height - 0.2, plot_title, [text.halign.right, text.valign.top, text.size.normalsize])
-            elif title_quadrant == 3:
+            elif title_position == 'ml':
+                g.text(0.2, g.height/2, plot_title, [text.halign.left, text.valign.middle, text.size.normalsize])
+            elif title_position == 'mc':
+                g.text(g.width/2, g.height/2, plot_title, [text.halign.center, text.valign.middle, text.size.normalsize])
+            elif title_position == 'mr':
+                g.text(g.width-0.2, g.height/2, plot_title, [text.halign.right, text.valign.middle, text.size.normalsize])
+            elif title_position == 'bl':
                 g.text(0.2, 0.2, plot_title, [text.halign.left, text.valign.bottom, text.size.normalsize])
-            elif title_quadrant == 4:
+            elif title_position == 'bc':
+                g.text(g.width/2, 0.2, plot_title, [text.halign.center, text.valign.bottom, text.size.normalsize])
+            elif title_position == 'br':
                 g.text(g.width-0.2, 0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
             else:
-                print "A title location was not specified.\nUsing the default top left quadrant."
+                print "A title location was not specified.\nUsing the default top left position."
                 g.text(0.2, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.normalsize])
             
             #Make %error text on plot by error bars.
@@ -881,7 +938,7 @@ if diagnostic_level >= 2:
 if diagnostic_level >= 3:
     print "   <3> Quantity Lines:\n", group_quantity_data_dicts[1]
 if diagnostic_level >= 2:
-    print "There are "+str(len(group_quantity_data_dicts[2]))+" comparison data sets to plot, (d lines)."
+    print "There are "+str(len(group_quantity_data_dicts[2]))+" comparison data sets to plot, ("+data_line_char+" lines)."
 
 ## Create comparison plots
 if diagnostic_level >= 1:
@@ -896,17 +953,17 @@ for data_record in group_quantity_data_dicts[2]:
     if diagnostic_level >= 3:
         print "   <3> Comparison Data to Plot:", comp_data_to_plot
 
-    #Seperate experimental and model data lists.
-    exp_plot_data = comp_data_to_plot[0]
-    mod_plot_data = comp_data_to_plot[1]
+    #Seperate d1 and d2 data lists.
+    d1_plot_data = comp_data_to_plot[0]
+    d2_plot_data = comp_data_to_plot[1]
 
     if diagnostic_level >= 3:
-        print "   <3> Exp Plot Data:", exp_plot_data
-        print "   <3> Mod Plot Data:", mod_plot_data
+        print "   <3> Data Set 1, Plot Data:", d1_plot_data
+        print "   <3> Data Set 2, Plot Data:", d2_plot_data
 
     # Create plot for data_record.
     if process_set == 1 or process_set == 2:
-        comparison_plot(group_quantity_data_dicts[2][data_record],exp_plot_data,mod_plot_data)
+        comparison_plot(group_quantity_data_dicts[2][data_record],d1_plot_data,d2_plot_data)
     d_count = d_count + 1
     if diagnostic_level >= 1:
         print "\n"
@@ -944,11 +1001,11 @@ if process_set == 1 or process_set == 3:
 ## Write Summary Data to File.
 #NRC Comparisons Output
 # Output for each data set 
-#*Exp Zero Val
-#*Exp Peak Val
+#*d1 Zero Val
+#*d1 Peak Val
 #*Peak Time Val
-#*Mod Zero Val
-#*Mod Peak Val
+#*d2 Zero Val
+#*d2 Peak Val
 #*Peak Time Val
 #*DeltaE
 #*DeltaM
