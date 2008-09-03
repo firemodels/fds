@@ -20,7 +20,7 @@ if data_set == 2:
     config_file_name = "Verification_Data_Config_File.csv"
     print "**** Processing Verification Data Set ****\n"
 
-## Examples Data
+## Examples Data (Currently not working because the file system is changed)
 if data_set == 3:
     data_directory = "../../Verification/"
     output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
@@ -367,7 +367,7 @@ def extract_comp_data(comp_file_info):
         print "!!! Data Set 2, filename "+d2_data_filename+" will not open. !!!"
         exit()
     
-    if diagnostic_level >= 1:
+    if diagnostic_level >= 2:
         print "*** Start File Processing ***"
     
     # Read in Data Set 1, data and flip lists from rows to columns.
@@ -946,8 +946,8 @@ if diagnostic_level >= 1:
 d_count = 1
 for data_record in group_quantity_data_dicts[2]:
     # Each d line, data_record, may contain compound column names from the config file.
-    if diagnostic_level >= 2:
-        print "*** #"+str(d_count)+" of "+str(len(group_quantity_data_dicts[2]))+" comparison records. ***\n"
+    if diagnostic_level >= 1:
+        print "*** #"+str(d_count)+" of "+str(len(group_quantity_data_dicts[2]))+" comparison records. ***"
     # Extract relevant portions of comparison data as defined in config file.
     comp_data_to_plot = extract_comp_data(group_quantity_data_dicts[2][data_record])
     if diagnostic_level >= 3:
@@ -965,8 +965,6 @@ for data_record in group_quantity_data_dicts[2]:
     if process_set == 1 or process_set == 2:
         comparison_plot(group_quantity_data_dicts[2][data_record],d1_plot_data,d2_plot_data)
     d_count = d_count + 1
-    if diagnostic_level >= 1:
-        print "\n"
 
 ## Create scatter plots
 if process_set == 1 or process_set == 3:
