@@ -515,7 +515,8 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II,JJ,KK)
                   A(N,N)  = A(N,N)  - DA/DX_M(N,NO)
                   A(N,NO) = A(N,NO) + DA/DX_M(N,NO)
-                  B(N)    = B(N)    + DA*FVX(II,JJ,KK)
+               !  B(N)    = B(N)    + DA*FVX(II,JJ,KK)
+                  B(N)    = B(N)    + (FVX(II,JJ,KK)+(H(II+1,JJ,KK)-H(II,JJ,KK))*RDXN(II))*DA
                ELSE 
                   IW = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),-1)
                   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
@@ -558,7 +559,8 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II+1,JJ,KK)
                   A(N,N)  = A(N,N)  - DA/DX_M(N,NO)
                   A(N,NO) = A(N,NO) + DA/DX_M(N,NO)
-                  B(N)    = B(N)    - DA*FVX(II,JJ,KK)
+               !  B(N)    = B(N)    - DA*FVX(II,JJ,KK)
+                  B(N)    = B(N)    - (FVX(II,JJ,KK)+(H(II+1,JJ,KK)-H(II,JJ,KK))*RDXN(II))*DA
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),1)
                   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
@@ -601,7 +603,8 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II,JJ,KK)
                   A(N,N)  = A(N,N)  - DA/DY_M(N,NO) 
                   A(N,NO) = A(N,NO) + DA/DY_M(N,NO) 
-                  B(N)    = B(N)    + DA*FVY(II,JJ,KK)
+               !  B(N)    = B(N)    + DA*FVY(II,JJ,KK)
+                  B(N)    = B(N)    + (FVY(II,JJ,KK)+(H(II,JJ+1,KK)-H(II,JJ,KK))*RDYN(JJ))*DA
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),-2)
                   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
@@ -644,7 +647,8 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II,JJ+1,KK)
                   A(N,N)  = A(N,N)  - DA/DY_M(N,NO)
                   A(N,NO) = A(N,NO) + DA/DY_M(N,NO)
-                  B(N)    = B(N)    - DA*FVY(II,JJ,KK)
+               !  B(N)    = B(N)    - DA*FVY(II,JJ,KK)
+                  B(N)    = B(N)    - (FVY(II,JJ,KK)+(H(II,JJ+1,KK)-H(II,JJ,KK))*RDYN(JJ))*DA
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),2)
                   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
@@ -687,7 +691,8 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II,JJ,KK)
                   A(N,N)  = A(N,N)  - DA/DZ_M(N,NO) 
                   A(N,NO) = A(N,NO) + DA/DZ_M(N,NO) 
-                  B(N)    = B(N)    + DA*FVZ(II,JJ,KK)
+              !   B(N)    = B(N)    + DA*FVZ(II,JJ,KK)
+                  B(N)    = B(N)    + (FVZ(II,JJ,KK)+(H(II,JJ,KK+1)-H(II,JJ,KK))*RDZN(KK))*DA
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),-3)
                   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
@@ -730,7 +735,8 @@ K_COARSE: DO KC=1,KBAR2
                   NO = CGI(II,JJ,KK+1)
                   A(N,N)  = A(N,N)  - DA/DZ_M(N,NO) 
                   A(N,NO) = A(N,NO) + DA/DZ_M(N,NO) 
-                  B(N)    = B(N)    - DA*FVZ(II,JJ,KK)
+               !  B(N)    = B(N)    - DA*FVZ(II,JJ,KK)
+                  B(N)    = B(N)    - (FVZ(II,JJ,KK)+(H(II,JJ,KK+1)-H(II,JJ,KK))*RDZN(KK))*DA
                ELSE
                   IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),3)
                   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
