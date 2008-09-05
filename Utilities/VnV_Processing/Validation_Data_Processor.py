@@ -38,7 +38,7 @@ if data_set == 4:
 ### Set Diagnostic Output Level
 ## Uncomment the level of diagnostics desired.
 ## 1 = Minimal, 2 = Normal, 3 = Maximum.
-diagnostic_level = 2 # Input Value
+diagnostic_level = 1 # Input Value
 
 print "**** Diagnostics Set at Level", diagnostic_level, "****\n"
 
