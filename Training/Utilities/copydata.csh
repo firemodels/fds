@@ -24,6 +24,10 @@ cp ../Demonstrations/2Room_Ranch/ranch_01_hrr.csv $FDSDATA/.
 cp ../Demonstrations/2Room_Ranch/ranch_02_hrr.csv $FDSDATA/.
 cp ../Demonstrations/2Room_Ranch/ranch_03_hrr.csv $FDSDATA/.
 cp ../Demonstrations/2Room_Ranch/ranch_04_hrr.csv $FDSDATA/.
+cp ../Demonstrations/2Room_Ranch/ranch_01_devc.csv $FDSDATA/.
+cp ../Demonstrations/2Room_Ranch/ranch_02_devc.csv $FDSDATA/.
+cp ../Demonstrations/2Room_Ranch/ranch_03_devc.csv $FDSDATA/.
+cp ../Demonstrations/2Room_Ranch/ranch_04_devc.csv $FDSDATA/.
 
 cp ../MCFRS/MCFRS_Ranch/MCFRS_Ranch_00_hrr.csv $FDSDATA/.
 cp ../MCFRS/MCFRS_Ranch/MCFRS_Ranch_00_devc.csv $FDSDATA/.
