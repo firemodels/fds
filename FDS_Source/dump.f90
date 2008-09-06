@@ -47,7 +47,8 @@ TYPE (ISOSURFACE_FILE_TYPE), POINTER :: IS
 PUBLIC ASSIGN_FILE_NAMES,INITIALIZE_GLOBAL_DUMPS,INITIALIZE_MESH_DUMPS,WRITE_STATUS_FILES, &
        TIMINGS,FLUSH_GLOBAL_BUFFERS,FLUSH_EVACUATION_BUFFERS,FLUSH_LOCAL_BUFFERS,READ_RESTART,WRITE_DIAGNOSTICS, &
        WRITE_SMOKEVIEW_FILE,DUMP_MESH_OUTPUTS,UPDATE_GLOBAL_OUTPUTS,DUMP_DEVICES,DUMP_HRR,DUMP_MASS, DUMP_CONTROLS,&
-       GET_REV_dump
+       GET_REV_dump, &
+       DUMP_VEG
        
 
 CONTAINS
@@ -561,6 +562,7 @@ USE COMP_FUNCTIONS, ONLY : SECOND
 USE MEMORY_FUNCTIONS, ONLY:RE_ALLOCATE_STRINGS,CHKMEMERR 
 INTEGER, INTENT(IN) :: NM
 INTEGER :: IOR,IZERO,I,J,K,N,ERROR,I1,I2,J1,J2,K1,K2,I1B,I2B,IW,NN,NF
+INTEGER :: NTSL
 CHARACTER(30) :: LABEL1,LABEL2,LABEL3
 REAL(EB) :: TNOW
  
@@ -709,6 +711,8 @@ ENDIF SMOKE3D_INITIALIZATION
  
 ! Initialize Slice Files
  
+NTSL = 0
+
 DO N=1,M%N_SLCF
    SL => M%SLICE(N)
    IF (APPEND) THEN
@@ -716,7 +720,8 @@ DO N=1,M%N_SLCF
    ELSE
       IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
       M%N_STRINGS = M%N_STRINGS + 1
-      WRITE(M%STRING(M%N_STRINGS),'(A,I6)') 'SLCF',NM
+      IF (.NOT. SL%TERRAIN_SLICE) WRITE(M%STRING(M%N_STRINGS),'(A,I6)') 'SLCF',NM
+      IF (      SL%TERRAIN_SLICE) WRITE(M%STRING(M%N_STRINGS),'(A,I6,F10.4)') 'SLCT',NM,SL%SLICE_AGL
       M%N_STRINGS = M%N_STRINGS + 1
       WRITE(M%STRING(M%N_STRINGS),'(A)') FN_SLCF(N,NM)
       M%N_STRINGS = M%N_STRINGS + 1
@@ -729,7 +734,19 @@ DO N=1,M%N_SLCF
       WRITE(LU_SLCF(N,NM)) SL%SMOKEVIEW_LABEL(1:30)
       WRITE(LU_SLCF(N,NM)) SL%SMOKEVIEW_BAR_LABEL(1:30)
       WRITE(LU_SLCF(N,NM)) OUTPUT_QUANTITY(SL%INDEX)%UNITS(1:30)
-      WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
+!orig WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
+!rm ->
+      IF (.NOT. SL%TERRAIN_SLICE) WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
+      IF (SL%TERRAIN_SLICE) THEN
+       NTSL = NTSL + 1
+       IF (SL%I1 == 0)    M%K_AGL_SLICE(0,SL%J1:SL%J2,NTSL)    = M%K_AGL_SLICE(1,SL%J1:SL%J2,NTSL)
+       IF (SL%I2 == IBP1) M%K_AGL_SLICE(IBP1,SL%J1:SL%J2,NTSL) = M%K_AGL_SLICE(IBP1-1,SL%J1:SL%J2,NTSL)
+       IF (SL%J1 == 0)    M%K_AGL_SLICE(SL%I1:SL%I2,0,NTSL)    = M%K_AGL_SLICE(SL%I1:SL%I2,1,NTSL)
+       IF (SL%J2 == JBP1) M%K_AGL_SLICE(SL%I1:SL%I2,JBP1,NTSL) = M%K_AGL_SLICE(SL%I1:SL%I2,JBP1-1,NTSL)
+       WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,M%K_AGL_SLICE(SL%I1,SL%J1,NTSL), &
+                            M%K_AGL_SLICE(SL%I1,SL%J1,NTSL)
+      ENDIF
+!rm <-
    ENDIF
 ENDDO   
  
@@ -952,6 +969,13 @@ OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED',STATUS='REPLACE')
  
 WRITE(LU_SMV,'(A)') 'TITLE'
 WRITE(LU_SMV,'(A)')  TITLE
+
+! Indentify as terrain case
+
+IF (TERRAIN_CASE) THEN
+  WRITE(LU_SMV,'(/A)') 'AUTOTERRAIN'
+  WRITE(LU_SMV,'(I3)') 1
+ENDIF
  
 ! Record the version and endian-ness in .smv file
  
@@ -2768,9 +2792,11 @@ REAL(EB), INTENT(IN) :: T
 REAL(EB) :: SUM,XI,YJ,ZK,DROPMASS,RVC,TT
 INTEGER :: IFRMT,I,J,K,IPC,II,JJ,KK,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQQ,IND,NQ,NRLE,II1,II2,JJ1,JJ2,KK1,KK2, &
            IC,SPEC_INDEX,PART_INDEX
+INTEGER :: KTS,NTSL
 REAL(EB), POINTER, DIMENSION(:,:,:) :: C,B,S,QUANTITY
 REAL(FB) :: ZERO,STIME
 LOGICAL :: D_FLUX,PLOT3D
+LOGICAL :: AGL_TERRAIN_SLICE
 CHARACTER(1), ALLOCATABLE, DIMENSION(:) :: CVAL
 
 ! Return if there are no slices to process and this is not a Plot3D dump
@@ -2932,6 +2958,8 @@ ELSE
    NQT = N_SLCF
 ENDIF
  
+NTSL = 0
+
 QUANTITY_LOOP: DO IQ=1,NQT
  
    IF (PLOT3D) THEN
@@ -2944,6 +2972,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
       J2  = JBAR
       K1  = 0
       K2  = KBAR
+      AGL_TERRAIN_SLICE = .FALSE.
    ELSE
       SL => SLICE(IQ)
       IND = SL%INDEX
@@ -2955,6 +2984,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
       J2  = SL%J2
       K1  = SL%K1
       K2  = SL%K2
+      AGL_TERRAIN_SLICE = SL%TERRAIN_SLICE
    ENDIF
  
    ! Determine what cells need to be evaluated to form cell-corner averages
@@ -2978,6 +3008,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
    
    ! Loop through the necessary cells, storing the desired output QUANTITY
 
+!orig ->
+   IF (.NOT. AGL_TERRAIN_SLICE) THEN
    DO K=KK1,KK2
       DO J=JJ1,JJ2
          DO I=II1,II2
@@ -2985,6 +3017,23 @@ QUANTITY_LOOP: DO IQ=1,NQT
          ENDDO
       ENDDO
    ENDDO
+   ENDIF
+!orig <-
+
+!rm ->
+   IF (AGL_TERRAIN_SLICE) THEN
+     NTSL = NTSL + 1
+     DO I=II1,II2
+        DO J=JJ1,JJ2
+              DO K=KK1,KK2
+!need values for additional K in order to us average procedure below
+                KTS = K_AGL_SLICE(I,J,NTSL) 
+                QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,KTS,IND,SPEC_INDEX,PART_INDEX,T)
+           ENDDO
+        ENDDO
+     ENDDO
+   ENDIF
+!rm <-
 
    ! Average the QUANTITY at cell nodes, faces, or edges, as appropriate
    
@@ -2994,31 +3043,47 @@ QUANTITY_LOOP: DO IQ=1,NQT
       IQQ = 1
    ENDIF
 
-   DO K=K1,K2
-      DO J=J1,J2
-         DO I=I1,I2
-            SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
-               CASE(CELL_CENTER)
-                  QQ(I,J,K,IQQ) = CORNER_VALUE(QUANTITY,B,S,IND)
-               CASE(CELL_FACE)
-                  QQ(I,J,K,IQQ) = FACE_VALUE(QUANTITY,C,OUTPUT_QUANTITY(IND)%IOR,IND)
-                  IC = CELL_INDEX(I,J,K)
-                  IF (IC>0) THEN
-                     SELECT CASE(IND)
-                        CASE(6)
-                           IF (UVW_GHOST(IC,1)>-1.E5_EB) QQ(I,J,K,IQQ) = UVW_GHOST(IC,1)
-                        CASE(7)
-                           IF (UVW_GHOST(IC,2)>-1.E5_EB) QQ(I,J,K,IQQ) = UVW_GHOST(IC,2)
-                        CASE(8)
-                           IF (UVW_GHOST(IC,3)>-1.E5_EB) QQ(I,J,K,IQQ) = UVW_GHOST(IC,3)
-                     END SELECT
-                  ENDIF
-               CASE(CELL_EDGE)
-                  QQ(I,J,K,IQQ) = EDGE_VALUE(QUANTITY,S,IND)
-            END SELECT
-         ENDDO
-      ENDDO
-   ENDDO
+!orig ->
+   IF (.NOT. AGL_TERRAIN_SLICE) THEN
+     DO K=K1,K2
+        DO J=J1,J2
+           DO I=I1,I2
+              SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
+                 CASE(CELL_CENTER)
+                    QQ(I,J,K,IQQ) = CORNER_VALUE(QUANTITY,B,S,IND)
+                 CASE(CELL_FACE)
+                    QQ(I,J,K,IQQ) = FACE_VALUE(QUANTITY,C,OUTPUT_QUANTITY(IND)%IOR,IND)
+                    IC = CELL_INDEX(I,J,K)
+                    IF (IC>0) THEN
+                       SELECT CASE(IND)
+                          CASE(6)
+                             IF (UVW_GHOST(IC,1)>-1.E5_EB) QQ(I,J,K,IQQ) = UVW_GHOST(IC,1)
+                          CASE(7)
+                             IF (UVW_GHOST(IC,2)>-1.E5_EB) QQ(I,J,K,IQQ) = UVW_GHOST(IC,2)
+                          CASE(8)
+                             IF (UVW_GHOST(IC,3)>-1.E5_EB) QQ(I,J,K,IQQ) = UVW_GHOST(IC,3)
+                       END SELECT
+                    ENDIF
+                 CASE(CELL_EDGE)
+                    QQ(I,J,K,IQQ) = EDGE_VALUE(QUANTITY,S,IND)
+              END SELECT
+           ENDDO
+        ENDDO
+     ENDDO
+   ENDIF
+!orig <-
+
+!rm ->   
+   IF (AGL_TERRAIN_SLICE) THEN
+     DO K=K1,K2
+        DO J=J1,J2
+           DO I=I1,I2
+             QQ(I,J,K,IQQ) = QUANTITY(I,J,K)
+          ENDDO
+       ENDDO
+    ENDDO
+   ENDIF
+!rm  <-
  
    ! Dump out the slice file to a .sf file
  
@@ -4142,6 +4207,34 @@ WRITE(LU_HRR,TCFORM) STIME,0.001_EB*HRR_TOTAL, .001_EB*RHRR_TOTAL,.001_EB*FHRR_T
                      MLR_TOTAL,(MESHES(1)%PBAR(1,I)/P_STP,I=1,N_ZONE)
  
 END SUBROUTINE DUMP_HRR
+ 
+!rm -> 
+SUBROUTINE DUMP_VEG(T)
+
+! --- temporary (place holder) ouput routine
+! Write out total dry and moisture mass in vegetation
+ 
+REAL(EB), INTENT(IN) :: T
+REAL(FB) :: STIME
+INTEGER :: NM
+REAL(EB) :: DRY_MASS_TOTAL,MOIST_MASS_TOTAL
+LOGICAL :: VEG_PRESENT
+ 
+VEG_PRESENT = .FALSE.
+STIME      = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
+DRY_MASS_TOTAL   = 0._EB
+MOIST_MASS_TOTAL = 0._EB
+ 
+DO NM=1,NMESHES
+  IF (TREE_MESH(NM)) VEG_PRESENT = .TRUE.
+  DRY_MASS_TOTAL    = DRY_MASS_TOTAL    + VEG_TOTAL_DRY_MASS(NM)
+  MOIST_MASS_TOTAL  = MOIST_MASS_TOTAL  + VEG_TOTAL_MOIST_MASS(NM)
+ENDDO
+ 
+IF (VEG_PRESENT) WRITE(9999,'(3(ES12.4))')T,DRY_MASS_TOTAL,MOIST_MASS_TOTAL
+ 
+END SUBROUTINE DUMP_VEG
+!rm <- 
 
  
 SUBROUTINE UPDATE_MASS(NM)
