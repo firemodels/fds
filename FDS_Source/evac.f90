@@ -4702,7 +4702,6 @@ Contains
     Integer(4) ibar_tmp, jbar_tmp, kbar_tmp, n_tmp
     Real(FB) tmpout1, tmpout2, tmpout3, tmpout4, t_tmp, dt_tmp
     Real(FB) tmpout5, tmpout6, tmpout7, tmpout8
-    Real(EB) Z_1,Z_2,Z_3
     !
     If (.Not. Any(EVACUATION_GRID)) Return
     If (ICYC < 1) Return
