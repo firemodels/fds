@@ -1367,6 +1367,8 @@ SPECIES(:)%MODE=GAS_SPECIES
  
 N_MIX=0
 NN=N_SPEC_EXTRA
+I_Z_MIN = -999
+I_Z_MAX = -999
 DO N=1,N_REACTIONS
    IF (REACTION(N)%MODE==MIXTURE_FRACTION_REACTION) THEN
       NN    = NN + 1
@@ -1376,6 +1378,8 @@ DO N=1,N_REACTIONS
       WRITE(SPECIES(NN)%FORMULA,'(A,I1.1)') 'Z',N_MIX
       IF (N_REACTIONS > 1) WRITE(SPECIES(NN)%ID,'(A,I1.1)') 'MIXTURE_FRACTION_',N_MIX
       IF (N_REACTIONS ==1) WRITE(SPECIES(NN)%ID,'(A)'     ) 'MIXTURE_FRACTION'
+      IF (I_Z_MIN < 0) I_Z_MIN = NN
+      I_Z_MAX = NN      
    ENDIF
 ENDDO
  
@@ -1561,12 +1565,16 @@ READ_REACTION_LOOP: DO NN=1,N_REAC_READ
    RN%HEAT_OF_COMBUSTION = HEAT_OF_COMBUSTION*1000._EB
    IF (FUEL=='null') THEN
       RN%MODE = MIXTURE_FRACTION_REACTION
+      ALLOCATE(RN%NU(9))
+      RN%NU = 0._EB
    ELSE
       RN%MODE = FINITE_RATE_REACTION
+      ALLOCATE(RN%N(MAX_SPECIES))
+      RN%N = N_S
+      ALLOCATE(RN%NU(MAX_SPECIES))
+      RN%NU = NU
    ENDIF
-   RN%N(:)               = N_S(:)
    RN%NAME               = ID
-   RN%NU(:)              = NU(:)
    RN%OXIDIZER           = OXIDIZER
 ENDDO READ_REACTION_LOOP
 
@@ -1574,6 +1582,10 @@ IF (H==0._EB) SOOT_H_FRACTION = 0._EB
 MW_SOOT = MW_C * (1._EB - SOOT_H_FRACTION) + MW_H * SOOT_H_FRACTION   
 
 SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
+   DO NN = 2,N_REACTIONS
+      ALLOCATE(REACTION(NN)%NU(9))
+      REACTION(NN)%NU = 0._EB
+   ENDDO
    !Set reaction variable constants
    REACTION%SOOT_H_FRACTION = SOOT_H_FRACTION
    REACTION%MW_OTHER        = MW_OTHER
@@ -1617,41 +1629,41 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
       RN%IDEAL      = IDEAL
       IF (RN%IDEAL) THEN
          !Compute fuel heat of formation
-         RN%NU_O2 = C + 0.5_EB * H - 0.5_EB * O
-         IF (HEAT_OF_COMBUSTION < 0._EB) HEAT_OF_COMBUSTION = EPUMO2*(MW_O2*RN%NU_O2)/RN%MW_FUEL
+         RN%NU(O2_INDEX) = C + 0.5_EB * H - 0.5_EB * O
+         IF (HEAT_OF_COMBUSTION < 0._EB) HEAT_OF_COMBUSTION = EPUMO2*(MW_O2*RN%NU(O2_INDEX))/RN%MW_FUEL
          FUEL_HEAT_OF_FORMATION =  HEAT_OF_COMBUSTION * RN%MW_FUEL - &
                                    (C * CO2_HEAT_OF_FORMATION + 0.5_EB * H * H2O_HEAT_OF_FORMATION)
       ENDIF
       RN%CO_YIELD   = CO_YIELD
       RN%SOOT_YIELD = SOOT_YIELD
       RN%H2_YIELD   = H2_YIELD
-      RN%NU_H2      = H2_YIELD * RN%MW_FUEL / MW_H2
-      RN%NU_SOOT    = SOOT_YIELD * RN%MW_FUEL / MW_SOOT
-      RN%NU_CO      = CO_YIELD * RN%MW_FUEL / MW_CO
-      RN%NU_CO2     = C - RN%NU_CO - RN%NU_SOOT * (1._EB - SOOT_H_FRACTION)
-      IF (RN%NU_CO2 < 0._EB) THEN
+      RN%NU(H2_INDEX)      = H2_YIELD * RN%MW_FUEL / MW_H2
+      RN%NU(SOOT_INDEX)    = SOOT_YIELD * RN%MW_FUEL / MW_SOOT
+      RN%NU(CO_INDEX)      = CO_YIELD * RN%MW_FUEL / MW_CO
+      RN%NU(CO2_INDEX)     = C - RN%NU(CO_INDEX) - RN%NU(SOOT_INDEX) * (1._EB - SOOT_H_FRACTION)
+      IF (RN%NU(CO2_INDEX) < 0._EB) THEN
          WRITE(MESSAGE,'(A)') 'Values for SOOT_YIELD, CO_YIELD, and SOOT_H_FRACTION result in negative CO2 yield'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      RN%NU_H2O     = 0.5_EB * H - RN%NU_H2 - 0.5_EB * RN%NU_SOOT * SOOT_H_FRACTION
-      IF (RN%NU_H2O < 0._EB) THEN
+      RN%NU(H2O_INDEX)     = 0.5_EB * H - RN%NU(H2_INDEX) - 0.5_EB * RN%NU(SOOT_INDEX) * SOOT_H_FRACTION
+      IF (RN%NU(H2O_INDEX) < 0._EB) THEN
          WRITE(MESSAGE,'(A)') 'Values for SOOT_YIELD, H2_YIELD, and SOOT_H_FRACTION result in negative H2O yield'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      RN%NU_O2      = RN%NU_CO2 + 0.5_EB * (RN%NU_CO + RN%NU_H2O - O)
-      RN%NU_N2      = 0.5_EB * N
-      RN%NU_OTHER   = OTHER
+      RN%NU(O2_INDEX)      = RN%NU(CO2_INDEX) + 0.5_EB * (RN%NU(CO_INDEX) + RN%NU(H2O_INDEX) - O)
+      RN%NU(N2_INDEX)      = 0.5_EB * N
+      RN%NU(OTHER_INDEX)   = OTHER
       RN%BOF        = 2.53E12_EB
       RN%E          = 199547._EB*1000._EB
-      RN%O2_F_RATIO    = (MW_O2*RN%NU_O2)/RN%MW_FUEL
+      RN%O2_F_RATIO    = (MW_O2*RN%NU(O2_INDEX))/RN%MW_FUEL
       IF (.NOT. RN%IDEAL) THEN
          IF(HEAT_OF_COMBUSTION < 0._EB) HEAT_OF_COMBUSTION = EPUMO2*RN%O2_F_RATIO
          RN%HEAT_OF_COMBUSTION = HEAT_OF_COMBUSTION*1000._EB
       ELSE
          ! Correct heat of combustion for minor products of combustion
-         RN%HEAT_OF_COMBUSTION = (FUEL_HEAT_OF_FORMATION + RN%NU_CO2 * CO2_HEAT_OF_FORMATION + &
-                                                         RN%NU_CO  * CO_HEAT_OF_FORMATION + &
-                                                         RN%NU_H2O * H2O_HEAT_OF_FORMATION) * 1000._EB /RN%MW_FUEL
+         RN%HEAT_OF_COMBUSTION = (FUEL_HEAT_OF_FORMATION + RN%NU(CO2_INDEX) * CO2_HEAT_OF_FORMATION + &
+                                                         RN%NU(CO_INDEX)  * CO_HEAT_OF_FORMATION + &
+                                                         RN%NU(H2O_INDEX) * H2O_HEAT_OF_FORMATION) * 1000._EB /RN%MW_FUEL
       ENDIF
       
       ! Set reaction variables for incomplete reaction
@@ -1661,52 +1673,52 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
       RN%CO_YIELD           = 0._EB
       RN%H2_YIELD           = H2_YIELD
       RN%SOOT_YIELD         = SOOT_YIELD
-      RN%NU_H2              = H2_YIELD * RN%MW_FUEL / MW_H2
-      RN%NU_SOOT            = SOOT_YIELD * RN%MW_FUEL / MW_SOOT
-      RN%NU_CO              = C - RN%NU_SOOT * (1._EB - SOOT_H_FRACTION)
-      RN%NU_CO2             = 0._EB
-      IF (RN%NU_CO2 < 0._EB) THEN
+      RN%NU(H2_INDEX)              = H2_YIELD * RN%MW_FUEL / MW_H2
+      RN%NU(SOOT_INDEX)            = SOOT_YIELD * RN%MW_FUEL / MW_SOOT
+      RN%NU(CO_INDEX)              = C - RN%NU(SOOT_INDEX) * (1._EB - SOOT_H_FRACTION)
+      RN%NU(CO2_INDEX)             = 0._EB
+      IF (RN%NU(CO2_INDEX) < 0._EB) THEN
          WRITE(MESSAGE,'(A)') 'Values for SOOT_YIELD, CO_YIELD, and SOOT_H_FRACTION result in negative CO2 yield'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      RN%NU_H2O             = 0.5_EB * H - RN%NU_H2 - 0.5_EB * RN%NU_SOOT * SOOT_H_FRACTION
-      IF (RN%NU_H2O < 0._EB) THEN
+      RN%NU(H2O_INDEX)             = 0.5_EB * H - RN%NU(H2_INDEX) - 0.5_EB * RN%NU(SOOT_INDEX) * SOOT_H_FRACTION
+      IF (RN%NU(H2O_INDEX) < 0._EB) THEN
          WRITE(MESSAGE,'(A)') 'Values for SOOT_YIELD, H2_YIELD, and SOOT_H_FRACTION result in negative H2O yield'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      RN%NU_O2              = RN%NU_CO2 + 0.5_EB * (RN%NU_CO + RN%NU_H2O - O)
-      RN%NU_N2              = 0.5_EB * N
-      RN%NU_OTHER           = OTHER
-      RN%O2_F_RATIO    = (MW_O2*RN%NU_O2)/RN%MW_FUEL      
-      RN%HEAT_OF_COMBUSTION = REACTION(2)%HEAT_OF_COMBUSTION - 1.E3_EB * REACTION(2)%NU_CO2 /RN%MW_FUEL * &
+      RN%NU(O2_INDEX)              = RN%NU(CO2_INDEX) + 0.5_EB * (RN%NU(CO_INDEX) + RN%NU(H2O_INDEX) - O)
+      RN%NU(N2_INDEX)              = 0.5_EB * N
+      RN%NU(OTHER_INDEX)           = OTHER
+      RN%O2_F_RATIO    = (MW_O2*RN%NU(O2_INDEX))/RN%MW_FUEL      
+      RN%HEAT_OF_COMBUSTION = REACTION(2)%HEAT_OF_COMBUSTION - 1.E3_EB * REACTION(2)%NU(CO2_INDEX) /RN%MW_FUEL * &
                              (CO2_HEAT_OF_FORMATION - CO_HEAT_OF_FORMATION)
       NN = 3
       !Set Z2Y + MW_Z array
       Z2Y(FUEL_INDEX,1) = RN%Y_F_INLET
 
       Z2Y(N2_INDEX,1) = RN%Y_N2_INLET                                - RN%Y_N2_INFTY
-      Z2Y(N2_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_N2 * RN%NU_N2 - RN%Y_N2_INFTY
-      Z2Y(N2_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_N2 * RN%NU_N2 - RN%Y_N2_INFTY
+      Z2Y(N2_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_N2 * RN%NU(N2_INDEX) - RN%Y_N2_INFTY
+      Z2Y(N2_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_N2 * RN%NU(N2_INDEX) - RN%Y_N2_INFTY
       
       Z2Y(O2_INDEX,1) =                                                        - RN%Y_O2_INFTY
-      Z2Y(O2_INDEX,2) = -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(1)%NU_O2 - RN%Y_O2_INFTY
-      Z2Y(O2_INDEX,3) = -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(2)%NU_O2 - RN%Y_O2_INFTY &
-                        -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(2)%NU_CO * 0.5_EB
+      Z2Y(O2_INDEX,2) = -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(1)%NU(O2_INDEX) - RN%Y_O2_INFTY
+      Z2Y(O2_INDEX,3) = -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(2)%NU(O2_INDEX) - RN%Y_O2_INFTY &
+                        -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 * REACTION(2)%NU(CO_INDEX) * 0.5_EB
 
-      Z2Y(CO_INDEX,2)  = RN%Y_F_INLET / RN%MW_FUEL * MW_CO  * REACTION(1)%NU_CO
-      Z2Y(CO2_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_CO2 * (REACTION(2)%NU_CO2 + REACTION(2)%NU_CO)
+      Z2Y(CO_INDEX,2)  = RN%Y_F_INLET / RN%MW_FUEL * MW_CO  * REACTION(1)%NU(CO_INDEX)
+      Z2Y(CO2_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_CO2 * (REACTION(2)%NU(CO2_INDEX) + REACTION(2)%NU(CO_INDEX))
 
-      Z2Y(H2O_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2O * REACTION(1)%NU_H2O
-      Z2Y(H2O_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2O * REACTION(2)%NU_H2O
+      Z2Y(H2O_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2O * REACTION(1)%NU(H2O_INDEX)
+      Z2Y(H2O_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2O * REACTION(2)%NU(H2O_INDEX)
 
-      Z2Y(H2_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2 * REACTION(1)%NU_H2
-      Z2Y(H2_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2 * REACTION(2)%NU_H2
+      Z2Y(H2_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2 * REACTION(1)%NU(H2_INDEX)
+      Z2Y(H2_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_H2 * REACTION(2)%NU(H2_INDEX)
 
-      Z2Y(SOOT_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_SOOT * REACTION(1)%NU_SOOT
-      Z2Y(SOOT_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_SOOT * REACTION(2)%NU_SOOT
+      Z2Y(SOOT_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_SOOT * REACTION(1)%NU(SOOT_INDEX)
+      Z2Y(SOOT_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_SOOT * REACTION(2)%NU(SOOT_INDEX)
 
-      Z2Y(OTHER_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_OTHER * REACTION(1)%NU_OTHER
-      Z2Y(OTHER_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_OTHER * REACTION(2)%NU_OTHER
+      Z2Y(OTHER_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_OTHER * REACTION(1)%NU(OTHER_INDEX)
+      Z2Y(OTHER_INDEX,3) = RN%Y_F_INLET / RN%MW_FUEL * MW_OTHER * REACTION(2)%NU(OTHER_INDEX)
       
       Z2MW(FUEL_INDEX,:)  = Z2Y(FUEL_INDEX,:)  / RN%MW_FUEL
       Z2MW(N2_INDEX,:)    = Z2Y(N2_INDEX,:)    / MW_N2
@@ -1753,31 +1765,31 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
       RN%IDEAL      = IDEAL
       IF (RN%IDEAL) THEN
          !Compute fuel heat of formation
-         RN%NU_O2 = C + 0.5_EB * H - 0.5_EB * O
-         IF (HEAT_OF_COMBUSTION < 0._EB) HEAT_OF_COMBUSTION = EPUMO2*(MW_O2*RN%NU_O2)/RN%MW_FUEL
+         RN%NU(O2_INDEX) = C + 0.5_EB * H - 0.5_EB * O
+         IF (HEAT_OF_COMBUSTION < 0._EB) HEAT_OF_COMBUSTION = EPUMO2*(MW_O2*RN%NU(O2_INDEX))/RN%MW_FUEL
          FUEL_HEAT_OF_FORMATION =  HEAT_OF_COMBUSTION * RN%MW_FUEL - &
                                    (C * CO2_HEAT_OF_FORMATION + 0.5_EB * H * H2O_HEAT_OF_FORMATION)
       ENDIF
       RN%CO_YIELD   = CO_YIELD
       RN%SOOT_YIELD = SOOT_YIELD
       RN%H2_YIELD   = H2_YIELD
-      RN%NU_H2      = H2_YIELD * RN%MW_FUEL / MW_H2
-      RN%NU_SOOT    = SOOT_YIELD * RN%MW_FUEL / MW_SOOT
-      RN%NU_CO      = CO_YIELD * RN%MW_FUEL / MW_CO
-      RN%NU_CO2     = C - RN%NU_CO - RN%NU_SOOT * (1._EB - SOOT_H_FRACTION)
-      RN%NU_H2O     = 0.5_EB * H - RN%NU_H2 - 0.5_EB * RN%NU_SOOT * SOOT_H_FRACTION
-      RN%NU_O2      = RN%NU_CO2 + 0.5_EB * (RN%NU_CO + RN%NU_H2O - O)
-      RN%NU_N2      = 0.5_EB * N
-      RN%NU_OTHER   = OTHER
-      RN%O2_F_RATIO    = (MW_O2*RN%NU_O2)/RN%MW_FUEL      
+      RN%NU(H2_INDEX)      = H2_YIELD * RN%MW_FUEL / MW_H2
+      RN%NU(SOOT_INDEX)    = SOOT_YIELD * RN%MW_FUEL / MW_SOOT
+      RN%NU(CO_INDEX)      = CO_YIELD * RN%MW_FUEL / MW_CO
+      RN%NU(CO2_INDEX)     = C - RN%NU(CO_INDEX) - RN%NU(SOOT_INDEX) * (1._EB - SOOT_H_FRACTION)
+      RN%NU(H2O_INDEX)     = 0.5_EB * H - RN%NU(H2_INDEX) - 0.5_EB * RN%NU(SOOT_INDEX) * SOOT_H_FRACTION
+      RN%NU(O2_INDEX)      = RN%NU(CO2_INDEX) + 0.5_EB * (RN%NU(CO_INDEX) + RN%NU(H2O_INDEX) - O)
+      RN%NU(N2_INDEX)      = 0.5_EB * N
+      RN%NU(OTHER_INDEX)   = OTHER
+      RN%O2_F_RATIO    = (MW_O2*RN%NU(O2_INDEX))/RN%MW_FUEL      
       IF (.NOT. RN%IDEAL) THEN
          IF(HEAT_OF_COMBUSTION < 0._EB) HEAT_OF_COMBUSTION = EPUMO2*RN%O2_F_RATIO
          RN%HEAT_OF_COMBUSTION = HEAT_OF_COMBUSTION*1000._EB
       ELSE
          !Correct heat of combustion for minor products of combustion
-         RN%HEAT_OF_COMBUSTION = (FUEL_HEAT_OF_FORMATION + RN%NU_CO2 * CO2_HEAT_OF_FORMATION + &
-                                                         RN%NU_CO  * CO_HEAT_OF_FORMATION + &
-                                                         RN%NU_H2O * H2O_HEAT_OF_FORMATION) * 1000._EB /RN%MW_FUEL
+         RN%HEAT_OF_COMBUSTION = (FUEL_HEAT_OF_FORMATION + RN%NU(CO2_INDEX) * CO2_HEAT_OF_FORMATION + &
+                                                         RN%NU(CO_INDEX)  * CO_HEAT_OF_FORMATION + &
+                                                         RN%NU(H2O_INDEX) * H2O_HEAT_OF_FORMATION) * 1000._EB /RN%MW_FUEL
       ENDIF
       NN = 2
 
@@ -1785,22 +1797,22 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
       Z2Y(FUEL_INDEX,1) =  RN%Y_F_INLET
 
       Z2Y(N2_INDEX,1) =    RN%Y_N2_INLET                                   - RN%Y_N2_INFTY
-      Z2Y(N2_INDEX,2) =    RN%Y_F_INLET / RN%MW_FUEL * MW_N2 *    RN%NU_N2 - RN%Y_N2_INFTY
+      Z2Y(N2_INDEX,2) =    RN%Y_F_INLET / RN%MW_FUEL * MW_N2 *    RN%NU(N2_INDEX) - RN%Y_N2_INFTY
       
       Z2Y(O2_INDEX,1) =                                                     - RN%Y_O2_INFTY
-      Z2Y(O2_INDEX,2) =    -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 *    RN%NU_O2 - RN%Y_O2_INFTY
+      Z2Y(O2_INDEX,2) =    -RN%Y_F_INLET / RN%MW_FUEL * MW_O2 *    RN%NU(O2_INDEX) - RN%Y_O2_INFTY
 
-      Z2Y(CO_INDEX,2)  =   RN%Y_F_INLET / RN%MW_FUEL * MW_CO  *   RN%NU_CO
+      Z2Y(CO_INDEX,2)  =   RN%Y_F_INLET / RN%MW_FUEL * MW_CO  *   RN%NU(CO_INDEX)
       
-      Z2Y(CO2_INDEX,2) =   RN%Y_F_INLET / RN%MW_FUEL * MW_CO2 *   RN%NU_CO2      
+      Z2Y(CO2_INDEX,2) =   RN%Y_F_INLET / RN%MW_FUEL * MW_CO2 *   RN%NU(CO2_INDEX)      
 
-      Z2Y(H2O_INDEX,2) =   RN%Y_F_INLET / RN%MW_FUEL * MW_H2O *   RN%NU_H2O
+      Z2Y(H2O_INDEX,2) =   RN%Y_F_INLET / RN%MW_FUEL * MW_H2O *   RN%NU(H2O_INDEX)
 
-      Z2Y(H2_INDEX,2) =    RN%Y_F_INLET / RN%MW_FUEL * MW_H2 *    RN%NU_H2
+      Z2Y(H2_INDEX,2) =    RN%Y_F_INLET / RN%MW_FUEL * MW_H2 *    RN%NU(H2_INDEX)
 
-      Z2Y(SOOT_INDEX,2) =  RN%Y_F_INLET / RN%MW_FUEL * MW_SOOT *  RN%NU_SOOT
+      Z2Y(SOOT_INDEX,2) =  RN%Y_F_INLET / RN%MW_FUEL * MW_SOOT *  RN%NU(SOOT_INDEX)
 
-      Z2Y(OTHER_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_OTHER * RN%NU_OTHER
+      Z2Y(OTHER_INDEX,2) = RN%Y_F_INLET / RN%MW_FUEL * MW_OTHER * RN%NU(OTHER_INDEX)
 
       Z2MW(FUEL_INDEX,:)  = Z2Y(FUEL_INDEX,:)  / RN%MW_FUEL
       Z2MW(N2_INDEX,:)    = Z2Y(N2_INDEX,:)    / MW_N2
@@ -1830,14 +1842,14 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
 
    RN => REACTION(NN)
    RN%CO_YIELD           = 0._EB
-   RN%NU_CO              = 0._EB
-   RN%NU_CO2             = 0._EB
-   RN%NU_H2              = 0._EB
-   RN%NU_H2O             = 0._EB
-   RN%NU_O2              = 0._EB
-   RN%NU_N2              = 0._EB   
-   RN%NU_OTHER           = 0._EB      
-   RN%NU_SOOT            = 0._EB
+   RN%NU(CO_INDEX)              = 0._EB
+   RN%NU(CO2_INDEX)             = 0._EB
+   RN%NU(H2_INDEX)              = 0._EB
+   RN%NU(H2O_INDEX)             = 0._EB
+   RN%NU(O2_INDEX)              = 0._EB
+   RN%NU(N2_INDEX)              = 0._EB   
+   RN%NU(OTHER_INDEX)           = 0._EB      
+   RN%NU(SOOT_INDEX)            = 0._EB
    RN%SOOT_YIELD         = 0._EB
    RN%H2_YIELD           = 0._EB   
    RN%HEAT_OF_COMBUSTION = 0._EB   
@@ -1897,25 +1909,26 @@ END SUBROUTINE READ_REAC
  
  
 SUBROUTINE PROC_SPEC
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT 
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT
 REAL(EB) :: EPSIJ,SIGMA2,AMW,OMEGA,TSTAR,MU_N,K_N,D_N0,TE,EPSK_N,SIG_N,MW_N, &
             CP_N2,CP_F,CP_CO2,CP_O2,CP_H2O,CP_CO,CP_H2,RSUM_DILUENTS,YSUM_DILUENTS,&
             CP_MF_TMP(N_STATE_SPECIES),D_MF_TMP(N_STATE_SPECIES),K_MF_TMP(N_STATE_SPECIES),MW_Z2,MW_Z3
 REAL(EB), DIMENSION(N_STATE_SPECIES,0:500) :: CP_MF
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: Z
 INTEGER :: IPC,NN,ITMP,N
 CHARACTER(30) :: STATE_SPECIES(N_STATE_SPECIES),FORMULA
 TYPE(PARTICLE_CLASS_TYPE), POINTER :: PC
 LOGICAL :: ABSORBING
 
 ! Compute state relations for mixture fraction model
- 
+
 IF (MIXTURE_FRACTION) THEN
-    
+   ALLOCATE(Z(1:I_Z_MAX-I_Z_MIN+1))   
    REACTION_LOOP: DO N=1,N_REACTIONS
       RN => REACTION(N)
       RN%Y_N2_INFTY = 1._EB-RN%Y_O2_INFTY  ! Assumes that air is made up of only oxygen and nitrogen
       RN%Y_N2_INLET = 1._EB-RN%Y_F_INLET   ! Assumes that the fuel is only diluted by nitrogen
-      RN%Z_F_CONS   = RN%NU_O2 * MW_O2/RN%MW_FUEL * (1._EB + RN%Y_N2_INFTY/RN%Y_O2_INFTY)
+      RN%Z_F_CONS   = RN%NU(O2_INDEX) * MW_O2/RN%MW_FUEL * (1._EB + RN%Y_N2_INFTY/RN%Y_O2_INFTY)
       RN%Z_F        = RN%Y_O2_INFTY/(RN%Y_O2_INFTY+RN%Y_F_INLET*RN%O2_F_RATIO)
    ENDDO REACTION_LOOP
  
@@ -1993,11 +2006,18 @@ SPECIES_LOOP_0: DO N=1,N_SPECIES
       RSUM_DILUENTS = RSUM_DILUENTS + SS%YY0*R0/SS%MW
    ELSEIF (SS%MODE==MIXTURE_FRACTION_SPECIES) THEN
       IF (CO_PRODUCTION) THEN
-         CALL GET_MOLECULAR_WEIGHT(0._EB,REACTION(1)%Z_F,0._EB,0._EB,MW_Z2)
-         CALL GET_MOLECULAR_WEIGHT(0._EB,0._EB,REACTION(1)%Z_F,0._EB,MW_Z3)
+         Z(1) = 0._EB
+         Z(2) = REACTION(1)%Z_F
+         Z(3) = 0._EB
+         CALL GET_MOLECULAR_WEIGHT(Z,0._EB,MW_Z2)
+         Z(2) = 0._EB
+         Z(3) = REACTION(1)%Z_F
+         CALL GET_MOLECULAR_WEIGHT(Z,0._EB,MW_Z3)
       ELSE
          MW_Z2 = SS0%MW
-         CALL GET_MOLECULAR_WEIGHT(0._EB,0._EB,REACTION(1)%Z_F,0._EB,MW_Z3)      
+         Z(1) = 0._EB
+         Z(2) = REACTION(1)%Z_F
+         CALL GET_MOLECULAR_WEIGHT(Z,0._EB,MW_Z3)      
       ENDIF
       MW_MIN = MIN(MW_MIN,MW_Z2,MW_Z3,REACTION(1)%MW_FUEL)
       MW_MAX = MAX(MW_MAX,MW_Z2,MW_Z3,REACTION(1)%MW_FUEL)
@@ -2292,7 +2312,9 @@ MF_DAND_K: IF (MIXTURE_FRACTION) THEN
       ENDIF      
    ENDDO 
 ENDIF MF_DAND_K
- 
+
+IF (MIXTURE_FRACTION) DEALLOCATE(Z)
+
 CONTAINS
   
  
@@ -4016,7 +4038,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                SF%LAYER_MATL_FRAC(NL,NN)/(MAXVAL(MATERIAL(NNN)%ADJUST_BURN_RATE(1:ML%N_REACTIONS,I_FUEL))*MATERIAL(NNN)%RHO_S)
          ELSE
             ADJUSTED_LAYER_DENSITY = ADJUSTED_LAYER_DENSITY + &
-               SF%LAYER_MATL_FRAC(NL,NN)/(MAXVAL(MATERIAL(NNN)%ADJUST_BURN_RATE(1:ML%N_REACTIONS,:))*MATERIAL(NNN)%RHO_S)            
+               SF%LAYER_MATL_FRAC(NL,NN)/(MAXVAL(MATERIAL(NNN)%ADJUST_BURN_RATE(1:ML%N_REACTIONS,:))*MATERIAL(NNN)%RHO_S)
          ENDIF
       ENDDO
       IF (ADJUSTED_LAYER_DENSITY > 0._EB) ADJUSTED_LAYER_DENSITY = 1./ADJUSTED_LAYER_DENSITY
@@ -6938,6 +6960,7 @@ MESH_LOOP: DO NM=1,NMESHES
       TWO_BYTE = .FALSE.
       AGL_SLICE = -1._EB
       SPEC_ID  = 'null'
+      PART_ID  = 'null'
  
       CALL CHECKREAD('SLCF',LU_INPUT,IOS)
       IF (IOS==1) EXIT SLCF_LOOP
