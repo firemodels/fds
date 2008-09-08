@@ -18,7 +18,7 @@ CONTAINS
 SUBROUTINE DIVERGENCE_PART_1(T,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_CP,GET_D,GET_K
+USE PHYSICAL_FUNCTIONS, ONLY: GET_D,GET_K,GET_CP
 
 ! Compute contributions to the divergence term
  
@@ -92,9 +92,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                ITMP = 0.1_EB*TMP(I,J,K)
                IZ   = NINT(Z_SUM(I,J,K)*100._EB)
                IZ   = MAX(0,MIN(IZ,100))
-               Z_2 = 0._EB
-               IF (CO_PRODUCTION) Z_2 = YYP(I,J,K,I_PROG_CO)
-               CALL GET_D(YYP(I,J,K,I_FUEL),Z_2,YYP(I,J,K,I_PROG_F),Y_SUM(I,J,K),RHO_D(I,J,K),ITMP)
+               CALL GET_D(YYP(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),RHO_D(I,J,K),ITMP)
                RHO_D(I,J,K) = RHOP(I,J,K)*RHO_D(I,J,K)
             ENDDO
          ENDDO
@@ -117,7 +115,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          ENDDO
       ENDDO
    ENDDO
- 
    ! Correct rho*D del Y at boundaries and store rho*D at boundaries
  
    WALL_LOOP: DO IW=1,NWC
@@ -241,7 +238,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             ENDDO
          ENDDO
    END SELECT CYLINDER2
-
+   
    ! Compute -Sum h_n del dot rho*D del Y_n
  
    SPECIES_DIFFUSION_2: IF (.NOT.MIXTURE_FRACTION) THEN
@@ -292,26 +289,14 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = 0.1_EB*TMP(I,J,K)
-                  IF(CO_PRODUCTION) THEN
-                     CALL GET_CP(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)
-                     IF (N_SPECIES > 3) THEN
-                        CP_SUM = 0._EB
-                        DO N=1,N_SPECIES
-                           IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                           CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
-                        END DO
-                        CP_MF = CP_SUM+(1._EB-Y_SUM(I,J,K))*CP_MF
-                     ENDIF
-                  ELSE
-                     CALL GET_CP(YY(I,J,K,I_FUEL),0._EB,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)                  
-                     IF (N_SPECIES > 2) THEN
-                        CP_SUM = 0._EB
-                        DO N=1,N_SPECIES
-                           IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                           CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
-                        END DO
-                        CP_MF = CP_SUM+(1._EB-Y_SUM(I,J,K))*CP_MF
-                     ENDIF
+                  CALL GET_CP(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),CP_MF,ITMP)
+                  IF (N_SPECIES > 3) THEN
+                     CP_SUM = 0._EB
+                     DO N=1,N_SPECIES
+                        IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
+                        CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
+                     END DO
+                     CP_MF = CP_SUM+(1._EB-Y_SUM(I,J,K))*CP_MF
                   ENDIF
                   KP(I,J,K) = MU(I,J,K)*CP_MF*RPR
                ENDDO
@@ -418,26 +403,14 @@ IF (MIXTURE_FRACTION) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = 0.1_EB*TMP(I,J,K)
-            IF (CO_PRODUCTION) THEN
-               CALL GET_CP(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)
-               IF (N_SPECIES > 3) THEN
-                  CP_SUM = 0._EB
-                  DO N=1,N_SPECIES
-                     IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                     CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
-                     CP_MF = CP_SUM+(1._EB-Y_SUM(I,J,K))*CP_MF
-                  END DO
-               ENDIF
-            ELSE
-               CALL GET_CP(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),CP_MF,ITMP)  
-               IF (N_SPECIES > 2) THEN
-                  CP_SUM = 0._EB
-                  DO N=1,N_SPECIES
-                     IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                     CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
-                  END DO                                
+            CALL GET_CP(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),CP_MF,ITMP)
+            IF (N_SPECIES > 3) THEN
+               CP_SUM = 0._EB
+               DO N=1,N_SPECIES
+                  IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
+                  CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
                   CP_MF = CP_SUM+(1._EB-Y_SUM(I,J,K))*CP_MF
-               ENDIF
+               END DO
             ENDIF
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_MF
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)

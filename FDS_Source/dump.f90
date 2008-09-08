@@ -374,12 +374,13 @@ SUBROUTINE INITIALIZE_GLOBAL_DUMPS
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT
 USE CONTROL_VARIABLES
-REAL(EB) :: ZZ,Z1,Z2,Z3,YY_SUM,Y_MF(9),MW_MF,TNOW,Z_F,CO_TO_F
+REAL(EB) :: ZZ,YY_SUM,Y_MF(9),MW_MF,TNOW,Z_F,CO_TO_F
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: Z
 INTEGER :: NN,IZ,I,N
 CHARACTER(30), DIMENSION(20) :: LABEL
 
 TNOW=SECOND() 
-
+ALLOCATE(Z(1:I_Z_MAX-I_Z_MIN+1))
 ! Open and initialize diagnostic output file
  
 IF (APPEND) THEN
@@ -471,20 +472,20 @@ IF (MIXTURE_FRACTION .AND. STATE_FILE) THEN
    WRITE(LU_STATE(1),TCFORM) 'Z','Fuel','O2','N2','H2O','CO2','CO','H2','Soot','Other','Wgt'
    IF (CO_PRODUCTION) THEN
       Z_F = REACTION(2)%Z_F
-      CO_TO_F = REACTION(2)%CO_YIELD * REACTION(1)%MW_FUEL / (REACTION(1)%NU_CO * MW_CO)
+      CO_TO_F = REACTION(2)%CO_YIELD * REACTION(1)%MW_FUEL / (REACTION(1)%NU(CO_INDEX) * MW_CO)
       DO IZ=0,1000
          ZZ = IZ/REAL(1000,EB)
          IF (ZZ<Z_F) THEN
-            Z1 = 0._EB
-            Z2 = ZZ * CO_TO_F   
-            Z3 = ZZ - Z2
+            Z(1) = 0._EB
+            Z(2) = ZZ * CO_TO_F   
+            Z(3) = ZZ - Z(2)
          ELSE
-            Z1 = REACTION(2)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
-            Z2 = (ZZ - Z1) * CO_TO_F
-            Z3 = ZZ - Z1 - Z2
+            Z(1) = REACTION(2)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
+            Z(2) = (ZZ - Z(1)) * CO_TO_F
+            Z(3) = ZZ - Z(1) - Z(2)
          ENDIF
-         CALL GET_MASS_FRACTION_ALL(Z1,Z2,Z3,YY_SUM,Y_MF)
-         CALL GET_MOLECULAR_WEIGHT(Z1,Z2,Z3,YY_SUM,MW_MF)
+         CALL GET_MASS_FRACTION_ALL(Z,YY_SUM,Y_MF)
+         CALL GET_MOLECULAR_WEIGHT(Z,YY_SUM,MW_MF)
          WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
       ENDDO
    ELSE
@@ -492,16 +493,14 @@ IF (MIXTURE_FRACTION .AND. STATE_FILE) THEN
       DO IZ=0,1000
          ZZ = IZ/REAL(1000,EB)
          IF (ZZ<Z_F) THEN
-            Z1 = 0._EB
-            Z2 = 0._EB
-            Z3 = ZZ
+            Z(1) = 0._EB
+            Z(3) = ZZ
          ELSE
-            Z1 = REACTION(1)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
-            Z2 = 0._EB
-            Z3 = ZZ - Z1
+            Z(1) = REACTION(1)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
+            Z(3) = ZZ - Z(1)
          ENDIF
-         CALL GET_MASS_FRACTION_ALL(Z1,Z2,Z3,YY_SUM,Y_MF)
-         CALL GET_MOLECULAR_WEIGHT(Z1,Z2,Z3,YY_SUM,MW_MF)
+         CALL GET_MASS_FRACTION_ALL(Z,YY_SUM,Y_MF)
+         CALL GET_MOLECULAR_WEIGHT(Z,YY_SUM,MW_MF)
          WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
       ENDDO  
    ENDIF
@@ -552,6 +551,8 @@ IF (UL_PAN_DATA) THEN
    OPEN(LU_UL_PAN_DATA,FILE=TRIM(CHID)//'_awmpua.csv',FORM='FORMATTED',STATUS='REPLACE')
    WRITE(LU_UL_PAN_DATA,'(A)') 'T, XW(IW), YW(IW), ZW(IW), PP(I-J)'
 ENDIF
+
+DEALLOCATE(Z)
 
 TUSED(7,:) = TUSED(7,:) + SECOND() - TNOW
 END SUBROUTINE INITIALIZE_GLOBAL_DUMPS
@@ -1902,13 +1903,13 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    WRITE(LU_OUTPUT,'(A,F8.0)')  '   Heat of Combustion (kJ/kg)    ',RN%HEAT_OF_COMBUSTION/1000._EB
    SELECT CASE (RN%MODE)
       CASE (MIXTURE_FRACTION_REACTION)
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., O_2           ',RN%NU_O2
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., CO_2          ',RN%NU_CO2
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., H2O           ',RN%NU_H2O
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., Soot          ',RN%NU_SOOT
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., CO            ',RN%NU_CO  
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., N_2           ',RN%NU_N2           
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., Other         ',RN%NU_OTHER
+         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., O_2           ',RN%NU(O2_INDEX)
+         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., CO_2          ',RN%NU(CO2_INDEX)
+         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., H2O           ',RN%NU(H2O_INDEX)
+         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., Soot          ',RN%NU(SOOT_INDEX)
+         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., CO            ',RN%NU(CO_INDEX)  
+         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., N_2           ',RN%NU(N2_INDEX)           
+         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., Other         ',RN%NU(OTHER_INDEX)
          WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoichiometric Value of Z     ',RN%Z_F
       CASE (FINITE_RATE_REACTION)
          DO NN=1,N_SPECIES
@@ -3451,14 +3452,7 @@ SELECT CASE(IND)
       Y_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
       Y_MF_INT=0._EB
       IF (MIXTURE_FRACTION) THEN
-         Z_1 = YY(II,JJ,KK,I_FUEL)
-         IF (CO_PRODUCTION) THEN
-            Z_2 = YY(II,JJ,KK,I_PROG_CO)
-         ELSE
-            Z_2 = 0._EB
-         ENDIF
-         Z_3 = YY(II,JJ,KK,I_PROG_F)
-         CALL GET_MASS_FRACTION(Z_1,Z_2,Z_3,H2O_INDEX,Y_SUM(II,JJ,KK),Y_MF_INT)
+         CALL GET_MASS_FRACTION(YY(II,JJ,KK,I_Z_MIN:I_Z_MAX),H2O_INDEX,Y_SUM(II,JJ,KK),Y_MF_INT)
       END IF
       IF (I_WATER /= 0) Y_MF_INT = Y_MF_INT + YY(II,JJ,KK,I_WATER)
       GAS_PHASE_OUTPUT = Y_MF_INT/Y_EQUIL * 100._EB      
@@ -3488,14 +3482,7 @@ SELECT CASE(IND)
       IF (IND<50) INDX = IND- 40
       IF (IND>50 .AND. IND<60) INDX = IND-50
       IF (IND>60) INDX = SOOT_INDEX
-      Z_1 = YY(II,JJ,KK,I_FUEL)            
-      IF (CO_PRODUCTION) THEN
-         Z_2 = YY(II,JJ,KK,I_PROG_CO)
-      ELSE
-         Z_2 = 0._EB
-      ENDIF
-      Z_3 = YY(II,JJ,KK,I_PROG_F)
-      CALL GET_MASS_FRACTION(Z_1,Z_2,Z_3,INDX,Y_SUM(II,JJ,KK),Y_MF_INT)
+      CALL GET_MASS_FRACTION(YY(II,JJ,KK,I_Z_MIN:I_Z_MAX),INDX,Y_SUM(II,JJ,KK),Y_MF_INT)
       SELECT CASE(IND)
          CASE(41:49)   ! Species volume fractions
             GAS_PHASE_OUTPUT = RCON_MF(INDX)*Y_MF_INT/RSUM(II,JJ,KK)
@@ -3624,14 +3611,7 @@ SELECT CASE(IND)
          J = DV%J_PATH(NN)
          K = DV%K_PATH(NN)
          IF (PY%SPEC_INDEX==0) THEN
-            Z_1 = YY(I,J,K,I_FUEL)
-            IF (CO_PRODUCTION) THEN
-               Z_2 = YY(I,J,K,I_PROG_CO)
-            ELSE
-               Z_2 = 0._EB
-            ENDIF
-            Z_3 = YY(I,J,K,I_PROG_F)
-            CALL GET_MASS_FRACTION(Z_1,Z_2,Z_3,SOOT_INDEX,Y_SUM(I,J,K),Y_MF_INT)
+            CALL GET_MASS_FRACTION(YY(I,J,K,I_Z_MIN:I_Z_MAX),SOOT_INDEX,Y_SUM(I,J,K),Y_MF_INT)
             MASS_EXT_COEF = MASS_EXTINCTION_COEFFICIENT
          ELSE
             Y_MF_INT = YY(I,J,K,PY%SPEC_INDEX)
@@ -3674,12 +3654,7 @@ SELECT CASE(IND)
       J = DV%J
       K = DV%K
       IF (PY%SPEC_INDEX==0) THEN
-         IF (CO_PRODUCTION) THEN
-            Z_2 = YY(I,J,K,I_PROG_CO)
-         ELSE
-            Z_2 = 0._EB
-         ENDIF
-         CALL GET_MASS_FRACTION(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),SOOT_INDEX,Y_SUM(I,J,K),Y_E)
+         CALL GET_MASS_FRACTION(YY(I,J,K,I_Z_MIN:I_Z_MAX),SOOT_INDEX,Y_SUM(I,J,K),Y_E)
          MASS_EXT_COEF = MASS_EXTINCTION_COEFFICIENT
       ELSE
          Y_E = YY(I,J,K,PY%SPEC_INDEX) 
@@ -4258,13 +4233,7 @@ DO K=1,KBAR
          VC = DX(I)*RC(I)*DY(J)*DZ(K)
          MINT(0,NM) = MINT(0,NM) + VC*RHO(I,J,K)
          IF (MIXTURE_FRACTION) THEN
-            Z_1 = YY(I,J,K,I_FUEL)
-            IF (CO_PRODUCTION) THEN
-               Z_2 = YY(I,J,K,I_PROG_CO)
-            ELSE
-               Z_2 = 0._EB
-            ENDIF               
-            CALL GET_MASS_FRACTION_ALL(Z_1,Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),Y_MF_INT)            
+            CALL GET_MASS_FRACTION_ALL(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),Y_MF_INT)            
             DO N=1,9
                MINT(N,NM) = MINT(N,NM) + RHO(I,J,K)*Y_MF_INT(N)*VC
             ENDDO

@@ -564,11 +564,6 @@ WALL_CELL_LOOP: DO IW=1,NWC
 ! Determine ghost cell value of RSUM=R0*Sum(Y_i/M_i) for mixture fraction case
 
    IF (MIXTURE_FRACTION) THEN
-      IF (CO_PRODUCTION) THEN
-         Z_2 = YY_W(IW,I_PROG_CO)
-      ELSE
-         Z_2 = 0._EB
-      ENDIF
       Z_SUM_W  =  0._EB
       Y_SUM_W  =  0._EB
       IF (N_SPEC_DILUENTS > 0) R_SUM_DILUENTS_W = 0._EB
@@ -580,7 +575,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
             R_SUM_DILUENTS_W = R_SUM_DILUENTS_W + SPECIES(N)%RCON*YY_W(IW,N)
          ENDIF
       ENDDO
-      CALL GET_MOLECULAR_WEIGHT(YY_W(IW,I_FUEL),Z_2,YY_W(IW,I_PROG_F),Y_SUM_W,RSUM_W(IW))
+      CALL GET_MOLECULAR_WEIGHT(YY_W(IW,I_Z_MIN:I_Z_MAX),Y_SUM_W,RSUM_W(IW))
       RSUM_W(IW) = R0/RSUM_W(IW)
       IF (N_SPEC_DILUENTS > 0) RSUM_W(IW) = RSUM_W(IW)*(1._EB-Y_SUM_W) + R_SUM_DILUENTS_W
    ENDIF
@@ -863,26 +858,16 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
       IF (ML%NU_FUEL(1)>0._EB) MFLUX = MFLUX/ML%NU_FUEL(1)
       ! gas phase 
       Y_MF_G = YY(IIG,JJG,KKG,I_FUEL)
-      IF (CO_PRODUCTION) THEN
-         Z_2 = YY(IIG,JJG,KKG,I_PROG_CO)
-      ELSE
-         Z_2 = 0._EB
-      ENDIF
-      CALL GET_MOLECULAR_WEIGHT(Y_MF_G,Z_2,YY(IIG,JJG,KKG,I_PROG_F),  Y_SUM(IIG,JJG,KKG),RSUM_G)
+      CALL GET_MOLECULAR_WEIGHT(YY(IIG,JJG,KKG,I_Z_MIN:I_Z_MAX),  Y_SUM(IIG,JJG,KKG),RSUM_G)
       ! wall values
       Y_MF_W = YY_W(IW,I_FUEL)
-      IF (CO_PRODUCTION) THEN
-         Z_2 = YY_W(IW,I_PROG_CO)
-      ELSE
-         Z_2 = 0._EB
-      ENDIF
       Y_SUM_W = 0._EB
       DO J=1,N_SPECIES
          IF (SPECIES(J)%MODE==GAS_SPECIES) THEN
             Y_SUM_W = Y_SUM_W + YY_W(IW,J)
          ENDIF
       ENDDO            
-      CALL GET_MOLECULAR_WEIGHT(Y_MF_W ,Z_2,YY_W(IW,I_PROG_F),Y_SUM_W,RSUM_W)
+      CALL GET_MOLECULAR_WEIGHT(YY_W(IW,I_Z_MIN:I_Z_MAX),Y_SUM_W,RSUM_W)
       ! Weighting for wall and gas values
       YY_S    = 0.2*Y_MF_W+0.8*Y_MF_G
       RSUM_S  = 0.2*RSUM_W+0.8*RSUM_G
