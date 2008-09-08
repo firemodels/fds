@@ -3610,20 +3610,18 @@ is 1 by default. If the value of $n_s$ is not known, it is a good
 starting point to assume $n_s=1$.
 
 The pre-exponential factor, $A_{ij}$, is prescribed under the name
-{\ct A(j)}, with units of 1/s. $E_{ij}$, the activation energy, is
+{\ct A(j)}, with units of s$^{-1}$. $E_{ij}$, the activation energy, is
 prescribed via {\ct E(j)} in units of kJ/kmol. Remember that 1~kcal is
 4.184~kJ, and be careful with factors of 1000.  $A$ and $E$ are not
 readily accessible for most real materials.  However, if they are
 known, specify both. Avoid specifying just one because they act as a
 pair.  If $A$ and $E$ are not known, which is usually the case,
-specify {\ct REFERENCE\_RATE} (1/s) and {\ct REFERENCE\_TEMPERATURE}
-($^\circ$C). This directs FDS to choose {\ct A} and {\ct E} so that
-the reaction rate ({\ct REFERENCE\_RATE}) is achieved at the {\ct
-REFERENCE\_TEMPERATURE}. The default value of {\ct REFERENCE\_RATE} is
+specify {\ct REFERENCE\_RATE} (s$^{-1}$) and {\ct REFERENCE\_TEMPERATURE}($^\circ$C). This directs FDS to calculate the activation energy, {\ct E}, using
+the specified reference rate, reference temperature, and an assumed value of $A=1\times 10^{13}$~s$^{-1}$. Essentially, this guarantees that
+the {\ct REFERENCE\_RATE} is achieved at the {\ct REFERENCE\_TEMPERATURE}. The default value of {\ct REFERENCE\_RATE} is
 0.1~s$^{-1}$.  It is suggested that unless you have information to the
 contrary, leave {\ct REFERENCE\_RATE} at its default value and just
-specify the {\ct REFERENCE\_TEMPERATURE}. Note that the {\ct
-REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition
+specify the {\ct REFERENCE\_TEMPERATURE}. Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition
 temperature. Rather, it is simply the temperature at which the mass
 fraction of the $i$th material decreases at a rate of
 0.1~s$^{-1}$. You should check the sensitivity of these parameters
@@ -9705,13 +9703,13 @@ for each time:
   end level
 end time
 \end{verbatim}
-\normalsize 
+\normalsize
 
 \noindent
 The length of each {\ct triangles\_i} node is one byte if
 the number of triangles, {\ct ntriangles}, is between zero
 and 255 (inclusive), two bytes if {\ct ntriangles} is
-between 256 and 65536 (inclusive) and four bytes if {\ct ntriangles} is greater than or equal to 65536. 
+between 256 and 65536 (inclusive) and four bytes if {\ct ntriangles} is greater than or equal to 65536.
 
 
 
