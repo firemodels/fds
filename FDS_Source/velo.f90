@@ -130,17 +130,12 @@ CALC_MU: IF (PREDICTOR) THEN
             ENDDO
          ENDDO
       ELSE MIXTURE_FRACTION_DNS
-         Z_2 = 0._EB
          DO K=1,KBAR
             DO J=1,JBAR
                IVLOOP2: DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IVLOOP2
                   ITMP = 0.1_EB*TMP(I,J,K)
-                  IF(CO_PRODUCTION) THEN
-                     CALL GET_MU(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)
-                  ELSE
-                     CALL GET_MU(YY(I,J,K,I_FUEL),Z_2,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
-                  ENDIF
+                  CALL GET_MU(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
                   MU_SUM = MU(I,J,K)*(1-Y_SUM(I,J,K))
                   DO N=1,N_SPECIES
                      IF(SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) MU_SUM = MU_SUM + YYP(I,J,K,N)*(SPECIES(N)%MU(ITMP)-MU(I,J,K))
@@ -571,11 +566,7 @@ CALC_MU: IF (PREDICTOR) THEN
             IVLOOP2: DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IVLOOP2
                ITMP = 0.1_EB*TMP(I,J,K)
-               IF(CO_PRODUCTION) THEN
-                  CALL GET_MU(YY(I,J,K,I_FUEL),YY(I,J,K,I_PROG_CO),YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)
-               ELSE
-                  CALL GET_MU(YY(I,J,K,I_FUEL),0._EB,YY(I,J,K,I_PROG_F),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
-               ENDIF
+               CALL GET_MU(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),MU(I,J,K),ITMP)
             ENDDO IVLOOP2
          ENDDO
       ENDIF MIXTURE_FRACTION_DNS
