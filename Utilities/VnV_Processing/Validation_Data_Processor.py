@@ -625,6 +625,9 @@ def comparison_plot(plot_data,d1_data,d2_data):
     g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
                         x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
                         y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
+#    g = graph.graphxy(width=plot_width, ratio=4./3, 
+#                        x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
+#                        y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
     
     # Create line styles that have predetermined color order for each pair in series.  
     # All Data Set 1, data is plotted with thick solid lines while Data Set 2, data is thin solid lines.
