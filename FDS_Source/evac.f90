@@ -1731,7 +1731,7 @@ Contains
             PDX%Xsmoke = XYZ_SMOKE(1)
             PDX%Ysmoke = XYZ_SMOKE(2)
             PDX%Zsmoke = XYZ_SMOKE(3)
-         Else       
+         Else
             PDX%Xsmoke = PDX%X
             PDX%Ysmoke = PDX%Y
             PDX%Zsmoke = 0.5_EB*(XB(5)+XB(6)) - EVACUATION_Z_OFFSET(PDX%IMESH) + HUMAN_SMOKE_HEIGHT
@@ -3194,7 +3194,7 @@ Contains
       Call ChkMemErr('Read_Evac','STRP%NODES_OUT',IZERO) 
       STRP%NODES_OUT = NODES_TMP(1:STRP%N_NODES_OUT)
     Enddo
-      
+
     End Subroutine CHECK_EVAC_NODES
 
   End Subroutine READ_EVAC
@@ -4050,7 +4050,7 @@ Contains
              HR%IMESH       = HPT%IMESH
              HR%INODE       = n_tmp
              HR%NODE_NAME   = Trim(EVAC_Node_List(n_tmp)%ID)
-             HR%IOR         = HUMAN_NO_TARGET
+             HR%IOR       = HUMAN_NO_TARGET
              HR%U         = 0.0_EB
              HR%V         = 0.0_EB
              HR%W         = 0.0_EB
@@ -4065,6 +4065,7 @@ Contains
              HR%NewRnd    = .True.
              HR%STR_SUB_INDX = 0
              HR%SKIP_WALL_FORCE_IOR = 0
+
 
 
              group_X_sum = group_X_sum + HR%X
@@ -5241,7 +5242,7 @@ Contains
          C_Yeff, t_flow_relax, LambdaW, &
          B_Wall, A_Wall, T, Contact_F, Social_F, &
          smoke_beta, smoke_alpha, smoke_speed_fac
-    Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, i_o,door_ior
+    Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, i_o, door_ior
     Real(EB) y_o, x_o, x_now, y_now, x_target, y_target, &
          d_humans, d_walls, &
          DTSP_new, &
@@ -5449,6 +5450,7 @@ Contains
              End If
           End If
        End Do
+
        ! ========================================================
        ! CHANGE TARGET DOOR CALCULATION STARTS HERE
        ! ========================================================
@@ -6042,7 +6044,7 @@ Contains
           ! Check if going straight line to target
           Straight_Line_To_Target = .False.
           If (NM_STRS_MESH) Then
-            If (HR%I_Target == 0) Then
+             If (HR%I_Target == 0) Then
 !               write(*,*) 'Finding target within move loop'
                HR%I_Target = Find_Target_Node_In_Strs(STRP,HR)
             Endif
@@ -6082,11 +6084,11 @@ Contains
                   HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
                end select
             Endif
-         Elseif (NM_STRS_MESH) Then 
+          Else If (NM_STRS_MESH) Then 
              ! Add here direction dependence           
              UBAR = STRP%U_RIGHT(II,JJ)
              VBAR = STRP%V_RIGHT(II,JJ)
-         Else
+          Else
              UBAR = AFILL(MFF%U(II-1,JJY,KKZ),MFF%U(II,JJY,KKZ), &
                   MFF%U(II-1,JJY+1,KKZ),MFF%U(II,JJY+1,KKZ), &
                   MFF%U(II-1,JJY,KKZ+1),MFF%U(II,JJY,KKZ+1), &
@@ -6490,10 +6492,12 @@ Contains
        ! ========================================================
        If (N_HUMANS > 0) Call CHECK_DOORS(T,NM)
        If (N_HUMANS > 0) Call CHECK_EXITS(T,NM)
+
        ! ========================================================
        ! Check if persons are entering this mesh via a corr.
        ! ========================================================
        Call CHECK_CORRS(T,NM,DTSP)
+
        ! ========================================================
        ! Add persons from entrys (specified flow rates)
        ! ========================================================
@@ -8172,7 +8176,8 @@ Contains
             HR=>HUMAN(I)
             new_ffield_name = Trim(HR%FFIELD_NAME)
             new_ffield_i = HR%I_FFIELD
-!            If ( HR%IOR /= HUMAN_NO_TARGET ) Cycle HumLoop ! can this happen?
+            ! Check only one door... (Yes, this can happen...)
+            If ( HR%IOR /= HUMAN_NO_TARGET) Cycle HumLoop
             x_old = HR%X_old
             y_old = HR%Y_old
             Select Case (PDX%IOR)
@@ -8211,7 +8216,7 @@ Contains
                   HR%Y = yy
                   HR%Z = zz
                   HR%Angle = angle
-                  IF (STR_INDX>0) HR%STR_SUB_INDX = STR_SUB_INDX
+                  If (STR_INDX>0) HR%STR_SUB_INDX = STR_SUB_INDX
                   If (keep_xy .And. ior_new == HUMAN_TARGET_UNSPECIFIED) Then
                      If (EVAC_Node_List(INODE2)%Node_Type == 'Door') Then
                         xx = 0.5_EB*(EVAC_DOORS(EVAC_Node_List(INODE2)%Node_Index)%X1 + &
@@ -8234,7 +8239,7 @@ Contains
                   v = Sqrt( HR%U**2 + HR%V**2 )
 
                   HR%IOR = ior_new
-                  If (ior_new == HUMAN_TARGET_UNSPECIFIED .Or. ior_new == HUMAN_STRS_TARGET) Then   
+                  If (ior_new == HUMAN_TARGET_UNSPECIFIED .Or. ior_new == HUMAN_STRS_TARGET) Then
                      ! door/entry or STRS-mesh
                      If (HR%IMESH /= imesh2 ) Then
                         ! Put the person to a new floor
@@ -8295,7 +8300,9 @@ Contains
                         MESHES(imesh2)%HUMAN(MESHES(imesh2)%N_HUMANS) = HUMAN(I)
                         MESHES(imesh2)%HUMAN(MESHES(imesh2)%N_HUMANS)%IOR = 0
                      End If
+
                   End If            ! target is door or entry
+
                   PDX%T_last=T
                   PDX%ICOUNT = PDX%ICOUNT + 1
                   If (PDX%T_first <= T_BEGIN) PDX%T_first = T
@@ -9638,8 +9645,8 @@ Contains
        Else
           Fc_y = Fc_y - HR%Gamma*v_tmp
        End If
-       !write(lu_evacout,*)'*** -x Fc',Fc_x,Fc_y,x_tmp,u_tmp,v_tmp,y_tmp,icyc
-       P2P_Torque = P2P_Torque + Fc_y*(x_tmp+is*dist-HR%X) - Fc_x*(y_tmp-HR%Y)
+       write(lu_evacout,*)'*** -x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+       P2P_Torque = P2P_Torque + Fc_y*(d_xy(idir)-HR%X) - Fc_x*(y_tmp-HR%Y)
        P2P_U = P2P_U + Fc_x
        P2P_V = P2P_V + Fc_y
     End If
@@ -9658,8 +9665,8 @@ Contains
        Else
           Fc_y = Fc_y - HR%Gamma*v_tmp
        End If
-       !write(lu_evacout,*)'*** +x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
-       P2P_Torque = P2P_Torque + Fc_y*(x_tmp+is*dist-HR%X) - Fc_x*(y_tmp-HR%Y)
+       write(lu_evacout,*)'*** +x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+       P2P_Torque = P2P_Torque + Fc_y*(d_xy(idir)-HR%X) - Fc_x*(y_tmp-HR%Y)
        P2P_U = P2P_U + Fc_x
        P2P_V = P2P_V + Fc_y
     End If
@@ -9678,8 +9685,8 @@ Contains
        Else
           Fc_x = Fc_x - HR%Gamma*u_tmp
        End If
-       !write(lu_evacout,*)'*** -y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
-       P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(y_tmp+is*dist-HR%Y)
+       write(lu_evacout,*)'*** -y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+       P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(d_xy(idir)-HR%Y)
        P2P_U = P2P_U + Fc_x
        P2P_V = P2P_V + Fc_y
     End If
@@ -9698,8 +9705,8 @@ Contains
        Else
           Fc_x = Fc_x - HR%Gamma*u_tmp
        End If
-       !write(lu_evacout,*)'*** +y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
-       P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(y_tmp+is*dist-HR%Y)
+       write(lu_evacout,*)'*** +y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+       P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(d_xy(idir)-HR%Y)
        P2P_U = P2P_U + Fc_x
        P2P_V = P2P_V + Fc_y
     End If
@@ -10762,158 +10769,160 @@ Contains
     IIN = Floor(M%CELLSI(Floor((r1_x-M%XS)*M%RDXINT))+1.0_EB)
     JJN = Floor(M%CELLSJ(Floor((r1_y-M%YS)*M%RDYINT))+1.0_EB)
     KKN = 1
-    
+
     ! Find the closest wall at the -x direction
 
-   is = -1    ! minus or plus direction
-   If (Skip_Wall_Force_Ior==-1) Then
-      d_mx = d_mx + is*(d_cutoff + 0.001_EB)
-   Else   
-      dx = M%DX(iin) ! no stretched meshes for evac
-      i_end = Int((d_cutoff+r_circle)/dx) + 1
-      i_end = iin + is*i_end
-      i_end = Min(M%IBAR,Max(1,i_end))
-      ii = iin
-      ic = M%cell_index(ii,jjn,kkn)  ! cell index
-      If (M%Solid(ic)) Then
-         istat = -1
-         Return
-      End If
-      iw = M%wall_index(ic, is*1)      ! wall index
-      Do While (iw==0 .And. ii/=i_end)
-         ii = ii + is
-         ic = M%cell_index(ii,jjn,kkn)  ! cell index
-         iw = M%wall_index(ic, is*1)      ! wall index
-      End Do
+    is = -1    ! minus or plus direction
+    If (Skip_Wall_Force_Ior==-1) Then
+       d_mx = d_mx + is*(2.0_EB*d_cutoff)
+    Else   
+       dx = M%DX(iin) ! no stretched meshes for evac
+       i_end = Int((d_cutoff+r_circle)/dx) + 1
+       i_end = iin + is*i_end
+       i_end = Min(M%IBAR,Max(1,i_end))
+       ii = iin
+       ic = M%cell_index(ii,jjn,kkn)  ! cell index
+       If (M%Solid(ic)) Then
+          istat = -1
+          Return
+       End If
+       iw = M%wall_index(ic, is*1)      ! wall index
+       Do While (iw==0 .And. ii/=i_end)
+          ii = ii + is
+          ic = M%cell_index(ii,jjn,kkn)  ! cell index
+          iw = M%wall_index(ic, is*1)      ! wall index
+       End Do
 
-      If (iw /= 0) Then
-         ibc = M%IJKW(5,iw)         ! Boundary condition index
-       ! There is a 'door', i.e., outflow-boundary (or open boundary)
-       ! so no wall forces ==> exit this loop
-         d_mx = M%xw(iw)
-         If (M%Solid(ic)) Then
-            Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
-            Call SHUTDOWN(MESSAGE)
-         End If
-         If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
-            d_mx = d_mx + is*(d_cutoff + 0.001_EB)
-         If (Abs(d_mx-r1_x) < r_circle) istat = 1
-      End If
-   End If
-   
+       If (iw /= 0) Then
+          ibc = M%IJKW(5,iw)         ! Boundary condition index
+          ! There is a 'door', i.e., outflow-boundary (or open boundary)
+          ! so no wall forces ==> exit this loop
+          d_mx = M%xw(iw)
+          If (M%Solid(ic)) Then
+             Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
+             Call SHUTDOWN(MESSAGE)
+          End If
+          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
+               d_mx = d_mx + is*(2.0_EB*d_cutoff)
+          If (Abs(d_mx-r1_x) < r_circle) istat = 1
+       End If
+    End If
+
     ! Find the closest wall at the +x direction
 
-   If (Skip_Wall_Force_Ior==1) Then
-      d_px = d_px + is*(d_cutoff + 0.001_EB)
-   Else   
-      is = +1    ! minus or plus direction
-      dx = M%DX(iin) ! no stretched meshes for evac
-      i_end = Int((d_cutoff+r_circle)/dx) + 1
-      i_end = iin + is*i_end
-      i_end = Min(M%IBAR,Max(1,i_end))
-      ii = iin
-      ic = M%cell_index(ii,jjn,kkn)  ! cell index
-      If (M%Solid(ic)) Then
-         istat = -1
-         Return
-      End If
-      iw = M%wall_index(ic, is*1)      ! wall index
-      Do While (iw==0 .And. ii/=i_end)
-         ii = ii + is
-         ic = M%cell_index(ii,jjn,kkn)  ! cell index
-         iw = M%wall_index(ic, is*1)      ! wall index
-      End Do
+    is = +1    ! minus or plus direction
+    If (Skip_Wall_Force_Ior==1) Then
+       d_px = d_px + is*(2.0_EB*d_cutoff)
+    Else   
+       dx = M%DX(iin) ! no stretched meshes for evac
+       i_end = Int((d_cutoff+r_circle)/dx) + 1
+       i_end = iin + is*i_end
+       i_end = Min(M%IBAR,Max(1,i_end))
+       ii = iin
+       ic = M%cell_index(ii,jjn,kkn)  ! cell index
+       If (M%Solid(ic)) Then
+          istat = -1
+          Return
+       End If
+       iw = M%wall_index(ic, is*1)      ! wall index
+       Do While (iw==0 .And. ii/=i_end)
+          ii = ii + is
+          ic = M%cell_index(ii,jjn,kkn)  ! cell index
+          iw = M%wall_index(ic, is*1)      ! wall index
+       End Do
 
-      If (iw /= 0) Then
-         ibc = M%IJKW(5,iw)         ! Boundary condition index
-       ! There is a 'door', i.e., outflow-boundary (or open boundary)
-       ! so no wall forces ==> exit this loop
-         d_px = M%xw(iw)
-         If (M%Solid(ic)) Then
-            Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
-            Call SHUTDOWN(MESSAGE)
-         End If
-         If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
-            d_px = d_px + is*(d_cutoff + 0.001_EB)
-         If (Abs(d_px-r1_x) < r_circle) istat = 1
-      End If
-   End If
+       If (iw /= 0) Then
+          ibc = M%IJKW(5,iw)         ! Boundary condition index
+          ! There is a 'door', i.e., outflow-boundary (or open boundary)
+          ! so no wall forces ==> exit this loop
+          d_px = M%xw(iw)
+          If (M%Solid(ic)) Then
+             Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
+             Call SHUTDOWN(MESSAGE)
+          End If
+          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
+               d_px = d_px + is*(2.0_EB*d_cutoff)
+          If (Abs(d_px-r1_x) < r_circle) istat = 1
+       End If
+    End If
+
     ! Find the closest wall at the -y direction
 
-   is = -1    ! minus or plus direction
-   If (Skip_Wall_Force_Ior==-2) Then
-      d_my = d_my + is*(d_cutoff + 0.001_EB)
-   Else   
-      dy = M%DY(jjn) ! no stretched meshes for evac
-      i_end = Int((d_cutoff+r_circle)/dy) + 1
-      i_end = jjn + is*i_end
-      i_end = Min(M%JBAR,Max(1,i_end))
-      jj = jjn
-      ic = M%cell_index(iin,jj,kkn)  ! cell index
-      If (M%Solid(ic)) Then
-         istat = -1
-         Return
-      End If
-      iw = M%wall_index(ic, is*2)      ! wall index
-      Do While (iw==0 .And. jj/=i_end)
-         jj = jj + is
-         ic = M%cell_index(iin,jj,kkn)  ! cell index
-         iw = M%wall_index(ic, is*2)      ! wall index
-      End Do
+    is = -1    ! minus or plus direction
+    If (Skip_Wall_Force_Ior==-2) Then
+       d_my = d_my + is*(2.0_EB*d_cutoff)
+    Else   
+       dy = M%DY(jjn) ! no stretched meshes for evac
+       i_end = Int((d_cutoff+r_circle)/dy) + 1
+       i_end = jjn + is*i_end
+       i_end = Min(M%JBAR,Max(1,i_end))
+       jj = jjn
+       ic = M%cell_index(iin,jj,kkn)  ! cell index
+       If (M%Solid(ic)) Then
+          istat = -1
+          Return
+       End If
+       iw = M%wall_index(ic, is*2)      ! wall index
+       Do While (iw==0 .And. jj/=i_end)
+          jj = jj + is
+          ic = M%cell_index(iin,jj,kkn)  ! cell index
+          iw = M%wall_index(ic, is*2)      ! wall index
+       End Do
 
-      If (iw /= 0) Then
-         ibc = M%IJKW(5,iw)         ! Boundary condition index
-       ! There is a 'door', i.e., outflow-boundary (or open boundary)
-       ! so no wall forces ==> exit this loop
-         d_my = M%yw(iw)
-         If (M%Solid(ic)) Then
-            Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
-            Call SHUTDOWN(MESSAGE)
-         End If
-         If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
-            d_my = d_my + is*(d_cutoff + 0.001_EB)
-         If (Abs(d_my-r1_y) < r_circle) istat = 1
-      End If
-   End If
+       If (iw /= 0) Then
+          ibc = M%IJKW(5,iw)         ! Boundary condition index
+          ! There is a 'door', i.e., outflow-boundary (or open boundary)
+          ! so no wall forces ==> exit this loop
+          d_my = M%yw(iw)
+          If (M%Solid(ic)) Then
+             Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
+             Call SHUTDOWN(MESSAGE)
+          End If
+          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
+               d_my = d_my + is*(2.0_EB*d_cutoff)
+          If (Abs(d_my-r1_y) < r_circle) istat = 1
+       End If
+    End If
+
     ! Find the closest wall at the +y direction
 
     is = +1    ! minus or plus direction
-   If (Skip_Wall_Force_Ior==2) Then
-      d_py = d_py + is*(d_cutoff + 0.001_EB)
-   Else   
-      dy = M%DY(jjn) ! no stretched meshes for evac
-      i_end = Int((d_cutoff+r_circle)/dy) + 1
-      i_end = jjn + is*i_end
-      i_end = Min(M%JBAR,Max(1,i_end))
-      jj = jjn
-      ic = M%cell_index(iin,jj,kkn)  ! cell index
-      If (M%Solid(ic)) Then
-         istat = -1
-         Return
-      End If
-      iw = M%wall_index(ic, is*2)      ! wall index
-      Do While (iw==0 .And. jj/=i_end)
-         jj = jj + is
-         ic = M%cell_index(iin,jj,kkn)  ! cell index
-         iw = M%wall_index(ic, is*2)      ! wall index
-      End Do
+    If (Skip_Wall_Force_Ior==2) Then
+       d_px = d_px + is*(2.0_EB*d_cutoff)
+    Else   
+       dy = M%DY(jjn) ! no stretched meshes for evac
+       i_end = Int((d_cutoff+r_circle)/dy) + 1
+       i_end = jjn + is*i_end
+       i_end = Min(M%JBAR,Max(1,i_end))
+       jj = jjn
+       ic = M%cell_index(iin,jj,kkn)  ! cell index
+       If (M%Solid(ic)) Then
+          istat = -1
+          Return
+       End If
+       iw = M%wall_index(ic, is*2)      ! wall index
+       Do While (iw==0 .And. jj/=i_end)
+          jj = jj + is
+          ic = M%cell_index(iin,jj,kkn)  ! cell index
+          iw = M%wall_index(ic, is*2)      ! wall index
+       End Do
 
-      If (iw /= 0) Then
-         ibc = M%IJKW(5,iw)         ! Boundary condition index
-       ! There is a 'door', i.e., outflow-boundary (or open boundary)
-       ! so no wall forces ==> exit this loop
-         d_py = M%yw(iw)
-         If (M%Solid(ic)) Then
-            Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
-            Call SHUTDOWN(MESSAGE)
-         End If
-         If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
-            d_py = d_py + is*(d_cutoff + 0.001_EB)
-         If (Abs(d_py-r1_y) < r_circle) istat = 1
-      End If
-   End If
- 
-   Return
+       If (iw /= 0) Then
+          ibc = M%IJKW(5,iw)         ! Boundary condition index
+          ! There is a 'door', i.e., outflow-boundary (or open boundary)
+          ! so no wall forces ==> exit this loop
+          d_py = M%yw(iw)
+          If (M%Solid(ic)) Then
+             Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
+             Call SHUTDOWN(MESSAGE)
+          End If
+          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
+               d_py = d_py + is*(2.0_EB*d_cutoff)
+          If (Abs(d_py-r1_y) < r_circle) istat = 1
+       End If
+    End If
+
+    Return
   End Subroutine Find_walls
   !
   Subroutine GET_REV_evac(MODULE_REV,MODULE_DATE)
