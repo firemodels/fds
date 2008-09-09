@@ -335,12 +335,12 @@ Module EVAC
   Integer :: STRS_LANDING_TYPE=1, STRS_STAIR_TYPE=2
 
  ! Human constants
-  Integer :: HMAN_SAME_MESH_TARGET=-2,HUMAN_IMPOSSIBLE_TARGET=-1, &
+  Integer :: HUMAN_SAME_MESH_TARGET=-2,HUMAN_IMPOSSIBLE_TARGET=-1, &
              HUMAN_NO_TARGET=0,&
-             HUMAN_MOVING_NO_TARGET = 1, &
+             HUMAN_TARGET_UNSPECIFIED = 1, &
              HUMAN_ANOTHER_MESH_TARGET=2,&
              HUMAN_CORRIDOR_TARGET=3,&
-             HUMAN_NOT_USED_TARGET=4, &
+             HUMAN_STRS_TARGET=4, &
              HUMAN_EXIT_TARGET=5
          ! hr%ior = 0: not entering a door
          !          1: moving but target not specified
@@ -1727,6 +1727,16 @@ Contains
             PDX%Z = 0.5_EB*(XB(5)+XB(6))
          End If
 
+         If (XYZ_SMOKE(1) < Huge(XYZ_SMOKE)) Then
+            PDX%Xsmoke = XYZ_SMOKE(1)
+            PDX%Ysmoke = XYZ_SMOKE(2)
+            PDX%Zsmoke = XYZ_SMOKE(3)
+         Else       
+            PDX%Xsmoke = PDX%X
+            PDX%Ysmoke = PDX%Y
+            PDX%Zsmoke = 0.5_EB*(XB(5)+XB(6)) - EVACUATION_Z_OFFSET(PDX%IMESH) + HUMAN_SMOKE_HEIGHT
+         End If
+
          ! Check which evacuation floor
          ii = 0
          PDX_Mesh3Loop: Do i = 1, nmeshes
@@ -1744,34 +1754,6 @@ Contains
                  ' problem with XYZ, no mesh found'
             Call SHUTDOWN(MESSAGE)
          End If
-
-         If (XYZ_SMOKE(1) < Huge(XYZ_SMOKE)) Then
-            PDX%Xsmoke = XYZ_SMOKE(1)
-            PDX%Ysmoke = XYZ_SMOKE(2)
-            PDX%Zsmoke = XYZ_SMOKE(3)
-         Else
-            PDX%Xsmoke = PDX%X
-            PDX%Ysmoke = PDX%Y
-            PDX%Zsmoke = 0.5_EB*(XB(5)+XB(6)) - EVACUATION_Z_OFFSET(PDX%IMESH) + HUMAN_SMOKE_HEIGHT
-         End If
-         ! Check if door leads to Stairs
-         PDX%STR_INDX = 0
-         PDX%STR_SUB_INDX = 0
-         CheckDoorStrLoop: Do i = 1, N_STRS
-            If (EVAC_STRS(i)%IMESH==PDX%IMESH .Or. &
-                 EVAC_STRS(i)%IMESH==PDX%IMESH2) Then
-               STRP=>EVAC_STRS(i)
-               PDX%STR_INDX = i
-               Do j = 1,STRP%N_NODES
-                  If ( Is_Within_Bounds(PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2, &
-                       STRP%XB_NODE(j,1), STRP%XB_NODE(j,2), STRP%XB_NODE(j,3),STRP%XB_NODE(j,4), &
-                       STRP%XB_NODE(j,5), STRP%XB_NODE(j,6), 0._EB, 0._EB, 0._EB)) Then
-                     PDX%STR_SUB_INDX = j
-                     Exit CheckDoorStrLoop
-                  End If
-               End Do
-            End If
-         End Do CheckDoorStrLoop       ! 
 
          ! Check, which fire grid and i,j,k (xyz)
          PDX_SmokeLoop: Do i = 1, nmeshes
@@ -3153,58 +3135,66 @@ Contains
          End If
       End Do
 
-      ! Create list  of incoming nodes for STairs
-      Do N = 1,N_STRS
-         STRP => EVAC_STRS(N)
-         STRP%N_NODES_IN = 0
-         STRP%N_NODES_OUT = 0
-         NODES_TMP = 0
-         Do I = 1,N_NODES
-            Select Case (EVAC_NODE_List(I)%Node_type)
-            Case ('Door')
-               J = EVAC_NODE_List(I)%Node_index
-               If (EVAC_DOORS(J)%IMESH2 == STRP%IMESH) Then
-                  STRP%N_NODES_IN = STRP%N_NODES_IN + 1
-                  NODES_TMP(STRP%N_NODES_IN) = I
-               End If
-            Case ('Entry')
-               J = EVAC_NODE_List(I)%Node_index
-               If (EVAC_ENTRYS(J)%IMESH == STRP%IMESH) Then
-                  STRP%N_NODES_IN = STRP%N_NODES_IN + 1
-                  NODES_TMP(STRP%N_NODES_IN) = I
-               End If
-            End Select
-         End Do
-         Allocate(STRP%NODES_IN(1:STRP%N_NODES_IN),STAT=IZERO)
-         Call ChkMemErr('Read_Evac','STRP%NODES_IN',IZERO) 
-         STRP%NODES_IN = NODES_TMP(1:STRP%N_NODES_IN)
-         ! Create List of outgoing nodes for stairs
-         NODES_TMP = 0
-         Do I = NMESHES+1,N_NODES
-            If (EVAC_NODE_List(I)%IMESH == STRP%IMESH) Then
-               STRP%N_NODES_OUT = STRP%N_NODES_OUT + 1
-               NODES_TMP(STRP%N_NODES_OUT) = I
-            End If
-         End Do
-         Allocate(STRP%NODES_OUT(1:STRP%N_NODES_OUT),STAT=IZERO)
-         Call ChkMemErr('Read_Evac','STRP%NODES_OUT',IZERO) 
-         STRP%NODES_OUT = NODES_TMP(1:STRP%N_NODES_OUT)
-      End Do
+   Do N = 1,N_DOORS
+      PDX => EVAC_DOORS(N)
+      ! Check if door leads to Stairs
+       PDX%STR_INDX = 0
+       PDX%STR_SUB_INDX = 0
+       CheckDoorStrLoop: Do i = 1, N_STRS
+         STRP=>EVAC_STRS(i)
+         If (STRP%IMESH==PDX%IMESH .OR. &
+             STRP%IMESH==PDX%IMESH2) Then
+            PDX%STR_INDX = i
+            Do j = 1,STRP%N_NODES
+               If ( Is_Within_Bounds(PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2, &
+                    STRP%XB_NODE(j,1), STRP%XB_NODE(j,2), STRP%XB_NODE(j,3),STRP%XB_NODE(j,4), &
+                    STRP%XB_NODE(j,5), STRP%XB_NODE(j,6), 0._EB, 0._EB, 0._EB)) Then
+                  PDX%STR_SUB_INDX = j
+                  Exit CheckDoorStrLoop
+               Endif
+            Enddo
+         Endif
+       Enddo CheckDoorStrLoop
+    Enddo
 
-      !         SELECT Case(Abs(PDX%IOR))
-      !         Case (1)
-      !            IF (Is_Within_Bounds(PDX%X1,    PDX%X2,    PDX%Y1,    PDX%Y2,    PDX%Z1,    PDX%Z2, &
-      !                                 STRP%XB(1),STRP%XB(2),STRP%XB(3),STRP%XB(4),STRP%XB(5),STRP%XB(6), &
-      !                                 0.2_EB,               0._EB,                0._EB)) Then
-      !               
-      !               STRP%N_DOORS_IN = STRP%N_DOORS_IN + 1
-      !               DOORS_TMP(STRP%N_DOORS_IN) = I
-      !            End If
-      !         Case (2)
-      !         End select
-      !      End Do
-
-
+    ! Create list  of incoming nodes for STairs
+    Do N = 1,N_STRS
+      STRP => EVAC_STRS(N)
+      STRP%N_NODES_IN = 0
+      STRP%N_NODES_OUT = 0
+      NODES_TMP = 0
+      Do I = 1,N_NODES
+         Select Case (EVAC_NODE_List(I)%Node_type)
+         Case ('Door')
+            J = EVAC_NODE_List(I)%Node_index
+            If (EVAC_DOORS(J)%IMESH2 == STRP%IMESH) Then
+               STRP%N_NODES_IN = STRP%N_NODES_IN + 1
+               NODES_TMP(STRP%N_NODES_IN) = I
+            Endif
+         Case ('Entry')
+            J = EVAC_NODE_List(I)%Node_index
+            If (EVAC_ENTRYS(J)%IMESH == STRP%IMESH) Then
+               STRP%N_NODES_IN = STRP%N_NODES_IN + 1
+               NODES_TMP(STRP%N_NODES_IN) = I
+            Endif
+         End Select
+      Enddo
+      Allocate(STRP%NODES_IN(1:STRP%N_NODES_IN),STAT=IZERO)
+      Call ChkMemErr('Read_Evac','STRP%NODES_IN',IZERO) 
+      STRP%NODES_IN = NODES_TMP(1:STRP%N_NODES_IN)
+      ! Create List of outgoing nodes for stairs
+      NODES_TMP = 0
+      Do I = NMESHES+1,N_NODES
+         If (EVAC_NODE_List(I)%IMESH == STRP%IMESH) Then
+            STRP%N_NODES_OUT = STRP%N_NODES_OUT + 1
+            NODES_TMP(STRP%N_NODES_OUT) = I
+         Endif
+      Enddo
+      Allocate(STRP%NODES_OUT(1:STRP%N_NODES_OUT),STAT=IZERO)
+      Call ChkMemErr('Read_Evac','STRP%NODES_OUT',IZERO) 
+      STRP%NODES_OUT = NODES_TMP(1:STRP%N_NODES_OUT)
+    Enddo
+      
     End Subroutine CHECK_EVAC_NODES
 
   End Subroutine READ_EVAC
@@ -4060,7 +4050,7 @@ Contains
              HR%IMESH       = HPT%IMESH
              HR%INODE       = n_tmp
              HR%NODE_NAME   = Trim(EVAC_Node_List(n_tmp)%ID)
-             HR%IOR       = 0  
+             HR%IOR         = HUMAN_NO_TARGET
              HR%U         = 0.0_EB
              HR%V         = 0.0_EB
              HR%W         = 0.0_EB
@@ -5234,13 +5224,12 @@ Contains
     Real(EB), Intent(IN) :: Tin
     Integer, Intent(IN) :: NM,ICYC
     !
-    Real(EB) DTSP,UBAR,VBAR, &
-         X1,Y1,XI,YJ,ZK
+    Real(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
     Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ, &
          IBC, ICX, ICY, N, J1, J2
     Integer  IE, tim_ic, tim_iw, NM_now, tim_iwx, tim_iwy, tim_iw2, tim_ic2
     Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, &
-         EVEL, tim_dist
+         EVEL, tim_dist, Door_dist, Door_width
     Integer istat, STRS_INDX
     !
     !
@@ -5250,8 +5239,8 @@ Contains
          C_Yeff, t_flow_relax, LambdaW, &
          B_Wall, A_Wall, T, Contact_F, Social_F, &
          smoke_beta, smoke_alpha, smoke_speed_fac
-    Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, i_o
-    Real(EB) y_o, x_o, x_now, y_now, &
+    Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, i_o,door_ior
+    Real(EB) y_o, x_o, x_now, y_now, x_target, y_target, &
          d_humans, d_walls, &
          DTSP_new, &
          fac_tim, dt_group_door, x1_old, y1_old, x11, y11, &
@@ -5458,13 +5447,18 @@ Contains
              End If
           End If
        End Do
-
        ! ========================================================
        ! CHANGE TARGET DOOR CALCULATION STARTS HERE
        ! ========================================================
        If (T > 0.0_EB) Then
           Change_Door_Loop: Do ie = 1, N_HUMANS
              HR => HUMAN(ie)
+
+             ! Check and cycle if in stairs
+             Check_Strs_Loop0: Do N = 1, N_STRS
+               IF (EVAC_STRS(N)%IMESH == HR%IMESH) Cycle Change_Door_Loop
+             Enddo Check_Strs_Loop0
+
              i_old_ffield = HR%I_FFIELD
              name_old_ffield = Trim(MESH_NAME(i_old_ffield))
              j  =  Max(0,HR%GROUP_ID)
@@ -5476,25 +5470,6 @@ Contains
                   Cycle Change_Door_Loop
              If (j > 0 .And. T < Group_List(j)%Tpre + &
                   Group_List(j)%Tdoor) Cycle Change_Door_Loop
-
-             ! Check if in stairs
-             NM_STRS_MESH = .False.
-             Check_Strs_Loop0: Do N = 1, N_STRS
-                If (EVAC_STRS(N)%IMESH == HR%IMESH) Then     
-                   NM_STRS_MESH = .True.
-                   STRS_Indx = N
-                   STRP=>EVAC_STRS(N)
-                   Exit Check_Strs_Loop0
-                End If
-             End Do Check_Strs_Loop0
-             !  SimoHo: should this be done here or later?
-             !             If (NM_STRS_MESH) Then
-             !                If (HR%I_Target /= 0) CYCLE Change_Door_Loop
-             !                Do N = 1,STRP%N_NODES_OUT
-             !
-             !                End Do
-
-             !             End If
 
              If (Group_List(j)%GROUP_I_FFIELDS(i_egrid) == 0) Then
                 Call Random_number(rn)
@@ -5525,8 +5500,7 @@ Contains
                             If ( EVAC_DOORS(i)%IMESH == nm) Then
                                Is_Visible_Door(i) = .True.
                                Do i_tmp = 1, Human_Known_Doors(j1)%N_nodes
-                                  If (EVAC_DOORS(i)%INODE == &
-                                       Human_Known_Doors(j1)%I_nodes(i_tmp)) &
+                                  If (EVAC_DOORS(i)%INODE == Human_Known_Doors(j1)%I_nodes(i_tmp)) &
                                        Is_Known_Door(i) = .True.
                                End Do
                             End If
@@ -5536,8 +5510,7 @@ Contains
                                  .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
                                Is_Visible_Door(n_doors+i) = .True.
                                Do i_tmp = 1, Human_Known_Doors(j1)%N_nodes
-                                  If (EVAC_EXITS(i)%INODE == &
-                                       Human_Known_Doors(j1)%I_nodes(i_tmp)) &
+                                  If (EVAC_EXITS(i)%INODE == Human_Known_Doors(j1)%I_nodes(i_tmp)) &
                                        Is_Known_Door(n_doors+i) = .True.
                                End Do
                             End If
@@ -6067,23 +6040,49 @@ Contains
           ! Check if going straight line to target
           Straight_Line_To_Target = .False.
           If (NM_STRS_MESH) Then
-             If (HR%I_Target == 0) Then
-                HR%I_Target = Find_Target_Node_In_Strs(STRP,HR)
-             End If
-             i_tmp = Abs(HR%I_Target)
-             !             write(*,*) I, i_tmp
-             !, EVAC_DOORS(i_tmp)%X,EVAC_DOORS(i_tmp)%Y
-             !             If (i_tmp > N_DOORS) i_tmp = i_tmp - N_DOORS
-             !             If (EVAC_DOORS(i_tmp)
-          End If
-          If (Straight_Line_To_Target) Then
-
-
-          Else If (NM_STRS_MESH) Then 
+            If (HR%I_Target == 0) Then
+!               write(*,*) 'Finding target within move loop'
+               HR%I_Target = Find_Target_Node_In_Strs(STRP,HR)
+            Endif
+            N = HR%I_Target
+            If (N>N_DOORS) Then
+               N = N - N_DOORS
+               If (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
+                  Straight_Line_To_Target = .TRUE.
+                  x_target = (EVAC_EXITS(N)%X1 + EVAC_EXITS(N)%X2)/2.0_EB
+                  y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
+                  door_width = EVAC_EXITS(N)%Width
+                  door_ior   = EVAC_EXITS(N)%IOR
+               Endif
+            Elseif (N>0) Then
+               If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
+                  Straight_Line_To_Target = .TRUE.
+                  x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
+                  y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
+                  door_width = EVAC_DOORS(N)%Width
+                  door_ior   = EVAC_DOORS(N)%IOR
+               Endif
+            Endif
+         Endif
+         If (Straight_Line_To_Target) Then
+            UBAR = x_target-HR%X
+            VBAR = y_target-HR%Y
+            Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
+            If ( Door_Dist < 0.50*Door_width ) Then
+               Select case(door_ior)
+               case(-1,+1)
+                  UBAR = SIGN(1.0,UBAR)
+                  VBAR = 0._EB
+               case(-2,+2)
+                  UBAR = 0._EB
+                  VBAR = SIGN(1.0,VBAR)
+               end select
+            Endif
+         Elseif (NM_STRS_MESH) Then 
              ! Add here direction dependence           
              UBAR = STRP%U_RIGHT(II,JJ)
              VBAR = STRP%V_RIGHT(II,JJ)
-          Else
+         Else
              UBAR = AFILL(MFF%U(II-1,JJY,KKZ),MFF%U(II,JJY,KKZ), &
                   MFF%U(II-1,JJY+1,KKZ),MFF%U(II,JJY+1,KKZ), &
                   MFF%U(II-1,JJY,KKZ+1),MFF%U(II,JJY,KKZ+1), &
@@ -6487,12 +6486,10 @@ Contains
        ! ========================================================
        If (N_HUMANS > 0) Call CHECK_DOORS(T,NM)
        If (N_HUMANS > 0) Call CHECK_EXITS(T,NM)
-
        ! ========================================================
        ! Check if persons are entering this mesh via a corr.
        ! ========================================================
        Call CHECK_CORRS(T,NM,DTSP)
-
        ! ========================================================
        ! Add persons from entrys (specified flow rates)
        ! ========================================================
@@ -6735,7 +6732,33 @@ Contains
 
           MFF=>MESHES(NM_now)
 
-          If (NM_STRS_MESH) Then 
+          ! Check if going straight line to target
+          Straight_Line_To_Target = .FALSE.
+          If (NM_STRS_MESH) Then
+            If (HR%I_Target == 0) Then
+!               write(*,*) 'Finding target within move loop'
+               HR%I_Target = Find_Target_Node_In_Strs(STRP,HR)
+            Endif
+            N = HR%I_Target
+            If (N>N_DOORS) Then
+               N = N - N_DOORS
+               If (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
+                  Straight_Line_To_Target = .TRUE.
+                  x_target = (EVAC_EXITS(N)%X1 + EVAC_EXITS(N)%X2)/2.0_EB
+                  y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
+               Endif
+            Elseif (N > 0) Then
+               If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
+                  Straight_Line_To_Target = .TRUE.
+                  x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
+                  y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
+               Endif
+            Endif
+         Endif
+         If (Straight_Line_To_Target) Then
+            UBAR = x_target-HR%X
+            VBAR = y_target-HR%Y
+          Elseif (NM_STRS_MESH) Then 
              ! Add here direction dependence           
              UBAR = STRP%U_RIGHT(IIN,JJN)
              VBAR = STRP%V_RIGHT(IIN,JJN)
@@ -7843,13 +7866,66 @@ Contains
       Type (EVAC_STRS_TYPE), Pointer ::  SP
       Type (HUMAN_TYPE), Pointer :: PH
       ! Local variables
-      Integer :: I_Target = 0, I
-      Real(EB) z_node, z_final, dz_node, dz_final
+      Logical IsKnownDoor,FinalTargetFound
+      Integer :: I_Target = 0, I, Id, Final_node, IG, IN
+      Real(EB) z_node, z_final, dz_node, dz_final, z_final_unknown
 
+      FinalTargetFound = .FALSE.
+      IG = ABS(HR%GROUP_ID)
       Find_Target_Node_In_Strs = 0
-      Do I = 1,SP%N_NODES_OUT
 
+      z_final_unknown = 0._EB
+
+      Do I = 1, n_nodes
+         ! check if is known door?
+         IsKnownDoor = .FALSE.
+         If (Human_Known_Doors(IG)%N_nodes == 0) Then
+            IsKnownDoor = .True.
+         Else
+            IN = EVAC_Node_List(I)%Node_index
+            Do Id = 1, Human_Known_Doors(IG)%N_nodes
+               If (I == Human_Known_Doors(IG)%I_nodes(Id)) Then
+                  IsKnownDoor = .True.
+                  Exit
+               Endif
+            End Do
+         Endif
+         If (EVAC_NODE_List(I)%Node_type=='Exit') Then
+            z_final_unknown = EVAC_EXITS(EVAC_NODE_List(I)%Node_index)%Z1
+            If (IsKnownDoor) Then
+               Final_node = I
+               z_final = z_final_unknown
+               FinalTargetFound = .TRUE.
+               Exit
+            Endif
+         Endif
+      Enddo
+      If (.NOT.FinalTargetFound) z_final = z_final_unknown
+      dz_final = z_final - HR%Z
+      FinalTargetFound = .FALSE.
+      FindTargetNodeLoop: Do I = 1,SP%N_NODES_OUT
+         dz_node = -1._EB * SIGN(1.0,dz_final) ! initialize dz_node to different direction than final target
          Select Case(EVAC_NODE_List(SP%NODES_OUT(I))%Node_type)
+         Case('Door')
+            z_node = EVAC_DOORS(EVAC_Node_List(SP%NODES_OUT(I))%Node_index)%Z1
+         Case('Exit')
+            z_node = EVAC_EXITS(EVAC_Node_List(SP%NODES_OUT(I))%Node_index)%Z1
+         Case default
+            write(LU_ERR,*) 'ERROR (debug): unknown node type in Find_Target_Node_In_Strs'
+         End Select
+         dz_node = z_node - HR%Z
+         If (SIGN(1.0,dz_node)==SIGN(1.0,dz_final)) Then
+            If (ABS(dz_node)<=ABS(dz_final)) Then
+               FinalTargetFound = .TRUE.
+               Find_Target_Node_In_Strs = EVAC_Node_List(SP%NODES_OUT(I))%Node_index
+               Exit FindTargetNodeLoop
+            Endif
+         Endif
+      Enddo FindTargetNodeLoop
+      If (FinalTargetFound) Return
+      FindTargetNodeLoop2: Do I = 1,SP%N_NODES_IN
+         dz_node = -1._EB * SIGN(1.0,dz_final) ! initialize dz_node to different direction than final target
+         Select Case(EVAC_NODE_List(SP%NODES_IN(I))%Node_type)
          Case('Door')
             z_node = EVAC_DOORS(EVAC_Node_List(I)%Node_index)%Z1
          Case('Exit')
@@ -7858,9 +7934,15 @@ Contains
             Write(LU_ERR,*) 'ERROR (debug): unknown node type in Find_Target_Node_In_Strs'
          End Select
          dz_node = z_node - HR%Z
-         Find_Target_Node_In_Strs = SP%NODES_OUT(I)
-      End Do
-
+         If (SIGN(1.0,dz_node)==SIGN(1.0,dz_final)) Then
+            If (ABS(dz_node)<=ABS(dz_final)) Then
+               FinalTargetFound = .TRUE.
+               Find_Target_Node_In_Strs = EVAC_Node_List(SP%NODES_IN(I))%Node_index
+               Exit FindTargetNodeLoop2
+            Endif
+         Endif
+      Enddo FindTargetNodeLoop2
+      
     End Function Find_Target_Node_In_Strs
 
     Subroutine GET_IW(IIin,JJin,KKin,IOR,IW)
@@ -7992,7 +8074,7 @@ Contains
                     ' EVAC: Person n:o', &
                     HR%ILABEL, ' out at ', T, &
                     ' s, exit ', Trim(PEX%ID), ' fed ', HR%IntDose
-               If (HR%IOR == 2) HR%IOR = 0
+               If (HR%IOR == 2) HR%IOR = HUMAN_NO_TARGET
             End If
          End Do HumLoop
       End Do PexLoop
@@ -8001,7 +8083,7 @@ Contains
          HR=>HUMAN(I)
          ! Remove person, if wanted.
          If (HR%IOR >= 1) Then
-            HR%IOR = 0
+            HR%IOR = HUMAN_NO_TARGET
             Call Remove_Person(I)
          End If
       End Do Remove_loop
@@ -8023,7 +8105,7 @@ Contains
       Logical :: keep_xy
       !
       keep_xy = .False.
-      HUMAN(:)%IOR = 0
+      HUMAN(:)%IOR = HUMAN_NO_TARGET
       PdxLoop: Do ie = 1, n_doors
          PDX=>EVAC_DOORS(ie)
          If (PDX%IMESH /= NM ) Cycle PdxLoop
@@ -8044,32 +8126,32 @@ Contains
             HR=>HUMAN(I)
             new_ffield_name = Trim(HR%FFIELD_NAME)
             new_ffield_i = HR%I_FFIELD
-            If ( HR%IOR /= 0 ) Cycle HumLoop
+!            If ( HR%IOR /= HUMAN_NO_TARGET ) Cycle HumLoop ! can this happen?
             x_old = HR%X_old
             y_old = HR%Y_old
             Select Case (PDX%IOR)
             Case (+1)
                If ((HR%X >= pdx%x1 .And. x_old < pdx%x1) .And. &
                     (HR%Y >= pdx%y1 .And. HR%Y <= pdx%y2) ) Then
-                  HR%IOR = HUMAN_MOVING_NO_TARGET
+                  HR%IOR = HUMAN_TARGET_UNSPECIFIED
                End If
             Case (-1)
                If ((HR%X <= pdx%x2 .And. x_old > pdx%x2) .And. &
                     (HR%Y >= pdx%y1 .And. HR%Y <= pdx%y2) ) Then
-                  HR%IOR = HUMAN_MOVING_NO_TARGET
+                  HR%IOR = HUMAN_TARGET_UNSPECIFIED
                End If
             Case (+2)
                If ((HR%Y >= pdx%y1 .And. y_old < pdx%y1) .And. &
                     (HR%X >= pdx%x1 .And. HR%X <= pdx%x2) ) Then
-                  HR%IOR = HUMAN_MOVING_NO_TARGET
+                  HR%IOR = HUMAN_TARGET_UNSPECIFIED
                End If
             Case (-2)
                If ((HR%Y <= pdx%y2 .And. y_old > pdx%y2) .And. &
                     (HR%X >= pdx%x1 .And. HR%X <= pdx%x2) ) Then
-                  HR%IOR = HUMAN_MOVING_NO_TARGET
+                  HR%IOR = HUMAN_TARGET_UNSPECIFIED
                End If
             End Select
-            If ( HR%IOR == HUMAN_MOVING_NO_TARGET ) Then
+            If ( HR%IOR == HUMAN_TARGET_UNSPECIFIED ) Then
                istat = 0
                inode = PDX%INODE
                inode2 = PDX%INODE2
@@ -8083,9 +8165,8 @@ Contains
                   HR%Y = yy
                   HR%Z = zz
                   HR%Angle = angle
-                  !                  write(*,*) 'STR ', STR_INDX, STR_SUB_INDX, HR%Z
-                  If (STR_INDX>0) HR%STR_SUB_INDX = STR_SUB_INDX
-                  If (keep_xy .And. ior_new == HUMAN_MOVING_NO_TARGET) Then
+                  IF (STR_INDX>0) HR%STR_SUB_INDX = STR_SUB_INDX
+                  If (keep_xy .And. ior_new == HUMAN_TARGET_UNSPECIFIED) Then
                      If (EVAC_Node_List(INODE2)%Node_Type == 'Door') Then
                         xx = 0.5_EB*(EVAC_DOORS(EVAC_Node_List(INODE2)%Node_Index)%X1 + &
                              EVAC_DOORS(EVAC_Node_List(INODE2)%Node_Index)%X2 - &
@@ -8107,10 +8188,11 @@ Contains
                   v = Sqrt( HR%U**2 + HR%V**2 )
 
                   HR%IOR = ior_new
-                  If (ior_new == 1 .Or. ior_new == 4) Then   ! door/entry or STRS-mesh
+                  If (ior_new == HUMAN_TARGET_UNSPECIFIED .Or. ior_new == HUMAN_STRS_TARGET) Then   
+                     ! door/entry or STRS-mesh
                      If (HR%IMESH /= imesh2 ) Then
                         ! Put the person to a new floor
-                        HR%IOR         = 2
+                        HR%IOR         = HUMAN_ANOTHER_MESH_TARGET
                         HR%INODE = 0
                         Do n = 1, n_egrids
                            If (EVAC_Node_List(n)%IMESH == imesh2) HR%INODE = n
@@ -8118,13 +8200,12 @@ Contains
                         HR%NODE_NAME   = Trim(MESH_NAME(imesh2))
                         HR%FFIELD_NAME = Trim(new_ffield_name)
                         HR%I_FFIELD = new_ffield_i
-                        HR%I_Target = I_Target
                      Else
                         HR%IOR = -2   ! same floor (door/entry)
                         HR%FFIELD_NAME = Trim(new_ffield_name)
                         HR%I_FFIELD = new_ffield_i
-                        HR%I_Target = I_Target
                      End If
+                     HR%I_Target = I_Target
                      HR%X_old = HR%X
                      HR%Y_old = HR%Y
                      ! ior is the direction where the human is ejected.
@@ -8160,24 +8241,20 @@ Contains
                         If (MESHES(imesh2)%N_HUMANS+1 > &
                              MESHES(imesh2)%N_HUMANS_DIM) Then
                            ! Re-allocation is not yet checked.
-                           Call SHUTDOWN( &
-                                'ERROR: Humans: no re-allocation yet')
+                           Call SHUTDOWN('ERROR: Humans: no re-allocation yet')
                            Call RE_ALLOCATE_HUMANS(1,imesh2)
                         End If
                         MESHES(imesh2)%N_HUMANS = MESHES(imesh2)%N_HUMANS + 1
                         MESHES(imesh2)%HUMAN(MESHES(imesh2)%N_HUMANS) = HUMAN(I)
                         MESHES(imesh2)%HUMAN(MESHES(imesh2)%N_HUMANS)%IOR = 0
                      End If
-
                   End If            ! target is door or entry
-
                   PDX%T_last=T
                   PDX%ICOUNT = PDX%ICOUNT + 1
                   If (PDX%T_first <= T_BEGIN) PDX%T_first = T
 
                   Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') &
-                       ' EVAC: Person n:o', &
-                       HR%ILABEL, ' out at ', T, &
+                       ' EVAC: Person n:o', HR%ILABEL, ' out at ', T, &
                        ' s, door ', Trim(PDX%ID), ' fed ', HR%IntDose
 
                Else    ! istat = 1 ==> do not move to node
@@ -8207,7 +8284,7 @@ Contains
          !
          ! Remove person from the floor
          If (HR%IOR >= 1) Then
-            HR%IOR = 0
+            HR%IOR = HUMAN_NO_TARGET
             Call Remove_Person(I)
          End If
       End Do Remove_loop
@@ -8356,13 +8433,13 @@ Contains
                   HR%I_Target = 0
                   HR%U = 0.0_EB
                   HR%V = 0.0_EB
-                  HR%IOR = 0
+                  HR%IOR = HUMAN_NO_TARGET
                End If         ! istat == 0
 
             Else             ! T_out > T, i.e., still in corridor
                HR%X = HR%X_old
                HR%Y = HR%Y_old
-               HR%IOR = 0
+               HR%IOR = HUMAN_NO_TARGET
                HR%I_Target = 0
             End If
 
@@ -8439,8 +8516,9 @@ Contains
       Logical, Dimension(:), Allocatable :: Is_Known_Door, &
            Is_Visible_Door
       Integer :: i_tmp, i_tim, iii, jjj
-      Logical :: PP_see_door, keep_xy2
+      Logical :: PP_see_door, keep_xy2, NM_STRS_MESH
       Type (CORR_LL_TYPE), Pointer :: TmpCurrent, TmpLoop
+      Type (EVAC_STRS_TYPE), Pointer :: STRP
       !
       xx = 0.0_EB ; yy = 0.0_EB ; zz = 0.0_EB 
       I_Target = 0
@@ -9026,17 +9104,24 @@ Contains
             imesh2 = HR%IMESH
          End If
       Case ('Floor') SelectTargetType
-         ! Add here test that the target is a STRS mesh
+         ! Next is used for meshes
          !
-         ior_new = 4  ! target is a floor (actually STRS mesh)
-         istat = 1         ! do not remove from the floor
-         ! imesh2 = HR%IMESH 
-         ! Next is used for STRS meshes
+         NM_STRS_MESH = .FALSE.
+         ior_new = 4       ! target is a mesh
+         istat = 1         ! Default: no space in the mesh
          Select Case (EVAC_NODE_List(INODE)%Node_Type)
          Case ('Door')
             PDX2 => EVAC_DOORS(EVAC_Node_List(INODE)%Node_Index)
             imesh2 = EVAC_Node_List(INODE2)%IMESH
             MFF=>Meshes(imesh2)
+            Do N = 1, N_STRS
+               IF (EVAC_STRS(N)%IMESH == imesh2) Then
+                  STRS_Indx = N
+                  STRP=>EVAC_STRS(N)
+                  NM_STRS_MESH = .TRUE.
+                  Exit
+               Endif
+            Enddo
             X1  = Min(Max(MFF%XS,PDX2%X1),MFF%XF)
             X2  = Min(Max(MFF%XS,PDX2%X2),MFF%XF)
             Y1  = Min(Max(MFF%YS,PDX2%Y1),MFF%YF)
@@ -9053,22 +9138,19 @@ Contains
             End If
          Case ('Entry')
             ! Todo:  Case ('Entry') and geometry part from CHECK_ENTRY
-         Case Default
+            PNX2 => EVAC_ENTRYS(EVAC_Node_List(INODE2)%Node_Index) 
             If (PNX2%STR_INDX > 0) Then
                STR_INDX = PNX2%STR_INDX            
                STR_SUB_INDX = PNX2%STR_SUB_INDX
             End If
+         Case Default
             Write(MESSAGE,'(A)') 'ERROR (debug): Check_Target_Node and STRS: Node 1 is not a door.'
          End Select
-
-         ! write(lu_err,fmt='(a,4f10.4)')'***',x1,x2,y1,y2
-         ! write(lu_err,fmt='(a,4i6)')'ior etc',ior,imesh2,inode,inode2
          If (Abs(ior) == 1) irnmax = Int(Width*4.0_EB)
          If (Abs(ior) == 2) irnmax = Int(Width*4.0_EB)
          If (Abs(ior) == 3 .Or. ior == 0) irnmax = &
               Int((x2-x1)*4.0_EB)*Int((y2-y1)*4.0_EB)
          irnmax = Max(irnmax,5)
-         istat = 1    ! Default: no space in the mesh
          !
          irn = 0
          angle = 0.0_EB
@@ -9095,17 +9177,14 @@ Contains
                   yy = y1 + (ior/Abs(ior))*(1.0_EB*HR%B + HR%Radius)
                   angle = HR%Angle
                Else
-                  xx = 0.5_EB*(x1+x2) + (rn-0.5_EB)* &
-                       Max(0.0_EB,Width-2.0_EB*HR%Radius-2.0_EB*HR%B)
+                  xx = 0.5_EB*(x1+x2) + (rn-0.5_EB)* Max(0.0_EB,Width-2.0_EB*HR%Radius-2.0_EB*HR%B)
                   yy = y1 + (ior/Abs(ior))*(1.0_EB*HR%B + HR%r_torso)
                End If
             Case(0,3)
                Call Random_number(rn)
-               yy = 0.5_EB*(y1+y2) + (rn-0.5_EB)* &
-                    Max(0.0_EB,(y2-y1)-2.0_EB*HR%Radius-2.0_EB*HR%B)
+               yy = 0.5_EB*(y1+y2) + (rn-0.5_EB)* Max(0.0_EB,(y2-y1)-2.0_EB*HR%Radius-2.0_EB*HR%B)
                Call Random_number(rn)
-               xx = 0.5_EB*(x1+x2) + (rn-0.5_EB)* &
-                    Max(0.0_EB,(x2-x1)-2.0_EB*HR%Radius-2.0_EB*HR%B)
+               xx = 0.5_EB*(x1+x2) + (rn-0.5_EB)* Max(0.0_EB,(x2-x1)-2.0_EB*HR%Radius-2.0_EB*HR%B)
             End Select
             II = Floor( MFF%CELLSI(Floor((xx-MFF%XS)*MFF%RDXINT)) + 1.0_EB )
             JJ = Floor( MFF%CELLSJ(Floor((yy-MFF%YS)*MFF%RDYINT)) + 1.0_EB )
@@ -9147,15 +9226,13 @@ Contains
                End Do
             End Do P2PLoopSTRS
             istat = 0    ! target is free
-            ! write(lu_err,fmt='(a,3f10.4)')'new pos: ',xx,yy,angle
             Exit CheckPPForceSTRS
          End Do CheckPPForceSTRS
          If (istat == 0) Then
-            I_Target = 0
+            If (NM_STRS_MESH) I_Target = Find_Target_Node_In_Strs(STRP,HR)
             new_ffield_i    = imesh2
             new_ffield_name = Trim(MESH_NAME(new_ffield_i))
          End If ! istat=0, i.e., put human to a new node
-         ior_new = 4  ! target is a mesh
       Case ('Exit') SelectTargetType
          ior_new = 5  ! target is an exit
          istat = 0    ! remove from the floor (exit is always free)
