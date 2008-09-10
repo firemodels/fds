@@ -412,6 +412,7 @@ DROPLET_LOOP: DO I=1,NLP
  IPC = DR%CLASS
  PC=>PARTICLE_CLASS(IPC)
  IF (.NOT. PC%TREE) CYCLE DROPLET_LOOP !Ensure grid cell has vegetation
+ IF (PC%MASSLESS) CYCLE DROPLET_LOOP   !Skip droplet if massless
 
 ! Intialize quantities
  Q_VEG_MOIST    = 0.0_EB
