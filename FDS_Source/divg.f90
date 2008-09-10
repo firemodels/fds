@@ -92,7 +92,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                ITMP = 0.1_EB*TMP(I,J,K)
                IZ   = NINT(Z_SUM(I,J,K)*100._EB)
                IZ   = MAX(0,MIN(IZ,100))
-               CALL GET_D(YYP(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),RHO_D(I,J,K),ITMP)
+               Z_VECTOR = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
+               CALL GET_D(Z_VECTOR,Y_SUM(I,J,K),RHO_D(I,J,K),ITMP)
                RHO_D(I,J,K) = RHOP(I,J,K)*RHO_D(I,J,K)
             ENDDO
          ENDDO
@@ -289,7 +290,8 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = 0.1_EB*TMP(I,J,K)
-                  CALL GET_CP(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),CP_MF,ITMP)
+                  Z_VECTOR = YY(I,J,K,I_Z_MIN:I_Z_MAX)
+                  CALL GET_CP(Z_VECTOR,Y_SUM(I,J,K),CP_MF,ITMP)
                   IF (N_SPECIES > 3) THEN
                      CP_SUM = 0._EB
                      DO N=1,N_SPECIES
@@ -403,7 +405,8 @@ IF (MIXTURE_FRACTION) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = 0.1_EB*TMP(I,J,K)
-            CALL GET_CP(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),CP_MF,ITMP)
+            Z_VECTOR = YY(I,J,K,I_Z_MIN:I_Z_MAX)
+            CALL GET_CP(Z_VECTOR,Y_SUM(I,J,K),CP_MF,ITMP)
             IF (N_SPECIES > 3) THEN
                CP_SUM = 0._EB
                DO N=1,N_SPECIES
