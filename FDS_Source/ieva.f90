@@ -6455,7 +6455,7 @@ Contains
     Real ( kind = 8 ) x
     Real ( kind = 8 ) xnonc
     !Timo: Statement function qsmall converted to an internal function
-    !Timo qsmall(xx) = sum1 < 1.0D-20 .Or. xx < eps * sum1
+    !Timo: qsmall(xx) = sum1 < 1.0D-20 .Or. xx < eps * sum1
     !Timo: dg(ii) = df +  2.0D+00  * Real ( ii, kind = 8 )
     !Timo: Statement function dg converted to an internal function
     !Timo: dg(xi) = df +  2.0D+00  * xi
