@@ -3616,8 +3616,9 @@ Contains
     Logical pp_see_group, is_solid
     Integer jjj, iii, i44
     Real(eb) x11, y11, group_x_sum, group_y_sum, group_x_center, group_y_center, dens_fac
-    Integer :: i_endless_loop
+    Integer :: i_endless_loop, istat
     Real(eb), Dimension(6) :: y_tmp, x_tmp, r_tmp
+    Real(eb), Dimension(4) :: d_xy
     ! 
     Type (mesh_type), Pointer :: m
     !
@@ -3874,13 +3875,11 @@ Contains
                 End If
                 dens_fac = Max(1.0_EB,DENS_INIT)
 
-                If (i_endless_loop >= Int(dens_fac*(16.0_EB*Max(1.0_EB,Log10(2.5_EB*VOL2))) / &
+                If (i_endless_loop >= 10*Int(dens_fac*(16.0_EB*Max(1.0_EB,Log10(2.5_EB*VOL2))) / &
                      Max(1.0_EB,Log10((2.5_EB*VOL2)/(2.5_EB*VOL2-1)))) ) Then
-                   Write (LU_EVACOUT,fmt='(A,I4,A,I4,A,I6)') &
-                        ' ERROR: Initialize_Humans, EVAC line ', &
+                   Write (LU_EVACOUT,fmt='(A,I4,A,I4,A,I6)') ' ERROR: Initialize_Humans, EVAC line ', &
                         IPC, ', Mesh ', NM, ', i_human ', n_humans
-                   Write (LU_EVACOUT,fmt='(a)') &
-                        '      x       y       z     Rd      Rt      Rs      ds  '
+                   Write (LU_EVACOUT,fmt='(a)') '      x       y       z     Rd      Rt      Rs      ds  '
                    Write (LU_EVACOUT,fmt='(3f8.2,4f8.4)') HR%X, HR%Y, HR%Z, &
                         2.0_EB*HR%Radius, HR%r_torso, HR%r_shoulder, HR%d_shoulder
                    ISTOP = 3  ! Stop code: FDS improperly set-up
@@ -3892,30 +3891,6 @@ Contains
 
                 Is_Solid = .False.
                 KK = 1
-
-                r_tmp(1) = HR%r_shoulder ! right circle
-                r_tmp(2) = HR%r_torso    ! center circle
-                r_tmp(3) = HR%r_shoulder ! left circle
-                y_tmp(1) = HR%Y - Cos(HR%angle)*(HR%d_shoulder+HR%r_shoulder) ! right
-                x_tmp(1) = HR%X + Sin(HR%angle)*(HR%d_shoulder+HR%r_shoulder)
-                y_tmp(3) = HR%Y + Cos(HR%angle)*(HR%d_shoulder+HR%r_shoulder)
-                x_tmp(3) = HR%X - Sin(HR%angle)*(HR%d_shoulder+HR%r_shoulder)
-                II = Floor( CELLSI(Floor((x_tmp(1)-XS)*RDXINT)) + 1.0_EB )
-                JJ = Floor( CELLSJ(Floor((y_tmp(1)-YS)*RDYINT)) + 1.0_EB )
-                Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
-                II = Floor( CELLSI(Floor((x_tmp(3)-XS)*RDXINT)) + 1.0_EB )
-                JJ = Floor( CELLSJ(Floor((y_tmp(3)-YS)*RDYINT)) + 1.0_EB )
-                Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
-                y_tmp(2) = HR%Y + Sin(HR%angle)*(HR%r_torso)  ! torso
-                x_tmp(2) = HR%X + Cos(HR%angle)*(HR%r_torso)
-                II = Floor( CELLSI(Floor((x_tmp(2)-XS)*RDXINT)) + 1.0_EB )
-                JJ = Floor( CELLSJ(Floor((y_tmp(2)-YS)*RDYINT)) + 1.0_EB )
-                Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
-                y_tmp(2) = HR%Y - Sin(HR%angle)*(HR%r_torso)  ! torso
-                x_tmp(2) = HR%X - Cos(HR%angle)*(HR%r_torso)
-                II = Floor( CELLSI(Floor((x_tmp(2)-XS)*RDXINT)) + 1.0_EB )
-                JJ = Floor( CELLSJ(Floor((y_tmp(2)-YS)*RDYINT)) + 1.0_EB )
-                Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
 
                 r_tmp(1) = HR%r_shoulder ! right circle
                 r_tmp(2) = HR%r_torso    ! center circle
@@ -3935,6 +3910,21 @@ Contains
                 II = Floor( CELLSI(Floor((x_tmp(2)-XS)*RDXINT)) + 1.0_EB )
                 JJ = Floor( CELLSJ(Floor((y_tmp(2)-YS)*RDYINT)) + 1.0_EB )
                 Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+
+                If (.Not.Is_Solid) Then
+                   ! Check the distances to walls (not to wall corners)
+                   ! Skip wall force ior = 0: Check all walls (do not put too
+                   ! close to doors/exits)
+                   Call Find_walls(nm, x_tmp(1), y_tmp(1), r_tmp(1), d_max, 0, &
+                        d_xy(1), d_xy(2), d_xy(3), d_xy(4), istat)
+                   If (istat/=0) Is_Solid = .True.
+                   Call Find_walls(nm, x_tmp(2), y_tmp(2), r_tmp(2), d_max, 0, &
+                        d_xy(1), d_xy(2), d_xy(3), d_xy(4), istat)
+                   If (istat/=0) Is_Solid = .True.
+                   Call Find_walls(nm, x_tmp(3), y_tmp(3), r_tmp(3), d_max, 0, &
+                        d_xy(1), d_xy(2), d_xy(3), d_xy(4), istat)
+                   If (istat/=0) Is_Solid = .True.
+                End If
 
                 If (.Not.Is_Solid) Then
                    P2PLoop: Do ie = 1, n_humans - 1
@@ -5227,11 +5217,9 @@ Contains
     Integer, Intent(IN) :: NM,ICYC
     !
     Real(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
-    Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ, &
-         IBC, ICX, ICY, N, J1, J2
-    Integer  IE, tim_ic, tim_iw, NM_now, tim_iwx, tim_iwy, tim_iw2, tim_ic2
-    Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, &
-         EVEL, tim_dist, Door_dist, Door_width
+    Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, J2
+    Integer  IE, tim_ic, tim_iw, NM_now, tim_iwx, tim_iwy, tim_iw2, tim_ic2, ibc
+    Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, tim_dist, Door_dist, Door_width
     Real(EB), Dimension(4) :: d_xy
     Integer istat, STRS_INDX
     !
@@ -5243,15 +5231,12 @@ Contains
          B_Wall, A_Wall, T, Contact_F, Social_F, &
          smoke_beta, smoke_alpha, smoke_speed_fac
     Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, i_o, door_ior
-    Real(EB) y_o, x_o, x_now, y_now, x_target, y_target, &
-         d_humans, d_walls, &
-         DTSP_new, &
+    Real(EB) y_o, x_o, x_now, y_now, x_target, y_target, d_humans, d_walls, DTSP_new, &
          fac_tim, dt_group_door, x1_old, y1_old, x11, y11, &
          max_fed, L2_min, L2_tmp, Speed, Tpre, ave_K
     Logical PP_see_each, PP_see_door
     Logical L_eff_read, L_eff_save, L_Dead
-    Real(EB) :: cos_x, cos_y, &
-         speed_xm, speed_xp, speed_ym, speed_yp, hr_z, hr_a, hr_b, hr_tau
+    Real(EB) :: cos_x, cos_y, speed_xm, speed_xp, speed_ym, speed_yp, hr_z, hr_a, hr_b, hr_tau
     !
     Real(EB) rn
     Real(EB) GaMe, GaTh, GaCM
@@ -5259,8 +5244,7 @@ Contains
     Real(EB), Dimension(:), Allocatable :: K_ave_Door
     Real(EB), Dimension(:), Allocatable :: FED_max_Door
     Integer, Dimension(:), Allocatable :: Color_Tmp
-    Logical, Dimension(:), Allocatable :: Is_Known_Door, &
-         Is_Visible_Door
+    Logical, Dimension(:), Allocatable :: Is_Known_Door, Is_Visible_Door
     Integer :: i_old_ffield, i_new_ffield, IEL, IZERO, color_index
     Character(26) :: name_old_ffield, name_new_ffield
     !
@@ -5460,7 +5444,7 @@ Contains
 
              ! Check and cycle if in stairs
              Check_Strs_Loop0: Do N = 1, N_STRS
-               IF (EVAC_STRS(N)%IMESH == HR%IMESH) Cycle Change_Door_Loop
+                IF (EVAC_STRS(N)%IMESH == HR%IMESH) Cycle Change_Door_Loop
              Enddo Check_Strs_Loop0
 
              i_old_ffield = HR%I_FFIELD
@@ -6045,45 +6029,45 @@ Contains
           Straight_Line_To_Target = .False.
           If (NM_STRS_MESH) Then
              If (HR%I_Target == 0) Then
-!               write(*,*) 'Finding target within move loop'
-               HR%I_Target = Find_Target_Node_In_Strs(STRP,HR)
-            Endif
-            N = HR%I_Target
-            If (N>N_DOORS) Then
-               N = N - N_DOORS
-               If (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
-                  Straight_Line_To_Target = .TRUE.
-                  x_target = (EVAC_EXITS(N)%X1 + EVAC_EXITS(N)%X2)/2.0_EB
-                  y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
-                  door_width = EVAC_EXITS(N)%Width
-                  door_ior   = EVAC_EXITS(N)%IOR
-               Endif
-            Elseif (N>0) Then
-               If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
-                  Straight_Line_To_Target = .TRUE.
-                  x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
-                  y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
-                  door_width = EVAC_DOORS(N)%Width
-                  door_ior   = EVAC_DOORS(N)%IOR
-               Endif
-            Endif
-         Endif
-         If (Straight_Line_To_Target) Then
-            UBAR = x_target-HR%X
-            VBAR = y_target-HR%Y
-            Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
-            If ( Door_Dist < 0.50*Door_width ) Then
-               Select case(door_ior)
-               case(-1,+1)
-                  UBAR = SIGN(1.0,UBAR)
-                  VBAR = 0._EB
-                  HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
-               case(-2,+2)
-                  UBAR = 0._EB
-                  VBAR = SIGN(1.0,VBAR)
-                  HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
-               end select
-            Endif
+                !               write(*,*) 'Finding target within move loop'
+                HR%I_Target = Find_Target_Node_In_Strs(STRP,HR)
+             Endif
+             N = HR%I_Target
+             If (N>N_DOORS) Then
+                N = N - N_DOORS
+                If (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
+                   Straight_Line_To_Target = .TRUE.
+                   x_target = (EVAC_EXITS(N)%X1 + EVAC_EXITS(N)%X2)/2.0_EB
+                   y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
+                   door_width = EVAC_EXITS(N)%Width
+                   door_ior   = EVAC_EXITS(N)%IOR
+                Endif
+             Elseif (N>0) Then
+                If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
+                   Straight_Line_To_Target = .TRUE.
+                   x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
+                   y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
+                   door_width = EVAC_DOORS(N)%Width
+                   door_ior   = EVAC_DOORS(N)%IOR
+                Endif
+             Endif
+          Endif
+          If (Straight_Line_To_Target) Then
+             UBAR = x_target-HR%X
+             VBAR = y_target-HR%Y
+             Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
+             If ( Door_Dist < 0.50*Door_width ) Then
+                Select case(door_ior)
+                case(-1,+1)
+                   UBAR = SIGN(1.0,UBAR)
+                   VBAR = 0._EB
+                   HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
+                case(-2,+2)
+                   UBAR = 0._EB
+                   VBAR = SIGN(1.0,VBAR)
+                   HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
+                end select
+             Endif
           Else If (NM_STRS_MESH) Then 
              ! Add here direction dependence           
              UBAR = STRP%U_RIGHT(II,JJ)
@@ -6470,8 +6454,7 @@ Contains
                 End If
              Else
                 Write(MESSAGE,'(A,I4,A,2F8.2)') &
-                     'ERROR: Evacuate_Humans, Solid ICX and ICY, mesh ', &
-                     nm, ' pos ',X1,Y1
+                     'ERROR: Evacuate_Humans, Solid ICX and ICY, mesh ', nm, ' pos ',X1,Y1
              End If
 
           Else
@@ -6479,6 +6462,8 @@ Contains
              HR%X = X1
              HR%Y = Y1
           End If
+          HR%X = X1
+          HR%Y = Y1
           HR%Angle = A1
           !
        End Do EVAC_MOVE_LOOP
@@ -6743,46 +6728,46 @@ Contains
           ! Check if going straight line to target
           Straight_Line_To_Target = .False.
           If (NM_STRS_MESH) Then
-            If (HR%I_Target == 0) Then
-!               write(*,*) 'Finding target within move loop'
-               HR%I_Target = Find_Target_Node_In_Strs(STRP,HR)
-            Endif
-            N = HR%I_Target
-            If (N>N_DOORS) Then
-               N = N - N_DOORS
-               If (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
-                  Straight_Line_To_Target = .TRUE.
-                  x_target = (EVAC_EXITS(N)%X1 + EVAC_EXITS(N)%X2)/2.0_EB
-                  y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
-                  door_width = EVAC_EXITS(N)%Width
-                  door_ior   = EVAC_EXITS(N)%IOR
-               Endif
-            Elseif (N>0) Then
-               If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
-                  Straight_Line_To_Target = .TRUE.
-                  x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
-                  y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
-                  door_width = EVAC_DOORS(N)%Width
-                  door_ior   = EVAC_DOORS(N)%IOR
-               Endif
-            Endif
-         Endif
-         If (Straight_Line_To_Target) Then
-            UBAR = x_target-HR%X
-            VBAR = y_target-HR%Y
-            Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
-            If ( Door_Dist < 0.50*Door_width ) Then
-               Select case(door_ior)
-               case(-1,+1)
-                  UBAR = SIGN(1.0,UBAR)
-                  VBAR = 0._EB
-                  HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
-               case(-2,+2)
-                  UBAR = 0._EB
-                  VBAR = SIGN(1.0,VBAR)
-                  HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
-               end select
-            Endif
+             If (HR%I_Target == 0) Then
+                !               write(*,*) 'Finding target within move loop'
+                HR%I_Target = Find_Target_Node_In_Strs(STRP,HR)
+             Endif
+             N = HR%I_Target
+             If (N>N_DOORS) Then
+                N = N - N_DOORS
+                If (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
+                   Straight_Line_To_Target = .TRUE.
+                   x_target = (EVAC_EXITS(N)%X1 + EVAC_EXITS(N)%X2)/2.0_EB
+                   y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
+                   door_width = EVAC_EXITS(N)%Width
+                   door_ior   = EVAC_EXITS(N)%IOR
+                Endif
+             Elseif (N>0) Then
+                If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
+                   Straight_Line_To_Target = .TRUE.
+                   x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
+                   y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
+                   door_width = EVAC_DOORS(N)%Width
+                   door_ior   = EVAC_DOORS(N)%IOR
+                Endif
+             Endif
+          Endif
+          If (Straight_Line_To_Target) Then
+             UBAR = x_target-HR%X
+             VBAR = y_target-HR%Y
+             Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
+             If ( Door_Dist < 0.50*Door_width ) Then
+                Select case(door_ior)
+                case(-1,+1)
+                   UBAR = SIGN(1.0,UBAR)
+                   VBAR = 0._EB
+                   HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
+                case(-2,+2)
+                   UBAR = 0._EB
+                   VBAR = SIGN(1.0,VBAR)
+                   HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
+                end select
+             Endif
           Elseif (NM_STRS_MESH) Then 
              ! Add here direction dependence           
              UBAR = STRP%U_RIGHT(IIN,JJN)
@@ -7435,6 +7420,17 @@ Contains
                 tim_ic2 = cell_index(ii-1,jj,kkn) ! one cell left
                 tim_iw2 = wall_index(tim_ic2, +2) ! left and up
                 If (tim_iwy /= 0) Exit Loop_mxpy
+                !If (tim_iwy /= 0) Then
+                !   IBC = IJKW(5,tim_iwy)  ! Boundary condition index
+                !   If (tim_iw2 == 0) Exit Loop_mxpy
+                !   IBC2 = IJKW(5,tim_iw2)  ! Boundary condition index
+                !   If ((SURFACE(IBC)%VEL> 0.0_EB .Or. BOUNDARY_TYPE(tim_iw)==OPEN_BOUNDARY) .And. &
+                !       .Not.(SURFACE(IBC2)%VEL> 0.0_EB .Or. BOUNDARY_TYPE(tim_iw2)==OPEN_BOUNDARY) ) Then
+                !      tim_iwy=0 ; tim_iw=0
+                !   Else
+                !      Exit Loop_mxpy
+                !   End If
+                !End If
                 If ( (tim_iwx==0).And.(tim_iwy==0).And.(tim_iw/=0 .Or. tim_iw2/=0) ) Then
                    If (tim_iw/=0) Then
                       ! first y-direction then x-direction
@@ -7992,7 +7988,7 @@ Contains
             Endif
          Endif
       Enddo FindTargetNodeLoop2
-      
+
     End Function Find_Target_Node_In_Strs
 
     Subroutine GET_IW(IIin,JJin,KKin,IOR,IW)
@@ -9549,169 +9545,169 @@ Contains
     !
 
 
-  Subroutine Wall_SocialForces(nm, x_tmp, y_tmp, r_tmp, p2p_dist_max, d_xy,&
-       P2P_U, P2P_V, Social_F)
-    Implicit None
-    Integer, Intent(In) :: nm
-    Real(EB), Intent(In) :: x_tmp, y_tmp, r_tmp, p2p_dist_max
-    Real(EB), Dimension(4), Intent(In) :: d_xy
-    Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F
-    !
-    Integer :: is, idir
-    Real(EB) :: CosPhiFac, dist
+    Subroutine Wall_SocialForces(nm, x_tmp, y_tmp, r_tmp, p2p_dist_max, d_xy,&
+         P2P_U, P2P_V, Social_F)
+      Implicit None
+      Integer, Intent(In) :: nm
+      Real(EB), Intent(In) :: x_tmp, y_tmp, r_tmp, p2p_dist_max
+      Real(EB), Dimension(4), Intent(In) :: d_xy
+      Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F
+      !
+      Integer :: is, idir
+      Real(EB) :: CosPhiFac, dist
 
-    ! -x direction
-    is   = -1
-    idir =  1
-    dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
-    If (dist-r_tmp <= P2P_DIST_MAX) Then
-       If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-          CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
-          CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-       Else
-          CosPhiFac = 1.0_EB
-       End If
-       P2P_U = P2P_U - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-       Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-    End If
+      ! -x direction
+      is   = -1
+      idir =  1
+      dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
+      If (dist-r_tmp <= P2P_DIST_MAX) Then
+         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+            CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
+            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+         Else
+            CosPhiFac = 1.0_EB
+         End If
+         P2P_U = P2P_U - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
+         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
+      End If
 
-    is   = +1
-    idir =  2
-    dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
-    If (dist-r_tmp <= P2P_DIST_MAX) Then
-       If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-          CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
-          CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-       Else
-          CosPhiFac = 1.0_EB
-       End If
-       P2P_U = P2P_U - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-       Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-    End If
+      is   = +1
+      idir =  2
+      dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
+      If (dist-r_tmp <= P2P_DIST_MAX) Then
+         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+            CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
+            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+         Else
+            CosPhiFac = 1.0_EB
+         End If
+         P2P_U = P2P_U - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
+         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
+      End If
 
-    is   = -1
-    idir =  3
-    dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
-    If (dist-r_tmp <= P2P_DIST_MAX) Then
-       If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-          CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
-          CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-       Else
-          CosPhiFac = 1.0_EB
-       End If
-       P2P_V = P2P_V - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-       Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-    End If
+      is   = -1
+      idir =  3
+      dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
+      If (dist-r_tmp <= P2P_DIST_MAX) Then
+         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+            CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
+            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+         Else
+            CosPhiFac = 1.0_EB
+         End If
+         P2P_V = P2P_V - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
+         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
+      End If
 
-    is   = +1
-    idir =  4
-    dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
-    If (dist-r_tmp <= P2P_DIST_MAX) Then
-       If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-          CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
-          CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-       Else
-          CosPhiFac = 1.0_EB
-       End If
-       P2P_V = P2P_V - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-       Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-    End If
+      is   = +1
+      idir =  4
+      dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
+      If (dist-r_tmp <= P2P_DIST_MAX) Then
+         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+            CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
+            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+         Else
+            CosPhiFac = 1.0_EB
+         End If
+         P2P_V = P2P_V - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
+         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
+      End If
 
-  End Subroutine Wall_SocialForces
+    End Subroutine Wall_SocialForces
 
 
-  Subroutine Wall_ContactForces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, d_xy,&
-       P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls)
-    Implicit None
-    Integer, Intent(In) :: nm
-    Real(EB), Intent(In) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
-    Real(EB), Dimension(4), Intent(In) :: d_xy
-    Real(EB), Intent(InOut) :: P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls
-    !
-    Integer :: is, idir
-    Real(EB) :: Fc_y, Fc_x, dist
+    Subroutine Wall_ContactForces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, d_xy,&
+         P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls)
+      Implicit None
+      Integer, Intent(In) :: nm
+      Real(EB), Intent(In) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
+      Real(EB), Dimension(4), Intent(In) :: d_xy
+      Real(EB), Intent(InOut) :: P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls
+      !
+      Integer :: is, idir
+      Real(EB) :: Fc_y, Fc_x, dist
 
-    ! -x direction
-    is   = -1
-    idir =  1
-    dist = Abs(d_xy(idir) - x_tmp)
-    d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
-    If (dist-r_tmp <= 0.0_EB) Then
-       Fc_x = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
-       Fc_y = 0.0_EB
-       Contact_F = Contact_F + Abs(Fc_x)
-       If (I_Fric_sw >= 1 ) Then
-          Fc_y = Fc_y - HR%Kappa*(r_tmp-dist)*v_tmp
-       Else
-          Fc_y = Fc_y - HR%Gamma*v_tmp
-       End If
-       write(lu_evacout,*)'*** -x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
-       P2P_Torque = P2P_Torque + Fc_y*(d_xy(idir)-HR%X) - Fc_x*(y_tmp-HR%Y)
-       P2P_U = P2P_U + Fc_x
-       P2P_V = P2P_V + Fc_y
-    End If
+      ! -x direction
+      is   = -1
+      idir =  1
+      dist = Abs(d_xy(idir) - x_tmp)
+      d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+      If (dist-r_tmp <= 0.0_EB) Then
+         Fc_x = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
+         Fc_y = 0.0_EB
+         Contact_F = Contact_F + Abs(Fc_x)
+         If (I_Fric_sw >= 1 ) Then
+            Fc_y = Fc_y - HR%Kappa*(r_tmp-dist)*v_tmp
+         Else
+            Fc_y = Fc_y - HR%Gamma*v_tmp
+         End If
+         write(lu_evacout,*)'*** -x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+         P2P_Torque = P2P_Torque + Fc_y*(d_xy(idir)-HR%X) - Fc_x*(y_tmp-HR%Y)
+         P2P_U = P2P_U + Fc_x
+         P2P_V = P2P_V + Fc_y
+      End If
 
-    ! +x direction
-    is   = +1
-    idir =  2
-    dist = Abs(d_xy(idir) - x_tmp)
-    d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
-    If (dist-r_tmp <= 0.0_EB) Then
-       Fc_x = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
-       Fc_y = 0.0_EB
-       Contact_F = Contact_F + Abs(Fc_x)
-       If (I_Fric_sw >= 1 ) Then
-          Fc_y = Fc_y - HR%Kappa*(r_tmp-dist)*v_tmp
-       Else
-          Fc_y = Fc_y - HR%Gamma*v_tmp
-       End If
-       write(lu_evacout,*)'*** +x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
-       P2P_Torque = P2P_Torque + Fc_y*(d_xy(idir)-HR%X) - Fc_x*(y_tmp-HR%Y)
-       P2P_U = P2P_U + Fc_x
-       P2P_V = P2P_V + Fc_y
-    End If
+      ! +x direction
+      is   = +1
+      idir =  2
+      dist = Abs(d_xy(idir) - x_tmp)
+      d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+      If (dist-r_tmp <= 0.0_EB) Then
+         Fc_x = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
+         Fc_y = 0.0_EB
+         Contact_F = Contact_F + Abs(Fc_x)
+         If (I_Fric_sw >= 1 ) Then
+            Fc_y = Fc_y - HR%Kappa*(r_tmp-dist)*v_tmp
+         Else
+            Fc_y = Fc_y - HR%Gamma*v_tmp
+         End If
+         write(lu_evacout,*)'*** +x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+         P2P_Torque = P2P_Torque + Fc_y*(d_xy(idir)-HR%X) - Fc_x*(y_tmp-HR%Y)
+         P2P_U = P2P_U + Fc_x
+         P2P_V = P2P_V + Fc_y
+      End If
 
-    ! -y direction
-    is   = -1
-    idir =  3
-    dist = Abs(d_xy(idir) - y_tmp)
-    d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
-    If (dist-r_tmp <= 0.0_EB) Then
-       Fc_y = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
-       Fc_x = 0.0_EB
-       Contact_F = Contact_F + Abs(Fc_y)
-       If (I_Fric_sw >= 1 ) Then
-          Fc_x = Fc_x - HR%Kappa*(r_tmp-dist)*u_tmp
-       Else
-          Fc_x = Fc_x - HR%Gamma*u_tmp
-       End If
-       write(lu_evacout,*)'*** -y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
-       P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(d_xy(idir)-HR%Y)
-       P2P_U = P2P_U + Fc_x
-       P2P_V = P2P_V + Fc_y
-    End If
+      ! -y direction
+      is   = -1
+      idir =  3
+      dist = Abs(d_xy(idir) - y_tmp)
+      d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+      If (dist-r_tmp <= 0.0_EB) Then
+         Fc_y = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
+         Fc_x = 0.0_EB
+         Contact_F = Contact_F + Abs(Fc_y)
+         If (I_Fric_sw >= 1 ) Then
+            Fc_x = Fc_x - HR%Kappa*(r_tmp-dist)*u_tmp
+         Else
+            Fc_x = Fc_x - HR%Gamma*u_tmp
+         End If
+         write(lu_evacout,*)'*** -y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+         P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(d_xy(idir)-HR%Y)
+         P2P_U = P2P_U + Fc_x
+         P2P_V = P2P_V + Fc_y
+      End If
 
-    ! +y direction
-    is   = +1
-    idir =  4
-    dist = Abs(d_xy(idir) - y_tmp)
-    d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
-    If (dist-r_tmp <= 0.0_EB) Then
-       Fc_y = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
-       Fc_x = 0.0_EB
-       Contact_F = Contact_F + Abs(Fc_y)
-       If (I_Fric_sw >= 1 ) Then
-          Fc_x = Fc_x - HR%Kappa*(r_tmp-dist)*u_tmp
-       Else
-          Fc_x = Fc_x - HR%Gamma*u_tmp
-       End If
-       write(lu_evacout,*)'*** +y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
-       P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(d_xy(idir)-HR%Y)
-       P2P_U = P2P_U + Fc_x
-       P2P_V = P2P_V + Fc_y
-    End If
+      ! +y direction
+      is   = +1
+      idir =  4
+      dist = Abs(d_xy(idir) - y_tmp)
+      d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+      If (dist-r_tmp <= 0.0_EB) Then
+         Fc_y = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
+         Fc_x = 0.0_EB
+         Contact_F = Contact_F + Abs(Fc_y)
+         If (I_Fric_sw >= 1 ) Then
+            Fc_x = Fc_x - HR%Kappa*(r_tmp-dist)*u_tmp
+         Else
+            Fc_x = Fc_x - HR%Gamma*u_tmp
+         End If
+         write(lu_evacout,*)'*** +y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+         P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(d_xy(idir)-HR%Y)
+         P2P_U = P2P_U + Fc_x
+         P2P_V = P2P_V + Fc_y
+      End If
 
-  End Subroutine Wall_ContactForces
+    End Subroutine Wall_ContactForces
 
 
     !
