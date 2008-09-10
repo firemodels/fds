@@ -84,7 +84,8 @@ Q        =  0._EB
       DO J=0,JBP1
          DO I=0,IBP1
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            CALL GET_MASS_FRACTION(YY(I,J,K,I_Z_MIN:I_Z_MAX),O2_INDEX,Y_SUM(I,J,K),Y_O2(I,J,K))   
+            Z_VECTOR = YY(I,J,K,I_Z_MIN:I_Z_MAX)
+            CALL GET_MASS_FRACTION(Z_VECTOR,O2_INDEX,Y_SUM(I,J,K),Y_O2(I,J,K))   
          ENDDO
       ENDDO
    ENDDO
@@ -292,7 +293,8 @@ ENDIF
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         CALL GET_MOLECULAR_WEIGHT(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),RSUM(I,J,K))
+         Z_VECTOR = YY(I,J,K,I_Z_MIN:I_Z_MAX)
+         CALL GET_MOLECULAR_WEIGHT(Z_VECTOR,Y_SUM(I,J,K),RSUM(I,J,K))
          RSUM(I,J,K) = R0/RSUM(I,J,K)
       ENDDO
    ENDDO
