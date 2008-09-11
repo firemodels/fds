@@ -5420,7 +5420,7 @@ A smoke detector is defined in the input file with an entry similar to:
 \footnotesize
 \begin{verbatim}
 &DEVC ID='SD_29', PROP_ID='Acme Smoke Detector', XYZ=2.3,4.6,3.4 /
-&PROP ID='Acme Smoke Detector', QUANTITY='spot obscuration', LENGTH=1.8,
+&PROP ID='Acme Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8,
       ACTIVATION_OBSCURATION=3.28 /
 \end{verbatim}
 
@@ -5482,7 +5482,7 @@ the ``SMOKE3D'' feature in Smokeview. Use the following lines:
 &SURF ID='SMOULDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, COLOR='RED' /
 &VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='SMOULDER' /
 
-&PROP ID='Acme Smoke', QUANTITY='spot obscuration', SPEC_ID='MY SMOKE' /
+&PROP ID='Acme Smoke', QUANTITY='CHAMBER OBSCURATION', SPEC_ID='MY SMOKE' /
 &DEVC XYZ=1.00,0.50,0.95, PROP_ID='Acme Smoke', ID='smoke_1' /
 
 &DUMP SMOKE3D_QUANTITY='MY SMOKE', DT_PL3D=30. /
@@ -5512,7 +5512,7 @@ is the distance within the mesh cell that is traversed by the beam.
 
 \footnotesize
 \begin{verbatim}
-&DEVC XB=x1,x2,y1,y2,z1,z2, QUANTITY='path obscuration', ID='beam1', SETPOINT=0.33 /
+&DEVC XB=x1,x2,y1,y2,z1,z2, QUANTITY='PATH OBSCURATION', ID='beam1', SETPOINT=0.33 /
 \end{verbatim}
 \normalsize
 
@@ -5529,10 +5529,13 @@ used to specify the central detector:
 
 \footnotesize
 \begin{verbatim}
-&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot1', DEVC_ID='asp1', FLOWRATE=0.1, DELAY=20 /
-&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot2', DEVC_ID='asp1', FLOWRATE=0.2, DELAY=10 /
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot1', DEVC_ID='asp1', 
+      FLOWRATE=0.1, DELAY=20 /
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot2', DEVC_ID='asp1', 
+      FLOWRATE=0.2, DELAY=10 /
  ...
-&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='sootN', DEVC_ID='asp1', FLOWRATE=0.3, DELAY=30 /
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='sootN', DEVC_ID='asp1', 
+      FLOWRATE=0.3, DELAY=30 /
 
 &DEVC XYZ=..., QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0.4, SETPOINT=0.02 /
 \end{verbatim}
@@ -6582,7 +6585,7 @@ Section~\ref{info:smoke_detector}, and Section~\ref{info:beam_detector}
 Estimates of visibility through smoke can be made by using the
 equation
 \be  S = C/K  \label{vis}  \ee
-where $C$ is a nondimensional constant characteristic of
+where $C$ is a non-dimensional constant characteristic of
 the type of object being viewed through the smoke, {\em i.e.}
 $C=8$ for a light-emitting sign and $C=3$ for a light-reflecting
 sign~\cite{SFPE:Mulholland}. Since $K$ varies from point to point in the
@@ -6594,7 +6597,7 @@ capability of the present version of the model.
 Three parameter control smoke production and visibility; each
 parameter is input on the {\ct REAC} line. The first parameter
 is {\ct SOOT\_YIELD}, which is the fraction of fuel mass that
-is converted to soot. The second parameter is called the
+is converted to soot if the mixture fraction model is being used. The second parameter is called the
 {\ct MASS\_EXTINCTION\_COEFFICIENT}, and it is the $K_m$ in
 Eq.~(\ref{mec}). The default value is 8700~m$^2$/kg, a value
 suggested for flaming combustion of wood and plastics\footnote{For most flaming fuels, a suggested value for $\kappa$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
@@ -6602,15 +6605,17 @@ wavelength of 633~nm~\cite{Mulholland:F+M}}.
 The third parameter is called the {\ct VISIBILITY\_FACTOR}, the
 constant $C$ in Eq.~(\ref{vis}). It is 3 by default.
 
-The gas phase output quantity {\ct extinction coefficient} is $K$.
-The visibility $S$ is output via the keyword {\ct visibility}. Note
-that each is tied to the mixture fraction formulation of combustion.
-
-\begin{warning}
-Note that you can specify the output quantity {\ct 'VISIBILITY'} (capital letters matter) along with a {\ct SPEC\_ID} to produce an estimate of the visibility calculated using
-the specified species instead of smoke. This does not require that you do a mixture fraction calculation; only that you have specified the given species. You can
-specify a unique {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line, as well.
-\end{warning}
+The gas phase output quantity {\ct 'EXTINCTION COEFFICIENT'} is $K$. A similar quantity is the
+{\ct 'OPTICAL DENSITY'}, $K/2.3$, the result of using $\log_{10}$ in the definition
+\be D \equiv - \frac{1}{L} \, \log_{10} \left( \frac{I}{I_0} \right) = K \, \log_{10} e   \ee
+The visibility $S$ is output via the keyword {\ct VISIBILITY}. Note
+that, by default, the visibility is associated with the smoke that is implicitly defined by the mixture fraction
+model. However, this quantity can also be associated with an 
+explicitly defined species via the inclusion of a {\ct SPEC\_ID}.
+In other words, you can specify the output quantity {\ct 'VISIBILITY'} along with a {\ct SPEC\_ID}. 
+This does not require that you do a mixture fraction calculation; only that you have specified the given species via a separate
+{\ct SPEC} line. You can
+specify a unique {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line as well.
 
 
 \subsection{Layer Height and the Average Upper and Lower Layer Temperatures}
@@ -6851,21 +6856,34 @@ with the name {\bf CHID\_fds2ascii.csv}.
 \label{info:outputquantities} \index{Output!Summary of Quantities}
 
 Table~\ref{tab:output}, spread over the following pages, summarizes the various Output Quantities.
-Note that lower case quantities are appropriate only for calculations involving the mixture fraction, $Z$.
-For example, the quantity
-{\ct visibility} pertains to the obscuration of visible light due to the implicitly defined smoke in a mixture fraction calculation, whereas
-{\ct VISIBILITY} pertains to the obscuration of visible light due to the explicitly defined species denoted by {\ct SPEC\_ID}.
-
 The column ``File Type'' lists the allowed output files for the quantities. ``B'' is for Boundary ({\ct BNDF}),
 ``D'' is for Device ({\ct DEVC}), ``I'' is for Iso-surface ({\ct ISOF}), ``P'' is for Plot3D, ``PA'' for PArticle ({\ct PART}),
 ``S'' is for Slice ({\ct SLCF}). Be careful
 when specifying complicated quantities for Iso-surface or Plot3D files, as it requires computation in every gas phase cell.
 
+For those output quantities that require a species name via {\ct SPEC\_ID}, the species implicitly defined when doing a mixture
+fraction calculation are as follows:
+
+\footnotesize
+\begin{verbatim}
+fuel
+oxygen
+nitrogen
+water vapor
+carbon dioxide
+carbon monoxide
+hydrogen
+soot
+other
+\end{verbatim}
+\normalsize
+
 \begin{warning}
 The format of certain output quantities changed, starting with FDS version 5.2, but the older names originating with version
 5.0 will still be accepted. The new convention is that when an output
 quantity is related to a particular gas species or particle type, then you must specify the appropriate {\ct SPEC\_ID} or
-{\ct PART\_ID} on the same input line. % Also, the use of unnecessary underscores in output quantity names has been eliminated.
+{\ct PART\_ID} on the same input line. Also note that the use of underscores in output quantity names has been eliminated -- just
+remember that all output quantity names ought to be in single quotes.
 \end{warning}
 
 \clearpage
@@ -6933,8 +6951,8 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct MPUA}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
 {\ct MPUV}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^3$       & D,P,S        \\ \hline
-{\ct OPTICAL DENSITY}                           & $K$ (Section~\ref{info:visibility})           & 1/m            & D,I,P,S      \\ \hline
-{\ct OPTICAL DEPTH}                             & $K/2.3$ (Section~\ref{info:visibility})       & 1/m            & D,I,P,S      \\ \hline
+{\ct OPTICAL DENSITY}                           & $K/2.3$ (Section~\ref{info:visibility})       & 1/m            & D,I,P,S      \\ \hline
+{\ct EXTINCTION COEFFICIENT}                    & $K$ (Section~\ref{info:visibility})           & 1/m            & D,I,P,S      \\ \hline
 {\ct PATH OBSCURATION}                          & See Section~\ref{info:beam_detector}          & \%             & D            \\ \hline
 {\ct PRESSURE}                                  & Perturbation pressure, $\tp$                  & Pa             & D,I,P,S      \\ \hline
 {\ct PRESSURE COEFFICIENT}                      & $C_p$ (Section~\ref{info:wind})               &                & B,D          \\ \hline
@@ -8498,7 +8516,7 @@ calculation ought to be:
 A 10~m x 10~m x 4~m compartment is filled with 0.006~kg/kg of
 {\ct MIXTURE\_FRACTION\_2} with the default soot yield
 0.01~kg/kg.  This results in an initial soot density of 71.9~mg/m$^3$
-which using the default extinction coefficient of
+which using the default mass extinction coefficient of
 8700~m$^2$/kg results in an optical depth of 0.626~m$^{-1}$.  The
 compartment has a series of obstructions placed at varying depths that are
 multiples of 1~m.  Using the correlation for the output quantity
