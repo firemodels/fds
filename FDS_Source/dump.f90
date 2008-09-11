@@ -732,19 +732,16 @@ DO N=1,M%N_SLCF
       WRITE(LU_SLCF(N,NM)) SL%SMOKEVIEW_LABEL(1:30)
       WRITE(LU_SLCF(N,NM)) SL%SMOKEVIEW_BAR_LABEL(1:30)
       WRITE(LU_SLCF(N,NM)) OUTPUT_QUANTITY(SL%INDEX)%UNITS(1:30)
-!orig WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
-!rm ->
-      IF (.NOT. SL%TERRAIN_SLICE) WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
-      IF (SL%TERRAIN_SLICE) THEN
-       NTSL = NTSL + 1
-       IF (SL%I1 == 0)    M%K_AGL_SLICE(0,SL%J1:SL%J2,NTSL)    = M%K_AGL_SLICE(1,SL%J1:SL%J2,NTSL)
-       IF (SL%I2 == IBP1) M%K_AGL_SLICE(IBP1,SL%J1:SL%J2,NTSL) = M%K_AGL_SLICE(IBP1-1,SL%J1:SL%J2,NTSL)
-       IF (SL%J1 == 0)    M%K_AGL_SLICE(SL%I1:SL%I2,0,NTSL)    = M%K_AGL_SLICE(SL%I1:SL%I2,1,NTSL)
-       IF (SL%J2 == JBP1) M%K_AGL_SLICE(SL%I1:SL%I2,JBP1,NTSL) = M%K_AGL_SLICE(SL%I1:SL%I2,JBP1-1,NTSL)
-       WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,M%K_AGL_SLICE(SL%I1,SL%J1,NTSL), &
-                            M%K_AGL_SLICE(SL%I1,SL%J1,NTSL)
+      IF (.NOT. SL%TERRAIN_SLICE) THEN
+         WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
+      ELSE
+         NTSL = NTSL + 1
+         IF (SL%I1 == 0)    M%K_AGL_SLICE(0,SL%J1:SL%J2,NTSL)    = M%K_AGL_SLICE(1,SL%J1:SL%J2,NTSL)
+         IF (SL%I2 == IBP1) M%K_AGL_SLICE(IBP1,SL%J1:SL%J2,NTSL) = M%K_AGL_SLICE(IBP1-1,SL%J1:SL%J2,NTSL)
+         IF (SL%J1 == 0)    M%K_AGL_SLICE(SL%I1:SL%I2,0,NTSL)    = M%K_AGL_SLICE(SL%I1:SL%I2,1,NTSL)
+         IF (SL%J2 == JBP1) M%K_AGL_SLICE(SL%I1:SL%I2,JBP1,NTSL) = M%K_AGL_SLICE(SL%I1:SL%I2,JBP1-1,NTSL)
+         WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,M%K_AGL_SLICE(SL%I1,SL%J1,NTSL),M%K_AGL_SLICE(SL%I1,SL%J1,NTSL)
       ENDIF
-!rm <-
    ENDIF
 ENDDO   
  
@@ -3006,32 +3003,25 @@ QUANTITY_LOOP: DO IQ=1,NQT
    
    ! Loop through the necessary cells, storing the desired output QUANTITY
 
-!orig ->
    IF (.NOT. AGL_TERRAIN_SLICE) THEN
-   DO K=KK1,KK2
-      DO J=JJ1,JJ2
-         DO I=II1,II2
-            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IND,SPEC_INDEX,PART_INDEX,T)
+      DO K=KK1,KK2
+         DO J=JJ1,JJ2
+            DO I=II1,II2
+               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IND,SPEC_INDEX,PART_INDEX,T)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ELSE
+      NTSL = NTSL + 1
+      DO I=II1,II2
+         DO J=JJ1,JJ2
+            DO K=KK1,KK2
+               KTS = K_AGL_SLICE(I,J,NTSL) 
+               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,KTS,IND,SPEC_INDEX,PART_INDEX,T)
+            ENDDO
+         ENDDO
+      ENDDO
    ENDIF
-!orig <-
-
-!rm ->
-   IF (AGL_TERRAIN_SLICE) THEN
-     NTSL = NTSL + 1
-     DO I=II1,II2
-        DO J=JJ1,JJ2
-              DO K=KK1,KK2
-!need values for additional K in order to us average procedure below
-                KTS = K_AGL_SLICE(I,J,NTSL) 
-                QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,KTS,IND,SPEC_INDEX,PART_INDEX,T)
-           ENDDO
-        ENDDO
-     ENDDO
-   ENDIF
-!rm <-
 
    ! Average the QUANTITY at cell nodes, faces, or edges, as appropriate
    
@@ -3041,7 +3031,6 @@ QUANTITY_LOOP: DO IQ=1,NQT
       IQQ = 1
    ENDIF
 
-!orig ->
    IF (.NOT. AGL_TERRAIN_SLICE) THEN
      DO K=K1,K2
         DO J=J1,J2
@@ -3069,19 +3058,18 @@ QUANTITY_LOOP: DO IQ=1,NQT
         ENDDO
      ENDDO
    ENDIF
-!orig <-
 
-!rm ->   
+   ! Special terrain-following slice
+
    IF (AGL_TERRAIN_SLICE) THEN
-     DO K=K1,K2
-        DO J=J1,J2
-           DO I=I1,I2
-             QQ(I,J,K,IQQ) = QUANTITY(I,J,K)
-          ENDDO
-       ENDDO
-    ENDDO
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               QQ(I,J,K,IQQ) = QUANTITY(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
    ENDIF
-!rm  <-
  
    ! Dump out the slice file to a .sf file
  
@@ -3526,7 +3514,10 @@ SELECT CASE(IND)
       IF (SPEC_INDEX<0) MEC = MASS_EXTINCTION_COEFFICIENT
       GAS_PHASE_OUTPUT = Y_SPECIES*RHO(II,JJ,KK)*MEC/2.3_EB
 
-   CASE(104)    ! HRR
+   CASE(103) ! LEAKAGE
+      GAS_PHASE_OUTPUT = USUM(PRESSURE_ZONE(II,JJ,KK),1)
+
+   CASE(104) ! HRR
       Q_SUM = 0._EB
       DO K=DV%K1,DV%K2
          DO J=DV%J1,DV%J2
@@ -4196,7 +4187,7 @@ WRITE(LU_HRR,TCFORM) STIME,0.001_EB*HRR_TOTAL, .001_EB*RHRR_TOTAL,.001_EB*FHRR_T
  
 END SUBROUTINE DUMP_HRR
  
-!rm -> 
+
 SUBROUTINE DUMP_VEG(T)
 
 ! --- temporary (place holder) ouput routine
@@ -4222,12 +4213,14 @@ ENDDO
 IF (VEG_PRESENT) WRITE(9999,'(3(ES12.4))')T,DRY_MASS_TOTAL,MOIST_MASS_TOTAL
  
 END SUBROUTINE DUMP_VEG
-!rm <- 
 
  
+
 SUBROUTINE UPDATE_MASS(NM)
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL
+
 ! Compute the total masses of various gases
+
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL
 REAL(EB) :: VC,Y_MF_INT(9)
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K,N,NN
@@ -4274,6 +4267,7 @@ END SUBROUTINE UPDATE_MASS
  
  
 SUBROUTINE DUMP_MASS(T)
+
 REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
 REAL(EB) :: MINT_TOTAL(0:MAX_SPECIES)
