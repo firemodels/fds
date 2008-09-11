@@ -190,9 +190,9 @@ TREE_LOOP: DO NCT=1,N_TREES
        DO NZB=0,KBAR-1
         IF (Z(NZB).GE.ZS_RECT_VEG(NCT) .AND. Z(NZB).LE.ZF_RECT_VEG(NCT)) THEN
          DO NXB = 1,IBAR
-          IF (X(NXB) .GT. XS_RECT_VEG(NCT) .AND. X(NXB) .LE. XF_RECT_VEG(NCT)) THEN
+          IF (X(NXB) .GE. XS_RECT_VEG(NCT) .AND. X(NXB) .LE. XF_RECT_VEG(NCT)) THEN
            DO NYB = 1,JBAR
-            IF (Y(NYB) .GT. YS_RECT_VEG(NCT) .AND. Y(NYB) .LE. YF_RECT_VEG(NCT)) THEN
+            IF (Y(NYB) .GE. YS_RECT_VEG(NCT) .AND. Y(NYB) .LE. YF_RECT_VEG(NCT)) THEN
              NLP  = NLP + 1
              NLP_RECT_VEG = NLP_RECT_VEG + 1
              IF (NLP.GT.NLPDIM) THEN
@@ -266,7 +266,7 @@ TREE_LOOP: DO NCT=1,N_TREES
    NLP_VEG_FUEL = NLP_TREE
    ENDIF IF_RING_VEGETATION_BUILD
 !
-! For the current vegetation type (particle classe) assign one fuel 
+! For the current vegetation type (particle class) assign one fuel 
 ! element (droplet) to each grid cell and initialize droplet properties
 ! (this is precautionary needs more tested to determine its necessity)
 !
@@ -286,6 +286,11 @@ TREE_LOOP: DO NCT=1,N_TREES
         DR%X = X(NXB) - 0.5_EB*DX(NXB)
         DR%Y = Y(NYB) - 0.5_EB*DY(NYB)
         DR%Z = Z(NZB) - 0.5_EB*DZ(NZB)
+        IF (VEG_FUEL_GEOM(NCT) .EQ. 'RECTANGLE')THEN
+         DR%X = X(NXB) + 0.5_EB*DX(NXB)
+         DR%Y = Y(NYB) + 0.5_EB*DY(NYB)
+         DR%Z = Z(NZB) - 0.5_EB*DZ(NZB)
+        ENDIF
         TREE_MESH(NM) = .TRUE.
         DR%SHOW = .TRUE.
         DR%T   = 0.
@@ -413,6 +418,7 @@ DROPLET_LOOP: DO I=1,NLP
  PC=>PARTICLE_CLASS(IPC)
  IF (.NOT. PC%TREE) CYCLE DROPLET_LOOP !Ensure grid cell has vegetation
  IF (PC%MASSLESS) CYCLE DROPLET_LOOP   !Skip droplet if massless
+ IF (PC%VEG_STEM) CYCLE DROPLET_LOOP   !Skip droplet if veg is a tree stem
 
 ! Intialize quantities
  Q_VEG_MOIST    = 0.0_EB
