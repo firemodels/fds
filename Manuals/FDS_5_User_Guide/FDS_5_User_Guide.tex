@@ -5529,12 +5529,12 @@ used to specify the central detector:
 
 \footnotesize
 \begin{verbatim}
-&DEVC XYZ=..., QUANTITY='soot density', ID='soot1', DEVC_ID='asp1', FLOWRATE=0.1, DELAY=20 /
-&DEVC XYZ=..., QUANTITY='soot density', ID='soot2', DEVC_ID='asp1', FLOWRATE=0.2, DELAY=10 /
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot1', DEVC_ID='asp1', FLOWRATE=0.1, DELAY=20 /
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot2', DEVC_ID='asp1', FLOWRATE=0.2, DELAY=10 /
  ...
-&DEVC XYZ=..., QUANTITY='soot density', ID='sootN', DEVC_ID='asp1', FLOWRATE=0.3, DELAY=30 /
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='sootN', DEVC_ID='asp1', FLOWRATE=0.3, DELAY=30 /
 
-&DEVC XYZ=..., QUANTITY='aspiration', ID='asp1', BYPASS_FLOWRATE=0.4, SETPOINT=0.02 /
+&DEVC XYZ=..., QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0.4, SETPOINT=0.02 /
 \end{verbatim}
 \normalsize
 
@@ -6574,9 +6574,8 @@ The light extinction coefficient, $K$, is a product of the
 density of smoke particulate, $\rho Y_s$, and a mass specific
 extinction coefficient that is fuel dependent
 \be K = K_m \; \rho \, Y_s \label{mec} \ee
-Devices that output a \% obscuration such as a {\ct DEVC} with a {\ct
-QUANTITY} of {\ct aspiration}, {\ct spot obscuration} (smoke
-detector), or {\ct path obscuration} (beam detector) are discussed
+Devices that output a \% obscuration such as a {\ct DEVC} with a {\ct QUANTITY} of {\ct ASPIRATION}, {\ct CHAMBER OBSCURATION} (smoke
+detector), or {\ct PATH OBSCURATION} (beam detector) are discussed
 respectively in Section~\ref{info:aspiration_detector},
 Section~\ref{info:smoke_detector}, and Section~\ref{info:beam_detector}
 
@@ -6881,11 +6880,10 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct ABSORPTION COEFFICIENT}                    & $\kappa$ (Section~\ref{info:RADI})            & 1/m            & D,I,P,S      \\ \hline
 {\ct ADIABATIC SURFACE TEMPERATURE}             & See Section~\ref{info:AST}                    & $^\circ$C      & B,D          \\ \hline
 {\ct AMPUA}$^{**}$                              & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
-{\ct aspiration}                                & See Section~\ref{info:aspiration_detector}    & \%             & D            \\ \hline
+{\ct ASPIRATION}                                & See Section~\ref{info:aspiration_detector}    & \%             & D            \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & See Section~\ref{info:PROF}                   & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
-{\ct carbon dioxide}                            & $X_{CO_2}(Z)$                                 & mol/mol        & D,I,P,S      \\ \hline
-{\ct carbon monoxide}                           & $X_{CO}(Z)$                                   & mol/mol        & D,I,P,S      \\ \hline
+{\ct CHAMBER OBSCURATION}                       & See Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
 {\ct CONTROL}                                   & See Section~\ref{info:CTRL}                   &                & D            \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & $\dq_c''$ (Section~\ref{info:heat_flux})      & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA}$^{**}$                               & See Section~\ref{info:part_output}            & kW/m$^2$       & B,D          \\ \hline
@@ -6899,8 +6897,6 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct DROPLET TEMPERATURE}                       & $T_d$                                         & $^\circ$C      & PA           \\ \hline
 {\ct DROPLET MASS}                              & $m_d$                                         & kg             & PA           \\ \hline
 {\ct DROPLET AGE}                               & $t_d$                                         & s              & PA           \\ \hline
-{\ct extinction coefficient}                    & $K$ (Section~\ref{info:visibility})           & 1/m            & D,I,P,S      \\ \hline
-{\ct fuel}                                      & $X_F(Z)$                                      & mol/mol        & D,I,P,S      \\ \hline
 {\ct GAUGE HEAT FLUX}                           & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct H}                                         & $H=|\bu|^2/2 + \tp/\rho_0$                    & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT FLOW}                                 & See Section~\ref{info:flows}                  & kW             & D            \\ \hline
@@ -6937,22 +6933,16 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct MPUA}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
 {\ct MPUV}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^3$       & D,P,S        \\ \hline
-{\ct nitrogen}                                  & $X_{N_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
-{\ct optical depth}                             & $OD=K/2.3$ (Section~\ref{info:visibility})    & 1/m            & D,I,P,S      \\ \hline
-{\ct other}                                     & $X_{other}(Z)$                                & mol/mol        & D,I,P,S      \\ \hline
-{\ct other mass fraction}                       & $Y_{other}(Z)$                                & mol/mol        & D,I,P,S      \\ \hline
-{\ct oxygen}                                    & $X_{O_2}(Z)$                                  & mol/mol        & D,I,P,S      \\ \hline
-{\ct oxygen mass fraction}                      & $Y_{O_2}(Z)$                                  & kg/kg          & D,I,P,S      \\ \hline
-{\ct path obscuration}                          & See Section~\ref{info:beam_detector}          & \%             & D            \\ \hline
+{\ct OPTICAL DENSITY}                           & $K$ (Section~\ref{info:visibility})           & 1/m            & D,I,P,S      \\ \hline
+{\ct OPTICAL DEPTH}                             & $K/2.3$ (Section~\ref{info:visibility})       & 1/m            & D,I,P,S      \\ \hline
+{\ct PATH OBSCURATION}                          & See Section~\ref{info:beam_detector}          & \%             & D            \\ \hline
 {\ct PRESSURE}                                  & Perturbation pressure, $\tp$                  & Pa             & D,I,P,S      \\ \hline
 {\ct PRESSURE COEFFICIENT}                      & $C_p$ (Section~\ref{info:wind})               &                & B,D          \\ \hline
 {\ct RADIATIVE HEAT FLUX}                       & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RADIATIVE HEAT FLUX GAS}                   & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D            \\ \hline
 {\ct RADIOMETER}                                & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Relative humidity                             & \%             & D,I,P,S      \\ \hline
-{\ct soot volume fraction}                      & $\rho Y_s(Z)/\rho_s$                          & mol/mol        & D,I,P,S      \\ \hline
-{\ct soot density}                              & $\rho Y_s(Z)$                                 & mg/m$^3$       & D,I,P,S      \\ \hline
-{\ct spot obscuration}                          & See Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
+{\ct SOOT VOLUME FRACTION}                      & $\rho Y_s(Z)/\rho_s$                          & mol/mol        & D,I,P,S      \\ \hline
 {\ct SPRINKLER LINK TEMPERATURE}                & See Section~\ref{info:sprinklers}             & $^\circ$C      & D            \\ \hline
 {\ct SOLID DENSITY}                             & See Section~\ref{info:material_components}    & kg/m$^3$       & D            \\ \hline
 {\ct SURFACE DENSITY}                           & See Section~\ref{info:material_components}    & kg/m$^2$       & B,D          \\ \hline
@@ -6966,13 +6956,10 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct VELOCITY}                                  & $\sqrt{u^2+v^2+w^2}$                          & m/s            & D,I,P,S      \\ \hline
 {\ct VISCOSITY}                                 & $\mu$                                         & kg/m/s         & D,I,P,S      \\ \hline
 {\ct VISIBILITY}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
-{\ct visibility}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & See Section~\ref{info:flows}                  & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FRACTION}$^*$                       & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
 {\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
 {\ct WALL THICKNESS}                            & $\Delta x_w$                                  & m              & B,D          \\ \hline
-{\ct water vapor}                               & $X_{H_2O}(Z)$                                 & mol/mol        & D,I,P,S      \\ \hline
-{\ct water vapor mass fraction}                 & $Y_{H_2O}(Z)$                                 & kg/kg          & D,I,P,S      \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -7148,8 +7135,8 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \endhead
 {\ct CHECK\_VOLUME\_FLOW}       & Logical      & See Section~\ref{info:pressurecorrection}        &           & {\ct .FALSE.}                      \\ \hline
 {\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
-{\ct CTRL\_DUMP\_LIMIT}         & Integer      & Number of columns in {\ct CTRL} file &           & 254                      \\ \hline
-{\ct DEVC\_DUMP\_LIMIT}         & Integer      & Number of columns in {\ct DEVC} file &           & 254                      \\ \hline
+{\ct CTRL\_COLUMN\_LIMIT}         & Integer      & Number of columns in {\ct CTRL} file &           & 254                      \\ \hline
+{\ct DEVC\_COLUMN\_LIMIT}         & Integer      & Number of columns in {\ct DEVC} file &           & 254                      \\ \hline
 {\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES} \\ \hline
 %{\ct DEBUG}                     & Logical      & General purpose diagnostic flag   &           & {\ct .FALSE.}                      \\ \hline
 {\ct DT\_CTRL}                  & Real         & Control status dump interval      &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
