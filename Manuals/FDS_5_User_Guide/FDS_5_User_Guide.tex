@@ -8288,7 +8288,7 @@ the air velocity on the bottom set of obstructions is not affected as much by th
 \clearpage
 
 
-\subsection{Pressure Boundaries (\texorpdfstring{{\bf pressure\_boundary}}{pressure\_boundary})}
+\section{Pressure Boundaries (\texorpdfstring{{\bf pressure\_boundary}}{pressure\_boundary})}
 \label{pressure_boundary}
 
 
@@ -8401,16 +8401,19 @@ in the Partition Wall, blowing in opposite directions. The relevant input lines 
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='BLOW LEFT',  POROUS=.TRUE., VEL=-0.2, DUCT_PATH=1,2, MAX_PRESSURE=1000. / &SURF ID='BLOW RIGHT', POROUS=.TRUE., VEL= 0.4, DUCT_PATH=2,1,
-MAX_PRESSURE=1000. /
+&SURF ID='BLOW LEFT',  POROUS=.TRUE., VEL=-0.2, DUCT_PATH=1,2, MAX_PRESSURE=1000. / 
+&SURF ID='BLOW RIGHT', POROUS=.TRUE., VEL= 0.4, DUCT_PATH=2,1, MAX_PRESSURE=1000. /
 
-&ZONE XB=-3.0, 0.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 1 &ZONE XB= 0.0, 3.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 2
+&ZONE XB=-3.0, 0.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 1 
+&ZONE XB= 0.0, 3.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 2
 
 &OBST XB= 0.0, 0.0,-1.0, 1.0, 0.0, 2.0 / Partition Wall
 
-&HOLE XB=-0.1, 0.1,-0.1, 0.1, 0.4, 0.6 / &OBST XB= 0.0, 0.0,-0.1, 0.1, 0.4, 0.6, ..., SURF_ID='BLOW RIGHT', PERMIT_HOLE=.FALSE. /
+&HOLE XB=-0.1, 0.1,-0.1, 0.1, 0.4, 0.6 / 
+&OBST XB= 0.0, 0.0,-0.1, 0.1, 0.4, 0.6, ..., SURF_ID='BLOW RIGHT', PERMIT_HOLE=.FALSE. /
 
-&HOLE XB=-0.1, 0.1,-0.1, 0.1, 1.4, 1.6 / &OBST XB= 0.0, 0.0,-0.1, 0.1, 1.4, 1.6, ..., SURF_ID='BLOW LEFT', PERMIT_HOLE=.FALSE. /
+&HOLE XB=-0.1, 0.1,-0.1, 0.1, 1.4, 1.6 / 
+&OBST XB= 0.0, 0.0,-0.1, 0.1, 1.4, 1.6, ..., SURF_ID='BLOW LEFT', PERMIT_HOLE=.FALSE. /
 \end{verbatim}
 \normalsize
 

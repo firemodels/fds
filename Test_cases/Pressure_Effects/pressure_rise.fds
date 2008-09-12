@@ -8,9 +8,12 @@ Test pressure rise in a multiple mesh simulation.
 
 &TIME T_END=600.0 / 
 
+&MISC SURF_DEFAULT='WALL', STRATIFICATION=.FALSE. /
+
 &DUMP MASS_FILE=.TRUE. /
 
-&SURF ID='BLOW', MASS_FLUX(0)=0.1, RAMP_MF(0)='blow' /
+&SURF ID='WALL', ADIABATIC=.TRUE. /
+&SURF ID='BLOW', MASS_FLUX(0)=0.1, RAMP_MF(0)='blow', ADIABATIC=.TRUE. /
 &RAMP ID='blow',T= 0.,F=0. /
 &RAMP ID='blow',T= 1.,F=1. /
 &RAMP ID='blow',T=60.,F=1. /
