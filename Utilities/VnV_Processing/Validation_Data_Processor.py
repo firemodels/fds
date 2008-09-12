@@ -675,7 +675,7 @@ def comparison_plot(plot_data,d1_data,d2_data):
             [d2PlotStyle])
     
     # Now plot the Title text, alignment based on Title_Position setting.
-    # "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br"
+    # "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br" or "nt"
     if title_position == 'tl':
         g.text(0.2, g.height - 0.2, plot_title, [text.halign.left,  text.valign.top, text.size.normalsize])
     elif title_position == 'tc':
@@ -694,6 +694,8 @@ def comparison_plot(plot_data,d1_data,d2_data):
         g.text(g.width/2, 0.2, plot_title, [text.halign.center, text.valign.bottom, text.size.normalsize])
     elif title_position == 'br':
         g.text(g.width-0.2, 0.2, plot_title, [text.halign.right, text.valign.bottom, text.size.normalsize])
+    elif title_position == 'nt':
+        print "no title"
     else:
         print "A title location was not specified.\nUsing the default top left position."
         g.text(0.2, g.height - 0.2, plot_title, [text.halign.left, text.valign.top, text.size.normalsize])
