@@ -43,12 +43,13 @@ cat << EOF  | Mail -s "FDS run status $pid STARTED $in" $user
       host: $host
  directory: $fulldir
 start time: $startdate
+ stop time:
      input: $in
 EOF
 echo Running $in on $host
 ssh -n $host $scriptfile
 set stopdate=`date`
-cat << EOF  | Mail -s "FDS run status $pid STOPPED $in" $user
+cat << EOF  | Mail -s "FDS run status $pid FINISHED $in" $user
       host: $host
  directory: $fulldir
 start time: $startdate
