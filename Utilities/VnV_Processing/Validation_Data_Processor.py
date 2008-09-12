@@ -4,7 +4,7 @@ from pyx import *
 
 ### Set Global Variables for Data to Process
 ## Validation Data Set (1), Verification Data Set (2), Examples Data Set (3), Trainier Data Set (4)
-data_set = 1 # Input Value
+data_set = 4 # Input Value
 
 ## Validation Data
 if data_set == 1:
@@ -602,7 +602,7 @@ def comparison_plot(plot_data,d1_data,d2_data):
     plot_file_name = plot_data["Plot_Filename"]
     
     # Determine the location for the key, alignment based on key_pos setting.
-    if key_pos == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br":
+    if key_pos == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br" or "nk":
         ()
         if diagnostic_level >= 3:
             print "   <3> Key Position =", key_pos
@@ -622,12 +622,14 @@ def comparison_plot(plot_data,d1_data,d2_data):
 
     #Begin Plotting
     # Initialize graph object
-    g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
+    if key_pos == "nk":
+        g = graph.graphxy(width=plot_width, ratio=4./3, 
                         x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
                         y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
-#    g = graph.graphxy(width=plot_width, ratio=4./3, 
-#                        x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
-#                        y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
+    else:
+        g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
+                        x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
+                        y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
     
     # Create line styles that have predetermined color order for each pair in series.  
     # All Data Set 1, data is plotted with thick solid lines while Data Set 2, data is thin solid lines.
