@@ -1,4 +1,4 @@
-&HEAD CHID='plume5', TITLE='plume fire SVN $Revision: 2300 $'  / 
+&HEAD CHID='plume5', TITLE='plume fire SVN $Revision$'  / 
 
 &MESH IJK=32,32,64, XB=0.0,1.6,0.0,1.6,0.0,3.2 / 
 
