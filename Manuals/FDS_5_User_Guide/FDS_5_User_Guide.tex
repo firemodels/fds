@@ -8556,18 +8556,24 @@ result computed by FDS for each of the three detectors.
 
 A cubical compartment, 2~m on a side has a three
 sampling location aspiration system.  The three locations
-have equal flow rates of 0.3 kg/s, and
+have equal flow rates of 0.3~kg/s, and
 transport times of 50, 100, and 150~s, respectively.  No bypass flow rate is
-specified for the aspiration detector.  1 kg/s of combustion products with {\ct SOOT_YIELD=0.001} is input into 
-the bottom of the compartment and 1 kg/s of total mass is removed from the top of the compartment.
-The aspiration detector shows an increasing \% obscuration over time, see figure blah blah blah.  There is a delay in slightly over 50 s in
-the initial increase which results from the 50 s transport time for the first sampling location plus a short 
-period of time to transport the combustion products to the sampling location.  The detector response has three plateaus 
+specified for the aspiration detector.  1~kg/s of combustion products with {\ct SOOT\_YIELD=0.001} is input into
+the bottom of the compartment and 1~kg/s of total mass is removed from the top of the compartment.
+The aspiration detector shows an increasing obscuration over time.  There is a delay of slightly over 50~s in
+the initial increase which results from the 50~s transport time for the first sampling location plus a short
+period of time to transport the combustion products to the sampling location.  The detector response has three plateaus
 that result from the delay times of the sampling locations.  The sampling points are co-located, so each plateau represents
 an additional one third of the soot being transported to the detector.  The soot density at the sampling point is
- $3.493x10^{-4}$~kg/m$^3$.  Using this value the plateaus are computed as 63.7 \%, 86.8 \%, and 95.2 \% as seen
+$3.493 \times 10^{-4}$~kg/m$^3$.  Using this value the plateaus are computed as 63.7~\%, 86.8~\%, and 95.2~\%, as seen
 in the figure.
 
+\vspace{\baselineskip}
+
+\noindent
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{FIGURES/aspiration_detector} &
+\end{tabular*}
 
 
 \chapter{Droplets and Sprays}
