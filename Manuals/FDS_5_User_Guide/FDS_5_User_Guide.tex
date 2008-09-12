@@ -5529,12 +5529,12 @@ used to specify the central detector:
 
 \footnotesize
 \begin{verbatim}
-&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot1', DEVC_ID='asp1', 
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot1', DEVC_ID='asp1',
       FLOWRATE=0.1, DELAY=20 /
-&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot2', DEVC_ID='asp1', 
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot2', DEVC_ID='asp1',
       FLOWRATE=0.2, DELAY=10 /
  ...
-&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='sootN', DEVC_ID='asp1', 
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='sootN', DEVC_ID='asp1',
       FLOWRATE=0.3, DELAY=30 /
 
 &DEVC XYZ=..., QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0.4, SETPOINT=0.02 /
@@ -6610,9 +6610,9 @@ The gas phase output quantity {\ct 'EXTINCTION COEFFICIENT'} is $K$. A similar q
 \be D \equiv - \frac{1}{L} \, \log_{10} \left( \frac{I}{I_0} \right) = K \, \log_{10} e   \ee
 The visibility $S$ is output via the keyword {\ct VISIBILITY}. Note
 that, by default, the visibility is associated with the smoke that is implicitly defined by the mixture fraction
-model. However, this quantity can also be associated with an 
+model. However, this quantity can also be associated with an
 explicitly defined species via the inclusion of a {\ct SPEC\_ID}.
-In other words, you can specify the output quantity {\ct 'VISIBILITY'} along with a {\ct SPEC\_ID}. 
+In other words, you can specify the output quantity {\ct 'VISIBILITY'} along with a {\ct SPEC\_ID}.
 This does not require that you do a mixture fraction calculation; only that you have specified the given species via a separate
 {\ct SPEC} line. You can
 specify a unique {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line as well.
@@ -6905,7 +6905,8 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct CONTROL}                                   & See Section~\ref{info:CTRL}                   &                & D            \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & $\dq_c''$ (Section~\ref{info:heat_flux})      & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA}$^{**}$                               & See Section~\ref{info:part_output}            & kW/m$^2$       & B,D          \\ \hline
-{\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$                     & kg/m$^3$       & D,I,P,S      \\ \hline
+{\ct CPU TIME}                                  & Elapsed CPU time                              & s              & D            \\ \hline
+{\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & s$^{-1}$       & D,I,P,S      \\ \hline
 {\ct DROPLET FLUX X}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
 {\ct DROPLET FLUX Y}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
@@ -6923,6 +6924,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct INSIDE WALL TEMPERATURE}                   & See Section~\ref{info:PROF}                   & $^\circ$C      & D            \\ \hline
+{\ct ITERATION}                                 & Number of time steps                          &                & D            \\ \hline
 {\ct LAYER HEIGHT}                              & See Section~\ref{info:layerheight}            & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & See Section~\ref{info:heat_detectors}         & $^\circ$C      & D            \\ \hline
 {\ct LOWER TEMPERATURE}                         & See Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
@@ -6967,6 +6969,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct TEMPERATURE}                               & $T$ (Section~\ref{info:THERMOCOUPLE})         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & $T_{TC}$ (Section~\ref{info:THERMOCOUPLE})    & $^\circ$C      & D            \\ \hline
 {\ct TIME}                                      & $t$ (Section~\ref{info:DEVC})                 & s              & D            \\ \hline
+{\ct TIME STEP}                                 & $\delta t$, Numerical time step               & s              & D            \\ \hline
 {\ct U-VELOCITY}                                & $u$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct V-VELOCITY}                                & $v$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct W-VELOCITY}                                & $w$                                           & m/s            & D,I,P,S      \\ \hline
@@ -6976,6 +6979,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct VISIBILITY}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & See Section~\ref{info:flows}                  & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FRACTION}$^*$                       & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
+{\ct WALL CLOCK TIME}                           & Elapsed wall clock time                       & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
 {\ct WALL THICKNESS}                            & $\Delta x_w$                                  & m              & B,D          \\ \hline
 \end{tabular}
