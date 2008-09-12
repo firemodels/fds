@@ -8332,26 +8332,33 @@ left because of the preferential flow in that direction.
 
 \chapter{Thermodynamics}
 
+This chapter contains examples of simple calculations that demonstrate various features of FDS related to the conservation of mass and energy via the 
+equation of state.
+
+
+\clearpage
+
 \section{Pressure Rise in a Sealed Enclosure (\texorpdfstring{{\bf pressure\_rise}}{pressure\_rise})  }
 \label{pressure_rise}
 
 This example tests several basic features of FDS. A narrow channel, 3~m long, 0.002~m wide, and 1~m tall, has air injected at a rate of
 0.1~kg/m$^2$/s over an area of 0.2~m by 0.002~m for 60 s, with a linear ramp-up and ramp-down over 1 s. The total mass of air in the channel at the
 start is 0.00718~kg. The total mass of air injected is 0.00244~kg. The domain is assumed two-dimensional, the walls are adiabatic, and {\ct
-STRATIFICATION} is set to {\ct .FALSE.}. The domain is divided into three meshes each 1~m long with identical gridding.  We expect the pressure,
- temperature and density to rise during the 60~s injection period. Afterwards, the
-temperature, density, and pressure should remain constant. A hand computation is performed at 10 second intervals using the First Law of
-Thermodynamics and the equation of state.  The figures below show the results of this calculation.  As is seen density matches exactly showing
-that FDS is injecting the appropriate quantity of mass and is properly initializing the domain. Pressure rise and temperature rise; however, are
-over-predicted by 3~\% and 12~\% respectively.  Also a slight drop in pressure is seen from 60 s to 120 s, indicating that the current implementation
-adiabatic boundary condition has a slight error in it.
+STRATIFICATION} is set to {\ct .FALSE.} simply to remove the slight change in pressure and density with height. 
+The domain is divided into three meshes, each 1~m long and each with identical gridding.  We expect the pressure,
+temperature and density to rise during the 60~s injection period. Afterwards, the
+temperature, density, and pressure should remain constant, according to the equation of state.  
+The figures below show the results of this calculation.  The density matches exactly showing
+that FDS is injecting the appropriate amount of mass. The steady state values of the pressure, density and temperature are consistent with 
+the ideal values.
+
+\vspace{\baselineskip}
 
 \noindent
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/pressure_rise_T.pdf} &
-\includegraphics[width=3.2in]{FIGURES/pressure_rise_P.pdf} \\
-\includegraphics[width=3.2in]{FIGURES/pressure_rise_R.pdf} &
-\includegraphics[width=3.2in]{FIGURES/pressure_rise_1000.jpg}
+\includegraphics[height=2.2in]{FIGURES/pressure_rise_T} &
+\includegraphics[height=2.2in]{FIGURES/pressure_rise_P} \\
+\includegraphics[height=2.2in]{FIGURES/pressure_rise_R} &
 \end{tabular*}
 
 \clearpage
@@ -8380,14 +8387,14 @@ flux related to details of the numerical solver.
 
 Just for fun, we add another leak to the compartment, only this time the leak is to the exterior of the entire computational domain, an infinite void
 at ambient pressure. Now the fan flow rate ought to balance the sum of the flow rates from the two leaks. After 5~min, the pressure difference is
-935.2~Pa.
+935.2~Pa. The two cases are summarized in the following plots:
 
-The two cases are summarized in the following plots:
+\vspace{\baselineskip} 
 
-\vspace{0.1in} \noindent
+\noindent
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.1in]{FIGURES/leak_test_Pressure_Case_1.PDF} &
-\includegraphics[width=3.1in]{FIGURES/leak_test_Pressure_Case_2.PDF}
+\includegraphics[height=2.2in]{FIGURES/leak_test} &
+\includegraphics[height=2.2in]{FIGURES/leak_test_2}
 \end{tabular*}
 
 
@@ -8401,18 +8408,18 @@ in the Partition Wall, blowing in opposite directions. The relevant input lines 
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='BLOW LEFT',  POROUS=.TRUE., VEL=-0.2, DUCT_PATH=1,2, MAX_PRESSURE=1000. / 
+&SURF ID='BLOW LEFT',  POROUS=.TRUE., VEL=-0.2, DUCT_PATH=1,2, MAX_PRESSURE=1000. /
 &SURF ID='BLOW RIGHT', POROUS=.TRUE., VEL= 0.4, DUCT_PATH=2,1, MAX_PRESSURE=1000. /
 
-&ZONE XB=-3.0, 0.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 1 
+&ZONE XB=-3.0, 0.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 1
 &ZONE XB= 0.0, 3.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 2
 
 &OBST XB= 0.0, 0.0,-1.0, 1.0, 0.0, 2.0 / Partition Wall
 
-&HOLE XB=-0.1, 0.1,-0.1, 0.1, 0.4, 0.6 / 
+&HOLE XB=-0.1, 0.1,-0.1, 0.1, 0.4, 0.6 /
 &OBST XB= 0.0, 0.0,-0.1, 0.1, 0.4, 0.6, ..., SURF_ID='BLOW RIGHT', PERMIT_HOLE=.FALSE. /
 
-&HOLE XB=-0.1, 0.1,-0.1, 0.1, 1.4, 1.6 / 
+&HOLE XB=-0.1, 0.1,-0.1, 0.1, 1.4, 1.6 /
 &OBST XB= 0.0, 0.0,-0.1, 0.1, 1.4, 1.6, ..., SURF_ID='BLOW LEFT', PERMIT_HOLE=.FALSE. /
 \end{verbatim}
 \normalsize
