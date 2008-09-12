@@ -6,24 +6,22 @@ Using default value of extinction coefficient, percent obscuration of asp1 shoul
 
 &HEAD CHID='aspiration_detector', TITLE='Test of aspiration detector, SVN $Revision$' /
 
-&MESH IJK = 20,20,40, XB=-1.,1.,-1.,1.,0.0,2.00 /
+&MESH IJK = 10,10,10, XB=-1.,1.,-1.,1.,-1.,1. /
 
-&TIME T_END=1. /
-&DUMP NFRAMES=100/
+&TIME T_END=200. /
+&DUMP NFRAMES=200/
 
-&VENT MB='YMIN' ,SURF_ID='OPEN'/
-&VENT MB='YMAX' ,SURF_ID='OPEN'/
-&VENT MB='XMIN' ,SURF_ID='OPEN'/
-&VENT MB='XMAX' ,SURF_ID='OPEN'/
-&VENT MB='ZMAX' ,SURF_ID='OPEN'/
+&REAC SOOT_YIELD=0.001/
 
-&SURF ID='BURNER',HRRPUA=2000.,COLOR='PURPLE'/
+&SURF ID='FLOWIN',MASS_FLUX(2)=1.0,COLOR='PURPLE'/
+&SURF ID='FLOWOUT',MASS_FLUX_TOTAL=-1.0,COLOR='GREEN'/
 
-&VENT XB=-0.5,0.5,-0.5,0.5,0.,0.,SURF_ID='BURNER'/
+&VENT XB=-0.5,0.5,-0.5,0.5,-1.,-1.,SURF_ID='FLOWIN'/
+&VENT XB=-0.5,0.5,-0.5,0.5,1.,1.,SURF_ID='FLOWOUT'/
 
-&DEVC XYZ = 0.0,0.5,0.5, QUANTITY = 'soot density', FLOWRATE=0.1,DELAY=0.2,ID='sp1',DEVC_ID='asp1'/
-&DEVC XYZ = 0.0,0.5,0.6, QUANTITY = 'soot density', FLOWRATE=0.5,DELAY=0.1,ID='sp2',DEVC_ID='asp1'/
-&DEVC XYZ = 0.0,0.5,0.7, QUANTITY = 'soot density', FLOWRATE=0.8,DELAY=0.3,ID='sp3',DEVC_ID='asp1'/
+&DEVC XYZ = 0.0,0.5,0.5, QUANTITY = 'soot density', FLOWRATE=0.3,DELAY=50,ID='sp1',DEVC_ID='asp1'/
+&DEVC XYZ = 0.0,0.5,0.5, QUANTITY = 'soot density', FLOWRATE=0.3,DELAY=100,ID='sp2',DEVC_ID='asp1'/
+&DEVC XYZ = 0.0,0.5,0.5, QUANTITY = 'soot density', FLOWRATE=0.3,DELAY=150,ID='sp3',DEVC_ID='asp1'/
 &DEVC XYZ = 0.0,0.0,0.0, QUANTITY = 'aspiration', ID='asp1',BYPASS_FLOWRATE=0./
 
 &TAIL /
