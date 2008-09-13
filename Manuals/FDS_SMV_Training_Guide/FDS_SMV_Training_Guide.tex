@@ -311,7 +311,10 @@ The FDS scenarios that are experimentally based are documented by 1) briefly des
 \section{Description of Test Cases}
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=6.0in]{FIGURES/2room_setup}
+\includegraphics[width=6.0in]{FIGURES/2room_setup}\\
+a) top view
+\includegraphics[width=6.0in]{FIGURES/placeholder}\\
+a) side view
 \end{center}
 \caption {Schematic of two room test case}
 \label{fig2roomplan}%
@@ -331,7 +334,7 @@ a) leaks&b) open doors/windows and vented ceiling\\
 c) open door/windows&d) vented ceiling\\
 \end{tabular}
 \end{center}
-\caption{HRR results for 2 room test cases.
+\caption{FDS heat release rate results for four 2 room test cases.
   }
 \label{fig2roomhrr}%
 \end{figure}
@@ -349,7 +352,8 @@ a) leaks&b) open doors/windows and vented ceiling\\
 c) open door/windows&d) vented ceiling\\
 \end{tabular}
 \end{center}
-\caption{THCP A results for 2 room test cases.
+\caption{FDS temperature results at location THCP A in the fire room
+(see Figure \ref{fig2roomplan}) for four 2 room test cases.
   }
 \label{fig2roomthcpa}%
 \end{figure}
@@ -367,8 +371,8 @@ a) leaks&b) open doors/windows and vented ceiling\\
 c) open door/windows&d) vented ceiling\\
 \end{tabular}
 \end{center}
-\caption{THCP B results for 2 room test cases.
-  }
+\caption{FDS temperature results at location THCP B in the target room
+(see Figure \ref{fig2roomplan}) for four 2 room test cases.}
 \label{fig2roomthcpa}%
 \end{figure}
 
@@ -416,7 +420,10 @@ c) open door/windows&d) vented ceiling\\
 \section{Description of Experiment}
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=5.0in]{FIGURES/flashover_setup}
+\includegraphics[width=5.0in]{FIGURES/placeholder}\\
+a) top view\\
+\includegraphics[width=5.0in]{FIGURES/flashover_setup}\\
+b) side view\\
 \end{center}
 \caption {Schematic of flashover trainer layout}
 \label{figflashoverplan}%
@@ -445,24 +452,34 @@ in what column of a spread sheet file).
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cc}
- \includegraphics[height=2.5in]{scriptfigures/flashover_3dsmoke_fire_150}&
- \includegraphics[height=2.5in]{scriptfigures/flashover_slice_temp_150}\\
-a) 3D Smoke and Fire&b) 2D Temperature Contours\\
-
+\begin{tabular}{c}
+ \includegraphics[width=5.0in]{scriptfigures/flashover_3dsmoke_fire_150}
 \end{tabular}
 \end{center}
-\caption {Flashover trainer at MCFRS}
+\caption {FDS simulation results of the flashover trainer visualized
+using realistic smoke and fire.}
+\label{figflashoversmoke}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=5in]{scriptfigures/flashover_slice_temp_150}
+\end{tabular}
+\end{center}
+\caption {FDS simulation results of the flashover trainer visualized
+using 2D temperature contours.  Blue colors represent 20~$^\circ$C
+temperatures while red colors represent 620~$\circ$C temperatures.}
 \label{figflashoversmokeslice}%
 \end{figure}
 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
- \includegraphics[height=4.0in]{datafigures/MCFRS_Flashover_00_hrr}\\
+ \includegraphics[width=5.0in]{datafigures/MCFRS_Flashover_00_hrr}\\
 \end{tabular}
 \end{center}
-\caption {Flashover HRR }
+\caption {FDS heat release rate results for the Flashover trainer case}
 \label{figflashoverhrr}%
 \end{figure}
 
@@ -472,10 +489,20 @@ a) 3D Smoke and Fire&b) 2D Temperature Contours\\
  \includegraphics[height=4.0in]{datafigures/MCFRS_Flashover_00_temp}\\
 \end{tabular}
 \end{center}
-\caption {Flashover HRR }
-\label{figflashoverhrr}%
+\caption {FDS temperatures results at location THCB A (see Figure \ref{figflashoverplan}a) in the
+fire region of the Flashover trainer case.}
+\label{figflashovertempa}%
 \end{figure}
 
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=4.0in]{datafigures/placeholder}\\
+\end{tabular}
+\end{center}
+\caption {FDS temperatures results at location THCB B (see Figure \ref{figflashoverplan}a) in the region where fire fighters sit in the Flashover trainer.}
+\label{figflashovertempb}%
+\end{figure}
 % ---------------------------- Training Tower -----------------------------------
 
 \chapter{Training Tower}
@@ -485,7 +512,7 @@ a) 3D Smoke and Fire&b) 2D Temperature Contours\\
 \begin{center}
 \includegraphics[width=6.5in]{FIGURES/MFRI_tower_setup}
 \end{center}
-\caption {Schematic of training tower layout}
+\caption {Schematic of the training tower layout}
 \label{figtowerplan}%
 \end{figure}
 
@@ -509,7 +536,8 @@ in what column of a spread sheet file).
  \includegraphics[height=4.0in]{datafigures/MFRI_Training_Tower_00_hrr}\\
 \end{tabular}
 \end{center}
-\caption {Training Tower HRR }
+\caption {Experimental and FDS heat release results for the
+Training Tower case}
 \label{figtrainingtowerhrr}%
 \end{figure}
 
@@ -527,7 +555,7 @@ a) 30 s&b) 60 s\\
 a) 120 s&b) 240 s\\
 \end{tabular}
 \end{center}
-\caption {MFRI Tower (one floor)}
+\caption {Realistic visualizations of an FDS simulation of an experimental burn performed in the third floor of the MFRI training tower.}
 \label{figtowersmoke}%
 \end{figure}
 
@@ -540,7 +568,7 @@ a) 120 s&b) 240 s\\
 \begin{center}
 \includegraphics[width=6.0in]{FIGURES/MCFRS_ranch_setup}
 \end{center}
-\caption {Schematic of ranch house layout}
+\caption {Schematic of the MCFRS ranch house layout}
 \label{figranchplan}%
 \end{figure}
 
@@ -562,7 +590,7 @@ in what column of a spread sheet file).
 \begin{center}
  \includegraphics[height=5.0in]{datafigures/MCFRS_Ranch_00_hrr}
 \end{center}
-\caption {Ranch house HRR}
+\caption {FDS heat release results for the MCFRS ranch house house case}
 \label{figranchhrr}%
 \end{figure}
 
@@ -577,7 +605,7 @@ a) 30 s&b) 60 s\\
 a) 120 s&b) 240 s\\
 \end{tabular}
 \end{center}
-\caption {Ranch house}
+\caption {Smokeview visualization of the MCFRS ranch house case.}
 \label{figranchsmoke}%
 \end{figure}
 
