@@ -23,9 +23,13 @@ TIME T_END=0.0
       SPECIFIC_HEAT=0.70,
       CONDUCTIVITY=0.1342,
       DENSITY=450.00/
-      
+
 &MATL ID='STEEL_MATL',
-      DENSITY=4000.0/
+      SPECIFIC_HEAT         = 0.47
+      CONDUCTIVITY          = 48.0
+      DENSITY               = 8000.0
+      REFERENCE_TEMPERATURE = 350.
+/
       
 &MATL ID='WOOD_MATL',
       SPECIFIC_HEAT=0.88,
