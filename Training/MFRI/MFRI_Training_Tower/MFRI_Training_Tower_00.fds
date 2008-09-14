@@ -55,7 +55,7 @@ TIME T_END=0.0
       
 &SURF ID='FIRE',
       COLOR='RED',
-      HRRPUA=2600.,
+      HRRPUA=2450.,
       RAMP_Q='FIRE_RAMP_Q'/
 
 &SURF ID='WOOD',
@@ -68,9 +68,10 @@ TIME T_END=0.0
 ## Ramp Profiles
 
 &RAMP ID='FIRE_RAMP_Q', T=0.00, F=0.00/
-&RAMP ID='FIRE_RAMP_Q', T=40.0, F=0.53/
+&RAMP ID='FIRE_RAMP_Q', T=30.0, F=0.55/
+&RAMP ID='FIRE_RAMP_Q', T=80.0, F=0.64/
 &RAMP ID='FIRE_RAMP_Q', T=150.0, F=1.0/
-&RAMP ID='FIRE_RAMP_Q', T=400.0, F=0.23/
+&RAMP ID='FIRE_RAMP_Q', T=400.0, F=0.3/
 &RAMP ID='FIRE_RAMP_Q', T=700.0, F=0.19/
 
 ## Geometric Information
