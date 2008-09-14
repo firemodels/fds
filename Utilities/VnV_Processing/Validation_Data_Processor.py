@@ -4,7 +4,7 @@ from pyx import *
 
 ### Set Global Variables for Data to Process
 ## Validation Data Set (1), Verification Data Set (2), Examples Data Set (3), Trainier Data Set (4)
-data_set = 3 # Input Value
+data_set = 1 # Input Value
 
 ## Validation Data
 if data_set == 1:
@@ -597,6 +597,7 @@ def comparison_plot(plot_data,d1_data,d2_data):
     v_dist   = 0.7*unit.v_cm
     h_dist   = 0.4*unit.v_cm
     plot_width = float(plot_data['Plot_Width(cm)'])
+    Flip_Axis_Indicator = plot_data['Flip_Axis']
     
     #Create filename from fields in input file record.
     plot_file_name = plot_data["Plot_Filename"]
@@ -623,19 +624,37 @@ def comparison_plot(plot_data,d1_data,d2_data):
     #Begin Plotting
     # Initialize graph object
     if key_pos == "nk":
-        g = graph.graphxy(width=plot_width, ratio=4./3, 
-                        x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
-                        y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
+        if Flip_Axis_Indicator == "no":
+            g = graph.graphxy(width=plot_width, ratio=4./3, 
+                            x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
+                            y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
+        else:
+            g = graph.graphxy(width=plot_width, ratio=4./3, 
+                            y=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
+                            x=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
     else:
-        g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
-                        x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
-                        y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
+        if Flip_Axis_Indicator == "no":
+            g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
+                            x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
+                            y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
+        else:
+            g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
+                            y=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
+                            x=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
     
     # Create line styles that have predetermined color order for each pair in series.  
     # All Data Set 1, data is plotted with thick solid lines while Data Set 2, data is thin solid lines.
     # Colors are from http://pyx.sourceforge.net/manual/colorname.html
     d1PlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Black, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.06*unit.w_cm)])
     d2PlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Grey, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.03*unit.w_cm)])
+
+    # Specify vertical and horizontal axes (1 is horizontal; 2 is vertical)
+    if Flip_Axis_Indicator == "yes":
+        ind_axis_index = 2
+        dep_axis_index = 1
+    else:
+        ind_axis_index = 1
+        dep_axis_index = 2
     
     #Loop strcuture to process compound colum names in d line.
     if diagnostic_level >= 3:
@@ -649,13 +668,13 @@ def comparison_plot(plot_data,d1_data,d2_data):
         
         # Loop through and plot Data Set 1, data
         for d1_data_item in d1_data:
-            g.plot(graph.data.points(d1_data_item, title=d1_key_list[d1_plot_counter], x=1, y=2),
+            g.plot(graph.data.points(d1_data_item, title=d1_key_list[d1_plot_counter], x=ind_axis_index, y=dep_axis_index),
                   [d1PlotStyle])
             d1_plot_counter = d1_plot_counter + 1
             
         # Loop through and plot Data Set 1, data
         for d2_data_item in d2_data:
-            g.plot(graph.data.points(d2_data_item, title=d2_key_list[d2_plot_counter], x=1, y=2),
+            g.plot(graph.data.points(d2_data_item, title=d2_key_list[d2_plot_counter], x=ind_axis_index, y=dep_axis_index),
                   [d2PlotStyle])
             d2_plot_counter = d2_plot_counter + 1
     else:
@@ -668,10 +687,10 @@ def comparison_plot(plot_data,d1_data,d2_data):
             print "   <3> Data Set 2, Data to Plot:", d2_data[0]
         
         # Plot Data Set 1, data
-        g.plot(graph.data.points(d1_data[0], title=d1_key, x=1, y=2),
+        g.plot(graph.data.points(d1_data[0], title=d1_key, x=ind_axis_index, y=dep_axis_index),
             [d1PlotStyle])
         # Plot Predicted/Data Set 2, data
-        g.plot(graph.data.points(d2_data[0], title=d2_key, x=1, y=2),
+        g.plot(graph.data.points(d2_data[0], title=d2_key, x=ind_axis_index, y=dep_axis_index),
             [d2PlotStyle])
     
     # Now plot the Title text, alignment based on Title_Position setting.
