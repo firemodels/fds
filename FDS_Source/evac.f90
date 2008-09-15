@@ -198,7 +198,6 @@ Module EVAC
      Integer :: N_LANDINGS, N_NODES, N_NODES_OUT, N_NODES_IN
      Integer, Pointer, Dimension(:) :: NODE_IOR, NODE_TYPE, NODES_IN, NODES_OUT
      Character(60) :: ID
-     ! Character(60) :: TO_NODE
      Character(24) :: MESH_ID
   End Type EVAC_STRS_Type
   !
@@ -3098,16 +3097,6 @@ Contains
             Call SHUTDOWN(MESSAGE)
          End If
       End Do
-
-      ! Set the IMESH for STRS in Evac_node_list 
-      !    Do n = 1, n_strs
-      !       Nodeloop3: Do i = 1, n_nodes
-      !          If (EVAC_Node_List(i)%ID == EVAC_STRS(n)%ID) Then
-      !             EVAC_Node_List(i)%IMESH = EVAC_STRS(n)%IMESH
-      !             Exit Nodeloop3
-      !           End If
-      !       End Do Nodeloop3
-      !    End Do
 
       !
       Do n = 1, n_doors
@@ -8179,36 +8168,13 @@ Contains
                If (SIGN(1.0,HR%X-pdx%x1)/=SIGN(1.0,x_old-pdx%x1) .And. &
                     (HR%Y >= pdx%y1 .And. HR%Y <= pdx%y2) ) Then
                   HR%IOR = HUMAN_TARGET_UNSPECIFIED
-!                  If (NINT(SIGN(1.0,HR%X-pdx%x1)) /= PDX%IOR) upstream = .TRUE.
                End If
             Case (2)
                If (SIGN(1.0,HR%Y-pdx%y1)/=SIGN(1.0,y_old-pdx%y1) .And. &
                     (HR%X >= pdx%x1 .And. HR%X <= pdx%x2) ) Then
                   HR%IOR = HUMAN_TARGET_UNSPECIFIED
-!                  If (NINT(SIGN(1.0,HR%Y-pdx%y1)) /= PDX%IOR) upstream = .TRUE.
                End If
             End Select
-!            Case (+1)
-!               If ((HR%X >= pdx%x1 .And. x_old < pdx%x1) .And. &
-!                    (HR%Y >= pdx%y1 .And. HR%Y <= pdx%y2) ) Then
-!                  HR%IOR = HUMAN_TARGET_UNSPECIFIED
-!               End If
-!            Case (-1)
-!               If ((HR%X <= pdx%x2 .And. x_old > pdx%x2) .And. &
-!                    (HR%Y >= pdx%y1 .And. HR%Y <= pdx%y2) ) Then
-!                  HR%IOR = HUMAN_TARGET_UNSPECIFIED
-!               End If
-!            Case (+2)
-!               If ((HR%Y >= pdx%y1 .And. y_old < pdx%y1) .And. &
-!                    (HR%X >= pdx%x1 .And. HR%X <= pdx%x2) ) Then
-!                  HR%IOR = HUMAN_TARGET_UNSPECIFIED
-!               End If
-!            Case (-2)
-!               If ((HR%Y <= pdx%y2 .And. y_old > pdx%y2) .And. &
-!                    (HR%X >= pdx%x1 .And. HR%X <= pdx%x2) ) Then
-!                  HR%IOR = HUMAN_TARGET_UNSPECIFIED
-!               End If
-!            End Select
             If ( HR%IOR == HUMAN_TARGET_UNSPECIFIED ) Then
                istat = 0
                If (upstream) Then
