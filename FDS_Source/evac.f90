@@ -5218,7 +5218,7 @@ Contains
     Integer, Intent(IN) :: NM,ICYC
     !
     Real(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
-    Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, J2
+    Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1
     Integer  IE, tim_ic, tim_iw, NM_now, tim_iwx, tim_iwy, tim_iw2, tim_ic2, ibc
     Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, tim_dist, Door_dist, Door_width
     Real(EB), Dimension(4) :: d_xy
@@ -6060,12 +6060,12 @@ Contains
              If ( Door_Dist < 0.50*Door_width ) Then
                 Select case(door_ior)
                 case(-1,+1)
-                   UBAR = SIGN(1.0,UBAR)
+                   UBAR = SIGN(1.0_EB,UBAR)
                    VBAR = 0._EB
                    HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
                 case(-2,+2)
                    UBAR = 0._EB
-                   VBAR = SIGN(1.0,VBAR)
+                   VBAR = SIGN(1.0_EB,VBAR)
                    HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
                 end select
              Endif
@@ -6700,12 +6700,12 @@ Contains
              If ( Door_Dist < 0.50*Door_width ) Then
                 Select case(door_ior)
                 case(-1,+1)
-                   UBAR = SIGN(1.0,UBAR)
+                   UBAR = SIGN(1.0_EB,UBAR)
                    VBAR = 0._EB
                    HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
                 case(-2,+2)
                    UBAR = 0._EB
-                   VBAR = SIGN(1.0,VBAR)
+                   VBAR = SIGN(1.0_EB,VBAR)
                    HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
                 end select
              Endif
@@ -7919,7 +7919,7 @@ Contains
       FinalTargetFound = .FALSE.
       dz_tmp2 = Huge(1.0_EB)
       FindTargetNodeLoop: Do I = 1,SP%N_NODES_OUT
-         dz_node = -1._EB * SIGN(1.0,dz_final) ! initialize dz_node to different direction than final target
+         dz_node = -1._EB * SIGN(1.0_EB,dz_final) ! initialize dz_node to different direction than final target
          Select Case(EVAC_NODE_List(SP%NODES_OUT(I))%Node_type)
          Case('Door')
             z_node = EVAC_DOORS(EVAC_Node_List(SP%NODES_OUT(I))%Node_index)%Z1
@@ -7929,7 +7929,7 @@ Contains
             write(LU_ERR,*) 'ERROR (debug): unknown node type in Find_Target_Node_In_Strs'
          End Select
          dz_node = z_node - HP%Z
-         If (SIGN(1.0,dz_node)==SIGN(1.0,dz_final)) Then
+         If (SIGN(1.0_EB,dz_node)==SIGN(1.0_EB,dz_final)) Then
             dz_tmp1 = ABS(dz_final)-ABS(dz_node)
             If ( dz_tmp1 < dz_tmp2) Then
                FinalTargetFound = .TRUE.
@@ -7941,7 +7941,7 @@ Contains
       Enddo FindTargetNodeLoop
       If (.NOT.FinalTargetFound) Then
       FindTargetNodeLoop2: Do I = 1,SP%N_NODES_IN
-         dz_node = -1._EB * SIGN(1.0,dz_final) ! initialize dz_node to different direction than final target
+         dz_node = -1._EB * SIGN(1.0_EB,dz_final) ! initialize dz_node to different direction than final target
          Select Case(EVAC_NODE_List(SP%NODES_IN(I))%Node_type)
          Case('Door')
             z_node = EVAC_DOORS(EVAC_Node_List(I)%Node_index)%Z1
@@ -7951,7 +7951,7 @@ Contains
             Write(LU_ERR,*) 'ERROR (debug): unknown node type in Find_Target_Node_In_Strs'
          End Select
          dz_node = z_node - HP%Z
-         If (SIGN(1.0,dz_node)==SIGN(1.0,dz_final)) Then
+         If (SIGN(1.0_EB,dz_node)==SIGN(1.0_EB,dz_final)) Then
             dz_tmp1 = ABS(dz_final-dz_node)
             If ( dz_tmp1 < dz_tmp2) Then
                FinalTargetFound = .TRUE.
@@ -8165,12 +8165,12 @@ Contains
             y_old = HR%Y_old
             Select Case (ABS(PDX%IOR))
             Case (1)
-               If (SIGN(1.0,HR%X-pdx%x1)/=SIGN(1.0,x_old-pdx%x1) .And. &
+               If (SIGN(1.0_EB,HR%X-pdx%x1)/=SIGN(1.0_EB,x_old-pdx%x1) .And. &
                     (HR%Y >= pdx%y1 .And. HR%Y <= pdx%y2) ) Then
                   HR%IOR = HUMAN_TARGET_UNSPECIFIED
                End If
             Case (2)
-               If (SIGN(1.0,HR%Y-pdx%y1)/=SIGN(1.0,y_old-pdx%y1) .And. &
+               If (SIGN(1.0_EB,HR%Y-pdx%y1)/=SIGN(1.0_EB,y_old-pdx%y1) .And. &
                     (HR%X >= pdx%x1 .And. HR%X <= pdx%x2) ) Then
                   HR%IOR = HUMAN_TARGET_UNSPECIFIED
                End If
