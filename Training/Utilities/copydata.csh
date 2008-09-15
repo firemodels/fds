@@ -19,6 +19,20 @@ cp ../MCFRS/MCFRS_Flashover/MCFRS_Flashover_03_hrr.csv $FDSDATA/.
 
 cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_00_hrr.csv $FDSDATA/.
 cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_00_devc.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_01_hrr.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_01_hrr.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_02_hrr.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_02_hrr.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_03_hrr.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_03_hrr.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_04_hrr.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_04_devc.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_05_devc.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_05_devc.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_06_devc.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_06_devc.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_07_devc.csv $FDSDATA/.
+cp ../MFRI/MFRI_Training_Tower/MFRI_Training_Tower_07_devc.csv $FDSDATA/.
 
 cp ../Demonstrations/2Room_Ranch/ranch_01_hrr.csv $FDSDATA/.
 cp ../Demonstrations/2Room_Ranch/ranch_02_hrr.csv $FDSDATA/.
