@@ -2,6 +2,7 @@
 echo "Press <CTRL> c to abort"
 echo "Press any other key to start FDS cases"
 pause
+cd ..\..\Test_cases\Visualization
 fds5 colorconv
 fds5 plume5a.fds
 fds5 plume5b.fds
