@@ -6109,10 +6109,19 @@ successfully. This file can be used as an error indicator. It is {\ct
 \end{description}
 
 
-\section{Output Options}
+\clearpage
 
-\subsection{Point Measurement Devices}
+\section{Output File Types}
+
+FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and
+rendered by Smokeview. Some of the files are just comma-delimited text files. It is important to remember that you must explicitly declare in
+the input file most of the FDS output data. A considerable amount of the input file is usually devoted to this.
+ 
+
+\subsection{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
 \index{Output!Point Measurements}
+\index{Output!Integrated Measurements}
+
 For many commonly used measurement devices there is no need to associate a
 specific {\ct PROP} line to the {\ct DEVC} entry. In such cases, use the character string
 {\ct QUANTITY} to indicate that a particular gas or solid phase quantity at the point should be recorded in
@@ -6156,9 +6165,6 @@ designates the surface temperature of a wall facing the negative $y$
 direction.
 
 
-
-\subsection{Integrated (non-pointwise) Measurement Devices}
-\index{Output!Integrated Measurements}
 In addition to point measurements, the {\ct DEVC} group can be used
 to report integrated quantities (See Table~\ref{tab:output}).
 For example, you may want to know the mass flow out of a door or window.
@@ -6182,71 +6188,6 @@ be done using {\ct XB} -- avoid planes or volumes
 that cross multiple mesh boundaries. FDS has to decide which mesh to
 use in the integration, and it chooses the finest mesh overlapping
 the centroid of the designated plane or volume.
-
-
-\subsection{Output Statistics}
-\label{info:statistics}
-\index{Output!Statistics}
-
-A useful feature of a device ({\ct DEVC}) is to specify an output quantity along with a desired statistic. For example,
-
-\footnotesize
-\begin{verbatim}
-&DEVC XYZ=2.3,4.5,6.7, QUANTITY='TEMPERATURE', ID='whatever', STATISTICS='MAX' /
-\end{verbatim}
-\normalsize
-
-\noindent
-causes FDS to write out the maximum gas phase temperature over the entire mesh containing the point {\ct XYZ}. Note that it
-does not compute the maximum over the entire computational domain, just that particular mesh. Other {\ct STATISTICS} include
-{\ct 'MIN'} and {\ct 'MEAN'}. They can be used for both gas and solid phase output quantities. In the case of solids, the
-specification of a {\ct SURF\_ID} limits the search to only those surfaces. Use the {\ct STATISTICS} feature with caution because
-it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
-
-\subsubsection{Volume-Weighted Mean}
-
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME MEAN'} produces the discrete analog of
-\be \frac{1}{V} \; \int \phi(x,y,z) \; dx \, dy \, dz \ee
-which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this
-statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
-
-\subsubsection{Mass-Weighted Mean}
-
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS MEAN'} produces the discrete analog of
-\be \frac{ \int \rho \, \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
-which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this
-statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
-
-\subsubsection{Volume Integral}
-
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME INTEGRAL'} produces the discrete analog of
-\be \int \phi(x,y,z) \; dx \, dy \, dz \ee
-Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example,
-heat release rate per unit volume is an appropriate output quantity. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
-
-\subsubsection{Area Integral}
-
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='AREA INTEGRAL'} produces the discrete analog of
-\be \int \phi(x,y,z) \; dA \ee
-where $dA$ depends on the coordinates you specify for {\ct XB}.
-Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example,
-{\ct MASS\_FLUX\_X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that
-you have named {\ct 'my gas'} through an
-area normal to the $x$ direction. Note also that you must specify an area to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
-
-\subsubsection{Surface Integral}
-
-For a given solid phase output quantity, $\phi$, {\ct STATISTICS='SURFACE INTEGRAL'} produces the discrete analog of
-\be \int \phi \; dA \ee
-Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass
-fluxes are appropriate output quantities.
-
-
-
 
 
 
@@ -6319,28 +6260,6 @@ mesh cell width. Rather, the {\ct THICKNESS} ought to be the actual thickness of
 calculation.
 
 
-\subsection{Additional Solid Outputs}
-\label{info:material_components} \index{Output!Material Components}
-
-In addition to the {\ct PROF}ile output, there are various additional quantities that are useful for monitoring reacting
-surfaces. For example, {\ct 'WALL THICKNESS'} gives the overall thickness of the solid surface
-element. {\ct 'SURFACE DENSITY'} gives the overall mass per unit area for the
-solid surface element, computed as an integral of material density over wall
-thickness. Both quantities are available both as {\ct DEVC} and {\ct BNDF}.
-
-To record the change in a material
-component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
-
-\footnotesize
-\begin{verbatim}
-&DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
-\end{verbatim} \normalsize
-
-\noindent
-This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density
-is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the
-density represents the mass of {\ct 'wood'} per unit volume of the mixture. Note also that {\ct 'SOLID DENSITY'} is only available as a
-{\ct DEVC} (device) quantity.
 
 
 
@@ -6474,8 +6393,8 @@ obtained elsewhere.
 \index{Output!Smoke and Fire}
 
 When you do a fire simulation using the default mixture fraction combustion model, FDS automatically creates two output files that are rendered by
-Smokeview as realistic looking smoke and fire. By default, the output quantities {\ct 'soot mass fraction'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume)
-are used in the visualization. You have the option of rendering any other species mass fraction instead of {\ct 'soot mass fraction'}, so long as the
+Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'MASS FRACTION'} of {\ct 'soot'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume)
+are used in the visualization. You have the option of rendering any other species mass fraction instead of {\ct 'soot'}, so long as the
 {\ct MASS\_EXTINCTION\_COEFFICIENT} (either from the {\ct REAC} line, or over-ridden by the value on the {\ct SPEC} line) is appropriate in
 describing the attenuation of visible light by the specified gas species.
 The alternative gas species is given by {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line.
@@ -6506,6 +6425,10 @@ Smokeview to be used for visualization.
 \clearpage
 
 \section{Special Output Quantities}
+
+This section lists a variety of output quantities that are useful for studying thermally-driven flows, combustion, pyrolysis, and so forth. Note that some
+of the output quantities can be produced in a variety of ways. 
+
 
 \subsection{Heat Release Rate}
 \label{info:HRR} \index{Output Files!\_hrr.csv}
@@ -6777,8 +6700,94 @@ prediction of the solid temperature (and ultimately its mechanical
 response) than FDS can provide.
 
 
+\subsection{Useful Solid Phase Outputs}
+\label{info:material_components} \index{Output!Material Components}
 
-\subsection{Integrated Mass and Energy Fluxes through Openings}
+In addition to the {\ct PROF}ile output, there are various additional quantities that are useful for monitoring reacting
+surfaces. For example, {\ct 'WALL THICKNESS'} gives the overall thickness of the solid surface
+element. {\ct 'SURFACE DENSITY'} gives the overall mass per unit area for the
+solid surface element, computed as an integral of material density over wall
+thickness. Both quantities are available both as {\ct DEVC} and {\ct BNDF}.
+
+To record the change in a material
+component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
+\end{verbatim} \normalsize
+
+\noindent
+This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density
+is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the
+density represents the mass of {\ct 'wood'} per unit volume of the mixture. Note also that {\ct 'SOLID DENSITY'} is only available as a
+{\ct DEVC} (device) quantity.
+
+
+
+\subsection{Spatially-Integrated Outputs}
+\label{info:statistics}
+\index{Output!Statistics}
+
+A useful feature of a device ({\ct DEVC}) is to specify an output quantity along with a desired statistic. For example,
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=2.3,4.5,6.7, QUANTITY='TEMPERATURE', ID='whatever', STATISTICS='MAX' /
+\end{verbatim}
+\normalsize
+
+\noindent
+causes FDS to write out the maximum gas phase temperature over the entire mesh containing the point {\ct XYZ}. Note that it
+does not compute the maximum over the entire computational domain, just that particular mesh. Other {\ct STATISTICS} include
+{\ct 'MIN'} and {\ct 'MEAN'}. They can be used for both gas and solid phase output quantities. In the case of solids, the
+specification of a {\ct SURF\_ID} limits the search to only those surfaces. Use the {\ct STATISTICS} feature with caution because
+it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
+
+\subsubsection{Volume-Weighted Mean}
+
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME MEAN'} produces the discrete analog of
+\be \frac{1}{V} \; \int \phi(x,y,z) \; dx \, dy \, dz \ee
+which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this
+statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+
+\subsubsection{Mass-Weighted Mean}
+
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS MEAN'} produces the discrete analog of
+\be \frac{ \int \rho \, \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
+which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this
+statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+
+\subsubsection{Volume Integral}
+
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME INTEGRAL'} produces the discrete analog of
+\be \int \phi(x,y,z) \; dx \, dy \, dz \ee
+Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example,
+heat release rate per unit volume is an appropriate output quantity. Note also that you must specify a volume to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+
+\subsubsection{Area Integral}
+
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='AREA INTEGRAL'} produces the discrete analog of
+\be \int \phi(x,y,z) \; dA \ee
+where $dA$ depends on the coordinates you specify for {\ct XB}.
+Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example,
+the quantity {\ct 'MASS FLUX X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that
+you have named {\ct 'my gas'} through an
+area normal to the $x$ direction. Note also that you must specify an area to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+
+\subsubsection{Surface Integral}
+
+For a given solid phase output quantity, $\phi$, {\ct STATISTICS='SURFACE INTEGRAL'} produces the discrete analog of
+\be \int \phi \; dA \ee
+Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass
+fluxes are appropriate output quantities.
+
+
+\subsubsection{Mass and Energy Flows}
 \label{info:flows}
 
 The net flow of mass and energy into or out of compartments can be useful for many applications. There are several outputs that address these. All are prescribed via
@@ -6848,7 +6857,47 @@ fds2ascii
 at the command prompt. You will be asked a series of questions
 about which type of output file to process, what time interval to
 time average the data, and so forth. A single file is produced
-with the name {\bf CHID\_fds2ascii.csv}.
+with the name {\bf CHID\_fds2ascii.csv}. A typical command line session looks like this:
+
+\footnotesize
+\begin{verbatim}
+>> fds2ascii
+  Enter Job ID string (CHID):
+bucket_test
+  What type of file to parse?
+  PL3D file? Enter 1
+  SLCF file? Enter 2
+  BNDF file? Enter 3
+3
+  Enter Sampling Factor for Data?
+  (1 for all data, 2 for every other point, etc.)
+1
+  Limit the domain size? (y or n)
+y
+  Enter min/max x, y and z
+-5 5 -5 5 0 1
+  1   MESH  1, WALL TEMPERATURE
+  Enter starting and ending time for averaging (s)
+35 36
+  Enter orientation: (plus or minus 1, 2 or 3)
+3
+  Enter number of variables
+1
+ Enter boundary file index for variable 1
+1
+ Enter output file name:
+bucket_test_fds2ascii.csv
+  Writing to file...      bucket_test_fds2ascii.csv
+\end{verbatim}
+
+\normalsize \noindent
+These commands tell {\bf fds2ascii} that you want to convert (binary)
+boundary file data into a text file. You want to sample
+every data point within the specified volume, you want only those surfaces that point 
+upwards (+3 orientation), you only want 1 variable (only one is listed anyway and its index is
+1 -- that is just the number used to list the available files). The data will be time-averaged, and it will
+be output to a file listed at the end of the session.
+
 
 
 \clearpage
@@ -6877,6 +6926,23 @@ soot
 other
 \end{verbatim}
 \normalsize
+
+\noindent
+As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide 
+through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z', SPEC_ID='carbon monoxide',
+      STATISTICS='AREA INTEGRAL' /
+\end{verbatim}
+\normalsize
+
+\noindent
+Here, the {\ct ID} is just a label in the output file. The use of lower case letters for the {\ct SPEC\_ID} indicates that
+you want to record the mass flow of the CO that is implicitly defined by the mixture fraction variables. This is the
+default combustion model in FDS. If you have defined a species explicitly via a {\ct SPEC} line, you can specify that instead.  
+
 
 \begin{warning}
 The format of certain output quantities changed, starting with FDS version 5.2, but the older names originating with version
@@ -6981,7 +7047,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct VOLUME FRACTION}$^*$                       & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
 {\ct WALL CLOCK TIME}                           & Elapsed wall clock time                       & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
-{\ct WALL THICKNESS}                            & $\Delta x_w$                                  & m              & B,D          \\ \hline
+{\ct WALL THICKNESS}                            & See Section~\ref{info:material_components}    & m              & B,D          \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -7016,20 +7082,22 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Boundary File Parameters]{For more information see Section~\ref{info:BNDF}.}
 \label{tbl:BNDF} \\
-%\noindent
-%\begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
+\hline \hline
 \endhead
 {\ct FYI}          & Character   & Comment String (has no effect)    &           &     \\ \hline
 {\ct PART\_ID}     & Character   & Particle identifier (if needed)   &           &     \\ \hline
 {\ct PROP\_ID}     & Character   & Property identifier (if needed)   &           &     \\ \hline
 {\ct QUANTITY}     & Character   & Quantity to visualize             &           &     \\ \hline
 {\ct SPEC\_ID}     & Character   & Species identifier (if needed)    &           &     \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -7042,13 +7110,16 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[MIN/MAX Clipping Parameters]{For more information see Section~\ref{info:CLIP}.}
 \label{tbl:CLIP} \\
-%\noindent
-%\begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\
+\hline \hline
 \endhead
 {\ct FYI}                     & Character      & Comment String (has no effect)   &            &     \\ \hline
 {\ct MAXIMUM\_DENSITY}        & Real           & Maximum Gas Density              & kg/m$^3$   &     \\ \hline
@@ -7068,13 +7139,16 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Control Function Parameters]{For more information see Section~\ref{info:CTRL}.}
 \label{tbl:CTRL} \\
-%\noindent
-%\begin{tabular*}{6.5in}{@{\extracolsep\fill}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\
+\hline \hline
 \endhead
 %{\ct CYCLE\_TIME}    & Real         & Periodicity                                 & s  &                           \\ \hline
 %{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                           \\ \hline
@@ -7088,7 +7162,6 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct ON\_BOUND}      & Character    & Active edge of a {\ct DEADBAND}             &    & {\ct LOWER}               \\ \hline
 {\ct RAMP\_ID}       & Character    & {\ct ID} for a {\ct CUSTOM} ramp controller &    &                           \\ \hline
 {\ct SETPOINT(2)}    & Real         & Lower and upper bound of a {\ct DEADBAND}   &    &                           \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -7102,13 +7175,16 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Device Parameters]{For more information see Section~\ref{info:DEVC}.}
 \label{tbl:DEVC} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\
+\hline \hline
 \endhead
 {\ct BYPASS\_FLOWRATE} & Real            & Aspiration smoke detector parameter                              & kg/s  & 0       \\ \hline
 {\ct CTRL\_ID}         & Character       & Associated {\ct CTRL} line                                       &       &         \\ \hline
@@ -7147,13 +7223,16 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Output Parameters]{For more information see Section~\ref{info:DUMP}.}
 \label{tbl:DUMP} \\
-%\noindent
-%\begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
+\hline \hline
 \endhead
 {\ct CHECK\_VOLUME\_FLOW}       & Logical      & See Section~\ref{info:pressurecorrection}        &           & {\ct .FALSE.}                      \\ \hline
 {\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
@@ -7202,18 +7281,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Header Parameters]{For more information see Section~\ref{info:HEAD}.}
 \label{tbl:HEAD} \\
-%\noindent
-%\begin{tabular*}{6.5in}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct HEAD} (Header Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct HEAD} (Header Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct HEAD} (Header Parameters)} \\
+\hline \hline
 \endhead
 {\ct CHID}      & Character   & Job Identification String      &           & {\ct 'output'} \\ \hline
 {\ct FYI}       & Character   & Comment String (has no effect) &           &                            \\ \hline
 {\ct TITLE}     & Character   & Title for job                  &           &                            \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -7226,13 +7307,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Obstruction Cutout Parameters]{For more information see Section~\ref{info:HOLE}.}
 \label{tbl:HOLE} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\
+\hline \hline
 \endhead
 {\ct COLOR    }    & Character         & Color name of obstruction color                           &       &           \\ \hline
 {\ct CTRL\_ID}     & Character         & {\ct ID} of {\ct ConTRoL} to control hole's existence     &       &           \\ \hline
@@ -7241,7 +7325,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RGB(3)   }    & Integer Triplet   & Color indices (0 - 255) for resulting obstruction(s)      &       &           \\ \hline
 {\ct TRANSPARENCY} & Real              & Transparency of obstruction                               &       &           \\ \hline
 {\ct XB(6)    }    & Real Sextuplet    & Physical coordinates                                      & m     &           \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -7253,19 +7336,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Initial Conditions]{For more information see Section~\ref{info:INIT}.}
 \label{tbl:INIT} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
+\hline \hline
 \endhead
 {\ct DENSITY}               & Real              & Initial value of density                          & kg/m$^3$      & Ambient       \\ \hline
 {\ct MASS\_FRACTION(II)}    & Real Array        & Initial value of species {\ct II}                 & kg/kg         & Ambient       \\ \hline
 {\ct TEMPERATURE}           & Real              & Initial value of temperature                      & $^\circ$C     & {\ct TMPA}    \\ \hline
 {\ct XB(6)}                 & Real Sextuplet    & Coordinates                                       & m             &               \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -7279,13 +7364,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Isosurface Parameters]{For more information see Section~\ref{info:ISOF}.}
 \label{tbl:ISOF} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\
+\hline \hline
 \endhead
 {\ct FYI}                   & Character     & Comment String (has no effect)        &       &         \\ \hline
 %{\ct COLOR\_QUANTITY}       & Character     & Secondary quantity to color surface   &       &         \\ \hline
@@ -7294,7 +7382,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct REDUCE\_TRIANGLES}     & Integer       & Smokeview parameter                   &       & 1       \\ \hline
 {\ct SPEC\_ID}              & Character     & Species indicator (if needed)         &       &         \\ \hline
 {\ct VALUE(I)}              & Real Array    & Contour value(s)                      &       &         \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -7307,13 +7394,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Material Properties]{For more information see Section~\ref{info:MATL}.}
 \label{tbl:MATL} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\
+\hline \hline
 \endhead
 {\ct A}                       & Real        & Pre-exponential factor         &    1/s           & 1E13   \\ \hline
 {\ct ABSORPTION\_COEFFICIENT} & Real        & Absorption Coefficient         &    1/m           & 50000. \\ \hline
@@ -7339,7 +7429,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RESIDUE}                 & Character   & {\ct ID} of residue {\ct MATL} &                  &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat                  & kJ/kg/K          & 0.     \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat      &                  &        \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -7352,13 +7441,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Mesh Parameters]{For more information see Section~\ref{info:MESH}.}
 \label{tbl:MESH} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\
+\hline \hline
 \endhead
 {\ct COLOR}       & Character                   & Mesh Line Color                             &    & {\ct 'BLACK'}    \\ \hline
 {\ct CYLINDRICAL} & Logical                     & 2-D Axi-symmetric calculation               &    & {\ct .FALSE.}    \\ \hline
@@ -7374,7 +7466,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct JBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
 %{\ct KBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
 %{\ct EVAC_Z_OFFSET} & Real                      & Floor level vs evacuation mesh $z$&  m & 1.0  \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -7388,13 +7479,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Miscellaneous Parameters]{For more information see Section~\ref{info:MISC}.}
 \label{tbl:MISC} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
+\hline \hline
 \endhead
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE} & Real & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
 {\ct BACKGROUND\_SPECIES}       & Character     & See Section~\ref{info:SPEC}                   &               & {\ct 'AIR'}       \\ \hline
@@ -7448,8 +7542,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
 {\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
-%\end{tabular*}
-%\end{table}
 \end{longtable}
 
 
@@ -7463,13 +7555,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Obstruction Parameters]{For more information see Section~\ref{info:OBST}.}
 \label{tbl:OBST} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\
+\hline \hline
 \endhead
 {\ct ALLOW\_VENT}         & Logical             & Allow vents on obstruction            &    & {\ct .TRUE.}  \\ \hline
 {\ct BNDF\_FACE(-3:3)}    & Logical Array       & See Section~\ref{info:BNDF}           &    & {\ct .TRUE.}  \\ \hline
@@ -7492,7 +7587,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_ORIGIN(3)}  & Real Triplet        & See Section~\ref{info:texture_map}    & m  & (0.,0.,0.)    \\ \hline
 {\ct TRANSPARENCY}        & Real                & Transparency indicator                &    &  1            \\ \hline
 {\ct XB(6) }              & Real Sextuplet      & Min/Max Physical coordinates          & m  &               \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -7506,13 +7600,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Lagrangian Particles/Droplets]{For more information see Section~\ref{info:PART}.}
 \label{tbl:PART} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
+\hline \hline
 \endhead
 {\ct AGE}                       & Real            & Droplet lifetime                  & s         & 100000.       \\ \hline
 {\ct COLOR}                     & Character       & Default color of droplets         &           & {\ct 'BLACK'} \\ \hline
@@ -7562,20 +7659,22 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Wall Profile Parameters]{For more information see Section~\ref{info:PROF}.}
 \label{tbl:PROF} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
+\hline \hline
 \endhead
 {\ct IOR}      & Real             & Orientation of wall surface      &            &     \\ \hline
 {\ct ID}       & Character        & Identifier                       &            &     \\ \hline
 {\ct FYI}      & Character        & Comment String (has no effect)   &            &     \\ \hline
 {\ct QUANTITY} & Character        & Name of output quantity          &            &     \\ \hline
 {\ct XYZ}      & Real Triplet     & Coordinates of wall surface      & m          &     \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -7587,13 +7686,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Device Properties]{For more information see Section~\ref{info:PROP}.}
 \label{tbl:PROP} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\
+\hline \hline
 \endhead
 {\ct ACTIVATION\_TEMPERATURE}           & Real          & Threshold link temperature                & $^\circ$C             & 74        \\ \hline
 {\ct ACTIVATION\_OBSCURATION}           & Real          & Threshold value of obscuration            & \%/m                  & 3.28      \\ \hline
@@ -7635,13 +7737,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Radiation Parameters]{For more information see Section~\ref{info:RADI}.}
 \label{tbl:RADI} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\
+\hline \hline
 \endhead
 {\ct ANGLE\_INCREMENT}          & Integer  & Number of angles skipped per update &                   & 5             \\ \hline
 {\ct CH4\_BANDS          }      & Logical  & Include extra fuel bands            &                   & {\ct .FALSE.} \\ \hline
@@ -7653,7 +7758,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RADTMP                   } & Real     & Assumed radiative source temp.      & $^\circ$C         & 900           \\ \hline
 {\ct TIME\_STEP\_INCREMENT}     & Integer  & Number time steps skipped           &                   & 3             \\ \hline
 {\ct WIDE\_BAND\_MODEL    }     & Logical  & Non-gray gas assumption             &                   & {\ct .FALSE.} \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -7665,13 +7769,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Ramp Function Parameters]{For more information see Section~\ref{info:RAMP}.}
 \label{tbl:RAMP} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\
+\hline \hline
 \endhead
 %{\ct CTRL\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &     \\ \hline
 %{\ct DEVC\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &     \\ \hline
@@ -7694,13 +7801,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Reaction Parameters]{For more information see Section~\ref{info:REAC}.}
 \label{tbl:REAC} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
+\hline \hline
 \endhead
 {\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)          &   cm$^3$/mol/s    &     \\ \hline
 {\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
@@ -7735,7 +7845,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct X\_O2\_LL}                           & Real        & Lower Oxygen Limit                            &  mol/mol          & 0.15    \\ \hline
 {\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner                  &  kg/kg            & 1.0     \\ \hline
 {\ct Y\_F\_LFL}                           & Real        & Lower Fuel limit (mass fraction)              &  kg/kg            & 0.0     \\ \hline
-{\ct Y\_O2\_INFTY}                        & Real        & Ambient Oxygen Mass Frac.                     &  kg/kg            & 0.23    \\ \hline
+{\ct Y\_O2\_INFTY}                        & Real        & Ambient oxygen mass fraction                  &  kg/kg            & 0.23    \\ \hline
 %\end{tabular*}
 \end{longtable}
 
@@ -7748,13 +7858,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Slice File Parameters]{For more information see Section~\ref{info:SLCF}.}
 \label{tbl:SLCF} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\
+\hline \hline
 \endhead
 {\ct FYI}               & Character         & Comment String (has no effect)         &           &     \\ \hline
 %{\ct MAXIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
@@ -7770,7 +7883,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct TWO\_BYTE    }     & Logical           & Save as 2 byte real                    &           & {\ct .FALSE.}    \\ \hline
 {\ct VECTOR    }        & Logical           & Include flow vectors                   &           & {\ct .FALSE.}    \\ \hline
 {\ct XB(6)}             & Real Sextuplet    & Min/Max coordinates of region to save  & m         &     \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -7783,13 +7895,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Species Parameters]{For more information see Section~\ref{info:SPEC}.}
 \label{tbl:SPEC} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\
+\hline \hline
 \endhead
 {\ct ABSORBING}                     & Logical     & Absorbs radiation                           &                   & {\ct .FALSE.} \\ \hline
 {\ct CONDUCTIVITY}                  & Real        & Conductivity $k$                            & W/m/K             &     \\ \hline
@@ -7804,7 +7919,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.  \\ \hline
 {\ct SIGMALJ}                       & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
 {\ct VISCOSITY}                     & Real        & Dynamic Viscosity $mu$                      & kg/m/s            &     \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -7818,10 +7932,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Surface Properties]{For more information see Section~\ref{info:SURF}.}
 \label{tbl:SURF} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\
+\hline \hline
 \endhead
 {\ct ADIABATIC}                       & Logical         & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                         & Character       & Back boundary condition           &                     & {\ct 'VOID'}            \\ \hline
@@ -7877,7 +7995,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VEL\_T }                         & Real Pair       & Tangential velocity comps.        & m/s                 & 0.     \\ \hline
 {\ct VOLUME\_FLUX}                    & Real            & Normal velocity x vent area       & m$^3$/s             & 0.     \\ \hline
 {\ct Z0 }                             & Real            & Atmospheric profile origin        &  m                  & 10.    \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -7889,18 +8006,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Table Parameters]{For more information see Section~\ref{info:TABL}.}
 \label{tbl:TABL} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct TABL} (Table Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct TABL} (Table Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct TABL} (Table Parameters)} \\
+\hline \hline
 \endhead
 {\ct ID}          & Character   & IDentifier                         &             &     \\ \hline
 {\ct FYI}         & Character   & Comment String (has no effect)     &             &     \\ \hline
 {\ct TABLE\_DATA} & Real Array  & Data for one row of the table      &             &     \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -7913,13 +8032,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Time Parameters]{For more information see Section~\ref{info:TIME}.}
 \label{tbl:TIME} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\
+\hline \hline
 \endhead
 {\ct DT}                   & Real       & Initial time step                   & s           &               \\ \hline
 {\ct FYI}                  & Character  & Comment String (has no effect)      &             &               \\ \hline
@@ -7929,7 +8051,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct T\_END}or{\ct TWFIN } & Real       & Ending time for calculation         & s           & 1             \\ \hline
 %{\ct TIME\_SHRINK\_FACTOR} & Real       & Scaling factor for time ramps and specific heat & & 1.            \\ \hline
 {\ct WALL\_INCREMENT}      & Integer    & Time steps between 1D wall solution updates  &     & 2             \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -7939,20 +8060,22 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[MESH Transformations]{For more information see Section~\ref{info:TRNX}.}
 \label{tbl:TRNX} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct TRNX, TRNY, TRNZ} (MESH Transformations)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct TRNX, TRNY, TRNZ} (MESH Transformations)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct TRNX, TRNY, TRNZ} (MESH Transformations)} \\
+\hline \hline
 \endhead
 {\ct CC    }            & Real          & Computational coordinate           & m            &     \\ \hline
 {\ct FYI}               & Character     & Comment String (has no effect)     &              &     \\ \hline
 {\ct IDERIV}            & Integer       & Order of polynomial transformation &              &     \\ \hline
 {\ct MESH\_NUMBER}      & Integer       & Number of mesh to transform        &              &     \\ \hline
 {\ct PC    }            & Real          & Physical coordinate or derivative  &              &     \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -7965,13 +8088,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Vent Parameters]{For more information see Section~\ref{info:VENT}.}
 \label{tbl:VENT} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\
+\hline \hline
 \endhead
 {\ct COLOR    }             & Character         & See Section~\ref{info:colors}                                 &             &                     \\ \hline
 {\ct CTRL\_ID }             & Character         & {\ct ID} of Control Function                                  &             &                     \\ \hline
@@ -7994,7 +8120,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TRANSPARENCY}          & Real              & Transparency indicator                                        &             &   1.0               \\ \hline
 {\ct XB(6) }                & Real Sextuplet    & Min/Max physical coordinates                                  & m           &                     \\ \hline
 {\ct XYZ(3) }               & Real Triplet      & See Section~\ref{info:spread}                                 & m           &                     \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -8007,18 +8132,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-%\begin{table}[H]
 \caption[Pressure Zone Parameters]{For more information see Section~\ref{info:ZONE}.}
 \label{tbl:ZONE} \\
-%\noindent
-%\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \hline
-\multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\ \hline \hline
+\multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
+\hline \hline
 \endhead
 {\ct ID}                    & Character         & {\ct ID}entifier                       &        &               \\ \hline
 {\ct LEAK\_AREA(N)}         & Real              & Leakage area to pressure zone {\ct N}  & m$^2$  & 0             \\ \hline
 {\ct XB(6)}                 & Real Sextuplet    & Coordinates of Zone                    & m      &               \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -8502,7 +8629,6 @@ appropriate.
 \end{itemize}
 
 
-\clearpage
 \section{Testing the ``Burn-Away'' Feature (\texorpdfstring{{\bf box\_burn\_away}}{box\_burn\_away}) }
 \label{box_burn_away}
 
