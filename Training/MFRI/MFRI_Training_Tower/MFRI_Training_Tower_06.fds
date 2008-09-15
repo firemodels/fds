@@ -1,5 +1,5 @@
-&HEAD CHID='MFRI_Training_Tower_01', TITLE='MFRI Fire Building (test 1) SVN $Revision$ '/
-# Based on HRR values from test 1
+&HEAD CHID='MFRI_Training_Tower_06', TITLE='MFRI Fire Building (test 1) SVN $Revision$ '/
+# Based on HRR values from test 6
 
 &MESH IJK=80,60,30, XB=-1.0, 7.0, -1.0, 5.0,0.0,3.00/
 &MESH IJK=80,60,30, XB= 7.0,15.0, -1.0, 5.0,0.0,3.00/
@@ -55,7 +55,7 @@
       
 &SURF ID='FIRE',
       COLOR='RED',
-      HRRPUA=2336.,
+      HRRPUA=2430.,
       RAMP_Q='FIRE_RAMP_Q'/
 
 &SURF ID='WOOD',
@@ -68,11 +68,13 @@
 ## Ramp Profiles
 
 &RAMP ID='FIRE_RAMP_Q', T=0.00, F=0.00/
-&RAMP ID='FIRE_RAMP_Q', T=68.0, F=1.00/
-&RAMP ID='FIRE_RAMP_Q', T=77.0, F=0.95/
-&RAMP ID='FIRE_RAMP_Q', T=140.0, F=0.16/
-&RAMP ID='FIRE_RAMP_Q', T=173.0, F=0.089/
-&RAMP ID='FIRE_RAMP_Q', T=400.0, F=0.017/
+&RAMP ID='FIRE_RAMP_Q', T=37.0, F=0.52/
+&RAMP ID='FIRE_RAMP_Q', T=80.0, F=0.58/
+&RAMP ID='FIRE_RAMP_Q', T=150.0, F=1.0/
+&RAMP ID='FIRE_RAMP_Q', T=240.0, F=0.8/
+&RAMP ID='FIRE_RAMP_Q', T=330.0, F=0.43/
+&RAMP ID='FIRE_RAMP_Q', T=345.0, F=0.5/
+&RAMP ID='FIRE_RAMP_Q', T=400.0, F=0.23/
 
 ## Geometric Information
 
