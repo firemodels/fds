@@ -3587,9 +3587,14 @@ energy but does not produce any ``product'' because the concrete is
 assumed to have either fallen off the surface in chunks or pulverized
 powder. The concrete's mass is not conserved {\em in the model}
 because it has essentially disappeared from that particular surface.
+More general way to specify gaseous yields is to use {\ct NU\_GAS}
+keyword, as explained in Section~\ref{nu_gas}.
 
-Now you must specify at what temperature the reaction occurs, and how fast the reaction occurs at that temperature.
-The reaction rate at the temperature, $T_s$, of the $i$th material ({\em i.e.} the {\ct MATL} that you are currently describing) undergoing its $j$th reaction is given by:
+Now you must specify at what temperature the reaction occurs, and how
+fast the reaction occurs at that temperature.  The reaction rate at
+the temperature, $T_s$, of the $i$th material ({\em i.e.} the {\ct
+MATL} that you are currently describing) undergoing its $j$th reaction
+is given by:
 \be
   r_{ij} =
   \dod{ }{t} \left( \frac{\rho_{s,i}}{\rho_{s0}} \right) =
@@ -3610,22 +3615,26 @@ is 1 by default. If the value of $n_s$ is not known, it is a good
 starting point to assume $n_s=1$.
 
 The pre-exponential factor, $A_{ij}$, is prescribed under the name
-{\ct A(j)}, with units of s$^{-1}$. $E_{ij}$, the activation energy, is
-prescribed via {\ct E(j)} in units of kJ/kmol. Remember that 1~kcal is
-4.184~kJ, and be careful with factors of 1000.  $A$ and $E$ are not
+{\ct A(j)}, with units of s$^{-1}$. $E_{ij}$, the activation energy,
+is prescribed via {\ct E(j)} in units of kJ/kmol. Remember that 1~kcal
+is 4.184~kJ, and be careful with factors of 1000.  $A$ and $E$ are not
 readily accessible for most real materials.  However, if they are
 known, specify both. Avoid specifying just one because they act as a
 pair.  If $A$ and $E$ are not known, which is usually the case,
-specify {\ct REFERENCE\_RATE} (s$^{-1}$) and {\ct REFERENCE\_TEMPERATURE}($^\circ$C). This directs FDS to calculate the activation energy, {\ct E}, using
-the specified reference rate, reference temperature, and an assumed value of $A=1\times 10^{13}$~s$^{-1}$. Essentially, this guarantees that
-the {\ct REFERENCE\_RATE} is achieved at the {\ct REFERENCE\_TEMPERATURE}. The default value of {\ct REFERENCE\_RATE} is
-0.1~s$^{-1}$.  It is suggested that unless you have information to the
-contrary, leave {\ct REFERENCE\_RATE} at its default value and just
-specify the {\ct REFERENCE\_TEMPERATURE}. Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition
-temperature. Rather, it is simply the temperature at which the mass
-fraction of the $i$th material decreases at a rate of
-0.1~s$^{-1}$. You should check the sensitivity of these parameters
-following the procedure explained in
+specify {\ct REFERENCE\_RATE} (s$^{-1}$) and {\ct
+REFERENCE\_TEMPERATURE}($^\circ$C). This directs FDS to calculate the
+activation energy, {\ct E}, using the specified reference rate,
+reference temperature, and an assumed value of $A=1\times
+10^{13}$~s$^{-1}$. Essentially, this guarantees that the {\ct
+REFERENCE\_RATE} is achieved at the {\ct REFERENCE\_TEMPERATURE}. The
+default value of {\ct REFERENCE\_RATE} is 0.1~s$^{-1}$.  It is
+suggested that unless you have information to the contrary, leave {\ct
+REFERENCE\_RATE} at its default value and just specify the {\ct
+REFERENCE\_TEMPERATURE}. Note that the {\ct REFERENCE\_TEMPERATURE} is
+{\em not} the same as an ignition temperature. Rather, it is simply
+the temperature at which the mass fraction of the $i$th material
+decreases at a rate of 0.1~s$^{-1}$. You should check the sensitivity
+of these parameters following the procedure explained in
 Section~\ref{solid_phase_verification}.  \index{MATL!REFERENCE\_RATE}
 \index{MATL!REFERENCE\_TEMPERATURE}
 
@@ -3649,13 +3658,18 @@ degrees Kelvin within the program. Thus, the formulae in this section ought to b
 \end{warning}
 
 \noindent
-One last issue before a few examples -- the most important one of all. Eq.~(\ref{rr}) describes the rate of the reaction as a function of temperature.
-Most solid phase reactions require energy; that is, they are {\em endothermic}. The amount of energy consumed, per unit mass of reactant that is converted into
-something else, is specified by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy
-difference between the products and the reactant. A positive value indicates that the reaction is {\em endothermic}; that is, the reaction takes energy out of the
-system. Usually the {\ct HEAT\_OF\_REACTION} is accurately known only
-for simple phase change reactions like the vaporization of water. For
-other reactions, it must be determined empirically.
+One last issue before a few examples -- the most important one of
+all. Eq.~(\ref{rr}) describes the rate of the reaction as a function
+of temperature.  Most solid phase reactions require energy; that is,
+they are {\em endothermic}. The amount of energy consumed, per unit
+mass of reactant that is converted into something else, is specified
+by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy
+difference between the products and the reactant. A positive value
+indicates that the reaction is {\em endothermic}; that is, the
+reaction takes energy out of the system. Usually the {\ct
+HEAT\_OF\_REACTION} is accurately known only for simple phase change
+reactions like the vaporization of water. For other reactions, it must
+be determined empirically.
 \index{MATL!HEAT\_OF\_REACTION}
 
 
@@ -3678,18 +3692,34 @@ converting all its mass to fuel gases ({\ct NU\_FUEL=1.}).
 \normalsize
 
 \noindent
-Note that the {\ct (1)} has been added to the reaction parameters to emphasize the fact that these parameters are stored in arrays of length equal to {\ct N\_REACTIONS}. If there
-is only one reaction, you need not include the {\ct (1)}, but it is a good habit to get into.
-Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released per unit mass of fuel gas that mixes with oxygen and combusts.  This has nothing to do with the pyrolysis
-process, so why is it specified here? The answer is that there can be only one {\em gas phase} reaction of fuel and oxygen in FDS, but there can be dozens of different materials and
-dozens of {\em solid phase} reactions. To ensure that the fuel vapors from
-different materials combust to produce the proper amount of energy, it is very important to specify a {\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss rate
-of fuel gases is automatically adjusted so that the effective mass loss rate multiplied by the single, global, gas phase heat of combustion produces the expected heat release rate.
-\index{MATL!HEAT\_OF\_COMBUSTION}.  If, for example, the {\ct HEAT\_OF\_COMBUSTION} specified on the {\ct REAC} line is twice that
-specified on the {\ct MATL} line, the mass of contained within wall cell will be decremented by that determined by the
-pyrolysis model, but the mass added to gas phase would be reduced by 50 \%.
+Note that the {\ct (1)} has been added to the reaction parameters to
+emphasize the fact that these parameters are stored in arrays of
+length equal to {\ct N\_REACTIONS}. If there is only one reaction, you
+need not include the {\ct (1)}, but it is a good habit to get into.
+Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released
+per unit mass of fuel gas that mixes with oxygen and combusts.  This
+has nothing to do with the pyrolysis process, so why is it specified
+here? The answer is that there can be only one {\em gas phase}
+reaction of fuel and oxygen in FDS, but there can be dozens of
+different materials and dozens of {\em solid phase} reactions. To
+ensure that the fuel vapors from different materials combust to
+produce the proper amount of energy, it is very important to specify a
+{\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss
+rate of fuel gases is automatically adjusted so that the effective
+mass loss rate multiplied by the single, global, gas phase heat of
+combustion produces the expected heat release rate
+\index{MATL!HEAT\_OF\_COMBUSTION}.  If, for example, the {\ct
+HEAT\_OF\_COMBUSTION} specified on the {\ct REAC} line is twice that
+specified on the {\ct MATL} line, the mass of contained within wall
+cell will be decremented by that determined by the pyrolysis model,
+but the mass added to gas phase would be reduced by 50 \%. A different
+value of heat of combustion can be specified for each reaction and
+each gaseous species using the notation {\ct
+HEAT\_OF\_COMBUSTION(j,s)}, as explained in Section~\ref{nu_gas}. 
 
-Several other examples of solid phase reactions can be found in various examples. See Sections~\ref{thermoplastic} and \ref{charring_solid}.
+Several other examples of solid phase reactions can be found in
+various examples. See Sections~\ref{thermoplastic} and
+\ref{charring_solid}.
 
 
 
@@ -3831,6 +3861,57 @@ Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
 denotes the absorption in depth of thermal radiation. Liquids do not
 just absorb radiation at the surface, but rather over a thin layer
 near the surface. Its effect on the burning rate is significant.
+
+\subsection{Special topic: Yields of Gaseous Species (NU\_GAS)}
+\label{nu_gas}
+\index{MATL!NU\_GAS}
+
+The yields of fuel and water gases are usually specified
+using the {\ct NU\_FUEL} and {\ct NU\_WATER} keywords at the {\ct
+MATL} line. A yield of any gaseous species that is present in the FDS
+simulation can be specified using {\ct NU\_GAS} keyword. It is used in
+the form {\ct NU\_GAS(j,s)} where {\ct j} refers to the j'th reaction
+of the current material, and {\ct s} refers to the s'th species. The
+order of the gaseous species is the order of the corresponding {\ct
+SPEC} lines. Note howerer, that in many cases FDS will automatically
+generate few species for mixture fraction and water vapor. It is best
+to check the order and numbering of the species from the CHID.out
+file. {\ct NU\_GAS} can also be used to specify the yields of the
+mixture fraction and water vapor.
+
+For consistency, {\ct HEAT\_OF\_COMBUSTION(j,s)} can also be specified
+separatelly for each reaction and species. These values values are
+used only if the corresponding heat of combustion for the gaseous
+species is greater than zero.
+
+In the example below, the pyrolysis of wood is modelled in the context
+of finite rate reactions. The yield of gaseous fuel is specified for
+propane, which in the example is used as a gas phase fuel.
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID = 'PROPANE'/
+&SPEC ID = 'OXYGEN' MASS_FRACTION_0 = 0.23 /
+&SPEC ID = 'WATER VAPOR' /
+&SPEC ID = 'CARBON DIOXIDE' /
+
+&MATL ID = 'WOOD'
+      EMISSIVITY        = 0.9
+      CONDUCTIVITY      = 0.2
+      SPECIFIC_HEAT     = 1.3
+      DENSITY           = 570. 
+      N_REACTIONS       = 1
+      A                 = 1.89E10
+      E                 = 1.51E5
+      N_S               = 1.0
+      NU_RESIDUE        = 0.171619
+      NU_GAS(1,:)       = 0.828381,0,0,0
+      HEAT_OF_REACTION  = 430.
+      HEAT_OF_COMBUSTION(1,1) = 14500.
+      RESIDUE           = 'CHAR'/
+
+\end{verbatim}
+
 
 \subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
 \index{SURF!BURN\_AWAY}
