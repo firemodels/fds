@@ -2064,17 +2064,17 @@ coefficient are effectively reduced.}
 \end{itemize}
 Each material component may undergo several competing reactions, and
 each of these reactions may produce some other solid component
-(residue), gaseous fuel, and/or water vapor according to
-the yield coefficients $\nu_s$, $\nu_f$ and $\nu_w$, respectively.
-These coefficients should usually satisfy $\nu_s + \nu_f + \nu_w = 1$,
-but smaller yields may also be used to take into account the gaseous
-products that are not explicitly included in the simulation.
+(residue) and gaseous volatiles according to the yield coefficients
+$\nu_s$ and $\nu_{g,s}$, respectively.  These coefficients should
+usually satisfy $\nu_s + \sum_s\nu_{g,\gamma} = 1$, but smaller yields may
+also be used to take into account the gaseous products that are not
+explicitly included in the simulation.
 
 Consider material component $\alpha$ that undergoes $N_{r,\alpha}$
 separate reactions. We will use the index $\beta$ to represent one of
 these reactions:
 \be \hbox{Material}_\alpha \rightarrow \nu_{s,\alpha \beta} \;
-    \hbox{Residue}_{\alpha \beta} + \nu_{w,\alpha \beta} \; \hbox{H$_2$O} + \nu_{f,\alpha \beta} \; \hbox{HC} \ee
+    \hbox{Residue}_{\alpha \beta} + \nu_{g,\alpha \beta,w} \; \hbox{H$_2$O} + \nu_{g,\alpha \beta,f} \; \hbox{HC} \ee
 The local density of material component $\alpha$ evolves in time
 according to the solid phase species conservation equation
 \be
@@ -2109,21 +2109,15 @@ S_\alpha = \sum_{\alpha'=1}^{N_m} \sum_{\beta=1}^{N_{r,\alpha'}}
        \quad \quad
            \hbox{(where Residue$_{\alpha' \beta}$ = Material$_\alpha$) }
 \ee
-The volumetric production rate of fuel gases and water vapor are
+The volumetric production rate of each gaseous volatile is
 \be
-\dot{m}_f''' = \rho_{s0}\; \sum_{\alpha=1}^{N_m} \sum_{\beta=1}^{N_{r,\alpha}}
-    \nu_{f,\alpha \beta} \; r_{\alpha \beta}
+\dot{m}_{\gamma}''' = \rho_{s0}\; \sum_{\alpha=1}^{N_m} \sum_{\beta=1}^{N_{r,\alpha}}
+    \nu_{g,\alpha \beta,\gamma} \; r_{\alpha \beta}
 \ee
-\be
-\dot{m}_w''' = \rho_{s0}\; \sum_{\alpha=1}^{N_m}
-    \sum_{\beta=1}^{N_{r,\alpha}}
-    \nu_{w,\alpha \beta} \; r_{\alpha \beta}
-\ee
-It is assumed that the fuel gases and water vapor are transported instantaneously to the surface, where the
+It is assumed that the gases are transported instantaneously to the surface, where the
 mass fluxes are given by:
 \be
-   \dm_f'' = \int_0^L \dm_f'''(x) \, dx  \quad ; \quad
-   \dm_w'' = \int_0^L \dm_w'''(x) \, dx
+   \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \, dx  
 \ee
 where $L$ is the thickness of the surface. The chemical source term of
 the heat conduction equation consists of the heats of reaction
@@ -4158,8 +4152,7 @@ $\kappa$                  \> absorption coefficient \\
 $\mu$                     \> dynamic viscosity \\
 $\nu_\alpha$              \> stoichiometric coefficient, species $\alpha$ \\
 $\nu_s$           \> yield of solid residue in solid phase reaction \\
-$\nu_f$           \> yield of gaseous fuel in solid phase reaction \\
-$\nu_w$           \> yield of gaseous water in solid phase reaction \\
+$\nu_g,\gamma$    \> yield of gaseous species $\gamma$ in solid phase reaction \\
 $\rho$                    \> density \\
 $\btau_{ij}$              \> viscous stress tensor \\
 $\chi_r$                  \> radiative loss fraction \\
