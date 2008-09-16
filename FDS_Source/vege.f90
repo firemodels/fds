@@ -188,13 +188,13 @@ TREE_LOOP: DO NCT=1,N_TREES
 !
    IF_RECTANGULAR_VEGETATION:IF (VEG_FUEL_GEOM(NCT) .EQ. 'RECTANGLE')THEN
        NLP_RECT_VEG = 0
-       DO NZB=0,KBAR
+       DO NZB=0,KBAR-1
         ZLOC = Z(NZB) + 0.5_EB*DZ(NZB)
         IF (ZLOC.GE.ZS_RECT_VEG(NCT) .AND. ZLOC.LE.ZF_RECT_VEG(NCT)) THEN
-         DO NXB = 0,IBAR
+         DO NXB = 0,IBAR-1
           XLOC = X(NXB) + 0.5_EB*DX(NXB)
           IF (XLOC .GE. XS_RECT_VEG(NCT) .AND. XLOC .LE. XF_RECT_VEG(NCT)) THEN
-           DO NYB = 0,JBAR
+           DO NYB = 0,JBAR-1
             YLOC = Y(NYB) + 0.5_EB*DY(NYB)
             IF (YLOC .GE. YS_RECT_VEG(NCT) .AND. YLOC .LE. YF_RECT_VEG(NCT)) THEN
              NLP  = NLP + 1
