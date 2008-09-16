@@ -3587,8 +3587,8 @@ energy but does not produce any ``product'' because the concrete is
 assumed to have either fallen off the surface in chunks or pulverized
 powder. The concrete's mass is not conserved {\em in the model}
 because it has essentially disappeared from that particular surface.
-More general way to specify gaseous yields is to use {\ct NU\_GAS}
-keyword, as explained in Section~\ref{nu_gas}.
+A more general way to specify gaseous yields is to use the parameter {\ct NU\_GAS},
+as explained in Section~\ref{nu_gas}.
 
 Now you must specify at what temperature the reaction occurs, and how
 fast the reaction occurs at that temperature.  The reaction rate at
@@ -3659,7 +3659,7 @@ degrees Kelvin within the program. Thus, the formulae in this section ought to b
 
 \noindent
 One last issue before a few examples -- the most important one of
-all. Eq.~(\ref{rr}) describes the rate of the reaction as a function
+all. Equation~(\ref{rr}) describes the rate of the reaction as a function
 of temperature.  Most solid phase reactions require energy; that is,
 they are {\em endothermic}. The amount of energy consumed, per unit
 mass of reactant that is converted into something else, is specified
@@ -3692,7 +3692,7 @@ converting all its mass to fuel gases ({\ct NU\_FUEL=1.}).
 \normalsize
 
 \noindent
-Note that the {\ct (1)} has been added to the reaction parameters to
+Note that the argument {\ct (1)} has been added to the reaction parameters to
 emphasize the fact that these parameters are stored in arrays of
 length equal to {\ct N\_REACTIONS}. If there is only one reaction, you
 need not include the {\ct (1)}, but it is a good habit to get into.
@@ -3715,7 +3715,7 @@ cell will be decremented by that determined by the pyrolysis model,
 but the mass added to gas phase would be reduced by 50 \%. A different
 value of heat of combustion can be specified for each reaction and
 each gaseous species using the notation {\ct
-HEAT\_OF\_COMBUSTION(j,s)}, as explained in Section~\ref{nu_gas}. 
+HEAT\_OF\_COMBUSTION(j,s)}, as explained in Section~\ref{nu_gas}.
 
 Several other examples of solid phase reactions can be found in
 various examples. See Sections~\ref{thermoplastic} and
@@ -3844,8 +3844,7 @@ properties are not all traceable to a measurement.
 \end{verbatim} \normalsize
 
 \noindent
-\index{MATL!BOILING\_TEMPERATURE}
-The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
+The inclusion of {\ct BOILING\_TEMPERATURE} \index{MATL!BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
 pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the
 phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent
 heat of vaporization. The gaseous fuel yield, {\ct NU\_FUEL}, is 0.97 instead of 1 to account for
@@ -3867,50 +3866,47 @@ near the surface. Its effect on the burning rate is significant.
 \index{MATL!NU\_GAS}
 
 The yields of fuel and water gases are usually specified
-using the {\ct NU\_FUEL} and {\ct NU\_WATER} keywords at the {\ct
-MATL} line. A yield of any gaseous species that is present in the FDS
-simulation can be specified using {\ct NU\_GAS} keyword. It is used in
-the form {\ct NU\_GAS(j,s)} where {\ct j} refers to the j'th reaction
-of the current material, and {\ct s} refers to the s'th species. The
-order of the gaseous species is the order of the corresponding {\ct
-SPEC} lines. Note howerer, that in many cases FDS will automatically
-generate few species for mixture fraction and water vapor. It is best
-to check the order and numbering of the species from the CHID.out
-file. {\ct NU\_GAS} can also be used to specify the yields of the
-mixture fraction and water vapor.
+with the parameters {\ct NU\_FUEL} and {\ct NU\_WATER} on the {\ct MATL} line. 
+However, the yield of any explicitly-defined (via the {\ct SPEC} line) gas species
+can be specified using the parameter {\ct NU\_GAS(j,k)}, where {\ct j} refers to the {\ct j}'th reaction
+of the material and {\ct k} refers to the {\ct k}'th explicitly-defined gas species.  
+{\ct NU\_GAS} can also be used to specify the yields of the
+mixture fraction and water vapor, assuming each is implicitly-defined and its order in the list of 
+species is obtained from the output file {\bf CHID.out}.
 
-For consistency, {\ct HEAT\_OF\_COMBUSTION(j,s)} can also be specified
-separatelly for each reaction and species. These values values are
+For consistency, the {\ct HEAT\_OF\_COMBUSTION(j,k)} can also be specified
+separately for each reaction and species. These values are
 used only if the corresponding heat of combustion for the gaseous
 species is greater than zero.
 
-In the example below, the pyrolysis of wood is modelled in the context
-of finite rate reactions. The yield of gaseous fuel is specified for
-propane, which in the example is used as a gas phase fuel.
+In the example below, the pyrolysis of wood is included within a simulation that uses
+a finite-rate reaction instead of the default mixture fraction model. Notice in this case that
+all of the gas species (except for the background nitrogen) are explicitly defined, and as a result, FDS
+needs to be told explicitly what gaseous species are produced by the solid phase reactions. In this case, 82~\% of the 
+mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted to solid {\ct 'CHAR'}.
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID = 'PROPANE'/
-&SPEC ID = 'OXYGEN' MASS_FRACTION_0 = 0.23 /
+&SPEC ID = 'PYROLYZATE', MW=53.6 /
+&SPEC ID = 'OXYGEN', MASS_FRACTION_0 = 0.23 /
 &SPEC ID = 'WATER VAPOR' /
 &SPEC ID = 'CARBON DIOXIDE' /
 
 &MATL ID = 'WOOD'
-      EMISSIVITY        = 0.9
-      CONDUCTIVITY      = 0.2
-      SPECIFIC_HEAT     = 1.3
-      DENSITY           = 570. 
-      N_REACTIONS       = 1
-      A                 = 1.89E10
-      E                 = 1.51E5
-      N_S               = 1.0
-      NU_RESIDUE        = 0.171619
-      NU_GAS(1,:)       = 0.828381,0,0,0
-      HEAT_OF_REACTION  = 430.
+      EMISSIVITY              = 0.9
+      CONDUCTIVITY            = 0.2
+      SPECIFIC_HEAT           = 1.3
+      DENSITY                 = 570.
+      N_REACTIONS             = 1
+      A                       = 1.89E10
+      E                       = 1.51E5
+      N_S                     = 1.0
+      NU_RESIDUE              = 0.18
+      NU_GAS(1,1:4)           = 0.82,0,0,0
+      HEAT_OF_REACTION        = 430.
       HEAT_OF_COMBUSTION(1,1) = 14500.
-      RESIDUE           = 'CHAR'/
-
-\end{verbatim}
+      RESIDUE                 = 'CHAR' /
+\end{verbatim} \normalsize
 
 
 \subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
@@ -6197,7 +6193,7 @@ successfully. This file can be used as an error indicator. It is {\ct
 FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and
 rendered by Smokeview. Some of the files are just comma-delimited text files. It is important to remember that you must explicitly declare in
 the input file most of the FDS output data. A considerable amount of the input file is usually devoted to this.
- 
+
 
 \subsection{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
 \index{Output!Point Measurements}
@@ -6508,7 +6504,7 @@ Smokeview to be used for visualization.
 \section{Special Output Quantities}
 
 This section lists a variety of output quantities that are useful for studying thermally-driven flows, combustion, pyrolysis, and so forth. Note that some
-of the output quantities can be produced in a variety of ways. 
+of the output quantities can be produced in a variety of ways.
 
 
 \subsection{Heat Release Rate}
@@ -6974,7 +6970,7 @@ bucket_test_fds2ascii.csv
 \normalsize \noindent
 These commands tell {\bf fds2ascii} that you want to convert (binary)
 boundary file data into a text file. You want to sample
-every data point within the specified volume, you want only those surfaces that point 
+every data point within the specified volume, you want only those surfaces that point
 upwards (+3 orientation), you only want 1 variable (only one is listed anyway and its index is
 1 -- that is just the number used to list the available files). The data will be time-averaged, and it will
 be output to a file listed at the end of the session.
@@ -7009,7 +7005,7 @@ other
 \normalsize
 
 \noindent
-As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide 
+As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide
 through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
 
 \footnotesize
@@ -7022,7 +7018,7 @@ through a horizontal plane, like the total amount entrained in a fire plume. Use
 \noindent
 Here, the {\ct ID} is just a label in the output file. The use of lower case letters for the {\ct SPEC\_ID} indicates that
 you want to record the mass flow of the CO that is implicitly defined by the mixture fraction variables. This is the
-default combustion model in FDS. If you have defined a species explicitly via a {\ct SPEC} line, you can specify that instead.  
+default combustion model in FDS. If you have defined a species explicitly via a {\ct SPEC} line, you can specify that instead.
 
 
 \begin{warning}
@@ -7166,7 +7162,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \caption[Boundary File Parameters]{For more information see Section~\ref{info:BNDF}.}
 \label{tbl:BNDF} \\
 \hline
-\multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7194,7 +7190,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \caption[MIN/MAX Clipping Parameters]{For more information see Section~\ref{info:CLIP}.}
 \label{tbl:CLIP} \\
 \hline
-\multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\ 
+\multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7223,7 +7219,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \caption[Control Function Parameters]{For more information see Section~\ref{info:CTRL}.}
 \label{tbl:CTRL} \\
 \hline
-\multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7259,7 +7255,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \caption[Device Parameters]{For more information see Section~\ref{info:DEVC}.}
 \label{tbl:DEVC} \\
 \hline
-\multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7307,7 +7303,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \caption[Output Parameters]{For more information see Section~\ref{info:DUMP}.}
 \label{tbl:DUMP} \\
 \hline
-\multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7365,7 +7361,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Header Parameters]{For more information see Section~\ref{info:HEAD}.}
 \label{tbl:HEAD} \\
 \hline
-\multicolumn{5}{|c|}{{\ct HEAD} (Header Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct HEAD} (Header Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7391,7 +7387,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Obstruction Cutout Parameters]{For more information see Section~\ref{info:HOLE}.}
 \label{tbl:HOLE} \\
 \hline
-\multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7420,7 +7416,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Initial Conditions]{For more information see Section~\ref{info:INIT}.}
 \label{tbl:INIT} \\
 \hline
-\multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\ 
+\multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7448,7 +7444,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Isosurface Parameters]{For more information see Section~\ref{info:ISOF}.}
 \label{tbl:ISOF} \\
 \hline
-\multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7478,7 +7474,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Material Properties]{For more information see Section~\ref{info:MATL}.}
 \label{tbl:MATL} \\
 \hline
-\multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\ 
+\multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7525,7 +7521,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Mesh Parameters]{For more information see Section~\ref{info:MESH}.}
 \label{tbl:MESH} \\
 \hline
-\multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7563,7 +7559,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Miscellaneous Parameters]{For more information see Section~\ref{info:MISC}.}
 \label{tbl:MISC} \\
 \hline
-\multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7639,7 +7635,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Obstruction Parameters]{For more information see Section~\ref{info:OBST}.}
 \label{tbl:OBST} \\
 \hline
-\multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7684,7 +7680,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Lagrangian Particles/Droplets]{For more information see Section~\ref{info:PART}.}
 \label{tbl:PART} \\
 \hline
-\multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\ 
+\multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7743,7 +7739,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Wall Profile Parameters]{For more information see Section~\ref{info:PROF}.}
 \label{tbl:PROF} \\
 \hline
-\multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7770,7 +7766,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Device Properties]{For more information see Section~\ref{info:PROP}.}
 \label{tbl:PROP} \\
 \hline
-\multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\ 
+\multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7821,7 +7817,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Radiation Parameters]{For more information see Section~\ref{info:RADI}.}
 \label{tbl:RADI} \\
 \hline
-\multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7853,7 +7849,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Ramp Function Parameters]{For more information see Section~\ref{info:RAMP}.}
 \label{tbl:RAMP} \\
 \hline
-\multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7885,7 +7881,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Reaction Parameters]{For more information see Section~\ref{info:REAC}.}
 \label{tbl:REAC} \\
 \hline
-\multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7942,7 +7938,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Slice File Parameters]{For more information see Section~\ref{info:SLCF}.}
 \label{tbl:SLCF} \\
 \hline
-\multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -7979,7 +7975,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Species Parameters]{For more information see Section~\ref{info:SPEC}.}
 \label{tbl:SPEC} \\
 \hline
-\multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -8014,7 +8010,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Surface Properties]{For more information see Section~\ref{info:SURF}.}
 \label{tbl:SURF} \\
 \hline
-\multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\ 
+\multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -8090,7 +8086,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Table Parameters]{For more information see Section~\ref{info:TABL}.}
 \label{tbl:TABL} \\
 \hline
-\multicolumn{5}{|c|}{{\ct TABL} (Table Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct TABL} (Table Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -8116,7 +8112,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Time Parameters]{For more information see Section~\ref{info:TIME}.}
 \label{tbl:TIME} \\
 \hline
-\multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -8144,7 +8140,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[MESH Transformations]{For more information see Section~\ref{info:TRNX}.}
 \label{tbl:TRNX} \\
 \hline
-\multicolumn{5}{|c|}{{\ct TRNX, TRNY, TRNZ} (MESH Transformations)} \\ 
+\multicolumn{5}{|c|}{{\ct TRNX, TRNY, TRNZ} (MESH Transformations)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -8172,7 +8168,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Vent Parameters]{For more information see Section~\ref{info:VENT}.}
 \label{tbl:VENT} \\
 \hline
-\multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct VENT} (Vent Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
@@ -8216,7 +8212,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Pressure Zone Parameters]{For more information see Section~\ref{info:ZONE}.}
 \label{tbl:ZONE} \\
 \hline
-\multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\ 
+\multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
