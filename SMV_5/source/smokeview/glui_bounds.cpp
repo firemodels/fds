@@ -177,22 +177,24 @@ extern "C" void glui_bounds_setup(int main_window){
       for(i=0;i<npatch_files;i++){
         if(patchinfo[i].firstshort==1)glui_bounds->add_radiobutton_to_group(bf_rlist,patchinfo[i].label.shortlabel);
       }
-    }
-    if(nradio>1){
+#ifdef pp_SHOW_IGNITED
       if(activate_ignited==1){
         glui_bounds->add_separator_to_panel(panel_bound);
         showchar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show Ignited",&vis_ignited,SHOWCHAR,Bound_CB);
         showonlychar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show Only Ignited",&vis_onlyignited,SHOWCHAR,Bound_CB);
         Bound_CB(SHOWCHAR);
       }
+#endif
       glui_bounds->add_column_to_panel(panel_bound,false);
     }
     else{
+#ifdef pp_SHOW_IGNITED
       if(activate_ignited==1){
         showchar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show Ignited",&vis_ignited,SHOWCHAR,Bound_CB);
         showonlychar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show Only Ignited",&vis_onlyignited,SHOWCHAR,Bound_CB);
         Bound_CB(SHOWCHAR);
       }
+#endif
     }
 
     boundmenu(&rollout_BOUNDARY,panel_bound,"Reload Boundary File(s)",

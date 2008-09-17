@@ -203,24 +203,6 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_bound_30
-// render boundary files
-UNLOADALL
-LOADINIFILE
- plume5c_bound_ign.ini
-LOADFILE
- plume5c_03.bf
-SETTIMEVAL
- 1.0
-RENDERONCE
- plume5c_bound_ign_01
-SETTIMEVAL
- 10.0
-RENDERONCE
- plume5c_bound_ign_10
-SETTIMEVAL
- 30.0
-RENDERONCE
- plume5c_bound_ign_30
 // render smoke files
 UNLOADALL
 LOADFILE

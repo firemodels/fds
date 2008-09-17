@@ -1165,7 +1165,14 @@ void initvars1(void){
   setpatchchopmin=0, setpatchchopmax=0;
   patchchopmin=0,  patchchopmax=0;
 
-  vis_onlyignited=0, vis_ignited=0, canshow_ignited=1, activate_ignited=1;
+  vis_onlyignited=0, vis_ignited=0;
+#ifdef pp_SHOW_IGNITED
+  activate_ignited=1;
+  canshow_ignited=1;
+#else
+  activate_ignited=0;
+  canshow_ignited=0;
+#endif
   settmin_p=0, settmin_b=0, settmin_s=0, settmin_z=0, settmin_i=0;
   settmax_p=0, settmax_b=0, settmax_s=0, settmax_z=0, settmax_i=0;
   set_no_part=0;
