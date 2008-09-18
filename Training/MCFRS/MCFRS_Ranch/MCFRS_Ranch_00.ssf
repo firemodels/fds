@@ -1,28 +1,32 @@
+LOADINIFILE
+ MCFRS_Ranch_00_slice.ini
 RENDERDIR
  ../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
+UNLOADALL
+LOADINIFILE
+ MCFRS_Ranch_00_slice.ini
 SETVIEWPOINT
  view 1
-LOAD3DSMOKE
- soot mass fraction
-LOAD3DSMOKE
- HRRPUV
+LOADSLICE
+ TEMPERATURE
+ 3 2.300000
 SETTIMEVAL
  0.000000
 RENDERONCE
- ranch_smoke_000
+ ranch_slice_temp_000
 SETTIMEVAL
  30.000000
 RENDERONCE
- ranch_smoke_030
+ ranch_slice_temp_030
 SETTIMEVAL
  60.000000
 RENDERONCE
- ranch_smoke_060
+ ranch_slice_temp_060
 SETTIMEVAL
  120.000000
 RENDERONCE
- ranch_smoke_120
+ ranch_slice_temp_120
 SETTIMEVAL
  240.000000
 RENDERONCE
- ranch_smoke_240
+ ranch_slice_temp_240
