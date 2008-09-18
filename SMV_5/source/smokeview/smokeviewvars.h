@@ -646,7 +646,7 @@ SVEXTERN scriptfiledata *script_recording;
 SVEXTERN int runscript, noexit;
 SVEXTERN int script_multislice, script_multivslice, script_iso;
 SVEXTERN FILE *scriptoutstream;
-SVEXTERN char *scriptinifilename, *scriptinifilename2;
+SVEXTERN char *scriptinifilename2;
 SVEXTERN char *logfilename;
 SVEXTERN char *flushfile, *chidfilebase;
 SVEXTERN char *hrrfilename;
