@@ -1513,9 +1513,9 @@ For example, the following line will instruct FDS to run the simulation for 5400
 If {\ct T\_END} is set to zero, only the set-up work is performed,
 allowing you to quickly check the geometry in Smokeview.
 
-If you want the timeline to start at a number other than zero, you can use the parameter
-{\ct T\_BEGIN} (Time Begin)\index{TIME!T\_BEGIN} to specify the time written to file for the first timestep.
-This would be useful for matching timelines of experimental data or or video recordings.
+If you want the time line to start at a number other than zero, you can use the parameter
+{\ct T\_BEGIN} (Time Begin)\index{TIME!T\_BEGIN} to specify the time written to file for the first time step.
+This would be useful for matching time lines of experimental data or or video recordings.
 
 \begin{warning}
 This does not run any of the simulation prior to the {\ct T\_BEGIN} value.
@@ -1531,7 +1531,8 @@ For example if you were testing a {\ct VENT} that is to open at 10 s whose {\ct 
  {\ct T\_BEGIN} should be set slightly less than 10 s.
 \end{warning}
 
-\noindent
+\subsection{Special Topic: Controlling the Time Step}
+
 The initial time step size can be specified with
 {\ct DT}\index{TIME!DT}. This parameter is normally set automatically by dividing the size of a mesh cell by the
 characteristic velocity of the flow.
@@ -1560,6 +1561,17 @@ Finally, if you want to prevent FDS from automatically changing the time step, s
 on the {\ct TIME} line, in which case the specified
 time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
 numerical instabilities if the initial time step is set too high.
+
+\subsection{Special Topic: Steady-State Applications}
+\label{info:steady_state}
+
+Occasionally, there are applications in which only the steady-state solution (in a time-averaged sense) is desired. However, the time necessary to
+heat the walls to steady-state can make the cost of the calculation prohibitive. In these situations, if you specify a
+{\ct TIME\_SHRINK\_FACTOR} of, say, 10, the specific heats of the various materials is reduced by a factor of 10, speeding up the heating
+of these materials roughly by 10. An example of an application where this parameter is handy is a validation experiment where a steady heat source
+warms up a compartment to a nearly equilibrium state at which point time-averaged flow quantities are measured. 
+
+
 
 \newpage
 
@@ -3866,12 +3878,12 @@ near the surface. Its effect on the burning rate is significant.
 \index{MATL!NU\_GAS}
 
 The yields of fuel and water gases are usually specified
-with the parameters {\ct NU\_FUEL} and {\ct NU\_WATER} on the {\ct MATL} line. 
+with the parameters {\ct NU\_FUEL} and {\ct NU\_WATER} on the {\ct MATL} line.
 However, the yield of any explicitly-defined (via the {\ct SPEC} line) gas species
 can be specified using the parameter {\ct NU\_GAS(j,k)}, where {\ct j} refers to the {\ct j}'th reaction
-of the material and {\ct k} refers to the {\ct k}'th explicitly-defined gas species.  
+of the material and {\ct k} refers to the {\ct k}'th explicitly-defined gas species.
 {\ct NU\_GAS} can also be used to specify the yields of the
-mixture fraction and water vapor, assuming each is implicitly-defined and its order in the list of 
+mixture fraction and water vapor, assuming each is implicitly-defined and its order in the list of
 species is obtained from the output file {\bf CHID.out}.
 
 For consistency, the {\ct HEAT\_OF\_COMBUSTION(j,k)} can also be specified
@@ -3882,7 +3894,7 @@ species is greater than zero.
 In the example below, the pyrolysis of wood is included within a simulation that uses
 a finite-rate reaction instead of the default mixture fraction model. Notice in this case that
 all of the gas species (except for the background nitrogen) are explicitly defined, and as a result, FDS
-needs to be told explicitly what gaseous species are produced by the solid phase reactions. In this case, 82~\% of the 
+needs to be told explicitly what gaseous species are produced by the solid phase reactions. In this case, 82~\% of the
 mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted to solid {\ct 'CHAR'}.
 
 \footnotesize
@@ -8126,7 +8138,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SYNCHRONIZE}          & Logical    & Sync time step of multiple meshes   &             & {\ct .TRUE.}  \\ \hline
 {\ct T\_BEGIN}             & Real       & Starting time for calculation       & s           & 0.            \\ \hline
 {\ct T\_END}or{\ct TWFIN } & Real       & Ending time for calculation         & s           & 1             \\ \hline
-%{\ct TIME\_SHRINK\_FACTOR} & Real       & Scaling factor for time ramps and specific heat & & 1.            \\ \hline
+{\ct TIME\_SHRINK\_FACTOR} & Real       & See Section~\ref{info:steady_state} &             & 1.            \\ \hline
 {\ct WALL\_INCREMENT}      & Integer    & Time steps between 1D wall solution updates  &     & 2             \\ \hline
 \end{longtable}
 
