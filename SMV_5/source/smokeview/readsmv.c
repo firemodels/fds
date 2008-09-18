@@ -5952,12 +5952,6 @@ int readini(int scriptconfigfile){
     if(readini2(caseinifilename,1)==2)return 2;
   }
 
-  // read in casename.spf if asked to do so
-
-  if(scriptinifilename!=NULL&&scriptconfigfile==1){
-    if(readini2(scriptinifilename,1)==2)return 2;
-  }
-
   // read in ini file specified in script
 
   if(scriptinifilename2!=NULL&&scriptconfigfile==2){
@@ -8063,9 +8057,6 @@ void writeini(int flag){
     break;
   case LOCAL_INI:
     fileout=fopen(caseinifilename,"w");
-    break;
-  case SCRIPT_INI:
-    fileout=fopen(scriptinifilename,"w");
     break;
   default:
     ASSERT(FFALSE);

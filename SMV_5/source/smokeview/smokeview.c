@@ -3299,11 +3299,6 @@ void Args(int argc, char **argv){
   STRCPY(caseinifilename,fdsprefix);
   STRCAT(caseinifilename,ini_ext);
 
-  FREEMEMORY(scriptinifilename);
-  NewMemory((void **)&scriptinifilename,len+4+1);
-  STRCPY(scriptinifilename,fdsprefix);
-  STRCAT(scriptinifilename,".spf");
-
   if(smvfilename==NULL){
     struct stat statbuffer;
 
