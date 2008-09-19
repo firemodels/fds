@@ -165,6 +165,63 @@ float get_zcell_val(mesh *meshi,float xval, float yval, int *loc){
   return 0.0;
 }
 
+
+/* ------------------ get_zcell_offset ------------------------ */
+
+float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
+  terraindata *terri;
+  mesh *meshj;
+  int ival, jval;
+  float *xplt, *yplt;
+  int ibar, jbar;
+  float dx, dy;
+  float *znode;
+  int nxcell;
+  float *zcell,zval;
+  int imesh;
+  float zvaloffset;
+
+  for(imesh=-1;imesh<nmeshes;imesh++){
+    if(imesh==-1){
+      meshj=meshi;
+    }
+    else{
+      meshj=meshinfo+imesh;
+      if(meshi==meshj)continue;
+    }
+
+// convert xval and yval to "user" units
+    xval = xbar0 + xval*xyzmaxdiff;
+    yval = ybar0 + yval*xyzmaxdiff;
+
+    xplt = meshj->xplt_orig;
+    yplt = meshj->yplt_orig;
+    ibar = meshj->ibar;
+    jbar = meshj->jbar;
+    if(xplt[0]<=xval&&xval<=xplt[ibar]&&yplt[0]<=yval&&yval<=yplt[jbar]){
+      dx = xplt[1]-xplt[0];
+      dy = yplt[1]-yplt[0];
+      ival = (xval-xplt[0])/dx;
+      if(ival>=ibar)ival=ibar-1;
+      jval = (yval-yplt[0])/dy;
+      if(jval>=jbar)jval=jbar-1;
+      terri=meshj->terrain;
+      nxcell = terri->nx;
+      zcell = terri->zcell;
+      zval = zcell[ijcell2(ival,jval)];
+      *loc=1;
+      zvaloffset = zterrain_min+vertical_factor*(zval-zterrain_min)-zval;
+
+    // convert zoffset back to smokeview/scaled units
+
+      zvaloffset /= xyzmaxdiff;
+      return zvaloffset;
+    }
+  }
+  *loc=0;
+  return 0.0;
+}
+
 /* ------------------ update_terrain_colors ------------------------ */
 
 void update_terrain_colors(void){

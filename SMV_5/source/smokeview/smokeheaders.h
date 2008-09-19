@@ -67,6 +67,7 @@ EXTERNCPP int init_shaders(void);
 EXTERNCPP void LoadSmokeShaders(void);
 EXTERNCPP void UnloadSmokeShaders(void);
 #endif
+EXTERNCPP float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc);
 EXTERNCPP void update_camera_ypos(camera *camera_data);
 EXTERNCPP void to_lower(char *string);
 EXTERNCPP void init_device_defs(void);
