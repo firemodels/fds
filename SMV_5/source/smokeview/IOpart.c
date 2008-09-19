@@ -1291,6 +1291,14 @@ void drawPart5(const particle *parti){
   part5data *datacopy,*datapast;
   int nclasses;
   int i,j;
+  int offset_terrain;
+
+  if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+    offset_terrain=1;
+  }
+  else{
+    offset_terrain=0;
+  }
 
   if(current_property==NULL)return;
   ipframe=parti->iframe;
@@ -1398,23 +1406,54 @@ void drawPart5(const particle *parti){
         }
         else{
           glPointSize(partpointsize);
-          glBegin(GL_POINTS);
-          if(itype==-1){
-            glColor4fv(datacopy->partclassbase->rgb);
-            for(j=0;j<datacopy->npoints;j++){
-              if(vis[j]==1)glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
-            }
-          }
-          else{
-            color=datacopy->irvals+itype*datacopy->npoints;
-            for(j=0;j<datacopy->npoints;j++){
-              if(vis[j]==1){
-                glColor4fv(rgb_full[color[j]]);
-                glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+          if(offset_terrain==0){
+            glBegin(GL_POINTS);
+            if(itype==-1){
+              glColor4fv(datacopy->partclassbase->rgb);
+              for(j=0;j<datacopy->npoints;j++){
+                if(vis[j]==1)glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
               }
             }
+            else{
+              color=datacopy->irvals+itype*datacopy->npoints;
+              for(j=0;j<datacopy->npoints;j++){
+                if(vis[j]==1){
+                  glColor4fv(rgb_full[color[j]]);
+                  glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+                }
+              }
+            }
+            glEnd();
           }
-          glEnd();
+          else{
+            glBegin(GL_POINTS);
+            if(itype==-1){
+              glColor4fv(datacopy->partclassbase->rgb);
+              printf("x=%f y=%f\n",xplts[sx[0]],yplts[sy[0]]);
+              for(j=0;j<datacopy->npoints;j++){
+                float zoffset;
+                float xx, yy, zz;
+                int loc;
+
+                xx = xplts[sx[j]];
+                yy = yplts[sy[j]];
+                zz = zplts[sz[j]];
+
+                zoffset = get_zcell_val_offset(meshinfo,xx,yy,&loc);
+                if(vis[j]==1)glVertex3f(xx,yy,zz+zoffset);
+              }
+            }
+            else{
+              color=datacopy->irvals+itype*datacopy->npoints;
+              for(j=0;j<datacopy->npoints;j++){
+                if(vis[j]==1){
+                  glColor4fv(rgb_full[color[j]]);
+                  glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+                }
+              }
+            }
+            glEnd();
+          }
         }
 
         datacopy++;
