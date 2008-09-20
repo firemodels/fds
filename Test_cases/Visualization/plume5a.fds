@@ -19,8 +19,10 @@
 &VENT XB=0.0,1.6,1.6,1.6,0.0,3.2,SURF_ID='OPEN'/
 &VENT XB=0.0,1.6,0.0,1.6,3.2,3.2,SURF_ID='OPEN'/
 
-&ISOF QUANTITY='TEMPERATURE',VALUE(1)=100.0 /  Show 3D contours of temperature at 30 C and 100 C
-&ISOF QUANTITY='MIXTURE_FRACTION',VALUE(1)=0.07 /  Show 3D contours of temperature at 30 C and 100 C
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=100.0 /  Show 3D contours of temperature at 100 C
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0 /  Show 3D contours of temperature at 200 C
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=620.0 /  Show 3D contours of temperature at 620 C
+&ISOF QUANTITY='MIXTURE_FRACTION',VALUE(1)=0.07 /  Show 3D contours of mixture fraction at 0.07
 
 &PART ID='tracers',MASSLESS=.TRUE., SAMPLING_FACTOR=1 /  Description of massless tracer particles. Apply at a
                                                              solid surface with the PART_ID='tracers'
