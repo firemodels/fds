@@ -24,9 +24,9 @@ $getstatus MCFRS/MCFRS_Flashover MCFRS_Flashover_00
 #$getstatus MCFRS/MCFRS_Flashover MCFRS_Flashover_03
 $getstatus MCFRS/MCFRS_Ranch MCFRS_Ranch_00
 # MFRI  cases
-$getstatus MFRI/MFRI_Training_Tower MFRI_Training_Tower_00
+#$getstatus MFRI/MFRI_Training_Tower MFRI_Training_Tower_00
 $getstatus MFRI/MFRI_Training_Tower MFRI_Training_Tower_01
-$getstatus MFRI/MFRI_Training_Tower MFRI_Training_Tower_02
+#$getstatus MFRI/MFRI_Training_Tower MFRI_Training_Tower_02
 $getstatus MFRI/MFRI_Training_Tower MFRI_Training_Tower_03
 $getstatus MFRI/MFRI_Training_Tower MFRI_Training_Tower_04
 $getstatus MFRI/MFRI_Training_Tower MFRI_Training_Tower_05
