@@ -1,6 +1,30 @@
-UNLOADALL
 RENDERDIR
  ../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
+UNLOADALL
+LOADINIFILE
+ MCFRS_Flashover_01_oxy.ini
+LOADSLICE
+ oxygen VOLUME FRACTION
+ 1 1.200000
+SETVIEWPOINT
+ view 1
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ flashover_slice_oxy_020
+SETTIMEVAL
+ 40.0
+RENDERONCE
+ flashover_slice_oxy_040
+SETTIMEVAL
+ 60.0
+RENDERONCE
+ flashover_slice_oxy_060
+SETTIMEVAL
+ 80.0
+RENDERONCE
+ flashover_slice_oxy_080
+UNLOADALL
 LOADINIFILE
  MCFRS_Flashover_01_slice.ini
 LOADSLICE
@@ -9,9 +33,21 @@ LOADSLICE
 SETVIEWPOINT
  view 1
 SETTIMEVAL
- 150.012939
+ 20.0
 RENDERONCE
- flashover_slice_temp_150
+ flashover_slice_temp_020
+SETTIMEVAL
+ 40.0
+RENDERONCE
+ flashover_slice_temp_040
+SETTIMEVAL
+ 60.0
+RENDERONCE
+ flashover_slice_temp_060
+SETTIMEVAL
+ 80.0
+RENDERONCE
+ flashover_slice_temp_80
 UNLOADALL
 LOAD3DSMOKE
  soot mass fraction
@@ -20,9 +56,41 @@ LOAD3DSMOKE
 SETVIEWPOINT
  view 1
 SETTIMEVAL
- 150.000000
+ 20.000000
 RENDERONCE
- flashover_3dsmoke_fire_150
+ flashover_3dsmoke_fire_020
+SETTIMEVAL
+ 40.000000
+RENDERONCE
+ flashover_3dsmoke_fire_040
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ flashover_3dsmoke_fire_060
+SETTIMEVAL
+ 80.000000
+RENDERONCE
+ flashover_3dsmoke_fire_080
+LOADINIFILE
+ MCFRS_Flashover_01_inside.ini
+SETVIEWPOINT
+ view 2
+SETTIMEVAL
+ 20.000000
+RENDERONCE
+ flashover_3dsmoke_ifire_020
+SETTIMEVAL
+ 40.000000
+RENDERONCE
+ flashover_3dsmoke_ifire_040
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ flashover_3dsmoke_ifire_060
+SETTIMEVAL
+ 80.000000
+RENDERONCE
+ flashover_3dsmoke_ifire_080
 UNLOADALL
 ~                                                                               
 ~
