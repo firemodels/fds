@@ -1429,7 +1429,6 @@ void drawPart5(const particle *parti){
             glBegin(GL_POINTS);
             if(itype==-1){
               glColor4fv(datacopy->partclassbase->rgb);
-              printf("x=%f y=%f\n",xplts[sx[0]],yplts[sy[0]]);
               for(j=0;j<datacopy->npoints;j++){
                 float zoffset;
                 float xx, yy, zz;
