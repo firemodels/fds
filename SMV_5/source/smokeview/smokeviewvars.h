@@ -637,6 +637,7 @@ SVEXTERN char *filename_sb;
 SVEXTERN int read_smoothobst;
 SVEXTERN FILE *STREAM_SB;
 #endif
+SVEXTERN time_t smv_modtime;
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
 SVEXTERN scriptfiledata first_scriptfile, last_scriptfile, *default_script;
 SVEXTERN scriptdata *scriptinfo, *current_script_command;

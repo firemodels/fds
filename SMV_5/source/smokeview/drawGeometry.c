@@ -2846,6 +2846,15 @@ void update_smooth_blockages(void){
 #ifdef pp_ISOOUT
   STREAM_SB=fopen(filename_sb,"rb");
   if(STREAM_SB!=NULL){
+    time_t sb_modtime;
+
+    getfile_modtime(filename_sb, &sb_modtime);
+    if(sb_modtime!=0&&smv_modtime!=0&&smv_modtime>sb_modtime){
+      fclose(STREAM_SB);
+      STREAM_SB=NULL;
+    }
+  }
+  if(STREAM_SB!=NULL){
     int version;
     read_smoothobst=1;
     if(fread(&version,4,1,STREAM_SB)==1){
@@ -2855,7 +2864,7 @@ void update_smooth_blockages(void){
       read_smoothobst=0;
     }
   }
-  else{
+  if(STREAM_SB==NULL){
     read_smoothobst=0;
     STREAM_SB=fopen(filename_sb,"wb");
   }

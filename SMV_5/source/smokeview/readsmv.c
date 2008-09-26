@@ -429,6 +429,8 @@ int readsmv(char *file){
   STRCPY(LESendian,"");
 
   if( (stream=fopen(file,"r"))==NULL)return 1;
+  getfile_modtime(file, &smv_modtime);
+  
   printf("\nReading: %s\n",file);
 
 /* 
@@ -8989,3 +8991,18 @@ void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
   xyznorm[2]/=norm;
 
 }
+
+/* ------------------ getfile_modtime ------------------------ */
+
+void getfile_modtime(char *filename, time_t *modtime){
+  struct stat statbuffer;
+  int statfile;
+
+  *modtime=0;
+  if(filename==NULL)return;
+  statfile=stat(filename,&statbuffer);
+  if(statfile!=0)return;
+  *modtime = statbuffer.st_mtime;
+  return;
+}
+
