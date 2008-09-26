@@ -122,8 +122,7 @@ typedef struct {
   int nx, ny;
   float xmin, xmax, ymin, ymax;
   float *x, *y;
-//  float *zcell, *znode, *znormal, *znode_scaled;
-  float *zcell, *znode, *znode_scaled;
+  float *zcell, *znode, *znode_scaled, *znode_offset;
   unsigned char *uc_znormal;
   float *times;
   terraincell *tcell;
