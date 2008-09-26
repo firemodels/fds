@@ -211,6 +211,50 @@ if(show_smoketest==0){\
       glVertex3f(XX,YY,ZZ);                                \
     }\
 }
+#define DRAWVERTEXGPUTERRAIN(XX,YY,ZZ) \
+  z_offset[0]=znode_offset[m11];\
+  z_offset[1]=znode_offset[m12];\
+  z_offset[2]=znode_offset[m22];\
+  z_offset[3]=znode_offset[m21];\
+  value[0]=alphaf_in[n11];\
+  value[1]=alphaf_in[n12];\
+  value[2]=alphaf_in[n22];\
+  value[3]=alphaf_in[n21];\
+  SETBVALS \
+  if(adjustalphaflag==2||adjustalphaflag==3){\
+    if(iblank_smoke3d[n11]==0)value[0]=0;\
+    if(iblank_smoke3d[n12]==0)value[1]=0;\
+    if(iblank_smoke3d[n22]==0)value[2]=0;\
+    if(iblank_smoke3d[n21]==0)value[3]=0;\
+  }\
+  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
+  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
+    xyzindex=xyzindex1;                                  \
+  }                                                      \
+  else{                                                  \
+    xyzindex=xyzindex2;                                  \
+}                                                        \
+  if(firecolor==NULL){\
+    for(node=0;node<6;node++){                             \
+      mm = xyzindex[node];                                 \
+      GPU_BLANK \
+      glVertexAttrib1f(GPU_smokealpha,(float)value[mm]); \
+      glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
+    }\
+  }\
+  else{\
+    fvalue[0]=firecolor[n11];\
+    fvalue[1]=firecolor[n12];\
+    fvalue[2]=firecolor[n22];\
+    fvalue[3]=firecolor[n21];\
+    for(node=0;node<6;node++){                             \
+      mm = xyzindex[node];                                 \
+      GPU_BLANK \
+      glVertexAttrib1f(GPU_smokealpha,(float)value[mm]);\
+      glVertexAttrib1f(GPU_hrr,(float)fvalue[mm]);\
+      glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
+    }\
+}
 #endif
 
 /* ------------------ readsmoke3d ------------------------ */
@@ -4052,6 +4096,7 @@ void drawsmoke3dCULL(void){
   int is1, is2, js1, js2, ks1;
   int ii, jj, kk;
   int ibeg, iend, jbeg, jend, kbeg, kend;
+  float *znode_offset;
 
   float *xplt, *yplt, *zplt;
   int nx,ny;
@@ -4060,7 +4105,7 @@ void drawsmoke3dCULL(void){
   unsigned char *light_color=NULL;
 #endif
   int xyzindex1[6],xyzindex2[6],*xyzindex,node,mm;
-  float xnode[4],znode[4],ynode[4];
+  float xnode[4],znode[4],ynode[4],zoffset[4];
   int iterm, jterm, kterm,nxy;
   float x11[3], x12[3], x22[3], x21[3];
   int n11, n12, n22, n21;
@@ -4074,6 +4119,7 @@ void drawsmoke3dCULL(void){
   int is_smoke;
 
   unsigned char value[4];
+  float z_offset[4];
 #ifdef pp_GPU_BLANK
   unsigned char bvalue[4];
 #endif
@@ -4137,6 +4183,8 @@ void drawsmoke3dCULL(void){
       mesh_old=meshi;
   
       glEnd();
+
+      znode_offset = meshi->terrain->znode_offset;
       sniffErrors("in drawsmoke3dcull 4");
       smoke3di=meshi->cull_smoke3d;
       firecolor=smoke3di->hrrpuv_color;
@@ -4319,8 +4367,19 @@ void drawsmoke3dCULL(void){
 //        n22 = (i+1-is1) + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-            DRAWVERTEXGPU(xnode[mm],constval,znode[mm])
+            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+              int m, m11, m12, m22, m21;
 
+              m = iterm+jterm;
+              m11 = m;
+              m12 = m11 + 1;
+              m22 = m12;
+              m21 = m22 - 1;
+              DRAWVERTEXGPUTERRAIN(xnode[mm],constval,znode[mm])
+            }
+            else{
+              DRAWVERTEXGPU(xnode[mm],constval,znode[mm])
+            }
           }
         }
       //  sniffErrors("after drawsmokecull case 2");

@@ -121,7 +121,7 @@ void drawtrees(void){
 
 /* ------------------ get_zcell ------------------------ */
 
-float get_zcell_val(mesh *meshi,float xval, float yval, int *loc){
+float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int *loc){
   terraindata *terri;
   mesh *meshj;
   int ival, jval;
@@ -130,7 +130,7 @@ float get_zcell_val(mesh *meshi,float xval, float yval, int *loc){
   float dx, dy;
   float *znode;
   int nxcell;
-  float *zcell,zval;
+  float *zcell,zval,zval_return;
   int imesh;
 
   for(imesh=-1;imesh<nmeshes;imesh++){
@@ -157,8 +157,11 @@ float get_zcell_val(mesh *meshi,float xval, float yval, int *loc){
       zcell = terri->zcell;
       zval = zcell[ijcell2(ival,jval)];
       *loc=1;
-      zval = zterrain_min+vertical_factor*(zval-zterrain_min);
-      return zval;
+      zval_return = zterrain_min+vertical_factor*(zval-zterrain_min);
+      if(zval_offset!=NULL){
+        *zval_offset=(vertical_factor-1.0)*(zval-zterrain_min);
+      }
+      return zval_return;
     }
   }
   *loc=0;
@@ -244,9 +247,8 @@ void initterrain_all(void){
   char buffer[1024];
   float dx, dy;
   float *x, *y;
-  float *znode;
+  float *znode, *znode_offset;
   int nxcell;
-  //float *znormal;
   float znormal3[3];
   int i,j,k;
   int nz;
@@ -268,10 +270,10 @@ void initterrain_all(void){
     dy = terri->y[1]-terri->y[0];
 
     znode = terri->znode;
+    znode_offset = terri->znode_offset;
     nxcell = terri->nx;
 
     uc_znormal = terri->uc_znormal;
-    znode = terri->znode;
     for(j=0;j<=terri->ny;j++){
       int jm1, im1, ii, jj;
       float zz;
@@ -284,12 +286,13 @@ void initterrain_all(void){
         float xnode;
         int count, loc1, loc2, loc3, loc4;
         float val1, val2, val3, val4;
+        float val1_offset, val2_offset, val3_offset, val4_offset;
         float valx1, valx2, valx3, valx4;
         float valx1a, valx2a, valx3a, valx4a;
         float valx1b, valx2b, valx3b, valx4b;
         float valy1a, valy2a, valy3a, valy4a;
         float valy1b, valy2b, valy3b, valy4b;
-        float zval;
+        float zval, zval_offset;
         float zvalxa, zvalxb;
         float zvalya, zvalyb;
         float dxa, dxb, dya, dyb;
@@ -298,23 +301,30 @@ void initterrain_all(void){
 
         xnode = terri->x[i];
 
-        val1 =  get_zcell_val(meshi,xnode-dx/2.0,ynode-dy/2.0,&loc1);
-        val2 =  get_zcell_val(meshi,xnode+dx/2.0,ynode-dy/2.0,&loc2);
-        val3 =  get_zcell_val(meshi,xnode+dx/2.0,ynode+dy/2.0,&loc3);
-        val4 =  get_zcell_val(meshi,xnode-dx/2.0,ynode+dy/2.0,&loc4);
+        val1 =  get_zcell_val(meshi,xnode-dx/2.0,ynode-dy/2.0,&val1_offset,&loc1);
+        val2 =  get_zcell_val(meshi,xnode+dx/2.0,ynode-dy/2.0,&val2_offset,&loc2);
+        val3 =  get_zcell_val(meshi,xnode+dx/2.0,ynode+dy/2.0,&val3_offset,&loc3);
+        val4 =  get_zcell_val(meshi,xnode-dx/2.0,ynode+dy/2.0,&val4_offset,&loc4);
         count = loc1 + loc2 + loc3 + loc4;
+
         zval = val1*loc1 + val2*loc2 + val3*loc3 + val4*loc4;
         if(count==0)count=1;
         zval /= (float)count;
 
         *znode++=zval;
 
+        zval_offset = (val1_offset*loc1 + val2_offset*loc2 + val3_offset*loc3 + val4_offset*loc4)/xyzmaxdiff;
+        if(count==0)count=1;
+        zval_offset /= (float)count;
+
+        *znode_offset++=zval_offset;
+
  // compute (f(x+dx,y) - f(x-dx,y))/(2*dx)
 
-        valx1a =  get_zcell_val(meshi,xnode-dx-dx/2.0,ynode-dy/2.0,&loc1);
-        valx2a =  get_zcell_val(meshi,xnode-dx+dx/2.0,ynode-dy/2.0,&loc2);
-        valx3a =  get_zcell_val(meshi,xnode-dx+dx/2.0,ynode+dy/2.0,&loc3);
-        valx4a =  get_zcell_val(meshi,xnode-dx-dx/2.0,ynode+dy/2.0,&loc4);
+        valx1a =  get_zcell_val(meshi,xnode-dx-dx/2.0,ynode-dy/2.0,NULL,&loc1);
+        valx2a =  get_zcell_val(meshi,xnode-dx+dx/2.0,ynode-dy/2.0,NULL,&loc2);
+        valx3a =  get_zcell_val(meshi,xnode-dx+dx/2.0,ynode+dy/2.0,NULL,&loc3);
+        valx4a =  get_zcell_val(meshi,xnode-dx-dx/2.0,ynode+dy/2.0,NULL,&loc4);
         count = loc1 + loc2 + loc3 + loc4;
         zvalxa = valx1a*loc1 + valx2a*loc2 + valx3a*loc3 + valx4a*loc4;
         if(count==0){
@@ -325,10 +335,10 @@ void initterrain_all(void){
           zvalxa /= (float)count;
           dxa = dx;
         }
-        valx1b =  get_zcell_val(meshi,xnode+dx-dx/2.0,ynode-dy/2.0,&loc1);
-        valx2b =  get_zcell_val(meshi,xnode+dx+dx/2.0,ynode-dy/2.0,&loc2);
-        valx3b =  get_zcell_val(meshi,xnode+dx+dx/2.0,ynode+dy/2.0,&loc3);
-        valx4b =  get_zcell_val(meshi,xnode+dx-dx/2.0,ynode+dy/2.0,&loc4);
+        valx1b =  get_zcell_val(meshi,xnode+dx-dx/2.0,ynode-dy/2.0,NULL,&loc1);
+        valx2b =  get_zcell_val(meshi,xnode+dx+dx/2.0,ynode-dy/2.0,NULL,&loc2);
+        valx3b =  get_zcell_val(meshi,xnode+dx+dx/2.0,ynode+dy/2.0,NULL,&loc3);
+        valx4b =  get_zcell_val(meshi,xnode+dx-dx/2.0,ynode+dy/2.0,NULL,&loc4);
         count = loc1 + loc2 + loc3 + loc4;
         zvalxb = valx1b*loc1 + valx2b*loc2 + valx3b*loc3 + valx4b*loc4;
         if(count==0){
@@ -349,10 +359,10 @@ void initterrain_all(void){
 
  // compute (f(x,y+dy) - f(x,y-dy))/(2*dy)
 
-        valy1a =  get_zcell_val(meshi,xnode-dx/2.0,ynode-dy-dy/2.0,&loc1);
-        valy2a =  get_zcell_val(meshi,xnode+dx/2.0,ynode-dy-dy/2.0,&loc2);
-        valy3a =  get_zcell_val(meshi,xnode+dx/2.0,ynode-dy+dy/2.0,&loc3);
-        valy4a =  get_zcell_val(meshi,xnode-dx/2.0,ynode-dy+dy/2.0,&loc4);
+        valy1a =  get_zcell_val(meshi,xnode-dx/2.0,ynode-dy-dy/2.0,NULL,&loc1);
+        valy2a =  get_zcell_val(meshi,xnode+dx/2.0,ynode-dy-dy/2.0,NULL,&loc2);
+        valy3a =  get_zcell_val(meshi,xnode+dx/2.0,ynode-dy+dy/2.0,NULL,&loc3);
+        valy4a =  get_zcell_val(meshi,xnode-dx/2.0,ynode-dy+dy/2.0,NULL,&loc4);
         count = loc1 + loc2 + loc3 + loc4;
         zvalya = valy1a*loc1 + valy2a*loc2 + valy3a*loc3 + valy4a*loc4;
         if(count==0){
@@ -363,10 +373,10 @@ void initterrain_all(void){
           zvalya /= (float)count;
           dya = dy;
         }
-        valy1b =  get_zcell_val(meshi,xnode-dx/2.0,ynode+dy-dy/2.0,&loc1);
-        valy2b =  get_zcell_val(meshi,xnode+dx/2.0,ynode+dy-dy/2.0,&loc2);
-        valy3b =  get_zcell_val(meshi,xnode+dx/2.0,ynode+dy+dy/2.0,&loc3);
-        valy4b =  get_zcell_val(meshi,xnode-dx/2.0,ynode+dy+dy/2.0,&loc4);
+        valy1b =  get_zcell_val(meshi,xnode-dx/2.0,ynode+dy-dy/2.0,NULL,&loc1);
+        valy2b =  get_zcell_val(meshi,xnode+dx/2.0,ynode+dy-dy/2.0,NULL,&loc2);
+        valy3b =  get_zcell_val(meshi,xnode+dx/2.0,ynode+dy+dy/2.0,NULL,&loc3);
+        valy4b =  get_zcell_val(meshi,xnode-dx/2.0,ynode+dy+dy/2.0,NULL,&loc4);
         count = loc1 + loc2 + loc3 + loc4;
         zvalyb = valy1b*loc1 + valy2b*loc2 + valy3b*loc3 + valy4b*loc4;
         if(count==0){
@@ -461,6 +471,7 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
     NewMemory((void **)&terri->zcell,nx*ny*sizeof(float));
     NewMemory((void **)&terri->state,nx*ny);
     NewMemory((void **)&terri->znode,(nx+1)*(ny+1)*sizeof(float));
+    NewMemory((void **)&terri->znode_offset,(nx+1)*(ny+1)*sizeof(float));
     NewMemory((void **)&terri->znode_scaled,(nx+1)*(ny+1)*sizeof(float));
     NewMemory((void **)&terri->uc_znormal,(nx+1)*(ny+1)*sizeof(unsigned char));
   }
