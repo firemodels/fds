@@ -65,7 +65,7 @@ if(show_smoketest==0){\
   }                                                      \
   else{                                                  \
     xyzindex=xyzindex2;                                  \
-}                                                      \
+  }                                                      \
   for(node=0;node<6;node++){                             \
     mm = xyzindex[node];                                 \
     alphabyte = value[mm];                               \
@@ -85,12 +85,12 @@ if(show_smoketest==0){\
       default:\
         ASSERT(FFALSE);\
         break;\
-}                                                          \
+    }                                                          \
     colorptr=mergecolorptr+ivalue[mm];\
     colorptr[3]=alphabyte;                                   \
     glColor4ubv(colorptr);                                \
     glVertex3f(XX,YY,ZZ);                                \
-}\
+  }\
 }\
     else{\
       for(node=0;node<6;node++){                             \
@@ -99,6 +99,61 @@ if(show_smoketest==0){\
         glVertex3f(XX,YY,ZZ);                                \
 }\
   }
+
+#define DRAWVERTEXTERRAIN(XX,YY,ZZ)        \
+z_offset[0]=znode_offset[m11];\
+z_offset[1]=znode_offset[m12];\
+z_offset[2]=znode_offset[m22];\
+z_offset[3]=znode_offset[m21];\
+if(show_smoketest==0){\
+  value[0]=alphaf_ptr[n11]; \
+  value[1]=alphaf_ptr[n12]; \
+  value[2]=alphaf_ptr[n22]; \
+  value[3]=alphaf_ptr[n21]; \
+  ivalue[0]=n11<<2;  \
+  ivalue[1]=n12<<2;  \
+  ivalue[2]=n22<<2;  \
+  ivalue[3]=n21<<2;  \
+  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
+  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
+    xyzindex=xyzindex1;                                  \
+  }                                                      \
+  else{                                                  \
+    xyzindex=xyzindex2;                                  \
+  }                                                      \
+  for(node=0;node<6;node++){                             \
+    mm = xyzindex[node];                                 \
+    alphabyte = value[mm];                               \
+    switch (skip){                                       \
+      case 1:\
+       break;\
+      case 2:                                              \
+        alphaval=alphabyte/255.0; \
+        alphaval=alphaval*(2.0-alphaval);                  \
+        alphabyte=alphaval*255.0;\
+       break;                                             \
+      case 3:                                              \
+        alphaval=alphabyte/255.0;                              \
+        alphaval = 3*alphaval*(1.0-alphaval*(1.0-alphaval/3.0));\
+        alphabyte = 255*alphaval; \
+        break;                                                   \
+      default:\
+        ASSERT(FFALSE);\
+        break;\
+    }                                                          \
+    colorptr=mergecolorptr+ivalue[mm];\
+    colorptr[3]=alphabyte;                                   \
+    glColor4ubv(colorptr);                                \
+    glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
+  }\
+}\
+else{\
+  for(node=0;node<6;node++){                             \
+    mm = xyzindex1[node];                                 \
+    glColor4ub(0,0,0,(unsigned char)smoke_alpha);\
+    glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
+  }\
+}
 
 #ifdef pp_GPU_BLANK
 #define GPU_BLANK glVertexAttrib1f(GPU_blank,(float)[mm]);
@@ -1306,6 +1361,7 @@ void drawsmoke3d(smoke3d *smoke3di){
   int is1, is2, js1, js2, ks1, ks2;
   int ii, jj, kk;
   int ibeg, iend, jbeg, jend, kbeg, kend;
+  float *znode_offset, z_offset[4];
   
   float *xplt, *yplt, *zplt;
   unsigned char mergealpha,*mergealphaptr,*mergecolorptr;
@@ -1339,6 +1395,7 @@ void drawsmoke3d(smoke3d *smoke3di){
   value[1]=255;
   value[2]=255;
   value[3]=255;
+  znode_offset = meshi->terrain->znode_offset;
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -1536,7 +1593,18 @@ void drawsmoke3d(smoke3d *smoke3di){
 //        n22 = (i-is1)   + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEX(constval,ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + nx;
+            m22 = m12;
+            m21 = m22 - nx;
+            DRAWVERTEXTERRAIN(constval,ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEX(constval,ynode[mm],znode[mm])
+          }
 
         }
       }
@@ -1686,14 +1754,18 @@ case -2:
 //        n22 = (i+1-is1) + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-         // for(node=0;node<6;node++){
-         //   int mm;
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
 
-         //   mm = xyzindex[node];
-         //   glColor4ub(255,255,255,(unsigned char)smoke_alpha);
-         //   glVertex3f(xnode[mm],constval,znode[mm]);
-         // }
-         DRAWVERTEX(xnode[mm],constval,znode[mm])
+            m11 = iterm + jterm;
+            m12 = m11 + 1;
+            m22 = m12;
+            m21 = m22 - 1;
+            DRAWVERTEXTERRAIN(xnode[mm],constval,znode[mm])
+          }
+          else{
+            DRAWVERTEX(xnode[mm],constval,znode[mm])
+          }
         }
       }
     }
@@ -1833,7 +1905,18 @@ case -2:
           n22 = n12+nx;
           n21 = n22-1;
 
-          DRAWVERTEX(xnode[mm],ynode[mm],constval)
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + 1;
+            m22 = m12 + nx;
+            m21 = m22 - 1;
+            DRAWVERTEXTERRAIN(xnode[mm],ynode[mm],constval)
+          }
+          else{
+            DRAWVERTEX(xnode[mm],ynode[mm],constval)
+          }
         }
       }
     }
@@ -2022,7 +2105,18 @@ case -2:
 //        n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
 //        n21 = (j-js1)*nx   + (i-is1)   + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEX(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 - nx + 1;
+            m22 = m12;
+            m21 = m11;
+            DRAWVERTEXTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEX(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     }
@@ -2215,7 +2309,18 @@ case -2:
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEX(xnode[mm], ynode[mm], znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + nx + 1;
+            m22 = m12;
+            m21 = m11 - nx;
+            DRAWVERTEXTERRAIN(xnode[mm], ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEX(xnode[mm], ynode[mm], znode[mm])
+          }
         }
       }
     }
@@ -2404,7 +2509,18 @@ case -2:
 //        n22 = (i+1-is1) + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
 //        n21 = (i+1-is1) + (j-js1)*nx   + (k-ks1)*nx*ny;
 
-          DRAWVERTEX(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + nx;
+            m22 = m12 + 1;
+            m21 = m22 - nx;
+            DRAWVERTEXTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEX(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     }
@@ -2595,7 +2711,18 @@ case -2:
         //    n22 = (i+1-is1) + (j+1-js1)*nx  + (k+1-ks1)*nx*ny;
         //    n21 = (i+1-is1) + (j-js1)*nx    + (k-ks1)*nx*ny;
 
-          DRAWVERTEX(xnode[mm], ynode[mm], znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + nx;
+            m22 = m12 + 1;
+            m21 = m22 - nx;
+            DRAWVERTEXTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEX(xnode[mm], ynode[mm], znode[mm])
+          }
         }
       }
     }
@@ -2785,7 +2912,18 @@ case -2:
 //        n22 = (i+1-is1) + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
 
-          DRAWVERTEX(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + 1;
+            m22 = m12 + nx;
+            m21 = m22 - 1;
+            DRAWVERTEXTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEX(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     }
@@ -2976,7 +3114,18 @@ case -2:
         //    n22 = (i+1-is1) + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
         //    n21 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
 
-          DRAWVERTEX(xnode[mm], ynode[mm], znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + 1;
+            m22 = m12 + nx;
+            m21 = m22 - 1;
+            DRAWVERTEXTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEX(xnode[mm], ynode[mm], znode[mm])
+          }
         }
       }
     }
@@ -3003,6 +3152,8 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   int ibeg, iend, jbeg, jend, kbeg, kend;
 
   float *xplt, *yplt, *zplt;
+  float *znode_offset, z_offset[4];
+
   int nx,ny,nz;
   unsigned char *alphaf_in;
 #ifdef pp_LIGHT
@@ -3066,6 +3217,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   smoke_shade4[1]=smoke_shade/255.0;
   smoke_shade4[2]=smoke_shade/255.0;
   smoke_shade4[3]=1.0;
+  znode_offset = meshi->terrain->znode_offset;
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -3210,7 +3362,18 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 //        n22 = (i-is1)   + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(constval,ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + nx;
+            m22 = m12;
+            m21 = m22 - nx;
+            DRAWVERTEXGPUTERRAIN(constval,ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(constval,ynode[mm],znode[mm])
+          }
 
         }
       }
@@ -3297,7 +3460,18 @@ case -2:
 //        n22 = (i+1-is1) + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-         DRAWVERTEXGPU(xnode[mm],constval,znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + 1;
+            m22 = m12;
+            m21 = m22 - 1;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],constval,znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],constval,znode[mm])
+          }
 
         }
       }
@@ -3379,7 +3553,18 @@ case -2:
           n22 = n12+nx;
           n21 = n22-1;
 
-          DRAWVERTEXGPU(xnode[mm],ynode[mm],constval)
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + 1;
+            m22 = m12 + nx;
+            m21 = m22 - 1;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],constval)
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],constval)
+          }
         }
       }
     }
@@ -3485,7 +3670,18 @@ case -2:
 //        n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
 //        n21 = (j-js1)*nx   + (i-is1)   + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 - nx + 1;
+            m22 = m12;
+            m21 = m11 - nx;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     }
@@ -3597,7 +3793,18 @@ case -2:
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm], ynode[mm], znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + nx + 1;
+            m22 = m12;
+            m21 = m11;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm], ynode[mm], znode[mm])
+          }
         }
       }
     }
@@ -3704,7 +3911,18 @@ case -2:
 //        n22 = (i+1-is1) + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
 //        n21 = (i+1-is1) + (j-js1)*nx   + (k-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + nx;
+            m22 = m12 + 1;
+            m21 = m22 - nx;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     }
@@ -3815,7 +4033,18 @@ case -2:
         //    n22 = (i+1-is1) + (j+1-js1)*nx  + (k+1-ks1)*nx*ny;
         //    n21 = (i+1-is1) + (j-js1)*nx    + (k-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm], ynode[mm], znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + nx;
+            m22 = m12 + 1;
+            m21 = m22 - nx;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm], ynode[mm], znode[mm])
+          }
         }
       }
     }
@@ -3921,7 +4150,18 @@ case -2:
 //        n22 = (i+1-is1) + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + 1;
+            m22 = m12 +nx;
+            m21 = m22 - 1;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     }
@@ -4032,7 +4272,18 @@ case -2:
         //    n22 = (i+1-is1) + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
         //    n21 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm], ynode[mm], znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m11, m12, m22, m21;
+
+            m11 = iterm + jterm;
+            m12 = m11 + 1;
+            m22 = m12 + nx;
+            m21 = m22 - 1;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm], ynode[mm], znode[mm])
+          }
         }
       }
     }
