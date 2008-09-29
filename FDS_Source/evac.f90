@@ -3867,6 +3867,22 @@ Contains
                    HR%Angle = HR%Angle + 2.0_EB*Pi
                 End Do
 
+                ! EVHO (evacuation hole) checking
+                EH_Loop: Do ie = 1, n_holes
+                   EHX => EVAC_HOLES(ie)
+                   If (EHX%IMESH /= NM) Cycle EH_Loop
+                   If ( Trim(EHX%EVAC_ID) /= 'null' .And. &
+                        Trim(EHX%EVAC_ID) /= Trim(HPT%ID)) Cycle EH_Loop
+                   If ( Trim(EHX%PERS_ID) /= 'null' .And. &
+                        Trim(EHX%PERS_ID) /= Trim(HPT%CLASS_NAME)) Cycle EH_Loop
+                   If ( (EHX%Y1 <= HR%Y .And. EHX%Y2 >= HR%Y) .And. &
+                        (EHX%X1 <= HR%X .And. EHX%X2 >= HR%X) ) Then
+                      ! User should not give too large EVHO:s
+                      i_endless_loop = i_endless_loop + 1
+                      Cycle BLK_LOOP
+                   End If
+                End Do EH_Loop
+
                 !Check, that a person is not put on top of some other person
                 If (DENS_INIT > 2.0_EB) Then
                    ! High density is wanted
@@ -3889,7 +3905,8 @@ Contains
                    Exit INITIALIZATION_LOOP
                 End If
 
-
+                ! Put a human in a mesh, if there is enough empty space, i.e.,
+                ! check the OBSTs.
                 Is_Solid = .False.
                 KK = 1
 
@@ -3928,6 +3945,8 @@ Contains
                 End If
 
                 If (.Not.Is_Solid) Then
+                   ! Check that the agent is not too close to other agents, who
+                   ! already introduced in the calculation.
                    P2PLoop: Do ie = 1, n_humans - 1
                       HRE => HUMAN(ie)
                       r_tmp(4) = HRE%r_shoulder ! right circle
@@ -3941,9 +3960,8 @@ Contains
                       x_tmp(6) = HRE%X - Sin(HRE%angle)*HRE%d_shoulder
                       Do iii = 1, 3
                          Do jjj = 4, 6
-                            DIST = Sqrt((x_tmp(jjj)-x_tmp(iii))**2 + &
-                                 (y_tmp(jjj)-y_tmp(iii))**2) - &
-                                 (r_tmp(jjj)+r_tmp(iii))
+                            DIST = Sqrt((x_tmp(jjj)-x_tmp(iii))**2 + (y_tmp(jjj)-y_tmp(iii))**2) &
+                                 - (r_tmp(jjj)+r_tmp(iii))
                             If ( DIST < d_max) Then
                                i_endless_loop = i_endless_loop + 1
                                Cycle BLK_LOOP
@@ -3951,27 +3969,6 @@ Contains
                          End Do
                       End Do
                    End Do P2PLoop
-
-                   ! EVHO (evacuation hole) checking
-                   EH_Loop: Do ie = 1, n_holes
-                      EHX => EVAC_HOLES(ie)
-
-                      If ( Trim(EHX%EVAC_ID) /= 'null' .And. &
-                           Trim(EHX%EVAC_ID) /= Trim(HPT%ID)) Then
-                         Cycle EH_Loop
-                      End If
-                      If ( Trim(EHX%PERS_ID) /= 'null' .And. &
-                           Trim(EHX%PERS_ID) /= Trim(HPT%CLASS_NAME)) Then
-                         Cycle EH_Loop
-                      End If
-
-                      If ( (EHX%IMESH == NM) .And. &
-                           (EHX%Y1 <= HR%Y .And. EHX%Y2 >= HR%Y) .And. &
-                           (EHX%X1 <= HR%X .And. EHX%X2 >= HR%X) ) Then
-                         i_endless_loop = i_endless_loop + 1
-                         Cycle BLK_LOOP
-                      End If
-                   End Do EH_Loop
 
                    If (i22 > 1) Then
                       ! Check if the new member will see the first member of the group.
@@ -6030,7 +6027,7 @@ Contains
           Straight_Line_To_Target = .False.
           If (NM_STRS_MESH) Then
              If (HR%I_Target == 0) Then
-!                write(*,*) 'Finding target within move loop'
+!               write(*,*) 'Finding target within move loop'
                 CALL Find_Target_Node_In_Strs(STRP,HR)
              Endif
              N = HR%I_Target
@@ -6106,6 +6103,9 @@ Contains
              VBAR = 0.0_EB
           End If
           ! ========================================================
+          !
+          cos_x = 1.0_EB
+          cos_y = 1.0_EB
           speed_xm = HR%Speed
           speed_xp = HR%Speed
           speed_ym = HR%Speed
@@ -6180,7 +6180,7 @@ Contains
           If ( GaTh > 0.0_EB .And. T > T_BEGIN ) Then
              U_new = U_new + 0.5_EB*DTSP*HR%v0_fac* HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
              V_new = V_new + 0.5_EB*DTSP*HR%v0_fac* HR%Mass*HR%ksi*Sin(HR%eta)/HR%Mass
-             Omega_new = Omega_new + 0.5_EB*DTSP  * 1.0_EB*Sign(HR%ksi,HR%eta-Pi)
+             Omega_new = Omega_new + 0.5_EB*DTSP* 1.0_EB*Sign(HR%ksi,HR%eta-Pi)
           End If
 
           j = Max(0,HR%GROUP_ID)
@@ -6827,7 +6827,7 @@ Contains
           End Do SS_Loop2
 
           ! Set height and speed for a human in stairs
-          If (NM_STRS_MESH) Then
+          If (NM_STRS_MESH) Then 
             Call GetStairSpeedAndZ(speed_xm, speed_xp, speed_ym, speed_yp,STRP,HR)
           Endif
 
@@ -9228,7 +9228,7 @@ Contains
                x_tmp(5) = HRE%X
                y_tmp(6) = HRE%Y + Cos(HRE%angle)*HRE%d_shoulder ! left circle
                x_tmp(6) = HRE%X - Sin(HRE%angle)*HRE%d_shoulder
-               Do iii = 1, 3  
+               Do iii = 1, 3
                   Do jjj = 4, 6
                      DIST = Sqrt((x_tmp(jjj)-x_tmp(iii))**2 + &
                                  (y_tmp(jjj)-y_tmp(iii))**2) - &
