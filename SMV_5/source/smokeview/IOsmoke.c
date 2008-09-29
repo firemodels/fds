@@ -4096,7 +4096,7 @@ void drawsmoke3dCULL(void){
   int is1, is2, js1, js2, ks1;
   int ii, jj, kk;
   int ibeg, iend, jbeg, jend, kbeg, kend;
-  float *znode_offset;
+  float *znode_offset, z_offset[4];
 
   float *xplt, *yplt, *zplt;
   int nx,ny;
@@ -4105,7 +4105,7 @@ void drawsmoke3dCULL(void){
   unsigned char *light_color=NULL;
 #endif
   int xyzindex1[6],xyzindex2[6],*xyzindex,node,mm;
-  float xnode[4],znode[4],ynode[4],zoffset[4];
+  float xnode[4],znode[4],ynode[4];
   int iterm, jterm, kterm,nxy;
   float x11[3], x12[3], x22[3], x21[3];
   int n11, n12, n22, n21;
@@ -4119,7 +4119,6 @@ void drawsmoke3dCULL(void){
   int is_smoke;
 
   unsigned char value[4];
-  float z_offset[4];
 #ifdef pp_GPU_BLANK
   unsigned char bvalue[4];
 #endif
@@ -4323,7 +4322,19 @@ void drawsmoke3dCULL(void){
 //        n22 = (i-is1)   + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-            DRAWVERTEXGPU(constval,ynode[mm],znode[mm])
+            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+              int m, m11, m12, m22, m21;
+
+              m = iterm+jterm;
+              m11 = m;
+              m12 = m11 + nx;
+              m22 = m12;
+              m21 = m22 - nx;
+              DRAWVERTEXGPUTERRAIN(constval,ynode[mm],znode[mm])
+            }
+            else{
+              DRAWVERTEXGPU(constval,ynode[mm],znode[mm])
+            }
 
           }
         }
@@ -4424,7 +4435,19 @@ void drawsmoke3dCULL(void){
 //        n22 = (i+1-is1) + (j+1-js1)*nx   + (k-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j+1-js1)*nx   + (k-ks1)*nx*ny;
 
-            DRAWVERTEXGPU(xnode[mm],ynode[mm],constval)
+            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+              int m, m11, m12, m22, m21;
+
+              m = iterm+jterm;
+              m11 = m;
+              m12 = m11 + 1;
+              m22 = m12 + nx;
+              m21 = m22 - 1;
+              DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],constval)
+            }
+            else{
+              DRAWVERTEXGPU(xnode[mm],ynode[mm],constval)
+            }
           }
         }
         break;
@@ -4473,7 +4496,19 @@ void drawsmoke3dCULL(void){
 //        n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
 //        n21 = (j-js1)*nx   + (i-is1)   + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m, m11, m12, m22, m21;
+
+            m = iterm+jterm;
+            m11 = m;
+            m12 = m11 - nx + 1;
+            m22 = m12;
+            m21 = m11;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     break;
@@ -4522,7 +4557,19 @@ void drawsmoke3dCULL(void){
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m, m11, m12, m22, m21;
+
+            m = iterm+jterm;
+            m11 = m;
+            m12 = m11 + nx + 1;
+            m22 = m12;
+            m21 = m11;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     break;
@@ -4573,7 +4620,19 @@ void drawsmoke3dCULL(void){
         //    n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-1-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m, m11, m12, m22, m21;
+
+            m = iterm+jterm;
+            m11 = m;
+            m12 = m11 + 1;
+            m22 = m12 - nx;
+            m21 = m11 - nx;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     break;
@@ -4624,7 +4683,19 @@ void drawsmoke3dCULL(void){
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j+1-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m, m11, m12, m22, m21;
+
+            m = iterm+jterm;
+            m11 = m;
+            m12 = m11 + 1;
+            m22 = m12 + nx;
+            m21 = m11 + nx;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     break;
@@ -4673,7 +4744,19 @@ void drawsmoke3dCULL(void){
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k-1-ks1)*nx*ny;
         //    n21 = (j+1-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m, m11, m12, m22, m21;
+
+            m = iterm+jterm;
+            m11 = m;
+            m12 = m11 + 1 - nx;
+            m22 = m12 + nx;
+            m21 = m11 + nx;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     break;
@@ -4722,7 +4805,19 @@ void drawsmoke3dCULL(void){
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
 
-          DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            int m, m11, m12, m22, m21;
+
+            m = iterm+jterm;
+            m11 = m;
+            m12 = m11 + nx;
+            m22 = m12 + 1;
+            m21 = m11 + 1;
+            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+          }
+          else{
+            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+          }
         }
       }
     break;
