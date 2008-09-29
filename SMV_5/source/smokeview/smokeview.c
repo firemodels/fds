@@ -1288,7 +1288,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
           patchi = patchinfo + filenum;
           if(patchi->loaded==0||patchi->display==0||patchi->type!=ipatchtype)continue;
           if(usetexturebar==1){
-            if(vis_ignited==1&&do_ignited==1){
+            if(vis_threshold==1&&do_threshold==1){
               drawpatch_texture_char(meshi);
             }
             else{
@@ -1298,7 +1298,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
           else{
             drawpatch(meshi);
           }
-          if(vis_ignited==1&&vis_onlyignited==1&&do_ignited==1)drawonlyignited(meshi);
+          if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)drawonlythreshold(meshi);
         }
       }
     }
