@@ -1165,14 +1165,10 @@ void initvars1(void){
   setpatchchopmin=0, setpatchchopmax=0;
   patchchopmin=0,  patchchopmax=0;
 
-  vis_onlyignited=0, vis_ignited=0;
-#ifdef pp_SHOW_IGNITED
-  activate_ignited=1;
-  canshow_ignited=1;
-#else
-  activate_ignited=0;
-  canshow_ignited=0;
-#endif
+  temp_threshold=400.0;
+  vis_onlythreshold=0, vis_threshold=0;
+  activate_threshold=1;
+  canshow_threshold=1;
   settmin_p=0, settmin_b=0, settmin_s=0, settmin_z=0, settmin_i=0;
   settmax_p=0, settmax_b=0, settmax_s=0, settmax_z=0, settmax_i=0;
   set_no_part=0;
@@ -1574,7 +1570,7 @@ void initvars1(void){
   ncolorbars=0;
   ndefaultcolorbars=3;
   update_load_startup=0;
-  do_ignited=0;
+  do_threshold=0;
   mt_compress=1;
   updateindexcolors=0;
   show_path_knots=0;

@@ -177,24 +177,25 @@ extern "C" void glui_bounds_setup(int main_window){
       for(i=0;i<npatch_files;i++){
         if(patchinfo[i].firstshort==1)glui_bounds->add_radiobutton_to_group(bf_rlist,patchinfo[i].label.shortlabel);
       }
-#ifdef pp_SHOW_IGNITED
-      if(activate_ignited==1){
+      if(activate_threshold==1){
         glui_bounds->add_separator_to_panel(panel_bound);
-        showchar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show Ignited",&vis_ignited,SHOWCHAR,Bound_CB);
-        showonlychar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show Only Ignited",&vis_onlyignited,SHOWCHAR,Bound_CB);
+        showchar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show temp threshold",
+          &vis_threshold,SHOWCHAR,Bound_CB);
+        showonlychar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show only temp threshold",
+          &vis_onlythreshold,SHOWCHAR,Bound_CB);
+        glui_bounds->add_spinner_to_panel(panel_bound,"temp threshold (C)",GLUI_SPINNER_FLOAT,
+          &temp_threshold);
         Bound_CB(SHOWCHAR);
       }
-#endif
       glui_bounds->add_column_to_panel(panel_bound,false);
     }
     else{
-#ifdef pp_SHOW_IGNITED
-      if(activate_ignited==1){
-        showchar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show Ignited",&vis_ignited,SHOWCHAR,Bound_CB);
-        showonlychar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show Only Ignited",&vis_onlyignited,SHOWCHAR,Bound_CB);
+      if(activate_threshold==1){
+        showchar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show temp threshold",&vis_threshold,SHOWCHAR,Bound_CB);
+        showonlychar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show only threshold",&vis_onlythreshold,SHOWCHAR,Bound_CB);
+        glui_bounds->add_spinner_to_panel(panel_bound,"temp threshold (C)",GLUI_SPINNER_FLOAT,&temp_threshold);
         Bound_CB(SHOWCHAR);
       }
-#endif
     }
 
     boundmenu(&rollout_BOUNDARY,panel_bound,"Reload Boundary File(s)",
@@ -663,13 +664,13 @@ void PLOT3D_CB(int var){
 
 extern "C" void updatechar(void){
   if(showchar_checkbox==NULL)return;
-  if(canshow_ignited==1){
+  if(canshow_threshold==1){
     showchar_checkbox->enable();
   }
   else{
     showchar_checkbox->disable();
   }
-  showchar_checkbox->set_int_val(vis_ignited);
+  showchar_checkbox->set_int_val(vis_threshold);
   Bound_CB(SHOWCHAR);
 }
 
@@ -769,7 +770,7 @@ void Bound_CB(int var){
     break;
   case SHOWCHAR:
     if(showchar_checkbox!=NULL&&showonlychar_checkbox!=NULL){
-      if(vis_ignited==1){
+      if(vis_threshold==1){
         showonlychar_checkbox->enable();
       }
       else{

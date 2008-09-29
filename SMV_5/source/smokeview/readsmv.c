@@ -4850,7 +4850,7 @@ typedef struct {
       }
     }
   }
-  canshow_ignited=0;
+  canshow_threshold=0;
   if(npatch_files>0){
     npatch2=0;
     FREEMEMORY(patchlabellist);
@@ -4863,7 +4863,7 @@ typedef struct {
       patchinfo[i].setvalmax=0;
       if(strncmp(patchinfo[i].label.shortlabel,"temp",4)==0||
          strncmp(patchinfo[i].label.shortlabel,"TEMP",4)==0){
-        canshow_ignited=1;
+        canshow_threshold=1;
       }
       patchlabellist[npatch2]=patchinfo[i].label.shortlabel;
       npatch2++;
@@ -5634,7 +5634,7 @@ void initmesh(mesh *meshi){
   meshi->zipoffset=NULL, meshi->zipsize=NULL;
   meshi->visPatches=NULL;
   meshi->xyzpatch=NULL;
-  meshi->xyzpatch_ignited=NULL;
+  meshi->xyzpatch_threshold=NULL;
   meshi->ipqq=NULL, meshi->ipqqi=NULL;
   meshi->ipqqi_zlib=NULL, meshi->ipqq_zlib=NULL;
   meshi->patchtimes=NULL, meshi->pqq=NULL, meshi->pqqi=NULL;
@@ -7584,7 +7584,7 @@ int readini2(char *inifile, int localfile){
       }
       if(match(buffer,"SHOWIGNITION",12)==1){
         if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i %i",&vis_ignited,&vis_onlyignited);
+        sscanf(buffer,"%i %i",&vis_threshold,&vis_onlythreshold);
         continue;
       }
       if(match(buffer,"TOURCONSTANTVEL",15)==1){
@@ -8434,7 +8434,7 @@ void writeini(int flag){
   fprintf(fileout,"SHOWALLTEXTURES\n");
   fprintf(fileout," %i\n",showall_textures);
   fprintf(fileout,"SHOWIGNITION\n");
-  fprintf(fileout," %i %i\n",vis_ignited,vis_onlyignited);
+  fprintf(fileout," %i %i\n",vis_threshold,vis_onlythreshold);
   fprintf(fileout,"SHOWHRRCUTOFF\n");
   fprintf(fileout," %i\n",show_hrrcutoff);
   fprintf(fileout,"TWOSIDEDVENTS\n");
