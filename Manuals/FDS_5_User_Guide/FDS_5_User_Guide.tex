@@ -2219,7 +2219,7 @@ maximum value of the CFL number is not between {\ct CFL\_MIN} and {\ct CFL\_MAX}
 A similar condition, but one constraining the time step when diffusive transport dominates, is sometimes called
 the Von Neumann condition. The Von Neumann number is defined:
 \be
-\hbox{VN} = 2 \, \max \left( \nu , D , \frac{k}{\rho c_p} \right)  \; \dt  \left(\frac{1}{\dx^2}+\frac{1}{dy^2}+\frac{1}{\dz^2} \right)
+\hbox{VN} = 2 \, \max \left( \nu , D , \frac{k}{\rho c_p} \right)  \; \dt  \left(\frac{1}{\dx^2}+\frac{1}{\dy^2}+\frac{1}{\dz^2} \right)
 \ee
 Like the CFL number, VN is computed in each mesh cell, and the time step is adjusted if VN is outside the
 range between {\ct VN\_MIN} and {\ct VN\_MAX}, which are 0.8 and 1.0 by default.
