@@ -110,7 +110,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   FREEMEMORY(meshi->patchtype);
   FREEMEMORY(meshi->visPatches);
   FREEMEMORY(meshi->xyzpatch);
-  FREEMEMORY(meshi->xyzpatch_ignited);
+  FREEMEMORY(meshi->xyzpatch_threshold);
   FREEMEMORY(meshi->ipqq);
   FREEMEMORY(meshi->ipqq_zlib);
   FREEMEMORY(meshi->ipqqi_zlib);
@@ -170,13 +170,13 @@ void readpatch(int ifile, int flag, int *errorcode){
   xplttemp=meshi->xplt;
   yplttemp=meshi->yplt;
   zplttemp=meshi->zplt;
-  do_ignited=0;
-  if(activate_ignited==1){
+  do_threshold=0;
+  if(activate_threshold==1){
     if(
       strncmp(patchinfo[ifile].label.shortlabel,"TEMP",4) == 0||
       strncmp(patchinfo[ifile].label.shortlabel,"temp",4) == 0
       ){
-      do_ignited=1;
+      do_threshold=1;
     }
   }
 
@@ -277,7 +277,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   if(meshi->npatchsize>0){
     if(
        NewMemory((void **)&meshi->xyzpatch,3*sizeof(float)*meshi->npatchsize)==0||
-       NewMemory((void **)&meshi->xyzpatch_ignited,3*sizeof(float)*meshi->npatchsize)==0||
+       NewMemory((void **)&meshi->xyzpatch_threshold,3*sizeof(float)*meshi->npatchsize)==0||
        NewMemory((void **)&meshi->chartime,sizeof(float)*meshi->npatchsize)==0||
        NewMemory((void **)&meshi->patchblank,meshi->npatchsize*sizeof(int))==0
        ){
@@ -295,7 +295,7 @@ void readpatch(int ifile, int flag, int *errorcode){
     meshi->patchblank[n]=1;
   }
   xyzpatchcopy = meshi->xyzpatch;
-  xyzpatch_ignitecopy = meshi->xyzpatch_ignited;
+  xyzpatch_ignitecopy = meshi->xyzpatch_threshold;
   patchblankcopy = meshi->patchblank;
   meshi->blockstart[0]=0;
   for(n=0;n<meshi->nbptrs;n++){
@@ -711,7 +711,7 @@ void readpatch(int ifile, int flag, int *errorcode){
         }
       }
     }
-    if(do_ignited==1){
+    if(do_threshold==1){
       if(local_first==1){
         nn=0;
         for(n=0;n<meshi->npatchsize;n++){
@@ -883,7 +883,7 @@ void readpatch(int ifile, int flag, int *errorcode){
     break;
   }
   strcpy(patchbase->scale,patchi->scale);
-  if(do_ignited==1){
+  if(do_threshold==1){
     meshi->surface_tempmax=patchmax_global;
     meshi->surface_tempmin=patchmin_global;
   }
@@ -1222,7 +1222,7 @@ void drawpatch_texture(const mesh *meshi){
   mesh *meshblock;
   float clear_color[4]={1.0,1.0,1.0,1.0};
 
-  if(vis_ignited==1&&vis_onlyignited==1&&do_ignited==1)return;
+  if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)return;
 
   patchtimes=meshi->patchtimes;
   visPatches=meshi->visPatches;
@@ -1464,7 +1464,7 @@ void drawpatch_texture_char(const mesh *meshi){
   float burn_color[4]={0.0,0.0,0.0,1.0};
   float clear_color[4]={1.0,1.0,1.0,1.0};
 
-  if(vis_ignited==1&&vis_onlyignited==1&&do_ignited==1)return;
+  if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)return;
 
   patchtimes=meshi->patchtimes;
   visPatches=meshi->visPatches;
@@ -1767,7 +1767,7 @@ void drawpatch(const mesh *meshi){
   float *color11, *color12, *color21, *color22;
   mesh *meshblock;
 
-  if(vis_ignited==1&&vis_onlyignited==1&&do_ignited==1)return;
+  if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)return;
 
   patchtimes=meshi->patchtimes;
   visPatches=meshi->visPatches;
@@ -1831,7 +1831,7 @@ void drawpatch(const mesh *meshi){
             color12 = &rgb_full[*(ipq1+1)][0];
             color21 = &rgb_full[*ipq2][0];
             color22 = &rgb_full[*(ipq2+1)][0];
-            if(vis_ignited==1&&vis_onlyignited==0&&do_ignited==1){
+            if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->chartime[nn1+icol  ]>=0.0&&times[itime]>meshi->chartime[nn1+icol  ])color11=&char_color[0];
               if(meshi->chartime[nn1+icol+1]>=0.0&&times[itime]>meshi->chartime[nn1+icol+1])color12=&char_color[0];
               if(meshi->chartime[nn2+icol  ]>=0.0&&times[itime]>meshi->chartime[nn2+icol  ])color21=&char_color[0];
@@ -1923,7 +1923,7 @@ void drawpatch(const mesh *meshi){
             color12 = &rgb_full[*(ipq1+1)][0];
             color21 = &rgb_full[*ipq2][0];
             color22 = &rgb_full[*(ipq2+1)][0];
-            if(vis_ignited==1&&vis_onlyignited==0&&do_ignited==1){
+            if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->chartime[nn1+icol  ]>=0.0&&times[itime]>meshi->chartime[nn1+icol  ])color11=&char_color[0];
               if(meshi->chartime[nn1+icol+1]>=0.0&&times[itime]>meshi->chartime[nn1+icol+1])color12=&char_color[0];
               if(meshi->chartime[nn2+icol  ]>=0.0&&times[itime]>meshi->chartime[nn2+icol  ])color21=&char_color[0];
@@ -2011,7 +2011,7 @@ void drawpatch(const mesh *meshi){
             color12 = &rgb_full[*(ipq1+1)][0];
             color21 = &rgb_full[*ipq2][0];
             color22 = &rgb_full[*(ipq2+1)][0];
-            if(vis_ignited==1&&vis_onlyignited==0&&do_ignited==1){
+            if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->chartime[nn1+icol  ]>=0.0&&times[itime]>meshi->chartime[nn1+icol  ])color11=&char_color[0];
               if(meshi->chartime[nn1+icol+1]>=0.0&&times[itime]>meshi->chartime[nn1+icol+1])color12=&char_color[0];
               if(meshi->chartime[nn2+icol  ]>=0.0&&times[itime]>meshi->chartime[nn2+icol  ])color21=&char_color[0];
@@ -2067,9 +2067,9 @@ void drawpatch(const mesh *meshi){
   glEnd();
 }
 
-/* ------------------ drawolyignited ------------------------ */
+/* ------------------ drawolythreshold ------------------------ */
 
-void drawonlyignited(const mesh *meshi){
+void drawonlythreshold(const mesh *meshi){
   int n,nn,nn1,nn2;
   int nrow, ncol, irow, icol;
   float *xyzp1, *xyzp2;
@@ -2088,11 +2088,11 @@ void drawonlyignited(const mesh *meshi){
   float *color_black;
   mesh *meshblock;
 
-  if(vis_ignited==0||vis_onlyignited==0||do_ignited==0)return;
+  if(vis_threshold==0||vis_onlythreshold==0||do_threshold==0)return;
 
   patchtimes=meshi->patchtimes;
   visPatches=meshi->visPatches;
-  xyzpatch=meshi->xyzpatch_ignited;
+  xyzpatch=meshi->xyzpatch_threshold;
   patchdir=meshi->patchdir;
   patchrow=meshi->patchrow;
   patchcol=meshi->patchcol;

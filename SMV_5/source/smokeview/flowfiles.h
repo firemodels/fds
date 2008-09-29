@@ -401,7 +401,7 @@ typedef struct mesh_ {
   int *patchrow, *patchcol, *blockstart;
   unsigned int *zipoffset, *zipsize;
   int *visPatches;
-  float *xyzpatch, *xyzpatch_ignited;
+  float *xyzpatch, *xyzpatch_threshold;
   unsigned char *ipqq_zlib, *ipqqi_zlib;
   unsigned char *ipqq, *ipqqi;
   float *patchtimes, *patchtimesi, *pqq, *pqqi;

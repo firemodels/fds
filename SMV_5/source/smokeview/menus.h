@@ -3327,7 +3327,7 @@ void ShowPatchMenu(int value){
     update_patchtype();
   }
   if(value==SHOW_CHAR){
-    vis_ignited = 1 - vis_ignited;
+    vis_threshold = 1 - vis_threshold;
     updatechar();
   }
   if(value==SHOWALL_BOUNDARY){
@@ -3945,7 +3945,7 @@ static int in_menu=0;
     CREATEMENU(showpatchmenu,ShowPatchMenu);
     npatchloaded=0;
     {
-      int local_do_ignited=0;
+      int local_do_threshold=0;
 
       for(ii=0;ii<npatch_files;ii++){
         patch *patchi;
@@ -3962,19 +3962,19 @@ static int in_menu=0;
           STRCPY(menulabel,patchi->menulabel);
         }
         glutAddMenuEntry(menulabel,1000+i);
-        if(activate_ignited==1){
+        if(activate_threshold==1){
           if(
             strncmp(patchi->label.shortlabel,"TEMP",4) == 0||
             strncmp(patchi->label.shortlabel,"temp",4) == 0
             ){
-            local_do_ignited=1;
+            local_do_threshold=1;
           }
         }
       }
-      if(activate_ignited==1&&local_do_ignited==1){
+      if(activate_threshold==1&&local_do_threshold==1){
         glutAddMenuEntry("-",DUMMYwallmenu);
-        if(vis_ignited==1)glutAddMenuEntry("*char",SHOW_CHAR);
-        if(vis_ignited==0)glutAddMenuEntry("char",SHOW_CHAR);
+        if(vis_threshold==1)glutAddMenuEntry("*char",SHOW_CHAR);
+        if(vis_threshold==0)glutAddMenuEntry("char",SHOW_CHAR);
       }
 
     }

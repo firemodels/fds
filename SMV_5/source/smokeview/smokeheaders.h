@@ -184,7 +184,7 @@ EXTERNCPP void set_3dsmoke_startup(void);
 EXTERNCPP void clear_3dsmoke_startup(void);
 EXTERNCPP void put_startup_smoke3d(FILE *fileout);
 EXTERNCPP void setspeed(float tospeed);
-EXTERNCPP void drawonlyignited(const mesh *meshi);
+EXTERNCPP void drawonlythreshold(const mesh *meshi);
 EXTERNCPP void draw_transparent_faces(void);
 EXTERNCPP smoothblockage *getsmoothblockage(mesh *meshi,float tt);
 EXTERNCPP void freesmoothblocks(smoothblockage *sb);

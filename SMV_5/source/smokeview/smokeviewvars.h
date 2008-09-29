@@ -327,7 +327,7 @@ SVEXTERN float slicechopmin, slicechopmax;
 SVEXTERN int setpatchchopmin, setpatchchopmax;
 SVEXTERN float patchchopmin,  patchchopmax;
 
-SVEXTERN int vis_onlyignited, vis_ignited, canshow_ignited, activate_ignited;
+SVEXTERN int vis_onlythreshold, vis_threshold, canshow_threshold, activate_threshold;
 SVEXTERN int settmin_p, settmin_b, settmin_s, settmin_z, settmin_i;
 SVEXTERN int settmax_p, settmax_b, settmax_s, settmax_z, settmax_i;
 SVEXTERN int set_no_part;
@@ -638,6 +638,7 @@ SVEXTERN int read_smoothobst;
 SVEXTERN FILE *STREAM_SB;
 #endif
 SVEXTERN time_t smv_modtime;
+SVEXTERN float temp_threshold;
 SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir;
 SVEXTERN scriptfiledata first_scriptfile, last_scriptfile, *default_script;
 SVEXTERN scriptdata *scriptinfo, *current_script_command;
@@ -766,7 +767,7 @@ SVEXTERN int ndefaultcolorbars;
 SVEXTERN colorbardata *colorbarinfo;
 
 SVEXTERN int update_load_startup;
-SVEXTERN int do_ignited;
+SVEXTERN int do_threshold;
 SVEXTERN int mt_compress;
 SVEXTERN int ntotal_blockages;
 SVEXTERN int updateindexcolors;

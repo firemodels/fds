@@ -1720,7 +1720,7 @@ void update_facelists(void){
         if(patchi!=NULL&&
           patchi->loaded==1&&
           patchi->display==1&&
-          (vis_ignited==0||vis_onlyignited==0||do_ignited==0)&& // check 1/7/2006
+          (vis_threshold==0||vis_onlythreshold==0||do_threshold==0)&& // check 1/7/2006
           (vi->dummy==1||vi->hideboundary==0)){
           continue;
         }
@@ -1762,7 +1762,7 @@ void update_facelists(void){
 
       if((
          visBlocks==visBLOCKOutline&&j<vent_offset)||
-         (facej->patchpresent==1&&(vis_ignited==0||vis_onlyignited==0||do_ignited==0))||
+         (facej->patchpresent==1&&(vis_threshold==0||vis_onlythreshold==0||do_threshold==0))||
          (facej->type==2&&visBlocks==visBLOCKAsInput)||
          ((j>=vent_offset&&j<vent_offset+meshi->nvents)&&vi->isOpenvent==1&&visOpenVentsAsOutline==1)
         ){
