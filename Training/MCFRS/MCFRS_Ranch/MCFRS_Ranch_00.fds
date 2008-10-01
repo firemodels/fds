@@ -1,8 +1,8 @@
 &HEAD CHID='MCFRS_Ranch_00', TITLE='MCFD ranch house, SVN $Revision$'  /
 
-&TIME T_END=10.0 /
+&TIME T_END=600.0 /
 
-&DUMP NFRAMES=50, DT_DEVC=5.0, DT_HRR=5.0 /
+&DUMP NFRAMES=3000, DT_DEVC=5.0, DT_HRR=5.0 /
 
 &MESH IJK=96,48,32, XB=-2.0, 9.8,-2.0, 5.1,0.0,4.6, / Open Boundary
 &MESH IJK=96,48,32, XB= 9.8,21.6,-2.0, 5.1,0.0,4.6, / Open Boundary
