@@ -37,6 +37,8 @@
 \usepackage[T1]{fontenc}
 \usepackage{upquote}
 \usepackage{array,eqnarray}
+
+\newcommand{\ct}{\tt\small}
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 
 
@@ -132,6 +134,10 @@ Pressure_Chapter, Surface_Temperature_Chapter, Heat_Flux_Chapter}
 \newcommand{\OTWO}{{\tiny \hbox{O}_2}}
 \newcommand{\CO}{{\tiny \hbox{CO}}}
 \newcommand{\F}{{\tiny \hbox{F}}}
+
+\floatstyle{boxed}
+\newfloat{notebox}{H}{lon}
+\newfloat{warning}{H}{low}
 
 \pagestyle{empty}
 
@@ -320,6 +326,8 @@ of experimental data for the ``HAI/NRL Wall Fire'' series. Thanks also to Craig 
 for the ``Beyler Hood Experiments.''
 
 Thanks to Ken Steckler for providing details about the ``Steckler Compartment Experiments'' of 1979.
+
+Jianping Zhang at the University of Ulster contributed heat flux measurements from the SBI apparatus.
 
 At the University of Maryland, Professor Fred~Mowrer and Phil Friday
 were the first to apply FDS to the NRC-sponsored experiments referred
