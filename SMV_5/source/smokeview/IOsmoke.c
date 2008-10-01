@@ -1395,7 +1395,10 @@ void drawsmoke3d(smoke3d *smoke3di){
   value[1]=255;
   value[2]=255;
   value[3]=255;
-  znode_offset = meshi->terrain->znode_offset;
+
+  if(nterraininfo>0){
+    znode_offset = meshi->terrain->znode_offset;
+  }
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -3217,7 +3220,10 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   smoke_shade4[1]=smoke_shade/255.0;
   smoke_shade4[2]=smoke_shade/255.0;
   smoke_shade4[3]=1.0;
-  znode_offset = meshi->terrain->znode_offset;
+
+  if(nterraininfo>0){
+    znode_offset = meshi->terrain->znode_offset;
+  }
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -4434,7 +4440,9 @@ void drawsmoke3dCULL(void){
   
       glEnd();
 
-      znode_offset = meshi->terrain->znode_offset;
+      if(nterraininfo>0){
+        znode_offset = meshi->terrain->znode_offset;
+      }
       sniffErrors("in drawsmoke3dcull 4");
       smoke3di=meshi->cull_smoke3d;
       firecolor=smoke3di->hrrpuv_color;
