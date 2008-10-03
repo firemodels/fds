@@ -16,11 +16,11 @@ VPATH = ../../FDS_Source
 #*** Serial or MPI object variables ***
 obj_serial = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
              ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o mass.o \
-             wall.o fire.o pres.o divg.o init.o velo.o main.o
+             wall.o fire.o pres.o divg.o init.o velo.o turb.o main.o
 
 obj_mpi = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
           ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o mass.o \
-          wall.o fire.o pres.o divg.o init.o velo.o main_mpi.o
+          wall.o fire.o pres.o divg.o init.o velo.o turb.o main_mpi.o
 
 #*** General Purpose Rules ***
 no_target:
@@ -270,6 +270,7 @@ devc.o : devc.f90 prec.f90
 pois.o : pois.f90 prec.f90
 mesh.o : mesh.f90 prec.f90 type.f90
 func.o : func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+turb.o : turb.f90 func.f90 prec.f90 cons.f90 mesh.f90
 ctrl.o : ctrl.f90 prec.f90 cons.f90 type.f90 mesh.f90 func.f90
 irad.o : irad.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
 ieva.o : ieva.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
@@ -285,9 +286,9 @@ part.o : part.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
 vege.o : vege.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
 read.o : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90
 init.o : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 pois.f90
-dump.o : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c
-main.o : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90
-main_mpi.o : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90
+dump.o : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c 
+main.o : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
+main_mpi.o : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
 
 #*** Clean Target to remove Object and Module files ***
 
