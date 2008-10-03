@@ -76,7 +76,7 @@ WALL_CELL_LOOP: DO IW=1,NEWC
    IOR = IJKW(4,IW)
 
    ! Identify the type of pressure BC for each of the six mesh boundaries
-
+   BC_TYPE = 0
    SELECT CASE(IOR)
       CASE( 1)
          IF (LBC==3 .OR. LBC==4 .OR. LBC==6) BC_TYPE = NEUMANN
@@ -467,11 +467,13 @@ IF (CHECK_POISSON) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            RHSS = (R(I-1)*FVX(I-1,J,K)-R(I)*FVX(I,J,K))*RDX(I)*RRN(I) + (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J) + &
-                   (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K) - DDDT(I,J,K)
+            RHSS = ( R(I-1)*FVX(I-1,J,K) - R(I)*FVX(I,J,K) )*RDX(I)*RRN(I) &
+                 + (        FVY(I,J-1,K) -      FVY(I,J,K) )*RDY(J)        &
+                 + (        FVZ(I,J,K-1) -      FVZ(I,J,K) )*RDZ(K)        &
+                 - DDDT(I,J,K)
             LHSS = ((H(I+1,J,K)-H(I,J,K))*RDXN(I)*R(I) - (H(I,J,K)-H(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
-                   +((H(I,J+1,K)-H(I,J,K))*RDYN(J) -  (H(I,J,K)-H(I,J-1,K))*RDYN(J-1) )*RDY(J) &
-                   +((H(I,J,K+1)-H(I,J,K))*RDZN(K) - (H(I,J,K)-H(I,J,K-1))*RDZN(K-1) )*RDZ(K)
+                 + ((H(I,J+1,K)-H(I,J,K))*RDYN(J)      - (H(I,J,K)-H(I,J-1,K))*RDYN(J-1)        )*RDY(J)        &
+                 + ((H(I,J,K+1)-H(I,J,K))*RDZN(K)      - (H(I,J,K)-H(I,J,K-1))*RDZN(K-1)        )*RDZ(K)
             RES = ABS(RHSS-LHSS)
             POIS_ERR = MAX(RES,POIS_ERR)
          ENDDO
