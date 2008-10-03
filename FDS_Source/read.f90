@@ -6210,9 +6210,9 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
       IF (DV%I1<DV%I2) DV%I1 = DV%I1 + 1
       IF (DV%J1<DV%J2) DV%J1 = DV%J1 + 1
       IF (DV%K1<DV%K2) DV%K1 = DV%K1 + 1
-      IF (XB(1)==XB(2)) DV%IOR = 1
-      IF (XB(3)==XB(4)) DV%IOR = 2
-      IF (XB(5)==XB(6)) DV%IOR = 3
+      IF (XB(1)==XB(2) .AND. IOR==0) DV%IOR = 1
+      IF (XB(3)==XB(4) .AND. IOR==0) DV%IOR = 2
+      IF (XB(5)==XB(6) .AND. IOR==0) DV%IOR = 3
    ENDIF
    
 ENDDO READ_DEVC_LOOP
