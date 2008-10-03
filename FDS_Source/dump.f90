@@ -399,24 +399,32 @@ IF (N_DEVC>0) THEN
          IF (APPEND) THEN
             OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
          ELSE
-            OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='REPLACE')
-            WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(DEVC_COLUMN_LIMIT, N_DEVC - DEVC_COLUMN_LIMIT * (I - 1)),"(A,','),A)"
-            WRITE(LU_DEVC(I),TCFORM) 's',(TRIM(OUTPUT_QUANTITY(DEVICE(N)%OUTPUT_INDEX)%UNITS), &
-                                          N=DEVC_COLUMN_LIMIT*(I-1)+1,MIN(N_DEVC,I*DEVC_COLUMN_LIMIT))
-            WRITE(TCFORM,'(A,I4.4,A)') "(A,",MIN(DEVC_COLUMN_LIMIT, N_DEVC - DEVC_COLUMN_LIMIT * (I - 1)),"(',',3A))"
-            WRITE(LU_DEVC(I),TCFORM) 'FDS Time',('"',TRIM(DEVICE(N)%ID),'"', &
-                                          N=DEVC_COLUMN_LIMIT * (I - 1) + 1,MIN(N_DEVC, I * DEVC_COLUMN_LIMIT))
+            IF (MATLAB_DLMREAD) THEN
+               OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='REPLACE')
+            ELSE
+               OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='REPLACE')
+               WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(DEVC_COLUMN_LIMIT, N_DEVC - DEVC_COLUMN_LIMIT * (I - 1)),"(A,','),A)"
+               WRITE(LU_DEVC(I),TCFORM) 's',(TRIM(OUTPUT_QUANTITY(DEVICE(N)%OUTPUT_INDEX)%UNITS), &
+                                             N=DEVC_COLUMN_LIMIT*(I-1)+1,MIN(N_DEVC,I*DEVC_COLUMN_LIMIT))
+               WRITE(TCFORM,'(A,I4.4,A)') "(A,",MIN(DEVC_COLUMN_LIMIT, N_DEVC - DEVC_COLUMN_LIMIT * (I - 1)),"(',',3A))"
+               WRITE(LU_DEVC(I),TCFORM) 'FDS Time',('"',TRIM(DEVICE(N)%ID),'"', &
+                                             N=DEVC_COLUMN_LIMIT * (I - 1) + 1,MIN(N_DEVC, I * DEVC_COLUMN_LIMIT))
+            ENDIF
          ENDIF
       ENDDO
    ELSE
       IF (APPEND) THEN
          OPEN(LU_DEVC(1),FILE=FN_DEVC(1),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
       ELSE
-         OPEN(LU_DEVC(1),FILE=FN_DEVC(1),FORM='FORMATTED',STATUS='REPLACE')
-         WRITE(TCFORM,'(A,I4.4,A)') "(",N_DEVC,"(A,','),A)"
-         WRITE(LU_DEVC(1),TCFORM) 's',(TRIM(OUTPUT_QUANTITY(DEVICE(N)%OUTPUT_INDEX)%UNITS),N=1,N_DEVC)
+         IF (MATLAB_DLMREAD) THEN
+            OPEN(LU_DEVC(1),FILE=FN_DEVC(1),FORM='FORMATTED',STATUS='REPLACE')
+         ELSE
+            OPEN(LU_DEVC(1),FILE=FN_DEVC(1),FORM='FORMATTED',STATUS='REPLACE')
+            WRITE(TCFORM,'(A,I4.4,A)') "(",N_DEVC,"(A,','),A)"
+            WRITE(LU_DEVC(1),TCFORM) 's',(TRIM(OUTPUT_QUANTITY(DEVICE(N)%OUTPUT_INDEX)%UNITS),N=1,N_DEVC)
             WRITE(TCFORM,'(A,I4.4,A)') "(A,",N_DEVC,"(',',3A))"
             WRITE(LU_DEVC(I),TCFORM) 'FDS Time',('"',TRIM(DEVICE(N)%ID),'"',N=1,N_DEVC)
+         ENDIF
       ENDIF
    ENDIF
 ENDIF
@@ -3454,6 +3462,13 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = Y_MF_INT/Y_EQUIL * 100._EB      
    CASE(22)  ! HP
       IF (PRESSURE_CORRECTION) GAS_PHASE_OUTPUT = HP(II,JJ,KK)
+      
+   CASE(23)  ! KINETIC ENERGY (per unit mass) -- do not average because this operation is dissipative
+      UU   = U(MIN(IBAR,II),JJ,KK)
+      VV   = V(II,MIN(JBAR,JJ),KK)
+      WW   = W(II,JJ,MIN(KBAR,KK))
+      GAS_PHASE_OUTPUT  = 0.5_EB*( UU**2 + VV**2 + WW**2 )
+      
    CASE(24)  ! STRAIN RATE X
       III = MAX(1,MIN(II,IBAR))
       GAS_PHASE_OUTPUT = (W(III,JJ+1,KK)-W(III,JJ,KK))*RDYN(JJ) + (V(III,JJ,KK+1)-V(III,JJ,KK))*RDZN(KK)

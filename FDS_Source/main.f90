@@ -23,6 +23,7 @@ USE WALL_ROUTINES
 USE FIRE
 USE CONTROL_FUNCTIONS
 USE EVAC
+USE TURBULENCE, ONLY: ANALYTICAL_SOLUTION,SANDIA_DAT,INIT_SPECTRAL_DATA,SPECTRAL_OUTPUT
 
 IMPLICIT NONE
  
@@ -141,10 +142,14 @@ CALL MESH_EXCHANGE(0)
  
 ! Initialize the flow field with random noise to eliminate false symmetries
 
-IF (NOISE .OR. PERIODIC_TEST) THEN
+IF (NOISE .OR. PERIODIC_TEST>0) THEN
    DO NM=1,NMESHES
-     IF (NOISE) CALL INITIAL_NOISE(NM)
-     IF (PERIODIC_TEST) CALL ANALYTICAL_SOLUTION(NM)
+      IF (NOISE) CALL INITIAL_NOISE(NM)
+      IF (PERIODIC_TEST==1) CALL ANALYTICAL_SOLUTION(NM)
+      IF (PERIODIC_TEST==2) THEN
+         CALL SANDIA_DAT(NM)
+         CALL INIT_SPECTRAL_DATA(NM)
+      ENDIF
    ENDDO
    CALL MESH_EXCHANGE(6)
    PREDICTOR = .FALSE.
@@ -263,6 +268,7 @@ MAIN_LOOP: DO
  
    IF (ALL(.NOT.ACTIVE_MESH)) ACTIVE_MESH = .TRUE.
    CALL EVAC_MAIN_LOOP
+   
    !=============================================================================================================================
    !                                                     PREDICTOR Step
    !=============================================================================================================================
@@ -272,11 +278,12 @@ MAIN_LOOP: DO
 
    ! Force normal components of velocity to match at interpolated boundaries
 
-   IF (NMESHES>1) THEN
-      DO NM=1,NMESHES
-         IF (ACTIVE_MESH(NM)) CALL MATCH_VELOCITY(NM)
-      ENDDO
-   ENDIF
+   DO NM=1,NMESHES
+      IF (ACTIVE_MESH(NM)) CALL MATCH_VELOCITY(NM)
+   ENDDO
+   
+   ! Spectral energy output
+   IF (NMESHES==1 .AND. PERIODIC_TEST==2 .AND. MINVAL(T)>=SPEC_CLOCK) CALL SPECTRAL_OUTPUT(MINVAL(T),1)
 
    ! Compute mass and momentum finite differences
    
@@ -576,7 +583,7 @@ ALLOCATE(M%OMESH(NMESHES))
  
 OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
-   IF (NOM==NM .AND. .NOT.PERIODIC_TEST) CYCLE OTHER_MESH_LOOP
+   IF (NOM==NM .AND. PERIODIC_TEST==0) CYCLE OTHER_MESH_LOOP
  
    M2=>MESHES(NOM)
    IMIN=0
@@ -595,7 +602,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
       NIC(NOM,NM) = NIC(NOM,NM) + 1
       FOUND = .TRUE.
       IOR = M%IJKW(4,IW)
-      NOT_PERIODIC: IF (.NOT.PERIODIC_TEST) THEN
+      NOT_PERIODIC: IF (PERIODIC_TEST==0) THEN
          SELECT CASE(IOR)
             CASE( 1)
                IMIN=MAX(IMIN,M%IJKW(10,IW)-1)
@@ -693,7 +700,7 @@ TYPE (MESH_TYPE), POINTER :: M2,M
 M=>MESHES(NM)
  
 OTHER_MESH_LOOP: DO NOM=1,NMESHES
-   IF (NOM==NM .AND. .NOT.PERIODIC_TEST) CYCLE OTHER_MESH_LOOP
+   IF (NOM==NM .AND. PERIODIC_TEST==0) CYCLE OTHER_MESH_LOOP
    IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP ! Issue 257 bug fix
    IF (NIC(NM,NOM)==0 .AND. NIC(NOM,NM)>0) THEN
       M2=>MESHES(NOM)
