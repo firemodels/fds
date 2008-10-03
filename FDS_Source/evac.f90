@@ -3616,10 +3616,11 @@ Contains
     Integer i11, i22, group_size
     Logical pp_see_group, is_solid
     Integer jjj, iii, i44
-    Real(eb) x11, y11, group_x_sum, group_y_sum, group_x_center, group_y_center, dens_fac
+    Real(EB) x11, y11, group_x_sum, group_y_sum, group_x_center, group_y_center, dens_fac
     Integer :: i_endless_loop, istat
-    Real(eb), Dimension(6) :: y_tmp, x_tmp, r_tmp
-    Real(eb), Dimension(4) :: d_xy
+    Real(EB), Dimension(6) :: y_tmp, x_tmp, r_tmp
+    Real(EB), Dimension(4) :: d_xy
+    Logical, Dimension(4) :: FoundWall_xy
     ! 
     Type (mesh_type), Pointer :: m
     !
@@ -3934,13 +3935,13 @@ Contains
                    ! Skip wall force ior = 0: Check all walls (do not put too
                    ! close to doors/exits)
                    Call Find_walls(nm, x_tmp(1), y_tmp(1), r_tmp(1), d_max, 0, &
-                        d_xy(1), d_xy(2), d_xy(3), d_xy(4), istat)
+                        d_xy, FoundWall_xy, istat)
                    If (istat/=0) Is_Solid = .True.
                    Call Find_walls(nm, x_tmp(2), y_tmp(2), r_tmp(2), d_max, 0, &
-                        d_xy(1), d_xy(2), d_xy(3), d_xy(4), istat)
+                        d_xy, FoundWall_xy, istat)
                    If (istat/=0) Is_Solid = .True.
                    Call Find_walls(nm, x_tmp(3), y_tmp(3), r_tmp(3), d_max, 0, &
-                        d_xy(1), d_xy(2), d_xy(3), d_xy(4), istat)
+                        d_xy, FoundWall_xy, istat)
                    If (istat/=0) Is_Solid = .True.
                 End If
 
@@ -5219,6 +5220,7 @@ Contains
     Integer  IE, tim_ic, tim_iw, NM_now, tim_iwx, tim_iwy, tim_iw2, tim_ic2, ibc
     Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, tim_dist, Door_dist, Door_width
     Real(EB), Dimension(4) :: d_xy
+    Logical, Dimension(4) :: FoundWall_xy
     Integer istat, STRS_INDX
     !
     !
@@ -7010,206 +7012,27 @@ Contains
           ! ========================================================
 
           ! ========================================================
-          ! The wall forces
+          ! THE PERSON-WALL FORCES
           ! ========================================================
-          !
+
           ! ========================================================
           ! WALL SURFACE - PERSON FORCES STARTS
           ! ========================================================
-
-          ! Call Find_walls(nm, x1, y1, HR%Radius, P2P_DIST_MAX, d_mx, d_px, d_my, d_py, istat)
-          ! istat = 0: no contact forces (close enough), -1: error, +1: contact with walls
-          ! distances d_mx etc measured from the centre of the circle to the walls.
-
+          !
           ! Walls are looked for the body circle
-          Call Find_walls(nm, x1, y1, HR%Radius, P2P_DIST_MAX, HR%SKIP_WALL_FORCE_IOR, d_xy(1), d_xy(2), d_xy(3), d_xy(4), istat)
-          Call Wall_SocialForces(nm, x1, y1, HR%Radius, P2P_DIST_MAX, d_xy, P2P_U, P2P_V, Social_F)
+          Call Find_walls(nm, x1, y1, HR%Radius, P2P_DIST_MAX, HR%SKIP_WALL_FORCE_IOR, d_xy, FoundWall_xy, istat)
+          Call Wall_SocialForces(nm, x1, y1, HR%Radius, P2P_DIST_MAX, d_xy, P2P_U, P2P_V, Social_F, FoundWall_xy)
 
-          !If (istat > 0) Then
           Call Wall_ContactForces(nm, x_tmp(1), y_tmp(1), r_tmp(1), u_tmp(1), v_tmp(1), d_xy, &
-               P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls)
+               P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy)
           Call Wall_ContactForces(nm, x_tmp(2), y_tmp(2), r_tmp(2), u_tmp(2), v_tmp(2), d_xy, &
-               P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls)
+               P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy)
           Call Wall_ContactForces(nm, x_tmp(3), y_tmp(3), r_tmp(3), u_tmp(3), v_tmp(3), d_xy, &
-               P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls)
-          !End If
-          !write(lu_evacout,*)'* T,dT,d_walls ',T,dtsp,d_walls
-          tim_dist = Huge(tim_dist)
-!!$          ! Find the closest wall at the -x direction
-!!$          x_now = -DX(iin)
-!!$          TIM_MX: Do ii = iin,0,-1
-!!$             x_now = x_now + DX(ii)
-!!$             If ( x_now-HR%Radius > P2P_DIST_MAX) Exit TIM_MX
-!!$             tim_ic = cell_index(ii,jjn,kkn)  ! cell index
-!!$             tim_iw = wall_index(tim_ic, -1)  ! wall index
-!!$             If ( tim_iw == 0 ) Cycle TIM_MX
-!!$             IBC = IJKW(5,tim_iw)  ! Boundary condition index
-!!$             ! Next line: There is a 'door', i.e., outflow-boundary (or open boundary)
-!!$             !            so no wall forces ==> exit this force loop
-!!$             If (SURFACE(IBC)%VEL> 0.0_EB .Or. BOUNDARY_TYPE(tim_iw)==OPEN_BOUNDARY) Exit TIM_MX
-!!$             x11 =  xw(tim_iw)
-!!$             tim_dist = Abs(x1-x11)
-!!$             If (tim_dist-HR%Radius > P2P_DIST_MAX) Exit TIM_MX
-!!$             If ( (HR%U**2 +HR%V**2) > 0.0_EB ) Then
-!!$                CosPhiFac = (-HR%U)/Sqrt(HR%U**2+HR%V**2)
-!!$                CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-!!$             Else
-!!$                CosPhiFac = 1.0_EB
-!!$             End If
-!!$             !P2P_U = P2P_U + A_Wall*CosPhiFac*Exp( -(tim_dist-HR%Radius)/B_Wall )
-!!$             !Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(tim_dist-HR%Radius)/B_Wall ))
-!!$             Do iii = 1, 3
-!!$                tim_dist = Abs(x_tmp(iii)-x11)
-!!$                d_walls = Min(tim_dist-r_tmp(iii),d_walls)
-!!$                If (tim_dist <= r_tmp(iii)) Then
-!!$                   Fc_x = + 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)
-!!$                   Fc_y = 0.0_EB
-!!$                   Contact_F = Contact_F + Abs(Fc_x)
-!!$                   write(lu_evacout,*)'*** -x Fc_x',Fc_x
-!!$                   If (I_Fric_sw >= 1 ) Then
-!!$                      Fc_y = Fc_y - HR%Kappa*(r_tmp(iii)-tim_dist)*v_tmp(iii)
-!!$                   Else
-!!$                      Fc_y = Fc_y - HR%Gamma*v_tmp(iii)
-!!$                   End If
-!!$                   P2P_Torque = P2P_Torque + Fc_y*(x11-HR%X) - Fc_x*(y_tmp(iii)-HR%Y)
-!!$                   P2P_U = P2P_U + Fc_x
-!!$                   P2P_V = P2P_V + Fc_y
-!!$                End If
-!!$             End Do
-!!$             Exit TIM_MX
-!!$          End Do TIM_MX
-!!$
-!!$          ! Find the closest wall at the +x direction
-!!$          x_now = -DX(iin)
-!!$          TIM_PX: Do ii = iin, IBAR+1, +1
-!!$             x_now = x_now + DX(ii)
-!!$             If ( x_now-HR%Radius > P2P_DIST_MAX) Exit TIM_PX
-!!$             tim_ic = cell_index(ii,jjn,kkn)  ! cell index
-!!$             tim_iw = wall_index(tim_ic, +1)  ! wall index
-!!$             If ( tim_iw == 0 ) Cycle TIM_PX
-!!$             IBC = IJKW(5,tim_iw)  ! Boundary condition index
-!!$             ! Next line: There is a 'door', i.e., outflow-boundary (or open boundary)
-!!$             !            so no wall forces ==> exit this force loop
-!!$             If (SURFACE(IBC)%VEL> 0.0_EB .Or. BOUNDARY_TYPE(tim_iw)==OPEN_BOUNDARY) Exit TIM_PX
-!!$             x11 =  xw(tim_iw)
-!!$             tim_dist = Abs(x1-x11)
-!!$             If (tim_dist-HR%Radius > P2P_DIST_MAX) Exit TIM_PX
-!!$             If ( (HR%U**2 +HR%V**2) > 0.0_EB ) Then
-!!$                CosPhiFac = (HR%U)/Sqrt(HR%U**2+HR%V**2)
-!!$                CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-!!$             Else
-!!$                CosPhiFac = 1.0_EB
-!!$             End If
-!!$             !P2P_U = P2P_U - A_Wall*CosPhiFac*Exp( -(tim_dist-HR%Radius)/B_Wall )
-!!$             !Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(tim_dist-HR%Radius)/B_Wall ))
-!!$             Do iii = 1, 3
-!!$                tim_dist = Abs(x11-x_tmp(iii))
-!!$                d_walls = Min(tim_dist-r_tmp(iii),d_walls)
-!!$                If (tim_dist <= r_tmp(iii)) Then
-!!$                   Fc_x = - 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)
-!!$                   Fc_y = 0.0_EB
-!!$                   Contact_F = Contact_F + Abs(Fc_x)
-!!$                   write(lu_evacout,*)'*** +x Fc_x',Fc_x
-!!$                   If (I_Fric_sw >= 1 ) Then
-!!$                      Fc_y = Fc_y - HR%Kappa*(r_tmp(iii)-tim_dist)*v_tmp(iii)
-!!$                   Else
-!!$                      Fc_y = Fc_y - HR%Gamma*v_tmp(iii)
-!!$                   End If
-!!$                   P2P_Torque = P2P_Torque + Fc_y*(x11-HR%X) - Fc_x*(y_tmp(iii)-HR%Y)
-!!$                   P2P_U = P2P_U + Fc_x
-!!$                   P2P_V = P2P_V + Fc_y
-!!$                End If
-!!$             End Do
-!!$             Exit TIM_PX
-!!$          End Do TIM_PX
-!!$
-!!$          ! Find the closest wall at the -y direction
-!!$          y_now = -DY(jjn)
-!!$          TIM_MY: Do jj = jjn,0,-1
-!!$             y_now = y_now + DY(jj)
-!!$             If ( y_now-HR%Radius > P2P_DIST_MAX) Exit TIM_MY
-!!$             tim_ic = cell_index(iin,jj,kkn)  ! cell index
-!!$             tim_iw = wall_index(tim_ic, -2)  ! wall index
-!!$             If ( tim_iw == 0 ) Cycle TIM_MY
-!!$             IBC = IJKW(5,tim_iw)  ! Boundary condition index
-!!$             ! Next line: There is a 'door', i.e., outflow-boundary (or open boundary)
-!!$             !            so no wall forces ==> exit this force loop
-!!$             If (SURFACE(IBC)%VEL> 0.0_EB .Or. BOUNDARY_TYPE(tim_iw)==OPEN_BOUNDARY) Exit TIM_MY
-!!$             y11 =  yw(tim_iw)
-!!$             tim_dist = Abs(y1-y11)
-!!$             If (tim_dist-HR%Radius > P2P_DIST_MAX) Exit TIM_MY
-!!$             If ( (HR%U**2 +HR%V**2) > 0.0_EB ) Then
-!!$                CosPhiFac = (-HR%V)/Sqrt(HR%U**2+HR%V**2)
-!!$                CosPhiFac = LambdaW +  0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-!!$             Else
-!!$                CosPhiFac = 1.0_EB
-!!$             End If
-!!$             !P2P_V = P2P_V + A_Wall*CosPhiFac*Exp( -(tim_dist-HR%Radius)/B_Wall )
-!!$             !Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(tim_dist-HR%Radius)/B_Wall ))
-!!$             Do iii = 1, 3
-!!$                tim_dist = Abs(y_tmp(iii)-y11)
-!!$                d_walls = Min(tim_dist-r_tmp(iii),d_walls)
-!!$                If (tim_dist <= r_tmp(iii)) Then
-!!$                   Fc_y = + 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)
-!!$                   Fc_x = 0.0_EB
-!!$                   Contact_F = Contact_F + Abs(Fc_y)
-!!$                   write(lu_evacout,*)'*** -y Fc_y',Fc_y
-!!$                   If (I_Fric_sw >= 1 ) Then
-!!$                      Fc_x = Fc_x - HR%Kappa*(r_tmp(iii)-tim_dist)*u_tmp(iii)
-!!$                   Else
-!!$                      Fc_x = Fc_x - HR%Gamma*u_tmp(iii)
-!!$                   End If
-!!$                   P2P_Torque = P2P_Torque + Fc_y*(x_tmp(iii)-HR%X) - Fc_x*(y11-HR%Y)
-!!$                   P2P_U = P2P_U + Fc_x
-!!$                   P2P_V = P2P_V + Fc_y
-!!$                End If
-!!$             End Do
-!!$             Exit TIM_MY
-!!$          End Do TIM_MY
-!!$
-!!$          ! Find the closest wall at the +y direction
-!!$          y_now = -DY(jjn)
-!!$          TIM_PY: Do jj = jjn, JBAR+1
-!!$             y_now = y_now + DY(jj)
-!!$             If ( y_now-HR%Radius > P2P_DIST_MAX) Exit TIM_PY
-!!$             tim_ic = cell_index(iin,jj,kkn)  ! cell index
-!!$             tim_iw = wall_index(tim_ic, +2)  ! wall index
-!!$             If ( tim_iw == 0 ) Cycle TIM_PY
-!!$             IBC = IJKW(5,tim_iw)  ! Boundary condition index
-!!$             ! Next line: There is a 'door', i.e., outflow-boundary (or open boundary)
-!!$             !            so no wall forces ==> exit this force loop
-!!$             If (SURFACE(IBC)%VEL> 0.0_EB .Or. BOUNDARY_TYPE(tim_iw)==OPEN_BOUNDARY) Exit TIM_PY
-!!$             y11 =  yw(tim_iw)
-!!$             tim_dist = Abs(y1-y11)
-!!$             If (tim_dist-HR%Radius > P2P_DIST_MAX) Exit TIM_PY
-!!$             If ( (HR%U**2 +HR%V**2) > 0.0_EB ) Then
-!!$                CosPhiFac = (HR%V)/Sqrt(HR%U**2+HR%V**2)
-!!$                CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-!!$             Else
-!!$                CosPhiFac = 1.0_EB
-!!$             End If
-!!$             !P2P_V = P2P_V - A_Wall*CosPhiFac*Exp( -(tim_dist-HR%Radius)/B_Wall )
-!!$             !Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(tim_dist-HR%Radius)/B_Wall ))
-!!$             Do iii = 1, 3
-!!$                tim_dist = Abs(y11-y_tmp(iii))
-!!$                d_walls = Min(tim_dist-r_tmp(iii),d_walls)
-!!$                If (tim_dist <= r_tmp(iii)) Then
-!!$                   Fc_y = - 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)
-!!$                   Fc_x = 0.0_EB
-!!$                   Contact_F = Contact_F + Abs(Fc_y)
-!!$                   write(lu_evacout,*)'*** -y Fc_y',Fc_y
-!!$                   If (I_Fric_sw >= 1 ) Then
-!!$                      Fc_x = Fc_x - HR%Kappa*(r_tmp(iii)-tim_dist)*u_tmp(iii)
-!!$                   Else
-!!$                      Fc_x = Fc_x - HR%Gamma*u_tmp(iii)
-!!$                   End If
-!!$                   P2P_Torque = P2P_Torque + Fc_y*(x_tmp(iii)-HR%X) - Fc_x*(y11-HR%Y)
-!!$                   P2P_U = P2P_U + Fc_x
-!!$                   P2P_V = P2P_V + Fc_y
-!!$                End If
-!!$             End Do
-!!$             Exit TIM_PY
-!!$          End Do TIM_PY
+               P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy)
+
+          Call Door_Forces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, p2p_dist_max, d_xy,&
+               P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, FoundWall_xy)
+          !tim_dist = Huge(tim_dist)
 
           ! ========================================================
           ! WALL SURFACE - PERSON FORCES ENDS
@@ -7218,7 +7041,6 @@ Contains
           ! ========================================================
           ! WALL CORNER - PERSON FORCES STARTS
           ! ========================================================
-
 
           ! top right corner (x > x_human, y > y_human)
           x_now = -DX(iin+1)
@@ -7247,54 +7069,11 @@ Contains
                       x11 = xw(tim_iw2)-0.5_EB*DX(ii+1) ! corner point x
                       y11 = yw(tim_iw2)                 ! corner point y
                    End If
-                   tim_dist = Sqrt( (y11 - y1)**2 + (x11 - x1)**2 )
-                   If (tim_dist-HR%Radius > P2P_DIST_MAX) Exit Loop_pxpy
-                   If ( (HR%U**2 +HR%V**2) > 0.0_EB ) Then
-                      CosPhiFac = ((x11-X1)*HR%U + (y11-Y1)*HR%V ) &
-                           / ( tim_dist* Sqrt(HR%U**2 +HR%V**2) )
-                      CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-                   Else
-                      CosPhiFac = 1.0_EB
-                   End If
-                   P2P_U = P2P_U + (X1-x11)*A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ) / tim_dist
-                   P2P_V = P2P_V + (Y1-y11)*A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ) / tim_dist
-                   Social_F = Social_F + Abs(A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ))
-                   Do iii = 1, 3
-                      tim_dist = Sqrt( (y11 - y_tmp(iii))**2 + (x11 - x_tmp(iii))**2 )
-                      d_walls = Min(tim_dist-r_tmp(iii),d_walls)
-                      If (tim_dist <= r_tmp(iii)) Then
-                         Fc_x = (x_tmp(iii)-x11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)/tim_dist
-                         Fc_y = (y_tmp(iii)-y11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)/tim_dist
-                         Contact_F = Contact_F + Sqrt( Fc_x**2 + Fc_y**2 )
-                         ! Tangential contact force:
-                         If (I_Fric_sw >= 1 ) Then
-                            Fc_x = Fc_x - HR%Kappa* &
-                                 (r_tmp(iii)-tim_dist)*(y_tmp(iii)-y11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                            Fc_y = Fc_y + HR%Kappa* &
-                                 (r_tmp(iii)-tim_dist)*(x_tmp(iii)-x11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                         Else
-                            Fc_x = Fc_x - HR%Gamma*(y_tmp(iii)-y11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                            Fc_y = Fc_y + HR%Gamma*(x_tmp(iii)-x11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                         End If
-                         P2P_Torque = P2P_Torque + Fc_y*(x11-x_tmp(iii)) - Fc_x*(y11-y_tmp(iii))
-                         P2P_U = P2P_U + Fc_x
-                         P2P_V = P2P_V + Fc_y
-                      End If
-                   End Do
+
+                   Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                        Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
                    Exit Loop_pxpy
                 End If
-                ! If ( Solid(tim_ic) ) Exit Loop_pxpy
              End Do Loop_pxpy
           End Do Loop_px
 
@@ -7315,17 +7094,6 @@ Contains
                 tim_ic2 = cell_index(ii-1,jj,kkn) ! one cell left
                 tim_iw2 = wall_index(tim_ic2, +2) ! left and up
                 If (tim_iwy /= 0) Exit Loop_mxpy
-                !If (tim_iwy /= 0) Then
-                !   IBC = IJKW(5,tim_iwy)  ! Boundary condition index
-                !   If (tim_iw2 == 0) Exit Loop_mxpy
-                !   IBC2 = IJKW(5,tim_iw2)  ! Boundary condition index
-                !   If ((SURFACE(IBC)%VEL> 0.0_EB .Or. BOUNDARY_TYPE(tim_iw)==OPEN_BOUNDARY) .And. &
-                !       .Not.(SURFACE(IBC2)%VEL> 0.0_EB .Or. BOUNDARY_TYPE(tim_iw2)==OPEN_BOUNDARY) ) Then
-                !      tim_iwy=0 ; tim_iw=0
-                !   Else
-                !      Exit Loop_mxpy
-                !   End If
-                !End If
                 If ( (tim_iwx==0).And.(tim_iwy==0).And.(tim_iw/=0 .Or. tim_iw2/=0) ) Then
                    If (tim_iw/=0) Then
                       ! first y-direction then x-direction
@@ -7336,54 +7104,11 @@ Contains
                       x11 = xw(tim_iw2)+0.5_EB*DX(ii-1) ! corner point x
                       y11 = yw(tim_iw2)                 ! corner point y
                    End If
-                   tim_dist = Sqrt( (y11 - y1)**2 + (x11 - x1)**2 )
-                   If (tim_dist-HR%Radius > P2P_DIST_MAX) Exit Loop_mxpy
-                   If ( (HR%U**2 +HR%V**2) > 0.0_EB ) Then
-                      CosPhiFac = ((x11-X1)*HR%U + (y11-Y1)*HR%V ) &
-                           / ( tim_dist* Sqrt(HR%U**2 +HR%V**2) )
-                      CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-                   Else
-                      CosPhiFac = 1.0_EB
-                   End If
-                   P2P_U = P2P_U + (X1-x11)*A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ) / tim_dist
-                   P2P_V = P2P_V + (Y1-y11)*A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ) / tim_dist
-                   Social_F = Social_F + Abs(A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ))
-                   Do iii = 1, 3
-                      tim_dist = Sqrt( (y11-y_tmp(iii))**2 + (x11-x_tmp(iii))**2 )
-                      d_walls = Min(tim_dist-r_tmp(iii),d_walls)
-                      If (tim_dist <= r_tmp(iii)) Then
-                         Fc_x = (x_tmp(iii)-x11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)/tim_dist
-                         Fc_y = (y_tmp(iii)-y11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)/tim_dist
-                         Contact_F = Contact_F + Sqrt( Fc_x**2 + Fc_y**2 )
-                         ! Tangential contact force:
-                         If (I_Fric_sw >= 1 ) Then
-                            Fc_x = Fc_x - HR%Kappa* &
-                                 (r_tmp(iii)-tim_dist)*(y_tmp(iii)-y11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                            Fc_y = Fc_y + HR%Kappa* &
-                                 (r_tmp(iii)-tim_dist)*(x_tmp(iii)-x11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                         Else
-                            Fc_x = Fc_x - HR%Gamma*(y_tmp(iii)-y11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                            Fc_y = Fc_y + HR%Gamma*(x_tmp(iii)-x11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                         End If
-                         P2P_Torque = P2P_Torque + Fc_y*(x11-x_tmp(iii)) - Fc_x*(y11-y_tmp(iii))
-                         P2P_U = P2P_U + Fc_x
-                         P2P_V = P2P_V + Fc_y
-                      End If
-                   End Do
+
+                   Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                        Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
                    Exit Loop_mxpy
                 End If
-                ! If ( Solid(tim_ic) ) Exit Loop_mxpy
              End Do Loop_mxpy
           End Do Loop_mx
 
@@ -7414,55 +7139,11 @@ Contains
                       x11 = xw(tim_iw2)-0.5_EB*DX(ii+1) ! corner point x
                       y11 = yw(tim_iw2)                 ! corner point y
                    End If
-                   tim_dist = Sqrt((y11-y1)**2 + (x11-x1)**2)
-                   If (tim_dist-HR%Radius > P2P_DIST_MAX) Exit Loop_pxmy
-                   If ( (HR%U**2 +HR%V**2) > 0.0_EB ) Then
-                      CosPhiFac = ((x11-X1)*HR%U + (y11-Y1)*HR%V ) &
-                           / ( tim_dist* Sqrt(HR%U**2 +HR%V**2) )
-                      CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-                   Else
-                      CosPhiFac = 1.0_EB
-                   End If
-                   P2P_U = P2P_U + (X1-x11)*A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ) / tim_dist
-                   P2P_V = P2P_V + (Y1-y11)*A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ) / tim_dist
-                   Social_F = Social_F + Abs(A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ))
-                   Do iii = 1, 3
-                      tim_dist = Sqrt( (y11 - y_tmp(iii))**2 + (x11 - x_tmp(iii))**2 )
-                      d_walls = Min(tim_dist-r_tmp(iii),d_walls)
-                      If (tim_dist <= r_tmp(iii)) Then
-                         Fc_x = (x_tmp(iii)-x11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)/tim_dist
-                         Fc_y = (y_tmp(iii)-y11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)/tim_dist
-                         Contact_F = Contact_F + Sqrt( Fc_x**2 + Fc_y**2 )
-                         ! Tangential contact force:
-                         If (I_Fric_sw >= 1 ) Then
-                            Fc_x = Fc_x - HR%Kappa* &
-                                 (r_tmp(iii)-tim_dist)*(y_tmp(iii)-y11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                            Fc_y = Fc_y + HR%Kappa* &
-                                 (r_tmp(iii)-tim_dist)*(x_tmp(iii)-x11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                         Else
-                            Fc_x = Fc_x - HR%Gamma*(y_tmp(iii)-y11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                            Fc_y = Fc_y + HR%Gamma*(x_tmp(iii)-x11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                         End If
-                         P2P_Torque = P2P_Torque + Fc_y*(x11-x_tmp(iii)) - Fc_x*(y11-y_tmp(iii))
-                         P2P_U = P2P_U + Fc_x
-                         P2P_V = P2P_V + Fc_y
-                      End If
-                   End Do
 
+                   Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                        Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
                    Exit Loop_pxmy
                 End If
-                ! If ( Solid(tim_ic) ) Exit Loop_pxmy
              End Do Loop_pxmy
           End Do Loop_py
 
@@ -7493,54 +7174,11 @@ Contains
                       x11 = xw(tim_iw2)+0.5_EB*DX(ii-1) ! corner point x
                       y11 = yw(tim_iw2)                 ! corner point y
                    End If
-                   tim_dist = Sqrt((y11-y1)**2 + (x11-x1)**2)
-                   If (tim_dist-HR%Radius > P2P_DIST_MAX) Exit Loop_mxmy
-                   If ( (HR%U**2 +HR%V**2) > 0.0_EB ) Then
-                      CosPhiFac = ((x11-X1)*HR%U + (y11-Y1)*HR%V ) &
-                           / ( tim_dist* Sqrt(HR%U**2 +HR%V**2) )
-                      CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-                   Else
-                      CosPhiFac = 1.0_EB
-                   End If
-                   P2P_U = P2P_U + (X1-x11)*A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ) / tim_dist
-                   P2P_V = P2P_V + (Y1-y11)*A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ) / tim_dist
-                   Social_F = Social_F + Abs(A_Wall*CosPhiFac* &
-                        Exp( -(tim_dist-HR%Radius)/B_Wall ))
-                   Do iii = 1, 3
-                      tim_dist = Sqrt( (y11 - y_tmp(iii))**2 + (x11 - x_tmp(iii))**2 )
-                      d_walls = Min(tim_dist-r_tmp(iii),d_walls)
-                      If (tim_dist <= r_tmp(iii)) Then
-                         Fc_x = (x_tmp(iii)-x11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)/tim_dist
-                         Fc_y = (y_tmp(iii)-y11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-tim_dist)/tim_dist
-                         Contact_F = Contact_F + Sqrt( Fc_x**2 + Fc_y**2 )
-                         ! Tangential contact force:
-                         If (I_Fric_sw >= 1 ) Then
-                            Fc_x = Fc_x - HR%Kappa* &
-                                 (r_tmp(iii)-tim_dist)*(y_tmp(iii)-y11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                            Fc_y = Fc_y + HR%Kappa* &
-                                 (r_tmp(iii)-tim_dist)*(x_tmp(iii)-x11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                         Else
-                            Fc_x = Fc_x - HR%Gamma*(y_tmp(iii)-y11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                            Fc_y = Fc_y + HR%Gamma*(x_tmp(iii)-x11)* &
-                                 ( (y_tmp(iii)-y11)*u_tmp(iii) - &
-                                 (x_tmp(iii)-x11)*v_tmp(iii) )/tim_dist**2
-                         End If
-                         P2P_Torque = P2P_Torque + Fc_y*(x11-x_tmp(iii)) - Fc_x*(y11-y_tmp(iii))
-                         P2P_U = P2P_U + Fc_x
-                         P2P_V = P2P_V + Fc_y
-                      End If
-                   End Do
+
+                   Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                        Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
                    Exit Loop_mxmy
                 End If
-                ! If ( Solid(tim_ic) ) Exit Loop_mxmy
              End Do Loop_mxmy
           End Do Loop_my
 
@@ -9505,15 +9143,205 @@ Contains
       End If
       ! 
     End Subroutine ENTRY_HUMAN
-    !
 
+    Subroutine Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+         Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+      Implicit None
+
+      ! Corner point - agent social and contact forces and torques
+      !
+      ! Inputs:  x1,y1: coordinates of the agent
+      !          x11,y11: coordiantes of the corner
+      !          x/y_tmp: coordinates of the centres of the spheres (1-3 used)
+      !                   1: right, 2: centre, 3: left circle
+      !          r_tmp: radii of the spheres
+      !          u/v_tmp: velocities of the centres of the spheres (1-3 used)
+      !          p2p_dist_max: cutoff distance of the social force
+      ! Outputs: istat: 0 no errors
+      !          P2P_U/V: Forces x/y directions
+      !          P2P_Torque: Torque
+      !          Social_F: Radial social line force
+      !          Contact_F: Radial contact line force
+      !          d_walls: Shortest distance to walls
+      !
+      
+      Real(EB), Intent(In) :: x1, y1, x11, y11, p2p_dist_max
+      Real(EB), Dimension(6), Intent(In) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
+      Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, d_walls
+      Integer, Intent(Out) :: istat
+      !
+      ! Local variables
+      Real(EB) :: dist, CosPhiFac, u, v, Fc_x, Fc_y, FricFac, k_fric
+      Integer :: iii
+
+      istat = 0
+      If (I_Fric_sw >= 1 ) Then
+         FricFac = 0.0_EB
+         k_fric = HR%Kappa
+      Else
+         FricFac = 1.0_EB
+         k_fric = HR%Gamma
+      End If
+
+      dist = Sqrt((y11-y1)**2 + (x11-x1)**2)
+      If (dist-HR%Radius > p2p_dist_max) Then
+         istat = 1
+         Return
+      End If
+      u = u_tmp(2) ; v = v_tmp(2)
+
+      If ( (u**2+v**2) > 0.0_EB ) Then
+         CosPhiFac = ((x11-X1)*u + (y11-Y1)*v) / (dist*Sqrt(u**2+v**2))
+         CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+      Else
+         CosPhiFac = 1.0_EB
+      End If
+      P2P_U = P2P_U + (X1-x11)*A_Wall*CosPhiFac*Exp(-(dist-HR%Radius)/B_Wall) / dist
+      P2P_V = P2P_V + (Y1-y11)*A_Wall*CosPhiFac*Exp(-(dist-HR%Radius)/B_Wall) / dist
+      Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp(-(dist-HR%Radius)/B_Wall))
+
+      Do iii = 1, 3
+         dist = Sqrt( (y11-y_tmp(iii))**2 + (x11-x_tmp(iii))**2 )
+         d_walls = Min(dist-r_tmp(iii),d_walls)
+         If (dist <= r_tmp(iii)) Then
+            Fc_x = (x_tmp(iii)-x11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-dist)/dist
+            Fc_y = (y_tmp(iii)-y11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-dist)/dist
+            !Only radial contact forces, i.e., pressure calculation
+            Contact_F = Contact_F + Sqrt(Fc_x**2 + Fc_y**2)
+            ! Tangential contact force:
+               Fc_x = Fc_x - k_fric*( (1.0_EB-FricFac)*(r_tmp(iii)-dist)+FricFac ) *(y_tmp(iii)-y11)* &
+                    ( (y_tmp(iii)-y11)*u_tmp(iii) - (x_tmp(iii)-x11)*v_tmp(iii) )/dist**2
+               Fc_y = Fc_y + k_fric*( (1.0_EB-FricFac)*(r_tmp(iii)-dist)+FricFac ) *(x_tmp(iii)-x11)* &
+                    ( (y_tmp(iii)-y11)*u_tmp(iii) - (x_tmp(iii)-x11)*v_tmp(iii) )/dist**2
+            P2P_Torque = P2P_Torque + Fc_y*(x11-x_tmp(iii)) - Fc_x*(y11-y_tmp(iii))
+            P2P_U = P2P_U + Fc_x
+            P2P_V = P2P_V + Fc_y
+         End If
+      End Do
+
+    End Subroutine Corner_Forces
+
+    Subroutine Door_Forces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, p2p_dist_max, d_xy,&
+         P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, FoundWall_xy)
+      Implicit None
+      !
+      ! This routine adds forces from the door posts. (VENTs with VEL>0)
+      !
+      ! Inputs:  FoundWall_xy(1-4): True for solid walls (False for outflow VENTs)
+      !          x/y_tmp: coordinates of the centres of the spheres (1-3 used)
+      !                   1: right, 2: centre, 3: left circle
+      !          r_tmp: radii of the spheres
+      !          u/v_tmp: velocities of the centres of the spheres (1-3 used)
+      !          p2p_dist_max: cutoff distance of the social force
+      ! Outputs: 
+      !          P2P_U/V: Forces x/y directions
+      !          P2P_Torque: Torque
+      !          Social_F: Radial social line force
+      !          Contact_F: Radial contact line force
+      !          d_walls: Shortest distance to walls
+
+
+      Integer, Intent(In) :: nm
+      Real(EB), Intent(In) :: p2p_dist_max
+      Real(EB), Dimension(4), Intent(In) :: d_xy
+      Logical, Dimension(4), Intent(In) :: FoundWall_xy
+      Real(EB), Dimension(6), Intent(In) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
+      Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque
+      !
+      Integer :: is, idir, iin, jjn, istat
+      Real(EB) :: CosPhiFac, dist, dist1, dist2
+
+      
+      ! Check if there are doors (vents with vel >0)
+      Do ii = 1, N_VENT
+         If (Abs(VENTS(ii)%IOR)>2 .Or. SURFACE(VENTS(ii)%IBC)%VEL<=0) Cycle
+         dist1 = Sqrt((VENTS(ii)%x1-x_tmp(2))**2 + (VENTS(ii)%y1-y_tmp(2))**2) ! door - agent centre distance
+         dist2 = Sqrt((VENTS(ii)%x2-x_tmp(2))**2 + (VENTS(ii)%y2-y_tmp(2))**2)
+         If ( (Min(dist1,dist2)-HR%Radius) > P2P_DIST_MAX) Cycle
+
+         
+         If (VENTS(ii)%IOR== -1 .And. FoundWall_xy(2)) Cycle
+         If (VENTS(ii)%IOR== +1 .And. FoundWall_xy(1)) Cycle
+         If (VENTS(ii)%IOR== -2 .And. FoundWall_xy(4)) Cycle
+         If (VENTS(ii)%IOR== +2 .And. FoundWall_xy(3)) Cycle
+         Select Case(VENTS(ii)%IOR)
+         Case(-1)  ! wall at +x direction
+            If (.Not.FoundWall_xy(2) .And. Abs(VENTS(ii)%x1-d_xy(2))<0.01_EB .And. &
+                 (VENTS(ii)%y1<y_tmp(2).And.VENTS(ii)%y2>y_tmp(2))) Then
+               ! There is a outflow vent here
+               x11 = VENTS(ii)%x1
+               y11 = VENTS(ii)%y1
+               Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+               x11 = VENTS(ii)%x2
+               y11 = VENTS(ii)%y2
+               Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+            End If
+         Case(+1)  ! wall at -x direction
+            If (.Not.FoundWall_xy(1) .And. Abs(VENTS(ii)%x1-d_xy(1))<0.01_EB .And. &
+                 (VENTS(ii)%y1<y_tmp(2).And.VENTS(ii)%y2>y_tmp(2))) Then
+               ! There is a outflow vent here
+               x11 = VENTS(ii)%x1
+               y11 = VENTS(ii)%y1
+               Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+               x11 = VENTS(ii)%x2
+               y11 = VENTS(ii)%y2
+               Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+            End If
+         Case(-2)  ! wall at +y direction
+            If (.Not.FoundWall_xy(4) .And. Abs(VENTS(ii)%y1-d_xy(4))<0.01_EB .And. &
+                 (VENTS(ii)%x1<x_tmp(2).And.VENTS(ii)%x2>x_tmp(2))) Then
+               ! There is a outflow vent here
+               x11 = VENTS(ii)%x1
+               y11 = VENTS(ii)%y1
+               Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+               x11 = VENTS(ii)%x2
+               y11 = VENTS(ii)%y2
+               Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+            End If
+         Case(+2)  ! wall at -y direction
+            If (.Not.FoundWall_xy(3) .And. Abs(VENTS(ii)%y1-d_xy(3))<0.01_EB .And. &
+                 (VENTS(ii)%x1<x_tmp(2).And.VENTS(ii)%x2>x_tmp(2))) Then
+               ! There is a outflow vent here
+               x11 = VENTS(ii)%x1
+               y11 = VENTS(ii)%y1
+               Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+               x11 = VENTS(ii)%x2
+               y11 = VENTS(ii)%y2
+               Call Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+            End If
+         End Select
+      End Do
+
+    End Subroutine Door_Forces
 
     Subroutine Wall_SocialForces(nm, x_tmp, y_tmp, r_tmp, p2p_dist_max, d_xy,&
-         P2P_U, P2P_V, Social_F)
+         P2P_U, P2P_V, Social_F, FoundWall_xy)
       Implicit None
+
+      ! wall - agent social forces
+      !
+      ! Inputs:  FoundWall_xy(1-4): True for solid walls (False for outflow VENTs)
+      !          x/y_tmp: coordinates of the centres of the spheres (1-3 used)
+      !                   1: right, 2: centre, 3: left circle
+      !          r_tmp: radii of the spheres
+      !          p2p_dist_max: cutoff distance of the social force
+      ! Outputs: 
+      !          P2P_U/V: Forces x/y directions
+      !          Social_F: Radial social line force
+      !
+
       Integer, Intent(In) :: nm
       Real(EB), Intent(In) :: x_tmp, y_tmp, r_tmp, p2p_dist_max
       Real(EB), Dimension(4), Intent(In) :: d_xy
+      Logical, Dimension(4), Intent(In) :: FoundWall_xy
       Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F
       !
       Integer :: is, idir
@@ -9523,7 +9351,7 @@ Contains
       is   = -1
       idir =  1
       dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
-      If (dist-r_tmp <= P2P_DIST_MAX) Then
+      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
          If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
             CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
             CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
@@ -9537,7 +9365,7 @@ Contains
       is   = +1
       idir =  2
       dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
-      If (dist-r_tmp <= P2P_DIST_MAX) Then
+      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
          If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
             CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
             CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
@@ -9551,7 +9379,7 @@ Contains
       is   = -1
       idir =  3
       dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
-      If (dist-r_tmp <= P2P_DIST_MAX) Then
+      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
          If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
             CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
             CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
@@ -9565,7 +9393,7 @@ Contains
       is   = +1
       idir =  4
       dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
-      If (dist-r_tmp <= P2P_DIST_MAX) Then
+      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
          If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
             CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
             CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
@@ -9578,13 +9406,29 @@ Contains
 
     End Subroutine Wall_SocialForces
 
-
     Subroutine Wall_ContactForces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, d_xy,&
-         P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls)
+         P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy)
       Implicit None
+
+      ! wall - agent contact forces
+      !
+      ! Inputs:  FoundWall_xy(1-4): True for solid walls (False for outflow VENTs)
+      !          x/y_tmp: coordinates of the centres of the spheres (1-3 used)
+      !                   1: right, 2: centre, 3: left circle
+      !          r_tmp: radii of the spheres
+      !          u/v_tmp: velocities of the centres of the spheres (1-3 used)
+      !          p2p_dist_max: cutoff distance of the social force
+      ! Outputs: 
+      !          P2P_U/V: Forces x/y directions
+      !          P2P_Torque: Torque
+      !          Social_F: Radial social line force
+      !          Contact_F: Radial contact line force
+      !          d_walls: Shortest distance to walls
+      !
       Integer, Intent(In) :: nm
       Real(EB), Intent(In) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
       Real(EB), Dimension(4), Intent(In) :: d_xy
+      Logical, Dimension(4), Intent(In) :: FoundWall_xy
       Real(EB), Intent(InOut) :: P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls
       !
       Integer :: is, idir
@@ -9595,7 +9439,7 @@ Contains
       idir =  1
       dist = Abs(d_xy(idir) - x_tmp)
       d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
-      If (dist-r_tmp <= 0.0_EB) Then
+      If (dist-r_tmp <= 0.0_EB .And. FoundWall_xy(idir)) Then
          Fc_x = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
          Fc_y = 0.0_EB
          Contact_F = Contact_F + Abs(Fc_x)
@@ -9604,7 +9448,7 @@ Contains
          Else
             Fc_y = Fc_y - HR%Gamma*v_tmp
          End If
-         write(lu_evacout,*)'*** -x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+         !write(lu_evacout,*)'*** -x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
          P2P_Torque = P2P_Torque + Fc_y*(d_xy(idir)-HR%X) - Fc_x*(y_tmp-HR%Y)
          P2P_U = P2P_U + Fc_x
          P2P_V = P2P_V + Fc_y
@@ -9615,7 +9459,7 @@ Contains
       idir =  2
       dist = Abs(d_xy(idir) - x_tmp)
       d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
-      If (dist-r_tmp <= 0.0_EB) Then
+      If (dist-r_tmp <= 0.0_EB .And. FoundWall_xy(idir)) Then
          Fc_x = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
          Fc_y = 0.0_EB
          Contact_F = Contact_F + Abs(Fc_x)
@@ -9624,7 +9468,7 @@ Contains
          Else
             Fc_y = Fc_y - HR%Gamma*v_tmp
          End If
-         write(lu_evacout,*)'*** +x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+         !write(lu_evacout,*)'*** +x Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
          P2P_Torque = P2P_Torque + Fc_y*(d_xy(idir)-HR%X) - Fc_x*(y_tmp-HR%Y)
          P2P_U = P2P_U + Fc_x
          P2P_V = P2P_V + Fc_y
@@ -9635,7 +9479,7 @@ Contains
       idir =  3
       dist = Abs(d_xy(idir) - y_tmp)
       d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
-      If (dist-r_tmp <= 0.0_EB) Then
+      If (dist-r_tmp <= 0.0_EB .And. FoundWall_xy(idir)) Then
          Fc_y = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
          Fc_x = 0.0_EB
          Contact_F = Contact_F + Abs(Fc_y)
@@ -9644,7 +9488,7 @@ Contains
          Else
             Fc_x = Fc_x - HR%Gamma*u_tmp
          End If
-         write(lu_evacout,*)'*** -y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+         !write(lu_evacout,*)'*** -y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
          P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(d_xy(idir)-HR%Y)
          P2P_U = P2P_U + Fc_x
          P2P_V = P2P_V + Fc_y
@@ -9655,7 +9499,7 @@ Contains
       idir =  4
       dist = Abs(d_xy(idir) - y_tmp)
       d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
-      If (dist-r_tmp <= 0.0_EB) Then
+      If (dist-r_tmp <= 0.0_EB .And. FoundWall_xy(idir)) Then
          Fc_y = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
          Fc_x = 0.0_EB
          Contact_F = Contact_F + Abs(Fc_y)
@@ -9664,7 +9508,7 @@ Contains
          Else
             Fc_x = Fc_x - HR%Gamma*u_tmp
          End If
-         write(lu_evacout,*)'*** +y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
+         !write(lu_evacout,*)'*** +y Fc',Fc_x,Fc_y,x_tmp,y_tmp,u_tmp,v_tmp,icyc
          P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(d_xy(idir)-HR%Y)
          P2P_U = P2P_U + Fc_x
          P2P_V = P2P_V + Fc_y
@@ -10688,9 +10532,9 @@ Contains
     End If
   End Function See_door
 
-  Subroutine Find_walls(nm, r1_x, r1_y, r_circle, d_cutoff, Skip_Wall_Force_Ior, d_mx, d_px, d_my, d_py, istat)
+  Subroutine Find_walls(nm, r1_x, r1_y, r_circle, d_cutoff, Skip_Wall_Force_Ior, d_xy, FoundWall_xy, istat)
     Implicit None
-    ! This subroutine check if the circle is inside a solid (totally or partially inside). 
+    ! This subroutine checks if the circle is inside a solid (totally or partially inside). 
     ! Only the positions of the closest walls in the four main directions are returned.
     ! If a wall is further away than d_cutoff from the arc of the circle then
     ! the corresponding edge of the mesh is returned.
@@ -10699,10 +10543,11 @@ Contains
     !          r_circle: radius of the circle
     !          d_cutoff: cut-off distance (e.g., P2P_DIST_MAX)
     !          Skip_Wall_Force_Ior: skip wall force in that direction
-    ! Outputs: d_mx: wall position, -x direction
-    !          d_px: wall position, +x direction
-    !          d_my: wall position, -y direction
-    !          d_py: wall position, +y direction
+    ! Outputs: d_xy(1): wall position, -x direction
+    !          d_xy(2): wall position, +x direction
+    !          d_xy(3): wall position, -y direction
+    !          d_xy(4): wall position, +y direction
+    !          FoundWall_xy(1-4): True if found an obst (VEL>0 vent: False)
     !          istat: error or not?
     !            =-1: circle center is inside a solid ==> error
     !            =0 : circle is not inside a solid (only social forces)
@@ -10711,14 +10556,16 @@ Contains
 
     Integer, Intent(In) :: nm, Skip_Wall_Force_Ior
     Real(EB), Intent(In) :: r1_x, r1_y, r_circle, d_cutoff
-    Real(EB), Intent(Out) :: d_mx, d_px, d_my, d_py
+    Real(EB), Dimension(4), Intent(Out) :: d_xy
+    Logical, Dimension(4), Intent(Out) :: FoundWall_xy
     Integer, Intent(Out) :: istat
     Integer :: ii, jj, iw, ic, ibc, is, i_end, iin, jjn, kkn
-    Real(EB) :: dx, dy
+    Real(EB) :: dx, dy, d_mx, d_px, d_my, d_py
     Type (Mesh_Type), Pointer :: M
 
     M => MESHES(NM)
     istat = 0            ! Default
+    FoundWall_xy = .False.
     d_mx = M%XS
     d_px = M%XF
     d_my = M%YS
@@ -10753,6 +10600,7 @@ Contains
        End Do
 
        If (iw /= 0) Then
+          FoundWall_xy(1) = .True.
           ibc = M%IJKW(5,iw)         ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
@@ -10761,8 +10609,10 @@ Contains
              Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              Call SHUTDOWN(MESSAGE)
           End If
-          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
-               d_mx = d_mx + is*(2.0_EB*d_cutoff)
+          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) Then
+             !d_mx = d_mx + is*(2.0_EB*d_cutoff)
+             FoundWall_xy(1) = .False.
+          End If
           If (Abs(d_mx-r1_x) < r_circle) istat = 1
        End If
     End If
@@ -10791,6 +10641,7 @@ Contains
        End Do
 
        If (iw /= 0) Then
+          FoundWall_xy(2) = .True.
           ibc = M%IJKW(5,iw)         ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
@@ -10799,8 +10650,10 @@ Contains
              Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              Call SHUTDOWN(MESSAGE)
           End If
-          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
-               d_px = d_px + is*(2.0_EB*d_cutoff)
+          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) Then
+             !d_px = d_px + is*(2.0_EB*d_cutoff)
+             FoundWall_xy(2) = .False.
+          End If
           If (Abs(d_px-r1_x) < r_circle) istat = 1
        End If
     End If
@@ -10829,6 +10682,7 @@ Contains
        End Do
 
        If (iw /= 0) Then
+          FoundWall_xy(3) = .True.
           ibc = M%IJKW(5,iw)         ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
@@ -10837,8 +10691,10 @@ Contains
              Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              Call SHUTDOWN(MESSAGE)
           End If
-          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
-               d_my = d_my + is*(2.0_EB*d_cutoff)
+          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) Then
+             !d_my = d_my + is*(2.0_EB*d_cutoff)
+             FoundWall_xy(3) = .False.
+          End If
           If (Abs(d_my-r1_y) < r_circle) istat = 1
        End If
     End If
@@ -10867,6 +10723,7 @@ Contains
        End Do
 
        If (iw /= 0) Then
+          FoundWall_xy(4) = .True.
           ibc = M%IJKW(5,iw)         ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
@@ -10875,11 +10732,18 @@ Contains
              Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              Call SHUTDOWN(MESSAGE)
           End If
-          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) &
-               d_py = d_py + is*(2.0_EB*d_cutoff)
+          If (SURFACE(ibc)%VEL> 0.0_EB .Or. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) Then
+             !d_py = d_py + is*(2.0_EB*d_cutoff)
+             FoundWall_xy(4) = .False.
+          End If
           If (Abs(d_py-r1_y) < r_circle) istat = 1
        End If
     End If
+    d_xy(1) = d_mx
+    d_xy(2) = d_px
+    d_xy(3) = d_my
+    d_xy(4) = d_py
+
 
     Return
   End Subroutine Find_walls
