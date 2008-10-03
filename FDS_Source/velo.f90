@@ -14,7 +14,8 @@ CHARACTER(255), PARAMETER :: veloid='$Id$'
 CHARACTER(255), PARAMETER :: velorev='$Revision$'
 CHARACTER(255), PARAMETER :: velodate='$Date$'
 
-PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,GET_REV_velo,MATCH_VELOCITY,VELOCITY_BC
+PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,GET_REV_velo, &
+       MATCH_VELOCITY,VELOCITY_BC
 PRIVATE VELOCITY_FLUX,VELOCITY_FLUX_ISOTHERMAL,VELOCITY_FLUX_CYLINDRICAL
  
 CONTAINS
@@ -32,12 +33,94 @@ TNOW = SECOND()
 IF (DNS .AND. ISOTHERMAL .AND. N_SPECIES==0) THEN
    CALL VELOCITY_FLUX_ISOTHERMAL(NM)
 ELSE
+   IF (LES) CALL EDDY_VISC(NM)
    IF (.NOT.CYLINDRICAL) CALL VELOCITY_FLUX(T,NM)
-   IF (     CYLINDRICAL) CALL VELOCITY_FLUX_CYLINDRICAL(T,NM)
+   IF (CYLINDRICAL) CALL VELOCITY_FLUX_CYLINDRICAL(T,NM)
+   !CALL VELOCITY_FLUX_CONSERVATIVE ! experimental, currently only works for NMESHES=1
 ENDIF
 
 TUSED(4,NM) = TUSED(4,NM) + SECOND() - TNOW
 END SUBROUTINE COMPUTE_VELOCITY_FLUX
+
+
+SUBROUTINE EDDY_VISC(NM)
+IMPLICIT NONE
+! Compute turblent eddy viscosity from constant coefficient Smagorinsky model
+INTEGER, INTENT(IN) :: NM
+REAL(EB) :: DUDX,DUDY,DUDZ, &
+            DVDX,DVDY,DVDZ, &
+            DWDX,DWDY,DWDZ, &
+            SS,S12,S13,S23,DELTA,CS
+INTEGER :: I,J,K,ITMP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
+ 
+CALL POINT_TO_MESH(NM)
+ 
+IF (PREDICTOR) THEN
+   UU => U
+   VV => V
+   WW => W
+   RHOP => RHO
+ELSE
+   UU => US
+   VV => VS
+   WW => WS
+   RHOP => RHOS
+ENDIF
+
+CS = CSMAG
+IF (EVACUATION_ONLY(NM)) CS = 0.9_EB
+   
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         
+!!         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
+         IF (TWO_D) THEN
+            DELTA = SQRT(DX(I)*DZ(K))
+         ELSE
+            DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
+         ENDIF
+        
+         DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
+         DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
+         DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
+         
+         DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
+         DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
+         
+         DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
+         DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
+         
+         DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
+         DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
+
+         S12 = 0.5_EB*(DUDY+DVDX)
+         S13 = 0.5_EB*(DUDZ+DWDX)
+         S23 = 0.5_EB*(DVDZ+DWDY)
+         SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
+         
+         ITMP = 0.1_EB*TMP(I,J,K)
+         MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*(CS*DELTA)**2*SS
+         
+      ENDDO
+   ENDDO
+ENDDO
+
+! Boundary conditions
+
+IF (PERIODIC_BC .AND. NMESHES==1) THEN
+   MU(0,:,:) = MU(IBAR,:,:)
+   MU(:,0,:) = MU(:,JBAR,:)
+   MU(:,:,0) = MU(:,:,KBAR)
+   
+   MU(IBP1,:,:) = MU(1,:,:)
+   MU(:,JBP1,:) = MU(:,1,:)
+   MU(:,:,KBP1) = MU(:,:,1)
+ENDIF
+
+END SUBROUTINE EDDY_VISC
+
 
 SUBROUTINE VELOCITY_FLUX(T,NM)
 ! Compute convective and diffusive terms
@@ -80,7 +163,7 @@ OMX => WORK4
 OMY => WORK5
 OMZ => WORK6
  
-CALC_MU: IF (PREDICTOR) THEN    
+CALC_MU: IF (PREDICTOR .AND. DNS) THEN    
  
    LES_VS_DNS: IF (LES) THEN   ! Smagorinsky model (LES)
 
@@ -108,7 +191,7 @@ CALC_MU: IF (PREDICTOR) THEN
                       (DVDZ+DWDY)**2-TWTH*DP(I,J,K)**2
                S2   = MAX(0._EB,S2)
                ITMP = 0.1_EB*TMP(I,J,K)
-               MU(I,J,K) = MAX(SPECIES(0)%MU(ITMP), RHOP(I,J,K)*CDXDYDZTT*SQRT(S2))
+               MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*CDXDYDZTT*SQRT(S2)
             ENDDO ILOOP
          ENDDO JLOOP
       ENDDO KLOOP
@@ -148,9 +231,13 @@ CALC_MU: IF (PREDICTOR) THEN
  
    ENDIF LES_VS_DNS
  
-! Mirror viscosity into solids
+   ! Mirror viscosity into solids
  
-   C_RATIO = (CSMAG_WALL/CSMAG)**2
+   IF (CSMAG==0._EB .OR. CSMAG_WALL>CSMAG) THEN
+      C_RATIO = 1._EB
+   ELSE
+      C_RATIO = (CSMAG_WALL/CSMAG)**2
+   ENDIF
    WALL_LOOP: DO IW=1,NWC
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP
       II  = IJKW(1,IW)
@@ -343,6 +430,207 @@ CALL NO_FLUX
  
 
 END SUBROUTINE VELOCITY_FLUX
+
+
+SUBROUTINE VELOCITY_FLUX_CONSERVATIVE !! RJM
+ 
+! Compute RHS of momentum equation in conservative form for periodic bcs
+
+REAL(EB) :: MUX,MUY,MUZ,RHOX,RHOY,RHOZ,DIVV, &
+            UUP,VVP,WWP,UUN,UUT,VVE,VVT,WWE,WWN, &
+            DUDX,DUDY,DUDZ, &
+            DVDX,DVDY,DVDZ, &
+            DWDX,DWDY,DWDZ, &
+            SS,S12,S13,S23,DELTA 
+INTEGER :: I,J,K,IP1,JP1,KP1,IM1,JM1,KM1,NM,ITMP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,TXX,TYY,TZZ,TXY,TXZ,TYZ
+
+NM = 1 ! periodic bcs only work for a single mesh
+CALL POINT_TO_MESH(NM)
+ 
+IF (PREDICTOR) THEN
+   UU => U
+   VV => V
+   WW => W
+   RHOP => RHO
+ELSE
+   UU => US
+   VV => VS
+   WW => WS
+   RHOP => RHOS
+ENDIF
+
+TXX => WORK1
+TYY => WORK2
+TZZ => WORK3
+TXY => WORK4
+TXZ => WORK5
+TYZ => WORK6
+
+TXX = 0._EB
+TYY = 0._EB
+TZZ = 0._EB
+TXY = 0._EB
+TXZ = 0._EB
+TYZ = 0._EB
+
+! Smagorinsky model
+IF (LES) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+      
+            IP1 = I+1
+            JP1 = J+1
+            KP1 = K+1
+            IF (IP1>IBAR) IP1=IP1-IBAR
+            IF (JP1>JBAR) JP1=JP1-JBAR
+            IF (KP1>KBAR) KP1=KP1-KBAR
+         
+            IM1 = I-1
+            JM1 = J-1
+            KM1 = K-1
+            IF (IM1<1) IM1=IM1+IBAR
+            IF (JM1<1) JM1=JM1+JBAR
+            IF (KM1<1) KM1=KM1+KBAR
+      
+            DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
+         
+            DUDX = RDX(I)*(UU(I,J,K)-UU(IM1,J,K))
+            DVDY = RDY(J)*(VV(I,J,K)-VV(I,JM1,K))
+            DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,KM1))
+            DUDY = 0.25_EB*RDY(J)*(UU(I,JP1,K)-UU(I,JM1,K)+UU(IM1,JP1,K)-UU(IM1,JM1,K))
+            DVDX = 0.25_EB*RDX(I)*(VV(IP1,J,K)-VV(IM1,J,K)+VV(IP1,JM1,K)-VV(IM1,JM1,K))
+            DWDX = 0.25_EB*RDX(I)*(WW(IP1,J,K)-WW(IM1,J,K)+WW(IP1,J,KM1)-WW(IM1,J,KM1))
+            DWDY = 0.25_EB*RDY(J)*(WW(I,JP1,K)-WW(I,JM1,K)+WW(I,JP1,KM1)-WW(I,JM1,KM1))
+            DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,KP1)-UU(I,J,KM1)+UU(IM1,J,KP1)-UU(IM1,J,KM1)) 
+            DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,KP1)-VV(I,J,KM1)+VV(I,JM1,KP1)-VV(I,JM1,KM1))
+         
+            S12 = 0.5_EB*(DUDY+DVDX)
+            S13 = 0.5_EB*(DUDZ+DWDX)
+            S23 = 0.5_EB*(DVDZ+DWDY)
+            SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
+         
+            ITMP = 0.1_EB*TMP(I,J,K)
+            MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*(CSMAG*DELTA)**2*SS
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
+
+! Compute stress tensor components
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+      
+         IP1 = I+1
+         JP1 = J+1
+         KP1 = K+1
+         IF (IP1>IBAR) IP1=IP1-IBAR
+         IF (JP1>JBAR) JP1=JP1-JBAR
+         IF (KP1>KBAR) KP1=KP1-KBAR
+         
+         IM1 = I-1
+         JM1 = J-1
+         KM1 = K-1
+         IF (IM1<1) IM1=IM1+IBAR
+         IF (JM1<1) JM1=JM1+JBAR
+         IF (KM1<1) KM1=KM1+KBAR
+         
+         ! average face velocities for advective terms
+         UUP = 0.5_EB*(UU(IM1,J,K)+UU(I,J,K))
+         VVP = 0.5_EB*(VV(I,JM1,K)+VV(I,J,K))
+         WWP = 0.5_EB*(WW(I,J,KM1)+WW(I,J,K))        
+         UUN = 0.5_EB*(UU(I,J,K)+UU(I,JP1,K))
+         UUT = 0.5_EB*(UU(I,J,K)+UU(I,J,KP1))
+         VVE = 0.5_EB*(VV(I,J,K)+VV(IP1,J,K))
+         VVT = 0.5_EB*(VV(I,J,K)+VV(I,J,KP1))
+         WWE = 0.5_EB*(WW(I,J,K)+WW(IP1,J,K))
+         WWN = 0.5_EB*(WW(I,J,K)+WW(I,JP1,K))
+         
+         ! velocity gradient tensor
+         DUDX = RDX(I)*(UU(I,J,K)-UU(IM1,J,K))
+         DVDY = RDY(J)*(VV(I,J,K)-VV(I,JM1,K))
+         DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,KM1))
+         DUDY = RDYN(J)*(UU(I,JP1,K)-UU(I,J,K))
+         DUDZ = RDZN(K)*(UU(I,J,KP1)-UU(I,J,K))
+         DVDX = RDXN(I)*(VV(IP1,J,K)-VV(I,J,K))
+         DVDZ = RDZN(K)*(VV(I,J,KP1)-VV(I,J,K))
+         DWDX = RDXN(I)*(WW(IP1,J,K)-WW(I,J,K))
+         DWDY = RDYN(J)*(WW(I,JP1,K)-WW(I,J,K))
+         
+         ! average viscosity to cell vertex
+         MUX = 0.25_EB*(MU(I,JP1,K)+MU(I,J,K)+MU(I,J,KP1)+MU(I,JP1,KP1))
+         MUY = 0.25_EB*(MU(IP1,J,K)+MU(I,J,K)+MU(I,J,KP1)+MU(IP1,J,KP1))
+         MUZ = 0.25_EB*(MU(IP1,J,K)+MU(I,J,K)+MU(I,JP1,K)+MU(IP1,JP1,K))
+         
+         ! average density to cell vertex
+         RHOX = 0.25_EB*(RHOP(I,JP1,K)+RHOP(I,J,K)+RHOP(I,J,KP1)+RHOP(I,JP1,KP1))
+         RHOY = 0.25_EB*(RHOP(IP1,J,K)+RHOP(I,J,K)+RHOP(I,J,KP1)+RHOP(IP1,J,KP1))
+         RHOZ = 0.25_EB*(RHOP(IP1,J,K)+RHOP(I,J,K)+RHOP(I,JP1,K)+RHOP(IP1,JP1,K))
+         
+         ! divergence
+         DIVV = DUDX+DVDY+DWDZ !! if DIVV\=0, there is a problem
+         
+         ! component-normal advective and viscous flux
+         ! stored at cell center
+         TXX(I,J,K) = RHOP(I,J,K)*UUP*UUP - 2._EB*MU(I,J,K)*(DUDX-ONTH*DIVV)
+         TYY(I,J,K) = RHOP(I,J,K)*VVP*VVP - 2._EB*MU(I,J,K)*(DVDY-ONTH*DIVV)
+         TZZ(I,J,K) = RHOP(I,J,K)*WWP*WWP - 2._EB*MU(I,J,K)*(DWDZ-ONTH*DIVV)
+         
+         ! off-diagonal tensor components
+         ! stored at cell vertices
+         TXY(I,J,K) = RHOZ*UUN*VVE - MUZ*(DUDY + DVDX)
+         TXZ(I,J,K) = RHOY*UUT*WWE - MUY*(DUDZ + DWDX)
+         TYZ(I,J,K) = RHOX*VVT*WWN - MUX*(DVDZ + DWDY)  
+      ENDDO
+   ENDDO
+ENDDO
+
+! Compute force term
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         
+         IP1 = I+1
+         JP1 = J+1
+         KP1 = K+1
+         IF (IP1>IBAR) IP1=IP1-IBAR
+         IF (JP1>JBAR) JP1=JP1-JBAR
+         IF (KP1>KBAR) KP1=KP1-KBAR
+         
+         IM1 = I-1
+         JM1 = J-1
+         KM1 = K-1
+         IF (IM1<1) IM1=IM1+IBAR
+         IF (JM1<1) JM1=JM1+JBAR
+         IF (KM1<1) KM1=KM1+KBAR
+      
+         FVX(I,J,K) = RDXN(I)*(TXX(IP1,J,K)-TXX(I,J,K)) &
+                    + RDY(J) *(TXY(I,J,K)-TXY(I,JM1,K)) &
+                    + RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,KM1))
+                    
+         FVY(I,J,K) = RDX(I) *(TXY(I,J,K)-TXY(IM1,J,K)) &
+                    + RDYN(J)*(TYY(I,JP1,K)-TYY(I,J,K)) &
+                    + RDZ(K) *(TYZ(I,J,K)-TYZ(I,J,KM1))
+                    
+         FVZ(I,J,K) = RDX(I) *(TXZ(I,J,K)-TXZ(IM1,J,K)) &
+                    + RDY(J) *(TYZ(I,J,K)-TYZ(I,JM1,K)) &
+                    + RDZN(K)*(TZZ(I,J,KP1)-TZZ(I,J,K))
+      ENDDO
+   ENDDO
+ENDDO
+
+! Baroclinic torque correction
+IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION
+
+! apply periodicity
+FVX(0,:,:) = FVX(IBAR,:,:)
+FVY(:,0,:) = FVY(:,JBAR,:)
+FVZ(:,:,0) = FVZ(:,:,KBAR)
+ 
+END SUBROUTINE VELOCITY_FLUX_CONSERVATIVE
  
  
 SUBROUTINE VELOCITY_FLUX_ISOTHERMAL(NM)
@@ -575,7 +863,11 @@ CALC_MU: IF (PREDICTOR) THEN
  
 ! Mirror viscosity into solids
  
-   C_RATIO = (CSMAG_WALL/CSMAG)**2
+   IF (CSMAG==0._EB .OR. CSMAG_WALL>CSMAG) THEN
+      C_RATIO = 1._EB
+   ELSE
+      C_RATIO = (CSMAG_WALL/CSMAG)**2
+   ENDIF
    DO IW=1,NWC
       II  = IJKW(1,IW)
       JJ  = IJKW(2,IW)
@@ -1301,7 +1593,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,OM_UU,OM_VV,OM_WW
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (MESH_TYPE), POINTER :: M2
 
-IF (SOLID_PHASE_ONLY .OR. NMESHES==1) RETURN
+IF (SOLID_PHASE_ONLY) RETURN
+IF (NMESHES==1 .AND. PERIODIC_TEST==0) RETURN
 
 TNOW = SECOND()
 
