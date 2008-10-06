@@ -699,12 +699,10 @@ MAIN_LOOP: DO
 
    ! Force normal components of velocity to match at interpolated boundaries
 
-   IF (NMESHES>1) THEN
-      DO NM=1,NMESHES
-         IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE
-         CALL MATCH_VELOCITY(NM)
-      ENDDO
-   ENDIF
+   DO NM=1,NMESHES
+      IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE
+      CALL MATCH_VELOCITY(NM)
+   ENDDO
 
    ! Finite differences for mass and momentum equations for the second half of the time step
 
