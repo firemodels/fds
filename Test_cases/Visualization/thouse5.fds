@@ -1,4 +1,4 @@
-&HEAD CHID='thouse5',TITLE='Town House Kitchen Fire' /
+&HEAD CHID='thouse5',TITLE='Town House Kitchen Fire SVN $Revision$' /
 
 &MESH IJK=48,80,48, XB=0.0,6.4,0.0,8.0,0.0,4.8 /
 
