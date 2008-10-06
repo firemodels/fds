@@ -2117,7 +2117,7 @@ The volumetric production rate of each gaseous volatile is
 It is assumed that the gases are transported instantaneously to the surface, where the
 mass fluxes are given by:
 \be
-   \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \, dx  
+   \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \, dx
 \ee
 where $L$ is the thickness of the surface. The chemical source term of
 the heat conduction equation consists of the heats of reaction
@@ -3446,7 +3446,7 @@ grid resolution is too coarse to resolve the flame.  Thus, flame temperatures wi
 finite-rate computation will not succeed.
 Instead, if any grid cell surrounding one containing both fuel and oxygen satisfies the ``Burn'' criteria depicted in Fig.~\ref{plotsupp},
 combustion is assumed to occur.  The heat release rate is computed as
-\be \dq''' = \frac{ \max \left( \rho Y_\F , s \rho Y_\OTWO \right) }{\tau} \, \Delta H  \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }   \ee
+\be \dq''' = \frac{ \min \left( \rho Y_\F , s \rho Y_\OTWO \right) }{\tau} \, \Delta H  \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }   \ee
 Here, $\tau$ is a mixing time scale~\cite{Raman:CF} given by
 \be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \ee
 The coefficient, $C$, is taken as 0.1 in FDS by default, based on comparisons to various flame height correlations.
