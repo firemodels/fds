@@ -7772,7 +7772,9 @@ Contains
       HUMAN(:)%IOR = HUMAN_NO_TARGET
       PdxLoop: Do ie = 1, n_doors
          PDX=>EVAC_DOORS(ie)
+         ! Note: IMESH2 is not good for CORR targets
          If (PDX%IMESH /= NM .AND. PDX%IMESH2 /= NM) Cycle PdxLoop
+         If (PDX%IMESH /= NM .And. .Not.NM_STRS_MESH) Cycle PdxLoop
          keep_xy = PDX%KEEP_XY
          Select Case (PDX%IOR)
          Case (-1,+1)
@@ -7794,7 +7796,7 @@ Contains
             If ( HR%IOR /= HUMAN_NO_TARGET) Cycle HumLoop
             ! Coming out upstream?
             upstream = .FALSE.
-            If (PDX%IMESH2 == NM) Then
+            If (PDX%IMESH2 == NM .And. NM_STRS_MESH) Then
                ! here, check for correct height
                If ((HR%Z > PDX%Z2) .OR. (HR%Z < PDX%Z1)) Cycle HumLoop
                upstream = .TRUE.
