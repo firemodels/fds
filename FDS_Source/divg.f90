@@ -646,7 +646,7 @@ SUBROUTINE DIVERGENCE_PART_2(NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_OLD,RTRM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_OLD,RTRM,DIV
 REAL(EB) :: RDT,TNOW
 REAL(EB), POINTER, DIMENSION(:) :: D_PBAR_DT_P
 INTEGER :: IW,IOR,II,JJ,KK,IIG,JJG,KKG,IC,I,J,K,IPZ
@@ -736,19 +736,43 @@ BC_LOOP: DO IW=1,NWC
 ENDDO BC_LOOP
 
 ! Compute time derivative of the divergence, dD/dt
- 
-IF (PREDICTOR) THEN
-   DDDT = (DS-D)*RDT
-ELSE
-   D_OLD => WORK1
-   D_OLD = DP
-   DDDT  = (2._EB*DP-DS-D)*RDT
-   D     = D_OLD
-ENDIF
+
+RJM_DIV: IF (PERIODIC_TEST==2) THEN
+   DIV=>WORK1
+   IF (PREDICTOR) THEN
+      DO K = 1,KBAR
+         DO J = 1,JBAR
+            DO I = 1,IBAR
+               DIV(I,J,K) = (U(I,J,K)-U(I-1,J,K))*RDX(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + (W(I,J,K)-W(I,J,K-1))*RDZ(K)
+            ENDDO
+         ENDDO
+      ENDDO
+      DDDT = (DS-DIV)*RDT
+   ELSEIF (CORRECTOR) THEN
+      DO K = 1,KBAR
+         DO J = 1,JBAR
+            DO I = 1,IBAR
+               DIV(I,J,K) = (U(I,J,K) -U(I-1,J,K)) *RDX(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
+                          + (US(I,J,K)-US(I-1,J,K))*RDX(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
+            ENDDO
+         ENDDO
+      ENDDO
+      DDDT = (2._EB*DP-DIV)*RDT
+   ENDIF
+ELSE RJM_DIV
+   IF (PREDICTOR) THEN
+      DDDT = (DS-D)*RDT
+   ELSE
+      D_OLD => WORK1
+      D_OLD = DDDT
+      DDDT  = (2._EB*DDDT-DS-D)*RDT
+      D     = D_OLD
+   ENDIF
+ENDIF RJM_DIV
  
 ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
 
-IF (NMESHES>1) THEN
+!! IF (NMESHES>1) THEN
    DO IW=1,NEWC
       IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE
       IIG = IJKW(6,IW)
@@ -757,7 +781,7 @@ IF (NMESHES>1) THEN
       IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
       IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
    ENDDO
-ENDIF
+!! ENDIF
 
 TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 END SUBROUTINE DIVERGENCE_PART_2

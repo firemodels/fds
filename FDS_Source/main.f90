@@ -394,11 +394,9 @@ MAIN_LOOP: DO
 
    ! Force normal component of predicted velocities to match at interpolated boundaries
 
-   IF (NMESHES>1) THEN
-      DO NM=1,NMESHES
-         IF (ACTIVE_MESH(NM)) CALL MATCH_VELOCITY(NM)
-      ENDDO
-   ENDIF
+   DO NM=1,NMESHES
+      IF (ACTIVE_MESH(NM)) CALL MATCH_VELOCITY(NM)
+   ENDDO
 
    ! Compute finite differences of predicted quantities
 
