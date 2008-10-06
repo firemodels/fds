@@ -1569,7 +1569,7 @@ Occasionally, there are applications in which only the steady-state solution (in
 heat the walls to steady-state can make the cost of the calculation prohibitive. In these situations, if you specify a
 {\ct TIME\_SHRINK\_FACTOR} of, say, 10, the specific heats of the various materials is reduced by a factor of 10, speeding up the heating
 of these materials roughly by 10. An example of an application where this parameter is handy is a validation experiment where a steady heat source
-warms up a compartment to a nearly equilibrium state at which point time-averaged flow quantities are measured. 
+warms up a compartment to a nearly equilibrium state at which point time-averaged flow quantities are measured.
 
 
 
@@ -2154,15 +2154,22 @@ However, an option exists in the code to restore the baroclinic torque by
 decomposing the relevant term in the pressure equation as follows,
 \be
    \label{eqn_baroclinic_torque}
-   \nabla \cdot \frac{1}{\rho^{n+1}} \nabla \tp^{n+1} \approx \nabla \cdot \frac{1}{\overline{\rho}^{n+1}} \nabla \tp^{n+1} +    \nabla \cdot \left( \frac{1}{\rho^{n+1}} - \frac{1}{\overline{\rho}^{n+1}} \right) \nabla \tp^{n} \,\mbox{.}
+   \nabla \cdot \frac{1}{\rho^{n+1}} \nabla \tp^{n+1} \approx \nabla \cdot \frac{1}{\overline{\rho}^{n+1}} \nabla \tp^{n+1} +    
+   \nabla \cdot \left( \frac{1}{\rho^{n+1}} - \frac{1}{\overline{\rho}^{n+1}} \right) \nabla \tp^{n} \,\mbox{.}
 \ee
-The first term on the right hand side of (\ref{eqn_baroclinic_torque}) is absorbed in $\nabla^2 {\cal H}$.  In the second term, which becomes part of $\nabla\cdot \mathbf{F}$, we must use the most recent value of the pressure $\tp^n$. The expression $\overline{\rho}$ is an average density, equal to $2 \rho_{\min} \rho_{\max} / (\rho_{\min} + \rho_{\max})$.
+The first term on the right hand side of (\ref{eqn_baroclinic_torque}) is absorbed in $\nabla^2 {\cal H}$.  
+In the second term, which becomes part of $\nabla\cdot \mathbf{F}$, we must use the most recent value of the pressure $\tp^n$. 
+The expression $\overline{\rho}$ is an average density, equal to $2 \rho_{\min} \rho_{\max} / (\rho_{\min} + \rho_{\max})$.
 To make this correction, simply include the statement {\ct BAROCLINIC=.TRUE.}
-on the {\ct MISC} line. In a DNS calculation ({\ct DNS=.TRUE.}), the
-correction is made by default. However, for an LES calculation (the default mode in FDS),
-the correction must be explicitly invoked. The cost of the
+on the {\ct MISC} line. The cost of the
 correction is not prohibitive -- try calculations with and without
 the correction to determine if its inclusion is warranted.
+
+\begin{warning}
+\noindent In past versions of FDS, a DNS calculation ({\ct DNS=.TRUE.} on the {\ct MISC} line) included the baroclinic correction by default. 
+However, starting with FDS 5.2, 
+the correction must be explicitly invoked for both LES and DNS.
+\end{warning} 
 
 
 
