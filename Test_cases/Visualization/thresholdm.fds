@@ -1,6 +1,7 @@
-&HEAD CHID='threshold',TITLE='Test of threshold temperature display SVN $Revision$' /
+&HEAD CHID='thresholdm',TITLE='Test of threshold temperature display SVN $Revision$' /
 
-&MESH IJK=16,16,16 XB=0.0,1.6,0.0,1.6,0.0,1.6 /
+&MESH IJK=16,16,8 XB=0.0,1.6,0.0,1.6,0.0,0.8 /
+&MESH IJK=16,16,8 XB=0.0,1.6,0.0,1.6,0.8,1.6 /
 
 &TIME TWFIN=100. /
 &DUMP NFRAMES=1000/
