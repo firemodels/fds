@@ -462,7 +462,7 @@ EXTERNCPP int compare( const void *arg1, const void *arg2 );
 EXTERNCPP void updateplotslice(int slicedir);
 EXTERNCPP void drawpatch(const mesh *gb);
 EXTERNCPP void drawpatch_texture(const mesh *gb);
-EXTERNCPP void drawpatch_texture_char(const mesh *gb);
+EXTERNCPP void drawpatch_texture_threshold(const mesh *gb);
 
 EXTERNCPP void updateslicebounds(void);
 EXTERNCPP void updateallslicecolors(int islicetype,int *errorcode);
