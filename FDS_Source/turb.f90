@@ -273,19 +273,33 @@ CALL POINT_TO_MESH(NM)
 M => MESHES(NM)
 n => M%IBAR
 
-ALLOCATE(M%tkeht(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','tkeht',IZERO)
-ALLOCATE(M%upht(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','upht',IZERO)
-ALLOCATE(M%vpht(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','vpht',IZERO)
-ALLOCATE(M%wpht(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','wpht',IZERO)
+! real work arrays
+ALLOCATE(M%PWORK1(n,n,n),STAT=IZERO)
+CALL ChkMemErr('init_spectral_data','PWORK1',IZERO)
+M%PWORK1 = 0._EB
+ALLOCATE(M%PWORK2(n,n,n),STAT=IZERO)
+CALL ChkMemErr('init_spectral_data','PWORK2',IZERO)
+M%PWORK2 = 0._EB
+ALLOCATE(M%PWORK3(n,n,n),STAT=IZERO)
+CALL ChkMemErr('init_spectral_data','PWORK3',IZERO)
+M%PWORK3 = 0._EB
+ALLOCATE(M%PWORK4(n,n,n),STAT=IZERO)
+CALL ChkMemErr('init_spectral_data','PWORK4',IZERO)
+M%PWORK4 = 0._EB
 
-M%tkeht = 0._EB
-M%upht = 0._EB
-M%vpht = 0._EB
-M%wpht = 0._EB
+! complex work arrays
+ALLOCATE(M%PWORK5(n,n,n),STAT=IZERO)
+CALL ChkMemErr('init_spectral_data','PWORK5',IZERO)
+M%PWORK5 = 0._EB
+ALLOCATE(M%PWORK6(n,n,n),STAT=IZERO)
+CALL ChkMemErr('init_spectral_data','PWORK6',IZERO)
+M%PWORK6 = 0._EB
+ALLOCATE(M%PWORK7(n,n,n),STAT=IZERO)
+CALL ChkMemErr('init_spectral_data','PWORK7',IZERO)
+M%PWORK7 = 0._EB
+ALLOCATE(M%PWORK8(n,n,n),STAT=IZERO)
+CALL ChkMemErr('init_spectral_data','PWORK8',IZERO)
+M%PWORK8 = 0._EB
 
 END SUBROUTINE init_spectral_data
 
@@ -295,38 +309,38 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: TT
 INTEGER :: nn(3)
-REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: UU,VV,WW,HH
+REAL(EB),     POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HH
+COMPLEX(DPC), POINTER, DIMENSION(:,:,:) :: UUHT,VVHT,WWHT,KKHT
 
 call POINT_TO_MESH(NM)
 nn = IBAR
-ALLOCATE ( UU(nn(1),nn(2),nn(3)) )
-ALLOCATE ( VV(nn(1),nn(2),nn(3)) )
-ALLOCATE ( WW(nn(1),nn(2),nn(3)) )
-IF (TURB_INIT) ALLOCATE ( HH(nn(1),nn(2),nn(3)) )
+UU => PWORK1
+VV => PWORK2
+WW => PWORK3
+HH => PWORK4
+UUHT => PWORK5
+VVHT => PWORK6
+WWHT => PWORK7
+KKHT => PWORK8
 
 UU = U(1:nn(1),1:nn(2),1:nn(3))
 VV = V(1:nn(1),1:nn(2),1:nn(3))
 WW = W(1:nn(1),1:nn(2),1:nn(3))
-IF (TURB_INIT) HH = H(1:nn(1),1:nn(2),1:nn(3))
+HH = H(1:nn(1),1:nn(2),1:nn(3))
 
 ! take fourier transform of velocities in 3d...
-call fft3d_f90(UU, upht, nn)
-call fft3d_f90(VV, vpht, nn)
-call fft3d_f90(WW, wpht, nn)
+call fft3d_f90(UU, UUHT, nn)
+call fft3d_f90(VV, VVHT, nn)
+call fft3d_f90(WW, WWHT, nn)
 
 ! calc the spectral kinetic energy
-call complex_tke_f90(tkeht, upht, vpht, wpht, nn(1))
+call complex_tke_f90(KKHT, UUHT, VVHT, WWHT, nn(1))
 
 ! total up the spectral energy for each mode and integrate over
 ! the resolved modes...
-call spectrum_f90(tkeht, nn(1), XF-XS, nint(100._EB*TT))
+call spectrum_f90(KKHT, nn(1), XF-XS, nint(100._EB*TT))
       
 IF (TURB_INIT) call sandia_out(UU,VV,WW,HH,nn(1))
-
-DEALLOCATE(UU)
-DEALLOCATE(VV)
-DEALLOCATE(WW)
-IF (TURB_INIT) DEALLOCATE(HH)
                       
 spec_clock = spec_clock + dt_spec
 
