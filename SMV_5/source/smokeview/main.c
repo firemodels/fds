@@ -19,7 +19,7 @@
 
 // svn revision character string
 char main_revision[]="$Revision$";
-// dummy change to bump revision number
+// dummy change to add comment to revision log
 
 /* ------------------ main ------------------------ */
 
