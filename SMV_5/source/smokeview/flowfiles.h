@@ -405,7 +405,7 @@ typedef struct mesh_ {
   unsigned char *ipqq_zlib, *ipqqi_zlib;
   unsigned char *ipqq, *ipqqi;
   float *patchtimes, *patchtimesi, *pqq, *pqqi;
-  float *chartime;
+  float *thresholdtime;
   int *patchblank;
   int npatch_frames,npatches;
   int ipatch;
