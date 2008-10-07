@@ -295,27 +295,38 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: TT
 INTEGER :: nn(3)
+REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: UU,VV,WW,HH
 
 call POINT_TO_MESH(NM)
 nn = IBAR
+ALLOCATE ( UU(nn(1),nn(2),nn(3)) )
+ALLOCATE ( VV(nn(1),nn(2),nn(3)) )
+ALLOCATE ( WW(nn(1),nn(2),nn(3)) )
+IF (TURB_INIT) ALLOCATE ( HH(nn(1),nn(2),nn(3)) )
+
+UU = U(1:nn(1),1:nn(2),1:nn(3))
+VV = V(1:nn(1),1:nn(2),1:nn(3))
+WW = W(1:nn(1),1:nn(2),1:nn(3))
+IF (TURB_INIT) HH = H(1:nn(1),1:nn(2),1:nn(3))
 
 ! take fourier transform of velocities in 3d...
-call fft3d(U, upht, nn)
-call fft3d(V, vpht, nn)
-call fft3d(W, wpht, nn) 
+call fft3d_f90(UU, upht, nn)
+call fft3d_f90(VV, vpht, nn)
+call fft3d_f90(WW, wpht, nn)
 
 ! calc the spectral kinetic energy
-call complex_tke(tkeht, upht, vpht, wpht, nn(1))
+call complex_tke_f90(tkeht, upht, vpht, wpht, nn(1))
 
 ! total up the spectral energy for each mode and integrate over
 ! the resolved modes...
-call spectrum(tkeht, nn(1), XF-XS, nint(100._EB*TT))
+call spectrum_f90(tkeht, nn(1), XF-XS, nint(100._EB*TT))
       
-IF (TURB_INIT) call sandia_out(U(1:nn(1),1:nn(2),1:nn(3)), &
-                               V(1:nn(1),1:nn(2),1:nn(3)), &
-                               W(1:nn(1),1:nn(2),1:nn(3)), &
-                               H(1:nn(1),1:nn(2),1:nn(3)), &
-                               nn(1))
+IF (TURB_INIT) call sandia_out(UU,VV,WW,HH,nn(1))
+
+DEALLOCATE(UU)
+DEALLOCATE(VV)
+DEALLOCATE(WW)
+IF (TURB_INIT) DEALLOCATE(HH)
                       
 spec_clock = spec_clock + dt_spec
 
@@ -375,7 +386,7 @@ CLOSE (unit=file_num)
 END SUBROUTINE sandia_out
 
 
-SUBROUTINE complex_tke(tkeht, upht, vpht, wpht, n)
+SUBROUTINE complex_tke_f90(tkeht, upht, vpht, wpht, n)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: n
 COMPLEX(DPC), INTENT(OUT) :: tkeht(n,n,n)
@@ -392,13 +403,13 @@ do k = 1,n
    end do
 end do
 
-END SUBROUTINE complex_tke
+END SUBROUTINE complex_tke_f90
 
 
-SUBROUTINE fft3d(v, vht, nn)
+SUBROUTINE fft3d_f90(v, vht, nn)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nn(3)
-REAL(EB), INTENT(IN) :: v(0:nn(1),0:nn(2),0:nn(3))
+REAL(EB), INTENT(IN) :: v(nn(1),nn(2),nn(3))
 COMPLEX(DPC), INTENT(INOUT) :: vht(nn(1),nn(2),nn(3))
 !COMPLEX(DPC) :: z2(nn(1))
 
@@ -411,27 +422,27 @@ COMPLEX(DPC), INTENT(INOUT) :: vht(nn(1),nn(2),nn(3))
 ! largest dimension.
 
 INTEGER :: i,j,k
-REAL(EB) :: tke
+!REAL(EB) :: tke
 
 ! convert v to spectral space
 
-tke = 0._EB
+!tke = 0._EB
 
 do k = 1,nn(3)
    do j = 1,nn(2)
       do i = 1,nn(1)
       
          vht(i,j,k) = cmplx(v(i,j,k),0.0_EB,kind=DPC)
-         tke = tke + 0.5_EB*v(i,j,k)**2
+         !tke = tke + 0.5_EB*v(i,j,k)**2
 
       end do
    end do
 end do
 
-tke = tke/real(nn(1)*nn(2)*nn(3),EB)
+!tke = tke/real(nn(1)*nn(2)*nn(3),EB)
 
-! print*, ' fft3d internal check-'
-! print*, ' tkeave (physical) =', tke
+!print*, ' fft3d internal check-'
+!print*, ' tkeave (physical) =', tke
 
 !call fourt(vht,nn,3,-1,1,z2)
 call four3(vht,-1)
@@ -446,24 +457,24 @@ do k = 1,nn(3)
    end do
 end do
 
-tke = 0._EB
+!tke = 0._EB
 
-do k = 1,nn(3)
-   do j = 1,nn(2)
-      do i = 1,nn(1)
+!do k = 1,nn(3)
+!   do j = 1,nn(2)
+!      do i = 1,nn(1)
+!
+!         tke = tke + 0.5_EB*real(vht(i,j,k)*conjg(vht(i,j,k)),kind=EB)
+!
+!      end do
+!   end do
+!end do
 
-         tke = tke + 0.5_EB*real(vht(i,j,k)*conjg(vht(i,j,k)),kind=EB)
+!print*, ' tkeave (spectral) =', tke
 
-      end do
-   end do
-end do
-
-! print*, ' tkeave (spectral) =', tke
-
-END SUBROUTINE fft3d
+END SUBROUTINE fft3d_f90
 
 
-SUBROUTINE spectrum(vht, n, Lm, iFVfilenum)
+SUBROUTINE spectrum_f90(vht, n, Lm, iFVfilenum)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: n, iFVfilenum 
 COMPLEX(DPC), INTENT(IN) :: vht(n,n,n)
@@ -569,7 +580,7 @@ close (unit = file_num)
 
 1	format (i3.3)
 
-END SUBROUTINE spectrum
+END SUBROUTINE spectrum_f90
 
 
 SUBROUTINE four3(data,isign)
