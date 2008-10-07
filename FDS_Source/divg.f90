@@ -737,7 +737,8 @@ ENDDO BC_LOOP
 
 ! Compute time derivative of the divergence, dD/dt
 
-RJM_DIV: IF (PERIODIC_TEST==2) THEN
+PERIODIC_DIV: IF (PERIODIC_TEST==2) THEN
+
    DIV=>WORK1
    IF (PREDICTOR) THEN
       DO K = 1,KBAR
@@ -759,7 +760,9 @@ RJM_DIV: IF (PERIODIC_TEST==2) THEN
       ENDDO
       DDDT = (2._EB*DP-DIV)*RDT
    ENDIF
-ELSE RJM_DIV
+   
+ELSE PERIODIC_DIV
+
    IF (PREDICTOR) THEN
       DDDT = (DS-D)*RDT
    ELSE
@@ -768,11 +771,10 @@ ELSE RJM_DIV
       DDDT  = (2._EB*DDDT-DS-D)*RDT
       D     = D_OLD
    ENDIF
-ENDIF RJM_DIV
- 
-! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
-
-!! IF (NMESHES>1) THEN
+   
+   ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
+   
+   !! IF (NMESHES>1) THEN
    DO IW=1,NEWC
       IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE
       IIG = IJKW(6,IW)
@@ -781,7 +783,10 @@ ENDIF RJM_DIV
       IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
       IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
    ENDDO
-!! ENDIF
+   !! ENDIF
+   
+ENDIF PERIODIC_DIV
+
 
 TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 END SUBROUTINE DIVERGENCE_PART_2
