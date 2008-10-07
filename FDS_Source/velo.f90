@@ -14,45 +14,50 @@ CHARACTER(255), PARAMETER :: veloid='$Id$'
 CHARACTER(255), PARAMETER :: velorev='$Revision$'
 CHARACTER(255), PARAMETER :: velodate='$Date$'
 
-PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,GET_REV_velo, &
-       MATCH_VELOCITY,VELOCITY_BC
+PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,GET_REV_velo,MATCH_VELOCITY,VELOCITY_BC
 PRIVATE VELOCITY_FLUX,VELOCITY_FLUX_ISOTHERMAL,VELOCITY_FLUX_CYLINDRICAL
  
 CONTAINS
  
-SUBROUTINE COMPUTE_VELOCITY_FLUX(T,NM)
+SUBROUTINE COMPUTE_VELOCITY_FLUX(T,NM,FUNCTION_CODE)
 
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: TNOW
-INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(IN) :: NM,FUNCTION_CODE
 
 IF (SOLID_PHASE_ONLY) RETURN
 
 TNOW = SECOND()
 
-IF (DNS .AND. ISOTHERMAL .AND. N_SPECIES==0) THEN
-   CALL VELOCITY_FLUX_ISOTHERMAL(NM)
-ELSE
-   IF (LES) CALL EDDY_VISC(NM)
-   IF (.NOT.CYLINDRICAL) CALL VELOCITY_FLUX(T,NM)
-   IF (CYLINDRICAL) CALL VELOCITY_FLUX_CYLINDRICAL(T,NM)
-   !CALL VELOCITY_FLUX_CONSERVATIVE ! experimental, currently only works for NMESHES=1
-ENDIF
+SELECT CASE(FUNCTION_CODE)
+   CASE(1)
+      IF (DNS .AND. ISOTHERMAL .AND. N_SPECIES==0) THEN
+         CALL VELOCITY_FLUX_ISOTHERMAL(NM)
+      ELSE
+         IF (PREDICTOR .OR. COMPUTE_VISCOSITY_TWICE) CALL COMPUTE_VISCOSITY(NM)
+      ENDIF
+   CASE(2)
+      IF (PREDICTOR .OR. COMPUTE_VISCOSITY_TWICE) CALL VISCOSITY_BC(NM)
+      IF (.NOT.CYLINDRICAL) CALL VELOCITY_FLUX(T,NM)
+      IF (     CYLINDRICAL) CALL VELOCITY_FLUX_CYLINDRICAL(T,NM)
+!!    CALL VELOCITY_FLUX_CONSERVATIVE ! experimental, currently only works for NMESHES=1
+END SELECT
 
 TUSED(4,NM) = TUSED(4,NM) + SECOND() - TNOW
 END SUBROUTINE COMPUTE_VELOCITY_FLUX
 
 
-SUBROUTINE EDDY_VISC(NM)
-IMPLICIT NONE
+
+SUBROUTINE COMPUTE_VISCOSITY(NM)
+
 ! Compute turblent eddy viscosity from constant coefficient Smagorinsky model
+
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MU
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: DUDX,DUDY,DUDZ, &
-            DVDX,DVDY,DVDZ, &
-            DWDX,DWDY,DWDZ, &
-            SS,S12,S13,S23,DELTA,CS
-INTEGER :: I,J,K,ITMP
+REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS,S12,S13,S23,DELTA,CS,MU_SUM
+INTEGER :: I,J,K,ITMP,N
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
  
 CALL POINT_TO_MESH(NM)
  
@@ -61,82 +66,180 @@ IF (PREDICTOR) THEN
    VV => V
    WW => W
    RHOP => RHO
+   IF (N_SPECIES > 0) YYP => YY
 ELSE
    UU => US
    VV => VS
    WW => WS
    RHOP => RHOS
+   IF (N_SPECIES > 0) YYP => YYS
 ENDIF
 
-CS = CSMAG
-IF (EVACUATION_ONLY(NM)) CS = 0.9_EB
-   
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         
-!!         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
-         IF (TWO_D) THEN
-            DELTA = SQRT(DX(I)*DZ(K))
-         ELSE
-            DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
-         ENDIF
-        
-         DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
-         DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
-         DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
-         
-         DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
-         DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
-         
-         DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
-         DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
-         
-         DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
-         DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
+! Compute eddy viscosity using Smagorinsky model
 
-         S12 = 0.5_EB*(DUDY+DVDX)
-         S13 = 0.5_EB*(DUDZ+DWDX)
-         S23 = 0.5_EB*(DVDZ+DWDY)
-         SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
-         
-         ITMP = 0.1_EB*TMP(I,J,K)
-         MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*(CS*DELTA)**2*SS
-         
+IF (LES) THEN
+   CS = CSMAG
+   IF (EVACUATION_ONLY(NM)) CS = 0.9_EB
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (TWO_D) THEN
+               DELTA = SQRT(DX(I)*DZ(K))
+            ELSE
+               DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
+            ENDIF
+            DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
+            DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
+            DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
+            DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
+            DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
+            DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
+            DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
+            DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
+            DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
+            S12 = 0.5_EB*(DUDY+DVDX)
+            S13 = 0.5_EB*(DUDZ+DWDX)
+            S23 = 0.5_EB*(DVDZ+DWDY)
+            SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
+            ITMP = 0.1_EB*TMP(I,J,K)
+            MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*(CS*DELTA)**2*SS
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
+ENDIF
+   
+! Compute viscosity for DNS using primitive species rather than mixture fraction model
 
-! Boundary conditions
+IF (DNS .AND. .NOT.MIXTURE_FRACTION) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            ITMP = 0.1_EB*TMP(I,J,K)
+            MU_SUM = SPECIES(0)%MU(ITMP)
+            DO N=1,N_SPECIES
+               MU_SUM = MU_SUM + YYP(I,J,K,N)*(SPECIES(N)%MU(ITMP)-SPECIES(0)%MU(ITMP))
+            ENDDO
+            MU(I,J,K) = MU_SUM
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
+! Compute viscosity for DNS using mixture fraction model
+
+IF (DNS .AND. MIXTURE_FRACTION) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            ITMP = 0.1_EB*TMP(I,J,K)
+            CALL GET_MU(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
+            MU_SUM = MU(I,J,K)*(1-Y_SUM(I,J,K))
+            DO N=1,N_SPECIES
+               IF(SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) MU_SUM = MU_SUM + YYP(I,J,K,N)*(SPECIES(N)%MU(ITMP)-MU(I,J,K))
+            ENDDO
+            MU(I,J,K) = MU_SUM
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF 
+
+END SUBROUTINE COMPUTE_VISCOSITY
+
+
+
+SUBROUTINE VISCOSITY_BC(NM)
+
+! Specify ghost cell values of the viscosity array MU
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB) :: C_RATIO,MU_OTHER
+INTEGER :: IIG,JJG,KKG,II,JJ,KK,IW,IIO,JJO,KKO,NOM,N_INT_CELLS
+
+CALL POINT_TO_MESH(NM)
+
+! Mirror viscosity into solids and exterior boundary cells
+ 
+IF (CSMAG==0._EB .OR. CSMAG_WALL>CSMAG) THEN
+   C_RATIO = 1._EB
+ELSE
+   C_RATIO = (CSMAG_WALL/CSMAG)**2
+ENDIF
+
+WALL_LOOP: DO IW=1,NWC
+   IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP
+   II  = IJKW(1,IW)
+   JJ  = IJKW(2,IW)
+   KK  = IJKW(3,IW)
+   IIG = IJKW(6,IW)
+   JJG = IJKW(7,IW)
+   KKG = IJKW(8,IW)
+   SELECT CASE(BOUNDARY_TYPE(IW))
+      CASE(SOLID_BOUNDARY)
+         MU(IIG,JJG,KKG) = C_RATIO*MU(IIG,JJG,KKG)
+         MU(II,JJ,KK) = MU(IIG,JJG,KKG)
+      CASE(OPEN_BOUNDARY,MIRROR_BOUNDARY)
+         MU(II,JJ,KK) = MU(IIG,JJG,KKG)
+      CASE(INTERPOLATED_BOUNDARY)
+         NOM = IJKW(9,IW)
+         MU_OTHER = 0._EB
+         DO KKO=IJKW(12,IW),IJKW(15,IW)
+            DO JJO=IJKW(11,IW),IJKW(14,IW)
+               DO IIO=IJKW(10,IW),IJKW(13,IW)
+                  MU_OTHER = MU_OTHER + OMESH(NOM)%MU(IIO,JJO,KKO)
+               ENDDO
+            ENDDO
+         ENDDO
+         N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
+         MU_OTHER = MU_OTHER/REAL(N_INT_CELLS,EB)
+         MU(II,JJ,KK) = MU_OTHER
+   END SELECT
+ENDDO WALL_LOOP
+    
+MU(   0,0:JBP1,   0) = MU(   1,0:JBP1,1)
+MU(IBP1,0:JBP1,   0) = MU(IBAR,0:JBP1,1)
+MU(IBP1,0:JBP1,KBP1) = MU(IBAR,0:JBP1,KBAR)
+MU(   0,0:JBP1,KBP1) = MU(   1,0:JBP1,KBAR)
+MU(0:IBP1,   0,   0) = MU(0:IBP1,   1,1)
+MU(0:IBP1,JBP1,0)    = MU(0:IBP1,JBAR,1)
+MU(0:IBP1,JBP1,KBP1) = MU(0:IBP1,JBAR,KBAR)
+MU(0:IBP1,0,KBP1)    = MU(0:IBP1,   1,KBAR)
+MU(0,   0,0:KBP1)    = MU(   1,   1,0:KBP1)
+MU(IBP1,0,0:KBP1)    = MU(IBAR,   1,0:KBP1)
+MU(IBP1,JBP1,0:KBP1) = MU(IBAR,JBAR,0:KBP1)
+MU(0,JBP1,0:KBP1)    = MU(   1,JBAR,0:KBP1)
+
+! Special periodic boundary conditions
 
 IF (PERIODIC_BC .AND. NMESHES==1) THEN
    MU(0,:,:) = MU(IBAR,:,:)
    MU(:,0,:) = MU(:,JBAR,:)
    MU(:,:,0) = MU(:,:,KBAR)
-   
+
    MU(IBP1,:,:) = MU(1,:,:)
    MU(:,JBP1,:) = MU(:,1,:)
    MU(:,:,KBP1) = MU(:,:,1)
 ENDIF
 
-END SUBROUTINE EDDY_VISC
+END SUBROUTINE VISCOSITY_BC
+
 
 
 SUBROUTINE VELOCITY_FLUX(T,NM)
-! Compute convective and diffusive terms
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MU
+
+! Compute convective and diffusive terms of the momentum equations
+
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: T,MUX,MUY,MUZ,UP,UM,VP,VM,WP,WM,VTRM, &
             DTXYDY,DTXZDZ,DTYZDZ,DTXYDX,DTXZDX,DTYZDY, &
             DUDX,DVDY,DWDZ,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY, &
             VOMZ,WOMY,UOMY,VOMX,UOMZ,WOMX,PMDT,MPDT, &
-            S2,C,CDXDYDZTT,AH,RRHO,GX,GY,GZ, &
-            TXXP,TXXM,TYYP,TYYM,TZZP,TZZM,DTXXDX,DTYYDY,DTZZDZ, &
-            EPSUP,EPSUM,EPSVP,EPSVM,EPSWP,EPSWM,MU_SUM,DUMMY=0._EB,C_RATIO
-INTEGER :: II,JJ,KK,I,J,K,IW,IIG,JJG,KKG,ITMP,N,IE,IEC
-REAL(EB), POINTER, DIMENSION(:,:,:) :: TXY,TXZ,TYZ,OMX,OMY,OMZ, UU,VV,WW,RHOP,DP
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
+            AH,RRHO,GX,GY,GZ,TXXP,TXXM,TYYP,TYYM,TZZP,TZZM,DTXXDX,DTYYDY,DTZZDZ, &
+            EPSUP,EPSUM,EPSVP,EPSVM,EPSWP,EPSWM,DUMMY=0._EB
+INTEGER :: II,JJ,KK,I,J,K,IE,IEC
+REAL(EB), POINTER, DIMENSION(:,:,:) :: TXY,TXZ,TYZ,OMX,OMY,OMZ,UU,VV,WW,RHOP,DP
  
 CALL POINT_TO_MESH(NM)
  
@@ -146,14 +249,12 @@ IF (PREDICTOR) THEN
    WW => W
    DP => D  
    RHOP => RHO
-   IF (N_SPECIES > 0) YYP => YY
 ELSE
    UU => US
    VV => VS
    WW => WS
    DP => DS
    RHOP => RHOS
-   IF (N_SPECIES > 0) YYP => YYS
 ENDIF
 
 TXY => WORK1
@@ -163,109 +264,8 @@ OMX => WORK4
 OMY => WORK5
 OMZ => WORK6
  
-CALC_MU: IF (PREDICTOR .AND. DNS) THEN    
- 
-   LES_VS_DNS: IF (LES) THEN   ! Smagorinsky model (LES)
-
-      C = CSMAG**2
-      IF (EVACUATION_ONLY(NM)) C = (0.9_EB)**2
-      KLOOP: DO K=1,KBAR
-         JLOOP: DO J=1,JBAR
-            ILOOP: DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
-               IF (.NOT.TWO_D) THEN
-                  CDXDYDZTT = C*(DX(I)*DY(J)*DZ(K))**TWTH
-               ELSE
-                  CDXDYDZTT = C*DX(I)*DZ(K)
-               ENDIF
-               DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
-               DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
-               DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
-               DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
-               DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
-               DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
-               DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
-               DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
-               DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1)) 
-               S2   = 2._EB*(DUDX*DUDX + DVDY*DVDY + DWDZ*DWDZ ) + (DUDY+DVDX)**2 + (DUDZ+DWDX)**2 + &
-                      (DVDZ+DWDY)**2-TWTH*DP(I,J,K)**2
-               S2   = MAX(0._EB,S2)
-               ITMP = 0.1_EB*TMP(I,J,K)
-               MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*CDXDYDZTT*SQRT(S2)
-            ENDDO ILOOP
-         ENDDO JLOOP
-      ENDDO KLOOP
- 
-   ELSE LES_VS_DNS ! DNS viscosity
- 
-      MIXTURE_FRACTION_DNS: IF (.NOT.MIXTURE_FRACTION) THEN
-         DO K=1,KBAR
-            DO J=1,JBAR
-               IVLOOP: DO I=1,IBAR
-                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IVLOOP
-                  ITMP = 0.1_EB*TMP(I,J,K)
-                  MU_SUM = SPECIES(0)%MU(ITMP)
-                  DO N=1,N_SPECIES
-                     MU_SUM = MU_SUM + YYP(I,J,K,N)*(SPECIES(N)%MU(ITMP)-SPECIES(0)%MU(ITMP))
-                  ENDDO
-                  MU(I,J,K) = MU_SUM
-               ENDDO IVLOOP
-            ENDDO
-         ENDDO
-      ELSE MIXTURE_FRACTION_DNS
-         DO K=1,KBAR
-            DO J=1,JBAR
-               IVLOOP2: DO I=1,IBAR
-                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IVLOOP2
-                  ITMP = 0.1_EB*TMP(I,J,K)
-                  CALL GET_MU(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
-                  MU_SUM = MU(I,J,K)*(1-Y_SUM(I,J,K))
-                  DO N=1,N_SPECIES
-                     IF(SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) MU_SUM = MU_SUM + YYP(I,J,K,N)*(SPECIES(N)%MU(ITMP)-MU(I,J,K))
-                  ENDDO
-                  MU(I,J,K) = MU_SUM
-               ENDDO IVLOOP2
-            ENDDO
-         ENDDO
-      ENDIF MIXTURE_FRACTION_DNS
- 
-   ENDIF LES_VS_DNS
- 
-   ! Mirror viscosity into solids
- 
-   IF (CSMAG==0._EB .OR. CSMAG_WALL>CSMAG) THEN
-      C_RATIO = 1._EB
-   ELSE
-      C_RATIO = (CSMAG_WALL/CSMAG)**2
-   ENDIF
-   WALL_LOOP: DO IW=1,NWC
-      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP
-      II  = IJKW(1,IW)
-      JJ  = IJKW(2,IW)
-      KK  = IJKW(3,IW)
-      IIG = IJKW(6,IW)
-      JJG = IJKW(7,IW)
-      KKG = IJKW(8,IW)
-      IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) MU(IIG,JJG,KKG) = C_RATIO*MU(IIG,JJG,KKG)
-      MU(II,JJ,KK) = MU(IIG,JJG,KKG)
-   ENDDO WALL_LOOP
-    
-   MU(0,0:JBP1,0)       = MU(   1,0:JBP1,1)
-   MU(IBP1,0:JBP1,0)    = MU(IBAR,0:JBP1,1)
-   MU(IBP1,0:JBP1,KBP1) = MU(IBAR,0:JBP1,KBAR)
-   MU(0,0:JBP1,KBP1)    = MU(   1,0:JBP1,KBAR)
-   MU(0:IBP1,0,0)       = MU(0:IBP1,   1,1)
-   MU(0:IBP1,JBP1,0)    = MU(0:IBP1,JBAR,1)
-   MU(0:IBP1,JBP1,KBP1) = MU(0:IBP1,JBAR,KBAR)
-   MU(0:IBP1,0,KBP1)    = MU(0:IBP1,   1,KBAR)
-   MU(0,0,0:KBP1)       = MU(   1,   1,0:KBP1)
-   MU(IBP1,0,0:KBP1)    = MU(IBAR,   1,0:KBP1)
-   MU(IBP1,JBP1,0:KBP1) = MU(IBAR,JBAR,0:KBP1)
-   MU(0,JBP1,0:KBP1)    = MU(   1,JBAR,0:KBP1)
- 
-ENDIF CALC_MU
- 
 ! Compute vorticity and stress tensor components
+
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
@@ -311,9 +311,9 @@ ENDDO EDGE_LOOP
 
 ! Compute gravity components
  
-GX  = EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(1)
-GY  = EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(2)
-GZ  = EVALUATE_RAMP(T,DUMMY,I_RAMP_GZ)*GVEC(3)
+GX = EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(1)
+GY = EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(2)
+GZ = EVALUATE_RAMP(T,DUMMY,I_RAMP_GZ)*GVEC(3)
  
 ! Upwind/Downwind bias factors
  
@@ -358,6 +358,7 @@ DO K=1,KBAR
 ENDDO   
  
 ! Compute y-direction flux term FVY
+
 DO K=1,KBAR
    DO J=0,JBAR
       DO I=1,IBAR
@@ -428,8 +429,8 @@ IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION
  
 CALL NO_FLUX
  
-
 END SUBROUTINE VELOCITY_FLUX
+
 
 
 SUBROUTINE VELOCITY_FLUX_CONSERVATIVE !! RJM
@@ -776,22 +777,17 @@ END SUBROUTINE VELOCITY_FLUX_ISOTHERMAL
  
  
 SUBROUTINE VELOCITY_FLUX_CYLINDRICAL(T,NM)
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MU
+
 ! Compute convective and diffusive terms for 2D axisymmetric
- 
+
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
 REAL(EB) :: T,DMUDX
 INTEGER :: I0
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: MUY,UP,UM,WP,WM,VTRM, &
-            DTXZDZ,DTXZDX, &
-            DUDX,DWDZ,DUDZ,DWDX,WOMY,UOMY,PMDT,MPDT, &
-            S2,C,CDXDYDZTT,AH,RRHO,GX,GZ,&
-            TXXP,TXXM,TZZP,TZZM,DTXXDX,DTZZDZ, &
-            EPSUP,EPSUM,EPSWP,EPSWM,MU_SUM,DUMMY=0._EB,C_RATIO
-INTEGER :: II,JJ,KK,I,J,K,IW,IIG,JJG,KKG,ITMP,N,IE,IEC
+REAL(EB) :: MUY,UP,UM,WP,WM,VTRM,DTXZDZ,DTXZDX,DUDX,DWDZ,DUDZ,DWDX,WOMY,UOMY,PMDT,MPDT, &
+            AH,RRHO,GX,GZ,TXXP,TXXM,TZZP,TZZM,DTXXDX,DTZZDZ,EPSUP,EPSUM,EPSWP,EPSWM,DUMMY=0._EB
+INTEGER :: II,JJ,KK,I,J,K,IE,IEC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: TXZ,OMY,UU,WW,RHOP,DP
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
  
 CALL POINT_TO_MESH(NM)
  
@@ -800,86 +796,15 @@ IF (PREDICTOR) THEN
    WW => W
    DP => D  
    RHOP => RHO
-   IF (N_SPECIES>0) YYP => YY
 ELSE
    UU => US
    WW => WS
    DP => DS
    RHOP => RHOS
-   IF (N_SPECIES>0) YYP => YYS
 ENDIF
  
 TXZ => WORK2
 OMY => WORK5
- 
-CALC_MU: IF (PREDICTOR) THEN    
- 
-   LES_VS_DNS: IF (LES) THEN   ! Smagorinsky model (LES)
-
-      C = CSMAG**2
-      J = 1
-      KLOOP: DO K=1,KBAR
-         ILOOP: DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
-            CDXDYDZTT = C*DX(I)*DZ(K)
-            DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
-            DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
-            DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
-            DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1))
-            S2   = 2._EB*(DUDX*DUDX     +  DWDZ*DWDZ ) +  (DUDZ+DWDX)**2 -  TWTH*DP(I,J,K)**2
-            S2   = MAX(0._EB,S2)
-            ITMP = 0.1_EB*TMP(I,J,K)
-            MU(I,J,K) = MAX(SPECIES(0)%MU(ITMP), RHOP(I,J,K)*CDXDYDZTT*SQRT(S2))
-         ENDDO ILOOP
-      ENDDO KLOOP
-
-   ELSE LES_VS_DNS           ! DNS viscosity
-
-      MIXTURE_FRACTION_DNS: IF (.NOT.MIXTURE_FRACTION) THEN
-         J = 1
-         DO K=1,KBAR
-            IVLOOP: DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IVLOOP
-               ITMP = 0.1_EB*TMP(I,J,K)
-               MU_SUM = SPECIES(0)%MU(ITMP)
-               DO N=1,N_SPECIES
-                  MU_SUM = MU_SUM + YYP(I,J,K,N)*(SPECIES(N)%MU(ITMP)-SPECIES(0)%MU(ITMP))
-               ENDDO
-               MU(I,J,K) = MU_SUM
-            ENDDO IVLOOP
-         ENDDO
-      ELSE MIXTURE_FRACTION_DNS
-         J = 1
-         DO K=1,KBAR
-            IVLOOP2: DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IVLOOP2
-               ITMP = 0.1_EB*TMP(I,J,K)
-               CALL GET_MU(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),MU(I,J,K),ITMP)
-            ENDDO IVLOOP2
-         ENDDO
-      ENDIF MIXTURE_FRACTION_DNS
- 
-   ENDIF LES_VS_DNS
- 
-! Mirror viscosity into solids
- 
-   IF (CSMAG==0._EB .OR. CSMAG_WALL>CSMAG) THEN
-      C_RATIO = 1._EB
-   ELSE
-      C_RATIO = (CSMAG_WALL/CSMAG)**2
-   ENDIF
-   DO IW=1,NWC
-      II  = IJKW(1,IW)
-      JJ  = IJKW(2,IW)
-      KK  = IJKW(3,IW)
-      IIG = IJKW(6,IW)
-      JJG = IJKW(7,IW)
-      KKG = IJKW(8,IW)
-      IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) MU(IIG,JJG,KKG) = C_RATIO*MU(IIG,JJG,KKG)
-      MU(II,JJ,KK) = MU(IIG,JJG,KKG)
-   ENDDO
- 
-ENDIF CALC_MU
  
 ! Compute vorticity and stress tensor components
  
