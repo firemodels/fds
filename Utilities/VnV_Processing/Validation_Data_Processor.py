@@ -646,6 +646,7 @@ def comparison_plot(plot_data,d1_data,d2_data):
     # All Data Set 1, data is plotted with thick solid lines while Data Set 2, data is thin solid lines.
     # Colors are from http://pyx.sourceforge.net/manual/colorname.html
     d1PlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Black, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.06*unit.w_cm)])
+    #d1PlotStyle = graph.style.symbol(symbolattrs=[attr.changelist([color.cmyk.Grey, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue])])
     d2PlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Grey, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.03*unit.w_cm)])
 
     # Specify vertical and horizontal axes (1 is horizontal; 2 is vertical)
