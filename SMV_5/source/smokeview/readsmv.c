@@ -5638,7 +5638,7 @@ void initmesh(mesh *meshi){
   meshi->ipqq=NULL, meshi->ipqqi=NULL;
   meshi->ipqqi_zlib=NULL, meshi->ipqq_zlib=NULL;
   meshi->patchtimes=NULL, meshi->pqq=NULL, meshi->pqqi=NULL;
-  meshi->chartime=NULL;
+  meshi->thresholdtime=NULL;
   meshi->patchblank=NULL;
   meshi->patch_contours=NULL;
   meshi->patchtimeslist=NULL;
@@ -7587,6 +7587,11 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i %i",&vis_threshold,&vis_onlythreshold);
         continue;
       }
+      if(match(buffer,"SHOWTHRESHOLD",13)==1){
+        if(fgets(buffer,255,stream)==NULL)break;
+        sscanf(buffer,"%i %i %f",&vis_threshold,&vis_onlythreshold,&temp_threshold);
+        continue;
+      }
       if(match(buffer,"TOURCONSTANTVEL",15)==1){
         if(fgets(buffer,255,stream)==NULL)break;
         sscanf(buffer,"%i",&tour_constant_vel);
@@ -8433,8 +8438,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",visFrame);
   fprintf(fileout,"SHOWALLTEXTURES\n");
   fprintf(fileout," %i\n",showall_textures);
-  fprintf(fileout,"SHOWIGNITION\n");
-  fprintf(fileout," %i %i\n",vis_threshold,vis_onlythreshold);
+  fprintf(fileout,"SHOWTHRESHOLD\n");
+  fprintf(fileout," %i %i %f\n",vis_threshold,vis_onlythreshold,temp_threshold);
   fprintf(fileout,"SHOWHRRCUTOFF\n");
   fprintf(fileout," %i\n",show_hrrcutoff);
   fprintf(fileout,"TWOSIDEDVENTS\n");
