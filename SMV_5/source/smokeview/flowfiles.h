@@ -307,6 +307,8 @@ typedef struct {
   flowlabels label;
   int blocknumber,display,loaded;
   float tmin,tmax;
+  float *levels;
+  int nlevels;
   char menulabel[128];
 
 } iso;

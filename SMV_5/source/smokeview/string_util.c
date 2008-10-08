@@ -336,3 +336,22 @@ int log_base2(float xx){
   return r-1; // returns -1 for x==0, floor(log2(x)) otherwise
 }
 #endif
+
+/* ------------------ array2string ------------------------ */
+
+void array2string(float *vals, int nvals, char *string){
+  char cval[30];
+  int i;
+
+  strcpy(string,"");
+  if(nvals==0)return;
+  for(i=0;i<nvals-1;i++){
+    sprintf(cval,"%f",vals[i]);
+    trimzeros(cval);
+    strcat(string,cval);
+    strcat(string,", ");
+  }
+  sprintf(cval,"%f",vals[nvals-1]);
+  trimzeros(cval);
+  strcat(string,cval);
+}

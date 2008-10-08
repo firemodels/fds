@@ -310,6 +310,9 @@ EXTERNCPP void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostre
 				 int *nvertices, int *ntriangles, float **levels, int *nisolevels,
 				 int *nisosteps, int isoframestep, float *tmin, float *tmax, int endian);
 #endif
+EXTERNCPP void array2string(float *array, int narray, char *string);
+EXTERNCPP void getisolevels(const char *isofile, int dataflag, float **levelsptr, int *nisolevels);
+EXTERNCPP void getcisolevels(const char *isofile, float **levelsptr, int *nisolevels);
 EXTERNCPP void getsmoothblockparms(mesh *gb, smoothblockage *sb);
 EXTERNCPP void MakeIsoBlockages(mesh *gb, smoothblockage *sb);
 EXTERNCPP void convert_fdsfile(const char *filein, const char *fileout, const char *fileout2);
