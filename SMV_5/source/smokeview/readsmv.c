@@ -3418,6 +3418,7 @@ typedef struct {
 
     if(match(buffer,"ISOF",4) == 1||match(buffer,"TISOF",5)==1){
       iso *isoi;
+      int get_isolevels;
 
       isoi = isoinfo + iiso;
       nn_iso++;
@@ -3453,6 +3454,8 @@ typedef struct {
       isoi->loaded=0;
       isoi->display=0;
       isoi->dataflag=dataflag;
+      isoi->nlevels=0;
+      isoi->levels=NULL;
 
       isoi->normaltable=NULL;
       isoi->comp_buffer=NULL;
@@ -3477,22 +3480,48 @@ typedef struct {
       STRCAT(isoi->size_file,".sz");
 
       if(stat(isoi->comp_file,&statbuffer)==0){
+        get_isolevels=1;
         isoi->compression_type=1;
         niso_compressed++;
         isoi->file=isoi->comp_file;
         if(readlabels(&isoi->label,stream)==2)return 2;
+        getcisolevels(isoi->file,&isoi->levels,&isoi->nlevels);
         iiso++;
       }
       else if(stat(isoi->reg_file,&statbuffer2)==0){
+        get_isolevels=1;
         isoi->compression_type=0;
         isoi->file=isoi->reg_file;
         if(readlabels(&isoi->label,stream)==2)return 2;
+        getisolevels(isoi->file,dataflag,&isoi->levels,&isoi->nlevels);
         iiso++;
       }
       else{
+        get_isolevels=0;
         printf("*** Warning: the file, %s, does not exist.\n",buffer);
         if(readlabels(&isoi->label,stream)==2)return 2;
         niso--;
+      }
+      if(get_isolevels==1){
+        int len_clevels;
+        char clevels[1024];
+
+        array2string(isoi->levels,isoi->nlevels,clevels);
+        len_clevels = strlen(clevels);
+        if(len_clevels>0){
+          int len_long;
+          char *long_label, *unit_label;
+
+          long_label = isoi->label.longlabel;
+          unit_label = isoi->label.unit;
+          len_long = strlen(long_label)+strlen(unit_label)+len_clevels+3+1;
+          ResizeMemory((void **)&long_label,(unsigned int)len_long);
+          isoi->label.longlabel=long_label;
+          strcat(long_label,": ");
+          strcat(long_label,clevels);
+          strcat(long_label," ");
+          strcat(long_label,unit_label);
+        }
       }
       continue;
     }
