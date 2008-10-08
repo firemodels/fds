@@ -106,9 +106,61 @@ void getisoheader(const char *isofile, EGZ_FILE **isostreamptr,
   EGZ_FREAD(nnormaltable,4,1,*isostreamptr);
   NewMemory((void **)normaltable,3*(*nnormaltable)*sizeof(short));
   EGZ_FREAD(*normaltable,2,3*(*nnormaltable),*isostreamptr);
+}
 
+/* ------------------ getcisolevels ------------------------ */
 
+void getcisolevels(const char *isofile, float **levelsptr, int *nisolevels){
+  EGZ_FILE *isostream;
+  char buffer[1024];
+  int one;
 
+  *nisolevels=0;
+#ifdef EGZ
+  isostream=EGZ_FOPEN(isofile,"rb",0,2);
+#else
+  isostream=EGZ_FOPEN(isofile,"rb");
+#endif
+  if(isostream==NULL)return;
+  EGZ_FREAD(&one,4,1,isostream);
+  EGZ_FREAD(nisolevels,4,1,isostream);
+  FREEMEMORY(*levelsptr);
+  NewMemory((void **)levelsptr,*nisolevels*sizeof(float));
+  EGZ_FREAD(*levelsptr,4,(unsigned int)(*nisolevels),isostream);
+  EGZ_FCLOSE(isostream);
+}
+
+/* ------------------ getisolevels ------------------------ */
+
+void getisolevels(const char *isofile, int dataflag, float **levelsptr, int *nisolevels){
+  int one;
+  int version;
+  int len[3],labellengths=0;
+  int nlevels;
+  EGZ_FILE *isostreamptr;
+
+#ifdef EGZ
+  isostreamptr=EGZ_FOPEN(isofile,"rb",0,2);
+#else
+  isostreamptr=EGZ_FOPEN(isofile,"rb");
+#endif
+
+  EGZ_FREAD(&one,4,1,isostreamptr);
+  if(dataflag!=0){
+    EGZ_FREAD(&version,4,1,isostreamptr);
+  }
+  else{
+    version=1;
+  }
+  EGZ_FREAD(len,4,3,isostreamptr);
+  labellengths=len[0]+len[1]+len[2];
+  EGZ_FSEEK(isostreamptr,labellengths+4,SEEK_CUR);
+  EGZ_FREAD(&nlevels,4,1,isostreamptr);
+  *nisolevels=nlevels;
+  FREEMEMORY(*levelsptr);
+  NewMemory((void **)levelsptr,nlevels*sizeof(float));
+  EGZ_FREAD(*levelsptr,4,(unsigned int)(nlevels),isostreamptr);
+  EGZ_FCLOSE(isostreamptr);
 }
 
 /* ------------------ getisosizes ------------------------ */
@@ -1423,7 +1475,7 @@ int getisoindex(const iso *isoi){
 
   for(j=0;j<nisotypes;j++){
     isoi2 = isoinfo+isotypes[j];
-    if(strcmp(isoi->label.shortlabel,isoi2->label.shortlabel)==0)return isotypes[j];
+    if(strcmp(isoi->label.longlabel,isoi2->label.longlabel)==0)return isotypes[j];
   }
   return -1;
 }
@@ -1436,7 +1488,7 @@ int getisotype(const iso *isoi){
 
   for(j=0;j<nisotypes;j++){
     isoi2 = isoinfo+isotypes[j];
-    if(strcmp(isoi->label.shortlabel,isoi2->label.shortlabel)==0)return j;
+    if(strcmp(isoi->label.longlabel,isoi2->label.longlabel)==0)return j;
   }
   return -1;
 }
