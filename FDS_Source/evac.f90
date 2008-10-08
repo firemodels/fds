@@ -3696,33 +3696,36 @@ Contains
           ! If there are no fire grids, skip this intialization part
           If (.Not. Btest(I_EVAC,4) ) Cycle FED_J_LOOP
 
-          If (.Not. SOLID(CELL_INDEX(i,j,1)) ) Then
-             MESH_LOOP: Do NOM = 1, NMESHES
-                If (.Not. EVACUATION_ONLY(NOM)) Then
-                   M => MESHES(NOM)
-                   If ( X1 >= M%XS .And. X1 <= M%XF .And. &
-                        Y1 >= M%YS .And. Y1 <= M%YF .And. &
-                        Z1 >= M%ZS .And. Z1 <= M%ZF) Then
-                      II = Floor( M%CELLSI(Floor((X1-M%XS)*M%RDXINT)) + 1.0_EB  )
-                      JJ = Floor( M%CELLSJ(Floor((Y1-M%YS)*M%RDYINT)) + 1.0_EB  )
-                      KK = Floor( M%CELLSK(Floor((Z1-M%ZS)*M%RDZINT)) + 1.0_EB  )
-                      If ( M%SOLID(M%CELL_INDEX(II,JJ,KK)) ) Then
-                         HUMAN_GRID(i,j)%IMESH = 0 ! No smoke inside OBSTs
-                      Else
-                         HUMAN_GRID(i,j)%II = II
-                         HUMAN_GRID(i,j)%JJ = JJ
-                         HUMAN_GRID(i,j)%KK = KK
-                         HUMAN_GRID(i,j)%IMESH = NOM
-                      End If
-                      Exit MESH_LOOP
+          MESH_LOOP: Do NOM = 1, NMESHES
+             If (.Not. EVACUATION_ONLY(NOM)) Then
+                M => MESHES(NOM)
+                If ( X1 >= M%XS .And. X1 <= M%XF .And. &
+                     Y1 >= M%YS .And. Y1 <= M%YF .And. &
+                     Z1 >= M%ZS .And. Z1 <= M%ZF) Then
+                   II = Floor( M%CELLSI(Floor((X1-M%XS)*M%RDXINT)) + 1.0_EB  )
+                   JJ = Floor( M%CELLSJ(Floor((Y1-M%YS)*M%RDYINT)) + 1.0_EB  )
+                   KK = Floor( M%CELLSK(Floor((Z1-M%ZS)*M%RDZINT)) + 1.0_EB  )
+                   If ( M%SOLID(M%CELL_INDEX(II,JJ,KK)) ) Then
+                      HUMAN_GRID(i,j)%IMESH = 0 ! No smoke inside OBSTs
+                   Else
+                      HUMAN_GRID(i,j)%II = II
+                      HUMAN_GRID(i,j)%JJ = JJ
+                      HUMAN_GRID(i,j)%KK = KK
+                      HUMAN_GRID(i,j)%IMESH = NOM
                    End If
+                   Exit MESH_LOOP
                 End If
-                ! No fire mesh is found
-                HUMAN_GRID(i,j)%IMESH = 0
-             End Do MESH_LOOP
+             End If
+             ! No fire mesh is found
+             HUMAN_GRID(i,j)%IMESH = 0
+          End Do MESH_LOOP
+          If (.Not. SOLID(CELL_INDEX(i,j,1)) ) Then
+             HUMAN_GRID(i,j)%IMESH = HUMAN_GRID(i,j)%IMESH
           Else
              ! This grid cell is solid ==> No humans in this cell
-             HUMAN_GRID(i,j)%IMESH = 0
+             ! Zero, if fire mesh obst or no fire mesh at all
+             ! Negative (-nom), if fire mesh gas cell but evac mesh solid.
+             HUMAN_GRID(i,j)%IMESH = -HUMAN_GRID(i,j)%IMESH
           End If
        End Do FED_J_LOOP
     End Do FED_I_LOOP
@@ -4771,11 +4774,11 @@ Contains
 
                 If (L_fed_save) Then
 
-                   If ( HUMAN_GRID(i,j)%IMESH > 0 ) Then
+                   If ( Abs(HUMAN_GRID(i,j)%IMESH) > 0 ) Then
                       i1 = HUMAN_GRID(i,j)%II
                       j1 = HUMAN_GRID(i,j)%JJ
                       k1 = HUMAN_GRID(i,j)%KK
-                      nom = HUMAN_GRID(i,j)%IMESH
+                      nom = Abs(HUMAN_GRID(i,j)%IMESH)
                       y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
                       ! Mass fraction array ==> soot density (mg/m3)
                       ! Next is for soot (mg/m3)
@@ -5924,8 +5927,6 @@ Contains
           GaTh    = NOISETH
           GaCM    = NOISECM
           EVEL = Sqrt(HR%U**2 + HR%V**2)
-          GaTh = Max( GaTh, &
-               GaTh*(100.0_EB-110.0_EB*Abs(EVEL/HR%Speed)) )
 
           L_Dead  = .False.
           If ( HR%IntDose >= 1.0_EB  ) Then
@@ -5950,19 +5951,6 @@ Contains
           End If
           fed_max = Max(fed_max,HR%IntDose)
           hr_tau = HR%Tau
-          !
-          ! Check, if new random force is needed on next time step.
-          If ( GaTh > 0.0_EB .And. T > T_BEGIN ) Then
-             Call Random_number(rn)
-             If ( rn > Exp(-DTSP/(0.2_EB*hr_tau)) ) HR%NewRnd = .True.
-             If ( HR%NewRnd ) Then
-                HR%NewRnd = .False.
-                HR%ksi = (GaussRand(GaMe, GaTh, GaCM))
-                Call Random_number(rn)
-                HR%eta = 2.0_EB*Pi*rn
-                HR%ksi = Abs(HR%ksi)
-             End If
-          End If
           !
           ! Where is the person
           !
@@ -6178,13 +6166,6 @@ Contains
           ! Rotational motion:
           Omega_new = HR%Omega + 0.5_EB*DTSP*HR%Torque/HR%M_iner
 
-          ! Add random force term
-          If ( GaTh > 0.0_EB .And. T > T_BEGIN ) Then
-             U_new = U_new + 0.5_EB*DTSP*HR%v0_fac* HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
-             V_new = V_new + 0.5_EB*DTSP*HR%v0_fac* HR%Mass*HR%ksi*Sin(HR%eta)/HR%Mass
-             Omega_new = Omega_new + 0.5_EB*DTSP* 1.0_EB*Sign(HR%ksi,HR%eta-Pi)
-          End If
-
           j = Max(0,HR%GROUP_ID)
           If (j == 0 ) Then
              Group_List(0)%Tpre = HR%Tpre + HR%Tdet
@@ -6263,7 +6244,6 @@ Contains
                   (speed*(VBAR/EVEL) - HR%V)
              HR%VBAR = speed*(VBAR/EVEL)
 
-
              If (VBAR >= 0.0_EB) Then
                 angle = Acos(UBAR/EVEL)
              Else
@@ -6285,11 +6265,42 @@ Contains
           Else
              U_new = U_new + 0.5_EB*(DTSP/hr_tau)* (- HR%U)
              V_new = V_new + 0.5_EB*(DTSP/hr_tau)* (- HR%V)
-             ! Slow rotation down if no direction available, i.e., target
-             ! Omega_0 is zero.
+             ! Slow rotation down if no direction available, i.e., target Omega_0 is zero.
              Omega_new = Omega_new + 0.5_EB*(DTSP/HR%tau_iner)*(-HR%Omega)
              HR%UBAR = 0.0_EB
              HR%VBAR = 0.0_EB
+          End If
+          !
+          ! Check, if new random force is needed on next time step.
+          If ( GaTh > 0.0_EB .And. T > T_BEGIN ) Then
+             Call Random_number(rn)
+             If ( rn > Exp(-DTSP/(0.2_EB*hr_tau)) ) HR%NewRnd = .True.
+             If ( HR%NewRnd ) Then
+                EVEL = (HR%UBAR**2 + HR%VBAR**2)/(HR%v0_fac**2)
+                ! Random noice variance: GaTh = Max( GaTh, GaTh*(100.0_EB-110.0_EB*Abs(EVEL/HR%Speed)) )
+                ! Above GaTh is found to be more or less nice for speeds about 1.3 m/s
+                ! Scale the random force by the current target speed v0 (note: Sqrt(GaTh) = std.dev.)
+                ! Note: Speed reduction due to smoke is treated elsewhere.
+                If (EVEL>0.0_EB) Then
+                   GaTh = GaTh*EVEL/(1.3_EB**2)
+                   GaTh = Max(GaTh, GaTh*(100.0_EB-110.0_EB*Sqrt((HR%U**2 + HR%V**2)/EVEL)))
+                Else
+                   GaTh = GaTh*(HR%Speed/1.3_EB)**2
+                   GaTh = Max(GaTh, GaTh*(100.0_EB-110.0_EB*Sqrt((HR%U**2 + HR%V**2)/HR%Speed)))
+                End If
+                HR%NewRnd = .False.
+                HR%ksi = (GaussRand(GaMe, GaTh, GaCM))
+                Call Random_number(rn)
+                HR%eta = 2.0_EB*Pi*rn
+                HR%ksi = Abs(HR%ksi)
+             End If
+          End If
+
+          ! Add random force term
+          If ( GaTh > 0.0_EB .And. T > T_BEGIN ) Then
+             U_new = U_new + 0.5_EB*DTSP*HR%v0_fac* HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
+             V_new = V_new + 0.5_EB*DTSP*HR%v0_fac* HR%Mass*HR%ksi*Sin(HR%eta)/HR%Mass
+             Omega_new = Omega_new + 0.5_EB*DTSP* 1.0_EB*Sign(HR%ksi,HR%eta-Pi)
           End If
 
           ! Check that velocities are not too large, i.e.,
