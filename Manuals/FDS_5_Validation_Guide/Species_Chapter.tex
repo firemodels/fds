@@ -308,31 +308,24 @@ performed using FDS version 5.1.3.}
 
 \clearpage
 
-\section{Experiments on Hydrogen Dispersion in Garage}
+\section{INERIS Hydrogen Dispersion Experiment}
 
-A series of experiments were conducted by INERIS \cite{INERIS} to study the release of small amounts of hydrogen in 
-a confined space. The experimental setup consisted of a 1 g/s vertical hydrogen release for 240 s from an origfice of 20 mm 
-diameter in a rectangular room (garage) of dimensions 3.78 X 7.2 X 2.88 m. Two small openings (50 mm diameter) at the front
-and bottom side of the room assured constant pressure conditions. Hydrogen concentrations were measured as a function of time 
-during both the release phase and the subsequent diffusion phase (5160 s) at various heights in the garage. 
 
-FDS simulations were conducted to understand the short and long term mixing and distribution obtained during small releases of 
-hydrogen in a large confined space. Since the dimensions of the orifice through which hydrogen releases and that of the two 
-openings were small compared to the garage dimensions, a grid resolution study was completed to full resolve the important physical 
-processes. The predicted hydrogen concentrations compared favorably (see Figure \ref{Hydrogen_Species}) with the measurements in the plume region as well 
+FDS simulations were conducted to understand the short and long term mixing and distribution obtained during small releases of
+hydrogen in a large confined space. Since the dimensions of the orifice through which hydrogen releases and that of the two
+openings were small compared to the garage dimensions, a grid resolution study was completed to fully resolve the important physical
+processes. The figures below show comparisons of predicted hydrogen volume fraction with the measurements in the plume region as well
 as in the upper layers of the buoyancy driven flow field.
 
-
-\begin{figure}[p]
-\begin{center}
-\begin{tabular}{l}
-\includegraphics[width=2.5in]{FIGURES/Hydrogen/Sensor1-4-6-7} \\
-\includegraphics[width=2.5in]{FIGURES/Hydrogen/Sensor13-14-16} \\
-\includegraphics[width=2.5in]{FIGURES/Hydrogen/Sensor12} \\
-\includegraphics[width=2.5in]{FIGURES/Hydrogen/Sensor16} \\
-\end{tabular}
-\end{center}
-\caption{Summary of the species predictions using FDS 5.1.3}
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/INERIS_H2/INERIS_H2_Sensor1-4-6-7} &
+\includegraphics[height=2.2in]{FIGURES/INERIS_H2/INERIS_H2_Sensor13-14-16} \\
+\includegraphics[height=2.2in]{FIGURES/INERIS_H2/INERIS_H2_Sensor16} &
+\includegraphics[height=2.2in]{FIGURES/INERIS_H2/INERIS_H2_Sensor12} 
+\end{tabular*}
+\caption[Summary of hydrogen concentration predictions, INERIS experiments]{Comparisons of predicted and measured hydrogen concentrations at various locations
+in the INERIS test enclosure. The calculations were performed with FDS 5.1.3}
 \label{Hydrogen_Species}
 \end{figure}
 

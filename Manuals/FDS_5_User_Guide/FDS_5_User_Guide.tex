@@ -2154,11 +2154,11 @@ However, an option exists in the code to restore the baroclinic torque by
 decomposing the relevant term in the pressure equation as follows,
 \be
    \label{eqn_baroclinic_torque}
-   \nabla \cdot \frac{1}{\rho^{n+1}} \nabla \tp^{n+1} \approx \nabla \cdot \frac{1}{\overline{\rho}^{n+1}} \nabla \tp^{n+1} +    
+   \nabla \cdot \frac{1}{\rho^{n+1}} \nabla \tp^{n+1} \approx \nabla \cdot \frac{1}{\overline{\rho}^{n+1}} \nabla \tp^{n+1} +
    \nabla \cdot \left( \frac{1}{\rho^{n+1}} - \frac{1}{\overline{\rho}^{n+1}} \right) \nabla \tp^{n} \,\mbox{.}
 \ee
-The first term on the right hand side of (\ref{eqn_baroclinic_torque}) is absorbed in $\nabla^2 {\cal H}$.  
-In the second term, which becomes part of $\nabla\cdot \mathbf{F}$, we must use the most recent value of the pressure $\tp^n$. 
+The first term on the right hand side of (\ref{eqn_baroclinic_torque}) is absorbed in $\nabla^2 {\cal H}$.
+In the second term, which becomes part of $\nabla\cdot \mathbf{F}$, we must use the most recent value of the pressure $\tp^n$.
 The expression $\overline{\rho}$ is an average density, equal to $2 \rho_{\min} \rho_{\max} / (\rho_{\min} + \rho_{\max})$.
 To make this correction, simply include the statement {\ct BAROCLINIC=.TRUE.}
 on the {\ct MISC} line. The cost of the
@@ -2166,10 +2166,10 @@ correction is not prohibitive -- try calculations with and without
 the correction to determine if its inclusion is warranted.
 
 \begin{warning}
-\noindent In past versions of FDS, a DNS calculation ({\ct DNS=.TRUE.} on the {\ct MISC} line) included the baroclinic correction by default. 
-However, starting with FDS 5.2, 
+\noindent In past versions of FDS, a DNS calculation ({\ct DNS=.TRUE.} on the {\ct MISC} line) included the baroclinic correction by default.
+However, starting with FDS 5.2,
 the correction must be explicitly invoked for both LES and DNS.
-\end{warning} 
+\end{warning}
 
 
 
@@ -7598,6 +7598,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct C\_HORIZONTAL}             & Real          & Convective heat transfer coefficient          &               & 1.52             \\ \hline
 %{\ct C\_VERTICAL}               & Real          & Convective heat transfer coefficient          &               & 1.31             \\ \hline
 {\ct CSMAG}                     & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
+%{\ct COMPUTE\_VISCOSITY\_TWICE} & Logical       & Compute twice per time step                   &               & {\ct .TRUE.}     \\ \hline
 {\ct CONDUCTIVITY}              & Real          & See Section~\ref{info:SPEC}                   &  W/m/K        &                   \\ \hline
 {\ct CO\_PRODUCTION}            & Logical       & See Section~\ref{info:combustion}             &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                       & Logical       & Direct Numerical Simulation                   &               & {\ct .FALSE.}     \\ \hline
