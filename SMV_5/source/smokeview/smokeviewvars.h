@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#include <time.h>
+
 #ifdef CPP
 #define CCC "C"
 #else
