@@ -2,6 +2,8 @@ import csv
 from re import *
 from pyx import *
 
+#### START USER DEFINED VARIABLES ####
+
 ### Set Global Variables for Data to Process
 ## Validation Data Set (1), Verification Data Set (2), Examples Data Set (3), Trainier Data Set (4)
 data_set = 1 # Input Value
@@ -38,7 +40,7 @@ if data_set == 4:
 ### Set Diagnostic Output Level
 ## Uncomment the level of diagnostics desired.
 ## 1 = Minimal, 2 = Normal, 3 = Maximum.
-diagnostic_level = 1 # Input Value
+diagnostic_level = 2 # Input Value
 
 print "**** Diagnostics Set at Level", diagnostic_level, "****\n"
 
@@ -67,6 +69,9 @@ print "**** Data Character Set to '"+data_line_char+"' ****\n"
 scatter_data_dict = {}
 combined_scatter_data = {}
 
+
+#### END USER DEFINED VARIABLES ####
+
 ### Define Functions
 
 def extract_config_data(config_file):
@@ -93,17 +98,38 @@ def extract_config_data(config_file):
 	    exit()
 	
     #Read file with csv module.
-    data_array = csv.reader(fh)
+    config_data_array = csv.reader(fh)
+    if diagnostic_level >= 3:
+        print "Config Data Array:", config_data_array
     #Convert into List object
-    config_lists = [list(sublist) for sublist in data_array]
+    config_lists = [list(sublist) for sublist in config_data_array]
     if diagnostic_level >= 2:
         print str(len(config_lists))+" lines read in from "+config_file_name+"\n"
     
     #Build Quantity and Data Dictionaries, with values keyed by config column name.
     for list_item in config_lists:
+        if diagnostic_level >= 3:
+            print list_item
+        if list_item == []:
+            break
         if list_item[0] == 'g':
             if group_counter < 1:
                 group_header = list_item[2:]
+                if diagnostic_level >= 3:
+                    print "Group Header:", group_header
+                g_header_counter = 0
+                for header_value in group_header:
+                    if diagnostic_level >= 3:
+                        print header_value
+                    if header_value == '':
+                        if diagnostic_level >= 3:
+                            print 'g Header Value is Blank'
+                        del group_header[g_header_counter:]
+                        if diagnostic_level >= 3:
+                            print 'Removed values from first blank to end of list.'
+                    g_header_counter = g_header_counter + 1
+                if diagnostic_level >= 3:
+                    print "New Group Header List:", group_header 
             else:
                 if group_counter >= 1:
                     for x in range(len(group_header)):
@@ -112,15 +138,29 @@ def extract_config_data(config_file):
                     keyed_groups = {}
             group_counter += 1
             if diagnostic_level >= 3:
-                print "   <3> This is group line #"+str(group_counter)+"."
+                print "This is group line #"+str(group_counter)+"."
         elif list_item[0] == 'q':
             if quantity_counter < 1:
                 quantity_header = list_item[2:]
+                if diagnostic_level >= 3:
+                    print "Quantity Header:", quantity_header
+                q_header_counter = 0
+                for q_header_value in quantity_header:
+                    print q_header_value
+                    if q_header_value == '':
+                        if diagnostic_level >= 3:
+                            print 'q Header Value is Blank'
+                        del quantity_header[q_header_counter:]
+                        if diagnostic_level >= 3:
+                            print 'Removed values from first blank to end of list.'
+                    q_header_counter = q_header_counter + 1
+                if diagnostic_level >= 3:
+                    print "New Quantity Header List:", quantity_header
             if quantity_counter >= 1:
                 for x in range(len(quantity_header)):
                     keyed_quantities[quantity_header[x]] = list_item[x+2]
                 if diagnostic_level >= 3:
-                    print "   <3> List item 1:",int(list_item[1])
+                    print "List item 1:",int(list_item[1])
                 quantities_dict[int(list_item[1])] = keyed_quantities
                 keyed_quantities = {}
             quantity_counter += 1
@@ -128,28 +168,43 @@ def extract_config_data(config_file):
             if data_counter < quantity_counter:
                 data_counter = quantity_counter - 1
                 data_header = list_item[1:]
+                if diagnostic_level >= 3:
+                    print "Data Header:", data_header
+                d_header_counter = 0
+                for d_header_value in data_header:
+                    if diagnostic_level >= 3:
+                        print d_header_value
+                    if d_header_value == '':
+                        if diagnostic_level >= 3:
+                            print 'd Header Value is Blank'
+                        del data_header[d_header_counter:]
+                        if diagnostic_level >= 3:
+                            print 'Removed values from first blank to end of list.'
+                    d_header_counter = d_header_counter + 1
+                if diagnostic_level >= 3:
+                    print "New Data Header List:", data_header
             if data_counter >= quantity_counter:
                 for x in range(len(data_header)):
                     keyed_data[data_header[x].strip()] = list_item[x+1]
                 data_key_name = keyed_data['Quantity'].strip()+"~"+keyed_data['Group'].strip()+"~"+keyed_data['Dataname'].strip()+"~"+keyed_data['d1_Dep_Col_Name'].strip()+"~"+keyed_data['d1_Ind_Col_Name'].strip()
                 if diagnostic_level >= 3:
-                    print "   <3> Key Name:", data_key_name
+                    print "Key Name:", data_key_name
                 data_dict[data_key_name] = keyed_data
                 if diagnostic_level >= 3:
-                    print "   <3> Data for Key Name Above:", data_dict[data_key_name]
+                    print "Data for Key Name Above:", data_dict[data_key_name]
                 keyed_data = {}
             data_counter += 1
         else:
             skip_counter = skip_counter + 1
             if diagnostic_level >= 3:
-                print "   <3> No g, q or "+data_line_char+", skipping row."            
+                print "No g, q or "+data_line_char+", skipping row."            
     if diagnostic_level >= 2:
         print "There were "+str(skip_counter)+" lines skipped, out of the "+str(len(config_lists))+" lines read in."
     #Return a single list object containing the dictionaries.
     if diagnostic_level >= 3:
-        print "   <3> Groups Dictionary: ", groups_dict
-        print "   <3> Quantities Dictionary: ", quantities_dict
-        print "   <3> Data Dictionary: ", data_dict
+        print "Groups Dictionary: ", groups_dict
+        print "Quantities Dictionary: ", quantities_dict
+        print "Data Dictionary: ", data_dict
     return [groups_dict,quantities_dict,data_dict]
 
 def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,stop_comp,ind_scale):
@@ -157,28 +212,28 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
     if diagnostic_level >= 2:
         print "\n*** Find Start/End Indexes for Independent Data Column ***"
     if diagnostic_level >= 3:
-        print "   <3> Start Data:", start_data
-        print "   <3> Stop Data:", stop_data
-        print "   <3> Independent Data Scale Factor:", ind_scale
+        print "Start Data:", start_data
+        print "Stop Data:", stop_data
+        print "Independent Data Scale Factor:", ind_scale
         
     if diagnostic_level >= 2:
         print "Independent Data Column name:", col_name
     if diagnostic_level >= 3:
-        print "   <3> Independent Data Column Data:", data_dict[col_name]
+        print "Independent Data Column Data:", data_dict[col_name]
     ## Find Start Value Index Number    
     rowcounter1 = 0
     if diagnostic_level >= 2:
         print "*** Finding Independent Data Column Start Index ***"
     for value1 in data_dict[col_name]:
         if diagnostic_level >= 3:
-            print "   <3> Value 1:", value1, " : ", rowcounter1
+            print "Value 1:", value1, " : ", rowcounter1
         if value1 == 'Null':
             continue
         else:
             if value1 >= (float(start_data)*float(ind_scale)):
                 if diagnostic_level >= 3:
-                    print "   <3> Independent Data Column Starts at row #:", str(rowcounter1)
-                    print "   <3> With a value of:", str(value1)
+                    print "Independent Data Column Starts at row #:", str(rowcounter1)
+                    print "With a value of:", str(value1)
                 ind_col_start_index = rowcounter1
                 break
         rowcounter1 = rowcounter1 + 1
@@ -190,7 +245,7 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
         print "*** Finding Index of last good value in Independent Data Column ***"    
     for end_data_index in data_dict[col_name]:
         if diagnostic_level >= 3:
-            print "   <3> ", end_data_index, " : ", index_count
+            print "", end_data_index, " : ", index_count
         if end_data_index == 'Null':
             end_index = index_count - 1
             break
@@ -199,9 +254,9 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
     if end_index == 0:
         end_index = index_count - 1
     if diagnostic_level >= 3:
-        print "   <3> Length of Independent Data Column:", end_index + 1
-        print "   <3> Last value in Independent Data Column:", data_dict[col_name][end_index]
-        print "   <3> Index of Last Numeric Value:", end_index
+        print "Length of Independent Data Column:", end_index + 1
+        print "Last value in Independent Data Column:", data_dict[col_name][end_index]
+        print "Index of Last Numeric Value:", end_index
     if diagnostic_level >= 2:
         print "*** Finding Independent Data Column End Index ***"
     for value2 in data_dict[col_name]:
@@ -242,7 +297,7 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
         scaled_stop_value = (float(stop_comp)*float(ind_scale))
         end_index_value = float(data_dict[col_name][end_index])
         if diagnostic_level >= 3:
-            print "   <3> Scaled Stop Value and End Index Value:", scaled_stop_value, " : ",end_index_value
+            print "Scaled Stop Value and End Index Value:", scaled_stop_value, " : ",end_index_value
         if end_index_value < scaled_stop_value:
             if diagnostic_level >= 2:
                 print "Specified end of Metric data is greater than last value in the Independent Data Column.\nUsing last value in the Independent Data Column.\n"
@@ -318,7 +373,7 @@ def extract_comp_data(comp_file_info):
             print "Data Set 1, Column Name List Detected"
         d1_compound_col_names = eval(d1_Dep_column_name_value)
         if diagnostic_level >= 3:
-            print "   <3> Data Set 1, Compound Column Names:", d1_compound_col_names
+            print "Data Set 1, Compound Column Names:", d1_compound_col_names
         for name in d1_compound_col_names:
             if diagnostic_level >= 2:
                 print "Data Set 1, Sub-Column Name:", name
@@ -333,7 +388,7 @@ def extract_comp_data(comp_file_info):
             print "Data Set 2, Column Name List Detected"
         d2_compound_col_names = eval(d2_Dep_column_name_value)
         if diagnostic_level >= 3:
-            print "   <3> Data Set 2, Compound Column Names:", d2_Dep_column_name_value
+            print "Data Set 2, Compound Column Names:", d2_Dep_column_name_value
         for name in d2_compound_col_names:
             if diagnostic_level >= 2:
                 print "Data Set 2, Sub-Column Name:", name
@@ -344,12 +399,12 @@ def extract_comp_data(comp_file_info):
         d2_scatter_data_labels.append(comp_file_info['Quantity']+"~"+comp_file_info['Group']+"~"+comp_file_info['Dataname']+"~"+d2_Dep_column_name_value+"~"+d2_ind_column_name_value)
     
     if diagnostic_level >= 3:
-        print "   <3> Data Set 1, Data Labels:\n", d1_scatter_data_labels
-        print "   <3> Data Set 2, Data Labels:\n", d2_scatter_data_labels
+        print "Data Set 1, Data Labels:\n", d1_scatter_data_labels
+        print "Data Set 2, Data Labels:\n", d2_scatter_data_labels
     
     combined_scatter_data_labels = [d1_scatter_data_labels,d2_scatter_data_labels]
     if diagnostic_level >= 3:
-        print "   <3> Combined Scatter Data:",combined_scatter_data_labels
+        print "Combined Scatter Data:",combined_scatter_data_labels
     
     metric = comp_file_info['Metric'] #String indicating the type of metric required.
     
@@ -370,6 +425,9 @@ def extract_comp_data(comp_file_info):
     if diagnostic_level >= 2:
         print "*** Start File Processing ***"
     
+    # Find length of column names row and use this length to pad the ends of the data rows with null values as necessary.
+    
+    
     # Read in Data Set 1, data and flip lists from rows to columns.
     if diagnostic_level >= 2:
         print "Reading in:", d1_data_filename
@@ -377,7 +435,7 @@ def extract_comp_data(comp_file_info):
         d1_file_object.next()
     d1_data_cols = zip(*csv.reader(d1_file_object))
     if diagnostic_level >= 3:
-        print "   <3> Data Set 1, Data Columns:",d1_data_cols
+        print "Data Set 1, Data Columns:",d1_data_cols
     
     # Find Ind_Axis index number and confirm Col_Name based on d1_Ind_Col_Name value in config file.
     column_counter = 0
@@ -386,7 +444,7 @@ def extract_comp_data(comp_file_info):
             if diagnostic_level >= 2:
                 print "Data Set 1, Independent Data Col name is: ",column[0].strip()
             if diagnostic_level >= 3:
-                print "   <3> The Index Value is:",column_counter
+                print "The Index Value is:",column_counter
             d1_ind_axis_column_name = column[0].strip()
         else:
             column_counter = column_counter + 1
@@ -397,14 +455,14 @@ def extract_comp_data(comp_file_info):
     #Convert tuples to lists.
     d1_data_list = [list(sublist) for sublist in d1_data_cols]
     if diagnostic_level >= 3:
-        print "   <3> Data Set 1, Data List:", d1_data_list
+        print "Data Set 1, Data List:", d1_data_list
     
     if diagnostic_level >= 2:
         print "*** Build Data Set 1 Dictionary. ***" 
     #Catch errors if conversion of data from string to float fails.
     for d1_list in d1_data_list:
         if diagnostic_level >= 3:
-            print "   <3> Data Set 1, List:", d1_list
+            print "Data Set 1, List:", d1_list
         try:
             temp_list = []
             for x in d1_list[(d1_data_row_index-d1_column_name_row_index):]:
@@ -414,7 +472,7 @@ def extract_comp_data(comp_file_info):
                     list_value = float(x)
                 temp_list.append(list_value)
                 if diagnostic_level >= 3:
-                    print "   <3> Temp List:", temp_list
+                    print "Temp List:", temp_list
             d1_data_dict[d1_list[0].strip()] = temp_list
         except:
             print "!!! Data Set 1, Conversion Error in Column Name "+d1_list[0].strip()+". !!!"
@@ -427,7 +485,7 @@ def extract_comp_data(comp_file_info):
         d2_file_object.next()
     d2_data_cols = zip(*csv.reader(d2_file_object))
     if diagnostic_level >= 3:
-        print "   <3> Data Set 2, Data Columns:", d2_data_cols
+        print "Data Set 2, Data Columns:", d2_data_cols
         
     #Find Ind_Axis index number and confirm Col_Name based on d2_Ind_Col_Name value in config file.
     column_counter = 0
@@ -436,7 +494,7 @@ def extract_comp_data(comp_file_info):
             if diagnostic_level >= 2:
                 print "Data Set 2, Independent Data Col name is: ",column[0].strip()
             if diagnostic_level >= 3:
-                print "   <3> The Index Value is: ",column_counter
+                print "The Index Value is: ",column_counter
             d2_ind_axis_column_name = column[0].strip()
         else:
             column_counter = column_counter + 1
@@ -467,8 +525,8 @@ def extract_comp_data(comp_file_info):
     d1_comp_ranges = find_start_stop_index(d1_data_dict,d1_ind_axis_column_name,d1_start_data_val,d1_stop_data_val,d1_start_comp_val,d1_stop_comp_val,ind_Scale_Factor)
     d2_comp_ranges = find_start_stop_index(d2_data_dict,d2_ind_axis_column_name,d2_start_data_val,d2_stop_data_val,d2_start_comp_val,d2_stop_comp_val,ind_Scale_Factor)
     if diagnostic_level >= 3:
-        print "   <3> D1 COMP RANGES: ",d1_comp_ranges
-        print "   <3> D2 COMP RANGES: ",d2_comp_ranges
+        print "D1 COMP RANGES: ",d1_comp_ranges
+        print "D2 COMP RANGES: ",d2_comp_ranges
     
     #### Begin Column specific operations.
     scatter_counter = 0
@@ -476,7 +534,7 @@ def extract_comp_data(comp_file_info):
     for scatter_label in combined_scatter_data_labels[0]:
         
         if diagnostic_level >= 3:
-            print "   <3> Scatter Counter Value:", scatter_counter
+            print "Scatter Counter Value:", scatter_counter
         
         d1_label_temp = []
         d2_label_temp = []
@@ -485,16 +543,16 @@ def extract_comp_data(comp_file_info):
         d2_label_temp = split("~",combined_scatter_data_labels[1][scatter_counter])
         
         if diagnostic_level >= 3:
-            print "   <3> Data Set 1, Label Split:", d1_label_temp
-            print "   <3> Data Set 2, Label Split:", d2_label_temp
+            print "Data Set 1, Label Split:", d1_label_temp
+            print "Data Set 2, Label Split:", d2_label_temp
         
         ##Find metric values.
         d1_data_values_comp = d1_data_dict[d1_label_temp[3]][d1_comp_ranges[2]:(d1_comp_ranges[3]+1)]
         d2_data_values_comp = d2_data_dict[d2_label_temp[3]][d2_comp_ranges[2]:(d2_comp_ranges[3]+1)]
         
         if diagnostic_level >= 3:
-            print "   <3> Data Set 1, data values:", d1_data_values_comp
-            print "   <3> Data Set 2, data values:", d2_data_values_comp
+            print "Data Set 1, data values:", d1_data_values_comp
+            print "Data Set 2, data values:", d2_data_values_comp
         
         # This allows the d line Quantity value to be set to 0 when either d1 or d2 data is missing.
         if comp_file_info['Quantity'] == str(0):
@@ -522,7 +580,7 @@ def extract_comp_data(comp_file_info):
                     exit()
                     #Append Rise Values to Global Scatter Data Dictionary.
                 if diagnostic_level >= 3:
-                    print "   <3> Scatter Data Labels:", combined_scatter_data_labels[0][scatter_counter]
+                    print "Scatter Data Labels:", combined_scatter_data_labels[0][scatter_counter]
                 scatter_data_dict[combined_scatter_data_labels[0][scatter_counter]] = [d1_rise_value,d2_rise_value,relative_difference]
             elif metric == 'min':
                 if diagnostic_level >= 2:
@@ -553,24 +611,24 @@ def extract_comp_data(comp_file_info):
         #Create data lists based on specified ranges
         d1_data_seconds = zip(d1_data_dict[d1_ind_axis_column_name][d1_comp_ranges[0]:(d1_comp_ranges[1]+1)], d1_data_dict[d1_label_temp[3]][d1_comp_ranges[0]:(d1_comp_ranges[1]+1)])
         if diagnostic_level >= 3:
-            print "   <3> Data Set 1, Data:", d1_data_seconds
+            print "Data Set 1, Data:", d1_data_seconds
         d2_data_seconds = zip(d2_data_dict[d2_ind_axis_column_name][d2_comp_ranges[0]:(d2_comp_ranges[1]+1)], d2_data_dict[d2_label_temp[3]][d2_comp_ranges[0]:(d2_comp_ranges[1]+1)])
         if diagnostic_level >= 3:
-            print "   <3> Data Set 2, Data:", d2_data_seconds
+            print "Data Set 2, Data:", d2_data_seconds
         
         #Scale Ind_Axis Data.
         d1_data.append([[x[0] / ind_Scale_Factor, x[1]] for x in d1_data_seconds])
         if diagnostic_level >= 3:
-            print "   <3> Scaled Data Set 1, Data:", d1_data
+            print "Scaled Data Set 1, Data:", d1_data
         d2_data.append([[x[0] / ind_Scale_Factor, x[1]] for x in d2_data_seconds])
         if diagnostic_level >= 3:
-            print "   <3> Scaled Prediction Data:", d2_data
+            print "Scaled Prediction Data:", d2_data
             
         #Need to Scale Dep_Axis Data...
         
         scatter_counter = scatter_counter + 1
         if diagnostic_level >= 3:
-            print "\n   <3> Scatter Counter:", scatter_counter, "\n"
+            print "\nScatter Counter:", scatter_counter, "\n"
     
     # Close files
     d1_file_object.close()
@@ -584,7 +642,7 @@ def comparison_plot(plot_data,d1_data,d2_data):
     # Variables for plot.
     plot_title = plot_data['Plot_Title']
     if diagnostic_level >= 3:
-        print "   <3> Plot Title:", plot_title
+        print "Plot Title:", plot_title
     ind_title = plot_data['Ind_Title']
     dep_title = plot_data['Dep_Title']   
     min_ind = float(plot_data['Min_Ind'])
@@ -606,7 +664,7 @@ def comparison_plot(plot_data,d1_data,d2_data):
     if key_pos == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br" or "nk":
         ()
         if diagnostic_level >= 3:
-            print "   <3> Key Position =", key_pos
+            print "Key Position =", key_pos
     else:
         print "The key position was not specified.\nUsing the default bottom right position."
         key_pos = "br"
@@ -615,12 +673,11 @@ def comparison_plot(plot_data,d1_data,d2_data):
     if title_position == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br":
         ()
         if diagnostic_level >= 3:
-            print "   <3> Title Position =", title_position
+            print "Title Position =", title_position
     else:
         if diagnostic_level >= 2:
             print "The Title position was not specified.\nUsing the default top left position."
         key_pos = "tl"
-
     #Begin Plotting
     # Initialize graph object
     if key_pos == "nk":
@@ -648,7 +705,7 @@ def comparison_plot(plot_data,d1_data,d2_data):
     d1PlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Black, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.06*unit.w_cm)])
     #d1PlotStyle = graph.style.symbol(symbolattrs=[attr.changelist([color.cmyk.Grey, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue])])
     d2PlotStyle = graph.style.line(lineattrs=[attr.changelist([color.cmyk.Grey, color.cmyk.Red, color.cmyk.Green, color.cmyk.Blue]), style.linestyle.solid, style.linewidth(0.03*unit.w_cm)])
-
+    
     # Specify vertical and horizontal axes (1 is horizontal; 2 is vertical)
     if Flip_Axis_Indicator == "yes":
         ind_axis_index = 2
@@ -659,7 +716,7 @@ def comparison_plot(plot_data,d1_data,d2_data):
     
     #Loop strcuture to process compound colum names in d line.
     if diagnostic_level >= 3:
-        print "   <3> Data Set 1, Data:",d1_data
+        print "Data Set 1, Data:",d1_data
     if len(d1_data) > 1 : # or len(d2_data) > 1:
         #Set plot legend key text.
         d1_key_list = eval(plot_data['d1_Key'])
@@ -684,8 +741,8 @@ def comparison_plot(plot_data,d1_data,d2_data):
         d2_key = plot_data['d2_Key']
         
         if diagnostic_level >= 3:
-            print "   <3> Data Set 1, Data to Plot:", d1_data[0]
-            print "   <3> Data Set 2, Data to Plot:", d2_data[0]
+            print "Data Set 1, Data to Plot:", d1_data[0]
+            print "Data Set 2, Data to Plot:", d2_data[0]
         
         # Plot Data Set 1, data
         g.plot(graph.data.points(d1_data[0], title=d1_key, x=ind_axis_index, y=dep_axis_index),
@@ -764,13 +821,13 @@ def scatter_plot(group_info,scatter_info,data_set):
             #Create filename from fields in input file record.
             plot_file_name = scatter_info[int(quantity_number)]['Plot_Filename']
             if diagnostic_level >= 3:
-                print "   <3> Plot File Name:", plot_file_name
+                print "Plot File Name:", plot_file_name
             
             # Determine the location for the key, alignment based on Key_Position setting.
             if key_pos == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br":
                 pass
                 if diagnostic_level >= 3:
-                    print "   <3> Key Position =", key_pos
+                    print "Key Position =", key_pos
             else:
                 if diagnostic_level >= 2:
                     print "The key position was not specified.\nUsing the default bottom right position."
@@ -780,7 +837,7 @@ def scatter_plot(group_info,scatter_info,data_set):
             if title_position == "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br":
                 ()
                 if diagnostic_level >= 3:
-                    print "   <3> Title Position =", title_position
+                    print "Title Position =", title_position
             else:
                 if diagnostic_level >= 2:
                     print "The Title position was not specified.\nUsing the default top left position."
@@ -796,7 +853,7 @@ def scatter_plot(group_info,scatter_info,data_set):
             #Plot Midline and Error bounds lines.
             errorLineCenterPoints = [[min_ind,min_dep],[max_ind,max_dep]]
             if diagnostic_level >= 3:
-                print "   <3> Error Line Center Points:", errorLineCenterPoints
+                print "Error Line Center Points:", errorLineCenterPoints
             
             if min_ind < 0:       
                 lower_bound = ((min_dep)+((min_dep)*(percent_error / 100)))
@@ -804,11 +861,11 @@ def scatter_plot(group_info,scatter_info,data_set):
                 upper_bound = ((min_dep)-((min_dep)*(percent_error/100)))
                 errorLineUpperPoints = [[min_ind,upper_bound],[max_ind,max_dep]]
                 if diagnostic_level >= 3:
-                    print "   <3> Error Line Center Points:", errorLineCenterPoints
-                    print "   <3> Lower Bound:", lower_bound
-                    print "   <3> Lower Error Line Points:", errorLineLowerPoints
-                    print "   <3> Upper Bound:", upper_bound
-                    print "   <3> Upper Error Line Points:", errorLineUpperPoints
+                    print "Error Line Center Points:", errorLineCenterPoints
+                    print "Lower Bound:", lower_bound
+                    print "Lower Error Line Points:", errorLineLowerPoints
+                    print "Upper Bound:", upper_bound
+                    print "Upper Error Line Points:", errorLineUpperPoints
                                  
             else:
                 lower_bound = max_dep - max_dep * percent_error / 100
@@ -816,11 +873,11 @@ def scatter_plot(group_info,scatter_info,data_set):
                 upper_bound = max_dep + max_dep * percent_error / 100.0
                 errorLineUpperPoints = [[min_ind,min_dep],[max_ind,upper_bound]]
                 if diagnostic_level >= 3:
-                    print "   <3> Error Line Center Points:", errorLineCenterPoints
-                    print "   <3> Lower Bound:", lower_bound
-                    print "   <3> Lower Error Line Points:", errorLineLowerPoints
-                    print "   <3> Upper Bound:", upper_bound
-                    print "   <3> Upper Error Line Points:", errorLineUpperPoints
+                    print "Error Line Center Points:", errorLineCenterPoints
+                    print "Lower Bound:", lower_bound
+                    print "Lower Error Line Points:", errorLineLowerPoints
+                    print "Upper Bound:", upper_bound
+                    print "Upper Error Line Points:", errorLineUpperPoints
             
             g.plot(graph.data.points(errorLineCenterPoints, title=None, x=1, y=2),
                     [graph.style.line([style.linewidth.Thin, style.linestyle.solid])])
@@ -845,43 +902,43 @@ def scatter_plot(group_info,scatter_info,data_set):
             grouped_data = {}
             grouped_data_list = range(len(group_quantity_data_dicts[0])+1)
             if diagnostic_level >= 3:
-                print "   <3> Grouped Data List:", grouped_data_list
+                print "Grouped Data List:", grouped_data_list
             
             if diagnostic_level >= 3:
-                print "   <3> DataSet for Quantity "+str(quantity_number)+":", data_set[quantity_number]
+                print "DataSet for Quantity "+str(quantity_number)+":", data_set[quantity_number]
             if len(data_set[quantity_number]) > 1:
                 if diagnostic_level >= 3:
-                    print "   <3> Grouped Scatter Data:", data_set[quantity_number]
+                    print "Grouped Scatter Data:", data_set[quantity_number]
                 for arr_temp in grouped_data_list:
                     grouped_data_list[arr_temp] = []
                 for data_set_item in data_set[quantity_number]:
                     if diagnostic_level >= 3:
-                        print "   <3> Data Set Item:", data_set_item
-                        print "   <3> Data for Group:"+data_set_item[0]+":", data_set_item[1]
+                        print "Data Set Item:", data_set_item
+                        print "Data for Group:"+data_set_item[0]+":", data_set_item[1]
                     grouped_data_list[int(data_set_item[0])].append(data_set_item[1])
                 if diagnostic_level >= 3:
-                    print "   <3> Grouped Data List:", grouped_data_list
+                    print "Grouped Data List:", grouped_data_list
                                 
                 group_counter = 0
                 for j in grouped_data_list:
                     if diagnostic_level >= 3:
-                        print "   <3> J =", j
+                        print "J =", j
                     if j != []:
                         if diagnostic_level >= 3:
-                            print "   <3> Group Counter:", group_counter
+                            print "Group Counter:", group_counter
                         
                         # Pull group symbol specifications from config file.
                         config_group_symbol = group_info[group_counter]["Symbol"]
                         if diagnostic_level >= 3:
-                            print "   <3> Group Symbol:", config_group_symbol
+                            print "Group Symbol:", config_group_symbol
                         group_symbol = "graph.style.symbol."+config_group_symbol
                         
                         config_group_symbol_color = group_info[group_counter]["Color"]
                         if diagnostic_level >= 3:
-                            print "   <3> Group Symbol Color:", config_group_symbol_color
+                            print "Group Symbol Color:", config_group_symbol_color
                         config_group_symbol_filled = group_info[group_counter]["Filled"]
                         if diagnostic_level >= 3:
-                            print "   <3> Group Symbol Filled:", config_group_symbol_filled
+                            print "Group Symbol Filled:", config_group_symbol_filled
                         
                         if config_group_symbol_filled == 'yes':
                             fillstyle = "deco.filled([color.cmyk."+config_group_symbol_color+"])"
@@ -894,13 +951,13 @@ def scatter_plot(group_info,scatter_info,data_set):
                         scatterpointstyle = eval(tempstyle)
                         
                         if diagnostic_level >= 3:
-                            print "   <3> Group Title:", group_info[group_counter]["Group_Title"]
+                            print "Group Title:", group_info[group_counter]["Group_Title"]
                         g.plot(graph.data.points(j, x=1, y=2, title=group_info[group_counter]["Group_Title"]), [scatterpointstyle])
                     else:
                         pass
                     group_counter = group_counter + 1
                     if diagnostic_level >= 3:
-                        print "   <3> Group Counter:", group_counter
+                        print "Group Counter:", group_counter
                     
             else:
                 if diagnostic_level >= 1:
@@ -909,7 +966,7 @@ def scatter_plot(group_info,scatter_info,data_set):
                 scatter_plot_data.append(data_set[quantity_number][0][1])
                 
             if diagnostic_level >= 3:
-                print "   <3> Grouped Data List:", grouped_data_list
+                print "Grouped Data List:", grouped_data_list
             
             # Now plot the Title text, alignment based on Title_Position setting.
             # "tl" or "tc" or "tr" or "ml" or "mc" or "mr" or "bl" or "bc" or "br"
@@ -944,7 +1001,7 @@ def scatter_plot(group_info,scatter_info,data_set):
             # Write the output
             plot_file_path = output_directory+plot_file_name
             if diagnostic_level >= 3:
-                print "   <3> Plot File Path:", plot_file_path
+                print "Plot File Path:", plot_file_path
             g.writePDFfile(plot_file_path)
             if diagnostic_level >= 2:
                 print "Scatter Plot to: \n", plot_file_path+".PDF\n"
@@ -959,11 +1016,11 @@ group_quantity_data_dicts = extract_config_data(config_file_name)
 if diagnostic_level >= 2:
     print "\nThere are "+str(len(group_quantity_data_dicts[0]))+" scatter data groups, (g lines)."
 if diagnostic_level >= 3:
-    print "   <3> Group Lines:\n", group_quantity_data_dicts[0]
+    print "Group Lines:\n", group_quantity_data_dicts[0]
 if diagnostic_level >= 2:
     print "There are "+str(len(group_quantity_data_dicts[1]))+" scatter data quantities to plot, (q lines)."
 if diagnostic_level >= 3:
-    print "   <3> Quantity Lines:\n", group_quantity_data_dicts[1]
+    print "Quantity Lines:\n", group_quantity_data_dicts[1]
 if diagnostic_level >= 2:
     print "There are "+str(len(group_quantity_data_dicts[2]))+" comparison data sets to plot, ("+data_line_char+" lines)."
 
@@ -978,15 +1035,15 @@ for data_record in group_quantity_data_dicts[2]:
     # Extract relevant portions of comparison data as defined in config file.
     comp_data_to_plot = extract_comp_data(group_quantity_data_dicts[2][data_record])
     if diagnostic_level >= 3:
-        print "   <3> Comparison Data to Plot:", comp_data_to_plot
+        print "Comparison Data to Plot:", comp_data_to_plot
 
     #Seperate d1 and d2 data lists.
     d1_plot_data = comp_data_to_plot[0]
     d2_plot_data = comp_data_to_plot[1]
 
     if diagnostic_level >= 3:
-        print "   <3> Data Set 1, Plot Data:", d1_plot_data
-        print "   <3> Data Set 2, Plot Data:", d2_plot_data
+        print "Data Set 1, Plot Data:", d1_plot_data
+        print "Data Set 2, Plot Data:", d2_plot_data
 
     # Create plot for data_record.
     if process_set == 1 or process_set == 2:
@@ -1004,8 +1061,8 @@ if process_set == 1 or process_set == 3:
     #Grouping Scatter Data by Quantity
     for scatter_plot_record in sorted(group_quantity_data_dicts[1]):
         if diagnostic_level >= 3:
-            print "   <3> Scatter Plot:", scatter_plot_record
-            print "   <3> Quantity:", group_quantity_data_dicts[1][scatter_plot_record]['Comparison_Quantities']
+            print "Scatter Plot:", scatter_plot_record
+            print "Quantity:", group_quantity_data_dicts[1][scatter_plot_record]['Comparison_Quantities']
     
         for scatter_data_key in sorted(scatter_data_dict):
             split_key = split("~",scatter_data_key)
@@ -1020,7 +1077,7 @@ if process_set == 1 or process_set == 3:
 
     # Plot Data
     if diagnostic_level >= 3:
-        print "   <3> Data to Scatter Plot:", combined_scatter_data
+        print "Data to Scatter Plot:", combined_scatter_data
     scatter_plot(group_quantity_data_dicts[0],group_quantity_data_dicts[1],combined_scatter_data)
 
 ## Write Summary Data to File.
