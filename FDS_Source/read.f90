@@ -2114,6 +2114,8 @@ SPECIES_LOOP: DO N=0,N_SPECIES
                   SS%CP(J) = CP_CO*1000._EB
                CASE('HYDROGEN')
                   SS%CP(J) = CP_H2*1000._EB
+               CASE('ARGON')
+                  SS%CP(J) = 519.75_EB
             END SELECT
             SS%H_G(J) = SS%H_G(J-1) + SS%CP(J)*10._EB  ! J/kg
             SS%RCP(J) = 1._EB/SS%CP(J)
