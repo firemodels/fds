@@ -2358,6 +2358,11 @@ SELECT CASE(GAS_NAME)
       MW=28._EB
       ABSORBING = .TRUE.
       FORMULA='C2H2'
+   CASE('ARGON')
+      SIGMA=3.42_EB
+      EPSOK= 124.0_EB
+      MW= 40._EB
+      FORMULA='Ar'
    CASE('HELIUM')          
       SIGMA=2.551_EB 
       EPSOK= 10.22_EB 
@@ -6140,7 +6145,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
       ELSE
          N      = N-1
          N_DEVC = N_DEVC-1
-         WRITE(MESSAGE,'(A,I2,A)') 'WARNING: DEVC ',NN,', is not within any mesh.'  
+         WRITE(MESSAGE,'(A,I3,A)') 'WARNING: DEVC ',NN,', is not within any mesh.'  
          IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          CYCLE READ_DEVC_LOOP
       ENDIF
