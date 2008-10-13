@@ -6140,6 +6140,8 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
       ELSE
          N      = N-1
          N_DEVC = N_DEVC-1
+         WRITE(MESSAGE,'(A,I2,A)') 'WARNING: DEVC ',NN,', is not within any mesh.'  
+         IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          CYCLE READ_DEVC_LOOP
       ENDIF
    ENDIF
