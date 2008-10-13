@@ -1204,11 +1204,14 @@ explicitly solved, but its source terms are included in the expression for the f
 
 The stratification of the atmosphere is derived from the relation
 \be \frac{d \bp_0}{dz} = - \rho_0(z) \, g  \ee
-where $\rho_0$ is the background
-density. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$
-\be \bp_0(z) = p_\infty \; \exp \; \left( -\int^z_{z_\infty} \frac{\bW \, g}{\R \, T_0} dz \right)  \label{pstrat} \ee
-where the subscript infinity generally refers to the ground. Usually, the temperature stratification of the atmosphere is
-specified by the user, in which case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref{state}), respectively.
+where $\rho_0$ is the background density and $g=9.8$ m/s$^2$. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$,
+\be \bp_0(z) = p_\infty \; \exp \; \left( -\int^z_{z_\infty} \frac{\bW \, g}{\R \, T_0[z]} dz \right)  \label{pstrat} \ee
+where the subscript infinity generally refers to the ground. A linear temperature stratification of the atmosphere may
+specified by the user such that $T_0(z) = T_\infty + \Gamma z$ where $\Gamma$ is the ``lapse rate'' (e.g., $\Gamma = -0.0098$ K/m).  In this case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref{state}), respectively.  It can then be shown that the pressure stratification becomes
+\be
+   \bp_0(z) = p_\infty\left( \frac{T_0[z]}{T_\infty} \right)^{\frac{\overline{W}g}{\R \Gamma}} \,\mbox{.}
+   \label{pstrat}
+\ee
 
 
 \subsection{Combination of the Mass and Energy Equations via the Divergence}
