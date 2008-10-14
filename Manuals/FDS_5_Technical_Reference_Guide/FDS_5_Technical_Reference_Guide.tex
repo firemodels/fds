@@ -891,20 +891,19 @@ regularly published in peer-reviewed journals and conference proceedings. In add
 is used world-wide by fire protection engineering firms who review the technical details of
 the model related to their particular application. Some of these firms also publish in the
 open literature reports documenting internal efforts to validate the model for a particular
-use. Many of these studies are referenced in the FDS Validation Guide~\cite{FDS_VV_Guide_5}.
+use. Many of these studies are referenced in Volume 3 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 
 
 \subsection{Survey of the Relevant Fire and Combustion Literature}
 
 \label{Relevantdocs}
 
-FDS has three separate manuals --
-the FDS Technical Reference Guide, the FDS Validation Guide~\cite{FDS_VV_Guide_5},
-and the FDS User's Guide~\cite{FDS_Users_Guide_5}.
-Smokeview has its own User's Guide~\cite{Smokeview_Users_Guide_5}. The User Guides only describe the mechanics of using the
+FDS has two separate manuals --
+the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}
+and the FDS User's Guide~\cite{FDS_Users_Guide_5}. The Technical Reference Guide is broken into three volumes: (1)~Mathematical Model, (2)~Verification, and (3)~Experimental Validation.
+Smokeview has its own User's Guide~\cite{Smokeview_Users_Guide_5}. The FDS and Smokeview User Guides only describe the mechanics of using the
 computer programs. The
-Technical Reference Guide provides the theory, algorithm details, and verification work. The Validation Guide is new with FDS~5.
-It describes validation studies of FDS, both those performed by NIST and by others.
+Technical Reference Guides provides the theory, algorithm details, and verification and validation work. 
 
 There are numerous sources that describe various parts of the
 model. The basic set of equations solved in FDS was formulated by Rehm
@@ -987,8 +986,8 @@ and scope. He/she does not need to be a technical expert in fire or combustion.
 Recently, the US Nuclear Regulatory Commission (US NRC) published a seven-volume report on its own verification and validation
 study of five different fire models used for nuclear power plant applications~\cite{NUREG_1824}. Two of the models are essentially a set
 of empirically-based correlations in the form of engineering ``spread sheets.'' Two of the models are classic two-zone fire models, one of which
-is the NIST developed CFAST. FDS is the sole CFD model in the study. More on the study and its results can be found in the
-FDS Validation Guide~\cite{FDS_VV_Guide_5}.
+is the NIST developed CFAST. FDS is the sole CFD model in the study. More on the study and its results can be found in Volume~3 of the
+FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 
 Besides formal internal and peer review, FDS is subjected to continuous scrutiny because
 it is available free of charge to the general public and is used
@@ -1206,10 +1205,13 @@ The stratification of the atmosphere is derived from the relation
 \be \frac{d \bp_0}{dz} = - \rho_0(z) \, g  \ee
 where $\rho_0$ is the background density and $g=9.8$ m/s$^2$. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$,
 \be \bp_0(z) = p_\infty \; \exp \; \left( -\int^z_{z_\infty} \frac{\bW \, g}{\R \, T_0[z]} dz \right)  \label{pstrat} \ee
-where the subscript infinity generally refers to the ground. A linear temperature stratification of the atmosphere may
-specified by the user such that $T_0(z) = T_\infty + \Gamma z$ where $\Gamma$ is the ``lapse rate'' (e.g., $\Gamma = -0.0098$ K/m).  In this case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref{state}), respectively.  It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
+where the subscript infinity generally refers to the ground. A linear temperature stratification of the atmosphere may be
+specified by the user such that $T_0(z) = T_\infty + \Gamma z$ where $T_\infty$ is the temperature at the ground and 
+$\Gamma$ is the lapse rate (e.g., $\Gamma = -0.0098$~K/m is the {\em adiabatic lapse rate}).
+In this case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref{state}), respectively.  
+It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 \be
-   \bp_0(z) = p_\infty\left( \frac{T_0[z]}{T_\infty} \right)^{\frac{\overline{W}g}{\R \Gamma}} \,\mbox{.}
+   \bp_0(z) = p_\infty  \left( \frac{T_0(z)}{T_\infty} \right)^{\frac{\overline{W}g}{\R \Gamma}} 
    \label{pstrat}
 \ee
 
@@ -1394,7 +1396,7 @@ of precision in most large-scale fire test data makes it difficult to
 assess the relative accuracy of each model.
 The Smagorinsky model with constant $C_s$ produces satisfactory results
 for most large-scale applications where boundary layers are not
-well-resolved~\cite{FDS_VV_Guide_5}. In fact, experience to date using the simple form of LES described above
+well-resolved (see Volume 3, {\em Experimental Validation}). In fact, experience to date using the simple form of LES described above
 has shown that the best results are obtained when the Smagorinsky constant $C_s$ is set
 as low as possible to maintain numerical stability. In other words, the most realistic
 flow simulations are obtained when resolvable eddies are not ``damped'' by excessive
@@ -4592,7 +4594,7 @@ composition of the combustion products as:
    \overline{c_p} = \frac{1}{(T_f-T_m)} \, \sum_\alpha \int_{T_m}^{T_f} c_{p,\alpha} (T) \, dT
 \ee
 To simplify the analysis, the combustion products are assumed to have an average specific heat
-of 1.1~kJ/kg/K over the temperature range of interest, a value similar to that of air, the primary
+of 1.2~kJ/kg/K over the temperature range of interest, a value similar to that of nitrogen, the primary
 component of the products.
 The relationship between the oxygen mass fraction within the control volume and the adiabatic
 temperature rise of the control volume is evaluated by equating Eqs.~(\ref{bbb}) and (\ref{eee}):
@@ -4606,23 +4608,19 @@ Protection Association, Quincy, MA, 2003.} then the relationship
 between the limiting oxygen mass fraction and the bulk temperature of a control volume is given
 by:
 \be
-   Y_{\OTWO,lim} = \frac{ \overline{c_p} (T_{f,lim}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.1 \, (1700-T_m) }{ 13100}  \label{extinction_model}
+   Y_{\OTWO,lim} = \frac{ \overline{c_p} (T_{f,lim}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.2 \, (1700-T_m) }{ 13100}  \label{extinction_model}
 \ee
-The relationship represented by Eq.~(\ref{extinction_model}) is shown in Fig.~\ref{plotsupp}.
+The relationship represented by Eq.~(\ref{extinction_model}) is shown {\em qualitatively} in Fig.~\ref{plotsupp}.
 For a control volume at a temperature of 300~K, i.e., near room temperature, the limiting oxygen
-mass fraction would evaluate to $Y_{\OTWO,lim}=0.118$.  This value is consistent with the measurements
+mass fraction would evaluate to $Y_{\OTWO,lim}=0.128$.  This value is consistent with the measurements
 of Morehart, Zukoski and Kubota,\footnote{Morehart, J., Zukoski, E., and Kubota, T., ``Characteristics of Large Diffusion Flames
 Burning in a Vitiated Atmosphere,'' {\em Third International Symposium on Fire Safety
-Science}, Elsevier Science Publishers, pp.~575-583, 1991.} although it is about 10 percent lower than their measured
-values and the limiting oxygen index values determined by Simmons and Wolfhard.\footnote{R.F.~Simmons and H.G.~Wolfhard, {\em Combustion and Flame}, Vol.~1, p.~155, 1957.}
-This difference would tend to be conservative in terms of indicating flammability of gas mixtures at
-oxygen concentrations lower than might occur in practice.
-Comparisons with additional
-experimental data are needed to further validate the concept.  Some improvement might result
-from a more exact analysis of the average specific heat of the combustion products or from the
-use of a slightly higher critical adiabatic flame temperature in the range of 1700~K to 1800~K,
-as suggested by the limiting oxygen index data of Simmons and Wolfhard that is
-summarized in the SFPE Handbook Chapter of Beyler.
+Science}, Elsevier Science Publishers, pp.~575-583, 1991.} who measured the oxygen concentration at extinction of flames by dilution of air
+with combustion products. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results
+are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen
+concentrations at extinction ranging from 12~\% to 15~\%. The default value in FDS is 15~\%. 
+
+
 
 
 
