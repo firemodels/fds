@@ -6998,7 +6998,7 @@ be output to a file listed at the end of the session.
 
 
 \clearpage
-\section{Summary of Output Quantities}
+\section{Summary of Frequently-Used Output Quantities}
 \label{info:outputquantities} \index{Output!Summary of Quantities}
 
 Table~\ref{tab:output}, spread over the following pages, summarizes the various Output Quantities.
@@ -7053,7 +7053,7 @@ remember that all output quantity names ought to be in single quotes.
 
 \begin{table}[ht!]
 \begin{center}
-\caption{Summary of all Output Quantities}
+\caption{Summary of frequently used output quantities}
 \label{tab:output}
 \begin{tabular}{|l|c|c|c|}
 \hline
@@ -7113,6 +7113,7 @@ $^{**}$                \> Quantity requires the specification of a particle name
 \hline
 Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
 {\ct MASS FRACTION}$^*$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
+{\ct MASS LOSS}                                 & Integrated mass loss at surface               & kg/m$^2$       & B,D          \\ \hline
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct MPUA}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
 {\ct MPUV}$^{**}$                               & See Section~\ref{info:part_output}            & kg/m$^3$       & D,P,S        \\ \hline
@@ -7156,6 +7157,47 @@ $^{**}$                \> Quantity requires the specification of a particle name
 \end{tabbing}
 
 
+\clearpage
+\section{Summary of Infrequently-Used Output Quantities}
+\label{info:oddoutputquantities} 
+
+Table~\ref{tab:oddoutput} below lists some less often used output quantities. These are mainly used for diagnostic purposes. Explanations for most can
+be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
+
+
+\begin{table}[ht!]
+\begin{center}
+\caption{Summary of infrequently used output quantities}
+\label{tab:oddoutput}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Output {\ct QUANTITY}                           & Symbol                                            & Units          & File Type    \\ \hline \hline
+{\ct ADD}                                       & Average Droplet Density                           & kg/m$^3$       & D,I,P,S      \\ \hline
+{\ct ADT}                                       & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
+%{\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
+{\ct DROPLET PHASE}                             & Orientation of droplet                            &                & PA           \\ \hline
+{\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
+{\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
+{\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
+{\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & kW/m$^2$/K     & B,D          \\ \hline
+{\ct HP}                                        & $\cal H'$ (pressure correction)                   & (m/s)$^2$      & D,I,P,S      \\ \hline
+{\ct HRRPUL}                                    & $\int \dq''' \, dx \, dy$                         & kW/m           & D            \\ \hline
+{\ct INTEGRATED INTENSITY}                      & $U=\int I \, d\bs$                                & kW/m$^2$       & D,I,P,S      \\ \hline
+{\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
+%{\ct LEAKAGE}                                   & Volume flow due to leaks                          & m$^3$/s        & D            \\ \hline
+{\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
+%{\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
+{\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
+{\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
+{\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
+{\ct STRAIN RATE Z}                             & $\partial v/\partial x + \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
+{\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
+{\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
+{\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
+{\ct WATER RADIATION LOSS}                      & $\nabla \cdot \bq_r''$ due to water droplets      & kW/m$^3$       & D,I,P,S      \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
 
 \chapter{Alphabetical List of Input Parameters}
