@@ -3798,12 +3798,12 @@ Contains
 
           i22 = 0
           i_endless_loop = 0
+          group_X_sum = 0
+          group_Y_sum = 0
           GROUP_SIZE_LOOP: Do 
              ! i22: Counter, humans on this group (group index i33)
              i22 = i22 + 1
              If (i22 > group_size) Exit GROUP_SIZE_LOOP
-             group_X_sum = 0
-             group_Y_sum = 0
              i11 = i11 + 1
 
              If (i22 == 1) Then
@@ -3848,7 +3848,7 @@ Contains
                    simoDY = Cos(2.0_EB*Pi*rn)
                    G_mean = (2.0_EB/3.0_EB)*Sqrt(group_size/(Pi*GROUP_DENS))
                    G_sd   = G_mean  ! units (m) std.dev.
-                   G_high = Max(3.0_EB,3.0_EB*GROUP_DENS)* G_mean ! units (m) cut-off
+                   G_high = Max(3.0_EB,3.0_EB/GROUP_DENS)* G_mean ! units (m) cut-off
                    G_low  = 0.25_EB      ! units (m) cut-off
                    GTrunFlag=0
                    rn = GaussTrun(G_mean,G_sd,G_low,G_high)
@@ -3980,7 +3980,7 @@ Contains
                       Y11 = HR%Y
 
                       PP_see_group = See_each_other(nm, x11, y11, x1_old, y1_old)
-
+                      
                    Else
                       PP_see_group = .True.
                    End If
@@ -4085,6 +4085,7 @@ Contains
                       i33 = i33 - 1  ! group index
                       i11 = i11 - group_size ! human index (evac-line)
                       N_HUMANS = N_HUMANS - group_size ! total # of humans
+                      ILABEL_last = ILABEL_last - group_size ! labels of humans
                       Cycle GROUP_SIZE_LOOP
                    End If
                 End Do
@@ -5239,7 +5240,7 @@ Contains
          max_fed, L2_min, L2_tmp, Speed, Tpre, ave_K
     Logical PP_see_each, PP_see_door
     Logical L_eff_read, L_eff_save, L_Dead
-    Real(EB) :: cos_x, cos_y, speed_xm, speed_xp, speed_ym, speed_yp, hr_z, hr_a, hr_b, hr_tau
+    Real(EB) :: cos_x, cos_y, speed_xm, speed_xp, speed_ym, speed_yp, hr_z, hr_a, hr_b, hr_tau, hr_tau_iner
     !
     Real(EB) rn
     Real(EB) GaMe, GaTh, GaCM
@@ -5943,14 +5944,15 @@ Contains
              End If
              HR%Tpre = Huge(HR%Tpre)
              HR%Tdet = Huge(HR%Tdet)
-             HR%Tau  = HR%Tau
-             HR%Mass = HR%Mass
+!!$             HR%Tau  = HR%Tau
+!!$             HR%Mass = HR%Mass
              HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           Else
              fed_max_alive = Max(fed_max_alive,HR%IntDose)
           End If
           fed_max = Max(fed_max,HR%IntDose)
           hr_tau = HR%Tau
+          hr_tau_iner = HR%Tau_Iner
           !
           ! Where is the person
           !
@@ -6110,10 +6112,6 @@ Contains
              If (ESS%Y1 > HR%Y) Cycle SS_Loop1
              If (ESS%Y2 < HR%Y) Cycle SS_Loop1
              ! Ok, human _is_ within ESS
-             If (.Not.L_Dead .And. ESS%Use_v0) Then
-                UBAR = ESS%UBAR0
-                VBAR = ESS%VBAR0
-             End If
 
              cos_x = ESS%cos_x
              cos_y = ESS%cos_y
@@ -6254,11 +6252,11 @@ Contains
              ! J(dw/dt) = (J/t_iner)*( ((angle-angle_0/pi))w_0 - w )
              If (Abs(angle-HR%angle) <= Pi ) Then
                 ! zero is not crossed.
-                Omega_new = Omega_new + 0.5_EB*(DTSP/HR%tau_iner)* &
+                Omega_new = Omega_new + 0.5_EB*(DTSP/HR_tau_iner)* &
                      ( (angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
              Else
                 ! zero is crossed
-                Omega_new = Omega_new + 0.5_EB*(DTSP/HR%tau_iner)* &
+                Omega_new = Omega_new + 0.5_EB*(DTSP/HR_tau_iner)* &
                      ( (2.0_EB*Pi-Abs(angle-HR%angle))*Sign(1.0_EB , HR%angle-angle)* &
                      (Omega_0/Pi) - HR%Omega )
              End If
@@ -6266,7 +6264,7 @@ Contains
              U_new = U_new + 0.5_EB*(DTSP/hr_tau)* (- HR%U)
              V_new = V_new + 0.5_EB*(DTSP/hr_tau)* (- HR%V)
              ! Slow rotation down if no direction available, i.e., target Omega_0 is zero.
-             Omega_new = Omega_new + 0.5_EB*(DTSP/HR%tau_iner)*(-HR%Omega)
+             Omega_new = Omega_new + 0.5_EB*(DTSP/HR_tau_iner)*(-HR%Omega)
              HR%UBAR = 0.0_EB
              HR%VBAR = 0.0_EB
           End If
@@ -6620,11 +6618,12 @@ Contains
              End If
              HR%Tdet = Huge(HR%Tdet)
              HR%Tpre = Huge(HR%Tpre)
-             HR%Tau  = HR%Tau
-             HR%Mass = HR%Mass
+!!$             HR%Tau  = HR%Tau
+!!$             HR%Mass = HR%Mass
              HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           End If
           hr_tau = HR%Tau
+          hr_tau_iner = HR%Tau_Iner
           !
           ! Psychological force: cut-off when acceleration below 0.0001 m/s**2
           P2P_DIST_MAX = HR%B*Log(HR%A/0.0001_EB)
@@ -6652,7 +6651,6 @@ Contains
           X1 = HR%X 
           Y1 = HR%Y 
           HR%W = 0.0_EB
-
 
           !
           ! ========================================================
@@ -6797,10 +6795,6 @@ Contains
                   (ESS%X1 <= HR%X .And. ESS%X2 >= HR%X) .And. &
                   (ESS%Y1 <= HR%Y .And. ESS%Y2 >= HR%Y) ) Then
 
-                If (.Not.L_Dead .And. ESS%Use_v0) Then
-                   UBAR = ESS%UBAR0
-                   VBAR = ESS%VBAR0
-                End If
 
                 cos_x = ESS%cos_x
                 cos_y = ESS%cos_y
@@ -6899,11 +6893,24 @@ Contains
              If (.Not. L_Dead) Then
                 Fc_x = 0.0_EB
                 Fc_y = 0.0_EB
+                ! Use the closest circles to calculate the psychological force
                 Do iii = 1, 3
                    Do jjj = 4, 6
                       tim_dist = Sqrt((x_tmp(iii)-x_tmp(jjj))**2 + &
                            (y_tmp(iii)-y_tmp(jjj))**2)
-                      d_humans = Min( tim_dist-(r_tmp(iii)+r_tmp(jjj)) , d_humans )
+                      ! d_humans = Min( tim_dist-(r_tmp(iii)+r_tmp(jjj)) , d_humans )
+
+                      ! Next is |vector1|*|vector2|
+                      evel = Sqrt((x_tmp(jjj)-x_tmp(iii))**2+(y_tmp(jjj)-y_tmp(iii))**2)* &
+                           Sqrt(u_tmp(iii)**2+v_tmp(iii)**2)
+                      If (evel > 0.0_EB) evel = ((x_tmp(jjj)-x_tmp(iii))*u_tmp(iii) + &
+                           (y_tmp(jjj)-y_tmp(iii))*v_tmp(iii)) / evel   ! cos theta (scal_prod/(lenght1*length2)
+                      If (evel > 0.01_EB) Then
+                         d_humans = Min( (tim_dist-(r_tmp(iii)+r_tmp(jjj))) /evel, d_humans)
+                      Else
+                         d_humans = Min( (tim_dist-(r_tmp(iii)+r_tmp(jjj))) /0.01_EB , d_humans)
+                      End If
+
                       Fc_x1 = (x_tmp(iii)-x_tmp(jjj)) * &
                            hr_a*CosPhiFac*Exp( -(tim_dist- &
                            ( r_tmp(iii)+r_tmp(jjj) ))/hr_b )/tim_dist 
@@ -6920,6 +6927,8 @@ Contains
                 P2P_V = P2P_V + Fc_y
                 Social_F = Social_F + Sqrt(Fc_x**2 + Fc_y**2)
                 Tc_z = 0.0_EB
+                ! Calculate the torque due to the social force.
+                ! Use the closest circles.
                 Do jjj = 4, 6
                    ! First the right shoulder
                    tim_dist = Sqrt( (x_tmp(jjj)-x_tmp(1))**2 + (y_tmp(jjj)-y_tmp(1))**2 )
@@ -6966,7 +6975,19 @@ Contains
                    Do jjj = 4, 6
                       tim_dist = Sqrt((x_tmp(iii)-x_tmp(jjj))**2 + &
                            (y_tmp(iii)-y_tmp(jjj))**2)
-                      d_humans = Min( tim_dist-(r_tmp(iii)+r_tmp(jjj)) , d_humans )
+                      ! d_humans = Min( tim_dist-(r_tmp(iii)+r_tmp(jjj)) , d_humans )
+
+                      ! Next is |vector1|*|vector2|
+                      evel = Sqrt((x_tmp(jjj)-x_tmp(iii))**2+(y_tmp(jjj)-y_tmp(iii))**2)* &
+                           Sqrt(u_tmp(iii)**2+v_tmp(iii)**2)
+                      If (evel > 0.0_EB) evel = ((x_tmp(jjj)-x_tmp(iii))*u_tmp(iii) + &
+                           (y_tmp(jjj)-y_tmp(iii))*v_tmp(iii)) / evel   ! cos theta (scal_prod/(lenght1*length2)
+                      If (evel > 0.01_EB) Then
+                         d_humans = Min( (tim_dist-(r_tmp(iii)+r_tmp(jjj))) /evel, d_humans)
+                      Else
+                         d_humans = Min( (tim_dist-(r_tmp(iii)+r_tmp(jjj))) /0.01_EB , d_humans)
+                      End If
+
                       If (tim_dist <= r_tmp(iii)+r_tmp(jjj) ) Then
                          ! Circles are touching each others
                          Fc_x =(x_tmp(iii)-x_tmp(jjj)) * &
@@ -7204,6 +7225,7 @@ Contains
           HR%F_Y = P2P_V
           HR%SumForces = Contact_F ! 21.9.2006 by T.K.
           HR%SumForces2 = Social_F + Contact_F
+
           HR%Torque = P2P_Torque
           !
 
@@ -7348,16 +7370,16 @@ Contains
              ! J(dw/dt) = (J/t_iner)*( ((angle-angle_0)/pi)w_0 - w )
              If (Abs(angle-HR%angle) <= Pi ) Then
                 ! zero is not crossed.
-                Omega_new = Omega_new + 0.5_EB*(DTSP/HR%tau_iner)* &
+                Omega_new = Omega_new + 0.5_EB*(DTSP/HR_tau_iner)* &
                      ( (angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
-                P2P_Torque = P2P_Torque + (HR%M_iner/HR%tau_iner)* &
+                P2P_Torque = P2P_Torque + (HR%M_iner/HR_tau_iner)* &
                      ( (angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
              Else
                 ! zero is crossed
-                Omega_new = Omega_new + 0.5_EB*(DTSP/HR%Tau_iner)* &
+                Omega_new = Omega_new + 0.5_EB*(DTSP/HR_Tau_iner)* &
                      ( (2.0_EB*Pi-Abs(angle-HR%angle))*Sign(1.0_EB , HR%angle-angle)* &
                      (Omega_0/Pi) - HR%Omega )
-                P2P_Torque = P2P_Torque + (HR%M_iner/HR%Tau_iner)* &
+                P2P_Torque = P2P_Torque + (HR%M_iner/HR_Tau_iner)* &
                      ( (2.0_EB*Pi-Abs(angle-HR%angle))*Sign(1.0_EB , HR%angle-angle)* &
                      (Omega_0/Pi) - HR%Omega )
              End If
@@ -7366,7 +7388,7 @@ Contains
              HR%VBAR = 0.0_EB
              U_new = U_new / fac_tim
              V_new = V_new / fac_tim
-             Omega_new = Omega_new + 0.5_EB*(DTSP/HR%Tau_iner)*(-HR%Omega)
+             Omega_new = Omega_new + 0.5_EB*(DTSP/HR_Tau_iner)*(-HR%Omega)
           End If
 
           ! ========================================================
@@ -7388,13 +7410,15 @@ Contains
           HR%V = V_new
           HR%Omega = Omega_new
 
-          d_humans = Max(d_humans,0.0001_EB)
-          d_walls  = Max(d_walls, 0.0001_EB)
-          d_humans_min = Min(d_humans_min,d_humans)
-          d_walls_min  = Min(d_walls_min, d_walls)
+          d_humans = Max(d_humans,0.0005_EB)        ! this agent
+          !d_humans = Max(d_humans,0.0005_EB)        ! this agent
+          d_walls  = Max(d_walls, 0.00025_EB)       ! this agent
+          d_humans_min = Min(d_humans_min,d_humans) ! among all agents
+          d_walls_min  = Min(d_walls_min, d_walls)  ! among all agents
 
           If ( T > T_BEGIN ) Then
-             ! Time step, do not move too close to other humans or 0.5*grid spacing
+             ! Time step, do not move too close to other agents or 0.5*grid spacing
+             ! Delta_min is minimum of dx and dy for the mesh.
              dt_Loop: Do
                 u_tmp(2) = HR%U + 0.5_EB*DTSP_new*P2P_U/HR%Mass
                 v_tmp(2) = HR%V + 0.5_EB*DTSP_new*P2P_V/HR%Mass
@@ -7405,18 +7429,20 @@ Contains
                 v_tmp(3) = v_tmp(2) - Sin(HR%angle)*Omega_new*HR%d_shoulder
                 If ( Max(u_tmp(1)**2+v_tmp(1)**2, u_tmp(2)**2+v_tmp(2)**2, &
                      u_tmp(3)**2+v_tmp(3)**2)*DTSP_new**2 > &
-                     (Min(0.2_EB*d_humans, 0.2_EB*d_walls, 0.5_EB*Delta_min))**2 ) Then
+                     (Min(0.2_EB*d_humans, 0.5_EB*d_walls, 0.5_EB*Delta_min))**2 ) Then
                    DTSP_new = DTSP_new*0.8_EB
                    Cycle dt_Loop
                 End If
                 Exit dt_Loop
              End Do dt_Loop
 
-             If (Social_F + Contact_F > 100.0_EB) Then
-                EVAC_DT_MIN2 = Max( EVAC_DT_MIN, EVAC_DT_MAX*100.0_EB/(Social_F+Contact_F) )
-             End If
-             DTSP_new = Max(DTSP_new, EVAC_DT_MIN2)
-
+!!$             If (Social_F + Contact_F > 100.0_EB) Then
+!!$                ! If Pressure, i.e., Social_F + Contact_F, = 100 ==> EVAC_DT_MAX
+!!$                EVAC_DT_MIN2 = Max( EVAC_DT_MIN, EVAC_DT_MAX*100.0_EB/(Social_F+Contact_F) )
+!!$             End If
+!!$             DTSP_new = Max(DTSP_new, EVAC_DT_MIN2)
+             DTSP_new = Max(DTSP_new, EVAC_DT_MIN)
+             DTSP_new = Min(DTSP_new, EVAC_DT_MAX)
           Else
              HR%U     = 0.0_EB
              HR%V     = 0.0_EB
@@ -9184,7 +9210,7 @@ Contains
       Integer, Intent(Out) :: istat
       !
       ! Local variables
-      Real(EB) :: dist, CosPhiFac, u, v, Fc_x, Fc_y, FricFac, k_fric
+      Real(EB) :: dist, CosPhiFac, u, v, Fc_x, Fc_y, FricFac, k_fric, evel
       Integer :: iii
 
       istat = 0
@@ -9215,7 +9241,19 @@ Contains
 
       Do iii = 1, 3
          dist = Sqrt( (y11-y_tmp(iii))**2 + (x11-x_tmp(iii))**2 )
-         d_walls = Min(dist-r_tmp(iii),d_walls)
+
+         ! Next is |vector1|*|vector2|
+         evel = Sqrt((x11-x_tmp(iii))**2+(y11-y_tmp(iii))**2)*Sqrt(u_tmp(iii)**2+v_tmp(iii)**2)
+         If (evel > 0.0_EB) evel = ((x11-x_tmp(iii))*u_tmp(iii) + &
+              (y11-y_tmp(iii))*v_tmp(iii)) / evel   ! cos theta (scal_prod/(lenght1*length2)
+         If (evel > 0.01_EB) Then
+            d_walls = Min( (dist-r_tmp(iii))/evel, d_walls)
+         Else
+            d_walls = Min( (dist-r_tmp(iii))/0.01_EB, d_walls)
+         End If
+
+         ! d_walls = Min(dist-r_tmp(iii),d_walls)
+
          If (dist <= r_tmp(iii)) Then
             Fc_x = (x_tmp(iii)-x11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-dist)/dist
             Fc_y = (y_tmp(iii)-y11)* 2.0_EB*HR%C_Young*(r_tmp(iii)-dist)/dist
@@ -9445,13 +9483,26 @@ Contains
       Real(EB), Intent(InOut) :: P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls
       !
       Integer :: is, idir
-      Real(EB) :: Fc_y, Fc_x, dist
+      Real(EB) :: Fc_y, Fc_x, dist, evel
 
       ! -x direction
       is   = -1
       idir =  1
       dist = Abs(d_xy(idir) - x_tmp)
-      d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+
+      If (FoundWall_xy(idir)) Then
+         ! Next is |vector1|*|vector2|
+         evel = Abs(d_xy(idir)-x_tmp)*Sqrt(u_tmp**2+v_tmp**2)
+         ! Next is cos(theta) = (scal_prod/(lenght1*length2)
+         If (evel > 0.0_EB) evel = ((d_xy(idir)-x_tmp)*u_tmp) / evel
+         If (evel > 0.01_EB) Then
+            d_walls = Min( (dist-r_tmp)/evel, d_walls)
+         Else
+            d_walls = Min( (dist-r_tmp)/0.01_EB, d_walls)
+         End If
+         ! d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+      End If
+
       If (dist-r_tmp <= 0.0_EB .And. FoundWall_xy(idir)) Then
          Fc_x = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
          Fc_y = 0.0_EB
@@ -9471,7 +9522,20 @@ Contains
       is   = +1
       idir =  2
       dist = Abs(d_xy(idir) - x_tmp)
-      d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+
+      If (FoundWall_xy(idir)) Then
+         ! Next is |vector1|*|vector2|
+         evel = Abs(d_xy(idir)-x_tmp)*Sqrt(u_tmp**2+v_tmp**2)
+         ! Next is cos(theta) = (scal_prod/(lenght1*length2)
+         If (evel > 0.0_EB) evel = ((d_xy(idir)-x_tmp)*u_tmp) / evel
+         If (evel > 0.01_EB) Then
+            d_walls = Min( (dist-r_tmp)/evel, d_walls)
+         Else
+            d_walls = Min( (dist-r_tmp)/0.01_EB, d_walls)
+         End If
+         ! d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+      End If
+
       If (dist-r_tmp <= 0.0_EB .And. FoundWall_xy(idir)) Then
          Fc_x = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
          Fc_y = 0.0_EB
@@ -9491,7 +9555,20 @@ Contains
       is   = -1
       idir =  3
       dist = Abs(d_xy(idir) - y_tmp)
-      d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+
+      If (FoundWall_xy(idir)) Then
+         ! Next is |vector1|*|vector2|
+         evel = Abs(d_xy(idir)-y_tmp)*Sqrt(u_tmp**2+v_tmp**2)
+         ! Next is cos(theta) = (scal_prod/(lenght1*length2)
+         If (evel > 0.0_EB) evel = ((d_xy(idir)-y_tmp)*v_tmp) / evel
+         If (evel > 0.01_EB) Then
+            d_walls = Min( (dist-r_tmp)/evel, d_walls)
+         Else
+            d_walls = Min( (dist-r_tmp)/0.01_EB, d_walls)
+         End If
+         !d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+      End If
+
       If (dist-r_tmp <= 0.0_EB .And. FoundWall_xy(idir)) Then
          Fc_y = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
          Fc_x = 0.0_EB
@@ -9511,7 +9588,20 @@ Contains
       is   = +1
       idir =  4
       dist = Abs(d_xy(idir) - y_tmp)
-      d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+
+      If (FoundWall_xy(idir)) Then
+         ! Next is |vector1|*|vector2|
+         evel = Abs(d_xy(idir)-y_tmp)*Sqrt(u_tmp**2+v_tmp**2)
+         ! Next is cos(theta) = (scal_prod/(lenght1*length2)
+         If (evel > 0.0_EB) evel = ((d_xy(idir)-y_tmp)*v_tmp) / evel
+         If (evel > 0.01_EB) Then
+            d_walls = Min( (dist-r_tmp)/evel, d_walls)
+         Else
+            d_walls = Min( (dist-r_tmp)/0.01_EB, d_walls)
+         End If
+         !d_walls = Min(dist-r_tmp,d_walls) ! wall - circle centre distance
+      End If
+
       If (dist-r_tmp <= 0.0_EB .And. FoundWall_xy(idir)) Then
          Fc_y = -is*2.0_EB*HR%C_Young*(r_tmp-dist)
          Fc_x = 0.0_EB
