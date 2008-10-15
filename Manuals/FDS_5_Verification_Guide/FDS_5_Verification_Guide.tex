@@ -972,18 +972,46 @@ The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $
 \label{emissivity}
 
 For thermally thick surfaces, the surface emissivity is computed as a
-mass-weighted sum of the individual material emissivities 
+mass-weighted sum of the individual material emissivities
 in the first condensed phase grid cell. In the verification test, the
 initial material, having emissivity of 1.0, is converted to another
 material, having emissivity of 0.0, at a constant rate of 0.1~s$^{-1}$. As a
 result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s.
 
-
-
 \begin{center}
 \includegraphics[width=3.5in]{FIGURES/emissivity}
 \end{center}
 
+
+\clearpage
+
+\section{Enthalpy of solid materials (\texorpdfstring{{\bf enthalpy}}{enthalpy})}
+\label{enthalpy}
+
+Consider a thin plate of conductive material that is exposed on one side to an elevated temperature heat source and exposed on the
+other to an ambient temperature void. In the thermally-thin limit, the temperature of the slab is governed by the following equation
+\be
+   \frac{dT_s}{dt} = \frac{\dq_{\hbox{\tiny front}}'' + \dq_{\hbox{\tiny back}}''}{c_s \, \rho_s \, \delta} 
+\ee
+In this example, the initial exposure to the front side of the slab is
+3~kW/m$^2$. The original material (call it A) undergoes a reaction to form material B.  The reaction rate is constant, 0.2~s$^{-1}$, which in this
+case means that material A disappears in exactly 5~s. This is achieved by setting $n_s$ and $E$ to 0 and $A$ to 0.2 in the reaction rate term:
+\be
+    r = \left( \frac{\rho_{s,A}}{\rho_{s0}}\right)^{n_{s}}
+    A \; \exp \left(-\frac{E}{RT_s}\right)
+\ee
+The density and conductivity of both materials are
+30~kg/m$^3$ and 10~W/m/K, respectively. The emissivity of front and back is 1.  The specific heat of material A changes from
+1.0~kJ/kg/K to 0.1~kJ/kg/K above 80~$^\circ$C, while the specific heat of material B is constant at 1.0~kJ/kg/K. The slab is 1~mm thick.
+
+\begin{center}
+\includegraphics[width=3.5in]{FIGURES/enthalpy}
+\end{center}
+
+\noindent
+Note that the ``analytical'' solution is actually a simple numerical integration of the equations above with a small time step to ensure accuracy. 
+This example tests a number of features, including the reaction rate, mass weighted specific heats, and radiation boundary conditions. Note that the
+convective heat transfer has been turned off, and the correct steady-state temperature is calculated by FDS.
 
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
