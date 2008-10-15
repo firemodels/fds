@@ -30,13 +30,19 @@ INTEGER, INTENT(IN) :: NM
 
 CALL POINT_TO_MESH(NM)
 
+IF (IBAR/=32 .AND. IBAR/=64) THEN
+   WRITE(LU_ERR,'(A)') 'Error 1 in SANDIA_DAT!'
+   STOP
+ENDIF  
+
 FILE_NUM = GET_FILE_NUMBER()
-OPEN (UNIT=FILE_NUM,FILE='iso_ini.dat',FORM='formatted',STATUS='old')
+IF (IBAR==32) OPEN (UNIT=FILE_NUM,FILE='iso_ini.32.rjm.dat',FORM='formatted',STATUS='old')
+IF (IBAR==64) OPEN (UNIT=FILE_NUM,FILE='iso_ini.64.rjm.dat',FORM='formatted',STATUS='old') 
      
 READ (FILE_NUM,*) II, JJ, KK	! reads number of points in each direction
 
 IF (II/=IBAR .OR. JJ/=JBAR .OR. KK/=KBAR) THEN
-   WRITE(LU_ERR,'(A)') 'Error in SANDIA_DAT!'
+   WRITE(LU_ERR,'(A)') 'Error 2 in SANDIA_DAT!'
    STOP
 ENDIF
 
