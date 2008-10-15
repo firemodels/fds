@@ -5228,12 +5228,9 @@ Contains
     Integer istat, STRS_INDX
     !
     !
-    Real(EB)  scal_prod_over_rsqr, t_init_timo, &
-         U_new, V_new, Vmax_timo, CosPhiFac, &
-         Speed_max, Delta_min, Dt_sum, &
-         C_Yeff, t_flow_relax, LambdaW, &
-         B_Wall, A_Wall, T, Contact_F, Social_F, &
-         smoke_beta, smoke_alpha, smoke_speed_fac
+    Real(EB)  scal_prod_over_rsqr, U_new, V_new, Vmax_timo, CosPhiFac, &
+         Speed_max, Delta_min, Dt_sum, C_Yeff, LambdaW, B_Wall, A_Wall, &
+         T, Contact_F, Social_F, smoke_beta, smoke_alpha, smoke_speed_fac
     Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, i_o, door_ior
     Real(EB) y_o, x_o, x_now, y_now, x_target, y_target, d_humans, d_walls, DTSP_new, &
          fac_tim, dt_group_door, x1_old, y1_old, x11, y11, &
@@ -5258,11 +5255,10 @@ Contains
     Real(EB), Dimension(6) :: y_tmp, x_tmp, r_tmp, v_tmp, u_tmp
     !
     Integer :: Max_Humans_Cell, i_dx, j_dy, ie_max, bl_max
-    Real(EB) :: dx_min, dy_min, evac_dt_min2
+    Real(EB) :: dx_min, dy_min
     Integer, Dimension(:,:,:), Allocatable :: BLOCK_GRID
     Integer, Dimension(:,:), Allocatable :: BLOCK_GRID_N
     Integer, Dimension(:), Allocatable :: BLOCK_LIST
-
     !
     Real(EB) d_humans_min, d_walls_min
     Real(EB) TNOW, tnow13, tnow14, tnow15
@@ -5274,27 +5270,30 @@ Contains
     TNOW=SECOND()
     If ( .Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) ) Return
     !
-    t_flow_relax   = 0.0_EB
-    t_init_timo    = 0.0_EB + t_flow_relax
 
+    ! Maximun speed of the agents.  
     Vmax_timo      = V_MAX
-    Omega_max      = V_ANGULAR_MAX*2.0_EB*Pi ! 8 rounds per second
-    Omega_0        = V_ANGULAR*2.0_EB*Pi     ! 2 rounds per second
+    ! Maximum angular speed of the agents.
+    Omega_max      = V_ANGULAR_MAX*2.0_EB*Pi ! 8 rounds per second in radians
+    ! The target angular speed of the agents (like v0 for translational motion)
+    Omega_0        = V_ANGULAR*2.0_EB*Pi     ! 2 rounds per second in radians
+    !
     Dt_sum         = 0.0_EB
-    Delta_min      = Huge(Delta_min)
     dt_group_door  = TAU_CHANGE_DOOR
     !
     Call POINT_TO_MESH(NM)
     !       Call POINT_TO_EVAC_MESH(NM)
     !
+    ! Find the smallest delta_x and/or delta_y.  Note: evac meshes should not be stretched ones.
     dx_min = Minval(DX)
     dy_min = Minval(DY)
-    Delta_min = Min( dy_min, dx_min, Delta_min )
+    Delta_min = Min(dy_min, dx_min)
     !
+    ! Read/Write the EFF-file?
     L_eff_read = Btest(I_EVAC,2)
     L_eff_save = Btest(I_EVAC,0)
     !
-    ! Find the egrid index
+    ! Find the egrid index of this main evac mesh.
     i_egrid = 0
     Do i = 1, n_egrids
        If (EVAC_Node_List(i)%IMESH == NM) Then
@@ -5302,11 +5301,11 @@ Contains
        End If
     End Do
     If (i_egrid == 0) Then
-       Write(MESSAGE,'(A,I6)') &
-            'ERROR: Evacuate_Humans, no mesh found ',NM
+       Write(MESSAGE,'(A,I6)') 'ERROR: Evacuate_Humans, no mesh found ',NM
        Call SHUTDOWN(MESSAGE)
     End If
     !
+    ! Tmp arrays needed in the door selection algorithm
     Allocate(Is_Known_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
     Call ChkMemErr('Evacuate_Humans','Is_Known_Door',IZERO) 
     Allocate(Is_Visible_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
@@ -5318,32 +5317,21 @@ Contains
     Allocate(Color_Tmp(Max(1,i33_dim)),STAT=IZERO)
     Call ChkMemErr('Evacuate_Humans','Color_Tmp',IZERO) 
 
+    ! Blocks are used to speed the double loops over the agent-agent interactions.
     Allocate(BLOCK_GRID_N(1:IBAR,1:JBAR),STAT=IZERO)
     Call ChkMemErr('EVACUATE_HUMANS','BLOCK_GRID_N',IZERO)
     ! 
     HUMAN_TIME_LOOP: Do While ( Dt_sum < DT )
+       ! DT is the fds flow calculation time step.
+       ! Sometimes agent time step is smaller than the fire time step, so
+       ! syncronize the agent clock correctly.
        DTSP = Min( (DT-Dt_sum), Tsteps(nm) )
-       evac_dt_min2 = EVAC_DT_MAX
-       d_humans_min = Huge(d_humans_min)
-       d_walls_min = Huge(d_walls_min)
 
-       ! ========================================================
-       ! Add up the human time steps.
-       ! ========================================================
        Dt_sum = Dt_sum + DTSP
-
+       ! T is the current time of the agent movement algorithm.
        T = Tin - DT + Dt_sum
 
-
-       ! ========================================================
-       ! Evacuation routine, here the humans are moved to the new
-       ! positions using the present velocities.  After this the
-       ! forces at the new postitions are calculated and the 
-       ! velocities are updated.  (The 'dissipative' self-driving
-       ! force contribution to the velocities is updated self-
-       ! consistently, but the friction terms are not.)
-       ! ========================================================
-
+       ! Arrays for groups of agents
        Group_List(:)%GROUP_SIZE  = 0
        Group_List(:)%GROUP_X = 0.0_EB
        Group_List(:)%GROUP_Y = 0.0_EB
@@ -5355,6 +5343,7 @@ Contains
 
 
        !
+       ! Initialize some counters etc., for this main evac mesh.
        Do i = 1, n_doors
           If ( EVAC_DOORS(i)%IMESH == nm) Then
              EVAC_DOORS(i)%NTARGET = 0
@@ -5366,12 +5355,14 @@ Contains
           End If
        End Do
 
+       ! Initialize group arrays for this main evac mesh.
        Do j = 0, i33_dim
           Group_List(j)%GROUP_I_FFIELDS(i_egrid) = 0
        End Do
+
        Do i = 1, N_HUMANS
           HR=>HUMAN(I)
-          j = Max(0,HR%GROUP_ID)
+          j = Max(0,HR%GROUP_ID)  ! Group index of the agent
           Group_List(j)%GROUP_SIZE = Group_List(j)%GROUP_SIZE + 1
           Group_List(j)%GROUP_X    = Group_List(j)%GROUP_X + HR%X
           Group_List(j)%GROUP_Y    = Group_List(j)%GROUP_Y + HR%Y
@@ -5380,24 +5371,20 @@ Contains
           Group_List(j)%Tpre       = Max(Group_List(j)%Tpre,HR%Tpre)
           Group_List(j)%Tdet       = Min(Group_List(j)%Tdet,HR%Tdet)
        End Do
-       Group_List(1:)%GROUP_X = Group_List(1:)%GROUP_X / &
-            Max(1,Group_List(1:)%GROUP_SIZE)
-       Group_List(1:)%GROUP_Y = Group_List(1:)%GROUP_Y / &
-            Max(1,Group_List(1:)%GROUP_SIZE)
-       Group_List(1:)%Speed   = Group_List(1:)%Speed / &
-            Max(1,Group_List(1:)%GROUP_SIZE)
-       Group_List(1:)%IntDose = Group_List(1:)%IntDose / &
-            Max(1,Group_List(1:)%GROUP_SIZE)
-
+       Group_List(1:)%GROUP_X = Group_List(1:)%GROUP_X / Max(1,Group_List(1:)%GROUP_SIZE)
+       Group_List(1:)%GROUP_Y = Group_List(1:)%GROUP_Y / Max(1,Group_List(1:)%GROUP_SIZE)
+       Group_List(1:)%Speed   = Group_List(1:)%Speed /   Max(1,Group_List(1:)%GROUP_SIZE)
+       Group_List(1:)%IntDose = Group_List(1:)%IntDose / Max(1,Group_List(1:)%GROUP_SIZE)
        Group_List(:)%MAX_DIST_CENTER = 0.0_EB
+
+       ! Count the number of agents going towards different doors/exits.
        Do i = 1, N_HUMANS
           HR=>HUMAN(I)
           ! group_id > 0: +group_id
-          ! group_id < 0: -human_id (lonely humans)
-          j  =  Max(0,HR%GROUP_ID)
-          j1 = -Min(0,HR%GROUP_ID)
-          Group_List(j)%MAX_DIST_CENTER = &
-               Max(Group_List(j)%MAX_DIST_CENTER, &
+          ! group_id < 0: -human_id (lonely agents)
+          j  =  Max(0,HR%GROUP_ID)  ! group index > 0
+          j1 = -Min(0,HR%GROUP_ID)  ! lonely agent index > 0
+          Group_List(j)%MAX_DIST_CENTER = Max(Group_List(j)%MAX_DIST_CENTER, &
                Sqrt((HR%X - Group_List(j)%GROUP_X)**2 + &
                (HR%Y - Group_List(j)%GROUP_Y)**2))
 
@@ -5411,7 +5398,7 @@ Contains
           End If
        End Do
 
-       ! j=0, i.e., lonely humans
+       ! j=0, i.e., lonely humans: Group_List is not used , but it is safe to initialize.
        If (N_HUMANS > 0) Then
           Group_List(0)%GROUP_SIZE = 1
           Group_List(0)%GROUP_X    = 0.5_EB*(XS+XF)
@@ -5422,16 +5409,18 @@ Contains
           Group_List(0)%COMPLETE = 1
        End If
 
+       ! Note: group_size is the number of group members on this main evac mesh.
+       ! Check if the groups are already together or not.
        Do j = 1, i33_dim
-          Group_List(j)%LIMIT_COMP = RADIUS_COMPLETE_0 + &
-               RADIUS_COMPLETE_1*Group_List(j)%GROUP_SIZE
-          If ( ((Group_List(j)%MAX_DIST_CENTER <=  &
-               Group_List(j)%LIMIT_COMP) .Or. &
-               (Group_List(j)%COMPLETE == 1)) .And. &
-               Group_List(j)%GROUP_SIZE > 0) Then
-             ! Note: If complete=1 already, it stays at 1.
+          Group_List(j)%LIMIT_COMP = RADIUS_COMPLETE_0 + RADIUS_COMPLETE_1*Group_List(j)%GROUP_SIZE
+          If ( ((Group_List(j)%MAX_DIST_CENTER <=  Group_List(j)%LIMIT_COMP) .Or. &
+               (Group_List(j)%COMPLETE == 1)) .And. Group_List(j)%GROUP_SIZE > 0) Then
+             ! If complete=1 already, it stays at 1.
+             ! If many floors, check only floors where there are group members.
+             ! Group may become complete before fire is detected. Do not count these as complete.
              If (T > Group_List(j)%Tdet) Then
                 If (Group_List(j)%COMPLETE == 0) Then
+                   ! Tdoor: saves the time point when the group started to move towards the exit.
                    Group_List(j)%Tdoor = Max(T,Group_List(j)%Tdet)
                 End If
                 Group_List(j)%COMPLETE = 1
@@ -5914,7 +5903,19 @@ Contains
        ! ========================================================
        ! MOVE LOOP STARTS HERE
        ! ========================================================
+       ! ========================================================
+       ! Evacuation routine, here the humans are moved to the new
+       ! positions using the present velocities.  After this the
+       ! forces at the new postitions are calculated and the 
+       ! velocities are updated.  (The 'dissipative' self-driving
+       ! force contribution to the velocities is updated self-
+       ! consistently, but the other terms are not.)
+       ! ========================================================
+       ! Some initialization
        TNOW15=SECOND()
+       d_humans_min = Huge(d_humans_min)
+       d_walls_min = Huge(d_walls_min)
+
        EVAC_MOVE_LOOP: Do I=1, N_HUMANS
 
           HR=>HUMAN(I)
@@ -7412,7 +7413,7 @@ Contains
 
           d_humans = Max(d_humans,0.0005_EB)        ! this agent
           !d_humans = Max(d_humans,0.0005_EB)        ! this agent
-          d_walls  = Max(d_walls, 0.00025_EB)       ! this agent
+          d_walls  = Max(d_walls, 0.0005_EB)       ! this agent
           d_humans_min = Min(d_humans_min,d_humans) ! among all agents
           d_walls_min  = Min(d_walls_min, d_walls)  ! among all agents
 
@@ -7429,7 +7430,7 @@ Contains
                 v_tmp(3) = v_tmp(2) - Sin(HR%angle)*Omega_new*HR%d_shoulder
                 If ( Max(u_tmp(1)**2+v_tmp(1)**2, u_tmp(2)**2+v_tmp(2)**2, &
                      u_tmp(3)**2+v_tmp(3)**2)*DTSP_new**2 > &
-                     (Min(0.2_EB*d_humans, 0.5_EB*d_walls, 0.5_EB*Delta_min))**2 ) Then
+                     (Min(0.2_EB*d_humans, 0.2_EB*d_walls, 0.5_EB*Delta_min))**2 ) Then
                    DTSP_new = DTSP_new*0.8_EB
                    Cycle dt_Loop
                 End If
