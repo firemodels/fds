@@ -78,7 +78,7 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date (All Nodes)
 
-WRITE(VERSION_STRING,'(A)') '5.2.2'
+WRITE(VERSION_STRING,'(A)') '5.2.3'
 PARALLEL = .TRUE.
 
 IF (INDEX(mainmpirev,':',BACK=.TRUE.)>0) THEN
