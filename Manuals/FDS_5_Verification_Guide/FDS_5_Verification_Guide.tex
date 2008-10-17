@@ -513,12 +513,13 @@ because  the time  step is not  limited by the  large flow speeds in a fire plum
 \subsection{Sensitivity of Large Eddy Simulation Parameters}
 
 FDS  uses the  Smagorinsky form  of  the Large  Eddy Simulation  (LES) technique.  This  means  that   instead  of  using  the  actual  fluid
-viscosity, the model uses a viscosity of the form \be \mu_{\hbox{\tiny LES}} =  \rho \,  (C_s\, \Delta)^2  \, |S|^\ha \ee  where $C_s$  is an
-empirical constant, $\Delta$ is a length on the order of the size of a grid  cell,  and  the  deformation   term  $|S|$  is  related  to  the
-Dissipation Function (see FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5} for details). Related to the ``turbulent  viscosity'' are  comparable
-expressions  for  the thermal conductivity  and  material diffusivity:  \be  k_{\hbox{\tiny LES}}  = \frac{\mu_{\hbox{\tiny  LES}}   \;  c_p}{\PR}
-\quad   ;  \quad  (\rho D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC}  \ee  The Prandtl  number  $\PR$  and  the  Schmidt number
-$\SC$  are  likewise considered to  be ``turbulent'' values.  Thus, $C_s$, $\PR$  and $\SC$ are  a set  of  empirical constants.  Most  FDS users
+viscosity, the model uses a viscosity of the form
+\be
+  \mu_{\hbox{\tiny LES}} =  \rho \,  (C_s\, \Delta)^2  \, |S|
+\ee
+where $C_s$  is an empirical constant, $\Delta$ is a length on the order of the size of a grid  cell,  and  the  deformation   term  $|S|$  is  related  to  the Dissipation Function (see FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5} for details). Related to the ``turbulent  viscosity'' are  comparable
+expressions  for  the thermal conductivity  and  material diffusivity:  \be  k_{\hbox{\tiny LES}}  = \frac{\mu_{\hbox{\tiny  LES}}   \;  c_p}{\PR_t}
+\quad   ;  \quad  (\rho D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC_t}  \ee  where $\PR_t$ and $\SC_t$ are the turbulent Prandtl and Schmidt numbers, respectively.  Thus, $C_s$, $\PR_t$  and $\SC_t$ are  a set  of  empirical constants.  Most  FDS users
 simply use  the default values  of (0.2,0.5,0.5), but some have  explored their effect on the solution of the equations.
 
 In an effort  to validate FDS with some  simple room temperature data, Zhang~{\em et al.}~\cite{Zhang:2}  tried different combinations of the
@@ -673,8 +674,109 @@ that is, comments within the source code itself.  Plus, they must compile the co
 
 
 
+\chapter{The Basic Flow Solver}
+
+\section{Single Mesh, Nonreacting Periodic Test Cases}
+
+In this section we present test cases aimed at exercising the advective, pressure and viscous terms and the time integration for nonreacting flows with periodic boundary conditions in all directions (this eliminates the possibility of gravitational stratification).  In Section \ref{ns2d} we present an analytical solution that is useful for confirming the convergence rates of the truncation errors in the discretization schemes.  In Section \ref{decaying_isotropic_turbulence} we present a canonical flow for LES which tests that the subgrid stress model has been coded properly.
+
+\subsection{2D Analytical Solution to Navier-Stokes}
+\label{ns2d}
+
+The velocity is given by $\mathbf{u} = [u, v]^T$. Let $A$ represent an arbitrary amplitude.  The kinematic viscosity and pressure are denoted $\nu$ and $p$, respectively, and the solution the 2D incompressible Navier-Stokes equations,
+\begin{equation}
+\label{eqn_NS}
+\frac{\partial \mathbf{u}}{\partial t} + \mathbf{u} \cdot \nabla \mathbf{u} = - \nabla{p} + \nu \nabla^2 \mathbf{u} \,\mbox{,}
+\end{equation}
+is given by \cite{McDermott:NS2D}
+\begin{eqnarray}
+\label{eqn_usoln}
+u(x,y,t) &=& 1 - A\cos(x-t)\sin(y-t)\,e^{-2\nu t} \,\mbox{,} \\
+v(x,y,t) &=& 1 + A\sin(x-t)\cos(y-t)\,e^{-2\nu t} \,\mbox{,}
+\end{eqnarray}
+\begin{equation}
+p(x,y,t) = -\frac{A^2}{4} \left[ \cos(2(x-t))+\cos(2(y-t))\right]e^{-4\nu t} \,\mbox{.}
+\end{equation}
+Note that this solution satisfies continuity for all time,
+\begin{equation}
+\label{eqn_divfree}
+\nabla\cdot\mathbf{u} = 0 \,\mbox{,}
+\end{equation}
+is period on an interval $2\pi$ in each direction, and is time periodic on $2\pi$ if $\nu=0$, else the solution decays exponentially.  Below we present two series of tests which demonstrate the second-order accuracy of the FDS numerical scheme and thus provide a strong form of code verification for the advective and viscous terms which are exercised.
+
+The physical domain of the problem is a square of side $L=2\pi$.  The grid spacing is uniform $\Delta x = \Delta y = L/N$ in each direction with $N =\{8,16,32,64\}$ for each test series.  The staggered grid locations are denoted $x_i = i \Delta x$ and $y_j = j \Delta y$, and the cell centers are marked by an overbar, $\bar{x}_i = x_i - \Delta x/2$ and $\bar{y}_j = y_j - \Delta y/2$.
+
+First, we present qualitative results for the case in which $\nu=0$.  Thus, only the advective discretization and the time integration are being tested. Figure \ref{fig_ns2d_smv} shows the initial and final $(t=2\pi)$ numerical solution for the case $N=64$.  As mentioned, with $\nu=0$ the solution is periodic in time and this figure demonstrates that, as should be the case, the FDS numerical solution is unaltered after one flow-through time.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_64_0000.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_64_1001.pdf} }
+   \end{tabular*}
+   \caption{\label{fig_ns2d_smv} \small Initial and final states of the $u$-component of velocity.}
+\end{figure}
+
+Next, in Figure \ref{fig_ns2d_timehistory}, we show time histories of the $u$-component of velocity at the center of the domain for the case in which $\nu = 0.1$.  It is clearly seen that the FDS solution (open circles) is converging to the analytical solution (solid line).
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_vel_8.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_vel_16.pdf} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_vel_32.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_vel_64.pdf} }
+   \end{tabular*}
+   \caption{\label{fig_ns2d_timehistory} \small Time history of the velocity at the center of the domain for a range of grid resolutions.  The domain is a square of side $L = 2\pi$ m.  The $N \times N$ grid is uniform.  Progressing from left to right and top to bottom we have resolutions $N =\{8,16,32,64\}$ clearly showing convergence of the FDS numerical solution (open circles) to the analytical solution (solid line).  The case is run with constant properties, $\rho=1$ kg/m$^3$ and $\mu = 0.1$ kg/m/s, and a CFL of 0.25.}
+\end{figure}
+
+Figure \ref{fig_ns2d_convergence} is the key quantitative result of this verification test.  In this figure we plot the rms error, $\varepsilon_{\mbox{\scriptsize rms}}$, in the $u$-component of velocity against the grid spacing.  The error is defined by
+\begin{equation}
+\label{eqn_rmserror}
+\varepsilon_{\mbox{\scriptsize rms}} \equiv \sqrt{ \frac{1}{M} \sum_{k=1}^{M} \left[ U_{ij}^k - u(x_i,\bar{y}_j,t_k) \right]^2 } \,\mbox{,}
+\end{equation}
+where $M$ is the number of time steps and $k$ is the time step index.  The spatial indices are $(i=N/2,j=N/2)$ and $U_{ij}^k$ represents the FDS value for the $u$-component of velocity at the staggered storage location for cell $(i,j)$ at time step $k$; $u(x_i,\bar{y}_j,t_k)$ is the analytical solution for the $u$-component at the corresponding location in space and time.  The figure confirms that the advective terms, the viscous terms, and the time integration in the FDS code are convergent and second-order accurate.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_convergence.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_convergence.pdf} }
+   \end{tabular*}
+   \caption{\label{fig_ns2d_convergence} \small (Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the advective terms in the FDS code are second-order accurate.  The stars represent the rms error in the $u$-component for grid spacings of $\Delta x = L/N$ where $L = 2\pi$ m and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$ sec with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing that the viscous terms in the FDS code are second-order accurate.}
+\end{figure}
 
 
+\subsection{Decaying Isotropic Turbulence}
+\label{decaying_isotropic_turbulence}
+
+In some cases the difference between verification and validation is not so clear.  Once a model is well-established and validated it may actually be used as a form of verification.  Granted, such a test is not as strong a verification as the convergence study shown in Section \ref{ns2d}.  Nevertheless, these tests are often quite useful in discovering problems within the code.  The case we examine in this section, decaying isotropic turbulence, is highly sensitive to errors in the advective and diffusive terms because the underlying physics is inherently three-dimensional and getting the problem right depends strongly on a delicate balance between vorticity dynamics and dissipation.  An even more subtle yet extremely powerful verification test is also presented in this section when we set both the molecular and turbulent viscosities to zero and confirm that the integrated kinetic energy within the domain remains constant.   In the absence of any form of viscosity, experience has shown that the slightest error in the advective terms or the pressure projection will cause the code to go unstable.  This verification is therefore stronger than one might initially expect.
+
+In this section we test the FDS model against the low Reynolds number (Re) data of Comte-Bellot and Corrsin (CBC) \cite{CBC}. Viscous effects are important in this data set for a well-resolved LES, testing the model's Re dependence.  Following \cite{SdBK}, we use a periodic box of side $L = 9 \times 2\pi$ centimeters ($\approx 0.566$ m) and $\nu = 1.5 \times 10^{-5}$ $\mbox{m}^2/\mbox{s}$ for the kinematic viscosity. The non-dimensional times for this data set are: $x/M = 42$ (initial condition), $98$, and $171$, where $M$ is the characteristic mesh spacing of the CBC wind tunnel and $x$ is the downstream location of the data station. Considering the mean velocity in the CBC wind tunnel experiment, these correspond to dimensional times of $t = 0.00$, $0.28$, and $0.66$ seconds in our simulations.
+
+The initial condition for the FDS simulation is generated by superimposing Fourier modes with random phases such that the spectrum matches that of the initial CBC data.  An iterative procedure is employed where the field is allowed to decay for small time increments subject to Navier-Stokes physics, each wavenumber is then injected with energy to again match the initial filtered CBC spectrum.  The specific filter used here is discussed in \cite{McDermott:2005b}.
+
+To provide the reader with a qualitative sense of the flow, Figure \ref{fig_cbc_smv} shows the initial and final states of the velocity field in the 3D periodic domain.  The flow is unforced and so if viscosity is present the total energy decays with time due to viscous dissipation.  Because the viscous scales are unresolved, a subgrid stress model is required. Here the stress is closed using the gradient diffusion hypothesis and the eddy viscosity is modeled by the constant coefficient Smagorinsky model with the coefficient taken to be $C_s = 0.2$ (see the Technical Reference Guide for further details).
+
+The decay curves for two grid resolutions are shown plotted on the left in Figure \ref{fig_cbc_energy}.  For an LES code such as FDS which uses a physically-based subgrid model, an important verification test is to run this periodic isotropic turbulence simulation in the absence of both molecular and turbulent viscosity.  For so-called ``energy-conserving'' explicit numerics the integrated energy will remain nearly constant in time.  This is demonstrated by the blue line in the top-left plot in Figure \ref{fig_cbc_energy}.  The deviations from identical energy conservation (to machine precision) are due solely to the time discretization (the spatial terms are conservative as discussed in \cite{Morinishi}) and converge to zero as the time step goes to the zero.  Note that strict energy conservation requires implicit time integration \cite{Ham,McDermott:2007b} and, as shown by the red curve on the same plot where only molecular viscosity is present in the simulation, this cost is unwarranted given that the molecular dissipation rate clearly overshadows the relatively insignificant amount of numerical dissipation caused by the explicit method.  The FDS result using the Smagorinsky eddy viscosity (the black solid line) matches the CBC data (red open circles) well for the $32^3$ case (top-left).  However, the FDS results are slightly too dissipative in the $64^3$ case (bottom-left).  This is due to a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased.
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/cbc_0000.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/cbc_0085.pdf} }
+   \end{tabular*}
+   \caption{\label{fig_cbc_smv} \small Initial and final states of the isotropic turbulence field.}
+\end{figure}
+
+To the right of each decay curve plot in Figure \ref{fig_cbc_energy} is the corresponding spectral data comparison.  The three black solid lines are the CBC spectral data for the points in time corresponding to dimensional times of $t = 0.00$, $0.28$, and $0.66$ seconds in our simulations.  As described above, the initial FDS velocity field (represented by the black dots) is specified to match the CBC data up to the grid Nyquist limit.  From there the spectral energy decays rapidly as discussed in \cite{McDermott:2005b}.  For each of the spectral plots on the right, the results of interest are the values of the red and blue dots and how well these match up with the corresponding CBC data.  For the $32^3$ case (top-right) the results are remarkably good.  Interestingly, the results for the more highly resolved $64^3$ case are not as good.  This is because the viscous scales are rather well-resolved at the later times in the experiment and, as mentioned, it is well-known that the constant coefficient Smagorinsky model is too dissipative under such conditions.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/energy_decay_32.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/cbc_spectra_32.pdf} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/energy_decay_64.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/cbc_spectra_64.pdf} }
+   \end{tabular*}
+   \caption{\label{fig_cbc_energy} \small (Left) Time histories of integrated kinetic energy corresponding to the grid resolutions on the right side of the figure.  In the $32^3$ case (top), the CBC data (open circles) are obtained by applying a filter to the CBC energy spectra at the Nyquist limit for an $N=32$ grid.  Similarly, for the $64^3$ case (bottom), the CBC data are obtained from filtered spectra for an $N=64$ grid.  Notice that the integrated FDS results for the $32^3$ case compare better with the filtered CBC data than the $64^3$ results.  This is a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased. (Right) Energy spectra for the $32^3$ case (top) and the $64^3$ case (bottom).  The solid black lines are the spectral data of Comte-Bellot and Corrsin at three different points in time corresponding to downstream positions in the turbulent wind tunnel.  The initial condition for the velocity field (spectra shown as black dots) in the FDS simulation is prescribed such that the energy spectrum matches the initial CBC data.  The FDS energy spectra corresponding to the subsequent CBC data are shown by the red and blue dots.  }
+\end{figure}
+
+Overall, the agreement between the FDS simulations and the CBC data is satisfactory and any discrepancies can be explained by limitations of the model.  Therefore, as a verification the results here are positive in that nothing points to coding errors.
 
 
 \chapter{Thermal Radiation}
