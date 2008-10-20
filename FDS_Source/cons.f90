@@ -210,6 +210,7 @@ LOGICAL :: POROUS_FLOOR
 ! Particles and Droplets
  
 INTEGER :: MAXIMUM_DROPLETS,N_PART,PARTICLE_TAG,N_EVAC,N_EVAP_INDICIES=0
+REAL(EB) :: FLUXMAX
  
 ! Initial value and pressure zone arrays
  

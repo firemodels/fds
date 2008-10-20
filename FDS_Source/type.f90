@@ -208,7 +208,7 @@ TYPE HUMAN_GRID_TYPE
 ! (x,y,z) Centers of the grid cells in the main evacuation meshes
 ! SOOT_DENS: Smoke density at the center of the cell (mg/m3)
 ! FED_CO_CO2_O2: Purser's FED for co, co2, and o2
-   REAL(EB) :: X,Y,Z,SOOT_DENS,FED_CO_CO2_O2,TMP_G,RADINT
+   REAL(EB) :: X,Y,Z,SOOT_DENS,FED_CO_CO2_O2,TMP_G,RADFLUX
    INTEGER :: N, N_old, IGRID, IHUMAN, ILABEL
 ! IMESH: (x,y,z) which fire mesh, if any
 ! II,JJ,KK: Fire mesh cell reference

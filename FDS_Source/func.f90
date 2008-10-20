@@ -769,7 +769,7 @@ TYPE (WALL_TYPE), POINTER :: WC
 M=>MESHES(NM)
 SF => SURFACE(M%IJKW(5,IW))
 WC => M%WALL(IW)
-!!IF (WC%ALREADY_ALLOCATED) RETURN
+IF (WC%ALREADY_ALLOCATED) RETURN
 IF (M%BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) RETURN
 
 IF (RADIATION) THEN
@@ -1295,6 +1295,37 @@ CNF = CNF/SUM1
  
 END SUBROUTINE DROPLET_SIZE_DISTRIBUTION
 
+! Returns the integrand of FED (Fractional Effective Dose) calculation.
+
+REAL(EB) FUNCTION FED(Z_IN,Y_EXTRA,RSUM)
+REAL(EB), INTENT(IN) :: Z_IN(1:I_Z_MAX - I_Z_MIN + 1),Y_EXTRA,RSUM
+REAL(EB) Y_MF_INT, tmp_1
+
+! This is the part depending on gaseous compounds CO2, CO, O2
+! Note: Purser uses minutes, here dt is in seconds
+!       fed_dose = fed_lco*fed_vco2 + fed_lo
+
+! Next is for CO (ppm)
+! CO:  (3.317E-5*RMV*t)/D
+!      [RMV]=ltr/min, D=30% COHb concentration at incapacitation
+Call GET_MASS_FRACTION(Z_IN,CO_INDEX,Y_EXTRA,Y_MF_INT)
+tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/RSUM
+FED   = 3.317E-5_EB*25.0_EB* tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
+
+! Next is for CO2
+! VCO2: CO2-induced hyperventilation
+!      exp(0.1903*c_CO2(%) + 2.0004)
+Call GET_MASS_FRACTION(Z_IN,CO2_INDEX,Y_EXTRA,Y_MF_INT)
+tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/RSUM
+FED = FED * Exp( 0.1903_EB*tmp_1*100.0_EB + 2.0004_EB )/7.1_EB
+
+! Next is for O2
+! LO: low oxygen
+Call GET_MASS_FRACTION(Z_IN,O2_INDEX,y_extra,Y_MF_INT)
+tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/RSUM
+If ( tmp_1 < 0.20_EB ) FED = FED + 1.0_EB  / (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*tmp_1)) )
+
+END FUNCTION FED
 
 END MODULE PHYSICAL_FUNCTIONS
 
