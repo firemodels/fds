@@ -12,7 +12,7 @@ USE COMP_FUNCTIONS
 IMPLICIT NONE
 
 PRIVATE
-PUBLIC :: ANALYTICAL_SOLUTION, sandia_dat, init_spectral_data, spectral_output
+PUBLIC :: ANALYTICAL_SOLUTION, sandia_dat, INIT_TURB_ARRAYS, spectral_output, VARDEN_DYNSMAG
  
 CONTAINS
 
@@ -78,47 +78,108 @@ W(:,:,0) = W(:,:,KBAR)
 END SUBROUTINE SANDIA_DAT
 
 
-SUBROUTINE init_spectral_data(NM)
+SUBROUTINE INIT_TURB_ARRAYS(NM)
 USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 INTEGER :: IZERO
-INTEGER, POINTER :: n
+INTEGER, POINTER :: NX,NY,NZ
 TYPE (MESH_TYPE), POINTER :: M
 
 CALL POINT_TO_MESH(NM)
 M => MESHES(NM)
-n => M%IBAR
+NX => M%IBAR
+NY => M%JBAR
+NZ => M%KBAR
 
-! real work arrays
-ALLOCATE(M%PWORK1(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','PWORK1',IZERO)
-M%PWORK1 = 0._EB
-ALLOCATE(M%PWORK2(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','PWORK2',IZERO)
-M%PWORK2 = 0._EB
-ALLOCATE(M%PWORK3(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','PWORK3',IZERO)
-M%PWORK3 = 0._EB
-ALLOCATE(M%PWORK4(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','PWORK4',IZERO)
-M%PWORK4 = 0._EB
+IF (PERIODIC_TEST==2 .OR. DYNSMAG) THEN
+   ! real work arrays
+   ALLOCATE(M%TURB_WORK1(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK1',IZERO)
+   M%TURB_WORK1 = 0._EB
+   ALLOCATE(M%TURB_WORK2(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK2',IZERO)
+   M%TURB_WORK2 = 0._EB
+   ALLOCATE(M%TURB_WORK3(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK3',IZERO)
+   M%TURB_WORK3 = 0._EB
+   ALLOCATE(M%TURB_WORK4(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK4',IZERO)
+   M%TURB_WORK4 = 0._EB
+ENDIF
 
-! complex work arrays
-ALLOCATE(M%PWORK5(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','PWORK5',IZERO)
-M%PWORK5 = 0._EB
-ALLOCATE(M%PWORK6(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','PWORK6',IZERO)
-M%PWORK6 = 0._EB
-ALLOCATE(M%PWORK7(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','PWORK7',IZERO)
-M%PWORK7 = 0._EB
-ALLOCATE(M%PWORK8(n,n,n),STAT=IZERO)
-CALL ChkMemErr('init_spectral_data','PWORK8',IZERO)
-M%PWORK8 = 0._EB
+IF (PERIODIC_TEST==2) THEN
+   ! complex work arrays
+   ALLOCATE(M%TURB_WORK_DPC1(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK_DPC1',IZERO)
+   M%TURB_WORK_DPC1 = 0._EB
+   ALLOCATE(M%TURB_WORK_DPC2(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK_DPC2',IZERO)
+   M%TURB_WORK_DPC2 = 0._EB
+   ALLOCATE(M%TURB_WORK_DPC3(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK_DPC3',IZERO)
+   M%TURB_WORK_DPC3 = 0._EB
+   ALLOCATE(M%TURB_WORK_DPC4(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK_DPC4',IZERO)
+   M%TURB_WORK_DPC4 = 0._EB
+ENDIF
 
-END SUBROUTINE init_spectral_data
+IF (DYNSMAG) THEN
+   ! real work arrays
+   ALLOCATE(M%TURB_WORK5(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK5',IZERO)
+   M%TURB_WORK5 = 0._EB
+   ALLOCATE(M%TURB_WORK6(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK6',IZERO)
+   M%TURB_WORK6 = 0._EB
+   ALLOCATE(M%TURB_WORK7(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK7',IZERO)
+   M%TURB_WORK7 = 0._EB
+   ALLOCATE(M%TURB_WORK8(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK8',IZERO)
+   M%TURB_WORK8 = 0._EB
+   
+   ALLOCATE(M%TURB_WORK9(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK9',IZERO)
+   M%TURB_WORK9 = 0._EB
+   ALLOCATE(M%TURB_WORK10(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK10',IZERO)
+   M%TURB_WORK10 = 0._EB
+   ALLOCATE(M%TURB_WORK11(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK11',IZERO)
+   M%TURB_WORK11 = 0._EB
+   ALLOCATE(M%TURB_WORK12(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK12',IZERO)
+   M%TURB_WORK12 = 0._EB
+   
+   ALLOCATE(M%TURB_WORK13(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK13',IZERO)
+   M%TURB_WORK13 = 0._EB
+   ALLOCATE(M%TURB_WORK14(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK14',IZERO)
+   M%TURB_WORK14 = 0._EB
+   ALLOCATE(M%TURB_WORK15(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK15',IZERO)
+   M%TURB_WORK15 = 0._EB
+   ALLOCATE(M%TURB_WORK16(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK16',IZERO)
+   M%TURB_WORK16 = 0._EB
+   
+   ALLOCATE(M%TURB_WORK17(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK17',IZERO)
+   M%TURB_WORK17 = 0._EB
+   ALLOCATE(M%TURB_WORK18(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK18',IZERO)
+   M%TURB_WORK18 = 0._EB
+   ALLOCATE(M%TURB_WORK19(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK19',IZERO)
+   M%TURB_WORK19 = 0._EB
+   ALLOCATE(M%TURB_WORK20(NX,NY,NZ),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK20',IZERO)
+   M%TURB_WORK20 = 0._EB
+ENDIF
+
+END SUBROUTINE INIT_TURB_ARRAYS
 
 
 SUBROUTINE spectral_output(TT,NM)
@@ -131,14 +192,14 @@ COMPLEX(DPC), POINTER, DIMENSION(:,:,:) :: UUHT,VVHT,WWHT,KKHT
 
 call POINT_TO_MESH(NM)
 nn = IBAR
-UU => PWORK1
-VV => PWORK2
-WW => PWORK3
-HH => PWORK4
-UUHT => PWORK5
-VVHT => PWORK6
-WWHT => PWORK7
-KKHT => PWORK8
+UU => TURB_WORK1
+VV => TURB_WORK2
+WW => TURB_WORK3
+HH => TURB_WORK4
+UUHT => TURB_WORK_DPC1
+VVHT => TURB_WORK_DPC2
+WWHT => TURB_WORK_DPC3
+KKHT => TURB_WORK_DPC4
 
 UU = U(1:nn(1),1:nn(2),1:nn(3))
 VV = V(1:nn(1),1:nn(2),1:nn(3))
@@ -1054,6 +1115,437 @@ ENDDO
 H(1:IBAR,1:JBAR,1:KBAR) = H(1:IBAR,1:JBAR,1:KBAR) - SUM(H(1:IBAR,1:JBAR,1:KBAR))/REAL(IBAR*JBAR*KBAR,EB)
 
 END SUBROUTINE ANALYTICAL_SOLUTION
+
+
+SUBROUTINE VARDEN_DYNSMAG(NM)
+IMPLICIT NONE
+
+!--------------------------------------------------------------
+!     for all tensors, the indices are defined as follows...
+!
+!     |  11    12    13  |
+!     |                  |
+!     |  21    22    23  |
+!     |                  |
+!     |  31    32    33  |
+!
+!     I"name"I is the 'magnitude' of "name".
+!--------------------------------------------------------------
+
+INTEGER, INTENT(IN) :: NM
+
+! Velocities relative to the p-cell center
+REAL(EB) :: U_E,U_W,U_N,U_S,U_T,U_B
+REAL(EB) :: V_E,V_W,V_N,V_S,V_T,V_B
+REAL(EB) :: W_E,W_W,W_N,W_S,W_T,W_B
+REAL(EB) :: DELTA,SKK
+INTEGER :: I,J,K,N_LO(3),N_HI(3)
+
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,UP,VP,WP,RHOP,RHOPHAT
+REAL(EB), POINTER, DIMENSION(:,:,:) :: S11,S22,S33,S12,S13,S23,SS
+REAL(EB), POINTER, DIMENSION(:,:,:) :: SHAT11,SHAT22,SHAT33,SHAT12,SHAT13,SHAT23,SSHAT
+REAL(EB), POINTER, DIMENSION(:,:,:) :: BETA11,BETA22,BETA33,BETA12,BETA13,BETA23
+REAL(EB), POINTER, DIMENSION(:,:,:) :: BETAHAT11,BETAHAT22,BETAHAT33,BETAHAT12,BETAHAT13,BETAHAT23
+REAL(EB), POINTER, DIMENSION(:,:,:) :: M11,M22,M33,M12,M13,M23,MM,MMHAT
+REAL(EB), POINTER, DIMENSION(:,:,:) :: L11,L22,L33,L12,L13,L23,ML,MLHAT
+
+REAL(EB), PARAMETER :: ALPHA = 6.0_EB ! See Lund, 1997 CTR briefs.
+
+! References:
+!
+! M. Germano, U. Piomelli, P. Moin, and W. Cabot.  A dynamic subgrid-scale eddy viscosity model.
+! Phys. Fluids A, 3(7):1760-1765, 1991.
+!
+! M. Pino Martin, U. Piomelli, and G. Candler. Subgrid-scale models for compressible large-eddy
+! simulation. Theoret. Comput. Fluid Dynamics, 13:361-376, 2000.
+!
+! P. Moin, K. Squires, W. Cabot, and S. Lee.  A dynamic subgrid-scale model for compressible
+! turbulence and scalar transport. Phys. Fluids A, 3(11):2746-2757, 1991.
+!
+! R. McDermott. Variable density formulation of the dynamic Smagorinsky model.
+! http://randy.mcdermott.googlepages.com/dynsmag_comp.pdf
+
+! *****************************************************************************
+! CAUTION WHEN MODIFYING: The order in which the tensor components are computed
+! is important because we overwrite pointers several times to conserve memory.
+! *****************************************************************************
+
+CALL POINT_TO_MESH(NM)
+
+N_LO = 1
+N_HI = (/IBAR,JBAR,KBAR/)
+
+RHOP    => TURB_WORK18
+RHOPHAT => TURB_WORK19
+
+IF (PREDICTOR) THEN
+   UU=>U
+   VV=>V
+   WW=>W
+   RHOP=RHO(1:IBAR,1:JBAR,1:KBAR)
+ELSE
+   UU=>US
+   VV=>VS
+   WW=>WS
+   RHOP=RHOS(1:IBAR,1:JBAR,1:KBAR)
+ENDIF
+
+UP => TURB_WORK1
+VP => TURB_WORK2
+WP => TURB_WORK3
+
+S11 => TURB_WORK4
+S22 => TURB_WORK5
+S33 => TURB_WORK6
+S12 => TURB_WORK7
+S13 => TURB_WORK8
+S23 => TURB_WORK9
+SS => TURB_WORK10
+
+DO K = 1,KBAR
+   DO J = 1,JBAR
+      DO I = 1,IBAR
+
+         U_E = UU(I,J,K)
+         U_W = UU(I-1,J,K)
+         U_N = 0.25_EB*( UU(I,J,K) + UU(I-1,J,K) + UU(I,J+1,K) + UU(I-1,J+1,K) )
+         U_S = 0.25_EB*( UU(I,J,K) + UU(I-1,J,K) + UU(I,J-1,K) + UU(I-1,J-1,K) )
+         U_T = 0.25_EB*( UU(I,J,K) + UU(I-1,J,K) + UU(I,J,K+1) + UU(I-1,J,K+1) )
+         U_B = 0.25_EB*( UU(I,J,K) + UU(I-1,J,K) + UU(I,J,K-1) + UU(I-1,J,K-1) )
+
+         V_N = VV(I,J,K)
+         V_S = VV(I,J-1,K)
+         V_E = 0.25_EB*( VV(I,J,K) + VV(I,J-1,K) + VV(I+1,J,K) + VV(I+1,J-1,K) )
+         V_W = 0.25_EB*( VV(I,J,K) + VV(I,J-1,K) + VV(I-1,J,K) + VV(I-1,J-1,K) )
+         V_T = 0.25_EB*( VV(I,J,K) + VV(I,J-1,K) + VV(I,J,K+1) + VV(I,J-1,K+1) )
+         V_B = 0.25_EB*( VV(I,J,K) + VV(I,J-1,K) + VV(I,J,K-1) + VV(I,J-1,K-1) )
+
+         W_T = WW(I,J,K)
+         W_B = WW(I,J,K-1)
+         W_E = 0.25_EB*( WW(I,J,K) + WW(I,J,K-1) + WW(I+1,J,K) + WW(I+1,J,K-1) ) 
+         W_W = 0.25_EB*( WW(I,J,K) + WW(I,J,K-1) + WW(I-1,J,K) + WW(I-1,J,K-1) )
+         W_N = 0.25_EB*( WW(I,J,K) + WW(I,J,K-1) + WW(I,J+1,K) + WW(I,J+1,K-1) )
+         W_S = 0.25_EB*( WW(I,J,K) + WW(I,J,K-1) + WW(I,J-1,K) + WW(I,J-1,K-1) )
+
+         UP(I,J,K) = 0.5_EB*(U_E + U_W)
+         VP(I,J,K) = 0.5_EB*(V_N + V_S)
+         WP(I,J,K) = 0.5_EB*(W_T + W_B)
+
+         ! calculate the grid strain rate tensor
+         
+         S11(I,J,K) = (U_E - U_W)/DX(I)
+         S22(I,J,K) = (V_N - V_S)/DY(J)
+         S33(I,J,K) = (W_T - W_B)/DZ(K)
+         SKK = S11(I,J,K) + S22(I,J,K) + S33(I,J,K)
+         S11(I,J,K) = S11(I,J,K) - ONTH*SKK
+         S22(I,J,K) = S22(I,J,K) - ONTH*SKK
+         S33(I,J,K) = S33(I,J,K) - ONTH*SKK
+         S12(I,J,K) = 0.5_EB*( (U_N - U_S)/DY(J) + (V_E - V_W)/DX(I) )
+         S13(I,J,K) = 0.5_EB*( (U_T - U_B)/DZ(K) + (W_E - W_W)/DX(I) )
+         S23(I,J,K) = 0.5_EB*( (V_T - V_B)/DZ(K) + (W_N - W_S)/DY(J) )
+
+      ENDDO
+   ENDDO
+ENDDO
+
+! calculate magnitude of the grid strain rate
+
+SS = SQRT(2._EB*(S11*S11 +  S22*S22 + S33*S33 + 2._EB*(S12*S12 +  S13*S13 + S23*S23)))
+
+! test filter the strain rate
+
+SHAT11 => TURB_WORK11
+SHAT22 => TURB_WORK12
+SHAT33 => TURB_WORK13
+SHAT12 => TURB_WORK14
+SHAT13 => TURB_WORK15
+SHAT23 => TURB_WORK16
+SSHAT => TURB_WORK17
+
+CALL TEST_FILTER(SHAT11,S11,N_LO,N_HI)
+CALL TEST_FILTER(SHAT22,S22,N_LO,N_HI)
+CALL TEST_FILTER(SHAT33,S33,N_LO,N_HI)
+CALL TEST_FILTER(SHAT12,S12,N_LO,N_HI)
+CALL TEST_FILTER(SHAT13,S13,N_LO,N_HI)
+CALL TEST_FILTER(SHAT23,S23,N_LO,N_HI)
+
+! calculate magnitude of test filtered strain rate
+
+SSHAT = SQRT(2._EB*(SHAT11*SHAT11 + SHAT22*SHAT22 + SHAT33*SHAT33 + 2._EB*(SHAT12*SHAT12 + SHAT13*SHAT13 + SHAT23*SHAT23)))
+
+! calculate the grid filtered stress tensor, beta
+
+BETA11 => TURB_WORK4
+BETA22 => TURB_WORK5
+BETA33 => TURB_WORK6
+BETA12 => TURB_WORK7
+BETA13 => TURB_WORK8
+BETA23 => TURB_WORK9
+
+BETA11 = RHOP*SS*S11
+BETA22 = RHOP*SS*S22
+BETA33 = RHOP*SS*S33
+BETA12 = RHOP*SS*S12
+BETA13 = RHOP*SS*S13
+BETA23 = RHOP*SS*S23
+
+! test filter the grid filtered stress tensor
+
+BETAHAT11 => TURB_WORK4
+BETAHAT22 => TURB_WORK5
+BETAHAT33 => TURB_WORK6
+BETAHAT12 => TURB_WORK7
+BETAHAT13 => TURB_WORK8
+BETAHAT23 => TURB_WORK9
+
+CALL TEST_FILTER(BETAHAT11,BETA11,N_LO,N_HI)
+CALL TEST_FILTER(BETAHAT22,BETA22,N_LO,N_HI)
+CALL TEST_FILTER(BETAHAT33,BETA33,N_LO,N_HI)
+CALL TEST_FILTER(BETAHAT12,BETA12,N_LO,N_HI)
+CALL TEST_FILTER(BETAHAT13,BETA13,N_LO,N_HI)
+CALL TEST_FILTER(BETAHAT23,BETA23,N_LO,N_HI)
+
+! calculate the Mij tensor
+
+M11 => TURB_WORK4
+M22 => TURB_WORK5
+M33 => TURB_WORK6
+M12 => TURB_WORK7
+M13 => TURB_WORK8
+M23 => TURB_WORK9
+
+M11 = 2._EB*(BETAHAT11 - ALPHA*RHOPHAT*SSHAT*SHAT11)
+M22 = 2._EB*(BETAHAT22 - ALPHA*RHOPHAT*SSHAT*SHAT22)
+M33 = 2._EB*(BETAHAT33 - ALPHA*RHOPHAT*SSHAT*SHAT33)
+M12 = 2._EB*(BETAHAT12 - ALPHA*RHOPHAT*SSHAT*SHAT12)
+M13 = 2._EB*(BETAHAT13 - ALPHA*RHOPHAT*SSHAT*SHAT13)
+M23 = 2._EB*(BETAHAT23 - ALPHA*RHOPHAT*SSHAT*SHAT23)
+
+! test filter the density
+
+CALL TEST_FILTER(RHOPHAT,RHOP,N_LO,N_HI)
+
+! calculate the Leonard term, Lij
+
+L11 => TURB_WORK11
+L22 => TURB_WORK12
+L33 => TURB_WORK13
+L12 => TURB_WORK14
+L13 => TURB_WORK15
+L23 => TURB_WORK16
+
+CALL CALC_VARDEN_LEONARD_TERM(NM)
+
+! calculate Mij*Lij & Mij*Mij
+
+MM    => TURB_WORK10
+MMHAT => TURB_WORK10
+
+ML    => TURB_WORK17
+MLHAT => TURB_WORK17
+
+ML = M11*L11 + M22*L22 + M33*L33 + 2._EB*(M12*L12 + M13*L13 + M23*L23)
+MM = M11*M11 + M22*M22 + M33*M33 + 2._EB*(M12*M12 +	M13*M13 + M23*M23)
+
+! do some smoothing
+
+CALL TEST_FILTER(MLHAT,ML,N_LO,N_HI)
+CALL TEST_FILTER(MMHAT,MM,N_LO,N_HI)
+
+DO K = 1,KBAR
+   DO J = 1,JBAR
+      DO I = 1,IBAR
+
+         ! calculate the local Smagorinsky coefficient
+
+         ! perform "clipping" in case MLij is negative...
+         IF (MLHAT(I,J,K) <= 0._EB) MLHAT(I,J,K) = 0._EB
+
+         ! calculate the effective viscosity
+
+         ! handle the case where we divide by zero
+         IF (MMHAT(I,J,K) == 0._EB) THEN
+            C_DYNSMAG(I,J,K) = 0._EB
+         ELSE
+            ! filter width
+            IF (TWO_D) THEN
+               DELTA = (DX(I)*DZ(K))**0.5_EB
+            ELSE
+               DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
+            ENDIF
+            C_DYNSMAG(I,J,K) = SQRT(MLHAT(I,J,K)/MMHAT(I,J,K))/DELTA
+         ENDIF
+				
+      END DO
+   END DO
+END DO
+
+WRITE(6,*) 'C_DYNSMAG (AVG) = ', SUM(C_DYNSMAG)/SIZE(C_DYNSMAG)
+
+END SUBROUTINE VARDEN_DYNSMAG
+
+
+SUBROUTINE CALC_VARDEN_LEONARD_TERM(NM)
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: NM
+
+REAL(EB), POINTER, DIMENSION(:,:,:) :: L11,L22,L33,L12,L13,L23
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,RHOPHAT
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RUU,RVV,RWW,RUV,RUW,RVW
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RU,RV,RW
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RUU_HAT,RVV_HAT,RWW_HAT,RUV_HAT,RUW_HAT,RVW_HAT
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RU_HAT,RV_HAT,RW_HAT
+
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: N_LO(3),N_HI(3)
+
+! *****************************************************************************
+! CAUTION WHEN MODIFYING: The order in which the tensor components are computed
+! is important because we overwrite pointers several times to conserve memory.
+! *****************************************************************************
+
+M => MESHES(NM)
+
+RHOP    => M%TURB_WORK18
+RHOPHAT => M%TURB_WORK19
+
+N_LO = 1
+N_HI = (/M%IBAR,M%JBAR,M%KBAR/)
+
+! Compute rho*UiUj
+
+UP => M%TURB_WORK1 ! will be overwritten by RU
+VP => M%TURB_WORK2
+WP => M%TURB_WORK3
+
+RUU => M%TURB_WORK11 ! will be overwritten by RUU_HAT
+RVV => M%TURB_WORK12
+RWW => M%TURB_WORK13
+RUV => M%TURB_WORK14
+RUW => M%TURB_WORK15
+RVW => M%TURB_WORK16
+
+RUU = RHOP*UP*UP
+RVV = RHOP*VP*VP
+RWW = RHOP*WP*WP
+RUV = RHOP*UP*VP
+RUW = RHOP*UP*WP
+RVW = RHOP*VP*WP
+
+! Test filter rho*UiUj
+
+RUU_HAT => M%TURB_WORK11 ! will be overwritten by Lij
+RVV_HAT => M%TURB_WORK12
+RWW_HAT => M%TURB_WORK13
+RUV_HAT => M%TURB_WORK14
+RUW_HAT => M%TURB_WORK15
+RVW_HAT => M%TURB_WORK16
+
+CALL TEST_FILTER(RUU_HAT,RUU,N_LO,N_HI)
+CALL TEST_FILTER(RVV_HAT,RVV,N_LO,N_HI)
+CALL TEST_FILTER(RWW_HAT,RWW,N_LO,N_HI)
+CALL TEST_FILTER(RUV_HAT,RUV,N_LO,N_HI)
+CALL TEST_FILTER(RUW_HAT,RUW,N_LO,N_HI)
+CALL TEST_FILTER(RVW_HAT,RVW,N_LO,N_HI)
+
+! Compute rho*Ui
+
+RU => M%TURB_WORK1 ! will be overwritten by RU_HAT
+RV => M%TURB_WORK2
+RW => M%TURB_WORK3
+
+RU = RHOP*UP
+RV = RHOP*VP
+RW = RHOP*WP
+
+! Test filter rho*Ui
+
+RU_HAT => M%TURB_WORK1
+RV_HAT => M%TURB_WORK2
+RW_HAT => M%TURB_WORK3
+
+CALL TEST_FILTER(RU_HAT,RU,N_LO,N_HI)
+CALL TEST_FILTER(RV_HAT,RV,N_LO,N_HI)
+CALL TEST_FILTER(RW_HAT,RW,N_LO,N_HI)
+
+! Compute variable density Leonard stress
+
+L11 => M%TURB_WORK11
+L22 => M%TURB_WORK12
+L33 => M%TURB_WORK13
+L12 => M%TURB_WORK14
+L13 => M%TURB_WORK15
+L23 => M%TURB_WORK16
+
+L11 = RUU_HAT - RU_HAT*RU_HAT/RHOPHAT
+L22 = RVV_HAT - RV_HAT*RV_HAT/RHOPHAT
+L33 = RWW_HAT - RW_HAT*RW_HAT/RHOPHAT
+L12 = RUV_HAT - RU_HAT*RV_HAT/RHOPHAT
+L13 = RUW_HAT - RU_HAT*RW_HAT/RHOPHAT
+L23 = RVW_HAT - RV_HAT*RW_HAT/RHOPHAT
+
+END SUBROUTINE CALC_VARDEN_LEONARD_TERM
+
+
+SUBROUTINE TEST_FILTER(PHIBAR,PHI,N_LO,N_HI)
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: N_LO(3),N_HI(3)
+REAL(EB), INTENT(IN) ::  PHI(N_LO(1):N_HI(1),N_LO(2):N_HI(2),N_LO(3):N_HI(3))
+
+REAL(EB) :: PHIBAR(N_LO(1):N_HI(1),N_LO(2):N_HI(2),N_LO(3):N_HI(3))
+INTEGER I,J,K
+
+! filter in x:
+DO K = N_LO(3),N_HI(3)
+   DO J = N_LO(2),N_HI(2)
+      CALL TOPHAT_FILTER_1D(PHIBAR(:,J,K),PHI(:,J,K),N_LO(1),N_HI(1))
+   END DO
+END DO
+
+! filter in y:
+DO K = N_LO(3),N_HI(3)
+   DO I = N_LO(1),N_HI(1)
+      CALL TOPHAT_FILTER_1D(PHIBAR(I,:,K),PHIBAR(I,:,K),N_LO(2),N_HI(2))
+   END DO
+END DO
+
+! filter in z:
+DO J = N_LO(2),N_HI(2)
+   DO I = N_LO(1),N_HI(1)
+      CALL TOPHAT_FILTER_1D(PHIBAR(I,J,:),PHIBAR(I,J,:),N_LO(3),N_HI(3))
+   END DO
+END DO
+
+END SUBROUTINE TEST_FILTER
+
+
+SUBROUTINE TOPHAT_FILTER_1D(UBAR,U,N_LO,N_HI)
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: N_LO,N_HI
+REAL(EB), INTENT(IN) :: U(N_LO:N_HI)
+REAL(EB), INTENT(OUT) :: UBAR(N_LO:N_HI)
+
+INTEGER :: J
+REAL(EB) :: WW(3),UU(3)
+
+! weighting coefficients for trapezoid rule
+WW = (/0.25_EB,0.5_EB,0.25_EB/)
+
+! Filter the u field to obtain ubar
+DO J=N_LO+1,N_HI-1
+   UU = U(J-1:J+1)
+   UBAR(J) = SUM(WW*UU)
+ENDDO
+! set boundary values (not ideal, but fast and simple)
+UBAR(N_LO) = UBAR(N_LO+1)
+UBAR(N_HI) = UBAR(N_HI-1)
+
+END SUBROUTINE TOPHAT_FILTER_1D
+
 
 
 END MODULE TURBULENCE
