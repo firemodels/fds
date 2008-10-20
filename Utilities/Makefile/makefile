@@ -16,11 +16,11 @@ VPATH = ../../FDS_Source
 #*** Serial or MPI object variables ***
 obj_serial = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
              ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o mass.o \
-             wall.o fire.o pres.o divg.o init.o velo.o turb.o main.o
+             wall.o fire.o pres.o divg.o init.o turb.o velo.o main.o
 
 obj_mpi = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
           ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o mass.o \
-          wall.o fire.o pres.o divg.o init.o velo.o turb.o main_mpi.o
+          wall.o fire.o pres.o divg.o init.o turb.o velo.o main_mpi.o
 
 #*** General Purpose Rules ***
 no_target:
@@ -276,7 +276,7 @@ irad.o : irad.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
 ieva.o : ieva.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
 fire.o : fire.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
 wall.o : wall.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-velo.o : velo.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+velo.o : velo.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
 divg.o : divg.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
 mass.o : mass.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
 radi.o : radi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 irad.f90
