@@ -3687,7 +3687,7 @@ Contains
           HUMAN_GRID(i,j)%SOOT_DENS     = 0.0_EB
           HUMAN_GRID(i,j)%FED_CO_CO2_O2 = 0.0_EB
           HUMAN_GRID(i,j)%TMP_G         = 0.0_EB
-          HUMAN_GRID(i,j)%RADFLUX       = 0.0_EB
+          HUMAN_GRID(i,j)%RADFLUX        = 0.0_EB
           HUMAN_GRID(i,j)%IMESH         = 0
           HUMAN_GRID(i,j)%II = i
           HUMAN_GRID(i,j)%JJ = j
@@ -4042,6 +4042,7 @@ Contains
              HR%IMESH       = HPT%IMESH
              HR%INODE       = n_tmp
              HR%NODE_NAME   = Trim(EVAC_Node_List(n_tmp)%ID)
+             HR%I_FFIELD  = 0
              HR%IOR       = HUMAN_NO_TARGET
              HR%U         = 0.0_EB
              HR%V         = 0.0_EB
@@ -4115,19 +4116,12 @@ Contains
     !
     ! Initialize group lists, known doors, etc
     !
-    Real(EB) RN
-    Real(EB) x1_old, y1_old
-    Integer I,J, IZERO, ie, nom, j1
-    Logical PP_see_door
-    Real(EB) y_o, x_o, x11, y11
-    Character(26) :: GROUP_FFIELD_NAME
-    Integer :: GROUP_FFIELD_I
+    Integer I,J, IZERO, nom, j1
     Real(EB), Dimension(:), Allocatable :: K_ave_Door
     Real(EB), Dimension(:), Allocatable :: FED_max_Door
     Logical, Dimension(:), Allocatable :: Is_Known_Door, Is_Visible_Door
     Integer, Dimension(:), Allocatable :: Color_Tmp
-    Integer :: i_tmp, i_egrid, color_index
-    Real(EB) :: L2_min, max_fed, ave_K, L2_tmp
+    Integer :: i_egrid, i_target, color_index, i_new_ffield
     ! 
     Type (MESH_TYPE), Pointer :: M
     !
@@ -4201,419 +4195,13 @@ Contains
           ! Test, if this group has already a ffield (on this floor)
           ! Lonely humans have j=0 and group_i_ffields is always 0.
           If (Group_List(j)%GROUP_I_FFIELDS(i_egrid) == 0) Then
-             If ( j == 0 ) Then
-                x1_old = HR%X
-                y1_old = HR%Y
-             Else
-                x1_old = Group_List(j)%GROUP_X
-                y1_old = Group_List(j)%GROUP_Y
-             End If
-             HPT => EVACUATION(HR%IEL)
-             K_ave_Door(:)      = 0.0_EB
-             FED_max_Door(:)    = 0.0_EB
-             Is_Known_Door(:)   = .False.
-             Is_Visible_Door(:) = .False.
-             Do ie = 1, n_doors
-                If ( EVAC_DOORS(ie)%IMESH == HPT%imesh ) Then
-                   Is_Visible_Door(ie) = .True.
-                End If
-             End Do
-             Do ie = 1, n_exits
-                If ( EVAC_EXITS(ie)%IMESH == HPT%imesh .And. &
-                     .Not. EVAC_EXITS(ie)%COUNT_ONLY ) Then
-                   Is_Visible_Door(n_doors+ie) = .True.
-                End If
-             End Do
-
-             Do ie = 1, HPT%N_VENT_FFIELDS 
-                i_tmp = 1
-                If (Trim(EVAC_Node_List(HPT%I_DOOR_NODES(ie) &
-                     )%Node_Type) == 'Door') Then
-                   i_tmp = EVAC_Node_List(HPT%I_DOOR_NODES(ie) &
-                        )%Node_Index 
-                End If
-                If (Trim(EVAC_Node_List(HPT%I_DOOR_NODES(ie) &
-                     )%Node_Type) == 'Exit' ) Then
-                   i_tmp = n_doors + &
-                        EVAC_Node_List(HPT%I_DOOR_NODES(ie) &
-                        )%Node_Index 
-                End If
-
-                If (HPT%P_VENT_FFIELDS(ie) < 1.0_EB) Then
-                   Call Random_number(RN)
-                   If ( RN < HPT%P_VENT_FFIELDS(ie) ) Then
-                      Is_Known_Door(i_tmp) = .True.
-                   Else
-                      Is_Known_Door(i_tmp) = .False.
-                   End If
-                Else
-                   Is_Known_Door(i_tmp) = .True.
-                End If
-             End Do
-
-             ! Find the visible doors 
-             Do ie = 1, n_doors + n_exits
-                ! Check that the door/exit is on the correct grid:
-                If ( Is_Visible_Door(ie) ) Then
-                   If (EVAC_Node_List(n_egrids+n_entrys+ie)%Node_Type &
-                        == 'Door' ) Then
-                      X11 = EVAC_DOORS(ie)%X 
-                      Y11 = EVAC_DOORS(ie)%Y
-                   Else        ! 'Exit'
-                      X11 = EVAC_EXITS(ie-n_doors)%X 
-                      Y11 = EVAC_EXITS(ie-n_doors)%Y
-                   End If
-                   PP_see_door = See_door(nom, ie, HR%I_Target, x1_old, y1_old, x11, y11, ave_K, max_fed)
-                   FED_max_Door(ie) = max_fed
-                   K_ave_Door(ie)   = ave_K 
-
-                   If (PP_see_door) Then
-                      If (EVAC_Node_List(n_egrids+n_entrys+ie)%Node_Type == 'Door') Then
-                         If (.Not. EVAC_DOORS(ie)%EXIT_SIGN) Then
-                            Is_Visible_Door(ie) = .False.
-                         End If
-                      End If
-                   Else
-                      ! Not visible, use fed at position of the human
-                      Is_Visible_Door(ie) = .False.
-                   End If
-
-                End If        ! correct floor
-             End Do          ! doors and exits
-
-             ! Save the random known door information
-             i_tmp = Count(Is_Known_Door)
-             If (j > 0 ) Then
-                Group_Known_Doors(j)%N_nodes = i_tmp
-                If (Count(Is_Known_Door) > 0 ) Then
-                   Allocate(Group_Known_Doors(j)%I_nodes(i_tmp), STAT=IZERO)
-                   Call ChkMemErr('Initialize_Evacuation', 'Group_Known_Doors',IZERO) 
-                   i_tmp = 0
-                   Do ie = 1, n_doors
-                      If (Is_Known_Door(ie)) Then
-                         i_tmp = i_tmp + 1
-                         Group_Known_Doors(j)%I_nodes(i_tmp) = EVAC_DOORS(ie)%INODE  
-                      End If
-                   End Do
-                   Do ie = 1, n_exits
-                      If (Is_Known_Door(ie+n_doors)) Then
-                         i_tmp = i_tmp + 1
-                         Group_Known_Doors(j)%I_nodes(i_tmp) = &
-                              EVAC_EXITS(ie)%INODE  
-                      End If
-                   End Do
-                End If        ! there are known doors for this group
-             Else
-                If (j1 > 0) Then
-                   Human_Known_Doors(j1)%N_nodes = i_tmp
-                   If (Count(Is_Known_Door) > 0 ) Then
-                      Allocate(Human_Known_Doors(j1)%I_nodes(i_tmp), &
-                           STAT=IZERO)
-                      Call ChkMemErr('Initialize_Evacuation', &
-                           'Human_Known_Doors',IZERO) 
-                      i_tmp = 0
-                      Do ie = 1, n_doors
-                         If (Is_Known_Door(ie)) Then
-                            i_tmp = i_tmp + 1
-                            Human_Known_Doors(j1)%I_nodes(i_tmp) = &
-                                 EVAC_DOORS(ie)%INODE  
-                         End If
-                      End Do
-                      Do ie = 1, n_exits
-                         If (Is_Known_Door(ie+n_doors)) Then
-                            i_tmp = i_tmp + 1
-                            Human_Known_Doors(j1)%I_nodes(i_tmp) = &
-                                 EVAC_EXITS(ie)%INODE  
-                         End If
-                      End Do
-                   End If        ! there are known doors for this group
-                End If
-             End If
-
-             Do ie = 1, n_doors
-                If ( EVAC_DOORS(ie)%IMESH /= HPT%imesh ) Then
-                   Is_Known_Door(ie) = .False.
-                End If
-             End Do
-             Do ie = 1, n_exits
-                If ( EVAC_EXITS(ie)%IMESH /= HPT%imesh .Or. &
-                     EVAC_EXITS(ie)%COUNT_ONLY ) Then
-                   Is_Known_Door(n_doors+ie) = .False.
-                End If
-             End Do
-
-
-             Do ie = 1, n_doors
-                If ( EVAC_DOORS(ie)%TIME_OPEN > T_BEGIN ) Then
-                   Is_Visible_Door(ie) = .False.
-                   Is_Known_Door(ie) = .False.
-                End If
-             End Do
-             Do ie = 1, n_exits
-                If ( EVAC_EXITS(ie)%TIME_OPEN > T_BEGIN .And. &
-                     .Not. EVAC_EXITS(ie)%COUNT_ONLY ) Then
-                   Is_Visible_Door(n_doors+ie) = .False.
-                   Is_Known_Door(n_doors+ie) = .False.
-                End If
-             End Do
-
-             If (Any(Is_Known_Door) .Or. Any(Is_Visible_Door)) Then
-                i_tmp   = 0
-                L2_min = Huge(L2_min)
-                Do ie = 1, n_doors + n_exits
-                   If ( Is_Known_Door(ie) .And. &
-                        Is_Visible_Door(ie) ) Then
-                      x_o = 0.0_EB
-                      y_o = 0.0_EB
-                      If (Trim(EVAC_Node_List(n_egrids+n_entrys+ie &
-                           )%Node_Type) == 'Door' ) Then
-                         x_o = EVAC_DOORS( EVAC_Node_List( &
-                              ie+n_egrids+n_entrys)%Node_Index )%X
-                         y_o = EVAC_DOORS( EVAC_Node_List( &
-                              ie+n_egrids+n_entrys)%Node_Index )%Y
-                      Else      ! 'Exit'
-                         x_o = EVAC_EXITS( EVAC_Node_List( &
-                              ie+n_egrids+n_entrys)%Node_Index )%X
-                         y_o = EVAC_EXITS( EVAC_Node_List( &
-                              ie+n_egrids+n_entrys)%Node_Index )%Y
-                      End If
-                      If (FED_DOOR_CRIT > 0.0_EB) Then
-                         L2_tmp = FED_max_Door(ie) * Sqrt((x_o-HR%X)**2 &
-                              + (y_o-HR%Y)**2)/HR%Speed
-                      Else
-                         L2_tmp = K_ave_Door(ie)
-                      End If
-
-                      If ( ((x_o-HR%X)**2 + (y_o-HR%Y)**2) < L2_min &
-                           .And. L2_tmp < Abs(FED_DOOR_CRIT)) Then
-                         L2_min = (x_o-HR%X)**2 + (y_o-HR%Y)**2 
-                         L2_min = Max(0.0_EB,L2_min)
-                         i_tmp = ie
-                      End If
-                   End If
-                End Do
-                If (i_tmp > 0 ) Then
-                   ! Known and visible door, no smoke
-                   color_index = 1
-                   If (EVAC_Node_List(n_egrids+n_entrys+i_tmp &
-                        )%Node_Type == 'Door' ) Then
-                      GROUP_FFIELD_NAME = &
-                           Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
-                      GROUP_FFIELD_I = &
-                           EVAC_DOORS(i_tmp)%I_VENT_FFIELD
-                   Else        ! 'Exit'
-                      GROUP_FFIELD_NAME = &
-                           Trim(EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
-                      GROUP_FFIELD_I = &
-                           EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
-                   End If
-                Else
-                   ! No visible known door available, try non-visible known doors
-                   i_tmp   = 0
-                   L2_min = Huge(L2_min)
-                   Do ie = 1, n_doors + n_exits
-                      If ( Is_Known_Door(ie) .And. &
-                           .Not. Is_Visible_Door(ie) ) Then
-                         x_o = 0.0_EB
-                         y_o = 0.0_EB
-                         If (EVAC_Node_List(n_egrids+n_entrys+ie &
-                              )%Node_Type == 'Door' ) Then
-                            x_o = EVAC_DOORS( EVAC_Node_List(ie+ &
-                                 n_egrids+n_entrys)%Node_Index )%X
-                            y_o = EVAC_DOORS( EVAC_Node_List(ie+ &
-                                 n_egrids+n_entrys)%Node_Index )%Y
-                         Else    ! 'Exit'
-                            x_o = EVAC_EXITS( EVAC_Node_List(ie+ &
-                                 n_egrids+n_entrys)%Node_Index )%X
-                            y_o = EVAC_EXITS( EVAC_Node_List(ie+ &
-                                 n_egrids+n_entrys)%Node_Index )%Y
-                         End If
-                         If (FED_DOOR_CRIT > 0.0_EB) Then
-                            L2_tmp = FED_max_Door(ie)*Sqrt((x_o-HR%X)**2 &
-                                 + (y_o-HR%Y)**2)/HR%Speed
-                         Else
-                            l2_tmp = K_ave_Door(ie)
-                         End If
-                         If ( ((x_o-HR%X)**2 + (y_o-HR%Y)**2) < &
-                              L2_min .And. L2_tmp < &
-                              Abs(FED_DOOR_CRIT)) Then
-                            L2_min = (x_o-HR%X)**2 + (y_o-HR%Y)**2 
-                            L2_min = Max(0.0_EB,L2_min)
-                            i_tmp = ie
-                         End If
-                      End If
-                   End Do
-                   If (i_tmp > 0 ) Then
-                      ! Non-visible known door, no smoke
-                      color_index = 2
-                      If (EVAC_Node_List( &
-                           n_egrids+n_entrys+i_tmp)%Node_Type &
-                           == 'Door' ) Then
-                         GROUP_FFIELD_NAME = &
-                              Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
-                         GROUP_FFIELD_I = &
-                              EVAC_DOORS(i_tmp)%I_VENT_FFIELD
-                      Else      ! 'Exit'
-                         GROUP_FFIELD_NAME = Trim( &
-                              EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
-                         GROUP_FFIELD_I = &
-                              EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
-                      End If
-                   Else
-                      ! known doors with no smoke have not been found
-                      i_tmp   = 0
-                      L2_min = Huge(L2_min)
-                      Do ie = 1, n_doors + n_exits
-                         If (Is_Visible_Door(ie)) Then
-                            x_o = 0.0_EB
-                            y_o = 0.0_EB
-                            If (EVAC_Node_List(n_egrids+n_entrys+ &
-                                 ie)%Node_Type == 'Door' ) Then
-                               x_o = EVAC_DOORS( EVAC_Node_List(ie+ &
-                                    n_egrids+n_entrys)%Node_Index )%X
-                               y_o = EVAC_DOORS( EVAC_Node_List(ie+ &
-                                    n_egrids+n_entrys)%Node_Index )%Y
-                            Else  ! 'Exit'
-                               x_o = EVAC_EXITS( EVAC_Node_List(ie+ &
-                                    n_egrids+n_entrys)%Node_Index )%X
-                               y_o = EVAC_EXITS( EVAC_Node_List(ie+ &
-                                    n_egrids+n_entrys)%Node_Index )%Y
-                            End If
-                            If (FED_DOOR_CRIT > 0.0_EB) Then
-                               L2_tmp = FED_max_Door(ie)*Sqrt( &
-                                    (x_o-HR%X)**2 + (y_o-HR%Y)**2) &
-                                    /HR%Speed
-                            Else
-                               l2_tmp = K_ave_Door(ie)
-                            End If
-                            If ( ((x_o-HR%X)**2+(y_o-HR%Y)**2) < L2_min &
-                                 .And. L2_tmp < &
-                                 Abs(FED_DOOR_CRIT)) Then
-                               L2_min = (x_o-HR%X)**2 + (y_o-HR%Y)**2 
-                               L2_min = Max(0.0_EB,L2_min)
-                               i_tmp = ie
-                            End If
-                         End If
-                      End Do
-                      If (i_tmp > 0 ) Then
-                         ! No smoke, visible door (not known)
-                         color_index = 3
-                         If (EVAC_Node_List( &
-                              n_egrids+n_entrys+i_tmp)%Node_Type &
-                              == 'Door' ) Then
-                            GROUP_FFIELD_NAME = &
-                                 Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
-                            GROUP_FFIELD_I = &
-                                 EVAC_DOORS(i_tmp)%I_VENT_FFIELD
-                         Else    ! 'Exit'
-                            GROUP_FFIELD_NAME = Trim( &
-                                 EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
-                            GROUP_FFIELD_I = &
-                                 EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
-                         End If
-                      Else
-                         ! Now we have smoke and some visible or known doors
-                         i_tmp   = 0
-                         L2_min = Huge(L2_min)
-                         Do ie = 1, n_doors + n_exits
-                            If (Is_Visible_Door(ie) .Or. &
-                                 Is_Known_Door(ie) ) Then
-                               x_o = 0.0_EB
-                               y_o = 0.0_EB
-                               If (EVAC_Node_List(n_egrids+n_entrys+ &
-                                    ie)%Node_Type == 'Door' ) Then
-                                  x_o = EVAC_DOORS(EVAC_Node_List(ie+ &
-                                       n_egrids+n_entrys)%Node_Index)%X
-                                  y_o = EVAC_DOORS( EVAC_Node_List(ie+ &
-                                       n_egrids+n_entrys)%Node_Index)%Y
-                               Else ! 'Exit'
-                                  x_o = EVAC_EXITS( EVAC_Node_List(ie+ &
-                                       n_egrids+n_entrys)%Node_Index)%X
-                                  y_o = EVAC_EXITS( EVAC_Node_List(ie+ &
-                                       n_egrids+n_entrys)%Node_Index)%Y
-                               End If
-                               If (FED_DOOR_CRIT > 0.0_EB) Then
-                                  L2_tmp = HR%IntDose +FED_max_Door(ie) * &
-                                       Sqrt((HR%X-x_o)**2 + (HR%Y-y_o)**2)/ &
-                                       HR%Speed
-                               Else
-                                  l2_tmp = (Sqrt((HR%X-x_o)**2 &
-                                       + (HR%Y-y_o)**2)*0.5_EB) / &
-                                       (3.0_EB/K_ave_Door(ie))
-                               End If
-                               If (L2_tmp < L2_min) Then
-                                  L2_min = L2_tmp
-                                  i_tmp = ie
-                               End If
-                            End If
-                         End Do
-
-                         If (i_tmp > 0 .And. L2_min < 1.0_EB) Then
-                            ! Not too much smoke, i.e., non-lethal amount (known or visible doors)
-                            If (EVAC_Node_List( &
-                                 n_egrids+n_entrys+i_tmp)%Node_Type &
-                                 == 'Door' ) Then
-                               GROUP_FFIELD_NAME = &
-                                    Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
-                               GROUP_FFIELD_I = &
-                                    EVAC_DOORS(i_tmp)%I_VENT_FFIELD
-                            Else  ! 'Exit'
-                               GROUP_FFIELD_NAME = Trim( &
-                                    EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
-                               GROUP_FFIELD_I = &
-                                    EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
-                            End If
-                            If (Is_Known_Door(i_tmp) .And. &
-                                 Is_Visible_Door(i_tmp)) color_index = 4
-                            If (Is_Known_Door(i_tmp) .And. .Not. &
-                                 Is_Visible_Door(i_tmp)) color_index = 5
-                            If (.Not. Is_Known_Door(i_tmp) .And. &
-                                 Is_Visible_Door(i_tmp)) color_index = 6
-                         Else
-                            ! No door found, use the main evac grid ffield or evac-line 
-                            i_tmp = 0 ! no door found
-                            GROUP_FFIELD_NAME = Trim(HPT%GRID_NAME)
-                            GROUP_FFIELD_I    = HPT%I_VENT_FFIELDS(0)
-                            color_index = 7
-                         End If  ! case 4
-                      End If    ! case 3
-                   End If      ! case 2
-                End If        ! case 1
-                If (Color_Method == 4 ) Then
-                   color_index = EVAC_AVATAR_NCOLOR ! default, cyan
-                   If (i_tmp > 0 .And. i_tmp <= n_doors) &
-                        color_index = EVAC_DOORS(i_tmp)%Avatar_Color_Index
-                   If (i_tmp > n_doors .And. i_tmp <=  n_doors + n_exits) &
-                        color_index = EVAC_EXITS(i_tmp-n_doors)%Avatar_Color_Index
-                End If
-
-             Else ! No known/visible door
-                i_tmp = 0 ! no door found
-                GROUP_FFIELD_NAME = Trim(HPT%GRID_NAME)
-                GROUP_FFIELD_I    = HPT%I_VENT_FFIELDS(0)
-                color_index = 7 ! default, cyan
-                If (Color_Method == 4) color_index = EVAC_AVATAR_NCOLOR 
-             End If
-
-             HR%I_Target = i_tmp
-             If (i_tmp > 0 .And. .Not. Is_Visible_Door(Max(1,i_tmp))) Then
-                ! I_Target >0: visible, <0: not visible
-                HR%I_Target = -i_tmp
-             End If
-             If (j > 0) Group_Known_Doors(j)%I_Target = HR%I_Target
-             HR%FFIELD_NAME = Trim(GROUP_FFIELD_NAME)
-             HR%I_FFIELD    = GROUP_FFIELD_I
-             If (COLOR_METHOD == 5 ) HR%COLOR_INDEX = color_index
-             If (COLOR_METHOD == 4 ) HR%COLOR_INDEX = color_index
-             If (j > 0) Color_Tmp(j) = color_index
-             If (j > 0) Group_List(j)%GROUP_I_FFIELDS(i_egrid) &
-                  = GROUP_FFIELD_I
+             Call Change_Target_Door(nom, nom, i, j, j1, i_egrid, 0, 0.0_EB, HR%X, HR%Y, &
+                  Is_Known_Door, Is_Visible_Door, FED_max_Door, K_ave_Door, Color_Tmp, &
+                  i_target, color_index, i_new_ffield)
           Else              ! this group has already a flow field
              ! This group has already tried to change the field
-             If (COLOR_METHOD == 5 .And. j > 0) &
-                  HR%COLOR_INDEX = Color_Tmp(j)
-             If (COLOR_METHOD == 4 .And. j > 0) &
-                  HR%COLOR_INDEX = Color_Tmp(j)
+             If (COLOR_METHOD == 5 .And. j > 0) HR%COLOR_INDEX = Color_Tmp(j)
+             If (COLOR_METHOD == 4 .And. j > 0) HR%COLOR_INDEX = Color_Tmp(j)
              HR%I_FFIELD    = Group_List(j)%GROUP_I_FFIELDS(i_egrid)
              HR%FFIELD_NAME = Trim(MESH_NAME(HR%I_FFIELD))
              HR%I_Target = Group_Known_Doors(j)%I_Target
@@ -4681,7 +4269,6 @@ Contains
     !
     Integer nm, nom, i, j, i1, j1, k1
     Integer ios
-    Real(EB) tmp_1, y_extra, Y_MF_INT
     Logical L_use_fed, L_fed_read, L_fed_save
     Real(EB) DT_Save
     Integer(4) ibar_tmp, jbar_tmp, kbar_tmp, n_tmp
@@ -4781,12 +4368,13 @@ Contains
                       k1 = HUMAN_GRID(i,j)%KK
                       nom = Abs(HUMAN_GRID(i,j)%IMESH)
                       CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
-                              HUMAN_GRID(i,j)%FED_CO_CO2_O2,HUMAN_GRID(i,j)%SOOT_DENS,&
-                              HUMAN_GRID(i,j)%TMP_G, HUMAN_GRID(i,j)%RADFLUX)
+                           HUMAN_GRID(i,j)%FED_CO_CO2_O2,HUMAN_GRID(i,j)%SOOT_DENS,&
+                           HUMAN_GRID(i,j)%TMP_G, HUMAN_GRID(i,j)%RADFLUX)
+
+
                    End If ! imesh > 0, i.e. fire grid found
 
-
-                   ! Save Fed, Soot, Temp(C), and RadFlux
+                   ! Save Fed, Soot, Temp(C), and Radflux
                    Write (LU_EVACFED) &
                         Real(HUMAN_GRID(i,j)%FED_CO_CO2_O2,FB), &
                         Real(HUMAN_GRID(i,j)%SOOT_DENS,FB), &
@@ -4794,7 +4382,7 @@ Contains
                         Real(HUMAN_GRID(i,j)%RADFLUX,FB)
 
                 Else     ! Read FED from a file
-                   ! Read Fed, Soot, Temp(C), and RADFLUX
+                   ! Read Fed, Soot, Temp(C), and Radflux
                    Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
                    If (ios.Ne.0) Then
                       Write(MESSAGE,'(A)') 'ERROR: Evac Mesh Exchange: FED READ ERROR'
@@ -4828,6 +4416,7 @@ Contains
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                          EVAC_CORRS(i)%FED_CO_CO2_O2(1),EVAC_CORRS(i)%SOOT_DENS(1),&
                          EVAC_CORRS(i)%TMP_G(1), EVAC_CORRS(i)%RADFLUX(1))
+
              Else
                 ! No fed_mesh found
                 EVAC_CORRS(i)%FED_CO_CO2_O2(1) = 0.0_EB
@@ -4844,6 +4433,7 @@ Contains
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                          EVAC_CORRS(i)%FED_CO_CO2_O2(2),EVAC_CORRS(i)%SOOT_DENS(2),&
                          EVAC_CORRS(i)%TMP_G(2), EVAC_CORRS(i)%RADFLUX(2))
+
              Else
                 ! No fed_mesh2 found
                 EVAC_CORRS(i)%FED_CO_CO2_O2(2) = 0.0_EB
@@ -4852,7 +4442,7 @@ Contains
                 EVAC_CORRS(i)%RADFLUX(2) = 0.0_EB
              End If                ! fed_mesh2 > 0, i.e. fire grid found
 
-             ! Save Fed, Soot, Temp(C), and RADFLUX
+             ! Save Fed, Soot, Temp(C), and Radflux
              Write (LU_EVACFED) &
                   Real(EVAC_CORRS(i)%FED_CO_CO2_O2(1),FB), &
                   Real(EVAC_CORRS(i)%SOOT_DENS(1),FB), &
@@ -4864,7 +4454,7 @@ Contains
                   Real(EVAC_CORRS(i)%RADFLUX(2),FB)
 
           Else                    ! Read FED from a file
-             ! Read Fed, Soot, Temp(C), and RADFLUX
+             ! Read Fed, Soot, Temp(C), and Radflux
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4, &
                   tmpout5, tmpout6, tmpout7, tmpout8
              If (ios.Ne.0) Then
@@ -4896,6 +4486,7 @@ Contains
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                               EVAC_DOORS(i)%FED_CO_CO2_O2,EVAC_DOORS(i)%SOOT_DENS,&
                               EVAC_DOORS(i)%TMP_G, EVAC_DOORS(i)%RADFLUX)
+
              Else
                 ! No fed_mesh found
                 EVAC_DOORS(i)%FED_CO_CO2_O2 = 0.0_EB
@@ -4904,7 +4495,7 @@ Contains
                 EVAC_DOORS(i)%RADFLUX = 0.0_EB
              End If                ! fed_mesh > 0, i.e. fire grid found
 
-             ! Save Fed, Soot, Temp(C), and RADFLUX
+             ! Save Fed, Soot, Temp(C), and Radflux
              Write (LU_EVACFED) &
                   Real(EVAC_DOORS(i)%FED_CO_CO2_O2,FB), &
                   Real(EVAC_DOORS(i)%SOOT_DENS,FB), &
@@ -4912,7 +4503,7 @@ Contains
                   Real(EVAC_DOORS(i)%RADFLUX,FB)
 
           Else                    ! Read FED from a file
-             ! Read Fed, Soot, Temp(C), and RADFLUX
+             ! Read Fed, Soot, Temp(C), and Radflux
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
              If (ios.Ne.0) Then
                 Write(MESSAGE,'(A)') 'ERROR: Evac Mesh Exchange: FED READ ERROR'
@@ -4940,6 +4531,7 @@ Contains
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                          EVAC_EXITS(i)%FED_CO_CO2_O2,EVAC_EXITS(i)%SOOT_DENS,&
                          EVAC_EXITS(i)%TMP_G, EVAC_EXITS(i)%RADFLUX)
+
              Else
                 ! No fed_mesh found
                 EVAC_EXITS(i)%FED_CO_CO2_O2 = 0.0_EB
@@ -4948,7 +4540,7 @@ Contains
                 EVAC_EXITS(i)%RADFLUX = 0.0_EB
              End If                ! fed_mesh > 0, i.e. fire grid found
 
-             ! Save Fed, Soot, Temp(C), and RADFLUX
+             ! Save Fed, Soot, Temp(C), and Radflux
              Write (LU_EVACFED) &
                   Real(EVAC_EXITS(i)%FED_CO_CO2_O2,FB), &
                   Real(EVAC_EXITS(i)%SOOT_DENS,FB), &
@@ -4956,7 +4548,7 @@ Contains
                   Real(EVAC_EXITS(i)%RADFLUX,FB)
 
           Else                    ! Read FED from a file
-             ! Read Fed, Soot, Temp(C), and RADFLUX
+             ! Read Fed, Soot, Temp(C), and Radflux
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
              If (ios.Ne.0) Then
                 Write(MESSAGE,'(A)') 'ERROR: Evac Mesh Exchange: FED READ ERROR'
@@ -5047,17 +4639,16 @@ Contains
     Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, tim_dist, Door_dist, Door_width
     Real(EB), Dimension(4) :: d_xy
     Logical, Dimension(4) :: FoundWall_xy
-    Integer istat, STRS_INDX
+    Integer istat, STRS_INDX, i_target, color_index, i_new_ffield
     !
     !
     Real(EB)  scal_prod_over_rsqr, U_new, V_new, Vmax_timo, CosPhiFac, &
          Speed_max, Delta_min, Dt_sum, C_Yeff, LambdaW, B_Wall, A_Wall, &
          T, Contact_F, Social_F, smoke_beta, smoke_alpha, smoke_speed_fac
-    Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, i_o, door_ior
-    Real(EB) y_o, x_o, x_now, y_now, x_target, y_target, d_humans, d_walls, DTSP_new, &
-         fac_tim, dt_group_door, x1_old, y1_old, x11, y11, &
-         max_fed, L2_min, L2_tmp, Speed, Tpre, ave_K
-    Logical PP_see_each, PP_see_door
+    Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, door_ior
+    Real(EB) x_now, y_now, x_target, y_target, d_humans, d_walls, DTSP_new, &
+         fac_tim, dt_group_door, x11, y11, Speed, Tpre
+    Logical PP_see_each
     Logical L_eff_read, L_eff_save, L_Dead
     Real(EB) :: cos_x, cos_y, speed_xm, speed_xp, speed_ym, speed_yp, hr_z, hr_a, hr_b, hr_tau, hr_tau_iner
     !
@@ -5068,8 +4659,8 @@ Contains
     Real(EB), Dimension(:), Allocatable :: FED_max_Door
     Integer, Dimension(:), Allocatable :: Color_Tmp
     Logical, Dimension(:), Allocatable :: Is_Known_Door, Is_Visible_Door
-    Integer :: i_old_ffield, i_new_ffield, IEL, IZERO, color_index
-    Character(26) :: name_old_ffield, name_new_ffield
+    Integer :: i_old_ffield, IZERO
+    Character(26) :: name_old_ffield
     !
     !
     Real(EB) :: P2P_Torque, Fc_x, Fc_y, Omega_new, angle, A1, Tc_z, Fc_x1, Fc_y1
@@ -5101,6 +4692,7 @@ Contains
     Omega_0        = V_ANGULAR*2.0_EB*Pi     ! 2 rounds per second in radians
     !
     Dt_sum         = 0.0_EB
+    ! dt_group_door: how often (on the average) an agent (or group) tries to change the door.
     dt_group_door  = TAU_CHANGE_DOOR
     !
     Call POINT_TO_MESH(NM)
@@ -5264,459 +4856,40 @@ Contains
 
              i_old_ffield = HR%I_FFIELD
              name_old_ffield = Trim(MESH_NAME(i_old_ffield))
-             j  =  Max(0,HR%GROUP_ID)
-             j1 = -Min(0,HR%GROUP_ID)
-             !cc          Do j = 1, i33_dim
+             j  =  Max(0,HR%GROUP_ID)   ! group index
+             j1 = -Min(0,HR%GROUP_ID)   ! lonely agent index
 
+             ! If the group is not yet together, they are not moving towards the exit.
              If (Group_List(j)%COMPLETE == 0) Cycle Change_Door_Loop
-             If (j == 0 .And. T < HR%Tpre+HR%Tdet) &
-                  Cycle Change_Door_Loop
-             If (j > 0 .And. T < Group_List(j)%Tpre + &
-                  Group_List(j)%Tdoor) Cycle Change_Door_Loop
+
+             ! Agents start to move towards the exit after the pre-evacuation (reaction) time.
+             If (j == 0 .And. T < HR%Tpre+HR%Tdet) Cycle Change_Door_Loop
+             If (j > 0 .And. T < Group_List(j)%Tpre + Group_List(j)%Tdoor) Cycle Change_Door_Loop
 
              If (Group_List(j)%GROUP_I_FFIELDS(i_egrid) == 0) Then
+                ! Test if this group/agent should update the exit door (exp. distribution)
                 Call Random_number(rn)
                 If (rn > Exp(-DTSP/dt_group_door) ) Then
-                   i_old_ffield = HR%I_FFIELD
-                   name_old_ffield = Trim(MESH_NAME(i_old_ffield))
 
-                   If (HR%IEL > 0 ) Then
-                      ! Human HR originates from an evac line
-                      HPT => EVACUATION(HR%IEL)
-                   Else
-                      ! Human HR originates from an entr line
-                      PNX => EVAC_ENTRYS(Abs(HR%IEL))
-                   End If
-
-                   K_ave_Door(:)      = 0.0_EB
-                   FED_max_Door(:)    = 0.0_EB
-                   Is_Known_Door(:)   = .False.
-                   Is_Visible_Door(:) = .False.
-                   If ( HR%GROUP_ID /= 0 ) Then
-                      If ( HR%GROUP_ID < 0 ) Then
-                         ! A lonely soul
-                         x1_old = HR%X
-                         y1_old = HR%Y
-                         IEL    = HR%IEL
-                         Speed  = HR%Speed
-                         Do i = 1, n_doors
-                            If ( EVAC_DOORS(i)%IMESH == nm) Then
-                               Is_Visible_Door(i) = .True.
-                               Do i_tmp = 1, Human_Known_Doors(j1)%N_nodes
-                                  If (EVAC_DOORS(i)%INODE == Human_Known_Doors(j1)%I_nodes(i_tmp)) &
-                                       Is_Known_Door(i) = .True.
-                               End Do
-                            End If
-                         End Do
-                         Do i = 1, n_exits
-                            If ( EVAC_EXITS(i)%IMESH == nm .And. &
-                                 .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
-                               Is_Visible_Door(n_doors+i) = .True.
-                               Do i_tmp = 1, Human_Known_Doors(j1)%N_nodes
-                                  If (EVAC_EXITS(i)%INODE == Human_Known_Doors(j1)%I_nodes(i_tmp)) &
-                                       Is_Known_Door(n_doors+i) = .True.
-                               End Do
-                            End If
-                         End Do
-                      Else
-                         ! A member of a group
-                         x1_old = Group_List(j)%GROUP_X
-                         y1_old = Group_List(j)%GROUP_Y
-                         IEL    = Group_List(j)%IEL
-                         Speed  = Group_List(j)%Speed
-                         Do i = 1, n_doors
-                            If ( EVAC_DOORS(i)%IMESH == nm) Then
-                               Is_Visible_Door(i) = .True.
-                               Do i_tmp = 1, Group_Known_Doors(j)%N_nodes
-                                  If (EVAC_DOORS(i)%INODE == &
-                                       Group_Known_Doors(j)%I_nodes(i_tmp)) &
-                                       Is_Known_Door(i) = .True.
-                               End Do
-                            End If
-                         End Do
-                         Do i = 1, n_exits
-                            If ( EVAC_EXITS(i)%IMESH == nm .And. &
-                                 .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
-                               Is_Visible_Door(n_doors+i) = .True.
-                               Do i_tmp = 1, Group_Known_Doors(j)%N_nodes
-                                  If (EVAC_EXITS(i)%INODE == &
-                                       Group_Known_Doors(j)%I_nodes(i_tmp)) &
-                                       Is_Known_Door(n_doors+i) = .True.
-                               End Do
-                            End If
-                         End Do
-                      End If
-                   Else
-                      x1_old = HR%X
-                      y1_old = HR%Y
-                      IEL    = Abs(HR%IEL)
-                      Speed  = HR%Speed
-                      Do i = 1, n_doors
-                         If ( EVAC_DOORS(i)%IMESH == nm) Then
-                            Is_Visible_Door(i) = .True.
-                         End If
-                      End Do
-                      Do i = 1, n_exits
-                         If ( EVAC_EXITS(i)%IMESH == nm .And. &
-                              .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
-                            Is_Visible_Door(n_doors+i) = .True.
-                         End If
-                      End Do
-                      Do i = 1, PNX%N_VENT_FFIELDS 
-                         i_tmp = 1
-                         If (Trim(EVAC_Node_List(PNX%I_DOOR_NODES(i) &
-                              )%Node_Type) == 'Door') Then
-                            i_tmp = EVAC_Node_List(PNX%I_DOOR_NODES(i) &
-                                 )%Node_Index 
-                         End If
-                         If (Trim(EVAC_Node_List(PNX%I_DOOR_NODES(i) &
-                              )%Node_Type) == 'Exit' ) Then
-                            i_tmp = n_doors + &
-                                 EVAC_Node_List(PNX%I_DOOR_NODES(i) &
-                                 )%Node_Index 
-                         End If
-                         If ( Is_Visible_Door(i_tmp) ) Then
-                            ! Door/exit is on this floor
-                            If (PNX%P_VENT_FFIELDS(i) < 0.5_EB) Then
-                               Is_Known_Door(i_tmp) = .False.
-                            Else
-                               Is_Known_Door(i_tmp) = .True.
-                            End If
-                         End If
-                      End Do
-                   End If
-
-                   ! Find the visible doors
-                   Do i = 1, n_doors + n_exits
-                      If ( Is_Visible_Door(i) ) Then
-                         If (EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type &
-                              == 'Door' ) Then
-                            X11 = EVAC_DOORS(i)%X 
-                            Y11 = EVAC_DOORS(i)%Y
-                         Else        ! 'Exit'
-                            X11 = EVAC_EXITS(i-n_doors)%X 
-                            Y11 = EVAC_EXITS(i-n_doors)%Y
-                         End If
-                         PP_see_door = See_door(nm, i, HR%I_Target, x1_old, y1_old, x11, y11, ave_K, max_fed)
-                         FED_max_Door(i) = max_fed
-                         K_ave_Door(i) = ave_K 
-
-                         If (PP_see_door) Then
-                            If (EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type == 'Door') Then
-                               If (.Not. EVAC_DOORS(i)%EXIT_SIGN .And. .Not. HR%I_Target == i) Then
-                                  Is_Visible_Door(i) = .False.
-                               End If
-                            End If
-                         Else
-                            Is_Visible_Door(i) = .False.
-                         End If
-
-                      End If ! correct floor
-                   End Do ! doors and exits
-
-
-
-                   If (Any(Is_Visible_Door)) Then
-                      Do i = 1, n_doors + n_exits
-                         If (Abs(HR%I_Target) == i .And. Is_Visible_Door(i)) &
-                              Is_Known_Door(i) = .True.
-                      End Do
-                   End If
-
-
-                   Do i = 1, n_doors
-                      If ( EVAC_DOORS(i)%TIME_OPEN > T .Or. EVAC_DOORS(i)%TIME_CLOSE < T) Then
-                         Is_Visible_Door(i) = .False.
-                         Is_Known_Door(i) = .False.
-                      End If
-                   End Do
-                   Do i = 1, n_exits
-                      If ( (EVAC_EXITS(i)%TIME_OPEN > T .Or. EVAC_EXITS(i)%TIME_CLOSE < T) .And. &
-                           .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
-                         Is_Visible_Door(n_doors+i) = .False.
-                         Is_Known_Door(n_doors+i) = .False.
-                      End If
-                   End Do
-
-                   If (Any(Is_Known_Door) .Or. Any(Is_Visible_Door)) Then
-                      i_tmp   = 0
-                      L2_min = Huge(L2_min)
-                      Do i = 1, n_doors + n_exits
-                         If ( Is_Known_Door(i) .And. &
-                              Is_Visible_Door(i) ) Then
-                            x_o = 0.0_EB
-                            y_o = 0.0_EB
-                            If (Trim(EVAC_Node_List(n_egrids+n_entrys+i &
-                                 )%Node_Type) == 'Door' ) Then
-                               x_o = EVAC_DOORS( EVAC_Node_List( i+n_egrids+n_entrys)%Node_Index )%X
-                               y_o = EVAC_DOORS( EVAC_Node_List( i+n_egrids+n_entrys)%Node_Index )%Y
-                               i_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids + n_entrys)%Node_Index )%I_VENT_FFIELD
-                            Else      ! 'Exit'
-                               x_o = EVAC_EXITS( EVAC_Node_List( i+n_egrids+n_entrys)%Node_Index )%X
-                               y_o = EVAC_EXITS( EVAC_Node_List( i+n_egrids+n_entrys)%Node_Index )%Y
-                               i_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids + n_entrys)%Node_Index )%I_VENT_FFIELD
-                            End If
-                            If (FED_DOOR_CRIT > 0.0_EB) Then
-                               L2_tmp = FED_max_Door(i) * Sqrt((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
-                            Else
-                               L2_tmp = K_ave_Door(i)
-                            End If
-                            If (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
-                            If ( ((x_o-x1_old)**2 + (y_o-y1_old)**2) < L2_min .And. L2_tmp < Abs(FED_DOOR_CRIT)) Then
-                               L2_min = (x_o-x1_old)**2 + (y_o-y1_old)**2 
-                               L2_min = Max(0.0_EB,L2_min)
-                               i_tmp = i
-                            End If
-                         End If
-                      End Do
-                      If (i_tmp > 0 ) Then
-                         ! Known and visible door, no smoke
-                         If (EVAC_Node_List(n_egrids+n_entrys+i_tmp )%Node_Type == 'Door' ) Then
-                            name_new_ffield = &
-                                 Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
-                            i_new_ffield = &
-                                 EVAC_DOORS(i_tmp)%I_VENT_FFIELD
-                         Else        ! 'Exit'
-                            name_new_ffield = &
-                                 Trim(EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
-                            i_new_ffield = &
-                                 EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
-                         End If
-                         color_index = 1
-                      Else
-                         ! No visible known door available, try non-visible known doors
-                         i_tmp   = 0
-                         L2_min = Huge(L2_min)
-                         Do i = 1, n_doors + n_exits
-                            If ( Is_Known_Door(i) .And. &
-                                 .Not. Is_Visible_Door(i) ) Then
-                               x_o = 0.0_EB
-                               y_o = 0.0_EB
-                               If (EVAC_Node_List(n_egrids+n_entrys+i &
-                                    )%Node_Type == 'Door' ) Then
-                                  x_o = EVAC_DOORS( EVAC_Node_List( i+n_egrids+n_entrys)%Node_Index )%X
-                                  y_o = EVAC_DOORS( EVAC_Node_List( i+n_egrids+n_entrys)%Node_Index )%Y
-                                  i_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids + n_entrys)%Node_Index )%I_VENT_FFIELD
-                               Else    ! 'Exit'
-                                  x_o = EVAC_EXITS( EVAC_Node_List( i+n_egrids+n_entrys)%Node_Index )%X
-                                  y_o = EVAC_EXITS( EVAC_Node_List( i+n_egrids+n_entrys)%Node_Index )%Y
-                                  i_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids + n_entrys)%Node_Index )%I_VENT_FFIELD
-                               End If
-                               If (FED_DOOR_CRIT > 0.0_EB) Then
-                                  L2_tmp = FED_max_Door(i)*Sqrt((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
-                               Else
-                                  l2_tmp = K_ave_Door(i)
-                               End If
-                               If (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
-                               If ( ((x_o-x1_old)**2 + (y_o-y1_old)**2) < L2_min .And. L2_tmp < &
-                                    Abs(FED_DOOR_CRIT)) Then
-                                  L2_min = (x_o-x1_old)**2 + (y_o-y1_old)**2 
-                                  L2_min = Max(0.0_EB,L2_min)
-                                  i_tmp = i
-                               End If
-                            End If
-                         End Do
-                         If (i_tmp > 0 ) Then
-                            !    Non-visible known door, no smoke
-                            If (EVAC_Node_List( n_egrids+n_entrys+i_tmp)%Node_Type == 'Door' ) Then
-                               name_new_ffield = Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
-                               i_new_ffield = EVAC_DOORS(i_tmp)%I_VENT_FFIELD
-                            Else      ! 'Exit'
-                               name_new_ffield = Trim(EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
-                               i_new_ffield = EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
-                            End If
-                            color_index = 2
-                         Else
-                            ! known doors with no smoke have not been found
-                            i_tmp   = 0
-                            L2_min = Huge(L2_min)
-                            Do i = 1, n_doors + n_exits
-                               If (Is_Visible_Door(i)) Then
-                                  x_o = 0.0_EB
-                                  y_o = 0.0_EB
-                                  If (EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type == 'Door' ) Then
-                                     x_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index )%X
-                                     y_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index )%Y
-                                     i_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids + n_entrys)%Node_Index )%I_VENT_FFIELD
-                                  Else  ! 'Exit'
-                                     x_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index )%X
-                                     y_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index )%Y
-                                     i_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index )%I_VENT_FFIELD
-                                  End If
-                                  If (FED_DOOR_CRIT > 0.0_EB) Then
-                                     L2_tmp = FED_max_Door(i)*Sqrt( (x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
-                                  Else
-                                     l2_tmp = K_ave_Door(i)
-                                  End If
-                                  If (i_o == i_old_ffield) &
-                                       L2_tmp = 0.1_EB*L2_tmp
-                                  If ( ((x_o-x1_old)**2 + (y_o-y1_old)**2) < L2_min .And. L2_tmp < Abs(FED_DOOR_CRIT)) Then
-                                     L2_min = (x_o-x1_old)**2 + (y_o-y1_old)**2
-                                     L2_min = Max(0.0_EB,L2_min)
-                                     i_tmp = i
-                                  End If
-                               End If
-                            End Do
-                            If (i_tmp > 0 ) Then
-                               ! No smoke, visible door (not known)
-                               If (EVAC_Node_List( n_egrids+n_entrys+i_tmp)%Node_Type == 'Door' ) Then
-                                  name_new_ffield = Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
-                                  i_new_ffield = EVAC_DOORS(i_tmp)%I_VENT_FFIELD
-                               Else    ! 'Exit'
-                                  name_new_ffield = Trim( EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
-                                  i_new_ffield = EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
-                               End If
-                               color_index = 3
-                            Else
-                               ! Now we have smoke and some visible or known doors
-                               i_tmp   = 0
-                               L2_min = Huge(L2_min)
-                               Do i = 1, n_doors + n_exits
-                                  If ( Is_Known_Door(i) .Or. Is_Visible_Door(i) ) Then
-                                     x_o = 0.0_EB
-                                     y_o = 0.0_EB
-                                     If (EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type == 'Door' ) Then
-                                        x_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
-                                        y_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
-                                        i_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids+ n_entrys)%Node_Index)%I_VENT_FFIELD
-                                     Else ! 'Exit'
-                                        x_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
-                                        y_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
-                                        i_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+ n_entrys)%Node_Index)%I_VENT_FFIELD
-                                     End If
-                                     If (FED_DOOR_CRIT > 0.0_EB) Then
-                                        If (j > 0) Then
-                                           L2_tmp = Group_List(j)%IntDose + &
-                                                FED_max_Door(i) * Sqrt((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
-                                        Else
-                                           L2_tmp = HR%IntDose + &
-                                                FED_max_Door(i) * Sqrt((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
-                                        End If
-                                     Else
-                                        l2_tmp = (Sqrt((x1_old-x_o)**2 + (y1_old-y_o)**2)*0.5_EB) / &
-                                             (3.0_EB/K_ave_Door(i))
-                                     End If
-                                     If (i_o == i_old_ffield) L2_tmp = 0.9_EB*L2_tmp
-                                     If (L2_tmp < L2_min) Then
-                                        L2_min = L2_tmp
-                                        i_tmp = i
-                                     End If
-                                  End If
-                               End Do
-
-                               If (i_tmp > 0 .And. L2_min < 1.0_EB) Then
-                                  ! Not too much smoke, i.e., non-lethal amount (known or visible doors)
-                                  If (EVAC_Node_List( n_egrids+n_entrys+i_tmp)%Node_Type == 'Door' ) Then
-                                     name_new_ffield = Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
-                                     i_new_ffield = EVAC_DOORS(i_tmp)%I_VENT_FFIELD
-                                  Else  ! 'Exit'
-                                     name_new_ffield = Trim(EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
-                                     i_new_ffield = EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
-                                  End If
-                                  If (Is_Known_Door(i_tmp) .And. Is_Visible_Door(i_tmp)) color_index = 4
-                                  If (Is_Known_Door(i_tmp) .And. .Not. Is_Visible_Door(i_tmp)) color_index = 5
-                                  If (.Not. Is_Known_Door(i_tmp) .And. Is_Visible_Door(i_tmp)) color_index = 6
-                               Else    ! no match using cases 1-3
-                                  ! No door found, use the main evac grid ffield
-                                  i_tmp = 0
-                                  name_new_ffield = Trim(MESH_NAME(nm))
-                                  i_new_ffield    = nm
-                                  color_index = 7
-                               End If  ! case 4
-                            End If    ! case 3
-                         End If      ! case 2
-                      End If        ! case 1
-                      If (Color_Method .Eq. 4 ) Then
-                         color_index = EVAC_AVATAR_NCOLOR ! default, cyan
-                         If (i_tmp > 0 .And. i_tmp <= n_doors ) color_index = EVAC_DOORS(i_tmp)%Avatar_Color_Index
-                         If (i_tmp > n_doors .And. i_tmp <= n_doors + n_exits) &
-                              color_index = EVAC_EXITS(i_tmp-n_doors)%Avatar_Color_Index
-                      End If
-
-                   Else ! No known/visible door
-                      i_tmp = 0 ! no door found
-                      color_index = 7
-                      If (HR%IEL > 0 ) Then
-                         If (HPT%IMESH == nm) Then
-                            i_new_ffield    = HPT%I_VENT_FFIELDS(0)
-                            name_new_ffield = Trim(Mesh_Name(i_new_ffield))
-                         Else
-                            name_new_ffield = Trim(MESH_NAME(nm))
-                            i_new_ffield    = nm
-                         End If
-                         If (Color_Method == 4) color_index = EVAC_AVATAR_NCOLOR
-                      Else
-                         If (PNX%IMESH == nm) Then
-                            i_new_ffield    = PNX%I_VENT_FFIELDS(0)
-                            name_new_ffield = Trim(Mesh_Name(i_new_ffield))
-                         Else
-                            name_new_ffield = Trim(MESH_NAME(nm))
-                            i_new_ffield    = nm
-                         End If
-                         If (Color_Method == 4) color_index = EVAC_AVATAR_NCOLOR
-                      End If
-                   End If ! Any known door
-                   HR%I_Target = i_tmp
-                   If (i_tmp > 0 .And. .Not. Is_Visible_Door(Max(1,i_tmp))) Then
-                      ! I_Target >0: visible, <0: not visible
-                      HR%I_Target = -i_tmp
-                   End If
-                   If (j > 0) Group_Known_Doors(j)%I_Target = HR%I_Target
-                   If (i_new_ffield /= i_old_ffield) Then
-                      ! Change the field of this group.
-                      If ( j == 0 ) Then
-                         ! Group index=0: 'lost souls'
-                         HR%I_FFIELD    = i_new_ffield
-                         HR%FFIELD_NAME = Trim(name_new_ffield)
-                         If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
-                         If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
-                         Write (LU_EVACOUT,fmt='(a,i5,a,a,a,a)') &
-                              ' EVAC: Human ',ie,', new ffield: ', &
-                              Trim(name_new_ffield), ', old ffield: ', &
-                              Trim(name_old_ffield)
-                      Else
-                         Group_List(j)%GROUP_I_FFIELDS(i_egrid) = &
-                              i_new_ffield
-                         HR%I_FFIELD    = i_new_ffield
-                         HR%FFIELD_NAME = Trim(name_new_ffield)
-                         If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
-                         If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
-                         If (j > 0) Color_Tmp(j) = color_index
-                         Write (LU_EVACOUT,fmt='(a,i5,a,a,a,a)') &
-                              ' EVAC: Group ',j,', new ffield: ', &
-                              Trim(name_new_ffield), ', old ffield: ', &
-                              Trim(name_old_ffield)
-                      End If
-
-                   Else ! door is the same
-                      If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
-                      If (COLOR_METHOD == 5 .And. j > 0) &
-                           Color_Tmp(j) = HR%COLOR_INDEX
-                      If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
-                      If (COLOR_METHOD == 4 .And. j > 0) &
-                           Color_Tmp(j) = HR%COLOR_INDEX
-                   End If
+                   Call Change_Target_Door(nm, nm, ie, j, j1, i_egrid, 1, T, HR%X, HR%Y, &
+                        Is_Known_Door, Is_Visible_Door, FED_max_Door, K_ave_Door, Color_Tmp, &
+                        i_target, color_index, i_new_ffield)
 
                 Else ! Do not update door flow field at this time step
                    If (j > 0) Group_Known_Doors(j)%I_Target = HR%I_Target
-                   If (COLOR_METHOD == 5 .And. j > 0) &
-                        Color_Tmp(j) = HR%COLOR_INDEX
-                   If (COLOR_METHOD == 4 .And. j > 0) &
-                        Color_Tmp(j) = HR%COLOR_INDEX
-                   If (j > 0) Group_List(j)%GROUP_I_FFIELDS(i_egrid) &
-                        = HR%I_FFIELD 
-                End If  ! update door flow field, rn large enough 
+                   If (COLOR_METHOD == 5 .And. j > 0) Color_Tmp(j) = HR%COLOR_INDEX
+                   If (COLOR_METHOD == 4 .And. j > 0) Color_Tmp(j) = HR%COLOR_INDEX
+                   If (j > 0) Group_List(j)%GROUP_I_FFIELDS(i_egrid) = HR%I_FFIELD 
+                End If  ! update door flow field: is rn large enough?
              Else
-                ! This group has already tried to change the field
-                If (COLOR_METHOD == 5 .And. j > 0) &
-                     HR%COLOR_INDEX = Color_Tmp(j)
-                If (COLOR_METHOD == 4 .And. j > 0) &
-                     HR%COLOR_INDEX = Color_Tmp(j)
+                ! This group has already tried to change the field.
+                If (COLOR_METHOD == 5 .And. j > 0) HR%COLOR_INDEX = Color_Tmp(j)
+                If (COLOR_METHOD == 4 .And. j > 0) HR%COLOR_INDEX = Color_Tmp(j)
                 HR%I_FFIELD    = Group_List(j)%GROUP_I_FFIELDS(i_egrid)
                 HR%FFIELD_NAME = Trim(MESH_NAME(HR%I_FFIELD))
                 If (j > 0) HR%I_Target = Group_Known_Doors(j)%I_Target
              End If  ! group_i_field=0
-          End Do Change_Door_Loop  ! loop over humans, 
+          End Do Change_Door_Loop  ! loop over agents 
        End If  ! t > 0
        ! ========================================================
        ! CHANGE TARGET DOOR CALCULATION ENDS HERE
@@ -5767,8 +4940,6 @@ Contains
              End If
              HR%Tpre = Huge(HR%Tpre)
              HR%Tdet = Huge(HR%Tdet)
-!!$             HR%Tau  = HR%Tau
-!!$             HR%Mass = HR%Mass
              HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           Else
              fed_max_alive = Max(fed_max_alive,HR%IntDose)
@@ -6441,8 +5612,6 @@ Contains
              End If
              HR%Tdet = Huge(HR%Tdet)
              HR%Tpre = Huge(HR%Tpre)
-!!$             HR%Tau  = HR%Tau
-!!$             HR%Mass = HR%Mass
              HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           End If
           hr_tau = HR%Tau
@@ -7259,11 +6428,6 @@ Contains
                 Exit dt_Loop
              End Do dt_Loop
 
-!!$             If (Social_F + Contact_F > 100.0_EB) Then
-!!$                ! If Pressure, i.e., Social_F + Contact_F, = 100 ==> EVAC_DT_MAX
-!!$                EVAC_DT_MIN2 = Max( EVAC_DT_MIN, EVAC_DT_MAX*100.0_EB/(Social_F+Contact_F) )
-!!$             End If
-!!$             DTSP_new = Max(DTSP_new, EVAC_DT_MIN2)
              DTSP_new = Max(DTSP_new, EVAC_DT_MIN)
              DTSP_new = Min(DTSP_new, EVAC_DT_MAX)
           Else
@@ -8251,333 +7415,22 @@ Contains
                If (j > 0) I_Target = Group_Known_Doors(j)%I_Target
             Else
                Allocate(Is_Known_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-               Call ChkMemErr('Is_Known_Door','Color_Tmp',IZERO) 
+               Call ChkMemErr('Check_Target_Node','Is_Known_Door',IZERO) 
                Allocate(Is_Visible_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-               Call ChkMemErr('Is_Visible_Door','Color_Tmp',IZERO) 
+               Call ChkMemErr('Check_Target_Node','Is_Visible_Door',IZERO) 
                Allocate(FED_max_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-               Call ChkMemErr('FED_max_Door','Color_Tmp',IZERO) 
+               Call ChkMemErr('Check_Target_Node','FED_max_Door',IZERO) 
                Allocate(K_ave_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-               Call ChkMemErr('Evacuate_Humans','K_ave_Door',IZERO) 
+               Call ChkMemErr('Check_Target_Node','K_ave_Door',IZERO) 
                Allocate(Color_Tmp(Max(1,i33_dim)),STAT=IZERO)
                Call ChkMemErr('Check_Target_Node','Color_Tmp',IZERO) 
-               K_ave_Door(:)      = 0.0_EB
-               FED_max_Door(:)    = 0.0_EB
-               Is_Known_Door(:)   = .False.
-               Is_Visible_Door(:) = .False.
-               If ( HR%GROUP_ID /= 0 ) Then
-                  If ( HR%GROUP_ID < 0 ) Then
-                     ! A lonely soul
-                     Do ie = 1, n_doors
-                        If ( EVAC_DOORS(ie)%IMESH == imesh2 ) Then
-                           Is_Visible_Door(ie) = .True.
-                           Do i_tim = 1, Human_Known_Doors(j1)%N_nodes
-                              If (EVAC_DOORS(ie)%INODE == &
-                                   Human_Known_Doors(j1)%I_nodes(i_tim)) &
-                                   Is_Known_Door(ie) = .True.
-                           End Do
-                        End If
-                     End Do
-                     Do ie = 1, n_exits
-                        If ( EVAC_EXITS(ie)%IMESH == imesh2 .And. &
-                             .Not. EVAC_EXITS(ie)%COUNT_ONLY ) Then
-                           Is_Visible_Door(n_doors+ie) = .True.
-                           Do i_tim = 1, Human_Known_Doors(j1)%N_nodes
-                              If (EVAC_EXITS(ie)%INODE == &
-                                   Human_Known_Doors(j1)%I_nodes(i_tim)) &
-                                   Is_Known_Door(n_doors+ie) = .True.
-                           End Do
-                        End If
-                     End Do
-                  Else
-                     ! A member of a group
-                     Do ie = 1, n_doors
-                        If ( EVAC_DOORS(ie)%IMESH == imesh2 ) Then
-                           Is_Visible_Door(ie) = .True.
-                           Do i_tim = 1, Group_Known_Doors(j)%N_nodes
-                              If (EVAC_DOORS(ie)%INODE == &
-                                   Group_Known_Doors(j)%I_nodes(i_tim)) &
-                                   Is_Known_Door(ie) = .True.
-                           End Do
-                        End If
-                     End Do
-                     Do ie = 1, n_exits
-                        If ( EVAC_EXITS(ie)%IMESH == imesh2 .And. &
-                             .Not. EVAC_EXITS(ie)%COUNT_ONLY ) Then
-                           Is_Visible_Door(n_doors+ie) = .True.
-                           Do i_tim = 1, Group_Known_Doors(j)%N_nodes
-                              If (EVAC_EXITS(ie)%INODE == &
-                                   Group_Known_Doors(j)%I_nodes(i_tim)) &
-                                   Is_Known_Door(n_doors+ie) = .True.
-                           End Do
-                        End If
-                     End Do
-                  End If
-               Else
-                  Do ie = 1, n_doors
-                     If ( EVAC_DOORS(ie)%IMESH == imesh2) Then
-                        Is_Visible_Door(ie) = .True.
-                     End If
-                  End Do
-                  Do ie = 1, n_exits
-                     If ( EVAC_EXITS(ie)%IMESH == imesh2 .And. &
-                          .Not. EVAC_EXITS(ie)%COUNT_ONLY ) Then
-                        Is_Visible_Door(n_doors+ie) = .True.
-                     End If
-                  End Do
-                  Do i = 1, PNX%N_VENT_FFIELDS 
-                     i_tim = 1
-                     If (Trim(EVAC_Node_List(PNX%I_DOOR_NODES(ie) &
-                          )%Node_Type) == 'Door') Then
-                        i_tim = &
-                             EVAC_Node_List(PNX%I_DOOR_NODES(ie))%Node_Index 
-                     End If
-                     If (Trim(EVAC_Node_List(PNX%I_DOOR_NODES(ie) &
-                          )%Node_Type) == 'Exit' ) Then
-                        i_tim = n_doors + &
-                             EVAC_Node_List(PNX%I_DOOR_NODES(ie))%Node_Index 
-                     End If
-                     If ( Is_Visible_Door(i_tim) ) Then
-                        ! Door/exit is on this floor
-                        If (PNX%P_VENT_FFIELDS(ie) < 0.5_EB) Then
-                           Is_Known_Door(i_tim) = .False.
-                        Else
-                           Is_Known_Door(i_tim) = .True.
-                        End If
-                     End If
-                  End Do
-               End If
 
-               ! Find the visible doors (only the first member of a group)
-               Do ie = 1, n_doors + n_exits
-                  If ( Is_Visible_Door(ie) ) Then
-                     If (EVAC_Node_List(n_egrids+n_entrys+ie)%Node_Type == 'Door' ) Then
-                        XX1 = EVAC_DOORS(ie)%X 
-                        YY1 = EVAC_DOORS(ie)%Y
-                     Else            ! 'Exit'
-                        XX1 = EVAC_EXITS(ie-n_doors)%X 
-                        YY1 = EVAC_EXITS(ie-n_doors)%Y
-                     End If
-                     PP_see_door = See_door(imesh2, ie, HR%I_Target, xx, yy, xx1, yy1, ave_K, max_fed)
-                     FED_max_Door(ie) = max_fed
-                     K_ave_Door(ie) = ave_K 
-
-                     If (PP_see_door) Then
-                        If (EVAC_Node_List(n_egrids+n_entrys+ie)%Node_Type == 'Door') Then
-                           If (.Not. EVAC_DOORS(ie)%EXIT_SIGN) Then
-                              Is_Visible_Door(ie) = .False.
-                           End If
-                        End If
-                     Else
-                        Is_Visible_Door(ie) = .False.
-                     End If
-
-                  End If            ! correct floor
-               End Do              ! doors and exits
+               Call Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, T, HR%X, HR%Y, &
+                    Is_Known_Door, Is_Visible_Door, FED_max_Door, K_ave_Door, Color_Tmp, &
+                    I_Target, color_index, new_ffield_i)
 
 
-               Do ie = 1, n_doors
-                  If ( EVAC_DOORS(ie)%TIME_OPEN > T .Or. EVAC_DOORS(ie)%TIME_CLOSE < T) Then
-                     Is_Visible_Door(ie) = .False.
-                     Is_Known_Door(ie) = .False.
-                  End If
-               End Do
-               Do ie = 1, n_exits
-                  If ( (EVAC_EXITS(ie)%TIME_OPEN > T .Or. EVAC_EXITS(ie)%TIME_CLOSE < T) .And. &
-                       .Not. EVAC_EXITS(ie)%COUNT_ONLY ) Then
-                     Is_Visible_Door(n_doors+ie) = .False.
-                     Is_Known_Door(n_doors+ie) = .False.
-                  End If
-               End Do
-
-               If (Any(Is_Known_Door) .Or. Any(Is_Visible_Door)) Then
-                  irn = 0
-                  d_max = Huge(d_max)
-                  Do ie = 1, n_doors + n_exits
-                     If (Is_Known_Door(ie) .And. &
-                          Is_Visible_Door(ie) ) Then
-                        x_o = 0.0_EB
-                        y_o = 0.0_EB
-                        If (Trim(EVAC_Node_List(n_egrids+n_entrys+ie &
-                             )%Node_Type) == 'Door' ) Then
-                           x_o = EVAC_DOORS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%X
-                           y_o = EVAC_DOORS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%Y
-                        Else          ! 'Exit'
-                           x_o = EVAC_EXITS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%X
-                           y_o = EVAC_EXITS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%Y
-                        End If
-                        If (FED_DOOR_CRIT > 0.0_EB) Then
-                           dist = FED_max_Door(ie) * Sqrt((xx-x_o)**2 + &
-                                (yy-y_o)**2)/HR%Speed
-                        Else
-                           dist = K_ave_Door(ie)
-                        End If
-                        If (( (x_o-xx)**2 + (y_o-yy)**2 ) < d_max &
-                             .And. dist < Abs(FED_DOOR_CRIT)) Then
-                           d_max = (x_o-xx)**2 + (y_o-yy)**2 
-                           d_max = Max(0.0_EB,d_max)
-                           irn = ie
-                        End If
-                     End If
-                  End Do
-                  If (irn > 0 ) Then
-                     ! Known and visible door, no smoke
-                     If (EVAC_Node_List(n_egrids+n_entrys+irn)%Node_Type &
-                          == 'Door' ) Then
-                        new_ffield_name = Trim(EVAC_DOORS(irn)%VENT_FFIELD)
-                        new_ffield_i = EVAC_DOORS(irn)%I_VENT_FFIELD
-                     Else            ! 'Exit'
-                        new_ffield_name = Trim(EVAC_EXITS(irn-n_doors)%VENT_FFIELD)
-                        new_ffield_i = EVAC_EXITS(irn-n_doors)%I_VENT_FFIELD
-                        color_index = 1
-                     End If
-                  Else
-                     ! No visible known door available, try non-visible known doors
-                     irn   = 0
-                     d_max = Huge(d_max)
-                     Do ie = 1, n_doors + n_exits
-                        If ( Is_Known_Door(ie) .And. &
-                             .Not. Is_Visible_Door(ie) ) Then
-                           x_o = 0.0_EB
-                           y_o = 0.0_EB
-                           If (EVAC_Node_List(n_egrids+n_entrys+ie)%Node_Type &
-                                == 'Door' ) Then
-                              x_o = EVAC_DOORS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%X
-                              y_o = EVAC_DOORS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%Y
-                           Else        ! 'Exit'
-                              x_o = EVAC_EXITS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%X
-                              y_o = EVAC_EXITS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%Y
-                           End If
-                           If (FED_DOOR_CRIT > 0.0_EB) Then
-                              dist = FED_max_Door(ie) * Sqrt((xx-x_o)**2 + (yy-y_o)**2)/HR%Speed
-                           Else
-                              dist = K_ave_Door(ie)
-                           End If
-                           If ( ((x_o-xx)**2 + (y_o-yy)**2) < d_max .And. dist < Abs(FED_DOOR_CRIT)) Then
-                              d_max = (x_o-xx)**2 + (y_o-yy)**2 
-                              d_max = Max(0.0_EB,d_max)
-                              irn = ie
-                           End If
-                        End If
-                     End Do
-                     If (irn > 0 ) Then
-                        !    Non-visible known door, no smoke
-                        If (EVAC_Node_List( n_egrids+n_entrys+irn)%Node_Type == 'Door' ) Then
-                           new_ffield_name = Trim(EVAC_DOORS(irn)%VENT_FFIELD)
-                           new_ffield_i    =      EVAC_DOORS(irn)%I_VENT_FFIELD
-                        Else          ! 'Exit'
-                           new_ffield_name = Trim(EVAC_EXITS(irn-n_doors)%VENT_FFIELD)
-                           new_ffield_i    =      EVAC_EXITS(irn-n_doors)%I_VENT_FFIELD
-                        End If
-                        color_index = 2
-                     Else
-                        ! known doors with no smoke have not been found
-                        irn   = 0
-                        d_max = Huge(d_max)
-                        Do ie = 1, n_doors + n_exits
-                           If (Is_Visible_Door(ie)) Then
-                              x_o = 0.0_EB
-                              y_o = 0.0_EB
-                              If (EVAC_Node_List(n_egrids+n_entrys+ie &
-                                   )%Node_Type == 'Door' ) Then
-                                 x_o = EVAC_DOORS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%X
-                                 y_o = EVAC_DOORS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%Y
-                              Else      ! 'Exit'
-                                 x_o = EVAC_EXITS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%X
-                                 y_o = EVAC_EXITS( EVAC_Node_List(ie+n_egrids+n_entrys)%Node_Index )%Y
-                              End If
-                              If (FED_DOOR_CRIT > 0.0_EB) Then
-                                 dist = FED_max_Door(ie) * Sqrt((xx-x_o)**2 + (yy-y_o)**2)/HR%Speed
-                              Else
-                                 dist = K_ave_Door(ie)
-                              End If
-                              If ( ((x_o-xx)**2 + (y_o-yy)**2) < d_max .And. dist < Abs(FED_DOOR_CRIT)) Then
-                                 d_max = (x_o-xx)**2 + (y_o-yy)**2 
-                                 d_max = Max(0.0_EB,d_max)
-                                 irn = ie
-                              End If
-                           End If
-                        End Do
-                        If (irn > 0 ) Then
-                           ! No smoke, visible door (not known)
-                           If (EVAC_Node_List( n_egrids+n_entrys+irn)%Node_Type == 'Door' ) Then
-                              new_ffield_name = Trim(EVAC_DOORS(irn)%VENT_FFIELD)
-                              new_ffield_i    =      EVAC_DOORS(irn)%I_VENT_FFIELD
-                           Else        ! 'Exit'
-                              new_ffield_name = Trim(EVAC_EXITS(irn-n_doors)%VENT_FFIELD)
-                              new_ffield_i    =      EVAC_EXITS(irn-n_doors)%I_VENT_FFIELD
-                           End If
-                           color_index = 3
-                        Else
-                           ! Now we have smoke and some visible or known doors
-                           irn   = 0
-                           d_max = Huge(d_max)
-                           Do ie = 1, n_doors + n_exits
-                              If ( Is_Known_Door(ie) .Or. Is_Visible_Door(ie) ) Then
-                                 x_o = 0.0_EB
-                                 y_o = 0.0_EB
-                                 If (EVAC_Node_List(n_egrids+n_entrys+ie)%Node_Type == 'Door' ) Then
-                                    x_o = EVAC_DOORS( EVAC_Node_List(ie+ n_egrids+n_entrys)%Node_Index )%X
-                                    y_o = EVAC_DOORS( EVAC_Node_List(ie+ n_egrids+n_entrys)%Node_Index )%Y
-                                 Else    ! 'Exit'
-                                    x_o = EVAC_EXITS( EVAC_Node_List(ie+ n_egrids+n_entrys)%Node_Index )%X
-                                    y_o = EVAC_EXITS( EVAC_Node_List(ie+ n_egrids+n_entrys)%Node_Index )%Y
-                                 End If
-                                 If (FED_DOOR_CRIT > 0.0_EB) Then
-                                    dist = HR%IntDose + FED_max_Door(ie) * &
-                                         Sqrt((xx-x_o)**2 + (yy-y_o)**2)/ &
-                                         HR%Speed
-                                 Else
-                                    ! Check that visibility > 0.5*distance to the door
-                                    dist = (Sqrt((xx-x_o)**2 &
-                                         + (yy-y_o)**2)*0.5_EB) / &
-                                         (3.0_EB/K_ave_Door(ie))
-                                 End If
-                                 If (dist < d_max) Then
-                                    d_max = dist
-                                    irn = ie
-                                 End If
-                              End If
-                           End Do
-
-                           If (irn > 0 .And. d_max < 1.0_EB ) Then
-                              ! Not too much smoke, i.e., non-lethal amount (known or visible doors)
-                              If (EVAC_Node_List( n_egrids+n_entrys+irn)%Node_Type == 'Door' ) Then
-                                 new_ffield_name = Trim(EVAC_DOORS(irn)%VENT_FFIELD)
-                                 new_ffield_i    =      EVAC_DOORS(irn)%I_VENT_FFIELD
-                              Else      ! 'Exit'
-                                 new_ffield_name = Trim(EVAC_EXITS(irn-n_doors)%VENT_FFIELD)
-                                 new_ffield_i    =      EVAC_EXITS(irn-n_doors)%I_VENT_FFIELD
-                              End If
-                              If (Is_Known_Door(irn) .And. Is_Visible_Door(irn))       color_index = 4
-                              If (Is_Known_Door(irn) .And. .Not. Is_Visible_Door(irn)) color_index = 5
-                              If (.Not. Is_Known_Door(irn) .And. Is_Visible_Door(irn)) color_index = 6
-                           Else        ! not case 1,2,3, i.e., no non-lethal door found
-                              ! No door found, use the main evac grid ffield 
-                              irn = 0
-                              new_ffield_i    = imesh2
-                              new_ffield_name = Trim(MESH_NAME(new_ffield_i))
-                              color_index = 7
-                           End If      ! case 4
-                        End If        ! case 3
-                     End If          ! case 2
-                  End If            ! case 1
-                  If (Color_Method == 4 ) Then
-                     color_index = EVAC_AVATAR_NCOLOR ! default, cyan
-                     If (irn > 0 .And. irn <= n_doors ) color_index = EVAC_DOORS(irn)%Avatar_Color_Index
-                     If (irn > n_doors .And. irn <= n_doors + n_exits) &
-                          color_index = EVAC_EXITS(irn-n_doors)%Avatar_Color_Index
-                  End If
-                  I_Target = irn
-                  If (irn > 0 .And. .Not. Is_Visible_Door(Max(1,irn)) ) Then
-                     ! I_Target >0: visible, <0: not visible
-                     I_Target = -irn
-                  End If
-
-               Else  ! no known/visible door
-                  I_Target = 0
-                  new_ffield_i    = imesh2
-                  new_ffield_name = Trim(MESH_NAME(new_ffield_i))
-               End If
+               new_ffield_name = Trim(MESH_NAME(new_ffield_i))
                If ( j > 0 ) Then
                   Group_List(j)%GROUP_I_FFIELDS(i_tmp) = new_ffield_i
                End If
@@ -10675,26 +9528,591 @@ Contains
   End Subroutine Find_walls
 
   SUBROUTINE GET_FIRE_CONDITIONS(NOM,I,J,K,fed_indx,soot_dens,gas_temp,rad_flux)
-  INTEGER, INTENT(IN) :: I,J,K,NOM
-  REAL(EB), INTENT(OUT) :: fed_indx,soot_dens,gas_temp,rad_flux
-  !
-  REAL(EB) Y_SUM, Y_MF_INT, tmp_1
+    Implicit None
+    INTEGER, INTENT(IN) :: I,J,K,NOM
+    REAL(EB), INTENT(OUT) :: fed_indx,soot_dens,gas_temp,rad_flux
+    !
+    REAL(EB) :: Y_SUM, Y_MF_INT
 
-  Y_SUM = MESHES(NOM)%Y_SUM(I,J,K)  ! extra species mass fraction
-                
-  ! Mass fraction array ==> soot density (mg/m3)
-  ! Next is for soot (mg/m3)
-  Call GET_MASS_FRACTION(MESHES(nom)%YY(I,J,K,I_Z_MIN:I_Z_MAX),SOOT_INDEX,Y_SUM,Y_MF_INT)
-  soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
-  ! Calculate Purser's fractional effective dose (FED)
-  fed_indx = FED(MESHES(nom)%YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM,MESHES(nom)%RSUM(I,J,K))
-  ! Gas temperature, ind=5, C
-  gas_temp  = MESHES(nom)%TMP(I,J,K)
-  ! Rad flux, ind=18, kW/m2 (no -sigma*Tamb^4 term)
-  rad_flux = Max(MESHES(nom)%UII(I,J,K)/4.0_EB,SIGMA*TMPA4)
-  
+    Y_SUM = MESHES(NOM)%Y_SUM(I,J,K)  ! extra species mass fraction
+
+    ! Mass fraction array ==> soot density (mg/m3)
+    ! Next is for soot (mg/m3)
+    Call GET_MASS_FRACTION(MESHES(nom)%YY(I,J,K,I_Z_MIN:I_Z_MAX),SOOT_INDEX,Y_SUM,Y_MF_INT)
+    soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
+    ! Calculate Purser's fractional effective dose (FED)
+    fed_indx = FED(MESHES(nom)%YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM,MESHES(nom)%RSUM(I,J,K))
+    ! Gas temperature, ind=5, C
+    gas_temp  = MESHES(nom)%TMP(I,J,K)
+    ! Rad flux, ind=18, kW/m2 (no -sigma*Tamb^4 term)
+    rad_flux = Max(MESHES(nom)%UII(I,J,K)/4.0_EB,SIGMA*TMPA4)
+
   END SUBROUTINE GET_FIRE_CONDITIONS
 
+  Subroutine Change_Target_Door(nm, nm2, ie, j, j1, i_egrid, imode, T, xx, yy, &
+       Is_Known_Door, Is_Visible_Door, FED_max_Door, K_ave_Door, Color_Tmp, &
+       I_Target, I_Color, I_Field)
+    Implicit None
+    !
+    ! Door selection algorithm
+    !
+    ! Inputs:
+    !   nm: mesh index
+    !   nm2: mesh2 index
+    !   ie: the index of the agent on this mesh  NOT USED
+    !   j:  group index
+    !   j1: lonely agent index
+    !   i_egrid: main evacuation mesh index
+    !   imode: 0= initialization, 1= evacuate_humans
+    !   T: time
+    !   xx: x co-ordinate of the agent
+    !   yy: y co-ordinate of the agent
+    !   
+    ! Outputs:
+    !   I_Target: Target door/exit node index
+    !   I_Color: color index
+    !   I_Field: new flow field index
+    !
+    ! Arguments
+    Integer, Intent(In) :: nm, nm2, ie, j, j1, i_egrid, imode
+    Real(EB), Intent(In) :: T, xx, yy
+    Real(EB), Dimension(n_doors+n_exits), Intent(InOut) :: K_ave_Door
+    Real(EB), Dimension(n_doors+n_exits), Intent(InOut) :: FED_max_Door
+    Integer, Dimension(i33_dim), Intent(InOut)  :: Color_Tmp
+    Logical, Dimension(n_doors+n_exits), Intent(InOut)  :: Is_Known_Door, Is_Visible_Door
+    Integer, Intent(Out)  :: I_Target, I_Color, I_Field
+    !
+    ! Local variables and arrays
+    Real(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn
+    Real(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o
+    Integer :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index
+    Integer :: i, i_o, izero, nm_tmp
+    Character(26) :: name_old_ffield, name_new_ffield
+    Logical :: PP_see_door
+
+
+    If (imode < 2) Then
+       nm_tmp = nm
+    Else
+       ! This is for check_target_node
+       nm_tmp = nm2
+    End If
+
+    i_old_ffield = HR%I_FFIELD
+    If (i_old_ffield > 0) Then
+       name_old_ffield = Trim(MESH_NAME(i_old_ffield))
+    Else
+       name_old_ffield = Trim(MESH_NAME(nm_tmp))
+    End If
+    If (HR%IEL > 0 ) Then
+       ! Agent HR originates from an evac line
+       HPT => EVACUATION(HR%IEL)
+    Else
+       ! Agent HR originates from an entr line (and is a lonely agent)
+       PNX => EVAC_ENTRYS(Abs(HR%IEL))
+    End If
+
+    ! Only those doors are possible which are in the same main evac mesh.
+    K_ave_Door(:)      = 0.0_EB
+    FED_max_Door(:)    = 0.0_EB
+    Is_Known_Door(:)   = .False.
+    Is_Visible_Door(:) = .False.
+    ! Group index=0: the agent is from an entry line (no evac line)
+    If ( HR%GROUP_ID /= 0 ) Then
+       If ( HR%GROUP_ID < 0 ) Then
+          ! A lonely soul
+          x1_old = xx
+          y1_old = yy
+          IEL    = HR%IEL
+          Speed  = HR%Speed
+          Do i = 1, n_doors
+             If ( EVAC_DOORS(i)%IMESH == nm_tmp) Then
+                Is_Visible_Door(i) = .True.
+                If (imode == 0) Cycle   ! Initialization call
+                Do i_tmp = 1, Human_Known_Doors(j1)%N_nodes
+                   If (EVAC_DOORS(i)%INODE == Human_Known_Doors(j1)%I_nodes(i_tmp)) &
+                        Is_Known_Door(i) = .True.
+                End Do
+             End If
+          End Do
+          Do i = 1, n_exits
+             If ( EVAC_EXITS(i)%IMESH == nm_tmp .And. .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
+                Is_Visible_Door(n_doors+i) = .True.
+                If (imode == 0) Cycle   ! Initialization call
+                Do i_tmp = 1, Human_Known_Doors(j1)%N_nodes
+                   If (EVAC_EXITS(i)%INODE == Human_Known_Doors(j1)%I_nodes(i_tmp)) &
+                        Is_Known_Door(n_doors+i) = .True.
+                End Do
+             End If
+          End Do
+       Else
+          ! A member of a group
+          x1_old = Group_List(j)%GROUP_X
+          y1_old = Group_List(j)%GROUP_Y
+          IEL    = Group_List(j)%IEL
+          Speed  = Group_List(j)%Speed
+          Do i = 1, n_doors
+             If ( EVAC_DOORS(i)%IMESH == nm_tmp) Then
+                Is_Visible_Door(i) = .True.
+                If (imode == 0) Cycle   ! Initialization call
+                Do i_tmp = 1, Group_Known_Doors(j)%N_nodes
+                   If (EVAC_DOORS(i)%INODE == Group_Known_Doors(j)%I_nodes(i_tmp)) &
+                        Is_Known_Door(i) = .True.
+                End Do
+             End If
+          End Do
+          Do i = 1, n_exits
+             If ( EVAC_EXITS(i)%IMESH == nm_tmp .And. .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
+                Is_Visible_Door(n_doors+i) = .True.
+                If (imode == 0) Cycle   ! Initialization call
+                Do i_tmp = 1, Group_Known_Doors(j)%N_nodes
+                   If (EVAC_EXITS(i)%INODE == Group_Known_Doors(j)%I_nodes(i_tmp)) &
+                        Is_Known_Door(n_doors+i) = .True.
+                End Do
+             End If
+          End Do
+       End If
+
+       If (imode == 0) Then
+          ! Initialization phase: Draw the known doors/exits.
+          Do i = 1, HPT%N_VENT_FFIELDS 
+             i_tmp = 1
+             If (Trim(EVAC_Node_List(HPT%I_DOOR_NODES(i))%Node_Type) == 'Door') Then
+                i_tmp = EVAC_Node_List(HPT%I_DOOR_NODES(i))%Node_Index 
+             End If
+             If (Trim(EVAC_Node_List(HPT%I_DOOR_NODES(i))%Node_Type) == 'Exit' ) Then
+                i_tmp = n_doors + EVAC_Node_List(HPT%I_DOOR_NODES(i))%Node_Index 
+             End If
+             If (HPT%P_VENT_FFIELDS(i) < 1.0_EB) Then
+                Call Random_number(RN)
+                If ( RN < HPT%P_VENT_FFIELDS(i) ) Then
+                   Is_Known_Door(i_tmp) = .True.
+                Else
+                   Is_Known_Door(i_tmp) = .False.
+                End If
+             Else
+                Is_Known_Door(i_tmp) = .True.
+             End If
+          End Do
+
+          ! Save the random known door information
+          i_tmp = Count(Is_Known_Door)
+          If (j > 0) Then    ! The agent is a member of a group
+             Group_Known_Doors(j)%N_nodes = i_tmp
+             If (Count(Is_Known_Door) > 0) Then
+                Allocate(Group_Known_Doors(j)%I_nodes(i_tmp), STAT=IZERO)
+                Call ChkMemErr('Change_Target_Door', 'Group_Known_Doors',IZERO) 
+                i_tmp = 0
+                Do i = 1, n_doors
+                   If (Is_Known_Door(i)) Then
+                      i_tmp = i_tmp + 1
+                      Group_Known_Doors(j)%I_nodes(i_tmp) = EVAC_DOORS(i)%INODE  
+                   End If
+                End Do
+                Do i = 1, n_exits
+                   If (Is_Known_Door(i+n_doors)) Then
+                      i_tmp = i_tmp + 1
+                      Group_Known_Doors(j)%I_nodes(i_tmp) = EVAC_EXITS(i)%INODE  
+                   End If
+                End Do
+             End If        ! there are known doors for this group
+          Else    ! The agent is a lonely one
+             Human_Known_Doors(j1)%N_nodes = i_tmp
+             If (Count(Is_Known_Door) > 0) Then
+                Allocate(Human_Known_Doors(j1)%I_nodes(i_tmp),STAT=IZERO)
+                Call ChkMemErr('Change_Target_Door', 'Human_Known_Doors',IZERO) 
+                i_tmp = 0
+                Do i = 1, n_doors
+                   If (Is_Known_Door(i)) Then
+                      i_tmp = i_tmp + 1
+                      Human_Known_Doors(j1)%I_nodes(i_tmp) = EVAC_DOORS(i)%INODE  
+                   End If
+                End Do
+                Do i = 1, n_exits
+                   If (Is_Known_Door(i+n_doors)) Then
+                      i_tmp = i_tmp + 1
+                      Human_Known_Doors(j1)%I_nodes(i_tmp) = EVAC_EXITS(i)%INODE  
+                   End If
+                End Do
+             End If   ! Is there any known doors for this group?
+          End If    ! Is the agent a member of a group or not?
+          
+          ! Check that the door is in correct main evac mesh.
+          Do i = 1, n_doors
+             If ( EVAC_DOORS(i)%IMESH /= HPT%imesh ) Then
+                Is_Known_Door(i) = .False.
+             End If
+          End Do
+          Do i = 1, n_exits
+             If ( EVAC_EXITS(i)%IMESH /= HPT%imesh .Or. EVAC_EXITS(i)%COUNT_ONLY ) Then
+                Is_Known_Door(n_doors+i) = .False.
+             End If
+          End Do
+       End If  ! imode=0, Initialization call
+
+    Else
+       ! The agent is from an entry line. P_door= 0.0 or 1.0, known doors
+       x1_old = xx
+       y1_old = yy
+       IEL    = Abs(HR%IEL)
+       Speed  = HR%Speed
+       Do i = 1, n_doors
+          If ( EVAC_DOORS(i)%IMESH == nm_tmp) Then
+             Is_Visible_Door(i) = .True.
+          End If
+       End Do
+       Do i = 1, n_exits
+          If ( EVAC_EXITS(i)%IMESH == nm_tmp .And. .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
+             Is_Visible_Door(n_doors+i) = .True.
+          End If
+       End Do
+       Do i = 1, PNX%N_VENT_FFIELDS 
+          ! Check that the door/exit is in the correct main evac grid.
+          i_tmp = 1
+          If (Trim(EVAC_Node_List(PNX%I_DOOR_NODES(i))%Node_Type) == 'Door') Then
+             i_tmp = EVAC_Node_List(PNX%I_DOOR_NODES(i))%Node_Index 
+          End If
+          If (Trim(EVAC_Node_List(PNX%I_DOOR_NODES(i))%Node_Type) == 'Exit' ) Then
+             i_tmp = n_doors + EVAC_Node_List(PNX%I_DOOR_NODES(i))%Node_Index 
+          End If
+          If ( Is_Visible_Door(i_tmp) ) Then
+             ! Door/exit is on this main evac mesh.
+             If (PNX%P_VENT_FFIELDS(i) < 0.5_EB) Then
+                Is_Known_Door(i_tmp) = .False.
+             Else
+                Is_Known_Door(i_tmp) = .True.
+             End If
+          End If
+       End Do
+    End If   ! Is the agent from an entr or from an evac line
+
+    ! Find the visible doors.
+    Do i = 1, n_doors + n_exits
+       If ( Is_Visible_Door(i) ) Then
+          If (EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type == 'Door' ) Then
+             X11 = EVAC_DOORS(i)%X 
+             Y11 = EVAC_DOORS(i)%Y
+          Else
+             X11 = EVAC_EXITS(i-n_doors)%X 
+             Y11 = EVAC_EXITS(i-n_doors)%Y
+          End If
+          ! Groups: the first member (x1_old,y1_old) of the group is used.
+          PP_see_door = See_door(nm_tmp, i, HR%I_Target, x1_old, y1_old, x11, y11, ave_K, max_fed)
+          FED_max_Door(i) = max_fed
+          K_ave_Door(i) = ave_K 
+
+          ! Note: a DOOR is not counted as visible door, if it does not have an
+          ! EXIT_SIGN, unless it is already been a target door for this agent/group.
+          If (PP_see_door) Then
+             If (EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type == 'Door') Then
+                If (.Not. EVAC_DOORS(i)%EXIT_SIGN .And. .Not. HR%I_Target == i) Then
+                   Is_Visible_Door(i) = .False.
+                End If
+             End If
+          Else
+             Is_Visible_Door(i) = .False.
+          End If
+       End If ! correct main evac mesh
+    End Do ! all doors and exits
+
+
+    ! Note: I_Target < 0: not visible, >0: visible
+    If (Any(Is_Visible_Door) .And. imode == 1) Then
+       Do i = 1, n_doors + n_exits
+          If (Abs(HR%I_Target) == i .And. Is_Visible_Door(i)) Is_Known_Door(i) = .True.
+       End Do
+    End If
+
+    Do i = 1, n_doors
+       If ( EVAC_DOORS(i)%TIME_OPEN > T .Or. EVAC_DOORS(i)%TIME_CLOSE < T) Then
+          Is_Visible_Door(i) = .False.
+          Is_Known_Door(i) = .False.
+       End If
+    End Do
+    Do i = 1, n_exits
+       If ( (EVAC_EXITS(i)%TIME_OPEN > T .Or. EVAC_EXITS(i)%TIME_CLOSE < T) .And. &
+            .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
+          Is_Visible_Door(n_doors+i) = .False.
+          Is_Known_Door(n_doors+i) = .False.
+       End If
+    End Do
+
+    If (Any(Is_Known_Door) .Or. Any(Is_Visible_Door)) Then
+       i_tmp   = 0
+       L2_min = Huge(L2_min)
+       Do i = 1, n_doors + n_exits
+          If ( Is_Known_Door(i) .And. Is_Visible_Door(i) ) Then
+             x_o = 0.0_EB
+             y_o = 0.0_EB
+             If (Trim(EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type) == 'Door' ) Then
+                x_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
+                y_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
+                i_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%I_VENT_FFIELD
+             Else      ! 'Exit'
+                x_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
+                y_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
+                i_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%I_VENT_FFIELD
+             End If
+             If (FED_DOOR_CRIT > 0.0_EB) Then
+                L2_tmp = FED_max_Door(i) * Sqrt((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
+             Else
+                L2_tmp = K_ave_Door(i)
+             End If
+             If (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
+             If ( ((x_o-x1_old)**2 + (y_o-y1_old)**2) < L2_min .And. L2_tmp < Abs(FED_DOOR_CRIT)) Then
+                L2_min = (x_o-x1_old)**2 + (y_o-y1_old)**2 
+                L2_min = Max(0.0_EB,L2_min)
+                i_tmp = i
+             End If
+          End If
+       End Do
+       If (i_tmp > 0 ) Then
+          ! Known and visible door, no smoke
+          If (EVAC_Node_List(n_egrids+n_entrys+i_tmp)%Node_Type == 'Door' ) Then
+             name_new_ffield = Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
+             i_new_ffield = EVAC_DOORS(i_tmp)%I_VENT_FFIELD
+          Else        ! 'Exit'
+             name_new_ffield = Trim(EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
+             i_new_ffield = EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
+          End If
+          color_index = 1
+       Else
+          ! No visible known doors available, try non-visible known doors
+          i_tmp   = 0
+          L2_min = Huge(L2_min)
+          Do i = 1, n_doors + n_exits
+             If ( Is_Known_Door(i) .And. .Not. Is_Visible_Door(i) ) Then
+                x_o = 0.0_EB
+                y_o = 0.0_EB
+                If (EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type == 'Door' ) Then
+                   x_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
+                   y_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
+                   i_o = EVAC_DOORS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%I_VENT_FFIELD
+                Else    ! 'Exit'
+                   x_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
+                   y_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
+                   i_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%I_VENT_FFIELD
+                End If
+                If (FED_DOOR_CRIT > 0.0_EB) Then
+                   L2_tmp = FED_max_Door(i)*Sqrt((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
+                Else
+                   l2_tmp = K_ave_Door(i)
+                End If
+                If (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
+                If ( ((x_o-x1_old)**2 + (y_o-y1_old)**2)<L2_min .And. L2_tmp<Abs(FED_DOOR_CRIT)) Then
+                   L2_min = (x_o-x1_old)**2 + (y_o-y1_old)**2 
+                   L2_min = Max(0.0_EB,L2_min)
+                   i_tmp = i
+                End If
+             End If
+          End Do
+          If (i_tmp > 0 ) Then
+             !  Non-visible known door, no smoke is found
+             If (EVAC_Node_List( n_egrids+n_entrys+i_tmp)%Node_Type == 'Door' ) Then
+                name_new_ffield = Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
+                i_new_ffield = EVAC_DOORS(i_tmp)%I_VENT_FFIELD
+             Else      ! 'Exit'
+                name_new_ffield = Trim(EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
+                i_new_ffield = EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
+             End If
+             color_index = 2
+          Else
+             ! Known doors with no smoke have not been found.
+             ! Try visible, not known door with no smoke.
+             i_tmp   = 0
+             L2_min = Huge(L2_min)
+             Do i = 1, n_doors + n_exits
+                If (Is_Visible_Door(i)) Then
+                   x_o = 0.0_EB
+                   y_o = 0.0_EB
+                   If (EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type == 'Door' ) Then
+                      x_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
+                      y_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
+                      i_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%I_VENT_FFIELD
+                   Else  ! 'Exit'
+                      x_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
+                      y_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
+                      i_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%I_VENT_FFIELD
+                   End If
+                   If (FED_DOOR_CRIT > 0.0_EB) Then
+                      L2_tmp = FED_max_Door(i)*Sqrt((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
+                   Else
+                      l2_tmp = K_ave_Door(i)
+                   End If
+                   If (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
+                   If ( ((x_o-x1_old)**2 + (y_o-y1_old)**2)<L2_min .And. L2_tmp<Abs(FED_DOOR_CRIT)) Then
+                      L2_min = (x_o-x1_old)**2 + (y_o-y1_old)**2
+                      L2_min = Max(0.0_EB,L2_min)
+                      i_tmp = i
+                   End If
+                End If
+             End Do
+             If (i_tmp > 0 ) Then
+                ! No smoke, visible door (not known) is found
+                If (EVAC_Node_List( n_egrids+n_entrys+i_tmp)%Node_Type == 'Door' ) Then
+                   name_new_ffield = Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
+                   i_new_ffield = EVAC_DOORS(i_tmp)%I_VENT_FFIELD
+                Else    ! 'Exit'
+                   name_new_ffield = Trim( EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
+                   i_new_ffield = EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
+                End If
+                color_index = 3
+             Else
+                ! Now we have some smoke and some visible or known doors
+                i_tmp   = 0
+                L2_min = Huge(L2_min)
+                Do i = 1, n_doors + n_exits
+                   If ( Is_Known_Door(i) .Or. Is_Visible_Door(i) ) Then
+                      x_o = 0.0_EB
+                      y_o = 0.0_EB
+                      If (EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type == 'Door' ) Then
+                         x_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
+                         y_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
+                         i_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%I_VENT_FFIELD
+                      Else ! 'Exit'
+                         x_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
+                         y_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
+                         i_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%I_VENT_FFIELD
+                      End If
+                      If (FED_DOOR_CRIT > 0.0_EB) Then
+                         If (j > 0) Then
+                            L2_tmp = Group_List(j)%IntDose + &
+                                 FED_max_Door(i) * Sqrt((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
+                         Else
+                            L2_tmp = HR%IntDose + &
+                                 FED_max_Door(i) * Sqrt((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
+                         End If
+                      Else
+                         l2_tmp = (Sqrt((x1_old-x_o)**2+(y1_old-y_o)**2)*0.5_EB)/(3.0_EB/K_ave_Door(i))
+                      End If
+                      If (i_o == i_old_ffield) L2_tmp = 0.9_EB*L2_tmp
+                      If (L2_tmp < L2_min) Then
+                         L2_min = L2_tmp
+                         i_tmp = i
+                      End If
+                   End If
+                End Do
+
+                If (i_tmp > 0 .And. L2_min < 1.0_EB) Then
+                   ! Not too much smoke, (known and/or visible doors)
+                   If (EVAC_Node_List(n_egrids+n_entrys+i_tmp)%Node_Type == 'Door' ) Then
+                      name_new_ffield = Trim(EVAC_DOORS(i_tmp)%VENT_FFIELD)
+                      i_new_ffield = EVAC_DOORS(i_tmp)%I_VENT_FFIELD
+                   Else  ! 'Exit'
+                      name_new_ffield = Trim(EVAC_EXITS(i_tmp-n_doors)%VENT_FFIELD)
+                      i_new_ffield = EVAC_EXITS(i_tmp-n_doors)%I_VENT_FFIELD
+                   End If
+                   If (Is_Known_Door(i_tmp) .And. Is_Visible_Door(i_tmp)) color_index = 4
+                   If (Is_Known_Door(i_tmp) .And. .Not. Is_Visible_Door(i_tmp)) color_index = 5
+                   If (.Not. Is_Known_Door(i_tmp) .And. Is_Visible_Door(i_tmp)) color_index = 6
+                Else    ! no match 
+                   ! No door found (or too much smoke), use the main evac grid ffield
+                   ! Note: This should be changed in later versions of the program.
+                   i_tmp = 0
+                   name_new_ffield = Trim(MESH_NAME(nm_tmp))
+                   i_new_ffield    = nm_tmp
+                   If (imode == 0) Then  ! Initialization call, use evac line info
+                      name_new_ffield = Trim(HPT%GRID_NAME)
+                      i_new_ffield    = HPT%I_VENT_FFIELDS(0)
+                   End If
+                   color_index = 7
+                End If  ! case 4
+             End If    ! case 3
+          End If      ! case 2
+       End If        ! case 1
+       If (Color_Method .Eq. 4 ) Then
+          color_index = EVAC_AVATAR_NCOLOR ! default, cyan
+          If (i_tmp > 0 .And. i_tmp <= n_doors ) color_index = EVAC_DOORS(i_tmp)%Avatar_Color_Index
+          If (i_tmp > n_doors .And. i_tmp <= n_doors + n_exits) &
+               color_index = EVAC_EXITS(i_tmp-n_doors)%Avatar_Color_Index
+       End If
+       If (imode == 2) Then   ! check_target_node calls
+          I_Target = i_tmp
+          If (i_tmp > 0 .And. .Not. Is_Visible_Door(Max(1,i_tmp)) ) Then
+             ! I_Target >0: visible, <0: not visible
+             I_Target = -i_tmp
+          End If
+          I_Color  = color_index
+          I_Field  = i_new_ffield
+          Return
+       End If
+
+    Else ! No known/visible door
+       i_tmp = 0 ! no door found
+       color_index = 7
+       If (imode == 2) Then   ! check_target_node calls
+          I_Target = 0
+          I_Color  = color_index
+          I_Field  = nm_tmp
+          Return
+       End If
+       If (HR%IEL > 0 ) Then  
+          ! The agent is from some evac line
+          If (HPT%IMESH == nm_tmp) Then
+             i_new_ffield    = HPT%I_VENT_FFIELDS(0)
+             name_new_ffield = Trim(Mesh_Name(i_new_ffield))
+          Else
+             name_new_ffield = Trim(MESH_NAME(nm_tmp))
+             i_new_ffield    = nm_tmp
+          End If
+          If (Color_Method == 4) color_index = EVAC_AVATAR_NCOLOR
+       Else
+          ! The agent is from some entr line
+          If (PNX%IMESH == nm_tmp) Then
+             i_new_ffield    = PNX%I_VENT_FFIELDS(0)
+             name_new_ffield = Trim(Mesh_Name(i_new_ffield))
+          Else
+             name_new_ffield = Trim(MESH_NAME(nm_tmp))
+             i_new_ffield    = nm_tmp
+          End If
+          If (Color_Method == 4) color_index = EVAC_AVATAR_NCOLOR
+       End If
+    End If ! Any known or visible door
+    HR%I_Target = i_tmp
+    If (i_tmp > 0 .And. .Not. Is_Visible_Door(Max(1,i_tmp))) Then
+       ! I_Target > 0: visible, < 0: not visible
+       HR%I_Target = -i_tmp
+    End If
+    If (j > 0) Group_Known_Doors(j)%I_Target = HR%I_Target
+    If ( (i_new_ffield /= i_old_ffield) .Or. (imode == 0) ) Then
+       ! Change the field of this group/agent.
+       If ( j == 0 ) Then
+          ! Group index=0: 'lost souls' or lonely agents
+          HR%I_FFIELD    = i_new_ffield
+          HR%FFIELD_NAME = Trim(name_new_ffield)
+          If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
+          If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
+          If (imode > 0) Then
+             Write (LU_EVACOUT,fmt='(a,i5,a,a,a,a)') ' EVAC: Human ',ie,', new ffield: ', &
+                  Trim(name_new_ffield), ', old ffield: ',Trim(name_old_ffield)
+          Else
+             Write (LU_EVACOUT,fmt='(a,i5,a,a)') ' EVAC: Human ',ie,', flow field: ', &
+                  Trim(name_new_ffield)
+          End If
+       Else
+          Group_Known_Doors(j)%I_Target = HR%I_Target
+          Group_List(j)%GROUP_I_FFIELDS(i_egrid) = i_new_ffield
+          HR%I_FFIELD = i_new_ffield
+          HR%FFIELD_NAME = Trim(name_new_ffield)
+          If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
+          If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
+          Color_Tmp(j) = color_index
+          If (imode > 0) Then
+             Write (LU_EVACOUT,fmt='(a,i5,a,a,a,a)') ' EVAC: Group ',j,', new ffield: ', &
+                  Trim(name_new_ffield), ', old ffield: ', Trim(name_old_ffield)
+          Else
+             Write (LU_EVACOUT,fmt='(a,i5,a,a)') ' EVAC: Group ',ie,', flow field: ', &
+                  Trim(name_new_ffield)
+          End If
+       End If
+    Else ! The new door is the same as the old target door.
+       If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
+       If (COLOR_METHOD == 5 .And. j > 0) Color_Tmp(j) = HR%COLOR_INDEX
+       If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
+       If (COLOR_METHOD == 4 .And. j > 0) Color_Tmp(j) = HR%COLOR_INDEX
+    End If
+
+  End Subroutine Change_Target_Door
   !
   Subroutine GET_REV_evac(MODULE_REV,MODULE_DATE)
     Integer,Intent(INOUT) :: MODULE_REV
