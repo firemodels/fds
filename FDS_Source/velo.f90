@@ -53,6 +53,7 @@ SUBROUTINE COMPUTE_VISCOSITY(NM)
 ! Compute turblent eddy viscosity from constant coefficient Smagorinsky model
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MU
+USE TURBULENCE, ONLY: VARDEN_DYNSMAG
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS,S12,S13,S23,DELTA,CS,MU_SUM
 INTEGER :: I,J,K,ITMP,N
@@ -67,6 +68,7 @@ IF (PREDICTOR) THEN
    WW => W
    RHOP => RHO
    IF (N_SPECIES > 0) YYP => YY
+   IF (LES .AND. DYNSMAG .AND. MOD(ICYC,DSMAG_FREQ)==0) CALL VARDEN_DYNSMAG(NM)
 ELSE
    UU => US
    VV => VS
@@ -101,6 +103,7 @@ IF (LES) THEN
             S13 = 0.5_EB*(DUDZ+DWDX)
             S23 = 0.5_EB*(DVDZ+DWDY)
             SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
+            IF (DYNSMAG) CS = C_DYNSMAG(I,J,K)
             ITMP = 0.1_EB*TMP(I,J,K)
             MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*(CS*DELTA)**2*SS
          ENDDO
