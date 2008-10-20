@@ -2435,6 +2435,20 @@ the constants were approximately 4.3, 2.9, 2.3, respectively. The strike
 plates of the two smaller sprinklers were notched, while that of the
 largest sprinkler was not~\cite{Yu:2}.
 
+In real sprinkler systems, the operating pressure is affected by the number of open nozzles. Typically, the pressure
+in the piping is high when the first sprinkler activates, and
+decreases when more and more sprinkler heads are activated. The pipe pressure has an effect on
+flow rate, droplet velocity and droplet size distribution. FDS tries
+not to predict the variation of pipe pressure; it should be specified
+by the user; but the following dependencies are used to update the
+droplet boundary conditions for mass flow $\dot{m}$, droplet speed
+$u_d$ and median diameter $d_m$
+\begin{eqnarray}
+	\dot{m} & \propto & \sqrt{p} \\
+	u_d	& \propto & \sqrt{p} \\
+	d_m	& \propto & p^{-1/3} 
+\end{eqnarray}
+
 In the numerical algorithm,
 the size of the droplets are chosen to mimic the
 Rosin-Rammler/log-normal distribution. A Probability Density Function (PDF)
@@ -3943,12 +3957,13 @@ Rearranging terms in Eq.~(\ref{rhou}) and using the expression for the ghost cel
 
 \section{Liquid Sprays}
 
-Lagrangian particles are sometimes introduced into the flow field as a means of
+\subsection{Particle movement}
+
+Lagrangian particles are can be introduced into the flow field as a means of
 visualization or simulation of droplets, aerosols, {\em etc.}. The
 position $\bx_p$ of each particle is governed by the equations
 \be \frac{d\bx_p}{dt} = \bu  \ee
-The particle positions are updated according to the same
-predictor-corrector
+The particle positions are updated according to the same predictor-corrector 
 scheme that is applied to the other flow quantities. Briefly, the
 position $\bx_p$ of a given particle is updated according to the two
 step scheme
