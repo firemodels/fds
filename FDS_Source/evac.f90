@@ -26,7 +26,7 @@ Module EVAC
   Use MESH_POINTERS
 !  Use MESH_POINTERS, ONLY: DT,IJKW,BOUNDARY_TYPE,XW,YW,WALL_INDEX,POINT_TO_MESH
 !  Use EVAC_MESH_POINTERS
-  Use PHYSICAL_FUNCTIONS, Only : GET_MASS_FRACTION
+  Use PHYSICAL_FUNCTIONS, Only : GET_MASS_FRACTION,FED
   !
   Implicit None
   Character(255), Parameter :: evacid='$Id$'
@@ -132,7 +132,7 @@ Module EVAC
           X=0._EB, Y=0._EB, Z=0._EB, Xsmoke=0._EB, Ysmoke=0._EB, Zsmoke=0._EB, &
           TIME_OPEN=0._EB, TIME_CLOSE=0._EB
      Integer :: IOR=0, ICOUNT=0, IMESH=0, INODE=0, NTARGET=0
-     Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADINT=0._EB
+     Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      Integer :: II=0, JJ=0, KK=0, FED_MESH=0
      Logical :: CHECK_FLOW=.False., COUNT_ONLY=.False.
      Integer :: STR_INDX=0, STR_SUB_INDX=0
@@ -154,7 +154,7 @@ Module EVAC
           TIME_OPEN=0._EB, TIME_CLOSE=0._EB
      Integer :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0, NTARGET=0
      Integer :: STR_INDX=0, STR_SUB_INDX=0
-     Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADINT=0._EB
+     Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      Integer :: II=0, JJ=0, KK=0, FED_MESH=0
      Logical :: CHECK_FLOW=.False., EXIT_SIGN=.False., KEEP_XY=.False.
      Character(60) :: ID='null'
@@ -175,7 +175,7 @@ Module EVAC
      Real(EB) :: Eff_Width=0._EB, Eff_Length=0._EB, Eff_Area=0._EB, Fac_Speed=0._EB
      ! Note: Corridor may have 2 different points, where smoke etc. data
      ! is saved.
-     Real(EB), Dimension(2) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADINT=0._EB
+     Real(EB), Dimension(2) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      Integer :: FED_MESH=0, FED_MESH2=0
      Integer, Dimension(2) :: II=0, JJ=0, KK=0
      Integer :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0
@@ -3356,7 +3356,7 @@ Contains
                status='replace')
           ! First line: <0 new format
           !             -1: second line: #mesh #reals #corrs #reals #doors+exits #nreals
-          !              (#reals: fed,soot,temp,radint,...)
+          !              (#reals: fed,soot,temp,radflux,...)
           ! First line: >0: nmeshes, fed and soot saved/read for meshes
           ntmp1 = -1
           ntmp2 = 4
@@ -3687,7 +3687,7 @@ Contains
           HUMAN_GRID(i,j)%SOOT_DENS     = 0.0_EB
           HUMAN_GRID(i,j)%FED_CO_CO2_O2 = 0.0_EB
           HUMAN_GRID(i,j)%TMP_G         = 0.0_EB
-          HUMAN_GRID(i,j)%RADINT        = 0.0_EB
+          HUMAN_GRID(i,j)%RADFLUX       = 0.0_EB
           HUMAN_GRID(i,j)%IMESH         = 0
           HUMAN_GRID(i,j)%II = i
           HUMAN_GRID(i,j)%JJ = j
@@ -4780,57 +4780,21 @@ Contains
                       j1 = HUMAN_GRID(i,j)%JJ
                       k1 = HUMAN_GRID(i,j)%KK
                       nom = Abs(HUMAN_GRID(i,j)%IMESH)
-                      y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
-                      ! Mass fraction array ==> soot density (mg/m3)
-                      ! Next is for soot (mg/m3)
-                      Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),SOOT_INDEX,y_extra,Y_MF_INT)
-                      tmp_1 = Y_MF_INT*MESHES(nom)%RHO(i1,j1,k1)*1.E6_EB
-                      HUMAN_GRID(i,j)%SOOT_DENS = tmp_1
-                      ! Calculate Purser's fractional effective dose (FED)
-                      ! Note: Purser uses minutes, here dt is in seconds
-                      !       fed_dose = fed_lco*fed_vco2 + fed_lo
-                      ! CO:  (3.317E-5*RMV*t)/D
-                      !      [RMV]=ltr/min, D=30% COHb concentration at incapacitation
-                      ! Next is for CO (ppm)
-                      Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),CO_INDEX,y_extra,Y_MF_INT)
-                      tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/MESHES(nom)%RSUM(I1,J1,K1)
-                      HUMAN_GRID(i,j)%FED_CO_CO2_O2 = 3.317E-5_EB*25.0_EB* &
-                           tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
-                      ! VCO2: CO2-induced hyperventilation
-                      !      exp(0.1903*c_CO2(%) + 2.0004)
-                      ! Next is for CO2
-                      Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),CO2_INDEX,y_extra,Y_MF_INT)
-                      tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
-                      HUMAN_GRID(i,j)%FED_CO_CO2_O2 = &
-                           HUMAN_GRID(i,j)%FED_CO_CO2_O2*Exp( 0.1903_EB*tmp_1 &
-                           *100.0_EB + 2.0004_EB )/7.1_EB
-                      ! LO: low oxygen
-                      ! Next is for O2
-                      Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),O2_INDEX,y_extra,Y_MF_INT)
-                      tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
-                      If ( tmp_1 < 0.20_EB ) Then
-                         HUMAN_GRID(i,j)%FED_CO_CO2_O2 = &
-                              HUMAN_GRID(i,j)%FED_CO_CO2_O2 + 1.0_EB  / &
-                              (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*tmp_1)) )
-                      End If
-                      ! Gas temperature, ind=5, C
-                      HUMAN_GRID(i,j)%TMP_G  = MESHES(nom)%TMP(i1,j1,k1)
-                      ! Radiant intensity, ind=18, kW/m2 (no -sigma*Tamb^4 term)
-                      HUMAN_GRID(i,j)%RADINT = &
-                           Max(MESHES(nom)%UII(i1,j1,k1),4.0_EB*SIGMA*TMPA4)
-
-
+                      CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
+                              HUMAN_GRID(i,j)%FED_CO_CO2_O2,HUMAN_GRID(i,j)%SOOT_DENS,&
+                              HUMAN_GRID(i,j)%TMP_G, HUMAN_GRID(i,j)%RADFLUX)
                    End If ! imesh > 0, i.e. fire grid found
 
-                   ! Save Fed, Soot, Temp(C), and RadInt
+
+                   ! Save Fed, Soot, Temp(C), and RadFlux
                    Write (LU_EVACFED) &
                         Real(HUMAN_GRID(i,j)%FED_CO_CO2_O2,FB), &
                         Real(HUMAN_GRID(i,j)%SOOT_DENS,FB), &
                         Real(HUMAN_GRID(i,j)%TMP_G,FB), &
-                        Real(HUMAN_GRID(i,j)%RADINT,FB)
+                        Real(HUMAN_GRID(i,j)%RADFLUX,FB)
 
                 Else     ! Read FED from a file
-                   ! Read Fed, Soot, Temp(C), and RadInt
+                   ! Read Fed, Soot, Temp(C), and RADFLUX
                    Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
                    If (ios.Ne.0) Then
                       Write(MESSAGE,'(A)') 'ERROR: Evac Mesh Exchange: FED READ ERROR'
@@ -4840,7 +4804,7 @@ Contains
                    HUMAN_GRID(i,j)%FED_CO_CO2_O2 = tmpout1
                    HUMAN_GRID(i,j)%SOOT_DENS = tmpout2
                    HUMAN_GRID(i,j)%TMP_G = tmpout3
-                   HUMAN_GRID(i,j)%RADINT = tmpout4
+                   HUMAN_GRID(i,j)%RADFLUX = tmpout4
 
                 End If   ! Calculate and save FED
 
@@ -4861,51 +4825,15 @@ Contains
                 j1 = EVAC_CORRS(i)%JJ(1)
                 k1 = EVAC_CORRS(i)%KK(1)
                 nom = EVAC_CORRS(i)%FED_MESH
-                y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
-
-                ! Mass fraction array ==> soot density (mg/m3)
-                ! Next is for soot (mg/m3)
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),SOOT_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = Y_MF_INT*MESHES(nom)%RHO(i1,j1,k1)*1.E6_EB
-                EVAC_CORRS(i)%SOOT_DENS(1) = tmp_1
-
-                ! Calculate Purser's fractional effective dose (FED)
-
-                ! Next is for CO (ppm)
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),CO_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/MESHES(nom)%RSUM(I1,J1,K1)
-                EVAC_CORRS(i)%FED_CO_CO2_O2(1) = 3.317E-5_EB*25.0_EB* &
-                     tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
-
-                ! Next is for CO2
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),CO2_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
-                EVAC_CORRS(i)%FED_CO_CO2_O2(1) = &
-                     EVAC_CORRS(i)%FED_CO_CO2_O2(1)*Exp( 0.1903_EB*tmp_1 &
-                     *100.0_EB + 2.0004_EB )/7.1_EB
-
-                ! Next is for O2
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),O2_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
-                If ( tmp_1 < 0.20_EB ) Then
-                   EVAC_CORRS(i)%FED_CO_CO2_O2(1) = &
-                        EVAC_CORRS(i)%FED_CO_CO2_O2(1) + 1.0_EB  / &
-                        (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*tmp_1)) )
-                End If
-
-                ! Gas temperature, ind=5, C
-                EVAC_CORRS(i)%TMP_G(1)  = MESHES(nom)%TMP(i1,j1,k1)
-
-                ! Radiant intensity, ind=18, kW/m2 (no -sigma*Tamb^4 term)
-                EVAC_CORRS(i)%RADINT(1) = &
-                     Max(MESHES(nom)%UII(i1,j1,k1),4.0_EB*SIGMA*TMPA4)
-
+                CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
+                         EVAC_CORRS(i)%FED_CO_CO2_O2(1),EVAC_CORRS(i)%SOOT_DENS(1),&
+                         EVAC_CORRS(i)%TMP_G(1), EVAC_CORRS(i)%RADFLUX(1))
              Else
                 ! No fed_mesh found
                 EVAC_CORRS(i)%FED_CO_CO2_O2(1) = 0.0_EB
                 EVAC_CORRS(i)%SOOT_DENS(1) = 0.0_EB
                 EVAC_CORRS(i)%TMP_G(1) = 0.0_EB
-                EVAC_CORRS(i)%RADINT(1) = 0.0_EB
+                EVAC_CORRS(i)%RADFLUX(1) = 0.0_EB
              End If                ! fed_mesh > 0, i.e. fire grid found
 
              If ( EVAC_CORRS(i)%FED_MESH2 > 0 ) Then
@@ -4913,64 +4841,30 @@ Contains
                 j1 = EVAC_CORRS(i)%JJ(2)
                 k1 = EVAC_CORRS(i)%KK(2)
                 nom = EVAC_CORRS(i)%FED_MESH2
-                y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
-
-                ! Mass fraction array ==> soot density (mg/m3)
-                ! Next is for soot (mg/m3)
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),SOOT_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = Y_MF_INT*MESHES(nom)%RHO(i1,j1,k1)*1.E6_EB
-                EVAC_CORRS(i)%SOOT_DENS(2) = tmp_1
-
-                ! Calculate Purser's fractional effective dose (FED)
-
-                ! Next is for CO (ppm)
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),CO_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/MESHES(nom)%RSUM(I1,J1,K1)
-                EVAC_CORRS(i)%FED_CO_CO2_O2(2) = 3.317E-5_EB*25.0_EB* &
-                     tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
-
-                ! Next is for CO2
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),CO2_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
-                EVAC_CORRS(i)%FED_CO_CO2_O2(2) = &
-                     EVAC_CORRS(i)%FED_CO_CO2_O2(2)*Exp( 0.1903_EB*tmp_1 &
-                     *100.0_EB + 2.0004_EB )/7.1_EB
-
-                ! Next is for O2
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),O2_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
-                If ( tmp_1 < 0.20_EB ) Then
-                   EVAC_CORRS(i)%FED_CO_CO2_O2(2) = &
-                        EVAC_CORRS(i)%FED_CO_CO2_O2(2) + 1.0_EB  / &
-                        (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*tmp_1)) )
-                End If
-                ! Gas temperature, ind=5, C
-                EVAC_CORRS(i)%TMP_G(2)  = MESHES(nom)%TMP(i1,j1,k1)
-                ! Radiant intensity, ind=18, kW/m2 (no -sigma*Tamb^4 term)
-                EVAC_CORRS(i)%RADINT(2) = &
-                     Max(MESHES(nom)%UII(i1,j1,k1),4.0_EB*SIGMA*TMPA4)
-
+                CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
+                         EVAC_CORRS(i)%FED_CO_CO2_O2(2),EVAC_CORRS(i)%SOOT_DENS(2),&
+                         EVAC_CORRS(i)%TMP_G(2), EVAC_CORRS(i)%RADFLUX(2))
              Else
                 ! No fed_mesh2 found
                 EVAC_CORRS(i)%FED_CO_CO2_O2(2) = 0.0_EB
                 EVAC_CORRS(i)%SOOT_DENS(2) = 0.0_EB
                 EVAC_CORRS(i)%TMP_G(2) = 0.0_EB
-                EVAC_CORRS(i)%RADINT(2) = 0.0_EB
+                EVAC_CORRS(i)%RADFLUX(2) = 0.0_EB
              End If                ! fed_mesh2 > 0, i.e. fire grid found
 
-             ! Save Fed, Soot, Temp(C), and RadInt
+             ! Save Fed, Soot, Temp(C), and RADFLUX
              Write (LU_EVACFED) &
                   Real(EVAC_CORRS(i)%FED_CO_CO2_O2(1),FB), &
                   Real(EVAC_CORRS(i)%SOOT_DENS(1),FB), &
                   Real(EVAC_CORRS(i)%TMP_G(1),FB), &
-                  Real(EVAC_CORRS(i)%RADINT(1),FB), &
+                  Real(EVAC_CORRS(i)%RADFLUX(1),FB), &
                   Real(EVAC_CORRS(i)%FED_CO_CO2_O2(2),FB), &
                   Real(EVAC_CORRS(i)%SOOT_DENS(2),FB), &
                   Real(EVAC_CORRS(i)%TMP_G(2),FB), &
-                  Real(EVAC_CORRS(i)%RADINT(2),FB)
+                  Real(EVAC_CORRS(i)%RADFLUX(2),FB)
 
           Else                    ! Read FED from a file
-             ! Read Fed, Soot, Temp(C), and RadInt
+             ! Read Fed, Soot, Temp(C), and RADFLUX
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4, &
                   tmpout5, tmpout6, tmpout7, tmpout8
              If (ios.Ne.0) Then
@@ -4981,11 +4875,11 @@ Contains
              EVAC_CORRS(i)%FED_CO_CO2_O2(1) = tmpout1
              EVAC_CORRS(i)%SOOT_DENS(1) = tmpout2
              EVAC_CORRS(i)%TMP_G(1) = tmpout3
-             EVAC_CORRS(i)%RADINT(1) = tmpout4
+             EVAC_CORRS(i)%RADFLUX(1) = tmpout4
              EVAC_CORRS(i)%FED_CO_CO2_O2(2) = tmpout5
              EVAC_CORRS(i)%SOOT_DENS(2) = tmpout6
              EVAC_CORRS(i)%TMP_G(2) = tmpout7
-             EVAC_CORRS(i)%RADINT(2) = tmpout8
+             EVAC_CORRS(i)%RADFLUX(2) = tmpout8
 
           End If                  ! Calculate and save FED
        End Do CORR_LOOP
@@ -4999,62 +4893,26 @@ Contains
                 j1 = EVAC_DOORS(i)%JJ
                 k1 = EVAC_DOORS(i)%KK
                 nom = EVAC_DOORS(i)%FED_MESH
-                y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
-                
-                ! Mass fraction array ==> soot density (mg/m3)
-                ! Next is for soot (mg/m3)
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),SOOT_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = Y_MF_INT*MESHES(nom)%RHO(i1,j1,k1)*1.E6_EB
-                EVAC_DOORS(i)%SOOT_DENS = tmp_1
-
-                ! Calculate Purser's fractional effective dose (FED)
-
-                ! Next is for CO (ppm)
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),CO_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/MESHES(nom)%RSUM(I1,J1,K1)
-                EVAC_DOORS(i)%FED_CO_CO2_O2 = 3.317E-5_EB*25.0_EB* &
-                     tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
-
-                ! Next is for CO2
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),CO2_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
-                EVAC_DOORS(i)%FED_CO_CO2_O2 = &
-                     EVAC_DOORS(i)%FED_CO_CO2_O2*Exp( 0.1903_EB*tmp_1 &
-                     *100.0_EB + 2.0004_EB )/7.1_EB
-
-                ! Next is for O2
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),O2_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
-                If ( tmp_1 < 0.20_EB ) Then
-                   EVAC_DOORS(i)%FED_CO_CO2_O2 = &
-                        EVAC_DOORS(i)%FED_CO_CO2_O2 + 1.0_EB  / &
-                        (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*tmp_1)) )
-                End If
-
-                ! Gas temperature, ind=5, C
-                EVAC_DOORS(i)%TMP_G  = MESHES(nom)%TMP(i1,j1,k1)
-
-                ! Radiant intensity, ind=18, kW/m2 (no -sigma*Tamb^4 term)
-                EVAC_DOORS(i)%RADINT = &
-                     Max(MESHES(nom)%UII(i1,j1,k1),4.0_EB*SIGMA*TMPA4)
-
+                CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
+                              EVAC_DOORS(i)%FED_CO_CO2_O2,EVAC_DOORS(i)%SOOT_DENS,&
+                              EVAC_DOORS(i)%TMP_G, EVAC_DOORS(i)%RADFLUX)
              Else
                 ! No fed_mesh found
                 EVAC_DOORS(i)%FED_CO_CO2_O2 = 0.0_EB
                 EVAC_DOORS(i)%SOOT_DENS = 0.0_EB
                 EVAC_DOORS(i)%TMP_G = 0.0_EB
-                EVAC_DOORS(i)%RADINT = 0.0_EB
+                EVAC_DOORS(i)%RADFLUX = 0.0_EB
              End If                ! fed_mesh > 0, i.e. fire grid found
 
-             ! Save Fed, Soot, Temp(C), and RadInt
+             ! Save Fed, Soot, Temp(C), and RADFLUX
              Write (LU_EVACFED) &
                   Real(EVAC_DOORS(i)%FED_CO_CO2_O2,FB), &
                   Real(EVAC_DOORS(i)%SOOT_DENS,FB), &
                   Real(EVAC_DOORS(i)%TMP_G,FB), &
-                  Real(EVAC_DOORS(i)%RADINT,FB)
+                  Real(EVAC_DOORS(i)%RADFLUX,FB)
 
           Else                    ! Read FED from a file
-             ! Read Fed, Soot, Temp(C), and RadInt
+             ! Read Fed, Soot, Temp(C), and RADFLUX
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
              If (ios.Ne.0) Then
                 Write(MESSAGE,'(A)') 'ERROR: Evac Mesh Exchange: FED READ ERROR'
@@ -5064,7 +4922,7 @@ Contains
              EVAC_DOORS(i)%FED_CO_CO2_O2 = tmpout1
              EVAC_DOORS(i)%SOOT_DENS = tmpout2
              EVAC_DOORS(i)%TMP_G = tmpout3
-             EVAC_DOORS(i)%RADINT = tmpout4
+             EVAC_DOORS(i)%RADFLUX = tmpout4
           End If                  ! Calculate and save FED
        End Do DOOR_LOOP
 
@@ -5079,62 +4937,26 @@ Contains
                 j1 = EVAC_EXITS(i)%JJ
                 k1 = EVAC_EXITS(i)%KK
                 nom = EVAC_EXITS(i)%FED_MESH
-                y_extra = MESHES(nom)%Y_SUM(I1,J1,K1)  ! extra species mass fraction
-
-                ! Mass fraction array ==> soot density (mg/m3)
-                ! Next is for soot (mg/m3)
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),SOOT_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = Y_MF_INT*MESHES(nom)%RHO(i1,j1,k1)*1.E6_EB
-                EVAC_EXITS(i)%SOOT_DENS = tmp_1
-
-                ! Calculate Purser's fractional effective dose (FED)
-
-                ! Next is for CO (ppm)
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),CO_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/MESHES(nom)%RSUM(I1,J1,K1)
-                EVAC_EXITS(i)%FED_CO_CO2_O2 = 3.317E-5_EB*25.0_EB* &
-                     tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
-
-                ! Next is for CO2
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),CO2_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
-                EVAC_EXITS(i)%FED_CO_CO2_O2 = &
-                     EVAC_EXITS(i)%FED_CO_CO2_O2*Exp( 0.1903_EB*tmp_1 &
-                     *100.0_EB + 2.0004_EB )/7.1_EB
-
-                ! Next is for O2
-                Call GET_MASS_FRACTION(MESHES(nom)%YY(I1,J1,K1,I_Z_MIN:I_Z_MAX),O2_INDEX,y_extra,Y_MF_INT)
-                tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/MESHES(nom)%RSUM(I1,J1,K1)
-                If ( tmp_1 < 0.20_EB ) Then
-                   EVAC_EXITS(i)%FED_CO_CO2_O2 = &
-                        EVAC_EXITS(i)%FED_CO_CO2_O2 + 1.0_EB  / &
-                        (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*tmp_1)) )
-                End If
-
-                ! Gas temperature, ind=5, C
-                EVAC_EXITS(i)%TMP_G  = MESHES(nom)%TMP(i1,j1,k1)
-
-                ! Radiant intensity, ind=18, kW/m2 (no -sigma*Tamb^4 term)
-                EVAC_EXITS(i)%RADINT = &
-                     Max(MESHES(nom)%UII(i1,j1,k1),4.0_EB*SIGMA*TMPA4)
-
+                CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
+                         EVAC_EXITS(i)%FED_CO_CO2_O2,EVAC_EXITS(i)%SOOT_DENS,&
+                         EVAC_EXITS(i)%TMP_G, EVAC_EXITS(i)%RADFLUX)
              Else
                 ! No fed_mesh found
                 EVAC_EXITS(i)%FED_CO_CO2_O2 = 0.0_EB
                 EVAC_EXITS(i)%SOOT_DENS = 0.0_EB
                 EVAC_EXITS(i)%TMP_G = 0.0_EB
-                EVAC_EXITS(i)%RADINT = 0.0_EB
+                EVAC_EXITS(i)%RADFLUX = 0.0_EB
              End If                ! fed_mesh > 0, i.e. fire grid found
 
-             ! Save Fed, Soot, Temp(C), and RadInt
+             ! Save Fed, Soot, Temp(C), and RADFLUX
              Write (LU_EVACFED) &
                   Real(EVAC_EXITS(i)%FED_CO_CO2_O2,FB), &
                   Real(EVAC_EXITS(i)%SOOT_DENS,FB), &
                   Real(EVAC_EXITS(i)%TMP_G,FB), &
-                  Real(EVAC_EXITS(i)%RADINT,FB)
+                  Real(EVAC_EXITS(i)%RADFLUX,FB)
 
           Else                    ! Read FED from a file
-             ! Read Fed, Soot, Temp(C), and RadInt
+             ! Read Fed, Soot, Temp(C), and RADFLUX
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
              If (ios.Ne.0) Then
                 Write(MESSAGE,'(A)') 'ERROR: Evac Mesh Exchange: FED READ ERROR'
@@ -5144,7 +4966,7 @@ Contains
              EVAC_EXITS(i)%FED_CO_CO2_O2 = tmpout1
              EVAC_EXITS(i)%SOOT_DENS = tmpout2
              EVAC_EXITS(i)%TMP_G = tmpout3
-             EVAC_EXITS(i)%RADINT = tmpout4
+             EVAC_EXITS(i)%RADFLUX = tmpout4
           End If                  ! Calculate and save FED
        End Do EXIT_LOOP
 
@@ -10851,6 +10673,28 @@ Contains
 
     Return
   End Subroutine Find_walls
+
+  SUBROUTINE GET_FIRE_CONDITIONS(NOM,I,J,K,fed_indx,soot_dens,gas_temp,rad_flux)
+  INTEGER, INTENT(IN) :: I,J,K,NOM
+  REAL(EB), INTENT(OUT) :: fed_indx,soot_dens,gas_temp,rad_flux
+  !
+  REAL(EB) Y_SUM, Y_MF_INT, tmp_1
+
+  Y_SUM = MESHES(NOM)%Y_SUM(I,J,K)  ! extra species mass fraction
+                
+  ! Mass fraction array ==> soot density (mg/m3)
+  ! Next is for soot (mg/m3)
+  Call GET_MASS_FRACTION(MESHES(nom)%YY(I,J,K,I_Z_MIN:I_Z_MAX),SOOT_INDEX,Y_SUM,Y_MF_INT)
+  soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
+  ! Calculate Purser's fractional effective dose (FED)
+  fed_indx = FED(MESHES(nom)%YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM,MESHES(nom)%RSUM(I,J,K))
+  ! Gas temperature, ind=5, C
+  gas_temp  = MESHES(nom)%TMP(I,J,K)
+  ! Rad flux, ind=18, kW/m2 (no -sigma*Tamb^4 term)
+  rad_flux = Max(MESHES(nom)%UII(I,J,K)/4.0_EB,SIGMA*TMPA4)
+  
+  END SUBROUTINE GET_FIRE_CONDITIONS
+
   !
   Subroutine GET_REV_evac(MODULE_REV,MODULE_DATE)
     Integer,Intent(INOUT) :: MODULE_REV
