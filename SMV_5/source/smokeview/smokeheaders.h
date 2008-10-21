@@ -603,7 +603,7 @@ EXTERNCPP void freecadinfo(void);
 EXTERNCPP void readcad2geom(cadgeom *cd);
 EXTERNCPP void readcadgeom(cadgeom *cd);
 EXTERNCPP void drawcadgeom(const cadgeom *cd);
-EXTERNCPP void drawcad2geom(const cadgeom *cd);
+EXTERNCPP void drawcad2geom_opaque(const cadgeom *cd,int trans_flag);
 
 EXTERNCPP char *newtextptr(char ***texture_list,int *n_texture_list,char *texturebuffer,char *lastbuffer);
 
