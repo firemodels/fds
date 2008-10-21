@@ -222,7 +222,7 @@ typedef struct {
 typedef struct {
   int index;
   float texture_width, texture_height;
-  float rgb[4];
+  float rgb[4], shininess;
   texture textureinfo;
 } cadlook;
 

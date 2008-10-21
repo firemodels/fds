@@ -724,6 +724,7 @@ void readcad2geom(cadgeom *cd){
     int errorcode;
     int ii;
     size_t lenbuffer,len;
+    float *shininess;
 
     cdi = cd->cadlookinfo + i;
 
@@ -731,18 +732,20 @@ void readcad2geom(cadgeom *cd){
 
     if(fgets(buffer,255,stream)==NULL)return;
     rrgb=cdi->rgb;
+    shininess=&cdi->shininess;
     cdi->texture_height=-1.0;
     cdi->texture_width=-1.0;
     rrgb[0]=-1.0;
     rrgb[1]=-1.0;
     rrgb[2]=-1.0;
+    rrgb[3]=1.0;
+    *shininess=block_shininess;
     lenbuffer=strlen(buffer);
     for(ii=0;ii<lenbuffer;ii++){
       if(buffer[ii]==',')buffer[ii]=' ';
     }
-    sscanf(buffer,"%i %f %f %f %f %f",
-      &cdi->index,rrgb,rrgb+1,rrgb+2,&cdi->texture_width,&cdi->texture_height);
-    cdi->rgb[3]=1.0;
+    sscanf(buffer,"%i %f %f %f %f %f %f %f",
+      &cdi->index,rrgb,rrgb+1,rrgb+2,&cdi->texture_width,&cdi->texture_height,rrgb+3,shininess);
 
     if(fgets(buffer,255,stream)==NULL)return;
     trim(buffer);
@@ -978,7 +981,7 @@ void drawcadgeom(const cadgeom *cd){
 
 /* ------------------ drawcadgeom ------------------------ */
 
-void drawcad2geom(const cadgeom *cd){
+void drawcad2geom(const cadgeom *cd, int trans_flag){
   int ii,i;
   float *xyzpoint;
   float *txypoint;
@@ -987,16 +990,19 @@ void drawcad2geom(const cadgeom *cd){
   cadquad *quadi;
   int colorindex,colorindex2;
   texture *lasttexture;
+  float last_block_shininess;
 
   lastcolor=NULL;
+  last_block_shininess=-1.0;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   glEnable(GL_LIGHTING); 
+  if(trans_flag==DRAW_TRANSPARENT)transparenton();
   glBegin(GL_QUADS);
-  glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
   colorindex=0;
   for(ii=0;ii<cd->nquads;ii++){
     texture *texti;
+    float this_block_shininess;
 
     i=cd->order[ii];
     ASSERT(i>=0&&i<cd->nquads);
@@ -1014,12 +1020,23 @@ void drawcad2geom(const cadgeom *cd){
         colorindex++;
       }
       else{
+        if((thiscolor[3]<1.0&&trans_flag!=DRAW_TRANSPARENT)||
+           (thiscolor[3]>=1.0&&trans_flag==DRAW_TRANSPARENT)){
+           continue;
+        }
         glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,thiscolor);
       }
       lastcolor=thiscolor;
     }
 
     if(RectangleInFrustum(xyzpoint,xyzpoint+3,xyzpoint+6,xyzpoint+9)==0)continue;
+
+    this_block_shininess = quadi->cadlookq->shininess;
+    if(last_block_shininess!=this_block_shininess){
+      last_block_shininess=this_block_shininess;
+      glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&this_block_shininess);
+    }
+    
     normal = quadi->normals;
 
     glNormal3fv(normal);
@@ -1078,6 +1095,7 @@ void drawcad2geom(const cadgeom *cd){
   }
 
   glDisable(GL_LIGHTING);
+  if(trans_flag==DRAW_TRANSPARENT)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -3617,14 +3635,15 @@ void drawBlockages(int mode, int trans_flag){
      sniffErrors("after drawblocks");
      if(xyz_clipplane!=0)glEnable(GL_CULL_FACE);
    }
-   if(trans_flag==DRAW_TRANSPARENT)return;
-   if(blocklocation!=BLOCKlocation_cad){
-     if(mode==SELECT&&blockageSelect==1){
-       draw_selectfaces();
-       return;
-     }
-     else{
-       draw_faces();
+   if(trans_flag!=DRAW_TRANSPARENT){
+     if(blocklocation!=BLOCKlocation_cad){
+       if(mode==SELECT&&blockageSelect==1){
+         draw_selectfaces();
+         return;
+       }
+       else{
+         draw_faces();
+       }
      }
    }
 
@@ -3632,10 +3651,11 @@ void drawBlockages(int mode, int trans_flag){
      for(i=0;i<ncadgeom;i++){
        cd=cadgeominfo+i;
        if(cd->version==1){
+         if(trans_flag==DRAW_TRANSPARENT)continue;
          drawcadgeom(cd);
        }
        else if(cd->version==2){
-         drawcad2geom(cd);
+         drawcad2geom(cd,trans_flag);
        }
      }
    }
