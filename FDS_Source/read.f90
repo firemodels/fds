@@ -3060,7 +3060,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
       IF ((FLOW_RATE>0._EB .AND. K_FACTOR<=0._EB .AND. OPERATING_PRESSURE<=0._EB) .OR. &
           (FLOW_RATE<0._EB .AND. K_FACTOR>=0._EB .AND. OPERATING_PRESSURE<=0._EB) .OR. &
           (FLOW_RATE<0._EB .AND. K_FACTOR<=0._EB .AND. OPERATING_PRESSURE>0._EB)) THEN
-         WRITE(MESSAGE,'(A,A,A,I5)') 'Problem with PROP ',TRIM(PY%ID),', too few flow parameters'
+         WRITE(MESSAGE,'(A,A,A)') 'Problem with PROP ',TRIM(PY%ID),', too few flow parameters'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       IF (K_FACTOR < 0._EB)           K_FACTOR           = FLOW_RATE/SQRT(OPERATING_PRESSURE)

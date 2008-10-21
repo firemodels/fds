@@ -1776,6 +1776,7 @@ SUBROUTINE INITIALIZE_DIAGNOSTIC_FILE
 USE RADCONS, ONLY: NRT,RSA,NRP,TIME_STEP_INCREMENT,ANGLE_INCREMENT,PATH_LENGTH
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP 
 INTEGER :: NM,I,NN,N,NR,NL,NS
+CHARACTER(30) :: QUANTITY
  
 ! Write out preliminary stuff to error file (unit 0)
  
@@ -2060,17 +2061,19 @@ ENDDO SURFLOOP
 ! Print out information about all Devices
  
 IF (N_PROP > 0) WRITE(LU_OUTPUT,'(//A,I2)')  ' Device Properties'
- 
+
 PROPERTY_LOOP: DO N=1,N_PROP
    PY => PROPERTY(N)
    WRITE(LU_OUTPUT,'(/I4,1X,A)')  N,TRIM(PY%ID)
-   SELECT CASE(PY%QUANTITY)
+   QUANTITY = PY%QUANTITY
+   IF (PY%FLOW_RATE > 0._EB) QUANTITY = 'SPRINKLER LINK TEMPERATURE'
+   SELECT CASE(QUANTITY)
       CASE('SPRINKLER LINK TEMPERATURE')
          WRITE(LU_OUTPUT,'(A,F8.1)') '     RTI (m-s)^1/2               ', PY%RTI
          WRITE(LU_OUTPUT,'(A,F8.2)') '     C-Factor (m/s)^1/2          ', PY%C_FACTOR
          WRITE(LU_OUTPUT,'(A,F8.1)') '     Activation Temperature (C)  ', PY%ACTIVATION_TEMPERATURE
-         WRITE(LU_OUTPUT,'(A,F8.1)') '     Flow Rate (L/min)           ', PY%FLOW_RATE
-         WRITE(LU_OUTPUT,'(A,F8.1)') '     K-Factor (L/min/atm**0.5)   ', PY%K_FACTOR
+         WRITE(LU_OUTPUT,'(A,F8.2)') '     Flow Rate (L/min)           ', PY%FLOW_RATE
+         WRITE(LU_OUTPUT,'(A,F8.2)') '     K-Factor (L/min/atm**0.5)   ', PY%K_FACTOR
          WRITE(LU_OUTPUT,'(A,A   )') '     Particle Class              ', TRIM(PY%PART_ID)
       CASE('LINK TEMPERATURE')
          WRITE(LU_OUTPUT,'(A,F8.1)') '     RTI (m-s)^1/2               ', PY%RTI
