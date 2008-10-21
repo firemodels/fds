@@ -1162,6 +1162,9 @@ REAL(EB), PARAMETER :: ALPHA = 6.0_EB ! See Lund, 1997 CTR briefs.
 ! P. Moin, K. Squires, W. Cabot, and S. Lee.  A dynamic subgrid-scale model for compressible
 ! turbulence and scalar transport. Phys. Fluids A, 3(11):2746-2757, 1991.
 !
+! T. S. Lund. On the use of discrete filters for large eddy simulation.  Center for Turbulence
+! Research Annual Research Briefs, 1997.
+!
 ! R. McDermott. Variable density formulation of the dynamic Smagorinsky model.
 ! http://randy.mcdermott.googlepages.com/dynsmag_comp.pdf
 
