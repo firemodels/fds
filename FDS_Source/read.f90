@@ -7330,8 +7330,8 @@ OUTPUT_QUANTITY(29)%SHORT_NAME = 'vort_z'
 OUTPUT_QUANTITY(24:29)%CELL_POSITION = CELL_EDGE
 
 OUTPUT_QUANTITY(30)%NAME = 'C_DYNSMAG'
-OUTPUT_QUANTITY(30)%UNITS = '--'
-OUTPUT_QUANTITY(30)%SHORT_NAME = 'c_dynsmag'  
+OUTPUT_QUANTITY(30)%UNITS = '  '
+OUTPUT_QUANTITY(30)%SHORT_NAME = 'c_smag'  
 
 ! QUANTITY's the refer to droplet properties that are used to color the droplets in Smokeview
 
