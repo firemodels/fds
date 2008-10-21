@@ -996,6 +996,8 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
   last_block_shininess=-1.0;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
+  glEnable(GL_COLOR_MATERIAL);
+  glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
   glEnable(GL_LIGHTING); 
   if(trans_flag==DRAW_TRANSPARENT)transparenton();
   glBegin(GL_QUADS);
@@ -1024,7 +1026,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
            (thiscolor[3]>=1.0&&trans_flag==DRAW_TRANSPARENT)){
            continue;
         }
-        glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,thiscolor);
+        glColor4fv(thiscolor);
       }
       lastcolor=thiscolor;
     }
@@ -1095,6 +1097,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
   }
 
   glDisable(GL_LIGHTING);
+  glDisable(GL_COLOR_MATERIAL);
   if(trans_flag==DRAW_TRANSPARENT)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
@@ -2212,6 +2215,8 @@ void draw_transparent_faces(){
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
   int drawing_smooth, drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
+
+  if(blocklocation==BLOCKlocation_cad||(ncadgeom!=0&&show_cad_and_grid==1))return;
 
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
@@ -3619,46 +3624,45 @@ void drawBlockages(int mode, int trans_flag){
 
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
-   if(drawing_smooth==1&&showedit==0){
-     if(xyz_clipplane!=0)glDisable(GL_CULL_FACE);
-     for(i=0;i<nmeshes;i++){
-       meshi = meshinfo + i;
-       for(j=0;j<meshi->nsmoothblockagecolors;j++){
-         isosurface *bsurface;
-         smoothnorms=1;
-         if(meshi->blockagesurface!=NULL){
-           bsurface=meshi->blockagesurfaces[j];
-           drawstaticiso(bsurface,1,smoothnorms,trans_flag,1);
-         }
-       }
-     }
-     sniffErrors("after drawblocks");
-     if(xyz_clipplane!=0)glEnable(GL_CULL_FACE);
-   }
-   if(trans_flag!=DRAW_TRANSPARENT){
-     if(blocklocation!=BLOCKlocation_cad){
-       if(mode==SELECT&&blockageSelect==1){
-         draw_selectfaces();
-         return;
-       }
-       else{
-         draw_faces();
-       }
-     }
-   }
+  if(drawing_smooth==1&&showedit==0){
+    if(xyz_clipplane!=0)glDisable(GL_CULL_FACE);
+    for(i=0;i<nmeshes;i++){
+      meshi = meshinfo + i;
 
-   if(blocklocation==BLOCKlocation_cad||(ncadgeom!=0&&show_cad_and_grid==1)){
-     for(i=0;i<ncadgeom;i++){
-       cd=cadgeominfo+i;
-       if(cd->version==1){
-         if(trans_flag==DRAW_TRANSPARENT)continue;
-         drawcadgeom(cd);
-       }
-       else if(cd->version==2){
-         drawcad2geom(cd,trans_flag);
-       }
-     }
-   }
+      for(j=0;j<meshi->nsmoothblockagecolors;j++){
+        isosurface *bsurface;
+        smoothnorms=1;
+        if(meshi->blockagesurface!=NULL){
+          bsurface=meshi->blockagesurfaces[j];
+          drawstaticiso(bsurface,1,smoothnorms,trans_flag,1);
+        }
+      }
+    }
+    sniffErrors("after drawblocks");
+    if(xyz_clipplane!=0)glEnable(GL_CULL_FACE);
+  }
+  if(trans_flag!=DRAW_TRANSPARENT&&blocklocation!=BLOCKlocation_cad){
+    if(mode==SELECT&&blockageSelect==1){
+      draw_selectfaces();
+      return;
+    }
+    else{
+      draw_faces();
+    }
+  }
+
+  if(blocklocation==BLOCKlocation_cad||(ncadgeom!=0&&show_cad_and_grid==1)){
+    for(i=0;i<ncadgeom;i++){
+      cd=cadgeominfo+i;
+      if(cd->version==1){
+        if(trans_flag==DRAW_TRANSPARENT)continue;
+        drawcadgeom(cd);
+      }
+      else if(cd->version==2){
+        drawcad2geom(cd,trans_flag);
+      }
+    }
+  }
 }
 
 /* ------------------ snap_view_angles ------------------------ */
