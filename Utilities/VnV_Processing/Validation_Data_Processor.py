@@ -110,7 +110,14 @@ def extract_config_data(config_file):
     for list_item in config_lists:
         if diagnostic_level >= 3:
             print list_item
-        if list_item == []:
+        if list_item == [] or list_item[0] == '':
+            if diagnostic_level >= 3:
+                print "No g, q or "+data_line_char+", skipping row."
+            skip_counter = skip_counter + 1
+            continue
+        if list_item[0] == 'e':
+            if diagnostic_level >= 2:
+                print "Stopping data read at e character."
             break
         if list_item[0] == 'g':
             if group_counter < 1:
