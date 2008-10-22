@@ -410,8 +410,8 @@ IF (MIXTURE_FRACTION) THEN
                DO N=1,N_SPECIES
                   IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
                   CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
-                  CP_MF = CP_SUM+(1._EB-Y_SUM(I,J,K))*CP_MF
                END DO
+               CP_MF = CP_SUM+(1._EB-Y_SUM(I,J,K))*CP_MF
             ENDIF
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_MF
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
