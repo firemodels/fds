@@ -108,7 +108,7 @@ intel_osx_mpi_db : obj = fds5_osx_intel_mpi_db
 intel_osx_mpi_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-intel_osx_64 : FFLAGS = -O3 -axTP -heap-arrays -ip -vec_report0 -m64
+intel_osx_64 : FFLAGS = -O3 -axTP -heap-arrays -ip -vec_report0 -m64 -fltconsistency
 intel_osx_64 : CFLAGS = -O2 -Dpp_noappend -Dpp_OSX
 intel_osx_64 : FCOMPL = ifort
 intel_osx_64 : CCOMPL = icc
@@ -116,7 +116,7 @@ intel_osx_64 : obj = fds5_osx_intel_64
 intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-intel_osx_64_mc : FFLAGS = -O3 -axTP -heap-arrays -ip -parallel -m64
+intel_osx_64_mc : FFLAGS = -O3 -axTP -heap-arrays -ip -parallel -m64 -fltconsistency
 intel_osx_64_mc : CFLAGS = -O2 -Dpp_noappend -Dpp_OSX
 intel_osx_64_mc : FCOMPL = ifort
 intel_osx_64_mc : CCOMPL = icc
@@ -132,7 +132,7 @@ intel_osx_db_64 : obj = fds5_osx_intel_db_64
 intel_osx_db_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-intel_osx_mpi_64 : FFLAGS  = -O3 -axP -ip -parallel -m64
+intel_osx_mpi_64 : FFLAGS  = -O3 -axTP -heap-arrays -ip -parallel -m64 -fltconsistency 
 intel_osx_mpi_64 : CFLAGS  = -Dpp_noappend -Dpp_OSX
 intel_osx_mpi_64 : FCOMPL  = /usr/local/bin/mpif77
 intel_osx_mpi_64 : CCOMPL  = icc
