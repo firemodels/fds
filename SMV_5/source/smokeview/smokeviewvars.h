@@ -30,6 +30,7 @@
 #include "smokeheaders.h"
 #endif
 
+SVEXTERN int part5colorindex;
 SVEXTERN int navatar_colors;
 SVEXTERN float *avatar_colors;
 
