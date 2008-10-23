@@ -1990,6 +1990,7 @@ void initvars0(void){
   tour_t=NULL, tour_t2=NULL, tour_dist=NULL, tour_dist2=NULL, tour_dist3=NULL;
   colorbarinfo=NULL;
 
+  part5colorindex=0;
   sd_shown=NULL;
   vd_shown=NULL;
   show_all_slices=1;

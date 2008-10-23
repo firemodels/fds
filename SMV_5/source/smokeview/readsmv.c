@@ -1003,8 +1003,9 @@ int readsmv(char *file){
         STRCPY(partclassi->name,trim_front(buffer));
       }
 
+      partclassi->always_uniform=0;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",rgb_class,rgb_class+1,rgb_class+2);
+      sscanf(buffer,"%f %f %f %i",rgb_class,rgb_class+1,rgb_class+2,&partclassi->always_uniform);
       rgb_class[3]=1.0;
       partclassi->rgb=getcolorptr(rgb_class);
 
@@ -6683,19 +6684,26 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f %f",&nearclip,&farclip);
     }
 
-/*    if(npart5prop>0){
-      fprintf(fileout,"PART5PROPDISP\n");
+    if(match(buffer,"PART5COLOR",10)==1){
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
 
         propi = part5propinfo + i;
-        fprintf(fileout," ");
-        for(j=0;j<npartclassinfo;j++){
-          fprintf(fileout,"%i ",propi->class_vis[j]);
-        }
-        fprintf(fileout,"\n");
+        propi->display=0;
       }
-    }*/
+      part5colorindex=0;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&i);
+      if(i>=0&&i<npart5prop){
+        part5prop *propi;
+
+        part5colorindex=i;
+        propi = part5propinfo + i;
+        propi->display=1;
+      }
+
+    }
+
     if(match(buffer,"PART5PROPDISP",13)==1){
       char *token;
 
@@ -8393,6 +8401,17 @@ void writeini(int flag){
         }
         fprintf(fileout,"\n");
       }
+      fprintf(fileout,"PART5COLOR\n");
+      for(i=0;i<npart5prop;i++){
+        part5prop *propi;
+
+        propi = part5propinfo + i;
+        if(propi->display==1){
+          fprintf(fileout," %i\n",i);
+          break;
+        }
+      }
+
     }
   }
   fprintf(fileout,"\nCONTOURS\n");
