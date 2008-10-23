@@ -295,9 +295,9 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                      CP_SUM = 0._EB
                      DO N=1,N_SPECIES
                         IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                        CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
+                        CP_SUM = CP_SUM + YYP(I,J,K,N)*SPECIES(N)%CP(ITMP)
                      END DO
-                     CP_MF = CP_SUM+(1._EB-Y_SUM(I,J,K))*CP_MF
+                     CP_MF = CP_SUM + (1._EB-Y_SUM(I,J,K))*CP_MF
                   ENDIF
                   KP(I,J,K) = MU(I,J,K)*CP_MF*RPR
                ENDDO
@@ -409,9 +409,9 @@ IF (MIXTURE_FRACTION) THEN
                CP_SUM = 0._EB
                DO N=1,N_SPECIES
                   IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                  CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
+                  CP_SUM = CP_SUM + YYP(I,J,K,N)*SPECIES(N)%CP(ITMP)
                END DO
-               CP_MF = CP_SUM+(1._EB-Y_SUM(I,J,K))*CP_MF
+               CP_MF = CP_SUM + (1._EB-Y_SUM(I,J,K))*CP_MF
             ENDIF
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_MF
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
