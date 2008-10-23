@@ -901,7 +901,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   parttype=0;
   PART_CB_INIT();
-  ParticlePropShowMenu(0);
+  ParticlePropShowMenu(part5colorindex);
   parti->loaded=1;
   parti->display=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -1378,7 +1378,7 @@ void drawPart5(const particle *parti){
               if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0&&navatar_colors>0){
                 is_human_color=1;
               }
-              if(itype==-1){
+              if(itype==-1||partclassi->always_uniform==1){
                 colorptr=datacopy->partclassbase->rgb;
               }
               else{
@@ -1408,7 +1408,7 @@ void drawPart5(const particle *parti){
           glPointSize(partpointsize);
           if(offset_terrain==0){
             glBegin(GL_POINTS);
-            if(itype==-1){
+            if(itype==-1||partclassi->always_uniform==1){
               glColor4fv(datacopy->partclassbase->rgb);
               for(j=0;j<datacopy->npoints;j++){
                 if(vis[j]==1)glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
@@ -1427,7 +1427,7 @@ void drawPart5(const particle *parti){
           }
           else{
             glBegin(GL_POINTS);
-            if(itype==-1){
+            if(itype==-1||partclassi->always_uniform==1){
               glColor4fv(datacopy->partclassbase->rgb);
               for(j=0;j<datacopy->npoints;j++){
                 float zoffset;
@@ -1491,7 +1491,7 @@ void drawPart5(const particle *parti){
     sz = datacopy->sz;
     vis = datacopy->vis_part;
 
-    if(itype==-1){
+    if(itype==-1||partclassi->always_uniform==1){
 
       // draw the streak line
 
