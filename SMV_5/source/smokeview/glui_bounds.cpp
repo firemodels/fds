@@ -62,6 +62,7 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
 #define FRAMELOADING 18
 #define STREAKLENGTH 19
 #define OUTPUTSLICEDATA 20
+#define TRACERS 21
 
 #define SAVE_SETTINGS 99
 #define CLOSE 98
@@ -103,6 +104,7 @@ GLUI_Checkbox *con_slice_setchopmax=NULL;
 GLUI_Checkbox *con_p3_setchopmin=NULL, *con_p3_setchopmax=NULL;
 GLUI_Checkbox *con_bf_setchopmin=NULL, *con_bf_setchopmax=NULL;
 GLUI_Checkbox *con_part_setchopmin=NULL, *con_part_setchopmax=NULL;
+GLUI_Checkbox *showtracer_checkbox=NULL;
 
 GLUI_Spinner *SPINNER_sliceaverage=NULL;
 GLUI_Spinner *SPINNER_boundframestep=NULL;
@@ -296,6 +298,9 @@ extern "C" void glui_bounds_setup(int main_window){
         SPINNER_partstreaklength=glui_bounds->add_spinner_to_panel(panel_part,"Streak Length (s)",GLUI_SPINNER_FLOAT,
           &float_streak5value,STREAKLENGTH,PART_CB);
         SPINNER_partstreaklength->set_float_limits(0.0,10.0);
+        
+        showtracer_checkbox=glui_bounds->add_checkbox_to_panel(panel_part,"Always show tracers",&show_tracers_always,
+          TRACERS,PART_CB);
     }
   }
 
@@ -660,6 +665,13 @@ void PLOT3D_CB(int var){
   }
 }
 
+/* ------------------ updatetracers ------------------------ */
+
+extern "C" void updatetracers(void){
+  if(showtracer_checkbox==NULL)return;
+  showtracer_checkbox->set_int_val(show_tracers_always);
+}
+
 /* ------------------ updatechar ------------------------ */
 
 extern "C" void updatechar(void){
@@ -971,6 +983,9 @@ void PART_CB(int var){
     else{
       streak5show=1;
     }
+    updatemenu=1;
+    break;
+  case TRACERS:
     updatemenu=1;
     break;
   case FRAMELOADING:

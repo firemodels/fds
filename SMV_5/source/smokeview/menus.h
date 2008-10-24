@@ -2467,7 +2467,6 @@ void ParticlePropShowMenu(int value){
 
   if(value==-1)return;
 
-
   if(value>=0){
     int iprop;
     int i;
@@ -2546,6 +2545,10 @@ void ParticlePropShowMenu(int value){
     }
     part5show=0;
     parttype=0;
+  }
+  else if(value==-6){
+    show_tracers_always=1-show_tracers_always;
+    updatetracers();
   }
   else{
     int iclass;
@@ -4711,6 +4714,9 @@ if(visBlocks==visBLOCKOutline){
         glutAddMenuEntry("  Show All Types",-2);
         glutAddMenuEntry("  Hide All Types",-3);
       }
+      glutAddMenuEntry("-",-1);
+      if(show_tracers_always==0)glutAddMenuEntry("Show tracers always",-6);
+      if(show_tracers_always==1)glutAddMenuEntry("*Show tracers always",-6);
     }
 
     CREATEMENU(humanpropshowmenu,ParticlePropShowMenu);

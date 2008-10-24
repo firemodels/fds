@@ -629,7 +629,6 @@ typedef struct {
   char *name;
   int kind;
   int maxpoints, ntypes;
-  int always_uniform;
   float *xyz, *rgb;
   flowlabels *labels;
 } part5class;
