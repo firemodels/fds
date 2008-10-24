@@ -654,6 +654,7 @@ EXTERNCPP void output3Text(float *color, float x, float y, float z, const char *
 EXTERNCPP void outputBarText(float x, float y, const GLfloat *color, const char *string);
 EXTERNCPP void getzonebounds(const float *pdata, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void updatechar(void);
+EXTERNCPP void updatetracers(void);
 EXTERNCPP void getPart5Colors(particle *parti, int nlevels);
 EXTERNCPP void getPartColors(const float *t, int skip, int nt, unsigned char *it,
                    const unsigned char *isprink, int particle_type, int droplet_type,

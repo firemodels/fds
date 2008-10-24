@@ -1313,6 +1313,7 @@ void drawPart5(const particle *parti){
         unsigned char *vis, *color;
         part5class *partclassi;
         int partclass_index, itype, vistype, class_vis;
+        int show_default;
 
         partclassi = parti->partclassptr[i];
         partclass_index = partclassi - partclassinfo;
@@ -1322,10 +1323,17 @@ void drawPart5(const particle *parti){
 
 
         if(vistype==0||datacopy->npoints<=0||(vistype==1&&class_vis==0)){
-          datacopy++;
-          continue;
+          if(show_tracers_always==0||partclassi->ntypes>2){
+            datacopy++;
+            continue;
+          }
         }
         itype = current_property->class_types[partclass_index];
+
+        show_default = 0;
+        if(itype==-1||(show_tracers_always==1&&partclassi->ntypes<=2)){
+          show_default=1;
+        }
 
         sx = datacopy->sx;
         sy = datacopy->sy;
@@ -1378,7 +1386,7 @@ void drawPart5(const particle *parti){
               if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0&&navatar_colors>0){
                 is_human_color=1;
               }
-              if(itype==-1||partclassi->always_uniform==1){
+              if(show_default==1){
                 colorptr=datacopy->partclassbase->rgb;
               }
               else{
@@ -1408,7 +1416,7 @@ void drawPart5(const particle *parti){
           glPointSize(partpointsize);
           if(offset_terrain==0){
             glBegin(GL_POINTS);
-            if(itype==-1||partclassi->always_uniform==1){
+            if(show_default==1){
               glColor4fv(datacopy->partclassbase->rgb);
               for(j=0;j<datacopy->npoints;j++){
                 if(vis[j]==1)glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
@@ -1427,7 +1435,7 @@ void drawPart5(const particle *parti){
           }
           else{
             glBegin(GL_POINTS);
-            if(itype==-1||partclassi->always_uniform==1){
+            if(show_default==1){
               glColor4fv(datacopy->partclassbase->rgb);
               for(j=0;j<datacopy->npoints;j++){
                 float zoffset;
@@ -1470,6 +1478,7 @@ void drawPart5(const particle *parti){
     short *sxx, *syy, *szz;
     unsigned char *vis;
     int k;
+    int show_default;
 
     part5class *partclassi;
     int partclass_index, itype, vistype, class_vis;
@@ -1481,17 +1490,23 @@ void drawPart5(const particle *parti){
     class_vis=current_property->class_vis[partclass_index];
 
     if(vistype==0||datacopy->npoints<=0||(vistype==1&&class_vis==0)){
-      datacopy++;
-      continue;
+      if(show_tracers_always==0||partclassi->ntypes>2){
+        datacopy++;
+        continue;
+      }
     }
     itype = current_property->class_types[partclass_index];
+
+    if(itype==-1||(show_tracers_always==1&&partclassi->ntypes<=2)){
+      show_default=1;
+    }
 
     sx = datacopy->sx;
     sy = datacopy->sy;
     sz = datacopy->sz;
     vis = datacopy->vis_part;
 
-    if(itype==-1||partclassi->always_uniform==1){
+    if(show_default==1){
 
       // draw the streak line
 
