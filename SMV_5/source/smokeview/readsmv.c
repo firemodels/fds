@@ -1003,9 +1003,8 @@ int readsmv(char *file){
         STRCPY(partclassi->name,trim_front(buffer));
       }
 
-      partclassi->always_uniform=0;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %i",rgb_class,rgb_class+1,rgb_class+2,&partclassi->always_uniform);
+      sscanf(buffer,"%f %f %f",rgb_class,rgb_class+1,rgb_class+2);
       rgb_class[3]=1.0;
       partclassi->rgb=getcolorptr(rgb_class);
 
@@ -6678,10 +6677,19 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"MSCALE",6)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",mscale,mscale+1,mscale+2);
+      continue;
     }
     if(match(buffer,"CLIP",4)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f",&nearclip,&farclip);
+      continue;
+    }
+
+    if(match(buffer,"SHOWTRACERSALWAYS",17)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&show_tracers_always);
+      if(show_tracers_always!=1)show_tracers_always=0;
+      continue;
     }
 
     if(match(buffer,"PART5COLOR",10)==1){
@@ -6701,7 +6709,7 @@ int readini2(char *inifile, int localfile){
         propi = part5propinfo + i;
         propi->display=1;
       }
-
+      continue;
     }
 
     if(match(buffer,"PART5PROPDISP",13)==1){
@@ -6726,6 +6734,7 @@ int readini2(char *inifile, int localfile){
         }
       }
       CheckMemory;
+      continue;
     }
 
     if(match(buffer,"COLORBAR",8) == 1 && match(buffer,"COLORBARFLIP",12)!=1){
@@ -8385,6 +8394,9 @@ void writeini(int flag){
   fprintf(fileout," %i\n",boundzipstep);
   fprintf(fileout,"ISOFRAMESTEP\n");
   fprintf(fileout," %i\n",isoframestep);
+  fprintf(fileout,"SHOWTRACERSALWAYS\n");
+  fprintf(fileout," %i\n",show_tracers_always);
+
   if(flag==LOCAL_INI){
     put_startup_smoke3d(fileout);
     fprintf(fileout,"LOADFILESATSTARTUP\n");

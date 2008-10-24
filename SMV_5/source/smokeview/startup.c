@@ -1991,6 +1991,7 @@ void initvars0(void){
   colorbarinfo=NULL;
 
   part5colorindex=0;
+  show_tracers_always=0;
   sd_shown=NULL;
   vd_shown=NULL;
   show_all_slices=1;
