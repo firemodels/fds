@@ -327,6 +327,11 @@ Module EVAC
   !
   Real(EB), Dimension(:), Allocatable :: Tsteps
   !
+  Real(EB), Dimension(:), Allocatable :: K_ave_Door
+  Real(EB), Dimension(:), Allocatable :: FED_max_Door
+  Logical, Dimension(:), Allocatable :: Is_Known_Door, Is_Visible_Door
+  Integer, Dimension(:), Allocatable :: Color_Tmp
+  !
   Integer :: n_dead, icyc_old
   Real(EB) :: fed_max_alive, fed_max
   !
@@ -3152,11 +3157,11 @@ Contains
                     STRP%XB_NODE(j,5), STRP%XB_NODE(j,6), 0._EB, 0._EB, 0._EB)) Then
                   PDX%STR_SUB_INDX = j
                   Exit CheckDoorStrLoop
-               Endif
-            Enddo
-         Endif
-       Enddo CheckDoorStrLoop
-    Enddo
+               End If
+            End Do
+         End If
+       End Do CheckDoorStrLoop
+    End Do
 
     ! Create list  of incoming nodes for STairs
     Do N = 1,N_STRS
@@ -3171,15 +3176,15 @@ Contains
             If (EVAC_DOORS(J)%IMESH2 == STRP%IMESH) Then
                STRP%N_NODES_IN = STRP%N_NODES_IN + 1
                NODES_TMP(STRP%N_NODES_IN) = I
-            Endif
+            End If
          Case ('Entry')
             J = EVAC_NODE_List(I)%Node_index
             If (EVAC_ENTRYS(J)%IMESH == STRP%IMESH) Then
                STRP%N_NODES_IN = STRP%N_NODES_IN + 1
                NODES_TMP(STRP%N_NODES_IN) = I
-            Endif
+            End If
          End Select
-      Enddo
+      End Do
       Allocate(STRP%NODES_IN(1:STRP%N_NODES_IN),STAT=IZERO)
       Call ChkMemErr('Read_Evac','STRP%NODES_IN',IZERO) 
       STRP%NODES_IN = NODES_TMP(1:STRP%N_NODES_IN)
@@ -3189,12 +3194,12 @@ Contains
          If (EVAC_NODE_List(I)%IMESH == STRP%IMESH) Then
             STRP%N_NODES_OUT = STRP%N_NODES_OUT + 1
             NODES_TMP(STRP%N_NODES_OUT) = I
-         Endif
-      Enddo
+         End If
+      End Do
       Allocate(STRP%NODES_OUT(1:STRP%N_NODES_OUT),STAT=IZERO)
       Call ChkMemErr('Read_Evac','STRP%NODES_OUT',IZERO) 
       STRP%NODES_OUT = NODES_TMP(1:STRP%N_NODES_OUT)
-    Enddo
+    End Do
 
     End Subroutine CHECK_EVAC_NODES
 
@@ -4117,10 +4122,6 @@ Contains
     ! Initialize group lists, known doors, etc
     !
     Integer I,J, IZERO, nom, j1
-    Real(EB), Dimension(:), Allocatable :: K_ave_Door
-    Real(EB), Dimension(:), Allocatable :: FED_max_Door
-    Logical, Dimension(:), Allocatable :: Is_Known_Door, Is_Visible_Door
-    Integer, Dimension(:), Allocatable :: Color_Tmp
     Integer :: i_egrid, i_target, color_index, i_new_ffield
     ! 
     Type (MESH_TYPE), Pointer :: M
@@ -4150,8 +4151,8 @@ Contains
     Call ChkMemErr('Initialize_Evacuation', 'Group_Known_Doors',IZERO) 
     Allocate(Human_Known_Doors(1:ilh_dim),STAT=IZERO)
     Call ChkMemErr('Initialize_Evacuation', 'Human_Known_Doors',IZERO) 
-
     !
+    ! These arrays are common for the whole module EVAC.  They are only allocated once.
     Allocate(Is_Known_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
     Call ChkMemErr('Initialize_Evacuation','Is_Known_Door',IZERO) 
     Allocate(Is_Visible_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
@@ -4196,7 +4197,6 @@ Contains
           ! Lonely humans have j=0 and group_i_ffields is always 0.
           If (Group_List(j)%GROUP_I_FFIELDS(i_egrid) == 0) Then
              Call Change_Target_Door(nom, nom, i, j, j1, i_egrid, 0, 0.0_EB, HR%X, HR%Y, &
-                  Is_Known_Door, Is_Visible_Door, FED_max_Door, K_ave_Door, Color_Tmp, &
                   i_target, color_index, i_new_ffield)
           Else              ! this group has already a flow field
              ! This group has already tried to change the field
@@ -4208,11 +4208,6 @@ Contains
           End If            ! first member of a group or a lonely soul
        End Do              ! 1, n_humans
     End Do                  ! 1, nmeshes
-    Deallocate(Color_Tmp)
-    Deallocate(K_ave_Door)
-    Deallocate(FED_max_Door)
-    Deallocate(Is_Visible_Door)
-    Deallocate(Is_Known_Door)
 
     ! Initialize the group_i_ffields
     i_egrid = 0
@@ -4380,7 +4375,6 @@ Contains
                         Real(HUMAN_GRID(i,j)%SOOT_DENS,FB), &
                         Real(HUMAN_GRID(i,j)%TMP_G,FB), &
                         Real(HUMAN_GRID(i,j)%RADFLUX,FB)
-
                 Else     ! Read FED from a file
                    ! Read Fed, Soot, Temp(C), and Radflux
                    Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
@@ -4416,7 +4410,6 @@ Contains
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                          EVAC_CORRS(i)%FED_CO_CO2_O2(1),EVAC_CORRS(i)%SOOT_DENS(1),&
                          EVAC_CORRS(i)%TMP_G(1), EVAC_CORRS(i)%RADFLUX(1))
-
              Else
                 ! No fed_mesh found
                 EVAC_CORRS(i)%FED_CO_CO2_O2(1) = 0.0_EB
@@ -4433,7 +4426,6 @@ Contains
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                          EVAC_CORRS(i)%FED_CO_CO2_O2(2),EVAC_CORRS(i)%SOOT_DENS(2),&
                          EVAC_CORRS(i)%TMP_G(2), EVAC_CORRS(i)%RADFLUX(2))
-
              Else
                 ! No fed_mesh2 found
                 EVAC_CORRS(i)%FED_CO_CO2_O2(2) = 0.0_EB
@@ -4452,7 +4444,6 @@ Contains
                   Real(EVAC_CORRS(i)%SOOT_DENS(2),FB), &
                   Real(EVAC_CORRS(i)%TMP_G(2),FB), &
                   Real(EVAC_CORRS(i)%RADFLUX(2),FB)
-
           Else                    ! Read FED from a file
              ! Read Fed, Soot, Temp(C), and Radflux
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4, &
@@ -4486,7 +4477,6 @@ Contains
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                               EVAC_DOORS(i)%FED_CO_CO2_O2,EVAC_DOORS(i)%SOOT_DENS,&
                               EVAC_DOORS(i)%TMP_G, EVAC_DOORS(i)%RADFLUX)
-
              Else
                 ! No fed_mesh found
                 EVAC_DOORS(i)%FED_CO_CO2_O2 = 0.0_EB
@@ -4501,7 +4491,6 @@ Contains
                   Real(EVAC_DOORS(i)%SOOT_DENS,FB), &
                   Real(EVAC_DOORS(i)%TMP_G,FB), &
                   Real(EVAC_DOORS(i)%RADFLUX,FB)
-
           Else                    ! Read FED from a file
              ! Read Fed, Soot, Temp(C), and Radflux
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
@@ -4531,7 +4520,6 @@ Contains
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                          EVAC_EXITS(i)%FED_CO_CO2_O2,EVAC_EXITS(i)%SOOT_DENS,&
                          EVAC_EXITS(i)%TMP_G, EVAC_EXITS(i)%RADFLUX)
-
              Else
                 ! No fed_mesh found
                 EVAC_EXITS(i)%FED_CO_CO2_O2 = 0.0_EB
@@ -4546,7 +4534,6 @@ Contains
                   Real(EVAC_EXITS(i)%SOOT_DENS,FB), &
                   Real(EVAC_EXITS(i)%TMP_G,FB), &
                   Real(EVAC_EXITS(i)%RADFLUX,FB)
-
           Else                    ! Read FED from a file
              ! Read Fed, Soot, Temp(C), and Radflux
              Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
@@ -4630,6 +4617,11 @@ Contains
     ! the force is done using the dissipative self-consistent
     ! velocity-Verlet algorithm by Vattulainen et al.
     !
+    ! Inputs:
+    !   Tin: End time, this routine makes the move Tin-DT ==> Tin (DT=FDS dt)
+    !   NM: Mesh index
+    !   ICYC: index of the FDS fire time step
+    !
     Real(EB), Intent(IN) :: Tin
     Integer, Intent(IN) :: NM,ICYC
     !
@@ -4655,10 +4647,6 @@ Contains
     Real(EB) rn
     Real(EB) GaMe, GaTh, GaCM
     !
-    Real(EB), Dimension(:), Allocatable :: K_ave_Door
-    Real(EB), Dimension(:), Allocatable :: FED_max_Door
-    Integer, Dimension(:), Allocatable :: Color_Tmp
-    Logical, Dimension(:), Allocatable :: Is_Known_Door, Is_Visible_Door
     Integer :: i_old_ffield, IZERO
     Character(26) :: name_old_ffield
     !
@@ -4667,6 +4655,7 @@ Contains
     Real(EB) :: Omega_max, Omega_0
     Real(EB), Dimension(6) :: y_tmp, x_tmp, r_tmp, v_tmp, u_tmp
     !
+    ! Next are for the block list of the double agent-agent loop (speed up)
     Integer :: Max_Humans_Cell, i_dx, j_dy, ie_max, bl_max
     Real(EB) :: dx_min, dy_min
     Integer, Dimension(:,:,:), Allocatable :: BLOCK_GRID
@@ -4707,7 +4696,7 @@ Contains
     L_eff_read = Btest(I_EVAC,2)
     L_eff_save = Btest(I_EVAC,0)
     !
-    ! Find the egrid index of this main evac mesh.
+    ! Find the egrid index of this main evac mesh. [1, # main evac meshes]
     i_egrid = 0
     Do i = 1, n_egrids
        If (EVAC_Node_List(i)%IMESH == NM) Then
@@ -4719,17 +4708,6 @@ Contains
        Call SHUTDOWN(MESSAGE)
     End If
     !
-    ! Tmp arrays needed in the door selection algorithm
-    Allocate(Is_Known_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-    Call ChkMemErr('Evacuate_Humans','Is_Known_Door',IZERO) 
-    Allocate(Is_Visible_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-    Call ChkMemErr('Evacuate_Humans','Is_Visible_Door',IZERO) 
-    Allocate(FED_max_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-    Call ChkMemErr('Evacuate_Humans','FED_max_Door',IZERO) 
-    Allocate(K_ave_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-    Call ChkMemErr('Evacuate_Humans','K_ave_Door',IZERO) 
-    Allocate(Color_Tmp(Max(1,i33_dim)),STAT=IZERO)
-    Call ChkMemErr('Evacuate_Humans','Color_Tmp',IZERO) 
 
     ! Blocks are used to speed the double loops over the agent-agent interactions.
     Allocate(BLOCK_GRID_N(1:IBAR,1:JBAR),STAT=IZERO)
@@ -4739,25 +4717,16 @@ Contains
        ! DT is the fds flow calculation time step.
        ! Sometimes agent time step is smaller than the fire time step, so
        ! syncronize the agent clock correctly.
+       ! Tsteps: Time steps of the agent movement algorithm for different meshes,
+       ! which were calculated at the end of the previous main time step.
+       ! DTSP: The present time step for the agent movement algorithm, which may be
+       ! smaller than the FDS main time step DT.
        DTSP = Min( (DT-Dt_sum), Tsteps(nm) )
 
        Dt_sum = Dt_sum + DTSP
-       ! T is the current time of the agent movement algorithm.
-       T = Tin - DT + Dt_sum
+       T = Tin - DT + Dt_sum     ! Current time for the agents
 
-       ! Arrays for groups of agents
-       Group_List(:)%GROUP_SIZE  = 0
-       Group_List(:)%GROUP_X = 0.0_EB
-       Group_List(:)%GROUP_Y = 0.0_EB
-       Group_List(:)%MAX_DIST_CENTER = 0.0_EB
-       Group_List(:)%Speed   = 0.0_EB
-       Group_List(:)%IntDose = 0.0_EB
-       Group_List(:)%Tpre    = 0.0_EB
-       Group_List(:)%Tdet    = Huge(Group_List(:)%Tdet)
-
-
-       !
-       ! Initialize some counters etc., for this main evac mesh.
+       ! Initialize some counters etc. for this main evac mesh.
        Do i = 1, n_doors
           If ( EVAC_DOORS(i)%IMESH == nm) Then
              EVAC_DOORS(i)%NTARGET = 0
@@ -4769,11 +4738,21 @@ Contains
           End If
        End Do
 
+       ! Initialize arrays for groups of agents
+       Group_List(:)%GROUP_SIZE      = 0
+       Group_List(:)%GROUP_X         = 0.0_EB
+       Group_List(:)%GROUP_Y         = 0.0_EB
+       Group_List(:)%MAX_DIST_CENTER = 0.0_EB
+       Group_List(:)%Speed           = 0.0_EB
+       Group_List(:)%IntDose         = 0.0_EB
+       Group_List(:)%Tpre            = 0.0_EB
+       Group_List(:)%Tdet            = Huge(Group_List(:)%Tdet)
+
+       !
        ! Initialize group arrays for this main evac mesh.
        Do j = 0, i33_dim
           Group_List(j)%GROUP_I_FFIELDS(i_egrid) = 0
        End Do
-
        Do i = 1, N_HUMANS
           HR=>HUMAN(I)
           j = Max(0,HR%GROUP_ID)  ! Group index of the agent
@@ -4787,11 +4766,11 @@ Contains
        End Do
        Group_List(1:)%GROUP_X = Group_List(1:)%GROUP_X / Max(1,Group_List(1:)%GROUP_SIZE)
        Group_List(1:)%GROUP_Y = Group_List(1:)%GROUP_Y / Max(1,Group_List(1:)%GROUP_SIZE)
-       Group_List(1:)%Speed   = Group_List(1:)%Speed /   Max(1,Group_List(1:)%GROUP_SIZE)
+       Group_List(1:)%Speed   = Group_List(1:)%Speed   / Max(1,Group_List(1:)%GROUP_SIZE)
        Group_List(1:)%IntDose = Group_List(1:)%IntDose / Max(1,Group_List(1:)%GROUP_SIZE)
        Group_List(:)%MAX_DIST_CENTER = 0.0_EB
 
-       ! Count the number of agents going towards different doors/exits.
+       ! Group_List intitialization and count the number of agents going towards different doors/exits.
        Do i = 1, N_HUMANS
           HR=>HUMAN(I)
           ! group_id > 0: +group_id
@@ -4799,9 +4778,7 @@ Contains
           j  =  Max(0,HR%GROUP_ID)  ! group index > 0
           j1 = -Min(0,HR%GROUP_ID)  ! lonely agent index > 0
           Group_List(j)%MAX_DIST_CENTER = Max(Group_List(j)%MAX_DIST_CENTER, &
-               Sqrt((HR%X - Group_List(j)%GROUP_X)**2 + &
-               (HR%Y - Group_List(j)%GROUP_Y)**2))
-
+               Sqrt((HR%X - Group_List(j)%GROUP_X)**2 + (HR%Y - Group_List(j)%GROUP_Y)**2))
           i_tmp = HR%I_TARGET
           If (i_tmp > 0 .And. i_tmp <= n_doors ) Then
              EVAC_DOORS(i_tmp)%NTARGET = EVAC_DOORS(i_tmp)%NTARGET + 1
@@ -4815,12 +4792,12 @@ Contains
        ! j=0, i.e., lonely humans: Group_List is not used , but it is safe to initialize.
        If (N_HUMANS > 0) Then
           Group_List(0)%GROUP_SIZE = 1
+          Group_List(0)%COMPLETE   = 1
           Group_List(0)%GROUP_X    = 0.5_EB*(XS+XF)
           Group_List(0)%GROUP_Y    = 0.5_EB*(YS+YF)
           Group_List(0)%Speed      = 1.0_EB
           Group_List(0)%IntDose    = 0.0_EB
           Group_List(0)%MAX_DIST_CENTER = 0.0_EB
-          Group_List(0)%COMPLETE = 1
        End If
 
        ! Note: group_size is the number of group members on this main evac mesh.
@@ -4843,18 +4820,17 @@ Contains
        End Do
 
        ! ========================================================
-       ! CHANGE TARGET DOOR CALCULATION STARTS HERE
+       ! CHANGE TARGET DOOR?
        ! ========================================================
        If (T > 0.0_EB) Then
           Change_Door_Loop: Do ie = 1, N_HUMANS
              HR => HUMAN(ie)
-
              ! Check and cycle if in stairs
              Check_Strs_Loop0: Do N = 1, N_STRS
                 IF (EVAC_STRS(N)%IMESH == HR%IMESH) Cycle Change_Door_Loop
-             Enddo Check_Strs_Loop0
+             End Do Check_Strs_Loop0
 
-             i_old_ffield = HR%I_FFIELD
+             i_old_ffield    = HR%I_FFIELD
              name_old_ffield = Trim(MESH_NAME(i_old_ffield))
              j  =  Max(0,HR%GROUP_ID)   ! group index
              j1 = -Min(0,HR%GROUP_ID)   ! lonely agent index
@@ -4863,20 +4839,17 @@ Contains
              If (Group_List(j)%COMPLETE == 0) Cycle Change_Door_Loop
 
              ! Agents start to move towards the exit after the pre-evacuation (reaction) time.
-             If (j == 0 .And. T < HR%Tpre+HR%Tdet) Cycle Change_Door_Loop
-             If (j > 0 .And. T < Group_List(j)%Tpre + Group_List(j)%Tdoor) Cycle Change_Door_Loop
+             If (j == 0 .And. T < HR%Tpre+HR%Tdet) Cycle Change_Door_Loop   ! lonely agents
+             If (j > 0 .And. T < Group_List(j)%Tpre + Group_List(j)%Tdoor) Cycle Change_Door_Loop ! groups
 
              If (Group_List(j)%GROUP_I_FFIELDS(i_egrid) == 0) Then
                 ! Test if this group/agent should update the exit door (exp. distribution)
                 Call Random_number(rn)
                 If (rn > Exp(-DTSP/dt_group_door) ) Then
-
                    Call Change_Target_Door(nm, nm, ie, j, j1, i_egrid, 1, T, HR%X, HR%Y, &
-                        Is_Known_Door, Is_Visible_Door, FED_max_Door, K_ave_Door, Color_Tmp, &
                         i_target, color_index, i_new_ffield)
-
                 Else ! Do not update door flow field at this time step
-                   If (j > 0) Group_Known_Doors(j)%I_Target = HR%I_Target
+                   If (j > 0) Group_Known_Doors(j)%I_Target = HR%I_Target 
                    If (COLOR_METHOD == 5 .And. j > 0) Color_Tmp(j) = HR%COLOR_INDEX
                    If (COLOR_METHOD == 4 .And. j > 0) Color_Tmp(j) = HR%COLOR_INDEX
                    If (j > 0) Group_List(j)%GROUP_I_FFIELDS(i_egrid) = HR%I_FFIELD 
@@ -4891,32 +4864,27 @@ Contains
              End If  ! group_i_field=0
           End Do Change_Door_Loop  ! loop over agents 
        End If  ! t > 0
-       ! ========================================================
-       ! CHANGE TARGET DOOR CALCULATION ENDS HERE
-       ! ========================================================
 
        ! ========================================================
-       ! MOVE LOOP STARTS HERE
+       ! MOVE LOOP: The first step of the VV algorithm
        ! ========================================================
        ! ========================================================
-       ! Evacuation routine, here the humans are moved to the new
-       ! positions using the present velocities.  After this the
-       ! forces at the new postitions are calculated and the 
-       ! velocities are updated.  (The 'dissipative' self-driving
-       ! force contribution to the velocities is updated self-
-       ! consistently, but the other terms are not.)
+       ! Step 1: Here the humans are moved to the new positions using the 
+       ! present velocities.  
+       ! After the first step the forces at the new postitions 
+       ! are calculated and the velocities are updated.  
+       ! (The 'dissipative' self-driving force contribution to the velocities 
+       ! is updated self-consistently, but the other terms are not.)
        ! ========================================================
-       ! Some initialization
        TNOW15=SECOND()
        d_humans_min = Huge(d_humans_min)
-       d_walls_min = Huge(d_walls_min)
+       d_walls_min  = Huge(d_walls_min)
 
        EVAC_MOVE_LOOP: Do I=1, N_HUMANS
-
           HR=>HUMAN(I)
-
+          ! hr%z is the real z-coordinate of the agent (inclines, stairs,etc),
+          ! hr_z is z-coordinate of the main evac mesh
           hr_z = 0.5_EB*(ZS+ZF)
-          !
           LambdaW = LAMBDA_WALL
           A_Wall  = FAC_A_WALL*HR%A
           B_Wall  = FAC_B_WALL*HR%B
@@ -4924,7 +4892,6 @@ Contains
           GaTh    = NOISETH
           GaCM    = NOISECM
           EVEL = Sqrt(HR%U**2 + HR%V**2)
-
           L_Dead  = .False.
           If ( HR%IntDose >= 1.0_EB  ) Then
              L_Dead = .True.
@@ -4934,9 +4901,8 @@ Contains
              A_Wall = 0.0_EB
              If (HR%Tpre /= Huge(HR%Tpre)) Then
                 n_dead = n_dead+1
-                Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,i6)') &
-                     ' EVAC: Person n:o', HR%ILABEL, ' dead at ', T, &
-                     ' s, number of casualties ', n_dead
+                Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,i6)') ' EVAC: Person n:o', &
+                     HR%ILABEL, ' dead at ', T, ' s, number of casualties ', n_dead
              End If
              HR%Tpre = Huge(HR%Tpre)
              HR%Tdet = Huge(HR%Tdet)
@@ -4944,11 +4910,11 @@ Contains
           Else
              fed_max_alive = Max(fed_max_alive,HR%IntDose)
           End If
-          fed_max = Max(fed_max,HR%IntDose)
-          hr_tau = HR%Tau
+          fed_max = Max(fed_max,HR%IntDose)  ! dead or alive
+          hr_tau      = HR%Tau
           hr_tau_iner = HR%Tau_Iner
           !
-          ! Where is the person
+          ! In which grid cell is the person?
           !
           XI = CELLSI(Floor((HR%X-XS)*RDXINT))
           YJ = CELLSJ(Floor((HR%Y-YS)*RDYINT))
@@ -4961,21 +4927,31 @@ Contains
           KKZ = Floor(ZK+0.5_EB)
           HR%W = 0.0_EB
 
-          ! Check the smoke density for Tdet
+          ! Check the smoke density for the detection by smoke
           If (.Not.L_Dead .And. HUMAN_GRID(ii,jj)%SOOT_DENS > TDET_SMOKE_DENS) Then
              HR%Tdet = Min(HR%Tdet,T)
           End If
 
-          ! Calculate Purser's fractional effective dose (FED)
           smoke_speed_fac = 1.0_EB
           If (T > T_BEGIN) Then
-             HR%IntDose = DTSP*HUMAN_GRID(II,JJ)%FED_CO_CO2_O2 + &
-                  HR%IntDose
+             ! Calculate Purser's fractional effective dose (FED)
+             ! Note: Purser uses minutes, here dt is in seconds
+             ! fed_dose = fed_lco*fed_vco2 + fed_lo
+             HR%IntDose = DTSP*HUMAN_GRID(II,JJ)%FED_CO_CO2_O2 + HR%IntDose
+             ! Smoke density vs speed
+             ! Lund 2003, Report 3126 (Frantzich & Nilsson)
+             ! v0(K) = v0*( 1 + (beta*K)/alpha ), where [K]=1/m ext.coeff
+             ! beta=-0.057 m2/s, sigma=0.015, [-0.087,-0.028]
+             ! alpha=0.706 m/s, sigma=0.069, [0.565,0.847]
+             ! [SOOT_DENS] = mg/m3
+             ! [K] = 1/m
+             ! [MASS_EXTINCTION_COEFFICIENT] = m2/kg
+             ! K = MASS_EXTINCTION_COEFFICIENT*SOOT_DENS*1.0E-6
+             ! Visibility = 3/K  [m]
              smoke_beta  = -0.057_EB
              smoke_alpha = 0.706_EB
              smoke_speed_fac = 1.0_EB + (smoke_beta/smoke_alpha)* &
-                  MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB* &
-                  HUMAN_GRID(II,JJ)%SOOT_DENS
+                  MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS
              If (MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS > &
                   3.0_EB/SMOKE_MIN_SPEED_VISIBILITY) Then
                 smoke_speed_fac = Min(smoke_speed_fac, smoke_speed_fac*( 2.0_EB - &
@@ -4987,8 +4963,9 @@ Contains
           HR%v0_fac = smoke_speed_fac
 
           ! ========================================================
-          ! Calculate persons prefered walking direction
+          ! Calculate persons prefered walking direction v0
           ! ========================================================
+          ! HR%I_FFIELD is the flow field mesh index for this agent
           NM_now = Max(1,HR%I_FFIELD)
           If (.Not.EVACUATION_ONLY(NM_now)) Then
              Write(MESSAGE,'(A,I6,A)') 'ERROR: Evacuate_Humans, mesh ',NM_now,&
@@ -5007,15 +4984,15 @@ Contains
              End If
           End Do StrsMeshLoop
 
-          MFF=>MESHES(NM_now)
+          MFF=>MESHES(NM_now)  ! Pointer to the flow field mesh
 
           ! Check if going straight line to target
           Straight_Line_To_Target = .False.
           If (NM_STRS_MESH) Then
              If (HR%I_Target == 0) Then
 !               write(*,*) 'Finding target within move loop'
-                CALL Find_Target_Node_In_Strs(STRP,HR)
-             Endif
+                Call Find_Target_Node_In_Strs(STRP,HR)
+             End If
              N = HR%I_Target
              If (N>N_DOORS) Then
                 N = N - N_DOORS
@@ -5025,33 +5002,33 @@ Contains
                    y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
                    door_width = EVAC_EXITS(N)%Width
                    door_ior   = EVAC_EXITS(N)%IOR
-                Endif
-             Elseif (N>0) Then
+                End If
+             Else If (N>0) Then
                 If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
                    Straight_Line_To_Target = .TRUE.
                    x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
                    y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
                    door_width = EVAC_DOORS(N)%Width
                    door_ior   = EVAC_DOORS(N)%IOR
-                Endif
-             Endif
-          Endif
+                End If
+             End If
+          End If
           If (Straight_Line_To_Target) Then
              UBAR = x_target-HR%X
              VBAR = y_target-HR%Y
              Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
              If ( Door_Dist < 0.50*Door_width ) Then
-                Select case(door_ior)
-                case(-1,+1)
+                Select Case(door_ior)
+                Case(-1,+1)
                    UBAR = SIGN(1.0_EB,UBAR)
                    VBAR = 0._EB
                    HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
-                case(-2,+2)
+                Case(-2,+2)
                    UBAR = 0._EB
                    VBAR = SIGN(1.0_EB,VBAR)
                    HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
-                end select
-             Endif
+                End Select
+             End If
           Else If (NM_STRS_MESH) Then 
              If (HR%STRS_Direction > 0) Then
                UBAR = STRP%U_UP(II,JJ)
@@ -5059,7 +5036,7 @@ Contains
              Else
                UBAR = STRP%U_DOWN(II,JJ)
                VBAR = STRP%V_DOWN(II,JJ)
-             Endif
+             End If
           Else
              UBAR = AFILL(MFF%U(II-1,JJY,KKZ),MFF%U(II,JJY,KKZ), &
                   MFF%U(II-1,JJY+1,KKZ),MFF%U(II,JJY+1,KKZ), &
@@ -5073,11 +5050,13 @@ Contains
                   XI-IIX+0.5_EB,YJ-JJ+1,ZK-KKZ+0.5_EB)
           End If
 
-          EVEL = Sqrt(UBAR**2 + VBAR**2)
+          EVEL = Sqrt(UBAR**2 + VBAR**2)  ! (UBAR,VBAR) is an unit vector
           If (EVEL > 0.0_EB) Then
              UBAR = UBAR/EVEL
              VBAR = VBAR/EVEL
           Else
+             ! No v0 found for the current location of the agent, continue
+             ! straight ahead (use the velocity vector of the agent).
              EVEL = Sqrt(HR%U**2 + HR%V**2)
              If (EVEL > 0.0_EB) Then
                 UBAR = HR%U/EVEL
@@ -5088,85 +5067,8 @@ Contains
              UBAR = 0.0_EB
              VBAR = 0.0_EB
           End If
-          ! ========================================================
-          !
-          cos_x = 1.0_EB
-          cos_y = 1.0_EB
-          speed_xm = HR%Speed
-          speed_xp = HR%Speed
-          speed_ym = HR%Speed
-          speed_yp = HR%Speed
-          !
-          ! Check if human is on a spectator stand.
-          SS_Loop1: Do j = 1, n_sstands
-             ESS => EVAC_SSTANDS(j)
-             If (ESS%IMESH /= NM) Cycle SS_Loop1
-             If (ESS%X1 > HR%X) Cycle SS_Loop1
-             If (ESS%X2 < HR%X) Cycle SS_Loop1
-             If (ESS%Y1 > HR%Y) Cycle SS_Loop1
-             If (ESS%Y2 < HR%Y) Cycle SS_Loop1
-             ! Ok, human _is_ within ESS
 
-             cos_x = ESS%cos_x
-             cos_y = ESS%cos_y
-             Select Case (ESS%IOR)
-             Case(-1)
-                speed_xm = cos_x*HR%Speed*ESS%FAC_V0_DOWN
-                speed_xp = cos_x*HR%Speed*ESS%FAC_V0_UP
-                speed_ym = HR%Speed*ESS%FAC_V0_HORI
-                speed_yp = HR%Speed*ESS%FAC_V0_HORI
-                HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
-                     (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
-             Case(+1)
-                speed_xm = cos_x*HR%Speed*ESS%FAC_V0_UP
-                speed_xp = cos_x*HR%Speed*ESS%FAC_V0_DOWN
-                speed_ym = HR%Speed*ESS%FAC_V0_HORI
-                speed_yp = HR%Speed*ESS%FAC_V0_HORI
-                HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
-                     (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
-             Case(-2)
-                speed_xm = HR%Speed*ESS%FAC_V0_HORI
-                speed_xp = HR%Speed*ESS%FAC_V0_HORI
-                speed_ym = cos_y*HR%Speed*ESS%FAC_V0_DOWN
-                speed_yp = cos_y*HR%Speed*ESS%FAC_V0_UP
-                HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
-                     (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
-             Case(+2)
-                speed_xm = HR%Speed*ESS%FAC_V0_HORI
-                speed_xp = HR%Speed*ESS%FAC_V0_HORI
-                speed_ym = cos_y*HR%Speed*ESS%FAC_V0_UP
-                speed_yp = cos_y*HR%Speed*ESS%FAC_V0_DOWN
-                HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
-                     (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
-             End Select
-             Exit SS_Loop1
-             HR%Z = 0.5_EB*(ZS+ZF)
-          End Do SS_Loop1
-
-          ! Set height and speed for a human in stairs
-          If (NM_STRS_MESH) Then 
-             Call GetStairSpeedAndZ(speed_xm, speed_xp, speed_ym, speed_yp,STRP,HR)
-          End If
-
-          !
-          ! SC-VV: The new velocities are calculated using the old forces.
-          ! Random forces and self-driving force are treated separately.
-
-          U_new = HR%U + 0.5_EB*HR%F_X*DTSP/HR%Mass
-          V_new = HR%V + 0.5_EB*HR%F_Y*DTSP/HR%Mass
-
-          ! Rotational motion:
-          Omega_new = HR%Omega + 0.5_EB*DTSP*HR%Torque/HR%M_iner
-
-          j = Max(0,HR%GROUP_ID)
-          If (j == 0 ) Then
-             Group_List(0)%Tpre = HR%Tpre + HR%Tdet
-             Tpre = HR%Tpre + HR%Tdet
-          Else
-             Tpre = HR%Tdet
-          End If
-          If (L_Dead) Tpre = Huge(Tpre)
-
+          ! Direction to the centre of the group (if any)
           If (Group_List(j)%GROUP_SIZE >= 2) Then
              HR%UBAR_Center = (Group_List(j)%GROUP_X - HR%X)
              HR%VBAR_Center = (Group_List(j)%GROUP_Y - HR%Y)
@@ -5183,18 +5085,26 @@ Contains
              HR%VBAR_Center = 0.0_EB ! only one person in the group
           End If
 
-
+          j = Max(0,HR%GROUP_ID)
+          If (j == 0 ) Then
+             Group_List(0)%Tpre = HR%Tpre + HR%Tdet
+             Tpre = HR%Tpre + HR%Tdet
+          Else
+             Tpre = HR%Tdet
+          End If
+          If (L_Dead) Tpre = Huge(Tpre)
 
           If ( j > 0 ) Then
-             If (Group_List(j)%COMPLETE == 1 .And. &
-                  T <= Group_List(j)%Tpre+Group_List(j)%Tdoor) Then
+             ! Group is already gathered together, but not yet moving towards the door
+             If (Group_List(j)%COMPLETE == 1 .And. T <= Group_List(j)%Tpre+Group_List(j)%Tdoor) Then
                 UBAR = 0.0_EB
                 VBAR = 0.0_EB
              End If
           End If
 
-          EVEL = Sqrt(UBAR**2 + VBAR**2)
+          EVEL = UBAR**2 + VBAR**2
           If (Group_List(j)%COMPLETE == 1 .And. EVEL > 0.0_EB) Then
+             ! The group is already gathered together
              UBAR = (1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center/ &
                   Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
                   ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
@@ -5202,59 +5112,122 @@ Contains
                   Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
                   ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
           Else
+             ! The group is still in the gathering phase
              UBAR = HR%UBAR_Center
              VBAR = HR%VBAR_Center
           End If
 
           If ( T <= Tpre ) Then
-             ! Fire is not yet detected ==> no movement
+             ! No movement yet
              UBAR = 0.0_EB
              VBAR = 0.0_EB
              hr_tau = Max(0.1_EB,HR%Tau/10.0_EB)
           End If
           If ( T <= T_BEGIN ) Then
-             ! Initialization phase
+             ! Initialization phase, i.e., flow field calculation
              UBAR = 0.0_EB
              VBAR = 0.0_EB
              hr_tau = HR%Tau
           End If
+          ! ========================================================
+          ! Prefered walking direction v0 is now (UBAR,VBAR)
+          ! ========================================================
 
+          ! Inclines: Velocities are along the incline
+          !           Coordinates are projected on the (x,y) plane
+          cos_x = 1.0_EB
+          cos_y = 1.0_EB
+          speed_xm = HR%Speed
+          speed_xp = HR%Speed
+          speed_ym = HR%Speed
+          speed_yp = HR%Speed
+          !
+          ! Check if an agent is on a spectator stand.
+          SS_Loop1: Do j = 1, n_sstands
+             ESS => EVAC_SSTANDS(j)
+             If (ESS%IMESH /= NM) Cycle SS_Loop1
+             If (ESS%X1 > HR%X) Cycle SS_Loop1
+             If (ESS%X2 < HR%X) Cycle SS_Loop1
+             If (ESS%Y1 > HR%Y) Cycle SS_Loop1
+             If (ESS%Y2 < HR%Y) Cycle SS_Loop1
+             cos_x = ESS%cos_x
+             cos_y = ESS%cos_y
+             Select Case (ESS%IOR)
+             Case(-1)
+                speed_xm = cos_x*HR%Speed*ESS%FAC_V0_DOWN
+                speed_xp = cos_x*HR%Speed*ESS%FAC_V0_UP
+                speed_ym = HR%Speed*ESS%FAC_V0_HORI
+                speed_yp = HR%Speed*ESS%FAC_V0_HORI
+                HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
+             Case(+1)
+                speed_xm = cos_x*HR%Speed*ESS%FAC_V0_UP
+                speed_xp = cos_x*HR%Speed*ESS%FAC_V0_DOWN
+                speed_ym = HR%Speed*ESS%FAC_V0_HORI
+                speed_yp = HR%Speed*ESS%FAC_V0_HORI
+                HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
+             Case(-2)
+                speed_xm = HR%Speed*ESS%FAC_V0_HORI
+                speed_xp = HR%Speed*ESS%FAC_V0_HORI
+                speed_ym = cos_y*HR%Speed*ESS%FAC_V0_DOWN
+                speed_yp = cos_y*HR%Speed*ESS%FAC_V0_UP
+                HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+             Case(+2)
+                speed_xm = HR%Speed*ESS%FAC_V0_HORI
+                speed_xp = HR%Speed*ESS%FAC_V0_HORI
+                speed_ym = cos_y*HR%Speed*ESS%FAC_V0_UP
+                speed_yp = cos_y*HR%Speed*ESS%FAC_V0_DOWN
+                HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+             End Select
+             Exit SS_Loop1
+             HR%Z = 0.5_EB*(ZS+ZF)  ! The agent is not on any incline
+          End Do SS_Loop1
+
+          ! Set height and speed for an agent in stairs
+          If (NM_STRS_MESH) Then 
+             Call GetStairSpeedAndZ(speed_xm, speed_xp, speed_ym, speed_yp, STRP, HR)
+          End If
+
+          ! ========================================================
+          ! Step 2:  The new velocities are calculated using the old forces.
+          ! ========================================================
+          ! (F_X,F_Y): wall forces + agent-agent forces (social + contact forces)
+          ! Random forces and self-driving force are treated separately.
+          U_new = HR%U + 0.5_EB*HR%F_X*DTSP/HR%Mass
+          V_new = HR%V + 0.5_EB*HR%F_Y*DTSP/HR%Mass
+          ! Rotational motion:
+          Omega_new = HR%Omega + 0.5_EB*DTSP*HR%Torque/HR%M_iner
+
+          ! Add self-driving force and torque
           EVEL = Sqrt(UBAR**2 + VBAR**2)
           If (EVEL > 0.0_EB) Then
-             ! Sstands:  U,V are (x,y) plane projection velocities
-             speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + &
-                  speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
+             !Inclines: U,V are the (x,y) plane projection velocities
+             speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
              speed = speed*HR%v0_fac
-             U_new = U_new + 0.5_EB*(DTSP/hr_tau)* &
-                  (speed*(UBAR/EVEL) - HR%U)
+             U_new = U_new + 0.5_EB*(DTSP/hr_tau)*(speed*(UBAR/EVEL) - HR%U)
              HR%UBAR = speed*(UBAR/EVEL)
 
-             speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + &
-                  speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
+             speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
              speed = speed*HR%v0_fac
-             V_new = V_new + 0.5_EB*(DTSP/hr_tau)* &
-                  (speed*(VBAR/EVEL) - HR%V)
+             V_new = V_new + 0.5_EB*(DTSP/hr_tau)*(speed*(VBAR/EVEL) - HR%V)
              HR%VBAR = speed*(VBAR/EVEL)
 
              If (VBAR >= 0.0_EB) Then
                 angle = Acos(UBAR/EVEL)
              Else
                 angle = 2.0_EB*Pi - Acos(UBAR/EVEL)
-             End If  ! angle is [0,2Pi)
-             If (angle == 2.0_EB*Pi) angle = 0.0_EB
+             End If
+             If (angle == 2.0_EB*Pi) angle = 0.0_EB  ! angle is [0,2Pi)
 
-             ! J(dw/dt) = (J/t_iner)*( ((angle-angle_0/pi))w_0 - w )
+             ! Rotational motion: J(dw/dt) = (J/t_iner)*( ((angle-angle_0/pi))w_0 - w )
              If (Abs(angle-HR%angle) <= Pi ) Then
                 ! zero is not crossed.
-                Omega_new = Omega_new + 0.5_EB*(DTSP/HR_tau_iner)* &
-                     ( (angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
+                Omega_new = Omega_new + 0.5_EB*(DTSP/HR_tau_iner)*( (angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
              Else
                 ! zero is crossed
                 Omega_new = Omega_new + 0.5_EB*(DTSP/HR_tau_iner)* &
-                     ( (2.0_EB*Pi-Abs(angle-HR%angle))*Sign(1.0_EB , HR%angle-angle)* &
-                     (Omega_0/Pi) - HR%Omega )
+                     ( (2.0_EB*Pi-Abs(angle-HR%angle))*Sign(1.0_EB , HR%angle-angle)*(Omega_0/Pi) - HR%Omega)
              End If
-          Else
+          Else  ! No v0
              U_new = U_new + 0.5_EB*(DTSP/hr_tau)* (- HR%U)
              V_new = V_new + 0.5_EB*(DTSP/hr_tau)* (- HR%V)
              ! Slow rotation down if no direction available, i.e., target Omega_0 is zero.
@@ -5263,7 +5236,9 @@ Contains
              HR%VBAR = 0.0_EB
           End If
           !
-          ! Check, if new random force is needed on next time step.
+          ! Check, if a new random force is needed on next time step.
+          ! Poisson distribution, i.e., the agents do not have memory.
+          ! P[No change during dt] = Exp(-DTSP/HR%Tau)
           If ( GaTh > 0.0_EB .And. T > T_BEGIN ) Then
              Call Random_number(rn)
              If ( rn > Exp(-DTSP/(0.2_EB*hr_tau)) ) HR%NewRnd = .True.
@@ -5295,8 +5270,7 @@ Contains
              Omega_new = Omega_new + 0.5_EB*DTSP* 1.0_EB*Sign(HR%ksi,HR%eta-Pi)
           End If
 
-          ! Check that velocities are not too large, i.e.,
-          ! unphysical (less than 10 m/s for humans)
+          ! Check that velocities are not too large, i.e., unphysical (less than 10 m/s for humans)
           EVEL = Sqrt(U_new**2 + V_new**2)
           If ( EVEL > Vmax_timo ) Then
              U_new = U_new*(Vmax_timo/EVEL)
@@ -5307,12 +5281,14 @@ Contains
              Omega_new = Sign(Omega_max,Omega_new)
           End If
 
-          ! New coordinates
+          ! ========================================================
+          ! Step 3:  The new coordinates are calculated using the new velocities.
+          ! ========================================================
           X1 = HR%X + U_new*DTSP
           Y1 = HR%Y + V_new*DTSP
           HR%U = U_new
           HR%V = V_new
-          ! New angle, should be on the interval [0,2Pi)
+          ! The new body angle, should be on the interval [0,2Pi)
           A1 = HR%Angle + Omega_new*DTSP
           Do While (A1 >= 2.0_EB*Pi)
              A1 = A1 - 2.0_EB*Pi
@@ -5325,8 +5301,7 @@ Contains
           ! Check, if human is on an escalator and change the coordinates.
           SS_Loop1b: Do j = 1, n_sstands
              ESS => EVAC_SSTANDS(j)
-             If (ESS%IMESH == nm .And. &
-                  (ESS%X1 <= HR%X .And. ESS%X2 >= HR%X) .And. &
+             If (ESS%IMESH == nm .And. (ESS%X1 <= HR%X .And. ESS%X2 >= HR%X) .And. &
                   (ESS%Y1 <= HR%Y .And. ESS%Y2 >= HR%Y) ) Then
                 cos_x = ESS%cos_x
                 cos_y = ESS%cos_y
@@ -5344,7 +5319,7 @@ Contains
              End If
           End Do SS_Loop1b
           !
-          ! Where is the person, new coordinates (t + dt)?
+          ! In which grid cell is the agent, the new coordinates (t + dt)?
           XI  = CELLSI(Floor((X1-XS)*RDXINT))
           YJ  = CELLSJ(Floor((Y1-YS)*RDYINT))
           ZK  = CELLSK(Floor((HR_Z-ZS)*RDZINT))
@@ -5354,13 +5329,14 @@ Contains
           ICN = CELL_INDEX(IIN,JJN,KKN)
           ICX = CELL_INDEX(IIN,JJ ,KKN)
           ICY = CELL_INDEX(II ,JJN,KKN)
-
           HR%X_old = HR%X
           HR%Y_old = HR%Y
           HR%Angle_old = HR%Angle
 
-          ! Check, if moves inside a solid object ==> might be a open
+          ! Check, if the agent moves inside a solid object ==> might be an open
           ! vent or a 'sucking vent' used to calculate the flow fields.
+          ! This is just to be fail safe.  If the user input is correct, this
+          ! should never happen.
           If ( SOLID(ICN) ) Then
              If ( Solid(ICX) .And. .Not. Solid(ICY) ) Then
                 If ( ii < iin ) Then
@@ -5399,10 +5375,8 @@ Contains
                    End If
                 End If
              Else
-                Write(MESSAGE,'(A,I4,A,2F8.2)') &
-                     'ERROR: Evacuate_Humans, Solid ICX and ICY, mesh ', nm, ' pos ',X1,Y1
+                Write(MESSAGE,'(A,I4,A,2F8.2)') 'ERROR: Evacuate_Humans, Solid ICX and ICY, mesh ', nm, ' pos ',X1,Y1
              End If
-
           Else
              ! Target cell is not a solid ==> move
              HR%X = X1
@@ -5443,20 +5417,13 @@ Contains
        ! ========================================================
        If (N_HUMANS > 0) Call REMOVE_OUT_OF_GRIDS(T,NM)
 
-       ! ========================================================
-       ! Step (2) of SC-VV ends here
-       ! ========================================================
-
        If ( ICYC >= 0) Then
           DTSP_new = EVAC_DT_STEADY_STATE
        Else
-          DTSP_new = EVAC_DT_FLOWFIELD
+          DTSP_new = EVAC_DT_FLOWFIELD  ! Initialization phase
        End If
-
        Speed_max  = 0.0_EB
-
        TUSED(15,NM)=TUSED(15,NM)+SECOND()-TNOW15
-
 
        Group_List(:)%GROUP_SIZE  = 0
        Group_List(:)%GROUP_X = 0.0_EB
@@ -5464,8 +5431,6 @@ Contains
        Group_List(:)%MAX_DIST_CENTER = 0.0_EB
        Group_List(:)%Tpre    = 0.0_EB
        Group_List(:)%Tdet    = Huge(Group_List(:)%Tdet)
-
-
 
        Do j = 0, i33_dim
           Group_List(j)%GROUP_I_FFIELDS(i_egrid) = 0
@@ -5481,25 +5446,21 @@ Contains
           Group_List(j)%Tdet       = Min(Group_List(j)%Tdet,HR%Tdet)
        End Do
        !
-       Group_List(1:)%GROUP_X = Group_List(1:)%GROUP_X / &
-            Max(1,Group_List(1:)%GROUP_SIZE)
-       Group_List(1:)%GROUP_Y = Group_List(1:)%GROUP_Y / &
-            Max(1,Group_List(1:)%GROUP_SIZE)
+       Group_List(1:)%GROUP_X = Group_List(1:)%GROUP_X / Max(1,Group_List(1:)%GROUP_SIZE)
+       Group_List(1:)%GROUP_Y = Group_List(1:)%GROUP_Y / Max(1,Group_List(1:)%GROUP_SIZE)
 
+       ! BLOCK_GRID_N(i,j): How many agents are in this grid cell
        BLOCK_GRID_N = 0
        Group_List(:)%MAX_DIST_CENTER = 0.0_EB
        Do i = 1, N_HUMANS
           HR => HUMAN(i)
           ! Which cell, new coordinates:
-          IIN = Floor( CELLSI(Floor((HR%X-XS)*RDXINT)) + 1.0_EB )
-          JJN = Floor( CELLSJ(Floor((HR%Y-YS)*RDYINT)) + 1.0_EB )
+          IIN = Floor( CELLSI(Floor((HR%X-XS)*RDXINT)) + 1.0_EB)
+          JJN = Floor( CELLSJ(Floor((HR%Y-YS)*RDYINT)) + 1.0_EB)
           BLOCK_GRID_N(IIN,JJN) = BLOCK_GRID_N(IIN,JJN) + 1
           j = Max(0,HR%GROUP_ID)
-          !
-          Group_List(j)%MAX_DIST_CENTER = &
-               Max(Group_List(j)%MAX_DIST_CENTER, &
-               Sqrt((HR%X - Group_List(j)%GROUP_X)**2 + &
-               (HR%Y - Group_List(j)%GROUP_Y)**2))
+          Group_List(j)%MAX_DIST_CENTER = Max(Group_List(j)%MAX_DIST_CENTER, &
+               Sqrt((HR%X - Group_List(j)%GROUP_X)**2 + (HR%Y - Group_List(j)%GROUP_Y)**2))
        End Do
        Max_Humans_Cell = Max(1,Maxval(BLOCK_GRID_N))
 
@@ -5512,14 +5473,11 @@ Contains
           Group_List(0)%MAX_DIST_CENTER = 0.0_EB
           Group_List(0)%COMPLETE   = 1
        End If
-
+       ! Check if the groups are already gathered together or not.
        Do j = 1, i33_dim
-          Group_List(j)%LIMIT_COMP = RADIUS_COMPLETE_0 + &
-               RADIUS_COMPLETE_1*Group_List(j)%GROUP_SIZE
-          If ( ((Group_List(j)%MAX_DIST_CENTER <=  &
-               Group_List(j)%LIMIT_COMP) .Or. &
-               (Group_List(j)%COMPLETE == 1)) .And. &
-               Group_List(j)%GROUP_SIZE > 0 ) Then
+          Group_List(j)%LIMIT_COMP = RADIUS_COMPLETE_0 + RADIUS_COMPLETE_1*Group_List(j)%GROUP_SIZE
+          If ( ((Group_List(j)%MAX_DIST_CENTER <=  Group_List(j)%LIMIT_COMP) .Or. &
+               (Group_List(j)%COMPLETE == 1)) .And. Group_List(j)%GROUP_SIZE > 0 ) Then
              If (T > Group_List(j)%Tdet) Then
                 If (Group_List(j)%COMPLETE == 0) Then
                    Group_List(j)%Tdoor = Max(T,Group_List(j)%Tdet)
@@ -5536,11 +5494,12 @@ Contains
        Call ChkMemErr('EVACUATE_HUMANS','BLOCK_GRID',IZERO)
        BLOCK_GRID = 0
        ! Block_Grid_N(:,:) how many agents in this cell.
-       ! Block_Grid(:,:,1-x) agent indeces
+       ! Block_Grid(:,:,1-n) agent indeces
 
        BLOCK_GRID_N = 0
        Do i = 1, N_HUMANS
           HR => HUMAN(i)
+          ! Which grid (block grid) cell, new coordinates:
           IIN = Floor( CELLSI(Floor((HR%X-XS)*RDXINT)) + 1.0_EB )
           JJN = Floor( CELLSJ(Floor((HR%Y-YS)*RDYINT)) + 1.0_EB )
           BLOCK_GRID_N(IIN,JJN) = BLOCK_GRID_N(IIN,JJN) + 1
@@ -5551,54 +5510,50 @@ Contains
        i_dx = Max(1,i_dx)
        j_dy = Max(1,j_dy)
        bl_max = i_dx*j_dy*Max_Humans_Cell
+       ! Next list will contain the agents that should be looped over for the present agent.
        Allocate(BLOCK_LIST(bl_max),STAT=IZERO)
        Call ChkMemErr('EVACUATE_HUMANS','BLOCK_LIST',IZERO)
 
        ! ========================================================
        ! Step (3) of SC-VV starts here: Calculate new forces
        ! ========================================================
-       ! Calculate forces on each person.
        TNOW13=SECOND()
        EVAC_FORCE_LOOP: Do I=1,N_HUMANS  
           HR => HUMAN(i)
-
-          ! Next is needed for spectator stands: hr%z is the real z-coordinate,
-          ! hr_z is xy-plane position, i.e., the evac mesh z.
+          ! hr%z is the real z-coordinate of the agent (inclines, stairs,etc),
+          ! hr_z is z-coordinate of the main evac mesh
           hr_z = 0.5_EB*(ZS+ZF)
-
-          ! Calculate the position of the shoulder cirles
+          ! Calculate the position and velocities of the shoulder cirles
           y_tmp(1) = HR%Y - Cos(HR%angle)*HR%d_shoulder ! right
-          x_tmp(1) = HR%X + Sin(HR%angle)*HR%d_shoulder
+          x_tmp(1) = HR%X + Sin(HR%angle)*HR%d_shoulder ! right
           y_tmp(2) = HR%Y ! torso
-          x_tmp(2) = HR%X
+          x_tmp(2) = HR%X ! torso
           y_tmp(3) = HR%Y + Cos(HR%angle)*HR%d_shoulder ! left
-          x_tmp(3) = HR%X - Sin(HR%angle)*HR%d_shoulder
+          x_tmp(3) = HR%X - Sin(HR%angle)*HR%d_shoulder ! left
           r_tmp(1) = HR%r_shoulder
           r_tmp(2) = HR%r_torso
           r_tmp(3) = HR%r_shoulder
-          v_tmp(1) = HR%V + Sin(HR%angle)*HR%Omega*HR%d_shoulder
-          v_tmp(2) = HR%V
-          v_tmp(3) = HR%V - Sin(HR%angle)*HR%Omega*HR%d_shoulder
-          u_tmp(1) = HR%U + Cos(HR%angle)*HR%Omega*HR%d_shoulder
-          u_tmp(2) = HR%U
-          u_tmp(3) = HR%U - Cos(HR%angle)*HR%Omega*HR%d_shoulder
+          u_tmp(1) = HR%U + Cos(HR%angle)*HR%Omega*HR%d_shoulder ! right
+          v_tmp(1) = HR%V + Sin(HR%angle)*HR%Omega*HR%d_shoulder ! right
+          u_tmp(2) = HR%U ! torso
+          v_tmp(2) = HR%V ! torso
+          u_tmp(3) = HR%U - Cos(HR%angle)*HR%Omega*HR%d_shoulder ! left
+          v_tmp(3) = HR%V - Sin(HR%angle)*HR%Omega*HR%d_shoulder ! left
           hr_a = HR%A
           hr_b = HR%B
 
           Contact_F = 0.0_EB
           Social_F  = 0.0_EB
-          !
           LambdaW = LAMBDA_WALL
           A_Wall  = FAC_A_WALL*HR%A
           B_Wall  = FAC_B_WALL*HR%B
           GaMe    = NOISEME
           GaTh    = NOISETH
           GaCM    = NOISECM
-
           d_humans = Huge(d_humans)
           d_walls  = Huge(d_walls)
           L_Dead  = .False.
-          If ( HR%IntDose >= 1.0_EB  ) Then
+          If (HR%IntDose >= 1.0_EB) Then
              L_Dead = .True.
              ! No random force for a dead person.
              GaTh = 0.0_EB
@@ -5606,9 +5561,8 @@ Contains
              A_Wall = 0.0_EB
              If (HR%Tpre /= Huge(HR%Tpre)) Then
                 n_dead = n_dead+1
-                Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,i6)') &
-                     ' EVAC: Person n:o', HR%ILABEL, ' dead at ', T, &
-                     ' s, number of casualties ', n_dead
+                Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,i6)') ' EVAC: Person n:o', HR%ILABEL, &
+                     ' dead at ', T, ' s, number of casualties ', n_dead
              End If
              HR%Tdet = Huge(HR%Tdet)
              HR%Tpre = Huge(HR%Tpre)
@@ -5620,16 +5574,15 @@ Contains
           ! Psychological force: cut-off when acceleration below 0.0001 m/s**2
           P2P_DIST_MAX = HR%B*Log(HR%A/0.0001_EB)
           P2P_DIST_MAX = Min(P2P_DIST_MAX, 5.0_EB)
-          ! If large pressure then short range forces only
+          ! If large pressure then short range forces only (speed up)
           If ( HR%SumForces2 > 0.1_EB ) Then
-             P2P_DIST_MAX = Min( P2P_DIST_MAX, &
-                  -HR%B*Log(HR%SumForces2/(100.0_EB*HR%A)) )
+             P2P_DIST_MAX = Min( P2P_DIST_MAX, -HR%B*Log(HR%SumForces2/(100.0_EB*HR%A)) )
           End If
           P2P_DIST_MAX = Max(P2P_DIST_MAX, 3.0_EB*HR%B)
-          ! Speed up dead person loop, only contact forces are needed.
-          If ( L_Dead ) P2P_DIST_MAX = 0.0_EB
+          ! Speed up the dead agent loop, only contact forces are needed.
+          If (L_Dead) P2P_DIST_MAX = 0.0_EB
 
-          ! Where is the person, new coordinates:
+          ! In which grid cell is the agent, new coordinates:
           XI = CELLSI(Floor((HR%X-XS)*RDXINT))
           YJ = CELLSJ(Floor((HR%Y-YS)*RDYINT))
           ZK = CELLSK(Floor((HR_Z-ZS)*RDZINT))
@@ -5644,10 +5597,8 @@ Contains
           Y1 = HR%Y 
           HR%W = 0.0_EB
 
-          !
           ! ========================================================
           ! Calculate persons prefered walking direction
-          ! (Now the 'flow field' is used.)
           ! ========================================================
           NM_now = Max(1,HR%I_FFIELD)
           If (.Not.EVACUATION_ONLY(NM_now)) Then
@@ -5655,7 +5606,6 @@ Contains
                   ' is not an evacuation flow field.'
              Call SHUTDOWN(MESSAGE)
           End If
-          ! 
           ! Determine if the mesh is a stairs-mesh
           NM_STRS_MESH = .False.
           StrsMeshLoop2: Do N = 1, N_STRS
@@ -5667,15 +5617,15 @@ Contains
              End If
           End Do StrsMeshLoop2
 
-          MFF=>MESHES(NM_now)
+          MFF=>MESHES(NM_now)  ! Pointer to the flow field mesh
 
           ! Check if going straight line to target
           Straight_Line_To_Target = .False.
           If (NM_STRS_MESH) Then
              If (HR%I_Target == 0) Then
 !                write(*,*) 'Finding target within move loop'
-                CALL Find_Target_Node_In_Strs(STRP,HR)
-             Endif
+                Call Find_Target_Node_In_Strs(STRP,HR)
+             End If
              N = HR%I_Target
              If (N>N_DOORS) Then
                 N = N - N_DOORS
@@ -5685,42 +5635,42 @@ Contains
                    y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
                    door_width = EVAC_EXITS(N)%Width
                    door_ior   = EVAC_EXITS(N)%IOR
-                Endif
-             Elseif (N>0) Then
+                End If
+             Else If (N>0) Then
                 If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
                    Straight_Line_To_Target = .TRUE.
                    x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
                    y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
                    door_width = EVAC_DOORS(N)%Width
                    door_ior   = EVAC_DOORS(N)%IOR
-                Endif
-             Endif
-          Endif
+                End If
+             End If
+          End If
           If (Straight_Line_To_Target) Then
              UBAR = x_target-HR%X
              VBAR = y_target-HR%Y
              Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
              If ( Door_Dist < 0.50*Door_width ) Then
-                Select case(door_ior)
-                case(-1,+1)
+                Select Case(door_ior)
+                Case(-1,+1)
                    UBAR = SIGN(1.0_EB,UBAR)
                    VBAR = 0._EB
                    HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
-                case(-2,+2)
+                Case(-2,+2)
                    UBAR = 0._EB
                    VBAR = SIGN(1.0_EB,VBAR)
                    HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
-                end select
-             Endif
-          Elseif (NM_STRS_MESH) Then 
+                End Select
+             End If
+          Else If (NM_STRS_MESH) Then 
              If (HR%STRS_Direction > 0) Then
                UBAR = STRP%U_UP(IIN,JJN)
                VBAR = STRP%V_UP(IIN,JJN)
              Else
                UBAR = STRP%U_DOWN(IIN,JJN)
                VBAR = STRP%V_DOWN(IIN,JJN)
-             Endif
-          Else
+             End If
+          Else  ! evacuation flow field
              UBAR = AFILL(MFF%U(IIN-1,JJY,KKZ),MFF%U(IIN,JJY,KKZ), &
                   MFF%U(IIN-1,JJY+1,KKZ),MFF%U(IIN,JJY+1,KKZ), &
                   MFF%U(IIN-1,JJY,KKZ+1),MFF%U(IIN,JJY,KKZ+1), &
@@ -5732,11 +5682,11 @@ Contains
                   MFF%V(IIX,JJN,KKZ+1),MFF%V(IIX+1,JJN,KKZ+1), &
                   XI-IIX+0.5_EB,YJ-JJN+1,ZK-KKZ+0.5_EB)
           End If
-          EVEL = Sqrt(UBAR**2 + VBAR**2)
+          EVEL = Sqrt(UBAR**2 + VBAR**2)  ! (UBAR,VBAR) is a unit vector
           If (EVEL > 0.0_EB) Then
              UBAR = UBAR/EVEL
              VBAR = VBAR/EVEL
-          Else
+          Else  ! no v0 found, use the direction of the velocity
              EVEL = Sqrt(HR%U**2 + HR%V**2)
              If (EVEL > 0.0_EB) Then
                 UBAR = HR%U/EVEL
@@ -5747,7 +5697,67 @@ Contains
              UBAR = 0.0_EB
              VBAR = 0.0_EB
           End If
+          j = Max(0,HR%GROUP_ID)
+          If (j == 0 ) Then
+             Group_List(0)%Tpre = HR%Tpre + HR%Tdet
+             Tpre = HR%Tpre + HR%Tdet
+          Else
+             Tpre = HR%Tdet
+          End If
+          If (L_Dead) Tpre = Huge(Tpre)
+
+          ! Find the vector pointing towards the centre of the group
+          If (Group_List(j)%GROUP_SIZE >= 2) Then
+             HR%UBAR_Center = (Group_List(j)%GROUP_X - HR%X)
+             HR%VBAR_Center = (Group_List(j)%GROUP_Y - HR%Y)
+             EVEL = Sqrt(HR%UBAR_Center**2 + HR%VBAR_Center**2)
+             If ( EVEL > 0.0_EB .And. .Not. L_Dead ) Then
+                HR%UBAR_Center = HR%UBAR_Center / EVEL
+                HR%VBAR_Center = HR%VBAR_Center / EVEL
+             Else
+                HR%UBAR_Center = 0.0_EB
+                HR%VBAR_Center = 0.0_EB
+             End If
+          Else
+             HR%UBAR_Center = 0.0_EB ! only one person in the group
+             HR%VBAR_Center = 0.0_EB ! only one person in the group
+          End If
+
+          If ( j > 0 ) Then
+             ! Next is needed for the first time step, when the group starts to move
+             ! towards exit door.
+             If (Group_List(j)%COMPLETE == 1 .And. T+DTSP_new &
+                  <= Group_List(j)%Tpre+Group_List(j)%Tdoor) Then
+                UBAR = 0.0_EB
+                VBAR = 0.0_EB
+             End If
+          End If
+
+          ! The group force
+          EVEL = Sqrt(UBAR**2 + VBAR**2)
+          If (Group_List(j)%COMPLETE == 1 .And. EVEL > 0.0_EB) Then
+             ! Moving stage
+             UBAR = (1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center/ &
+                  Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
+                  ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
+             VBAR = (1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center/ &
+                  Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
+                  ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
+          Else
+             ! Gathering stage: towards the centre of the group
+             UBAR = HR%UBAR_Center
+             VBAR = HR%VBAR_Center
+          End If
+
+          ! Add dissipative self-driving force term around T=0 (or T=Tpre)
+          If (T+DTSP_new <= Tpre .Or. T+DTSP_new <= T_BEGIN) Then
+             UBAR = 0.0_EB
+             VBAR = 0.0_EB
+          End If
           ! ========================================================
+          ! The prefered walking direction v0 is (UBAR,VBAR)
+          ! ========================================================
+
           ! Update the Block_Grid array search ranges
           BLOCK_LIST = 0
           i_dx = Int((2.0_EB*0.3_EB+P2P_DIST_MAX)/DX(IIN)) + 1
@@ -5766,21 +5776,19 @@ Contains
              End Do
           End Do
           If (ie_max > bl_max ) Then
-             Write(MESSAGE,'(A,2I6)') &
-                  'ERROR: Evacuate_Humans, ie_max, bl_max ', ie_max, bl_max
+             Write(MESSAGE,'(A,2I6)') 'ERROR: Evacuate_Humans, ie_max, bl_max ', ie_max, bl_max
              Call SHUTDOWN(MESSAGE)
           End If
 
-          ! ========================================================
-          ! Check if human is on a spectator stand.
-          ! Velocities are along the incline.
-          ! Coordinates are projected to the (x,y) plane.
+          ! Inclines: Velocities are along the incline
+          !           Coordinates are projected on the (x,y) plane
           cos_x = 1.0_EB
           cos_y = 1.0_EB
           speed_xm = HR%Speed
           speed_xp = HR%Speed
           speed_ym = HR%Speed
           speed_yp = HR%Speed
+          ! Check if an agent is on a spectator stand.
           SS_Loop2: Do j = 1, n_sstands
              ESS => EVAC_SSTANDS(j)
              If (ESS%IMESH == nm .And. &
@@ -5822,22 +5830,22 @@ Contains
                 End Select
                 Exit SS_Loop2
              End If
-             HR%Z = 0.5_EB*(ZS+ZF)
+             HR%Z = 0.5_EB*(ZS+ZF)  ! The agent is not on any incline
           End Do SS_Loop2
 
-          ! Set height and speed for a human in stairs
+          ! Set height and speed for an agent in stairs
           If (NM_STRS_MESH) Then 
             Call GetStairSpeedAndZ(speed_xm, speed_xp, speed_ym, speed_yp,STRP,HR)
-          Endif
+          End If
 
-
+          ! Speed dependent social force
           hr_a =  HR%A*Max(0.5_EB,(Sqrt(HR%U**2+HR%V**2)/HR%Speed))
           A_Wall = Min(A_Wall, FAC_A_WALL*hr_a)
 
           ! ========================================================
           ! PERSON-PERSON INTERACTION FORCES
           ! ========================================================
-          ! Look for other persons
+          ! Look for other agents, use blocks to speed up the loop.
           P2P_U      = 0.0_EB
           P2P_V      = 0.0_EB
           P2P_Torque = 0.0_EB
@@ -5851,36 +5859,34 @@ Contains
              If ( P2P_DIST > (P2P_DIST_MAX+HR%Radius+HRE%Radius)**2 ) Cycle P2PLOOP
              P2P_DIST = Sqrt(P2P_DIST)
              !
-             ! Check, that the persons are seeing each other, i.e., there
-             ! are no walls between.
+             ! Check, that the persons are seeing each other, i.e., there are no walls between.
              PP_see_each = See_each_other(nm, x1, y1, HRE%X, HRE%Y)
              If (.Not. PP_see_each) Cycle P2PLOOP
              ! 
-             ! Calculate the combination of spring constant for humans
+             ! Calculate the combination of spring constant for the two agents
              C_Yeff = (2.0_EB*HR%C_Young*2.0_EB*HRE%C_Young)/(2.0_EB*HR%C_Young+2.0_EB*HRE%C_Young)
              !
-             ! Directional force:
+             ! Angle dependent social force:
              If ( (HR%U**2 +HR%V**2) > 0.0_EB ) Then
                 CosPhiFac = ( (HRE%X-X1)*HR%U + (HRE%Y-Y1)*HR%V ) &
-                     / ( Sqrt((HRE%X-X1)**2 + (HRE%Y-Y1)**2)* &
-                     Sqrt(HR%U**2 +HR%V**2) )
-                CosPhiFac = HR%Lambda + &
-                     0.5_EB*(1.0_EB-HR%Lambda)*(1.0_EB+CosPhiFac)
+                     / ( Sqrt((HRE%X-X1)**2 + (HRE%Y-Y1)**2)*Sqrt(HR%U**2 +HR%V**2) )
+                CosPhiFac = HR%Lambda + 0.5_EB*(1.0_EB-HR%Lambda)*(1.0_EB+CosPhiFac)
              Else
                 CosPhiFac = 1.0_EB
              End If
-             ! Calculate the position of the shoulder cirles
+             ! Calculate the position and velocities of the shoulder cirles
              r_tmp(4) = HRE%r_shoulder ! right circle
-             r_tmp(5) = HRE%r_torso     ! center circle
+             r_tmp(5) = HRE%r_torso    ! center circle
              r_tmp(6) = HRE%r_shoulder ! left circle
              y_tmp(4) = HRE%Y - Cos(HRE%angle)*HRE%d_shoulder ! right circle
-             x_tmp(4) = HRE%X + Sin(HRE%angle)*HRE%d_shoulder
+             x_tmp(4) = HRE%X + Sin(HRE%angle)*HRE%d_shoulder ! right circle
              y_tmp(5) = HRE%Y ! center circle
-             x_tmp(5) = HRE%X
+             x_tmp(5) = HRE%X ! center circle
              y_tmp(6) = HRE%Y + Cos(HRE%angle)*HRE%d_shoulder ! left circle
-             x_tmp(6) = HRE%X - Sin(HRE%angle)*HRE%d_shoulder
+             x_tmp(6) = HRE%X - Sin(HRE%angle)*HRE%d_shoulder ! left circle
+
              ! ========================================================
-             ! Add psychological force term
+             ! Add psychological (social) force term
              ! ========================================================
              If (.Not. L_Dead) Then
                 Fc_x = 0.0_EB
@@ -5891,7 +5897,6 @@ Contains
                       tim_dist = Sqrt((x_tmp(iii)-x_tmp(jjj))**2 + &
                            (y_tmp(iii)-y_tmp(jjj))**2)
                       ! d_humans = Min( tim_dist-(r_tmp(iii)+r_tmp(jjj)) , d_humans )
-
                       ! Next is |vector1|*|vector2|
                       evel = Sqrt((x_tmp(jjj)-x_tmp(iii))**2+(y_tmp(jjj)-y_tmp(iii))**2)* &
                            Sqrt(u_tmp(iii)**2+v_tmp(iii)**2)
@@ -5903,12 +5908,10 @@ Contains
                          d_humans = Min( (tim_dist-(r_tmp(iii)+r_tmp(jjj))) /0.01_EB , d_humans)
                       End If
 
-                      Fc_x1 = (x_tmp(iii)-x_tmp(jjj)) * &
-                           hr_a*CosPhiFac*Exp( -(tim_dist- &
-                           ( r_tmp(iii)+r_tmp(jjj) ))/hr_b )/tim_dist 
-                      Fc_y1 = (y_tmp(iii)-y_tmp(jjj)) * &
-                           hr_a*CosPhiFac*Exp( -(tim_dist- &
-                           ( r_tmp(iii)+r_tmp(jjj) ))/hr_b )/tim_dist 
+                      Fc_x1 = (x_tmp(iii)-x_tmp(jjj))*hr_a*CosPhiFac* &
+                           Exp( -(tim_dist-( r_tmp(iii)+r_tmp(jjj) ))/hr_b )/tim_dist 
+                      Fc_y1 = (y_tmp(iii)-y_tmp(jjj))*hr_a*CosPhiFac* &
+                           Exp( -(tim_dist-( r_tmp(iii)+r_tmp(jjj) ))/hr_b )/tim_dist 
                       If ( (Fc_x1**2+Fc_y1**2) > (Fc_x**2+Fc_y**2) ) Then
                          Fc_x = Fc_x1
                          Fc_y = Fc_y1
@@ -5919,8 +5922,7 @@ Contains
                 P2P_V = P2P_V + Fc_y
                 Social_F = Social_F + Sqrt(Fc_x**2 + Fc_y**2)
                 Tc_z = 0.0_EB
-                ! Calculate the torque due to the social force.
-                ! Use the closest circles.
+                ! Calculate the torque due to the social force. Use the closest circles.
                 Do jjj = 4, 6
                    ! First the right shoulder
                    tim_dist = Sqrt( (x_tmp(jjj)-x_tmp(1))**2 + (y_tmp(jjj)-y_tmp(1))**2 )
@@ -5950,7 +5952,8 @@ Contains
                    End If
                 End Do
                 P2P_Torque = P2P_Torque + Tc_z
-             End If
+             End If  ! dead or alive?
+
              ! ========================================================
              ! Add contact force terms
              ! ========================================================
@@ -5968,7 +5971,6 @@ Contains
                       tim_dist = Sqrt((x_tmp(iii)-x_tmp(jjj))**2 + &
                            (y_tmp(iii)-y_tmp(jjj))**2)
                       ! d_humans = Min( tim_dist-(r_tmp(iii)+r_tmp(jjj)) , d_humans )
-
                       ! Next is |vector1|*|vector2|
                       evel = Sqrt((x_tmp(jjj)-x_tmp(iii))**2+(y_tmp(jjj)-y_tmp(iii))**2)* &
                            Sqrt(u_tmp(iii)**2+v_tmp(iii)**2)
@@ -5979,45 +5981,32 @@ Contains
                       Else
                          d_humans = Min( (tim_dist-(r_tmp(iii)+r_tmp(jjj))) /0.01_EB , d_humans)
                       End If
-
                       If (tim_dist <= r_tmp(iii)+r_tmp(jjj) ) Then
                          ! Circles are touching each others
-                         Fc_x =(x_tmp(iii)-x_tmp(jjj)) * &
-                              C_Yeff*((r_tmp(iii)+r_tmp(jjj))-tim_dist)/tim_dist
-                         Fc_y =(y_tmp(iii)-y_tmp(jjj)) * &
-                              C_Yeff*((r_tmp(iii)+r_tmp(jjj))-tim_dist)/tim_dist
-
-                         Fc_x = Fc_x - FC_DAMPING*(u_tmp(iii)-u_tmp(jjj))*&
-                              (x_tmp(iii)-x_tmp(jjj))/tim_dist
-                         Fc_y = Fc_y - FC_DAMPING*(v_tmp(iii)-v_tmp(jjj))*&
-                              (y_tmp(iii)-y_tmp(jjj))/tim_dist
-
+                         Fc_x =(x_tmp(iii)-x_tmp(jjj))*C_Yeff*((r_tmp(iii)+r_tmp(jjj))-tim_dist)/tim_dist
+                         Fc_y =(y_tmp(iii)-y_tmp(jjj))*C_Yeff*((r_tmp(iii)+r_tmp(jjj))-tim_dist)/tim_dist
+                         Fc_x = Fc_x - FC_DAMPING*(u_tmp(iii)-u_tmp(jjj))*(x_tmp(iii)-x_tmp(jjj))/tim_dist
+                         Fc_y = Fc_y - FC_DAMPING*(v_tmp(iii)-v_tmp(jjj))*(y_tmp(iii)-y_tmp(jjj))/tim_dist
                          Contact_F = Contact_F + Sqrt(Fc_x**2 + Fc_y**2)
                          P2P_U = P2P_U + Fc_x
                          P2P_V = P2P_V + Fc_y
                          P2P_Torque = P2P_Torque + Fc_y*(x_tmp(iii)-HR%X) - Fc_x*(y_tmp(iii)-HR%Y)
-
                          scal_prod_over_rsqr = ((y_tmp(iii)-y_tmp(jjj))*(u_tmp(iii)-u_tmp(jjj)) - &
                               (x_tmp(iii)-x_tmp(jjj))*(v_tmp(iii)-v_tmp(jjj))) / (tim_dist**2)
-                         If (I_Fric_sw >= 1 ) Then
-                            Fc_x = - HR%Kappa * &
-                                 ((r_tmp(iii)+r_tmp(jjj))-tim_dist)* &
+                         If (I_Fric_sw >= 1 ) Then  ! This is the default
+                            Fc_x = - HR%Kappa*((r_tmp(iii)+r_tmp(jjj))-tim_dist)* &
                                  ( (y_tmp(iii)-y_tmp(jjj)) * scal_prod_over_rsqr )
-                            Fc_y = - HR%Kappa * &
-                                 ((r_tmp(iii)+r_tmp(jjj))-tim_dist)* &
+                            Fc_y = - HR%Kappa*((r_tmp(iii)+r_tmp(jjj))-tim_dist)* &
                                  (-(x_tmp(iii)-x_tmp(jjj)) * scal_prod_over_rsqr )
                             P2P_U = P2P_U + Fc_x
                             P2P_V = P2P_V + Fc_y
-
                             P2P_Torque = P2P_Torque + Fc_y*( (x_tmp(iii) + &
                                  (r_tmp(iii)/r_tmp(jjj))*(x_tmp(jjj)-x_tmp(iii)) ) - HR%X ) 
                             P2P_Torque = P2P_Torque - Fc_x*( (y_tmp(iii) + &
                                  (r_tmp(iii)/r_tmp(jjj))*(y_tmp(jjj)-y_tmp(iii)) ) - HR%Y ) 
                          Else
-                            Fc_x = - HR%Gamma * ( (y_tmp(iii)-y_tmp(jjj)) &
-                                 * scal_prod_over_rsqr )
-                            Fc_y = - HR%Gamma * (-(x_tmp(iii)-x_tmp(jjj)) &
-                                 * scal_prod_over_rsqr )
+                            Fc_x = - HR%Gamma * ( (y_tmp(iii)-y_tmp(jjj))*scal_prod_over_rsqr)
+                            Fc_y = - HR%Gamma * (-(x_tmp(iii)-x_tmp(jjj))*scal_prod_over_rsqr)
                             P2P_U = P2P_U + Fc_x
                             P2P_V = P2P_V + Fc_y
                             P2P_Torque = P2P_Torque + Fc_y*( (x_tmp(iii) + &
@@ -6028,7 +6017,7 @@ Contains
                       End If
                    End Do
                 End Do
-             End If
+             End If  ! contact forces?
           End Do P2PLOOP
           TUSED(14,NM)=TUSED(14,NM)+SECOND()-TNOW14
           ! ========================================================
@@ -6038,13 +6027,10 @@ Contains
           ! ========================================================
           ! THE PERSON-WALL FORCES
           ! ========================================================
-
-          ! ========================================================
-          ! WALL SURFACE - PERSON FORCES STARTS
-          ! ========================================================
           !
           ! Walls are looked for the body circle
           Call Find_walls(nm, x1, y1, HR%Radius, P2P_DIST_MAX, HR%SKIP_WALL_FORCE_IOR, d_xy, FoundWall_xy, istat)
+
           Call Wall_SocialForces(nm, x1, y1, HR%Radius, P2P_DIST_MAX, d_xy, P2P_U, P2P_V, Social_F, FoundWall_xy)
 
           Call Wall_ContactForces(nm, x_tmp(1), y_tmp(1), r_tmp(1), u_tmp(1), v_tmp(1), d_xy, &
@@ -6054,18 +6040,11 @@ Contains
           Call Wall_ContactForces(nm, x_tmp(3), y_tmp(3), r_tmp(3), u_tmp(3), v_tmp(3), d_xy, &
                P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy)
 
+          ! Add forces from the door case
           Call Door_Forces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, p2p_dist_max, d_xy,&
                P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, FoundWall_xy)
-          !tim_dist = Huge(tim_dist)
 
-          ! ========================================================
-          ! WALL SURFACE - PERSON FORCES ENDS
-          ! ========================================================
-
-          ! ========================================================
-          ! WALL CORNER - PERSON FORCES STARTS
-          ! ========================================================
-
+          ! Add wall corner - person forces
           ! top right corner (x > x_human, y > y_human)
           x_now = -DX(iin+1)
           Loop_px: Do ii = iin, IBAR, +1
@@ -6207,123 +6186,52 @@ Contains
           End Do Loop_my
 
           ! ========================================================
-          ! WALL CORNER - PERSON FORCES ENDS
+          ! THE PERSON-WALL FORCES ENDS HERE
           ! ========================================================
-          !
-          ! ========================================================
-          ! WALL FORCES ENDS HERE
-          ! ========================================================
+
+          ! Save the forces for the loop EVAC_MOVE_LOOP (next time step)
           HR%F_X = P2P_U
           HR%F_Y = P2P_V
-          HR%SumForces = Contact_F ! 21.9.2006 by T.K.
+          HR%SumForces  = Contact_F
           HR%SumForces2 = Social_F + Contact_F
-
           HR%Torque = P2P_Torque
-          !
 
           If ( T <= T_BEGIN ) Then
-             If ( Abs(P2P_U)/HR%Mass > 550.0_EB ) &
-                  P2P_U =550.0_EB*HR%Mass*P2P_U/Abs(P2P_U)
-             If ( Abs(P2P_V)/HR%Mass > 550.0_EB ) &
-                  P2P_V =550.0_EB*HR%Mass*P2P_V/Abs(P2P_V)
+             If ( Abs(P2P_U)/HR%Mass > 550.0_EB ) P2P_U =550.0_EB*HR%Mass*P2P_U/Abs(P2P_U)
+             If ( Abs(P2P_V)/HR%Mass > 550.0_EB ) P2P_V =550.0_EB*HR%Mass*P2P_V/Abs(P2P_V)
              HR%F_X = P2P_U
              HR%F_Y = P2P_V
           End If
 
-          U_new = HR%U + 0.5_EB*HR%F_X*DTSP/HR%Mass
-          V_new = HR%V + 0.5_EB*HR%F_Y*DTSP/HR%Mass
-          ! Rotational motion:
+          ! Add the social and contact force terms
+          U_new     = HR%U + 0.5_EB*HR%F_X*DTSP/HR%Mass
+          V_new     = HR%V + 0.5_EB*HR%F_Y*DTSP/HR%Mass
           Omega_new = HR%Omega + 0.5_EB*DTSP*HR%Torque/HR%M_iner
 
-          ! ========================================================
-          ! Some random force here
-          ! ========================================================
+          ! Add the effect of the random force
           If (GaTh > 0.0_EB .And. T > T_BEGIN ) Then
-             U_new = U_new + 0.5_EB*DTSP*HR%v0_fac* &
-                  HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
-             V_new = V_new + 0.5_EB*DTSP*HR%v0_fac* &
-                  HR%Mass*HR%ksi*Sin(HR%eta)/HR%Mass
+             U_new = U_new + 0.5_EB*DTSP*HR%v0_fac*HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
+             V_new = V_new + 0.5_EB*DTSP*HR%v0_fac*HR%Mass*HR%ksi*Sin(HR%eta)/HR%Mass
              P2P_U = P2P_U + HR%v0_fac*HR%Mass*HR%ksi*Cos(HR%eta)
              P2P_V = P2P_V + HR%v0_fac*HR%Mass*HR%ksi*Sin(HR%eta)
-             Omega_new = Omega_new + 0.5_EB*DTSP* &
-                  1.0_EB*Sign(HR%ksi,HR%eta-Pi)
+             Omega_new = Omega_new + 0.5_EB*DTSP*1.0_EB*Sign(HR%ksi,HR%eta-Pi)
              P2P_Torque = P2P_Torque + 1.0_EB*Sign(HR%ksi,HR%eta-Pi)*HR%M_iner
           Else
              HR%ksi = 0.0_EB
              HR%eta = 0.0_EB
           End If
-
           ! Now the step (4a) of SC-VV by Vattulainen is ended.
 
+          ! Add self-propelling force terms, self-consistent VV (first time step towards the exit door)
           fac_tim =  1.0_EB + (DTSP/(2.0_EB*hr_tau))
-          ! 
-          ! ========================================================
-          ! Add self-propelling force terms, self-consistent
-          ! ========================================================
-
-          j = Max(0,HR%GROUP_ID)
-          If (j == 0 ) Then
-             Group_List(0)%Tpre = HR%Tpre + HR%Tdet
-             Tpre = HR%Tpre + HR%Tdet
-          Else
-             Tpre = HR%Tdet
-          End If
-          If (L_Dead) Tpre = Huge(Tpre)
-
-
-          If (Group_List(j)%GROUP_SIZE >= 2) Then
-             HR%UBAR_Center = (Group_List(j)%GROUP_X - HR%X)
-             HR%VBAR_Center = (Group_List(j)%GROUP_Y - HR%Y)
-             EVEL = Sqrt(HR%UBAR_Center**2 + HR%VBAR_Center**2)
-             If ( EVEL > 0.0_EB .And. .Not. L_Dead ) Then
-                HR%UBAR_Center = HR%UBAR_Center / EVEL
-                HR%VBAR_Center = HR%VBAR_Center / EVEL
-             Else
-                HR%UBAR_Center = 0.0_EB
-                HR%VBAR_Center = 0.0_EB
-             End If
-          Else
-             HR%UBAR_Center = 0.0_EB ! only one person in the group
-             HR%VBAR_Center = 0.0_EB ! only one person in the group
-          End If
-
-          If ( j > 0 ) Then
-             If (Group_List(j)%COMPLETE == 1 .And. T+DTSP_new &
-                  <= Group_List(j)%Tpre+Group_List(j)%Tdoor) Then
-                UBAR = 0.0_EB
-                VBAR = 0.0_EB
-             End If
-          End If
-
-
-          EVEL = Sqrt(UBAR**2 + VBAR**2)
-          If (Group_List(j)%COMPLETE == 1 .And. EVEL > 0.0_EB) Then
-             UBAR = (1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center/ &
-                  Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
-                  ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
-             VBAR = (1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center/ &
-                  Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
-                  ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
-          Else
-             UBAR = HR%UBAR_Center
-             VBAR = HR%VBAR_Center
-          End If
-
-          If (T+DTSP_new <= Tpre .Or. T+DTSP_new <= 0.0_EB) Then
-             ! Fire is not yet detected ==> no movement
-             UBAR = 0.0_EB
-             VBAR = 0.0_EB
-          End If
           If ( T <= Tpre ) Then
              If ( (T+DTSP_new) > Tpre) Then
                 EVEL = Sqrt(UBAR**2 + VBAR**2)
                 If (EVEL > 0.0_EB) Then
-                   speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + &
-                        speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
+                   speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
                    speed = speed*HR%v0_fac
                    P2P_U = P2P_U + (HR%Mass/hr_tau)*speed*(UBAR/EVEL)
-                   speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + &
-                        speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
+                   speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
                    speed = speed*HR%v0_fac
                    P2P_V = P2P_V + (HR%Mass/hr_tau)*speed*(VBAR/EVEL)
                 End If
@@ -6332,62 +6240,54 @@ Contains
              VBAR = 0.0_EB
           End If
 
+          ! Add self-propelling force terms, self-consistent VV
           EVEL = Sqrt(UBAR**2 + VBAR**2)
           If (EVEL > 0.0_EB) Then
-             speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + &
-                  speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
+             speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
              speed = speed*HR%v0_fac
-             U_new = (U_new + 0.5_EB*(DTSP/hr_tau)* &
-                  speed*(UBAR/EVEL)) / fac_tim
+             U_new = (U_new + 0.5_EB*(DTSP/hr_tau)*speed*(UBAR/EVEL)) / fac_tim
              HR%UBAR = speed*(UBAR/EVEL)
-             P2P_U = P2P_U + (HR%Mass/hr_tau)* &
-                  (speed*(UBAR/EVEL) - HR%U)
+             P2P_U = P2P_U + (HR%Mass/hr_tau)*(speed*(UBAR/EVEL) - HR%U)
 
-             speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + &
-                  speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
+             speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
              speed = speed*HR%v0_fac
-             V_new = (V_new + 0.5_EB*(DTSP/hr_tau)* &
-                  speed*(VBAR/EVEL)) / fac_tim
+             V_new = (V_new + 0.5_EB*(DTSP/hr_tau)*speed*(VBAR/EVEL)) / fac_tim
              HR%VBAR = speed*(VBAR/EVEL)
-             P2P_V = P2P_V + (HR%Mass/hr_tau)* &
-                  (speed*(VBAR/EVEL) - HR%V)
+             P2P_V = P2P_V + (HR%Mass/hr_tau)*(speed*(VBAR/EVEL) - HR%V)
 
              If (VBAR >= 0.0_EB) Then
                 angle = Acos(UBAR/EVEL)
              Else
                 angle = 2.0_EB*Pi - Acos(UBAR/EVEL)
-             End If  ! angle is [0,2Pi)
-             If (angle == 2.0_EB*Pi) angle = 0.0_EB
+             End If
+             If (angle == 2.0_EB*Pi) angle = 0.0_EB  ! angle is [0,2Pi)
 
-             ! J(dw/dt) = (J/t_iner)*( ((angle-angle_0)/pi)w_0 - w )
+             ! Rotational motion: J(dw/dt) = (J/t_iner)*( ((angle-angle_0)/pi)*w_0 - w)
              If (Abs(angle-HR%angle) <= Pi ) Then
                 ! zero is not crossed.
-                Omega_new = Omega_new + 0.5_EB*(DTSP/HR_tau_iner)* &
-                     ( (angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
-                P2P_Torque = P2P_Torque + (HR%M_iner/HR_tau_iner)* &
-                     ( (angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
+                Omega_new = Omega_new + 0.5_EB*(DTSP/HR_tau_iner)*((angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
+                P2P_Torque = P2P_Torque + (HR%M_iner/HR_tau_iner)*((angle-HR%angle)*(Omega_0/Pi) - HR%Omega)
              Else
                 ! zero is crossed
                 Omega_new = Omega_new + 0.5_EB*(DTSP/HR_Tau_iner)* &
-                     ( (2.0_EB*Pi-Abs(angle-HR%angle))*Sign(1.0_EB , HR%angle-angle)* &
-                     (Omega_0/Pi) - HR%Omega )
+                     ( (2.0_EB*Pi-Abs(angle-HR%angle))*Sign(1.0_EB , HR%angle-angle)*(Omega_0/Pi) - HR%Omega)
                 P2P_Torque = P2P_Torque + (HR%M_iner/HR_Tau_iner)* &
-                     ( (2.0_EB*Pi-Abs(angle-HR%angle))*Sign(1.0_EB , HR%angle-angle)* &
-                     (Omega_0/Pi) - HR%Omega )
+                     ( (2.0_EB*Pi-Abs(angle-HR%angle))*Sign(1.0_EB , HR%angle-angle)*(Omega_0/Pi) - HR%Omega)
              End If
-          Else
+          Else  ! No target direction
              HR%UBAR = 0.0_EB
              HR%VBAR = 0.0_EB
              U_new = U_new / fac_tim
              V_new = V_new / fac_tim
+             ! Slow rotation down if no direction available, i.e., target Omega_0 is zero.
              Omega_new = Omega_new + 0.5_EB*(DTSP/HR_Tau_iner)*(-HR%Omega)
           End If
 
           ! ========================================================
           ! SELF PROPELLING FORCE ENDS HERE
           ! ========================================================
-          ! Check that velocities are not too large, i.e.,
-          ! unphysical (less than 10 m/s for humans)
+
+          ! Check that velocities are not too large, i.e., less than 10 m/s for humans
           EVEL = Sqrt(U_new**2 + V_new**2)
           If ( EVEL > Vmax_timo ) Then
              U_new = U_new*(Vmax_timo/EVEL)
@@ -6402,15 +6302,18 @@ Contains
           HR%V = V_new
           HR%Omega = Omega_new
 
+          ! ========================================================
+          ! Decide the time step for the next human movement loop
+          ! ========================================================
+          ! Distances to closest walls and other agents
           d_humans = Max(d_humans,0.0005_EB)        ! this agent
-          !d_humans = Max(d_humans,0.0005_EB)        ! this agent
-          d_walls  = Max(d_walls, 0.0005_EB)       ! this agent
+          d_walls  = Max(d_walls, 0.0005_EB)        ! this agent
           d_humans_min = Min(d_humans_min,d_humans) ! among all agents
           d_walls_min  = Min(d_walls_min, d_walls)  ! among all agents
 
           If ( T > T_BEGIN ) Then
-             ! Time step, do not move too close to other agents or 0.5*grid spacing
-             ! Delta_min is minimum of dx and dy for the mesh.
+             ! Time step, do not move too close to other agents, walls, or 0.5*grid spacing.
+             ! Delta_min is minimum of dx and dy for the mesh.  Minimum movement is 0.0001 m.
              dt_Loop: Do
                 u_tmp(2) = HR%U + 0.5_EB*DTSP_new*P2P_U/HR%Mass
                 v_tmp(2) = HR%V + 0.5_EB*DTSP_new*P2P_V/HR%Mass
@@ -6430,7 +6333,7 @@ Contains
 
              DTSP_new = Max(DTSP_new, EVAC_DT_MIN)
              DTSP_new = Min(DTSP_new, EVAC_DT_MAX)
-          Else
+          Else  ! Initialization phase
              HR%U     = 0.0_EB
              HR%V     = 0.0_EB
              HR%Omega = 0.0_EB
@@ -6444,23 +6347,18 @@ Contains
        ! FORCE LOOP ENDS HERE
        ! ========================================================
 
-       ! Maximum time step allowed by the SC-VV algorithm
+       ! Save the maximum time steps allowed by the SC-VV algorithm
        Tsteps(NM) = DTSP_new
 
-       ! ========================================================
-       ! HUMAN TIME LOOP ENDS HERE
-       ! ========================================================
     End Do HUMAN_TIME_LOOP
     Deallocate(BLOCK_GRID_N)
-    Deallocate(Color_Tmp)
-    Deallocate(K_ave_Door)
-    Deallocate(FED_max_Door)
-    Deallocate(Is_Visible_Door)
-    Deallocate(Is_Known_Door)
+    ! ========================================================
+    ! HUMAN TIME LOOP ENDS HERE (Tin ==> T = Tin + DT)
+    ! ========================================================
+
     ! ========================================================
     ! Evacuation routine ends here
     ! ========================================================
-    !
     TUSED(12,NM)=TUSED(12,NM)+SECOND()-TNOW
 
   Contains
@@ -6532,9 +6430,9 @@ Contains
             End Select
          Else
             HP%Z = 0.5_EB*(SP%XB_NODE(J,5)+SP%XB_NODE(J,6))      
-         Endif
+         End If
          Exit LoopSubIndx
-      Enddo LoopSubIndx
+      End Do LoopSubIndx
     End Subroutine GetStairSpeedAndZ
 
     Subroutine Find_Target_Node_In_Strs(SP,HP)
@@ -6562,9 +6460,9 @@ Contains
                If (I == Human_Known_Doors(IG)%I_nodes(Id)) Then
                   IsKnownDoor = .True.
                   Exit
-               Endif
+               End If
             End Do
-         Endif
+         End If
          If (EVAC_NODE_List(I)%Node_type=='Exit') Then
             z_final_unknown = EVAC_EXITS(EVAC_NODE_List(I)%Node_index)%Z1
             If (IsKnownDoor) Then
@@ -6572,9 +6470,9 @@ Contains
                z_final = z_final_unknown
                FinalTargetFound = .TRUE.
                Exit
-            Endif
-         Endif
-      Enddo
+            End If
+         End If
+      End Do
       If (.NOT.FinalTargetFound) z_final = z_final_unknown
       dz_final = z_final - HP%Z
 
@@ -6598,9 +6496,9 @@ Contains
                HP%I_Target = EVAC_Node_List(SP%NODES_OUT(I))%Node_index
                dz_tmp2 = dz_tmp1
                dz_node_actual = dz_node
-            Endif
-         Endif
-      Enddo FindTargetNodeLoop
+            End If
+         End If
+      End Do FindTargetNodeLoop
       If (.NOT.FinalTargetFound) Then
       FindTargetNodeLoop2: Do I = 1,SP%N_NODES_IN
          dz_node = -1._EB * SIGN(1.0_EB,dz_final) ! initialize dz_node to different direction than final target
@@ -6620,15 +6518,15 @@ Contains
                HP%I_Target = EVAC_Node_List(SP%NODES_IN(I))%Node_index
                dz_tmp2 = dz_tmp1
                dz_node_actual = dz_node
-            Endif
-         Endif
-      Enddo FindTargetNodeLoop2
-      Endif
+            End If
+         End If
+      End Do FindTargetNodeLoop2
+      End If
       if (dz_node_actual >= 0._EB) Then
          HP%STRS_Direction = 1
       Else
          HP%STRS_Direction = -1   
-      Endif
+      End If
 
 
     End Subroutine Find_Target_Node_In_Strs
@@ -7205,11 +7103,6 @@ Contains
            xx1,yy1, max_fed, ave_K
       Integer  II, JJ, KK, ior, irnmax, irn, ie, izero, j1
       Real(EB), Dimension(6) :: r_tmp, x_tmp, y_tmp
-      Real(EB), Dimension(:), Allocatable :: K_ave_Door
-      Real(EB), Dimension(:), Allocatable :: FED_max_Door
-      Integer, Dimension(:), Allocatable :: Color_Tmp
-      Logical, Dimension(:), Allocatable :: Is_Known_Door, &
-           Is_Visible_Door
       Integer :: i_tmp, i_tim, iii, jjj
       Logical :: PP_see_door, keep_xy2, NM_STRS_MESH
       Type (CORR_LL_TYPE), Pointer :: TmpCurrent, TmpLoop
@@ -7414,31 +7307,14 @@ Contains
                new_ffield_name = Trim(MESH_NAME(new_ffield_i))
                If (j > 0) I_Target = Group_Known_Doors(j)%I_Target
             Else
-               Allocate(Is_Known_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-               Call ChkMemErr('Check_Target_Node','Is_Known_Door',IZERO) 
-               Allocate(Is_Visible_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-               Call ChkMemErr('Check_Target_Node','Is_Visible_Door',IZERO) 
-               Allocate(FED_max_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-               Call ChkMemErr('Check_Target_Node','FED_max_Door',IZERO) 
-               Allocate(K_ave_Door(Max(1,n_doors+n_exits)),STAT=IZERO)
-               Call ChkMemErr('Check_Target_Node','K_ave_Door',IZERO) 
-               Allocate(Color_Tmp(Max(1,i33_dim)),STAT=IZERO)
-               Call ChkMemErr('Check_Target_Node','Color_Tmp',IZERO) 
 
                Call Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, T, HR%X, HR%Y, &
-                    Is_Known_Door, Is_Visible_Door, FED_max_Door, K_ave_Door, Color_Tmp, &
                     I_Target, color_index, new_ffield_i)
-
 
                new_ffield_name = Trim(MESH_NAME(new_ffield_i))
                If ( j > 0 ) Then
                   Group_List(j)%GROUP_I_FFIELDS(i_tmp) = new_ffield_i
                End If
-               Deallocate(Color_Tmp)
-               Deallocate(K_ave_Door)
-               Deallocate(FED_max_Door)
-               Deallocate(Is_Visible_Door)
-               Deallocate(Is_Known_Door)
             End If  ! first member of a group?
 
          End If ! istat=0, i.e., put human to a new node
@@ -7484,8 +7360,8 @@ Contains
                   STRP=>EVAC_STRS(N)
                   NM_STRS_MESH = .TRUE.
                   Exit
-               Endif
-            Enddo
+               End If
+            End Do
             X1  = Min(Max(MFF%XS,PDX2%X1),MFF%XF)
             X2  = Min(Max(MFF%XS,PDX2%X2),MFF%XF)
             Y1  = Min(Max(MFF%YS,PDX2%Y1),MFF%YF)
@@ -8294,8 +8170,6 @@ Contains
       End If
 
     End Subroutine Wall_ContactForces
-
-
     !
   End Subroutine EVACUATE_HUMANS
 ! ============================================================
@@ -8303,7 +8177,7 @@ Contains
 ! ============================================================
 !
 ! ============================================================
-! NEXT ARE MODULE SUBPROGRMAS
+! NEXT ARE EVAC MODULE SUBPROGRMAS
 ! ============================================================
 !
   Subroutine CLASS_PROPERTIES
@@ -9522,8 +9396,6 @@ Contains
     d_xy(2) = d_px
     d_xy(3) = d_my
     d_xy(4) = d_py
-
-
     Return
   End Subroutine Find_walls
 
@@ -9550,7 +9422,6 @@ Contains
   END SUBROUTINE GET_FIRE_CONDITIONS
 
   Subroutine Change_Target_Door(nm, nm2, ie, j, j1, i_egrid, imode, T, xx, yy, &
-       Is_Known_Door, Is_Visible_Door, FED_max_Door, K_ave_Door, Color_Tmp, &
        I_Target, I_Color, I_Field)
     Implicit None
     !
@@ -9576,10 +9447,6 @@ Contains
     ! Arguments
     Integer, Intent(In) :: nm, nm2, ie, j, j1, i_egrid, imode
     Real(EB), Intent(In) :: T, xx, yy
-    Real(EB), Dimension(n_doors+n_exits), Intent(InOut) :: K_ave_Door
-    Real(EB), Dimension(n_doors+n_exits), Intent(InOut) :: FED_max_Door
-    Integer, Dimension(i33_dim), Intent(InOut)  :: Color_Tmp
-    Logical, Dimension(n_doors+n_exits), Intent(InOut)  :: Is_Known_Door, Is_Visible_Door
     Integer, Intent(Out)  :: I_Target, I_Color, I_Field
     !
     ! Local variables and arrays
