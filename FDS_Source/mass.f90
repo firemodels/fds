@@ -723,7 +723,7 @@ SUBROUTINE CHECK_MASS_FRACTION
 
 ! Redistribute species mass from cells below or above the cut-off limits
 
-USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,YYMIN,YYMAX
+USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,YYMIN,YYMAX,POROUS_BOUNDARY
 REAL(EB) :: SUM,CONST,RHYMI,RHYPI,RHYMJ,RHYPJ,RHYMK,RHYPK,RHY0,YMI,YPI,YMJ,YPJ,YMK,YPK,Y00,YMIN,YMAX
 INTEGER  :: IC,N,ISUM, IW_A(-3:3)
 LOGICAL  :: LC(-3:3)
@@ -760,37 +760,67 @@ SPECIESLOOP: DO N=1,N_SPECIES
                YMI = YYP(I-1,J,K,N)
                LC(-1) = .TRUE.
             ELSE
-               YMI = YY_W(IW_A(-1),N)  
+               IF (BOUNDARY_TYPE(IW_A(-1))==POROUS_BOUNDARY) THEN
+                 YMI = YYP(I-1,J,K,N)
+                 LC(-1) = .TRUE.
+               ELSE
+                 YMI = YY_W(IW_A(-1),N)  
+               ENDIF
             ENDIF          
             IF (IW_A( 1) == 0) THEN
                YPI = YYP(I+1,J,K,N)
                LC( 1) = .TRUE.
             ELSE
-               YPI = YY_W(IW_A( 1),N)  
+               IF (BOUNDARY_TYPE(IW_A(1))==POROUS_BOUNDARY) THEN
+                 YPI = YYP(I+1,J,K,N)
+                 LC( 1) = .TRUE.
+               ELSE
+                 YPI = YY_W(IW_A(1),N)  
+               ENDIF
             ENDIF           
             IF (IW_A(-2) == 0) THEN
                YMJ = YYP(I,J-1,K,N)
                LC(-2) = .TRUE.
             ELSE
-               YMJ = YY_W(IW_A(-2),N)  
+               IF (BOUNDARY_TYPE(IW_A(-2))==POROUS_BOUNDARY) THEN
+                 YMJ = YYP(I,J-1,K,N)
+                 LC(-2) = .TRUE.
+               ELSE
+                 YMJ = YY_W(IW_A(-2),N)  
+               ENDIF
             ENDIF         
             IF (IW_A( 2) == 0) THEN
                YPJ = YYP(I,J+1,K,N)
                LC( 2) = .TRUE.
             ELSE
-               YPJ = YY_W(IW_A( 2),N)  
+               IF (BOUNDARY_TYPE(IW_A( 2))==POROUS_BOUNDARY) THEN
+                 YPJ = YYP(I,J+1,K,N)
+                 LC( 2) = .TRUE.
+               ELSE
+                 YPJ = YY_W(IW_A( 2),N)  
+               ENDIF
             ENDIF         
             IF (IW_A(-3) == 0) THEN
                YMK = YYP(I,J,K-1,N)
                LC(-3) = .TRUE.
             ELSE
-               YMK = YY_W(IW_A(-3),N)  
+               IF (BOUNDARY_TYPE(IW_A(-3))==POROUS_BOUNDARY) THEN
+                 YMK = YYP(I,J,K-1,N)
+                 LC(-3) = .TRUE.
+               ELSE
+                 YMK = YY_W(IW_A(-3),N)  
+               ENDIF
             ENDIF         
             IF (IW_A( 3) == 0) THEN
                YPK = YYP(I,J,K+1,N)
                LC( 3) = .TRUE.
             ELSE
-               YPK = YY_W(IW_A( 3),N)  
+               IF (BOUNDARY_TYPE(IW_A( 3))==POROUS_BOUNDARY) THEN
+                 YPK = YYP(I,J,K+1,N)
+                 LC( 3) = .TRUE.
+               ELSE
+                 YPK = YY_W(IW_A( 3),N)  
+               ENDIF
             ENDIF           
             YMIN  = MIN(YMI,YPI,YMJ,YPJ,YMK,YPK)
             YMIN = MAX(YMIN,YYMIN(N))
