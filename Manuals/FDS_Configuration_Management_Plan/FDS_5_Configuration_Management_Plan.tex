@@ -1,0 +1,503 @@
+\documentclass[11pt]{book}
+\usepackage{mathptm,times}
+\usepackage[pdftex]{graphicx}
+%\usepackage{hyperref}
+
+%\usepackage{array,eqnarray}
+
+%\usepackage{eso-pic}
+%\usepackage{graphicx}
+%\usepackage{color}
+%\usepackage{type1cm}
+
+%\makeatletter
+%   \AddToShipoutPicture{%
+%     \setlength{\@tempdimb}{.5\paperwidth}%
+%    \setlength{\@tempdimc}{.5\paperheight}%
+%   \setlength{\unitlength}{1pt}%
+%  \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
+%     \makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}{8cm}\selectfont{DRAFT}}}}}}
+%\makeatother
+
+\usepackage[pdftex,
+        colorlinks=true,
+        urlcolor=linkblue,     % \href{...}{...} external (URL)
+        citecolor=linkred,     % citation number colors
+        linkcolor=linknavy,    % \ref{...} and \pageref{...}
+        pdftitle={Fire Dynamics Simulator (Version 5) Configuration Management Plan},
+        pdfauthor={Kevin McGrattan, Bryan Klein, Simo Hostikka, Jason Floyd},
+        pdfsubject={User Guide},
+        pdfkeywords={FDS, Fire Model, NIST, BFRL},
+        pdfproducer={pdflatex},
+        pagebackref,
+        pdfpagemode=UseNone,
+        bookmarksopen=true,
+        plainpages=false]{hyperref}
+\usepackage{color}
+\definecolor{linknavy}{rgb}{0,0,0.50196}
+\definecolor{linkred}{rgb}{1,0,0}
+\definecolor{linkblue}{rgb}{0,0,1}
+\usepackage{caption}
+\usepackage{graphpap}
+\usepackage{rotating}
+\usepackage{epsfig,psfrag}
+\usepackage{geometry}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{lscape}
+\usepackage{amssymb}
+\usepackage{makeidx} % Create index at end of document
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography and index in the ToC
+\usepackage{float}
+\usepackage{lastpage} % Automatic last page number reference.
+\usepackage[T1]{fontenc}
+\usepackage{upquote}
+\usepackage{array,eqnarray}
+\newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
+
+
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9.0in}
+\setlength{\topmargin}{0.in}
+\setlength{\headheight}{0.in}
+\setlength{\headsep}{0.in}
+\setlength{\parindent}{0.25in}
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in}
+
+\begin{document}
+
+\bibliographystyle{unsrt}
+
+\newcommand{\dod}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\DoD}[2]{\frac{D #1}{D #2}}
+\newcommand{\dsods}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\dx}{\delta x}
+\newcommand{\dy}{\delta y}
+\newcommand{\dz}{\delta z}
+\newcommand{\x}{x}
+\newcommand{\y}{y}
+\newcommand{\z}{z}
+\newcommand{\dt}{\delta t}
+\newcommand{\dn}{\delta n}
+\newcommand{\cH}{{\cal H}}
+\newcommand{\hu}{u}
+\newcommand{\hv}{v}
+\newcommand{\hw}{w}
+\newcommand{\la}{\lambda}
+%\newcommand{\bO}{\mbox{\boldmath $\Omega$}}
+\newcommand{\bO}{{\Omega}}
+\newcommand{\bo}{{\bf \omega}}
+%\newcommand{\btau}{\mbox{\boldmath $\tau$}}
+\newcommand{\btau}{{\bf \tau}}
+\newcommand{\bdelta}{{\bf \delta}}
+\newcommand{\sumyw}{\sum (Y_\alpha/W_\alpha)}
+\newcommand{\oW}{\overline{W}}
+\newcommand{\om}{\omega}
+\newcommand{\omx}{\omega_x}
+\newcommand{\omy}{\omega_y}
+\newcommand{\omz}{\omega_z}
+\newcommand{\erf}{\hbox{erf}}
+\newcommand{\bF}{{\bf F}}
+\newcommand{\bG}{{\bf G}}
+\newcommand{\bof}{{\bf f}}
+\newcommand{\bq}{{\bf q}}
+\newcommand{\br}{{\bf r}}
+\newcommand{\bu}{{\bf u}}
+\newcommand{\bx}{{\bf x}}
+\newcommand{\bk}{{\bf k}}
+\newcommand{\bv}{{\bf v}}
+\newcommand{\bg}{{\bf g}}
+\newcommand{\bn}{{\bf n}}
+\newcommand{\bS}{{\bf S}}
+\newcommand{\bW}{\overline{W}}
+\newcommand{\dS}{d{\bf S}}
+\newcommand{\bs}{{\bf s}}
+\newcommand{\bI}{{\bf I}}
+\newcommand{\hp}{{\cal H}}
+\newcommand{\trho}{\tilde{\rho}}
+\newcommand{\dph}{{\delta\phi}}
+\newcommand{\dth}{{\delta\theta}}
+\newcommand{\tp}{\tilde{p}}
+\newcommand{\bp}{\overline{p}}
+\newcommand{\dQ}{\dot{Q}}
+\newcommand{\dq}{\dot{q}}
+\newcommand{\dbq}{\dot{\bf q}}
+\newcommand{\dm}{\dot{m}}
+\newcommand{\ha}{\frac{1}{2}}
+\newcommand{\ft}{\frac{4}{3}}
+\newcommand{\ot}{\frac{1}{3}}
+\newcommand{\fofi}{\frac{4}{5}}
+\newcommand{\of}{\frac{1}{4}}
+\newcommand{\twth}{\frac{2}{3}}
+\newcommand{\R}{{\cal R}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\RE}{\hbox{Re}}
+\newcommand{\LE}{\hbox{Le}}
+\newcommand{\PR}{\hbox{Pr}}
+\newcommand{\PE}{\hbox{Pe}}
+\newcommand{\NU}{\hbox{Nu}}
+\newcommand{\SC}{\hbox{Sc}}
+\newcommand{\SH}{\hbox{Sh}}
+\newcommand{\WE}{\hbox{We}}
+\newcommand{\COTWO}{{\tiny \hbox{CO}_2}}
+\newcommand{\HTWOO}{{\tiny \hbox{H}_2\hbox{O}}}
+\newcommand{\OTWO}{{\tiny \hbox{O}_2}}
+\newcommand{\NTWO}{{\tiny \hbox{N}_2}}
+\newcommand{\CO}{{\tiny \hbox{CO}}}
+\newcommand{\F}{{\tiny \hbox{F}}}
+\newcommand{\C}{{\tiny \hbox{C}}}
+\newcommand{\Hy}{{\tiny \hbox{H}}}
+\newcommand{\So}{{\tiny \hbox{S}}}
+\newcommand{\M}{{\tiny \hbox{M}}}
+\newcommand{\xx}{{\tiny \hbox{x}}}
+\newcommand{\yy}{{\tiny \hbox{y}}}
+\newcommand{\zz}{{\tiny \hbox{z}}}
+
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\mhalf}{\mbox{$\frac{1}{2}$}}
+\newcommand{\tripleprime}{{\prime\prime\prime}}
+
+\pagestyle{empty}
+
+\begin{minipage}[t][9in][s]{6.5in}
+
+\huge \flushright{NIST Special Publication 1018-5}
+
+\vspace{1in}
+
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ \Large Volume 4: Configuration Management Plan}
+
+\vspace{.5in}
+
+\large
+\flushright{
+Kevin McGrattan \\
+Simo Hostikka \\
+Jason Floyd \\
+Bryan Klein}
+
+\vspace{0.5in}
+
+\flushright{In cooperation with: \\
+VTT Technical Research Centre of Finland  }
+
+
+
+\vfill
+
+
+\flushright{\includegraphics[width=2.in]{FIGURES/nistident_flright_vec}}
+
+
+\end{minipage}
+
+\newpage
+
+\hspace{5in}
+
+\newpage
+
+\begin{minipage}[t][9in][s]{6.5in}
+
+\huge \flushright{NIST Special Publication 1018-5}
+
+\vspace{.75in}
+
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ \Large Volume 4: Configuration Management Plan}
+
+\vspace{.25in}
+
+\normalsize
+\flushright{
+Kevin McGrattan \\
+Bryan Klein \\
+{\em Fire Research Division} \\
+{\em Building and Fire Research Laboratory}  \\
+\hspace{1.in} \\
+Simo Hostikka \\
+{\em VTT Technical Research Centre of Finland} \\
+{\em Espoo, Finland}  \\
+\hspace{1.in} \\
+Jason Floyd \\
+{\em Hughes Associates, Inc.}  \\
+{\em Baltimore, Maryland, USA}}
+
+\vspace{.25in}
+
+\flushright{\today \\
+FDS Version 5.2 \\
+$SVN Repository$~$Revision$}
+
+\vfill
+
+\flushright{\includegraphics[width=1in]{FIGURES/doc} }
+
+\small
+\flushright{U.S. Department of Commerce \\
+{\em Carlos M. Gutierrez, Secretary} \\
+\hspace{1in} \\
+National Institute of Standards and Technology \\
+{\em James M. Turner, Acting Director} }
+
+\end{minipage}
+
+\newpage
+
+\begin{minipage}[t][9in][s]{6.5in}
+
+\flushright{Certain commercial entities, equipment, or materials may be identified in this \\
+document in order to describe an experimental procedure or concept adequately. Such \\
+identification is not intended to imply recommendation or endorsement by the \\
+National Institute of Standards and Technology, nor is it intended to imply that the \\
+entities, materials, or equipment are necessarily the best available for the purpose.
+}
+
+\vspace{3in}
+
+\large
+\flushright{\bf National Institute of Standards and Technology Special Publication 1018-5 \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1018-5, \pageref{LastPage} pages (October 2007) \\
+CODEN: NSPUE2 }
+
+\vfill
+
+\flushright{U.S. GOVERNMENT PRINTING OFFICE \\
+WASHINGTON: 2007 \\
+\rule{3.5in}{0.01in} \\
+For sale by the Superintendent of Documents, U.S. Government Printing Office \\
+Internet: bookstore.gpo.gov -- Phone: (202) 512-1800 -- Fax: (202) 512-2250 \\
+Mail: Stop SSOP, Washington, DC 20402-0001 }
+
+\end{minipage}
+
+
+
+\newpage
+
+\frontmatter
+
+\pagestyle{plain}
+
+\chapter{Disclaimer}
+
+The US Department of Commerce makes no warranty, expressed or implied,
+to users of the Fire Dynamics Simulator (FDS), and accepts no responsibility for its use.
+Users of FDS assume sole responsibility under Federal law for determining
+the appropriateness of its use in any particular application;
+for any conclusions drawn from the results of its use; and for any
+actions taken or not taken as a result of analysis performed using these tools.
+
+Users are warned that FDS is intended for use only by those competent
+in the fields of fluid dynamics, thermodynamics, heat transfer, combustion, and fire science,
+and is intended only to supplement the informed judgment of the qualified user.
+The software package is a computer model that may or may not have predictive
+capability when applied to a specific set of factual circumstances.
+Lack of accurate predictions by the model could lead to erroneous
+conclusions with regard to fire safety. All results should be evaluated by an informed user.
+
+Throughout this document, the mention of computer hardware or commercial
+software does not constitute endorsement by NIST, nor does it indicate that
+the products are necessarily those best suited for the intended purpose.
+
+
+\chapter{About the Authors}
+
+\begin{description}
+\item[Kevin McGrattan] is a mathematician in the Building and Fire Research Laboratory (BFRL) of NIST. He received a bachelors of science degree from
+the School of Engineering and Applied Science of Columbia University in 1987 and a doctorate at the Courant Institute
+of New York University in 1991. He joined the NIST staff in 1992 and has since worked on the development of fire models, most notably the
+Fire Dynamics Simulator.
+\item[Simo Hostikka] is a Senior Research Scientist at VTT Technical
+Research Centre of Finland. He received a master of science
+(technology) degree in 1997 and a doctorate in 2008 from
+the Department of Engineering Physics and Mathematics of the
+Helsinki University of Technology.  He is the principal developer of the
+radiation and solid phase sub-models within FDS.
+\item[Jason Floyd] is a Senior Engineer at Hughes Associates, Inc., in Baltimore, Maryland. He received a bachelors of science and Ph.D. in the Nuclear Engineering
+Program of the University of Maryland. After graduating, he won a National Research Council Post-Doctoral Fellowship at the Building and Fire
+Research Laboratory of NIST, where he developed the combustion algorithm within FDS. He is currently funded by NIST under grant 60NANB5D1205 from the Fire Research Grants Program (15 USC 278f).
+He is the principal developer of the multi-parameter mixture fraction combustion model and control logic within FDS.
+\item[Howard Baum] is a NIST Fellow {\em emeritus}. He received a bachelors of science degree from Brooklyn Polytechnic Institute in 1957 and a
+doctorate from Harvard University in 1964. After joining the staff of the National Bureau of Standards (now NIST), he, along with Ronald Rehm,
+developed the low Mach number formulation of the Navier-Stokes equations that is still the core transport algorithm within FDS.
+\item[Ronald Rehm] is a former NIST fellow, currently retired but still active in a number of projects at NIST. He received a bachelors of science
+degree from Purdue University in 1960 and a doctorate from the Massachusetts Institute of Technology in 1965. Along with Howard Baum, he
+formulated the original numerical scheme that evolved over 25 years into the current FDS solver.
+\item[Randall McDermott] joined the research staff of the Building and Fire Research Lab in 2008. He received a B.S. degree from the University of Tulsa in
+Chemical Engineering in 1994 and a doctorate at the University of Utah in 2005. His research interests include domain decomposition, Lagrangian particle methods, and
+adaptive mesh refinement.
+\item[William (Ruddy) Mell] is an applied mathematician in BFRL. He holds a B.S. degree from the University of Minnesota (1994) and doctorate from the
+University of Washington (1994). His research interests include the development of large eddy simulation methods and sub-models applicable to the
+physics of large fires in buildings, vegetation, and the wildland-urban interface.
+\end{description}
+
+
+\chapter{Acknowledgments}
+
+\label{acksection}
+
+The development and maintenance of the Fire Dynamics Simulator has been made possible through
+a partnership of public and private organizations, both in the United States and abroad. Following
+is a list of contributors from the various sectors of the fire research, fire protection engineering and
+fire services communities:
+
+FDS is supported financially via internal funding at both NIST and
+VTT, Finland. In addition, support is provided by other agencies of
+the US Federal Government, most notably the Nuclear Regulatory Agency
+Office of Research. The US NRC Office of Research has funded key
+validation experiments, the preparation of the FDS manuals, and the
+development of various sub-models that are of importance in the area
+of nuclear power plant safety. Special thanks to Mark Salley and Jason
+Dreisbach for their efforts and support.  The Office of Nuclear
+Material Safety and Safeguards, another branch of the NRC, has
+supported modeling studies of tunnel fires under the direction of
+Chris Bajwa and Allen Hansen.
+
+Another source of support for FDS development has been the Microgravity Combustion Program of the National Aeronautics and Space
+Administration (NASA).
+
+Originally, the basic hydrodynamic solver was designed by Ronald Rehm
+and Howard Baum with programming help from Darcy Barnett, Dan Lozier
+and Hai Tang of the Computing and Applied Mathematics Laboratory
+(CAML) at NIST, and Dan Corley of the Building and Fire Research
+Laboratory (BFRL). Jim Sims of CAML developed the original
+visualization software.  The direct pressure solver was written by
+Roland Sweet of the National Center for Atmospheric Research (NCAR),
+Boulder, Colorado.  Kuldeep Prasad added the multiple-mesh data
+structures, paving the way for parallel processing.   Charles Bouldin
+devised the basic framework of the parallel version of the code.
+
+At NIST, Glenn Forney developed the visualization tool Smokeview that
+not only made the public release possible, but it also serves as the
+principal diagnostic tool for the continuing development of
+FDS.
+
+William Grosshandler and Tom Cleary, both currently at NIST, developed
+an enhancement to the smoke detector activation algorithm, originally
+conceived by Gunnar Heskestad of Factory Mutual. Steve
+Olenick of Combustion Science and Engineering (CSE) implemented the
+smoke detector model into FDS.
+
+William Grosshandler is also the developer of RadCal, a library of
+subroutines that have been incorporated in FDS to provide the
+radiative properties of gases and smoke.
+
+Prof.~Nick Dembsey of Worcester Polytechnic Institute (WPI) has provided valuable feedback about the pyrolysis model used within FDS.
+
+Professor Fred Mowrer of the University of Maryland provided a simple
+of model of gas phase extinction to FDS.
+
+Chris Lautenburger of the University of California, Berkeley, and Jose Torero and Guillermo Rein of the University of Edinburg. have
+provided valuable insight in the development of the solid phase model.
+
+
+
+
+
+
+
+
+
+
+
+
+\tableofcontents
+
+\mainmatter
+
+\chapter{Introduction}
+
+This plan is applicable to Fire Dynamics Simulator (FDS).  This document follows guidelines set forth in IEEE 
+STD 828-1998, Standard for Software Configuration Management Plans.
+
+\section{Purpose}
+
+The purpose of this document is to identify and describe the overall policies and methods for CM to be used for
+FDS.  This plan will be updated as the necessity arises. 
+
+This CM Plan (CMP) will establish and provide the basis for a uniform and concise CM practice for FDS
+The primary intention of this CMP is to provide information on the CM policies and methods to be adopted and
+implemented by the FDS development team.
+
+The primary objective of the FDS CMP is twofold.  First is to establish the process for tracking and controlling
+FDS requirements and enhancements.  Second is to establish a change management status and reporting system for
+officially released FDS versions, documentation, and associated input data files.
+
+\section{Scope}
+
+This plan covers the Modeling and Simulation (M\&S) configuration management activities associated with FDS.
+
+\section{Fire Dynamics Simulator (FDS) Model Description}
+
+FDS is a Computational Fluid Dynamics (CFD) model of fire-driven fluid flow.
+The model solves numerically a form of the Navier-Stokes equations appropriate
+for low-speed, thermally-driven flow with an emphasis on smoke and heat transport
+from fires. The partial derivatives of the conservation equations of mass, momentum and energy are approximated
+as finite differences, and the solution is updated in time on a three-dimensional, rectilinear grid.
+Thermal radiation is computed using a finite volume technique on the same grid as the flow solver.
+Lagrangian particles are used to simulate smoke movement, sprinkler discharge, and fuel sprays.
+
+\chapter{CM Management}
+
+Configuration management is defined as part of the project management system required for the technical and
+administrative direction of the project.  This section describes the relationship of configuration management
+to the project management structure as it relates to controlling the configuration of FDS.
+
+\section{FDS CM Manager Responsibilities}
+
+The CM Manager for FDS is Kevin McGrattan, Fire Modeling Group Leader of the Building and Fire Research
+Laboratory at the National Insitute of Standards and Technology located in Gaithersburg, MD.  The responsibilities
+of the CM Manager include:
+
+\begin{enumerate}
+
+\item Maintaining configuration control over the officially released software and data for FDS.
+
+\item Final approval of changes to the officially released software and data for FDS.
+
+\item Developing and maintaining the FDS Configuration Management Plan (CMP).
+
+\item Maintaining all officially released software and data for the FDS configuration baselines and documenting
+the baseline contents.
+
+\item Authorize individuals to become members of the software development team (SDT).
+
+\item Authorize establish of software baselines and identification of Computer Software Configuration Items (CSCIs)
+
+\item Recording new FDS change proposals and tracking them to completion
+
+\end{enumerate}
+
+The CM Manager may designate a member of the SDT to be responsible for one or more CM Manager responsibilties.
+
+\section{FDS Software Development Team Member Responsibilities}
+
+FDS Development Team Members are those individuals allowed to make changes to the official FDS CSCI repository.
+Their specific responsibilities include:
+
+\begin{enumerate}
+
+\item Represent interests of project management and all groups who may be affected by changes
+to the software baselines. 
+
+\item Assign, review, and provide for disposition of action items.
+
+\item Determine or review the availability of resources required to complete the proposed change or
+modification, assess the impact of the proposed change upon the system, examine cost considerations,
+and determine the impact of the change on development schedules.
+
+\end{enumerate}
+
+\backmatter
+\nopart %To Fix TOC in PDF output.
+
+\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+
+\printindex
+
+\end{document}
+
+% Just a test comment
