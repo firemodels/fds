@@ -3643,6 +3643,11 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    LAYER_LOOP: DO IL=1,MAX_LAYERS
    
+      IF (ADIABATIC .AND. MATL_ID(IL,1)/='null') THEN
+         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SURF_NAME(N))//' is ADIABATIC and cannot have a MATL_ID'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+
       IF (THICKNESS(IL)>0._EB .AND. MATL_ID(IL,1)=='null') THEN
          WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SURF_NAME(N))//' must have a MATL_ID for Layer ',IL
          CALL SHUTDOWN(MESSAGE)
