@@ -1,8 +1,10 @@
 #!/bin/csh -f
+echo starting script
 set smokeview=~/bin/smv5_linux
-smokeview -help figures/smokeview.help
-smokeview -version figures/smokeview.version
-smokezip -help figures/smokezip.help
+set smokezip=~/bin/smokezip_intel
+$smokeview -help figures/smokeview.help
+$smokeview -version figures/smokeview.version
+$smokezip -help figures/smokezip.help
 cd ../../Test_cases/Visualization
 $smokeview -runscript colorconv
 $smokeview -runscript plume5a
