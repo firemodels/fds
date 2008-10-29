@@ -109,7 +109,9 @@ EXTERNCPP void InitOpenGL(void);
 EXTERNCPP void TextureShowMenu(int value);
 EXTERNCPP void initcolors(void);
 EXTERNCPP void copy_args(int *argc, char **aargv, char ***argv_sv);
+#ifdef pp_OPEN
 EXTERNCPP void OpenSMVFile(char *filename,int filenamelength,int *openfile);
+#endif
 EXTERNCPP void get_smokezippath(char *progdir, char **zippath);
 EXTERNCPP void moveiblockage(int ival);
 EXTERNCPP void stretchiblockage(int ival);

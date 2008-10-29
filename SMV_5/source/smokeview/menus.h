@@ -10,9 +10,12 @@
 
 // svn revision character string
 char menu_revision[]="$Revision$";
-/* ------------------ OpenSMVFile ------------------------ */
 void ScriptMenu(int var);
-#ifdef WIN32
+
+#ifdef pp_OPEN
+
+/* ------------------ OpenSMVFile ------------------------ */
+
 void OpenSMVFile(char *filebuffer,int filebufferlength,int *openfile){
   char stringFilter[]="Smokeview Files (*.smv)\0*.smv\0\0\0";
   char strTitle[80]="Select Smokeview Case";
@@ -46,9 +49,6 @@ void OpenSMVFile(char *filebuffer,int filebufferlength,int *openfile){
     else{
       *openfile=1;
     }
-  }
-  else{
-    //printf("smv open error code=%x\n",CommDlgExtendedError());
   }
 }
 #endif

@@ -8108,6 +8108,7 @@ void writeini(int flag){
   case STDOUT_INI:
     fileout=stdout;
     break;
+  case SCRIPT_INI:
   case LOCAL_INI:
     fileout=fopen(caseinifilename,"w");
     break;
