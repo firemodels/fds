@@ -154,7 +154,7 @@
 \newcommand{\xx}{{\tiny \hbox{x}}}
 \newcommand{\yy}{{\tiny \hbox{y}}}
 \newcommand{\zz}{{\tiny \hbox{z}}}
-
+\newcommand{\ct}{\tt\small}
 \newcommand{\dif}{\mathrm{d}}
 \newcommand{\Div}{\nabla\cdot}
 \newcommand{\mhalf}{\mbox{$\frac{1}{2}$}}
@@ -306,32 +306,35 @@ the products are necessarily those best suited for the intended purpose.
 \chapter{About the Authors}
 
 \begin{description}
-\item[Kevin McGrattan] is a mathematician in the Building and Fire Research Laboratory (BFRL) of NIST. He received a bachelors of science degree from
-the School of Engineering and Applied Science of Columbia University in 1987 and a doctorate at the Courant Institute
-of New York University in 1991. He joined the NIST staff in 1992 and has since worked on the development of fire models, most notably the
-Fire Dynamics Simulator.
+\item[Kevin McGrattan] is a mathematician in the Building and Fire
+Research Laboratory of NIST. He received a bachelors of science degree
+from the School of Engineering and Applied Science of Columbia
+University in 1987 and a doctorate at the Courant Institute of New
+York University in 1991. He joined the NIST staff in 1992 and has
+since worked on the development of fire models, most notably the Fire
+Dynamics Simulator.
 \item[Simo Hostikka] is a Senior Research Scientist at VTT Technical
 Research Centre of Finland. He received a master of science
 (technology) degree in 1997 and a doctorate in 2008 from
 the Department of Engineering Physics and Mathematics of the
 Helsinki University of Technology.  He is the principal developer of the
 radiation and solid phase sub-models within FDS.
-\item[Jason Floyd] is a Senior Engineer at Hughes Associates, Inc., in Baltimore, Maryland. He received a bachelors of science and Ph.D. in the Nuclear Engineering
-Program of the University of Maryland. After graduating, he won a National Research Council Post-Doctoral Fellowship at the Building and Fire
-Research Laboratory of NIST, where he developed the combustion algorithm within FDS. He is currently funded by NIST under grant 60NANB5D1205 from the Fire Research Grants Program (15 USC 278f).
-He is the principal developer of the multi-parameter mixture fraction combustion model and control logic within FDS.
-\item[Howard Baum] is a NIST Fellow {\em emeritus}. He received a bachelors of science degree from Brooklyn Polytechnic Institute in 1957 and a
-doctorate from Harvard University in 1964. After joining the staff of the National Bureau of Standards (now NIST), he, along with Ronald Rehm,
-developed the low Mach number formulation of the Navier-Stokes equations that is still the core transport algorithm within FDS.
-\item[Ronald Rehm] is a former NIST fellow, currently retired but still active in a number of projects at NIST. He received a bachelors of science
-degree from Purdue University in 1960 and a doctorate from the Massachusetts Institute of Technology in 1965. Along with Howard Baum, he
-formulated the original numerical scheme that evolved over 25 years into the current FDS solver.
-\item[Randall McDermott] joined the research staff of the Building and Fire Research Lab in 2008. He received a B.S. degree from the University of Tulsa in
-Chemical Engineering in 1994 and a doctorate at the University of Utah in 2005. His research interests include domain decomposition, Lagrangian particle methods, and
-adaptive mesh refinement.
-\item[William (Ruddy) Mell] is an applied mathematician in BFRL. He holds a B.S. degree from the University of Minnesota (1994) and doctorate from the
-University of Washington (1994). His research interests include the development of large eddy simulation methods and sub-models applicable to the
-physics of large fires in buildings, vegetation, and the wildland-urban interface.
+\item[Jason Floyd] is a Senior Engineer at Hughes Associates, Inc., in
+Baltimore, Maryland. He received a bachelors of science degree and a
+doctorate from the Nuclear Engineering Program of the University of
+Maryland. After graduating, he won a National Research Council
+Post-Doctoral Fellowship at the Building and Fire Research Laboratory
+of NIST, where he developed the combustion algorithm within FDS. He is
+currently funded by NIST under grant 60NANB5D1205 from the Fire
+Research Grants Program (15 USC 278f).  He is the principal developer
+of the multi-parameter mixture fraction combustion model and control
+logic within FDS.
+\item[Bryan Klein] is an Information Technology Specialist in the
+Building and Fire Research Laboratory of NIST.  Before coming to NIST,
+Bryan worked for five years with Western Fire Center, Inc., performing a
+wide range of activities including fire modeling, data acquisition programming,
+and quantitative fire measurements. His current focus is on FDS development and
+user support, along with experimental model validation work.
 \end{description}
 
 
@@ -490,6 +493,119 @@ modification, assess the impact of the proposed change upon the system, examine 
 and determine the impact of the change on development schedules.
 
 \end{enumerate}
+
+\chapter{CM Process}
+
+The IRM Suite Configuration Management (CM) process consists of four primary functions: configuration
+identification, configuration control, configuration status accounting, and configuration audits.
+The responsibilities of each CM function are listed in the paragraphs below, as they relate to
+controlling the configuration of the IRM Suite.
+
+\section{Configuration Identification}
+
+Configuration identification consists of placing significant FDS related files under configuration control.
+These products are called Computer Software Configuration Items (CSCIs).  CSCIs are defined as a collection
+of software, data, or documentation required for an end use function and designated by the Project Engineer
+for separate configuration management.  The CSCIs include:
+
+\begin{enumerate}
+
+\item Compiled FDS executables
+\item FDS source code files
+\item FDS documentation
+\item Input files for software testing, verification testing, and validation testing
+\item Experimental data files used for validation testing
+\item Scripts and post-processing utilities used for software testing
+\item FDS web pages and wikis
+
+\end{enumerate}
+
+\subsection{Maintaining CSCIs}
+
+All CSCIs are maintained using the online service GoogleCode.  GoogleCode is a free service offered by Google
+to support configuration management and software development for open source applications.  GoogleCode uses 
+Subversion (SVN) for revision control.  Under this system a centralized repository containing all CSCIs resides
+on a GoogleCode server.  Versions are indentified by a version number which represents the version of the
+entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are
+incremented in version number).  A record of version number when a specific file was last changed is maintained.
+
+As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
+repository.  Only CM Manager approved members of the SDT; however, can make committ changes to the repository.
+
+\subsection{Identifying Specific CSCIs in Compiled Executables}
+
+At the start of an FDS simulation FDS writes header information to the Smokeview output file, FDS output file,
+and the FDS log file.  This header information contains the version of FDS used to perform that simulation.
+While each release is tagged with a specific version number (e.g. 5.0.1), there may be many commits of source
+code, documentation, or other files to the SVN repository before a new version is released with an incremented
+version number.  Thus, if a developer or a user who performs their own compilation between baseline releases
+discovers an error, the version number written to the output files may not be sufficient to identify the
+specific set of source code files used.  Rather one would need to know the SVN revision number of the most
+recently committed source file.
+
+This is accomplished by using source file tagging.  In each source file a series of character parameter
+strings are defined.  For example the strings in main.f90 are:
+
+\footnotesize
+\begin{verbatim}
+CHARACTER(255), PARAMETER :: mainid='$Id$'
+CHARACTER(255), PARAMETER :: mainrev='$Revision$'
+CHARACTER(255), PARAMETER :: maindate='$Date$'
+\end{verbatim}
+\normalsize
+
+The string contains the name of the source file, the version of the file (this reflects only the source
+file version and not the overall release version number), the date and time of the file version, and
+the person who checked the file in to the archive.  Upon compiling, these strings will be stored in the
+executable file.  The user is then capable of searching the executable file, for example, for strings
+beginning with {\ct \$Id:}.  This will result in a list of all source files compiled and their version.
+Within the SVN archive any specific version of a source file can be extracted and differences between
+versions can be determined.
+
+Within the source code a series of subroutines were created, one per source file, which parses the {\ct \$Id:} in
+each file and extracts from it the SVN revision number.  Each of these subroutines is called at the start
+of an FDS run and the largest (and hence most recent) revision number is determined.  This number is written
+along with the FDS version number to the output header information.  A user can now identify specifically
+the source code used for a particular compilation of FDS when reporting an error.
+
+\section{Configuration Control}
+
+Configuration control is the exercising of established procedures to classify, approve or disapprove, release,
+implement, and confirm changes to officially released models and databases.  The CM Manager is the
+ultimate is the gatekeeper for all changes required to an established officially released FDS Suite baseline.
+These change requests could include:
+
+\begin{enumerate}
+
+\item Modifications of defined requirements
+
+\item Corrections for deficiecies
+
+\item Changes to existing capabilities 
+
+\item Model enhancements
+
+\section{Requesting Changes}
+
+
+
+\section{Establishing Baselines}
+
+The decision to establish a new baseline is made by the CM Manager.  
+
+\subsection{Naming Baselines}
+
+New FDS baselines are identified using a specific naming convention. Baselines are identified as app.#.#.#\_os. 
+Where app is the application name (fds), #.#.# is a version number, and \_os is the operating system that the
+baseline executable was compiled for.  The version number consists of three integers where the first number
+is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance}
+release.  Major releases occur every few years, and as the name implies dramatically changed functionality of the
+model. Minor releases occur every few months, and may cause minor changes in functionality. 
+Release notes can help you decide whether the changes should effect the type of applications that you typically do.
+Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity),
+and should not affect code functionality.
+
+\subsection{Baseline Software Testing}
 
 \backmatter
 \nopart %To Fix TOC in PDF output.
