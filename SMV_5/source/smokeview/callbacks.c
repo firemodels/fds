@@ -1817,26 +1817,6 @@ void Idle(void){
   /* increment frame counter if the proper amount of time has passed
      or if we are rendering images or stepping by hand */
 
-/*
-#ifdef WIN32
-  if(updateOpenSMVFile==2){
-    hide_glui_motion();
-    hide_glui_bounds();
-    hide_glui_edit();
-    sv_unload();
-    PrintAllMemoryInfo;
-    sv_init0();
-    sv_startup(openfilebuffer,0);
-    updateOpenSMVFile=0;
-  }
-  if(updateOpenSMVFile==1){
-    hide_glui_motion();
-    hide_glui_bounds();
-    hide_glui_edit();
-    updateOpenSMVFile=2;
-  }
-#endif
-  */
   if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||RenderGif!=0||timedrag==1)){       /* ready for a new frame */
 
     cputimes[cpuframe]=thistime/1000.;
