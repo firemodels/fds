@@ -50,7 +50,7 @@ typedef struct {
   char *file,*filebase;
   int filesize;
   int seq_id, autozip;
-  int doit, done, count;
+  int doit, done;
   int setvalmin, setvalmax;
   float valmin, valmax;
   int version;
@@ -188,7 +188,6 @@ void trimzeros(char *line);
 void usage(char *prog);
 void getpdf(float *vals, int nvals, pdfdata *pdf);
 void mergepdf(pdfdata *pdf1, pdfdata *pdf2, pdfdata *pdfmerge);
-int getdatabounds(patch *patchi, FILE *stream);
 void smoothlabel(float *a, float *b, int n);
 #ifdef pp_PART
 unsigned char getpartcolor(float val);
