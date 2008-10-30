@@ -614,8 +614,10 @@ void compress_slices(void){
       convert_slice(slicei);
     }
     else{
-      printf("%s not compressed\n",slicei->file);
-      printf("  Min and Max for %s not set in .ini file\n",slicei->label.shortlabel);
+      if(cleanfiles==0){
+        printf("%s not compressed\n",slicei->file);
+        printf("  Min and Max for %s not set in .ini file\n",slicei->label.shortlabel);
+      }
     }
   }
 
