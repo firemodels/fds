@@ -3469,6 +3469,7 @@ void BlockageMenu(int value){
      break;
    case SMOOTH_BLOCKAGES:
      menusmooth=1;
+     updatesmoothblocks=1;
      break;
    case SMOOTH_ATSTART:
      sb_atstart=1-sb_atstart;
