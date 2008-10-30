@@ -15,6 +15,7 @@
 #pragma warning (disable:4127)		
 #pragma warning (disable:4244)		
 #pragma warning (disable:1478)
+#pragma warning (disable:1786)
 
 #pragma warning (disable:810)		/* conversion from xx to yy may lose sig bits */
 #pragma warning (disable:869)		/* parameer was never referenced */

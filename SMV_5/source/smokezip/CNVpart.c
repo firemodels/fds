@@ -72,7 +72,6 @@ void compress_parts(void){
   for(i=0;i<npart_files;i++){
     parti = partinfo + i;
     if(autozip==1&&parti->autozip==0)continue;
-
     pb=getpart(parti->label.shortlabel);
     if(pb!=NULL){
       parti->setvalmax=pb->setvalmax;
@@ -80,12 +79,8 @@ void compress_parts(void){
       parti->valmax=pb->valmax;
       parti->valmin=pb->valmin;
     }
-//      getdatabounds(parti);
-
     convert_part(parti);
-
   }
-
 }
 
 /* ------------------ compress_part ------------------------ */

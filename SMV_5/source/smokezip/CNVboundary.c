@@ -131,15 +131,10 @@ int convert_boundary(patch *patchi,int pass){
     boundarysizestream=fopen(boundarysizefile_svz,"r");
     if(boundarystream!=NULL||boundarysizestream!=NULL){
       if(boundarystream!=NULL){
-        getdatabounds(patchi,boundarystream); // even though file exists we'll retrieve local bound data
         fclose(boundarystream);
         printf("  %s exists.\n",boundaryfile_svz);
         printf("     Use the -f option to overwrite boundary or 3d smoke files\n");
       }
-   //   if(boundarysizestream!=NULL){
-   //     fclose(boundarysizestream);
-   //     printf("  %s exists.\n  Use the -f option if you wish to overwrite it.\n",boundarysizefile_svz);
-   //   }
       return 0;
     }
   }
@@ -161,7 +156,6 @@ int convert_boundary(patch *patchi,int pass){
     }
   }
   else{
-    returncode = getdatabounds(patchi,NULL);
     strcpy(units,"");
     unit=patchi->label.unit;
     if(strlen(unit)>0)strcat(units,unit);
@@ -172,7 +166,7 @@ int convert_boundary(patch *patchi,int pass){
     sprintf(cval,"%f",patchi->valmax);
     trimzeros(cval);
     printf(" max=%s %s\n",cval,units);
-    return returncode;
+    return 1;
   }
 
   // read and write boundary header
@@ -395,31 +389,21 @@ patch *getpatch(char *string){
 /* ------------------ compress_patches ------------------------ */
 
 void compress_patches(void){
-  int i,j;
-  patch *patchi,*patchj;
+  int i;
+  patch *patchi;
   patch *pb;
-  float valmin, valmax;
-  int consolidate=0;
 
   printf("\n");
   for(i=0;i<npatch_files;i++){
     patchi = patchinfo + i;
     if(autozip==1&&patchi->autozip==0)continue;
-    patchi->count=0;
-  }
-  for(i=0;i<npatch_files;i++){
-    patchi = patchinfo + i;
-    if(autozip==1&&patchi->autozip==0)continue;
 
     pb=getpatch(patchi->label.shortlabel);
-//    if(pb!=NULL&&pb->setvalmin==1&&pb->setvalmax==1&&pb->valmax>pb->valmin){
     if(pb!=NULL){
       patchi->setvalmax=pb->setvalmax;
       patchi->setvalmin=pb->setvalmin;
       patchi->valmax=pb->valmax;
       patchi->valmin=pb->valmin;
-      pb->count++;
-      if(pb->count>1)consolidate=1;
     }
     else{
       patchi->setvalmax=1;
@@ -436,45 +420,15 @@ void compress_patches(void){
 
     patchi->done=0;
 
-    patchi->doit=convert_boundary(patchi,1);
-  }
-
-  // consolidate bounds
-
-  if(consolidate==1){
-    printf("Consolidating bounds.\n");
-    for(i=0;i<npatch_files;i++){
-      patchi = patchinfo + i;
-      if(autozip==1&&patchi->autozip==0)continue;
-      if(patchi->doit==0||patchi->done==1)continue;  // if we can't doit or this patch is done then skip it
-      if(patchi->setvalmax!=PERCENTILE_MAX&&
-         patchi->setvalmin!=PERCENTILE_MIN)continue; // only need to consolidate percentile bounds
-
-    // find bounds
-
-      valmin=patchi->valmin;
-      valmax=patchi->valmax;
-      for(j=i+1;j<npatch_files;j++){
-        patchj = patchinfo + j;
-        if(autozip==1&&patchj->autozip==0)continue;
-        if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)!=0)continue;
-        patchi->done=1;
-
-        if(patchj->valmin<valmin)valmin=patchj->valmin;
-        if(patchj->valmax>valmax)valmax=patchj->valmax;
-      }
-
-    // copy bounds back
-      smoothlabel(&valmin,&valmax,12);
-
-      for(j=i;j<npatch_files;j++){
-        patchj = patchinfo + j;
-        if(autozip==1&&patchj->autozip==0)continue;
-        if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)!=0)continue;
-
-        patchj->valmin=valmin;
-        patchj->valmax=valmax;
-      }
+    // only support boundary file compression when bounds are specified
+    //   ie. no longer estimate bounds in smokezip
+    
+    if(patchi->setvalmin==1&&patchi->setvalmax==1){
+      patchi->doit=1;
+      convert_boundary(patchi,1);
+    }
+    else{
+      patchi->doit=0;
     }
   }
 
@@ -484,192 +438,14 @@ void compress_patches(void){
     patchi = patchinfo + i;
     if(autozip==1&&patchi->autozip==0)continue;
 
-    if(patchi->doit==0)continue;
-    convert_boundary(patchi,2);
-  }
-
-
-}
-
-/* ------------------ getdatabounds ------------------------ */
-
-int getdatabounds(patch *patchi,FILE *stream){
-  FILE *BOUNDARYFILE;
-  int count;
-  int i;
-  int npatch;
-  int npatchfull;
-  int *patchsize;
-  int returncode;
-  float *patchvals;
-  float time;
-  float *patchvalscopy;
-  float pmin, pmax, gmin, gmax;
-  int firsttime=1;
-  int *buckets;
-  float dbucket;
-  int percent_done;
-  int percent_next=10;
-  long data_loc;
-  float minmax[2];
-  int one;
-  int completion;
-
-  // endian
-  // completion (0/1)
-  // fileversion (compressed format)
-  // version  (bndf version)
-  // global min max (used to perform conversion)
-  // local min max  (min max found for this file)
-  // npatch
-  // i1,i2,j1,j2,k1,k2,idir,dummy,dummy (npatch times)
-  // time
-  // compressed size of frame
-  // compressed buffer
-
-  if(stream!=NULL){
-    int endswitch=0;
-
-    fread(&one,4,1,stream);
-    if(one!=1)endswitch=1;
-    fread(&completion,4,1,stream);
-    if(completion==0)return 0;  // don't need to endian switch a 0
-    fseek(stream,16,SEEK_CUR);  // skip over next 4 values
-    fread(minmax,4,2,stream);
-    if(endswitch==1)endian_switch(minmax,2);
-    patchi->valmin=minmax[0];
-    patchi->valmax=minmax[1];
-    return 1;
-  }
-  initpdf(&pdfmerge);
-  initpdf(&pdfframe);
-  if(patchi->setvalmin==1&&patchi->setvalmin==1)return 1;
-  BOUNDARYFILE = fopen(patchi->file,"rb");
-  if(BOUNDARYFILE==NULL)return 0;
-  printf("  for: %s ",patchi->file);
-
-  {
-    int skip;
-
-    skip = 3*(4+30+4);  // skip over 3 records each containing a 30 byte FORTRAN character string
-    returncode=fseek(BOUNDARYFILE,skip,SEEK_CUR);
-  }
-
-  FORTREAD(&npatch,1);
-
-  if(npatch>0){
-    int nbounds=6;
-
-    NewMemory((void **)&patchsize,npatch*sizeof(int));
-    npatchfull=0;
-    if(patchi->version==1)nbounds=9;
-    for(i=0;i<npatch;i++){
-      int size;
-      int ijkbounds[9];
-      int i1, i2, j1, j2, k1, k2;
-
-      FORTREAD(ijkbounds,nbounds);
-      i1 = ijkbounds[0];
-      i2 = ijkbounds[1];
-      j1 = ijkbounds[2];
-      j2 = ijkbounds[3];
-      k1 = ijkbounds[4];
-      k2 = ijkbounds[5];
-      size = (i2+1-i1)*(j2+1-j1)*(k2+1-k1);
-      npatchfull += size;
-      patchsize[i]=size;
-    }
-    patchvals=NULL;
-    NewMemory((void **)&patchvals,npatchfull*sizeof(float));
-
-    for(i=1;;i++){
-      int j ;
-
-      FORTREAD(&time,1);
-      if(returncode==0)break;
-
-      patchvalscopy=patchvals;
-
-      for(j=0;j<npatch;j++){
-        FORTREAD(patchvalscopy,patchsize[j]);
-        if(returncode==0)goto percentile_loop;
-        patchvalscopy+=patchsize[j];
-      }
-      if(firsttime==1){
-        gmin=patchvals[0];
-        gmax=gmin;
-        firsttime=0;
-      }
-      data_loc=ftell(BOUNDARYFILE);
-      percent_done=100.0*(float)data_loc/(float)patchi->filesize;
-      if(percent_done>percent_next){
-        printf(" %i%s",percent_next,pp);
-        fflush(stdout);
-        percent_next+=10;
-      }
-      getpdf(patchvals,npatchfull,&pdfframe);
-      mergepdf(&pdfframe,&pdfmerge,&pdfmerge);
-    }
-percentile_loop:
-    printf(" completed\n");
-    buckets=pdfmerge.buckets;
-    count=pdfmerge.ncount;
-    gmin=pdfmerge.pdfmin;
-    gmax=pdfmerge.pdfmax;
-
-    if(buckets!=NULL){
-      int alpha05;
-      int nsmall=0, nbig=0;
-      int total;
-      int n;
-
-      alpha05 = (int)(0.01*count);
-      total = 0;
-      for (n=0;n<NBUCKETS;n++){
-        total += buckets[n];
-        if(total>alpha05){
-          nsmall=n;
-          break;
-        }
-      }
-      total = 0;
-      for (n=NBUCKETS;n>0;n--){
-        total += buckets[n-1];
-        if(total>alpha05){
-          nbig=n;
-          break;
-        }
-      }
-      dbucket=(gmax-gmin)/(float)NBUCKETS;
-      pmin = gmin + (nsmall-1)*dbucket;
-      pmax = gmin + (nbig+1)*dbucket;
+    if(patchi->doit==1){
+      convert_boundary(patchi,2);
     }
     else{
-      pmin=gmin;
-      pmax=gmax;
+      printf("%s not compressed\n",patchi->file);
+      printf("  Min and Max for %s not set in .ini file\n",patchi->label.shortlabel);
     }
-//    FREEMEMORY(buckets);
-    smoothlabel(&pmin,&pmax,12);
-    smoothlabel(&gmin,&gmax,12);
-    switch(patchi->setvalmin){
-    case PERCENTILE_MIN:
-      patchi->valmin=pmin;
-      break;
-    case GLOBAL_MIN:
-      patchi->valmin=gmax;
-      break;
-    }
-    switch(patchi->setvalmax){
-    case PERCENTILE_MAX:
-      patchi->valmax=pmax;
-      break;
-    case GLOBAL_MAX:
-      patchi->valmax=gmax;
-      break;
-    }
-    FREEMEMORY(patchvals);
-    FREEMEMORY(patchsize);
   }
-  fclose(BOUNDARYFILE);
-  return 1;
+
+
 }
