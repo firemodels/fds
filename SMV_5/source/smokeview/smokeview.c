@@ -1031,7 +1031,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     nunitclasses=nunitclasses_default;
     unitclasses=unitclasses_default;
   }
-  //debug
+
   if(menusmooth==1&&smoothing_blocks==0&&updatesmoothblocks==1){
     smooth_blockages();
   }
