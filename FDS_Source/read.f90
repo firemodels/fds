@@ -6583,7 +6583,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       ENDIF
 
       IF (QUANTITY_INDEX > 0 .AND. DV%STATISTICS/='null' .AND. DV%STATISTICS/='TIME INTEGRAL' .AND. DV%I1<0) THEN
-         WRITE(MESSAGE,'(A,I4)') 'ERROR: XB required when STATISTICS specified for gas DEVC ',N
+         WRITE(MESSAGE,'(A,I4)') 'ERROR: XB required when geometrical STATISTICS specified for gas DEVC ',N
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
@@ -6806,6 +6806,13 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             ENDIF
          ENDDO
          DV%DT = DV%DT * 0.01_EB
+
+      CASE ('FED')
+         IF (DV%STATISTICS /= 'null' .AND. DV%STATISTICS /= 'TIME INTEGRAL') THEN
+            WRITE(MESSAGE,'(A)') 'ERROR: Only TIME INTEGRAL statistics can be used with FED devices'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
+         DV%STATISTICS = 'TIME INTEGRAL'
 
    END SELECT SPECIAL_QUANTITIES
 
