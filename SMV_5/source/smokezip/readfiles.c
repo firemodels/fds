@@ -286,7 +286,6 @@ int readsmv(char *smvfile){
       smoke3d *smoke3di;
       int filesize;
       int filelen;
-      int blocknumber;
 
       smoke3di = smoke3dinfo + ismoke3d;
 #ifdef pp_LIGHT
