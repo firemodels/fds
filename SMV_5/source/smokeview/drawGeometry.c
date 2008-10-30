@@ -2867,7 +2867,9 @@ void update_smooth_blockages(void){
   blocktotal=0;
 
 #ifdef pp_ISOOUT
-  STREAM_SB=fopen(filename_sb,"rb");
+  if(menusmooth==0){
+    STREAM_SB=fopen(filename_sb,"rb");
+  }
   if(STREAM_SB!=NULL){
     time_t sb_modtime;
 
@@ -2921,6 +2923,8 @@ void update_smooth_blockages(void){
     }
     printf(" - completed \n");
   }
+  fclose(STREAM_SB);
+  STREAM_SB=NULL;
   blocksneedsmoothing=0;
   updatesmoothblocks=0;
   smoothing_blocks=0;
