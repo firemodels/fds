@@ -632,14 +632,16 @@ DO K=1,KBAR
             RHODELTA(I,J,K) = RMIN - RHOP(I,J,K)
             CYCLE CHECK_LOOP
          ELSE
-            CONST = (RHOMIN-RHO00)/(SUM-ISUM*RHO00)
-            IF (LC(-1)) RHODELTA(I-1,J,K) = RHODELTA(I-1,J,K) + MAX(RMIN,RHOMI+CONST*(RHO00-RHOMI)) - RHOP(I-1,J,K)
-            IF (LC( 1)) RHODELTA(I+1,J,K) = RHODELTA(I+1,J,K) + MAX(RMIN,RHOPI+CONST*(RHO00-RHOPI)) - RHOP(I+1,J,K)
-            IF (LC(-2)) RHODELTA(I,J-1,K) = RHODELTA(I,J-1,K) + MAX(RMIN,RHOMJ+CONST*(RHO00-RHOMJ)) - RHOP(I,J-1,K)
-            IF (LC( 2)) RHODELTA(I,J+1,K) = RHODELTA(I,J+1,K) + MAX(RMIN,RHOPJ+CONST*(RHO00-RHOPJ)) - RHOP(I,J+1,K)
-            IF (LC(-3)) RHODELTA(I,J,K-1) = RHODELTA(I,J,K-1) + MAX(RMIN,RHOMK+CONST*(RHO00-RHOMK)) - RHOP(I,J,K-1)
-            IF (LC( 3)) RHODELTA(I,J,K+1) = RHODELTA(I,J,K+1) + MAX(RMIN,RHOPK+CONST*(RHO00-RHOPK)) - RHOP(I,J,K+1)
-            RHODELTA(I,J,K) = RHODELTA(I,J,K) + RMIN - RHOP(I,J,K)
+            IF(SUM-ISUM*RHO00 /= 0._EB) THEN
+               CONST = (RHOMIN-RHO00)/(SUM-ISUM*RHO00)
+               IF (LC(-1)) RHODELTA(I-1,J,K) = RHODELTA(I-1,J,K) + MAX(RMIN,RHOMI+CONST*(RHO00-RHOMI)) - RHOP(I-1,J,K)
+               IF (LC( 1)) RHODELTA(I+1,J,K) = RHODELTA(I+1,J,K) + MAX(RMIN,RHOPI+CONST*(RHO00-RHOPI)) - RHOP(I+1,J,K)
+               IF (LC(-2)) RHODELTA(I,J-1,K) = RHODELTA(I,J-1,K) + MAX(RMIN,RHOMJ+CONST*(RHO00-RHOMJ)) - RHOP(I,J-1,K)
+               IF (LC( 2)) RHODELTA(I,J+1,K) = RHODELTA(I,J+1,K) + MAX(RMIN,RHOPJ+CONST*(RHO00-RHOPJ)) - RHOP(I,J+1,K)
+               IF (LC(-3)) RHODELTA(I,J,K-1) = RHODELTA(I,J,K-1) + MAX(RMIN,RHOMK+CONST*(RHO00-RHOMK)) - RHOP(I,J,K-1)
+               IF (LC( 3)) RHODELTA(I,J,K+1) = RHODELTA(I,J,K+1) + MAX(RMIN,RHOPK+CONST*(RHO00-RHOPK)) - RHOP(I,J,K+1)
+               RHODELTA(I,J,K) = RHODELTA(I,J,K) + RMIN - RHOP(I,J,K)
+            ENDIF
          ENDIF
       ENDDO CHECK_LOOP
    ENDDO
@@ -701,14 +703,16 @@ DO K=1,KBAR
             RHODELTA(I,J,K) = RMAX - RHOP(I,J,K)
             CYCLE CHECK_LOOP2
          ELSE
-            CONST = (RMAX-RHO00)/(SUM-ISUM*RHO00)
-            IF (LC(-1)) RHODELTA(I-1,J,K) = RHODELTA(I-1,J,K) + MIN(RMAX,RHOMI+CONST*(RHO00-RHOMI)) - RHOP(I-1,J,K)
-            IF (LC( 1)) RHODELTA(I+1,J,K) = RHODELTA(I+1,J,K) + MIN(RMAX,RHOPI+CONST*(RHO00-RHOPI)) - RHOP(I+1,J,K)
-            IF (LC(-2)) RHODELTA(I,J-1,K) = RHODELTA(I,J-1,K) + MIN(RMAX,RHOMJ+CONST*(RHO00-RHOMJ)) - RHOP(I,J-1,K)
-            IF (LC( 2)) RHODELTA(I,J+1,K) = RHODELTA(I,J+1,K) + MIN(RMAX,RHOPJ+CONST*(RHO00-RHOPJ)) - RHOP(I,J+1,K)
-            IF (LC(-3)) RHODELTA(I,J,K-1) = RHODELTA(I,J,K-1) + MIN(RMAX,RHOMK+CONST*(RHO00-RHOMK)) - RHOP(I,J,K-1)
-            IF (LC( 3)) RHODELTA(I,J,K+1) = RHODELTA(I,J,K+1) + MIN(RMAX,RHOPK+CONST*(RHO00-RHOPK)) - RHOP(I,J,K+1)
-            RHODELTA(I,J,K) = RHODELTA(I,J,K) + RMAX - RHOP(I,J,K)
+            IF(SUM-ISUM*RHO00 /= 0._EB) THEN         
+               CONST = (RMAX-RHO00)/(SUM-ISUM*RHO00)
+               IF (LC(-1)) RHODELTA(I-1,J,K) = RHODELTA(I-1,J,K) + MIN(RMAX,RHOMI+CONST*(RHO00-RHOMI)) - RHOP(I-1,J,K)
+               IF (LC( 1)) RHODELTA(I+1,J,K) = RHODELTA(I+1,J,K) + MIN(RMAX,RHOPI+CONST*(RHO00-RHOPI)) - RHOP(I+1,J,K)
+               IF (LC(-2)) RHODELTA(I,J-1,K) = RHODELTA(I,J-1,K) + MIN(RMAX,RHOMJ+CONST*(RHO00-RHOMJ)) - RHOP(I,J-1,K)
+               IF (LC( 2)) RHODELTA(I,J+1,K) = RHODELTA(I,J+1,K) + MIN(RMAX,RHOPJ+CONST*(RHO00-RHOPJ)) - RHOP(I,J+1,K)
+               IF (LC(-3)) RHODELTA(I,J,K-1) = RHODELTA(I,J,K-1) + MIN(RMAX,RHOMK+CONST*(RHO00-RHOMK)) - RHOP(I,J,K-1)
+               IF (LC( 3)) RHODELTA(I,J,K+1) = RHODELTA(I,J,K+1) + MIN(RMAX,RHOPK+CONST*(RHO00-RHOPK)) - RHOP(I,J,K+1)
+               RHODELTA(I,J,K) = RHODELTA(I,J,K) + RMAX - RHOP(I,J,K)
+            ENDIF
          ENDIF
       ENDDO CHECK_LOOP2
    ENDDO
@@ -873,15 +877,16 @@ SPECIESLOOP: DO N=1,N_SPECIES
                   IF (YMIN <= YYMIN(N)) YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMIN - Y00  
                   CYCLE CHECK_LOOP
                ELSE
-                  YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMIN - Y00
-               
-                  CONST = MIN(1._EB,RHY0/SUM)
-                  IF (LC(-1)) YYDELTA(I-1,J,K) = YYDELTA(I-1,J,K) - RHYMI*CONST/RHOP(I-1,J,K)
-                  IF (LC( 1)) YYDELTA(I+1,J,K) = YYDELTA(I+1,J,K) - RHYPI*CONST/RHOP(I+1,J,K)
-                  IF (LC(-2)) YYDELTA(I,J-1,K) = YYDELTA(I,J-1,K) - RHYMJ*CONST/RHOP(I,J-1,K)
-                  IF (LC( 2)) YYDELTA(I,J+1,K) = YYDELTA(I,J+1,K) - RHYPJ*CONST/RHOP(I,J+1,K)
-                  IF (LC(-3)) YYDELTA(I,J,K-1) = YYDELTA(I,J,K-1) - RHYMK*CONST/RHOP(I,J,K-1)
-                  IF (LC( 3)) YYDELTA(I,J,K+1) = YYDELTA(I,J,K+1) - RHYPK*CONST/RHOP(I,J,K+1)
+                  IF (SUM/=0._EB) THEN
+                     YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMIN - Y00
+                     CONST = MIN(1._EB,RHY0/SUM)
+                     IF (LC(-1)) YYDELTA(I-1,J,K) = YYDELTA(I-1,J,K) - RHYMI*CONST/RHOP(I-1,J,K)
+                     IF (LC( 1)) YYDELTA(I+1,J,K) = YYDELTA(I+1,J,K) - RHYPI*CONST/RHOP(I+1,J,K)
+                     IF (LC(-2)) YYDELTA(I,J-1,K) = YYDELTA(I,J-1,K) - RHYMJ*CONST/RHOP(I,J-1,K)
+                     IF (LC( 2)) YYDELTA(I,J+1,K) = YYDELTA(I,J+1,K) - RHYPJ*CONST/RHOP(I,J+1,K)
+                     IF (LC(-3)) YYDELTA(I,J,K-1) = YYDELTA(I,J,K-1) - RHYMK*CONST/RHOP(I,J,K-1)
+                     IF (LC( 3)) YYDELTA(I,J,K+1) = YYDELTA(I,J,K+1) - RHYPK*CONST/RHOP(I,J,K+1)
+                  ENDIF                  
                ENDIF
             ENDIF
          ENDDO CHECK_LOOP
@@ -989,14 +994,16 @@ SPECIESLOOP: DO N=1,N_SPECIES
                   IF(YMAX >= YYMAX(N)) YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMAX - Y00
                   CYCLE CHECK_LOOP2
                ELSE
-                  YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMAX - Y00               
-                  CONST = MIN(1._EB,RHY0/SUM)
-                  IF (LC(-1)) YYDELTA(I-1,J,K) = YYDELTA(I-1,J,K) + RHYMI*CONST/RHOP(I-1,J,K)
-                  IF (LC( 1)) YYDELTA(I+1,J,K) = YYDELTA(I+1,J,K) + RHYPI*CONST/RHOP(I+1,J,K)
-                  IF (LC(-2)) YYDELTA(I,J-1,K) = YYDELTA(I,J-1,K) + RHYMJ*CONST/RHOP(I,J-1,K)
-                  IF (LC( 2)) YYDELTA(I,J+1,K) = YYDELTA(I,J+1,K) + RHYPJ*CONST/RHOP(I,J+1,K)
-                  IF (LC(-3)) YYDELTA(I,J,K-1) = YYDELTA(I,J,K-1) + RHYMK*CONST/RHOP(I,J,K-1)
-                  IF (LC( 3)) YYDELTA(I,J,K+1) = YYDELTA(I,J,K+1) + RHYPK*CONST/RHOP(I,J,K+1)
+                  IF (SUM/=0._EB) THEN
+                     YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMAX - Y00               
+                     CONST = MIN(1._EB,RHY0/SUM)
+                     IF (LC(-1)) YYDELTA(I-1,J,K) = YYDELTA(I-1,J,K) + RHYMI*CONST/RHOP(I-1,J,K)
+                     IF (LC( 1)) YYDELTA(I+1,J,K) = YYDELTA(I+1,J,K) + RHYPI*CONST/RHOP(I+1,J,K)
+                     IF (LC(-2)) YYDELTA(I,J-1,K) = YYDELTA(I,J-1,K) + RHYMJ*CONST/RHOP(I,J-1,K)
+                     IF (LC( 2)) YYDELTA(I,J+1,K) = YYDELTA(I,J+1,K) + RHYPJ*CONST/RHOP(I,J+1,K)
+                     IF (LC(-3)) YYDELTA(I,J,K-1) = YYDELTA(I,J,K-1) + RHYMK*CONST/RHOP(I,J,K-1)
+                     IF (LC( 3)) YYDELTA(I,J,K+1) = YYDELTA(I,J,K+1) + RHYPK*CONST/RHOP(I,J,K+1)
+                  ENDIF
                ENDIF
             ENDIF
          ENDDO CHECK_LOOP2
