@@ -403,10 +403,6 @@ provided valuable insight in the development of the solid phase model.
 
 
 
-
-
-
-
 \tableofcontents
 
 \mainmatter
@@ -532,6 +528,9 @@ incremented in version number).  A record of version number when a specific file
 As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
 repository.  Only CM Manager approved members of the SDT; however, can make committ changes to the repository.
 
+The current location of the FDS repository is \href{http://fds-smv.googlecode.com/svn/trunk/}
+{{\ct http://fds-smv.googlecode.com/svn/trunk/}}
+
 \subsection{Identifying Specific CSCIs in Compiled Executables}
 
 At the start of an FDS simulation FDS writes header information to the Smokeview output file, FDS output file,
@@ -585,18 +584,61 @@ These change requests could include:
 
 \item Model enhancements
 
-\section{Requesting Changes}
+\end{enumerate}
 
+\section{Software Changes}
 
+\subsection{Creating a Change Request}
+
+Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service that is part of
+GoogleCode.  The current location of the Issue Tracker is \href{http://code.google.com/p/fds-smv/issues/list}
+{{\ct http://code.google.com/p/fds-smv/issues/list}}.  A change request is initiated by opening a new issue.
+The issue report contains the baseline identification (version number, complie date, and SVN revision number),
+operating system, and a description of the defect or ehancement request.  Input files or other supporting 
+documentation can be attached.
+
+\begin{figure}[ht!]
+\includegraphics[width=\textwidth]{FIGURES/defectreport.jpg}
+\caption{\bf Screenshot of issue tracker reporting form}
+\label{fig:issueform}
+\end{figure}
+
+If the issue is opened by a user, it will be given a status of 'New' until it is reviewed by a developer.  If the
+issue is opened by a developer, the developer can immeadiate assign a status and an owner.
+
+\subsection{Processing a Change Request}
+
+A change request may be evaluated by any member of the development team. 
+
+If the request duplicates an existing request, then the issue status is changed to {\ct Duplicate} and the 
+requestor is sent the issue number of the existing request.
+
+If the request is for an enhancement to FDS, then then the issue type is changed to {\ct Type-Ehancement} and the
+component type is declared. The request is evaluated for suitability.  If it is a valid enhancement 
+request, then the status is changed to {\ct Accepted}.  If the request is not to
+be addressed under the next baseline, then the status will be changed to {\ct OnHold}.  If the request is denied, then
+the status is changed to {\ct WontFix}.  An accepted request will be assigned to a developer.
+
+If the request is identifying a defect in FDS, then the issue type is changed to {\ct Type-Defect} and the
+component type is declared.  The defect is evaluated for validity.  If insufficient information has
+been provided in the request, then the status is changed to {\ct MoreInfo} and a description of the additional 
+information required is sent to the requestor.  If the defect is due to user error or is the intended function of FDS,
+then the status is changed to {\ct Invalid}.  If the defect is valid, then the request reviewer will change the 
+status to {\ct Accepted} and assign the request to a developer.
+
+Once a change request has be addressed by a developer and changes submitted to the repositoty, the request status
+is changed to {\ct Fixed}.  Once either the requestor or another developer has verified that the changes address 
+the original request, then the status is changed to {\ct Verified}.  
 
 \section{Establishing Baselines}
 
-The decision to establish a new baseline is made by the CM Manager.  
+The decision to establish a new baseline is made by the CM Manager.  The new baseline is named, tested, and the
+released based on the procedures that follow.
 
 \subsection{Naming Baselines}
 
-New FDS baselines are identified using a specific naming convention. Baselines are identified as app.#.#.#\_os. 
-Where app is the application name (fds), #.#.# is a version number, and \_os is the operating system that the
+New FDS baselines are identified using a specific naming convention. Baselines are identified as app.\#.\#.\#\_os. 
+Where app is the application name (fds), \#.\#.\# is a version number, and \_os is the operating system that the
 baseline executable was compiled for.  The version number consists of three integers where the first number
 is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance}
 release.  Major releases occur every few years, and as the name implies dramatically changed functionality of the
@@ -606,6 +648,169 @@ Maintenance releases are either just bug fixes or the addition of minor enhancem
 and should not affect code functionality.
 
 \subsection{Baseline Software Testing}
+
+Each proposed baseline release will undergo software testing.  Three suites of test cases exists: a functional test suite,
+a verification test suite, and a validation test suite.  Testing will depend upon the type of baseline release: 
+maintenance, minor, or major.
+
+Each maintenance release will be tested with the functional test suite.  It will be verified that the proposed baseline
+successfully executes all of the functional test cases.  
+
+Each minor release will be tested with the functional test suite and the verification test suite.  It will be verified
+that the proposed baseline successfully executes all of the functional and verification test cases.  The
+verification manual will be updated with the results.
+
+Each major release will be tested with all three test suites.    It will be verified
+that the proposed baseline successfully executes all of the functional and verification test cases.  The verification
+manual will be updated with the results.  The results of the validation cases will be evaluated to ensure that the
+predictive performance of the proposed baseline as either remained equivalent or improved.  The validation manual will
+be updated.
+
+\subsection{Release of a New Baseline}
+
+Following successful completion of the required baseline testing, a baseline can be released.  Prior to release, the 
+version identification information within the FDS source code will be updated to reflect the new baseline.  FDS
+documentation will be updated to reflect the new baseline.  The baseline will be compiled and new executable files 
+or installation packages will be placed on the FDS download site.  Prior baselines will be deprecated.  The
+current FDS dowload site is \href{http://code.google.com/p/fds-smv/downloads/list}
+{{\ct http://code.google.com/p/fds-smv/downloads/list}}.
+
+\chapter{Coding Standard}
+
+\section{Indentation}
+
+Each new level of source code will be indented by three spaces.  Indentation will occur following a {\ct DO},
+{\ct IF} {\ct ELSE}, {\ct ELSEIF}, {\ct SELECT CASE}, or {\ct CASE} statement. Comment lines are not indented.
+
+\section{Source File Organization}
+
+Each source file in FDS shall contain subroutines and functions specific to narrow subsegment or physical submodel of
+the software.  Currently the FDS source consists of the following files:
+
+\begin{table}[ht]
+\begin{center}
+\caption{FDS Source Code Files}\index{Source Code Files}
+\label{tbl:sourcecodefiles}
+\begin{tabular}{|c|c|c|}
+\hline
+File Name    & Filetype & Description    \\ \hline 
+cons.f90     & Fortran  & Definition of physical constants, parameters, global variables \\ \hline 
+ctrl.f90     & Fortran  & Control functions  \\ \hline 
+devc.f90     & Fortran  & Definition of device, control, and property variables \\ \hline 
+divg.f90     & Fortran  & Divergence computation \\ \hline 
+dump.f90     & Fortran  & Output processing \\ \hline 
+evac.f90     & Fortran  & Evacuation model \\ \hline 
+fire.f90     & Fortran  & Combustion model \\ \hline 
+func.f90     & Fortran  & Miscellaneous functions \\ \hline 
+ieva.f90     & Fortran  & Defintion of evacuation variables and evacuation functions \\ \hline 
+init.f90     & Fortran  & Intialization \\ \hline 
+irad.f90     & Fortran  & Radiation transport variables, RADCAL, and Mie solver \\ \hline 
+isob.c       & C        & Functions for generating iso surfaces \\ \hline 
+main.f90     & Fortran  & Main timestepping routine \\ \hline 
+main\_mpi.f90 & Fortran  & Main timestepping routine for parallel version of FDS \\ \hline 
+mesh.f90     & Fortran  & Defintion of mesh variables \\ \hline 
+part.f90     & Fortran  & Droplet and particle mass and energy transport \\ \hline 
+pois.f90     & Fortran  & CRAYFISHPAK Poisson solver \\ \hline 
+prec.f90     & Fortran  & Kind defintions \\ \hline 
+pres.f90     & Fortran  & Pressure solver \\ \hline 
+radi.f90     & Fortran  & Radiation transport solver and initialization  \\ \hline 
+read.f90     & Fortran  & Input processsing \\ \hline 
+smvv.f90     & Fortran  & Interface routines for Smokeview \\ \hline 
+turb.f90     & Fortran  & Module for testing turbulence models \\ \hline 
+type.f90     & Fortran  & Variable type defintions \\ \hline 
+vege.f90     & Fortran  & WUI vegetation model \\ \hline 
+velo.f90     & Fortran  & Velocity solver \\ \hline 
+wall.f90     & Fortran  & Wall heat transfer and boundary conditions                   \\ \hline
+\end{tabular}s
+\end{center}
+\end{table}
+
+\section{Explicit Variable Typing}
+
+All variables in FDS will be explicitly typed.  To aid in this, all source code files will contain the expression
+{\ct IMPLICIT NONE}.  All {\ct REAL} numbers in FDS will have their kind indicated.  For example:
+
+\begin{verbatim}
+REAL(EB) :: x
+x = 0._EB
+\end{verbatim}
+
+and not:
+
+\begin{verbatim}
+REAL(EB) :: x
+x = 0.
+\end{verbatim}
+
+\section{Loop and Branch Naming}
+
+Any {\ct DO} loop, {\ct IF} block, or {\ct SELECT CASE} block that continues for more than 20 lines will be named.
+For example:
+
+\begin{verbatim}
+LOOPNAME: DO 
+   more than 20 lines of code
+END DO LOOPNAME
+\end{verbatim}
+
+and not:
+
+\begin{verbatim}
+DO 
+   more than 20 lines of code
+END DO
+\end{verbatim}
+
+\section{Named Constants}
+
+Named integer constants shall be used rather than integers or text strings for controlling code execution.  This
+is done to enhance readability and improve execution speed by avoiding string comparisons.  For example:
+
+\begin{verbatim}
+INTEGER :: OPTIONS
+INTEGER, PARAMETER :: OPTION1=1, OPTION2=2
+
+SELECT CASE (OPTIONS) 
+   CASE(OPTION1)
+      ...
+   CASE(OPTION2)
+      ...
+END SELECT
+\end{verbatim}
+
+and neither:
+\begin{verbatim}
+INTEGER :: OPTIONS
+
+SELECT CASE (OPTIONS) 
+   CASE(1)
+      ...
+   CASE(2)
+      ...
+END SELECT
+\end{verbatim}
+
+nor:
+\begin{verbatim}
+CHARACTER(10):: OPTIONS
+
+SELECT CASE (OPTIONS) 
+   CASE('OPTION1')
+      ...
+   CASE('OPTION2')
+      ...
+END SELECT
+\end{verbatim}
+
+\section{Redundant Code}
+
+Where a block of code must be used repeatedly in different subroutines a {\ct FUNCTION} or {\ct SUBROUTINE}
+shall be created.  For example, there are a number of places where FDS must compute the average molecular weight
+of a gas.  Rather than having that block of code repeated in each location, a single function was created to
+perform this function.  This accomplishes two goals.  By using a function or subroutine, a meaningful name can
+be used to represent the function being performed which improves source code readibilty.  If the form of the
+function must be changed do to a bug fix or an enhancement, then having only one location to fix reduces that
+chance of the error that would occur if one of multiple locations was missed.
 
 \backmatter
 \nopart %To Fix TOC in PDF output.
