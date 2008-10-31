@@ -156,16 +156,6 @@ int convert_boundary(patch *patchi,int pass){
     }
   }
   else{
-    strcpy(units,"");
-    unit=patchi->label.unit;
-    if(strlen(unit)>0)strcat(units,unit);
-    trim(units);
-    sprintf(cval,"%f",patchi->valmin);
-    trimzeros(cval);
-    printf("    local bounds min=%s %s",cval,units);
-    sprintf(cval,"%f",patchi->valmax);
-    trimzeros(cval);
-    printf(" max=%s %s\n",cval,units);
     return 1;
   }
 
@@ -413,7 +403,6 @@ void compress_patches(void){
 
   // find bounds
 
-  if(npatch_files>0&&cleanfiles==0)printf("Finding bounds.\n");
   for(i=0;i<npatch_files;i++){
     patchi = patchinfo + i;
     if(autozip==1&&patchi->autozip==0)continue;
