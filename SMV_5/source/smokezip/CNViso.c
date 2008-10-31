@@ -173,18 +173,21 @@ int convert_iso(iso *isoi){
   vertexnorm=NULL;
   vertinfo=NULL;
 
-  jj=0;
+  jj=-1;
   iframe=0;
   time_max=-1000000.0;
   for(;;){
     int memory_fail=0;
 
     jj++;
-	EGZ_FREAD(&time,4,1,ISOFILE);
+    EGZ_FREAD(&time,4,1,ISOFILE);
     if(EGZ_FEOF(ISOFILE)!=0)goto wrapup;
-    fprintf(isosizestream," %f\n",time);
     sizebefore+=4;
-    fwrite(&time,4,1,isostream);
+
+    if(jj%isozipstep==0){
+      fprintf(isosizestream," %f\n",time);
+      fwrite(&time,4,1,isostream);
+    }
     sizeafter+=4;
     for(j=0;j<isoi->nisolevels;j++){
       EGZ_FREAD(&nvertices_i,4,1,ISOFILE);
@@ -683,6 +686,7 @@ void compress_isos(void){
   if(niso_files>0){
     initspherepoints(&sphereinfo,14);
   // convert and compress files
+    printf("\n");
     for(i=0;i<niso_files;i++){
       isoi = isoinfo + i;
       if(autozip==1&&isoi->autozip==0)continue;
