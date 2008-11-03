@@ -359,8 +359,8 @@ Material Safety and Safeguards, another branch of the NRC, has
 supported modeling studies of tunnel fires under the direction of
 Chris Bajwa and Allen Hansen.
 
-Another source of support for FDS development has been the Microgravity Combustion Program of the National Aeronautics and Space
-Administration (NASA).
+Another source of support for FDS development has been the Microgravity Combustion Program of the National 
+Aeronautics and SpaceAdministration (NASA).
 
 Originally, the basic hydrodynamic solver was designed by Ronald Rehm
 and Howard Baum with programming help from Darcy Barnett, Dan Lozier
@@ -388,13 +388,14 @@ William Grosshandler is also the developer of RadCal, a library of
 subroutines that have been incorporated in FDS to provide the
 radiative properties of gases and smoke.
 
-Prof.~Nick Dembsey of Worcester Polytechnic Institute (WPI) has provided valuable feedback about the pyrolysis model used within FDS.
+Prof.~Nick Dembsey of Worcester Polytechnic Institute (WPI) has provided valuable feedback about the pyrolysis
+model used within FDS.
 
 Professor Fred Mowrer of the University of Maryland provided a simple
 of model of gas phase extinction to FDS.
 
-Chris Lautenburger of the University of California, Berkeley, and Jose Torero and Guillermo Rein of the University of Edinburg. have
-provided valuable insight in the development of the solid phase model.
+Chris Lautenburger of the University of California, Berkeley, and Jose Torero and Guillermo Rein of the
+University of Edinburg. have provided valuable insight in the development of the solid phase model.
 
 
 
@@ -629,6 +630,22 @@ status to {\ct Accepted} and assign the request to a developer.
 Once a change request has be addressed by a developer and changes submitted to the repositoty, the request status
 is changed to {\ct Fixed}.  Once either the requestor or another developer has verified that the changes address 
 the original request, then the status is changed to {\ct Verified}.  
+
+
+\subsection{Committing Changes}
+
+Once a developer has addressed a change request, the changed CSCIs are committed to the SVN repository.  A description
+of the changes will be added to the SVN change log.  This description should first identify the primary component being 
+changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief 
+summary of the changes made.  The issue identifier will be included as part of that brief description.
+
+\subsection{Change Verification}
+
+Once a change has been committed and the issue tracker updated to reflect that the issue has been {\ct Fixed},
+the changes will be verified.  Verification can be done by either the requester of the change or by another 
+developer.  Once the changes have been verified to solve the problem reported in the issue, the issue status will
+be changed to {\ct Verified}.  At this point the issue is closed.
+
 
 \section{Establishing Baselines}
 
