@@ -25,7 +25,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_D,GET_K,GET_CP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
           RHO_D_DYDX,RHO_D_DYDY,RHO_D_DYDZ,RHO_D,RHOP,H_RHO_D_DYDX,H_RHO_D_DYDY,H_RHO_D_DYDZ,RTRM
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP,FX,FY,FZ
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,K_SUM,CP_SUM,TNOW, &
             HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,VDOT_LEAK,TIME_RAMP_FACTOR,ZONE_VOLUME,CP_MF,DELTA_P,PRES_RAMP_FACTOR
 TYPE(SURFACE_TYPE), POINTER :: SF
@@ -53,6 +53,16 @@ IF (N_SPECIES > 0) THEN
    RHO_D_DYDX  => WORK1
    RHO_D_DYDY  => WORK2
    RHO_D_DYDZ  => WORK3
+   
+   IF (FLUX_LIMITER>=0) THEN
+      FX => SCALAR_SAVE1
+      FY => SCALAR_SAVE2
+      FZ => SCALAR_SAVE3
+      FX = 0._EB
+      FY = 0._EB
+      FZ = 0._EB
+   ENDIF
+   
    SELECT CASE(PREDICTOR)
       CASE(.TRUE.)  
          YYP => YYS 
@@ -116,6 +126,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          ENDDO
       ENDDO
    ENDDO
+   
    ! Correct rho*D del Y at boundaries and store rho*D at boundaries
  
    WALL_LOOP: DO IW=1,NWC
@@ -142,6 +153,12 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             RHO_D_DYDZ(IIG,JJG,KKG)   = 0._EB
       END SELECT
    ENDDO WALL_LOOP
+   
+   IF (FLUX_LIMITER>=0) THEN
+      FX(:,:,:,N) = -RHO_D_DYDX
+      FY(:,:,:,N) = -RHO_D_DYDY
+      FZ(:,:,:,N) = -RHO_D_DYDZ
+   ENDIF
 
    ! Compute del dot h_n*rho*D del Y_n only for non-mixture fraction cases
  
