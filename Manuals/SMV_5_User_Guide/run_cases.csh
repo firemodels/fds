@@ -46,14 +46,14 @@ setenv BASEDIR $SVNROOT/Test_cases/Visualization
 # plume cases
 $RUNFDS . colorconv fire71 &
 $RUNFDS . plume5a fire71 &
-$RUNFDS . plume5b fire71 &
+#$RUNFDS . plume5b fire71 &
 $RUNFDS . plume5c fire71 &
-$RUNFDS . sillytexture fire71 &
-$RUNFDS . smoke_sensor fire71 &
-$RUNFDS . smoke_test fire71 &
-$RUNFDS . smoke_test2 fire71 &
+$RUNFDS . sillytexture fire74 &
+$RUNFDS . smoke_sensor fire74 &
+$RUNFDS . smoke_test fire74 &
+$RUNFDS . smoke_test2 fire74 &
 #setenv LAMNODES "n6 n6 n6 n6"
 #$RUNFDSMPI . pthouse5 fire76 &
-$RUNFDS . thouse5 fire72 &
+$RUNFDS . thouse5 fire75 &
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
