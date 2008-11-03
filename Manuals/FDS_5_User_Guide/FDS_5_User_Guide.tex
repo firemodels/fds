@@ -7039,11 +7039,21 @@ free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the
 \noindent
 Thus, you can either paint values of $C_p$ at all surface points, or create a single time history of $C_p$ using a single device at a single point.
 
+\subsection{Dry Volume and Mass Fractions}
+\label{info:dry}
 
+During experiments, the species such as CO and CO${}_2$ are typically measured as dry quantities, i.e. the water 
+vapor is removed from the gas sample prior to analysis.  For easier comparison of FDS predictions with measured data
+one can speciefy the logical flag {\ct DRY} on a {\ct DEVC} line measuring either a {\ct MASS FRACTION} or
+{\ct VOLUME FRACTION} of a mixture fraction species.  For example, in the inputs below the first line would be the
+actual volume fraction of CO and the second line would represent the output of a gas analyzer in a typical experiment.
 
-
-
-
+\footnotesize
+\begin{verbatim}
+&DEVC ID='wet CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='carbon monoxide'/
+&PROP ID='dry CO', XYZ=...,QUANTITY='VOLUME FRACTION', SPEC_ID='carbon monoxide', DRY=.TRUE. /
+\end{verbatim}
+\normalsize
 
 \section{Extracting Numbers from the Output Data Files}
 \label{info:fds2ascii} \index{Output!fds2ascii}
