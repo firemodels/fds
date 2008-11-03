@@ -1321,6 +1321,8 @@ FED = FED * Exp( 0.1903_EB*tmp_1*100.0_EB + 2.0004_EB )/7.1_EB
 
 ! Next is for O2
 ! LO: low oxygen
+! t_Io = exp(8.13-0.54(20.9-%O2)), time in minutes
+! F_Io = dt/t_Io
 Call GET_MASS_FRACTION(Z_IN,O2_INDEX,y_extra,Y_MF_INT)
 tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/RSUM
 If ( tmp_1 < 0.20_EB ) FED = FED + 1.0_EB  / (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*tmp_1)) )
