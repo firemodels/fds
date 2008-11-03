@@ -1,6 +1,6 @@
 &HEAD CHID='MCFRS_Tower_01', TITLE='MCFD ranch house, SVN $Revision: 2589 $'  /
 
-&TIME T_END=0.0 /
+&TIME T_END=600.0 /
 
 &DUMP NFRAMES=3000, DT_DEVC=5.0, DT_HRR=5.0 /
 
