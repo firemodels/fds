@@ -4628,24 +4628,24 @@ Contains
     Real(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
     Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1
     Integer  IE, tim_ic, tim_iw, NM_now, tim_iwx, tim_iwy, tim_iw2, tim_ic2, ibc
-    Real(EB) P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, tim_dist, Door_dist, Door_width
+    Real(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, tim_dist
     Real(EB), Dimension(4) :: d_xy
     Logical, Dimension(4) :: FoundWall_xy
-    Integer istat, STRS_INDX, i_target, color_index, i_new_ffield
+    Integer :: istat, STRS_INDX, i_target, color_index, i_new_ffield
     !
     !
-    Real(EB)  scal_prod_over_rsqr, U_new, V_new, Vmax_timo, CosPhiFac, &
+    Real(EB) ::  scal_prod_over_rsqr, U_new, V_new, Vmax_timo, CosPhiFac, &
          Speed_max, Delta_min, Dt_sum, C_Yeff, LambdaW, B_Wall, A_Wall, &
          T, Contact_F, Social_F, smoke_beta, smoke_alpha, smoke_speed_fac
-    Integer iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp, door_ior
-    Real(EB) x_now, y_now, x_target, y_target, d_humans, d_walls, DTSP_new, &
+    Integer :: iie, jje, iio, jjo, iii, jjj, i_egrid, i_tmp
+    Real(EB) :: x_now, y_now, d_humans, d_walls, DTSP_new, &
          fac_tim, dt_group_door, x11, y11, Speed, Tpre
     Logical PP_see_each
     Logical L_eff_read, L_eff_save, L_Dead
     Real(EB) :: cos_x, cos_y, speed_xm, speed_xp, speed_ym, speed_yp, hr_z, hr_a, hr_b, hr_tau, hr_tau_iner
     !
-    Real(EB) rn
-    Real(EB) GaMe, GaTh, GaCM
+    Real(EB) :: rn
+    Real(EB) :: GaMe, GaTh, GaCM
     !
     Integer :: i_old_ffield, IZERO
     Character(26) :: name_old_ffield
@@ -4665,7 +4665,7 @@ Contains
     Real(EB) d_humans_min, d_walls_min
     Real(EB) TNOW, tnow13, tnow14, tnow15
     !
-    Logical NM_STRS_MESH, Straight_Line_To_Target
+    Logical NM_STRS_MESH
 
     Type (MESH_TYPE), Pointer :: MFF
     !
@@ -4965,170 +4965,13 @@ Contains
           ! ========================================================
           ! Calculate persons prefered walking direction v0
           ! ========================================================
-          ! HR%I_FFIELD is the flow field mesh index for this agent
-          NM_now = Max(1,HR%I_FFIELD)
-          If (.Not.EVACUATION_ONLY(NM_now)) Then
-             Write(MESSAGE,'(A,I6,A)') 'ERROR: Evacuate_Humans, mesh ',NM_now,&
-                  ' is not an evacuation flow field.'
-             Call SHUTDOWN(MESSAGE)
-          End If
-          ! 
-          ! Determine if the mesh is a stairs-mesh
-          NM_STRS_MESH = .False.
-          StrsMeshLoop: Do N = 1, N_STRS
-             If (EVAC_STRS(N)%IMESH==NM_now) Then     
-                NM_STRS_MESH = .True.
-                STRS_Indx = N
-                STRP=>EVAC_STRS(N)
-                Exit StrsMeshLoop
-             End If
-          End Do StrsMeshLoop
-
-          MFF=>MESHES(NM_now)  ! Pointer to the flow field mesh
-
-          ! Check if going straight line to target
-          Straight_Line_To_Target = .False.
+          Call Find_Prefered_Direction(I, N, T, T_BEGIN, L_Dead, NM_STRS_MESH, &
+               II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
           If (NM_STRS_MESH) Then
-             If (HR%I_Target == 0) Then
-!               write(*,*) 'Finding target within move loop'
-                Call Find_Target_Node_In_Strs(STRP,HR)
-             End If
-             N = HR%I_Target
-             If (N>N_DOORS) Then
-                N = N - N_DOORS
-                If (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
-                   Straight_Line_To_Target = .TRUE.
-                   x_target = (EVAC_EXITS(N)%X1 + EVAC_EXITS(N)%X2)/2.0_EB
-                   y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
-                   door_width = EVAC_EXITS(N)%Width
-                   door_ior   = EVAC_EXITS(N)%IOR
-                End If
-             Else If (N>0) Then
-                If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
-                   Straight_Line_To_Target = .TRUE.
-                   x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
-                   y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
-                   door_width = EVAC_DOORS(N)%Width
-                   door_ior   = EVAC_DOORS(N)%IOR
-                End If
-             End If
-          End If
-          If (Straight_Line_To_Target) Then
-             UBAR = x_target-HR%X
-             VBAR = y_target-HR%Y
-             Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
-             If ( Door_Dist < 0.50*Door_width ) Then
-                Select Case(door_ior)
-                Case(-1,+1)
-                   UBAR = SIGN(1.0_EB,UBAR)
-                   VBAR = 0._EB
-                   HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
-                Case(-2,+2)
-                   UBAR = 0._EB
-                   VBAR = SIGN(1.0_EB,VBAR)
-                   HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
-                End Select
-             End If
-          Else If (NM_STRS_MESH) Then 
-             If (HR%STRS_Direction > 0) Then
-               UBAR = STRP%U_UP(II,JJ)
-               VBAR = STRP%V_UP(II,JJ)
-             Else
-               UBAR = STRP%U_DOWN(II,JJ)
-               VBAR = STRP%V_DOWN(II,JJ)
-             End If
-          Else
-             UBAR = AFILL(MFF%U(II-1,JJY,KKZ),MFF%U(II,JJY,KKZ), &
-                  MFF%U(II-1,JJY+1,KKZ),MFF%U(II,JJY+1,KKZ), &
-                  MFF%U(II-1,JJY,KKZ+1),MFF%U(II,JJY,KKZ+1), &
-                  MFF%U(II-1,JJY+1,KKZ+1),MFF%U(II,JJY+1,KKZ+1), &
-                  XI-II+1,YJ-JJY+0.5_EB,ZK-KKZ+0.5_EB)
-             VBAR = AFILL(MFF%V(IIX,JJ-1,KKZ),MFF%V(IIX+1,JJ-1,KKZ), &
-                  MFF%V(IIX,JJ,KKZ),MFF%V(IIX+1,JJ,KKZ), &
-                  MFF%V(IIX,JJ-1,KKZ+1),MFF%V(IIX+1,JJ-1,KKZ+1), &
-                  MFF%V(IIX,JJ,KKZ+1),MFF%V(IIX+1,JJ,KKZ+1), &
-                  XI-IIX+0.5_EB,YJ-JJ+1,ZK-KKZ+0.5_EB)
+             STRS_Indx = N
+             STRP=>EVAC_STRS(N)     
           End If
 
-          EVEL = Sqrt(UBAR**2 + VBAR**2)  ! (UBAR,VBAR) is an unit vector
-          If (EVEL > 0.0_EB) Then
-             UBAR = UBAR/EVEL
-             VBAR = VBAR/EVEL
-          Else
-             ! No v0 found for the current location of the agent, continue
-             ! straight ahead (use the velocity vector of the agent).
-             EVEL = Sqrt(HR%U**2 + HR%V**2)
-             If (EVEL > 0.0_EB) Then
-                UBAR = HR%U/EVEL
-                VBAR = HR%V/EVEL
-             End If
-          End If
-          If (L_Dead) Then
-             UBAR = 0.0_EB
-             VBAR = 0.0_EB
-          End If
-
-          ! Direction to the centre of the group (if any)
-          If (Group_List(j)%GROUP_SIZE >= 2) Then
-             HR%UBAR_Center = (Group_List(j)%GROUP_X - HR%X)
-             HR%VBAR_Center = (Group_List(j)%GROUP_Y - HR%Y)
-             EVEL = Sqrt(HR%UBAR_Center**2 + HR%VBAR_Center**2)
-             If ( EVEL > 0.0_EB .And. .Not. L_Dead ) Then
-                HR%UBAR_Center = HR%UBAR_Center / EVEL
-                HR%VBAR_Center = HR%VBAR_Center / EVEL
-             Else
-                HR%UBAR_Center = 0.0_EB
-                HR%VBAR_Center = 0.0_EB
-             End If
-          Else
-             HR%UBAR_Center = 0.0_EB ! only one person in the group
-             HR%VBAR_Center = 0.0_EB ! only one person in the group
-          End If
-
-          j = Max(0,HR%GROUP_ID)
-          If (j == 0 ) Then
-             Group_List(0)%Tpre = HR%Tpre + HR%Tdet
-             Tpre = HR%Tpre + HR%Tdet
-          Else
-             Tpre = HR%Tdet
-          End If
-          If (L_Dead) Tpre = Huge(Tpre)
-
-          If ( j > 0 ) Then
-             ! Group is already gathered together, but not yet moving towards the door
-             If (Group_List(j)%COMPLETE == 1 .And. T <= Group_List(j)%Tpre+Group_List(j)%Tdoor) Then
-                UBAR = 0.0_EB
-                VBAR = 0.0_EB
-             End If
-          End If
-
-          EVEL = UBAR**2 + VBAR**2
-          If (Group_List(j)%COMPLETE == 1 .And. EVEL > 0.0_EB) Then
-             ! The group is already gathered together
-             UBAR = (1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center/ &
-                  Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
-                  ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
-             VBAR = (1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center/ &
-                  Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
-                  ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
-          Else
-             ! The group is still in the gathering phase
-             UBAR = HR%UBAR_Center
-             VBAR = HR%VBAR_Center
-          End If
-
-          If ( T <= Tpre ) Then
-             ! No movement yet
-             UBAR = 0.0_EB
-             VBAR = 0.0_EB
-             hr_tau = Max(0.1_EB,HR%Tau/10.0_EB)
-          End If
-          If ( T <= T_BEGIN ) Then
-             ! Initialization phase, i.e., flow field calculation
-             UBAR = 0.0_EB
-             VBAR = 0.0_EB
-             hr_tau = HR%Tau
-          End If
           ! ========================================================
           ! Prefered walking direction v0 is now (UBAR,VBAR)
           ! ========================================================
@@ -5520,6 +5363,8 @@ Contains
        TNOW13=SECOND()
        EVAC_FORCE_LOOP: Do I=1,N_HUMANS  
           HR => HUMAN(i)
+          j  =  Max(0,HR%GROUP_ID)   ! group index
+          j1 = -Min(0,HR%GROUP_ID)   ! lonely agent index
           ! hr%z is the real z-coordinate of the agent (inclines, stairs,etc),
           ! hr_z is z-coordinate of the main evac mesh
           hr_z = 0.5_EB*(ZS+ZF)
@@ -5600,160 +5445,13 @@ Contains
           ! ========================================================
           ! Calculate persons prefered walking direction
           ! ========================================================
-          NM_now = Max(1,HR%I_FFIELD)
-          If (.Not.EVACUATION_ONLY(NM_now)) Then
-             Write(MESSAGE,'(A,I6,A)') 'ERROR: Evacuate_Humans, mesh ',NM_now,&
-                  ' is not an evacuation flow field.'
-             Call SHUTDOWN(MESSAGE)
-          End If
-          ! Determine if the mesh is a stairs-mesh
-          NM_STRS_MESH = .False.
-          StrsMeshLoop2: Do N = 1, N_STRS
-             If (EVAC_STRS(N)%IMESH == NM_now) Then     
-                NM_STRS_MESH = .True.
-                STRS_Indx = N
-                STRP=>EVAC_STRS(N)
-                Exit StrsMeshLoop2
-             End If
-          End Do StrsMeshLoop2
-
-          MFF=>MESHES(NM_now)  ! Pointer to the flow field mesh
-
-          ! Check if going straight line to target
-          Straight_Line_To_Target = .False.
+          Call Find_Prefered_Direction(I, N, T+DTSP_new, T_BEGIN, L_Dead, NM_STRS_MESH, &
+               IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
           If (NM_STRS_MESH) Then
-             If (HR%I_Target == 0) Then
-!                write(*,*) 'Finding target within move loop'
-                Call Find_Target_Node_In_Strs(STRP,HR)
-             End If
-             N = HR%I_Target
-             If (N>N_DOORS) Then
-                N = N - N_DOORS
-                If (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
-                   Straight_Line_To_Target = .TRUE.
-                   x_target = (EVAC_EXITS(N)%X1 + EVAC_EXITS(N)%X2)/2.0_EB
-                   y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
-                   door_width = EVAC_EXITS(N)%Width
-                   door_ior   = EVAC_EXITS(N)%IOR
-                End If
-             Else If (N>0) Then
-                If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
-                   Straight_Line_To_Target = .TRUE.
-                   x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
-                   y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
-                   door_width = EVAC_DOORS(N)%Width
-                   door_ior   = EVAC_DOORS(N)%IOR
-                End If
-             End If
-          End If
-          If (Straight_Line_To_Target) Then
-             UBAR = x_target-HR%X
-             VBAR = y_target-HR%Y
-             Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
-             If ( Door_Dist < 0.50*Door_width ) Then
-                Select Case(door_ior)
-                Case(-1,+1)
-                   UBAR = SIGN(1.0_EB,UBAR)
-                   VBAR = 0._EB
-                   HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
-                Case(-2,+2)
-                   UBAR = 0._EB
-                   VBAR = SIGN(1.0_EB,VBAR)
-                   HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
-                End Select
-             End If
-          Else If (NM_STRS_MESH) Then 
-             If (HR%STRS_Direction > 0) Then
-               UBAR = STRP%U_UP(IIN,JJN)
-               VBAR = STRP%V_UP(IIN,JJN)
-             Else
-               UBAR = STRP%U_DOWN(IIN,JJN)
-               VBAR = STRP%V_DOWN(IIN,JJN)
-             End If
-          Else  ! evacuation flow field
-             UBAR = AFILL(MFF%U(IIN-1,JJY,KKZ),MFF%U(IIN,JJY,KKZ), &
-                  MFF%U(IIN-1,JJY+1,KKZ),MFF%U(IIN,JJY+1,KKZ), &
-                  MFF%U(IIN-1,JJY,KKZ+1),MFF%U(IIN,JJY,KKZ+1), &
-                  MFF%U(IIN-1,JJY+1,KKZ+1),MFF%U(IIN,JJY+1,KKZ+1), &
-                  XI-IIN+1,YJ-JJY+0.5_EB,ZK-KKZ+0.5_EB)
-             VBAR = AFILL(MFF%V(IIX,JJN-1,KKZ),MFF%V(IIX+1,JJN-1,KKZ), &
-                  MFF%V(IIX,JJN,KKZ),MFF%V(IIX+1,JJN,KKZ), &
-                  MFF%V(IIX,JJN-1,KKZ+1),MFF%V(IIX+1,JJN-1,KKZ+1), &
-                  MFF%V(IIX,JJN,KKZ+1),MFF%V(IIX+1,JJN,KKZ+1), &
-                  XI-IIX+0.5_EB,YJ-JJN+1,ZK-KKZ+0.5_EB)
-          End If
-          EVEL = Sqrt(UBAR**2 + VBAR**2)  ! (UBAR,VBAR) is a unit vector
-          If (EVEL > 0.0_EB) Then
-             UBAR = UBAR/EVEL
-             VBAR = VBAR/EVEL
-          Else  ! no v0 found, use the direction of the velocity
-             EVEL = Sqrt(HR%U**2 + HR%V**2)
-             If (EVEL > 0.0_EB) Then
-                UBAR = HR%U/EVEL
-                VBAR = HR%V/EVEL
-             End If
-          End If
-          If (L_Dead) Then
-             UBAR = 0.0_EB
-             VBAR = 0.0_EB
-          End If
-          j = Max(0,HR%GROUP_ID)
-          If (j == 0 ) Then
-             Group_List(0)%Tpre = HR%Tpre + HR%Tdet
-             Tpre = HR%Tpre + HR%Tdet
-          Else
-             Tpre = HR%Tdet
-          End If
-          If (L_Dead) Tpre = Huge(Tpre)
-
-          ! Find the vector pointing towards the centre of the group
-          If (Group_List(j)%GROUP_SIZE >= 2) Then
-             HR%UBAR_Center = (Group_List(j)%GROUP_X - HR%X)
-             HR%VBAR_Center = (Group_List(j)%GROUP_Y - HR%Y)
-             EVEL = Sqrt(HR%UBAR_Center**2 + HR%VBAR_Center**2)
-             If ( EVEL > 0.0_EB .And. .Not. L_Dead ) Then
-                HR%UBAR_Center = HR%UBAR_Center / EVEL
-                HR%VBAR_Center = HR%VBAR_Center / EVEL
-             Else
-                HR%UBAR_Center = 0.0_EB
-                HR%VBAR_Center = 0.0_EB
-             End If
-          Else
-             HR%UBAR_Center = 0.0_EB ! only one person in the group
-             HR%VBAR_Center = 0.0_EB ! only one person in the group
+             STRS_Indx = N
+             STRP=>EVAC_STRS(N)     
           End If
 
-          If ( j > 0 ) Then
-             ! Next is needed for the first time step, when the group starts to move
-             ! towards exit door.
-             If (Group_List(j)%COMPLETE == 1 .And. T+DTSP_new &
-                  <= Group_List(j)%Tpre+Group_List(j)%Tdoor) Then
-                UBAR = 0.0_EB
-                VBAR = 0.0_EB
-             End If
-          End If
-
-          ! The group force
-          EVEL = Sqrt(UBAR**2 + VBAR**2)
-          If (Group_List(j)%COMPLETE == 1 .And. EVEL > 0.0_EB) Then
-             ! Moving stage
-             UBAR = (1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center/ &
-                  Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
-                  ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
-             VBAR = (1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center/ &
-                  Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
-                  ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
-          Else
-             ! Gathering stage: towards the centre of the group
-             UBAR = HR%UBAR_Center
-             VBAR = HR%VBAR_Center
-          End If
-
-          ! Add dissipative self-driving force term around T=0 (or T=Tpre)
-          If (T+DTSP_new <= Tpre .Or. T+DTSP_new <= T_BEGIN) Then
-             UBAR = 0.0_EB
-             VBAR = 0.0_EB
-          End If
           ! ========================================================
           ! The prefered walking direction v0 is (UBAR,VBAR)
           ! ========================================================
@@ -6222,7 +5920,8 @@ Contains
           End If
           ! Now the step (4a) of SC-VV by Vattulainen is ended.
 
-          ! Add self-propelling force terms, self-consistent VV (first time step towards the exit door)
+          ! Add self-propelling force terms, self-consistent VV 
+          ! (first time step towards the exit door)
           fac_tim =  1.0_EB + (DTSP/(2.0_EB*hr_tau))
           If ( T <= Tpre ) Then
              If ( (T+DTSP_new) > Tpre) Then
@@ -6282,10 +5981,6 @@ Contains
              ! Slow rotation down if no direction available, i.e., target Omega_0 is zero.
              Omega_new = Omega_new + 0.5_EB*(DTSP/HR_Tau_iner)*(-HR%Omega)
           End If
-
-          ! ========================================================
-          ! SELF PROPELLING FORCE ENDS HERE
-          ! ========================================================
 
           ! Check that velocities are not too large, i.e., less than 10 m/s for humans
           EVEL = Sqrt(U_new**2 + V_new**2)
@@ -6363,13 +6058,220 @@ Contains
 
   Contains
 
+    Subroutine Find_Prefered_Direction(I, Nout, T, T_BEGIN, L_Dead, NM_STRS_MESH, &
+         II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
+      Implicit None
+      ! Calculate the prefered walking direction
+      !
+      ! Inputs:
+      !   I: The index of the agent (on this mesh)
+      !   T: Time
+      !   T_BEGIN: The starting time of the simulation
+      !   L_Dead: Is the agent dead or not
+      !   II,JJ: The grid cell indices of the agent
+      !   IIX,JJY: The grid cell indices of the agent for the velocity
+      !   XI,YJ,ZK: The grid cell coordinates of the agent for the velocity
+      ! Outputs:
+      !   Nout: The index of the stairs mesh (if the agent is on stairs)
+      !   NM_STRS_MESH: True, if the mesh is a stair mesh
+      !   UBAR,VBAR: The prefered walking direction
+      !   hr_tau: translational motion Tau
+      !   hr_tau: motive force relaxation time constant
+      !   Tpre: Pre-movement time
+      Integer, Intent(In) :: II, JJ, IIX, JJY, I
+      Real(EB), Intent(In) :: XI, YJ, ZK, T, T_BEGIN
+      Logical, Intent(In) :: L_Dead
+      Integer, Intent(Out) :: Nout
+      Logical, Intent(InOut) :: NM_STRS_MESH
+      Real(EB), Intent(InOut) :: hr_tau
+      Real(EB), Intent(Out) :: UBAR, VBAR, Tpre
+      !
+      ! Local varaibles
+      Integer :: N,MN_now, STRS_Indx, door_ior, KKZ, j
+      Real(EB) :: x_target, y_target, door_width, Door_Dist, EVEL
+      Logical :: NM_STRS_MESHS, straight_Line_To_Target
+      Type (MESH_TYPE), Pointer :: MFF
+      Type (HUMAN_Type), Pointer :: HR
+
+      HR=>HUMAN(I)
+      KKZ = 1
+      ! HR%I_FFIELD is the flow field mesh index for this agent
+      NM_now = Max(1,HR%I_FFIELD)
+      If (.Not.EVACUATION_ONLY(NM_now)) Then
+         Write(MESSAGE,'(A,I6,A)') 'ERROR: Evacuate_Humans, mesh ',NM_now,&
+              ' is not an evacuation flow field.'
+         Call SHUTDOWN(MESSAGE)
+      End If
+      ! 
+      ! Determine if the mesh is a stairs-mesh
+      NM_STRS_MESH = .False.
+      StrsMeshLoop: Do N = 1, N_STRS
+         If (EVAC_STRS(N)%IMESH==NM_now) Then     
+            NM_STRS_MESH = .True.
+            STRS_Indx = N
+            STRP=>EVAC_STRS(N)
+            Nout = N
+            Exit StrsMeshLoop
+         End If
+      End Do StrsMeshLoop
+
+      MFF=>MESHES(NM_now)  ! Pointer to the flow field mesh
+
+      ! Check if going straight line to target
+      Straight_Line_To_Target = .False.
+      If (NM_STRS_MESH) Then
+         If (HR%I_Target == 0) Then
+            !               write(*,*) 'Finding target within move loop'
+            Call Find_Target_Node_In_Strs(STRP,HR)
+         End If
+         N = HR%I_Target
+         If (N>N_DOORS) Then
+            N = N - N_DOORS
+            If (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
+               Straight_Line_To_Target = .TRUE.
+               x_target = (EVAC_EXITS(N)%X1 + EVAC_EXITS(N)%X2)/2.0_EB
+               y_target = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
+               door_width = EVAC_EXITS(N)%Width
+               door_ior   = EVAC_EXITS(N)%IOR
+            End If
+         Else If (N>0) Then
+            If (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) Then
+               Straight_Line_To_Target = .TRUE.
+               x_target = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
+               y_target = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
+               door_width = EVAC_DOORS(N)%Width
+               door_ior   = EVAC_DOORS(N)%IOR
+            End If
+         End If
+      End If
+      If (Straight_Line_To_Target) Then
+         UBAR = x_target-HR%X
+         VBAR = y_target-HR%Y
+         Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
+         If ( Door_Dist < 0.50*Door_width ) Then
+            Select Case(door_ior)
+            Case(-1,+1)
+               UBAR = SIGN(1.0_EB,UBAR)
+               VBAR = 0._EB
+               HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
+            Case(-2,+2)
+               UBAR = 0._EB
+               VBAR = SIGN(1.0_EB,VBAR)
+               HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
+            End Select
+         End If
+      Else If (NM_STRS_MESH) Then 
+         If (HR%STRS_Direction > 0) Then
+            UBAR = STRP%U_UP(II,JJ)
+            VBAR = STRP%V_UP(II,JJ)
+         Else
+            UBAR = STRP%U_DOWN(II,JJ)
+            VBAR = STRP%V_DOWN(II,JJ)
+         End If
+      Else
+         UBAR = AFILL(MFF%U(II-1,JJY,KKZ),MFF%U(II,JJY,KKZ), &
+              MFF%U(II-1,JJY+1,KKZ),MFF%U(II,JJY+1,KKZ), &
+              MFF%U(II-1,JJY,KKZ+1),MFF%U(II,JJY,KKZ+1), &
+              MFF%U(II-1,JJY+1,KKZ+1),MFF%U(II,JJY+1,KKZ+1), &
+              XI-II+1,YJ-JJY+0.5_EB,ZK-KKZ+0.5_EB)
+         VBAR = AFILL(MFF%V(IIX,JJ-1,KKZ),MFF%V(IIX+1,JJ-1,KKZ), &
+              MFF%V(IIX,JJ,KKZ),MFF%V(IIX+1,JJ,KKZ), &
+              MFF%V(IIX,JJ-1,KKZ+1),MFF%V(IIX+1,JJ-1,KKZ+1), &
+              MFF%V(IIX,JJ,KKZ+1),MFF%V(IIX+1,JJ,KKZ+1), &
+              XI-IIX+0.5_EB,YJ-JJ+1,ZK-KKZ+0.5_EB)
+      End If
+
+      EVEL = Sqrt(UBAR**2 + VBAR**2)  ! (UBAR,VBAR) is an unit vector
+      If (EVEL > 0.0_EB) Then
+         UBAR = UBAR/EVEL
+         VBAR = VBAR/EVEL
+      Else
+         ! No v0 found for the current location of the agent, continue
+         ! straight ahead (use the velocity vector of the agent).
+         EVEL = Sqrt(HR%U**2 + HR%V**2)
+         If (EVEL > 0.0_EB) Then
+            UBAR = HR%U/EVEL
+            VBAR = HR%V/EVEL
+         End If
+      End If
+      If (L_Dead) Then
+         UBAR = 0.0_EB
+         VBAR = 0.0_EB
+      End If
+
+      j = Max(0,HR%GROUP_ID)
+      If (j == 0 ) Then
+         Group_List(0)%Tpre = HR%Tpre + HR%Tdet
+         Tpre = HR%Tpre + HR%Tdet
+      Else
+         Tpre = HR%Tdet
+      End If
+      If (L_Dead) Tpre = Huge(Tpre)
+
+      ! Direction to the centre of the group (if any)
+      If (Group_List(j)%GROUP_SIZE >= 2) Then
+         HR%UBAR_Center = (Group_List(j)%GROUP_X - HR%X)
+         HR%VBAR_Center = (Group_List(j)%GROUP_Y - HR%Y)
+         EVEL = Sqrt(HR%UBAR_Center**2 + HR%VBAR_Center**2)
+         If ( EVEL > 0.0_EB .And. .Not. L_Dead ) Then
+            HR%UBAR_Center = HR%UBAR_Center / EVEL
+            HR%VBAR_Center = HR%VBAR_Center / EVEL
+         Else
+            HR%UBAR_Center = 0.0_EB
+            HR%VBAR_Center = 0.0_EB
+         End If
+      Else
+         HR%UBAR_Center = 0.0_EB ! only one person in the group
+         HR%VBAR_Center = 0.0_EB ! only one person in the group
+      End If
+
+      If ( j > 0 ) Then
+         ! Group is already gathered together, but not yet moving towards the door
+         If (Group_List(j)%COMPLETE == 1 .And. T <= Group_List(j)%Tpre+Group_List(j)%Tdoor) Then
+            UBAR = 0.0_EB
+            VBAR = 0.0_EB
+         End If
+
+         EVEL = UBAR**2 + VBAR**2
+         If (Group_List(j)%COMPLETE == 1 .And. EVEL > 0.0_EB) Then
+            ! The group is already gathered together
+            UBAR = (1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center/ &
+                 Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
+                 ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
+            VBAR = (1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center/ &
+                 Sqrt(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_Center)**2+ &
+                 ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_Center)**2)
+         Else
+            ! The group is still in the gathering phase
+            UBAR = HR%UBAR_Center
+            VBAR = HR%VBAR_Center
+         End If
+      End If
+
+      If ( T <= Tpre ) Then
+         ! No movement yet
+         UBAR = 0.0_EB
+         VBAR = 0.0_EB
+         hr_tau = Max(0.1_EB,HR%Tau/10.0_EB)
+      End If
+      If ( T <= T_BEGIN ) Then
+         ! Initialization phase, i.e., flow field calculation
+         UBAR = 0.0_EB
+         VBAR = 0.0_EB
+         hr_tau = HR%Tau
+      End If
+      Return
+    End Subroutine Find_Prefered_Direction
+
+
     Subroutine GetStairSpeedAndZ(speed_xm,speed_xp, speed_ym,speed_yp,SP,HP)
-    Real(EB) speed_xm, speed_xp, speed_ym, speed_yp
-    Type (EVAC_STRS_TYPE), Pointer ::  SP
-    Type (HUMAN_TYPE), Pointer :: HP
-    ! Local variables
-    Real(EB) cos_x, cos_y
-    Integer J1, J2, J
+      Implicit None
+      Real(EB) speed_xm, speed_xp, speed_ym, speed_yp
+      Type (EVAC_STRS_TYPE), Pointer ::  SP
+      Type (HUMAN_TYPE), Pointer :: HP
+      ! Local variables
+      Real(EB) cos_x, cos_y
+      Integer J1, J2, J
 
       If (HP%STR_SUB_INDX > 0) Then
          J1 = Max(HP%STR_SUB_INDX-1,1)
@@ -6394,18 +6296,18 @@ Contains
             Select Case (SP%NODE_IOR(J))
             Case(-1)
                HP%Z = SP%XB_NODE(J,5) + (SP%XB_NODE(J,6)-SP%XB_NODE(J,5))* &
-                  Abs(SP%XB_NODE(J,2)-HP%X)/Abs(SP%XB_NODE(J,2)-SP%XB_NODE(J,1))
+                    Abs(SP%XB_NODE(J,2)-HP%X)/Abs(SP%XB_NODE(J,2)-SP%XB_NODE(J,1))
             Case(+1)
                HP%Z = SP%XB_NODE(J,5) + (SP%XB_NODE(J,6)-SP%XB_NODE(J,5))* &
-                   Abs(SP%XB_NODE(J,1)-HP%X)/Abs(SP%XB_NODE(J,2)-SP%XB_NODE(J,1))
+                    Abs(SP%XB_NODE(J,1)-HP%X)/Abs(SP%XB_NODE(J,2)-SP%XB_NODE(J,1))
             Case(-2)
                HP%Z = SP%XB_NODE(J,5) + (SP%XB_NODE(J,6)-SP%XB_NODE(J,5))* &
-                  Abs(SP%XB_NODE(J,4)-HP%Y)/Abs(SP%XB_NODE(J,4)-SP%XB_NODE(J,3))
+                    Abs(SP%XB_NODE(J,4)-HP%Y)/Abs(SP%XB_NODE(J,4)-SP%XB_NODE(J,3))
             Case(+2)
                HP%Z = SP%XB_NODE(J,5) + (SP%XB_NODE(J,6)-SP%XB_NODE(J,5))* &
-                  Abs(SP%XB_NODE(J,3)-HP%Y)/Abs(SP%XB_NODE(J,4)-SP%XB_NODE(J,3))
-            End Select            
-!            Select Case (SP%NODE_IOR(J)*HP%STRS_direction)
+                    Abs(SP%XB_NODE(J,3)-HP%Y)/Abs(SP%XB_NODE(J,4)-SP%XB_NODE(J,3))
+            End Select
+            !            Select Case (SP%NODE_IOR(J)*HP%STRS_direction)
             Select Case (SP%NODE_IOR(J))
             Case(-1)
                speed_xm = cos_x* HP%Speed* SP%FAC_V0_UP
