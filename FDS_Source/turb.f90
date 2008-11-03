@@ -1,4 +1,4 @@
-! This set of modules is useful for verification tests and development of
+! This module is useful for verification tests and development of
 ! turbulence models.
 
 MODULE TURBULENCE
@@ -174,9 +174,11 @@ IF (DYNSMAG) THEN
    ALLOCATE(M%TURB_WORK19(NX,NY,NZ),STAT=IZERO)
    CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK19',IZERO)
    M%TURB_WORK19 = 0._EB
-   !! ALLOCATE(M%TURB_WORK20(NX,NY,NZ),STAT=IZERO)
-   !! CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK20',IZERO)
-   !! M%TURB_WORK20 = 0._EB
+   
+   ! 1D working array
+   ALLOCATE(M%TURB_WORK20(MAX(NX,NY,NZ)),STAT=IZERO)
+   CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK20',IZERO)
+   M%TURB_WORK20 = 0._EB
 ENDIF
 
 END SUBROUTINE INIT_TURB_ARRAYS
@@ -1253,7 +1255,7 @@ ENDDO
 
 ! calculate magnitude of the grid strain rate
 
-SS = SQRT(2._EB*(S11*S11 +  S22*S22 + S33*S33 + 2._EB*(S12*S12 +  S13*S13 + S23*S23)))
+SS = SQRT(2._EB*(S11*S11 +  S22*S22 + S33*S33 + 2._EB*(S12*S12 + S13*S13 + S23*S23)))
 
 ! test filter the strain rate
 
@@ -1362,11 +1364,11 @@ DO K = 1,KBAR
          ! calculate the local Smagorinsky coefficient
 
          ! perform "clipping" in case MLij is negative...
-         IF (MLHAT(I,J,K) <= 0._EB) MLHAT(I,J,K) = 0._EB
+         IF (MLHAT(I,J,K) < 0._EB) MLHAT(I,J,K) = 0._EB
 
          ! calculate the effective viscosity
 
-         ! handle the case where we divide by zero
+         ! handle the case where we divide by zero, note MMHAT is positive semi-definite
          IF (MMHAT(I,J,K) == 0._EB) THEN
             C_DYNSMAG(I,J,K) = 0._EB
          ELSE
@@ -1383,7 +1385,7 @@ DO K = 1,KBAR
    END DO
 END DO
 
-WRITE(6,*) 'C_DYNSMAG (AVG) = ', SUM(C_DYNSMAG)/SIZE(C_DYNSMAG)
+IF (MYID==0) WRITE(LU_OUTPUT,*) 'C_DYNSMAG (AVG) = ', SUM(C_DYNSMAG)/SIZE(C_DYNSMAG)
 
 END SUBROUTINE VARDEN_DYNSMAG
 
@@ -1505,8 +1507,7 @@ SUBROUTINE TEST_FILTER(PHIBAR,PHI,N_LO,N_HI)
 IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: N_LO(3),N_HI(3)
-REAL(EB), INTENT(IN) ::  PHI(N_LO(1):N_HI(1),N_LO(2):N_HI(2),N_LO(3):N_HI(3))
-
+REAL(EB), INTENT(IN) :: PHI(N_LO(1):N_HI(1),N_LO(2):N_HI(2),N_LO(3):N_HI(3))
 REAL(EB) :: PHIBAR(N_LO(1):N_HI(1),N_LO(2):N_HI(2),N_LO(3):N_HI(3))
 INTEGER I,J,K
 
@@ -1540,17 +1541,15 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: N_LO,N_HI
 REAL(EB), INTENT(IN) :: U(N_LO:N_HI)
 REAL(EB), INTENT(OUT) :: UBAR(N_LO:N_HI)
-
 INTEGER :: J
-REAL(EB) :: WW(3),UU(3)
+REAL(EB), POINTER, DIMENSION(:) :: UU
 
-! weighting coefficients for trapezoid rule
-WW = (/0.25_EB,0.5_EB,0.25_EB/)
+UU => TURB_WORK20
+UU(N_LO:N_HI) = U
 
-! Filter the u field to obtain ubar
+! Filter the u field to obtain ubar by trapezoid rule
 DO J=N_LO+1,N_HI-1
-   UU = U(J-1:J+1)
-   UBAR(J) = SUM(WW*UU)
+   UBAR(J) = 0.25_EB*UU(J-1) + 0.5_EB*UU(J) + 0.25_EB*UU(J+1)
 ENDDO
 ! set boundary values (not ideal, but fast and simple)
 UBAR(N_LO) = UBAR(N_LO+1)
@@ -1559,6 +1558,179 @@ UBAR(N_HI) = UBAR(N_HI-1)
 END SUBROUTINE TOPHAT_FILTER_1D
 
 
-
 END MODULE TURBULENCE
+
+
+!! This module is an experimental implementation of my embedded mesh method (EMB),
+!! a prelude to adaptive mesh refinement.
+!
+!MODULE EMBEDDED_MESH_METHOD
+!
+!USE PRECISION_PARAMETERS
+!USE GLOBAL_CONSTANTS
+!USE MESH_VARIABLES
+!USE MASS, ONLY: SCALARF
+!
+!IMPLICIT NONE
+!
+!PRIVATE
+! 
+!CONTAINS
+!
+!
+!SUBROUTINE MASS_EMB(NM1,NM2)
+!
+!IMPLICIT NONE
+!
+!INTEGER, INTENT(IN) :: NM1,NM2
+!
+!CALL SCALARF(NM1)         ! Computes FRHOYY and FRHO and populates SCALAR_SAVE3 on coarse mesh
+!CALL SCALARF(NM2)         ! Computes FRHOYY and FRHO and populates SCALAR_SAVE3 on fine mesh
+!CALL SCALARF_EMB(NM1,NM2) ! Corrects FRHOYY and FRHO based on fine mesh
+!
+!END SUBROUTINE MASS_EMB
+!
+!
+!SUBROUTINE SCALARF_EMB(NM1,NM2)
+!IMPLICIT NONE
+!
+!INTEGER, INTENT(IN) :: NM1,NM2
+!
+!TYPE(MESH_TYPE), POINTER :: M1,M2
+!INTEGER :: N,I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK
+!INTEGER :: NRX,NRY,NRZ,N3,N2X,N2Y,N2Z
+!REAL(EB) :: ZZ(4),M_CORR
+!REAL(EB), POINTER, DIMENSION(:,:,:) :: FX,FY,FZ,FFX,FFY,FFZ
+!
+!!   Comments:
+!!
+!!   Assumes uniform grid in each direction and that M2 lies within M1.
+!!
+!!   -------------------------------
+!!   |         |         |         |
+!!   |         |         |         |
+!!   |         |         |         |
+!!   |         |         |         |
+!!   -------------------------------
+!!   |         |-|-|-|-|-|         |
+!!   |         |-|-|-|-|-|         |
+!!   |         |-|-|-|-|-|         |
+!!   |         |-|-|-|-|-|         |
+!!   -------------------------------
+!!   |         |         |         |
+!!   |         |         |         |
+!!   |         |         |         |
+!!   |         |         |         |
+!!   -------------------------------
+!
+!M1=>MESHES(NM1) ! coarse mesh
+!M2=>MESHES(NM2) ! fine mesh
+!
+!! Compute refinment ratio in each direction
+!
+!NRX = NINT(M2%DX(1)/M1%DX(1))
+!NRY = NINT(M2%DY(1)/M1%DY(1))
+!NRZ = NINT(M2%DZ(1)/M1%DZ(1))
+!N3 = NRX*NRY*NRZ ! number of fine cells per coarse cell
+!N2X = NRY*NRZ
+!N2Y = NRX*NRZ
+!N2Z = NRX*NRY
+!
+!! Locate fine mesh within coarse mesh
+!
+!I_LO = NINT((M2%XS-M1%XS)/M1%DX(1))+1
+!I_HI = NINT((M2%XF-M1%XS)/M1%DX(1))
+!
+!J_LO = NINT((M2%YS-M1%YS)/M1%DY(1))+1
+!J_HI = NINT((M2%YF-M1%YS)/M1%DY(1))
+!
+!K_LO = NINT((M2%ZS-M1%ZS)/M1%DZ(1))+1
+!K_HI = NINT((M2%ZF-M1%ZS)/M1%DZ(1))
+!
+!! Restrict fine mesh to coarse mesh for embedded cells
+!
+!DO K = K_LO,K_HI
+!   KK_0 = (K-K_LO)*NRZ
+!   DO J = J_LO,J_HI
+!      JJ_0 = (J-J_LO)*NRY
+!      DO I = I_LO,I_HI
+!         II_0 = (I-I_LO)*NRX
+!         
+!         M1%FRHO(I,J,K) = 0._EB
+!         
+!         DO KK = KK_0+1,KK_0+NRZ
+!            DO JJ = JJ_0+1,JJ_0+NRY
+!               DO II = II_0+1,II_0+NRX
+!               
+!                  M1%FRHO(I,J,K) = M1%FRHO(I,J,K) + M2%FRHO(II,JJ,KK)
+!                  
+!               ENDDO
+!            ENDDO
+!         ENDDO
+!         
+!         M1%FRHO(I,J,K) = M1%FRHO(I,J,K)/N3
+!         
+!      ENDDO
+!   ENDDO
+!ENDDO
+!
+!SPECIES_LOOP1: DO N = 1,N_SPECIES
+!DO K = K_LO,K_HI
+!   KK_0 = (K-K_LO)*NRZ
+!   DO J = J_LO,J_HI
+!      JJ_0 = (J-J_LO)*NRY
+!      DO I = I_LO,I_HI
+!         II_0 = (I-I_LO)*NRX
+!                  
+!         M1%FRHOYY(I,J,K,N) = 0._EB
+!         
+!         DO KK = KK_0+1,KK_0+NRZ
+!            DO JJ = JJ_0+1,JJ_0+NRY
+!               DO II = II_0+1,II_0+NRX
+!               
+!                  M1%FRHOYY(I,J,K,N) = M1%FRHOYY(I,J,K,N) + M2%FRHOYY(II,JJ,KK,N)
+!                  
+!               ENDDO
+!            ENDDO
+!         ENDDO
+!         
+!         M1%FRHOYY(I,J,K,N) = M1%FRHOYY(I,J,K,N)/N3
+!         
+!      ENDDO
+!   ENDDO
+!ENDDO
+!ENDDO SPECIES_LOOP1
+!
+!! Correct coarse mesh surrounding cells
+!
+!FX  => M1%SCALAR_SAVE4
+!FFX => M2%SCALAR_SAVE4
+!
+!! west side of embedded mesh
+!I = I_LO-1
+!DO K = K_LO,K_HI
+!   KK_0 = (K-K_LO)*NRZ
+!   DO J = J_LO,J_HI
+!      JJ_0 = (J-J_LO)*NRY
+!      
+!      M_CORR = 0._EB
+!      DO KK = KK_0+1,KK_0+NRZ
+!         DO JJ = JJ_0+1,JJ_0+NRY
+!            M_CORR = M_CORR + FFX(0,JJ,KK)
+!         ENDDO
+!      ENDDO
+!      M_CORR = M_CORR/N2X
+!   
+!      M_CORR = M_CORR - FX(I,J,K)
+!      
+!      M1%FRHO(I,J,K) = M1%FRHO(I,J,K) + M1%RDX(I)*M_CORR
+!      
+!   ENDDO
+!ENDDO
+!
+!
+!END SUBROUTINE SCALARF_EMB
+!
+!
+!END MODULE EMBEDDED_MESH_METHOD
 
