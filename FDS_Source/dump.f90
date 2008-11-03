@@ -3304,7 +3304,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
          WALL_CELL_LOOP: DO IW=1,NWC
             IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE WALL_CELL_LOOP
             IBC = IJKW(5,IW)
-            IF (DV%SURF_ID=='null' .OR. SURF_NAME(IBC)==DV%SURF_ID) THEN
+!            IF (DV%SURF_ID=='null' .OR. SURF_NAME(IBC)==DV%SURF_ID) THEN
+            IF (DV%SURF_INDEX == 0 .OR. IBC == DV%SURF_INDEX) THEN
                NOT_FOUND = .FALSE.
                SELECT CASE(DV%STATISTICS)
                   CASE('MAX')
