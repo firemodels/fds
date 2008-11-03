@@ -14,7 +14,7 @@ CHARACTER(255), PARAMETER :: veloid='$Id$'
 CHARACTER(255), PARAMETER :: velorev='$Revision$'
 CHARACTER(255), PARAMETER :: velodate='$Date$'
 
-PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,GET_REV_velo,MATCH_VELOCITY,VELOCITY_BC
+PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,GET_REV_velo,MATCH_VELOCITY,VELOCITY_BC,CHECK_STABILITY
 PRIVATE VELOCITY_FLUX,VELOCITY_FLUX_ISOTHERMAL,VELOCITY_FLUX_CYLINDRICAL
  
 CONTAINS
@@ -355,10 +355,10 @@ DO K=1,KBAR
          DTXYDY= RDY(J) *(TXY(I,J,K)-TXY(I,J-1,K))
          DTXZDZ= RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,K-1))
          VTRM  = RRHO*(DTXXDX + DTXYDY + DTXZDZ)
-         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) + GX*AH - VTRM 
+         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) + GX*AH - VTRM
       ENDDO 
    ENDDO   
-ENDDO   
+ENDDO
  
 ! Compute y-direction flux term FVY
 
@@ -422,12 +422,12 @@ DO K=0,KBAR
          FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) + GZ*AH - VTRM       
       ENDDO
    ENDDO   
-ENDDO   
+ENDDO
  
 ! Baroclinic torque correction
  
 IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION
- 
+
 ! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
  
 CALL NO_FLUX
@@ -1032,7 +1032,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: HT
 
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY) THEN
-   CALL CHECK_STABILITY(NM)
+   CALL CHECK_STABILITY(NM,2)
    RETURN
 ENDIF
 
@@ -1073,7 +1073,7 @@ ENDDO
 ! Check the stability criteria, and if the time step is too small, send back a signal to kill the job
  
 DTOLD = DT
-CALL CHECK_STABILITY(NM)
+CALL CHECK_STABILITY(NM,2)
  
 IF (DT<DTINT*1.E-4) STOP_STATUS = INSTABILITY_STOP
  
@@ -1694,12 +1694,28 @@ END SUBROUTINE MATCH_VELOCITY
 
 
 
-SUBROUTINE CHECK_STABILITY(NM)
+SUBROUTINE CHECK_STABILITY(NM,CODE)
  
 ! Checks the Courant and Von Neumann stability criteria, and if necessary, reduces the time step accordingly
  
+INTEGER, INTENT(IN) :: NM,CODE
 REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,DMAX,RDMAX
-INTEGER  :: NM,I,J,K
+INTEGER  :: I,J,K
+
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
+
+SELECT CASE(CODE)
+   CASE(1)
+      UU => MESHES(NM)%U
+      VV => MESHES(NM)%V
+      WW => MESHES(NM)%W
+      RHOP => MESHES(NM)%RHO
+   CASE(2)
+      UU => MESHES(NM)%US
+      VV => MESHES(NM)%VS
+      WW => MESHES(NM)%WS
+      RHOP => MESHES(NM)%RHOS
+END SELECT
  
 CHANGE_TIME_STEP(NM) = .FALSE.
 UVWMAX = 0._EB
@@ -1715,9 +1731,9 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               UODX = ABS(US(I,J,K))*RDXN(I)
-               VODY = ABS(VS(I,J,K))*RDYN(J)
-               WODZ = ABS(WS(I,J,K))*RDZN(K)
+               UODX = ABS(UU(I,J,K))*RDXN(I)
+               VODY = ABS(VV(I,J,K))*RDYN(J)
+               WODZ = ABS(WW(I,J,K))*RDZN(K)
                UVW  = MAX(UODX,VODY,WODZ)
                IF (UVW>=UVWMAX) THEN
                   UVWMAX = UVW 
@@ -1733,7 +1749,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               UVW = (ABS(US(I,J,K)) + ABS(VS(I,J,K)) + ABS(WS(I,J,K)))**2
+               UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))**2
                IF (UVW>=UVWMAX) THEN
                   UVWMAX = UVW 
                   ICFL=I
@@ -1748,7 +1764,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               UVW = US(I,J,K)**2 + VS(I,J,K)**2 + WS(I,J,K)**2
+               UVW = UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2
                IF (UVW>=UVWMAX) THEN
                   UVWMAX = UVW 
                   ICFL=I
@@ -1788,8 +1804,8 @@ PARABOLIC_IF: IF (DNS .OR. CELL_SIZE<0.005_EB) THEN
          DO J=1,JBAR
             IILOOP: DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IILOOP
-               IF (MU(I,J,K)>=MU_MAX) THEN
-                  MU_MAX = MU(I,J,K)
+               IF (MU(I,J,K)/RHOP(I,J,K)>=MU_MAX) THEN
+                  MU_MAX = MU(I,J,K)/RHOP(I,J,K)
                   I_VN=I
                   J_VN=J
                   K_VN=K
@@ -1802,7 +1818,7 @@ PARABOLIC_IF: IF (DNS .OR. CELL_SIZE<0.005_EB) THEN
       ELSE
          R_DX2 = RDX(I_VN)**2 + RDY(J_VN)**2 + RDZ(K_VN)**2
       ENDIF
-      MUTRM = MAX(RPR,RSC)*MU_MAX/RHOS(I_VN,J_VN,K_VN)
+      MUTRM = MAX(RPR,RSC)*MU_MAX !! /RHOS(I_VN,J_VN,K_VN)
    ENDIF INCOMPRESSIBLE_IF
  
    VN = DT*2._EB*R_DX2*MUTRM
@@ -1845,9 +1861,15 @@ ELSE
 ENDIF
  
 RHO_AVG_OLD = RHO_AVG
-RHO_AVG = 2._EB*RHO_LOWER*RHO_UPPER/(RHO_LOWER+RHO_UPPER)
-RRAT = RHO_AVG_OLD/RHO_AVG
-RTRM = (1._EB-RHO_AVG/RHOP)*RRAT
+RHO_AVG = 2._EB*RHO_LOWER_GLOBAL*RHO_UPPER_GLOBAL/(RHO_LOWER_GLOBAL+RHO_UPPER_GLOBAL)
+IF (RHO_AVG<=0._EB) THEN
+   WRITE(LU_ERR,*) 'WARNING! RHO_AVG <= 0 in BAROCLINIC_CORRECTION'
+   RRAT = 1._EB
+   RTRM = 0._EB
+ELSE
+   RRAT = RHO_AVG_OLD/RHO_AVG
+   RTRM = (1._EB-RHO_AVG/RHOP)*RRAT
+ENDIF
  
 DO K=1,KBAR
    DO J=1,JBAR
