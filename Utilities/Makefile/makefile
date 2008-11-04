@@ -49,6 +49,14 @@ intel_linux : CCOMPL = icc
 intel_linux : obj = fds5_intel
 intel_linux : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+
+intel_linux_mpi_64 : FFLAGS = -O3 -axPTSW -unroll -ipo -xPTSW -static -fpe3 -auto -mp1 -fltconsistency
+intel_linux_mpi_64 : CFLAGS = -O3 -Dpp_noappend
+intel_linux_mpi_64 : FCOMPL = mpif90
+intel_linux_mpi_64 : CCOMPL = mpicc
+intel_linux_mpi_64 : obj = fds5_mpi_intel64
+intel_linux_mpi_64 : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 	
 intel_linux_db : $(obj_serial)
 intel_linux_db : FFLAGS = -FR  -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static
