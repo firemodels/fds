@@ -1,5 +1,5 @@
 #!/bin/csh -f
-set version=5.2.7_2601
+set version=5.2.7_2602
 
 set MACDIR=smv_$version\_osx
 set LINUXDIR=smv_$version\_linux
