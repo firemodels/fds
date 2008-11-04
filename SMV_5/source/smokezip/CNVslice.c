@@ -94,6 +94,7 @@ int convert_slice(slice *slicei){
   int ncol, nrow, idir;
   int endian_rle_switch;
   float time_max;
+  int itime;
 
   FILE *SLICEFILE;
   FILE *slicestream,*slicesizestream;
@@ -396,6 +397,7 @@ int convert_slice(slice *slicei){
     nk = ijkbar[5]+1-ijkbar[4];
 
     time_max=-1000000.0;
+    itime=-1;
     for(;;){
       int i;
       int ncomp_rle;
@@ -481,6 +483,9 @@ int convert_slice(slice *slicei){
         sliceframe_float_rle[index2] = sliceframe_raw[i];
 #endif
       }
+      itime++;
+      if(itime%slicezipstep!=0)continue;
+
       //int compress (Bytef *dest,   uLongf *destLen, const Bytef *source, uLong sourceLen);
       ncompressed_zlib=ncompressed_save;
       returncode=compress(sliceframe_compressed,&ncompressed_zlib,sliceframe_uncompressed,framesize);
