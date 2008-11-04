@@ -2099,25 +2099,15 @@ IF (N_DEVC>0) THEN
    DO N=1,N_DEVC
       DV => DEVICE(N)
       IF (DV%SPEC_INDEX>0) THEN
-         WRITE(LU_OUTPUT,'(I4,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
+         WRITE(LU_OUTPUT,'(I6,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
             ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
             ', Species: ',TRIM(SPECIES(DV%SPEC_INDEX)%ID)
-      ELSEIF (DV%SPEC_INDEX<0) THEN
-         IF (DV%OUTPUT_INDEX==90 .OR. DV%OUTPUT_INDEX==94) THEN
-            WRITE(LU_OUTPUT,'(I4,A,3F9.2,A,A,A,A,A,A,A,A,A,L)') N,' Coords:',DV%X,DV%Y,DV%Z, &
-               ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
-               ', Species: ',TRIM(MF_SPEC_ID(-DV%SPEC_INDEX)),', Dry: ',DV%DRY
-         ELSE
-            WRITE(LU_OUTPUT,'(I4,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
-               ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
-               ', Species: ',TRIM(MF_SPEC_ID(-DV%SPEC_INDEX))
-         ENDIF
       ELSEIF (DV%PART_INDEX>0) THEN
-         WRITE(LU_OUTPUT,'(I4,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
+         WRITE(LU_OUTPUT,'(I6,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
             ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
             ', Particle Class: ',TRIM(PARTICLE_CLASS(DV%PART_INDEX)%ID)
       ELSE
-         WRITE(LU_OUTPUT,'(I4,A,3F9.2,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
+         WRITE(LU_OUTPUT,'(I6,A,3F9.2,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
             ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY)
       ENDIF
    ENDDO
@@ -3308,16 +3298,20 @@ DEVICE_LOOP: DO N=1,N_DEVC
          VALUE = SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)
 
       ELSEIF (DV%STATISTICS=='TIME INTEGRAL') THEN SOLID_STATS
+
          VALUE = DV%TI_VALUE + (T-DV%TI_T)*SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)
          DV%TI_VALUE = VALUE
          DV%TI_T = T
+
       ELSE SOLID_STATS
 
          WALL_CELL_LOOP: DO IW=1,NWC
             IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE WALL_CELL_LOOP
+            IF (XW(IW)<DV%X1 .OR. XW(IW)>DV%X2 .OR. &
+                YW(IW)<DV%Y1 .OR. YW(IW)>DV%Y2 .OR. &
+                ZW(IW)<DV%Z1 .OR. ZW(IW)>DV%Z2) CYCLE WALL_CELL_LOOP
             IBC = IJKW(5,IW)
-!            IF (DV%SURF_ID=='null' .OR. SURF_NAME(IBC)==DV%SURF_ID) THEN
-            IF (DV%SURF_INDEX == 0 .OR. IBC == DV%SURF_INDEX) THEN
+            IF (DV%SURF_ID=='null' .OR. SURF_NAME(IBC)==DV%SURF_ID) THEN
                NOT_FOUND = .FALSE.
                SELECT CASE(DV%STATISTICS)
                   CASE('MAX')
