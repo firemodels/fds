@@ -8,6 +8,15 @@
 <p>Latest FDS and Smokeview available at 
 <a href="http://fire.nist.gov/fds">http://fire.nist.gov/fds</a>
 <ul>
+<li>5.2.7 (build 2602) - November 4, 2008
+<ol>
+<li>change - smokezip now requires the user to specifiy the minimum and maximum data bounds when compressing boundary files.  
+This now makes the treatment of boundary and slice files consistent (and more correct).
+<li>fix - correct skip frame option in both Smokeview and Smokezip allowing users to load bigger cases by skipping data frames.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=513&can=1&sort=-id">Issue 513</a>).
+<li>fix - correct option to smooth blockages from menu when blockages are already cached
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=510&can=1&sort=-id">Issue 510</a>).
+</ol>
 <li>5.2.6 (build 2554) - October 24, 2008
 <ol>
 <li>enhancement - add option to display tracer particles (no value assigned) and particles with values
