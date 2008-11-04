@@ -796,7 +796,6 @@ USE GLOBAL_CONSTANTS, ONLY: NCGC,SOLID_BOUNDARY,OPEN_BOUNDARY,NULL_BOUNDARY,INTE
                             PREDICTOR,TWO_D,CYLINDRICAL,NMESHES,LU_ERR,DX_M,DY_M,DZ_M
 USE POIS, ONLY: H3CZSS, H2CZSS, H3CSSS, H2CYSS
 REAL(EB), DIMENSION(0:NMESHES) :: DHDX_F,DHDX_S,DHDY_F,DHDY_S,DHDZ_F,DHDZ_S,AREA_XS,AREA_XF,AREA_YS,AREA_YF,AREA_ZS,AREA_ZF
-REAL(EB), DIMENSION(0:NMESHES) :: SUMX_F,SUMX_S,SUMY_F,SUMY_S,SUMZ_F,SUMZ_S
 REAL(EB) :: B(NCGC),DA,DUUDT,DVVDT,DWWDT,RDT,B_OTHER
 INTEGER :: NM,II,JJ,KK,IW,IOR,I,J,K,IIO,JJO,KKO,NOM,IOR_PATCH,II_LOW,II_HIGH,JJ_LOW,JJ_HIGH,KK_LOW,KK_HIGH,IC,JC,KC,N,NO
 TYPE (MESH_TYPE), POINTER :: M2
@@ -881,13 +880,6 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
             DHDZ_S = 0._EB 
             DHDZ_F = 0._EB 
 
-            SUMX_S = 0._EB
-            SUMX_F = 0._EB
-            SUMY_S = 0._EB 
-            SUMY_F = 0._EB 
-            SUMZ_S = 0._EB 
-            SUMZ_F = 0._EB 
- 
             AREA_XS = 0._EB 
             AREA_XF = 0._EB 
             AREA_YS = 0._EB 
@@ -920,45 +912,39 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                      CASE( 1) 
                         DA      = R(0)*DY(JJ)*DZ(KK)
                         DUUDT   = -FVX(0,JJ,KK) - (H(1,JJ,KK)-H(0,JJ,KK))*RDXN(0)
-                        BXS(JJ,KK) = DUUDT - DUDT_AVG(IW) + (B(N)-B(NO))/DX_M(N,NO)
-                     !  BXS(JJ,KK) = DUUDT - DUDT_AVG(IW)
-                     !  SUMX_S(NOM) = SUMX_S(NOM) + ABS(BXS(JJ,KK))*DA
-                     !  AREA_XS(NOM) = AREA_XS(NOM) + DA
+                  !!    BXS(JJ,KK) = DUUDT - DUDT_AVG(IW) + (B(N)-B(NO))/DX_M(N,NO)
+                        DHDX_S(NOM) = DHDX_S(NOM) + DA*(DUUDT - DUDT_AVG(IW) + (B(N)-B(NO))/DX_M(N,NO))
+                        AREA_XS(NOM) = AREA_XS(NOM) + DA
                      CASE(-1)
                         DA      = R(IBAR)*DY(JJ)*DZ(KK)
                         DUUDT   = -FVX(IBAR,JJ,KK) - (H(IBP1,JJ,KK)-H(IBAR,JJ,KK))*RDXN(IBAR)
-                        BXF(JJ,KK) = DUUDT - DUDT_AVG(IW) + (B(NO)-B(N))/DX_M(N,NO)
-                     !  BXF(JJ,KK) = DUUDT - DUDT_AVG(IW)
-                     !  SUMX_F(NOM) = SUMX_F(NOM) + ABS(BXF(JJ,KK))*DA
-                     !  AREA_XF(NOM) = AREA_XF(NOM) + DA
+                  !!    BXF(JJ,KK) = DUUDT - DUDT_AVG(IW) + (B(NO)-B(N))/DX_M(N,NO)
+                        DHDX_F(NOM) = DHDX_F(NOM) + DA*(DUUDT - DUDT_AVG(IW) + (B(NO)-B(N))/DX_M(N,NO))
+                        AREA_XF(NOM) = AREA_XF(NOM) + DA
                      CASE( 2)
                         DA      = DX(II)*DZ(KK)
                         DVVDT   = -FVY(II,0,KK) - (H(II,1,KK)-H(II,0,KK))*RDYN(0)
-                        BYS(II,KK) = DVVDT - DVDT_AVG(IW) + (B(N)-B(NO))/DY_M(N,NO)
-                     !  BYS(II,KK) = DVVDT - DVDT_AVG(IW)
-                     !  SUMY_S(NOM) = SUMY_S(NOM) + ABS(BYS(II,KK))*DA
-                     !  AREA_YS(NOM) = AREA_YS(NOM) + DA
+                  !!    BYS(II,KK) = DVVDT - DVDT_AVG(IW) + (B(N)-B(NO))/DY_M(N,NO)
+                        DHDY_S(NOM) = DHDY_S(NOM) + DA*(DVVDT - DVDT_AVG(IW) + (B(N)-B(NO))/DY_M(N,NO))
+                        AREA_YS(NOM) = AREA_YS(NOM) + DA
                      CASE(-2)
                         DA      = DX(II)*DZ(KK)
                         DVVDT   = -FVY(II,JBAR,KK) - (H(II,JBP1,KK)-H(II,JBAR,KK))*RDYN(JBAR)
-                        BYF(II,KK) = DVVDT - DVDT_AVG(IW) + (B(NO)-B(N))/DY_M(N,NO)
-                     !  BYF(II,KK) = DVVDT - DVDT_AVG(IW)
-                     !  SUMY_F(NOM) = SUMY_F(NOM) + ABS(BYF(II,KK))*DA
-                     !  AREA_YF(NOM) = AREA_YF(NOM) + DA
+                  !!    BYF(II,KK) = DVVDT - DVDT_AVG(IW) + (B(NO)-B(N))/DY_M(N,NO)
+                        DHDY_F(NOM) = DHDY_F(NOM) + DA*(DVVDT - DVDT_AVG(IW) + (B(NO)-B(N))/DY_M(N,NO))
+                        AREA_YF(NOM) = AREA_YF(NOM) + DA
                      CASE( 3)
                         DA      = RC(II)*DX(II)*DY(JJ)
                         DWWDT   = -FVZ(II,JJ,0) - (H(II,JJ,1)-H(II,JJ,0))*RDZN(0)
-                        BZS(II,JJ) = DWWDT - DWDT_AVG(IW) + (B(N)-B(NO))/DZ_M(N,NO)
-                     !  BZS(II,JJ) = DWWDT - DWDT_AVG(IW)
-                     !  SUMZ_S(NOM) = SUMZ_S(NOM) + ABS(BZS(II,JJ))*DA
-                     !  AREA_ZS(NOM) = AREA_ZS(NOM) + DA
+                  !!    BZS(II,JJ) = DWWDT - DWDT_AVG(IW) + (B(N)-B(NO))/DZ_M(N,NO)
+                        DHDZ_S(NOM) = DHDZ_S(NOM) + DA*(DWWDT - DWDT_AVG(IW) + (B(N)-B(NO))/DZ_M(N,NO))
+                        AREA_ZS(NOM) = AREA_ZS(NOM) + DA
                      CASE(-3)
                         DA      = RC(II)*DX(II)*DY(JJ)
                         DWWDT   = -FVZ(II,JJ,KBAR) - (H(II,JJ,KBP1)-H(II,JJ,KBAR))*RDZN(KBAR)
-                        BZF(II,JJ) = DWWDT - DWDT_AVG(IW) + (B(NO)-B(N))/DZ_M(N,NO)
-                     !  BZF(II,JJ) = DWWDT - DWDT_AVG(IW)
-                     !  SUMZ_F(NOM) = SUMZ_F(NOM) + ABS(BZF(II,JJ))*DA
-                     !  AREA_ZF(NOM) = AREA_ZF(NOM) + DA
+                  !!    BZF(II,JJ) = DWWDT - DWDT_AVG(IW) + (B(NO)-B(N))/DZ_M(N,NO)
+                        DHDZ_F(NOM) = DHDZ_F(NOM) + DA*(DWWDT - DWDT_AVG(IW) + (B(NO)-B(N))/DZ_M(N,NO))
+                        AREA_ZF(NOM) = AREA_ZF(NOM) + DA
                   END SELECT
  
                ELSE IF_INTERPOLATED_BOUNDARY
@@ -1065,44 +1051,38 @@ ORIENT_LOOP:  DO IOR_PATCH=-3,3
                      CASE( 1) 
                         IF (NOM==0) BXS(JJ,KK) = HX(0)   *DHDX_S(0)/AREA_XS(0)
                         IF (NOM>0) THEN
-                         ! FAC = ABS(BXS(JJ,KK))*AREA_XS(NOM)/SUMX_S(NOM)
-                         ! BXS(JJ,KK) = HX(0)*(BXS(JJ,KK) + FAC*(B(N)-B(NO))/DX_M(N,NO))
-                           BXS(JJ,KK) = HX(0)*BXS(JJ,KK)
+                           BXS(JJ,KK) = HX(0)   *DHDX_S(NOM)/AREA_XS(NOM)
+                     !!    BXS(JJ,KK) = HX(0)*BXS(JJ,KK)
                         ENDIF
                      CASE(-1) 
                         IF (NOM==0) BXF(JJ,KK) = HX(IBP1)*DHDX_F(0)/AREA_XF(0)
                         IF (NOM>0) THEN
-                         ! FAC = ABS(BXF(JJ,KK))*AREA_XF(NOM)/SUMX_F(NOM)
-                         ! BXF(JJ,KK) = HX(IBP1)*(BXF(JJ,KK) + FAC*(B(NO)-B(N))/DX_M(N,NO))
-                           BXF(JJ,KK) = HX(IBP1)*BXF(JJ,KK)
+                           BXF(JJ,KK) = HX(IBP1)*DHDX_F(NOM)/AREA_XF(NOM)
+                     !!    BXF(JJ,KK) = HX(IBP1)*BXF(JJ,KK)
                         ENDIF
                      CASE( 2) 
                         IF (NOM==0) BYS(II,KK) = HY(0)   *DHDY_S(0)/AREA_YS(0)
                         IF (NOM>0) THEN
-                         ! FAC = ABS(BYS(II,KK))*AREA_YS(NOM)/SUMY_S(NOM)
-                         ! BYS(II,KK) = HY(0)*(BYS(II,KK) + FAC*(B(N)-B(NO))/DY_M(N,NO))
-                           BYS(II,KK) = HY(0)*BYS(II,KK)
+                           BYS(II,KK) = HY(0)   *DHDY_S(NOM)/AREA_YS(NOM)
+                     !!    BYS(II,KK) = HY(0)*BYS(II,KK)
                         ENDIF
                      CASE(-2) 
                         IF (NOM==0) BYF(II,KK) = HY(JBP1)*DHDY_F(0)/AREA_YF(0)
                         IF (NOM>0) THEN
-                         ! FAC = ABS(BYF(II,KK))*AREA_YF(NOM)/SUMY_F(NOM)
-                         ! BYF(II,KK) = HY(JBP1)*(BYF(II,KK) + FAC*(B(NO)-B(N))/DY_M(N,NO))
-                           BYF(II,KK) = HY(JBP1)*BYF(II,KK)
+                           BYF(II,KK) = HY(JBP1)*DHDY_F(NOM)/AREA_YF(NOM)
+                     !!    BYF(II,KK) = HY(JBP1)*BYF(II,KK)
                         ENDIF
                      CASE( 3) 
                         IF (NOM==0) BZS(II,JJ) = HZ(0)   *DHDZ_S(0)/AREA_ZS(0)
                         IF (NOM>0) THEN
-                         ! FAC = ABS(BZS(II,JJ))*AREA_ZS(NOM)/SUMZ_S(NOM)
-                         ! BZS(II,JJ) = HZ(0)*(BZS(II,JJ) + FAC*(B(N)-B(NO))/DZ_M(N,NO))
-                           BZS(II,JJ) = HZ(0)*BZS(II,JJ)
+                           BZS(II,JJ) = HZ(0)   *DHDZ_S(NOM)/AREA_ZS(NOM)
+                     !!    BZS(II,JJ) = HZ(0)*BZS(II,JJ)
                         ENDIF
                      CASE(-3) 
                         IF (NOM==0) BZF(II,JJ) = HZ(KBP1)*DHDZ_F(0)/AREA_ZF(0)
                         IF (NOM>0) THEN
-                         ! FAC = ABS(BZF(II,JJ))*AREA_ZF(NOM)/SUMZ_F(NOM)
-                         ! BZF(II,JJ) = HZ(KBP1)*(BZF(II,JJ) + FAC*(B(NO)-B(N))/DZ_M(N,NO))
-                           BZF(II,JJ) = HZ(KBP1)*BZF(II,JJ)
+                           BZF(II,JJ) = HZ(KBP1)*DHDZ_F(NOM)/AREA_ZF(NOM)
+                     !!    BZF(II,JJ) = HZ(KBP1)*BZF(II,JJ)
                         ENDIF
                   END SELECT
 
