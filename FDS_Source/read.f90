@@ -6257,11 +6257,12 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    DV%DRY              = DRY
 
    ! Grouping of PDPA devices
+
    DV%PDPA_GROUP       = 1   
 
    ! Coordinates for non-point devices
 
-   IF (XB(1)>-1.E5_EB) THEN
+   IF (XB(1)>-1.E5_EB .OR. STATISTICS/='null') THEN
       NM = DV%MESH
       M=>MESHES(NM)
       XB(1) = MAX(XB(1),M%XS)
@@ -6322,7 +6323,12 @@ DELAY            = 0._EB
 BYPASS_FLOWRATE  = 0._EB
 QUANTITY         = 'null'
 ROTATION         = 0._EB
-XB               = -1.E6_EB
+XB(1)            = -1.E6_EB
+XB(2)            =  1.E6_EB
+XB(3)            = -1.E6_EB
+XB(4)            =  1.E6_EB
+XB(5)            = -1.E6_EB
+XB(6)            =  1.E6_EB
 INITIAL_STATE    = .FALSE.
 LATCH            = .TRUE.
 SETPOINT         = 1.E20_EB
@@ -6584,11 +6590,6 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Specify orientation of DEVC ' ,N,' using the parameter IOR'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-
-!      IF (QUANTITY_INDEX<0 .AND. DV%IOR==0 .AND. DV%STATISTICS/='null' .AND. DV%SURF_ID=='null') THEN
-!         WRITE(MESSAGE,'(A,I4)') 'ERROR: Specify SURF_ID for DEVC ',N
-!         CALL SHUTDOWN(MESSAGE)
-!      ENDIF
 
       IF (QUANTITY_INDEX < 0 .AND. (DV%STATISTICS=='MASS MEAN' .OR. DV%STATISTICS=='VOLUME MEAN' .OR. &
                                     DV%STATISTICS=='VOLUME INTEGRAL') ) THEN
