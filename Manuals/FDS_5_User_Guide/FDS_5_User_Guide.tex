@@ -1947,8 +1947,8 @@ program and an error message is produced if it is not monotonic.
 
 \begin{warning}
 \noindent
-Do not specify either linear transformation points or {\ct IDERIV=0} points at coordinate values corresponding to 
-the mesh boundaries. 
+Do not specify either linear transformation points or {\ct IDERIV=0} points at coordinate values corresponding to
+the mesh boundaries.
 \end{warning}
 
 \subsection{Choosing the Right Mesh Dimensions}
@@ -5473,10 +5473,10 @@ the {\ct TABL} lines can be specified in any order.
 \index{Pipe Pressure}
 \index{Sprinkler!Pipe Pressure}
 
-In real sprinkler systems, the pipe pressure is affected by the number of open nozzles. Typically, 
+In real sprinkler systems, the pipe pressure is affected by the number of open nozzles. Typically,
 the pressure is higher than the design value when the first sprinkler activates, and decreases towards the design
-value and below that when more and more sprinklers are activated. The pipe pressure has an effect on flow rate, 
-droplet velocity and droplet size distribution. 
+value and below that when more and more sprinklers are activated. The pipe pressure has an effect on flow rate,
+droplet velocity and droplet size distribution.
 
 In FDS, the varying pipe pressure can be specified on a {\ct PROP} line using {\ct PRESSURE\_RAMP}. On each {\ct RAMP} line,
 the number of open sprinklers or nozzles is associated with certain pipe pressure (atm). For example:
@@ -5489,7 +5489,7 @@ the number of open sprinklers or nozzles is associated with certain pipe pressur
       FLOW_RATE=0.9
       OPERATING_PRESSURE = 10.0
       DROPLET_VELOCITY=15.0
-      SPRAY_ANGLE=0.0,80.0 
+      SPRAY_ANGLE=0.0,80.0
       PRESSURE_RAMP = 'PR1' /
 
 &RAMP ID = 'PR1' T = 1, F = 16.0 /
@@ -5499,14 +5499,14 @@ the number of open sprinklers or nozzles is associated with certain pipe pressur
 \normalsize
 \noindent
 These lines would indicate that the pressure is 16.0 atm when the first sprinkler having propertise of {\ct My nozzle}
-activates, 10.0 atm when two sprinklers are active, and 8.0 atm when three or more sprinklers are active. When counting the 
+activates, 10.0 atm when two sprinklers are active, and 8.0 atm when three or more sprinklers are active. When counting the
 number of active sprinklers, FDS accounts for all active sprinklers or nozzles with {\ct PART\_ID} associated with them.
 
 When pressure ramps are used, both {\ct FLOW\_RATE} and {\ct DROPLET\_VELOCITY} are associated with the
-{\ct OPERATING\_PRESSURE}. At leat two of the following three parameters affecting the flow rate should then be specified: {\ct FLOW\_RATE}, 
-{\ct K\_FACTOR} and {\ct OPERATING\_PRESSURE}. The flow rate is then given by $ \dm_w = K \sqrt{p}$ and droplet velocity 
-by $v = C \sqrt{p}$.  If spray pattern table is used, the coefficient $C$ is determined separatelly for each line of the 
-table. The median diameter of the particle size distribution is scaled as 
+{\ct OPERATING\_PRESSURE}. At leat two of the following three parameters affecting the flow rate should then be specified: {\ct FLOW\_RATE},
+{\ct K\_FACTOR} and {\ct OPERATING\_PRESSURE}. The flow rate is then given by $ \dm_w = K \sqrt{p}$ and droplet velocity
+by $v = C \sqrt{p}$.  If spray pattern table is used, the coefficient $C$ is determined separatelly for each line of the
+table. The median diameter of the particle size distribution is scaled as
 $d_m(p) = d_m(p_o)(p_o/p)^{1/3}$, where $p_o$ is the {\ct OPERATING\_PRESSURE}
 and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} at the corresponding {\ct PART} line.
 
@@ -6294,7 +6294,9 @@ When prescribing a solid phase quantity, be sure to position the
 probe at a solid surface. It is not always obvious where the
 solid surface is since the mesh does not always align with the input obstruction
 locations. To help locate the appropriate surface, the parameter {\ct IOR} {\em must} be included
-when designating a solid phase quantity.
+when designating a solid phase quantity, except when using the {\ct STATISTICS} feature described in
+Section~\ref{info:statistics} in which case the output quantity is not associated with just a single point
+on the surface.
 If the orientation of the solid surface is in the
 positive $x$ direction {\ct IOR=1}, negative $x$ direction {\ct IOR=-1},
 positive $y$ {\ct IOR=2}, negative {\ct IOR=-2}, positive $z$ {\ct IOR=3},
@@ -6884,27 +6886,27 @@ density represents the mass of {\ct 'wood'} per unit volume of the mixture. Note
 \label{info:FED}
 \index{Output!FED}
 
-The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapasitation 
-due to the combustion gases.  The present version of FDS uses only the concentrations of the gases CO, CO${}_2$, and O${}_2$ to 
+The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapasitation
+due to the combustion gases.  The present version of FDS uses only the concentrations of the gases CO, CO${}_2$, and O${}_2$ to
 calculate the FED value as
 %
 \be
 \mathrm{FED}_\mathrm{tot} = \mathrm{FED}_\mathrm{CO} \times
-\mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2} 
+\mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
 \ee
 The fraction of an incapacitating dose of CO is calculated as
 \be
 \mathrm{FED}_\mathrm{CO} = 4.607 \cdot 10^{-7} (C_\mathrm{CO})^{1.036}
-\ t 
+\ t
 \ee
 where $t$ is time in seconds and $C_\mathrm{CO}$ is the CO concentration (ppm).  The fraction of an incapacitating dose of low
 O${}_2$ hypoxia is calculated as
 \be
 \mathrm{FED}_\mathrm{O_2} =  \frac{t}{60 \exp \left [ 8.13-0.54 (20.9 -
-  C_\mathrm{O_2}) \right ] } 
+  C_\mathrm{O_2}) \right ] }
 \ee
-where $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent).  The hyperventilation factor induced by carbon dioxide 
-is calculated as 
+where $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent).  The hyperventilation factor induced by carbon dioxide
+is calculated as
 \be
 \mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1930 \, C_\mathrm{CO_2} +  2.0004 ) }{7.1}
 \ee
@@ -6929,10 +6931,21 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 
 \noindent
 causes FDS to write out the maximum gas phase temperature over the entire mesh containing the point {\ct XYZ}. Note that it
-does not compute the maximum over the entire computational domain, just that particular mesh. Other {\ct STATISTICS} include
-{\ct 'MIN'} and {\ct 'MEAN'}. They can be used for both gas and solid phase output quantities. In the case of solids, the
-specification of a {\ct SURF\_ID} limits the search to only those surfaces. Use the {\ct STATISTICS} feature with caution because
+does not compute the maximum over the entire computational domain, just that particular mesh. Other {\ct STATISTICS} are discussed below.
+Note that some are appropriate for gas phase output quantities, some for solid phase, and some for both.
+
+For solid phase output quantities, like heat fluxes and surface temperatures, the
+specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the
+sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to
+account for the fact that the solid surface might shift to conform to the underlying numerical grid. Also, be careful not to specify a
+volume that extends beyond a single mesh. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using
+a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
+
+\begin{warning}
+\noindent
+Use the {\ct STATISTICS} feature with caution because
 it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
+\end{warning}
 
 \subsubsection{Volume-Weighted Mean}
 
@@ -7006,10 +7019,10 @@ on the orientation of the door.
 \label{info:time_integral}
 \index{Output!Time integral}
 
-In addition to the spatial statistics, a time integral of an {\ct DEVC} output can be computed by specifying 
-{\ct STATISTICS = 'TIME INTEGRAL'} on the {\ct DEVC} line. This produces a discrete analog of 
+In addition to the spatial statistics, a time integral of an {\ct DEVC} output can be computed by specifying
+{\ct STATISTICS = 'TIME INTEGRAL'} on the {\ct DEVC} line. This produces a discrete analog of
 \be
- \int_{t_0}^t \phi(\tau)d\tau
+ \int_{t_0}^t \phi(\tau) \; d\tau
 \ee
 Note that the spatial and time integrals can not be used simultaneously.
 
@@ -7042,16 +7055,16 @@ Thus, you can either paint values of $C_p$ at all surface points, or create a si
 \subsection{Dry Volume and Mass Fractions}
 \label{info:dry}
 
-During experiments, the species such as CO and CO${}_2$ are typically measured as dry quantities, i.e. the water 
-vapor is removed from the gas sample prior to analysis.  For easier comparison of FDS predictions with measured data
-one can speciefy the logical flag {\ct DRY} on a {\ct DEVC} line measuring either a {\ct MASS FRACTION} or
-{\ct VOLUME FRACTION} of a mixture fraction species.  For example, in the inputs below the first line would be the
-actual volume fraction of CO and the second line would represent the output of a gas analyzer in a typical experiment.
+During actual experiments, species such as CO and CO$_2$ are typically measured ``dry''; that is, the water
+vapor is removed from the gas sample prior to analysis.  For easier comparison of FDS predictions with measured data,
+you can specify the logical parameter {\ct DRY} on a {\ct DEVC} line that reports the {\ct 'MASS FRACTION'} or
+{\ct 'VOLUME FRACTION'} of a species when using the mixture fraction combustion model.  For example, the first line reports
+the actual volume fraction of CO, and the second line reports the output of a gas analyzer in a typical experiment.
 
 \footnotesize
 \begin{verbatim}
-&DEVC ID='wet CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='carbon monoxide'/
-&PROP ID='dry CO', XYZ=...,QUANTITY='VOLUME FRACTION', SPEC_ID='carbon monoxide', DRY=.TRUE. /
+&DEVC ID='wet CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='carbon monoxide' /
+&DEVC ID='dry CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='carbon monoxide', DRY=.TRUE. /
 \end{verbatim}
 \normalsize
 
@@ -7275,7 +7288,7 @@ $^{**}$                \> Quantity requires the specification of a particle name
 
 \clearpage
 \section{Summary of Infrequently-Used Output Quantities}
-\label{info:oddoutputquantities} 
+\label{info:oddoutputquantities}
 
 Table~\ref{tab:oddoutput} below lists some less often used output quantities. These are mainly used for diagnostic purposes. Explanations for most can
 be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
