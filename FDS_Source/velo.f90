@@ -1693,7 +1693,6 @@ TUSED(4,NM)=TUSED(4,NM)+SECOND()-TNOW
 END SUBROUTINE MATCH_VELOCITY
 
 
-
 SUBROUTINE CHECK_STABILITY(NM,CODE)
  
 ! Checks the Courant and Von Neumann stability criteria, and if necessary, reduces the time step accordingly
@@ -1701,7 +1700,6 @@ SUBROUTINE CHECK_STABILITY(NM,CODE)
 INTEGER, INTENT(IN) :: NM,CODE
 REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,DMAX,RDMAX
 INTEGER  :: I,J,K
-
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
 
 SELECT CASE(CODE)
@@ -1805,7 +1803,7 @@ PARABOLIC_IF: IF (DNS .OR. CELL_SIZE<0.005_EB) THEN
             IILOOP: DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IILOOP
                IF (MU(I,J,K)/RHOP(I,J,K)>=MU_MAX) THEN
-                  MU_MAX = MU(I,J,K)/RHOP(I,J,K)
+                  MU_MAX = MU(I,J,K)/RHOP(I,J,K) !! RJM
                   I_VN=I
                   J_VN=J
                   K_VN=K
@@ -1818,7 +1816,7 @@ PARABOLIC_IF: IF (DNS .OR. CELL_SIZE<0.005_EB) THEN
       ELSE
          R_DX2 = RDX(I_VN)**2 + RDY(J_VN)**2 + RDZ(K_VN)**2
       ENDIF
-      MUTRM = MAX(RPR,RSC)*MU_MAX !! /RHOS(I_VN,J_VN,K_VN)
+      MUTRM = MAX(RPR,RSC)*MU_MAX !! /RHOS(I_VN,J_VN,K_VN) !! RJM
    ENDIF INCOMPRESSIBLE_IF
  
    VN = DT*2._EB*R_DX2*MUTRM
