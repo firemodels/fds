@@ -88,20 +88,20 @@
 
  exterior openings
 
-&HOLE XB=-0.01,0.21, 7.1,7.9, 1.0,1.7 DEVC_ID='add_hole' / Window in Burn Room A
-&HOLE XB=-0.01,0.21, 7.1,7.9, 0.9,1.0 / Window in Burn Room A
+&HOLE XB=-0.01,0.21, 7.1,7.9, 1.0,1.7, DEVC_ID='add_hole', COLOR='BLACK' / Window in Burn Room A
+&HOLE XB=-0.01,0.21, 7.1,7.9, 0.9,1.0, COLOR='BLACK' / Window in Burn Room A
 
-&HOLE XB=-0.01,0.21, 2.2,3.0, 1.0,1.7 DEVC_ID='add_hole' / Window in Target Room B
-&HOLE XB=-0.01,0.21, 2.2,3.0, 0.9,1.0 / Window in Target Room B
+&HOLE XB=-0.01,0.21, 2.2,3.0, 1.0,1.7, COLOR='BLACK' DEVC_ID='add_hole' / Window in Target Room B
+&HOLE XB=-0.01,0.21, 2.2,3.0, 0.9,1.0, COLOR='BLACK' / Window in Target Room B
 
-&HOLE XB= 7.1, 7.9,-0.01,0.21,3.6,4.3 DEVC_ID='add_hole' / Window in Burn Room A
-&HOLE XB= 7.1, 7.9,-0.01,0.21,3.5,3.6 / Window in Burn Room A
+&HOLE XB= 7.1, 7.9,-0.01,0.21,3.6,4.3, COLOR='BLACK' DEVC_ID='add_hole' / Window in Burn Room A
+&HOLE XB= 7.1, 7.9,-0.01,0.21,3.5,3.6, COLOR='BLACK' / Window in Burn Room A
 
-&HOLE XB= 2.2, 3.0,-0.01,0.21,3.6,4.3 DEVC_ID='add_hole' / Window in Target Room B
-&HOLE XB= 2.2, 3.0,-0.01,0.21,3.5,3.6 / Window in Target Room B
+&HOLE XB= 2.2, 3.0,-0.01,0.21,3.6,4.3, COLOR='BLACK' DEVC_ID='add_hole' / Window in Target Room B
+&HOLE XB= 2.2, 3.0,-0.01,0.21,3.5,3.6, COLOR='BLACK' / Window in Target Room B
 
-&HOLE XB=9.7,9.8,-0.01,0.21,0.0,2.0 / Door for South Outside Wall
-&HOLE XB=8.9,9.7,-0.01,0.21,0.0,2.0 DEVC_ID='add_hole' / Door for South Outside Wall
+&HOLE XB=9.7,9.8,-0.01,0.21,0.0,2.0, COLOR='BLACK' / Door for South Outside Wall
+&HOLE XB=8.9,9.7,-0.01,0.21,0.0,2.0, COLOR='BLACK' DEVC_ID='add_hole' / Door for South Outside Wall
 
 &DEVC XYZ=0.0,0.0,0.0,ID='add_hole',SETPOINT=700.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
 
