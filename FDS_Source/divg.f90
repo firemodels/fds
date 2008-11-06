@@ -306,7 +306,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = 0.1_EB*TMP(I,J,K)
-                  Z_VECTOR = YY(I,J,K,I_Z_MIN:I_Z_MAX)
+                  Z_VECTOR = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
                   CALL GET_CP(Z_VECTOR,Y_SUM(I,J,K),CP_MF,ITMP)
                   IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
                      CP_SUM = 0._EB
@@ -420,7 +420,7 @@ IF (MIXTURE_FRACTION) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = 0.1_EB*TMP(I,J,K)
-            Z_VECTOR = YY(I,J,K,I_Z_MIN:I_Z_MAX)
+            Z_VECTOR = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
             CALL GET_CP(Z_VECTOR,Y_SUM(I,J,K),CP_MF,ITMP)
             IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
                CP_SUM = 0._EB
