@@ -1561,176 +1561,357 @@ END SUBROUTINE TOPHAT_FILTER_1D
 END MODULE TURBULENCE
 
 
-!! This module is an experimental implementation of my embedded mesh method (EMB),
-!! a prelude to adaptive mesh refinement.
+! This module is an experimental implementation of my embedded mesh method (EMB),
+! a prelude to adaptive mesh refinement.
+
+MODULE EMBEDDED_MESH_METHOD
+
+USE PRECISION_PARAMETERS
+USE GLOBAL_CONSTANTS
+USE MESH_VARIABLES
+
+IMPLICIT NONE
+
+PRIVATE
+PUBLIC SCALARF_EMB,VELOCITY_EMB,CHECK_MASS_EMB
+ 
+CONTAINS
+
+
+SUBROUTINE SCALARF_EMB(NM1,NM2)
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: NM1,NM2
+
+TYPE(MESH_TYPE), POINTER :: M1,M2
+INTEGER :: N,I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK
+INTEGER :: NRX,NRY,NRZ,N2X,N2Y,N2Z
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: FX1,FY1,FZ1,FX2,FY2,FZ2
+
+!   Comments:
 !
-!MODULE EMBEDDED_MESH_METHOD
+!   Assumes uniform grid in each direction and that M2 lies within M1.
 !
-!USE PRECISION_PARAMETERS
-!USE GLOBAL_CONSTANTS
-!USE MESH_VARIABLES
-!USE MASS, ONLY: SCALARF
-!
-!IMPLICIT NONE
-!
-!PRIVATE
-! 
-!CONTAINS
-!
-!
-!SUBROUTINE MASS_EMB(NM1,NM2)
-!
-!IMPLICIT NONE
-!
-!INTEGER, INTENT(IN) :: NM1,NM2
-!
-!CALL SCALARF(NM1)         ! Computes FRHOYY and FRHO and populates SCALAR_SAVE3 on coarse mesh
-!CALL SCALARF(NM2)         ! Computes FRHOYY and FRHO and populates SCALAR_SAVE3 on fine mesh
-!CALL SCALARF_EMB(NM1,NM2) ! Corrects FRHOYY and FRHO based on fine mesh
-!
-!END SUBROUTINE MASS_EMB
-!
-!
-!SUBROUTINE SCALARF_EMB(NM1,NM2)
-!IMPLICIT NONE
-!
-!INTEGER, INTENT(IN) :: NM1,NM2
-!
-!TYPE(MESH_TYPE), POINTER :: M1,M2
-!INTEGER :: N,I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK
-!INTEGER :: NRX,NRY,NRZ,N3,N2X,N2Y,N2Z
-!REAL(EB) :: ZZ(4),M_CORR
-!REAL(EB), POINTER, DIMENSION(:,:,:) :: FX,FY,FZ,FFX,FFY,FFZ
-!
-!!   Comments:
-!!
-!!   Assumes uniform grid in each direction and that M2 lies within M1.
-!!
-!!   -------------------------------
-!!   |         |         |         |
-!!   |         |         |         |
-!!   |         |         |         |
-!!   |         |         |         |
-!!   -------------------------------
-!!   |         |-|-|-|-|-|         |
-!!   |         |-|-|-|-|-|         |
-!!   |         |-|-|-|-|-|         |
-!!   |         |-|-|-|-|-|         |
-!!   -------------------------------
-!!   |         |         |         |
-!!   |         |         |         |
-!!   |         |         |         |
-!!   |         |         |         |
-!!   -------------------------------
-!
-!M1=>MESHES(NM1) ! coarse mesh
-!M2=>MESHES(NM2) ! fine mesh
-!
-!! Compute refinment ratio in each direction
-!
-!NRX = NINT(M2%DX(1)/M1%DX(1))
-!NRY = NINT(M2%DY(1)/M1%DY(1))
-!NRZ = NINT(M2%DZ(1)/M1%DZ(1))
-!N3 = NRX*NRY*NRZ ! number of fine cells per coarse cell
-!N2X = NRY*NRZ
-!N2Y = NRX*NRZ
-!N2Z = NRX*NRY
-!
-!! Locate fine mesh within coarse mesh
-!
-!I_LO = NINT((M2%XS-M1%XS)/M1%DX(1))+1
-!I_HI = NINT((M2%XF-M1%XS)/M1%DX(1))
-!
-!J_LO = NINT((M2%YS-M1%YS)/M1%DY(1))+1
-!J_HI = NINT((M2%YF-M1%YS)/M1%DY(1))
-!
-!K_LO = NINT((M2%ZS-M1%ZS)/M1%DZ(1))+1
-!K_HI = NINT((M2%ZF-M1%ZS)/M1%DZ(1))
-!
-!! Restrict fine mesh to coarse mesh for embedded cells
-!
-!DO K = K_LO,K_HI
-!   KK_0 = (K-K_LO)*NRZ
-!   DO J = J_LO,J_HI
-!      JJ_0 = (J-J_LO)*NRY
-!      DO I = I_LO,I_HI
-!         II_0 = (I-I_LO)*NRX
-!         
-!         M1%FRHO(I,J,K) = 0._EB
-!         
-!         DO KK = KK_0+1,KK_0+NRZ
-!            DO JJ = JJ_0+1,JJ_0+NRY
-!               DO II = II_0+1,II_0+NRX
-!               
-!                  M1%FRHO(I,J,K) = M1%FRHO(I,J,K) + M2%FRHO(II,JJ,KK)
-!                  
-!               ENDDO
-!            ENDDO
-!         ENDDO
-!         
-!         M1%FRHO(I,J,K) = M1%FRHO(I,J,K)/N3
-!         
-!      ENDDO
-!   ENDDO
-!ENDDO
-!
-!SPECIES_LOOP1: DO N = 1,N_SPECIES
-!DO K = K_LO,K_HI
-!   KK_0 = (K-K_LO)*NRZ
-!   DO J = J_LO,J_HI
-!      JJ_0 = (J-J_LO)*NRY
-!      DO I = I_LO,I_HI
-!         II_0 = (I-I_LO)*NRX
-!                  
-!         M1%FRHOYY(I,J,K,N) = 0._EB
-!         
-!         DO KK = KK_0+1,KK_0+NRZ
-!            DO JJ = JJ_0+1,JJ_0+NRY
-!               DO II = II_0+1,II_0+NRX
-!               
-!                  M1%FRHOYY(I,J,K,N) = M1%FRHOYY(I,J,K,N) + M2%FRHOYY(II,JJ,KK,N)
-!                  
-!               ENDDO
-!            ENDDO
-!         ENDDO
-!         
-!         M1%FRHOYY(I,J,K,N) = M1%FRHOYY(I,J,K,N)/N3
-!         
-!      ENDDO
-!   ENDDO
-!ENDDO
-!ENDDO SPECIES_LOOP1
-!
-!! Correct coarse mesh surrounding cells
-!
-!FX  => M1%SCALAR_SAVE4
-!FFX => M2%SCALAR_SAVE4
-!
-!! west side of embedded mesh
-!I = I_LO-1
-!DO K = K_LO,K_HI
-!   KK_0 = (K-K_LO)*NRZ
-!   DO J = J_LO,J_HI
-!      JJ_0 = (J-J_LO)*NRY
-!      
-!      M_CORR = 0._EB
-!      DO KK = KK_0+1,KK_0+NRZ
-!         DO JJ = JJ_0+1,JJ_0+NRY
-!            M_CORR = M_CORR + FFX(0,JJ,KK)
-!         ENDDO
-!      ENDDO
-!      M_CORR = M_CORR/N2X
-!   
-!      M_CORR = M_CORR - FX(I,J,K)
-!      
-!      M1%FRHO(I,J,K) = M1%FRHO(I,J,K) + M1%RDX(I)*M_CORR
-!      
-!   ENDDO
-!ENDDO
-!
-!
-!END SUBROUTINE SCALARF_EMB
-!
-!
-!END MODULE EMBEDDED_MESH_METHOD
+!   -------------------------------
+!   |         |         |         |
+!   |         |         |         |<---MESHES(M1)
+!   |         |         |         |
+!   |         |         |         |
+!   -------------------------------
+!   |         |-|-|-|-|-|         |
+!   |         |-|-|-|-|-|<-------------MESHES(M2)
+!   |         |-|-|-|-|-|         |
+!   |         |-|-|-|-|-|         |
+!   -------------------------------
+!   |         |         |         |
+!   |         |         |         |
+!   |         |         |         |
+!   |         |         |         |
+!   -------------------------------
+
+M1=>MESHES(NM1) ! coarse mesh
+M2=>MESHES(NM2) ! fine mesh
+
+FX1=>M1%SCALAR_SAVE1
+FY1=>M1%SCALAR_SAVE2
+FZ1=>M1%SCALAR_SAVE3
+
+FX2=>M2%SCALAR_SAVE1
+FY2=>M2%SCALAR_SAVE2
+FZ2=>M2%SCALAR_SAVE3
+
+! Compute refinment ratio in each direction
+
+NRX = NINT(M1%DX(1)/M2%DX(1))
+NRY = NINT(M1%DY(1)/M2%DY(1))
+NRZ = NINT(M1%DZ(1)/M2%DZ(1))
+N2X = NRY*NRZ
+N2Y = NRX*NRZ
+N2Z = NRX*NRY
+
+! Locate fine mesh within coarse mesh
+
+I_LO = NINT((M2%XS-M1%XS)/M1%DX(1))+1
+I_HI = NINT((M2%XF-M1%XS)/M1%DX(1))
+
+J_LO = NINT((M2%YS-M1%YS)/M1%DY(1))+1
+J_HI = NINT((M2%YF-M1%YS)/M1%DY(1))
+
+K_LO = NINT((M2%ZS-M1%ZS)/M1%DZ(1))+1
+K_HI = NINT((M2%ZF-M1%ZS)/M1%DZ(1))
+
+! Restrict fine mesh to coarse mesh for embedded cells
+
+SPECIES_LOOP: DO N = 0,N_SPECIES
+
+   ! x-direction fluxes
+
+   DO K = K_LO,K_HI
+      KK_0 = (K-K_LO)*NRZ
+      DO J = J_LO,J_HI
+         JJ_0 = (J-J_LO)*NRY
+         DO I = I_LO-1,I_HI !!
+            II_0 = (I-I_LO+1)*NRX !!
+                  
+            FX1(I,J,K,N) = 0._EB
+            DO KK = KK_0+1,KK_0+NRZ
+               DO JJ = JJ_0+1,JJ_0+NRY
+                  FX1(I,J,K,N) = FX1(I,J,K,N) + FX2(II_0,JJ,KK,N)
+               ENDDO
+            ENDDO
+            FX1(I,J,K,N) = FX1(I,J,K,N)/N2X
+         
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   ! y-direction fluxes
+
+   DO K = K_LO,K_HI
+      KK_0 = (K-K_LO)*NRZ
+      DO J = J_LO-1,J_HI !!
+         JJ_0 = (J-J_LO+1)*NRY !!
+         DO I = I_LO,I_HI 
+            II_0 = (I-I_LO)*NRX
+                  
+            FY1(I,J,K,N) = 0._EB
+            DO KK = KK_0+1,KK_0+NRZ
+               DO II = II_0+1,II_0+NRX
+                  FY1(I,J,K,N) = FY1(I,J,K,N) + FY2(II,JJ_0,KK,N)
+               ENDDO
+            ENDDO
+            FY1(I,J,K,N) = FY1(I,J,K,N)/N2Y
+         
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   ! z-direction fluxes
+
+   DO K = K_LO-1,K_HI !!
+      KK_0 = (K-K_LO+1)*NRZ !!
+      DO J = J_LO,J_HI
+         JJ_0 = (J-J_LO)*NRY
+         DO I = I_LO,I_HI 
+            II_0 = (I-I_LO)*NRX
+                  
+            FZ1(I,J,K,N) = 0._EB
+            DO JJ = JJ_0+1,JJ_0+NRY
+               DO II = II_0+1,II_0+NRX
+                  FZ1(I,J,K,N) = FZ1(I,J,K,N) + FZ2(II,JJ,KK_0,N)
+               ENDDO
+            ENDDO
+            FZ1(I,J,K,N) = FZ1(I,J,K,N)/N2Z
+         
+         ENDDO
+      ENDDO
+   ENDDO
+   
+ENDDO SPECIES_LOOP
+
+END SUBROUTINE SCALARF_EMB
+
+
+SUBROUTINE VELOCITY_EMB(NM1,NM2)
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: NM1,NM2
+
+TYPE(MESH_TYPE), POINTER :: M1,M2
+INTEGER :: I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK
+INTEGER :: NRX,NRY,NRZ,N2X,N2Y,N2Z
+REAL(EB) :: RDT
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU1,VV1,WW1,UU2,VV2,WW2
+
+M1=>MESHES(NM1) ! coarse mesh
+M2=>MESHES(NM2) ! fine mesh
+
+IF (PREDICTOR) THEN
+   UU1=>M1%U
+   VV1=>M1%V
+   WW1=>M1%W
+   UU2=>M2%US
+   VV2=>M2%VS
+   WW2=>M2%WS
+ELSEIF (CORRECTOR) THEN
+   UU1=>M1%US
+   VV1=>M1%VS
+   WW1=>M1%WS
+   UU2=>M2%U
+   VV2=>M2%V
+   WW2=>M2%W
+ENDIF
+
+RDT = 1._EB/M1%DT
+
+! Compute refinment ratio in each direction
+
+NRX = NINT(M1%DX(1)/M2%DX(1))
+NRY = NINT(M1%DY(1)/M2%DY(1))
+NRZ = NINT(M1%DZ(1)/M2%DZ(1))
+N2X = NRY*NRZ
+N2Y = NRX*NRZ
+N2Z = NRX*NRY
+
+! Locate fine mesh within coarse mesh
+
+I_LO = NINT((M2%XS-M1%XS)/M1%DX(1))+1
+I_HI = NINT((M2%XF-M1%XS)/M1%DX(1))
+
+J_LO = NINT((M2%YS-M1%YS)/M1%DY(1))+1
+J_HI = NINT((M2%YF-M1%YS)/M1%DY(1))
+
+K_LO = NINT((M2%ZS-M1%ZS)/M1%DZ(1))+1
+K_HI = NINT((M2%ZF-M1%ZS)/M1%DZ(1))
+
+! Restrict fine mesh velocity to coarse mesh for embedded cells and
+! mask coarse mesh force term such that dU_i/dt = 0 identically.
+
+! U-VELOCITY
+
+DO K = K_LO,K_HI
+   KK_0 = (K-K_LO)*NRZ
+   DO J = J_LO,J_HI
+      JJ_0 = (J-J_LO)*NRY
+      DO I = I_LO-1,I_HI !!
+         II_0 = (I-I_LO+1)*NRX !!
+                  
+         UU1(I,J,K) = 0._EB
+         DO KK = KK_0+1,KK_0+NRZ
+            DO JJ = JJ_0+1,JJ_0+NRY
+               UU1(I,J,K) = UU1(I,J,K) + UU2(II_0,JJ,KK)
+            ENDDO
+         ENDDO
+         UU1(I,J,K) = UU1(I,J,K)/N2X
+         M1%FVX(I,J,K) = -M1%RDXN(I)*(M1%H(I+1,J,K)-M1%H(I,J,K))
+         
+      ENDDO
+   ENDDO
+ENDDO
+   
+! V-VELOCITY
+
+DO K = K_LO,K_HI
+   KK_0 = (K-K_LO)*NRZ
+   DO J = J_LO-1,J_HI !!
+      JJ_0 = (J-J_LO+1)*NRY !!
+      DO I = I_LO,I_HI 
+         II_0 = (I-I_LO)*NRX
+                  
+         VV1(I,J,K) = 0._EB
+         DO KK = KK_0+1,KK_0+NRZ
+            DO II = II_0+1,II_0+NRX
+               VV1(I,J,K) = VV1(I,J,K) + VV2(II,JJ_0,KK)
+            ENDDO
+         ENDDO
+         VV1(I,J,K) = VV1(I,J,K)/N2Y
+         M1%FVY(I,J,K) = -M1%RDYN(J)*(M1%H(I,J+1,K)-M1%H(I,J,K))
+         
+      ENDDO
+   ENDDO
+ENDDO
+   
+! W-VELOCITY
+
+DO K = K_LO-1,K_HI !!
+   KK_0 = (K-K_LO+1)*NRZ !!
+   DO J = J_LO,J_HI
+      JJ_0 = (J-J_LO)*NRY
+      DO I = I_LO,I_HI 
+         II_0 = (I-I_LO)*NRX
+                  
+         WW1(I,J,K) = 0._EB
+         DO JJ = JJ_0+1,JJ_0+NRY
+            DO II = II_0+1,II_0+NRX
+               WW1(I,J,K) = WW1(I,J,K) + WW2(II,JJ,KK_0)
+            ENDDO
+         ENDDO
+         WW1(I,J,K) = WW1(I,J,K)/N2Z
+         M1%FVZ(I,J,K) = -M1%RDZN(K)*(M1%H(I,J,K+1)-M1%H(I,J,K))
+         
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE VELOCITY_EMB
+
+
+SUBROUTINE CHECK_MASS_EMB(NM1,NM2)
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: NM1,NM2
+
+TYPE(MESH_TYPE), POINTER :: M1,M2
+INTEGER :: N,I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK
+INTEGER :: NRX,NRY,NRZ,N2X,N2Y,N2Z
+REAL(EB) :: M1_MASS(0:N_SPECIES),M2_MASS(0:N_SPECIES),DV1,DV2
+
+M1=>MESHES(NM1) ! coarse mesh
+M2=>MESHES(NM2) ! fine mesh
+
+! Compute refinment ratio in each direction
+
+NRX = NINT(M1%DX(1)/M2%DX(1))
+NRY = NINT(M1%DY(1)/M2%DY(1))
+NRZ = NINT(M1%DZ(1)/M2%DZ(1))
+N2X = NRY*NRZ
+N2Y = NRX*NRZ
+N2Z = NRX*NRY
+
+! Cell volumes
+
+DV1 = M1%DX(1)*M1%DY(1)*M1%DZ(1)
+DV2 = M2%DX(1)*M2%DY(1)*M2%DZ(1)
+
+! Locate fine mesh within coarse mesh
+
+I_LO = NINT((M2%XS-M1%XS)/M1%DX(1))+1
+I_HI = NINT((M2%XF-M1%XS)/M1%DX(1))
+
+J_LO = NINT((M2%YS-M1%YS)/M1%DY(1))+1
+J_HI = NINT((M2%YF-M1%YS)/M1%DY(1))
+
+K_LO = NINT((M2%ZS-M1%ZS)/M1%DZ(1))+1
+K_HI = NINT((M2%ZF-M1%ZS)/M1%DZ(1))
+
+
+M1_MASS = 0._EB
+M2_MASS = 0._EB
+   
+DO K = K_LO,K_HI
+   KK_0 = (K-K_LO)*NRZ
+   DO J = J_LO,J_HI
+      JJ_0 = (J-J_LO)*NRY
+      DO I = I_LO,I_HI
+         II_0 = (I-I_LO)*NRX
+            
+         M1_MASS(0)           = M1_MASS(0)           + M1%RHO(I,J,K)*DV1
+         M1_MASS(1:N_SPECIES) = M1_MASS(1:N_SPECIES) + M1%RHO(I,J,K)*M1%YY(I,J,K,1:N_SPECIES)*DV1
+                  
+         DO KK = KK_0+1,KK_0+NRZ
+            DO JJ = JJ_0+1,JJ_0+NRY
+               DO II = II_0+1,II_0+NRX
+                 
+                  M2_MASS(0)           = M2_MASS(0)           + M2%RHO(II,JJ,KK)*DV2
+                  M2_MASS(1:N_SPECIES) = M2_MASS(1:N_SPECIES) + M2%RHO(II,JJ,KK)*M2%YY(II,JJ,KK,1:N_SPECIES)*DV2
+                     
+               ENDDO
+            ENDDO
+         ENDDO
+      
+      ENDDO
+   ENDDO
+ENDDO
+      
+IF (MAXVAL(ABS(M1_MASS-M2_MASS))>1.E-6_EB) THEN
+   DO N=0,N_SPECIES
+      IF (MYID==0) WRITE(0,*) 'EMB MASS ERROR (SPEC N/ERROR):',N,ABS(M1_MASS(N)-M2_MASS(N))
+   ENDDO
+ENDIF
+
+END SUBROUTINE CHECK_MASS_EMB
+
+
+
+END MODULE EMBEDDED_MESH_METHOD
 
