@@ -415,8 +415,10 @@ IF (FLUX_LIMITER>=0) THEN
    M%SCALAR_SAVE1 = 0._EB
    M%SCALAR_SAVE2 = 0._EB
    M%SCALAR_SAVE3 = 0._EB
-   M%SCALAR_SAVE4 = 0._EB
-   M%SCALAR_SAVE5 = 0._EB
+   IF (N_SPECIES>0) THEN
+      M%SCALAR_SAVE4 = 0._EB
+      M%SCALAR_SAVE5 = 0._EB
+   ENDIF
 ENDIF
 
 ! Designate each boundary cell with a reference number for wall BC's
