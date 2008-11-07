@@ -18,7 +18,7 @@ CONTAINS
 SUBROUTINE DIVERGENCE_PART_1(T,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_D,GET_K,GET_CP
+USE PHYSICAL_FUNCTIONS, ONLY: GET_D,GET_K,GET_CP,GET_CPBAR
 
 ! Compute contributions to the divergence term
  
@@ -421,12 +421,12 @@ IF (MIXTURE_FRACTION) THEN
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = 0.1_EB*TMP(I,J,K)
             Z_VECTOR = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
-            CALL GET_CP(Z_VECTOR,Y_SUM(I,J,K),CP_MF,ITMP)
+            CALL GET_CPBAR(Z_VECTOR,Y_SUM(I,J,K),CP_MF,ITMP)
             IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
                CP_SUM = 0._EB
                DO N=1,N_SPECIES
                   IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                  CP_SUM = CP_SUM + YYP(I,J,K,N)*SPECIES(N)%CP(ITMP)
+                  CP_SUM = CP_SUM + YYP(I,J,K,N)*SPECIES(N)%CPBAR(ITMP)
                END DO
                CP_MF = CP_SUM + (1._EB-Y_SUM(I,J,K))*CP_MF
             ENDIF
@@ -442,9 +442,9 @@ IF (.NOT.MIXTURE_FRACTION .AND. N_SPECIES>0) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = 0.1_EB*TMP(I,J,K)
-            CP_SUM = SPECIES(0)%CP(ITMP)
+            CP_SUM = SPECIES(0)%CPBAR(ITMP)
             DO N=1,N_SPECIES
-               CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
+               CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CPBAR(ITMP)-SPECIES(0)%CPBAR(ITMP))
             END DO
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_SUM
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
@@ -458,7 +458,7 @@ IF (.NOT.MIXTURE_FRACTION .AND. N_SPECIES==0) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = 0.1_EB*TMP(I,J,K)
-            CP_SUM = SPECIES(0)%CP(ITMP)
+            CP_SUM = SPECIES(0)%CPBAR(ITMP)
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*SPECIES(0)%RCON/CP_SUM
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO

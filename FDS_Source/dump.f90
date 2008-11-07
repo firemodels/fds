@@ -3398,16 +3398,16 @@ REAL(EB) FUNCTION GAS_PHASE_OUTPUT(II,JJ,KK,IND,SPEC_INDEX,PART_INDEX,T,NM)
 
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D,EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION, FED
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION, FED,GET_H_G
 USE CONTROL_VARIABLES, ONLY: CONTROL
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: II,JJ,KK,IND,NM
 REAL(EB) :: FLOW,HMFAC,F1,F2,H_TC,SRAD,TMP_TC,MU_AIR,RE_D,K_AIR,NUSSELT,NU_FAC,PR,AREA,VEL, &
             Q_SUM,TMP_G,UU,VV,WW,VEL2,Y_MF_INT,DENS,EXT_COEF,MASS_EXT_COEF,UIIINT, &
-            VELSR,WATER_VOL_FRAC,RHS,Y_E,DT_C,DT_E,T_RATIO,Y_E_LAG, &
-            DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O
+            VELSR,WATER_VOL_FRAC,RHS,Y_E,DT_C,DT_E,T_RATIO,Y_E_LAG, H_G,H_G_SUM,&
+            DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,YY_G(1:N_SPECIES)
 REAL(FB) :: TMPUP,TMPLOW,ZINT
-INTEGER :: ITER,N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW,SPEC_INDEX,PART_INDEX
+INTEGER :: ITER,N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW,SPEC_INDEX,PART_INDEX,ITMP
 CHARACTER(100) :: MESSAGE
 
 ! Get species mass fraction if necessary
@@ -3645,22 +3645,58 @@ SELECT CASE(IND)
                   CASE(1)
                      VEL  = U(I,J,K)
                      AREA = DY(J)*DZ(K)*RC(I)
-                     IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I+1,J,K))
-                     IF (IND==113 .OR. IND==116 .OR. IND==119) &
-                        HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I+1,J,K))*CP_GAMMA*(0.5_EB*(TMP(I,J,K)+TMP(I+1,J,K))-TMPA)*0.001_EB
+!                     IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I+1,J,K))
+                     IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
+                        ITMP=0.05_EB*(TMP(I,J,K)+TMP(I+1,J,K))
+                        YY_G =0.5_EB*(YY(I,J,K,:)+YY(I+1,J,K,:))
+                     ENDIF
+                     HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I+1,J,K))
                   CASE(2)
                      VEL  = V(I,J,K)
                      AREA = DX(I)*DZ(K)
-                     IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J+1,K))
-                     IF (IND==113 .OR. IND==116 .OR. IND==119) &
-                        HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J+1,K))*CP_GAMMA*(0.5_EB*(TMP(I,J,K)+TMP(I,J+1,K))-TMPA)*0.001_EB
+!                     IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J+1,K))
+                     IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
+                        ITMP = 0.05_EB*(TMP(I,J,K)+TMP(I,J+1,K))
+                        YY_G = 0.5_EB*(YY(I,J,K,:)+YY(I,J+1,K,:))
+                     ENDIF
+                     HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J+1,K))
                   CASE(3)
                      VEL  = W(I,J,K)
                      AREA = DX(I)*DY(J)*RC(I)
-                     IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J,K+1))
-                     IF (IND==113 .OR. IND==116 .OR. IND==119) &
-                        HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J,K+1))*CP_GAMMA*(0.5_EB*(TMP(I,J,K)+TMP(I,J,K+1))-TMPA)*0.001_EB
+!                     IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J,K+1))
+                     IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
+                        ITMP = 0.05_EB*(TMP(I,J,K)+TMP(I,J,K+1))
+                        YY_G = 0.5_EB*(YY(I,J,K,:)+YY(I,J+1,K,:))
+                     ENDIF                        
+                     HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J,K+1))
                END SELECT
+               IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
+                  IF (MIXTURE_FRACTION) THEN
+                     Z_VECTOR = YY_G(I_Z_MIN:I_Z_MAX)
+                     CALL GET_H_G(Z_VECTOR,Y_SUM(I,J,K),H_G_SUM,ITMP)
+                     CALL GET_H_G(Z_VECTOR,Y_SUM(I,J,K),H_G,INT(0.1*TMPA))
+                     H_G = H_G_SUM - H_G
+                     IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
+                        H_G_SUM = 0._EB
+                        DO N=1,N_SPECIES
+                           IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
+                              H_G_SUM = H_G_SUM + YY_G(N)*(SPECIES(N)%H_G(ITMP)-SPECIES(N)%H_G(INT(0.1*TMPA)))
+                        END DO
+                        H_G = H_G_SUM + (1._EB-Y_SUM(I,J,K))*H_G
+                     ENDIF
+                  ELSEIF (.NOT.MIXTURE_FRACTION) THEN
+                     IF(N_SPECIES>0) THEN
+                        H_G = SPECIES(0)%H_G(ITMP)
+                        DO N=1,N_SPECIES
+                           H_G = H_G + YY_G(N)*(SPECIES(N)%H_G(ITMP)-SPECIES(N)%H_G(INT(0.1*TMPA)) -&
+                                                SPECIES(0)%H_G(ITMP)+SPECIES(0)%H_G(INT(0.1*TMPA)))
+                        END DO
+                     ELSE
+                        H_G = SPECIES(0)%H_G(ITMP)-SPECIES(0)%H_G(INT(0.1*TMPA))
+                     ENDIF
+                  ENDIF
+                  HMFAC = HMFAC * H_G * 0.001_EB
+               ENDIF
                SELECT CASE(IND)
                   CASE(111:113)
                      FLOW = FLOW + VEL*HMFAC*AREA
@@ -4161,10 +4197,10 @@ END SUBROUTINE DUMP_PROF
 
 
 SUBROUTINE UPDATE_HRR(NM)
-USE PHYSICAL_FUNCTIONS, ONLY : GET_CP
+USE PHYSICAL_FUNCTIONS, ONLY : GET_H_G
 ! Compute the total heat release rate and the radiative loss part
 
-REAL(EB) :: VC,TMP_N,RHO_N,U_N,CP,CP_SUM,YY_N(1:N_SPECIES)
+REAL(EB) :: VC,TMP_N,RHO_N,U_N,H_G,H_G_SUM,YY_N(1:N_SPECIES)
 INTEGER, INTENT(IN) :: NM
 INTEGER :: IOR,I,J,K,IW,IIG,JJG,KKG,N,ITMP
 
@@ -4216,32 +4252,32 @@ WALL_LOOP: DO IW=1,NWC
       CASE(-3) 
          U_N =  W(IIG,JJG,KKG)
    END SELECT
-  ITMP = 0.1_EB*TMP_N
+   ITMP = 0.1_EB*TMP_N
    IF (MIXTURE_FRACTION) THEN
       YY_N = 0.5_EB*(YY(IIG,JJG,KKG,:) + YY_W(IW,:))
       Z_VECTOR = YY_N(I_Z_MIN:I_Z_MAX)
-      CALL GET_CP(Z_VECTOR,Y_SUM(I,J,K),CP,ITMP)
+      CALL GET_H_G(Z_VECTOR,Y_SUM(I,J,K),H_G,ITMP)
       IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
-         CP_SUM = 0._EB
+         H_G_SUM = 0._EB
          DO N=1,N_SPECIES
             IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                CP_SUM = CP_SUM + YY_N(N)*SPECIES(N)%CP(ITMP)
+                H_G_SUM = H_G_SUM + YY_N(N)*SPECIES(N)%H_G(ITMP)
          END DO
-         CP = CP_SUM + (1._EB-Y_SUM(I,J,K))*CP
+         H_G = H_G_SUM + (1._EB-Y_SUM(I,J,K))*H_G
       ENDIF
    ELSEIF (.NOT.MIXTURE_FRACTION) THEN
       IF(N_SPECIES>0) THEN
-         CP = SPECIES(0)%CP(ITMP)
+         H_G = SPECIES(0)%H_G(ITMP)
          DO N=1,N_SPECIES
-            CP = CP + YY_N(N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
+            H_G = H_G + YY_N(N)*(SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP))
          END DO
       ELSE
-         CP = SPECIES(0)%CP(ITMP)
+         H_G = SPECIES(0)%H_G(ITMP)
       ENDIF
    ENDIF
 
    IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) CHRR(NM) = CHRR(NM) + (QCONF(IW)+QRADIN(IW)-QRADOUT(IW))*AW(IW)
-   FHRR(NM) = FHRR(NM) + U_N*RHO_N*CP*(TMP_N-TMPA)*AW(IW)
+   FHRR(NM) = FHRR(NM) + U_N*RHO_N*H_G*AW(IW)
    MLR(NM)  = MLR(NM)  + ACTUAL_BURN_RATE(IW)*AW(IW)*AREA_ADJUST(IW)
 ENDDO WALL_LOOP
 
