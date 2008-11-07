@@ -2052,8 +2052,17 @@ CPOPR = CP_GAMMA/PR
 SPECIES_LOOP: DO N=0,N_SPECIES
  
    SS => SPECIES(N)
-   SS%H_G(0) = 0.
-      CP_MF_TMP(SOOT_INDEX) = 904._EB !cp carbon
+   IF (SS%MODE/=MIXTURE_FRACTION_SPECIES) THEN
+      ALLOCATE(SS%CP(0:500))
+      SS%CP = 0._EB
+      ALLOCATE(SS%CPBAR(0:500))
+      SS%CPBAR = 0._EB
+      ALLOCATE(SS%H_G(0:500))
+      SS%H_G = 0._EB
+      ALLOCATE(SS%RCP(0:500))
+      SS%RCP = 0._EB
+   ENDIF
+   CP_MF_TMP(SOOT_INDEX) = 904._EB !cp carbon
    T_LOOP: DO J=1,500
       TE  = MAX(0.01_EB*J,0.301_EB)
       CP_O2 = 0.926844_EB+0.191789_EB*TE-0.0370788_EB*TE**2+0.00299313_EB*TE**3- 0.00686447_EB/TE**2
@@ -2087,7 +2096,7 @@ SPECIES_LOOP: DO N=0,N_SPECIES
       ELSE
          CP_H2 = 21.70678_EB-2.14654_EB*TE+0.636214_EB*TE**2-0.048438_EB*TE**3-10.266931_EB/TE**2            
       ENDIF
-      SELECT CASE (SPECIES(N)%MODE)
+      SELECT CASE (SS%MODE)
          CASE (MIXTURE_FRACTION_SPECIES)
             CP_MF(FUEL_INDEX,J)  = CP_F*1000._EB
             CP_MF(O2_INDEX,J)    = CP_O2*1000._EB
@@ -2100,7 +2109,7 @@ SPECIES_LOOP: DO N=0,N_SPECIES
             CP_MF(H2_INDEX,J)    = CP_H2*1000._EB
 
          CASE (GAS_SPECIES)
-            SELECT CASE(SPECIES(N)%ID)
+            SELECT CASE(SS%ID)
                CASE DEFAULT
                   SS%CP(J) = SS%RCON*GAMMA/(GAMMA-1._EB)
                CASE('AIR')
@@ -2122,8 +2131,9 @@ SPECIES_LOOP: DO N=0,N_SPECIES
                CASE('ARGON')
                   SS%CP(J) = 519.75_EB
             END SELECT
-            SS%H_G(J) = SS%H_G(J-1) + SS%CP(J)*10._EB  ! J/kg
-            SS%RCP(J) = 1._EB/SS%CP(J)
+            SS%H_G(J)    = SS%H_G(J-1) + SS%CP(J)*10._EB  ! J/kg
+            SS%RCP(J)    = 1._EB/SS%CP(J)
+            SS%CPBAR(J) = SS%H_G(J)*0.001_EB/TE 
       END SELECT
    ENDDO T_LOOP
 ENDDO SPECIES_LOOP
@@ -2131,11 +2141,19 @@ ENDDO SPECIES_LOOP
 !Mixture fraction CP 
 IF (MIXTURE_FRACTION) THEN
    ALLOCATE(Z2CP_C(500))
+   ALLOCATE(Z2CPBAR_C(500))   
+   ALLOCATE(Z2H_G_C(0:500))
    IF (CO_PRODUCTION) THEN
       ALLOCATE(Z2CP(500,3))     
+      ALLOCATE(Z2CPBAR(500,3))     
+      ALLOCATE(Z2H_G(0:500,3))           
    ELSE
       ALLOCATE(Z2CP(500,2))     
+      ALLOCATE(Z2CPBAR(500,2))           
+      ALLOCATE(Z2H_G(0:500,2))           
    ENDIF
+   Z2H_G_C(0)=0._EB
+   Z2H_G(0,:)=0._EB      
    CP_MF_TMP(SOOT_INDEX) = 0.904_EB !cp carbon
    T_LOOP2: DO J=1,500
       TE  = MAX(0.01_EB*J,0.301_EB)
@@ -2171,7 +2189,9 @@ IF (MIXTURE_FRACTION) THEN
       ELSE
          CP_MF_TMP(H2_INDEX) = 21.70678_EB-2.14654_EB*TE+0.636214_EB*TE**2-0.048438_EB*TE**3-10.266931_EB/TE**2            
       ENDIF
-      Z2CP_C(J) = SUM(Z2Y_C(:) * CP_MF_TMP(:)) * 1000._EB
+      Z2CP_C(J)    = SUM(Z2Y_C(:) * CP_MF_TMP(:)) * 1000._EB
+      Z2H_G_C(J)    = Z2H_G_C(J-1) + Z2CP_C(J) * 10._EB
+      Z2CPBAR_C(J) = Z2H_G_C(J)*0.001/TE
       IF (CO_PRODUCTION) THEN
          Z2CP(J,1) = SUM(Z2Y(:,1) * CP_MF_TMP(:)) * 1000._EB
          Z2CP(J,2) = SUM(Z2Y(:,2) * CP_MF_TMP(:)) * 1000._EB
@@ -2180,6 +2200,8 @@ IF (MIXTURE_FRACTION) THEN
          Z2CP(J,1) = SUM(Z2Y(:,1) * CP_MF_TMP(:)) * 1000._EB
          Z2CP(J,2) = SUM(Z2Y(:,2) * CP_MF_TMP(:)) * 1000._EB
       ENDIF    
+      Z2H_G(J,:)    = Z2H_G(J-1,:) + Z2CP(J,:) * 10._EB
+      Z2CPBAR(J,:) = Z2H_G(J,:)*0.001/TE      
    ENDDO T_LOOP2
 ENDIF
 
@@ -2234,7 +2256,10 @@ SPECIES_LOOP_2: DO N=0,N_SPECIES
 
    SS  => SPECIES(N)
    SS0 => SPECIES(0)
- 
+   ALLOCATE(SS%MU(0:500))
+   SS%MU = 0._EB
+   ALLOCATE(SS%K(0:500))
+   SS%K = 0._EB   
    SIGMA2 = SIG(N)**2
    DO ITMP=1,500
       TSTAR = ITMP*10/EPSK(N)
