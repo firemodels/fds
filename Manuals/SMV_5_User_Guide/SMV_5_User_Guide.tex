@@ -340,7 +340,7 @@ pushing the envelope and not accepting the status quo.
 For applied research, Daniel Madrzykowski, Doug Walton and Robert
 Vettori of NIST have used Smokeview to analyze fire incidents.
 Steve Kerber has used Smokeview to visualize flows resulting from
-positive pressure ventiliation (PPV) fans. David Stroup has used Smokeview to analyze cases for use
+positive pressure ventilation (PPV) fans. David Stroup has used Smokeview to analyze cases for use
 in fire fighter training scenarios.  Conversations with Doug
 Walton have been particularly helpful in identifying needed
 features and clarifying how best to make their implementation user
@@ -887,7 +887,7 @@ mesh. This is handy when meshes are defined far apart.
 as appropriate for the mode of scene motion. For example, if
 {\em about world center - level rotations}\ has been selected, then
 the \frameit{Rotate X} and \frameit{Rotate eye} buttons are
-disabled.  A rotation button labelled \frameit{90 deg} has been
+disabled.  A rotation button labeled \frameit{90 deg} has been
 added to allow one to rotate 90 degrees while in {\em eye center}\
 mode. This is handy when one wishes to move down a long corridor
 precisely parallel to one of the walls.  The first click of {\em 90
@@ -1431,7 +1431,7 @@ returns control of scene movement to the user.
 \section{Keyframe Settings}
 A tour is created from a series of keyframes.  Each keyframe is specified using time, position and view direction.  Smokeview interpolates between keyframes using cubic splines to generate the path or tour.  An initial tour is created by pressing the {\em Add Tour} button.  This tour has two keyframes located at opposite ends of the Smokeview scene.  Additional keyframes may be created by selected the {\em Add}\ button.
 
-The position and viewepoint of a keyframe may be adjusted.  First it must be selected.  A keyframe may be selected by either clicking it with
+The position and viewpoint of a keyframe may be adjusted.  First it must be selected.  A keyframe may be selected by either clicking it with
 the left mouse button or by {\em moving}\ through the keyframes using the {\bf Next} or {\bf Previous} buttons.  The active keyframe changes color from red to green.  In Figure \ref{figTOUREXAMPLE}, the active or selected keyframe is at time 40 s.
 Keyframe positions may then be modified by changing data in the t,
 X, Y or Z edit boxes. A different view direction may also be set.
@@ -2746,7 +2746,7 @@ z coordinates of the first tick; {\tt xe}, {\tt ye} and {\tt ze}
 are the x, y and z coordinates of the last tick and {\tt nticks}
 is the number of ticks. The coordinate dimensions are in physical
 units, the same units used to set up the FDS geometry. The
-parameter {\tt ticklength} specifies the lengh of the tick in
+parameter {\tt ticklength} specifies the length of the tick in
 physical units. The parameter {\tt tickdir} specifies the tick
 direction.  For example 1(-1) places ticks in the
 positive(negative) x direction. Similarly, 2(-2) and 3(-3) place
@@ -3812,7 +3812,7 @@ the character string after the {\tt ``:''} are ignored.
 %$(r_{beg}^i,g_{beg}^i,b_{beg}^i)$ to
 %$(r_{end}^i,g_{end}^i,b_{end}^i)$ where each of the six color
 %components range from 0.0 to 1.0.  The line segments do not have
-%to be continous, in other words the last color of one segment may
+%to be continuous, in other words the last color of one segment may
 %be different than the first color of the next segment. The format is given by
 %\begin{verbatim}
 %GENCOLORBAR
@@ -3832,7 +3832,7 @@ the character string after the {\tt ``:''} are ignored.
 %The color at the end of a segment, ({\tt r2, b2, g2}), is only
 %required if it differs from the color at the beginning of the next
 %segment, ({\tt r1,g1,b1}).  In other words, it is required if the
-%colorbar is discontinous. The, {\tt frac}, parameter ranges from
+%colorbar is discontinuous. The, {\tt frac}, parameter ranges from
 %0.0 to 1.0 and is the portion of the colorbar taken up by its
 %segment. Smokeview normalizes the {\tt fracs's} so that their
 %total sums to 1.0.
@@ -4366,10 +4366,10 @@ should be used to render images.  (default: 1)
 
 \hitem{RENDEROPTION} Records the option used to render images.
 
-\hitem{SBATSTART} Specifies that if smooth blockags are present in a simulation that they should be
+\hitem{SBATSTART} Specifies that if smooth blockages are present in a simulation that they should be
 smoothed when Smokeview starts up.
 
-\hitem{SENSORRELSIZE} Specifies a scaling factor that is applied when drawing all sensors.  (defualt: 1.0)
+\hitem{SENSORRELSIZE} Specifies a scaling factor that is applied when drawing all sensors.  (default: 1.0)
 
 \hitem{SHOWAXISLABELS} Specifies whether axis labels should
 be drawn (1) or not drawn (0) drawn. (default: 0)
@@ -4495,7 +4495,7 @@ the title should be drawn (1) or not drawn (0).
 \hitem{SHOWVENTS} Specifies whether vents should be drawn
 (1) or not drawn (0).  (default: 1)
 
-\hitem{SHOWALLTEXTURES} If wall texures are defined in the input .smv file, this
+\hitem{SHOWALLTEXTURES} If wall textures are defined in the input .smv file, this
 option specifies whether to draw (1) or not to draw (0) wall textures.
 (default: 0)
 
@@ -4504,7 +4504,7 @@ option specifies whether to draw (1) or not to draw (0) wall textures.
 the four walls (four vertical bounding surfaces) should be drawn (1) or not drawn (0).
 (default: 1)
 
-\hitem{SMOKERTHICK} When the GPU is used to visualie smoke, this parameter specifies a
+\hitem{SMOKERTHICK} When the GPU is used to visualize smoke, this parameter specifies a
 relative thickness scaling factor.
 
 \hitem{SMOOTHBLOCKSOLID}  Specifies that smooth blockages should be drawn as regular rectangular blockages: (default: 0)
@@ -5218,7 +5218,7 @@ http://www.c-point.com
 A likely explanation is that your video drivers are not hardware
 accelerated for OpenGL. You need to download the latest drivers
 for your video card. You may also try playing around with the
-hardware accleration settings (see \ref{faq3}).
+hardware acceleration settings (see \ref{faq3}).
 
 \section{I loaded a particle file but Smokeview is not
 displaying particles. What is wrong?}
