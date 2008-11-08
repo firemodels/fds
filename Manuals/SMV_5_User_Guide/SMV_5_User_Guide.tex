@@ -5116,7 +5116,7 @@ described below. Details of this program can be found at the FDS/Smokeview websi
 [APPEARANCE]
 nappearances
 string (material description)
-index r g b twidth, theight
+index r g b twidth, theight, tx0, ty0, tz0, alpha, shininess
 tfile
 :
 :   The above entry is repeated nappearances-1 more times
@@ -5137,6 +5137,11 @@ Each appearance entry has 3 lines.
 The values of r, g and b range from 0 to 255.  If a color is not used then use -1 for each color component.
 \hitem{twidth, theight} Textures are tiled or repeated.  The characteristic width and length of the
 texture file is twidth and theight respectively.
+\hitem{tx0, ty0, tz0} x, y and z values in physical coordinates of the offset used to apply a 
+texture to a cad element. (default: 0.0, 0.0, 0.0)
+\hitem{alpha}Opaqueness value of the cad element being drawn.  Values may range from 0.0 (completely transparent)
+to 1.0 (completely opaque.  (default: 1.0)
+\hitem{shininess} Shininess value of the cad element being drawn.  Values may be larger than 0.0 .  (default: 800.0) 
 \hitem{tfile} The name of the texture file.  If one is not used or available then leave this line blank.
 \hitem{nfaces} Number of face entries to follow.  Each face entry has one line.
 \hitem{x1/y1/z1/.../x4/y4/z4}x,y,z coordinates of a quadrilateral.  The four corners of the quad
