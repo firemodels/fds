@@ -725,6 +725,7 @@ void readcad2geom(cadgeom *cd){
     int ii;
     size_t lenbuffer,len;
     float *shininess;
+    float *t_origin;
 
     cdi = cd->cadlookinfo + i;
 
@@ -735,6 +736,10 @@ void readcad2geom(cadgeom *cd){
     shininess=&cdi->shininess;
     cdi->texture_height=-1.0;
     cdi->texture_width=-1.0;
+    t_origin = cdi->texture_origin;
+    t_origin[0]=0.0;
+    t_origin[1]=0.0;
+    t_origin[2]=0.0;
     rrgb[0]=-1.0;
     rrgb[1]=-1.0;
     rrgb[2]=-1.0;
@@ -744,8 +749,12 @@ void readcad2geom(cadgeom *cd){
     for(ii=0;ii<lenbuffer;ii++){
       if(buffer[ii]==',')buffer[ii]=' ';
     }
-    sscanf(buffer,"%i %f %f %f %f %f %f %f",
-      &cdi->index,rrgb,rrgb+1,rrgb+2,&cdi->texture_width,&cdi->texture_height,rrgb+3,shininess);
+    sscanf(buffer,"%i %f %f %f %f %f %f %f %f %f %f",
+      &cdi->index,rrgb,rrgb+1,rrgb+2,
+      &cdi->texture_width,&cdi->texture_height,
+      t_origin,t_origin+1,t_origin+2,
+      rrgb+3,shininess
+      );
 
     if(fgets(buffer,255,stream)==NULL)return;
     trim(buffer);
@@ -855,11 +864,13 @@ void update_cadtextcoords(cadquad *quadi){
   float qx, qy, qz;
   float *xyz;
   float *txy;
+  float *t_origin;
 
   xyz = quadi->xyzpoints;
   txy = quadi->txypoints;
 
   twidth = quadi->cadlookq->texture_width;
+  t_origin = quadi->cadlookq->texture_origin;
   if(twidth==0.0)twidth=1.0;
   theight = quadi->cadlookq->texture_height;
   if(theight==0.0)theight=1.0;
@@ -871,20 +882,22 @@ void update_cadtextcoords(cadquad *quadi){
 
 
   for(i=0;i<4;i++){
-    qx=xbar0+xyz[3*i+0]*xyzmaxdiff;
-    qy=ybar0+xyz[3*i+1]*xyzmaxdiff;
-    qz=zbar0+xyz[3*i+2]*xyzmaxdiff;
+    qx=xbar0+xyz[3*i+0]*xyzmaxdiff - t_origin[0];
+    qy=ybar0+xyz[3*i+1]*xyzmaxdiff - t_origin[1];
+    qz=zbar0+xyz[3*i+2]*xyzmaxdiff - t_origin[2];
 
     if(l1!=0.0){
       txy[2*i]=(ny*qx-nx*qy)/l1;
       txy[2*i+1]=(nx*nz*qx+ny*nz*qy-(nx*nx+ny*ny)*qz)/l2;
     }
     else{
-      txy[2*i]=qx;
-      txy[2*i+1]=qy;
+      txy[2*i]=-qx;
+      txy[2*i+1]=-qy;
     }
     txy[2*i]/=twidth;
     txy[2*i+1]/=theight;
+    txy[2*i]=1.0-txy[2*i];
+    txy[2*i+1]=1.0-txy[2*i+1];
   }
 
 
@@ -1065,7 +1078,6 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
       texti=&quadi->cadlookq->textureinfo;
       if(texti->loaded==0)continue;
 
-
       txypoint = quadi->txypoints;
       normal = quadi->normals;
 
@@ -1090,7 +1102,6 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
 
       glTexCoord2fv(txypoint+6);
       glVertex3fv(xyzpoint+9);
-
     }
     glEnd();
     glDisable(GL_TEXTURE_2D);
