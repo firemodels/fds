@@ -37,7 +37,6 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define CRAWL 0
 #define WALK 1
 #define RUN 2
-#define PROJECTION 24
 
 #define LABEL_VIEW 4
 
@@ -472,7 +471,7 @@ extern "C" void showhide_translate(int var){
 
 /* ------------------ TRANSLATE_CB ------------------------ */
 
-void TRANSLATE_CB(int var){
+extern "C" void TRANSLATE_CB(int var){
   float dx, dy;
   float dx2, dy2;
   float *eye_xyz;

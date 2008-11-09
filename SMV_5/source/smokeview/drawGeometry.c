@@ -3612,7 +3612,6 @@ void init_user_ticks(void){
   user_tick_length=0.1;
   user_tick_width=2.0;
 
-  vis_user_ticks=1;
 }
 
 //SVEXTERN float user_tick_origin[3], user_tick_dxyz[3], user_tick_length, user_tick_width;
