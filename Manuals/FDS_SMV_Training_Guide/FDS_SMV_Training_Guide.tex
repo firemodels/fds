@@ -319,15 +319,15 @@ objective then is to illustrate how these different ventilation conditions effec
 The space, illustrated in Figure \ref{fig2roomplan}, consists of two rooms connected by an open door.  The first room contains a couch
 with dimensions X x Y x Z and the second
 room contains a a twin sized bed with dimension a x b.  The rooms
-each have dimension X x Y x Z.  The interior and exterior doors both have 
-dimensions X x Y.  
+each have dimension X x Y x Z.  The interior and exterior doors both have
+dimensions X x Y.
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=6.0in]{FIGURES/2room_setup}\\
-a) top view
-\includegraphics[width=6.0in]{FIGURES/placeholder}\\
-a) side view
+\includegraphics[width=5.0in]{FIGURES/ranch_00_xz}\\
+a) front view\\
+\includegraphics[width=5.0in]{FIGURES/ranch_00_xy}\\
+c) top view
 \end{center}
 \caption {Schematic of two room test case}
 \label{fig2roomplan}%
@@ -339,7 +339,7 @@ a A~$m^2$ area.
 
 
 \subsection{Materials}
-The walls and ceiling are standard gypsum board.  The floor is 
+The walls and ceiling are standard gypsum board.  The floor is
 covered with carpet.  Wall materials are assumed to be xxxx with thermal properties taken from yyy.  Materials for the couch
 are adjusted so that the heat release curve a free-burn couch matches experimental data given by wwww.
 
@@ -364,7 +364,7 @@ Four cases are modeled each with different ventilation conditions.  Two configur
 \section{Physical Assumptions}
 \subsection{Fire}
 The fire is assumed to spread given an initial constant ignition in a corner
-(back right) of the couch.  
+(back right) of the couch.
 
 \subsection{Materials}
 The thermal properties (thermal conductivity, density and specific heat) for gypsum board are used the wall, floor and ceiling materials.  These values are obtained from XXXX.  The thermal properties and combustion properties of the couch and twin mattresses were chosen to match experimental data obtained from ZZZZ.
@@ -375,7 +375,7 @@ The two room scenarios are modeled using the Fire Dynamics Simulator and
 visualized using Smokeview.
 
 \subsection{Geometry}
-The computational domain includes both the space required to model the two room 
+The computational domain includes both the space required to model the two room
 structure and a space surrounding the structure to account for air flow entering and leaving two room structure.  The domain is modeled using grid cells 0.1 m on a side.
 
 
@@ -385,7 +385,7 @@ couch.  Fire growth occurs as a result of radiative and convective flux from the
 
 \subsection{Ventilation}
 All ventilation is natural.  Open boundaries are used for boundary conditions for the side and top bounding surfaces.  Ventilation is varid from case to case by altering the inflow into the two room structure by opening or closing doors/windows and/or
-venting or not venting the ceiling and roof space over the room with the couch. 
+venting or not venting the ceiling and roof space over the room with the couch.
 
 
 \section{Summary of Results}
@@ -752,10 +752,10 @@ c) open door/windows&d) vented ceiling\\
 \subsection{Geometry}
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=5.0in]{FIGURES/placeholder}\\
+\includegraphics[width=5.0in]{FIGURES/MCFRS_Flashover_00_top}\\
 a) top view\\
-\includegraphics[width=5.0in]{FIGURES/flashover_setup}\\
-b) side view\\
+\includegraphics[width=5.0in]{FIGURES/MCFRS_Flashover_00_front}\\
+a) front view\\
 \end{center}
 \caption {Schematic of flashover trainer layout}
 \label{figflashoverplan}%
@@ -882,6 +882,24 @@ at 3 locations within the MCFRS flashover trainer.  See Figure \ref{figflashover
 \section{Design Data}
 \subsection{Geometry}
 
+%\begin{figure}[\figoptions]
+%\begin{center}
+%\includegraphics[width=6.5in]{FIGURES/MFRI_tower_setup}
+%\end{center}
+%\caption {Schematic of the training tower layout}
+%\label{figtowerplan}%
+%\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=5.0in]{FIGURES/MFRI_Training_Tower_00_top}\\
+a) top view\\
+\includegraphics[width=5.0in]{FIGURES/MFRI_Training_Tower_00_3d}\\
+a) 3D perspective view\\
+\end{center}
+\caption {Schematic of training tower layout}
+\label{figflashoverplan}%
+\end{figure}
 \subsection{Fire}
 
 \subsection{Materials}
@@ -895,13 +913,6 @@ at 3 locations within the MCFRS flashover trainer.  See Figure \ref{figflashover
 
 \section{Model Assumptions and Analysis}
 \subsection{Geometry}
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=6.5in]{FIGURES/MFRI_tower_setup}
-\end{center}
-\caption {Schematic of the training tower layout}
-\label{figtowerplan}%
-\end{figure}
 
 \subsection{Fire}
 
@@ -1023,6 +1034,25 @@ a) 120 s&b) 240 s\\
 \label{figranchplan}%
 \end{figure}
 
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=5.0in]{FIGURES/MCFRS_Tower_00_front}\\
+a) front view\\
+\end{center}
+\caption {Schematic of training tower layout}
+\label{figflashoverplan}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.0in]{FIGURES/MCFRS_Tower_00_2nd_top}\\
+b) top view 2nd floor\\
+\includegraphics[width=4.0in]{FIGURES/MCFRS_Tower_00_1st_top}\\
+b) top view 1st floor\\
+\end{center}
+\caption {Schematic of training tower layout}
+\label{figflashoverplan}%
+\end{figure}
 \subsection{Fire}
 
 \subsection{Materials}
