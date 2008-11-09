@@ -26,7 +26,21 @@ int nevacloaded,nplot3dloaded,nsmoke3dloaded,nisoloaded,nsliceloaded,nvsliceload
 
 GLUI *glui_labels=NULL;
 
+GLUI_Spinner *SPINNER_tick_xmin=NULL;
+GLUI_Spinner *SPINNER_tick_ymin=NULL;
+GLUI_Spinner *SPINNER_tick_zmin=NULL;
+GLUI_Spinner *SPINNER_tick_xmax=NULL;
+GLUI_Spinner *SPINNER_tick_ymax=NULL;
+GLUI_Spinner *SPINNER_tick_zmax=NULL;
+
+GLUI_Rollout *panel_user_tick=NULL;
 GLUI_Spinner *SPINNER_sensorrelsize=NULL;
+GLUI_Spinner *SPINNER_tick_x0=NULL;
+GLUI_Spinner *SPINNER_tick_y0=NULL;
+GLUI_Spinner *SPINNER_tick_z0=NULL;
+GLUI_Spinner *SPINNER_tick_dx0=NULL;
+GLUI_Spinner *SPINNER_tick_dy0=NULL;
+GLUI_Spinner *SPINNER_tick_dz0=NULL;
 GLUI_Panel *panel_transparency=NULL;
 GLUI_Spinner *SPINNER_labels_transparency=NULL;
 GLUI_Checkbox *CHECKBOX_labels_colorbar=NULL;
@@ -35,6 +49,7 @@ GLUI_Checkbox *CHECKBOX_labels_ticks=NULL;
 GLUI_Checkbox *CHECKBOX_labels_title=NULL;
 GLUI_Checkbox *CHECKBOX_labels_axis=NULL;
 GLUI_Checkbox *CHECKBOX_labels_hms=NULL;
+GLUI_Spinner *SPINNER_subtick=NULL;
 
 GLUI_Checkbox *CHECKBOX_labels_framerate=NULL;
 GLUI_Checkbox *CHECKBOX_labels_timelabel=NULL;
@@ -45,6 +60,8 @@ GLUI_Checkbox *CHECKBOX_labels_availmemory=NULL;
 GLUI_Checkbox *CHECKBOX_labels_labels=NULL;
 GLUI_Checkbox *CHECKBOX_labels_gridloc=NULL;
 GLUI_Checkbox *CHECKBOX_labels_average=NULL;
+GLUI_Checkbox *CHECKBOX_vis_user_ticks=NULL;
+GLUI_Checkbox *CHECKBOX_vis_sutodir=NULL;
 
 GLUI_Checkbox *CHECKBOX_labels_flip=NULL;
 GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
@@ -62,11 +79,6 @@ GLUI_Button *Button_BOUNDARY=NULL;
 GLUI_Button *Button_ISO=NULL;
 GLUI_Button *Button_BENCHMARK=NULL;
 
-
-
-
-
-
 GLUI_Panel *panel_showhide=NULL;
 
 #define LABELS_label 0
@@ -80,6 +92,7 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_shade 5
 #define LABELS_transparent 6
 #define LABELS_fontsize 7
+#define LABELS_ticks 8
 
 #define LABELS_particleshow    10
 #define LABELS_sliceshow       11
@@ -92,8 +105,6 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_BENCHMARK 17
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
-
-
 
 /* ------------------ glui_labels_setup ------------------------ */
 
@@ -153,6 +164,32 @@ extern "C" void glui_labels_setup(int main_window){
 
   SPINNER_sensorrelsize=glui_labels->add_spinner("Sensor Scaling",GLUI_SPINNER_FLOAT,&sensorrelsize);
   SPINNER_sensorrelsize->set_float_limits(0.1,10.0,GLUI_LIMIT_CLAMP);
+
+//SVEXTERN float user_tick_origin[3], user_tick_dxyz[3], user_tick_length, user_tick_width;
+//SVEXTERN int user_tick_nxyz[3], user_tick_sub, vis_user_ticks, auto_user_tick_dir;
+
+// x0  y0  z0
+// nx0 ny0 nz0 subint
+// dxyz
+// checkboxes: show ticks, autodir
+
+  panel_user_tick = glui_labels->add_rollout("User Ticks",false);
+  CHECKBOX_vis_user_ticks=glui_labels->add_checkbox_to_panel(panel_user_tick,"Show User Ticks",&vis_user_ticks,LABELS_ticks,Labels_CB);
+  CHECKBOX_vis_sutodir=glui_labels->add_checkbox_to_panel(panel_user_tick,"Auto Tick Dir",&auto_user_tick_dir,LABELS_ticks,Labels_CB);
+  SPINNER_subtick=glui_labels->add_spinner_to_panel(panel_user_tick,"sub-intervals",GLUI_SPINNER_INT,&user_tick_sub);
+  SPINNER_subtick->set_int_limits(1,10,GLUI_LIMIT_CLAMP);
+  SPINNER_tick_x0=glui_labels->add_spinner_to_panel(panel_user_tick,"x0",GLUI_SPINNER_FLOAT,user_tick_origin);
+  SPINNER_tick_y0=glui_labels->add_spinner_to_panel(panel_user_tick,"y0",GLUI_SPINNER_FLOAT,user_tick_origin+1);
+  SPINNER_tick_z0=glui_labels->add_spinner_to_panel(panel_user_tick,"z0",GLUI_SPINNER_FLOAT,user_tick_origin+2);
+  SPINNER_tick_xmin=glui_labels->add_spinner_to_panel(panel_user_tick,"xmin",GLUI_SPINNER_FLOAT,user_tick_min);
+  SPINNER_tick_ymin=glui_labels->add_spinner_to_panel(panel_user_tick,"ymin",GLUI_SPINNER_FLOAT,user_tick_min+1);
+  SPINNER_tick_zmin=glui_labels->add_spinner_to_panel(panel_user_tick,"zmin",GLUI_SPINNER_FLOAT,user_tick_min+2);
+  SPINNER_tick_xmax=glui_labels->add_spinner_to_panel(panel_user_tick,"xmax",GLUI_SPINNER_FLOAT,user_tick_max);
+  SPINNER_tick_ymax=glui_labels->add_spinner_to_panel(panel_user_tick,"ymax",GLUI_SPINNER_FLOAT,user_tick_max+1);
+  SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(panel_user_tick,"zmax",GLUI_SPINNER_FLOAT,user_tick_max+2);
+  SPINNER_tick_dx0=glui_labels->add_spinner_to_panel(panel_user_tick,"dx0",GLUI_SPINNER_FLOAT,user_tick_dxyz);
+  SPINNER_tick_dy0=glui_labels->add_spinner_to_panel(panel_user_tick,"dy0",GLUI_SPINNER_FLOAT,user_tick_dxyz+1);
+  SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(panel_user_tick,"dz0",GLUI_SPINNER_FLOAT,user_tick_dxyz+2);
 
   if((npartinfo>0)||nslice>0||nvslice>0||niso>0||npatch_files||nsmoke3d>0||nplot3d>0){
     glui_labels->add_column(true);
@@ -595,6 +632,8 @@ void Labels_CB(int var){
     LabelMenu(16);
     break;
   case HRRPUVCUTOFF_label:
+    break;
+  case LABELS_ticks:
     break;
   default:
     ASSERT(FFALSE);
