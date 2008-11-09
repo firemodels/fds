@@ -50,6 +50,7 @@ void _sniffErrors(char *whereat);
 #define DIRZ 3
 #define ISO 4
 
+#define PROJECTION 24
 
 #define PARTICLES 0
 #define HUMANS 1
