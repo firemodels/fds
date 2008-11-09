@@ -4968,6 +4968,7 @@ typedef struct {
   updateplot3dmenulabels();
   updatepartmenulabels();
   updatetourmenulabels();
+  init_user_ticks();
   clip_I=ibartemp; clip_J=jbartemp; clip_K=kbartemp;
 
   // define changed_idlist used for blockage editing
@@ -7110,6 +7111,19 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&visTicks);
       continue;
       }
+    if(match(buffer,"USERTICKS",9)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %i %i",&vis_user_ticks,&auto_user_tick_dir,&user_tick_sub);
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f",user_tick_origin,user_tick_origin+1,user_tick_origin+2);
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f",user_tick_min,user_tick_min+1,user_tick_min+2);
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f",user_tick_max,user_tick_max+1,user_tick_max+2);
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f",user_tick_dxyz,user_tick_dxyz+1,user_tick_dxyz+2);
+      continue;
+      }
     if(match(buffer,"SHOWLABELS",10)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visLabels);
@@ -8545,6 +8559,14 @@ void writeini(int flag){
   fprintf(fileout," %i\n",show_slice_in_obst);
   fprintf(fileout,"SHOWTICKS\n");
   fprintf(fileout," %i\n",visTicks);
+  if(flag==LOCAL_INI){
+    fprintf(fileout,"USERTICKS\n");
+    fprintf(fileout," %i %i %i\n",vis_user_ticks,auto_user_tick_dir,user_tick_sub);
+    fprintf(fileout," %f %f %f\n",user_tick_origin[0],user_tick_origin[1],user_tick_origin[2]);
+    fprintf(fileout," %f %f %f\n",user_tick_min[0],user_tick_min[1],user_tick_min[2]);
+    fprintf(fileout," %f %f %f\n",user_tick_max[0],user_tick_max[1],user_tick_max[2]);
+    fprintf(fileout," %f %f %f\n",user_tick_dxyz[0],user_tick_dxyz[1],user_tick_dxyz[2]);
+  }
   fprintf(fileout,"SHOWLABELS\n");
   fprintf(fileout," %i\n",visLabels);
   fprintf(fileout,"SHOWFRAMERATE\n");

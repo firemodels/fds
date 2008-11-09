@@ -804,6 +804,8 @@ SVEXTERN blockagedata **selectblockinfo;
 SVEXTERN tickdata *tickinfo;
 SVEXTERN int nticks,ntickssmv;
 SVEXTERN int visTicks;
+SVEXTERN float user_tick_origin[3], user_tick_max[3], user_tick_min[3], user_tick_dxyz[3], user_tick_length, user_tick_width;
+SVEXTERN int user_tick_nxyz[3], user_tick_sub, user_tick_option, vis_user_ticks, auto_user_tick_dir;
 SVEXTERN int visCadTextures, visTerrainTexture;
 #ifdef pp_COLOR
 SVEXTERN int viscolorbarpath;
