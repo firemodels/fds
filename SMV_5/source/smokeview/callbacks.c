@@ -548,6 +548,12 @@ void keyboard(unsigned char key, int x, int y){
     snap_view_angles();
     return;
   }
+  if(strncmp((const char *)&key2,"%",1)==0){
+    projection_type = 1 - projection_type;
+    TRANSLATE_CB(PROJECTION);
+    updatemenu=1;
+    return;
+  }
   if(strncmp((const char *)&key,"$",1)==0){
     trainer_active=1-trainer_active;
     if(trainer_active==1){

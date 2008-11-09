@@ -248,6 +248,7 @@ EXTERNCPP unsigned char adjustalpha(unsigned char alpha, float factor);
 EXTERNCPP unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
 EXTERNCPP void updatesmoke3d(smoke3d *smoke3di);
 EXTERNCPP void drawsmoke3d(smoke3d *smoke3di);
+EXTERNCPP void TRANSLATE_CB(int var);
 #ifdef pp_GPU
 EXTERNCPP void drawsmoke3dGPU(smoke3d *smoke3di);
 #endif

@@ -190,6 +190,7 @@ void LabelMenu(int value){
     visFramerate = 1 - visFramerate;
     break;
    case 4:
+    vis_user_ticks=1;
     visColorLabels=1;
     visTimeLabels=1;
     visTitle0=1;
@@ -219,6 +220,7 @@ void LabelMenu(int value){
     }
     break;
    case 5:
+    vis_user_ticks=0;
     visColorLabels=0;
     visTimeLabels=0;
     visTitle0=0;
@@ -297,6 +299,9 @@ void LabelMenu(int value){
      break;
    case 17:
      show_hrrcutoff=1-show_hrrcutoff;
+     break;
+   case 18:
+     vis_user_ticks = 1 - vis_user_ticks;
      break;
    default:
      ASSERT(FFALSE);
@@ -3627,6 +3632,11 @@ void GeometryMenu(int value){
   case 3:
     if(isZoneFireModel==0)visFrame=1-visFrame;
     break;
+  case 4:
+    projection_type = 1 - projection_type;
+    TRANSLATE_CB(PROJECTION);
+    updatemenu=1;
+    break;
   case 5:
     visFloor=1-visFloor;
     break;
@@ -4088,7 +4098,7 @@ static int in_menu=0;
   else{
     glutAddMenuEntry("   Solid",visBLOCKNormal);
   }
-if(visBlocks==visBLOCKOutline){
+  if(visBlocks==visBLOCKOutline){
     glutAddMenuEntry("   *Outline",visBLOCKOutline);
   }
    else{
@@ -4446,6 +4456,12 @@ if(visBlocks==visBLOCKOutline){
   else{
     visFrame=0;
   }
+  if(projection_type==0){
+    glutAddMenuEntry("Size preserving projection (%)",4);
+  }
+  else{
+    glutAddMenuEntry("*Size preserving projection (%)",4);
+  }
   glutAddMenuEntry("Show All",11);
   glutAddMenuEntry("Hide All",13);
 
@@ -4478,9 +4494,12 @@ if(visBlocks==visBLOCKOutline){
   if(visTimeLabels==1)glutAddMenuEntry("*Time Bars",1);
   if(visTimeLabels==0)glutAddMenuEntry("Time Bars",1);
   if(nticks>0){
-    if(visTicks==0)glutAddMenuEntry("Ticks",12);
-    if(visTicks==1)glutAddMenuEntry("*Ticks",12);
+    if(visTicks==0)glutAddMenuEntry("FDS Generated Ticks",12);
+    if(visTicks==1)glutAddMenuEntry("*FDS Generated Ticks",12);
   }
+  if(vis_user_ticks==1)glutAddMenuEntry("*User Settable Ticks",18);
+  if(vis_user_ticks==0)glutAddMenuEntry("User Settable Ticks",18);
+
   if(ntitles>1){
     glutAddSubMenu("Titles",titlemenu);
   }
