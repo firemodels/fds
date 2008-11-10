@@ -138,9 +138,9 @@ IF (DNS .AND. MIXTURE_FRACTION) THEN
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = 0.1_EB*TMP(I,J,K)
             CALL GET_MU(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
-            MU_SUM = MU(I,J,K)*(1-Y_SUM(I,J,K))
+            MU_SUM = MU(I,J,K)*(1._EB-Y_SUM(I,J,K))
             DO N=1,N_SPECIES
-               IF(SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) MU_SUM = MU_SUM + YYP(I,J,K,N)*(SPECIES(N)%MU(ITMP)-MU(I,J,K))
+               IF(SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) MU_SUM = MU_SUM + YYP(I,J,K,N)*SPECIES(N)%MU(ITMP)
             ENDDO
             MU(I,J,K) = MU_SUM
          ENDDO
