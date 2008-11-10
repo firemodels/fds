@@ -463,10 +463,14 @@ ENDIF
 IF (APPEND) THEN
    OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
 ELSE
-   OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')
-   WRITE(TCFORM,'(A,I4.4,A)') "(",5+N_ZONE,"(A,','),A)"
-   WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kg/s',('atm',N=1,N_ZONE) 
-   WRITE(LU_HRR,TCFORM) 'FDS_HRR_Time','HRR','RAD_LOSS','CONV_LOSS','COND_LOSS','BURN_RATE',(TRIM(P_ZONE(N)%ID),N=1,N_ZONE) 
+   IF (MATLAB_DLMREAD) THEN
+      OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')   
+   ELSE
+      OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')
+      WRITE(TCFORM,'(A,I4.4,A)') "(",5+N_ZONE,"(A,','),A)"
+      WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kg/s',('atm',N=1,N_ZONE) 
+      WRITE(LU_HRR,TCFORM) 'FDS_HRR_Time','HRR','RAD_LOSS','CONV_LOSS','COND_LOSS','BURN_RATE',(TRIM(P_ZONE(N)%ID),N=1,N_ZONE) 
+   ENDIF
 ENDIF
  
 ! Write out info about mixture fraction-based state relationships for all mixture fraction SPECies
@@ -519,34 +523,38 @@ IF_DUMP_SPECIES_INFO: IF (MASS_FILE) THEN
    IF (APPEND) THEN
       OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
    ELSE
-      OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='REPLACE')
-      IF (MIXTURE_FRACTION) THEN
-         LABEL(1) = 'Time'
-         LABEL(2) = 'Total'
-         LABEL(3) = 'Fuel'
-         LABEL(4) = 'O2'
-         LABEL(5) = 'N2'
-         LABEL(6) = 'H2O'
-         LABEL(7) = 'CO2'
-         LABEL(8) = 'CO'
-         LABEL(9) = 'H2'
-         LABEL(10)= 'Soot'
-         LABEL(11)= 'Other'         
-         NN = 11
-         DO N=1,N_SPECIES
-            IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-               NN = NN+1
-               LABEL(NN) = SPECIES(N)%ID
-            ENDIF
-         ENDDO
-         WRITE(TCFORM,'(A,I4.4,A)') "(",NN-1,"(A,','),A)"
-         WRITE(LU_MASS,TCFORM) 's',('kg',N=1,NN-1)
-         WRITE(LU_MASS,TCFORM) (TRIM(LABEL(N)),N=1,NN)
-      ELSE
-         WRITE(TCFORM,'(A,I4.4,A)') "(",N_SPECIES+1,"(A,','),A)"
-         WRITE(LU_MASS,TCFORM) 's',('kg',N=0,N_SPECIES)
-         WRITE(LU_MASS,TCFORM)'FDS Time','Total',(TRIM(SPECIES(N)%ID),N=1,N_SPECIES)
-      ENDIF
+      IF_MATLAB_DLMREAD_MASS: IF (MATLAB_DLMREAD) THEN
+         OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='REPLACE')
+      ELSE IF_MATLAB_DLMREAD_MASS
+         OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='REPLACE')
+         IF (MIXTURE_FRACTION) THEN
+            LABEL(1) = 'Time'
+            LABEL(2) = 'Total'
+            LABEL(3) = 'Fuel'
+            LABEL(4) = 'O2'
+            LABEL(5) = 'N2'
+            LABEL(6) = 'H2O'
+            LABEL(7) = 'CO2'
+            LABEL(8) = 'CO'
+            LABEL(9) = 'H2'
+            LABEL(10)= 'Soot'
+            LABEL(11)= 'Other'         
+            NN = 11
+            DO N=1,N_SPECIES
+               IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
+                  NN = NN+1
+                  LABEL(NN) = SPECIES(N)%ID
+               ENDIF
+            ENDDO
+            WRITE(TCFORM,'(A,I4.4,A)') "(",NN-1,"(A,','),A)"
+            WRITE(LU_MASS,TCFORM) 's',('kg',N=1,NN-1)
+            WRITE(LU_MASS,TCFORM) (TRIM(LABEL(N)),N=1,NN)
+         ELSE
+            WRITE(TCFORM,'(A,I4.4,A)') "(",N_SPECIES+1,"(A,','),A)"
+            WRITE(LU_MASS,TCFORM) 's',('kg',N=0,N_SPECIES)
+            WRITE(LU_MASS,TCFORM)'FDS Time','Total',(TRIM(SPECIES(N)%ID),N=1,N_SPECIES)
+         ENDIF
+      ENDIF IF_MATLAB_DLMREAD_MASS
    ENDIF
 ENDIF IF_DUMP_SPECIES_INFO
 
