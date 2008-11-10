@@ -20,6 +20,7 @@
 // svn revision character string
 char main_revision[]="$Revision$";
 // dummy change to update version
+// dummy change to test "commit" access to google code repository
 
 /* ------------------ main ------------------------ */
 
