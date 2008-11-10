@@ -2260,6 +2260,8 @@ SPECIES_LOOP_2: DO N=0,N_SPECIES
    SS%MU = 0._EB
    ALLOCATE(SS%K(0:500))
    SS%K = 0._EB   
+   ALLOCATE(SS%D(0:500))
+   SS%D = 0._EB   
    SIGMA2 = SIG(N)**2
    DO ITMP=1,500
       TSTAR = ITMP*10/EPSK(N)
@@ -2287,8 +2289,7 @@ SPECIES_LOOP_2: DO N=0,N_SPECIES
                
          D_N0 = 0.00266E-4_EB*AMW*(10*ITMP)**1.5_EB/(SIGMA2*OMEGA)
          IF (D_USER(N)>=0._EB .AND. .NOT.CONSTANT_PROPERTIES) D_N0 = D_USER(N)*(ITMP*10/TMPA)**1.75_EB
-         IF (D_USER(N)>=0._EB .AND. CONSTANT_PROPERTIES)      D_N0 = D_USER(N)
-         
+         IF (D_USER(N)>=0._EB .AND. CONSTANT_PROPERTIES)      D_N0 = D_USER(N)         
          SS%D(ITMP) = D_N0
       ENDDO
    ENDIF
