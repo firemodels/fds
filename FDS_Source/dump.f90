@@ -3416,7 +3416,7 @@ REAL(EB) :: FLOW,HMFAC,F1,F2,H_TC,SRAD,TMP_TC,MU_AIR,RE_D,K_AIR,NUSSELT,NU_FAC,P
             VELSR,WATER_VOL_FRAC,RHS,Y_E,DT_C,DT_E,T_RATIO,Y_E_LAG, H_G,H_G_SUM,&
             DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,YY_G(1:N_SPECIES)
 REAL(FB) :: TMPUP,TMPLOW,ZINT
-INTEGER :: ITER,N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW,SPEC_INDEX,PART_INDEX,ITMP
+INTEGER :: ITER,N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW,SPEC_INDEX,PART_INDEX,ITMP,IP,JP,KP
 CHARACTER(100) :: MESSAGE
 
 ! Get species mass fraction if necessary
@@ -3649,37 +3649,28 @@ SELECT CASE(IND)
       DO K=DV%K1,DV%K2
          DO J=DV%J1,DV%J2
             DO I=DV%I1,DV%I2
-               IF (IND==111 .OR. IND==114 .OR. IND==117) HMFAC = 1._EB
+               IP = I
+               JP = J
+               KP = K
                SELECT CASE(DV%IOR)
                   CASE(1)
+                     IP   = I+1
                      VEL  = U(I,J,K)
                      AREA = DY(J)*DZ(K)*RC(I)
-!                     IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I+1,J,K))
-                     IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
-                        ITMP=0.05_EB*(TMP(I,J,K)+TMP(I+1,J,K))
-                        YY_G =0.5_EB*(YY(I,J,K,:)+YY(I+1,J,K,:))
-                     ENDIF
-                     HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I+1,J,K))
                   CASE(2)
+                     JP   = J+1
                      VEL  = V(I,J,K)
                      AREA = DX(I)*DZ(K)
-!                     IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J+1,K))
-                     IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
-                        ITMP = 0.05_EB*(TMP(I,J,K)+TMP(I,J+1,K))
-                        YY_G = 0.5_EB*(YY(I,J,K,:)+YY(I,J+1,K,:))
-                     ENDIF
-                     HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J+1,K))
                   CASE(3)
+                     KP   = K+1
                      VEL  = W(I,J,K)
                      AREA = DX(I)*DY(J)*RC(I)
-!                     IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J,K+1))
-                     IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
-                        ITMP = 0.05_EB*(TMP(I,J,K)+TMP(I,J,K+1))
-                        YY_G = 0.5_EB*(YY(I,J,K,:)+YY(I,J+1,K,:))
-                     ENDIF                        
-                     HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(I,J,K+1))
                END SELECT
+               IF (IND==111 .OR. IND==114 .OR. IND==117) HMFAC = 1._EB
+               IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))
                IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
+                  ITMP=0.05_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
+                  YY_G =0.5_EB*(YY(I,J,K,:)+YY(IP,JP,KP,:))
                   IF (MIXTURE_FRACTION) THEN
                      Z_VECTOR = YY_G(I_Z_MIN:I_Z_MAX)
                      CALL GET_H_G(Z_VECTOR,Y_SUM(I,J,K),H_G_SUM,ITMP)
@@ -3693,18 +3684,18 @@ SELECT CASE(IND)
                         END DO
                         H_G = H_G_SUM + (1._EB-Y_SUM(I,J,K))*H_G
                      ENDIF
-                  ELSEIF (.NOT.MIXTURE_FRACTION) THEN
-                     IF(N_SPECIES>0) THEN
+                  ELSE
+                     IF (N_SPECIES>0) THEN
                         H_G = SPECIES(0)%H_G(ITMP)
                         DO N=1,N_SPECIES
                            H_G = H_G + YY_G(N)*(SPECIES(N)%H_G(ITMP)-SPECIES(N)%H_G(INT(0.1*TMPA)) -&
                                                 SPECIES(0)%H_G(ITMP)+SPECIES(0)%H_G(INT(0.1*TMPA)))
-                        END DO
+                        ENDDO
                      ELSE
                         H_G = SPECIES(0)%H_G(ITMP)-SPECIES(0)%H_G(INT(0.1*TMPA))
                      ENDIF
                   ENDIF
-                  HMFAC = HMFAC * H_G * 0.001_EB
+                  HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))*H_G*0.001_EB
                ENDIF
                SELECT CASE(IND)
                   CASE(111:113)
