@@ -543,7 +543,9 @@ Contains
       NPC_PERS = 0
       COUNT_PERS_LOOP: Do
          Call CHECKREAD('PERS',LU_INPUT,IOS) 
-         If (IOS == 1) Exit COUNT_PERS_LOOP
+         If (IOS == 1) Then
+            Exit COUNT_PERS_LOOP
+         End If
          Read(LU_INPUT,NML=PERS,End=221,ERR=222,IOSTAT=IOS)
          NPC_PERS = NPC_PERS + 1
 222      If (IOS > 0) Call SHUTDOWN('ERROR: Problem with PERS line')
@@ -558,7 +560,9 @@ Contains
       COUNT_EVAC_LOOP: Do
          NUMBER_INITIAL_PERSONS = 0
          Call CHECKREAD('EVAC',LU_INPUT,IOS) 
-         If (IOS == 1) Exit COUNT_EVAC_LOOP
+         If (IOS == 1) Then
+            Exit COUNT_EVAC_LOOP
+         End If
          Read(LU_INPUT,NML=EVAC,End=219,ERR=220,IOSTAT=IOS)
          NPC_EVAC = NPC_EVAC + 1
          If (COLOR_METHOD == 0 .And. NUMBER_INITIAL_PERSONS > 0) Then
@@ -575,7 +579,9 @@ Contains
       COUNT_EXITS_LOOP: Do
          COUNT_ONLY = .False.
          Call CHECKREAD('EXIT',LU_INPUT,IOS) 
-         If (IOS == 1) Exit COUNT_EXITS_LOOP
+         If (IOS == 1) Then
+            Exit COUNT_EXITS_LOOP
+         End If
          Read(LU_INPUT,NML=Exit,End=223,ERR=224,IOSTAT=IOS)
          N_EXITS = N_EXITS + 1
          If (COLOR_METHOD == 4 .And. .Not.COUNT_ONLY) Then
@@ -590,7 +596,9 @@ Contains
       N_DOORS = 0
       COUNT_DOORS_LOOP: Do
          Call CHECKREAD('DOOR',LU_INPUT,IOS) 
-         If (IOS == 1) Exit COUNT_DOORS_LOOP
+         If (IOS == 1) Then
+            Exit COUNT_DOORS_LOOP
+         End If
          Read(LU_INPUT,NML=DOOR,End=225,ERR=226,IOSTAT=IOS)
          N_DOORS = N_DOORS + 1
          If (COLOR_METHOD == 4) Then
@@ -606,7 +614,9 @@ Contains
       COUNT_ENTRYS_LOOP: Do
          MAX_FLOW     = 0.0_EB
          Call CHECKREAD('ENTR',LU_INPUT,IOS) 
-         If (IOS == 1) Exit COUNT_ENTRYS_LOOP
+         If (IOS == 1) Then
+            Exit COUNT_ENTRYS_LOOP
+         End If
          Read(LU_INPUT,NML=ENTR,End=227,ERR=228,IOSTAT=IOS)
          N_ENTRYS = N_ENTRYS + 1
          If (COLOR_METHOD == 0 .And. MAX_FLOW > 0) Then
@@ -621,7 +631,9 @@ Contains
       N_CORRS = 0
       COUNT_CORRS_LOOP: Do
          Call CHECKREAD('CORR',LU_INPUT,IOS) 
-         If (IOS == 1) Exit COUNT_CORRS_LOOP
+         If (IOS == 1) Then
+            Exit COUNT_CORRS_LOOP
+         End If
          Read(LU_INPUT,NML=CORR,End=229,ERR=230,IOSTAT=IOS)
          N_CORRS = N_CORRS + 1
 230      If (IOS > 0) Call SHUTDOWN('ERROR: Problem with CORR line')
@@ -633,7 +645,9 @@ Contains
       N_HOLES = 0
       COUNT_EVHO_LOOP: Do
          Call CHECKREAD('EVHO',LU_INPUT,IOS) 
-         If (IOS == 1) Exit COUNT_EVHO_LOOP
+         If (IOS == 1) Then
+            Exit COUNT_EVHO_LOOP
+         End If
          Read(LU_INPUT,NML=EVHO,End=231,ERR=232,IOSTAT=IOS)
          N_HOLES = N_HOLES + 1
 232      If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EVHO line')
@@ -645,7 +659,9 @@ Contains
       N_SSTANDS = 0
       COUNT_EVSS_LOOP: Do
          Call CHECKREAD('EVSS',LU_INPUT,IOS) 
-         If (IOS == 1) Exit COUNT_EVSS_LOOP
+         If (IOS == 1) Then
+            Exit COUNT_EVSS_LOOP
+         End If
          Read(LU_INPUT,NML=EVSS,End=233,ERR=234,IOSTAT=IOS)
          N_SSTANDS = N_SSTANDS + 1
 234      If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EVSS line')
@@ -657,7 +673,9 @@ Contains
       N_STRS = 0
       COUNT_STRS_LOOP: Do
          Call CHECKREAD('STRS',LU_INPUT,IOS) 
-         If (IOS == 1) Exit COUNT_STRS_LOOP
+         If (IOS == 1) Then
+            Exit COUNT_STRS_LOOP
+         End If
          Read(LU_INPUT,NML=STRS,End=235,ERR=236,IOSTAT=IOS)
          N_STRS = N_STRS + 1
 236      If (IOS > 0) Call SHUTDOWN('ERROR: Problem with STRS line')
@@ -916,7 +934,9 @@ Contains
          ! No read for default values
          If ( N > 0 ) Then
             Call CHECKREAD('PERS',LU_INPUT,IOS)
-            If (IOS == 1) Exit READ_PERS_LOOP
+            If (IOS == 1) Then
+               Exit READ_PERS_LOOP
+            End If
             Read(LU_INPUT,PERS,End=24,IOSTAT=IOS)
 
             ! Check if some default human group is given.
@@ -1294,7 +1314,9 @@ Contains
          COLOR_INDEX   = -1
          !
          Call CHECKREAD('EXIT',LU_INPUT,IOS)
-         If (IOS == 1) Exit READ_EXIT_LOOP
+         If (IOS == 1) Then
+            Exit READ_EXIT_LOOP
+         End If
          Read(LU_INPUT,Exit,End=26,IOSTAT=IOS)
          !
          ! Old input used COLOR_INDEX, next lines are needed for that
@@ -1570,7 +1592,9 @@ Contains
          KEEP_XY       = .False.
          !
          Call CHECKREAD('DOOR',LU_INPUT,IOS)
-         If (IOS == 1) Exit READ_DOOR_LOOP
+         If (IOS == 1) Then
+            Exit READ_DOOR_LOOP
+         End If
          Read(LU_INPUT,DOOR,End=27,IOSTAT=IOS)
          !
          ! Old input used COLOR_INDEX, next lines are needed for that
@@ -1833,7 +1857,9 @@ Contains
          MAX_HUMANS_INSIDE = 0
          !
          Call CHECKREAD('CORR',LU_INPUT,IOS)
-         If (IOS == 1) Exit READ_CORR_LOOP
+         If (IOS == 1) Then
+            Exit READ_CORR_LOOP
+         End If
          Read(LU_INPUT,CORR,End=29,IOSTAT=IOS)
          !
          !
@@ -2059,7 +2085,9 @@ Contains
          FAC_V0_HORI                 = 1.0_EB
          !
          Call CHECKREAD('STRS',LU_INPUT,IOS)
-         If (IOS == 1) Exit READ_STRS_LOOP
+         If (IOS == 1) Then
+            Exit READ_STRS_LOOP
+         End If
          Read(LU_INPUT,STRS,End=32,IOSTAT=IOS)
          !
          Do I=1,5,2
@@ -2363,7 +2391,9 @@ Contains
          !
          !
          Call CHECKREAD('ENTR',LU_INPUT,IOS)
-         If (IOS == 1) Exit READ_ENTR_LOOP
+         If (IOS == 1) Then
+            Exit READ_ENTR_LOOP
+         End If
          Read(LU_INPUT,ENTR,End=28,IOSTAT=IOS)
          ! 
          ! Old input used QUANTITY, next lines are needed for that
@@ -2636,7 +2666,9 @@ Contains
          KNOWN_DOOR_PROBS         = 1.0_EB
          !
          Call CHECKREAD('EVAC',LU_INPUT,IOS)
-         If (IOS == 1) Exit READ_EVAC_LOOP
+         If (IOS == 1) Then
+            Exit READ_EVAC_LOOP
+         End If
          Read(LU_INPUT,EVAC,End=25,IOSTAT=IOS)
          ! 
          ! Old input used QUANTITY, next lines are needed for that
@@ -2879,7 +2911,9 @@ Contains
          EVAC_MESH     = 'null'
          !
          Call CHECKREAD('EVHO',LU_INPUT,IOS)
-         If (IOS == 1) Exit READ_EVHO_LOOP
+         If (IOS == 1) Then
+            Exit READ_EVHO_LOOP
+         End If
          Read(LU_INPUT,EVHO,End=30,IOSTAT=IOS)
          !
          Do I=1,5,2
@@ -2971,7 +3005,9 @@ Contains
          USE_V0        = .False.
          !
          Call CHECKREAD('EVSS',LU_INPUT,IOS)
-         If (IOS == 1) Exit READ_EVSS_LOOP
+         If (IOS == 1) Then
+            Exit READ_EVSS_LOOP
+         End If
          Read(LU_INPUT,EVSS,End=31,IOSTAT=IOS)
          !
          Do I=1,5,2
@@ -3771,7 +3807,9 @@ Contains
        HP_MeshLoop: Do i = 1, nmeshes
           If (evacuation_only(i) .And. evacuation_grid(i)) Then
              n_tmp = n_tmp +1
-             If (HPT%IMESH == i) Exit HP_MeshLoop
+             If (HPT%IMESH == i) Then
+                Exit HP_MeshLoop
+             End If
           End If
        End Do HP_MeshLoop
        If (n_tmp < 1 .Or. n_tmp > n_egrids) Then
