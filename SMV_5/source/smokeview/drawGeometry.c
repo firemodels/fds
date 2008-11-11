@@ -752,8 +752,8 @@ void readcad2geom(cadgeom *cd){
     sscanf(buffer,"%i %f %f %f %f %f %f %f %f %f %f",
       &cdi->index,rrgb,rrgb+1,rrgb+2,
       &cdi->texture_width,&cdi->texture_height,
-      t_origin,t_origin+1,t_origin+2,
-      rrgb+3,shininess
+      rrgb+3,shininess,
+      t_origin,t_origin+1,t_origin+2
       );
 
     if(fgets(buffer,255,stream)==NULL)return;
