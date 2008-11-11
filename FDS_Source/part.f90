@@ -1107,7 +1107,7 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,NM)
     
 ! Mass and energy transfer between gas and droplets
 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_CPBAR
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN,DROP_RAD,DROP_TMP,MVAP_TOT
 REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS
@@ -1116,10 +1116,12 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
             T,PR_AIR,M_VAP,M_VAP_MAX,XI,YJ,ZK,RDT,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
-            C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP
-INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS
+            C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
+            CP,CP_SUM,H_NEW
+INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS,ITMP,N
 INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
+LOGICAL :: TEMPITER
 
 ! Initializations
 RDT    = 1._EB/DT
@@ -1383,13 +1385,63 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ENDIF
          
             ! Decrease temperature of the gas cell
-
-            TMP(II,JJ,KK) = (M_GAS*CP_GAMMA*TMP_G - WGT*Q_CON_GAS)/(M_GAS*CP_GAMMA)  
+            ITMP = 0.1_EB*TMP_G
+            IF (MIXTURE_FRACTION) THEN
+               Z_VECTOR = YY(II,JJ,KK,I_Z_MIN:I_Z_MAX)
+               CALL GET_CPBAR(Z_VECTOR,Y_SUM(II,JJ,KK),CP,ITMP)
+               IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
+                  CP_SUM = 0._EB
+                  DO N=1,N_SPECIES
+                     IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
+                        CP_SUM = CP_SUM + YY(II,JJ,KK,N)*SPECIES(N)%CPBAR(ITMP)
+                  END DO
+                  CP = CP_SUM + (1._EB-Y_SUM(II,JJ,KK))*CP
+               ENDIF
+            ELSEIF (.NOT.MIXTURE_FRACTION) THEN
+               IF(N_SPECIES>0) THEN
+                  CP = SPECIES(0)%CPBAR(ITMP)
+                  DO N=1,N_SPECIES
+                     CP = CP + YY(II,JJ,KK,N)*(SPECIES(N)%CPBAR(ITMP)-SPECIES(0)%CPBAR(ITMP))
+                  END DO
+               ELSE
+                  CP = SPECIES(0)%CPBAR(ITMP)
+               ENDIF
+            ENDIF
+            H_NEW = (M_GAS*CP*TMP_G - WGT*Q_CON_GAS)/M_GAS
+            TEMPITER = .FALSE.
+            ITERATE_TEMP: DO WHILE (TEMPITER)
+               TMP_G = H_NEW/CP
+               IF ((TMP(II,JJ,KK)-TMP_G)/TMP(II,JJ,KK) > 0.01_EB) TEMPITER = .TRUE.
+               TMP(II,JJ,KK) = TMP_G
+               ITMP = 0.1_EB*TMP(II,JJ,KK)
+               IF (MIXTURE_FRACTION) THEN
+                  Z_VECTOR = YY(II,JJ,KK,I_Z_MIN:I_Z_MAX)
+                  CALL GET_CPBAR(Z_VECTOR,Y_SUM(II,JJ,KK),CP,ITMP)
+                  IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
+                     CP_SUM = 0._EB
+                     DO N=1,N_SPECIES
+                        IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
+                           CP_SUM = CP_SUM + YY(II,JJ,KK,N)*SPECIES(N)%CPBAR(ITMP)
+                     END DO
+                     CP = CP_SUM + (1._EB-Y_SUM(II,JJ,KK))*CP
+                  ENDIF
+               ELSEIF (.NOT.MIXTURE_FRACTION) THEN
+                  IF(N_SPECIES>0) THEN
+                     CP = SPECIES(0)%CPBAR(ITMP)
+                     DO N=1,N_SPECIES
+                        CP = CP + YY(II,JJ,KK,N)*(SPECIES(N)%CPBAR(ITMP)-SPECIES(0)%CPBAR(ITMP))
+                     END DO
+                  ELSE
+                     CP = SPECIES(0)%CPBAR(ITMP)
+                  ENDIF
+               ENDIF
+            ENDDO ITERATE_TEMP
+            
             TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
 
             ! Compute contribution to the divergence
 
-            D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) + WGT*RVC/(DT_SUBSTEP*RHO_G)*( M_VAP*MW_RATIO-Q_CON_GAS/(CP_GAMMA*TMP(II,JJ,KK)) )
+            D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) + WGT*RVC/(DT_SUBSTEP*RHO_G)*( M_VAP*MW_RATIO-Q_CON_GAS/(CP*TMP(II,JJ,KK)) )
 
             ! Add fuel evaporation rate to running counter before adjusting its value
 
