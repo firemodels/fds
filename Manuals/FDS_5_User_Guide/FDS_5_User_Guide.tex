@@ -2839,12 +2839,17 @@ Usually, the thermal properties of a solid boundary are specified via the
 {\ct MATL} namelist group, which is in turn invoked by the {\ct SURF} entry via
 the character string {\ct MATL\_ID}. However, sometimes it is convenient to
 simply specify a fixed temperature boundary condition, in which case set
-{\ct TMP\_FRONT} to be the surface temperature in units of $^\circ$C.
-For a solid surface of fixed convective heat flux, set {\ct CONVECTIVE\_HEAT\_FLUX} to be
-the convective heat flux in units of kW/m$^2$. If {\ct CONVECTIVE\_HEAT\_FLUX} is
-positive, the wall heats up the surrounding gases. If {\ct CONVECTIVE\_HEAT\_FLUX}
-is negative, the wall cools the surrounding gases. The radiative heat
-flux can be specified only by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY}.
+{\ct TMP\_FRONT} to be the surface temperature in units of $^\circ$C.  One may also specify
+a fixed heat flux.  Two methods are available to do this.  The first is to specify a 
+{\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface
+temperature required to
+ensure that the combine radiative and convective heat flux from the surface is equal to the
+{\ct NET\_HEAT\_FLUX}.  The second method is to specify seperately the {\ct CONVECTIVE\_HEAT\_FLUX}, 
+in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both
+{\ct TMP\_FRONT} and {\ct EMISSIVITY}. Note that if you wish there to be only a convective heat flux from a
+surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or 
+{\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or 
+{\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. 
 
 Fixed temperature or fixed heat flux boundary conditions are
 easy to apply, but only of limited usefulness in real fire scenarios.
@@ -2875,7 +2880,8 @@ surface be adiabatic, that is, there is no net heat transfer
 (radiative and convective) from the gas to the solid. For this case,
 all that must be prescribed on the {\ct SURF} line is {\ct
 ADIABATIC=.TRUE.}, nothing else.  FDS will compute a wall temperature
-so that the sum of the convective and radiative fluxes is zero.
+so that the sum of the convective and radiative fluxes is zero.  Specifying a surface as {\ct ADIABATIC} will
+result in FDS defining {\ct NET\_HEAT\_FLUX=0}.  
 \index{SURF!ADIABATIC}
 
 
@@ -6791,7 +6797,8 @@ vector defined by {\ct ORIENTATION}, a triplet of real numbers that defines the 
 means that the device points in the negative $x$ direction. Unlike {\ct IOR}, the {\ct ORIENTATION} can be in any direction, not just those associated with
 the three coordinate directions.
 
-
+Note that the sign of the output of heat flux is different than the sign of the input of a heat flux.  A positive
+output quantity for heat flux means heat is being transferred into the surface.
 
 \subsection{Droplet Output Quantities}
 \label{info:part_output}
@@ -8235,6 +8242,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MATL\_MASS\_FRACTION}            & Real Array      & (Layer,Component)                 &                     &                         \\ \hline
 {\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 1E12                    \\ \hline
 {\ct MLRPUA }                         & Real            & Mass loss rate per unit area      & kg/m$^2$s           & 0.                      \\ \hline
+{\ct NET\_HEAT\_FLUX}                 & Real            & Net flux at surface               & kW/m$^2$            & 0.                      \\ \hline
 {\ct NPPC}                            & Integer         & Number of particles per cell      &                     & 1                       \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}            & Real            & See Section~\ref{info:particle_flux} & kg/m$^2$ s       & 0.                      \\ \hline
 {\ct PART\_ID}                        & Character       & Lagrangian Particle ID            &                     &                         \\ \hline
