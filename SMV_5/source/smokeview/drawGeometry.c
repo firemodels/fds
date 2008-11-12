@@ -3603,9 +3603,9 @@ void init_user_ticks(void){
   user_tick_origin[1]=user_tick_min[1];
   user_tick_origin[2]=user_tick_min[2];
 
-  user_tick_dxyz[0]=1.0;
-  user_tick_dxyz[1]=1.0;
-  user_tick_dxyz[2]=1.0;
+  user_tick_step[0]=1.0;
+  user_tick_step[1]=1.0;
+  user_tick_step[2]=1.0;
 
   user_tick_sub=5;
 
@@ -3614,76 +3614,138 @@ void init_user_ticks(void){
 
 }
 
-//SVEXTERN float user_tick_origin[3], user_tick_dxyz[3], user_tick_length, user_tick_width;
-//SVEXTERN int user_tick_nxyz[3], user_tick_sub, vis_user_ticks, auto_user_tick_dir;
-
-// x0  y0  z0
-// nx0 ny0 nz0 subint
-// dxyz
-// checkboxes: show ticks, autodir
-
 /* ------------------ drawticks ------------------------ */
 
 void draw_user_ticks(void){
   int i;
   float xyz[3],xyz2[3];
+  float tick_origin[3], step[3];
+  int show_tick_x, show_tick_y, show_tick_z;
 
-  if(user_tick_dxyz[0]>0.1){
-    user_tick_nxyz[0]=abs((user_tick_max[0]+1.0-user_tick_origin[0])/user_tick_dxyz[0]);
+#define TEXT_FACTOR 1.5
+
+  user_tick_option=get_tick_dir(modelview_scratch);
+
+  if(auto_user_tick_placement==0){
+    tick_origin[0]=user_tick_origin[0];
+    tick_origin[1]=user_tick_origin[1];
+    tick_origin[2]=user_tick_origin[2];
+    step[0]=user_tick_step[0];
+    step[1]=user_tick_step[1];
+    step[2]=user_tick_step[2];
+    show_tick_x = user_tick_show_x;
+    show_tick_y = user_tick_show_y;
+    show_tick_z = user_tick_show_z;
   }
-  else if(user_tick_dxyz[0]<-0.1){
-    user_tick_nxyz[0]=abs((user_tick_origin[0]+1.0-user_tick_min[0])/user_tick_dxyz[0]);
+  if(auto_user_tick_placement==1){
+    step[0]=abs(user_tick_step[0]);
+    step[1]=abs(user_tick_step[1]);
+    step[2]=abs(user_tick_step[2]);
+    show_tick_x=0;
+    show_tick_y=0;
+    show_tick_z=0;
+  switch (user_tick_option){
+    case -1:
+      tick_origin[0] = user_tick_min[0];
+      tick_origin[1] = user_tick_min[1];
+      tick_origin[2] = user_tick_min[0];
+      show_tick_x = 1;
+      show_tick_z = 1;
+      break;
+    case 1:
+      tick_origin[0] = user_tick_min[0];
+      tick_origin[1] = user_tick_max[1];
+      step[1] = -step[1];
+      tick_origin[2] = user_tick_min[0];
+      show_tick_x = 1;
+      show_tick_z = 1;
+      break;
+    case -2:
+      tick_origin[0] = user_tick_min[0];
+      tick_origin[1] = user_tick_min[1];
+      tick_origin[2] = user_tick_min[2];
+      show_tick_y = 1;
+      show_tick_z = 1;
+      break;
+    case 2:
+      tick_origin[0] = user_tick_max[0];
+      step[0] = -step[0];
+      tick_origin[1] = user_tick_min[1];
+      tick_origin[2] = user_tick_min[2];
+      show_tick_y = 1;
+      show_tick_z = 1;
+      break;
+    case -3:
+      tick_origin[0] = user_tick_min[0];
+      tick_origin[1] = user_tick_min[1];
+      tick_origin[2] = user_tick_min[2];
+      show_tick_x = 1;
+      show_tick_y = 1;
+      break;
+    case 3:
+      tick_origin[0] = user_tick_min[0];
+      tick_origin[1] = user_tick_min[1];
+      tick_origin[2] = user_tick_max[2];
+      step[2] = -step[2];
+      show_tick_x = 1;
+      show_tick_y = 1;
+      break;
+  }
+  }
+  if(step[0]>0.1){
+    user_tick_nxyz[0]=abs((user_tick_max[0]+1.0-tick_origin[0])/step[0]);
+  }
+  else if(step[0]<-0.1){
+    user_tick_nxyz[0]=abs((tick_origin[0]+1.0-user_tick_min[0])/step[0]);
   }
   else{
     user_tick_nxyz[0]=0;
   }
-  if(user_tick_dxyz[1]>0.1){
-    user_tick_nxyz[1]=abs((user_tick_max[1]+1.0-user_tick_origin[1])/user_tick_dxyz[1]);
+  if(step[1]>0.1){
+    user_tick_nxyz[1]=abs((user_tick_max[1]+1.0-tick_origin[1])/step[1]);
   }
-  else if(user_tick_dxyz[1]<-0.1){
-    user_tick_nxyz[1]=abs((user_tick_origin[1]+1.0-user_tick_min[1])/user_tick_dxyz[1]);
+  else if(step[1]<-0.1){
+    user_tick_nxyz[1]=abs((tick_origin[1]+1.0-user_tick_min[1])/step[1]);
   }
   else{
     user_tick_nxyz[1]=0;
   }
-  if(user_tick_dxyz[2]>0.1){
-    user_tick_nxyz[2]=abs((user_tick_max[2]+1.0-user_tick_origin[2])/user_tick_dxyz[2]);
+  if(step[2]>0.1){
+    user_tick_nxyz[2]=abs((user_tick_max[2]+1.0-tick_origin[2])/step[2]);
   }
-  else if(user_tick_dxyz[2]<-0.1){
-    user_tick_nxyz[2]=abs((user_tick_origin[2]+1.0-user_tick_min[2])/user_tick_dxyz[2]);
+  else if(step[2]<-0.1){
+    user_tick_nxyz[2]=abs((tick_origin[2]+1.0-user_tick_min[2])/step[2]);
   }
   else{
     user_tick_nxyz[2]=0;
   }
-
-  if(auto_user_tick_dir==1){
-    user_tick_option=get_tick_dir(modelview_scratch);
-    if(user_tick_option<0){
-      user_tick_option=-user_tick_option;
-    }
-  }
-  else{
-    user_tick_option=0;
+  if(user_tick_option<0){
+    user_tick_option=-user_tick_option;
   }
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
   glLineWidth(user_tick_width);
 
+  //glPointSize(20.0);
+  //glBegin(GL_POINTS);
+  //glVertex3fv(tick_origin);
+  //glEnd();
+    
  //*** x axis tick/lables
 
  // major ticks
-  if(user_tick_option==1||user_tick_option==3||user_tick_option==0){
+  if(show_tick_x==1){
   glBegin(GL_LINES);
   glColor3fv(foregroundcolor);
   for(i=0;i<user_tick_nxyz[0];i++){
-    xyz[0]=user_tick_origin[0] + i*user_tick_dxyz[0];
+    xyz[0]=tick_origin[0] + i*step[0];
     if(
-      (user_tick_dxyz[0]>0.0&&xyz[0]>user_tick_max[0])||
-      (user_tick_dxyz[0]<0.0&&xyz[0]<user_tick_min[0])
+      (step[0]>0.0&&xyz[0]>user_tick_max[0])||
+      (step[0]<0.0&&xyz[0]<user_tick_min[0])
       )continue;
-    xyz[1]=user_tick_origin[1];
-    xyz[2]=user_tick_origin[2];
+    xyz[1]=tick_origin[1];
+    xyz[2]=tick_origin[2];
     if(user_tick_option==3){
       xyz2[0]=xyz[0];
       xyz2[1]=xyz[1]-user_tick_length*xyzmaxdiff;
@@ -3694,6 +3756,15 @@ void draw_user_ticks(void){
       xyz2[1]=xyz[1];
       xyz2[2]=xyz[2]-user_tick_length*xyzmaxdiff;
     }
+    if(i==0){
+      glVertex3fv(xyz);
+      if(step[0]>0.0){
+        glVertex3f(user_tick_max[0],xyz[1],xyz[2]);
+      }
+      else{
+        glVertex3f(user_tick_min[0],xyz[1],xyz[2]);
+      }
+    }
     glVertex3fv(xyz);
     glVertex3fv(xyz2);
   }
@@ -3703,13 +3774,13 @@ void draw_user_ticks(void){
   if(user_tick_sub>1){
     for(i=1;i<user_tick_nxyz[0]*user_tick_sub;i++){
       if(i%user_tick_sub==0)continue;
-      xyz[0]=user_tick_origin[0] + i*user_tick_dxyz[0]/(float)user_tick_sub;
+      xyz[0]=tick_origin[0] + i*step[0]/(float)user_tick_sub;
       if(
-        (user_tick_dxyz[0]>0.0&&xyz[0]>user_tick_max[0])||
-        (user_tick_dxyz[0]<0.0&&xyz[0]<user_tick_min[0])
+        (step[0]>0.0&&xyz[0]>user_tick_max[0])||
+        (step[0]<0.0&&xyz[0]<user_tick_min[0])
         )continue;
-      xyz[1]=user_tick_origin[1];
-      xyz[2]=user_tick_origin[2];
+      xyz[1]=tick_origin[1];
+      xyz[2]=tick_origin[2];
       if(user_tick_option==3){
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1]-user_tick_length*xyzmaxdiff/2.0;
@@ -3728,22 +3799,22 @@ void draw_user_ticks(void){
   for(i=0;i<user_tick_nxyz[0];i++){
     char label[128];
 
-    xyz[0]=user_tick_origin[0] + i*user_tick_dxyz[0];
+    xyz[0]=tick_origin[0] + i*step[0];
     if(
-      (user_tick_dxyz[0]>0.0&&xyz[0]>user_tick_max[0])||
-      (user_tick_dxyz[0]<0.0&&xyz[0]<user_tick_min[0])
+      (step[0]>0.0&&xyz[0]>user_tick_max[0])||
+      (step[0]<0.0&&xyz[0]<user_tick_min[0])
       )continue;
-    xyz[1]=user_tick_origin[1];
-    xyz[2]=user_tick_origin[2];
+    xyz[1]=tick_origin[1];
+    xyz[2]=tick_origin[2];
     if(user_tick_option==3){
       xyz2[0]=xyz[0];
-      xyz2[1]=xyz[1]-user_tick_length*xyzmaxdiff;
+      xyz2[1]=xyz[1]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
       xyz2[2]=xyz[2];
     }
     else{
       xyz2[0]=xyz[0];
       xyz2[1]=xyz[1];
-      xyz2[2]=xyz[2]-user_tick_length*xyzmaxdiff;
+      xyz2[2]=xyz[2]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
     }
     sprintf(label,"%f",xyz[0]);
     trimzeros(label);
@@ -3755,18 +3826,18 @@ void draw_user_ticks(void){
 
  // major ticks
 
-  if(user_tick_option==2||user_tick_option==3||user_tick_option==0){
+  if(show_tick_y){
   glLineWidth(user_tick_width);
   glBegin(GL_LINES);
   glColor3fv(foregroundcolor);
   for(i=0;i<user_tick_nxyz[1];i++){
-    xyz[0]=user_tick_origin[0];
-    xyz[1]=user_tick_origin[1] + i*user_tick_dxyz[1];
+    xyz[0]=tick_origin[0];
+    xyz[1]=tick_origin[1] + i*step[1];
     if(
-      (user_tick_dxyz[1]>0.0&&xyz[1]>user_tick_max[1])||
-      (user_tick_dxyz[1]<0.0&&xyz[1]<user_tick_min[1])
+      (step[1]>0.0&&xyz[1]>user_tick_max[1])||
+      (step[1]<0.0&&xyz[1]<user_tick_min[1])
       )continue;
-    xyz[2]=user_tick_origin[2];
+    xyz[2]=tick_origin[2];
     if(user_tick_option==3){
       xyz2[0]=xyz[0]-user_tick_length*xyzmaxdiff;
       xyz2[1]=xyz[1];
@@ -3777,6 +3848,15 @@ void draw_user_ticks(void){
       xyz2[1]=xyz[1];
       xyz2[2]=xyz[2]-user_tick_length*xyzmaxdiff;
     }
+    if(i==0){
+      glVertex3fv(xyz);
+      if(step[1]>0.0){
+        glVertex3f(xyz[0],user_tick_max[1],xyz[2]);
+      }
+      else{
+        glVertex3f(xyz[0],user_tick_min[1],xyz[2]);
+      }
+    }
     glVertex3fv(xyz);
     glVertex3fv(xyz2);
   }
@@ -3786,13 +3866,13 @@ void draw_user_ticks(void){
   if(user_tick_sub>1){
     for(i=1;i<user_tick_nxyz[1]*user_tick_sub;i++){
       if(i%user_tick_sub==0)continue;
-      xyz[0]=user_tick_origin[0];
-      xyz[1]=user_tick_origin[1] + i*user_tick_dxyz[1]/(float)user_tick_sub;
+      xyz[0]=tick_origin[0];
+      xyz[1]=tick_origin[1] + i*step[1]/(float)user_tick_sub;
       if(
-        (user_tick_dxyz[1]>0.0&&xyz[1]>user_tick_max[1])||
-        (user_tick_dxyz[1]<0.0&&xyz[1]<user_tick_min[1])
+        (step[1]>0.0&&xyz[1]>user_tick_max[1])||
+        (step[1]<0.0&&xyz[1]<user_tick_min[1])
         )continue;
-      xyz[2]=user_tick_origin[2];
+      xyz[2]=tick_origin[2];
       if(user_tick_option==3){
         xyz2[0]=xyz[0]-user_tick_length*xyzmaxdiff/2.0;
         xyz2[1]=xyz[1];
@@ -3811,23 +3891,23 @@ void draw_user_ticks(void){
   for(i=0;i<user_tick_nxyz[1];i++){
     char label[128];
 
-    xyz[0]=user_tick_origin[0];
-    xyz[1]=user_tick_origin[1] + i*user_tick_dxyz[1];
+    xyz[0]=tick_origin[0];
+    xyz[1]=tick_origin[1] + i*step[1];
     if(
-      (user_tick_dxyz[1]>0.0&&xyz[1]>user_tick_max[1])||
-      (user_tick_dxyz[1]<0.0&&xyz[1]<user_tick_min[1])
+      (step[1]>0.0&&xyz[1]>user_tick_max[1])||
+      (step[1]<0.0&&xyz[1]<user_tick_min[1])
       )continue;
-    xyz[2]=user_tick_origin[2];
+    xyz[2]=tick_origin[2];
     xyz2[0]=xyz[0];
     if(user_tick_option==3){
-      xyz2[0]=xyz[0]-user_tick_length*xyzmaxdiff;
+      xyz2[0]=xyz[0]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
       xyz2[1]=xyz[1];
       xyz2[2]=xyz[2];
     }
     else{
       xyz2[0]=xyz[0];
       xyz2[1]=xyz[1];
-      xyz2[2]=xyz[2]-user_tick_length*xyzmaxdiff;
+      xyz2[2]=xyz[2]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
     }
     sprintf(label,"%f",xyz[1]);
     trimzeros(label);
@@ -3838,17 +3918,17 @@ void draw_user_ticks(void){
  //*** z axis tick/lables
 
  // major ticks
-  if(user_tick_option==1||user_tick_option==2||user_tick_option==0){
+  if(show_tick_z){
   glLineWidth(user_tick_width);
   glBegin(GL_LINES);
   glColor3fv(foregroundcolor);
   for(i=0;i<user_tick_nxyz[2];i++){
-    xyz[0]=user_tick_origin[0];
-    xyz[1]=user_tick_origin[1];
-    xyz[2]=user_tick_origin[2] + i*user_tick_dxyz[2];
+    xyz[0]=tick_origin[0];
+    xyz[1]=tick_origin[1];
+    xyz[2]=tick_origin[2] + i*step[2];
     if(
-      (user_tick_dxyz[2]>0.0&&xyz[2]>user_tick_max[2])||
-      (user_tick_dxyz[2]<0.0&&xyz[2]<user_tick_min[2])
+      (step[2]>0.0&&xyz[2]>user_tick_max[2])||
+      (step[2]<0.0&&xyz[2]<user_tick_min[2])
       )continue;
     if(user_tick_option==2){
       xyz2[0]=xyz[0];
@@ -3859,6 +3939,15 @@ void draw_user_ticks(void){
       xyz2[1]=xyz[1];
     }
     xyz2[2]=xyz[2];
+    if(i==0){
+      glVertex3fv(xyz);
+      if(step[2]>0.0){
+        glVertex3f(xyz[0],xyz[1],user_tick_max[2]);
+      }
+      else{
+        glVertex3f(xyz[0],xyz[1],user_tick_min[2]);
+      }
+    }
     glVertex3fv(xyz);
     glVertex3fv(xyz2);
   }
@@ -3868,12 +3957,12 @@ void draw_user_ticks(void){
   if(user_tick_sub>1){
     for(i=1;i<user_tick_nxyz[2]*user_tick_sub;i++){
       if(i%user_tick_sub==0)continue;
-      xyz[0]=user_tick_origin[0];
-      xyz[1]=user_tick_origin[1];
-      xyz[2]=user_tick_origin[2] + i*user_tick_dxyz[2]/(float)user_tick_sub;
+      xyz[0]=tick_origin[0];
+      xyz[1]=tick_origin[1];
+      xyz[2]=tick_origin[2] + i*step[2]/(float)user_tick_sub;
       if(
-        (user_tick_dxyz[2]>0.0&&xyz[2]>user_tick_max[2])||
-        (user_tick_dxyz[2]<0.0&&xyz[2]<user_tick_min[2])
+        (step[2]>0.0&&xyz[2]>user_tick_max[2])||
+        (step[2]<0.0&&xyz[2]<user_tick_min[2])
         )continue;
       if(user_tick_option==2){
         xyz2[0]=xyz[0];
@@ -3892,19 +3981,19 @@ void draw_user_ticks(void){
   for(i=0;i<user_tick_nxyz[2];i++){
     char label[128];
 
-    xyz[0]=user_tick_origin[0];
-    xyz[1]=user_tick_origin[1];
-    xyz[2]=user_tick_origin[2] + i*user_tick_dxyz[2];
+    xyz[0]=tick_origin[0];
+    xyz[1]=tick_origin[1];
+    xyz[2]=tick_origin[2] + i*step[2];
     if(
-      (user_tick_dxyz[2]>0.0&&xyz[2]>user_tick_max[2])||
-      (user_tick_dxyz[2]<0.0&&xyz[2]<user_tick_min[2])
+      (step[2]>0.0&&xyz[2]>user_tick_max[2])||
+      (step[2]<0.0&&xyz[2]<user_tick_min[2])
       )continue;
     if(user_tick_option==2){
       xyz2[0]=xyz[0];
-      xyz2[1]=xyz[1]-user_tick_length*xyzmaxdiff;
+      xyz2[1]=xyz[1]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
     }
     else{
-      xyz2[0]=xyz[0]-user_tick_length*xyzmaxdiff;
+      xyz2[0]=xyz[0]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
       xyz2[1]=xyz[1];
     }
     xyz2[2]=xyz[2];

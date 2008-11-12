@@ -35,7 +35,11 @@ GLUI_Spinner *SPINNER_tick_zmax=NULL;
 
 GLUI_Rollout *panel_user_tick=NULL;
 GLUI_Rollout *panel_label1=NULL;
-GLUI_Panel *panel_label2;
+GLUI_Panel *panel_label2=NULL;
+GLUI_Panel *panel_tick1;
+GLUI_Panel *panel_tick1a;
+GLUI_Panel *panel_tick1b;
+GLUI_Panel *panel_tick2;
 GLUI_Spinner *SPINNER_sensorrelsize=NULL;
 GLUI_Spinner *SPINNER_tick_x0=NULL;
 GLUI_Spinner *SPINNER_tick_y0=NULL;
@@ -63,6 +67,9 @@ GLUI_Checkbox *CHECKBOX_labels_labels=NULL;
 GLUI_Checkbox *CHECKBOX_labels_gridloc=NULL;
 GLUI_Checkbox *CHECKBOX_labels_average=NULL;
 GLUI_Checkbox *CHECKBOX_vis_user_ticks=NULL;
+GLUI_Checkbox *CHECKBOX_user_ticks_show_x=NULL;
+GLUI_Checkbox *CHECKBOX_user_ticks_show_y=NULL;
+GLUI_Checkbox *CHECKBOX_user_ticks_show_z=NULL;
 GLUI_Checkbox *CHECKBOX_tick_auto=NULL;
 
 GLUI_Checkbox *CHECKBOX_labels_flip=NULL;
@@ -123,7 +130,7 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_framelabel=glui_labels->add_checkbox_to_panel(panel_label1,"Frame Label",&visFramelabel,FRAME_label,Labels_CB);
   CHECKBOX_labels_hrrlabel=glui_labels->add_checkbox_to_panel(panel_label1,"HRR Label",&visHRRlabel,HRR_label,Labels_CB);
   CHECKBOX_labels_hrrcutoff=glui_labels->add_checkbox_to_panel(panel_label1,"HRRPUV cutoff",&show_hrrcutoff,HRRPUVCUTOFF_label,Labels_CB);
-  CHECKBOX_labels_ticks=glui_labels->add_checkbox_to_panel(panel_label1,"Ticks",&visTicks,LABELS_label,Labels_CB);
+  CHECKBOX_labels_ticks=glui_labels->add_checkbox_to_panel(panel_label1,"FDS Ticks",&visTicks,LABELS_label,Labels_CB);
   if(ntotal_blockages>0||isZoneFireModel==0){
     CHECKBOX_labels_gridloc=glui_labels->add_checkbox_to_panel(panel_label1,"Grid Loc",&visgridloc,LABELS_label,Labels_CB);
   }
@@ -170,33 +177,48 @@ extern "C" void glui_labels_setup(int main_window){
 
   panel_user_tick = glui_labels->add_rollout("User Tick Settings",false);
 
-  CHECKBOX_vis_user_ticks=glui_labels->add_checkbox_to_panel(panel_user_tick,"Show User Ticks",&vis_user_ticks,LABELS_ticks,Labels_CB);
 
-  glui_labels->add_statictext_to_panel(panel_user_tick,"                    x");
-  SPINNER_tick_x0=glui_labels->add_spinner_to_panel(panel_user_tick,"origin",GLUI_SPINNER_FLOAT,user_tick_origin);
-  SPINNER_tick_xmin=glui_labels->add_spinner_to_panel(panel_user_tick,"min",GLUI_SPINNER_FLOAT,user_tick_min);
-  SPINNER_tick_xmax=glui_labels->add_spinner_to_panel(panel_user_tick,"max",GLUI_SPINNER_FLOAT,user_tick_max);
-  SPINNER_tick_dx0=glui_labels->add_spinner_to_panel(panel_user_tick,"step",GLUI_SPINNER_FLOAT,user_tick_dxyz);
-  glui_labels->add_column_to_panel(panel_user_tick,false);
+  panel_tick1 = glui_labels->add_panel_to_panel(panel_user_tick,"Display",true);
+  panel_tick1a = glui_labels->add_panel_to_panel(panel_tick1,"",false);
 
-  CHECKBOX_tick_auto=glui_labels->add_checkbox_to_panel(panel_user_tick,"Auto Tick Placement",&auto_user_tick_dir,LABELS_ticks,Labels_CB);
-
-  glui_labels->add_statictext_to_panel(panel_user_tick,"                    y");
-  SPINNER_tick_y0=glui_labels->add_spinner_to_panel(panel_user_tick,"",GLUI_SPINNER_FLOAT,user_tick_origin+1);
-  SPINNER_tick_ymin=glui_labels->add_spinner_to_panel(panel_user_tick,"",GLUI_SPINNER_FLOAT,user_tick_min+1);
-  SPINNER_tick_ymax=glui_labels->add_spinner_to_panel(panel_user_tick,"",GLUI_SPINNER_FLOAT,user_tick_max+1);
-  SPINNER_tick_dy0=glui_labels->add_spinner_to_panel(panel_user_tick,"",GLUI_SPINNER_FLOAT,user_tick_dxyz+1);
-  glui_labels->add_column_to_panel(panel_user_tick,false);
-
-  SPINNER_subtick=glui_labels->add_spinner_to_panel(panel_user_tick,"sub-intervals",GLUI_SPINNER_INT,&user_tick_sub); 
+  CHECKBOX_vis_user_ticks=glui_labels->add_checkbox_to_panel(panel_tick1a,"Show",&vis_user_ticks);
+  glui_labels->add_column_to_panel(panel_tick1a,false);
+  SPINNER_subtick=glui_labels->add_spinner_to_panel(panel_tick1a,"sub-intervals",GLUI_SPINNER_INT,&user_tick_sub); 
   SPINNER_subtick->set_int_limits(1,10,GLUI_LIMIT_CLAMP);
 
-  glui_labels->add_statictext_to_panel(panel_user_tick,"                    z");
-  SPINNER_tick_z0=glui_labels->add_spinner_to_panel(panel_user_tick,"",GLUI_SPINNER_FLOAT,user_tick_origin+2);
-  SPINNER_tick_zmin=glui_labels->add_spinner_to_panel(panel_user_tick,"",GLUI_SPINNER_FLOAT,user_tick_min+2);
-  SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(panel_user_tick,"",GLUI_SPINNER_FLOAT,user_tick_max+2);
-  SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(panel_user_tick,"",GLUI_SPINNER_FLOAT,user_tick_dxyz+2);
+  panel_tick1b = glui_labels->add_panel_to_panel(panel_tick1,"",false);
+  CHECKBOX_tick_auto=glui_labels->add_checkbox_to_panel(panel_tick1b,"Auto place",&auto_user_tick_placement,LABELS_ticks,Labels_CB);
+  glui_labels->add_column_to_panel(panel_tick1b,false);
+  CHECKBOX_user_ticks_show_x=glui_labels->add_checkbox_to_panel(panel_tick1b,"x",&user_tick_show_x);
+  glui_labels->add_column_to_panel(panel_tick1b,false);
+  CHECKBOX_user_ticks_show_y=glui_labels->add_checkbox_to_panel(panel_tick1b,"y",&user_tick_show_y);
+  glui_labels->add_column_to_panel(panel_tick1b,false);
+  CHECKBOX_user_ticks_show_z=glui_labels->add_checkbox_to_panel(panel_tick1b,"z",&user_tick_show_z);
+  Labels_CB(LABELS_ticks);
 
+  panel_tick2 = glui_labels->add_panel_to_panel(panel_user_tick,"Parameters",true);
+  glui_labels->add_statictext_to_panel(panel_tick2,"                    x");
+  SPINNER_tick_x0=glui_labels->add_spinner_to_panel(panel_tick2,"origin",GLUI_SPINNER_FLOAT,user_tick_origin);
+  SPINNER_tick_xmin=glui_labels->add_spinner_to_panel(panel_tick2,"min",GLUI_SPINNER_FLOAT,user_tick_min);
+  SPINNER_tick_xmax=glui_labels->add_spinner_to_panel(panel_tick2,"max",GLUI_SPINNER_FLOAT,user_tick_max);
+  SPINNER_tick_dx0=glui_labels->add_spinner_to_panel(panel_tick2,"step",GLUI_SPINNER_FLOAT,user_tick_step);
+
+  glui_labels->add_column_to_panel(panel_tick2,false);
+
+  glui_labels->add_statictext_to_panel(panel_tick2,"                    y");
+  SPINNER_tick_y0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_origin+1);
+  SPINNER_tick_ymin=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_min+1);
+  SPINNER_tick_ymax=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+1);
+  SPINNER_tick_dy0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+1);
+
+  glui_labels->add_column_to_panel(panel_tick2,false);
+
+  glui_labels->add_statictext_to_panel(panel_tick2,"                    z");
+  SPINNER_tick_z0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_origin+2);
+  SPINNER_tick_zmin=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_min+2);
+  SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+2);
+  SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+2);
+  
   if((npartinfo>0)||nslice>0||nvslice>0||niso>0||npatch_files||nsmoke3d>0||nplot3d>0){
     panel_showhide = glui_labels->add_rollout("Show/Hide Loaded Files",false);
 
@@ -639,6 +661,16 @@ void Labels_CB(int var){
   case HRRPUVCUTOFF_label:
     break;
   case LABELS_ticks:
+    if(auto_user_tick_placement==1){
+      CHECKBOX_user_ticks_show_x->disable();
+      CHECKBOX_user_ticks_show_y->disable();
+      CHECKBOX_user_ticks_show_z->disable();
+    }
+    else{
+      CHECKBOX_user_ticks_show_x->enable();
+      CHECKBOX_user_ticks_show_y->enable();
+      CHECKBOX_user_ticks_show_z->enable();
+    }
     break;
   default:
     ASSERT(FFALSE);
