@@ -1559,7 +1559,10 @@ void initvars1(void){
   updategetlabels=1;
 
   vis_user_ticks=0;
-  auto_user_tick_dir=0;
+  user_tick_show_x=1;
+  user_tick_show_y=1;
+  user_tick_show_z=1;
+  auto_user_tick_placement=1;
 
   pixel_skip=0;
   smoke_extinct=7.600,smoke_dens=.50,smoke_pathlength=1.0;

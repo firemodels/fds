@@ -53,9 +53,6 @@ void outputAxisLabels(){
     glutBitmapCharacter(large_font,ZZ[0]);
   }
 
-
-
-
 }
 
 /* ------------------ output3Text ------------------------ */
