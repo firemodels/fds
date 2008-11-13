@@ -2,6 +2,14 @@ RENDERDIR
  ../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
 UNLOADALL
 SETVIEWPOINT
+ 3D view
+RENDERONCE
+ MFRItower_00_3D
+SETVIEWPOINT
+ top
+RENDERONCE
+ MFRItower_00_top
+SETVIEWPOINT
  view 1
 LOAD3DSMOKE
  soot mass fraction
