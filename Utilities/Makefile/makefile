@@ -55,7 +55,7 @@ intel_linux_mpi_64 : CFLAGS = -O3 -Dpp_noappend
 intel_linux_mpi_64 : FCOMPL = mpif90
 intel_linux_mpi_64 : CCOMPL = mpicc
 intel_linux_mpi_64 : obj = fds5_mpi_intel64
-intel_linux_mpi_64 : setup $(obj_serial)
+intel_linux_mpi_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 	
 intel_linux_db : $(obj_serial)
