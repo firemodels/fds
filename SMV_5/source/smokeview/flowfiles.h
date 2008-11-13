@@ -347,6 +347,9 @@ typedef struct mesh_ {
   int slicedir;
   int plotn;
   char *c_iblank,*c_iblank_cell,*c_iblank_x,*c_iblank_y,*c_iblank_z;
+  #ifdef pp_CARVE
+  char *c_iblank_embed;
+  #endif
   float *block_zdist;
   int zdist_flag;
   unsigned char *iblank_smoke3d;

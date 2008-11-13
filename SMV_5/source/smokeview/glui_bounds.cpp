@@ -390,11 +390,13 @@ extern "C" void glui_bounds_setup(int main_window){
       &vectorlinewidth);
     SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
 
+#ifdef pp_CARVE
+    if(n_embedded_meshes>0){
+      glui_bounds->add_checkbox_to_panel(panel_slice,"Skip coarse sub-slice",&skip_slice_in_embedded_mesh);
+    }
+#endif
     glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata,OUTPUTSLICEDATA,Slice_CB);
     Slice_CB(FILETYPEINDEX);
-
-
-
   }
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice>0)){
