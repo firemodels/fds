@@ -6938,8 +6938,10 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 
 \noindent
 causes FDS to write out the maximum gas phase temperature over the entire mesh containing the point {\ct XYZ}. Note that it
-does not compute the maximum over the entire computational domain, just that particular mesh. Other {\ct STATISTICS} are discussed below.
-Note that some are appropriate for gas phase output quantities, some for solid phase, and some for both.
+does not compute the maximum over the entire computational domain, just that particular mesh. One may also use {\ct XB} to 
+limit the {\ct DEVC} to a subvolume of a mesh; however, the specified {\ct XB} must lie within a single mesh.  
+Other {\ct STATISTICS} are discussed below.  Note that some are appropriate for gas phase output quantities, some for solid phase,
+and some for both.
 
 For solid phase output quantities, like heat fluxes and surface temperatures, the
 specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the
