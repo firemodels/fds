@@ -1,0 +1,16 @@
+RENDERDIR
+ ../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
+SETVIEWPOINT
+ front
+RENDERONCE
+ ranch_00_front
+SETVIEWPOINT
+ side
+RENDERONCE
+ ranch_00_side
+LOADINIFILE
+ ranch_00_clip.ini
+SETVIEWPOINT
+ top
+RENDERONCE
+ ranch_00_top
