@@ -306,6 +306,9 @@ EXTERNCPP int remove_block(blockagedata *block, const blockagedata *hole,int fla
 EXTERNCPP void showhide_translate(int var);
 EXTERNCPP void updateallplotslices(void);
 EXTERNCPP int makeiblank(void);
+#ifdef pp_CARVE
+EXTERNCPP int makeiblank_carve(void);
+#endif
 EXTERNCPP void makeiblank_smoke3d(void);
 EXTERNCPP void getunitinfo(const char *shortlabel, int *unitclass, int *unittype);
 EXTERNCPP void SmoothIsoSurface(isosurface *surfacedata);

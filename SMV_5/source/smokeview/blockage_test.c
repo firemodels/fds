@@ -695,6 +695,140 @@ void init_blockdist(void){
     }
 }
 
+#ifdef pp_CARVE
+
+/* ------------------ makeiblank_carve ------------------------ */
+
+int makeiblank_carve(void){
+  int i, j;
+  int ibar, jbar, kbar;
+  int ijksize;
+  int nx, ny, nz, nxy;
+  int n_embed;
+  char *ib_embed;
+  char *iblank_embed;
+
+#define MESHIJ(i,j) (i)*nmeshes + (j)
+
+  n_embedded_meshes=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi = meshinfo+i;
+    meshi->c_iblank_embed=NULL;
+  }
+  if(nmeshes==1)return 0;
+
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int n_embedded;
+
+    meshi = meshinfo+i;
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
+    nx = ibar + 1;
+    ny = jbar + 1;
+    nz = kbar + 1;
+    nxy = nx*ny;
+    ijksize=(ibar+1)*(jbar+1)*(kbar+1);
+
+    meshi->c_iblank_embed=NULL;
+
+    // check to see if there are any embedded meshes
+
+    n_embedded=0;
+    for(j=0;j<nmeshes;j++){
+      mesh *meshj;
+
+      if(i==j)continue;
+      meshj = meshinfo + j;
+      if(
+        meshi->boxmin[0]<=meshj->boxmin[0]&&meshj->boxmax[0]<=meshi->boxmax[0]&&
+        meshi->boxmin[1]<=meshj->boxmin[1]&&meshj->boxmax[1]<=meshi->boxmax[1]&&
+        meshi->boxmin[2]<=meshj->boxmin[2]&&meshj->boxmax[2]<=meshi->boxmax[2]
+      ){
+        n_embedded++;
+        n_embedded_meshes++;
+      }
+    }
+    if(n_embedded==0)continue;
+
+    ib_embed=NULL;
+    if(NewMemory((void **)&ib_embed,ijksize*sizeof(char))==0)return 1;
+    meshi->c_iblank_embed=ib_embed;
+    for(j=0;j<ijksize;j++){
+      ib_embed[j]=1;
+    }
+    for(j=0;j<nmeshes;j++){
+      mesh *meshj;
+      int i1, i2, j1, j2, k1, k2;
+      int ii, jj, kk;
+      float *xplt, *yplt, *zplt;
+
+      if(i==j)continue;
+      meshj = meshinfo + j;
+      // meshj is embedded inside meshi
+      if(
+        meshi->boxmin[0]>meshj->boxmin[0]||meshj->boxmax[0]>meshi->boxmax[0]||
+        meshi->boxmin[1]>meshj->boxmin[1]||meshj->boxmax[1]>meshi->boxmax[1]||
+        meshi->boxmin[2]>meshj->boxmin[2]||meshj->boxmax[2]>meshi->boxmax[2]
+      )continue;
+
+      xplt = meshi->xplt_orig;
+      yplt = meshi->yplt_orig;
+      zplt = meshi->zplt_orig;
+      for(ii=0;ii<nx;ii++){
+        if(xplt[ii]<=meshj->boxmin[0]&&meshj->boxmin[0]<xplt[ii+1]){
+          i1=ii;
+          break;
+        }
+      }
+      for(ii=0;ii<nx;ii++){
+        if(xplt[ii]<meshj->boxmax[0]&&meshj->boxmax[0]<=xplt[ii+1]){
+          i2=ii;
+          break;
+        }
+      }
+      for(jj=0;jj<ny;jj++){
+        if(yplt[jj]<=meshj->boxmin[1]&&meshj->boxmin[1]<yplt[jj+1]){
+          j1=jj;
+          break;
+        }
+      }
+      for(jj=0;jj<ny;jj++){
+        if(yplt[jj]<meshj->boxmax[1]&&meshj->boxmax[1]<=yplt[jj+1]){
+          j2=jj;
+          break;
+        }
+      }
+      for(kk=0;kk<nz;kk++){
+        if(zplt[kk]<=meshj->boxmin[2]&&meshj->boxmin[2]<zplt[kk+1]){
+          k1=kk;
+          break;
+        }
+      }
+      for(kk=0;kk<nz;kk++){
+        if(zplt[kk]<meshj->boxmax[2]&&meshj->boxmax[2]<=zplt[kk+1]){
+          k2=kk;
+          break;
+        }
+      }
+
+      for(kk=k1;kk<=k2;kk++){
+        for(jj=j1;jj<=j2;jj++){
+          for(ii=i1;ii<=i2;ii++){
+            ib_embed[IJKNODE(ii,jj,kk)]=0;
+          }
+        }
+      }
+    }
+  }
+  return 0;
+}
+#endif
+
 /* ------------------ makeiblank ------------------------ */
 
 int makeiblank(void){
