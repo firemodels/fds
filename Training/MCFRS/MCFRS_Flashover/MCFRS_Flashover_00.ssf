@@ -1,0 +1,11 @@
+RENDERDIR
+../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
+SETVIEWPOINT
+  top
+RENDERONCE
+ MCFRS_Flashover_00_top
+SETVIEWPOINT
+  front
+RENDERONCE
+ MCFRS_Flashover_00_front
+
