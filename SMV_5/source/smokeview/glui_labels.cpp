@@ -181,13 +181,13 @@ extern "C" void glui_labels_setup(int main_window){
   panel_tick1 = glui_labels->add_panel_to_panel(panel_user_tick,"Display",true);
   panel_tick1a = glui_labels->add_panel_to_panel(panel_tick1,"",false);
 
-  CHECKBOX_vis_user_ticks=glui_labels->add_checkbox_to_panel(panel_tick1a,"Show",&vis_user_ticks);
+  CHECKBOX_vis_user_ticks=glui_labels->add_checkbox_to_panel(panel_tick1a,"Show User Ticks",&vis_user_ticks);
   glui_labels->add_column_to_panel(panel_tick1a,false);
   SPINNER_subtick=glui_labels->add_spinner_to_panel(panel_tick1a,"sub-intervals",GLUI_SPINNER_INT,&user_tick_sub); 
   SPINNER_subtick->set_int_limits(1,10,GLUI_LIMIT_CLAMP);
 
   panel_tick1b = glui_labels->add_panel_to_panel(panel_tick1,"",false);
-  CHECKBOX_tick_auto=glui_labels->add_checkbox_to_panel(panel_tick1b,"Auto place",&auto_user_tick_placement,LABELS_ticks,Labels_CB);
+  CHECKBOX_tick_auto=glui_labels->add_checkbox_to_panel(panel_tick1b,"Auto place (2D)",&auto_user_tick_placement,LABELS_ticks,Labels_CB);
   glui_labels->add_column_to_panel(panel_tick1b,false);
   CHECKBOX_user_ticks_show_x=glui_labels->add_checkbox_to_panel(panel_tick1b,"x",&user_tick_show_x);
   glui_labels->add_column_to_panel(panel_tick1b,false);

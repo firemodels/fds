@@ -3646,45 +3646,45 @@ void draw_user_ticks(void){
     show_tick_z=0;
   switch (user_tick_option){
     case -1:
-      tick_origin[0] = user_tick_min[0];
-      tick_origin[1] = user_tick_min[1];
-      tick_origin[2] = user_tick_min[0];
+      tick_origin[0] = user_tick_origin[0];
+      tick_origin[1] = user_tick_origin[1];
+      tick_origin[2] = user_tick_origin[2];
       show_tick_x = 1;
       show_tick_z = 1;
       break;
     case 1:
-      tick_origin[0] = user_tick_min[0];
+      tick_origin[0] = user_tick_origin[0];
       tick_origin[1] = user_tick_max[1];
       step[1] = -step[1];
-      tick_origin[2] = user_tick_min[0];
+      tick_origin[2] = user_tick_origin[2];
       show_tick_x = 1;
       show_tick_z = 1;
       break;
     case -2:
-      tick_origin[0] = user_tick_min[0];
-      tick_origin[1] = user_tick_min[1];
-      tick_origin[2] = user_tick_min[2];
+      tick_origin[0] = user_tick_origin[0];
+      tick_origin[1] = user_tick_origin[1];
+      tick_origin[2] = user_tick_origin[2];
       show_tick_y = 1;
       show_tick_z = 1;
       break;
     case 2:
       tick_origin[0] = user_tick_max[0];
       step[0] = -step[0];
-      tick_origin[1] = user_tick_min[1];
-      tick_origin[2] = user_tick_min[2];
+      tick_origin[1] = user_tick_origin[1];
+      tick_origin[2] = user_tick_origin[2];
       show_tick_y = 1;
       show_tick_z = 1;
       break;
     case -3:
-      tick_origin[0] = user_tick_min[0];
-      tick_origin[1] = user_tick_min[1];
-      tick_origin[2] = user_tick_min[2];
+      tick_origin[0] = user_tick_origin[0];
+      tick_origin[1] = user_tick_origin[1];
+      tick_origin[2] = user_tick_origin[2];
       show_tick_x = 1;
       show_tick_y = 1;
       break;
     case 3:
-      tick_origin[0] = user_tick_min[0];
-      tick_origin[1] = user_tick_min[1];
+      tick_origin[0] = user_tick_origin[0];
+      tick_origin[1] = user_tick_origin[1];
       tick_origin[2] = user_tick_max[2];
       step[2] = -step[2];
       show_tick_x = 1;
