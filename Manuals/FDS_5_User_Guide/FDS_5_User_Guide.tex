@@ -6118,7 +6118,7 @@ You can make an obstruction appear and disappear multiple times by using lines l
 \begin{verbatim}
 &OBST XB=..., SURF_ID='whatever', CTRL_ID='cycling timer' /
 &DEVC ID='TIMER', XYZ=..., QUANTITY='TIME' /
-&CTRL ID='cycling timer', FUNCTION_TYPE='CUSTOM, INPUT_ID='TIMER', RAMP_ID='cycle' /
+&CTRL ID='cycling timer', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='cycle' /
 &RAMP ID='cycle', T=  0, F=-1 /
 &RAMP ID='cycle', T= 59, F=-1 /
 &RAMP ID='cycle', T= 61, F= 1 /
