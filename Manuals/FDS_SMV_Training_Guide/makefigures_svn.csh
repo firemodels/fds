@@ -24,12 +24,13 @@ set RUNSMV=$FDSSMV/Utilities/Scripts/runsmv.csh
 setenv BASEDIR $FDSSMV/Training
 
 # demonstration cases
+$RUNSMV Demonstrations/2Room_Ranch ranch_00
 $RUNSMV Demonstrations/2Room_Ranch ranch_01
 $RUNSMV Demonstrations/2Room_Ranch ranch_02
 $RUNSMV Demonstrations/2Room_Ranch ranch_03
 $RUNSMV Demonstrations/2Room_Ranch ranch_04
 # MCFRS cases
-#$RUNSMV MCFRS/MCFRS_Flashover MCFRS_Flashover_00
+$RUNSMV MCFRS/MCFRS_Flashover MCFRS_Flashover_00
 $RUNSMV MCFRS/MCFRS_Flashover MCFRS_Flashover_01
 #$RUNSMV MCFRS/MCFRS_Flashover MCFRS_Flashover_02
 #$RUNSMV MCFRS/MCFRS_Flashover MCFRS_Flashover_03
