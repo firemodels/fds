@@ -35,5 +35,6 @@ $RUNSMV MCFRS/MCFRS_Flashover MCFRS_Flashover_01
 #$RUNSMV MCFRS/MCFRS_Flashover MCFRS_Flashover_02
 #$RUNSMV MCFRS/MCFRS_Flashover MCFRS_Flashover_03
 $RUNSMV MCFRS/MCFRS_Ranch MCFRS_Ranch_00
+$RUNSMV MCFRS/MCFRS_Tower MCFRS_Tower_00
 # MFRI  cases
 $RUNSMV MFRI/MFRI_Training_Tower MFRI_Training_Tower_00
