@@ -1,0 +1,18 @@
+RENDERDIR
+../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
+SETVIEWPOINT
+ front
+RENDERONCE
+ MCFRS_Tower_00_front
+LOADINIFILE
+MCFRS_Tower_00_2nd.ini
+SETVIEWPOINT
+ top
+RENDERONCE
+ MCFRS_Tower_00_2nd_top
+LOADINIFILE
+MCFRS_Tower_00_1st.ini
+SETVIEWPOINT
+ top
+RENDERONCE
+ MCFRS_Tower_00_1st_top
