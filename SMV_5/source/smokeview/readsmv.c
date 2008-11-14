@@ -6287,7 +6287,7 @@ int readini2(char *inifile, int localfile){
       continue;
     }
 #ifdef pp_CARVE
-    if(match(buffer,"SKIPEMEDSLICE",14)==1){
+    if(match(buffer,"SKIPEMBEDSLICE",14)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&skip_slice_in_embedded_mesh);
       if(skip_slice_in_embedded_mesh!=1)skip_slice_in_embedded_mesh=0;
