@@ -22,6 +22,11 @@
 extern "C" char glui_bounds_revision[]="$Revision$";
 // $Date$ $Author$
 
+#ifdef pp_SCRIPT
+extern "C" void glui_script_disable(void);
+extern "C" void glui_script_enable();
+#endif
+extern "C" void ScriptMenu(int var);
 extern "C" void update_glui_smoke3dframestep(void);
 extern "C" void ParticlePropShowMenu(int value);
 
@@ -29,6 +34,9 @@ void SETslicemax(int setslicemax, float slicemax);
 void SETslicemin(int setslicemin, float slicemin);
 void BUTTON_hide_CB(int var);
 void PART_CB(int var), Bound_CB(int var), Slice_CB(int var), PLOT3D_CB(int var), Iso_CB(int var), Smoke3D_CB(int var);
+#ifdef pp_SCRIPT
+void Script_CB(int var);
+#endif
 void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
           GLUI_EditText **con_min,GLUI_EditText **con_max,
           GLUI_RadioGroup **con_setmin,GLUI_RadioGroup **con_setmax,
@@ -64,6 +72,16 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
 #define OUTPUTSLICEDATA 20
 #define TRACERS 21
 
+#ifdef pp_SCRIPT
+#define SCRIPT_START 31
+#define SCRIPT_STOP 32
+#define SCRIPT_LIST 33
+#define SCRIPT_SAVEINI 34
+#define SCRIPT_EDIT_INI 35
+#define SCRIPT_SETSUFFIX 36
+#define SCRIPT_RUNSCRIPT 37
+#endif
+
 #define SAVE_SETTINGS 99
 #define CLOSE 98
 #define COMPRESS_FILES 97
@@ -79,8 +97,23 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
 #define UPDATEBOUNDS 1
 #define DONT_UPDATEBOUNDS 0
 
-
 GLUI_Button *BUTTON_compress=NULL;
+#ifdef pp_SCRIPT
+GLUI_Panel *panel_script1=NULL;
+GLUI_Panel *panel_script1a=NULL;
+GLUI_Panel *panel_script1b=NULL;
+GLUI_Panel *panel_script2=NULL;
+GLUI_Panel *panel_script2a=NULL;
+GLUI_Panel *panel_script2b=NULL;
+GLUI_Listbox *LIST_scriptlist=NULL;
+GLUI_Rollout *rollout_SCRIPT=NULL;
+GLUI_Button *BUTTON_script_stop=NULL;
+GLUI_Button *BUTTON_script_start=NULL;
+GLUI_Button *BUTTON_script_saveini=NULL;
+GLUI_EditText *EDIT_ini=NULL;
+GLUI_Button *BUTTON_script_setsuffix=NULL;
+GLUI_Button *BUTTON_script_runscript=NULL;
+#endif
 GLUI_Rollout *rollout_BOUNDARY=NULL;
 GLUI_Rollout *rollout_AUTOLOAD=NULL;
 GLUI_Rollout *rollout_compress=NULL;
@@ -436,12 +469,55 @@ extern "C" void glui_bounds_setup(int main_window){
   }
 #endif
 
+#ifdef pp_SCRIPT
+  rollout_SCRIPT = glui_bounds->add_rollout("Scripts/Config",false);
+
+  panel_script1 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,"Script files",true);
+
+  panel_script1a = glui_bounds->add_panel_to_panel(panel_script1,"",false);
+  BUTTON_script_start=glui_bounds->add_button_to_panel(panel_script1a,"Start Recording",SCRIPT_START,Script_CB);
+  glui_bounds->add_column_to_panel(panel_script1a,false);
+  BUTTON_script_stop=glui_bounds->add_button_to_panel(panel_script1a,"Stop Recording",SCRIPT_STOP,Script_CB);
+  BUTTON_script_stop->disable();
+
+  panel_script1b = glui_bounds->add_panel_to_panel(panel_script1,"",false);
+  BUTTON_script_runscript=glui_bounds->add_button_to_panel(panel_script1b,"Run script",SCRIPT_RUNSCRIPT,Script_CB);
+  glui_bounds->add_column_to_panel(panel_script1b,false);
+  LIST_scriptlist = glui_bounds->add_listbox_to_panel(panel_script1b,"Select:",&script_index,SCRIPT_LIST,Script_CB);
+    {
+      scriptfiledata *scriptfile;
+
+        for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
+          char *file;
+          int len;
+
+          file=scriptfile->file;
+          if(file==NULL)continue;
+          len = strlen(file);
+          if(len<=0)continue;
+
+          LIST_scriptlist->add_item(scriptfile->id,file);
+        }
+        Script_CB(SCRIPT_LIST);
+    }
+
+  panel_script2 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,"Config files",true);
+
+  panel_script2a = glui_bounds->add_panel_to_panel(panel_script2,"",false);
+  EDIT_ini=glui_bounds->add_edittext_to_panel(panel_script2a,"suffix:",GLUI_EDITTEXT_TEXT,script_inifile_suffix,SCRIPT_EDIT_INI,Script_CB);
+  glui_bounds->add_column_to_panel(panel_script2a,false);
+  BUTTON_script_setsuffix=glui_bounds->add_button_to_panel(panel_script2a,"Set",SCRIPT_SETSUFFIX,Script_CB);
+
+  BUTTON_script_saveini=glui_bounds->add_button_to_panel(panel_script2,"Save: ",SCRIPT_SAVEINI,Script_CB);
+  Script_CB(SCRIPT_EDIT_INI);
+
+#endif
+
   rollout_AUTOLOAD = glui_bounds->add_rollout("Auto Load",false);
   glui_bounds->add_checkbox_to_panel(rollout_AUTOLOAD,"Auto Load at Startup",
     &loadfiles_at_startup,STARTUP,Bound_CB);
   glui_bounds->add_button_to_panel(rollout_AUTOLOAD,"Save Auto Load File List",SAVE_FILE_LIST,Bound_CB);
   glui_bounds->add_button_to_panel(rollout_AUTOLOAD,"Auto Load Now",LOAD_FILES,Bound_CB);
-
 
   glui_bounds->add_button("Save Settings",SAVE_SETTINGS,BUTTON_hide_CB);
 
@@ -750,10 +826,99 @@ void Smoke3D_CB(int var){
     break;
   }
 }
+/*
+  rollout_SCRIPT = glui_bounds->add_rollout("Scripts",false);
+  BUTTON_script_start=glui_bounds->add_button_to_panel(rollout_SCRIPT,"Start Recording",SCRIPT_START,Script_CB);
+  BUTTON_script_start=glui_bounds->add_button_to_panel(rollout_SCRIPT,"Stop Recording",SCRIPT_STOP,Script_CB);
+    LIST_scriptlist = glui_bounds->add_listbox_to_panel(rollout_SCRIPT,"Script;",&script_index,SCRIPT_LIST,Script_CB);
+  glui_bounds->add_statictext_to_panel(rollout_SCRIPT,fdsprefix);
+  BUTTON_script_saveini=glui_bounds->add_button_to_panel(rollout_SCRIPT,"Save ini:",SCRIPT_SAVEINI,Script_CB);
+  EDIT_ini=glui_bounds->add_edittext_to_panel(rollout_SCRIPT,"config file suffix",GLUI_EDITTEXT_TEXT,script_inifile_suffix,SCRIPT_EDIT_INI,Script_CB);
+  */
+#ifdef pp_SCRIPT
 
+/* ------------------ glui_script_enable ------------------------ */
+
+  void glui_script_enable(void){
+    BUTTON_script_start->enable();
+    BUTTON_script_stop->enable();
+    BUTTON_script_runscript->enable();
+    LIST_scriptlist->enable();
+    BUTTON_script_saveini->enable();
+    BUTTON_script_setsuffix->enable();
+    EDIT_ini->enable();
+  }
+
+/* ------------------ glui_script_disable ------------------------ */
+
+  void glui_script_disable(void){
+    BUTTON_script_start->disable();
+    BUTTON_script_stop->disable();
+    BUTTON_script_runscript->disable();
+    LIST_scriptlist->disable();
+    BUTTON_script_saveini->disable();
+    BUTTON_script_setsuffix->disable();
+    EDIT_ini->disable();
+  }
+
+  /* ------------------ Script_CB ------------------------ */
+
+  void Script_CB(int var){
+    char label[1024];
+    char *name;
+    int id;
+
+    switch (var){
+    case SCRIPT_START:
+      BUTTON_script_start->disable();
+      BUTTON_script_stop->enable();
+      BUTTON_script_runscript->disable();
+      ScriptMenu(START_RECORDING_SCRIPT);
+      break;
+    case SCRIPT_STOP:
+      ScriptMenu(STOP_RECORDING_SCRIPT);
+      BUTTON_script_start->enable();
+      BUTTON_script_stop->disable();
+      BUTTON_script_runscript->enable();
+      break;
+    case SCRIPT_RUNSCRIPT:
+      name = 5+BUTTON_script_runscript->name;
+      printf("running script: %s\n",name);
+      ScriptMenu(LIST_scriptlist->get_int_val());
+      break;
+    case SCRIPT_LIST:
+      id = LIST_scriptlist->get_int_val();
+      name = get_scriptfilename(id);
+      if(name!=NULL&&strlen(name)>0){
+        strcpy(label,"Run: ");
+        strcat(label,name);
+        BUTTON_script_runscript->set_name(label);
+      }
+      break;
+    case SCRIPT_SAVEINI:
+      name = 5+BUTTON_script_saveini->name;
+      printf("saving file %s\n",name);
+      break;
+    case SCRIPT_EDIT_INI:
+      strcpy(label,"Save ");
+      strcat(label,fdsprefix);
+      trim(script_inifile_suffix);
+      if(strlen(script_inifile_suffix)>0){
+        strcat(label,"_");
+        strcat(label,script_inifile_suffix);
+      }
+      strcat(label,".ini");
+      BUTTON_script_saveini->set_name(label);
+      break;
+    case SCRIPT_SETSUFFIX:
+      break;
+    }
+  }
+#endif
 
 /* ------------------ Bound_CB ------------------------ */
-void Bound_CB(int var){
+
+  void Bound_CB(int var){
   patch *pi;
   int i;
 

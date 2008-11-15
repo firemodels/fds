@@ -38,6 +38,9 @@ EXTERNCPP void start_script(void);
 EXTERNCPP void run_script(void);
 EXTERNCPP int compile_script(char *scriptfile);
 EXTERNCPP scriptfiledata *insert_scriptfile(char *file);
+#ifdef pp_SCRIPT
+EXTERNCPP char *get_scriptfilename(int id);
+#endif
 EXTERNCPP void get_newscriptfilename(char *newscriptfilename);
 EXTERNCPP void init_avatar(void);
 #ifdef pp_GPU
