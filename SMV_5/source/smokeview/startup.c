@@ -1016,6 +1016,9 @@ void initvars1(void){
   usetexturebar=1;
   percentile_level=0.01;
 
+#ifdef pp_SCRIPT
+  strcpy(script_inifile_suffix,"");
+#endif
   trainerview=1;
   show_bothsides_int=1;
   show_hrrcutoff=1;

@@ -753,6 +753,10 @@ SVEXTERN float xyzeyeorig[3],xeyedir[3], yeyedir[3], zeyedir[3];
 SVEXTERN int adjustalphaflag;
 SVEXTERN int colorband, show_extremedata;
 
+#ifdef pp_SCRIPT
+SVEXTERN int script_index;
+SVEXTERN char script_inifile_suffix[256];
+#endif
 SVEXTERN int highlight_block, highlight_mesh, highlight_flag;
 SVEXTERN int updatesmoothblocks,menusmooth,use_menusmooth;
 SVEXTERN int smoothing_blocks;
