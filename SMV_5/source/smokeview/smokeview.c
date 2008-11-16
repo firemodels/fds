@@ -3115,8 +3115,8 @@ void RenderFrame(int view_mode){
   renderfile_prefix=fdsprefix;
   if(current_script_command==NULL&&strlen(script_renderfile)>0){
     strcpy(renderfile,"");
-    if(script_dir_path!=NULL){
-      strcat(renderfile,script_dir_path);
+    if(strlen(script_renderdir)>0){
+      strcat(renderfile,script_renderdir);
     }
     strcat(renderfile,script_renderfile);
     use_script_filename=1;
