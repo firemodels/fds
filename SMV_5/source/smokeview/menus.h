@@ -1879,6 +1879,26 @@ void CompressMenu(int value){
 }
 #endif
 
+
+/* ------------------ IniSubMenu ------------------------ */
+
+void IniSubMenu(int value){
+  if(value==-1){
+    readini(0);
+  }
+  else{
+    char *inifilename;
+
+    inifilename = get_inifilename(value);
+    if(inifilename==NULL||strlen(inifilename)<=0)return;
+    scriptinifilename2=scriptinifilename;
+    strcpy(scriptinifilename,inifilename);
+    windowresized=0;
+    readini(2);
+    scriptinifilename2=NULL;
+  }
+}
+
 /* ------------------ SmokeviewiniMenu ------------------------ */
 
 void SmokeviewiniMenu(int value){
@@ -3777,7 +3797,7 @@ void InitMenus(int unload){
 
 static int titlemenu=0, labelmenu=0, shademenu=0, colorbarmenu=0, lightingmenu=0, showhidemenu=0;
 static int optionmenu=0, rotatetypemenu=0;
-static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0;
+static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0;
 #ifdef pp_COMPRESS
 static int compressmenu=0;
 #endif
@@ -5929,7 +5949,15 @@ static int in_menu=0;
   glutAddMenuEntry("  space bar: increment time step, 2D contour planes, 3D contour levels",2);
   glutAddMenuEntry("",1);
   glutAddMenuEntry("  %: toggle projection  method (between perspective and size preserving)",2);
-  glutAddMenuEntry("  #: save settings (create casename.ini file)",2);
+  if(caseinifilename!=NULL&&strlen(caseinifilename)>0){
+    char inilabel[512];
+
+    sprintf(inilabel,"  #: save settings to %s",caseinifilename);
+    glutAddMenuEntry(inilabel,2);
+  }
+  else{
+    glutAddMenuEntry("  #: save settings (create casename.ini file)",2);
+  }
   glutAddMenuEntry("  !: snap scene's view angles",2);
   glutAddMenuEntry("",1);
   glutAddMenuEntry("Mouse Motion",1);
@@ -6863,27 +6891,55 @@ static int in_menu=0;
   }
 #endif
 
+
+/* --------------------------------inisub menu -------------------------- */
+  {
+    int n_inifiles;
+    inifiledata *inifile;
+
+    n_inifiles=0;
+    for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
+      if(inifile->file!=NULL&&file_exist(inifile->file)==1){
+        n_inifiles++;
+      }
+    }
+    if(n_inifiles>0){
+      CREATEMENU(inisubmenu,IniSubMenu);
+      if(caseinifilename!=NULL&&file_exist(caseinifilename)==1){
+        glutAddMenuEntry(caseinifilename,-1);
+      }
+      for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
+        if(inifile->file!=NULL&&file_exist(inifile->file)==1){
+          glutAddMenuEntry(inifile->file,inifile->id);
+        }
+      }
+    }
+  }
+
 /* --------------------------------smokeviewini menu -------------------------- */
 
     CREATEMENU(smokeviewinimenu,SmokeviewiniMenu);
 
 
-    if( (stream=fopen(INIfile,"r"))!=NULL ){
-      readinifile=1;
-      glutAddMenuEntry("Read preference files",1);
-      fclose(stream);
-    }
-    if( readinifile==0 && (stream2=fopen(caseinifilename,"r"))!=NULL ){
-      readinifile=1;
-      glutAddMenuEntry("Read ini files",1);
-      fclose(stream2);
-    }
-    if(smokeviewini != NULL){
-      if( readinifile==0 && (stream3=fopen(smokeviewini,"r"))!=NULL ){
-        glutAddMenuEntry("Read ini files",1);
-        fclose(stream3);
+   {
+    inifiledata *inifile;
+    int n_inifiles;
+
+    n_inifiles=0;
+    for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
+      if(inifile->file!=NULL&&file_exist(inifile->file)==1){
+        n_inifiles++;
       }
     }
+    if( n_inifiles>0||file_exist(INIfile)==1||file_exist(caseinifilename)==1||file_exist(smokeviewini)==1){
+      if(n_inifiles==0){
+        glutAddMenuEntry("Read ini files",1);
+      }
+      else{
+        glutAddSubMenu("Read ini files",inisubmenu);
+      }
+    }
+  }
 
     glutAddMenuEntry(WRITEINIfile,2);
 
