@@ -22,9 +22,12 @@
 extern "C" char glui_bounds_revision[]="$Revision$";
 // $Date$ $Author$
 
+extern "C" int file_exist(char *file);
 #ifdef pp_SCRIPT
+extern "C" void keyboard(unsigned char key, int x, int y);
 extern "C" void glui_script_disable(void);
 extern "C" void glui_script_enable();
+extern "C" void writeini(int var);
 #endif
 extern "C" void ScriptMenu(int var);
 extern "C" void update_glui_smoke3dframestep(void);
@@ -80,6 +83,10 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
 #define SCRIPT_EDIT_INI 35
 #define SCRIPT_SETSUFFIX 36
 #define SCRIPT_RUNSCRIPT 37
+#define SCRIPT_LOADINI 38
+#define SCRIPT_LISTINI 39
+#define SCRIPT_EDIT_RENDERDIR 40
+#define SCRIPT_RENDER 41
 #endif
 
 #define SAVE_SETTINGS 99
@@ -102,15 +109,21 @@ GLUI_Button *BUTTON_compress=NULL;
 GLUI_Panel *panel_script1=NULL;
 GLUI_Panel *panel_script1a=NULL;
 GLUI_Panel *panel_script1b=NULL;
+GLUI_Panel *panel_script1c=NULL;
 GLUI_Panel *panel_script2=NULL;
 GLUI_Panel *panel_script2a=NULL;
 GLUI_Panel *panel_script2b=NULL;
 GLUI_Listbox *LIST_scriptlist=NULL;
+GLUI_Listbox *LIST_ini_list=NULL;
+GLUI_Button *BUTTON_ini_load=NULL;
 GLUI_Rollout *rollout_SCRIPT=NULL;
 GLUI_Button *BUTTON_script_stop=NULL;
 GLUI_Button *BUTTON_script_start=NULL;
 GLUI_Button *BUTTON_script_saveini=NULL;
+GLUI_Button *BUTTON_script_render=NULL;
 GLUI_EditText *EDIT_ini=NULL;
+GLUI_EditText *EDIT_renderdir=NULL;
+GLUI_EditText *EDIT_rendersuffix=NULL;
 GLUI_Button *BUTTON_script_setsuffix=NULL;
 GLUI_Button *BUTTON_script_runscript=NULL;
 #endif
@@ -480,6 +493,17 @@ extern "C" void glui_bounds_setup(int main_window){
   BUTTON_script_stop=glui_bounds->add_button_to_panel(panel_script1a,"Stop Recording",SCRIPT_STOP,Script_CB);
   BUTTON_script_stop->disable();
 
+  EDIT_renderdir=glui_bounds->add_edittext_to_panel(panel_script1,"render directory:",
+    GLUI_EDITTEXT_TEXT,script_renderdir);
+  EDIT_renderdir->set_w(260);
+
+  panel_script1c = glui_bounds->add_panel_to_panel(panel_script1,"",false);
+  BUTTON_script_render=glui_bounds->add_button_to_panel(panel_script1c,"Render",SCRIPT_RENDER,Script_CB);
+  glui_bounds->add_column_to_panel(panel_script1c,false);
+  EDIT_rendersuffix=glui_bounds->add_edittext_to_panel(panel_script1c,"render file suffix:",
+    GLUI_EDITTEXT_TEXT,script_renderfilesuffix);
+  EDIT_rendersuffix->set_w(130);
+
   panel_script1b = glui_bounds->add_panel_to_panel(panel_script1,"",false);
   BUTTON_script_runscript=glui_bounds->add_button_to_panel(panel_script1b,"Run script",SCRIPT_RUNSCRIPT,Script_CB);
   glui_bounds->add_column_to_panel(panel_script1b,false);
@@ -493,6 +517,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
           file=scriptfile->file;
           if(file==NULL)continue;
+          if(file_exist(file)==0)continue;
           len = strlen(file);
           if(len<=0)continue;
 
@@ -507,9 +532,29 @@ extern "C" void glui_bounds_setup(int main_window){
   EDIT_ini=glui_bounds->add_edittext_to_panel(panel_script2a,"suffix:",GLUI_EDITTEXT_TEXT,script_inifile_suffix,SCRIPT_EDIT_INI,Script_CB);
   glui_bounds->add_column_to_panel(panel_script2a,false);
   BUTTON_script_setsuffix=glui_bounds->add_button_to_panel(panel_script2a,"Set",SCRIPT_SETSUFFIX,Script_CB);
-
-  BUTTON_script_saveini=glui_bounds->add_button_to_panel(panel_script2,"Save: ",SCRIPT_SAVEINI,Script_CB);
+  glui_bounds->add_column_to_panel(panel_script2a,false);
+  BUTTON_script_saveini=glui_bounds->add_button_to_panel(panel_script2a,"Save: ",SCRIPT_SAVEINI,Script_CB);
   Script_CB(SCRIPT_EDIT_INI);
+
+  panel_script2b = glui_bounds->add_panel_to_panel(panel_script2,"",false);
+  ini_index=-2;
+  LIST_ini_list = glui_bounds->add_listbox_to_panel(panel_script2b,"Select:",&ini_index,SCRIPT_LISTINI,Script_CB);
+  if(file_exist(caseinifilename)==1){
+    ini_index=-1;
+    LIST_ini_list->add_item(-1,caseinifilename);
+  }
+  {
+    inifiledata *inifile;
+
+    for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
+      if(inifile->file!=NULL&&file_exist(inifile->file)==1){
+        if(ini_index==-2)ini_index=inifile->id;
+        LIST_ini_list->add_item(inifile->id,inifile->file);
+      }
+    }
+  }
+  glui_bounds->add_column_to_panel(panel_script2b,false);
+  BUTTON_ini_load=glui_bounds->add_button_to_panel(panel_script2b,"Load",SCRIPT_LOADINI,Script_CB);
 
 #endif
 
@@ -837,6 +882,14 @@ void Smoke3D_CB(int var){
   */
 #ifdef pp_SCRIPT
 
+/* ------------------ add_scriptlist ------------------------ */
+
+extern "C" void add_scriptlist(char *file, int id){
+  if(file!=NULL&&strlen(file)>0&&LIST_scriptlist!=NULL){
+    LIST_scriptlist->add_item(id,file);
+  }
+}
+
 /* ------------------ glui_script_enable ------------------------ */
 
   void glui_script_enable(void){
@@ -869,10 +922,15 @@ void Smoke3D_CB(int var){
     int id;
 
     switch (var){
+    case SCRIPT_RENDER:
+      keyboard('r',0,0);
+      break;
     case SCRIPT_START:
       BUTTON_script_start->disable();
       BUTTON_script_stop->enable();
       BUTTON_script_runscript->disable();
+      EDIT_renderdir->disable();
+
       ScriptMenu(START_RECORDING_SCRIPT);
       break;
     case SCRIPT_STOP:
@@ -880,6 +938,7 @@ void Smoke3D_CB(int var){
       BUTTON_script_start->enable();
       BUTTON_script_stop->disable();
       BUTTON_script_runscript->enable();
+      EDIT_renderdir->enable();
       break;
     case SCRIPT_RUNSCRIPT:
       name = 5+BUTTON_script_runscript->name;
@@ -897,7 +956,44 @@ void Smoke3D_CB(int var){
       break;
     case SCRIPT_SAVEINI:
       name = 5+BUTTON_script_saveini->name;
-      printf("saving file %s\n",name);
+      if(strlen(name)>0){
+        inifiledata *inifile;
+
+        strcpy(scriptinifilename,name);
+        writeini(SCRIPT_INI);
+        inifile=insert_inifile(name);
+        if(inifile!=NULL&&LIST_ini_list!=NULL){
+          LIST_ini_list->add_item(inifile->id,inifile->file);
+        }
+      }
+      break;
+    case SCRIPT_LOADINI:
+      {
+        int id;
+        char *inifilename;
+
+        id = LIST_ini_list->get_int_val();
+        if(id==-1){
+          readini(0);
+          if(scriptoutstream!=NULL){
+            fprintf(scriptoutstream,"LOADINIFILE\n");
+            fprintf(scriptoutstream," %s\n",caseinifilename);
+          }
+        }
+        else if(id>=0){
+          inifilename = get_inifilename(id);
+          if(inifilename==NULL||strlen(inifilename)<=0)break;
+          scriptinifilename2=scriptinifilename;
+          strcpy(scriptinifilename,inifilename);
+          windowresized=0;
+          readini(2);
+          if(scriptoutstream!=NULL){
+            fprintf(scriptoutstream,"LOADINIFILE\n");
+            fprintf(scriptoutstream," %s\n",scriptinifilename);
+          }
+          scriptinifilename2=NULL;
+        }
+      }
       break;
     case SCRIPT_EDIT_INI:
       strcpy(label,"Save ");

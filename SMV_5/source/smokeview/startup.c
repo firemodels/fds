@@ -1018,6 +1018,9 @@ void initvars1(void){
 
 #ifdef pp_SCRIPT
   strcpy(script_inifile_suffix,"");
+  strcpy(script_renderdir,"");
+  strcpy(script_renderfilesuffix,"");
+  strcpy(script_renderfile,"");
 #endif
   trainerview=1;
   show_bothsides_int=1;
@@ -2106,6 +2109,15 @@ void initvars0(void){
   last_scriptfile.prev=&first_scriptfile;
   last_scriptfile.next=NULL;
 
+#ifdef pp_SCRIPT
+  first_inifile.id=-1;
+  first_inifile.prev=NULL;
+  first_inifile.next=&last_inifile;
+
+  last_inifile.id=-1;
+  last_inifile.prev=&first_inifile;
+  last_inifile.next=NULL;
+#endif
   scriptoutstream=NULL;
   script_recording=NULL;
   runscript=0;
