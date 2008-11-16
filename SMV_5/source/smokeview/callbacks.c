@@ -983,12 +983,26 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"r",1)==0
     ||strncmp((const char *)&key2,"R",1)==0
     ){
-      int rflag=0;
+    int rflag=0;
 
-      if(strncmp((const char *)&key2,"R",1)==0){
-        render_double=2;
-        rflag=1;
+    if(strncmp((const char *)&key2,"R",1)==0){
+      render_double=2;
+      rflag=1;
+    }
+#ifdef pp_SCRIPT
+    {
+      char *suffix;
+
+      trim(script_renderfilesuffix);
+      suffix = trim_front(script_renderfilesuffix);
+      strcpy(script_renderfile,"");
+      if(strlen(suffix)>0){
+        strcpy(script_renderfile,fdsprefix);
+        strcat(script_renderfile,"_");
+        strcat(script_renderfile,suffix);
       }
+    }
+#endif
     if(scriptoutstream!=NULL){
       if(ntimes>0){
         float timeval;
@@ -1003,7 +1017,11 @@ void keyboard(unsigned char key, int x, int y){
       else{
         fprintf(scriptoutstream,"RENDERDOUBLEONCE\n");
       }
+#ifdef pp_SCRIPT
+      fprintf(scriptoutstream," %s\n",script_renderfile);
+#else
       fprintf(scriptoutstream,"\n");
+#endif
     }
     RenderOnceNow=1;
     if(showstereo!=0){

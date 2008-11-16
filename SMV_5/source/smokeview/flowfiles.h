@@ -7,6 +7,14 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 
+#ifdef pp_SCRIPT
+typedef struct _inifiledata {
+  struct _inifiledata *prev, *next;
+  int id;
+  char *file;
+} inifiledata;
+#endif
+
 /* --------------------------  scriptdata ------------------------------------ */
 
 typedef struct _scriptfiledata {

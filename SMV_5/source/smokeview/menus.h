@@ -11,6 +11,9 @@
 // svn revision character string
 char menu_revision[]="$Revision$";
 void ScriptMenu(int var);
+#ifdef pp_SCRIPT
+void add_scriptlist(char *file, int id);
+#endif
 
 #ifdef pp_OPEN
 
@@ -1932,8 +1935,25 @@ void ScriptMenu(int value){
       if(scriptoutstream!=NULL){
         printf("Script recorder on\n");
         script_recording->recording=1;
+#ifdef pp_SCRIPT
+        {
+          char *renderdir;
+
+          trim(script_renderdir);
+          renderdir = trim_front(script_renderdir);
+          if(strlen(renderdir)>0&&strcmp(renderdir,".")!=0){
+            fprintf(scriptoutstream,"RENDERDIR\n");
+            fprintf(scriptoutstream," %s\n",renderdir);
+          }
+          else{
+            fprintf(scriptoutstream,"RENDERDIR\n");
+            fprintf(scriptoutstream," .\n");
+          }
+        }
+#else
         fprintf(scriptoutstream,"RENDERDIR\n");
         fprintf(scriptoutstream," .\n");
+#endif
       }
       else{
         script_recording->recording=0;
@@ -1944,6 +1964,9 @@ void ScriptMenu(int value){
     case STOP_RECORDING_SCRIPT:
       if(script_recording!=NULL){
         script_recording->recording=0;
+#ifdef pp_SCRIPT
+        add_scriptlist(script_recording->file,script_recording->id);
+#endif
         script_recording=NULL;
       }
       if(scriptoutstream!=NULL){
