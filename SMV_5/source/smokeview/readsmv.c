@@ -7321,6 +7321,14 @@ int readini2(char *inifile, int localfile){
       updatemenu=1;
       continue;
       }
+#ifdef pp_SCRIPT
+    if(localfile==1&&match(buffer,"INIFILE",7)==1){
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      insert_inifile(buffer);
+      continue;
+      }
+#endif
     if(localfile==1&&match(buffer,"XYZCLIP",7)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&xyz_clipplane);
@@ -8137,6 +8145,8 @@ void writeini(int flag){
     fileout=stdout;
     break;
   case SCRIPT_INI:
+    fileout=fopen(scriptinifilename,"w");
+    break;
   case LOCAL_INI:
     fileout=fopen(caseinifilename,"w");
     break;
@@ -8979,6 +8989,9 @@ void writeini(int flag){
   
   if(flag==LOCAL_INI){
     scriptfiledata *scriptfile;
+#ifdef pp_SCRIPT
+    inifiledata *inifile;
+#endif
 
     for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
       char *file;
@@ -8989,6 +9002,14 @@ void writeini(int flag){
         fprintf(fileout," %s\n",file);
       }
     }
+#ifdef pp_SCRIPT
+    for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
+      if(inifile->file!=NULL){
+        fprintf(fileout,"INIFILE\n");
+        fprintf(fileout," %s\n",inifile->file);
+      }
+    }
+#endif
   }
   {
   GLint nred, ngreen, nblue, ndepth, nalpha;
@@ -9114,3 +9135,14 @@ void getfile_modtime(char *filename, time_t *modtime){
   return;
 }
 
+/* ------------------ file_exit ------------------------ */
+
+int file_exist(char *file){
+  struct stat statbuffer;
+  int statfile;
+
+  if(file==NULL)return 0;
+  statfile=stat(file,&statbuffer);
+  if(statfile!=0)return 0;
+  return 1;
+}

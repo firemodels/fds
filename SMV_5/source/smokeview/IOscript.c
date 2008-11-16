@@ -166,6 +166,57 @@ char *get_scriptfilename(int id){
   return NULL;
 }
 
+#ifdef pp_SCRIPT
+/* ------------------ get_scriptfilename ------------------------ */
+
+char *get_inifilename(int id){
+  inifiledata *thisptr,*prevptr,*nextptr;
+  int len;
+  inifiledata *inifile;
+
+  for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
+    if(inifile->id==id)return inifile->file;
+    if(inifile->file==NULL)continue;
+  }
+  return NULL;
+}
+
+/* ------------------ insert_inifile ------------------------ */
+
+inifiledata *insert_inifile(char *file){
+  inifiledata *thisptr,*prevptr,*nextptr;
+  int len;
+  inifiledata *inifile;
+  int idmax=-1;
+
+  for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
+    if(inifile->id>idmax)idmax=inifile->id;
+    if(inifile->file==NULL)continue;
+    if(strcmp(file,inifile->file)==0)return NULL;
+  }
+
+  NewMemory((void **)&thisptr,sizeof(inifiledata));
+  nextptr = &last_inifile;
+  prevptr = nextptr->prev;
+  nextptr->prev=thisptr;
+  prevptr->next=thisptr;
+
+  thisptr->next=nextptr;
+  thisptr->prev=prevptr;
+  thisptr->file=NULL;
+  thisptr->id=idmax+1;
+
+  if(file!=NULL){
+    len = strlen(file);
+    if(len>0){
+      NewMemory((void **)&thisptr->file,len+1);
+      strcpy(thisptr->file,file);
+    }
+  }
+  return thisptr;
+}
+
+#endif
 /* ------------------ insert_scriptfile ------------------------ */
 
 scriptfiledata *insert_scriptfile(char *file){
