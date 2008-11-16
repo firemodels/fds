@@ -87,6 +87,8 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
 #define SCRIPT_LISTINI 39
 #define SCRIPT_EDIT_RENDERDIR 40
 #define SCRIPT_RENDER 41
+#define SCRIPT_RENDER_SUFFIX 42
+#define SCRIPT_RENDER_DIR 43
 #endif
 
 #define SAVE_SETTINGS 99
@@ -113,6 +115,7 @@ GLUI_Panel *panel_script1c=NULL;
 GLUI_Panel *panel_script2=NULL;
 GLUI_Panel *panel_script2a=NULL;
 GLUI_Panel *panel_script2b=NULL;
+GLUI_Panel *panel_script3=NULL;
 GLUI_Listbox *LIST_scriptlist=NULL;
 GLUI_Listbox *LIST_ini_list=NULL;
 GLUI_Button *BUTTON_ini_load=NULL;
@@ -493,17 +496,6 @@ extern "C" void glui_bounds_setup(int main_window){
   BUTTON_script_stop=glui_bounds->add_button_to_panel(panel_script1a,"Stop Recording",SCRIPT_STOP,Script_CB);
   BUTTON_script_stop->disable();
 
-  EDIT_renderdir=glui_bounds->add_edittext_to_panel(panel_script1,"render directory:",
-    GLUI_EDITTEXT_TEXT,script_renderdir);
-  EDIT_renderdir->set_w(260);
-
-  panel_script1c = glui_bounds->add_panel_to_panel(panel_script1,"",false);
-  BUTTON_script_render=glui_bounds->add_button_to_panel(panel_script1c,"Render",SCRIPT_RENDER,Script_CB);
-  glui_bounds->add_column_to_panel(panel_script1c,false);
-  EDIT_rendersuffix=glui_bounds->add_edittext_to_panel(panel_script1c,"render file suffix:",
-    GLUI_EDITTEXT_TEXT,script_renderfilesuffix);
-  EDIT_rendersuffix->set_w(130);
-
   panel_script1b = glui_bounds->add_panel_to_panel(panel_script1,"",false);
   BUTTON_script_runscript=glui_bounds->add_button_to_panel(panel_script1b,"Run script",SCRIPT_RUNSCRIPT,Script_CB);
   glui_bounds->add_column_to_panel(panel_script1b,false);
@@ -525,6 +517,18 @@ extern "C" void glui_bounds_setup(int main_window){
         }
         Script_CB(SCRIPT_LIST);
     }
+
+  panel_script3 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,"Render images",true);
+  EDIT_renderdir=glui_bounds->add_edittext_to_panel(panel_script3,"render directory:",
+    GLUI_EDITTEXT_TEXT,script_renderdir,SCRIPT_RENDER_DIR,Script_CB);
+  EDIT_renderdir->set_w(260);
+  panel_script1c = glui_bounds->add_panel_to_panel(panel_script3,"",false);
+  BUTTON_script_render=glui_bounds->add_button_to_panel(panel_script1c,"Render",SCRIPT_RENDER,Script_CB);
+  glui_bounds->add_column_to_panel(panel_script1c,false);
+  EDIT_rendersuffix=glui_bounds->add_edittext_to_panel(panel_script1c,"suffix:",
+    GLUI_EDITTEXT_TEXT,script_renderfilesuffix,SCRIPT_RENDER_SUFFIX,Script_CB);
+  EDIT_rendersuffix->set_w(130);
+  Script_CB(SCRIPT_RENDER_SUFFIX);
 
   panel_script2 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,"Config files",true);
 
@@ -920,10 +924,72 @@ extern "C" void add_scriptlist(char *file, int id){
     char label[1024];
     char *name;
     int id;
+    int len,i;
+    int set_renderlabel;
 
     switch (var){
+    case SCRIPT_RENDER_DIR:
+      strcpy(label,script_renderdir);
+      trim(label);
+      name = trim_front(label);
+      set_renderlabel=0;
+      if(name!=NULL&&strlen(name)!=strlen(script_renderdir)){
+        strcpy(script_renderdir,name);
+        set_renderlabel=1;
+      }
+      name=script_renderdir;
+      len = strlen(script_renderdir);
+      if(len==0)break;
+      for(i=0;i<len;i++){
+#ifdef WIN32
+        if(name[i]=='/'){
+          set_renderlabel=1;
+          name[i]='\\';
+        }
+#else
+        if(name[i]=='\\'){
+          set_renderlabel=1;
+          name[i]='/';
+        }
+#endif
+      }
+#ifdef WIN32
+      if(name[len-1]!='\\'){
+        set_renderlabel=1;
+        strcat(name,dirseparator);        
+      }
+#else
+      if(name[len-1]!='/'){
+        set_renderlabel=1;
+        strcat(name,dirseparator);        
+      }
+#endif
+      if(set_renderlabel==1){
+        EDIT_renderdir->set_text(script_renderdir);
+      }
+      break;
     case SCRIPT_RENDER:
       keyboard('r',0,0);
+      break;
+    case SCRIPT_RENDER_SUFFIX:
+    {
+      char *suffix;
+
+      trim(script_renderfilesuffix);
+      suffix = trim_front(script_renderfilesuffix);
+      strcpy(script_renderfile,"");
+      if(strlen(suffix)>0){
+        strcpy(script_renderfile,fdsprefix);
+        strcat(script_renderfile,"_");
+        strcat(script_renderfile,suffix);
+        strcpy(label,"Render: ");
+        strcat(label,script_renderfile);
+      }
+      else{
+        strcpy(label,"Render");
+      }
+      BUTTON_script_render->set_name(label);
+    }
       break;
     case SCRIPT_START:
       BUTTON_script_start->disable();
