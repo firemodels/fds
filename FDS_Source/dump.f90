@@ -3862,30 +3862,39 @@ SELECT CASE(IND)
    CASE(231) ! PDPA
       GAS_PHASE_OUTPUT = 0._EB
       IF ( (PY%PDPA_START<=T) .AND.(PY%PDPA_END>=T) ) THEN
+         IF ((PY%PDPA_M-PY%PDPA_N) /= 0) THEN
+            EXPON = 1._EB/(PY%PDPA_M-PY%PDPA_N)
+         ELSE
+            EXPON = 1._EB
+         ENDIF
+         IF (PY%QUANTITY == 'NUMBER CONCENTRATION') DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*PY%PDPA_RADIUS**3
          DLOOP: DO I=1,NLP
             DR=>DROPLET(I)
             IPC=DR%CLASS
             PC=>PARTICLE_CLASS(IPC)
             IF (PY%PART_ID/=PC%ID .AND. PY%PART_ID/='ALL') CYCLE DLOOP
             IF ((DR%X-DV%X)**2+(DR%Y-DV%Y)**2+(DR%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP
-            ! Compute mean diameter numerator and denumerator
-            IF (PY%PDPA_COUNT) THEN
-               DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT
-               DV%PDPA_DENUM = 1.0_EB
-            ELSE
+            SELECT CASE(PY%QUANTITY)
+            CASE('U-VELOCITY') 
+               VEL = DR%U
+            CASE('V-VELOCITY') 
+               VEL = DR%V
+            CASE('W-VELOCITY') 
+               VEL = DR%W
+            CASE('VELOCITY') 
+               VEL = SQRT(DR%U**2 + DR%V**2 + DR%W**2)
+            CASE('TEMPERATURE')
+               VEL = DR%TMP - TMPM
+            CASE DEFAULT
                VEL = 1.0_EB
-               IF (PY%PDPA_U) VEL = DR%U
-               IF (PY%PDPA_V) VEL = DR%V
-               IF (PY%PDPA_W) VEL = DR%W
-               DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M*VEL
+            END SELECT
+            ! Compute numerator and denumerator
+            DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M * VEL
+            IF (PY%QUANTITY /= 'NUMBER CONCENTRATION') THEN
                DV%PDPA_DENUM = DV%PDPA_DENUM + DR%PWT*(2._EB*DR%R)**PY%PDPA_N
-            ENDIF      
+            ENDIF
          ENDDO DLOOP
-         EXPON = 1._EB
-         IF ((PY%PDPA_M-PY%PDPA_N) /= 0) EXPON = 1._EB/(PY%PDPA_M-PY%PDPA_N)
-         IF (DV%PDPA_DENUM > 0._EB) THEN
-            GAS_PHASE_OUTPUT = (DV%PDPA_NUMER/DV%PDPA_DENUM)**EXPON
-         ENDIF
+         IF (DV%PDPA_DENUM > 0._EB) GAS_PHASE_OUTPUT = (DV%PDPA_NUMER/DV%PDPA_DENUM)**EXPON
       ENDIF
 
   END SELECT
