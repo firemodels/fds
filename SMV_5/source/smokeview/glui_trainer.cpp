@@ -55,8 +55,8 @@ GLUI_StaticText *STATIC_alert=NULL;
 GLUI *glui_alert=NULL;
 
 extern "C" void update_glui_viewlist(void){
-  if(trainer_viewpoints!=-11){
-    LIST_viewpoint->set_int_val(-11);
+  if(trainer_viewpoints!=-1){
+    LIST_viewpoint->set_int_val(-1);
   }
 }
 
@@ -181,7 +181,7 @@ extern "C" void glui_trainer_setup(int main_window){
       if(strcmp(ca->name,"external")==0){
         strcpy(line,"Outside");
         LIST_viewpoint->add_item(ca->view_id,line);
-        LIST_viewpoint->add_item(-11,"-");
+        LIST_viewpoint->add_item(-1,"-");
       }
       else{
         strcpy(line,ca->name);
@@ -236,8 +236,8 @@ void ROTATE_CB(int var){
     ResetView(RESTORE_EXTERIOR_VIEW);
   }
 
-  if(trainer_viewpoints!=-11){
-    LIST_viewpoint->set_int_val(-11);
+  if(trainer_viewpoints!=-1){
+    LIST_viewpoint->set_int_val(-1);
   }
   if(trainer_path!=-1){
     LIST_trainerpath->set_int_val(-1);
@@ -274,7 +274,7 @@ void TRAINER_CB(int var){
     keyboard('t',0,0);
     break;
   case TRAINERVIEWPOINTS:
-    if(trainer_viewpoints!=-11){
+    if(trainer_viewpoints!=-1){
       ResetMenu(trainer_viewpoints);
     }
     if(trainer_path!=-1){
@@ -300,8 +300,8 @@ void TRAINER_CB(int var){
     break;
   case TRAINERPATH:
     TRAINER_CB(MOVETYPE);
-    if(trainer_viewpoints!=11){
-      LIST_viewpoint->set_int_val(-11);
+    if(trainer_viewpoints!=1){
+      LIST_viewpoint->set_int_val(-1);
     }
     switch (trainer_path){
     case -1:

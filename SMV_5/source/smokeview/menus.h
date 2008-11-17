@@ -1176,6 +1176,7 @@ void ResetMenu(int value){
     set_startup_view();
     break;
   default:
+    ASSERT(value>=0);
     if(value<100000){
       reset_glui_view(value);
       if(scriptoutstream!=NULL){
@@ -5679,10 +5680,8 @@ static int in_menu=0;
     if(showedit==1)glutAddMenuEntry("*Edit Geometry...  ALT+e",16);
     if(showedit==0)glutAddMenuEntry("Edit Geometry...  ALT+e",16);
   }
-  if(glui_active==1){
-    if(showbounds==1)glutAddMenuEntry("*File/Bound Settings...  ALT+f",14);
-    if(showbounds==0)glutAddMenuEntry("File/Bound Settings...  ALT+f",14);
-  }
+  if(showbounds==1)glutAddMenuEntry("*File/Bound Settings...  ALT+f",14);
+  if(showbounds==0)glutAddMenuEntry("File/Bound Settings...  ALT+f",14);
   if(showmotion==1)glutAddMenuEntry("*Motion/View...  ALT+m",15);
   if(showmotion==0)glutAddMenuEntry("Motion/View...  ALT+m",15);
   if(nsmoke3d>0){
@@ -5828,7 +5827,7 @@ static int in_menu=0;
         strcat(line,"*");
       }
       if(trainer_mode==1&&strcmp(ca->name,"external")==0){
-        strcat(line,"Outsidelt");
+        strcat(line,"Outside");
       }
       else{
         strcat(line,ca->name);
@@ -7120,7 +7119,13 @@ static int in_menu=0;
         strcpy(loadmenulabel,"Zone Fire File");
         glutAddSubMenu(loadmenulabel,zonemenu);
       }
-      glutAddMenuEntry("-",999);
+#ifdef pp_OPEN
+        glutAddMenuEntry("-",999);
+#else
+      if(glui_active==1){      
+        glutAddMenuEntry("-",999);
+      }
+#endif
       glutAddSubMenu("Configuration files",smokeviewinimenu);
       glutAddSubMenu("Script Options",scriptmenu);
 #ifdef pp_COMPRESS

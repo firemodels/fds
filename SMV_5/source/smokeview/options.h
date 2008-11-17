@@ -76,7 +76,9 @@
 
 #undef pp_OPEN
 #ifdef WIN32
+#ifdef pp_BETA
 #define pp_OPEN
+#endif
 #endif
 
 
