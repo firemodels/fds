@@ -3061,16 +3061,8 @@ READ_PROP_LOOP: DO N=0,N_PROP
    PY%PDPA_START       = PDPA_START
    PY%PDPA_END         = PDPA_END
    PY%PDPA_RADIUS      = PDPA_RADIUS
-   PY%PDPA_COUNT       = PDPA_COUNT
    PY%PDPA_M           = PDPA_M
    PY%PDPA_N           = PDPA_N
-   PY%PDPA_U           = PDPA_U
-   PY%PDPA_V           = PDPA_V
-   PY%PDPA_W           = PDPA_W
-   IF (PDPA_COUNT) THEN
-      PY%PDPA_M = 1
-      PY%PDPA_N = 1
-   ENDIF
 
    ! Set flow variables
 
@@ -3148,7 +3140,7 @@ OFFSET                   = 0.05_EB     ! m
 OPERATING_PRESSURE       = -1.0_EB     ! atm
 PART_ID                  = 'null'
 PDPA_START               = T_BEGIN
-PDPA_END                 = T_END  
+PDPA_END                 = T_END + 1.0_EB
 PDPA_RADIUS              = 0.1_EB
 PDPA_COUNT               = .FALSE.
 PDPA_M                   = 3
@@ -6297,9 +6289,6 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    DV%Z                = XYZ(3)
    DV%DRY              = DRY
 
-   ! Grouping of PDPA devices
-
-   DV%PDPA_GROUP       = 1   
 
    ! Coordinates for non-point devices
 

@@ -6803,24 +6803,69 @@ output quantity for heat flux means heat is being transferred into the surface.
 \subsection{Droplet Output Quantities}
 \label{info:part_output}
 
-It is possible to record various properties of evaporating droplets. Some of the output quantities are associated with solid boundaries. For example,
-{\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named
-{\ct PART\_ID}. Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea. Both of these
-are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area, and the accumulated total, respectively. The
-accumulated total is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time
-period. The cooling of a solid surface by droplets of a given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea
-in units of kW/m$^2$.
+\subsubsection{Droplet Quantities on Solid Surfaces}
 
-Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the
-{\ct MISC} line). \index{POROUS\_FLOOR!output issues}
+It is possible to record various properties of droplets and particles. Some of the output quantities are associated with solid boundaries. For example, 
+{\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named {\ct PART\_ID}. 
+Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea. 
+Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area, 
+and the accumulated total, respectively. The accumulated total is analogous to a ``bucket test,'' where the droplets are collected 
+in buckets and the total mass determined at the end of a given time period. The cooling of a solid surface by droplets of a 
+given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.
+
+Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, 
+is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line). \index{POROUS\_FLOOR!output issues}
 In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from
 the simulation for the purpose of saving CPU time.
+
+\subsubsection{Droplet Mass and Fluxes in Gas Phase}
 
 Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of the droplets as they fly through
 the air, in units of kg/m$^3$.  {\ct 'DROPLET FLUX X'},  {\ct 'DROPLET FLUX Y'}, and {\ct 'DROPLET FLUX Z'} produce {\em only} slice and Plot3D files
 of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
 
+\subsubsection{Local Spray Properties}
+\index{Output!PDPA output}
 
+Detailed experimental measurements of sprays are often performed using \underline{P}hase \underline{D}oppler \underline{P}article 
+\underline{A}nalysis (PDPA) which can be used to obtain information on the droplet size distribution, speed and concentration. 
+Special device type has been defined to simulate the PDPA measurement. The actual quantity to measure, and the details of the 
+measurement are defined using an associated {\ct PROP}erty. Note that in FDS, the PDPA device cannot produce complete droplet size
+distributions, but only various mean properties. 
+
+The PDPA device output is computed as
+\be
+f(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} \left( \frac{\sum_i n_i d_i^m}{\sum_i n_i d_i^n}\right)^{1/(m-n)}x  dt
+\ee
+The summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS}. 
+The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
+\begin{description}
+\item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Use {\ct 'ALL'} to account for all particles.
+\item[{\ct PDPA\_START}] $t_s$, starting time of time integration in seconds. PDPA output is always a running average over time. 
+As the spray simulation may contain some initial transient phase, it may be usefull to specify the starting time of data collection.
+\item[{\ct PDPA\_END}] $t_e$, ending time of time integration in seconds.
+\item[{\ct PDPA\_M}] $m$, exponent of diameter.
+\item[{\ct PDPA\_N}] $n$, exponent of diameter. In case $m=n$, the exponent $1/(m-n)$ is removed from the formula.
+\item[{\ct PDPA\_RADIUS}] Radius (m) of the sphere, centered at the device location, inside which the particles are monitored.
+\item[{\ct QUANTITY}] Particle property that is used for variable $x$. Possible variables are {\ct 'VELOCITY'},{\ct 'U-VELOCITY'},
+{\ct 'V-VELOCITY'},{\ct 'W-VELOCITY'},{\ct 'TEMPERATURE'} and {\ct 'NUMBER CONCENTRATION'}. Leave unspecified to compute mean diameters.
+\end{description}
+The following example is used to measure the Sauter mean diameter $D_{32}$ of the particle type {\ct 'water drops'}, starting from
+time 5.0 s.
+
+\footnotesize
+\begin{verbatim}
+&PROP ID='pdpa_d32'
+      PART_ID='water drops'
+      PDPA_M=3
+      PDPA_N=2
+      PDPA_RADIUS=0.01
+      PDPA_START=5.0 /
+&DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d32' /
+\end{verbatim}
+
+\normalsize
+\noindent
 
 
 \subsection{Interfacing with Structural Models}
