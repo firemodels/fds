@@ -1,6 +1,10 @@
 RENDERDIR
  ../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
 SETVIEWPOINT
+ 3D
+RENDERONCE
+ ranch_00_3D
+SETVIEWPOINT
  front
 RENDERONCE
  ranch_00_front
