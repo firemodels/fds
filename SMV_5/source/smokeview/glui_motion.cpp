@@ -76,9 +76,11 @@ GLUI_Translation *rotate_zx=NULL,*eyerotate_z=NULL;
 GLUI_Translation *translate_z=NULL,*translate_xy=NULL;
 GLUI_Checkbox *blockpath_checkbox=NULL,*cursor_checkbox=NULL;
 GLUI_Button *eyerotate90_z=NULL,*eyelevel=NULL, *floorlevel=NULL, *reset_saved_view=NULL;
-GLUI_Button *restore_view=NULL,*save_view=NULL,*add_view=NULL,*delete_view=NULL;
+GLUI_Button *replace_view=NULL,*add_view=NULL,*delete_view=NULL;
 GLUI_Button *startup_button=NULL,*cycle_views_button=NULL;
 GLUI_Rollout *reset_panel=NULL;
+GLUI_Panel *reset_panel1=NULL;
+GLUI_Panel *reset_panel2=NULL;
 GLUI_EditText *edit_view_label=NULL;
 GLUI_Listbox *view_lists=NULL;
 GLUI_Listbox *LIST_windowsize=NULL;
@@ -102,10 +104,17 @@ extern "C" void gluiIdleNULL(void){
 /* ------------------ reset_glui_view ------------------------ */
 
 extern "C" void reset_glui_view(int ival){
-  view_lists->set_int_val(ival);
-  selected_view=ival;
-  BUTTON_Reset_CB(RESTORE_LIST_VIEW);
-  enable_disable_views();
+  
+  if(ival!=old_listview)view_lists->set_int_val(ival);
+  if(ival==-1){
+    replace_view->disable();
+  }
+  else{
+    selected_view=ival;
+    replace_view->enable();
+    BUTTON_Reset_CB(RESTORE_LIST_VIEW);
+    enable_disable_views();
+  }
 }
 
 /* ------------------ glui_motion_setup ------------------------ */
@@ -233,7 +242,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   //glui_motion->add_column(false);
 
-  panel_projection = glui_motion->add_rollout("View",false);
+  panel_projection = glui_motion->add_rollout("Window Properties",false);
   projection_radio=glui_motion->add_radiogroup_to_panel(panel_projection,&projection_type,PROJECTION,TRANSLATE_CB);
   glui_motion->add_radiobutton_to_group(projection_radio,"Perspective");
   glui_motion->add_radiobutton_to_group(projection_radio,"Size Preserving");
@@ -244,7 +253,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_aperture=glui_motion->add_spinner_to_panel(panel_projection,"aperture",GLUI_SPINNER_FLOAT,&aperture_glui,
     APERTURE,TRANSLATE_CB);
   glui_motion->add_separator_to_panel(panel_projection);
-  glui_motion->add_statictext_to_panel(panel_projection,"Window Size");
+  glui_motion->add_statictext_to_panel(panel_projection,"Size");
   
   LIST_windowsize = glui_motion->add_listbox_to_panel(panel_projection,"",&windowsize_pointer,WINDOWSIZE_LIST,TRANSLATE_CB);
   LIST_windowsize->add_item(0,"Custom");
@@ -263,19 +272,23 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_window_height->set_int_limits(100,max_screenHeight);
   window_update=glui_motion->add_button_to_panel(panel_projection,"Apply",WINDOW_RESIZE,TRANSLATE_CB);
 
-  reset_panel = glui_motion->add_rollout("Save/Restore Views",false);
+  reset_panel = glui_motion->add_rollout("Viewpoints",false);
 
-  restore_view=glui_motion->add_button_to_panel(reset_panel,"Restore",RESTORE_LIST_VIEW,BUTTON_Reset_CB);
-  save_view=glui_motion->add_button_to_panel(reset_panel,"Replace",SAVE_LIST_VIEW,BUTTON_Reset_CB);
-  add_view=glui_motion->add_button_to_panel(reset_panel,"Add",ADD_LIST_VIEW,BUTTON_Reset_CB);
-  delete_view=glui_motion->add_button_to_panel(reset_panel,"Delete",DELETE_LIST_VIEW,BUTTON_Reset_CB);
+  reset_panel1 = glui_motion->add_panel_to_panel(reset_panel,"",false);
 
-  glui_motion->add_column_to_panel(reset_panel,false);
+  delete_view=glui_motion->add_button_to_panel(reset_panel1,"Delete",DELETE_LIST_VIEW,BUTTON_Reset_CB);
+  delete_view_is_disabled=0;
+  startup_button=glui_motion->add_button_to_panel(reset_panel1,"view at startup",STARTUP,BUTTON_Reset_CB);
+  cycle_views_button=glui_motion->add_button_to_panel(reset_panel1,"Cycle",CYCLEVIEWS,BUTTON_Reset_CB);
+  view_lists = glui_motion->add_listbox_to_panel(reset_panel1,"Select",&i_view_list,LIST_VIEW,BUTTON_Reset_CB);
+  view_lists->add_item(-1,"-");
 
-  view_lists = glui_motion->add_listbox_to_panel(reset_panel,"Select",&i_view_list,LIST_VIEW,BUTTON_Reset_CB);
-  edit_view_label=glui_motion->add_edittext_to_panel(reset_panel,"Edit",GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,BUTTON_Reset_CB);
-  startup_button=glui_motion->add_button_to_panel(reset_panel,"view at startup",STARTUP,BUTTON_Reset_CB);
-  cycle_views_button=glui_motion->add_button_to_panel(reset_panel,"cycle user views",CYCLEVIEWS,BUTTON_Reset_CB);
+  glui_motion->add_column_to_panel(reset_panel,true);
+  reset_panel2 = glui_motion->add_panel_to_panel(reset_panel,"",false);
+
+  replace_view=glui_motion->add_button_to_panel(reset_panel2,"Replace",SAVE_LIST_VIEW,BUTTON_Reset_CB);
+  add_view=glui_motion->add_button_to_panel(reset_panel2,"Add",ADD_LIST_VIEW,BUTTON_Reset_CB);
+  edit_view_label=glui_motion->add_edittext_to_panel(reset_panel2,"View name",GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,BUTTON_Reset_CB);
 
   cursor_checkbox=glui_motion->add_checkbox("Map cursor keys for Plot3D use",&cursorPlot3D,CURSOR,TRANSLATE_CB);
   panel_close = glui_motion->add_panel("",GLUI_PANEL_NONE);
@@ -294,7 +307,9 @@ extern "C" void glui_motion_setup(int main_window){
 
 void enable_disable_views(void){
   int ival;
+
   ival=view_lists->get_int_val();
+  if(ival==-1)return;
   selected_view=ival;
   camera *cex;
 
@@ -312,14 +327,13 @@ void enable_disable_views(void){
   switch (ival){
   case 0:
   case 1:
-    save_view->disable();
+    replace_view->disable();
     delete_view->disable();
    // edit_view_label->disable();
     break;
   default:
     edit_view_label->enable();
-    if(restore_view!=NULL)restore_view->enable();
-    save_view->enable();
+    replace_view->enable();
     add_view->enable();
     delete_view->enable();
 
@@ -684,6 +698,7 @@ extern "C" void TRANSLATE_CB(int var){
   switch (var){
     case EYE_ROTATE:
     case TRANSLATE_XY:
+      reset_glui_view(-1);
       if(glui_move_mode==EYE_ROTATE){
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[1]=eye_xyz[1];
@@ -696,6 +711,7 @@ extern "C" void TRANSLATE_CB(int var){
       glui_move_mode=TRANSLATE_XY;
       break;
     case GLUI_Z:
+      reset_glui_view(-1);
       if(glui_move_mode==EYE_ROTATE){
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[1]=eye_xyz[1];
@@ -713,14 +729,14 @@ extern "C" void TRANSLATE_CB(int var){
     case WINDOW_RESIZE:
     case WINDOWSIZE_LIST:
     case SNAPVIEW:
+      break;
     case ROTATE_ZX:
+      reset_glui_view(-1);
       break;
     default:
       ASSERT(FFALSE);
       break;
   }
-
-
 }
 
 /* ------------------ update_meshlist1 ------------------------ */
@@ -837,8 +853,14 @@ void BUTTON_Reset_CB(int var){
     view_lists->delete_item(ival);
     prev=cam1->prev;
     delete_camera(cam1);
-    view_lists->set_int_val(prev->view_id);
-    selected_view=prev->view_id;
+    if(prev->view_id!=-1){
+      view_lists->set_int_val(prev->view_id);
+      selected_view=prev->view_id;
+    }
+    else{
+      view_lists->set_int_val(0);
+      selected_view=0;
+    }
     BUTTON_Reset_CB(RESTORE_LIST_VIEW);
     enable_disable_views();
     break;
@@ -855,6 +877,19 @@ void BUTTON_Reset_CB(int var){
    edit_view_label->set_text(ca->name);
    break;
   case LIST_VIEW:
+    ival=view_lists->get_int_val();
+    old_listview=-2;
+    if(ival==-1&&delete_view_is_disabled==0){
+      delete_view->disable();
+      delete_view_is_disabled=1;
+      break;
+    }
+    else{
+      if(delete_view_is_disabled==1){
+        delete_view->enable();
+        delete_view_is_disabled=0;
+      }
+    }
     BUTTON_Reset_CB(RESTORE_LIST_VIEW);
     enable_disable_views();
     break;
@@ -870,6 +905,7 @@ void BUTTON_Reset_CB(int var){
     cex=cex->next;
     cex=cex->next;
     switch (ival){
+    case -1:
     case 0:
     case 1:
       cex=cex->next;
@@ -904,9 +940,13 @@ void BUTTON_Reset_CB(int var){
   }
 }
 
+/* ------------------ set_startup_view ------------------------ */
+
 void set_startup_view(void){
   BUTTON_Reset_CB(STARTUP);
 }
+
+/* ------------------ add_list_view ------------------------ */
 
 void add_list_view(char *label_in){
   int ival;
@@ -914,6 +954,10 @@ void add_list_view(char *label_in){
   camera *cam1,*cam2,*cex,*ca;
 
   ival=view_lists->get_int_val();
+  if(ival==-1){
+    view_lists->set_int_val(0);
+    ival=view_lists->get_int_val();
+  }
   selected_view=ival;
   label=label_in;
   if(label==NULL)label=edit_view_label->get_text();

@@ -317,6 +317,7 @@ void mouse(int button, int state, int x, int y){
 }
 
 /* ------------------ motion ------------------------ */
+
 void motion(int xm, int ym){
   float xx, yy;
   float *eye_xyz, *angle_zx;
@@ -325,6 +326,8 @@ void motion(int xm, int ym){
 
   eye_xyz = camera_current->eye;
   angle_zx = camera_current->angle_zx;
+  
+  reset_glui_view(-1);
 
   GLUTPOSTREDISPLAY
   if( colordrag==1&&(showtime==1 || showplot3d==1)){
