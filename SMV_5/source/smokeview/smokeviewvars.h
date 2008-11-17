@@ -619,6 +619,8 @@ SVEXTERN float xplts[256*256], yplts[256*256], zplts[256*256];
 SVEXTERN float *targtimes;
 SVEXTERN int *targtimeslist;
 SVEXTERN int *zonetlist;
+SVEXTERN int delete_view_is_disabled;
+SVEXTERN int old_listview;
 
 SVEXTERN int sv_age;
 SVEXTERN int titlesafe_offset;

@@ -7437,12 +7437,13 @@ int readini2(char *inifile, int localfile){
 		    sscanf(buffer,"%i %i %i",&camera_ini->eyeview,&camera_ini->rotation_index,&camera_ini->view_id);
 
         {
-          float zoom_in, zoomindex_in;
+          float zoom_in;
+          int zoomindex_in;
 
           zoom_in=zoom;
           zoomindex_in=zoomindex;
           fgets(buffer,255,stream);
-	  	    sscanf(buffer,"%f %f %f %f %f",eye,eye+1,eye+2,&zoom_in,&zoomindex_in);
+	  	    sscanf(buffer,"%f %f %f %f %i",eye,eye+1,eye+2,&zoom_in,&zoomindex_in);
           zoom=zoom_in;
           zoomindex=zoomindex_in;
           if(zoomindex!=-1){
@@ -7497,12 +7498,15 @@ int readini2(char *inifile, int localfile){
           strcpy(camera_ini->name,buffer);
           init_camera_list();
           {
+            //*** following code shouldn't be here but leaving it here commented
+            //    in case it is really necessary
+
             camera *cam;
 
             cam=insert_camera(&camera_list_first,camera_ini,buffer);
-            if(cam!=NULL){
-              cam->view_id=camera_ini->view_id;
-            }
+           // if(cam!=NULL){
+           //   cam->view_id=camera_ini->view_id;
+           // }
           }
         }
 
