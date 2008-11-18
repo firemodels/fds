@@ -603,12 +603,6 @@ extern "C" void TRANSLATE_CB(int var){
       break;
 
     case PROJECTION:
-      if(projection_type==0){
-        projection_type=1;
-      }
-      else{
-        projection_type=0;
-      }
       ZoomMenu(-2);
       camera_current->projection_type=projection_type;
       return;
