@@ -7507,9 +7507,9 @@ int readini2(char *inifile, int localfile){
             //*** following code shouldn't be here but leaving it here commented
             //    in case it is really necessary
 
-            camera *cam;
+            //  camera *cam;
 
-            cam=insert_camera(&camera_list_first,camera_ini,buffer);
+            insert_camera(&camera_list_first,camera_ini,buffer);
            // if(cam!=NULL){
            //   cam->view_id=camera_ini->view_id;
            // }
