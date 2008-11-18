@@ -762,7 +762,7 @@ typedef struct {
   char *file;
   char *size_file;
   char *rle_file, *comp_file, *reg_file;
-  int terrain;
+  int terrain, cellcenter;
   int compression_type;
   int ncompressed;
   float qval256[256];

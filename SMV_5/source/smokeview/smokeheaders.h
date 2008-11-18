@@ -510,6 +510,7 @@ EXTERNCPP void ApertureMenu(int value);
 EXTERNCPP void ZoomMenu(int value);
 EXTERNCPP void setslicecolors(float slicemin, float slicemax, slice *sd, int *errorcode);
 EXTERNCPP void drawslice(const slice *sd);
+EXTERNCPP void drawslice_cellcenter(const slice *sd);
 EXTERNCPP void drawslice_texture(const slice *sd);
 EXTERNCPP void drawslice_terrain(const slice *sd);
 EXTERNCPP void drawvolslice_terrain(const slice *sd);
