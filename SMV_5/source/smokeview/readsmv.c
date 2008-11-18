@@ -666,6 +666,7 @@ int readsmv(char *file){
       continue;
     }
     if( (match(buffer,"SLCF",4) == 1)||
+        (match(buffer,"SLCC",4) == 1)||
         (match(buffer,"SLCT",4) == 1)
       ){
       nslice++;
@@ -3232,14 +3233,18 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if( (match(buffer,"SLCF",4) == 1)||
+        (match(buffer,"SLCC",4) == 1)||
         (match(buffer,"SLCT",4) == 1)
       ){
-      int terrain=0;
+      int terrain=0, cellcenter=0;
       float above_ground_level=0.0;
 
       nn_slice++;
       if(match(buffer,"SLCT",4) == 1){
         terrain=1;
+      }
+      if(match(buffer,"SLCC",4) == 1){
+        cellcenter=1;
       }
       trim(buffer);
       len=strlen(buffer);
@@ -3292,6 +3297,7 @@ typedef struct {
         sd->file=sd->reg_file;
       }
       sd->terrain=terrain;
+      sd->cellcenter=cellcenter;
       sd->above_ground_level=above_ground_level;
       sd->seq_id=nn_slice;
       sd->autoload=0;
