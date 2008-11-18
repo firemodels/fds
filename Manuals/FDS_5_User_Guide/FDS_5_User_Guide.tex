@@ -2840,16 +2840,16 @@ Usually, the thermal properties of a solid boundary are specified via the
 the character string {\ct MATL\_ID}. However, sometimes it is convenient to
 simply specify a fixed temperature boundary condition, in which case set
 {\ct TMP\_FRONT} to be the surface temperature in units of $^\circ$C.  One may also specify
-a fixed heat flux.  Two methods are available to do this.  The first is to specify a 
+a fixed heat flux.  Two methods are available to do this.  The first is to specify a
 {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface
 temperature required to
 ensure that the combine radiative and convective heat flux from the surface is equal to the
-{\ct NET\_HEAT\_FLUX}.  The second method is to specify seperately the {\ct CONVECTIVE\_HEAT\_FLUX}, 
+{\ct NET\_HEAT\_FLUX}.  The second method is to specify seperately the {\ct CONVECTIVE\_HEAT\_FLUX},
 in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both
 {\ct TMP\_FRONT} and {\ct EMISSIVITY}. Note that if you wish there to be only a convective heat flux from a
-surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or 
-{\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or 
-{\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. 
+surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or
+{\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or
+{\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
 
 Fixed temperature or fixed heat flux boundary conditions are
 easy to apply, but only of limited usefulness in real fire scenarios.
@@ -2881,7 +2881,7 @@ surface be adiabatic, that is, there is no net heat transfer
 all that must be prescribed on the {\ct SURF} line is {\ct
 ADIABATIC=.TRUE.}, nothing else.  FDS will compute a wall temperature
 so that the sum of the convective and radiative fluxes is zero.  Specifying a surface as {\ct ADIABATIC} will
-result in FDS defining {\ct NET\_HEAT\_FLUX=0}.  
+result in FDS defining {\ct NET\_HEAT\_FLUX=0}.
 \index{SURF!ADIABATIC}
 
 
@@ -6440,6 +6440,12 @@ Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the 
 entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity
 component slices will be created.
 
+Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they
+are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, 
+set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this
+feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes. Note also that this
+feature should only be used for scalar quantities that are computed at cell centers, like temperatures, mass fractions, {\em etc.}
+
 Slice file information is recorded in files (See Section~\ref{out:SLCF}) \index{Output!Slice File}
 labeled {\bf CHID\_$n$.sf}, where $n$ is the index of the slice file.
 A short fortran program {\bf fds2ascii.f} produces a text file from a line,
@@ -6805,15 +6811,15 @@ output quantity for heat flux means heat is being transferred into the surface.
 
 \subsubsection{Droplet Quantities on Solid Surfaces}
 
-It is possible to record various properties of droplets and particles. Some of the output quantities are associated with solid boundaries. For example, 
-{\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named {\ct PART\_ID}. 
-Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea. 
-Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area, 
-and the accumulated total, respectively. The accumulated total is analogous to a ``bucket test,'' where the droplets are collected 
-in buckets and the total mass determined at the end of a given time period. The cooling of a solid surface by droplets of a 
+It is possible to record various properties of droplets and particles. Some of the output quantities are associated with solid boundaries. For example,
+{\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named {\ct PART\_ID}.
+Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea.
+Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area,
+and the accumulated total, respectively. The accumulated total is analogous to a ``bucket test,'' where the droplets are collected
+in buckets and the total mass determined at the end of a given time period. The cooling of a solid surface by droplets of a
 given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.
 
-Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, 
+Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$,
 is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line). \index{POROUS\_FLOOR!output issues}
 In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from
 the simulation for the purpose of saving CPU time.
@@ -6827,21 +6833,21 @@ of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, 
 \subsubsection{Local Spray Properties}
 \index{Output!PDPA output}
 
-Detailed experimental measurements of sprays are often performed using \underline{P}hase \underline{D}oppler \underline{P}article 
-\underline{A}nalysis (PDPA) which can be used to obtain information on the droplet size distribution, speed and concentration. 
-Special device type has been defined to simulate the PDPA measurement. The actual quantity to measure, and the details of the 
+Detailed experimental measurements of sprays are often performed using \underline{P}hase \underline{D}oppler \underline{P}article
+\underline{A}nalysis (PDPA) which can be used to obtain information on the droplet size distribution, speed and concentration.
+Special device type has been defined to simulate the PDPA measurement. The actual quantity to measure, and the details of the
 measurement are defined using an associated {\ct PROP}erty. Note that in FDS, the PDPA device cannot produce complete droplet size
-distributions, but only various mean properties. 
+distributions, but only various mean properties.
 
 The PDPA device output is computed as
 \be
 f(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} \left( \frac{\sum_i n_i d_i^m}{\sum_i n_i d_i^n}\right)^{1/(m-n)}x  dt
 \ee
-The summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS}. 
+The summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS}.
 The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Use {\ct 'ALL'} to account for all particles.
-\item[{\ct PDPA\_START}] $t_s$, starting time of time integration in seconds. PDPA output is always a running average over time. 
+\item[{\ct PDPA\_START}] $t_s$, starting time of time integration in seconds. PDPA output is always a running average over time.
 As the spray simulation may contain some initial transient phase, it may be usefull to specify the starting time of data collection.
 \item[{\ct PDPA\_END}] $t_e$, ending time of time integration in seconds.
 \item[{\ct PDPA\_M}] $m$, exponent of diameter.
@@ -6983,8 +6989,8 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 
 \noindent
 causes FDS to write out the maximum gas phase temperature over the entire mesh containing the point {\ct XYZ}. Note that it
-does not compute the maximum over the entire computational domain, just that particular mesh. One may also use {\ct XB} to 
-limit the {\ct DEVC} to a subvolume of a mesh; however, the specified {\ct XB} must lie within a single mesh.  
+does not compute the maximum over the entire computational domain, just that particular mesh. One may also use {\ct XB} to
+limit the {\ct DEVC} to a subvolume of a mesh; however, the specified {\ct XB} must lie within a single mesh.
 Other {\ct STATISTICS} are discussed below.  Note that some are appropriate for gas phase output quantities, some for solid phase,
 and some for both.
 
@@ -8193,6 +8199,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\
 \hline \hline
 \endhead
+{\ct CELL\_CENTERED}    & Logical           & Show raw data with no averaging        &           & {\ct .FALSE.}    \\ \hline
 {\ct FYI}               & Character         & Comment String (has no effect)         &           &     \\ \hline
 %{\ct MAXIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
 %{\ct MINIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
