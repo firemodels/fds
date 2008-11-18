@@ -108,6 +108,7 @@ extern "C" void reset_glui_view(int ival){
   if(ival!=old_listview)view_lists->set_int_val(ival);
   if(ival==-1){
     replace_view->disable();
+    edit_view_label->set_text("new view");
   }
   else{
     selected_view=ival;
