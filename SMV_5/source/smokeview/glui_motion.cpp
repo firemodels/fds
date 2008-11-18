@@ -265,6 +265,7 @@ extern "C" void glui_motion_setup(int main_window){
   if(max_screenWidth>=800&&max_screenHeight>=480)LIST_windowsize->add_item(4, "800x640");
   if(max_screenWidth>=1024&&max_screenHeight>=768)  LIST_windowsize->add_item(5,"1024x768");
   if(max_screenWidth>=1280&&max_screenHeight>=1024)  LIST_windowsize->add_item(6,"1280x1024");
+  if(max_screenWidth>=1920&&max_screenHeight>=1200)  LIST_windowsize->add_item(8,"1920x1200");
   update_windowsizelist();
 
   SPINNER_window_width = glui_motion->add_spinner_to_panel(panel_projection,"width",GLUI_SPINNER_INT,&glui_screenWidth);
@@ -368,6 +369,9 @@ extern "C" void update_windowsizelist(void){
   }
   if(screenWidth==1280&&screenHeight==1024){
     windowsize_pointer=6;
+  }
+  if(screenWidth==1920&&screenHeight==1200){
+    windowsize_pointer=8;
   }
   if(LIST_windowsize!=NULL)LIST_windowsize->set_int_val(windowsize_pointer);
 }
@@ -562,6 +566,10 @@ extern "C" void TRANSLATE_CB(int var){
         case 7:
           glui_screenWidth=720;
           glui_screenHeight=480;
+          break;
+        case 8:
+          glui_screenWidth=1920;
+          glui_screenHeight=1200;
           break;
         case 4:
           glui_screenWidth=800;
