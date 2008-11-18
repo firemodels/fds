@@ -999,20 +999,12 @@ void ZoomMenu(int value){
       zoomindex=4;
     }
     if(projection_type!=0){
-      projection_type=0;
       camera_current->projection_type=projection_type;
       ResetView(RESTORE_EXTERIOR_VIEW);
       update_projection_type();
     }
   }
   else if(zoomindex==-2){
-    if(projection_type!=1){
-      projection_type=1;
-//      zoom=zooms[2];
-    }
-    else{
-      projection_type=0;
-    }
     camera_current->projection_type=projection_type;
     update_projection_type();
     if(projection_type==0){
@@ -1029,7 +1021,6 @@ void ZoomMenu(int value){
     if(zoomindex>4)zoomindex=2;
     zoom=zooms[zoomindex];
     if(projection_type!=0){
-      projection_type=0;
       ResetView(RESTORE_EXTERIOR_VIEW_ZOOM);
       camera_current->projection_type=projection_type;
       update_projection_type();
@@ -1186,7 +1177,8 @@ void ResetMenu(int value){
     }
     break;
   }
-  updatezoommenu=1;
+  //updatezoommenu=1; // updating zoom causes a bug when restoring views from the menu
+                      // kept commented code in for future reference
   updatemenu=1;  
   GLUTPOSTREDISPLAY
 }
