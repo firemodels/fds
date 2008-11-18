@@ -508,6 +508,8 @@ EXTERNCPP void update_current_mesh(mesh *meshi);
 EXTERNCPP void DialogMenu(int value);
 EXTERNCPP void ApertureMenu(int value);
 EXTERNCPP void ZoomMenu(int value);
+EXTERNCPP void setClipPlanes(int mode);
+EXTERNCPP void unsetClipPlanes(void);
 EXTERNCPP void setslicecolors(float slicemin, float slicemax, slice *sd, int *errorcode);
 EXTERNCPP void drawslice(const slice *sd);
 EXTERNCPP void drawslice_cellcenter(const slice *sd);

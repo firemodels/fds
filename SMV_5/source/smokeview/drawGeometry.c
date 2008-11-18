@@ -4183,10 +4183,22 @@ void drawBlockages(int mode, int trans_flag){
       cd=cadgeominfo+i;
       if(cd->version==1){
         if(trans_flag==DRAW_TRANSPARENT)continue;
+        if(xyz_clipplane==2){
+          setClipPlanes(1);
+        }
         drawcadgeom(cd);
+        if(xyz_clipplane==2){
+          unsetClipPlanes();
+        }
       }
       else if(cd->version==2){
+        if(xyz_clipplane==2){
+          setClipPlanes(1);
+        }
         drawcad2geom(cd,trans_flag);
+        if(xyz_clipplane==2){
+          unsetClipPlanes();
+        }
       }
     }
   }

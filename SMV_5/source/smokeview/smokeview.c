@@ -1177,7 +1177,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw sensors/sprinklers/heat detectors +++++++++++++++++++++++++ */
 
+    if(xyz_clipplane==2){
+      setClipPlanes(1);
+    }
     draw_devices();
+    if(xyz_clipplane==2){
+      unsetClipPlanes();
+    }
     sniffErrors("after draw_devices");
 
     if(visaxislabels==1||showedit==1){
@@ -1245,6 +1251,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   }
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
+
   if(xyz_clipplane==2){
     setClipPlanes(1);
   }
