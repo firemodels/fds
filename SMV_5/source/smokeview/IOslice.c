@@ -1698,7 +1698,6 @@ void adjustslicebounds(const slice *sd, float *pmin, float *pmax){
 
 }
 
-
 /* ------------------ drawslice ------------------------ */
 
 void drawslice(const slice *sd){
@@ -1903,6 +1902,144 @@ void drawslice(const slice *sd){
          glColor4fv(&rgb_ptr[i13]);
          glVertex3f(x1,y3,constval);
        }
+     }
+   }
+   glEnd();
+  }
+  if(transparentflag==1)transparentoff();
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
+
+}
+
+/* ------------------ drawslice_cellcenter ------------------------ */
+
+void drawslice_cellcenter(const slice *sd){
+  int i,j,k,n,n2;
+  int i11, i31, i13, i33;
+  float constval,x1,x3,yy1,y3,z1,z3;
+  int maxj;
+
+  float *xplt, *yplt, *zplt;
+  int ibar,jbar;
+  int nx,ny,nxy;
+  char *iblank_x, *iblank_y, *iblank_z;
+#ifdef pp_CARVE
+  char *iblank_embed;
+#endif
+
+  mesh *meshi;
+
+  float *rgb_ptr;
+
+  rgb_ptr = rgb_slice;
+
+  meshi = meshinfo + sd->blocknumber;
+
+  xplt=meshi->xplt;
+  yplt=meshi->yplt;
+  zplt=meshi->zplt;
+  ibar=meshi->ibar;
+  jbar=meshi->jbar;
+  iblank_x=meshi->c_iblank_x;
+  iblank_y=meshi->c_iblank_y;
+  iblank_z=meshi->c_iblank_z;
+#ifdef pp_CARVE
+  iblank_embed = meshi->c_iblank_embed;
+#endif
+  nx = ibar + 1;
+  ny = jbar + 1;
+  nxy = nx*ny;
+
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
+
+  if(transparentflag==1)transparenton();
+  if(sd->idir==1){
+   constval = xplt[sd->is1]+offset_slice*sd->sliceoffset;
+   glBegin(GL_TRIANGLES);
+   maxj = sd->js2;
+   if(sd->js1+1>maxj){
+     maxj=sd->js1+1;
+   }
+   for(j=sd->js1; j<maxj; j++){
+     n = (j-sd->js1)*sd->nslicek -1;
+     n2 = n + sd->nslicek;
+     yy1 = yplt[j];
+     y3 = yplt[j+1];
+     for(k=sd->ks1; k<sd->ks2; k++){
+       n++; n2++; 
+       if(show_slice_in_obst==0&&iblank_x[ijk(sd->is1,j,k)]!=2)continue;
+#ifdef pp_CARVE
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(sd->is1,j,k)]==0)continue;
+#endif
+       i33 = 4*sd->slicepoint[n2+1];
+       z1 = zplt[k];
+       z3 = zplt[k+1];
+       glColor4fv(&rgb_ptr[i33]);
+       glVertex3f(constval,yy1,z1);
+       glVertex3f(constval,y3,z1);
+       glVertex3f(constval,y3,z3);
+
+       glVertex3f(constval,yy1,z1);
+       glVertex3f(constval,y3,z3);
+       glVertex3f(constval,yy1,z3);
+     }
+   }
+   glEnd();
+  }
+  else if(sd->idir==2){
+   constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
+   glBegin(GL_TRIANGLES);
+   for(i=sd->is1; i<sd->is2; i++){
+
+     n = (i-sd->is1)*sd->nslicek -1;
+     n2 = n + sd->nslicek;
+     x1 = xplt[i];
+     x3 = xplt[i+1];
+     for(k=sd->ks1; k<sd->ks2; k++){
+       n++; n2++; 
+       if(show_slice_in_obst==0&&iblank_y[ijk(i,sd->js1,k)]!=2)continue;
+#ifdef pp_CARVE
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
+#endif
+       i33 = 4*sd->slicepoint[n2+1];
+       z1 = zplt[k];
+       z3 = zplt[k+1];
+       glColor4fv(&rgb_ptr[i33]);
+       glVertex3f(x1,constval,z1);
+       glVertex3f(x3,constval,z1);
+       glVertex3f(x3,constval,z3);
+       glVertex3f(x1,constval,z1);
+       glVertex3f(x3,constval,z3);
+       glVertex3f(x1,constval,z3);
+      }
+   }
+   glEnd();
+  }
+  else if(sd->idir==3){
+   constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset;
+   glBegin(GL_TRIANGLES);
+   for(i=sd->is1; i<sd->is2; i++){
+     n = (i-sd->is1)*sd->nslicej -1;
+     n2 = n + sd->nslicej;
+     x1 = xplt[i];
+     x3 = xplt[i+1];
+     for(j=sd->js1; j<sd->js2; j++){
+       n++; n2++; 
+       if(show_slice_in_obst==0&&iblank_z[ijk(i,j,sd->ks1)]!=2)continue;
+#ifdef pp_CARVE
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,j,sd->ks1)]==0)continue;
+#endif
+       i33 = 4*sd->slicepoint[n2+1];
+       yy1 = yplt[j];
+       y3 = yplt[j+1];
+         glColor4fv(&rgb_ptr[i33]);
+         glVertex3f(x1,yy1,constval);
+         glVertex3f(x3,yy1,constval);
+         glVertex3f(x3,y3,constval);
+
+         glVertex3f(x1,yy1,constval);
+         glVertex3f(x3,y3,constval);
+         glVertex3f(x1,y3,constval);
      }
    }
    glEnd();
