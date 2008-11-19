@@ -2351,9 +2351,19 @@ Contains
                   Write(MESSAGE,'(8A)') &
                        'ERROR: ', Trim(EVAC_Node_List(n)%Node_Type), ': ', &
                        Trim(EVAC_Node_List(n)%ID), ' has same ID as ', &
-                       Trim(EVAC_Node_List(i)%Node_Type), ': ', &
-                       Trim(EVAC_Node_List(i)%ID)
+                       Trim(EVAC_Node_List(i)%Node_Type), ': ', Trim(EVAC_Node_List(i)%ID)
                   Call SHUTDOWN(MESSAGE)
+               End If
+            End Do
+         End Do
+
+         ! BUG fix, 17.11.2008
+         Do n = 1, n_entrys
+            Do i = 1, evac_entrys(n)%N_VENT_FFIELDS
+               If (evac_entrys(n)%I_DOOR_NODES(i) < 0) Then
+                  evac_entrys(n)%I_DOOR_NODES(i) = EVAC_EXITS(Abs(evac_entrys(n)%I_DOOR_NODES(i)))%INODE
+               Else If (evac_entrys(n)%I_DOOR_NODES(i) > 0) Then
+                  evac_entrys(n)%I_DOOR_NODES(i) = EVAC_DOORS(Abs(evac_entrys(n)%I_DOOR_NODES(i)))%INODE
                End If
             End Do
          End Do
@@ -2526,8 +2536,7 @@ Contains
                If ( (PNX%Z1 >= Meshes(i)%ZS .And. PNX%Z2 <= Meshes(i)%ZF).And. &
                     (PNX%Y1 >= Meshes(i)%YS .And. PNX%Y2 <= Meshes(i)%YF).And. &
                     (PNX%X1 >= Meshes(i)%XS .And. PNX%X2 <= Meshes(i)%XF)) Then
-                  If (Trim(MESH_ID) == 'null' .Or. &
-                       Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
+                  If (Trim(MESH_ID) == 'null' .Or. Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
                      ii = ii + 1
                      PNX%IMESH = i
                      PNX%TO_INODE = n_tmp
@@ -2537,14 +2546,12 @@ Contains
             End If
          End Do PNX_MeshLoop
          If (PNX%IMESH == 0) Then
-            Write(MESSAGE,'(A,A,A)') &
-                 'ERROR: ENTR line ',Trim(PNX%ID), &
+            Write(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',Trim(PNX%ID), &
                  ' problem with IMESH, no mesh found'
             Call SHUTDOWN(MESSAGE)
          End If
          If (ii > 1) Then
-            Write(MESSAGE,'(A,A,A)') &
-                 'ERROR: ENTR line ',Trim(PNX%ID), &
+            Write(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',Trim(PNX%ID), &
                  ' not an unique mesh found '
             Call SHUTDOWN(MESSAGE)
          End If
@@ -2578,34 +2585,32 @@ Contains
             ! P = 0 or 1 for entrys.
             If ( .Not.( Abs(KNOWN_DOOR_PROBS(i)-1.0_EB) < 0.0001_EB .Or. &
                  Abs(KNOWN_DOOR_PROBS(i)) < 0.0001_EB ) )  Then
-               Write(MESSAGE,'(A,A,A,f12.6,A)') &
-                    'ERROR: ENTR line ',Trim(PNX%ID), &
-                    ' problem with probability, ', &
-                    KNOWN_DOOR_PROBS(i),' it should be zero or one.'
+               Write(MESSAGE,'(A,A,A,f12.6,A)') 'ERROR: ENTR line ',Trim(PNX%ID), &
+                    ' problem with probability, ', KNOWN_DOOR_PROBS(i),' it should be zero or one.'
                Call SHUTDOWN(MESSAGE)
             End If
             PNX%P_VENT_FFIELDS(i) = Max(0.0_EB,KNOWN_DOOR_PROBS(i))
             PNX%I_VENT_FFIELDS(i) = 0
             PNX%I_DOOR_NODES(i) = 0
             Do j = 1, n_exits
-               If ( Trim(EVAC_EXITS(j)%ID) == &
-                    Trim(KNOWN_DOOR_NAMES(i)) ) Then
+               If ( Trim(EVAC_EXITS(j)%ID) == Trim(KNOWN_DOOR_NAMES(i)) ) Then
                   PNX%I_VENT_FFIELDS(i) = EVAC_EXITS(j)%I_VENT_FFIELD
-                  PNX%I_DOOR_NODES(i)   = EVAC_EXITS(j)%INODE
+                  ! BUG fix, 17.11.2008
+                  ! PNX%I_DOOR_NODES(i)   = EVAC_EXITS(j)%INODE
+                  PNX%I_DOOR_NODES(i)   = -j
                End If
             End Do
             Do j = 1, n_doors
-               If ( Trim(EVAC_DOORS(j)%ID) == &
-                    Trim(KNOWN_DOOR_NAMES(i)) ) Then
+               If ( Trim(EVAC_DOORS(j)%ID) == Trim(KNOWN_DOOR_NAMES(i)) ) Then
                   PNX%I_VENT_FFIELDS(i) = EVAC_DOORS(j)%I_VENT_FFIELD
-                  PNX%I_DOOR_NODES(i)   = EVAC_DOORS(j)%INODE
+                  ! BUG fix, 17.11.2008
+                  ! PNX%I_DOOR_NODES(i)   = EVAC_DOORS(j)%INODE
+                  PNX%I_DOOR_NODES(i)   = +j
                End If
             End Do
             If ( PNX%I_VENT_FFIELDS(i)*PNX%I_DOOR_NODES(i) == 0 ) Then
-               Write(MESSAGE,'(A,A,A,A,A)') &
-                    'ERROR: ENTR line ',Trim(PNX%ID), &
-                    ' problem with door/exit names, ', &
-                    Trim(KNOWN_DOOR_NAMES(i)),' not found'
+               Write(MESSAGE,'(A,A,A,A,A)') 'ERROR: ENTR line ',Trim(PNX%ID), &
+                    ' problem with door/exit names, ', Trim(KNOWN_DOOR_NAMES(i)),' not found'
                Call SHUTDOWN(MESSAGE)
             End If
          End Do
@@ -2616,8 +2621,7 @@ Contains
          PNX%I_VENT_FFIELDS(0) = 0
          PNX%I_DOOR_NODES(0) = 0
          PNX_Mesh2Loop: Do i = 1, nmeshes
-            If ( evacuation_only(i) .And. Trim(PNX%GRID_NAME) == &
-                 Trim(MESH_NAME(i)) ) Then
+            If ( evacuation_only(i) .And. Trim(PNX%GRID_NAME) == Trim(MESH_NAME(i)) ) Then
                PNX%I_VENT_FFIELDS(0) = i
                Exit PNX_Mesh2Loop
             End If
