@@ -1923,8 +1923,8 @@ void drawslice_cellcenter(const slice *sd){
   int maxj;
 
   float *xplt, *yplt, *zplt;
-  int ibar,jbar;
-  int nx,ny,nxy;
+  int ibar,jbar,kbar;
+  int nx,ny,nz,nxy;
   char *iblank_x, *iblank_y, *iblank_z;
 #ifdef pp_CARVE
   char *iblank_embed;
@@ -1943,6 +1943,7 @@ void drawslice_cellcenter(const slice *sd){
   zplt=meshi->zplt;
   ibar=meshi->ibar;
   jbar=meshi->jbar;
+  kbar=meshi->kbar;
   iblank_x=meshi->c_iblank_x;
   iblank_y=meshi->c_iblank_y;
   iblank_z=meshi->c_iblank_z;
@@ -1951,13 +1952,19 @@ void drawslice_cellcenter(const slice *sd){
 #endif
   nx = ibar + 1;
   ny = jbar + 1;
+  nz = kbar + 1;
   nxy = nx*ny;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   if(transparentflag==1)transparenton();
   if(sd->idir==1){
-   constval = xplt[sd->is1]+offset_slice*sd->sliceoffset;
+   int ii1, ii2;
+
+   ii1 = sd->is1;
+   ii2 = ii1 + 1;
+   if(ii2>nx)ii2=nx;
+   constval = (xplt[ii1]+xplt[ii2])/2.0;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
    if(sd->js1+1>maxj){
@@ -1990,7 +1997,12 @@ void drawslice_cellcenter(const slice *sd){
    glEnd();
   }
   else if(sd->idir==2){
-   constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
+   int jj1, jj2;
+
+   jj1 = sd->js1;
+   jj2 = jj1+1;
+   if(jj2>ny)jj2=ny;
+   constval = (yplt[jj1]+yplt[jj2])/2.0;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
 
@@ -2019,7 +2031,12 @@ void drawslice_cellcenter(const slice *sd){
    glEnd();
   }
   else if(sd->idir==3){
-   constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset;
+   int kk1, kk2;
+
+   kk1 = sd->ks1;
+   kk2 = sd->ks2;
+   if(kk2>nz)kk2=nz;
+   constval = (zplt[kk1]+zplt[kk2])/2.0;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
      n = (i-sd->is1)*sd->nslicej -1;
