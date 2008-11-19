@@ -639,6 +639,9 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     sd->qval256[i] = (qmin*(255-i) + qmax*i)/255;
   }
 
+  if(sd->cellcenter==1){
+    usetexturebar=0;
+  }
   sd->loaded=1;
   if(sd->vloaded==0)sd->display=1;
   islicetype=getslicetype(sd);
