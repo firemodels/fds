@@ -1027,9 +1027,7 @@ void initvars1(void){
   hrrpuv_loaded=0;
   show_bothsides_ext=0;
   show_slice_in_obst=0;
-  #ifdef pp_CARVE
   skip_slice_in_embedded_mesh=1;
-  #endif
   offset_slice=0;
   updategluiview=1;
   trainer_pause=0;

@@ -35,10 +35,8 @@ SVEXTERN int navatar_colors;
 SVEXTERN float *avatar_colors;
 
 SVEXTERN int show_slice_in_obst, offset_slice;
-#ifdef pp_CARVE
 SVEXTERN int skip_slice_in_embedded_mesh;
 SVEXTERN int n_embedded_meshes;
-#endif
 
 SVEXTERN int force_isometric;
 SVEXTERN int updategluiview;
