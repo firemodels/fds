@@ -8,7 +8,49 @@
 <p>Latest FDS and Smokeview available at 
 <a href="http://fire.nist.gov/fds">http://fire.nist.gov/fds</a>
 <ul>
-<li>5.2.7 (build 2602) - November 4, 2008
+
+<li>5.3 (build xxx) - To be released soon.  Note, the features described below are available in the smokeview test version available at the 
+<a href="http://code.google.com/p/fds-smv/downloads/list">download site</a>.
+<ol>
+
+<li> enhancement: Add option to draw cell centered slice data.  Cell centered data is created by adding the string, <tt>CELL_CENTERED=.TRUE.</tt>
+on a <tt>&SLCF</tt> line in an FDS input file (requires FDS built with svn revision 2690 or later).
+
+<li> enhancement: Optionally hide slice data residing on the coarse mesh portion of a region refined by an imbedded mesh -
+so that data from both meshes are not displayed simultaneously.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=531&can=1&sort=-id">Issue 531</a>).
+
+<li>  enhancement - Add option to control placement of scaling ticks (through the Display dialog box) used 
+to document cases.
+
+<li> enhancement - Add menu item and command key equivalent (%) for toggling the projection type.  Pressing '%' toggles between
+perspective and size preserving projection methods for displaying the scene.
+
+<li> enhancement: Add a dialog box for setting up and running smokeview scripts.  
+The dialog box includes several items such as specifying a custom configuration/.ini file name for later loading by the script, specifying custom render images file names, 
+specifying the render directory.  As a result, the edits required to finalize the auto-generated script are minimal.
+
+<li> enhancement: Improve the layout and functionality of the motion dialog box.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=534&can=1&sort=-id">Issue 534</a>).
+
+<li> enhancement: Add window size option (1920x1080) to Motion dialog box
+
+<p><li> fix: hrrpuvcutoff values now clamped down to 1199.99 since hrrpuv 3d file data can ONLY contain hrrpuv's between 0 and 1200.  A hrrpuvcutoff value greater
+than 1200.0 would result in hiding of ALL hrrpuv data.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=524&can=1&sort=-id">Issue 524</a>).
+
+<li> fix: fix clipping when displaying cad textures (and devices) - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=536&can=1&sort=-id">Issue 536</a>).
+
+<li>fix - fixed the cad texture display by 
+<ul>
+<li>adding the texture origin to the .ge1 file and 
+<li>fix texture file flipping issue
+</ul>
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=522&can=1&sort=-id">Issue 522</a>).
+</ol>
+
+<p><li>5.2.7 (build 2602) - November 4, 2008
 <ol>
 <li>change - smokezip now requires the user to specifiy the minimum and maximum data bounds when compressing boundary files.  
 This now makes the treatment of boundary and slice files consistent (and more correct).
@@ -17,6 +59,7 @@ This now makes the treatment of boundary and slice files consistent (and more co
 <li>fix - correct option to smooth blockages from menu when blockages are already cached
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=510&can=1&sort=-id">Issue 510</a>).
 </ol>
+
 <li>5.2.6 (build 2554) - October 24, 2008
 <ol>
 <li>enhancement - add option to display tracer particles (no value assigned) and particles with values
@@ -27,6 +70,7 @@ simultaneously.  Option is activated using the Show/Hide>Particles menu or the F
 <li>fix - fix color display of CAD output when smoke is also displayed
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=491&can=1&sort=-id">Issue 491</a>).
 </ol>
+
 <li>5.2.5 (build 2466) - October 8, 2008
 <ol>
 <li>enhancement - add value labels to isosurface menus to make clear which surfaces are being displayed
@@ -37,6 +81,7 @@ burning but have simply exceeded a specified temperature threshold value.
 <li>fix - Update the smooth blockage cache file if a case has been re-run in order to avoid reading that is out of date.
 <li>fix - make particles and smoke conform to terrain if terrain is vertically exaggerated .
 </ol>
+
 <li>5.2.4 (build 2236) - August 27, 2008
 <ol>
 <li>enhancement - add smoke sensor device used by Smokeview to detect opacity level or optical depth of intervening smoke.
@@ -48,6 +93,7 @@ burning but have simply exceeded a specified temperature threshold value.
 <li>fix - fix clipping for transparent blockages. 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=446&can=1&sort=-id">Issue 446</a>).
 </ol>
+
 <li>5.2.3 (build 2136) - August 8, 2008
 <ol>
 <li>enhancement - save isosurface state (hidden=0, solid=1, outline=2, points=3) in .ini file
@@ -57,11 +103,13 @@ burning but have simply exceeded a specified temperature threshold value.
 <li>enhancement - add LOADINIFILE script keyword to let one change Smokeview view settings 
 during a script run.
 </ol>
+
 <li>5.2.2 (build 2050) - July 18, 2008
 <ol>
 <li>fix - Circular Tour was missing from Tour menu.  Fix by adding <em>Show Tours</em> menu when there is only one Tour.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=412&can=1&sort=-id">Issue 412</a>).
 </ol>
+
 <li>5.2 (build 2039) - July 17, 2008
 <ol>
 <li>enhancement - Add an option to speed up smoke visualization by using the 
@@ -96,7 +144,8 @@ are not visible
 <li>fix - fix time advance when adjusting 3D slice/vector files.
 
 </ol>
-<li>5.1.6 (build 1736) - May 31, 2008
+
+<p><li>5.1.6 (build 1736) - May 31, 2008
 <ol>
 <li>enhancement - allow slice and vector slice files to conform to terrain (for WUI applications)
 <li>fix - print out the keyword &TAIL at the end of the file when editing blockages
@@ -105,11 +154,13 @@ are not visible
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=361&can=1&sort=-id">Issue 361</a>).
 <li>fix - fix lighting bug when displaying terrain
 </ol>
+
 <li>5.1.5 (build 1666) - May 10, 2008
 <ol>
 <li>fix - fix display of hrrpuv cutoff value
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=355&can=1&sort=-id">Issue 355</a>).
 </ol>
+
 <li>5.1.4 (build 1635) - May 5, 2008
 <ol>
 <li>enhancement - save smooth blockages to a file so that their definition may be read in rather than re-calculated.  
@@ -137,6 +188,7 @@ This could occur when FDS is restarted to an earlier time than was saved in thes
 <li>fix - fix drawing of text on the colorbar 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=325&can=1&sort=-id">Issue 325</a>).
 </ol>
+
 <li>5.1.3 (build 1501) - March 26, 2008
 <ol>
 <li>enhancement -  redo grid show menu to make clearer which grid planes will be visible once grid drawing is turned on.  
@@ -153,6 +205,7 @@ This mode is used to demonstrate an FDS/Smokeview case by presenting a simplifie
 <li>enhancement - add the command line option -skip val to the companion program <bold>smokezip</bold> to allow
 frame skipping specifiation when running this tool from a command shell.
 </ol>
+
 <li>5.1 (build 1345) - February 20, 2008
 <ol>
 <li>enhancement - add demo mode, activated by copying casename.smv to casename.svd .  
@@ -170,21 +223,25 @@ and viewpoints (defined in an .ini file).  Further details are found in the Smok
 <li>fix - fix problem with menu disconnects (<a href="http://code.google.com/p/fds-smv/issues/detail?id=263&can=1&sort=-id">issues 263</a>).
 <li>fix - add missing scaling info to PART5 colorbar label (<a href="http://code.google.com/p/fds-smv/issues/detail?id=269&can=1&sort=-id">issue 269</a>).
 </ol>
-<li>5.0.7 (build 1136) - December 30, 2007
+
+<p><li>5.0.7 (build 1136) - December 30, 2007
 <ol>
 <li>fix - Hide blockages when using the <tt>Hide All</tt> Geometry menu item so that all geometry is hidden.
 </ol>
+
 <li>5.0.6 (build 1042) - November 30, 2007
 <ol>
 <li>fix - fix error in colorbar when displaying CFAST zone data 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=234&can=1&sort=-id">issue 234</a>).
 </ol>
+
 <li>5.0.5 (build 940) - November 6, 2007
 <ol>
 <li>enhancement - add hrr cutoff parameter to .ini file.
 <li>fix - fix errors in device file input that occur when smokeview is run from a command line
 (smokeview bin directory was defined improperly) (<a href="http://code.google.com/p/fds-smv/issues/detail?id=217&can=1&sort=-id">issue 217</a>).
 </ol>
+
 <li>5.0.4 (build 875) - October 25, 2007
 <ol>
 <li>enhancement - Add option to toggle vent transparency. <br>
@@ -194,12 +251,14 @@ and viewpoints (defined in an .ini file).  Further details are found in the Smok
 <li>fix - colorbar selection (<a href="http://code.google.com/p/fds-smv/issues/detail?id=126&can=1&sort=-id">issue 126</a>).
 <li>fix - vent transparency .
 </ol>
+
 <li>5.0.3 (build 863) - October 18, 2007
 <ol>
 <li>fix - missing slice file menu entries (<a href="http://code.google.com/p/fds-smv/issues/detail?id=209&can=1&sort=-id">Issue 209</a>).
 <li>fix - crash when particle file reloading (<a href="http://code.google.com/p/fds-smv/issues/detail?id=203&can=1&sort=-id">Issue 203</a>).
 <li>maintenance - internal source clean up to remove more un-needed compiler directives.
 </ol>
+
 <li>5.0.2 (build 826) - October 10, 2007
 <ol>
 <li>enhancement - changed default color of first iso-surface to purple to address fire colorization detailed in 
@@ -210,6 +269,7 @@ and viewpoints (defined in an .ini file).  Further details are found in the Smok
 <li>5.0.1 (build 730) - October 1, 2007<br>
 enhancement - Display versioning information (svn build number, compile date, <em>etc.</em>) 
 in the help menu and when Smokeview is run at a command line.
+
 <li>5.0.0 (build 661) - September 19, 2007<br>
 Official public release
 </ul>
