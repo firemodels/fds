@@ -23,12 +23,10 @@ extern "C" char glui_bounds_revision[]="$Revision$";
 // $Date$ $Author$
 
 extern "C" int file_exist(char *file);
-#ifdef pp_SCRIPT
 extern "C" void keyboard(unsigned char key, int x, int y);
 extern "C" void glui_script_disable(void);
 extern "C" void glui_script_enable();
 extern "C" void writeini(int var);
-#endif
 extern "C" void ScriptMenu(int var);
 extern "C" void update_glui_smoke3dframestep(void);
 extern "C" void ParticlePropShowMenu(int value);
@@ -37,9 +35,7 @@ void SETslicemax(int setslicemax, float slicemax);
 void SETslicemin(int setslicemin, float slicemin);
 void BUTTON_hide_CB(int var);
 void PART_CB(int var), Bound_CB(int var), Slice_CB(int var), PLOT3D_CB(int var), Iso_CB(int var), Smoke3D_CB(int var);
-#ifdef pp_SCRIPT
 void Script_CB(int var);
-#endif
 void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
           GLUI_EditText **con_min,GLUI_EditText **con_max,
           GLUI_RadioGroup **con_setmin,GLUI_RadioGroup **con_setmax,
@@ -75,7 +71,6 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
 #define OUTPUTSLICEDATA 20
 #define TRACERS 21
 
-#ifdef pp_SCRIPT
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
 #define SCRIPT_LIST 33
@@ -89,7 +84,6 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
 #define SCRIPT_RENDER 41
 #define SCRIPT_RENDER_SUFFIX 42
 #define SCRIPT_RENDER_DIR 43
-#endif
 
 #define SAVE_SETTINGS 99
 #define CLOSE 98
@@ -107,7 +101,6 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
 #define DONT_UPDATEBOUNDS 0
 
 GLUI_Button *BUTTON_compress=NULL;
-#ifdef pp_SCRIPT
 GLUI_Panel *panel_script1=NULL;
 GLUI_Panel *panel_script1a=NULL;
 GLUI_Panel *panel_script1b=NULL;
@@ -129,7 +122,6 @@ GLUI_EditText *EDIT_renderdir=NULL;
 GLUI_EditText *EDIT_rendersuffix=NULL;
 GLUI_Button *BUTTON_script_setsuffix=NULL;
 GLUI_Button *BUTTON_script_runscript=NULL;
-#endif
 GLUI_Rollout *rollout_BOUNDARY=NULL;
 GLUI_Rollout *rollout_AUTOLOAD=NULL;
 GLUI_Rollout *rollout_compress=NULL;
@@ -485,7 +477,6 @@ extern "C" void glui_bounds_setup(int main_window){
   }
 #endif
 
-#ifdef pp_SCRIPT
   rollout_SCRIPT = glui_bounds->add_rollout("Scripts/Config",false);
 
   panel_script1 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,"Script files",true);
@@ -559,8 +550,6 @@ extern "C" void glui_bounds_setup(int main_window){
   }
   glui_bounds->add_column_to_panel(panel_script2b,false);
   BUTTON_ini_load=glui_bounds->add_button_to_panel(panel_script2b,"Load",SCRIPT_LOADINI,Script_CB);
-
-#endif
 
   rollout_AUTOLOAD = glui_bounds->add_rollout("Auto Load",false);
   glui_bounds->add_checkbox_to_panel(rollout_AUTOLOAD,"Auto Load at Startup",
@@ -884,7 +873,6 @@ void Smoke3D_CB(int var){
   BUTTON_script_saveini=glui_bounds->add_button_to_panel(rollout_SCRIPT,"Save ini:",SCRIPT_SAVEINI,Script_CB);
   EDIT_ini=glui_bounds->add_edittext_to_panel(rollout_SCRIPT,"config file suffix",GLUI_EDITTEXT_TEXT,script_inifile_suffix,SCRIPT_EDIT_INI,Script_CB);
   */
-#ifdef pp_SCRIPT
 
 /* ------------------ add_scriptlist ------------------------ */
 
@@ -1076,7 +1064,6 @@ extern "C" void add_scriptlist(char *file, int id){
       break;
     }
   }
-#endif
 
 /* ------------------ Bound_CB ------------------------ */
 

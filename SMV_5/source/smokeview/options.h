@@ -16,7 +16,6 @@
 #define SMVVERSION "Test"
 #undef pp_release
 #define pp_CARVE
-#define pp_SCRIPT
 #endif
 
 #ifdef pp_ALPHA

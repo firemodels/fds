@@ -25,9 +25,7 @@ char IOscript_revision[]="$Revision$";
 void remove_comment(char *buffer);
 void ParticlePropShowMenu(int var);
 void update_menu(void);
-#ifdef pp_SCRIPT
 void glui_script_disable(void);
-#endif
 
 //
 // script commands
@@ -166,7 +164,6 @@ char *get_scriptfilename(int id){
   return NULL;
 }
 
-#ifdef pp_SCRIPT
 /* ------------------ get_scriptfilename ------------------------ */
 
 char *get_inifilename(int id){
@@ -217,7 +214,6 @@ inifiledata *insert_inifile(char *file){
   return thisptr;
 }
 
-#endif
 /* ------------------ insert_scriptfile ------------------------ */
 
 scriptfiledata *insert_scriptfile(char *file){
@@ -272,9 +268,7 @@ void start_script(void){
     printf("*** warning: Smokeview script does not exist\n");
     return;
   }
-#ifdef pp_SCRIPT
   glui_script_disable();
-#endif
 current_script_command=scriptinfo-1;
 }
 

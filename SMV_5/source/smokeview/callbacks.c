@@ -45,9 +45,7 @@ void print_gpu_cull_state(void);
 #endif
 void ScriptMenu(int var);
 
-#ifdef pp_SCRIPT
 void glui_script_enable(void);
-#endif
 void update_glui_viewlist(void);
 float gmod(float x, float y);
 void  OBJECT_CB(int flag);
@@ -1006,11 +1004,7 @@ void keyboard(unsigned char key, int x, int y){
       else{
         fprintf(scriptoutstream,"RENDERDOUBLEONCE\n");
       }
-#ifdef pp_SCRIPT
       fprintf(scriptoutstream," %s\n",script_renderfile);
-#else
-      fprintf(scriptoutstream,"\n");
-#endif
     }
     RenderOnceNow=1;
     if(showstereo!=0){
@@ -1655,11 +1649,9 @@ void Display(void){
       if(runscript==2&&noexit==0&&current_script_command==NULL){
         exit(0);
       }
-#ifdef pp_SCRIPT
       if(current_script_command==NULL){
         glui_script_enable();
       }
-#endif
     }
     GLUTPOSTREDISPLAY
   }

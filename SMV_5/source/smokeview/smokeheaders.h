@@ -38,12 +38,10 @@ EXTERNCPP void run_script(void);
 EXTERNCPP int compile_script(char *scriptfile);
 EXTERNCPP scriptfiledata *insert_scriptfile(char *file);
 EXTERNCPP int file_exist(char *file);
-#ifdef pp_SCRIPT
 EXTERNCPP char *get_inifilename(int id);
 EXTERNCPP char *get_scriptfilename(int id);
 EXTERNCPP inifiledata *insert_inifile(char *file);
 EXTERNCPP void keyboard(unsigned char key, int x, int y);
-#endif
 EXTERNCPP void get_newscriptfilename(char *newscriptfilename);
 EXTERNCPP void init_avatar(void);
 #ifdef pp_GPU
