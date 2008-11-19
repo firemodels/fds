@@ -4105,7 +4105,6 @@ lines of the form:
 Here, {\ct T} is the time, and {\ct F} indicates the fraction of the heat
 release rate, wall temperature, velocity, mass fraction, {\em etc.}, to apply.
 Linear interpolation is used to fill in intermediate time points.
-Be sure that the prescribed function starts at {\ct T=0.0}.
 
 \begin{warning}
 \noindent
@@ -4197,7 +4196,14 @@ Note that each set of {\ct RAMP} lines must have a unique {\ct ID} and that the 
 be listed with monotonically increasing {\ct T}.
 \end{warning}
 
+Use {\ct TAU\_T} or {\ct RAMP\_T}
+to control the ramp-ups for surface temperature.
+The surface temperature will be computed as
+$$ T_W(t) = {\ct TAMB} + f(t) \left( {\ct TMP\_FRONT} - {\ct TAMB} \right) $$ 
 
+where $T_W(t)$ is the surface temperature to be applied, $f(t)$ is the result of evaluating the 
+{\ct RAMP\_T} at time $t$, {\ct TAMB} is the input specified on the {\ct MISC} line, and {\ct TMP\_FRONT} is the
+input specified on the {\ct SURF} line that the {\ct RAMP\_T} is for.
 
 \subsection{Tabular Functions}
 
