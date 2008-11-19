@@ -695,8 +695,6 @@ void init_blockdist(void){
     }
 }
 
-#ifdef pp_CARVE
-
 /* ------------------ makeiblank_carve ------------------------ */
 
 int makeiblank_carve(void){
@@ -827,7 +825,6 @@ int makeiblank_carve(void){
   }
   return 0;
 }
-#endif
 
 /* ------------------ makeiblank ------------------------ */
 

@@ -1713,9 +1713,7 @@ void drawslice(const slice *sd){
   int ibar,jbar;
   int nx,ny,nxy;
   char *iblank_x, *iblank_y, *iblank_z;
-#ifdef pp_CARVE
   char *iblank_embed;
-#endif
 
   mesh *meshi;
 
@@ -1733,9 +1731,7 @@ void drawslice(const slice *sd){
   iblank_x=meshi->c_iblank_x;
   iblank_y=meshi->c_iblank_y;
   iblank_z=meshi->c_iblank_z;
-#ifdef pp_CARVE
   iblank_embed = meshi->c_iblank_embed;
-#endif
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -1758,9 +1754,7 @@ void drawslice(const slice *sd){
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_x[ijk(sd->is1,j,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(sd->is1,j,k)]==0)continue;
-#endif
        i11 = 4*sd->slicepoint[n];
        i31 = 4*sd->slicepoint[n2];
        i13 = 4*sd->slicepoint[n+1];
@@ -1813,9 +1807,7 @@ void drawslice(const slice *sd){
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_y[ijk(i,sd->js1,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
-#endif
        i11 = 4*sd->slicepoint[n];
        i31 = 4*sd->slicepoint[n2];
        i13 = 4*sd->slicepoint[n+1];
@@ -1866,9 +1858,7 @@ void drawslice(const slice *sd){
      for(j=sd->js1; j<sd->js2; j++){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_z[ijk(i,j,sd->ks1)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,j,sd->ks1)]==0)continue;
-#endif
        i11 = 4*sd->slicepoint[n];
        i31 = 4*sd->slicepoint[n2];
        i13 = 4*sd->slicepoint[n+1];
@@ -1926,9 +1916,7 @@ void drawslice_cellcenter(const slice *sd){
   int ibar,jbar,kbar;
   int nx,ny,nz,nxy;
   char *iblank_x, *iblank_y, *iblank_z;
-#ifdef pp_CARVE
   char *iblank_embed;
-#endif
 
   mesh *meshi;
 
@@ -1947,9 +1935,7 @@ void drawslice_cellcenter(const slice *sd){
   iblank_x=meshi->c_iblank_x;
   iblank_y=meshi->c_iblank_y;
   iblank_z=meshi->c_iblank_z;
-#ifdef pp_CARVE
   iblank_embed = meshi->c_iblank_embed;
-#endif
   nx = ibar + 1;
   ny = jbar + 1;
   nz = kbar + 1;
@@ -1978,9 +1964,7 @@ void drawslice_cellcenter(const slice *sd){
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_x[ijk(sd->is1,j,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(sd->is1,j,k)]==0)continue;
-#endif
        i33 = 4*sd->slicepoint[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
@@ -2013,9 +1997,7 @@ void drawslice_cellcenter(const slice *sd){
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_y[ijk(i,sd->js1,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
-#endif
        i33 = 4*sd->slicepoint[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
@@ -2046,9 +2028,7 @@ void drawslice_cellcenter(const slice *sd){
      for(j=sd->js1; j<sd->js2; j++){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_z[ijk(i,j,sd->ks1)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,j,sd->ks1)]==0)continue;
-#endif
        i33 = 4*sd->slicepoint[n2+1];
        yy1 = yplt[j];
        y3 = yplt[j+1];
@@ -2081,9 +2061,7 @@ void drawslice_texture(const slice *sd){
   int ibar,jbar;
   int nx,ny,nxy;
   char *iblank_x, *iblank_y, *iblank_z;
-#ifdef pp_CARVE
   char *iblank_embed;
-#endif
 
   mesh *meshi;
 
@@ -2097,9 +2075,7 @@ void drawslice_texture(const slice *sd){
   iblank_x=meshi->c_iblank_x;
   iblank_y=meshi->c_iblank_y;
   iblank_z=meshi->c_iblank_z;
-#ifdef pp_CARVE
   iblank_embed = meshi->c_iblank_embed;
-#endif
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -2132,9 +2108,7 @@ void drawslice_texture(const slice *sd){
 
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_x[ijk(sd->is1,j,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(sd->is1,j,k)]==0)continue;
-#endif
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
@@ -2178,9 +2152,7 @@ void drawslice_texture(const slice *sd){
 
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_y[ijk(i,sd->js1,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
-#endif
        r11 = (float)sd->slicepoint[n]/255;
        r31 = (float)sd->slicepoint[n2]/255;
        r13 = (float)sd->slicepoint[n+1]/255;
@@ -2225,9 +2197,7 @@ void drawslice_texture(const slice *sd){
 
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_z[ijk(i,j,sd->ks1)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,j,sd->ks1)]==0)continue;
-#endif
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
@@ -2366,9 +2336,7 @@ void drawvolslice_texture(const slice *sd){
   int ibar,jbar;
   int nx,ny,nxy;
   char *iblank_x, *iblank_y, *iblank_z;
-  #ifdef pp_CARVE
   char *iblank_embed;
-  #endif
 
   mesh *meshi;
 
@@ -2382,9 +2350,7 @@ void drawvolslice_texture(const slice *sd){
   iblank_x=meshi->c_iblank_x;
   iblank_y=meshi->c_iblank_y;
   iblank_z=meshi->c_iblank_z;
-#ifdef pp_CARVE
   iblank_embed = meshi->c_iblank_embed;
-#endif
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -2423,9 +2389,7 @@ void drawvolslice_texture(const slice *sd){
 
        n++; n2++; 
        if(iblank_x[ijk(iislice,j,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(iislice,j,k)]==0)continue;
-#endif
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
@@ -2481,9 +2445,7 @@ void drawvolslice_texture(const slice *sd){
 
        n++; n2++; 
        if(iblank_y[ijk(i,sd->js1,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
-#endif
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
@@ -2541,9 +2503,7 @@ void drawvolslice_texture(const slice *sd){
         n+=sd->nslicek; 
        n2+=sd->nslicek; 
        if(iblank_z[ijk(i,j,meshi->plotz)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,j,meshi->plotz)]==0)continue;
-#endif
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[ n+sd->nslicek]/255.0;
@@ -2647,9 +2607,7 @@ void drawvolslice_terrain(const slice *sd){
   terraindata *terri;
   float *znode;
   int nxcell;
-  #ifdef pp_CARVE
   char *iblank_embed;
-  #endif
 
   mesh *meshi;
 
@@ -2668,9 +2626,7 @@ void drawvolslice_terrain(const slice *sd){
   iblank_x=meshi->c_iblank_x;
   iblank_y=meshi->c_iblank_y;
   iblank_z=meshi->c_iblank_z;
-#ifdef pp_CARVE
   iblank_embed = meshi->c_iblank_embed;
-#endif
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -2709,9 +2665,7 @@ void drawvolslice_terrain(const slice *sd){
 
        n++; n2++; 
        if(iblank_x[ijk(iislice,j,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(iislice,j,k)]==0)continue;
-#endif
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
@@ -2767,9 +2721,7 @@ void drawvolslice_terrain(const slice *sd){
 
        n++; n2++; 
        if(iblank_y[ijk(i,sd->js1,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
-#endif
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
@@ -2835,9 +2787,7 @@ void drawvolslice_terrain(const slice *sd){
        zmid = (z11 + z31 + z13 + z33)/4.0;
 
        if(iblank_z[ijk(i,j,meshi->plotz)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,j,meshi->plotz)]==0)continue;
-#endif
 
        n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
        r11 = interp3dsliceindex(sd->slicepoint,zplt,meshi->kbar,n11,z11)/255.0;
@@ -2905,9 +2855,7 @@ void drawvolslice(const slice *sd){
   int ibar,jbar;
   int nx,ny,nxy;
   char *iblank_x, *iblank_y, *iblank_z;
-#ifdef pp_CARVE
   char *iblank_embed;
-#endif
 
   mesh *meshi;
 
@@ -2925,9 +2873,7 @@ void drawvolslice(const slice *sd){
   iblank_x=meshi->c_iblank_x;
   iblank_y=meshi->c_iblank_y;
   iblank_z=meshi->c_iblank_z;
-#ifdef pp_CARVE
   iblank_embed = meshi->c_iblank_embed;
-#endif
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -2957,9 +2903,7 @@ void drawvolslice(const slice *sd){
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
        if(iblank_x[ijk(iislice,j,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(iislice,j,k)]==0)continue;
-#endif
        i11 = 4*sd->slicepoint[n];
        i31 = 4*sd->slicepoint[n2];
        i13 = 4*sd->slicepoint[n+1];
@@ -3008,9 +2952,7 @@ void drawvolslice(const slice *sd){
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
        if(iblank_y[ijk(i,sd->js1,k)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
-#endif
        i11 = 4*sd->slicepoint[n];
        i31 = 4*sd->slicepoint[n2];
        i13 = 4*sd->slicepoint[n+1];
@@ -3061,9 +3003,7 @@ void drawvolslice(const slice *sd){
         n+=sd->nslicek; 
        n2+=sd->nslicek; 
        if(iblank_z[ijk(i,j,meshi->plotz)]!=2)continue;
-#ifdef pp_CARVE
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,j,meshi->plotz)]==0)continue;
-#endif
        i11 = 4*sd->slicepoint[n];
        i31 = 4*sd->slicepoint[n2];
        i13 = 4*sd->slicepoint[ n+sd->nslicek];
