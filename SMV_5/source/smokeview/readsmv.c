@@ -3327,6 +3327,9 @@ typedef struct {
         if(sd->terrain==1){
           if(readlabels_terrain(&sd->label,stream)==2)return 2;
         }
+        else if(sd->cellcenter==1){
+          if(readlabels_cellcenter(&sd->label,stream)==2)return 2;
+        }
         else{
           if(readlabels(&sd->label,stream)==2)return 2;
         }
@@ -5833,6 +5836,48 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   return 0;
 }
 
+/* ------------------ readlabels_cellcenter ------------------------ */
+
+int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
+  char buffer[255];
+  size_t len;
+
+  if(fgets(buffer,255,stream)==NULL){
+    strcpy(buffer,"*");
+  }
+
+  len=strlen(buffer);
+  buffer[len-1]='\0';
+  trim(buffer);
+  len=strlen(buffer);
+  if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1+15))==0)return 2;
+  STRCPY(flowlabel->longlabel,buffer);
+  STRCAT(flowlabel->longlabel,"(cell centered)");
+
+  if(fgets(buffer,255,stream)==NULL){
+    strcpy(buffer,"**");
+  }
+
+  len=strlen(buffer);
+  buffer[len-1]='\0';
+  trim(buffer);
+  len=strlen(buffer);
+  if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
+  STRCPY(flowlabel->shortlabel,buffer);
+
+  if(fgets(buffer,255,stream)==NULL){
+    strcpy(buffer,"***");
+  }
+
+  len=strlen(buffer);
+  buffer[len-1]='\0';
+  trim(buffer);
+  len=strlen(buffer);
+  if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
+  STRCPY(flowlabel->unit,buffer);
+  return 0;
+}
+
 /* ------------------ readlabels_terrain ------------------------ */
 
 int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
@@ -5843,7 +5888,6 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
     strcpy(buffer,"*");
   }
 
-
   len=strlen(buffer);
   buffer[len-1]='\0';
   trim(buffer);
@@ -5851,7 +5895,6 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1+9))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
   STRCAT(flowlabel->longlabel,"(terrain)");
-
 
   if(fgets(buffer,255,stream)==NULL){
     strcpy(buffer,"**");
