@@ -4830,9 +4830,7 @@ typedef struct {
     meshi->vent_offset[2] = ventoffset_factor*(meshi->zplt[1]-meshi->zplt[0]);
   }
   makeiblank();
-#ifdef pp_CARVE
   makeiblank_carve();
-#endif
   makeiblank_smoke3d();
   setventdirs();
   update_faces();
@@ -6335,14 +6333,12 @@ int readini2(char *inifile, int localfile){
       if(show_slice_in_obst!=1)show_slice_in_obst=0;
       continue;
     }
-#ifdef pp_CARVE
     if(match(buffer,"SKIPEMBEDSLICE",14)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&skip_slice_in_embedded_mesh);
       if(skip_slice_in_embedded_mesh!=1)skip_slice_in_embedded_mesh=0;
       continue;
     }
-#endif
     if(match(buffer,"PERCENTILELEVEL",15)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f",&percentile_level);
@@ -8632,10 +8628,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",visDummyVents);
   fprintf(fileout,"SHOWSLICEINOBST\n");
   fprintf(fileout," %i\n",show_slice_in_obst);
-#ifdef pp_CARVE
   fprintf(fileout,"SKIPEMBEDSLICE\n");
   fprintf(fileout," %i\n",skip_slice_in_embedded_mesh);
-#endif
   fprintf(fileout,"SHOWTICKS\n");
   fprintf(fileout," %i\n",visTicks);
   if(flag==LOCAL_INI){
