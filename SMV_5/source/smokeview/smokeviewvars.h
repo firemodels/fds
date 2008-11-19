@@ -755,13 +755,11 @@ SVEXTERN float xyzeyeorig[3],xeyedir[3], yeyedir[3], zeyedir[3];
 SVEXTERN int adjustalphaflag;
 SVEXTERN int colorband, show_extremedata;
 
-#ifdef pp_SCRIPT
 SVEXTERN int script_index, ini_index;
 SVEXTERN char script_inifile_suffix[1024];
 SVEXTERN char script_renderdir[1024], script_renderfilesuffix[1024], script_renderfile[1024];
 SVEXTERN inifiledata first_inifile, last_inifile;
 SVEXTERN char scriptinifilename[1024];
-#endif
 SVEXTERN int highlight_block, highlight_mesh, highlight_flag;
 SVEXTERN int updatesmoothblocks,menusmooth,use_menusmooth;
 SVEXTERN int smoothing_blocks;
