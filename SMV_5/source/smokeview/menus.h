@@ -6,6 +6,7 @@
 #define MENU_SAVEVIEW -101
 #define MENU_STARTUPVIEW -102
 #define MENU_OUTLINEVIEW -104
+#define MENU_SIZEPRESERVING -105
 #define MENU_DUMMY -999
 
 // svn revision character string
@@ -1144,6 +1145,10 @@ void ResetMenu(int value){
 
   if(value==MENU_DUMMY)return;
   switch (value){
+  case MENU_SIZEPRESERVING:
+    projection_type = 1 - projection_type;
+    TRANSLATE_CB(PROJECTION);
+    break;
   case MENU_OUTLINEVIEW:
     if(visBlocks==visBLOCKOutline){
       BlockageMenu(visBLOCKAsInput);
@@ -3659,11 +3664,6 @@ void GeometryMenu(int value){
   case 3:
     if(isZoneFireModel==0)visFrame=1-visFrame;
     break;
-  case 4:
-    projection_type = 1 - projection_type;
-    TRANSLATE_CB(PROJECTION);
-    updatemenu=1;
-    break;
   case 5:
     visFloor=1-visFloor;
     break;
@@ -4482,12 +4482,6 @@ static int in_menu=0;
   }
   else{
     visFrame=0;
-  }
-  if(projection_type==0){
-    glutAddMenuEntry("Size preserving projection (%)",4);
-  }
-  else{
-    glutAddMenuEntry("*Size preserving projection (%)",4);
   }
   glutAddMenuEntry("Show All",11);
   glutAddMenuEntry("Hide All",13);
@@ -5705,9 +5699,6 @@ static int in_menu=0;
   if(zoomindex!=3)glutAddMenuEntry("2.0",3);
   if(zoomindex==4)glutAddMenuEntry("*4.0",4);
   if(zoomindex!=4)glutAddMenuEntry("4.0",4);
-  glutAddMenuEntry("-",999);
-  if(projection_type==1)glutAddMenuEntry("*Size Preserving",-2);
-  if(projection_type==0)glutAddMenuEntry("Size Preserving",-2);
 
   /* -------------------------------- font menu -------------------------- */
 
@@ -5801,6 +5792,8 @@ static int in_menu=0;
       glutAddMenuEntry("Save",MENU_SAVEVIEW);
       glutAddMenuEntry("Set as Startup",MENU_STARTUPVIEW);
       glutAddSubMenu("Zoom",zoommenu);
+      if(projection_type==1)glutAddMenuEntry("*Size preserving projection (%)",MENU_SIZEPRESERVING);
+      if(projection_type==0)glutAddMenuEntry("Size preserving projection (%)",MENU_SIZEPRESERVING);
       glutAddMenuEntry("-",MENU_DUMMY);
     }
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
