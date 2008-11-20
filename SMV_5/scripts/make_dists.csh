@@ -1,5 +1,5 @@
 #!/bin/csh -f
-set version=5.2.7_2602
+set version=5.3_2700
 set SVNROOT=~/FDS-SMV
 set MACHOST=tiger.cfr.nist.gov
 
