@@ -5792,8 +5792,8 @@ static int in_menu=0;
       glutAddMenuEntry("Save",MENU_SAVEVIEW);
       glutAddMenuEntry("Set as Startup",MENU_STARTUPVIEW);
       glutAddSubMenu("Zoom",zoommenu);
-      if(projection_type==1)glutAddMenuEntry("*Size preserving projection (%)",MENU_SIZEPRESERVING);
-      if(projection_type==0)glutAddMenuEntry("Size preserving projection (%)",MENU_SIZEPRESERVING);
+      if(projection_type==1)glutAddMenuEntry("Switch to perspective view       ALT+v",MENU_SIZEPRESERVING);
+      if(projection_type==0)glutAddMenuEntry("Switch to size preserving view   ALT+v",MENU_SIZEPRESERVING);
       glutAddMenuEntry("-",MENU_DUMMY);
     }
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
@@ -5923,7 +5923,7 @@ static int in_menu=0;
   glutAddMenuEntry("  -: decrement time step, 2D contour planes, 3D contour levels",2);
   glutAddMenuEntry("  space bar: increment time step, 2D contour planes, 3D contour levels",2);
   glutAddMenuEntry("",1);
-  glutAddMenuEntry("  %: toggle projection  method (between perspective and size preserving)",2);
+  glutAddMenuEntry("  ALT+v: toggle projection  method (between perspective and size preserving)",2);
   if(caseinifilename!=NULL&&strlen(caseinifilename)>0){
     char inilabel[512];
 

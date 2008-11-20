@@ -552,12 +552,6 @@ void keyboard(unsigned char key, int x, int y){
     snap_view_angles();
     return;
   }
-  if(strncmp((const char *)&key2,"%",1)==0){
-    projection_type = 1 - projection_type;
-    TRANSLATE_CB(PROJECTION);
-    updatemenu=1;
-    return;
-  }
   if(strncmp((const char *)&key,"$",1)==0){
     trainer_active=1-trainer_active;
     if(trainer_active==1){
@@ -921,8 +915,20 @@ void keyboard(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"v",1)==0){
-    visVector=1-visVector;
-    if(vectorspresent==0)visVector=0;
+    int state;
+    
+    state=glutGetModifiers();
+    switch (state){
+      case GLUT_ACTIVE_ALT:
+        projection_type = 1 - projection_type;
+        TRANSLATE_CB(PROJECTION);
+        updatemenu=1;
+        break;
+      default:
+        visVector=1-visVector;
+        if(vectorspresent==0)visVector=0;
+        break;
+    }
     return;
   }
   if(strncmp((const char *)&key2,"H",1)==0){
