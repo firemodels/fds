@@ -40,7 +40,6 @@ void TRAINER_CB(int var);
 #define MENU_OUTLINEVIEW -104
 
 GLUI *glui_trainer=NULL;
-
 GLUI_Checkbox *CHECKBOX_pause=NULL;
 GLUI_Checkbox *CHECKBOX_outline=NULL;
 GLUI_Listbox *LIST_trainerpath=NULL,*LIST_viewpoint=NULL;
