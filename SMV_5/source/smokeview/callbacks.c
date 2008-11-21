@@ -458,7 +458,7 @@ void motion(int xm, int ym){
   }
 }
 
-/* ------------------ keyboard ------------------------ */
+/* ------------------ keyboard_up ------------------------ */
 
 void keyboard_up(unsigned char key, int x, int y){
   resetclock=1;

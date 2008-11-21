@@ -607,12 +607,12 @@ viewed or edited.  Any text appearing after the closing ``/'' in
 an {\tt \&OBST} line is treated as a comment by Smokeview.
 
 \item[Annotating Cases]The {\tt
-LABEL} keyword is used to help document Smokeview output. 
+LABEL} keyword is used to help document Smokeview output.
 It allows one to place colored labels at specified
 locations at specified times.  A second keyword, {\tt TICK} keyword places
 equally spaced tick marks between specified bounds. These marks
 along with {\tt LABEL} text may be used to specify length scales
-in the scene.  
+in the scene.
 
 The {\em User Tick Settings}\ tab of the Display dialog box
 provides an easier way to place ticks with length annotations along coordinate axes.
@@ -674,8 +674,8 @@ the Smokeview scene into one or more image files.
 The script file may be created by Smokeview itself using a script recorder
 or may be created by editing a text file.
 
-\item[cell centered slice files] The user may visualize data computed by FDS 
-at cell centers (rather than interpolated data at cell nodes).  This is useful for 
+\item[cell centered slice files] The user may visualize data computed by FDS
+at cell centers (rather than interpolated data at cell nodes).  This is useful for
 investigating numerical algorithms as the data has not been filtered.
 
 \item[3D slice files] The user may visualize a 3D region of
@@ -826,7 +826,7 @@ movement.
 %\begin{wrapfigure}[15]{O}[0.5in]{3.5in}
 \begin{figure}[\figoptions]
 \centerline{
-\includegraphics[width=2.38888in]{figures/figMOTION} 
+\includegraphics[width=2.38888in]{figures/figMOTION}
 }
 \caption[Motion/View Dialog Box.]{Motion/View Dialog Box. Rotate or translate
 the scene by clicking an {\em arrow}\ and dragging the mouse. The
@@ -3677,9 +3677,13 @@ Plot3D data set.
 perpendicular to the x, y and z axes respectively (parallel to the
 yz, xz and xy planes).
 
+\hitem{1-9}Number of frames to skip when viewing an animation.
+
 \hitem{!}Snap scene to nearest 45 degree rotation angle.
 
 \hitem{\%}Toggle scene projection method between size preserving and perspective.
+
+\hitem{\#}Save smokeview settings to the casename.ini file.
 
 \hitem{Left/Right Cursor}When the {\em eyeview}\ mode is
 {\bf eye centered} then these keys rotate the scene to the
