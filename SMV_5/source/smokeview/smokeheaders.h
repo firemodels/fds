@@ -495,6 +495,8 @@ EXTERNCPP int getpatchtype(const patch *patchi);
 EXTERNCPP void update_patchtype(void);
 EXTERNCPP void updatepatchtypes(void);
 
+EXTERNCPP void update_glui_cellcenter(void);
+EXTERNCPP void drawslice_cellcenter_interp(const slice *sd);
 EXTERNCPP void update_plot3dtitle(void);
 EXTERNCPP void LoadPlot3dMenu(int value);
 EXTERNCPP void init_plot3dtimelist(void);
