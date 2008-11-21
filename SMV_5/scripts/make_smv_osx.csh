@@ -2,7 +2,6 @@
 set SVNROOT=~/FDS-SMV
 
 cd $SVNROOT
-svn update
 cd $SVNROOT/SMV_5/MACtiger2/sv5p0
 make clean >& /dev/null
 make >& $SVNROOT/SMV_5/bin/make_osx.out
