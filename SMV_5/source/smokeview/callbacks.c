@@ -47,6 +47,7 @@ void ScriptMenu(int var);
 
 void glui_script_enable(void);
 void update_glui_viewlist(void);
+void update_glui_cellcenter_interp(void);
 float gmod(float x, float y);
 void  OBJECT_CB(int flag);
 /* ------------------ WindowStatus ------------------------ */
