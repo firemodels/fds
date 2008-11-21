@@ -5896,6 +5896,7 @@ static int in_menu=0;
     glutAddMenuEntry("  o: reset animation to the initial time",6);
     glutAddMenuEntry("  T: toggle texture method for drawing slice and boundary colors",6);
     glutAddMenuEntry("  u: reload files",6);
+    glutAddMenuEntry("1-9: number of frames to skip",6);
     displayblank=1;
   }
   if(plotstate==STATIC_PLOTS){
