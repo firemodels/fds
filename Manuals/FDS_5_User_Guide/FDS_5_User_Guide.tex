@@ -3944,8 +3944,43 @@ mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted t
 \end{verbatim} \normalsize
 
 
+\subsection{Special topic: Two-Sided Burning}
+\label{info:EXPOSED}
+
+If you apply the attribute {\ct BACKING='EXPOSED'} on a {\ct SURF} line that is applied to a zero or one-cell thick
+obstruction, FDS calculates the heat conduction through the entire {\ct THICKNESS} and it uses the gas phase temperature
+and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction, so be
+careful how you specify multiple layers. If the layering is symmetric, the same {\ct SURF} line can be applied to both sides. However,
+if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply one to each side. For example, a hollow box column that is 
+made of steel and covered on the outside by an insulation material would have to be described with two {\ct SURF} lines like the following: 
+
+\footnotesize
+\begin{verbatim}
+&SURF ID                 = 'COLUMN EXTERIOR'
+      COLOR              = 'ANTIQUE WHITE'
+      BACKING            = 'EXPOSED'
+      MATL_ID(1:2,1)     = 'INSULATION','STEEL'
+      THICKNESS(1:2)     = 0.038,0.0063 /
+
+&SURF ID                 = 'COLUMN INTERIOR'
+      COLOR              = 'BLACK'
+      BACKING            = 'EXPOSED'
+      MATL_ID(1:2,1)     = 'STEEL','INSULATION'
+      THICKNESS(1:2)     = 0.0063,0.038 /
+\end{verbatim} \normalsize
+
+\noindent
+If, in addition, the insulation material is combustible, and its burning properties are specified on the appropriate {\ct MATL} line, then you need
+to indicate which side of the column would generate the fuel vapor. In this case, the steel is impermeable; thus you should add the parameter
+{\ct LAYER\_DIVIDE=1.0} to the {\ct SURF} line labelled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the 
+first layer ({\ct 'INSULATION'}) are to be driven out of that surface. You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF}
+line labelled {\ct 'COLUMN INTERIOR'} to indicate that no fuel vapors are to driven into the interior of the column.   
+ 
+
+
 \subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
 \index{SURF!BURN\_AWAY}
+\label{info:BURN_AWAY}
 
 If a burning object is to disappear from the
 calculation once it is exhausted of fuel, set {\ct BURN\_AWAY=.TRUE.}.
@@ -4199,9 +4234,9 @@ be listed with monotonically increasing {\ct T}.
 Use {\ct TAU\_T} or {\ct RAMP\_T}
 to control the ramp-ups for surface temperature.
 The surface temperature will be computed as
-$$ T_W(t) = {\ct TAMB} + f(t) \left( {\ct TMP\_FRONT} - {\ct TAMB} \right) $$ 
+$$ T_W(t) = {\ct TAMB} + f(t) \left( {\ct TMP\_FRONT} - {\ct TAMB} \right) $$
 
-where $T_W(t)$ is the surface temperature to be applied, $f(t)$ is the result of evaluating the 
+where $T_W(t)$ is the surface temperature to be applied, $f(t)$ is the result of evaluating the
 {\ct RAMP\_T} at time $t$, {\ct TAMB} is the input specified on the {\ct MISC} line, and {\ct TMP\_FRONT} is the
 input specified on the {\ct SURF} line that the {\ct RAMP\_T} is for.
 
@@ -6447,7 +6482,7 @@ entries are in the same plane, then only one of the lines needs to have {\ct VEC
 component slices will be created.
 
 Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they
-are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, 
+are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening,
 set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this
 feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes. Note also that this
 feature should only be used for scalar quantities that are computed at cell centers, like temperatures, mass fractions, {\em etc.}
@@ -8280,7 +8315,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ADIABATIC}                       & Logical         & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                         & Character       & Back boundary condition           &                     & {\ct 'VOID'}            \\ \hline
-{\ct BURN\_AWAY}                      & Logical         & Object can vanish                 &                     & {\ct .FALSE.}           \\ \hline
+{\ct BURN\_AWAY}                      & Logical         & See Section~\ref{info:BURN_AWAY}  &                     & {\ct .FALSE.}           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}              & Real            & See Section~\ref{info:solid_phase_stability}  &         & 1.0                     \\ \hline
 {\ct COLOR    }                       & Character       & Surface Color                     &                     &                         \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Heat flux at surface              & kW/m$^2$            & 0.                      \\ \hline
@@ -8294,6 +8329,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HRRPUA }                         & Real            & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
 {\ct ID     }                         & Character       & IDentifier                        &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Ignition temperature              & $^\circ$C           & 5000.                   \\ \hline
+{\ct LAYER\_DIVIDE}                   & Real            & See Section~\ref{info:EXPOSED}    &                     & 0.5                     \\ \hline
 {\ct LEAK\_PATH}                      & Int.~Pair       & Pressure Zones for leakage        &                     &                         \\ \hline
 {\ct MASS\_FLUX(I)}                   & Real Array      & For species {\ct I}               & kg/m$^2$ s          & 0.                      \\ \hline
 {\ct MASS\_FLUX\_TOTAL}               & Real            & Total Mass Flux                   & kg/m$^2$ s          &                         \\ \hline
