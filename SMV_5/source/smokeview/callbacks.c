@@ -521,7 +521,19 @@ void keyboard(unsigned char key, int x, int y){
   }
 #endif
   if(strncmp((const char *)&key2,"u",1)==0){
-    ReloadMenu(0);
+    int state;
+
+    state=glutGetModifiers();
+
+    switch (state){
+      case GLUT_ACTIVE_ALT:
+        skip_slice_in_embedded_mesh = 1 - skip_slice_in_embedded_mesh;
+        update_glui_cellcenter_interp();
+        break;
+      default:
+        ReloadMenu(0);
+        break;
+    }
     return;
   }
   if(strncmp((const char *)&key2,"q",1)==0){
@@ -668,7 +680,19 @@ void keyboard(unsigned char key, int x, int y){
       return;
   }
   if(strncmp((const char *)&key2,"y",1)==0){
+    int state;
+
+    state=glutGetModifiers();
+
+    switch (state){
+
+    case GLUT_ACTIVE_ALT:
+      cellcenter_interp = 1 - cellcenter_interp;
+      update_glui_cellcenter_interp();
+      break;
+     default:
       updateshowstep(1-current_mesh->visy,DIRY);
+     }
        return;
   }
   if(strncmp((const char *)&key2,"z",1)==0){

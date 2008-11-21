@@ -3244,6 +3244,7 @@ typedef struct {
         terrain=1;
       }
       if(match(buffer,"SLCC",4) == 1){
+        cellcenter_active=1;
         cellcenter=1;
       }
       trim(buffer);
