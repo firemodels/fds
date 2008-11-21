@@ -116,7 +116,7 @@ EXTERNCPP void copy_args(int *argc, char **aargv, char ***argv_sv);
 EXTERNCPP void init_user_ticks(void);
 EXTERNCPP void draw_user_ticks(void);
 EXTERNCPP int get_tick_dir(float *mm);
-#ifdef pp_OPEN
+#ifdef WIN32
 EXTERNCPP void OpenSMVFile(char *filename,int filenamelength,int *openfile);
 #endif
 EXTERNCPP void get_smokezippath(char *progdir, char **zippath);

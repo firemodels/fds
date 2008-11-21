@@ -45,7 +45,7 @@ void copy_args(int *argc, char **aargv, char ***argv_sv){
     if(*argc==1){
       if(NewMemory((void **)&filename,(unsigned int)(filelength+1))!=0){
         openfile=0;
-#ifdef pp_OPEN
+#ifdef WIN32
         OpenSMVFile(filename,filelength,&openfile);
 #endif
         if(openfile==1&&ResizeMemory((void **)&filename,strlen(filename)+1)!=0){
