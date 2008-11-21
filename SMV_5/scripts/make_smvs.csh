@@ -10,7 +10,6 @@ cd $SVNROOT/SMV_5/INTEL/sv5p0
 make clean >& /dev/null
 make >& $SVNROOT/SMV_5/scripts/make_linux.out
 cd $SVNROOT/SMV_5/bin
-ls -l smv5_linux
 
 echo 
 echo building OSX smokeview
