@@ -1,5 +1,5 @@
 #!/bin/csh -f
-set version=$1
+set version=xxx
 set SVNROOT=~/FDS-SMV
 set OSXHOST=tiger.cfr.nist.gov
 
