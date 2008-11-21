@@ -6,7 +6,6 @@ set OSXHOST=tiger.cfr.nist.gov
 echo
 echo building Linux smokeview
 cd $SVNROOT
-svn update
 cd $SVNROOT/SMV_5/INTEL/sv5p0
 make clean >& /dev/null
 make >& $SVNROOT/SMV_5/scripts/make_linux.out
