@@ -1,22 +1,22 @@
 #!/bin/csh -f
-set version=5.3_2700
+set version=$1
 set SVNROOT=~/FDS-SMV
-set MACHOST=tiger.cfr.nist.gov
+set OSXHOST=tiger.cfr.nist.gov
 
 set BINDIR=$SVNROOT/SMV_5/bin
 set FORBUNDLE=$SVNROOT/SMV_5/for_bundle
-set MACDIR=smv_$version\_osx
+set OSXDIR=smv_$version\_osx
 set LINUXDIR=smv_$version\_linux
 
 cd $FORBUNDLE
 
-mkdir -p $MACDIR
-cp readme.html $MACDIR/.
-scp $MACHOST\:FDS-SMV/SMV_5/bin/smv5_osx $MACDIR/.
-scp $MACHOST\:FDS-SMV/SMV_5/bin/smokezip_osx $MACDIR/.
-rm -f $MACDIR.tar $MACDIR.tar.gz
-tar cvf $MACDIR.tar $MACDIR/.
-gzip $MACDIR.tar
+mkdir -p $OSXDIR
+cp readme.html $OSXDIR/.
+scp $OSXHOST\:FDS-SMV/SMV_5/bin/smv5_osx $OSXDIR/.
+scp $OSXHOST\:FDS-SMV/SMV_5/bin/smokezip_osx $OSXDIR/.
+rm -f $OSXDIR.tar $OSXDIR.tar.gz
+tar cvf $OSXDIR.tar $OSXDIR/.
+gzip $OSXDIR.tar
 
 mkdir -p $LINUXDIR
 cp readme.html $LINUXDIR/.
