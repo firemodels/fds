@@ -6340,6 +6340,12 @@ int readini2(char *inifile, int localfile){
       if(skip_slice_in_embedded_mesh!=1)skip_slice_in_embedded_mesh=0;
       continue;
     }
+    if(match(buffer,"CELLCENTERINTERP",16)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&cellcenter_interp);
+      if(cellcenter_interp!=1)cellcenter_interp=0;
+      continue;
+    }
     if(match(buffer,"PERCENTILELEVEL",15)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f",&percentile_level);
@@ -8631,6 +8637,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",show_slice_in_obst);
   fprintf(fileout,"SKIPEMBEDSLICE\n");
   fprintf(fileout," %i\n",skip_slice_in_embedded_mesh);
+  fprintf(fileout,"CELLCENTERINTERP\n");
+  fprintf(fileout," %i\n",cellcenter_interp);
   fprintf(fileout,"SHOWTICKS\n");
   fprintf(fileout," %i\n",visTicks);
   if(flag==LOCAL_INI){

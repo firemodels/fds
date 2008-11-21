@@ -1027,7 +1027,7 @@ void initvars1(void){
   hrrpuv_loaded=0;
   show_bothsides_ext=0;
   show_slice_in_obst=0;
-  skip_slice_in_embedded_mesh=1;
+  skip_slice_in_embedded_mesh=0;
   cellcenter_interp=1;
   cellcenter_active=0;
   offset_slice=0;
