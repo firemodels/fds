@@ -14,7 +14,7 @@ char menu_revision[]="$Revision$";
 void ScriptMenu(int var);
 void add_scriptlist(char *file, int id);
 
-#ifdef pp_OPEN
+#ifdef WIN32
 
 /* ------------------ OpenSMVFile ------------------------ */
 
@@ -5924,7 +5924,17 @@ static int in_menu=0;
   glutAddMenuEntry("  -: decrement time step, 2D contour planes, 3D contour levels",2);
   glutAddMenuEntry("  space bar: increment time step, 2D contour planes, 3D contour levels",2);
   glutAddMenuEntry("",1);
+  glutAddMenuEntry("  SHIFT+t: toggle slice file color interpolation methods",2);
+  if(cellcenter_active==1){
+    glutAddMenuEntry("           (turns on/off cell center display)",2);
+  }
   glutAddMenuEntry("  ALT+v: toggle projection  method (between perspective and size preserving)",2);
+  if(n_embedded_meshes>0){
+    glutAddMenuEntry("  ALT+u: toggle coarse slice display in embedded mesh",2);
+  }
+  if(cellcenter_active==1){
+    glutAddMenuEntry("  ALT+y: toggle cell center interpolation on/off",2);
+  }
   if(caseinifilename!=NULL&&strlen(caseinifilename)>0){
     char inilabel[512];
 
