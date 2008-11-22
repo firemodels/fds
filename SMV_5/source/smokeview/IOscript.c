@@ -269,7 +269,7 @@ void start_script(void){
     return;
   }
   glui_script_disable();
-current_script_command=scriptinfo-1;
+  current_script_command=scriptinfo-1;
 }
 
 /* ------------------ free_script ------------------------ */
