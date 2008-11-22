@@ -671,11 +671,11 @@ instructions found in a script file.
 These instructions direct Smokeview to load data files, load configuration files,
 set view points and time values in order to document a case by rendering
 the Smokeview scene into one or more image files.
-The script file may be created by Smokeview itself using a script recorder
+The script file may be created by Smokeview as a user performs various actions
 or may be created by editing a text file.
 
-\item[cell centered slice files] The user may visualize data computed by FDS
-at cell centers (rather than interpolated data at cell nodes).  This is useful for
+\item[cell centered slice files] The user may visualize data computed
+at cell centers rather than interpolated at cell nodes.  This is useful for
 investigating numerical algorithms as the data has not been filtered.
 
 \item[3D slice files] The user may visualize a 3D region of
@@ -860,16 +860,14 @@ more controlled manner. For example, buttons in the {\em Motion}\ region allows 
 The \frameit{Horizontal} button allows one to translate the scene horizontally in a left/right or in/out
 direction while the \frameit{Vertical}\ button allows one to translate the scene in an up/down direction.
 
-Controls in the {\em View} region of the {\em Motion/View}\ dialog box
+Controls in the {\em Window Properties} region of the {\em Motion/View}\ dialog box
 allow one to change the scene magnification or zoom factor and the
 projection method used to draw objects (perspective or size preserving).
 These two projection methods differ in how objects are displayed
 at a distance.  A perspective projection for-shortens or draws an
 object smaller when drawn at a distance. An isometric or size preserving projection
 on the other hand draws an objects the same size regardless of
-where it is drawn in the scene. The projection method desired may
-be selected using the {\em View} section of the {\em Motion/View}\ dialog
-box.
+where it is drawn in the scene.
 
 The \frameit{zoom}\ and \frameit{aperture} edit boxes allow one to
 change the magnification of the scene or equivalently the angle of
@@ -887,7 +885,7 @@ external, internal (to the scene), or previously saved viewpoint.
 
 \blist
 
-\hitem{Select Rotation Center}A pull down list appears in
+\hitem{Rotate about}A pull down list appears in
 multi-mesh cases allowing one to change the rotation center.
 Therefore one could rotate the scene about the center of the
 entire physical domain or about the center of any one particular
@@ -911,9 +909,8 @@ scene is manipulated to the desired orientation then stored by pressing the
 {\bf Add}\ button which adds the new viewpoint or the {\bf Replace}\
 button which replaces this viewpoint with the currently selected one.
 To change the view to a currently stored viewpoint, use the {\bf
-Select} listbox to select the viewpoint and the {\bf Restore}
-button to activate it. The {\bf Delete} button may be used to
-remove a viewpoint from the stored list.  The {\bf Edit} text box
+Select} listbox to select the desired viewpoint. The {\bf Delete} button may be used to
+remove a viewpoint from the stored list.  The {\bf View name} text box
 may be used to change the name or label for the selected
 viewpoint.  The {\bf view at startup} button is used to specify
 the viewpoint that should be set when Smokeview first starts up.
@@ -948,7 +945,6 @@ w/s &   \\\hline
 left/right cursor  & rotate left/right \\ \hline
 {\tt Page Up/Down}  & look up/down \\ \hline
 {\tt Home}  & look level \\ \hline\hline
-j&toggle between crawling and walking\\ \hline
 \multicolumn{2}{|p{3.5in}|}{Pressing the {\tt SHIFT} key while moving, sliding or rotating
 results in a  4x speedup of these actions. } \\ \hline
 
@@ -1597,43 +1593,41 @@ observer will look straight ahead as they go up the stairs.
 
 \chapter{Running Smokeview Automatically - The Scripting Option}
 \section{Overview}
-Smokeview may be run in an unattended mode using
-instructions found in a script file.  The default name of the script file
+Smokeview may be run in an unattended or batch mode using
+instructions found in a text or script file.  The default script file name
 is  {\tt casename.ssf}.
 These instructions direct Smokeview to perform actions such as loading data files,
-setting view points and time values and rendering the Smokeview generated scene to an image file. These actions may be repeated over and over for different data files, different time values {\em etc.}
-The script file may be created by Smokeview itself by turning
-on a {\em Script recorder} and then performing the actions desired to be automated.  The script
-may also or may created by editing a text file using documentation found below.
+setting view points, setting time values and rendering the Smokeview generated scene to an image file. These actions may be repeated for different data files, different time values {\em etc.}
+The intent of the scripting option is to allow one to reproducibly document a case.
+This is necessary whenever changes occur in the FDS input file or in the FDS or Smokeview applications. The script may be re-run resulting in newly generated images guaranteed to correspond properly with the previously generated
+ones.
 
-The intent of the scripting feature is to allow
-one to reproducibly document a case.  If the FDS case is re-run or a new version of Smokeview is used,
-the script may be re-run resulting in newly generated images guaranteed to correspond properly with the previously generated
-ones.  Reiterating, the intent of this new feature is not to provide script commands for all possible Smokeview features but simply to provide an easy means to document cases.
+The script file may be created by Smokeview as a user performs these actions using the
+script recorder feature
+or may be created by editing a text file.
+The documentation that follows may be used to create a script or refine one created by the recorder.
+Once a script is created, it may be run from either the {\em Load/Unload>Script Option}\ menu or the Scripts panel of the File/Bounds dialog box illustrated in Figure \ref{figScript}.
 
-The script recorder is activated by using the
-{\em Load/Unload>Scripting Option}\ menu and selecting {\em Start Recording}.
+The script recorder may be activated by using the
+{\em Load/Unload$>$Script Option}\ menu and selecting {\em Start Recording}.
 Select {\em Stop Recording}\ to terminate the script recorder.
 While the recorder is on, each time Smokeview loads a file, sets a view point
-{\em etc.}\ Smokeview places a script command into a file.  The file is named
+{\em etc.}, Smokeview places a script command into a file.  The file is named
 either {\tt casename.ssf}\ or if this file already exists is named {\tt casename\_seq.ssf}\ where seq is integer.
 \begin{figure}[\figoptions]
 \centerline{
 \includegraphics[width=3.04166in]{figures/figSCRIPT}
 }
 \caption[Script Dialog Box.]{Script Dialog Box. The script dialog box allows one
-to setup and activate smokeview scripts.  The
+to setup and run smokeview scripts.  The
 Script Dialog Box is invoked by selecting
 \frameit{Dialogs$>$File/Bounds}. }
 \label{figSCRIPT}
 \end{figure}
 
-
-
 \section{Script Syntax}
 
 This section contains documentations for the script commands.
-The script commands supported are documented below.
 However, to make the job creating script easier,
 Smokeview has a {\em recorder}\ mode.  The user turns on the recorder, then performs the
 desired sequence of steps.  The following example script loads two data files, sets a time
@@ -2412,7 +2406,7 @@ allows one to show or hide loaded data files.
 \subsection{Stereo}
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[height=2.0in]{figures/thouse5c_stereo}
+\includegraphics[height=3.0in]{figures/thouse5c_stereo}
 \caption[Stereo pair view of a townhouse kitchen fire.]{
 Stereo pair view of a townhouse kitchen fire. To aid in viewing the stereo effect, place
 a finger in front of each image.  Relax your eyes allowing your two fingers and stereo pair

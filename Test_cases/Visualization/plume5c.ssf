@@ -19,6 +19,24 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_slice_30
+// render cell centered slice files
+UNLOADALL
+LOADINIFILE
+ plume5c_slice_cell.ini
+LOADFILE
+ plume5c_22.sf
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_slice_cell_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_slice_cell_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_slice_cell_30
 // render slice files with chopping
 UNLOADALL
 LOADINIFILE
@@ -72,6 +90,7 @@ SETTIMEVAL
 RENDERONCE
  plume5c_vslicechop_30
 // render iso files
+UNLOADALL
 UNLOADALL
 LOADINIFILE
  plume5c_iso.ini
