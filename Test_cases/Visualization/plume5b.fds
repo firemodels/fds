@@ -1,4 +1,4 @@
-&HEAD CHID='plume5b',TITLE='Plume whirl case' /
+&HEAD CHID='plume5b',TITLE='Plume whirl case SVN $Revision$' /
 
   same as plume5a except the top 1.6 m of the domain is closed.
   The purpose of this case is to demonstrate the curved flow (via streak lines) that results.
