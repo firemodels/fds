@@ -254,6 +254,14 @@ SETTIMEVAL
  30.000000
 RENDERONCE
  thouse5_smoke_clip_blockages_data
+UNLOADALL
+LOADINIFILE
+ thouse5_ticks.ini
+SETVIEWPOINT
+ front
+RENDERONCE
+ thouse5_ticks
+
 
 
 

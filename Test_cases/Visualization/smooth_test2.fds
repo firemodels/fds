@@ -1,4 +1,4 @@
-&HEAD CHID='smooth_test2', TITLE='smooth blockage test'  /
+&HEAD CHID='smooth_test2', TITLE='smooth blockage test SVN $Revision$'  /
 
 &TIME TWFIN=10. /  Total simulation time
 

@@ -1,4 +1,4 @@
-&HEAD CHID='sillytexture', TITLE='Silly Test Case' /
+&HEAD CHID='sillytexture', TITLE='Silly Test Case SVN $Revision$' /
 &MISC TEXTURE_ORIGIN=0.1,0.1,0.1 /
 
 &MESH IJK=20,20,02, XB=0.0,1.0,0.0,1.0,0.0,1.0 /

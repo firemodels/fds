@@ -1,4 +1,4 @@
-&HEAD CHID='smooth_test3', TITLE='Transparency Test - Same Colours' /
+&HEAD CHID='smooth_test3', TITLE='Transparency Test - Same Colours SVN $Revision$' /
 &TIME TWFIN=0. /
 
 &MESH IJK=50,50,50, XB=0.0,5.0,0.0,5.0,0.0,5.0 / 

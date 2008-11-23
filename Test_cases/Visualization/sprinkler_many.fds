@@ -1,4 +1,4 @@
-&HEAD CHID='sprinkler_many',TITLE='many sprinkler case' /
+&HEAD CHID='sprinkler_many',TITLE='many sprinkler case SVN $Revision$' /
 
 test of video cards ability to display many (15*15*31=6975 to be exact) sprinklers
   (and fds's ability to handle many devices)

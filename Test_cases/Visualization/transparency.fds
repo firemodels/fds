@@ -1,4 +1,4 @@
-&HEAD CHID='transparency', TITLE='Test of transparent vents' / 
+&HEAD CHID='transparency', TITLE='Test of transparent vents SVN $Revision$' / 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
 &TIME TWFIN=10.0 / 
