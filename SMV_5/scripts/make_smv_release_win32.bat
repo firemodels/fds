@@ -14,14 +14,16 @@ set smvdir=to_google\smv_%version%_win32
 echo
 echo filling distribution directory
 mkdir %smvdir%
+mkdir %smvdir%\Documentation
 copy smokeview_release.exe %smvdir%\smokeview.exe
 copy smokezip_release.exe %smvdir%\smokezip.exe
 copy devices.svo %smvdir%\.
-copy readme.html %smvdir%\.
+copy readme.html %smvdir%\Documentation\.
+copy ..\..\Manuals\All_PDF_Files\SMV_5_User_Guide.pdf %smvdir%\Documentation\.
 
 echo
 echo winzipping distribution directory
-wzzip -a %smvdir%.zip %smvdir%\*
+wzzip -a -r -P %smvdir%.zip %smvdir%\*
 
 echo
 echo creating self-extracting archive
