@@ -1593,27 +1593,33 @@ observer will look straight ahead as they go up the stairs.
 
 \chapter{Running Smokeview Automatically - The Scripting Option}
 \section{Overview}
-Smokeview may be run in an unattended or batch mode using
-instructions found in a text or script file.  The default script file name
-is  {\tt casename.ssf}.
-These instructions direct Smokeview to perform actions such as loading data files,
-setting view points, setting time values and rendering the Smokeview generated scene to an image file. These actions may be repeated for different data files, different time values {\em etc.}
+Smokeview may be run in an automatic or batch mode using
+instructions found in a text or script file.
 The intent of the scripting option is to allow one to reproducibly document a case.
 This is necessary whenever changes occur in the FDS input file or in the FDS or Smokeview applications. The script may be re-run resulting in newly generated images guaranteed to correspond properly with the previously generated
 ones.
 
-The script file may be created by Smokeview as a user performs these actions using the
-script recorder feature
-or may be created by editing a text file.
-The documentation that follows may be used to create a script or refine one created by the recorder.
-Once a script is created, it may be run from either the {\em Load/Unload>Script Option}\ menu or the Scripts panel of the File/Bounds dialog box illustrated in Figure \ref{figScript}.
+Script instructions direct Smokeview to perform actions such as loading data files,
+moving the scene to a specified view point, setting the time and rendering the
+scene.  Smokeview settings such as font sizes, file bounds, label visibility are set by using the script command LOADINI to load a custom named .ini file.
+A simplified scripting language results by allowing
+most of the customization to be performed through the use of .ini files.
 
-The script recorder may be activated by using the
-{\em Load/Unload$>$Script Option}\ menu and selecting {\em Start Recording}.
-Select {\em Stop Recording}\ to terminate the script recorder.
-While the recorder is on, each time Smokeview loads a file, sets a view point
-{\em etc.}, Smokeview places a script command into a file.  The file is named
-either {\tt casename.ssf}\ or if this file already exists is named {\tt casename\_seq.ssf}\ where seq is integer.
+
+\section{Creating a Script}
+Scripts may be created by Smokeview using the script recorder feature
+or may be created by editing a text file using commands described in the glossary that follows.
+A script may be run using three methods.  It may be run from within Smokeview using
+the {\em Load/Unload$>$Script Option}\ menu or
+from the Scripts panel of the File/Bounds dialog box illustrated in Figure \ref{figScript}.
+It may also be run from a Windows command shell by typing the command
+\begin{verbatim}
+smokeview -runscript casename
+\end{verbatim}
+
+\noindent where casename is the name specified by
+the {\tt CHID} keyword defined in the \fds\ input data file.
+
 \begin{figure}[\figoptions]
 \centerline{
 \includegraphics[width=3.04166in]{figures/figSCRIPT}
@@ -1625,15 +1631,38 @@ Script Dialog Box is invoked by selecting
 \label{figSCRIPT}
 \end{figure}
 
-\section{Script Syntax}
+The recorder is turned on using the
+{\em Load/Unload$>$Script Option}\ menu and selecting {\em Start Recording}.
+After performing a sequence of steps to repeated it is turned off and the script is saved with the same menu.
+Typically steps involve loading data files, 
+setting view points, setting times and rendering images.
 
-This section contains documentations for the script commands.
-However, to make the job creating script easier,
-Smokeview has a {\em recorder}\ mode.  The user turns on the recorder, then performs the
-desired sequence of steps.  The following example script loads two data files, sets a time
-value and renders images.  The resulting images are displayed in Figure \ref{figscriptexample}.
 
+\subsection{Example}
+This example describes the steps used to create the script listed  
+in Figure \ref{figscripttext} which in turn was used to
+create the images
+illustrated in Figure \ref{figscriptimages}.
+
+\begin{enumerate}
+\item Obtain the test case {\em plume5b.fds}\ from the directory \\
+    {\tt Test\_cases/Visualization/plume5b.fds} located with 
+the FDS$-$SMV repository.  If you do have the repository stored
+on your computer copy the file to a separate directory ( so that
+svn updates you may perform will not over write the script file
+generated in this example).
+\item Run the case with FDS
+\item Open up the case in Smokeview
+\item Open up the Script panel of the File/Bounds dialog box
+\item
+\end{enumerate}
+
+\begin{figure}[\figoptions]
 \fdsinput{plume5b.ssf}
+\caption{Scripting example.}
+\label{figscripttext}%
+\end{figure}
+
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1643,8 +1672,17 @@ value and renders images.  The resulting images are displayed in Figure \ref{fig
   \end{tabular}
 \end{center}
  \caption{Scripting example.}
-\label{figscriptexample}%
+\label{figscriptimages}%
 \end{figure}
+
+\section{Script Glossary}
+
+This section contains documentations for the script commands.
+Commands fall into three logical categories.  Commands 
+to load data files, commands to position the scene in both time and space
+and commands to output the scene to image files.
+
+
 
 \subsection{Loading and Unloading  Files}
 
@@ -3582,21 +3620,19 @@ defined automatically by Smokeview.
 \label{sectionkeyboard} Many menu commands have equivalent
 keyboard shortcuts.  These shortcuts are described here and are
 also briefly described under the \fbox{Help}\ menu item from
-within \smokeview\  itself. \blist
+within \smokeview.
+
+\section{alphanumeric shortcuts}
+\blist
 
 \hitem{a}Alter the arrow size used to display velocity vectors.
 
 \hitem{a}Slide left when in {\bf eye centered}\ movement mode.
 
 
-\hitem{b} To increase the drawing speed, adjacent grid cells may
-be combined into coarser pseudo-grid cells when generating and
-viewing 3D contours.  The ``{\tt b}'' key is used to increment the
-number of grid cells that are combined (between one and five grid
-cells) when generating 3D contours. Using one grid will result in
-highly resolved contours but may take longer to draw.  Using five
-grid cells will have the opposite effect resulting in coarse
-contours that can be drawn quickly.
+\hitem{b} Used to increment the
+number of grid cells combined (between one and five)
+to generate PLOT3D iso-contours.
 
 \hitem{c}Toggle the Plot3D 2D contour display between solid
 banded contours and continuously shaded contours.
@@ -3608,8 +3644,6 @@ banded contours and continuously shaded contours.
 and a {\em world view}\ where the scene motion is relative to
 the scene center.
 
-\hitem{ALT f}Opens up  the File/Bounds dialog box.
-
 \hitem{g}Toggle the grid visibility.  When the grid display option is active,
 the x, y and z keys may be used to show or hide the grid perpendicular to the x, y and
 z axes respectively.
@@ -3617,7 +3651,7 @@ z axes respectively.
 \hitem{h}Toggle window indentation, for
 use with window capturing.
 
-\hitem{i}Toggle the visibility of iso-contours (3D surface
+\hitem{i}Toggle the visibility of PLOT3D iso-contours (3D surface
 contours).
 
 \hitem{k}Toggle the visibility of the time bar.
@@ -3655,7 +3689,7 @@ meshed.
 \hitem{t}Toggle the time stepping mode.  Time stepping mode allows one
 to step through the simulation one time step at a time.
 
-\hitem{T}Toggle the texture method for drawing slice and boundary file colors.
+\hitem{T}Toggle the method for interpolating colors when drawing slice and boundary files.
 
 \hitem{u}Reload files from the keyboard.  This is useful when using
 Smokeview to display a case that is currently running in
@@ -3671,8 +3705,42 @@ Plot3D data set.
 perpendicular to the x, y and z axes respectively (parallel to the
 yz, xz and xy planes).
 
-\hitem{1-9}Number of frames to skip when viewing an animation.
+\hitem{ALT y}Toggles the interpolation method used to display cell centered slice file (draw
+cells as one color or interpolate colors smoothly between cell centers.
 
+
+\hitem{1-9}Number of frames to skip when viewing an animation.
+ \elist
+
+ \section{ALT shortcuts}
+\blist
+\hitem{ALT d} Open the Display dialog box.
+
+\hitem{ALT e}Open the Edit Blockage dialog box.
+
+\hitem{ALT f}Open the File/Bounds dialog box.
+
+\hitem{ALT m}Open the Motion/View dialog box.
+
+\hitem{ALT s}Open the 3D Smoke dialog box.
+
+\hitem{ALT t}Open the Edit Tours dialog box.
+
+\hitem{ALT u} Toggle option to draw a coarse portion of a 2D slice file within an
+imbedded mesh.
+
+\hitem{ALT v}Toggle projection method used to visualize scene between size preserving and perspective.
+
+\hitem{ALT x}Close all dialog boxes.
+
+\hitem{ALT y}Toggles the interpolation method used to display cell centered slice file (draw
+cells as one color or interpolate colors smoothly between cell centers.
+
+\hitem{ALT z}Open the Compress Files portion of the File/Bounds dialog box.
+ \elist
+
+\section{Special character short cuts}
+\blist
 \hitem{!}Snap scene to nearest 45 degree rotation angle.
 
 \hitem{\%}Toggle scene projection method between size preserving and perspective.
@@ -3696,7 +3764,6 @@ or time step displayed.
 
 \hitem{space bar}Increment Plot3D data planes, Plot3D iso-contour
 levels or time step displayed.
-
  \elist
 
 %---------------------------------------------------------------------------------
