@@ -868,15 +868,6 @@ void Smoke3D_CB(int var){
     break;
   }
 }
-/*
-  rollout_SCRIPT = glui_bounds->add_rollout("Scripts",false);
-  BUTTON_script_start=glui_bounds->add_button_to_panel(rollout_SCRIPT,"Start Recording",SCRIPT_START,Script_CB);
-  BUTTON_script_start=glui_bounds->add_button_to_panel(rollout_SCRIPT,"Stop Recording",SCRIPT_STOP,Script_CB);
-    LIST_scriptlist = glui_bounds->add_listbox_to_panel(rollout_SCRIPT,"Script;",&script_index,SCRIPT_LIST,Script_CB);
-  glui_bounds->add_statictext_to_panel(rollout_SCRIPT,fdsprefix);
-  BUTTON_script_saveini=glui_bounds->add_button_to_panel(rollout_SCRIPT,"Save ini:",SCRIPT_SAVEINI,Script_CB);
-  EDIT_ini=glui_bounds->add_edittext_to_panel(rollout_SCRIPT,"config file suffix",GLUI_EDITTEXT_TEXT,script_inifile_suffix,SCRIPT_EDIT_INI,Script_CB);
-  */
 
 /* ------------------ add_scriptlist ------------------------ */
 
@@ -1018,8 +1009,8 @@ extern "C" void add_scriptlist(char *file, int id){
         inifiledata *inifile;
 
         strcpy(scriptinifilename,name);
-        writeini(SCRIPT_INI);
         inifile=insert_inifile(name);
+        writeini(SCRIPT_INI);
         if(inifile!=NULL&&LIST_ini_list!=NULL){
           LIST_ini_list->add_item(inifile->id,inifile->file);
         }
