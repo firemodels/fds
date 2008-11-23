@@ -296,7 +296,7 @@ best suited for the
 intended purpose.
 
 %---------------------------------------------------------------------------------
-%------------------------ Acknowledgements ---------------------------------------
+%------------------------ Acknowledgements ---------------------------------
 %---------------------------------------------------------------------------------
 
 \chapter*{Acknowledgements}
@@ -410,7 +410,7 @@ Feedback is encouraged and may be sent to glenn.forney@nist.gov .
 %\renewcommand{\footskip}{1.5in}
 
 %---------------------------------------------------------------------------------
-%------------------------ Introduction -------------------------------------------
+%------------------------ Introduction ----------------------------------------
 %---------------------------------------------------------------------------------
 \part{Using Smokeview}
 \chapter{Introduction}
@@ -715,7 +715,7 @@ the {\em Stereo}\ dialog box or pressing the "S" key (upper case).  A 3D view ap
 \end{description}
 
 %---------------------------------------------------------------------------------
-%------------------------ Getting Started ----------------------------------------
+%------------------------ Getting Started -------------------------------------
 %---------------------------------------------------------------------------------
 
 \chapter{Getting Started}
@@ -804,6 +804,10 @@ as more features are added.  A video card designed to perform well
 for {\em fancy}\ computer games should do well for Smokeview. Some
 apparent bugs in Smokeview have been found to be the result of
 problems found in video cards on older computers.
+
+%---------------------------------------------------------------------------------
+%------------------------ Manipulating the Scene Manually --------------------
+%---------------------------------------------------------------------------------
 
 \chapter{Manipulating the Scene Manually}
 The scene may be manipulated from two points of view, a world or
@@ -953,6 +957,9 @@ results in a  4x speedup of these actions. } \\ \hline
 \end{center}
 \end{table}
 
+%---------------------------------------------------------------------------------
+%--------------- Creating Custom Devices and Avatars -------------------------
+%---------------------------------------------------------------------------------
 
 \chapter{Creating Custom Devices and Avatars}
 Smokeview draws devices such as heat and smoke detectors,
@@ -1357,6 +1364,9 @@ The notation {\tt , gt, le} and {\tt lt} has the usual meaning of greater than o
 {\tt skipifgt}\ if the floating point values {\em a} and {\em b} satisfy $a> b$.
 \elist
 
+%---------------------------------------------------------------------------------
+%--Manipulating the Scene Automatically - The Touring Option ---------
+%---------------------------------------------------------------------------------
 
 \chapter{Manipulating the Scene Automatically - The Touring
 Option}
@@ -1591,19 +1601,23 @@ With this second set of changes, the observer will look to the
 side as they pass through the kitchen and living room.  The
 observer will look straight ahead as they go up the stairs.
 
+%---------------------------------------------------------------------------------
+%-----Running Smokeview Automatically - The Scripting Option ----------------
+%---------------------------------------------------------------------------------
+
 \chapter{Running Smokeview Automatically - The Scripting Option}
 \section{Overview}
 Smokeview may be run in an automatic or batch mode using
-instructions found in a text or script file.
+instructions found in a text file.
 The intent of the scripting option is to allow one to reproducibly document a case.
-This is necessary whenever changes occur in the FDS input file or in the FDS or Smokeview applications. The script may be re-run resulting in newly generated images guaranteed to correspond properly with the previously generated
-ones.
+A script may be re-run resulting in newly generated images guaranteed to correspond properly with the previously generated
+ones whenever changes occur in the FDS input file or in the FDS or Smokeview applications.
 
-Script instructions direct Smokeview to perform actions such as loading data files,
-moving the scene to a specified view point, setting the time and rendering the
-scene.  Smokeview settings such as font sizes, file bounds, label visibility are set by using the script command LOADINI to load a custom named .ini file.
+Script instructions direct Smokeview to perform actions such as loading data files, moving the scene to a specified view point, setting the time and rendering the scene.
+Smokeview settings such as font sizes, file bounds, label visibility
+{\em etc.} are set by using the script command LOADINI to load a custom named .ini file.
 A simplified scripting language results by allowing
-most of the customization to be performed through the use of .ini files.
+most customizations to be performed through the use of .ini files.
 
 
 \section{Creating a Script}
@@ -1612,7 +1626,8 @@ or may be created by editing a text file using commands described in the glossar
 A script may be run using three methods.  It may be run from within Smokeview using
 the {\em Load/Unload$>$Script Option}\ menu or
 from the Scripts panel of the File/Bounds dialog box illustrated in Figure \ref{figScript}.
-It may also be run from a Windows command shell by typing the command
+It may also be run from a Windows command shell using the command
+
 \begin{verbatim}
 smokeview -runscript casename
 \end{verbatim}
@@ -1633,52 +1648,133 @@ Script Dialog Box is invoked by selecting
 
 The recorder is turned on using the
 {\em Load/Unload$>$Script Option}\ menu and selecting {\em Start Recording}.
-After performing a sequence of steps to repeated it is turned off and the script is saved with the same menu.
-Typically steps involve loading data files, 
+After performing a sequence of steps, it is turned off and the script is saved. Typically steps involve loading data files,
 setting view points, setting times and rendering images.
 
 
 \subsection{Example}
-This example describes the steps used to create the script listed  
+This example describes the steps used to create the script listed
 in Figure \ref{figscripttext} which in turn was used to
 create the images
-illustrated in Figure \ref{figscriptimages}.
+illustrated in Figure \ref{figscriptimages}.  The script built here
+will create three images,
+a slice file viewed and clipped from the left at 5 s,
+the same slice file viewed from the center at 10 s,
+and again the same slice file viewed and clipped from the right at 15 s.
+The center slice is not clipped.
+
+Several preliminary steps need to be performed before script actions may be recorded.
+In particular a left and right view point will be defined and
+an .ini file will be setup that contains clipping values for the
+left and right slice file images.
+
+\subsubsection{Obtaining and setting up the example}
 
 \begin{enumerate}
-\item Obtain the test case {\em plume5b.fds}\ from the directory \\
-    {\tt Test\_cases/Visualization/plume5b.fds} located with 
-the FDS$-$SMV repository.  If you do have the repository stored
-on your computer copy the file to a separate directory ( so that
-svn updates you may perform will not over write the script file
-generated in this example).
+\item Obtain the test case {\tt script\_test.fds}\ from the
+    {\tt Test\_cases/Visualization} directory in
+the FDS$-$SMV repository.  Copy this file to a separate directory
+ if a local copy of the repository already exists
+ ( so that svn updates will not overwrite the script file generated in this example).  Of course, these steps may be repeated
+ for any test case that have data files defined.
 \item Run the case with FDS
-\item Open up the case in Smokeview
-\item Open up the Script panel of the File/Bounds dialog box
-\item
+\item Open the case in Smokeview
+\item Open the Scripts/Config panel of the File/Bounds dialog box,
+the Clip Geometry dialog box and the Viewpoints panel of the Motion/View
+dialog box.
 \end{enumerate}
 
+\subsubsection{Preliminary Steps - Setting up the viewpoints}
+
+\begin{enumerate}
+\item Rotate the scene slightly to the right of center so that you can see the left side of the geometry.  In the Viewpoints panel of the Motion/View dialog change {\tt new view}\ to {\tt left}\
+    then click on the {\em Add}\ button.
+\item Rotate the scene slightly to the left of center so that you can see the right side of the geometry.  In the Viewpoints panel of the Motion/View dialog change {\tt new view}\ to {\tt right}\
+    then click on the {\em Add}\ button.
+\item Click the {\em Save Settings}\ button.
+\end{enumerate}
+
+An .ini file has now been saved with two custom view points defined named left and right.
+
+\subsubsection{Preliminary Steps - Defining clip planes and creating additional .ini files}
+
+Defining the left clipping plane.
+\begin{enumerate}
+\item Click on the Clip Blockages + Data radio button,
+\item change the {\em Clip Lower x}\ value 0.5 after checking the check box next to edit field.
+\item Save an .ini file named script\_test\_left.ini by entering the text
+{\tt left}\ in the suffix field of the Config files section of the Scripts/Config dialog.
+\item Click on the Set button then the Save script\_test\_left.ini button.
+\end{enumerate}
+
+Defining the right clipping plane.
+\begin{enumerate}
+\item Click on the Clip Blockages + Data radio button,
+\item change {\em Clip Upper x}\ value 1.0 after checking check box next to edit field.
+\item Save an .ini file named script\_test\_right.ini by entering the text
+{\tt right}\ in the suffix field of the Config files section of the Scripts/Config dialog.
+\item Click on the Set button then the Save script\_test\_right.ini button.
+\end{enumerate}
+
+Two .ini files named {\tt scripts\_test\_left.ini}\
+and {\tt scripts\_test\_right.ini}\ have
+now been created.
+\subsubsection{Recording the Script}
+The script may be recorded now that the .ini files and viewpoints have been created.  The following steps reference the Scripts/Config dialog.
+
+\begin{enumerate}
+\item Click on the Start Recording button
+\item Load the $y=0.8$ temperature slice from the Load/Unload menu.
+\item Generate the left image
+\begin{enumerate}
+\item Select the script\_test\_left.ini file and click on Load
+\item Select the left view from the View menu.
+\item Set the time to 5.0
+\item Set the render suffix to left\_05 and press the Render button
+\end{enumerate}
+\item Generate the center image
+\begin{enumerate}
+\item Select the script\_test.ini file and click on Load
+\item Select external from the View menu.
+\item Set the time to 10.0
+\item Set the render suffix to right\_10 and press the Render button
+\end{enumerate}
+\item Render the right image
+\begin{enumerate}
+\item Select the script\_test\_right.ini file and click on the Load button
+\item Select the right view from the View menu.
+\item Set the time to 15.0
+\item Set the render suffix to right\_15 and press the Render button
+\end{enumerate}
+\item Click on the Stop Recording button
+\end{enumerate}
+
+
+
 \begin{figure}[\figoptions]
-\fdsinput{plume5b.ssf}
-\caption{Scripting example.}
+\fdsinput{script_test.ssf}
+\caption{Script commands generated using the Smokeview script recorder option.}
 \label{figscripttext}%
 \end{figure}
 
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cc}
- \includegraphics[width=3.5in]{scriptfigures/plume5b_smoke_05}&
- \includegraphics[width=3.5in]{scriptfigures/plume5b_slice_05}\\
+\begin{tabular}{ccc}
+ \includegraphics[width=2.25in]{scriptfigures/script_test_left_05}&
+ \includegraphics[width=2.25in]{scriptfigures/script_test_center_10}&
+ \includegraphics[width=2.25in]{scriptfigures/script_test_right_15}\\
   \end{tabular}
 \end{center}
- \caption{Scripting example.}
+ \caption{Smokeview images generated using script detailed in
+ Figure \ref{figscripttext}}
 \label{figscriptimages}%
 \end{figure}
 
 \section{Script Glossary}
 
 This section contains documentations for the script commands.
-Commands fall into three logical categories.  Commands 
+Commands fall into three logical categories.  Commands
 to load data files, commands to position the scene in both time and space
 and commands to output the scene to image files.
 
@@ -1864,8 +1960,16 @@ RENDERALL
 \end{verbatim}
 \elist
 
+%---------------------------------------------------------------------------------
+%------------------------ Visualization --------------------
+%---------------------------------------------------------------------------------
 
 \part{Visualization}
+
+%---------------------------------------------------------------------------------
+%---------------Realistic or Qualitative Visualization - 3D Smoke--------------
+%---------------------------------------------------------------------------------
+
 \chapter{Realistic or Qualitative Visualization - 3D Smoke}
 \FDS\ generates several data files visualized by \smokeview. Each
 file type may be loaded or unloaded using the \loadmenu\  menu
@@ -2773,13 +2877,25 @@ file.
 Note, the Smokeview animation must be running when the render command is selected or only one frame will be saved instead of the entire image sequence.
 
 \chapter{Annotating the Scene }
-\label{section:annotate} \label{subsect_features} Smokeview
-rendered JPEG or PNG image files may be annotated with any package
-that edits these types of files. Tick marks and label annotation
-can be placed within the 3D scene and moved around as the scene is
-moved. This would be difficult to duplicate with an external image
-editor. In addition, axis labels are displayed, if desired, by
-selecting the {tt Axis} checkbox in the Display dialog box illustrated in Figure \ref{figProperties}.
+\label{section:annotate} \label{subsect_features}
+\section{Overview}
+Smokeview scenes may be annotated by using the User Ticks dialog box or
+by using the TICKS and LABEL keywords.  The User Ticks dialog box is
+easier to use but  has limited flexibility in tick and label placement.
+A user may use the TICKS and LABELS keywords to duplicate the functionality
+of the User Ticks dialog box and also place text anywhere in the scene
+and at any time throughout the simulation.  This added generality makes
+it more difficult to exploit.
+
+
+\section{User Ticks Settings Dialog Box}
+The User Ticks Settings dialog box allows one to place
+ticks and labels along one or more orthogonal coordinate axes.
+The user may specify tick spacing, number of sub-tick intervals and how far  axes extend.  There is an automatic
+placement option that allows the tick axes to be placed based upon
+the orientation of the scene.  The user may specify which tick axes are visible if the automatic placement option is not
+invoked.  Figure \ref{figTICKSdialog} illustrates the User Ticks Settings
+dialog box.  It is a panel of the Display dialog box.  Figure \ref{figTICKSdialogexample} shows the ticks and labels resulting from the dialog box.
 
 \begin{figure}[\figoptions]
 \centerline{
@@ -2788,12 +2904,22 @@ selecting the {tt Axis} checkbox in the Display dialog box illustrated in Figure
 \caption[Ticks Dialog Box.]{Ticks Dialog Box.  The
 Ticks Dialog Box is invoked by selecting
 \frameit{Dialogs$>$Display}. }
-\label{figMOTION}
+\label{figTICKSdialog}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=5.0in]{scriptfigures/thouse5_ticks}
+\end{center}
+\caption{Annotation example using the Ticks dialog box}
+\label{figTICKSdialogexample}%
 \end{figure}
 
 
-
-The current release of FDS places tick marks and labels
+\section{TICKS and LABELS keywords}
+Tick marks and label annotation
+can be also placed within the 3D scene using the TICKS and LABELS keywords.
+FDS places tick marks and labels
 documenting the scene dimensions.  To replace or customize
 these annotations add the {\tt TICK} keyword to a .smv file
 using the following format:
@@ -2843,18 +2969,12 @@ the default).  The parameters, {\tt tstart} and {\tt tstop}
 indicate the time interval when the label is visible. The text
 string is specified on the next line ({\tt label}).
 
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[height=3.0in]{figures/ticklabels}
-\end{center}
-\caption{ Annotation example using the TICKS and LABEL keyword. }
-\label{figticklabels}%
-\end{figure}
-Figure \ref{figticklabels} shows how the {\tt LABEL} and
-{\tt TICKS} keywords can be used together to create a
-{\em ruler}\ with major and minor tick marks.  These ticks and
-labels were created using:
+Figure \ref{figticklabels} shows how the {\tt TICKS} and
+{\tt LABELS} keywords can be used together to create a
+{\em ruler}\ with major and minor tick marks illustrated in Figure
+\ref{figticklabelexample}.
 
+\begin{figure}[\figoptions]
 {\small
 \begin{verbatim}
 TICKS
@@ -2889,7 +3009,17 @@ LABEL
 m
 \end{verbatim}
 }
+\caption{ TICKS and LABEL commands used to create image in Figure \ref{figticklabelexample}}
+\label{figticklabels}%
+\end{figure}
 
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=3.0in]{figures/ticklabels}
+\end{center}
+\caption{ Annotation example using the TICKS and LABEL keyword. }
+\label{figticklabelexample}%
+\end{figure}
 
 
 \chapter{Compression - Using Smokezip to reduce FDS file sizes}
@@ -3704,10 +3834,6 @@ Plot3D data set.
 \hitem{x, y, z}Toggle the visibility of the Plot3D data planes
 perpendicular to the x, y and z axes respectively (parallel to the
 yz, xz and xy planes).
-
-\hitem{ALT y}Toggles the interpolation method used to display cell centered slice file (draw
-cells as one color or interpolate colors smoothly between cell centers.
-
 
 \hitem{1-9}Number of frames to skip when viewing an animation.
  \elist
