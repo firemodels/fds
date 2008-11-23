@@ -6092,6 +6092,31 @@ int readini2(char *inifile, int localfile){
   FREEMEMORY(unitclasses_ini);
   nunitclasses_ini=0;
 
+  if(localfile==1){
+    inifiledata *inifile;
+    int first_time=1;
+    FILE *filein_inilist=NULL;
+    char ini_listfile[1024];
+
+    strcpy(ini_listfile,caseinifilename);
+    strcat(ini_listfile,"list");
+    filein_inilist=fopen(ini_listfile,"r");
+    if(filein_inilist!=NULL){
+
+      while(!feof(stream)){
+        CheckMemory;
+        if(fgets(buffer,255,filein_inilist)==NULL)break;
+        if(match(buffer,"INIFILE",7)==1){
+          if(fgets(buffer2,255,filein_inilist)==NULL)break;
+          cleanbuffer(buffer,buffer2);
+          insert_inifile(buffer);
+          continue;
+          }
+      }
+      fclose(filein_inilist);
+    }
+  }
+
   printf("reading: %s\n",inifile);
   if(localfile==1){
     update_selectedtour_index=0;
@@ -7371,12 +7396,6 @@ int readini2(char *inifile, int localfile){
       cleanbuffer(buffer,buffer2);
       insert_scriptfile(buffer);
       updatemenu=1;
-      continue;
-      }
-    if(localfile==1&&match(buffer,"INIFILE",7)==1){
-      if(fgets(buffer2,255,stream)==NULL)break;
-      cleanbuffer(buffer,buffer2);
-      insert_inifile(buffer);
       continue;
       }
     if(localfile==1&&match(buffer,"XYZCLIP",7)==1){
@@ -9044,6 +9063,8 @@ void writeini(int flag){
   if(flag==LOCAL_INI){
     scriptfiledata *scriptfile;
     inifiledata *inifile;
+    int first_time=1;
+    FILE *fileout_inilist=NULL;
 
     for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
       char *file;
@@ -9055,11 +9076,23 @@ void writeini(int flag){
       }
     }
     for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
-      if(inifile->file!=NULL){
-        fprintf(fileout,"INIFILE\n");
-        fprintf(fileout," %s\n",inifile->file);
+      char ini_listfile[1024];
+
+      if(inifile->file==NULL)continue;
+      if(first_time==1){
+        char ini_listfile[1024];
+
+        first_time=0;
+        strcpy(ini_listfile,caseinifilename);
+        strcat(ini_listfile,"list");
+        fileout_inilist=fopen(ini_listfile,"w");
+      }
+      if(ini_listfile!=NULL){
+        fprintf(fileout_inilist,"INIFILE\n");
+        fprintf(fileout_inilist," %s\n",inifile->file);
       }
     }
+    if(fileout_inilist!=NULL)fclose(fileout_inilist);
   }
   {
   GLint nred, ngreen, nblue, ndepth, nalpha;
