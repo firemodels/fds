@@ -3952,29 +3952,35 @@ obstruction, FDS calculates the heat conduction through the entire {\ct THICKNES
 and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction, so be
 careful how you specify multiple layers. If the layering is symmetric, the same {\ct SURF} line can be applied to both sides. However,
 if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply one to each side. For example, a hollow box column that is 
-made of steel and covered on the outside by an insulation material would have to be described with two {\ct SURF} lines like the following: 
+made of steel and covered on the outside by a layer of insulation material and a layer of plastic on top of the insulation material, 
+would have to be described with two {\ct SURF} lines like the following: 
 
 \footnotesize
 \begin{verbatim}
 &SURF ID                 = 'COLUMN EXTERIOR'
       COLOR              = 'ANTIQUE WHITE'
       BACKING            = 'EXPOSED'
-      MATL_ID(1:2,1)     = 'INSULATION','STEEL'
-      THICKNESS(1:2)     = 0.038,0.0063 /
+      MATL_ID(1:2,1)     = 'PLASTIC','INSULATION','STEEL'
+      THICKNESS(1:2)     = 0.002,0.036,0.0063 /
 
 &SURF ID                 = 'COLUMN INTERIOR'
       COLOR              = 'BLACK'
       BACKING            = 'EXPOSED'
-      MATL_ID(1:2,1)     = 'STEEL','INSULATION'
-      THICKNESS(1:2)     = 0.0063,0.038 /
+      MATL_ID(1:2,1)     = 'STEEL','INSULATION','PLASTIC'
+      THICKNESS(1:2)     = 0.0063,0.036,0.002 /
 \end{verbatim} \normalsize
 
 \noindent
-If, in addition, the insulation material is combustible, and its burning properties are specified on the appropriate {\ct MATL} line, then you need
-to indicate which side of the column would generate the fuel vapor. In this case, the steel is impermeable; thus you should add the parameter
-{\ct LAYER\_DIVIDE=1.0} to the {\ct SURF} line labelled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the 
-first layer ({\ct 'INSULATION'}) are to be driven out of that surface. You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF}
-line labelled {\ct 'COLUMN INTERIOR'} to indicate that no fuel vapors are to driven into the interior of the column.   
+If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate {\ct MATL} lines, 
+then you need to indicate which side of the column would generate the fuel vapor. In this case, the steel is impermeable; thus you should add the parameter
+{\ct LAYER\_DIVIDE=2.0} to the {\ct SURF} line labelled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the 
+two first layers ({\ct 'PLASTIC'} and {\ct 'INSULATION'}) are to be driven out of that surface. 
+You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF} line labelled {\ct 'COLUMN INTERIOR'} to indicate that no fuel 
+vapors are to driven into the interior of the column. In fact, values from 0.0 to 1.0 would work equally because the material 
+{\ct 'STEEL'} would not generate any fuel vapors.
+
+By default, {\ct LAYER\_DIVIDE} is 0.5 times the number of layers for surfaces with {\ct EXPOSED} backing, and equal to the number of 
+layers for other surfaces.
  
 
 
