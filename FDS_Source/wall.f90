@@ -362,7 +362,6 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ENDIF
 
    ! Apply the different species boundary conditions to non-thermally thick solids
-   
    METHOD_OF_MASS_TRANSFER: SELECT CASE(SF%SPECIES_BC_INDEX)
  
       CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER 
@@ -453,20 +452,17 @@ WALL_CELL_LOOP: DO IW=1,NWC
                ENDIF
             ENDIF
             MASSFLUX(IW,N) = MASSFLUX(IW,N)*AREA_ADJUST(IW)
-!            IF (N==I_FUEL) ACTUAL_BURN_RATE(IW) = ACTUAL_BURN_RATE(IW)*AREA_ADJUST(IW)
             MFT = MFT + MASSFLUX(IW,N)
          ENDDO SUM_MASSFLUX_LOOP
  
-         ! Add total fuel consumed to various summing arrays
+         ! Add total consumed mass to various summing arrays
 
-         CONSUME_FUEL: IF (CORRECTOR .AND. SF%THERMALLY_THICK .AND. I_FUEL /= 0) THEN  
-!            IF (SF%SURFACE_DENSITY>0._EB .AND. SF%BACKING==EXPOSED) THEN
-!               IWB = WALL_INDEX_BACK(IW)
-!               IF (BOUNDARY_TYPE(IWB)==SOLID_BOUNDARY) MASS_LOSS(IWB) = MASS_LOSS(IWB) + MASSFLUX(IW,I_FUEL)*DT
-!            ENDIF
-            MASS_LOSS(IW) = MASS_LOSS(IW) + MASSFLUX(IW,I_FUEL)*DT
-            OBSTRUCTION(OBST_INDEX_W(IW))%MASS = OBSTRUCTION(OBST_INDEX_W(IW))%MASS - MASSFLUX(IW,I_FUEL)*DT*AW(IW)
-         ENDIF CONSUME_FUEL
+         CONSUME_MASS: IF (CORRECTOR .AND. SF%THERMALLY_THICK) THEN  
+            DO N=1,N_SPECIES
+               MASS_LOSS(IW) = MASS_LOSS(IW) + MASSFLUX(IW,N)*DT
+               OBSTRUCTION(OBST_INDEX_W(IW))%MASS = OBSTRUCTION(OBST_INDEX_W(IW))%MASS-MASSFLUX(IW,N)*DT*AW(IW)
+            ENDDO
+         ENDIF CONSUME_MASS
 
          ! Compute the ghost cell value of the species to get the right mass flux
  
