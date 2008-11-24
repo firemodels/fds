@@ -3951,9 +3951,9 @@ If you apply the attribute {\ct BACKING='EXPOSED'} on a {\ct SURF} line that is 
 obstruction, FDS calculates the heat conduction through the entire {\ct THICKNESS} and it uses the gas phase temperature
 and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction, so be
 careful how you specify multiple layers. If the layering is symmetric, the same {\ct SURF} line can be applied to both sides. However,
-if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply one to each side. For example, a hollow box column that is 
-made of steel and covered on the outside by a layer of insulation material and a layer of plastic on top of the insulation material, 
-would have to be described with two {\ct SURF} lines like the following: 
+if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply one to each side. For example, a hollow box column that is
+made of steel and covered on the outside by a layer of insulation material and a layer of plastic on top of the insulation material,
+would have to be described with two {\ct SURF} lines like the following:
 
 \footnotesize
 \begin{verbatim}
@@ -3971,17 +3971,17 @@ would have to be described with two {\ct SURF} lines like the following:
 \end{verbatim} \normalsize
 
 \noindent
-If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate {\ct MATL} lines, 
+If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate {\ct MATL} lines,
 then you need to indicate which side of the column would generate the fuel vapor. In this case, the steel is impermeable; thus you should add the parameter
-{\ct LAYER\_DIVIDE=2.0} to the {\ct SURF} line labelled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the 
-two first layers ({\ct 'PLASTIC'} and {\ct 'INSULATION'}) are to be driven out of that surface. 
-You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF} line labelled {\ct 'COLUMN INTERIOR'} to indicate that no fuel 
-vapors are to driven into the interior of the column. In fact, values from 0.0 to 1.0 would work equally because the material 
+{\ct LAYER\_DIVIDE=2.0} to the {\ct SURF} line labelled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the
+two first layers ({\ct 'PLASTIC'} and {\ct 'INSULATION'}) are to be driven out of that surface.
+You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF} line labelled {\ct 'COLUMN INTERIOR'} to indicate that no fuel
+vapors are to driven into the interior of the column. In fact, values from 0.0 to 1.0 would work equally because the material
 {\ct 'STEEL'} would not generate any fuel vapors.
 
-By default, {\ct LAYER\_DIVIDE} is 0.5 times the number of layers for surfaces with {\ct EXPOSED} backing, and equal to the number of 
+By default, {\ct LAYER\_DIVIDE} is 0.5 times the number of layers for surfaces with {\ct EXPOSED} backing, and equal to the number of
 layers for other surfaces.
- 
+
 
 
 \subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
@@ -3991,23 +3991,23 @@ layers for other surfaces.
 
 If a burning object is to disappear from the calculation once it is consumed, set {\ct BURN\_AWAY=.TRUE.} on the corresponding
 {\ct SURF} line. The solid object disappears from the calculation cell by cell, as the mass contained by each mesh cells is consumed
-either by the pyrolysis reactions or by the prescribed HRR.  The mass of each mesh cell is the cell face area multiplied by the 
-surface density of the {\ct SURF} type. 
+either by the pyrolysis reactions or by the prescribed HRR.  The mass of each mesh cell is the cell face area multiplied by the
+surface density of the {\ct SURF} type.
 
 The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \begin{itemize}
-\item  For reacting surfaces, the surface density is computed as a sum of the layer densities multiplied by the layer thicknesses. 
-This value can be overriden by setting {\ct SURFACE\_DENSITY} on the {\ct SURF} line. For surfaces with prescribed HRR 
+\item  For reacting surfaces, the surface density is computed as a sum of the layer densities multiplied by the layer thicknesses.
+This value can be overriden by setting {\ct SURFACE\_DENSITY} on the {\ct SURF} line. For surfaces with prescribed HRR
 ({\ct HRRPUA}), {\ct SURFACE\_DENSITY} parameter is the only way of defining the mass of the object.
-\item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant 
+\item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant
 amount of extra memory has to be set aside to store additional surface information as the rectangular block is
-eaten away. 
+eaten away.
 \item If {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the entire object, not just a face of the object
 because it is unclear how to handle edges of solid obstructions that have different {\ct SURF\_ID}s on different faces.
-\item If the volume of the obstruction changes because it has to conform to the uniform mesh, 
-FDS does {\bf not} adjust the burning rate to account for this as it does with various quantities associated with areas, 
+\item If the volume of the obstruction changes because it has to conform to the uniform mesh,
+FDS does {\bf not} adjust the burning rate to account for this as it does with various quantities associated with areas,
 like {\ct HRRPUA}.
-\item The mass of the object is based on the densities of the all material components ({\ct MATL}), but it is only consumed by mass fluxes of 
+\item The mass of the object is based on the densities of the all material components ({\ct MATL}), but it is only consumed by mass fluxes of
 the {\bf known} species. If the sum of the gaseous yields (Section~\ref{nu_gas}) is less than one, it will take longer to consume the mass.
 \end{itemize}
 
@@ -7361,6 +7361,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct RADIOMETER}                                & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Relative humidity                             & \%             & D,I,P,S      \\ \hline
 {\ct SOOT VOLUME FRACTION}                      & $\rho Y_s(Z)/\rho_s$                          & mol/mol        & D,I,P,S      \\ \hline
+{\ct SPECIFIC HEAT}                             & $c_p$                                         & kJ/kg/K        & D,I,P,S      \\ \hline
 {\ct SPRINKLER LINK TEMPERATURE}                & See Section~\ref{info:sprinklers}             & $^\circ$C      & D            \\ \hline
 {\ct SOLID DENSITY}                             & See Section~\ref{info:material_components}    & kg/m$^3$       & D            \\ \hline
 {\ct SURFACE DENSITY}                           & See Section~\ref{info:material_components}    & kg/m$^2$       & B,D          \\ \hline
