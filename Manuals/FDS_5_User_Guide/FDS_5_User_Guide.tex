@@ -3986,42 +3986,33 @@ layers for other surfaces.
 
 \subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
 \index{SURF!BURN\_AWAY}
+\index{SURF!SURFACE\_DENSITY}
 \label{info:BURN_AWAY}
 
-If a burning object is to disappear from the
-calculation once it is exhausted of fuel, set {\ct BURN\_AWAY=.TRUE.}.
-Use this parameter cautiously. If an object has the potential of
-burning away, a significant amount of extra memory has to be set aside
-to store additional surface information as the rectangular block is
-eaten away. If {\ct BURN\_AWAY} is prescribed as a {\ct SURF} parameter, then a solid
-object with this {\ct SURF\_ID} disappears from a calculation as
-the mass of each of its mesh cells are consumed. The mass of each mesh
-cell is the volume of the mesh cell multiplied by the {\ct DENSITY} of the
-materials making up the obstruction.
+If a burning object is to disappear from the calculation once it is consumed, set {\ct BURN\_AWAY=.TRUE.} on the corresponding
+{\ct SURF} line. The solid object disappears from the calculation cell by cell, as the mass contained by each mesh cells is consumed
+either by the pyrolysis reactions or by the prescribed HRR.  The mass of each mesh cell is the cell face area multiplied by the 
+surface density of the {\ct SURF} type. 
 
-\begin{warning}
-\noindent
-Note also that if {\ct BURN\_AWAY} is prescribed, the {\ct SURF}
-should be applied to the entire object, not just a face of the object
-because it is unclear how to handle edges of solid obstructions that
-have different {\ct SURF\_ID}s on different faces.
-\end{warning}
-
-\noindent
-Also note that the amount of combustible fuel equals the {\ct DENSITY}
-of the designated materials multiplied by the volume of the mesh
-cell. If the volume of the obstruction changes because it has to
-conform to the uniform mesh, FDS does {\bf not} adjust the burning
-rate to account for this as it does with various quantities associated
-with areas, like {\ct HRRPUA}.
+The following issues should be kept in mind when using {\ct BURN\_AWAY}:
+\begin{itemize}
+\item  For reacting surfaces, the surface density is computed as a sum of the layer densities multiplied by the layer thicknesses. 
+This value can be overriden by setting {\ct SURFACE\_DENSITY} on the {\ct SURF} line. For surfaces with prescribed HRR 
+({\ct HRRPUA}), {\ct SURFACE\_DENSITY} parameter is the only way of defining the mass of the object.
+\item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant 
+amount of extra memory has to be set aside to store additional surface information as the rectangular block is
+eaten away. 
+\item If {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the entire object, not just a face of the object
+because it is unclear how to handle edges of solid obstructions that have different {\ct SURF\_ID}s on different faces.
+\item If the volume of the obstruction changes because it has to conform to the uniform mesh, 
+FDS does {\bf not} adjust the burning rate to account for this as it does with various quantities associated with areas, 
+like {\ct HRRPUA}.
+\item The mass of the object is based on the densities of the all material components ({\ct MATL}), but it is only consumed by mass fluxes of 
+the {\bf known} species. If the sum of the gaseous yields (Section~\ref{nu_gas}) is less than one, it will take longer to consume the mass.
+\end{itemize}
 
 Examples of how to use the {\ct BURN\_AWAY} feature are given in Section~\ref{box_burn_away} and Section~\ref{couch}.
 
-\index{SURF!SHRINK} If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
-the surface is going to shrink when the surface reacts. The shrinking behavior can be prevented in the numerical model by setting {\ct SHRINK=.FALSE.}
-on the {\ct SURF} line.  However, setting {\ct SHRINK=.FALSE.} may introduce numerical problems in the wall solver. When all the material of
-a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux
-to zero and burning rate to zero.
 
 
 \subsection{Special Topic: Initial and Backside Boundary Conditions}
@@ -4071,6 +4062,12 @@ less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR=0.5} makes the
 mesh cells half the size. Setting {\ct WALL\_INCREMENT=1}\index{TIME!WALL\_INCREMENT} on the
 {\ct TIME} line forces the solid phase temperatures to be solved on every
 time step.
+
+\index{SURF!SHRINK} If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
+the surface is going to shrink when the surface reacts. The shrinking behavior can be prevented in the numerical model by setting {\ct SHRINK=.FALSE.}
+on the {\ct SURF} line.  However, setting {\ct SHRINK=.FALSE.} may introduce numerical problems in the wall solver. When all the material of
+a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux
+to zero and burning rate to zero.
 
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
@@ -7781,28 +7778,29 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\
 \hline \hline
 \endhead
-{\ct A}                       & Real        & Pre-exponential factor         &    1/s           & 1E13   \\ \hline
+{\ct A}                       & Real array  & Pre-exponential factors        &    1/s           & 1E13   \\ \hline
 {\ct ABSORPTION\_COEFFICIENT} & Real        & Absorption Coefficient         &    1/m           & 50000. \\ \hline
 {\ct BOILING\_TEMPERATURE}    & Real        & Boiling temperature            & $^\circ$C        & 5000.  \\ \hline
 {\ct CONDUCTIVITY}            & Real        & Thermal conductivity           & W/m/K            & 0.     \\ \hline
 {\ct CONDUCTIVITY\_RAMP}      & Character   & Ramp ID for conductivity       &                  &        \\ \hline
 {\ct DENSITY}                 & Real        & Solid mass per unit volume     & kg/m$^3$         & 0.     \\ \hline
-{\ct E}                       & Real        & Activation energy              & kJ/kmol          &        \\ \hline
+{\ct E}                       & Real array  & Activation energies            & kJ/kmol          &        \\ \hline
 {\ct EMISSIVITY    }          & Real        & Emissivity                     &                  & 0.9    \\ \hline
 {\ct FYI}                     & Character   & Comment String (has no effect) &                  &        \\ \hline
-{\ct HEAT\_OF\_COMBUSTION}    & Real        & Heat of combustion             & kJ/kg            &        \\ \hline
-{\ct HEAT\_OF\_REACTION}      & Real        & Heat of reaction               & kJ/kg            & 0.     \\ \hline
+{\ct HEAT\_OF\_COMBUSTION(:,II)}& Real array& Heats of combustion for species {\ct II}& kJ/kg   & 0.      \\ \hline
+{\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of reaction               & kJ/kg            & 0.     \\ \hline
 {\ct ID     }                 & Character   & IDentifier                     &                  &        \\ \hline
-{\ct THRESHOLD\_TEMPERATURE}  & Real        & Threshold temperature          & $^\circ$C        & -273.15 \\ \hline
+{\ct THRESHOLD\_TEMPERATURE}  & Real array  & Threshold temperatures         & $^\circ$C        & -273.15 \\ \hline
 {\ct N\_REACTIONS}            & Character   & Number of Reactions            &                  & 0      \\ \hline
-{\ct N\_S}                    & Real        & Exponent of mass fraction      &                  & 1.     \\ \hline
-{\ct N\_T}                    & Real        & Exponent of temperature        &                  & 0.     \\ \hline
-{\ct NU\_FUEL}                & Real        & Fuel Yield                     & kg/kg            & 0.     \\ \hline
-{\ct NU\_RESIDUE}             & Real        & Residue Yield                  & kg/kg            & 0.     \\ \hline
-{\ct NU\_WATER  }             & Real        & Steam Yield                    & kg/kg            & 0.     \\ \hline
-{\ct REFERENCE\_RATE}         & Real        & Reaction rate at ref.~temp.    & s$^{-1}$         & 0.1    \\ \hline
-{\ct REFERENCE\_TEMPERATURE}  & Real        & Reference temperature          & $^\circ$C        &        \\ \hline
-{\ct RESIDUE}                 & Character   & {\ct ID} of residue {\ct MATL} &                  &        \\ \hline
+{\ct N\_S}                    & Real array  & Exponents of mass fraction     &                  & 1.     \\ \hline
+{\ct N\_T}                    & Real array  & Exponents of temperature       &                  & 0.     \\ \hline
+{\ct NU\_FUEL}                & Real array  & Fuel yields                    & kg/kg            & 0.     \\ \hline
+{\ct NU\_GAS(:,II)}           & Real array  & Yields of species {\ct II}     & kg/kg            & 0.     \\ \hline
+{\ct NU\_RESIDUE}             & Real array  & Residue yields                 & kg/kg            & 0.     \\ \hline
+{\ct NU\_WATER}               & Real aray   & Water vapor yields             & kg/kg            & 0.     \\ \hline
+{\ct REFERENCE\_RATE}         & Real array  & Reaction rates at ref.~temp.   & s$^{-1}$         & 0.1    \\ \hline
+{\ct REFERENCE\_TEMPERATURE}  & Real array  & Reference temperatures         & $^\circ$C        &        \\ \hline
+{\ct RESIDUE}                 & Character   & {\ct IDs} of residue {\ct MATL} &                 &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat                  & kJ/kg/K          & 0.     \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat      &                  &        \\ \hline
 \end{longtable}
@@ -8096,6 +8094,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct OFFSET}                            & Real          & Droplet offset distance                   & m                     & 0.05      \\ \hline
 {\ct OPERATING\_PRESSURE}               & Real          & Sprinkler pipe pressure                   & atm                   & 1.        \\ \hline
 {\ct PART\_ID}                          & Character     & Name of associated PART line              &                       &           \\ \hline
+{\ct PRESSURE\_RAMP}                    & Character     & Pressure {\ct RAMP} for sprinkler systems &                       &           \\ \hline
 {\ct QUANTITY}                          & Character     & Name of associated output                 &                       &           \\ \hline
 {\ct RTI}                               & Real          & Response Time Index                       & $\sqrt{\hbox{m~s}}$   & 100.      \\ \hline
 {\ct SMOKEVIEW\_ID}                     & Character     & Name of drawn object                      &                       &           \\ \hline
@@ -8335,7 +8334,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HRRPUA }                         & Real            & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
 {\ct ID     }                         & Character       & IDentifier                        &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Ignition temperature              & $^\circ$C           & 5000.                   \\ \hline
-{\ct LAYER\_DIVIDE}                   & Real            & See Section~\ref{info:EXPOSED}    &                     & 0.5                     \\ \hline
+{\ct LAYER\_DIVIDE}                   & Real            & See Section~\ref{info:EXPOSED}    &                     & 0.5 $\times$ n.of.layers\\ \hline
 {\ct LEAK\_PATH}                      & Int.~Pair       & Pressure Zones for leakage        &                     &                         \\ \hline
 {\ct MASS\_FLUX(I)}                   & Real Array      & For species {\ct I}               & kg/m$^2$ s          & 0.                      \\ \hline
 {\ct MASS\_FLUX\_TOTAL}               & Real            & Total Mass Flux                   & kg/m$^2$ s          &                         \\ \hline
@@ -8359,6 +8358,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHRINK}                          & Logical         & Shrinking material                &                     & {\ct .TRUE.}            \\ \hline
 {\ct SLIP\_FACTOR    }                & Real            & Velocity Slip Condition           &                     & 0.5                     \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
+{\ct SURFACE\_DENSITY}                & Real            & See Section~\ref{info:BURN_AWAY}  & kg/m$^2$            & 0.0                     \\ \hline
 {\ct TAU\_MF(I)}                      & Real Array      & Ramp time for species {\ct I}     & s                   & 1.     \\ \hline
 {\ct TAU\_Q}                          & Real            & Ramp time for HRR                 & s                   & 1.     \\ \hline
 {\ct TAU\_T}                          & Real            & Ramp time for temp.               & s                   & 1.     \\ \hline
@@ -8366,7 +8366,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_HEIGHT}                 & Real            & Height of texture image           & m                   & 1.     \\ \hline
 {\ct TEXTURE\_MAP}                    & Character       & Name of texture map file          &                     &        \\ \hline
 {\ct TEXTURE\_WIDTH}                  & Real            & Width of texture image            & m                   & 1.     \\ \hline
-{\ct THICKNESS(IL)}                   & Real Array      & Thickness of Layer {\ct IL}       & m                   & 0.    \\ \hline
+{\ct THICKNESS(IL)}                   & Real Array      & Thickness of Layer {\ct IL}       & m                   & 0.     \\ \hline
 {\ct TMP\_BACK}                       & Real            & Back surface temperature BC       & $^\circ$C           & 20.    \\ \hline
 {\ct TMP\_FRONT}                      & Real            & Front surface temperature         & $^\circ$C           & 20.    \\ \hline
 {\ct TMP\_INNER}                      & Real            & Initial solid temperature         & $^\circ$C           & 20.    \\ \hline
