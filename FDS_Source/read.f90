@@ -3025,15 +3025,18 @@ READ_PROP_LOOP: DO N=0,N_PROP
    PY%OPERATING_PRESSURE       = OPERATING_PRESSURE
    PY%PART_ID                  = PART_ID
    PY%QUANTITY                 = QUANTITY
+   IF (PY%PART_ID/='null' .AND. PY%QUANTITY == 'null' ) PY%QUANTITY = 'NOZZLE'
    PY%RTI                      = RTI
    IF (SMOKEVIEW_ID /= 'null') THEN
       PY%SMOKEVIEW_ID          = SMOKEVIEW_ID
    ELSE
-      SELECT CASE(QUANTITY)
+      SELECT CASE(PY%QUANTITY)
          CASE DEFAULT
             PY%SMOKEVIEW_ID = 'sensor'
          CASE('SPRINKLER LINK TEMPERATURE')
             PY%SMOKEVIEW_ID = 'sprinkler_pendent'
+         CASE('NOZZLE')
+            PY%SMOKEVIEW_ID = 'nozzle'
          CASE('LINK TEMPERATURE')
             PY%SMOKEVIEW_ID = 'heat_detector'
          CASE('CABLE TEMPERATURE')
@@ -3043,7 +3046,6 @@ READ_PROP_LOOP: DO N=0,N_PROP
       END SELECT
    ENDIF
    PY%SPEC_ID                  = SPEC_ID
-   IF (PY%PART_ID/='null' .AND. PY%SMOKEVIEW_ID == 'null' ) PY%SMOKEVIEW_ID = 'nozzle'
    IF (PART_ID/='null' .AND. SPRAY_PATTERN_TABLE /= 'null') THEN
       CALL GET_TABLE_INDEX(SPRAY_PATTERN_TABLE,SPRAY_PATTERN,PY%SPRAY_PATTERN_INDEX)
       PY%TABLE_ID = SPRAY_PATTERN_TABLE
@@ -7427,6 +7429,10 @@ OUTPUT_QUANTITY(24:29)%CELL_POSITION = CELL_EDGE
 OUTPUT_QUANTITY(30)%NAME = 'C_DYNSMAG'
 OUTPUT_QUANTITY(30)%UNITS = '  '
 OUTPUT_QUANTITY(30)%SHORT_NAME = 'c_smag'  
+
+OUTPUT_QUANTITY(31)%NAME = 'SPECIFIC HEAT'
+OUTPUT_QUANTITY(31)%UNITS = 'kJ/kg/K'
+OUTPUT_QUANTITY(31)%SHORT_NAME = 'c_p'
 
 ! QUANTITY's the refer to droplet properties that are used to color the droplets in Smokeview
 
