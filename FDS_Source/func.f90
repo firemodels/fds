@@ -1030,13 +1030,20 @@ REAL(EB) R, THICKNESS, X_DIVIDE
 ! Compute mass flux fraction array (array numbers indicate the fraction of mass flux that
 ! is added to the front
 
-   IF (LAYER_DIVIDE .GE. REAL(N_LAYERS,EB)) THEN
+   IF (LAYER_DIVIDE >= REAL(N_LAYERS,EB)) THEN
       MF_FRAC = 1.0_EB
    ELSE
       MF_FRAC = 0._EB
 
-      II = INT(LAYER_DIVIDE)
-      X_DIVIDE  = LAYER_THICKNESS(II) + DMOD(LAYER_DIVIDE,1.0_EB)*LAYER_THICKNESS(II+1)
+      X_DIVIDE = 0._EB
+      DO NL=1,N_LAYERS
+         IF (LAYER_DIVIDE>=REAL(NL,EB)) THEN
+            X_DIVIDE  = X_DIVIDE + LAYER_THICKNESS(NL)
+         ELSE
+            X_DIVIDE  = X_DIVIDE + MOD(LAYER_DIVIDE,1.0_EB)*LAYER_THICKNESS(NL)
+            EXIT
+         ENDIF
+      ENDDO
 
       II = 0
       DIVILOOP: DO NL=1,N_LAYERS
@@ -1736,7 +1743,7 @@ END FUNCTION CSEVL
 
 INTEGER(2) FUNCTION TWO_BYTE_REAL(REAL_IN)
 REAL(FB),INTENT(IN) :: REAL_IN
-INTEGER(2) EXP,TEMP,I
+INTEGER(2) EXP,TEMP
 
 IF (ABS(REAL_IN) <= 1.E-16_8) THEN
    TWO_BYTE_REAL = 0
