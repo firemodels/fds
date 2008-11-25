@@ -93,7 +93,7 @@
 &HOLE XB=9.7,9.8,-0.01,0.21,0.0,2.0, COLOR='BLACK' / Door for South Outside Wall
 &HOLE XB=8.9,9.7,-0.01,0.21,0.0,2.0, COLOR='BLACK' DEVC_ID='add_hole' / Door for South Outside Wall
 
-&DEVC XYZ=0.0,0.0,0.0,ID='add_hole',SETPOINT=700.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=0.0,0.0,0.0,ID='add_hole',SETPOINT=1300.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
 
  interior openings/connections
 
