@@ -9,7 +9,8 @@ REM  make_smv_release_win32 version
 REM    where version is of the from X.Y_svn#
 
 cd ..\for_bundle
-set smvdir=to_google\smv_%version%_win32
+set zipbase=smv_%version%_win32
+set smvdir=to_google\%zipbase%
 
 echo
 echo filling distribution directory
@@ -23,10 +24,12 @@ copy ..\..\Manuals\All_PDF_Files\SMV_5_User_Guide.pdf %smvdir%\Documentation\.
 
 echo
 echo winzipping distribution directory
-wzzip -a -r -P %smvdir%.zip %smvdir%\*
+cd %smvdir%
+wzzip -a -r -P %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-d:\bin\winzip\wzipse32 %smvdir%.zip -d "c:\program files\nist\smokeview"
+d:\bin\winzip\wzipse32 %zipbase%.zip -d "c:\program files\nist\smokeview"
+copy %zipbase%.exe ..\.
 
-cd ..\scripts
+cd ..\..\..\scripts
