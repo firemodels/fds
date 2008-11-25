@@ -6876,6 +6876,7 @@ of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, 
 
 \subsubsection{Local Spray Properties}
 \index{Output!PDPA output}
+\label{PDPA}
 
 Detailed experimental measurements of sprays are often performed using \underline{P}hase \underline{D}oppler \underline{P}article
 \underline{A}nalysis (PDPA) which can be used to obtain information on the droplet size distribution, speed and concentration.
@@ -7420,7 +7421,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
 %{\ct LEAKAGE}                                   & Volume flow due to leaks                          & m$^3$/s        & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
-%{\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
+{\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -8095,6 +8096,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct OFFSET}                            & Real          & Droplet offset distance                   & m                     & 0.05      \\ \hline
 {\ct OPERATING\_PRESSURE}               & Real          & Sprinkler pipe pressure                   & atm                   & 1.        \\ \hline
 {\ct PART\_ID}                          & Character     & Name of associated PART line              &                       &           \\ \hline
+{\ct PDPA\_END}                         & Real          & See Section~\ref{PDPA}                    & s                     & {\ct T\_END} \\ \hline
+{\ct PDPA\_M}                           & Integer       & See Section~\ref{PDPA}                    &                       & 0         \\ \hline
+{\ct PDPA\_M}                           & Integer       & See Section~\ref{PDPA}                    &                       & 0         \\ \hline
+{\ct PDPA\_RADIUS}                      & Real          & See Section~\ref{PDPA}                    & m                     & 0.1       \\ \hline
+{\ct PDPA\_START}                       & Real          & See Section~\ref{PDPA}                    & s                     & 0.        \\ \hline
 {\ct PRESSURE\_RAMP}                    & Character     & Pressure {\ct RAMP} for sprinkler systems &                       &           \\ \hline
 {\ct QUANTITY}                          & Character     & Name of associated output                 &                       &           \\ \hline
 {\ct RTI}                               & Real          & Response Time Index                       & $\sqrt{\hbox{m~s}}$   & 100.      \\ \hline
