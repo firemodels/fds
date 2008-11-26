@@ -13,6 +13,16 @@
 &MESH IJK=72,72,36, XB=-2.1,  5.1, 5.1, 12.3,3.6,7.2, /
 &MESH IJK=72,72,36, XB= 5.1, 12.3, 5.1, 12.3,3.6,7.2, /
 
+&REAC ID                 = 'WOOD'
+     FYI                = 'Tewarson, SFPE Handbook, Douglas Fir'
+     C                  = 1.
+     H                  = 1.7
+     O                  = 0.74
+     N                  = 0.002
+     HEAT_OF_COMBUSTION = 16400.
+     CO_YIELD = 0.01
+     SOOT_YIELD         = 0.015 /
+
 &PART ID='tracers', MASSLESS=.TRUE. /
 
 &VENT XB=1.5,2.5,5.7,6.7,1.0,1.0, SURF_ID='FIRE', COLOR='MINT' / Vent in Burn Room A
@@ -22,18 +32,18 @@
       CONDUCTIVITY=1.4,
       DENSITY=2300.0 /
 
-&MATL ID='GYPSUM PLASTER',
+&MATL ID='DUROCK',
       SPECIFIC_HEAT=0.84,
-      CONDUCTIVITY=0.48,
-      DENSITY=1440.0 /
+      CONDUCTIVITY=0.12,
+      DENSITY=1153.0 /
 
 &SURF ID='WALL',
       MATL_ID='CONCRETE',
       THICKNESS=0.2 /
 
 &SURF ID='CEILING',
-      MATL_ID='GYPSUM PLASTER',
-      THICKNESS=0.2 /
+      MATL_ID='DUROCK',
+      THICKNESS=0.0254 /
 
 &SURF ID='FIRE',
       HRRPUA=2750.0,
