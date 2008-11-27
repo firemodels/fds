@@ -322,7 +322,8 @@ Module EVAC
        TDET_SMOKE_DENS, DENS_INIT, EVAC_DT_MAX, GROUP_DENS, &
        FC_DAMPING, EVAC_DT_MIN, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
        SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, TAU_CHANGE_DOOR, &
-       HUMAN_SMOKE_HEIGHT
+       HUMAN_SMOKE_HEIGHT, TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, &
+       CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF
   Integer, Dimension(3) :: DEAD_RGB
   !
   Real(EB), Dimension(:), Allocatable :: Tsteps
@@ -468,7 +469,9 @@ Contains
          COLOR_INDEX, DEAD_RGB, DEAD_COLOR, &
          SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, &
          TAU_CHANGE_DOOR, RGB, COLOR, &
-         AVATAR_COLOR, AVATAR_RGB, HUMAN_SMOKE_HEIGHT
+         AVATAR_COLOR, AVATAR_RGB, HUMAN_SMOKE_HEIGHT, &
+         TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, CONST_CF, FAC_CF, &
+         FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF
     !
     NPPS = 30000 ! Number Persons Per Set (dump to a file)
     !
@@ -862,7 +865,17 @@ Contains
       GROUP_DENS      = 0.0_EB
       SMOKE_MIN_SPEED = 0.1_EB
       SMOKE_MIN_SPEED_VISIBILITY = 0.0_EB
-      TAU_CHANGE_DOOR = 1.0_EB
+      TAU_CHANGE_DOOR      =  1.0_EB
+      TAU_CHANGE_V0 = -1.0_EB
+      THETA_SECTOR = -60.0_EB
+      CONST_DF = -0.1_EB
+      FAC_DF = 1.0_EB
+      CONST_CF = 1.0_EB
+      FAC_CF = 2.0_EB
+      FAC_1_WALL = 1.0_EB   ! direction is towards a wall
+      FAC_2_WALL = 5.5_EB   ! close to a wall
+      FAC_V0_DIR = 2.5_EB   ! v0*cos term for all sectors
+      FAC_V0_NOCF = 0.5_EB  ! prefer v0, if no counterflow
       OUTPUT_SPEED         = .False.
       OUTPUT_MOTIVE_FORCE  = .False.
       OUTPUT_FED           = .False.
@@ -4398,8 +4411,8 @@ Contains
              Do j= 1, JBAR
 
                 If (L_fed_save) Then
-
                    If ( Abs(HUMAN_GRID(i,j)%IMESH) > 0 ) Then
+                      ! imesh > 0, i.e. fire grid found
                       i1 = HUMAN_GRID(i,j)%II
                       j1 = HUMAN_GRID(i,j)%JJ
                       k1 = HUMAN_GRID(i,j)%KK
@@ -4407,17 +4420,14 @@ Contains
                       CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                            HUMAN_GRID(i,j)%FED_CO_CO2_O2,HUMAN_GRID(i,j)%SOOT_DENS,&
                            HUMAN_GRID(i,j)%TMP_G, HUMAN_GRID(i,j)%RADFLUX)
-
-
-                   End If ! imesh > 0, i.e. fire grid found
-
+                   End If
                    ! Save Fed, Soot, Temp(C), and Radflux
                    Write (LU_EVACFED) &
                         Real(HUMAN_GRID(i,j)%FED_CO_CO2_O2,FB), &
                         Real(HUMAN_GRID(i,j)%SOOT_DENS,FB), &
                         Real(HUMAN_GRID(i,j)%TMP_G,FB), &
                         Real(HUMAN_GRID(i,j)%RADFLUX,FB)
-                Else     ! Read FED from a file
+                Else ! Read FED from a file
                    ! Read Fed, Soot, Temp(C), and Radflux
                    Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
                    If (ios.Ne.0) Then
@@ -4429,7 +4439,6 @@ Contains
                    HUMAN_GRID(i,j)%SOOT_DENS = tmpout2
                    HUMAN_GRID(i,j)%TMP_G = tmpout3
                    HUMAN_GRID(i,j)%RADFLUX = tmpout4
-
                 End If   ! Calculate and save FED
 
              End Do     ! j=1,JBAR
@@ -4507,7 +4516,6 @@ Contains
           End If                  ! Calculate and save FED
        End Do CORR_LOOP
 
-
        DOOR_LOOP: Do i = 1, N_DOORS
           !
           If (L_fed_save) Then
@@ -4547,7 +4555,6 @@ Contains
              EVAC_DOORS(i)%RADFLUX = tmpout4
           End If                  ! Calculate and save FED
        End Do DOOR_LOOP
-
 
        EXIT_LOOP: Do i = 1, N_EXITS
           !
@@ -4595,8 +4602,7 @@ Contains
 
 324 Continue
     If (ios < 0) Then 
-       Write (LU_EVACOUT,fmt='(a,f12.4,a)') 'FED file EOF: time ', &
-            T_Save-DT_Save, ' not found'
+       Write (LU_EVACOUT,fmt='(a,f12.4,a)') 'FED file EOF: time ', T_Save-DT_Save, ' not found'
        Write (LU_EVACOUT,fmt='(a)') 'FED file EOF: use previous values'
        T_Save = 1.0E15
     End If
@@ -4667,6 +4673,7 @@ Contains
     Real(EB), Intent(IN) :: Tin
     Integer, Intent(IN) :: NM,ICYC
     !
+    Integer, Parameter :: n_sectors = 4
     Real(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
     Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1
     Integer  IE, tim_ic, tim_iw, NM_now, tim_iwx, tim_iwy, tim_iw2, tim_ic2, ibc
@@ -4686,12 +4693,11 @@ Contains
     Logical L_eff_read, L_eff_save, L_Dead
     Real(EB) :: cos_x, cos_y, speed_xm, speed_xp, speed_ym, speed_yp, hr_z, hr_a, hr_b, hr_tau, hr_tau_iner
     !
-    Real(EB) :: rn
+    Real(EB) :: rn, rnCF
     Real(EB) :: GaMe, GaTh, GaCM
     !
     Integer :: i_old_ffield, IZERO
     Character(26) :: name_old_ffield
-    !
     !
     Real(EB) :: P2P_Torque, Fc_x, Fc_y, Omega_new, angle, A1, Tc_z, Fc_x1, Fc_y1
     Real(EB) :: Omega_max, Omega_0
@@ -4704,17 +4710,21 @@ Contains
     Integer, Dimension(:,:), Allocatable :: BLOCK_GRID_N
     Integer, Dimension(:), Allocatable :: BLOCK_LIST
     !
-    Real(EB) d_humans_min, d_walls_min
-    Real(EB) TNOW, tnow13, tnow14, tnow15
+    Real(EB) :: d_humans_min, d_walls_min
+    Real(EB) :: TNOW, tnow13, tnow14, tnow15
     !
-    Logical NM_STRS_MESH
+    Logical :: NM_STRS_MESH
+    Real(EB), Dimension(n_sectors+1) :: Sum_suunta, u_theta, v_theta, cos_theta, sin_theta, thetas
+    Real(EB) :: Sum_suunta_max, theta_step, theta_start, vr_2r, angle_hre, &
+         angle_hr, v_hr, v_hre, P2P_Suunta_MAX, angle_old
+    Integer :: i_suunta_max, N_suunta_back, N_suunta_backCF
+    Integer, Dimension(n_sectors+1) :: N_suunta, N_suuntaCF
 
     Type (MESH_TYPE), Pointer :: MFF
     !
     TNOW=SECOND()
     If ( .Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) ) Return
     !
-
     ! Maximun speed of the agents.  
     Vmax_timo      = V_MAX
     ! Maximum angular speed of the agents.
@@ -4727,7 +4737,6 @@ Contains
     dt_group_door  = TAU_CHANGE_DOOR
     !
     Call POINT_TO_MESH(NM)
-    !       Call POINT_TO_EVAC_MESH(NM)
     !
     ! Find the smallest delta_x and/or delta_y.  Note: evac meshes should not be stretched ones.
     dx_min = Minval(DX)
@@ -4750,7 +4759,6 @@ Contains
        Call SHUTDOWN(MESSAGE)
     End If
     !
-
     ! Blocks are used to speed the double loops over the agent-agent interactions.
     Allocate(BLOCK_GRID_N(1:IBAR,1:JBAR),STAT=IZERO)
     Call ChkMemErr('EVACUATE_HUMANS','BLOCK_GRID_N',IZERO)
@@ -4780,7 +4788,9 @@ Contains
           End If
        End Do
 
-       ! Initialize arrays for groups of agents
+       ! ================================================
+       ! Initialize group arrays for this main evac mesh.
+       ! ================================================
        Group_List(:)%GROUP_SIZE      = 0
        Group_List(:)%GROUP_X         = 0.0_EB
        Group_List(:)%GROUP_Y         = 0.0_EB
@@ -4789,9 +4799,7 @@ Contains
        Group_List(:)%IntDose         = 0.0_EB
        Group_List(:)%Tpre            = 0.0_EB
        Group_List(:)%Tdet            = Huge(Group_List(:)%Tdet)
-
        !
-       ! Initialize group arrays for this main evac mesh.
        Do j = 0, i33_dim
           Group_List(j)%GROUP_I_FFIELDS(i_egrid) = 0
        End Do
@@ -4955,8 +4963,13 @@ Contains
           fed_max = Max(fed_max,HR%IntDose)  ! dead or alive
           hr_tau      = HR%Tau
           hr_tau_iner = HR%Tau_Iner
+          ! Counterflow: increase motivation to go ahead
+          If (Abs(HR%angle_old) > 0.01_EB) Then
+             hr_tau      = Max(0.25_EB,0.5_EB*hr_tau)
+             hr_tau_iner = Min(0.10_EB,0.5_EB*hr_tau_iner)
+          End If
           !
-          ! In which grid cell is the person?
+          ! In which grid cell is the agent?
           !
           XI = CELLSI(Floor((HR%X-XS)*RDXINT))
           YJ = CELLSJ(Floor((HR%Y-YS)*RDYINT))
@@ -5007,13 +5020,13 @@ Contains
           ! ========================================================
           ! Calculate persons prefered walking direction v0
           ! ========================================================
-          Call Find_Prefered_Direction(I, N, T, T_BEGIN, L_Dead, NM_STRS_MESH, &
-               II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
-          If (NM_STRS_MESH) Then
-             STRS_Indx = N
-             STRP=>EVAC_STRS(N)     
+          If (TAU_CHANGE_V0 > 0.0_EB) Then
+             ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
+             UBAR = HR%UBAR; VBAR = HR%VBAR
+          Else
+             Call Find_Prefered_Direction(I, N, T, T_BEGIN, L_Dead, NM_STRS_MESH, &
+                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
           End If
-
           ! ========================================================
           ! Prefered walking direction v0 is now (UBAR,VBAR)
           ! ========================================================
@@ -5026,6 +5039,10 @@ Contains
           speed_xp = HR%Speed
           speed_ym = HR%Speed
           speed_yp = HR%Speed
+          If (NM_STRS_MESH) Then
+             STRS_Indx = N
+             STRP=>EVAC_STRS(N)     
+          End If
           !
           ! Check if an agent is on a spectator stand.
           SS_Loop1: Do j = 1, n_sstands
@@ -5089,18 +5106,28 @@ Contains
              speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
              speed = speed*HR%v0_fac
              U_new = U_new + 0.5_EB*(DTSP/hr_tau)*(speed*(UBAR/EVEL) - HR%U)
-             HR%UBAR = speed*(UBAR/EVEL)
+             HR%UBAR = UBAR
 
              speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
              speed = speed*HR%v0_fac
              V_new = V_new + 0.5_EB*(DTSP/hr_tau)*(speed*(VBAR/EVEL) - HR%V)
-             HR%VBAR = speed*(VBAR/EVEL)
+             HR%VBAR = VBAR
 
              If (VBAR >= 0.0_EB) Then
                 angle = Acos(UBAR/EVEL)
              Else
                 angle = 2.0_EB*Pi - Acos(UBAR/EVEL)
              End If
+
+             ! Collison avoidance
+             angle = angle + HR%angle_old
+             Do While (angle >= 2.0_EB*Pi)
+                angle = angle - 2.0_EB*Pi
+             End Do
+             Do While (angle < 0.0_EB)
+                angle = angle + 2.0_EB*Pi
+             End Do
+
              If (angle == 2.0_EB*Pi) angle = 0.0_EB  ! angle is [0,2Pi)
 
              ! Rotational motion: J(dw/dt) = (J/t_iner)*( ((angle-angle_0/pi))w_0 - w )
@@ -5216,7 +5243,6 @@ Contains
           ICY = CELL_INDEX(II ,JJN,KKN)
           HR%X_old = HR%X
           HR%Y_old = HR%Y
-          HR%Angle_old = HR%Angle
 
           ! Check, if the agent moves inside a solid object ==> might be an open
           ! vent or a 'sucking vent' used to calculate the flow fields.
@@ -5308,8 +5334,17 @@ Contains
           DTSP_new = EVAC_DT_FLOWFIELD  ! Initialization phase
        End If
        Speed_max  = 0.0_EB
-       TUSED(15,NM)=TUSED(15,NM)+SECOND()-TNOW15
+       TUSED(15,NM)=TUSED(15,NM)+SECOND()-TNOW15  ! CPU timing
 
+       ! ================================================
+       ! Prepare to calculate the new forces, initialize
+       ! different variables and arrys for the step 3 of 
+       ! the SC-VV algorithm.
+       ! ================================================
+
+       ! ================================================
+       ! Initialize group arrays for this main evac mesh.
+       ! ================================================
        Group_List(:)%GROUP_SIZE  = 0
        Group_List(:)%GROUP_X = 0.0_EB
        Group_List(:)%GROUP_Y = 0.0_EB
@@ -5457,17 +5492,26 @@ Contains
           End If
           hr_tau = HR%Tau
           hr_tau_iner = HR%Tau_Iner
+          ! Counterflow: increase motivation to go ahead
+          If (Abs(HR%angle_old) > 0.01_EB) Then
+             hr_tau      = Max(0.25_EB,0.5_EB*hr_tau)
+             hr_tau_iner = Min(0.10_EB,0.5_EB*hr_tau_iner)
+          End If
           !
           ! Psychological force: cut-off when acceleration below 0.0001 m/s**2
           P2P_DIST_MAX = HR%B*Log(HR%A/0.0001_EB)
-          P2P_DIST_MAX = Min(P2P_DIST_MAX, 5.0_EB)
-          ! If large pressure then short range forces only (speed up)
+          P2P_DIST_MAX = Min(P2P_DIST_MAX, 5.0_EB)  ! 5.0 m is the maximum range of PP-force
           If ( HR%SumForces2 > 0.1_EB ) Then
+             ! If large pressure then short range forces only (speed up)
              P2P_DIST_MAX = Min( P2P_DIST_MAX, -HR%B*Log(HR%SumForces2/(100.0_EB*HR%A)) )
           End If
-          P2P_DIST_MAX = Max(P2P_DIST_MAX, 3.0_EB*HR%B)
+          P2P_DIST_MAX = Max(P2P_DIST_MAX, 1.5_EB*HR%B)
+          ! Next is the max distance for the collision avoidance, counterflow, etc.
+          P2P_Suunta_MAX = Max(P2P_DIST_MAX, 1.5_EB)
+
           ! Speed up the dead agent loop, only contact forces are needed.
           If (L_Dead) P2P_DIST_MAX = 0.0_EB
+          If (L_Dead) P2P_Suunta_MAX = 0.0_EB
 
           ! In which grid cell is the agent, new coordinates:
           XI = CELLSI(Floor((HR%X-XS)*RDXINT))
@@ -5489,19 +5533,16 @@ Contains
           ! ========================================================
           Call Find_Prefered_Direction(I, N, T+DTSP_new, T_BEGIN, L_Dead, NM_STRS_MESH, &
                IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
-          If (NM_STRS_MESH) Then
-             STRS_Indx = N
-             STRP=>EVAC_STRS(N)     
-          End If
-
           ! ========================================================
           ! The prefered walking direction v0 is (UBAR,VBAR)
           ! ========================================================
 
+          ! =======================================================
           ! Update the Block_Grid array search ranges
+          ! =======================================================
           BLOCK_LIST = 0
-          i_dx = Int((2.0_EB*0.3_EB+P2P_DIST_MAX)/DX(IIN)) + 1
-          j_dy = Int((2.0_EB*0.3_EB+P2P_DIST_MAX)/DY(JJN)) + 1
+          i_dx = Int((2.0_EB*0.3_EB+Max(P2P_Suunta_MAX,P2P_DIST_MAX))/DX(IIN)) + 1
+          j_dy = Int((2.0_EB*0.3_EB+Max(P2P_Suunta_MAX,P2P_DIST_MAX))/DY(JJN)) + 1
           iio = Max(1,IIN-i_dx)
           iie = Min(IBAR,IIN+i_dx)
           jjo = Max(1,JJN-j_dy)
@@ -5520,22 +5561,25 @@ Contains
              Call SHUTDOWN(MESSAGE)
           End If
 
+          ! =======================================================
           ! Inclines: Velocities are along the incline
           !           Coordinates are projected on the (x,y) plane
+          ! =======================================================
           cos_x = 1.0_EB
           cos_y = 1.0_EB
           speed_xm = HR%Speed
           speed_xp = HR%Speed
           speed_ym = HR%Speed
           speed_yp = HR%Speed
+          If (NM_STRS_MESH) Then
+             STRS_Indx = N
+             STRP=>EVAC_STRS(N)     
+          End If
           ! Check if an agent is on a spectator stand.
           SS_Loop2: Do j = 1, n_sstands
              ESS => EVAC_SSTANDS(j)
-             If (ESS%IMESH == nm .And. &
-                  (ESS%X1 <= HR%X .And. ESS%X2 >= HR%X) .And. &
+             If (ESS%IMESH == nm .And. (ESS%X1 <= HR%X .And. ESS%X2 >= HR%X) .And. &
                   (ESS%Y1 <= HR%Y .And. ESS%Y2 >= HR%Y) ) Then
-
-
                 cos_x = ESS%cos_x
                 cos_y = ESS%cos_y
                 Select Case (ESS%IOR)
@@ -5544,69 +5588,174 @@ Contains
                    speed_xp = cos_x*HR%Speed*ESS%FAC_V0_UP
                    speed_ym = HR%Speed*ESS%FAC_V0_HORI
                    speed_yp = HR%Speed*ESS%FAC_V0_HORI
-                   HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
-                        (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
+                   HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
                 Case(+1)
                    speed_xm = cos_x*HR%Speed*ESS%FAC_V0_UP
                    speed_xp = cos_x*HR%Speed*ESS%FAC_V0_DOWN
                    speed_ym = HR%Speed*ESS%FAC_V0_HORI
                    speed_yp = HR%Speed*ESS%FAC_V0_HORI
-                   HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
-                        (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
+                   HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
                 Case(-2)
                    speed_xm = HR%Speed*ESS%FAC_V0_HORI
                    speed_xp = HR%Speed*ESS%FAC_V0_HORI
                    speed_ym = cos_y*HR%Speed*ESS%FAC_V0_DOWN
                    speed_yp = cos_y*HR%Speed*ESS%FAC_V0_UP
-                   HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
-                        (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                   HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
                 Case(+2)
                    speed_xm = HR%Speed*ESS%FAC_V0_HORI
                    speed_xp = HR%Speed*ESS%FAC_V0_HORI
                    speed_ym = cos_y*HR%Speed*ESS%FAC_V0_UP
                    speed_yp = cos_y*HR%Speed*ESS%FAC_V0_DOWN
-                   HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + &
-                        (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
+                   HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
                 End Select
                 Exit SS_Loop2
              End If
              HR%Z = 0.5_EB*(ZS+ZF)  ! The agent is not on any incline
           End Do SS_Loop2
+          ! =======================================================
+          ! Inclines Ends
+          ! =======================================================
 
+          ! =======================================================
           ! Set height and speed for an agent in stairs
+          ! =======================================================
           If (NM_STRS_MESH) Then 
             Call GetStairSpeedAndZ(speed_xm, speed_xp, speed_ym, speed_yp,STRP,HR)
           End If
 
+          ! =======================================================
           ! Speed dependent social force
+          ! =======================================================
           hr_a =  HR%A*Max(0.5_EB,(Sqrt(HR%U**2+HR%V**2)/HR%Speed))
           A_Wall = Min(A_Wall, FAC_A_WALL*hr_a)
 
           ! ========================================================
-          ! PERSON-PERSON INTERACTION FORCES
+          ! AGENT-AGENT INTERACTION FORCES
           ! ========================================================
           ! Look for other agents, use blocks to speed up the loop.
           P2P_U      = 0.0_EB
           P2P_V      = 0.0_EB
           P2P_Torque = 0.0_EB
           TNOW14=SECOND()   ! person-person force loop timing
+          ! ========================================================
+          ! Collision avoidance (incl. counterflow)
+          ! ========================================================
+          ! Do not do this on every time step, do it every 0.1 s on the average.
+          If (TAU_CHANGE_V0 > 0.0_EB) Then
+             Call Random_number(rnCF)
+          Else
+             rnCF = -1.0_EB
+          End If
+          Change_v0_rnCF0: If ( rnCF > Exp(-DTSP/TAU_CHANGE_V0) ) Then
+
+             v_hr = Max(0.1_EB,Min(1.0_EB,Sqrt(HR%U**2 + HR%V**2)/HR%Speed))
+             theta_start = -Abs(THETA_SECTOR)
+             theta_step = 2.0_EB*Abs(theta_start)/Real(n_sectors-1,EB)
+             If(HR%UBAR**2+HR%VBAR**2 < 0.1_EB) Then
+                HR%UBAR = UBAR; HR%VBAR = VBAR
+             End If
+             Sum_suunta = 0.0_EB
+             Do iii = 1, n_sectors
+                thetas(iii)    = -Abs(theta_start) + (iii-1)*theta_step ! Degrees
+                cos_theta(iii) = Cos(Pi*thetas(iii)/180._EB) ! Radians in Fortran functions
+                sin_theta(iii) = Sin(Pi*thetas(iii)/180._EB)
+                u_theta(iii) = cos_theta(iii)*UBAR - sin_theta(iii)*VBAR
+                v_theta(iii) = sin_theta(iii)*UBAR + cos_theta(iii)*VBAR
+             End Do
+             cos_theta(n_sectors+1) = 1.0_EB ! v0 direction
+             sin_theta(n_sectors+1) = 0.0_EB
+             thetas(n_sectors+1)    = 0.0_EB
+             u_theta(n_sectors+1)   = UBAR
+             v_theta(n_sectors+1)   = VBAR
+             angle_old       = 0.0_EB
+             N_suunta        = 0 ! How many agents per sector
+             N_suuntaCF      = 0 ! How many agents per sector (counterflow)
+             N_suunta_back   = 0 ! How many agents "behind"
+             N_suunta_backCF = 0 ! How many agents "behind" (counterflow)
+          End If Change_v0_rnCF0
+
+          ! The force loop over the other agents starts here
           P2PLOOP: Do IE = 1, ie_max
              If (BLOCK_LIST(ie) == I) Cycle P2PLOOP
              HRE => HUMAN(BLOCK_LIST(ie))
              ! In stairs, only consider humans at the same, next and previous sub nodes (landings, stairs)
              If (ABS(HRE%STR_SUB_INDX - HR%STR_SUB_INDX)>1) Cycle P2PLOOP
              P2P_DIST = ((HRE%X-X1)**2 + (HRE%Y-Y1)**2)
-             If ( P2P_DIST > (P2P_DIST_MAX+HR%Radius+HRE%Radius)**2 ) Cycle P2PLOOP
+             If (P2P_DIST > (Max(P2P_Suunta_Max,P2P_DIST_MAX)+HR%Radius+HRE%Radius)**2) Cycle P2PLOOP
              P2P_DIST = Sqrt(P2P_DIST)
              !
              ! Check, that the persons are seeing each other, i.e., there are no walls between.
              PP_see_each = See_each_other(nm, x1, y1, HRE%X, HRE%Y)
              If (.Not. PP_see_each) Cycle P2PLOOP
+
+             ! Collision avoidance, counterflow, etc.
+             Change_v0_rnCF1: If ( rnCF > Exp(-DTSP/TAU_CHANGE_V0) ) Then
+                EVEL = Sqrt(UBAR**2 + VBAR**2)
+                If (VBAR >= 0.0_EB) Then
+                   angle_hr = Acos(UBAR/EVEL)
+                Else
+                   angle_hr = 2.0_EB*Pi - Acos(UBAR/EVEL)
+                End If
+                If (angle_hr == 2.0_EB*Pi) angle_hr = 0.0_EB  ! agent HR angle is [0,2Pi)
+
+                EVEL = Sqrt((HRE%X-HR%X)**2+(HRE%Y-HR%Y)**2)
+                If ((HRE%Y-HR%Y) >= 0.0_EB) Then
+                   angle_hre = Acos((HRE%X-HR%X)/EVEL)
+                Else
+                   angle_hre = 2.0_EB*Pi - Acos((HRE%X-HR%X)/EVEL)
+                End If
+                If (angle_hre == 2.0_EB*Pi) angle_hre = 0.0_EB  ! agent HRE angle is [0,2Pi)
+                angle_hre = angle_hr - angle_hre
+
+                If (angle_hre >= Pi) angle_hre = 2.0_EB*Pi - angle_hre
+                If (angle_hre <= -Pi) angle_hre = 2.0_EB*Pi + angle_hre
+                ! Agent HRE is at this angle when measured from HR
+                ! If HRE is on the right hand side of HR then the angle is negative,
+                ! i.e., positive direction is anti-clockwise (as usual).
+                angle_hre = -180.0_EB*angle_hre/Pi  ! degrees
+
+                v_hre = (HRE%X-HR%X)*UBAR + (HRE%Y-HR%Y)*VBAR
+                v_hre = v_hre/Sqrt((HRE%X-HR%X)**2+(HRE%Y-HR%Y)**2) ! cos r_HRE vs v0
+                v_hre = Max(0.5_EB,v_hre)*P2P_Suunta_MAX ! look further ahead than sideways
+                If (P2P_DIST < (v_hre+HR%Radius+HRE%Radius) ) Then
+                   vr_2r = Sign(1.0_EB,HRE%UBAR*UBAR+HRE%VBAR*VBAR) ! -1 or +1: counterflow or not?
+                   If (angle_hre > 180.0_EB-theta_step .Or. angle_hre < -(180.0_EB-theta_step)) Then
+                      ! Count the agents which are behind
+                      N_suunta_back = N_suunta_back + 1
+                      If (vr_2r <= 0.0_EB) N_suunta_backCF = N_suunta_backCF + 1
+                   End If
+                   ! Which sector if any
+                   iii = Int((angle_hre-(theta_start-0.5_EB*theta_step))/theta_step) + 1
+                   If (iii > 0 .And. iii < n_sectors+1) Then
+                      ! (UBAR,VBAR) are unit vectors
+                      N_suunta(iii) = N_suunta(iii) + 1
+                      v_hre = HRE%U*UBAR + HRE%V*VBAR  ! HRE speed along the v0 direction
+                      If (vr_2r > 0.0_EB) Then ! Same direction
+                         v_hre = CONST_DF + FAC_DF*v_hre
+                      Else ! Counterflow
+                         N_suuntaCF(iii) = N_suuntaCF(iii) + 1
+                         v_hre = -1.0_EB*(CONST_CF + FAC_CF*Max(0.0_EB,-v_hre))
+                      End If
+                      Sum_suunta(iii) = Sum_suunta(iii) + v_hre/Max(0.2_EB,(P2P_DIST-HR%Radius-HRE%Radius))
+                      If (angle_hre > -0.5_EB*theta_step .And. angle_hre < 0.5_EB*theta_step) Then
+                         ! The "additional" sector pointing on the v0 direction
+                         N_suunta(n_sectors+1) = N_suunta(n_sectors+1) + 1
+                         If (vr_2r <= 0.0_EB) N_suuntaCF(n_sectors+1) = N_suuntaCF(n_sectors+1) + 1
+                         Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + v_hre/Max(0.2_EB,(P2P_DIST-HR%Radius-HRE%Radius))
+                      End If
+                   End If
+                End If
+             End If Change_v0_rnCF1
+             If ( P2P_DIST > (P2P_DIST_MAX+HR%Radius+HRE%Radius)**2 ) Cycle P2PLOOP
              ! 
+             ! ========================================================
              ! Calculate the combination of spring constant for the two agents
+             ! ========================================================
              C_Yeff = (2.0_EB*HR%C_Young*2.0_EB*HRE%C_Young)/(2.0_EB*HR%C_Young+2.0_EB*HRE%C_Young)
              !
+             ! ========================================================
              ! Angle dependent social force:
+             ! ========================================================
              If ( (HR%U**2 +HR%V**2) > 0.0_EB ) Then
                 CosPhiFac = ( (HRE%X-X1)*HR%U + (HRE%Y-Y1)*HR%V ) &
                      / ( Sqrt((HRE%X-X1)**2 + (HRE%Y-Y1)**2)*Sqrt(HR%U**2 +HR%V**2) )
@@ -5614,7 +5763,8 @@ Contains
              Else
                 CosPhiFac = 1.0_EB
              End If
-             ! Calculate the position and velocities of the shoulder cirles
+
+             ! Calculate the position and velocities of the shoulder cirles for HRE
              r_tmp(4) = HRE%r_shoulder ! right circle
              r_tmp(5) = HRE%r_torso    ! center circle
              r_tmp(6) = HRE%r_shoulder ! left circle
@@ -5634,8 +5784,7 @@ Contains
                 ! Use the closest circles to calculate the psychological force
                 Do iii = 1, 3
                    Do jjj = 4, 6
-                      tim_dist = Sqrt((x_tmp(iii)-x_tmp(jjj))**2 + &
-                           (y_tmp(iii)-y_tmp(jjj))**2)
+                      tim_dist = Sqrt((x_tmp(iii)-x_tmp(jjj))**2 + (y_tmp(iii)-y_tmp(jjj))**2)
                       ! d_humans = Min( tim_dist-(r_tmp(iii)+r_tmp(jjj)) , d_humans )
                       ! Next is |vector1|*|vector2|
                       evel = Sqrt((x_tmp(jjj)-x_tmp(iii))**2+(y_tmp(jjj)-y_tmp(iii))**2)* &
@@ -5666,11 +5815,9 @@ Contains
                 Do jjj = 4, 6
                    ! First the right shoulder
                    tim_dist = Sqrt( (x_tmp(jjj)-x_tmp(1))**2 + (y_tmp(jjj)-y_tmp(1))**2 )
-                   Fc_x = (x_tmp(1)-x_tmp(jjj)) * &
-                        hr_a*CosPhiFac*Exp( -(tim_dist - &
+                   Fc_x = (x_tmp(1)-x_tmp(jjj)) * hr_a*CosPhiFac*Exp( -(tim_dist - &
                         (r_tmp(1)+r_tmp(jjj)))/hr_b )/tim_dist
-                   Fc_y = (y_tmp(1)-y_tmp(jjj)) * &
-                        hr_a*CosPhiFac*Exp( -(tim_dist- &
+                   Fc_y = (y_tmp(1)-y_tmp(jjj)) * hr_a*CosPhiFac*Exp( -(tim_dist- &
                         (r_tmp(1)+r_tmp(jjj)))/hr_b )/tim_dist
                    If ( Abs(Fc_y*(x_tmp(1)-HR%X) - Fc_x*(y_tmp(1)-HR%Y)) > Abs(Tc_z) ) Then
                       Tc_z = Fc_y*(x_tmp(1)-HR%X) - Fc_x*(y_tmp(1)-HR%Y)
@@ -5681,11 +5828,9 @@ Contains
                 Do jjj = 4, 6
                    ! Then the left shoulder
                    tim_dist = Sqrt( (x_tmp(jjj)-x_tmp(3))**2 + (y_tmp(jjj)-y_tmp(3))**2 )
-                   Fc_x = (x_tmp(3)-x_tmp(jjj)) * &
-                        hr_a*CosPhiFac*Exp( -(tim_dist - &
+                   Fc_x = (x_tmp(3)-x_tmp(jjj)) * hr_a*CosPhiFac*Exp( -(tim_dist - &
                         (r_tmp(3)+r_tmp(jjj)))/hr_b )/tim_dist
-                   Fc_y = (y_tmp(3)-y_tmp(jjj)) * &
-                        hr_a*CosPhiFac*Exp( -(tim_dist- &
+                   Fc_y = (y_tmp(3)-y_tmp(jjj)) * hr_a*CosPhiFac*Exp( -(tim_dist- &
                         (r_tmp(3)+r_tmp(jjj)))/hr_b )/tim_dist
                    If ( Abs(Fc_y*(x_tmp(3)-HR%X) - Fc_x*(y_tmp(3)-HR%Y)) > Abs(Tc_z) ) Then
                       Tc_z = Fc_y*(x_tmp(3)-HR%X) - Fc_x*(y_tmp(3)-HR%Y)
@@ -5708,8 +5853,7 @@ Contains
 
                 Do iii = 1, 3
                    Do jjj = 4, 6
-                      tim_dist = Sqrt((x_tmp(iii)-x_tmp(jjj))**2 + &
-                           (y_tmp(iii)-y_tmp(jjj))**2)
+                      tim_dist = Sqrt((x_tmp(iii)-x_tmp(jjj))**2 + (y_tmp(iii)-y_tmp(jjj))**2)
                       ! d_humans = Min( tim_dist-(r_tmp(iii)+r_tmp(jjj)) , d_humans )
                       ! Next is |vector1|*|vector2|
                       evel = Sqrt((x_tmp(jjj)-x_tmp(iii))**2+(y_tmp(jjj)-y_tmp(iii))**2)* &
@@ -5745,8 +5889,8 @@ Contains
                             P2P_Torque = P2P_Torque - Fc_x*( (y_tmp(iii) + &
                                  (r_tmp(iii)/r_tmp(jjj))*(y_tmp(jjj)-y_tmp(iii)) ) - HR%Y ) 
                          Else
-                            Fc_x = - HR%Gamma * ( (y_tmp(iii)-y_tmp(jjj))*scal_prod_over_rsqr)
-                            Fc_y = - HR%Gamma * (-(x_tmp(iii)-x_tmp(jjj))*scal_prod_over_rsqr)
+                            Fc_x = -HR%Gamma*( (y_tmp(iii)-y_tmp(jjj))*scal_prod_over_rsqr)
+                            Fc_y = -HR%Gamma*(-(x_tmp(iii)-x_tmp(jjj))*scal_prod_over_rsqr)
                             P2P_U = P2P_U + Fc_x
                             P2P_V = P2P_V + Fc_y
                             P2P_Torque = P2P_Torque + Fc_y*( (x_tmp(iii) + &
@@ -5770,6 +5914,102 @@ Contains
           !
           ! Walls are looked for the body circle
           Call Find_walls(nm, x1, y1, HR%Radius, P2P_DIST_MAX, HR%SKIP_WALL_FORCE_IOR, d_xy, FoundWall_xy, istat)
+
+          ! ========================================================
+          ! Collision avoidance, counterflow, etc.
+          ! ========================================================
+          Change_v0_rnCF2: If ( rnCF > Exp(-DTSP/TAU_CHANGE_V0) ) Then
+             v_hr  = Max(0.1_EB,Sqrt(HR%U**2+HR%V**2)/HR%Speed)
+             Do iii = 1, n_sectors
+                ! Awoid walls, do not take a direction where there is a wall closer than
+                ! d_perp = 0.6 m (perpendicular).
+                If (Abs(sin_theta(iii)) > 0.0001_EB) Then
+                   x11 = HR%X + u_theta(iii)*Min(P2P_Suunta_MAX, 0.6_EB/Abs(sin_theta(iii)))
+                   y11 = HR%Y + v_theta(iii)*Min(P2P_Suunta_MAX, 0.6_EB/Abs(sin_theta(iii)))
+                Else ! straight ahead
+                   x11 = HR%X + u_theta(iii)*P2P_Suunta_MAX
+                   y11 = HR%Y + v_theta(iii)*P2P_Suunta_MAX
+                End If
+                P2P_DIST = Sqrt((HR%X-x11)**2 + (HR%Y-y11)**2) - HR%Radius
+                x11 = Max(XS,Min(XF,x11))
+                y11 = Max(YS,Min(YF,y11))
+                PP_see_each = See_each_other(nm, HR%X, HR%Y, x11, y11)
+                If(.Not.PP_see_each) Then
+                   vr_2r = -FAC_1_WALL*P2P_Suunta_MAX*v_hr
+                   Sum_suunta(iii) = Sum_suunta(iii) + vr_2r/Max(0.2_EB,P2P_DIST)
+                End If
+             End Do
+             If (FoundWall_xy(1) .And. Abs(HR%X-d_xy(1))-HR%Radius < 0.2_EB) Then
+                Do iii = 1, n_sectors
+                   If(u_theta(iii) < -0.10_EB) Then
+                      vr_2r = u_theta(iii)/Max(0.1_EB, Abs(HR%X-HR%Radius-d_xy(1)))
+                      Sum_suunta(iii) = Sum_suunta(iii) - Abs(P2P_Suunta_MAX*FAC_2_WALL*vr_2r)
+                   End If
+                End Do
+             End If
+             If (FoundWall_xy(2) .And. Abs(HR%X-d_xy(2))-HR%Radius < 0.2_EB) Then
+                Do iii = 1, n_sectors
+                   If(u_theta(iii) > +0.10_EB) Then
+                      vr_2r = -u_theta(iii)/Max(0.1_EB, Abs(HR%X+HR%Radius-d_xy(2)))
+                      Sum_suunta(iii) = Sum_suunta(iii) - Abs(P2P_Suunta_MAX*FAC_2_WALL*vr_2r)
+                   End If
+                End Do
+             End If
+             If (FoundWall_xy(3) .And. Abs(HR%Y-d_xy(3))-HR%Radius < 0.2_EB) Then
+                Do iii = 1, n_sectors
+                   If(v_theta(iii) < -0.10_EB) Then
+                      vr_2r = v_theta(iii)/Max(0.1_EB, Abs(HR%Y-HR%Radius-d_xy(3)))
+                      Sum_suunta(iii) = Sum_suunta(iii) - Abs(P2P_Suunta_MAX*FAC_2_WALL*vr_2r)
+                   End If
+                End Do
+             End If
+             If (FoundWall_xy(4) .And. Abs(HR%Y-d_xy(4))-HR%Radius < 0.2_EB) Then
+                Do iii = 1, n_sectors
+                   If(v_theta(iii) > +0.10_EB) Then
+                      vr_2r = -v_theta(iii)/Max(0.1_EB, Abs(HR%Y+HR%Radius-d_xy(4)))
+                      Sum_suunta(iii) = Sum_suunta(iii) - Abs(P2P_Suunta_MAX*FAC_2_WALL*vr_2r)
+                   End If
+                End Do
+             End If
+             Do iii = 1, n_sectors+1
+                ! Prefer flow field direction
+                Sum_suunta(iii) = Sum_suunta(iii) + FAC_V0_DIR*v_hr*((UBAR*u_theta(iii)+VBAR*v_theta(iii)))
+             End Do
+             If (N_suunta(n_sectors+1) < 1) Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + 50.0_EB  ! Empty space ahead
+             If (Sum(N_suuntaCF(1:n_sectors)) < 1) Then
+                ! No counterflow, prefer v0 direction, i.e., "stay on line"
+                Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + FAC_V0_NOCF*v_hr*Sum(N_suunta(1:n_sectors))
+             End If
+             i_suunta_max = n_sectors + 1
+             Sum_suunta_max = -Huge(Sum_suunta_max)
+             Do iii = 1, n_sectors+1
+                If (Sum_suunta(iii) > Sum_suunta_max) Then
+                   UBAR = u_theta(iii)
+                   VBAR = v_theta(iii)
+                   Sum_suunta_max = Sum_suunta(iii)
+                   i_suunta_max = iii
+                End If
+             End Do
+             ! If counterflow then try to pass sideways and decrease tau and tau_iner.
+             ! Use this if there are more counterflow agents than downstrean agents.
+             angle_old = 0.0_EB
+             If (v_hr < 0.3_EB .And. (Sum(N_suunta(1:n_sectors))-Sum(N_suuntaCF(1:n_sectors))) < &
+                  Sum(N_suuntaCF(1:n_sectors))) Then
+                angle_old = Sign(1.0_EB,thetas(i_suunta_max))*Pi*45.0_EB/180.0_EB  ! radians
+             Else
+                angle_old = 0.0_EB
+             End If
+          Else
+             ! Do not change direction during this time step, use the previous direction
+             If (TAU_CHANGE_V0 > 0.0_EB) Then
+                UBAR = HR%UBAR
+                VBAR = HR%VBAR
+                angle_old = HR%angle_old
+             Else
+                angle_old = 0.0_EB
+             End If
+          End If Change_v0_rnCF2 ! Collision avoidance ends
+          HR%angle_old = angle_old
 
           Call Wall_SocialForces(nm, x1, y1, HR%Radius, P2P_DIST_MAX, d_xy, P2P_U, P2P_V, Social_F, FoundWall_xy)
 
@@ -5987,13 +6227,13 @@ Contains
              speed = speed_xp*(0.5_EB + Sign(0.5_EB,UBAR)) + speed_xm*(0.5_EB - Sign(0.5_EB,UBAR)) 
              speed = speed*HR%v0_fac
              U_new = (U_new + 0.5_EB*(DTSP/hr_tau)*speed*(UBAR/EVEL)) / fac_tim
-             HR%UBAR = speed*(UBAR/EVEL)
+             HR%UBAR = UBAR
              P2P_U = P2P_U + (HR%Mass/hr_tau)*(speed*(UBAR/EVEL) - HR%U)
 
              speed = speed_yp*(0.5_EB + Sign(0.5_EB,VBAR)) + speed_ym*(0.5_EB - Sign(0.5_EB,VBAR)) 
              speed = speed*HR%v0_fac
              V_new = (V_new + 0.5_EB*(DTSP/hr_tau)*speed*(VBAR/EVEL)) / fac_tim
-             HR%VBAR = speed*(VBAR/EVEL)
+             HR%VBAR = VBAR
              P2P_V = P2P_V + (HR%Mass/hr_tau)*(speed*(VBAR/EVEL) - HR%V)
 
              If (VBAR >= 0.0_EB) Then
@@ -6001,6 +6241,16 @@ Contains
              Else
                 angle = 2.0_EB*Pi - Acos(UBAR/EVEL)
              End If
+
+             ! Collision avoidance has HR%angle_old .ne. 0.0
+             angle = angle + HR%angle_old
+             Do While (angle >= 2.0_EB*Pi)
+                angle = angle - 2.0_EB*Pi
+             End Do
+             Do While (angle < 0.0_EB)
+                angle = angle + 2.0_EB*Pi
+             End Do
+
              If (angle == 2.0_EB*Pi) angle = 0.0_EB  ! angle is [0,2Pi)
 
              ! Rotational motion: J(dw/dt) = (J/t_iner)*( ((angle-angle_0)/pi)*w_0 - w)
