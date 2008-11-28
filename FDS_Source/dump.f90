@@ -423,7 +423,7 @@ IF (N_DEVC>0) THEN
             WRITE(TCFORM,'(A,I4.4,A)') "(",N_DEVC,"(A,','),A)"
             WRITE(LU_DEVC(1),TCFORM) 's',(TRIM(OUTPUT_QUANTITY(DEVICE(N)%OUTPUT_INDEX)%UNITS),N=1,N_DEVC)
             WRITE(TCFORM,'(A,I4.4,A)') "(A,",N_DEVC,"(',',3A))"
-            WRITE(LU_DEVC(I),TCFORM) 'FDS Time',('"',TRIM(DEVICE(N)%ID),'"',N=1,N_DEVC)
+            WRITE(LU_DEVC(1),TCFORM) 'FDS Time',('"',TRIM(DEVICE(N)%ID),'"',N=1,N_DEVC)
          ENDIF
       ENDIF
    ENDIF
