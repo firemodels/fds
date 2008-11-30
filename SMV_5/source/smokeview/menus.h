@@ -4342,8 +4342,8 @@ static int in_menu=0;
     if(p3cont2d!=SHADED_CONTOURS){
       glutAddMenuEntry("Continuous Contours",4);
     }
-    glutAddMenuEntry("Show All Planes",5);
-    glutAddMenuEntry("Hide All Planes",6);
+    glutAddMenuEntry("Show all planes in active mesh",5);
+    glutAddMenuEntry("Hide all planes in active mesh",6);
 
     CREATEMENU(plot3dshowmenu,Plot3DShowMenu);
     if(nplot3dloaded>0){
