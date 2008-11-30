@@ -1195,7 +1195,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
  /* ++++++++++++++++++++++++ draw user ticks +++++++++++++++++++++++++ */
 
     if(vis_user_ticks==1){
+      antialias(1);
       draw_user_ticks();
+      antialias(0);
       sniffErrors("after drawticks");
     }
 
