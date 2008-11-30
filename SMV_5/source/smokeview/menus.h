@@ -5945,6 +5945,7 @@ static int in_menu=0;
     glutAddMenuEntry("  #: save settings (create casename.ini file)",2);
   }
   glutAddMenuEntry("  !: snap scene's view angles",2);
+  glutAddMenuEntry("  &: toggle line anti-aliasing (draw lines smoothly)",2);
   glutAddMenuEntry("",1);
   glutAddMenuEntry("Mouse Motion",1);
   glutAddMenuEntry("      : rotate around z, x axis",1);
