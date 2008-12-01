@@ -2091,24 +2091,54 @@ restart.
 \subsection{Special Topic: Defying Gravity}
 \label{info:GVEC}
 
-Most users of FDS assume that the acceleration of gravity\index{gravity} points toward
-the negative end of the $z$ axis, or more simply, downward.
+Most users of FDS assume that the acceleration of gravity\index{gravity} points in the negative $z$ direction, or more simply, downward.
 However, to change the direction of gravity to model
 a sloping roof or tunnel, for example, specify the gravity
 vector on the {\ct MISC} line with a triplet of numbers of the form
-{\ct GVEC=0.0, 0.0, -9.81} (units are m/s$^2$). This is the default, but it
+{\ct GVEC=0.,0.,-9.81},
+with units of m/s$^2$. This is the default, but it
 can be changed to be any direction.
 
-Note: if sprinklers are specified, the gravity vector must not be
-changed. Much of the logic governing the trajectories of water droplets
-over solid objects assumes that gravity points in the negative $z$
-direction.
+There are a few special applications where you might want to vary the gravity vector as a function of time
+or as a function of the first spatial coordinate, $x$. For example, on board the Space Shuttle or International Space Station, small motions can
+cause temporal changes in the normally zero level of gravity, an effect known as ``g-jitter.'' More commonly, in tunnel
+fire simulations, it is sometimes convenient to change the direction of gravity to mimic the change in slope. The slope
+of the tunnel might change as you travel through it; thus, you can tell FDS where to redirect gravity.
+For either a spatially or temporally varying direction and/or magnitude of gravity, do the following. First, on the 
+{\ct MISC} line, set the three components of gravity, {\ct GVEC}, to some ``base'' state like {\ct GVEC=1.,1.,1.},
+which gives you the flexibility to vary all three components. Next, designate ``ramps'' for the individual components, {\ct RAMP\_GX},
+{\ct RAMP\_GY}, and {\ct RAMP\_GZ}, all of which are specified on the {\ct MISC} line. There is more discussion of
+{\ct RAMP}s in Section~\ref{info:RAMP}, but for now you can use the following as a simple template to follow:
 
-There are a few special applications where you might want to vary the gravity vector in
-time, for instance, for spacecraft applications. The gravity vector, {\ct GVEC}, can be
-made a function of time using ``ramps'' for the individual components, {\ct RAMP\_GX},
-{\ct RAMP\_GY}, and {\ct RAMP\_GZ}, all specified on the {\ct MISC} line. More about
-{\ct RAMP}s can be found in Section~\ref{info:RAMP}.
+\footnotesize
+\begin{verbatim}
+&MISC GVEC=1.,0.,1., RAMP_GX='x-ramp', RAMP_GZ='z-ramp' /
+
+&RAMP ID='x-ramp', X=  0., F=0.0 /
+&RAMP ID='x-ramp', X= 50., F=0.0 /
+&RAMP ID='x-ramp', X= 51., F=-0.49 /
+&RAMP ID='x-ramp', X=100., F=-0.49 /
+
+&RAMP ID='z-ramp', X=  0., F=-9.81 /
+&RAMP ID='z-ramp', X= 50., F=-9.81 /
+&RAMP ID='z-ramp', X= 51., F=-9.80 /
+&RAMP ID='z-ramp', X=100., F=-9.80 /
+\end{verbatim} \normalsize
+
+\noindent
+Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the 
+$x$ coordinate. Note also that {\ct F} is just a multiplier of the ``base'' gravity vector components, given by {\ct GVEC}. This is why 
+using the number 1 is convenient -- it allows you to specify the gravity components on the {\ct RAMP} lines directly.  
+The effect of these lines is to model the first 50~m of a tunnel without a slope, but the second 50~m with a 5~\% slope
+upwards. Note that the angle from vertical of the gravity vector due to a 5~\% slope is $\tan^{-1} 0.05=2.86^\circ$ and that
+0.49 and 9.80 are equal to the magnitude of the gravity vector, 9.81~m/s$^2$, multiplied by the sine and cosine of 2.86$^\circ$,
+respectively. To check your math, the sum of the squares of the gravity components ought to equal 9.81.
+Notice in this case that the $y$ direction has been left out because there is no $y$ variation in the gravity vector. 
+
+To vary the direction and/or magnitude of gravity in time, follow the same procedure but replace the {\ct X} in the {\ct RAMP}
+lines with a {\ct T}.
+
+
 
 
 \subsection{Special Topic: Improving the Pressure Solver}
@@ -8171,7 +8201,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Points in interpolation function  &                       &  5000   \\ \hline
 {\ct ID}                            & Character     & Identifier                        &                       &     \\ \hline
 {\ct T}                             & Real          & Time (or Temperature)             & s (or $^\circ$C)      &     \\ \hline
-%\end{tabular*}
+{\ct X}                             & Real          & $x$-coordinate (gravity only)     & m                     &     \\ \hline
 \end{longtable}
 
 
