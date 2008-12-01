@@ -734,28 +734,28 @@ DROPLET_LOOP: DO I=1,NLP
    RHO_G = RHO(II,JJ,KK)
    MU_AIR = SPECIES(0)%MU(MIN(500,NINT(0.1_EB*TMP_G)))
    DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
+
    DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
       C_DRAG  = DRAG(DR%RE)
-!rm ->
       IF (.NOT. PC%TREE) THEN
-!rm <-
-      SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
-      DR%A_X  = SFAC*UREL*RVC
-      DR%A_Y  = SFAC*VREL*RVC
-      DR%A_Z  = SFAC*WREL*RVC
-!rm ->
+         SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
+         DR%A_X  = SFAC*UREL*RVC
+         DR%A_Y  = SFAC*VREL*RVC
+         DR%A_Z  = SFAC*WREL*RVC
+      ELSE
+         SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
+         DR%A_X  = SFAC*UREL
+         DR%A_Y  = SFAC*VREL
+         DR%A_Z  = SFAC*WREL
       ENDIF
-      IF (PC%TREE) THEN
-      SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
-      DR%A_X  = SFAC*UREL
-      DR%A_Y  = SFAC*VREL
-      DR%A_Z  = SFAC*WREL
-      ENDIF
-!rm <-
-
       IF (.NOT.PC%STATIC) THEN
          CONST   = 8._EB*PC%DENSITY*RD/(3._EB*RHO_G*C_DRAG*QREL)
          BFAC    = EXP(-DT/CONST)
+         IF (SPATIAL_GRAVITY_VARIATION) THEN
+            GRVT1 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GX)*GVEC(1) 
+            GRVT2 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GY)*GVEC(2) 
+            GRVT3 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GZ)*GVEC(3) 
+         ENDIF
          AUREL   = CONST*GRVT1
          AVREL   = CONST*GRVT2
          AWREL   = CONST*GRVT3
@@ -763,7 +763,7 @@ DROPLET_LOOP: DO I=1,NLP
          DR%V    = VBAR + (VREL+AVREL)*BFAC - AVREL
          DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
       ENDIF
-   ELSE
+   ELSE DRAG_CALC  ! No drag
       DR%A_X  = 0._EB
       DR%A_Y  = 0._EB
       DR%A_Z  = 0._EB
