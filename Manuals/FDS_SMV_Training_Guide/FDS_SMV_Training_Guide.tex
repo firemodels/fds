@@ -940,18 +940,15 @@ a) 3D perspective view\\
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cc}
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_01_hrr}&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_03_hrr}\\
- test 1&test 3\\
+\begin{tabular}{c}
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_min_hrr}\\
+ minimum HRR\\
  \\
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_04_hrr}&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_05_hrr}\\
- test 4&test 5\\
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_avg_hrr}\\
+ average HRR\\
  \\
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_06_hrr}&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_07_hrr}\\
- test 6&test 7\\
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_max_hrr}\\
+ maximum HRR\\
 \end{tabular}
 \end{center}
 \caption {Experimental and FDS heat release results for the
@@ -962,40 +959,57 @@ Training Tower case}
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{rcc}
- test 1&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_01_temp_exp}&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_01_temp_fds}\\
- test 3&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_03_temp_exp}&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_03_temp_fds}\\
- test 4&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_04_temp_exp}&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_04_temp_fds}\\
- &experiment&FDS calc\\
+min HRR& \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_01_temp_min}&
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_03_temp_min}\\
+ 
+ average HRR& \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_01_temp_avg}&
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_03_temp_avg}\\
+ 
+ max HRR& \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_01_temp_max}&
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_03_temp_max}\\
+ &Test 1&Test 3\\
 \end{tabular}
 \end{center}
-\caption {Experimental and FDS temperatures for Training Tower test cases 1, 3 and 4}
+\caption {Comparisons for Test 1 and 3}
 \label{figtrainingtowerhrr}%
 \end{figure}
 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{rcc}
- test 5&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_05_temp_exp}&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_05_temp_fds}\\
- test 6&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_06_temp_exp}&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_06_temp_fds}\\
- test 7&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_07_temp_exp}&
- \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_07_temp_fds}\\
- &experiment&FDS calc\\
+min HRR& \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_04_temp_min}&
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_05_temp_min}\\
+
+ average HRR& \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_04_temp_avg}&
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_05_temp_avg}\\
+
+ max HRR& \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_04_temp_max}&
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_05_temp_max}\\
+ &Test 4&Test 5\\
 \end{tabular}
 \end{center}
-\caption {Experimental and FDS temperatures for Training Tower test cases 5, 6 and 7}
+\caption {Comparisons for Test 4 and 5}
 \label{figtrainingtowerhrr}%
 \end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rcc}
+min HRR& \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_06_temp_min}&
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_07_temp_min}\\
+
+ average HRR& \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_06_temp_avg}&
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_07_temp_avg}\\
+
+ max HRR& \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_06_temp_max}&
+ \includegraphics[width=3.0in]{datafigures/MFRI_Training_Tower_07_temp_max}\\
+ &Test 6&Test 7\\
+\end{tabular}
+\end{center}
+\caption {Comparisons for Test 6 and 7}
+\label{figtrainingtowerhrr}%
+\end{figure}
+
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1097,7 +1111,7 @@ b) top view 1st floor\\
  \includegraphics[height=2.5in]{datafigures/MCFRS_Tower_open_4pal_hrr}&
  \includegraphics[height=2.5in]{datafigures/MCFRS_Tower_open_6pal_hrr}\\
  open door and windows, 4 pallet fire& open door and window, 6 pallet fire\\
-\end{tabular} 
+\end{tabular}
 \end{center}
 \caption {FDS heat release results for the MCFRS two level tower case}
 \label{figMCFRStower_hrr}%
@@ -1115,7 +1129,7 @@ b) top view 1st floor\\
  open door and windows, 4 pallet fire& open door and window, 6 pallet fire\\
 \end{tabular}
 \end{center}
-\caption {FDS temperature results for the MCFRS two level tower case at 
+\caption {FDS temperature results for the MCFRS two level tower case at
 the 5 ft level at 4 locations within the structure}
 \label{figMCFRStower_hrr}%
 \end{figure}
