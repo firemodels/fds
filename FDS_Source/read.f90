@@ -80,10 +80,10 @@ OPEN(LU_INPUT,FILE=FN_INPUT,ACTION='READ')
 
 CALL READ_DEAD    ! Scan input file looking for old NAMELIST groups, and stop the run if they exist
 CALL READ_HEAD
+CALL READ_MULT
 CALL READ_MESH
 CALL READ_TRAN
 CALL READ_TIME
-CALL READ_MULT
 CALL READ_MISC
 CALL READ_RADI
 CALL READ_PROP
@@ -194,23 +194,35 @@ END SUBROUTINE READ_HEAD
  
 SUBROUTINE READ_MESH
 
-INTEGER :: IJK(3),NM,MPI_PROCESS,RGB(3),LEVEL
+INTEGER :: IJK(3),NM,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN
 INTEGER, DIMENSION(0:100) :: I_MG,J_MG,K_MG
 LOGICAL :: EVACUATION, EVAC_HUMANS
-REAL(EB) :: EVAC_Z_OFFSET,XB(6)
+REAL(EB) :: EVAC_Z_OFFSET,XB(6),XB1,XB2,XB3,XB4,XB5,XB6
 CHARACTER(25) :: COLOR
+CHARACTER(30) :: MULT_ID
 NAMELIST /MESH/ IJK,FYI,ID,SYNCHRONIZE,EVACUATION,EVAC_HUMANS,CYLINDRICAL,XB,RGB,COLOR,EVAC_Z_OFFSET, &
-                MPI_PROCESS,I_MG,J_MG,K_MG,LEVEL
+                MPI_PROCESS,I_MG,J_MG,K_MG,LEVEL,MULT_ID
 TYPE (MESH_TYPE), POINTER :: M
+TYPE (MULTIPLIER_TYPE), POINTER :: MR
  
 NMESHES = 0
+NMESHES_READ = 0
  
 REWIND(LU_INPUT)
 COUNT_MESH_LOOP: DO
    CALL CHECKREAD('MESH',LU_INPUT,IOS)
    IF (IOS==1) EXIT COUNT_MESH_LOOP
+   MULT_ID = 'null'
    READ(LU_INPUT,MESH,END=15,ERR=16,IOSTAT=IOS)
-   NMESHES = NMESHES + 1
+   N_MESH_NEW = 1
+   IF (MULT_ID/='null') THEN
+      DO N=1,N_MULT
+         MR => MULTIPLIER(N)
+         IF (MULT_ID==MR%ID) N_MESH_NEW = (MR%I_UPPER-MR%I_LOWER+1)*(MR%J_UPPER-MR%J_LOWER+1)*(MR%K_UPPER-MR%K_LOWER+1)
+      ENDDO
+   ENDIF
+   NMESHES      = NMESHES + N_MESH_NEW
+   NMESHES_READ = NMESHES_READ + 1
    16 IF (IOS>0) CALL SHUTDOWN('ERROR: Problem with MESH line.')
 ENDDO COUNT_MESH_LOOP
 15 CONTINUE
@@ -245,8 +257,10 @@ EVACUATION_Z_OFFSET = 1.0_EB
 ! Read in the Mesh lines from Input file
 
 REWIND(LU_INPUT)
+
+NM = 0
  
-MESH_LOOP: DO NM=1,NMESHES
+MESH_LOOP: DO N=1,NMESHES_READ
 
    ! Set MESH defaults
 
@@ -271,9 +285,9 @@ MESH_LOOP: DO NM=1,NMESHES
    EVACUATION  = .FALSE.
    EVAC_Z_OFFSET = 1.0_EB
    EVAC_HUMANS = .FALSE.
-   WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
    MPI_PROCESS = -1
    LEVEL = 0
+   MULT_ID = 'null'
 
    ! Read the MESH line
 
@@ -281,139 +295,168 @@ MESH_LOOP: DO NM=1,NMESHES
    IF (IOS==1) EXIT MESH_LOOP
    READ(LU_INPUT,MESH)
 
-   ! Determine which PROCESS to assign the MESH to
+   ! Multiply meshes if need be
 
-   IF (MPI_PROCESS>-1) THEN
-      IF (MPI_PROCESS>NUMPROCS-1) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: MPI_PROCESS greater than total number of processes'
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
-      RESTRICT_MESH_ASSIGNMENT = .FALSE.
-   ELSE
-      IF (     PARALLEL) MPI_PROCESS = MIN(NM-1,NUMPROCS-1)
-      IF (.NOT.PARALLEL) MPI_PROCESS = 0
-   ENDIF
+   MR => MULTIPLIER(0)
+   DO NNN=1,N_MULT
+      IF (MULT_ID==MULTIPLIER(NNN)%ID) MR => MULTIPLIER(NNN)
+   ENDDO
 
-   ! Fill in MESH related variables
+   K_MULT_LOOP: DO KK=MR%K_LOWER,MR%K_UPPER
+      J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
+         I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
 
-   M => MESHES(NM)
-   M%MESH_LEVEL = LEVEL
-   M%IBAR = IJK(1)
-   M%JBAR = IJK(2)
-   M%KBAR = IJK(3)
-   IBAR_MAX = MAX(IBAR_MAX,M%IBAR)
-   JBAR_MAX = MAX(JBAR_MAX,M%JBAR)
-   KBAR_MAX = MAX(KBAR_MAX,M%KBAR)
-   M%NEWC = 2*M%IBAR*M%JBAR+2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
-   IF (.NOT.SYNCHRONIZE) SYNC_TIME_STEP(NM)  = .FALSE.
-   IF (EVACUATION)  EVACUATION_ONLY(NM) = .TRUE.
-   IF (EVACUATION)  SYNC_TIME_STEP(NM)  = .FALSE.
-   IF (EVAC_HUMANS) EVACUATION_GRID(NM) = .TRUE.
-   IF (EVACUATION)  EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET
-   IF (M%JBAR==1) TWO_D = .TRUE.
-   IF (TWO_D .AND. M%JBAR/=1) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: IJK(2) must be 1 for all grids in 2D Calculation'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-   IF (EVACUATION .AND. M%KBAR/=1) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: IJK(3) must be 1 for all evacuation grids'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
+            XB1 = XB(1) + II*MR%DX
+            XB2 = XB(2) + II*MR%DX
+            XB3 = XB(3) + JJ*MR%DY
+            XB4 = XB(4) + JJ*MR%DY
+            XB5 = XB(5) + KK*MR%DZ
+            XB6 = XB(6) + KK*MR%DZ
 
-   ! Associate the MESH with the PROCESS
+            ! Increase the MESH counter by 1
 
-   PROCESS(NM) = MPI_PROCESS
-   IF (MYID==0 .AND. PARALLEL) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
-   IF (EVACUATION_ONLY(NM) .AND. PARALLEL) EVAC_PROCESS = NUMPROCS-1
+            NM = NM + 1
 
-   ! Mesh boundary colors
+            ! Determine which PROCESS to assign the MESH to
+
+            IF (MPI_PROCESS>-1) THEN
+               IF (MPI_PROCESS>NUMPROCS-1) THEN
+                  WRITE(MESSAGE,'(A)') 'ERROR: MPI_PROCESS greater than total number of processes'
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
+               RESTRICT_MESH_ASSIGNMENT = .FALSE.
+            ELSE
+               IF (     PARALLEL) MPI_PROCESS = MIN(NM-1,NUMPROCS-1)
+               IF (.NOT.PARALLEL) MPI_PROCESS = 0
+            ENDIF
+
+            ! Fill in MESH related variables
+
+            M => MESHES(NM)
+            M%MESH_LEVEL = LEVEL
+            M%IBAR = IJK(1)
+            M%JBAR = IJK(2)
+            M%KBAR = IJK(3)
+            IBAR_MAX = MAX(IBAR_MAX,M%IBAR)
+            JBAR_MAX = MAX(JBAR_MAX,M%JBAR)
+            KBAR_MAX = MAX(KBAR_MAX,M%KBAR)
+            M%NEWC = 2*M%IBAR*M%JBAR+2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
+            IF (.NOT.SYNCHRONIZE) SYNC_TIME_STEP(NM)  = .FALSE.
+            IF (EVACUATION)  EVACUATION_ONLY(NM) = .TRUE.
+            IF (EVACUATION)  SYNC_TIME_STEP(NM)  = .FALSE.
+            IF (EVAC_HUMANS) EVACUATION_GRID(NM) = .TRUE.
+            IF (EVACUATION)  EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET
+            IF (M%JBAR==1) TWO_D = .TRUE.
+            IF (TWO_D .AND. M%JBAR/=1) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: IJK(2) must be 1 for all grids in 2D Calculation'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            IF (EVACUATION .AND. M%KBAR/=1) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: IJK(3) must be 1 for all evacuation grids'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+
+            ! Associate the MESH with the PROCESS
+         
+            PROCESS(NM) = MPI_PROCESS
+            IF (MYID==0 .AND. PARALLEL) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
+            IF (EVACUATION_ONLY(NM) .AND. PARALLEL) EVAC_PROCESS = NUMPROCS-1
+
+            ! Mesh boundary colors
    
-   IF (ANY(RGB<0) .AND. COLOR=='null') COLOR = 'BLACK'
-   IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
-   ALLOCATE(M%RGB(3))
-   M%RGB = RGB
+            IF (ANY(RGB<0) .AND. COLOR=='null') COLOR = 'BLACK'
+            IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
+            ALLOCATE(M%RGB(3))
+            M%RGB = RGB
    
-   ! Mesh Geometry and Name
+            ! Mesh Geometry and Name
    
-   IF (ID/='null') MESH_NAME(NM) = ID
+            WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
+            IF (ID/='null') MESH_NAME(NM) = ID
    
-   ! Parameters needed by PRESSURE_CORRECTION scheme
+            ! Parameters needed by PRESSURE_CORRECTION scheme
    
-   M%IBAR2 = 1
-   DO I=1,100
-      IF (I_MG(I)>-1) M%IBAR2 = M%IBAR2 + 1
-   ENDDO
-   I_MG(0) = 0
-   I_MG(M%IBAR2) = M%IBAR
+            M%IBAR2 = 1
+            DO I=1,100
+               IF (I_MG(I)>-1) M%IBAR2 = M%IBAR2 + 1
+            ENDDO
+            IF (I_MG(1)>-1) I_MG(0) = 0
+            IF (I_MG(1)>-1) I_MG(M%IBAR2) = M%IBAR
 
-   M%JBAR2 = 1
-   DO J=1,100
-      IF (J_MG(J)>-1) M%JBAR2 = M%JBAR2 + 1
-   ENDDO
-   J_MG(0) = 0
-   J_MG(M%JBAR2) = M%JBAR
+            M%JBAR2 = 1
+            DO J=1,100
+               IF (J_MG(J)>-1) M%JBAR2 = M%JBAR2 + 1
+            ENDDO
+            IF (J_MG(1)>-1) J_MG(0) = 0
+            IF (J_MG(1)>-1) J_MG(M%JBAR2) = M%JBAR
+         
+            M%KBAR2 = 1
+            DO K=1,100
+               IF (K_MG(K)>-1) M%KBAR2 = M%KBAR2 + 1
+            ENDDO
+             IF (K_MG(1)>-1) K_MG(0) = 0
+             IF (K_MG(1)>-1) K_MG(M%KBAR2) = M%KBAR
 
-   M%KBAR2 = 1
-   DO K=1,100
-      IF (K_MG(K)>-1) M%KBAR2 = M%KBAR2 + 1
-   ENDDO
-   K_MG(0) = 0
-   K_MG(M%KBAR2) = M%KBAR
+            ALLOCATE(M%I_LO(M%IBAR2))
+            ALLOCATE(M%I_HI(M%IBAR2))
+            ALLOCATE(M%J_LO(M%JBAR2))
+            ALLOCATE(M%J_HI(M%JBAR2))
+            ALLOCATE(M%K_LO(M%KBAR2))
+            ALLOCATE(M%K_HI(M%KBAR2))
 
-   ALLOCATE(M%I_LO(M%IBAR2))
-   ALLOCATE(M%I_HI(M%IBAR2))
-   ALLOCATE(M%J_LO(M%JBAR2))
-   ALLOCATE(M%J_HI(M%JBAR2))
-   ALLOCATE(M%K_LO(M%KBAR2))
-   ALLOCATE(M%K_HI(M%KBAR2))
+            DO I=1,M%IBAR2
+               M%I_LO(I) = I_MG(I-1) + 1
+               M%I_HI(I) = I_MG(I)
+            ENDDO
 
-   DO I=1,M%IBAR2
-      M%I_LO(I) = I_MG(I-1) + 1
-      M%I_HI(I) = I_MG(I)
-   ENDDO
+            DO J=1,M%JBAR2
+               M%J_LO(J) = J_MG(J-1) + 1
+               M%J_HI(J) = J_MG(J)
+            ENDDO
 
-   DO J=1,M%JBAR2
-      M%J_LO(J) = J_MG(J-1) + 1
-      M%J_HI(J) = J_MG(J)
-   ENDDO
+            DO K=1,M%KBAR2
+               M%K_LO(K) = K_MG(K-1) + 1
+               M%K_HI(K) = K_MG(K)
+            ENDDO
 
-   DO K=1,M%KBAR2
-      M%K_LO(K) = K_MG(K-1) + 1
-      M%K_HI(K) = K_MG(K)
-   ENDDO
+            ! Process Physical Coordinates
 
-   ! Process Physical Coordinates
+            IF (XB1 > XB2) THEN
+               WRITE(MESSAGE,'(A,I2)') 'ERROR: XMIN > XMAX on MESH ', NM
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            IF (XB3 > XB4) THEN
+               WRITE(MESSAGE,'(A,I2)') 'ERROR: YMIN > YMAX on MESH ', NM
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            IF (XB5 > XB6) THEN
+               WRITE(MESSAGE,'(A,I2)') 'ERROR: ZMIN > ZMAX on MESH ', NM
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
 
-   IF (XB(1) > XB(2)) THEN
-      WRITE(MESSAGE,'(A,I2)') 'ERROR: XMIN > XMAX on MESH ', NM
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-   IF (XB(3) > XB(4)) THEN
-      WRITE(MESSAGE,'(A,I2)') 'ERROR: YMIN > YMAX on MESH ', NM
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-   IF (XB(5) > XB(6)) THEN
-      WRITE(MESSAGE,'(A,I2)') 'ERROR: ZMIN > ZMAX on MESH ', NM
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-   M%XS    = XB(1)
-   M%XF    = XB(2)
-   M%YS    = XB(3)
-   M%YF    = XB(4)
-   M%ZS    = XB(5)
-   M%ZF    = XB(6)
-   M%DXI   = (M%XF-M%XS)/REAL(M%IBAR,EB)
-   M%DETA  = (M%YF-M%YS)/REAL(M%JBAR,EB)
-   M%DZETA = (M%ZF-M%ZS)/REAL(M%KBAR,EB)
-   M%RDXI  = 1._EB/M%DXI
-   M%RDETA = 1._EB/M%DETA
-   M%RDZETA= 1._EB/M%DZETA
-   M%IBM1  = M%IBAR-1
-   M%JBM1  = M%JBAR-1
-   M%KBM1  = M%KBAR-1
-   M%IBP1  = M%IBAR+1
-   M%JBP1  = M%JBAR+1
-   M%KBP1  = M%KBAR+1
+            M%XS    = XB1
+            M%XF    = XB2
+            M%YS    = XB3
+            M%YF    = XB4
+            M%ZS    = XB5
+            M%ZF    = XB6
+            M%DXI   = (M%XF-M%XS)/REAL(M%IBAR,EB)
+            M%DETA  = (M%YF-M%YS)/REAL(M%JBAR,EB)
+            M%DZETA = (M%ZF-M%ZS)/REAL(M%KBAR,EB)
+            M%RDXI  = 1._EB/M%DXI
+            M%RDETA = 1._EB/M%DETA
+            M%RDZETA= 1._EB/M%DZETA
+            M%IBM1  = M%IBAR-1
+            M%JBM1  = M%JBAR-1
+            M%KBM1  = M%KBAR-1
+            M%IBP1  = M%IBAR+1
+            M%JBP1  = M%JBAR+1
+            M%KBP1  = M%KBAR+1
+
+         ENDDO I_MULT_LOOP
+      ENDDO J_MULT_LOOP
+   ENDDO K_MULT_LOOP
+
 ENDDO MESH_LOOP
 REWIND(LU_INPUT)
  
