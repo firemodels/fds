@@ -1,6 +1,6 @@
 &HEAD CHID='MCFRS_Tower_open_6pal', TITLE='MCFRS 2 level ranch house, SVN $Revision$'  /
 
-&TIME T_END=0.0 /
+&TIME T_END=1200.0 /
 
 &DUMP NFRAMES=6000, DT_DEVC=5.0, DT_HRR=5.0 /
 
