@@ -2104,7 +2104,7 @@ or as a function of the first spatial coordinate, $x$. For example, on board the
 cause temporal changes in the normally zero level of gravity, an effect known as ``g-jitter.'' More commonly, in tunnel
 fire simulations, it is sometimes convenient to change the direction of gravity to mimic the change in slope. The slope
 of the tunnel might change as you travel through it; thus, you can tell FDS where to redirect gravity.
-For either a spatially or temporally varying direction and/or magnitude of gravity, do the following. First, on the 
+For either a spatially or temporally varying direction and/or magnitude of gravity, do the following. First, on the
 {\ct MISC} line, set the three components of gravity, {\ct GVEC}, to some ``base'' state like {\ct GVEC=1.,1.,1.},
 which gives you the flexibility to vary all three components. Next, designate ``ramps'' for the individual components, {\ct RAMP\_GX},
 {\ct RAMP\_GY}, and {\ct RAMP\_GZ}, all of which are specified on the {\ct MISC} line. There is more discussion of
@@ -2126,14 +2126,14 @@ which gives you the flexibility to vary all three components. Next, designate ``
 \end{verbatim} \normalsize
 
 \noindent
-Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the 
-$x$ coordinate. Note also that {\ct F} is just a multiplier of the ``base'' gravity vector components, given by {\ct GVEC}. This is why 
-using the number 1 is convenient -- it allows you to specify the gravity components on the {\ct RAMP} lines directly.  
+Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the
+$x$ coordinate. Note also that {\ct F} is just a multiplier of the ``base'' gravity vector components, given by {\ct GVEC}. This is why
+using the number 1 is convenient -- it allows you to specify the gravity components on the {\ct RAMP} lines directly.
 The effect of these lines is to model the first 50~m of a tunnel without a slope, but the second 50~m with a 5~\% slope
 upwards. Note that the angle from vertical of the gravity vector due to a 5~\% slope is $\tan^{-1} 0.05=2.86^\circ$ and that
 0.49 and 9.80 are equal to the magnitude of the gravity vector, 9.81~m/s$^2$, multiplied by the sine and cosine of 2.86$^\circ$,
 respectively. To check your math, the sum of the squares of the gravity components ought to equal 9.81.
-Notice in this case that the $y$ direction has been left out because there is no $y$ variation in the gravity vector. 
+Notice in this case that the $y$ direction has been left out because there is no $y$ variation in the gravity vector.
 
 To vary the direction and/or magnitude of gravity in time, follow the same procedure but replace the {\ct X} in the {\ct RAMP}
 lines with a {\ct T}.
@@ -6323,14 +6323,16 @@ and only makes sense for calculations involving the mixture fraction model.
 \item[{\ct MAXIMUM\_DROPLETS}] Maximum number of Lagrangian particles that can be included on any
 mesh at any given time. (Default 500000)
 \item[{\ct SMOKE3D}] If {\ct .FALSE.}, do not produce an animation of the smoke and fire. It is {\ct .TRUE.} by default.
-\item[{\ct FLUSH\_FILE\_BUFFERS}] By default, every 10 time steps FDS
-purges the output file buffers and forces the data to be written out
-into the respective output files. It has been noticed on Windows
-machines that ocassionally a runtime error occurs because of file
+\item[{\ct FLUSH\_FILE\_BUFFERS}] FDS
+purges the output file buffers periodically and forces the data to be written out
+into the respective output files. It does this to make it easier to view the case in Smokeview while it is running.
+It has been noticed on Windows
+machines that occasionally a runtime error occurs because of file
 access problems related to the buffer flushing. If this happens, set
 this parameter to {\ct .FALSE.}, but be aware that it may not be
 possible to look at output in Smokeview until after the calculation is
-finished.
+finished. You may also set {\ct DT\_FLUSH} to control the frequency of the file flushing. Its default value is the duration of
+the simulation divided by {\ct NFRAMES}.
 \item[{\ct STATUS\_FILES}] If {\ct .TRUE.}, produces an output file
 {\bf CHID.notready} which is deleted, if the simulation is completed
 successfully. This file can be used as an error indicator. It is {\ct
@@ -7647,6 +7649,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 %{\ct DEBUG}                     & Logical      & General purpose diagnostic flag   &           & {\ct .FALSE.}                      \\ \hline
 {\ct DT\_CTRL}                  & Real         & Control status dump interval      &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
 {\ct DT\_DEVC}                  & Real         & Device output dump interval       &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_FLUSH}                 & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
 {\ct DT\_HRR}                   & Real         & Heat release dump interval        &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
 {\ct DT\_ISOF}                  & Real         & Iso-surface dump interval         &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
 {\ct DT\_MASS}                  & Real         & Mass diagnostic dump interval     &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
@@ -7655,7 +7658,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct DT\_PROF}                  & Real         & Profile dump interval             &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
 {\ct DT\_RESTART}               & Real         & Restart core dump interval        &  s        & 1000000.                          \\ \hline
 {\ct DT\_SLCF}                  & Real         & Slice dump interval               &  s        & $\Delta t${\ct /NFRAMES}    \\ \hline
-{\ct FLUSH\_FILE\_BUFFERS}      & Logical      & Periodically empty file buffers   &           & {\ct .TRUE.}                      \\ \hline
+{\ct FLUSH\_FILE\_BUFFERS}      & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .TRUE.}                      \\ \hline
 {\ct MASS\_FILE}                & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                     \\ \hline
 {\ct MAXIMUM\_DROPLETS}         & Integer      & Max particles per mesh            &           & 500000                            \\ \hline
 {\ct NFRAMES}                   & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
