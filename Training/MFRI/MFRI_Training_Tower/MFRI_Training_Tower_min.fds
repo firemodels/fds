@@ -1,4 +1,4 @@
-&HEAD CHID='MFRI_Training_Tower_min', TITLE='MFRI Fire Building (min HRR) SVN $Revision: 2617 $ '/
+&HEAD CHID='MFRI_Training_Tower_min', TITLE='MFRI Fire Building (min HRR) SVN $Revision$ '/
 # Based on HRR values from test 1
 
 &MESH IJK=80,60,30, XB=-1.0, 7.0, -1.0, 5.0,0.0,3.00/
