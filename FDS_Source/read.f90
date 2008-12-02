@@ -83,6 +83,7 @@ CALL READ_HEAD
 CALL READ_MESH
 CALL READ_TRAN
 CALL READ_TIME
+CALL READ_MULT
 CALL READ_MISC
 CALL READ_RADI
 CALL READ_PROP
@@ -917,10 +918,75 @@ ENDDO MESH_LOOP
  
 END SUBROUTINE READ_TIME
  
+
  
+SUBROUTINE READ_MULT
+
+REAL(EB) :: DX,DY,DZ
+CHARACTER(30) :: ID
+INTEGER :: N,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER
+TYPE(MULTIPLIER_TYPE), POINTER :: MR
+NAMELIST /MULT/ FYI,ID,DX,DY,DZ,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER
+
+N_MULT = 0
+REWIND(LU_INPUT)
+COUNT_MULT_LOOP: DO
+   CALL CHECKREAD('MULT',LU_INPUT,IOS)
+   IF (IOS==1) EXIT COUNT_MULT_LOOP
+   READ(LU_INPUT,NML=MULT,END=9,ERR=10,IOSTAT=IOS)
+   N_MULT = N_MULT + 1
+   10 IF (IOS>0) THEN
+      WRITE(MESSAGE,'(A,I2)') 'ERROR: Problem with MULT no.',N_MULT
+      CALL SHUTDOWN(MESSAGE)
+      ENDIF
+ENDDO COUNT_MULT_LOOP
+9 REWIND(LU_INPUT)
+
+ALLOCATE(MULTIPLIER(0:N_MULT),STAT=IZERO)
+CALL ChkMemErr('READ','MULTIPLIER',IZERO)
+
+READ_MULT_LOOP: DO N=0,N_MULT
+
+   ID      = 'null'
+   IF (N==0) ID = 'MULT DEFAULT'
+   DX      = 0._EB
+   DY      = 0._EB
+   DZ      = 0._EB
+   I_LOWER = 0
+   I_UPPER = 0
+   J_LOWER = 0
+   J_UPPER = 0
+   K_LOWER = 0
+   K_UPPER = 0
+
+   IF (N>0) THEN
+      CALL CHECKREAD('MULT',LU_INPUT,IOS)
+      IF (IOS==1) EXIT READ_MULT_LOOP
+      READ(LU_INPUT,MULT)
+   ENDIF
+
+   MR => MULTIPLIER(N)
+   MR%ID      = ID
+   MR%DX      = DX
+   MR%DY      = DY
+   MR%DZ      = DZ
+   MR%I_LOWER = I_LOWER
+   MR%I_UPPER = I_UPPER
+   MR%J_LOWER = J_LOWER
+   MR%J_UPPER = J_UPPER
+   MR%K_LOWER = K_LOWER
+   MR%K_UPPER = K_UPPER
+
+ENDDO READ_MULT_LOOP
+REWIND(LU_INPUT)
+
+END SUBROUTINE READ_MULT
+
+
+
 SUBROUTINE READ_MISC
+
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
- 
 REAL(EB) :: X_H2O_TMPA,X_H2O_40_C,C_HORIZONTAL,C_VERTICAL,MW,VISCOSITY,CONDUCTIVITY
 CHARACTER(30) :: RAMP_GX,RAMP_GY,RAMP_GZ
 INTEGER :: NCG,N,NO,IC,JC,KC,NM,COARSE_I(10000),COARSE_MESH(10000),COARSE_J(10000),COARSE_K(10000)
@@ -4638,7 +4704,6 @@ COUNT_TABLE_POINTS: DO N=1,N_TABLE
    ENDIF
 ENDDO COUNT_TABLE_POINTS
 
-! Read the TABLE functions
 READ_TABL_LOOP: DO N=1,N_TABLE
    TA => TABLES(N)
    ALLOCATE(TA%TABLE_DATA(TA%NUMBER_ROWS,TA%NUMBER_COLUMNS),STAT=IZERO)
@@ -4657,21 +4722,25 @@ ENDDO READ_TABL_LOOP
 
 END SUBROUTINE READ_TABL
  
+
+
 SUBROUTINE READ_OBST
+
 USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
 USE DEVICE_VARIABLES, ONLY : DEVICE, N_DEVC
 USE CONTROL_VARIABLES, ONLY : CONTROL, N_CTRL 
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2,OBT
+TYPE(MULTIPLIER_TYPE), POINTER :: MR
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: NM,NOM,N_OBST_O,NNN,IC,N,NN,NNNN,N_NEW_OBST,RGB(3)
-CHARACTER(30) :: DEVC_ID,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID
+INTEGER :: NM,NOM,N_OBST_O,NNN,IC,N,NN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK
+CHARACTER(30) :: DEVC_ID,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
-REAL(EB) :: TRANSPARENCY,DUMMY
+REAL(EB) :: TRANSPARENCY,DUMMY,XB1,XB2,XB3,XB4,XB5,XB6
 LOGICAL :: SAWTOOTH,EMBEDDED,THICKEN,PERMIT_HOLE,ALLOW_VENT,EVACUATION, REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE
 NAMELIST /OBST/ XB,SURF_ID,SURF_IDS,SURF_ID6,FYI,BNDF_FACE,BNDF_OBST, &
                 SAWTOOTH,RGB,TRANSPARENCY,TEXTURE_ORIGIN,THICKEN, OUTLINE,DEVC_ID,CTRL_ID,COLOR, &
-                PERMIT_HOLE,ALLOW_VENT,EVACUATION,MESH_ID,REMOVABLE
+                PERMIT_HOLE,ALLOW_VENT,EVACUATION,MESH_ID,REMOVABLE,MULT_ID
  
 MESH_LOOP: DO NM=1,NMESHES
 
@@ -4687,8 +4756,16 @@ MESH_LOOP: DO NM=1,NMESHES
    COUNT_OBST_LOOP: DO
       CALL CHECKREAD('OBST',LU_INPUT,IOS)
       IF (IOS==1) EXIT COUNT_OBST_LOOP
+      MULT_ID = 'null'
       READ(LU_INPUT,NML=OBST,END=1,ERR=2,IOSTAT=IOS)
-      N_OBST = N_OBST + 1
+      N_OBST_NEW = 1
+      IF (MULT_ID/='null') THEN
+         DO N=1,N_MULT
+            MR => MULTIPLIER(N)
+            IF (MULT_ID==MR%ID) N_OBST_NEW = (MR%I_UPPER-MR%I_LOWER+1)*(MR%J_UPPER-MR%J_LOWER+1)*(MR%K_UPPER-MR%K_LOWER+1)
+         ENDDO
+      ENDIF
+      N_OBST = N_OBST + N_OBST_NEW
       2 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I5)')  'ERROR: Problem with OBSTruction number',N_OBST+1
          CALL SHUTDOWN(MESSAGE)
@@ -4706,7 +4783,8 @@ MESH_LOOP: DO NM=1,NMESHES
    N_OBST_O = N_OBST
  
    READ_OBST_LOOP: DO NN=1,N_OBST_O
-      N        = N + 1
+
+      MULT_ID  = 'null'
       SURF_ID  = 'null'
       SURF_IDS = 'null'
       SURF_ID6 = 'null'
@@ -4720,35 +4798,22 @@ MESH_LOOP: DO NM=1,NMESHES
       THICKEN     = THICKEN_OBSTRUCTIONS
       OUTLINE     = .FALSE.
       TEXTURE_ORIGIN = -999._EB
-      DEVC_ID  = 'null'
-      CTRL_ID = 'null'
+      DEVC_ID     = 'null'
+      CTRL_ID     = 'null'
       PERMIT_HOLE = .TRUE.
       ALLOW_VENT  = .TRUE.
       REMOVABLE   = .TRUE.
       IF (.NOT.EVACUATION_ONLY(NM)) EVACUATION = .FALSE.
       IF (     EVACUATION_ONLY(NM)) EVACUATION = .TRUE.
-      ! IF (     EVACUATION_ONLY(NM)) THICKEN    = .TRUE. ! Evac 2.1.0
  
+      ! Read the OBST line
+
       CALL CHECKREAD('OBST',LU_INPUT,IOS)
       IF (IOS==1) EXIT READ_OBST_LOOP
       READ(LU_INPUT,OBST,END=35)
- 
-      ! Evacuation criteria
- 
-      IF (MESH_ID/=MESH_NAME(NM) .AND. MESH_ID/='null') THEN
-            N = N-1
-            N_OBST = N_OBST-1
-            CYCLE READ_OBST_LOOP
-      ENDIF
- 
-      IF ((.NOT.EVACUATION .AND. EVACUATION_ONLY(NM)) .OR. (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM))) THEN
-            N = N-1
-            N_OBST = N_OBST-1
-            CYCLE READ_OBST_LOOP
-      ENDIF
- 
-      ! Reorder coords if necessary
- 
+
+      ! Reorder OBST coordinates if necessary
+
       DO I=1,5,2
          IF (XB(I)>XB(I+1)) THEN
             DUMMY   = XB(I)
@@ -4757,248 +4822,288 @@ MESH_LOOP: DO NM=1,NMESHES
          ENDIF
       ENDDO
 
-      ! Include obstructions within half a grid cell of the computational boundary
+      ! Loop over all possible multiples of the OBST
 
-      IF (XB(2)>=XS-0.5_EB*DX(0)    .AND. XB(2)<XS) THEN
-         XB(1) = XS
-         XB(2) = XS
-      ENDIF
-      IF (XB(1)< XF+0.5_EB*DX(IBP1) .AND. XB(1)>XF) THEN
-         XB(1) = XF
-         XB(2) = XF
-      ENDIF
-      IF (XB(4)>=YS-0.5_EB*DY(0)    .AND. XB(4)<YS) THEN
-         XB(3) = YS
-         XB(4) = YS
-      ENDIF
-      IF (XB(3)< YF+0.5_EB*DY(JBP1) .AND. XB(3)>YF) THEN
-         XB(3) = YF
-         XB(4) = YF
-      ENDIF
-      IF (XB(6)>=ZS-0.5_EB*DZ(0)    .AND. XB(6)<ZS .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-         XB(5) = ZS
-         XB(6) = ZS
-      ENDIF
-      IF (XB(5)< ZF+0.5_EB*DZ(KBP1) .AND. XB(5)>ZF .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-         XB(5) = ZF
-         XB(6) = ZF
-      ENDIF
- 
-      ! Throw out obstructions that are not within computational domain
-
-      XB(1) = MAX(XB(1),XS)
-      XB(2) = MIN(XB(2),XF)
-      XB(3) = MAX(XB(3),YS)
-      XB(4) = MIN(XB(4),YF)
-      XB(5) = MAX(XB(5),ZS)
-      XB(6) = MIN(XB(6),ZF)
-      IF (XB(1)>XF .OR. XB(2)<XS .OR. XB(3)>YF .OR. XB(4)<YS .OR. XB(5)>ZF .OR. XB(6)<ZS) THEN
-         N = N-1
-         N_OBST = N_OBST-1
-         CYCLE READ_OBST_LOOP
-      ENDIF
- 
-      ! Begin processing of OBSTruction
- 
-      OB=>OBSTRUCTION(N)
- 
-      OB%X1 = XB(1)
-      OB%X2 = XB(2)
-      OB%Y1 = XB(3)
-      OB%Y2 = XB(4)
-      OB%Z1 = XB(5)
-      OB%Z2 = XB(6)
-      OB%I1 = NINT( GINV(XB(1)-XS,1,NM)*RDXI   ) 
-      OB%I2 = NINT( GINV(XB(2)-XS,1,NM)*RDXI   )
-      OB%J1 = NINT( GINV(XB(3)-YS,2,NM)*RDETA  ) 
-      OB%J2 = NINT( GINV(XB(4)-YS,2,NM)*RDETA  )
-      OB%K1 = NINT( GINV(XB(5)-ZS,3,NM)*RDZETA ) 
-      OB%K2 = NINT( GINV(XB(6)-ZS,3,NM)*RDZETA )
- 
-      ! If desired, thicken small obstructions
- 
-      IF (THICKEN .AND. OB%I1==OB%I2) THEN
-         OB%I1 = GINV(.5_EB*(XB(1)+XB(2))-XS,1,NM)*RDXI
-         OB%I2 = MIN(OB%I1+1,IBAR)
-      ENDIF
-      IF (THICKEN .AND. OB%J1==OB%J2) THEN
-         OB%J1 = GINV(.5_EB*(XB(3)+XB(4))-YS,2,NM)*RDETA
-         OB%J2 = MIN(OB%J1+1,JBAR)
-      ENDIF
-      IF (THICKEN .AND. OB%K1==OB%K2) THEN
-         OB%K1 = GINV(.5_EB*(XB(5)+XB(6))-ZS,3,NM)*RDZETA
-         OB%K2 = MIN(OB%K1+1,KBAR)
-      ENDIF
- 
-      ! Throw out obstructions that are too small
- 
-      IF ((OB%I1==OB%I2 .AND. OB%J1==OB%J2) .OR. (OB%I1==OB%I2 .AND. OB%K1==OB%K2) .OR. (OB%J1==OB%J2 .AND. OB%K1==OB%K2)) THEN
-         N = N-1
-         N_OBST= N_OBST-1
-         CYCLE READ_OBST_LOOP
-      ENDIF
-
-      IF (OB%I1==OB%I2 .OR. OB%J1==OB%J2 .OR. OB%K1==OB%K2) OB%THIN = .TRUE.
- 
-      ! Check to see if obstacle is completely embedded in another
- 
-      EMBEDDED = .FALSE.
-      EMBED_LOOP: DO NNN=1,N-1
-         OB2=>OBSTRUCTION(NNN)
-         IF (OB%I1>OB2%I1 .AND. OB%I2<OB2%I2 .AND. &
-             OB%J1>OB2%J1 .AND. OB%J2<OB2%J2 .AND. &
-             OB%K1>OB2%K1 .AND. OB%K2<OB2%K2) THEN
-            EMBEDDED = .TRUE.
-            EXIT EMBED_LOOP
-         ENDIF
-      ENDDO EMBED_LOOP
- 
-      IF (EMBEDDED  .AND. DEVC_ID=='null' .AND.  REMOVABLE .AND. CTRL_ID=='null' ) THEN
-            N = N-1
-            N_OBST= N_OBST-1
-            CYCLE READ_OBST_LOOP
-      ENDIF
-
-      ! Check if the SURF IDs exist
-
-      IF (EVACUATION_ONLY(NM)) SURF_ID=EVAC_SURF_DEFAULT
-
-      IF (SURF_ID/='null') CALL CHECK_SURF_NAME(SURF_ID,EX)
-      IF (.NOT.EX) THEN
-         WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID),' does not exist'
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
-
-      DO NNNN=1,3
-         IF (EVACUATION_ONLY(NM)) SURF_IDS(NNNN)=EVAC_SURF_DEFAULT
-         IF (SURF_IDS(NNNN)/='null') CALL CHECK_SURF_NAME(SURF_IDS(NNNN),EX)
-         IF (.NOT.EX) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_IDS(NNNN)),' does not exist'
-            CALL SHUTDOWN(MESSAGE)
-         ENDIF
+      MR => MULTIPLIER(0)
+      DO NNN=1,N_MULT
+         IF (MULT_ID==MULTIPLIER(NNN)%ID) MR => MULTIPLIER(NNN)
       ENDDO
 
-      DO NNNN=1,6
-         IF (EVACUATION_ONLY(NM)) SURF_ID6(NNNN)=EVAC_SURF_DEFAULT
-         IF (SURF_ID6(NNNN)/='null') CALL CHECK_SURF_NAME(SURF_ID6(NNNN),EX)
-         IF (.NOT.EX) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID6(NNNN)),' does not exist'
-            CALL SHUTDOWN(MESSAGE)
-         ENDIF
-      ENDDO
+      K_MULT_LOOP: DO KK=MR%K_LOWER,MR%K_UPPER
+         J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
+            I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
  
-      ! Save boundary condition info for obstacles
- 
-      OB%IBC(:) = DEFAULT_SURF_INDEX
- 
-      DO NNN=0,N_SURF
-         IF (SURF_ID    ==SURF_NAME(NNN)) OB%IBC(:)    = NNN
-         IF (SURF_IDS(1)==SURF_NAME(NNN)) OB%IBC(3)    = NNN
-         IF (SURF_IDS(2)==SURF_NAME(NNN)) OB%IBC(-2:2) = NNN
-         IF (SURF_IDS(3)==SURF_NAME(NNN)) OB%IBC(-3)   = NNN
-         IF (SURF_ID6(1)==SURF_NAME(NNN)) OB%IBC(-1)   = NNN
-         IF (SURF_ID6(2)==SURF_NAME(NNN)) OB%IBC( 1)   = NNN
-         IF (SURF_ID6(3)==SURF_NAME(NNN)) OB%IBC(-2)   = NNN
-         IF (SURF_ID6(4)==SURF_NAME(NNN)) OB%IBC( 2)   = NNN
-         IF (SURF_ID6(5)==SURF_NAME(NNN)) OB%IBC(-3)   = NNN
-         IF (SURF_ID6(6)==SURF_NAME(NNN)) OB%IBC( 3)   = NNN
-      ENDDO
+               XB1 = XB(1) + II*MR%DX
+               XB2 = XB(2) + II*MR%DX
+               XB3 = XB(3) + JJ*MR%DY
+               XB4 = XB(4) + JJ*MR%DY
+               XB5 = XB(5) + KK*MR%DZ
+               XB6 = XB(6) + KK*MR%DZ
 
-      ! Determine if the OBST is CONSUMABLE and check if POROUS inappropriately applied
+               ! Increase the OBST counter
 
-      FACE_LOOP: DO NNN=-3,3
-         IF (NNN==0) CYCLE FACE_LOOP
-         IF (SURFACE(OB%IBC(NNN))%BURN_AWAY) THEN
-            OB%CONSUMABLE = .TRUE.
-            IF (.NOT.SAWTOOTH) THEN
-               WRITE(MESSAGE,'(A,I5,A)')  'ERROR: OBST number',N,' cannot have a BURN_AWAY SURF_ID and SAWTOOTH=.FALSE.' 
-               CALL SHUTDOWN(MESSAGE)
-            ENDIF
-         ENDIF
-         IF (SURFACE(OB%IBC(NNN))%POROUS .AND. .NOT.OB%THIN) THEN
-            WRITE(MESSAGE,'(A,I5,A)')  'ERROR: OBST number',N,' must be zero cells thick if it is to be POROUS'
-            CALL SHUTDOWN(MESSAGE)
-         ENDIF
-      ENDDO FACE_LOOP
+               N = N + 1
  
-      ! Creation and removal logic
+               ! Evacuation criteria
  
-      OB%DEVC_ID = DEVC_ID
-      OB%CTRL_ID = CTRL_ID
-      OB%HIDDEN = .FALSE.
+               IF (MESH_ID/=MESH_NAME(NM) .AND. MESH_ID/='null') THEN
+                     N = N-1
+                     N_OBST = N_OBST-1
+                     CYCLE I_MULT_LOOP
+               ENDIF
+ 
+               IF ((.NOT.EVACUATION .AND. EVACUATION_ONLY(NM)) .OR. (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM))) THEN
+                     N = N-1
+                     N_OBST = N_OBST-1
+                     CYCLE I_MULT_LOOP
+               ENDIF
+ 
+               ! Include obstructions within half a grid cell of the computational boundary
 
-      CALL SEARCH_CONTROLLER('OBST',CTRL_ID,DEVC_ID,OB%DEVC_INDEX,OB%CTRL_INDEX,N)
-      IF (DEVC_ID /='null') THEN
-         IF (.NOT.DEVICE(OB%DEVC_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-         OB%REMOVABLE = .TRUE.
-      ENDIF
-      IF (CTRL_ID /='null') THEN
-         IF (.NOT.CONTROL(OB%CTRL_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-         OB%REMOVABLE = .TRUE.
-      ENDIF
+               IF (XB2>=XS-0.5_EB*DX(0)    .AND. XB2<XS) THEN
+                  XB1 = XS
+                  XB2 = XS
+               ENDIF
+               IF (XB1< XF+0.5_EB*DX(IBP1) .AND. XB1>XF) THEN
+                  XB1 = XF
+                  XB2 = XF
+               ENDIF
+               IF (XB4>=YS-0.5_EB*DY(0)    .AND. XB4<YS) THEN
+                  XB3 = YS
+                  XB4 = YS
+               ENDIF
+               IF (XB3< YF+0.5_EB*DY(JBP1) .AND. XB3>YF) THEN
+                  XB3 = YF
+                  XB4 = YF
+               ENDIF
+               IF (XB6>=ZS-0.5_EB*DZ(0)    .AND. XB6<ZS .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+                  XB5 = ZS
+                  XB6 = ZS
+               ENDIF
+               IF (XB5< ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+                  XB5 = ZF
+                  XB6 = ZF
+               ENDIF
+ 
+               ! Throw out obstructions that are not within computational domain
 
-      IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.      
+               XB1 = MAX(XB1,XS)
+               XB2 = MIN(XB2,XF)
+               XB3 = MAX(XB3,YS)
+               XB4 = MIN(XB4,YF)
+               XB5 = MAX(XB5,ZS)
+               XB6 = MIN(XB6,ZF)
+               IF (XB1>XF .OR. XB2<XS .OR. XB3>YF .OR. XB4<YS .OR. XB5>ZF .OR. XB6<ZS) THEN
+                  N = N-1
+                  N_OBST = N_OBST-1
+                  CYCLE I_MULT_LOOP
+               ENDIF
+ 
+               ! Begin processing of OBSTruction
+ 
+               OB=>OBSTRUCTION(N)
+ 
+               OB%X1 = XB1
+               OB%X2 = XB2
+               OB%Y1 = XB3
+               OB%Y2 = XB4
+               OB%Z1 = XB5
+               OB%Z2 = XB6
+               OB%I1 = NINT( GINV(XB1-XS,1,NM)*RDXI   ) 
+               OB%I2 = NINT( GINV(XB2-XS,1,NM)*RDXI   )
+               OB%J1 = NINT( GINV(XB3-YS,2,NM)*RDETA  ) 
+               OB%J2 = NINT( GINV(XB4-YS,2,NM)*RDETA  )
+               OB%K1 = NINT( GINV(XB5-ZS,3,NM)*RDZETA ) 
+               OB%K2 = NINT( GINV(XB6-ZS,3,NM)*RDZETA )
+ 
+               ! If desired, thicken small obstructions
+ 
+               IF (THICKEN .AND. OB%I1==OB%I2) THEN
+                  OB%I1 = GINV(.5_EB*(XB1+XB2)-XS,1,NM)*RDXI
+                  OB%I2 = MIN(OB%I1+1,IBAR)
+               ENDIF
+               IF (THICKEN .AND. OB%J1==OB%J2) THEN
+                  OB%J1 = GINV(.5_EB*(XB3+XB4)-YS,2,NM)*RDETA
+                  OB%J2 = MIN(OB%J1+1,JBAR)
+               ENDIF
+               IF (THICKEN .AND. OB%K1==OB%K2) THEN
+                  OB%K1 = GINV(.5_EB*(XB5+XB6)-ZS,3,NM)*RDZETA
+                  OB%K2 = MIN(OB%K1+1,KBAR)
+               ENDIF
+ 
+               ! Throw out obstructions that are too small
+ 
+               IF ((OB%I1==OB%I2.AND.OB%J1==OB%J2) .OR. (OB%I1==OB%I2.AND.OB%K1==OB%K2) .OR. (OB%J1==OB%J2.AND.OB%K1==OB%K2)) THEN
+                  N = N-1
+                  N_OBST= N_OBST-1
+                  CYCLE I_MULT_LOOP
+               ENDIF
 
-      ! Choose obstruction color index
+               IF (OB%I1==OB%I2 .OR. OB%J1==OB%J2 .OR. OB%K1==OB%K2) OB%THIN = .TRUE.
+ 
+               ! Check to see if obstacle is completely embedded in another
+ 
+               EMBEDDED = .FALSE.
+               EMBED_LOOP: DO NNN=1,N-1
+                  OB2=>OBSTRUCTION(NNN)
+                  IF (OB%I1>OB2%I1 .AND. OB%I2<OB2%I2 .AND. &
+                      OB%J1>OB2%J1 .AND. OB%J2<OB2%J2 .AND. &
+                      OB%K1>OB2%K1 .AND. OB%K2<OB2%K2) THEN
+                     EMBEDDED = .TRUE.
+                     EXIT EMBED_LOOP
+                  ENDIF
+               ENDDO EMBED_LOOP
+ 
+               IF (EMBEDDED  .AND. DEVC_ID=='null' .AND.  REMOVABLE .AND. CTRL_ID=='null' ) THEN
+                     N = N-1
+                     N_OBST= N_OBST-1
+                     CYCLE I_MULT_LOOP
+               ENDIF
 
-      SELECT CASE (COLOR)
-         CASE ('INVISIBLE')
-            OB%COLOR_INDICATOR = -3
-            RGB(1) = 255
-            RGB(2) = 204
-            RGB(3) = 102
-            TRANSPARENCY = 0._EB
-         CASE ('null')
-            IF (ANY (RGB<0)) THEN
-               OB%COLOR_INDICATOR = -1
-            ELSE
-               OB%COLOR_INDICATOR = -3
-            ENDIF
-         CASE DEFAULT
-            CALL COLOR2RGB(RGB,COLOR)
-            OB%COLOR_INDICATOR = -3
-      END SELECT
-      OB%RGB  = RGB
-      OB%TRANSPARENCY = TRANSPARENCY
+               ! Check if the SURF IDs exist
+         
+               IF (EVACUATION_ONLY(NM)) SURF_ID=EVAC_SURF_DEFAULT
+         
+               IF (SURF_ID/='null') CALL CHECK_SURF_NAME(SURF_ID,EX)
+               IF (.NOT.EX) THEN
+                  WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID),' does not exist'
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
+         
+               DO NNNN=1,3
+                  IF (EVACUATION_ONLY(NM)) SURF_IDS(NNNN)=EVAC_SURF_DEFAULT
+                  IF (SURF_IDS(NNNN)/='null') CALL CHECK_SURF_NAME(SURF_IDS(NNNN),EX)
+                  IF (.NOT.EX) THEN
+                     WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_IDS(NNNN)),' does not exist'
+                     CALL SHUTDOWN(MESSAGE)
+                  ENDIF
+               ENDDO
 
-      ! Miscellaneous assignments
+               DO NNNN=1,6
+                  IF (EVACUATION_ONLY(NM)) SURF_ID6(NNNN)=EVAC_SURF_DEFAULT
+                  IF (SURF_ID6(NNNN)/='null') CALL CHECK_SURF_NAME(SURF_ID6(NNNN),EX)
+                  IF (.NOT.EX) THEN
+                     WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID6(NNNN)),' does not exist'
+                     CALL SHUTDOWN(MESSAGE)
+                  ENDIF
+               ENDDO
  
-      OB%TEXTURE(:) = TEXTURE_ORIGIN(:)  ! Origin of texture map
-      OB%ORDINAL = NN  ! Order of OBST in original input file
-      OB%PERMIT_HOLE = PERMIT_HOLE
-      OB%ALLOW_VENT  = ALLOW_VENT
+               ! Save boundary condition info for obstacles
  
-      ! Make obstruction invisible if it's within a finer mesh
+               OB%IBC(:) = DEFAULT_SURF_INDEX
+          
+               DO NNN=0,N_SURF
+                  IF (SURF_ID    ==SURF_NAME(NNN)) OB%IBC(:)    = NNN
+                  IF (SURF_IDS(1)==SURF_NAME(NNN)) OB%IBC(3)    = NNN
+                  IF (SURF_IDS(2)==SURF_NAME(NNN)) OB%IBC(-2:2) = NNN
+                  IF (SURF_IDS(3)==SURF_NAME(NNN)) OB%IBC(-3)   = NNN
+                  IF (SURF_ID6(1)==SURF_NAME(NNN)) OB%IBC(-1)   = NNN
+                  IF (SURF_ID6(2)==SURF_NAME(NNN)) OB%IBC( 1)   = NNN
+                  IF (SURF_ID6(3)==SURF_NAME(NNN)) OB%IBC(-2)   = NNN
+                  IF (SURF_ID6(4)==SURF_NAME(NNN)) OB%IBC( 2)   = NNN
+                  IF (SURF_ID6(5)==SURF_NAME(NNN)) OB%IBC(-3)   = NNN
+                  IF (SURF_ID6(6)==SURF_NAME(NNN)) OB%IBC( 3)   = NNN
+               ENDDO
+         
+               ! Determine if the OBST is CONSUMABLE and check if POROUS inappropriately applied
+         
+               FACE_LOOP: DO NNN=-3,3
+                  IF (NNN==0) CYCLE FACE_LOOP
+                  IF (SURFACE(OB%IBC(NNN))%BURN_AWAY) THEN
+                     OB%CONSUMABLE = .TRUE.
+                     IF (.NOT.SAWTOOTH) THEN
+                        WRITE(MESSAGE,'(A,I5,A)')  'ERROR: OBST number',N,' cannot have a BURN_AWAY SURF_ID and SAWTOOTH=.FALSE.' 
+                        CALL SHUTDOWN(MESSAGE)
+                     ENDIF
+                  ENDIF
+                  IF (SURFACE(OB%IBC(NNN))%POROUS .AND. .NOT.OB%THIN) THEN
+                     WRITE(MESSAGE,'(A,I5,A)')  'ERROR: OBST number',N,' must be zero cells thick if it is to be POROUS'
+                     CALL SHUTDOWN(MESSAGE)
+                  ENDIF
+               ENDDO FACE_LOOP
+          
+               ! Creation and removal logic
+          
+               OB%DEVC_ID = DEVC_ID
+               OB%CTRL_ID = CTRL_ID
+               OB%HIDDEN = .FALSE.
+         
+               CALL SEARCH_CONTROLLER('OBST',CTRL_ID,DEVC_ID,OB%DEVC_INDEX,OB%CTRL_INDEX,N)
+               IF (DEVC_ID /='null') THEN
+                  IF (.NOT.DEVICE(OB%DEVC_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
+                  OB%REMOVABLE = .TRUE.
+               ENDIF
+               IF (CTRL_ID /='null') THEN
+                  IF (.NOT.CONTROL(OB%CTRL_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
+                  OB%REMOVABLE = .TRUE.
+               ENDIF
+         
+               IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.      
+
+               ! Choose obstruction color index
+
+               SELECT CASE (COLOR)
+                  CASE ('INVISIBLE')
+                     OB%COLOR_INDICATOR = -3
+                     RGB(1) = 255
+                     RGB(2) = 204
+                     RGB(3) = 102
+                     TRANSPARENCY = 0._EB
+                  CASE ('null')
+                     IF (ANY (RGB<0)) THEN
+                        OB%COLOR_INDICATOR = -1
+                     ELSE
+                        OB%COLOR_INDICATOR = -3
+                     ENDIF
+                  CASE DEFAULT
+                     CALL COLOR2RGB(RGB,COLOR)
+                     OB%COLOR_INDICATOR = -3
+               END SELECT
+               OB%RGB  = RGB
+               OB%TRANSPARENCY = TRANSPARENCY
+
+               ! Miscellaneous assignments
  
-      DO NOM=1,NM-1
-         IF (XB(1)>MESHES(NOM)%XS .AND. XB(2)<MESHES(NOM)%XF .AND. &
-             XB(3)>MESHES(NOM)%YS .AND. XB(4)<MESHES(NOM)%YF .AND. &
-             XB(5)>MESHES(NOM)%ZS .AND. XB(6)<MESHES(NOM)%ZF) OB%COLOR_INDICATOR=-2
-      ENDDO
+               OB%TEXTURE(:) = TEXTURE_ORIGIN(:)  ! Origin of texture map
+               OB%ORDINAL = NN  ! Order of OBST in original input file
+               OB%PERMIT_HOLE = PERMIT_HOLE
+               OB%ALLOW_VENT  = ALLOW_VENT
  
-      ! Prevent drawing of boundary info if desired
+               ! Make obstruction invisible if it's within a finer mesh
  
-      IF (BNDF_DEFAULT) THEN
-         OB%SHOW_BNDF(:) = BNDF_FACE(:)
-         IF (.NOT.BNDF_OBST) OB%SHOW_BNDF(:) = .FALSE.
-      ELSE
-         OB%SHOW_BNDF(:) = BNDF_FACE(:)
-         IF (BNDF_OBST) OB%SHOW_BNDF(:) = .TRUE.
-      ENDIF
+               DO NOM=1,NM-1
+                  IF (XB1>MESHES(NOM)%XS .AND. XB2<MESHES(NOM)%XF .AND. &
+                      XB3>MESHES(NOM)%YS .AND. XB4<MESHES(NOM)%YF .AND. &
+                      XB5>MESHES(NOM)%ZS .AND. XB6<MESHES(NOM)%ZF) OB%COLOR_INDICATOR=-2
+               ENDDO
  
-      ! Smooth obstacles if desired
+               ! Prevent drawing of boundary info if desired
+          
+               IF (BNDF_DEFAULT) THEN
+                  OB%SHOW_BNDF(:) = BNDF_FACE(:)
+                  IF (.NOT.BNDF_OBST) OB%SHOW_BNDF(:) = .FALSE.
+               ELSE
+                  OB%SHOW_BNDF(:) = BNDF_FACE(:)
+                  IF (BNDF_OBST) OB%SHOW_BNDF(:) = .TRUE.
+               ENDIF
  
-      IF (.NOT.SAWTOOTH) THEN
-         OB%TYPE_INDICATOR = 3
-         OB%SAWTOOTH = .FALSE.
-      ENDIF
+               ! Smooth obstacles if desired
+          
+               IF (.NOT.SAWTOOTH) THEN
+                  OB%TYPE_INDICATOR = 3
+                  OB%SAWTOOTH = .FALSE.
+               ENDIF
  
-      ! In Smokeview, draw the outline of the obstruction
+               ! In Smokeview, draw the outline of the obstruction
  
-      IF (OUTLINE) OB%TYPE_INDICATOR = 2
+               IF (OUTLINE) OB%TYPE_INDICATOR = 2
+
+            ENDDO I_MULT_LOOP
+         ENDDO J_MULT_LOOP
+      ENDDO K_MULT_LOOP
       
-      ENDDO READ_OBST_LOOP
-   35 REWIND(LU_INPUT)
+   ENDDO READ_OBST_LOOP
+35 REWIND(LU_INPUT)
  
 ENDDO MESH_LOOP
  
