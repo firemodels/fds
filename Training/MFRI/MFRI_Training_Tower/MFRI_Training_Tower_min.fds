@@ -55,7 +55,7 @@
       
 &SURF ID='FIRE',
       COLOR='RED',
-      HRRPUA=2735,
+      HRRPUA=2437.0,
       RAMP_Q='FIRE_RAMP_Q'/
 
 &SURF ID='WOOD',
