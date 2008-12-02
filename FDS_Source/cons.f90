@@ -213,9 +213,9 @@ LOGICAL :: POROUS_FLOOR
 INTEGER :: MAXIMUM_DROPLETS,N_PART,PARTICLE_TAG,N_EVAC,N_EVAP_INDICIES=0
 REAL(EB) :: FLUXMAX
  
-! Initial value and pressure zone arrays
+! Number of initial value, pressure zone, and multiplier derived types
  
-INTEGER :: N_INIT,N_ZONE
+INTEGER :: N_INIT,N_ZONE,N_MULT
  
 ! Output quantity arrays
  
