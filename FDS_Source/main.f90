@@ -279,6 +279,17 @@ MAIN_LOOP: DO
    LO10 = LOG10(REAL(MAX(1,ABS(ICYC)),EB))
    IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,100)==0 .OR. T_MIN>=T_END .OR. PROCESS_STOP_STATUS/=NO_STOP) DIAGNOSTICS = .TRUE.
    
+   ! Flush output file buffers
+
+   IF (T_MIN>=FLUSH_CLOCK .AND. FLUSH_FILE_BUFFERS) THEN
+      CALL FLUSH_GLOBAL_BUFFERS
+      CALL FLUSH_EVACUATION_BUFFERS
+      DO NM=1,NMESHES
+         CALL FLUSH_LOCAL_BUFFERS(NM)
+      ENDDO
+      FLUSH_CLOCK = FLUSH_CLOCK + DT_FLUSH
+   ENDIF
+
    ! If no meshes are due to be updated, update them all
  
    IF (ALL(.NOT.ACTIVE_MESH)) ACTIVE_MESH = .TRUE.
@@ -535,16 +546,6 @@ MAIN_LOOP: DO
    
    IF (T_MIN>=T_END .OR. PROCESS_STOP_STATUS/=NO_STOP) EXIT MAIN_LOOP
  
-   ! Flush Buffers 
-   
-   IF (MOD(ICYC,10)==0 .AND. FLUSH_FILE_BUFFERS) THEN
-      CALL FLUSH_GLOBAL_BUFFERS
-      CALL FLUSH_EVACUATION_BUFFERS
-      DO NM=1,NMESHES
-         CALL FLUSH_LOCAL_BUFFERS(NM)
-      ENDDO
-   ENDIF
-
 ENDDO MAIN_LOOP
  
 !***********************************************************************************************************************************
