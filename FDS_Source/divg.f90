@@ -814,9 +814,22 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 INTEGER, INTENT(IN) :: NM
 INTEGER  :: I,J,K
 REAL(EB) :: DIV,RES,TNOW
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP
  
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
+
+IF (PREDICTOR) THEN
+   UU=>US
+   VV=>VS
+   WW=>WS
+   DP=>DS
+ELSEIF (CORRECTOR) THEN
+   UU=>U
+   VV=>V
+   WW=>W
+   DP=>D
+ENDIF
  
 RESMAX = 0._EB
 DIVMX  = -10000._EB
@@ -831,14 +844,14 @@ DO K=1,KBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE LOOP1
          SELECT CASE(CYLINDRICAL)
             CASE(.FALSE.)
-               DIV = (U(I,J,K)-U(I-1,J,K))*RDX(I) + &
-                     (V(I,J,K)-V(I,J-1,K))*RDY(J) + &
-                     (W(I,J,K)-W(I,J,K-1))*RDZ(K)
+               DIV = (UU(I,J,K)-UU(I-1,J,K))*RDX(I) + &
+                     (VV(I,J,K)-VV(I,J-1,K))*RDY(J) + &
+                     (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
             CASE(.TRUE.)
-               DIV = (R(I)*U(I,J,K)-R(I-1)*U(I-1,J,K))*RDX(I)*RRN(I) +  &
-                     (W(I,J,K)-W(I,J,K-1))*RDZ(K)
+               DIV = (R(I)*UU(I,J,K)-R(I-1)*UU(I-1,J,K))*RDX(I)*RRN(I) +  &
+                     (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
          END SELECT
-         RES = ABS(DIV-D(I,J,K))
+         RES = ABS(DIV-DP(I,J,K))
          IF (ABS(RES)>=RESMAX) THEN
             RESMAX = ABS(RES)
             IRM=I
