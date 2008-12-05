@@ -362,23 +362,28 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
       IIG = IJKW(6,IW) 
       JJG = IJKW(7,IW) 
       KKG = IJKW(8,IW) 
-      KW(IW) = KP(IIG,JJG,KKG)
       IOR = IJKW(4,IW)
       SELECT CASE(IOR)
          CASE( 1)
-            KDTDX(II,JJ,KK)   = 0._EB
+            DTDX = (TMP(IIG,JJG,KKG)-TMP_W(IW))*RDXN(II)
+            KDTDX(II,JJ,KK) = KW(IW)*DTDX
          CASE(-1)
-            KDTDX(II-1,JJ,KK) = 0._EB
+            DTDX = (TMP_W(IW)-TMP(IIG,JJG,KKG))*RDXN(IIG)
+            KDTDX(IIG,JJ,KK) = KW(IW)*DTDX
          CASE( 2)
-            KDTDY(II,JJ,KK)   = 0._EB
+            DTDY = (TMP(IIG,JJG,KKG)-TMP_W(IW))*RDYN(JJ)
+            KDTDY(II,JJ,KK) = KW(IW)*DTDY
          CASE(-2)
-            KDTDY(II,JJ-1,KK) = 0._EB
+            DTDY = (TMP_W(IW)-TMP(IIG,JJG,KKG))*RDYN(JJG)
+            KDTDY(II,JJG,KK) = KW(IW)*DTDY
          CASE( 3)
-            KDTDZ(II,JJ,KK)   = 0._EB
+            DTDZ = (TMP(IIG,JJG,KKG)-TMP_W(IW))*RDZN(KK)
+            KDTDZ(II,JJ,KK) = KW(IW)*DTDZ
          CASE(-3)
-            KDTDZ(II,JJ,KK-1) = 0._EB
+            DTDZ = (TMP_W(IW)-TMP(IIG,JJG,KKG))*RDZN(KKG)
+            KDTDZ(II,JJ,KKG) = KW(IW)*DTDZ
       END SELECT
-      DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - QCONF(IW)*RDN(IW)
+      KW(IW) = KP(IIG,JJG,KKG)
    ENDDO CORRECTION_LOOP
 
    ! Compute (q + del dot k del T) and add to the divergence
