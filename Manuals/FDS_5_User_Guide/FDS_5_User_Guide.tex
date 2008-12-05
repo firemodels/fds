@@ -3488,8 +3488,11 @@ materials are often listed as in the following example:
 Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the materials in multiple layers, with each layer consisting of only a single
 material component.
 
-Note also in this example that the {\ct BRICK WALL} is not symmetric. Be careful when applying this {\ct SURF} line to an entire obstruction, because the
-attribute {\ct EXPOSED} implies that the back surface of the obstruction is different than the front surface.
+\begin{warning}
+\noindent
+When a {\ct SURF} is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} is at the face of the {\ct OBST}, with the other {\ct MATL\_ID}s being applied in succession with the final {\ct MATL\_ID} being applied on the opposite face of the {\ct OBST}.  If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the +x face to the -x face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer calculation from the -x face to the +x face.  To avoid this the user would need to specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} and use {\ct SURF\_ID6} to apply the two {\ct SURF} defintions to opposite faces of the {\ct OBST}.
+\end{warning}
+
 
 \begin{warning}
 \noindent
