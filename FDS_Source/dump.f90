@@ -3350,7 +3350,7 @@ INTEGER, INTENT(IN) :: II,JJ,KK,IND,NM
 REAL(EB) :: FLOW,HMFAC,F1,F2,H_TC,SRAD,TMP_TC,MU_AIR,RE_D,K_AIR,NUSSELT,NU_FAC,PR,AREA,VEL, &
             Q_SUM,TMP_G,UU,VV,WW,VEL2,Y_MF_INT,DENS,EXT_COEF,MASS_EXT_COEF,UIIINT, &
             VELSR,WATER_VOL_FRAC,RHS,Y_E,DT_C,DT_E,T_RATIO,Y_E_LAG, H_G,H_G_SUM,CP,CP_SUM, &
-            DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,YY_G(1:N_SPECIES)
+            DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,YY_G(1:N_SPECIES),R_DN
 REAL(FB) :: TMPUP,TMPLOW,ZINT
 INTEGER :: ITER,N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW,SPEC_INDEX,PART_INDEX,ITMP,IP,JP,KP
 CHARACTER(100) :: MESSAGE
@@ -3616,21 +3616,24 @@ SELECT CASE(IND)
                      IP   = I+1
                      VEL  = U(I,J,K)
                      AREA = DY(J)*DZ(K)*RC(I)
+                     R_DN  = RDXN(I)
                   CASE(2)
                      JP   = J+1
                      VEL  = V(I,J,K)
                      AREA = DX(I)*DZ(K)
+                     R_DN  = RDYN(J)
                   CASE(3)
                      KP   = K+1
                      VEL  = W(I,J,K)
                      AREA = DX(I)*DY(J)*RC(I)
+                     R_DN  = RDZN(K)
                END SELECT
                IF (IND==111 .OR. IND==114 .OR. IND==117) HMFAC = 1._EB
                IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))
                IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
                   ITMP=0.05_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
-                  YY_G =0.5_EB*(YY(I,J,K,:)+YY(IP,JP,KP,:))
                   IF (MIXTURE_FRACTION) THEN
+                     YY_G =0.5_EB*(YY(I,J,K,:)+YY(IP,JP,KP,:))
                      Z_VECTOR = YY_G(I_Z_MIN:I_Z_MAX)
                      CALL GET_H_G(Z_VECTOR,Y_SUM(I,J,K),H_G_SUM,ITMP)
                      CALL GET_H_G(Z_VECTOR,Y_SUM(I,J,K),H_G,INT(0.1*TMPA))
@@ -3645,6 +3648,7 @@ SELECT CASE(IND)
                      ENDIF
                   ELSE
                      IF (N_SPECIES>0) THEN
+                        YY_G =0.5_EB*(YY(I,J,K,:)+YY(IP,JP,KP,:))
                         H_G = SPECIES(0)%H_G(ITMP)
                         DO N=1,N_SPECIES
                            H_G = H_G + YY_G(N)*(SPECIES(N)%H_G(ITMP)-SPECIES(N)%H_G(INT(0.1*TMPA)) -&
@@ -3664,6 +3668,7 @@ SELECT CASE(IND)
                   CASE(117:119)
                      FLOW = FLOW - MIN(0._EB,VEL)*HMFAC*AREA
                END SELECT
+IF (IND==113 .OR. IND==116 .OR. IND==119) FLOW = FLOW - AREA*MU(I,J,K)*CPOPR*(TMP(IP,JP,KP)-TMP(I,J,K))*R_DN*0.001
             ENDDO
          ENDDO
       ENDDO
