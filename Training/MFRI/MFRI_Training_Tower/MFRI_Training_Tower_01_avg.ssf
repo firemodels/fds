@@ -63,13 +63,13 @@ RENDERONCE
  MFRItower_slice_temp_240
 UNLOADALL
 LOADINIFILE
-MFRI_Training_Tower_00_3D.ini
+MFRI_Training_Tower_01_avg_3D.ini
 SETVIEWPOINT
  3D view
 RENDERONCE
  MFRItower_00_3D
 LOADINIFILE
-MFRI_Training_Tower_00_top.ini
+MFRI_Training_Tower_01_avg_top.ini
 SETVIEWPOINT
  top
 RENDERONCE
