@@ -903,7 +903,7 @@ the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}
 and the FDS User's Guide~\cite{FDS_Users_Guide_5}. The Technical Reference Guide is broken into three volumes: (1)~Mathematical Model, (2)~Verification, and (3)~Experimental Validation.
 Smokeview has its own User's Guide~\cite{Smokeview_Users_Guide_5}. The FDS and Smokeview User Guides only describe the mechanics of using the
 computer programs. The
-Technical Reference Guides provides the theory, algorithm details, and verification and validation work. 
+Technical Reference Guides provides the theory, algorithm details, and verification and validation work.
 
 There are numerous sources that describe various parts of the
 model. The basic set of equations solved in FDS was formulated by Rehm
@@ -1206,12 +1206,12 @@ The stratification of the atmosphere is derived from the relation
 where $\rho_0$ is the background density and $g=9.8$ m/s$^2$. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$,
 \be \bp_0(z) = p_\infty \; \exp \; \left( -\int^z_{z_\infty} \frac{\bW \, g}{\R \, T_0[z]} dz \right)  \label{pstrat} \ee
 where the subscript infinity generally refers to the ground. A linear temperature stratification of the atmosphere may be
-specified by the user such that $T_0(z) = T_\infty + \Gamma z$ where $T_\infty$ is the temperature at the ground and 
+specified by the user such that $T_0(z) = T_\infty + \Gamma z$ where $T_\infty$ is the temperature at the ground and
 $\Gamma$ is the lapse rate (e.g., $\Gamma = -0.0098$~K/m is the {\em adiabatic lapse rate}).
-In this case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref{state}), respectively.  
+In this case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref{state}), respectively.
 It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 \be
-   \bp_0(z) = p_\infty  \left( \frac{T_0(z)}{T_\infty} \right)^{\frac{\overline{W}g}{\R \Gamma}} 
+   \bp_0(z) = p_\infty  \left( \frac{T_0(z)}{T_\infty} \right)^{\frac{\overline{W}g}{\R \Gamma}}
    \label{pstrat}
 \ee
 
@@ -2446,7 +2446,7 @@ $u_d$ and median diameter $d_m$
 \begin{eqnarray}
 	\dot{m} & \propto & \sqrt{p} \\
 	u_d	& \propto & \sqrt{p} \\
-	d_m	& \propto & p^{-1/3} 
+	d_m	& \propto & p^{-1/3}
 \end{eqnarray}
 
 In the numerical algorithm,
@@ -3858,26 +3858,31 @@ the temperature difference between the ``gas'' cell and the ``ghost'' cell.
 The solid surface temperature is not used directly in the gas phase calculation.
 Rather, the ghost cell temperature is used to couple the gas and solid phases.
 The ghost cell temperature
-has no physical meaning on its own. Only the difference between ghost and
+has no physical meaning on its own. It is purely a numerical construct. It does
+not represent the temperature within the wall, but rather establishes
+a temperature gradient at the solid surface consistent with the empirical
+correlation. Only the difference between ghost and
 gas cell temperatures matters, for this defines the heat transfer to the
 wall.
 
-In a DNS calculation, the wall temperature is assumed to be an average of the
+In a DNS calculation, the solid surface temperature is assumed to be an average of the
 ghost cell temperature and the temperature of the first cell in the gas,
 thus the ghost cell temperature is defined
-\be T_{ghost} =  2 T_w - T_{gas}  \ee
+\be T_{ghost} =  2 T_s - T_{gas}  \ee
 For an LES calculation, the numerical expression for the heat lost to the boundary is
 equated with the empirical convective heat transfer
-\be k_{\hbox{\tiny LES}} \frac{T_{gas} - T_{ghost}}{\dn} - c_p u_n \rho \frac{T_{gas} + T_{ghost}}{2}
-   = h \; (T_{gas}-T_s) - c_p u_n \rho T_s  \ee
+\be k_{\hbox{\tiny LES}} \frac{T_{gas} - T_{ghost}}{\dn} - \bar{\rho} \, u_n \bar{c}_p (\bar{T}) \, \bar{T}
+   = h \; (T_{gas}-T_s) - \bar{\rho} \, u_n  \, \bar{c}_p(T_s) \, T_s  \label{ebal} \ee
 where $\dn$ is the distance between the center of the ghost cell
-and the center of the gas cell. This equation is solved for $T_{ghost}$,
+and the center of the gas cell, and the bar over the $T$ and $\rho$ indicate the average of the gas and ghost values:
+\be \overline{T} = \frac{T_{gas}+T_{ghost}}{2}  \quad ; \quad \overline{\rho} = \frac{\rho_{gas} + \rho_{ghost}^*}{2} \ee
+The specific heat is defined:
+\be \bar{c}_p (T) = \frac{1}{T} \int_0^T c_p(T') \, dT' \ee
+Equation~(\ref{ebal}) is solved for $T_{ghost}$,
 so that when the conservation equations are updated, the amount of heat
 lost to the wall is equivalent to the empirical expression on the right
-hand side. Note that $T_{ghost}$ is purely a numerical construct. It does
-not represent the temperature within the wall, but rather establishes
-a temperature gradient at the wall consistent with the empirical
-correlation.
+hand side. Note that the asterisk in the equations above denotes that the value is taken from the previous
+time step. 
 
 At solid walls there is no transfer of mass, thus the boundary condition
 for the $l$th species at a wall is simply
@@ -3963,7 +3968,7 @@ Lagrangian particles are can be introduced into the flow field as a means of
 visualization or simulation of droplets, aerosols, {\em etc.}. The
 position $\bx_p$ of each particle is governed by the equations
 \be \frac{d\bx_p}{dt} = \bu  \ee
-The particle positions are updated according to the same predictor-corrector 
+The particle positions are updated according to the same predictor-corrector
 scheme that is applied to the other flow quantities. Briefly, the
 position $\bx_p$ of a given particle is updated according to the two
 step scheme
@@ -4633,7 +4638,7 @@ Burning in a Vitiated Atmosphere,'' {\em Third International Symposium on Fire S
 Science}, Elsevier Science Publishers, pp.~575-583, 1991.} who measured the oxygen concentration at extinction of flames by dilution of air
 with combustion products. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results
 are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen
-concentrations at extinction ranging from 12~\% to 15~\%. The default value in FDS is 15~\%. 
+concentrations at extinction ranging from 12~\% to 15~\%. The default value in FDS is 15~\%.
 
 
 
