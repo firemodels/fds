@@ -1031,7 +1031,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
     if(thiscolor!=lastcolor){
       if(thiscolor[0]<0.0){
         colorindex2 = 15 + (15*colorindex % 230);
-        glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,rgb_cad[colorindex2]);
+        glColor4fv(rgb_cad+colorindex2);
         colorindex++;
       }
       else{
