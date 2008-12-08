@@ -177,6 +177,7 @@ int convert_csv(char *csv_in, char *csv_out){
     ij = IJ(irow,icol);
     csv_fields[ij]=line2;
     for(i=0;i<nlength;i++){
+      if(line2[i]=='"')line2[i]=' ';
       if(line2[i]==','){
         line2[i]=0;
         icol++;
@@ -188,6 +189,9 @@ int convert_csv(char *csv_in, char *csv_out){
     irow++;
   }
   fclose(stream);
+  for(i=0;i<nlines*(maxcommas+1);i++){
+    csv_fields[i]=trim_both(csv_fields[i]);
+  }
 
 
   ntimes = nlines-2;
@@ -217,7 +221,6 @@ int convert_csv(char *csv_in, char *csv_out){
   stream=fopen(csv_out,"w");
   if(stream==NULL)return -1;
 
-  fprintf(stream,"units,labels,");
   if(key_unit!=NULL){
     fprintf(stream,"%s,",key_unit);
   }
@@ -225,7 +228,7 @@ int convert_csv(char *csv_in, char *csv_out){
     fprintf(stream,",");
   }
   for(i=0;i<ntimes2;i++){
-    fprintf(stream,"DT_%04i",i*dt_skip);
+    fprintf(stream,"%i",(int)i*dt_skip);
     if(i!=ntimes2-1)fprintf(stream,",");
   }
   fprintf(stream,"\n");
@@ -248,7 +251,6 @@ int convert_csv(char *csv_in, char *csv_out){
       if(irow==2){
         float val;
 
-        printf("icol=%i\n",icol);
         if(icol==0){
           if(key_label!=NULL){
             fprintf(stream,"%s",key_label);
@@ -266,7 +268,6 @@ int convert_csv(char *csv_in, char *csv_out){
         else{
           fprintf(stream,",",val);
         }
-       // if(icol==0)continue;
       }
       if(irow>1&&irow<nlines-1){
         float t1, ts, t2, w1, w2, v1,v2;
@@ -289,28 +290,21 @@ int convert_csv(char *csv_in, char *csv_out){
         field = csv_fields[ij];
         sscanf(field,"%f",&v2);
         if(icol==0){
-          fprintf(stream,"%i,",(int)ts);
+          fprintf(stream,"DT_%04i,",(int)ts);
         }
         else{
           fprintf(stream,"%f,",w1*v1+w2*v2);
         }
         continue;
       }
-      ij=IJ(irow,icol);
-      field = csv_fields[ij];
-      if(field!=NULL&&strlen(field)>0&&irow<2){
-        fprintf(stream,"%s",field);
-      }
       if(irow==nlines-1){
         fprintf(stream,"\n");
       }
-      if(irow!=nlines-1){
+      if(irow!=nlines-1&&irow>=2){
         fprintf(stream,",");
       }
     }
   }
-
-
 
   fclose(stream);
   return 0;
