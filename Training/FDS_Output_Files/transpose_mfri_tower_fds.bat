@@ -1,0 +1,11 @@
+transpose -c MFRI_Training_Tower_fds.cfg MFRI_Training_Tower_01_avg_devc
+transpose -c MFRI_Training_Tower_fds.cfg MFRI_Training_Tower_02_avg_devc
+transpose -c MFRI_Training_Tower_fds.cfg MFRI_Training_Tower_03_avg_devc
+transpose -c MFRI_Training_Tower_fds.cfg MFRI_Training_Tower_04_avg_devc
+transpose -c MFRI_Training_Tower_fds.cfg MFRI_Training_Tower_05_avg_devc
+transpose -c MFRI_Training_Tower_fds.cfg MFRI_Training_Tower_06_avg_devc
+transpose -c MFRI_Training_Tower_fds.cfg MFRI_Training_Tower_07_avg_devc
+
+transpose -c MFRI_Training_Tower_fds.cfg MFRI_Training_Tower_01_min_devc
+
+transpose -c MFRI_Training_Tower_fds.cfg MFRI_Training_Tower_01_max_devc
