@@ -194,7 +194,7 @@ END SUBROUTINE READ_HEAD
  
 SUBROUTINE READ_MESH
 
-INTEGER :: IJK(3),NM,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN
+INTEGER :: IJK(3),NM,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN,IBAR2,JBAR2,KBAR2
 INTEGER, DIMENSION(0:100) :: I_MG,J_MG,K_MG
 LOGICAL :: EVACUATION, EVAC_HUMANS
 REAL(EB) :: EVAC_Z_OFFSET,XB(6),XB1,XB2,XB3,XB4,XB5,XB6
@@ -295,6 +295,29 @@ MESH_LOOP: DO N=1,NMESHES_READ
    IF (IOS==1) EXIT MESH_LOOP
    READ(LU_INPUT,MESH)
 
+   ! Parameters needed by PRESSURE_CORRECTION scheme
+
+   IBAR2 = 1
+   DO I=1,100
+      IF (I_MG(I)>-1) IBAR2 = IBAR2 + 1
+   ENDDO
+   I_MG(0)     = 0
+   I_MG(IBAR2) = IJK(1)
+
+   JBAR2 = 1
+   DO J=1,100
+      IF (J_MG(J)>-1) JBAR2 = JBAR2 + 1
+   ENDDO
+   J_MG(0)     = 0
+   J_MG(JBAR2) = IJK(2)
+
+   KBAR2 = 1
+   DO K=1,100
+      IF (K_MG(K)>-1) KBAR2 = KBAR2 + 1
+   ENDDO
+   K_MG(0)     = 0
+   K_MG(KBAR2) = IJK(3)
+
    ! Multiply meshes if need be
 
    MR => MULTIPLIER(0)
@@ -376,26 +399,9 @@ MESH_LOOP: DO N=1,NMESHES_READ
    
             ! Parameters needed by PRESSURE_CORRECTION scheme
    
-            M%IBAR2 = 1
-            DO I=1,100
-               IF (I_MG(I)>-1) M%IBAR2 = M%IBAR2 + 1
-            ENDDO
-            IF (I_MG(1)>-1) I_MG(0) = 0
-            IF (I_MG(1)>-1) I_MG(M%IBAR2) = M%IBAR
-
-            M%JBAR2 = 1
-            DO J=1,100
-               IF (J_MG(J)>-1) M%JBAR2 = M%JBAR2 + 1
-            ENDDO
-            IF (J_MG(1)>-1) J_MG(0) = 0
-            IF (J_MG(1)>-1) J_MG(M%JBAR2) = M%JBAR
-         
-            M%KBAR2 = 1
-            DO K=1,100
-               IF (K_MG(K)>-1) M%KBAR2 = M%KBAR2 + 1
-            ENDDO
-             IF (K_MG(1)>-1) K_MG(0) = 0
-             IF (K_MG(1)>-1) K_MG(M%KBAR2) = M%KBAR
+            M%IBAR2 = IBAR2
+            M%JBAR2 = JBAR2
+            M%KBAR2 = KBAR2
 
             ALLOCATE(M%I_LO(M%IBAR2))
             ALLOCATE(M%I_HI(M%IBAR2))
