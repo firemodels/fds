@@ -1,4 +1,8 @@
       PROGRAM FDS2ASCII
+C $Id$  
+C $Revision$
+C $Date$
+ 
 C
 C Program to convert various FDS output files to ASCII
 C
@@ -21,13 +25,16 @@ C
       INTEGER IOR_SLCF
       CHARACTER(1) ANS
       CHARACTER(30) :: UNITJUNK
-      CHARACTER(40) GRIDFILE,QNAME,CHID,QFILE,JUNK,FRMT,OUTFILE
-      CHARACTER(40), DIMENSION(500) :: PL3D_FILE,SLCF_FILE,BNDF_FILE,
+      CHARACTER(256) GRIDFILE,QNAME,CHID,QFILE,JUNK,FRMT,OUTFILE
+      CHARACTER(256), DIMENSION(500) :: PL3D_FILE,SLCF_FILE,BNDF_FILE,
      .                                 SLCF_TEXT,BNDF_TEXT,
      .                                 SLCF_UNIT,BNDF_UNIT
       INTEGER,  DIMENSION(60) :: IB,IS
       INTEGER,  DIMENSION(500) :: PL3D_MESH,SLCF_MESH,BNDF_MESH
       REAL(FB), DIMENSION(500) :: PL3D_TIME
+      LOGICAL, DIMENSION(500) :: FILE_EXISTS
+      INTEGER :: RCODE
+      INTEGER :: NFILES_EXIST
 C
       WRITE(6,*) ' Enter Job ID string (CHID):'
       READ(5,'(a)') CHID
@@ -129,6 +136,7 @@ C Read a PLOT3D file and print out the values in ASCII text
 C
       PL3D_MESH = 1
       REWIND(11)
+      NFILES_EXIST=0
       SEARCH_PL3D: DO I=1,500
       CALL SEARCH('PL3D',4,11,IERR)
       IF (IERR.EQ.1) EXIT SEARCH_PL3D
@@ -142,12 +150,32 @@ C
       READ(11,*)
       READ(11,'(A)') SLCF_UNIT(II)
       ENDDO
+      OPEN(12,FILE=TRIM(PL3D_FILE(I)),FORM='UNFORMATTED',STATUS='OLD',
+     .                          IOSTAT=RCODE)
+      CLOSE(12)
+      FILE_EXISTS(I)=.TRUE.
+      IF(RCODE.NE.0)THEN
+        FILE_EXISTS(I)=.FALSE.
+        CYCLE
+      ENDIF
+      NFILES_EXIST = NFILES_EXIST + 1
       WRITE(6,'(I3,3X,A,A,I2,A,F5.0)') I,TRIM(PL3D_FILE(I)),
      .    ', MESH ',PL3D_MESH(I),', Time: ',PL3D_TIME(I)
       ENDDO SEARCH_PL3D
 C
+      IF(NFILES_EXIST.EQ.0)THEN
+        WRITE(6,*)"There are no PLOT3D files to convert"
+        GOTO 500
+      ENDIF
+      
       WRITE(6,'(/A)') ' Choose PLOT3D .q file by its index: (0 to end)'
       READ(5,*) I
+      IF(I.NE.0)THEN
+        IF(.NOT.FILE_EXISTS(I))THEN
+          WRITE(6,*)"The file, ",TRIM(PL3D_FILE(I)),", does not exist"
+          CYCLE
+        ENDIF
+      ENDIF
       IF (I.EQ.0) GOTO 500
 C
       QFILE = PL3D_FILE(I)
@@ -183,6 +211,7 @@ C
 C
       SLCF_MESH = 1
       REWIND(11)
+      NFILES_EXIST=0
       SEARCH_SLCF: DO I=1,500
       CALL SEARCH('SLCF',4,11,IERR)
       IF (IERR.EQ.1) EXIT SEARCH_SLCF
@@ -193,8 +222,14 @@ C
       READ(11,'(A)') SLCF_TEXT(I)
       READ(11,*) 
       READ(11,'(A)') SLCF_UNIT(I)
-      OPEN(12,FILE=SLCF_FILE(I),FORM='UNFORMATTED',STATUS='OLD')
-      write(6,*) SLCF_FILE(I)
+      OPEN(12,FILE=SLCF_FILE(I),FORM='UNFORMATTED',STATUS='OLD',
+     .                          IOSTAT=RCODE)
+      IF(RCODE.NE.0)THEN
+        CLOSE(12)
+        CYCLE
+      ENDIF
+      NFILES_EXIST=NFILES_EXIST+1
+      write(6,*) TRIM(SLCF_FILE(I))
       READ(12) UNITJUNK
       write(6,*) UNITJUNK
       READ(12) UNITJUNK
@@ -217,6 +252,11 @@ C
       ENDIF
       ENDDO SEARCH_SLCF
 C
+      IF(NFILES_EXIST.EQ.0)THEN
+        WRITE(6,*)"There are no slice files to convert"
+        GOTO 500
+      ENDIF
+
       WRITE(6,*) ' How many variables to read: (6 max)'
       READ(5,*) NV
 C
@@ -337,6 +377,7 @@ C
 C
       BNDF_MESH = 1
       REWIND(11)
+      NFILES_EXIST=0
       SEARCH_BNDF: DO I=1,500
       CALL SEARCH('BNDF',4,11,IERR)
       IF (IERR.EQ.1) EXIT SEARCH_BNDF
@@ -347,10 +388,22 @@ C
       READ(11,'(A)') BNDF_TEXT(I)
       READ(11,*)
       READ(11,'(A)') BNDF_UNIT(I)
+      OPEN(12,FILE=BNDF_FILE(I),FORM='UNFORMATTED',STATUS='OLD',
+     .                   IOSTAT=RCODE)
+      CLOSE(12)
+      IF(RCODE.NE.0)THEN
+        CYCLE
+      ENDIF
+      NFILES_EXIST=NFILES_EXIST+1
       WRITE(6,'(I3,3X,A,I2,A,A)') I,'MESH ',BNDF_MESH(I),
      .     ', ',TRIM(BNDF_TEXT(I))
       ENDDO SEARCH_BNDF
 C
+      IF(NFILES_EXIST.EQ.0)THEN
+        WRITE(6,*)"There are no boundary files to convert"
+        GOTO 500
+      ENDIF
+      
       WRITE(6,*) ' Enter starting and ending time for averaging (s)'
       READ(5,*) TBEG,TEND
       WRITE(6,*) ' Enter orientation: (plus or minus 1, 2 or 3)'
@@ -366,7 +419,12 @@ C
       READ(5,*) I
       IB(MV) = I
       QFILE = BNDF_FILE(I)
-      OPEN(12,FILE=QFILE,FORM='UNFORMATTED',STATUS='OLD')
+      OPEN(12,FILE=QFILE,FORM='UNFORMATTED',STATUS='OLD',
+     .                   IOSTAT=RCODE)
+      IF(RCODE.NE.0)THEN
+        CLOSE(12)
+        CYCLE
+      ENDIF
 C
       IF (MV.EQ.1) THEN
       NM = BNDF_MESH(I)
@@ -478,7 +536,7 @@ C
 C     WRITE(QNAME,'(A,A)') TRIM(CHID),'_fds2ascii.csv'
       OPEN(44,FILE=OUTFILE,FORM='FORMATTED',STATUS='UNKNOWN')
 C
-      WRITE(6,*) ' Writing to file...      ',OUTFILE
+      WRITE(6,*) ' Writing to file...      ',TRIM(OUTFILE)
 C
       SELECT CASE(IFILE)
 C
