@@ -3789,7 +3789,13 @@ contours).
 \hitem{m}Switch between blocks in a case that has more than one
 mesh.
 
-\hitem{o,0}Reset a time dependent animation to the initial time.
+\hitem{o}Switch between outline viewing modes. The modes are 
+\begin{enumerate}
+\item outline of the current mesh
+\item outline of the entire case
+\item no outline
+\end{enumerate}
+This option may be used with the {\em m}] key to highlight all meshes in sequence of a case.
 
 \hitem{p}Show the next variable in the Plot3D data set.
 
@@ -3835,6 +3841,8 @@ Plot3D data set.
 perpendicular to the x, y and z axes respectively (parallel to the
 yz, xz and xy planes).
 
+\hitem{0}Reset a time dependent animation to the initial time.
+
 \hitem{1-9}Number of frames to skip when viewing an animation.
  \elist
 
@@ -3873,7 +3881,7 @@ cells as one color or interpolate colors smoothly between cell centers.
 
 \hitem{\#}Save smokeview settings to the casename.ini file.
 
-\hitem{\&}Toggle line anti-aliasing.  When active, this option draws 
+\hitem{\&}Toggle line anti-aliasing.  When active, this option draws
 line smoothly without {\em jaggies}.
 
 \hitem{\$}Toggle trainer or demonstrator mode.  When active, displays
