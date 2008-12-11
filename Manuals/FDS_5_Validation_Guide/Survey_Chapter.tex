@@ -71,24 +71,8 @@ the model can be used for a very specific purpose. While  not  comprehensive on 
 assessment of the model.
 
 
-\subsection{Comparison with Full-Scale Tests Conducted Specifically for the Chosen Evaluation}
 
-As part of the NIST investigation  of the World Trade Center fires and collapse,  a series  of large  scale fire  experiments  were performed
-specifically  to  validate  FDS~\cite{NIST_NCSTAR_1-5B}.   The  tests  were performed in  a rectangular  compartment 7.2~m long  by 3.6~m  wide by 3.8~m
-tall.   The fires were  fueled by heptane  for some tests  and a heptane/toluene mixture  for the others.  The results of the experiments and simulations
-are included in detail in this Guide.
-
-A second set of experiments to validate FDS for use in the World Trade Center  investigation is  documented  in Ref.~\cite{NIST_NCSTAR_1-5E}.  The experiments
-are not described as part of this Guide. The intent
-of  these tests  was to  evaluate the ability  of the  model to simulate the growth  of a fire burning three  office workstations within a compartment of
-dimensions 11~m by 7~m by 4~m, open at one end to mimic the ventilation  of windows similar to  those in  the WTC towers. Six tests  were performed
-with various  initial conditions  exploring the effect of jet fuel spray and ceiling tiles covering the surface of the desks and carpet. Measurements
-were  made of the heat release rate and compartment  gas   temperatures  at  four   locations  using  vertical thermocouple arrays. Six different
-material samples were tested in the NIST  cone calorimeter:  desk,  chair, paper,  computer case,  privacy panel, and  carpet. Data for the  carpet,
-desk and  privacy panel were input directly into FDS, with the other three materials lumped together to form an  idealized fuel type.  Open burns of
-single  workstations were used to  calibrate the simplified fuel  package. Details of the modeling are contained in Ref.~\cite{NIST_NCSTAR_1-5F}.
-
-\subsection{Comparison with Engineering Correlations}
+\subsection{Fire Plumes}
 
 There are  several examples of  fire flows that have  been extensively studied, so much  so that a set of  engineering correlations combining the
 results  of   many  experiments   have  been   developed.  These correlations are  useful to modelers because of  their simplicity. The most studied
@@ -114,14 +98,7 @@ well-resolved and adjustments  must be made to  the combustion routine to accoun
 
 
 
-\subsection{Comparisons with Previously Published Full-Scale Test Data}
-\label{prevpub}
-
-Experiments  conducted  solely   for  model  validation  are  somewhat rare.  More common  are validation  studies  that use  data from  past
-experiments.  This   section  contains  brief   descriptions  of  work published  comparing  FDS with  past  experiments  or correlations  of
-experimental data.
-
-\subsubsection{Pool Fires}
+\subsection{Pool Fires}
 
 
 Xin~{\em et  al.}~\cite{Xin:JSS2005} used FDS to model  a 1~m diameter methane pool  fire.  The  computational domain was  2~m by 2~m  by 4~m with  a
@@ -143,7 +120,7 @@ twice as fine a grid spanning the burner than would be necessary to predict plum
 of the heat  feedback to the  burning surface necessary to {\em predict} rather  than to {\em specify} the burning rate.
 
 
-\subsubsection{Air and Gas Movement in the Absence of Fire}
+\subsection{Air and Gas Movement in the Absence of Fire}
 
 The low Mach number assumption in FDS is appropriate not only to fire, but to  most building  ventilation scenarios.  An  example of  how the model
 can  be used  to  assess indoor  air  quality  is presented  by Musser~{\em  et  al.}~\cite{Musser:1}.   The  test compartment  was  a displacement
@@ -169,7 +146,7 @@ Kerber  and Walton  provided a  comparison between  FDS version  1 and experimen
 a fire.   The model predictions of velocity  were within 10~\% to 20~\% of the experimental values~\cite{Kerber:1}.
 
 
-\subsubsection{Wind Engineering}
+\subsection{Wind Engineering}
 
 Most applications  of FDS involve fires within  buildings. However, it can be used to model thermal  plumes in the open and wind impinging on the
 exterior   of   a   building.    Rehm,   McGrattan,   Baum   and Simiu~\cite{LES:4} used the LES solver to estimate surface pressures on simple
@@ -189,7 +166,7 @@ Navier-Stokes)  closure  methods,   whereas  FDS  employs  large  eddy simulatio
 wind tunnel measurements within a 1:50 scale physical model of an urban street ``canyon.''
 
 
-\subsubsection{Growing Fires}
+\subsection{Growing Fires}
 \label{growingfires}
 
 Vettori~\cite{Vettori:1} modeled two different fire growth rates in an obstructed ceiling geometry.  The rectangular compartment was 9.2~m by 5.6~m
@@ -222,7 +199,7 @@ National Research Council  Canada.  The tests were performed in a compartment wi
 single supply fan.  A burner  generated fires ranging in size  from 15~kW  to 1000~kW.
 
 
-\subsubsection{Flame Spread}
+\subsection{Flame Spread}
 \label{flame spread}
 
 Although FDS simulations have been compared to actual and experimental large-scale fires, it is difficult to {\em quantify} the accuracy because of
@@ -255,10 +232,57 @@ can still be used for a qualitative assessment  of fire behavior as long  as the
 Kwon~{\em et al.}~\cite{Kwon:Fire_Technology_2007} performed three simulations to evaluate the capability of
 FDS, version 4, in predicting upward flame spread. The FDS predictions were
 compared with empirical correlations and experimental data for upward flame spread
-on a 5~m PMMA panel. A simplified flame spread model was also applied to assess the simulation results. 
+on a 5~m PMMA panel. A simplified flame spread model was also applied to assess the simulation results.
+
+An extensive  amount of  flame spread validation work with  FDS version 4  has been performed    by   Hietaniemi,    Hostikka,   and    Vaari    at   VTT,
+Finland~\cite{Hietaniemi:1}.  The  case studies are  comprised of fire experiments ranging  in scale  from the cone  calorimeter (ISO~5660-1, 2002)
+to full-scale fire tests such as the room corner test (ISO~9705, 1993).  Comparisons are  also  made  between FDS  4  results and  data obtained  in
+the  SBI (Single  Burning Item)  Euro-classification test apparatus (EN  13823, 2002) as  well as data  obtained in two  {\em ad hoc} experimental
+configurations: one is  similar to the  room corner test but  has only partial linings and  the other is a  space to study fires in building
+cavities. In the study of upholstered furniture, the experimental configurations  are the cone  and furniture calorimeters, and the  ISO room. For
+liquid  pool fires, comparison is  made to data obtained  by  numerous  researchers.   The burning  materials  include spruce  timber, MDF  (Medium
+Density  Fiber) board,  PVC  wall carpet, upholstered furniture, cables with plastic sheathing, and heptane.
+The scope of the VTT work is considerable. Assessing the accuracy of the model must be done on a case by case basis. In some cases, predictions of
+the burning rate of the material were based solely on its fundamental properties, as in the heptane pool fire simulations. In other cases, some
+properties of the material are unknown, as in the spruce timber simulations. Thus, some of the simulations are true predictions, some are
+calibrations. The intent of the authors was to provide guidance to engineers using the model as to appropriate grid sizes and material properties. In
+many cases, the numerical grid was made fairly coarse to account for the fact that in practice, FDS is used to model large spaces of which the fuel
+may only comprise a small fraction.
 
 
-\subsubsection{Sprinklers, Mist System, and Suppression by Water}
+
+\subsection{Compartment Fires}
+
+As part of the NIST investigation  of the World Trade Center fires and collapse,  a series  of large  scale fire  experiments  were performed
+specifically  to  validate  FDS~\cite{NIST_NCSTAR_1-5B}.   The  tests  were performed in  a rectangular  compartment 7.2~m long  by 3.6~m  wide by 3.8~m
+tall.   The fires were  fueled by heptane  for some tests  and a heptane/toluene mixture  for the others.  The results of the experiments and simulations
+are included in detail in this Guide.
+
+A second set of experiments to validate FDS for use in the World Trade Center  investigation is  documented  in Ref.~\cite{NIST_NCSTAR_1-5E}.  The experiments
+are not described as part of this Guide. The intent
+of  these tests  was to  evaluate the ability  of the  model to simulate the growth  of a fire burning three  office workstations within a compartment of
+dimensions 11~m by 7~m by 4~m, open at one end to mimic the ventilation  of windows similar to  those in  the WTC towers. Six tests  were performed
+with various  initial conditions  exploring the effect of jet fuel spray and ceiling tiles covering the surface of the desks and carpet. Measurements
+were  made of the heat release rate and compartment  gas   temperatures  at  four   locations  using  vertical thermocouple arrays. Six different
+material samples were tested in the NIST  cone calorimeter:  desk,  chair, paper,  computer case,  privacy panel, and  carpet. Data for the  carpet,
+desk and  privacy panel were input directly into FDS, with the other three materials lumped together to form an  idealized fuel type.  Open burns of
+single  workstations were used to  calibrate the simplified fuel  package. Details of the modeling are contained in Ref.~\cite{NIST_NCSTAR_1-5F}.
+
+
+The BRE Centre for Fire Safety Engineering at the University of Edinburgh conducted a series of large-scale fire tests in a real high rise building in Dalmarnock, Glasgow,
+Scotland~\cite{Rein:Dalmarnock}.
+The experiments took place in July, 2006, with the close collaboration of the Strathclyde Fire Brigade and other partners.
+These experiments attempted to create realistic scenario in which a wide range of modern fire safety engineering tools could be put to a test.
+Wolfram, Rein and Torero assessed the sensitivity of FDS when applied to these experiments~\cite{Wolfram:IAFSS9}. Fire size and
+location, convection, radiation and combustion parameters were varied in order to determine the associated
+degree of sensitivity. Emphasis was put in the prediction of secondary ignition and time to flashover. In this
+context and while keeping the HRR constant, simulations of fire growth were significantly sensitive to
+location of the heat release rate, fire area, flame radiative fraction, and material thermal and ignition
+properties.
+
+
+
+\subsection{Sprinklers, Mist System, and Suppression by Water}
 
 A   significant  validation  effort   for  sprinkler   activation  and suppression was  a project entitled the  International Fire Sprinkler, Smoke
 and Heat Vent, Draft  Curtain Fire Test Project organized by the National   Fire  Protection   Research  Foundation~\cite{McGrattan:5}. Thirty-nine
@@ -296,7 +320,7 @@ between   the  droplets  is   weak.''  However,  modeling interacting sprays wou
 results of the model were  sensitive to grid size, angular discretization, and droplet sampling.
 
 
-\subsubsection{Airflows in Fire Compartments}
+\subsection{Airflows in Fire Compartments}
 
 Friday studied the  use of FDS in large  scale mechanically ventilated spaces.   The ventilated  enclosure  was provided  with air  injection rates
 of  1 to 12 air  changes per hour  and a fire with  heat release rates ranging  from 0.5~MW to  2~MW.  The test measurements  and model output were
@@ -311,7 +335,7 @@ of  the temperature  fluctuation  ``agree[d] very well'' at  all points  except 
 found to be larger in the region above the heat source.
 
 
-\subsubsection{Tunnel Fires}
+\subsection{Tunnel Fires}
 
 Cochard~\cite{Cochard:1} used  FDS to  study the ventilation  within a tunnel. He  compared the model  results with a full-scale  tunnel fire
 experiment conducted  as part of the  Massachusetts Highway Department Memorial Tunnel Fire Ventilation  Test Program.  The test consisted of a
@@ -339,7 +363,7 @@ ventilation and smoke exhaust system.
 
 
 
-\subsubsection{Smoke Detection}
+\subsection{Smoke Detection}
 
 The ability of  version 1 of FDS to  accurately predict smoke detector activation was studied by D'Souza~\cite{DSouza:1}. The smoke transport model
 within FDS  was tested and compared with UL~217 test data.  The second step  in this research was  to further validate  the model with full-scale
@@ -359,7 +383,7 @@ experience during a real fire  event.  The FDS model was able to predict the smo
 detector locations to within 15~\% of measurements.
 
 
-\subsubsection{Combustion Model}
+\subsection{Combustion Model}
 
 A few studies have been performed comparing direct numerical
 simulations (DNS) of a simple burner flame to laboratory
@@ -398,38 +422,25 @@ compartment was 2.8~m by 2.8~m  by 2.2~m high with natural ventilation from a  s
 
 
 
+\section{Reconstructions of Actual Fires}
+
+ASTM E 1355 states that a model may be evaluated by comparing it with ``Documented Fire Experience'' which includes
+\begin{itemize}
+\item eyewitness accounts of real fires,
+\item known behavior of materials in fires (for example, melting temperatures of materials), and
+\item observed post-fire conditions, such as the extent of fire spread.
+\end{itemize}
+Often the term ``reconstruction'' is applied to this type of simulation, because the model is used to reconstruct events based on evidence collected during and after the
+fire. The two most
+notable examples of fire reconstructions by NIST using FDS were the reconstructions of the fires within the World Trade Center towers and Building 7 on September 11, 2001~\cite{NIST_NCSTAR_1-5F};
+and the fire that occurred at the Station Nightclub in Rhode Island in February, 2003~\cite{Grosshandler:Station}. Other examples of reconstructions by NIST staff are
+cited below.
 
 
-\subsection{Comparison with Standard Tests}
-
-Standard fire tests are  performed at various testing laboratories and universities  around  the world.   While  most  were  not designed  as
-validation tools, they nevertheless  can be used as relatively simple, well characterized fire experiments.
-
-An extensive  amount of  validation work with  FDS version 4  has been performed    by   Hietaniemi,    Hostikka,   and    Vaari    at   VTT,
-Finland~\cite{Hietaniemi:1}.  The  case studies are  comprised of fire experiments ranging  in scale  from the cone  calorimeter (ISO~5660-1, 2002)
-to full-scale fire tests such as the room corner test (ISO~9705, 1993).  Comparisons are  also  made  between FDS  4  results and  data obtained  in
-the  SBI (Single  Burning Item)  Euro-classification test apparatus (EN  13823, 2002) as  well as data  obtained in two  {\em ad hoc} experimental
-configurations: one is  similar to the  room corner test but  has only partial linings and  the other is a  space to study fires in building
-cavities. In the study of upholstered furniture, the experimental configurations  are the cone  and furniture calorimeters, and the  ISO room. For
-liquid  pool fires, comparison is  made to data obtained  by  numerous  researchers.   The burning  materials  include spruce  timber, MDF  (Medium
-Density  Fiber) board,  PVC  wall carpet, upholstered furniture, cables with plastic sheathing, and heptane.
-
-The scope of the VTT work is considerable. Assessing the accuracy of the model must be done on a case by case basis. In some cases, predictions of
-the burning rate of the material were based solely on its fundamental properties, as in the heptane pool fire simulations. In other cases, some
-properties of the material are unknown, as in the spruce timber simulations. Thus, some of the simulations are true predictions, some are
-calibrations. The intent of the authors was to provide guidance to engineers using the model as to appropriate grid sizes and material properties. In
-many cases, the numerical grid was made fairly coarse to account for the fact that in practice, FDS is used to model large spaces of which the fuel
-may only comprise a small fraction.
-
-
-\subsection{Comparison with Documented Fire Experience}
-
-Documented fire experience includes known behavior of materials in fires, eyewitness accounts of real fires, observed post fire conditions, and other
-means. To date, several actual fires have been reconstructed using FDS. One case study performed by NIST is documented in Ref.~\cite{Madrzykowski:1}.
-Two fire fighters were killed and one severely injured in a townhouse fire in Washington, D.C. during the evening of May 30, 1999. Questions arose
+Dan Madrzykowski and Bob Vettori examined a fire in a townhouse in Washington, D.C., where
+two fire fighters were killed and one severely injured during the evening hours of May 30, 1999~\cite{Madrzykowski:1}. Questions arose
 about the injuries the fire fighters had sustained, the lack of thermal damage in the living room where a fallen fire fighter was found and why the
 fire fighters never opened their hose lines to protect themselves or to extinguish the fire.
-
 To answer some of the questions, a rectangular volume of 10~m by 6~m by 5.1~m was divided into 76,500 cells in the FDS model. The FDS results that
 best replicated the observed fire behavior indicated that the opening of the basement sliding glass door provided oxygen to a pre-heated,
 under-ventilated fire. Flashover was estimated to occur in less than 60 s following the entry of fire fighters into the basement. The resulting fire
@@ -439,17 +450,21 @@ respond. The model showed that the oxygen level was too low to support flaming a
 thermal conditions until it was too late. Results of the FDS study were shared with the D.C. fire department and have been made available via a
 multi-media CD-ROM to other fire departments across the country.
 
-Another case study performed at NIST involved a fire in a Houston restaurant~\cite{Texas}. On the morning of February 14, 2000, a fire started in the
+Bob Vettori, Dan Madrzykowski, and Doug Walton simulated a fire in a Houston restaurant~\cite{Texas}. On the morning of February 14, 2000, a fire started in the
 office area of a fast food restaurant. Two fire fighters died when the roof collapsed. The FDS model was used to simulate the fire. The fuel was
 assumed to be the contents of a typical office, and the fire was assumed to have a slowly growing heat release rate peaking at 6~MW. Multiple vents
 were modeled and the time at which they opened replicated the fire fighters' actions after arrival.  The model provided a visual representation of
 the fire during the initial phases until the collapse of the roof.
 
-NIST also performed a case study on a fire that killed three children and three fire fighters on the morning of December 22, 1999~\cite{Iowa}. The
-fire started on top of a stove in a two-story residence. FDS was used to simulate the fire.  The fuel packages consisted of several furniture items
+Dan Madrzykowski, Glenn Forney and Doug Walton simulated a fire that killed three children and three fire fighters on the morning of December 22, 1999 in a 
+two story duplex house in Iowa~\cite{Iowa}. The fire started on top of a stove in a two-story residence. FDS was used to simulate the fire.  
+The fuel packages consisted of several furniture items
 in the kitchen and living room with heat release rates reaching 5.2~MW. The model results indicated the critical event in the fire was flashover of
 the kitchen. The fire became a multi-room event after flashover with temperatures increasing to over 600~$^\circ$C. The hot gases spread quickly from
 the living room to the stairway on the second floor trapping the fire fighters.
+
+Dan Madrzykowski and Doug Walton investigated the fire in the Cook County (Chicago) Administration Building in October, 2003, that claimed the lives of six people trapped
+in a stairwell~\cite{Cook_County}. Issues addressed by the model were the movement of the fire from its room of origin and the movement of smoke up the stairwell.
 
 Outside of NIST, FDS has been used to investigate many actual fires, but very few of these studies are documented in the literature. Exceptions
 include a study by Rein~{\em et al.}~\cite{Rein:Interflam2004} looking at several fire events using an analytical fire growth model, the NIST zone
