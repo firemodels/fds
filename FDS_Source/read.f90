@@ -7598,6 +7598,9 @@ OUTPUT_QUANTITY(32)%NAME = 'HRRPUA'
 OUTPUT_QUANTITY(32)%UNITS = 'kW/m2'
 OUTPUT_QUANTITY(32)%SHORT_NAME = 'hrrpua'  
 
+OUTPUT_QUANTITY(33)%NAME = 'CONDUCTIVITY'
+OUTPUT_QUANTITY(33)%UNITS = 'W/m/K'
+OUTPUT_QUANTITY(33)%SHORT_NAME = 'k'
 ! QUANTITY's the refer to droplet properties that are used to color the droplets in Smokeview
 
 OUTPUT_QUANTITY(34)%NAME = 'DROPLET DIAMETER'                     
