@@ -3663,6 +3663,7 @@ typedef struct {
       devicei->xyznorm[2]=xyzn[2];
       devicei->act_time=-1.0;
       devicei->device_mesh=NULL;
+      get_elevaz(devicei->xyznorm,&devicei->angle_elev,&devicei->angle_az);
 
       ndeviceinfo++;
       continue;
