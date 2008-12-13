@@ -1,26 +1,16 @@
 #!/bin/csh -f
 set f2a=~/bin/fds2ascii_linux
 
-$f2a < MFRI_Training_Tower_01_min.fds2ascii
-$f2a < MFRI_Training_Tower_02_min.fds2ascii
-$f2a < MFRI_Training_Tower_03_min.fds2ascii
-$f2a < MFRI_Training_Tower_04_min.fds2ascii
-$f2a < MFRI_Training_Tower_05_min.fds2ascii
-$f2a < MFRI_Training_Tower_06_min.fds2ascii
-$f2a < MFRI_Training_Tower_07_min.fds2ascii
-
-$f2a < MFRI_Training_Tower_01_avg.fds2ascii
-$f2a < MFRI_Training_Tower_02_avg.fds2ascii
-$f2a < MFRI_Training_Tower_03_avg.fds2ascii
-$f2a < MFRI_Training_Tower_04_avg.fds2ascii
-$f2a < MFRI_Training_Tower_05_avg.fds2ascii
-$f2a < MFRI_Training_Tower_06_avg.fds2ascii
-$f2a < MFRI_Training_Tower_07_avg.fds2ascii
-
-$f2a < MFRI_Training_Tower_01_max.fds2ascii
-$f2a < MFRI_Training_Tower_02_max.fds2ascii
-$f2a < MFRI_Training_Tower_03_max.fds2ascii
-$f2a < MFRI_Training_Tower_04_max.fds2ascii
-$f2a < MFRI_Training_Tower_05_max.fds2ascii
-$f2a < MFRI_Training_Tower_06_max.fds2ascii
-$f2a < MFRI_Training_Tower_07_max.fds2ascii
+foreach n (01 02 03 04 05 06 07)
+$f2a < MFRI_Training_Tower_$n\_min_0060.fds2ascii
+$f2a < MFRI_Training_Tower_$n\_min_0120.fds2ascii
+$f2a < MFRI_Training_Tower_$n\_min_0180.fds2ascii
+$f2a < MFRI_Training_Tower_$n\_avg_0060.fds2ascii
+$f2a < MFRI_Training_Tower_$n\_avg_0120.fds2ascii
+$f2a < MFRI_Training_Tower_$n\_avg_0180.fds2ascii
+$f2a < MFRI_Training_Tower_$n\_max_0060.fds2ascii
+$f2a < MFRI_Training_Tower_$n\_max_0120.fds2ascii
+$f2a < MFRI_Training_Tower_$n\_max_0180.fds2ascii
+end
+$f2a < MFRI_Training_Tower_01_Savg.fds2ascii
+$f2a < MFRI_Training_Tower_01_Lavg.fds2ascii
