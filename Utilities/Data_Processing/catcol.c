@@ -2,7 +2,7 @@
 // $Revision: 2842 $
 // $Author: gforney $
 
-// colcat merges 3 files together.  The results of the merge
+// colcat merges 3 files together.  The result of the merge
 //      is written to stdout (so should be re-direected to a file)
 
 //      The merging takes place to the right of a file
@@ -26,45 +26,53 @@ void trim(char *line);
 /* ------------------ main ------------------------ */
 
 int main(int argc, char **argv){
-  char buffer1[1024];
-  char buffer2[1024];
-  char buffer3[1024];
-  FILE *stream1, *stream2, *stream3;
-  char *file1, *file2, *file3;
+  char buffer[1024];
+  char **filelist;
+  FILE **streams;
+  int nfiles;
+  int i;
 
-  if(argc<4){
-    fprintf(stderr,"aborting: 3 input files required (only %i found)\n",argc-1);
+  nfiles = argc-1;
+  if(nfiles<1){
+    fprintf(stderr,"%s file 1, file 2, ..., file n\n\n",argv[0]);
+    fprintf(stderr,"  Concatenates files 2 to the right of 1 then 3 to the\n");
+    fprintf(stderr,"  right of 2 and so on assuming that each file is\n");
+    fprintf(stderr,"  comma deliminated. The result of the concatenation\n");
+    fprintf(stderr,"  is output to stdout\n");
+    exit(0);
+  }
+  
+  if(nfiles>10){
+    fprintf(stderr,"  Concatenation of more than 10 files not supported\n");
     exit(1);
   }
-  file1 = argv[1];
-  file2 = argv[2];
-  file3 = argv[3];
-  stream1=fopen(file1,"r");
-  stream2=fopen(file2,"r");
-  stream3=fopen(file3,"r");
-  if(stream1==NULL||stream2==NULL||stream3==NULL){
-    fprintf(stderr,"aborting ...\n");
-    if(stream1==NULL){
-      fprintf(stderr,"  The file %s could not be opened for input.\n",file1);
+  streams=malloc((argc-1)*sizeof(FILE *));
+  for(i=0;i<nfiles;i++){
+    streams[i]=fopen(argv[i+1],"r");
+    if(streams[i]==NULL){
+      fprintf(stderr,"  The file %s could not be opened for input.\n",argv[i]);
     }
-    if(stream2==NULL){
-      fprintf(stderr,"  The file %s could not be opened for input.\n",file2);
-    }
-    if(stream3==NULL){
-      fprintf(stderr,"  The file %s could not be opened for input.\n",file3);
-    }
-    exit(1);
   }
+
   while(1){
 //  as soon as one file ends the merging stops
-    if(fgets(buffer1,1024,stream1)==NULL)break;
-    if(fgets(buffer2,1024,stream2)==NULL)break;
-    if(fgets(buffer3,1024,stream3)==NULL)break;
-    trim(buffer1);
-    trim(buffer2);
-    trim(buffer3);
-    printf("%s,%s,%s\n",buffer1,buffer2,buffer3);
+   
+    for(i=0;i<nfiles;i++){ 
+      if(fgets(buffer,1024,streams[i])==NULL){
+        if(i!=0)printf("\n");
+        exit(1);
+      }
+      trim(buffer);
+      printf("%s",buffer);
+      if(i==nfiles-1){
+        printf("\n");
+      }
+      else{
+        printf(",");
+      }
+    }
   }
+  exit(0);
 }
 
 
