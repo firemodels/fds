@@ -191,8 +191,7 @@ $SVN Repository$~$Revision$}
 {\em Carlos M. Gutierrez, Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em James M. Turner, Acting Director} }
-
+{\em Patrick Gallagher, Acting Director} }
 
 \end{minipage}
 
@@ -3789,7 +3788,7 @@ contours).
 \hitem{m}Switch between blocks in a case that has more than one
 mesh.
 
-\hitem{o}Switch between outline viewing modes. The modes are 
+\hitem{o}Switch between outline viewing modes. The modes are
 \begin{enumerate}
 \item outline of the current mesh
 \item outline of the entire case
@@ -5248,9 +5247,12 @@ activation time for a particular device. The format for the {\tt
 DEVICE\_ACT} keyword is
 \begin{verbatim}
 DEVICE_ACT
-idevice time
+idevice time state
 \end{verbatim}
 where {\tt time}\ is the activation time of the {\tt idevice}'th device.
+State is the state of the device, 0 for off or in-active and 1 for 
+on or active.  If the device may be drawn more than two ways then
+more than 2 states may be used with this keyword.
 
 \hitem{HEAT}The {\tt HEAT} keyword defines heat detector location data.
 A FORTRAN 90 code segment describing the format of {\tt HEAT} data is given by:
