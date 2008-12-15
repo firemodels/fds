@@ -55,8 +55,8 @@ SUBROUTINE COMPUTE_VISCOSITY(NM)
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MU
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS,S12,S13,S23,DELTA,CS,MU_SUM
-INTEGER :: I,J,K,ITMP,N
+REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS,S12,S13,S23,DELTA,CS
+INTEGER :: I,J,K,ITMP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
  
@@ -104,49 +104,38 @@ IF (LES) THEN
             S23 = 0.5_EB*(DVDZ+DWDY)
             SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
             IF (DYNSMAG) CS = C_DYNSMAG(I,J,K)
-            ITMP = 0.1_EB*TMP(I,J,K)
-            MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*(CS*DELTA)**2*SS
+            ITMP = NINT(0.1_EB*TMP(I,J,K))
+            MU(I,J,K) = Y2MU_C(ITMP) + RHOP(I,J,K)*(CS*DELTA)**2*SS
          ENDDO
       ENDDO
    ENDDO
 ENDIF
    
-! Compute viscosity for DNS using primitive species rather than mixture fraction model
+! Compute viscosity for DNS using primitive species/mixture fraction
 
-IF (DNS .AND. .NOT.MIXTURE_FRACTION) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = 0.1_EB*TMP(I,J,K)
-            MU_SUM = SPECIES(0)%MU(ITMP)
-            DO N=1,N_SPECIES
-               MU_SUM = MU_SUM + YYP(I,J,K,N)*(SPECIES(N)%MU(ITMP)-SPECIES(0)%MU(ITMP))
+IF (DNS)  THEN
+   IF (N_SPECIES == 0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               ITMP = NINT(0.1_EB*TMP(I,J,K))
+               MU(I,J,K)=Y2MU_C(ITMP)
             ENDDO
-            MU(I,J,K) = MU_SUM
          ENDDO
       ENDDO
-   ENDDO
+   ELSE
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               ITMP = NINT(0.1_EB*TMP(I,J,K))
+               CALL GET_MU(YYP(I,J,K,:),MU(I,J,K),ITMP)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 ENDIF
-
-! Compute viscosity for DNS using mixture fraction model
-
-IF (DNS .AND. MIXTURE_FRACTION) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = 0.1_EB*TMP(I,J,K)
-            CALL GET_MU(YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM(I,J,K),MU(I,J,K),ITMP)                  
-            MU_SUM = MU(I,J,K)*(1._EB-Y_SUM(I,J,K))
-            DO N=1,N_SPECIES
-               IF(SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) MU_SUM = MU_SUM + YYP(I,J,K,N)*SPECIES(N)%MU(ITMP)
-            ENDDO
-            MU(I,J,K) = MU_SUM
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF 
 
 END SUBROUTINE COMPUTE_VISCOSITY
 
@@ -523,8 +512,8 @@ IF (LES) THEN
             S23 = 0.5_EB*(DVDZ+DWDY)
             SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
          
-            ITMP = 0.1_EB*TMP(I,J,K)
-            MU(I,J,K) = SPECIES(0)%MU(ITMP) + RHOP(I,J,K)*(CSMAG*DELTA)**2*SS
+            ITMP = NINT(0.1_EB*TMP(I,J,K))
+            MU(I,J,K) = Y2MU_C(ITMP) + RHOP(I,J,K)*(CSMAG*DELTA)**2*SS
          ENDDO
       ENDDO
    ENDDO
@@ -1356,7 +1345,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
             IF (NOM(1)<0) UM = WGT*OM_UU(IIO(1),JJO(1),KKO(1)) + (1._EB-WGT)*OM_UU(IIO(1)-1,JJO(1),KKO(1))
             IF (NOM(1)>0) UP = WGT*OM_UU(IIO(1),JJO(1),KKO(1)) + (1._EB-WGT)*OM_UU(IIO(1)-1,JJO(1),KKO(1))
          ENDIF
-
          IF (NOM(2)==0 .OR. EDGE_TYPE(IE,2)/=INTERPOLATED_EDGE) THEN
             SELECT CASE(IOR(2))
                CASE(-1)
@@ -1794,6 +1782,7 @@ ELSE
    CFL = DT*UVWMAX
 ENDIF
 
+CFL = DT*UVWMAX
  
 ! Determine max Von Neumann Number for fine grid calcs
  
@@ -1805,7 +1794,7 @@ PARABOLIC_IF: IF (DNS .OR. CELL_SIZE<0.005_EB .OR. CFL_VELOCITY_NORM>0) THEN
       ELSE
          R_DX2 = 1._EB/DXMIN**2 + 1._EB/DYMIN**2 + 1._EB/DZMIN**2
       ENDIF
-      MUTRM = MAX(RPR,RSC)*SPECIES(0)%MU(NINT(0.1_EB*TMPA))/RHOA
+      MUTRM = MAX(RPR,RSC)*Y2MU_C(NINT(0.1_EB*TMPA))
    ELSE INCOMPRESSIBLE_IF
       MU_MAX = 0._EB   
       DO K=1,KBAR
