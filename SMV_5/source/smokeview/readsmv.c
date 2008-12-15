@@ -3644,6 +3644,7 @@ typedef struct {
       ){
       device *devicei;
       float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
+      int state0=0;
 
       devicei = deviceinfo + ndeviceinfo;
       devicei->type=DEVICE_DEVICE;
@@ -3654,15 +3655,21 @@ typedef struct {
         devicei->object = device_defs_backup[0];
       }
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f",xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2);
+      sscanf(buffer,"%f %f %f %f %f %f %i",xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0);
       devicei->xyz[0]=xyz[0];
       devicei->xyz[1]=xyz[1];
       devicei->xyz[2]=xyz[2];
       devicei->xyznorm[0]=xyzn[0];
       devicei->xyznorm[1]=xyzn[1];
       devicei->xyznorm[2]=xyzn[2];
+      devicei->nstate_changes=0;
+      devicei->istate_changes=0;
+      devicei->act_times=NULL;
+      devicei->state_values=NULL;
+      devicei->showstatelist=NULL;
       devicei->act_time=-1.0;
       devicei->device_mesh=NULL;
+      devicei->state0=state0;
       get_elevaz(devicei->xyznorm,&devicei->angle_elev,&devicei->angle_az);
 
       ndeviceinfo++;
@@ -3672,13 +3679,16 @@ typedef struct {
       device *devicei;
       int idevice;
       float act_time;
+      int act_state;
 
+      do_pass4=1;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&idevice,&act_time);
+      sscanf(buffer,"%i %f %i",&idevice,&act_time,&act_state);
       idevice--;
       if(idevice>=0&&idevice<ndeviceinfo){
         devicei = deviceinfo + idevice;
         devicei->act_time=act_time;
+        devicei->nstate_changes++;
       }
 
       continue;
@@ -4185,6 +4195,42 @@ typedef struct {
           }
         }
       }
+      continue;
+    }
+
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ DEVICE_ACT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+
+    if(match(buffer,"DEVICE_ACT",10) == 1){
+      device *devicei;
+      int idevice;
+      float act_time;
+      int act_state=1;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f %i",&idevice,&act_time,&act_state);
+      idevice--;
+      if(idevice>=0&&idevice<ndeviceinfo){
+        int istate;
+
+        devicei = deviceinfo + idevice;
+        devicei->act_time=act_time;
+        if(devicei->act_times==NULL){
+          devicei->nstate_changes++;
+          NewMemory((void **)&devicei->act_times,devicei->nstate_changes*sizeof(int));
+          NewMemory((void **)&devicei->state_values,devicei->nstate_changes*sizeof(int));
+          devicei->act_times[0]=0.0;
+          devicei->state_values[0]=devicei->state0;
+          devicei->istate_changes++;
+        }
+        istate = devicei->istate_changes++;
+        devicei->act_times[istate]=act_time;
+        devicei->state_values[istate]=act_state;
+      }
+
       continue;
     }
 
@@ -9188,6 +9234,12 @@ void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
   norm+=xyznorm[2]*xyznorm[2];
   norm=sqrt(norm);
   pi=4.0*atan(1.0);
+  if(norm<=0.001){
+    xyznorm[0]=0.0;
+    xyznorm[1]=0.0;
+    xyznorm[2]=1.0;
+    norm=1.0;
+  }
 
   coselev=-1.0*xyznorm[2]/norm;
   *angle_elev=180.0*acos(coselev)/pi;

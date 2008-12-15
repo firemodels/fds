@@ -74,6 +74,10 @@ EXTERNCPP void UnloadSmokeShaders(void);
 EXTERNCPP void getfile_modtime(char *filename, time_t *modtime);
 EXTERNCPP float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc);
 EXTERNCPP void update_camera_ypos(camera *camera_data);
+#ifdef pp_VIEWCLIP
+EXTERNCPP void clip2cam(camera *cam);
+EXTERNCPP void cam2clip(camera *cam);
+#endif
 EXTERNCPP void to_lower(char *string);
 EXTERNCPP void init_device_defs(void);
 EXTERNCPP void make_error_frame(void);
