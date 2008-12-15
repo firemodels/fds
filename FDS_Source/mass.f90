@@ -127,7 +127,6 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
          ENDDO
       ENDDO
    ENDDO
- 
 ENDIF NOT_ISOTHERMAL_IF
  
 ! Compute the species equation differences
@@ -209,13 +208,12 @@ SUBROUTINE DENSITY(NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
-                            CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_SPEC_DILUENTS, N_ZONE,MIXTURE_FRACTION_SPECIES,Z_VECTOR, &
+                            CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_ZONE,MIXTURE_FRACTION_SPECIES, &
                             GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,BAROCLINIC, &
-                            RHO_LOWER_GLOBAL,RHO_UPPER_GLOBAL,I_Z_MIN,I_Z_MAX
+                            RHO_LOWER_GLOBAL,RHO_UPPER_GLOBAL,RSUM0
 REAL(EB) :: WFAC,DTRATIO,OMDTRATIO,TNOW
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: R_SUM_DILUENTS
  
 IF (EVACUATION_ONLY(NM)) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
@@ -267,7 +265,6 @@ CASE(.TRUE.) PREDICTOR_STEP
             ENDDO
          ENDDO
       ENDDO
-
    ELSE
 
       DO K=0,KBP1
@@ -324,31 +321,15 @@ CASE(.TRUE.) PREDICTOR_STEP
       PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
    ENDDO
 
-   ! Compute mixture fraction and diluent sums: Y_SUM=Sum(Y_i), Z_SUM=Sum(Z_i)
-
-   IF (MIXTURE_FRACTION) THEN
-      Z_SUM  =  0._EB
-      Y_SUM  =  0._EB
-      IF (N_SPEC_DILUENTS > 0) THEN
-         R_SUM_DILUENTS => WORK4
-         R_SUM_DILUENTS =  0._EB
-      ENDIF
-      DO N=1,N_SPECIES
-         IF (SPECIES(N)%MODE==MIXTURE_FRACTION_SPECIES) Z_SUM = Z_SUM + YYS(:,:,:,N)
-         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-            Y_SUM = Y_SUM + YYS(:,:,:,N)
-            R_SUM_DILUENTS(:,:,:) = R_SUM_DILUENTS(:,:,:) + SPECIES(N)%RCON*YYS(:,:,:,N)
-         ENDIF
-      ENDDO
-   ENDIF
-
-   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
- 
-   IF (N_SPECIES>0 .AND. .NOT.MIXTURE_FRACTION) THEN
-      RSUM = SPECIES(0)%RCON
-      DO N=1,N_SPECIES
-         WFAC = SPECIES(N)%RCON - SPECIES(0)%RCON
-         RSUM(:,:,:) = RSUM(:,:,:) + WFAC*YYS(:,:,:,N)
+! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+   IF (N_SPECIES>0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR               
+               CALL GET_MOLECULAR_WEIGHT(YYS(I,J,K,:),RSUM(I,J,K))
+               RSUM(I,J,K) = R0/RSUM(I,J,K)
+            ENDDO
+         ENDDO
       ENDDO
       IF (ISOTHERMAL) THEN
          DO K=0,KBP1
@@ -361,27 +342,13 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDIF
    ENDIF
 
-   IF (MIXTURE_FRACTION) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               Z_VECTOR = YYS(I,J,K,I_Z_MIN:I_Z_MAX)
-               CALL GET_MOLECULAR_WEIGHT(Z_VECTOR,Y_SUM(I,J,K),RSUM(I,J,K))
-               RSUM(I,J,K) = R0/RSUM(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
-      IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
-   ENDIF
-
-   ! Extract predicted temperature at next time step from Equation of State
-
-   IF (.NOT.ISOTHERMAL) THEN
+! Extract predicted temperature at next time step from Equation of State
+   IF (.NOT. ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
-                  TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*RHOS(I,J,K))
+                  TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHOS(I,J,K))
                ENDDO
             ENDDO
          ENDDO
@@ -478,31 +445,15 @@ CASE(.FALSE.) PREDICTOR_STEP
       PBAR(:,I) = .5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_S_DT(I)*DT)
    ENDDO
  
-   ! Compute mixture fraction and diluent sums: Y_SUM=Sum(Y_i), Z_SUM=Sum(Z_i)
-
-   IF (MIXTURE_FRACTION) THEN
-      Z_SUM  =  0._EB
-      Y_SUM  =  0._EB
-      IF (N_SPEC_DILUENTS > 0) THEN
-         R_SUM_DILUENTS => WORK4
-         R_SUM_DILUENTS =  0._EB
-         ENDIF
-      DO N=1,N_SPECIES
-         IF (SPECIES(N)%MODE==MIXTURE_FRACTION_SPECIES) Z_SUM = Z_SUM + YY(:,:,:,N)
-         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-            Y_SUM = Y_SUM + YY(:,:,:,N)
-            R_SUM_DILUENTS(:,:,:) = R_SUM_DILUENTS(:,:,:) + SPECIES(N)%RCON*YY(:,:,:,N)
-         ENDIF
-      ENDDO
-   ENDIF
-
-   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
- 
-   IF (N_SPECIES>0 .AND. .NOT. MIXTURE_FRACTION) THEN
-      RSUM = SPECIES(0)%RCON
-      DO N=1,N_SPECIES
-         WFAC = SPECIES(N)%RCON - SPECIES(0)%RCON
-         RSUM(:,:,:) = RSUM(:,:,:) + WFAC*YY(:,:,:,N)
+! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+   IF (N_SPECIES>0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR               
+               CALL GET_MOLECULAR_WEIGHT(YY(I,J,K,:),RSUM(I,J,K))
+               RSUM(I,J,K) = R0/RSUM(I,J,K)
+            ENDDO
+         ENDDO
       ENDDO
       IF (ISOTHERMAL) THEN
          DO K=0,KBP1
@@ -515,27 +466,13 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDIF
    ENDIF
 
-   IF (MIXTURE_FRACTION) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               Z_VECTOR = YY(I,J,K,I_Z_MIN:I_Z_MAX)
-               CALL GET_MOLECULAR_WEIGHT(Z_VECTOR,Y_SUM(I,J,K),RSUM(I,J,K))
-               RSUM(I,J,K) = R0/RSUM(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
-      IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
-   ENDIF
-
-   ! Extract temperature from the Equation of State
-
-   IF (.NOT.ISOTHERMAL) THEN
+! Extract predicted temperature at next time step from Equation of State
+   IF (.NOT. ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
-                  TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*RHO(I,J,K))
+                  TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHO(I,J,K))
                ENDDO
             ENDDO
          ENDDO
@@ -550,7 +487,6 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDIF
       TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
    ENDIF
-
 END SELECT PREDICTOR_STEP
 
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
@@ -1035,15 +971,14 @@ SUBROUTINE DENSITY_TVD(NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
-                            CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_SPEC_DILUENTS, N_ZONE,MIXTURE_FRACTION_SPECIES, LU_ERR, &
+                            CHANGE_TIME_STEP,ISOTHERMAL,TMPA, N_ZONE,MIXTURE_FRACTION_SPECIES, LU_ERR, &
                             GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,FLUX_LIMITER, &
-                            RHO_LOWER_GLOBAL,RHO_UPPER_GLOBAL, &
-                            BAROCLINIC,I_Z_MIN,I_Z_MAX,Z_VECTOR
+                            RHO_LOWER_GLOBAL,RHO_UPPER_GLOBAL, RSUM0,&
+                            BAROCLINIC
  
 REAL(EB) :: WFAC,TNOW
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: R_SUM_DILUENTS
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,YYN,FX,FY,FZ
 
  
@@ -1115,31 +1050,15 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
    ENDDO
 
-   ! Compute mixture fraction and diluent sums: Y_SUM=Sum(Y_i), Z_SUM=Sum(Z_i)
-
-   IF (MIXTURE_FRACTION) THEN
-      Z_SUM  =  0._EB
-      Y_SUM  =  0._EB
-      IF (N_SPEC_DILUENTS > 0) THEN
-         R_SUM_DILUENTS => WORK4
-         R_SUM_DILUENTS =  0._EB
-      ENDIF
-      DO N=1,N_SPECIES
-         IF (SPECIES(N)%MODE==MIXTURE_FRACTION_SPECIES) Z_SUM = Z_SUM + YYS(:,:,:,N)
-         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-            Y_SUM = Y_SUM + YYS(:,:,:,N)
-            R_SUM_DILUENTS(:,:,:) = R_SUM_DILUENTS(:,:,:) + SPECIES(N)%RCON*YYS(:,:,:,N)
-         ENDIF
-      ENDDO
-   ENDIF
-
-   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
- 
-   IF (N_SPECIES>0 .AND. .NOT.MIXTURE_FRACTION) THEN
-      RSUM = SPECIES(0)%RCON
-      DO N=1,N_SPECIES
-         WFAC = SPECIES(N)%RCON - SPECIES(0)%RCON
-         RSUM(:,:,:) = RSUM(:,:,:) + WFAC*YYS(:,:,:,N)
+! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+   IF (N_SPECIES>0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR               
+               CALL GET_MOLECULAR_WEIGHT(YYS(I,J,K,:),RSUM(I,J,K))
+               RSUM(I,J,K) = R0/RSUM(I,J,K)
+            ENDDO
+         ENDDO
       ENDDO
       IF (ISOTHERMAL) THEN
          DO K=0,KBP1
@@ -1152,28 +1071,13 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       ENDIF
    ENDIF
 
-   IF (MIXTURE_FRACTION) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               Z_VECTOR = YYS(I,J,K,I_Z_MIN:I_Z_MAX)
-               CALL GET_MOLECULAR_WEIGHT(Z_VECTOR,Y_SUM(I,J,K),RSUM(I,J,K))
-               RSUM(I,J,K) = R0/RSUM(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
-      IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
-   ENDIF
-
-   ! Extract predicted temperature at next time step from Equation of State
-
-   IF (.NOT.ISOTHERMAL) THEN
+! Extract predicted temperature at next time step from Equation of State
+   IF (.NOT. ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
-                  TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*RHOS(I,J,K))
-                  TMP(I,J,K) = MAX(TMPMIN,MIN(TMPMAX,TMP(I,J,K)))
+                  TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHOS(I,J,K))
                ENDDO
             ENDDO
          ENDDO
@@ -1182,14 +1086,12 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
             DO J=0,JBP1
                DO I=0,IBP1
                   TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
-                  TMP(I,J,K) = MAX(TMPMIN,MIN(TMPMAX,TMP(I,J,K)))
                ENDDO
             ENDDO
          ENDDO
       ENDIF
-      !TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
-   ENDIF
-
+      TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
+   ENDIF   
 ! The CORRECTOR step   
 ELSEIF (CORRECTOR) THEN
 
@@ -1258,31 +1160,15 @@ ELSEIF (CORRECTOR) THEN
       PBAR(:,I) = .5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_S_DT(I)*DT)
    ENDDO
  
-   ! Compute mixture fraction and diluent sums: Y_SUM=Sum(Y_i), Z_SUM=Sum(Z_i)
-
-   IF (MIXTURE_FRACTION) THEN
-      Z_SUM  =  0._EB
-      Y_SUM  =  0._EB
-      IF (N_SPEC_DILUENTS > 0) THEN
-         R_SUM_DILUENTS => WORK4
-         R_SUM_DILUENTS =  0._EB
-         ENDIF
-      DO N=1,N_SPECIES
-         IF (SPECIES(N)%MODE==MIXTURE_FRACTION_SPECIES) Z_SUM = Z_SUM + YY(:,:,:,N)
-         IF (SPECIES(N)%MODE==GAS_SPECIES) THEN
-            Y_SUM = Y_SUM + YY(:,:,:,N)
-            R_SUM_DILUENTS(:,:,:) = R_SUM_DILUENTS(:,:,:) + SPECIES(N)%RCON*YY(:,:,:,N)
-         ENDIF
-      ENDDO
-   ENDIF
-
-   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
- 
-   IF (N_SPECIES>0 .AND. .NOT. MIXTURE_FRACTION) THEN
-      RSUM = SPECIES(0)%RCON
-      DO N=1,N_SPECIES
-         WFAC = SPECIES(N)%RCON - SPECIES(0)%RCON
-         RSUM(:,:,:) = RSUM(:,:,:) + WFAC*YY(:,:,:,N)
+! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+   IF (N_SPECIES>0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR               
+               CALL GET_MOLECULAR_WEIGHT(YYS(I,J,K,:),RSUM(I,J,K))
+               RSUM(I,J,K) = R0/RSUM(I,J,K)
+            ENDDO
+         ENDDO
       ENDDO
       IF (ISOTHERMAL) THEN
          DO K=0,KBP1
@@ -1295,28 +1181,13 @@ ELSEIF (CORRECTOR) THEN
       ENDIF
    ENDIF
 
-   IF (MIXTURE_FRACTION) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               Z_VECTOR = YY(I,J,K,I_Z_MIN:I_Z_MAX)
-               CALL GET_MOLECULAR_WEIGHT(Z_VECTOR,Y_SUM(I,J,K),RSUM(I,J,K))
-               RSUM(I,J,K) = R0/RSUM(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
-      IF (N_SPEC_DILUENTS > 0) RSUM = RSUM*(1._EB-Y_SUM) + R_SUM_DILUENTS
-   ENDIF
-
-   ! Extract temperature from the Equation of State
-
-   IF (.NOT.ISOTHERMAL) THEN
+! Extract predicted temperature at next time step from Equation of State
+   IF (.NOT. ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
-                  TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*RHO(I,J,K))
-                  TMP(I,J,K) = MAX(TMPMIN,MIN(TMPMAX,TMP(I,J,K)))
+                  TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHO(I,J,K))
                ENDDO
             ENDDO
          ENDDO
@@ -1325,14 +1196,12 @@ ELSEIF (CORRECTOR) THEN
             DO J=0,JBP1
                DO I=0,IBP1
                   TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
-                  TMP(I,J,K) = MAX(TMPMIN,MIN(TMPMAX,TMP(I,J,K)))
                ENDDO
             ENDDO
          ENDDO
       ENDIF
-      !TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
+      TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
    ENDIF
-
 ENDIF SELECT_SUBSTEP
 
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
