@@ -14,6 +14,7 @@
 
 #ifdef pp_BETA
 #define SMVVERSION "Test"
+#define pp_VIEWCLIP
 #undef pp_release
 #endif
 

@@ -2574,6 +2574,26 @@ void updatetimes(void){
     }
   }
 
+  /* determine state of each device at each time step */
+
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+
+    devicei = deviceinfo + i;
+    if(devicei->object->visible==0)continue;
+    if(devicei->nstate_changes==0)continue;
+    FREEMEMORY(devicei->showstatelist);
+    if(ntimes>0){
+      NewMemory((void **)&devicei->showstatelist,ntimes*sizeof(int));
+      for(k=0;k<ntimes;k++){
+        int listindex;
+
+        listindex=getindex(times[k],devicei->act_times,devicei->nstate_changes);
+        devicei->showstatelist[k]=devicei->state_values[listindex];
+      }
+    }
+  }
+
   /* determine visibility of each vent at each time step */
 
   for(i=0;i<nmeshes;i++){

@@ -285,6 +285,10 @@ void CLIP_CB(int var){
     ASSERT(0);
     break;
   }
+#ifdef pp_VIEWCLIP
+  clip2cam(camera_current);
+#endif
+
 }
 
 /* ------------------ update_clip_all ------------------------ */
