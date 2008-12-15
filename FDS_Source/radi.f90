@@ -25,9 +25,8 @@ USE MEMORY_FUNCTIONS, ONLY : CHKMEMERR
 USE MIEV
 USE RADCALV
 USE DEVICE_VARIABLES, ONLY : DEVICE, GAS_CELL_RAD_FLUX, GAS_CELL_RAD_DEVC_INDEX, N_GAS_CELL_RAD_DEVC
-REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,MW_RADCAL,PLANCK_C2,KSI,LT,RCRHO,YY,BBF,AP0,AMEAN,MTOT
-INTEGER  :: N,I,J,K,IZERO,NN,NI,II,JJ,IIM,JJM,IBND,NS,I_RADCAL,NRA,NSB
-TYPE(SPECIES_TYPE), POINTER :: SS
+REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,PLANCK_C2,KSI,LT,RCRHO,YY,BBF,AP0,AMEAN
+INTEGER  :: N,I,J,K,IZERO,NN,NI,II,JJ,IIM,JJM,IBND,NS,NRA,NSB
 TYPE(PARTICLE_CLASS_TYPE), POINTER :: PC
  
 ! Determine the number of polar angles (theta)
@@ -282,229 +281,184 @@ ENDIF INIT_WIDE_BAND
 !          OMMAX=MAXIMUM WAVE NUMBER IN SPECTRUM, CM-1.
 !
 !-------------------------------------------------------------------------
- 
+MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_FUEL /= 0 .OR. I_CO2 /= 0 .OR. I_WATER /=0) THEN 
+   KAPPA_ARRAY = .TRUE.
 ! Allocate arrays for RadCal
-
-CALL RCALLOC
+   CALL RCALLOC
  
 ! Set the Mean Beam Length to 5 times the smallest cell dimension unless the user desires otherwise
  
-IF (PATH_LENGTH < 0._EB) PATH_LENGTH = MIN( 10._EB , 5._EB*CHARACTERISTIC_CELL_SIZE )
-
-DD(1) = MAX(PATH_LENGTH,1.0E-4_EB)
+   IF (PATH_LENGTH < 0._EB) PATH_LENGTH = MIN( 10._EB , 5._EB*CHARACTERISTIC_CELL_SIZE )
+   DD = MAX(PATH_LENGTH,1.0E-4_EB)
  
 ! Using RadCal, create look-up tables for the absorption coefficients for all gas species, mixture fraction or aerosols
-
-SPECIES_LOOP: DO NS=1,N_SPECIES
-
-   SS => SPECIES(NS)
-   IF (.NOT. SS%ABSORBING) CYCLE SPECIES_LOOP
- 
-   GAS_TYPE: SELECT CASE (SS%MODE) 
-
-      CASE (GAS_SPECIES) GAS_TYPE
-
-         SS%NKAP_TEMP = 21
-         SS%NKAP_MASS = 200
-         SS%MAXMASS=1._EB
-         ALLOCATE(SS%KAPPA(0:SS%NKAP_MASS,0:SS%NKAP_TEMP,1:NSB),STAT=IZERO)
-         CALL ChkMemErr('RADI','KAPPA',IZERO)
-         IF (NS==I_CO2) THEN
-            I_RADCAL = 1
-            MW_RADCAL = MW_CO2
-         ELSEIF (NS==I_CO) THEN
-            I_RADCAL = 4
-            MW_RADCAL = MW_CO
-         ELSEIF (NS==I_WATER) THEN
-            I_RADCAL = 2
-            MW_RADCAL = MW_H2O
-         ELSE
-            IF (SS%ABSORBING) THEN
-               I_RADCAL = 3
-               MW_RADCAL = 16
-            ELSE
-               I_RADCAL = 5
-               MW_RADCAL = 32
-            ENDIF
-         END IF
-         BAND_LOOP_FR1: DO IBND = 1,NSB
-            IF (NSB>1) THEN
-               OMMIN = REAL(NINT(1.E4_EB/WL_HIGH(IBND)),EB)
-               OMMAX = REAL(NINT(1.E4_EB/WL_LOW(IBND)),EB)
-            ELSE
-               OMMIN = 50._EB
-               OMMAX = 10000._EB
-            ENDIF
-            CALL INIT_RADCAL
-            T_LOOP_MF2: DO K = 0,SS%NKAP_TEMP
-               RCT(1) = RTMPMIN + K*(RTMPMAX-RTMPMIN)/SS%NKAP_TEMP
-               Z_LOOP_MF2: DO J=0,SS%NKAP_MASS
-                  YY = SS%MAXMASS*(REAL(J)/REAL(SS%NKAP_MASS))**4
-                  MTOT = YY/MW_RADCAL+(1._EB-YY)/MW_N2
-                  SPECIE = 0._EB
-                  SPECIE(I_RADCAL) = YY
-                  P(:,1) = 0._EB
-                  SVF = 0._EB
-                  P(I_RADCAL,1) = YY/MW_RADCAL/MTOT
-                  P(6,1) = (1-YY)/MW_N2/MTOT
-                  CALL RADCAL(AMEAN,AP0)
-                  IF (NSB==1 .AND. PATH_LENGTH > 0._EB) THEN
-                     SS%KAPPA(J,K,IBND) = MIN(AMEAN,AP0)
-                  ELSE
-                     IF (NSB==1) THEN
-                        BBF = 1._EB
-                     ELSE
-                        BBF = BLACKBODY_FRACTION(WL_LOW(1),WL_HIGH(1),RCT(1))
-                     ENDIF
-                     SS%KAPPA(J,K,IBND) = AP0/BBF
-                  ENDIF
-              ENDDO Z_LOOP_MF2
-            ENDDO T_LOOP_MF2
-         ENDDO BAND_LOOP_FR1
-
-      CASE (AEROSOL_SPECIES) GAS_TYPE
-
-         SS%NKAP_TEMP = 21
-         SS%NKAP_MASS = 200  
-         SS%MAXMASS=0.2_EB   
-         ALLOCATE(SS%KAPPA(0:SS%NKAP_MASS,0:SS%NKAP_TEMP,1:NSB),STAT=IZERO)
-         CALL ChkMemErr('RADI','KAPPA',IZERO)
-         BAND_LOOP_FR2: DO IBND = 1,NSB
-            IF (NSB>1) THEN
-               OMMIN = REAL(NINT(1.E4_EB/WL_HIGH(IBND)),EB)
-               OMMAX = REAL(NINT(1.E4_EB/WL_LOW(IBND)),EB)
-            ELSE
-               OMMIN = 50._EB
-               OMMAX = 10000._EB
-            ENDIF
-            CALL INIT_RADCAL
-            I_RADCAL=5
-            T_LOOP_MF3: DO K = 0,SS%NKAP_TEMP
-               RCT(1) = RTMPMIN + K*(RTMPMAX-RTMPMIN)/SS%NKAP_TEMP
-               Z_LOOP_MF3: DO J=0,SS%NKAP_MASS
-                  YY = SS%MAXMASS*(REAL(J)/REAL(SS%NKAP_MASS))**4
-                  RCRHO = 29._EB * P_INF/(R0*RCT(1)) !Good enough
-                  SPECIE = 0._EB               
-                  P(:,1) = 0._EB               
-                  P(6,1) = 1._EB
-                  SPECIE(I_RADCAL) = YY*RCRHO/RHO_SOOT                  
-                  SVF(1) = YY*RCRHO/RHO_SOOT                                    
-                  CALL RADCAL(AMEAN,AP0)
-                  IF (NSB==1 .AND. PATH_LENGTH > 0._EB) THEN
-                     SS%KAPPA(J,K,IBND) = MIN(AMEAN,AP0)
-                  ELSE
-                     IF (NSB==1) THEN
-                        BBF = 1._EB
-                     ELSE
-                        BBF = BLACKBODY_FRACTION(WL_LOW(1),WL_HIGH(1),RCT(1))
-                     ENDIF
-                     SS%KAPPA(J,K,IBND) = AP0/BBF
-                  ENDIF
-               ENDDO Z_LOOP_MF3
-            ENDDO T_LOOP_MF3
-         ENDDO BAND_LOOP_FR2
-
-   END SELECT GAS_TYPE
-
-ENDDO SPECIES_LOOP
-
-IF (MIXTURE_FRACTION) THEN
-   Z2KAPPA_T = 42
-   Z2KAPPA_M = 50
-   ALLOCATE (Z2KAPPA_M4(5),STAT=IZERO)
-   CALL ChkMemErr('RADI','Z2KAPPA_M4',IZERO)
-   Z2KAPPA_M4(1) = REAL(Z2KAPPA_M,EB)**4/REACTION(1)%MW_FUEL
-   Z2KAPPA_M4(2) = REAL(Z2KAPPA_M,EB)**4/MW_CO2
-   Z2KAPPA_M4(3) = REAL(Z2KAPPA_M,EB)**4/MW_CO
-   Z2KAPPA_M4(4) = REAL(Z2KAPPA_M,EB)**4/MW_H2O
-   Z2KAPPA_M4(5) = REAL(Z2KAPPA_M,EB)**4*5._EB
-   ALLOCATE (Z2KAPPA(5,0:Z2KAPPA_M,0:Z2KAPPA_T,NSB),STAT=IZERO)
-   CALL ChkMemErr('RADI','Z2KAPPA',IZERO)
-   Z2KAPPA = 0._EB
+   N_KAPPA_ARRAY=0
+   IF (MIXTURE_FRACTION) THEN
+      N_KAPPA_ARRAY = 5
+   ELSE
+      IF (I_FUEL /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
+      IF (I_CO2 /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
+      IF (I_CO /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
+      IF (I_WATER /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
+      IF (I_SOOT /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
+   ENDIF
+   Y2KAPPA_T = 42
+   Y2KAPPA_M = 50
+   ALLOCATE (Y2KAPPA_M4(N_KAPPA_ARRAY),STAT=IZERO)
+   CALL ChkMemErr('RADI','Y2KAPPA_M4',IZERO)
+   ALLOCATE (KAPPA_INDEX(N_KAPPA_ARRAY),STAT=IZERO)
+   CALL ChkMemErr('RADI','KAPPA_INDEX',IZERO)
+   IF (MIXTURE_FRACTION) THEN
+      Y2KAPPA_M4(1) = REAL(Y2KAPPA_M,EB)**4/REACTION(1)%MW_FUEL
+      Y2KAPPA_M4(2) = REAL(Y2KAPPA_M,EB)**4/MW_CO2
+      Y2KAPPA_M4(3) = REAL(Y2KAPPA_M,EB)**4/MW_CO
+      Y2KAPPA_M4(4) = REAL(Y2KAPPA_M,EB)**4/MW_H2O
+      Y2KAPPA_M4(5) = REAL(Y2KAPPA_M,EB)**4*5._EB
+      KAPPA_INDEX(1) = FUEL_INDEX
+      KAPPA_INDEX(2) = CO2_INDEX
+      KAPPA_INDEX(3) = CO_INDEX      
+      KAPPA_INDEX(4) = H2O_INDEX
+      KAPPA_INDEX(5) = SOOT_INDEX
+   ELSE
+      NS = 0
+      IF (I_FUEL /= 0) THEN
+         NS = NS + 1
+         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/SPECIES(I_FUEL)%MW
+         KAPPA_INDEX(NS) = I_FUEL
+      ENDIF
+      IF (I_CO2 /= 0) THEN
+         NS = NS + 1
+         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_CO2
+         KAPPA_INDEX(NS) = I_CO2         
+      ENDIF
+      IF (I_CO /= 0) THEN
+         NS = NS + 1
+         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_CO
+         KAPPA_INDEX(NS) = I_CO         
+      ENDIF
+      IF (I_WATER /= 0) THEN
+         NS = NS + 1
+         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_H2O
+         KAPPA_INDEX(NS) = I_WATER
+      ENDIF
+      IF (I_SOOT /= 0) THEN
+         NS = NS + 1
+         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/5._EB
+         KAPPA_INDEX(NS) = I_SOOT
+      ENDIF
+   ENDIF
+   ALLOCATE (Y2KAPPA(N_KAPPA_ARRAY,0:Y2KAPPA_M,0:Y2KAPPA_T,NSB),STAT=IZERO)
+   CALL ChkMemErr('RADI','Y2KAPPA',IZERO)
+   Y2KAPPA = 0._EB
    BBF = 1._EB
    OMMIN = 50._EB
    OMMAX = 10000._EB
    BAND_LOOP_Z: DO IBND = 1,NSB
       IF (NSB>1) THEN
-       OMMIN = REAL(NINT(1.E4_EB/WL_HIGH(IBND)),EB)
-       OMMAX = REAL(NINT(1.E4_EB/WL_LOW(IBND)),EB)
+         OMMIN = REAL(NINT(1.E4_EB/WL_HIGH(IBND)),EB)
+         OMMAX = REAL(NINT(1.E4_EB/WL_LOW(IBND)),EB)
       ENDIF
       CALL INIT_RADCAL 
-      T_LOOP_Z: DO K = 0,Z2KAPPA_T
-         RCT(1) = RTMPMIN + K*(RTMPMAX-RTMPMIN)/Z2KAPPA_T         
-         IF (NSB>1) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),RCT(1))
-         Y_LOOP_Z: DO J=0,Z2KAPPA_M
-            YY = (REAL(J,EB)/REAL(Z2KAPPA_M,EB))**4
-            SVF(1) = 0._EB
-            !FUEL
-            SPECIE = 0._EB
-            P = 0._EB
-            SPECIE(3) = YY
-            P(3,1) = YY
-            P(6,1) = (1._EB-YY)
-            CALL RADCAL(AMEAN,AP0)
-            IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-               Z2KAPPA(1,J,K,IBND) = MIN(AMEAN,AP0)
-            ELSE
-               Z2KAPPA(1,J,K,IBND) = AP0/BBF
-            ENDIF
-            !CO2
-            SPECIE = 0._EB
-            P = 0._EB
-            SPECIE(1) = YY
-            P(1,1) = YY
-            P(6,1) = (1._EB-YY)
-            CALL RADCAL(AMEAN,AP0)
-            IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-               Z2KAPPA(2,J,K,IBND) = MIN(AMEAN,AP0)
-            ELSE
-               Z2KAPPA(2,J,K,IBND) = AP0/BBF
-            ENDIF
-            !CO
-            SPECIE = 0._EB
-            P = 0._EB
-            SPECIE(4) = YY
-            P(4,1) = YY
-            P(6,1) = (1._EB-YY)
-            CALL RADCAL(AMEAN,AP0)
-            IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-               Z2KAPPA(3,J,K,IBND) = MIN(AMEAN,AP0)
-            ELSE
-               Z2KAPPA(3,J,K,IBND) = AP0/BBF
-            ENDIF
-            !H2O
-            SPECIE = 0._EB
-            P = 0._EB
-            SPECIE(2) = YY
-            P(2,1) = YY
-            P(6,1) = (1._EB-YY)
-            CALL RADCAL(AMEAN,AP0)
-            IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-               Z2KAPPA(4,J,K,IBND) = MIN(AMEAN,AP0)
-            ELSE
-               Z2KAPPA(4,J,K,IBND) = AP0/BBF
-            ENDIF
-            !Soot
-            RCRHO = MW_AIR*P_INF/(R0*RCT(1))
-            YY = YY * 0.2_EB
-            SPECIE = 0._EB
-            P = 0._EB
-            SPECIE(5) = YY*RCRHO/RHO_SOOT
-            P(6,1) = 1._EB
-            SVF(1) = YY*RCRHO/RHO_SOOT
-            CALL RADCAL(AMEAN,AP0)
-            IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-               Z2KAPPA(5,J,K,IBND) = MIN(AMEAN,AP0)
-            ELSE
-               Z2KAPPA(5,J,K,IBND) = AP0/BBF
-            ENDIF
-         ENDDO Y_LOOP_Z
+      T_LOOP_Z: DO K = 0,Y2KAPPA_T
+         RCT = RTMPMIN + K*(RTMPMAX-RTMPMIN)/Y2KAPPA_T         
+         IF (NSB>1) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),RCT)
+         Y_LOOP_Z: DO J=0,Y2KAPPA_M
+            YY = (REAL(J,EB)/REAL(Y2KAPPA_M,EB))**4
+            N = 0
+            KAPPA_SPECIES: DO NS = 1, 5
+               SELECT CASE(NS)
+                  CASE(1) !FUEL
+                     IF(MIXTURE_FRACTION .OR. I_FUEL /=0) THEN
+                        N = N + 1
+                        SVF = 0._EB
+                        !FUEL
+                        SPECIE = 0._EB
+                        P = 0._EB
+                        SPECIE(3) = YY
+                        P(3) = YY
+                        P(6) = (1._EB-YY)
+                        CALL RADCAL(AMEAN,AP0)
+                        IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
+                           Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                        ELSE
+                           Y2KAPPA(N,J,K,IBND) = AP0/BBF
+                        ENDIF
+                     ENDIF
+                  CASE(2) !CO2
+                     IF(MIXTURE_FRACTION .OR. I_FUEL /=0) THEN
+                        N = N + 1
+                        SVF = 0._EB
+                        !FUEL
+                        SPECIE = 0._EB
+                        P = 0._EB
+                        SPECIE(1) = YY
+                        P(1) = YY
+                        P(6) = (1._EB-YY)
+                        CALL RADCAL(AMEAN,AP0)
+                        IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
+                           Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                        ELSE
+                           Y2KAPPA(N,J,K,IBND) = AP0/BBF
+                        ENDIF
+                     ENDIF
+                  CASE(3) !CO
+                     IF(MIXTURE_FRACTION .OR. I_FUEL /=0) THEN
+                        N = N + 1
+                        SVF = 0._EB
+                        !FUEL
+                        SPECIE = 0._EB
+                        P = 0._EB
+                        SPECIE(4) = YY
+                        P(4) = YY
+                        P(6) = (1._EB-YY)
+                        CALL RADCAL(AMEAN,AP0)
+                        IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
+                           Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                        ELSE
+                           Y2KAPPA(N,J,K,IBND) = AP0/BBF
+                        ENDIF
+                     ENDIF
+                  CASE(4) !H2O
+                     IF(MIXTURE_FRACTION .OR. I_FUEL /=0) THEN
+                        N = N + 1
+                        SVF = 0._EB
+                        !FUEL
+                        SPECIE = 0._EB
+                        P = 0._EB
+                        SPECIE(2) = YY
+                        P(2) = YY
+                        P(6) = (1._EB-YY)
+                        CALL RADCAL(AMEAN,AP0)
+                        IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
+                           Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                        ELSE
+                           Y2KAPPA(N,J,K,IBND) = AP0/BBF
+                        ENDIF
+                     ENDIF
+                  CASE(5) !Soot
+                     IF(MIXTURE_FRACTION .OR. I_SOOT /=0) THEN
+                        N = N + 1
+                        RCRHO = MW_AIR*P_INF/(R0*RCT)
+                        YY = YY * 0.2_EB
+                        SPECIE = 0._EB
+                        P = 0._EB
+                        SPECIE(5) = YY*RCRHO/RHO_SOOT
+                        P(6) = 1._EB
+                        SVF = YY*RCRHO/RHO_SOOT
+                        CALL RADCAL(AMEAN,AP0)                        
+                        IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
+                           Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                        ELSE
+                           Y2KAPPA(N,J,K,IBND) = AP0/BBF
+                        ENDIF
+                     ENDIF
+               END SELECT
+            END DO KAPPA_SPECIES
+         ENDDO Y_LOOP_z
       ENDDO T_LOOP_Z
    ENDDO BAND_LOOP_Z
-ENDIF
-
-CALL RCDEALLOC  ! Deallocate RadCal arrays
- 
+   CALL RCDEALLOC  ! Deallocate RadCal arrays
+ENDIF MAKE_KAPPA_ARRAYS
  
 !-----------------------------------------------------
 !
@@ -571,12 +525,12 @@ SUBROUTINE RADIATION_FVM(NM)
 USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 USE DEVICE_VARIABLES, ONLY : DEVICE_TYPE,DEVICE, GAS_CELL_RAD_FLUX, GAS_CELL_RAD_DEVC_INDEX, N_GAS_CELL_RAD_DEVC
-REAL(EB) :: ZZ, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
-            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT, KAPPA_1, Z_2, COSINE, KFST4_ALTERNATIVE
+REAL(EB) :: RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
+            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT, COSINE, KFST4_ALTERNATIVE
 INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
-            I_UIID, N_UPDATES, IBND, TYY, NOM, NS, IBC,EVAP_INDEX,NRA
+            I_UIID, N_UPDATES, IBND, TYY, NOM, IBC,EVAP_INDEX,NRA
 REAL(EB) :: XID,YJD,ZKD
 INTEGER :: IPC,IID,JJD,KKD,ID
 LOGICAL :: UPDATE_INTENSITY
@@ -693,36 +647,23 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
    BBF   = 1._EB
    KAPPA = KAPPA0
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         ZLOOP: DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ZLOOP
-            SUM_SPECIES: DO NS=1,N_SPECIES
-               IF (SPECIES(NS)%MODE == MIXTURE_FRACTION_SPECIES) CYCLE SUM_SPECIES
-               IF (.NOT. SPECIES(NS)%ABSORBING)                  CYCLE SUM_SPECIES
-               TYY = NINT(SPECIES(NS)%NKAP_TEMP*(TMP(I,J,K)-RTMPMIN)/(RTMPMAX-RTMPMIN))
-               TYY = MAX(0,MIN(SPECIES(NS)%NKAP_TEMP,TYY))
-               ZZ = MIN(1._EB,MAX(0._EB,YY(I,J,K,NS)))
-               KAPPA(I,J,K) = KAPPA(I,J,K) + YY2KAPPA(ZZ,TYY,IBND,NS)
-            ENDDO SUM_SPECIES
-            IF (MIXTURE_FRACTION) THEN
-               TYY = NINT(Z2KAPPA_T*(TMP(I,J,K)-RTMPMIN)/(RTMPMAX-RTMPMIN))
-               TYY = MAX(0,MIN(Z2KAPPA_T,TYY))
-               Z_VECTOR = YY(I,J,K,I_Z_MIN:I_Z_MAX)
-               CALL GET_KAPPA(Z_VECTOR,Y_SUM(I,J,K),KAPPA_1,TYY,IBND)      
-               KAPPA(I,J,K) = KAPPA(I,J,K) + KAPPA_1
-            ENDIF
-            IF (WIDE_BAND_MODEL)  BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
-            KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-            IF (RADIATIVE_FRACTION>0._EB) THEN
-               KFST4_ALTERNATIVE = BBF*RADIATIVE_FRACTION*Q(I,J,K)
-               IF (KFST4_ALTERNATIVE > KFST4(I,J,K)) KFST4(I,J,K) = KFST4_ALTERNATIVE + KAPPA(I,J,K)*UII(I,J,K)
-            ENDIF
-         ENDDO ZLOOP
+   IF (KAPPA_ARRAY) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            ZLOOP: DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ZLOOP
+               TYY = MIN(Y2KAPPA_T,INT((TMP(I,J,K) - RTMPMIN) * Y2KAPPA_T / (RTMPMAX-RTMPMIN)))
+               KAPPA(I,J,K) = KAPPA(I,J,K) + GET_KAPPA(YY(I,J,K,:),TYY,IBND)
+               IF (WIDE_BAND_MODEL)  BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
+               KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+               IF (RADIATIVE_FRACTION>0._EB) THEN
+                  KFST4_ALTERNATIVE = BBF*RADIATIVE_FRACTION*Q(I,J,K)
+                  IF (KFST4_ALTERNATIVE > KFST4(I,J,K)) KFST4(I,J,K) = KFST4_ALTERNATIVE + KAPPA(I,J,K)*UII(I,J,K)
+               ENDIF
+            ENDDO ZLOOP
+         ENDDO
       ENDDO
-   ENDDO
-
+   ENDIF
    ! Calculate extinction coefficient
  
    EXTCOE = KAPPA + KAPPAW + SCAEFF*RSA_RAT
@@ -1090,36 +1031,6 @@ ENDIF
 END SUBROUTINE RADIATION_FVM
 
 END SUBROUTINE COMPUTE_RADIATION
-
-
-
-REAL(EB) FUNCTION YY2KAPPA(YY_IN,TYY,IBND,NS)
-
-! Calculate KAPPA as a function of YY
-
-REAL(EB), INTENT(IN) :: YY_IN
-REAL(EB) :: MAX_MASS,YY_K,INT_FAC
-INTEGER, INTENT(IN) :: TYY,IBND,NS
-INTEGER  :: LBND,UBND,NIYY
-REAL(EB), POINTER, DIMENSION(:,:,:) :: KAPPA
-
-KAPPA => SPECIES(NS)%KAPPA
-NIYY = SPECIES(NS)%NKAP_MASS
-MAX_MASS = SPECIES(NS)%MAXMASS
-
-YY_K = MAX(0._EB,MIN(YY_IN,MAX_MASS))
-INT_FAC = REAL(NIYY,EB)*(YY_K/MAX_MASS)**0.25_EB
-
-LBND = INT(INT_FAC)
-INT_FAC = INT_FAC - LBND   
-LBND = MIN(LBND,NIYY)
-UBND = MIN(LBND+1,NIYY)
-
-YY2KAPPA = KAPPA(LBND,TYY,IBND)
-YY2KAPPA = YY2KAPPA + INT_FAC*(KAPPA(UBND,TYY,IBND)-YY2KAPPA)
-
-END FUNCTION YY2KAPPA
-
  
 REAL(EB) FUNCTION BLACKBODY_FRACTION(L1,L2,TEMP)
  
@@ -1151,62 +1062,28 @@ BLACKBODY_FRACTION = BBFHIGH - BBFLOW
 
 END FUNCTION BLACKBODY_FRACTION
 
-SUBROUTINE GET_KAPPA(Z_IN,YY_SUM,KAPPA,TYY,IBND)
+FUNCTION GET_KAPPA(Y_IN,TYY,IBND)
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT
 ! GET_KAPPA returns the radiative absorption
-REAL(EB) :: YY_SUM,KAPPA,Z_IN(1:I_Z_MAX - I_Z_MIN + 1),Y_MF(9),MWA
-REAL(EB) :: K_FUEL,K_CO2,K_CO,K_H2O,K_SOOT,INT_FAC
-INTEGER :: IBND,TYY,LBND,UBND
+REAL(EB), INTENT(INOUT) :: Y_IN(1:N_SPECIES)
+REAL(EB) :: KAPPA_TEMP,INT_FAC,GET_KAPPA,Y_MF(1:N_Y_ARRAY),MWA
+INTEGER, INTENT(IN) :: IBND,TYY
+INTEGER :: LBND,UBND,N
 
-IF (YY_SUM >=1._EB) THEN
-   KAPPA = 0._EB
-   RETURN
-ELSE
-   CALL GET_MASS_FRACTION_ALL(Z_IN,YY_SUM,Y_MF)
-   CALL GET_MOLECULAR_WEIGHT(Z_IN,YY_SUM,MWA)
-   INT_FAC = MAX(0._EB,(Y_MF(FUEL_INDEX)*MWA*Z2KAPPA_M4(1)))**0.25_EB
+CALL GET_MASS_FRACTION_ALL(Y_IN,Y_MF)
+CALL GET_MOLECULAR_WEIGHT(Y_IN,MWA)
+GET_KAPPA = 0._EB
+DO N = 1, N_KAPPA_ARRAY
+   INT_FAC = MAX(0._EB,(Y_MF(KAPPA_INDEX(N))*MWA*Y2KAPPA_M4(N)))**0.25_EB
    LBND = INT(INT_FAC)
    INT_FAC = INT_FAC - LBND   
-   LBND = MIN(LBND,Z2KAPPA_M)
-   UBND = MIN(LBND+1,Z2KAPPA_M)
-   K_FUEL = Z2KAPPA (1,LBND,TYY,IBND)
-   K_FUEL = K_FUEL+INT_FAC*(Z2KAPPA (1,UBND,TYY,IBND)-K_FUEL)
+   LBND = MIN(LBND,Y2KAPPA_M)
+   UBND = MIN(LBND+1,Y2KAPPA_M)
+   KAPPA_TEMP = Y2KAPPA (N,LBND,TYY,IBND)
+   GET_KAPPA = GET_KAPPA + KAPPA_TEMP + INT_FAC*(Y2KAPPA(N,UBND,TYY,IBND)-KAPPA_TEMP)
+ENDDO
 
-   INT_FAC = MAX(0._EB,(Y_MF(CO2_INDEX)*MWA*Z2KAPPA_M4(2)))**0.25_EB
-   LBND = INT(INT_FAC)
-   INT_FAC = INT_FAC - LBND  
-   LBND = MIN(LBND,Z2KAPPA_M)
-   UBND = MIN(LBND+1,Z2KAPPA_M)
-   K_CO2 = Z2KAPPA (2,LBND,TYY,IBND)
-   K_CO2 = K_CO2 + INT_FAC*(Z2KAPPA (2,UBND,TYY,IBND)-K_CO2)
-
-   INT_FAC = MAX(0._EB,(Y_MF(CO_INDEX)*MWA*Z2KAPPA_M4(3)))**0.25_EB
-   LBND = INT(INT_FAC)
-   INT_FAC = INT_FAC - LBND   
-   LBND = MIN(LBND,Z2KAPPA_M)
-   UBND = MIN(LBND+1,Z2KAPPA_M)
-   K_CO = Z2KAPPA (3,LBND,TYY,IBND)
-   K_CO = K_CO + INT_FAC*(Z2KAPPA (3,UBND,TYY,IBND)-K_CO)
-   
-   INT_FAC = MAX(0._EB,(Y_MF(H2O_INDEX)*MWA*Z2KAPPA_M4(4)))**0.25_EB
-   LBND = INT(INT_FAC)
-   INT_FAC = INT_FAC - LBND  
-   LBND = MIN(LBND,Z2KAPPA_M)
-   UBND = MIN(LBND+1,Z2KAPPA_M)
-   K_H2O = Z2KAPPA (4,LBND,TYY,IBND)
-   K_H2O = K_H2O + INT_FAC*(Z2KAPPA (4,UBND,TYY,IBND)-K_H2O)
-
-   INT_FAC = MAX(0._EB,(Y_MF(SOOT_INDEX)*Z2KAPPA_M4(5)))**0.25_EB
-   LBND = INT(INT_FAC)
-   INT_FAC = INT_FAC - LBND   
-   LBND = MIN(LBND,Z2KAPPA_M)
-   UBND = MIN(LBND+1,Z2KAPPA_M)
-   K_SOOT = Z2KAPPA (5,LBND,TYY,IBND)
-   K_SOOT = K_SOOT + INT_FAC*(Z2KAPPA (5,UBND,TYY,IBND)-K_SOOT)
-   KAPPA = K_FUEL + K_CO2 + K_CO + K_H2O + K_SOOT
-ENDIF
-
-END SUBROUTINE GET_KAPPA 
+END FUNCTION GET_KAPPA 
 
 SUBROUTINE GET_REV_radi(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV

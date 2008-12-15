@@ -732,9 +732,8 @@ DROPLET_LOOP: DO I=1,NLP
    QREL  = MAX(1.E-6_EB,SQRT(UREL*UREL + VREL*VREL + WREL*WREL))
    TMP_G = MAX(TMPMIN,TMP(II,JJ,KK))
    RHO_G = RHO(II,JJ,KK)
-   MU_AIR = SPECIES(0)%MU(MIN(500,NINT(0.1_EB*TMP_G)))
+   MU_AIR = Y2MU_C(MIN(500,NINT(0.1_EB*TMP_G)))
    DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
-
    DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
       C_DRAG  = DRAG(DR%RE)
       IF (.NOT. PC%TREE) THEN
@@ -748,6 +747,7 @@ DROPLET_LOOP: DO I=1,NLP
          DR%A_Y  = SFAC*VREL
          DR%A_Z  = SFAC*WREL
       ENDIF
+
       IF (.NOT.PC%STATIC) THEN
          CONST   = 8._EB*PC%DENSITY*RD/(3._EB*RHO_G*C_DRAG*QREL)
          BFAC    = EXP(-DT/CONST)
@@ -763,7 +763,7 @@ DROPLET_LOOP: DO I=1,NLP
          DR%V    = VBAR + (VREL+AVREL)*BFAC - AVREL
          DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
       ENDIF
-   ELSE DRAG_CALC  ! No drag
+   ELSE DRAG_CALC ! No drag
       DR%A_X  = 0._EB
       DR%A_Y  = 0._EB
       DR%A_Z  = 0._EB
@@ -1117,8 +1117,8 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
-            CP,CP_SUM,H_NEW
-INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS,ITMP,N
+            CP,H_NEW
+INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS,ITMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
 LOGICAL :: TEMPITER
@@ -1241,7 +1241,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
             TMP_G  = TMP(II,JJ,KK)
             RHO_G  = RHO(II,JJ,KK)
-            MU_AIR = SPECIES(0)%MU(MIN(500,NINT(0.1_EB*TMP_G)))
+            MU_AIR = Y2MU_C(MIN(500,NINT(0.1_EB*TMP_G)))
             M_GAS  = RHO_G/RVC        
             M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT!limit to avoid diveregence errors
             K_AIR  = CPOPR*MU_AIR
@@ -1385,27 +1385,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ENDIF
          
             ! Decrease temperature of the gas cell
-            ITMP = 0.1_EB*TMP_G
-            IF (MIXTURE_FRACTION) THEN
-               Z_VECTOR = YY(II,JJ,KK,I_Z_MIN:I_Z_MAX)
-               CALL GET_CPBAR(Z_VECTOR,Y_SUM(II,JJ,KK),CP,ITMP)
-               IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
-                  CP_SUM = 0._EB
-                  DO N=1,N_SPECIES
-                     IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                        CP_SUM = CP_SUM + YY(II,JJ,KK,N)*SPECIES(N)%CPBAR(ITMP)
-                  END DO
-                  CP = CP_SUM + (1._EB-Y_SUM(II,JJ,KK))*CP
-               ENDIF
-            ELSEIF (.NOT.MIXTURE_FRACTION) THEN
-               IF(N_SPECIES>0) THEN
-                  CP = SPECIES(0)%CPBAR(ITMP)
-                  DO N=1,N_SPECIES
-                     CP = CP + YY(II,JJ,KK,N)*(SPECIES(N)%CPBAR(ITMP)-SPECIES(0)%CPBAR(ITMP))
-                  END DO
-               ELSE
-                  CP = SPECIES(0)%CPBAR(ITMP)
-               ENDIF
+            ITMP = NINT(0.1_EB*TMP_G)
+            IF (N_SPECIES == 0 ) THEN
+               CP = Y2CPBAR_C(ITMP)
+            ELSE
+               CALL GET_CPBAR(YY(II,JJ,KK,:),CP,ITMP)
             ENDIF
             H_NEW = (M_GAS*CP*TMP_G - WGT*Q_CON_GAS)/M_GAS
             TEMPITER = .FALSE.
@@ -1413,27 +1397,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                TMP_G = H_NEW/CP
                IF ((TMP(II,JJ,KK)-TMP_G)/TMP(II,JJ,KK) > 0.01_EB) TEMPITER = .TRUE.
                TMP(II,JJ,KK) = TMP_G
-               ITMP = 0.1_EB*TMP(II,JJ,KK)
-               IF (MIXTURE_FRACTION) THEN
-                  Z_VECTOR = YY(II,JJ,KK,I_Z_MIN:I_Z_MAX)
-                  CALL GET_CPBAR(Z_VECTOR,Y_SUM(II,JJ,KK),CP,ITMP)
-                  IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
-                     CP_SUM = 0._EB
-                     DO N=1,N_SPECIES
-                        IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                           CP_SUM = CP_SUM + YY(II,JJ,KK,N)*SPECIES(N)%CPBAR(ITMP)
-                     END DO
-                     CP = CP_SUM + (1._EB-Y_SUM(II,JJ,KK))*CP
-                  ENDIF
-               ELSEIF (.NOT.MIXTURE_FRACTION) THEN
-                  IF(N_SPECIES>0) THEN
-                     CP = SPECIES(0)%CPBAR(ITMP)
-                     DO N=1,N_SPECIES
-                        CP = CP + YY(II,JJ,KK,N)*(SPECIES(N)%CPBAR(ITMP)-SPECIES(0)%CPBAR(ITMP))
-                     END DO
-                  ELSE
-                     CP = SPECIES(0)%CPBAR(ITMP)
-                  ENDIF
+               ITMP = NINT(0.1_EB*TMP(II,JJ,KK))
+               IF (N_SPECIES == 0 ) THEN
+                  CP = Y2CPBAR_C(ITMP)
+               ELSE
+                  CALL GET_CPBAR(YY(II,JJ,KK,:),CP,ITMP)
                ENDIF
             ENDDO ITERATE_TEMP
             

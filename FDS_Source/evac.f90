@@ -865,7 +865,7 @@ Contains
       GROUP_DENS      = 0.0_EB
       SMOKE_MIN_SPEED = 0.1_EB
       SMOKE_MIN_SPEED_VISIBILITY = 0.0_EB
-      TAU_CHANGE_DOOR      =  1.0_EB
+      TAU_CHANGE_DOOR = 1.0_EB
       TAU_CHANGE_V0 = -1.0_EB
       THETA_SECTOR = -60.0_EB
       CONST_DF = -0.1_EB
@@ -4427,7 +4427,7 @@ Contains
                         Real(HUMAN_GRID(i,j)%SOOT_DENS,FB), &
                         Real(HUMAN_GRID(i,j)%TMP_G,FB), &
                         Real(HUMAN_GRID(i,j)%RADFLUX,FB)
-                Else ! Read FED from a file
+                Else     ! Read FED from a file
                    ! Read Fed, Soot, Temp(C), and Radflux
                    Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
                    If (ios.Ne.0) Then
@@ -5024,8 +5024,8 @@ Contains
              ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
              UBAR = HR%UBAR; VBAR = HR%VBAR
           Else
-             Call Find_Prefered_Direction(I, N, T, T_BEGIN, L_Dead, NM_STRS_MESH, &
-                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
+          Call Find_Prefered_Direction(I, N, T, T_BEGIN, L_Dead, NM_STRS_MESH, &
+               II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
           End If
           ! ========================================================
           ! Prefered walking direction v0 is now (UBAR,VBAR)
@@ -9598,16 +9598,14 @@ Contains
     INTEGER, INTENT(IN) :: I,J,K,NOM
     REAL(EB), INTENT(OUT) :: fed_indx,soot_dens,gas_temp,rad_flux
     !
-    REAL(EB) :: Y_SUM, Y_MF_INT
-
-    Y_SUM = MESHES(NOM)%Y_SUM(I,J,K)  ! extra species mass fraction
+    REAL(EB) :: Y_MF_INT
 
     ! Mass fraction array ==> soot density (mg/m3)
     ! Next is for soot (mg/m3)
-    Call GET_MASS_FRACTION(MESHES(nom)%YY(I,J,K,I_Z_MIN:I_Z_MAX),SOOT_INDEX,Y_SUM,Y_MF_INT)
+    Call GET_MASS_FRACTION(MESHES(nom)%YY(I,J,K,:),SOOT_INDEX,Y_MF_INT)
     soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
     ! Calculate Purser's fractional effective dose (FED)
-    fed_indx = FED(MESHES(nom)%YY(I,J,K,I_Z_MIN:I_Z_MAX),Y_SUM,MESHES(nom)%RSUM(I,J,K))
+    fed_indx = FED(MESHES(nom)%YY(I,J,K,:),MESHES(nom)%RSUM(I,J,K))
     ! Gas temperature, ind=5, C
     gas_temp  = MESHES(nom)%TMP(I,J,K)
     ! Rad flux, ind=18, kW/m2 (no -sigma*Tamb^4 term)

@@ -26,10 +26,10 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
           RHO_D_DYDX,RHO_D_DYDY,RHO_D_DYDZ,RHO_D,RHOP,H_RHO_D_DYDX,H_RHO_D_DYDY,H_RHO_D_DYDZ,RTRM
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP,FX,FY,FZ
-REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,K_SUM,CP_SUM,TNOW, &
+REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW, YSUM,&
             HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,VDOT_LEAK,TIME_RAMP_FACTOR,ZONE_VOLUME,CP_MF,DELTA_P,PRES_RAMP_FACTOR
 TYPE(SURFACE_TYPE), POINTER :: SF
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,IZ,I,J,K,IPZ,IOPZ
+INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,I,J,K,IPZ,IOPZ
  
 IF (SOLID_PHASE_ONLY) RETURN
 
@@ -88,7 +88,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ITMP = 0.1_EB*TMP(I,J,K)
+               ITMP = NINT(0.1_EB*TMP(I,J,K))
                RHO_D(I,J,K) = RHOP(I,J,K)*SPECIES(N)%D(ITMP)
             ENDDO 
          ENDDO
@@ -99,11 +99,9 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ITMP = 0.1_EB*TMP(I,J,K)
-               IZ   = NINT(Z_SUM(I,J,K)*100._EB)
-               IZ   = MAX(0,MIN(IZ,100))
-               Z_VECTOR = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
-               CALL GET_D(Z_VECTOR,Y_SUM(I,J,K),RHO_D(I,J,K),ITMP)
+               ITMP = NINT(0.1_EB*TMP(I,J,K))
+               YSUM = SUM(YYP(I,J,K,:)) - SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
+               CALL GET_D(YYP(I,J,K,I_Z_MIN:I_Z_MAX),YSUM,RHO_D(I,J,K),ITMP)
                RHO_D(I,J,K) = RHOP(I,J,K)*RHO_D(I,J,K)
             ENDDO
          ENDDO
@@ -126,7 +124,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          ENDDO
       ENDDO
    ENDDO
-   
    ! Correct rho*D del Y at boundaries and store rho*D at boundaries
  
    WALL_LOOP: DO IW=1,NWC
@@ -153,7 +150,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             RHO_D_DYDZ(IIG,JJG,KKG)   = 0._EB
       END SELECT
    ENDDO WALL_LOOP
-   
+
    IF (FLUX_LIMITER>=0) THEN
       FX(:,:,:,N) = -RHO_D_DYDX
       FY(:,:,:,N) = -RHO_D_DYDY
@@ -171,14 +168,14 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               ITMP = .05_EB*(TMP(I+1,J,K)+TMP(I,J,K))
-               HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
+               ITMP = NINT(.05_EB*(TMP(I+1,J,K)+TMP(I,J,K)))
+               HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
                H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
-               ITMP = .05_EB*(TMP(I,J+1,K)+TMP(I,J,K))
-               HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
+               ITMP = NINT(.05_EB*(TMP(I,J+1,K)+TMP(I,J,K)))
+               HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
                H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
-               ITMP = .05_EB*(TMP(I,J,K+1)+TMP(I,J,K))
-               HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
+               ITMP = NINT(.05_EB*(TMP(I,J,K+1)+TMP(I,J,K)))
+               HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
                H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
             ENDDO
          ENDDO
@@ -190,8 +187,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          JJG = IJKW(7,IW)
          KKG = IJKW(8,IW)
          IOR  = IJKW(4,IW)
-         ITMP = 0.1_EB*TMP_F(IW)
-         HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
+         ITMP = NINT(0.1_EB*TMP_F(IW))
+         HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
          RHO_D_DYDN = RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_W(IW,N))*RDN(IW)
          SELECT CASE(IOR)
             CASE( 1) 
@@ -230,7 +227,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                ENDDO
             ENDDO
       END SELECT CYLINDER
-    
    ENDIF SPECIES_DIFFUSION
 
    ! Compute del dot rho*D del Y_n or del dot rho D del Z
@@ -263,8 +259,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ITMP = 0.1_EB*TMP(I,J,K)
-               HDIFF = SPECIES(N)%H_G(ITMP)-SPECIES(0)%H_G(ITMP)
+               ITMP = NINT(0.1_EB*TMP(I,J,K))
+               HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
                DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
             ENDDO
          ENDDO
@@ -272,7 +268,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    ENDIF SPECIES_DIFFUSION_2
  
 ENDDO SPECIES_LOOP
- 
+
 
 ! Compute del dot k del T
  
@@ -286,37 +282,23 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
    ! Compute thermal conductivity k (KP)
  
    K_DNS_OR_LES: IF (DNS) THEN
- 
-      IF (.NOT.MIXTURE_FRACTION) THEN
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  ITMP = 0.1_EB*TMP(I,J,K)
-                  K_SUM = SPECIES(0)%K(ITMP)
-                  DO N=1,N_SPECIES
-                     K_SUM = K_SUM + YYP(I,J,K,N)*(SPECIES(N)%K(ITMP)-SPECIES(0)%K(ITMP))
-                  END DO
-                  KP(I,J,K) = K_SUM
-               ENDDO
-            ENDDO
-         ENDDO
-      ELSE   ! MIXTURE_FRACTION TRUE
+      IF (N_SPECIES > 0 ) THEN
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  ITMP = 0.1_EB*TMP(I,J,K)
-                  Z_VECTOR = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
-                  CALL GET_CP(Z_VECTOR,Y_SUM(I,J,K),CP_MF,ITMP)
-                  IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
-                     CP_SUM = 0._EB
-                     DO N=1,N_SPECIES
-                        IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                        CP_SUM = CP_SUM + YYP(I,J,K,N)*SPECIES(N)%CP(ITMP)
-                     END DO
-                     CP_MF = CP_SUM + (1._EB-Y_SUM(I,J,K))*CP_MF
-                  ENDIF
-                  KP(I,J,K) = MU(I,J,K)*CP_MF*RPR
+                  ITMP = NINT(0.1_EB*TMP(I,J,K))
+                  CALL GET_K(YYP(I,J,K,:),KP(I,J,K),ITMP)     
+               ENDDO
+            ENDDO
+         ENDDO
+      ELSE
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  ITMP = NINT(0.1_EB*TMP(I,J,K))
+                  KP(I,J,K) = Y2K_C(ITMP)
                ENDDO
             ENDDO
          ENDDO
@@ -330,7 +312,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
          KKG = IJKW(8,IW)
          KP(II,JJ,KK) = KP(IIG,JJG,KKG)
       ENDDO BOUNDARY_LOOP
- 
+
    ELSE K_DNS_OR_LES
     
       KP = MU*CPOPR
@@ -362,28 +344,23 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
       IIG = IJKW(6,IW) 
       JJG = IJKW(7,IW) 
       KKG = IJKW(8,IW) 
+      KW(IW) = KP(IIG,JJG,KKG)
       IOR = IJKW(4,IW)
       SELECT CASE(IOR)
          CASE( 1)
-            DTDX = (TMP(IIG,JJG,KKG)-TMP_W(IW))*RDXN(II)
-            KDTDX(II,JJ,KK) = KW(IW)*DTDX
+            KDTDX(II,JJ,KK)   = 0._EB
          CASE(-1)
-            DTDX = (TMP_W(IW)-TMP(IIG,JJG,KKG))*RDXN(IIG)
-            KDTDX(IIG,JJ,KK) = KW(IW)*DTDX
+            KDTDX(II-1,JJ,KK) = 0._EB
          CASE( 2)
-            DTDY = (TMP(IIG,JJG,KKG)-TMP_W(IW))*RDYN(JJ)
-            KDTDY(II,JJ,KK) = KW(IW)*DTDY
+            KDTDY(II,JJ,KK)   = 0._EB
          CASE(-2)
-            DTDY = (TMP_W(IW)-TMP(IIG,JJG,KKG))*RDYN(JJG)
-            KDTDY(II,JJG,KK) = KW(IW)*DTDY
+            KDTDY(II,JJ-1,KK) = 0._EB
          CASE( 3)
-            DTDZ = (TMP(IIG,JJG,KKG)-TMP_W(IW))*RDZN(KK)
-            KDTDZ(II,JJ,KK) = KW(IW)*DTDZ
+            KDTDZ(II,JJ,KK)   = 0._EB
          CASE(-3)
-            DTDZ = (TMP_W(IW)-TMP(IIG,JJG,KKG))*RDZN(KKG)
-            KDTDZ(II,JJ,KKG) = KW(IW)*DTDZ
+            KDTDZ(II,JJ,KK-1) = 0._EB
       END SELECT
-      KW(IW) = KP(IIG,JJG,KKG)
+      DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - QCONF(IW)*RDN(IW)
    ENDDO CORRECTION_LOOP
 
    ! Compute (q + del dot k del T) and add to the divergence
@@ -418,58 +395,30 @@ ENDIF ENERGY
 ! Compute RTRM = R*sum(Y_i/M_i)/(PBAR*C_P) and multiply it by divergence terms already summed up
  
 RTRM => WORK1
- 
-IF (MIXTURE_FRACTION) THEN
+IF (N_SPECIES==0) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = 0.1_EB*TMP(I,J,K)
-            Z_VECTOR = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
-            CALL GET_CP(Z_VECTOR,Y_SUM(I,J,K),CP_MF,ITMP)
-            IF (N_SPECIES > (I_Z_MAX-I_Z_MIN+1)) THEN
-               CP_SUM = 0._EB
-               DO N=1,N_SPECIES
-                  IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) &
-                  CP_SUM = CP_SUM + YYP(I,J,K,N)*SPECIES(N)%CP(ITMP)
-               END DO
-               CP_MF = CP_SUM + (1._EB-Y_SUM(I,J,K))*CP_MF
-            ENDIF
+            ITMP = NINT(0.1_EB*TMP(I,J,K))
+            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM0/Y2CP_C(ITMP)
+            DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
+         ENDDO
+      ENDDO 
+   ENDDO
+ELSE
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            ITMP = NINT(0.1_EB*TMP(I,J,K))
+            CALL GET_CP(YYP(I,J,K,:),CP_MF,ITMP)
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_MF
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
       ENDDO 
    ENDDO
-ENDIF
-IF (.NOT.MIXTURE_FRACTION .AND. N_SPECIES>0) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = 0.1_EB*TMP(I,J,K)
-            CP_SUM = SPECIES(0)%CP(ITMP)
-            DO N=1,N_SPECIES
-               CP_SUM = CP_SUM + YYP(I,J,K,N)*(SPECIES(N)%CP(ITMP)-SPECIES(0)%CP(ITMP))
-            END DO
-            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_SUM
-            DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-IF (.NOT.MIXTURE_FRACTION .AND. N_SPECIES==0) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = 0.1_EB*TMP(I,J,K)
-            CP_SUM = SPECIES(0)%CP(ITMP)
-            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*SPECIES(0)%RCON/CP_SUM
-            DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
+ENDIF 
 
 ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Y_n
 
@@ -721,7 +670,7 @@ SOLID_LOOP: DO IC=1,CELL_COUNT
    K = K_CELL(IC)
    DP(I,J,K) = 0._EB
 ENDDO SOLID_LOOP
- 
+
 ! Specify divergence in boundary cells to account for volume being generated at the walls
  
 BC_LOOP: DO IW=1,NWC
@@ -807,7 +756,6 @@ ELSE PERIODIC_DIV
    
 ENDIF PERIODIC_DIV
 
-
 TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 END SUBROUTINE DIVERGENCE_PART_2
  
@@ -823,7 +771,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP
  
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
-
+ 
 IF (PREDICTOR) THEN
    UU=>US
    VV=>VS
