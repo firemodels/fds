@@ -586,11 +586,15 @@ typedef struct {
   float xyznorm[3];
   float angle_elev, angle_az;
   float act_time;
+  float *act_times;
+  int *state_values;
+  int istate_changes, nstate_changes, state0;
+  int *showstatelist;
   sv_object *object;
   int type;
 } device;
 
-/* --------------------------  camera ------------------------------------ */
+/* --------------------------  camviewdata ------------------------------------ */
 
 typedef struct {
   float time, eye0[3], view0[3], aperture, up[3];
@@ -598,7 +602,7 @@ typedef struct {
 } camviewdata;
 
 
-/* --------------------------  camera ------------------------------------ */
+/* --------------------------  camdata ------------------------------------ */
 
 typedef struct {
   char *file, *label;
@@ -625,6 +629,17 @@ typedef struct _camera {
   float xcen, ycen, zcen;
   float zoom;
   float modelview[16];
+
+#ifdef pp_VIEWCLIP  
+  int xyz_clipplane;
+  int clip_x, clip_X;
+  int clip_y, clip_Y;
+  int clip_z, clip_Z;
+  float clip_x_val, clip_X_val;
+  float clip_y_val, clip_Y_val;
+  float clip_z_val, clip_Z_val;
+#endif
+
   int view_id;
   struct _camera *next,*prev;
   char name[32];

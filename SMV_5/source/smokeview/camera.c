@@ -142,7 +142,48 @@ void init_camera(camera *camera_data,char *name){
   camera_data->zoom=1.0;
   camera_data->projection_type=projection_type;
   camera_data->dirty=0;
+
+  #ifdef pp_VIEWCLIP
+  clip2cam(camera_data);
+  #endif
 }
+
+#ifdef pp_VIEWCLIP
+/* ------------------ clip2cam ------------------------ */
+
+  void clip2cam(camera *cam){
+    cam->xyz_clipplane=xyz_clipplane;
+    cam->clip_x=clip_x;
+    cam->clip_y=clip_y;
+    cam->clip_z=clip_z;
+  
+    cam->clip_x_val=clip_x_val;
+    cam->clip_y_val=clip_y_val;
+    cam->clip_z_val=clip_z_val;
+
+    cam->clip_X_val=clip_X_val;
+    cam->clip_Y_val=clip_Y_val;
+    cam->clip_Z_val=clip_Z_val;
+  }
+
+
+/* ------------------ clip2cam ------------------------ */
+
+  void cam2clip(camera *cam){
+    xyz_clipplane = cam->xyz_clipplane;
+    clip_x = cam->clip_x;
+    clip_y = cam->clip_y;
+    clip_z = cam->clip_z;
+  
+    clip_x_val = cam->clip_x_val;
+    clip_y_val = cam->clip_y_val;
+    clip_z_val = cam->clip_z_val;
+
+    clip_X_val = cam->clip_X_val;
+    clip_Y_val = cam->clip_Y_val;
+    clip_Z_val = cam->clip_Z_val;
+  }
+#endif
 
 /* ------------------ copy_camera ------------------------ */
 
@@ -154,7 +195,6 @@ void copy_camera(camera *to, camera *from){
     update_glui_zoom();
   }
   to->dirty=1;
-
 }
 
 /* ------------------ update_camera ------------------------ */
@@ -187,6 +227,21 @@ void update_camera(camera *ca){
     handle_eyeview(1);
     update_meshlist1(ca->rotation_index);
     update_trainer_moves();
+
+#ifdef pp_VIEWCLIP
+    ca->xyz_clipplane=xyz_clipplane;
+    ca->clip_x=clip_x;
+    ca->clip_y=clip_y;
+    ca->clip_z=clip_z;
+  
+    ca->clip_x_val=clip_x_val;
+    ca->clip_y_val=clip_y_val;
+    ca->clip_z_val=clip_z_val;
+
+    ca->clip_X_val=clip_X_val;
+    ca->clip_Y_val=clip_Y_val;
+    ca->clip_Z_val=clip_Z_val;
+#endif
   }
   ca->dirty=0;
 }
@@ -260,19 +315,3 @@ void delete_camera(camera *cam){
   FREEMEMORY(cam);
   updatemenu=1;
 }
-
-/*
-typedef struct {
-  float time, eye[3], view[3], aperature, up[3];
-} camviewdata;
-
-typedef struct {
-  char *file, *label;
-  int loaded;
-  int ncamviews;
-  camviewdata *camviews;
-  char menulabel[128];
-} camdata;
-
-
-*/

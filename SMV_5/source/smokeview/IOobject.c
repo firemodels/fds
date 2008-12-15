@@ -399,10 +399,11 @@ void draw_devices(void){
     if(sensorrelsize!=1.0){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
     }
-    if(showtime==1&&itime>=0&&itime<ntimes&&
-      times!=NULL&&devicei->act_time>=0.0&&times[itime]>=devicei->act_time&&
-      devicei->object->nframes>1){
-      draw_SVOBJECT(devicei->object,1);
+    if(showtime==1&&itime>=0&&itime<ntimes){
+      int state;
+
+      state=devicei->showstatelist[itime];
+      draw_SVOBJECT(devicei->object,state);
     }
     else{
       draw_SVOBJECT(devicei->object,0);
@@ -461,6 +462,7 @@ void draw_SVOBJECT(sv_object *object, int iframe){
   int displaylist_id=0;
   int op_skip=0;
 
+  if(iframe>object->nframes-1||iframe<0)iframe=0;
   framei=object->obj_frames[iframe];
   ASSERT(framei->error==0||framei->error==1);
   if(framei->error!=0)framei=error_frame;
