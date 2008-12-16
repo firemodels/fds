@@ -727,6 +727,7 @@ PERIODIC_DIV: IF (PERIODIC_TEST==2) THEN
             ENDDO
          ENDDO
       ENDDO
+      D = DDDT
       DDDT = (2._EB*DP-DIV)*RDT
    ENDIF
    
