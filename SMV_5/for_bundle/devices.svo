@@ -1,5 +1,5 @@
 // $Date: 2008-01-18 14:27:20 -0500 (Fri, 18 Jan 2008) $ 
-// $Revision: 1210 $
+// $Revision$
 // $Author: gforney $
 
 DEVICEDEF
@@ -12,6 +12,12 @@ DEVICEDEF
  0.038 drawsphere
  NEWFRAME
  1.0 0.0 0.0  setcolor
+ 0.038 drawsphere
+ NEWFRAME
+ 0.0 0.0 1.0  setcolor
+ 0.038 drawsphere
+ NEWFRAME
+ 1.0 1.0 0.0  setcolor
  0.038 drawsphere
 DEVICEDEF
  thermoc4
