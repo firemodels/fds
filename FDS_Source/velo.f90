@@ -1743,7 +1743,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))**2
+               UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
                IF (UVW>=UVWMAX) THEN
                   UVWMAX = UVW 
                   ICFL=I
@@ -1758,7 +1758,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               UVW = UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2
+               UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
                IF (UVW>=UVWMAX) THEN
                   UVWMAX = UVW 
                   ICFL=I
@@ -1771,22 +1771,20 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       
 END SELECT SELECT_VELOCITY_NORM
 
+CFL = DT*UVWMAX
+
 ! Find minimum time step allowed by divergence constraint
 RDMAX = HUGE(1._EB)
 IF (CFL_VELOCITY_NORM>0) THEN
-   DMAX = SQRT(UVWMAX)*MAX(RDXN(ICFL),RDYN(JCFL),RDZN(KCFL))
-   CFL = DT*DMAX
-   DMAX = DMAX + MAXVAL(D)
+   DMAX = MAXVAL(D)
    IF (DMAX>0._EB) RDMAX = CFL_MAX/DMAX
-ELSE
-   CFL = DT*UVWMAX
 ENDIF
 
 CFL = DT*UVWMAX
  
 ! Determine max Von Neumann Number for fine grid calcs
  
-PARABOLIC_IF: IF (DNS .OR. CELL_SIZE<0.005_EB .OR. CFL_VELOCITY_NORM>0) THEN
+PARABOLIC_IF: IF (DNS .OR. CELL_SIZE<0.005_EB) THEN
  
    INCOMPRESSIBLE_IF: IF (ISOTHERMAL .AND. N_SPECIES==0) THEN
       IF (TWO_D) THEN
