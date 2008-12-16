@@ -491,7 +491,9 @@ END SELECT PREDICTOR_STEP
 
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
  
-CONTAINS
+!! CONTAINS
+
+END SUBROUTINE DENSITY
  
 
 SUBROUTINE CHECK_DENSITY
@@ -500,7 +502,7 @@ SUBROUTINE CHECK_DENSITY
 
 USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,RHOMIN,RHOMAX 
 REAL(EB) :: SUM,CONST,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,RHO00,RMIN,RMAX
-INTEGER  :: IC,ISUM
+INTEGER  :: IC,ISUM,I,J,K
 LOGICAL :: LC(-3:3)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHODELTA
 
@@ -666,7 +668,7 @@ SUBROUTINE CHECK_MASS_FRACTION
 
 USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,YYMIN,YYMAX,POROUS_BOUNDARY
 REAL(EB) :: SUM,CONST,RHYMI,RHYPI,RHYMJ,RHYPJ,RHYMK,RHYPK,RHY0,YMI,YPI,YMJ,YPJ,YMK,YPK,Y00,YMIN,YMAX
-INTEGER  :: IC,N,ISUM, IW_A(-3:3)
+INTEGER  :: IC,N,ISUM, IW_A(-3:3),I,J,K
 LOGICAL  :: LC(-3:3)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: YYDELTA
 
@@ -955,7 +957,7 @@ RETURN
 
 END SUBROUTINE CHECK_MASS_FRACTION
  
-END SUBROUTINE DENSITY
+!! END SUBROUTINE DENSITY
 
 
 !===========================================================================
@@ -1004,10 +1006,13 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
             RHOS(I,J,K) = RHO(I,J,K) - DT*( RDX(I)*(FX(I,J,K,0)-FX(I-1,J,K,0)) &
                                           + RDY(J)*(FY(I,J,K,0)-FY(I,J-1,K,0)) &
                                           + RDZ(K)*(FZ(I,J,K,0)-FZ(I,J,K-1,0)) )
-            IF (RHOS(I,J,K)<=0._EB) WRITE(0,*) 'WARNING! NM RHOS(I,J,K) = ',NM,I,J,K,RHOS(I,J,K)
          ENDDO
       ENDDO
    ENDDO
+   
+   ! Correct densities above or below clip limits
+
+   CALL CHECK_DENSITY
    
    IF (BAROCLINIC) THEN
       ! Set global min and max for rho
@@ -1127,12 +1132,13 @@ ELSEIF (CORRECTOR) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             RHO(I,J,K) = 0.5_EB*( RHO(I,J,K) + RHOS(I,J,K) )
-            
-            ! IF (CLIP_SCALAR) THEN...
-            !RHO(I,J,K) = MAX(RHO(I,J,K),0._EB)
          ENDDO
       ENDDO
    ENDDO
+   
+   ! Correct densities above or below clip limits
+
+   CALL CHECK_DENSITY
    
    DO N=1,N_SPECIES
       DO K=1,KBAR

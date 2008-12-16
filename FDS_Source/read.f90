@@ -329,12 +329,12 @@ MESH_LOOP: DO N=1,NMESHES_READ
       J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
          I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
 
-            XB1 = XB(1) + II*MR%DX
-            XB2 = XB(2) + II*MR%DX
-            XB3 = XB(3) + JJ*MR%DY
-            XB4 = XB(4) + JJ*MR%DY
-            XB5 = XB(5) + KK*MR%DZ
-            XB6 = XB(6) + KK*MR%DZ
+            XB1 = MR%X0 + XB(1) + II*MR%DX
+            XB2 = MR%X0 + XB(2) + II*MR%DX
+            XB3 = MR%Y0 + XB(3) + JJ*MR%DY
+            XB4 = MR%Y0 + XB(4) + JJ*MR%DY
+            XB5 = MR%Z0 + XB(5) + KK*MR%DZ
+            XB6 = MR%Z0 + XB(6) + KK*MR%DZ
 
             ! Increase the MESH counter by 1
 
@@ -969,11 +969,11 @@ END SUBROUTINE READ_TIME
  
 SUBROUTINE READ_MULT
 
-REAL(EB) :: DX,DY,DZ
+REAL(EB) :: DX,DY,DZ,X0,Y0,Z0
 CHARACTER(30) :: ID
 INTEGER :: N,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
-NAMELIST /MULT/ FYI,ID,DX,DY,DZ,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER
+NAMELIST /MULT/ FYI,ID,DX,DY,DZ,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER,X0,Y0,Z0
 
 N_MULT = 0
 REWIND(LU_INPUT)
@@ -1005,6 +1005,9 @@ READ_MULT_LOOP: DO N=0,N_MULT
    J_UPPER = 0
    K_LOWER = 0
    K_UPPER = 0
+   X0      = 0._EB
+   Y0      = 0._EB
+   Z0      = 0._EB
 
    IF (N>0) THEN
       CALL CHECKREAD('MULT',LU_INPUT,IOS)
@@ -1023,6 +1026,9 @@ READ_MULT_LOOP: DO N=0,N_MULT
    MR%J_UPPER = J_UPPER
    MR%K_LOWER = K_LOWER
    MR%K_UPPER = K_UPPER
+   MR%X0      = X0
+   MR%Y0      = Y0
+   MR%Z0      = Z0
 
 ENDDO READ_MULT_LOOP
 REWIND(LU_INPUT)
@@ -4840,12 +4846,12 @@ MESH_LOOP: DO NM=1,NMESHES
          J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
             I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
  
-               XB1 = XB(1) + II*MR%DX
-               XB2 = XB(2) + II*MR%DX
-               XB3 = XB(3) + JJ*MR%DY
-               XB4 = XB(4) + JJ*MR%DY
-               XB5 = XB(5) + KK*MR%DZ
-               XB6 = XB(6) + KK*MR%DZ
+               XB1 = MR%X0 + XB(1) + II*MR%DX
+               XB2 = MR%X0 + XB(2) + II*MR%DX
+               XB3 = MR%Y0 + XB(3) + JJ*MR%DY
+               XB4 = MR%Y0 + XB(4) + JJ*MR%DY
+               XB5 = MR%Z0 + XB(5) + KK*MR%DZ
+               XB6 = MR%Z0 + XB(6) + KK*MR%DZ
 
                ! Increase the OBST counter
 
