@@ -1589,7 +1589,7 @@ USE MESH_POINTERS
 IMPLICIT NONE
 
 PRIVATE
-PUBLIC SCALARF_EMB,RESTRICT_MASS_EMB,RESTRICT_DIV_EMB,PROJECT_VELOCITY, &
+PUBLIC SCALARF_EMB,VELOCITY_EMB,RESTRICT_MASS_EMB,RESTRICT_DIV_EMB,PROJECT_VELOCITY, &
        SORT_MESH_LEVEL,MATCH_VELOCITY_EMB,SCALAR_GHOST_EMB
  
 CONTAINS
@@ -1733,6 +1733,127 @@ SPECIES_LOOP: DO N = 0,N_SPECIES
 ENDDO SPECIES_LOOP
 
 END SUBROUTINE SCALARF_EMB
+
+
+SUBROUTINE VELOCITY_EMB(NM1,NM2,IERROR)
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: NM1,NM2
+
+TYPE(MESH_TYPE), POINTER :: M1,M2
+INTEGER :: I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK, &
+           NRX,NRY,NRZ,N2X,N2Y,N2Z,II_LO,JJ_LO,KK_LO,INDEX_LIST(12),IERROR
+REAL(EB) :: VOLUME_LIST(3)
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU1,VV1,WW1,UU2,VV2,WW2
+
+CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
+SELECT CASE (IERROR)
+   CASE(0)
+      I_LO = INDEX_LIST(1)
+      I_HI = INDEX_LIST(2)
+      J_LO = INDEX_LIST(3)
+      J_HI = INDEX_LIST(4)
+      K_LO = INDEX_LIST(5)
+      K_HI = INDEX_LIST(6)
+      II_LO = INDEX_LIST(7)
+      JJ_LO = INDEX_LIST(8)
+      KK_LO = INDEX_LIST(9)
+      NRX = INDEX_LIST(10)
+      NRY = INDEX_LIST(11)
+      NRZ = INDEX_LIST(12)
+   CASE(1)
+      RETURN
+END SELECT
+
+M1=>MESHES(NM1) ! coarse mesh
+M2=>MESHES(NM2) ! fine mesh
+
+N2X = NRY*NRZ
+N2Y = NRX*NRZ
+N2Z = NRX*NRY
+
+IF (PREDICTOR) THEN
+   UU1=>M1%U
+   VV1=>M1%V
+   WW1=>M1%W
+   UU2=>M2%U
+   VV2=>M2%V
+   WW2=>M2%W
+ELSEIF (CORRECTOR) THEN
+   UU1=>M1%US
+   VV1=>M1%VS
+   WW1=>M1%WS
+   UU2=>M2%US
+   VV2=>M2%VS
+   WW2=>M2%WS
+ENDIF
+
+! Restrict fine mesh to coarse mesh for embedded cells
+
+! U-VELOCITY
+
+DO K = K_LO,K_HI
+   KK_0 = KK_LO + (K-K_LO)*NRZ
+   DO J = J_LO,J_HI
+      JJ_0 = JJ_LO + (J-J_LO)*NRY
+      DO I = I_LO,I_HI-1 ! excludes boundary values
+         II_0 = II_LO + (I-I_LO+1)*NRX
+                  
+         UU1(I,J,K) = 0._EB
+         DO KK = KK_0+1,KK_0+NRZ
+            DO JJ = JJ_0+1,JJ_0+NRY
+               UU1(I,J,K) = UU1(I,J,K) + UU2(II_0,JJ,KK)
+            ENDDO
+         ENDDO
+         UU1(I,J,K) = UU1(I,J,K)/N2X
+         
+      ENDDO
+   ENDDO
+ENDDO
+   
+! V-VELOCITY
+
+DO K = K_LO,K_HI
+   KK_0 = KK_LO + (K-K_LO)*NRZ
+   DO J = J_LO,J_HI-1 ! excludes boundary values
+      JJ_0 = JJ_LO + (J-J_LO+1)*NRY
+      DO I = I_LO,I_HI 
+         II_0 = II_LO + (I-I_LO)*NRX
+                  
+         VV1(I,J,K) = 0._EB
+         DO KK = KK_0+1,KK_0+NRZ
+            DO II = II_0+1,II_0+NRX
+               VV1(I,J,K) = VV1(I,J,K) + VV2(II,JJ_0,KK)
+            ENDDO
+         ENDDO
+         VV1(I,J,K) = VV1(I,J,K)/N2Y
+         
+      ENDDO
+   ENDDO
+ENDDO
+   
+! W-VELOCITY
+
+DO K = K_LO,K_HI-1 ! excludes boundary values
+   KK_0 = KK_LO + (K-K_LO+1)*NRZ
+   DO J = J_LO,J_HI
+      JJ_0 = JJ_LO + (J-J_LO)*NRY
+      DO I = I_LO,I_HI 
+         II_0 = II_LO + (I-I_LO)*NRX
+                  
+         WW1(I,J,K) = 0._EB
+         DO JJ = JJ_0+1,JJ_0+NRY
+            DO II = II_0+1,II_0+NRX
+               WW1(I,J,K) = WW1(I,J,K) + WW2(II,JJ,KK_0)
+            ENDDO
+         ENDDO
+         WW1(I,J,K) = WW1(I,J,K)/N2Z
+         
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE VELOCITY_EMB
 
 
 SUBROUTINE RESTRICT_MASS_EMB(NM1,NM2,IERROR)
@@ -1962,32 +2083,32 @@ PRHS_SAVE(1:IBAR,1:JBAR,1:KBAR) = PRHS
 CALL H3CZSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,POIS_PTB,SAVE3,WORK,HX)
 PP(1:IBAR,1:JBAR,1:KBAR) = PRHS
 
-! Apply boundary conditions to PP
- 
-DO K=1,KBAR
-   DO J=1,JBAR
-      PP(0,J,K)    = PP(1,J,K)
-      PP(IBP1,J,K) = PP(IBAR,J,K)
-   ENDDO
-ENDDO
- 
-DO K=1,KBAR
-   DO I=1,IBAR
-      PP(I,0,K)    = PP(I,1,K)
-      PP(I,JBP1,K) = PP(I,JBAR,K)
-   ENDDO
-ENDDO
- 
-DO J=1,JBAR
-   DO I=1,IBAR
-      PP(I,J,0)    = PP(I,J,1)
-      PP(I,J,KBP1) = PP(I,J,KBAR)
-   ENDDO
-ENDDO
+!! Apply boundary conditions to PP
+! 
+!DO K=1,KBAR
+!   DO J=1,JBAR
+!      PP(0,J,K)    = PP(1,J,K)
+!      PP(IBP1,J,K) = PP(IBAR,J,K)
+!   ENDDO
+!ENDDO
+! 
+!DO K=1,KBAR
+!   DO I=1,IBAR
+!      PP(I,0,K)    = PP(I,1,K)
+!      PP(I,JBP1,K) = PP(I,JBAR,K)
+!   ENDDO
+!ENDDO
+! 
+!DO J=1,JBAR
+!   DO I=1,IBAR
+!      PP(I,J,0)    = PP(I,J,1)
+!      PP(I,J,KBP1) = PP(I,J,KBAR)
+!   ENDDO
+!ENDDO
 
 ! ************************* Check the Solution *************************
  
-IF (.FALSE.) THEN     
+IF (.FALSE.) THEN !! need to apply bcs to PP if TRUE    
    POIS_ERR = 0._EB
    DO K=1,KBAR
       DO J=1,JBAR
@@ -2008,21 +2129,21 @@ ENDIF
 
 DO K=1,KBAR
    DO J=1,JBAR
-      DO I=0,IBAR
+      DO I=1,IBAR-1
          UU(I,J,K) = UU(I,J,K) - RDXN(I)*(PP(I+1,J,K)-PP(I,J,K))
       ENDDO
    ENDDO
 ENDDO
 
 DO K=1,KBAR
-   DO J=0,JBAR
+   DO J=1,JBAR-1
       DO I=1,IBAR
          VV(I,J,K) = VV(I,J,K) - RDYN(J)*(PP(I,J+1,K)-PP(I,J,K))
       ENDDO
    ENDDO
 ENDDO
 
-DO K=0,KBAR
+DO K=1,KBAR-1
    DO J=1,JBAR
       DO I=1,IBAR
          WW(I,J,K) = WW(I,J,K) - RDZN(K)*(PP(I,J,K+1)-PP(I,J,K))
@@ -2241,7 +2362,7 @@ TYPE(MESH_TYPE), POINTER :: M1,M2
 INTEGER :: N,I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK, &
            NRX,NRY,NRZ,II_LO,JJ_LO,KK_LO,INDEX_LIST(12),IERROR,IW
 REAL(EB) :: VOLUME_LIST(3)
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP1,RHOP2,TMP1,TMP2
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP1,RHOP2,TMP1,TMP2,HH1,HH2
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP1,YYP2
 
 CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
@@ -2281,6 +2402,8 @@ ELSEIF (CORRECTOR) THEN
 ENDIF
 TMP1 => M1%TMP
 TMP2 => M2%TMP
+HH1 => M1%H
+HH2 => M2%H
 
 ! Set fine mesh boundary value to corresponding coarse mesh value
 
@@ -2301,6 +2424,7 @@ DO K = K_LO,K_HI
             DO JJ = JJ_0+1,JJ_0+NRY
                RHOP2(II_0,JJ,KK) = RHOP1(I,J,K)
                TMP2(II_0,JJ,KK) = TMP1(I,J,K)
+               HH2(II_0,JJ,KK) = HH1(I,J,K)
                IF (N_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
             ENDDO
          ENDDO
@@ -2314,6 +2438,7 @@ DO K = K_LO,K_HI
             DO JJ = JJ_0+1,JJ_0+NRY
                RHOP2(II_0,JJ,KK) = RHOP1(I,J,K)
                TMP2(II_0,JJ,KK) = TMP1(I,J,K)
+               HH2(II_0,JJ,KK) = HH1(I,J,K)
                IF (N_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
             ENDDO
          ENDDO
@@ -2335,6 +2460,7 @@ DO K = K_LO,K_HI
             DO II = II_0+1,II_0+NRX
                RHOP2(II,JJ_0,KK) = RHOP1(I,J,K)
                TMP2(II,JJ_0,KK) = TMP1(I,J,K)
+               HH2(II,JJ_0,KK) = HH1(I,J,K)
                IF (N_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
             ENDDO
          ENDDO
@@ -2348,6 +2474,7 @@ DO K = K_LO,K_HI
             DO II = II_0+1,II_0+NRX
                RHOP2(II,JJ_0,KK) = RHOP1(I,J,K)
                TMP2(II,JJ_0,KK) = TMP1(I,J,K)
+               HH2(II,JJ_0,KK) = HH1(I,J,K)
                IF (N_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
             ENDDO
          ENDDO
@@ -2369,6 +2496,7 @@ DO J = J_LO,J_HI
             DO II = II_0+1,II_0+NRX
                RHOP2(II,JJ,KK_0) = RHOP1(I,J,K)
                TMP2(II,JJ,KK_0) = TMP1(I,J,K)
+               HH2(II,JJ,KK_0) = HH1(I,J,K)
                IF (N_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
             ENDDO
          ENDDO
@@ -2382,6 +2510,7 @@ DO J = J_LO,J_HI
             DO II = II_0+1,II_0+NRX
                RHOP2(II,JJ,KK_0) = RHOP1(I,J,K)
                TMP2(II,JJ,KK_0) = TMP1(I,J,K)
+               HH2(II,JJ,KK_0) = HH1(I,J,K)
                IF (N_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
             ENDDO
          ENDDO
