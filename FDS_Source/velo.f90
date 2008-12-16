@@ -85,6 +85,7 @@ IF (LES) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             IF (TWO_D) THEN
                DELTA = SQRT(DX(I)*DZ(K))
             ELSE
