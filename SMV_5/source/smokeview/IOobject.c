@@ -399,7 +399,7 @@ void draw_devices(void){
     if(sensorrelsize!=1.0){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
     }
-    if(showtime==1&&itime>=0&&itime<ntimes){
+    if(showtime==1&&itime>=0&&itime<ntimes&&devicei->showstatelist!=NULL){
       int state;
 
       state=devicei->showstatelist[itime];
