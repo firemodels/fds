@@ -9237,7 +9237,7 @@ void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
   if(norm<=0.001){
     xyznorm[0]=0.0;
     xyznorm[1]=0.0;
-    xyznorm[2]=1.0;
+    xyznorm[2]=-1.0;
     norm=1.0;
   }
 
