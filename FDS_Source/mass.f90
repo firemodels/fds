@@ -1055,7 +1055,8 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
    ENDDO
 
-! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+   
    IF (N_SPECIES>0) THEN
       DO K=1,KBAR
          DO J=1,JBAR
@@ -1076,7 +1077,8 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       ENDIF
    ENDIF
 
-! Extract predicted temperature at next time step from Equation of State
+   ! Extract predicted temperature at next time step from Equation of State
+   
    IF (.NOT. ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
          DO K=0,KBP1
@@ -1096,8 +1098,10 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
          ENDDO
       ENDIF
       TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
-   ENDIF   
+   ENDIF
+     
 ! The CORRECTOR step   
+
 ELSEIF (CORRECTOR) THEN
 
    ! Update the density
@@ -1166,7 +1170,8 @@ ELSEIF (CORRECTOR) THEN
       PBAR(:,I) = .5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_S_DT(I)*DT)
    ENDDO
  
-! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+   
    IF (N_SPECIES>0) THEN
       DO K=1,KBAR
          DO J=1,JBAR
@@ -1187,7 +1192,8 @@ ELSEIF (CORRECTOR) THEN
       ENDIF
    ENDIF
 
-! Extract predicted temperature at next time step from Equation of State
+   ! Extract predicted temperature at next time step from Equation of State
+   
    IF (.NOT. ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
          DO K=0,KBP1
@@ -1208,6 +1214,7 @@ ELSEIF (CORRECTOR) THEN
       ENDIF
       TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
    ENDIF
+   
 ENDIF SELECT_SUBSTEP
 
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
@@ -1361,7 +1368,6 @@ WALL_LOOP: DO IW=1,NWC
          ENDIF
    END SELECT
 ENDDO WALL_LOOP
-
 
 ! Compute species advective fluxes at interior cell faces and 
 ! add to diffusive flux which is already stored in FX,FY,FZ.
