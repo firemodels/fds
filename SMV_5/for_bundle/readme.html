@@ -10,7 +10,28 @@
 <a href="http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/SMV_5/for_bundle/readme.html">Latest Smokeview release notes</a>
 <ul>
 
-<li>5.3 (build 2720) - November 23, 2008 
+<li>5.3.2 (build 2878) - December 17, 2008 
+<ol>
+<li>enhancement: add an option to draw sensors activating (and deactivating) multiple times, 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=581&can=1&sort=-id">Issue 581</a>).
+<li>enhancement: add 2 states to the sensor device to allow testing of  code to draw sensors more generally,
+<li>enhancement: improve user  tick/label drawing using antialiasing (smooth line drawing) 
+<li>fix: correct the default orientation vector for devices,
+<li>fix: compute the elevation and azmuthal orientation angles for devices
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=584&can=1&sort=-id">Issue 584</a>).
+<li>turn off clipping for user ticks/labels
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=561&can=1&sort=-id">Issue 561</a>).
+<li>fix: expand the time interval for drawing text labels to allow for numerical FDS time step differences
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=557&can=1&sort=-id">Issue 557</a>).
+<li>usability: change the wording of the <em>Show/Hide All Plot3D</em> plane menu item to indicate that this 
+only effects planes in the active or current mesh
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=556&can=1&sort=-id">Issue 556</a>).
+<li>fix: code change to fix default cad color drawing
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=547&can=1&sort=-id">Issue 547</a>).
+<li>usability: add key code definitions to the help menu and Appendix C of the User's guide.
+</ol>
+
+<p><li>5.3 (build 2720) - November 23, 2008 
 <ol>
 
 <li> enhancement: Add option to draw cell centered slice data.  Cell centered data is created by adding the string, <tt>CELL_CENTERED=.TRUE.</tt>
