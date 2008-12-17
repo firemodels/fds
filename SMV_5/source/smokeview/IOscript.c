@@ -833,9 +833,13 @@ void script_loadiso(scriptdata *scripti){
 
   for(i=0;i<niso;i++){
     iso *isoi;
+    int len;
+    int imatch;
 
     isoi = isoinfo + i;
-    if(match_upper(isoi->label.longlabel,scripti->cval,strlen(scripti->cval))==1){
+    len = strlen(scripti->cval);
+    imatch = match_upper(isoi->label.longlabel,scripti->cval,len);
+    if(imatch==1||imatch==2){
       readiso(isoi->file,i,LOAD,&errorcode);
     }
   }
