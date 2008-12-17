@@ -124,6 +124,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          ENDDO
       ENDDO
    ENDDO
+   
    ! Correct rho*D del Y at boundaries and store rho*D at boundaries
  
    WALL_LOOP: DO IW=1,NWC
@@ -268,7 +269,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    ENDIF SPECIES_DIFFUSION_2
  
 ENDDO SPECIES_LOOP
-
 
 ! Compute del dot k del T
  

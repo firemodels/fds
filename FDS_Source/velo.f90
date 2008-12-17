@@ -77,6 +77,30 @@ ELSE
    IF (N_SPECIES > 0) YYP => YYS
 ENDIF
 
+! Compute viscosity for DNS using primitive species/mixture fraction
+
+IF (N_SPECIES == 0) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            ITMP = NINT(0.1_EB*TMP(I,J,K))
+            MU(I,J,K)=Y2MU_C(ITMP)
+         ENDDO
+      ENDDO
+   ENDDO
+ELSE
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            ITMP = NINT(0.1_EB*TMP(I,J,K))
+            CALL GET_MU(YYP(I,J,K,:),MU(I,J,K),ITMP)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
 ! Compute eddy viscosity using Smagorinsky model
 
 IF (LES) THEN
@@ -104,38 +128,12 @@ IF (LES) THEN
             S13 = 0.5_EB*(DUDZ+DWDX)
             S23 = 0.5_EB*(DVDZ+DWDY)
             SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
+            
             IF (DYNSMAG) CS = C_DYNSMAG(I,J,K)
-            ITMP = NINT(0.1_EB*TMP(I,J,K))
-            MU(I,J,K) = Y2MU_C(ITMP) + RHOP(I,J,K)*(CS*DELTA)**2*SS
+            MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
          ENDDO
       ENDDO
    ENDDO
-ENDIF
-   
-! Compute viscosity for DNS using primitive species/mixture fraction
-
-IF (DNS)  THEN
-   IF (N_SPECIES == 0) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ITMP = NINT(0.1_EB*TMP(I,J,K))
-               MU(I,J,K)=Y2MU_C(ITMP)
-            ENDDO
-         ENDDO
-      ENDDO
-   ELSE
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ITMP = NINT(0.1_EB*TMP(I,J,K))
-               CALL GET_MU(YYP(I,J,K,:),MU(I,J,K),ITMP)
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
 ENDIF
 
 END SUBROUTINE COMPUTE_VISCOSITY
@@ -154,7 +152,7 @@ CALL POINT_TO_MESH(NM)
 
 ! Mirror viscosity into solids and exterior boundary cells
  
-IF (CSMAG==0._EB .OR. CSMAG_WALL>CSMAG) THEN
+IF (CSMAG==0._EB .OR. CSMAG_WALL>CSMAG .OR. DYNSMAG) THEN
    C_RATIO = 1._EB
 ELSE
    C_RATIO = (CSMAG_WALL/CSMAG)**2

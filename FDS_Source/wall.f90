@@ -166,14 +166,15 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
          ENDIF
          CP_TERM   = MAX(0._EB,-UW(IW))*RHOWAL*CP
          CP_TERM_F = MAX(0._EB,-UW(IW))*RHOWAL*CP_F
-         IF (FLUX_LIMITER<0) THEN
+         !!IF (FLUX_LIMITER<0) THEN
             TMP_W(IW) = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G + CP_TERM*TMP_F(IW) - QCONF(IW) )/(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
-         ELSE
-            TMP_W(IW) = ( RDN(IW)*KW(IW)*TMP_G - QCONF(IW) )/(RDN(IW)*KW(IW))
-         ENDIF
+         !!ELSE
+         !!   TMP_W(IW) = ( RDN(IW)*KW(IW)*TMP_G - QCONF(IW) )/(RDN(IW)*KW(IW))
+         !!ENDIF
          TMP_W(IW) = MAX(TMPMIN,TMP_W(IW))
-
+         
       CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER
+         
          IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(TIME_HEAT)>=1) THEN
             TSI = T
          ELSE
@@ -211,6 +212,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
          TMP_W(IW) = MAX(TMPMIN,TMP_W(IW))
 
       CASE (CONVECTIVE_FLUX_BC) METHOD_OF_HEAT_TRANSFER
+      
          IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(TIME_HEAT)>=1) THEN
             TSI = T
          ELSE
@@ -275,7 +277,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
  
    END SELECT METHOD_OF_HEAT_TRANSFER
  
-! Record wall temperature in the ghost cell
+   ! Record wall temperature in the ghost cell
  
    IF (SOLID(CELL_INDEX(II,JJ,KK))) TMP(II,JJ,KK) = MAX(100._EB,MIN(4900._EB,TMP_W(IW)))
  
@@ -408,7 +410,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
                YY_WALL = YYP(IIG,JJG,KKG,N)
             ENDIF
             IF (DNS) YY_W(IW,N) = 2._EB*YY_WALL - YYP(IIG,JJG,KKG,N)
-            IF (LES) YY_W(IW,N) =       YY_WALL 
+            IF (LES) YY_W(IW,N) =       YY_WALL
          ENDDO
  
       CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
