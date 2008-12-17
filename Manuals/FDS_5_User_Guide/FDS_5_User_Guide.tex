@@ -2435,6 +2435,64 @@ also be specified on the appropriate {\ct SURF} line, along with a color indicat
 \item Obstructions are drawn solid in Smokeview. To draw an outline representation, set {\ct OUTLINE=.TRUE.}
 \end{itemize}
 
+
+\subsection{Repeated Obstructions: The \texorpdfstring{{\tt MULT}}{MULT} Namelist Group (Table \ref{tbl:MULT})}
+\label{info:MULT}
+
+Sometimes obstructions are repeated over and over in the input file. This can be tedious to create and make the input file hard to read. However,
+if a particular obstruction or set of obstructions repeats itself in a regular pattern, you can use a utility known as a multiplier. If you want to
+repeat an obstruction, create a line in the input file as follows:
+
+\footnotesize
+\begin{verbatim}
+&MULT ID='m1', DX=1.2, DY=2.4, I_LOWER=-2, I_UPPER=3, J_LOWER=0, J_UPPER=5 /
+
+&OBST XB=..., MULT_ID='m1' /
+\end{verbatim}
+\normalsize
+
+\noindent
+This has the effect of making an array of obstructions according to the following formulae: 
+\begin{eqnarray*}  x_i = x_0 + i \, \dx  &;& \hbox{\small I\_LOWER} \le i \le \hbox{\small I\_UPPER} \\
+                   y_j = y_0 + j \, \dy  &;& \hbox{\small J\_LOWER} \le j \le \hbox{\small J\_UPPER} 
+\end{eqnarray*}
+Note that the same rules apply for the $z$ direction as well.
+
+A slightly more complicated use of this feature is demonstrated by the following short input file:
+
+\footnotesize
+\begin{verbatim}
+&HEAD CHID='pyramid', TITLE='Simple demo of multiplier function' /
+
+&MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=0. /
+
+&MULT ID='south', DXB=0.01,-.01,0.01,0.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+&MULT ID='north', DXB=0.01,-.01,-.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+&MULT ID='east',  DXB=-.01,-.01,0.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+&MULT ID='west',  DXB=0.01,0.01,0.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+
+&OBST XB=0.10,0.90,0.10,0.11,0.10,0.11, MULT_ID='south', COLOR='RED' /
+&OBST XB=0.10,0.90,0.89,0.90,0.10,0.11, MULT_ID='north', COLOR='BLUE' /
+&OBST XB=0.10,0.11,0.11,0.89,0.10,0.11, MULT_ID='west',  COLOR='GREEN' /
+&OBST XB=0.89,0.90,0.11,0.89,0.10,0.11, MULT_ID='east',  COLOR='CYAN' /
+
+&TAIL /
+\end{verbatim}
+\normalsize
+
+\noindent
+The end result of this input file is to create a pyramid by repeating long, rectangular obstructions at the base of each
+face in a stair-step pattern. Note in this case the use of {\ct N\_LOWER} and {\ct N\_UPPER} which automatically cause FDS to
+repeat the obstructions in sequence rather than as an array. 
+
+
+
+
+
+
+
 \subsection{Non-rectangular Geometry and Sloped Ceilings}
 \label{info:SAWTOOTH}
 \index{Sawtooth}
@@ -7961,7 +8019,41 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\clearpage
+\section{\texorpdfstring{{\tt MULT}}{MULT} (Multiplier Function Parameters)}
+
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Multiplier Function Parameters]{For more information see Section~\ref{info:MULT}.}
+\label{tbl:MULT} \\
+\hline
+\multicolumn{5}{|c|}{{\ct MULT} (Multiplier Function Parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct CTRL} (Multiplier Function Parameters)} \\
+\hline \hline
+\endhead
+{\ct DXB}            & Real Sextuplet   & Spacing for all 6 coordinates               & m  & 0.                         \\ \hline
+{\ct DX}             & Real             & Spacing in the $x$ direction                & m  & 0.                         \\ \hline
+{\ct DY}             & Real             & Spacing in the $y$ direction                & m  & 0.                         \\ \hline
+{\ct DZ}             & Real             & Spacing in the $z$ direction                & m  & 0.                         \\ \hline
+{\ct ID }            & Character        & {\ct ID}entifier                            &    &                            \\ \hline
+{\ct I\_LOWER}       & Integer          & Lower array bound, $x$ direction            &    & 0                          \\ \hline
+{\ct I\_UPPER}       & Integer          & Upper array bound, $x$ direction            &    & 0                          \\ \hline
+{\ct J\_LOWER}       & Integer          & Lower array bound, $y$ direction            &    & 0                          \\ \hline
+{\ct J\_UPPER}       & Integer          & Upper array bound, $y$ direction            &    & 0                          \\ \hline
+{\ct K\_LOWER}       & Integer          & Lower array bound, $z$ direction            &    & 0                          \\ \hline
+{\ct K\_UPPER}       & Integer          & Upper array bound, $z$ direction            &    & 0                          \\ \hline
+{\ct N\_LOWER}       & Integer          & Lower sequence bound                        &    & 0                          \\ \hline
+{\ct N\_UPPER}       & Integer          & Upper sequence bound                        &    & 0                          \\ \hline
+\end{longtable}
+
+
+\vspace{\baselineskip}
+
+
 
 \section{\texorpdfstring{{\tt OBST}}{OBST} (Obstruction Parameters)}
 
