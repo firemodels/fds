@@ -1,0 +1,42 @@
+#!/bin/bash
+#   Example script for submitting a job to PBS on titan.
+#
+#PBS -N MFT_XXXNUM_YYYTYPE
+#PBS -q default
+#PBS -l nodes=4:ppn=1:ethernet64
+
+cd $PBS_O_WORKDIR
+echo "cd $PBS_O_WORKDIR"
+
+echo "lamboot -v $PBS_NODEFILE"
+lamboot -v $PBS_NODEFILE
+
+echo "lamnodes"
+lamnodes
+
+jobnum=`echo $PBS_JOBID | awk 'BEGIN {FS = "."} { printf("%05d", $1)}'`
+echo jobnum $jobnum
+#determine the number of nodes/processors
+numnodes=`wc $PBS_NODEFILE | awk '{print $1}'`
+wrkdir=$PBS_O_WORKDIR
+prog=fds5_mpi_pgi_Opteron64
+prog_args="MFRI_Training_Tower_XXXNUM_YYYTYPE.fds"
+
+cd $wrkdir
+#
+######  Start the program.
+#
+echo
+echo "Starting user program $prog"
+date
+
+echo
+#cmd="mpirun  -machinefile $PBS_NODEFILE  -np $numnodes $prog $prog_args"
+#cmd="mpirun  $PBS_NODEFILE  -np $numnodes $prog $prog_args"
+cmd="mpirun  -np $numnodes -v $prog $prog_args"
+echo "Run command:$cmd"
+$cmd
+
+date
+lamhalt -v
+exit
