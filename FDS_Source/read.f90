@@ -218,7 +218,7 @@ COUNT_MESH_LOOP: DO
    IF (MULT_ID/='null') THEN
       DO N=1,N_MULT
          MR => MULTIPLIER(N)
-         IF (MULT_ID==MR%ID) N_MESH_NEW = (MR%I_UPPER-MR%I_LOWER+1)*(MR%J_UPPER-MR%J_LOWER+1)*(MR%K_UPPER-MR%K_LOWER+1)
+         IF (MULT_ID==MR%ID) N_MESH_NEW = MR%N_COPIES
       ENDDO
    ENDIF
    NMESHES      = NMESHES + N_MESH_NEW
@@ -329,12 +329,21 @@ MESH_LOOP: DO N=1,NMESHES_READ
       J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
          I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
 
-            XB1 = MR%X0 + XB(1) + II*MR%DX
-            XB2 = MR%X0 + XB(2) + II*MR%DX
-            XB3 = MR%Y0 + XB(3) + JJ*MR%DY
-            XB4 = MR%Y0 + XB(4) + JJ*MR%DY
-            XB5 = MR%Z0 + XB(5) + KK*MR%DZ
-            XB6 = MR%Z0 + XB(6) + KK*MR%DZ
+            IF (.NOT.MR%SEQUENTIAL) THEN
+               XB1 = XB(1) + II*MR%DXB(1)
+               XB2 = XB(2) + II*MR%DXB(2)
+               XB3 = XB(3) + JJ*MR%DXB(3)
+               XB4 = XB(4) + JJ*MR%DXB(4)
+               XB5 = XB(5) + KK*MR%DXB(5)
+               XB6 = XB(6) + KK*MR%DXB(6)
+            ELSE
+               XB1 = XB(1) + II*MR%DXB(1)
+               XB2 = XB(2) + II*MR%DXB(2)
+               XB3 = XB(3) + II*MR%DXB(3)
+               XB4 = XB(4) + II*MR%DXB(4)
+               XB5 = XB(5) + II*MR%DXB(5)
+               XB6 = XB(6) + II*MR%DXB(6)
+            ENDIF
 
             ! Increase the MESH counter by 1
 
@@ -967,13 +976,15 @@ ENDDO MESH_LOOP
  
 END SUBROUTINE READ_TIME
  
+
+
 SUBROUTINE READ_MULT
 
-REAL(EB) :: DX,DY,DZ,X0,Y0,Z0
+REAL(EB) :: DX,DY,DZ,DXB(6)
 CHARACTER(30) :: ID
-INTEGER :: N,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER
+INTEGER :: N,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER,N_LOWER,N_UPPER
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
-NAMELIST /MULT/ FYI,ID,DX,DY,DZ,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER,X0,Y0,Z0
+NAMELIST /MULT/ FYI,ID,DX,DY,DZ,DXB,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER,N_LOWER,N_UPPER
 
 N_MULT = 0
 REWIND(LU_INPUT)
@@ -999,15 +1010,15 @@ READ_MULT_LOOP: DO N=0,N_MULT
    DX      = 0._EB
    DY      = 0._EB
    DZ      = 0._EB
+   DXB     = 0._EB
    I_LOWER = 0
    I_UPPER = 0
    J_LOWER = 0
    J_UPPER = 0
    K_LOWER = 0
    K_UPPER = 0
-   X0      = 0._EB
-   Y0      = 0._EB
-   Z0      = 0._EB
+   N_LOWER = 0
+   N_UPPER = 0
 
    IF (N>0) THEN
       CALL CHECKREAD('MULT',LU_INPUT,IOS)
@@ -1017,18 +1028,29 @@ READ_MULT_LOOP: DO N=0,N_MULT
 
    MR => MULTIPLIER(N)
    MR%ID      = ID
-   MR%DX      = DX
-   MR%DY      = DY
-   MR%DZ      = DZ
+   MR%DXB     = DXB
+   IF (DX/=0._EB) MR%DXB(1:2) = DX
+   IF (DY/=0._EB) MR%DXB(3:4) = DY
+   IF (DZ/=0._EB) MR%DXB(5:6) = DZ
+
    MR%I_LOWER = I_LOWER
    MR%I_UPPER = I_UPPER
    MR%J_LOWER = J_LOWER
    MR%J_UPPER = J_UPPER
    MR%K_LOWER = K_LOWER
    MR%K_UPPER = K_UPPER
-   MR%X0      = X0
-   MR%Y0      = Y0
-   MR%Z0      = Z0
+   MR%N_COPIES = (I_UPPER-I_LOWER+1)*(J_UPPER-J_LOWER+1)*(K_UPPER-K_LOWER+1)
+
+   IF (N_LOWER/=0 .OR. N_UPPER/=0) THEN
+      MR%SEQUENTIAL = .TRUE.
+      MR%I_LOWER  = N_LOWER
+      MR%I_UPPER  = N_UPPER
+      MR%J_LOWER  = 0
+      MR%J_UPPER  = 0
+      MR%K_LOWER  = 0
+      MR%K_UPPER  = 0
+      MR%N_COPIES = (N_UPPER-N_LOWER+1)
+   ENDIF
 
 ENDDO READ_MULT_LOOP
 REWIND(LU_INPUT)
@@ -4751,11 +4773,11 @@ INTEGER :: NM,NOM,N_OBST_O,NNN,IC,N,NN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,K
 CHARACTER(30) :: DEVC_ID,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
-REAL(EB) :: TRANSPARENCY,DUMMY,XB1,XB2,XB3,XB4,XB5,XB6
+REAL(EB) :: TRANSPARENCY,DUMMY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY
 LOGICAL :: SAWTOOTH,EMBEDDED,THICKEN,PERMIT_HOLE,ALLOW_VENT,EVACUATION, REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE
 NAMELIST /OBST/ XB,SURF_ID,SURF_IDS,SURF_ID6,FYI,BNDF_FACE,BNDF_OBST, &
                 SAWTOOTH,RGB,TRANSPARENCY,TEXTURE_ORIGIN,THICKEN, OUTLINE,DEVC_ID,CTRL_ID,COLOR, &
-                PERMIT_HOLE,ALLOW_VENT,EVACUATION,MESH_ID,REMOVABLE,MULT_ID
+                PERMIT_HOLE,ALLOW_VENT,EVACUATION,MESH_ID,REMOVABLE,MULT_ID,BULK_DENSITY
  
 MESH_LOOP: DO NM=1,NMESHES
 
@@ -4777,7 +4799,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (MULT_ID/='null') THEN
          DO N=1,N_MULT
             MR => MULTIPLIER(N)
-            IF (MULT_ID==MR%ID) N_OBST_NEW = (MR%I_UPPER-MR%I_LOWER+1)*(MR%J_UPPER-MR%J_LOWER+1)*(MR%K_UPPER-MR%K_LOWER+1)
+            IF (MULT_ID==MR%ID) N_OBST_NEW = MR%N_COPIES
          ENDDO
       ENDIF
       N_OBST = N_OBST + N_OBST_NEW
@@ -4806,6 +4828,7 @@ MESH_LOOP: DO NM=1,NMESHES
       COLOR    = 'null'
       MESH_ID     = 'null'
       RGB         = -1
+      BULK_DENSITY= -1._EB
       TRANSPARENCY=  1._EB
       BNDF_FACE   = BNDF_DEFAULT
       BNDF_OBST   = BNDF_DEFAULT
@@ -4848,12 +4871,21 @@ MESH_LOOP: DO NM=1,NMESHES
          J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
             I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
  
-               XB1 = MR%X0 + XB(1) + II*MR%DX
-               XB2 = MR%X0 + XB(2) + II*MR%DX
-               XB3 = MR%Y0 + XB(3) + JJ*MR%DY
-               XB4 = MR%Y0 + XB(4) + JJ*MR%DY
-               XB5 = MR%Z0 + XB(5) + KK*MR%DZ
-               XB6 = MR%Z0 + XB(6) + KK*MR%DZ
+               IF (.NOT.MR%SEQUENTIAL) THEN
+                  XB1 = XB(1) + II*MR%DXB(1)
+                  XB2 = XB(2) + II*MR%DXB(2)
+                  XB3 = XB(3) + JJ*MR%DXB(3)
+                  XB4 = XB(4) + JJ*MR%DXB(4)
+                  XB5 = XB(5) + KK*MR%DXB(5)
+                  XB6 = XB(6) + KK*MR%DXB(6)
+               ELSE
+                  XB1 = XB(1) + II*MR%DXB(1)
+                  XB2 = XB(2) + II*MR%DXB(2)
+                  XB3 = XB(3) + II*MR%DXB(3)
+                  XB4 = XB(4) + II*MR%DXB(4)
+                  XB5 = XB(5) + II*MR%DXB(5)
+                  XB6 = XB(6) + II*MR%DXB(6)
+               ENDIF
 
                ! Increase the OBST counter
 
@@ -5083,6 +5115,7 @@ MESH_LOOP: DO NM=1,NMESHES
                OB%ORDINAL = NN  ! Order of OBST in original input file
                OB%PERMIT_HOLE = PERMIT_HOLE
                OB%ALLOW_VENT  = ALLOW_VENT
+               OB%BULK_DENSITY= BULK_DENSITY
  
                ! Make obstruction invisible if it's within a finer mesh
  
@@ -6841,6 +6874,20 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
       CASE ('RADIATIVE_FLUX_GAS','RADIATIVE HEAT FLUX GAS')
 
+         SELECT CASE(DV%IOR)
+            CASE(-1)
+               DV%ORIENTATION(1:3) = (/-1._EB, 0._EB, 0._EB/)
+            CASE( 1)
+               DV%ORIENTATION(1:3) = (/ 1._EB, 0._EB, 0._EB/)
+            CASE(-2)
+               DV%ORIENTATION(1:3) = (/ 0._EB,-1._EB, 0._EB/)
+            CASE( 2)
+               DV%ORIENTATION(1:3) = (/ 0._EB, 1._EB, 0._EB/)
+            CASE(-3)
+               DV%ORIENTATION(1:3) = (/ 0._EB, 0._EB,-1._EB/)
+            CASE( 3)
+               DV%ORIENTATION(1:3) = (/ 0._EB, 0._EB, 1._EB/)
+         END SELECT
          GAS_CELL_RAD_FLUX    = .TRUE.
          N_GAS_CELL_RAD_DEVC  = N_GAS_CELL_RAD_DEVC + 1
          DV%GAS_CELL_RAD_FLUX = .TRUE.
