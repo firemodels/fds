@@ -3511,7 +3511,7 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = C_DYNSMAG(III,JJJ,KKK) 
       
    CASE(31)  ! SPECIFIC HEAT
-      ITMP = MAX(500,NINT(0.1_EB*TMP(II,JJ,KK)))
+      ITMP = MIN(500,NINT(0.1_EB*TMP(II,JJ,KK)))
       IF (N_SPECIES>0) THEN
          YY_GET(:) = YY(II,JJ,KK,:)
          CALL GET_CP(YY_GET,CP,ITMP)
@@ -3523,7 +3523,7 @@ SELECT CASE(IND)
    CASE(32)  ! HRRPUA
       GAS_PHASE_OUTPUT = Q(II,JJ,KK)*0.001_EB*(DX(II)*DY(JJ)*DZ(KK))**ONTH
    CASE(33)  ! CONDUCTIVITY
-      ITMP = MAX(500,NINT(0.1_EB*TMP(II,JJ,KK)))
+      ITMP = MIN(500,NINT(0.1_EB*TMP(II,JJ,KK)))
       IF (DNS) THEN
          IF (N_SPECIES > 0 ) THEN
             YY_GET(:) = YY(II,JJ,KK,:)
@@ -3675,7 +3675,7 @@ SELECT CASE(IND)
                IF (IND==111 .OR. IND==114 .OR. IND==117) HMFAC = 1._EB
                IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))
                IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
-                  ITMP=MAX(500,NINT(0.05_EB*(TMP(I,J,K)+TMP(IP,JP,KP))))
+                  ITMP=MIN(500,NINT(0.05_EB*(TMP(I,J,K)+TMP(IP,JP,KP))))
                   IF (N_SPECIES>0) THEN
                      YY_G =0.5_EB*(YY(I,J,K,:)+YY(IP,JP,KP,:))
                      CALL GET_H_G(YY_G,H_G_SUM,ITMP)
@@ -4251,7 +4251,7 @@ WALL_LOOP: DO IW=1,NWC
       CASE(-3) 
          U_N =  W(IIG,JJG,KKG)
    END SELECT
-   ITMP = MAX(500,NINT(0.1_EB*TMP_N))
+   ITMP = MIN(500,NINT(0.1_EB*TMP_N))
    IF (N_SPECIES>0) THEN
       YY_N = 0.5_EB*(YY(IIG,JJG,KKG,:) + YY_W(IW,:))
       CALL GET_H_G(YY_N,H_G,ITMP)
