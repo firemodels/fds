@@ -510,12 +510,10 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: RHODELTA
 
 RHODELTA => WORK2
 
-IF (PREDICTOR) THEN
+IF (PREDICTOR .OR. FLUX_LIMITER>=0) THEN
    RHOP=>RHOS
-   YYP=>YYS
 ELSE
    RHOP=>RHO
-   YYP=>YY
 ENDIF
  
 ! Correct undershoots
@@ -982,7 +980,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TM
 REAL(EB) :: TNOW,YY_GET(1:N_SPECIES)
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,YYN,FX,FY,FZ
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,FX,FY,FZ !!YYN
 
  
 IF (EVACUATION_ONLY(NM)) RETURN
@@ -994,7 +992,7 @@ CALL POINT_TO_MESH(NM)
 FX => SCALAR_SAVE1
 FY => SCALAR_SAVE2
 FZ => SCALAR_SAVE3
-YYN    => SCALAR_SAVE4
+!!YYN    => SCALAR_SAVE4
 RHOYYP => SCALAR_SAVE5
 
 SELECT_SUBSTEP: IF (PREDICTOR) THEN
@@ -1027,7 +1025,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               YYN(I,J,K,N) = RHOYYP(I,J,K,N)         
+               !!YYN(I,J,K,N) = RHOYYP(I,J,K,N)         
                YYS(I,J,K,N) = RHOYYP(I,J,K,N) - DT*( RDX(I)*(FX(I,J,K,N)-FX(I-1,J,K,N)) &
                                                    + RDY(J)*(FY(I,J,K,N)-FY(I,J-1,K,N)) &
                                                    + RDZ(K)*(FZ(I,J,K,N)-FZ(I,J,K-1,N)) )
@@ -1118,6 +1116,10 @@ ELSEIF (CORRECTOR) THEN
       ENDDO
    ENDDO
    
+   ! Correct densities above or below clip limits
+
+   CALL CHECK_DENSITY
+   
    ! Update mass fractions
    
    DO N=1,N_SPECIES
@@ -1144,15 +1146,15 @@ ELSEIF (CORRECTOR) THEN
    
    ! Correct densities above or below clip limits
 
-   CALL CHECK_DENSITY
+   !!CALL CHECK_DENSITY
    
    DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YYS(I,J,K,N) )/RHO(I,J,K)
-               
-               ! IF (CLIP_SCALAR) THEN...
+               !!YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YYS(I,J,K,N) )/RHO(I,J,K)
+               ! I am testing this change to see if we can eliminate the need for YYN(:,:,:,1:N_SPECIES)
+               YY(I,J,K,N) = 0.5_EB*( YY(I,J,K,N) + YYS(I,J,K,N)/RHOS(I,J,K) )
                YY(I,J,K,N) = MAX(YY(I,J,K,N),0._EB)
                YY(I,J,K,N) = MIN(YY(I,J,K,N),1._EB)
             ENDDO
