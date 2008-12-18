@@ -9598,11 +9598,12 @@ Contains
     INTEGER, INTENT(IN) :: I,J,K,NOM
     REAL(EB), INTENT(OUT) :: fed_indx,soot_dens,gas_temp,rad_flux
     !
-    REAL(EB) :: Y_MF_INT
+    REAL(EB) :: Y_MF_INT,YY_GET(1:N_SPECIES)
 
     ! Mass fraction array ==> soot density (mg/m3)
     ! Next is for soot (mg/m3)
-    Call GET_MASS_FRACTION(MESHES(nom)%YY(I,J,K,:),SOOT_INDEX,Y_MF_INT)
+    YY_GET(:) = MESHES(nom)%YY(I,J,K,:)
+    Call GET_MASS_FRACTION(YY_GET,SOOT_INDEX,Y_MF_INT)
     soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
     ! Calculate Purser's fractional effective dose (FED)
     fed_indx = FED(MESHES(nom)%YY(I,J,K,:),MESHES(nom)%RSUM(I,J,K))
