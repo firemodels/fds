@@ -1385,7 +1385,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ENDIF
          
             ! Decrease temperature of the gas cell
-            ITMP = MAX(500,NINT(0.1_EB*TMP_G))
+            ITMP = MIN(500,NINT(0.1_EB*TMP_G))
             IF (N_SPECIES == 0 ) THEN
                CP = Y2CPBAR_C(ITMP)
             ELSE
@@ -1398,7 +1398,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                TMP_G = H_NEW/CP
                IF ((TMP(II,JJ,KK)-TMP_G)/TMP(II,JJ,KK) > 0.01_EB) TEMPITER = .TRUE.
                TMP(II,JJ,KK) = TMP_G
-               ITMP = MAX(500,NINT(0.1_EB*TMP(II,JJ,KK)))
+               ITMP = MIN(500,NINT(0.1_EB*TMP(II,JJ,KK)))
                IF (N_SPECIES == 0 ) THEN
                   CP = Y2CPBAR_C(ITMP)
                ELSE
