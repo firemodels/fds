@@ -1117,7 +1117,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
-            CP,H_NEW
+            CP,H_NEW,YY_GET(1:N_SPECIES)
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS,ITMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
@@ -1385,11 +1385,12 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ENDIF
          
             ! Decrease temperature of the gas cell
-            ITMP = NINT(0.1_EB*TMP_G)
+            ITMP = MAX(500,NINT(0.1_EB*TMP_G))
             IF (N_SPECIES == 0 ) THEN
                CP = Y2CPBAR_C(ITMP)
             ELSE
-               CALL GET_CPBAR(YY(II,JJ,KK,:),CP,ITMP)
+               YY_GET(:) = YY(II,JJ,KK,:)
+               CALL GET_CPBAR(YY_GET,CP,ITMP)
             ENDIF
             H_NEW = (M_GAS*CP*TMP_G - WGT*Q_CON_GAS)/M_GAS
             TEMPITER = .FALSE.
@@ -1397,11 +1398,12 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                TMP_G = H_NEW/CP
                IF ((TMP(II,JJ,KK)-TMP_G)/TMP(II,JJ,KK) > 0.01_EB) TEMPITER = .TRUE.
                TMP(II,JJ,KK) = TMP_G
-               ITMP = NINT(0.1_EB*TMP(II,JJ,KK))
+               ITMP = MAX(500,NINT(0.1_EB*TMP(II,JJ,KK)))
                IF (N_SPECIES == 0 ) THEN
                   CP = Y2CPBAR_C(ITMP)
                ELSE
-                  CALL GET_CPBAR(YY(II,JJ,KK,:),CP,ITMP)
+                  YY_GET(:) = YY(II,JJ,KK,:)
+                  CALL GET_CPBAR(YY_GET,CP,ITMP)
                ENDIF
             ENDDO ITERATE_TEMP
             
