@@ -84,7 +84,7 @@ IF (N_SPECIES == 0) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = MAX(500,NINT(0.1_EB*TMP(I,J,K)))
+            ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
             MU(I,J,K)=Y2MU_C(ITMP)
          ENDDO
       ENDDO
@@ -94,7 +94,7 @@ ELSE
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = MAX(500,NINT(0.1_EB*TMP(I,J,K)))
+            ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
             YY_GET(:) = YYP(I,J,K,:)
             CALL GET_MU(YY_GET,MU(I,J,K),ITMP)
          ENDDO
@@ -512,7 +512,7 @@ IF (LES) THEN
             S23 = 0.5_EB*(DVDZ+DWDY)
             SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
          
-            ITMP = MAX(500,NINT(0.1_EB*TMP(I,J,K)))
+            ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
             MU(I,J,K) = Y2MU_C(ITMP) + RHOP(I,J,K)*(CSMAG*DELTA)**2*SS
          ENDDO
       ENDDO
