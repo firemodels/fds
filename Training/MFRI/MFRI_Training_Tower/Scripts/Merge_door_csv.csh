@@ -15,7 +15,7 @@ set file1t=aa.$$
 set file2t=bb.$$
 set file3t=cc.$$
 set fileout=$OUTDIR/MFRI_Training_Tower_door_time.csv
-
+echo creating door test time histories for TC 3, 6 and 10
 cd $INDIR
 echo s,C,C,C,C,C,C,C,C,C > $fileout
 echo FDS Time,TC03S,TC06S,TC10S,TC03M,TC06M,TC10M,TC03L,TC06L,TC10L>>$fileout
