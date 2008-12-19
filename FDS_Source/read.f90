@@ -194,7 +194,7 @@ END SUBROUTINE READ_HEAD
  
 SUBROUTINE READ_MESH
 
-INTEGER :: IJK(3),NM,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN,IBAR2,JBAR2,KBAR2
+INTEGER :: IJK(3),NM,CURRENT_MPI_PROCESS,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN,IBAR2,JBAR2,KBAR2
 INTEGER, DIMENSION(0:100) :: I_MG,J_MG,K_MG
 LOGICAL :: EVACUATION, EVAC_HUMANS
 REAL(EB) :: EVAC_Z_OFFSET,XB(6),XB1,XB2,XB3,XB4,XB5,XB6
@@ -330,19 +330,19 @@ MESH_LOOP: DO N=1,NMESHES_READ
          I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
 
             IF (.NOT.MR%SEQUENTIAL) THEN
-               XB1 = XB(1) + II*MR%DXB(1)
-               XB2 = XB(2) + II*MR%DXB(2)
-               XB3 = XB(3) + JJ*MR%DXB(3)
-               XB4 = XB(4) + JJ*MR%DXB(4)
-               XB5 = XB(5) + KK*MR%DXB(5)
-               XB6 = XB(6) + KK*MR%DXB(6)
+               XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+               XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+               XB3 = XB(3) + MR%DY0 + JJ*MR%DXB(3)
+               XB4 = XB(4) + MR%DY0 + JJ*MR%DXB(4)
+               XB5 = XB(5) + MR%DZ0 + KK*MR%DXB(5)
+               XB6 = XB(6) + MR%DZ0 + KK*MR%DXB(6)
             ELSE
-               XB1 = XB(1) + II*MR%DXB(1)
-               XB2 = XB(2) + II*MR%DXB(2)
-               XB3 = XB(3) + II*MR%DXB(3)
-               XB4 = XB(4) + II*MR%DXB(4)
-               XB5 = XB(5) + II*MR%DXB(5)
-               XB6 = XB(6) + II*MR%DXB(6)
+               XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+               XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+               XB3 = XB(3) + MR%DY0 + II*MR%DXB(3)
+               XB4 = XB(4) + MR%DY0 + II*MR%DXB(4)
+               XB5 = XB(5) + MR%DZ0 + II*MR%DXB(5)
+               XB6 = XB(6) + MR%DZ0 + II*MR%DXB(6)
             ENDIF
 
             ! Increase the MESH counter by 1
@@ -352,14 +352,15 @@ MESH_LOOP: DO N=1,NMESHES_READ
             ! Determine which PROCESS to assign the MESH to
 
             IF (MPI_PROCESS>-1) THEN
-               IF (MPI_PROCESS>NUMPROCS-1) THEN
+               CURRENT_MPI_PROCESS = MPI_PROCESS
+               IF (CURRENT_MPI_PROCESS>NUMPROCS-1) THEN
                   WRITE(MESSAGE,'(A)') 'ERROR: MPI_PROCESS greater than total number of processes'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
                RESTRICT_MESH_ASSIGNMENT = .FALSE.
             ELSE
-               IF (     PARALLEL) MPI_PROCESS = MIN(NM-1,NUMPROCS-1)
-               IF (.NOT.PARALLEL) MPI_PROCESS = 0
+               IF (     PARALLEL) CURRENT_MPI_PROCESS = MIN(NM-1,NUMPROCS-1)
+               IF (.NOT.PARALLEL) CURRENT_MPI_PROCESS = 0
             ENDIF
 
             ! Fill in MESH related variables
@@ -390,7 +391,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Associate the MESH with the PROCESS
          
-            PROCESS(NM) = MPI_PROCESS
+            PROCESS(NM) = CURRENT_MPI_PROCESS
             IF (MYID==0 .AND. PARALLEL) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
             IF (EVACUATION_ONLY(NM) .AND. PARALLEL) EVAC_PROCESS = NUMPROCS-1
 
@@ -980,11 +981,11 @@ END SUBROUTINE READ_TIME
 
 SUBROUTINE READ_MULT
 
-REAL(EB) :: DX,DY,DZ,DXB(6)
+REAL(EB) :: DX,DY,DZ,DXB(6),DX0,DY0,DZ0
 CHARACTER(30) :: ID
 INTEGER :: N,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER,N_LOWER,N_UPPER
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
-NAMELIST /MULT/ FYI,ID,DX,DY,DZ,DXB,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER,N_LOWER,N_UPPER
+NAMELIST /MULT/ FYI,ID,DX,DY,DZ,DXB,I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER,N_LOWER,N_UPPER,DX0,DY0,DZ0
 
 N_MULT = 0
 REWIND(LU_INPUT)
@@ -1010,6 +1011,9 @@ READ_MULT_LOOP: DO N=0,N_MULT
    DX      = 0._EB
    DY      = 0._EB
    DZ      = 0._EB
+   DX0     = 0._EB
+   DY0     = 0._EB
+   DZ0     = 0._EB
    DXB     = 0._EB
    I_LOWER = 0
    I_UPPER = 0
@@ -1029,6 +1033,9 @@ READ_MULT_LOOP: DO N=0,N_MULT
    MR => MULTIPLIER(N)
    MR%ID      = ID
    MR%DXB     = DXB
+   MR%DX0     = DX0
+   MR%DY0     = DY0
+   MR%DZ0     = DZ0
    IF (DX/=0._EB) MR%DXB(1:2) = DX
    IF (DY/=0._EB) MR%DXB(3:4) = DY
    IF (DZ/=0._EB) MR%DXB(5:6) = DZ
@@ -4872,19 +4879,19 @@ MESH_LOOP: DO NM=1,NMESHES
             I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
  
                IF (.NOT.MR%SEQUENTIAL) THEN
-                  XB1 = XB(1) + II*MR%DXB(1)
-                  XB2 = XB(2) + II*MR%DXB(2)
-                  XB3 = XB(3) + JJ*MR%DXB(3)
-                  XB4 = XB(4) + JJ*MR%DXB(4)
-                  XB5 = XB(5) + KK*MR%DXB(5)
-                  XB6 = XB(6) + KK*MR%DXB(6)
+                  XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+                  XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+                  XB3 = XB(3) + MR%DY0 + JJ*MR%DXB(3)
+                  XB4 = XB(4) + MR%DY0 + JJ*MR%DXB(4)
+                  XB5 = XB(5) + MR%DZ0 + KK*MR%DXB(5)
+                  XB6 = XB(6) + MR%DZ0 + KK*MR%DXB(6)
                ELSE
-                  XB1 = XB(1) + II*MR%DXB(1)
-                  XB2 = XB(2) + II*MR%DXB(2)
-                  XB3 = XB(3) + II*MR%DXB(3)
-                  XB4 = XB(4) + II*MR%DXB(4)
-                  XB5 = XB(5) + II*MR%DXB(5)
-                  XB6 = XB(6) + II*MR%DXB(6)
+                  XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+                  XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+                  XB3 = XB(3) + MR%DY0 + II*MR%DXB(3)
+                  XB4 = XB(4) + MR%DY0 + II*MR%DXB(4)
+                  XB5 = XB(5) + MR%DZ0 + II*MR%DXB(5)
+                  XB6 = XB(6) + MR%DZ0 + II*MR%DXB(6)
                ENDIF
 
                ! Increase the OBST counter
