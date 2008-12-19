@@ -1,0 +1,190 @@
+&HEAD CHID='MCFRS_Flashover_00leak',TITLE='MontoCo Flashover Simulator SVN $Revision$' / base case
+
+&MESH IJK=32,48,18, XB=-0.4,2.8,-0.4,4.4,0.0, 1.8/
+&MESH IJK=32,48,18, XB=-0.4,2.8,-0.4,4.4,1.8, 3.6/
+&MESH IJK=32,48,18, XB=-0.4,2.8, 4.4,9.2,0.0, 1.8/
+&MESH IJK=32,48,18, XB=-0.4,2.8, 4.4,9.2,1.8, 3.6/
+
+MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
+
+&TIME TWFIN=300.0 /
+&DUMP NFRAMES=3000, DT_DEVC=5.0, DT_HRR=5.0 /
+&MISC SURF_DEFAULT='METAL WALL'/
+
+***** starter fire
+
+&OBST XB= 1.3, 1.9, 7.7, 8.3, 1.1, 1.6,   COLOR='BLACK' /  metal drum
+&HOLE XB= 1.4, 1.8, 7.8, 8.2, 1.5, 1.7 /
+&VENT XB= 1.4, 1.8, 7.8, 8.2, 1.5, 1.5 SURF_ID='STARTER_FIRE'/
+&SURF ID='STARTER_FIRE', HRRPUA=3125.0 /500 kW
+
+&REAC ID                 = 'WOOD'
+     FYI                = 'Tewarson, SFPE Handbook, Douglas Fir'
+     C                  = 1.
+     H                  = 1.7
+     O                  = 0.74
+     N                  = 0.002
+     HEAT_OF_COMBUSTION = 16400.
+     CO_YIELD = 0.01
+     SOOT_YIELD         = 0.015 /
+
+
+***** openings
+
+&OBST XB=1.0, 1.4, 4.2, 4.6, 2.4, 2.6, / vent over large container
+&HOLE XB=1.1,1.3, 4.3,4.5, 2.2,2.7 DEVC_ID='top_vent' /
+&DEVC XYZ=0.0,0.0,0.0,ID='top_vent',SETPOINT=400.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+
+
+&HOLE XB=0.2,0.4,-0.1,0.2,0.2,0.4 DEVC_ID='front_hole' / front hole
+&DEVC XYZ=0.0,0.0,0.0,ID='front_hole',SETPOINT=400.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+
+&HOLE XB=-0.1,0.2, 0.2,1.0, 0.1,0.2 /  door
+&HOLE XB=-0.1,0.2, 0.7,1.0, 0.2,2.3 DEVC_ID='door'/  door
+&DEVC XYZ=0.0,0.0,0.0,ID='door',SETPOINT=400.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+
+
+***** materials
+
+&MATL ID                    = 'SHEETMETAL'
+      SPECIFIC_HEAT         = 0.47
+      CONDUCTIVITY          = 48.0
+      DENSITY               = 8000.0
+      /
+
+&SURF ID                 = 'METAL WALL'
+      FYI                = '18 guage sheet metal'
+      COLOR = 'RED',
+      MATL_ID            = 'SHEETMETAL'
+      THICKNESS          = 0.00635 /
+
+&MATL ID                    = 'MT_PARTBRD'
+      FYI='http://www.customthermoelectric.com/MaterialProperties5.htm'
+      SPECIFIC_HEAT         = 0.134
+      CONDUCTIVITY          = 0.17
+      DENSITY               = 1000.0
+      /
+
+&SURF ID='PARTBRD'
+      MATL_ID = 'MT_PARTBRD'
+      THICKNESS=0.016
+      IGNITION_TEMPERATURE=360. /
+
+&MATL ID                    = 'MT_CONCRETE'
+      SPECIFIC_HEAT         = 0.88
+      CONDUCTIVITY          = 1280.
+      DENSITY               = 2200.
+      /
+
+&SURF ID='CONCRETE'
+      MATL_ID = 'MT_CONCRETE'
+      THICKNESS=0.016
+      RGB=220,220,220/
+
+***** boundary conditions
+
+&VENT XB=-0.4,-0.4,-0.4, 9.2,0.0,3.6, SURF_ID='OPEN' /
+&VENT XB= 2.8, 2.8,-0.4, 9.2,0.0,3.6, SURF_ID='OPEN' /
+&VENT XB=-0.4, 2.8,-0.4,-0.4,0.0,3.6, SURF_ID='OPEN' /
+&VENT XB=-0.4, 2.8, 9.2, 9.2,0.0,3.6, SURF_ID='OPEN' /
+&VENT XB=-0.4, 2.8,-0.4, 9.2,0.0,0.0, SURF_ID='CONCRETE' /
+&VENT XB=-0.4, 2.8,-0.4, 9.2,3.6,3.6, SURF_ID='OPEN' /
+
+***** geometry
+
+&OBST XB=0.0, 2.4, 6.0, 8.8, 3.3, 3.4, / small container
+&OBST XB=0.0, 2.4, 6.0, 8.8, 1.0, 1.1, / small container
+&OBST XB=0.0, 2.4, 6.0, 6.1, 1.1, 3.3, / small container
+&OBST XB=0.0, 2.4, 8.7, 8.8, 1.1, 3.3, / small container
+&OBST XB=0.0, 0.1, 6.1, 8.7, 1.1, 3.3, / small container
+&OBST XB=2.3, 2.4, 6.1, 8.7, 1.1, 3.3, / small container
+&OBST XB=0.1, 2.3, 6.1, 8.7, 3.2, 3.3, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=0.1, 2.3, 6.1, 8.7, 1.9, 2.0, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=0.1, 2.3, 6.1, 6.2, 2.0, 3.2, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=0.1, 2.3, 8.599999, 8.7, 2.0, 3.2, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=0.1, 0.2, 6.2, 8.599999, 2.0, 3.2, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=2.2, 2.3, 6.2, 8.599999, 2.0, 3.2, SURF_ID='PARTBRD' / liner in small container
+&HOLE  XB=0.2, 2.2, 6.2, 8.6, 1.8, 2.0 /
+&OBST XB=0.0, 2.4, 0.0, 6.0, 2.3, 2.4, /  large container
+&OBST XB=0.0, 2.4, 0.0, 6.0, 0.0, 0.1, /  large container
+&OBST XB=0.0, 2.4, 0.0, 0.1, 0.1, 2.3, /  large container
+&OBST XB=0.0, 2.4, 5.9, 6.0, 0.1, 2.3, /  large container
+&OBST XB=0.0, 0.1, 0.1, 5.9, 0.1, 2.3, /  large container
+&OBST XB=2.3, 2.4, 0.1, 5.9, 0.1, 2.3, /  large container
+&HOLE  XB=0.1, 2.3, 5.8, 6.2, 1.1, 2.3 /  opening between two containers
+&OBST  XB=0.1, 2.3, 3.6, 3.7, 1.7, 2.3 / baffle
+
+***** Output results
+
+***   thermocouple tree in burn compartment
+
+&DEVC XYZ=1.14,7.1,3.17, QUANTITY='THERMOCOUPLE', ID='TC_A1' /
+&DEVC XYZ=1.14,7.1,2.90, QUANTITY='THERMOCOUPLE', ID='TC_A2' /
+&DEVC XYZ=1.14,7.1,2.60, QUANTITY='THERMOCOUPLE', ID='TC_A3' /
+&DEVC XYZ=1.14,7.1,2.29, QUANTITY='THERMOCOUPLE', ID='TC_A4' /
+&DEVC XYZ=1.14,7.1,1.98, QUANTITY='THERMOCOUPLE', ID='TC_A5' /
+&DEVC XYZ=1.14,7.1,1.68, QUANTITY='THERMOCOUPLE', ID='TC_A6' /
+&DEVC XYZ=1.14,7.1,1.37, QUANTITY='THERMOCOUPLE', ID='TC_A7' /
+
+***   middle thermocouple 
+
+&DEVC XYZ=1.14,4.6,2.27, QUANTITY='THERMOCOUPLE', ID='TC_B1' /
+&DEVC XYZ=1.14,4.6,2.00, QUANTITY='THERMOCOUPLE', ID='TC_B2' /
+&DEVC XYZ=1.14,4.6,1.69, QUANTITY='THERMOCOUPLE', ID='TC_B3' /
+&DEVC XYZ=1.14,4.6,1.39, QUANTITY='THERMOCOUPLE', ID='TC_B4' /
+&DEVC XYZ=1.14,4.6,1.08, QUANTITY='THERMOCOUPLE', ID='TC_B5' /
+&DEVC XYZ=1.14,4.6,0.78, QUANTITY='THERMOCOUPLE', ID='TC_B6' /
+&DEVC XYZ=1.14,4.6,0.47, QUANTITY='THERMOCOUPLE', ID='TC_B7' /
+
+***   thermocouple tree closest to door
+
+&DEVC XYZ=1.14,3.0,2.27, QUANTITY='THERMOCOUPLE', ID='TC_C1' /
+&DEVC XYZ=1.14,3.0,2.00, QUANTITY='THERMOCOUPLE', ID='TC_C2' /
+&DEVC XYZ=1.14,3.0,1.69, QUANTITY='THERMOCOUPLE', ID='TC_C3' /
+&DEVC XYZ=1.14,3.0,1.39, QUANTITY='THERMOCOUPLE', ID='TC_C4' /
+&DEVC XYZ=1.14,3.0,1.08, QUANTITY='THERMOCOUPLE', ID='TC_C5' /
+&DEVC XYZ=1.14,3.0,0.78, QUANTITY='THERMOCOUPLE', ID='TC_C6' /
+&DEVC XYZ=1.14,3.0,0.47, QUANTITY='THERMOCOUPLE', ID='TC_C7' /
+
+*** 1D slice files for temperature and oxygen at above tree locations
+
+&SLCF XB=1.14,1.14,7.1,7.1,1.1,3.2, QUANTITY='TEMPERATURE' / 
+&SLCF XB=1.14,1.14,4.6,4.6,0.0,2.4, QUANTITY='TEMPERATURE' / 
+&SLCF XB=1.14,1.14,3.0,3.0,0.0,2.4, QUANTITY='TEMPERATURE' /
+
+&SLCF XB=1.14,1.14,7.1,7.1,0.0,3.2, QUANTITY='oxygen' / 
+&SLCF XB=1.14,1.14,4.6,4.6,0.0,2.4, QUANTITY='oxygen' / 
+&SLCF XB=1.14,1.14,3.0,3.0,0.0,2.4, QUANTITY='oxygen' / 
+
+&SLCF PBX=1.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center
+
+&SLCF PBY=0.7 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / left opening (crack)
+&SLCF PBY=4.4 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / top vent
+&SLCF PBY=8.0 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center of fire
+
+&SLCF PBZ=1.3 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / sitting eye level
+&SLCF PBZ=2.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  large container
+&SLCF PBZ=3.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  small cotainer
+
+&SLCF PBX=1.2 QUANTITY='oxygen' / center
+
+&SLCF PBY=0.7 QUANTITY='oxygen' / left opening (crack)
+&SLCF PBY=4.4 QUANTITY='oxygen' / top vent
+&SLCF PBY=8.0 QUANTITY='oxygen' / center of fire
+
+&SLCF PBZ=1.3 QUANTITY='oxygen' / sitting eye level
+&SLCF PBZ=2.2 QUANTITY='oxygen'  / below  large container
+&SLCF PBZ=3.2 QUANTITY='oxygen' /  below  small cotainer
+
+*** boundary file quantities
+
+&BNDF QUANTITY='RADIATIVE_FLUX' /
+&BNDF QUANTITY='HEAT_FLUX' /
+&BNDF QUANTITY='WALL_TEMPERATURE' /
+&BNDF QUANTITY='BURNING_RATE' /
+
+*** isosurface quantitiy
+
+&ISOF QUANTITY='TEMPERATURE',VALUE=100.0 /
+
+&TAIL /
