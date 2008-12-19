@@ -1538,7 +1538,9 @@ characteristic velocity of the flow.
 During the calculation, the time step is adjusted so that the CFL (Courant, Friedrichs, Lewy) condition is
 satisfied. The default value of {\ct DT} is $5 \, (\dx \, \dy \, \dz)^\ot/\sqrt{gH}$ s, where
 $\dx$, $\dy$, and $\dz$ are the dimensions of the smallest mesh
-cell, $H$ is the height of the computational domain, and $g$ is the acceleration of gravity.
+cell, $H$ is the height of the computational domain, and $g$ is the acceleration of gravity. Note that by default the
+time step is never allowed to increase above its initial value. To allow this to happen, set
+{\ct RESTRICT\_TIME\_STEP=.FALSE.}
 
 \begin{warning}
 If something sudden is to happen right at the start of a simulation,
@@ -1560,6 +1562,8 @@ Finally, if you want to prevent FDS from automatically changing the time step, s
 on the {\ct TIME} line, in which case the specified
 time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
 numerical instabilities if the initial time step is set too high.
+
+
 
 \subsection{Special Topic: Steady-State Applications}
 \label{info:steady_state}
@@ -2482,7 +2486,7 @@ The end result of this input file is to create a pyramid by repeating long, rect
 face in a stair-step pattern. Note in this case the use of {\ct N\_LOWER} and {\ct N\_UPPER} which automatically cause FDS to
 repeat the obstructions in sequence rather than as an array.
 
-Note that the {\ct MULT}iplication functionality works for {\ct MESH}es, as well, but it only applies to the 
+Note that the {\ct MULT}iplication functionality works for {\ct MESH}es, as well, but it only applies to the
 bounds ({\ct XB}) of the mesh, not the number of cells.
 
 
@@ -8557,14 +8561,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct TIME} (Time Parameters)} \\
 \hline \hline
 \endhead
-{\ct DT}                   & Real       & Initial time step                   & s           &               \\ \hline
-{\ct FYI}                  & Character  & Comment String (has no effect)      &             &               \\ \hline
-{\ct LOCK\_TIME\_STEP}     & Logical    & Do not allow time step changes      &             & {\ct .FALSE.}  \\ \hline
-{\ct SYNCHRONIZE}          & Logical    & Sync time step of multiple meshes   &             & {\ct .TRUE.}  \\ \hline
-{\ct T\_BEGIN}             & Real       & Starting time for calculation       & s           & 0.            \\ \hline
-{\ct T\_END}or{\ct TWFIN } & Real       & Ending time for calculation         & s           & 1             \\ \hline
-{\ct TIME\_SHRINK\_FACTOR} & Real       & See Section~\ref{info:steady_state} &             & 1.            \\ \hline
-{\ct WALL\_INCREMENT}      & Integer    & Time steps between 1D wall solution updates  &     & 2             \\ \hline
+{\ct DT}                        & Real       & Initial time step                             & s           &                 \\ \hline
+{\ct FYI}                       & Character  & Comment String (has no effect)                &             &                 \\ \hline
+{\ct LOCK\_TIME\_STEP}          & Logical    & Do not allow time step changes                &             & {\ct .FALSE.}   \\ \hline
+{\ct RESTRICT\_TIME\_STEP}      & Logical    & Do not allow time step to exceed initial      &             & {\ct .TRUE.}    \\ \hline
+{\ct SYNCHRONIZE}               & Logical    & Sync time step of multiple meshes             &             & {\ct .TRUE.}    \\ \hline
+{\ct T\_BEGIN}                  & Real       & Starting time for calculation                 & s           & 0.              \\ \hline
+{\ct T\_END} ({\ct TWFIN})      & Real       & Ending time for calculation                   & s           & 1               \\ \hline
+{\ct TIME\_SHRINK\_FACTOR}      & Real       & See Section~\ref{info:steady_state}           &             & 1.              \\ \hline
+{\ct WALL\_INCREMENT}           & Integer    & Time steps between 1D wall solution updates   &             & 2               \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
