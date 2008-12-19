@@ -3077,14 +3077,34 @@ value. In most practical simulations, it is not possible to resolve this boundar
 empirical model is used to represent its effect on the overall flow field.
 In an LES calculation (default), the velocity at the wall
 is set to be a fraction of its value in the mesh cell adjacent to the
-wall. Only in a DNS (Direct Numerical Simulation) calculation is the velocity at the wall actually set to zero.
-To alter these defaults, you can set a parameter called
-{\ct SLIP\_FACTOR}. \index{SURF!SLIP\_FACTOR} This parameter ranges
+wall. Consider a solid surface forming the lower boundary of the computational domain ($z=0$). The horizontal velocity components $u_{ij,1}$ and
+$v_{ij,1}$ are computed at the vertical faces of the first layer of gas phase grid cells above the solid surface. What should the
+values of $u_{ij,0}$ and $v_{ij,0}$ be set to such that the flow near the wall is impeded by the same amount as a
+real turbulent flow? Assuming that the numerical grid is too coarse to resolve the boundary layer (of nominal thickness $d$), and assuming
+a turbulent velocity profile
+\be U(z) = \left\{ \begin{array}{ll}  U_0  (z/d)^{1/7} &   z<d  \\
+                                      U_0              &   z>d \end{array} \right. \ee
+a simple slip boundary condition can be worked out such that
+\be u_{ij,0} = u_{ij,1} \; \left( 1- \frac{d}{\dz} \right)  \quad ; \quad  v_{ij,0} = v_{ij,1} \; \left( 1- \frac{d}{\dz} \right) \ee
+where $\dz$ is the height of the grid cell. For coarse grids,
+the boundary condition is very similar to a ``free-slip'' condition because $d << \dz$.
+
+Prior to FDS 5.3, the default boundary condition for LES calculations
+was where $u_{ij,0}$ and $v_{ij,0}$ were set to one-half the values of
+$u_{ij,1}$ and $v_{ij,1}$, respectively. Now, however, FDS assumes a default value of 0.01~m for $d$. This parameter can be reset using
+{\ct BOUNDARY\_LAYER\_THICKNESS} on the {\ct SURF} line. The boundary condition is now a function of the grid resolution. 
+
+In a DNS calculation, this discussion is moot. The inner-wall ``ghost'' cell velocities are
+set so that the velocity at the wall surface is zero.
+
+Note that it is still possible to specify the tangential velocity conditions the old way. 
+To alter the default mode, you can set a parameter called
+{\ct SLIP\_FACTOR} which ranges
 from -1 to 1. If a no-slip wall is desired, {\ct SLIP\_FACTOR=-1}. If
 a free-slip wall is desired, {\ct SLIP\_FACTOR=1}. Numbers in between
 -1 and 1 can represent partial slip conditions, which may be
 appropriate for simulations involving large mesh cells.
-The default {\ct SLIP\_FACTOR} is 0.5 for LES, -1.0 for DNS.
+Prior to FDS~5.3, the default values for {\ct SLIP\_FACTOR} were 0.5 for LES and -1.0 for DNS.
 
 \begin{warning}
 \noindent
@@ -4087,7 +4107,7 @@ surface density of the {\ct SURF} type.
 The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \begin{itemize}
 \item  For reacting surfaces, the surface density is computed as a sum of the layer densities multiplied by the layer thicknesses.
-This value can be overriden by setting {\ct SURFACE\_DENSITY} on the {\ct SURF} line. For surfaces with prescribed HRR
+This value can be over-ridden by setting {\ct SURFACE\_DENSITY} on the {\ct SURF} line. For surfaces with prescribed HRR
 ({\ct HRRPUA}), {\ct SURFACE\_DENSITY} parameter is the only way of defining the mass of the object.
 \item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant
 amount of extra memory has to be set aside to store additional surface information as the rectangular block is
@@ -4097,6 +4117,9 @@ because it is unclear how to handle edges of solid obstructions that have differ
 \item If the volume of the obstruction changes because it has to conform to the uniform mesh,
 FDS does {\bf not} adjust the burning rate to account for this as it does with various quantities associated with areas,
 like {\ct HRRPUA}.
+\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be applied to the {\ct OBST} rather than the {\ct SURF} line. This parameter is used
+to determine the combustible mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted
+object. This parameter over-rides all other parameters from which a combustible mass would be calculated. 
 \item The mass of the object is based on the densities of the all material components ({\ct MATL}), but it is only consumed by mass fluxes of
 the {\bf known} species. If the sum of the gaseous yields (Section~\ref{nu_gas}) is less than one, it will take longer to consume the mass.
 \end{itemize}
@@ -8077,6 +8100,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ALLOW\_VENT}         & Logical             & Allow vents on obstruction            &    & {\ct .TRUE.}  \\ \hline
 {\ct BNDF\_FACE(-3:3)}    & Logical Array       & See Section~\ref{info:BNDF}           &    & {\ct .TRUE.}  \\ \hline
 {\ct BNDF\_OBST}          & Logical             & See Section~\ref{info:BNDF}           &    & {\ct .TRUE.}  \\ \hline
+{\ct BULK\_DENSITY}       & Real                & See Section~\ref{info:BURN_AWAY}      &    &  1            \\ \hline
 {\ct COLOR    }           & Character           & Color name of obstruction color       &    &               \\ \hline
 {\ct CTRL\_ID }           & Character           & {\ct ID} of Controlling {\ct ConTRoL} &    &               \\ \hline
 {\ct DEVC\_ID }           & Character           & {\ct ID} of Controlling {\ct DEViCe}  &    &               \\ \hline
@@ -8458,6 +8482,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ADIABATIC}                       & Logical         & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                         & Character       & Back boundary condition           &                     & {\ct 'VOID'}            \\ \hline
+{\ct BOUNDARY\_LAYER\_THICKNESS}      & Real            & See Section~\ref{info:Velocity_BC}&  m                  & 0.01                    \\ \hline
 {\ct BURN\_AWAY}                      & Logical         & See Section~\ref{info:BURN_AWAY}  &                     & {\ct .FALSE.}           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}              & Real            & See Section~\ref{info:solid_phase_stability}  &         & 1.0                     \\ \hline
 {\ct COLOR    }                       & Character       & Surface Color                     &                     &                         \\ \hline
