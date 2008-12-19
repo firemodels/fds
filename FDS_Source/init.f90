@@ -253,9 +253,9 @@ ENDDO
 
 ! Initialize various time step variables
  
-M%DTOLD   = M%DT
-M%DTNEXT  = M%DT
-M%DTINT   = M%DT
+M%DT_PREV = M%DT
+M%DT_NEXT = M%DT
+M%DT_INIT = M%DT
 
 ! Initialize major arrays
 
