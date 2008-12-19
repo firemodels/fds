@@ -385,7 +385,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         ENDIF
                      ENDIF
                   CASE(2) !CO2
-                     IF(MIXTURE_FRACTION .OR. I_FUEL /=0) THEN
+                     IF(MIXTURE_FRACTION .OR. I_CO2 /=0) THEN
                         N = N + 1
                         SVF = 0._EB
                         !FUEL
@@ -402,7 +402,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         ENDIF
                      ENDIF
                   CASE(3) !CO
-                     IF(MIXTURE_FRACTION .OR. I_FUEL /=0) THEN
+                     IF(MIXTURE_FRACTION .OR. I_CO /=0) THEN
                         N = N + 1
                         SVF = 0._EB
                         !FUEL
@@ -419,7 +419,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         ENDIF
                      ENDIF
                   CASE(4) !H2O
-                     IF(MIXTURE_FRACTION .OR. I_FUEL /=0) THEN
+                     IF(MIXTURE_FRACTION .OR. I_WATER /=0) THEN
                         N = N + 1
                         SVF = 0._EB
                         !FUEL
