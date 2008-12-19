@@ -2452,43 +2452,38 @@ repeat an obstruction, create a line in the input file as follows:
 \normalsize
 
 \noindent
-This has the effect of making an array of obstructions according to the following formulae: 
-\begin{eqnarray*}  x_i = x_0 + i \, \dx  &;& \hbox{\small I\_LOWER} \le i \le \hbox{\small I\_UPPER} \\
-                   y_j = y_0 + j \, \dy  &;& \hbox{\small J\_LOWER} \le j \le \hbox{\small J\_UPPER} 
+This has the effect of making an array of obstructions according to the following formulae:
+\begin{eqnarray*}  x_i = x_0 + \dx_0 + i \, \dx  &;& \hbox{\ct I\_LOWER} \le i \le \hbox{\ct I\_UPPER} \\
+                   y_j = y_0 + \dy_0 + j \, \dy  &;& \hbox{\ct J\_LOWER} \le j \le \hbox{\ct J\_UPPER}
 \end{eqnarray*}
-Note that the same rules apply for the $z$ direction as well.
+Note that the same rules apply for the $z$ direction as well. In situations where the position of the obstruction needs shifting prior to the multiplication, use the
+parameters {\ct DX0}, {\ct DY0}, and {\ct DZ0}.
 
 A slightly more complicated use of this feature is demonstrated by the following short input file:
 
 \footnotesize
 \begin{verbatim}
 &HEAD CHID='pyramid', TITLE='Simple demo of multiplier function' /
-
 &MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-
 &TIME T_END=0. /
-
 &MULT ID='south', DXB=0.01,-.01,0.01,0.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
 &MULT ID='north', DXB=0.01,-.01,-.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
 &MULT ID='east',  DXB=-.01,-.01,0.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
 &MULT ID='west',  DXB=0.01,0.01,0.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
-
 &OBST XB=0.10,0.90,0.10,0.11,0.10,0.11, MULT_ID='south', COLOR='RED' /
 &OBST XB=0.10,0.90,0.89,0.90,0.10,0.11, MULT_ID='north', COLOR='BLUE' /
 &OBST XB=0.10,0.11,0.11,0.89,0.10,0.11, MULT_ID='west',  COLOR='GREEN' /
 &OBST XB=0.89,0.90,0.11,0.89,0.10,0.11, MULT_ID='east',  COLOR='CYAN' /
-
-&TAIL /
 \end{verbatim}
 \normalsize
 
 \noindent
 The end result of this input file is to create a pyramid by repeating long, rectangular obstructions at the base of each
 face in a stair-step pattern. Note in this case the use of {\ct N\_LOWER} and {\ct N\_UPPER} which automatically cause FDS to
-repeat the obstructions in sequence rather than as an array. 
+repeat the obstructions in sequence rather than as an array.
 
-
-
+Note that the {\ct MULT}iplication functionality works for {\ct MESH}es, as well, but it only applies to the 
+bounds ({\ct XB}) of the mesh, not the number of cells.
 
 
 
@@ -8039,6 +8034,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DX}             & Real             & Spacing in the $x$ direction                & m  & 0.                         \\ \hline
 {\ct DY}             & Real             & Spacing in the $y$ direction                & m  & 0.                         \\ \hline
 {\ct DZ}             & Real             & Spacing in the $z$ direction                & m  & 0.                         \\ \hline
+{\ct DX0}            & Real             & Translation in the $x$ direction            & m  & 0.                         \\ \hline
+{\ct DY0}            & Real             & Translation in the $y$ direction            & m  & 0.                         \\ \hline
+{\ct DZ0}            & Real             & Translation in the $z$ direction            & m  & 0.                         \\ \hline
 {\ct ID }            & Character        & {\ct ID}entifier                            &    &                            \\ \hline
 {\ct I\_LOWER}       & Integer          & Lower array bound, $x$ direction            &    & 0                          \\ \hline
 {\ct I\_UPPER}       & Integer          & Upper array bound, $x$ direction            &    & 0                          \\ \hline
