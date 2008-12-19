@@ -1136,12 +1136,13 @@ SUBROUTINE VELOCITY_BC(T,NM)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
 REAL(EB), INTENT(IN) :: T
-REAL(EB) :: BC(2),MUA,FVT(2,2),UP,UM,VP,VM,WP,WM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,TSI,WGT,TNOW,PROF(2),RAMP_T
+REAL(EB) :: VBC(2),MUA,FVT(2,2),UP,UM,VP,VM,WP,WM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,TSI,WGT,TNOW,PROF(2),RAMP_T
 INTEGER  :: I,J,K,IBC(2),NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR(2),IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,N_IOR
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,OM_UU,OM_VV,OM_WW
 TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (OMESH_TYPE), POINTER :: OM
+LOGICAL :: SPEC_TANG_VEL(2)
 
 IF (SOLID_PHASE_ONLY) RETURN
 
@@ -1204,10 +1205,26 @@ EDGE_LOOP: DO IE=1,N_EDGES
    JJO(2) = IJKE(15,IE)
    KKO(2) = IJKE(16,IE)
 
+   ! Evaluate tangential velocity conditions
+
    DO N_IOR=1,2
       SF  => SURFACE(IBC(N_IOR))
-      BC(N_IOR)  = SF%SLIP_FACTOR
-      IF (BC(N_IOR)>1.5_EB) THEN
+      IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY) THEN
+         SPEC_TANG_VEL(N_IOR) = .FALSE.
+         IF (SF%SLIP_FACTOR > -2._EB) THEN
+            VBC(N_IOR) = SF%SLIP_FACTOR
+         ELSE
+            SELECT CASE(ABS(IOR(N_IOR)))
+               CASE(1)
+                  VBC(N_IOR) = MAX(-1._EB , 1._EB - SF%BOUNDARY_LAYER_THICKNESS*RDX(II) )
+               CASE(2)
+                  VBC(N_IOR) = MAX(-1._EB , 1._EB - SF%BOUNDARY_LAYER_THICKNESS*RDY(JJ) )
+               CASE(3)
+                  VBC(N_IOR) = MAX(-1._EB , 1._EB - SF%BOUNDARY_LAYER_THICKNESS*RDZ(KK) )
+            END SELECT
+         ENDIF
+      ELSE
+         SPEC_TANG_VEL(N_IOR) = .TRUE.
          IF (SF%T_IGN==T_BEGIN .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
             TSI = T
          ELSE
@@ -1220,6 +1237,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
          FVT(N_IOR,2) = RAMP_T*SF%VEL_T(2)
       ENDIF
    ENDDO
+
+   ! Loop over all edges and assign tangential velocity components
  
    COMPONENT: SELECT CASE(IEC)
  
@@ -1240,15 +1259,15 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IWM = WALL_INDEX(ICMM, 3) 
                   IWP = WALL_INDEX(ICPM, 3) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(2)<1.5_EB) VP = BC(2)*VM
-                     IF (BC(2)>1.5_EB) VP = FVT(2,2)*PROF(2)
+                     IF (.NOT.SPEC_TANG_VEL(2)) VP = VBC(2)*VM
+                     IF (     SPEC_TANG_VEL(2)) VP = FVT(2,2)*PROF(2)
                   ENDIF
                CASE( 3)
                   IWM = WALL_INDEX(ICMP,-3) 
                   IWP = WALL_INDEX(ICPP,-3) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(2)<1.5_EB) VM = BC(2)*VP
-                     IF (BC(2)>1.5_EB) VM = FVT(2,2)*PROF(2)
+                     IF (.NOT.SPEC_TANG_VEL(2)) VM = VBC(2)*VP
+                     IF (     SPEC_TANG_VEL(2)) VM = FVT(2,2)*PROF(2)
                   ENDIF
             END SELECT
          ELSE
@@ -1269,15 +1288,15 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IWM = WALL_INDEX(ICMM, 2) 
                   IWP = WALL_INDEX(ICMP, 2) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(1)<1.5_EB) WP = BC(1)*WM
-                     IF (BC(1)>1.5_EB) WP = FVT(1,2)
+                     IF (.NOT.SPEC_TANG_VEL(1)) WP = VBC(1)*WM
+                     IF (     SPEC_TANG_VEL(1)) WP = FVT(1,2)
                   ENDIF
                CASE( 2)
                   IWM = WALL_INDEX(ICPM,-2) 
                   IWP = WALL_INDEX(ICPP,-2) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(1)<1.5_EB) WM = BC(1)*WP
-                     IF (BC(1)>1.5_EB) WM = FVT(1,2)
+                     IF (.NOT.SPEC_TANG_VEL(1)) WM = VBC(1)*WP
+                     IF (     SPEC_TANG_VEL(1)) WM = FVT(1,2)
                   ENDIF
             END SELECT
          ELSE
@@ -1323,15 +1342,15 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IWM = WALL_INDEX(ICMM, 3) 
                   IWP = WALL_INDEX(ICPM, 3) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(1)<1.5_EB) UP = BC(1)*UM
-                     IF (BC(1)>1.5_EB) UP = FVT(1,1)*PROF(1)
+                     IF (.NOT.SPEC_TANG_VEL(1)) UP = VBC(1)*UM
+                     IF (     SPEC_TANG_VEL(1)) UP = FVT(1,1)*PROF(1)
                   ENDIF
                CASE( 3)
                   IWM = WALL_INDEX(ICMP,-3) 
                   IWP = WALL_INDEX(ICPP,-3) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(1)<1.5_EB) UM = BC(1)*UP
-                     IF (BC(1)>1.5_EB) UM = FVT(1,1)*PROF(1)
+                     IF (.NOT.SPEC_TANG_VEL(1)) UM = VBC(1)*UP
+                     IF (     SPEC_TANG_VEL(1)) UM = FVT(1,1)*PROF(1)
                   ENDIF
             END SELECT
          ELSE
@@ -1351,15 +1370,15 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IWM = WALL_INDEX(ICMM, 1) 
                   IWP = WALL_INDEX(ICMP, 1) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(2)<1.5_EB) WP = BC(2)*WM
-                     IF (BC(2)>1.5_EB) WP = FVT(2,2)
+                     IF (.NOT.SPEC_TANG_VEL(2)) WP = VBC(2)*WM
+                     IF (     SPEC_TANG_VEL(2)) WP = FVT(2,2)
                   ENDIF
                CASE( 1)
                   IWM = WALL_INDEX(ICPM,-1) 
                   IWP = WALL_INDEX(ICPP,-1) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(2)<1.5_EB) WM = BC(2)*WP
-                     IF (BC(2)>1.5_EB) WM = FVT(2,2)
+                     IF (.NOT.SPEC_TANG_VEL(2)) WM = VBC(2)*WP
+                     IF (     SPEC_TANG_VEL(2)) WM = FVT(2,2)
                   ENDIF
             END SELECT
          ELSE
@@ -1405,15 +1424,15 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IWM = WALL_INDEX(ICMM, 2) 
                   IWP = WALL_INDEX(ICPM, 2) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(2)<1.5_EB) UP = BC(2)*UM
-                     IF (BC(2)>1.5_EB) UP = FVT(2,1)*PROF(2)
+                     IF (.NOT.SPEC_TANG_VEL(2)) UP = VBC(2)*UM
+                     IF (     SPEC_TANG_VEL(2)) UP = FVT(2,1)*PROF(2)
                   ENDIF
                CASE( 2)
                   IWM = WALL_INDEX(ICMP,-2) 
                   IWP = WALL_INDEX(ICPP,-2) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(2)<1.5_EB) UM = BC(2)*UP
-                     IF (BC(2)>1.5_EB) UM = FVT(2,1)*PROF(2)
+                     IF (.NOT.SPEC_TANG_VEL(2)) UM = VBC(2)*UP
+                     IF (     SPEC_TANG_VEL(2)) UM = FVT(2,1)*PROF(2)
                   ENDIF
             END SELECT
          ELSE
@@ -1434,15 +1453,15 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IWM = WALL_INDEX(ICMM, 1) 
                   IWP = WALL_INDEX(ICMP, 1) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(1)<1.5_EB) VP = BC(1)*VM
-                     IF (BC(1)>1.5_EB) VP = FVT(1,1)*PROF(1)
+                     IF (.NOT.SPEC_TANG_VEL(1)) VP = VBC(1)*VM
+                     IF (     SPEC_TANG_VEL(1)) VP = FVT(1,1)*PROF(1)
                   ENDIF
                CASE( 1)
                   IWM = WALL_INDEX(ICPM,-1) 
                   IWP = WALL_INDEX(ICPP,-1) 
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
-                     IF (BC(1)<1.5_EB) VM = BC(1)*VP
-                     IF (BC(1)>1.5_EB) VM = FVT(1,1)*PROF(1)
+                     IF (.NOT.SPEC_TANG_VEL(1)) VM = VBC(1)*VP
+                     IF (     SPEC_TANG_VEL(1)) VM = FVT(1,1)*PROF(1)
                   ENDIF
             END SELECT
          ELSE
