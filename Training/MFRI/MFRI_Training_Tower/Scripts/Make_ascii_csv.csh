@@ -23,7 +23,7 @@ $fdsin
 n
 $low $high
 1
-31
+1
 $csvfile
 EOF
 endtype:
