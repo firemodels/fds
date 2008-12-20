@@ -1,9 +1,9 @@
 &HEAD CHID='MCFRS_Flashover_00leak',TITLE='MontoCo Flashover Simulator SVN $Revision: 2910 $' / base case
 
-&MESH IJK=32,48,18, XB=-0.4,2.8,-0.4,4.4,0.0, 1.8/
-&MESH IJK=32,48,18, XB=-0.4,2.8,-0.4,4.4,1.8, 3.6/
-&MESH IJK=32,48,18, XB=-0.4,2.8, 4.4,9.2,0.0, 1.8/
-&MESH IJK=32,48,18, XB=-0.4,2.8, 4.4,9.2,1.8, 3.6/
+&MESH IJK=32,96,36, XB=-0.4,1.2, -0.4,4.4,0.0, 3.6/
+&MESH IJK=32,96,36, XB= 1.2,2.8, -0.4,4.4,0.0, 3.6/
+&MESH IJK=32,96,36, XB=-0.4,1.2,  4.4,9.2,0.0, 3.6/
+&MESH IJK=32,96,36, XB= 1.2,2.8,  4.4,9.2,0.0, 3.6/
 
 MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
@@ -148,13 +148,9 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
 *** 1D slice files for temperature and oxygen at above tree locations
 
-&SLCF XB=1.14,1.14,7.1,7.1,1.1,3.2, QUANTITY='TEMPERATURE' / 
+&SLCF XB=1.14,1.14,7.1,7.1,0.0,3.2, QUANTITY='TEMPERATURE' / 
 &SLCF XB=1.14,1.14,4.6,4.6,0.0,2.4, QUANTITY='TEMPERATURE' / 
 &SLCF XB=1.14,1.14,3.0,3.0,0.0,2.4, QUANTITY='TEMPERATURE' /
-
-&SLCF XB=1.14,1.14,7.1,7.1,0.0,3.2, QUANTITY='oxygen' / 
-&SLCF XB=1.14,1.14,4.6,4.6,0.0,2.4, QUANTITY='oxygen' / 
-&SLCF XB=1.14,1.14,3.0,3.0,0.0,2.4, QUANTITY='oxygen' / 
 
 &SLCF PBX=1.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center
 
