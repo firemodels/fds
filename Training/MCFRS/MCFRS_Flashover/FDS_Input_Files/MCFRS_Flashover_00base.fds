@@ -1,4 +1,4 @@
-&HEAD CHID='MCFRS_Flashover_00base',TITLE='MontoCo Flashover Simulator SVN $Revision$' / base case
+&HEAD CHID='MCFRS_Flashover_00base',TITLE='MontoCo Flashover Simulator SVN $Revision: 2910 $' / base case
 
 &MESH IJK=32,48,18, XB=-0.4,2.8,-0.4,4.4,0.0, 1.8/
 &MESH IJK=32,48,18, XB=-0.4,2.8,-0.4,4.4,1.8, 3.6/
