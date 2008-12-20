@@ -1,0 +1,439 @@
+\chapter{Two Room}
+\section{Training Objectives}
+The training scenarios in this chapter consist of a series of two room cases.  Each case uses different ventilation configurations
+involving open or closed doors/windows and a vented/un-vented roof.  The training
+objective then is to illustrate how these different ventilation conditions effect smoke and fire behavior.
+
+\section{Design Data}
+\subsection{Geometry}
+The space, illustrated in Figure \ref{fig2roomplan}, consists of two rooms connected by an open door.  The first room contains a couch
+with dimensions X x Y x Z and the second
+room contains a a twin sized bed with dimension a x b.  The rooms
+each have dimension X x Y x Z.  The interior and exterior doors both have
+dimensions X x Y.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[trim=5.25in 0.75in 5.25in 4.25in clip, width=2.25in]{scriptfigures/ranch_00_side}\\
+a) side view\\
+\includegraphics[trim=0.75in 0.75in 1.75in 4.25in, clip, width=4.5in]{scriptfigures/ranch_00_front}\\
+b) front view\\
+\includegraphics[trim=0.75in 3.25in 1.75in 3.75in, clip, width=4.5in]{scriptfigures/ranch_00_top}\\
+c) top view
+\end{center}
+\caption {Schematic of two room test case}
+\label{fig2roomplan}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[trim=3.25in 0.25in 1.0in 4.5in clip, width=5.0in]{scriptfigures/ranch_00_3D}\\
+\end{center}
+\caption {3D view of a two room test case}
+\label{fig2roomplan}%
+\end{figure}
+
+\subsection{Fire}
+A couch is assumed to have caught fire due to a piloted ignition source of XX kW/m2 over
+a A~$m^2$ area.
+
+
+\subsection{Materials}
+The walls and ceiling are standard gypsum board.  The floor is
+covered with carpet.  Wall materials are assumed to be xxxx with thermal properties taken from yyy.  Materials for the couch
+are adjusted so that the heat release curve a free-burn couch matches experimental data given by wwww.
+
+\subsection{Ventilation}
+Four cases are modeled each with different ventilation conditions.  Two configurations are varied.  The first configuration is whether the exterior doors and windows are open or closed.  The second configuration is whether the roof is vented or not.  The ventilation for these cases are summarized in Table \ref{tab:demoranch}.
+
+\begin{table}[ht]
+\caption{Summary of two room demonstration cases}
+\vspace{0.1in}
+\label{tab:demoranch}
+\begin{center}
+\begin{tabular}{|r||c|c|}
+  \hline
+   & vented roof & non-vented roof \\ \hline
+  Open door and windows & Case 1 & Case 2 \\
+  Leaky door and windows & Case 3 & Case 4 \\
+  \hline
+  \end{tabular}
+\end{center}
+\end{table}
+
+\section{Physical Assumptions}
+\subsection{Fire}
+The fire is assumed to spread given an initial constant ignition in a corner
+(back right) of the couch.
+
+\subsection{Materials}
+The thermal properties (thermal conductivity, density and specific heat) for gypsum board are used the wall, floor and ceiling materials.  These values are obtained from XXXX.  The thermal properties and combustion properties of the couch and twin mattresses were chosen to match experimental data obtained from ZZZZ.
+
+
+\section{Model Assumptions and Analysis}
+The two room scenarios are modeled using the Fire Dynamics Simulator and
+visualized using Smokeview.
+
+\subsection{Geometry}
+The computational domain includes both the space required to model the two room
+structure and a space surrounding the structure to account for air flow entering and leaving two room structure.  The domain is modeled using grid cells 0.1 m on a side.
+
+
+\subsection{Fire}
+The fire is modeled by imposing a XX constant fire on the back right corner of the
+couch.  Fire growth occurs as a result of radiative and convective flux from the fire heating up and igniting spaces adjacent to the fire.
+
+\subsection{Ventilation}
+All ventilation is natural.  Open boundaries are used for boundary conditions for the side and top bounding surfaces.  Ventilation is varid from case to case by altering the inflow into the two room structure by opening or closing doors/windows and/or
+venting or not venting the ceiling and roof space over the room with the couch.
+
+
+\section{Summary of Results}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.5in]{datafigures/ranch_01_hrr}&
+ \includegraphics[height=2.5in]{datafigures/ranch_02_hrr}\\
+a) leaks&b) open doors/windows and vented ceiling\\
+\\
+\\
+ \includegraphics[height=2.5in]{datafigures/ranch_03_hrr}&
+ \includegraphics[height=2.5in]{datafigures/ranch_04_hrr}\\
+c) open door/windows&d) vented ceiling\\
+\end{tabular}
+\end{center}
+\caption{
+FDS heat release rate results for four 2 room test cases.
+  }
+\label{fig2roomhrr}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.5in]{datafigures/ranch_01_thcp_a}&
+ \includegraphics[height=2.5in]{datafigures/ranch_02_thcp_a}\\
+a) leaks&b) open doors/windows and vented ceiling\\
+\\
+\\
+ \includegraphics[height=2.5in]{datafigures/ranch_03_thcp_a}&
+ \includegraphics[height=2.5in]{datafigures/ranch_04_thcp_a}\\
+c) open door/windows&d) vented ceiling\\
+\end{tabular}
+\end{center}
+\caption{FDS temperature results at location THCP A in the fire room
+(see Figure \ref{fig2roomplan}) for four 2 room test cases.
+  }
+\label{fig2roomthcpa}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.5in]{datafigures/ranch_01_thcp_b}&
+ \includegraphics[height=2.5in]{datafigures/ranch_02_thcp_b}\\
+a) leaks&b) open doors/windows and vented ceiling\\
+\\
+\\
+ \includegraphics[height=2.5in]{datafigures/ranch_03_thcp_b}&
+ \includegraphics[height=2.5in]{datafigures/ranch_04_thcp_b}\\
+c) open door/windows&d) vented ceiling\\
+\end{tabular}
+\end{center}
+\caption{FDS temperature results at location THCP B in the target room
+(see Figure \ref{fig2roomplan}) for four 2 room test cases.}
+\label{fig2roomthcpa}%
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_030}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_060}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_090}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_120}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_150}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_180}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_210}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_240}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_270}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_300}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_330}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_360}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_390}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_420}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_temp_slice_450}
+ %\includegraphics[width=1.5in]{scriptfigures/ranch_01_temp_slice_480}
+\\
+\end{tabular}
+\end{center}
+\caption{2 Room test case with only leaks to the outside showing shaded temperature contours from 30 to 480 s every 30 s.
+  }
+\label{fig2roomsmoke}%
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_030}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_060}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_090}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_120}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_150}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_180}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_210}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_240}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_270}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_300}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_330}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_360}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_390}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_420}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_temp_slice_450}
+ %\includegraphics[width=1.5in]{scriptfigures/ranch_02_temp_slice_480}
+\\
+\end{tabular}
+\end{center}
+\caption{2 Room test case with open doors, windows and a vented roof showing shaded temperature contours from 30 to 480 s every 30 s.
+  }
+\label{fig2roomsmoke}%
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_030}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_060}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_090}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_120}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_150}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_180}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_210}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_240}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_270}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_300}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_330}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_360}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_390}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_420}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_temp_slice_450}
+ %\includegraphics[width=1.5in]{scriptfigures/ranch_03_temp_slice_480}
+\\
+\end{tabular}
+\end{center}
+\caption{2 Room test case with open doors, windows and a vented roof showing shaded temperature contours from 30 to 480 s every 30 s.
+  }
+\label{fig2roomsmoke}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_030}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_060}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_090}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_120}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_150}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_180}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_210}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_240}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_270}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_300}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_330}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_360}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_390}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_420}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_temp_slice_450}
+ %\includegraphics[width=1.5in]{scriptfigures/ranch_04_temp_slice_480}
+\\
+\end{tabular}
+\end{center}
+\caption{2 Room test case with a vented roof showing shaded temperature contours from 30 to 480 s every 30 s.
+  }
+\label{fig2roomsmoke}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_030}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_060}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_090}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_120}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_150}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_180}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_210}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_240}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_270}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_300}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_330}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_360}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_390}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_420}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_01_3dsmoke_fire_450}
+ %\includegraphics[width=1.5in]{scriptfigures/ranch_01_3dsmoke_fire_480}
+\\
+\end{tabular}
+\end{center}
+\caption{2 Room test case with only leaks to the outside showing realistic smoke from 30 to 480 s every 30 s.
+  }
+\label{fig2roomsmoke}%
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_030}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_060}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_090}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_120}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_150}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_180}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_210}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_240}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_270}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_300}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_330}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_360}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_390}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_420}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_02_3dsmoke_fire_450}
+ %\includegraphics[width=1.5in]{scriptfigures/ranch_02_3dsmoke_fire_480}
+\\
+\end{tabular}
+\end{center}
+\caption{2 Room test case with open doors, windows and a vented roof showing realistic smoke from 30 to 480 s every 30 s.
+  }
+\label{fig2roomsmoke}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_030}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_060}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_090}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_120}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_150}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_180}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_210}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_240}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_270}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_300}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_330}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_360}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_390}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_420}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_03_3dsmoke_fire_450}
+ %\includegraphics[width=1.5in]{scriptfigures/ranch_03_3dsmoke_fire_480}
+\\
+\end{tabular}
+\end{center}
+\caption{2 Room test case with open doors, windows and a vented roof showing realistic smoke from 30 to 480 s every 30 s.
+  }
+\label{fig2roomsmoke}%
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_030}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_060}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_090}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_120}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_150}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_180}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_210}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_240}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_270}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_300}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_330}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_360}
+\\
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_390}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_420}&
+ \includegraphics[width=2.25in]{scriptfigures/ranch_04_3dsmoke_fire_450}
+ %\includegraphics[width=1.5in]{scriptfigures/ranch_04_3dsmoke_fire_480}
+\\
+\end{tabular}
+\end{center}
+\caption{2 Room test case with a vented roof showing realistic smoke
+from 30 to 480 s every 30 s.
+  }
+\label{fig2roomsmoke}%
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.5in]{scriptfigures/ranch_01_3dsmoke_fire_300}&
+ \includegraphics[height=2.5in]{scriptfigures/ranch_02_3dsmoke_fire_300}\\
+a) leaks&b) open doors/windows and vented ceiling\\
+\\
+\includegraphics[height=2.5in]{scriptfigures/ranch_03_3dsmoke_fire_300}&
+\includegraphics[height=2.5in]{scriptfigures/ranch_04_3dsmoke_fire_300}\\
+c) open door/windows&d) vented ceiling\\
+\end{tabular}
+\end{center}
+\caption{2 Room test cases showing realistic smoke and fire at 300.0 seconds to illustrate the effect of openings on smoke flow.
+  }
+\label{fig2roomsmoke}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[height=2.25in]{scriptfigures/ranch_01_temp_slice_300}&
+ \includegraphics[height=2.25in]{scriptfigures/ranch_02_temp_slice_300}\\
+a) leaks&b) open doors/windows and vented ceiling\\
+\includegraphics[height=2.25in]{scriptfigures/ranch_03_temp_slice_300}&
+\includegraphics[height=2.25in]{scriptfigures/ranch_04_temp_slice_300}\\
+c) open door/windows&d) vented ceiling\\
+&&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
+\end{tabular}
+\end{center}
+\caption{2 Room test cases showing 2D temperature contours at 300.0 seconds to illustrate the effect of openings on smoke flow.
+  }
+\label{fig2roomslice}%
+\end{figure}
+
+\section{Conclusions}
