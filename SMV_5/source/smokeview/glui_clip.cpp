@@ -105,25 +105,10 @@ extern "C" void glui_clip_setup(int main_window){
   glui_clip->add_column_to_panel(panel_clipz,false);
   CHECKBOX_clip_zlower=glui_clip->add_checkbox_to_panel(panel_clipz,"",&clip_z,CLIP_zlower,CLIP_CB);
 
-  /*
-  if(nmeshes>1){
-    int i;
-
-    LIST_mesh = glui_clip->add_listbox_to_panel(panel_clip,"Clipping Region",&clip_mesh,CLIP_MESH,CLIP_CB);
-
-    LIST_mesh->add_item(0,"Global");
-    for(i=0;i<nmeshes;i++){
-      char meshstring[100];
-
-      sprintf(meshstring,"Mesh %i",i+1);
-      LIST_mesh->add_item(i+1,meshstring);
-    }
-  }
-  */
-    radio_clip = glui_clip->add_radiogroup_to_panel(panel_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
-    glui_clip->add_radiobutton_to_group(radio_clip,"Clipping Disabled");
-    glui_clip->add_radiobutton_to_group(radio_clip,"Clip Blockages + Data");
-    glui_clip->add_radiobutton_to_group(radio_clip,"Clip Blockages");
+  radio_clip = glui_clip->add_radiogroup_to_panel(panel_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
+  glui_clip->add_radiobutton_to_group(radio_clip,"Clipping Disabled");
+  glui_clip->add_radiobutton_to_group(radio_clip,"Clip Blockages + Data");
+  glui_clip->add_radiobutton_to_group(radio_clip,"Clip Blockages");
 
   glui_clip->add_column_to_panel(panel_clip,false);
 
@@ -189,6 +174,20 @@ extern "C" void show_glui_clip(void){
   if(glui_clip!=NULL)glui_clip->show();
 }
 
+
+/* ------------------ update_glui_clip ------------------------ */
+
+extern "C" void update_glui_clip(void){
+  CHECKBOX_clip_xlower->set_int_val(clip_x);
+  CHECKBOX_clip_ylower->set_int_val(clip_y);
+  CHECKBOX_clip_zlower->set_int_val(clip_z);
+  CHECKBOX_clip_xupper->set_int_val(clip_X);
+  CHECKBOX_clip_yupper->set_int_val(clip_Y);
+  CHECKBOX_clip_zupper->set_int_val(clip_Z);
+  radio_clip->set_int_val(xyz_clipplane);
+  CLIP_CB(CLIP_all);
+}
+
 /* ------------------ CLIP_CB ------------------------ */
 
 void CLIP_CB(int var){
@@ -235,7 +234,7 @@ void CLIP_CB(int var){
     break;
   case CLIP_all:
     update_clipplanes();
-    if(xyz_clipplane==1){
+    if(xyz_clipplane!=0){
       for(i=0;i<6;i++){
         CLIP_CB(i);
       }
@@ -246,7 +245,7 @@ void CLIP_CB(int var){
       CHECKBOX_clip_yupper->enable();
       CHECKBOX_clip_zupper->enable();
     }
-    else if(xyz_clipplane==0){
+    else{
       SPINNER_clip_xlower->disable();
       SPINNER_clip_ylower->disable();
       SPINNER_clip_zlower->disable();
@@ -286,9 +285,17 @@ void CLIP_CB(int var){
     break;
   }
 #ifdef pp_VIEWCLIP
-  clip2cam(camera_current);
+  switch (var){
+  case SPINNER_xlower:
+  case SPINNER_xupper:
+  case SPINNER_ylower:
+  case SPINNER_yupper:
+  case SPINNER_zlower:
+  case SPINNER_zupper:
+    clip2cam(camera_current);
+    break;
+  }
 #endif
-
 }
 
 /* ------------------ update_clip_all ------------------------ */

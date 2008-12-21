@@ -157,6 +157,10 @@ void init_camera(camera *camera_data,char *name){
     cam->clip_y=clip_y;
     cam->clip_z=clip_z;
   
+    cam->clip_X=clip_X;
+    cam->clip_Y=clip_Y;
+    cam->clip_Z=clip_Z;
+
     cam->clip_x_val=clip_x_val;
     cam->clip_y_val=clip_y_val;
     cam->clip_z_val=clip_z_val;
@@ -175,6 +179,10 @@ void init_camera(camera *camera_data,char *name){
     clip_y = cam->clip_y;
     clip_z = cam->clip_z;
   
+    clip_X = cam->clip_X;
+    clip_Y = cam->clip_Y;
+    clip_Z = cam->clip_Z;
+
     clip_x_val = cam->clip_x_val;
     clip_y_val = cam->clip_y_val;
     clip_z_val = cam->clip_z_val;
@@ -182,6 +190,8 @@ void init_camera(camera *camera_data,char *name){
     clip_X_val = cam->clip_X_val;
     clip_Y_val = cam->clip_Y_val;
     clip_Z_val = cam->clip_Z_val;
+    update_glui_clip();
+
   }
 #endif
 
@@ -195,6 +205,11 @@ void copy_camera(camera *to, camera *from){
     update_glui_zoom();
   }
   to->dirty=1;
+#ifdef pp_VIEWCLIP
+  if(to==camera_current){
+    cam2clip(camera_current);
+  }
+#endif
 }
 
 /* ------------------ update_camera ------------------------ */
