@@ -362,6 +362,8 @@ EXTERNCPP void hide_glui_colorbar(void);
 EXTERNCPP void show_glui_motion(void);
 EXTERNCPP void hide_glui_motion(void);
 EXTERNCPP void show_glui_clip(void);
+EXTERNCPP void update_glui_clip(void);
+
 EXTERNCPP void hide_glui_clip(void);
 EXTERNCPP void show_glui_wui(void);
 EXTERNCPP void hide_glui_wui(void);
