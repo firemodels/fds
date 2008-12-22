@@ -278,7 +278,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
    KDTDY => WORK2
    KDTDZ => WORK3
    KP    => WORK4
- 
+   KP = Y2K_C(NINT(0.1_EB*TMPA))
    ! Compute thermal conductivity k (KP)
  
    K_DNS_OR_LES: IF (DNS) THEN
