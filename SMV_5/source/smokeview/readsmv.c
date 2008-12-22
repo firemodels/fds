@@ -8945,11 +8945,11 @@ void writeini(int flag){
         fprintf(fileout," %f %f %f %f\n",mat[8],mat[9],mat[10],mat[11]);
         fprintf(fileout," %f %f %f %f\n",mat[12],mat[13],mat[14],mat[15]);
 #ifdef pp_VIEWCLIP
-        fprintf(fileout,"%i %i %i %i %i %i %i\n",
+        fprintf(fileout," %i %i %i %i %i %i %i\n",
             ca->xyz_clipplane,
             ca->clip_x,ca->clip_y,ca->clip_z,
             ca->clip_X,ca->clip_Y,ca->clip_Z);
-        fprintf(fileout,"%f %f %f %f %f %f\n",
+        fprintf(fileout," %f %f %f %f %f %f\n",
             ca->clip_x_val,ca->clip_y_val,ca->clip_z_val,
             ca->clip_X_val,ca->clip_Y_val,ca->clip_Z_val);
 #endif
