@@ -1,4 +1,4 @@
-&HEAD CHID='MCFRS_Flashover_00open',TITLE='MontoCo Flashover Simulator SVN $Revision: 2910 $' / base case
+&HEAD CHID='MCFRS_Flashover_00leak',TITLE='MontoCo Flashover Simulator SVN $Revision: 2910 $' / base case
 
 &MESH IJK=16,48,36, XB=-0.4,1.2, -0.4,4.4,0.0, 3.6/
 &MESH IJK=16,48,36, XB= 1.2,2.8, -0.4,4.4,0.0, 3.6/
@@ -66,7 +66,7 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
 &MATL ID                    = 'MT_PARTBRD'
       FYI='http://www.customthermoelectric.com/MaterialProperties6.htm'
-      SPECIFIC_HEAT         = 0.134
+      SPECIFIC_HEAT         = 1.34
       CONDUCTIVITY          = 0.17
       DENSITY               = 1000.0
       N_REACTIONS = 1
