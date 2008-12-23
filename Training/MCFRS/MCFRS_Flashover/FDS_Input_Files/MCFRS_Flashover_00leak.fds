@@ -1,4 +1,4 @@
-&HEAD CHID='MCFRS_Flashover_00leak',TITLE='MontoCo Flashover Simulator SVN $Revision: 2910 $' / base case
+&HEAD CHID='MCFRS_Flashover_00open',TITLE='MontoCo Flashover Simulator SVN $Revision: 2910 $' / base case
 
 &MESH IJK=16,48,36, XB=-0.4,1.2, -0.4,4.4,0.0, 3.6/
 &MESH IJK=16,48,36, XB= 1.2,2.8, -0.4,4.4,0.0, 3.6/
@@ -13,20 +13,15 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
 ***** starter fire
 
-&OBST XB= 1.3, 2.1, 7.7, 8.5, 1.1, 1.6,   COLOR='BLACK' /  metal drum
-&VENT XB= 1.3, 2.1, 7.7, 8.5, 1.6, 1.6 SURF_ID='FIRE'/
-&SURF ID='FIRE', HRRPUA=530.0 /4MW
+&OBST XB= 1.5, 2.1, 7.9, 8.5, 1.1, 1.6,   COLOR='BLACK' /  metal drum
+&VENT XB= 1.5, 2.1, 7.9, 8.5, 1.6, 1.6 SURF_ID='FIRE'/
+&SURF ID='FIRE', HRRPUA=1389.0 / 500KW
 
 &OBST XB=0.1, 2.3, 6.1, 8.7, 3.2, 3.3, SURF_ID='PARTBRD' / liner in small container
-&VENT XB=0.1, 2.3, 6.1, 8.7, 3.2, 3.2, SURF_ID='FIRE' /
 &OBST XB=0.1, 2.3, 6.1, 6.2, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
-&VENT XB=0.1, 2.3, 6.2, 6.2, 3.0, 3.2, SURF_ID='FIRE' /
 &OBST XB=0.1, 2.3, 8.6, 8.7, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
-&VENT XB=0.1, 2.3, 8.6, 8.6, 3.0, 3.2, SURF_ID='FIRE' /
 &OBST XB=0.1, 0.2, 6.2, 8.6, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
-&VENT XB=0.2, 0.2, 6.2, 8.6, 3.0, 3.2, SURF_ID='FIRE' /
 &OBST XB=2.2, 2.3, 6.2, 8.6, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
-&VENT XB=2.2, 2.2, 6.2, 8.6, 3.0, 3.2, SURF_ID='FIRE' / liner in small container
 
 &REAC ID                 = 'WOOD'
      FYI                = 'Tewarson, SFPE Handbook, Douglas Fir'
@@ -70,16 +65,19 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
       THICKNESS          = 0.00635 /
 
 &MATL ID                    = 'MT_PARTBRD'
-      FYI='http://www.customthermoelectric.com/MaterialProperties5.htm'
+      FYI='http://www.customthermoelectric.com/MaterialProperties6.htm'
       SPECIFIC_HEAT         = 0.134
       CONDUCTIVITY          = 0.17
       DENSITY               = 1000.0
-      /
+      N_REACTIONS = 1
+      NU_FUEL = 1.0
+      REFERENCE_TEMPERATURE=360.0
+      HEAT_OF_REACTION= 3000.0
+      HEAT_OF_COMBUSTION=16400.0/
 
 &SURF ID='PARTBRD'
       MATL_ID = 'MT_PARTBRD'
-      THICKNESS=0.016
-      IGNITION_TEMPERATURE=360. /
+      THICKNESS=0.016 /
 
 &MATL ID                    = 'MT_CONCRETE'
       SPECIFIC_HEAT         = 0.88
