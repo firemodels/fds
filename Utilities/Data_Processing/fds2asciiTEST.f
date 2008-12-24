@@ -17,7 +17,10 @@ C
       REAL(FB) :: XS, XF, YS, YF, ZS, ZF, TIME
       REAL(FB) :: D1, D2, D3, D4, TBEG, TEND
       CHARACTER(256) :: AUTO_SLICE_LABEL
-      INTEGER :: AUTO_SLICE_FLAG, N_AUTO_SLICES
+      INTEGER :: AUTO_SLICE_FLAG, N_AUTO_SLICES, IAUTO
+      INTEGER, DIMENSION(500) :: AUTO_SLICE_LISTS
+      REAL(FB) :: AX1, AX2, AY1, AY2, AZ1, AZ2
+      REAL(FB) :: EPS
 C
       TYPE MESH_TYPE
       REAL(FB), POINTER, DIMENSION(:) :: X,Y,Z
@@ -41,6 +44,7 @@ C
       CHARACTER(256), DIMENSION(500) :: PL3D_FILE,SLCF_FILE,BNDF_FILE,
      .                                 SLCF_TEXT,BNDF_TEXT,
      .                                 SLCF_UNIT,BNDF_UNIT
+      REAL(FB), DIMENSION(500) :: X1, X2, Y1, Y2, Z1, Z2
       INTEGER,  DIMENSION(60) :: IB,IS
       INTEGER,  DIMENSION(500) :: PL3D_MESH,SLCF_MESH,BNDF_MESH
       REAL(FB), DIMENSION(500) :: PL3D_TIME
@@ -266,6 +270,12 @@ C
       CLOSE(12)
       NM=SLCF_MESH(I)
       M=>MESH(NM)
+      X1(I)=M%X(I1)
+      X2(I)=M%X(I2)
+      Y1(I)=M%Y(J1)
+      Y2(I)=M%Y(J2)
+      Z1(I)=M%Z(K1)
+      Z2(I)=M%Z(K2)
       write(6,'(I3,1x,A,1x,A)')I, TRIM(SLCF_TEXT(I)),TRIM(SLCF_FILE(I))
       write(6,'(3x,A,6(1x,f8.2))')'slice bounds:',
      .M%X(I1),M%X(I2),M%Y(J1),M%Y(J2),M%Z(K1),M%Z(K2)
@@ -276,25 +286,58 @@ C
         GOTO 500
       ENDIF
 
-      WRITE(6,*) ' How many variables to read: (6 max, 0 auto select)'
+      WRITE(6,*)'How many variables to read: (6 max, 0 for auto select)'
       READ(5,*) NV
       AUTO_SLICE_FLAG=0
+      N_AUTO_SLICES=0
       IF(NV.EQ.0)THEN
         AUTO_SLICE_FLAG=1
+        write(6,*)"Enter file type: eg: TEMPERATURE"
+        read(5,'(A)')AUTO_SLICE_LABEL
+        AUTO_SLICE_LABEL=TRIM(AUTO_SLICE_LABEL)
+        write(6,*)"Enter slice bounds"
+        read(5,*)AX1, AX2, AY1, AY2, AZ1, AZ2
+        EPS=0.001
+        AUTO_LOOP1: DO I=1,NFILES_EXIST
+          IF(TRIM(SLCF_TEXT(I)).EQ.TRIM(AUTO_SLICE_LABEL))THEN
+            IF(AX1+EPS.LT.X1(I))CYCLE
+            IF(AX2-EPS.GT.X2(I))CYCLE
+            IF(AY1+EPS.LT.Y1(I))CYCLE
+            IF(AY2-EPS.GT.Y2(I))CYCLE
+            IF(AZ1+EPS.LT.Z1(I))CYCLE
+            IF(AZ2-EPS.GT.Z2(I))CYCLE
+            N_AUTO_SLICES = N_AUTO_SLICES + 1
+            AUTO_SLICE_LISTS(N_AUTO_SLICES)=I
+          ENDIF
+        ENDDO AUTO_LOOP1
       ENDIF
 C
       SUM = 0.
 C
+      IF(AUTO_SLICE_FLAG.EQ.1)THEN
+        ALLOCATE(Q(0:1,0:1,0:1,1))
+        ALLOCATE(F(0:1,0:1,0:1))
+        NV = 1
+      ENDIF
+      AUTO_LIST: DO IAUTO=1, N_AUTO_SLICES
       VARLOOP: DO MV=1,NV
 C
-      WRITE(6,'(A,I2)') ' Enter index for variable',MV
-      READ(5,*) I
+      IF(AUTO_SLICE_FLAG.EQ.0)THEN
+        WRITE(6,'(A,I2)') ' Enter index for variable',MV
+        READ(5,*) I
+      ELSE
+        I=AUTO_SLICE_LISTS(IAUTO)
+      ENDIF
       IS(MV) = I
       QFILE = SLCF_FILE(I)
 C
       IF (MV.EQ.1) THEN
       NM = SLCF_MESH(I)
       M=>MESH(NM)
+      IF(AUTO_SLICE_FLAG.EQ.1)THEN
+        DEALLOCATE(Q)
+        DEALLOCATE(F)
+      ENDIF
       ALLOCATE(Q(0:M%IBAR,0:M%JBAR,0:M%KBAR,NV))
       ALLOCATE(F(0:M%IBAR,0:M%JBAR,0:M%KBAR))
       F = 0.
@@ -394,6 +437,58 @@ C
      .    ' Integral of ',TRIM(SLCF_TEXT(IS(MV))),' = ',SUM(MV)
 C
       ENDDO VARLOOP
+C*** WRITE OUT SLICE STUFF IF AUTO_SLICE_FLAG_SET      
+      IF(AUTO_SLICE_FLAG.EQ.1)THEN
+      IF(IAUTO.EQ.1)THEN
+      WRITE(6,*) 'Enter output file name:'
+      READ(5,'(A)') OUTFILE
+      OPEN(44,FILE=OUTFILE,FORM='FORMATTED',STATUS='UNKNOWN')
+C
+      WRITE(6,*) ' Writing to file...      ',TRIM(OUTFILE)
+      ENDIF
+C
+      I3 = I2 - I1 + 1
+      J3 = J2 - J1 + 1
+      K3 = K2 - K1 + 1
+C
+C One-dimensional section file
+C
+      IF (I1.EQ.I2 .AND. J1.EQ.J2 .AND. K1.NE.K2) then
+        WRITE(FRMT,'(A,I2.2,A)') "(1X,",NV,"(A,','),A)"
+        WRITE(44,FRMT) 'Z',(TRIM(SLCF_TEXT(IS(L))),L=1,NV)
+        WRITE(44,FRMT) 'm',(TRIM(SLCF_UNIT(IS(L))),L=1,NV)
+        WRITE(FRMT,'(A,I2.2,A)') "(",NV,"(E12.5,','),E12.5)"
+        LOOP1A: DO K=K1,K2,NSAM
+        IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE LOOP1A
+        IF (ZOFFSET_FLAG.EQ.1.AND.M%Z(K)-ZOFFSET.LT.0.0) CYCLE LOOP1A
+        write(44,FRMT) M%Z(K)-ZOFFSET,(Q(I2,J2,K,L),L=1,NV)
+        enddo LOOP1A
+        endif
+
+        if(i1.eq.i2.and.j1.ne.j2.and.k1.eq.k2) then
+        WRITE(FRMT,'(A,I2.2,A)') "(1X,",NV,"(A,','),A)"
+        WRITE(44,FRMT) 'Y',(TRIM(SLCF_TEXT(IS(L))),L=1,NV)
+        WRITE(44,FRMT) 'm',(TRIM(SLCF_UNIT(IS(L))),L=1,NV)
+        WRITE(FRMT,'(A,I2.2,A)') "(",NV,"(E12.5,','),E12.5)"
+        LOOP2A: DO J=J1,J2,NSAM
+        IF (M%Y(J).GT.YF .OR. M%Y(J).LT.YS) CYCLE LOOP2A
+        write(44,FRMT) M%y(j),(q(i2,j,k2,l),l=1,nv)
+        enddo LOOP2A
+        endif
+
+        if(i1.ne.i2.and.j1.eq.j2.and.k1.eq.k2) then
+        WRITE(FRMT,'(A,I2.2,A)') "(1X,",NV,"(A,','),A)"
+        WRITE(44,FRMT) 'X',(TRIM(SLCF_TEXT(IS(L))),L=1,NV)
+        WRITE(44,FRMT) 'm',(TRIM(SLCF_UNIT(IS(L))),L=1,NV)
+        WRITE(FRMT,'(A,I2.2,A)') "(",NV,"(E12.5,','),E12.5)"
+        LOOP3A: DO I=I1,I2,NSAM
+        IF (M%X(I).GT.XF .OR. M%X(I).LT.XS) CYCLE LOOP3A
+        write(44,FRMT) M%x(i),(q(i,j2,k2,l),l=1,nv)
+        enddo LOOP3A
+        endif
+        ENDIF
+C***
+      ENDDO AUTO_LIST
 C
 C
       CASE(3) FILETYPE
@@ -552,6 +647,8 @@ C
       ENDDO BVARLOOP
 C
       END SELECT FILETYPE
+      
+      IF(AUTO_SLICE_FLAG.EQ.1)GOTO 500
 C
 C Write out the data to an ASCII file
 C
