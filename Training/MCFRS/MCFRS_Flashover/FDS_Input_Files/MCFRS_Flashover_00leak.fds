@@ -151,29 +151,29 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
 *** 1D slice files for temperature and oxygen at above tree locations
 
-&SLCF XB=1.14,1.14,7.1,7.1,0.0,3.2, QUANTITY='TEMPERATURE' / 
+&SLCF XB=1.14,1.14,7.1,7.1,0.8,3.2, QUANTITY='TEMPERATURE' / 
 &SLCF XB=1.14,1.14,4.6,4.6,0.0,2.4, QUANTITY='TEMPERATURE' / 
 &SLCF XB=1.14,1.14,3.0,3.0,0.0,2.4, QUANTITY='TEMPERATURE' /
 
-&SLCF PBX=1.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center
+SLCF PBX=1.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center
 
-&SLCF PBY=0.7 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / left opening (crack)
-&SLCF PBY=4.4 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / top vent
-&SLCF PBY=8.0 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center of fire
+SLCF PBY=0.7 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / left opening (crack)
+SLCF PBY=4.4 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / top vent
+SLCF PBY=8.0 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center of fire
 
-&SLCF PBZ=1.3 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / sitting eye level
-&SLCF PBZ=2.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  large container
-&SLCF PBZ=3.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  small cotainer
+SLCF PBZ=1.3 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / sitting eye level
+SLCF PBZ=2.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  large container
+SLCF PBZ=3.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  small cotainer
 
-&SLCF PBX=1.2 QUANTITY='oxygen' / center
+SLCF PBX=1.2 QUANTITY='oxygen' / center
 
-&SLCF PBY=0.7 QUANTITY='oxygen' / left opening (crack)
-&SLCF PBY=4.4 QUANTITY='oxygen' / top vent
-&SLCF PBY=8.0 QUANTITY='oxygen' / center of fire
+SLCF PBY=0.7 QUANTITY='oxygen' / left opening (crack)
+SLCF PBY=4.4 QUANTITY='oxygen' / top vent
+SLCF PBY=8.0 QUANTITY='oxygen' / center of fire
 
-&SLCF PBZ=1.3 QUANTITY='oxygen' / sitting eye level
-&SLCF PBZ=2.2 QUANTITY='oxygen'  / below  large container
-&SLCF PBZ=3.2 QUANTITY='oxygen' /  below  small cotainer
+SLCF PBZ=1.3 QUANTITY='oxygen' / sitting eye level
+SLCF PBZ=2.2 QUANTITY='oxygen'  / below  large container
+SLCF PBZ=3.2 QUANTITY='oxygen' /  below  small cotainer
 
 *** boundary file quantities
 
