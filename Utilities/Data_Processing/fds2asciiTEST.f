@@ -1,4 +1,5 @@
       PROGRAM FDS2ASCII
+      IMPLICIT NONE
 C $Id: fds2ascii.f 2822 2008-12-09 18:18:46Z gforney $  
 C $Revision: 2822 $
 C $Date: 2008-12-09 13:18:46 -0500 (Tue, 09 Dec 2008) $
@@ -7,6 +8,16 @@ C
 C Program to convert various FDS output files to ASCII
 C
       INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
+      INTEGER :: IERR, VERSION, NMESHES, NM, NOC, I, J, K, L
+      INTEGER :: IDUM, IFILE, NSAM, NV, MV
+      INTEGER :: I1, I2, J1, J2, K1, K2, I3, J3, K3
+      INTEGER :: I10, I20, J10, J20, K10, K20
+      INTEGER :: NCOUNT, IOR_INPUT, NPATCH, IJBAR, JKBAR
+      INTEGER :: II, NXP, NYP, NZP, N
+      REAL(FB) :: XS, XF, YS, YF, ZS, ZF, TIME
+      REAL(FB) :: D1, D2, D3, D4, TBEG, TEND
+      CHARACTER(256) :: AUTO_SLICE_LABEL
+      INTEGER :: AUTO_SLICE_FLAG, N_AUTO_SLICES
 C
       TYPE MESH_TYPE
       REAL(FB), POINTER, DIMENSION(:) :: X,Y,Z
@@ -19,6 +30,7 @@ C
 C
       REAL(FB), DIMENSION(60) :: SUM
       INTEGER, ALLOCATABLE, DIMENSION(:) :: IOR,I1B,I2B,J1B,J2B,K1B,K2B
+      INTEGER, ALLOCATABLE, DIMENSION(:) :: AUTO_SLICES
       REAL(FB), ALLOCATABLE, DIMENSION(:,:,:,:) :: Q
       REAL(FB), ALLOCATABLE, DIMENSION(:,:,:) :: F
       LOGICAL :: NEW_PLOT3D=.TRUE.
@@ -247,30 +259,16 @@ C
         CYCLE
       ENDIF
       NFILES_EXIST=NFILES_EXIST+1
-      write(6,*) TRIM(SLCF_FILE(I))
       READ(12) UNITJUNK
-      write(6,*) UNITJUNK
       READ(12) UNITJUNK
-      write(6,*) UNITJUNK
       READ(12) UNITJUNK
-      write(6,*) UNITJUNK
       READ(12) I1,I2,J1,J2,K1,K2
       CLOSE(12)
       NM=SLCF_MESH(I)
       M=>MESH(NM)
-      write(6,'(A,f8.2,2x,A,f8.2)')'xmin=',M%X(I1),'xmax=',M%X(I2)
-      write(6,'(A,f8.2,2x,A,f8.2)')'ymin=',M%Y(J1),'ymax=',M%Y(J2)
-      write(6,'(A,f8.2,2x,A,f8.2)')'zmin=',M%Z(K1),'zmax=',M%Z(K2)
-      IF (I1.EQ.I2) THEN
-      WRITE(6,'(I3,3X,A,I2,A,F8.2,A,A)') I,'MESH ',SLCF_MESH(I),
-     .     ', x=',M%X(I1),', ',TRIM(SLCF_TEXT(I))
-      ELSEIF (J1.EQ.J2) THEN
-      WRITE(6,'(I3,3X,A,I2,A,F8.2,A,A)') I,'MESH ',SLCF_MESH(I),
-     .     ', y=',M%Y(J1),', ',TRIM(SLCF_TEXT(I))
-      ELSE
-      WRITE(6,'(I3,3X,A,I2,A,F8.2,A,A)') I,'MESH ',SLCF_MESH(I),
-     .     ', z=',M%Z(K1),', ',TRIM(SLCF_TEXT(I))
-      ENDIF
+      write(6,'(I3,1x,A,1x,A)')I, TRIM(SLCF_TEXT(I)),TRIM(SLCF_FILE(I))
+      write(6,'(3x,A,6(1x,f8.2))')'slice bounds:',
+     .M%X(I1),M%X(I2),M%Y(J1),M%Y(J2),M%Z(K1),M%Z(K2)
       ENDDO SEARCH_SLCF
 C
       IF(NFILES_EXIST.EQ.0)THEN
@@ -278,8 +276,12 @@ C
         GOTO 500
       ENDIF
 
-      WRITE(6,*) ' How many variables to read: (6 max)'
+      WRITE(6,*) ' How many variables to read: (6 max, 0 auto select)'
       READ(5,*) NV
+      AUTO_SLICE_FLAG=0
+      IF(NV.EQ.0)THEN
+        AUTO_SLICE_FLAG=1
+      ENDIF
 C
       SUM = 0.
 C
@@ -708,11 +710,12 @@ C
 
 
       SUBROUTINE SEARCH(STRING,LENGTH,LU,IERR)
+      IMPLICIT NONE
 C
       CHARACTER(*), INTENT(IN) :: STRING
       INTEGER, INTENT(OUT) :: IERR
       CHARACTER(20) :: JUNK
-      INTEGER LU,LENGTH
+      INTEGER :: LU,LENGTH
 C
       SEARCH_LOOP: DO 
       READ(LU,'(A)',END=10) JUNK
