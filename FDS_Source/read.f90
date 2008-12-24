@@ -3469,7 +3469,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
       WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,': SPECIFIC_HEAT = 0' 
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-
+   IF ( SPECIFIC_HEAT > 10._EB) WRITE(LU_ERR,'(A,I2)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL number ',N
  
    ! Pack MATL parameters into the MATERIAL derived type
  
@@ -3639,6 +3639,13 @@ PROC_MATL_LOOP: DO N=1,N_MATL
          ENDIF
       ENDIF
    ENDDO
+   
+   IF (ML%RAMP_C_S/='null') THEN
+         IF (RAMPS(-INT(ML%C_S))%DEPENDENT_DATA(1) > 10._EB) &
+            WRITE(LU_ERR,'(A,I2)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL number ',N
+   ENDIF   
+
+
 
 ENDDO PROC_MATL_LOOP
 
