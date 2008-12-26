@@ -17,10 +17,11 @@ C
       REAL(FB) :: XS, XF, YS, YF, ZS, ZF, TIME
       REAL(FB) :: D1, D2, D3, D4, TBEG, TEND
       CHARACTER(256) :: AUTO_SLICE_LABEL
-      INTEGER :: AUTO_SLICE_FLAG, N_AUTO_SLICES, IAUTO
+      INTEGER :: AUTO_SLICE_FLAG, N_AUTO_SLICES, IAUTO, IZTEMP, IZMIN
       INTEGER, DIMENSION(500) :: AUTO_SLICE_LISTS
+      REAL(FB), DIMENSION(500) :: AUTO_SLICE_Z
       REAL(FB) :: AX1, AX2, AY1, AY2, AZ1, AZ2
-      REAL(FB) :: EPS
+      REAL(FB) :: EPS, ZMIN
 C
       TYPE MESH_TYPE
       REAL(FB), POINTER, DIMENSION(:) :: X,Y,Z
@@ -300,6 +301,8 @@ C
         EPS=0.001
         AUTO_LOOP1: DO I=1,NFILES_EXIST
           IF(TRIM(SLCF_TEXT(I)).EQ.TRIM(AUTO_SLICE_LABEL))THEN
+            IF(X2(I)-X1(I).GT.EPS)CYCLE
+            IF(Y2(I)-Y1(I).GT.EPS)CYCLE
             IF(AX1+EPS.LT.X1(I))CYCLE
             IF(AX2-EPS.GT.X2(I))CYCLE
             IF(AY1+EPS.LT.Y1(I))CYCLE
@@ -308,6 +311,7 @@ C
             IF(AZ2-EPS.GT.Z2(I))CYCLE
             N_AUTO_SLICES = N_AUTO_SLICES + 1
             AUTO_SLICE_LISTS(N_AUTO_SLICES)=I
+            AUTO_SLICE_Z(N_AUTO_SLICES) = Z1(I)
           ENDIF
         ENDDO AUTO_LOOP1
       ENDIF
@@ -318,6 +322,23 @@ C
         ALLOCATE(Q(0:1,0:1,0:1,1))
         ALLOCATE(F(0:1,0:1,0:1))
         NV = 1
+        DO I = 1, N_AUTO_SLICES
+          IZMIN=I
+          ZMIN=AUTO_SLICE_Z(I)
+          DO J = I+1, N_AUTO_SLICES
+            IF(AUTO_SLICE_Z(J).LT.ZMIN)THEN
+               IZMIN=J
+               ZMIN=AUTO_SLICE_Z(J)
+            ENDIF
+          END DO
+          IF(IZMIN.NE.I)THEN
+            AUTO_SLICE_Z(IZMIN)=AUTO_SLICE_Z(I)
+            AUTO_SLICE_Z(I) = ZMIN
+            IZTEMP = AUTO_SLICE_LISTS(IZMIN)
+            AUTO_SLICE_LISTS(IZMIN)=AUTO_SLICE_LISTS(I)
+            AUTO_SLICE_LISTS(I)=IZTEMP
+          ENDIF
+        END DO
       ENDIF
       AUTO_LIST: DO IAUTO=1, N_AUTO_SLICES
       VARLOOP: DO MV=1,NV
@@ -445,6 +466,7 @@ C*** WRITE OUT SLICE STUFF IF AUTO_SLICE_FLAG_SET
       OPEN(44,FILE=OUTFILE,FORM='FORMATTED',STATUS='UNKNOWN')
 C
       WRITE(6,*) ' Writing to file...      ',TRIM(OUTFILE)
+      ZMIN=-1000000000000.0
       ENDIF
 C
       I3 = I2 - I1 + 1
@@ -461,7 +483,10 @@ C
         LOOP1A: DO K=K1,K2,NSAM
         IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE LOOP1A
         IF (ZOFFSET_FLAG.EQ.1.AND.M%Z(K)-ZOFFSET.LT.0.0) CYCLE LOOP1A
-        write(44,FRMT) M%Z(K)-ZOFFSET,(Q(I2,J2,K,L),L=1,NV)
+        IF(M%Z(I)-ZOFFSET.GT.ZMIN)THEN
+          write(44,FRMT) M%Z(K)-ZOFFSET,(Q(I2,J2,K,L),L=1,NV)
+        ENDIF
+        ZMIN=M%Z(I)-ZOFFSET
         enddo LOOP1A
         endif
 
