@@ -289,9 +289,11 @@ C
 
       WRITE(6,*)'How many variables to read: (6 max, 0 for auto select)'
       READ(5,*) NV
-      AUTO_SLICE_FLAG=0
-      N_AUTO_SLICES=0
+      IF(NV.NE.0)THEN
+        AUTO_SLICE_FLAG=0
+      ENDIF
       IF(NV.EQ.0)THEN
+        N_AUTO_SLICES=0
         AUTO_SLICE_FLAG=1
         write(6,*)"Enter file type: eg: TEMPERATURE"
         read(5,'(A)')AUTO_SLICE_LABEL
@@ -339,6 +341,9 @@ C
             AUTO_SLICE_LISTS(I)=IZTEMP
           ENDIF
         END DO
+      ENDIF
+      IF(AUTO_SLICE_FLAG.EQ.0)THEN
+        N_AUTO_SLICES=1
       ENDIF
       AUTO_LIST: DO IAUTO=1, N_AUTO_SLICES
       VARLOOP: DO MV=1,NV
