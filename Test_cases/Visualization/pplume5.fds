@@ -2,10 +2,10 @@
 
  simple plume calculation to demonstrate basic Smokeview functions
 
-&MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,0.0,0.8 /
 &MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,0.8,1.6 /
-&MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,1.6,2.4 /
 &MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,2.4,3.2 /
+&MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,0.0,0.8 /
+&MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,1.6,2.4 /
 
 &TIME TWFIN=10. /  Total simulation time
 
