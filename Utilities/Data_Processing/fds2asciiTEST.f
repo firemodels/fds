@@ -22,7 +22,7 @@ C
       INTEGER :: IZMIN
       INTEGER, DIMENSION(500) :: AUTO_SLICE_LISTS
       REAL(FB), DIMENSION(500) :: AUTO_SLICE_Z
-      REAL(FB) :: AX1, AX2, AY1, AY2, AZ1, AZ2
+      REAL(FB) :: AX1, AY1, AZ1, AZ2
       REAL(FB) :: EPS, ZMIN
 C
       TYPE MESH_TYPE
@@ -147,6 +147,14 @@ C
       WRITE(6,*) ' (1 for all data, 2 for every other point, etc.)'
       READ(5,*) NSAM
 C
+C*** ANS(1:1) may be 'y', 'n' or 'z' (or upper case equivalents)
+C    ANS(2:2) may be 'a' or ' '
+C
+C     y - domain size is limited
+C     n - domain size is not limited
+C     z - domain size is not limted z levels are offset by zoffset
+C     a - slice files are selected based on slice file type and location
+
       WRITE(6,*) ' Limit the domain size? (y or n)'
       READ(5,'(A)') ANS
       IF (ANS(1:1).EQ.'y' .OR. ANS(1:1).EQ.'Y') THEN
@@ -161,13 +169,13 @@ C
          ZF =  100000.
       ENDIF
 C      
-C*** if ANS is z or Z then subtract a zoffset from z data (for multi-level cases)
+C*** if ANS is z or Z then subtract zoffset from z data (for multi-level cases)
       IF (ANS(1:1).EQ.'z' .OR. ANS(1:1).EQ.'Z') THEN
          ZOFFSET_FLAG=1
         ELSE
          ZOFFSET_FLAG=0
       ENDIF
-      IF (ANS(2:2).eq.'w'.or.ANS(2:2).eq.'W')THEN
+      IF (ANS(2:2).eq.'a'.or.ANS(2:2).eq.'A')THEN
          AUTO_SLICE_FLAG=1
         ELSE
          AUTO_SLICE_FLAG=0
@@ -270,8 +278,9 @@ C
       IF (VERSION.LE.2.) READ(11,*) JUNK
       IF (VERSION.GT.2.) READ(11,*) JUNK,SLCF_MESH(I)
       READ(11,'(A)') SLCF_FILE(I)
-      
       READ(11,'(A)') SLCF_TEXT(I)
+
+C*** create unique list of slice types      
       SLICE_EXIST=0
       DO II=1, NSLICE_LABELS
         IF(TRIM(SLCF_TEXT(I)).EQ.SLICE_LABELS(II))THEN
@@ -342,17 +351,18 @@ C
         
         WRITE(6,*)"Enter 1D SLICE bounds (x y zmin zmax)"
         READ(5,*)AX1, AY1, AZ1, AZ2
-        AX2=AX1
-        AY2=AY1
         EPS=0.001
+C*** create list of slices that match requested type and location
+C         also record the elevation (z) of each slice so that they
+C         may be later output in increasing order
         AUTO_LOOP1: DO I=1,NFILES_EXIST
           IF(TRIM(SLCF_TEXT(I)).EQ.TRIM(AUTO_SLICE_LABEL))THEN
             IF(X2(I)-X1(I).GT.EPS)CYCLE
             IF(Y2(I)-Y1(I).GT.EPS)CYCLE
             IF(AX1+EPS.LT.X1(I))CYCLE
-            IF(AX2-EPS.GT.X2(I))CYCLE
+            IF(AX1-EPS.GT.X2(I))CYCLE
             IF(AY1+EPS.LT.Y1(I))CYCLE
-            IF(AY2-EPS.GT.Y2(I))CYCLE
+            IF(AY1-EPS.GT.Y2(I))CYCLE
             N_AUTO_SLICES = N_AUTO_SLICES + 1
             AUTO_SLICE_LISTS(N_AUTO_SLICES)=I
             AUTO_SLICE_Z(N_AUTO_SLICES) = Z1(I)
@@ -366,6 +376,7 @@ C
         ALLOCATE(Q(0:1,0:1,0:1,1))
         ALLOCATE(F(0:1,0:1,0:1))
         NV = 1
+C*** sort slice list        
         DO I = 1, N_AUTO_SLICES
           IZMIN1= MINLOC(AUTO_SLICE_Z(I:N_AUTO_SLICES))
           IZMIN = IZMIN1(1) + I - 1
@@ -499,7 +510,9 @@ C
      .    ' Integral of ',TRIM(SLCF_TEXT(IS(MV))),' = ',SUM(MV)
 C
       ENDDO VARLOOP
-C*** WRITE OUT SLICE STUFF IF AUTO_SLICE_FLAG_SET      
+C*** WRITE OUT SLICE DATA IF AUTO_SLICE_FLAG IS SET
+C       (WRITE IT OUT HERE RATHER THAN later SO WE DON'T HAVE TO SAVE EXTRA DATA)
+c        
       IF(AUTO_SLICE_FLAG.EQ.1)THEN
         IF(IAUTO.EQ.1)THEN
           WRITE(6,*) 'Enter output file name:'
@@ -515,6 +528,7 @@ C
         K3 = K2 - K1 + 1
 C
 C One-dimensional section file
+C    NOTE: IN AUTO_SLICE MODE ONLY VERTICAL 1D SLICES ARE SUPPORTED
 C
         IF (I1.EQ.I2 .AND. J1.EQ.J2 .AND. K1.NE.K2) then
           IF(IAUTO.EQ.1)THEN
@@ -694,7 +708,7 @@ C
 C
       END SELECT FILETYPE
 
-C*** output already generated if AUTO_SLICE option was selected
+C*** AUTO_SLICE DATA WAS ALREADY GENERATED
       IF(AUTO_SLICE_FLAG.EQ.1)GOTO 500
 C
 C Write out the data to an ASCII file
