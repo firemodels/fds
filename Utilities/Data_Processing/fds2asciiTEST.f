@@ -17,7 +17,9 @@ C
       REAL(FB) :: XS, XF, YS, YF, ZS, ZF, TIME
       REAL(FB) :: D1, D2, D3, D4, TBEG, TEND
       CHARACTER(256) :: AUTO_SLICE_LABEL
-      INTEGER :: AUTO_SLICE_FLAG, N_AUTO_SLICES, IAUTO, IZTEMP, IZMIN
+      INTEGER :: AUTO_SLICE_FLAG, N_AUTO_SLICES, IAUTO, IZTEMP
+      INTEGER, DIMENSION(1) :: IZMIN1
+      INTEGER :: IZMIN
       INTEGER, DIMENSION(500) :: AUTO_SLICE_LISTS
       REAL(FB), DIMENSION(500) :: AUTO_SLICE_Z
       REAL(FB) :: AX1, AX2, AY1, AY2, AZ1, AZ2
@@ -39,12 +41,14 @@ C
       REAL(FB), ALLOCATABLE, DIMENSION(:,:,:) :: F
       LOGICAL :: NEW_PLOT3D=.TRUE.
       INTEGER IOR_SLCF
-      CHARACTER(1) ANS
+      CHARACTER(2) ANS
       CHARACTER(30) :: UNITJUNK
       CHARACTER(256) GRIDFILE,QNAME,CHID,QFILE,JUNK,FRMT,OUTFILE
       CHARACTER(256), DIMENSION(500) :: PL3D_FILE,SLCF_FILE,BNDF_FILE,
      .                                 SLCF_TEXT,BNDF_TEXT,
      .                                 SLCF_UNIT,BNDF_UNIT
+      CHARACTER(256), DIMENSION(500) :: SLICE_LABELS
+      INTEGER :: NSLICE_LABELS, SLICE_EXIST
       REAL(FB), DIMENSION(500) :: X1, X2, Y1, Y2, Z1, Z2
       INTEGER,  DIMENSION(60) :: IB,IS
       INTEGER,  DIMENSION(500) :: PL3D_MESH,SLCF_MESH,BNDF_MESH
@@ -54,9 +58,11 @@ C
       INTEGER :: NFILES_EXIST
       REAL(FB) :: ZOFFSET
       INTEGER :: ZOFFSET_FLAG
+      LOGICAL :: EXISTS
 
       ZOFFSET=0.0
       ZOFFSET_FLAG=0
+      EPS=0.001
 C
       WRITE(6,*) ' Enter Job ID string (CHID):'
       READ(5,'(a)') CHID
@@ -64,6 +70,13 @@ C
 C
 C Open grid file
 C
+      INQUIRE(FILE=GRIDFILE,EXIST=EXISTS)
+      IF(.NOT.EXISTS)THEN
+        WRITE(6,*)"*** Fatal error: The file: ",TRIM(GRIDFILE),
+     .        " does not exist"
+        STOP
+      ENDIF
+
       OPEN(11,FILE=GRIDFILE,STATUS='OLD',FORM='FORMATTED')
 C
       CALL SEARCH('VERSION',7,11,IERR)
@@ -136,18 +149,9 @@ C
 C
       WRITE(6,*) ' Limit the domain size? (y or n)'
       READ(5,'(A)') ANS
-      ZOFFSET_FLAG=0
-      IF (ANS.EQ.'y' .OR. ANS.EQ.'Y') THEN
+      IF (ANS(1:1).EQ.'y' .OR. ANS(1:1).EQ.'Y') THEN
          WRITE(6,*) ' Enter min/max x, y and z'
          READ(5,*) XS,XF,YS,YF,ZS,ZF
-      ELSE IF(ANS.EQ.'z' .OR. ANS.EQ.'Z') THEN
-         ZOFFSET_FLAG=1
-         XS = -100000.
-         XF =  100000.
-         YS = -100000.
-         YF =  100000.
-         ZS = -100000.
-         ZF =  100000.
       ELSE
          XS = -100000.
          XF =  100000.
@@ -155,6 +159,18 @@ C
          YF =  100000.
          ZS = -100000.
          ZF =  100000.
+      ENDIF
+C      
+C*** if ANS is z or Z then subtract a zoffset from z data (for multi-level cases)
+      IF (ANS(1:1).EQ.'z' .OR. ANS(1:1).EQ.'Z') THEN
+         ZOFFSET_FLAG=1
+        ELSE
+         ZOFFSET_FLAG=0
+      ENDIF
+      IF (ANS(2:2).eq.'w'.or.ANS(2:2).eq.'W')THEN
+         AUTO_SLICE_FLAG=1
+        ELSE
+         AUTO_SLICE_FLAG=0
       ENDIF
 C
       EXTRA_PLOT3D_FILES: DO
@@ -238,12 +254,12 @@ C Example:  for two-dimensional data, the form is  x,y,t,u,v, where x,y
 C are the coordinates, and t,u,v are averaged scalar variables.
 C
       WRITE(6,*) ' Enter starting and ending time for averaging (s)'
+      NSLICE_LABELS=0
       IF(ZOFFSET_FLAG.EQ.0)THEN
-      READ(5,*) TBEG,TEND
+        READ(5,*) TBEG,TEND
       ELSE
-      READ(5,*) TBEG,TEND,ZOFFSET
+        READ(5,*) TBEG,TEND,ZOFFSET
       ENDIF
-C
       SLCF_MESH = 1
       REWIND(11)
       NFILES_EXIST=0
@@ -254,7 +270,19 @@ C
       IF (VERSION.LE.2.) READ(11,*) JUNK
       IF (VERSION.GT.2.) READ(11,*) JUNK,SLCF_MESH(I)
       READ(11,'(A)') SLCF_FILE(I)
+      
       READ(11,'(A)') SLCF_TEXT(I)
+      SLICE_EXIST=0
+      DO II=1, NSLICE_LABELS
+        IF(TRIM(SLCF_TEXT(I)).EQ.SLICE_LABELS(II))THEN
+          SLICE_EXIST=1
+          EXIT
+        ENDIF
+      ENDDO
+      IF(SLICE_EXIST.EQ.0)THEN
+        NSLICE_LABELS=NSLICE_LABELS+1
+        SLICE_LABELS(NSLICE_LABELS)=TRIM(SLCF_TEXT(I))
+      ENDIF
       READ(11,*) 
       READ(11,'(A)') SLCF_UNIT(I)
       OPEN(12,FILE=SLCF_FILE(I),FORM='UNFORMATTED',STATUS='OLD',
@@ -277,9 +305,11 @@ C
       Y2(I)=M%Y(J2)
       Z1(I)=M%Z(K1)
       Z2(I)=M%Z(K2)
-      write(6,'(I3,1x,A,1x,A)')I, TRIM(SLCF_TEXT(I)),TRIM(SLCF_FILE(I))
-      write(6,'(3x,A,6(1x,f8.2))')'slice bounds:',
-     .M%X(I1),M%X(I2),M%Y(J1),M%Y(J2),M%Z(K1),M%Z(K2)
+      IF(AUTO_SLICE_FLAG.EQ.0)THEN
+        write(6,'(I3,1x,A,1x,A)')I,TRIM(SLCF_TEXT(I)),TRIM(SLCF_FILE(I))
+        write(6,'(3x,A,6(1x,f8.2))')'slice bounds:',
+     .  M%X(I1),M%X(I2),M%Y(J1),M%Y(J2),M%Z(K1),M%Z(K2)
+      ENDIF
       ENDDO SEARCH_SLCF
 C
       IF(NFILES_EXIST.EQ.0)THEN
@@ -287,19 +317,33 @@ C
         GOTO 500
       ENDIF
 
-      WRITE(6,*)'How many variables to read: (6 max, 0 for auto select)'
-      READ(5,*) NV
-      IF(NV.NE.0)THEN
-        AUTO_SLICE_FLAG=0
-      ENDIF
-      IF(NV.EQ.0)THEN
+      IF(AUTO_SLICE_FLAG.EQ.0)THEN
+        WRITE(6,*)'How many variables to read: (6 max)'
+        READ(5,*) NV
+        N_AUTO_SLICES=1
+       ELSE
         N_AUTO_SLICES=0
         AUTO_SLICE_FLAG=1
-        write(6,*)"Enter file type: eg: TEMPERATURE"
-        read(5,'(A)')AUTO_SLICE_LABEL
-        AUTO_SLICE_LABEL=TRIM(AUTO_SLICE_LABEL)
-        write(6,*)"Enter slice bounds"
-        read(5,*)AX1, AX2, AY1, AY2, AZ1, AZ2
+        WRITE(6,*)' Enter slice file type index'
+        DO II=1, NSLICE_LABELS
+          WRITE(6,'(I3,1x,A)')II,TRIM(SLICE_LABELS(II))
+        ENDDO
+        READ(5,'(I3)')II
+        AUTO_SLICE_LABEL=TRIM(SLICE_LABELS(II))
+        boundloop: DO II=1,NFILES_EXIST
+          IF(TRIM(AUTO_SLICE_LABEL).NE.TRIM(SLCF_TEXT(II)))THEN
+            CYCLE boundloop
+          ENDIF
+          IF(X2(II)-X1(II).GT.EPS)CYCLE boundloop
+          IF(Y2(II)-Y1(II).GT.EPS)CYCLE boundloop
+          WRITE(6,'(4(a,f8.3))')"x=",X1(II)," y=",Y1(II),
+     .                          " zmin=",Z1(II)," zmax=",Z2(II)
+        ENDDO boundloop
+        
+        WRITE(6,*)"Enter 1D SLICE bounds (x y zmin zmax)"
+        READ(5,*)AX1, AY1, AZ1, AZ2
+        AX2=AX1
+        AY2=AY1
         EPS=0.001
         AUTO_LOOP1: DO I=1,NFILES_EXIST
           IF(TRIM(SLCF_TEXT(I)).EQ.TRIM(AUTO_SLICE_LABEL))THEN
@@ -309,8 +353,6 @@ C
             IF(AX2-EPS.GT.X2(I))CYCLE
             IF(AY1+EPS.LT.Y1(I))CYCLE
             IF(AY2-EPS.GT.Y2(I))CYCLE
-            IF(AZ1+EPS.LT.Z1(I))CYCLE
-            IF(AZ2-EPS.GT.Z2(I))CYCLE
             N_AUTO_SLICES = N_AUTO_SLICES + 1
             AUTO_SLICE_LISTS(N_AUTO_SLICES)=I
             AUTO_SLICE_Z(N_AUTO_SLICES) = Z1(I)
@@ -325,15 +367,10 @@ C
         ALLOCATE(F(0:1,0:1,0:1))
         NV = 1
         DO I = 1, N_AUTO_SLICES
-          IZMIN=I
-          ZMIN=AUTO_SLICE_Z(I)
-          DO J = I+1, N_AUTO_SLICES
-            IF(AUTO_SLICE_Z(J).LT.ZMIN)THEN
-               IZMIN=J
-               ZMIN=AUTO_SLICE_Z(J)
-            ENDIF
-          END DO
+          IZMIN1= MINLOC(AUTO_SLICE_Z(I:N_AUTO_SLICES))
+          IZMIN = IZMIN1(1) + I - 1
           IF(IZMIN.NE.I)THEN
+            ZMIN=AUTO_SLICE_Z(IZMIN)
             AUTO_SLICE_Z(IZMIN)=AUTO_SLICE_Z(I)
             AUTO_SLICE_Z(I) = ZMIN
             IZTEMP = AUTO_SLICE_LISTS(IZMIN)
@@ -341,8 +378,7 @@ C
             AUTO_SLICE_LISTS(I)=IZTEMP
           ENDIF
         END DO
-      ENDIF
-      IF(AUTO_SLICE_FLAG.EQ.0)THEN
+       ELSE
         N_AUTO_SLICES=1
       ENDIF
       AUTO_LIST: DO IAUTO=1, N_AUTO_SLICES
@@ -465,59 +501,40 @@ C
       ENDDO VARLOOP
 C*** WRITE OUT SLICE STUFF IF AUTO_SLICE_FLAG_SET      
       IF(AUTO_SLICE_FLAG.EQ.1)THEN
-      IF(IAUTO.EQ.1)THEN
-      WRITE(6,*) 'Enter output file name:'
-      READ(5,'(A)') OUTFILE
-      OPEN(44,FILE=OUTFILE,FORM='FORMATTED',STATUS='UNKNOWN')
+        IF(IAUTO.EQ.1)THEN
+          WRITE(6,*) 'Enter output file name:'
+          READ(5,'(A)') OUTFILE
+          OPEN(44,FILE=OUTFILE,FORM='FORMATTED',STATUS='UNKNOWN')
 C
-      WRITE(6,*) ' Writing to file...      ',TRIM(OUTFILE)
-      ZMIN=-1000000000000.0
-      ENDIF
+          WRITE(6,*) ' Writing to file...      ',TRIM(OUTFILE)
+          ZMIN=-1000000000000.0
+        ENDIF
 C
-      I3 = I2 - I1 + 1
-      J3 = J2 - J1 + 1
-      K3 = K2 - K1 + 1
+        I3 = I2 - I1 + 1
+        J3 = J2 - J1 + 1
+        K3 = K2 - K1 + 1
 C
 C One-dimensional section file
 C
-      IF (I1.EQ.I2 .AND. J1.EQ.J2 .AND. K1.NE.K2) then
-        WRITE(FRMT,'(A,I2.2,A)') "(1X,",NV,"(A,','),A)"
-        WRITE(44,FRMT) 'Z',(TRIM(SLCF_TEXT(IS(L))),L=1,NV)
-        WRITE(44,FRMT) 'm',(TRIM(SLCF_UNIT(IS(L))),L=1,NV)
-        WRITE(FRMT,'(A,I2.2,A)') "(",NV,"(E12.5,','),E12.5)"
-        LOOP1A: DO K=K1,K2,NSAM
-        IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE LOOP1A
-        IF (ZOFFSET_FLAG.EQ.1.AND.M%Z(K)-ZOFFSET.LT.0.0) CYCLE LOOP1A
-        IF(M%Z(I)-ZOFFSET.GT.ZMIN)THEN
-          write(44,FRMT) M%Z(K)-ZOFFSET,(Q(I2,J2,K,L),L=1,NV)
-        ENDIF
-        ZMIN=M%Z(I)-ZOFFSET
-        enddo LOOP1A
-        endif
-
-        if(i1.eq.i2.and.j1.ne.j2.and.k1.eq.k2) then
-        WRITE(FRMT,'(A,I2.2,A)') "(1X,",NV,"(A,','),A)"
-        WRITE(44,FRMT) 'Y',(TRIM(SLCF_TEXT(IS(L))),L=1,NV)
-        WRITE(44,FRMT) 'm',(TRIM(SLCF_UNIT(IS(L))),L=1,NV)
-        WRITE(FRMT,'(A,I2.2,A)') "(",NV,"(E12.5,','),E12.5)"
-        LOOP2A: DO J=J1,J2,NSAM
-        IF (M%Y(J).GT.YF .OR. M%Y(J).LT.YS) CYCLE LOOP2A
-        write(44,FRMT) M%y(j),(q(i2,j,k2,l),l=1,nv)
-        enddo LOOP2A
-        endif
-
-        if(i1.ne.i2.and.j1.eq.j2.and.k1.eq.k2) then
-        WRITE(FRMT,'(A,I2.2,A)') "(1X,",NV,"(A,','),A)"
-        WRITE(44,FRMT) 'X',(TRIM(SLCF_TEXT(IS(L))),L=1,NV)
-        WRITE(44,FRMT) 'm',(TRIM(SLCF_UNIT(IS(L))),L=1,NV)
-        WRITE(FRMT,'(A,I2.2,A)') "(",NV,"(E12.5,','),E12.5)"
-        LOOP3A: DO I=I1,I2,NSAM
-        IF (M%X(I).GT.XF .OR. M%X(I).LT.XS) CYCLE LOOP3A
-        write(44,FRMT) M%x(i),(q(i,j2,k2,l),l=1,nv)
-        enddo LOOP3A
+        IF (I1.EQ.I2 .AND. J1.EQ.J2 .AND. K1.NE.K2) then
+          IF(IAUTO.EQ.1)THEN
+            WRITE(FRMT,'(A,I2.2,A)') "(1X,",NV,"(A,','),A)"
+            WRITE(44,FRMT) 'Z',(TRIM(SLCF_TEXT(IS(L))),L=1,NV)
+            WRITE(44,FRMT) 'm',(TRIM(SLCF_UNIT(IS(L))),L=1,NV)
+            WRITE(FRMT,'(A,I2.2,A)') "(",NV,"(E12.5,','),E12.5)"
+          ENDIF
+          LOOP1A: DO K=K1,K2,NSAM
+            IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE LOOP1A
+            IF (ZOFFSET_FLAG.EQ.1.AND.M%Z(K)-ZOFFSET.LT.0.0)CYCLE LOOP1A
+            IF(M%Z(K).LT.AZ1)CYCLE LOOP1A
+            IF(M%Z(K).GT.AZ2)EXIT LOOP1A
+            IF(M%Z(K)-ZOFFSET.GT.ZMIN)THEN
+              WRITE(44,FRMT) M%Z(K)-ZOFFSET,(Q(I2,J2,K,L),L=1,NV)
+            ENDIF
+            ZMIN=M%Z(k)-ZOFFSET
+          enddo LOOP1A
         endif
         ENDIF
-C***
       ENDDO AUTO_LIST
 C
 C
@@ -627,8 +644,7 @@ C
       CASE(1)
       READ(12,END=199) ((F(J,K,II),J=J1B(II),J2B(II)),K=K1B(II),K2B(II))
       CASE(2)
-      READ(12,END=199) ((F(I,K,II),
-     .                 I=I1B(II),I2B(II)),K=K1B(II),K2B(II))
+      READ(12,END=199) ((F(I,K,II),I=I1B(II),I2B(II)),K=K1B(II),K2B(II))
       CASE(3)
       READ(12,END=199) ((F(I,J,II),I=I1B(II),I2B(II)),J=J1B(II),J2B(II))
       END SELECT
@@ -677,7 +693,8 @@ C
       ENDDO BVARLOOP
 C
       END SELECT FILETYPE
-      
+
+C*** output already generated if AUTO_SLICE option was selected
       IF(AUTO_SLICE_FLAG.EQ.1)GOTO 500
 C
 C Write out the data to an ASCII file
@@ -841,8 +858,8 @@ C
 C
       CHARACTER(*), INTENT(IN) :: STRING
       INTEGER, INTENT(OUT) :: IERR
+      INTEGER, INTENT(IN) :: LU, LENGTH
       CHARACTER(20) :: JUNK
-      INTEGER :: LU,LENGTH
 C
       SEARCH_LOOP: DO 
       READ(LU,'(A)',END=10) JUNK
