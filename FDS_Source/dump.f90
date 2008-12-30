@@ -3401,6 +3401,8 @@ IF (SPEC_INDEX<0) THEN
    IF (DRY) CALL GET_MASS_FRACTION(YY_GET,H2O_INDEX,Y_SPECIES)
 ELSEIF (SPEC_INDEX>0) THEN
    Y_SPECIES=YY(II,JJ,KK,SPEC_INDEX)
+ELSE
+   Y_SPECIES=1.0_EB
 ENDIF
 
 ! Get desired output value
@@ -3672,8 +3674,18 @@ SELECT CASE(IND)
                      AREA = DX(I)*DY(J)*RC(I)
                      R_DN  = RDZN(K)
                END SELECT
+               IF (SPEC_INDEX /= 0) THEN
+                  IF (SPEC_INDEX<0) THEN
+                     YY_GET(:) = YY(IP,JP,KP,:)
+                     CALL GET_MASS_FRACTION(YY_GET,-SPEC_INDEX,Y_SPECIES2)
+                  ELSEIF (SPEC_INDEX>0) THEN
+                     Y_SPECIES2=YY(IP,JP,KP,SPEC_INDEX)
+                  ENDIF
+               ELSE
+                  Y_SPECIES2 = 1._EB
+               ENDIF
                IF (IND==111 .OR. IND==114 .OR. IND==117) HMFAC = 1._EB
-               IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))
+               IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
                IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
                   ITMP=MIN(500,NINT(0.05_EB*(TMP(I,J,K)+TMP(IP,JP,KP))))
                   IF (N_SPECIES>0) THEN
