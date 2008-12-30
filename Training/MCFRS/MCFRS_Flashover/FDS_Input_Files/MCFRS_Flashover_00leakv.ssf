@@ -1,0 +1,84 @@
+RENDERDIR
+../../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
+LOADINIFILE
+ MCFRS_Flashover_00leakv_slice.ini
+LOADSLICE
+ TEMPERATURE
+ 1 1.200000
+SETVIEWPOINT
+ front slice
+SETTIMEVAL
+ 15.011683
+RENDERONCE
+ MCFRS_Flashover_00leakv_front_slice_015
+SETTIMEVAL
+ 30.010981
+RENDERONCE
+ MCFRS_Flashover_00leakv_front_slice_030
+SETTIMEVAL
+ 60.025211
+RENDERONCE
+ MCFRS_Flashover_00leakv_front_slice_060
+SETTIMEVAL
+ 120.001823
+RENDERONCE
+ MCFRS_Flashover_00leakv_front_slice_120
+UNLOADALL
+LOADINIFILE
+ MCFRS_Flashover_00leakv_labels.ini
+SETVIEWPOINT
+ top label
+RENDERONCE
+ MCFRS_Flashover_00leakv_toplabel
+SETVIEWPOINT
+ front label
+RENDERONCE
+ MCFRS_Flashover_00leakv_frontlabel
+LOADINIFILE
+ MCFRS_Flashover_00leakv_smoke.ini
+UNLOADALL
+LOAD3DSMOKE
+ soot mass fraction
+LOAD3DSMOKE
+ HRRPUV
+SETVIEWPOINT
+ inside smoke
+SETTIMEVAL
+ 15.011683
+RENDERONCE
+ MCFRS_Flashover_00leakv_in_smoke_015
+SETTIMEVAL
+ 30.010981
+RENDERONCE
+ MCFRS_Flashover_00leakv_in_smoke_030
+SETTIMEVAL
+ 60.025211
+RENDERONCE
+ MCFRS_Flashover_00leakv_in_smoke_060
+SETTIMEVAL
+ 120.001823
+RENDERONCE
+ MCFRS_Flashover_00leakv_in_smoke_120
+LOADINIFILE
+ MCFRS_Flashover_00leakv_slice.ini
+SETVIEWPOINT
+ front slice
+SETTIMEVAL
+ 15.011683
+RENDERONCE
+ MCFRS_Flashover_00leakv_front_smoke_015
+SETTIMEVAL
+ 30.010981
+RENDERONCE
+ MCFRS_Flashover_00leakv_front_smoke_030
+SETTIMEVAL
+ 60.025211
+RENDERONCE
+ MCFRS_Flashover_00leakv_front_smoke_060
+SETTIMEVAL
+ 120.001823
+RENDERONCE
+ MCFRS_Flashover_00leakv_front_smoke_120
+
+
+ 
