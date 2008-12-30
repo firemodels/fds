@@ -1842,6 +1842,25 @@ CHECK_MESHES: IF (IW<=M%NEWC .AND.  .NOT.EVACUATION_ONLY(NM)) THEN
          IERR = 1
          RETURN
       ENDIF
+
+      SELECT CASE(ABS(IOR))
+         CASE(1)
+            IF ( (M%DY(J)<0.99_EB*MM%DY(JJO_MIN)) .AND. (M%DZ(K)>1.01_EB*MM%DZ(KKO_MIN)) ) ALIGNED = .FALSE.
+            IF ( (M%DY(J)>1.01_EB*MM%DY(JJO_MIN)) .AND. (M%DZ(K)<0.99_EB*MM%DZ(KKO_MIN)) ) ALIGNED = .FALSE.
+         CASE(2)
+            IF ( (M%DX(I)<0.99_EB*MM%DX(IIO_MIN)) .AND. (M%DZ(K)>1.01_EB*MM%DZ(KKO_MIN)) ) ALIGNED = .FALSE.
+            IF ( (M%DX(I)>1.01_EB*MM%DX(IIO_MIN)) .AND. (M%DZ(K)<0.99_EB*MM%DZ(KKO_MIN)) ) ALIGNED = .FALSE.
+         CASE(3)
+            IF ( (M%DY(J)<0.99_EB*MM%DY(JJO_MIN)) .AND. (M%DX(I)>1.01_EB*MM%DX(IIO_MIN)) ) ALIGNED = .FALSE.
+            IF ( (M%DY(J)>1.01_EB*MM%DY(JJO_MIN)) .AND. (M%DX(I)<0.99_EB*MM%DX(IIO_MIN)) ) ALIGNED = .FALSE.
+      END SELECT
+      IF (.NOT.ALIGNED) THEN
+         WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is finer in one direction and coarser in the other than MESH ',NOM
+         PROCESS_STOP_STATUS = SETUP_STOP
+         IERR = 1
+         RETURN
+      ENDIF
+
       M%IJKW(9,IW)  = NOM
       M%IJKW(10,IW) = IIO_MIN
       M%IJKW(11,IW) = JJO_MIN
