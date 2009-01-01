@@ -7,6 +7,18 @@ PROGRAM FDS2ASCII
 ! $Date$
  
 IMPLICIT NONE
+
+INTERFACE
+
+SUBROUTINE PARSE(BUFFER,SB_TOKS,SE_TOKS,N_TOKS)
+IMPLICIT NONE
+
+CHARACTER(*), INTENT(INOUT) :: BUFFER
+INTEGER, DIMENSION(*), INTENT(OUT) :: SB_TOKS, SE_TOKS
+INTEGER, INTENT(OUT) :: N_TOKS
+END SUBROUTINE PARSE
+END INTERFACE
+
 CHARACTER(255), PARAMETER :: revision='$Revision$'
 CHARACTER(255), PARAMETER :: f2aversion='2.0.0'
 INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
@@ -61,6 +73,9 @@ INTEGER :: ZOFFSET_FLAG
 LOGICAL :: EXISTS
 INTEGER :: LU_IN, NARGS, IARG, LENSTRING, BATCHMODE
 CHARACTER(256) :: BUFFER, FILEIN
+INTEGER, DIMENSION(256) :: SB_TOKS, SE_TOKS
+INTEGER :: N_TOKS
+INTEGER :: ERROR_STATUS
 
 ZOFFSET=0.0
 ZOFFSET_FLAG=0
@@ -84,11 +99,12 @@ ARGLOOP: DO IARG = 1, NARGS
       CYCLE ARGLOOP
    ENDIF
    IF (LENSTRING.GT.1.AND.BUFFER(1:1).EQ.'-') THEN
-      IF (BUFFER(2:2).EQ.'h'.OR.BUFFER(2:2).EQ.'H') THEN
+      CALL TOUPPER(BUFFER(2:2),BUFFER(2:2))
+      IF (BUFFER(2:2).EQ.'H') THEN
          CALL USAGE2(f2aversion,revision)
          STOP
       ENDIF
-      IF (BUFFER(2:2).EQ.'v'.OR.BUFFER(2:2).EQ.'V') THEN
+      IF (BUFFER(2:2).EQ.'V') THEN
          CALL VERSION2(f2aversion,revision)
          STOP
       ENDIF
@@ -217,9 +233,17 @@ READ(LU_IN,*) NSAM
 ! z - domain size is not limited z levels are offset by zoffset
 ! a - slice files are selected based on slice file type and location
 
-IF (BATCHMODE.EQ.0) write(6,*) ' Limit the domain size? (y or n)'
+IF (BATCHMODE.EQ.0)THEN
+   write(6,*) ' Domain selection:'
+   write(6,*) '   y - domain size is limited'
+   write(6,*) '   n - domain size is not limited'
+   write(6,*) '   z - domain size is not limited and z levels are offset'
+   write(6,*) '   ya, na or za - slice files are selected based on type and location.'
+   write(6,*) '       The y, n, z prefix are defined as before.  '
+ENDIF
 READ(LU_IN,'(A)') ANS
-IF (ANS(1:1).EQ.'y' .OR. ANS(1:1).EQ.'Y') THEN
+CALL TOUPPER(ANS,ANS)
+IF (ANS(1:1).EQ.'Y') THEN
    IF (BATCHMODE.EQ.0)write(6,*) ' Enter min/max x, y and z'
    READ(LU_IN,*) XS,XF,YS,YF,ZS,ZF
 ELSE
@@ -233,16 +257,18 @@ ENDIF
        
 ! If ANS is z or Z then subtract zoffset from z data (for multi-level cases)
 
-IF (ANS(1:1).EQ.'z' .OR. ANS(1:1).EQ.'Z') THEN
+IF (ANS(1:1).EQ.'Z') THEN
    ZOFFSET_FLAG=1
 ELSE
    ZOFFSET_FLAG=0
 ENDIF
 
-IF (ANS(2:2).eq.'a'.or.ANS(2:2).eq.'A')THEN
-   AUTO_SLICE_FLAG=1
-ELSE
-   AUTO_SLICE_FLAG=0
+IF(LEN(TRIM(ANS)).GT.1)THEN
+   IF (ANS(2:2).EQ.'A')THEN
+      AUTO_SLICE_FLAG=1
+   ELSE
+      AUTO_SLICE_FLAG=0
+   ENDIF
 ENDIF
  
 ! Select which kind of file to work on
@@ -322,14 +348,15 @@ EXTRA_PLOT3D_FILES: DO
 
       CASE(2) FILETYPE  ! Slice files
  
-         IF (BATCHMODE.EQ.0) write(6,*) ' Enter starting and ending time for averaging (s)'
 
          NSLICE_LABELS=0
          SLCF_LABEL = 'null'
 
          IF (ZOFFSET_FLAG.EQ.0) THEN
+            IF (BATCHMODE.EQ.0) write(6,*) ' Enter starting and ending time for averaging (s)'
             READ(LU_IN,*) TBEG,TEND
          ELSE
+            IF (BATCHMODE.EQ.0) write(6,*) ' Enter starting and ending time for averaging (s) and zoffset (m)'
             READ(LU_IN,*) TBEG,TEND,ZOFFSET
          ENDIF
 
@@ -413,7 +440,7 @@ EXTRA_PLOT3D_FILES: DO
             IF (BATCHMODE.EQ.0)THEN
                write(6,*)' Enter slice file type index'
                DO II=1, NSLICE_LABELS
-                  write(6,'(I3,1x,A)')II,TRIM(SLICE_LABELS(II))
+                  write(6,'(2x,I3,1x,A)')II,TRIM(SLICE_LABELS(II))
                ENDDO
             ENDIF
             READ(LU_IN,'(I3)')II
@@ -426,7 +453,7 @@ EXTRA_PLOT3D_FILES: DO
                IF(BATCHMODE.EQ.0) write(6,'(4(a,f8.3))')"x=",X1(II)," y=",Y1(II)," zmin=",Z1(II)," zmax=",Z2(II)
             ENDDO boundloop
         
-            IF (BATCHMODE.EQ.0) write(6,*)"Enter 1D SLICE bounds (x y zmin zmax)"
+            IF (BATCHMODE.EQ.0) write(6,*)"Enter 1D SLICE location (x y zmin zmax)"
             READ(LU_IN,*)AX1, AY1, AZ1, AZ2
             EPS=0.001
 
@@ -478,10 +505,27 @@ EXTRA_PLOT3D_FILES: DO
       VARLOOP: DO MV=1,NV
  
       IF (AUTO_SLICE_FLAG.EQ.0)THEN
+         SLCF_LABEL_DUMMY=' '
+ ! note:  The following two lines of FORTRAN was my attempt at getting EOR to work.
+ !        I got compile errors. (My "research" said that you can only use EOR with non-advancing IO)
+ !  see http://www.pcc.qub.ac.uk/tec/courses/f77tof90/stu-notes/f90studentMIF_7.html for an example
+         !IF (BATCHMODE.EQ.0) write(6,'(A,I2)',ADVANCE='NO') ' Enter index for variable',MV
+         !READ(LU_IN,*,EOR=200,ADVANCE='NO') I,SLCF_LABEL_DUMMY
          IF (BATCHMODE.EQ.0) write(6,'(A,I2)') ' Enter index for variable',MV
-         READ(LU_IN,*,ERR=200) I,SLCF_LABEL_DUMMY
+         READ(LU_IN,'(A)',IOSTAT=ERROR_STATUS) BUFFER
+         IF(ERROR_STATUS.NE.0)THEN
+             WRITE(6,*)"*** fatal error: read of variable index failed"
+             STOP
+         ENDIF
+         CALL PARSE(BUFFER,SB_TOKS,SE_TOKS,N_TOKS)
+         IF(N_TOKS.GE.1)THEN
+            READ(BUFFER(SB_TOKS(1):SE_TOKS(1)),*)I
+            IF(N_TOKS.GT.1)SLCF_LABEL_DUMMY=BUFFER(SB_TOKS(2):SE_TOKS(N_TOKS))
+         ELSE
+            WRITE(6,*)"*** fatal error: index for variable ",MV," not entered"
+            STOP
+         ENDIF
          200 CONTINUE
-         SLCF_LABEL(I) = SLCF_LABEL_DUMMY
          IF (SLCF_LABEL(I)=='null' .OR. SLCF_LABEL(I)==' ') SLCF_LABEL(I) = SLCF_TEXT(I)
       ELSE
          I=AUTO_SLICE_LISTS(IAUTO)
@@ -941,7 +985,7 @@ ENDDO EXTRA_PLOT3D_FILES
 STOP
 END PROGRAM FDS2ASCII
 
-
+! *********************** SEARCH *******************************
 
 SUBROUTINE SEARCH(STRING,LENGTH,LU,IERR)
 
@@ -963,10 +1007,11 @@ RETURN
 RETURN
 
 END SUBROUTINE SEARCH
-      
 
+! *********************** USAGE2 *******************************
 
 SUBROUTINE USAGE2(f2aversion,revision)
+IMPLICIT NONE
 
 CHARACTER(255), intent(in) :: revision, f2aversion
 CHARACTER(255) :: rev2
@@ -983,15 +1028,16 @@ WRITE(6,*)""
 WRITE(6,*)"Usage:"
 WRITE(6,*)"  fds2ascii [-h] [-v] [input]"
 WRITE(6,*)""
-WRITE(6,*)"   -h     - print out this message"
-WRITE(6,*)"   -v     - print out version info"
-WRITE(6,*)"   infile - read input from a file named input or"
-WRITE(6,*)"            from the console if no file is specified"
+WRITE(6,*)"   -h    - print out this message"
+WRITE(6,*)"   -v    - print out version info"
+WRITE(6,*)"   input - read input from a file named input or from"
+WRITE(6,*)"           the console if no file is specified"
 END SUBROUTINE USAGE2
 
-
+! *********************** VERSION2 *******************************
 
 SUBROUTINE VERSION2(f2aversion,revision)
+IMPLICIT NONE
 
 CHARACTER(255), intent(in) :: revision, f2aversion
 CHARACTER(255) :: rev2
@@ -1003,3 +1049,77 @@ rev2 = revision(2:lastchar-1)
 WRITE(6,*)"fds2ascii ",trim(f2aversion)," ",trim(rev2)
 
 END SUBROUTINE VERSION2
+
+! *********************** PARSE *******************************
+
+SUBROUTINE PARSE(BUFFER,SB_TOKS,SE_TOKS,N_TOKS)
+
+! parse buffer into a series of tokens each separated by blanks
+
+IMPLICIT NONE
+CHARACTER(*), INTENT(INOUT) :: BUFFER
+INTEGER, DIMENSION(*), INTENT(OUT) :: SB_TOKS, SE_TOKS
+INTEGER, INTENT(OUT) :: N_TOKS
+INTEGER :: I, INTOK, INQUOTE, LENBUF
+CHARACTER(LEN=1) :: C
+
+N_TOKS=0
+LENBUF = LEN(TRIM(BUFFER))
+IF(LENBUF.EQ.0)RETURN ! buffer is blank so there are no tokens
+INTOK=0
+INQUOTE=0
+DO I = 1, LENBUF
+  IF(INTOK.EQ.0)THEN  
+     IF(BUFFER(I:I).NE.' ')THEN  ! beginning of a new token since previous char
+       INTOK=1                   ! was not in a token and this one is
+       N_TOKS=N_TOKS + 1
+       SB_TOKS(N_TOKS)=I
+       IF(BUFFER(I:I).EQ."'")INQUOTE=1
+     ENDIF
+  ELSE
+     IF(INQUOTE.EQ.1)THEN
+        IF(BUFFER(I:I).EQ."'")THEN
+           SE_TOKS(N_TOKS)=I
+           INTOK=0
+           INQUOTE=0
+        ENDIF
+     ENDIF
+     IF(BUFFER(I:I).EQ.' ')THEN
+       SE_TOKS(N_TOKS)=I-1       ! previous char was in a token, this one is not
+       INTOK=0                   ! so previous char is end of token
+     ENDIF
+  ENDIF
+END DO
+IF(BUFFER(LENBUF:LENBUF).NE.' ')SE_TOKS(N_TOKS)=LENBUF ! last char in buffer is not blank
+                                                       ! so it is end of last token
+
+! strip out single or double quotes if present
+DO I = 1, N_TOKS
+   C = BUFFER(SB_TOKS(I):SB_TOKS(I))
+   IF(C.EQ."'")SB_TOKS(I)=SB_TOKS(I)+1
+   C = BUFFER(SE_TOKS(I):SE_TOKS(I))
+   IF(C.EQ."'")SE_TOKS(I)=SE_TOKS(I)-1
+   IF(SE_TOKS(I).LT.SB_TOKS(I))THEN
+     SE_TOKS(I)=SB_TOKS(I)
+     BUFFER(SB_TOKS(I):SE_TOKS(I))=' '
+   ENDIF
+END DO
+END SUBROUTINE PARSE
+
+! *********************** TOUPPER *******************************
+
+SUBROUTINE TOUPPER(BUFFERIN, BUFFEROUT)
+CHARACTER(LEN=*), INTENT(IN) :: BUFFERIN
+CHARACTER(LEN=*), INTENT(OUT) :: BUFFEROUT
+CHARACTER(LEN=1) :: C
+
+INTEGER :: LENBUF, I
+
+LENBUF=MIN(LEN(TRIM(BUFFERIN)),LEN(BUFFEROUT))
+DO I = 1, LENBUF
+   C = BUFFERIN(I:I)
+   IF(C.GE.'a'.AND.C.LE.'z')C=CHAR(ICHAR(C)+ICHAR('A')-ICHAR('a'))
+    BUFFEROUT(I:I)=C
+END DO
+
+END SUBROUTINE TOUPPER
