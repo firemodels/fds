@@ -3155,12 +3155,14 @@ void synctimes(void){
 
 void RenderFrame(int view_mode){
   char renderfile[1024],renderfile2[1024];
+  char renderfile_rb_stereo[1024];
   FILE *stream;
   char *ext;
   char *renderfile_prefix;
   int use_script_filename=0;
 
   renderfile_prefix=fdsprefix;
+  strcpy(renderfile_rb_stereo,"");
   if(current_script_command==NULL&&strlen(script_renderfile)>0){
     strcpy(renderfile,"");
     if(strlen(script_renderdir)>0){
@@ -3212,6 +3214,7 @@ void RenderFrame(int view_mode){
       }
       else{
         sprintf(renderfile,"%s_%04i_R",renderfile_prefix,itime/RenderSkip);
+        if(showstereo==3)sprintf(renderfile_rb_stereo,"%s_%04i_RB",renderfile_prefix,itime/RenderSkip);
       }
       break;
     default:
@@ -3227,6 +3230,7 @@ void RenderFrame(int view_mode){
       break;
     case VIEW_LEFT:
       sprintf(renderfile,"%s_s%04i_L",renderfile_prefix,seqnum);
+      sprintf(renderfile_rb_stereo,"%s_s%04i_RB",renderfile_prefix,seqnum);
       break;
     case VIEW_RIGHT:
       if(showstereo==2){
@@ -3234,6 +3238,7 @@ void RenderFrame(int view_mode){
       }
       else{
         sprintf(renderfile,"%s_s%04i_R",renderfile_prefix,seqnum);
+        if(showstereo==3)sprintf(renderfile_rb_stereo,"%s_s%04i_RB",renderfile_prefix,seqnum);
       }
       seqnum++;
       break;
@@ -3243,6 +3248,7 @@ void RenderFrame(int view_mode){
     }
   }
   strcat(renderfile,ext);
+  if(showstereo==3)strcat(renderfile_rb_stereo,ext);
 
   // if there is a tempdir see if we need to use it
 
@@ -3256,7 +3262,7 @@ void RenderFrame(int view_mode){
     }
     if(stream!=NULL)fclose(stream);
   }
-  SVimage2file(renderfile,renderfiletype,screenWidth,screenHeight);
+  SVimage2file(renderfile,renderfile_rb_stereo,renderfiletype,screenWidth,screenHeight,view_mode);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }

@@ -581,7 +581,23 @@ void keyboard(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"S",1)==0){
-
+#ifdef pp_STEREO
+    switch (showstereo){
+      case 0:
+        showstereo=2;
+        if(videoSTEREO==1)showstereo=1;
+        break;
+      case 1:
+        showstereo=2;
+        break;
+      case 2:
+        showstereo=3;
+        break;
+      case 3:
+        showstereo=0;
+        break;
+    }
+#else
     switch (showstereo){
       case 0:
         showstereo=2;
@@ -592,12 +608,17 @@ void keyboard(unsigned char key, int x, int y){
         showstereo=0;
         break;
     }
+#endif
     stereo_frame=0;
     stereo_leftright=0;
     stereo_off=0;
+    stereo_redblue=0;
     if(showstereo==0)stereo_off=1;
     if(showstereo==1)stereo_frame=1;
     if(showstereo==2)stereo_leftright=1;
+#ifdef pp_STEREO
+    if(showstereo==3)stereo_redblue=1;
+#endif
     update_glui_stereo();
   }
   if(strncmp((const char *)&key2,"T",1)==0){
@@ -1766,6 +1787,16 @@ void Display(void){
       0,0,screenWidth/2,screenHeight);
     ShowScene(RENDER,VIEW_RIGHT,0,
       screenWidth/2,0,screenWidth/2,screenHeight);
+    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+  }
+  else if(showstereo==3){ 
+    glDrawBuffer(GL_BACK);
+    ShowScene(RENDER,VIEW_LEFT,0,
+      0,0,screenWidth,screenHeight);
+    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    glDrawBuffer(GL_BACK);
+    ShowScene(RENDER,VIEW_RIGHT,0,
+      0,0,screenWidth,screenHeight);
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
   }
    else{
