@@ -2060,7 +2060,6 @@ void drawslice_cellcenter_interp(const slice *sd){
   float *xplt, *yplt, *zplt;
   int ibar,jbar;
   int nx,ny,nxy;
-  char *iblank_x, *iblank_y, *iblank_z;
   char *iblank_embed;
 
   mesh *meshi;
@@ -2072,9 +2071,6 @@ void drawslice_cellcenter_interp(const slice *sd){
   zplt=meshi->zplt;
   ibar=meshi->ibar;
   jbar=meshi->jbar;
-  iblank_x=meshi->c_iblank_x;
-  iblank_y=meshi->c_iblank_y;
-  iblank_z=meshi->c_iblank_z;
   iblank_embed = meshi->c_iblank_embed;
   nx = ibar + 1;
   ny = jbar + 1;
@@ -2107,7 +2103,6 @@ void drawslice_cellcenter_interp(const slice *sd){
        float rmid;
 
        n++; n2++; 
-//       if(show_slice_in_obst==0&&iblank_x[ijk(sd->is1,j,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(sd->is1,j,k)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
@@ -2151,7 +2146,6 @@ void drawslice_cellcenter_interp(const slice *sd){
        float zmid,rmid;
 
        n++; n2++; 
-//       if(show_slice_in_obst==0&&iblank_y[ijk(i,sd->js1,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255;
        r31 = (float)sd->slicepoint[n2]/255;
@@ -2196,7 +2190,6 @@ void drawslice_cellcenter_interp(const slice *sd){
        float ymid, rmid;
 
        n++; n2++; 
-//       if(show_slice_in_obst==0&&iblank_z[ijk(i,j,sd->ks1)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,j,sd->ks1)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
