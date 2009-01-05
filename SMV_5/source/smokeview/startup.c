@@ -1473,6 +1473,7 @@ void initvars1(void){
 
   pbalanceindex=9, eoffsetindex=9;
   showstereo=0;
+  stereo_rb_image=NULL;
   showglui3dsmoke=0;
   showgluitour=0;
   showalert=0;

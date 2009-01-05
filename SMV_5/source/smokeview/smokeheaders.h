@@ -596,6 +596,7 @@ EXTERNCPP void trim(char *line);
 EXTERNCPP void drawticks(void);
 EXTERNCPP void set_startup_view(void);
 EXTERNCPP void add_list_view(char *label_in);
+EXTERNCPP float color2bw(const float *color);
 EXTERNCPP float *getcolorptr(const float *color);
 EXTERNCPP void colorconvert(int flag);
 EXTERNCPP void initcadcolors(void);
@@ -712,7 +713,7 @@ EXTERNCPP void getSliceColors(const float *t, int nt, unsigned char *it,
               float tmin, float tmax, 
               int ndatalevel, int nlevel,
               char labels[12][11],char **scale, float *tlevels2);
-EXTERNCPP int SVimage2file(char *GIFfilename, int rendertype, int width, int height);
+EXTERNCPP int SVimage2file(char *GIFfilename, char *renderfile_rb_stereo, int rendertype, int width, int height,int view_mode);
 EXTERNCPP void update_showhidebuttons(void);
 EXTERNCPP void update_fileload(void);
 
