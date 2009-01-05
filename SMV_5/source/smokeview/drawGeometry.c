@@ -1030,8 +1030,11 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
     thiscolor=quadi->cadlookq->rgb;
     if(thiscolor!=lastcolor){
       if(thiscolor[0]<0.0){
+        GLfloat *colorptr;
+
         colorindex2 = 15 + (15*colorindex % 230);
-        glColor4fv(rgb_cad+colorindex2);
+        colorptr = &rgb_cad[0][0]+colorindex2;
+        glColor4fv(colorptr);
         colorindex++;
       }
       else{
