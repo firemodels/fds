@@ -7533,27 +7533,19 @@ int readini2(char *inifile, int localfile){
       {
         float *eye,*mat,*angle_zx;
         int is_viewpoint4=0;
-#ifdef pp_VIEWCLIP
         int is_viewpoint5=0;
-#endif
 
     if(match(buffer,"VIEWPOINT3",10)==1
-#ifdef pp_VIEWCLIP
       ||match(buffer,"VIEWPOINT4",10)==1
       ||match(buffer,"VIEWPOINT5",10)==1
-#else
-      ||match(buffer,"VIEWPOINT4",10)==1
-#endif
       ){
         int p_type;
 
         if(match(buffer,"VIEWPOINT4",10)==1)is_viewpoint4=1;
-#ifdef pp_VIEWCLIP
         if(match(buffer,"VIEWPOINT5",10)==1){
           is_viewpoint4=1;
           is_viewpoint5=1;
         }
-#endif
         eye=camera_ini->eye;
         mat=camera_ini->modelview;
         angle_zx=camera_ini->angle_zx;
@@ -7623,7 +7615,6 @@ int readini2(char *inifile, int localfile){
 
 		    fgets(buffer,255,stream);
         sscanf(buffer,"%f %f %f %f",mat+12,mat+13,mat+14,mat+15);
-#ifdef pp_VIEWCLIP
         if(is_viewpoint5==1){
           camera *ci;
 
@@ -7639,7 +7630,6 @@ int readini2(char *inifile, int localfile){
             &ci->clip_X_val,&ci->clip_Y_val,&ci->clip_Z_val);
 
         }
-#endif
         if(is_viewpoint4==1){
   		    fgets(buffer,255,stream);
           trim(buffer);
@@ -8913,11 +8903,7 @@ void writeini(int flag){
       for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
         if(strcmp(ca->name,"internal")==0)continue;
         if(strcmp(ca->name,"external")==0)continue;
-#ifdef pp_VIEWCLIP
         fprintf(fileout,"VIEWPOINT5\n");
-#else
-        fprintf(fileout,"VIEWPOINT4\n");
-#endif
         eye = ca->eye;
         angle_zx = ca->angle_zx;
         mat = ca->modelview;
@@ -8944,7 +8930,6 @@ void writeini(int flag){
         fprintf(fileout," %f %f %f %f\n",mat[4],mat[5],mat[6],mat[7]);
         fprintf(fileout," %f %f %f %f\n",mat[8],mat[9],mat[10],mat[11]);
         fprintf(fileout," %f %f %f %f\n",mat[12],mat[13],mat[14],mat[15]);
-#ifdef pp_VIEWCLIP
         fprintf(fileout," %i %i %i %i %i %i %i\n",
             ca->xyz_clipplane,
             ca->clip_x,ca->clip_y,ca->clip_z,
@@ -8952,7 +8937,6 @@ void writeini(int flag){
         fprintf(fileout," %f %f %f %f %f %f\n",
             ca->clip_x_val,ca->clip_y_val,ca->clip_z_val,
             ca->clip_X_val,ca->clip_Y_val,ca->clip_Z_val);
-#endif
         fprintf(fileout,"%s\n",ca->name);
       }
     }

@@ -45,7 +45,6 @@
 // #define pp_GPU_BLANK
 #endif
 
-#define pp_VIEWCLIP
 #define pp_SPHERE
 #define pp_ISOOUT
 #define pp_DRAWISO

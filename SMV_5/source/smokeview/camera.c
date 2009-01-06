@@ -143,12 +143,9 @@ void init_camera(camera *camera_data,char *name){
   camera_data->projection_type=projection_type;
   camera_data->dirty=0;
 
-  #ifdef pp_VIEWCLIP
   clip2cam(camera_data);
-  #endif
 }
 
-#ifdef pp_VIEWCLIP
 /* ------------------ clip2cam ------------------------ */
 
   void clip2cam(camera *cam){
@@ -193,7 +190,6 @@ void init_camera(camera *camera_data,char *name){
     update_glui_clip();
 
   }
-#endif
 
 /* ------------------ copy_camera ------------------------ */
 
@@ -205,11 +201,9 @@ void copy_camera(camera *to, camera *from){
     update_glui_zoom();
   }
   to->dirty=1;
-#ifdef pp_VIEWCLIP
   if(to==camera_current){
     cam2clip(camera_current);
   }
-#endif
 }
 
 /* ------------------ update_camera ------------------------ */
@@ -243,7 +237,6 @@ void update_camera(camera *ca){
     update_meshlist1(ca->rotation_index);
     update_trainer_moves();
 
-#ifdef pp_VIEWCLIP
     ca->xyz_clipplane=xyz_clipplane;
     ca->clip_x=clip_x;
     ca->clip_y=clip_y;
@@ -256,7 +249,6 @@ void update_camera(camera *ca){
     ca->clip_X_val=clip_X_val;
     ca->clip_Y_val=clip_Y_val;
     ca->clip_Z_val=clip_Z_val;
-#endif
   }
   ca->dirty=0;
 }
