@@ -187,32 +187,19 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
 
 /* ------------------ SVimage2file ------------------------ */
 
-int SVimage2file(char *RENDERfilename, char *RENDER2filename, int rendertype, int width, int height, int view_mode){
+int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
-  FILE *RENDERfile, *RENDER2file;
-  GLubyte *OpenGLimage, *p, *p2;
-  gdImagePtr RENDERimage, RENDER2image;
+  FILE *RENDERfile;
+  GLubyte *OpenGLimage, *p;
+  gdImagePtr RENDERimage;
   unsigned int r, g, b;
-  unsigned int r2, g2, b2;
   int i,j,rgb;
   int x=0, y=0;
-
-  if(showstereo==3&&view_mode==VIEW_LEFT){
-    stereo_rb_image = (GLubyte *) malloc(width * height * sizeof(GLubyte));
-  }
-  p2=stereo_rb_image;
 
   RENDERfile = fopen(RENDERfilename, "wb");
   if (RENDERfile == NULL) {
     printf("*** warning:  unable to write to %s\n",RENDERfilename);
     return 1;
-  }
-  if(showstereo==3&&view_mode==VIEW_RIGHT){
-    RENDER2file = fopen(RENDER2filename, "wb");
-    if (RENDER2file == NULL) {
-      printf("*** warning:  unable to write to %s\n",RENDER2filename);
-      return 1;
-    }
   }
   OpenGLimage = (GLubyte *) malloc(width * height * sizeof(GLubyte) * 3);
   if(OpenGLimage == NULL){
@@ -232,45 +219,15 @@ int SVimage2file(char *RENDERfilename, char *RENDER2filename, int rendertype, in
   p = OpenGLimage;
 
   RENDERimage = gdImageCreateTrueColor(width,height);
-  if(showstereo==3&&view_mode==VIEW_RIGHT){
-    RENDER2image = gdImageCreateTrueColor(width,height);
-  }
 
-  if(showstereo!=3||view_mode==VIEW_CENTER){
-    for (i = height-1 ; i>=0; i--) {
-      for(j=0;j<width;j++){
-        r=*p++; g=*p++; b=*p++;
-        rgb = (r<<16)|(g<<8)|b;
-        gdImageSetPixel(RENDERimage,j,i,rgb);
-      }
+  for (i = height-1 ; i>=0; i--) {
+    for(j=0;j<width;j++){
+      r=*p++; g=*p++; b=*p++;
+      rgb = (r<<16)|(g<<8)|b;
+      gdImageSetPixel(RENDERimage,j,i,rgb);
     }
   }
-  else{
-    for (i = height-1 ; i>=0; i--) {
-      for(j=0;j<width;j++){
-        float color[3];
-        unsigned int irgb;
 
-        r=*p++; g=*p++; b=*p++;
-        rgb = (r<<16)|(g<<8)|b;
-        gdImageSetPixel(RENDERimage,j,i,rgb);
-
-        color[0]=r/255.0;
-        color[1]=g/255.0;
-        color[2]=b/255.0;
-        color2bw(color);
-        irgb = color[0]*255;
-        if(view_mode==VIEW_LEFT){
-          *p2++ = irgb;
-        }
-        else{
-          r = *p2++; b=irgb;
-          rgb = (r<<16)|b;
-          gdImageSetPixel(RENDER2image,j,i,rgb);
-        }
-      }
-    }
-  }
   if(test_smokesensors==1&&active_smokesensors==1&&show_smokesensors!=0){
     int idev;
 
@@ -308,22 +265,13 @@ int SVimage2file(char *RENDERfilename, char *RENDER2filename, int rendertype, in
 
   switch (rendertype){
   case PNG:
-    if(showstereo==3&&view_mode==VIEW_RIGHT){
-      gdImagePng(RENDER2image,RENDER2file);
-    }
     gdImagePng(RENDERimage,RENDERfile);
     break;
   case JPEG:
-    if(showstereo==3&&view_mode==VIEW_RIGHT){
-      gdImageJpeg(RENDER2image,RENDER2file,-1);
-    }
     gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
 #ifdef pp_GDGIF
   case GIF:
-    if(showstereo==3&&view_mode==VIEW_RIGHT){
-      gdImageGif(RENDER2image,RENDER2file);
-    }
     gdImageGif(RENDERimage,RENDERfile);
     break;
 #endif
@@ -335,10 +283,6 @@ int SVimage2file(char *RENDERfilename, char *RENDER2filename, int rendertype, in
   /* free up memory used by both OpenGL and GIF images */
 
   fclose(RENDERfile);
-  if(showstereo==3&&view_mode==VIEW_RIGHT){
-    fclose(RENDER2file);
-    gdImageDestroy(RENDER2image);
-  }
 
   gdImageDestroy(RENDERimage);
   free(OpenGLimage);

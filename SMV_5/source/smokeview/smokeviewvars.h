@@ -483,6 +483,7 @@ SVEXTERN int rgb_white, rgb_yellow, rgb_blue, rgb_red;
 SVEXTERN int rgb_green, rgb_magenta, rgb_cyan, rgb_black;
 SVEXTERN int numColorbars;
 SVEXTERN int setbw,colorbarflip;
+SVEXTERN int setbwSAVE;
 SVEXTERN int flip;
 SVEXTERN float transparentlevel;
 SVEXTERN int transparentflag,transparentflagVOL;
@@ -596,7 +597,6 @@ SVEXTERN int showtours_whenediting;
 SVEXTERN float xtimeleft, xtimeright;
 SVEXTERN int pbalanceindex, eoffsetindex;
 SVEXTERN int showstereo;
-SVEXTERN GLubyte *stereo_rb_image;
 
 SVEXTERN int show_hrrcutoff, show_hrrcutoff_active, hrrpuv_loaded;
 SVEXTERN int showglui3dsmoke;

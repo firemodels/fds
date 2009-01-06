@@ -40,6 +40,8 @@ GLUI_Checkbox *CHECKBOX_stereo_off=NULL;
 void STEREO_CB(int var);
 
 extern "C" void update_glui_stereo(void){
+  int showstereoOLD;
+
   if(CHECKBOX_stereo_frame!=NULL){
     if(CHECKBOX_stereo_frame->get_int_val()!=stereo_frame)CHECKBOX_stereo_frame->set_int_val(stereo_frame);
   }
@@ -54,12 +56,26 @@ extern "C" void update_glui_stereo(void){
   if(CHECKBOX_stereo_off!=NULL){
     if(CHECKBOX_stereo_off->get_int_val()!=stereo_off)CHECKBOX_stereo_off->set_int_val(stereo_off);
   }
+  showstereoOLD=showstereo;
   if(stereo_frame==1)showstereo=1;
   if(stereo_leftright==1)showstereo=2;
 #ifdef pp_STEREO
   if(stereo_redblue==1)showstereo=3;
 #endif
   if(stereo_off==1)showstereo=0;
+  if(showstereoOLD==3&&showstereo!=3){
+    if(setbw!=setbwSAVE){
+      setbw=1-setbwSAVE;
+      ShadeMenu(2);
+    }
+  }
+  else if(showstereoOLD!=3&&showstereo==3){
+    setbwSAVE=setbw;
+    if(setbw==0){
+      setbwSAVE=setbw;
+      ShadeMenu(2);
+    }
+  }
 }
   
 

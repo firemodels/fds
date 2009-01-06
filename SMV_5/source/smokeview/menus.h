@@ -1115,15 +1115,6 @@ void OptionMenu(int value){
   if(value==999)return;
   updatemenu=1;  
   GLUTPOSTREDISPLAY
-  if(value==17){
-    if(showstereo!=0){
-      glDrawBuffer(GL_BACK_LEFT);
-      ClearBuffers(RENDER);
-      glDrawBuffer(GL_BACK_RIGHT);
-      ClearBuffers(RENDER);
-    }
-    showstereo=1-showstereo;
-  }
   if(value==1){
     Labels_CB(17); // run the benchmark
   }
@@ -5115,8 +5106,12 @@ static int in_menu=0;
   else{
     glutAddMenuEntry("Flip background",1);
   }
-  if(setbw==0){glutAddMenuEntry("*Color/BW",2);}
-   else{glutAddMenuEntry("Color/*BW",2);}
+  if(setbw==0){
+    glutAddMenuEntry("*Color/BW",2);
+  }
+  else{
+    glutAddMenuEntry("Color/*BW",2);
+  }
   if(transparentflag==1){
     glutAddMenuEntry("*Transparent (data)",3);
   }
