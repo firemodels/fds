@@ -1340,6 +1340,7 @@ void initvars1(void){
   rgb_green=NRGB+4, rgb_magenta=NRGB+5, rgb_cyan=NRGB+6, rgb_black=NRGB+7;
   numColorbars=0;
   setbw=0,colorbarflip=0;
+  setbwSAVE=setbw;
   flip=1;
   transparentlevel=0.8f;
   transparentflag=1;
@@ -1473,7 +1474,6 @@ void initvars1(void){
 
   pbalanceindex=9, eoffsetindex=9;
   showstereo=0;
-  stereo_rb_image=NULL;
   showglui3dsmoke=0;
   showgluitour=0;
   showalert=0;

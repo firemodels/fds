@@ -592,9 +592,17 @@ void keyboard(unsigned char key, int x, int y){
         break;
       case 2:
         showstereo=3;
+        setbwSAVE=setbw;
+        if(setbw==0){
+          ShadeMenu(2);
+        }
         break;
       case 3:
         showstereo=0;
+        if(setbw!=setbwSAVE){
+          setbw=1-setbwSAVE;
+          ShadeMenu(2);
+        }
         break;
     }
 #else
@@ -609,9 +617,9 @@ void keyboard(unsigned char key, int x, int y){
         break;
     }
 #endif
+    stereo_off=0;
     stereo_frame=0;
     stereo_leftright=0;
-    stereo_off=0;
     stereo_redblue=0;
     if(showstereo==0)stereo_off=1;
     if(showstereo==1)stereo_frame=1;
@@ -1771,7 +1779,8 @@ void Display(void){
       }
     }
   }
-  if(showstereo==1&&videoSTEREO==1){ 
+  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+  if(showstereo==1&&videoSTEREO==1){  // temporal stereo (shuttered glasses)
     glDrawBuffer(GL_BACK_LEFT);
     ShowScene(RENDER,VIEW_LEFT,0,
       0,0,screenWidth,screenHeight);
@@ -1780,7 +1789,7 @@ void Display(void){
       0,0,screenWidth,screenHeight);
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
   }
-  else if(showstereo==2){ 
+  else if(showstereo==2){             // left/right stereo
     glDrawBuffer(GL_BACK);
     ClearBuffers(RENDER);
     ShowScene(RENDER,VIEW_LEFT,0,
@@ -1789,17 +1798,22 @@ void Display(void){
       screenWidth/2,0,screenWidth/2,screenHeight);
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
   }
-  else if(showstereo==3){ 
+  else if(showstereo==3){             // red/blue stereo
     glDrawBuffer(GL_BACK);
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    glClearColor(1.0, 0.0, 0.0, 1.0); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
     ShowScene(RENDER,VIEW_LEFT,0,
       0,0,screenWidth,screenHeight);
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
-    glDrawBuffer(GL_BACK);
+
+    glClearColor(0.0, 0.0, 1.0, 1.0);
+    glColorMask(GL_FALSE,GL_FALSE,GL_TRUE,GL_TRUE);
     ShowScene(RENDER,VIEW_RIGHT,0,
       0,0,screenWidth,screenHeight);
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
   }
-   else{
+  else{
     if(benchmark_flag==1){
       glDrawBuffer(GL_FRONT);
       ShowScene(RENDER,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
