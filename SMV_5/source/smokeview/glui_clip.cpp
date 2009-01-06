@@ -284,7 +284,6 @@ void CLIP_CB(int var){
     ASSERT(0);
     break;
   }
-#ifdef pp_VIEWCLIP
   switch (var){
   case SPINNER_xlower:
   case SPINNER_xupper:
@@ -295,7 +294,6 @@ void CLIP_CB(int var){
     clip2cam(camera_current);
     break;
   }
-#endif
 }
 
 /* ------------------ update_clip_all ------------------------ */

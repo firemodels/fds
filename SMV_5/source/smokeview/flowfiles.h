@@ -630,7 +630,6 @@ typedef struct _camera {
   float zoom;
   float modelview[16];
 
-#ifdef pp_VIEWCLIP  
   int xyz_clipplane;
   int clip_x, clip_X;
   int clip_y, clip_Y;
@@ -638,7 +637,6 @@ typedef struct _camera {
   float clip_x_val, clip_X_val;
   float clip_y_val, clip_Y_val;
   float clip_z_val, clip_Z_val;
-#endif
 
   int view_id;
   struct _camera *next,*prev;
