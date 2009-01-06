@@ -654,6 +654,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   float fnear, ffar, fleft, fright, fup, fdown, fzero;
   float StereoCameraOffset,FrustumAsymmetry;
   float aperture_temp;
+  float widthdiv2;
 
   if(showstereo==2){
     down=0;
@@ -749,11 +750,13 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     }
   }
 
-  fup = fnear*tan(PI*aperture_temp/360.);
-  if(showstereo==2)fup*=2.0;
-  fdown = -fup;
-  fright = fup*aspect;
-  fleft = -fright;
+
+  widthdiv2 = fnear*tan(0.5*PI*aperture_temp/180.);
+  if(showstereo==2)widthdiv2*=2.0;
+  fup = widthdiv2;
+  fdown = -widthdiv2;
+  fleft = -aspect*widthdiv2;
+  fright = aspect*widthdiv2;
   
   if(showstereo==0||view_mode==VIEW_CENTER){
     StereoCameraOffset=0.0;
@@ -762,7 +765,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   else if(showstereo!=0&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
     StereoCameraOffset = (fright-fleft)*0.035*eoffset*fzero/fnear;
     if(view_mode==VIEW_LEFT)StereoCameraOffset = -StereoCameraOffset;
-    FrustumAsymmetry=-StereoCameraOffset*pbalance*fnear/fzero;
+    FrustumAsymmetry= StereoCameraOffset*pbalance*fnear/fzero;
   }
 
   if(SUB_portfrustum(quad,
@@ -770,7 +773,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     (int)(down+titlesafe_offset),
     (int)(right-left-2*fontWoffset-2*titlesafe_offset),
     (int)(up-down-dh-2*titlesafe_offset),
-    (double)(fleft+FrustumAsymmetry),(double)(fright+FrustumAsymmetry),
+    (double)(fleft-FrustumAsymmetry),(double)(fright-FrustumAsymmetry),
     (double)fdown,(double)fup,
     (double)fnear,(double)ffar,
       s_left, s_down, s_width, s_height)==0)return;
@@ -786,6 +789,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     float *modelview_rotate;
     float cos_elevation_angle, sin_elevation_angle;
     float xcen, ycen, zcen;
+    float posx, posy, posz;
 
     sn_view_angle=camera_current->sin_view_angle;
     cs_view_angle=camera_current->cos_view_angle;
@@ -807,9 +811,14 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     sin_dv_sum = sn_direction_angle*cs_view_angle + cs_direction_angle*sn_view_angle;
     cos_dv_sum = cs_direction_angle*cs_view_angle - sn_direction_angle*sn_view_angle;
 
-    viewx = eyexINI + sin_dv_sum*cos_elevation_angle;
-    viewy = eyeyINI + cos_dv_sum*cos_elevation_angle;
-    viewz = eyezINI + sin_elevation_angle;
+
+    posx = eyexINI+StereoCameraOffset*cos_dv_sum;
+    posy = eyeyINI-StereoCameraOffset*sin_dv_sum;
+    posz = eyezINI;
+
+    viewx = posx + sin_dv_sum*cos_elevation_angle;
+    viewy = posy + cos_dv_sum*cos_elevation_angle;
+    viewz = posz + sin_elevation_angle;
 
     /* set view direction for virtual tour */
     {
@@ -827,8 +836,8 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
             pj = touri->pathnodes + iframe;
           }
 
-          viewx = pj->oview[0];
-          viewy = pj->oview[1];
+          viewx = pj->oview[0]+StereoCameraOffset*cos_dv_sum;
+          viewy = pj->oview[1]-StereoCameraOffset*sin_dv_sum;
           viewz = pj->oview[2];
           angleyzINI=0.0;
           anglexyINI=0.0;
@@ -838,15 +847,9 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
     uup = camera_current->up;
     gluLookAt(
-      (double)(eyexINI+StereoCameraOffset*cos_dv_sum),
-      (double)(eyeyINI-StereoCameraOffset*sin_dv_sum),
-      (double)eyezINI,
-      (double)viewx,
-      (double)viewy,
-      (double)viewz,
-      uup[0],
-      uup[1],
-      uup[2]);
+      (double)(posx), (double)(posy), (double)posz,
+      (double)viewx,  (double)viewy,  (double)viewz,
+      uup[0], uup[1], uup[2]);
 
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_setup);
     getinverse(modelview_setup,inverse_modelview_setup);
