@@ -374,7 +374,7 @@ SUBROUTINE INITIALIZE_GLOBAL_DUMPS
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT
 USE CONTROL_VARIABLES
-REAL(EB) :: ZZ,Y_MF(1:N_Y_ARRAY),MW_MF,TNOW,Z_F,Y_VECTOR(1:N_Y_ARRAY)
+REAL(EB) :: ZZ,Y_MF(1:N_Y_ARRAY),MW_MF,TNOW,Z_F,Y_VECTOR(1:N_SPECIES)
 INTEGER :: NN,IZ,I,N
 CHARACTER(30), DIMENSION(20) :: LABEL
 
@@ -481,39 +481,79 @@ IF (MIXTURE_FRACTION .AND. STATE_FILE) THEN
    WRITE(LU_STATE(1),TCFORM) ('kg/kg',NN=1,10),'g/mol'
    WRITE(LU_STATE(1),TCFORM) 'Z','Fuel','O2','N2','H2O','CO2','CO','H2','Soot','Other','Wgt'
    Y_VECTOR=0._EB
-   IF (CO_PRODUCTION) THEN
-      Z_F = REACTION(2)%Z_F
-      DO IZ=0,1000
-         ZZ = IZ/REAL(1000,EB)
-         IF (ZZ<Z_F) THEN
-            Y_VECTOR(I_Z_MIN) = 0._EB
-            Y_VECTOR(I_Z_MIN+1) = ZZ * REACTION(2)%CO_YIELD   
-            Y_VECTOR(I_Z_MIN+2) = ZZ - Y_VECTOR(I_Z_MIN+1)
-         ELSE
-            Y_VECTOR(I_Z_MIN) = REACTION(2)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
-            Y_VECTOR(I_Z_MIN+1) = (ZZ - Y_VECTOR(I_Z_MIN)) * REACTION(2)%CO_YIELD
-            Y_VECTOR(I_Z_MIN+2) = ZZ - Y_VECTOR(I_Z_MIN) - Y_VECTOR(I_Z_MIN+1)
-         ENDIF
-         CALL GET_MASS_FRACTION_ALL(Y_VECTOR,Y_MF)
-         CALL GET_MOLECULAR_WEIGHT(Y_VECTOR,MW_MF)
-         WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
-      ENDDO
-   ELSE
-      Z_F = REACTION(1)%Z_F
-      DO IZ=0,1000
-         ZZ = IZ/REAL(1000,EB)
-         IF (ZZ<Z_F) THEN
-            Y_VECTOR(I_Z_MIN) = 0._EB
-            Y_VECTOR(I_Z_MIN+1) = ZZ
-         ELSE
-            Y_VECTOR(I_Z_MIN) = REACTION(1)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
-            Y_VECTOR(I_Z_MIN+1) = ZZ - Y_VECTOR(I_Z_MIN)
-         ENDIF
-         CALL GET_MASS_FRACTION_ALL(Y_VECTOR,Y_MF)
-         CALL GET_MOLECULAR_WEIGHT(Y_VECTOR,MW_MF)
-         WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
-      ENDDO  
-   ENDIF
+   SOOT_DEP_IF: IF (SOOT_DEPOSITION) THEN
+      IF (CO_PRODUCTION) THEN
+         Z_F = REACTION(2)%Z_F
+         DO IZ=0,1000
+            ZZ = IZ/REAL(1000,EB)
+            IF (ZZ<Z_F) THEN
+               Y_VECTOR(I_Z_MIN)   = 0._EB
+               Y_VECTOR(I_Z_MIN+1) = ZZ * REACTION(2)%CO_YIELD / MW_CO/REACTION(1)%NU(CO_INDEX)*REACTION(1)%MW_FUEL
+               Y_VECTOR(I_Z_MAX)   = ZZ * REACTION(2)%SOOT_YIELD   
+               Y_VECTOR(I_Z_MIN+2) = ZZ - Y_VECTOR(I_Z_MIN+1) - Y_VECTOR(I_Z_MAX)
+            ELSE
+               Y_VECTOR(I_Z_MIN)   = REACTION(2)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
+               Y_VECTOR(I_Z_MIN+1) = (ZZ-Y_VECTOR(I_Z_MIN))*REACTION(2)%CO_YIELD/MW_CO/REACTION(1)%NU(CO_INDEX)*REACTION(1)%MW_FUEL
+               Y_VECTOR(I_Z_MAX)   = (ZZ - Y_VECTOR(I_Z_MIN)) * REACTION(2)%SOOT_YIELD
+               Y_VECTOR(I_Z_MIN+2) = ZZ - Y_VECTOR(I_Z_MIN) - Y_VECTOR(I_Z_MIN+1) - Y_VECTOR(I_Z_MAX)
+            ENDIF
+            CALL GET_MASS_FRACTION_ALL(Y_VECTOR,Y_MF)
+            CALL GET_MOLECULAR_WEIGHT(Y_VECTOR,MW_MF)
+            WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
+         ENDDO
+      ELSE
+         Z_F = REACTION(1)%Z_F
+         DO IZ=0,1000
+            ZZ = IZ/REAL(1000,EB)
+            IF (ZZ<Z_F) THEN
+               Y_VECTOR(I_Z_MIN)   = 0._EB
+               Y_VECTOR(I_Z_MAX)   = ZZ * REACTION(1)%SOOT_YIELD   
+               Y_VECTOR(I_Z_MIN+1) = ZZ * (1._EB - REACTION(1)%SOOT_YIELD)
+            ELSE
+               Y_VECTOR(I_Z_MIN)   = REACTION(1)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
+               Y_VECTOR(I_Z_MAX)   = (ZZ - Y_VECTOR(I_Z_MIN)) * REACTION(1)%SOOT_YIELD
+               Y_VECTOR(I_Z_MIN+1) = (ZZ - Y_VECTOR(I_Z_MIN)) * (1._EB - REACTION(1)%SOOT_YIELD)
+            ENDIF
+            CALL GET_MASS_FRACTION_ALL(Y_VECTOR,Y_MF)
+            CALL GET_MOLECULAR_WEIGHT(Y_VECTOR,MW_MF)
+            WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
+         ENDDO  
+      ENDIF 
+   ELSE SOOT_DEP_IF
+      IF (CO_PRODUCTION) THEN
+         Z_F = REACTION(2)%Z_F
+         DO IZ=0,1000
+            ZZ = IZ/REAL(1000,EB)
+            IF (ZZ<Z_F) THEN
+               Y_VECTOR(I_Z_MIN) = 0._EB
+               Y_VECTOR(I_Z_MIN+1) = ZZ * REACTION(2)%CO_YIELD / MW_CO/REACTION(1)%NU(CO_INDEX)*REACTION(1)%MW_FUEL   
+               Y_VECTOR(I_Z_MIN+2) = ZZ - Y_VECTOR(I_Z_MIN+1)
+            ELSE
+               Y_VECTOR(I_Z_MIN) = REACTION(2)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
+               Y_VECTOR(I_Z_MIN+1) = (ZZ-Y_VECTOR(I_Z_MIN))*REACTION(2)%CO_YIELD/MW_CO/REACTION(1)%NU(CO_INDEX)*REACTION(1)%MW_FUEL
+               Y_VECTOR(I_Z_MIN+2) = ZZ - Y_VECTOR(I_Z_MIN) - Y_VECTOR(I_Z_MIN+1)
+            ENDIF
+            CALL GET_MASS_FRACTION_ALL(Y_VECTOR,Y_MF)
+            CALL GET_MOLECULAR_WEIGHT(Y_VECTOR,MW_MF)
+            WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
+         ENDDO
+      ELSE
+         Z_F = REACTION(1)%Z_F
+         DO IZ=0,1000
+            ZZ = IZ/REAL(1000,EB)
+            IF (ZZ<Z_F) THEN
+               Y_VECTOR(I_Z_MIN) = 0._EB
+               Y_VECTOR(I_Z_MIN+1) = ZZ
+            ELSE
+               Y_VECTOR(I_Z_MIN) = REACTION(1)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
+               Y_VECTOR(I_Z_MIN+1) = ZZ - Y_VECTOR(I_Z_MIN)
+            ENDIF
+            CALL GET_MASS_FRACTION_ALL(Y_VECTOR,Y_MF)
+            CALL GET_MOLECULAR_WEIGHT(Y_VECTOR,MW_MF)
+            WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:9),MW_MF
+         ENDDO  
+      ENDIF
+   ENDIF SOOT_DEP_IF
    CLOSE(LU_STATE(1))
 ENDIF
 
@@ -3202,7 +3242,6 @@ DEVICE_LOOP: DO N=1,N_DEVC
    END SELECT
 
    ! Select either gas or solid phase output quantity
-
    GAS_OR_SOLID_PHASE: IF (DV%OUTPUT_INDEX>0) THEN 
 
       GAS_STATS: IF (DV%STATISTICS=='null') THEN
@@ -3676,9 +3715,12 @@ SELECT CASE(IND)
                END SELECT
                IF (SPEC_INDEX /= 0) THEN
                   IF (SPEC_INDEX<0) THEN
+                     YY_GET(:) = YY(I,J,K,:)
+                     CALL GET_MASS_FRACTION(YY_GET,-SPEC_INDEX,Y_SPECIES)
                      YY_GET(:) = YY(IP,JP,KP,:)
                      CALL GET_MASS_FRACTION(YY_GET,-SPEC_INDEX,Y_SPECIES2)
                   ELSEIF (SPEC_INDEX>0) THEN
+                     Y_SPECIES =YY(I,J,K,SPEC_INDEX)                  
                      Y_SPECIES2=YY(IP,JP,KP,SPEC_INDEX)
                   ENDIF
                ELSE
@@ -4082,6 +4124,9 @@ SELECT CASE(INDX)
       SOLID_PHASE_OUTPUT = 0._EB
    CASE(27) ! EMISSIVITY
       SOLID_PHASE_OUTPUT = E_WALL(IWX)
+
+   CASE(28) ! EMISSIVITY
+      SOLID_PHASE_OUTPUT = AWMSOOT(IWX)
         
    CASE(30) ! MPUA
       PC => PARTICLE_CLASS(PART_INDEX)
@@ -4356,7 +4401,6 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K
  
 IF (.NOT.MASS_FILE) RETURN
-
 MINT(:,NM) = 0._EB
 CALL POINT_TO_MESH(NM)
 DO K=1,KBAR
@@ -4374,7 +4418,6 @@ DO K=1,KBAR
       ENDDO ILOOP
    ENDDO
 ENDDO
- 
 MINT_SUM(:,NM) = MINT_SUM(:,NM) + MINT(:,NM)
 MINT_COUNT(NM) = MINT_COUNT(NM) + 1._EB
 
