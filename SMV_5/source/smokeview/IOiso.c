@@ -805,6 +805,8 @@ void drawiso(const mesh *meshi,int tranflag){
   int isomin_index,isomax_index;
   float factor, offset[3];
   iso *isoi=NULL;
+  float iso_color_tmp[4];
+  float *iso_color_ptr;
 
   if(meshi->isofilenum>=0){
     isoi = isoinfo + meshi->isofilenum;
@@ -888,7 +890,19 @@ void drawiso(const mesh *meshi,int tranflag){
       nvertices=asurface->nvertices;
       ntriangles=asurface->ntriangles/3;
       if(ntriangles==0)continue;
-      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,iso_colors+4*icolor);
+      if(setbw==0){
+        iso_color_ptr = iso_colors+4*icolor;
+      }
+      else{
+        float greylevel;
+
+        greylevel=color2bw(iso_colors+4*icolor);
+        iso_color_tmp[0]=greylevel;
+        iso_color_tmp[1]=greylevel;
+        iso_color_tmp[2]=greylevel;
+        iso_color_ptr=iso_color_tmp;
+      }
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,iso_color_ptr);
       vertices_i=asurface->vertices;
       if(asurface->dataflag==1){
         tvertices_i=asurface->tvertices;
@@ -1008,7 +1022,19 @@ void drawiso(const mesh *meshi,int tranflag){
       if(showlevels[i]==0)continue;
       icolor=i;
       if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
-      glColor3fv(iso_colors+4*icolor);
+      if(setbw==0){
+        iso_color_ptr = iso_colors+4*icolor;
+      }
+      else{
+        float greylevel;
+
+        greylevel=color2bw(iso_colors+4*icolor);
+        iso_color_tmp[0]=greylevel;
+        iso_color_tmp[1]=greylevel;
+        iso_color_tmp[2]=greylevel;
+        iso_color_ptr=iso_color_tmp;
+      }
+      glColor3fv(iso_color_ptr);
       nvertices=asurface->nvertices;
       ntriangles=asurface->ntriangles/3;
       vertices_i=asurface->vertices;
@@ -1174,7 +1200,19 @@ void drawiso(const mesh *meshi,int tranflag){
       if(showlevels[i]==0)continue;
       icolor=i;
       if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
-      glColor3fv(iso_colors+4*icolor);
+      if(setbw==0){
+        iso_color_ptr = iso_colors+4*icolor;
+      }
+      else{
+        float greylevel;
+
+        greylevel=color2bw(iso_colors+4*icolor);
+        iso_color_tmp[0]=greylevel;
+        iso_color_tmp[1]=greylevel;
+        iso_color_tmp[2]=greylevel;
+        iso_color_ptr=iso_color_tmp;
+      }
+      glColor3fv(iso_color_ptr);
       nvertices=asurface->nvertices;
       ntriangles=asurface->ntriangles/3;
       vertices_i=asurface->vertices;
