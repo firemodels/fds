@@ -177,10 +177,20 @@ DO K=1,KBAR
          Q(I,J,K)   = Q_NEW
          YY(I,J,K,I_FUEL) = YY(I,J,K,I_FUEL) - DYF
          IF (CO_PRODUCTION) THEN
-            YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) + DYF
+            IF (SOOT_DEPOSITION) THEN
+               YY(I,J,K,I_PROG_CO)   = YY(I,J,K,I_PROG_CO)   + DYF * (1._EB - RN%SOOT_YIELD)
+               YY(I,J,K,I_PROG_SOOT) = YY(I,J,K,I_PROG_SOOT) + DYF * RN%SOOT_YIELD
+            ELSE
+               YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) + DYF            
+            ENDIF
             Y_O2_NEW(I,J,K) = Y_O2_NEW(I,J,K) - DYF * RN%O2_F_RATIO
          ELSE
-            YY(I,J,K,I_PROG_F)  = YY(I,J,K,I_PROG_F)  + DYF
+            IF (SOOT_DEPOSITION) THEN
+               YY(I,J,K,I_PROG_F)    = YY(I,J,K,I_PROG_F)    + DYF * (1._EB - RN%SOOT_YIELD)
+               YY(I,J,K,I_PROG_SOOT) = YY(I,J,K,I_PROG_SOOT) + DYF * RN%SOOT_YIELD
+            ELSE
+               YY(I,J,K,I_PROG_F)  = YY(I,J,K,I_PROG_F)  + DYF            
+            ENDIF
          ENDIF
       ENDDO
    ENDDO
