@@ -153,7 +153,7 @@ SVEXTERN float tmin, tmax;
 
 SVEXTERN int videoSTEREO;
 SVEXTERN int stereo_frame, stereo_leftright, stereo_off, stereo_redblue;
-SVEXTERN float pbalance, eoffset;
+SVEXTERN float pbalance, eoffset, fzero;
 SVEXTERN float pbalanceORIG, eoffsetORIG;
 SVEXTERN float pbalances[PBALANCEINDEX_MAX+1];
 SVEXTERN float eoffsets[EOFFSETINDEX_MAX+1];
