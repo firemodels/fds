@@ -1836,6 +1836,7 @@ void initvars1(void){
 
   pbalance=-0.5, eoffset=0.7;
   pbalanceORIG=-0.5, eoffsetORIG=0.7;
+  fzero=0.25;
   
    pbalances[0]=0.000;
    pbalances[1]=0.500;
