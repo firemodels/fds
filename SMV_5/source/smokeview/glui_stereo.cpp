@@ -87,10 +87,15 @@ extern "C" void glui_stereo_setup(int main_window){
   glui_stereo = GLUI_Master.create_glui("stereo",0,0,0);
   if(showgluistereo==0)glui_stereo->hide();
   
+#ifdef pp_STEREO
+  SPINNER_stereo_balance=glui_stereo->add_spinner("Zero parallax distance",GLUI_SPINNER_FLOAT,&fzero);
+  SPINNER_stereo_balance->set_float_limits(0.1,1.0,GLUI_LIMIT_CLAMP);
+#else
   SPINNER_stereo_balance=glui_stereo->add_spinner("Balance",GLUI_SPINNER_FLOAT,&pbalance);
   SPINNER_stereo_balance->set_float_limits(-5.0,5.0,GLUI_LIMIT_CLAMP);
   SPINNER_stereo_offset=glui_stereo->add_spinner("Offset",GLUI_SPINNER_FLOAT,&eoffset);
   SPINNER_stereo_offset->set_float_limits(-5.0,5.0,GLUI_LIMIT_CLAMP);
+#endif
 
   CHECKBOX_stereo_off=glui_stereo->add_checkbox("Off",&stereo_off,STEREO_OFF,STEREO_CB);
   CHECKBOX_stereo_frame=glui_stereo->add_checkbox("Successive frames",&stereo_frame,STEREO_FRAME,STEREO_CB);
@@ -130,8 +135,12 @@ void STEREO_CB(int var){
   case STEREO_RESET:
     pbalance=pbalanceORIG;
     eoffset=eoffsetORIG;
+#ifdef pp_STEREO
+    SPINNER_stereo_balance->set_float_val(0.25);
+#else
     SPINNER_stereo_balance->set_float_val(pbalance);
     SPINNER_stereo_offset->set_float_val(eoffset);
+#endif
     break;
 
   case STEREO_CLOSE:

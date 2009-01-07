@@ -651,7 +651,11 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
   float up, down, left, right;
   float dh;
+#ifdef pp_STEREO
+  float fnear, ffar, fleft, fright, fup, fdown;
+#else
   float fnear, ffar, fleft, fright, fup, fdown, fzero;
+#endif
   float StereoCameraOffset,FrustumAsymmetry;
   float aperture_temp;
   float widthdiv2;
@@ -719,8 +723,10 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   fnear =  - eyeyINI-1.0;
   if(fnear<nearclip)fnear=nearclip;
   ffar = fnear + farclip;
+#ifndef pp_STEREO
   fzero = camera_current->ycen-eyeyINI;
   if(fzero<fnear)fzero=fnear+0.5;
+#endif
   
   StereoCameraOffset=0.0;
   aperture_temp=aperture;
@@ -763,9 +769,17 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     FrustumAsymmetry=0.0;
   }
   else if(showstereo!=0&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
+#ifdef pp_STEREO
+    StereoCameraOffset = fzero/30.0;
+#else
     StereoCameraOffset = (fright-fleft)*0.035*eoffset*fzero/fnear;
+#endif
     if(view_mode==VIEW_LEFT)StereoCameraOffset = -StereoCameraOffset;
+#ifdef pp_STEREO
+    FrustumAsymmetry= 0.5*StereoCameraOffset*fnear/fzero;
+#else
     FrustumAsymmetry= StereoCameraOffset*pbalance*fnear/fzero;
+#endif
   }
 
   if(SUB_portfrustum(quad,
