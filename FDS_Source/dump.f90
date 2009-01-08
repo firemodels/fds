@@ -3242,6 +3242,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
    END SELECT
 
    ! Select either gas or solid phase output quantity
+
    GAS_OR_SOLID_PHASE: IF (DV%OUTPUT_INDEX>0) THEN 
 
       GAS_STATS: IF (DV%STATISTICS=='null') THEN
@@ -4401,23 +4402,27 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K
  
 IF (.NOT.MASS_FILE) RETURN
+
 MINT(:,NM) = 0._EB
 CALL POINT_TO_MESH(NM)
 DO K=1,KBAR
    DO J=1,JBAR
-      ILOOP: DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
          IF (NM>1) THEN
-            IF (INTERPOLATED_MESH(I,J,K)/=0) CYCLE ILOOP
+            IF (INTERPOLATED_MESH(I,J,K)/=0) CYCLE
          ENDIF
          VC = DX(I)*RC(I)*DY(J)*DZ(K)
          MINT(0,NM) = MINT(0,NM) + VC*RHO(I,J,K)
-         YY_GET(:) = YY(I,J,K,:)
-         CALL GET_MASS_FRACTION_ALL(YY_GET,Y_MF_INT)            
-         MINT(1:N_Y_ARRAY,NM) = MINT(1:N_Y_ARRAY,NM) + RHO(I,J,K)*Y_MF_INT(1:N_Y_ARRAY)*VC
-      ENDDO ILOOP
+         IF (N_SPECIES>0) THEN
+            YY_GET(:) = YY(I,J,K,:)
+            CALL GET_MASS_FRACTION_ALL(YY_GET,Y_MF_INT)            
+            MINT(1:N_Y_ARRAY,NM) = MINT(1:N_Y_ARRAY,NM) + RHO(I,J,K)*Y_MF_INT(1:N_Y_ARRAY)*VC
+         ENDIF
+      ENDDO
    ENDDO
 ENDDO
+ 
 MINT_SUM(:,NM) = MINT_SUM(:,NM) + MINT(:,NM)
 MINT_COUNT(NM) = MINT_COUNT(NM) + 1._EB
 
