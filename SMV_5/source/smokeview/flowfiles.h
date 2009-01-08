@@ -542,19 +542,11 @@ typedef struct _tourdata {
   // part/op types
   // 0 translatexyz/3, 1 rotatex/1, 2 rotatey/1, 3 rotatez/1, 4 scalexyz/3, 5 scale/1 6 drawcube/1, 7 drawdisk/2, 8 drawsphere/1, 9 drawline  10 drawelliposid/3
 
-//typedef struct {
-//  float *rgb4;
-//  int nops,nargs;
-//  float *args;
-//  int *ops;
-//} sv_object_part;
-
 /* --------------------------  sv_object_frame ------------------------------------ */
 
 typedef struct _sv_object_frame {
-//  int nparts;
-//  sv_object_part *parts;
   int *ops, nops, nargs;
+  int use_bw;
   int error;
   int display_list_ID;
   float *args;
