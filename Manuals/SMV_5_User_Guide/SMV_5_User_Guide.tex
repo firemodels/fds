@@ -2545,42 +2545,55 @@ allows one to show or hide loaded data files.
 
 
 \subsection{Stereo}
+Smokeview implements three methods for displaying scenes in stereo or 3D.
+Each method creates two versions of the scene, one version for each eye.
+
+The first method, denoted sequential stereo, displays the left and right eye images alternately in time.  Shuttered glasses  synchronized
+with the monitor are used to ensure that the left eye only sees the left image and the right eye only sees the right image.  To be effective the monitor should have a refresh rate of at least 120 frames per second (60 frames per second for each eye).
+Flickering is annoyingly noticeable in monitors with slower frame rates.  Unfortunately, today's LCD flat panel monitors typically do not have refresh rates faster than 60 to 80 frames per second.  This method requires a video card that implements OpenGL {\em QUAD buffering}.
+This Smokeview option can only be enabled from the command line by using the {\tt -stereo}\
+option.
+
+The second method, denoted left/right stereo, displays the two images side by side.  With practice, one can merge the two images without requiring specialized glasses (though they are available if desired) especially if the images are small and not separated by a large angle.
+A trick for seeing the stereo effect is to place a finger from each hand in the center of each picture.  Then relax your eyes, trying to {\em merge}\ your two fingers together.  Figure \ref{figlrstereo} show an example of the left/right method for generating a stereo image.  This method can generate full colored images and requires no equipment (for most people) to view but results in in smaller images.
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[height=3.0in]{figures/thouse5c_stereo}
+\includegraphics[trim=0.25in 3.75in 0.25in 3.75in, clip, height=2.75in]{scriptfigures/thouse5_iso_lr_stereo}
 \caption[Stereo pair view of a townhouse kitchen fire.]{
 Stereo pair view of a townhouse kitchen fire. To aid in viewing the stereo effect, place
 a finger in front of each image.  Relax your eyes allowing your two fingers and stereo pair
 images to merge into one.
 }
-\label{figstereo}
+\label{figlrstereo}
 \end{center}
 \end{figure}
 
+The third method, denoted red/green stereo, displays red and blue versions of each image.  Glasses with a red left lens and a blue right lens are required to view the image.   They may be obtained inexpensively or even made by using red and blue cellophane or by coloring clear plastic with read and blue marking pens.  Figure \ref{figrbstereo} shows the red/blue method for generating a stereo image.  This method generates full size images, requires only inexpensive glasses to view but can only display monochrome images.
+
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[height=1.5in]{figures/figSTEREO}
+\includegraphics[width=6.0in]{scriptfigures/thouse5_iso_rb_stereo}\\
+\caption[Stereo pair view of a townhouse kitchen fire.]{
+Stereo pair view of a townhouse kitchen fire. To aid in viewing the stereo effect, place
+a finger in front of each image.  Relax your eyes allowing your two fingers and stereo pair
+images to merge into one.
+}
+\label{figrbstereo}
+\end{center}
+\end{figure}
+
+Figure \ref{figstereodialog} shows the dialog
+box used to activate this option.  If the {\em -stereo}\ command line option was used and
+the video card supports shuttered stereo display then the {\em shuttered checkbox}\ in the dialog box will be enabled.  
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=1.65277777in]{figures/figSTEREO}
 \caption{Dialog
 box for activating the stereo view option.}
 \label{figstereodialog}
 \end{center}
 \end{figure}
-Smokeview implements two methods for displaying images in stereo or 3D.
-Each method creates two versions of the scene, one version for each eye.
-In one method, the two images are displayed alternately.  Specialized shuttered glasses are synched
-with the monitor to ensure that the left eye sees only the left eye's version of the scene and that the right eye sees only the right eye's version  of the scene. To be effective the monitor requires a refresh rate of at least 120 frames per second (60 frames per second for each eye).
-Flickering is annoyingly noticeable in monitors with slower frame rates.  Unfortunately, today's LCD flat panel monitors typically do not have refresh rates faster than 60 to 80 frames per second.  This method requires a video card that implements OpenGL {\em QUAD buffering}.
-This Smokeview option can only be enabled from the command line by using the {\tt -stereo}\
-option.
-
-In the second method, Smokeview displays the two images side by side, again one image for each eye.  With practice, one can merge the images without requiring specialized equipment, especially if the images are small and not separated by a large angle.
-A trick for seeing the stereo effect is to place a finger from each hand in the center of each picture.  Then relax your eyes, trying to {\em merge}\ your two fingers together.
-
-Figure \ref{figstereo} shows
-a pair of images of a townhouse kitchen fire.  Figure \ref{figstereodialog} shows the dialog
-box used to activate this option.  If the {\em -stereo}\ command line option was used and
-the video card supports shuttered stereo display then the {\em shuttered checkbox}\ in the dialog box will be enabled.
-
 \section{Clipping Scenes}
 
 
@@ -5250,7 +5263,7 @@ DEVICE_ACT
 idevice time state
 \end{verbatim}
 where {\tt time}\ is the activation time of the {\tt idevice}'th device.
-State is the state of the device, 0 for off or in-active and 1 for 
+State is the state of the device, 0 for off or in-active and 1 for
 on or active.  If the device may be drawn more than two ways then
 more than 2 states may be used with this keyword.
 
