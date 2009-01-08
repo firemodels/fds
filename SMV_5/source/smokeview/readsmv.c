@@ -6220,6 +6220,15 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
+    if(match(buffer,"STEREO",6)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&showstereo);
+      if(showstereo<0)showstereo=0;
+      if(showstereo>3)showstereo=3;
+      if(showstereo==1&&videoSTEREO!=1)showstereo=0;
+      update_glui_stereo();
+      continue;
+    }
     if(match(buffer,"TERRAINPARMS",12)==1){
       int i;
 
@@ -8773,6 +8782,9 @@ void writeini(int flag){
   fprintf(fileout," %i\n",pixel_skip);
   fprintf(fileout,"PROJECTION\n");
   fprintf(fileout," %i\n",projection_type);
+  fprintf(fileout,"STEREO\n");
+  fprintf(fileout," %i\n",showstereo);
+
   if(nskyboxinfo>0){
     int iskybox;
     skyboxdata *skyi;
