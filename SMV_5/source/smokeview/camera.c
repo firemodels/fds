@@ -77,17 +77,23 @@ void add_default_views(void){
 void update_camera_ypos(camera *camera_data){
   float local_aperture_default;
   float height;
+  float width;
   float asp;
-  //float xzmax;
   
   local_aperture_default=zoom2aperture(1.0);
+#ifdef pp_STEREO
+  asp=(float)screenHeight/(float)screenWidth;
+  width=xbar;
+  if(zbar/asp>xbar)width=zbar/asp;
+  eyeyfactor = -1.05*width/2.0/tan(local_aperture_default*PI/360.0);
+  camera_data->eye[1]=eyeyfactor*xyzbox;
+#else
   asp=(float)screenHeight/(float)screenWidth;
   height=zbar;
   if(xbar*asp>zbar)height=xbar*asp;
   eyeyfactor = -1.05*height/2.0/tan(local_aperture_default*PI/360.0);
   camera_data->eye[1]=eyeyfactor*xyzbox;
- // xzmax = zbar;
- // if(xbar*asp>zbar)xzmax=xbar*asp;
+#endif
   camera_data->isometric_y=(eyeyfactor-1.0)*xyzbox;
 }
 

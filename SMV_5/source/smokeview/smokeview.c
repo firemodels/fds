@@ -685,7 +685,11 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   down += fontHoffset;
   dh = (up-down)*2*fontWoffset/(right-left);
   
+#ifdef pp_STEREO
+  aspect=(float)(up-down)/(float)(right-left);
+#else
   aspect=(float)(right-left)/(float)(up-down);
+#endif
 
   /* set view position for virtual tour */
 
@@ -758,11 +762,18 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
 
   widthdiv2 = fnear*tan(0.5*PI*aperture_temp/180.);
+#ifdef pp_STEREO
+  fleft = -widthdiv2;
+  fright = widthdiv2;
+  fup = aspect*widthdiv2;
+  fdown = -aspect*widthdiv2;
+#else
   if(showstereo==2)widthdiv2*=2.0;
   fup = widthdiv2;
   fdown = -widthdiv2;
   fleft = -aspect*widthdiv2;
   fright = aspect*widthdiv2;
+#endif
   
   if(showstereo==0||view_mode==VIEW_CENTER){
     StereoCameraOffset=0.0;
@@ -770,7 +781,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   }
   else if(showstereo!=0&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
 #ifdef pp_STEREO
-    StereoCameraOffset = fzero/30.0;
+    StereoCameraOffset = (fzero/xyzmaxdiff)/30.0;
 #else
     StereoCameraOffset = (fright-fleft)*0.035*eoffset*fzero/fnear;
 #endif
@@ -787,7 +798,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     (int)(down+titlesafe_offset),
     (int)(right-left-2*fontWoffset-2*titlesafe_offset),
     (int)(up-down-dh-2*titlesafe_offset),
-    (double)(fleft-FrustumAsymmetry),(double)(fright-FrustumAsymmetry),
+    (double)(fleft+FrustumAsymmetry),(double)(fright+FrustumAsymmetry),
     (double)fdown,(double)fup,
     (double)fnear,(double)ffar,
       s_left, s_down, s_width, s_height)==0)return;
