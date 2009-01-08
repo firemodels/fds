@@ -479,9 +479,16 @@ void draw_SVOBJECT(sv_object *object, int iframe){
   if(framei->display_list_ID!=-1
     &&object->use_displaylist==1
     ){
-    glCallList(framei->display_list_ID);
-    glPopMatrix();
-    return;
+    if(framei->use_bw==setbw){
+      glCallList(framei->display_list_ID);
+      glPopMatrix();
+      return;
+    }
+    else{
+      framei->use_bw=setbw;
+      glDeleteLists(framei->display_list_ID,1);
+      framei->display_list_ID=-1;
+    }
   }
 
   if(object->use_displaylist==1){   
@@ -644,10 +651,21 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       break;
     case SV_SETCOLOR:
       if(op_skip==0&&iarg+SV_SETCOLOR_NUMARGS<=framei->nargs){
-        rgbcolor[0]=arg[0];
-        rgbcolor[1]=arg[1];
-        rgbcolor[2]=arg[2];
-        rgbcolor[3]=1.0;
+        if(setbw==1){
+          float gray;
+
+          gray = color2bw(arg);
+          rgbcolor[0]=gray;
+          rgbcolor[1]=gray;
+          rgbcolor[2]=gray;
+          rgbcolor[3]=1.0;
+        }
+        else{
+          rgbcolor[0]=arg[0];
+          rgbcolor[1]=arg[1];
+          rgbcolor[2]=arg[2];
+          rgbcolor[3]=1.0;
+        }
         rgbptr=rgbcolor;
       }
       iarg+=3;
@@ -1311,7 +1329,7 @@ void freecircle(void){
   ncirc=0;
 }
 
-/* ----------------------- init_SMVOBJECT1 ----------------------------- */
+/* ----------------------- init_SVOBJECT1 ----------------------------- */
 
 sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
   sv_object *object;
@@ -1331,6 +1349,7 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
   getargsops(commands,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
   framei->display_list_ID=-1;
   framei->error=0;
+  framei->use_bw=setbw;
 
   return object;
 }
@@ -1371,6 +1390,7 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
       framei->error=0;
       getargsops(commandsoff,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
       framei->display_list_ID=-1;
+      framei->use_bw=setbw;
     }
     else{
       NewMemory((void **)&framei,sizeof(sv_object_frame));
@@ -1378,6 +1398,7 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
       getargsops(commandson,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
       framei->error=0;
       framei->display_list_ID=-1;
+      framei->use_bw=setbw;
     }
   }
   return object;
@@ -1669,6 +1690,7 @@ int read_device_defs(char *file){
       current_frame->nargs=0;
       current_frame->nops=0;
       current_frame->display_list_ID=-1;
+      current_frame->use_bw=setbw;
 
       current_object->nframes++;
 
@@ -1958,6 +1980,8 @@ void init_avatar(void){
   }
   iavatar_types=0;
 }
+
+/* ----------------------- dist ----------------------------- */
 
 float dist(float p1[3], float p2[3]){
   float dx, dy, dz;
