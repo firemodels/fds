@@ -341,16 +341,6 @@ void InitOpenGL(void){
       printf("***warning: video hardware does not support stereo\n");
     }
   }
-  if(videoSTEREO==1){
-    stereo_frame=1;
-    stereo_leftright=0;
-    stereo_off=0;
-  }
-  else{
-    stereo_frame=0;
-    stereo_leftright=0;
-    stereo_off=1;
-  }
 
   printf("   Initializing Glut display mode\n");
   glutInitDisplayMode(type);
@@ -1830,10 +1820,6 @@ void initvars1(void){
   list_p3_index_old=0, list_slice_index_old=0, list_patch_index_old=0;
 
   videoSTEREO=0;
-  stereo_frame=0;
-  stereo_leftright=0;
-  stereo_off=1;
-
   pbalance=-0.5, eoffset=0.7;
   pbalanceORIG=-0.5, eoffsetORIG=0.7;
   fzero=0.25;
