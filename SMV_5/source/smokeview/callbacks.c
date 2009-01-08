@@ -617,16 +617,6 @@ void keyboard(unsigned char key, int x, int y){
         break;
     }
 #endif
-    stereo_off=0;
-    stereo_frame=0;
-    stereo_leftright=0;
-    stereo_redblue=0;
-    if(showstereo==0)stereo_off=1;
-    if(showstereo==1)stereo_frame=1;
-    if(showstereo==2)stereo_leftright=1;
-#ifdef pp_STEREO
-    if(showstereo==3)stereo_redblue=1;
-#endif
     update_glui_stereo();
   }
   if(strncmp((const char *)&key2,"T",1)==0){
