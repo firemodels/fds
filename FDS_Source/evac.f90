@@ -40,7 +40,7 @@ Module EVAC
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_evac
   ! Public variables (needed in the main program):
   !
-  Character(255):: EVAC_VERSION = '2.1.0'
+  Character(255):: EVAC_VERSION = '2.1.1'
   Character(255) :: EVAC_COMPILE_DATE
   Integer :: EVAC_MODULE_REV
   !
@@ -1308,8 +1308,11 @@ Contains
     End Subroutine READ_PERS
 
     Subroutine READ_EXIT
+      Implicit None
       !
       ! Read the EXIT lines
+      !
+      Integer nm, i1, i2, j1, j2
       !
       READ_EXIT_LOOP: Do N = 1, N_EXITS
          !
@@ -1371,6 +1374,8 @@ Contains
                  Trim(ID)
          End If
 
+         ! Check that the exit is properly specified
+ 
          Do I=1,5,2
             If (XB(I) > XB(I+1)) Then
                DUMMY   = XB(I)
@@ -1378,13 +1383,85 @@ Contains
                XB(I+1) = DUMMY
             End If
          End Do
-         !
+         ! 
+         ! Check which evacuation mesh
+         ii = 0
+         PEX_MeshLoop: Do i = 1, nmeshes
+            If (evacuation_only(i) .And. evacuation_grid(i)) Then
+               If (Is_Within_Bounds(XB(1),XB(2),XB(3),XB(4),XB(5),XB(6),&
+                  Meshes(i)%XS,Meshes(i)%XF,Meshes(i)%YS,Meshes(i)%YF,Meshes(i)%ZS,Meshes(i)%ZF, &
+                  0._EB, 0._EB, 0._EB)) Then
+!!$               If ( (XB(5) >= Meshes(i)%ZS .And. XB(6) <= Meshes(i)%ZF).And. &
+!!$                    (XB(3) >= Meshes(i)%YS .And. XB(4) <= Meshes(i)%YF).And. &
+!!$                    (XB(1) >= Meshes(i)%XS .And. XB(2) <= Meshes(i)%XF)) Then
+                  If (Trim(MESH_ID) == 'null' .Or. &
+                       Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
+                     ii = ii + 1
+                     PEX%IMESH = i
+                     !cc             Exit PEX_MeshLoop
+                  End If
+               End If
+            End If
+         End Do PEX_MeshLoop
+         If (PEX%IMESH == 0) Then
+            Write(MESSAGE,'(A,A,A)') &
+                 'ERROR: EXIT line ',Trim(PEX%ID), ' problem with IMESH, no mesh found'
+            Call SHUTDOWN(MESSAGE)
+         End If
+         If (ii > 1) Then
+            Write(MESSAGE,'(A,A,A)') &
+                 'ERROR: EXIT line ',Trim(PEX%ID), ' not an unique mesh found '
+            Call SHUTDOWN(MESSAGE)
+         End If
+ 
+         nm = PEX%IMESH
+         XB(5) = Meshes(nm)%ZS 
+         XB(6) = Meshes(nm)%ZF 
+ 
+         If (XB(1)/=XB(2) .And. XB(3)/=XB(4)) Then
+            Write(MESSAGE,'(A,I4,A)') 'ERROR: EXIT',N,' must be a plane'
+            Call SHUTDOWN(MESSAGE)
+         Endif
+
+         ! User input
          PEX%X1 = XB(1)
          PEX%X2 = XB(2)
          PEX%Y1 = XB(3)
          PEX%Y2 = XB(4)
          PEX%Z1 = XB(5)
          PEX%Z2 = XB(6)
+
+         ! Move user input to mesh cell boundaries
+         XB(1) = Max(XB(1),Meshes(nm)%XS)
+         XB(2) = Min(XB(2),Meshes(nm)%XF)
+         XB(3) = Max(XB(3),Meshes(nm)%YS)
+         XB(4) = Min(XB(4),Meshes(nm)%YF)
+
+         I1 = Nint( GINV(XB(1)-Meshes(nm)%XS,1,nm)*Meshes(nm)%RDXI ) 
+         I2 = Nint( GINV(XB(2)-Meshes(nm)%XS,1,nm)*Meshes(nm)%RDXI )
+         J1 = Nint( GINV(XB(3)-Meshes(nm)%YS,2,nm)*Meshes(nm)%RDETA) 
+         J2 = Nint( GINV(XB(4)-Meshes(nm)%YS,2,nm)*Meshes(nm)%RDETA)
+
+         XB(1) = Meshes(nm)%X(I1)
+         XB(2) = Meshes(nm)%X(I2)
+         XB(3) = Meshes(nm)%Y(J1)
+         XB(4) = Meshes(nm)%Y(J2)
+         If ( Abs(XB(1)-PEX%X1)>1.E-4_EB .Or. Abs(XB(2)-PEX%X2)>1.E-4_EB .Or. &
+              Abs(XB(3)-PEX%Y1)>1.E-4_EB .Or. Abs(XB(4)-PEX%Y2)>1.E-4_EB ) Then
+            Write(lu_evacout,fmt='(a,a,a,a)') &
+                 ' WARNING: Exit line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
+            Write(lu_evacout,fmt='(a,6f12.4)') 'Old XB:', PEX%X1,PEX%X2,PEX%Y1,PEX%Y2,PEX%Z1,PEX%Z2
+            Write(lu_evacout,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+         End If
+
+         ! Coordinates are lined up with the mesh.
+         PEX%X1 = XB(1)
+         PEX%X2 = XB(2)
+         PEX%Y1 = XB(3)
+         PEX%Y2 = XB(4)
+         PEX%Z1 = XB(5)
+         PEX%Z2 = XB(6)
+         !
          PEX%IOR = IOR
          PEX%ID  = Trim(ID)
          PEX%GRID_NAME  = Trim(FLOW_FIELD_ID)
@@ -1433,35 +1510,6 @@ Contains
                  'ERROR: EXIT',N,' problem with IOR'
             Call SHUTDOWN(MESSAGE)
          End Select
-         ! 
-         ! Check which evacuation mesh
-         ii = 0
-         PEX_MeshLoop: Do i = 1, nmeshes
-            If (evacuation_only(i) .And. evacuation_grid(i)) Then
-               If ( (PEX%Z1 >= Meshes(i)%ZS .And. PEX%Z2 <= Meshes(i)%ZF).And. &
-                    (PEX%Y1 >= Meshes(i)%YS .And. PEX%Y2 <= Meshes(i)%YF).And. &
-                    (PEX%X1 >= Meshes(i)%XS .And. PEX%X2 <= Meshes(i)%XF)) Then
-                  If (Trim(MESH_ID) == 'null' .Or. &
-                       Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
-                     ii = ii + 1
-                     PEX%IMESH = i
-                     !cc             Exit PEX_MeshLoop
-                  End If
-               End If
-            End If
-         End Do PEX_MeshLoop
-         If (PEX%IMESH == 0) Then
-            Write(MESSAGE,'(A,A,A)') &
-                 'ERROR: EXIT line ',Trim(PEX%ID), &
-                 ' problem with IMESH, no mesh found'
-            Call SHUTDOWN(MESSAGE)
-         End If
-         If (ii > 1) Then
-            Write(MESSAGE,'(A,A,A)') &
-                 'ERROR: EXIT line ',Trim(PEX%ID), &
-                 ' not an unique mesh found '
-            Call SHUTDOWN(MESSAGE)
-         End If
          ! 
          ! Check which vent field. If VENT_FFIELD is not found, use
          ! the main evac grid.
@@ -1584,8 +1632,11 @@ Contains
     End Subroutine READ_EXIT
 
     Subroutine READ_DOOR    
+      Implicit None
       !
       ! Read the DOOR lines
+      !
+      Integer nm, i1, i2, j1, j2
       !
       READ_DOOR_LOOP: Do N = 1, N_DOORS
          !
@@ -1649,6 +1700,8 @@ Contains
                  Trim(ID)
          End If
 
+         ! Check that the door is properly specified
+
          Do I=1,5,2
             If (XB(I) > XB(I+1)) Then
                DUMMY   = XB(I)
@@ -1656,13 +1709,84 @@ Contains
                XB(I+1) = DUMMY
             End If
          End Do
-         !
+         ! 
+         ! Check which evacuation floor
+         ! Now there may be overlapping meshes.
+         ii = 0
+         PDX_MeshLoop: Do i = 1, nmeshes
+            If (evacuation_only(i) .And. evacuation_grid(i)) Then
+               If (Is_Within_Bounds(XB(1),XB(2),XB(3),XB(4),XB(5),XB(6),&
+                  Meshes(i)%XS,Meshes(i)%XF,Meshes(i)%YS,Meshes(i)%YF,Meshes(i)%ZS,Meshes(i)%ZF, &
+                  0._EB, 0._EB, 0._EB)) Then
+                  If (Trim(MESH_ID) == 'null' .Or. Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
+                     ii = ii + 1
+                     PDX%IMESH = i
+                  End If
+                  If (Trim(TO_NODE) == Trim(MESH_NAME(i))) Then
+                     PDX%IMESH2 = i
+                  End If
+               End If
+            End If
+         End Do PDX_MeshLoop
+         If (PDX%IMESH == 0) Then
+            Write(MESSAGE,'(A,A,A)') &
+                 'ERROR: DOOR line ',Trim(PDX%ID), ' problem with IMESH, no mesh found'
+            Call SHUTDOWN(MESSAGE)
+         End If
+         If (ii > 1) Then
+            Write(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',Trim(PDX%ID), &
+                 ' not an unique mesh found '
+            Call SHUTDOWN(MESSAGE)
+         End If
+
+         nm = PDX%IMESH
+         XB(5) = Meshes(nm)%ZS 
+         XB(6) = Meshes(nm)%ZF 
+ 
+         If (XB(1)/=XB(2) .And. XB(3)/=XB(4)) Then
+            Write(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' must be a plane'
+            Call SHUTDOWN(MESSAGE)
+         Endif
+
+         ! User input
          PDX%X1 = XB(1)
          PDX%X2 = XB(2)
          PDX%Y1 = XB(3)
          PDX%Y2 = XB(4)
          PDX%Z1 = XB(5)
          PDX%Z2 = XB(6)
+
+         ! Move user input to mesh cell boundaries
+         XB(1) = Max(XB(1),Meshes(nm)%XS)
+         XB(2) = Min(XB(2),Meshes(nm)%XF)
+         XB(3) = Max(XB(3),Meshes(nm)%YS)
+         XB(4) = Min(XB(4),Meshes(nm)%YF)
+
+         I1 = Nint( GINV(XB(1)-Meshes(nm)%XS,1,nm)*Meshes(nm)%RDXI ) 
+         I2 = Nint( GINV(XB(2)-Meshes(nm)%XS,1,nm)*Meshes(nm)%RDXI )
+         J1 = Nint( GINV(XB(3)-Meshes(nm)%YS,2,nm)*Meshes(nm)%RDETA) 
+         J2 = Nint( GINV(XB(4)-Meshes(nm)%YS,2,nm)*Meshes(nm)%RDETA)
+
+         XB(1) = Meshes(nm)%X(I1)
+         XB(2) = Meshes(nm)%X(I2)
+         XB(3) = Meshes(nm)%Y(J1)
+         XB(4) = Meshes(nm)%Y(J2)
+         If ( Abs(XB(1)-PDX%X1)>1.E-4_EB .Or. Abs(XB(2)-PDX%X2)>1.E-4_EB .Or. &
+              Abs(XB(3)-PDX%Y1)>1.E-4_EB .Or. Abs(XB(4)-PDX%Y2)>1.E-4_EB ) Then
+            Write(lu_evacout,fmt='(a,a,a,a)') &
+                 ' WARNING: Door line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
+            Write(lu_evacout,fmt='(a,6f12.4)') 'Old XB:', PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2
+            Write(lu_evacout,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+         End If
+
+         ! Coordinates are lined up with the mesh.
+         PDX%X1 = XB(1)
+         PDX%X2 = XB(2)
+         PDX%Y1 = XB(3)
+         PDX%Y2 = XB(4)
+         PDX%Z1 = XB(5)
+         PDX%Z2 = XB(6)
+         !
          PDX%IOR        = IOR
          PDX%ID         = ID
          PDX%GRID_NAME  = FLOW_FIELD_ID
@@ -1713,35 +1837,6 @@ Contains
                  'ERROR: DOOR',N,' problem with IOR'
             Call SHUTDOWN(MESSAGE)
          End Select
-         ! 
-         ! Check which evacuation floor
-         ! Now there may be overlapping meshes.
-         ii = 0
-         PDX_MeshLoop: Do i = 1, nmeshes
-            If (evacuation_only(i) .And. evacuation_grid(i)) Then
-               If (Is_Within_Bounds(PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2,&
-                  Meshes(i)%XS,Meshes(i)%XF,Meshes(i)%YS,Meshes(i)%YF,Meshes(i)%ZS,Meshes(i)%ZF, &
-                  0._EB, 0._EB, 0._EB)) Then
-                  If (Trim(MESH_ID) == 'null' .Or. Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
-                     ii = ii + 1
-                     PDX%IMESH = i
-                  End If
-                  If (Trim(TO_NODE) == Trim(MESH_NAME(i))) Then
-                     PDX%IMESH2 = i
-                  End If
-               End If
-            End If
-         End Do PDX_MeshLoop
-         If (PDX%IMESH == 0) Then
-            Write(MESSAGE,'(A,A,A)') &
-                 'ERROR: DOOR line ',Trim(PDX%ID), ' problem with IMESH, no mesh found'
-            Call SHUTDOWN(MESSAGE)
-         End If
-         If (ii > 1) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',Trim(PDX%ID), &
-                 ' not an unique mesh found '
-            Call SHUTDOWN(MESSAGE)
-         End If
          ! 
          ! Check which vent field. If VENT_FFIELD is not found, use
          ! the main evac grid.
@@ -2392,8 +2487,11 @@ Contains
     End Subroutine COLLECT_NODE_INFO
 
     Subroutine READ_ENTRIES
+      Implicit None
       !
       ! Read the ENTR lines
+      !
+      Integer nm, i1, i2, j1, j2
       !
       READ_ENTR_LOOP: Do N = 1, N_ENTRYS
          !
@@ -2483,6 +2581,17 @@ Contains
          Allocate(PNX%P_VENT_FFIELDS(0:i),STAT=IZERO)
          Call ChkMemErr('Read_Evac','PNX%P_VENT_FFIELDS',IZERO) 
          !
+
+         PNX%TO_NODE    = TO_NODE
+         PNX%T_first    = T_BEGIN
+         PNX%T_last     = T_BEGIN
+         PNX%ICOUNT     = 0
+         PNX%Flow       = MAX_FLOW
+         PNX%T_Start    = TIME_START
+         PNX%T_Stop     = TIME_STOP
+
+         ! Check that the entry is properly specified
+
          Do I=1,5,2
             If (XB(I) > XB(I+1)) Then
                DUMMY   = XB(I)
@@ -2490,15 +2599,88 @@ Contains
                XB(I+1) = DUMMY
             End If
          End Do
-         !
+         ! 
+         ! Check which evacuation floor
+         ii = 0
+         n_tmp = 0
+         PNX_MeshLoop: Do i = 1, nmeshes
+            If (evacuation_only(i) .And. evacuation_grid(i)) Then
+               n_tmp = n_tmp + 1
+               If (Is_Within_Bounds(XB(1),XB(2),XB(3),XB(4),XB(5),XB(6),&
+                  Meshes(i)%XS,Meshes(i)%XF,Meshes(i)%YS,Meshes(i)%YF,Meshes(i)%ZS,Meshes(i)%ZF, &
+                  0._EB, 0._EB, 0._EB)) Then
+!!$               If ( (PNX%Z1 >= Meshes(i)%ZS .And. PNX%Z2 <= Meshes(i)%ZF).And. &
+!!$                    (PNX%Y1 >= Meshes(i)%YS .And. PNX%Y2 <= Meshes(i)%YF).And. &
+!!$                    (PNX%X1 >= Meshes(i)%XS .And. PNX%X2 <= Meshes(i)%XF)) Then
+                  If (Trim(MESH_ID) == 'null' .Or. Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
+                     ii = ii + 1
+                     PNX%IMESH = i
+                     PNX%TO_INODE = n_tmp
+                     PNX%TO_NODE  = MESH_NAME(i)
+                  End If
+               End If
+            End If
+         End Do PNX_MeshLoop
+         If (PNX%IMESH == 0) Then
+            Write(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',Trim(PNX%ID), &
+                 ' problem with IMESH, no mesh found'
+            Call SHUTDOWN(MESSAGE)
+         End If
+         If (ii > 1) Then
+            Write(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',Trim(PNX%ID), &
+                 ' not an unique mesh found '
+            Call SHUTDOWN(MESSAGE)
+         End If
+
+         nm = PNX%IMESH
+         XB(5) = Meshes(nm)%ZS 
+         XB(6) = Meshes(nm)%ZF 
+ 
+         If (XB(1)/=XB(2) .And. XB(3)/=XB(4)) Then
+            Write(MESSAGE,'(A,I4,A)') 'ERROR: ENTR',N,' must be a plane'
+            Call SHUTDOWN(MESSAGE)
+         Endif
+
+         ! User input
          PNX%X1 = XB(1)
          PNX%X2 = XB(2)
          PNX%Y1 = XB(3)
          PNX%Y2 = XB(4)
          PNX%Z1 = XB(5)
          PNX%Z2 = XB(6)
-         PNX%IOR = IOR
+
+         ! Move user input to mesh cell boundaries
+         XB(1) = Max(XB(1),Meshes(nm)%XS)
+         XB(2) = Min(XB(2),Meshes(nm)%XF)
+         XB(3) = Max(XB(3),Meshes(nm)%YS)
+         XB(4) = Min(XB(4),Meshes(nm)%YF)
+
+         I1 = Nint( GINV(XB(1)-Meshes(nm)%XS,1,nm)*Meshes(nm)%RDXI ) 
+         I2 = Nint( GINV(XB(2)-Meshes(nm)%XS,1,nm)*Meshes(nm)%RDXI )
+         J1 = Nint( GINV(XB(3)-Meshes(nm)%YS,2,nm)*Meshes(nm)%RDETA) 
+         J2 = Nint( GINV(XB(4)-Meshes(nm)%YS,2,nm)*Meshes(nm)%RDETA)
+
+         XB(1) = Meshes(nm)%X(I1)
+         XB(2) = Meshes(nm)%X(I2)
+         XB(3) = Meshes(nm)%Y(J1)
+         XB(4) = Meshes(nm)%Y(J2)
+         If ( Abs(XB(1)-PNX%X1)>1.E-4_EB .Or. Abs(XB(2)-PNX%X2)>1.E-4_EB .Or. &
+              Abs(XB(3)-PNX%Y1)>1.E-4_EB .Or. Abs(XB(4)-PNX%Y2)>1.E-4_EB ) Then
+            Write(lu_evacout,fmt='(a,a,a,a)') &
+                 ' WARNING: Entr line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
+            Write(lu_evacout,fmt='(a,6f12.4)') 'Old XB:', PNX%X1,PNX%X2,PNX%Y1,PNX%Y2,PNX%Z1,PNX%Z2
+            Write(lu_evacout,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+         End If
+
+         ! Coordinates are lined up with the mesh.
+         PNX%X1 = XB(1)
+         PNX%X2 = XB(2)
+         PNX%Y1 = XB(3)
+         PNX%Y2 = XB(4)
+         PNX%Z1 = XB(5)
+         PNX%Z2 = XB(6)
          ! 
+         PNX%IOR        = IOR
          PNX%ID         = ID
          PNX%CLASS_NAME = PERS_ID
 
@@ -2507,13 +2689,6 @@ Contains
             pcp => evac_person_classes(ipc)
             If ( pcp%id == PERS_ID ) PNX%IPC = IPC
          End Do
-         PNX%TO_NODE    = TO_NODE
-         PNX%T_first    = T_BEGIN
-         PNX%T_last     = T_BEGIN
-         PNX%ICOUNT     = 0
-         PNX%Flow       = MAX_FLOW
-         PNX%T_Start    = TIME_START
-         PNX%T_Stop     = TIME_STOP
 
          Select Case (IOR)
          Case (-1,+1)
@@ -2545,35 +2720,6 @@ Contains
                  'ERROR: ENTR',N,' problem with IOR'
             Call SHUTDOWN(MESSAGE)
          End Select
-         ! 
-         ! Check which evacuation floor
-         ii = 0
-         n_tmp = 0
-         PNX_MeshLoop: Do i = 1, nmeshes
-            If (evacuation_only(i) .And. evacuation_grid(i)) Then
-               n_tmp = n_tmp + 1
-               If ( (PNX%Z1 >= Meshes(i)%ZS .And. PNX%Z2 <= Meshes(i)%ZF).And. &
-                    (PNX%Y1 >= Meshes(i)%YS .And. PNX%Y2 <= Meshes(i)%YF).And. &
-                    (PNX%X1 >= Meshes(i)%XS .And. PNX%X2 <= Meshes(i)%XF)) Then
-                  If (Trim(MESH_ID) == 'null' .Or. Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
-                     ii = ii + 1
-                     PNX%IMESH = i
-                     PNX%TO_INODE = n_tmp
-                     PNX%TO_NODE  = MESH_NAME(i)
-                  End If
-               End If
-            End If
-         End Do PNX_MeshLoop
-         If (PNX%IMESH == 0) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',Trim(PNX%ID), &
-                 ' problem with IMESH, no mesh found'
-            Call SHUTDOWN(MESSAGE)
-         End If
-         If (ii > 1) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',Trim(PNX%ID), &
-                 ' not an unique mesh found '
-            Call SHUTDOWN(MESSAGE)
-         End If
 
          ! Check if entry leads to Stairs
          PNX%STR_INDX = 0
@@ -2597,7 +2743,7 @@ Contains
          If (Trim(FLOW_FIELD_ID) == 'null') Then
             PNX%GRID_NAME  = Trim(PNX%TO_NODE)
          Else
-            PNX%GRID_NAME  = FLOW_FIELD_ID
+            PNX%GRID_NAME  = Trim(FLOW_FIELD_ID)
          End If
 
          Do i = 1, PNX%N_VENT_FFIELDS
@@ -2646,10 +2792,8 @@ Contains
             End If
          End Do PNX_Mesh2Loop
          If ( PNX%I_VENT_FFIELDS(0) == 0 ) Then
-            Write(MESSAGE,'(A,A,A,A,A)') &
-                 'ERROR: ENTR line ',Trim(PNX%ID), &
-                 ' problem with flow field name, ', &
-                 Trim(PNX%GRID_NAME),' not found'
+            Write(MESSAGE,'(A,A,A,A,A)') 'ERROR: ENTR line ',Trim(PNX%ID),&
+                 ' problem with flow field name, ', Trim(PNX%GRID_NAME),' not found'
             Call SHUTDOWN(MESSAGE)
          End If
          ! 
