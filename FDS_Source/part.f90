@@ -732,7 +732,7 @@ DROPLET_LOOP: DO I=1,NLP
    QREL  = MAX(1.E-6_EB,SQRT(UREL*UREL + VREL*VREL + WREL*WREL))
    TMP_G = MAX(TMPMIN,TMP(II,JJ,KK))
    RHO_G = RHO(II,JJ,KK)
-   MU_AIR = Y2MU_C(MIN(500,NINT(0.1_EB*TMP_G)))
+   MU_AIR = Y2MU_C(MIN(500,NINT(0.1_EB*TMP_G)))*SPECIES(0)%MW
    DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
    DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
       C_DRAG  = DRAG(DR%RE)
@@ -1241,7 +1241,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
             TMP_G  = TMP(II,JJ,KK)
             RHO_G  = RHO(II,JJ,KK)
-            MU_AIR = Y2MU_C(MIN(500,NINT(0.1_EB*TMP_G)))
+            MU_AIR = Y2MU_C(MIN(500,NINT(0.1_EB*TMP_G)))*SPECIES(0)%MW
             M_GAS  = RHO_G/RVC        
             M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT!limit to avoid diveregence errors
             K_AIR  = CPOPR*MU_AIR

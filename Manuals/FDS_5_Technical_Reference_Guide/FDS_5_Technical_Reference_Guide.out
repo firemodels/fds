@@ -1,0 +1,78 @@
+\BOOKMARK [0][]{chapter*.1}{Preface}{}
+\BOOKMARK [0][]{chapter*.2}{Disclaimer}{}
+\BOOKMARK [0][]{chapter*.3}{About the Authors}{}
+\BOOKMARK [0][]{chapter*.4}{Acknowledgments}{}
+\BOOKMARK [0][]{chapter.1}{Introduction}{}
+\BOOKMARK [0][]{chapter.2}{Model Overview}{}
+\BOOKMARK [1][]{section.2.1}{Basic Description of FDS}{chapter.2}
+\BOOKMARK [2][]{subsection.2.1.1}{Type of Model}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.2}{Version History}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.3}{Model Developers}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.4}{Intended Uses}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.5}{Input Parameters}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.6}{Output Quantities}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.7}{Governing Equations, Assumptions and Numerics}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.8}{Limitations}{section.2.1}
+\BOOKMARK [1][]{section.2.2}{Peer Review Process}{chapter.2}
+\BOOKMARK [2][]{subsection.2.2.1}{Survey of the Relevant Fire and Combustion Literature}{section.2.2}
+\BOOKMARK [2][]{subsection.2.2.2}{Review of the Theoretical Basis of the Model}{section.2.2}
+\BOOKMARK [1][]{section.2.3}{Development Process}{chapter.2}
+\BOOKMARK [0][]{chapter.3}{Governing Equations}{}
+\BOOKMARK [1][]{section.3.1}{Hydrodynamic Model}{chapter.3}
+\BOOKMARK [2][]{subsection.3.1.1}{The Fundamental Conservation Equations}{section.3.1}
+\BOOKMARK [2][]{subsection.3.1.2}{The Low Mach Number Assumption and the Equation of State}{section.3.1}
+\BOOKMARK [2][]{subsection.3.1.3}{Combination of the Mass and Energy Equations via the Divergence}{section.3.1}
+\BOOKMARK [2][]{subsection.3.1.4}{The Momentum Equation}{section.3.1}
+\BOOKMARK [2][]{subsection.3.1.5}{The Equation for Pressure \(Poisson's Equation\)}{section.3.1}
+\BOOKMARK [2][]{subsection.3.1.6}{Large Eddy Simulation \(LES\)}{section.3.1}
+\BOOKMARK [2][]{subsection.3.1.7}{Direct Numerical Simulation \(DNS\)}{section.3.1}
+\BOOKMARK [1][]{section.3.2}{Combustion Model}{chapter.3}
+\BOOKMARK [2][]{subsection.3.2.1}{Mixture Fraction Combustion Model}{section.3.2}
+\BOOKMARK [2][]{subsection.3.2.2}{Finite-Rate Reaction \(DNS\)}{section.3.2}
+\BOOKMARK [1][]{section.3.3}{Thermal Radiation}{chapter.3}
+\BOOKMARK [1][]{section.3.4}{Solid Phase Model}{chapter.3}
+\BOOKMARK [2][]{subsection.3.4.1}{The Heat Conduction Equation for a Solid}{section.3.4}
+\BOOKMARK [2][]{subsection.3.4.2}{Component-Averaged Thermal Properties}{section.3.4}
+\BOOKMARK [2][]{subsection.3.4.3}{Pyrolysis Models}{section.3.4}
+\BOOKMARK [2][]{subsection.3.4.4}{Radiation Heat Transfer to Solids}{section.3.4}
+\BOOKMARK [2][]{subsection.3.4.5}{Convective Heat Transfer to Solids}{section.3.4}
+\BOOKMARK [2][]{subsection.3.4.6}{Boundary Conditions}{section.3.4}
+\BOOKMARK [1][]{section.3.5}{Fire Detection Devices}{chapter.3}
+\BOOKMARK [2][]{subsection.3.5.1}{Sprinkler Activation}{section.3.5}
+\BOOKMARK [2][]{subsection.3.5.2}{Heat Detectors}{section.3.5}
+\BOOKMARK [2][]{subsection.3.5.3}{Smoke Detectors}{section.3.5}
+\BOOKMARK [1][]{section.3.6}{Liquid Sprays}{chapter.3}
+\BOOKMARK [2][]{subsection.3.6.1}{Droplet Size Distribution}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.2}{Droplet Transport in the Gas Phase}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.3}{Droplet Transport on a Surface}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.4}{Absorption and Scattering of Thermal Radiation by Droplets}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.5}{Heating and Evaporation of Liquid Droplets}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.6}{Fire Suppression by Water}{section.3.6}
+\BOOKMARK [0][]{chapter.4}{Numerical Method}{}
+\BOOKMARK [1][]{section.4.1}{Hydrodynamic Model}{chapter.4}
+\BOOKMARK [2][]{subsection.4.1.1}{Simplified Equations}{section.4.1}
+\BOOKMARK [2][]{subsection.4.1.2}{The Mass Transport Equations and the Divergence}{section.4.1}
+\BOOKMARK [2][]{subsection.4.1.3}{The Momentum Equation}{section.4.1}
+\BOOKMARK [2][]{subsection.4.1.4}{The Pressure Equation}{section.4.1}
+\BOOKMARK [2][]{subsection.4.1.5}{Multiple Mesh Considerations}{section.4.1}
+\BOOKMARK [1][]{section.4.2}{Combustion}{chapter.4}
+\BOOKMARK [2][]{subsection.4.2.1}{Heat Release Rate \(Mixture Fraction\)}{section.4.2}
+\BOOKMARK [2][]{subsection.4.2.2}{Heat Release Rate \(Finite-Rate Reaction\)}{section.4.2}
+\BOOKMARK [1][]{section.4.3}{Thermal Radiation}{chapter.4}
+\BOOKMARK [2][]{subsection.4.3.1}{Discretization of the Radiative Heat Transfer Equation}{section.4.3}
+\BOOKMARK [2][]{subsection.4.3.2}{Radiation Heat Transfer to Solid Objects}{section.4.3}
+\BOOKMARK [1][]{section.4.4}{Solid Phase Model}{chapter.4}
+\BOOKMARK [2][]{subsection.4.4.1}{Solid Surface and Interior Temperatures}{section.4.4}
+\BOOKMARK [2][]{subsection.4.4.2}{Convective Heat Transfer to Solid Objects}{section.4.4}
+\BOOKMARK [2][]{subsection.4.4.3}{Coupling the Gas and Solid Phase}{section.4.4}
+\BOOKMARK [2][]{subsection.4.4.4}{Mass and Energy Transfer at Interpolated Mesh Boundaries}{section.4.4}
+\BOOKMARK [1][]{section.4.5}{Liquid Sprays}{chapter.4}
+\BOOKMARK [2][]{subsection.4.5.1}{Particle movement}{section.4.5}
+\BOOKMARK [2][]{subsection.4.5.2}{Interaction of Droplets and Radiation}{section.4.5}
+\BOOKMARK [2][]{subsection.4.5.3}{Heating and Evaporation of Liquid Droplets}{section.4.5}
+\BOOKMARK [0][]{chapter.5}{Conclusion}{}
+\BOOKMARK [0][]{chapter.5}{References}{}
+\BOOKMARK [0][]{appendix.A}{Nomenclature}{}
+\BOOKMARK [0][]{appendix.B}{Derivation of the Velocity Divergence}{}
+\BOOKMARK [0][]{appendix.C}{Domain Decomposition Strategy}{}
+\BOOKMARK [0][]{appendix.D}{A Simple Model of Flame Extinction}{}
