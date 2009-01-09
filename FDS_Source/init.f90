@@ -107,6 +107,20 @@ IF (DYNSMAG) THEN
    ALLOCATE(M%C_DYNSMAG(IBAR,JBAR,KBAR),STAT=IZERO)
    CALL ChkMemErr('INIT','C_DYNSMAG',IZERO)
 ENDIF
+IF (CHECK_KINETIC_ENERGY) THEN
+   ! subgrid turbulent kinetic energy
+   ALLOCATE(M%TKE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','TKE',IZERO)
+   M%TKE=0._EB
+   ! LES resolved kinetic energy
+   ALLOCATE(M%RKE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','RKE',IZERO)
+   M%RKE=0._EB
+   ! Pope measure of turbulence resolution
+   ALLOCATE(M%MTR(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','MTR',IZERO)
+   M%MTR=0._EB
+ENDIF
 
 ! Background pressure, temperature, density as a function of height (Z coordinate)
 
