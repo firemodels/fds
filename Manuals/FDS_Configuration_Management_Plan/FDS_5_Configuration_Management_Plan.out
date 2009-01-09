@@ -1,0 +1,31 @@
+\BOOKMARK [0][]{chapter*.1}{Disclaimer}{}
+\BOOKMARK [0][]{chapter*.2}{About the Authors}{}
+\BOOKMARK [0][]{chapter*.3}{Acknowledgments}{}
+\BOOKMARK [0][]{chapter.1}{Introduction}{}
+\BOOKMARK [1][]{section.1.1}{Purpose}{chapter.1}
+\BOOKMARK [1][]{section.1.2}{Scope}{chapter.1}
+\BOOKMARK [1][]{section.1.3}{Fire Dynamics Simulator \(FDS\) Model Description}{chapter.1}
+\BOOKMARK [0][]{chapter.2}{CM Management}{}
+\BOOKMARK [1][]{section.2.1}{FDS CM Manager Responsibilities}{chapter.2}
+\BOOKMARK [1][]{section.2.2}{FDS Software Development Team Member Responsibilities}{chapter.2}
+\BOOKMARK [0][]{chapter.3}{CM Process}{}
+\BOOKMARK [1][]{section.3.1}{Configuration Identification}{chapter.3}
+\BOOKMARK [2][]{subsection.3.1.1}{Maintaining CSCIs}{section.3.1}
+\BOOKMARK [2][]{subsection.3.1.2}{Identifying Specific CSCIs in Compiled Executables}{section.3.1}
+\BOOKMARK [1][]{section.3.2}{Configuration Control}{chapter.3}
+\BOOKMARK [1][]{section.3.3}{Software Changes}{chapter.3}
+\BOOKMARK [2][]{subsection.3.3.1}{Creating a Change Request}{section.3.3}
+\BOOKMARK [2][]{subsection.3.3.2}{Processing a Change Request}{section.3.3}
+\BOOKMARK [2][]{subsection.3.3.3}{Committing Changes}{section.3.3}
+\BOOKMARK [2][]{subsection.3.3.4}{Change Verification}{section.3.3}
+\BOOKMARK [1][]{section.3.4}{Establishing Baselines}{chapter.3}
+\BOOKMARK [2][]{subsection.3.4.1}{Naming Baselines}{section.3.4}
+\BOOKMARK [2][]{subsection.3.4.2}{Baseline Software Testing}{section.3.4}
+\BOOKMARK [2][]{subsection.3.4.3}{Release of a New Baseline}{section.3.4}
+\BOOKMARK [0][]{chapter.4}{Coding Standard}{}
+\BOOKMARK [1][]{section.4.1}{Indentation}{chapter.4}
+\BOOKMARK [1][]{section.4.2}{Source File Organization}{chapter.4}
+\BOOKMARK [1][]{section.4.3}{Explicit Variable Typing}{chapter.4}
+\BOOKMARK [1][]{section.4.4}{Loop and Branch Naming}{chapter.4}
+\BOOKMARK [1][]{section.4.5}{Named Constants}{chapter.4}
+\BOOKMARK [1][]{section.4.6}{Redundant Code}{chapter.4}

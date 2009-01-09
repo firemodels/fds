@@ -1,0 +1,271 @@
+\contentsline {chapter}{Preface}{i}{chapter*.1}
+\contentsline {chapter}{Disclaimer}{iii}{chapter*.2}
+\contentsline {chapter}{About the Authors}{v}{chapter*.3}
+\contentsline {chapter}{Acknowledgments}{vii}{chapter*.4}
+\contentsline {part}{I\hspace {1em}Running FDS}{1}{part.1}
+\contentsline {chapter}{\numberline {1}Introduction}{3}{chapter.1}
+\contentsline {section}{\numberline {1.1}Features of FDS}{3}{section.1.1}
+\contentsline {section}{\numberline {1.2}What's New in FDS 5?}{4}{section.1.2}
+\contentsline {chapter}{\numberline {2}Getting Started}{7}{chapter.2}
+\contentsline {section}{\numberline {2.1}How to Acquire FDS and Smokeview}{7}{section.2.1}
+\contentsline {section}{\numberline {2.2}Computer Hardware Requirements}{7}{section.2.2}
+\contentsline {section}{\numberline {2.3}Computer Operating System (OS) and Software Requirements}{8}{section.2.3}
+\contentsline {chapter}{\numberline {3}Running FDS}{9}{chapter.3}
+\contentsline {section}{\numberline {3.1}Starting an FDS Calculation}{9}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Starting an FDS Calculation (Single Processor Version)}{9}{subsection.3.1.1}
+\contentsline {subsubsection}{MS Windows}{9}{section*.8}
+\contentsline {subsubsection}{Mac OS X, Unix, Linux}{10}{section*.9}
+\contentsline {subsection}{\numberline {3.1.2}Starting an FDS Calculation (Multiple Processor Version)}{10}{subsection.3.1.2}
+\contentsline {subsubsection}{MPICH2}{11}{section*.10}
+\contentsline {subsubsection}{LAM-MPI}{12}{section*.11}
+\contentsline {section}{\numberline {3.2}Monitoring Progress}{12}{section.3.2}
+\contentsline {chapter}{\numberline {4}User Support}{13}{chapter.4}
+\contentsline {section}{\numberline {4.1}The Version Number}{13}{section.4.1}
+\contentsline {section}{\numberline {4.2}Common Error Statements}{14}{section.4.2}
+\contentsline {section}{\numberline {4.3}Support Requests and Bug Tracking}{15}{section.4.3}
+\contentsline {part}{II\hspace {1em}Writing an FDS Input File}{17}{part.2}
+\contentsline {chapter}{\numberline {5}The Basic Structure of an Input File}{19}{chapter.5}
+\contentsline {section}{\numberline {5.1}Naming the Job}{19}{section.5.1}
+\contentsline {section}{\numberline {5.2}Namelist Formatting}{19}{section.5.2}
+\contentsline {section}{\numberline {5.3}Input File Structure}{20}{section.5.3}
+\contentsline {chapter}{\numberline {6}Setting the Bounds of Time and Space}{23}{chapter.6}
+\contentsline {section}{\numberline {6.1}Naming the Job: The {\tt HEAD} Namelist Group (Table \ref {tbl:HEAD})}{23}{section.6.1}
+\contentsline {section}{\numberline {6.2}Simulation Time: The {\tt TIME} Namelist Group (Table \ref {tbl:TIME})}{23}{section.6.2}
+\contentsline {subsection}{\numberline {6.2.1}Special Topic: Controlling the Time Step}{24}{subsection.6.2.1}
+\contentsline {subsection}{\numberline {6.2.2}Special Topic: Steady-State Applications}{24}{subsection.6.2.2}
+\contentsline {section}{\numberline {6.3}Computational Meshes: The {\tt MESH} Namelist Group (Table \ref {tbl:MESH})}{25}{section.6.3}
+\contentsline {subsection}{\numberline {6.3.1}Two-Dimensional and Axially-Symmetric Calculations}{25}{subsection.6.3.1}
+\contentsline {subsection}{\numberline {6.3.2}Multiple Meshes and Parallel Processing}{26}{subsection.6.3.2}
+\contentsline {subsubsection}{Serial vs. Parallel Processing of Multiple Meshes}{26}{section*.14}
+\contentsline {subsection}{\numberline {6.3.3}Mesh Alignment}{27}{subsection.6.3.3}
+\contentsline {subsubsection}{Accuracy of the Parallel Calculation}{27}{section*.16}
+\contentsline {subsubsection}{Efficiency of the Parallel Calculation}{29}{section*.17}
+\contentsline {subsection}{\numberline {6.3.4}Mesh Stretching: The {\tt TRNX}, {\tt TRNY} and/or {\tt TRNZ} Namelist Groups (Table \ref {tbl:TRNX})}{29}{subsection.6.3.4}
+\contentsline {subsection}{\numberline {6.3.5}Choosing the Right Mesh Dimensions}{31}{subsection.6.3.5}
+\contentsline {section}{\numberline {6.4}Miscellaneous Parameters: The {\tt MISC} Namelist Group (Table \ref {tbl:MISC})}{32}{section.6.4}
+\contentsline {subsection}{\numberline {6.4.1}Stopping and Restarting Calculations}{33}{subsection.6.4.1}
+\contentsline {subsection}{\numberline {6.4.2}Special Topic: Defying Gravity}{33}{subsection.6.4.2}
+\contentsline {subsection}{\numberline {6.4.3}Special Topic: Improving the Pressure Solver}{34}{subsection.6.4.3}
+\contentsline {subsection}{\numberline {6.4.4}Special Topic: Restoring the Baroclinic Vorticity}{35}{subsection.6.4.4}
+\contentsline {subsection}{\numberline {6.4.5}Special Topic: Stack Effect}{35}{subsection.6.4.5}
+\contentsline {subsection}{\numberline {6.4.6}Special Topic: Large Eddy Simulation Parameters}{35}{subsection.6.4.6}
+\contentsline {subsection}{\numberline {6.4.7}Special Topic: Numerical Stability Parameters}{36}{subsection.6.4.7}
+\contentsline {section}{\numberline {6.5}Special Topic: Unusual Initial Conditions: The {\tt INIT} Namelist Group (Table \ref {tbl:INIT})}{37}{section.6.5}
+\contentsline {section}{\numberline {6.6}Special Topic: Setting Limits: The {\tt CLIP} Namelist Group (Table \ref {tbl:CLIP})}{37}{section.6.6}
+\contentsline {chapter}{\numberline {7}Building the Model}{39}{chapter.7}
+\contentsline {section}{\numberline {7.1}Creating Obstructions: The {\tt OBST} Namelist Group (Table \ref {tbl:OBST})}{39}{section.7.1}
+\contentsline {subsection}{\numberline {7.1.1}Non-rectangular Geometry and Sloped Ceilings}{40}{subsection.7.1.1}
+\contentsline {section}{\numberline {7.2}Creating Voids: The {\tt HOLE} Namelist Group (Table \ref {tbl:HOLE})}{41}{section.7.2}
+\contentsline {section}{\numberline {7.3}Applying Surface Properties: The {\tt VENT} Namelist Group (Table \ref {tbl:VENT})}{42}{section.7.3}
+\contentsline {subsection}{\numberline {7.3.1}Special {\tt VENT}s}{43}{subsection.7.3.1}
+\contentsline {subsubsection}{An {\tt OPEN} {\tt VENT}}{43}{section*.19}
+\contentsline {subsubsection}{A {\tt MIRROR} {\tt VENT}}{43}{section*.20}
+\contentsline {subsection}{\numberline {7.3.2}{Controlling {\tt VENT}s}}{44}{subsection.7.3.2}
+\contentsline {subsection}{\numberline {7.3.3}{Trouble-Shooting {\tt VENT}s}}{44}{subsection.7.3.3}
+\contentsline {chapter}{\numberline {8}Boundary Conditions}{45}{chapter.8}
+\contentsline {section}{\numberline {8.1}Basics}{45}{section.8.1}
+\contentsline {section}{\numberline {8.2}Describing the Bounding Surfaces: The {\tt SURF} Namelist Group (Table \ref {tbl:SURF})}{46}{section.8.2}
+\contentsline {subsection}{\numberline {8.2.1}Specifying a Fire with a Known Heat Release Rate}{46}{subsection.8.2.1}
+\contentsline {subsection}{\numberline {8.2.2}Simple Thermal Boundary Conditions}{47}{subsection.8.2.2}
+\contentsline {subsection}{\numberline {8.2.3}Fans and other Velocity Boundary Conditions}{47}{subsection.8.2.3}
+\contentsline {subsubsection}{Supply and Exhaust Vents}{48}{section*.21}
+\contentsline {subsubsection}{Heaters}{48}{section*.22}
+\contentsline {subsubsection}{Total Mass Flux}{48}{section*.23}
+\contentsline {subsubsection}{Tangential Velocity Boundary Conditions}{49}{section*.24}
+\contentsline {subsubsection}{Louvered Vents}{49}{section*.25}
+\contentsline {subsubsection}{Jet Fans}{49}{section*.26}
+\contentsline {subsubsection}{Fan Curves}{50}{section*.27}
+\contentsline {subsection}{\numberline {8.2.4}Species and Species Mass Flux Boundary Conditions}{50}{subsection.8.2.4}
+\contentsline {subsection}{\numberline {8.2.5}Special Topic: Pressure Boundary Conditions}{50}{subsection.8.2.5}
+\contentsline {subsection}{\numberline {8.2.6}Special Topic: Fires and Flows in the Outdoors}{51}{subsection.8.2.6}
+\contentsline {subsection}{\numberline {8.2.7}Special Topic: A Radially-Spreading Fire}{51}{subsection.8.2.7}
+\contentsline {subsection}{\numberline {8.2.8}Special Topic: Non-Planar Walls and Targets}{52}{subsection.8.2.8}
+\contentsline {section}{\numberline {8.3}Pressure-Related Effects: The {\tt ZONE} Namelist Group (Table \ref {tbl:VENT})}{53}{section.8.3}
+\contentsline {subsection}{\numberline {8.3.1}Leaks}{53}{subsection.8.3.1}
+\contentsline {subsection}{\numberline {8.3.2}Fan Curves}{54}{subsection.8.3.2}
+\contentsline {section}{\numberline {8.4}Describing Real Materials: The {\tt MATL} Namelist Group}{56}{section.8.4}
+\contentsline {subsection}{\numberline {8.4.1}Thermal Properties}{57}{subsection.8.4.1}
+\contentsline {subsection}{\numberline {8.4.2}Pyrolysis Models}{57}{subsection.8.4.2}
+\contentsline {subsubsection}{Solid Fuels}{58}{section*.29}
+\contentsline {subsubsection}{Solid Fuels that Burn at a Specified Rate}{60}{section*.30}
+\contentsline {subsubsection}{Liquid Fuels}{61}{section*.31}
+\contentsline {subsection}{\numberline {8.4.3}Special topic: Yields of Gaseous Species (NU\_GAS)}{62}{subsection.8.4.3}
+\contentsline {subsection}{\numberline {8.4.4}Special topic: Two-Sided Burning}{62}{subsection.8.4.4}
+\contentsline {subsection}{\numberline {8.4.5}Special topic: Making Fuels Disappear (BURN\_AWAY)}{63}{subsection.8.4.5}
+\contentsline {subsection}{\numberline {8.4.6}Special Topic: Initial and Backside Boundary Conditions}{63}{subsection.8.4.6}
+\contentsline {subsection}{\numberline {8.4.7}Special Topic: Numerical Accuracy and Stability}{64}{subsection.8.4.7}
+\contentsline {section}{\numberline {8.5}User-Specified Functions: The {\tt RAMP} and {\tt TABL} Namelist Groups}{65}{section.8.5}
+\contentsline {subsection}{\numberline {8.5.1}Time-Dependent Functions}{65}{subsection.8.5.1}
+\contentsline {subsection}{\numberline {8.5.2}Temperature-Dependent Functions}{66}{subsection.8.5.2}
+\contentsline {subsection}{\numberline {8.5.3}Tabular Functions}{67}{subsection.8.5.3}
+\contentsline {section}{\numberline {8.6}Coloring Obstructions, Vents, Surfaces and Meshes}{68}{section.8.6}
+\contentsline {subsection}{\numberline {8.6.1}Texture Mapping}{68}{subsection.8.6.1}
+\contentsline {chapter}{\numberline {9}Combustion and Radiation}{71}{chapter.9}
+\contentsline {section}{\numberline {9.1}Mixture Fraction Combustion: The {\tt REAC} Namelist Group}{71}{section.9.1}
+\contentsline {subsection}{\numberline {9.1.1}The Basics}{71}{subsection.9.1.1}
+\contentsline {subsection}{\numberline {9.1.2}Special Topic: Heat of Combustion}{73}{subsection.9.1.2}
+\contentsline {subsection}{\numberline {9.1.3}Special Topic: Flame Extinction}{74}{subsection.9.1.3}
+\contentsline {subsection}{\numberline {9.1.4}Special Topic: CO Production}{74}{subsection.9.1.4}
+\contentsline {subsection}{\numberline {9.1.5}Special Topic: Turbulent Combustion}{74}{subsection.9.1.5}
+\contentsline {section}{\numberline {9.2}Extra Gas Species: The {\tt SPEC} Namelist Group}{76}{section.9.2}
+\contentsline {section}{\numberline {9.3}Finite-Rate Combustion}{78}{section.9.3}
+\contentsline {section}{\numberline {9.4}Radiation Transport: The {\tt RADI} Namelist Group}{79}{section.9.4}
+\contentsline {chapter}{\numberline {10}Particles and Droplets: The {\tt PART} Namelist Group}{81}{chapter.10}
+\contentsline {section}{\numberline {10.1}Basics}{81}{section.10.1}
+\contentsline {section}{\numberline {10.2}Controlling Particles and Droplets}{82}{section.10.2}
+\contentsline {subsubsection}{Particles Introduced at a Solid Surface}{82}{section*.34}
+\contentsline {subsubsection}{Droplets Introduced at a Sprinkler or Nozzle}{82}{section*.35}
+\contentsline {subsubsection}{Particles or Droplets Introduced Initially}{83}{section*.36}
+\contentsline {subsubsection}{Droplets that Strike Solid Surfaces}{83}{section*.37}
+\contentsline {section}{\numberline {10.3}Particle and Droplet Properties}{83}{section.10.3}
+\contentsline {section}{\numberline {10.4}Special Types of Particles and Droplets}{84}{section.10.4}
+\contentsline {subsubsection}{Massless Particles}{84}{section*.38}
+\contentsline {subsubsection}{Static Particles or Droplets}{84}{section*.39}
+\contentsline {subsubsection}{Water Droplets}{85}{section*.40}
+\contentsline {subsubsection}{Fuel Droplets}{85}{section*.41}
+\contentsline {subsubsection}{Particles that do not Evaporate}{85}{section*.42}
+\contentsline {section}{\numberline {10.5}Coloring Particles and Droplets}{85}{section.10.5}
+\contentsline {section}{\numberline {10.6}Special Topic: Droplet Fuel Sprays}{85}{section.10.6}
+\contentsline {section}{\numberline {10.7}Special Topic: Suppression by Water (Mixture Fraction Model Only)}{86}{section.10.7}
+\contentsline {chapter}{\numberline {11}Devices and Control Logic}{89}{chapter.11}
+\contentsline {section}{\numberline {11.1}Device Location and Orientation: The {\tt DEVC} Namelist Group (Table \ref {tbl:DEVC})}{89}{section.11.1}
+\contentsline {section}{\numberline {11.2}Device Output}{90}{section.11.2}
+\contentsline {section}{\numberline {11.3}Special Devices and their Properties: The {\tt PROP} Namelist Group (Table \ref {tbl:PROP})}{90}{section.11.3}
+\contentsline {subsection}{\numberline {11.3.1}Sprinklers}{90}{subsection.11.3.1}
+\contentsline {subsubsection}{Special Topic: Specifying Complex Spray Patterns}{92}{section*.43}
+\contentsline {subsubsection}{Special Topic: Varying Pipe Pressure}{92}{section*.44}
+\contentsline {subsection}{\numberline {11.3.2}Nozzles}{93}{subsection.11.3.2}
+\contentsline {subsection}{\numberline {11.3.3}Heat Detectors}{93}{subsection.11.3.3}
+\contentsline {subsection}{\numberline {11.3.4}Smoke Detectors}{93}{subsection.11.3.4}
+\contentsline {subsubsection}{Defining Smoke}{94}{section*.46}
+\contentsline {subsection}{\numberline {11.3.5}Beam Detection Systems}{95}{subsection.11.3.5}
+\contentsline {subsection}{\numberline {11.3.6}Aspiration Detection Systems}{95}{subsection.11.3.6}
+\contentsline {section}{\numberline {11.4}Basic Control Logic}{96}{section.11.4}
+\contentsline {subsection}{\numberline {11.4.1}Creating and Removing Obstructions}{96}{subsection.11.4.1}
+\contentsline {subsection}{\numberline {11.4.2}Activating and Deactivating Vents}{97}{subsection.11.4.2}
+\contentsline {section}{\numberline {11.5}Advanced Control Functions: The {\tt CTRL} Namelist Group}{98}{section.11.5}
+\contentsline {subsection}{\numberline {11.5.1}Control Functions: {\tt ANY}, {\tt ALL}, {\tt ONLY}, and {\tt AT\_LEAST}}{98}{subsection.11.5.1}
+\contentsline {subsection}{\numberline {11.5.2}Control Function: {\tt TIME\_DELAY}}{99}{subsection.11.5.2}
+\contentsline {subsection}{\numberline {11.5.3}Control Function: {\tt DEADBAND}}{99}{subsection.11.5.3}
+\contentsline {subsection}{\numberline {11.5.4}Control Function: {\tt RESTART} and {\tt KILL} }{100}{subsection.11.5.4}
+\contentsline {subsection}{\numberline {11.5.5}Control Function: {\tt CUSTOM} }{100}{subsection.11.5.5}
+\contentsline {subsection}{\numberline {11.5.6}Combining Control Functions: A Pre-Action Sprinkler System}{101}{subsection.11.5.6}
+\contentsline {subsection}{\numberline {11.5.7}Combining Control Functions: A Dry Pipe Sprinkler System}{101}{subsection.11.5.7}
+\contentsline {chapter}{\numberline {12}Output Data}{103}{chapter.12}
+\contentsline {section}{\numberline {12.1}Output Control Parameters: The {\tt DUMP} Namelist Group}{103}{section.12.1}
+\contentsline {section}{\numberline {12.2}Output File Types}{105}{section.12.2}
+\contentsline {subsection}{\numberline {12.2.1}Device Output: The {\tt DEVC} Namelist Group}{105}{subsection.12.2.1}
+\contentsline {subsection}{\numberline {12.2.2}Quantities within Solids: The {\tt PROF} Namelist Group}{106}{subsection.12.2.2}
+\contentsline {subsection}{\numberline {12.2.3}Animated Planar Slices: The {\tt SLCF} Namelist Group}{106}{subsection.12.2.3}
+\contentsline {subsection}{\numberline {12.2.4}Animated Boundary Quantities: The {\tt BNDF} Namelist Group}{107}{subsection.12.2.4}
+\contentsline {subsection}{\numberline {12.2.5}Animated Isosurfaces: The {\tt ISOF} Namelist Group}{107}{subsection.12.2.5}
+\contentsline {subsection}{\numberline {12.2.6}Plot3D Static Data Dumps}{107}{subsection.12.2.6}
+\contentsline {subsection}{\numberline {12.2.7}SMOKE3D: Realistic Smoke and Fire}{108}{subsection.12.2.7}
+\contentsline {section}{\numberline {12.3}Special Output Quantities}{109}{section.12.3}
+\contentsline {subsection}{\numberline {12.3.1}Heat Release Rate}{109}{subsection.12.3.1}
+\contentsline {subsection}{\numberline {12.3.2}Visibility and Obscuration}{110}{subsection.12.3.2}
+\contentsline {subsection}{\numberline {12.3.3}Layer Height and the Average Upper and Lower Layer Temperatures}{110}{subsection.12.3.3}
+\contentsline {subsection}{\numberline {12.3.4}The True Gas Temperature vs. the Measured Gas Temperature}{111}{subsection.12.3.4}
+\contentsline {subsection}{\numberline {12.3.5}Heat Fluxes and Thermal Radiation}{111}{subsection.12.3.5}
+\contentsline {subsection}{\numberline {12.3.6}Droplet Output Quantities}{112}{subsection.12.3.6}
+\contentsline {subsubsection}{Droplet Quantities on Solid Surfaces}{112}{section*.48}
+\contentsline {subsubsection}{Droplet Mass and Fluxes in Gas Phase}{112}{section*.49}
+\contentsline {subsubsection}{Local Spray Properties}{112}{section*.50}
+\contentsline {subsection}{\numberline {12.3.7}Interfacing with Structural Models}{113}{subsection.12.3.7}
+\contentsline {subsection}{\numberline {12.3.8}Useful Solid Phase Outputs}{114}{subsection.12.3.8}
+\contentsline {subsection}{\numberline {12.3.9}Fractional Effective Dose (FED)}{114}{subsection.12.3.9}
+\contentsline {subsection}{\numberline {12.3.10}Spatially-Integrated Outputs}{115}{subsection.12.3.10}
+\contentsline {subsubsection}{Volume-Weighted Mean}{115}{section*.51}
+\contentsline {subsubsection}{Mass-Weighted Mean}{115}{section*.52}
+\contentsline {subsubsection}{Volume Integral}{116}{section*.53}
+\contentsline {subsubsection}{Area Integral}{116}{section*.54}
+\contentsline {subsubsection}{Surface Integral}{116}{section*.55}
+\contentsline {subsubsection}{Mass and Energy Flows}{116}{section*.56}
+\contentsline {subsection}{\numberline {12.3.11}Temporally-Integrated Outputs}{117}{subsection.12.3.11}
+\contentsline {subsection}{\numberline {12.3.12}Wind and the Pressure Coefficient}{117}{subsection.12.3.12}
+\contentsline {subsection}{\numberline {12.3.13}Dry Volume and Mass Fractions}{117}{subsection.12.3.13}
+\contentsline {section}{\numberline {12.4}Extracting Numbers from the Output Data Files}{117}{section.12.4}
+\contentsline {section}{\numberline {12.5}Summary of Frequently-Used Output Quantities}{119}{section.12.5}
+\contentsline {section}{\numberline {12.6}Summary of Infrequently-Used Output Quantities}{123}{section.12.6}
+\contentsline {chapter}{\numberline {13}Alphabetical List of Input Parameters}{125}{chapter.13}
+\contentsline {section}{\numberline {13.1}{\tt BNDF} (Boundary File Parameters)}{126}{section.13.1}
+\contentsline {section}{\numberline {13.2}{\tt CLIP} (MIN/MAX Clipping Parameters)}{126}{section.13.2}
+\contentsline {section}{\numberline {13.3}{\tt CTRL} (Control Function Parameters)}{126}{section.13.3}
+\contentsline {section}{\numberline {13.4}{\tt DEVC} (Device Parameters)}{127}{section.13.4}
+\contentsline {section}{\numberline {13.5}{\tt DUMP} (Output Parameters)}{127}{section.13.5}
+\contentsline {section}{\numberline {13.6}{\tt HEAD} (Header Parameters)}{128}{section.13.6}
+\contentsline {section}{\numberline {13.7}{\tt HOLE} (Obstruction Cutout Parameters)}{128}{section.13.7}
+\contentsline {section}{\numberline {13.8}{\tt INIT} (Initial Conditions)}{129}{section.13.8}
+\contentsline {section}{\numberline {13.9}{\tt ISOF} (Isosurface Parameters)}{129}{section.13.9}
+\contentsline {section}{\numberline {13.10}{\tt MATL} (Material Properties)}{129}{section.13.10}
+\contentsline {section}{\numberline {13.11}{\tt MESH} (Mesh Parameters)}{130}{section.13.11}
+\contentsline {section}{\numberline {13.12}{\tt MISC} (Miscellaneous Parameters)}{130}{section.13.12}
+\contentsline {section}{\numberline {13.13}{\tt OBST} (Obstruction Parameters)}{132}{section.13.13}
+\contentsline {section}{\numberline {13.14}{\tt PART} (Lagrangian Particles/Droplets)}{132}{section.13.14}
+\contentsline {section}{\numberline {13.15}{\tt PROF} (Wall Profile Parameters)}{133}{section.13.15}
+\contentsline {section}{\numberline {13.16}{\tt PROP} (Device Properties)}{133}{section.13.16}
+\contentsline {section}{\numberline {13.17}{\tt RADI} (Radiation Parameters)}{134}{section.13.17}
+\contentsline {section}{\numberline {13.18}{\tt RAMP} (Ramp Function Parameters)}{135}{section.13.18}
+\contentsline {section}{\numberline {13.19}{\tt REAC} (Reaction Parameters)}{135}{section.13.19}
+\contentsline {section}{\numberline {13.20}{\tt SLCF} (Slice File Parameters)}{136}{section.13.20}
+\contentsline {section}{\numberline {13.21}{\tt SPEC} (Species Parameters)}{136}{section.13.21}
+\contentsline {section}{\numberline {13.22}{\tt SURF} (Surface Properties)}{137}{section.13.22}
+\contentsline {section}{\numberline {13.23}{\tt TABL} (Table Parameters)}{138}{section.13.23}
+\contentsline {section}{\numberline {13.24}{\tt TIME} (Time Parameters)}{139}{section.13.24}
+\contentsline {section}{\numberline {13.25}{\tt TRNX, TRNY, TRNZ} (MESH Transformations)}{139}{section.13.25}
+\contentsline {section}{\numberline {13.26}{\tt VENT} (Vent Parameters)}{139}{section.13.26}
+\contentsline {section}{\numberline {13.27}{\tt ZONE} (Pressure Zone Parameters)}{140}{section.13.27}
+\contentsline {chapter}{\numberline {14}Conversion of Old Input Files to FDS 5}{141}{chapter.14}
+\contentsline {section}{\numberline {14.1}Numerical Domain Parameters: {\tt GRID} and {\tt PDIM} }{141}{section.14.1}
+\contentsline {section}{\numberline {14.2}Obstructions, Vents, and Holes: {\tt OBST}, {\tt VENT}, and {\tt HOLE}}{141}{section.14.2}
+\contentsline {section}{\numberline {14.3}Surface Parameters: {\tt SURF}}{141}{section.14.3}
+\contentsline {section}{\numberline {14.4}Reaction Parameters: {\tt REAC}}{142}{section.14.4}
+\contentsline {section}{\numberline {14.5}Device Parameters: {\tt SPRK}, {\tt SMOD}, {\tt HEAT}, {\tt THCP}}{143}{section.14.5}
+\contentsline {part}{III\hspace {1em}Sample Calculations}{145}{part.3}
+\contentsline {chapter}{\numberline {15}Basic Hydrodynamics}{147}{chapter.15}
+\contentsline {section}{\numberline {15.1}Axially-Symmetric Helium Plume ({\bf helium\_2d}) }{147}{section.15.1}
+\contentsline {section}{\numberline {15.2}Sawtooth ({\bf sawtooth})}{148}{section.15.2}
+\contentsline {section}{\numberline {15.3}Pressure Boundaries ({\bf pressure\_boundary})}{149}{section.15.3}
+\contentsline {chapter}{\numberline {16}Thermodynamics}{151}{chapter.16}
+\contentsline {section}{\numberline {16.1}Pressure Rise in a Sealed Enclosure ({\bf pressure\_rise}) }{152}{section.16.1}
+\contentsline {section}{\numberline {16.2}Leaks and Fans in a Sealed Enclosure ({\bf leak\_test} and {\bf leak\_test\_2})}{153}{section.16.2}
+\contentsline {section}{\numberline {16.3}Fan Curves ({\bf fan\_test})}{154}{section.16.3}
+\contentsline {section}{\numberline {16.4}Stack Effect ({\bf stack\_effect})}{155}{section.16.4}
+\contentsline {chapter}{\numberline {17}Combustion}{157}{chapter.17}
+\contentsline {section}{\numberline {17.1}A Simple Under-Ventilated Compartment Fire ({\bf door\_crack}) }{157}{section.17.1}
+\contentsline {section}{\numberline {17.2}Testing the ``Burn-Away'' Feature ({\bf box\_burn\_away}) }{158}{section.17.2}
+\contentsline {chapter}{\numberline {18}Detectors}{159}{chapter.18}
+\contentsline {section}{\numberline {18.1}Aspiration Detector ({\bf beam\_detector})}{159}{section.18.1}
+\contentsline {section}{\numberline {18.2}Aspiration Detector ({\bf aspiration\_detector}) }{160}{section.18.2}
+\contentsline {chapter}{\numberline {19}Droplets and Sprays}{161}{chapter.19}
+\contentsline {section}{\numberline {19.1}Water Droplet Evaporation ({\bf water\_evaporation}) }{161}{section.19.1}
+\contentsline {section}{\numberline {19.2}Measuring Water Flux ({\bf bucket\_test}) }{162}{section.19.2}
+\contentsline {section}{\numberline {19.3}Complex Spray Patterns ({\bf bucket\_test\_2}) }{163}{section.19.3}
+\contentsline {chapter}{\numberline {20}General Functionality}{165}{chapter.20}
+\contentsline {section}{\numberline {20.1}Creating and Removing {\tt \relax \fontsize {10}{12}\selectfont \abovedisplayskip 10\p@ plus2\p@ minus5\p@ \abovedisplayshortskip \z@ plus3\p@ \belowdisplayshortskip 6\p@ plus3\p@ minus3\p@ \def \leftmargin \leftmargini \parsep 4.5\p@ plus2\p@ minus\p@ \topsep 9\p@ plus3\p@ minus5\p@ \itemsep 4.5\p@ plus2\p@ minus\p@ {\leftmargin \leftmargini \topsep 6\p@ plus2\p@ minus2\p@ \parsep 3\p@ plus2\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip HOLE}s and {\tt \relax \fontsize {10}{12}\selectfont \abovedisplayskip 10\p@ plus2\p@ minus5\p@ \abovedisplayshortskip \z@ plus3\p@ \belowdisplayshortskip 6\p@ plus3\p@ minus3\p@ \def \leftmargin \leftmargini \parsep 4.5\p@ plus2\p@ minus\p@ \topsep 9\p@ plus3\p@ minus5\p@ \itemsep 4.5\p@ plus2\p@ minus\p@ {\leftmargin \leftmargini \topsep 6\p@ plus2\p@ minus2\p@ \parsep 3\p@ plus2\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip OBST}ructions ({\bf create\_remove})}{165}{section.20.1}
+\contentsline {chapter}{\numberline {21}Materials}{167}{chapter.21}
+\contentsline {section}{\numberline {21.1}Testing Solid Phase Properties}{167}{section.21.1}
+\contentsline {section}{\numberline {21.2}Pyrolysis Samples}{169}{section.21.2}
+\contentsline {subsection}{\numberline {21.2.1}A Simple Thermoplastic ({\bf thermoplastic}) }{169}{subsection.21.2.1}
+\contentsline {subsection}{\numberline {21.2.2}A Charring Solid ({\bf charring\_solid}) }{171}{subsection.21.2.2}
+\contentsline {chapter}{\numberline {22}Sample Fires}{173}{chapter.22}
+\contentsline {section}{\numberline {22.1}A Couch Fire ({\bf couch}) }{174}{section.22.1}
+\contentsline {section}{\numberline {22.2}Flame Spread along a Cable Tray ({\bf cable\_tray}) }{175}{section.22.2}
+\contentsline {section}{\numberline {22.3}A Liquid Fuel Spray Burner ({\bf spray\_burner}) }{176}{section.22.3}
+\contentsline {part}{IV\hspace {1em}Working with the FDS Source Code}{179}{part.4}
+\contentsline {chapter}{\numberline {23}Compiling FDS}{181}{chapter.23}
+\contentsline {section}{\numberline {23.1}FDS Source Code}{181}{section.23.1}
+\contentsline {chapter}{\numberline {24}Output File Formats}{183}{chapter.24}
+\contentsline {section}{\numberline {24.1}Diagnostic Output}{183}{section.24.1}
+\contentsline {section}{\numberline {24.2}Heat Release Rate and Related Quantities}{184}{section.24.2}
+\contentsline {section}{\numberline {24.3}Device Output Data}{184}{section.24.3}
+\contentsline {section}{\numberline {24.4}Control Output Data}{185}{section.24.4}
+\contentsline {section}{\numberline {24.5}Gas Mass Data}{185}{section.24.5}
+\contentsline {section}{\numberline {24.6}Mixture Fraction State Relations}{185}{section.24.6}
+\contentsline {section}{\numberline {24.7}Slice Files}{185}{section.24.7}
+\contentsline {section}{\numberline {24.8}Plot3D Data}{186}{section.24.8}
+\contentsline {section}{\numberline {24.9}Boundary Files}{187}{section.24.9}
+\contentsline {section}{\numberline {24.10}Particle Data}{187}{section.24.10}
+\contentsline {section}{\numberline {24.11}Profile Files}{188}{section.24.11}
+\contentsline {section}{\numberline {24.12}3-D Smoke File Format}{188}{section.24.12}
+\contentsline {section}{\numberline {24.13}Isosurface File Format}{189}{section.24.13}

@@ -2385,7 +2385,7 @@ T_LOOP_1: DO J=1,500
          TSTAR = J*10/EPSK_N
          OMEGA = 1.16145_EB*TSTAR**(-0.14874_EB) + 0.52487_EB*EXP(-0.77320_EB*TSTAR) + 2.16178_EB*EXP(-2.43787_EB*TSTAR)
          MU_TMP(NN) = 26.69E-7_EB*(MW_N*J*10)**0.5_EB/(SIGMA2*OMEGA)/MW_N
-         K_TMP(NN)  = MU_TMP(NN) * CP_TMP(NN) / PR
+         K_TMP(NN)  = MU_TMP(NN) * CP_TMP(NN) / PR*MW_N
          !Diffusivity
          SIGMA2 = (0.5_EB*(SIG_N+SIG(0)))**2
          EPSIJ  = SQRT(EPSK_N*EPSK(0))

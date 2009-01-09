@@ -318,7 +318,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
    KDTDY => WORK2
    KDTDZ => WORK3
    KP    => WORK4
-   KP = Y2K_C(NINT(0.1_EB*TMPA))
+   KP = Y2K_C(NINT(0.1_EB*TMPA))*SPECIES(0)%MW
    ! Compute thermal conductivity k (KP)
  
    K_DNS_OR_LES: IF (DNS) THEN
@@ -339,7 +339,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
-                  KP(I,J,K) = Y2K_C(ITMP)
+                  KP(I,J,K) = Y2K_C(ITMP)*SPECIES(0)%MW
                ENDDO
             ENDDO
          ENDDO

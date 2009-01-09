@@ -85,7 +85,7 @@ IF (N_SPECIES == 0) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
-            MU(I,J,K)=Y2MU_C(ITMP)
+            MU(I,J,K)=Y2MU_C(ITMP)*SPECIES(0)%MW
          ENDDO
       ENDDO
    ENDDO
@@ -513,7 +513,7 @@ IF (LES) THEN
             SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
          
             ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
-            MU(I,J,K) = Y2MU_C(ITMP) + RHOP(I,J,K)*(CSMAG*DELTA)**2*SS
+            MU(I,J,K) = Y2MU_C(ITMP)*SPECIES(0)%MW + RHOP(I,J,K)*(CSMAG*DELTA)**2*SS
          ENDDO
       ENDDO
    ENDDO
@@ -1811,7 +1811,7 @@ PARABOLIC_IF: IF (DNS .OR. CELL_SIZE<0.005_EB) THEN
       ELSE
          R_DX2 = 1._EB/DXMIN**2 + 1._EB/DYMIN**2 + 1._EB/DZMIN**2
       ENDIF
-      MUTRM = MAX(RPR,RSC)*Y2MU_C(NINT(0.1_EB*TMPA))
+      MUTRM = MAX(RPR,RSC)*Y2MU_C(NINT(0.1_EB*TMPA))*SPECIES(0)%MW
    ELSE INCOMPRESSIBLE_IF
       MU_MAX = 0._EB   
       DO K=1,KBAR
