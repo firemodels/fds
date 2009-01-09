@@ -391,7 +391,7 @@ Contains
     Logical :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, &
          EXIT_SIGN, KEEP_XY, USE_V0
     Logical :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA,&
-         OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE
+         OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, OUTPUT_MOTIVE_ANGLE
     Integer, Dimension(3) :: RGB, AVATAR_RGB
     Character(26) :: VENT_FFIELD, MESH_ID, EVAC_MESH
     Real(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED
@@ -465,7 +465,7 @@ Contains
          D_TORSO_MEAN, D_SHOULDER_MEAN, TAU_ROT, M_INERTIA, &
          FC_DAMPING, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
          OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA,&
-         OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, &
+         OUTPUT_MOTIVE_ANGLE, OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, &
          COLOR_INDEX, DEAD_RGB, DEAD_COLOR, &
          SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, &
          TAU_CHANGE_DOOR, RGB, COLOR, &
@@ -878,6 +878,7 @@ Contains
       FAC_V0_NOCF = 0.5_EB  ! prefer v0, if no counterflow
       OUTPUT_SPEED         = .False.
       OUTPUT_MOTIVE_FORCE  = .False.
+      OUTPUT_MOTIVE_ANGLE  = .False.
       OUTPUT_FED           = .False.
       OUTPUT_OMEGA         = .False.
       OUTPUT_ANGLE         = .False.
@@ -1210,6 +1211,7 @@ Contains
 
       If (COLOR_METHOD >= 0) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
       If (OUTPUT_MOTIVE_FORCE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
+      If (OUTPUT_MOTIVE_ANGLE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
       If (OUTPUT_FED) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
       If (OUTPUT_SPEED) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
       If (OUTPUT_OMEGA) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
@@ -1253,9 +1255,9 @@ Contains
          OUTPUT_QUANTITY(247)%UNITS      = '  '
          OUTPUT_QUANTITY(247)%SHORT_NAME = 'color'
 
-         OUTPUT_QUANTITY(248)%NAME       = 'HUMAN_ANGULAR_ACCELERATION'
-         OUTPUT_QUANTITY(248)%UNITS      = 'rad/s2'
-         OUTPUT_QUANTITY(248)%SHORT_NAME = 'acc'
+         OUTPUT_QUANTITY(248)%NAME       = 'HUMAN_MOTIVE_ANGLE'
+         OUTPUT_QUANTITY(248)%UNITS      = 'rad'
+         OUTPUT_QUANTITY(248)%SHORT_NAME = 'mAngle'
 
          n = 1
          If (COLOR_METHOD >= 0) Then
@@ -1288,6 +1290,10 @@ Contains
          End If
          If (OUTPUT_TOTAL_FORCE) Then
             EVAC_QUANTITIES_INDEX(n)=246
+            n = n + 1
+         End If
+         If (OUTPUT_MOTIVE_ANGLE) Then
+            EVAC_QUANTITIES_INDEX(n)=248
             n = n + 1
          End If
 
@@ -4427,7 +4433,7 @@ Contains
                         Real(HUMAN_GRID(i,j)%SOOT_DENS,FB), &
                         Real(HUMAN_GRID(i,j)%TMP_G,FB), &
                         Real(HUMAN_GRID(i,j)%RADFLUX,FB)
-                Else     ! Read FED from a file
+                Else ! Read FED from a file
                    ! Read Fed, Soot, Temp(C), and Radflux
                    Read (LU_EVACFED,Iostat=ios) tmpout1, tmpout2, tmpout3, tmpout4
                    If (ios.Ne.0) Then
@@ -5024,8 +5030,8 @@ Contains
              ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
              UBAR = HR%UBAR; VBAR = HR%VBAR
           Else
-          Call Find_Prefered_Direction(I, N, T, T_BEGIN, L_Dead, NM_STRS_MESH, &
-               II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
+             Call Find_Prefered_Direction(I, N, T, T_BEGIN, L_Dead, NM_STRS_MESH, &
+                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
           End If
           ! ========================================================
           ! Prefered walking direction v0 is now (UBAR,VBAR)
@@ -6461,16 +6467,14 @@ Contains
             VBAR = STRP%V_DOWN(II,JJ)
          End If
       Else
-         UBAR = AFILL(MFF%U(II-1,JJY,KKZ),MFF%U(II,JJY,KKZ), &
-              MFF%U(II-1,JJY+1,KKZ),MFF%U(II,JJY+1,KKZ), &
-              MFF%U(II-1,JJY,KKZ+1),MFF%U(II,JJY,KKZ+1), &
-              MFF%U(II-1,JJY+1,KKZ+1),MFF%U(II,JJY+1,KKZ+1), &
-              XI-II+1,YJ-JJY+0.5_EB,ZK-KKZ+0.5_EB)
-         VBAR = AFILL(MFF%V(IIX,JJ-1,KKZ),MFF%V(IIX+1,JJ-1,KKZ), &
-              MFF%V(IIX,JJ,KKZ),MFF%V(IIX+1,JJ,KKZ), &
-              MFF%V(IIX,JJ-1,KKZ+1),MFF%V(IIX+1,JJ-1,KKZ+1), &
-              MFF%V(IIX,JJ,KKZ+1),MFF%V(IIX+1,JJ,KKZ+1), &
-              XI-IIX+0.5_EB,YJ-JJ+1,ZK-KKZ+0.5_EB)
+         ! For thin walls and large dx,dy one do not get nice
+         ! interpolation by using AFILL2. AFILL2 does not notice that
+         ! there are thin walls and, thus, sometimes takes values from
+         ! the other side of the thin wall in order to interpolate.
+         ! UBAR = AFILL2(MFF%U,II-1,JJY,KKZ,XI-II+1,YJ-JJY+.5_EB,ZK-KKZ+.5_EB)
+         ! VBAR = AFILL2(MFF%V,IIX,JJ-1,KKZ,XI-IIX+.5_EB,YJ-JJ+1,ZK-KKZ+.5_EB)
+         UBAR = (1.0_EB-(XI-II+1))*MFF%U(II-1,JJ,1) + (XI-II+1)*MFF%U(II,JJ,1)
+         VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
       End If
 
       EVEL = Sqrt(UBAR**2 + VBAR**2)  ! (UBAR,VBAR) is an unit vector
@@ -8896,7 +8900,7 @@ Contains
     Integer, Intent(IN) :: NM
     Real(EB), Intent(IN) :: T
     Integer :: NPP,NPLIM,i,izero,nn,n
-    Real(EB) :: TNOW
+    Real(EB) :: TNOW, EVEL, angle_hr
     Real(FB), Allocatable, Dimension(:) :: XP,YP,ZP
     Real(FB), Allocatable, Dimension(:,:) :: QP, AP
     Integer, Allocatable, Dimension(:) :: TA
@@ -8961,10 +8965,15 @@ Contains
           Do NN=1,EVAC_N_QUANTITIES
              Select Case(EVAC_QUANTITIES_INDEX(NN))
              Case(240)  ! MOTIVE_ACCELERATION, Unimpeded walking Speed / tau
-                QP(NPP,NN) = Real(HR%Speed/HR%Tau,FB)
+                EVEL = Sqrt(HR%UBAR**2 + HR%VBAR**2)
+                If (EVEL > 0.0_EB) Then
+                   QP(NPP,NN) = Real(HR%Speed/HR%Tau,FB)
+                Else
+                   QP(NPP,NN) = Real(EVEL,FB)
+                End If
              Case(241)  ! FED_DOSE, Fractional Effective Dose
                 QP(NPP,NN) = Real(HR%IntDose,FB)
-             Case(242)  ! SPEED, Human peed
+             Case(242)  ! SPEED, Human speed
                 QP(NPP,NN) = Real(Sqrt(HR%U**2 + HR%V**2),FB)
              Case(243)  ! ANGULAR_SPEED, Human Angular Velocity
                 QP(NPP,NN) = Real(HR%Omega,FB)
@@ -8977,8 +8986,19 @@ Contains
                 QP(NPP,NN) = Real(HR%SumForces2 ,FB)
              Case(247)  ! COLOR, Human color index
                 QP(NPP,NN) = Real(HR%COLOR_INDEX - 1,FB)
-             Case(248)  ! ANGULAR_ACCELERATION, 
-                QP(NPP,NN) = Real(HR%Torque/HR%M_iner,FB)
+             Case(248)  ! MOTIVE_ANGLE, 
+                EVEL = Sqrt(HR%UBAR**2 + HR%VBAR**2)
+                If (EVEL > 0.0_EB) Then
+                   If (HR%VBAR >= 0.0_EB) Then
+                      angle_hr = Acos(HR%UBAR/EVEL)
+                   Else
+                      angle_hr = 2.0_EB*Pi - Acos(HR%UBAR/EVEL)
+                   End If
+                   If (angle_hr == 2.0_EB*Pi) angle_hr = 0.0_EB  ! agent HR angle is [0,2Pi)
+                Else
+                   angle_hr = 0.0_EB
+                End If
+                QP(NPP,NN) = Real(angle_hr*180.0_EB/Pi,FB)
              End Select
           End Do
 
