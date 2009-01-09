@@ -1,0 +1,111 @@
+\contentsline {chapter}{Preface}{i}{chapter*.1}
+\contentsline {chapter}{Disclaimer}{iii}{chapter*.2}
+\contentsline {chapter}{About the Authors}{v}{chapter*.3}
+\contentsline {chapter}{Acknowledgments}{vii}{chapter*.4}
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}
+\contentsline {subsubsection}{Howard Baum, NIST Fellow Emeritus}{1}{section*.6}
+\contentsline {chapter}{\numberline {2}Model Overview}{5}{chapter.2}
+\contentsline {section}{\numberline {2.1}Basic Description of FDS}{5}{section.2.1}
+\contentsline {subsection}{\numberline {2.1.1}Type of Model}{5}{subsection.2.1.1}
+\contentsline {subsection}{\numberline {2.1.2}Version History}{5}{subsection.2.1.2}
+\contentsline {subsection}{\numberline {2.1.3}Model Developers}{6}{subsection.2.1.3}
+\contentsline {subsection}{\numberline {2.1.4}Intended Uses}{6}{subsection.2.1.4}
+\contentsline {subsection}{\numberline {2.1.5}Input Parameters}{7}{subsection.2.1.5}
+\contentsline {subsection}{\numberline {2.1.6}Output Quantities}{7}{subsection.2.1.6}
+\contentsline {subsection}{\numberline {2.1.7}Governing Equations, Assumptions and Numerics}{8}{subsection.2.1.7}
+\contentsline {subsection}{\numberline {2.1.8}Limitations}{9}{subsection.2.1.8}
+\contentsline {section}{\numberline {2.2}Peer Review Process}{11}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Survey of the Relevant Fire and Combustion Literature}{11}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Review of the Theoretical Basis of the Model}{12}{subsection.2.2.2}
+\contentsline {section}{\numberline {2.3}Development Process}{14}{section.2.3}
+\contentsline {chapter}{\numberline {3}Governing Equations}{15}{chapter.3}
+\contentsline {section}{\numberline {3.1}Hydrodynamic Model}{15}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}The Fundamental Conservation Equations}{15}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}The Low Mach Number Assumption and the Equation of State}{17}{subsection.3.1.2}
+\contentsline {subsection}{\numberline {3.1.3}Combination of the Mass and Energy Equations via the Divergence}{18}{subsection.3.1.3}
+\contentsline {subsection}{\numberline {3.1.4}The Momentum Equation}{19}{subsection.3.1.4}
+\contentsline {subsection}{\numberline {3.1.5}The Equation for Pressure (Poisson's Equation)}{20}{subsection.3.1.5}
+\contentsline {subsection}{\numberline {3.1.6}Large Eddy Simulation (LES)}{20}{subsection.3.1.6}
+\contentsline {subsection}{\numberline {3.1.7}Direct Numerical Simulation (DNS)}{21}{subsection.3.1.7}
+\contentsline {section}{\numberline {3.2}Combustion Model}{23}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}Mixture Fraction Combustion Model}{23}{subsection.3.2.1}
+\contentsline {subsubsection}{A Single-Step, Instantaneous Reaction}{23}{section*.7}
+\contentsline {subsubsection}{A Single-Step Reaction, but with Local Extinction}{25}{section*.9}
+\contentsline {subsubsection}{CO Production (Two-Step Reaction with Extinction)}{26}{section*.11}
+\contentsline {subsubsection}{Heat Release Rate}{28}{section*.12}
+\contentsline {subsubsection}{On-Going Research}{28}{section*.13}
+\contentsline {subsection}{\numberline {3.2.2}Finite-Rate Reaction (DNS)}{29}{subsection.3.2.2}
+\contentsline {section}{\numberline {3.3}Thermal Radiation}{30}{section.3.3}
+\contentsline {section}{\numberline {3.4}Solid Phase Model}{32}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}The Heat Conduction Equation for a Solid}{32}{subsection.3.4.1}
+\contentsline {subsection}{\numberline {3.4.2}Component-Averaged Thermal Properties}{32}{subsection.3.4.2}
+\contentsline {subsection}{\numberline {3.4.3}Pyrolysis Models}{33}{subsection.3.4.3}
+\contentsline {subsubsection}{Specified Heat Release Rate}{33}{section*.15}
+\contentsline {subsubsection}{Solid Fuels}{33}{section*.16}
+\contentsline {subsubsection}{Liquid Fuels}{34}{section*.17}
+\contentsline {subsection}{\numberline {3.4.4}Radiation Heat Transfer to Solids}{35}{subsection.3.4.4}
+\contentsline {subsection}{\numberline {3.4.5}Convective Heat Transfer to Solids}{35}{subsection.3.4.5}
+\contentsline {subsection}{\numberline {3.4.6}Boundary Conditions}{36}{subsection.3.4.6}
+\contentsline {section}{\numberline {3.5}Fire Detection Devices}{37}{section.3.5}
+\contentsline {subsection}{\numberline {3.5.1}Sprinkler Activation}{37}{subsection.3.5.1}
+\contentsline {subsection}{\numberline {3.5.2}Heat Detectors}{37}{subsection.3.5.2}
+\contentsline {subsection}{\numberline {3.5.3}Smoke Detectors}{37}{subsection.3.5.3}
+\contentsline {section}{\numberline {3.6}Liquid Sprays}{40}{section.3.6}
+\contentsline {subsection}{\numberline {3.6.1}Droplet Size Distribution}{40}{subsection.3.6.1}
+\contentsline {subsection}{\numberline {3.6.2}Droplet Transport in the Gas Phase}{41}{subsection.3.6.2}
+\contentsline {subsection}{\numberline {3.6.3}Droplet Transport on a Surface}{42}{subsection.3.6.3}
+\contentsline {subsection}{\numberline {3.6.4}Absorption and Scattering of Thermal Radiation by Droplets}{42}{subsection.3.6.4}
+\contentsline {subsection}{\numberline {3.6.5}Heating and Evaporation of Liquid Droplets}{44}{subsection.3.6.5}
+\contentsline {subsection}{\numberline {3.6.6}Fire Suppression by Water}{45}{subsection.3.6.6}
+\contentsline {chapter}{\numberline {4}Numerical Method}{47}{chapter.4}
+\contentsline {section}{\numberline {4.1}Hydrodynamic Model}{47}{section.4.1}
+\contentsline {subsection}{\numberline {4.1.1}Simplified Equations}{47}{subsection.4.1.1}
+\contentsline {subsubsection}{Temporal Discretization (Single Mesh Case)}{48}{section*.19}
+\contentsline {subsubsection}{Spatial Discretization}{49}{section*.20}
+\contentsline {subsection}{\numberline {4.1.2}The Mass Transport Equations and the Divergence}{50}{subsection.4.1.2}
+\contentsline {subsubsection}{Discretizing the Convective and Diffusive Transport Terms}{50}{section*.21}
+\contentsline {subsubsection}{Flux Correction}{51}{section*.22}
+\contentsline {subsubsection}{Discretizing the Divergence}{51}{section*.23}
+\contentsline {subsection}{\numberline {4.1.3}The Momentum Equation}{53}{subsection.4.1.3}
+\contentsline {subsubsection}{Viscous Terms (LES)}{54}{section*.24}
+\contentsline {subsubsection}{Viscous Terms (DNS)}{55}{section*.25}
+\contentsline {subsubsection}{Velocity Boundary Conditions at a Solid Surface}{55}{section*.26}
+\contentsline {subsubsection}{Force Terms}{56}{section*.27}
+\contentsline {subsubsection}{Time Step}{56}{section*.28}
+\contentsline {subsection}{\numberline {4.1.4}The Pressure Equation}{57}{subsection.4.1.4}
+\contentsline {subsection}{\numberline {4.1.5}Multiple Mesh Considerations}{58}{subsection.4.1.5}
+\contentsline {subsubsection}{Temporal Discretization (Multiple Mesh Case)}{59}{section*.29}
+\contentsline {section}{\numberline {4.2}Combustion}{61}{section.4.2}
+\contentsline {subsection}{\numberline {4.2.1}Heat Release Rate (Mixture Fraction)}{61}{subsection.4.2.1}
+\contentsline {subsubsection}{Two-Parameter Mixture Fraction}{61}{section*.30}
+\contentsline {subsubsection}{Three-Parameter Mixture Fraction}{62}{section*.31}
+\contentsline {subsection}{\numberline {4.2.2}Heat Release Rate (Finite-Rate Reaction)}{62}{subsection.4.2.2}
+\contentsline {section}{\numberline {4.3}Thermal Radiation}{63}{section.4.3}
+\contentsline {subsection}{\numberline {4.3.1}Discretization of the Radiative Heat Transfer Equation}{63}{subsection.4.3.1}
+\contentsline {subsection}{\numberline {4.3.2}Radiation Heat Transfer to Solid Objects}{66}{subsection.4.3.2}
+\contentsline {section}{\numberline {4.4}Solid Phase Model}{67}{section.4.4}
+\contentsline {subsection}{\numberline {4.4.1}Solid Surface and Interior Temperatures}{67}{subsection.4.4.1}
+\contentsline {subsection}{\numberline {4.4.2}Convective Heat Transfer to Solid Objects}{67}{subsection.4.4.2}
+\contentsline {subsection}{\numberline {4.4.3}Coupling the Gas and Solid Phase}{68}{subsection.4.4.3}
+\contentsline {subsection}{\numberline {4.4.4}Mass and Energy Transfer at Interpolated Mesh Boundaries}{69}{subsection.4.4.4}
+\contentsline {section}{\numberline {4.5}Liquid Sprays}{70}{section.4.5}
+\contentsline {subsection}{\numberline {4.5.1}Particle movement}{70}{subsection.4.5.1}
+\contentsline {subsection}{\numberline {4.5.2}Interaction of Droplets and Radiation}{70}{subsection.4.5.2}
+\contentsline {subsection}{\numberline {4.5.3}Heating and Evaporation of Liquid Droplets}{70}{subsection.4.5.3}
+\contentsline {chapter}{\numberline {5}Conclusion}{73}{chapter.5}
+\contentsline {chapter}{References}{73}{chapter.5}
+\contentsline {chapter}{\numberline {A}Nomenclature}{75}{appendix.A}
+\contentsline {chapter}{\numberline {B}Derivation of the Velocity Divergence}{77}{appendix.B}
+\contentsline {subsubsection}{Randall McDermott, NIST Postdoctoral Fellow}{77}{section*.33}
+\contentsline {subsubsection}{Continuity Equation}{77}{section*.34}
+\contentsline {subsubsection}{Equation of State}{77}{section*.35}
+\contentsline {subsubsection}{Species Transport Equation}{78}{section*.36}
+\contentsline {subsubsection}{Enthalpy Transport Equation}{79}{section*.37}
+\contentsline {subsubsection}{Relating Enthalpy, Temperature, and Species}{79}{section*.38}
+\contentsline {subsubsection}{Assembling Terms}{80}{section*.39}
+\contentsline {subsubsection}{FDS Notation}{81}{section*.40}
+\contentsline {chapter}{\numberline {C}Domain Decomposition Strategy}{83}{appendix.C}
+\contentsline {subsubsection}{Randall McDermott, NIST Postdoctoral Fellow}{83}{section*.41}
+\contentsline {subsubsection}{Pressure Correction}{84}{section*.42}
+\contentsline {chapter}{\numberline {D}A Simple Model of Flame Extinction}{87}{appendix.D}
+\contentsline {subsubsection}{Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}{87}{section*.43}

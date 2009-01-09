@@ -1,0 +1,31 @@
+\contentsline {chapter}{Disclaimer}{i}{chapter*.1}
+\contentsline {chapter}{About the Authors}{iii}{chapter*.2}
+\contentsline {chapter}{Acknowledgments}{v}{chapter*.3}
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}
+\contentsline {section}{\numberline {1.1}Purpose}{1}{section.1.1}
+\contentsline {section}{\numberline {1.2}Scope}{1}{section.1.2}
+\contentsline {section}{\numberline {1.3}Fire Dynamics Simulator (FDS) Model Description}{1}{section.1.3}
+\contentsline {chapter}{\numberline {2}CM Management}{3}{chapter.2}
+\contentsline {section}{\numberline {2.1}FDS CM Manager Responsibilities}{3}{section.2.1}
+\contentsline {section}{\numberline {2.2}FDS Software Development Team Member Responsibilities}{3}{section.2.2}
+\contentsline {chapter}{\numberline {3}CM Process}{5}{chapter.3}
+\contentsline {section}{\numberline {3.1}Configuration Identification}{5}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Maintaining CSCIs}{5}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}Identifying Specific CSCIs in Compiled Executables}{6}{subsection.3.1.2}
+\contentsline {section}{\numberline {3.2}Configuration Control}{6}{section.3.2}
+\contentsline {section}{\numberline {3.3}Software Changes}{7}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}Creating a Change Request}{7}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}Processing a Change Request}{7}{subsection.3.3.2}
+\contentsline {subsection}{\numberline {3.3.3}Committing Changes}{8}{subsection.3.3.3}
+\contentsline {subsection}{\numberline {3.3.4}Change Verification}{8}{subsection.3.3.4}
+\contentsline {section}{\numberline {3.4}Establishing Baselines}{8}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Naming Baselines}{8}{subsection.3.4.1}
+\contentsline {subsection}{\numberline {3.4.2}Baseline Software Testing}{8}{subsection.3.4.2}
+\contentsline {subsection}{\numberline {3.4.3}Release of a New Baseline}{9}{subsection.3.4.3}
+\contentsline {chapter}{\numberline {4}Coding Standard}{11}{chapter.4}
+\contentsline {section}{\numberline {4.1}Indentation}{11}{section.4.1}
+\contentsline {section}{\numberline {4.2}Source File Organization}{11}{section.4.2}
+\contentsline {section}{\numberline {4.3}Explicit Variable Typing}{11}{section.4.3}
+\contentsline {section}{\numberline {4.4}Loop and Branch Naming}{11}{section.4.4}
+\contentsline {section}{\numberline {4.5}Named Constants}{12}{section.4.5}
+\contentsline {section}{\numberline {4.6}Redundant Code}{13}{section.4.6}
