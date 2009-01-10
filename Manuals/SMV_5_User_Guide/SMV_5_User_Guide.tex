@@ -2548,14 +2548,15 @@ allows one to show or hide loaded data files.
 Smokeview implements three methods for displaying scenes in stereo or 3D.
 Each method creates two versions of the scene, one version for each eye.
 
-The first method, denoted sequential stereo, displays the left and right eye images alternately in time.  Shuttered glasses  synchronized
-with the monitor are used to ensure that the left eye only sees the left image and the right eye only sees the right image.  To be effective the monitor should have a refresh rate of at least 120 frames per second (60 frames per second for each eye).
-Flickering is annoyingly noticeable in monitors with slower frame rates.  Unfortunately, today's LCD flat panel monitors typically do not have refresh rates faster than 60 to 80 frames per second.  This method requires a video card that implements OpenGL {\em QUAD buffering}.
-This Smokeview option can only be enabled from the command line by using the {\tt -stereo}\
+The first method, denoted sequential stereo, displays images for the the left and right eye 
+alternately in time.  Shuttered glasses  synchronized
+with the monitor are used to ensure that only the left eye sees the left image and only the right eye sees the right image.  A monitor displaying this type of stereo should have a refresh rate of at least 120 frames per second (60 frames per second for each eye) otherwise
+flickering is noticeable.  Unfortunately, most of today's LCD flat panel monitors typically do not have refresh rates faster than 60 to 80 frames per second.  This method (for Smokeview) requires a video card that supports OpenGL {\em QUAD buffering}.
+This Smokeview stereo option may be enabled from the command line by using the {\tt -stereo}\
 option.
 
-The second method, denoted left/right stereo, displays the two images side by side.  With practice, one can merge the two images without requiring specialized glasses (though they are available if desired) especially if the images are small and not separated by a large angle.
-A trick for seeing the stereo effect is to place a finger from each hand in the center of each picture.  Then relax your eyes, trying to {\em merge}\ your two fingers together.  Figure \ref{figlrstereo} show an example of the left/right method for generating a stereo image.  This method can generate full colored images and requires no equipment (for most people) to view but results in in smaller images.
+The second method, denoted left/right stereo, displays the two images side by side.  With practice, one can merge both images without requiring specialized glasses (though they are available if desired) especially if the images are small and not separated by a large angle.
+A trick for seeing the stereo effect is to place a finger from each hand in the center of each picture.  Then relax your eyes while trying to {\em merge}\ your two fingers together.  Figure \ref{figlrstereo} show an example of the left/right method for generating a stereo image.  This method can generate full colored images and requires no equipment (for most people) to view but results in smaller images.
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[trim=0.25in 3.75in 0.25in 3.75in, clip, height=2.75in]{scriptfigures/thouse5_iso_lr_stereo}
@@ -2568,7 +2569,7 @@ images to merge into one.
 \end{center}
 \end{figure}
 
-The third method, denoted red/green stereo, displays red and blue versions of each image.  Glasses with a red left lens and a blue right lens are required to view the image.   They may be obtained inexpensively or even made by using red and blue cellophane or by coloring clear plastic with read and blue marking pens.  Figure \ref{figrbstereo} shows the red/blue method for generating a stereo image.  This method generates full size images, requires only inexpensive glasses to view but can only display monochrome images.
+The third method, denoted red/green stereo, displays red and blue versions of each image.  Glasses with a red left lens and a blue right lens are required to view the image.  As with the shuttered glasses for sequential stereo, the colored glasses {\em separate}\ the images enabling each eye to see only one image.  Red/blue colored glasses may be obtained inexpensively.  They also may be made using using red and blue cellophane or by coloring clear plastic with read and blue marking pens.  Figure \ref{figrbstereo} shows the red/blue method for generating a stereo image.  This method generates full size images, requires only inexpensive glasses to view but can only display monochrome images.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -2583,8 +2584,8 @@ images to merge into one.
 \end{figure}
 
 Figure \ref{figstereodialog} shows the dialog
-box used to activate this option.  If the {\em -stereo}\ command line option was used and
-the video card supports shuttered stereo display then the {\em shuttered checkbox}\ in the dialog box will be enabled.  
+box used to configure the stereo option.  If the {\em -stereo}\ command line option was used and
+the video card supports shuttered stereo display then the {\em shuttered checkbox}\ in the dialog box will be enabled.
 
 \begin{figure}[\figoptions]
 \begin{center}
