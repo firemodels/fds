@@ -14,7 +14,6 @@
 
 #ifdef pp_BETA
 #define SMVVERSION "Test"
-#define pp_STEREO
 #undef pp_release
 #endif
 
