@@ -256,9 +256,6 @@ void _sniffErrors(char *whereat);
 #define UNLOAD 1
 #define RESETBOUNDS 2
 
-#define PBALANCEINDEX_MAX 17
-#define EOFFSETINDEX_MAX 17
-
 #define MAXPLOT3DVARS 6
 #define NRGB 12
 

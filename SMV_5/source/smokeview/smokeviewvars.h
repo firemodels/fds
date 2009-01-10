@@ -152,10 +152,7 @@ SVEXTERN float *tspr;
 SVEXTERN float tmin, tmax;
 
 SVEXTERN int videoSTEREO;
-SVEXTERN float pbalance, eoffset, fzero;
-SVEXTERN float pbalanceORIG, eoffsetORIG;
-SVEXTERN float pbalances[PBALANCEINDEX_MAX+1];
-SVEXTERN float eoffsets[EOFFSETINDEX_MAX+1];
+SVEXTERN float fzero;
 
 SVEXTERN char blank[2];
 
@@ -594,7 +591,6 @@ SVEXTERN int callfrom_tourglui;
 SVEXTERN int showtours_whenediting;
 
 SVEXTERN float xtimeleft, xtimeright;
-SVEXTERN int pbalanceindex, eoffsetindex;
 SVEXTERN int showstereo;
 
 SVEXTERN int show_hrrcutoff, show_hrrcutoff_active, hrrpuv_loaded;
