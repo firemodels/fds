@@ -1462,7 +1462,6 @@ void initvars1(void){
   callfrom_tourglui=0;
   showtours_whenediting=0;
 
-  pbalanceindex=9, eoffsetindex=9;
   showstereo=0;
   showglui3dsmoke=0;
   showgluitour=0;
@@ -1820,47 +1819,8 @@ void initvars1(void){
   list_p3_index_old=0, list_slice_index_old=0, list_patch_index_old=0;
 
   videoSTEREO=0;
-  pbalance=-0.5, eoffset=0.7;
-  pbalanceORIG=-0.5, eoffsetORIG=0.7;
   fzero=0.25;
-  
-   pbalances[0]=0.000;
-   pbalances[1]=0.500;
-   pbalances[2]=0.545;
-   pbalances[3]=0.595;
-   pbalances[4]=0.648;
-   pbalances[5]=0.707;
-   pbalances[6]=0.771;
-   pbalances[7]=0.841;
-   pbalances[8]=0.917;
-   pbalances[9]=1.000;
-  pbalances[10]=1.090;
-  pbalances[11]=1.190;
-  pbalances[12]=1.300;
-  pbalances[13]=1.410;
-  pbalances[14]=1.540;
-  pbalances[15]=1.680;
-  pbalances[16]=1.830;
-  pbalances[17]=2.000;
-  
-   eoffsets[0]=0.000;
-   eoffsets[1]=0.500;
-   eoffsets[2]=0.545;
-   eoffsets[3]=0.595;
-   eoffsets[4]=0.648;
-   eoffsets[5]=0.707;
-   eoffsets[6]=0.771;
-   eoffsets[7]=0.841;
-   eoffsets[8]=0.917;
-   eoffsets[9]=1.000;
-  eoffsets[10]=1.090;
-  eoffsets[11]=1.190;
-  eoffsets[12]=1.300;
-  eoffsets[13]=1.410;
-  eoffsets[14]=1.540;
-  eoffsets[15]=1.680;
-  eoffsets[16]=1.830;
-  eoffsets[17]=2.000;
+ 
 
   strcpy(blank,"");
 

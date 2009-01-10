@@ -651,11 +651,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
   float up, down, left, right;
   float dh;
-#ifdef pp_STEREO
   float fnear, ffar, fleft, fright, fup, fdown;
-#else
-  float fnear, ffar, fleft, fright, fup, fdown, fzero;
-#endif
   float StereoCameraOffset,FrustumAsymmetry;
   float aperture_temp;
   float widthdiv2;
@@ -685,11 +681,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   down += fontHoffset;
   dh = (up-down)*2*fontWoffset/(right-left);
   
-#ifdef pp_STEREO
   aspect=(float)(up-down)/(float)(right-left);
-#else
-  aspect=(float)(right-left)/(float)(up-down);
-#endif
 
   /* set view position for virtual tour */
 
@@ -727,10 +719,6 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   fnear =  - eyeyINI-1.0;
   if(fnear<nearclip)fnear=nearclip;
   ffar = fnear + farclip;
-#ifndef pp_STEREO
-  fzero = camera_current->ycen-eyeyINI;
-  if(fzero<fnear)fzero=fnear+0.5;
-#endif
   
   StereoCameraOffset=0.0;
   aperture_temp=aperture;
@@ -762,35 +750,19 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
 
   widthdiv2 = fnear*tan(0.5*PI*aperture_temp/180.);
-#ifdef pp_STEREO
   fleft = -widthdiv2;
   fright = widthdiv2;
   fup = aspect*widthdiv2;
   fdown = -aspect*widthdiv2;
-#else
-  if(showstereo==2)widthdiv2*=2.0;
-  fup = widthdiv2;
-  fdown = -widthdiv2;
-  fleft = -aspect*widthdiv2;
-  fright = aspect*widthdiv2;
-#endif
   
   if(showstereo==0||view_mode==VIEW_CENTER){
     StereoCameraOffset=0.0;
     FrustumAsymmetry=0.0;
   }
   else if(showstereo!=0&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
-#ifdef pp_STEREO
     StereoCameraOffset = (fzero/xyzmaxdiff)/30.0;
-#else
-    StereoCameraOffset = (fright-fleft)*0.035*eoffset*fzero/fnear;
-#endif
     if(view_mode==VIEW_LEFT)StereoCameraOffset = -StereoCameraOffset;
-#ifdef pp_STEREO
-    FrustumAsymmetry= 0.5*StereoCameraOffset*fnear/fzero;
-#else
-    FrustumAsymmetry= StereoCameraOffset*pbalance*fnear/fzero;
-#endif
+    FrustumAsymmetry= -0.5*StereoCameraOffset*fnear/(fzero/xyzmaxdiff);
   }
 
   if(SUB_portfrustum(quad,

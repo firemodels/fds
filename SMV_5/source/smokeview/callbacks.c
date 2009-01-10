@@ -581,7 +581,6 @@ void keyboard(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"S",1)==0){
-#ifdef pp_STEREO
     switch (showstereo){
       case 0:
         showstereo=2;
@@ -605,18 +604,6 @@ void keyboard(unsigned char key, int x, int y){
         }
         break;
     }
-#else
-    switch (showstereo){
-      case 0:
-        showstereo=2;
-        if(videoSTEREO==1)showstereo=1;
-        break;
-      case 1:
-      case 2:
-        showstereo=0;
-        break;
-    }
-#endif
     update_glui_stereo();
   }
   if(strncmp((const char *)&key2,"T",1)==0){
