@@ -28,5 +28,7 @@ test of video cards ability to display many (15*15*31=6975 to be exact) sprinkle
       SMOKEVIEW_ID='sprinkler_upright'
  /
 
-&OBST XB=1.1,1.2,0.0,1.6,0.8,0.9 COLOR='BLUE' /
+&OBST XB=1.1,1.2,0.0,1.6,0.8,0.9 RGB=100,50,50 /
+
+&OBST XB=0.0,1.6,1.1,1.2,0.3,0.4 RGB=50,100,10 /
 
