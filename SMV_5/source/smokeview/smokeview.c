@@ -1061,7 +1061,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(times!=NULL&&updateUpdateFrameRateMenu==1)sv_FrameRateMenu(frameratevalue);
   if(updatefaces==1)update_faces();
   if(updatefacelists==1)update_facelists();
-  if(showstereo!=2)ClearBuffers(mode);
+  if(showstereo!=2&&showstereo!=3)ClearBuffers(mode);
 
 /* ++++++++++++++++++++++++ draw viewports +++++++++++++++++++++++++ */
   if(mode==RENDER){
@@ -1261,6 +1261,20 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     drawtours();
     sniffErrors("after drawTours");
   }
+
+  /* ++++++++++++++++++++++++ draw stereo parallax indicator +++++++++++++++++++++++++ */
+  
+  if(show_parallax==1){
+    antialias(1);
+    glLineWidth(linewidth);
+    glBegin(GL_LINES);
+    glColor3fv(foregroundcolor);
+    glVertex3f(0.75,0.0,0.25);
+    glVertex3f(0.75,1.0,0.25);
+    glEnd();
+    antialias(0);
+  }
+
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 

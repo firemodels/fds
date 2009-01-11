@@ -1759,35 +1759,54 @@ void Display(void){
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   if(showstereo==1&&videoSTEREO==1){  // temporal stereo (shuttered glasses)
     glDrawBuffer(GL_BACK_LEFT);
-    ShowScene(RENDER,VIEW_LEFT,0,
-      0,0,screenWidth,screenHeight);
+    if(showstereo_frame==0||showstereo_frame==2){
+      ShowScene(RENDER,VIEW_LEFT,0,
+        0,0,screenWidth,screenHeight);
+    }
     glDrawBuffer(GL_BACK_RIGHT);
-    ShowScene(RENDER,VIEW_RIGHT,0,
-      0,0,screenWidth,screenHeight);
+    if(showstereo_frame==1||showstereo_frame==2){
+      ShowScene(RENDER,VIEW_RIGHT,0,
+        0,0,screenWidth,screenHeight);
+    }
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
   }
   else if(showstereo==2){             // left/right stereo
     glDrawBuffer(GL_BACK);
     ClearBuffers(RENDER);
-    ShowScene(RENDER,VIEW_LEFT,0,
-      0,0,screenWidth/2,screenHeight);
-    ShowScene(RENDER,VIEW_RIGHT,0,
-      screenWidth/2,0,screenWidth/2,screenHeight);
+    if(showstereo_frame==0||showstereo_frame==2){
+      ShowScene(RENDER,VIEW_LEFT,0,
+        0,0,screenWidth/2,screenHeight);
+    }
+    if(showstereo_frame==1||showstereo_frame==2){
+      ShowScene(RENDER,VIEW_RIGHT,0,
+        screenWidth/2,0,screenWidth/2,screenHeight);
+    }
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
   }
   else if(showstereo==3){             // red/blue stereo
     glDrawBuffer(GL_BACK);
-    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-    glClearColor(1.0, 0.0, 0.0, 1.0); 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+//    glClearColor(0.0, 0.0, 0.0, 1.0); 
     glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
-    ShowScene(RENDER,VIEW_LEFT,0,
-      0,0,screenWidth,screenHeight);
+    if(showstereo_frame==0||showstereo_frame==2){
+      ShowScene(RENDER,VIEW_LEFT,0,
+        0,0,screenWidth,screenHeight);
+      glFlush();
+    }
 
-    glClearColor(0.0, 0.0, 1.0, 1.0);
-    glColorMask(GL_FALSE,GL_FALSE,GL_TRUE,GL_TRUE);
-    ShowScene(RENDER,VIEW_RIGHT,0,
-      0,0,screenWidth,screenHeight);
+    if(showstereo_frame==1||showstereo_frame==2){
+      glDrawBuffer(GL_BACK);
+      glClear(GL_DEPTH_BUFFER_BIT);
+
+      glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+      glColorMask(GL_FALSE,GL_FALSE,GL_TRUE,GL_TRUE);
+
+      ShowScene(RENDER,VIEW_RIGHT,0,
+        0,0,screenWidth,screenHeight);
+      glFlush();
+      glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    }
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
   }
   else{
