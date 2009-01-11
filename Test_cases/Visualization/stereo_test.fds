@@ -1,0 +1,32 @@
+&HEAD CHID='stereo_test',TITLE='test of stereo display SVN $Revision: 2722 $' /
+
+test of video cards ability to display many (15*15*31=6975 to be exact) sprinklers
+  (and fds's ability to handle many devices)
+
+  run case with TWFIN=0.0
+
+&MESH IJK=32,32,32, XB=0.0,1.6,0.0,1.6,0.0,1.6 /
+
+&DUMP NFRAMES=200 /
+
+&VENT XB=0.0,0.0,0.0,1.6,0.0,1.6,SURF_ID='OPEN'/
+&VENT XB=1.6,1.6,0.0,1.6,0.0,1.6,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,0.0,0.0,0.0,1.6,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,1.6,1.6,0.0,1.6,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,0.0,1.6,1.6,1.6,SURF_ID='OPEN'/
+
+&PART ID='water', WATER=.TRUE.,    SAMPLING_FACTOR=1 /
+
+&PROP ID='Acme Sprinkler'
+      QUANTITY='SPRINKLER LINK TEMPERATURE'
+      FLOW_RATE=5.
+      RTI=50.
+      ACTIVATION_TEMPERATURE= 74.
+      OFFSET= 0.05
+      SPRAY_ANGLE=50.,55.
+      PART_ID='water'
+      SMOKEVIEW_ID='sprinkler_upright'
+ /
+
+&OBST XB=1.1,1.2,0.0,1.6,0.8,0.9 COLOR='BLUE' /
+
