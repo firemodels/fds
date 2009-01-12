@@ -925,17 +925,19 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
             IF (CYLINDRICAL) THEN
                J=1
-               DO K=1,KBAR
-                  DO I=1,IBAR
-                     IWUP   = WALL_INDEX(CELL_INDEX(I,J,K),-2)
-                     IWDOWN = WALL_INDEX(CELL_INDEX(I,J,K), 2)
-                     IF (MODULO(N,NRP(1))==1) THEN
-                        WALL(IWUP)%ILW(N,IBND) = WALL(IWDOWN)%ILW(N,IBND)
-                     ELSE
-                        WALL(IWUP)%ILW(N-1,IBND) = WALL(IWDOWN)%ILW(N,IBND)
-                     ENDIF
-                  ENDDO
-               ENDDO
+               CKLOOP2: DO K=1,KBAR
+               CILOOP2: DO I=1,IBAR
+                  IC = CELL_INDEX(I,J,K)
+                  IF (SOLID(IC)) CYCLE CILOOP2
+                  IWUP   = WALL_INDEX(CELL_INDEX(I,J,K),-2)
+                  IWDOWN = WALL_INDEX(CELL_INDEX(I,J,K), 2)
+                  IF (MODULO(N,NRP(1))==1) THEN
+                     WALL(IWUP)%ILW(N,IBND) = WALL(IWDOWN)%ILW(N,IBND)
+                  ELSE
+                     WALL(IWUP)%ILW(N-1,IBND) = WALL(IWDOWN)%ILW(N,IBND)
+                  ENDIF
+               ENDDO CILOOP2
+               ENDDO CKLOOP2
             ENDIF
  
             ! Calculate integrated intensity UIID
