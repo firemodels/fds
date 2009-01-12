@@ -652,12 +652,12 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     case SV_SETCOLOR:
       if(op_skip==0&&iarg+SV_SETCOLOR_NUMARGS<=framei->nargs){
         if(setbw==1){
-          float gray;
+          float grey;
 
-          gray = color2bw(arg);
-          rgbcolor[0]=gray;
-          rgbcolor[1]=gray;
-          rgbcolor[2]=gray;
+          grey = color2bw(arg);
+          rgbcolor[0]=grey;
+          rgbcolor[1]=grey;
+          rgbcolor[2]=grey;
           rgbcolor[3]=1.0;
         }
         else{

@@ -1785,11 +1785,11 @@ void Display(void){
   }
   else if(showstereo==3){             // red/blue stereo
     glDrawBuffer(GL_BACK);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-//    glClearColor(0.0, 0.0, 0.0, 1.0); 
-    glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
+    glClearColor(1.0, 0.0, 0.0, 1.0); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(showstereo_frame==0||showstereo_frame==2){
+      glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
       ShowScene(RENDER,VIEW_LEFT,0,
         0,0,screenWidth,screenHeight);
       glFlush();
@@ -1797,15 +1797,13 @@ void Display(void){
 
     if(showstereo_frame==1||showstereo_frame==2){
       glDrawBuffer(GL_BACK);
-      glClear(GL_DEPTH_BUFFER_BIT);
-
-      glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
       glColorMask(GL_FALSE,GL_FALSE,GL_TRUE,GL_TRUE);
+      glClearColor(0.0, 0.0, 1.0, 1.0); 
+      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
       ShowScene(RENDER,VIEW_RIGHT,0,
         0,0,screenWidth,screenHeight);
       glFlush();
-      glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
     }
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
   }
@@ -1821,8 +1819,6 @@ void Display(void){
         if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
       }
       else{
-//        int rendertype;
-
         GLubyte *screenbuffers[4];
 
         glDrawBuffer(GL_BACK);

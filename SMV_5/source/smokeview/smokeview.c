@@ -875,14 +875,16 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
       getsmokedir(modelview_scratch);
       sniffErrors("after getsmokedir");
 #ifdef pp_CULL
-      if(cullsmoke==1){
-        getPixelCount();
-        sniffErrors("after getPixelCount");
+      if(showstereo==0){
+        if(cullsmoke==1){
+          getPixelCount();
+          sniffErrors("after getPixelCount");
+        }
+        if(cullactive==1&&update_initcullplane==1){
+          initcullplane(cullsmoke);
+        }
+        sniffErrors("after initcullplane");
       }
-      if(cullactive==1&&update_initcullplane==1){
-        initcullplane(cullsmoke);
-      }
-      sniffErrors("after initcullplane");
 #endif
     }
     if(nface_transparent>0)sort_transparent_faces(modelview_scratch);
@@ -1444,7 +1446,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     }
 #endif
 #ifdef pp_CULL
-    if(cullsmoke==1){
+    if(cullsmoke==1&&showstereo==0){
       setPixelCount();
     }
 #endif
