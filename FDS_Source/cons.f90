@@ -184,6 +184,7 @@ INTEGER,  ALLOCATABLE, DIMENSION(:) :: LAYER_INDEX
 ! Divergence Arrays
 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DSUM,USUM,PSUM
+REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: ASUM
 
 ! Raised vegetation arrays
  
@@ -219,7 +220,7 @@ REAL(EB) :: FLUXMAX
 ! Number of initial value, pressure zone, and multiplier derived types
  
 INTEGER :: N_INIT,N_ZONE,N_MULT 
-LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: CONNECTED_ZONES
+LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: CONNECTED_ZONES
 REAL(EB) :: PRESSURE_RELAX_FACTOR=0.1_EB
 
 ! Output quantity arrays

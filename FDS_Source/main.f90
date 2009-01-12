@@ -713,24 +713,58 @@ SUBROUTINE EXCHANGE_DIVERGENCE_INFO
 
 ! Exchange information mesh to mesh used to compute global pressure integrals
 
-INTEGER :: IPZ
-REAL(EB) :: DSUM_ALL,PSUM_ALL,USUM_ALL
+INTEGER :: IPZ,IOPZ,IOPZ2
+REAL(EB) :: DSUM_ALL,PSUM_ALL,USUM_ALL,ASUM_ALL(0:N_ZONE)
 
 DO IPZ=1,N_ZONE
    DSUM_ALL = 0._EB
    PSUM_ALL = 0._EB
    USUM_ALL = 0._EB
+   ASUM_ALL = 0._EB
    DO NM=1,NMESHES
       IF(EVACUATION_ONLY(NM)) CYCLE  
       DSUM_ALL = DSUM_ALL + DSUM(IPZ,NM)
       PSUM_ALL = PSUM_ALL + PSUM(IPZ,NM)
       USUM_ALL = USUM_ALL + USUM(IPZ,NM)
+      DO IOPZ=0,N_ZONE
+         ASUM_ALL(IOPZ) = ASUM_ALL(IOPZ) + ASUM(IPZ,IOPZ,NM)
+      ENDDO
    ENDDO
    DO NM=1,NMESHES
       IF(EVACUATION_ONLY(NM)) CYCLE 
       DSUM(IPZ,NM) = DSUM_ALL
       PSUM(IPZ,NM) = PSUM_ALL
       USUM(IPZ,NM) = USUM_ALL
+      DO IOPZ=0,N_ZONE
+         ASUM(IPZ,IOPZ,NM) = ASUM_ALL(IOPZ)
+      ENDDO
+   ENDDO
+ENDDO
+
+! Sync up connection matrices for all meshes
+
+DO NM=1,NMESHES
+   DO IPZ=0,N_ZONE
+      DO IOPZ=0,N_ZONE
+         IF (CONNECTED_ZONES(IPZ,IOPZ,NM)) CONNECTED_ZONES(IPZ,IOPZ,:) = .TRUE.
+      ENDDO
+   ENDDO
+ENDDO
+
+! Connect zones to others which are not directly connected
+
+DO NM=1,NMESHES
+   DO IPZ=1,N_ZONE
+      DO IOPZ=1,N_ZONE
+         IF (IOPZ==IPZ) CYCLE
+         IF (CONNECTED_ZONES(IPZ,IOPZ,NM)) THEN
+            DO IOPZ2=0,N_ZONE
+               IF (IOPZ==IOPZ2) CYCLE
+               IF (CONNECTED_ZONES(IOPZ,IOPZ2,NM)) CONNECTED_ZONES(IPZ,IOPZ2,NM) = .TRUE.
+               IF (CONNECTED_ZONES(IOPZ,IOPZ2,NM)) CONNECTED_ZONES(IOPZ2,IPZ,NM) = .TRUE.
+            ENDDO
+         ENDIF
+      ENDDO
    ENDDO
 ENDDO
 
@@ -1076,9 +1110,9 @@ ENDDO MESH_LOOP_2
 
 IF (RECOMPUTE_A) THEN
    CALL GAUSSJ(A,NCGC,NCGC,B,1,1,IERROR)
-   IF (IERROR>0) WRITE(LU_ERR,*) ' Warning: Problem with coarse pressure computation'
+!! IF (IERROR>0) WRITE(LU_ERR,*) ' Warning: Problem with coarse pressure computation'
    AINV = A  ! store inverse of A matrix
-   IF (N_ZONE==0) RECOMPUTE_A = .FALSE.  ! Redo linear solve if the domain is sealed
+!! IF (N_ZONE==0) RECOMPUTE_A = .FALSE.  ! Redo linear solve if the domain is sealed
 ELSE
    B = MATMUL(AINV,B)
 ENDIF
