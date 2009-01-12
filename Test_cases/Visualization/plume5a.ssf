@@ -3,11 +3,21 @@ RENDERDIR
 LOADFILE
  plume5a_05.sf
 LOADINIFILE
+ plume5a_notexturebar.ini
+SETTIMEVAL
+ 1.9
+RENDERONCE
+ plume5a_texturebar
+LOADFILE
+ plume5a_05.sf
+LOADINIFILE
  plume5a_texturebar.ini
 SETTIMEVAL
  1.9
 RENDERONCE
  plume5a_texturebar
+LOADFILE
+ plume5a_05.sf
 LOADINIFILE
  plume5a_notexturebar.ini
 SETTIMEVAL
