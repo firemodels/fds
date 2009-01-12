@@ -83,8 +83,10 @@ void update_camera_ypos(camera *camera_data){
   local_aperture_default=zoom2aperture(1.0);
   asp=(float)screenHeight/(float)screenWidth;
   width=xbar;
-  if(zbar/asp>xbar)width=zbar/asp;
-  eyeyfactor = -1.05*width/2.0/tan(local_aperture_default*PI/360.0);
+  if(zbar/asp>xbar){
+    width=zbar/asp;
+  }
+  eyeyfactor = -1.10*width/2.0/tan(local_aperture_default*PI/360.0);
   camera_data->eye[1]=eyeyfactor*xyzbox;
   camera_data->isometric_y=(eyeyfactor-1.0)*xyzbox;
 }
