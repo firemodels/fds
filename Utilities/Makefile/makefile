@@ -41,42 +41,51 @@ setup:
 
 #*** Intel Compiler ***
 
-# Linux
-intel_linux : FFLAGS = -O3 -axP -ip -static -vec_report0
-intel_linux : CFLAGS = -O -Dpp_noappend
+# Linux 32
+intel_linux : FFLAGS = -m32 -O3 -axP -ip -static -vec_report0
+intel_linux : CFLAGS = -m32 -O -Dpp_noappend
 intel_linux : FCOMPL = ifort
 intel_linux : CCOMPL = icc
 intel_linux : obj = fds5_intel
 intel_linux : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_mpi_64 : FFLAGS = -O3 -axPTSW -unroll -ipo -xPTSW -static -fpe3 -auto -mp1 -fltconsistency
-intel_linux_mpi_64 : CFLAGS = -O3 -Dpp_noappend
-intel_linux_mpi_64 : FCOMPL = mpif90
+# Linux 64
+intel_linux_64 : FFLAGS = -m64 -O2 -axP -static -vec_report0
+intel_linux_64 : CFLAGS = -m64 -O2 -Dpp_noappend -vec_report0
+intel_linux_64 : FCOMPL = ifort
+intel_linux_64 : CCOMPL = icc
+intel_linux_64 : obj = fds5_intel_64
+intel_linux_64 : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+
+intel_linux_mpi_64 : FFLAGS = -m64 -O2 -axPTSW -unroll -xPTSW -static -fpe3 -auto -mp1 -fltconsistency -vec_report0
+intel_linux_mpi_64 : CFLAGS = -O2 -Dpp_noappend -vec_report0
+intel_linux_mpi_64 : FCOMPL = mpif77
 intel_linux_mpi_64 : CCOMPL = mpicc
 intel_linux_mpi_64 : obj = fds5_mpi_intel64
 intel_linux_mpi_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 	
 intel_linux_db : $(obj_serial)
-intel_linux_db : FFLAGS = -FR  -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static
-intel_linux_db : CFLAGS = -O -Dpp_noappend
+intel_linux_db : FFLAGS = -m32 -FR  -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static
+intel_linux_db : CFLAGS = -m32 -O -Dpp_noappend
 intel_linux_db : FCOMPL = ifort
 intel_linux_db : CCOMPL = icc
 intel_linux_db : obj = fds5_intel_db
 intel_linux_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 	
-intel_linux_mpi : FFLAGS = -O3 -axP -ip -vec_report0
-intel_linux_mpi : CFLAGS = -O -Dpp_noappend
+intel_linux_mpi : FFLAGS = -m32 -O3 -axP -ip -vec_report0
+intel_linux_mpi : CFLAGS = -m32 -O -Dpp_noappend
 intel_linux_mpi : FCOMPL = mpif77
 intel_linux_mpi : CCOMPL = icc
 intel_linux_mpi : obj = fds5_mpi_intel
 intel_linux_mpi : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-intel_linux_mpi_db : FFLAGS = -FR -check all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
-intel_linux_mpi_db : CFLAGS = -O -Dpp_noappend
+intel_linux_mpi_db : FFLAGS = -m32 -FR -check all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
+intel_linux_mpi_db : CFLAGS = -m32 -O -Dpp_noappend
 intel_linux_mpi_db : FCOMPL = mpif77
 intel_linux_mpi_db : CCOMPL = icc
 intel_linux_mpi_db : obj = fds5_mpi_intel_db
