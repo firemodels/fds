@@ -10,6 +10,8 @@
 
 #*** Begin User Defined Variables Section ***
 VPATH = ../../FDS_Source
+# path to source assuming each FDS variant is built in its own sub-directory
+#VPATH = ../../../FDS_Source
 
 #*** End User Defined Variables Section***
 
