@@ -1632,7 +1632,7 @@ void update_iso_showlevels(void){
 }
 
 /* ------------------ uncompress_isodataframe ------------------------ */
-
+#ifdef USE_ZLIB
 void uncompress_isodataframe(isosurface *asurface, int n){
   uLong countin;
   uLongf countout;
@@ -1653,3 +1653,4 @@ void uncompress_isodataframe(isosurface *asurface, int n){
   }
 
 }
+#endif

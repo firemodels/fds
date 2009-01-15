@@ -65,6 +65,7 @@
 
 
 #ifdef pp_ALPHA
+#undef USE_ZLIB
 #undef pp_RENDER
 #undef pp_THREAD
 //#define pp_LIGHT

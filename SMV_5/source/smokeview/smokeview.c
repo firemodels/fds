@@ -1486,7 +1486,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       if(sd->display==0||sd->type!=islicetype)continue;
       if(sd->slicetimes[0]>times[itime])continue;
       if(sd->compression_type==1||sd->compression_type==2){
+#ifdef USE_ZLIB
         uncompress_slicedataframe(sd,sd->islice);
+#endif
         sd->slicepoint=sd->slicecomplevel;
       }
       else{
@@ -1560,7 +1562,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       if(sliceinfo[vd->ival].slicetimes[0]>times[itime])continue;
 #define VAL val
       if(VAL->compression_type==1){
+#ifdef USE_ZLIB
         uncompress_slicedataframe(VAL,VAL->islice);
+#endif
         VAL->slicepoint=VAL->slicecomplevel;
       }
       else{
@@ -1570,7 +1574,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 #define VAL u
       if(VAL!=NULL){
         if(VAL->compression_type==1){
+#ifdef USE_ZLIB
           uncompress_slicedataframe(VAL,VAL->islice);
+#endif
           VAL->slicepoint=VAL->slicecomplevel;
         }
         else{
@@ -1581,7 +1587,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 #define VAL v
       if(VAL!=NULL){
         if(VAL->compression_type==1){
+#ifdef USE_ZLIB
           uncompress_slicedataframe(VAL,VAL->islice);
+#endif
           VAL->slicepoint=VAL->slicecomplevel;
         }
         else{
@@ -1592,7 +1600,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 #define VAL w
       if(VAL!=NULL){
         if(VAL->compression_type==1){
+#ifdef USE_ZLIB
           uncompress_slicedataframe(VAL,VAL->islice);
+#endif
           VAL->slicepoint=VAL->slicecomplevel;
         }
         else{

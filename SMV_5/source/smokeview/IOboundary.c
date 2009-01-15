@@ -728,8 +728,9 @@ void readpatch(int ifile, int flag, int *errorcode){
         int surf_index;
 
         nn=0;
-
+#ifdef USE_ZLIB
         if(loadpatchbysteps==2)uncompress_patchdataframe(meshi,i);
+#endif
         for(n=0;n<meshi->npatches;n++){
           mesh *meshblock;
           float dval;
@@ -2979,7 +2980,7 @@ void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata,
 }
 
 /* ------------------ updatesmoke3d ------------------------ */
-
+#ifdef USE_ZLIB
 void uncompress_patchdataframe(mesh *meshi,int local_iframe){
   unsigned int countin;
   uLongf countout;
@@ -2992,4 +2993,5 @@ void uncompress_patchdataframe(mesh *meshi,int local_iframe){
   uncompress(meshi->ipqqi_zlib,&countout,compressed_data,countin);
 
 }
+#endif
 

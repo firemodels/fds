@@ -218,8 +218,10 @@ EXTERNCPP void getnewpos(float *oldpos, float dx, float dy, float dz, float spee
 EXTERNCPP void free_skybox(void);
 EXTERNCPP void draw_skybox(void);
 EXTERNCPP void loadskytexture(char *filebase, texture *texti);
+#ifdef USE_ZLIB
 EXTERNCPP void uncompress_isodataframe(isosurface *asurface, int n);
 EXTERNCPP void uncompress_patchdataframe(mesh *meshi,int iframe);
+#endif
 EXTERNCPP void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata, 
                        float *times, unsigned int *zipoffset, unsigned int *zipsize, int ntimes);
 EXTERNCPP void getpatchsizeinfo(patch *patchi, int *nframes, int *buffersize);
