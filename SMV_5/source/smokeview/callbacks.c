@@ -2051,7 +2051,9 @@ void update_framenumber(int changetime){
           meshi->ipqqi = meshi->ipqq + meshi->ipatch*meshi->npatchsize;
         }
         else{
+#ifdef USE_ZLIB
           uncompress_patchdataframe(meshi,meshi->ipatch);
+#endif
         }
       }
     }
@@ -2073,7 +2075,9 @@ void update_framenumber(int changetime){
           isosurface *asurface;
           asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels-1;
           CheckMemory;
+#ifdef USE_ZLIB
           uncompress_isodataframe(asurface,meshi->nisolevels);
+#endif
           CheckMemory;
         }
       }

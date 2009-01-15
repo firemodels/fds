@@ -4520,6 +4520,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
 
 }
 
+#ifdef USE_ZLIB
 /* ------------------ updatesmoke3d ------------------------ */
 
 void uncompress_slicedataframe(slice *sd,int iframe){
@@ -4539,6 +4540,7 @@ void uncompress_slicedataframe(slice *sd,int iframe){
   }
 
 }
+#endif
 
 /* ------------------ getsliceval ------------------------ */
 
