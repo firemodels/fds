@@ -1018,6 +1018,7 @@ void keyboard(unsigned char key, int x, int y){
     updateplot3dlistindex();
     return;
   }
+#ifndef pp_NORENDER
   if(strncmp((const char *)&key2,"r",1)==0
     ||strncmp((const char *)&key2,"R",1)==0
     ){
@@ -1051,6 +1052,7 @@ void keyboard(unsigned char key, int x, int y){
     RenderState(1);
     return;
   }
+#endif
 
   skip2=key2-one+1;
   if(skip2>0&&skip2<10)skip=skip2;

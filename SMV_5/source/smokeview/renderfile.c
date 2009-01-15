@@ -25,6 +25,7 @@
 #define GIF 2
 #endif
 
+#ifndef pp_NORENDER
 // svn revision character string
 char renderfile_revision[]="$Revision$";
 
@@ -712,3 +713,4 @@ unsigned char *readrgb(const char *name, int *width, int *height) {
     free(bbuf);
     return (unsigned char *) base;
 }
+#endif
