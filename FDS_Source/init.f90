@@ -108,18 +108,14 @@ IF (DYNSMAG) THEN
    CALL ChkMemErr('INIT','C_DYNSMAG',IZERO)
 ENDIF
 IF (CHECK_KINETIC_ENERGY) THEN
-   ! subgrid turbulent kinetic energy
-   ALLOCATE(M%TKE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','TKE',IZERO)
-   M%TKE=0._EB
-   ! LES resolved kinetic energy
-   ALLOCATE(M%RKE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','RKE',IZERO)
-   M%RKE=0._EB
-   ! Pope measure of turbulence resolution
+   ! measure of turbulence resolution
    ALLOCATE(M%MTR(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
    CALL ChkMemErr('INIT','MTR',IZERO)
    M%MTR=0._EB
+   !! measure of scalar resolution
+   !ALLOCATE(M%MSR(0:IBP1,0:JBP1,0:KBP1,N_SPECIES),STAT=IZERO)
+   !CALL ChkMemErr('INIT','MSR',IZERO)
+   !M%MSR=0._EB
 ENDIF
 
 ! Background pressure, temperature, density as a function of height (Z coordinate)
@@ -229,10 +225,8 @@ IF (FLUX_LIMITER>=0) THEN
    ALLOCATE(M%SCALAR_SAVE3(0:IBP1,0:JBP1,0:KBP1,0:N_SPECIES),STAT=IZERO)
    CALL ChkMemErr('INIT','SCALAR_SAVE3',IZERO)
    IF (N_SPECIES>0) THEN
-      !!ALLOCATE(M%SCALAR_SAVE4(0:IBP1,0:JBP1,0:KBP1,1:N_SPECIES),STAT=IZERO)
-      !!CALL ChkMemErr('INIT','SCALAR_SAVE4',IZERO)
-      ALLOCATE(M%SCALAR_SAVE5(0:IBP1,0:JBP1,0:KBP1,1:N_SPECIES),STAT=IZERO)
-      CALL ChkMemErr('INIT','SCALAR_SAVE5',IZERO)
+      ALLOCATE(M%SCALAR_SAVE4(0:IBP1,0:JBP1,0:KBP1,1:N_SPECIES),STAT=IZERO)
+      CALL ChkMemErr('INIT','SCALAR_SAVE4',IZERO)
    ENDIF
 ENDIF
 
@@ -420,8 +414,7 @@ IF (FLUX_LIMITER>=0) THEN
    M%SCALAR_SAVE2 = 0._EB
    M%SCALAR_SAVE3 = 0._EB
    IF (N_SPECIES>0) THEN
-      !!M%SCALAR_SAVE4 = 0._EB
-      M%SCALAR_SAVE5 = 0._EB
+      M%SCALAR_SAVE4 = 0._EB
    ENDIF
 ENDIF
 

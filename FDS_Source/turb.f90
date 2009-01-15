@@ -17,7 +17,7 @@ CHARACTER(255), PARAMETER :: turbdate='$Date: 2008-12-18 13:26:05 -0500 (Thu, 18
 
 PRIVATE
 PUBLIC :: ANALYTICAL_SOLUTION, sandia_dat, INIT_TURB_ARRAYS, spectral_output, VARDEN_DYNSMAG, &
-          GET_REV_turb, TURBULENT_KINETIC_ENERGY
+          GET_REV_turb, TURBULENT_KINETIC_ENERGY, SUBGRID_SCALAR_VARIANCE
  
 CONTAINS
 
@@ -1549,25 +1549,22 @@ END SUBROUTINE TOPHAT_FILTER_1D
 SUBROUTINE TURBULENT_KINETIC_ENERGY
 IMPLICIT NONE
 
-
-! Velocities relative to the p-cell center
-REAL(EB) :: U_E,U_W,V_N,V_S,W_T,W_B,KE
+REAL(EB) :: KE,SGS_KE,LES_KE
 INTEGER :: I,J,K,N_LO(3),N_HI(3)
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,UP,VP,WP,UP_HAT,VP_HAT,WP_HAT
 
-!CALL POINT_TO_MESH(NM)
-
 IF (PREDICTOR) THEN
-   UU=>U
-   VV=>V
-   WW=>W
-ELSE
    UU=>US
    VV=>VS
    WW=>WS
+ELSE
+   UU=>U
+   VV=>V
+   WW=>W
 ENDIF
 
+! Velocities relative to the p-cell center
 UP => WORK1(1:IBAR,1:JBAR,1:KBAR)
 VP => WORK2(1:IBAR,1:JBAR,1:KBAR)
 WP => WORK3(1:IBAR,1:JBAR,1:KBAR)
@@ -1575,20 +1572,9 @@ WP => WORK3(1:IBAR,1:JBAR,1:KBAR)
 DO K = 1,KBAR
    DO J = 1,JBAR
       DO I = 1,IBAR
-
-         U_E = UU(I,J,K)
-         U_W = UU(I-1,J,K)
-
-         V_N = VV(I,J,K)
-         V_S = VV(I,J-1,K)
-
-         W_T = WW(I,J,K)
-         W_B = WW(I,J,K-1)
-
-         UP(I,J,K) = 0.5_EB*(U_E + U_W)
-         VP(I,J,K) = 0.5_EB*(V_N + V_S)
-         WP(I,J,K) = 0.5_EB*(W_T + W_B)
-
+         UP(I,J,K) = 0.5_EB*(UU(I,J,K) + UU(I-1,J,K))
+         VP(I,J,K) = 0.5_EB*(VV(I,J,K) + VV(I,J-1,K))
+         WP(I,J,K) = 0.5_EB*(WW(I,J,K) + WW(I,J,K-1))
       ENDDO
    ENDDO
 ENDDO
@@ -1607,20 +1593,69 @@ CALL TEST_FILTER(WP_HAT,WP,N_LO,N_HI)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         RKE(I,J,K) = 0.5_EB*(UP(I,J,K)**2 + VP(I,J,K)**2 + WP(I,J,K)**2)
-         TKE(I,J,K) = 0.5_EB*((UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2)
-         KE = RKE(I,J,K)+TKE(I,J,K)
+      
+         LES_KE = UP(I,J,K)**2 + VP(I,J,K)**2 + WP(I,J,K)**2
+         SGS_KE = (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2
+         KE = LES_KE+SGS_KE
+         
          IF (KE>0) THEN
-            MTR(I,J,K) = TKE(I,J,K)/KE
+            MTR(I,J,K) = SGS_KE/KE
          ELSE
             MTR(I,J,K) = 0._EB
          ENDIF
+         
       ENDDO
    ENDDO
 ENDDO
 
-
 END SUBROUTINE TURBULENT_KINETIC_ENERGY
+
+
+SUBROUTINE SUBGRID_SCALAR_VARIANCE
+IMPLICIT NONE
+
+INTEGER :: I,J,K,N,N_LO(3),N_HI(3)
+REAL(EB) :: VAR,SGS_VAR
+REAL(EB), POINTER, DIMENSION(:,:,:) :: YYP,YYP_HAT
+
+IF (N_SPECIES==0) RETURN
+
+N_LO = 1
+N_HI = (/IBAR,JBAR,KBAR/)
+
+YYP => WORK1(1:IBAR,1:JBAR,1:KBAR)
+YYP_HAT => WORK2(1:IBAR,1:JBAR,1:KBAR)
+
+SPECIES_LOOP: DO N=1,N_SPECIES
+
+   IF (PREDICTOR) THEN
+      YYP => YYS(1:IBAR,1:JBAR,1:KBAR,N)
+   ELSE
+      YYP => YY(1:IBAR,1:JBAR,1:KBAR,N)
+   ENDIF
+   
+   CALL TEST_FILTER(YYP_HAT,YYP,N_LO,N_HI)
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+         
+            SGS_VAR = (YYP(I,J,K)-YYP_HAT(I,J,K))**2
+            VAR = YYP(I,J,K)**2 + SGS_VAR
+            
+            IF (VAR>0) THEN
+               MSR(I,J,K,N) = SGS_VAR/VAR
+            ELSE
+               MSR(I,J,K,N) = 0._EB
+            ENDIF
+            
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO SPECIES_LOOP
+
+END SUBROUTINE SUBGRID_SCALAR_VARIANCE
 
 
 SUBROUTINE GET_REV_turb(MODULE_REV,MODULE_DATE)
