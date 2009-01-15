@@ -16,6 +16,7 @@
 #pragma warning (disable:1572)		/* floating-point equality and inequality comparisons are unreliable */
 #pragma warning (disable:494)		/* omission of "class"is nonstandard */
 #pragma warning (disable:444)		/* destructor for base class */
+#pragma warning (disable:2259)
 #else
 #pragma warning (disable:4305)		/* truncation from 'double' to 'GLfloat' */
 #pragma warning (disable:4244)		/* truncation from '__w64' to 'int' */

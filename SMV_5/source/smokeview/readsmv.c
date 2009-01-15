@@ -1503,11 +1503,11 @@ typedef struct {
       fgets(buffer,255,stream);
       trim(buffer);
       buffer3 = trim_front(buffer);
+#ifdef pp_RENDER
       {
         int found_texture;
 
         found_texture=0;
-
         if(smokeviewbindir!=NULL&&stat(buffer3,&statbuffer)!=0){
           STRCPY(texturebuffer,smokeviewbindir);
           STRCAT(texturebuffer,buffer3);
@@ -1528,6 +1528,7 @@ typedef struct {
           printf("             the current working directory or in %s\n",smokeviewbindir);
         }
       }
+#endif
       nsurfaces++;
       continue;
     }
@@ -1814,7 +1815,7 @@ typedef struct {
 
   // check to see if texture files exist .
   // If so, then convert to OpenGL format 
-
+#ifdef pp_RENDER
   for(i=0;i<ntextures;i++){
     unsigned char *floortex;
     int texwid, texht;
@@ -1862,6 +1863,7 @@ typedef struct {
     texti->loaded=1;
     printf(" - completed\n");
   }
+#endif
   if(ntextures==0)FREEMEMORY(textureinfo);
 
   // define colobar textures
@@ -1899,12 +1901,15 @@ typedef struct {
     unsigned char *floortex;
     int texwid, texht;
 
+#ifdef pp_RENDER
     printf("      Loading terrain texture: ");
+#endif
     tt = terrain_texture;
     tt->loaded=0;
     tt->used=0;
     tt->display=0;
 
+#ifdef pp_RENDER
     glGenTextures(1,&tt->name);
     glBindTexture(GL_TEXTURE_2D,tt->name);
     floortex=NULL;
@@ -1927,6 +1932,7 @@ typedef struct {
       tt->loaded=1;
       printf(" - completed\n");
     }
+#endif
   }
 
 /* 
@@ -4391,7 +4397,9 @@ typedef struct {
     readhrr(LOAD, &errorcode);
   }
 
+#ifdef pp_THREAD
   if(mt_compress==1)pthread_mutex_init(&mutexCOMPRESS,NULL);
+#endif
 
   init_part5prop();
   init_plot3dtimelist();
@@ -6358,6 +6366,7 @@ int readini2(char *inifile, int localfile){
       if(slice_average_interval<0.0)slice_average_interval=0.0;
       continue;
     }
+#ifdef pp_RENDER
     if(match(buffer,"SKYBOX",6)==1){
       skyboxdata *skyi;
 
@@ -6371,6 +6380,7 @@ int readini2(char *inifile, int localfile){
         loadskytexture(buffer,skyi->face+i);
       }
     }
+#endif
     if(match(buffer,"C_PLOT3D",8)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&tempval);

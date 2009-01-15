@@ -44,6 +44,8 @@
 // #define pp_GPU_BLANK
 #endif
 
+#define pp_RENDER
+#define pp_THREAD
 #define pp_SPHERE
 #define pp_ISOOUT
 #define pp_DRAWISO
@@ -63,9 +65,11 @@
 
 
 #ifdef pp_ALPHA
-#define pp_LIGHT
-#define pp_SHOWLIGHT
-#define pp_COLOR
+#undef pp_RENDER
+#undef pp_THREAD
+//#define pp_LIGHT
+//#define pp_SHOWLIGHT
+//#define pp_COLOR
 #endif
 
 #ifdef pp_CULL

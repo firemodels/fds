@@ -18,7 +18,9 @@
 
 
 #ifndef CPP
+#ifdef pp_THREAD
 #include <pthread.h>
+#endif
 #endif
 
 #ifdef pp_SPHERE
@@ -550,9 +552,11 @@ SVEXTERN float veclengths[NVECLENGTHS];
 SVEXTERN float texture_origin[3];
 
 #ifndef CPP
+#ifdef pp_THREAD
 SVEXTERN pthread_mutex_t mutexCOMPRESS;
 SVEXTERN pthread_t smooth_block_thread_id;
 SVEXTERN pthread_t compress_thread_id;
+#endif
 #endif
 
 SVEXTERN int lock_allsmoke;
