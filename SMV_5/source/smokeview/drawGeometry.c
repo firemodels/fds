@@ -12,7 +12,9 @@
 #else
 #include <GL/glut.h>
 #endif
+#ifdef pp_THREAD
 #include <pthread.h>
+#endif
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "ASSERT.h"
@@ -762,15 +764,18 @@ void readcad2geom(cadgeom *cd){
 
     texti = &cdi->textureinfo;
     texti->file=NULL;
+#ifdef pp_RENDER
     if(len>0){
       NewMemory((void **)&texti->file,len+1);
       strcpy(texti->file,buffer);
     }
+#endif
     texti->display=0;
     texti->loaded=0;
     texti->used=0;
     texti->name=0;
 
+#ifdef pp_RENDER
     if(texti->file!=NULL){
       int texwid, texht;
       unsigned char *floortex;
@@ -797,8 +802,7 @@ void readcad2geom(cadgeom *cd){
       texti->loaded=1;
       printf(" - completed\n");
     }
-
-    
+#endif
   }
 
   /* read in [FACES] info */
@@ -2837,7 +2841,7 @@ int remove_block(blockagedata *block, const blockagedata *hole,int flag,blockage
 }
 
 /* ------------------ mt_update_smooth_blockages ------------------------ */
-
+#ifdef pp_THREAD
 void *mt_update_smooth_blockages(void *arg){
 
   if(ifsmoothblock()==1){
@@ -2849,11 +2853,13 @@ void *mt_update_smooth_blockages(void *arg){
   return NULL;
 
    }
+#endif
 
 /* ------------------ smooth_blockages ------------------------ */
 
 void smooth_blockages(void){
   smoothing_blocks=1;
+#ifdef pp_THREAD
   if(mt_compress==1){
     pthread_create( 
       &smooth_block_thread_id,
@@ -2868,6 +2874,12 @@ void smooth_blockages(void){
       update_smooth_blockages();
     }
   }
+#else
+    blocksneedsmoothing=ifsmoothblock();
+    if(blocksneedsmoothing==1){
+      update_smooth_blockages();
+    }
+#endif
 }
 
 /* ------------------ update_smooth_blockages ------------------------ */

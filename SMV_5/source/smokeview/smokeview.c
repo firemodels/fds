@@ -1655,7 +1655,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ render scene +++++++++++++++++++++++++ */
 
-#ifndef pp_NONRENDER
+#ifdef pp_RENDER
   if(RenderOnceNow==0&&RenderGif !=0
     &&render_double==0
     ){
@@ -3170,6 +3170,7 @@ void synctimes(void){
   reset_gltime();
 }
 
+#ifdef pp_RENDER
 /* ------------------ RenderFrame ------------------------ */
 
 void RenderFrame(int view_mode){
@@ -3280,6 +3281,7 @@ void RenderFrame(int view_mode){
     output_Slicedata();
   }
 }
+#endif
 
 /* ------------------ ClearBuffers ------------------------ */
 
@@ -3609,11 +3611,14 @@ void usage(char **argv){
 #ifdef pp_noappend
     printf(", pp_noappend");
 #endif
-#ifdef pp_SHOWLIGHT
-    printf(", pp_SHOWLIGHT");
-#endif
 #ifdef pp_OSX
     printf(", pp_OSX");
+#endif
+#ifdef pp_RENDER
+    printf(", pp_RENDER");
+#endif
+#ifdef pp_SHOWLIGHT
+    printf(", pp_SHOWLIGHT");
 #endif
 #ifdef pp_SMOKETEST
     printf(", pp_SMOKETEST");
