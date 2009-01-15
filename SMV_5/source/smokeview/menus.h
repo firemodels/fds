@@ -5759,7 +5759,9 @@ static int in_menu=0;
 #endif
   glutAddSubMenu("Rotation",rotatetypemenu);
   glutAddSubMenu("Max Frame Rate",frameratemenu);
+#ifdef pp_RENDER
   glutAddSubMenu("Render",rendermenu);
+#endif
   if(showfontmenu==1)glutAddSubMenu("Font Size",fontmenu);
 //  glutAddSubMenu("Aperture",aperturemenu);
 #ifdef pp_ALPHA

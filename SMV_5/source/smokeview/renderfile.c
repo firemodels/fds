@@ -25,10 +25,10 @@
 #define GIF 2
 #endif
 
-#ifndef pp_NORENDER
 // svn revision character string
 char renderfile_revision[]="$Revision$";
 
+#ifdef pp_RENDER
 //void pauseSV(void);
 
 
