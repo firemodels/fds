@@ -1655,6 +1655,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ render scene +++++++++++++++++++++++++ */
 
+#ifndef pp_NONRENDER
   if(RenderOnceNow==0&&RenderGif !=0
     &&render_double==0
     ){
@@ -1696,6 +1697,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       RenderSkip=1;
     }
   }
+#endif
 
  /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
