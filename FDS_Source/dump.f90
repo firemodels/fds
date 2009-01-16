@@ -404,8 +404,7 @@ IF (N_DEVC>0) THEN
             ELSE
                OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='REPLACE')
                WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(DEVC_COLUMN_LIMIT, N_DEVC - DEVC_COLUMN_LIMIT * (I - 1)),"(A,','),A)"
-               WRITE(LU_DEVC(I),TCFORM) 's',(TRIM(OUTPUT_QUANTITY(DEVICE(N)%OUTPUT_INDEX)%UNITS), &
-                                             N=DEVC_COLUMN_LIMIT*(I-1)+1,MIN(N_DEVC,I*DEVC_COLUMN_LIMIT))
+               WRITE(LU_DEVC(I),TCFORM) 's',(TRIM(DEVICE(N)%UNITS),N=DEVC_COLUMN_LIMIT*(I-1)+1,MIN(N_DEVC,I*DEVC_COLUMN_LIMIT))
                WRITE(TCFORM,'(A,I4.4,A)') "(A,",MIN(DEVC_COLUMN_LIMIT, N_DEVC - DEVC_COLUMN_LIMIT * (I - 1)),"(',',3A))"
                WRITE(LU_DEVC(I),TCFORM) 'FDS Time',('"',TRIM(DEVICE(N)%ID),'"', &
                                              N=DEVC_COLUMN_LIMIT * (I - 1) + 1,MIN(N_DEVC, I * DEVC_COLUMN_LIMIT))
@@ -421,7 +420,7 @@ IF (N_DEVC>0) THEN
          ELSE
             OPEN(LU_DEVC(1),FILE=FN_DEVC(1),FORM='FORMATTED',STATUS='REPLACE')
             WRITE(TCFORM,'(A,I4.4,A)') "(",N_DEVC,"(A,','),A)"
-            WRITE(LU_DEVC(1),TCFORM) 's',(TRIM(OUTPUT_QUANTITY(DEVICE(N)%OUTPUT_INDEX)%UNITS),N=1,N_DEVC)
+            WRITE(LU_DEVC(1),TCFORM) 's',(TRIM(DEVICE(N)%UNITS),N=1,N_DEVC)
             WRITE(TCFORM,'(A,I4.4,A)') "(A,",N_DEVC,"(',',3A))"
             WRITE(LU_DEVC(1),TCFORM) 'FDS Time',('"',TRIM(DEVICE(N)%ID),'"',N=1,N_DEVC)
          ENDIF
@@ -3349,6 +3348,12 @@ DEVICE_LOOP: DO N=1,N_DEVC
          STAT_COUNT = MAX(STAT_COUNT,1)
          VALUE = STAT_VALUE/REAL(STAT_COUNT,EB)
    END SELECT
+
+   ! Convert units of device quantity
+
+   VALUE = DV%CONVERSION_FACTOR*VALUE
+
+   ! Update the running average and instantaneous device value
 
    DV%COUNT         = DV%COUNT + 1
    DV%VALUE         = DV%VALUE + VALUE
