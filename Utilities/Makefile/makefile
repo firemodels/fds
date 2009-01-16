@@ -7,8 +7,7 @@
 
 # The variable VPATH defines where the source code is relative to the current directory
 
-#VPATH = ../../FDS_Source
-VPATH = ../SOURCE
+VPATH = ../../FDS_Source
 
 # Definition of the Serial or MPI object variables (same, except for main vs main_mpi)
 
@@ -95,7 +94,6 @@ mpi_intel_linux_32_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 mpi_intel_linux_64_db : FFLAGS = -m64 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
-mpi_intel_linux_64_db : FFLAGS = -m64 -O3
 mpi_intel_linux_64_db : CFLAGS = -m64 -O -Dpp_noappend
 mpi_intel_linux_64_db : FCOMPL = mpif77
 mpi_intel_linux_64_db : CCOMPL = icc
