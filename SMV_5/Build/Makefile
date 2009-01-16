@@ -31,6 +31,19 @@ bin = ../bin
 .f90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 
+# OSX 32
+
+intel_osx_32 : IMAGELIBS = -Llib_linux_intel_32
+intel_osx_32 : FORTLIBS  = -L/opt/intel/Compiler/11.0/056/lib
+intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
+intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
+intel_osx_32 : CC        = icc 
+intel_osx_32 : FC        = ifort
+intel_osx_32 : exe       = smv5_osx_32
+
+intel_osx_32 : $(obj)
+	icpc -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -lXmu -lGLU -lGL -lm
+
 # Linux 32
 
 intel_linux_32 : IMAGELIBS = -Llib_linux_intel_32
