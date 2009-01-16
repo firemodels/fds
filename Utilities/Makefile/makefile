@@ -1,30 +1,27 @@
-#*** Fire Dynamics Simulator (FDS), Version 5, Makefile ***
+# Makefile for Fire Dynamics Simulator (FDS), Version 5
 
-#To use this makefile, you will need to provide a make target
-#at the command line.  For example, to make the MPI version with
-#the intel compiler and the debugging flags set, you would need
-#to type 'make intel_linux_mpi_db' at the prompt.
-#Below this comment section there are make file Variables that 
-#can be modified by the user. Please make the changes that 
-#are necessary for your system configuration.
+# To use this makefile, select the appropriate compiler and OS from the list below. For example, to
+# compile the 64 bit parallel version (MPI) of FDS under Linux using the Intel compilers type:
+#
+# make intel_linux_mpi_64
 
-#*** Begin User Defined Variables Section ***
-VPATH = ../../FDS_Source
-# path to source assuming each FDS variant is built in its own sub-directory
-#VPATH = ../../../FDS_Source
+# The variable VPATH defines where the source code is relative to the current directory
 
-#*** End User Defined Variables Section***
+#VPATH = ../../FDS_Source
+VPATH = ../SOURCE
 
-#*** Serial or MPI object variables ***
+# Definition of the Serial or MPI object variables (same, except for main vs main_mpi)
+
 obj_serial = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
-             ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o mass.o \
-             wall.o fire.o pres.o divg.o init.o turb.o velo.o main.o
+             ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o turb.o mass.o \
+             wall.o fire.o pres.o divg.o init.o velo.o main.o
 
 obj_mpi = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
-          ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o mass.o \
-          wall.o fire.o pres.o divg.o init.o turb.o velo.o main_mpi.o
+          ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o turb.o mass.o \
+          wall.o fire.o pres.o divg.o init.o velo.o main_mpi.o
 
-#*** General Purpose Rules ***
+# General Purpose Rules
+
 no_target:
 	@echo \******** You did not specify a make target \********
 	@echo Please read the comments at the top of the makefile
@@ -39,60 +36,73 @@ setup:
 .c.o:
 	$(CCOMPL) -c $(CFLAGS) $<
 
-#*** Begin Compiler Specific Rules ***
+# Intel Compiler, version 11
 
-#*** Intel Compiler ***
-
-# Linux 32
-intel_linux : FFLAGS = -m32 -O3 -axP -ip -static -vec_report0
-intel_linux : CFLAGS = -m32 -O -Dpp_noappend
-intel_linux : FCOMPL = ifort
-intel_linux : CCOMPL = icc
-intel_linux : obj = fds5_intel
-intel_linux : setup $(obj_serial)
+intel_linux_32 : FFLAGS = -m32 -O3 -static
+intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend
+intel_linux_32 : FCOMPL = ifort
+intel_linux_32 : CCOMPL = icc
+intel_linux_32 : obj = fds5_intel_linux_32
+intel_linux_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-# Linux 64
-intel_linux_64 : FFLAGS = -m64 -O2 -axP -static -vec_report0
-intel_linux_64 : CFLAGS = -m64 -O2 -Dpp_noappend -vec_report0
+intel_linux_64 : FFLAGS = -m64 -O3 -static
+intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend
 intel_linux_64 : FCOMPL = ifort
 intel_linux_64 : CCOMPL = icc
-intel_linux_64 : obj = fds5_intel_64
+intel_linux_64 : obj = fds5_intel_linux_64
 intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_mpi_64 : FFLAGS = -m64 -O2 -axPTSW -unroll -xPTSW -static -fpe3 -auto -mp1 -fltconsistency -vec_report0
-intel_linux_mpi_64 : CFLAGS = -O2 -Dpp_noappend -vec_report0
-intel_linux_mpi_64 : FCOMPL = mpif77
-intel_linux_mpi_64 : CCOMPL = mpicc
-intel_linux_mpi_64 : obj = fds5_mpi_intel64
-intel_linux_mpi_64 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
-	
-intel_linux_db : $(obj_serial)
-intel_linux_db : FFLAGS = -m32 -FR  -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static
-intel_linux_db : CFLAGS = -m32 -O -Dpp_noappend
-intel_linux_db : FCOMPL = ifort
-intel_linux_db : CCOMPL = icc
-intel_linux_db : obj = fds5_intel_db
-intel_linux_db : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-	
-intel_linux_mpi : FFLAGS = -m32 -O3 -axP -ip -vec_report0
-intel_linux_mpi : CFLAGS = -m32 -O -Dpp_noappend
-intel_linux_mpi : FCOMPL = mpif77
-intel_linux_mpi : CCOMPL = icc
-intel_linux_mpi : obj = fds5_mpi_intel
-intel_linux_mpi : setup $(obj_mpi)
+mpi_intel_linux_32 : FFLAGS = -m32 -O3
+mpi_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend
+mpi_intel_linux_32 : FCOMPL = mpif77
+mpi_intel_linux_32 : CCOMPL = icc
+mpi_intel_linux_32 : obj = fds5_mpi_intel_linux_32
+mpi_intel_linux_32 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-intel_linux_mpi_db : FFLAGS = -m32 -FR -check all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
-intel_linux_mpi_db : CFLAGS = -m32 -O -Dpp_noappend
-intel_linux_mpi_db : FCOMPL = mpif77
-intel_linux_mpi_db : CCOMPL = icc
-intel_linux_mpi_db : obj = fds5_mpi_intel_db
-intel_linux_mpi_db : setup $(obj_mpi)
+mpi_intel_linux_64 : FFLAGS = -m64 -O3
+mpi_intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend
+mpi_intel_linux_64 : FCOMPL = mpif77
+mpi_intel_linux_64 : CCOMPL = icc
+mpi_intel_linux_64 : obj = fds5_mpi_intel_linux_64
+mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+	
+intel_linux_32_db : FFLAGS = -m32 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static
+intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend
+intel_linux_32_db : FCOMPL = ifort
+intel_linux_32_db : CCOMPL = icc
+intel_linux_32_db : obj = fds5_intel_linux_32_db
+intel_linux_32_db : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+	
+intel_linux_64_db : FFLAGS = -m64 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static
+intel_linux_64_db : CFLAGS = -m64 -Dpp_noappend
+intel_linux_64_db : FCOMPL = ifort
+intel_linux_64_db : CCOMPL = icc
+intel_linux_64_db : obj = fds5_intel_linux_64_db
+intel_linux_64_db : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+
+mpi_intel_linux_32_db : FFLAGS = -m32 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency 
+mpi_intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend
+mpi_intel_linux_32_db : FCOMPL = mpif77
+mpi_intel_linux_32_db : CCOMPL = icc
+mpi_intel_linux_32_db : obj = fds5_mpi_intel_linux_32_db
+mpi_intel_linux_32_db : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+
+mpi_intel_linux_64_db : FFLAGS = -m64 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
+mpi_intel_linux_64_db : FFLAGS = -m64 -O3
+mpi_intel_linux_64_db : CFLAGS = -m64 -O -Dpp_noappend
+mpi_intel_linux_64_db : FCOMPL = mpif77
+mpi_intel_linux_64_db : CCOMPL = icc
+mpi_intel_linux_64_db : obj = fds5_mpi_intel_linux_64_db
+mpi_intel_linux_64_db : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+
 
 # OS X
 osx32_libdir = /opt/intel/Compiler/11.0/056/lib
@@ -301,7 +311,7 @@ fire.o : fire.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
 wall.o : wall.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
 velo.o : velo.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
 divg.o : divg.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-mass.o : mass.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+mass.o : mass.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
 radi.o : radi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 irad.f90
 evac.o : evac.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 ieva.f90
 pres.o : pres.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 pois.f90
