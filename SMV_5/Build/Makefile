@@ -12,7 +12,7 @@ bin = ../bin
 
 # Definition of the object variables
 
-obj = main.o IOscript.o glui_wui.o csphere.o colorbar.o endian.o camera.o IOhrr.o IOwui.o IOobject.o IOtour.o glui_labels.o glui_tour.o smoothlabel.o getdatacolors.o smokeview.o output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o sv_api.o getsizes.o getdata.o  glui_3dsmoke.o glui_clip.o glui_stereo.o glui_blockedit.o glui_motion.o glui_bounds.o egz_stdio.o parseobst.o dmalloc.o objectedit.o assert.o compress3dc.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o glui_colorbar.o skybox.o blockage_test.o segtri.o string_util.o startup.o glui_trainer.o shaders.o
+obj = main.o IOscript.o glui_wui.o csphere.o colorbar.o endian.o camera.o IOhrr.o IOwui.o IOobject.o IOtour.o glui_labels.o glui_tour.o smoothlabel.o getdatacolors.o smokeview.o output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o sv_api.o glui_3dsmoke.o glui_clip.o glui_stereo.o glui_blockedit.o glui_motion.o glui_bounds.o egz_stdio.o parseobst.o dmalloc.o objectedit.o assert.o compress3dc.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o glui_colorbar.o skybox.o blockage_test.o segtri.o string_util.o startup.o glui_trainer.o shaders.o getsizes.o getdata.o
 
 # include file directory locations
 
@@ -32,12 +32,15 @@ no_target:
 	@echo make intel_linux_32
 	@echo make intel_lilnux_64
 
-.SUFFIXES: .c .o .f90 .cpp
+.SUFFIXES: .F90 .c .o .f90 .cpp
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
 .cpp.o:
 	$(CPP) -c $(CFLAGS) $(INC) $(FILTERC) $<
+
+.F90.o:
+	$(FC) -c $(FFLAGS) $(FILTERF) $<
 
 .f90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
@@ -58,6 +61,21 @@ intel_osx_32 : exe       = smv5_osx_32
 
 intel_osx_32 : $(obj)
 	g++ -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT $(IMAGELIBS) -lz -ljpeg -lpng -lgd -lglui $(FORTLIBS)/libifcoremt.a $(FORTLIBS)/libimf.a $(FORTLIBS)/libirc.a $(FORTLIBS)/libsvml.a
+
+# ------------- Linux 32 ----------------
+#  32 bit linux (acrux) using gnu compilers 
+
+intel_linux_g32 : IMAGELIBS = -Llib_linux_gcc_32
+intel_linux_g32 : FORTLIBS  = -L/opt/intel/fc/10.1.021/lib
+intel_linux_g32 : FFLAGS    = -O2 -m32 -D pp_noappend -ffree-form
+intel_linux_g32 : CFLAGS    = -O2 -m32 -D pp_LINUX
+intel_linux_g32 : CC        = gcc
+intel_linux_g32 : CPP       = g++
+intel_linux_g32 : FC        = gfortran
+intel_linux_g32 : exe       = smv5_linux_32
+
+intel_linux_g32 : $(obj)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lXmu -lgfortran -lGLU -lGL -lm
 
 # ------------- Linux 32 ----------------
 #  32 bit linux (acrux)
