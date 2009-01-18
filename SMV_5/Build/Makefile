@@ -85,6 +85,21 @@ gcc_linux_32 : exe       = smv5_linux_32
 gcc_linux_32 : $(obj)
 	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lXmu -lgfortran -lGLU -lGL -lm
 
+# ------------- Linux 32 DEBUG ----------------
+#  32 bit debug linux (acrux)
+
+intel_linux_32_dbg : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_32
+intel_linux_32_dbg : FORTLIBS  = -L/opt/intel/fc/10.1.021/lib
+intel_linux_32_dbg : FFLAGS    = -O0 -m32 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
+intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -vec_report0 -D pp_LINUX
+intel_linux_32_dbg : CC        = icc 
+intel_linux_32_dbg : CPP       = icpc
+intel_linux_32_dbg : FC        = ifort
+intel_linux_32_dbg : exe       = smv5_linux_32_dbg
+
+intel_linux_32_dbg : $(obj)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -lXmu -lGLU -lGL -lm
+
 # ------------- Linux 32 ----------------
 #  32 bit linux (acrux)
 
@@ -99,6 +114,21 @@ intel_linux_32 : exe       = smv5_linux_32
 
 intel_linux_32 : $(obj)
 	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -lXmu -lGLU -lGL -lm
+
+# ------------- Linux 64 DEBUG ----------------
+# 64 bit debug linux (fire79)
+
+intel_linux_64_dbg : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_64
+intel_linux_64_dbg : FORTLIBS  = -L/opt/intel/Compiler/11.0/074/lib/intel64
+intel_linux_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
+intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_LINUX
+intel_linux_64_dbg : CC        = icc 
+intel_linux_64_dbg : CPP       = icpc
+intel_linux_64_dbg : FC        = ifort
+intel_linux_64_dbg : exe       = smv5_linux_64_dbg
+
+intel_linux_64_dbg : $(obj)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc -lXmu -lGLU -lGL -lm
 
 # ------------- Linux 64 ----------------
 # 64 bit linux (fire79)
