@@ -1,2 +1,2 @@
 #!/bin/csh -f
-make -f ../Makefile intel_osx32
+make -f ../Makefile intel_osx_32
