@@ -1,0 +1,2 @@
+test of red/blue stereo view (hit S key twice)
+iso-surface now drawn using shades of grey when coloring is turned off
