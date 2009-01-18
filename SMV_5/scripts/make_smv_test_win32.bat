@@ -18,6 +18,8 @@ mkdir %smvdir%
 copy smokeview_test.exe %smvdir%\smokeview.exe
 copy smokezip_release.exe %smvdir%\smokezip.exe
 copy devices.svo %smvdir%\.
+copy glew32.dll %smvdir%\.
+copy pthreadVC.dll %smvdir%\.
 copy note.txt %smvdir%\.
 
 echo
