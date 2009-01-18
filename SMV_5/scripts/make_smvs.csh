@@ -9,7 +9,7 @@ echo building 32 bit Linux Smokeview
 #cd $SVNROOT/SMV_5/INTEL/sv5p0
 cd $SVNROOT/SMV_5/Build/INTEL_LINUX_32
 make -f ../Makefile clean >& /dev/null
-date >& $SVNROOT/SMV_5/scripts/make_linux.out
+date >& $SVNROOT/SMV_5/scripts/make_intel_linux_32.out
 ./make_smv.csh >>& $SVNROOT/SMV_5/scripts/make_intel_linux_32.out
 cd $SVNROOT/SMV_5/bin
 
@@ -21,4 +21,4 @@ scp $LINUX64HOST\:FDS-SMV/SMV_5/bin/make_intel_linux_64.out $SVNROOT/SMV_5/scrip
 echo 
 echo building 32 bit OSX Smokeview
 ssh $OSXHOST FDS-SMV/SMV_5/scripts/make_smv_osx.csh
-scp $OSXHOST\:FDS-SMV/SMV_5/bin/make_osx_32.out $SVNROOT/SMV_5/scripts/.
+scp $OSXHOST\:FDS-SMV/SMV_5/bin/make_intel_osx_32.out $SVNROOT/SMV_5/scripts/.
