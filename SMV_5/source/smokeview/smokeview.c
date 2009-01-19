@@ -1063,7 +1063,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(times!=NULL&&updateUpdateFrameRateMenu==1)sv_FrameRateMenu(frameratevalue);
   if(updatefaces==1)update_faces();
   if(updatefacelists==1)update_facelists();
-  if(showstereo!=2&&showstereo!=3)ClearBuffers(mode);
+  if(showstereo!=2&&showstereo!=3&&showstereo!=4)ClearBuffers(mode);
 
 /* ++++++++++++++++++++++++ draw viewports +++++++++++++++++++++++++ */
   if(mode==RENDER){
@@ -3237,7 +3237,7 @@ void RenderFrame(int view_mode){
       sprintf(renderfile,"%s_%04i_L",renderfile_prefix,itime/RenderSkip);
       break;
     case VIEW_RIGHT:
-      if(showstereo==2||showstereo==3){
+      if(showstereo==2||showstereo==3||showstereo==4){
         sprintf(renderfile,"%s_%04i",renderfile_prefix,itime/RenderSkip);
       }
       else{
@@ -3259,7 +3259,7 @@ void RenderFrame(int view_mode){
       sprintf(renderfile,"%s_s%04i_L",renderfile_prefix,seqnum);
       break;
     case VIEW_RIGHT:
-      if(showstereo==2||showstereo==3){
+      if(showstereo==2||showstereo==3||showstereo==4){
         sprintf(renderfile,"%s_s%04i",renderfile_prefix,seqnum);
       }
       else{

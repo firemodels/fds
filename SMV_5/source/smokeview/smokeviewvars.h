@@ -595,7 +595,7 @@ SVEXTERN int callfrom_tourglui;
 SVEXTERN int showtours_whenediting;
 
 SVEXTERN float xtimeleft, xtimeright;
-SVEXTERN int showstereo, show_parallax, showstereo_frame;
+SVEXTERN int showstereo, showstereoOLD, show_parallax, showstereo_frame;
 
 SVEXTERN int show_hrrcutoff, show_hrrcutoff_active, hrrpuv_loaded;
 SVEXTERN int showglui3dsmoke;
