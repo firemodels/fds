@@ -1463,6 +1463,7 @@ void initvars1(void){
   showtours_whenediting=0;
 
   showstereo=0;
+  showstereoOLD=showstereo;
   showstereo_frame=2;
   show_parallax=0;
   showglui3dsmoke=0;

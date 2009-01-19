@@ -32,17 +32,15 @@ GLUI_Spinner *SPINNER_zero_parallax=NULL, *SPINNER_stereo_offset=NULL;
 #define STEREO_CLOSE 0
 #define STEREO_RESET 2
 #define STEREO_FRAME 3
+#define STEREO_SHOW 4
 #define SAVE_SETTINGS 999
 
 void STEREO_CB(int var);
 
 extern "C" void update_glui_stereo(void){
-  int showstereoOLD;
-
   if(RADIO_showstereo!=NULL){
     RADIO_showstereo->set_int_val(showstereo);
   }
-  showstereoOLD=showstereo;
   if(showstereoOLD==3&&showstereo!=3){
     if(setbw!=setbwSAVE){
       setbw=1-setbwSAVE;
@@ -66,12 +64,13 @@ extern "C" void glui_stereo_setup(int main_window){
   if(showgluistereo==0)glui_stereo->hide();
   
   panel_stereo_method = glui_stereo->add_panel("Stereo Method");
-  RADIO_showstereo = glui_stereo->add_radiogroup_to_panel(panel_stereo_method,&showstereo);
+  RADIO_showstereo = glui_stereo->add_radiogroup_to_panel(panel_stereo_method,&showstereo,STEREO_SHOW,STEREO_CB);
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Off");
   RADIO_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Sucessive frames");
   if(videoSTEREO==0)RADIO_seq->disable();
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Left/Right");
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Red/Blue");
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Red/Cyan");
 
   fzero*=xyzmaxdiff;
   SPINNER_zero_parallax=glui_stereo->add_spinner("Distance to zero parallax plane (m)",GLUI_SPINNER_FLOAT,&fzero);
@@ -111,6 +110,12 @@ extern "C" void show_glui_stereo(void){
 void STEREO_CB(int var){
 
   switch (var){
+  case STEREO_SHOW:
+    if(showstereoOLD!=showstereo){
+      update_glui_stereo();
+      showstereoOLD=showstereo;
+    }
+    break;
   case STEREO_RESET:
     SPINNER_zero_parallax->set_float_val(0.25*xyzmaxdiff);
     break;
