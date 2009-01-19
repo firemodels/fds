@@ -1,7 +1,26 @@
 program compute_flame_height
 
 character(30) :: infile(16)
-real :: z(0:100),hrrpul(100),height(16)
+real :: z(0:100),hrrpul(100),height(16),qstar(16),diameter
+
+diameter = 1.13  ! Equivalent diameter of 1 m2 square
+
+qstar(1)   = 0.1
+qstar(2)   = 0.2
+qstar(3)   = 0.5
+qstar(4)   = 1.0
+qstar(5)   = 2.0
+qstar(6)   = 5.0
+qstar(7)   = 10.
+qstar(8)   = 20.
+qstar(9)   = 50.
+qstar(10)  = 100.
+qstar(11)  = 200.
+qstar(12)  = 500.
+qstar(13)  = 1000.
+qstar(14)  = 2000.
+qstar(15)  = 5000.
+qstar(16)  = 10000.
 
 infile(1)  = 'Qs=p1_fds2ascii.csv'
 infile(2)  = 'Qs=p2_fds2ascii.csv'
@@ -19,6 +38,8 @@ infile(13) = 'Qs=1000_fds2ascii.csv'
 infile(14) = 'Qs=2000_fds2ascii.csv'
 infile(15) = 'Qs=5000_fds2ascii.csv'
 infile(16) = 'Qs=10000_fds2ascii.csv'
+
+write(6,"(a,',',a)") "Q*","L/D"
 
 file_loop: do n=1,16
 
@@ -43,7 +64,7 @@ file_loop: do n=1,16
       endif
    enddo
 
-   write(6,"(i3,',',f8.2)") n,height(n)
+   write(6,"(f8.1,',',f8.2)") qstar(n),height(n)/diameter
    close(10)
 
 enddo file_loop
