@@ -7,12 +7,13 @@
 
 # use the following line if building Smokeview in the directory containing this Makefile
 #SOURCE_DIR = ../source/
+
 # use the following line if building Smokeview in a directory 'below' Makefile
 SOURCE_DIR = ../../source/
 
 # use FILTERC and FILTERF to customize smokeview builds (ie -D pp_BETA)
 FILTERC = 
-FILTERC =
+FILTERF =
 
 #----------------------------------------------------------------------------
 # Should not need to edit lines below except to add or 'debug' target entries
@@ -29,6 +30,7 @@ INC_DIR = $(SOURCE_DIR)/include2
 # Definition of the object variables
 
 obj = main.o IOscript.o glui_wui.o csphere.o colorbar.o endian.o camera.o IOhrr.o IOwui.o IOobject.o IOtour.o glui_labels.o glui_tour.o smoothlabel.o getdatacolors.o smokeview.o output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o sv_api.o glui_3dsmoke.o glui_clip.o glui_stereo.o glui_blockedit.o glui_motion.o glui_bounds.o egz_stdio.o parseobst.o dmalloc.o objectedit.o assert.o compress3dc.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o glui_colorbar.o skybox.o blockage_test.o segtri.o string_util.o startup.o glui_trainer.o shaders.o getsizes.o getdata.o
+objwin = $(obj:.o=.obj)
 
 # include file directory locations (should be the same for all builds)
 
@@ -40,20 +42,43 @@ no_target:
 	@echo \******** You did not specify a make target \********
 	@echo Use one of targets found in the Makefile
 
-.SUFFIXES: .F90 .c .o .f90 .cpp
+.SUFFIXES: .F90 .c .obj .o .f90 .cpp
 
+.c.obj:
+	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
 .c.o:
 	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
+
+.cpp.obj:
+	$(CPP) -c $(CFLAGS) $(INC) $(FILTERC) $<
 .cpp.o:
 	$(CPP) -c $(CFLAGS) $(INC) $(FILTERC) $<
 
 .F90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
-
+.f90.obj:
+	$(FC) -c $(FFLAGS) $(FILTERF) $<
 .f90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 
 # ********  rules for each platform supported *************
+
+# ------------- Win 32 ----------------
+#  32 bit windows
+
+intel_win_32 : INC = -I ../../source/include
+intel_win_32 : IMAGELIBS = $(LIB_DIR)/lib_win_intel_32
+intel_win_32 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
+intel_win_32 : FORTLIBS  = "C:\Program Files\Intel\Compiler\11.0\066\fortran\lib\ia32"
+intel_win_32 : FFLAGS    = -O2 -fpp -D pp_noappend
+intel_win_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D pp_WIN_INTEL
+intel_win_32 : CC        = icl
+intel_win_32 : CPP       = icl
+intel_win_32 : FC        = ifort
+intel_win_32 : exe       = smv5_win_32
+
+intel_win_32 : $(objwin)
+	$(CPP) -m32 -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBS)\smokeview_fort.lib $(IMAGELIBS)\pthreadVC.lib $(IMAGELIBS)\glui.lib $(IMAGELIBS)\glut32.lib $(IMAGELIBS)\glew32.lib $(IMAGELIBS)\gd.lib $(IMAGELIBS)\jpeg.lib $(IMAGELIBS)\png.lib $(IMAGELIBS)\zlib.lib
 
 # ------------- OSX 32 ----------------
 #  OSX running tiger (tiger)
