@@ -581,34 +581,17 @@ void keyboard(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"S",1)==0){
-    switch (showstereo){
-      case 0:
-        showstereo=2;
-        if(videoSTEREO==1)showstereo=1;
-        break;
-      case 1:
-        showstereo=2;
-        break;
-      case 2:
-        showstereo=3;
-        setbwSAVE=setbw;
-        if(setbw==0){
-          ShadeMenu(2);
-        }
-        break;
-      case 3:
-        showstereo=0;
-        if(setbw!=setbwSAVE){
-          setbw=1-setbwSAVE;
-          ShadeMenu(2);
-        }
-        break;
-    }
+    showstereoOLD=showstereo;
+    showstereo++;
+    if(showstereo>4)showstereo=0;
+    if(showstereo==1&&videoSTEREO!=1)showstereo=2;
     update_glui_stereo();
+    return;
   }
   if(strncmp((const char *)&key2,"T",1)==0){
     usetexturebar=1-usetexturebar;
     printf("usetexturebar=%i\n",usetexturebar);
+    return;
   }
 #ifdef pp_CULL
   if(strncmp((const char *)&key2,"C",1)==0){
@@ -618,6 +601,7 @@ void keyboard(unsigned char key, int x, int y){
       initcull(cullsmoke);
       print_gpu_cull_state();
     }
+    return;    
   }
 #endif
 #ifdef pp_GPU
@@ -625,6 +609,7 @@ void keyboard(unsigned char key, int x, int y){
     if(gpuactive==1)usegpu=1-usegpu;
     update_smoke3dflags();
     print_gpu_cull_state();
+    return;    
   }
 #endif
   if(strncmp((const char *)&key2,"t",1)==0){
@@ -684,7 +669,7 @@ void keyboard(unsigned char key, int x, int y){
       }
       updateshowstep(1-current_mesh->visx,DIRX);
     }
-      return;
+    return;
   }
   if(strncmp((const char *)&key2,"y",1)==0){
     int state;
@@ -699,8 +684,8 @@ void keyboard(unsigned char key, int x, int y){
       break;
      default:
       updateshowstep(1-current_mesh->visy,DIRY);
-     }
-       return;
+    }
+    return;
   }
   if(strncmp((const char *)&key2,"z",1)==0){
     int state;
@@ -716,7 +701,7 @@ void keyboard(unsigned char key, int x, int y){
     default:
       updateshowstep(1-current_mesh->visz,DIRZ);
     }
-      return;
+    return;
   }
   if(strncmp((const char *)&key2,"k",1)==0){
     visTimeLabels = 1 - visTimeLabels;
@@ -779,6 +764,7 @@ void keyboard(unsigned char key, int x, int y){
       InitMenus(LOAD);
       glutAttachMenu(GLUT_RIGHT_BUTTON);
     }
+    return;
   }
 
   if(strncmp((const char *)&key2,"j",1)==0&&eyeview==EYE_CENTERED){
@@ -861,6 +847,7 @@ void keyboard(unsigned char key, int x, int y){
       if(xyz_clipplane>2)xyz_clipplane=0;
       update_clip_all();
     }
+    return;
   }
   if(strncmp((const char *)&key2,"a",1)==0&&(eyeview==EYE_CENTERED||(visVector==1&&ReadPlot3dFile==1)||showvslice==1)){
     if(eyeview==EYE_CENTERED){
@@ -934,9 +921,11 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"&",1)==0){
     antialiasflag=1-antialiasflag;
     printf("antialiasflag=%i\n",antialiasflag);
+    return;
   }
   if(strncmp((const char *)&key2,"i",1)==0){
     handleiso();
+    return;
   }
   if(strncmp((const char *)&key2,"b",1)==0&&visiso==1){
     isooffset+=FlowDir;
@@ -1050,10 +1039,10 @@ void keyboard(unsigned char key, int x, int y){
       RenderOnceNowR=1;
     }
     RenderState(1);
-    return;
 #else
-      printf("*** rendering not supported in this version of Smokeview\n");
+    printf("*** rendering not supported in this version of Smokeview\n");
 #endif
+    return;
   }
 
   skip2=key2-one+1;
@@ -1102,7 +1091,7 @@ void keyboard(unsigned char key, int x, int y){
   if(plotstate==DYNAMIC_PLOTS){
     if(timedrag==0)itime += skip*FlowDir;
     checktimebound();
-  IDLE();
+    IDLE();
 
     return;
   }
@@ -1803,6 +1792,30 @@ void Display(void){
       glDrawBuffer(GL_BACK);
       glColorMask(GL_FALSE,GL_FALSE,GL_TRUE,GL_TRUE);
       glClearColor(0.0, 0.0, 1.0, 1.0); 
+      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+      ShowScene(RENDER,VIEW_RIGHT,0,
+        0,0,screenWidth,screenHeight);
+      glFlush();
+    }
+    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+  }
+  else if(showstereo==4){             // red/cyan stereo
+    glDrawBuffer(GL_BACK);
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    glClearColor(1.0, 0.0, 0.0, 1.0); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if(showstereo_frame==0||showstereo_frame==2){
+      glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
+      ShowScene(RENDER,VIEW_LEFT,0,
+        0,0,screenWidth,screenHeight);
+      glFlush();
+    }
+
+    if(showstereo_frame==1||showstereo_frame==2){
+      glDrawBuffer(GL_BACK);
+      glColorMask(GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE);
+      glClearColor(0.0, 1.0, 1.0, 0.0); 
       glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
       ShowScene(RENDER,VIEW_RIGHT,0,

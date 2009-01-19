@@ -6230,9 +6230,10 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"STEREO",6)==1){
       fgets(buffer,255,stream);
+      showstereoOLD=showstereo;
       sscanf(buffer,"%i",&showstereo);
       if(showstereo<0)showstereo=0;
-      if(showstereo>3)showstereo=3;
+      if(showstereo>4)showstereo=4;
       if(showstereo==1&&videoSTEREO!=1)showstereo=0;
       update_glui_stereo();
       continue;
