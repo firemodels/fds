@@ -399,7 +399,7 @@ SVEXTERN int showonly_hiddenfaces;
 
 SVEXTERN int windowresized;
 
-SVEXTERN int updatemenu;
+SVEXTERN int updatemenu, first_display;
 SVEXTERN int updatezoommenu;
 SVEXTERN int updatemenu_count;
 

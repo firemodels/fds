@@ -178,14 +178,18 @@ extern "C" void show_glui_clip(void){
 /* ------------------ update_glui_clip ------------------------ */
 
 extern "C" void update_glui_clip(void){
-  CHECKBOX_clip_xlower->set_int_val(clip_x);
-  CHECKBOX_clip_ylower->set_int_val(clip_y);
-  CHECKBOX_clip_zlower->set_int_val(clip_z);
-  CHECKBOX_clip_xupper->set_int_val(clip_X);
-  CHECKBOX_clip_yupper->set_int_val(clip_Y);
-  CHECKBOX_clip_zupper->set_int_val(clip_Z);
-  radio_clip->set_int_val(xyz_clipplane);
-  CLIP_CB(CLIP_all);
+  if(CHECKBOX_clip_xlower!=NULL&&CHECKBOX_clip_ylower!=NULL&&CHECKBOX_clip_zlower!=NULL&&
+     CHECKBOX_clip_xupper!=NULL&&CHECKBOX_clip_yupper!=NULL&&CHECKBOX_clip_zupper!=NULL){
+
+    CHECKBOX_clip_xlower->set_int_val(clip_x);
+    CHECKBOX_clip_ylower->set_int_val(clip_y);
+    CHECKBOX_clip_zlower->set_int_val(clip_z);
+    CHECKBOX_clip_xupper->set_int_val(clip_X);
+    CHECKBOX_clip_yupper->set_int_val(clip_Y);
+    CHECKBOX_clip_zupper->set_int_val(clip_Z);
+    if(radio_clip!=NULL)radio_clip->set_int_val(xyz_clipplane);
+    CLIP_CB(CLIP_all);
+  }
 }
 
 /* ------------------ CLIP_CB ------------------------ */
@@ -335,15 +339,12 @@ void set_clip_controls(int val){
     yplt = meshi->yplt_orig;
     zplt = meshi->zplt_orig;
 
-
     clip_x_val = xplt[0] - dxclip;
     clip_y_val = yplt[0] - dyclip;
     clip_z_val = zplt[0] - dzclip;
     clip_X_val = xplt[meshi->ibar] + dxclip;
     clip_Y_val = yplt[meshi->jbar] + dyclip;
     clip_Z_val = zplt[meshi->kbar] + dzclip;
-
-
   }
   SPINNER_clip_xlower->set_float_val(clip_x_val);
   SPINNER_clip_ylower->set_float_val(clip_y_val);

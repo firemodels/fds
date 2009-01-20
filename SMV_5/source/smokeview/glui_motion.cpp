@@ -902,6 +902,7 @@ void BUTTON_Reset_CB(int var){
       }
     }
     BUTTON_Reset_CB(RESTORE_LIST_VIEW);
+    updatezoommenu=1;
     enable_disable_views();
     break;
   case STARTUP:
