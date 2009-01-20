@@ -1238,6 +1238,8 @@ void initvars1(void){
 
   windowresized=0;
 
+  first_display=2;
+
   updatemenu=0;
   updatezoommenu=0;
   updatemenu_count=0;

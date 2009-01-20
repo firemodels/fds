@@ -6110,6 +6110,7 @@ int readini(int scriptconfigfile){
   if(ncolorbars<=ndefaultcolorbars){
     initdefaultcolorbars();
   }
+  updatezoommenu=1;
   return 0;
 }
 
@@ -7604,8 +7605,7 @@ int readini2(char *inifile, int localfile){
               zoomindex=4;
             }
           }
-          ZoomMenu(zoomindex);
-
+          updatezoommenu=1;
         }
 
         p_type=0;
