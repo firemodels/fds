@@ -1685,7 +1685,8 @@ void Display(void){
     }
     GLUTPOSTREDISPLAY
   }
-  if(updatezoommenu==1){
+  if(updatezoommenu==1||first_display>0){
+     if(first_display>0)first_display--;
      updatezoommenu=0;
     ZoomMenu(zoomindex);
   }
