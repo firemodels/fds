@@ -3531,8 +3531,8 @@ transport time scale. Thus, it makes sense to calculate the
 consequences of the reaction assuming all other processes are
 frozen in a state corresponding to the beginning of the time step.
 For each grid cell, at the start of a time step where $t=t^n$ and
-$Y_{C_x H_y,ijk}^n/\rho_{ijk} W_F       \equiv X_\F(t^n)$ and
-$Y_{\OTWO,ijk}^n    /\rho_{ijk} W_\OTWO \equiv X_\OTWO(t^n)$,
+$Y_{C_x H_y,ijk}^n \rho_{ijk}/ W_F       \equiv X_\F(t^n)$ and
+$Y_{\OTWO,ijk}^n   \rho_{ijk}/ W_\OTWO \equiv X_\OTWO(t^n)$,
 the following set of ODEs is solved numerically with a second-order Runge-Kutta scheme
 \begin{eqnarray}
 \frac{dX_\F}{dt}    &=& -B \; X_\F(t)^a \, X_\OTWO(t)^b \; e^{-E/RT_{ijk}} \label{finitefuel} \\
