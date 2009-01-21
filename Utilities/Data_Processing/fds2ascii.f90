@@ -526,6 +526,7 @@ EXTRA_PLOT3D_FILES: DO
             STOP
          ENDIF
          200 CONTINUE
+         SLCF_LABEL(I) = SLCF_LABEL_DUMMY
          IF (SLCF_LABEL(I)=='null' .OR. SLCF_LABEL(I)==' ') SLCF_LABEL(I) = SLCF_TEXT(I)
       ELSE
          I=AUTO_SLICE_LISTS(IAUTO)
