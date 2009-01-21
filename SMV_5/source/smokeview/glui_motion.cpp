@@ -884,6 +884,9 @@ void BUTTON_Reset_CB(int var){
 
    eyeview_save = ca->eyeview;
    copy_camera(camera_current,ca);
+   if(strcmp(ca->name,"external")==0||strcmp(ca->name,"internal")==0){
+     updatezoommenu=1;
+   }
    camera_current->eyeview=eyeview_save;
    edit_view_label->set_text(ca->name);
    break;
