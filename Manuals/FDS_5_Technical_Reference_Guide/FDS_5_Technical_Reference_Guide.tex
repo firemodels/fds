@@ -2081,8 +2081,8 @@ coefficient are effectively reduced.}
 Each material component may undergo several competing reactions, and
 each of these reactions may produce some other solid component
 (residue) and gaseous volatiles according to the yield coefficients
-$\nu_s$ and $\nu_{g,s}$, respectively.  These coefficients should
-usually satisfy $\nu_s + \sum_s\nu_{g,\gamma} = 1$, but smaller yields may
+$\nu_s$ and $\nu_{g,\gamma}$, respectively.  These coefficients should
+usually satisfy $\nu_s + \sum_\gamma \nu_{g,\gamma} = 1$, but smaller yields may
 also be used to take into account the gaseous products that are not
 explicitly included in the simulation.
 
@@ -2091,6 +2091,9 @@ separate reactions. We will use the index $\beta$ to represent one of
 these reactions:
 \be \hbox{Material}_\alpha \rightarrow \nu_{s,\alpha \beta} \;
     \hbox{Residue}_{\alpha \beta} + \nu_{g,\alpha \beta,w} \; \hbox{H$_2$O} + \nu_{g,\alpha \beta,f} \; \hbox{HC} \ee
+In this his particular reaction, condenced phase residue, water vapor
+and hydrocarbon fuel are produced.
+
 The local density of material component $\alpha$ evolves in time
 according to the solid phase species conservation equation
 \be
@@ -2132,6 +2135,12 @@ The volumetric production rate of each gaseous volatile is
 \ee
 It is assumed that the gases are transported instantaneously to the surface, where the
 mass fluxes are given by:
+\footnote{In cylindrical and spherical coordinates, the mass fluxes are
+\be
+   \dm_\gamma'' =\frac{1}{R} \int_0^R \dm_\gamma'''(x) \,r dr \;\; ; \;\;
+   \dm_\gamma'' =\frac{1}{R^2} \int_0^R \dm_\gamma'''(x) \,r^2 dr \;\; 
+\ee}
+
 \be
    \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \, dx
 \ee
