@@ -2,9 +2,7 @@
 \usepackage{mathptm,times}
 \usepackage[pdftex]{graphicx}
 %\usepackage{hyperref}
-
 %\usepackage{array,eqnarray}
-
 %\usepackage{eso-pic}
 %\usepackage{graphicx}
 %\usepackage{color}
@@ -25,9 +23,9 @@
         citecolor=linkred,     % citation number colors
         linkcolor=linknavy,    % \ref{...} and \pageref{...}
         pdftitle={Fire Dynamics Simulator (Version 5) Configuration Management Plan},
-        pdfauthor={Kevin McGrattan, Bryan Klein, Simo Hostikka, Jason Floyd},
-        pdfsubject={User Guide},
-        pdfkeywords={FDS, Fire Model, NIST, BFRL},
+        pdfauthor={Bryan Klein, Jason Floyd},
+        pdfsubject={Software Configuration Management Guide},
+        pdfkeywords={FDS, Fire Model, NIST, BFRL, SCM},
         pdfproducer={pdflatex},
         pagebackref,
         pdfpagemode=UseNone,
@@ -168,29 +166,23 @@
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ \Large Volume 4: Configuration Management Plan}
+\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ \Large Volume 4: Software Configuration Management Plan}
 
 \vspace{.5in}
 
 \large
 \flushright{
-Kevin McGrattan \\
-Simo Hostikka \\
-Jason Floyd \\
-Bryan Klein}
+Bryan Klein \\
+Jason Floyd}
 
 \vspace{0.5in}
 
 \flushright{In cooperation with: \\
 VTT Technical Research Centre of Finland  }
 
-
-
 \vfill
 
-
 \flushright{\includegraphics[width=2.in]{FIGURES/nistident_flright_vec}}
-
 
 \end{minipage}
 
@@ -212,14 +204,9 @@ VTT Technical Research Centre of Finland  }
 
 \normalsize
 \flushright{
-Kevin McGrattan \\
 Bryan Klein \\
 {\em Fire Research Division} \\
 {\em Building and Fire Research Laboratory}  \\
-\hspace{1.in} \\
-Simo Hostikka \\
-{\em VTT Technical Research Centre of Finland} \\
-{\em Espoo, Finland}  \\
 \hspace{1.in} \\
 Jason Floyd \\
 {\em Hughes Associates, Inc.}  \\
@@ -228,7 +215,7 @@ Jason Floyd \\
 \vspace{.25in}
 
 \flushright{\today \\
-FDS Version 5.2 \\
+FDS Version 5.3 \\
 $SVN Repository$~$Revision$}
 
 \vfill
@@ -306,19 +293,10 @@ the products are necessarily those best suited for the intended purpose.
 \chapter{About the Authors}
 
 \begin{description}
-\item[Kevin McGrattan] is a mathematician in the Building and Fire
-Research Laboratory of NIST. He received a bachelors of science degree
-from the School of Engineering and Applied Science of Columbia
-University in 1987 and a doctorate at the Courant Institute of New
-York University in 1991. He joined the NIST staff in 1992 and has
-since worked on the development of fire models, most notably the Fire
-Dynamics Simulator.
-\item[Simo Hostikka] is a Senior Research Scientist at VTT Technical
-Research Centre of Finland. He received a master of science
-(technology) degree in 1997 and a doctorate in 2008 from
-the Department of Engineering Physics and Mathematics of the
-Helsinki University of Technology.  He is the principal developer of the
-radiation and solid phase sub-models within FDS.
+\item[Bryan Klein], the current Configuration Manager, is an Information Technology Specialist in the
+Building and Fire Research Laboratory of NIST. His current focus is on FDS development and
+user support, along with experimental model validation work.
+
 \item[Jason Floyd] is a Senior Engineer at Hughes Associates, Inc., in
 Baltimore, Maryland. He received a bachelors of science degree and a
 doctorate from the Nuclear Engineering Program of the University of
@@ -329,80 +307,7 @@ currently funded by NIST under grant 60NANB5D1205 from the Fire
 Research Grants Program (15 USC 278f).  He is the principal developer
 of the multi-parameter mixture fraction combustion model and control
 logic within FDS.
-\item[Bryan Klein] is an Information Technology Specialist in the
-Building and Fire Research Laboratory of NIST.  Before coming to NIST,
-Bryan worked for five years with Western Fire Center, Inc., performing a
-wide range of activities including fire modeling, data acquisition programming,
-and quantitative fire measurements. His current focus is on FDS development and
-user support, along with experimental model validation work.
 \end{description}
-
-
-\chapter{Acknowledgments}
-
-\label{acksection}
-
-The development and maintenance of the Fire Dynamics Simulator has been made possible through
-a partnership of public and private organizations, both in the United States and abroad. Following
-is a list of contributors from the various sectors of the fire research, fire protection engineering and
-fire services communities:
-
-FDS is supported financially via internal funding at both NIST and
-VTT, Finland. In addition, support is provided by other agencies of
-the US Federal Government, most notably the Nuclear Regulatory Agency
-Office of Research. The US NRC Office of Research has funded key
-validation experiments, the preparation of the FDS manuals, and the
-development of various sub-models that are of importance in the area
-of nuclear power plant safety. Special thanks to Mark Salley and Jason
-Dreisbach for their efforts and support.  The Office of Nuclear
-Material Safety and Safeguards, another branch of the NRC, has
-supported modeling studies of tunnel fires under the direction of
-Chris Bajwa and Allen Hansen.
-
-Another source of support for FDS development has been the Microgravity Combustion Program of the National 
-Aeronautics and SpaceAdministration (NASA).
-
-Originally, the basic hydrodynamic solver was designed by Ronald Rehm
-and Howard Baum with programming help from Darcy Barnett, Dan Lozier
-and Hai Tang of the Computing and Applied Mathematics Laboratory
-(CAML) at NIST, and Dan Corley of the Building and Fire Research
-Laboratory (BFRL). Jim Sims of CAML developed the original
-visualization software.  The direct pressure solver was written by
-Roland Sweet of the National Center for Atmospheric Research (NCAR),
-Boulder, Colorado.  Kuldeep Prasad added the multiple-mesh data
-structures, paving the way for parallel processing.   Charles Bouldin
-devised the basic framework of the parallel version of the code.
-
-At NIST, Glenn Forney developed the visualization tool Smokeview that
-not only made the public release possible, but it also serves as the
-principal diagnostic tool for the continuing development of
-FDS.
-
-William Grosshandler and Tom Cleary, both currently at NIST, developed
-an enhancement to the smoke detector activation algorithm, originally
-conceived by Gunnar Heskestad of Factory Mutual. Steve
-Olenick of Combustion Science and Engineering (CSE) implemented the
-smoke detector model into FDS.
-
-William Grosshandler is also the developer of RadCal, a library of
-subroutines that have been incorporated in FDS to provide the
-radiative properties of gases and smoke.
-
-Prof.~Nick Dembsey of Worcester Polytechnic Institute (WPI) has provided valuable feedback about the pyrolysis
-model used within FDS.
-
-Professor Fred Mowrer of the University of Maryland provided a simple
-of model of gas phase extinction to FDS.
-
-Chris Lautenburger of the University of California, Berkeley, and Jose Torero and Guillermo Rein of the
-University of Edinburg. have provided valuable insight in the development of the solid phase model.
-
-
-
-
-
-
-
 
 \tableofcontents
 
@@ -410,27 +315,24 @@ University of Edinburg. have provided valuable insight in the development of the
 
 \chapter{Introduction}
 
-This plan is applicable to Fire Dynamics Simulator (FDS).  This document follows guidelines set forth in IEEE 
-STD 828-1998, Standard for Software Configuration Management Plans.
+This plan is for the Fire Dynamics Simulator (FDS) development project and conforms with the requirements of IEEE Std 828-2005.
 
 \section{Purpose}
 
-The purpose of this document is to identify and describe the overall policies and methods for CM to be used for
-FDS.  This plan will be updated as the necessity arises. 
+The purpose of this document is to identify and describe the overall policies and methods for a Software Configuration Management Plan (SCMP) to be used for the Fire Dynamics Simulator (FDS) development project.  This plan will be updated as the necessity arises and will establish and provide the basis for a uniform and concise configuration management practice for the FDS development process.
 
-This CM Plan (CMP) will establish and provide the basis for a uniform and concise CM practice for FDS
-The primary intention of this CMP is to provide information on the CM policies and methods to be adopted and
-implemented by the FDS development team.
-
-The primary objective of the FDS CMP is twofold.  First is to establish the process for tracking and controlling
-FDS requirements and enhancements.  Second is to establish a change management status and reporting system for
+The primary intention of this SCMP is to provide information on the SCM policies and methods to be adopted and
+implemented by the FDS development team.  First, the document is to establish the process for tracking and controlling
+FDS requirements and enhancements.  Second it will serve to establish a change management status and reporting system for
 officially released FDS versions, documentation, and associated input data files.
+
+The intended audience for this document are those that need to familiarize themselves with the policies and methodology of the project development process.  In addition those who need to provide formal documentation of the SCMP to authorities to demonstrate a standardized process is in place to ensure consistent process applied to the support for and evolution of the FDS software package.
 
 \section{Scope}
 
-This plan covers the Modeling and Simulation (M\&S) configuration management activities associated with FDS.
+This plan covers the Modeling and Simulation (M\&S) configuration management activities associated with FDS. See the following subsection for more information about what FDS is in general.
 
-\section{Fire Dynamics Simulator (FDS) Model Description}
+\subsection{Overview of the Fire Dynamics Simulator (FDS) Software Project}
 
 FDS is a Computational Fluid Dynamics (CFD) model of fire-driven fluid flow.
 The model solves numerically a form of the Navier-Stokes equations appropriate
@@ -440,38 +342,54 @@ as finite differences, and the solution is updated in time on a three-dimensiona
 Thermal radiation is computed using a finite volume technique on the same grid as the flow solver.
 Lagrangian particles are used to simulate smoke movement, sprinkler discharge, and fuel sprays.
 
-\chapter{CM Management}
+\subsection{Applicability}
+This SCMP applies only to the FDS Software Application and related NIST Special Publication Documentation in both PDF and LaTeX formats.
+
+\subsection{Limitations}
+This SCMP document does not cover the associated utilities, documents or data sets, that are also provided through the revision management system. This document does not cover the development process of the closely related visualization application known as Smokeview.  Although these items are not covered explicitly, the same systems will be used to track their evolution over time, and much of the policies and procedures will be used to maintain these items as well.
+
+\subsection{Assumptions}
+The policies and procedures defined in this document rely on the supporting technologies and systems that are used to implement them.  The continued availability and use of these systems is fundamental to the descriptions herein.  If these support systems become unavailable for any reason, the SCMP will have to be updated to reflect the changes required for the continuity of the development process.
+
+\section{Key Terms}
+
+
+\section{References}
+
+
+\chapter{SCM Management}
 
 Configuration management is defined as part of the project management system required for the technical and
 administrative direction of the project.  This section describes the relationship of configuration management
 to the project management structure as it relates to controlling the configuration of FDS.
 
-\section{FDS CM Manager Responsibilities}
+\section{FDS SCM Manager Responsibilities}
 
-The CM Manager for FDS is Kevin McGrattan, Fire Modeling Group Leader of the Building and Fire Research
+The SCM Manager for FDS is Bryan Klein, member of the Fire Modeling Group in the Building and Fire Research
 Laboratory at the National Insitute of Standards and Technology located in Gaithersburg, MD.  The responsibilities
-of the CM Manager include:
+of the SCM Manager include:
 
 \begin{enumerate}
 
 \item Maintaining configuration control over the officially released software and data for FDS.
 
-\item Final approval of changes to the officially released software and data for FDS.
-
-\item Developing and maintaining the FDS Configuration Management Plan (CMP).
+\item Developing and maintaining the FDS Configuration Management Plan (SCMP).
 
 \item Maintaining all officially released software and data for the FDS configuration baselines and documenting
 the baseline contents.
 
 \item Authorize individuals to become members of the software development team (SDT).
 
-\item Authorize establish of software baselines and identification of Computer Software Configuration Items (CSCIs)
+\item Authorize establish of software baselines and identification of Computer Software Configuration Items (CSCIs).
 
-\item Recording new FDS change proposals and tracking them to completion
+\item Recording new FDS change proposals and tracking them to completion.
 
 \end{enumerate}
 
-The CM Manager may designate a member of the SDT to be responsible for one or more CM Manager responsibilties.
+%\item Final approval of changes to the officially released software and data for FDS.
+% CCB members...
+
+The SCM Manager may designate a member of the SDT to be responsible for one or more SCM Manager responsibilties.
 
 \section{FDS Software Development Team Member Responsibilities}
 
@@ -491,7 +409,7 @@ and determine the impact of the change on development schedules.
 
 \end{enumerate}
 
-\chapter{CM Process}
+\chapter{SCM Activities}
 
 The IRM Suite Configuration Management (CM) process consists of four primary functions: configuration
 identification, configuration control, configuration status accounting, and configuration audits.
@@ -527,7 +445,7 @@ entire repository rather than of a specific file (i.e. anytime a change is made 
 incremented in version number).  A record of version number when a specific file was last changed is maintained.
 
 As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
-repository.  Only CM Manager approved members of the SDT; however, can make committ changes to the repository.
+repository.  Only SCM Manager approved members of the SDT; however, can make committ changes to the repository.
 
 The current location of the FDS repository is \href{http://fds-smv.googlecode.com/svn/trunk/}
 {{\ct http://fds-smv.googlecode.com/svn/trunk/}}
@@ -571,7 +489,7 @@ the source code used for a particular compilation of FDS when reporting an error
 \section{Configuration Control}
 
 Configuration control is the exercising of established procedures to classify, approve or disapprove, release,
-implement, and confirm changes to officially released models and databases.  The CM Manager is the
+implement, and confirm changes to officially released models and databases.  The SCM Manager is the
 ultimate is the gatekeeper for all changes required to an established officially released FDS Suite baseline.
 These change requests could include:
 
@@ -649,7 +567,7 @@ be changed to {\ct Verified}.  At this point the issue is closed.
 
 \section{Establishing Baselines}
 
-The decision to establish a new baseline is made by the CM Manager.  The new baseline is named, tested, and the
+The decision to establish a new baseline is made by the SCM Manager.  The new baseline is named, tested, and the
 released based on the procedures that follow.
 
 \subsection{Naming Baselines}
@@ -691,6 +609,12 @@ documentation will be updated to reflect the new baseline.  The baseline will be
 or installation packages will be placed on the FDS download site.  Prior baselines will be deprecated.  The
 current FDS dowload site is \href{http://code.google.com/p/fds-smv/downloads/list}
 {{\ct http://code.google.com/p/fds-smv/downloads/list}}.
+
+\chapter{SCM Schedules}
+\chapter{SCM Resources}
+\chapter{SCM Plan Maintenance}
+
+\appendix
 
 \chapter{Coding Standard}
 
@@ -830,12 +754,10 @@ function must be changed do to a bug fix or an enhancement, then having only one
 chance of the error that would occur if one of multiple locations was missed.
 
 \backmatter
-\nopart %To Fix TOC in PDF output.
+\nopart
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
 \printindex
 
 \end{document}
-
-% Just a test comment
