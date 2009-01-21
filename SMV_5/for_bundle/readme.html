@@ -10,6 +10,18 @@
 <a href="http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/SMV_5/for_bundle/readme.html">Latest Smokeview release notes</a>
 <ul>
 
+
+<li>5.3.6 (build 3091) - January 21, 2009 
+<ol>
+<li>enhancement: add an option for viewing scenes using red/cyan stereo pairs (requires red/cyan glasses)
+<li>fix: change where zoom is reset within Smokeview source to only reset zoom for external and internal
+pre-defined viewpoints so that user viewpoints may be displayed properly when smokeview starts up.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=608&can=1&sort=-id">Issue 608</a>).
+<li>fix: fix startup crash when projection is set to size preserving
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=607&can=1&sort=-id">Issue 607</a>).
+<li>maintenance: internal coding reorganization to isolate calls to external imaging, compression and threading libraries
+</ol>
+
 <li>5.3.5 (build 3000) - January 11, 2009 
 <ol>
 <li>enhancement: add an option for viewing scenes using red/blue stereo pairs (requires red/blue glasses)
