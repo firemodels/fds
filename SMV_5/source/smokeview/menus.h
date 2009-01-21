@@ -1164,7 +1164,6 @@ void ResetMenu(int value){
     ASSERT(value>=0);
     if(value<100000){
       reset_glui_view(value);
-      updatezoommenu=1;
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"SETVIEWPOINT\n");
         fprintf(scriptoutstream," %s\n",camera_current->name);
