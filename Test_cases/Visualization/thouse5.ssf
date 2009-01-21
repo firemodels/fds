@@ -271,6 +271,12 @@ SETTIMEVAL
 RENDERONCE
  thouse5_iso_lr_stereo
 LOADINIFILE
+ thouse5_rc_stereo.ini 
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_iso_rc_stereo
+LOADINIFILE
  thouse5_rb_stereo.ini 
 SETTIMEVAL
  30.000000
