@@ -19,6 +19,8 @@ mkdir %smvdir%\Documentation
 copy smokeview_release.exe %smvdir%\smokeview.exe
 copy smokezip_release.exe %smvdir%\smokezip.exe
 copy devices.svo %smvdir%\.
+copy glew32.dll %smvdir%\.
+copy pthreadVC.dll %smvdir%\.
 copy readme.html %smvdir%\Documentation\.
 copy ..\..\Manuals\All_PDF_Files\SMV_5_User_Guide.pdf %smvdir%\Documentation\.
 
