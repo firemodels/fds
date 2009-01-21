@@ -1019,7 +1019,10 @@ if diagnostic_level >= 1:
     print "**** READING CONFIGURATION FILE ****"
 
 ##Get information from config file.
+
 group_quantity_data_dicts = extract_config_data(config_file_name)
+## Should return separate dict objects, not all in one.
+
 if diagnostic_level >= 2:
     print "\nThere are "+str(len(group_quantity_data_dicts[0]))+" scatter data groups, (g lines)."
 if diagnostic_level >= 3:
