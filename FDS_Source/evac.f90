@@ -3525,9 +3525,7 @@ Contains
                 Close (LU_EVACEFF)
              End If
           End If
-          If (ios == 0) Then
-             Write (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', Trim(FN_EVACEFF), ' is read in and used'
-          Else
+          If (ios .Ne. 0) Then
              ! Read error ==> recalculate EFF
              l_eff_save = .True.
              l_eff_read = .False.
@@ -3535,16 +3533,6 @@ Contains
              I_EVAC = Ibset(I_EVAC,0) ! save EFF
           End If
        End If  ! L_eff_read
-       !
-       ! Number of evac flow fields is same as the number of all evac grids.
-       If (L_eff_save) Then
-          l_eff_read = .False.
-          I_EVAC = Ibclr(I_EVAC,2)  ! do not read EFF
-          Open (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', status='replace')
-          n_egrids_tmp = Count(EVACUATION_ONLY)
-          Write (LU_EVACEFF) n_egrids_tmp
-          Write (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', Trim(FN_EVACEFF), ' is (re)calculated and used'
-       End If
        !
        If ( l_fed_read .Or. l_fed_save ) Then
           ! Write the 'fed' columns
@@ -3607,26 +3595,32 @@ Contains
     ! 
     ! Read the evac flow fields from the disk, if they exist.
     If ( L_eff_read ) Then
-       Do nm = 1, NMESHES
+       ios = 0
+       ReadEffLoop: Do nm = 1, NMESHES
           If (EVACUATION_ONLY(NM)) Then
              MFF=>MESHES(nm)
              Read (LU_EVACEFF,Iostat=ios) ibar_tmp, jbar_tmp, kbar_tmp
-             If (ios.Ne.0) Then
-                Write(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: EFF READ ERROR'
+             If (ios .Ne. 0) Then
+                Write (LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
+                Write (LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
                 Close (LU_EVACEFF)
-                Call SHUTDOWN(MESSAGE)
+                Exit ReadEffLoop
              End If
              If ( MFF%IBAR /= ibar_tmp .Or. MFF%JBAR /= jbar_tmp .Or. MFF%KBAR /= kbar_tmp ) Then
+                ios = 2
+                Write (LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
+                Write (LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
                 Close (LU_EVACEFF)
-                Call SHUTDOWN('ERROR: Problems to read the EFF file')
+                Exit ReadEffLoop
              End If
              Do  i = 0, MFF%IBAR+1
                 Do j= 0, MFF%JBAR+1
                    Read (LU_EVACEFF,Iostat=ios) u_tmp, v_tmp
-                   If (ios.Ne.0) Then
-                      Write(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: EFF READ ERROR'
+                   If (ios .Ne. 0) Then
+                      Write (LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
+                      Write (LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
                       Close (LU_EVACEFF)
-                      Call SHUTDOWN(MESSAGE)
+                      Exit ReadEffLoop
                    End If
                    MFF%U(i,j,:) = u_tmp
                    MFF%V(i,j,:) = v_tmp
@@ -3636,7 +3630,26 @@ Contains
              MFF%UVW_GHOST(:,1)=-1.E6_EB
              MFF%UVW_GHOST(:,2)=-1.E6_EB
           End If
-       End Do
+       End Do ReadEffLoop
+       If (ios .Ne. 0) Then
+          ! Read error ==> recalculate EFF
+          l_eff_save = .True.
+          l_eff_read = .False.
+          I_EVAC = Ibclr(I_EVAC,2) ! do not read EFF
+          I_EVAC = Ibset(I_EVAC,0) ! save EFF
+       End If
+    End If
+    !
+    If (L_eff_read) Then
+       Write (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', Trim(FN_EVACEFF), ' is read in and used'
+    End If
+    If (L_eff_save .And. .Not. append) Then
+       l_eff_read = .False.
+       I_EVAC = Ibclr(I_EVAC,2)  ! do not read EFF
+       Open (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', status='replace')
+       n_egrids_tmp = Count(EVACUATION_ONLY)
+       Write (LU_EVACEFF) n_egrids_tmp
+       Write (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', Trim(FN_EVACEFF), ' is (re)calculated and used'
     End If
 
     EVAC_Z_MIN =  Huge(EVAC_Z_MIN)
