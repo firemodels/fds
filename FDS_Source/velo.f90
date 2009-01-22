@@ -1262,14 +1262,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE(-3)
                   IWM = WALL_INDEX(ICMM, 3) 
                   IWP = WALL_INDEX(ICPM, 3) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) VP = VBC(2)*VM
                      IF (     SPEC_TANG_VEL(2)) VP = FVT(2,2)*PROF(2)
                   ENDIF
                CASE( 3)
                   IWM = WALL_INDEX(ICMP,-3) 
                   IWP = WALL_INDEX(ICPP,-3) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) VM = VBC(2)*VP
                      IF (     SPEC_TANG_VEL(2)) VM = FVT(2,2)*PROF(2)
                   ENDIF
@@ -1291,14 +1291,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE(-2)
                   IWM = WALL_INDEX(ICMM, 2) 
                   IWP = WALL_INDEX(ICMP, 2) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) WP = VBC(1)*WM
                      IF (     SPEC_TANG_VEL(1)) WP = FVT(1,2)
                   ENDIF
                CASE( 2)
                   IWM = WALL_INDEX(ICPM,-2) 
                   IWP = WALL_INDEX(ICPP,-2) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) WM = VBC(1)*WP
                      IF (     SPEC_TANG_VEL(1)) WM = FVT(1,2)
                   ENDIF
@@ -1345,14 +1345,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE(-3)
                   IWM = WALL_INDEX(ICMM, 3) 
                   IWP = WALL_INDEX(ICPM, 3) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) UP = VBC(1)*UM
                      IF (     SPEC_TANG_VEL(1)) UP = FVT(1,1)*PROF(1)
                   ENDIF
                CASE( 3)
                   IWM = WALL_INDEX(ICMP,-3) 
                   IWP = WALL_INDEX(ICPP,-3) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) UM = VBC(1)*UP
                      IF (     SPEC_TANG_VEL(1)) UM = FVT(1,1)*PROF(1)
                   ENDIF
@@ -1373,14 +1373,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE(-1)
                   IWM = WALL_INDEX(ICMM, 1) 
                   IWP = WALL_INDEX(ICMP, 1) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) WP = VBC(2)*WM
                      IF (     SPEC_TANG_VEL(2)) WP = FVT(2,2)
                   ENDIF
                CASE( 1)
                   IWM = WALL_INDEX(ICPM,-1) 
                   IWP = WALL_INDEX(ICPP,-1) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) WM = VBC(2)*WP
                      IF (     SPEC_TANG_VEL(2)) WM = FVT(2,2)
                   ENDIF
@@ -1427,14 +1427,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE(-2)
                   IWM = WALL_INDEX(ICMM, 2) 
                   IWP = WALL_INDEX(ICPM, 2) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) UP = VBC(2)*UM
                      IF (     SPEC_TANG_VEL(2)) UP = FVT(2,1)*PROF(2)
                   ENDIF
                CASE( 2)
                   IWM = WALL_INDEX(ICMP,-2) 
                   IWP = WALL_INDEX(ICPP,-2) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) UM = VBC(2)*UP
                      IF (     SPEC_TANG_VEL(2)) UM = FVT(2,1)*PROF(2)
                   ENDIF
@@ -1456,14 +1456,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE(-1)
                   IWM = WALL_INDEX(ICMM, 1) 
                   IWP = WALL_INDEX(ICMP, 1) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) VP = VBC(1)*VM
                      IF (     SPEC_TANG_VEL(1)) VP = FVT(1,1)*PROF(1)
                   ENDIF
                CASE( 1)
                   IWM = WALL_INDEX(ICPM,-1) 
                   IWP = WALL_INDEX(ICPP,-1) 
-                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .OR. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) VM = VBC(1)*VP
                      IF (     SPEC_TANG_VEL(1)) VM = FVT(1,1)*PROF(1)
                   ENDIF
