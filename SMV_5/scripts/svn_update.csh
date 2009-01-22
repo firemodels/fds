@@ -7,7 +7,7 @@ echo updating LINUX  repository
 svn update
 
 echo updating FIRE72 repository
-ssh fire72 \(cd FIRE72/FDS-SMV \; /usr/local/bin/svn update \)
+ssh fire72 \(cd FIRE72/FDS-SMV \; svn update \)
 
 echo updating MAC repository
 ssh tiger.cfr.nist.gov \(cd FDS-SMV \; /usr/local/bin/svn update \)
