@@ -38,6 +38,34 @@ char readsmv_revision[]="$Revision$";
 #define ijcell2(i,j) nxcell*(j) + (i)
 int GeometryMenu(int var);
 
+/* ------------------ update_inilist ------------------------ */
+
+void update_inilist(void){
+  inifiledata *inifile;
+  int first_time=1;
+  FILE *filein_inilist=NULL;
+  char ini_listfile[1024];
+  char buffer[255],buffer2[255];
+
+  strcpy(ini_listfile,caseinifilename);
+  strcat(ini_listfile,"list");
+  filein_inilist=fopen(ini_listfile,"r");
+  if(filein_inilist!=NULL){
+
+    while(!feof(filein_inilist)){
+      CheckMemory;
+      if(fgets(buffer,255,filein_inilist)==NULL)break;
+      if(match(buffer,"INIFILE",7)==1){
+        if(fgets(buffer2,255,filein_inilist)==NULL)break;
+        cleanbuffer(buffer,buffer2);
+        insert_inifile(buffer);
+        continue;
+        }
+    }
+    fclose(filein_inilist);
+  }
+}
+
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(char *file){
@@ -4390,6 +4418,8 @@ typedef struct {
 
   CheckMemory;
 
+  update_inilist();
+
   if(meshinfo!=NULL&&meshinfo->jbar==1){
     force_isometric=1;
   }
@@ -5974,7 +6004,7 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
   return 0;
 }
 
-/* ------------------ match ------------------------ */
+/* ------------------ match_upper ------------------------ */
 
 int match_upper(char *buffer, const char *key, unsigned int lenkey){
   size_t lenbuffer;
@@ -6095,6 +6125,8 @@ int readini(int scriptconfigfile){
 
   if(scriptinifilename2!=NULL&&scriptconfigfile==2){
     if(readini2(scriptinifilename2,1)==2)return 2;
+    updatecolors(-1);
+    updateshowtitles();
     scriptinifilename2=NULL;
   }
   updateglui();
@@ -6150,28 +6182,7 @@ int readini2(char *inifile, int localfile){
   nunitclasses_ini=0;
 
   if(localfile==1){
-    inifiledata *inifile;
-    int first_time=1;
-    FILE *filein_inilist=NULL;
-    char ini_listfile[1024];
-
-    strcpy(ini_listfile,caseinifilename);
-    strcat(ini_listfile,"list");
-    filein_inilist=fopen(ini_listfile,"r");
-    if(filein_inilist!=NULL){
-
-      while(!feof(stream)){
-        CheckMemory;
-        if(fgets(buffer,255,filein_inilist)==NULL)break;
-        if(match(buffer,"INIFILE",7)==1){
-          if(fgets(buffer2,255,filein_inilist)==NULL)break;
-          cleanbuffer(buffer,buffer2);
-          insert_inifile(buffer);
-          continue;
-          }
-      }
-      fclose(filein_inilist);
-    }
+    update_inilist();
   }
 
   printf("reading: %s\n",inifile);
