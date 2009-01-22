@@ -172,8 +172,7 @@
 
 \large
 \flushright{
-Bryan Klein \\
-Jason Floyd}
+Bryan Klein}
 
 \vspace{0.5in}
 
@@ -206,11 +205,8 @@ VTT Technical Research Centre of Finland  }
 \flushright{
 Bryan Klein \\
 {\em Fire Research Division} \\
-{\em Building and Fire Research Laboratory}  \\
-\hspace{1.in} \\
-Jason Floyd \\
-{\em Hughes Associates, Inc.}  \\
-{\em Baltimore, Maryland, USA}}
+{\em Building and Fire Research Laboratory}}
+
 
 \vspace{.25in}
 
@@ -227,7 +223,7 @@ $SVN Repository$~$Revision$}
 {\em Carlos M. Gutierrez, Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em James M. Turner, Acting Director} }
+{\em Patrick Gallagher, Acting Director} }
 
 \end{minipage}
 
@@ -290,23 +286,13 @@ software does not constitute endorsement by NIST, nor does it indicate that
 the products are necessarily those best suited for the intended purpose.
 
 
-\chapter{About the Authors}
+\chapter{About the Author}
 
 \begin{description}
 \item[Bryan Klein], the current Configuration Manager, is an Information Technology Specialist in the
 Building and Fire Research Laboratory of NIST. His current focus is on FDS development and
 user support, along with experimental model validation work.
 
-\item[Jason Floyd] is a Senior Engineer at Hughes Associates, Inc., in
-Baltimore, Maryland. He received a bachelors of science degree and a
-doctorate from the Nuclear Engineering Program of the University of
-Maryland. After graduating, he won a National Research Council
-Post-Doctoral Fellowship at the Building and Fire Research Laboratory
-of NIST, where he developed the combustion algorithm within FDS. He is
-currently funded by NIST under grant 60NANB5D1205 from the Fire
-Research Grants Program (15 USC 278f).  He is the principal developer
-of the multi-parameter mixture fraction combustion model and control
-logic within FDS.
 \end{description}
 
 \tableofcontents
@@ -315,22 +301,13 @@ logic within FDS.
 
 \chapter{Introduction}
 
-This plan is for the Fire Dynamics Simulator (FDS) development project and conforms with the requirements of IEEE Std 828-2005.
 
 \section{Purpose}
 
-The purpose of this document is to identify and describe the overall policies and methods for a Software Configuration Management Plan (SCMP) to be used for the Fire Dynamics Simulator (FDS) development project.  This plan will be updated as the necessity arises and will establish and provide the basis for a uniform and concise configuration management practice for the FDS development process.
+The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics Simulator (FDS). Such a document is 
+commonly referred to as a {\em Configuration Management Plan}. This document will be updated as the necessity arises and will establish and provide 
+the basis for a uniform and concise standard of practice for the FDS development process. It is based in part on IEEE Standard 828-2005.
 
-The primary intention of this SCMP is to provide information on the SCM policies and methods to be adopted and
-implemented by the FDS development team.  First, the document is to establish the process for tracking and controlling
-FDS requirements and enhancements.  Second it will serve to establish a change management status and reporting system for
-officially released FDS versions, documentation, and associated input data files.
-
-The intended audience for this document are those that need to familiarize themselves with the policies and methodology of the project development process.  In addition those who need to provide formal documentation of the SCMP to authorities to demonstrate a standardized process is in place to ensure consistent process applied to the support for and evolution of the FDS software package.
-
-\section{Scope}
-
-This plan covers the Modeling and Simulation (M\&S) configuration management activities associated with FDS. See the following subsection for more information about what FDS is in general.
 
 \subsection{Overview of the Fire Dynamics Simulator (FDS) Software Project}
 
@@ -343,114 +320,92 @@ Thermal radiation is computed using a finite volume technique on the same grid a
 Lagrangian particles are used to simulate smoke movement, sprinkler discharge, and fuel sprays.
 
 \subsection{Applicability}
-This SCMP applies only to the FDS Software Application and related NIST Special Publication Documentation in both PDF and LaTeX formats.
 
-\subsection{Limitations}
-This SCMP document does not cover the associated utilities, documents or data sets, that are also provided through the revision management system. This document does not cover the development process of the closely related visualization application known as Smokeview.  Although these items are not covered explicitly, the same systems will be used to track their evolution over time, and much of the policies and procedures will be used to maintain these items as well.
+This document applies only to the program FDS, its companion visualization program called Smokeview,  the related NIST publications and Internet site, and
+the various utility programs that support the two main programs. This document does not apply to third-party software developed by others not affiliated with
+NIST or its software development collaborators.
+
 
 \subsection{Assumptions}
-The policies and procedures defined in this document rely on the supporting technologies and systems that are used to implement them.  The continued availability and use of these systems is fundamental to the descriptions herein.  If these support systems become unavailable for any reason, the SCMP will have to be updated to reflect the changes required for the continuity of the development process.
 
-\section{Key Terms}
-
-
-\section{References}
+The policies and procedures described in this document involve the use of a variety of open source and commercial software and Internet utilities.  
+The continued availability of these resources is an important consideration in the day to day upkeep of FDS and Smokeview.  
+If these resources become unavailable for any reason, the procedures will be updated accordingly.
 
 
-\chapter{SCM Management}
 
-Configuration management is defined as part of the project management system required for the technical and
-administrative direction of the project.  This section describes the relationship of configuration management
-to the project management structure as it relates to controlling the configuration of FDS.
 
-\section{FDS SCM Manager Responsibilities}
+\chapter{Roles and Responsibilities}
 
-The SCM Manager for FDS is Bryan Klein, member of the Fire Modeling Group in the Building and Fire Research
-Laboratory at the National Insitute of Standards and Technology located in Gaithersburg, MD.  The responsibilities
-of the SCM Manager include:
+This chapter describes the roles and responsibilities of the FDS and Smokeview developers.
 
+\section{Development Team Members}
+
+Primary support for the development and maintenance of the Fire Dynamics Simulator (FDS) and Smokeview is provided by the Building and Fire
+Research Laboratory (BFRL) of the National Institute of Standards and Technology (NIST), an agency of the United States Department of Commerce. 
+The software developers themselves and experimental support personnel
+work mainly within the Fire Research Division of BFRL. In addition, external collaborators include staff members of the research laboratory VTT of Finland, guest researchers at NIST, 
+and grantees of the NIST extramural fire grants program.
+
+Members of the FDS and Smokeview team share in the development and maintenance responsibilities, which include: 
 \begin{enumerate}
-
-\item Maintaining configuration control over the officially released software and data for FDS.
-
-\item Developing and maintaining the FDS Configuration Management Plan (SCMP).
-
-\item Maintaining all officially released software and data for the FDS configuration baselines and documenting
-the baseline contents.
-
-\item Authorize individuals to become members of the software development team (SDT).
-
-\item Authorize establish of software baselines and identification of Computer Software Configuration Items (CSCIs).
-
-\item Recording new FDS change proposals and tracking them to completion.
-
+\item Developing new algorithms and improving program functionality
+\item Answering user questions
+\item Responding to bug reports
+\item Issuing periodic updates to the officially released versions of the programs
+\item Maintaining the Technical Reference and Users Guides
+\item Maintaining a suite of sample cases to demonstrate model use
+\item Maintaining a suite of verification and validation cases to test model accuracy and reliability
+\item Developing and maintaining a ``Road Map'' of future development
 \end{enumerate}
+Most decisions concerning these various tasks are made by consensus of the team members. In the event of a disagreement over technical issues, the decision is
+made by Kevin McGrattan, leader of the Fire Modeling Group in the Fire Research Division of BFRL. 
+Non-technical issues are addressed by Anthony Hamins, Chief of the Fire Research Division in BFRL, or by
+Shyam Sunder, Director of BFRL, depending on the nature of the issue. All policies and procedures described in this document are
+subject to review by NIST in consultation with VTT, Finland. 
 
-%\item Final approval of changes to the officially released software and data for FDS.
-% CCB members...
 
-The SCM Manager may designate a member of the SDT to be responsible for one or more SCM Manager responsibilties.
 
-\section{FDS Software Development Team Member Responsibilities}
 
-FDS Development Team Members are those individuals allowed to make changes to the official FDS CSCI repository.
-Their specific responsibilities include:
 
-\begin{enumerate}
 
-\item Represent interests of project management and all groups who may be affected by changes
-to the software baselines. 
+\chapter{Software Maintenance}
 
-\item Assign, review, and provide for disposition of action items.
+Software maintenance consists of the following components:
+control of the project files and documents, procedures for making changes, and procedures for testing new versions.
 
-\item Determine or review the availability of resources required to complete the proposed change or
-modification, assess the impact of the proposed change upon the system, examine cost considerations,
-and determine the impact of the change on development schedules.
 
-\end{enumerate}
+\section{Document Identification and Control}
 
-\chapter{SCM Activities}
+Document identification and control consists of placing all project files in a central location and maintaining a record of
+changes to those files. The central location is known as the {\em Repository}. 
 
-The IRM Suite Configuration Management (CM) process consists of four primary functions: configuration
-identification, configuration control, configuration status accounting, and configuration audits.
-The responsibilities of each CM function are listed in the paragraphs below, as they relate to
-controlling the configuration of the IRM Suite.
 
-\section{Configuration Identification}
+\subsection{Project Repository}
 
-Configuration identification consists of placing significant FDS related files under configuration control.
-These products are called Computer Software Configuration Items (CSCIs).  CSCIs are defined as a collection
-of software, data, or documentation required for an end use function and designated by the Project Engineer
-for separate configuration management.  The CSCIs include:
-
-\begin{enumerate}
-
-\item Compiled FDS executables
-\item FDS source code files
-\item FDS documentation
-\item Input files for software testing, verification testing, and validation testing
-\item Experimental data files used for validation testing
-\item Scripts and post-processing utilities used for software testing
-\item FDS web pages and wikis
-
-\end{enumerate}
-
-\subsection{Maintaining CSCIs}
-
-All CSCIs are maintained using the online service GoogleCode.  GoogleCode is a free service offered by Google
-to support configuration management and software development for open source applications.  GoogleCode uses 
-Subversion (SVN) for revision control.  Under this system a centralized repository containing all CSCIs resides
-on a GoogleCode server.  Versions are indentified by a version number which represents the version of the
+All project documents are maintained using the online utility GoogleCode, a free service offered by Google
+to support software development for open source applications.  GoogleCode uses
+Subversion (SVN) for revision control.  Under this system a centralized repository containing all project files resides
+on a GoogleCode server.  Subversion uses a single integer that identifies the version of the
 entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are
 incremented in version number).  A record of version number when a specific file was last changed is maintained.
 
 As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
-repository.  Only SCM Manager approved members of the SDT; however, can make committ changes to the repository.
+repository.  Only Team Members described in the previous chapter can commit changes to the repository.
 
 The current location of the FDS repository is \href{http://fds-smv.googlecode.com/svn/trunk/}
-{{\ct http://fds-smv.googlecode.com/svn/trunk/}}
+{{\ct http://fds-smv.googlecode.com/svn/trunk/}}. The repository contains the following files:
+\begin{enumerate}
+\item Compiled FDS and Smokeview executables
+\item FDS and Smokeview source code files
+\item FDS and Smokeview documentation
+\item Input files for software testing, verification testing, and validation testing
+\item Experimental data files used for validation testing
+\item Scripts and post-processing utilities used for software testing
+\item Web pages and wikis
+\end{enumerate}
 
-\subsection{Identifying Specific CSCIs in Compiled Executables}
+\subsection{Version Identification}
 
 At the start of an FDS simulation FDS writes header information to the Smokeview output file, FDS output file,
 and the FDS log file.  This header information contains the version of FDS used to perform that simulation.
@@ -486,24 +441,6 @@ of an FDS run and the largest (and hence most recent) revision number is determi
 along with the FDS version number to the output header information.  A user can now identify specifically
 the source code used for a particular compilation of FDS when reporting an error.
 
-\section{Configuration Control}
-
-Configuration control is the exercising of established procedures to classify, approve or disapprove, release,
-implement, and confirm changes to officially released models and databases.  The SCM Manager is the
-ultimate is the gatekeeper for all changes required to an established officially released FDS Suite baseline.
-These change requests could include:
-
-\begin{enumerate}
-
-\item Modifications of defined requirements
-
-\item Corrections for deficiecies
-
-\item Changes to existing capabilities 
-
-\item Model enhancements
-
-\end{enumerate}
 
 \section{Software Changes}
 
@@ -512,8 +449,8 @@ These change requests could include:
 Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service that is part of
 GoogleCode.  The current location of the Issue Tracker is \href{http://code.google.com/p/fds-smv/issues/list}
 {{\ct http://code.google.com/p/fds-smv/issues/list}}.  A change request is initiated by opening a new issue.
-The issue report contains the baseline identification (version number, complie date, and SVN revision number),
-operating system, and a description of the defect or ehancement request.  Input files or other supporting 
+The issue report contains the baseline identification (version number, compile date, and SVN revision number),
+operating system, and a description of the defect or enhancement request.  Input files or other supporting
 documentation can be attached.
 
 \begin{figure}[ht!]
@@ -523,73 +460,74 @@ documentation can be attached.
 \end{figure}
 
 If the issue is opened by a user, it will be given a status of 'New' until it is reviewed by a developer.  If the
-issue is opened by a developer, the developer can immeadiate assign a status and an owner.
+issue is opened by a developer, the developer can immediate assign a status and an owner.
 
 \subsection{Processing a Change Request}
 
-A change request may be evaluated by any member of the development team. 
+A change request may be evaluated by any member of the development team.
 
-If the request duplicates an existing request, then the issue status is changed to {\ct Duplicate} and the 
+If the request duplicates an existing request, then the issue status is changed to {\ct Duplicate} and the
 requestor is sent the issue number of the existing request.
 
-If the request is for an enhancement to FDS, then then the issue type is changed to {\ct Type-Ehancement} and the
-component type is declared. The request is evaluated for suitability.  If it is a valid enhancement 
+If the request is for an enhancement to FDS, then then the issue type is changed to {\ct Type-Enhancement} and the
+component type is declared. The request is evaluated for suitability.  If it is a valid enhancement
 request, then the status is changed to {\ct Accepted}.  If the request is not to
 be addressed under the next baseline, then the status will be changed to {\ct OnHold}.  If the request is denied, then
 the status is changed to {\ct WontFix}.  An accepted request will be assigned to a developer.
 
 If the request is identifying a defect in FDS, then the issue type is changed to {\ct Type-Defect} and the
 component type is declared.  The defect is evaluated for validity.  If insufficient information has
-been provided in the request, then the status is changed to {\ct MoreInfo} and a description of the additional 
+been provided in the request, then the status is changed to {\ct MoreInfo} and a description of the additional
 information required is sent to the requestor.  If the defect is due to user error or is the intended function of FDS,
-then the status is changed to {\ct Invalid}.  If the defect is valid, then the request reviewer will change the 
+then the status is changed to {\ct Invalid}.  If the defect is valid, then the request reviewer will change the
 status to {\ct Accepted} and assign the request to a developer.
 
 Once a change request has be addressed by a developer and changes submitted to the repositoty, the request status
-is changed to {\ct Fixed}.  Once either the requestor or another developer has verified that the changes address 
-the original request, then the status is changed to {\ct Verified}.  
+is changed to {\ct Fixed}.  Once either the requestor or another developer has verified that the changes address
+the original request, then the status is changed to {\ct Verified}.
 
 
 \subsection{Committing Changes}
 
-Once a developer has addressed a change request, the changed CSCIs are committed to the SVN repository.  A description
-of the changes will be added to the SVN change log.  This description should first identify the primary component being 
-changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief 
+Once a developer has addressed a change request, the modified files are committed to the SVN repository.  A description
+of the changes will be added to the SVN change log.  This description first identifies the primary component being
+changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief
 summary of the changes made.  The issue identifier will be included as part of that brief description.
 
 \subsection{Change Verification}
 
 Once a change has been committed and the issue tracker updated to reflect that the issue has been {\ct Fixed},
-the changes will be verified.  Verification can be done by either the requester of the change or by another 
+the changes will be verified.  Verification can be done by either the requester of the change or by another
 developer.  Once the changes have been verified to solve the problem reported in the issue, the issue status will
 be changed to {\ct Verified}.  At this point the issue is closed.
 
 
-\section{Establishing Baselines}
 
-The decision to establish a new baseline is made by the SCM Manager.  The new baseline is named, tested, and the
-released based on the procedures that follow.
+\section{Issuing New Releases}
 
-\subsection{Naming Baselines}
+The decision to change versions of the software is made by consensus of the development team, usually after it is determined that enough
+changes have been made to warrant a new release. There is no formal process to determine when a new release is to be issued. However, once the
+decision is made, the new version is given a number, it is tested, and then posted to the official download site.
 
-New FDS baselines are identified using a specific naming convention. Baselines are identified as app.\#.\#.\#\_os. 
-Where app is the application name (fds), \#.\#.\# is a version number, and \_os is the operating system that the
-baseline executable was compiled for.  The version number consists of three integers where the first number
+\subsection{Version Number}
+
+New versions of FDS and Smokeview are identified using a specific numbering convention, for example, FDS 5.2.5.
+The version number consists of three integers where the first number
 is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance}
 release.  Major releases occur every few years, and as the name implies dramatically changed functionality of the
-model. Minor releases occur every few months, and may cause minor changes in functionality. 
+model. Minor releases occur every few months, and may cause minor changes in functionality.
 Release notes can help you decide whether the changes should effect the type of applications that you typically do.
 Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity),
 and should not affect code functionality.
 
-\subsection{Baseline Software Testing}
+\subsection{Testing a New Release}
 
-Each proposed baseline release will undergo software testing.  Three suites of test cases exists: a functional test suite,
-a verification test suite, and a validation test suite.  Testing will depend upon the type of baseline release: 
+Each proposed release will undergo software testing.  Three suites of test cases exists: a functional test suite,
+a verification test suite, and a validation test suite.  Testing will depend upon the type of baseline release:
 maintenance, minor, or major.
 
-Each maintenance release will be tested with the functional test suite.  It will be verified that the proposed baseline
-successfully executes all of the functional test cases.  
+Each maintenance release will be tested with the functional test suite.  It will be verified that the proposed release version
+successfully executes all of the functional test cases.
 
 Each minor release will be tested with the functional test suite and the verification test suite.  It will be verified
 that the proposed baseline successfully executes all of the functional and verification test cases.  The
@@ -601,157 +539,18 @@ manual will be updated with the results.  The results of the validation cases wi
 predictive performance of the proposed baseline as either remained equivalent or improved.  The validation manual will
 be updated.
 
-\subsection{Release of a New Baseline}
+\subsection{Announcing a New Version}
 
-Following successful completion of the required baseline testing, a baseline can be released.  Prior to release, the 
+Following successful completion of the required baseline testing, a baseline can be released.  Prior to release, the
 version identification information within the FDS source code will be updated to reflect the new baseline.  FDS
-documentation will be updated to reflect the new baseline.  The baseline will be compiled and new executable files 
+documentation will be updated to reflect the new baseline.  The baseline will be compiled and new executable files
 or installation packages will be placed on the FDS download site.  Prior baselines will be deprecated.  The
-current FDS dowload site is \href{http://code.google.com/p/fds-smv/downloads/list}
+current FDS download site is \href{http://code.google.com/p/fds-smv/downloads/list}
 {{\ct http://code.google.com/p/fds-smv/downloads/list}}.
 
-\chapter{SCM Schedules}
-\chapter{SCM Resources}
-\chapter{SCM Plan Maintenance}
 
-\appendix
 
-\chapter{Coding Standard}
 
-\section{Indentation}
-
-Each new level of source code will be indented by three spaces.  Indentation will occur following a {\ct DO},
-{\ct IF} {\ct ELSE}, {\ct ELSEIF}, {\ct SELECT CASE}, or {\ct CASE} statement. Comment lines are not indented.
-
-\section{Source File Organization}
-
-Each source file in FDS shall contain subroutines and functions specific to narrow subsegment or physical submodel of
-the software.  Currently the FDS source consists of the following files:
-
-\begin{table}[ht]
-\begin{center}
-\caption{FDS Source Code Files}\index{Source Code Files}
-\label{tbl:sourcecodefiles}
-\begin{tabular}{|c|c|c|}
-\hline
-File Name    & Filetype & Description    \\ \hline 
-cons.f90     & Fortran  & Definition of physical constants, parameters, global variables \\ \hline 
-ctrl.f90     & Fortran  & Control functions  \\ \hline 
-devc.f90     & Fortran  & Definition of device, control, and property variables \\ \hline 
-divg.f90     & Fortran  & Divergence computation \\ \hline 
-dump.f90     & Fortran  & Output processing \\ \hline 
-evac.f90     & Fortran  & Evacuation model \\ \hline 
-fire.f90     & Fortran  & Combustion model \\ \hline 
-func.f90     & Fortran  & Miscellaneous functions \\ \hline 
-ieva.f90     & Fortran  & Defintion of evacuation variables and evacuation functions \\ \hline 
-init.f90     & Fortran  & Intialization \\ \hline 
-irad.f90     & Fortran  & Radiation transport variables, RADCAL, and Mie solver \\ \hline 
-isob.c       & C        & Functions for generating iso surfaces \\ \hline 
-main.f90     & Fortran  & Main timestepping routine \\ \hline 
-main\_mpi.f90 & Fortran  & Main timestepping routine for parallel version of FDS \\ \hline 
-mesh.f90     & Fortran  & Defintion of mesh variables \\ \hline 
-part.f90     & Fortran  & Droplet and particle mass and energy transport \\ \hline 
-pois.f90     & Fortran  & CRAYFISHPAK Poisson solver \\ \hline 
-prec.f90     & Fortran  & Kind defintions \\ \hline 
-pres.f90     & Fortran  & Pressure solver \\ \hline 
-radi.f90     & Fortran  & Radiation transport solver and initialization  \\ \hline 
-read.f90     & Fortran  & Input processsing \\ \hline 
-smvv.f90     & Fortran  & Interface routines for Smokeview \\ \hline 
-turb.f90     & Fortran  & Module for testing turbulence models \\ \hline 
-type.f90     & Fortran  & Variable type defintions \\ \hline 
-vege.f90     & Fortran  & WUI vegetation model \\ \hline 
-velo.f90     & Fortran  & Velocity solver \\ \hline 
-wall.f90     & Fortran  & Wall heat transfer and boundary conditions                   \\ \hline
-\end{tabular}s
-\end{center}
-\end{table}
-
-\section{Explicit Variable Typing}
-
-All variables in FDS will be explicitly typed.  To aid in this, all source code files will contain the expression
-{\ct IMPLICIT NONE}.  All {\ct REAL} numbers in FDS will have their kind indicated.  For example:
-
-\begin{verbatim}
-REAL(EB) :: x
-x = 0._EB
-\end{verbatim}
-
-and not:
-
-\begin{verbatim}
-REAL(EB) :: x
-x = 0.
-\end{verbatim}
-
-\section{Loop and Branch Naming}
-
-Any {\ct DO} loop, {\ct IF} block, or {\ct SELECT CASE} block that continues for more than 20 lines will be named.
-For example:
-
-\begin{verbatim}
-LOOPNAME: DO 
-   more than 20 lines of code
-END DO LOOPNAME
-\end{verbatim}
-
-and not:
-
-\begin{verbatim}
-DO 
-   more than 20 lines of code
-END DO
-\end{verbatim}
-
-\section{Named Constants}
-
-Named integer constants shall be used rather than integers or text strings for controlling code execution.  This
-is done to enhance readability and improve execution speed by avoiding string comparisons.  For example:
-
-\begin{verbatim}
-INTEGER :: OPTIONS
-INTEGER, PARAMETER :: OPTION1=1, OPTION2=2
-
-SELECT CASE (OPTIONS) 
-   CASE(OPTION1)
-      ...
-   CASE(OPTION2)
-      ...
-END SELECT
-\end{verbatim}
-
-and neither:
-\begin{verbatim}
-INTEGER :: OPTIONS
-
-SELECT CASE (OPTIONS) 
-   CASE(1)
-      ...
-   CASE(2)
-      ...
-END SELECT
-\end{verbatim}
-
-nor:
-\begin{verbatim}
-CHARACTER(10):: OPTIONS
-
-SELECT CASE (OPTIONS) 
-   CASE('OPTION1')
-      ...
-   CASE('OPTION2')
-      ...
-END SELECT
-\end{verbatim}
-
-\section{Redundant Code}
-
-Where a block of code must be used repeatedly in different subroutines a {\ct FUNCTION} or {\ct SUBROUTINE}
-shall be created.  For example, there are a number of places where FDS must compute the average molecular weight
-of a gas.  Rather than having that block of code repeated in each location, a single function was created to
-perform this function.  This accomplishes two goals.  By using a function or subroutine, a meaningful name can
-be used to represent the function being performed which improves source code readibilty.  If the form of the
-function must be changed do to a bug fix or an enhancement, then having only one location to fix reduces that
-chance of the error that would occur if one of multiple locations was missed.
 
 \backmatter
 \nopart
