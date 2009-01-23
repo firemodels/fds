@@ -162,6 +162,12 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       ENDDO
    ENDDO
    
+   IF (FLUX_LIMITER>=0) THEN
+      FX(:,:,:,N) = -RHO_D_DYDX
+      FY(:,:,:,N) = -RHO_D_DYDY
+      FZ(:,:,:,N) = -RHO_D_DYDZ
+   ENDIF
+   
    ! Correct rho*D del Y at boundaries and store rho*D at boundaries
  
    WALL_LOOP: DO IW=1,NWC
@@ -175,25 +181,27 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       IOR = IJKW(4,IW)
       SELECT CASE(IOR) 
          CASE( 1)
+            IF (FLUX_LIMITER>=0) FX(IIG-1,JJG,KKG,N) = -RHO_D_DYDN
             RHO_D_DYDX(IIG-1,JJG,KKG) = 0._EB
-         CASE(-1) 
+         CASE(-1)
+            IF (FLUX_LIMITER>=0) FX(IIG,JJG,KKG,N) = -RHO_D_DYDN
             RHO_D_DYDX(IIG,JJG,KKG)   = 0._EB
          CASE( 2)
+            IF (FLUX_LIMITER>=0) FY(IIG,JJG-1,KKG,N) = -RHO_D_DYDN
             RHO_D_DYDY(IIG,JJG-1,KKG) = 0._EB
-         CASE(-2) 
+         CASE(-2)
+            IF (FLUX_LIMITER>=0) FY(IIG,JJG,KKG,N) = -RHO_D_DYDN
             RHO_D_DYDY(IIG,JJG,KKG)   = 0._EB
-         CASE( 3) 
+         CASE( 3)
+            IF (FLUX_LIMITER>=0) FZ(IIG,JJG,KKG-1,N) = -RHO_D_DYDN
             RHO_D_DYDZ(IIG,JJG,KKG-1) = 0._EB
-         CASE(-3) 
+         CASE(-3)
+            IF (FLUX_LIMITER>=0) FZ(IIG,JJG,KKG,N) = -RHO_D_DYDN
             RHO_D_DYDZ(IIG,JJG,KKG)   = 0._EB
       END SELECT
    ENDDO WALL_LOOP
 
-   IF (FLUX_LIMITER>=0) THEN
-      FX(:,:,:,N) = -RHO_D_DYDX
-      FY(:,:,:,N) = -RHO_D_DYDY
-      FZ(:,:,:,N) = -RHO_D_DYDZ
-   ENDIF
+   
 
    ! Compute del dot h_n*rho*D del Y_n only for non-mixture fraction cases
  
