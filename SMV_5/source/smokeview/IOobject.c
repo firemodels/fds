@@ -241,7 +241,7 @@ void getsmokesensors(void){
 
 void getdevice_screencoords(void){
   double mv_setup[16], projection_setup[16];
-  int viewport_setup[4];
+  GLint viewport_setup[4];
   double d_ijk[3];
   int i;
   int doit;
