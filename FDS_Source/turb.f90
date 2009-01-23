@@ -32,8 +32,11 @@ IMPLICIT NONE
 REAL :: XXX
 INTEGER :: I,J,K,II,JJ,KK,FILE_NUM
 INTEGER, INTENT(IN) :: NM
+LOGICAL :: CBC=.FALSE.
 
 CALL POINT_TO_MESH(NM)
+
+IF (XF<1._EB) CBC=.TRUE. ! XF=9*2*pi/100 meters for CBC
 
 IF (IBAR/=32 .AND. IBAR/=64) THEN
    WRITE(LU_ERR,'(A)') 'Error 1 in SANDIA_DAT!'
@@ -41,8 +44,13 @@ IF (IBAR/=32 .AND. IBAR/=64) THEN
 ENDIF  
 
 FILE_NUM = GET_FILE_NUMBER()
-IF (IBAR==32) OPEN (UNIT=FILE_NUM,FILE='iso_ini.32.rjm.dat',FORM='formatted',STATUS='old')
-IF (IBAR==64) OPEN (UNIT=FILE_NUM,FILE='iso_ini.64.rjm.dat',FORM='formatted',STATUS='old') 
+IF (CBC) THEN
+   IF (IBAR==32) OPEN (UNIT=FILE_NUM,FILE='iso_ini.32.cbc.rjm.dat',FORM='formatted',STATUS='old')
+   IF (IBAR==64) OPEN (UNIT=FILE_NUM,FILE='iso_ini.64.cbc.rjm.dat',FORM='formatted',STATUS='old')
+ELSE
+   IF (IBAR==32) OPEN (UNIT=FILE_NUM,FILE='iso_ini.32.kang.rjm.dat',FORM='formatted',STATUS='old')
+   IF (IBAR==64) OPEN (UNIT=FILE_NUM,FILE='iso_ini.64.kang.rjm.dat',FORM='formatted',STATUS='old') 
+ENDIF
      
 READ (FILE_NUM,*) II, JJ, KK	! reads number of points in each direction
 
@@ -60,9 +68,11 @@ DO K = 1,KBAR
 
          READ (FILE_NUM,*) U(I,J,K), V(I,J,K), W(I,J,K), XXX, XXX
          
-         U(I,J,K) = 0.01*U(I,J,K)	! scale from cm/s
-         V(I,J,K) = 0.01*V(I,J,K)
-         W(I,J,K) = 0.01*W(I,J,K)
+         IF (CBC) THEN
+            U(I,J,K) = 0.01*U(I,J,K)	! scale from cm/s
+            V(I,J,K) = 0.01*V(I,J,K)
+            W(I,J,K) = 0.01*W(I,J,K)
+         ENDIF
          
       ENDDO
    ENDDO
@@ -1128,7 +1138,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: BETAHAT11,BETAHAT22,BETAHAT33,BETAHAT12,B
 REAL(EB), POINTER, DIMENSION(:,:,:) :: M11,M22,M33,M12,M13,M23,MM,MMHAT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: L11,L22,L33,L12,L13,L23,ML,MLHAT
 
-REAL(EB), PARAMETER :: ALPHA = 6.0_EB ! See Lund, 1997 CTR briefs.
+REAL(EB), PARAMETER :: ALPHA = 5.0_EB ! See Lund, 1997 CTR briefs.
 
 ! References:
 !
