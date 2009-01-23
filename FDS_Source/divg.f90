@@ -798,7 +798,7 @@ PERIODIC_DIV: IF (PERIODIC_TEST==2) THEN
             ENDDO
          ENDDO
       ENDDO
-      DDDT = (DS-DIV)*RDT
+      DDDT = (DP-DIV)*RDT
    ELSEIF (CORRECTOR) THEN
       DO K = 1,KBAR
          DO J = 1,JBAR
