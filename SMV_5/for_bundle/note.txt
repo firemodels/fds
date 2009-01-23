@@ -1,3 +1,2 @@
-test of red/cyan stereo view (hit S key three times)
-test fix for issue 607 (was crashing at startup when size preserving view was set in ini file)
-test fix for issue 608 (was not preserving viewpoint properly)
+test ini file output to casename.inilist
+test fix for issue 610 (handling colorbarflip value properly)
