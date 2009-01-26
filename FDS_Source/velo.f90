@@ -1325,8 +1325,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
          IF (KK==0)    VV(II,JJ,KK)   = VM
          IF (KK==KBAR) VV(II,JJ,KK+1) = VP
          IF (CORRECTOR .AND. JJ>0 .AND. JJ<JBAR .AND. KK>0 .AND. KK<KBAR) THEN
-            W_Y(II,JJ,KK) = 0.5_EB*(WM+WP)
-            V_Z(II,JJ,KK) = 0.5_EB*(VM+VP)
+            IF (WP/=WW(II,JJ+1,KK) .OR. WM/=WW(II,JJ,KK)) W_Y(II,JJ,KK) = 0.5_EB*(WM+WP)
+            IF (VP/=VV(II,JJ,KK+1) .OR. VM/=VV(II,JJ,KK)) V_Z(II,JJ,KK) = 0.5_EB*(VM+VP)
          ENDIF
  
       CASE(2) COMPONENT  ! Treat edges that point in the y direction (omega_y, tau_y)
@@ -1407,8 +1407,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
          IF (KK==0)    UU(II,JJ,KK)   = UM
          IF (KK==KBAR) UU(II,JJ,KK+1) = UP
          IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. KK>0 .AND. KK<KBAR) THEN
-            U_Z(II,JJ,KK) = 0.5_EB*(UM+UP) 
-            W_X(II,JJ,KK) = 0.5_EB*(WM+WP) 
+            IF (UP/=UU(II,JJ,KK+1) .OR. UM/=UU(II,JJ,KK)) U_Z(II,JJ,KK) = 0.5_EB*(UM+UP) 
+            IF (WP/=WW(II+1,JJ,KK) .OR. WM/=WW(II,JJ,KK)) W_X(II,JJ,KK) = 0.5_EB*(WM+WP) 
          ENDIF
 
       CASE(3) COMPONENT   ! Treat edges that point in the z direction (omega_z, tau_z)
@@ -1490,8 +1490,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
          IF (JJ==0)    UU(II,JJ,KK)   = UM
          IF (JJ==JBAR) UU(II,JJ+1,KK) = UP
          IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. JJ>0 .AND. JJ<JBAR) THEN
-            U_Y(II,JJ,KK) = 0.5_EB*(UM+UP) 
-            V_X(II,JJ,KK) = 0.5_EB*(VM+VP) 
+            IF (UP/=UU(II,JJ+1,KK) .OR. UM/=UU(II,JJ,KK)) U_Y(II,JJ,KK) = 0.5_EB*(UM+UP) 
+            IF (VP/=VV(II+1,JJ,KK) .OR. VM/=VV(II,JJ,KK)) V_X(II,JJ,KK) = 0.5_EB*(VM+VP) 
          ENDIF
 
    END SELECT COMPONENT
