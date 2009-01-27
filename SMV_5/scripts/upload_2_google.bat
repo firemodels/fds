@@ -1,6 +1,6 @@
 @echo off
-set version=test
-set revision=3110
+set version=5.3.8
+set revision=3138
 
 set release=1
 
@@ -31,12 +31,12 @@ if not %upload_win32% == 1 goto endif_win32
   set glabels=Type-Installer,Opsys-Windows,%level%
   set dplatform=32 bit Windows
   set platform=win32
-  set summary=Smokeview %version% for %platform% build %revision%
+  set summary=Smokeview %version% for %dplatform% build %revision%
   set exe=smv_%version%_%revision%_%platform%.exe
   echo -----
   echo Uploading %summary% - %exe%
-Rem  echo googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
-Rem       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
+  echo googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
+       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
 :endif_win32
 
 Rem --------------- 32 bit Linux ----------------
@@ -46,11 +46,11 @@ if not %upload_linux32% == 1 goto endif_linux32
   set dplatform=32 bit Linux
   set platform=linux
   set summary=Smokeview %version% for %dplatform% (build %revision%)
-  set exe=smv_%version%_%revision%_%platform%.exe
+  set exe=smv_%version%_%revision%_%platform%.tar.gz
   echo -----
   echo Uploading %summary% - %exe%
-Rem  echo googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none  -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
-Rem       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none  -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
+  echo googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none  -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
+       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none  -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
 :endif_linux32
 
 Rem --------------- 32 bit OSX ----------------
@@ -60,11 +60,11 @@ if not %upload_osx32% == 1 goto endif_osx32
   set dplatform=32 bit OSX
   set platform=osx
   set summary=Smokeview %version% for %dplatform% (build %revision%)
-  set exe=smv_%version%_%revision%_%platform%.exe
+  set exe=smv_%version%_%revision%_%platform%.tar.gz
   echo -----
   echo Uploading %summary% - %exe%
-Rem  echo googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none  -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
-Rem       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none  -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
+  echo googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none  -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
+       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none  -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
 :endif_osx32
 
 echo -----
