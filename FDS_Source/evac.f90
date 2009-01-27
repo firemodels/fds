@@ -304,7 +304,7 @@ Module EVAC
   Real(EB) GTrunSet1, GTrunSet2
   !
   Integer :: NPC_EVAC, NPC_PERS, N_EXITS, N_DOORS, N_ENTRYS, &
-       N_CORRS, N_EGRIDS, N_NODES, N_HOLES, N_SSTANDS, N_STRS
+       N_CORRS, N_EGRIDS, N_NODES, N_HOLES, N_SSTANDS, N_STRS, N_CO_EXITS
   Integer :: NPPS
   Integer :: ILABEL_last
   Character(100) :: MESSAGE
@@ -575,6 +575,7 @@ Contains
       ! Determine total number of EXIT lines in the input file
       !
       N_EXITS = 0
+      N_CO_EXITS = 0
       COUNT_EXITS_LOOP: Do
          COUNT_ONLY = .False.
          Call CHECKREAD('EXIT',LU_INPUT,IOS) 
@@ -586,6 +587,7 @@ Contains
          If (COLOR_METHOD == 4 .And. .Not.COUNT_ONLY) Then
             EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
          End If
+         If (COUNT_ONLY) N_CO_EXITS = N_CO_EXITS + 1
 224      If (IOS > 0) Call SHUTDOWN('ERROR: Problem with EXIT line')
       End Do COUNT_EXITS_LOOP
 223   Rewind(LU_INPUT)
@@ -1378,9 +1380,6 @@ Contains
             If (evacuation_only(i) .And. evacuation_grid(i)) Then
                If (Is_Within_Bounds(XB(1),XB(2),XB(3),XB(4),XB(5),XB(6),&
                   Meshes(i)%XS,Meshes(i)%XF,Meshes(i)%YS,Meshes(i)%YF,Meshes(i)%ZS,Meshes(i)%ZF, 0._EB, 0._EB, 0._EB)) Then
-!!$               If ( (XB(5) >= Meshes(i)%ZS .And. XB(6) <= Meshes(i)%ZF).And. &
-!!$                    (XB(3) >= Meshes(i)%YS .And. XB(4) <= Meshes(i)%YF).And. &
-!!$                    (XB(1) >= Meshes(i)%XS .And. XB(2) <= Meshes(i)%XF)) Then
                   If (Trim(MESH_ID) == 'null' .Or. Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
                      ii = ii + 1
                      PEX%IMESH = i
@@ -2558,9 +2557,6 @@ Contains
                n_tmp = n_tmp + 1
                If (Is_Within_Bounds(XB(1),XB(2),XB(3),XB(4),XB(5),XB(6),&
                   Meshes(i)%XS,Meshes(i)%XF,Meshes(i)%YS,Meshes(i)%YF,Meshes(i)%ZS,Meshes(i)%ZF, 0._EB, 0._EB, 0._EB)) Then
-!!$               If ( (PNX%Z1 >= Meshes(i)%ZS .And. PNX%Z2 <= Meshes(i)%ZF).And. &
-!!$                    (PNX%Y1 >= Meshes(i)%YS .And. PNX%Y2 <= Meshes(i)%YF).And. &
-!!$                    (PNX%X1 >= Meshes(i)%XS .And. PNX%X2 <= Meshes(i)%XF)) Then
                   If (Trim(MESH_ID) == 'null' .Or. Trim(MESH_ID) == Trim(MESH_NAME(i))) Then
                      ii = ii + 1
                      PNX%IMESH = i
@@ -3316,11 +3312,12 @@ Contains
     !
     !
     Character(50) tcform
-    Integer n_cols, i, j, nm
+    Integer n_cols, i, j, nm, izero
     Logical L_fed_read, L_fed_save, L_eff_read, L_eff_save, L_status
     Integer(4) n_egrids_tmp, ibar_tmp, jbar_tmp, kbar_tmp, &
          ntmp1, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6, ios
     Real(FB) u_tmp, v_tmp
+    Character(60), Allocatable, Dimension(:) :: CTEMP
     !
     Type (MESH_TYPE), Pointer :: MFF
     !
@@ -3362,7 +3359,7 @@ Contains
     L_eff_read = Btest(I_EVAC,2)
     L_eff_save = Btest(I_EVAC,0)
 
-    n_cols = n_egrids + n_corrs + n_exits + n_doors + 1 + n_exits + n_doors
+    n_cols = n_egrids + n_corrs + n_exits + n_doors + 1 + n_exits - n_co_exits + n_doors
     ! Initialize the FED counters:
     icyc_old = -1
     n_dead = -1
@@ -3534,6 +3531,16 @@ Contains
           End If
        End If  ! L_eff_read
        !
+       Allocate(CTEMP(Max(1,n_exits-n_co_exits)), STAT = IZERO)
+       Call ChkMemErr('Initialize_Evac_Dumps','CTEMP', IZERO)
+       j = 0
+       Do i = 1, n_exits
+          If (.Not. EVAC_EXITS(i)%COUNT_ONLY) Then
+             j = j + 1
+             CTEMP(j) = Trim(EVAC_EXITS(i)%ID)
+          End If
+       End Do
+    
        If ( l_fed_read .Or. l_fed_save ) Then
           ! Write the 'fed' columns
           n_dead = 0
@@ -3545,7 +3552,7 @@ Contains
                ('Corridor', i=1,n_corrs), &
                ('Exit', i=1,n_exits), &
                ('Door', i=1,n_doors), &
-               ('Exit', i=1,n_exits), &
+               ('Exit', i=1,n_exits-n_co_exits), &
                ('Door', i=1,n_doors), &
                'Fed','Fed','Fed'
           Write (LU_EVACCSV,tcform) 'Time','Inside', &
@@ -3553,7 +3560,7 @@ Contains
                ('Inside', i=1,n_corrs), &
                ('Counter', i=1,n_exits), &
                ('Counter', i=1,n_doors), &
-               ('Target', i=1,n_exits), &
+               ('Target', i=1,n_exits-n_co_exits), &
                ('Target', i=1,n_doors), &
                'Counter','Fed','Fed'
           Write (LU_EVACCSV,tcform) 's','All Nodes', &
@@ -3561,7 +3568,7 @@ Contains
                (Trim(EVAC_CORRS(i)%ID), i=1,n_corrs), &
                (Trim(EVAC_EXITS(i)%ID), i=1,n_exits), &
                (Trim(EVAC_DOORS(i)%ID), i=1,n_doors), &
-               (Trim(EVAC_EXITS(i)%ID), i=1,n_exits), &
+               (Trim(CTEMP(i)), i=1,n_exits-n_co_exits), &
                (Trim(EVAC_DOORS(i)%ID), i=1,n_doors), &
                'Deads','FED_max','FED_max_alive'
        Else
@@ -3574,23 +3581,24 @@ Contains
                ('Corridor', i=1,n_corrs), &
                ('Exit', i=1,n_exits), &
                ('Door', i=1,n_doors), &
-               ('Exit', i=1,n_exits), &
+               ('Exit', i=1,n_exits-n_co_exits), &
                ('Door', i=1,n_doors)
           Write (LU_EVACCSV,tcform) 'Time','Inside', &
                ('Inside', i=1,n_egrids), &
                ('Inside', i=1,n_corrs), &
                ('Counter', i=1,n_exits), &
                ('Counter', i=1,n_doors), &
-               ('Target', i=1,n_exits), &
+               ('Target', i=1,n_exits-n_co_exits), &
                ('Target', i=1,n_doors)
           Write (LU_EVACCSV,tcform) 's','All Nodes', &
                (Trim(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
                (Trim(EVAC_CORRS(i)%ID), i=1,n_corrs), &
                (Trim(EVAC_EXITS(i)%ID), i=1,n_exits), &
                (Trim(EVAC_DOORS(i)%ID), i=1,n_doors), &
-               (Trim(EVAC_EXITS(i)%ID), i=1,n_exits), &
+               (Trim(CTEMP(i)), i=1,n_exits-n_co_exits), &
                (Trim(EVAC_DOORS(i)%ID), i=1,n_doors)
        End If
+       Deallocate(CTEMP)
     End If                  ! if-append-else
     ! 
     ! Read the evac flow fields from the disk, if they exist.
@@ -9045,9 +9053,13 @@ Contains
     !
     Real(EB), Intent(In) :: Tin
     Character(50) tcform
-    Integer n_cols, n_tot_humans, i
+    Integer n_cols, n_tot_humans, i, ii, izero
+    Integer, Allocatable, Dimension(:) :: ITEMP
     !
     If (.Not.Any(EVACUATION_GRID)) Return
+    !
+    Allocate(ITEMP(Max(1,n_exits-n_co_exits)), STAT = IZERO)
+    Call ChkMemErr('DUMP_EVAC_CSV','ITEMP', IZERO)
     !
     ! Output first the floors then the corridors
     n_cols = n_egrids + n_corrs + n_exits + n_doors + 1
@@ -9059,29 +9071,38 @@ Contains
        n_tot_humans = n_tot_humans + EVAC_CORRS(i)%n_inside
     End Do
     !
+    ii = 0
+    Do i = 1, n_exits
+       If (.Not.EVAC_EXITS(i)%COUNT_ONLY) Then
+          ii = ii + 1
+          ITEMP(ii) = EVAC_EXITS(i)%NTARGET
+       End If
+    End Do
+    !
     If (n_dead >= 0) Then
        ! Write the 'fed' columns
-       Write(tcform,'(a,i4.4,a,a)') "(ES13.5E3,",n_cols+1+n_exits+n_doors, &
+       Write(tcform,'(a,i4.4,a,a)') "(ES13.5E3,",n_cols+1+n_exits-n_co_exits+n_doors, &
             "(',',i8)", ",',',ES13.5E3,',',ES13.5E3)"
        Write (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
             (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
             (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
             (EVAC_EXITS(i)%ICOUNT, i = 1,n_exits), &
             (EVAC_DOORS(i)%ICOUNT, i = 1,n_doors), &
-            (EVAC_EXITS(i)%NTARGET, i = 1,n_exits), &
+            (ITEMP(i), i = 1,n_exits-n_co_exits), &
             (EVAC_DOORS(i)%NTARGET, i = 1,n_doors), &
             n_dead, fed_max, fed_max_alive
     Else
        ! Do not write the 'fed' columns
-       Write(tcform,'(a,i4.4,a)') "(ES13.5E3,",n_cols+n_exits+n_doors, "(',',i8))"
+       Write(tcform,'(a,i4.4,a)') "(ES13.5E3,",n_cols+n_exits-n_co_exits+n_doors, "(',',i8))"
        Write (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
             (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
             (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
             (EVAC_EXITS(i)%ICOUNT, i = 1,n_exits), &
             (EVAC_DOORS(i)%ICOUNT, i = 1,n_doors), &
-            (EVAC_EXITS(i)%NTARGET, i = 1,n_exits), &
+            (ITEMP(i), i = 1,n_exits-n_co_exits), &
             (EVAC_DOORS(i)%NTARGET, i = 1,n_doors)
     End If
+    Deallocate(ITEMP)
     !
   End Subroutine DUMP_EVAC_CSV
 
