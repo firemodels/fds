@@ -304,9 +304,7 @@ user support, along with experimental model validation work.
 
 \section{Purpose}
 
-The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics Simulator (FDS). Such a document is 
-commonly referred to as a {\em Configuration Management Plan}. This document will be updated as the necessity arises and will establish and provide 
-the basis for a uniform and concise standard of practice for the FDS development process. It is based in part on IEEE Standard 828-2005.
+The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics Simulator (FDS). Such a document is commonly referred to as a {\em Software Configuration Management (SCM) Plan}, known through the rest of this document as "the plan". This document will be updated as the necessity arises and will establish and provide the basis for a uniform and concise standard of practice for the FDS development process. It is based in part on IEEE Standard 828-2005.
 
 
 \subsection{Overview of the Fire Dynamics Simulator (FDS) Software Project}
@@ -332,9 +330,6 @@ The policies and procedures described in this document involve the use of a vari
 The continued availability of these resources is an important consideration in the day to day upkeep of FDS and Smokeview.  
 If these resources become unavailable for any reason, the procedures will be updated accordingly.
 
-
-
-
 \chapter{Roles and Responsibilities}
 
 This chapter describes the roles and responsibilities of the FDS and Smokeview developers.
@@ -358,8 +353,7 @@ Members of the FDS and Smokeview team share in the development and maintenance r
 \item Maintaining a suite of verification and validation cases to test model accuracy and reliability
 \item Developing and maintaining a ``Road Map'' of future development
 \end{enumerate}
-Most decisions concerning these various tasks are made by consensus of the team members. In the event of a disagreement over technical issues, the decision is
-made by Kevin McGrattan, leader of the Fire Modeling Group in the Fire Research Division of BFRL. 
+Most decisions concerning these various tasks are made individually or by consensus of the team members. In the event of a disagreement over technical issues, the decision is made by Kevin McGrattan, leader of the Fire Modeling Group in the Fire Research Division of BFRL. 
 Non-technical issues are addressed by Anthony Hamins, Chief of the Fire Research Division in BFRL, or by
 Shyam Sunder, Director of BFRL, depending on the nature of the issue. All policies and procedures described in this document are
 subject to review by NIST in consultation with VTT, Finland. 
@@ -377,18 +371,12 @@ control of the project files and documents, procedures for making changes, and p
 
 \section{Document Identification and Control}
 
-Document identification and control consists of placing all project files in a central location and maintaining a record of
-changes to those files. The central location is known as the {\em Repository}. 
+Document identification and control consists of placing all project files in a central location and maintaining a record of changes to those files. The central location is known as the {\em Repository}. 
 
 
 \subsection{Project Repository}
 
-All project documents are maintained using the online utility GoogleCode, a free service offered by Google
-to support software development for open source applications.  GoogleCode uses
-Subversion (SVN) for revision control.  Under this system a centralized repository containing all project files resides
-on a GoogleCode server.  Subversion uses a single integer that identifies the version of the
-entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are
-incremented in version number).  A record of version number when a specific file was last changed is maintained.
+All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service offered by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.  Under this system a centralized repository containing all project files resides on a Google Code server.  Subversion uses a single integer that identifies the version of the entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are incremented in version number).  A record of version number when a specific file was last changed is maintained.
 
 As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
 repository.  Only Team Members described in the previous chapter can commit changes to the repository.
@@ -417,15 +405,13 @@ specific set of source code files used.  Rather one would need to know the SVN r
 recently committed source file.
 
 This is accomplished by using source file tagging.  In each source file a series of character parameter
-strings are defined.  For example the strings in main.f90 are:
+strings are defined.  For example the strings in main.f90 at revision 3144 are:
 
-\footnotesize
-\begin{verbatim}
-CHARACTER(255), PARAMETER :: mainid='$Id$'
-CHARACTER(255), PARAMETER :: mainrev='$Revision$'
-CHARACTER(255), PARAMETER :: maindate='$Date$'
-\end{verbatim}
-\normalsize
+\begin{figure}[ht!]
+\includegraphics[width=\textwidth]{FIGURES/RevisionStrings.jpg}
+\caption{\bf Example of Revision Identification Strings in main.f90}
+\label{fig:revstrings}
+\end{figure}
 
 The string contains the name of the source file, the version of the file (this reflects only the source
 file version and not the overall release version number), the date and time of the file version, and
@@ -447,14 +433,12 @@ the source code used for a particular compilation of FDS when reporting an error
 \subsection{Creating a Change Request}
 
 Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service that is part of
-GoogleCode.  The current location of the Issue Tracker is \href{http://code.google.com/p/fds-smv/issues/list}
-{{\ct http://code.google.com/p/fds-smv/issues/list}}.  A change request is initiated by opening a new issue.
-The issue report contains the baseline identification (version number, compile date, and SVN revision number),
-operating system, and a description of the defect or enhancement request.  Input files or other supporting
-documentation can be attached.
+Google Code.  To submit a new issue to the tracker or to provide follow up comments, the user must sign in with a Google Account.  The current location of the Issue Tracker can be found through a link under the 'Support' section of the menu on the FDS-SMV website \href{http://code.google.com/p/fds-smv/issues/list}{[Link to Tracker]}.
+
+A change request is initiated by opening a new issue.  The issue report contains the baseline identification (version number, compile date, and SVN revision number), operating system, and a description of the defect or enhancement request.  Input files or other supporting documentation can be attached.
 
 \begin{figure}[ht!]
-\includegraphics[width=\textwidth]{FIGURES/defectreport.jpg}
+\includegraphics[width=\textwidth]{FIGURES/NewIssue.jpg}
 \caption{\bf Screenshot of issue tracker reporting form}
 \label{fig:issueform}
 \end{figure}
