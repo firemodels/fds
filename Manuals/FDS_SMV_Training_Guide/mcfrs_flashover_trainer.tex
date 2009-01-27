@@ -1,0 +1,152 @@
+\chapter{Flashover Trainer}
+
+\section{Training Objectives}
+
+\section{Design Data}
+\subsection{Geometry}
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[trim=1.0in 3.0inin 0.5in 4.5in, clip, width=6.0in]{scriptfigures/MCFRS_Flashover_00_top}\\
+a) top view\\
+\includegraphics[trim=1.0 2.25in 0.5in 4.25in, clip, width=6.0in]{scriptfigures/MCFRS_Flashover_00_front}\\
+b) front view\\
+\end{center}
+\caption {Schematic of flashover trainer layout}
+\label{figflashoverplan}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[trim=1.5 1.0in 1.0in 3.75in, clip, width=6.0in]{scriptfigures/MCFRS_Flashover_00_3D}\\
+\end{center}
+\caption {Schematic of flashover trainer layout}
+\label{figflashoverplan}%
+\end{figure}
+
+\note\ Need the following (remove from check list when we get it):
+\begin{enumerate}
+\item drawings containing measurements of facility,
+\item photos showing outside of facility before the test and inside at various times during the test,
+\item test report describing
+measurements taken, where they were taken
+\item a cross-walk between measurements taken and where these measurements are recorded (ie
+in what column of a spread sheet file).
+\end{enumerate}
+
+\subsection{Fire}
+
+\subsection{Materials}
+
+\subsection{Ventilation}
+
+\section{Physical Assumptions}
+\subsection{Fire}
+
+\subsection{Materials}
+
+\section{Model Assumptions and Analysis}
+\subsection{Geometry}
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=4.0in]{FIGURES/mcfrs_flashover}
+\end{center}
+\caption {Flashover trainer at MCFRS}
+\label{figflashoversmoke}%
+\end{figure}
+
+\subsection{Fire}
+
+\subsection{Ventilation}
+
+\section{Summary of Results}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.0in]{scriptfigures/flashover_slice_temp_020}&
+ \includegraphics[height=2.0in]{scriptfigures/flashover_slice_oxy_020}
+ \\
+ \includegraphics[height=2.0in]{scriptfigures/flashover_slice_temp_040}&
+ \includegraphics[height=2.25in]{scriptfigures/flashover_slice_oxy_040}
+ \\
+ \includegraphics[height=2.0in]{scriptfigures/flashover_slice_temp_060}&
+ \includegraphics[height=2.0in]{scriptfigures/flashover_slice_oxy_060}
+ \\
+ \includegraphics[height=2.0in]{scriptfigures/flashover_slice_temp_080}&
+ \includegraphics[height=2.0in]{scriptfigures/flashover_slice_oxy_080}
+ \\
+\end{tabular}
+\end{center}
+\caption {Smokeview visualizations of FDS Flashover trainer simulations comparing temperature and oxygen
+results from 20 s to 80 s every 20 s.}
+\label{figflashoversmoke}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.25in]{scriptfigures/flashover_3dsmoke_fire_020}&
+ \includegraphics[height=2.25in]{scriptfigures/flashover_3dsmoke_ifire_020}
+ \\
+ \includegraphics[height=2.25in]{scriptfigures/flashover_3dsmoke_fire_040}&
+ \includegraphics[height=2.25in]{scriptfigures/flashover_3dsmoke_ifire_040}
+ \\
+ \includegraphics[height=2.25in]{scriptfigures/flashover_3dsmoke_fire_060}&
+ \includegraphics[height=2.25in]{scriptfigures/flashover_3dsmoke_ifire_060}
+ \\
+ \includegraphics[height=2.25in]{scriptfigures/flashover_3dsmoke_fire_080}&
+ \includegraphics[height=2.25in]{scriptfigures/flashover_3dsmoke_ifire_080}
+ \\
+\end{tabular}
+\end{center}
+\caption {FDS simulation results of the flashover trainer visualized
+using realistic smoke and fire. Front and side views are compared from
+20 s to 80 s every 20 s.}
+\label{figflashoversmoke}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=4.5in]{datafigures/MCFRS_Flashover_00leak_hrr}\\
+ \includegraphics[width=4.5in]{datafigures/MCFRS_Flashover_00open_hrr}\\
+\end{tabular}
+\end{center}
+\caption {FDS heat release rate results for the Flashover trainer case}
+\label{figflashoverhrr}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00leakLL}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00openLL}\\
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00leakMM}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00openMM}\\
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00leakRR}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00openRR}\\
+\end{tabular}
+\end{center}
+\caption {FDS temperatures as a function of height
+at 3 locations within the MCFRS flashover trainer at 60 s, 120 s and 180 s.  See Figure \ref{figflashoverplan}a for location details.}
+\label{figflashovertempa}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00leak_temp_0060}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00open_temp_0060}\\
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00leak_temp_0120}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00open_temp_0120}\\
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00leak_temp_0180}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00open_temp_0180}\\
+\end{tabular}
+\end{center}
+\caption {FDS temperatures as a function of height
+at 3 locations within the MCFRS flashover trainer at 60 s, 120 s and 180 s.  See Figure \ref{figflashoverplan}a for location details.}
+\label{figflashovertempa}%
+\end{figure}
+
+
+\section{Conclusions}
