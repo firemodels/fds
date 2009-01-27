@@ -3334,6 +3334,12 @@ void Args(int argc, char **argv){
     exit(0);
   }
 
+  if(strncmp(argv[1],"-ng_ini",6)==0){
+    no_graphics=1;
+    updatecolors(-1);
+    writeini(GLOBAL_INI);
+    exit(0);
+  }
   strcpy(SMVFILENAME,"");
   smv_parse=0;
   for(iarg=1;iarg<argc;iarg++){
@@ -3566,7 +3572,7 @@ void usage(char **argv){
   printf("%s\n",TITLERELEASE);
   printf("Visualize fire/smoke flow simulations.  All parameters are optional.\n\n");
   printf("Usage:\n\n");
-  printf("%s casename -points m -frames n -ini -part -nopart -stereo -demo\n",argv[0]);
+  printf("%s casename -points m -frames n -ini -ng_ini -part -nopart -stereo -demo\n",argv[0]);
   printf("            -runscript -script scriptname\n\n");
   printf("where \n\n");
   printf("  casename = project id (file names without the extension)\n");
@@ -3575,6 +3581,7 @@ void usage(char **argv){
   printf("     -demo = activate demonstrator mode of Smokeview\n");
   printf("     -help = display this message\n");
   printf("      -ini = output default smokeview parameters to smokeview.ini\n");
+  printf("   -ng_ini = same as -ini .  Used when console does not have graphics setup\n");
   printf("     -part = load particle file if present \n");
   printf("   -nopart = do not load particle file \n");
   printf("   -stereo = activate stereo mode (if supported)\n");
