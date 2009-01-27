@@ -1464,6 +1464,7 @@ void initvars1(void){
   callfrom_tourglui=0;
   showtours_whenediting=0;
 
+  no_graphics=0;
   showstereo=0;
   showstereoOLD=showstereo;
   showstereo_frame=2;

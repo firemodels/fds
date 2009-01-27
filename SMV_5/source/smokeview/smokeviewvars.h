@@ -402,6 +402,7 @@ SVEXTERN int windowresized;
 SVEXTERN int updatemenu, first_display;
 SVEXTERN int updatezoommenu;
 SVEXTERN int updatemenu_count;
+SVEXTERN int no_graphics;
 
 SVEXTERN int updatefaces,updatefacelists;
 SVEXTERN int updateOpenSMVFile;

@@ -9215,9 +9215,11 @@ void writeini(int flag){
   {
     int svn_num;
     char version_label[256];
-    char *glversion;
+    char *glversion=NULL;
 
-    glversion=(char *)glGetString(GL_VERSION);
+    if(no_graphics==0){
+      glversion=(char *)glGetString(GL_VERSION);
+    }
     if(glversion!=NULL){
       strcpy(version_label,"OpenGL Version: "); 
       strcat(version_label,glversion);
@@ -9245,13 +9247,15 @@ void writeini(int flag){
 
 }
 
-  fprintf(fileout,"\n\n# Graphics Environment\n");
-  fprintf(fileout,"# --------------------\n\n");
-  fprintf(fileout,"#   Red bits:%i\n",nred);
-  fprintf(fileout,"# Green bits:%i\n",ngreen);
-  fprintf(fileout,"#  Blue bits:%i\n",nblue);
-  fprintf(fileout,"# Alpha bits:%i\n",nalpha);
-  fprintf(fileout,"# Depth bits:%i\n\n",ndepth);
+    if(no_graphics==0){
+      fprintf(fileout,"\n\n# Graphics Environment\n");
+      fprintf(fileout,"# --------------------\n\n");
+      fprintf(fileout,"#   Red bits:%i\n",nred);
+      fprintf(fileout,"# Green bits:%i\n",ngreen);
+      fprintf(fileout,"#  Blue bits:%i\n",nblue);
+      fprintf(fileout,"# Alpha bits:%i\n",nalpha);
+      fprintf(fileout,"# Depth bits:%i\n\n",ndepth);
+    }
   }
 
   if(fileout!=stdout)fclose(fileout);
