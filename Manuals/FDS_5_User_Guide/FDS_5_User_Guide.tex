@@ -9893,42 +9893,24 @@ The HRR curve for this example is given here:
 \includegraphics[width=4.5in]{FIGURES/spray_burner_HRR.PDF}
 \end{center}
 
-Note that in this example there is no need for a separate ignition source. The combustion model assumes fuel and oxygen burn
-on contact, and so the small amount of evaporation at ambient temperature is enough to start the reaction.
-
-
-
-
-
-
-
+Note that in this example there is no need for a separate ignition source. The combustion model assumes fuel and oxygen burn on contact, and so the small amount of evaporation at ambient temperature is enough to start the reaction.
 
 
 \part{FDS and Smokeview Development Tools}
 
-
-
 \chapter{The FDS/Smokeview Repository}
 
-For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform, it is
-strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.''
-All project documents are maintained using the online utility GoogleCode, a free service offered by Google
-to support software development for open source applications.  GoogleCode uses
-Subversion (SVN) for revision control.  Under this system a centralized repository containing all project files resides
-on a GoogleCode server.  Subversion uses a single integer that identifies the version of the
-entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are
-incremented in version number).  A record of version number when a specific file was last changed is maintained.
+For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform, it is strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.''  All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service offered by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.  Under this system a centralized repository containing all project files resides on a Google Code server.  Subversion uses a single integer that identifies the version of the entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are incremented in version number).  A record of version number when a specific file was last changed is maintained.
 
 As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
 repository.  Only Team Members described in the previous chapter can commit changes to the repository.
 
-The current location of the FDS repository is \href{http://fds-smv.googlecode.com/svn/trunk/}
+The current location of the FDS repository is \href{http://code.google.com/p/fds-smv/source/checkout}
 {{\ct http://fds-smv.googlecode.com/svn/trunk/}}. The repository contains the following files:
 \begin{enumerate}
-\item Compiled FDS and Smokeview executables
 \item FDS and Smokeview source code files
 \item FDS and Smokeview documentation
-\item Input files for software testing, verification testing, and validation testing
+\item Input files for software testing (Examples), verification testing, and validation testing
 \item Experimental data files used for validation testing
 \item Scripts and post-processing utilities used for software testing
 \item Web pages and wikis
@@ -9946,15 +9928,14 @@ Some of these files are used for example input throughout this document, especia
 \item[{\bf Command Line SVN Client}]
 There are two steps for using the command line client, and a third optional step to keep the files up to date with the latest version in the repository over time.
 \begin{enumerate}
-\item Download and install the Subversion command line client for your platform.
-\item From the command line (Terminal) change to the directory where you want the new directory of files to appear and enter the following string into the command prompt. 
-This command will create a directory for you named Test\_Case\_Files and download all of the example cases into directories within it.
+\item Download and install the \href{http://subversion.tigris.org}{{Subversion}} command line client for your platform.
+\item From the command line (Terminal) change to the directory where you want the new directory of files to appear and enter the following command into the shell prompt. This svn command will create a directory for you named Test\_Cases and download all of the example cases into directories within it.
 \footnotesize
 \begin{verbatim}
 svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Test_cases Test_Cases
 \end{verbatim}
 \normalsize
-\item Optional: Run the following command from within the Test\_Case\_Files directory when you want to update your local copy of the files to the latest versions of the test cases in the repository.
+\item Optional: Run the following svn command from within the Test\_Cases directory when you want to update your local copy of the files to the latest versions of the test cases in the repository.
 \footnotesize
 \begin{verbatim}
 svn update
@@ -9969,7 +9950,7 @@ Instead, it is a convenient way to review the individual files online within the
 \item Go to the FDS-SMV Project Site \href{http://fds-smv.googlecode.com}{{\ct http://fds-smv.googlecode.com}}.  
 Navigate to the Source Tab and then click Browse between 'Checkout' and 'Changes' next to the 'Search Trunk' text box.  
 You can also click this \href{http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Test_cases/}{{\ct Link to Test\_cases}}, to go directly to the Test\_cases directory in the repository.
-\item Navigate through the repository directories and click on the 'casename'.fds files that you want to review and download.c
+\item Navigate through the repository directories and click on the 'casename'.fds files that you want to review and download.
 \item To download a file you are interested in, right click the 'View raw file' link in the 'File info' section to the right of the page and save it to your local machine.
 \end{enumerate}
 \end{description}
