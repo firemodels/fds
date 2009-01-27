@@ -16,6 +16,7 @@ echo
 echo filling distribution directory
 mkdir %smvdir%
 mkdir %smvdir%\Documentation
+copy smokeview.ini %smvdir%\smokeview.ini
 copy smokeview_release.exe %smvdir%\smokeview.exe
 copy smokezip_release.exe %smvdir%\smokezip.exe
 copy devices.svo %smvdir%\.
