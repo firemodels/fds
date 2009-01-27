@@ -751,7 +751,7 @@ FDS and Smokeview can be found at the web site.
 Detailed instructions on how to download executables, manuals, source-code and related utilities,
 can be found on the FDS-SMV Website
 \href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}} for more information.
-The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac OS X, and Linux.  
+The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac OS X, and Linux.
 For other operating systems, consult the web site.
 
 \begin{warning}
@@ -3409,14 +3409,27 @@ increase (or decrease) the background pressure in this single compartment, and a
 be defined between the compartment and the ambient exterior. Flow through the ``cracks'' was simply
 a function of the background pressure via the usual empirical rules.
 This idea has been generalized starting in FDS 5. Now, you can specify any number of sealed portions of the computational
-domain to have their own ``background'' pressures, and these zones can be connected via leakage and duct paths.
+domain to have their own ``background'' pressures, and these zones can be connected via leakage and duct paths. The basic syntax
+for a pressure {\ct ZONE} is:
 
+\footnotesize
+\begin{verbatim}
+&ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5 /
+&ZONE XB=2.3,5.8,1.4,2.9,6.8,9.7 /
+\end{verbatim}
+\normalsize
+
+\noindent
 There are several restrictions to assigning pressure zones. First, the pressure zones must be completely surrounded by
-obstructions (an external boundary also suffices). It is possible to ``break'' pressure zones by removing obstructions between them.
-\footnote{The ability to open pressure zones became available in FDS starting with version 5.3.0. Prior versions prevented it by issuing an
+obstructions (an external boundary also suffices). It is possible to ``break'' pressure zones by removing 
+obstructions between them.\footnote{The ability to open pressure zones became available in FDS starting with version 5.3.0. Prior versions prevented it by issuing an
 error statement} An example of how to break pressure zones is given in Section~\ref{zone_break}.
 Second, the pressure zones {\bf can} span multiple meshes,
 but check the pressure in each mesh to ensure consistency.
+
+Note that if you plan to have one zone open up to another via the removal of an obstruction, make sure that the coordinates of the two
+zones abut (i.e. touch) even if the volume includes the solid region between the zones. FDS recognizes that a zone boundary has been removed when
+two adjacent cells belong to two different zones but have no solid obstruction between them.
 
 
 \subsection{Leaks}
@@ -3426,7 +3439,7 @@ The volume flow, $\dot{V}$, through a leak of area $A_L$ is given by
 \be  \dot{V}_{\hbox{\footnotesize leak}} = A_L \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
 where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and
 $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
-to be 1. Leakage is inherently a submesh-scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
+to be 1. Leakage is inherently a subgrid-scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
 numerical mesh. It is sometimes possible to ``lump'' the leaks into a single mesh-resolvable hole, but this is problematic
 for two reasons. First, the leakage area rarely corresponds neatly to the area of a single mesh cell-sized hole. Second, the
 flow speeds through the hole can be large and cause numerical instabilities.
