@@ -1,0 +1,44 @@
+&HEAD CHID='zone_break', TITLE='Test of opening pressure ZONEs, SVN $Revision: 2066 $' /
+
+&MESH IJK=50,50,12, XB=0.0,10.0,0.0,10.0,0.0,2.4 /
+
+&TIME TWFIN=30. / 
+&MISC PRESSURE_RELAX_FACTOR=0.2, ALLOW_ZONE_BREAKS=.TRUE. /
+
+&SURF ID='FIRE', MASS_FLUX(0)=1., COLOR='RED', RAMP_MF(0)='flow' / 
+&RAMP ID='flow', T= 0., F=0. /
+&RAMP ID='flow', T= 1., F=1. /
+&RAMP ID='flow', T= 4., F=1. /
+&RAMP ID='flow', T= 5., F=0. /
+
+&OBST XB= 5.0, 5.2, 0.0,10.0, 0.0, 2.4 /
+&OBST XB= 0.0, 5.0, 5.0, 5.2, 0.0, 2.4 /
+
+&HOLE XB= 4.9, 5.3, 2.0, 3.0, 0.0, 2.0, DEVC_ID='door 1', COLOR='GREEN' /
+&HOLE XB= 4.9, 5.3, 7.0, 8.0, 0.0, 2.0, DEVC_ID='door 2', COLOR='BLUE' /
+
+&ZONE XB= 0.0, 5.0, 0.0, 5.0, 0.0, 2.4 /
+&ZONE XB= 5.0,10.0, 0.0,10.0, 0.0, 2.4 /
+&ZONE XB= 0.0, 5.0, 5.0,10.0, 0.0, 2.4 /
+
+&VENT XB= 2.0, 3.0, 2.0, 3.0, 0.0, 0.0, SURF_ID='FIRE' /
+
+&VENT XB= 0.0, 0.0, 6.0, 7.0, 0.0, 2.0, SURF_ID='OPEN' /
+&OBST XB= 0.0, 0.0, 6.0, 7.0, 0.0, 2.0, DEVC_ID='door 3' /
+
+&DEVC XYZ=1.0,1.0,1.0,ID='pres_1',QUANTITY='PRESSURE' /
+&DEVC XYZ=7.5,5.0,1.0,ID='pres_2',QUANTITY='PRESSURE' /
+&DEVC XYZ=2.5,7.5,1.0,ID='pres_3',QUANTITY='PRESSURE' /
+
+&DEVC XYZ=0.0,0.0,0.0, ID='door 1', SETPOINT=10.0, QUANTITY='TIME', INITIAL_STATE=.FALSE. /
+&DEVC XYZ=0.0,0.0,0.0, ID='door 2', SETPOINT=15.0, QUANTITY='TIME', INITIAL_STATE=.FALSE. /
+&DEVC XYZ=0.0,0.0,0.0, ID='door 3', SETPOINT=20.0, QUANTITY='TIME', INITIAL_STATE=.TRUE. /
+
+&SLCF PBZ=1.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBZ=1.0,QUANTITY='PRESSURE' /
+&SLCF PBZ=1.0,QUANTITY='DENSITY' /
+
+&DUMP MASS_FILE=.TRUE. /
+
+&TAIL /
+
