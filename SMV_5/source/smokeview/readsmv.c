@@ -8439,8 +8439,9 @@ void writeini(int flag){
   fprintf(fileout," %f\n",sensorrelsize);
   fprintf(fileout,"SPRINKLERABSSIZE\n");
   fprintf(fileout," %f\n",sprinklerabssize);
-  if(screenWidth == glutGet(GLUT_SCREEN_WIDTH)||
-     screenHeight == glutGet(GLUT_SCREEN_HEIGHT)){
+  if(no_graphics==0&&
+     (screenWidth == glutGet(GLUT_SCREEN_WIDTH)||screenHeight == glutGet(GLUT_SCREEN_HEIGHT))
+    ){
     fprintf(fileout,"WINDOWWIDTH\n");
     fprintf(fileout," %i\n",-1);
     fprintf(fileout,"WINDOWHEIGHT\n");
@@ -9204,26 +9205,7 @@ void writeini(int flag){
     if(fileout_inilist!=NULL)fclose(fileout_inilist);
   }
   {
-  GLint nred, ngreen, nblue, ndepth, nalpha;
-  glGetIntegerv(GL_RED_BITS,&nred);    
-  glGetIntegerv(GL_GREEN_BITS,&ngreen);
-  glGetIntegerv(GL_BLUE_BITS,&nblue); 
-  glGetIntegerv(GL_DEPTH_BITS,&ndepth);
-  glGetIntegerv(GL_ALPHA_BITS,&nalpha);
-
-
-  {
     int svn_num;
-    char version_label[256];
-    char *glversion=NULL;
-
-    if(no_graphics==0){
-      glversion=(char *)glGetString(GL_VERSION);
-    }
-    if(glversion!=NULL){
-      strcpy(version_label,"OpenGL Version: "); 
-      strcat(version_label,glversion);
-    }
 
     svn_num=getmaxrevision();    // get svn revision number
     fprintf(fileout,"\n\n# Development Environment\n");
@@ -9231,7 +9213,17 @@ void writeini(int flag){
     fprintf(fileout,"# Smokeview Version: %s\n",SMVVERSION);
     fprintf(fileout,"# Smokeview Revision Number: %i\n",svn_num);
     fprintf(fileout,"# Smokeview Compile Date: %s\n",__DATE__);
-    fprintf(fileout,"# %s\n",version_label);
+    if(no_graphics==0){
+      char version_label[256];
+      char *glversion=NULL;
+
+      glversion=(char *)glGetString(GL_VERSION);
+      if(glversion!=NULL){
+        strcpy(version_label,"OpenGL Version: "); 
+        strcat(version_label,glversion);
+        fprintf(fileout,"# %s\n",version_label);
+      }
+    }
     if(revision_fds>0){
       fprintf(fileout,"# FDS Revision Number: %i\n",revision_fds);
     }
@@ -9245,9 +9237,14 @@ void writeini(int flag){
     fprintf(fileout,"# Platform: LINUX\n");
 #endif
 
-}
-
     if(no_graphics==0){
+      GLint nred, ngreen, nblue, ndepth, nalpha;
+
+      glGetIntegerv(GL_RED_BITS,&nred);    
+      glGetIntegerv(GL_GREEN_BITS,&ngreen);
+      glGetIntegerv(GL_BLUE_BITS,&nblue); 
+      glGetIntegerv(GL_DEPTH_BITS,&ndepth);
+      glGetIntegerv(GL_ALPHA_BITS,&nalpha);
       fprintf(fileout,"\n\n# Graphics Environment\n");
       fprintf(fileout,"# --------------------\n\n");
       fprintf(fileout,"#   Red bits:%i\n",nred);
