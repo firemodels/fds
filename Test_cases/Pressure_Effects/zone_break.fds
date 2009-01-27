@@ -1,15 +1,17 @@
+This example case demonstrates how to create pressure ZONEs that can be opened. 
+Each time a ZONE is opened, the pressure of the two connected ZONEs quickly equilibriates.
+
 &HEAD CHID='zone_break', TITLE='Test of opening pressure ZONEs, SVN $Revision: 2066 $' /
 
 &MESH IJK=50,50,12, XB=0.0,10.0,0.0,10.0,0.0,2.4 /
 
 &TIME TWFIN=30. / 
-&MISC PRESSURE_RELAX_FACTOR=0.2, ALLOW_ZONE_BREAKS=.TRUE. /
 
-&SURF ID='FIRE', MASS_FLUX(0)=1., COLOR='RED', RAMP_MF(0)='flow' / 
-&RAMP ID='flow', T= 0., F=0. /
-&RAMP ID='flow', T= 1., F=1. /
-&RAMP ID='flow', T= 4., F=1. /
-&RAMP ID='flow', T= 5., F=0. /
+&SURF ID='BLOW', MASS_FLUX(0)=1., COLOR='RED', RAMP_MF(0)='flow' / 
+&RAMP ID='flow', T= 0.0, F=0. /
+&RAMP ID='flow', T= 0.1, F=1. /
+&RAMP ID='flow', T= 5.0, F=1. /
+&RAMP ID='flow', T= 5.1, F=0. /
 
 &OBST XB= 5.0, 5.2, 0.0,10.0, 0.0, 2.4 /
 &OBST XB= 0.0, 5.0, 5.0, 5.2, 0.0, 2.4 /
@@ -21,7 +23,7 @@
 &ZONE XB= 5.0,10.0, 0.0,10.0, 0.0, 2.4 /
 &ZONE XB= 0.0, 5.0, 5.0,10.0, 0.0, 2.4 /
 
-&VENT XB= 2.0, 3.0, 2.0, 3.0, 0.0, 0.0, SURF_ID='FIRE' /
+&VENT XB= 2.0, 3.0, 2.0, 3.0, 0.0, 0.0, SURF_ID='BLOW' /
 
 &VENT XB= 0.0, 0.0, 6.0, 7.0, 0.0, 2.0, SURF_ID='OPEN' /
 &OBST XB= 0.0, 0.0, 6.0, 7.0, 0.0, 2.0, DEVC_ID='door 3' /
