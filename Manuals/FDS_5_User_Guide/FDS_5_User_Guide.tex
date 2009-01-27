@@ -829,37 +829,7 @@ By running a sample case, you become familiar with the procedure, learn how to u
 ensure that your computer is up to the task before embarking on
 learning how to create new input files.
 
-\section{How to Acquire Example Input Files}
-\index{Download Example Files}
-Example input files for FDS can be found in the FDS-SMV project Subversion repository.  There are a few ways to get a copy of these files but the two easiest methods will be covered here.  Some of these files are used for example input throughout this document, especially in Part \ref{part:samples}.
 
-\begin{description}
-\item[{\bf Command Line SVN Client}]
-There are two steps for using the command line client, and a third optional step to keep the files up to date with the latest version in the repository over time. 
-\begin{enumerate}
-\item Download and install the Subversion command line client for your platform.
-\item From the command line (Terminal) change to the directory where you want the new directory of files to appear and enter the following string into the command prompt. This command will create a directory for you named Test\_Case\_Files and download all of the example cases into directories within it.
-\footnotesize
-\begin{verbatim}
-svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Test_cases Test_Cases
-\end{verbatim}
-\normalsize
-\item Optional: Run the following command from within the Test\_Case\_Files directory when you want to update your local copy of the files to the latest versions of the test cases in the repository.
-\footnotesize
-\begin{verbatim}
-svn update
-\end{verbatim}
-\normalsize
-\end{enumerate}
-
-\item[{\bf Download Individual Files From Web Interface}]
-This method is not the most efficient way to get all of the test cases to your local computer. Instead, it is a convenient way to review the individual files online within the repository browser, and to selectively download only the files that you are interested in.
-\begin{enumerate}
-\item Go to the FDS-SMV Project Site \href{http://fds-smv.googlecode.com}{{\ct http://fds-smv.googlecode.com}}.  Navigate to the Source Tab and then click Browse between 'Checkout' and 'Changes' next to the 'Search Trunk' text box.  You can also click this \href{http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Test_cases/}{{\ct Link to Test\_cases}}, to go directly to the Test\_cases directory in the repository.
-\item Navigate through the repository directories and click on the 'casename'.fds files that you want to review and download.c 
-\item To download a file you are interested in, right click the 'View raw file' link in the 'File info' section to the right of the page and save it to your local machine.
-\end{enumerate}
-\end{description}
 
 \section{Starting an FDS Calculation}
 \index{Running FDS}
@@ -3421,7 +3391,7 @@ for a pressure {\ct ZONE} is:
 
 \noindent
 There are several restrictions to assigning pressure zones. First, the pressure zones must be completely surrounded by
-obstructions (an external boundary also suffices). It is possible to ``break'' pressure zones by removing 
+obstructions (an external boundary also suffices). It is possible to ``break'' pressure zones by removing
 obstructions between them.\footnote{The ability to open pressure zones became available in FDS starting with version 5.3.0. Prior versions prevented it by issuing an
 error statement} An example of how to break pressure zones is given in Section~\ref{zone_break}.
 Second, the pressure zones {\bf can} span multiple meshes,
@@ -9934,7 +9904,75 @@ on contact, and so the small amount of evaporation at ambient temperature is eno
 
 
 
-\part{Working with the FDS Source Code}
+\part{FDS and Smokeview Development Tools}
+
+
+
+\chapter{The FDS/Smokeview Repository}
+
+For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform, it is
+strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.''
+All project documents are maintained using the online utility GoogleCode, a free service offered by Google
+to support software development for open source applications.  GoogleCode uses
+Subversion (SVN) for revision control.  Under this system a centralized repository containing all project files resides
+on a GoogleCode server.  Subversion uses a single integer that identifies the version of the
+entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are
+incremented in version number).  A record of version number when a specific file was last changed is maintained.
+
+As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
+repository.  Only Team Members described in the previous chapter can commit changes to the repository.
+
+The current location of the FDS repository is \href{http://fds-smv.googlecode.com/svn/trunk/}
+{{\ct http://fds-smv.googlecode.com/svn/trunk/}}. The repository contains the following files:
+\begin{enumerate}
+\item Compiled FDS and Smokeview executables
+\item FDS and Smokeview source code files
+\item FDS and Smokeview documentation
+\item Input files for software testing, verification testing, and validation testing
+\item Experimental data files used for validation testing
+\item Scripts and post-processing utilities used for software testing
+\item Web pages and wikis
+\end{enumerate}
+
+
+\section{How to Acquire Example Input Files}
+\index{Download Example Files}
+
+Example input files for FDS can be found in the FDS-SMV project Subversion repository.  
+There are a few ways to get a copy of these files but the two easiest methods will be covered here.  
+Some of these files are used for example input throughout this document, especially in Part \ref{part:samples}.
+
+\begin{description}
+\item[{\bf Command Line SVN Client}]
+There are two steps for using the command line client, and a third optional step to keep the files up to date with the latest version in the repository over time.
+\begin{enumerate}
+\item Download and install the Subversion command line client for your platform.
+\item From the command line (Terminal) change to the directory where you want the new directory of files to appear and enter the following string into the command prompt. 
+This command will create a directory for you named Test\_Case\_Files and download all of the example cases into directories within it.
+\footnotesize
+\begin{verbatim}
+svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Test_cases Test_Cases
+\end{verbatim}
+\normalsize
+\item Optional: Run the following command from within the Test\_Case\_Files directory when you want to update your local copy of the files to the latest versions of the test cases in the repository.
+\footnotesize
+\begin{verbatim}
+svn update
+\end{verbatim}
+\normalsize
+\end{enumerate}
+
+\item[{\bf Download Individual Files From Web Interface}]
+This method is not the most efficient way to get all of the test cases to your local computer. 
+Instead, it is a convenient way to review the individual files online within the repository browser, and to selectively download only the files that you are interested in.
+\begin{enumerate}
+\item Go to the FDS-SMV Project Site \href{http://fds-smv.googlecode.com}{{\ct http://fds-smv.googlecode.com}}.  
+Navigate to the Source Tab and then click Browse between 'Checkout' and 'Changes' next to the 'Search Trunk' text box.  
+You can also click this \href{http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Test_cases/}{{\ct Link to Test\_cases}}, to go directly to the Test\_cases directory in the repository.
+\item Navigate through the repository directories and click on the 'casename'.fds files that you want to review and download.c
+\item To download a file you are interested in, right click the 'View raw file' link in the 'File info' section to the right of the page and save it to your local machine.
+\end{enumerate}
+\end{description}
 
 
 \chapter{Compiling FDS}
