@@ -318,7 +318,7 @@ Jason Floyd \\
 \vspace{.25in}
 
 \flushright{\today \\
-FDS Version 5.2 \\
+FDS Version 5.3 \\
 $SVN Repository$~$Revision$}
 
 \vfill
@@ -374,7 +374,7 @@ Mail: Stop SSOP, Washington, DC 20402-0001 }
 \chapter{Preface}
 
 This Guide describes how to use the Fire Dynamics Simulator (FDS). Most of the content pertains to version 5, although some features
-have been added since the release of FDS 5.0. The current version is 5.2.
+have been added since the release of FDS 5.0. The current version is 5.3.
 
 Note that this Guide does not provide the background theory for FDS. A three volume set of companion documents, referred to
 collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}, contains details about the governing
@@ -751,7 +751,8 @@ FDS and Smokeview can be found at the web site.
 Detailed instructions on how to download executables, manuals, source-code and related utilities,
 can be found on the FDS-SMV Website
 \href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}} for more information.
-The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac OS X, and Linux.  For other operating systems, consult the web site.
+The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac OS X, and Linux.  
+For other operating systems, consult the web site.
 
 \begin{warning}
 \noindent
@@ -2702,8 +2703,9 @@ species index. See Section~\ref{info:SPEC} for more information about gas specie
 If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
 
 \begin{warning}
-Vents to the outside of the computational domain ({\ct OPEN} vents)
-may {\bf not} be opened or closed during a simulation. See Section~\ref{info:activate_deactivate} for details.
+Starting with FDS 5.3.0, vents to the outside of the computational domain ({\ct OPEN} vents)
+{\em  can} be opened or closed during a simulation. It is best done by creating or removing a thin obstruction that covers the {\ct OPEN VENT}.
+See Section~\ref{info:activate_deactivate} for details.
 \end{warning}
 
 \subsubsection{A \texorpdfstring{{\tt MIRROR}}{MIRROR} \texorpdfstring{{\tt VENT}}{VENT}}
@@ -3092,12 +3094,12 @@ the boundary condition is very similar to a ``free-slip'' condition because $d <
 Prior to FDS 5.3, the default boundary condition for LES calculations
 was where $u_{ij,0}$ and $v_{ij,0}$ were set to one-half the values of
 $u_{ij,1}$ and $v_{ij,1}$, respectively. Now, however, FDS assumes a default value of 0.01~m for $d$. This parameter can be reset using
-{\ct BOUNDARY\_LAYER\_THICKNESS} on the {\ct SURF} line. The boundary condition is now a function of the grid resolution. 
+{\ct BOUNDARY\_LAYER\_THICKNESS} on the {\ct SURF} line. The boundary condition is now a function of the grid resolution.
 
 In a DNS calculation, this discussion is moot. The inner-wall ``ghost'' cell velocities are
 set so that the velocity at the wall surface is zero.
 
-Note that it is still possible to specify the tangential velocity conditions the old way. 
+Note that it is still possible to specify the tangential velocity conditions the old way.
 To alter the default mode, you can set a parameter called
 {\ct SLIP\_FACTOR} which ranges
 from -1 to 1. If a no-slip wall is desired, {\ct SLIP\_FACTOR=-1}. If
@@ -3233,7 +3235,8 @@ The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follow
 {\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 &\quad& \mbox{(outgoing)}  \nonumber\\
 {\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty &\quad& \mbox{(incoming)}
 \end{equationarray}
-where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary. The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
+where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary.
+The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
 need to ramp the pressure up or down starting at zero, like you do for various other ramps.
 The net effect of a positive dynamic pressure at an otherwise quiescent boundary is to
 drive a flow into the domain. However, a fire-driven flow of sufficient strength can push back against this incoming flow. A simple example demonstrating this
@@ -3377,11 +3380,10 @@ This idea has been generalized starting in FDS 5. Now, you can specify any numbe
 domain to have their own ``background'' pressures, and these zones can be connected via leakage and duct paths.
 
 There are several restrictions to assigning pressure zones. First, the pressure zones must be completely surrounded by
-obstructions (an external boundary also suffices).
-Second, the obstructions cannot be removed during the calculation. In other words, the door or window cannot
-suddenly fly open (equivalently, there must be no {\ct OPEN} vents if one of the zone boundaries
-is an external boundary of the computational domain).
-Third, the pressure zones {\bf can} span multiple meshes,
+obstructions (an external boundary also suffices). It is possible to ``break'' pressure zones by removing obstructions between them.
+\footnote{The ability to open pressure zones became available in FDS starting with version 5.3.0. Prior versions prevented it by issuing an
+error statement} An example of how to break pressure zones is given in Section~\ref{zone_break}.
+Second, the pressure zones {\bf can} span multiple meshes,
 but check the pressure in each mesh to ensure consistency.
 
 
@@ -4119,7 +4121,7 @@ FDS does {\bf not} adjust the burning rate to account for this as it does with v
 like {\ct HRRPUA}.
 \item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be applied to the {\ct OBST} rather than the {\ct SURF} line. This parameter is used
 to determine the combustible mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted
-object. This parameter over-rides all other parameters from which a combustible mass would be calculated. 
+object. This parameter over-rides all other parameters from which a combustible mass would be calculated.
 \item The mass of the object is based on the densities of the all material components ({\ct MATL}), but it is only consumed by mass fluxes of
 the {\bf known} species. If the sum of the gaseous yields (Section~\ref{nu_gas}) is less than one, it will take longer to consume the mass.
 \end{itemize}
@@ -5976,8 +5978,8 @@ To remove an obstruction, then re-create a different one in its place, use 2 lin
 since the code simply sees this as two different obstructions.
 
 \begin{warning}
-Until further notice, an obstruction that makes up the boundary of a ``pressure zone'' (see Section~\ref{info:ZONE}) should not be created or
-removed. The reason for this restriction is that abrupt changes in pressure can cause numerical instabilities.
+Starting with FDS version 5.3.0, an obstruction that makes up the boundary of a ``pressure zone'' (see Section~\ref{info:ZONE}) {\em can} be created or
+removed. The reason for this restriction prior to 5.3 was that abrupt changes in pressure could cause numerical instabilities.
 \end{warning}
 
 
@@ -9120,6 +9122,38 @@ minus coordinate direction. This convention can make these types of calculations
 
 \clearpage
 
+\section{Opening Pressure ZONEs (\texorpdfstring{{\bf zone\_break}}{zone\_break})}
+\label{zone_break}
+
+A {\em pressure zone} is a term used in FDS to designate a volume within the computational domain that has a background pressure that is distinct from
+other volumes. Air movement through cracks, fans, ducts, and so on, is often a function of the overall pressure difference between the zones. In the
+example case called {\bf zone\_break}, three simple compartments are initially isolated from each other and from the ambient environment outside. Air
+is blown into compartment~1 at a constant rate for 5~s, increasing its pressure approximately 9500~Pa. At 10~s, compartment~1 is opened to compartment~2, decreasing the
+overall pressure in the two compartments to roughly one-third the original value because the volume of the combined pressure zone has been roughly tripled.
+At 15~s, the pressure is further decreased by opening a door to compartment~3, and, finally, at 20~s the pressure returns to ambient following the opening
+of a door to the outside.
+
+\begin{center}
+\includegraphics[width=3.1in]{FIGURES/zone_break}
+\end{center}
+
+\noindent
+Notice that the pressure within each compartment does not come to equilibrium instantaneously. Rather, a relaxation factor is applied by FDS to bring the zones
+into equilibrium over several seconds. This is done for several reasons. First, in reality doors and windows do not magically disappear as they do in FDS. It takes
+a finite amount of time to fully open them, and the slowing of the pressure increase/decrease is a simple way to simulate the effect.
+Second, relatively large pressure differences between zones wreak havoc with flow solvers, especially ones like FDS that
+use a low Mach number approximation. To maintain numerical stability, FDS gradually brings the pressures into equilibrium. This second point ought to be seen as a warning:
+
+\begin{warning}
+\noindent Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that
+are very important in such analyses. The zone breaking functionality described in this example is only intended to be used for relatively small pressure differences (<0.1~atm)
+between compartments. Real buildings cannot withstand substantially larger pressures anyway.
+\end{warning}
+
+
+
+\clearpage
+
 \section{Stack Effect (\texorpdfstring{{\bf stack\_effect}}{stack\_effect})}
 \label{stack_effect}
 
@@ -9829,7 +9863,7 @@ parameters are given here:
 &RAMP ID='fuel', T=60.0, F=0.0  /
 \end{verbatim}
 \normalsize
-Many of these parameters are self-explanatory. Note that a 2~MW fire is achieved via 2 nozzles flowing heptane at 1.96~L/min each: 
+Many of these parameters are self-explanatory. Note that a 2~MW fire is achieved via 2 nozzles flowing heptane at 1.96~L/min each:
 \be 2 \times 1.96 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 688 \;
 \frac{\hbox{kg}}{\hbox{m}^3} \times \frac{1}{1000} \; \frac{\hbox{m}^3}{\hbox{L}} \times 44500 \;
 \frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW} \ee

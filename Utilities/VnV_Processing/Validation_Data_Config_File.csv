@@ -1,51 +1,52 @@
-g,Group_Number,Group_Title,Symbol,Color,Filled
-g,1,VTT,diamond,Red,yes
-g,2,NIST/NRC,circle,Black,yes
-g,3,NBS Multiroom,square,Red,yes
-g,4,FM/SNL,triangle,Green,yes
-g,5,WTC,diamond,Blue,no
-g,6,NIST/NRC (Cable B),circle,Black,yes
-g,7,NIST/NRC (Cable D),circle,Red,yes
-g,8,NIST/NRC (Cable F),circle,Green,yes
-g,9,NIST/NRC (Cable G),circle,Yellow,yes
-g,10,NIST/NRC (Long Wall),circle,Black,yes
-g,11,NIST/NRC (Short Wall),circle,Red,yes
-g,12,NIST/NRC (Ceiling),circle,Green,yes
-g,13,NIST/NRC (Floor),circle,Yellow,yes
-g,14,WTC (Column),diamond,Black,no
-g,15,WTC (Truss),diamond,Red,no
-g,16,WTC (Bar),diamond,Green,no
-g,17,WTC (Slug Calorimeter),diamond,Yellow,no
-g,18,WTC (Inside Ceiling),diamond,Black,yes
-g,19,WTC (Floor),diamond,Red,no
-g,20,WTC (Column),diamond,Green,no
-g,21,WTC (Ceiling),diamond,Black,no
-g,22,WTC (Truss Support),diamond,Yellow,no
-g,23,Smyth Slot,circle,Blue,yes
-g,24,WTC (Wall),diamond,Red,no
-g,25,WTC (Inside Wall),diamond,Red,yes
-g,26,"Steckler, Position A",circle,Black,yes
-g,27,"Steckler, Position B",circle,Red,yes
-g,28,"Steckler, Position C",circle,Green,yes
-g,29,"Steckler, Raised Burner",circle,Yellow,yes
-g,30,INERIS H2,circle,Black,yes
-s,,,,,
-q,Quantity,Comparison_Quantities,Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,%error,Title_Position,Key_Position,Plot_Width(cm),Plot_Filename
-q,1,HGL_Temperature,Hot Gas Layer Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,14,tl,tl,8,ScatterPlots/HGL_Temperature
-q,2,HGL_Depth,Hot Gas Layer Depth,Measured Layer Depth (m),Predicted Layer Depth (m),0,20,13,tl,tl,8,ScatterPlots/HGL_Depth
-q,3,Ceiling_Jet_Temperature,Ceiling Jet Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,16,tl,tl,8,ScatterPlots/Ceiling_Jet_Temperature
-q,4,Plume_Temperature,Plume Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,14,tl,tl,8,ScatterPlots/Plume_Temperature
-q,5,Flame_Height,Flame Height,Measured Flame Height (m),Predicted Flame Height (m),0,8,20,tl,tl,8,ScatterPlots/Flame_Height
-q,6,Oxygen_Concentration,Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.15,9,tl,tl,8,ScatterPlots/Oxygen_Concentration
-q,7,Carbon_Dioxide_Concentration,Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.15,9,tl,tl,8,ScatterPlots/Carbon_Dioxide_Concentration
-q,8,Compartment_Pressure,Compartment Over-Pressure,Measured Pressure Rise(Pa),Predicted Pressure Rise (Pa),0,300,40,tl,tl,8,ScatterPlots/Compartment_Pressure
-q,9,Heat_Flux,NIST/NRC Heat Flux near Cables,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,20,20,tl,tl,8,ScatterPlots/NIST_NRC_Heat_Flux
-q,10,Heat_Flux,WTC Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,120,20,tl,tl,8,ScatterPlots/WTC_Heat_Flux
-q,11,Target_Temperature,NIST/NRC Cable Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,14,tl,tl,8,ScatterPlots/Cable_Temperature
-q,12,Dummy,Dummy,Dummy,Dummy,0,800,14,tl,tl,8,ScatterPlots/Dummy
-q,13,Wall_Temperature,"NIST/NRC Wall, Floor and Ceiling Temperatures",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,14,tl,tl,8,ScatterPlots/Wall_Temperature
-q,14,Smoke_Concentration,Smoke Concentration,Measured Density (mg/m$^3$),Predicted Density (mg/m$^3$),0,400,33,tl,tl,8,ScatterPlots/Smoke_Concentration
-q,15,Carbon_Monoxide_Concentration,Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.1,9,tl,tl,8,ScatterPlots/Carbon_Monoxide_Concentration
+g,Group_Number,Group_Title,Symbol,Color,Filled,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,1,VTT,diamond,Red,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,2,NIST/NRC,circle,Black,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,3,NBS Multiroom,square,Red,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,4,FM/SNL,triangle,Green,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,5,WTC,diamond,Blue,no,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,6,NIST/NRC (Cable B),circle,Black,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,7,NIST/NRC (Cable D),circle,Red,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,8,NIST/NRC (Cable F),circle,Green,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,9,NIST/NRC (Cable G),circle,Yellow,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,10,NIST/NRC (Long Wall),circle,Black,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,11,NIST/NRC (Short Wall),circle,Red,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,12,NIST/NRC (Ceiling),circle,Green,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,13,NIST/NRC (Floor),circle,Yellow,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,14,WTC (Column),diamond,Black,no,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,15,WTC (Truss),diamond,Red,no,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,16,WTC (Bar),diamond,Green,no,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,17,WTC (Slug Calorimeter),diamond,Yellow,no,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,18,WTC (Inside Ceiling),diamond,Black,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,19,WTC (Floor),diamond,Red,no,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,20,WTC (Column),diamond,Green,no,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,21,WTC (Ceiling),diamond,Black,no,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,22,WTC (Truss Support),diamond,Yellow,no,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,23,Smyth Slot,circle,Blue,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,24,WTC (Wall),diamond,Red,no,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,25,WTC (Inside Wall),diamond,Red,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,26,"Steckler, Position A",circle,Black,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,27,"Steckler, Position B",circle,Red,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,28,"Steckler, Position C",circle,Green,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,29,"Steckler, Raised Burner",circle,Yellow,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,30,INERIS H2,circle,Black,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+g,31,Heskestad Flame Height,circle,Black,yes,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+s,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,Quantity,Comparison_Quantities,Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,%error,Title_Position,Key_Position,Plot_Width(cm),Plot_Filename,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,1,HGL_Temperature,Hot Gas Layer Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,14,tl,tl,8,ScatterPlots/HGL_Temperature,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,2,HGL_Depth,Hot Gas Layer Depth,Measured Layer Depth (m),Predicted Layer Depth (m),0,20,13,tl,tl,8,ScatterPlots/HGL_Depth,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,3,Ceiling_Jet_Temperature,Ceiling Jet Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,16,tl,tl,8,ScatterPlots/Ceiling_Jet_Temperature,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,4,Plume_Temperature,Plume Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,14,tl,tl,8,ScatterPlots/Plume_Temperature,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,5,Flame_Height,Flame Height,Measured Flame Height (m),Predicted Flame Height (m),0,8,20,tl,tl,8,ScatterPlots/Flame_Height,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,6,Oxygen_Concentration,Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.15,9,tl,tl,8,ScatterPlots/Oxygen_Concentration,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,7,Carbon_Dioxide_Concentration,Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.15,9,tl,tl,8,ScatterPlots/Carbon_Dioxide_Concentration,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,8,Compartment_Pressure,Compartment Over-Pressure,Measured Pressure Rise(Pa),Predicted Pressure Rise (Pa),0,300,40,tl,tl,8,ScatterPlots/Compartment_Pressure,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,9,Heat_Flux,NIST/NRC Heat Flux near Cables,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,20,20,tl,tl,8,ScatterPlots/NIST_NRC_Heat_Flux,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,10,Heat_Flux,WTC Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,120,20,tl,tl,8,ScatterPlots/WTC_Heat_Flux,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,11,Target_Temperature,NIST/NRC Cable Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,14,tl,tl,8,ScatterPlots/Cable_Temperature,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,12,Dummy,Dummy,Dummy,Dummy,0,800,14,tl,tl,8,ScatterPlots/Dummy,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,13,Wall_Temperature,"NIST/NRC Wall, Floor and Ceiling Temperatures",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,14,tl,tl,8,ScatterPlots/Wall_Temperature,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,14,Smoke_Concentration,Smoke Concentration,Measured Density (mg/m$^3$),Predicted Density (mg/m$^3$),0,400,33,tl,tl,8,ScatterPlots/Smoke_Concentration,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+q,15,Carbon_Monoxide_Concentration,Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.1,9,tl,tl,8,ScatterPlots/Carbon_Monoxide_Concentration,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 q,16,Velocity,Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0,5,10,tl,tl,8,ScatterPlots/Velocity,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 q,17,Compartment_Pressure,Open Compartment Over-Pressure,Measured Pressure Drop (Pa),Predicted Pressure Drop (Pa),0,5,40,tl,tl,8,ScatterPlots/Open_Compartment_Pressure,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 q,18,Target_Temperature,WTC Steel Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,14,tl,tl,8,ScatterPlots/Steel_Temperature,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -210,6 +211,8 @@ d,0,McCaffrey_22_kW,1,McCaffrey_Plume/Experimental_Data/McCaffrey_Plume.csv,1,He
 d,0,McCaffrey_33_kW,1,McCaffrey_Plume/Experimental_Data/McCaffrey_Plume.csv,1,Height,Vel 33 kW,2,Exp (Vel 33 kW),0,1000,0,1000,0,McCaffrey_Plume/FDS_Output_Files/McCaffrey_33_kW_fds2ascii.csv,1,Z,W-VELOCITY,3,FDS (W-VELOCITY),0,1000,0,1000,0,max,"Plume Velocity, McCaffrey 33 kW",Height (m),Velocity (m/s),0,6,1,0,5,1,yes,tr,bl,8,McCaffrey_Plume/McCaffrey_Plume_Velocity_33_kW
 d,0,McCaffrey_45_kW,1,McCaffrey_Plume/Experimental_Data/McCaffrey_Plume.csv,1,Height,Vel 45 kW,2,Exp (Vel 45 kW),0,1000,0,1000,0,McCaffrey_Plume/FDS_Output_Files/McCaffrey_45_kW_fds2ascii.csv,1,Z,W-VELOCITY,3,FDS (W-VELOCITY),0,1000,0,1000,0,max,"Plume Velocity, McCaffrey 45 kW",Height (m),Velocity (m/s),0,6,1,0,5,1,yes,tr,bl,8,McCaffrey_Plume/McCaffrey_Plume_Velocity_45_kW
 d,0,McCaffrey_57_kW,1,McCaffrey_Plume/Experimental_Data/McCaffrey_Plume.csv,1,Height,Vel 57 kW,2,Exp (Vel 57 kW),0,1000,0,1000,0,McCaffrey_Plume/FDS_Output_Files/McCaffrey_57_kW_fds2ascii.csv,1,Z,W-VELOCITY,3,FDS (W-VELOCITY),0,1000,0,1000,0,max,"Plume Velocity, McCaffrey 57 kW",Height (m),Velocity (m/s),0,6,1,0,5,1,yes,tr,bl,8,McCaffrey_Plume/McCaffrey_Plume_Velocity_57_kW
+s,Flame Height,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+d,0,Flame_Height,31,Flame_Height/Experimental_Data/Heskestad_Correlation.csv,1,Q*,L/D,2,Heskestad Correlation,0,10000,0,10000,0,Flame_Height/FDS_Output_Files/FDS_Flame_Height.csv,1,Q*,L/D,2,FDS,0,10000,0,10000,0,max,Flame Height,Q*,L$_f$/D,0.1,10000,-1,0.1,1000,-1,no,tl,br,8,ScatterPlots/Flame_Height
 s,Ceiling Jet,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 d,3,NIST_NRC_01,2,NIST_NRC/Experimental_Data/NIST_NRC_Test_01_file_1.csv,1,Time,Tree 7-10,2,Experiment (Tree 7-10),0,1000,0,1000,20,NIST_NRC/FDS_Output_Files/NIST_NRC_01_v5_devc.csv,2,FDS Time,Tr 7-10,3,FDS (Tr 7-10),0,1000,0,1000,20,max,"Ceiling Jet Temperature, NIST/NRC Test 1",Time (min),Temperature ($^\circ$C),0,30,60,0,400,1,no,tl,br,8,NIST_NRC/NIST_NRC_01_v5_Ceiling_Jet
 d,3,NIST_NRC_02,2,NIST_NRC/Experimental_Data/NIST_NRC_Test_02_file_1.csv,1,Time,Tree 7-10,2,Experiment (Tree 7-10),0,1000,0,1000,20,NIST_NRC/FDS_Output_Files/NIST_NRC_02_v5_devc.csv,2,FDS Time,Tr 7-10,3,FDS (Tr 7-10),0,1000,0,1000,20,max,"Ceiling Jet Temperature, NIST/NRC Test 2",Time (min),Temperature ($^\circ$C),0,30,60,0,400,1,no,tl,br,8,NIST_NRC/NIST_NRC_02_v5_Ceiling_Jet
@@ -780,6 +783,7 @@ d,10,WTC_04,21,WTC/Experimental_Data/WTCP1T4.csv,1,Time,"['HCe2','HCe3']",2,"['E
 d,10,WTC_05,21,WTC/Experimental_Data/WTCP1T5.csv,1,Time,"['HCe2','HCe3']",2,"['Experiment (HCe2)','Experiment (HCe3)']",0,1000,0,1000,0,WTC/FDS_Output_Files/WTC_05_v5_1_devc.csv,2,FDS Time,"['HCe2_FDS','HCe3_FDS']",3,"['FDS (HCe2\_FDS)','FDS (HCe3\_FDS)']",0,1000,0,1000,0,max,"Ceiling Heat Flux, WTC Test 5",Time (min),Heat Flux (kW/m$^2$),0,90,60,0,150,1,no,tl,br,8,WTC/WTC_05_v5_Ceiling_Flux_2
 d,10,WTC_06,21,WTC/Experimental_Data/WTCP1T6.csv,1,Time,"['HCe2','HCe3']",2,"['Experiment (HCe2)','Experiment (HCe3)']",0,1000,0,1000,0,WTC/FDS_Output_Files/WTC_06_v5_1_devc.csv,2,FDS Time,"['HCe2_FDS','HCe3_FDS']",3,"['FDS (HCe2\_FDS)','FDS (HCe3\_FDS)']",0,1000,0,1000,0,max,"Ceiling Heat Flux, WTC Test 6",Time (min),Heat Flux (kW/m$^2$),0,90,60,0,150,1,no,tl,br,8,WTC/WTC_06_v5_Ceiling_Flux_2
 s,Velocity,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+d,21,Steckler_Compartment_10_test,26,Steckler_Compartment/Experimental_Data/Steckler_Test_10.csv,1,Height,V_C,5,Exp (V\_C),-1000,1000,-1000,1000,0,Steckler_Compartment/FDS_Output_Files/Steckler_010_test_fds2ascii.csv,1,Z,V_C,3,FDS (V\_C),0,1.8,0,1.8,0,max,"Velocity Profile, Steckler Test 10",Height (m),Velocity (m/s),0,2.18,1,-1.5,3.5,1,yes,tl,br,8,Steckler_Compartment/Steckler_010_test_Vel
 d,21,Steckler_Compartment_10,26,Steckler_Compartment/Experimental_Data/Steckler_Test_10.csv,1,Height,V_C,5,Exp (V\_C),-1000,1000,-1000,1000,0,Steckler_Compartment/FDS_Output_Files/Steckler_010_fds2ascii.csv,1,Z,V_C,3,FDS (V\_C),0,1.8,0,1.8,0,max,"Velocity Profile, Steckler Test 10",Height (m),Velocity (m/s),0,2.18,1,-1.5,3.5,1,yes,tl,br,8,Steckler_Compartment/Steckler_010_Vel
 d,21,Steckler_Compartment_11,26,Steckler_Compartment/Experimental_Data/Steckler_Test_11.csv,1,Height,V_C,5,Exp (V\_C),-1000,1000,-1000,1000,0,Steckler_Compartment/FDS_Output_Files/Steckler_011_fds2ascii.csv,1,Z,V_C,3,FDS (V\_C),0,1.8,0,1.8,0,max,"Velocity Profile, Steckler Test 11",Height (m),Velocity (m/s),0,2.18,1,-1.5,3.5,1,yes,tl,br,8,Steckler_Compartment/Steckler_011_Vel
 d,21,Steckler_Compartment_12,26,Steckler_Compartment/Experimental_Data/Steckler_Test_12.csv,1,Height,V_C,5,Exp (V\_C),-1000,1000,-1000,1000,0,Steckler_Compartment/FDS_Output_Files/Steckler_012_fds2ascii.csv,1,Z,V_C,3,FDS (V\_C),0,1.8,0,1.8,0,max,"Velocity Profile, Steckler Test 12",Height (m),Velocity (m/s),0,2.18,1,-1.5,3.5,1,yes,tl,br,8,Steckler_Compartment/Steckler_012_Vel
