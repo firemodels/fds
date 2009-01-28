@@ -1,6 +1,6 @@
 @echo off
 
-Rem Windows batch to upload Smokeview release or test files to
+Rem Windows batch file to upload Smokeview release or test files to
 Rem the google download site.  This script assume that the Windows
 Rem batch file, MAKEall_smvs.bat, has already been run.
 
@@ -14,7 +14,7 @@ Rem set release to 0 to upload Smokeview test files
 set release=1
 
 Rem ----------------------------------------------------------
-Rem should not need to edit lines below
+Rem should not need to edit any lines below
 
 if not %release% == 1 goto endif_release
   Rem set level=Release-1_Major

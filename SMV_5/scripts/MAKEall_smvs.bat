@@ -8,7 +8,7 @@ set version=5.3.8_3138
 #set version=test
 
 Rem -----------------------------------------------------------
-Rem shouldn't need to change lines below
+Rem shouldn't need to change any lines below
 
 set logon=gforney@acrux.cfr.nist.gov
 
@@ -20,7 +20,7 @@ plink %logon% %scriptdir%/make_smvs.csh
 plink %logon% %scriptdir%/make_dists.csh %version%
 
 echo downloading Linux Smokeview files
-psop %logon%:%bundledir%/smv_%version%_linux.tar.gz ..\for_bundle\to_google\.
+pscp %logon%:%bundledir%/smv_%version%_linux.tar.gz ..\for_bundle\to_google\.
 pscp %logon%:%bundledir%/smv_%version%_linux_64.tar.gz ..\for_bundle\to_google\.
 pscp %logon%:%scriptdir%/make_intel_linux_32.out ..\for_bundle\to_google\.
 pscp %logon%:%scriptdir%/make_intel_linux_64.out ..\for_bundle\to_google\.
