@@ -1,9 +1,14 @@
 #!/bin/csh -f
 
+# script to copy Smokeview files to a "holding" area in 
+# preparation for a bundle
+
 set FROM_LINUX_32=$FOR_BUNDLE/smv_5.3.8_3138_linux
 set FROM_OSX_32=$FOR_BUNDLE/smv_5.3.8_3138_osx
 
-# shouldn't need to edit lines below unless file distribution changes
+# --------------------------------------
+# shouldn't need to edit lines below unless the files 
+# in the distribution change
 
 set FOR_BUNDLE=~/FDS-SMV/SMV_5/for_bundle
 set MANUALS=~/FDS-SMV/Manuals/All_PDF_Files
