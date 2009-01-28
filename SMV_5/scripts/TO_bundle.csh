@@ -1,8 +1,12 @@
 #!/bin/csh -f
-set FOR_BUNDLE=~/FDS-SMV/SMV_5/for_bundle
-set MANUALS=~/FDS-SMV/Manuals/All_PDF_Files
+
 set FROM_LINUX_32=$FOR_BUNDLE/smv_5.3.8_3138_linux
 set FROM_OSX_32=$FOR_BUNDLE/smv_5.3.8_3138_osx
+
+# shouldn't need to edit lines below unless file distribution changes
+
+set FOR_BUNDLE=~/FDS-SMV/SMV_5/for_bundle
+set MANUALS=~/FDS-SMV/Manuals/All_PDF_Files
 
 set BRYAN_SHARE=~/FDS_SV_SHARE/NIST
 set TO_LINUX_32=$BRYAN_SHARE/Linux/NIST/Smokeview
