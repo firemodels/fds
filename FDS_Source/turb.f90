@@ -1541,13 +1541,17 @@ REAL(EB), INTENT(IN) :: U(N_LO:N_HI)
 REAL(EB), INTENT(OUT) :: UBAR(N_LO:N_HI)
 INTEGER :: J
 REAL(EB), POINTER, DIMENSION(:) :: UU
+REAL(EB):: W(-1:1)
 
 UU => WORK
 UU(N_LO:N_HI) = U
 
-! Filter the u field to obtain ubar by trapezoid rule
+W(-1:1) = (/0.25_EB,0.5_EB,0.25_EB/)   ! trapezoid rule
+!W(-1:1) = (/ONSI,TWTH,ONSI/)           ! Simpson's rule
+
+! Filter the u field to obtain ubar
 DO J=N_LO+1,N_HI-1
-   UBAR(J) = 0.25_EB*UU(J-1) + 0.5_EB*UU(J) + 0.25_EB*UU(J+1)
+   UBAR(J) = W(-1)*UU(J-1) + W(0)*UU(J) + W(1)*UU(J+1)
 ENDDO
 ! set boundary values (not ideal, but fast and simple)
 UBAR(N_LO) = UBAR(N_LO+1)
