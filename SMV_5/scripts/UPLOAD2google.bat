@@ -6,8 +6,8 @@ Rem batch file, MAKEall_smvs.bat, has already been run.
 
 Rem set version and revision to same values used in MAKEall_smvs.bat file
 
-set version=5.3.8
-set revision=3138
+set version=5.3.9
+set revision=3167
 
 Rem set release to 0 to upload Smokeview test files
 
@@ -43,7 +43,7 @@ if not %upload_win32% == 1 goto endif_win32
   set glabels=Type-Installer,Opsys-Windows,%level%
   set dplatform=32 bit Windows
   set platform=win32
-  set summary=Smokeview %version% for %dplatform% build %revision%
+  set summary=Smokeview %version% for %dplatform% (build %revision%)
   set exe=smv_%version%_%revision%_%platform%.exe
   echo -----
   echo Uploading %summary% - %exe%
