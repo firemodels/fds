@@ -881,7 +881,8 @@ void drawColorBars(void){
   bottom[1]=labeltop-2*dyfont;
   bottom[2]=labeltop-3*dyfont;
   bottom[3]=labeltop-4*dyfont;
-  if(showevac_colorbar==1||(showsmoke==1&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
+  if(showiso_colorbar==1||showevac_colorbar==1||
+    (showsmoke==1&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
     sniffErrors("before colorbar");
     CheckMemory;
     glBegin(GL_QUADS);
@@ -1041,6 +1042,9 @@ void drawColorBars(void){
     outputBarText(right[leftzone],bottom[2],color1,unitlabel);
     outputBarText(right[leftzone],bottom[3],color1,zonescale);
 
+  }
+  if(showiso_colorbar==1){
+    // put code here to draw iso-surface value labels
   }
   if(showevac_colorbar==1||(showsmoke==1&&parttype!=0)){
     float *partlevels256_ptr;
@@ -1345,6 +1349,8 @@ void update_texturebar(void){
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
   glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
+  glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
 }
 
 /* ------------------ initrgb ------------------------ */
@@ -1574,6 +1580,10 @@ void updatechopcolors(){
 
   last_particle_type=current_particle_type;
   for(i=0;i<nrgb_full;i++){
+    rgb_iso[4*i+0]=rgb_full[i][0];
+    rgb_iso[4*i+1]=rgb_full[i][1];
+    rgb_iso[4*i+2]=rgb_full[i][2];
+    rgb_iso[4*i+3]=rgb_full[i][3];
     rgb_slice[4*i+0]=rgb_full[i][0];
     rgb_slice[4*i+1]=rgb_full[i][1];
     rgb_slice[4*i+2]=rgb_full[i][2];
