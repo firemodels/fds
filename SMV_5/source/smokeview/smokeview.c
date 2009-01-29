@@ -3360,6 +3360,14 @@ void Args(int argc, char **argv){
   for(iarg=1;iarg<argc;iarg++){
     argi=argv[iarg];
     if(strncmp(argi,"-",1)==0){
+      if(
+        strncmp(argv[1],"-points",7)==0||
+        strncmp(argv[1],"-frames",7)==0||
+        strncmp(argv[1],"-script",7)==0
+        ){
+        iarg++;
+      }
+
       if(smv_parse==0)continue;
       if(smv_parse==1)break;
     }
