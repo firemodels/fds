@@ -7178,8 +7178,8 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SENSORRELSIZE",13)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f ",&sensorrelsize);
-      if(sensorrelsize<=0.1)sensorrelsize=0.1;
-      if(sensorrelsize>10.0)sensorrelsize=10.0;
+      if(sensorrelsize<sensorrelsizeMIN)sensorrelsize=sensorrelsizeMIN;
+      if(sensorrelsize>sensorrelsizeMAX)sensorrelsize=sensorrelsizeMAX;
       continue;
       }
     if(match(buffer,"SETBW",5)==1){

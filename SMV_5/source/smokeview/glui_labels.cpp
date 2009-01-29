@@ -173,7 +173,7 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_radiobutton_to_group(RADIO_fontsize,"large font");
 
   SPINNER_sensorrelsize=glui_labels->add_spinner_to_panel(panel_label1,"Sensor Scaling",GLUI_SPINNER_FLOAT,&sensorrelsize);
-  SPINNER_sensorrelsize->set_float_limits(0.1,10.0,GLUI_LIMIT_CLAMP);
+  SPINNER_sensorrelsize->set_float_limits(sensorrelsizeMIN,sensorrelsizeMAX,GLUI_LIMIT_CLAMP);
 
   panel_user_tick = glui_labels->add_rollout("User Tick Settings",false);
 
