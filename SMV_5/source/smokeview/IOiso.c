@@ -807,9 +807,16 @@ void drawiso(const mesh *meshi,int tranflag){
   iso *isoi=NULL;
   float iso_color_tmp[4];
   float *iso_color_ptr;
+  int iso_lighting;
 
   if(meshi->isofilenum>=0){
     isoi = isoinfo + meshi->isofilenum;
+  }
+  if(isoi->dataflag==1){
+    iso_lighting=0;
+  }
+  else{
+    iso_lighting=1;
   }
 
   showlevels=meshi->showlevels;
@@ -842,17 +849,10 @@ void drawiso(const mesh *meshi,int tranflag){
     if(tranflag==DRAW_TRANSPARENT)transparenton();
 
     glPushAttrib(GL_LIGHTING_BIT);
-    if(demo_mode==0){
+    if(iso_lighting==1){
       glEnable(GL_LIGHTING);
       glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
       glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,iso_shininess);
-    }
-    /* using the following two statments and glColor4f is a little faster */
-    if(asurface[1].dataflag==1){
-      if(demo_mode==0){
-        glEnable(GL_COLOR_MATERIAL);
-        glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-      }
     }
     glBegin(GL_TRIANGLES);
 
@@ -1243,6 +1243,483 @@ void drawiso(const mesh *meshi,int tranflag){
 
 
 
+}
+
+/* ------------------ drawtiso ------------------------ */
+
+void drawtiso(const mesh *meshi,int tranflag){
+  int i, j,k;
+  float vv1[3],vv2[3],vv3[3];
+  float vv1n[3],vv2n[3],vv3n[3];
+  isosurface *asurface;
+  short *norm;
+  unsigned short *v1, *v2, *v3, tval1=0, tval2=0, tval3=0;
+  float ttval1, ttval2, ttval3;
+  unsigned short *vertices_i=NULL,*tvertices_i=NULL;
+  int *triangles_i;
+  unsigned short *triangles2_i;
+  unsigned char *triangles1_i;
+  unsigned char *color8;
+  int nvertices;
+  int i1, i2, i3;
+  short *norm1,*norm2,*norm3,*vertexnorm;
+  float *iso_colors;
+  int n_iso_colors;
+  int icolor;
+  int ntriangles;
+  int *showlevels, nisolevels;
+  int isomin_index,isomax_index;
+  float factor, offset[3];
+  iso *isoi=NULL;
+  float iso_color_tmp[4];
+  float *iso_color_ptr;
+  int iso_lighting;
+
+  if(meshi->isofilenum>=0){
+    isoi = isoinfo + meshi->isofilenum;
+  }
+  if(isoi->dataflag==1){
+    iso_lighting=0;
+  }
+  else{
+    iso_lighting=1;
+  }
+
+  showlevels=meshi->showlevels;
+  nisolevels=meshi->nisolevels;
+  isomin_index=meshi->isomin_index;
+  isomax_index=meshi->isomax_index;
+  factor = (meshi->xyzmaxdiff/xyzmaxdiff)/65535.0;
+  offset[0]=(meshi->xbar0-xbar0)/xyzmaxdiff;
+  offset[1]=(meshi->ybar0-ybar0)/xyzmaxdiff;
+  offset[2]=(meshi->zbar0-zbar0)/xyzmaxdiff;
+
+
+  if(tranflag==DRAW_TRANSPARENT&&visAIso!=1)return;
+
+  if(iso_ambient_ini==NULL||n_iso_ambient_ini==0){
+    iso_colors=iso_ambient;
+    n_iso_colors=n_iso_ambient;
+  }
+  else{
+    iso_colors=iso_ambient_ini;
+    n_iso_colors=n_iso_ambient_ini;
+  }
+
+  if(visAIso==1){
+
+
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
+    if(cullfaces==1)glDisable(GL_CULL_FACE);
+
+    iso_specular[3] = 1.0;
+    if(tranflag==DRAW_TRANSPARENT)transparenton();
+    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glEnable(GL_TEXTURE_1D);
+    glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
+
+    glPushAttrib(GL_LIGHTING_BIT);
+    if(iso_lighting==1){
+      glEnable(GL_LIGHTING);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
+      glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,iso_shininess);
+    }
+    glBegin(GL_TRIANGLES);
+
+    for(i=0;i<nisolevels;i++){
+      asurface++;
+      icolor=i;
+      if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
+      if(showlevels[i]==0)continue;
+      if(tranflag==DRAW_TRANSPARENT){
+        if(transparent_state==ALL_TRANSPARENT){
+        }
+        else if(transparent_state==MIN_SOLID){
+          if(i==isomin_index)continue;
+        }
+        else if(transparent_state==MAX_SOLID){
+          if(i==isomax_index)continue;
+        }
+        else if(transparent_state==ALL_SOLID){
+          continue;
+        }
+      }
+      else if(tranflag==DRAW_SOLID){
+        if(transparent_state==ALL_TRANSPARENT){
+          continue;
+        }
+        else if(transparent_state==MIN_SOLID){
+          if(i!=isomin_index)continue;
+        }
+        else if(transparent_state==MAX_SOLID){
+          if(i!=isomax_index)continue;
+        }
+        else if(transparent_state==ALL_SOLID){
+        }
+      }
+      nvertices=asurface->nvertices;
+      ntriangles=asurface->ntriangles/3;
+      if(ntriangles==0)continue;
+      if(setbw==0){
+        iso_color_ptr = iso_colors+4*icolor;
+      }
+      else{
+        float greylevel;
+
+        greylevel=color2bw(iso_colors+4*icolor);
+        iso_color_tmp[0]=greylevel;
+        iso_color_tmp[1]=greylevel;
+        iso_color_tmp[2]=greylevel;
+        iso_color_ptr=iso_color_tmp;
+      }
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,iso_color_ptr);
+      vertices_i=asurface->vertices;
+      if(asurface->dataflag==1){
+        tvertices_i=asurface->tvertices;
+        color8 = asurface->color8;
+      }
+      triangles_i=asurface->triangles;
+      triangles1_i=asurface->triangles1;
+      triangles2_i=asurface->triangles2;
+      norm=asurface->norm;
+  	  vertexnorm=asurface->vertexnorm;
+      for(j=0;j<ntriangles;j++){
+        if(nvertices<256){
+          i1=3*triangles1_i[3*j];
+          i2=3*triangles1_i[3*j+1];
+          i3=3*triangles1_i[3*j+2];
+        }
+        else if(nvertices>=256&&nvertices<65536){
+          i1=3*triangles2_i[3*j];
+          i2=3*triangles2_i[3*j+1];
+          i3=3*triangles2_i[3*j+2];
+        }
+        else{
+          i1=3*triangles_i[3*j];
+          i2=3*triangles_i[3*j+1];
+          i3=3*triangles_i[3*j+2];
+        }
+        v1=vertices_i+i1;
+        v2=vertices_i+i2;
+        v3=vertices_i+i3;
+        for(k=0;k<3;k++){
+          vv1[k]=offset[k]+factor*v1[k];
+          vv2[k]=offset[k]+factor*v2[k];
+          vv3[k]=offset[k]+factor*v3[k];
+        }
+        if(asurface->dataflag==1){
+          tval1=color8[i1/3];
+          tval2=color8[i2/3];
+          tval3=color8[i3/3];
+          ttval1=tval1/255.0;
+          ttval2=tval2/255.0;
+          ttval3=tval3/255.0;
+        }
+	    	if(isonormtype==1
+          ||(isonormtype==0&&isoi->compression_type==1)
+          ){
+          if(isoi->compression_type==1){
+            norm1 = isoi->normaltable + 3*asurface->s_norm[i1/3];
+            norm2 = isoi->normaltable + 3*asurface->s_norm[i2/3];
+            norm3 = isoi->normaltable + 3*asurface->s_norm[i3/3];
+          }
+          else{
+            norm1 = vertexnorm+i1;
+	  	      norm2 = vertexnorm+i2;
+		        norm3 = vertexnorm+i3;
+          }
+          if(asurface->dataflag==1){
+            glNormal3sv(norm1);
+            //glColor4fv(rgb_full[tval1]);
+            glTexCoord1f(ttval1);
+            glVertex3fv(vv1);
+
+  		      glNormal3sv(norm2);
+            //glColor4fv(rgb_full[tval2]);
+            glTexCoord1f(ttval2);
+            glVertex3fv(vv2);
+
+   		      glNormal3sv(norm3);
+            //glColor4fv(rgb_full[tval3]);
+            glTexCoord1f(ttval3);
+            glVertex3fv(vv3);
+          }
+          else{
+            glNormal3sv(norm1);
+            glVertex3fv(vv1);
+
+  		      glNormal3sv(norm2);
+            glVertex3fv(vv2);
+
+   		      glNormal3sv(norm3);
+            glVertex3fv(vv3);
+          }
+        }
+		    else{
+          if(asurface->dataflag==1){
+            glNormal3sv(norm);
+            //glColor4fv(rgb_full[tval1]);
+            glTexCoord1f(ttval1);
+            glVertex3fv(vv1);
+
+            //glColor4fv(rgb_full[tval2]);
+            glTexCoord1f(ttval2);
+            glVertex3fv(vv2);
+
+            //glColor4fv(rgb_full[tval3]);
+            glTexCoord1f(ttval3);
+            glVertex3fv(vv3);
+          }
+          else{
+            glNormal3sv(norm);
+            glVertex3fv(vv1);
+            glVertex3fv(vv2);
+            glVertex3fv(vv3);
+          }
+          norm += 3;
+        }
+      }
+    }
+    glEnd();
+    if(asurface->dataflag==1)glDisable(GL_COLOR_MATERIAL);
+
+    glPopAttrib();
+
+    if(tranflag==DRAW_TRANSPARENT)transparentoff();
+    glDisable(GL_TEXTURE_1D);
+    if(cullfaces==1)glEnable(GL_CULL_FACE);
+  }
+
+  if(visAIso==2){
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels-1;
+
+    glPushAttrib(GL_LIGHTING_BIT);
+    antialias(1);
+    glBegin(GL_LINES);
+    for(i=0;i<nisolevels;i++){
+      asurface++;
+      if(asurface->dataflag==1)tvertices_i=asurface->tvertices;
+      if(showlevels[i]==0)continue;
+      icolor=i;
+      if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
+      if(setbw==0){
+        iso_color_ptr = iso_colors+4*icolor;
+      }
+      else{
+        float greylevel;
+
+        greylevel=color2bw(iso_colors+4*icolor);
+        iso_color_tmp[0]=greylevel;
+        iso_color_tmp[1]=greylevel;
+        iso_color_tmp[2]=greylevel;
+        iso_color_ptr=iso_color_tmp;
+      }
+      glColor3fv(iso_color_ptr);
+      nvertices=asurface->nvertices;
+      ntriangles=asurface->ntriangles/3;
+      vertices_i=asurface->vertices;
+      triangles_i=asurface->triangles;
+      triangles1_i=asurface->triangles1;
+      triangles2_i=asurface->triangles2;
+      for(j=0;j<ntriangles;j++){
+        if(nvertices<256){
+          i1=3*triangles1_i[3*j];
+          i2=3*triangles1_i[3*j+1];
+          i3=3*triangles1_i[3*j+2];
+        }
+        else if(nvertices>=256&&nvertices<65536){
+          i1=3*triangles2_i[3*j];
+          i2=3*triangles2_i[3*j+1];
+          i3=3*triangles2_i[3*j+2];
+        }
+        else{
+          i1=3*triangles_i[3*j];
+          i2=3*triangles_i[3*j+1];
+          i3=3*triangles_i[3*j+2];
+        }
+        v1=vertices_i+i1;
+        v2=vertices_i+i2;
+        v3=vertices_i+i3;
+        for(k=0;k<3;k++){
+          vv1[k]=offset[k]+factor*v1[k];
+          vv2[k]=offset[k]+factor*v2[k];
+          vv3[k]=offset[k]+factor*v3[k];
+        }
+        if(asurface->dataflag==1){
+          tval1=tvertices_i[i1/3]/256;
+          if(tval1>255)tval1=255;
+          tval2=tvertices_i[i2/3]/256;
+          if(tval2>255)tval2=255;
+          tval3=tvertices_i[i3/3]/256;
+          if(tval3>255)tval3=255;
+        }
+        if(asurface->dataflag==1){
+          glColor4fv(rgb_full[tval1]);
+          glVertex3fv(vv1);
+          glColor4fv(rgb_full[tval2]);
+          glVertex3fv(vv2);
+          glVertex3fv(vv2);
+          glColor4fv(rgb_full[tval3]);
+          glVertex3fv(vv3);
+          glVertex3fv(vv3);
+          glColor4fv(rgb_full[tval1]);
+          glVertex3fv(vv1);
+        }
+        else{
+          glVertex3fv(vv1);
+          glVertex3fv(vv2);
+          glVertex3fv(vv2);
+          glVertex3fv(vv3);
+          glVertex3fv(vv3);
+          glVertex3fv(vv1);
+        }
+      }
+    }
+    glEnd();
+    antialias(0);
+    glPopAttrib();
+
+  }
+
+  if(showisonormals==1){
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
+
+    antialias(1);
+    glBegin(GL_LINES);
+    for(i=0;i<nisolevels;i++){
+      asurface++;
+      if(showlevels[i]==0)continue;
+      glColor3f((float)1.,(float)1.,(float)1.);
+      nvertices=asurface->nvertices;
+      ntriangles=asurface->ntriangles/3;
+      vertices_i=asurface->vertices;
+      if(asurface->dataflag==1)tvertices_i=asurface->tvertices;
+      triangles_i=asurface->triangles;
+      triangles1_i=asurface->triangles1;
+      triangles2_i=asurface->triangles2;
+      norm=asurface->norm;
+  	  vertexnorm=asurface->vertexnorm;
+      for(j=0;j<ntriangles;j++){
+        if(nvertices<256){
+          i1=3*triangles1_i[3*j];
+          i2=3*triangles1_i[3*j+1];
+          i3=3*triangles1_i[3*j+2];
+        }
+        else if(nvertices>=256&&nvertices<65536){
+          i1=3*triangles2_i[3*j];
+          i2=3*triangles2_i[3*j+1];
+          i3=3*triangles2_i[3*j+2];
+        }
+        else{
+          i1=3*triangles_i[3*j];
+          i2=3*triangles_i[3*j+1];
+          i3=3*triangles_i[3*j+2];
+        }
+        v1=vertices_i+i1;
+        v2=vertices_i+i2;
+        v3=vertices_i+i3;
+        for(k=0;k<3;k++){
+          vv1[k]=offset[k]+factor*v1[k];
+          vv2[k]=offset[k]+factor*v2[k];
+          vv3[k]=offset[k]+factor*v3[k];
+        }
+	    	if(isonormtype==1
+          ||(isonormtype==0&&isoi->compression_type==1)
+          ){
+          if(isoi->compression_type==1){
+            norm1 = isoi->normaltable + 3*asurface->s_norm[i1/3];
+            norm2 = isoi->normaltable + 3*asurface->s_norm[i2/3];
+            norm3 = isoi->normaltable + 3*asurface->s_norm[i3/3];
+          }
+          else{
+            norm1 = vertexnorm+i1;
+	  	      norm2 = vertexnorm+i2;
+		        norm3 = vertexnorm+i3;
+          }
+          for(k=0;k<3;k++){
+            vv1n[k]=vv1[k]+norm1[k]/(8.*32768.);
+            vv2n[k]=vv2[k]+norm2[k]/(8.*32768.);
+            vv3n[k]=vv3[k]+norm3[k]/(8.*32768.);
+          }
+
+          glVertex3fv(vv1);
+          glVertex3fv(vv1n);
+          glVertex3fv(vv2);
+          glVertex3fv(vv2n);
+          glVertex3fv(vv3);
+          glVertex3fv(vv3n);
+        }
+		    else{
+          for(k=0;k<3;k++){
+            vv1n[k]=vv1[k]+norm[k]/(8.*32768.);
+            vv2n[k]=vv2[k]+norm[k]/(8.*32768.);
+            vv3n[k]=vv3[k]+norm[k]/(8.*32768.);
+          }
+          glVertex3fv(vv1);
+          glVertex3fv(vv1n);
+          glVertex3fv(vv2);
+          glVertex3fv(vv2n);
+          glVertex3fv(vv3);
+          glVertex3fv(vv3n);
+          norm += 3;
+        }
+
+      }
+    }
+    glEnd();
+    antialias(0);
+  }
+
+  if(visAIso==3){
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
+
+    antialias(1);
+    glBegin(GL_POINTS);
+    for(i=0;i<nisolevels;i++){
+      asurface++;
+      if(showlevels[i]==0)continue;
+      icolor=i;
+      if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
+      if(setbw==0){
+        iso_color_ptr = iso_colors+4*icolor;
+      }
+      else{
+        float greylevel;
+
+        greylevel=color2bw(iso_colors+4*icolor);
+        iso_color_tmp[0]=greylevel;
+        iso_color_tmp[1]=greylevel;
+        iso_color_tmp[2]=greylevel;
+        iso_color_ptr=iso_color_tmp;
+      }
+      glColor3fv(iso_color_ptr);
+      nvertices=asurface->nvertices;
+      ntriangles=asurface->ntriangles/3;
+      vertices_i=asurface->vertices;
+      if(asurface->dataflag==1)tvertices_i=asurface->tvertices;
+      triangles_i=asurface->triangles;
+      triangles1_i=asurface->triangles1;
+      triangles2_i=asurface->triangles2;
+      for(j=0;j<nvertices;j++){
+        v1=vertices_i+3*j;
+        for(k=0;k<3;k++){
+          vv1[k]=offset[k]+factor*v1[k];
+        }
+        if(asurface->dataflag==1){
+          tval1=tvertices_i[j]/256;
+          if(tval1>255)tval1=255;
+          glColor4fv(rgb_full[tval1]);
+          glVertex3fv(vv1);
+        }
+        else{
+          glVertex3fv(vv1);
+        }
+      }
+      asurface++;
+    }
+    glEnd();
+    antialias(0);
+  }
 }
 
 /* ------------------ drawstaticiso ------------------------ */

@@ -1366,7 +1366,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       if(meshi->isotimes==NULL||meshi->isofilenum<0)continue;
       isoi = isoinfo + meshi->isofilenum;
       if(isoi->loaded==0||isoi->display==0||isoi->type!=iisotype)continue;
-      drawiso(meshi,DRAW_SOLID);
+      if(isoi->dataflag==0||usetexturebar==0){
+        drawiso(meshi,DRAW_SOLID);
+      }
+      else{
+        drawtiso(meshi,DRAW_SOLID);
+      }
     }
 
     //  nothing transparent should be drawn before this portion of the code
@@ -1377,7 +1382,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       if(meshi->isotimes==NULL||meshi->isofilenum<0)continue;
       isoi = isoinfo + meshi->isofilenum;
       if(isoi->loaded==0||isoi->display==0||isoi->type!=iisotype)continue;
-      drawiso(meshi,DRAW_TRANSPARENT);
+      if(isoi->dataflag==0||usetexturebar==0){
+        drawiso(meshi,DRAW_TRANSPARENT);
+      }
+      else{
+        drawtiso(meshi,DRAW_TRANSPARENT);
+      }
     }
   }
 
@@ -1896,7 +1906,7 @@ void updateLights(int pos){
 /* ------------------ updateShow ------------------------ */
 
 void updateShow(void){
-  int i,evacflag,sliceflag,vsliceflag,partflag,patchflag,isoflag,smoke3dflag;
+  int i,evacflag,sliceflag,vsliceflag,partflag,patchflag,isoflag,smoke3dflag,tisoflag;
   int ii;
   slice *sd;
   vslice *vd;
@@ -1989,16 +1999,17 @@ void updateShow(void){
     }
   }
   isoflag=0;
+  tisoflag=0;
   if(visTimeIso==1){
     for(i=0;i<niso;i++){
       isoi = isoinfo+i;
       if(isoi->loaded==0)continue;
- //xxx     if(isoi->display==0||isoi->type!=iisotype)continue;
- //     isoflag=1;
- //     break;
       if(isoi->display==1&&isoi->type==iisotype){
         isoflag=1;
-        break;
+        if(isoi->dataflag==1){
+          tisoflag=1;
+          break;
+        }
       }
     }
   }
@@ -2096,6 +2107,10 @@ void updateShow(void){
   if(plotstate==DYNAMIC_PLOTS&&(sliceflag==1||vsliceflag==1))numColorbars++;
   if(plotstate==DYNAMIC_PLOTS&&patchflag==1)numColorbars++;
   if(plotstate==DYNAMIC_PLOTS&&ReadZoneFile==1)numColorbars++;
+  if(plotstate==DYNAMIC_PLOTS&&tisoflag==1){
+    showiso_colorbar=1;
+    numColorbars++;
+  }
   if(ReadPlot3dFile==1&&numColorbars==0)numColorbars=1;
   /* note: animated iso-contours do not need a color bar,
            so we don't test for isosurface files */
@@ -2108,7 +2123,7 @@ void updateShow(void){
   olddrawColorLabel=drawColorLabel;
   if(showtime2==1)showtime=1;
   if(plotstate==DYNAMIC_PLOTS&&stept==1){
-  glutIdleFunc(Idle);
+    glutIdleFunc(Idle);
   }
   else{
     glutIdleFunc(NULL);
