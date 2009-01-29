@@ -4,8 +4,8 @@ Rem  Windows batch file to build Smokeview for all platforms.
 Rem  This script builds LInux and OSX Smokeview's by doing a
 Rem  remote shell (plink) to the NIST Linux cluster. 
 
-set version=5.3.8_3138
-#set version=test
+set version=5.3.9_3167
+Rem set version=test
 
 Rem -----------------------------------------------------------
 Rem shouldn't need to change any lines below
@@ -25,7 +25,7 @@ pscp %logon%:%bundledir%/smv_%version%_linux_64.tar.gz ..\for_bundle\to_google\.
 pscp %logon%:%scriptdir%/make_intel_linux_32.out ..\for_bundle\to_google\.
 pscp %logon%:%scriptdir%/make_intel_linux_64.out ..\for_bundle\to_google\.
 
-echo downloading Linux MAC OSX files
+echo downloading MAC OSX Smokeview files
 pscp %logon%:%bundledir%/smv_%version%_osx.tar.gz ..\for_bundle\to_google\.
 pscp %logon%:%scriptdir%/make_intel_osx_32.out ..\for_bundle\to_google\.
 
