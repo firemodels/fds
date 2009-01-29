@@ -7,17 +7,18 @@
 
 MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
-&TIME TWFIN=300.0 /
-&DUMP NFRAMES=1500, DT_DEVC=5.0, DT_HRR=5.0 /
+&TIME TWFIN=1000.0 /
+&DUMP NFRAMES=5000, DT_DEVC=5.0, DT_HRR=5.0 /
 &MISC SURF_DEFAULT='METAL WALL'/
 
 ***** starter fire
 
 &OBST XB= 1.5, 2.1, 7.9, 8.5, 1.1, 1.6,   COLOR='BLACK' /  metal drum
 &VENT XB= 1.5, 2.1, 7.9, 8.5, 1.6, 1.6 SURF_ID='FIRE'/
-&SURF ID='FIRE', HRRPUA=1389.0 / 500KW
+&SURF ID='FIRE', HRRPUA=833.0 / 300KW
 
-&OBST XB=0.1, 2.3, 6.1, 8.7, 3.2, 3.3, SURF_ID='PARTBRD' / liner in small container
+OBST XB=0.1, 2.3, 6.1, 8.7, 3.2, 3.3, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=0.3, 2.1, 6.3, 8.5, 2.8, 2.9, SURF_ID='PARTBRD' / liner in small container
 &OBST XB=0.1, 2.3, 6.1, 6.2, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
 &OBST XB=0.1, 2.3, 8.6, 8.7, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
 &OBST XB=0.1, 0.2, 6.2, 8.6, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
@@ -38,16 +39,16 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
 &OBST XB=1.0, 1.5, 4.1, 4.7, 2.4, 2.6, / vent over large container
 &HOLE XB=1.1,1.4, 4.2,4.6, 2.2,2.7 DEVC_ID='top_vent' /
-&DEVC XYZ=0.0,0.0,0.0,ID='top_vent',SETPOINT=400.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=0.0,0.0,0.0,ID='top_vent',SETPOINT=1100.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
 
 
 &HOLE XB=0.2,0.4,-0.1,0.2,0.2,0.4 DEVC_ID='front_hole' / front hole
-&DEVC XYZ=0.0,0.0,0.0,ID='front_hole',SETPOINT=400.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=0.0,0.0,0.0,ID='front_hole',SETPOINT=1100.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
 
 &HOLE XB=-0.1,0.2, 0.2,1.1, 0.1,0.2 /  door
 &HOLE XB=-0.1,0.2, 0.2,0.3, 0.2,2.0 /  door
 &HOLE XB=-0.1,0.2, 0.3,1.1, 0.2,2.0 DEVC_ID='door'/  door
-&DEVC XYZ=0.0,0.0,0.0,ID='door',SETPOINT=400.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=0.0,0.0,0.0,ID='door',SETPOINT=1100.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
 
 
 ***** materials
@@ -64,7 +65,7 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
       MATL_ID            = 'SHEETMETAL'
       THICKNESS          = 0.00635 /
 
-*** change ref temp from 360 to 300
+ ** change ref temp from 360 to 300
 
 &MATL ID                    = 'MT_PARTBRD'
       FYI='http://www.customthermoelectric.com/MaterialProperties6.htm'
