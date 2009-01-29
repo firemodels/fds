@@ -2612,6 +2612,11 @@ SELECT CASE(GAS_NAME)
       SIGMA=3.711_EB 
       EPSOK= 78.6_EB
       MW=28.8_EB
+   CASE('SOOT')        
+      SIGMA=3.798_EB 
+      EPSOK= 71.4_EB  
+      MW=12._EB
+      FORMULA='C'
 END SELECT  
  
 IF (SIGMAIN>0._EB) SIGMA = SIGMAIN
