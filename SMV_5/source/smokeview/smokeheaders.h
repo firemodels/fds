@@ -467,6 +467,7 @@ EXTERNCPP void initmesh(mesh *gb);
 EXTERNCPP void updateglui(void);
 EXTERNCPP void updateslicelist(int index);
 EXTERNCPP void drawiso(const mesh *gb,int tranflag);
+EXTERNCPP void drawtiso(const mesh *gb,int tranflag);
 EXTERNCPP int getendian(void);
 EXTERNCPP void drawplot3d(mesh *gb);
 EXTERNCPP void drawplot3d_texture(mesh *gb);
