@@ -1949,7 +1949,7 @@ void drawslice_cellcenter(const slice *sd){
 
    ii1 = sd->is1;
    ii2 = ii1 + 1;
-   if(ii2>nx)ii2=nx;
+   if(ii2>nx-1)ii2=nx-1;
    constval = (xplt[ii1]+xplt[ii2])/2.0;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
@@ -1985,7 +1985,7 @@ void drawslice_cellcenter(const slice *sd){
 
    jj1 = sd->js1;
    jj2 = jj1+1;
-   if(jj2>ny)jj2=ny;
+   if(jj2>ny-1)jj2=ny-1;
    constval = (yplt[jj1]+yplt[jj2])/2.0;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
@@ -2017,7 +2017,7 @@ void drawslice_cellcenter(const slice *sd){
 
    kk1 = sd->ks1;
    kk2 = sd->ks2;
-   if(kk2>nz)kk2=nz;
+   if(kk2>nz-1)kk2=nz-1;
    constval = (zplt[kk1]+zplt[kk2])/2.0;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
