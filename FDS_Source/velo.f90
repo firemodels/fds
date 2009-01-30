@@ -40,7 +40,7 @@ SELECT CASE(FUNCTION_CODE)
       IF (PREDICTOR .OR. COMPUTE_VISCOSITY_TWICE) CALL VISCOSITY_BC(NM)
       IF (.NOT.CYLINDRICAL) CALL VELOCITY_FLUX(T,NM)
       IF (     CYLINDRICAL) CALL VELOCITY_FLUX_CYLINDRICAL(T,NM)
-!!    CALL VELOCITY_FLUX_CONSERVATIVE ! experimental, currently only works for NMESHES=1
+      !!CALL VELOCITY_FLUX_CONSERVATIVE ! experimental, currently only works for NMESHES=1
 END SELECT
 
 TUSED(4,NM) = TUSED(4,NM) + SECOND() - TNOW
@@ -441,9 +441,8 @@ REAL(EB) :: MUX,MUY,MUZ,RHOX,RHOY,RHOZ,DIVV, &
             UUP,VVP,WWP,UUN,UUT,VVE,VVT,WWE,WWN, &
             DUDX,DUDY,DUDZ, &
             DVDX,DVDY,DVDZ, &
-            DWDX,DWDY,DWDZ, &
-            SS,S12,S13,S23,DELTA 
-INTEGER :: I,J,K,IP1,JP1,KP1,IM1,JM1,KM1,NM,ITMP
+            DWDX,DWDY,DWDZ
+INTEGER :: I,J,K,IP1,JP1,KP1,IM1,JM1,KM1,NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,TXX,TYY,TZZ,TXY,TXZ,TYZ
 
 NM = 1 ! periodic bcs only work for a single mesh
@@ -474,51 +473,6 @@ TZZ = 0._EB
 TXY = 0._EB
 TXZ = 0._EB
 TYZ = 0._EB
-
-! Smagorinsky model
-IF (LES) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-      
-            IP1 = I+1
-            JP1 = J+1
-            KP1 = K+1
-            IF (IP1>IBAR) IP1=IP1-IBAR
-            IF (JP1>JBAR) JP1=JP1-JBAR
-            IF (KP1>KBAR) KP1=KP1-KBAR
-         
-            IM1 = I-1
-            JM1 = J-1
-            KM1 = K-1
-            IF (IM1<1) IM1=IM1+IBAR
-            IF (JM1<1) JM1=JM1+JBAR
-            IF (KM1<1) KM1=KM1+KBAR
-      
-            DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
-         
-            DUDX = RDX(I)*(UU(I,J,K)-UU(IM1,J,K))
-            DVDY = RDY(J)*(VV(I,J,K)-VV(I,JM1,K))
-            DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,KM1))
-            DUDY = 0.25_EB*RDY(J)*(UU(I,JP1,K)-UU(I,JM1,K)+UU(IM1,JP1,K)-UU(IM1,JM1,K))
-            DVDX = 0.25_EB*RDX(I)*(VV(IP1,J,K)-VV(IM1,J,K)+VV(IP1,JM1,K)-VV(IM1,JM1,K))
-            DWDX = 0.25_EB*RDX(I)*(WW(IP1,J,K)-WW(IM1,J,K)+WW(IP1,J,KM1)-WW(IM1,J,KM1))
-            DWDY = 0.25_EB*RDY(J)*(WW(I,JP1,K)-WW(I,JM1,K)+WW(I,JP1,KM1)-WW(I,JM1,KM1))
-            DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,KP1)-UU(I,J,KM1)+UU(IM1,J,KP1)-UU(IM1,J,KM1)) 
-            DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,KP1)-VV(I,J,KM1)+VV(I,JM1,KP1)-VV(I,JM1,KM1))
-         
-            S12 = 0.5_EB*(DUDY+DVDX)
-            S13 = 0.5_EB*(DUDZ+DWDX)
-            S23 = 0.5_EB*(DVDZ+DWDY)
-            SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
-         
-            ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
-            MU(I,J,K) = Y2MU_C(ITMP)*SPECIES(0)%MW + RHOP(I,J,K)*(CSMAG*DELTA)**2*SS
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
 
 ! Compute stress tensor components
 DO K=1,KBAR
@@ -608,17 +562,17 @@ DO K=1,KBAR
          IF (JM1<1) JM1=JM1+JBAR
          IF (KM1<1) KM1=KM1+KBAR
       
-         FVX(I,J,K) = RDXN(I)*(TXX(IP1,J,K)-TXX(I,J,K)) &
-                    + RDY(J) *(TXY(I,J,K)-TXY(I,JM1,K)) &
-                    + RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,KM1))
+         FVX(I,J,K) = ( RDXN(I)*(TXX(IP1,J,K)-TXX(I,J,K)) &
+                      + RDY(J) *(TXY(I,J,K)-TXY(I,JM1,K)) &
+                      + RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,KM1)) )/RHOP(I,J,K)
                     
-         FVY(I,J,K) = RDX(I) *(TXY(I,J,K)-TXY(IM1,J,K)) &
-                    + RDYN(J)*(TYY(I,JP1,K)-TYY(I,J,K)) &
-                    + RDZ(K) *(TYZ(I,J,K)-TYZ(I,J,KM1))
+         FVY(I,J,K) = ( RDX(I) *(TXY(I,J,K)-TXY(IM1,J,K)) &
+                      + RDYN(J)*(TYY(I,JP1,K)-TYY(I,J,K)) &
+                      + RDZ(K) *(TYZ(I,J,K)-TYZ(I,J,KM1)) )/RHOP(I,J,K)
                     
-         FVZ(I,J,K) = RDX(I) *(TXZ(I,J,K)-TXZ(IM1,J,K)) &
-                    + RDY(J) *(TYZ(I,J,K)-TYZ(I,JM1,K)) &
-                    + RDZN(K)*(TZZ(I,J,KP1)-TZZ(I,J,K))
+         FVZ(I,J,K) = ( RDX(I) *(TXZ(I,J,K)-TXZ(IM1,J,K)) &
+                      + RDY(J) *(TYZ(I,J,K)-TYZ(I,JM1,K)) &
+                      + RDZN(K)*(TZZ(I,J,KP1)-TZZ(I,J,K)) )/RHOP(I,J,K)
       ENDDO
    ENDDO
 ENDDO
