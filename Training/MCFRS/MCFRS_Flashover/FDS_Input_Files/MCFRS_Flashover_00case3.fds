@@ -1,4 +1,4 @@
-&HEAD CHID='MCFRS_Flashover_00open',TITLE='MontoCo Flashover Simulator SVN $Revision: 2910 $' / base case
+&HEAD CHID='MCFRS_Flashover_00case3',TITLE='MontoCo Flashover Simulator SVN $Revision: 2910 $' / base case
 
 &MESH IJK=16,48,36, XB=-0.4,1.2, -0.4,4.4,0.0, 3.6/
 &MESH IJK=16,48,36, XB= 1.2,2.8, -0.4,4.4,0.0, 3.6/
@@ -17,7 +17,54 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 &VENT XB= 1.5, 2.1, 7.9, 8.5, 1.6, 1.6 SURF_ID='FIRE'/
 &SURF ID='FIRE', HRRPUA=1389.0 / 500KW
 
-OBST XB=0.1, 2.3, 6.1, 8.7, 3.2, 3.3, SURF_ID='PARTBRD' / liner in small container
+&DEVC ID='TIMER1', XYZ=0.0,0.0,0.0, QUANTITY='TIME' /
+&CTRL ID='door timer1', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER1', RAMP_ID='door times1' /
+&RAMP ID='door times1', T=     0, F= 1 /
+&RAMP ID='door times1', T=    59, F= 1 /
+&RAMP ID='door times1', T=    61, F=-1 /
+&RAMP ID='door times1', T=   244, F=-1 /
+&RAMP ID='door times1', T=   246, F= 1 /
+&RAMP ID='door times1', T=  1119, F= 1 /
+&RAMP ID='door times1', T=  1121, F=-1 /
+&RAMP ID='door times1', T=  1144, F=-1 /
+&RAMP ID='door times1', T=  1146, F= 1 /
+
+&DEVC ID='TIMER2', XYZ=0.0,0.0,0.0, QUANTITY='TIME' /
+&CTRL ID='door timer2', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER1', RAMP_ID='door times2' /
+&RAMP ID='door times2', T=     0, F= 1 /
+&RAMP ID='door times2', T=    59, F= 1 /
+&RAMP ID='door times2', T=    61, F=-1 /
+&RAMP ID='door times2', T=   404, F=-1 /
+&RAMP ID='door times2', T=   406, F= 1 /
+&RAMP ID='door times2', T=   599, F= 1 /
+&RAMP ID='door times2', T=   601, F=-1 /
+&RAMP ID='door times2', T=   794, F=-1 /
+&RAMP ID='door times2', T=   796, F= 1 /
+&RAMP ID='door times2', T=  1119, F= 1 /
+&RAMP ID='door times2', T=  1121, F=-1 /
+&RAMP ID='door times2', T=  1559, F=-1 /
+&RAMP ID='door times2', T=  1561, F= 1 /
+
+&DEVC ID='TIMER2', XYZ=0.0,0.0,0.0, QUANTITY='TIME' /
+&CTRL ID='vent timer', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER2', RAMP_ID='vent times' /
+&RAMP ID='vent times', T=    0,  F=-1 /
+&RAMP ID='vent times', T=   619, F=-1 /
+&RAMP ID='vent times', T=   621, F= 1 /
+&RAMP ID='vent times', T=   669, F= 1 /
+&RAMP ID='vent times', T=   671, F=-1 /
+&RAMP ID='vent times', T=   856, F=-1 /
+&RAMP ID='vent times', T=   858, F= 1 /
+&RAMP ID='vent times', T=  1063, F= 1 /
+&RAMP ID='vent times', T=  1065, F=-1 /
+&RAMP ID='vent times', T=  1164, F=-1 /
+&RAMP ID='vent times', T=  1166, F= 1 /
+&RAMP ID='vent times', T=  1404, F= 1 /
+&RAMP ID='vent times', T=  1406, F=-1 /
+&RAMP ID='vent times', T=  1499, F=-1 /
+&RAMP ID='vent times', T=  1501, F= 1 /
+&RAMP ID='vent times', T=  1559, F= 1 /
+&RAMP ID='vent times', T=  1561, F=-1 /
+
 &OBST XB=0.3, 2.1, 6.3, 8.5, 2.8, 2.9, SURF_ID='PARTBRD' / liner in small container
 &OBST XB=0.1, 2.3, 6.1, 6.2, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
 &OBST XB=0.1, 2.3, 8.6, 8.7, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
@@ -38,17 +85,14 @@ OBST XB=0.1, 2.3, 6.1, 8.7, 3.2, 3.3, SURF_ID='PARTBRD' / liner in small contain
 ***** openings
 
 &OBST XB=1.0, 1.5, 4.1, 4.7, 2.4, 2.6, / vent over large container
-&HOLE XB=1.1,1.4, 4.2,4.6, 2.2,2.7 DEVC_ID='top_vent' /
-&DEVC XYZ=0.0,0.0,0.0,ID='top_vent',SETPOINT=0.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&HOLE XB=1.1,1.4, 4.2,4.6, 2.2,2.7 CTRL_ID='vent timer' /
 
 
-&HOLE XB=0.2,0.4,-0.1,0.2,0.2,0.4 DEVC_ID='front_hole' / front hole
-&DEVC XYZ=0.0,0.0,0.0,ID='front_hole',SETPOINT=0.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&HOLE XB=0.2,0.4,-0.1,0.2,0.2,0.4 / front hole
 
 &HOLE XB=-0.1,0.2, 0.2,1.1, 0.1,0.2 /  door
-&HOLE XB=-0.1,0.2, 0.2,0.3, 0.2,2.0 /  door
-&HOLE XB=-0.1,0.2, 0.3,1.1, 0.2,2.0 DEVC_ID='door'/  door
-&DEVC XYZ=0.0,0.0,0.0,ID='door',SETPOINT=0.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&HOLE XB=-0.1,0.2, 0.2,0.3, 0.2,2.0 CTRL_ID='door timer1'/  door
+&HOLE XB=-0.1,0.2, 0.3,1.1, 0.2,2.0 CTRL_ID='door timer2'/  door
 
 
 ***** materials
