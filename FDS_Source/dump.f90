@@ -2933,22 +2933,10 @@ IF (PLOT3D) THEN  ! Write out information to .smv file
    TT   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
    ITM  = INT(TT)
    ITM1 = ABS(TT-ITM)*100
-   IF (T_BEGIN+(T_END-T_BEGIN)*TIME_SHRINK_FACTOR < 10000._EB) THEN
-      IF (ITM < 0) THEN
-         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I4.4,A1,I5.4,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
-         IF (NMESHES==1) WRITE(FN_PL3D(NM),'(A,A1,I5.4,A,I2.2,A2)')        TRIM(CHID),'_',ITM,'_',ITM1,'.q'
-      ELSE
-         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I4.4,A1,I4.4,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
-         IF (NMESHES==1) WRITE(FN_PL3D(NM),'(A,A1,I4.4,A,I2.2,A2)')        TRIM(CHID),'_',ITM,'_',ITM1,'.q'
-      ENDIF
+   IF (ITM <0 ) THEN
+      WRITE(FN_PL3D(NM),'(A,A,I4.4,A1,I8.7,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
    ELSE
-      IF (ITM <0 ) THEN
-         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I4.4,A1,I6.5,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
-         IF (NMESHES==1) WRITE(FN_PL3D(NM),'(A,A1,I6.5,A,I2.2,A2)')        TRIM(CHID),'_',ITM,'_',ITM1,'.q'
-      ELSE
-         IF (NMESHES>1)  WRITE(FN_PL3D(NM),'(A,A,I4.4,A1,I5.5,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
-         IF (NMESHES==1) WRITE(FN_PL3D(NM),'(A,A1,I5.5,A,I2.2,A2)')        TRIM(CHID),'_',ITM,'_',ITM1,'.q'
-      ENDIF
+      WRITE(FN_PL3D(NM),'(A,A,I4.4,A1,I8.8,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
    ENDIF
    IF (N_STRINGS+17>N_STRINGS_MAX) THEN
       CALL RE_ALLOCATE_STRINGS(NM)
