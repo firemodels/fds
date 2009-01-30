@@ -90,9 +90,9 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
 &HOLE XB=0.2,0.4,-0.1,0.2,0.2,0.4 / front hole
 
-&HOLE XB=-0.1,0.2, 0.2,1.1, 1.9,2.0 CTRL_ID='door timer1'/  door
-&HOLE XB=-0.1,0.2, 0.2,0.3, 0.2,2.0 CTRL_ID='door timer1'/  door
-&HOLE XB=-0.1,0.2, 0.3,1.1, 0.2,2.0 CTRL_ID='door timer2'/  door
+&HOLE XB=-0.1,0.2, 0.2,1.1, 1.8,2.0 CTRL_ID='door timer1'/  door
+&HOLE XB=-0.1,0.2, 0.2,0.4, 0.2,1.8 CTRL_ID='door timer1'/  door
+&HOLE XB=-0.1,0.2, 0.4,1.1, 0.2,1.8 CTRL_ID='door timer2'/  door
 
 
 ***** materials
