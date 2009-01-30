@@ -183,9 +183,12 @@ CLOOP: DO I=1,39
    IF (CHID(I:I)==' ') EXIT CLOOP
 ENDDO CLOOP
  
-INQUIRE(FILE=TRIM(CHID)//'.stop',EXIST=EX)
+! Define and look for a stop file
+
+FN_STOP = TRIM(CHID)//'.stop'
+INQUIRE(FILE=FN_STOP,EXIST=EX)
 IF (EX) THEN
-   WRITE(MESSAGE,'(A,A,A)') "ERROR: Remove the file, ", TRIM(CHID)//'.stop',", from the current directory"
+   WRITE(MESSAGE,'(A,A,A)') "ERROR: Remove the file, ",TRIM(FN_STOP),", from the current directory"
    CALL SHUTDOWN(MESSAGE)
 ENDIF
  

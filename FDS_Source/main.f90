@@ -232,7 +232,7 @@ MAIN_LOOP: DO
 
    ! Check for program stops
 
-   INQUIRE(FILE=TRIM(CHID)//'.stop',EXIST=EX)
+   INQUIRE(FILE=FN_STOP,EXIST=EX)
    IF (EX) MESH_STOP_STATUS = USER_STOP
  
    ! Figure out fastest and slowest meshes
