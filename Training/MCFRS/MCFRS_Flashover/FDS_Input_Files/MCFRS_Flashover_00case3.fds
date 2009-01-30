@@ -7,8 +7,8 @@
 
 MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
-&TIME TWFIN=1600.0 /
-&DUMP NFRAMES=8000, DT_DEVC=5.0, DT_HRR=5.0 /
+&TIME TWFIN=1700.0 /
+&DUMP NFRAMES=8500, DT_DEVC=5.0, DT_HRR=5.0 /
 &MISC SURF_DEFAULT='METAL WALL'/
 
 ***** starter fire
@@ -45,8 +45,8 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 &RAMP ID='door times2', T=  1559, F=-1 /
 &RAMP ID='door times2', T=  1561, F= 1 /
 
-&DEVC ID='TIMER2', XYZ=0.0,0.0,0.0, QUANTITY='TIME' /
-&CTRL ID='vent timer', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER2', RAMP_ID='vent times' /
+&DEVC ID='TIMER3', XYZ=0.0,0.0,0.0, QUANTITY='TIME' /
+&CTRL ID='vent timer', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER3', RAMP_ID='vent times' /
 &RAMP ID='vent times', T=    0,  F=-1 /
 &RAMP ID='vent times', T=   619, F=-1 /
 &RAMP ID='vent times', T=   621, F= 1 /
@@ -65,7 +65,7 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 &RAMP ID='vent times', T=  1559, F= 1 /
 &RAMP ID='vent times', T=  1561, F=-1 /
 
-&OBST XB=0.3, 2.1, 6.3, 8.5, 2.8, 2.9, SURF_ID='PARTBRD' / liner in small container
+&OBST XB=0.3, 2.1, 6.3, 8.5, 3.0, 3.1, SURF_ID='PARTBRD' / liner in small container
 &OBST XB=0.1, 2.3, 6.1, 6.2, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
 &OBST XB=0.1, 2.3, 8.6, 8.7, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
 &OBST XB=0.1, 0.2, 6.2, 8.6, 1.9, 3.2, SURF_ID='PARTBRD' / liner in small container
@@ -90,7 +90,7 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
 &HOLE XB=0.2,0.4,-0.1,0.2,0.2,0.4 / front hole
 
-&HOLE XB=-0.1,0.2, 0.2,1.1, 0.1,0.2 /  door
+&HOLE XB=-0.1,0.2, 0.2,1.1, 1.9,2.0 CTRL_ID='door timer1'/  door
 &HOLE XB=-0.1,0.2, 0.2,0.3, 0.2,2.0 CTRL_ID='door timer1'/  door
 &HOLE XB=-0.1,0.2, 0.3,1.1, 0.2,2.0 CTRL_ID='door timer2'/  door
 
@@ -124,7 +124,7 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 
 &SURF ID='PARTBRD'
       MATL_ID = 'MT_PARTBRD'
-      THICKNESS=0.016 /
+      THICKNESS=0.0127 / 0.5"
 
 &MATL ID                    = 'MT_CONCRETE'
       SPECIFIC_HEAT         = 0.88
@@ -151,7 +151,11 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 &OBST XB=0.0, 2.4, 6.0, 8.8, 3.3, 3.4, / small container
 &OBST XB=0.0, 2.4, 6.0, 8.8, 1.0, 1.1, / small container
 &OBST XB=0.0, 2.4, 6.0, 6.1, 1.1, 3.3, / small container
-&OBST XB=0.0, 2.4, 8.7, 8.8, 1.1, 3.3, / small container
+   ** open rear door
+&DEVC XYZ=0.0,0.0,0.0,ID='rear_door',SETPOINT=1600.0,QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&HOLE XB=0.0, 2.4, 8.6, 8.9, 1.1, 3.3, DEVC_ID='rear_door'/
+&OBST XB=0.0, 2.4, 8.7, 8.8, 1.1, 3.3  / small container
+
 &OBST XB=0.0, 0.1, 6.1, 8.7, 1.1, 3.3, / small container
 &OBST XB=2.3, 2.4, 6.1, 8.7, 1.1, 3.3, / small container
 &HOLE  XB=0.2, 2.2, 6.2, 8.6, 1.8, 2.0 /
