@@ -30,7 +30,7 @@ MESH IJK=32,96,36, XB=-0.4,2.8, -0.4,9.2,0.0, 3.6/
 &RAMP ID='door times1', T=  1146, F= 1 /
 
 &DEVC ID='TIMER2', XYZ=0.0,0.0,0.0, QUANTITY='TIME' /
-&CTRL ID='door timer2', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER1', RAMP_ID='door times2' /
+&CTRL ID='door timer2', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER2', RAMP_ID='door times2' /
 &RAMP ID='door times2', T=     0, F= 1 /
 &RAMP ID='door times2', T=    59, F= 1 /
 &RAMP ID='door times2', T=    61, F=-1 /
