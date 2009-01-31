@@ -1,0 +1,19 @@
+&HEAD CHID='pyramid', TITLE='Simple demo of multiplier function, SVN $Revision: 2338 $' /
+
+&MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=0. /
+
+&MULT ID='south', DXB=0.01,-.01,0.01,0.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+&MULT ID='north', DXB=0.01,-.01,-.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+&MULT ID='east',  DXB=-.01,-.01,0.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+&MULT ID='west',  DXB=0.01,0.01,0.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+
+&OBST XB=0.10,0.90,0.10,0.11,0.10,0.11, MULT_ID='south', COLOR='RED' /
+&OBST XB=0.10,0.90,0.89,0.90,0.10,0.11, MULT_ID='north', COLOR='BLUE' /
+&OBST XB=0.10,0.11,0.11,0.89,0.10,0.11, MULT_ID='west',  COLOR='GREEN' /
+&OBST XB=0.89,0.90,0.11,0.89,0.10,0.11, MULT_ID='east',  COLOR='CYAN' /
+
+&TAIL /
+
+
