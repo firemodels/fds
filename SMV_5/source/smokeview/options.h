@@ -73,6 +73,10 @@
 //#define pp_COLOR
 #endif
 
+#ifdef pp_BETA
+#define pp_MSCALE
+#endif
+
 #ifdef pp_CULL
 #define pp_GPU
 #endif
