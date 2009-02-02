@@ -90,6 +90,14 @@ GLUI_Spinner *SPINNER_xx=NULL, *SPINNER_yy=NULL, *SPINNER_zz=NULL;
 GLUI_Spinner *SPINNER_window_width=NULL, *SPINNER_window_height=NULL;
 GLUI_Button *window_update=NULL ;
 GLUI_Button *button_snap=NULL;
+#ifdef pp_MSCALE
+GLUI_Panel *panel_scale=NULL;
+GLUI_Spinner *SPINNER_scalex=NULL;
+GLUI_Spinner *SPINNER_scaley=NULL;
+GLUI_Spinner *SPINNER_scalez=NULL;
+GLUI_Spinner *SPINNER_nearclip=NULL;
+GLUI_Spinner *SPINNER_farclip=NULL;
+#endif
 
 void enable_disable_views(void);
 
@@ -254,9 +262,8 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_aperture=glui_motion->add_spinner_to_panel(panel_projection,"aperture",GLUI_SPINNER_FLOAT,&aperture_glui,
     APERTURE,TRANSLATE_CB);
   glui_motion->add_separator_to_panel(panel_projection);
-  glui_motion->add_statictext_to_panel(panel_projection,"Size");
   
-  LIST_windowsize = glui_motion->add_listbox_to_panel(panel_projection,"",&windowsize_pointer,WINDOWSIZE_LIST,TRANSLATE_CB);
+  LIST_windowsize = glui_motion->add_listbox_to_panel(panel_projection,"Size:",&windowsize_pointer,WINDOWSIZE_LIST,TRANSLATE_CB);
   LIST_windowsize->add_item(0,"Custom");
   LIST_windowsize->add_item(1,"-");
   LIST_windowsize->add_item(2, "320x240");
@@ -292,6 +299,24 @@ extern "C" void glui_motion_setup(int main_window){
   replace_view=glui_motion->add_button_to_panel(reset_panel2,"Replace",SAVE_LIST_VIEW,BUTTON_Reset_CB);
   add_view=glui_motion->add_button_to_panel(reset_panel2,"Add",ADD_LIST_VIEW,BUTTON_Reset_CB);
   edit_view_label=glui_motion->add_edittext_to_panel(reset_panel2,"View name",GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,BUTTON_Reset_CB);
+
+#ifdef pp_MSCALE
+  panel_scale = glui_motion->add_rollout("Scaling/Depth Params",false);
+  SPINNER_scalex=glui_motion->add_spinner_to_panel(panel_scale,"Scale x",GLUI_SPINNER_FLOAT,mscale);
+  SPINNER_scalex->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
+
+  SPINNER_scaley=glui_motion->add_spinner_to_panel(panel_scale,"Scale y",GLUI_SPINNER_FLOAT,mscale+1);
+  SPINNER_scaley->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
+
+  SPINNER_scalez=glui_motion->add_spinner_to_panel(panel_scale,"Scale z",GLUI_SPINNER_FLOAT,mscale+2);
+  SPINNER_scalez->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
+
+  SPINNER_nearclip=glui_motion->add_spinner_to_panel(panel_scale,"Near depth",GLUI_SPINNER_FLOAT,&nearclip);
+  SPINNER_nearclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
+
+  SPINNER_farclip=glui_motion->add_spinner_to_panel(panel_scale,"Far depth",GLUI_SPINNER_FLOAT,&farclip);
+  SPINNER_farclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
+#endif
 
   cursor_checkbox=glui_motion->add_checkbox("Map cursor keys for Plot3D use",&cursorPlot3D,CURSOR,TRANSLATE_CB);
   panel_close = glui_motion->add_panel("",GLUI_PANEL_NONE);
