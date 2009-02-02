@@ -1509,17 +1509,19 @@ DO K = N_LO(3),N_HI(3)
       PHI1(N_LO(1):N_HI(1)) = PHIBAR(:,J,K)
       CALL TOPHAT_FILTER_1D(PHI2(N_LO(1):N_HI(1)),PHI1(N_LO(1):N_HI(1)),N_LO(1),N_HI(1))
       PHIBAR(:,J,K) = PHI2(N_LO(1):N_HI(1))
-   END DO
-END DO
+   ENDDO
+ENDDO
 
-! filter in y:
-DO K = N_LO(3),N_HI(3)
-   DO I = N_LO(1),N_HI(1)
-      PHI1(N_LO(2):N_HI(2)) = PHIBAR(I,:,K)
-      CALL TOPHAT_FILTER_1D(PHI2(N_LO(2):N_HI(2)),PHI1(N_LO(2):N_HI(2)),N_LO(2),N_HI(2))
-      PHIBAR(I,:,K) = PHI2(N_LO(2):N_HI(2))
-   END DO
-END DO
+IF (.NOT.TWO_D) THEN
+   ! filter in y:
+   DO K = N_LO(3),N_HI(3)
+      DO I = N_LO(1),N_HI(1)
+         PHI1(N_LO(2):N_HI(2)) = PHIBAR(I,:,K)
+         CALL TOPHAT_FILTER_1D(PHI2(N_LO(2):N_HI(2)),PHI1(N_LO(2):N_HI(2)),N_LO(2),N_HI(2))
+         PHIBAR(I,:,K) = PHI2(N_LO(2):N_HI(2))
+      ENDDO
+   ENDDO
+ENDIF
 
 ! filter in z:
 DO J = N_LO(2),N_HI(2)
@@ -1527,8 +1529,8 @@ DO J = N_LO(2),N_HI(2)
       PHI1(N_LO(3):N_HI(3)) = PHIBAR(I,J,:)
       CALL TOPHAT_FILTER_1D(PHI2(N_LO(3):N_HI(3)),PHI1(N_LO(3):N_HI(3)),N_LO(3),N_HI(3))
       PHIBAR(I,J,:) = PHI2(N_LO(3):N_HI(3))
-   END DO
-END DO
+   ENDDO
+ENDDO
 
 END SUBROUTINE TEST_FILTER
 
