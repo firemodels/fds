@@ -1142,8 +1142,6 @@ ELSEIF (CORRECTOR) THEN
    ENDDO
    
    ! Correct densities above or below clip limits
-
-   !!CALL CHECK_DENSITY
    
    DO N=1,N_SPECIES
       DO K=1,KBAR
