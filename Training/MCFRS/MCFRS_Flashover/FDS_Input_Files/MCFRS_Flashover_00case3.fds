@@ -1,11 +1,11 @@
-&HEAD   CHID='test',TITLE='MontoCo   Flashover   Simulator  SVN $Revision$' / base case
+&HEAD   CHID='MCFRS_Flashover_00case3',TITLE='MontoCo   Flashover   Simulator  SVN $Revision$' / base case
 
 &MESH IJK=54,20,36, XB=-1.6, 3.8, -0.4,1.6, 0.0, 3.6/
 &MESH IJK=54,20,36, XB=-1.6, 3.8,  1.6,3.6, 0.0, 3.6/
 &MESH IJK=54,20,36, XB= 3.8, 9.2, -0.4,1.6, 0.0, 3.6/
 &MESH IJK=54,20,36, XB= 3.8, 9.2,  1.6,3.6, 0.0, 3.6/
 
-&TIME TWFIN=0.0 /
+&TIME TWFIN=1700.0 /
 &DUMP NFRAMES=8500, DT_DEVC=5.0, DT_HRR=5.0 /
 &MISC SURF_DEFAULT='METAL WALL'/
 
@@ -17,6 +17,9 @@
 
 &DEVC ID='TIMER1', XYZ=0.0,0.0,0.0, QUANTITY='TIME' /
 &CTRL ID='door timer1', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER1', RAMP_ID='door times1' /
+&RAMP ID='door times1open',   T=     0, F= 1 /
+&RAMP ID='door times1closed', T=     0, F= -1 /
+
 &RAMP ID='door times1', T=     0, F= 1 /
 &RAMP ID='door times1', T=    59, F= 1 /
 &RAMP ID='door times1', T=    61, F=-1 /
@@ -29,6 +32,8 @@
 
 &DEVC ID='TIMER2', XYZ=0.0,0.0,0.0, QUANTITY='TIME' /
 &CTRL ID='door timer2', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER2', RAMP_ID='door times2' /
+&RAMP ID='door times2open',   T=     0, F= 1 /
+&RAMP ID='door times2closed', T=     0, F= -1 /
 &RAMP ID='door times2', T=     0, F= 1 /
 &RAMP ID='door times2', T=    59, F= 1 /
 &RAMP ID='door times2', T=    61, F=-1 /
@@ -45,6 +50,8 @@
 
 &DEVC ID='TIMER3', XYZ=0.0,0.0,0.0, QUANTITY='TIME' /
 &CTRL ID='vent timer', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER3', RAMP_ID='vent times' /
+&RAMP ID='vent times1open',   T=     0, F= 1 /
+&RAMP ID='vent times1closed', T=     0, F= -1 /
 &RAMP ID='vent times', T=    0,  F=-1 /
 &RAMP ID='vent times', T=   619, F=-1 /
 &RAMP ID='vent times', T=   621, F= 1 /
@@ -105,21 +112,40 @@
       MATL_ID            = 'SHEETMETAL'
       THICKNESS          = 0.00635 /
 
- ** change ref temp from 360 to 300
-
-&MATL ID                    = 'MT_PARTBRD'
+&MATL ID                    = 'MT_PARTBRD_HIGH'
       FYI='http://www.customthermoelectric.com/MaterialProperties6.htm'
       SPECIFIC_HEAT         = 1.34
       CONDUCTIVITY          = 0.17
       DENSITY               = 1000.0
       N_REACTIONS = 1
       NU_FUEL = 1.0
-      REFERENCE_TEMPERATURE=300.0
+      REFERENCE_TEMPERATURE=360.0
+      HEAT_OF_REACTION= 3000.0
+      HEAT_OF_COMBUSTION=16400.0/
+
+&MATL ID                    = 'MT_PARTBRD_MEDIUM'
+      SPECIFIC_HEAT         = 1.34
+      CONDUCTIVITY          = 0.10
+      DENSITY               = 750.0
+      N_REACTIONS = 1
+      NU_FUEL = 1.0
+      REFERENCE_TEMPERATURE=360.0
+      HEAT_OF_REACTION= 3000.0
+      HEAT_OF_COMBUSTION=16400.0/
+
+&MATL ID                    = 'MT_PARTBRD_LOW'
+      FYI='http://www.customthermoelectric.com/MaterialProperties6.htm'
+      SPECIFIC_HEAT         = 1.34
+      CONDUCTIVITY          = 0.078
+      DENSITY               = 590.0
+      N_REACTIONS = 1
+      NU_FUEL = 1.0
+      REFERENCE_TEMPERATURE=360.0
       HEAT_OF_REACTION= 3000.0
       HEAT_OF_COMBUSTION=16400.0/
 
 &SURF ID='PARTBRD'
-      MATL_ID = 'MT_PARTBRD'
+      MATL_ID = 'MT_PARTBRD_MEDIUM'
       THICKNESS=0.0127 / 0.5"
 
 &MATL ID                    = 'MT_CONCRETE'
@@ -203,25 +229,25 @@
 &SLCF XB=4.2,4.2,1.14,1.14,0.0,2.4, QUANTITY='TEMPERATURE' / 
 &SLCF XB=5.8,5.8,1.14,1.14,0.0,2.4, QUANTITY='TEMPERATURE' /
 
-SLCF PBY=7.6 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center
+&SLCF PBY=1.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center
 
-SLCF PBX=7.1 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / left opening (crack)
-SLCF PBX=4.4 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / top vent
-SLCF PBX=0.8 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center of fire
+&SLCF PBX=8.1 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / left opening (crack)
+&SLCF PBX=4.4 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / top vent
+&SLCF PBX=0.6 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / center of fire
 
-SLCF PBZ=1.3 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / sitting eye level
-SLCF PBZ=2.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  large container
-SLCF PBZ=3.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  small cotainer
+&SLCF PBZ=1.3 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / sitting eye level
+&SLCF PBZ=2.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  large container
+&SLCF PBZ=3.2 QUANTITY='TEMPERATURE' VECTOR=.TRUE. / below  small cotainer
 
-SLCF PBY=1.2 QUANTITY='oxygen' / center
+&SLCF PBY=1.2 QUANTITY='oxygen' / center
 
-SLCF PBX=8.1 QUANTITY='oxygen' / left opening (crack)
-SLCF PBX=4.4 QUANTITY='oxygen' / top vent
-SLCF PBX=0.8 QUANTITY='oxygen' / center of fire
+&SLCF PBX=8.1 QUANTITY='oxygen' / left opening (crack)
+&SLCF PBX=4.4 QUANTITY='oxygen' / top vent
+&SLCF PBX=0.6 QUANTITY='oxygen' / center of fire
 
-SLCF PBZ=1.3 QUANTITY='oxygen' / sitting eye level
-SLCF PBZ=2.2 QUANTITY='oxygen'  / below  large container
-SLCF PBZ=3.2 QUANTITY='oxygen' /  below  small cotainer
+&SLCF PBZ=1.3 QUANTITY='oxygen' / sitting eye level
+&SLCF PBZ=2.2 QUANTITY='oxygen'  / below  large container
+&SLCF PBZ=3.2 QUANTITY='oxygen' /  below  small cotainer
 
 *** boundary file quantities
 
