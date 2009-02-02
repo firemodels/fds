@@ -10,7 +10,10 @@ is presented in Table~\ref{Steckler_Table}. Shown on
 the following pages are the centerline profiles, compared with model predictions. Off-center profiles are not shown. The vertical spacing
 of the measurements was approximately 11~cm, with the uppermost velocity probe centered 5.7~cm below the 10~cm thick soffit. The FDS
 simulations were uniformly gridded with cells of 5~cm on each side. To quantify the difference between prediction and measurement, the
-maximum outward velocities, which always occurred at the uppermost measurement location, were compared.
+maximum outward velocities, which always occurred at the uppermost measurement location, were compared. As can be seen in Fig.~\ref{Steckler_Scatterplot}, the
+uppermost velocity measurement is under-predicted by FDS. It has been found that relatively minor changes in the velocity boundary conditions at the
+edges and bottom of the door soffit can have a noticeable impact on these results. It is believed that the resolution of the grid is not fine enough to
+capture the steep gradients in the velocity profile in the uppermost grid cell. Work is on-going to improve the situation.
 
 
 
@@ -119,10 +122,11 @@ maximum outward velocities, which always occurred at the uppermost measurement l
 \begin{tabular}{l}
 \includegraphics[width=5.0in]{FIGURES/ScatterPlots/Velocity_Steckler}
 \end{tabular}
+\end{center}
 \caption[Summary of velocity predictions, Steckler compartment experiments.]
 {Summary of comparisons of predicted and measured maximum velocities in the doorway/window of the Steckler compartment experiments. The uncertainty
 in the measurements (dotted lines) were reported by Steckler to be about 10~\%.}
-\end{center}
+\label{Steckler_Scatterplot}
 \end{figure}
 
 
