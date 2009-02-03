@@ -14,10 +14,12 @@ VPATH = ../../FDS_Source
 obj_serial = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
              ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o turb.o mass.o \
              wall.o fire.o pres.o divg.o init.o velo.o main.o
+objwin_serial = $(obj_serial:.o=.obj)
 
 obj_mpi = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
           ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o turb.o mass.o \
           wall.o fire.o pres.o divg.o init.o velo.o main_mpi.o
+objwin_mpi = $(obj_mpi:.o=.obj)
 
 # General Purpose Rules
 
@@ -28,12 +30,29 @@ no_target:
 setup:
 %.o : %.mod
 
-.SUFFIXES: .c .f90 .o
+setup_win:
+%.obj : %.mod
+
+.SUFFIXES: .c .f90 .o .obj
 
 .f90.o:
 	$(FCOMPL) -c $(FFLAGS) $<
+.f90.obj:
+	$(FCOMPL) -c $(FFLAGS) $<
 .c.o:
 	$(CCOMPL) -c $(CFLAGS) $<
+.c.obj:
+	$(CCOMPL) -c $(CFLAGS) $<
+
+# Windows Intel Compiler, version 11
+
+intel_win_32 : FFLAGS = -O2 /Qvec_report0
+intel_win_32 : CFLAGS = -O2 -Dpp_noappend /Qvec_report0
+intel_win_32 : FCOMPL = ifort
+intel_win_32 : CCOMPL = icl
+intel_win_32 : obj = fds5_win_32
+intel_win_32 : setup_win $(objwin_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(objwin_serial)
 
 # Intel Compiler, version 11
 
@@ -320,6 +339,36 @@ init.o : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90
 dump.o : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c 
 main.o : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
 main_mpi.o : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
+
+isob.obj : isob.c
+smvv.obj : smvv.f90 isob.c
+prec.obj : prec.f90
+cons.obj : cons.f90 prec.f90
+type.obj : type.f90 prec.f90 cons.f90
+devc.obj : devc.f90 prec.f90
+pois.obj : pois.f90 prec.f90
+mesh.obj : mesh.f90 prec.f90 type.f90
+func.obj : func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+turb.obj : turb.f90 func.f90 prec.f90 cons.f90 mesh.f90
+ctrl.obj : ctrl.f90 prec.f90 cons.f90 type.f90 mesh.f90 func.f90
+irad.obj : irad.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+ieva.obj : ieva.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+fire.obj : fire.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+wall.obj : wall.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+velo.obj : velo.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
+divg.obj : divg.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+mass.obj : mass.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
+radi.obj : radi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 irad.f90
+evac.obj : evac.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 ieva.f90
+pres.obj : pres.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 pois.f90
+part.obj : part.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
+vege.obj : vege.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
+read.obj : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90
+init.obj : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 pois.f90
+dump.obj : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c 
+main.obj : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
+main_mpi.obj : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
+
 
 #*** Clean Target to remove Object and Module files ***
 
