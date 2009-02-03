@@ -1,4 +1,4 @@
-@echo off
+icl@echo off
 Rem
 Rem Copyright  (C) 1985-2008 Intel Corporation. All rights reserved.
 Rem
@@ -25,10 +25,10 @@ if {%1} EQU {ia32_intel64} (
 )
 
 if {%1} EQU {intel64} (
-  @call "C:\Program Files\Intel\Compiler\11.0\066\cpp\bin\intel64\iclvars_intel64.bat"
-  if exist "C:\Program Files\Intel\Compiler\11.0\066\cpp\tbb\em64t\vc8\bin\tbbvars.bat" @call "C:\Program Files\Intel\Compiler\11.0\066\cpp\tbb\em64t\vc8\bin\tbbvars.bat"
-  if exist "C:\Program Files\Intel\Compiler\11.0\066\cpp\mkl\tools\environment\mklvarsem64t.bat" @call "C:\Program Files\Intel\Compiler\11.0\066\cpp\mkl\tools\environment\mklvarsem64t.bat"
-  if exist "C:\Program Files\Intel\Compiler\11.0\066\cpp\ipp\em64t\tools\env\ippenvem64t.bat" @call "C:\Program Files\Intel\Compiler\11.0\066\cpp\ipp\em64t\tools\env\ippenvem64t.bat"
+  @call "C:\Program Files (x86)\Intel\Compiler\11.0\066\cpp\bin\intel64\iclvars_intel64.bat"
+  if exist "C:\Program Files (x86)\Intel\Compiler\11.0\066\cpp\tbb\em64t\vc8\bin\tbbvars.bat" @call "C:\Program Files (x86)\Intel\Compiler\11.0\066\cpp\tbb\em64t\vc8\bin\tbbvars.bat"
+  if exist "C:\Program Files (x86)\Intel\Compiler\11.0\066\cpp\mkl\tools\environment\mklvarsem64t.bat" @call "C:\Program Files (x86)\Intel\Compiler\11.0\066\cpp\mkl\tools\environment\mklvarsem64t.bat"
+  if exist "C:\Program Files (x86)\Intel\Compiler\11.0\066\cpp\ipp\em64t\tools\env\ippenvem64t.bat" @call "C:\Program Files (x86)\Intel\Compiler\11.0\066\cpp\ipp\em64t\tools\env\ippenvem64t.bat"
   exit /B 0
 )
 
