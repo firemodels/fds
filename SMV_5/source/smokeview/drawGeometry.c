@@ -2576,12 +2576,14 @@ end_kmax_loop:
 
 void allocate_faces(){
   int i;
-  int ntotal;
   mesh *meshi;
   int ntotal2=0;
+  int abortflag=0;
 
   FREEMEMORY(face_transparent);
   for(i=0;i<nmeshes;i++){
+    int ntotal;
+
     meshi = meshinfo + i;
     ntotal = 6*meshi->nbptrs + meshi->nvents+12;
     ntotal2 += ntotal;
@@ -2592,17 +2594,70 @@ void allocate_faces(){
     FREEMEMORY(meshi->face_transparent_double);
     FREEMEMORY(meshi->face_textures);
     FREEMEMORY(meshi->face_outlines);
-    
     if(ntotal>0){
-      NewMemory((void **)&meshi->faceinfo,sizeof(facedata)*ntotal);
-      NewMemory((void **)&meshi->face_normals_single,sizeof(facedata *)*ntotal);
-      NewMemory((void **)&meshi->face_normals_double,sizeof(facedata *)*ntotal);
-      NewMemory((void **)&meshi->face_transparent_double,sizeof(facedata *)*ntotal);
-      NewMemory((void **)&meshi->face_textures,sizeof(facedata *)*ntotal);
-      NewMemory((void **)&meshi->face_outlines,sizeof(facedata *)*ntotal);
+      if(abortflag==0&&NewMemory((void **)&meshi->faceinfo,sizeof(facedata)*ntotal)==0){
+        abortflag=1;
+      }
+      if(abortflag==0&&NewMemory((void **)&meshi->face_normals_single,sizeof(facedata *)*ntotal)==0){
+        abortflag=1;
+      }
+      if(abortflag==0&&NewMemory((void **)&meshi->face_normals_double,sizeof(facedata *)*ntotal)==0){
+        abortflag=1;
+      }
+      if(abortflag==0&&NewMemory((void **)&meshi->face_transparent_double,sizeof(facedata *)*ntotal)==0){
+        abortflag=1;
+      }
+      if(abortflag==0&&NewMemory((void **)&meshi->face_textures,sizeof(facedata *)*ntotal)==0){
+        abortflag=1;
+      }
+      if(abortflag==0&&NewMemory((void **)&meshi->face_outlines,sizeof(facedata *)*ntotal)==0){
+        abortflag=1;
+      }
     }
   }
-  if(ntotal2>0)NewMemory((void **)&face_transparent,sizeof(facedata *)*ntotal2);
+  if(ntotal2>0){
+    if(abortflag==0&&NewMemory((void **)&face_transparent,sizeof(facedata *)*ntotal2)==0){
+      abortflag=1;
+    }
+  }
+  if(abortflag==1){
+    int mem_sum;
+    float rmem;
+    int nfaces_temp;
+
+    mem_sum=0;
+    nfaces_temp=0;
+    ntotal2=0;
+    for(i=0;i<nmeshes;i++){
+      int ntotal;
+
+      meshi = meshinfo + i;
+ 
+      ntotal = 6*meshi->nbptrs + meshi->nvents+12;
+      nfaces_temp+=(6*meshi->nbptrs);
+      mem_sum+= ntotal*(sizeof(facedata)+5*sizeof(facedata *));
+      ntotal2 += ntotal;
+    }
+    mem_sum+= ntotal2*sizeof(facedata *);
+    printf("*** Fatal error.  Unable to allocate\n");
+    if(mem_sum>=1000000000){
+      rmem=(float)mem_sum/1000000000.0;
+      printf("    %4.2f GB for %i blockage faces.\n",
+        rmem,nfaces_temp);
+    }
+    else if(mem_sum>1000000&&mem_sum<1000000000){
+      rmem=(float)mem_sum/1000000.0;
+      printf("    %4.2f MB for %i blockage faces.\n",
+        rmem,nfaces_temp);
+    }
+    else{
+      printf("    %i bytes for %i blockage faces.\n",
+        mem_sum,nfaces_temp);
+    }
+    printf("    Smokeview aborting.\n");
+    pauseSV();
+  }
+  printf("\n");
 }
 
 /* ------------------ blockcompare ------------------------ */

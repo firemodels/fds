@@ -122,7 +122,7 @@ void get_smokezippath(char *progdir, char **zippath){
 
 void pauseSV(void){
   int i;
-  printf("program paused - hit any key and \"enter\" to continue\n");
+  printf("program paused - press <CTRL> c to close window\n");
   scanf("%i",&i);
 }
 
