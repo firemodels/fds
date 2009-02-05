@@ -306,13 +306,6 @@ MAIN_LOOP: DO
    RHO_LOWER_GLOBAL = RHOA
    RHO_UPPER_GLOBAL = RHOA
    
-   IF (FLUX_LIMITER>=0) THEN
-      DO NM=1,NMESHES
-         IF (.NOT.ACTIVE_MESH(NM)) CYCLE
-         CALL SCALARF(NM)
-      ENDDO
-   ENDIF
-   
    ! Predict various flow quantities at next time step, and repeat process if there is a time step change
 
    FIRST_PASS = .TRUE.
@@ -322,6 +315,7 @@ MAIN_LOOP: DO
       COMPUTE_DENSITY_LOOP: DO NM=1,NMESHES
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DENSITY_LOOP
          IF (FLUX_LIMITER>=0) THEN
+            CALL SCALARF(NM)
             CALL DENSITY_TVD(NM)
          ELSE
             IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) CALL DENSITY(NM)
@@ -413,19 +407,13 @@ MAIN_LOOP: DO
    ENDDO
    
    ! Compute finite differences of predicted quantities
-
-   IF (FLUX_LIMITER>=0) THEN
-      DO NM=1,NMESHES
-         IF (.NOT.ACTIVE_MESH(NM)) CYCLE
-         CALL SCALARF(NM)
-      ENDDO
-   ENDIF
       
    COMPUTE_FINITE_DIFFERENCES_2: DO NM=1,NMESHES
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_FINITE_DIFFERENCES_2
       CALL OPEN_AND_CLOSE(T(NM),NM)
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,1)
       IF (FLUX_LIMITER>=0) THEN
+         CALL SCALARF(NM)
          CALL DENSITY_TVD(NM)
       ELSE
          IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
