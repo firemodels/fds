@@ -510,7 +510,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: RHODELTA
 
 RHODELTA => WORK2
 
-IF (PREDICTOR .OR. FLUX_LIMITER>=0) THEN
+IF (PREDICTOR) THEN
    RHOP=>RHOS
 ELSE
    RHOP=>RHO
@@ -979,7 +979,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TM
 REAL(EB) :: TNOW,YY_GET(1:N_SPECIES)
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,FX,FY,FZ
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,FX,FY,FZ,YYN
 
  
 IF (EVACUATION_ONLY(NM)) RETURN
@@ -992,6 +992,7 @@ FX => SCALAR_SAVE1
 FY => SCALAR_SAVE2
 FZ => SCALAR_SAVE3
 RHOYYP => SCALAR_SAVE4
+YYN => SCALAR_SAVE5
 
 SELECT_SUBSTEP: IF (PREDICTOR) THEN
    
@@ -1022,7 +1023,8 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
    DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
-            DO I=1,IBAR         
+            DO I=1,IBAR
+               YYN(I,J,K,N) = RHOYYP(I,J,K,N)   
                YYS(I,J,K,N) = RHOYYP(I,J,K,N) - DT*( RDX(I)*(FX(I,J,K,N)-FX(I-1,J,K,N)) &
                                                    + RDY(J)*(FY(I,J,K,N)-FY(I,J-1,K,N)) &
                                                    + RDZ(K)*(FZ(I,J,K,N)-FZ(I,J,K-1,N)) )
@@ -1113,10 +1115,6 @@ ELSEIF (CORRECTOR) THEN
       ENDDO
    ENDDO
    
-   ! Correct densities above or below clip limits
-
-   CALL CHECK_DENSITY
-   
    ! Update mass fractions
    
    DO N=1,N_SPECIES
@@ -1142,14 +1140,14 @@ ELSEIF (CORRECTOR) THEN
    ENDDO
    
    ! Correct densities above or below clip limits
+
+   CALL CHECK_DENSITY
    
    DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               !!YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YYS(I,J,K,N) )/RHO(I,J,K)
-               ! I am testing this change to see if we can eliminate the need for YYN(:,:,:,1:N_SPECIES)
-               YY(I,J,K,N) = 0.5_EB*( YY(I,J,K,N) + YYS(I,J,K,N)/RHOS(I,J,K) )
+               YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YYS(I,J,K,N) )/RHO(I,J,K)
                YY(I,J,K,N) = MAX(YY(I,J,K,N),0._EB)
                YY(I,J,K,N) = MIN(YY(I,J,K,N),1._EB)
             ENDDO
@@ -1258,6 +1256,28 @@ ELSE
    RHOP => RHOS
    IF (N_SPECIES > 0) YYP => YYS
 ENDIF
+
+! Notes on CELL_INDEX and WALL_INDEX:
+!
+! Consider a flux normal to the x-direction.  The cell index on the 'minus' side
+! of the face and the cell index on the 'plus' side of the face are labeled ICM
+! and ICP, respectively.  WALL_INDEX(:,-1)==0 states that the face on the left (-1)
+! side of the cell is NOT a wall.  WALL_INDEX(:,+1)==0 states that the face on
+! the right (+1) side of the cell is NOT a wall.  Thus, the IF statements in the
+! loops below check to see if we indeed have two gas phase cells -- which are
+! needed for the FLUX_LIMITER calculation -- to the left and to the right of the
+! face.  If this is not true, then we use first-order upwinding (Godunov's scheme),
+! FLUX_LIMITER=1, which only requires one gas phase cell.
+!
+!    |-------------|-------------|
+!    |             |             |
+!    |             |             |
+!    |      o      x      o      |
+!    |    ICM=I    |   ICP=I+1   |
+!    |             |             |
+!    |-------------|-------------|
+!                FX(I)
+
 
 ! Density flux
 
