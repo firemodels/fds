@@ -12,13 +12,13 @@ cd $REPOS/Utilities/Scripts/to_google/
 
 set testdir=FDS_Test_cases_$revision
 
-if (-d $testdir) then
-echo removing $testdir
-rm -rf $testdir
+if (-d Test_cases) then
+echo removing Test_cases
+rm -rf Test_cases
 endif
 rm -rf $testdir.tar
 rm -rf $testdir.tar.gz
 
-svn export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Test_cases $testdir
-tar cvf $testdir.tar $testdir/.
+svn export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Test_cases Test_cases
+tar cvf $testdir.tar Test_cases/.
 gzip $testdir.tar
