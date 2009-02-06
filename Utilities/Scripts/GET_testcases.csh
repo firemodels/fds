@@ -20,7 +20,5 @@ rm -rf $testdir.tar
 rm -rf $testdir.tar.gz
 
 svn export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Test_cases $testdir
-cd $testdir
-tar cvf ../$testdir.tar .
-cd ..
+tar cvf $testdir.tar $testdir/.
 gzip $testdir.tar
