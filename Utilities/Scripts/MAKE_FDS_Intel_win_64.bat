@@ -15,7 +15,7 @@ cd ..\Makefile\Intel_Win_64
 Rem If you want to do a full compile then remove following two Rem's
 Rem erase *.obj
 Rem erase *.mod
-make VPATH="../../../FDS_Source" -f ..\makefile intel_win_64
+%intelbin%\make VPATH="../../../FDS_Source" -f ..\makefile intel_win_64
 
 cd ..\..\Scripts
 
