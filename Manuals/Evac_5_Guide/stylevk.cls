@@ -95,37 +95,36 @@
 \renewcommand\dblfloatpagefraction{.5}
 \if@twoside
   \def\ps@headings{%
-      \let\@oddfoot\@empty\let\@evenfoot\@empty
-      \def\@evenhead{\thepage\hfil\slshape\leftmark}%
-      \def\@oddhead{{\slshape\rightmark}\hfil\thepage}%
+%      \let\@oddfoot\@empty\let\@evenfoot\@empty
+      \def\@oddfoot{\centerline\thepage}
+      \def\@evenfoot{\centerline\thepage}
+      \def\@evenhead{\hfil{\normalfont\fontsize{10}{12}\selectfont\bfseries\sffamily\leftmark}}%
+      \def\@oddhead{{\normalfont\fontsize{10}{12}\selectfont\bfseries\sffamily\leftmark}\hfil}%
+%%%      \def\@oddhead{{\slshape\rightmark}\hfil}%
       \let\@mkboth\markboth
     \def\chaptermark##1{%
-      \markboth {\MakeUppercase{%
+      \markboth {{%
         \ifnum \c@secnumdepth >\m@ne
-            \@chapapp\ \thechapter. \ %
+            \thechapter. \ %
         \fi
         ##1}}{}}%
-    \def\sectionmark##1{%
-      \markright {\MakeUppercase{%
-        \ifnum \c@secnumdepth >\z@
-          \thesection. \ %
-        \fi
-        ##1}}}}
+}
 \else
   \def\ps@headings{%
     \let\@oddfoot\@empty
-    \def\@oddhead{{\slshape\rightmark}\hfil\thepage}%
+%%%    \def\@oddhead{{\slshape\rightmark}\hfil\thepage}%
+    \def\@oddhead{{\slshape\rightmark}\hfil}%
     \let\@mkboth\markboth
     \def\chaptermark##1{%
-      \markright {\MakeUppercase{%
+      \markright {{%
         \ifnum \c@secnumdepth >\m@ne
-            \@chapapp\ \thechapter. \ %
+            \thechapter. \ %
         \fi
         ##1}}}}
 \fi
 \def\ps@myheadings{%
     \let\@oddfoot\@empty\let\@evenfoot\@empty
-    \def\@evenhead{\thepage\hfil\slshape\leftmark}%
+    \def\@evenhead{\thepage\hfil\bfseries\leftmark}%
     \def\@oddhead{{\slshape\rightmark}\hfil\thepage}%
     \let\@mkboth\@gobbletwo
     \let\chaptermark\@gobble
@@ -284,7 +283,7 @@
                 \twocolumn
               \fi}
 \newcommand\chapter{\if@openright\cleardoublepage\else\clearpage\fi
-                    \thispagestyle{plain}%
+                    \thispagestyle{plain}% Heading 1
                     \global\@topnum\z@
                     \@afterindentfalse
                     \secdef\@chapter\@schapter}
@@ -307,10 +306,15 @@
                     \fi}
 \def\@makechapterhead#1{%
   %\vspace*{40\p@}%
+  \vspace*{130\p@}%
   {\parindent \z@ \raggedright \normalfont
     \ifnum \c@secnumdepth >\m@ne
-        \centering\huge\bfseries\sffamily \thechapter. #1 \par\nobreak
-        \vskip 20\p@
+        \normalfont\fontsize{18}{20}\selectfont\bfseries\sffamily \thechapter. #1 \par\nobreak
+%        \huge\bfseries\sffamily \thechapter. #1 \par\nobreak
+%      \normalfont\fontsize{10}{12}\selectfont\bfseries\sffamily
+%         \centering\huge\bfseries\sffamily \thechapter. #1 \par\nobreak
+%        \vskip 20\p@
+        \vskip 16\p@
     \fi
   }}
 \def\@schapter#1{\if@twocolumn
@@ -321,28 +325,39 @@
                  \fi}
 \def\@makeschapterhead#1{%
   %\vspace*{40\p@}%
+  \vspace*{130\p@}%
   {\parindent \z@ \raggedright
     \normalfont
     \interlinepenalty\@M
-    \Large\bfseries\sffamily   #1\par\nobreak
-    \vskip 20\p@
+    \normalfont\fontsize{18}{20}\selectfont\bfseries\sffamily #1\par\nobreak
+%    \vskip 20\p@
+    \vskip 16\p@
   }}
-\newcommand\section{\@startsection {section}{1}{\z@}%
-                                   {-3.5ex \@plus -1ex \@minus -.2ex}% vertical space before
-                                   {2.3ex \@plus.2ex}% vertical space after
-                                   {\centering\normalfont\fontsize{18}{23}\selectfont\bfseries\sffamily}}
+\newcommand\section{\@startsection {section}{1}{\z@}% Heading 2
+%                                   {-3.5ex \@plus -1ex \@minus -.2ex}% vertical space before
+%                                   {2.3ex \@plus.2ex}% vertical space after
+                                   {-20pt \@plus -5pt \@minus -1.5pt}% vertical space before
+                                   {14pt \@plus 1.4pt}% vertical space after
+                                   {\normalfont\fontsize{14}{16}\selectfont\bfseries\sffamily}}
+%                                    {\centering\normalfont\fontsize{18}{23}\selectfont\bfseries\sffamily}}
 %\newcommand\section{\@startsection {section}{1}{\z@}%
 %                                   {-3.5ex \@plus -1ex \@minus -.2ex}%
 %                                   {2.3ex \@plus.2ex}%
 %                                   {\normalfont\large\bfseries\sffamily}}
-\newcommand\subsection{\@startsection{subsection}{2}{\z@}%
-                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
-                                     {1.5ex \@plus .2ex}%
-                                     {\centering\normalfont\normalsize\bfseries\sffamily}}
-\newcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
-                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
-                                     {1.5ex \@plus .2ex}%
-                                     {\centering\normalfont\normalsize\sffamily}}
+\newcommand\subsection{\@startsection{subsection}{2}{\z@}% Heading 3
+%                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+%                                     {1.5ex \@plus .2ex}%
+                                     {-18pt \@plus -5pt \@minus -1pt}%
+                                     {14pt \@plus 2pt}%
+                                     {\normalfont\normalsize\bfseries\sffamily}}
+%                                     {\centering\normalfont\normalsize\bfseries\sffamily}}
+\newcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}% Heading 4
+%                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+%                                     {1.5ex \@plus .2ex}%
+                                     {-18pt \@plus -5pt \@minus -1pt}%
+                                     {12pt \@plus 1.8pt}%
+                                     {\normalfont\normalsize\sffamily}}
+%                                     {\centering\normalfont\normalsize\sffamily}}
 \newcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
                                     {3.25ex \@plus1ex \@minus.2ex}%
                                     {-1em}%
@@ -489,16 +504,19 @@
 \def\fps@figure{tbp}
 \def\ftype@figure{1}
 \def\ext@figure{lof}
-\def\fnum@figure{\em \figurename~\thefigure}
+\def\fnum@figure{\figurename~\thefigure}
+%  \def\fnum@figure{\em \figurename~\thefigure}
 \newenvironment{figure}
                {\@float{figure}}
                {\end@float}
 \newenvironment{figure*}
                {\@dblfloat{figure}}
                {\end@dblfloat}
-\newcounter{table}[chapter]
+% \newcounter{table}[chapter]
+\newcounter{table}
 \renewcommand \thetable
-     {\ifnum \c@chapter>\z@ \thechapter.\fi \@arabic\c@table}
+     {\@arabic\c@table}
+%       {\ifnum \c@chapter>\z@ \thechapter.\fi \@arabic\c@table}
 \def\fps@table{tbp}
 \def\ftype@table{2}
 \def\ext@table{lot}
@@ -511,10 +529,11 @@
                {\end@dblfloat}
 \newlength\abovecaptionskip
 \newlength\belowcaptionskip
-\setlength\abovecaptionskip{10\p@}
+\setlength\abovecaptionskip{0\p@}
 \setlength\belowcaptionskip{0\p@}
 \long\def\@makecaption#1#2{%
   \vskip\abovecaptionskip
+ \normalfont\fontsize{10}{13}\sffamily\selectfont
   \sbox\@tempboxa{#1.~~#2}%
   \ifdim \wd\@tempboxa >\hsize
     #1.~~#2\par
@@ -532,10 +551,12 @@
 \DeclareOldFontCommand{\sc}{\normalfont\scshape}{\@nomath\sc}
 \DeclareRobustCommand*\cal{\@fontswitch\relax\mathcal}
 \DeclareRobustCommand*\mit{\@fontswitch\relax\mathnormal}
+%\newcommand\@pnumwidth{1.55em}
 \newcommand\@pnumwidth{1.55em}
 \newcommand\@tocrmarg{2.55em}
 \newcommand\@dotsep{4.5}
-\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{1}
+% \setcounter{tocdepth}{2}
 \newcommand\tableofcontents{%
     \if@twocolumn
       \@restonecoltrue\onecolumn
@@ -544,7 +565,8 @@
     \fi
     \chapter*{\contentsname
         \@mkboth{%
-           \MakeUppercase\contentsname}{\MakeUppercase\contentsname}}%
+           \contentsname}{\contentsname}}%
+%           \MakeUppercase\contentsname}{\MakeUppercase\contentsname}}%
     \@starttoc{toc}%
     \if@restonecol\twocolumn\fi
     }
@@ -565,23 +587,32 @@
 \newcommand*\l@chapter[2]{%
   \ifnum \c@tocdepth >\m@ne
     \addpenalty{-\@highpenalty}%
-    \vskip 1.0em \@plus\p@
-    \setlength\@tempdima{1.5em}%
+    \vskip 12pt \@plus\p@
+%    \vskip 1.0em \@plus\p@
+%    \setlength\@tempdima{1.5em}%
+    \setlength\@tempdima{18pt}%
     \begingroup
       \parindent \z@ \rightskip \@pnumwidth
       \parfillskip -\@pnumwidth
-      \leavevmode \bfseries
+      \leavevmode   \normalfont\fontsize{11}{14}\selectfont\sffamily
       \advance\leftskip\@tempdima
-      \hskip -\leftskip
+      \hskip -1.25\@tempdima
+%      \hskip -\leftskip
       #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+%      #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
       \penalty\@highpenalty
     \endgroup
   \fi}
-\newcommand*\l@section{\@dottedtocline{1}{1.5em}{2.3em}}
-\newcommand*\l@subsection{\@dottedtocline{2}{3.8em}{3.2em}}
-\newcommand*\l@subsubsection{\@dottedtocline{3}{7.0em}{4.1em}}
-\newcommand*\l@paragraph{\@dottedtocline{4}{10em}{5em}}
-\newcommand*\l@subparagraph{\@dottedtocline{5}{12em}{6em}}
+\newcommand*\l@section{\normalfont\fontsize{9}{12}\selectfont\sffamily
+      \@dottedtocline{1}{1.5em}{2.3em}}
+\newcommand*\l@subsection{\normalfont\fontsize{9}{12}\selectfont\sffamily
+      \@dottedtocline{2}{3.8em}{3.2em}}
+\newcommand*\l@subsubsection{\normalfont\fontsize{9}{12}\selectfont\sffamily
+      \@dottedtocline{3}{7.0em}{4.1em}}
+\newcommand*\l@paragraph{\normalfont\fontsize{9}{12}\selectfont\sffamily
+      \@dottedtocline{4}{10em}{5em}}
+\newcommand*\l@subparagraph{\normalfont\fontsize{9}{12}\selectfont\sffamily
+      \@dottedtocline{5}{12em}{6em}}
 \newcommand\listoffigures{%
     \if@twocolumn
       \@restonecoltrue\onecolumn
@@ -612,7 +643,8 @@
 \setlength\bibindent{1.5em}
 \newenvironment{thebibliography}[1]
      {\chapter*{\bibname
-        \@mkboth{\MakeUppercase\bibname}{\MakeUppercase\bibname}}%
+        \@mkboth{\bibname}{\bibname}}%
+      \normalfont\fontsize{10}{13}\selectfont
       \list{\@biblabel{\@arabic\c@enumiv}}%
            {\settowidth\labelwidth{\@biblabel{#1}}%
             \leftmargin\labelwidth
@@ -662,7 +694,7 @@
 \newcommand\contentsname{Contents}
 \newcommand\listfigurename{List of Figures}
 \newcommand\listtablename{List of Tables}
-\newcommand\bibname{Bibliography}
+\newcommand\bibname{References}
 \newcommand\indexname{Index}
 \newcommand\figurename{Figure}
 \newcommand\tablename{Table}
