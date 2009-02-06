@@ -1,9 +1,12 @@
 #!/bin/csh -f 
 
-# get FDS-SMV test cases for current revision
+# get test cases for Linux/OSX
 
-set revision=3222
 set REPOS=~/FDS-SMV
+
+# -------------- should not need to edit below ------------
+
+set revision=$1
 
 cd $REPOS/Utilities/Scripts/to_google/
 
