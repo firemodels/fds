@@ -10,12 +10,12 @@ set svn_drive=d:
 
 Rem set username for Linux cluster and google code
 
-set linux_username=gforney
-set google_username=gforney
+set linux_username=username
+set google_username=username
 
 Rem set linux cluster hostname
 
-set linux_hostname=acrux.cfr.nist.gov
+set linux_hostname=hostname
 
 Rem define Smokeview version and svn revision info
 
