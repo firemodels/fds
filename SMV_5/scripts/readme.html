@@ -5,20 +5,37 @@
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Smokeview Build Notes</h2>
 <p><hr size="1">
-<h3>Prerequisites</h3>
+<h3>Prerequisites/Assumptions</h3>
 <ul>
-<li><a href="EDIT_setup.bat">Edit environment setup file</a>
-<li><a href="EDIT_readme.bat">Edit this web page</a>
+<li><a href="EDIT_readme.bat">Edit this web page</a> (remove this entry when this page is finished)
+<li><a href="EDIT_setup.bat">Edit configuration file</a> Define environmental variables used by the scripts on this page 
+(such as svn revision numbers, user names, local SVN repository location, <em>etc.</em>).
+<li><a href="GET_smv_svn_num.bat">Get version</a> Get svn status information for the Smokeview source directory.
+<li>Software Assumptions
+<ol>
+<li>Intel Fortran and C/C++ compilers - version 11
+<li>command line versions of Winzip version 12, Winzip self extracter generator
+</ol>
 </ul>
 <h3>Build and/or Upload Release Smokeview</h3>
 <ul>
-<li><a href="MAKEall_smvs.bat">Build for all platforms</a>
-<li><a href="UPLOADrelease.bat">Upload to Googlecode</a>
+<li>For now, assume that a release Smokeview version has been built and tested for Windows.
+Assume that it is located at SVN_ROOT/SMV_5/for_bundle/smokeview_release.exe .  
+<li>Smokeview's for Linux and OSX will be built using the script below.
+<li><a href="MAKEall_smvs.bat">Build Smokeviews</a> Create an installation file for Windows.  
+Compile and create a compressed tar file for Linux and OSX.
+<li><a href="UPLOADrelease.bat">Upload</a> Upload installation/archive files created in the previous step to google code.
 </ul>
 <h3>Build and/or Upload a Test Smokeview</h3>
 <ul>
-<li><a href="MAKEtest.bat">Build test Smokeview installation for Windows</a>
-<li><a href="UPLOADtest.bat">Upload to Googlecode</a>
+<li>For now, assume that a test Smokeview version has been built and preliminarly tested for Windows.
+Assume that it is located at SVN_ROOT/SMV_5/for_bundle/smokeview_test.exe .  
+<li><a href="MAKEtest.bat">Build test Smokeview</a> Create an installation file for Windows.
+<li><a href="UPLOADtest.bat">Upload</a> Upload the installation file created in the previous step to google code.
+</ul>
+<h3>FDS Build Notes</h3>
+<ul>
+<li><a href="../../Utilities/Scripts/readme.html">Build notes for FDS</a>
 </ul>
 <p><hr>
 
