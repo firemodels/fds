@@ -2,11 +2,6 @@
 
 Rem Windows batch file to upload FDS release to the google download site.
 
-Rem set version and revision to match those set in ZIP_FDS_Intel_win_32.bat
-
-set version=upload_test
-set revision=r3202
-
 Rem uncomment 2 of the following 3 lines depending on what type of release is
 Rem being uploaded
 
@@ -15,28 +10,48 @@ Rem being uploaded
   set level=Release-3_Maintenance
 
 Rem directory containing googlecode password file (gc.passwd)
-  set pwdir=d:\bin\
+  set pwdir=c:\bin\
 
-Rem -------- should not need to edit any lines below ---------
+set envfile=c:\bin\fds_smv_env.bat
+IF EXIST %envfile% GOTO endif_envexist
+echo ***Fatal error.  The environment setup file %envfile% does not exist. 
+echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
+echo as an example.
+echo.
+echo Aborting now...
+pause>NUL
+goto:eof
+
+:endif_envexist
+
+call %envfile%
+
+%svn_drive%
+cd %svn_root%\Utilities\Scripts\to_google
 
 
-echo Uploading FDS %level% version=%version% revision=%revision%
-pause
-
-set upload_win32=1
-Rem --------------- 32 bit Windows ----------------
-if not %upload_win32% == 1 goto endif_win32
   set glabels=Type-Installer,Opsys-Windows,%level%
   set dplatform=32 bit Windows
   set platform=win32
-  set summary=FDS %version% for %dplatform% (build %revision%)
-  set exe=FDS_%version%_%revision%_%platform%.exe
-  echo -----
+  set summary=FDS %fds_version% for %dplatform% (SVN r%fds_revision%)
+  set exe=fds_%fds_version%_%fds_revision%_%platform%.exe
+echo Uploading %exe%
+echo FDS %level% version=%fds_version% revision=%fds_revision%
+echo.
+echo press any key to proceed with upload, CTRL c to abort
+pause>NUL
+
+  if not exist %exe% goto abort_upload
+  echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
        googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
-:endif_win32
 
-echo -----
+echo.
 echo Uploads complete
+pause
+goto:eof
+
+:abort_upload
+echo %exe% does not exist - upload to google failed
 pause
