@@ -10,7 +10,7 @@ set revision=$1
 
 cd $REPOS/Utilities/Scripts/to_google/
 
-set testdir=FDS_Test_cases_$revision
+set testdir=fds_test_cases_$revision
 
 if (-d Test_cases) then
 echo removing Test_cases
