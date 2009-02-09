@@ -27,5 +27,10 @@ Rem define FDS version and svn revision info
 set fds_version=xxxx
 set fds_revision=zzzz
 
+Rem define revision number for test cases
+
+set test_cases_revision=zzzz
+
+Rem --- do not edit below ----------------
 
 set svn_logon=%linux_username%@%linux_hostname%
