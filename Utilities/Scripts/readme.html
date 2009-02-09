@@ -8,8 +8,11 @@
 <h3>Prerequisites and Assumptions</h3>
 <ul>
 <li><a href="EDIT_readme.bat">Edit this web page</a> (remove this entry when this page is finished)
-<li><a href="EDIT_setup.bat">Edit configuration file</a> Define environmental variables used by the scripts on this page 
-(such as svn revision numbers, user names, local SVN repository location, <em>etc.</em>).
+<li><a href="EDIT_setup.bat">Edit configuration file</a> Define environmental variables used by the scripts on this page.
+<ul>
+<li>user names, linux cluster host name and SVN repository location need only be defined once
+<li>version and revision numbers need to be updated as repository changes
+</ul>
 <li>Software Assumptions
 <ol>
 <li>Intel Fortran and C/C++ compilers - version 11
@@ -29,6 +32,15 @@
 <ul>
 <li>
 </ul>
+
+<h3>Documentation</h3>
+<ul>
+<li><a href="GET_docs_svn_num.bat">Get version</a> Get svn status information for the Documentation directory (Manuals/All_PDF_Files)
+<li><a href="GET_docs.bat">Generate docs</a> Generate an installation file containing documentation for FDS and Smokeview
+<li><a href="TOGOOGLE_docs.bat">Upload Documentation</a>
+</ul>
+
+
 <h3>Test Cases</h3>
 <ul>
 <li><a href="GET_testcases_svn_num.bat">Get version</a> Get svn status information for the Test_cases directory tree.
