@@ -118,7 +118,17 @@ void get_smokezippath(char *progdir, char **zippath){
   return;
 }
 
-/* ------------------ pause ------------------------ */
+/* ------------------ abortSV ------------------------ */
+
+void abortSV(char *message){
+  int i;
+  if(message!=NULL&&strlen(message)>0){
+    printf("%s\n",message);
+  }
+  scanf("%i",&i);
+}
+
+/* ------------------ pauseSV ------------------------ */
 
 void pauseSV(void){
   int i;
