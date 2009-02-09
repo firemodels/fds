@@ -2,27 +2,40 @@
 
 Rem Batch file used to create a self-extracting archive containing FDS
 
-set version=upload_test
-set revision=r3202
+set envfile=c:\bin\fds_smv_env.bat
+IF EXIST %envfile% GOTO endif_envexist
+echo ***Fatal error.  The environment setup file %envfile% does not exist. 
+echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
+echo as an example.
+echo.
+echo Aborting now...
+pause>NUL
+goto:eof
+
+:endif_envexist
+
+call %envfile%
+
+%svn_drive%
+cd %svn_root%\Utilities\Makefile
 
 set bin=d:\bin
 
-Rem --------- should not need to edit lines below ------
+set fdsroot=fds_%fds_version%_%fds_revision%_win32
+set togoogle=%svn_root%\Utilities\Scripts\to_google\%fdsroot%
+mkdir %togoogle%
+copy Intel_Win_32\fds5_win_32.exe %togoogle%\fds5.exe
 
-set togoogle=to_google
-set fdsdir=fds_%version%_%revision%_win32
-
-copy ..\Makefile\Intel_Win_32\fds5_win_32.exe %togoogle%\fds5.exe
-
-echo
+echo.
 echo winzipping distribution directory
 cd %togoogle%
-wzzip -a -r -P %fdsdir%.zip *
-
-echo
+if exist ..\%fdsroot%.zip erase ..\%fdsroot%.zip
+wzzip -a -r -P ..\%fdsroot%.zip *
+cd ..
+echo.
 echo creating self-extracting archive
-%bin%\winzip\wzipse32 %fdsdir%.zip -d "C:\Program Files\nist\FDS"
-copy %fdsdir%.exe ..\.
+if exist %fdsroot%.exe erase %fdsroot%.exe
+%bin%\winzip\wzipse32 %fdsroot%.zip -d "C:\Program Files\nist\FDS"
 
-
+echo %fdsroot%.exe located in %cd%
 pause
