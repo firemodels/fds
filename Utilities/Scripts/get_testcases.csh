@@ -1,6 +1,7 @@
 #!/bin/csh -f 
 
 # get test cases for Linux/OSX
+# dummy change to force commit
 
 set REPOS=~/FDS-SMV
 
