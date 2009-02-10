@@ -46,7 +46,7 @@ echo.
 echo Uploads complete
 
 
-  set glabels=Type-Installer,Opsys-Unix,%level%
+  set glabels=Type-Archive,Opsys-Unix,%level%
   set dplatform=Linux/OSX
   set summary=Documentation (SVN r%docs_revision% - gzipped/tar archive)
   set file=%unixdocs%
