@@ -28,26 +28,27 @@ set pwdir=c:\bin\
 
 Rem -------- should not need to edit any lines below ---------
 
-echo Uploading FDS_Test_cases_%revision%.exe
-echo Uploading FDS_Test_cases_%revision%.tar.gz
+set winfile=fds_test_cases_%test_cases_revision%.exe
+set unixfile=fds_test_cases_%test_cases_revision%.tar.gz
+
+echo Uploading %winfile%
+echo Uploading %unixfile%
 pause
 
   set glabels=Type-Installer,Opsys-Windows,%level%
   set dplatform=Windows
-  set summary=FDS test cases for %dplatform% (SVN r%revision% - Windows line endings)
-  set file=fds_test_cases_%test_cases_revision%.exe
+  set summary=Test cases (SVN r%test_cases_revision% - Windows line endings)
   echo.
   echo Uploading %summary% - %wincase%
-       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
+       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %winfile%
 
   set glabels=Type-Archive,Opsys-Unix,%level%
   set dplatform=Linux/OSX
-  set summary=FDS test cases for %dplatform% (SVN r%revision% - Unix line endings)
-  set file=fds_test_cases_%test_cases_revision%.tar.gz
+  set summary=Test cases (SVN r%test_cases_revision% - Unix line endings)
   echo.
   echo Uploading %summary% - %wincase%
-       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
+       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %unixfile%
 
-echo -----
+echo.
 echo Uploads complete
 pause
