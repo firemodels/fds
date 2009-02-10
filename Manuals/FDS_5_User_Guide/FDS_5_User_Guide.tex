@@ -7201,7 +7201,7 @@ coordinate parameters, {\ct XB}, all of which must be contained within the same 
 \subsubsection{Mass-Weighted Mean}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS MEAN'} produces the discrete analog of
-\be \frac{ \int \rho \, \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
+\be \frac{ \int \rho(x,y,z) \, \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
 which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this
 statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
@@ -7212,6 +7212,13 @@ For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME IN
 \be \int \phi(x,y,z) \; dx \, dy \, dz \ee
 Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example,
 heat release rate per unit volume is an appropriate output quantity. Note also that you must specify a volume to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+
+\subsubsection{Mass Integral}
+
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS INTEGRAL'} produces the discrete analog of
+\be \int \, \rho(x,y,z) \, \phi(x,y,z) \; dx \, dy \, dz \ee
+Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
 \subsubsection{Area Integral}
@@ -7422,13 +7429,20 @@ remember that all output quantity names ought to be in single quotes.
 
 \clearpage
 
-\begin{table}[ht!]
-\begin{center}
-\caption{Summary of frequently used output quantities}
-\label{tab:output}
-\begin{tabular}{|l|c|c|c|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
+\caption[Output quantities.]{Summary of frequently used output quantities.}
+\label{tab:output} \\
 \hline
-Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
+{\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Summary of frequently used output quantities (continued).} \\
+\hline
+{\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ 
+\hline \hline
+\endhead
 {\ct ABSORPTION COEFFICIENT}                    & $\kappa$ (Section~\ref{info:RADI})            & 1/m            & D,I,P,S      \\ \hline
 {\ct ADIABATIC SURFACE TEMPERATURE}             & See Section~\ref{info:AST}                    & $^\circ$C      & B,D          \\ \hline
 {\ct AMPUA}$^{**}$                              & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
@@ -7436,7 +7450,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct BACK WALL TEMPERATURE}                     & See Section~\ref{info:PROF}                   & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
 {\ct CHAMBER OBSCURATION}                       & See Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
-{\ct CONDUCTIVITY}                              & $k$                                        & W/m/k          & D,I,P,S      \\ \hline
+{\ct CONDUCTIVITY}                              & $k$                                           & W/m/k          & D,I,P,S      \\ \hline
 {\ct CONTROL}                                   & See Section~\ref{info:CTRL}                   &                & D            \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & $\dq_c''$ (Section~\ref{info:heat_flux})      & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA}$^{**}$                               & See Section~\ref{info:part_output}            & kW/m$^2$       & B,D          \\ \hline
@@ -7451,6 +7465,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct DROPLET TEMPERATURE}                       & $T_d$                                         & $^\circ$C      & PA           \\ \hline
 {\ct DROPLET MASS}                              & $m_d$                                         & kg             & PA           \\ \hline
 {\ct DROPLET AGE}                               & $t_d$                                         & s              & PA           \\ \hline
+{\ct ENTHALPY}                                  & $\sum Y_\alpha \int_0^T c_{p,\alpha}(T') \, dT'$  & kJ/kg      & D,I,P,S      \\ \hline
 {\ct FED}                                       & See Section~\ref{info:FED}                    &                & D            \\ \hline
 {\ct GAUGE HEAT FLUX}                           & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct H}                                         & $H=|\bu|^2/2 + \tp/\rho_0$                    & (m/s)$^2$      & D,I,P,S      \\ \hline
@@ -7469,22 +7484,6 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct MASS FLUX X}$^*$                           & $\rho u Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
 {\ct MASS FLUX Y}$^*$                           & $\rho v Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
 {\ct MASS FLUX Z}$^*$                           & $\rho w Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-\noindent
-\begin{tabbing}
-$^*$    \hspace{0.2in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
-$^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}.
-\end{tabbing}
-
-\clearpage
-
-\begin{table}[ht!]
-\begin{center}
-\begin{tabular}{|l|c|c|c|}
-\hline
-Output {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\ \hline \hline
 {\ct MASS FRACTION}$^*$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
 {\ct MASS LOSS}                                 & Integrated mass loss at surface               & kg/m$^2$       & B,D          \\ \hline
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
@@ -7521,9 +7520,8 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct WALL CLOCK TIME}                           & Elapsed wall clock time                       & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
 {\ct WALL THICKNESS}                            & See Section~\ref{info:material_components}    & m              & B,D          \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
+\end{longtable}
+
 \noindent
 \begin{tabbing}
 $^*$    \hspace{0.2in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
@@ -7538,14 +7536,20 @@ $^{**}$                \> Quantity requires the specification of a particle name
 Table~\ref{tab:oddoutput} below lists some less often used output quantities. These are mainly used for diagnostic purposes. Explanations for most can
 be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 
-
-\begin{table}[ht!]
-\begin{center}
-\caption{Summary of infrequently used output quantities}
-\label{tab:oddoutput}
-\begin{tabular}{|l|c|c|c|}
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
+\caption[Output quantities.]{Summary of {\em infrequently} used output quantities.}
+\label{tab:oddoutput} \\
 \hline
-Output {\ct QUANTITY}                           & Symbol                                            & Units          & File Type    \\ \hline \hline
+{\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
+\hline \hline
+\endfirsthead
+\caption[]{Summary of {\em infrequently} used output quantities (continued).} \\
+\hline
+{\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
+\hline \hline
+\endhead
 {\ct ADD}                                       & Average Droplet Density                           & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct ADT}                                       & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 %{\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
@@ -7569,9 +7573,7 @@ Output {\ct QUANTITY}                           & Symbol                        
 {\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
 {\ct WATER RADIATION LOSS}                      & $\nabla \cdot \bq_r''$ due to water droplets      & kW/m$^3$       & D,I,P,S      \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
+\end{longtable}
 
 
 \chapter{Alphabetical List of Input Parameters}
@@ -8209,7 +8211,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 
 \section{\texorpdfstring{{\tt PROF}}{PROF} (Wall Profile Parameters)}
-
 
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
