@@ -193,10 +193,6 @@ CALL INIT_EVAC_GROUPS
  
 CALL WRITE_STRINGS
 
-! Initialize Mesh Exchange Arrays (All Nodes)
-
-!!! CALL MESH_EXCHANGE(0)
-
 ! Initialize output files 
 
 IF (.NOT.RESTART) THEN
@@ -433,9 +429,7 @@ MAIN_LOOP: DO
       IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
          CALL WALL_BC(T(NM),NM)
          IF (N_REACTIONS > 0) CALL COMBUSTION(NM)
-         !! CALL COMPUTE_RADIATION(NM)
       ENDIF
-      !! CALL DIVERGENCE_PART_1(T(NM),NM)
    ENDDO COMPUTE_REACTION
    
    COMPUTE_DIVERGENCE_2: DO NM=1,NMESHES
@@ -959,9 +953,7 @@ ENDDO MESH_LOOP_2
 
 IF (RECOMPUTE_A) THEN
    CALL GAUSSJ(A,NCGC,NCGC,B,1,1,IERROR)
-!! IF (IERROR>0) WRITE(LU_ERR,*) ' Warning: Problem with coarse pressure computation'
    AINV = A  ! store inverse of A matrix
-!! IF (N_ZONE==0) RECOMPUTE_A = .FALSE.  ! Redo linear solve if the domain is sealed
 ELSE
    B = MATMUL(AINV,B)
 ENDIF
