@@ -3261,6 +3261,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
                      CASE('VOLUME INTEGRAL')
                         VOL = DX(I)*DY(J)*DZ(K)
                         STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T,NM)*VOL
+                     CASE('MASS INTEGRAL')
+                        VOL = DX(I)*DY(J)*DZ(K)
+                        STAT_VALUE = STAT_VALUE + &
+                                     GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T,NM)*VOL*RHO(I,J,K)
                      CASE('AREA INTEGRAL')
                         IF (DV%IOR==1) STAT_VALUE = STAT_VALUE + &
                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,T,NM)*DY(J)*DZ(K)
@@ -3590,6 +3594,16 @@ SELECT CASE(IND)
    CASE(45)  ! ITERATION
       GAS_PHASE_OUTPUT = ICYC
       
+   CASE(46)  ! ENTHALPY
+      ITMP = MIN(500,NINT(0.1_EB*TMP(II,JJ,KK)))
+      IF (N_SPECIES>0) THEN
+         YY_G = YY(II,JJ,KK,:)
+         CALL GET_H_G(YY_G,H_G,ITMP)
+      ELSE
+         H_G = Y2H_G_C(ITMP)
+      ENDIF
+      GAS_PHASE_OUTPUT = H_G*0.001_EB
+
    CASE(50)  ! MTR (measure of turbulence resolution)
       IF (.NOT.CHECK_KINETIC_ENERGY) THEN
          WRITE(MESSAGE,'(A)') "ERROR: Cannot DUMP MTR, CHECK_KINETIC_ENERGY=.FALSE."
@@ -3650,9 +3664,6 @@ SELECT CASE(IND)
       IF (SPEC_INDEX>0) MEC = SPECIES(SPEC_INDEX)%MASS_EXTINCTION_COEFFICIENT
       IF (SPEC_INDEX<0) MEC = MASS_EXTINCTION_COEFFICIENT
       GAS_PHASE_OUTPUT = Y_SPECIES*RHO(II,JJ,KK)*MEC/2.3_EB
-
-   CASE(103) ! LEAKAGE
-      GAS_PHASE_OUTPUT = USUM(PRESSURE_ZONE(II,JJ,KK),1)
 
    CASE(104) ! HRR
       Q_SUM = 0._EB
