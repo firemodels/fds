@@ -2117,3 +2117,24 @@ float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2
   ASSERT(FALSE);
   return dist(p1,p2);
 }
+
+/* ----------------------- init_device ----------------------------- */
+
+void init_device(device *devicei, float *xyz, float *xyzn, int state0){
+  if(xyz!=NULL){
+    devicei->xyz[0]=xyz[0];
+    devicei->xyz[1]=xyz[1];
+    devicei->xyz[2]=xyz[2];
+  }
+  devicei->xyznorm[0]=xyzn[0];
+  devicei->xyznorm[1]=xyzn[1];
+  devicei->xyznorm[2]=xyzn[2];
+  devicei->nstate_changes=0;
+  devicei->istate_changes=0;
+  devicei->act_times=NULL;
+  devicei->state_values=NULL;
+  devicei->showstatelist=NULL;
+  devicei->act_time=-1.0;
+  devicei->device_mesh=NULL;
+  devicei->state0=state0;
+}
