@@ -3636,6 +3636,8 @@ typedef struct {
             devicecopy->object = device_defs_backup[2];
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
+    
+          init_device(devicecopy,xyz,xyznorm,0);
 
           devicecopy++;
           ndeviceinfo++;
@@ -3697,20 +3699,7 @@ typedef struct {
       }
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f %f %f %i",xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0);
-      devicei->xyz[0]=xyz[0];
-      devicei->xyz[1]=xyz[1];
-      devicei->xyz[2]=xyz[2];
-      devicei->xyznorm[0]=xyzn[0];
-      devicei->xyznorm[1]=xyzn[1];
-      devicei->xyznorm[2]=xyzn[2];
-      devicei->nstate_changes=0;
-      devicei->istate_changes=0;
-      devicei->act_times=NULL;
-      devicei->state_values=NULL;
-      devicei->showstatelist=NULL;
-      devicei->act_time=-1.0;
-      devicei->device_mesh=NULL;
-      devicei->state0=state0;
+      init_device(devicei,xyz,xyzn,state0);
       get_elevaz(devicei->xyznorm,&devicei->angle_elev,&devicei->angle_az);
 
       ndeviceinfo++;
@@ -3764,6 +3753,7 @@ typedef struct {
         for(nn=0;nn<meshi->nspr;nn++){
           float *xyznorm;
           float normdenom;
+
           fgets(buffer,255,stream);
           xyznorm = devicecopy->xyznorm;
           xyznorm[0]=0.0;
@@ -3796,6 +3786,8 @@ typedef struct {
             devicecopy->object = device_defs_backup[2];
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
+    
+          init_device(devicecopy,NULL,xyznorm,0);
 
           devicecopy++;
           ndeviceinfo++;
@@ -3915,6 +3907,8 @@ typedef struct {
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
 
+          init_device(devicecopy,NULL,xyznorm,0);
+
           devicecopy++;
           ndeviceinfo++;
           xheatcopy++; yheatcopy++; zheatcopy++;
@@ -4015,7 +4009,8 @@ typedef struct {
           devicecopy->object = device_defs_backup[3];
         }
         get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
-
+    
+        init_device(devicecopy,xyz,xyznorm,0);
 
         devicecopy++;
         ndeviceinfo++;

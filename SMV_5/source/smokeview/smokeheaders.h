@@ -28,6 +28,7 @@ int SUB_portfrustum(int quad,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
 
+EXTERNCPP void init_device(device *devicei, float *xyz, float *xyzn, int state0);
 EXTERNCPP void draw_devices_val(void);
 EXTERNCPP void getsmokesensors(void);
 EXTERNCPP float get_vecfactor(int *iveclengths);
