@@ -49,6 +49,7 @@ setup_win:
  #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
  #    ..\Scripts\iclvars ia32
  #    ..\Scripts\ifortvars ia32
+/STACK:100000000,100000000 
 
 intel_win_32 : FFLAGS = -O2 /Qvec_report0
 intel_win_32 : CFLAGS = -O2 -Dpp_noappend /Qvec_report0
@@ -56,7 +57,7 @@ intel_win_32 : FCOMPL = ifort
 intel_win_32 : CCOMPL = icl
 intel_win_32 : obj = fds5_win_32
 intel_win_32 : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(objwin_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /STACK:100000000,100000000 $(objwin_serial)
 
  #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
  #    ..\Scripts\iclvars intel64
@@ -68,7 +69,7 @@ intel_win_64 : FCOMPL = ifort
 intel_win_64 : CCOMPL = icl
 intel_win_64 : obj = fds5_win_64
 intel_win_64 : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(objwin_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /STACK:100000000,100000000 $(objwin_serial)
 
 # Intel Compiler, version 11
 
