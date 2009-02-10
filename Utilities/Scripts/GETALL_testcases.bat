@@ -19,7 +19,7 @@ cd %svn_root%/Utilities/Scripts
 
 set LREPOS=FDS-SMV
 
-set testdir=FDS_Test_cases_%test_cases_revision%
+set testdir=fds_test_cases_%test_cases_revision%
 
 Rem get test cases for Linux/OSX systems
 

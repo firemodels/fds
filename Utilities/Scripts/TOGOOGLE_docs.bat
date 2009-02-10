@@ -29,17 +29,32 @@ Rem directory containing googlecode password file (gc.passwd)
 set pwdir=c:\bin\
 
 set windocs=fds_smv_docs_%docs_revision%.exe
+set unixdocs=fds_smv_docs_%docs_revision%.tar.gz
 echo Uploading %windocs%
+echo Uploading %unixdocs%
 pause
 
   set glabels=Type-Installer,Opsys-Windows,%level%
   set dplatform=Windows
-  set summary=FDS and Smokeview documentation for %dplatform% (SVN r%docs_revision%)
+  set summary=Documentation  (SVN r%docs_revision% - Windows self-extracter)
   set file=%windocs%
   echo.
   echo Uploading %summary% 
        googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
 
-echo -----
+echo.
 echo Uploads complete
+
+
+  set glabels=Type-Installer,Opsys-Unix,%level%
+  set dplatform=Linux/OSX
+  set summary=Documentation (SVN r%docs_revision% - gzipped/tar archive)
+  set file=%unixdocs%
+  echo.
+  echo Uploading %summary% 
+       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
+
+echo .
+echo Uploads complete
+
 pause
