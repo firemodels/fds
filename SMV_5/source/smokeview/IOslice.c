@@ -868,6 +868,8 @@ int slicecompare( const void *arg1, const void *arg2 ){
 
   slicei = sliceinfo + *(int *)arg1;
   slicej = sliceinfo + *(int *)arg2;
+  if(slicei->volslice==0&&slicej->volslice==1)return -1;
+  if(slicei->volslice==1&&slicej->volslice==0)return -1;
   if(slicei->mesh_type<slicej->mesh_type)return -1;
   if(slicei->mesh_type>slicej->mesh_type)return 1;
   delta = slicei->delta;
@@ -889,8 +891,6 @@ int slicecompare( const void *arg1, const void *arg2 ){
       return 1;
     }
   }
-
-
   if(strcmp(slicei->label.longlabel,slicej->label.longlabel)<0)return -1;
   if(strcmp(slicei->label.longlabel,slicej->label.longlabel)>0)return 1;
   if(slicei->idir<slicej->idir)return -1;
@@ -915,6 +915,8 @@ int vslicecompare( const void *arg1, const void *arg2 ){
   slicej = sliceinfo + vslicej->ival;
   delta = slicei->delta;
 
+  if(slicei->volslice==0&&slicej->volslice==1)return -1;
+  if(slicei->volslice==1&&slicej->volslice==0)return -1;
   if(slicei->mesh_type<slicej->mesh_type)return -1;
   if(slicei->mesh_type>slicej->mesh_type)return 1;
 
@@ -934,8 +936,6 @@ int vslicecompare( const void *arg1, const void *arg2 ){
       return 1;
     }
   }
-
-
   if(slicej->delta>delta)delta=slicej->delta;
   if(strcmp(slicei->label.longlabel,slicej->label.longlabel)<0)return -1;
   if(strcmp(slicei->label.longlabel,slicej->label.longlabel)>0)return 1;
@@ -999,14 +999,7 @@ void updateslicemenulabels(void){
       sdold = sliceinfo + sliceorderindex[i - 1];
       sd = sliceinfo + sliceorderindex[i];
       STRCPY(sd->menulabel,sd->slicedir);
-      delta = sdold->delta;
-      if(sd->delta>delta)delta=sd->delta;
-      if(strcmp(sd->label.longlabel,sdold->label.longlabel)!=0
-         ||sd->idir!=sdold->idir
-         ||sd->position+delta<sdold->position
-         ||sd->position-delta>sdold->position
-         ||sd->mesh_type!=sdold->mesh_type
-         ){
+      if(new_multi(sdold,sd)==1){
         mslicei++;
         STRCPY(mslicei->menulabel,sd->menulabel);
         STRCPY(mslicei->menulabel2,sd->label.longlabel);
@@ -1086,16 +1079,9 @@ void updatevslicemenulabels(void){
       vsd = vsliceinfo + vsliceorderindex[i];
       sd = sliceinfo + vsd->ival;
       STRCPY(vsd->menulabel,sd->slicedir);
-      delta = sdold->delta;
-      if(sd->delta>delta)delta=sd->delta;
-      if(strcmp(sd->label.longlabel,sdold->label.longlabel)!=0||
-         sd->idir!=sdold->idir||
-         sd->position+delta<sdold->position||
-         sd->position-delta>sdold->position
-         ){
+      if(new_multi(sdold,sd)==1){
         mvslicei++;
         STRCPY(mvslicei->menulabel,vsd->menulabel);
-
         STRCPY(mvslicei->menulabel2,sd->label.longlabel);
         STRCAT(mvslicei->menulabel2,", ");
         STRCAT(mvslicei->menulabel2,mvslicei->menulabel);
@@ -1119,6 +1105,35 @@ void updatevslicemenulabels(void){
   }
 }
 
+/* ------------------ new_multi ------------------------ */
+
+int new_multi(slice *sdold,slice *sd){
+
+  if(sdold->volslice!=sd->volslice==1)return 1;
+  if(sd->volslice==0){
+    float delta;
+
+    delta = sdold->delta;
+    if(sd->delta>delta)delta=sd->delta;
+    if(strcmp(sd->label.shortlabel,sdold->label.shortlabel)!=0
+      ||sd->idir!=sdold->idir
+      ||sd->position+delta<sdold->position
+      ||sd->position-delta>sdold->position
+      ||sd->mesh_type!=sdold->mesh_type
+        ){
+      return 1;
+    }
+  }
+  if(sd->volslice==1){
+    if(strcmp(sd->label.shortlabel,sdold->label.shortlabel)!=0
+      ||sd->mesh_type!=sdold->mesh_type
+        ){
+      return 1;
+    }
+  }
+  return 0;
+}
+
 /* ------------------ getsliceparams ------------------------ */
 
 void getsliceparams(void){
@@ -1132,7 +1147,6 @@ void getsliceparams(void){
   int iblock;
   mesh *meshi;
   multislice *mslicei;
-  float delta;
 
   for(i=0;i<nslice;i++){
     sd = sliceinfo + i;
@@ -1243,14 +1257,7 @@ void getsliceparams(void){
     for(i=1;i<nslice;i++){
       sdold = sliceinfo + sliceorderindex[i - 1];
       sd = sliceinfo + sliceorderindex[i];
-      delta = sdold->delta;
-      if(sd->delta>delta)delta=sd->delta;
-      if(strcmp(sd->label.shortlabel,sdold->label.shortlabel)!=0
-         ||sd->idir!=sdold->idir
-         ||sd->position+delta<sdold->position
-         ||sd->position-delta>sdold->position
-         ||sd->mesh_type!=sdold->mesh_type
-         ){
+      if(new_multi(sdold,sd)==1){
         nmultislices++;
         mslicei++;
         mslicei->nslices=0;
@@ -1404,14 +1411,7 @@ void updatevslices(void){
       sdold = sliceinfo + vsdold->ival;
       vsd = vsliceinfo + vsliceorderindex[i];
       sd = sliceinfo + vsd->ival;
-      delta = sdold->delta;
-      if(sd->delta>delta)delta=sd->delta;
-      if(strcmp(sd->label.longlabel,sdold->label.longlabel)!=0
-         ||sd->idir!=sdold->idir
-         ||sd->position+delta<sdold->position
-         ||sd->position-delta>sdold->position
-         ||sd->mesh_type!=sdold->mesh_type
-         ){
+      if(new_multi(sdold,sd)==1){
         nmultivslices++;
         mvslicei++;
         mvslicei->nvslices=0;
