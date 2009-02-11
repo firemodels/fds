@@ -3691,6 +3691,7 @@ void draw_user_ticks(void){
   float tick_origin[3], step[3];
   int show_tick_x, show_tick_y, show_tick_z;
 
+#define MIN_DTICK 0.0
 #define TEXT_FACTOR 1.5
 
   user_tick_option=get_tick_dir(modelview_scratch);
@@ -3761,28 +3762,28 @@ void draw_user_ticks(void){
       break;
   }
   }
-  if(step[0]>0.1){
+  if(step[0]>MIN_DTICK){
     user_tick_nxyz[0]=abs((user_tick_max[0]+1.0-tick_origin[0])/step[0]);
   }
-  else if(step[0]<-0.1){
+  else if(step[0]<-MIN_DTICK){
     user_tick_nxyz[0]=abs((tick_origin[0]+1.0-user_tick_min[0])/step[0]);
   }
   else{
     user_tick_nxyz[0]=0;
   }
-  if(step[1]>0.1){
+  if(step[1]>MIN_DTICK){
     user_tick_nxyz[1]=abs((user_tick_max[1]+1.0-tick_origin[1])/step[1]);
   }
-  else if(step[1]<-0.1){
+  else if(step[1]<-MIN_DTICK){
     user_tick_nxyz[1]=abs((tick_origin[1]+1.0-user_tick_min[1])/step[1]);
   }
   else{
     user_tick_nxyz[1]=0;
   }
-  if(step[2]>0.1){
+  if(step[2]>MIN_DTICK){
     user_tick_nxyz[2]=abs((user_tick_max[2]+1.0-tick_origin[2])/step[2]);
   }
-  else if(step[2]<-0.1){
+  else if(step[2]<-MIN_DTICK){
     user_tick_nxyz[2]=abs((tick_origin[2]+1.0-user_tick_min[2])/step[2]);
   }
   else{
