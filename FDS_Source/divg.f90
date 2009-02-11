@@ -125,7 +125,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
+               ITMP = MIN(5000,NINT(TMP(I,J,K)))
                RHO_D(I,J,K) = RHOP(I,J,K)*SPECIES(N)%D(ITMP)
             ENDDO 
          ENDDO
@@ -136,7 +136,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
+               ITMP = MIN(5000,NINT(TMP(I,J,K)))
                YSUM = SUM(YYP(I,J,K,:)) - SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
                CALL GET_D(YYP(I,J,K,I_Z_MIN:I_Z_MAX),YSUM,RHO_D(I,J,K),ITMP)
                RHO_D(I,J,K) = RHOP(I,J,K)*RHO_D(I,J,K)
@@ -233,7 +233,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          JJG = IJKW(7,IW)
          KKG = IJKW(8,IW)
          IOR  = IJKW(4,IW)
-         ITMP = MIN(500,NINT(0.1_EB*TMP_F(IW)))
+         ITMP = MIN(5000,NINT(TMP_F(IW)))
          HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
          RHO_D_DYDN = RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_W(IW,N))*RDN(IW)
          SELECT CASE(IOR)
@@ -332,7 +332,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
+                  ITMP = MIN(5000,NINT(TMP(I,J,K)))
                   YY_GET(:) = YYP(I,J,K,:)
                   CALL GET_K(YY_GET,KP(I,J,K),ITMP)     
                ENDDO
@@ -343,7 +343,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
+                  ITMP = MIN(5000,NINT(TMP(I,J,K)))
                   KP(I,J,K) = Y2K_C(ITMP)*SPECIES(0)%MW
                ENDDO
             ENDDO
@@ -446,7 +446,7 @@ IF (N_SPECIES==0) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
+            ITMP = MIN(5000,NINT(TMP(I,J,K)))
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM0/Y2CP_C(ITMP)
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
@@ -457,7 +457,7 @@ ELSE
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
+            ITMP = MIN(5000,NINT(TMP(I,J,K)))
             YY_GET(:) = YYP(I,J,K,:)
             CALL GET_CP(YY_GET,CP_MF,ITMP)
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_MF
