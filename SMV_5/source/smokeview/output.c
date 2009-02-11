@@ -97,6 +97,7 @@ void outputBarText(float x, float y, const GLfloat *color, const char *string){
   int len, i;
   int length;
   float xlength;
+  float xbeg;
 
   if(string==NULL)return;
 
@@ -104,7 +105,9 @@ void outputBarText(float x, float y, const GLfloat *color, const char *string){
   xlength = length*barright/dwinWW+0.02;
 
   glColor3fv(color);
-  glRasterPos2f(x-xlength, y);
+  xbeg=x-xlength;
+  if(xbeg<0.0)xbeg=0.0;
+  glRasterPos2f(xbeg, y);
   len = (int) strlen(string);
   for (i = 0; i < len; i++){
     glutBitmapCharacter(small_font,string[i]);
