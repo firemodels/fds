@@ -18,19 +18,25 @@
 </ol>
 <li><a href="http://code.google.com/p/fds-smv/downloads/list?deleted=1&ts=1234368278">Check download page</a>
 </ul>
-<h3>Build and/or Upload Release Smokeview</h3>
+
+<h3>Verify Smokeview</h3>
 <ul>
-<li>For now, assume that a release Smokeview version has been built and tested for Windows.
-Assume that it is located at SVN_ROOT/SMV_5/for_bundle/smokeview_release.exe .  
+<li><a href="RUN_smv_test_cases.bat">Run test cases</a> Run FDS cases used to test smokeview (allow several hours to complete)
+<li><a href="MAKE_SMV_UG_figures.bat">Create test figures</a> Run Smokeview scripts that generate figures for the User's Guide
+<li><a href="MAKE_SMV_UG.bat">Generate User's Guide</a> Use pdflatex and bibtex to generate a PDF version of the Smokeview user's guide
+<li><a href="VIEW_SMV_UG.bat">View User's Guide</a> Examine the generated figures in the User's guide to verify that Smokeview is working properly.
+</ul>
+
+<h3>Build and  Upload a Release Smokeview</h3>
+<ul>
 <li>Smokeview's for Linux and OSX will be built using the script below.
 <li><a href="MAKEall_smvs.bat">Build Smokeviews</a> Create an installation file for Windows.  
 Compile and create a compressed tar file for Linux and OSX.
 <li><a href="UPLOADrelease.bat">Upload</a> Upload installation/archive files created in the previous step to google code.
 </ul>
-<h3>Build and/or Upload a Test Smokeview</h3>
+
+<h3>Build and Upload a Test Smokeview</h3>
 <ul>
-<li>For now, assume that a test Smokeview version has been built and preliminarly tested for Windows.
-Assume that it is located at SVN_ROOT/SMV_5/for_bundle/smokeview_test.exe .  
 <li><a href="MAKEtest.bat">Build test Smokeview</a> Create an installation file for Windows.
 <li><a href="UPLOADtest.bat">Upload</a> Upload the installation file created in the previous step to google code.
 </ul>
