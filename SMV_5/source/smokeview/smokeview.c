@@ -439,7 +439,12 @@ void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GL
   float xnum;
 
 
- if(visColorLabels==1&&numColorbars!=0){
+  if(visColorLabels==1&&numColorbars!=0){
+    float ybump=0.0;
+
+    if(fontindex==LARGE_FONT){
+      ybump=1.0;
+    }
     temp = (int)(1.2f*dwinH);
     xnum=numColorbars;
     if(fontindex==LARGE_FONT)xnum*=1.5;
@@ -450,25 +455,28 @@ void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GL
         temp+titlesafe_offset,
         dwinWW,
         screenHeight-temp-fontHoffset-2*titlesafe_offset,
-        0.,(double)barright,-1.0,(double)(ratio*(nrgb+1)),
-        s_left, s_down, s_width, s_height)==0)return;
+        0.,(double)barright,-1.0,(double)(ratio*(nrgb+1+ybump)),
+        s_left, s_down, s_width, s_height)==0){
+          return;
+      }
     }
     else{
       barright=ratio*(xnum/3.0+0.1f);
       if(SUB_portortho(quad,
-       screenWidth-dwinWW-fontWoffset-titlesafe_offset,temp+titlesafe_offset,dwinWW,screenHeight-temp-fontHoffset-2*titlesafe_offset,
-       0.,(double)barright,-1.0,(double)(nrgb+1),
-       s_left, s_down, s_width, s_height)==0)return;
+        screenWidth-dwinWW-fontWoffset-titlesafe_offset,temp+titlesafe_offset,dwinWW,screenHeight-temp-fontHoffset-2*titlesafe_offset,
+        0.,(double)barright,-1.0,(double)(nrgb+1+ybump),
+        s_left, s_down, s_width, s_height)==0){
+        return;
+      }
     }
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
     if( showtime==1 || showplot3d==1){
-      drawColorBars();
+      drawColorBars(ybump);
     }
   }
-
 }
 
 /* -------------------------- LOGO Viewport -------------------------- */

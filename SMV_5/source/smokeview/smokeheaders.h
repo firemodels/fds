@@ -529,7 +529,7 @@ EXTERNCPP void drawvvolslice_terrain(const vslice *vd);
 EXTERNCPP void drawvslice(const vslice *vd);
 EXTERNCPP void drawvslice_terrain(const vslice *vd);
 EXTERNCPP void drawTimeBar(void);
-EXTERNCPP void drawColorBars(void);
+EXTERNCPP void drawColorBars(float ybump);
 EXTERNCPP void drawPart(const particle *parti);
 EXTERNCPP void drawEvac(const particle *parti);
 EXTERNCPP void drawStaticPart(const particle *parti);

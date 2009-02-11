@@ -778,7 +778,7 @@ int get_label_position(float position, float dyfont, float barbot){
 
       /* ------------------ drawColorBars ------------------------ */
 
-void drawColorBars(void){
+void drawColorBars(float ybump){
   float dyfont;
   int dyscreen;
   int temp;
@@ -860,7 +860,7 @@ void drawColorBars(void){
   if(left[2]<0.0f)left[2]=0.0;
 
 //  labeltop=nrgb+.7;
-  labeltop=nrgb+1.0;
+  labeltop=nrgb+1.0+ybump;
   temp = (int)(1.2f*dwinH);
   dyscreen=screenHeight-temp-fontHoffset-2*titlesafe_offset;
 
