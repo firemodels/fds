@@ -660,7 +660,7 @@ USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP, AFILL2
 USE PHYSICAL_FUNCTIONS, ONLY : DRAG
  
 REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,SFAC,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
-            RD,T,C_DRAG,XI,YJ,ZK,MU_AIR, &
+            RD,T,C_DRAG,XI,YJ,ZK,MU_AIR,&
             DTSP,DTMIN,UBAR,VBAR,WBAR,BFAC,GRVT1,GRVT2,GRVT3,AUREL,AVREL,AWREL,CONST, &
             UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION(-3:3),R_NEW,SURFACE_DROPLET_DIAMETER
 LOGICAL :: HIT_SOLID
@@ -732,7 +732,7 @@ DROPLET_LOOP: DO I=1,NLP
    QREL  = MAX(1.E-6_EB,SQRT(UREL*UREL + VREL*VREL + WREL*WREL))
    TMP_G = MAX(TMPMIN,TMP(II,JJ,KK))
    RHO_G = RHO(II,JJ,KK)
-   MU_AIR = Y2MU_C(MIN(500,NINT(0.1_EB*TMP_G)))*SPECIES(0)%MW
+   MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
    DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
    DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
       C_DRAG  = DRAG(DR%RE)
@@ -1117,7 +1117,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
-            CP,H_NEW,YY_GET(1:N_SPECIES)
+            CP,H_NEW,YY_GET(1:N_SPECIES), H_GAS,H_VAPOR,M_GAS_NEW
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS,ITMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
@@ -1241,7 +1241,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
             TMP_G  = TMP(II,JJ,KK)
             RHO_G  = RHO(II,JJ,KK)
-            MU_AIR = Y2MU_C(MIN(500,NINT(0.1_EB*TMP_G)))*SPECIES(0)%MW
+            MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
             M_GAS  = RHO_G/RVC        
             M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT!limit to avoid diveregence errors
             K_AIR  = CPOPR*MU_AIR
@@ -1335,7 +1335,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
             Q_CON_GAS  = DT_SUBSTEP*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
             Q_CON_WALL = DT_SUBSTEP*A_DROP*H_WALL*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))
-
             ! Compute the total amount of liquid evaporated
   
             M_VAP = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
@@ -1385,32 +1384,44 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ENDIF
          
             ! Decrease temperature of the gas cell
-            ITMP = MIN(500,NINT(0.1_EB*TMP_G))
+            ITMP = MIN(5000,NINT(TMP_G))
             IF (N_SPECIES == 0 ) THEN
                CP = Y2CPBAR_C(ITMP)
             ELSE
                YY_GET(:) = YY(II,JJ,KK,:)
                CALL GET_CPBAR(YY_GET,CP,ITMP)
             ENDIF
-            H_NEW = (M_GAS*CP*TMP_G - WGT*Q_CON_GAS)/M_GAS
-            TEMPITER = .FALSE.
+            M_GAS_NEW = M_GAS + WGT*M_VAP
+            H_GAS = M_GAS*CP*TMP_G
+            H_VAPOR = 0._EB
+            ! Add vapor or fuel gas to the grid cell, compute vapor enthalpy
+            IF (IGAS>0) THEN
+               ! Renorm current mass fractions
+               H_VAPOR = WGT*M_VAP*(H_V+C_DROP*TMP_DROP_NEW)
+               YY(II,JJ,KK,:) = YY(II,JJ,KK,:) * M_GAS/M_GAS_NEW
+               ! Update for evaporation
+               YY(II,JJ,KK,IGAS)= YY(II,JJ,KK,IGAS) + WGT*M_VAP/M_GAS_NEW
+            ENDIF
+            H_NEW = (H_VAPOR + H_GAS - WGT*Q_CON_GAS)/M_GAS_NEW
+            
+            TEMPITER = .TRUE.
             ITERATE_TEMP: DO WHILE (TEMPITER)
-               TMP_G = H_NEW/CP
-               IF ((TMP(II,JJ,KK)-TMP_G)/TMP(II,JJ,KK) > 0.01_EB) TEMPITER = .TRUE.
-               TMP(II,JJ,KK) = TMP_G
-               ITMP = MIN(500,NINT(0.1_EB*TMP(II,JJ,KK)))
+               TEMPITER=.FALSE.
+               ITMP = MIN(5000,NINT(TMP_G))
                IF (N_SPECIES == 0 ) THEN
                   CP = Y2CPBAR_C(ITMP)
                ELSE
                   YY_GET(:) = YY(II,JJ,KK,:)
                   CALL GET_CPBAR(YY_GET,CP,ITMP)
                ENDIF
+               TMP_G = TMP_G+(H_NEW-CP*TMP_G)/CP
+               IF ((TMP(II,JJ,KK)-TMP_G) > 2._EB) TEMPITER = .TRUE.
+               TMP(II,JJ,KK) = TMP_G
             ENDDO ITERATE_TEMP
             
             TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
 
             ! Compute contribution to the divergence
-
             D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) + WGT*RVC/(DT_SUBSTEP*RHO_G)*( M_VAP*MW_RATIO-Q_CON_GAS/(CP*TMP(II,JJ,KK)) )
 
             ! Add fuel evaporation rate to running counter before adjusting its value
@@ -1420,10 +1431,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ! Adjust mass of evaporated liquid to account for different Heat of Combustion between fuel droplet and gas
 
             M_VAP = PC%ADJUST_EVAPORATION*M_VAP
-
-            ! Add vapor or fuel gas to the grid cell
-
-            IF (IGAS>0) YY(II,JJ,KK,IGAS)= MIN(1._EB,(WGT*M_VAP+M_GAS*Y_GAS)/(WGT*M_VAP+M_GAS))
 
             ! Add new mass from vaporized droplet to the grid cell
 
