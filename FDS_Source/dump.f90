@@ -3511,6 +3511,8 @@ SELECT CASE(IND)
       IF (MIXTURE_FRACTION) THEN
          YY_GET(:) = YY(II,JJ,KK,:)
          CALL GET_MASS_FRACTION(YY_GET,H2O_INDEX,Y_MF_INT)
+      ELSE
+         IF (I_WATER > 0) Y_MF_INT = YY(II,JJ,KK,I_WATER)
       ENDIF
       GAS_PHASE_OUTPUT = Y_MF_INT/Y_EQUIL * 100._EB      
    CASE(22)  ! HP
@@ -3552,7 +3554,7 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = C_DYNSMAG(III,JJJ,KKK) 
       
    CASE(31)  ! SPECIFIC HEAT
-      ITMP = MIN(500,NINT(0.1_EB*TMP(II,JJ,KK)))
+      ITMP = MIN(5000,NINT(TMP(II,JJ,KK)))
       IF (N_SPECIES>0) THEN
          YY_GET(:) = YY(II,JJ,KK,:)
          CALL GET_CP(YY_GET,CP,ITMP)
@@ -3564,7 +3566,7 @@ SELECT CASE(IND)
    CASE(32)  ! HRRPUA
       GAS_PHASE_OUTPUT = Q(II,JJ,KK)*0.001_EB*(DX(II)*DY(JJ)*DZ(KK))**ONTH
    CASE(33)  ! CONDUCTIVITY
-      ITMP = MIN(500,NINT(0.1_EB*TMP(II,JJ,KK)))
+      ITMP = MIN(5000,NINT(TMP(II,JJ,KK)))
       IF (DNS) THEN
          IF (N_SPECIES > 0 ) THEN
             YY_GET(:) = YY(II,JJ,KK,:)
@@ -3594,8 +3596,8 @@ SELECT CASE(IND)
    CASE(45)  ! ITERATION
       GAS_PHASE_OUTPUT = ICYC
       
-   CASE(46)  ! ENTHALPY
-      ITMP = MIN(500,NINT(0.1_EB*TMP(II,JJ,KK)))
+   CASE(46:47)  ! SPECIFIC ENTHALPY and ENTHALPY
+      ITMP = MIN(5000,NINT(TMP(II,JJ,KK)))
       IF (N_SPECIES>0) THEN
          YY_G = YY(II,JJ,KK,:)
          CALL GET_H_G(YY_G,H_G,ITMP)
@@ -3603,6 +3605,7 @@ SELECT CASE(IND)
          H_G = Y2H_G_C(ITMP)
       ENDIF
       GAS_PHASE_OUTPUT = H_G*0.001_EB
+      IF(IND==47) GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT * RHO(II,JJ,KK)
 
    CASE(50)  ! MTR (measure of turbulence resolution)
       IF (.NOT.CHECK_KINETIC_ENERGY) THEN
@@ -3694,7 +3697,7 @@ SELECT CASE(IND)
       WW      = W(II,JJ,KK)
       VEL2    = UU**2+VV**2+WW**2
       PR      = 0.7_EB
-      MU_AIR  = Y2MU_C(MIN(500,NINT(0.1_EB*TMP_G)))*SPECIES(0)%MW
+      MU_AIR  = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
       RE_D    = DENS*SQRT(VEL2)*PY%BEAD_DIAMETER/MU_AIR
       NU_FAC  = 0.6_EB*PR**ONTH
       K_AIR   = CPOPR*MU_AIR
@@ -3750,14 +3753,14 @@ SELECT CASE(IND)
                IF (IND==111 .OR. IND==114 .OR. IND==117) HMFAC = 1._EB
                IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
                IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
-                  ITMP=MIN(500,NINT(0.05_EB*(TMP(I,J,K)+TMP(IP,JP,KP))))
+                  ITMP=MIN(5000,NINT(0.5_EB*(TMP(I,J,K)+TMP(IP,JP,KP))))
                   IF (N_SPECIES>0) THEN
                      YY_G =0.5_EB*(YY(I,J,K,:)+YY(IP,JP,KP,:))
                      CALL GET_H_G(YY_G,H_G_SUM,ITMP)
-                     CALL GET_H_G(YY_G,H_G,NINT(0.1_EB*TMPA))
+                     CALL GET_H_G(YY_G,H_G,NINT(TMPA))
                   ELSE
                      H_G_SUM = Y2H_G_C(ITMP)
-                     H_G     = Y2H_G_C(NINT(0.1_EB*TMPA))
+                     H_G     = Y2H_G_C(NINT(TMPA))
                   ENDIF
                   HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))*(H_G_SUM-H_G)*0.001_EB
                ENDIF
@@ -3932,37 +3935,48 @@ SELECT CASE(IND)
          ELSE
             EXPON = 1._EB
          ENDIF
-         IF (PY%QUANTITY == 'NUMBER CONCENTRATION') DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*PY%PDPA_RADIUS**3
-         DLOOP: DO I=1,NLP
-            DR=>DROPLET(I)
-            IPC=DR%CLASS
-            PC=>PARTICLE_CLASS(IPC)
-            IF (PY%PART_ID/=PC%ID .AND. PY%PART_ID/='ALL') CYCLE DLOOP
-            IF ((DR%X-DV%X)**2+(DR%Y-DV%Y)**2+(DR%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP
-            SELECT CASE(PY%QUANTITY)
-            CASE('U-VELOCITY') 
-               VEL = DR%U
-            CASE('V-VELOCITY') 
-               VEL = DR%V
-            CASE('W-VELOCITY') 
-               VEL = DR%W
-            CASE('VELOCITY') 
-               VEL = SQRT(DR%U**2 + DR%V**2 + DR%W**2)
-            CASE('TEMPERATURE')
-               VEL = DR%TMP - TMPM
-            CASE DEFAULT
-               VEL = 1.0_EB
-            END SELECT
-            ! Compute numerator and denumerator
-            DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M * VEL
-            IF (PY%QUANTITY /= 'NUMBER CONCENTRATION') THEN
-               DV%PDPA_DENUM = DV%PDPA_DENUM + DR%PWT*(2._EB*DR%R)**PY%PDPA_N
-            ENDIF
-         ENDDO DLOOP
-         IF (DV%PDPA_DENUM > 0._EB) GAS_PHASE_OUTPUT = (DV%PDPA_NUMER/DV%PDPA_DENUM)**EXPON
+         IF (PY%QUANTITY == 'ENTHALPY') THEN
+            DLOOP: DO I=1,NLP
+               DR=>DROPLET(I)
+               IPC=DR%CLASS
+               PC=>PARTICLE_CLASS(IPC)
+               IF (PY%PART_ID/=PC%ID .AND. PY%PART_ID/='ALL') CYCLE DLOOP
+               IF ((DR%X-DV%X)**2+(DR%Y-DV%Y)**2+(DR%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP
+               GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT + FOTH*PI*DR%R**3*PC%DENSITY*PC%C_P*DR%TMP*DR%PWT
+            ENDDO DLOOP          
+            GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT * 0.001_EB  
+         ELSE
+            IF (PY%QUANTITY == 'NUMBER CONCENTRATION') DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*PY%PDPA_RADIUS**3
+            DLOOP2: DO I=1,NLP
+               DR=>DROPLET(I)
+               IPC=DR%CLASS
+               PC=>PARTICLE_CLASS(IPC)
+               IF (PY%PART_ID/=PC%ID .AND. PY%PART_ID/='ALL') CYCLE DLOOP2
+               IF ((DR%X-DV%X)**2+(DR%Y-DV%Y)**2+(DR%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP2
+               SELECT CASE(PY%QUANTITY)
+                  CASE('U-VELOCITY') 
+                     VEL = DR%U
+                  CASE('V-VELOCITY') 
+                     VEL = DR%V
+                  CASE('W-VELOCITY') 
+                     VEL = DR%W
+                  CASE('VELOCITY') 
+                     VEL = SQRT(DR%U**2 + DR%V**2 + DR%W**2)
+                  CASE('TEMPERATURE')
+                     VEL = DR%TMP - TMPM
+                  CASE DEFAULT
+                     VEL = 1.0_EB
+               END SELECT
+               ! Compute numerator and denumerator
+               DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M * VEL
+               IF (PY%QUANTITY /= 'NUMBER CONCENTRATION') THEN
+                  DV%PDPA_DENUM = DV%PDPA_DENUM + DR%PWT*(2._EB*DR%R)**PY%PDPA_N
+               ENDIF
+            ENDDO DLOOP2
+            IF (DV%PDPA_DENUM > 0._EB) GAS_PHASE_OUTPUT = (DV%PDPA_NUMER/DV%PDPA_DENUM)**EXPON         
+         ENDIF
       ENDIF
-
-  END SELECT
+   END SELECT
 
 END FUNCTION GAS_PHASE_OUTPUT
 
@@ -4329,7 +4343,7 @@ WALL_LOOP: DO IW=1,NWC
       CASE(-3) 
          U_N =  W(IIG,JJG,KKG)
    END SELECT
-   ITMP = MIN(500,NINT(0.1_EB*TMP_N))
+   ITMP = MIN(5000,NINT(TMP_N))
    IF (N_SPECIES>0) THEN
       YY_N = 0.5_EB*(YY(IIG,JJG,KKG,:) + YY_W(IW,:))
       CALL GET_H_G(YY_N,H_G,ITMP)

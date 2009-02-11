@@ -84,7 +84,7 @@ IF (N_SPECIES == 0) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
+            ITMP = MIN(5000,NINT(TMP(I,J,K)))
             MU(I,J,K)=Y2MU_C(ITMP)*SPECIES(0)%MW
          ENDDO
       ENDDO
@@ -94,7 +94,7 @@ ELSE
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = MIN(500,NINT(0.1_EB*TMP(I,J,K)))
+            ITMP = MIN(5000,NINT(TMP(I,J,K)))
             YY_GET(:) = YYP(I,J,K,:)
             CALL GET_MU(YY_GET,MU(I,J,K),ITMP)
          ENDDO
