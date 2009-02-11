@@ -3,6 +3,7 @@
 \usepackage[pdftex]{graphicx}
 %\usepackage{hyperref}
 
+\usepackage{pdfsync}
 \usepackage[pdftex,
         colorlinks=true,
         urlcolor=linkblue,     % \href{...}{...} external (URL)
@@ -777,6 +778,32 @@ To the right of each decay curve plot in Figure \ref{fig_cbc_energy} is the corr
 \end{figure}
 
 Overall, the agreement between the FDS simulations and the CBC data is satisfactory and any discrepancies can be explained by limitations of the model.  Therefore, as a verification the results here are positive in that nothing points to coding errors.
+
+\subsection{The Dynamic Smagorinsky Model}
+\label{dynamic_smagorinsky_model}
+
+In the previous section, all calculations were performed with a constant and uniform Smagorinsky coefficient, $C_s = 0.2$.  For the canonical case of homogeneous decaying isotropic turbulence -- \emph{at sufficiently high Reynolds number} -- this model is sufficient.  However, we noticed that, even for the isotropic turbulence problem, when the grid Reynolds number is low (i.e., the flow is well-resolved) the constant coefficient model tends to over predict the dissipation of kinetic energy (see Figure \ref{fig_cbc_energy}).  This is because the eddy viscosity does not converge to zero at the proper rate; so long as strain is present in the flow (the magnitude of the stain rate tensor is nonzero), the eddy viscosity will be nonzero.  This violates a guiding principle in LES development: that the method should converge to a DNS if the flow field is sufficiently resolved \cite{McDermott:2007}.
+
+The dynamic procedure for calculating the model coefficient (invoked by setting {\tt DYNSMAG=.TRUE.} on the {\tt MISC} line) alleviates this problem.  The basis of the model is that the coefficient should be the same for two different filter scales within the inertial subrange.  Details of the procedure are explained in the following references \cite{Germano:1991,PinoMartin:2000,Moin:1991,Lund:1997,McDermott:2004}.  Here we present results for the implementation of the dynamic model in FDS.  In Figure \ref{fig_c_smag} we show contours of the Smagorinsky coefficient $C_s(\mathbf{x},t)$ at a time midway through a $64^3$ simulation of the CBC experiment.  Notice that the coefficient ranges from 0.00 to roughly 0.30 within the domain with the average value falling around 0.17.  This is consistent with the notion of intermittency in turbulence (see e.g. \cite{Pope:2000}).
+
+\begin{figure}[t]
+   \begin{center}
+      \includegraphics[height=3.00in]{FIGURES/c_smag.pdf}
+      \caption{\label{fig_c_smag} \small Smagorinsky coefficient for a $64^3$ simulation of the CBC experiment.}
+   \end{center}
+\end{figure}
+
+Next, in Figure \ref{fig_dynsmag_cbc}, we show results for the dynamic model analogous to Figure \ref{fig_cbc_energy}.  For the $32^3$ case the result is not dramatically different than the constant coefficient model.  In fact, one might argue that the $32^3$ constant coefficient results are slightly better.  But there are several reasons why we should not stop here and conclude that the constant coefficient model is superior.  First, as pointed out in Pope Exercise 13.34 \cite{Pope:2000}, $38^3$ is required to resolve 80\% of the total kinetic energy (for this flow) and thus put the cutoff wavenumber within the inertial subrange of turbulent length scales.  Pope recommends that simulations which are under-resolved by this criterion should be termed ``very large-eddy simulations'' -- weather forecasting is a typical example.  For a $32^3$ LES, the test filter width in the dynamic model falls at a resolution of $16^3$, clearly outside the inertial range.  A tacit assumption underlying the original interpretation of the dynamic model is that both the grid filter scale and the test filter scale should fall within the inertial range, since this is the range in which the scales of turbulent motion (in theory) exhibit fractal-like, scale similar behavior (recently the procedure has been derived from other arguments \cite{Pope:LES}).  With this in mind, it is perhaps not surprising that the dynamic model does not perform optimally for the low resolution case.  In the higher resolution $64^3$ case, however, the dynamic model does perform better than the constant coefficient model -- and this is the desired result: we want better performance at higher resolution.  As can be seen from the energy spectra (lower right), the energy near the grid Nyquist limit is more accurately retained by the dynamic model.  This equates to better flow structure with fewer grid cells.  Thus, for practical calculations of engineering interest the small computational overhead of computing the coefficient may recuperated by a reduction is cell count.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/dynsmag_cbc_32_decay.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/dynsmag_cbc_32_spectra.pdf} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/dynsmag_cbc_64_decay.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/dynsmag_cbc_64_spectra.pdf} }
+   \end{tabular*}
+   \caption{\label{fig_dynsmag_cbc} \small Dynamic Smagorinsky model results (analogous to Figure \ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
+\end{figure}
 
 
 \chapter{Thermal Radiation}
