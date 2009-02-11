@@ -3708,9 +3708,9 @@ void draw_user_ticks(void){
     show_tick_z = user_tick_show_z;
   }
   if(auto_user_tick_placement==1){
-    step[0]=abs(user_tick_step[0]);
-    step[1]=abs(user_tick_step[1]);
-    step[2]=abs(user_tick_step[2]);
+    step[0]=fabs(user_tick_step[0]);
+    step[1]=fabs(user_tick_step[1]);
+    step[2]=fabs(user_tick_step[2]);
     show_tick_x=0;
     show_tick_y=0;
     show_tick_z=0;
