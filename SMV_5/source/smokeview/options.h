@@ -44,6 +44,7 @@
 // #define pp_GPU_BLANK
 #endif
 
+#define pp_MSCALE
 #define pp_RENDER
 #define pp_THREAD
 #define pp_SPHERE
@@ -74,7 +75,6 @@
 #endif
 
 #ifdef pp_BETA
-#define pp_MSCALE
 #endif
 
 #ifdef pp_CULL
