@@ -1030,7 +1030,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(loadfiles_at_startup&&update_load_startup==1){
     load_startup_smoke();
   }
-  if(updategluiview==1){
+  if(updategluiview==1&&updateclipvals==0){
     reset_glui_view(startup_view_ini);
     updategluiview=0;
   }
@@ -1052,6 +1052,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(camera_current->dirty==1){
     update_camera(camera_current);
   }
+  if(updateclipvals==1){
+    clip2cam(camera_current);
+    update_clip_all();
+    updateclipvals=0;
+    updategluiview=0;
+  }
   if(update_selectedtour_index==1){
     update_tourindex();
   }
@@ -1066,7 +1072,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     ZoomMenu(-2);
   }
 
-
   updateShow();
   if(times!=NULL&&updateUpdateFrameRateMenu==1)sv_FrameRateMenu(frameratevalue);
   if(updatefaces==1)update_faces();
@@ -1074,6 +1079,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(showstereo!=2&&showstereo!=3&&showstereo!=4)ClearBuffers(mode);
 
 /* ++++++++++++++++++++++++ draw viewports +++++++++++++++++++++++++ */
+
   if(mode==RENDER){
     BLOCK_viewport(quad,          s_left,s_down,s_width,s_height);
     sniffErrors("after BLOCK_viewport");
