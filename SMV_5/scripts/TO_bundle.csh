@@ -4,8 +4,8 @@
 # preparation for a bundle
 
 set FOR_BUNDLE=~/FDS-SMV/SMV_5/for_bundle
-set FROM_LINUX_32=$FOR_BUNDLE/smv_5.3.9_3167_linux
-set FROM_OSX_32=$FOR_BUNDLE/smv_5.3.9_3167_osx
+set FROM_LINUX_32=$FOR_BUNDLE/smv_5.3.10_3188_linux
+set FROM_OSX_32=$FOR_BUNDLE/smv_5.3.10_3188_osx
 
 # --------------------------------------
 # shouldn't need to edit lines below unless the files 
