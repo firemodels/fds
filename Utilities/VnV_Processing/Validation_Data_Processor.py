@@ -40,7 +40,7 @@ if data_set == 4:
 ### Set Diagnostic Output Level
 ## Uncomment the level of diagnostics desired.
 ## 1 = Minimal, 2 = Normal, 3 = Maximum.
-diagnostic_level = 2 # Input Value
+diagnostic_level = 1 # Input Value
 
 print "**** Diagnostics Set at Level", diagnostic_level, "****\n"
 
@@ -237,7 +237,7 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
         if value1 == 'Null':
             continue
         else:
-            if value1 >= (float(start_data)*float(ind_scale)):
+            if value1 >= (float(start_data)*float(abs(ind_scale))):
                 if diagnostic_level >= 3:
                     print "Independent Data Column Starts at row #:", str(rowcounter1)
                     print "With a value of:", str(value1)
@@ -269,13 +269,13 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
     for value2 in data_dict[col_name]:
         if diagnostic_level >= 3:
             print "Value 2:", value2, " : ", rowcounter2
-        if float(data_dict[col_name][end_index]) < (float(stop_data)*float(ind_scale)):
+        if float(data_dict[col_name][end_index]) < (float(stop_data)*float(abs(ind_scale))):
             if diagnostic_level >= 2:
                 print "Specified end of Independent Data Column Data is greater than end of time in the data set. \nUsing last value in the Independent Data Column.\n"
                 print "Value used is: "+str(float(data_dict[col_name][end_index]))+"\n"
             ind_col_end_index = (end_index)
             break
-        if value2 < (float(stop_data)*float(ind_scale)):
+        if value2 < (float(stop_data)*float(abs(ind_scale))):
             rowcounter2 = rowcounter2 + 1
         else:
             row_number2 = (rowcounter2) - 1
@@ -290,7 +290,7 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
     for value3 in data_dict[col_name]:
         if diagnostic_level >= 3:
             print "Value 3:", value3, " : ", rowcounter3
-        if value3 >= (float(start_comp)*float(ind_scale)):
+        if value3 >= (float(start_comp)*float(abs(ind_scale))):
             if diagnostic_level >= 2:
                 print "Metric Data starts at Index #:", str(rowcounter3), "with a value of:", str(value3)
             metric_start_index = rowcounter3
@@ -301,7 +301,7 @@ def find_start_stop_index(data_dict,col_name,start_data,stop_data,start_comp,sto
     if diagnostic_level >= 2:
         print "*** Finding End Index for Metric Data ***"
     for value4 in data_dict[col_name]:
-        scaled_stop_value = (float(stop_comp)*float(ind_scale))
+        scaled_stop_value = (float(stop_comp)*float(abs(ind_scale)))
         end_index_value = float(data_dict[col_name][end_index])
         if diagnostic_level >= 3:
             print "Scaled Stop Value and End Index Value:", scaled_stop_value, " : ",end_index_value
@@ -624,10 +624,10 @@ def extract_comp_data(comp_file_info):
             print "Data Set 2, Data:", d2_data_seconds
         
         #Scale Ind_Axis Data.
-        d1_data.append([[x[0] / ind_Scale_Factor, x[1]] for x in d1_data_seconds])
+        d1_data.append([[x[0] / abs(ind_Scale_Factor), x[1]] for x in d1_data_seconds])
         if diagnostic_level >= 3:
             print "Scaled Data Set 1, Data:", d1_data
-        d2_data.append([[x[0] / ind_Scale_Factor, x[1]] for x in d2_data_seconds])
+        d2_data.append([[x[0] / abs(ind_Scale_Factor), x[1]] for x in d2_data_seconds])
         if diagnostic_level >= 3:
             print "Scaled Prediction Data:", d2_data
             
@@ -663,6 +663,7 @@ def comparison_plot(plot_data,d1_data,d2_data):
     h_dist   = 0.4*unit.v_cm
     plot_width = float(plot_data['Plot_Width(cm)'])
     Flip_Axis_Indicator = plot_data['Flip_Axis']
+    ind_Scale_Factor = float(plot_data['Scale_Ind'])
     
     #Create filename from fields in input file record.
     plot_file_name = plot_data["Plot_Filename"]
@@ -698,9 +699,14 @@ def comparison_plot(plot_data,d1_data,d2_data):
                             x=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
     else:
         if Flip_Axis_Indicator == "no":
-            g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
-                            x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
-                            y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
+            if ind_Scale_Factor > 0:
+                g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
+                                x=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
+                                y=graph.axis.linear(title=dep_title, min=min_dep, max=max_dep))
+            else:
+                g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
+                                x=graph.axis.logarithmic(title=ind_title), 
+                                y=graph.axis.logarithmic(title=dep_title))
         else:
             g = graph.graphxy(width=plot_width, ratio=4./3, key=graph.key.key(pos=key_pos, dist=key_dist, vdist=v_dist, hdist=h_dist), 
                             y=graph.axis.linear(title=ind_title, min=min_ind, max=max_ind), 
