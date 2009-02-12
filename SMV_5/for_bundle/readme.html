@@ -6,9 +6,29 @@
 <h2>Smokeview Release Notes</h2>
 <p><hr size="1">
 <p>
+
 <a href="http://code.google.com/p/fds-smv/downloads/list">Latest FDS and Smokeview</a><br>
 <a href="http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/SMV_5/for_bundle/readme.html">Latest Smokeview release notes</a>
 <ul>
+
+<li>5.3.11 (build 3279) - February 12, 2009 
+<ol>
+<li>enhancement: add widgets to the motion/view dialog box for setting x,y,z scaling and near/far depth planes
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=619&can=1&sort=-id">Issue 619</a>).
+
+<li> fix: fix clipping when used from a script (via the LOADINI keyword)
+<li> fix: fix display of user ticks by using fabs (floating point) instead of abs (int) for computing absolute value of tick step sizes.
+Lowered minimum tic spacing from 0.1 to 0.0 to allow for tic display for small geometries.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=637&can=1&sort=-id">Issue 637</a>).
+
+<li> fix: fix how slices are grouped together into multi-slices when some of the slices are 3D.
+All 3D slices of the same type are grouped into one multi-slice, non 3D slices are grouped as before.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=631&can=1&sort=-id">Issue 631</a>).
+<li> fix: improve colorbar label spacing when large fonts are used to display labels.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=626&can=1&sort=-id">Issue 626</a>).
+<li> fix: add missing device initializations for deprecated device keywords: THCP, SMOD and HEAT.
+<li> fix: add error checking when blockage memory allocation fails to allow for a more graceful program exit.
+</ol>
 
 <li>5.3.10 (build 3188) - January 30, 2009 
 <ol>
@@ -22,7 +42,6 @@
 <li>fix: fix command line parsing when the -script parameter is present.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=618&can=1&sort=-id">Issue 618</a>).
 </ol>
-
 
 <li>5.3.8 (build 3138) - January 27, 2009 
 <ol>
