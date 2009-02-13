@@ -4,54 +4,32 @@
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <h2>FDS Build Notes</h2>
+<a href="EDIT_readme.bat">Edit this page</a>
 <p><hr size="1">
-<h3>Prerequisites and Assumptions</h3>
-<ul>
-<li><a href="EDIT_readme.bat">Edit this web page</a> (remove this entry when this page is finished)
-<li><a href="EDIT_setup.bat">Edit configuration file</a> Define environmental variables used by the scripts on this page.
-<ul>
-<li>user names, linux cluster host name and SVN repository location need only be defined once
-<li>version and revision numbers need to be updated as repository changes
-</ul>
-<li>Software Assumptions
-<ol>
-<li>Intel Fortran and C/C++ compilers - version 11
-<li>command line versions of Winzip version 12, Winzip self extracter generator
-</ol>
-<li><a href="http://code.google.com/p/fds-smv/downloads/list?deleted=1&ts=1234368278">Check download page</a>
 
+<h3>Other Notes</h3>
+<ul>
+<li><a href="../../SMV_5/scripts/assumptions.html">Getting Started</a> Various software tools such as data compressors, software compilers, 
+data communicators <em>etc</em> are required to run the scripts found here.
+<a href="assumptions.html">This web page</a>
+details exactly what software is needed and how to configure it.
+<li><a href="../../SMV_5/scripts/readme.html">Build notes for Smokeview</a>
+<li><a href="other.html">Build notes for Documentation and other FDS/Smokeview components</a>
 </ul>
+
 <h3>32 bit FDS</h3>
 <ul>
 <li><a href="GET_fds_svn_num.bat">Get version</a> Get svn status information for the FDS source directory.
 <li><a href="MAKE_FDS_Intel_win_32.bat">Compile FDS</a> Build a 32 bit windows version of FDS
 <li><a href="ZIP_FDS_Intel_win_32.bat">Compress FDS</a> Create a 32 bit FDS self-extracter
 <li><a href="TOGOOGLE_FDS_Intel_win_32.bat">Upload FDS</a> Upload the FDS self extracter to google code
+<li><a href="http://code.google.com/p/fds-smv/downloads/list?deleted=1&ts=1234368278">Check download page</a>
 </ul>
 <h3>64 bit FDS</h3>
 <ul>
 <li>
 </ul>
 
-<h3>Documentation</h3>
-<ul>
-<li><a href="GET_docs_svn_num.bat">Get version</a> Get svn status information for the Documentation directory (Manuals/All_PDF_Files)
-<li><a href="GET_docs.bat">Generate docs</a> Generate an installation file containing documentation for FDS and Smokeview
-<li><a href="TOGOOGLE_docs.bat">Upload Documentation</a>
-</ul>
-
-
-<h3>Test Cases</h3>
-<ul>
-<li><a href="GET_testcases_svn_num.bat">Get version</a> Get svn status information for the Test_cases directory tree.
-<li><a href="GETALL_testcases.bat">Generate Test Cases</a>
-<li><a href="TOGOOGLE_testcases.bat">Upload Test cases</a>
-</ul>
-
-<h3>Smokeview Build Notes</h3>
-<ul>
-<li><a href="../../SMV_5/scripts/readme.html">Build notes for Smokeview</a>
-</ul>
 <p><hr>
 
 <p><address>
