@@ -23,7 +23,7 @@ Module DCDFLIB
   CHARACTER(255), PARAMETER :: ievadate='$Date$'
 
   Private
-  Public cdfbet,cdfgam,cdfnor,GET_REV_ieva
+  Public cdfbet,cdfgam,cdfnor,GET_REV_ieva,gamma
 
   !
   !*********************************************************
