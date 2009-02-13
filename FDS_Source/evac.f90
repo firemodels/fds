@@ -27,6 +27,7 @@ Module EVAC
 !  Use MESH_POINTERS, ONLY: DT,IJKW,BOUNDARY_TYPE,XW,YW,WALL_INDEX,POINT_TO_MESH
 !  Use EVAC_MESH_POINTERS
   Use PHYSICAL_FUNCTIONS, Only : GET_MASS_FRACTION,FED
+  Use DCDFLIB, Only :  DCDFLIB_Gamma => Gamma
   !
   Implicit None
   Character(255), Parameter :: evacid='$Id$'
@@ -209,7 +210,7 @@ Module EVAC
      Real(EB) :: T_first=0._EB, T_last=0._EB, Flow=0._EB, Width=0._EB, T_Start=0._EB, T_Stop=0._EB
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB
      Integer :: IOR=0, ICOUNT=0, IPC=0, IMESH=0, INODE=0, &
-          TO_INODE=0, N_Initial=0, &
+          TO_INODE=0, N_Initial=0, Max_Humans=-1, &
           STR_INDX=0, STR_SUB_INDX=0
      Character(60) :: CLASS_NAME='null', ID='null'
      Character(60) :: TO_NODE='null'
@@ -323,7 +324,7 @@ Module EVAC
        FC_DAMPING, EVAC_DT_MIN, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
        SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, TAU_CHANGE_DOOR, &
        HUMAN_SMOKE_HEIGHT, TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, &
-       CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF
+       CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF
   Integer, Dimension(3) :: DEAD_RGB
   !
   Real(EB), Dimension(:), Allocatable :: Tsteps
@@ -382,7 +383,7 @@ Contains
          FCONST_A,FCONST_B,L_NON_SP, &
          C_YOUNG,GAMMA,KAPPA, ANGLE, &
          D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA
-    Integer :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, i_avatar_color
+    Integer :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, i_avatar_color, MAX_HUMANS
     Real(EB) :: MAX_FLOW, WIDTH, TIME_START, TIME_STOP, WIDTH1, &
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED, TIME_OPEN, TIME_CLOSE
     Real(EB) :: UBAR0, VBAR0
@@ -423,7 +424,7 @@ Contains
          TIME_STOP, AFTER_REACTION_TIME, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, &
          MESH_ID, COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
-         AVATAR_COLOR, AVATAR_RGB
+         AVATAR_COLOR, AVATAR_RGB, MAX_HUMANS
     Namelist /CORR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, WIDTH1, WIDTH2, &
          EFF_WIDTH, EFF_LENGTH, MAX_HUMANS_INSIDE, FAC_SPEED, &
@@ -468,7 +469,7 @@ Contains
          TAU_CHANGE_DOOR, RGB, COLOR, &
          AVATAR_COLOR, AVATAR_RGB, HUMAN_SMOKE_HEIGHT, &
          TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, CONST_CF, FAC_CF, &
-         FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF
+         FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF
     !
     NPPS = 30000 ! Number Persons Per Set (dump to a file)
     !
@@ -501,8 +502,13 @@ Contains
        I_EVAC = 16*1 + 8*0 + 4*0 + 2*1 + 1*1
        If (N_REACTIONS == 0) I_EVAC = 16*1 + 8*0 + 4*0 + 2*0 + 1*1
     Else
-       ! There are no fire grids ==> try to read fed and evac flow fields
-       I_EVAC = 16*0 + 8*1 + 4*1 + 2*0 + 1*0
+       If (EVACUATION_MC_MODE) Then
+          ! There are no fire grids ==> try to read fed and evac flow fields if MC mode
+          I_EVAC = 16*0 + 8*1 + 4*1 + 2*0 + 1*0
+       Else
+          ! There are no fire grids ==> try to read fed and recalculate evac flow fields if not MC mode
+          I_EVAC = 16*0 + 8*1 + 4*0 + 2*0 + 1*1
+       End If
     End If
     !
     ! Every human has an identification number, ILABEL_last is
@@ -847,6 +853,7 @@ Contains
       V_MAX             = 20.0_EB
       V_ANGULAR_MAX     = 8.0_EB  ! rps
       V_ANGULAR         = 2.0_EB  ! rps
+      FC_DAMPING        = 500.0_EB
       GROUP_EFF         = 0.0_EB
       RADIUS_COMPLETE_0 = 0.2_EB
       RADIUS_COMPLETE_1 = 0.5_EB
@@ -874,6 +881,7 @@ Contains
       FAC_2_WALL = 5.5_EB   ! close to a wall
       FAC_V0_DIR = 2.5_EB   ! v0*cos term for all sectors
       FAC_V0_NOCF = 0.5_EB  ! prefer v0, if no counterflow
+      FAC_NOCF    = 0.1_EB  ! prefer v0, if no counterflow
       OUTPUT_SPEED         = .False.
       OUTPUT_MOTIVE_FORCE  = .False.
       OUTPUT_MOTIVE_ANGLE  = .False.
@@ -926,7 +934,7 @@ Contains
          TAU_HIGH = 999.0_EB
          ! Default values for persons
          VEL_MEAN = 1.25_EB
-         DIA_MEAN = 0.51_EB
+         DIA_MEAN = -10.0_EB
          PRE_MEAN = 10.0_EB
          DET_MEAN = T_BEGIN
          TAU_MEAN = 1.0_EB
@@ -936,7 +944,6 @@ Contains
          C_YOUNG  = 120000.0_EB
          GAMMA    = 16000.0_EB
          KAPPA    = 40000.0_EB
-         FC_DAMPING        = 500.0_EB
          ! Rotational freedom constants
          D_TORSO_MEAN = 0.30_EB
          D_SHOULDER_MEAN = 0.19_EB
@@ -1086,10 +1093,33 @@ Contains
             Write(MESSAGE,'(A,A,A)') 'ERROR: PERS ',Trim(ID), ' PRE-evacuation time should positive.'
             Call SHUTDOWN(MESSAGE)
          End If
-
+         
          DIAMETER_DIST = Max(0,DIAMETER_DIST)
          VELOCITY_DIST = Max(0,VELOCITY_DIST)
          TAU_EVAC_DIST = Max(0,TAU_EVAC_DIST)
+         If (DIA_MEAN < 0.0_EB) Then
+            Select Case (DIAMETER_DIST)
+               Case (1)  ! Uniform
+                  DIA_MEAN = 0.5_EB*(DIA_HIGH+DIA_LOW)
+               Case (3)  ! Gamma: mean = alpha*beta
+                  DIA_MEAN = DIA_PARA*DIA_PARA2
+               Case (6)  ! Beta: mean alpha/(alpha+beta)
+                  DIA_MEAN = DIA_PARA/(DIA_PARA*DIA_PARA2)
+               Case (8)  ! Weibull (Exp, alpha=1): 
+                  ! mean = (1/lambda)*GammaFunc(1 + (1/alpha) )
+                  ! median = (1/lambda)* (ln(2))^(1/alpha)
+                  ! exp: mean = (1/lambda), median = ln(2)/lambda
+                  DIA_MEAN = (1.0_EB/DIA_PARA2)*DCDFLIB_Gamma(1.0_EB+(1.0_EB/DIA_PARA))
+               Case (9)  ! Gumbel
+                  ! mean = gamma / alpha, gamma = 0.5772156649015328606_EB
+                  ! median = -(1/alpha)*ln(ln(2))
+                  DIA_MEAN = 0.5772156649015328606_EB / DIA_PARA
+               Case Default
+                  Continue
+            End Select
+            DIA_MEAN = 0.51_EB
+         End If
+
          !
          ! Avatar colors, integer RGB(3), e.g., (23,255,0)
          If (DEAD_COLOR /= 'null') Then
@@ -2466,6 +2496,7 @@ Contains
          AFTER_REACTION_TIME = .False.
          TIME_START          = -Huge(TIME_START)
          TIME_STOP           =  Huge(TIME_STOP)
+         MAX_HUMANS    = -1
          KNOWN_DOOR_NAMES         = 'null'
          KNOWN_DOOR_PROBS         = 1.0_EB
          !
@@ -2492,17 +2523,20 @@ Contains
          If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
          If (Any(AVATAR_RGB < 0) .And. AVATAR_COLOR=='null') AVATAR_COLOR = 'ROYAL BLUE 4'
          If (AVATAR_COLOR /= 'null') Call COLOR2RGB(AVATAR_RGB,AVATAR_COLOR)
-         If (COLOR_METHOD == 0 .And. MAX_FLOW > 0) Then
+         If (COLOR_METHOD == 0 .And. MAX_FLOW > 0.0_EB) Then
             i_avatar_color = i_avatar_color + 1
             EVAC_AVATAR_RGB(1:3,i_avatar_color) = AVATAR_RGB
          End If
          If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_ENTR_LOOP
 
+         If (MAX_HUMANS < 0) MAX_HUMANS = Huge(MAX_HUMANS)
+         If (MAX_FLOW <= 0.0_EB) MAX_HUMANS = 0
+
          PNX=>EVAC_ENTRYS(N)
 
          PNX%RGB = RGB
          PNX%AVATAR_RGB =AVATAR_RGB
-         If (COLOR_METHOD == 0 .And. MAX_FLOW > 0) PNX%Avatar_Color_Index = i_avatar_color
+         If (COLOR_METHOD == 0 .And. MAX_FLOW > 0.0_EB) PNX%Avatar_Color_Index = i_avatar_color
 
          If (EVAC_MESH /= 'null') Then
             MESH_ID = EVAC_MESH
@@ -2538,6 +2572,7 @@ Contains
          PNX%Flow       = MAX_FLOW
          PNX%T_Start    = TIME_START
          PNX%T_Stop     = TIME_STOP
+         PNX%Max_Humans = MAX_HUMANS
 
          ! Check that the entry is properly specified
 
@@ -4195,10 +4230,6 @@ Contains
        Group_List(i)%GROUP_I_FFIELDS(:) = 0
     End Do
 
-    Write (LU_EVACOUT,fmt='(/a)') ' EVAC: Initial positions of the humans'
-    Write (LU_EVACOUT,fmt='(a,a)') ' person     x       y       z    Tpre    Tdet  ', &
-         ' dia    v0   tau   i_gr i_ff'
-
     Allocate(Group_Known_Doors(1:i33_dim),STAT=IZERO)
     Call ChkMemErr('Initialize_Evacuation', 'Group_Known_Doors',IZERO) 
     Allocate(Human_Known_Doors(1:ilh_dim),STAT=IZERO)
@@ -4257,6 +4288,10 @@ Contains
        End Do              ! 1, n_humans
     End Do                  ! 1, nmeshes
 
+    Write (LU_EVACOUT,fmt='(/a)') ' EVAC: Initial positions of the humans'
+    Write (LU_EVACOUT,fmt='(a,a)') ' person     x       y       z    Tpre    Tdet  ', &
+         ' dia    v0   tau   i_gr i_ff'
+
     ! Initialize the group_i_ffields
     i_egrid = 0
     Do nom = 1, NMESHES
@@ -4293,6 +4328,7 @@ Contains
                HR%Speed, HR%Tau, HR%GROUP_ID, HR%i_ffield, HR%COLOR_INDEX
        End Do
     End Do
+    Write (LU_EVACOUT,fmt='(/)')
 
   End Subroutine INIT_EVAC_GROUPS
 !
@@ -4658,7 +4694,7 @@ Contains
     Real(EB), Intent(IN) :: Tin
     Integer, Intent(IN) :: NM,ICYC
     !
-    Integer, Parameter :: n_sectors = 4
+    Integer, Parameter :: n_sectors = 2
     Real(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
     Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1
     Integer  IE, tim_ic, tim_iw, NM_now, tim_iwx, tim_iwy, tim_iw2, tim_ic2, ibc
@@ -4950,7 +4986,7 @@ Contains
           ! Counterflow: increase motivation to go ahead
           If (Abs(HR%angle_old) > 0.01_EB) Then
              hr_tau      = Max(0.25_EB,0.5_EB*hr_tau)
-             hr_tau_iner = Min(0.10_EB,0.5_EB*hr_tau_iner)
+             hr_tau_iner = Max(0.10_EB,0.5_EB*hr_tau_iner)
           End If
           !
           ! In which grid cell is the agent?
@@ -5477,7 +5513,7 @@ Contains
           ! Counterflow: increase motivation to go ahead
           If (Abs(HR%angle_old) > 0.01_EB) Then
              hr_tau      = Max(0.25_EB,0.5_EB*hr_tau)
-             hr_tau_iner = Min(0.10_EB,0.5_EB*hr_tau_iner)
+             hr_tau_iner = Max(0.10_EB,0.5_EB*hr_tau_iner)
           End If
           !
           ! Psychological force: cut-off when acceleration below 0.0001 m/s**2
@@ -5706,13 +5742,13 @@ Contains
                       If (vr_2r <= 0.0_EB) N_suunta_backCF = N_suunta_backCF + 1
                    End If
                    ! Which sector if any
-                   iii = Int((angle_hre-(theta_start-0.5_EB*theta_step))/theta_step) + 1
+                   iii = Int((angle_hre-(theta_start-1.5_EB*theta_step))/theta_step)
                    If (iii > 0 .And. iii < n_sectors+1) Then
                       ! (UBAR,VBAR) are unit vectors
                       N_suunta(iii) = N_suunta(iii) + 1
                       v_hre = HRE%U*UBAR + HRE%V*VBAR  ! HRE speed along the v0 direction
                       If (vr_2r > 0.0_EB) Then ! Same direction
-                         v_hre = CONST_DF + FAC_DF*v_hre
+                         v_hre = CONST_DF + FAC_DF*Max(0.0_EB,v_hre)
                       Else ! Counterflow
                          N_suuntaCF(iii) = N_suuntaCF(iii) + 1
                          v_hre = -1.0_EB*(CONST_CF + FAC_CF*Max(0.0_EB,-v_hre))
@@ -5914,7 +5950,7 @@ Contains
                    Sum_suunta(iii) = Sum_suunta(iii) + vr_2r/Max(0.2_EB,P2P_DIST)
                 End If
              End Do
-             If (FoundWall_xy(1) .And. Abs(HR%X-d_xy(1))-HR%Radius < 0.2_EB) Then
+             If (FoundWall_xy(1) .And. Abs(HR%X-d_xy(1))-HR%Radius < 0.1_EB) Then
                 Do iii = 1, n_sectors
                    If(u_theta(iii) < -0.10_EB) Then
                       vr_2r = u_theta(iii)/Max(0.1_EB, Abs(HR%X-HR%Radius-d_xy(1)))
@@ -5922,7 +5958,7 @@ Contains
                    End If
                 End Do
              End If
-             If (FoundWall_xy(2) .And. Abs(HR%X-d_xy(2))-HR%Radius < 0.2_EB) Then
+             If (FoundWall_xy(2) .And. Abs(HR%X-d_xy(2))-HR%Radius < 0.1_EB) Then
                 Do iii = 1, n_sectors
                    If(u_theta(iii) > +0.10_EB) Then
                       vr_2r = -u_theta(iii)/Max(0.1_EB, Abs(HR%X+HR%Radius-d_xy(2)))
@@ -5930,7 +5966,7 @@ Contains
                    End If
                 End Do
              End If
-             If (FoundWall_xy(3) .And. Abs(HR%Y-d_xy(3))-HR%Radius < 0.2_EB) Then
+             If (FoundWall_xy(3) .And. Abs(HR%Y-d_xy(3))-HR%Radius < 0.1_EB) Then
                 Do iii = 1, n_sectors
                    If(v_theta(iii) < -0.10_EB) Then
                       vr_2r = v_theta(iii)/Max(0.1_EB, Abs(HR%Y-HR%Radius-d_xy(3)))
@@ -5938,7 +5974,7 @@ Contains
                    End If
                 End Do
              End If
-             If (FoundWall_xy(4) .And. Abs(HR%Y-d_xy(4))-HR%Radius < 0.2_EB) Then
+             If (FoundWall_xy(4) .And. Abs(HR%Y-d_xy(4))-HR%Radius < 0.1_EB) Then
                 Do iii = 1, n_sectors
                    If(v_theta(iii) > +0.10_EB) Then
                       vr_2r = -v_theta(iii)/Max(0.1_EB, Abs(HR%Y+HR%Radius-d_xy(4)))
@@ -5953,7 +5989,8 @@ Contains
              If (N_suunta(n_sectors+1) < 1) Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + 50.0_EB  ! Empty space ahead
              If (Sum(N_suuntaCF(1:n_sectors)) < 1) Then
                 ! No counterflow, prefer v0 direction, i.e., "stay on line"
-                Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + FAC_V0_NOCF*v_hr*Sum(N_suunta(1:n_sectors))
+                Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + &
+                     (FAC_NOCF + FAC_V0_NOCF*v_hr)*Sum(N_suunta(1:n_sectors))
              End If
              i_suunta_max = n_sectors + 1
              Sum_suunta_max = -Huge(Sum_suunta_max)
@@ -5970,7 +6007,9 @@ Contains
              angle_old = 0.0_EB
              If (v_hr < 0.3_EB .And. (Sum(N_suunta(1:n_sectors))-Sum(N_suuntaCF(1:n_sectors))) < &
                   Sum(N_suuntaCF(1:n_sectors))) Then
-                angle_old = Sign(1.0_EB,thetas(i_suunta_max))*Pi*45.0_EB/180.0_EB  ! radians
+                angle_old = -Sign(1.0_EB,thetas(i_suunta_max))* &
+                     Max(0.1_EB,Abs(thetas(i_suunta_max)))*Pi/180.0_EB 
+                angle_old = angle_old - 75.0_EB*Pi/180.0_EB
              Else
                 angle_old = 0.0_EB
              End If
@@ -7660,6 +7699,7 @@ Contains
       If (PNX%Flow <= 0.0_EB ) Return
       If (PNX%T_Start > Tin) Return
       If (PNX%T_Stop < Tin) Return
+      If (PNX%Max_Humans > PNX%ICOUNT) Return
       MFF => MESHES(NM)
       If ( (Tin-PNX%T_last) < (1.0_EB/PNX%Flow) ) Return
       X1  = PNX%X1
@@ -7779,6 +7819,7 @@ Contains
       If (istat == 0 ) Then
          N_HUMANS = N_HUMANS + 1
          PNX%T_last = Tin
+         PNX%ICOUNT = PNX%ICOUNT + 1
          If (PNX%T_first <= T_BEGIN) PNX%T_first = Tin
          HR%X = xx
          HR%Y = yy
@@ -8400,8 +8441,7 @@ Contains
        ! Parameters: (ave,min,max) ave not used
        n_par = 3
        Randomtype = 1
-       RandomPara(1) = 0.5_EB*(PCP%D_high+PCP%D_low)
-       PCP%D_mean    = 0.5_EB*(PCP%D_high+PCP%D_low)
+       RandomPara(1) = PCP%D_mean
        RandomPara(2) = PCP%D_low
        RandomPara(3) = PCP%D_high
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
@@ -9992,12 +10032,12 @@ Contains
                       name_new_ffield = Trim(HPT%GRID_NAME)
                       i_new_ffield    = HPT%I_VENT_FFIELDS(0)
                    End If
-                   color_index = 7
+                   color_index = EVAC_AVATAR_NCOLOR ! default, cyan
                 End If  ! case 4
              End If    ! case 3
           End If      ! case 2
        End If        ! case 1
-       If (Color_Method .Eq. 4 ) Then
+       If (Color_Method == 4 ) Then
           color_index = EVAC_AVATAR_NCOLOR ! default, cyan
           If (i_tmp > 0 .And. i_tmp <= n_doors ) color_index = EVAC_DOORS(i_tmp)%Avatar_Color_Index
           If (i_tmp > n_doors .And. i_tmp <= n_doors + n_exits) &
@@ -10016,7 +10056,7 @@ Contains
 
     Else ! No known/visible door
        i_tmp = 0 ! no door found
-       color_index = 7
+       color_index = EVAC_AVATAR_NCOLOR ! default, cyan
        If (imode == 2) Then   ! check_target_node calls
           I_Target = 0
           I_Color  = color_index
