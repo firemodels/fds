@@ -2,7 +2,7 @@
 # make tools on the fire linux cluster
 icc -o ~/bin/catcol catcol.c
 icc -o ~/bin/headskip headskip.c
-ifort -o ~/bin/fds2ascii_linux fds2asciiTEST.f
+ifort -o ~/bin/fds2ascii_linux fds2ascii.f90
 
 # make tools on hercules
 #pgcc -o ~/bin/catcol catcol.c
