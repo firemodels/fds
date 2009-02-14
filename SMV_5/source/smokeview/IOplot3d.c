@@ -57,8 +57,12 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   int nx, ny, nz;
   int pn;
   size_t plot3dfilelen;
+  int local_starttime=0, local_stoptime=0, file_size=0;
+  int local_starttime0=0, local_stoptime0=0;  
+  float delta_time, delta_time0;
 
   CheckMemory;
+  local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
   STRCPY(FULLTITLE,TITLEBASE);
   *errorcode=0;
 
@@ -193,14 +197,18 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
      return;
   }
 
+  getfile_size(file,&file_size);
   plot3dfilelen = strlen(file);
   printf("Loading plot3d data: %s\n",file);
-    FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&endian,&isotest,plot3dfilelen);
+  local_starttime = glutGet(GLUT_ELAPSED_TIME);
+  FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&endian,&isotest,plot3dfilelen);
   if(NewMemory((void **)&meshi->iqdata,numplot3dvars*ntotal*sizeof(int))==0){
     *errorcode=1;
     readplot("",ifile,UNLOAD,&error);
     return;
   }
+  local_stoptime = glutGet(GLUT_ELAPSED_TIME);
+  delta_time = (local_stoptime-local_starttime)/1000.0;
   p->loaded=1;
   p->display=1;
   speedmax = -1.;
@@ -334,6 +342,20 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
 #endif
   updatetimes();
   IDLE();
+  local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
+  delta_time0=(local_stoptime0-local_starttime0)/1000.0;
+
+  if(file_size!=0&&delta_time>0.0){
+    float loadrate;
+
+    loadrate = (file_size*8.0/1000000.0)/delta_time;
+    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+    (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
+  }
+  else{
+    printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+    (float)file_size/1000000.,delta_time,delta_time0-delta_time);
+  }
 
   GLUTPOSTREDISPLAY
 }

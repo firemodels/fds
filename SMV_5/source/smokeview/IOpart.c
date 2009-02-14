@@ -114,7 +114,7 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
 
 /* ------------------ getpart5data ------------------------ */
 
-void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_all){
+void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_all, float *delta_time, int *file_size){
   FILE *PART5FILE;
   int one;
   int endianswitch=0;
@@ -132,12 +132,14 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
   int count;
   int count2;
   int first_frame=1;
+  int local_starttime=0, local_stoptime=0;
 
   reg_file=parti->reg_file;
 
   PART5FILE=fopen(reg_file,"rb");
   if(PART5FILE==NULL)return;
 
+  getfile_size(reg_file,file_size);
   fseek(PART5FILE,4,SEEK_CUR);fread(&one,4,1,PART5FILE);fseek(PART5FILE,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
 
@@ -163,6 +165,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
   datacopy = parti->data5;
   count=0;
   count2=-1;
+  local_starttime = glutGet(GLUT_ELAPSED_TIME);
   for(;;){
     int doit;
 
@@ -303,6 +306,9 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
 
   }
 wrapup:
+  local_stoptime = glutGet(GLUT_ELAPSED_TIME);
+  *delta_time=(local_stoptime-local_starttime)/1000.0;
+
   CheckMemory;
   update_all_partvis(parti);
   FREEMEMORY(numtypes);
@@ -785,6 +791,11 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   int blocknumber;
   mesh *meshi;
   int nf_all;
+  int local_starttime0, local_stoptime0;
+  float delta_time0, delta_time;
+  int file_size;
+
+  local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
 
   parti=partinfo+ifile;
 
@@ -849,7 +860,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   if(offsetmax>kbar/4)offsetmax=kbar/4;
   
   printf("Loading particle data: %s\n",file);
-  getpart5data(parti,partframestep,partpointstep, nf_all);
+  getpart5data(parti,partframestep,partpointstep, nf_all, &delta_time, &file_size);
   updateglui();
 
 #ifdef _DEBUG
@@ -908,6 +919,22 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   updatetimes();
   updatemenu=1;
   IDLE();
+
+  local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
+  delta_time0 = (local_stoptime0-local_starttime0)/1000.0;
+
+  if(file_size!=0&&delta_time>0.0){
+    float loadrate;
+
+    loadrate = (file_size*8.0/1000000.0)/delta_time;
+    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s",
+    (float)file_size/1000000.,delta_time,loadrate);
+  }
+  else{
+    printf(" %.1f MB downloaded in %.2f s",
+    (float)file_size/1000000.,delta_time);
+  }
+  printf(" (overhead: %.2f s)\n",delta_time0-delta_time);
 
   GLUTPOSTREDISPLAY
 }
