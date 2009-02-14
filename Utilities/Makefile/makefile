@@ -73,16 +73,16 @@ intel_win_64 : setup_win $(objwin_serial)
 
 # Intel Compiler, version 11
 
-intel_linux_32 : FFLAGS = -m32 -O3 -static
-intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend
+intel_linux_32 : FFLAGS = -m32 -O3 -static -vec_report0
+intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
 intel_linux_32 : FCOMPL = ifort
 intel_linux_32 : CCOMPL = icc
 intel_linux_32 : obj = fds5_intel_linux_32
 intel_linux_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_64 : FFLAGS = -m64 -O3 -static
-intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend
+intel_linux_64 : FFLAGS = -m64 -O3 -static -vec_report0
+intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
 intel_linux_64 : FCOMPL = ifort
 intel_linux_64 : CCOMPL = icc
 intel_linux_64 : obj = fds5_intel_linux_64
