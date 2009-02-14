@@ -9336,6 +9336,20 @@ void getfile_modtime(char *filename, time_t *modtime){
   return;
 }
 
+/* ------------------ getfile_size ------------------------ */
+
+void getfile_size(const char *filename, int *filesize){
+  struct stat statbuffer;
+  int statfile;
+
+  *filesize=0;
+  if(filename==NULL)return;
+  statfile=stat(filename,&statbuffer);
+  if(statfile!=0)return;
+  *filesize = statbuffer.st_size;
+  return;
+}
+
 /* ------------------ file_exit ------------------------ */
 
 int file_exist(char *file){
