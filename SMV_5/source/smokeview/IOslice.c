@@ -265,6 +265,9 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   vslice *vd;
   int flag2=0;
   mesh *meshi;
+  int local_starttime=0, local_stoptime=0, file_size=0;
+  int local_starttime0=0, local_stoptime0=0;  
+  float delta_time, delta_time0;
 #ifdef _DEBUG
   int num_memblocks_load,num_memblocks_unload;
 #endif
@@ -273,6 +276,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 #endif
 
   CheckMemory;
+  local_starttime0 = glutGet(GLUT_ELAPSED_TIME);  
   *errorcode=0;
   error=0;
   show_slice_average=0;
@@ -385,6 +389,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       return;
     }
     GetMemoryInfo(num_memblocks_load,0);
+    getfile_size(file,&file_size);
 
     slicefilelen = strlen(file);
     if(settmax_s==0&&settmin_s==0){
@@ -437,6 +442,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     }
     printf("Loading slice data: %s\n",file);
     MEMSTATUS(1,&availmemory,NULL,NULL);
+    local_starttime = glutGet(GLUT_ELAPSED_TIME);
     if(sd->compression_type==1||sd->compression_type==2){
       char *datafile;
 
@@ -477,6 +483,8 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
                    slicefilelen,LABELLEN,LABELLEN,LABELLEN);
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
     }
+    local_stoptime = glutGet(GLUT_ELAPSED_TIME);
+    delta_time = (local_stoptime-local_starttime)/1000.0;    
 
     if(slice_average_flag==1){
       int data_per_timestep;
@@ -677,6 +685,21 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   exportdata=1;
   if(exportdata==0){
     FREEMEMORY(sd->qslicedata);
+  }
+  
+  local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
+  delta_time0=(local_stoptime0-local_starttime0)/1000.0;
+
+  if(file_size!=0&&delta_time>0.0){
+    float loadrate;
+
+    loadrate = (file_size*8.0/1000000.0)/delta_time;
+    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+    (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
+  }
+  else{
+    printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+    (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
 
   GLUTPOSTREDISPLAY
