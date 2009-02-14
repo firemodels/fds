@@ -143,8 +143,8 @@ osx32_libdir = /opt/intel/Compiler/11.0/056/lib
 osx64_libdir = /opt/intel/Compiler/11.0/056/lib
 
 # 32 bit
-intel_osx_32 : FFLAGS = -O3  -m32 -axSSSE3 -heap-arrays -static-intel -L$(osx32_libdir)
-intel_osx_32 : CFLAGS = -O3 -m32 -Dpp_noappend -Dpp_OSX
+intel_osx_32 : FFLAGS = -O3  -m32 -axSSSE3 -heap-arrays -static-intel -L$(osx32_libdir) -vec_report0
+intel_osx_32 : CFLAGS = -O3 -m32 -Dpp_noappend -Dpp_OSX -vec_report0
 intel_osx_32 : FCOMPL = ifort
 intel_osx_32 : CCOMPL = icc
 intel_osx_32 : obj = fds5_osx_32
