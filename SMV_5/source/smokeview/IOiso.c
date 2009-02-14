@@ -299,6 +299,12 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   mesh *meshi;
   iso *ib;
 
+  int local_starttime=0, local_stoptime=0, file_size=0;
+  int local_starttime0=0, local_stoptime0=0;  
+  float delta_time, delta_time0;
+
+  local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
+  
   ib = isoinfo+ifile;
   if(ib->loaded==0&&flag==UNLOAD)return;
 
@@ -343,6 +349,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   if(ib->compression_type==1){
     getisoheader(ib->comp_file,&isostream,ib->size_file,&nisopoints, &nisotriangles,&nbuffer,&maxfullbuffer, &maxcompbuffer,
       &meshi->isolevels, &meshi->nisolevels, &meshi->nisosteps, isoframestep, &ib->normaltable, &ib->nnormaltable);
+    getfile_size(ib->comp_file,&file_size);
     if(nbuffer>0){
       NewMemory((void **)&ib->comp_buffer,nbuffer);
       maxfullbuffer=1.01*maxfullbuffer+600;
@@ -357,6 +364,8 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       &meshi->isolevels, &meshi->nisolevels, &meshi->nisosteps, isoframestep, 
       &ib->tmin, &ib->tmax,
       endian_data);
+
+    getfile_size(file,&file_size);
   }
   if(meshi->isolevels==NULL){
     readiso("",ifile,UNLOAD,&error);
@@ -409,6 +418,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   jj=0;
   i=0;
   time_max = -1000000.0;
+  local_starttime = glutGet(GLUT_ELAPSED_TIME);
   for(;;){
     int skip_frame;
 
@@ -697,6 +707,8 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       if(i>=meshi->nisosteps)break;
     }
   }
+  local_stoptime = glutGet(GLUT_ELAPSED_TIME);
+  delta_time = (local_stoptime-local_starttime)/1000.0;
   EGZ_FCLOSE(isostream);
   if(*errorcode!=0){
     unloadiso(meshi);
@@ -720,6 +732,20 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 #endif
   IDLE();
 
+  local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
+  delta_time0=(local_stoptime0-local_starttime0)/1000.0;
+
+  if(file_size!=0&&delta_time>0.0){
+    float loadrate;
+
+    loadrate = (file_size*8.0/1000000.0)/delta_time;
+    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+    (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
+  }
+  else{
+    printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+    (float)file_size/1000000.,delta_time,delta_time0-delta_time);
+  }
   GLUTPOSTREDISPLAY
 }
 

@@ -325,6 +325,9 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   int error;
   int ncomp_smoke_total;
   int ncomp_smoke_total_skipped;
+  int local_starttime=0, local_stoptime=0, file_size=0;
+  int local_starttime0=0, local_stoptime0=0;  
+  float delta_time, delta_time0;
 #ifdef pp_LIGHT
   int ncomp_light_total;
   int ncomp_light_total_skipped;
@@ -338,6 +341,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   char compstring[128];
   mesh *meshi;
 
+  local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
   smoke3di = smoke3dinfo + ifile;
 
   if(smoke3di->loaded==1){
@@ -492,6 +496,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
 // read in data
 
+  getfile_size(smoke3di->file,&file_size);
 #ifdef EGZ
   SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"rb",0,2);
 #ifdef pp_LIGHT
@@ -542,6 +547,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
   iii=0;
   nframes_found=0;
+  local_starttime = glutGet(GLUT_ELAPSED_TIME);
   for(i=0;i<smoke3di->n_times_full;i++){
 	  EGZ_FREAD(&time,4,1,SMOKE3DFILE);
     if(EGZ_FEOF(SMOKE3DFILE)!=0){
@@ -589,6 +595,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       }
     }
   }
+  local_stoptime = glutGet(GLUT_ELAPSED_TIME);
+  delta_time = (local_stoptime-local_starttime)/1000.0;
 
   if(SMOKE3DFILE!=NULL){
     EGZ_FCLOSE(SMOKE3DFILE);
@@ -653,6 +661,20 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     if(cullactive==1)initcull(cullsmoke);
 #endif
   IDLE();
+  local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
+  delta_time0=(local_stoptime0-local_starttime0)/1000.0;
+
+  if(file_size!=0&&delta_time>0.0){
+    float loadrate;
+
+    loadrate = (file_size*8.0/1000000.0)/delta_time;
+    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+    (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
+  }
+  else{
+    printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+    (float)file_size/1000000.,delta_time,delta_time0-delta_time);
+  }
 }
 
 /* ------------------ setsmokecolorflags ------------------------ */
