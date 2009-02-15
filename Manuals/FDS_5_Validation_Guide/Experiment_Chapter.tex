@@ -476,7 +476,7 @@ outlines the range of applicability of the validation performed to date. The par
 \item[Fire Plume Parameter, $Q^*$,] is a useful non-dimensional quantity for plume correlations and flame height estimates.
 \be Q^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2} \ee
 \item[Global Equivalence Ratio, $\phi$,] is the ratio of the mass flux of fuel to the mass flux of oxygen into the compartment, divided by the stoichiometric value.
-\item[Fire Diameter, $D$,] is the equivalent diameter of the base of the fire. 
+\item[Fire Diameter, $D$,] is the equivalent diameter of the base of the fire.
 \item[Characteristic Fire Diameter, $D^*$,] is a useful length scale that incorporates the heat release rate of the fire.
 \be D^* = \left( \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g}} \right)^{2/5}  \ee
 \item[Non-dimensional Ceiling Height, $H/D^*$,] reports the actual ceiling height, $H$, in terms of the fire's characteristic length scale. This is a useful
@@ -491,12 +491,16 @@ parameter in assessing the role that the fire plume plays in the simulation. A l
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|}
 \hline
-Test Series     & $\dot{Q}$     & $Q^*$     & $\phi$    & $D$       & $D^*$     & $H/D*$    & $r_{cj}/H$    & $r_{rad}/D$       \\ 
+Test Series     & $\dot{Q}$     & $Q^*$     & $\phi$    & $D$       & $D^*$     & $H/D*$    & $r_{cj}/H$    & $r_{rad}/D$       \\
                 & (kW)          &           &           & (m)       & (m)       &           &               &                   \\ \hline \hline
 FM/SNL          & 500           & 0.6       &  0.04-0.4 & 0.9       & 1.0-1.3   &  8.4      &   1.2-1.6     &  N/A              \\ \hline
-NIST/NRC        & 400-2300      & 0.4-2.1   &  0.1-0.6  & 1.0       & 1.0-1.3   &  2.9-5.7  &   1.3-1.7     &  2.2-5.7          \\ \hline
 NBS Multi-Room  & 100           & 1.4       &  0.04     & 0.34      & 1.0-1.3   &  5.6      &   N/A         &  N/A              \\ \hline
-VTT             & 1800-3600     & 1.0       &  0.1      & 1.2-1.6   & 1.0-1.3   &  12-16    &   N/A         &  N/A              \\ \hline
+NIST/NRC        & 400-2300      & 0.4-2.1   &  0.1-0.6  & 1.0       & 1.0-1.3   &  2.9-5.7  &   1.3-1.7     &  2.2-5.7          \\ \hline
+NIST RSE        & 600           & 62        &  0.83     & 0.15      & 0.8       &  1.3      &   N/A         &  N/A              \\ \hline
+Steckler        & 63            & 1.1       &  0.02     & 0.30      & 0.32      &  6.7      &   N/A         &  N/A              \\ \hline
+UL/NFPRF        & 4400          & 3.9       &  0.11     & 1.0       & 1.7       &  4.4      &   0.86        &  N/A              \\ \hline
+VTT             & 1800-3600     & 1.0       &  0.10     & 1.2-1.6   & 1.0-1.3   &  12-16    &   N/A         &  N/A              \\ \hline
+WTC             & 3000          & 2.7       &  0.33     & 1.0       & 1.5       &  2.6      &   0.52        &  1.0              \\ \hline
 \end{tabular}
 \end{center}
 \label{Test_Parameters}
