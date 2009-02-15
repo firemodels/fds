@@ -5,7 +5,7 @@ Rem Batch file used to create a self-extracting archive containing FDS
 set version=upload_test
 set revision=r3202
 
-set bin=d:\bin
+set bin=c:\bin
 
 Rem --------- should not need to edit lines below ------
 

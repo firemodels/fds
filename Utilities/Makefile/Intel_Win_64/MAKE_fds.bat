@@ -1,4 +1,4 @@
-set intelbin=d:\bin
+set intelbin=c:\bin
 
 call %intelbin%\iclvars intel64
 call %intelbin%\ifortvars intel64
