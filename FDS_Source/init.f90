@@ -1666,7 +1666,7 @@ SUBROUTINE INIT_WALL_CELL(NM,I,J,K,I_OBST,IW,IOR,IBC,IERR)
  
 USE MEMORY_FUNCTIONS, ONLY: ALLOCATE_WALL_ARRAYS
 USE GEOMETRY_FUNCTIONS, ONLY : SEARCH_OTHER_MESHES
-INTEGER  :: NM,NOM,IBC,IOR,ITER,IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX
+INTEGER  :: NM,NOM,IBC,IOR,ITER,IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX,I_VENT
 INTEGER, INTENT(OUT) :: IERR
 REAL(EB) :: PX,PY,PZ,X1,X2,Y1,Y2,Z1,Z2,T_ACTIVATE,XIN,YIN,ZIN,DIST
 INTEGER  :: N,I_OBST,I,J,K,IBCX,IIG,JJG,KKG,IW,IIO,JJO,KKO,IC,ICG,NOM_CHECK(0:1)
@@ -1679,9 +1679,59 @@ TYPE (VENTS_TYPE), POINTER :: VT
 IERR = 0
 M=>MESHES(NM)
  
-! Compute boundary cell physical coords (XW,YW,ZW) and area (AW)
+! Determine if a VENT covers the surface
  
-IBCX         = IBC
+I_VENT = 0
+IBCX   = IBC
+VENT_FOUND = .FALSE.
+
+VENT_SEARCH_LOOP: DO N=1,M%N_VENT
+
+   VT => M%VENTS(N)
+   IF (I_OBST>0) THEN
+      IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY)       CYCLE VENT_SEARCH_LOOP
+      IF (.NOT.M%OBSTRUCTION(I_OBST)%ALLOW_VENT) CYCLE VENT_SEARCH_LOOP
+   ENDIF
+   IF (VT%IOR/=IOR) CYCLE VENT_SEARCH_LOOP
+
+   IF (ABS(IOR)==1) THEN
+      IF (IOR== 1 .AND. I/=VT%I1  ) CYCLE VENT_SEARCH_LOOP
+      IF (IOR==-1 .AND. I/=VT%I1+1) CYCLE VENT_SEARCH_LOOP
+      IF (J<VT%J1+1 .OR. J>VT%J2)   CYCLE VENT_SEARCH_LOOP
+      IF (K<VT%K1+1 .OR. K>VT%K2)   CYCLE VENT_SEARCH_LOOP
+   ENDIF
+   IF (ABS(IOR)==2) THEN
+      IF (IOR== 2 .AND. J/=VT%J1  ) CYCLE VENT_SEARCH_LOOP
+      IF (IOR==-2 .AND. J/=VT%J1+1) CYCLE VENT_SEARCH_LOOP
+      IF (I<VT%I1+1 .OR. I>VT%I2)   CYCLE VENT_SEARCH_LOOP
+      IF (K<VT%K1+1 .OR. K>VT%K2)   CYCLE VENT_SEARCH_LOOP
+   ENDIF
+   IF (ABS(IOR)==3) THEN
+      IF (IOR== 3 .AND. K/=VT%K1  ) CYCLE VENT_SEARCH_LOOP
+      IF (IOR==-3 .AND. K/=VT%K1+1) CYCLE VENT_SEARCH_LOOP
+      IF (I<VT%I1+1 .OR. I>VT%I2)   CYCLE VENT_SEARCH_LOOP
+      IF (J<VT%J1+1 .OR. J>VT%J2)   CYCLE VENT_SEARCH_LOOP
+   ENDIF
+
+   ! Check if there are over-lapping VENTs
+
+   IF (VENT_FOUND) THEN
+      WRITE(LU_ERR,'(A,I0,A,3(I0,1X),A,I0,A)') 'WARNING: Two VENTs overlap in MESH ',NM,', Cell ',I,J,K,'. VENT ', &
+                                           VT%ORDINAL,' rejected for that cell'
+      EXIT VENT_SEARCH_LOOP
+   ENDIF
+
+   VENT_FOUND = .TRUE.
+
+   ! Reassign the SURF index to be that of the VENT
+
+   I_VENT = N
+   IBCX   = VT%IBC
+
+ENDDO VENT_SEARCH_LOOP
+
+! Compute boundary cell physical coords (XW,YW,ZW) and area (AW)
+
 M%IJKW(1,IW) = I
 M%IJKW(2,IW) = J
 M%IJKW(3,IW) = K
@@ -1748,40 +1798,29 @@ IF (ABS(IOR)==3) THEN
    M%AW(IW) = M%DX(I)*M%RC(I)*M%DY(J)
 ENDIF
  
+IF (M%AW(IW)>0._EB) M%RAW(IW) = 1._EB/M%AW(IW)
+
 IF (IOR==0) THEN
    M%IJKW(6,IW) = I
    M%IJKW(7,IW) = J
    M%IJKW(8,IW) = K
 ENDIF
 
-!rm ->
-!Fill array containing K index of terrain following slice, used in dump slice
-!IF (M%TERRAIN_SLICE) THEN
- !assumes uniform z-grid
- DO NSLICE = 1, M%N_TERRAIN_SLCF
-! SL => M%SLICE(NSLICE)
-! M%K_AGL_SLICE(I,J,NSLICE) = SL%SLICE_AGL*M%RDZ(1)
-  IF (IOR == 3) THEN
-   M%K_AGL_SLICE(I,J,NSLICE) = M%K_AGL_SLICE(I,J,NSLICE) + M%IJKW(8,IW) 
-  ENDIF
- ENDDO
-!ENDIF
-!rm <-
+! Fill array containing K index of terrain following slice, used in dump slice
 
-IF (M%AW(IW)>0._EB) M%RAW(IW) = 1._EB/M%AW(IW)
+DO NSLICE = 1, M%N_TERRAIN_SLCF
+   IF (IOR==3) M%K_AGL_SLICE(I,J,NSLICE) = M%K_AGL_SLICE(I,J,NSLICE) + M%IJKW(8,IW) 
+ENDDO
 
 ! Do not assign normal velocities at boundaries of evacuation meshes
 
 IF (EVACUATION_ONLY(NM)) M%UW(IW) = 0._EB
 
-! Gas phase cell abutting boundary cell
+! Save the wall index
 
 IIG = M%IJKW(6,IW)
 JJG = M%IJKW(7,IW)
 KKG = M%IJKW(8,IW)
-
-! Use IWA to indicate the boundary cell number, IW, at the various faces of a grid cell
- 
 IC  = M%CELL_INDEX(I  ,J  ,K  )
 ICG = M%CELL_INDEX(IIG,JJG,KKG)
 M%WALL_INDEX(ICG,-IOR) = IW
@@ -1818,6 +1857,12 @@ CHECK_MESHES: IF (IW<=M%NEWC .AND.  .NOT.EVACUATION_ONLY(NM)) THEN
       XIN = M%XW(IW)
       YIN = M%YW(IW)
       ZIN = M%ZW(IW)
+      IF (IBCX==PERIODIC_SURF_INDEX .AND. IOR== 1) XIN = XF_MAX
+      IF (IBCX==PERIODIC_SURF_INDEX .AND. IOR==-1) XIN = XS_MIN
+      IF (IBCX==PERIODIC_SURF_INDEX .AND. IOR== 2) YIN = YF_MAX
+      IF (IBCX==PERIODIC_SURF_INDEX .AND. IOR==-2) YIN = YS_MIN
+      IF (IBCX==PERIODIC_SURF_INDEX .AND. IOR== 3) ZIN = ZF_MAX
+      IF (IBCX==PERIODIC_SURF_INDEX .AND. IOR==-3) ZIN = ZS_MIN
       IF (ABS(IOR)/=1) XIN = M%XW(IW) + (ITER*0.8_EB-0.4_EB)*(M%X(I)-M%X(I-1))
       IF (ABS(IOR)/=2) YIN = M%YW(IW) + (ITER*0.8_EB-0.4_EB)*(M%Y(J)-M%Y(J-1))
       IF (ABS(IOR)/=3) ZIN = M%ZW(IW) + (ITER*0.8_EB-0.4_EB)*(M%Z(K)-M%Z(K-1))
@@ -1896,260 +1941,11 @@ CHECK_MESHES: IF (IW<=M%NEWC .AND.  .NOT.EVACUATION_ONLY(NM)) THEN
          M%IJKW(5,IW) = IBCX
       ENDIF
       IF (M%BOUNDARY_TYPE(IW) == INTERPOLATED_BOUNDARY) M%SOLID(M%CELL_INDEX(I,J,K)) = .FALSE.
+      I_VENT = 0
    ENDIF FOUND_OTHER_MESH
  
 ENDIF CHECK_MESHES
 
-! periodic b.c. test
-IF_PERIODIC1: IF (PERIODIC_TEST>0 .AND. NMESHES==1) THEN
-   !! z direction periodicity, ABS(IOR)==3
-   IF (NM==1 .AND. IOR==3) THEN
-      NOM = 1
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = I
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = MESHES(NOM)%KBAR
-      M%IJKW(13,IW) = I
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = MESHES(NOM)%KBAR
-   ENDIF
-   IF (NM==1 .AND. IOR==-3) THEN
-      NOM = 1
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = I
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = 1
-      M%IJKW(13,IW) = I
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = 1
-   ENDIF
-   
-   IF (PERIODIC_TEST==2) THEN
-      !! y direction periodicity, ABS(IOR)==2
-      IF (NM==1 .AND. IOR==2) THEN
-         NOM = 1
-         M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-         M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-         M%IJKW(9,IW)  = NOM
-         M%IJKW(10,IW) = I
-         M%IJKW(11,IW) = MESHES(NOM)%JBAR
-         M%IJKW(12,IW) = K
-         M%IJKW(13,IW) = I
-         M%IJKW(14,IW) = MESHES(NOM)%JBAR
-         M%IJKW(15,IW) = K
-      ENDIF
-      IF (NM==1 .AND. IOR==-2) THEN
-         NOM = 1
-         M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-         M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-         M%IJKW(9,IW)  = NOM
-         M%IJKW(10,IW) = I
-         M%IJKW(11,IW) = 1
-         M%IJKW(12,IW) = K
-         M%IJKW(13,IW) = I
-         M%IJKW(14,IW) = 1
-         M%IJKW(15,IW) = K
-      ENDIF
-   ENDIF
-   
-   !! x direction periodicity, ABS(IOR)==1
-   IF (NM==1 .AND. IOR==1) THEN
-      NOM = 1
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = MESHES(NOM)%IBAR
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = K
-      M%IJKW(13,IW) = MESHES(NOM)%IBAR
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = K
-   ENDIF
-   IF (NM==1 .AND. IOR==-1) THEN
-      NOM = 1
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = 1
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = K
-      M%IJKW(13,IW) = 1
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = K
-   ENDIF
-ENDIF IF_PERIODIC1
-
-IF_PERIODIC4: IF (PERIODIC_TEST>0 .AND. NMESHES==4) THEN
-   !! z direction periodicity, ABS(IOR)==3
-   IF (NM==1 .AND. IOR==3) THEN
-      NOM = 2
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = I
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = MESHES(NOM)%KBAR
-      M%IJKW(13,IW) = I
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = MESHES(NOM)%KBAR
-   ENDIF
-   IF (NM==2 .AND. IOR==-3) THEN
-      NOM = 1
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = I
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = 1
-      M%IJKW(13,IW) = I
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = 1
-   ENDIF
-
-   IF (NM==3 .AND. IOR==3) THEN
-      NOM = 4
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = I
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = MESHES(NOM)%KBAR
-      M%IJKW(13,IW) = I
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = MESHES(NOM)%KBAR
-   ENDIF
-   IF (NM==4 .AND. IOR==-3) THEN
-      NOM = 3
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = I
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = 1
-      M%IJKW(13,IW) = I
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = 1
-   ENDIF
-
-   !! x direction periodicity, ABS(IOR)==1
-   IF (NM==1 .AND. IOR==1) THEN
-      NOM = 3
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = MESHES(NOM)%IBAR
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = K
-      M%IJKW(13,IW) = MESHES(NOM)%IBAR
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = K
-   ENDIF
-   IF (NM==3 .AND. IOR==-1) THEN
-      NOM = 1
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = 1
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = K
-      M%IJKW(13,IW) = 1
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = K
-   ENDIF
-
-   IF (NM==2 .AND. IOR==1) THEN
-      NOM = 4
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = MESHES(NOM)%IBAR
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = K
-      M%IJKW(13,IW) = MESHES(NOM)%IBAR
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = K
-   ENDIF
-   IF (NM==4 .AND. IOR==-1) THEN
-      NOM = 2
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = 1
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = K
-      M%IJKW(13,IW) = 1
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = K
-   ENDIF
-ENDIF IF_PERIODIC4
-
-!! Susan Kilian M x M mesh case...
-IF_PERIODIC_MXM: IF (PERIODIC_TEST==1) THEN
-   !!!NMESHES_SQRT=4
-   NMESHES_SQRT=NINT(SQRT(REAL(NMESHES,EB)))
-   
-   !! z direction periodicity, ABS(IOR)==3
-   IF (MOD(NM,NMESHES_SQRT)==1 .AND. IOR==3) THEN
-      !!!NOM = NM+3
-      NOM = NM+NMESHES_SQRT-1
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = I
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = MESHES(NOM)%KBAR
-      M%IJKW(13,IW) = I
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = MESHES(NOM)%KBAR
-   ENDIF
-   IF (MOD(NM,NMESHES_SQRT)==0 .AND. IOR==-3) THEN
-      !!!NOM = NM-3
-      NOM = NM-(NMESHES_SQRT-1)
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = I
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = 1
-      M%IJKW(13,IW) = I
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = 1
-   ENDIF
-
-   !! x direction periodicity, ABS(IOR)==1
-   IF ((NM.le.NMESHES_SQRT) .AND. IOR==1) THEN
-      !!!NOM = NM+12
-      NOM=NM+(NMESHES_SQRT-1)*NMESHES_SQRT
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = MESHES(NOM)%IBAR
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = K
-      M%IJKW(13,IW) = MESHES(NOM)%IBAR
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = K
-   ENDIF
-   IF ((NM.GT.NMESHES-NMESHES_SQRT) .AND. IOR==-1) THEN
-      !!!NOM = NM-12
-      NOM=NM-((NMESHES_SQRT-1)*NMESHES_SQRT)
-      M%BOUNDARY_TYPE(IW) = INTERPOLATED_BOUNDARY
-      M%IJKW(5,IW)  = INTERPOLATED_SURF_INDEX
-      M%IJKW(9,IW)  = NOM
-      M%IJKW(10,IW) = 1
-      M%IJKW(11,IW) = J
-      M%IJKW(12,IW) = K
-      M%IJKW(13,IW) = 1
-      M%IJKW(14,IW) = J
-      M%IJKW(15,IW) = K
-   ENDIF
-   
-ENDIF IF_PERIODIC_MXM
- 
 ! Assign internal values of temp, density, and mass fraction
  
 IF (N_SPECIES>0 .AND. M%BOUNDARY_TYPE(IW)/=VIRTUAL_BOUNDARY) THEN
@@ -2189,54 +1985,14 @@ IF (I_OBST>0 .AND. SURFACE(IBCX)%MASS_FLUX_TOTAL/=-999._EB) THEN
 ENDIF
  
 T_ACTIVATE = T_BEGIN-1._EB
-VENT_FOUND = .FALSE.
  
-! Check if there is a vent embedded in the surface
+! Do VENT-specific set-ups
  
-VLOOP: DO N=1,M%N_VENT
+PROCESS_VENT: IF (I_VENT>0) THEN
  
-   VT => M%VENTS(N)
-   IF (I_OBST>0) THEN
-      IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY)       CYCLE VLOOP
-      IF (.NOT.M%OBSTRUCTION(I_OBST)%ALLOW_VENT) CYCLE VLOOP
-   ENDIF
-   IF (VT%IOR/=IOR) CYCLE VLOOP
-   IF (IBCX==INTERPOLATED_SURF_INDEX) CYCLE VLOOP
-   IF ((VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY) .AND.M%IJKW(9,IW)>0) CYCLE VLOOP
- 
-   IF (ABS(IOR)==1) THEN
-      IF (IOR== 1 .AND. I/=VT%I1  ) CYCLE VLOOP
-      IF (IOR==-1 .AND. I/=VT%I1+1) CYCLE VLOOP
-      IF (J<VT%J1+1 .OR. J>VT%J2)   CYCLE VLOOP
-      IF (K<VT%K1+1 .OR. K>VT%K2)   CYCLE VLOOP
-   ENDIF
-   IF (ABS(IOR)==2) THEN
-      IF (IOR== 2 .AND. J/=VT%J1  ) CYCLE VLOOP
-      IF (IOR==-2 .AND. J/=VT%J1+1) CYCLE VLOOP
-      IF (I<VT%I1+1 .OR. I>VT%I2)   CYCLE VLOOP
-      IF (K<VT%K1+1 .OR. K>VT%K2)   CYCLE VLOOP
-   ENDIF
-   IF (ABS(IOR)==3) THEN
-      IF (IOR== 3 .AND. K/=VT%K1  ) CYCLE VLOOP
-      IF (IOR==-3 .AND. K/=VT%K1+1) CYCLE VLOOP
-      IF (I<VT%I1+1 .OR. I>VT%I2)   CYCLE VLOOP
-      IF (J<VT%J1+1 .OR. J>VT%J2)   CYCLE VLOOP
-   ENDIF
- 
-   ! Check if there are over-lapping VENTs
-  
-   IF (VENT_FOUND) THEN
-      WRITE(LU_ERR,'(A,I0,A,3(I0,1X),A,I0,A)') 'WARNING: Two VENTs overlap in MESH ',NM,', Cell ',I,J,K,'. VENT ', &
-                                           VT%ORDINAL,' rejected for that cell'
-      EXIT VLOOP
-   ENDIF
+   VT => M%VENTS(I_VENT)
 
-   VENT_FOUND = .TRUE.
-
-   ! Reassign the SURF index to be that of the VENT
-
-   M%VENT_INDEX(IW) = N
-   IBCX = VT%IBC
+   M%VENT_INDEX(IW) = I_VENT
    M%AREA_ADJUST(IW) = VT%INPUT_AREA/VT%FDS_AREA
    IF (M%AREA_ADJUST(IW)==0._EB) M%AREA_ADJUST(IW) = 1._EB
  
@@ -2341,9 +2097,7 @@ VLOOP: DO N=1,M%N_VENT
 
    IF (VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .AND. .NOT.M%SOLID(ICG)) M%BOUNDARY_TYPE(IW) = MIRROR_BOUNDARY
 
-   M%IJKW(5,IW) = IBCX
- 
-ENDDO VLOOP
+ENDIF PROCESS_VENT
  
 ! Set ignition time of each boundary cell
  
