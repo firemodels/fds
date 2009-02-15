@@ -1,7 +1,7 @@
 make clean
 make intel_osx_32
 make clean
-make intel_osx_mpi_32
+make mpi_intel_osx_32
 make clean
 # Uncomment the following for Debug Builds.
 #make intel_osx_32_db
