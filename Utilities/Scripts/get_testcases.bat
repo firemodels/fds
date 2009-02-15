@@ -26,6 +26,6 @@ svn export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Test_cases Test_ca
 if exist %testdir%.zip erase %testdir%.zip
 wzzip -a -r -P %testdir%.zip Test_cases
 if exist %testdir%.exe erase %testdir%.exe
-d:\bin\winzip\wzipse32 %testdir%.zip -d "c:\program files\nist\"
+c:\bin\winzip\wzipse32 %testdir%.zip -d "c:\program files\nist\"
 erase %testdir%.zip
 pause

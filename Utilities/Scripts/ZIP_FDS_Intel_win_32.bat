@@ -19,7 +19,7 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Utilities\Makefile
 
-set bin=d:\bin
+set bin=c:\bin
 
 set fdsroot=fds_%fds_version%_%fds_revision%_win32
 set togoogle=%svn_root%\Utilities\Scripts\to_google\%fdsroot%

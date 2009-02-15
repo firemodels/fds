@@ -49,7 +49,7 @@ echo Uploading Smokeview %level% version=%smv_version% revision=%smv_revision%
 pause
 
 cd ..\for_bundle\to_google
-set pwdir=d:\bin\
+set pwdir=c:\bin\
 
 Rem --------------- 32 bit Windows ----------------
 if not %upload_win32% == 1 goto endif_win32
