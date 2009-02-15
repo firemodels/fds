@@ -1,6 +1,6 @@
 @echo off
 
-Rem Batch file used to build a 64 bit version of FDS
+Rem Batch file used to build a 32 bit version of FDS
 
 set envfile=c:\bin\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -15,20 +15,11 @@ goto:eof
 :endif_envexist
 
 Rem location of batch files used to set up Intel compilation environment
-set intelbin=c:\bin
-
-call %intelbin%\iclvars intel64
-call %intelbin%\ifortvars intel64
 
 call %envfile%
 
-%svn_drive%
-cd %svn_root%\Utilities\Makefile\Intel_Win_64
+set makefds=%linux_svn_root%/Utilities/Makefile/Intel_Linux_32
 
-Rem remove the following two Rem's to do a full compile
-Rem erase *.obj
-Rem erase *.mod
-
-make VPATH="../../../FDS_Source" -f ..\makefile intel_win_64
+plink %svn_logon% %makefds%/MAKE_fds.csh %makefds%
 
 pause
