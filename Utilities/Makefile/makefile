@@ -203,7 +203,7 @@ intel_osx_64 : obj = fds5_osx_64
 intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64 : FFLAGS  = -O3 -m64 -heap-arrays -axSSSE3 -static-intel -L$(osx64_libdir)
+mpi_intel_osx_64 : FFLAGS  = -O3 -m64 -heap-arrays -axSSSE3 -static-intel -L$(osx64_libdir) -L/opt/openmpi/lib
 mpi_intel_osx_64 : CFLAGS  = -O3 -m64 -Dpp_noappend -Dpp_OSX
 mpi_intel_osx_64 : FCOMPL  = /usr/local/bin/mpif77
 mpi_intel_osx_64 : CCOMPL  = icc
