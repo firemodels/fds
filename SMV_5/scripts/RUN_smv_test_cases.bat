@@ -20,7 +20,7 @@ echo   (will take several hours depending on computer speed)
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Test_cases\Visualization
+cd %svn_root%\Verification\Visualization
 
 echo "Press <CTRL> c to abort"
 echo "Press any other key to start FDS cases"

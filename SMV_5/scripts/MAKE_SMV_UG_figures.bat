@@ -27,7 +27,7 @@ erase scriptfigures\*.version
 smokeview -help > scriptfigures\smokeview.help
 smokeview -version > scriptfigures\smokeview.version
 smokezip -help > scriptfigures\smokezip.help
-cd ..\..\Test_cases\Visualization
+cd ..\..\Verification\Visualization
 smokeview -runscript colorconv
 smokeview -runscript plume5a
 smokeview -runscript plume5b
