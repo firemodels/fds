@@ -15,7 +15,7 @@ Rem being uploaded
   set level=Release-3_Maintenance
 
 Rem directory containing googlecode password file (gc.passwd)
-  set pwdir=d:\bin\
+  set pwdir=c:\bin\
 
 Rem -------- should not need to edit any lines below ---------
 

@@ -15,7 +15,7 @@ goto:eof
 :endif_envexist
 
 Rem location of batch files used to set up Intel compilation environment
-set intelbin=d:\bin
+set intelbin=c:\bin
 
 call %intelbin%\iclvars ia32
 call %intelbin%\ifortvars ia32
