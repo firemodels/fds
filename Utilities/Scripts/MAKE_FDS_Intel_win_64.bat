@@ -26,8 +26,9 @@ call %envfile%
 cd %svn_root%\Utilities\Makefile\Intel_Win_64
 
 Rem remove the following two Rem's to do a full compile
-Rem erase *.obj
-Rem erase *.mod
+erase *.obj
+erase *.mod
+erase main.obj
 
 make VPATH="../../../FDS_Source" -f ..\makefile intel_win_64
 
