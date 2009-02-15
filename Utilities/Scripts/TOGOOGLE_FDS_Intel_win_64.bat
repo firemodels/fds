@@ -4,8 +4,8 @@ Rem Windows batch file to upload FDS release to the google download site.
 
 Rem set version and revision to match those set in ZIP_FDS_Intel_win_64.bat
 
-set version=upload_test
-set revision=r3202
+set version=5.3.0
+set revision=3193
 
 Rem uncomment 2 of the following 3 lines depending on what type of release is
 Rem being uploaded
@@ -29,8 +29,8 @@ if not %upload_win64% == 1 goto endif_win64
   set glabels=Type-Installer,Opsys-Windows,%level%
   set dplatform=64 bit Windows
   set platform=win64
-  set summary=FDS %version% for %dplatform% (build %revision%)
-  set exe=FDS_%version%_%revision%_%platform%.exe
+  set summary=FDS Executable for %dplatform% (SVN r%revision%)
+  set exe=fds_%version%_%platform%.exe
   echo -----
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%

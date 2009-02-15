@@ -25,10 +25,10 @@ if {%1} EQU {ia32_intel64} (
 )
 
 if {%1} EQU {intel64} (
-  @call "C:\Program Files\Intel\Compiler\11.0\066\fortran\bin\intel64\ifortvars_intel64.bat"
-  if exist "C:\Program Files\Intel\Compiler\11.0\066\fortran\tbb\em64t\vc8\bin\tbbvars.bat" @call "C:\Program Files\Intel\Compiler\11.0\066\fortran\tbb\em64t\vc8\bin\tbbvars.bat"
-  if exist "C:\Program Files\Intel\Compiler\11.0\066\fortran\mkl\tools\environment\mklvarsem64t.bat" @call "C:\Program Files\Intel\Compiler\11.0\066\fortran\mkl\tools\environment\mklvarsem64t.bat"
-  if exist "C:\Program Files\Intel\Compiler\11.0\066\fortran\ipp\em64t\tools\env\ippenvem64t.bat" @call "C:\Program Files\Intel\Compiler\11.0\066\fortran\ipp\em64t\tools\env\ippenvem64t.bat"
+  @call "C:\Program Files (x86)\Intel\Compiler\11.0\066\fortran\bin\intel64\ifortvars_intel64.bat"
+  if exist "C:\Program Files (x86)\Intel\Compiler\11.0\066\fortran\tbb\em64t\vc8\bin\tbbvars.bat" @call "C:\Program Files (x86)\Intel\Compiler\11.0\066\fortran\tbb\em64t\vc8\bin\tbbvars.bat"
+  if exist "C:\Program Files (x86)\Intel\Compiler\11.0\066\fortran\mkl\tools\environment\mklvarsem64t.bat" @call "C:\Program Files (x86)\Intel\Compiler\11.0\066\fortran\mkl\tools\environment\mklvarsem64t.bat"
+  if exist "C:\Program Files (x86)\Intel\Compiler\11.0\066\fortran\ipp\em64t\tools\env\ippenvem64t.bat" @call "C:\Program Files (x86)\Intel\Compiler\11.0\066\fortran\ipp\em64t\tools\env\ippenvem64t.bat"
   exit /B 0
 )
 
@@ -40,9 +40,9 @@ if {%1} EQU {ia32_ia64} (
 )
 
 if {%1} EQU {ia64} (
-  @call "C:\Program Files\Intel\Compiler\11.0\066\fortran\bin\ia64\ifortvars_ia64.bat"
-  if exist "C:\Program Files\Intel\Compiler\11.0\066\fortran\mkl\tools\environment\mklvars64.bat" @call "C:\Program Files\Intel\Compiler\11.0\066\fortran\mkl\tools\environment\mklvars64.bat"
-  if exist "C:\Program Files\Intel\Compiler\11.0\066\fortran\ipp\ia64\tools\env\ippenv64.bat" @call "C:\Program Files\Intel\Compiler\11.0\066\fortran\ipp\ia64\tools\env\ippenv64.bat"
+  @call "C:\Program Files(x86)\Intel\Compiler\11.0\066\fortran\bin\ia64\ifortvars_ia64.bat"
+  if exist "C:\Program Files(x86)\Intel\Compiler\11.0\066\fortran\mkl\tools\environment\mklvars64.bat" @call "C:\Program Files(x86)\Intel\Compiler\11.0\066\fortran\mkl\tools\environment\mklvars64.bat"
+  if exist "C:\Program Files(x86)\Intel\Compiler\11.0\066\fortran\ipp\ia64\tools\env\ippenv64.bat" @call "C:\Program Files(x86)\Intel\Compiler\11.0\066\fortran\ipp\ia64\tools\env\ippenv64.bat"
   exit /B 0
 )
 
