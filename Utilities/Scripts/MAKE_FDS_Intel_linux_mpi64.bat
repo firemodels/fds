@@ -15,21 +15,13 @@ goto:eof
 :endif_envexist
 
 Rem location of batch files used to set up Intel compilation environment
-set intelbin=c:\bin
-
-call %intelbin%\iclvars ia32
-call %intelbin%\ifortvars ia32
 
 call %envfile%
 
-%svn_drive%
-cd %svn_root%\Utilities\Makefile\Intel_Win_32
+set target=mpi_intel_linux_64
+set fdsdir=%linux_svn_root%/Utilities/Makefile/Mpi_Intel_Linux_64
+set scriptdir=%linux_svn_root%/Utilities/Scripts
 
-Rem remove the following two Rem's to do a full compile
-Rem erase *.obj
-Rem erase *.mod
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% fire79
 
-make VPATH="../../../FDS_Source" -f ..\makefile intel_win_32
-
-cd ..\..\Scripts
 pause
