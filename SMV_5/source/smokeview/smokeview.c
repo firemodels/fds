@@ -1067,7 +1067,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   }
   if(force_isometric==1){
     force_isometric=0;
-    projection_type=0;
+    projection_type=1;
     camera_current->projection_type=projection_type;
     ZoomMenu(-2);
   }
