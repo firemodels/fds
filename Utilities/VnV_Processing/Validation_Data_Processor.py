@@ -6,7 +6,7 @@ from pyx import *
 
 ### Set Global Variables for Data to Process
 ## Validation Data Set (1), Verification Data Set (2), Examples Data Set (3), Trainier Data Set (4)
-data_set = 1 # Input Value
+data_set = 3 # Input Value
 
 ## Validation Data
 if data_set == 1:
@@ -24,7 +24,7 @@ if data_set == 2:
 
 ## Examples Data 
 if data_set == 3:
-    data_directory = "../../Test_cases/"
+    data_directory = "../../Verification/"
     output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
     config_file_name = "Examples_Data_Config_File.csv"
     print "**** Processing Examples Data Set ****\n"
