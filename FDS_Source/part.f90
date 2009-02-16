@@ -1107,7 +1107,7 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,NM)
     
 ! Mass and energy transfer between gas and droplets
 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_CPBAR
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_CPBAR,GET_MOLECULAR_WEIGHT
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN,DROP_RAD,DROP_TMP,MVAP_TOT
 REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS
@@ -1117,7 +1117,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
-            CP,H_NEW,YY_GET(1:N_SPECIES), H_GAS,H_VAPOR,M_GAS_NEW
+            CP,H_NEW,YY_GET(1:N_SPECIES), H_GAS,H_VAPOR,M_GAS_NEW,MW_GAS,DTERM1,DTERM2,DTERM3,DTERM4,CP1,CP2,VEL_REL
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS,ITMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
@@ -1156,6 +1156,52 @@ IF (N_EVAP_INDICIES>0) THEN
    MVAP_TOT = 0._EB
 ENDIF
 
+!DO KK=1,KBAR
+!   DO JJ=1,JBAR
+!      DO II=1,IBAR
+!         TMP_G=TMP(II,JJ,KK)
+!         RHO_G=RHO(II,JJ,KK)
+!         ITMP = MIN(5000,NINT(TMP_G))
+!         YY_GET(1) = 1._EB
+!         CALL GET_CPBAR(YY_GET,CP1,ITMP)
+!         CALL GET_CPBAR(YY_GET,CP2,300)
+!         H_VAPOR = M_VAP * CP2 * 300._EB
+!         YY_GET(:) = YY(II,JJ,KK,:)
+!         CALL GET_CPBAR(YY_GET,CP,ITMP)
+!         H_GAS = RHO_G * TMP_G * CP
+!         CP2 = CP2*300._EB - CP1*TMP_G
+!         CALL GET_MOLECULAR_WEIGHT(YY_GET,MW_RATIO)
+!         MW_RATIO = MW_RATIO / SPECIES(1)%MW
+!         U2 = 0.25_EB*(U(II-1,JJ,KK)+U(II,JJ,KK))**2
+!         V2 = 0.25_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))**2
+!         W2 = 0.25_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))**2
+!         VEL = U2+V2+W2
+!         M_VAP = 0.01_EB
+!         RHO(II,JJ,KK) = RHO_G + M_VAP
+!         H_NEW = (H_GAS + H_VAPOR) / RHO_G
+!         YY(II,JJ,KK,1) = (YY(II,JJ,KK,1) * RHO_G + M_VAP)/RHO(II,JJ,KK)
+!         D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) +(MW_RATIO +  2._EB*(CP2 + VEL * 0.5_EB) / (H_NEW + CP * TMP_G) ) * M_VAP * & 
+!                            2._EB / (RHO(II,JJ,KK)+RHO_G) * RDT
+                            
+!         TEMPITER = .TRUE.
+!         ITERATE_TEMP: DO WHILE (TEMPITER)
+!            TEMPITER=.FALSE.
+!            ITMP = MIN(5000,NINT(TMP_G))
+!            YY_GET(:) = YY(II,JJ,KK,:)
+!            CALL GET_CPBAR(YY_GET,CP,ITMP)
+!            TMP_G = TMP_G+(H_NEW-CP*TMP_G)/CP
+!            IF ((TMP(II,JJ,KK)-TMP_G) > 2._EB) TEMPITER = .TRUE.
+!            TMP(II,JJ,KK) = TMP_G
+!         ENDDO ITERATE_TEMP
+         
+!         TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
+                            
+!      ENDDO
+!   ENDDO
+!ENDDO
+
+!RETURN
+
 ! Loop over all types of evaporative species
 
 EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
@@ -1179,7 +1225,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
       TMP_BOIL = PC%TMP_V
       IGAS     = PC%SPEC_INDEX
       MW_DROP  = SPECIES(IGAS)%MW
-      MW_RATIO = SPECIES(0)%MW/MW_DROP
       H_V      = PC%H_V
       DHOR     = H_V*MW_DROP/R0
 
@@ -1215,7 +1260,15 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          JJ  = FLOOR(YJ+1._EB)
          KK  = FLOOR(ZK+1._EB)
          RVC = RDX(II)*RDY(JJ)*RDZ(KK)
-
+         
+         IF (N_SPECIES==0) THEN
+            MW_GAS = SPECIES(0)%MW
+         ELSE
+            YY_GET = YY(II,JJ,KK,:)
+            CALL GET_MOLECULAR_WEIGHT(YY_GET,MW_GAS)
+         ENDIF
+         MW_RATIO = MW_GAS/MW_DROP
+         
          ! Determine how many sub-time step iterations are needed and then iterate over the time step.
          ! This is not fully functional. Keep as a placeholder for now.
 
@@ -1250,7 +1303,10 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ELSE
                Y_GAS = 0._EB
             ENDIF
-
+            U2 = 0.5_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))
+            V2 = 0.5_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))
+            W2 = 0.5_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))
+            VEL_REL = SQRT((U2-DR%U)**2+(V2-DR%V)**2+(W2-DR%W)**2)
             ! Set variables for heat transfer on solid
 
             SOLID_OR_GAS_PHASE: IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
@@ -1260,17 +1316,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                TMP_WALL = TMP_F(IW) 
                SELECT CASE(ABS(DR%IOR))
                   CASE(1)
-                     V2 = 0.25_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))**2
-                     W2 = 0.25_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))**2
-                     VEL = SQRT(V2+W2)
+                     VEL = SQRT(V2**2+W2**2)
                   CASE(2)
-                     U2 = 0.25_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))**2
-                     W2 = 0.25_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))**2
-                     VEL = SQRT(U2+W2)
+                     VEL = SQRT(U2**2+W2**2)
                   CASE(3)
-                     U2 = 0.25_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))**2
-                     V2 = 0.25_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))**2
-                     VEL = SQRT(U2+V2)
+                     VEL = SQRT(U2**2+V2**2)
                END SELECT
                LENGTH   = 1._EB
                RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
@@ -1382,28 +1432,32 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*(Q_RAD+Q_CON_WALL)*RAW(IW)/DT_SUBSTEP
                WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*WGT*M_DROP*RAW(IW)/REAL(N_SUBSTEPS,EB) 
             ENDIF
-         
-            ! Decrease temperature of the gas cell
-            ITMP = MIN(5000,NINT(TMP_G))
-            IF (N_SPECIES == 0 ) THEN
-               CP = Y2CPBAR_C(ITMP)
-            ELSE
-               YY_GET(:) = YY(II,JJ,KK,:)
-               CALL GET_CPBAR(YY_GET,CP,ITMP)
-            ENDIF
-            M_GAS_NEW = M_GAS + WGT*M_VAP
-            H_GAS = M_GAS*CP*TMP_G
-            H_VAPOR = 0._EB
-            ! Add vapor or fuel gas to the grid cell, compute vapor enthalpy
-            IF (IGAS>0) THEN
-               ! Renorm current mass fractions
-               H_VAPOR = WGT*M_VAP*(H_V+C_DROP*TMP_DROP_NEW)
-               YY(II,JJ,KK,:) = YY(II,JJ,KK,:) * M_GAS/M_GAS_NEW
-               ! Update for evaporation
-               YY(II,JJ,KK,IGAS)= YY(II,JJ,KK,IGAS) + WGT*M_VAP/M_GAS_NEW
-            ENDIF
-            H_NEW = (H_VAPOR + H_GAS - WGT*Q_CON_GAS)/M_GAS_NEW
             
+            ITMP = MIN(5000,NINT(TMP_G))
+            YY_GET(:) = 0._EB
+            YY_GET(IGAS) = 1._EB
+            CALL GET_CPBAR(YY_GET,CP2,ITMP)
+            CALL GET_CPBAR(YY_GET,CP1,NINT(TMP_DROP_NEW))
+            YY_GET(:) = YY(II,JJ,KK,:)
+            CALL GET_CPBAR(YY_GET,CP,ITMP)
+            CP1 = H_V+C_DROP*(0.5_EB*(TMP_DROP_NEW+TMP_DROP)-TMP_MELT)
+            CP2 = CP1 - CP2*TMP_G
+            H_VAPOR = WGT*M_VAP*CP1
+            H_GAS = M_GAS*CP*TMP_G
+            M_GAS_NEW = M_GAS + WGT*M_VAP
+            RHO(II,JJ,KK) = M_GAS_NEW*RVC
+            H_NEW = (H_VAPOR+H_GAS)/M_GAS_NEW
+            
+            YY(II,JJ,KK,:) = YY(II,JJ,KK,:) * M_GAS/M_GAS_NEW
+            YY(II,JJ,KK,IGAS)= YY(II,JJ,KK,IGAS) + WGT*M_VAP/M_GAS_NEW
+
+            ! Compute contribution to the divergence
+!            D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) +(MW_RATIO *M_VAP + 2._EB*(M_VAP*(CP2 + VEL_REL**2 * 0.5_EB)-Q_CON_GAS*WGT)/ &
+!                                (H_NEW+CP*TMP_G) ) * 2._EB / (M_GAS_NEW+M_GAS) /DT_SUBSTEP
+            D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) +(MW_RATIO *M_VAP + 2._EB*(M_VAP*CP2-Q_CON_GAS*WGT)/ &
+                                (H_NEW+CP*TMP_G) ) * 2._EB / (M_GAS_NEW+M_GAS) /DT_SUBSTEP
+
+
             TEMPITER = .TRUE.
             ITERATE_TEMP: DO WHILE (TEMPITER)
                TEMPITER=.FALSE.
@@ -1418,12 +1472,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                IF ((TMP(II,JJ,KK)-TMP_G) > 2._EB) TEMPITER = .TRUE.
                TMP(II,JJ,KK) = TMP_G
             ENDDO ITERATE_TEMP
-            
             TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
-
-            ! Compute contribution to the divergence
-            D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK) + WGT*RVC/(DT_SUBSTEP*RHO_G)*( M_VAP*MW_RATIO-Q_CON_GAS/(CP*TMP(II,JJ,KK)) )
-
+            
+            CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM(II,JJ,KK))
+            RSUM(II,JJ,KK) = R0/RSUM(II,JJ,KK)
+            
             ! Add fuel evaporation rate to running counter before adjusting its value
 
             IF (IGAS>0 .AND. IGAS==I_FUEL) FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP
@@ -1432,10 +1485,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
             M_VAP = PC%ADJUST_EVAPORATION*M_VAP
 
-            ! Add new mass from vaporized droplet to the grid cell
-
-            RHO(II,JJ,KK) = RHO(II,JJ,KK) + WGT*M_VAP*RVC
-            
             !Track total mass evaporate in cell
             MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
 
