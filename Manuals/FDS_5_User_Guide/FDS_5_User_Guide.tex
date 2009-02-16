@@ -5985,18 +5985,9 @@ obstruction disappears at 4~s because it does exist initially. The red hole is c
 red obstruction). The green hole is filled in at 2~s because it does exist (as a hole) initially. {\bf You should always try a simple example first before
 embarking on a complicated creation/removal scheme for obstructions and holes.}
 
+To learn how to create and remove obstructions multiple times, see Section~\ref{info:CUSTOM} for information about the custom control feature.
 
-To remove an obstruction, then re-create a different one in its place, use 2 lines
 
-\footnotesize
-\begin{verbatim}
-&OBST XB=..., SURF_ID='whatever', DEVC_ID='device 1' /
-&OBST XB=..., SURF_ID='whatever', DEVC_ID='device 2' /
-\end{verbatim}
-
-\normalsize
-\noindent
-since the code simply sees this as two different obstructions.
 
 \begin{warning}
 Starting with FDS version 5.3.0, an obstruction that makes up the boundary of a ``pressure zone'' (see Section~\ref{info:ZONE}) {\em can} be created or
@@ -6251,6 +6242,7 @@ will lead to the job being stopped gracefully, with restart files output, when t
 
 
 \subsection{Control Function: \texorpdfstring{{\tt CUSTOM}}{CUSTOM} }
+\label{info:CUSTOM}
 
 For most of the control function types, the logical (true/false) output of
 the devices and control functions and the time they last changed
