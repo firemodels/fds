@@ -17,30 +17,71 @@ details exactly what software is needed and how to configure it.
 <li><a href="other.html">Build notes for Documentation and other FDS/Smokeview components</a>
 </ul>
 
+<h3>Configuring the Build Scripts</h3>
+The aim of the scripts on this web page is to create
+installation files used to update FDS on a Windows, Linux and/or a Mac computer.  
+These names are formed using the FDS version number and the SVN revision number
+of the FDS source.  
+
+
+<ul>
+<li><a href="GET_fds_svn_num.bat">Find the SVN revision number of the FDS source</a> 
+<li><a href="EDIT_setup.bat">Specify the FDS source revision number</a> 
+in the <tt>fds_smv_env.bat</tt> configuration file - used by all scripts run from this web page.
+<li><a href="Update_FDS_svn_num.bat">Update the FDS source to the revision specified </a> 
+in the <tt>fds_smv_env.bat</tt> configuration file.
+<li><a href="Update_FDS_latest_svn.bat">Update the FDS source to the latest SVN revision number</a> .
+</ul>
+
+<h3>Build and Package FDS</h3>
+
+<table border=on>
+<tr><th></th><th>Windows</th><th>Linux</th><th>OSX</th></tr>
+<tr>
+<th>32 bit</th>
+<td>
+<a href="MAKE_FDS_Intel_win_32.bat">Build Serial FDS</a><br>
+<a href="MAKE_FDS_Intel_win_mpi32.bat">Build Parallel FDS</a><br>
+<a href="ZIP_FDS_Intel_win_32.bat">Create Self extractor</a>
+</td>
+<td>
+<a href="MAKE_FDS_Intel_linux_32.bat">Build Serial FDS</a><br>
+<a href="MAKE_FDS_Intel_linux_mpi32.bat">Build Parallel FDS</a><br>
+<a href="ZIP_FDS_Intel_linux_32.bat">Create zipped archive</a>
+</td>
+<td>
+<a href="MAKE_FDS_Intel_OSX_32.bat">Build Serial FDS</a><br>
+<a href="MAKE_FDS_Intel_OSX_mpi32.bat">Build Parallel FDS</a><br>
+<a href="ZIP_FDS_Intel_OSX_32.bat">Create zipped archive</a>
+</td>
+</tr>
+<tr><th>64 bit</th>
+<td>
+<a href="MAKE_FDS_Intel_win_64.bat">Build Serial FDS</a><br>
+<a href="MAKE_FDS_Intel_win_mpi64.bat">Build Parallel FDS</a><br>
+<a href="ZIP_FDS_Intel_win_64.bat">Create Self extractor</a><br>
+(must be logged onto a PC<br>running 64 bit Windows)
+</td>
+<td>
+<a href="MAKE_FDS_Intel_linux_64.bat">Build Serial FDS</a><br>
+<a href="MAKE_FDS_Intel_linux_mpi64.bat">Build Parallel FDS</a><br>
+<a href="ZIP_FDS_Intel_linux_64.bat">Create zipped archive</a>
+</td>
+<td>
+<a href="MAKE_FDS_Intel_OSX_64.bat">Build Serial FDS</a><br>
+<a href="ZIP_FDS_Intel_OSX_64.bat">Create zipped archive</a><br>
+parallel FDS not available
+</td>
+</tr>
+</table>
+
+<h3>Upload FDS</h3>
+
 <h3>32 bit FDS</h3>
 <ul>
-<li><a href="GET_fds_svn_num.bat">Get svn revision</a> Get the svn revision number for the FDS source directory.
-<li><a href="EDIT_setup.bat">Set svn revision number</a> Set the svn version number and fds version number - 
-used for naming the fds build file.
 
-<li><a href="MAKE_FDS_Intel_win_32.bat">Compile serial FDS for 32 bit windows</a>
-<li><a href="MAKE_FDS_Intel_win_mpi32.bat">Compile parallel FDS for 32 bit windows</a>
-<li><a href="MAKE_FDS_Intel_linux_32.bat">Compile serial FDS for 32 bit Linux</a>
-<li><a href="MAKE_FDS_Intel_linux_mpi32.bat">Compile parallel FDS for 32 bit Linux</a>
-<li><a href="MAKE_FDS_Intel_OSX_32.bat">Compile serial FDS for 32 bit OSX</a>
-<li><a href="MAKE_FDS_Intel_OSX_mpi32.bat">Compile parallel FDS for 32 bit OSX</a>
-
-<li><a href="ZIP_FDS_Intel_win_32.bat">Compress FDS</a> Create a 32 bit FDS self-extracter
 <li><a href="TOGOOGLE_FDS_Intel_win_32.bat">Upload FDS</a> Upload the FDS self extracter to google code
 <li><a href="http://code.google.com/p/fds-smv/downloads/list?deleted=1&ts=1234368278">Check download page</a>
-</ul>
-<h3>64 bit FDS</h3>
-<ul>
-<li><a href="MAKE_FDS_Intel_win_64.bat">Compile serial FDS for 64 bit windows</a> (note: must be on the PC running 64 bit Windows)
-<li><a href="MAKE_FDS_Intel_win_mpi64.bat">Compile parallel FDS for 64 bit windows</a> (note: must be on the PC running 64 bit Windows)
-<li><a href="MAKE_FDS_Intel_linux_64.bat">Compile serial FDS for 64 bit Linux</a>
-<li><a href="MAKE_FDS_Intel_linux_mpi64.bat">Compile parallel FDS for 64 bit Linux</a>
-<li><a href="MAKE_FDS_Intel_OSX_64.bat">Compile serial FDS for 64 bit OSX</a>
 </ul>
 
 <p><hr>
