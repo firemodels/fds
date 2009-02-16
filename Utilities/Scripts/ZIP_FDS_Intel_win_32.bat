@@ -25,6 +25,7 @@ set fdsroot=fds_%fds_version%_%fds_revision%_win32
 set togoogle=%svn_root%\Utilities\Scripts\to_google\%fdsroot%
 mkdir %togoogle%
 copy Intel_Win_32\fds5_win_32.exe %togoogle%\fds5.exe
+copy Mpi_Intel_Win_32\fds5_win_mpi_32.exe %togoogle%\fds5_mpi.exe
 
 echo.
 echo winzipping distribution directory
