@@ -21,4 +21,4 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Manuals\SMV_5_User_Guide
 
-c:\bin\acro SMV_5_User_Guide.pdf
+start acrobat %svn_root%\Manuals\SMV_5_User_Guide\SMV_5_User_Guide.pdf
