@@ -166,7 +166,7 @@ intel_osx_32 : FFLAGS = -O3  -m32 -axSSSE3 -heap-arrays -static-intel -L$(osx32_
 intel_osx_32 : CFLAGS = -O3 -m32 -Dpp_noappend -Dpp_OSX -vec_report0
 intel_osx_32 : FCOMPL = ifort
 intel_osx_32 : CCOMPL = icc
-intel_osx_32 : obj = fds5_osx_32
+intel_osx_32 : obj = fds5_intel_osx_32
 intel_osx_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
@@ -174,7 +174,7 @@ mpi_intel_osx_32 : FFLAGS  = -O3 -m32 -axSSSE3 -heap-arrays -static-intel -L$(os
 mpi_intel_osx_32 : CFLAGS  = -O3 -m32 -Dpp_noappend -Dpp_OSX
 mpi_intel_osx_32 : FCOMPL  = /usr/local/bin/mpif77
 mpi_intel_osx_32 : CCOMPL  = icc
-mpi_intel_osx_32 : obj = fds5_mpi_osx_32
+mpi_intel_osx_32 : obj = fds5_mpi_intel_osx_32
 mpi_intel_osx_32 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
