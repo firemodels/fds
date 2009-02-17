@@ -22,5 +22,5 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV_5\scripts
-notepad readme.html
+cd %svn_root%\SMV_5\
+notepad readme_smv.html
