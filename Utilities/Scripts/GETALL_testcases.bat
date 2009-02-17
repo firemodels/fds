@@ -15,7 +15,7 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-cd %svn_root%/Utilities/Scripts
+cd %svn_root%\Utilities
 
 set LREPOS=FDS-SMV
 

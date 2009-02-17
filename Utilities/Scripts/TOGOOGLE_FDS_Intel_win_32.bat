@@ -17,14 +17,14 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Utilities\Scripts\to_google
+cd %svn_root%\Utilities\to_google
 
+set glabels=Type-Installer,Opsys-Windows,%fds_google_level%
+set dplatform=32 bit Windows
+set platform=win32
+set summary=FDS %fds_version% for %dplatform% (SVN r%fds_revision%)
+set exe=fds_%fds_version%_%fds_revision%_%platform%.exe
 
-  set glabels=Type-Installer,Opsys-Windows,%fds_google_level%
-  set dplatform=32 bit Windows
-  set platform=win32
-  set summary=FDS %fds_version% for %dplatform% (SVN r%fds_revision%)
-  set exe=fds_%fds_version%_%fds_revision%_%platform%.exe
 echo Uploading %exe%
 echo FDS %fds_google_level% version=%fds_version% revision=%fds_revision%
 echo.

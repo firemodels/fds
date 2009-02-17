@@ -17,16 +17,7 @@ goto:eof
 call %envfile%
 %svn_drive%
 
-cd %svn_root%\Utilities\Scripts\to_google
-
-Rem un-comment 1 of the following 3 lines
-
-Rem set level=Release-1_Major
-Rem set level=Release-2_Minor
-set level=Release-3_Maintenance
-
-Rem directory containing googlecode password file (gc.passwd)
-set pwdir=c:\bin\
+cd %svn_root%\Utilities\to_google
 
 set windocs=fds_smv_docs_%docs_revision%.exe
 set unixdocs=fds_smv_docs_%docs_revision%.tar.gz
@@ -34,13 +25,13 @@ echo Uploading %windocs%
 echo Uploading %unixdocs%
 pause
 
-  set glabels=Type-Installer,Opsys-Windows,%level%
+  set glabels=Type-Installer,Opsys-Windows,%docs_google_level%
   set dplatform=Windows
   set summary=Documentation  (SVN r%docs_revision% - Windows self-extracter)
   set file=%windocs%
   echo.
   echo Uploading %summary% 
-       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
+       googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
 
 echo.
 echo Uploads complete
@@ -52,7 +43,7 @@ echo Uploads complete
   set file=%unixdocs%
   echo.
   echo Uploading %summary% 
-       googlecode_upload.py --passwd-file-dir %pwdir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
+       googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
 
 echo .
 echo Uploads complete
