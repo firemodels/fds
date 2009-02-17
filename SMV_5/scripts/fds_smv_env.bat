@@ -15,7 +15,7 @@ Rem windows repository hard drive
 set svn_drive=d:
 
 Rem Linux repository directory 
-set linux_svn_root=FDS-SMV
+set linux_svn_root=FDS-SMVclean
 
 Rem Linux cluster user name
 set linux_username=gforney
@@ -25,9 +25,6 @@ set google_username=gforney
 
 Rem linux cluster hostname
 set linux_hostname=acrux.cfr.nist.gov
-
-Rem directory containing google password file
-set google_password_dir=c:\bin\
 
 Rem ----------------------------------------------------------------------
 Rem ------ settings updated updated as repository changes ----------------
@@ -39,18 +36,21 @@ set smv_version=5.3.11
 set smv_revision=3322
 
 Rem define Google-code release level for Smokeview
+Rem  *** comment 2 of the following 3 lines
 
 Rem set smv_google_level=Release-1_Major
 Rem set smv_google_level=Release-2_Minor
 set     smv_google_level=Release-3_Maintenance
 
 Rem define Google-code release level for docs
+Rem  *** comment 2 of the following 3 lines
 
 Rem set docs_google_level=Release-1_Major
-Rem set docs_google_level=Release-2_Minor
-set     docs_google_level=Release-3_Maintenance
+Rem docs_google_level=Release-2_Minor
+    set     docs_google_level=Release-3_Maintenance
 
 Rem define Google-code release level for Test_cases
+Rem  *** comment 2 of the following 3 lines
 
 Rem set test_cases_google_level=Release-1_Major
 Rem set test_cases_google_level=Release-2_Minor
@@ -58,10 +58,11 @@ set     test_cases_google_level=Release-3_Maintenance
 
 Rem define FDS version and svn revision info
 
-set fds_version=uploadtest
-set fds_revision=donotuse
+set fds_version=xxxx
+set fds_revision=yyyy
 
 Rem define Google-code release level for FDS
+Rem  *** comment 2 of the following 3 lines
 
 Rem set fds_google_level=Release-1_Major
 Rem set fds_google_level=Release-2_Minor
@@ -81,3 +82,6 @@ Rem --- do not edit below ----------------
 Rem --------------------------------------
 
 set svn_logon=%linux_username%@%linux_hostname%
+
+Rem directory containing google password file
+set google_password_dir=%homedrive%\%homepath%\
