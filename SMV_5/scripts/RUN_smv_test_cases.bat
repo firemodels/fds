@@ -30,6 +30,7 @@ fds5 plume5a.fds
 fds5 plume5b.fds
 fds5 plume5c.fds
 fds5 sillytexture.fds
+fds5 script_test.fds
 fds5 smoke_sensor.fds
 fds5 smoke_test.fds
 fds5 smoke_test2.fds
