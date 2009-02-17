@@ -22,7 +22,7 @@ cd %svn_root%\Utilities\Makefile
 set bin=c:\bin
 
 set fdsroot=fds_%fds_version%_%fds_revision%_OSX32
-set togoogle=%svn_root%\Utilities\Scripts\to_google
+set togoogle=%svn_root%\Utilities\to_google
 set fdsrootdir=%togoogle%\%fdsroot%
 set scriptdir=%linux_svn_root%/Utilities/Scripts
 mkdir %fdsrootdir%

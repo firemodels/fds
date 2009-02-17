@@ -18,7 +18,7 @@ Rem --------- should not need to edit below ----------
 
 call %envfile%
 %svn_drive%
-cd %svn_root%\Utilities\Scripts\to_google\
+cd %svn_root%\Utilities\to_google\
 
 set testdir=fds_test_cases_%test_cases_revision%
 if exist Test_cases rmdir /s /q Test_cases

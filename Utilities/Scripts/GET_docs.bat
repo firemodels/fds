@@ -21,7 +21,7 @@ echo.
 
 set mandir=%svn_root%\Manuals\All_PDF_Files
 set zipbase=fds_smv_docs_%docs_revision%
-set togoogle=%svn_root%\Utilities\Scripts\to_google
+set togoogle=%svn_root%\Utilities\to_google
 set docbasedir=%togoogle%\%zipbase%\
 
 mkdir %docbasedir%
