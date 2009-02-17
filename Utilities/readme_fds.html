@@ -1,0 +1,96 @@
+<html>
+<head>
+<TITLE>FDS Build Notes</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" >
+<h2>FDS Build Notes</h2>
+<a href="Scripts/EDIT_readme.bat">Edit this page</a>
+<p><hr size="1">
+
+<h3>Other Notes</h3>
+<ul>
+<li><a href="../SMV_5/readme_assumptions.html">Getting Started</a> Various software tools such as data compressors, software compilers, 
+data communicators <em>etc</em> are required to run the scripts found here.
+<a href="../SMV_5/readme_assumptions.html">This web page</a>
+details exactly what software is needed and how to configure it.
+<li><a href="../SMV_5/readme_smv.html">Build notes for Smokeview</a>
+<li><a href="readme_other.html">Build notes for Documentation and other FDS/Smokeview components</a>
+</ul>
+
+<h3>Configuring the Build Scripts</h3>
+The aim of the scripts on this web page is to create
+files for updating FDS on a Windows, Linux and/or a Mac computer.  
+These names are formed using the FDS version number and the SVN revision number
+of the FDS source.  
+
+<ul>
+<li><a href="Scripts/GET_fds_svn_num.bat">Find the SVN revision number of the FDS source</a> 
+<li><a href="Scripts/EDIT_setup.bat">Specify the FDS source revision number</a> 
+in the <tt>fds_smv_env.bat</tt> configuration file - used by all scripts run from this web page.
+<li><a href="Scripts/Update_FDS_svn_num.bat">Update the FDS source to the revision specified </a> 
+in the <tt>fds_smv_env.bat</tt> configuration file.
+<li><a href="Scripts/Update_FDS_latest_svn.bat">Update the FDS source to the latest SVN revision number</a> .
+<li><a href="Scripts/EDIT_setup.bat">Configure build scripts</a> Define environmental variables used by the scripts on this page.
+</ul>
+
+<h3>Build, Package and Upload FDS</h3>
+
+<table border=on>
+<tr><th></th><th>Windows</th><th>Linux</th><th>OSX</th></tr>
+<tr>
+<th>32 bit</th>
+<td>
+<a href="Scripts/MAKE_FDS_Intel_win_32.bat">Build Serial</a><br>
+<a href="Scripts/MAKE_FDS_Intel_win_mpi32.bat">Build Parallel</a><br>
+<a href="Scripts/ZIP_FDS_Intel_win_32.bat">Create Self extractor</a><br>
+<a href="Scripts/TOGOOGLE_FDS_Intel_win_32.bat">Upload to Google Code</a> 
+</td>
+<td>
+<a href="Scripts/MAKE_FDS_Intel_linux_32.bat">Build Serial</a><br>
+<a href="Scripts/MAKE_FDS_Intel_linux_mpi32.bat">Build Parallel</a><br>
+<a href="Scripts/ZIP_FDS_Intel_linux_32.bat">Create zipped archive</a><br>
+<a href="Scripts/TOGOOGLE_FDS_Intel_linux_32.bat">Upload to Google Code</a><br> 
+</td>
+<td>
+<a href="Scripts/MAKE_FDS_Intel_OSX_32.bat">Build Serial</a><br>
+<a href="Scripts/MAKE_FDS_Intel_OSX_mpi32.bat">Build Parallel</a><br>
+<a href="Scripts/ZIP_FDS_Intel_OSX_32.bat">Create zipped archive</a><br>
+<a href="Scripts/TOGOOGLE_FDS_Intel_osx_32.bat">Upload to Google Code</a><br> 
+</td>
+</tr>
+<tr><th>64 bit</th>
+<td>
+<a href="Scripts/MAKE_FDS_Intel_win_64.bat">Build Serial</a><br>
+<a href="Scripts/MAKE_FDS_Intel_win_mpi64.bat">Build Parallel</a><br>
+<a href="Scripts/ZIP_FDS_Intel_win_64.bat">Create Self extractor</a><br>
+<a href="Scripts/TOGOOGLE_FDS_Intel_win_64.bat">Upload to Google Code</a><br> 
+(scripts cannot be run remotely)
+</td>
+<td>
+<a href="Scripts/MAKE_FDS_Intel_linux_64.bat">Build Serial</a><br>
+<a href="Scripts/MAKE_FDS_Intel_linux_mpi64.bat">Build Parallel</a><br>
+<a href="Scripts/ZIP_FDS_Intel_linux_64.bat">Create zipped archive</a><br>
+<a href="Scripts/TOGOOGLE_FDS_Intel_linux_64.bat">Upload to Google Code</a><br> 
+</td>
+<td>
+<a href="Scripts/MAKE_FDS_Intel_OSX_64.bat">Build Serial</a><br>
+Build Parallel not implemented<br>
+<a href="Scripts/ZIP_FDS_Intel_OSX_64.bat">Create zipped archive</a><br>
+<a href="Scripts/TOGOOGLE_FDS_Intel_osx_64.bat">Upload to Google Code</a><br> 
+</td>
+</tr>
+</table>
+
+<p><a href="http://code.google.com/p/fds-smv/downloads/list?deleted=1&ts=1234368278">Check Google Code download page</a>
+
+<p><hr>
+
+<p><address>
+<A HREF="http://www.bfrl.nist.gov" >Building and Fire Research Laboratory</A><BR>
+<a href="http://www.nist.gov" >National Institute of Standards and Technology</a><br>
+Gaithersburg, MD 20899
+</address>
+
+
+</BODY>
+</HTML>
