@@ -17,7 +17,8 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Utilities\Scripts\to_google
+set scriptdir=%svn_root%\Utilities\Scripts
+cd %scriptdir%\to_google
 
 
   set glabels=Type-Installer,Opsys-Windows,%fds_google_level%
@@ -35,7 +36,7 @@ pause>NUL
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
-       googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
+       %scriptdir%\googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %exe%
 
 echo.
 echo Uploads complete
