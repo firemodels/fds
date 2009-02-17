@@ -9917,7 +9917,7 @@ The current location of the FDS repository is \href{http://code.google.com/p/fds
 
 
 \section{How to Acquire Example Input Files}
-\index{Download Example Files}
+\index{Download Verification Files}
 
 Example input files for FDS can be found in the FDS-SMV project Subversion repository.
 There are a few ways to get a copy of these files but the two easiest methods will be covered here.
@@ -9928,13 +9928,13 @@ Some of these files are used for example input throughout this document, especia
 There are two steps for using the command line client, and a third optional step to keep the files up to date with the latest version in the repository over time.
 \begin{enumerate}
 \item Download and install the \href{http://subversion.tigris.org}{{Subversion}} command line client for your platform.
-\item From the command line (Terminal) change to the directory where you want the new directory of files to appear and enter the following command into the shell prompt. This svn command will create a directory for you named Test\_Cases and download all of the example cases into directories within it.
+\item From the command line (Terminal) change to the directory where you want the new directory of files to appear and enter the following command into the shell prompt. This svn command will create a directory for you named Verification and download all of the example cases into directories within it.
 \footnotesize
 \begin{verbatim}
-svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Test_cases Test_Cases
+svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification Verification
 \end{verbatim}
 \normalsize
-\item Optional: Run the following svn command from within the Test\_Cases directory when you want to update your local copy of the files to the latest versions of the test cases in the repository.
+\item Optional: Run the following svn command from within the Verification directory when you want to update your local copy of the files to the latest versions of the test cases in the repository.
 \footnotesize
 \begin{verbatim}
 svn update
@@ -9948,7 +9948,7 @@ Instead, it is a convenient way to review the individual files online within the
 \begin{enumerate}
 \item Go to the FDS-SMV Project Site \href{http://fds-smv.googlecode.com}{{\ct http://fds-smv.googlecode.com}}.
 Navigate to the Source Tab and then click Browse between 'Checkout' and 'Changes' next to the 'Search Trunk' text box.
-You can also click this \href{http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Test_cases/}{{\ct Link to Test\_cases}}, to go directly to the Test\_cases directory in the repository.
+You can also click this \href{http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Verification/}{{\ct Link to Verification}}, to go directly to the Verification directory in the repository.
 \item Navigate through the repository directories and click on the 'casename'.fds files that you want to review and download.
 \item To download a file you are interested in, right click the 'View raw file' link in the 'File info' section to the right of the page and save it to your local machine.
 \end{enumerate}
