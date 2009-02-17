@@ -8,11 +8,14 @@ Rem ----------------------------------------------------------------------
 Rem ------ settings below changed only once ------------------------------------
 Rem ----------------------------------------------------------------------
 
-Rem repository directory 
+Rem windows repository directory 
 set svn_root=d:\fds-smv
 
-Rem repository hard drive
+Rem windows repository hard drive
 set svn_drive=d:
+
+Rem Linux repository directory 
+set linux_svn_root=FDS-SMV
 
 Rem Linux cluster user name
 set linux_username=gforney
@@ -23,6 +26,9 @@ set google_username=gforney
 Rem linux cluster hostname
 set linux_hostname=acrux.cfr.nist.gov
 
+Rem directory containing google password file
+set google_password_dir=c:\bin\
+
 Rem ----------------------------------------------------------------------
 Rem ------ settings updated updated as repository changes ----------------
 Rem ----------------------------------------------------------------------
@@ -30,12 +36,25 @@ Rem ----------------------------------------------------------------------
 Rem define Smokeview version and svn revision info
 
 set smv_version=5.3.11
-set smv_revision=3279
+set smv_revision=3322
+
+Rem define Google-code release level for Smokeview
+
+Rem set smv_google_level=Release-1_Major
+Rem set smv_google_level=Release-2_Minor
+set     smv_google_level=Release-3_Maintenance
 
 Rem define FDS version and svn revision info
 
-set fds_version=xxxx
-set fds_revision=zzzz
+set fds_version=uploadtest
+set fds_revision=donotuse
+
+Rem define Google-code release level for FDS
+
+Rem set fds_google_level=Release-1_Major
+Rem set fds_google_level=Release-2_Minor
+set     fds_google_level=Release-3_Maintenance
+
 
 Rem revision number for Documentation directory
 
