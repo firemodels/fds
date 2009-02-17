@@ -16,5 +16,5 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Utilities\Scripts
-notepad other.html
+cd %svn_root%\Utilities\
+notepad readme_other.html
