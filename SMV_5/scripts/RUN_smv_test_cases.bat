@@ -2,7 +2,7 @@
 
 Rem Batch script to run FDS cases used to test Smokeview
 
-set envfile=c:\bin\fds_smv_env.bat
+set envfile=%homedrive%\%homepath%\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
