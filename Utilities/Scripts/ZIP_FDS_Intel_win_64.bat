@@ -22,7 +22,7 @@ cd %svn_root%\Utilities\Makefile
 set bin=c:\bin
 
 set fdsroot=fds_%fds_version%_%fds_revision%_win64
-set togoogle=%svn_root%\Utilities\Scripts\to_google\%fdsroot%
+set togoogle=%svn_root%\Utilities\to_google\%fdsroot%
 mkdir %togoogle%
 copy Intel_Win_64\fds5_win_64.exe %togoogle%\fds5_win64.exe
 copy Mpi_Intel_Win_64\fds5_win_mpi_64.exe %togoogle%\fds5_mpi_win64.exe

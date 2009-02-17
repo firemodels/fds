@@ -44,6 +44,18 @@ Rem set smv_google_level=Release-1_Major
 Rem set smv_google_level=Release-2_Minor
 set     smv_google_level=Release-3_Maintenance
 
+Rem define Google-code release level for docs
+
+Rem set docs_google_level=Release-1_Major
+Rem set docs_google_level=Release-2_Minor
+set     docs_google_level=Release-3_Maintenance
+
+Rem define Google-code release level for Test_cases
+
+Rem set test_cases_google_level=Release-1_Major
+Rem set test_cases_google_level=Release-2_Minor
+set     test_cases_docs_google_level=Release-3_Maintenance
+
 Rem define FDS version and svn revision info
 
 set fds_version=uploadtest
