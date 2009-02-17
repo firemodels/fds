@@ -19,10 +19,9 @@ details exactly what software is needed and how to configure it.
 
 <h3>Configuring the Build Scripts</h3>
 The aim of the scripts on this web page is to create
-installation files used to update FDS on a Windows, Linux and/or a Mac computer.  
+files for updating FDS on a Windows, Linux and/or a Mac computer.  
 These names are formed using the FDS version number and the SVN revision number
 of the FDS source.  
-
 
 <ul>
 <li><a href="GET_fds_svn_num.bat">Find the SVN revision number of the FDS source</a> 
@@ -31,58 +30,58 @@ in the <tt>fds_smv_env.bat</tt> configuration file - used by all scripts run fro
 <li><a href="Update_FDS_svn_num.bat">Update the FDS source to the revision specified </a> 
 in the <tt>fds_smv_env.bat</tt> configuration file.
 <li><a href="Update_FDS_latest_svn.bat">Update the FDS source to the latest SVN revision number</a> .
+<li><a href="EDIT_setup.bat">Configure build scripts</a> Define environmental variables used by the scripts on this page.
 </ul>
 
-<h3>Build and Package FDS</h3>
+<h3>Build, Package and Upload FDS</h3>
 
 <table border=on>
 <tr><th></th><th>Windows</th><th>Linux</th><th>OSX</th></tr>
 <tr>
 <th>32 bit</th>
 <td>
-<a href="MAKE_FDS_Intel_win_32.bat">Build Serial FDS</a><br>
-<a href="MAKE_FDS_Intel_win_mpi32.bat">Build Parallel FDS</a><br>
-<a href="ZIP_FDS_Intel_win_32.bat">Create Self extractor</a>
+<a href="MAKE_FDS_Intel_win_32.bat">Build Serial</a><br>
+<a href="MAKE_FDS_Intel_win_mpi32.bat">Build Parallel</a><br>
+<a href="ZIP_FDS_Intel_win_32.bat">Create Self extractor</a><br>
+<a href="TOGOOGLE_FDS_Intel_win_32.bat">Upload to Google Code</a> 
 </td>
 <td>
-<a href="MAKE_FDS_Intel_linux_32.bat">Build Serial FDS</a><br>
-<a href="MAKE_FDS_Intel_linux_mpi32.bat">Build Parallel FDS</a><br>
-<a href="ZIP_FDS_Intel_linux_32.bat">Create zipped archive</a>
+<a href="MAKE_FDS_Intel_linux_32.bat">Build Serial</a><br>
+<a href="MAKE_FDS_Intel_linux_mpi32.bat">Build Parallel</a><br>
+<a href="ZIP_FDS_Intel_linux_32.bat">Create zipped archive</a><br>
+<a href="TOGOOGLE_FDS_Intel_linux_32.bat">Upload to Google Code</a><br> 
 </td>
 <td>
-<a href="MAKE_FDS_Intel_OSX_32.bat">Build Serial FDS</a><br>
-<a href="MAKE_FDS_Intel_OSX_mpi32.bat">Build Parallel FDS</a><br>
-<a href="ZIP_FDS_Intel_OSX_32.bat">Create zipped archive</a>
+<a href="MAKE_FDS_Intel_OSX_32.bat">Build Serial</a><br>
+<a href="MAKE_FDS_Intel_OSX_mpi32.bat">Build Parallel</a><br>
+<a href="ZIP_FDS_Intel_OSX_32.bat">Create zipped archive</a><br>
+<a href="TOGOOGLE_FDS_Intel_osx_32.bat">Upload to Google Code</a><br> 
 </td>
 </tr>
 <tr><th>64 bit</th>
 <td>
-<a href="MAKE_FDS_Intel_win_64.bat">Build Serial FDS</a><br>
-<a href="MAKE_FDS_Intel_win_mpi64.bat">Build Parallel FDS</a><br>
+<a href="MAKE_FDS_Intel_win_64.bat">Build Serial</a><br>
+<a href="MAKE_FDS_Intel_win_mpi64.bat">Build Parallel</a><br>
 <a href="ZIP_FDS_Intel_win_64.bat">Create Self extractor</a><br>
-(must be logged onto a PC<br>running 64 bit Windows)
+<a href="TOGOOGLE_FDS_Intel_win_64.bat">Upload to Google Code</a><br> 
+(scripts cannot be run remotely)
 </td>
 <td>
-<a href="MAKE_FDS_Intel_linux_64.bat">Build Serial FDS</a><br>
-<a href="MAKE_FDS_Intel_linux_mpi64.bat">Build Parallel FDS</a><br>
-<a href="ZIP_FDS_Intel_linux_64.bat">Create zipped archive</a>
+<a href="MAKE_FDS_Intel_linux_64.bat">Build Serial</a><br>
+<a href="MAKE_FDS_Intel_linux_mpi64.bat">Build Parallel</a><br>
+<a href="ZIP_FDS_Intel_linux_64.bat">Create zipped archive</a><br>
+<a href="TOGOOGLE_FDS_Intel_linux_64.bat">Upload to Google Code</a><br> 
 </td>
 <td>
-<a href="MAKE_FDS_Intel_OSX_64.bat">Build Serial FDS</a><br>
+<a href="MAKE_FDS_Intel_OSX_64.bat">Build Serial</a><br>
+Build Parallel not implemented<br>
 <a href="ZIP_FDS_Intel_OSX_64.bat">Create zipped archive</a><br>
-parallel FDS not available
+<a href="TOGOOGLE_FDS_Intel_osx_64.bat">Upload to Google Code</a><br> 
 </td>
 </tr>
 </table>
 
-<h3>Upload FDS</h3>
-
-<h3>32 bit FDS</h3>
-<ul>
-
-<li><a href="TOGOOGLE_FDS_Intel_win_32.bat">Upload FDS</a> Upload the FDS self extracter to google code
-<li><a href="http://code.google.com/p/fds-smv/downloads/list?deleted=1&ts=1234368278">Check download page</a>
-</ul>
+<p><a href="http://code.google.com/p/fds-smv/downloads/list?deleted=1&ts=1234368278">Check Google Code download page</a>
 
 <p><hr>
 
