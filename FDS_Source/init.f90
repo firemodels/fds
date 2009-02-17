@@ -1046,24 +1046,15 @@ IF (NOC(1)/=0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) THEN
 ENDIF
  
 IF (M%IPS<=1 .OR. M%IPS==4) THEN
-   SELECT CASE (PERIODIC_TEST)
-      CASE(0)
-         ITRN = IBP1
-         IF (JBAR>1) JTRN = JBP1
-         IF (JBAR==1) JTRN = 1
-         KTRN = KBP1
-      CASE(1:3)
-         IF (PERIODIC_BC) THEN
-            ITRN = IBAR
-            JTRN = JBAR
-            KTRN = KBAR
-         ELSE
-            ITRN = IBP1
-            IF (JBAR>1) JTRN = JBP1
-            IF (JBAR==1) JTRN = 1
-            KTRN = KBP1
-         ENDIF
-   END SELECT
+   ITRN = IBP1
+   IF (JBAR>1) JTRN = JBP1
+   IF (JBAR==1) JTRN = 1
+   KTRN = KBP1
+   
+   ! pressure periodic boundary conditions
+   IF (PP_BC_X) ITRN=IBAR
+   IF (PP_BC_Y) JTRN=JBAR
+   IF (PP_BC_Z) KTRN=KBAR
 ENDIF
  
 IF (M%IPS==2) THEN
@@ -1236,16 +1227,11 @@ DO IW=1,M%NEWC
       END SELECT
    ENDIF
 ENDDO
- 
-IF (PERIODIC_BC) THEN
-   IF (NMESHES/=1) THEN
-      WRITE(LU_ERR,'(A)') 'ERROR: NMESHES must equal 1 for PERIODIC_BC'
-      STOP
-   ENDIF
-   LBC = 0
-   MBC = 0
-   NBC = 0
-ENDIF
+
+! pressure periodic boundary conditions for CrayFishpak
+IF (PP_BC_X) LBC=0
+IF (PP_BC_Y) MBC=0
+IF (PP_BC_Z) NBC=0
  
 ! Poisson solver with stretching in the 1st coordinate
  

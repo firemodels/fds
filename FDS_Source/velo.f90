@@ -202,18 +202,6 @@ MU(IBP1,0,0:KBP1)    = MU(IBAR,   1,0:KBP1)
 MU(IBP1,JBP1,0:KBP1) = MU(IBAR,JBAR,0:KBP1)
 MU(0,JBP1,0:KBP1)    = MU(   1,JBAR,0:KBP1)
 
-! Special periodic boundary conditions
-
-IF (PERIODIC_BC .AND. NMESHES==1) THEN
-   MU(0,:,:) = MU(IBAR,:,:)
-   MU(:,0,:) = MU(:,JBAR,:)
-   MU(:,:,0) = MU(:,:,KBAR)
-
-   MU(IBP1,:,:) = MU(1,:,:)
-   MU(:,JBP1,:) = MU(:,1,:)
-   MU(:,:,KBP1) = MU(:,:,1)
-ENDIF
-
 END SUBROUTINE VISCOSITY_BC
 
 
