@@ -202,6 +202,19 @@ MU(IBP1,0,0:KBP1)    = MU(IBAR,   1,0:KBP1)
 MU(IBP1,JBP1,0:KBP1) = MU(IBAR,JBAR,0:KBP1)
 MU(0,JBP1,0:KBP1)    = MU(   1,JBAR,0:KBP1)
 
+IF (PP_BC_X) THEN
+   MU(0,:,:) = MU(IBAR,:,:)
+   MU(IBP1,:,:) = MU(1,:,:)
+ENDIF
+IF (PP_BC_Y) THEN
+   MU(:,0,:) = MU(:,JBAR,:)
+   MU(:,JBP1,:) = MU(:,1,:)
+ENDIF
+IF (PP_BC_Z) THEN
+   MU(:,:,0) = MU(:,:,KBAR)
+   MU(:,:,KBP1) = MU(:,:,1)
+ENDIF
+
 END SUBROUTINE VISCOSITY_BC
 
 
