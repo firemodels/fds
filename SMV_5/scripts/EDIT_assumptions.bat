@@ -1,7 +1,7 @@
 @echo off
 Rem setup environment variables (defining where repository resides etc) 
 
-set envfile=c:\bin\fds_smv_env.bat
+set envfile=%homedrive%\%homepath%\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and define the environment
@@ -22,5 +22,6 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV_5\scripts
-notepad assumptions.html
+cd %svn_root%\SMV_5
+echo %CD%
+notepad readme_assumptions.html

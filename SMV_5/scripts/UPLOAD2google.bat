@@ -14,7 +14,7 @@ Rem release is 0 or 1
 
 set release=%1
 
-set envfile=c:\bin\fds_smv_env.bat
+set envfile=%homedrive%\%homepath%\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
