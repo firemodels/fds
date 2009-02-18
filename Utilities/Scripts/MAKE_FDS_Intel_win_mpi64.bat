@@ -1,8 +1,8 @@
 @echo off
 
-Rem Batch file used to build a 64 bit version of FDS
+Rem Batch file used to build a 32 bit version of FDS
 
-set envfile=%homedrive%\%homepath%\fds_smv_env.bat
+set envfile=c:\bin\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
@@ -23,8 +23,9 @@ call %intelbin%\ifortvars intel64
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Utilities\Makefile\Intel_Win_64
+cd %svn_root%\Utilities\Makefile\Mpi_Intel_Win_64
 
-make VPATH="../../../FDS_Source" -f ..\makefile intel_win_64
+make VPATH="../../../FDS_Source" -f ..\makefile mpi_intel_win_64
 
+cd ..\..\Scripts
 pause
