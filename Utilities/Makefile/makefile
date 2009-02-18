@@ -108,48 +108,48 @@ intel_linux_64 : obj = fds5_intel_linux_64
 intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_linux_32 : FFLAGS = -m32 -O3
-mpi_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend
+mpi_intel_linux_32 : FFLAGS = -m32 -O3 -vec_report0
+mpi_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
 mpi_intel_linux_32 : FCOMPL = mpif77
 mpi_intel_linux_32 : CCOMPL = icc
 mpi_intel_linux_32 : obj = fds5_mpi_intel_linux_32
 mpi_intel_linux_32 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-mpi_intel_linux_64 : FFLAGS = -m64 -O3
-mpi_intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend
+mpi_intel_linux_64 : FFLAGS = -m64 -O3 -vec_report0
+mpi_intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
 mpi_intel_linux_64 : FCOMPL = mpif77
 mpi_intel_linux_64 : CCOMPL = icc
 mpi_intel_linux_64 : obj = fds5_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 	
-intel_linux_32_db : FFLAGS = -m32 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static
-intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend
+intel_linux_32_db : FFLAGS = -m32 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0
+intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend -vec_report0
 intel_linux_32_db : FCOMPL = ifort
 intel_linux_32_db : CCOMPL = icc
 intel_linux_32_db : obj = fds5_intel_linux_32_db
 intel_linux_32_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 	
-intel_linux_64_db : FFLAGS = -m64 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static
-intel_linux_64_db : CFLAGS = -m64 -Dpp_noappend
+intel_linux_64_db : FFLAGS = -m64 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0
+intel_linux_64_db : CFLAGS = -m64 -Dpp_noappend -vec_report0
 intel_linux_64_db : FCOMPL = ifort
 intel_linux_64_db : CCOMPL = icc
 intel_linux_64_db : obj = fds5_intel_linux_64_db
 intel_linux_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_linux_32_db : FFLAGS = -m32 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency 
-mpi_intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend
+mpi_intel_linux_32_db : FFLAGS = -m32 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency  -vec_report0
+mpi_intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend -vec_report0
 mpi_intel_linux_32_db : FCOMPL = mpif77
 mpi_intel_linux_32_db : CCOMPL = icc
 mpi_intel_linux_32_db : obj = fds5_mpi_intel_linux_32_db
 mpi_intel_linux_32_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-mpi_intel_linux_64_db : FFLAGS = -m64 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
-mpi_intel_linux_64_db : CFLAGS = -m64 -O -Dpp_noappend
+mpi_intel_linux_64_db : FFLAGS = -m64 -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
+mpi_intel_linux_64_db : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
 mpi_intel_linux_64_db : FCOMPL = mpif77
 mpi_intel_linux_64_db : CCOMPL = icc
 mpi_intel_linux_64_db : obj = fds5_mpi_intel_linux_64_db
@@ -410,4 +410,4 @@ main_mpi.obj : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f9
 
 .PHONY : clean
 clean:
-	-rm -f *.o *.mod *.obj
+	-rm -f *.o *.mod *.obj fds5_*
