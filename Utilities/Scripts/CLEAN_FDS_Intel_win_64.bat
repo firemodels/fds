@@ -28,17 +28,17 @@ set out=intel_win_64
 date /t > %out%
 time /t >> %out%
 echo Cleaning intel_win_64 >> %out%
-pscp %out% %svn_log0n%\:%linux_svn_root%/Utilities/Makefile/Intel_win_64/.
+pscp %out% %svn_logon%:%linux_svn_root%/Utilities/Makefile/Intel_win_64/.
 make -f ..\makefile clean
 
 echo.
 echo cleaning Mpi_Intel_Win_64
 cd %svn_root%\Utilities\Makefile\Mpi_Intel_Win_64
 set out=mpi_intel_win_64
-date /t > $out
-time /t >> $out
-echo Cleaning mpi_intel_win_64 >> $out
-pscp %out% %svn_log0n%\:%linux_svn_root%/Utilities/Makefile/Mpi_Intel_win_64/.
+date /t > %out%
+time /t >> %out%
+echo Cleaning mpi_intel_win_64 >> %out%
+pscp %out% %svn_logon%:%linux_svn_root%/Utilities/Makefile/Mpi_Intel_win_64/.
 make -f ..\makefile clean
 
 cd ..\..\Scripts
