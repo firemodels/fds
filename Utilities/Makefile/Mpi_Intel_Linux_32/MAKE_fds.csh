@@ -1,8 +1,18 @@
 #!/bin/csh -f
+set mssg="32 bit MPI Linux FDS"
+set target=mpi_intel_linux_32
+set out=$target.out
 
 cd $1
 if ($#argv > 1) then
-make  -f ../makefile clean
+date | tee $out
+echo Cleaning $mssg |& tee -a $out
+make  -f ../makefile clean |& tee -a $out
 exit 0
 endif
-make VPATH="../../../FDS_Source" -f ../makefile mpi_intel_linux_32
+echo "" |& tee -a $out
+date |& tee -a $out
+echo Building $mssg |& tee -a $out
+make VPATH="../../../FDS_Source" -f ../makefile $target |& tee -a $out
+date |& tee -a $out
+echo Complete |& tee -a $out

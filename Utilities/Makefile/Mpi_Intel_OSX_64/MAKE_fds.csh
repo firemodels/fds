@@ -2,6 +2,7 @@
  
 cd $1
 if ($#argv > 1) then
+echo Cleaning 64 bit paraallel OSX FDS
 make  -f ../makefile clean
 exit 0
 endif
