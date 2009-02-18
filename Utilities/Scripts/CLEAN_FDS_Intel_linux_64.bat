@@ -1,7 +1,7 @@
 @echo off
 Title Cleaning FDS for 64 bit Linux
 
-Rem Batch file used to build a 32 bit version of FDS
+Rem Batch file used to build a 64 bit version of FDS
 
 set envfile=%homedrive%\%homepath%\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
