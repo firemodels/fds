@@ -1,4 +1,5 @@
 @echo off
+Title Building FDS for 32 bit Windows
 
 Rem Batch file used to build a 32 bit version of FDS
 
@@ -15,6 +16,7 @@ goto:eof
 :endif_envexist
 
 Rem location of batch files used to set up Intel compilation environment
+
 set intelbin=c:\bin
 
 call %intelbin%\iclvars ia32
@@ -24,12 +26,11 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\Utilities\Makefile\Intel_Win_32
-
-Rem remove the following two Rem's to do a full compile
-Rem erase *.obj
-Rem erase *.mod
-
-make VPATH="../../../FDS_Source" -f ..\makefile intel_win_32
+set out=intel_win_32.out
+echo. >> $out
+date /t >> $out
+time /t >> $out
+make VPATH="../../../FDS_Source" -f ..\makefile intel_win_32 >> $out
 
 cd ..\..\Scripts
 pause

@@ -1,4 +1,5 @@
 @echo off
+Title Building Parallel FDS for 32 bit OSX
 
 Rem Batch file used to build a 32 bit version of FDS
 
