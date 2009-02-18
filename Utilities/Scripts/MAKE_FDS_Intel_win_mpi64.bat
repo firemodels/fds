@@ -1,5 +1,6 @@
 @echo off
-
+Title Building Parallel FDS for 64 bit Windows 
+	       
 Rem Batch file used to build a 32 bit version of FDS
 
 set envfile=c:\bin\fds_smv_env.bat
@@ -15,6 +16,7 @@ goto:eof
 :endif_envexist
 
 Rem location of batch files used to set up Intel compilation environment
+
 set intelbin=c:\bin
 
 call %intelbin%\iclvars intel64

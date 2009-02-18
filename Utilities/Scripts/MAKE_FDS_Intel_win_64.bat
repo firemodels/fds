@@ -1,4 +1,5 @@
 @echo off
+Title Building FDS for 64 bit Windows
 
 Rem Batch file used to build a 64 bit version of FDS
 
@@ -15,6 +16,7 @@ goto:eof
 :endif_envexist
 
 Rem location of batch files used to set up Intel compilation environment
+
 set intelbin=c:\bin
 
 call %intelbin%\iclvars intel64
@@ -24,7 +26,10 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\Utilities\Makefile\Intel_Win_64
-
-make VPATH="../../../FDS_Source" -f ..\makefile intel_win_64
+set out=intel_win_64.out
+echo. >> $out
+date /t >> $out
+time /t >> $out
+make VPATH="../../../FDS_Source" -f ..\makefile intel_win_64 >> $out
 
 pause
