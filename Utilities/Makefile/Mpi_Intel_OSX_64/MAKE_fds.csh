@@ -1,9 +1,20 @@
 #!/bin/csh -f
- 
+set mssg="64 bit MPI OSX FDS"
+set target=mpi_intel_osx_64
+set out=$target.out
+
 cd $1
 if ($#argv > 1) then
-echo Cleaning 64 bit paraallel OSX FDS
-make  -f ../makefile clean
+date | tee $out
+echo Cleaning $mssg |& tee -a $out
+make  -f ../makefile clean |& tee -a $out
 exit 0
 endif
-make VPATH="../../../FDS_Source" -f ../makefile mpi_intel_osx_64
+echo "" |& tee -a $out
+date |& tee -a $out
+echo Building $mssg |& tee -a $out
+svn info ../../../FDS_Source/ | grep Rev | grep Last |& tee -a $out
+make VPATH="../../../FDS_Source" -f ../makefile $target |& tee -a $out
+date |& tee -a $out
+echo Complete |& tee -a $out
+

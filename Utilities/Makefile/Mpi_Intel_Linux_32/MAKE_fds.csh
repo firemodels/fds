@@ -1,7 +1,9 @@
 #!/bin/csh -f
 set mssg="32 bit MPI Linux FDS"
 set target=mpi_intel_linux_32
+
 set out=$target.out
+
 
 cd $1
 if ($#argv > 1) then
@@ -13,6 +15,7 @@ endif
 echo "" |& tee -a $out
 date |& tee -a $out
 echo Building $mssg |& tee -a $out
+svn info ../../../FDS_Source/ | grep Rev | grep Last |& tee -a $out
 make VPATH="../../../FDS_Source" -f ../makefile $target |& tee -a $out
 date |& tee -a $out
 echo Complete |& tee -a $out
