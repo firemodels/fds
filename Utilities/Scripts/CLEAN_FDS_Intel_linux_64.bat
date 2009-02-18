@@ -19,13 +19,13 @@ Rem location of batch files used to set up Intel compilation environment
 
 call %envfile%
 
-set target=intel_linux_64
 set scriptdir=%linux_svn_root%/Utilities/Scripts
 
-
+set target=intel_linux_64
 set fdsdir=%linux_svn_root%/Utilities/Makefile/Intel_Linux_64
 plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% fire79 clean
 
+set target=mpi_intel_linux_64
 set fdsdir=%linux_svn_root%/Utilities/Makefile/Mpi_Intel_Linux_64
 plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% fire79 clean
 
