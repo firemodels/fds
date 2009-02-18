@@ -19,12 +19,13 @@ Rem location of batch files used to set up Intel compilation environment
 
 call %envfile%
 
-set target=intel_osx_32
 set scriptdir=%linux_svn_root%/Utilities/Scripts
 
+set target=intel_osx_32
 set fdsdir=%linux_svn_root%/Utilities/Makefile/Intel_OSX_32
 plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% devi1.nist.gov clean
 
+set target=mpi_intel_osx_32
 set fdsdir=%linux_svn_root%/Utilities/Makefile/Mpi_Intel_OSX_32
 plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% devi1.nist.gov clean
 
