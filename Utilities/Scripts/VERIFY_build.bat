@@ -71,7 +71,7 @@ pdflatex fds_verify_build>Nul
 
 echo.
 echo opening summary document
-start acrobat %verify%\fds_verify_build.pdf
+start acrord32 %verify%\fds_verify_build.pdf
 
 
 pause
