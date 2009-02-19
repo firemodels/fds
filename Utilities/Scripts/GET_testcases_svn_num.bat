@@ -19,11 +19,11 @@ call %envfile%
 
 echo.
 
-cd %svn_root%\Test_cases
+cd %svn_root%\Verification
 svn update
-echo ---------------------------
-echo Test cases svn info
-echo ---------------------------
+echo -----------------------------------------
+echo svn info for Verification cases directory
+echo -----------------------------------------
 svn info
 
 
