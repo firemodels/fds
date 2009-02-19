@@ -19,13 +19,14 @@ Rem --------- should not need to edit below ----------
 call %envfile%
 %svn_drive%
 cd %svn_root%\Utilities\to_google\
-
+set excludefile=%svn_root%\Utilities\Scripts\examples_win.exclude
 set testdir=fds_examples_%verification_revision%
+
 if exist Examples rmdir /s /q Examples
 svn export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification Examples
 if exist %testdir%.zip erase %testdir%.zip
-rmdir /S /Q Examples\Decaying_Isotropic_Turbulence
-wzzip -a -r -P %testdir%.zip Examples
+Rem rmdir /S /Q Examples\Decaying_Isotropic_Turbulence
+wzzip -a -r -P -x@%excludefile% %testdir%.zip Examples
 if exist %testdir%.exe erase %testdir%.exe
 c:\bin\winzip\wzipse32 %testdir%.zip -d "c:\program files\nist\"
 erase %testdir%.zip
