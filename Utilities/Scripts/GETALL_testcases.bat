@@ -19,13 +19,12 @@ cd %svn_root%\Utilities
 
 set LREPOS=FDS-SMV
 
-set testdir=fds_test_cases_%test_cases_revision%
+set testdir=fds_examples_%verification_revision%
 
 Rem get test cases for Linux/OSX systems
 
-plink %svn_logon% %LREPOS%/Utilities/Scripts/get_testcases.csh %test_cases_revision%
-pscp %svn_logon%:%LREPOS%/Utilities/Scripts/to_google/%testdir%.tar.gz to_google\.
-
+plink %svn_logon% %LREPOS%/Utilities/Scripts/get_testcases.csh %verification_revision% %LREPOS%
+pscp %svn_logon%:%LREPOS%/Utilities/to_google/%testdir%.tar.gz to_google\.
 
 Rem get test cases for Windows systems
 

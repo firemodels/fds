@@ -20,11 +20,12 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Utilities\to_google\
 
-set testdir=fds_test_cases_%test_cases_revision%
-if exist Test_cases rmdir /s /q Test_cases
-svn export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Test_cases Test_cases
+set testdir=fds_examples_%verification_revision%
+if exist Examples rmdir /s /q Examples
+svn export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification Examples
 if exist %testdir%.zip erase %testdir%.zip
-wzzip -a -r -P %testdir%.zip Test_cases
+rmdir /S /Q Examples\Decaying_Isotropic_Turbulence
+wzzip -a -r -P %testdir%.zip Examples
 if exist %testdir%.exe erase %testdir%.exe
 c:\bin\winzip\wzipse32 %testdir%.zip -d "c:\program files\nist\"
 erase %testdir%.zip

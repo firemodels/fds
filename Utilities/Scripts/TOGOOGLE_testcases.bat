@@ -18,23 +18,23 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Utilities\to_google
 
-set winfile=fds_test_cases_%test_cases_revision%.exe
-set unixfile=fds_test_cases_%test_cases_revision%.tar.gz
+set winfile=fds_examples_%verification_revision%.exe
+set unixfile=fds_examples_%verification_revision%.tar.gz
 
 echo Uploading %winfile%
 echo Uploading %unixfile%
 pause
 
-  set glabels=Type-Installer,Opsys-Windows,%test_cases_google_level%
+  set glabels=Type-Installer,Opsys-Windows,%verification_google_level%
   set dplatform=Windows
-  set summary=Test cases (SVN r%test_cases_revision% - Windows line endings)
+  set summary=Test cases (SVN r%verification_revision% - Windows line endings)
   echo.
   echo Uploading %summary% - %wincase%
        googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %winfile%
 
   set glabels=Type-Archive,Opsys-Unix,%level%
   set dplatform=Linux/OSX
-  set summary=Test cases (SVN r%test_cases_revision% - Unix line endings)
+  set summary=Test cases (SVN r%verification_revision% - Unix line endings)
   echo.
   echo Uploading %summary% - %wincase%
        googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %unixfile%
