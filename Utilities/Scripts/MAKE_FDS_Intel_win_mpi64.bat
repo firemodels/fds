@@ -32,6 +32,7 @@ echo. | tee -a %out%
 date /t | tee -a  %out%
 time /t | tee -a  %out%
 make VPATH="../../../FDS_Source" -f ..\makefile mpi_intel_win_64 | tee -a %out%
+pscp %out% %svn_logon%:%linux_svn_root%/Utilities/Makefile/Mpi_Intel_Win_64/mpi_intel_win_64.out
 
 cd ..\..\Scripts
 pause
