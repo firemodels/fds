@@ -27,10 +27,10 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Utilities\Makefile\Intel_Win_32
 set out=intel_win_32.out
-echo. >> $out
-date /t >> $out
-time /t >> $out
-make VPATH="../../../FDS_Source" -f ..\makefile intel_win_32 >> $out
+echo. | tee -a %out%
+date /t | tee -a  %out%
+time /t | tee -a  %out%
+make VPATH="../../../FDS_Source" -f ..\makefile intel_win_32 | tee -a %out%
 
 cd ..\..\Scripts
 pause
