@@ -17,6 +17,6 @@ rm -rf $testdir.tar
 rm -rf $testdir.tar.gz
 
 svn export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification Examples
-rm -rf Examples/Decaying_Isotropic_Turbulence
-tar cvf $testdir.tar Examples/.
+#rm -rf Examples/Decaying_Isotropic_Turbulence
+tar cvf $testdir.tar -X ../Scripts/examples_linux.exclude Examples/.
 gzip $testdir.tar
