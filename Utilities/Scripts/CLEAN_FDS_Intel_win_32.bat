@@ -24,22 +24,22 @@ call %envfile%
 echo.
 echo cleaning Intel_Win_32
 cd %svn_root%\Utilities\Makefile\Intel_Win_32
-set out=%svn_root%\Utilities\Makefile\Intel_Win_32\intel_win_32.out
-date /t > %out%
-time /t >> %out%
-echo Cleaning intel_win_32 >> %out%
+set out=intel_win_32.out
+date /t | tee %out%
+time /t | tee -a %out%
+echo Cleaning intel_win_32 | tee -a %out%
 
-make -f ..\makefile clean
+make -f ..\makefile clean | tee -a %out%
 
 echo.
 echo cleaning Mpi_Intel_Win_32
 cd %svn_root%\Utilities\Makefile\Mpi_Intel_Win_32
 set out=%svn_root%\Utilities\Makefile\Mpi_Intel_Win_32\mpi_intel_win_32.out
-date /t > %out%
-time /t >> %out%
-echo Cleaning mpi_intel_win_32 >> %out%
+date /t | tee %out%
+time /t | tee -a %out%
+echo Cleaning mpi_intel_win_32 | tee -a %out%
 
-make -f ..\makefile clean
+make -f ..\makefile clean | tee -a %out%
 
 cd ..\..\Scripts
 pause

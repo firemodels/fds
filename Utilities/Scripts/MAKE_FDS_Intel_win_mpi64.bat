@@ -27,7 +27,11 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Utilities\Makefile\Mpi_Intel_Win_64
 
-make VPATH="../../../FDS_Source" -f ..\makefile mpi_intel_win_64
+set out=mpi_intel_win_64.out
+echo. | tee -a %out%
+date /t | tee -a  %out%
+time /t | tee -a  %out%
+make VPATH="../../../FDS_Source" -f ..\makefile mpi_intel_win_64 | tee -a %out%
 
 cd ..\..\Scripts
 pause
