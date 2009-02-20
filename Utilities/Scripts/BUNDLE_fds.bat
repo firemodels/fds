@@ -1,65 +1,82 @@
 @echo off
 
-Rem Example illustrating how a script to bundle fds and smokeview for windows might be written
+Rem Script to bundle fds and smokeview into an installation file
 
-set REPOS=D:\fds-smv
-set bundledir=D:\fds_bundle\NIST\Windows
+set envfile=%homedrive%\%homepath%\fds_smv_env.bat
+IF EXIST %envfile% GOTO endif_envexist
+echo ***Fatal error.  The environment setup file %envfile% does not exist. 
+echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
+echo as an example.
+echo.
+echo Aborting now...
+pause>NUL
+goto:eof
 
-Rem should not need to edit lines below
+:endif_envexist
 
-set fdsdir=%REPOS%\Utilities\Makefile
-set scriptdir=%REPOS%\Utilities\Scripts
-set pdfdir=%REPOS%\Manuals\All_PDF_Files
-set smvbundle=%REPOS%\SMV_5\for_bundle
-set exampledir=%bundledir%\Examples
+call %envfile%
+%svn_drive%
 
-Rem build FDS
-echo Building FDS
-cd %fdsdir%
-echo %scriptdir%
-call %scriptdir%\iclvars.bat ia32
-call %scriptdir%\ifortvars.bat ia32
-Rem erase *.obj
-make intel_win_32
+set in_pdf=%svn_root%\Manuals\All_PDF_Files
+set in_fds=%svn_root%\Utilities\to_google\fds_%fds_version%_%fds_revision%_win32
+set in_smv=%svn_root%\SMV_5\for_bundle\to_google\smv_%smv_version%_%smv_revision%_win32
 
-Rem Copy FDS to bundle directory
+set to_google=%svn_root%\Utilities\to_google
+set basename=FDS_%fds_version%-SMV_%smv_version%_Windows
+set out_bundle=%to_google%\%basename%
+set out_bin=%out_bundle%\FDS5\bin
+set out_doc=%out_bundle%\FDS5\Documentation
+set out_examples=%out_bundle%\FDS5\Examples
 
-copy fds5_win_32.exe %bundledir%\FDS\fds5.exe
+set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 
-Rem Copy Documentation to bundle directory
-echo Copying Documentation
-copy %pdfdir%\FDS_5_User_Guide.pdf               %bundledir%\Documentation\.
-copy %pdfdir%\FDS_5_Technical_Reference_Guide.pdf %bundledir%\Documentation\.
-copy %pdfdir%\SMV_5_User_Guide.pdf               %bundledir%\Documentation\.
+if exist %out_bundle% rmdir /s /q %out_bundle%
+mkdir %out_bundle%
+mkdir %out_bin%
+mkdir %out_doc%
 
-Rem Copy Smokeview files to bundle directory
-echo Copying Smokeview files
-copy %smvbundle%\smokeview_release.exe %bundledir%\Smokeview\smokeview.exe
-copy %smvbundle%\smokezip_release.exe %bundledir%\Smokeview\smokezip.exe
-copy %smvbundle%\devices.svo %bundledir%\Smokeview\.
-copy %smvbundle%\glew32.dll %bundledir%\Smokeview\.
-copy %smvbundle%\pthreadVC.dll %bundledir%\Smokeview\.
-copy %smvbundle%\readme.html %bundledir%\Smokeview\.
-copy %smvbundle%\smokeview.ini %bundledir%\Smokeview\.
+echo.
+echo Copying files to bin directory
+copy %in_fds%\fds5.exe %out_bin%\.
+copy %in_smv%\smokeview.exe %out_bin%\.
+copy %in_smv%\devices.svo %out_bin%\.
+copy %in_smv%\pthreadVC.dll %out_bin%\.
+copy %in_smv%\smokezip.exe %out_bin%\.
+copy %in_smv%\glew32.dll %out_bin%\.
+copy %in_smv%\smokeview.ini %out_bin%\.
 
-Rem Copy examples to bundle directory
+echo.
+echo Copying files to Documentation directory
 
-echo Copying Examples
-cd %REPOS%\Test_cases
+copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_doc%\.
+copy %in_pdf%\FDS_5_Validation_Guide.pdf          %out_doc%\.
+copy %in_pdf%\SMV_5_User_Guide.pdf                %out_doc%\.
+copy %in_pdf%\FDS_5_User_Guide.pdf                %out_doc%\.
+copy %in_pdf%\FDS_5_Verification_Guide.pdf        %out_doc%\.
 
-copy Atmospheric_Effects\*.fds %exampledir%\.
-copy Controls\*.fds %exampledir%\.
-copy Detectors\*.fds %exampledir%\.
-copy Fires\*.fds %exampledir%\.
-copy Flowfields\*.fds %exampledir%\.
-copy Heat_Transfer\*.fds %exampledir%\.
-copy Miscellaneous\*.fds %exampledir%\.
-copy Pressure_Effects\*.fds %exampledir%\.
-copy Pyrolysis\*.fds %exampledir%\.
-copy Sprinklers_and_Sprays\*.fds %exampledir%\.
-copy Timing_Benchmarks\*.fds %exampledir%\.
-copy Visualization\*.fds %exampledir%\.
+echo.
+echo Creating Examples directory
 
+svn -q export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
+set turbfile=%out_examples%\Decaying_Isotropic_Turbulence
+if exist %turbfile% rmdir /S /Q %turbfile%
 
+echo. 
+echo Compressing %out_bundle%
 
+copy %bundleinfo%\setup.bat %out_bundle%\FDS5\setup.bat
+
+cd %to_google%
+if exist %basename%.zip erase %basename%.zip
+cd %basename%
+wzzip -a -r -P ..\%basename%.zip *
+
+echo.
+echo Creating installer
+cd ..
+echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
+echo Press Setup to begin installation. > %bundleinfo%\main.txt
+if exist %basename%.exe erase %basename%.exe
+Rem c:\bin\winzip\wzipse32 %basename%.zip -d "c:\program files\nist\"
+c:\bin\winzip\wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -m %bundleinfo%\message.txt %basename%.zip -c FDS5\setup.bat
 pause
