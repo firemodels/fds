@@ -43,7 +43,7 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
  
 
    PC=>PARTICLE_CLASS(IPC)
-
+   
    ! If particles/droplets have a size distribution, initialize here
  
    IF_SIZE_DISTRIBUTION: IF (PC%DIAMETER > 0._EB) THEN
@@ -1440,13 +1440,14 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             CALL GET_CPBAR(YY_GET,CP1,NINT(TMP_DROP_NEW))
             YY_GET(:) = YY(II,JJ,KK,:)
             CALL GET_CPBAR(YY_GET,CP,ITMP)
-            CP1 = H_V+C_DROP*(0.5_EB*(TMP_DROP_NEW+TMP_DROP)-TMP_MELT)
+            !CP1 = H_V+C_DROP*(0.5_EB*(TMP_DROP_NEW+TMP_DROP)-TMP_MELT)
+            CP1 = H_V+C_DROP*(TMP_DROP_NEW-TMP_MELT)
             CP2 = CP1 - CP2*TMP_G
-            H_VAPOR = WGT*M_VAP*CP1
+            H_VAPOR = WGT*M_VAP*CP2
             H_GAS = M_GAS*CP*TMP_G
             M_GAS_NEW = M_GAS + WGT*M_VAP
             RHO(II,JJ,KK) = M_GAS_NEW*RVC
-            H_NEW = (H_VAPOR+H_GAS)/M_GAS_NEW
+            H_NEW = (H_VAPOR+H_GAS-Q_CON_GAS*WGT)/M_GAS_NEW
             
             YY(II,JJ,KK,:) = YY(II,JJ,KK,:) * M_GAS/M_GAS_NEW
             YY(II,JJ,KK,IGAS)= YY(II,JJ,KK,IGAS) + WGT*M_VAP/M_GAS_NEW
@@ -1454,8 +1455,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ! Compute contribution to the divergence
 !            D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) +(MW_RATIO *M_VAP + 2._EB*(M_VAP*(CP2 + VEL_REL**2 * 0.5_EB)-Q_CON_GAS*WGT)/ &
 !                                (H_NEW+CP*TMP_G) ) * 2._EB / (M_GAS_NEW+M_GAS) /DT_SUBSTEP
-            D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) +(MW_RATIO *M_VAP + 2._EB*(M_VAP*CP2-Q_CON_GAS*WGT)/ &
-                                (H_NEW+CP*TMP_G) ) * 2._EB / (M_GAS_NEW+M_GAS) /DT_SUBSTEP
+            D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) +(MW_RATIO *M_VAP + 2._EB*(M_VAP*CP2-Q_CON_GAS)/ &
+                                (H_NEW+CP*TMP_G) ) * 2._EB * WGT / (M_GAS_NEW+M_GAS) /DT_SUBSTEP
 
 
             TEMPITER = .TRUE.
@@ -1492,7 +1493,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             IF (DR%R<=0._EB) CYCLE DROPLET_LOOP
 
          ENDDO TIME_ITERATION_LOOP
-
          ! Assign liquid mass to the cell for airborne drops
 
          IF (DR%IOR==0) THEN
@@ -1503,6 +1503,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          ENDIF
          
       ENDDO DROPLET_LOOP
+      
       ! Calculate cumulative quantities for droplet "clouds"
 
       WGT   = .5_EB
