@@ -1057,9 +1057,9 @@ IF (M%IPS<=1 .OR. M%IPS==4) THEN
    KTRN = KBP1
    
    ! pressure periodic boundary conditions
-   IF (PP_BC_X) ITRN=IBAR
-   IF (PP_BC_Y) JTRN=JBAR
-   IF (PP_BC_Z) KTRN=KBAR
+   IF (FISHPAK_BC(1)==0) ITRN=IBAR
+   IF (FISHPAK_BC(2)==0) JTRN=JBAR
+   IF (FISHPAK_BC(3)==0) KTRN=KBAR
 ENDIF
  
 IF (M%IPS==2) THEN
@@ -1234,9 +1234,9 @@ DO IW=1,M%NEWC
 ENDDO
 
 ! pressure periodic boundary conditions for CrayFishpak
-IF (PP_BC_X) LBC=0
-IF (PP_BC_Y) MBC=0
-IF (PP_BC_Z) NBC=0
+IF (FISHPAK_BC(1)==0) LBC=0
+IF (FISHPAK_BC(2)==0) MBC=0
+IF (FISHPAK_BC(3)==0) NBC=0
  
 ! Poisson solver with stretching in the 1st coordinate
  
