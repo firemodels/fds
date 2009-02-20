@@ -102,6 +102,8 @@ ELSE
    ENDDO
 ENDIF
 
+IF (CHECK_MU_DNS) MU_DNS=MU
+
 ! Compute eddy viscosity using Smagorinsky model
 
 IF (LES) THEN
@@ -353,7 +355,7 @@ DO K=1,KBAR
          DTXYDY= RDY(J) *(TXY(I,J,K)-TXY(I,J-1,K))
          DTXZDZ= RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,K-1))
          VTRM  = RRHO*(DTXXDX + DTXYDY + DTXZDZ)
-         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) + GX(I)*AH - VTRM
+         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) + GX(I)*AH - VTRM - RRHO*FVEC(1)
       ENDDO 
    ENDDO   
 ENDDO
@@ -385,7 +387,7 @@ DO K=1,KBAR
          DTYYDY= RDYN(J)*(TYYP      -TYYM)
          DTYZDZ= RDZ(K) *(TYZ(I,J,K)-TYZ(I,J,K-1))
          VTRM  = RRHO*(DTXYDX + DTYYDY + DTYZDZ)
-         FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) + GY(I)*AH - VTRM 
+         FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) + GY(I)*AH - VTRM - RRHO*FVEC(2)
       ENDDO
    ENDDO   
 ENDDO   
@@ -417,7 +419,7 @@ DO K=0,KBAR
          DTYZDY= RDY(J) *(TYZ(I,J,K)-TYZ(I,J-1,K))
          DTZZDZ= RDZN(K)*(TZZP      -TZZM)
          VTRM  = RRHO*(DTXZDX + DTYZDY + DTZZDZ)
-         FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) + GZ(I)*AH - VTRM       
+         FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) + GZ(I)*AH - VTRM - RRHO*FVEC(3)       
       ENDDO
    ENDDO   
 ENDDO
