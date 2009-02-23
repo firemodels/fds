@@ -1552,7 +1552,7 @@ N_MIX=0
 NN=N_SPEC_EXTRA
 I_Z_MIN = -999
 I_Z_MAX = -999
-NN = 0
+!NN = 0
 DO N=1,N_REACTIONS
    IF (REACTION(N)%MODE==MIXTURE_FRACTION_REACTION) THEN
       NN    = NN + 1
@@ -2187,7 +2187,7 @@ ELSE
 ENDIF  
 
 ! Compute the initial value of R0/MW_AVG
- 
+
 SS0 => SPECIES(0)
  
 SS0%YY0 = 1._EB
@@ -2406,7 +2406,7 @@ T_LOOP_1: DO J=1,5000
          TSTAR = J/EPSK_N
          OMEGA = 1.16145_EB*TSTAR**(-0.14874_EB) + 0.52487_EB*EXP(-0.77320_EB*TSTAR) + 2.16178_EB*EXP(-2.43787_EB*TSTAR)
          MU_TMP(NN) = 26.69E-7_EB*(MW_N*J)**0.5_EB/(SIGMA2*OMEGA)/MW_N
-         K_TMP(NN)  = MU_TMP(NN) * CP_TMP(NN) / PR*MW_N
+         K_TMP(NN)  = MU_TMP(NN) * CP_TMP(NN) / PR
          !Diffusivity
          SIGMA2 = (0.5_EB*(SIG_N+SIG(0)))**2
          EPSIJ  = SQRT(EPSK_N*EPSK(0))
