@@ -5045,6 +5045,18 @@ GRID
 specifies that there are 10, 20 and 30 grid cells in the {\tt X},
 {\tt Y} and {\tt Z} directions respectively.
 
+\hitem{OFFSET}This keyword specifies signals to Smokeview that a new mesh has begun and also
+gives values for the front, left bottom corner of the mesh.  For example,
+\begin{verbatim}
+OFFSET
+xmin, ymin, zmin
+\end{verbatim}
+
+Note that the xmin, ymin and zmin values must be identical to the corresponding values given in
+the {\tt PDIM} keyword. The {\tt OFFSET}\ keyword cannot be eliminated from the .smv file
+(it may seem logical to do this due
+to the presence of redundant data) because of its role in signalling new meshes.
+
 \hitem{PDIM}This keyword specifies the region where a mesh is located
 using the same convention as is used in an FDS input file to specify a blockage location.
 PDIM also specifies a color to use for drawing grids.  For example,
@@ -5055,6 +5067,10 @@ xmin, xmax, ymin, ymax, zmin, zmax, r, g, b
 where {\tt (xmin,~ymin,~ymax)}\ and {\tt (xmax,~ymax,~zmax)}\  represent opposite corners of a mesh
 and r, g and b represent the red, green and blue components (0.0 to 1.0) of grids drawn
 in the mesh.
+
+Note that the xmin, ymin and zmin values must be identical to the values given in the
+{\tt OFFSET}\ keyword.
+
 
 \hitem{SHOW\_OBST(HIDE\_OBST)} This keyword specifies when a
 blockage should be shown(hidden). For example,
@@ -5125,7 +5141,7 @@ blocktype & integer &
 \end{table}
 
 \hitem{TOFFSET}The {\tt TOFFSET}\ keyword defines a default texture origin, $(x_0, y_0, z_0)$ .
-This origin may be overridden with data provided with the {\tt OBST}\ keyword. For example, 
+This origin may be overridden with data provided with the {\tt OBST}\ keyword. For example,
 
 \begin{verbatim}
 TOFFSET
