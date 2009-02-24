@@ -1724,10 +1724,7 @@ void drawgrid(const mesh *meshi){
     antialias(1);
     glLineWidth(vectorlinewidth);
     if(meshi->meshrgb_ptr!=NULL){
-      const float *rgb;
-
-      rgb=meshi->meshrgb;
-      glColor3f(rgb[0],rgb[1],rgb[2]);
+      glColor3fv(meshi->meshrgb);
     }
     else{
       glColor4fv(foregroundcolor);
