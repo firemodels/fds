@@ -63,6 +63,7 @@ void TRANSLATE_CB(int var);
 GLUI_Listbox *meshlist1=NULL;
 GLUI *glui_motion=NULL;
 GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
+GLUI_Panel *panel_blockageview=NULL;
 GLUI_Panel *panel_rotate=NULL;
 GLUI_Panel *panel_speed=NULL;
 GLUI_Panel *panel_height=NULL;
@@ -250,6 +251,18 @@ extern "C" void glui_motion_setup(int main_window){
   button_snap=glui_motion->add_button_to_panel(panel_anglebuttons,"Snap",SNAPVIEW,TRANSLATE_CB);
 
   //glui_motion->add_column(false);
+
+  if(nmeshes>1){
+    int i;
+    
+    panel_blockageview = glui_motion->add_rollout("Blockage View",false);
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
+      meshi = meshinfo + i;
+      glui_motion->add_checkbox_to_panel(panel_blockageview,meshi->label,&meshi->blockvis);
+    }
+  }
 
   panel_projection = glui_motion->add_rollout("Window Properties",false);
   projection_radio=glui_motion->add_radiogroup_to_panel(panel_projection,&projection_type,PROJECTION,TRANSLATE_CB);

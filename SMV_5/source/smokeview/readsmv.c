@@ -6199,6 +6199,23 @@ int readini2(char *inifile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
+    if(match(buffer,"MESHVIS",7)==1){
+      int nm, i;
+      mesh *meshi;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&nm);
+      for(i=0;i<nm;i++){
+        int vis;
+
+        if(i>nmeshes-1)break;
+        meshi = meshinfo + i;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i",&meshi->blockvis);
+        if(meshi->blockvis!=0)meshi->blockvis=1;
+      }
+      continue;
+    }
     if(match(buffer,"OFFSETSLICE",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&offset_slice);
@@ -8664,6 +8681,17 @@ void writeini(int flag){
 
   fprintf(fileout,"\nVISIBILITY\n");
   fprintf(fileout,"----------\n\n");
+  if(nmeshes>1){
+    fprintf(fileout,"MESHVIS\n");
+    fprintf(fileout," %i\n",nmeshes);
+
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
+      meshi = meshinfo + i;
+      fprintf(fileout," %i\n",meshi->blockvis);
+    }
+  }
   fprintf(fileout,"SHOWTITLE\n");
   fprintf(fileout," %i\n",visTitle0);
   fprintf(fileout,"SHOWCOLORBARS\n");
