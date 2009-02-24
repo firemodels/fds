@@ -5109,7 +5109,7 @@ parameters for controlling them:
 \begin{description}
 \item[{\ct DT\_INSERT}] Time increment in seconds between the introduction of a ``batch'' of particles or droplets.
 The number per ``batch'' depends on how they are introduced.
-If more particles are desired, lower the input value of this parameter. The default value is 0.05~s.
+If more particles are desired, lower the input value of this parameter. The default value is 0.01~s.
 \item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
 file {\bf CHID.prt5}. This parameter can be used to reduce the size
 of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default
@@ -5147,7 +5147,7 @@ diameter, temperature, or age.
 \index{PART!DROPLETS\_PER\_SECOND}
 
 {\ct DROPLETS\_PER\_SECOND} is the  number of droplets inserted every
-second per active sprinkler or nozzle. Its default value is 1000. Note that this parameter only affects sprinklers and nozzles.
+second per active sprinkler or nozzle (Default 5000). Note that this parameter only affects sprinklers and nozzles.
 Changing this parameter does {\em not} change the flow rate, but rather the number
 of droplets used to represent the flow. Also note that the number of droplets introduced per ``batch'' is {\ct DROPLETS\_PER\_SECOND} times {\ct DT\_INSERT}.
 
@@ -8164,8 +8164,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR}                     & Character       & Default color of droplets         &           & {\ct 'BLACK'} \\ \hline
 {\ct DENSITY}                   & Real            & Droplet density                   & kg/m$^3$  & 1000.         \\ \hline
 {\ct DIAMETER}                  & Real            & Median Volumetric Diameter        & $\mu$m    & 500.          \\ \hline
-{\ct DROPLETS\_PER\_SECOND}     & Integer         & Drops per second per head         &           & 1000          \\ \hline
-{\ct DT\_INSERT}                & Real            & Time between insertions           & s         & 0.05          \\ \hline
+{\ct DROPLETS\_PER\_SECOND}     & Integer         & Drops per second per head         &           & 5000          \\ \hline
+{\ct DT\_INSERT}                & Real            & Time between insertions           & s         & 0.01          \\ \hline
 {\ct EVAPORATE}                 & Logical         & Assume liquid evaporation         &           & {\ct .TRUE.}  \\ \hline
 {\ct FYI}                       & Character       & Comment String                    &           &               \\ \hline
 {\ct FUEL}                      & Logical         & Liquid Fuel                       &           & {\ct .FALSE.} \\ \hline
