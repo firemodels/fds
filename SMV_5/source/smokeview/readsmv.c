@@ -664,8 +664,11 @@ int readsmv(char *file){
       nmeshes++;
       continue;
     }
-    if(match(buffer,"PDIM",4) == 1){
+    if(match(buffer,"OFFSET",6) == 1){
       noffset++;
+      continue;
+    }
+    if(match(buffer,"PDIM",4) == 1){
       npdim++;
       setPDIM=1;
       fgets(buffer,255,stream);
@@ -1305,6 +1308,15 @@ typedef struct {
       else{
         printf("   CAD geometry file: %s could not be opened\n",buffer);
       }
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ OFFSET ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"OFFSET",6) == 1){
+      ioffset++;
       continue;
     }
   /*
@@ -2147,6 +2159,21 @@ typedef struct {
       }
       continue;
     }
+
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ OFFSET ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"OFFSET",6) == 1){
+      mesh *meshi;
+
+      ioffset++;
+      meshi=meshinfo+ioffset-1;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f",meshi->offset,meshi->offset+1,meshi->offset+2);
+      continue;
+    }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ VENTGEOM ++++++++++++++++++++++++++++++
@@ -2301,7 +2328,6 @@ typedef struct {
       float *meshrgb;
 
       ipdim++;
-      ioffset++;
       meshi=meshinfo+ipdim-1;
       meshrgb = meshi->meshrgb;
 
@@ -2315,9 +2341,6 @@ typedef struct {
         meshi->meshrgb_ptr=NULL;
       }
 
-      meshi->offset[0]=xbar0;
-      meshi->offset[1]=ybar0;
-      meshi->offset[2]=zbar0;
       meshi->xbar0=xbar0;
       meshi->xbar =xbar;
       meshi->xcen=(xbar+xbar0)/2.0;
@@ -5666,6 +5689,7 @@ void initmesh(mesh *meshi){
   meshi->cull_smoke3d=NULL;
   meshi->smokedir_old=-100;
 #endif
+  meshi->blockvis=1;
   meshi->zcell=NULL;
   meshi->terrain=NULL;
   meshi->meshrgb[0]=0.0;
