@@ -5045,15 +5045,16 @@ GRID
 specifies that there are 10, 20 and 30 grid cells in the {\tt X},
 {\tt Y} and {\tt Z} directions respectively.
 
-\hitem{PDIM}This keywords specifies the physical length of the
-simulation domain in the {\tt X}, {\tt Y} and {\tt Z} directions.
-For example,
+\hitem{PDIM}This keyword specifies the region where a mesh is located
+using the same convention as is used in an FDS input file to specify a blockage location.
+PDIM also specifies a color to use for drawing grids.  For example,
 \begin{verbatim}
 PDIM
-6.0 12.0 5.0
+xmin, xmax, ymin, ymax, zmin, zmax, r, g, b
 \end{verbatim}
-specifies that the length of the {\tt X}, {\tt Y} and {\tt Z}
-directions is 6.0, 12.0 and 5.0~m respectively.
+where {\tt (xmin,~ymin,~ymax)}\ and {\tt (xmax,~ymax,~zmax)}\  represent opposite corners of a mesh
+and r, g and b represent the red, green and blue components (0.0 to 1.0) of grids drawn
+in the mesh.
 
 \hitem{SHOW\_OBST(HIDE\_OBST)} This keyword specifies when a
 blockage should be shown(hidden). For example,
@@ -5113,7 +5114,7 @@ colorindex & integer &
 \tabentry{Type of coloring used to color blockage.\\ -1 - default color\\ -2 - invisible\\-3 - use red, green, blue and alpha to follow (values follow)\\n$>$0 - use n'th color table entry}\\  \hline
 
 blocktype & integer &
-\tabentry{Defines how the blockage is drawn.\\0 - regular block\\2 - outline\\ 3 - smooth}\\  \hline
+\tabentry{Defines how the blockage is drawn.\\ -1 - use surface to obtain blocktype\\0 - regular block\\2 - outline\\ 3 - smooth}\\  \hline
 
 \parbox[c]{1.0in}{red, green, blue\\alpha} & float &
 \tabentry{Each color value ranges from 0.0 to 1.0 .  The alpha {\em color}\ represents transparency, alpha=0.0 is transparent, alpha=1.0 is opaque.}\\  \hline
@@ -5123,7 +5124,13 @@ blocktype & integer &
 \end{center}
 \end{table}
 
+\hitem{TOFFSET}The {\tt TOFFSET}\ keyword defines a default texture origin, $(x_0, y_0, z_0)$ .
+This origin may be overridden with data provided with the {\tt OBST}\ keyword. For example, 
 
+\begin{verbatim}
+TOFFSET
+0.0 0.0 0.0
+\end{verbatim}
 
 \hitem{TRNX,TRNY,TRNZ}The {\tt TRNX, TRNY, TRNZ} keywords specify
 grid nodes in the {\tt X, Y, Z} coordinate directions.  A FORTRAN
@@ -5342,6 +5349,9 @@ coordinates of the thermocouples.
 
 \subsection{Miscellaneous Keywords}
 \blist
+
+\hitem{ALBEDO}This keyword is not implemented yet.
+It will be used to specify the smoke albedo (0.0, 1.0).
 
 \hitem{ENDIAN}The {\tt ENDIAN}\ keyword defines whether a big or little
 endian\footnote{
