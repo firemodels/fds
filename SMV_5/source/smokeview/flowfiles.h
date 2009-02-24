@@ -334,6 +334,7 @@ typedef struct mesh_ {
   terraindata *terrain;
   int mesh_type;
   float meshrgb[3], *meshrgb_ptr;
+  int blockvis;
   float cellsize;
   float *xplt, *yplt, *zplt;
   float *xplt_orig, *yplt_orig, *zplt_orig;
