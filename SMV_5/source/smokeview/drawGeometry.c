@@ -1944,6 +1944,7 @@ void draw_faces(){
     glBegin(GL_QUADS);
     for(j=0;j<nmeshes;j++){
       meshi=meshinfo + j;
+      if(meshi->blockvis==0)continue;
       for(i=0;i<meshi->nface_normals_single;i++){
         facei = meshi->face_normals_single[i];
        // if(blocklocation==BLOCKlocation_grid||showedit==1){
@@ -2086,6 +2087,7 @@ void draw_faces(){
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
       meshi = meshinfo + j;
+      if(meshi->blockvis==0)continue;
       for(i=0;i<meshi->nface_outlines;i++){
         facei = meshi->face_outlines[i];
         showtimelist_handle = facei->showtimelist_handle;
@@ -2134,6 +2136,7 @@ void draw_faces(){
     glEnable(GL_TEXTURE_2D);
     for(j=0;j<nmeshes;j++){
       meshi = meshinfo + j;
+      if(meshi->blockvis==0)continue;
       for(i=0;i<meshi->nface_textures;i++){
         facei=meshi->face_textures[i];
         showtimelist_handle = facei->showtimelist_handle;
