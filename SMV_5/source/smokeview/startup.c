@@ -1483,6 +1483,7 @@ void initvars1(void){
   apertures[2]=60.;
   apertures[3]=75.;
   apertures[3]=90.;
+  planar_terrain_slice=0;
 
   aperture=60.,aperture_glui,aperture_default;
   zooms[0]=0.25;
