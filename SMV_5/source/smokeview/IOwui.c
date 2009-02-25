@@ -1169,3 +1169,18 @@ void update_terrain(int allocate_memory, float vertical_factor){
   }
 }
 
+/* ------------------ if_slice_terrain ------------------------ */
+
+int have_terrain_slice(void){
+  int i;
+
+  for(i=0;i<nslice;i++){
+    slice *slicei;
+
+    slicei = sliceinfo + i;
+
+    if(slicei->loaded==1&&slicei->terrain==1)return 1;
+
+  }
+  return 0;
+}
