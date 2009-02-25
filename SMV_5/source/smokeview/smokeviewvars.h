@@ -477,6 +477,7 @@ SVEXTERN float sensorrelsize,sensorrelsizeMIN,sensorrelsizeMAX;
 SVEXTERN float linewidth, ventlinewidth, highlight_linewidth;
 SVEXTERN float sliceoffset_factor, ventoffset_factor;
 
+SVEXTERN int planar_terrain_slice;
 SVEXTERN int nrgb;
 SVEXTERN int nrgb_ini;
 SVEXTERN int nrgb2_ini;

@@ -701,6 +701,9 @@ void ShowHideSliceMenu(int value){
     case -12:
       offset_slice=1-offset_slice;
       break;
+    case -13:
+      planar_terrain_slice=1-planar_terrain_slice;
+      break;
     default:
       ASSERT(FFALSE);
     }
@@ -5205,6 +5208,10 @@ static int in_menu=0;
       glutAddMenuEntry(menulabel,i);
     }
     glutAddMenuEntry("-",-10);
+    if(have_terrain_slice()==1){
+      if(planar_terrain_slice==1)glutAddMenuEntry("*Planar terrain slice",-13);
+      if(planar_terrain_slice==0)glutAddMenuEntry("Planar terrain slice",-13);
+    }
     if(show_slice_in_obst==1)glutAddMenuEntry("*Show slice in blockage",-11);
     if(show_slice_in_obst==0)glutAddMenuEntry("Show slice in blockage",-11);
     if(offset_slice==1)glutAddMenuEntry("*Offset slice",-12);
