@@ -586,7 +586,7 @@ SVEXTERN sv_object_frame *error_frame;
 SVEXTERN int svofile_exists;
 SVEXTERN treedata *treeinfo;
 SVEXTERN terraindata *terraininfo;
-SVEXTERN int ntreeinfo, nterraininfo, visTerrain;
+SVEXTERN int ntreeinfo, nterraininfo, visTerrainType;
 SVEXTERN float treecolor[4], treecharcolor[4], trunccolor[4];
 SVEXTERN int showterrain;
 SVEXTERN float rgb_terrain[10][4];

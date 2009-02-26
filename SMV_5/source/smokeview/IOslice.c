@@ -2432,7 +2432,7 @@ void drawslice_texture(const slice *sd){
 }
 
 /* ------------------ drawslice_terrain ------------------------ */
-#define ijnode2(i,j) ((nxcell+1)*(j) + (i))
+#define ijnode2(i,j) ((nycell+1)*(i) + (j))
 
 void drawslice_terrain(const slice *sd){
   int i,j,k,n,n2;
@@ -2443,7 +2443,7 @@ void drawslice_terrain(const slice *sd){
   float *xplt, *yplt;
   terraindata *terri;
   float *znode;
-  int nxcell;
+  int nycell;
 
   mesh *meshi;
 
@@ -2451,7 +2451,7 @@ void drawslice_terrain(const slice *sd){
   terri = meshi->terrain;
   if(terri==NULL)return;
   znode = terri->znode_scaled;
-  nxcell = terri->nx;
+  nycell = terri->ny;
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -2805,7 +2805,7 @@ void drawvolslice_terrain(const slice *sd){
   char *iblank_x, *iblank_y, *iblank_z;
   terraindata *terri;
   float *znode;
-  int nxcell;
+  int nycell;
   char *iblank_embed;
 
   mesh *meshi;
@@ -2815,7 +2815,7 @@ void drawvolslice_terrain(const slice *sd){
   terri = meshi->terrain;
   if(terri==NULL)return;
   znode = terri->znode_scaled;
-  nxcell = terri->nx;
+  nycell = terri->ny;
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -3453,7 +3453,7 @@ void drawvvolslice_terrain(const vslice *vd){
   float *rgb_ptr;
   terraindata *terri;
   float *znode;
-  int nxcell;
+  int nycell;
 
   sd = sliceinfo + vd->ival;
   meshi=meshinfo+sd->blocknumber;
@@ -3468,7 +3468,7 @@ void drawvvolslice_terrain(const vslice *vd){
   terri = meshi->terrain;
   if(terri==NULL)return;
   znode = terri->znode_scaled;
-  nxcell = terri->nx;
+  nycell = terri->ny;
 
   vrange = velocity_range;
   if(vrange<=0.0)vrange=1.0;
@@ -3864,14 +3864,14 @@ void drawvslice_terrain(const vslice *vd){
   float *rgb_ptr;
   terraindata *terri;
   float *znode;
-  int nxcell;
+  int nycell;
 
   sd = sliceinfo + vd->ival;
   meshi=meshinfo+sd->blocknumber;
   terri = meshi->terrain;
   if(terri==NULL)return;
   znode = terri->znode_scaled;
-  nxcell = terri->nx;
+  nycell = terri->ny;
 
   xplttemp=meshi->xplt;
   yplttemp=meshi->yplt;
