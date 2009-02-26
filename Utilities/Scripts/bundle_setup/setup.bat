@@ -9,8 +9,8 @@ xcopy  "%fromdir%" "%todir%" /E /C /I /Y /Q
 erase "%todir%"\setup.bat
 
 
-assoc .smv=smokeview.Document>Nul
-ftype smokeview.Document=%bindir%\smokeview.exe %1 >Nul
+Rem assoc .smv=smokeview.Document>Nul
+Rem ftype smokeview.Document=%bindir%\smokeview.exe %1 >Nul
 echo.
 echo Installation Complete.  
 echo Press any key to continue . . . 

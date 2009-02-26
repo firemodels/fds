@@ -1,2 +1,1 @@
-test ini file output to casename.inilist
-test fix for issue 610 (handling colorbarflip value properly)
+1.  added option to show/hide blockages on a mesh by mesh basis - set using the Motion/View dialog box

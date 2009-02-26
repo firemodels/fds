@@ -527,8 +527,8 @@ int readsmv(char *file){
       tt = terrain_texture;
       autoterrain=1;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visTerrain);
-      if(visTerrain!=1)visTerrain=0;
+      sscanf(buffer,"%i",&visTerrainType);
+    //  if(visTerrain!=1)visTerrain=0;
   
       fgets(buffer,255,stream);
       buffer2 = trim_front(buffer);
@@ -6252,12 +6252,14 @@ int readini2(char *inifile, int localfile){
 
     if(match(buffer,"SHOWTERRAIN",11)==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visTerrain);
+      sscanf(buffer,"%i",&visTerrainType);
+      /*
       if(visTerrain!=0)visTerrain=1;
       if(visTerrain==1){
         visTerrain=1-visTerrain;
         GeometryMenu(17);
       }
+      */
       continue;
     }
     if(match(buffer,"STEREO",6)==1){
@@ -8751,7 +8753,7 @@ void writeini(int flag){
   fprintf(fileout,"TRAINERVIEW\n");
   fprintf(fileout," %i\n",trainerview);
   fprintf(fileout,"SHOWTERRAIN\n");
-  fprintf(fileout," %i\n",visTerrain);
+  fprintf(fileout," %i\n",visTerrainType);
   fprintf(fileout,"TERRAINPARMS\n");
   fprintf(fileout,"%f %f %f\n",terrain_rgba_zmin[0],terrain_rgba_zmin[1],terrain_rgba_zmin[2]);
   fprintf(fileout,"%f %f %f\n",terrain_rgba_zmax[0],terrain_rgba_zmax[1],terrain_rgba_zmax[2]);

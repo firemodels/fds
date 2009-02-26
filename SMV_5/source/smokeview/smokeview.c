@@ -1305,8 +1305,14 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
 
-  if(visTerrain==1){
+  if(visTerrainType!=4){
     int i;
+    
+    //shaded 17 0
+    //stepped 18 1
+    //line    19 2
+    //texture 20 3
+    //hidden 20 4
 
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
@@ -1319,11 +1325,27 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       else{
         only_geom=1;
       }
-      if(terrain_texture!=NULL&&terrain_texture->loaded==1&&visTerrainTexture==1){
-        drawterrain_texture(terri,only_geom);
-      }
-      else{
-        drawterrain(terri,only_geom);
+      switch (visTerrainType){
+        case 1:
+        case 2:
+          if(visTerrainType==1){
+            if(cullfaces==1)glDisable(GL_CULL_FACE);
+            DrawContours(&meshinfo[i].terrain_contour,1);
+            if(cullfaces==1)glEnable(GL_CULL_FACE);
+          }
+          else{
+            DrawContours(&meshinfo[i].terrain_contour,2);
+          }
+          break;
+        case 0:
+        case 3:
+          if(visTerrainType==3&&terrain_texture!=NULL&&terrain_texture->loaded==1){
+            drawterrain_texture(terri,only_geom);
+          }
+          else{
+            drawterrain(terri,only_geom);
+          }
+          break;
       }
     }
   }
@@ -1534,7 +1556,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
           }
         }
         else{
-          if(sd->terrain==1&&planar_terrain_slice){
+          if(sd->terrain==1&&planar_terrain_slice==0){
             drawslice_terrain(sd);
           }
           else{
@@ -1978,7 +2000,7 @@ void updateShow(void){
       }
     }
   }
-  if(visTerrain==1){
+  if(visTerrainType!=4){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
 
@@ -2269,7 +2291,7 @@ void updatetimes(void){
 
   updateShow();  
   ntimes = 0;
-  if(visTerrain==1){
+  if(visTerrainType!=4){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
 
@@ -2336,7 +2358,7 @@ void updatetimes(void){
   NewMemory((void **)&times,ntimes*sizeof(float));
   timescopy=times;
 
-  if(visTerrain==1){
+  if(visTerrainType!=4){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
 
@@ -2500,7 +2522,7 @@ void updatetimes(void){
       FREEMEMORY(touri->path_timeslist);
       NewMemory((void **)&touri->path_timeslist,ntimes*sizeof(int));
     }
-    if(visTerrain==1){
+    if(visTerrainType!=4){
       for(i=0;i<nterraininfo;i++){
         terraindata *terri;
 
@@ -3791,7 +3813,7 @@ int getplotstate(int choice){
         return DYNAMIC_PLOTS;
       }
       if(visGrid==0)stept = 1;
-      if(visTerrain==1){
+      if(visTerrainType!=4){
         for(i=0;i<nterraininfo;i++){
           terraindata *terri;
 
