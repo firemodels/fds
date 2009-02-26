@@ -3685,6 +3685,13 @@ void GeometryMenu(int value){
       BlockageMenu(visBLOCKHide);
     }
     visTerrainType=value-17;
+    if(visTerrainType==0){
+      planar_terrain_slice=0;
+    }
+    else{
+      planar_terrain_slice=1;
+    }
+    update_glui_wui();
     break;
   case 11:
     if(isZoneFireModel)visFrame=1;
@@ -4463,15 +4470,15 @@ static int in_menu=0;
 
   CREATEMENU(terrain_showmenu,GeometryMenu);
 
-  if(visTerrainType==0)glutAddMenuEntry("*Shaded contours",17);
-  if(visTerrainType!=0)glutAddMenuEntry("Shaded contours",17);
-  if(visTerrainType==1)glutAddMenuEntry("*Stepped contours",18);
-  if(visTerrainType!=1)glutAddMenuEntry("Stepped contours",18);
-  if(visTerrainType==2)glutAddMenuEntry("*Line contours",19);
-  if(visTerrainType!=2)glutAddMenuEntry("Line contours",19);
+  if(visTerrainType==0)glutAddMenuEntry("*3D surface",17);
+  if(visTerrainType!=0)glutAddMenuEntry("3D surface",17);
+  if(visTerrainType==1)glutAddMenuEntry("*2D stepped",18);
+  if(visTerrainType!=1)glutAddMenuEntry("2D stepped",18);
+  if(visTerrainType==2)glutAddMenuEntry("*2D lines",19);
+  if(visTerrainType!=2)glutAddMenuEntry("2D lines",19);
   if(terrain_texture!=NULL&&terrain_texture->loaded==1){
-    if(visTerrainType==3)glutAddMenuEntry("*Texture",20);
-    if(visTerrainType!=3)glutAddMenuEntry("Texture",20);
+    if(visTerrainType==3)glutAddMenuEntry("*Image",20);
+    if(visTerrainType!=3)glutAddMenuEntry("Image",20);
   }
   if(visTerrainType==4)glutAddMenuEntry("*Hidden",21);
   if(visTerrainType!=4)glutAddMenuEntry("Hidden",21);
@@ -5660,8 +5667,8 @@ static int in_menu=0;
 
   CREATEMENU(dialogmenu,DialogMenu);
   if(nterraininfo>0){
-    if(showwui==1)glutAddMenuEntry("*WUI Display Properties...",26);
-    if(showwui==0)glutAddMenuEntry("WUI Display Properties...",26);
+    if(showwui==1)glutAddMenuEntry("*WUI Display... ALT+w",26);
+    if(showwui==0)glutAddMenuEntry("WUI Display... ALT+w...",26);
   }
   if(showclip==1)glutAddMenuEntry("*Clip Geometry...  ALT+c",18);
   if(showclip==0)glutAddMenuEntry("Clip Geometry...  ALT+c",18);

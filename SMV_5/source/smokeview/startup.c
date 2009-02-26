@@ -1262,15 +1262,13 @@ void initvars1(void){
   visTitle=1, visFullTitle=1, visFramerate=0, visFramelabel=1, visTimelabel=1;
 
   vertical_factor=1.0;
-  terrain_rgba_zmin[0]=0.35;
-  terrain_rgba_zmin[1]=0.20;
-  terrain_rgba_zmin[2]=0.05; 
-  terrain_rgba_zmin[3]=1.0;
+  terrain_rgba_zmin[0]=90;
+  terrain_rgba_zmin[1]=50;
+  terrain_rgba_zmin[2]=50; 
 
-  terrain_rgba_zmax[0]=0.80;
-  terrain_rgba_zmax[1]=0.80;
-  terrain_rgba_zmax[2]=0.80;
-  terrain_rgba_zmax[3]=1.0;
+  terrain_rgba_zmax[0]=200;
+  terrain_rgba_zmax[1]=200;
+  terrain_rgba_zmax[2]=200;
 
 #ifdef pp_memstatus
   visAvailmemory=0;
