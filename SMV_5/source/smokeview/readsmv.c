@@ -6276,22 +6276,20 @@ int readini2(char *inifile, int localfile){
       int i;
 
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",terrain_rgba_zmin,terrain_rgba_zmin+1,terrain_rgba_zmin+2);
+      sscanf(buffer,"%i %i %i",terrain_rgba_zmin,terrain_rgba_zmin+1,terrain_rgba_zmin+2);
 
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",terrain_rgba_zmax,terrain_rgba_zmax+1,terrain_rgba_zmax+2);
+      sscanf(buffer,"%i %i %i",terrain_rgba_zmax,terrain_rgba_zmax+1,terrain_rgba_zmax+2);
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%f",&vertical_factor);
 
       for(i=0;i<3;i++){
-        if(terrain_rgba_zmin[i]<0.0)terrain_rgba_zmin[i]=0.0;
-        if(terrain_rgba_zmin[i]>1.0)terrain_rgba_zmin[i]=1.0;
-        if(terrain_rgba_zmax[i]<0.0)terrain_rgba_zmax[i]=0.0;
-        if(terrain_rgba_zmax[i]>1.0)terrain_rgba_zmax[i]=1.0;
+        if(terrain_rgba_zmin[i]<0)terrain_rgba_zmin[i]=0;
+        if(terrain_rgba_zmin[i]>255)terrain_rgba_zmin[i]=255;
+        if(terrain_rgba_zmax[i]<0)terrain_rgba_zmax[i]=0;
+        if(terrain_rgba_zmax[i]>255)terrain_rgba_zmax[i]=255;
       }
-      terrain_rgba_zmin[3]=1.0;
-      terrain_rgba_zmax[3]=1.0;
       if(vertical_factor<0.25)vertical_factor=0.25;
       if(vertical_factor>4.0)vertical_factor=4.0;
       update_terrain(0,vertical_factor);
@@ -8755,8 +8753,8 @@ void writeini(int flag){
   fprintf(fileout,"SHOWTERRAIN\n");
   fprintf(fileout," %i\n",visTerrainType);
   fprintf(fileout,"TERRAINPARMS\n");
-  fprintf(fileout,"%f %f %f\n",terrain_rgba_zmin[0],terrain_rgba_zmin[1],terrain_rgba_zmin[2]);
-  fprintf(fileout,"%f %f %f\n",terrain_rgba_zmax[0],terrain_rgba_zmax[1],terrain_rgba_zmax[2]);
+  fprintf(fileout,"%i %i %i\n",terrain_rgba_zmin[0],terrain_rgba_zmin[1],terrain_rgba_zmin[2]);
+  fprintf(fileout,"%i %i %i\n",terrain_rgba_zmax[0],terrain_rgba_zmax[1],terrain_rgba_zmax[2]);
   fprintf(fileout,"%f\n",vertical_factor);
   fprintf(fileout,"OFFSETSLICE\n");
   fprintf(fileout," %i\n",offset_slice);
