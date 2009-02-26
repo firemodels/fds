@@ -160,11 +160,14 @@ void freecontour(contour *ci){
   ci->nlevels=0;
 }
 
+/*  ------------------ setcontourslice ------------------------ */
+
 void setcontourslice(contour *ci,int idir,float xyz){
   ci->idir=idir;
   ci->xyzval=xyz;
 
 }
+
 /*  ------------------ getcontours ------------------------ */
 
 void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,  

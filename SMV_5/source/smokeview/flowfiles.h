@@ -128,6 +128,8 @@ typedef struct {
   int nx, ny;
   float xmin, xmax, ymin, ymax;
   float *x, *y;
+  float *x_scaled, *y_scaled;
+  float levels[13];
   float *zcell, *znode, *znode_scaled, *znode_offset;
   unsigned char *uc_znormal;
   float *times;
@@ -375,6 +377,7 @@ typedef struct mesh_ {
   char *c_iblank_xy, *c_iblank_xz, *c_iblank_yz;
   float plot3d_speedmax;
   contour plot3dcontour1,plot3dcontour2,plot3dcontour3;
+  contour terrain_contour;
   isosurface currentsurf,currentsurf2;
   isosurface *blockagesurface;
   isosurface **blockagesurfaces;

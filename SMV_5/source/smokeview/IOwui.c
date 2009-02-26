@@ -30,6 +30,7 @@ void endian_switch(void *val, int nval);
 
 #define ijcell2(i,j) nxcell*(j) + (i)
 #define ijnode2(i,j) ((nxcell+1)*(j) + (i))
+#define ijnode3(i,j) ((nycell+1)*(i) + (j))
 #define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
 #define FORTWUIREAD(var,size) fseek(WUIFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,WUIFILE);\
@@ -248,19 +249,19 @@ void initterrain_all(void){
   float dx, dy;
   float *x, *y;
   float *znode, *znode_offset;
-  int nxcell;
+  int nycell;
   float znormal3[3];
   int i,j,k;
   int nz;
   int ibar, jbar;
-  mesh *meshi;
   int imesh;
-  terraindata *terri;
   float *xplt, *yplt;
   float denom;
   unsigned char *uc_znormal;
 
   for(imesh=0;imesh<nmeshes;imesh++){
+    mesh *meshi;
+    terraindata *terri;
     
     meshi = meshinfo + imesh;
 
@@ -271,7 +272,7 @@ void initterrain_all(void){
 
     znode = terri->znode;
     znode_offset = terri->znode_offset;
-    nxcell = terri->nx;
+    nycell = terri->ny;
 
     uc_znormal = terri->uc_znormal;
     for(j=0;j<=terri->ny;j++){
@@ -311,8 +312,8 @@ void initterrain_all(void){
         if(count==0)count=1;
         zval /= (float)count;
 
-        *znode++=zval;
-
+        //*znode++=zval;
+        znode[ijnode3(i,j)]=zval;
         zval_offset = (val1_offset*loc1 + val2_offset*loc2 + val3_offset*loc3 + val4_offset*loc4)/xyzmaxdiff;
         if(count==0)count=1;
         zval_offset /= (float)count;
@@ -402,7 +403,7 @@ void initterrain_all(void){
      //     -dzdx -dzdy 1
 
         //znormal = terri->znormal + 3*ijnode2(i,j);
-        uc_znormal = terri->uc_znormal + ijnode2(i,j);
+        uc_znormal = terri->uc_znormal + ijnode3(i,j);
         znormal3[0] = -dzdx;
         znormal3[1] = -dzdy;
         znormal3[2] = 1.0;
@@ -418,6 +419,49 @@ void initterrain_all(void){
       }
     }
   }
+  for(imesh=0;imesh<nmeshes;imesh++){
+    mesh *meshi;
+    terraindata *terri;
+    int minfill=1, maxfill=1;
+    int i, j;
+    float zmin, zmax, dz;
+    
+    meshi = meshinfo + imesh;
+    terri = meshi->terrain;
+
+    zmin = terri->znode[0];
+    zmax = zmin;
+    for(i=1;i<(terri->nx+1)*(terri->ny+1);i++){
+      if(terri->znode[i]<zmin)zmin=terri->znode[i];
+      if(terri->znode[i]>zmax)zmax=terri->znode[i];
+    }
+    dz = (zmax - zmin)/12.0;
+    for(i=0;i<13;i++){
+      terri->levels[i]=zmin + i*dz;
+    }
+    terri->levels[12]=zmax;
+    
+    freecontour(&meshi->terrain_contour);
+    initcontour(&meshi->terrain_contour,rgbptr,nrgb);
+
+    meshi->terrain_contour.idir=3;
+    meshi->terrain_contour.xyzval=zmin;
+
+    for(i=0;i<=terri->nx;i++){
+      terri->x_scaled[i] = (meshi->xplt_orig[i]-xbar0)/xyzmaxdiff;
+    }
+    for(j=0;j<=terri->ny;j++){
+      terri->y_scaled[j] = (meshi->yplt_orig[j]-ybar0)/xyzmaxdiff;
+    }
+
+    getcontours(terri->x_scaled,terri->y_scaled,terri->nx+1,terri->ny+1,
+      terri->znode, NULL, terri->levels,
+      minfill, maxfill,
+      &meshi->terrain_contour);
+
+  }
+
+
 }
 
 /* ------------------ initterrain_znode ------------------------ */
@@ -468,6 +512,8 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
   if(allocate_memory==1){
     NewMemory((void **)&terri->x,(nx+1)*sizeof(float));
     NewMemory((void **)&terri->y,(ny+1)*sizeof(float));
+    NewMemory((void **)&terri->x_scaled,(nx+1)*sizeof(float));
+    NewMemory((void **)&terri->y_scaled,(ny+1)*sizeof(float));
     NewMemory((void **)&terri->zcell,nx*ny*sizeof(float));
     NewMemory((void **)&terri->state,nx*ny);
     NewMemory((void **)&terri->znode,(nx+1)*(ny+1)*sizeof(float));
@@ -511,7 +557,7 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
 void drawterrain(terraindata *terri, int only_geom){
   float *znode, *zn;
   unsigned char *uc_znormal;
-  int nxcell;
+  int nycell;
   int i, j;
   float *x, *y;
   terraincell *ti;
@@ -543,7 +589,7 @@ void drawterrain(terraindata *terri, int only_geom){
 //  znormal = terri->znormal;
   uc_znormal = terri->uc_znormal;
   znode = terri->znode;
-  nxcell = terri->nx;
+  nycell = terri->ny;
   x = terri->x;
   y = terri->y;
   ti = terri->tcell;
@@ -563,44 +609,43 @@ void drawterrain(terraindata *terri, int only_geom){
       unsigned char izval;
 
       ip1 = i + 1;
-
       if(only_geom==0){
         ter_rgbptr = get_terraincolor(ti);
         glColor4fv(ter_rgbptr);
       }
       //zn = znormal+3*ijnode2(i,j);
-      uc_zn = uc_znormal+ijnode2(i,j);
+      uc_zn = uc_znormal+ijnode3(i,j);
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
 
       glNormal3fv(zn);
-      zval = znode[ijnode2(i,j)];
+      zval = znode[ijnode3(i,j)];
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i],y[j],zval);
 
 //      zn = znormal+3*ijnode2(ip1,j);
-      uc_zn = uc_znormal+ijnode2(ip1,j);
+      uc_zn = uc_znormal+ijnode3(ip1,j);
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
       glNormal3fv(zn);
-      zval = znode[ijnode2(ip1,j)];
+      zval = znode[ijnode3(ip1,j)];
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i+1],y[j],zval);
 
 //      zn = znormal+3*ijnode2(ip1,jp1);
-      uc_zn = uc_znormal+ijnode2(ip1,jp1);
+      uc_zn = uc_znormal+ijnode3(ip1,jp1);
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
       glNormal3fv(zn);
-      zval = znode[ijnode2(ip1,jp1)];
+      zval = znode[ijnode3(ip1,jp1)];
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i+1],y[j+1],zval);
 
       //zn = znormal+3*ijnode2(i,jp1);
-      uc_zn = uc_znormal+ijnode2(i,jp1);
+      uc_zn = uc_znormal+ijnode3(i,jp1);
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
       glNormal3fv(zn);
-      zval = znode[ijnode2(i,jp1)];
+      zval = znode[ijnode3(i,jp1)];
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i],y[j+1],zval);
@@ -824,7 +869,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
     return;
   }
   terri->loaded=1;
-  visTerrain=1;
+  visTerrainType=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatetimes();
 #ifdef _DEBUG
@@ -1060,13 +1105,13 @@ void init_tnorm(terraindata *terri){
   unsigned char *uc_znormal;
   float znormal3[3];
   int i, j;
-  int nxcell;
+  int nycell;
   float dx, dy;
 
   //znormal = terri->znormal;
   uc_znormal = terri->uc_znormal;
   znode = terri->znode;
-  nxcell = terri->nx;
+  nycell = terri->ny;
   dx = (terri->xmax-terri->xmin)/terri->nx;
   dy = (terri->ymax-terri->ymin)/terri->ny;
 
@@ -1081,8 +1126,8 @@ void init_tnorm(terraindata *terri){
     for(i=0;i<=terri->nx;i++){
       ip1 = i + 1;
       if(ip1>terri->nx)ip1=terri->nx;
-      dzdx = (znode[ijnode2(ip1,j)] - znode[ijnode2(i,j)])/dx;
-      dzdy = (znode[ijnode2(i,jp1)] - znode[ijnode2(i,j)])/dy;
+      dzdx = (znode[ijnode3(ip1,j)] - znode[ijnode3(i,j)])/dx;
+      dzdy = (znode[ijnode3(i,jp1)] - znode[ijnode3(i,j)])/dy;
 
  //     i  j  k
  //     1  0 dzdx           uu
@@ -1092,7 +1137,7 @@ void init_tnorm(terraindata *terri){
 
       
 //      znormal = terri->znormal + 3*ijnode2(i,j);
-      uc_znormal = terri->uc_znormal + ijnode2(i,j);
+      uc_znormal = terri->uc_znormal + ijnode3(i,j);
       znormal3[0] = -dzdx;
       znormal3[1] = -dzdy;
       znormal3[2] = 1.0;
@@ -1116,9 +1161,6 @@ void update_terrain(int allocate_memory, float vertical_factor){
 
   if(autoterrain==1){
 
-    zterrain_min=1000000000.0;
-    zterrain_max=-zterrain_min;
-
     nterraininfo = nmeshes;
     if(allocate_memory==1){
       NewMemory((void **)&terraininfo,nterraininfo*sizeof(terraindata));
@@ -1141,6 +1183,7 @@ void update_terrain(int allocate_memory, float vertical_factor){
       ymax = meshi->yplt_orig[ny];
 
       initterrain_znode(meshi, terri, xmin, xmax, nx, ymin, ymax, ny, allocate_memory);
+      initcontour(&meshi->terrain_contour,rgbptr,nrgb+1);
     }
     initterrain_all();
   }
@@ -1164,7 +1207,6 @@ void update_terrain(int allocate_memory, float vertical_factor){
           *znode_scaled++ = (*znode++-zbar0)/xyzmaxdiff;
         }
       }
-
     }
   }
 }

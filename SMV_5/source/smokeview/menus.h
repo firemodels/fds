@@ -3667,20 +3667,25 @@ void GeometryMenu(int value){
   case 7:
     visCeiling=1-visCeiling;
     break;
+    //shaded 17 0
+    //stepped 18 1
+    //line    19 2
+    //texture 20 3
+    //hidden 21 4
   case 17:
-    visTerrain=1 - visTerrain;
-    if(visTerrain==1){
+  case 18:
+  case 19:
+  case 20:
+  case 21:
+    if(value==21){
+      BlockageMenu(visBlocksSave);
+    }
+    else{
       visBlocksSave=visBlocks;
       BlockageMenu(visBLOCKHide);
     }
-    else{
-      BlockageMenu(visBlocksSave);
-    }
-
+    visTerrainType=value-17;
     break;
-   case 18:
-     visTerrainTexture = 1 - visTerrainTexture;
-     break;
   case 11:
     if(isZoneFireModel)visFrame=1;
     /*
@@ -3786,7 +3791,7 @@ static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
 static int isoblockmenu=0, fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
 static int gridslicemenu=0, blockagemenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
-static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0;
+static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0, terrain_showmenu=0;
 static int scriptmenu=0;
 static int loadplot3dmenu=0, unloadvslicemenu=0, unloadslicemenu=0;
 static int loadterrainmenu=0, unloadterrainmenu=0;
@@ -4453,18 +4458,35 @@ static int in_menu=0;
       }
     }
   }
+  
+/* --------------------------------terrain_showmenu -------------------------- */
 
+  CREATEMENU(terrain_showmenu,GeometryMenu);
+
+  if(visTerrainType==0)glutAddMenuEntry("*Shaded contours",17);
+  if(visTerrainType!=0)glutAddMenuEntry("Shaded contours",17);
+  if(visTerrainType==1)glutAddMenuEntry("*Stepped contours",18);
+  if(visTerrainType!=1)glutAddMenuEntry("Stepped contours",18);
+  if(visTerrainType==2)glutAddMenuEntry("*Line contours",19);
+  if(visTerrainType!=2)glutAddMenuEntry("Line contours",19);
+  if(terrain_texture!=NULL&&terrain_texture->loaded==1){
+    if(visTerrainType==3)glutAddMenuEntry("*Texture",20);
+    if(visTerrainType!=3)glutAddMenuEntry("Texture",20);
+  }
+  if(visTerrainType==4)glutAddMenuEntry("*Hidden",21);
+  if(visTerrainType!=4)glutAddMenuEntry("Hidden",21);
+    
 /* --------------------------------geometry menu -------------------------- */
 
   CREATEMENU(geometrymenu,GeometryMenu);
   if(showedit==0&&ntotal_blockages>0)glutAddSubMenu("Blockages",blockagemenu);
+    //shaded 17 0
+    //stepped 18 1
+    //line    19 2
+    //texture 20 3
+    //hidden 21 4
   if(nterraininfo>0){
-    if(visTerrain==1)glutAddMenuEntry("*Terrain",17);
-    if(visTerrain==0)glutAddMenuEntry("Terrain",17);
-    if(terrain_texture!=NULL&&terrain_texture->loaded==1){
-      if(visTerrainTexture==1)glutAddMenuEntry("  *Terrain Texture",18);
-      if(visTerrainTexture==0)glutAddMenuEntry("  Terrain Texture",18);
-    }
+    glutAddSubMenu("Terrain",terrain_showmenu);
   }
  glutAddSubMenu("Vents",ventmenu);
  if(ntotal_blockages>0||isZoneFireModel==0){

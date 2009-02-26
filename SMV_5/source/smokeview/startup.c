@@ -138,11 +138,12 @@ int initcase_c(int argc, char **argv){
     show_trainer();
     show_load_alert();
   }
+  /*
   if(visTerrain==1){
     visTerrain=1-visTerrain;
     GeometryMenu(17);
   }
-
+*/
   return 0;
 }
 
@@ -2016,7 +2017,7 @@ void initvars0(void){
   ntreeinfo=0;
   terraininfo=NULL;
   nterraininfo=0;
-  visTerrain=0;
+  visTerrainType=4;
   treecolor[0]=0.09;
   treecolor[1]=0.5;
   treecolor[2]=0.015;
