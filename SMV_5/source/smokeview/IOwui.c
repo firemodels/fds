@@ -235,9 +235,9 @@ void update_terrain_colors(void){
     float f1;
 
     f1 = (float)i/(float)(MAXRGB-1);
-    rgbterrain[4*i+0]=(1.0-f1)*terrain_rgba_zmin[0] + f1*terrain_rgba_zmax[0];
-    rgbterrain[4*i+1]=(1.0-f1)*terrain_rgba_zmin[1] + f1*terrain_rgba_zmax[1];
-    rgbterrain[4*i+2]=(1.0-f1)*terrain_rgba_zmin[2] + f1*terrain_rgba_zmax[2];
+    rgbterrain[4*i+0]=((1.0-f1)*terrain_rgba_zmin[0] + f1*terrain_rgba_zmax[0])/255.0;
+    rgbterrain[4*i+1]=((1.0-f1)*terrain_rgba_zmin[1] + f1*terrain_rgba_zmax[1])/255.0;
+    rgbterrain[4*i+2]=((1.0-f1)*terrain_rgba_zmin[2] + f1*terrain_rgba_zmax[2])/255.0;
     rgbterrain[4*i+3]=1.0;
   }
 }

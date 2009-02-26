@@ -77,8 +77,8 @@ SVEXTERN float cb_valmin, cb_valmax, cb_val;
 SVEXTERN int cb_colorindex;
 SVEXTERN float rgb_plot3d[4*MAXRGB];
 SVEXTERN float rgbterrain[4*MAXRGB];
-SVEXTERN float terrain_rgba_zmin[4];
-SVEXTERN float terrain_rgba_zmax[4];
+SVEXTERN int terrain_rgba_zmin[3];
+SVEXTERN int terrain_rgba_zmax[3];
 SVEXTERN float vertical_factor;
 
 SVEXTERN char inputfilename_ext[4];

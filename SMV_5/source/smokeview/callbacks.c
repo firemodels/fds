@@ -839,13 +839,25 @@ void keyboard(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"w",1)==0){
-    if(eyeview==EYE_CENTERED){
-      handle_move_keys(GLUT_KEY_UP);
-    }
-    else{
-      xyz_clipplane++;
-      if(xyz_clipplane>2)xyz_clipplane=0;
-      update_clip_all();
+    int state;
+
+    state=glutGetModifiers();
+    switch (state){
+      case GLUT_ACTIVE_ALT:
+        DialogMenu(26); // WUI dialog
+        break;
+      case GLUT_ACTIVE_CTRL:
+      case GLUT_ACTIVE_SHIFT:
+      default:
+      if(eyeview==EYE_CENTERED){
+        handle_move_keys(GLUT_KEY_UP);
+      }
+      else{
+        xyz_clipplane++;
+        if(xyz_clipplane>2)xyz_clipplane=0;
+        update_clip_all();
+      }
+      break;
     }
     return;
   }
