@@ -7374,11 +7374,11 @@ SUBROUTINE READ_SLCF
 REAL(EB) :: MAXIMUM_VALUE,MINIMUM_VALUE
 REAL(EB) :: AGL_SLICE
 INTEGER :: N,NN,NM,MESH_NUMBER,N_SLCF_O,NITER,ITER
-LOGICAL :: VECTOR,RLE,TWO_BYTE,CELL_CENTERED
+LOGICAL :: VECTOR,RLE,TWO_BYTE,CELL_CENTERED, FIRE_LINE
 CHARACTER(30) :: QUANTITY,SPEC_ID,PART_ID
 TYPE (SLICE_TYPE), POINTER :: SL
 NAMELIST /SLCF/ XB,QUANTITY,FYI,PBX,PBY,PBZ,VECTOR,MESH_NUMBER,RLE,MAXIMUM_VALUE,MINIMUM_VALUE,TWO_BYTE,SPEC_ID, &
-                AGL_SLICE,PART_ID,CELL_CENTERED
+                AGL_SLICE,PART_ID,CELL_CENTERED, FIRE_LINE
 
 MESH_LOOP: DO NM=1,NMESHES
 
@@ -7429,6 +7429,7 @@ MESH_LOOP: DO NM=1,NMESHES
       SPEC_ID  = 'null'
       PART_ID  = 'null'
       CELL_CENTERED = .FALSE.
+      FIRE_LINE=.FALSE.
  
       CALL CHECKREAD('SLCF',LU_INPUT,IOS)
       IF (IOS==1) EXIT SLCF_LOOP
@@ -7486,11 +7487,23 @@ MESH_LOOP: DO NM=1,NMESHES
          IF (ITER==3 .AND. .NOT. TWO_D)  QUANTITY = 'V-VELOCITY' 
          IF (ITER==3 .AND. TWO_D)        QUANTITY = 'W-VELOCITY' 
          IF (ITER==4)                    QUANTITY = 'W-VELOCITY'
+         IF (ITER==1 .AND. FIRE_LINE)    QUANTITY = 'TEMPERATURE'
+         IF ( ITER==1) THEN
+            SL%FIRE_LINE = FIRE_LINE
+           ELSE
+            SL%FIRE_LINE = .FALSE.
+         ENDIF
          CALL GET_QUANTITY_INDEX(SL%SMOKEVIEW_LABEL,SL%SMOKEVIEW_BAR_LABEL,SL%INDEX,SL%SPEC_INDEX,SL%PART_INDEX, &
                                  'SLCF',QUANTITY,SPEC_ID,PART_ID)
          !for terrain slices, AGL=above ground level
-         IF (ITER == 1 .AND. AGL_SLICE > -1._EB) THEN 
+         !FIRE_LINE==.TRUE. ==> a terrain slice at one grid cell above ground with quantity temperature
+         !                      smokeview will display only regions where temperature is above 200 C.
+         !                      This is currently hard wired.
+         IF (ITER == 1 .AND. (AGL_SLICE > -1._EB .OR. FIRE_LINE ) ) THEN 
             SL%TERRAIN_SLICE = .TRUE. 
+            IF (AGL_SLICE .LE. -1._EB .AND. FIRE_LINE) THEN
+               AGL_SLICE = M%Z(1) - M%Z(0)
+            ENDIF
             SL%SLICE_AGL     = AGL_SLICE
             N_TERRAIN_SLCF   = N_TERRAIN_SLCF + 1
          ENDIF
