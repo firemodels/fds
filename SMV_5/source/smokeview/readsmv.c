@@ -695,6 +695,7 @@ int readsmv(char *file){
     }
     if( (match(buffer,"SLCF",4) == 1)||
         (match(buffer,"SLCC",4) == 1)||
+        (match(buffer,"SLFL",4) == 1)||
         (match(buffer,"SLCT",4) == 1)
       ){
       nslice++;
@@ -3275,14 +3276,19 @@ typedef struct {
   */
     if( (match(buffer,"SLCF",4) == 1)||
         (match(buffer,"SLCC",4) == 1)||
+        (match(buffer,"SLFL",4) == 1)||
         (match(buffer,"SLCT",4) == 1)
       ){
-      int terrain=0, cellcenter=0;
+      int terrain=0, cellcenter=0, fire_line=0;
       float above_ground_level=0.0;
 
       nn_slice++;
       if(match(buffer,"SLCT",4) == 1){
         terrain=1;
+      }
+      if(match(buffer,"SLFL",4) == 1){
+        terrain=1;
+        fire_line=1;
       }
       if(match(buffer,"SLCC",4) == 1){
         cellcenter_active=1;
@@ -3338,6 +3344,7 @@ typedef struct {
       if(sd->compression_type==0){
         sd->file=sd->reg_file;
       }
+      sd->fire_line=fire_line;
       sd->terrain=terrain;
       sd->cellcenter=cellcenter;
       sd->above_ground_level=above_ground_level;
