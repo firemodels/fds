@@ -1416,7 +1416,7 @@ void PART_CB(int var){
 
 /* ------------------ SLICE_CB ------------------------ */
 
-void Slice_CB(int var){
+extern "C" void Slice_CB(int var){
   int error,i;
   int ii;
   slice *sd;
