@@ -84,6 +84,7 @@ SVEXTERN float vertical_factor;
 SVEXTERN char inputfilename_ext[4];
 
 SVEXTERN float percentile_level;
+SVEXTERN float fire_line_min, fire_line_max;
 
 SVEXTERN int dwinHbase;
 SVEXTERN int dwinH;

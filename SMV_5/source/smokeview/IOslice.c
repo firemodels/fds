@@ -1550,6 +1550,20 @@ int getslicetype(const slice *sd){
   return -1;
 }
 
+/* ------------------ getslicetype_fromlabel ------------------------ */
+
+int getslicetype_fromlabel(char *label){
+  slice *sd2;
+  int j;
+
+  for(j=0;j<nslicetypes;j++){
+    sd2 = sliceinfo+slicetypes[j];
+    if(strcmp(label,sd2->label.shortlabel)==0)return j;
+  }
+  return -1;
+}
+
+
 /* ------------------ updatesliceboundlabels ------------------------ */
 
 void updatesliceboundlabels(){
@@ -1714,7 +1728,7 @@ void adjustslicebounds(const slice *sd, float *pmin, float *pmax){
       }
       FreeMemory(buckets);
       ppmin = *pmin;
-      if(setslicemin==PERCENTILE_MIN)*pmin = ppmin + (nsmall-1)*dp;
+      if(setslicemin==PERCENTILE_MIN)*pmin = ppmin + nsmall*dp;
       if(setslicemax==PERCENTILE_MAX)*pmax = ppmin + (nbig+1)*dp;
       
     }

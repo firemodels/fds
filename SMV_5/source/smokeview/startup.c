@@ -2029,6 +2029,8 @@ void initvars0(void){
   trunccolor[2]=0.0;
   trunccolor[3]=1.0;
 
+  fire_line_min=150.0;
+  fire_line_max=200.0;
   tourknotskeylist=NULL;
   tourknotstourlist=NULL;
   selected_frame=NULL;

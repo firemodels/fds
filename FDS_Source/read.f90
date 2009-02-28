@@ -7500,7 +7500,11 @@ MESH_LOOP: DO NM=1,NMESHES
          !                      smokeview will display only regions where temperature is above 200 C.
          !                      This is currently hard wired.
          IF (ITER == 1 .AND. (AGL_SLICE > -1._EB .OR. FIRE_LINE ) ) THEN 
-            SL%TERRAIN_SLICE = .TRUE. 
+            SL%TERRAIN_SLICE = .TRUE.
+            IF (FIRE_LINE) THEN
+               SL%SMOKEVIEW_LABEL = "Fire line"
+               SL%SMOKEVIEW_BAR_LABEL = "Fire line"
+            ENDIF 
             IF (AGL_SLICE .LE. -1._EB .AND. FIRE_LINE) THEN
                AGL_SLICE = M%Z(1) - M%Z(0)
             ENDIF

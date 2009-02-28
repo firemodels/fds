@@ -27,10 +27,25 @@ GLUI_Panel *panel_terrain=NULL;
 #define WUI_CLOSE 99
 #define SAVE_SETTINGS 98
 #define TERRAIN_TYPE 36
+#define TERRAIN_MIN 37
+#define TERRAIN_MAX 38
+#define TERRAIN_FIRE_LINE_UPDATE 39
 
+#define SETVALMIN 1
+#define SETVALMAX 2
+#define VALMIN 3
+#define VALMAX 4
+#define FILETYPEINDEX 5
+#define CHOPVALMIN 13
+#define CHOPVALMAX 14
+#define SETCHOPMINVAL 15
+#define SETCHOPMAXVAL 16
+#define CHOPUPDATE 17
+#define FILEUPDATE 6
 
 GLUI *glui_wui=NULL;
 GLUI_Panel *panel_wui=NULL;
+GLUI_Panel *panel_fire_line=NULL;
 GLUI_Panel *panel_terrain_hidden1=NULL;
 GLUI_Panel *panel_terrain_color=NULL;
 GLUI_Panel *panel_terrain_type=NULL;
@@ -43,6 +58,8 @@ GLUI_Spinner *SPINNER_red_max=NULL;
 GLUI_Spinner *SPINNER_green_max=NULL;
 GLUI_Spinner *SPINNER_blue_max=NULL;
 GLUI_Spinner *SPINNER_vertical_factor=NULL;
+GLUI_Spinner *SPINNER_fire_line_min=NULL;
+GLUI_Spinner *SPINNER_fire_line_max=NULL;
 
 void WUI_CB(int var);
 
@@ -110,12 +127,18 @@ extern "C" void glui_wui_setup(int main_window){
       "vertical exaggeration",GLUI_SPINNER_FLOAT,&vertical_factor,TERRAIN_VERT,WUI_CB);
      SPINNER_vertical_factor->set_float_limits(0.25,4.0,GLUI_LIMIT_CLAMP);
 
+    panel_fire_line=glui_wui->add_panel_to_panel(panel_terrain_hidden1,"Fire line settings");
+    SPINNER_fire_line_min=glui_wui->add_spinner_to_panel(panel_fire_line,
+      "min",GLUI_SPINNER_FLOAT,&fire_line_min,TERRAIN_MIN,WUI_CB);
+    SPINNER_fire_line_max=glui_wui->add_spinner_to_panel(panel_fire_line,
+      "max",GLUI_SPINNER_FLOAT,&fire_line_max,TERRAIN_MAX,WUI_CB);
+    glui_wui->add_button_to_panel(panel_fire_line,"Update",TERRAIN_FIRE_LINE_UPDATE,WUI_CB);
+
     glui_wui->add_button("Save Settings",SAVE_SETTINGS,WUI_CB);
 
     glui_wui->add_button("Close",WUI_CLOSE,WUI_CB);
 
   }
-
 
   glui_wui->set_main_gfx_window( main_window );
 }
@@ -138,8 +161,40 @@ extern "C" void show_glui_wui(void){
 
 void WUI_CB(int var){
   int i;
+  int fire_line_type;
 
   switch (var){
+    case TERRAIN_MIN:
+    case TERRAIN_MAX:
+      break;
+    case TERRAIN_FIRE_LINE_UPDATE:
+      fire_line_type=getslicetype_fromlabel("Fire line");
+      if(fire_line_type<0)break;
+      list_slice_index=fire_line_type;
+
+      Slice_CB(FILETYPEINDEX);
+
+      setslicemin=1;
+      setslicemax=1;
+      slicemin=20.0;
+      slicemax=fire_line_max;
+      setslicechopmin=1;
+      setslicechopmax=0;
+      slicechopmin=fire_line_min;
+
+      Slice_CB(SETVALMIN);
+      Slice_CB(SETVALMAX);
+      Slice_CB(VALMIN);
+      Slice_CB(VALMAX);
+
+      Slice_CB(SETCHOPMINVAL);
+      Slice_CB(SETCHOPMAXVAL);
+      Slice_CB(CHOPVALMIN);
+      Slice_CB(CHOPVALMAX);
+
+      Slice_CB(FILEUPDATE);
+      Slice_CB(CHOPUPDATE);
+      break;
     case TERRAIN_COLORS:
       update_terrain_colors();
       break;
