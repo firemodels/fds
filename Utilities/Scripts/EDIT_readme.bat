@@ -17,4 +17,4 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\Utilities\
-notepad readme_fds.html
+start wordpad readme_fds.html

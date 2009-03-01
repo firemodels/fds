@@ -17,4 +17,4 @@ call %envfile%
 cd %svn_root%\Utilities\Scripts
 
 
-notepad TOGOOGLE_FDS_Intel_win_32.bat
+start wordpad TOGOOGLE_FDS_Intel_win_32.bat
