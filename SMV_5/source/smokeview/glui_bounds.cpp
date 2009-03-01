@@ -36,7 +36,7 @@ void SETslicemin(int setslicemin, float slicemin);
 void BUTTON_hide_CB(int var);
 void PART_CB(int var), Bound_CB(int var), Slice_CB(int var), PLOT3D_CB(int var), Iso_CB(int var), Smoke3D_CB(int var);
 void Script_CB(int var);
-void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
+void boundmenu(GLUI_Rollout **rollout_bound, GLUI_Rollout **rollout_chop, GLUI_Panel *panel, char *button_title,
           GLUI_EditText **con_min,GLUI_EditText **con_max,
           GLUI_RadioGroup **con_setmin,GLUI_RadioGroup **con_setmax,
           GLUI_Checkbox **con_setchopmin, GLUI_Checkbox **con_setchopmax,
@@ -48,6 +48,9 @@ void boundmenu(GLUI_Rollout **rollout, GLUI_Panel *panel, char *button_title,
           int updatebounds,
           int truncatebounds,
           GLUI_Update_CB FILE_CB);
+
+GLUI_Rollout *rollout_slice_bound=NULL;
+GLUI_Rollout *rollout_slice_chop=NULL;
 
 #define TRUNCATEMIN 8
 #define TRUNCATEMAX 9
@@ -243,7 +246,7 @@ extern "C" void glui_bounds_setup(int main_window){
       }
     }
 
-    boundmenu(&rollout_BOUNDARY,panel_bound,"Reload Boundary File(s)",
+    boundmenu(&rollout_BOUNDARY,NULL,panel_bound,"Reload Boundary File(s)",
       &con_bf_min,&con_bf_max,&con_bf_setmin,&con_bf_setmax,
       NULL,NULL,NULL,NULL,
       &setpatchmin,&setpatchmax,&patchmin,&patchmax,
@@ -315,7 +318,7 @@ extern "C" void glui_bounds_setup(int main_window){
 #endif
 
       strcpy(boundmenulabel,"Reload Particle File(s)");
-      boundmenu(NULL,panel_part,boundmenulabel,
+      boundmenu(NULL,NULL,panel_part,boundmenulabel,
         &con_part_min,&con_part_max,&con_part_setmin,&con_part_setmax,
         &con_part_setchopmin, &con_part_setchopmax,
         editcon, &con_part_chopmax,
@@ -380,7 +383,7 @@ extern "C" void glui_bounds_setup(int main_window){
     p3chopmin_temp=p3chopmin[0];
     p3chopmax_temp=p3chopmax[0];
     glui_bounds->add_column_to_panel(panel_plot3d,false);
-    boundmenu(NULL,panel_plot3d,"Reload Plot3D File(s)",
+    boundmenu(NULL,NULL,panel_plot3d,"Reload Plot3D File(s)",
       &con_p3_min,&con_p3_max,&con_p3_setmin,&con_p3_setmax,
       &con_p3_setchopmin, &con_p3_setchopmax,
       &con_p3_chopmin, &con_p3_chopmax,
@@ -393,21 +396,31 @@ extern "C" void glui_bounds_setup(int main_window){
   /*  Slice File Bounds   */
 
   if(nslice>0){
+    int index;
+
     glui_active=1;
     panel_slice = glui_bounds->add_rollout("Slice",false);
 
     slice_rlist = glui_bounds->add_radiogroup_to_panel(panel_slice,&list_slice_index,FILETYPEINDEX,Slice_CB);
 
+    index=0;
     for(i=0;i<nslice;i++){
       if(sliceinfo[i].firstshort==1){
-        glui_bounds->add_radiobutton_to_group(slice_rlist,sliceinfo[i].label.shortlabel);
+        GLUI_RadioButton *RADIO_slicetype;
+
+        RADIO_slicetype=glui_bounds->add_radiobutton_to_group(slice_rlist,sliceinfo[i].label.shortlabel);
+        if(strcmp(sliceinfo[i].label.shortlabel,"Fire line")==0){
+          RADIO_slicetype->disable();
+          fire_line_index=index;
+        }
+        index++;
         firstcount++;
       }
     }
 
     glui_bounds->add_column_to_panel(panel_slice,false);
 
-    boundmenu(NULL,panel_slice,"Reload Slice File(s)",
+    boundmenu(&rollout_slice_bound,&rollout_slice_chop,panel_slice,"Reload Slice File(s)",
       &con_slice_min,&con_slice_max,&con_slice_setmin,&con_slice_setmax,
       &con_slice_setchopmin, &con_slice_setchopmax,
       &con_slice_chopmin, &con_slice_chopmax,
@@ -426,12 +439,17 @@ extern "C" void glui_bounds_setup(int main_window){
       if(view_tstop>tttmax)tttmax=view_tstop;
       SPINNER_sliceaverage->set_float_limits(0.0,tttmax);
     }
-    SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_slice,"Vector particle size",GLUI_SPINNER_FLOAT,
+    {
+    GLUI_Panel *panel_vector=NULL;
+
+    panel_vector=glui_bounds->add_panel_to_panel(panel_slice,"Vector");
+    SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_vector,"particle size",GLUI_SPINNER_FLOAT,
       &vectorpointsize);
     SPINNER_vectorpointsize->set_float_limits(1.0,10.0);
-    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_slice,"Vector line width",GLUI_SPINNER_FLOAT,
+    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_vector,"line width",GLUI_SPINNER_FLOAT,
       &vectorlinewidth);
     SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
+    }
 
     if(n_embedded_meshes>0){
       CHECKBOX_skip_subslice=glui_bounds->add_checkbox_to_panel(panel_slice,"Skip coarse sub-slice",&skip_slice_in_embedded_mesh);
@@ -587,7 +605,7 @@ extern "C" void compress_onoff(int flag){
 
 /* ------------------ boundmenu ------------------------ */
 
-void boundmenu(GLUI_Rollout **rollout,GLUI_Panel *panel, char *button_title,
+void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Panel *panel, char *button_title,
           GLUI_EditText **con_min,GLUI_EditText **con_max,
           GLUI_RadioGroup **con_setmin,GLUI_RadioGroup **con_setmax,
           GLUI_Checkbox **con_setchopmin, GLUI_Checkbox **con_setchopmax,
@@ -606,7 +624,7 @@ void boundmenu(GLUI_Rollout **rollout,GLUI_Panel *panel, char *button_title,
   GLUI_Panel *panel_f=NULL;
 
   panel_g = glui_bounds->add_rollout_to_panel(panel,"Bound Data",false);
-  if(rollout!=NULL)*rollout=panel_g;
+  if(bound_rollout!=NULL)*bound_rollout=panel_g;
   panel_a = glui_bounds->add_panel_to_panel(panel_g,"",GLUI_PANEL_NONE);
 
   *con_min = glui_bounds->add_edittext_to_panel(panel_a,"",GLUI_EDITTEXT_FLOAT,minval,VALMIN,FILE_CB);
@@ -641,6 +659,7 @@ void boundmenu(GLUI_Rollout **rollout,GLUI_Panel *panel, char *button_title,
 
   if(con_chopmin!=NULL&&con_chopmax!=NULL&&con_setchopmin!=NULL&&con_setchopmax!=NULL){
     panel_e = glui_bounds->add_rollout_to_panel(panel,"Truncate Data",false);
+    if(chop_rollout!=NULL)*chop_rollout=panel_e;
     panel_f = glui_bounds->add_panel_to_panel(panel_e,"",GLUI_PANEL_NONE);
     *con_chopmin = glui_bounds->add_edittext_to_panel(panel_f,"",GLUI_EDITTEXT_FLOAT,chopminval,CHOPVALMIN,FILE_CB);
     *con_chopmax = glui_bounds->add_edittext_to_panel(panel_f,"",GLUI_EDITTEXT_FLOAT,chopmaxval,CHOPVALMAX,FILE_CB);
@@ -1509,6 +1528,26 @@ extern "C" void Slice_CB(int var){
     SETslicemax(setslicemax,slicemax);
     break;
   case FILETYPEINDEX:
+    if(slice_bounds_dialog==1&&list_slice_index==fire_line_index){
+      slice_bounds_dialog=0;
+      if(rollout_slice_bound!=NULL){
+        rollout_slice_bound->close();
+        rollout_slice_bound->disable();
+      }
+      if(rollout_slice_chop!=NULL){
+        rollout_slice_chop->close();
+        rollout_slice_chop->disable();
+      }
+    }
+    if(slice_bounds_dialog==0&&list_slice_index!=fire_line_index){
+      slice_bounds_dialog=1;
+      if(rollout_slice_bound!=NULL){
+        rollout_slice_bound->enable();
+      }
+      if(rollout_slice_chop!=NULL){
+        rollout_slice_chop->enable();
+      }
+    }
     setslicebounds(list_slice_index);
     con_slice_min->set_float_val(slicemin);
     switch (setslicemin){

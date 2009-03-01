@@ -28,6 +28,8 @@
 #define KEY_SHIFT 3
 #define KEY_NONE 2
 
+#define TERRAIN_FIRE_LINE_UPDATE 39
+void WUI_CB(int var);
 char callbacks_revision[]="$Revision$";
 
 #undef pp_GPU_CULL_STATE
@@ -1697,6 +1699,12 @@ void Display(void){
     }
     GLUTPOSTREDISPLAY
   }
+
+  if(update_fire_line==1){
+    WUI_CB(TERRAIN_FIRE_LINE_UPDATE);
+    update_fire_line=0;
+   }
+
   if(updatezoommenu==1||first_display>0){
      if(first_display>0)first_display--;
      updatezoommenu=0;
