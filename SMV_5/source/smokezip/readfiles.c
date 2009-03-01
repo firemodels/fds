@@ -56,6 +56,8 @@ int readsmv(char *smvfile){
 #endif
     if(
       match(buffer,"SLCF",4) == 1||
+      match(buffer,"SLCC",4) == 1||
+      match(buffer,"SLFL",4) == 1||
       match(buffer,"SLCT",4) == 1
       ){
       nslice_files++;
@@ -133,10 +135,17 @@ int readsmv(char *smvfile){
       slicei = sliceinfo + i;
       slicei->file=NULL;
       slicei->filebase=NULL;
+
       slicei->setvalmin=0;
       slicei->setvalmax=0;
       slicei->valmax=1.0;
       slicei->valmin=0.0;
+
+      slicei->setchopvalmin=0;
+      slicei->setchopvalmax=0;
+      slicei->chopvalmax=1.0;
+      slicei->chopvalmin=0.0;
+
       slicei->doit=1;
     }
   }
@@ -453,6 +462,8 @@ int readsmv(char *smvfile){
     }
     if(
       match(buffer,"SLCF",4) == 1||
+      match(buffer,"SLCC",4) == 1||
+      match(buffer,"SLFL",4) == 1||
       match(buffer,"SLCT",4) == 1)
     {
       int version=0,dummy;
@@ -903,6 +914,25 @@ void readini2(char *inifile){
         slicei->setvalmin=setslicemin;
         slicei->valmax=slicemax;
         slicei->valmin=slicemin;
+      }
+      continue;
+    }
+    if(match(buffer,"C_SLICE",7)==1){
+      int setchopslicemin, setchopslicemax;
+      float chopslicemin, chopslicemax;
+      slice *slicei;
+
+      fgets(buffer,255,stream);
+      strcpy(buffer2,"");
+      sscanf(buffer,"%i %f %i %f %s",&setchopslicemin,&chopslicemin,&setchopslicemax,&chopslicemax,buffer2);
+      type_buffer=trim_front(buffer2);
+      trim(type_buffer);
+      slicei=getslice(type_buffer);
+      if(slicei!=NULL){
+        slicei->setchopvalmax=setchopslicemax;
+        slicei->setchopvalmin=setchopslicemin;
+        slicei->chopvalmax=chopslicemax;
+        slicei->chopvalmin=chopslicemin;
       }
       continue;
     }
