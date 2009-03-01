@@ -24,4 +24,4 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\SMV_5
 echo %CD%
-notepad readme_assumptions.html
+start wordpad readme_assumptions.html
