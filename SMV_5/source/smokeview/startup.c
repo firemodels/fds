@@ -2029,6 +2029,9 @@ void initvars0(void){
   trunccolor[2]=0.0;
   trunccolor[3]=1.0;
 
+  update_fire_line=0;
+  slice_bounds_dialog=1;
+  fire_line_index=-1;
   fire_line_min=150.0;
   fire_line_max=200.0;
   tourknotskeylist=NULL;

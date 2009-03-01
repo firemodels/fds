@@ -61,7 +61,7 @@ GLUI_Spinner *SPINNER_vertical_factor=NULL;
 GLUI_Spinner *SPINNER_fire_line_min=NULL;
 GLUI_Spinner *SPINNER_fire_line_max=NULL;
 
-void WUI_CB(int var);
+extern "C" void WUI_CB(int var);
 
 /* ------------------ update_glui_wui ------------------------ */
 
@@ -82,7 +82,7 @@ extern "C" void glui_wui_setup(int main_window){
   panel_terrain = glui_wui->add_panel("",GLUI_PANEL_NONE);
 
   if(nterraininfo>0){
-    panel_terrain_color=glui_wui->add_panel_to_panel(panel_terrain,"Color");
+    panel_terrain_color=glui_wui->add_panel_to_panel(panel_terrain,"3D surface color");
 //  glui_labels->add_statictext_to_panel(panel_tick2,"                    x");
 //  glui_labels->add_column_to_panel(panel_tick2,false);
 
@@ -111,7 +111,7 @@ extern "C" void glui_wui_setup(int main_window){
      SPINNER_blue_max->set_int_limits(0,255,GLUI_LIMIT_CLAMP);
 
     panel_terrain_hidden1=glui_wui->add_panel_to_panel(panel_terrain,"",GLUI_PANEL_NONE);
-    panel_terrain_type=glui_wui->add_panel_to_panel(panel_terrain_hidden1,"Display");
+    panel_terrain_type=glui_wui->add_panel_to_panel(panel_terrain_hidden1,"View");
     RADIO_terrain_type=glui_wui->add_radiogroup_to_panel(panel_terrain_type,&visTerrainType,
       TERRAIN_TYPE,WUI_CB);
     glui_wui->add_radiobutton_to_group(RADIO_terrain_type,"3D surface");
@@ -123,16 +123,17 @@ extern "C" void glui_wui_setup(int main_window){
     RADIO_texture->disable();
 
     glui_wui->add_column_to_panel(panel_terrain_hidden1,false);
+
+    panel_fire_line=glui_wui->add_panel_to_panel(panel_terrain_hidden1,"Fire line");
+    SPINNER_fire_line_min=glui_wui->add_spinner_to_panel(panel_fire_line,
+      "chop below:",GLUI_SPINNER_FLOAT,&fire_line_min,TERRAIN_MIN,WUI_CB);
+    SPINNER_fire_line_max=glui_wui->add_spinner_to_panel(panel_fire_line,
+      "color red above:",GLUI_SPINNER_FLOAT,&fire_line_max,TERRAIN_MAX,WUI_CB);
+    glui_wui->add_button_to_panel(panel_fire_line,"Update",TERRAIN_FIRE_LINE_UPDATE,WUI_CB);
+
     SPINNER_vertical_factor=glui_wui->add_spinner_to_panel(panel_terrain_hidden1,
       "vertical exaggeration",GLUI_SPINNER_FLOAT,&vertical_factor,TERRAIN_VERT,WUI_CB);
      SPINNER_vertical_factor->set_float_limits(0.25,4.0,GLUI_LIMIT_CLAMP);
-
-    panel_fire_line=glui_wui->add_panel_to_panel(panel_terrain_hidden1,"Fire line settings");
-    SPINNER_fire_line_min=glui_wui->add_spinner_to_panel(panel_fire_line,
-      "min",GLUI_SPINNER_FLOAT,&fire_line_min,TERRAIN_MIN,WUI_CB);
-    SPINNER_fire_line_max=glui_wui->add_spinner_to_panel(panel_fire_line,
-      "max",GLUI_SPINNER_FLOAT,&fire_line_max,TERRAIN_MAX,WUI_CB);
-    glui_wui->add_button_to_panel(panel_fire_line,"Update",TERRAIN_FIRE_LINE_UPDATE,WUI_CB);
 
     glui_wui->add_button("Save Settings",SAVE_SETTINGS,WUI_CB);
 
@@ -159,7 +160,7 @@ extern "C" void show_glui_wui(void){
 
 /* ------------------ WUI_CB ------------------------ */
 
-void WUI_CB(int var){
+extern "C" void WUI_CB(int var){
   int i;
   int fire_line_type;
 
@@ -171,6 +172,8 @@ void WUI_CB(int var){
       fire_line_type=getslicetype_fromlabel("Fire line");
       if(fire_line_type<0)break;
       list_slice_index=fire_line_type;
+      updateslicelist(list_slice_index);
+
 
       Slice_CB(FILETYPEINDEX);
 

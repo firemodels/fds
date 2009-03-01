@@ -85,6 +85,9 @@ SVEXTERN char inputfilename_ext[4];
 
 SVEXTERN float percentile_level;
 SVEXTERN float fire_line_min, fire_line_max;
+SVEXTERN int update_fire_line;
+SVEXTERN int fire_line_index;
+SVEXTERN int slice_bounds_dialog;
 
 SVEXTERN int dwinHbase;
 SVEXTERN int dwinH;
