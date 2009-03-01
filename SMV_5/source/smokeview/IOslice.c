@@ -27,6 +27,8 @@ int endianswitch;
 int int_switch(int val);
 float float_switch(float val);
 void endian_switch(void *val, int nval);
+void WUI_CB(int var);
+#define TERRAIN_FIRE_LINE_UPDATE 39
 
 int getslicezlibdata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
@@ -700,6 +702,10 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   else{
     printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
+  }
+
+  if(update_fire_line==0&&strcmp(sd->label.shortlabel,"Fire line")==0){
+    update_fire_line=1;
   }
 
   GLUTPOSTREDISPLAY
