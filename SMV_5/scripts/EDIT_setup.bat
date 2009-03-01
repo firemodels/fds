@@ -1,2 +1,2 @@
 @echo off
-notepad %homedrive%\%homepath%\fds_smv_env.bat
+start wordpad %homedrive%\%homepath%\fds_smv_env.bat

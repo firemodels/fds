@@ -23,4 +23,4 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\SMV_5\for_bundle
-notepad readme.html
+start wordpad readme.html

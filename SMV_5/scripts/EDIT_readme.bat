@@ -23,4 +23,4 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\SMV_5\
-notepad readme_smv.html
+start wordpad readme_smv.html
