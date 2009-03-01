@@ -7503,7 +7503,7 @@ MESH_LOOP: DO NM=1,NMESHES
             SL%TERRAIN_SLICE = .TRUE.
             IF (FIRE_LINE) THEN
                SL%SMOKEVIEW_LABEL = "Fire line"
-               SL%SMOKEVIEW_BAR_LABEL = "Fire line"
+               SL%SMOKEVIEW_BAR_LABEL = "Fire_line"
             ENDIF 
             IF (AGL_SLICE .LE. -1._EB .AND. FIRE_LINE) THEN
                AGL_SLICE = M%Z(1) - M%Z(0)
