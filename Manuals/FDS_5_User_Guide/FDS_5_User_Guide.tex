@@ -7158,14 +7158,13 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 
 \footnotesize
 \begin{verbatim}
-&DEVC XYZ=2.3,4.5,6.7, QUANTITY='TEMPERATURE', ID='whatever', STATISTICS='MAX' /
+&DEVC XB=2.3,4.5,2.8,6.7,3.6,7.8, QUANTITY='TEMPERATURE', ID='maxT', STATISTICS='MAX' /
 \end{verbatim}
 \normalsize
 
 \noindent
-causes FDS to write out the maximum gas phase temperature over the entire mesh containing the point {\ct XYZ}. Note that it
-does not compute the maximum over the entire computational domain, just that particular mesh. One may also use {\ct XB} to
-limit the {\ct DEVC} to a subvolume of a mesh; however, the specified {\ct XB} must lie within a single mesh.
+causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Note that it
+does not compute the maximum over the entire computational domain, just the specified volume, and this volume must lie within a single mesh.
 Other {\ct STATISTICS} are discussed below.  Note that some are appropriate for gas phase output quantities, some for solid phase,
 and some for both.
 
@@ -7181,6 +7180,24 @@ a spatial statistic. {\ct IOR} is only needed to find a specific point on the so
 Use the {\ct STATISTICS} feature with caution because
 it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
 \end{warning}
+
+\subsubsection{Minimum or Maximum Value}
+
+For a given gas phase scalar output quantity defined at the center of each grid cell, $\phi_{ijk}$, {\ct STATISTICS='MIN'} or {\ct STATISTICS='MAX'}
+computes the minimum or maximum value, respectively
+\be \min_{ijk} \, \phi_{ijk} \quad ; \quad  \max_{ijk} \, \phi_{ijk} \ee
+over the cells that are included in the specified volume bounded by {\ct XB}. Note that this
+statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+
+
+\subsubsection{Average Value}
+
+For a given gas phase scalar output quantity defined at the center of each grid cell, $\phi_{ijk}$, {\ct STATISTICS='MEAN'} computes the average value,
+\be \frac{1}{N} \; \sum_{ijk} \phi_{ijk}  \ee
+over the cells that are included in the specified volume bounded by {\ct XB}. Note that this
+statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
+coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
 \subsubsection{Volume-Weighted Mean}
 
