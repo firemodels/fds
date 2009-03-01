@@ -50,6 +50,7 @@ int main(int argc, char **argv){
   nphotons=NPHOTONS;
 #endif
   frameskip=-1;
+  no_chop=0;
   autozip=0;
   make_demo=0;
   endf=0;
@@ -163,6 +164,14 @@ int main(int argc, char **argv){
         break;
       case 'e':
         endian_info=1;
+        break;
+      case 'n':
+        if(lenarg==2){
+        }
+        else if(strcmp(arg,"-no_chop")==0){
+          no_chop=1;
+        }
+        i++;
         break;
       case 's':
         if(i+1>=argc)break;
@@ -483,7 +492,7 @@ void usage(char *prog){
   printf("  smokezip %s(%i) - %s\n\n",smv_version,svn_num,__DATE__);
   printf("  Compresses Smokeview 3D smoke, slice, iso-surface and boundary files\n\n");
   printf("  %s",prog);
-  printf(" [-c -f -3 -b -s -i -skip skipval]");
+  printf(" [-c -f -3 -b -s -i -skip skipval -no_chop]");
 #ifdef pp_LIGHT
   printf("[-a val -l]");
 #endif
@@ -501,6 +510,8 @@ void usage(char *prog){
   printf("          creates the .svd file which activates the Smokeview demonstrator mode.\n");
   printf("  -s sourcedir - specifies directory containing source files\n");
   printf("  -skip skipval - skip frames when compressing files\n");
+  printf("  -no_chop - do not chop or truncate slice data.  Smokezip by default will compress\n");
+  printf("             slice data truncating data above and below values specified in the .ini file\n");
   printf("  -auto - compress only files that are auto-loaded by Smokeview\n");
 #ifdef pp_LIGHT
   printf("  -l  - create lighting file used with 3d smoke\n");

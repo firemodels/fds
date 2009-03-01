@@ -80,6 +80,8 @@ typedef struct {
   int doit, done, count;
   int setvalmin, setvalmax;
   float valmin, valmax;
+  int setchopvalmin, setchopvalmax;
+  float chopvalmin, chopvalmax;
   int version;
   flowlabels label;
   int dup;
@@ -217,6 +219,7 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
 #endif
 
 EXTERN int frameskip;
+EXTERN int no_chop;
 EXTERN unsigned char *full_alphabuffer;
 #ifdef pp_LIGHT
 EXTERN float *full_logalphabuffer;

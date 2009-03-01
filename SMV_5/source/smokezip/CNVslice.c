@@ -88,6 +88,7 @@ int convert_slice(slice *slicei){
   int percent_done;
   int percent_next=10;
   float valmin, valmax, denom;
+  int chop_min, chop_max;
   uLongf ncompressed_zlib;
   int ncompressed_save;
   int count=0;
@@ -241,6 +242,21 @@ int convert_slice(slice *slicei){
   valmax=slicei->valmax;
   denom = valmax-valmin;
   if(denom==0.0)denom=1.0;
+  
+  chop_min=0;
+  chop_max=255;
+  if(slicei->rle==0&&no_chop==0){
+    if(slicei->setchopvalmax==1){
+        chop_max = 255*(slicei->chopvalmax-valmin)/denom;
+        if(chop_max<0)chop_max=0;
+        if(chop_max>255)chop_max=255;
+    }
+    if(slicei->setchopvalmin==1){
+       chop_min = 255*(slicei->chopvalmin-valmin)/denom;
+       if(chop_min<0)chop_min=0;
+       if(chop_min>255)chop_min=255;
+    }
+  }
 
 
   fwrite(&one,4,1,slicestream);           // write out a 1 to determine "endianness" when file is read in later
@@ -472,8 +488,8 @@ int convert_slice(slice *slicei){
 
         if(slicei->rle==0){
           ival = 255*(sliceframe_raw[i]-valmin)/denom;
-          if(ival<0)ival=0;
-          if(ival>255)ival=255;
+          if(ival<chop_min)ival=0;
+          if(ival>chop_max)ival=255;
           sliceframe_uncompressed[index2] = ival;
         }
         else{
