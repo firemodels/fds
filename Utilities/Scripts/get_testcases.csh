@@ -7,7 +7,7 @@ set REPOS=$2
 
 cd $REPOS/Utilities/to_google/
 
-set testdir=fds_examples_$revision
+set testdir=examples_fds_smv_$revision
 
 if (-d Examples) then
 echo removing Examples
