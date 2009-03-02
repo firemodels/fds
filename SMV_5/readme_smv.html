@@ -23,15 +23,13 @@ This step does not need to be performed every time.
 
 <h3>Package and Upload Smokeview</h3>
 <ul>
-<li>Preliminaries - Rebuild Smokeview and the User's guide.
-<ul>
+<li><a href="scripts/GET_smvsrc_svn_num.bat">Get revision number</a> Get the SVN revision number of the Smokeview source directory.
 <li>Increment the version number (<tt>SMVVERSION</tt> found in <tt>options.h</tt> .
 Add a dummy comment in <tt>main.c</tt> to force a repository update.
 <li><strong>IMPORTANT</strong> - Commit changes so that the proper revision number appears when Smokeview runs.
 <li>Rebuild a Windows release version of Smokeview.
 <li>Regenerate test cases and Smokeview user's guide using instructions above under <strong>Verify Smokeview</strong>. 
 Rebuilding the User's guide ensures that the proper Smokeview version information appears in the guide.
-</ul>
 </ul>
 
 <table border=on>
