@@ -931,8 +931,9 @@ Note the subtle difference between these
 terms -- a ``process'' does not have the same meaning as a ``processor.'' The former can be thought of as a ``task'' that you would see in
 the Windows Task Manager or by executing the ``top'' command on a Linux/Unix machine. The latter refers to the computer itself. A single
 processor may run multiple processes, for example. The computation on a given FDS mesh is thought of as an individual ``process,'' and
-MPI handles the transfer of information between these processes. Currently, each mesh is assigned its own process in a parallel calculation, although plans
-are underway to relax this restriction, allowing multiple meshes to be handled via a single process. In this way, large meshes can be computed on dedicated processors, while
+MPI handles the transfer of information between these processes. Usually, each mesh is assigned its own process in a parallel calculation, although it is also possible
+assign multiple meshes to a single process.\footnote{Assigning multiple meshes to a single process was introduced in FDS version 5.3.} 
+In this way, large meshes can be computed on dedicated processors, while
 smaller meshes can be clustered together in a single process running on a single processor, without the need for MPI message passing between themselves.
 
 Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, whereas MPI refers to its processes by the numbers
@@ -1664,6 +1665,7 @@ An example of an axially-symmetric helium plume ({\bf helium\_2d}) is given in t
 \subsection{Multiple Meshes and Parallel Processing}
 \label{info:multimesh}\index{Multiple Meshes}
 
+
 \begin{figure}[ht!]
 \includegraphics[width=\textwidth]{FIGURES/hallways.jpg}
 \caption{\bf An example of a multiple-mesh geometry.}
@@ -1682,10 +1684,6 @@ calculations are performed with no communication at all between them. Obstructio
 in terms of the overall coordinate system and need not apply to any one particular mesh.
 Each mesh checks the coordinates of all the geometric
 entities and decides whether or not they are to be included.
-
-
-
-\subsubsection{Serial vs. Parallel Processing of Multiple Meshes}
 
 To run FDS in parallel, you {\bf must} break up the computational domain into
 multiple meshes so that the workload can be divided among the available processors.
@@ -1713,6 +1711,27 @@ there is a tighter connection between meshes.
 It is also possible to synchronize the time step in only a select set of meshes. To do
 this, add {\ct SYNCHRONIZE=.TRUE.} to the appropriate {\ct MESH} lines and then add
 {\ct SYNCHRONIZE=.FALSE.} to the {\ct TIME} line.\index{MESH!SYNCHRONIZE}
+
+Usually in a multi-mesh calculation, each mesh is assigned its own process, and each process its own processor. However, it is possible to assign more than one
+mesh to a single process, and it is possible to assign more than one process to a single processor. Consider a case that involves six meshes: 
+
+\footnotesize
+\begin{verbatim}
+&MESH ID='mesh1', IJK=..., XB=..., MPI_PROCESS=0 /
+&MESH ID='mesh2', IJK=..., XB=..., MPI_PROCESS=1 /
+&MESH ID='mesh3', IJK=..., XB=..., MPI_PROCESS=1 /
+&MESH ID='mesh4', IJK=..., XB=..., MPI_PROCESS=2 /
+&MESH ID='mesh5', IJK=..., XB=..., MPI_PROCESS=3 /
+&MESH ID='mesh6', IJK=..., XB=..., MPI_PROCESS=3 /
+\end{verbatim} \normalsize
+
+\noindent
+The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to the given process. In this case, only four processes are to be started, numbered
+0 through 3. Note that the processes need to be invoked in ascending order, starting with 0. Why would you do this? Suppose you only have four processors available for this
+job. By starting only four processes instead of six, you can save time because 'mesh2' and 'mesh3' can communicate directly with each other without having to transmit data
+using MPI calls over the network. Same goes for 'mesh5' and 'mesh6'.  
+In essence, it is as if these mesh pairs are neighbors and need not send mail to each other via the postal system. The letters can just be 
+walked next door. 
 
 
 \subsection{Mesh Alignment}
@@ -1935,8 +1954,8 @@ the parameters are specified (assuming that this is the third mesh):
 
 \footnotesize
 \begin{verbatim}
- &TRNX IDERIV=0, CC=0.75, PC=0.75, MESH_NUMBER=3 /
- &TRNX IDERIV=1, CC=0.75, PC=0.50, MESH_NUMBER=3 /
+&TRNX IDERIV=0, CC=0.75, PC=0.75, MESH_NUMBER=3 /
+&TRNX IDERIV=1, CC=0.75, PC=0.50, MESH_NUMBER=3 /
 \end{verbatim} \normalsize
 
 \noindent
@@ -1958,7 +1977,7 @@ Do not specify either linear transformation points or {\ct IDERIV=0} points at c
 the mesh boundaries.
 \end{warning}
 
-\subsection{Choosing the Right Mesh Dimensions}
+\subsection{Choosing Optimum Mesh Dimensions}
 \index{mesh dimensions}
 
 A common question asked by new FDS users is, ``What size mesh should I use?''
@@ -1990,6 +2009,9 @@ These values were used to adequately resolve plume dynamics,
 along with other geometrical characteristics of the models as well.
 This range does not indicate what values to use for all models,
 only what values worked well for that particular set of models.
+
+
+
 
 
 \clearpage
@@ -7984,7 +8006,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}          & Character                   & MESH IDentifier                             &    &                  \\ \hline
 {\ct IJK}         & Integer Triplet             & No. cells in $x$, $y$, and $z$ directions   &    & 10               \\ \hline
 {\ct FYI}         & Character                   & Comment String (has no effect)              &    &                  \\ \hline
-%{\ct MPI\_PROCESS} & Integer                    & See Section~\ref{info:MPI}                &    &    \\ \hline
+{\ct MPI\_PROCESS} & Integer                    & See Section~\ref{info:multimesh}            &    &    \\ \hline
 {\ct RGB}         & Integer Triplet             & Color indices (0-255)                       &    & 0,0,0            \\ \hline
 {\ct SYNCHRONIZE} & Logical                     & Sync. time steps of multiple meshes         &    & {\ct .TRUE.}     \\ \hline
 {\ct XB(6)}          & Real Sextuplet              & Min/Max Coordinates of the MESH             & m  & 0,1,0,1,0,1      \\ \hline
