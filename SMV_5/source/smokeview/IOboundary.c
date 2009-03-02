@@ -1214,7 +1214,7 @@ void global2localpatchbounds(const char *key){
   }
 }
 
-/* ------------------ drawpatch ------------------------ */
+/* ------------------ drawpatch_texture ------------------------ */
 
 void drawpatch_texture(const mesh *meshi){
   float r11, r12, r21, r22;
@@ -1299,6 +1299,7 @@ void drawpatch_texture(const mesh *meshi){
         ipq1 = ipqqcopy + irow*ncol;
         ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
+
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
             r11 = (float)(*ipq1)/255.0;
@@ -1421,6 +1422,7 @@ void drawpatch_texture(const mesh *meshi){
         ipq1 = ipqqcopy + irow*ncol;
         ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
+
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
             r11 = (float)(*ipq1)/255.0;
@@ -1545,6 +1547,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
         ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
         nn2 = nn1 + ncol;
+
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
             r11 = (float)(*ipq1)/255.0;
@@ -1708,6 +1711,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
         ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
         nn2 = nn1 + ncol;
+
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
             r11 = (float)(*ipq1)/255.0;
@@ -1760,6 +1764,221 @@ void drawpatch_texture_threshold(const mesh *meshi){
   }
   glEnd();
   glDisable(GL_TEXTURE_1D);
+}
+
+/* ------------------ drawpatch_threshold_cellcenter ------------------------ */
+
+void drawpatch_threshold_cellcenter(const mesh *meshi){
+  float r11, r12, r21, r22;
+  int n,nn,nn1;
+  int nrow, ncol, irow, icol;
+  float *xyzp1, *xyzp2;
+  unsigned char *ipq1, *ipq2;
+  unsigned char *ipqqcopy;
+  float *xyzpatchcopy;
+  int *patchblankcopy, *ip1, *ip2;
+  float *patchtimes;
+  int *visPatches;
+  float *xyzpatch;
+  int *patchdir, *patchrow, *patchcol;
+  int *blockstart;
+  int *patchblank;
+  unsigned char *ipqqi;
+  int iblock;
+  blockagedata *bc;
+  patch *patchi;
+  float *color11;
+  mesh *meshblock;
+  float burn_color[4]={0.0,0.0,0.0,1.0};
+  float clear_color[4]={1.0,1.0,1.0,1.0};
+
+  if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)return;
+
+  patchtimes=meshi->patchtimes;
+  visPatches=meshi->visPatches;
+  xyzpatch=meshi->xyzpatch;
+  patchdir=meshi->patchdir;
+  patchrow=meshi->patchrow;
+  patchcol=meshi->patchcol;
+  blockstart=meshi->blockstart;
+  patchblank=meshi->patchblank;
+  patchi=patchinfo+meshi->patchfilenum;
+  switch(patchi->compression_type){
+  case 0:
+    ASSERT(meshi->ipqqi!=NULL);
+    ipqqi=meshi->ipqqi;
+    break;
+  case 1:
+    ASSERT(meshi->ipqqi_zlib!=NULL);
+    ipqqi=meshi->ipqqi_zlib;
+    break;
+  default:
+    ASSERT(0);
+  }
+  patchi = patchinfo + meshi->patchfilenum;
+
+  if(patchtimes[0]>times[itime]||patchi->display==0)return;
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
+
+  /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
+
+  nn =0;
+  glBegin(GL_TRIANGLES);
+  for(n=0;n<meshi->npatches;n++){
+    iblock = meshi->blockonpatch[n];
+    meshblock = meshi->meshonpatch[n];
+    ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
+    if(iblock!=-1&&meshblock!=NULL){
+      bc=meshblock->blockageinfoptrs[iblock];
+      if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
+        nn += patchrow[n]*patchcol[n];
+        continue;
+      }
+    }
+    if(visPatches[n]==1&&patchdir[n]==0){
+      nrow=patchrow[n];
+      ncol=patchcol[n];
+      xyzpatchcopy = xyzpatch + 3*blockstart[n];
+      patchblankcopy = patchblank + blockstart[n];
+      ipqqcopy = ipqqi + blockstart[n];
+
+      for(irow=0;irow<nrow-1;irow++){
+        xyzp1 = xyzpatchcopy + 3*irow*ncol;
+        ip1 = patchblankcopy + irow*ncol;
+        nn1 = nn + irow*ncol;
+        xyzp2 = xyzp1 + 3*ncol;
+        ipq1 = ipqqcopy + irow*ncol;
+        ipq2 = ipq1 + ncol;
+        ip2 = ip1 + ncol;
+
+        for(icol=0;icol<ncol-1;icol++){
+          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+            color11=clear_color;
+            if(meshi->thresholdtime[nn1+icol  ]>=0.0&&times[itime]>meshi->thresholdtime[nn1+icol  ])color11=burn_color;
+
+            glColor4fv(color11);
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp1+3);
+            glVertex3fv(xyzp2+3);
+
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp2+3);
+            glVertex3fv(xyzp2);
+          }
+          ipq1++; ipq2++; ip1++; ip2++;
+          xyzp1+=3;
+          xyzp2+=3;
+        }
+      }
+    }
+    nn += patchrow[n]*patchcol[n];
+  }
+  glEnd();
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
+
+  /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
+
+  nn=0;
+  glBegin(GL_TRIANGLES);
+  for(n=0;n<meshi->npatches;n++){
+    iblock = meshi->blockonpatch[n];
+    meshblock=meshi->meshonpatch[n];
+    if(iblock!=-1){
+      bc=meshblock->blockageinfoptrs[iblock];
+      if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
+        nn += patchrow[n]*patchcol[n];
+        continue;
+      }
+    }
+    if(meshi->visPatches[n]==1&&meshi->patchdir[n]>0){
+      nrow=patchrow[n];
+      ncol=patchcol[n];
+      xyzpatchcopy = xyzpatch + 3*blockstart[n];
+      patchblankcopy = patchblank + blockstart[n];
+      ipqqcopy = ipqqi + blockstart[n];
+      for(irow=0;irow<nrow-1;irow++){
+        xyzp1 = xyzpatchcopy + 3*irow*ncol;
+        ipq1 = ipqqcopy + irow*ncol;
+        ip1 = patchblankcopy + irow*ncol;
+        nn1 = nn + irow*ncol;
+
+        xyzp2 = xyzp1 + 3*ncol;
+        ipq2 = ipq1 + ncol;
+        ip2 = ip1 + ncol;
+
+        for(icol=0;icol<ncol-1;icol++){
+          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+            color11=clear_color;
+            if(meshi->thresholdtime[nn1+icol  ]>=0.0&&times[itime]>meshi->thresholdtime[nn1+icol  ])color11=burn_color;
+           
+            glColor4fv(color11);
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp1+3);
+            glVertex3fv(xyzp2+3);
+
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp2+3);
+            glVertex3fv(xyzp2);
+          }
+          ipq1++; ipq2++; ip1++; ip2++;
+          xyzp1+=3;
+          xyzp2+=3;
+        }
+      }
+    }
+    nn += patchrow[n]*patchcol[n];
+  }
+
+  /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
+  nn=0;
+  for(n=0;n<meshi->npatches;n++){
+    iblock = meshi->blockonpatch[n];
+    meshblock = meshi->meshonpatch[n];
+    ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
+    if(iblock!=-1&&meshblock!=NULL){
+      bc=meshblock->blockageinfoptrs[iblock];
+      if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
+        nn += patchrow[n]*patchcol[n];
+        continue;
+      }
+    }
+    if(visPatches[n]==1&&patchdir[n]<0){
+      nrow=patchrow[n];
+      ncol=patchcol[n];
+      xyzpatchcopy = xyzpatch + 3*blockstart[n];
+      patchblankcopy = patchblank + blockstart[n];
+      ipqqcopy = ipqqi + blockstart[n];
+      for(irow=0;irow<nrow-1;irow++){
+        xyzp1 = xyzpatchcopy + 3*irow*ncol;
+        ip1 = patchblankcopy + irow*ncol;
+        nn1 = nn + irow*ncol;
+        xyzp2 = xyzp1 + 3*ncol;
+        ipq1 = ipqqcopy + irow*ncol;
+        ipq2 = ipq1 + ncol;
+        ip2 = ip1 + ncol;
+
+        for(icol=0;icol<ncol-1;icol++){
+          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+            color11=clear_color;
+            if(meshi->thresholdtime[nn1+icol  ]>=0.0&&times[itime]>meshi->thresholdtime[nn1+icol  ])color11=burn_color;
+          
+            glColor4fv(color11);
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp2+3);
+            glVertex3fv(xyzp1+3);
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp2);
+            glVertex3fv(xyzp2+3);
+          }
+          ipq1++; ipq2++; ip1++; ip2++;
+          xyzp1+=3;
+          xyzp2+=3;
+        }
+      }
+    }
+    nn += patchrow[n]*patchcol[n];
+  }
+  glEnd();
 }
 
 /* ------------------ drawpatch ------------------------ */
@@ -1843,6 +2062,7 @@ void drawpatch(const mesh *meshi){
         ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
         nn2 = nn1 + ncol;
+
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
             color11 = &rgb_full[*ipq1][0];
@@ -1872,6 +2092,7 @@ void drawpatch(const mesh *meshi){
               glVertex3fv(xyzp2+3);
 
               glColor4fv(color21); 
+              glVertex3fv(xyzp2);
             }
             else{
               glColor4fv(color11); 
@@ -2023,6 +2244,7 @@ void drawpatch(const mesh *meshi){
         ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
         nn2 = nn1 + ncol;
+
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
             color11 = &rgb_full[*ipq1][0];
@@ -2073,6 +2295,221 @@ void drawpatch(const mesh *meshi){
               glColor4fv(color22); 
               glVertex3fv(xyzp2+3);
             }
+          }
+          ipq1++; ipq2++; ip1++; ip2++;
+          xyzp1+=3;
+          xyzp2+=3;
+        }
+      }
+    }
+    nn += patchrow[n]*patchcol[n];
+  }
+  glEnd();
+}
+
+/* ------------------ drawpatch_cellcenter ------------------------ */
+
+void drawpatch_cellcenter(const mesh *meshi){
+  int n,nn,nn1;
+  int nrow, ncol, irow, icol;
+  float *xyzp1, *xyzp2;
+  unsigned char *ipq1, *ipq2;
+  unsigned char *ipqqcopy;
+  float *xyzpatchcopy;
+  int *patchblankcopy, *ip1, *ip2;
+  float *patchtimes;
+  int *visPatches;
+  float *xyzpatch;
+  int *patchdir, *patchrow, *patchcol;
+  int *blockstart;
+  int *patchblank;
+  unsigned char *ipqqi;
+  int iblock;
+  blockagedata *bc;
+  patch *patchi;
+  float *color11, *color12, *color21, *color22;
+  mesh *meshblock;
+
+  if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)return;
+
+  patchtimes=meshi->patchtimes;
+  visPatches=meshi->visPatches;
+  xyzpatch=meshi->xyzpatch;
+  patchdir=meshi->patchdir;
+  patchrow=meshi->patchrow;
+  patchcol=meshi->patchcol;
+  blockstart=meshi->blockstart;
+  patchblank=meshi->patchblank;
+  patchi=patchinfo+meshi->patchfilenum;
+  switch(patchi->compression_type){
+  case 0:
+    ASSERT(meshi->ipqqi!=NULL);
+    ipqqi=meshi->ipqqi;
+    break;
+  case 1:
+    ASSERT(meshi->ipqqi_zlib!=NULL);
+    ipqqi=meshi->ipqqi_zlib;
+    break;
+  default:
+    ASSERT(0);
+  }
+  patchi = patchinfo + meshi->patchfilenum;
+
+  if(patchtimes[0]>times[itime]||patchi->display==0)return;
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
+
+  /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
+
+  nn =0;
+  glBegin(GL_TRIANGLES);
+  for(n=0;n<meshi->npatches;n++){
+    iblock = meshi->blockonpatch[n];
+    meshblock = meshi->meshonpatch[n];
+    ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
+    if(iblock!=-1&&meshblock!=NULL){
+      bc=meshblock->blockageinfoptrs[iblock];
+      if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
+        nn += patchrow[n]*patchcol[n];
+        continue;
+      }
+    }
+    if(visPatches[n]==1&&patchdir[n]==0){
+      nrow=patchrow[n];
+      ncol=patchcol[n];
+      xyzpatchcopy = xyzpatch + 3*blockstart[n];
+      patchblankcopy = patchblank + blockstart[n];
+      ipqqcopy = ipqqi + blockstart[n];
+      for(irow=0;irow<nrow-1;irow++){
+        xyzp1 = xyzpatchcopy + 3*irow*ncol;
+        ip1 = patchblankcopy + irow*ncol;
+        nn1 = nn + irow*ncol;
+        xyzp2 = xyzp1 + 3*ncol;
+        ipq1 = ipqqcopy + irow*ncol;
+        ipq2 = ipq1 + ncol;
+        ip2 = ip1 + ncol;
+
+        for(icol=0;icol<ncol-1;icol++){
+          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+            color11 = &rgb_full[*ipq1][0];
+            if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
+              if(meshi->thresholdtime[nn1+icol  ]>=0.0&&times[itime]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
+            }
+            glColor4fv(color11); 
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp1+3);
+            glVertex3fv(xyzp2+3);
+
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp2+3);
+            glVertex3fv(xyzp2);
+          }
+          ipq1++; ipq2++; ip1++; ip2++;
+          xyzp1+=3;
+          xyzp2+=3;
+        }
+      }
+    }
+    nn += patchrow[n]*patchcol[n];
+  }
+  glEnd();
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
+
+  /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
+
+  nn=0;
+  glBegin(GL_TRIANGLES);
+  for(n=0;n<meshi->npatches;n++){
+    iblock = meshi->blockonpatch[n];
+    meshblock=meshi->meshonpatch[n];
+    if(iblock!=-1){
+      bc=meshblock->blockageinfoptrs[iblock];
+      if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
+        nn += patchrow[n]*patchcol[n];
+        continue;
+      }
+    }
+    if(meshi->visPatches[n]==1&&meshi->patchdir[n]>0){
+      nrow=patchrow[n];
+      ncol=patchcol[n];
+      xyzpatchcopy = xyzpatch + 3*blockstart[n];
+      patchblankcopy = patchblank + blockstart[n];
+      ipqqcopy = ipqqi + blockstart[n];
+      for(irow=0;irow<nrow-1;irow++){
+        xyzp1 = xyzpatchcopy + 3*irow*ncol;
+        ipq1 = ipqqcopy + irow*ncol;
+        ip1 = patchblankcopy + irow*ncol;
+        nn1 = nn + irow*ncol;
+
+        xyzp2 = xyzp1 + 3*ncol;
+        ipq2 = ipq1 + ncol;
+        ip2 = ip1 + ncol;
+
+        for(icol=0;icol<ncol-1;icol++){
+          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+            color11 = &rgb_full[*ipq1][0];
+            if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
+              if(meshi->thresholdtime[nn1+icol  ]>=0.0&&times[itime]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
+            }
+            glColor4fv(color11); 
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp1+3);
+            glVertex3fv(xyzp2+3);
+
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp2+3);
+            glVertex3fv(xyzp2);
+          }
+          ipq1++; ipq2++; ip1++; ip2++;
+          xyzp1+=3;
+          xyzp2+=3;
+        }
+      }
+    }
+    nn += patchrow[n]*patchcol[n];
+  }
+
+  /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
+  nn=0;
+  for(n=0;n<meshi->npatches;n++){
+    iblock = meshi->blockonpatch[n];
+    meshblock = meshi->meshonpatch[n];
+    ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
+    if(iblock!=-1&&meshblock!=NULL){
+      bc=meshblock->blockageinfoptrs[iblock];
+      if(bc->showtimelist!=NULL&&bc->showtimelist[itime]==0){
+        nn += patchrow[n]*patchcol[n];
+        continue;
+      }
+    }
+    if(visPatches[n]==1&&patchdir[n]<0){
+      nrow=patchrow[n];
+      ncol=patchcol[n];
+      xyzpatchcopy = xyzpatch + 3*blockstart[n];
+      patchblankcopy = patchblank + blockstart[n];
+      ipqqcopy = ipqqi + blockstart[n];
+      for(irow=0;irow<nrow-1;irow++){
+        xyzp1 = xyzpatchcopy + 3*irow*ncol;
+        ip1 = patchblankcopy + irow*ncol;
+        nn1 = nn + irow*ncol;
+        xyzp2 = xyzp1 + 3*ncol;
+        ipq1 = ipqqcopy + irow*ncol;
+        ipq2 = ipq1 + ncol;
+        ip2 = ip1 + ncol;
+
+        for(icol=0;icol<ncol-1;icol++){
+          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+            color11 = &rgb_full[*ipq1][0];
+            if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
+              if(meshi->thresholdtime[nn1+icol  ]>=0.0&&times[itime]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
+            }
+            glColor4fv(color11); 
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp2+3);
+            glVertex3fv(xyzp1+3);
+
+            glVertex3fv(xyzp1);
+            glVertex3fv(xyzp2);
+            glVertex3fv(xyzp2+3);
           }
           ipq1++; ipq2++; ip1++; ip2++;
           xyzp1+=3;
@@ -2161,6 +2598,7 @@ void drawonlythreshold(const mesh *meshi){
         xyzp2 = xyzp1 + 3*ncol;
         ip2 = ip1 + ncol;
         nn2 = nn1 + ncol;
+
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
             int nnulls;
@@ -2320,6 +2758,7 @@ void drawonlythreshold(const mesh *meshi){
         xyzp2 = xyzp1 + 3*ncol;
         ip2 = ip1 + ncol;
         nn2 = nn1 + ncol;
+
         for(icol=0;icol<ncol-1;icol++){
           if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
             int nnulls;

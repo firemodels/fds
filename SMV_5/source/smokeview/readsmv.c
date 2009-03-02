@@ -705,7 +705,7 @@ int readsmv(char *file){
       nsmoke3d++;
       continue;
     }
-    if(match(buffer,"BNDF",4) == 1){
+    if(match(buffer,"BNDF",4) == 1|| match(buffer,"BNDC",4) == 1){
       npatch_files++;
       continue;
     }
@@ -3291,7 +3291,7 @@ typedef struct {
         fire_line=1;
       }
       if(match(buffer,"SLCC",4) == 1){
-        cellcenter_active=1;
+        cellcenter_slice_active=1;
         cellcenter=1;
       }
       trim(buffer);
@@ -3395,7 +3395,7 @@ typedef struct {
     ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"BNDF",4) == 1){
+    if(match(buffer,"BNDF",4) == 1||match(buffer,"BNDC",4) == 1){
       patch *patchi;
 
       nn_patch++;
@@ -3418,6 +3418,14 @@ typedef struct {
       patchi = patchinfo + ipatch;
 
       patchi->version=version;
+  
+      if(match(buffer,"BNDC",4) == 1){
+        patchi->cellcenter=1;
+        cellcenter_bound_active=1;
+      }
+      else{
+        patchi->cellcenter=0;
+      }
 
       if(fgets(buffer,255,stream)==NULL){
         npatch_files--;
@@ -3454,9 +3462,11 @@ typedef struct {
       patchi->display=0;
       meshinfo[blocknumber].patchfilenum=-1;
       if(stat(patchi->file,&statbuffer)==0){
-        if(readlabels(&patchi->label,stream)==2){
-          printf("*** Warning: problem reading BNDF entry\n");
-          npatch_files--;
+        if(patchi->cellcenter==1){
+          if(readlabels_cellcenter(&patchi->label,stream)==2)return 2;
+        }
+        else{
+          if(readlabels(&patchi->label,stream)==2)return 2;
         }
         ipatch++;
       }

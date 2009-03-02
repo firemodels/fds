@@ -32,7 +32,7 @@
 #include "smokeheaders.h"
 #endif
 
-SVEXTERN int cellcenter_interp, cellcenter_active;
+SVEXTERN int cellcenter_interp, cellcenter_slice_active, cellcenter_bound_active;
 SVEXTERN int part5colorindex, show_tracers_always;
 SVEXTERN int navatar_colors;
 SVEXTERN float *avatar_colors;

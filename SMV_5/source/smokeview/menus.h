@@ -5958,14 +5958,14 @@ static int in_menu=0;
   glutAddMenuEntry("  space bar: increment time step, 2D contour planes, 3D contour levels",2);
   glutAddMenuEntry("",1);
   glutAddMenuEntry("  SHIFT+t: toggle slice file color interpolation methods",2);
-  if(cellcenter_active==1){
+  if(cellcenter_slice_active==1){
     glutAddMenuEntry("           (also, toggles cell center display on/off)",2);
   }
   glutAddMenuEntry("  ALT+v: toggle projection  method (between perspective and size preserving)",2);
   if(n_embedded_meshes>0){
     glutAddMenuEntry("  ALT+u: toggle coarse slice display in embedded mesh",2);
   }
-  if(cellcenter_active==1){
+  if(cellcenter_slice_active==1){
     glutAddMenuEntry("  ALT+y: if current slice is cell centered, toggle interpolation on/off",2);
   }
   if(caseinifilename!=NULL&&strlen(caseinifilename)>0){
