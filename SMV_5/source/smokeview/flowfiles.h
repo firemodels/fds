@@ -921,6 +921,7 @@ typedef struct {
   char *file,*size_file;
   char *comp_file, *reg_file;
   int version;
+  int cellcenter;
   int type;
   int firstshort;
   int compression_type;

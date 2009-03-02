@@ -486,8 +486,11 @@ EXTERNCPP int getxyzindex(float x,const float *xplt_orig,int ijkbar);
 EXTERNCPP int compare( const void *arg1, const void *arg2 );
 EXTERNCPP void updateplotslice(int slicedir);
 EXTERNCPP void drawpatch(const mesh *gb);
+EXTERNCPP void drawpatch_cellcenter(const mesh *gb);
 EXTERNCPP void drawpatch_texture(const mesh *gb);
+EXTERNCPP void drawpatch_texture_cellcenter(const mesh *gb);
 EXTERNCPP void drawpatch_texture_threshold(const mesh *gb);
+EXTERNCPP void drawpatch_threshold_cellcenter(mesh *meshi);
 
 EXTERNCPP void updateslicebounds(void);
 EXTERNCPP void updateallslicecolors(int islicetype,int *errorcode);

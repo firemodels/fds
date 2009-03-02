@@ -149,7 +149,7 @@ GLUI_Checkbox *con_p3_setchopmin=NULL, *con_p3_setchopmax=NULL;
 GLUI_Checkbox *con_bf_setchopmin=NULL, *con_bf_setchopmax=NULL;
 GLUI_Checkbox *con_part_setchopmin=NULL, *con_part_setchopmax=NULL;
 GLUI_Checkbox *showtracer_checkbox=NULL;
-GLUI_Checkbox *CHECKBOX_cellcenter_interp=NULL;
+GLUI_Checkbox *CHECKBOX_cellcenter_slice_interp=NULL;
 GLUI_Checkbox *CHECKBOX_skip_subslice=NULL;
 
 GLUI_Spinner *SPINNER_sliceaverage=NULL;
@@ -454,8 +454,8 @@ extern "C" void glui_bounds_setup(int main_window){
     if(n_embedded_meshes>0){
       CHECKBOX_skip_subslice=glui_bounds->add_checkbox_to_panel(panel_slice,"Skip coarse sub-slice",&skip_slice_in_embedded_mesh);
     }
-    if(cellcenter_active==1){
-      CHECKBOX_cellcenter_interp = glui_bounds->add_checkbox_to_panel(panel_slice,"Interpolate cell centered slices",
+    if(cellcenter_slice_active==1){
+      CHECKBOX_cellcenter_slice_interp = glui_bounds->add_checkbox_to_panel(panel_slice,"Interpolate cell centered slices",
         &cellcenter_interp);
     }
     glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata,OUTPUTSLICEDATA,Slice_CB);
@@ -1243,7 +1243,7 @@ extern "C" void updatepatchlistindex(int patchfilenum){
 /* ------------------ update_glui_streakvalue ------------------------ */
 
 extern "C" void update_glui_cellcenter_interp(void){
-  if(CHECKBOX_cellcenter_interp!=NULL)CHECKBOX_cellcenter_interp->set_int_val(cellcenter_interp);
+  if(CHECKBOX_cellcenter_slice_interp!=NULL)CHECKBOX_cellcenter_slice_interp->set_int_val(cellcenter_interp);
   if(CHECKBOX_skip_subslice!=NULL)CHECKBOX_skip_subslice->set_int_val(skip_slice_in_embedded_mesh);
 }
 
