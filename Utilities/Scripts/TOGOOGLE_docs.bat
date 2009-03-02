@@ -19,8 +19,8 @@ call %envfile%
 
 cd %svn_root%\Utilities\to_google
 
-set windocs=fds_smv_docs_%docs_revision%.exe
-set unixdocs=fds_smv_docs_%docs_revision%.tar.gz
+set windocs=docs_fds_smv_%docs_revision%.exe
+set unixdocs=docs_fds_smv_%docs_revision%.tar.gz
 echo Uploading %windocs%
 echo Uploading %unixdocs%
 pause
@@ -34,10 +34,10 @@ pause
        googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
 
 echo.
-echo Uploads complete
+echo Upload complete
 
 
-  set glabels=Type-Archive,Opsys-Unix,%level%
+  set glabels=Type-Archive,Opsys-Unix,%docs_google_level%
   set dplatform=Linux/OSX
   set summary=Documentation (SVN r%docs_revision% - gzipped/tar archive)
   set file=%unixdocs%
@@ -46,6 +46,6 @@ echo Uploads complete
        googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
 
 echo .
-echo Uploads complete
+echo Upload complete
 
 pause
