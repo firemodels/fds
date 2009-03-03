@@ -54,7 +54,7 @@
 % }
 %\makeatother
 
-\doublespace
+%\doublespace
 
 \newcommand{\figheightA}{1.5in}
 \newcommand{\fdsinput}[1]{
@@ -226,10 +226,6 @@ commercial software does not constitute endorsement by NIST, nor does
 it indicate that the products are necessarily those best suited for the
 intended purpose.
 
-% ---------------------------- Acknowledgments -----------------------------------
-
-\chapter{Acknowledgments}
-
 \tableofcontents
 \listoffigures
 %\listoftables
@@ -274,17 +270,12 @@ FDS predictions are sensitive to grid size; using a larger number of smaller cel
 
 Building items such as walls, floors, windows, doors and furniture are described in FDS as rectilinear blocks. These blocks must have sides that are either horizontal or vertical and no sloped or curved surfaces are allowed. The blocks may be colored for identification and may be assigned material properties. The blocks may be entered into the simulation with exact measurements from the building. However FDS can only work with items that fall exactly on grid cell boundaries. FDS takes the input blocks and adjusts them to match the grid cell boundaries. As a result, items may either grow or shrink to match the grid. In most cases this does not have a major impact on the calculations, although it can result in walls with no thickness or walls with gaps at intersections. Usually these issues are resolved by adjusting the size of the blocks slightly to produce the desired geometry that matches the grid size.
 
-\subsection{Materials}
-When a wall, ceiling, floor, piece of furniture, or any other material is defined for use in the FDS model, it is given a set of physical and thermal properties that are used by the model. Some of these properties such as thermal diffusivity, thermal conductivity, density and thickness impact the heat transfer in the material. For materials that burn, additional parameters such as ignition temperature, heat of combustion, heat of vaporization and maximum burning rate are specified. The properties for the materials, to the extent they were available, were taken from standard references or fire experiments.
-
-The combustion process is handled in two ways within FDS. In one version, the fuel gasification rate is related to the radiant heat flux imposed from the fire onto the material. The mass burning rates of these same materials are measured in a cone calorimeter (or similar) apparatus; hence, the importance of collecting these data as described in Chapter 4. An alternative way to handle the gasification of fuel in FDS is to base the fuel generation rate on a measured heat of vaporization and ignition temperature. Both versions utilize a mixture fraction combustion model, in which burning occurs in regions where the fuel and air are in stoichiometric proportion. The second approach was used in FDS to model both the mock-up experiments and the full nightclub fire.
-
-The accuracy of either of these combustion models is related to the complexity of the fuel and the resolution of the numerical grid used during the simulation. A maximum burning rate is imposed to limit the amount of pyrolysis that can occur regardless of the amount of heat flux impinging on the surface of the fuel. To the extent that the heat release rates measured for the polyurethane foams by NIST and ATF differed, this had no effect on the calculations presented in this chapter since the same ignition temperature, heat of vaporization, and maximum burning rate were used for simulations of the experimental mock-up and the full nightclub fires.
+\subsection{Fire}
 
 \subsection{Ventilation}
 Vents in FDS are openings from the model to ambient conditions outside the computational domain. Vents allow smoke and heat to leave the grid area and air to enter. Vents may be either simple openings that allow natural flow to occur based on the buoyancy of the hot gases, or vents may use a specified or forced flow rate such as the flow from a fan. Vents can also be used to introduce heat into the modeling domain. In both the mock-up and the incident simulations, vents are used to represent the areas of the foam which were initially ignited.
 
-\subsection{Openings Within the Grid}
+\subsubsection{Openings Within the Grid}
 The placement of blocks within the grid forms the structure of the building and its contents. The hydrodynamic calculations performed by FDS allow air, hot gases, smoke and flames to flow through the simulated building. Thermal radiation travels by line-of-sight and may be intercepted by obstacles within the grid.
 
 Normal buildings may appear tightly constructed, but there are many small openings or leaks within a building that allow for the flow of air or combustion products. Since objects can only exist at grid boundaries, small leaks may be created by either using a very small grid size, or by representing many small leaks by fewer large leaks.
@@ -292,6 +283,12 @@ Normal buildings may appear tightly constructed, but there are many small openin
 During the course of a fire, some items within the building may be consumed by the fire or otherwise change position. FDS does not have the capability to calculate burn-through or collapse but the user can remove items during the course of the calculations. Items that are removed can represent objects that fall or are destroyed by fire, or objects that are changed by people such as doors or windows that are opened.
 
 
+\subsection{Materials}
+When a wall, ceiling, floor, piece of furniture, or any other material is defined for use in the FDS model, it is given a set of physical and thermal properties that are used by the model. Some of these properties such as thermal diffusivity, thermal conductivity, density and thickness impact the heat transfer in the material. For materials that burn, additional parameters such as ignition temperature, heat of combustion, heat of vaporization and maximum burning rate are specified. The properties for the materials, to the extent they were available, were taken from standard references or fire experiments.
+
+The combustion process is handled in two ways within FDS. In one version, the fuel gasification rate is related to the radiant heat flux imposed from the fire onto the material. The mass burning rates of these same materials are measured in a cone calorimeter (or similar) apparatus; hence, the importance of collecting these data as described in Chapter 4. An alternative way to handle the gasification of fuel in FDS is to base the fuel generation rate on a measured heat of vaporization and ignition temperature. Both versions utilize a mixture fraction combustion model, in which burning occurs in regions where the fuel and air are in stoichiometric proportion. The second approach was used in FDS to model both the mock-up experiments and the full nightclub fire.
+
+The accuracy of either of these combustion models is related to the complexity of the fuel and the resolution of the numerical grid used during the simulation. A maximum burning rate is imposed to limit the amount of pyrolysis that can occur regardless of the amount of heat flux impinging on the surface of the fuel. To the extent that the heat release rates measured for the polyurethane foams by NIST and ATF differed, this had no effect on the calculations presented in this chapter since the same ignition temperature, heat of vaporization, and maximum burning rate were used for simulations of the experimental mock-up and the full nightclub fires.
 
 \section{Overview}
 This publication documents a series of FDS test cases used as a basis for fire fighter training. These test cases fall into two logical groups, those that are based on a full scale experiments and those that are meant to be demonstrations of fire phenomena encountered by fire fighters.
@@ -334,17 +331,17 @@ The FDS scenarios that are experimentally based are documented by 1) briefly des
 %\fdsinput{Demonstrations/2Room_Ranch/ranch_00.fds}
 
 \section{Flashover Trainer - MCFRS Case}
-\fdsinput{MCFRS/MCFRS_Flashover/MCFRS_Flashover_00.fds}
+\fdsinput{MCFRS/MCFRS_Flashover/FDS_Input_Files/MCFRS_Flashover_00open.fds}
 
 %\section{Two level ranch House - MCFRS Case}
 %\subsection{Open Doors and Windows}
-%\fdsinput{MCFRS/MCFRS_Tower/MCFRS_Tower_00.fds}
+%\fdsinput{MCFRS/MCFRS_Tower/MCFRS_Tower_open_4pal.fds}
 
 %\subsection{Leaks}
 %\fdsinput{MCFRS/MCFRS_Tower/MCFRS_Tower_01.fds}
 
 \section{Training Tower - MFRI Case}
-\fdsinput{MFRI/MFRI_Training_Tower/MFRI_Training_Tower_01_avg.fds}
+\fdsinput{MFRI/MFRI_Training_Tower/FDS_Input_Files/MFRI_Training_Tower_01_avg.fds}
 
 
 \end{document}
