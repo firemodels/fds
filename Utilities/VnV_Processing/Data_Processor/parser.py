@@ -18,7 +18,6 @@ import cPickle as cP
 #diagnostic_level = 1
 config_files = ['groups','styles','quantities']
 data_config_file = 'validation_data_config'
-
 scatter_data_dict = {}
 
 def read_config(config_file,diagnostic_level):
@@ -132,7 +131,7 @@ def add_group_data_to_scatter_data_dict(quantity_ID,group_ID,data_set,diagnostic
     if diagnostic_level >= 3:
         print "Added Group Information to Scatter Data Dictionary Object."
 
-def process_csv_data_file(file_name,column_names,titles_row_number,data_row_number,diagnostic_level):
+def process_csv_data_file(file_name,column_names,titles_row_number,data_row_number,ind_scale,dep_scale,diagnostic_level):
     col_data = []
     fh = open(file_name, "rb")
     reader = csv.reader(fh)
@@ -150,14 +149,18 @@ def process_csv_data_file(file_name,column_names,titles_row_number,data_row_numb
     for row in data:
         for name in row.keys():
             if row[name] == '' or row[name] == 'NaN' or row[name] == 'inf' or row[name] == '-inf':
-                row[name] = -9999
+                row[name] = -9999.0
+            else:
+                row[name] = row[name]
+                
     for name in column_names:
         col_data.append([float(row[name]) for row in data])
+        
     fh.close()
     
     if diagnostic_level >= 3:
         print "Processed .csv File:",file_name
-        
+    
     return col_data
     
 
@@ -167,12 +170,10 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
     data_sets = {}
     #import progress
     
-    #total = len(data_info)
-    #print "Total:",total
-    #p = progress.ProgressMeter(total=total)
-    
-    for key in data_info.keys():            
-        #print data_directory+data_info[key]['d1_Filename']
+    for key in data_info.keys():
+        ind_scale = float(data_info[key]['Scale_Ind'])
+        dep_scale = float(data_info[key]['Scale_Dep'])
+        
         d1_column_names = []
         if data_info[key]['d1_Dep_Col_Name'][0].strip() == '[':
             d1_column_names.append(data_info[key]['d1_Ind_Col_Name'].strip())
@@ -182,7 +183,8 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
         else:
             d1_column_names.append(data_info[key]['d1_Ind_Col_Name'].strip())
             d1_column_names.append(data_info[key]['d1_Dep_Col_Name'].strip())
-        d1_data = process_csv_data_file(data_directory+data_info[key]['d1_Filename'],d1_column_names,int(data_info[key]['d1_Col_Name_Row']),int(data_info[key]['d1_Data_Row']),diagnostic_level)
+        
+        d1_data = process_csv_data_file(data_directory+data_info[key]['d1_Filename'],d1_column_names,int(data_info[key]['d1_Col_Name_Row']),int(data_info[key]['d1_Data_Row']),ind_scale,dep_scale,diagnostic_level)
         
         d2_column_names = []
         #print data_info[key]['d2_Filename']
@@ -194,14 +196,34 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
         else:
             d2_column_names.append(data_info[key]['d2_Ind_Col_Name'].strip())
             d2_column_names.append(data_info[key]['d2_Dep_Col_Name'].strip())
-        d2_data = process_csv_data_file(data_directory+data_info[key]['d2_Filename'],d2_column_names,int(data_info[key]['d2_Col_Name_Row']),int(data_info[key]['d2_Data_Row']),diagnostic_level)
+        
+        d2_data = process_csv_data_file(data_directory+data_info[key]['d2_Filename'],d2_column_names,int(data_info[key]['d2_Col_Name_Row']),int(data_info[key]['d2_Data_Row']),ind_scale,dep_scale,diagnostic_level)
+        
+        # Scale Data Values
+        #  Scale Independent Data Values
+        d1_data[0] = [value/ind_scale for value in d1_data[0]]
+        d2_data[0] = [value/ind_scale for value in d2_data[0]]
+        
+        #  Scale Dependent Data Values
+        column_count = 1
+        if len(d1_column_names) <= 2:
+            d1_data[1] = [value/dep_scale for value in d1_data[1]]
+        else:
+            for data_column in d1_data[1:]:
+                d1_data[column_count] = [value/dep_scale for value in data_column]
+                column_count += 1
+                
+        column_count = 1
+        if len(d2_column_names) <= 2:
+            d2_data[1] = [value/dep_scale for value in d2_data[1]]
+        else:
+            for data_column in d2_data[1:]:
+                d2_data[column_count] = [value/dep_scale for value in data_column]
+                column_count += 1
         
         data_sets[key] = [d1_data,d2_data]
         number_of_columns += ((len(d1_data)-1)+(len(d2_data)-1))
         count += 1
-        
-        #p.update(count)
-        #print count
         
     if diagnostic_level >= 1:
         print count,"Data Info records processed."
@@ -209,7 +231,7 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
     
     return data_sets
 
-def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,ind_scale,diagnostic_level):
+def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,diagnostic_level):
     #This function is used to find index numbers for start and stop points in plotting and metric values.
     found_start = False
     found_stop = False
@@ -223,41 +245,40 @@ def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,i
         print "Stop Value:", stop_value
         print "Metric Start Value:", start_value
         print "Metric Stop Value:", stop_value
-        print "Independent Data Scale Factor:", ind_scale
         
     ## Find Start Value Index Number    
     rowcounter = 0
     for value in data_set:
         if found_start == False or found_stop == False or found_comp_start == False or found_comp_stop == False:
-            if value >= (float(start_value)*float(ind_scale)) and found_start == False:
+            if value >= float(start_value) and found_start == False:
                 if diagnostic_level >= 3:
                     print "Independent Data Column Starts at row #:",rowcounter
                     print "With a value of:",value
                 ind_col_start_index = rowcounter
                 found_start = True
-            if value >= (float(start_comp)*float(ind_scale)) and found_comp_start == False:
+            if value >= float(start_comp) and found_comp_start == False:
                 if diagnostic_level >= 3:
                     print "Metric Data starts at Index #:", rowcounter, "with a value of:", value
                 metric_start_index = rowcounter
                 found_comp_start = True
-            if float(data_set[len(data_set)-1]) <= (float(stop_comp)*float(ind_scale)) and found_comp_stop == False:
+            if float(data_set[len(data_set)-1]) <= float(stop_comp)and found_comp_stop == False:
                 if diagnostic_level >= 3:
                     print "Specified end of Metric data is greater than or equal to the last value in the Independent Data Column.\nUsing last value in the Independent Data Column."
                     print "Metric Data stops at Index #:", len(data_set)-1, "with a value of:", data_set[len(data_set)-1]
                 metric_end_index = len(data_set)-1
                 found_comp_stop = True
-            if value > (float(stop_comp)*float(ind_scale)) and found_comp_stop == False:
+            if value > float(stop_comp) and found_comp_stop == False:
                 if diagnostic_level >= 3:
                     print "Metric Data stops at Index #:", rowcounter-1, "with a value of: ", data_set[rowcounter-1]
                 metric_end_index = rowcounter-1
                 found_comp_stop = True
-            if float(data_set[len(data_set)-1]) <= (float(stop_value)*float(ind_scale)) and found_stop == False:
+            if float(data_set[len(data_set)-1]) <= float(stop_value) and found_stop == False:
                 if diagnostic_level >= 3:
                     print "Specified end of Data is greater than or equal to the last value in the Independent Data Column. \nUsing last value in the Independent Data Column."
                     print "Value used is: "+str(data_set[len(data_set)-1])+"\n"
                 ind_col_end_index = len(data_set)-1
                 found_stop = True
-            if value > (float(stop_value)*float(ind_scale)) and found_stop == False:
+            if value > float(stop_value) and found_stop == False:
                 if diagnostic_level >= 3:
                     print "Independent Data Column Ends at Index #:", rowcounter, "with a value of:", data_set[rowcounter]
                 ind_col_end_index = rowcounter
@@ -269,7 +290,7 @@ def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,i
                 print "Independent Data Col Start Index:", ind_col_start_index
                 print "Independent Data Col End Index:", ind_col_end_index
                 print "Metric Start Index:", metric_start_index
-                print "Metric End Index:", metric_end_index, "\n"
+                print "Metric End Index:", metric_end_index
             break
     return (ind_col_start_index, ind_col_end_index, metric_start_index, metric_end_index)
 
@@ -339,112 +360,3 @@ def test_process_csv_data_file():
 #test_add_group_data_to_scatter_dict()
 #test_process_csv_data_file()
 #test_pickle()
-
-# def extract_comp_data(comp_file_info):
-#     ## Read in d line dict from config file and Process data from source .csv files.
-#     d1_data_filename = comp_file_info['d1_Filename'] #String of filename
-#     d1_column_name_row_index = int(comp_file_info['d1_Col_Name_Row'])-1 #Data 1, Column Name Row Number
-#     d1_data_row_index = int(comp_file_info['d1_Data_Row'])-1 #Data 1, Starting Row Number
-#     d1_start_data_val = comp_file_info['d1_Start'] #String value to start d1 plot data
-#     d1_stop_data_val = comp_file_info['d1_End'] #String value to stop d1 plot data
-#     d1_start_comp_val = comp_file_info['d1_Comp_Start'] #String value to start d1 compare data
-#     d1_stop_comp_val = comp_file_info['d1_Comp_End'] #String value to start d1 compare data
-#     d1_initial_value = comp_file_info['d1_Initial_Value'] #Initial Value for Quantity
-#     d1_ind_column_name_value = comp_file_info['d1_Ind_Col_Name'].strip() #Data 1, Independent Data Column Name
-#     d1_dep_column_name_value = comp_file_info['d1_Dep_Col_Name'].strip() #Data 1, Dep Column Name
-#     ind_Scale_Factor = float(comp_file_info['Scale_Ind'])
-#     dep_scale_Factor = float(comp_file_info['Scale_Dep'])
-#         
-#     d2_data_filename = comp_file_info['d2_Filename'] #String of filename
-#     d2_column_name_row_index = int(comp_file_info['d2_Col_Name_Row'])-1 #Data Set 2, Data Column Name Row Number
-#     d2_data_row_index = int(comp_file_info['d2_Data_Row'])-1 #Data Set 2, Data Starting Row Number
-#     d2_start_data_val = comp_file_info['d2_Start'] #String value to start d2 plot data
-#     d2_stop_data_val = comp_file_info['d2_End']  #String value to stop d2 plot data
-#     d2_start_comp_val = comp_file_info['d2_Comp_Start'] #String value to start d2 compare data
-#     d2_stop_comp_val = comp_file_info['d2_Comp_End']  #String value to start d2 compare data
-#     d2_initial_value = comp_file_info['d2_Initial_Value']  #Initial value for Quantity
-#     d2_ind_column_name_value = comp_file_info['d2_Ind_Col_Name'].strip() #Data Set 2, Independent Data Column Name
-#     d2_dep_column_name_value = comp_file_info['d2_Dep_Col_Name'].strip() #Data Set 2, Dep Column Name
-#     
-#     
-#     metric = comp_file_info['Metric'] #String indicating the type of metric required.
-#     
-#     group_value = int(comp_file_info['Group'])
-#     
-#     if diagnostic_level >= 2:
-#         print "*** Start File Processing ***"
-#     
-
-#                 if x == 'Null' or x == '' or x == 'NaN' or x == 'inf' or x == '-inf':
-#                     list_value = 'Null'
-#                 else:
-#                     list_value = float(x)
-#                 temp_list.append(list_value)
-#             d2_data_dict[d2_list[0].strip()] = temp_list
-#         except:
-#             print "!!! Data Set 2, Conversion Error in Column Name "+d2_list[0].strip()+". !!!"
-#             exit()
-#     
-#     # Passing in the Ind_Axis Column Name.
-#     d1_comp_ranges = find_start_stop_index(d1_data_dict,d1_ind_axis_column_name,d1_start_data_val,d1_stop_data_val,d1_start_comp_val,d1_stop_comp_val,ind_Scale_Factor)
-#     d2_comp_ranges = find_start_stop_index(d2_data_dict,d2_ind_axis_column_name,d2_start_data_val,d2_stop_data_val,d2_start_comp_val,d2_stop_comp_val,ind_Scale_Factor)
-#     if diagnostic_level >= 3:
-#         print "D1 COMP RANGES: ",d1_comp_ranges
-#         print "D2 COMP RANGES: ",d2_comp_ranges
-#     
-#     #### Begin Column specific operations.
-#     scatter_counter = 0
-#     
-#     for scatter_label in combined_scatter_data_labels[0]:
-#         
-#         if diagnostic_level >= 3:
-#             print "Scatter Counter Value:", scatter_counter
-#         
-#         d1_label_temp = []
-#         d2_label_temp = []
-#         
-#         d1_label_temp = split("~",combined_scatter_data_labels[0][scatter_counter])
-#         d2_label_temp = split("~",combined_scatter_data_labels[1][scatter_counter])
-#         
-#         if diagnostic_level >= 3:
-#             print "Data Set 1, Label Split:", d1_label_temp
-#             print "Data Set 2, Label Split:", d2_label_temp
-#         
-#         ##Find metric values.
-#         d1_data_values_comp = d1_data_dict[d1_label_temp[3]][d1_comp_ranges[2]:(d1_comp_ranges[3]+1)]
-#         d2_data_values_comp = d2_data_dict[d2_label_temp[3]][d2_comp_ranges[2]:(d2_comp_ranges[3]+1)]
-#         
-#         if diagnostic_level >= 3:
-#             print "Data Set 1, data values:", d1_data_values_comp
-#             print "Data Set 2, data values:", d2_data_values_comp
-#         
-#                 
-#         #Create data lists based on specified ranges
-#         d1_data_seconds = zip(d1_data_dict[d1_ind_axis_column_name][d1_comp_ranges[0]:(d1_comp_ranges[1]+1)], d1_data_dict[d1_label_temp[3]][d1_comp_ranges[0]:(d1_comp_ranges[1]+1)])
-#         if diagnostic_level >= 3:
-#             print "Data Set 1, Data:", d1_data_seconds
-#         d2_data_seconds = zip(d2_data_dict[d2_ind_axis_column_name][d2_comp_ranges[0]:(d2_comp_ranges[1]+1)], d2_data_dict[d2_label_temp[3]][d2_comp_ranges[0]:(d2_comp_ranges[1]+1)])
-#         if diagnostic_level >= 3:
-#             print "Data Set 2, Data:", d2_data_seconds
-#         
-#         #Scale Ind_Axis Data.
-#         d1_data.append([[x[0] / ind_Scale_Factor, x[1]] for x in d1_data_seconds])
-#         if diagnostic_level >= 3:
-#             print "Scaled Data Set 1, Data:", d1_data
-#         d2_data.append([[x[0] / ind_Scale_Factor, x[1]] for x in d2_data_seconds])
-#         if diagnostic_level >= 3:
-#             print "Scaled Prediction Data:", d2_data
-#             
-#         #Need to Scale Dep_Axis Data...
-#         
-#         scatter_counter = scatter_counter + 1
-#         if diagnostic_level >= 3:
-#             print "\nScatter Counter:", scatter_counter, "\n"
-#     
-#     # Close files
-#     d1_file_object.close()
-#     d2_file_object.close()
-#     
-#     return [d1_data,d2_data]
-
-    
