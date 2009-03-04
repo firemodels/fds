@@ -759,7 +759,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
             CYCLE MATERIAL_LOOP1b
          ENDIF
 
-         DO J=1,ML%N_REACTIONS
+         REACTION_LOOP: DO J=1,ML%N_REACTIONS
             ! Reaction rate in 1/s
             REACTION_RATE = ML%A(J)*(WC%RHO_S(I,N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*WC%TMP_S(I)))
             ! power term
@@ -790,7 +790,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
                NNN = SF%RESIDUE_INDEX(N,J)
                WC%RHO_S(I,NNN) = WC%RHO_S(I,NNN) + ML%NU_RESIDUE(J)*DT_BC*REACTION_RATE
             ENDIF
-         ENDDO
+         ENDDO REACTION_LOOP
          VOLSUM = VOLSUM + WC%RHO_S(I,N)/ML%RHO_S
       ENDDO MATERIAL_LOOP1b
 
@@ -799,7 +799,6 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
       MATERIAL_LOOP1a: DO N=1,SF%N_MATL
          IF (WC%RHO_S(I,N).EQ. 0._EB) CYCLE MATERIAL_LOOP1a
          ML  => MATERIAL(SF%MATL_INDEX(N))
-!         IF (ML%N_REACTIONS.EQ.0 .OR. ANY(ML%NU_RESIDUE.GT.0._EB)) THEN
          IF (ML%N_REACTIONS.EQ.0) THEN
             POINT_SHRINK = .FALSE.
             EXIT MATERIAL_LOOP1a
@@ -808,6 +807,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
       ENDIF
 
       ! In points that actuall shrink, increase the density to account for filled material
+
       VOLSUM = MIN(VOLSUM,1._EB)
       IF (POINT_SHRINK) THEN
          IF (VOLSUM<1.0_EB) THEN
@@ -888,7 +888,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
       MFLUX = MIN(MFLUX,THICKNESS*ML%RHO_S/DT_BC)
       ! CYLINDRICAL and SPHERICAL scaling not implemented
       DO NS = 1,N_SPECIES
-         MASSFLUX(IW,NS)         = MASSFLUX(IW,NS)      + ML%ADJUST_BURN_RATE(J,NS)*ML%NU_GAS(1,NS)*MFLUX
+         MASSFLUX(IW,NS)         = MASSFLUX(IW,NS)      + ML%ADJUST_BURN_RATE(1,NS)*ML%NU_GAS(1,NS)*MFLUX
          IF (SPECIES(NS)%ISFUEL) &
             ACTUAL_BURN_RATE(IW) = ACTUAL_BURN_RATE(IW) +                           ML%NU_GAS(1,NS)*MFLUX
       ENDDO
@@ -905,6 +905,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
    ENDDO MATERIAL_LOOP2
 
    ! Re-generate grid for shrinking wall
+
    N_LAYER_CELLS_NEW = 0
    RECOMPUTE_GRID: IF (WC%SHRINKING) THEN
       NWP_NEW = 0

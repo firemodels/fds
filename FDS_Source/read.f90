@@ -1525,6 +1525,13 @@ DO N=1,N_REACTIONS
       YYMIN(I_FUEL) = 0.0_EB
    ENDIF
 ENDDO
+
+! Record the total number of mixture fraction variables that are to be tracked
+
+N_MIX_SPECIES = N_MIX
+
+! Add additional species for soot and water vapor if desired by user or needed by FDS
+
 IF (SOOT_DEPOSITION .AND. MIXTURE_FRACTION) THEN
    N_SPECIES = N_SPECIES + 1
    I_PROG_SOOT = N_SPECIES
