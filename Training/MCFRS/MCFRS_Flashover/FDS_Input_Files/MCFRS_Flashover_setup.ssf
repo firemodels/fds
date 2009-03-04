@@ -1,0 +1,18 @@
+RENDERDIR
+../../../../Manuals/FDS_SMV_Training_Guide/scriptfigures
+LOADINIFILE
+ MCFRS_Flashover_setup_2dview.ini
+SETVIEWPOINT
+ side
+RENDERONCE
+ MCFRS_Flashover_setup_side
+SETVIEWPOINT
+ top
+RENDERONCE
+ MCFRS_Flashover_setup_top
+LOADINIFILE
+ MCFRS_Flashover_setup_3dview.ini
+SETVIEWPOINT
+ 3dview
+RENDERONCE
+ MCFRS_Flashover_setup_3dview
