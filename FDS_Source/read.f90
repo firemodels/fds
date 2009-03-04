@@ -5760,11 +5760,13 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
             IF (DEVC_ID /='null') THEN
                OB%REMOVABLE   = .TRUE.
                OB%HOLE_FILLER = .TRUE.
+               OB%CTRL_INDEX = -1
                IF (DEVICE(OB%DEVC_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
             ENDIF
             IF (CTRL_ID /='null') THEN
                OB%REMOVABLE   = .TRUE.
                OB%HOLE_FILLER = .TRUE.
+               OB%DEVC_INDEX = -1
                IF (CONTROL(OB%CTRL_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
             ENDIF
             
