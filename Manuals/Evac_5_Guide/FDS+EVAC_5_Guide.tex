@@ -135,28 +135,33 @@
   \thispagestyle{fancy}
 
   \begin{center}
+
     VTT Technical Research Centre of Finland
-  \end{center}
-  \vspace{30mm}
 
-  \begin{center}
-    {\bf \huge Fire Dynamics Simulator with Evacuation}\\[0.5em]
+    \vspace{90mm}
 
-%    {\bf \huge FDS+Evac, version 5.}\\[0.2em]
+    { \normalfont\fontsize{28}{42}\selectfont\bfseries\sffamily
+      Fire Dynamics Simulator with Evacuation: FDS+Evac
+    }
 
-    {\bf \huge Technical Reference and User's Guide}\\[0.5em]
+    \vspace{6mm}
 
-    {\large (FDS 5.3.0, Evac 2.1.1, SVN Revision 3193)}
-  \end{center}
-  \vspace{30pt}
-  \begin{center}
-   {\large Timo Korhonen and Simo Hostikka}
-  \end{center}
+    { \normalfont\fontsize{22}{28}\selectfont\bfseries\sffamily
+      Technical Reference and User's Guide }
 
-  \begin{center}
-    VTT Technical Research Centre of Finland\\
-    P.O.~Box 1000\\
-    FI-02044 VTT, Finland
+    { \normalfont\fontsize{14}{18}\selectfont\sffamily
+      (FDS 5.3.0, Evac 2.1.1, SVN Revision 3193) }
+
+    \vspace{15mm}
+
+    { \normalfont\fontsize{14}{18}\selectfont\sffamily
+      Timo Korhonen and Simo Hostikka }
+
+    \vspace{3mm}
+
+    { \normalfont\fontsize{12}{16}\selectfont\sffamily
+      VTT}
+
   \end{center}
 
 
@@ -2789,6 +2794,12 @@ might not get a nice 2D potential flow solution.
 
 \begin{description}
 %
+\item[\Timts{EVACUATION\_MC\_MODE}] This parameter has only an effect
+  when there are no fire meshes in the calculation.  If the EFF file
+  is wanted to be read in then this keyword should be set to
+  \Timtt{.TRUE.}.  The default is \Timtt{.FALSE.}, \emph{i.e.,} the
+  evacuation flow fields are (re)calculated.
+%
 \item[\Timts{EVAC\_SURF\_DEFAULT}] is the surface default for the
   evacuation meshes.  The default is \Timtt{INERT}.  You could specify
   some other solid material for the default surface material, but
@@ -3409,8 +3420,12 @@ one way door, \emph{i.e.}, agents can only come out from this 'door'.
   $\Rightarrow$ room).  Note that the namelist \Timtt{EXIT} has just
   the opposite rule for the sign of \Timtt{IOR}.
 %
-\item[\Timtt{MAX\_FLOW}] Persons per second (actual flow may be
+\item[\Timtt{MAX\_FLOW}] Agents per second (actual flow may be
   smaller, if the area in front of the entry is crowded)
+%
+\item[\Timtt{MAX\_HUMANS}] The maximum number of agents to be
+  introduced in the calculation by this entry, the default is a very
+  large integer.
 %
 \item[\Timts{TIME\_START}] The time (s) when this entry starts adding
   agents to the calculation.  The default is $T_\textrm{start}$.

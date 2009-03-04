@@ -98,8 +98,8 @@
 %      \let\@oddfoot\@empty\let\@evenfoot\@empty
       \def\@oddfoot{\centerline\thepage}
       \def\@evenfoot{\centerline\thepage}
-      \def\@evenhead{\hfil{\normalfont\fontsize{10}{12}\selectfont\bfseries\sffamily\leftmark}}%
-      \def\@oddhead{{\normalfont\fontsize{10}{12}\selectfont\bfseries\sffamily\leftmark}\hfil}%
+      \def\@evenhead{\hfil{\normalfont\fontsize{10}{12}\selectfont\sffamily\leftmark}}%
+      \def\@oddhead{{\normalfont\fontsize{10}{12}\selectfont\sffamily\leftmark}\hfil}%
 %%%      \def\@oddhead{{\slshape\rightmark}\hfil}%
       \let\@mkboth\markboth
     \def\chaptermark##1{%
