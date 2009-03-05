@@ -6862,7 +6862,7 @@ Contains
 
     Subroutine STRS_U_AND_V(STRP,I_NODE,X,Y,Direction,UBAR,VBAR)
     ! Get preferred direction in STRS
-    Type (EVAC_STRS_TYPE), Pointer, Intent(IN)::  STRP
+    Type (EVAC_STRS_TYPE), Pointer::  STRP
     Integer, intent(IN) :: I_NODE, Direction
     REAL(EB), Intent(IN) :: X, Y
     REAL(EB), Intent(OUT) :: UBAR, VBAR
