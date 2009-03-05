@@ -2623,7 +2623,7 @@ SELECT CASE(GAS_NAME)
       EPSOK=148.6_EB  
       MW=16._EB
       ABSORBING = .TRUE.
-      FORMULA='CH2'
+      FORMULA='CH4'
    CASE('NITROGEN')        
       SIGMA=3.798_EB 
       EPSOK= 71.4_EB  
