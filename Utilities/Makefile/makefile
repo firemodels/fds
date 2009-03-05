@@ -108,6 +108,22 @@ intel_linux_64 : obj = fds5_intel_linux_64
 intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
+openmp_intel_linux_32 : FFLAGS = -m32 -O3 -static -vec_report0 -openmp -openmp-link static
+openmp_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
+openmp_intel_linux_32 : FCOMPL = ifort
+openmp_intel_linux_32 : CCOMPL = icc
+openmp_intel_linux_32 : obj = fds5_openmp_intel_linux_32
+openmp_intel_linux_32 : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+
+openmp_intel_linux_64 : FFLAGS = -m64 -O3 -static -vec_report0 -openmp -openmp-link static
+openmp_intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
+openmp_intel_linux_64 : FCOMPL = ifort
+openmp_intel_linux_64 : CCOMPL = icc
+openmp_intel_linux_64 : obj = fds5_openmp_intel_linux_64
+openmp_intel_linux_64 : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+
 mpi_intel_linux_32 : FFLAGS = -m32 -O3 -vec_report0
 mpi_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
 mpi_intel_linux_32 : FCOMPL = mpif77
@@ -156,6 +172,24 @@ mpi_intel_linux_64_db : obj = fds5_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
+# These settings are only usable if the Intel ThreadChecker is installed. Use this settings not for debugging
+# mathematical problems. Only use this settings to check the correctness of the OpenMP parallelization.
+# Static linking is not possible in these cases.
+openmp_intel_linux_32_db : FFLAGS = -m32 -O0 -g -tcheck -openmp
+openmp_intel_linux_32_db : CFLAGS = -m32 -O0 -Dpp_noappend -vec_report0
+openmp_intel_linux_32_db : FCOMPL = ifort
+openmp_intel_linux_32_db : CCOMPL = icc
+openmp_intel_linux_32_db : obj = fds5_openmp_intel_linux_32_db
+openmp_intel_linux_32_db : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+
+openmp_intel_linux_64_db : FFLAGS = -m64 -O0 -g -tcheck -openmp
+openmp_intel_linux_64_db : CFLAGS = -m64 -O0 -Dpp_noappend -vec_report0
+openmp_intel_linux_64_db : FCOMPL = ifort
+openmp_intel_linux_64_db : CCOMPL = icc
+openmp_intel_linux_64_db : obj = fds5_openmp_intel_linux_64_db
+openmp_intel_linux_64_db : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 # OS X
 osx32_libdir = /opt/intel/Compiler/11.0/056/lib
