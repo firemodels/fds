@@ -96,6 +96,7 @@ END SUBROUTINE GET_REV_smvv
 end module isodefs
 
 module compressdefs
+implicit none
 
 interface
 
