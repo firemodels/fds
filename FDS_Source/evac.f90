@@ -7840,7 +7840,7 @@ Contains
          HR=>HUMAN(I)
          If (I > N_HUMANS-IKILL) Exit DROP_LOOP
          If (HR%X > XS .And. HR%X < XF .And. HR%Y > YS .And. HR%Y < YF) Cycle DROP_LOOP
-         write(*,*) HR%X,HR%Y,HR%Z,HR%SKIP_WALL_FORCE_IOR,ABS(HR%IEL)
+         write(LU_ERR,'(A, 3F8.2, I3)') 'WARNING: Person removed at coord: ', HR%X,HR%Y,HR%Z,HR%SKIP_WALL_FORCE_IOR
          HUMAN(I) = HUMAN(N_HUMANS-IKILL)
          IKILL = IKILL + 1
       End Do DROP_LOOP
