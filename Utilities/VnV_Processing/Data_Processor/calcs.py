@@ -14,11 +14,13 @@ def mu_2sigma(x_data_set,y_data_set):
             epsilion_vals = epsilion_vals+[(y_data_set[i][j]-x_data_set[i][j])/x_data_set[i][j]]
             
     mu_val = sum(epsilion_vals)/len(epsilion_vals)
-    print 'Mu:', mu_val
+    if diagnostic_level >= 3:
+        print 'Mu:', mu_val
     
     sigma_val = sqrt(sum([(e_val-mu_val)**2 for e_val in epsilion_vals])/len(epsilion_vals))
     sigma_2_val = sigma_val*2
-    print '2 Sigma:', sigma_2_val
+    if diagnostic_level >= 3:
+        print '2 Sigma:', sigma_2_val
     
     return[mu_val,sigma_2_val]
 
@@ -29,7 +31,7 @@ def test_mu_2sigma():
     mu_2sigma(x_data_set,y_data_set)
 
 def calc_min(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level):
-    if diagnostic_level >= 2:
+    if diagnostic_level >= 3:
         print "*** Compute Drop ***"
     
     temp_d1_data_values = [x for x in d1_data if x != -9999.0]
@@ -47,7 +49,7 @@ def calc_min(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level)
         print "\n*** Computing Drop Relative Difference ***"
     try:
         relative_difference = ((d2_drop_value-d1_drop_value)/d1_drop_value)
-        if diagnostic_level >= 2:
+        if diagnostic_level >= 3:
             print "Min Relative Difference is:", relative_difference
     except:
         print "!!! Computation of Min relative_difference failed. !!!\nCheck source data for columns listed above."
