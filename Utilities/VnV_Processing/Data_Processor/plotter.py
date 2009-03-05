@@ -36,7 +36,11 @@ def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
     ind_axis_title = quantities[quantity_id]["Ind_Title"]
     dep_axis_title = quantities[quantity_id]["Dep_Title"]
     title_position = eval(quantities[quantity_id]["Title_Position"])
-    percent_error = int(quantities[quantity_id]["%error"])
+    percent_error = float(quantities[quantity_id]["%error"])/100.0
+    
+    exp_error_lines = quantities[quantity_id]["Exp_Error_Lines"]
+    mu_line = quantities[quantity_id]["Mu_Line"]
+    sigma_lines = quantities[quantity_id]["Sigma_Lines"]
     
     print "Write Scatter Plot:",title
     
@@ -67,13 +71,24 @@ def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
     mu_max = plot_max*(1+mu_val)
     
     # Draw Center Line
-    ax.plot([plot_min,plot_max],[plot_min,plot_max], 'k-', linewidth=0.5, label='_nolegend_')
-    # Draw Mu Line
-    muline = ax.plot([plot_min,plot_max],[plot_min,mu_max], 'g:', linewidth=2.0, label='_nolegend_')
-    # Upper 2 Sigma Line
-    sigma2upper = ax.plot([plot_min,plot_max], [plot_min,(mu_max*(1+sigma_2_val))], 'r-.', linewidth=2.0, label='_nolegend_')
-    # Lower 2 Sigma Line
-    sigma2lower = ax.plot([plot_min,plot_max], [plot_min,(mu_max*(1-sigma_2_val))], 'r-.', linewidth=2.0, label='_nolegend_')
+    ax.plot([plot_min,plot_max],[plot_min,plot_max], 'k-', linewidth=2.0, label='_nolegend_')
+    
+    if exp_error_lines == 'yes':
+        # Draw Upper Exp Error
+        exp_error_upper = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1+percent_error))], 'k:', linewidth=2.0, label='_nolegend_')
+        # Draw Lower Exp Error
+        exp_error_lower = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1-percent_error))], 'k:', linewidth=2.0, label='_nolegend_')
+    
+    if mu_line == 'yes':
+        # Draw Mu Line
+        muline = ax.plot([plot_min,plot_max],[plot_min,mu_max], 'r-', linewidth=1.0, label='_nolegend_')
+    
+    if sigma_lines == 'yes':
+        # Upper 2 Sigma Line
+        sigma2upper = ax.plot([plot_min,plot_max], [plot_min,(mu_max*(1+sigma_2_val))], 'r:', linewidth=1.0, label='_nolegend_')
+        # Lower 2 Sigma Line
+        sigma2lower = ax.plot([plot_min,plot_max], [plot_min,(mu_max*(1-sigma_2_val))], 'r:', linewidth=1.0, label='_nolegend_')
+    
     plt.xlabel(ind_axis_title)
     plt.ylabel(dep_axis_title)
     ax.text(plot_max*title_position[0], plot_max*title_position[1], title, horizontalalignment='left') 
@@ -106,7 +121,9 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
     ymin = float(data_info['Min_Dep'])
     ymax = float(data_info['Max_Dep'])
     
-    #title_position = eval(data_info["Title_Position"])
+    title_position = eval(data_info["Title_Position"])
+    title_x_pos = float(title_position[0])
+    title_y_pos = float(title_position[1])
     
     mask_value = -9999.0
     
@@ -155,12 +172,15 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
         symboltype = styles[int(d1_style[linecount])]['Symbol_Style']
         edgecolor = styles[int(d1_style[linecount])]['Edge_Color']
         symbolcolor = styles[int(d1_style[linecount])]['Fill_Color']
+        
         if styles[int(d1_style[linecount])]['Symbol_Size'] == 'none':
             symbolsize = 'none'
         else:
             symbolsize = int(styles[int(d1_style[linecount])]['Symbol_Size'])
+        
         linecolor = styles[int(d1_style[linecount])]['Line_Color']
         linestyle = styles[int(d1_style[linecount])]['Line_Style']
+        
         if styles[int(d1_style[linecount])]['Line_Width'] == 'none':
             linewidth = 'none'
         else:
@@ -177,12 +197,15 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
         symboltype = styles[int(d2_style[linecount])]['Symbol_Style']
         edgecolor = styles[int(d2_style[linecount])]['Edge_Color']
         symbolcolor = styles[int(d2_style[linecount])]['Fill_Color']
+        
         if styles[int(d2_style[linecount])]['Symbol_Size'] == 'none':
             symbolsize = 'none'
         else:
             symbolsize = int(styles[int(d2_style[linecount])]['Symbol_Size'])
+        
         linecolor = styles[int(d2_style[linecount])]['Line_Color']
         linestyle = styles[int(d2_style[linecount])]['Line_Style']
+        
         if styles[int(d2_style[linecount])]['Line_Width'] == 'none':
             linewidth = 'none'
         else:
@@ -194,11 +217,10 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
     plt.xlabel(ind_axis_title)
     plt.ylabel(dep_axis_title)
     
-    #ax.text(5.0, 70.0, title, horizontalalignment='left') 
-    
     ax.grid(False)
     ax.axis([xmin,xmax,ymin,ymax])
-    ax.text(xmax*0.05, ymax*0.94, title, horizontalalignment='left')
+    
+    ax.text(xmax*title_x_pos, ymax*title_y_pos, title, horizontalalignment='left')
     
     if legend_loc != 'none':
         leg = ax.legend(loc=legend_loc)
@@ -256,6 +278,3 @@ def test_comparison_plot():
         y_values_masked = M.masked_where(y_values == mask_value , y_values)
         y_data_to_plot.append(y_values_masked)
 
-#     
-#     
-# #return(0)

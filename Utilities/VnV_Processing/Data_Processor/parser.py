@@ -238,7 +238,7 @@ def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,d
     found_comp_start = False
     found_comp_stop = False
     
-    if diagnostic_level >= 2:
+    if diagnostic_level >= 3:
         print "\n*** Find Start/End Indexes for Independent Data Column ***"
     if diagnostic_level >= 3:
         print "Start Value:", start_value
@@ -285,7 +285,7 @@ def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,d
                 found_stop = True
             rowcounter += 1
         else:
-            if diagnostic_level >= 2:
+            if diagnostic_level >= 3:
                 print "*** Start/End Indexes Found ***"
                 print "Independent Data Col Start Index:", ind_col_start_index
                 print "Independent Data Col End Index:", ind_col_end_index
@@ -293,10 +293,6 @@ def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,d
                 print "Metric End Index:", metric_end_index
             break
     return (ind_col_start_index, ind_col_end_index, metric_start_index, metric_end_index)
-
-def assemble_data_to_plot(diagnostic_level):
-    pass
-
 
 # Test Functions
 def test_add_group_data_to_scatter_dict():

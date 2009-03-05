@@ -5,7 +5,7 @@ import plotter as plot
 ### Set Diagnostic Output Level
 ## Uncomment the level of diagnostics desired.
 ## 1 = Minimal, 2 = Normal, 3 = Maximum.
-diagnostic_level = 1 # Input Value
+diagnostic_level = 2 # Input Value
 
 print "**** Diagnostics Set at Level", diagnostic_level, "****\n"
 
@@ -26,7 +26,9 @@ if diagnostic_level >= 1:
 ## then only the lines starting with that character will be read in for processing.
 ## NOTE: You must also change the line containing the d line column names to the same character string.
 data_line_char = 'd' # Input Value
-print "**** Data Character Set to '"+data_line_char+"' ****\n"
+
+if diagnostic_level >= 1:
+    print "**** Data Character Set to '"+data_line_char+"' ****\n"
 
 
 ## Validation Data Set (1), Verification Data Set (2), Examples Data Set (3), Trainier Data Set (4)
@@ -71,17 +73,21 @@ if data_set == 5:
 config_files = ['groups','styles','quantities']
 
 ### Start of Main Code
-if diagnostic_level >= 2:
+if diagnostic_level >= 1:
     print "**** READING CONFIGURATION FILES ****"
 
 ##Get information from config files.
-print "Parsing Configs"
+if diagnostic_level >= 2:
+    print "Parsing Configs"
 pr.parse_configs(config_files,diagnostic_level)
-print "Parsing Data Info"
+
+if diagnostic_level >= 2:
+    print "Parsing Data Info"
 pr.parse_data_info(config_file_name,data_line_char,diagnostic_level)
 
 data_info = pr.read_pickle(config_file_name+'_object.pkl',diagnostic_level)
-print "There are",len(data_info),"data records to process."
+if diagnostic_level >= 1:
+    print "There are",len(data_info),"data records to process."
 
 #Start Processing records in data config file.
 data_sets = pr.collect_data_sets(data_info,data_directory,diagnostic_level)
@@ -94,10 +100,15 @@ for key in data_sets:
     #print data_index_records[key]['d1_index_set'],",",data_index_records[key]['d2_index_set']
 
 # Make Comparison Plots.
+if diagnostic_level >= 2:
+    print "Begin Comparison Plots"
+
 for key in data_info:
-    print key, data_info[key]['Plot_Filename']
+    #print key, data_info[key]['Plot_Filename']
     plot.comparison_plot(data_sets[key],data_info[key],data_index_records[key]['d1_index_set'],data_index_records[key]['d2_index_set'],output_directory,diagnostic_level)
-    
+
+if diagnostic_level >= 2:
+    print "Finished Comparison Plots"
 
 # Create Scatter Plot Data Object based on quantities object.
 pr.make_scatter_dict(diagnostic_level)
@@ -105,7 +116,7 @@ pr.make_scatter_dict(diagnostic_level)
 # Find metric data for scatter plots and write data to scatter_data_dict object.
 for key in data_info:
     if data_info[key]['Quantity'] == str(0):
-        if diagnostic_level >= 2:
+        if diagnostic_level >= 1:
             print "Quantity set to 0, no scatter data."
             #This allows the d line Quantity value to be set to 0 when either d1 or d2 data is missing.
     else:
@@ -123,28 +134,21 @@ for key in data_info:
                 min_results = calc.calc_min(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index],data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'],data_info[key]['d2_Initial_Value'],diagnostic_level)
                 pr.add_group_data_to_scatter_data_dict(data_info[key]['Quantity'],data_info[key]['Group'],min_results[:2],diagnostic_level)
         else:
-            print "!!! Metric is undefined in the input file. !!!"
+            if diagnostic_level >= 1:
+                print "!!! Metric is undefined in the input file. !!!"
             exit()
 
 # Make Scatter Plots.
+if diagnostic_level >= 1:
+    print "Begin Scatter Plots"
+
 scatter_data_dict = pr.read_pickle('scatter_data_dict_object.pkl',diagnostic_level)
 for quantity_key in scatter_data_dict:
     if scatter_data_dict[quantity_key] != {}:
         plot.scatter_plot(quantity_key,scatter_data_dict[quantity_key],output_directory,diagnostic_level)
 
-
-## Call stats functions, which write Summary of results to csv file.
-#NRC Comparisons Output
-# Output for each data set 
-#*d1 Zero Val
-#*d1 Peak Val
-#*Peak Time Val
-#*d2 Zero Val
-#*d2 Peak Val
-#*Peak Time Val
-#*DeltaE
-#*DeltaM
-#*Rel Diff
+if diagnostic_level >= 1:
+    print "Finished Scatter Plots"
 
 
 ## Report Completion.
