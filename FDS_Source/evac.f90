@@ -192,14 +192,15 @@ Module EVAC
   ! STRS is a construct to build a staircase. STRS consists of stairs and
   ! landings. 
   Type EVAC_STRS_Type
-     Real(EB) :: XB(6), XB_CORE(4)
-     Real(EB), Pointer, Dimension(:,:) :: U_UP, V_UP, U_DOWN, V_DOWN, XB_NODE
+     Real(EB) :: XB(6)
+     Real(EB), Pointer, Dimension(:,:)   :: XB_NODE, XB_CORE
      Real(EB) :: FAC_V0_HORI, FAC_V0_DOWN, FAC_V0_UP
-     Integer :: ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0
+     Integer :: ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0, N_CORES = 0
      Integer :: N_LANDINGS, N_NODES, N_NODES_OUT, N_NODES_IN
-     Integer, Pointer, Dimension(:) :: NODE_IOR, NODE_TYPE, NODES_IN, NODES_OUT
+     Integer, Pointer, Dimension(:) :: NODE_IOR, NODE_TYPE, NODES_IN, NODES_OUT, I_CORE
      Character(60) :: ID
      Character(24) :: MESH_ID
+     Logical RIGHT_HANDED
   End Type EVAC_STRS_Type
   !
   ! This produces more humans on the floor specified by the
@@ -214,7 +215,7 @@ Module EVAC
           STR_INDX=0, STR_SUB_INDX=0
      Character(60) :: CLASS_NAME='null', ID='null'
      Character(60) :: TO_NODE='null'
-     Character(30) :: GRID_NAME='null'
+     Character(30) :: GRID_NAME='null', Max_Humans_Ramp
      Logical :: After_Tpre=.False., No_Persons=.False.
      Integer :: N_VENT_FFIELDS=0, Avatar_Color_Index=0
      Integer, Pointer, Dimension(:) :: I_DOOR_NODES
@@ -362,15 +363,15 @@ Contains
     Implicit None
     !
     Integer :: NUMBER_INITIAL_PERSONS, COLOR_METHOD_TMP, &
-         SAMPLING_FACTOR, IPC, n_tmp, GN_MIN, GN_MAX
+         SAMPLING_FACTOR, IPC, n_tmp, GN_MIN, GN_MAX, N_RAMP_INI
     Real(EB) :: DTSAM
     Logical :: EVACFILE
 
     Real(EB) :: DUMMY
     Real(EB) :: XB(6), XB1(6), XB2(6)
     Real(EB), Dimension(3) :: XYZ, XYZ_SMOKE
-    Integer :: IOS, IZERO, N, I, J, IOR, NM
-    Character(30) QUANTITY
+    Integer :: IOS, IZERO, N, I, J, K, IOR, NM
+    Character(30) QUANTITY, MAX_HUMANS_RAMP
     Character(60) FYI,ID,PERS_ID,TO_NODE,EVAC_ID, DEFAULT_PROPERTIES
     Character(26) FLOW_FIELD_ID
     Integer :: DIAMETER_DIST,VELOCITY_DIST, &
@@ -396,7 +397,7 @@ Contains
     Character(25) :: COLOR, DEAD_COLOR, AVATAR_COLOR
 
     ! Stairs variables
-    Real(EB) :: XB_CORE(4), XB_LANDINGS(500,6), XB_STAIRS(500,8)
+    Real(EB) :: XB_CORE(4), XB_CORES(500,6), XB_LANDINGS(500,6), XB_STAIRS(500,8)
     Real(EB) VERTICAL_LANDING_SEPARATION, STR_Length, STR_Height
     Integer N_LANDINGS, NL, NODES_TMP(500)
     Logical :: RIGHT_HANDED, LEFT_HANDED
@@ -424,12 +425,12 @@ Contains
          TIME_STOP, AFTER_REACTION_TIME, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, &
          MESH_ID, COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
-         AVATAR_COLOR, AVATAR_RGB, MAX_HUMANS
+         AVATAR_COLOR, AVATAR_RGB, MAX_HUMANS, MAX_HUMANS_RAMP
     Namelist /CORR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, WIDTH1, WIDTH2, &
          EFF_WIDTH, EFF_LENGTH, MAX_HUMANS_INSIDE, FAC_SPEED, &
          XB1, XB2, RGB, COLOR
-    Namelist /STRS/ ID, XB, XB_CORE, TO_NODE, RIGHT_HANDED, LEFT_HANDED, MESH_ID, &
+    Namelist /STRS/ ID, XB, XB_CORE, XB_CORES, TO_NODE, RIGHT_HANDED, LEFT_HANDED, MESH_ID, &
          N_LANDINGS, XB_LANDINGS, VERTICAL_LANDING_SEPARATION, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI
     Namelist /EVAC/ NUMBER_INITIAL_PERSONS, QUANTITY, FYI, &
@@ -471,12 +472,18 @@ Contains
          TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, CONST_CF, FAC_CF, &
          FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF
     !
+   If (.Not. ANY(EVACUATION_GRID)) Then
+      N_EVAC = 0
+      RETURN
+   Endif
+
     NPPS = 30000 ! Number Persons Per Set (dump to a file)
     !
     EVAC_DT = EVAC_DT_FLOWFIELD     ! Initialize the clock
     EVAC_CLOCK = T_BEGIN    ! clock for the CHID_evac.csv file
     EVAC_N_QUANTITIES = 0
 
+    N_RAMP_INI = N_RAMP
     i33 = 0
     ilh = 0
 
@@ -484,11 +491,6 @@ Contains
        Allocate(Tsteps(NMESHES),STAT=IZERO)
        Call ChkMemErr('READ','Tsteps',IZERO) 
        Tsteps(:) = EVAC_DT_FLOWFIELD
-       If (append) Then
-          Open (LU_EVACOUT,file=FN_EVACOUT,form='formatted',status='old', position='append')
-       Else 
-          Open (LU_EVACOUT,file=FN_EVACOUT,form='formatted', status='replace')
-       End If
        If (Abs(TIME_SHRINK_FACTOR-1.0_EB) > 0.000000000001_EB ) Call SHUTDOWN('ERROR: Evac is not ready for TIME_SHRINK_FACTOR')
     End If
     !
@@ -516,7 +518,6 @@ Contains
     ! identification number, which is ILABEL_last + 1
     ILABEL_last = 0
 
-    Open(LU_INPUT,File=FN_INPUT)
 
     Call COUNT_EVAC_NODES
     Call READ_PERS
@@ -530,7 +531,6 @@ Contains
     Call READ_EVHO
     Call READ_EVSS
 
-    Close (LU_INPUT)    
     If (MYID /= Max(0,EVAC_PROCESS)) Return
 
     Call CHECK_EVAC_NODES
@@ -778,7 +778,7 @@ Contains
             End If
          End  Do
 
-         n_nodes = n_entrys + n_exits + n_doors + n_corrs + n_egrids
+         n_nodes = n_entrys + n_exits + n_doors + n_corrs + n_egrids + n_strs
          If (n_nodes > 0 ) Then
             Allocate(EVAC_Node_List(1:n_nodes),STAT=IZERO)
             Call ChkMemErr('READ','EVAC_NODE_LIST',IZERO) 
@@ -1225,7 +1225,8 @@ Contains
          Continue
       Case (7)
          COLOR_METHOD = -1
-         If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A)') &
+!         If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A)') &
+         If (MYID==Max(0,EVAC_PROCESS)) Write (LU_ERR,'(A)') &
               ' WARNING: COLOR_METHOD=7 is not defined anymore, the default (-1) is used.'
       Case Default
          Write(MESSAGE,'(A,I3,A)') 'ERROR: READ_EVAC COLOR METHOD',COLOR_METHOD, ' is not defined'
@@ -1363,7 +1364,7 @@ Contains
          Read(LU_INPUT,Exit,End=26,IOSTAT=IOS)
          !
          ! Old input used COLOR_INDEX, next lines are needed for that
-         If (MYID==Max(0,EVAC_PROCESS) .And. COLOR_INDEX.Ne.-1) Write (LU_EVACOUT,'(A,A)') &
+         If (MYID==Max(0,EVAC_PROCESS) .And. COLOR_INDEX.Ne.-1) Write (LU_ERR,'(A,A)') &
               ' WARNING: keyword COLOR_INDEX is replaced by COLOR at EXIT line ',Trim(ID)
          If (COLOR_INDEX == 1) COLOR = 'BLACK'  
          If (COLOR_INDEX == 2) COLOR = 'YELLOW' 
@@ -1390,7 +1391,7 @@ Contains
 
          If (EVAC_MESH /= 'null') Then
             MESH_ID = EVAC_MESH
-            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
+            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EXIT line ', Trim(ID)
          End If
 
@@ -1461,9 +1462,9 @@ Contains
          XB(4) = Meshes(nm)%Y(J2)
          If ( Abs(XB(1)-PEX%X1)>1.E-4_EB .Or. Abs(XB(2)-PEX%X2)>1.E-4_EB .Or. &
               Abs(XB(3)-PEX%Y1)>1.E-4_EB .Or. Abs(XB(4)-PEX%Y2)>1.E-4_EB ) Then
-            Write(lu_evacout,fmt='(a,a,a,a)') ' WARNING: Exit line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
-            Write(lu_evacout,fmt='(a,6f12.4)') 'Old XB:', PEX%X1,PEX%X2,PEX%Y1,PEX%Y2,PEX%Z1,PEX%Z2
-            Write(lu_evacout,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+            Write(lu_err,fmt='(a,a,a,a)') ' WARNING: Exit line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
+            Write(lu_err,fmt='(a,6f12.4)') 'Old XB:', PEX%X1,PEX%X2,PEX%Y1,PEX%Y2,PEX%Z1,PEX%Z2
+            Write(lu_err,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
          End If
 
          ! Coordinates are lined up with the mesh.
@@ -1673,7 +1674,7 @@ Contains
          Read(LU_INPUT,DOOR,End=27,IOSTAT=IOS)
          !
          ! Old input used COLOR_INDEX, next lines are needed for that
-         If (MYID==Max(0,EVAC_PROCESS) .And. COLOR_INDEX.Ne.-1) Write (LU_EVACOUT,'(A,A)') &
+         If (MYID==Max(0,EVAC_PROCESS) .And. COLOR_INDEX.Ne.-1) Write (LU_ERR,'(A,A)') &
               ' WARNING: keyword COLOR_INDEX is replaced by COLOR at DOOR line ',Trim(ID)
          If (COLOR_INDEX == 1) COLOR = 'BLACK'  
          If (COLOR_INDEX == 2) COLOR = 'YELLOW' 
@@ -1700,7 +1701,7 @@ Contains
 
          If (EVAC_MESH /= 'null') Then
             MESH_ID = EVAC_MESH
-            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
+            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at DOOR line ', Trim(ID)
          End If
 
@@ -1741,8 +1742,6 @@ Contains
          End If
 
          nm = PDX%IMESH
-         XB(5) = Meshes(nm)%ZS 
-         XB(6) = Meshes(nm)%ZF 
  
          If (XB(1)/=XB(2) .And. XB(3)/=XB(4)) Then
             Write(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' must be a plane'
@@ -1762,6 +1761,8 @@ Contains
          XB(2) = Min(XB(2),Meshes(nm)%XF)
          XB(3) = Max(XB(3),Meshes(nm)%YS)
          XB(4) = Min(XB(4),Meshes(nm)%YF)
+         XB(5) = Max(XB(5),Meshes(nm)%ZS)
+         XB(6) = Min(XB(6),Meshes(nm)%ZF)
 
          I1 = Nint( GINV(XB(1)-Meshes(nm)%XS,1,nm)*Meshes(nm)%RDXI ) 
          I2 = Nint( GINV(XB(2)-Meshes(nm)%XS,1,nm)*Meshes(nm)%RDXI )
@@ -1774,9 +1775,9 @@ Contains
          XB(4) = Meshes(nm)%Y(J2)
          If ( Abs(XB(1)-PDX%X1)>1.E-4_EB .Or. Abs(XB(2)-PDX%X2)>1.E-4_EB .Or. &
               Abs(XB(3)-PDX%Y1)>1.E-4_EB .Or. Abs(XB(4)-PDX%Y2)>1.E-4_EB ) Then
-            Write(lu_evacout,fmt='(a,a,a,a)') ' WARNING: Door line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
-            Write(lu_evacout,fmt='(a,6f12.4)') 'Old XB:', PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2
-            Write(lu_evacout,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+            Write(lu_err,fmt='(a,a,a,a)') ' WARNING: Door line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
+            Write(lu_err,fmt='(a,6f12.4)') 'Old XB:', PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2
+            Write(lu_err,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
          End If
 
          ! Coordinates are lined up with the mesh.
@@ -2169,6 +2170,9 @@ Contains
 
     Subroutine READ_STRS
       !
+      ! Local variables
+      REAL(EB) Z_TMP
+
       ! Read the STRS line
       READ_STRS_LOOP: Do N = 1,N_STRS
          STRP=>EVAC_STRS(N)
@@ -2176,6 +2180,7 @@ Contains
          ID                          = 'null'
          XB                          = 0._EB
          XB_CORE                     = 0._EB
+         XB_CORES                    = 0._EB
          XB_LANDINGS                 = 0._EB
          RIGHT_HANDED                = .True.
          LEFT_HANDED                 = .False.
@@ -2213,10 +2218,15 @@ Contains
             End If
          End Do STRP_MeshLoop
 
-         STRP%XB_CORE     = XB_CORE
-         STRP%INODE       = 0
-         !       STRP%TO_NODE     = TO_NODE
+         ! Count number of cores
+         STRP%N_CORES = 0
+         DO I = 1,500
+            If (ANY(XB_CORES(I,:)/=0._EB)) STRP%N_CORES = STRP%N_CORES + 1
+         ENDDO
+
+         STRP%INODE          = 0
          If (LEFT_HANDED) RIGHT_HANDED = .FALSE.
+         STRP%RIGHT_HANDED = RIGHT_HANDED
          STRP%MESH_ID     = MESH_ID
          STRP%FAC_V0_UP   = FAC_V0_UP
          STRP%FAC_V0_DOWN = FAC_V0_DOWN
@@ -2238,13 +2248,31 @@ Contains
          Call ChkMemErr('Read_Evac','STRP%NODE_TYPE',IZERO)
          STRP%XB_NODE = 0._EB 
          STRP%NODE_IOR = 0
+
+         Allocate(STRP%XB_CORE(1:MAX(1,STRP%N_CORES),1:6), STAT=IZERO)
+         Call ChkMemErr('Read_Evac','STRP%XB_CORE',IZERO)
+         If (STRP%N_CORES == 0) Then
+            STRP%N_CORES = 1
+            STRP%XB_CORE(1,1:4) = XB_CORE(1:4)
+            STRP%XB_CORE(1,5:6) = XB(5:6)
+            If (All(XB_CORE==0._EB)) Then
+                Write(MESSAGE,'(3A)') 'ERROR: STRS object ', Trim(ID), ' has no XB_CORE defined.'
+                Call SHUTDOWN(MESSAGE)
+            Endif
+         
+         Else
+            STRP%XB_CORE(1:STRP%N_CORES,1:6) = XB_CORES(1:STRP%N_CORES,1:6)
+         Endif
+         Allocate(STRP%I_CORE(1:STRP%N_NODES), STAT=IZERO)
+         Call ChkMemErr('Read_Evac','STRP%I_CORE',IZERO)
+
          ! Count and copy explicitly given landing geometries
          NL = 0
          Do I = 1,N_LANDINGS
             If (Any(XB_LANDINGS(I,:)/=0._EB)) NL = NL + 1
          End Do
          Do I = NL+1,N_LANDINGS
-            XB_LANDINGS(I,1:4) = XB_LANDINGS(I-NL,1:4)
+            XB_LANDINGS(I,1:4) = XB_LANDINGS(I-2,1:4)
             XB_LANDINGS(I,5:6) = XB_LANDINGS(I-1,5:6)+VERTICAL_LANDING_SEPARATION
          End Do
          ! Compute stair geometry
@@ -2252,15 +2280,21 @@ Contains
             XB_STAIRS(I,5) = 0.5_EB*(XB_LANDINGS(I,5)+XB_LANDINGS(I,6))
             XB_STAIRS(I,6) = 0.5_EB*(XB_LANDINGS(I+1,5)+XB_LANDINGS(I+1,6))
             STR_Height = XB_STAIRS(I,6)-XB_STAIRS(I,5)
+            Z_TMP = 0.5_EB * (XB_STAIRS(I,6)+XB_STAIRS(I,5))
+            ! Choose core
+            Do J = 1,STRP%N_CORES
+               If ((Z_TMP >= STRP%XB_CORE(J,5)) .AND. (Z_TMP <= STRP%XB_CORE(J,6))) Exit
+            Enddo
+            J = Min(J,STRP%N_CORES)
             If (XB_LANDINGS(I+1,1)>XB_LANDINGS(I,2)) Then ! From -x to +x
                XB_STAIRS(I,1) = XB_LANDINGS(I,2)
                XB_STAIRS(I,2) = XB_LANDINGS(I+1,1)
                STR_Length = XB_STAIRS(I,2)-XB_STAIRS(I,1)
                If (RIGHT_HANDED) Then 
                   XB_STAIRS(I,3) = STRP%XB(3)   
-                  XB_STAIRS(I,4) = STRP%XB_CORE(3)
+                  XB_STAIRS(I,4) = STRP%XB_CORE(J,3)
                Else
-                  XB_STAIRS(I,3) = STRP%XB_CORE(4)   
+                  XB_STAIRS(I,3) = STRP%XB_CORE(J,4)   
                   XB_STAIRS(I,4) = STRP%XB(4)
                End If
                STRP%NODE_IOR(2*I) = +1
@@ -2271,11 +2305,11 @@ Contains
                XB_STAIRS(I,2) = XB_LANDINGS(I,1)
                STR_Length = XB_STAIRS(I,2)-XB_STAIRS(I,1)
                If (RIGHT_HANDED) Then
-                  XB_STAIRS(I,3) = STRP%XB_CORE(4)
+                  XB_STAIRS(I,3) = STRP%XB_CORE(J,4)
                   XB_STAIRS(I,4) = STRP%XB(4)
                Else
                   XB_STAIRS(I,3) = STRP%XB(3)
-                  XB_STAIRS(I,4) = STRP%XB_CORE(3)
+                  XB_STAIRS(I,4) = STRP%XB_CORE(J,3)
                End If
                STRP%NODE_IOR(2*I) = -1
                If (STR_Length > 0._EB) XB_STAIRS(I,7) = Cos(Atan(STR_Height/STR_Length))
@@ -2283,11 +2317,11 @@ Contains
             End If
             If (XB_LANDINGS(I+1,3)>XB_LANDINGS(I,4)) Then ! From -y to +y
                If (RIGHT_HANDED) Then
-                  XB_STAIRS(I,1) = STRP%XB_CORE(2)
+                  XB_STAIRS(I,1) = STRP%XB_CORE(J,2)
                   XB_STAIRS(I,2) = STRP%XB(2)
                Else
                   XB_STAIRS(I,1) = STRP%XB(1)
-                  XB_STAIRS(I,2) = STRP%XB_CORE(1)
+                  XB_STAIRS(I,2) = STRP%XB_CORE(J,1)
                End If
                XB_STAIRS(I,3) = XB_LANDINGS(I,4)
                XB_STAIRS(I,4) = XB_LANDINGS(I+1,3)
@@ -2298,9 +2332,9 @@ Contains
             Else If (XB_LANDINGS(I+1,4)<XB_LANDINGS(I,3)) Then ! From +y to -y
                If (RIGHT_HANDED) Then
                   XB_STAIRS(I,1) = STRP%XB(1)
-                  XB_STAIRS(I,2) = STRP%XB_CORE(1)
+                  XB_STAIRS(I,2) = STRP%XB_CORE(J,1)
                Else
-                  XB_STAIRS(I,1) = STRP%XB_CORE(2)
+                  XB_STAIRS(I,1) = STRP%XB_CORE(J,2)
                   XB_STAIRS(I,2) = STRP%XB(2)
                End If
                XB_STAIRS(I,3) = XB_LANDINGS(I+1,4)
@@ -2317,63 +2351,79 @@ Contains
          Do I = 1, N_LANDINGS
             STRP%XB_NODE(J,1:6)     = XB_LANDINGS(I,:)
             STRP%NODE_TYPE(J)       = STRS_LANDING_TYPE
+            ! Choose core
+            Z_TMP = 0.5_EB * (STRP%XB_NODE(J,5)+STRP%XB_NODE(J,6))
+            Do K = 1,STRP%N_CORES
+               If ((Z_TMP >= STRP%XB_CORE(K,5)) .AND. (Z_TMP <= STRP%XB_CORE(K,6))) Exit
+            Enddo
+            K = Min(K,STRP%N_CORES)
+            STRP%I_CORE(J) = K
             If (I<N_LANDINGS) Then
                STRP%XB_NODE(J+1,1:8) = XB_STAIRS(I,:)
                STRP%NODE_TYPE(J+1)   = STRS_STAIR_TYPE
+               ! Choose core
+               Z_TMP = 0.5_EB * (STRP%XB_NODE(J+1,5)+STRP%XB_NODE(J+1,6))
+               Do K = 1,STRP%N_CORES
+                  If ((Z_TMP >= STRP%XB_CORE(K,5)) .AND. (Z_TMP <= STRP%XB_CORE(K,6))) Exit
+               Enddo
+               K = Min(K,STRP%N_CORES)
+               STRP%I_CORE(J+1) = K
             End If
             J = J + 2
          End Do
 
          ! Compute velocity fields
-         Do NM = 1, NMESHES
-            If (MESH_ID == MESH_NAME(NM)) Then
-               M=>MESHES(NM)
-               Allocate(STRP%U_UP(1:M%IBAR,1:M%JBAR),STAT=IZERO)
-               Call ChkMemErr('Read_Evac','STRP%U_UP',IZERO) 
-               Allocate(STRP%V_UP(1:M%IBAR,1:M%JBAR),STAT=IZERO)
-               Call ChkMemErr('Read_Evac','STRP%V_UP',IZERO) 
-               Allocate(STRP%U_DOWN(1:M%IBAR,1:M%JBAR),STAT=IZERO)
-               Call ChkMemErr('Read_Evac','STRP%U_DOWN',IZERO) 
-               Allocate(STRP%V_DOWN(1:M%IBAR,1:M%JBAR),STAT=IZERO)
-               Call ChkMemErr('Read_Evac','STRP%V_DOWN',IZERO) 
-               STRP%U_UP = 0._EB
-               STRP%V_UP = 0._EB
-               STRP%U_DOWN  = 0._EB
-               STRP%V_DOWN  = 0._EB
+!         Do NM = 1, NMESHES
+!            If (MESH_ID == MESH_NAME(NM)) Then
+!               M=>MESHES(NM)
+!               Allocate(STRP%U_UP(1:M%IBAR,1:M%JBAR),STAT=IZERO)
+!               Call ChkMemErr('Read_Evac','STRP%U_UP',IZERO) 
+!               Allocate(STRP%V_UP(1:M%IBAR,1:M%JBAR),STAT=IZERO)
+!               Call ChkMemErr('Read_Evac','STRP%V_UP',IZERO) 
+!               Allocate(STRP%U_DOWN(1:M%IBAR,1:M%JBAR),STAT=IZERO)
+!               Call ChkMemErr('Read_Evac','STRP%U_DOWN',IZERO) 
+!               Allocate(STRP%V_DOWN(1:M%IBAR,1:M%JBAR),STAT=IZERO)
+!               Call ChkMemErr('Read_Evac','STRP%V_DOWN',IZERO) 
+!               STRP%U_UP = 0._EB
+!               STRP%V_UP = 0._EB
+!               STRP%U_DOWN  = 0._EB
+!               STRP%V_DOWN  = 0._EB
 
-               II_C1 = Floor(M%CELLSI(Floor((STRP%XB_CORE(1)-M%XS)*M%RDXINT)) + 1.0_EB)
-               II_C2 = Floor(M%CELLSI(Floor((STRP%XB_CORE(2)-M%XS)*M%RDXINT)) + 1.0_EB)
-               JJ_C1 = Floor(M%CELLSJ(Floor((STRP%XB_CORE(3)-M%YS)*M%RDYINT)) + 1.0_EB)
-               JJ_C2 = Floor(M%CELLSJ(Floor((STRP%XB_CORE(4)-M%YS)*M%RDYINT)) + 1.0_EB)
+!               II_C1 = Floor(M%CELLSI(Floor((STRP%XB_CORE(1)-M%XS)*M%RDXINT)) + 1.0_EB)
+!               II_C2 = Floor(M%CELLSI(Floor((STRP%XB_CORE(2)-M%XS)*M%RDXINT)) + 1.0_EB)
+!               JJ_C1 = Floor(M%CELLSJ(Floor((STRP%XB_CORE(3)-M%YS)*M%RDYINT)) + 1.0_EB)
+!               JJ_C2 = Floor(M%CELLSJ(Floor((STRP%XB_CORE(4)-M%YS)*M%RDYINT)) + 1.0_EB)
 
-               If (RIGHT_HANDED) Then
-                  STRP%U_UP(1    :II_C2,  1    :JJ_C1 ) = 1._EB
-                  STRP%V_UP(II_C2:M%IBAR, 1    :JJ_C2 ) = 1._EB             
-                  STRP%U_UP(II_C1:M%IBAR, JJ_C2:M%JBAR) = -1._EB
-                  STRP%V_UP(1    :II_C1,  JJ_C1:M%JBAR) = -1._EB
+!               If (RIGHT_HANDED) Then
+!                  STRP%U_UP(1    :II_C2,  1    :JJ_C1 ) = 1._EB
+!                  STRP%V_UP(II_C2:M%IBAR, 1    :JJ_C2 ) = 1._EB             
+!                  STRP%U_UP(II_C1:M%IBAR, JJ_C2:M%JBAR) = -1._EB
+!                  STRP%V_UP(1    :II_C1,  JJ_C1:M%JBAR) = -1._EB
 
-                  STRP%V_DOWN(1    :II_C1,  1    :JJ_C2 )  = 1._EB
-                  STRP%U_DOWN(1    :II_C2,  JJ_C2:M%JBAR)  = 1._EB             
-                  STRP%V_DOWN(II_C2:M%IBAR, JJ_C1:M%JBAR)  = -1._EB
-                  STRP%U_DOWN(II_C1:M%IBAR, 1    :JJ_C1 )  = -1._EB
-               Else
-                  STRP%U_DOWN(1    :II_C2,  1    :JJ_C1 ) = 1._EB
-                  STRP%V_DOWN(II_C2:M%IBAR, 1    :JJ_C2 ) = 1._EB             
-                  STRP%U_DOWN(II_C1:M%IBAR, JJ_C2:M%JBAR) = -1._EB
-                  STRP%V_DOWN(1    :II_C1,  JJ_C1:M%JBAR) = -1._EB
+!                  STRP%V_DOWN(1    :II_C1,  1    :JJ_C2 )  = 1._EB
+!                  STRP%U_DOWN(1    :II_C2,  JJ_C2:M%JBAR)  = 1._EB             
+!                  STRP%V_DOWN(II_C2:M%IBAR, JJ_C1:M%JBAR)  = -1._EB
+!                  STRP%U_DOWN(II_C1:M%IBAR, 1    :JJ_C1 )  = -1._EB
+!               Else
+!                  STRP%U_DOWN(1    :II_C2,  1    :JJ_C1 ) = 1._EB
+!                  STRP%V_DOWN(II_C2:M%IBAR, 1    :JJ_C2 ) = 1._EB             
+!                  STRP%U_DOWN(II_C1:M%IBAR, JJ_C2:M%JBAR) = -1._EB
+!                  STRP%V_DOWN(1    :II_C1,  JJ_C1:M%JBAR) = -1._EB
 
-                  STRP%V_UP(1    :II_C1,  1    :JJ_C2 )  = 1._EB
-                  STRP%U_UP(1    :II_C2,  JJ_C2:M%JBAR)  = 1._EB             
-                  STRP%V_UP(II_C2:M%IBAR, JJ_C1:M%JBAR)  = -1._EB
-                  STRP%U_UP(II_C1:M%IBAR, 1    :JJ_C1 )  = -1._EB
-               End If
-            End If
-         End Do
+!                  STRP%V_UP(1    :II_C1,  1    :JJ_C2 )  = 1._EB
+!                  STRP%U_UP(1    :II_C2,  JJ_C2:M%JBAR)  = 1._EB             
+!                  STRP%V_UP(II_C2:M%IBAR, JJ_C1:M%JBAR)  = -1._EB
+!                  STRP%U_UP(II_C1:M%IBAR, 1    :JJ_C1 )  = -1._EB
+!               End If
+!            End If
+!         End Do
 
       End Do READ_STRS_LOOP
 32    Rewind(LU_INPUT)
 
     End Subroutine READ_STRS
+
+
 
     Logical Function Is_Within_Bounds(P1x1,P1x2,P1y1,P1y2,P1z1,P1z2,& 
          P2x1,P2x2,P2y1,P2y2,P2z1,P2z2,xtol,ytol,ztol)
@@ -2433,14 +2483,13 @@ Contains
             EVAC_Node_List(n_tmp)%Node_Type  = 'Corr'
             EVAC_Node_List(n_tmp)%ID         = EVAC_CORRS(n)%ID
          End Do
-         !       Do n = 1, n_strs
-         !          write(lu_evacout,*)'*** ', n,EVAC_STRS(n)%ID
-         !          n_tmp = n_tmp + 1
-         !          EVAC_STRS(n)%INODE               = n_tmp
-         !          EVAC_Node_List(n_tmp)%Node_Index = n
-         !          EVAC_Node_List(n_tmp)%Node_Type  = 'Stairs'
-         !          EVAC_Node_List(n_tmp)%ID         = EVAC_STRS(n)%ID
-         !       End Do
+         Do n = 1, n_strs
+            n_tmp = n_tmp + 1
+            EVAC_STRS(n)%INODE               = n_tmp
+            EVAC_Node_List(n_tmp)%Node_Index = n
+            EVAC_Node_List(n_tmp)%Node_Type  = 'Stairs'
+            EVAC_Node_List(n_tmp)%ID         = EVAC_STRS(n)%ID
+         End Do
 
          ! Check that door/corr/entry/exit have unique names
          Do n = 1, n_nodes - 1
@@ -2474,31 +2523,32 @@ Contains
       !
       ! Read the ENTR lines
       !
-      Integer nm, i1, i2, j1, j2
+      Integer nm, i1, i2, j1, j2, NR
       !
       READ_ENTR_LOOP: Do N = 1, N_ENTRYS
          !
-         ID            = 'null'
-         RGB           = -1
-         COLOR         = 'null'
-         AVATAR_RGB    = -1
-         AVATAR_COLOR  = 'null'
-         XB            = 0.0_EB
-         IOR           = 0
-         FLOW_FIELD_ID = 'null'
-         MESH_ID       = 'null'
-         EVAC_MESH     = 'null'
-         TO_NODE       = 'null'
-         PERS_ID       = 'null'
-         QUANTITY      = 'null'
-         MAX_FLOW      = 0.0_EB
-         WIDTH         = 0.0_EB
-         AFTER_REACTION_TIME = .False.
-         TIME_START          = -Huge(TIME_START)
-         TIME_STOP           =  Huge(TIME_STOP)
-         MAX_HUMANS    = -1
-         KNOWN_DOOR_NAMES         = 'null'
-         KNOWN_DOOR_PROBS         = 1.0_EB
+         ID                      = 'null'
+         RGB                     = -1
+         COLOR                   = 'null'
+         AVATAR_RGB              = -1
+         AVATAR_COLOR            = 'null'
+         XB                      = 0.0_EB
+         IOR                     = 0
+         FLOW_FIELD_ID           = 'null'
+         MESH_ID                 = 'null'
+         EVAC_MESH               = 'null'
+         TO_NODE                 = 'null'
+         PERS_ID                 = 'null'
+         QUANTITY                = 'null'
+         MAX_FLOW                = 0.0_EB
+         WIDTH                   = 0.0_EB
+         AFTER_REACTION_TIME     = .False.
+         TIME_START              = -Huge(TIME_START)
+         TIME_STOP               =  Huge(TIME_STOP)
+         MAX_HUMANS              = -1
+         MAX_HUMANS_RAMP         = 'null'
+         KNOWN_DOOR_NAMES        = 'null'
+         KNOWN_DOOR_PROBS        = 1.0_EB
          !
          !
          Call CHECKREAD('ENTR',LU_INPUT,IOS)
@@ -2508,7 +2558,7 @@ Contains
          Read(LU_INPUT,ENTR,End=28,IOSTAT=IOS)
          ! 
          ! Old input used QUANTITY, next lines are needed for that
-         If (MYID==Max(0,EVAC_PROCESS) .And. QUANTITY .Ne. 'null') Write (LU_EVACOUT,'(A,A)') &
+         If (MYID==Max(0,EVAC_PROCESS) .And. QUANTITY .Ne. 'null') Write (LU_ERR,'(A,A)') &
               ' WARNING: keyword QUANTITY is replaced by AVATAR_COLOR at ENTR line ',Trim(ID)
          If (QUANTITY == 'BLACK')   AVATAR_COLOR = 'BLACK'  
          If (QUANTITY == 'YELLOW')  AVATAR_COLOR = 'YELLOW' 
@@ -2531,6 +2581,10 @@ Contains
 
          If (MAX_HUMANS < 0) MAX_HUMANS = Huge(MAX_HUMANS)
          If (MAX_FLOW <= 0.0_EB) MAX_HUMANS = 0
+         IF (MAX_HUMANS_RAMP/='null') THEN
+            CALL GET_RAMP_INDEX(MAX_HUMANS_RAMP,'TIME',NR)
+            MAX_HUMANS = -NR
+         ENDIF 
 
          PNX=>EVAC_ENTRYS(N)
 
@@ -2540,7 +2594,7 @@ Contains
 
          If (EVAC_MESH /= 'null') Then
             MESH_ID = EVAC_MESH
-            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
+            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at ENTR line ', Trim(ID)
          End If
 
@@ -2565,14 +2619,15 @@ Contains
          Call ChkMemErr('Read_Evac','PNX%P_VENT_FFIELDS',IZERO) 
          !
 
-         PNX%TO_NODE    = TO_NODE
-         PNX%T_first    = T_BEGIN
-         PNX%T_last     = T_BEGIN
-         PNX%ICOUNT     = 0
-         PNX%Flow       = MAX_FLOW
-         PNX%T_Start    = TIME_START
-         PNX%T_Stop     = TIME_STOP
-         PNX%Max_Humans = MAX_HUMANS
+         PNX%TO_NODE          = TO_NODE
+         PNX%T_first          = T_BEGIN
+         PNX%T_last           = T_BEGIN
+         PNX%ICOUNT           = 0
+         PNX%Flow             = MAX_FLOW
+         PNX%T_Start          = TIME_START
+         PNX%T_Stop           = TIME_STOP
+         PNX%Max_Humans       = MAX_HUMANS
+         PNX%Max_Humans_Ramp  = MAX_HUMANS_RAMP
 
          ! Check that the entry is properly specified
 
@@ -2611,9 +2666,7 @@ Contains
          End If
 
          nm = PNX%IMESH
-         XB(5) = Meshes(nm)%ZS 
-         XB(6) = Meshes(nm)%ZF 
- 
+
          If (XB(1)/=XB(2) .And. XB(3)/=XB(4)) Then
             Write(MESSAGE,'(A,I4,A)') 'ERROR: ENTR',N,' must be a plane'
             Call SHUTDOWN(MESSAGE)
@@ -2624,14 +2677,14 @@ Contains
          PNX%X2 = XB(2)
          PNX%Y1 = XB(3)
          PNX%Y2 = XB(4)
-         PNX%Z1 = XB(5)
-         PNX%Z2 = XB(6)
 
          ! Move user input to mesh cell boundaries
          XB(1) = Max(XB(1),Meshes(nm)%XS)
          XB(2) = Min(XB(2),Meshes(nm)%XF)
          XB(3) = Max(XB(3),Meshes(nm)%YS)
          XB(4) = Min(XB(4),Meshes(nm)%YF)
+         XB(5) = Max(XB(5),Meshes(nm)%ZS)
+         XB(6) = Min(XB(6),Meshes(nm)%ZF)
 
          I1 = Nint( GINV(XB(1)-Meshes(nm)%XS,1,nm)*Meshes(nm)%RDXI ) 
          I2 = Nint( GINV(XB(2)-Meshes(nm)%XS,1,nm)*Meshes(nm)%RDXI )
@@ -2644,9 +2697,9 @@ Contains
          XB(4) = Meshes(nm)%Y(J2)
          If ( Abs(XB(1)-PNX%X1)>1.E-4_EB .Or. Abs(XB(2)-PNX%X2)>1.E-4_EB .Or. &
               Abs(XB(3)-PNX%Y1)>1.E-4_EB .Or. Abs(XB(4)-PNX%Y2)>1.E-4_EB ) Then
-            Write(lu_evacout,fmt='(a,a,a,a)') ' WARNING: Entr line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
-            Write(lu_evacout,fmt='(a,6f12.4)') 'Old XB:', PNX%X1,PNX%X2,PNX%Y1,PNX%Y2,PNX%Z1,PNX%Z2
-            Write(lu_evacout,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+            Write(lu_err,fmt='(a,a,a,a)') ' WARNING: Entr line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
+            Write(lu_err,fmt='(a,6f12.4)') 'Old XB:', PNX%X1,PNX%X2,PNX%Y1,PNX%Y2,PNX%Z1,PNX%Z2
+            Write(lu_err,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
          End If
 
          ! Coordinates are lined up with the mesh.
@@ -2812,7 +2865,7 @@ Contains
          Read(LU_INPUT,EVAC,End=25,IOSTAT=IOS)
          ! 
          ! Old input used QUANTITY, next lines are needed for that
-         If (MYID==Max(0,EVAC_PROCESS) .And. QUANTITY .Ne. 'null') Write (LU_EVACOUT,'(A,A)') &
+         If (MYID==Max(0,EVAC_PROCESS) .And. QUANTITY .Ne. 'null') Write (LU_ERR,'(A,A)') &
               ' WARNING: keyword QUANTITY is replaced by AVATAR_COLOR at EVAC line ',Trim(ID)
          If (QUANTITY == 'BLACK')   AVATAR_COLOR = 'BLACK'  
          If (QUANTITY == 'YELLOW')  AVATAR_COLOR = 'YELLOW' 
@@ -2841,7 +2894,7 @@ Contains
          If (COLOR_METHOD == 0 .And. NUMBER_INITIAL_PERSONS > 0) HPT%Avatar_Color_Index = i_avatar_color
          If (EVAC_MESH /= 'null') Then
             MESH_ID = EVAC_MESH
-            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
+            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVAC line ', Trim(ID)
          End If
          If (Trim(PERS_ID) == 'null') Then
@@ -3048,7 +3101,7 @@ Contains
          End Do
          If (EVAC_MESH /= 'null') Then
             MESH_ID = EVAC_MESH
-            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
+            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVHO line ', Trim(ID)
          End If
 
@@ -3136,7 +3189,7 @@ Contains
          End Do
          If (EVAC_MESH /= 'null') Then
             MESH_ID = EVAC_MESH
-            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A,A)') &
+            If (MYID==Max(0,EVAC_PROCESS)) Write (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVSS line ', Trim(ID)
          End If
          !
@@ -3328,6 +3381,8 @@ Contains
       ! Create List of outgoing nodes for stairs
       NODES_TMP = 0
       Do I = NMESHES+1,N_NODES
+         If (EVAC_NODE_List(I)%Node_type == 'Entry') Cycle
+         If (EVAC_NODE_List(I)%Node_type == 'Stair') Cycle
          If (EVAC_NODE_List(I)%IMESH == STRP%IMESH) Then
             STRP%N_NODES_OUT = STRP%N_NODES_OUT + 1
             NODES_TMP(STRP%N_NODES_OUT) = I
@@ -3350,7 +3405,7 @@ Contains
     Integer n_cols, i, j, nm, izero
     Logical L_fed_read, L_fed_save, L_eff_read, L_eff_save, L_status
     Integer(4) n_egrids_tmp, ibar_tmp, jbar_tmp, kbar_tmp, &
-         ntmp1, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6, ios
+         ntmp1, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6, ios,N
     Real(FB) u_tmp, v_tmp
     Character(60), Allocatable, Dimension(:) :: CTEMP
     !
@@ -3365,6 +3420,30 @@ Contains
     !              1a. row: n < 0 (New Format)
     !              1b. row: n_egrids,4,n_corrs=0,4 (New Format, version 1.11)
     !
+
+   IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+
+   ! Evacuation files
+
+   LU_EVACCSV = GET_FILE_NUMBER()
+   FN_EVACCSV = TRIM(CHID)//'_evac.csv'
+   LU_EVACEFF = GET_FILE_NUMBER()
+   FN_EVACEFF = TRIM(CHID)//'_evac.eff'
+   LU_EVACFED = GET_FILE_NUMBER()
+   FN_EVACFED = TRIM(CHID)//'_evac.fed'
+   LU_EVACOUT = GET_FILE_NUMBER()
+   FN_EVACOUT = TRIM(CHID)//'_evac.out'
+
+   ! Open evacuation output file
+
+   IF (APPEND) THEN
+      OPEN (LU_EVACOUT,file=FN_EVACOUT,form='formatted',status='old', position='append')
+   ELSE
+      OPEN (LU_EVACOUT,file=FN_EVACOUT,form='formatted', status='replace')
+   ENDIF
+
+   ! Write program info
+
     Write(EVAC_COMPILE_DATE,'(A)') evacrev(Index(evacrev,':')+1:Len_trim(evacrev)-2)
     Read (EVAC_COMPILE_DATE,'(I5)') EVAC_MODULE_REV
     Write(EVAC_COMPILE_DATE,'(A)') evacdate
@@ -3702,6 +3781,30 @@ Contains
        EVAC_Z_MIN = Min(EVAC_Z_MIN,Real(MFF%ZS,FB))
        EVAC_Z_MAX = Max(EVAC_Z_MAX,Real(MFF%ZF,FB))
     End Do
+
+   ! write STRS properties
+   If (MYID==Max(0,EVAC_PROCESS)) Then
+   Do N = 1, N_STRS
+      Write (LU_EVACOUT,'(A,A)')      '  Stair ',Trim(EVAC_STRS(N)%ID)
+      Write (LU_EVACOUT,'(A,6F10.3)') '   Co-ordinates: ',EVAC_STRS(N)%XB(1:6)
+      Write (LU_EVACOUT,'(A)')          '   Node coordinates'
+      Do NM = 1,EVAC_STRS(N)%N_NODES
+      If (EVAC_STRS(N)%NODE_TYPE(NM) == STRS_LANDING_TYPE) Then
+      Write (LU_EVACOUT,'(A,I3,8F8.3)') '   Landing ',NM,EVAC_STRS(N)%XB_NODE(NM,1:8)
+      Else
+      Write (LU_EVACOUT,'(A,I3,8F8.3)') '   Stair   ',NM,EVAC_STRS(N)%XB_NODE(NM,1:8)
+      Endif
+      ENDDO
+      Write (LU_EVACOUT,'(A)')          '   Nodes in '
+      DO NM = 1, EVAC_STRS(N)%N_NODES_IN
+      Write (LU_EVACOUT,'(I5,A,A)')          NM, ' ', EVAC_NODE_List(EVAC_STRS(N)%NODES_IN(NM))%ID
+      ENDDO
+      Write (LU_EVACOUT,'(A)')          '   Nodes out '
+      DO NM = 1, EVAC_STRS(N)%N_NODES_OUT
+      Write (LU_EVACOUT,'(I5,A,A)')          NM, ' ', EVAC_NODE_List(EVAC_STRS(N)%NODES_OUT(NM))%ID
+      ENDDO
+   Enddo
+   End if
 
   End Subroutine Initialize_Evac_Dumps
       
@@ -6452,7 +6555,7 @@ Contains
          UBAR = x_target-HR%X
          VBAR = y_target-HR%Y
          Door_Dist = SQRT((x_target-HR%X)**2+(y_target-HR%Y)**2)
-         If ( Door_Dist < 0.50*Door_width ) Then
+         If ( Door_Dist < 0.5_EB*Door_width ) Then
             Select Case(door_ior)
             Case(-1,+1)
                UBAR = SIGN(1.0_EB,UBAR)
@@ -6461,17 +6564,18 @@ Contains
             Case(-2,+2)
                UBAR = 0._EB
                VBAR = SIGN(1.0_EB,VBAR)
-               HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)
+               HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)*2
             End Select
          End If
       Else If (NM_STRS_MESH) Then 
-         If (HR%STRS_Direction > 0) Then
-            UBAR = STRP%U_UP(II,JJ)
-            VBAR = STRP%V_UP(II,JJ)
-         Else
-            UBAR = STRP%U_DOWN(II,JJ)
-            VBAR = STRP%V_DOWN(II,JJ)
-         End If
+         CALL STRS_U_AND_V(STRP,HR%STR_SUB_INDX,HR%X,HR%Y,HR%STRS_Direction,UBAR,VBAR)
+!         If (HR%STRS_Direction > 0) Then
+!            UBAR = STRP%U_UP(II,JJ)
+!            VBAR = STRP%V_UP(II,JJ)
+!         Else
+!            UBAR = STRP%U_DOWN(II,JJ)
+!            VBAR = STRP%V_DOWN(II,JJ)
+!         End If
       Else
          ! For thin walls and large dx,dy one do not get nice
          ! interpolation by using AFILL2. AFILL2 does not notice that
@@ -6582,7 +6686,6 @@ Contains
          J1 = 1
          J2 = STRP%N_NODES
       End If
-
       LoopSubIndx: Do J = J1,J2
          If (HP%X < SP%XB_NODE(J,1)) Cycle                
          If (HP%X > SP%XB_NODE(J,2)) Cycle                
@@ -6642,9 +6745,11 @@ Contains
     Subroutine Find_Target_Node_In_Strs(SP,HP)
       Type (EVAC_STRS_TYPE), Pointer ::  SP
       Type (HUMAN_TYPE), Pointer :: HP
+      Type (EVAC_ENTR_TYPE), Pointer :: PNX
+
       ! Local variables
       Logical IsKnownDoor,FinalTargetFound
-      Integer :: I_Target = 0, I, Id, Final_node, IG, IN
+      Integer :: I_Target = 0, I, Id, Final_node, IG, IN, Inode
       Real(EB) z_node, z_final, dz_node, dz_final, z_final_unknown,dz_tmp1, dz_tmp2, dz_node_actual
 
       FinalTargetFound = .FALSE.
@@ -6654,18 +6759,33 @@ Contains
       dz_node_actual = 0._EB
 
       Do I = 1, n_nodes
-         ! check if is known door?
          IsKnownDoor = .FALSE.
-         If (Human_Known_Doors(IG)%N_nodes == 0) Then
-            IsKnownDoor = .True.
-         Else
-            IN = EVAC_Node_List(I)%Node_index
-            Do Id = 1, Human_Known_Doors(IG)%N_nodes
-               If (I == Human_Known_Doors(IG)%I_nodes(Id)) Then
-                  IsKnownDoor = .True.
-                  Exit
-               End If
-            End Do
+         If (IG == 0 ) Then
+            ! Human came from entry
+            PNX => EVAC_ENTRYS(ABS(HR%IEL))
+            If (PNX%N_VENT_FFIELDS == 0) Then
+               IsKnownDoor = .True.
+            Else
+               Do Id = 1, PNX%N_VENT_FFIELDS
+                  If (I == EVAC_Node_List(PNX%I_DOOR_NODES(II))%Node_Index) Then
+                     IsKnownDoor = .True.
+                     Exit
+                  End If
+               End Do
+            Endif
+         Else            
+            ! Check the group know doors
+            If (Human_Known_Doors(IG)%N_nodes == 0) Then
+               IsKnownDoor = .True.
+            Else
+               IN = EVAC_Node_List(I)%Node_index
+               Do Id = 1, Human_Known_Doors(IG)%N_nodes
+                  If (I == Human_Known_Doors(IG)%I_nodes(Id)) Then
+                     IsKnownDoor = .True.
+                     Exit
+                  End If
+               End Do
+            End If
          End If
          If (EVAC_NODE_List(I)%Node_type=='Exit') Then
             z_final_unknown = EVAC_EXITS(EVAC_NODE_List(I)%Node_index)%Z1
@@ -6680,15 +6800,17 @@ Contains
       If (.NOT.FinalTargetFound) z_final = z_final_unknown
       dz_final = z_final - HP%Z
 
+      ! Find the target among the nodes leading out of the STRS (doors and exits)
       FinalTargetFound = .FALSE.
       dz_tmp2 = Huge(1.0_EB)
       FindTargetNodeLoop: Do I = 1,SP%N_NODES_OUT
+         Inode = SP%NODES_OUT(I)
          dz_node = -1._EB * SIGN(1.0_EB,dz_final) ! initialize dz_node to different direction than final target
-         Select Case(EVAC_NODE_List(SP%NODES_OUT(I))%Node_type)
+         Select Case(EVAC_NODE_List(Inode)%Node_type)
          Case('Door')
-            z_node = EVAC_DOORS(EVAC_Node_List(SP%NODES_OUT(I))%Node_index)%Z1
+            z_node = EVAC_DOORS(EVAC_Node_List(Inode)%Node_index)%Z1
          Case('Exit')
-            z_node = EVAC_EXITS(EVAC_Node_List(SP%NODES_OUT(I))%Node_index)%Z1
+            z_node = EVAC_EXITS(EVAC_Node_List(Inode)%Node_index)%Z1
          Case default
             write(LU_ERR,*) 'ERROR (debug): unknown node type in Find_Target_Node_In_Strs'
          End Select
@@ -6703,14 +6825,19 @@ Contains
             End If
          End If
       End Do FindTargetNodeLoop
+
+      ! Find the target among the nodes leading in to the STRS, i.e. DOORS
       If (.NOT.FinalTargetFound) Then
       FindTargetNodeLoop2: Do I = 1,SP%N_NODES_IN
+         Inode = SP%NODES_IN(I)
          dz_node = -1._EB * SIGN(1.0_EB,dz_final) ! initialize dz_node to different direction than final target
-         Select Case(EVAC_NODE_List(SP%NODES_IN(I))%Node_type)
+         Select Case(EVAC_NODE_List(Inode)%Node_type)
          Case('Door')
-            z_node = EVAC_DOORS(EVAC_Node_List(I)%Node_index)%Z1
+            z_node = EVAC_DOORS(EVAC_Node_List(Inode)%Node_index)%Z1
          Case('Exit')
-            z_node = EVAC_EXITS(EVAC_Node_List(I)%Node_index)%Z1
+!            z_node = EVAC_EXITS(EVAC_Node_List(SP%NODES_IN(I))%Node_index)%Z1
+         Case('Entry')
+!            z_node = EVAC_ENTRYS(EVAC_Node_list(SP%NODES_IN(I))%Node_index)%Z1
          Case default
             Write(LU_ERR,*) 'ERROR (debug): unknown node type in Find_Target_Node_In_Strs'
          End Select
@@ -6719,7 +6846,7 @@ Contains
             dz_tmp1 = ABS(dz_final-dz_node)
             If ( dz_tmp1 < dz_tmp2) Then
                FinalTargetFound = .TRUE.
-               HP%I_Target = EVAC_Node_List(SP%NODES_IN(I))%Node_index
+               HP%I_Target = EVAC_Node_List(Inode)%Node_index
                dz_tmp2 = dz_tmp1
                dz_node_actual = dz_node
             End If
@@ -6731,9 +6858,48 @@ Contains
       Else
          HP%STRS_Direction = -1   
       End If
-
-
     End Subroutine Find_Target_Node_In_Strs
+
+    Subroutine STRS_U_AND_V(STRP,I_NODE,X,Y,Direction,UBAR,VBAR)
+    ! Get preferred direction in STRS
+    Type (EVAC_STRS_TYPE), Pointer, Intent(IN)::  STRP
+    Integer, intent(IN) :: I_NODE, Direction
+    REAL(EB), Intent(IN) :: X, Y
+    REAL(EB), Intent(OUT) :: UBAR, VBAR
+    ! Local variables
+    Integer I_CORE
+
+    I_CORE = STRP%I_CORE(I_NODE)
+
+    UBAR = 0._EB
+    VBAR = 0._EB
+    
+    If (STRP%RIGHT_HANDED) Then
+      If (Direction > 0) Then
+         IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR =  1._EB
+         IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
+         IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR = -1._EB
+         IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
+      Else
+         IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
+         IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR =  1._EB
+         IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
+         IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR = -1._EB
+      Endif
+    Else
+      If (Direction < 0) Then
+         IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR =  1._EB
+         IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
+         IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR = -1._EB
+         IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
+      Else
+         IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
+         IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR =  1._EB
+         IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
+         IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR = -1._EB
+      Endif
+    Endif
+    End Subroutine STRS_U_AND_V
 
     Subroutine GET_IW(IIin,JJin,KKin,IOR,IW)
       Implicit None
@@ -7674,6 +7840,7 @@ Contains
          HR=>HUMAN(I)
          If (I > N_HUMANS-IKILL) Exit DROP_LOOP
          If (HR%X > XS .And. HR%X < XF .And. HR%Y > YS .And. HR%Y < YF) Cycle DROP_LOOP
+         write(*,*) HR%X,HR%Y,HR%Z,HR%SKIP_WALL_FORCE_IOR,ABS(HR%IEL)
          HUMAN(I) = HUMAN(N_HUMANS-IKILL)
          IKILL = IKILL + 1
       End Do DROP_LOOP
@@ -7690,7 +7857,7 @@ Contains
       Integer,  Intent(IN) :: I_entry, NM
       Integer, Intent(OUT) :: istat
       Real(EB) RN, x1, x2, y1, y2, z1, z2, d_max, dist, xx, yy, zz, xx1, yy1
-      Integer  II, JJ, KK, ior, irnmax, irn, ie
+      Integer  II, JJ, KK, ior, irnmax, irn, ie, NR
       Real(EB), Dimension(6) ::y_tmp, x_tmp, r_tmp
       !
       istat = 1
@@ -7699,7 +7866,12 @@ Contains
       If (PNX%Flow <= 0.0_EB ) Return
       If (PNX%T_Start > Tin) Return
       If (PNX%T_Stop < Tin) Return
-      If (PNX%Max_Humans > PNX%ICOUNT) Return
+      If (PNX%Max_Humans < 0) Then
+         NR     = -PNX%Max_Humans  
+         If (PNX%ICOUNT >= INT(EVALUATE_RAMP(Tin,0._EB,NR))) Return
+      Else
+         If (PNX%ICOUNT >= PNX%Max_Humans) Return
+      Endif
       MFF => MESHES(NM)
       If ( (Tin-PNX%T_last) < (1.0_EB/PNX%Flow) ) Return
       X1  = PNX%X1
@@ -7874,6 +8046,8 @@ Contains
          HR%Eta       = 0.0_EB
          HR%Ksi       = 0.0_EB
          HR%NewRnd    = .True.
+         HR%STR_SUB_INDX = PNX%STR_SUB_INDX
+         HR%SKIP_WALL_FORCE_IOR = 0
          Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,3a)') ' EVAC: Person n:o', HR%ILABEL, ' inserted ', Tin, &
               ' s, entry ', Trim(PNX%ID),' ffield ', Trim(HR%FFIELD_NAME)
       End If
@@ -9515,7 +9689,7 @@ Contains
 
     is = +1    ! minus or plus direction
     If (Skip_Wall_Force_Ior==2) Then
-       d_px = d_px + is*(2.0_EB*d_cutoff)
+       d_py = d_py + is*(2.0_EB*d_cutoff)
     Else   
        dy = M%DY(jjn) ! no stretched meshes for evac
        i_end = Int((d_cutoff+r_circle)/dy) + 1
