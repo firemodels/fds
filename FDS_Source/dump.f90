@@ -191,19 +191,6 @@ ENDIF
 LU_HRR   = GET_FILE_NUMBER()
 FN_HRR   = TRIM(CHID)//'_hrr.csv'
 
-! Evacuation files
-
-IF (ANY(EVACUATION_ONLY)) THEN
-   LU_EVACCSV = GET_FILE_NUMBER()
-   FN_EVACCSV = TRIM(CHID)//'_evac.csv'
-   LU_EVACEFF = GET_FILE_NUMBER()
-   FN_EVACEFF = TRIM(CHID)//'_evac.eff'
-   LU_EVACFED = GET_FILE_NUMBER()
-   FN_EVACFED = TRIM(CHID)//'_evac.fed'
-   LU_EVACOUT = GET_FILE_NUMBER()
-   FN_EVACOUT = TRIM(CHID)//'_evac.out'
-ENDIF
-
 ! Device and Control Files
 
 IF (COLUMN_DUMP_LIMIT) THEN 
