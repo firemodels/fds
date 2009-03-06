@@ -102,7 +102,10 @@ ELSE
    ENDDO
 ENDIF
 
-IF (CHECK_MU_DNS) MU_DNS=MU
+IF (CHECK_MU_DNS .OR. WERNER_WENGLE_WALL_MODEL) THEN
+   CALL VISCOSITY_BC(NM)
+   MU_DNS=MU
+ENDIF
 
 ! Compute eddy viscosity using Smagorinsky model
 
@@ -1095,15 +1098,19 @@ SUBROUTINE VELOCITY_BC(T,NM)
 
 ! Assert tangential velocity boundary conditions
 
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+USE TURBULENCE, ONLY: WALL_MODEL
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: VBC(2),MUA,FVT(2,2),UP,UM,VP,VM,WP,WM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,TSI,WGT,TNOW,PROF(2),RAMP_T
 INTEGER  :: I,J,K,IBC(2),NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR(2),IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,N_IOR
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,OM_UU,OM_VV,OM_WW
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,OM_UU,OM_VV,OM_WW,RHOP
 TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (OMESH_TYPE), POINTER :: OM
 LOGICAL :: SPEC_TANG_VEL(2)
+
+!! new for WERNER_WENGLE_WALL_MODEL
+REAL(EB) :: MU_WALL,RHO_WALL,WW_SF,TAU_XY_WALL,TAU_YX_WALL,TAU_YZ_WALL,TAU_ZY_WALL,TAU_XZ_WALL,TAU_ZX_WALL
 
 IF (SOLID_PHASE_ONLY) RETURN
 
@@ -1119,10 +1126,12 @@ IF (PREDICTOR) THEN
    UU => US
    VV => VS
    WW => WS
+   RHOP => RHOS
 ELSE
    UU => U
    VV => V
    WW => W
+   RHOP => RHO
 ENDIF
 
 ! Set the boundary velocity place holder to some large negative number
@@ -1198,6 +1207,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          FVT(N_IOR,2) = RAMP_T*SF%VEL_T(2)
       ENDIF
    ENDDO
+   IF (WERNER_WENGLE_WALL_MODEL) VBC=-1._EB
 
    ! Loop over all edges and assign tangential velocity components
  
@@ -1213,22 +1223,58 @@ EDGE_LOOP: DO IE=1,N_EDGES
          VM   = VV(II,JJ,KK)
          WP   = WW(II,JJ+1,KK)
          WM   = WW(II,JJ,KK)
+         
+         MUA = .25_EB*( MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) ) ! based on effective viscosity
+         IF (WERNER_WENGLE_WALL_MODEL) THEN
+            MU_WALL = .25_EB*( MU_DNS(II,JJ,KK) + MU_DNS(II,JJ+1,KK) + MU_DNS(II,JJ+1,KK+1) + MU_DNS(II,JJ,KK+1) )
+            RHO_WALL = .25_EB*( RHOP(II,JJ,KK) + RHOP(II,JJ+1,KK) + RHOP(II,JJ+1,KK+1) + RHOP(II,JJ,KK+1) )
+         ENDIF
 
          IF (NOM(2)==0 .OR. EDGE_TYPE(IE,2)/=INTERPOLATED_EDGE) THEN
+            !!IF (EDGE_TYPE(IE,2)==OPEN_EDGE .OR. EDGE_TYPE(IE,2)==MIRROR_EDGE) VBC(2)=1._EB ! not yet functional, **
             SELECT CASE(IOR(2))
                CASE(-3)
                   IWM = WALL_INDEX(ICMM, 3) 
-                  IWP = WALL_INDEX(ICPM, 3) 
+                  IWP = WALL_INDEX(ICPM, 3)
+                  
+                  ! ** ... but would replace this IF statment
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(2)=1._EB
+                  ENDIF
+                  
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) VP = VBC(2)*VM
                      IF (     SPEC_TANG_VEL(2)) VP = FVT(2,2)*PROF(2)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,VM,MU_WALL/RHO_WALL,DZ(KK))
+                        TAU_YZ_WALL = MU_WALL*RDZ(KK)*VM*(WW_SF-1._EB)
+                     ELSE
+                        TAU_YZ_WALL = MUA*RDZ(KK)*(VP-VM)
+                     ENDIF
                   ENDIF
                CASE( 3)
                   IWM = WALL_INDEX(ICMP,-3) 
-                  IWP = WALL_INDEX(ICPP,-3) 
+                  IWP = WALL_INDEX(ICPP,-3)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(2)=1._EB
+                  ENDIF
+                  
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) VM = VBC(2)*VP
                      IF (     SPEC_TANG_VEL(2)) VM = FVT(2,2)*PROF(2)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,VP,MU_WALL/RHO_WALL,DZ(KK))
+                        TAU_YZ_WALL = MU_WALL*RDZ(KK)*VP*(1._EB-WW_SF)
+                     ELSE
+                        TAU_YZ_WALL = MUA*RDZ(KK)*(VP-VM)
+                     ENDIF
                   ENDIF
             END SELECT
          ELSE
@@ -1247,17 +1293,45 @@ EDGE_LOOP: DO IE=1,N_EDGES
             SELECT CASE(IOR(1))
                CASE(-2)
                   IWM = WALL_INDEX(ICMM, 2) 
-                  IWP = WALL_INDEX(ICMP, 2) 
+                  IWP = WALL_INDEX(ICMP, 2)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(1)=1._EB
+                  ENDIF
+                  
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) WP = VBC(1)*WM
                      IF (     SPEC_TANG_VEL(1)) WP = FVT(1,2)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,WM,MU_WALL/RHO_WALL,DY(JJ))
+                        TAU_ZY_WALL = MU_WALL*RDY(JJ)*WM*(WW_SF-1._EB)
+                     ELSE
+                        TAU_ZY_WALL = MUA*RDY(JJ)*(WP-WM)
+                     ENDIF
                   ENDIF
                CASE( 2)
                   IWM = WALL_INDEX(ICPM,-2) 
-                  IWP = WALL_INDEX(ICPP,-2) 
+                  IWP = WALL_INDEX(ICPP,-2)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(1)=1._EB
+                  ENDIF
+                   
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) WM = VBC(1)*WP
                      IF (     SPEC_TANG_VEL(1)) WM = FVT(1,2)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,WP,MU_WALL/RHO_WALL,DY(JJ))
+                        TAU_ZY_WALL = MU_WALL*RDY(JJ)*WP*(1._EB-WW_SF)
+                     ELSE
+                        TAU_ZY_WALL = MUA*RDY(JJ)*(WP-WM)
+                     ENDIF
                   ENDIF
             END SELECT
          ELSE
@@ -1272,11 +1346,13 @@ EDGE_LOOP: DO IE=1,N_EDGES
             IF (NOM(1)>0) WP = WGT*OM_WW(IIO(1),JJO(1),KKO(1)) + (1._EB-WGT)*OM_WW(IIO(1),JJO(1),KKO(1)-1) 
          ENDIF
 
-         MUA = .25_EB*( MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
+         !!MUA = .25_EB*( MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
          DVDZ = RDZN(KK)*(VP-VM)
          DWDY = RDYN(JJ)*(WP-WM)
          OME_E(IE) = DWDY - DVDZ
-         TAU_E(IE) = MUA*(DVDZ + DWDY)
+         !!TAU_E(IE) = MUA*(DVDZ + DWDY)
+         TAU_E(IE) = TAU_YZ_WALL + TAU_ZY_WALL
+         
          IF (JJ==0)    WW(II,JJ,KK)   = WM
          IF (JJ==JBAR) WW(II,JJ+1,KK) = WP
          IF (KK==0)    VV(II,JJ,KK)   = VM
@@ -1296,22 +1372,56 @@ EDGE_LOOP: DO IE=1,N_EDGES
          UM   = UU(II,JJ,KK)
          WP   = WW(II+1,JJ,KK)
          WM   = WW(II,JJ,KK)
+         
+         MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
+         IF (WERNER_WENGLE_WALL_MODEL) THEN
+            MU_WALL = .25_EB*( MU_DNS(II,JJ,KK) + MU_DNS(II+1,JJ,KK) + MU_DNS(II+1,JJ,KK+1) + MU_DNS(II,JJ,KK+1) )
+            RHO_WALL = .25_EB*( RHOP(II,JJ,KK) + RHOP(II+1,JJ,KK) + RHOP(II+1,JJ,KK+1) + RHOP(II,JJ,KK+1) )
+         ENDIF
 
          IF (NOM(1)==0 .OR. EDGE_TYPE(IE,1)/=INTERPOLATED_EDGE) THEN
             SELECT CASE(IOR(1))
                CASE(-3)
                   IWM = WALL_INDEX(ICMM, 3) 
-                  IWP = WALL_INDEX(ICPM, 3) 
+                  IWP = WALL_INDEX(ICPM, 3)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(1)=1._EB
+                  ENDIF
+                  
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) UP = VBC(1)*UM
                      IF (     SPEC_TANG_VEL(1)) UP = FVT(1,1)*PROF(1)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,UM,MU_WALL/RHO_WALL,DZ(KK))
+                        TAU_XZ_WALL = MU_WALL*RDZ(KK)*UM*(WW_SF-1._EB)
+                     ELSE
+                        TAU_XZ_WALL = MUA*RDZ(KK)*(UP-UM)
+                     ENDIF
                   ENDIF
                CASE( 3)
                   IWM = WALL_INDEX(ICMP,-3) 
-                  IWP = WALL_INDEX(ICPP,-3) 
+                  IWP = WALL_INDEX(ICPP,-3)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(1)=1._EB
+                  ENDIF
+                  
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) UM = VBC(1)*UP
                      IF (     SPEC_TANG_VEL(1)) UM = FVT(1,1)*PROF(1)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,UP,MU_WALL/RHO_WALL,DZ(KK))
+                        TAU_XZ_WALL = MU_WALL*RDZ(KK)*UP*(1._EB-WW_SF)
+                     ELSE
+                        TAU_XZ_WALL = MUA*RDZ(KK)*(UP-UM)
+                     ENDIF
                   ENDIF
             END SELECT
          ELSE
@@ -1329,17 +1439,45 @@ EDGE_LOOP: DO IE=1,N_EDGES
             SELECT CASE(IOR(2))
                CASE(-1)
                   IWM = WALL_INDEX(ICMM, 1) 
-                  IWP = WALL_INDEX(ICMP, 1) 
+                  IWP = WALL_INDEX(ICMP, 1)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(2)=1._EB
+                  ENDIF
+                   
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) WP = VBC(2)*WM
                      IF (     SPEC_TANG_VEL(2)) WP = FVT(2,2)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,WM,MU_WALL/RHO_WALL,DX(II))
+                        TAU_ZX_WALL = MU_WALL*RDX(II)*WM*(WW_SF-1._EB)
+                     ELSE
+                        TAU_ZX_WALL = MUA*RDX(II)*(WP-WM)
+                     ENDIF
                   ENDIF
                CASE( 1)
                   IWM = WALL_INDEX(ICPM,-1) 
-                  IWP = WALL_INDEX(ICPP,-1) 
+                  IWP = WALL_INDEX(ICPP,-1)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(2)=1._EB
+                  ENDIF
+                   
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) WM = VBC(2)*WP
                      IF (     SPEC_TANG_VEL(2)) WM = FVT(2,2)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,WP,MU_WALL/RHO_WALL,DX(II))
+                        TAU_ZX_WALL = MU_WALL*RDX(II)*WP*(1._EB-WW_SF)
+                     ELSE
+                        TAU_ZX_WALL = MUA*RDX(II)*(WP-WM)
+                     ENDIF
                   ENDIF
             END SELECT
          ELSE
@@ -1354,11 +1492,13 @@ EDGE_LOOP: DO IE=1,N_EDGES
             IF (NOM(2)>0) WP = WGT*OM_WW(IIO(2),JJO(2),KKO(2)) + (1._EB-WGT)*OM_WW(IIO(2),JJO(2),KKO(2)-1)
          ENDIF
          
-         MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
+         !!MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
          DUDZ = RDZN(KK)*(UP-UM)
          DWDX = RDXN(II)*(WP-WM)
          OME_E(IE) = DUDZ - DWDX
-         TAU_E(IE) = MUA*(DUDZ + DWDX)
+         !!TAU_E(IE) = MUA*(DUDZ + DWDX)
+         TAU_E(IE) = TAU_XZ_WALL + TAU_ZX_WALL
+         
          IF (II==0)    WW(II,JJ,KK)   = WM
          IF (II==IBAR) WW(II+1,JJ,KK) = WP
          IF (KK==0)    UU(II,JJ,KK)   = UM
@@ -1378,22 +1518,56 @@ EDGE_LOOP: DO IE=1,N_EDGES
          UM   = UU(II,JJ,KK)
          VP   = VV(II+1,JJ,KK)
          VM   = VV(II,JJ,KK)
+         
+         MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
+         IF (WERNER_WENGLE_WALL_MODEL) THEN
+            MU_WALL = .25_EB*( MU_DNS(II,JJ,KK) + MU_DNS(II+1,JJ,KK) + MU_DNS(II+1,JJ+1,KK) + MU_DNS(II,JJ+1,KK) )
+            RHO_WALL = .25_EB*( RHOP(II,JJ,KK) + RHOP(II+1,JJ,KK) + RHOP(II+1,JJ+1,KK) + RHOP(II,JJ+1,KK) )
+         ENDIF
 
          IF (NOM(2)==0 .OR. EDGE_TYPE(IE,2)/=INTERPOLATED_EDGE) THEN
             SELECT CASE(IOR(2))
                CASE(-2)
                   IWM = WALL_INDEX(ICMM, 2) 
-                  IWP = WALL_INDEX(ICPM, 2) 
+                  IWP = WALL_INDEX(ICPM, 2)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(2)=1._EB
+                  ENDIF
+                  
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) UP = VBC(2)*UM
                      IF (     SPEC_TANG_VEL(2)) UP = FVT(2,1)*PROF(2)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,UM,MU_WALL/RHO_WALL,DY(JJ))
+                        TAU_XY_WALL = MU_WALL*RDY(JJ)*UM*(WW_SF-1._EB)
+                     ELSE
+                        TAU_XY_WALL = MUA*RDY(JJ)*(UP-UM)
+                     ENDIF
                   ENDIF
                CASE( 2)
                   IWM = WALL_INDEX(ICMP,-2) 
-                  IWP = WALL_INDEX(ICPP,-2) 
+                  IWP = WALL_INDEX(ICPP,-2)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(2)=1._EB
+                  ENDIF
+                   
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(2)) UM = VBC(2)*UP
                      IF (     SPEC_TANG_VEL(2)) UM = FVT(2,1)*PROF(2)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,UP,MU_WALL/RHO_WALL,DY(JJ))
+                        TAU_XY_WALL = MU_WALL*RDY(JJ)*UP*(1._EB-WW_SF)
+                     ELSE
+                        TAU_XY_WALL = MUA*RDY(JJ)*(UP-UM)
+                     ENDIF
                   ENDIF
             END SELECT
          ELSE
@@ -1412,17 +1586,45 @@ EDGE_LOOP: DO IE=1,N_EDGES
             SELECT CASE(IOR(1))
                CASE(-1)
                   IWM = WALL_INDEX(ICMM, 1) 
-                  IWP = WALL_INDEX(ICMP, 1) 
+                  IWP = WALL_INDEX(ICMP, 1)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(1)=1._EB
+                  ENDIF
+                   
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) VP = VBC(1)*VM
                      IF (     SPEC_TANG_VEL(1)) VP = FVT(1,1)*PROF(1)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,VM,MU_WALL/RHO_WALL,DX(II))
+                        TAU_YX_WALL = MU_WALL*RDX(II)*VM*(WW_SF-1._EB)
+                     ELSE
+                        TAU_YX_WALL = MUA*RDX(II)*(VP-VM)
+                     ENDIF
                   ENDIF
                CASE( 1)
                   IWM = WALL_INDEX(ICPM,-1) 
-                  IWP = WALL_INDEX(ICPP,-1) 
+                  IWP = WALL_INDEX(ICPP,-1)
+                  
+                  IF (BOUNDARY_TYPE(IWM)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWP)==OPEN_BOUNDARY   .OR. &
+                      BOUNDARY_TYPE(IWM)==MIRROR_BOUNDARY .OR. &
+                      BOUNDARY_TYPE(IWP)==MIRROR_BOUNDARY) THEN
+                     VBC(1)=1._EB
+                  ENDIF
+                  
                   IF (BOUNDARY_TYPE(IWM)/=NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=NULL_BOUNDARY) THEN
                      IF (.NOT.SPEC_TANG_VEL(1)) VM = VBC(1)*VP
                      IF (     SPEC_TANG_VEL(1)) VM = FVT(1,1)*PROF(1)
+                     IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        CALL WALL_MODEL(WW_SF,VP,MU_WALL/RHO_WALL,DX(II))
+                        TAU_YX_WALL = MU_WALL*RDX(II)*VP*(1._EB-WW_SF)
+                     ELSE
+                        TAU_YX_WALL = MUA*RDX(II)*(VP-VM)
+                     ENDIF
                   ENDIF
             END SELECT
          ELSE
@@ -1437,11 +1639,13 @@ EDGE_LOOP: DO IE=1,N_EDGES
             IF (NOM(1)>0) VP = WGT*OM_VV(IIO(1),JJO(1),KKO(1)) + (1._EB-WGT)*OM_VV(IIO(1),JJO(1)-1,KKO(1)) 
          ENDIF
    
-         MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
+         !!MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
          DVDX = RDXN(II)*(VP-VM)
          DUDY = RDYN(JJ)*(UP-UM)
          OME_E(IE) = DVDX - DUDY
-         TAU_E(IE) = MUA*(DVDX + DUDY)
+         !!TAU_E(IE) = MUA*(DVDX + DUDY)
+         TAU_E(IE) = TAU_XY_WALL + TAU_YX_WALL
+         
          IF (II==0)    VV(II,JJ,KK)   = VM
          IF (II==IBAR) VV(II+1,JJ,KK) = VP
          IF (JJ==0)    UU(II,JJ,KK)   = UM
@@ -1475,7 +1679,7 @@ IF (CORRECTOR) THEN
             IF (V_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_X(I,J,K) 
             IF (V_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_Z(I,J,K) 
             IF (W_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_X(I,J,K) 
-            IF (W_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I,J,K) 
+            IF (W_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I,J,K)
          ENDDO
       ENDDO
    ENDDO
