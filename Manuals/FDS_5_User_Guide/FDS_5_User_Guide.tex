@@ -932,7 +932,7 @@ terms -- a ``process'' does not have the same meaning as a ``processor.'' The fo
 the Windows Task Manager or by executing the ``top'' command on a Linux/Unix machine. The latter refers to the computer itself. A single
 processor may run multiple processes, for example. The computation on a given FDS mesh is thought of as an individual ``process,'' and
 MPI handles the transfer of information between these processes. Usually, each mesh is assigned its own process in a parallel calculation, although it is also possible
-assign multiple meshes to a single process.\footnote{Assigning multiple meshes to a single process was introduced in FDS version 5.3.} 
+assign multiple meshes to a single process.\footnote{Assigning multiple meshes to a single process was introduced in FDS version 5.3.}
 In this way, large meshes can be computed on dedicated processors, while
 smaller meshes can be clustered together in a single process running on a single processor, without the need for MPI message passing between themselves.
 
@@ -1713,7 +1713,7 @@ this, add {\ct SYNCHRONIZE=.TRUE.} to the appropriate {\ct MESH} lines and then 
 {\ct SYNCHRONIZE=.FALSE.} to the {\ct TIME} line.\index{MESH!SYNCHRONIZE}
 
 Usually in a multi-mesh calculation, each mesh is assigned its own process, and each process its own processor. However, it is possible to assign more than one
-mesh to a single process, and it is possible to assign more than one process to a single processor. Consider a case that involves six meshes: 
+mesh to a single process, and it is possible to assign more than one process to a single processor. Consider a case that involves six meshes:
 
 \footnotesize
 \begin{verbatim}
@@ -1729,9 +1729,9 @@ mesh to a single process, and it is possible to assign more than one process to 
 The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to the given process. In this case, only four processes are to be started, numbered
 0 through 3. Note that the processes need to be invoked in ascending order, starting with 0. Why would you do this? Suppose you only have four processors available for this
 job. By starting only four processes instead of six, you can save time because 'mesh2' and 'mesh3' can communicate directly with each other without having to transmit data
-using MPI calls over the network. Same goes for 'mesh5' and 'mesh6'.  
-In essence, it is as if these mesh pairs are neighbors and need not send mail to each other via the postal system. The letters can just be 
-walked next door. 
+using MPI calls over the network. Same goes for 'mesh5' and 'mesh6'.
+In essence, it is as if these mesh pairs are neighbors and need not send mail to each other via the postal system. The letters can just be
+walked next door.
 
 
 \subsection{Mesh Alignment}
@@ -6205,7 +6205,7 @@ before water can flow out of the head. %A more complicated function is given by 
 
 \subsection{Control Function: \texorpdfstring{{\tt DEADBAND}}{DEADBAND}}
 
-This control function behaves like an HVAC thermostat.  It can operating in one of two modes analagous to heating or cooling.  The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function, a {\ct DEADBAND}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'}, the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops below the lower value in {\ct DEADBAND} and reverts when it increases past the upper value, i.e. like a heating system.  The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e. like a cooling system.  
+This control function behaves like an HVAC thermostat.  It can operating in one of two modes analagous to heating or cooling.  The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function, a {\ct DEADBAND}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'}, the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops below the lower value in {\ct DEADBAND} and reverts when it increases past the upper value, i.e. like a heating system.  The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e. like a cooling system.
 
 For an HVAC\index{HVAC} example, the following lines of input would set up a simple thermostat\index{thermostat}:
 \index{CTRL!FUNCTION\_TYPE!DEADBAND}
@@ -9338,35 +9338,10 @@ in the figure.
 \chapter{Droplets and Sprays}
 \label{chapter:sprays}
 
-This chapter considers cases involving evaporating droplets, both water and fuel.
+This chapter considers cases involving sprinklers and sprays.
 
 
-\section{Water Droplet Evaporation (\texorpdfstring{{\bf water\_evaporation}}{water\_evaporation}) }
-\label{water_evaporation}
 
-The case called {\bf water\_evaporation} is nothing more than stationary
-water droplets in an adiabatic box with dimensions of 1~m on a side. The air
-within the box is stirred to maintain uniform conditions, and there are no
-leaks or heat losses. The initial air temperature is 40~$^\circ$C.
-Initially, the droplets have a median volumetric diameter of 100~$\mu$m,
-a temperature of 90~$^\circ$C, and a total mass of 0.02~kg.
-It is expected that a steady-state will be achieved after several minutes.
-The initial energy content, sum of the air and water enthalpies, of the box
-is 344,369~kJ.  After a short period of time, 0.0131 kg of water evaporates, a mass fraction of 0.0115~kg/kg and the box
-reaches an equilibrium temperature of 12.8~$^\circ$C, see the figure below.
-At this point the energy content of the box is 336,867~kJ or a 3~\% error.
-At 12.8~$^\circ$C, the expected mass fraction is 0.0115~kg/kg.
-
-\begin{center}
-\includegraphics[width=4.5in]{FIGURES/water_evaporation.jpg}
-\end{center}
-
-
-%\subsection{Fuel Droplet Evaporation ({\bf fuel\_evaporation}) }
-
-%In the exact same geometry as the above example, stationary droplets of heptane at ambient temperature vaporize and burn.
-
-\clearpage
 
 \section{Measuring Water Flux (\texorpdfstring{{\bf bucket\_test}}{bucket\_test}) }
 \label{bucket_test}
@@ -9933,14 +9908,21 @@ The HRR curve for this example is given here:
 \includegraphics[width=4.5in]{FIGURES/spray_burner_HRR.PDF}
 \end{center}
 
-Note that in this example there is no need for a separate ignition source. The combustion model assumes fuel and oxygen burn on contact, and so the small amount of evaporation at ambient temperature is enough to start the reaction.
+Note that in this example there is no need for a separate ignition source. 
+The combustion model assumes fuel and oxygen burn on contact, and so the small amount of evaporation at ambient temperature is enough to start the reaction.
 
 
 \part{FDS and Smokeview Development Tools}
 
 \chapter{The FDS/Smokeview Repository}
 
-For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform, it is strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.''  All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service offered by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.  Under this system a centralized repository containing all project files resides on a Google Code server.  Subversion uses a single integer that identifies the version of the entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are incremented in version number).  A record of version number when a specific file was last changed is maintained.
+For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform, 
+it is strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.''  
+All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service offered 
+by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.  
+Under this system a centralized repository containing all project files resides on a Google Code server.  Subversion uses a single integer that 
+identifies the version of the entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are incremented in version number).  
+A record of version number when a specific file was last changed is maintained.
 
 As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
 repository.  Only Team Members described in the previous chapter can commit changes to the repository.
@@ -9960,11 +9942,20 @@ The current location of the FDS repository is \href{http://code.google.com/p/fds
 \section{How to Acquire Example Input Files}
 \index{Download Verification Files}
 
-Example input files for FDS can be found in the FDS-SMV project Subversion repository.  There are a few ways to get a copy of these files, two different approaches will be covered here. The first is via the SVN Command Line Client and the second is to Download Individual Files from the Web Interface.  Note: Some of these files are used for example input throughout this document, especially in Part \ref{part:samples}.
+Example input files for FDS can be found in the FDS-SMV project Subversion repository.  There are a few ways to get a copy of these files, 
+two different approaches will be covered here. The first is via the SVN Command Line Client and the second is to Download Individual Files from the Web Interface.  
+Note: Some of these files are used for example input throughout this document, especially in Part \ref{part:samples}.
 
 \begin{description}
 \item[{\bf Command Line SVN Client}]
-There are two methods for using the command line client, both methods have an optional step to keep the files up to date with the latest version in the repository over time.  The first method using SVN Checkout (co) is useful if you want to able to easily update the files on your local machine.  The downside of this method is that there will be '.svn' files within each directory that are used to check the local versions when the optional Update command is later used.  The SVN Export command will make a 'clean' copy the files and folders from the repository to your local computer, where 'clean' in this context means that there will not be '.svn' files in the directories.  The disadvantage of this method is that you cannot use the standard 'svn update' command to get the latest versions from the repository after check out.  Instead you will have to either force an overwrite of the existing files or remove the Verification directory and run the export command again.  Both methods will require that you download and install the \href{http://subversion.tigris.org}{{Subversion}} command line client for your Operating System.
+There are two methods for using the command line client, both methods have an optional step to keep the files up to date with the latest version in the repository over time.  
+The first method using SVN Checkout (co) is useful if you want to able to easily update the files on your local machine.  
+The downside of this method is that there will be '.svn' files within each directory that are used to check the local versions when the optional Update command is later used.  
+The SVN Export command will make a 'clean' copy the files and folders from the repository to your local computer, where 'clean' in this context 
+means that there will not be '.svn' files in the directories.  The disadvantage of this method is that you cannot use the standard 'svn update' command to 
+get the latest versions from the repository after check out.  Instead you will have to either force an overwrite of the existing files or remove 
+the Verification directory and run the export command again.  Both methods will require that you download and install the \href{http://subversion.tigris.org}{{Subversion}} 
+command line client for your Operating System.
 
 {\bf METHOD 1: SVN Checkout}
 \begin{enumerate}
