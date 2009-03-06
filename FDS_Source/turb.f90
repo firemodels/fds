@@ -17,7 +17,7 @@ CHARACTER(255), PARAMETER :: turbdate='$Date: 2008-12-18 13:26:05 -0500 (Thu, 18
 
 PRIVATE
 PUBLIC :: ANALYTICAL_SOLUTION, sandia_dat, INIT_TURB_ARRAYS, spectral_output, VARDEN_DYNSMAG, &
-          GET_REV_turb, TURBULENT_KINETIC_ENERGY, SUBGRID_SCALAR_VARIANCE
+          GET_REV_turb, TURBULENT_KINETIC_ENERGY, SUBGRID_SCALAR_VARIANCE, WALL_MODEL
  
 CONTAINS
 
@@ -1672,6 +1672,79 @@ SPECIES_LOOP: DO N=1,N_SPECIES
 ENDDO SPECIES_LOOP
 
 END SUBROUTINE SUBGRID_SCALAR_VARIANCE
+
+
+SUBROUTINE WALL_MODEL(SF,U1,NU,DZ)
+IMPLICIT NONE
+
+REAL(EB), INTENT(OUT) :: SF
+REAL(EB), INTENT(IN) :: U1,NU,DZ
+
+REAL(EB), PARAMETER :: A=8.3_EB,B=1._EB/7._EB
+REAL(EB), PARAMETER :: Z_PLUS_TURBULENT = 11.81_EB
+REAL(EB), PARAMETER :: ALPHA=(1._EB-B)/2._EB*A**((1._EB+B)/(1._EB-B))
+REAL(EB), PARAMETER :: BETA=1._EB+B
+REAL(EB), PARAMETER :: ETA=(1._EB+B)/A
+REAL(EB), PARAMETER :: GAMMA=2._EB/(1._EB+B)
+
+REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS
+
+! Werner and Wengle wall model
+!
+! References:
+!
+! Werner, H., Wengle, H. (1991) Large-eddy simulation of turbulent flow over
+! and around a cube in a plate channel. 8th Symposium on Turbulent Shear
+! Flows, Munich, Germany.
+!
+! Pierre Sagaut. Large Eddy Simulation for Incompressible Flows: An Introduction.
+! Springer, 2001.
+!
+! Temmerman, L., Leschziner, M.A., Mellen, C.P., and Frohlich, J. (2003)
+! Investigation of wall-function approximations and subgrid-scale models in
+! Large Eddy Simulation of separated flow in a channel with streamwise
+! periodic constrictions. International Journal of Heat and Fluid Flow,
+! Vol. 24, No. 2, pp. 157-180.
+!
+! Breuer, M., Kniazev, B., and Abel, M. (2007) Development of wall models
+! for LES of separated flows using statistical evaluations. Computers and
+! Fluids, Vol. 36, pp. 817-837.
+!
+! McDermott, R. Notes on the wall model of Werner and Wengle.
+!
+! The slip factor (SF) is based on the following approximation to the wall stress
+! (note that u0 is the ghost cell value of the streamwise velocity component and
+! z is the wall-normal direction):
+! tau_w = mu*(u1-u0)/dz = mu*(u1-SF*u1)/dz = mu*u1/dz*(1-SF)
+! note that tau_w/rho = nu*u1/dz*(1-SF)
+
+NU_OVER_DZ = NU/DZ
+TAU_W = (ALPHA*NU_OVER_DZ**BETA + ETA*NU_OVER_DZ**B*ABS(U1))**GAMMA ! actually tau_w/rho
+Z_PLUS = SQRT(TAU_W)/NU_OVER_DZ
+
+IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
+   SF = 1._EB-TAU_W/(NU_OVER_DZ*ABS(U1)) ! log layer
+ELSE
+   SF = -1._EB ! viscous sublayer
+ENDIF
+
+!! check values...
+!IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
+!   print *,'A = ',A
+!   print *,'B = ',B
+!   print *,'ALPHA = ',ALPHA
+!   print *,'BETA = ',BETA
+!   print *,'ETA = ',ETA
+!   print *,'GAMMA = ',GAMMA
+!   print *,'U1 = ',U1
+!   print *,'NU/DZ = ',NU_OVER_DZ
+!   print *,'TAU_W/RHO = ',TAU_W
+!   print *,'Z_PLUS = ',Z_PLUS
+!   print *,'SF = ',SF
+!   print *
+!ENDIF
+
+END SUBROUTINE WALL_MODEL
 
 
 SUBROUTINE GET_REV_turb(MODULE_REV,MODULE_DATE)
