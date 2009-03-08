@@ -22,6 +22,7 @@ int main(int argc, char **argv){
 
   char *prog=NULL, *arg;
   char *filebase=NULL;
+  char *fileoutbase=NULL;
   int i;
   int return_code;
 
@@ -57,6 +58,12 @@ int main(int argc, char **argv){
           i++;
         }
         break;
+      case 'o':
+        if(i+1<argc&&argv[i]!=NULL){
+          fileoutbase=argv[i+1];
+          i++;
+        }
+        break;
       case 'h':
         usage(prog);
         return 1;
@@ -80,6 +87,10 @@ int main(int argc, char **argv){
   strcpy(csv_in,filebase);
   strcat(csv_in,".csv");
   strcpy(csv_out,filebase);
+  if(fileoutbase!=NULL){
+    strcat(csv_out,"_");
+    strcat(csv_out,fileoutbase);
+  }
   strcat(csv_out,"_tran.csv");
 
   return_code = getfileinfo(csv_in,NULL,NULL);
@@ -123,6 +134,7 @@ void usage(char *prog){
   printf(" -c config file - specify a file containing:\n");
   printf("      line 1: list of comma delimited field names to be tranposed\n");
   printf("      line 2: list of corresponding values (usually elevations) for each field\n");
+  printf(" -o file mod - add string used modify output file name\n");
   printf(" -t skip - copy data every skip seconds (default %i s).  skip must be\n",DT_SKIP);
   printf("           larger than the time intervals in the file to be transposed.\n");
   printf(" csv_in - FDS spreadsheet file (csv_in.csv) to be transposed.  The transposed\n");
