@@ -1225,6 +1225,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
          WM   = WW(II,JJ,KK)
          
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) ) ! based on effective viscosity
+         TAU_YZ_WALL = MUA*RDZ(KK)*(VP-VM)
+         TAU_ZY_WALL = MUA*RDY(JJ)*(WP-WM)
+
          IF (WERNER_WENGLE_WALL_MODEL) THEN
             MU_WALL = .25_EB*( MU_DNS(II,JJ,KK) + MU_DNS(II,JJ+1,KK) + MU_DNS(II,JJ+1,KK+1) + MU_DNS(II,JJ,KK+1) )
             RHO_WALL = .25_EB*( RHOP(II,JJ,KK) + RHOP(II,JJ+1,KK) + RHOP(II,JJ+1,KK+1) + RHOP(II,JJ,KK+1) )
@@ -1378,6 +1381,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
          WM   = WW(II,JJ,KK)
          
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
+         TAU_XZ_WALL = MUA*RDZ(KK)*(UP-UM)
+         TAU_ZX_WALL = MUA*RDX(II)*(WP-WM)
+
          IF (WERNER_WENGLE_WALL_MODEL) THEN
             MU_WALL = .25_EB*( MU_DNS(II,JJ,KK) + MU_DNS(II+1,JJ,KK) + MU_DNS(II+1,JJ,KK+1) + MU_DNS(II,JJ,KK+1) )
             RHO_WALL = .25_EB*( RHOP(II,JJ,KK) + RHOP(II+1,JJ,KK) + RHOP(II+1,JJ,KK+1) + RHOP(II,JJ,KK+1) )
@@ -1528,6 +1534,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
          VM   = VV(II,JJ,KK)
          
          MUA = .25_EB*( MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
+         TAU_XY_WALL = MUA*RDY(JJ)*(UP-UM)
+         TAU_YX_WALL = MUA*RDX(II)*(VP-VM)
+
          IF (WERNER_WENGLE_WALL_MODEL) THEN
             MU_WALL = .25_EB*( MU_DNS(II,JJ,KK) + MU_DNS(II+1,JJ,KK) + MU_DNS(II+1,JJ+1,KK) + MU_DNS(II,JJ+1,KK) )
             RHO_WALL = .25_EB*( RHOP(II,JJ,KK) + RHOP(II+1,JJ,KK) + RHOP(II+1,JJ+1,KK) + RHOP(II,JJ+1,KK) )

@@ -3352,11 +3352,17 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    VALUE = DV%CONVERSION_FACTOR*VALUE
 
-   ! Update the running average and instantaneous device value
+   ! Update the running average and/or instantaneous device value
 
-   DV%COUNT         = DV%COUNT + 1
-   DV%VALUE         = DV%VALUE + VALUE
    DV%INSTANT_VALUE = VALUE
+
+   IF (OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%TIME_AVERAGED) THEN
+      DV%COUNT = DV%COUNT + 1
+      DV%VALUE = DV%VALUE + VALUE
+   ELSE
+      DV%COUNT = 1
+      DV%VALUE = VALUE
+   ENDIF
    
    ! Check for change in control function output of device
 
@@ -3632,6 +3638,9 @@ SELECT CASE(IND)
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       GAS_PHASE_OUTPUT = MU_DNS(II,JJ,KK)
+
+   CASE(60)  ! ACTUATED SPRINKLERS
+      GAS_PHASE_OUTPUT = N_ACTUATED_SPRINKLERS
 
    CASE(90)  ! MASS FRACTION
       IF (SPEC_INDEX<0) THEN

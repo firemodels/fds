@@ -192,25 +192,35 @@ TYPE (DEVICE_TYPE), POINTER :: DV
 TYPE (SURFACE_TYPE), POINTER :: SF
  
 IF (EVACUATION_ONLY(NM)) RETURN  ! Don't waste time if an evac mesh
-IF (N_PART==0) RETURN  ! Don't waste time if no particles
+IF (N_PART==0) RETURN            ! Don't waste time if no particles
+
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
 
-OVERALL_INSERT_LOOP: DO  ! Add more than one batch of particles/droplets if FDS time step is large enough
-INSERT_ANOTHER_BATCH = .FALSE.
-INSERT_RATE = 0._EB
-INSERT_COUNT = 0
+! Count active sprinklers and nozzles
 
 N_OPEN_NOZZLES = 0
+N_ACTUATED_SPRINKLERS = 0
 COUNT_OPEN_NOZZLES_LOOP: DO KS=1,N_DEVC ! Loop over all devices, but look for sprinklers or nozzles
    DV => DEVICE(KS)
    PY => PROPERTY(DV%PROP_INDEX)
    IF (.NOT. DV%CURRENT_STATE) CYCLE COUNT_OPEN_NOZZLES_LOOP
    IF (PY%PART_ID == 'null')   CYCLE COUNT_OPEN_NOZZLES_LOOP
    N_OPEN_NOZZLES = N_OPEN_NOZZLES + 1
+   IF (PY%QUANTITY=='SPRINKLER LINK TEMPERATURE') N_ACTUATED_SPRINKLERS = N_ACTUATED_SPRINKLERS + 1
 ENDDO COUNT_OPEN_NOZZLES_LOOP
+
+! Add more than one batch of particles/droplets if FDS time step is large enough
+
+OVERALL_INSERT_LOOP: DO  
+
+INSERT_ANOTHER_BATCH = .FALSE.
+INSERT_RATE = 0._EB
+INSERT_COUNT = 0
+
+! Loop over all devices, but look for sprinklers or nozzles
    
-SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  ! Loop over all devices, but look for sprinklers or nozzles
+SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  
    DV => DEVICE(KS)
    PY => PROPERTY(DV%PROP_INDEX)
    IF (PY%PART_ID == 'null')   CYCLE SPRINKLER_INSERT_LOOP
