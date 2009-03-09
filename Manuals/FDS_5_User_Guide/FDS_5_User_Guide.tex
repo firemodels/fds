@@ -6211,9 +6211,10 @@ Here is a very simple example of sprinkler:
 \end{verbatim} \normalsize
 
 \noindent
-A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties are given on
-the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with another, so try to use {\ct ID}s that are as
-meaningful to you as possible.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does} have a specific meaning to FDS, directing it to compute the activation of
+A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties 
+are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with 
+another, so try to use {\ct ID}s that are as meaningful to you as possible.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does} 
+have a specific meaning to FDS, directing it to compute the activation of
 the device using the standard RTI algorithm. The various sprinkler properties will be discussed below.
 \footnote{Past versions of FDS used a separate file to store
 properties of a given sprinkler. This file is no longer used.}
@@ -6234,14 +6235,18 @@ equivalent to 14.41~L/min/bar$^\ha$.
 sprinkler where the water droplets are initially placed in the simulation. It is assumed that
 at and beyond the {\ct OFFSET} the droplets have completely broken
 up and are transported independently of each other. (Default 0.05~m)
-\item[{\ct DROPLET\_VELOCITY}]  Initial droplet velocity. (Default 5~m/s)
+\item[{\ct DROPLET\_VELOCITY}]  Initial droplet velocity. (Default 0~m/s)
+\item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity 
+by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the the droplet velocity is computed by dividing the 
+flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often
+the user must fine-tune {\ct DROPLET\_VELOCITY} in order to reproduce certain spray profile.
+The {\ct ORIFICE\_DIAMETER} input is not used, if either {\ct DROPLET\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is given.
 \item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed.
 The angles outline a conical spray pattern relative to the
 south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}.
 For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave
 the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the orientation of
-the sprinkler is (0,0,-1), the default. The droplets are uniformly
-distributed within this belt.
+the sprinkler is (0,0,-1), the default. The droplets are uniformly distributed within this belt.
 \item[{\ct SPRAY\_PATTERN\_TABLE}] Name of a set of {\ct TABL} lines containing the description of the spray pattern.
 \item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets.
 See Section~\ref{info:PART} for additional details.
@@ -6268,7 +6273,7 @@ Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 \index{Spray Pattern}
 \index{sprinkler!Spray Pattern}
 
-If a more complex spray pattern is desired than can be achieved by using {\ct SPRAY\_ANGLE}, {\ct VELOCITY},
+If a more complex spray pattern is desired than can be achieved by using {\ct SPRAY\_ANGLE}, {\ct DROPLET\_VELOCITY},
 and {\ct FLOW\_RATE}, then a {\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL})
 namelist group.  For a spray pattern, specify the total flow using {\ct FLOW\_RATE} of the {\ct PROP} line, the name of the spray pattern using
 {\ct SPRAY\_PARTTERN\_TABLE} and then one or more {\ct TABL} lines of the format:
@@ -9044,7 +9049,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of TC bead                     &                       & 0.85      \\ \hline
 {\ct C\_FACTOR}                         & Real          & Sprinkler activation parameter            &                       & 0.        \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}               & m/s                   & 1.0       \\ \hline
-{\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity                  & m/s                   & 5.0       \\ \hline
+{\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity                  & m/s                   & 0.0       \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Sprinkler or nozzle flow rate             & L/min                 &           \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & Time {\ct RAMP} for flow                  &                       &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & Time constant for flow                    &                       & 0.0       \\ \hline
@@ -9055,6 +9060,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LENGTH}                            & Real          & Smoke detector parameter                  &                       & 1.8       \\ \hline
 {\ct OFFSET}                            & Real          & Droplet offset distance                   & m                     & 0.05      \\ \hline
 {\ct OPERATING\_PRESSURE}               & Real          & Sprinkler pipe pressure                   & atm                   & 1.        \\ \hline
+{\ct ORIFICE\_DIAMETER}                 & Real          & Nozzle orifice diameter                   & m                     & 0.0       \\ \hline
 {\ct PART\_ID}                          & Character     & Name of associated PART line              &                       &           \\ \hline
 {\ct PDPA\_END}                         & Real          & See Section~\ref{PDPA}                    & s                     & {\ct T\_END} \\ \hline
 {\ct PDPA\_M}                           & Integer       & See Section~\ref{PDPA}                    &                       & 0         \\ \hline
