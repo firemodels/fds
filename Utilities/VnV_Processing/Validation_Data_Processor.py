@@ -61,7 +61,7 @@ if diagnostic_level >= 1:
 ## The default character is 'd' if you change the value below to something else 
 ## then only the lines starting with that character will be read in for processing.
 ## NOTE: You must also change the line containing the d line column names to the same character string.
-data_line_char = 'd' # Input Value
+data_line_char = 'dd' # Input Value
 print "**** Data Character Set to '"+data_line_char+"' ****\n"
 
 
