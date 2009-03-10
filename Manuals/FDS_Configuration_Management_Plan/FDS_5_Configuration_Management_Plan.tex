@@ -172,6 +172,7 @@
 
 \large
 \flushright{
+Kevin McGrattan \\
 Bryan Klein}
 
 \vspace{0.5in}
@@ -203,6 +204,7 @@ VTT Technical Research Centre of Finland  }
 
 \normalsize
 \flushright{
+Kevin McGrattan \\
 Bryan Klein \\
 {\em Fire Research Division} \\
 {\em Building and Fire Research Laboratory}}
@@ -242,7 +244,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1018-5 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1018-5, \pageref{LastPage} pages (October 2007) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1018-5, \pageref{LastPage} pages (March 2009) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -285,14 +287,31 @@ Throughout this document, the mention of computer hardware or commercial
 software does not constitute endorsement by NIST, nor does it indicate that
 the products are necessarily those best suited for the intended purpose.
 
+\chapter{Preface}
+
+This is Volume 4 of the FDS Technical Reference Guide. Volume 1 describes the mathematical model and numerical method. Volumes~2 and 3 document past and
+present model verification and validation work, respectively. Instructions for using FDS are contained in a separate User's Guide~\cite{FDS_Users_Guide_5}.
+
+The volumes that make up the FDS Technical Reference Guide are based in part on the ASTM E 1355, {\em Standard Guide for Evaluating the Predictive Capability of
+Deterministic Fire Models}~\cite{ASTM:E1355}. ASTM~E~1355 outlines the process of assessing the accuracy of a fire model. Volumes~1 through 3 are the
+result of this evaluation process. The main purpose of the present volume is to describe the process by which the model software is developed and maintained. A model such
+as FDS cannot remain static. As progress is made in fire science, the model needs to be updated and improved, but still shown to reliably predict the kinds of
+phenomena for which it was originally designed.
+
 
 \chapter{About the Author}
 
 \begin{description}
-\item[Bryan Klein], the current Configuration Manager, is an Information Technology Specialist in the
+\item[Kevin McGrattan] is a mathematician in the Building and Fire
+Research Laboratory of NIST. He received a bachelors of science degree
+from the School of Engineering and Applied Science of Columbia
+University in 1987 and a doctorate at the Courant Institute of New
+York University in 1991. He joined the NIST staff in 1992 and has
+since worked on the development of fire models, most notably the Fire
+Dynamics Simulator.
+\item[Bryan Klein] is an Information Technology Specialist in the
 Building and Fire Research Laboratory of NIST. His current focus is on FDS development and
 user support, along with experimental model validation work.
-
 \end{description}
 
 \tableofcontents
@@ -304,7 +323,10 @@ user support, along with experimental model validation work.
 
 \section{Purpose}
 
-The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics Simulator (FDS). Such a document is commonly referred to as a {\em Software Configuration Management (SCM) Plan}, known through the rest of this document as "the plan". This document will be updated as the necessity arises and will establish and provide the basis for a uniform and concise standard of practice for the FDS development process. It is based in part on IEEE Standard 828-2005.
+The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics Simulator (FDS). 
+Such a document is commonly referred to as a {\em Configuration Management Plan}, 
+known through the rest of this document as ``the Plan.'' This document will be updated as the necessity arises and will establish and provide 
+the basis for a uniform and concise standard of practice for the FDS development process. It is based in part on IEEE Standard 828~\cite{IEEE-828}.
 
 
 \subsection{Overview of the Fire Dynamics Simulator (FDS) Software Project}
@@ -326,8 +348,8 @@ NIST or its software development collaborators.
 
 \subsection{Assumptions}
 
-The policies and procedures described in this document involve the use of a variety of open source and commercial software and Internet utilities.  
-The continued availability of these resources is an important consideration in the day to day upkeep of FDS and Smokeview.  
+The policies and procedures described in this document involve the use of a variety of open source and commercial software and Internet utilities.
+The continued availability of these resources is an important consideration in the day to day upkeep of FDS and Smokeview.
 If these resources become unavailable for any reason, the procedures will be updated accordingly.
 
 \chapter{Roles and Responsibilities}
@@ -337,12 +359,12 @@ This chapter describes the roles and responsibilities of the FDS and Smokeview d
 \section{Development Team Members}
 
 Primary support for the development and maintenance of the Fire Dynamics Simulator (FDS) and Smokeview is provided by the Building and Fire
-Research Laboratory (BFRL) of the National Institute of Standards and Technology (NIST), an agency of the United States Department of Commerce. 
+Research Laboratory (BFRL) of the National Institute of Standards and Technology (NIST), an agency of the United States Department of Commerce.
 The software developers themselves and experimental support personnel
-work mainly within the Fire Research Division of BFRL. In addition, external collaborators include staff members of the research laboratory VTT of Finland, guest researchers at NIST, 
+work mainly within the Fire Research Division of BFRL. In addition, external collaborators include staff members of the research laboratory VTT of Finland, guest researchers at NIST,
 and grantees of the NIST extramural fire grants program.
 
-Members of the FDS and Smokeview team share in the development and maintenance responsibilities, which include: 
+Members of the FDS and Smokeview team share in the development and maintenance responsibilities, which include:
 \begin{enumerate}
 \item Developing new algorithms and improving program functionality
 \item Answering user questions
@@ -353,10 +375,12 @@ Members of the FDS and Smokeview team share in the development and maintenance r
 \item Maintaining a suite of verification and validation cases to test model accuracy and reliability
 \item Developing and maintaining a ``Road Map'' of future development
 \end{enumerate}
-Most decisions concerning these various tasks are made individually or by consensus of the team members. In the event of a disagreement over technical issues, the decision is made by Kevin McGrattan, leader of the Fire Modeling Group in the Fire Research Division of BFRL. 
+Most decisions concerning these various tasks are made individually or by consensus of the team members. 
+In the event of a disagreement over technical issues, the decision is made by Kevin McGrattan, leader of the Fire Modeling Group in the Fire Research Division of BFRL,
+in consultation with team members at VTT, Finland.
 Non-technical issues are addressed by Anthony Hamins, Chief of the Fire Research Division in BFRL, or by
 Shyam Sunder, Director of BFRL, depending on the nature of the issue. All policies and procedures described in this document are
-subject to review by NIST in consultation with VTT, Finland. 
+subject to review by NIST in consultation with VTT, Finland.
 
 
 
@@ -371,12 +395,17 @@ control of the project files and documents, procedures for making changes, and p
 
 \section{Document Identification and Control}
 
-Document identification and control consists of placing all project files in a central location and maintaining a record of changes to those files. The central location is known as the {\em Repository}. 
+Document identification and control consists of placing all project files in a central location and maintaining a record of changes to those files. 
+The central location is known as the {\em Repository}.
 
 
 \subsection{Project Repository}
 
-All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service offered by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.  Under this system a centralized repository containing all project files resides on a Google Code server.  Subversion uses a single integer that identifies the version of the entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are incremented in version number).  A record of version number when a specific file was last changed is maintained.
+All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service 
+offered by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.  
+Under this system a centralized repository containing all project files resides on a Google Code server.  
+Subversion uses a single integer that identifies the version of the entire repository rather than of a specific file 
+(i.e. anytime a change is made to the repository all files are incremented in version number).  A record of version number when a specific file was last changed is maintained.
 
 As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
 repository.  Only Team Members described in the previous chapter can commit changes to the repository.
@@ -405,14 +434,16 @@ specific set of source code files used.  Rather one would need to know the SVN r
 recently committed source file.
 
 This is accomplished by using source file tagging.  In each source file a series of character parameter
-strings are defined.  For example the strings in main.f90 at revision 3144 are:
+strings are defined.  For example, near the top of the file called main.f90 are lines of the form:
 
-\begin{figure}[ht!]
-\includegraphics[width=\textwidth]{FIGURES/RevisionStrings.jpg}
-\caption{\bf Example of Revision Identification Strings in main.f90}
-\label{fig:revstrings}
-\end{figure}
+\footnotesize
+\begin{verbatim}
+CHARACTER(255), PARAMETER :: mainid='$Id$'
+CHARACTER(255), PARAMETER :: mainrev='$Revision$'
+CHARACTER(255), PARAMETER :: maindate='$Date$'
+\end{verbatim} \normalsize
 
+\noindent
 The string contains the name of the source file, the version of the file (this reflects only the source
 file version and not the overall release version number), the date and time of the file version, and
 the person who checked the file in to the archive.  Upon compiling, these strings will be stored in the
@@ -433,9 +464,12 @@ the source code used for a particular compilation of FDS when reporting an error
 \subsection{Creating a Change Request}
 
 Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service that is part of
-Google Code.  To submit a new issue to the tracker or to provide follow up comments, the user must sign in with a Google Account.  The current location of the Issue Tracker can be found through a link under the 'Support' section of the menu on the FDS-SMV website \href{http://code.google.com/p/fds-smv/issues/list}{[Link to Tracker]}.
+Google Code.  To submit a new issue to the tracker or to provide follow up comments, the user must sign in with a Google Account.  
+The current location of the Issue Tracker can be found through a link under the 'Support' section of the menu 
+on the FDS-SMV website \href{http://code.google.com/p/fds-smv/issues/list}{[Link to Tracker]}.
 
-A change request is initiated by opening a new issue.  The issue report contains the baseline identification (version number, compile date, and SVN revision number), operating system, and a description of the defect or enhancement request.  Input files or other supporting documentation can be attached.
+A change request is initiated by opening a new issue.  The issue report contains the baseline identification (version number, compile date, and SVN revision number), 
+operating system, and a description of the defect or enhancement request.  Input files or other supporting documentation can be attached.
 
 \begin{figure}[ht!]
 \includegraphics[width=\textwidth]{FIGURES/NewIssue.jpg}
@@ -449,7 +483,6 @@ issue is opened by a developer, the developer can immediate assign a status and 
 \subsection{Processing a Change Request}
 
 A change request may be evaluated by any member of the development team.
-
 If the request duplicates an existing request, then the issue status is changed to {\ct Duplicate} and the
 requestor is sent the issue number of the existing request.
 
@@ -506,22 +539,27 @@ and should not affect code functionality.
 
 \subsection{Testing a New Release}
 
-Each proposed release will undergo software testing.  Three suites of test cases exists: a functional test suite,
-a verification test suite, and a validation test suite.  Testing will depend upon the type of baseline release:
-maintenance, minor, or major.
+Each proposed release undergoes software testing.  There are two sets of input files that are used to test new releases -- 
+a verification suite and a validation suite. The verification suite consists of a range of calculations, from ones that just test a feature to
+ones that compare FDS results with analytical solutions of the governing equations. The validation suite consists of simulations of a wide range
+of experiments.  
 
-Each maintenance release will be tested with the functional test suite.  It will be verified that the proposed release version
-successfully executes all of the functional test cases.
+Testing will depend upon the type of baseline release:
+maintenance, minor, or major. A maintenance release occurs every few weeks.
+Each maintenance release is tested with the verification suite. Because each case requires no more than a few
+hours of computer time, the suite can be run overnight. The following day, the results of the calculations are automatically plotted and 
+compared with the expected results. This is done simply be recompiling the FDS User's Guide and Verification Guide, each of which contains pictures
+and graphs that demonstrate the test was successful.
 
-Each minor release will be tested with the functional test suite and the verification test suite.  It will be verified
-that the proposed baseline successfully executes all of the functional and verification test cases.  The
-verification manual will be updated with the results.
+A minor release occurs every three to six months.
+Each minor release is tested with both the verification and validation suites. The validation cases take considerably longer to run, but the
+procedure is similar -- the results are plotted and compared to the experimental measurements using an automated plotting package that
+essentially redraws all of the plots and graphs in the FDS Validation Guide. The old and new guides are compared to assess whether or not
+the new version of the model has become noticeably less accurate than the old. Work is underway to better quantify this procedure.
 
-Each major release will be tested with all three test suites.    It will be verified
-that the proposed baseline successfully executes all of the functional and verification test cases.  The verification
-manual will be updated with the results.  The results of the validation cases will be evaluated to ensure that the
-predictive performance of the proposed baseline as either remained equivalent or improved.  The validation manual will
-be updated.
+A major release of FDS occurs every few years. As the name implies, major changes are made to the algorithm, requiring months of beta testing, and several
+runs through the V\&V suites.
+   
 
 \subsection{Announcing a New Version}
 
