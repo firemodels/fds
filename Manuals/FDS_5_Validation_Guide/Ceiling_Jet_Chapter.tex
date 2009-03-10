@@ -101,65 +101,59 @@ was observed in the HGL temperature comparison for this test.
 The ceiling jet is an important fire phenomenon because of the presence of automatic fire protection devices at the ceiling, like
 sprinklers and smoke/heat vents. The results of the UL/NFPRF experiments provide useful data to assess the accuracy of FDS in predicting
 the velocity and temperature near the ceiling, and consequently the resulting activation of sprinklers.
-The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}, along with the predictions of FDS.
+The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}.
 
-\begin{table}[h!]
-\begin{center}
-\begin{tabular}{|c||c|c|c|c|c|c|c|c|}
-\hline
-\multicolumn{9}{|c|}{\bf Heptane Spray Burner Test Series I}  \\ \hline \hline
-Test & Burner & Vent                    & \multicolumn{2}{|c|}{First Act. (s) } & \multicolumn{2}{|c|}{Total Acts.}  & Draft    & Heat Release Rate \\ \cline{4-7}
-No.  & Pos.   & Operation               & Exp. & FDS                            & Exp.  & FDS                        & Curtains & MW @ s \\
-\hline \hline
-I-1   & B  & Closed                     & 65   & 53                             & 11   & 11     & Yes  & 4.4 @ 50  \\ \hline
-I-2   & B  & Manual (0:40)              & 66   & 53                             & 12   & 9      & Yes  & 4.4 @ 50  \\ \hline
-I-3   & B  & Manual (1:30)              & 64   & 53                             & 12   & 9      & Yes  & 4.4 @ 50  \\ \hline
-I-4   & C  & Closed                     & 60   & 52                             & 10   & 11     & Yes  & 4.4 @ 50  \\ \hline
-I-5   & C  & Manual (0:40)              & 72   & 52                             & 9    & 8      & Yes  & 4.4 @ 50  \\ \hline
-I-6   & C  & Manual (1:30)              & 62   & 52                             & 8    & 8      & Yes  & 4.4 @ 50  \\ \hline
-I-7   & C  & 74$^\circ$C link (DNO)     & 70   & 52                             & 10   & 11     & Yes  & 4.4 @ 50  \\ \hline
-I-8   & B  & 74$^\circ$C link (9:26)    & 60   & 53                             & 11   & 11     & Yes  & 4.4 @ 50  \\ \hline
-I-9   & D  & 74$^\circ$C link (DNO)     & 70   & 55                             & 12   & 16     & Yes  & 4.4 @ 50  \\ \hline
-I-10  & D  & Manual (0:40)              & 72   & 55                             & 13   & 14     & Yes  & 4.4 @ 50  \\ \hline
-I-11  & D  & 74$^\circ$C link (4:48)    & N/A  & N/A                            & N/A  & N/A    & Yes  & 4.4 @ 50  \\ \hline
-I-12  & A  & Closed                     & 68   & 58                             & 14   & 13     & Yes  & 4.4 @ 50  \\ \hline
-I-13  & A  & 74$^\circ$C link (1:04)    & 69   & 59                             & 5    & 11     & Yes  & 6.0 @ 60  \\ \hline
-I-14  & A  & Manual (0:40)              & 74   & 127                            & 7    & 7      & Yes  & 5.8 @ 60  \\ \hline
-I-15  & A  & Manual (1:30)              & 64   & 59                             & 5    & 13     & Yes  & 5.8 @ 60  \\ \hline
-I-16  & A  & 74$^\circ$C link (1:46)    & 106  & 99                             & 4    & 6      & Yes  & 5.0 @ 110 \\ \hline \hline
-I-17  & B  & 100$^\circ$C link (DNO)    & 58   & 54                             & 4    & 6      & No   & 4.6 @ 50 \\ \hline
-I-18  & C  & 100$^\circ$C link (DNO)    & 58   & 58                             & 4    & 4      & No   & 3.7 @ 50 \\ \hline
-I-19  & A  & 100$^\circ$C link (10:00)  & 56   & 60                             & 10   & 4      & No   & 4.6 @ 50 \\ \hline
-I-20  & A  & 74$^\circ$C link (1:20)    & 54   & 64                             & 4    & 4      & No   & 4.2 @ 50 \\ \hline
-I-21  & C  & 74$^\circ$C link (7:00)    & 58   & 52                             & 10   & 4      & No   & 4.6 @ 50 \\ \hline
-I-22  & D  & 100$^\circ$C link (DNO)    & 60   & 54                             & 6    & 5      & No   & 4.6 @ 50 \\ \hline
-\end{tabular}
-\end{center}
-\caption[Results of the UL/NFPRF Experiments.]
-{\bf Results of the UL/NFPRF Experiments. Note that DNO means
-``Did Not Open''. Also note, the fires grew at a rate proportional
-to the square of the time until a certain flow rate of fuel was achieved
-at which time the flow rate was held steady. Thus, the ``Heat Release Rate''
-was the size of the fire at the time when the fuel supply was leveled off.}
-\label{ULmatrix}
-\end{table}
-
-Figure~\ref{UL_NFPRF} displays graphically the difference between predicted and measured sprinkler activation times as a function of
-burner position. Note that there are no experimental uncertainty bounds on the plot because it is difficult to estimate the
+The figures on the following pages display the number of sprinklers actuated as a function of time. 
+The results are then summarized in Fig.~\ref{UL_NFPRF}. Note that there are no experimental uncertainty bounds on the plot because it is difficult to estimate the
 combined uncertainty related to the various parameters that are input into the model. For example, changing the median volumetric droplet
 size from 1000~$\mu$m to 750~$\mu$m led to a reduction of approximately 50~\% in the number of predicted sprinkler activations due to the
-increased cooling of the smaller droplets. Consequently, three replicate experiments are compared to show how much variation one can expect in
-sprinkler activation times in repeat experiments.
+increased cooling of the smaller droplets. 
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_01_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_02_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_03_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_04_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_05_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_06_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_07_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_08_Actuations} \\
+\end{tabular*}
+\label{UL_NFPRF_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_09_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_10_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_11_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_12_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_13_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_14_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_15_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_16_Actuations} \\
+\end{tabular*}
+\label{UL_NFPRF_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_17_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_18_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_19_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_20_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_21_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_22_Actuations} 
+\end{tabular*}
+\label{UL_NFPRF_3}
+\end{figure}
 
 \begin{figure}[p]
 \begin{center}
-\begin{tabular}{c}
-\includegraphics[width=4in]{FIGURES/ScatterPlots/UL_NFPRF_Activation_Times} \\
-\includegraphics[width=4in]{FIGURES/ScatterPlots/UL_NFPRF_Repeatability}
-\end{tabular}
+\includegraphics[width=4in]{FIGURES/ScatterPlots/UL_NFPRF_Actuations}
 \end{center}
-\caption[Summary of sprinkler activation time predictions, UL/NFPRF test series.]
-{Above: Comparison of predicted and measured sprinkler activation times for the UL/NFPRF Series. Below: Comparison of activation
-times for three pairs of replicate experiments.}
+\caption[Summary of sprinkler actuation predictions, UL/NFPRF test series.]
+{Above: Comparison of predicted and measured sprinkler activation times for the UL/NFPRF Test Series I. }
 \label{UL_NFPRF}
 \end{figure}
