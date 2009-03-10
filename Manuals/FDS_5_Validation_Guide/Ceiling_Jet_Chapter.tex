@@ -105,9 +105,13 @@ The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}.
 
 The figures on the following pages display the number of sprinklers actuated as a function of time. 
 The results are then summarized in Fig.~\ref{UL_NFPRF}. Note that there are no experimental uncertainty bounds on the plot because it is difficult to estimate the
-combined uncertainty related to the various parameters that are input into the model. For example, changing the median volumetric droplet
-size from 1000~$\mu$m to 750~$\mu$m led to a reduction of approximately 50~\% in the number of predicted sprinkler activations due to the
-increased cooling of the smaller droplets. 
+combined uncertainty related to the various parameters that are input into the model. At the bottom of Fig.~\ref{UL_NFPRF}, the results of three replicate experiments
+demonstrate that the total number of actuated sprinklers in each experiment is repeatable, even though individual actuation times may vary. Based on these
+three replicates, there is very little, if any, uncertainty in the total number of actuated sprinklers for each test. However, the test report~\cite{Sheppard:1} does not
+include uncertainty estimates for the heat release rate, thermal properties of the ceiling, sprinkler RTI, conductivity factor, actuation temperature,
+median droplet diameter, and various other parameters that have been input into the model. Consequently, it is not possible to estimate the uncertainty in the
+total number of actuated sprinklers due to the uncertainty in the reported parameters. The only sensitivity analysis conducted for this set of experiments was
+to change the median volumetric droplet size from 1000~$\mu$m to 750~$\mu$m, which led to a reduction of approximately 50~\% in the number of predicted sprinkler actuations.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -151,9 +155,17 @@ increased cooling of the smaller droplets.
 
 \begin{figure}[p]
 \begin{center}
-\includegraphics[width=4in]{FIGURES/ScatterPlots/UL_NFPRF_Actuations}
+\includegraphics[width=3.5in]{FIGURES/ScatterPlots/UL_NFPRF_Actuations}
 \end{center}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_01_08_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_04_07_Actuations}
+\end{tabular*}
+\begin{center}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_09_10_Actuations} 
+\end{center}`
 \caption[Summary of sprinkler actuation predictions, UL/NFPRF test series.]
-{Above: Comparison of predicted and measured sprinkler activation times for the UL/NFPRF Test Series I. }
+{Above: Comparison of predicted and measured sprinkler activation times for the UL/NFPRF Test Series I. Below:
+The results of three replicate experiments.}
 \label{UL_NFPRF}
 \end{figure}
