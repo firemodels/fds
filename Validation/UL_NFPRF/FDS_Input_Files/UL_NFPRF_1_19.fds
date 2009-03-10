@@ -278,4 +278,8 @@ Vent Link
 
 &DEVC ID='vent link', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=600., INITIAL_STATE=.FALSE. / 
 
+Actuated Sprinklers
+
+&DEVC ID='Acts', XYZ=15.0,15.0,1.0, QUANTITY='ACTUATED SPRINKLERS' /
+
 &TAIL /
