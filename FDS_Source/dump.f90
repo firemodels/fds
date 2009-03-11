@@ -1834,50 +1834,50 @@ SPEC_LOOP: DO N=0,N_SPECIES
    WRITE(LU_OUTPUT,'(A,F8.3)')   '   Initial Mass Fraction         ',SS%YY0
    IF (N==0) THEN
       IF (DNS .AND. SS%MODE==GAS_SPECIES) THEN
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Viscosity (kg/m/s)   Ambient: ',Y2MU_C(NINT(0.1_EB*TMPA))*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2MU_C(77)*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2MU_C(127)*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2MU_C(177)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Viscosity (kg/m/s)   Ambient: ',Y2MU_C(NINT(TMPA))*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2MU_C(773)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2MU_C(1273)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2MU_C(1773)*SPECIES(0)%MW
       ENDIF
       IF (.NOT.ISOTHERMAL .AND. DNS .AND. SS%MODE==GAS_SPECIES) THEN
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Therm. Cond. (W/m/K) Ambient: ',Y2K_C(NINT(0.1_EB*TMPA))*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2K_C(77)*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2K_C(127)*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2K_C(177)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Therm. Cond. (W/m/K) Ambient: ',Y2K_C(NINT(TMPA))*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2K_C(773)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2K_C(1273)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2K_C(1773)*SPECIES(0)%MW
       ENDIF
       IF (.NOT.ISOTHERMAL .AND. DNS .AND. SS%MODE==GAS_SPECIES) THEN
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',Y2CP_C(NINT(0.1_EB*TMPA))
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2CP_C(77)
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2CP_C(127)
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2CP_C(177)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',Y2CP_C(NINT(TMPA))
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2CP_C(773)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2CP_C(1273)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2CP_C(1773)
       ENDIF
    ELSE   
       IF (DNS .AND. SS%MODE==GAS_SPECIES) THEN
          WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Viscosity (kg/m/s)   Ambient: ',&
-                                           (Y2MU_C(NINT(0.1_EB*TMPA))+Y2MU(NINT(0.1_EB*TMPA),N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',(Y2MU_C(77)+Y2MU(77,N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',(Y2MU_C(127)+Y2MU(127,N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',(Y2MU_C(177)+Y2MU(177,N))*SPECIES(N)%MW
+                                           (Y2MU_C(NINT(TMPA))+Y2MU(NINT(TMPA),N))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',(Y2MU_C(773)+Y2MU(773,N))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',(Y2MU_C(1273)+Y2MU(1273,N))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',(Y2MU_C(1773)+Y2MU(1773,N))*SPECIES(N)%MW
       ENDIF
       IF (.NOT.ISOTHERMAL .AND. DNS .AND. SS%MODE==GAS_SPECIES) THEN
          WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Therm. Cond. (W/m/K) Ambient: ',&
-                                           (Y2K_C(NINT(0.1_EB*TMPA))+Y2K(NINT(0.1_EB*TMPA),N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',(Y2K_C(77)+Y2K(77,N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',(Y2K_C(127)+Y2K(127,N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',(Y2K_C(177)+Y2K(177,N))*SPECIES(N)%MW
+                                           (Y2K_C(NINT(TMPA))+Y2K(NINT(TMPA),N))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',(Y2K_C(773)+Y2K(773,N))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',(Y2K_C(1273)+Y2K(1273,N))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',(Y2K_C(1773)+Y2K(1773,N))*SPECIES(N)%MW
       ENDIF
       IF (.NOT.ISOTHERMAL .AND. DNS .AND. SS%MODE==GAS_SPECIES) THEN
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',Y2CP_C(NINT(0.1_EB*TMPA))+Y2CP(NINT(0.1_EB*TMPA),N)
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2CP_C(77)+Y2CP(77,N)
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2CP_C(127)+Y2CP(127,N)
-         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2CP_C(177)+Y2CP(177,N)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',Y2CP_C(NINT(TMPA))+Y2CP(NINT(TMPA),N)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2CP_C(7733)+Y2CP(773,N)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2CP_C(1273)+Y2CP(1273,N)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2CP_C(1773)+Y2CP(1773,N)
       ENDIF
    ENDIF
    IF (N>0 .AND. DNS .AND. SS%MODE==GAS_SPECIES) THEN
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Diff. Coeff. (m^2/s) Ambient: ',SS%D(NINT(0.1_EB*TMPA))
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',SS%D(77)
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',SS%D(127)
-      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',SS%D(177)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Diff. Coeff. (m^2/s) Ambient: ',SS%D(NINT(TMPA))
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',SS%D(773)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',SS%D(1273)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',SS%D(1773)
    ENDIF
 ENDDO SPEC_LOOP
  
@@ -2021,7 +2021,7 @@ SURFLOOP: DO N=0,N_SURF
          WRITE(LU_OUTPUT,'(8X,I3,2X,A)') NN,SF%MATL_NAME(NN)
       ENDDO
       IF (SF%SHRINK)          WRITE(LU_OUTPUT,'(A)')'     Shrinking wall'
-      SD = 0._EB
+      SD = 0._EB      
       DO NL=1,SF%N_LAYERS
          WRITE(LU_OUTPUT,'(A,I2)')      '     Layer ',NL
          WRITE(LU_OUTPUT,'(A,F8.5)')    '        Thickness   (m): ',SF%LAYER_THICKNESS(NL)
