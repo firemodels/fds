@@ -1747,6 +1747,7 @@ SUBROUTINE INITIALIZE_DIAGNOSTIC_FILE
 USE RADCONS, ONLY: NRT,RSA,NRP,TIME_STEP_INCREMENT,ANGLE_INCREMENT,PATH_LENGTH
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP 
 INTEGER :: NM,I,NN,N,NR,NL,NS
+REAL(EB) SD
 CHARACTER(30) :: QUANTITY
  
 ! Write out preliminary stuff to error file (unit 0)
@@ -2020,14 +2021,17 @@ SURFLOOP: DO N=0,N_SURF
          WRITE(LU_OUTPUT,'(8X,I3,2X,A)') NN,SF%MATL_NAME(NN)
       ENDDO
       IF (SF%SHRINK)          WRITE(LU_OUTPUT,'(A)')'     Shrinking wall'
+      SD = 0._EB
       DO NL=1,SF%N_LAYERS
          WRITE(LU_OUTPUT,'(A,I2)')      '     Layer ',NL
-         WRITE(LU_OUTPUT,'(A,F8.3)')    '        Thickness   (m): ',SF%LAYER_THICKNESS(NL)
+         WRITE(LU_OUTPUT,'(A,F8.5)')    '        Thickness   (m): ',SF%LAYER_THICKNESS(NL)
          WRITE(LU_OUTPUT,'(A,F8.2)')    '        Density (kg/m3): ',SF%LAYER_DENSITY(NL)
+         SD = SD + SF%LAYER_THICKNESS(NL)*SF%LAYER_DENSITY(NL)
          DO NN=1,SF%N_LAYER_MATL(NL)
             WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SF%LAYER_MATL_NAME(NL,NN)),', Mass fraction: ',SF%LAYER_MATL_FRAC(NL,NN)
          ENDDO
       ENDDO
+      WRITE(LU_OUTPUT,'(A,F9.3,A)')     '     Total surface density ', SD, ' kg/m2'
       WRITE(LU_OUTPUT,'(A)')         '     Solid Phase Nodes (m):      '
       DO I=0,SF%N_CELLS
          WRITE(LU_OUTPUT,'(10X,I3, F10.5)') I,SF%X_S(I)
