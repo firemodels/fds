@@ -8050,6 +8050,11 @@ Contains
          HR%SKIP_WALL_FORCE_IOR = 0
          Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,3a)') ' EVAC: Person n:o', HR%ILABEL, ' inserted ', Tin, &
               ' s, entry ', Trim(PNX%ID),' ffield ', Trim(HR%FFIELD_NAME)
+         Write (LU_EVACOUT,fmt='(a,a)') ' person     x       y       z    Tpre    Tdet  ', &
+         ' dia    v0   tau   i_gr i_ff'
+         Write (LU_EVACOUT,fmt='(i6,5f8.2,3f6.2,i6,i4,i4)') HR%ILABEL, &
+              HR%X, HR%Y, HR%Z, HR%Tpre, HR%Tdet,2.0_EB*HR%Radius, &
+              HR%Speed, HR%Tau, HR%GROUP_ID, HR%i_ffield, HR%COLOR_INDEX
       End If
       ! 
     End Subroutine ENTRY_HUMAN
