@@ -1,0 +1,475 @@
+&HEAD CHID='ISOHept25',TITLE='TN-1603 test ISOHept25'/
+
+&MESH XB = 0, 2.4, -1.2, 3.6, -0.35, 3.6, IJK = 60,120,96/
+
+&MISC CO_PRODUCTION=.TRUE./
+
+&TIME T_BEGIN=-5,T_END=1600,TIME_SHRINK_FACTOR=10./
+&DUMP NFRAMES=321/
+
+&REAC C=7,H=16,N=0,O=0,HEAT_OF_COMBUSTION=44630,IDEAL=.TRUE.,SOOT_YIELD=0.015,CO_YIELD=0.008/
+
+&SURF ID='skin2',MATL_ID='STEEL','KLITE HTZ', THICKNESS=0.00089, 0.05, COLOR='GRAY 40'/
+&SURF ID='skin1',MATL_ID='KLITE HTZ','STEEL', THICKNESS=0.05, 0.00089, COLOR='ANTIQUE WHITE'/
+&SURF ID='CONCRETE',MATL_ID='CONCRETE',THICKNESS=0.3,COLOR='GRAY 40'/
+
+&SURF ID='fire',HRRPUA=3835.7,COLOR='ORANGE',TMP_FRONT=100.,RAMP_Q='fire'/
+&OBST XB=0.846,1.553,1.446,2.154,0.0,0.10,SURF_IDS='fire','skin2','skin2'/
+
+&VENT MB='ZMIN',SURF_ID='CONCRETE'/
+&VENT XB= 0.0, 0.0, 0.0, 3.6, 0.0, 2.4,SURF_ID='skin1'/
+&VENT XB= 2.4, 2.4, 0.0, 3.6, 0.0, 2.4,SURF_ID='skin1'/
+&VENT XB= 0.0, 2.4, 3.6, 3.6, 0.0, 2.4,SURF_ID='skin1'/
+&VENT MB='ZMAX',SURF_ID='OPEN'/
+&VENT MB='YMIN',SURF_ID='OPEN'/
+
+&VENT XB= 0.0, 0.0, 0.0, 3.6, 2.4, 3.6,SURF_ID='OPEN'/
+&VENT XB= 2.4, 2.4, 0.0, 3.6, 2.4, 3.6,SURF_ID='OPEN'/
+&VENT XB= 0.0, 0.0, 0.0, 3.6,-0.35,-0.05,SURF_ID='OPEN'/
+&VENT XB= 2.4, 2.4, 0.0, 3.6,-0.35,-0.05,SURF_ID='OPEN'/
+&VENT XB= 0.0, 0.0,-1.2, 0.0,-0.35, 3.6,SURF_ID='OPEN'/
+&VENT XB= 2.4, 2.4,-1.2, 0.0,-0.35, 3.6,SURF_ID='OPEN'/
+&VENT XB= 0.0, 2.4, 3.6, 3.6,-0.35,-0.05,SURF_ID='OPEN'/
+&VENT XB= 0.0, 2.4, 3.6, 3.6, 2.4, 3.6,SURF_ID='OPEN'/
+
+&OBST XB= 0.0, 2.4, 0.0, 3.6, -0.05, 0.00, SURF_IDS='skin1','skin2','skin2'/
+&OBST XB= 0.0, 2.4, 0.0, 3.6,  2.40, 2.45, SURF_IDS='skin2','skin2','skin1'/
+&OBST XB= 0.0, 2.4,-0.05, 0.0, -0.05, 2.45, SURF_ID6='skin1','skin1','skin2','skin1','skin1','skin1'/
+&HOLE XB= 1.0, 1.4, -0.1, 0.1, 0.00, 2.00/ 
+
+&OBST XB= 1.16,1.23, -0.23,-.17,-0.05, 0.00, SURF_ID='skin1'/
+
+
+&MATL ID            = 'STEEL'
+      FYI           = 'Quintiere, Fire Behavior'
+      SPECIFIC_HEAT = 0.77
+      EMISSIVITY    = 0.8
+      DENSITY       = 7800.
+      CONDUCTIVITY  = 45. /
+
+&MATL ID            = 'CONCRETE'
+      FYI           = 'Quintiere, Fire Behavior'
+      SPECIFIC_HEAT = 0.88
+      DENSITY       = 2100.
+      CONDUCTIVITY  = 1.0 /
+
+&MATL ID            = 'KLITE HTZ'
+      FYI           = 'INSWOOL HTZ for k and WEBBOOK for c'
+      EMISSIVITY    = 0.95
+      DENSITY       = 128.
+      CONDUCTIVITY_RAMP  = 'KLINE HTZ k'
+      SPECIFIC_HEAT_RAMP = 'KLINE HTZ c'/
+
+&RAMP ID='KLINE HTZ k', T = 316.0, F = 0.06/
+&RAMP ID='KLINE HTZ k', T = 538.0, F = 0.09/
+&RAMP ID='KLINE HTZ k', T = 760.0, F = 0.12/
+&RAMP ID='KLINE HTZ k', T = 871.0, F = 0.14/
+
+&RAMP ID='KLINE HTZ c', T = 24.9, F = 0.706/
+&RAMP ID='KLINE HTZ c', T = 26.9, F = 0.709/
+&RAMP ID='KLINE HTZ c', T = 126.9, F = 0.848/
+&RAMP ID='KLINE HTZ c', T = 226.9, F = 0.937/
+&RAMP ID='KLINE HTZ c', T = 326.9, F = 1.001/
+&RAMP ID='KLINE HTZ c', T = 426.9, F = 1.055/
+&RAMP ID='KLINE HTZ c', T = 526.9, F = 1.111/
+&RAMP ID='KLINE HTZ c', T = 573.9, F = 1.059/
+&RAMP ID='KLINE HTZ c', T = 626.9, F = 1.069/
+&RAMP ID='KLINE HTZ c', T = 726.9, F = 1.086/
+&RAMP ID='KLINE HTZ c', T = 826.9, F = 1.102/
+&RAMP ID='KLINE HTZ c', T = 926.9, F = 1.118/
+&RAMP ID='KLINE HTZ c', T = 1026.9, F = 1.132/
+&RAMP ID='KLINE HTZ c', T = 1126.9, F = 1.146/
+&RAMP ID='KLINE HTZ c', T = 1204.9, F = 1.149/
+&RAMP ID='KLINE HTZ c', T = 1226.9, F = 1.152/
+&RAMP ID='KLINE HTZ c', T = 1326.9, F = 1.164/
+&RAMP ID='KLINE HTZ c', T = 1426.9, F = 1.175/
+&RAMP ID='KLINE HTZ c', T = 1526.9, F = 1.187/
+&RAMP ID='KLINE HTZ c', T = 1626.9, F = 1.198/
+
+&DEVC XYZ = 1.89, 0.25, 2.08, QUANTITY = 'oxygen', ID = 'O2Front'/
+&DEVC XYZ = 1.89, 0.25, 2.08, QUANTITY = 'carbon dioxide', ID = 'CO2Front'/
+&DEVC XYZ = 1.89, 0.25, 2.08, QUANTITY = 'carbon monoxide', ID = 'COFront'/
+&DEVC XYZ = 1.89, 0.25, 2.08, QUANTITY = 'fuel', ID = 'UHFront'/
+&DEVC XYZ = 1.87, 0.25, 2.08, QUANTITY = 'THERMOCOUPLE', ID = 'TFSampPtRh'/
+&DEVC XYZ = 1.87, 0.25, 2.08, QUANTITY = 'TEMPERATURE', ID = 'TFSampA'/
+&DEVC XYZ = 1.89, 0.25, 2.08, QUANTITY = 'soot', ID = 'SootFront'/
+&DEVC XYZ = 1.89, 0.25, 2.08, QUANTITY = 'water vapor', ID = 'H2OFront'/
+&DEVC XYZ = 1.89, 2.86, 2.08, QUANTITY = 'oxygen', ID = 'O2Rear'/
+&DEVC XYZ = 1.89, 2.86, 2.08, QUANTITY = 'carbon dioxide', ID = 'CO2Rear'/
+&DEVC XYZ = 1.89, 2.86, 2.08, QUANTITY = 'carbon monoxide', ID = 'CORear'/
+&DEVC XYZ = 1.89, 2.86, 2.08, QUANTITY = 'fuel', ID = 'UHRear'/
+&DEVC XYZ = 1.87, 2.86, 2.08, QUANTITY = 'THERMOCOUPLE', ID = 'TRSampPtRh'/
+&DEVC XYZ = 1.87, 2.86, 2.08, QUANTITY = 'TEMPERATURE', ID = 'TRSampA'/
+&DEVC XYZ = 1.89, 2.86, 2.08, QUANTITY = 'soot', ID = 'SootRear'/
+&DEVC XYZ = 1.89, 2.86, 2.08, QUANTITY = 'water vapor', ID = 'H2ORear'/
+&DEVC XYZ = 1.20, 2.66, 0.00, QUANTITY = 'GAUGE_HEAT_FLUX', ID = 'HFRFL', IOR=3/
+&DEVC XYZ = 1.20, 0.90, 0.00, QUANTITY = 'GAUGE_HEAT_FLUX', ID = 'HFFFL', IOR=3/
+&DEVC XYZ = 1.20, -0.20, 0.00, QUANTITY = 'GAUGE_HEAT_FLUX', ID = 'HFOFL', IOR=3/
+&DEVC XYZ = 1.20, 2.66, 2.40, QUANTITY = 'GAUGE_HEAT_FLUX', ID = 'HFRCE', IOR=-3/
+&DEVC XYZ = 1.20, 1.78, 2.40, QUANTITY = 'GAUGE_HEAT_FLUX', ID = 'HFCCE', IOR=-3/
+&DEVC XYZ = 1.20, 0.90, 2.40, QUANTITY = 'GAUGE_HEAT_FLUX', ID = 'HFFCE', IOR=-3/
+&DEVC XYZ = 1.20, 2.66, 0.00, QUANTITY = 'WALL_TEMPERATURE', ID = 'TSHFRFL', IOR=3/
+&DEVC XYZ = 1.20, 0.90, 0.00, QUANTITY = 'WALL_TEMPERATURE', ID = 'TSHFFFL', IOR=3/
+&DEVC XYZ = 1.20, -0.20, 0.00, QUANTITY = 'WALL_TEMPERATURE', ID = 'TSHFOFL', IOR=3/
+&DEVC XYZ = 1.20, 2.66, 2.40, QUANTITY = 'WALL_TEMPERATURE', ID = 'TSHFRCE', IOR=-3/
+&DEVC XYZ = 1.20, 1.78, 2.40, QUANTITY = 'WALL_TEMPERATURE', ID = 'TSHFCCE', IOR=-3/
+&DEVC XYZ = 1.20, 0.90, 2.40, QUANTITY = 'WALL_TEMPERATURE', ID = 'TSHFFCE', IOR=-3/
+&DEVC XYZ = 1.20, 2.66, 0.00, QUANTITY = 'BACK_WALL_TEMPERATURE', ID = 'TSXHFRFL', IOR=3/
+&DEVC XYZ = 1.20, 0.90, 0.00, QUANTITY = 'BACK_WALL_TEMPERATURE', ID = 'TSXHFFFL', IOR=3/
+&DEVC XYZ = 1.20, 2.66, 2.40, QUANTITY = 'BACK_WALL_TEMPERATURE', ID = 'TSXHFRCE', IOR=-3/
+&DEVC XYZ = 1.20, 1.78, 2.40, QUANTITY = 'BACK_WALL_TEMPERATURE', ID = 'TSXHFCCE', IOR=-3/
+&DEVC XYZ = 1.20, 0.90, 2.40, QUANTITY = 'BACK_WALL_TEMPERATURE', ID = 'TSXHFFCE', IOR=-3/
+&DEVC XYZ = 1.20, 2.88, 0.03, QUANTITY = 'THERMOCOUPLE', ID = 'TR3'/
+&DEVC XYZ = 1.20, 2.88, 0.30, QUANTITY = 'THERMOCOUPLE', ID = 'TR30'/
+&DEVC XYZ = 1.20, 2.88, 0.60, QUANTITY = 'THERMOCOUPLE', ID = 'TR60'/
+&DEVC XYZ = 1.20, 2.88, 0.90, QUANTITY = 'THERMOCOUPLE', ID = 'TR90'/
+&DEVC XYZ = 1.20, 2.88, 1.05, QUANTITY = 'THERMOCOUPLE', ID = 'TR105'/
+&DEVC XYZ = 1.20, 2.88, 1.20, QUANTITY = 'THERMOCOUPLE', ID = 'TR120'/
+&DEVC XYZ = 1.20, 2.88, 1.35, QUANTITY = 'THERMOCOUPLE', ID = 'TR135'/
+&DEVC XYZ = 1.20, 2.88, 1.50, QUANTITY = 'THERMOCOUPLE', ID = 'TR150'/
+&DEVC XYZ = 1.20, 2.88, 1.80, QUANTITY = 'THERMOCOUPLE', ID = 'TR180'/
+&DEVC XYZ = 1.20, 2.88, 2.10, QUANTITY = 'THERMOCOUPLE', ID = 'TR210'/
+&DEVC XYZ = 1.20, 2.88, 2.38, QUANTITY = 'THERMOCOUPLE', ID = 'TR237'/
+&DEVC XYZ = 1.20, 0.72, 0.03, QUANTITY = 'THERMOCOUPLE', ID = 'TF3'/
+&DEVC XYZ = 1.20, 0.72, 0.30, QUANTITY = 'THERMOCOUPLE', ID = 'TF30'/
+&DEVC XYZ = 1.20, 0.72, 0.60, QUANTITY = 'THERMOCOUPLE', ID = 'TF60'/
+&DEVC XYZ = 1.20, 0.72, 0.90, QUANTITY = 'THERMOCOUPLE', ID = 'TF90'/
+&DEVC XYZ = 1.20, 0.72, 1.05, QUANTITY = 'THERMOCOUPLE', ID = 'TF105'/
+&DEVC XYZ = 1.20, 0.72, 1.20, QUANTITY = 'THERMOCOUPLE', ID = 'TF120'/
+&DEVC XYZ = 1.20, 0.72, 1.35, QUANTITY = 'THERMOCOUPLE', ID = 'TF135'/
+&DEVC XYZ = 1.20, 0.72, 1.50, QUANTITY = 'THERMOCOUPLE', ID = 'TF150'/
+&DEVC XYZ = 1.20, 0.72, 1.80, QUANTITY = 'THERMOCOUPLE', ID = 'TF180'/
+&DEVC XYZ = 1.20, 0.72, 2.10, QUANTITY = 'THERMOCOUPLE', ID = 'TF210'/
+&DEVC XYZ = 1.20, 0.72, 2.38, QUANTITY = 'THERMOCOUPLE', ID = 'TF237'/
+
+&SLCF PBX = 1.2, QUANTITY='TEMPERATURE',VECTOR=.TRUE./
+&SLCF PBX = 1.2, QUANTITY='HRRPUV'/
+&SLCF PBX = 1.2, QUANTITY='MIXTURE_FRACTION_1'/
+&SLCF PBX = 1.2, QUANTITY='MIXTURE_FRACTION_2'/
+&SLCF PBX = 1.2, QUANTITY='MIXTURE_FRACTION_3'/
+
+&RAMP ID='fire', T = -20, F = 0.0000/
+&RAMP ID='fire', T = -15, F = 0.0000/
+&RAMP ID='fire', T = -10, F = 0.0000/
+&RAMP ID='fire', T = -5, F = 0.0000/
+&RAMP ID='fire', T = 0, F = 0.0019/
+&RAMP ID='fire', T = 5, F = 0.0127/
+&RAMP ID='fire', T = 10, F = 0.0376/
+&RAMP ID='fire', T = 15, F = 0.0637/
+&RAMP ID='fire', T = 20, F = 0.0850/
+&RAMP ID='fire', T = 25, F = 0.1029/
+&RAMP ID='fire', T = 30, F = 0.1217/
+&RAMP ID='fire', T = 35, F = 0.1351/
+&RAMP ID='fire', T = 40, F = 0.1430/
+&RAMP ID='fire', T = 45, F = 0.1497/
+&RAMP ID='fire', T = 50, F = 0.1553/
+&RAMP ID='fire', T = 55, F = 0.1570/
+&RAMP ID='fire', T = 60, F = 0.1542/
+&RAMP ID='fire', T = 65, F = 0.1563/
+&RAMP ID='fire', T = 70, F = 0.1613/
+&RAMP ID='fire', T = 75, F = 0.1619/
+&RAMP ID='fire', T = 80, F = 0.1591/
+&RAMP ID='fire', T = 85, F = 0.1547/
+&RAMP ID='fire', T = 90, F = 0.1581/
+&RAMP ID='fire', T = 95, F = 0.1733/
+&RAMP ID='fire', T = 100, F = 0.2018/
+&RAMP ID='fire', T = 105, F = 0.2357/
+&RAMP ID='fire', T = 110, F = 0.2509/
+&RAMP ID='fire', T = 115, F = 0.2528/
+&RAMP ID='fire', T = 120, F = 0.2577/
+&RAMP ID='fire', T = 125, F = 0.2815/
+&RAMP ID='fire', T = 130, F = 0.3044/
+&RAMP ID='fire', T = 135, F = 0.3129/
+&RAMP ID='fire', T = 140, F = 0.3059/
+&RAMP ID='fire', T = 145, F = 0.2969/
+&RAMP ID='fire', T = 150, F = 0.3040/
+&RAMP ID='fire', T = 155, F = 0.3133/
+&RAMP ID='fire', T = 160, F = 0.3224/
+&RAMP ID='fire', T = 165, F = 0.3179/
+&RAMP ID='fire', T = 170, F = 0.2913/
+&RAMP ID='fire', T = 175, F = 0.2701/
+&RAMP ID='fire', T = 180, F = 0.2826/
+&RAMP ID='fire', T = 185, F = 0.3080/
+&RAMP ID='fire', T = 190, F = 0.3197/
+&RAMP ID='fire', T = 195, F = 0.3165/
+&RAMP ID='fire', T = 200, F = 0.3115/
+&RAMP ID='fire', T = 205, F = 0.3052/
+&RAMP ID='fire', T = 210, F = 0.2937/
+&RAMP ID='fire', T = 215, F = 0.2837/
+&RAMP ID='fire', T = 220, F = 0.2859/
+&RAMP ID='fire', T = 225, F = 0.2988/
+&RAMP ID='fire', T = 230, F = 0.3053/
+&RAMP ID='fire', T = 235, F = 0.3107/
+&RAMP ID='fire', T = 240, F = 0.3207/
+&RAMP ID='fire', T = 245, F = 0.3357/
+&RAMP ID='fire', T = 250, F = 0.3554/
+&RAMP ID='fire', T = 255, F = 0.3844/
+&RAMP ID='fire', T = 260, F = 0.4212/
+&RAMP ID='fire', T = 265, F = 0.4486/
+&RAMP ID='fire', T = 270, F = 0.4636/
+&RAMP ID='fire', T = 275, F = 0.4803/
+&RAMP ID='fire', T = 280, F = 0.5030/
+&RAMP ID='fire', T = 285, F = 0.5134/
+&RAMP ID='fire', T = 290, F = 0.5188/
+&RAMP ID='fire', T = 295, F = 0.5217/
+&RAMP ID='fire', T = 300, F = 0.5261/
+&RAMP ID='fire', T = 305, F = 0.5230/
+&RAMP ID='fire', T = 310, F = 0.4987/
+&RAMP ID='fire', T = 315, F = 0.4900/
+&RAMP ID='fire', T = 320, F = 0.4931/
+&RAMP ID='fire', T = 325, F = 0.5003/
+&RAMP ID='fire', T = 330, F = 0.5045/
+&RAMP ID='fire', T = 335, F = 0.4956/
+&RAMP ID='fire', T = 340, F = 0.4991/
+&RAMP ID='fire', T = 345, F = 0.5246/
+&RAMP ID='fire', T = 350, F = 0.5381/
+&RAMP ID='fire', T = 355, F = 0.5320/
+&RAMP ID='fire', T = 360, F = 0.5174/
+&RAMP ID='fire', T = 365, F = 0.4945/
+&RAMP ID='fire', T = 370, F = 0.4974/
+&RAMP ID='fire', T = 375, F = 0.5197/
+&RAMP ID='fire', T = 380, F = 0.5384/
+&RAMP ID='fire', T = 385, F = 0.5343/
+&RAMP ID='fire', T = 390, F = 0.5261/
+&RAMP ID='fire', T = 395, F = 0.5217/
+&RAMP ID='fire', T = 400, F = 0.5080/
+&RAMP ID='fire', T = 405, F = 0.4836/
+&RAMP ID='fire', T = 410, F = 0.4776/
+&RAMP ID='fire', T = 415, F = 0.5052/
+&RAMP ID='fire', T = 420, F = 0.5382/
+&RAMP ID='fire', T = 425, F = 0.5382/
+&RAMP ID='fire', T = 430, F = 0.5055/
+&RAMP ID='fire', T = 435, F = 0.4886/
+&RAMP ID='fire', T = 440, F = 0.5055/
+&RAMP ID='fire', T = 445, F = 0.5110/
+&RAMP ID='fire', T = 450, F = 0.5076/
+&RAMP ID='fire', T = 455, F = 0.5202/
+&RAMP ID='fire', T = 460, F = 0.5597/
+&RAMP ID='fire', T = 465, F = 0.5776/
+&RAMP ID='fire', T = 470, F = 0.5345/
+&RAMP ID='fire', T = 475, F = 0.4769/
+&RAMP ID='fire', T = 480, F = 0.4486/
+&RAMP ID='fire', T = 485, F = 0.4585/
+&RAMP ID='fire', T = 490, F = 0.4869/
+&RAMP ID='fire', T = 495, F = 0.4969/
+&RAMP ID='fire', T = 500, F = 0.5025/
+&RAMP ID='fire', T = 505, F = 0.5076/
+&RAMP ID='fire', T = 510, F = 0.5225/
+&RAMP ID='fire', T = 515, F = 0.5417/
+&RAMP ID='fire', T = 520, F = 0.5261/
+&RAMP ID='fire', T = 525, F = 0.5133/
+&RAMP ID='fire', T = 530, F = 0.5158/
+&RAMP ID='fire', T = 535, F = 0.5110/
+&RAMP ID='fire', T = 540, F = 0.5140/
+&RAMP ID='fire', T = 545, F = 0.5231/
+&RAMP ID='fire', T = 550, F = 0.5166/
+&RAMP ID='fire', T = 555, F = 0.5102/
+&RAMP ID='fire', T = 560, F = 0.5339/
+&RAMP ID='fire', T = 565, F = 0.5554/
+&RAMP ID='fire', T = 570, F = 0.5654/
+&RAMP ID='fire', T = 575, F = 0.5548/
+&RAMP ID='fire', T = 580, F = 0.5360/
+&RAMP ID='fire', T = 585, F = 0.5123/
+&RAMP ID='fire', T = 590, F = 0.5048/
+&RAMP ID='fire', T = 595, F = 0.5452/
+&RAMP ID='fire', T = 600, F = 0.6391/
+&RAMP ID='fire', T = 605, F = 0.7274/
+&RAMP ID='fire', T = 610, F = 0.7602/
+&RAMP ID='fire', T = 615, F = 0.7657/
+&RAMP ID='fire', T = 620, F = 0.7412/
+&RAMP ID='fire', T = 625, F = 0.6979/
+&RAMP ID='fire', T = 630, F = 0.6659/
+&RAMP ID='fire', T = 635, F = 0.6611/
+&RAMP ID='fire', T = 640, F = 0.7213/
+&RAMP ID='fire', T = 645, F = 0.7372/
+&RAMP ID='fire', T = 650, F = 0.6904/
+&RAMP ID='fire', T = 655, F = 0.6751/
+&RAMP ID='fire', T = 660, F = 0.7195/
+&RAMP ID='fire', T = 665, F = 0.7536/
+&RAMP ID='fire', T = 670, F = 0.7498/
+&RAMP ID='fire', T = 675, F = 0.7596/
+&RAMP ID='fire', T = 680, F = 0.7709/
+&RAMP ID='fire', T = 685, F = 0.7717/
+&RAMP ID='fire', T = 690, F = 0.7651/
+&RAMP ID='fire', T = 695, F = 0.7371/
+&RAMP ID='fire', T = 700, F = 0.7114/
+&RAMP ID='fire', T = 705, F = 0.7065/
+&RAMP ID='fire', T = 710, F = 0.7118/
+&RAMP ID='fire', T = 715, F = 0.7286/
+&RAMP ID='fire', T = 720, F = 0.7336/
+&RAMP ID='fire', T = 725, F = 0.7418/
+&RAMP ID='fire', T = 730, F = 0.7255/
+&RAMP ID='fire', T = 735, F = 0.7165/
+&RAMP ID='fire', T = 740, F = 0.7279/
+&RAMP ID='fire', T = 745, F = 0.7254/
+&RAMP ID='fire', T = 750, F = 0.7160/
+&RAMP ID='fire', T = 755, F = 0.7201/
+&RAMP ID='fire', T = 760, F = 0.7220/
+&RAMP ID='fire', T = 765, F = 0.7167/
+&RAMP ID='fire', T = 770, F = 0.6990/
+&RAMP ID='fire', T = 775, F = 0.6928/
+&RAMP ID='fire', T = 780, F = 0.7231/
+&RAMP ID='fire', T = 785, F = 0.7482/
+&RAMP ID='fire', T = 790, F = 0.7261/
+&RAMP ID='fire', T = 795, F = 0.6969/
+&RAMP ID='fire', T = 800, F = 0.6996/
+&RAMP ID='fire', T = 805, F = 0.7168/
+&RAMP ID='fire', T = 810, F = 0.7393/
+&RAMP ID='fire', T = 815, F = 0.7491/
+&RAMP ID='fire', T = 820, F = 0.7350/
+&RAMP ID='fire', T = 825, F = 0.7270/
+&RAMP ID='fire', T = 830, F = 0.7315/
+&RAMP ID='fire', T = 835, F = 0.7145/
+&RAMP ID='fire', T = 840, F = 0.6994/
+&RAMP ID='fire', T = 845, F = 0.7100/
+&RAMP ID='fire', T = 850, F = 0.7239/
+&RAMP ID='fire', T = 855, F = 0.7091/
+&RAMP ID='fire', T = 860, F = 0.7115/
+&RAMP ID='fire', T = 865, F = 0.7346/
+&RAMP ID='fire', T = 870, F = 0.7335/
+&RAMP ID='fire', T = 875, F = 0.7267/
+&RAMP ID='fire', T = 880, F = 0.7279/
+&RAMP ID='fire', T = 885, F = 0.7197/
+&RAMP ID='fire', T = 890, F = 0.7142/
+&RAMP ID='fire', T = 895, F = 0.7076/
+&RAMP ID='fire', T = 900, F = 0.6976/
+&RAMP ID='fire', T = 905, F = 0.6850/
+&RAMP ID='fire', T = 910, F = 0.6787/
+&RAMP ID='fire', T = 915, F = 0.7107/
+&RAMP ID='fire', T = 920, F = 0.7537/
+&RAMP ID='fire', T = 925, F = 0.7725/
+&RAMP ID='fire', T = 930, F = 0.7471/
+&RAMP ID='fire', T = 935, F = 0.7061/
+&RAMP ID='fire', T = 940, F = 0.6692/
+&RAMP ID='fire', T = 945, F = 0.6617/
+&RAMP ID='fire', T = 950, F = 0.6897/
+&RAMP ID='fire', T = 955, F = 0.7132/
+&RAMP ID='fire', T = 960, F = 0.7301/
+&RAMP ID='fire', T = 965, F = 0.7235/
+&RAMP ID='fire', T = 970, F = 0.7026/
+&RAMP ID='fire', T = 975, F = 0.6937/
+&RAMP ID='fire', T = 980, F = 0.6944/
+&RAMP ID='fire', T = 985, F = 0.7053/
+&RAMP ID='fire', T = 990, F = 0.7099/
+&RAMP ID='fire', T = 995, F = 0.7067/
+&RAMP ID='fire', T = 1000, F = 0.6984/
+&RAMP ID='fire', T = 1005, F = 0.7110/
+&RAMP ID='fire', T = 1010, F = 0.7647/
+&RAMP ID='fire', T = 1015, F = 0.7894/
+&RAMP ID='fire', T = 1020, F = 0.7732/
+&RAMP ID='fire', T = 1025, F = 0.7926/
+&RAMP ID='fire', T = 1030, F = 0.8585/
+&RAMP ID='fire', T = 1035, F = 0.9097/
+&RAMP ID='fire', T = 1040, F = 0.9234/
+&RAMP ID='fire', T = 1045, F = 0.8929/
+&RAMP ID='fire', T = 1050, F = 0.8794/
+&RAMP ID='fire', T = 1055, F = 0.9004/
+&RAMP ID='fire', T = 1060, F = 0.9343/
+&RAMP ID='fire', T = 1065, F = 0.9600/
+&RAMP ID='fire', T = 1070, F = 0.9519/
+&RAMP ID='fire', T = 1075, F = 0.9296/
+&RAMP ID='fire', T = 1080, F = 0.8888/
+&RAMP ID='fire', T = 1085, F = 0.8541/
+&RAMP ID='fire', T = 1090, F = 0.8645/
+&RAMP ID='fire', T = 1095, F = 0.9172/
+&RAMP ID='fire', T = 1100, F = 0.9630/
+&RAMP ID='fire', T = 1105, F = 0.9549/
+&RAMP ID='fire', T = 1110, F = 0.9211/
+&RAMP ID='fire', T = 1115, F = 0.9120/
+&RAMP ID='fire', T = 1120, F = 0.9150/
+&RAMP ID='fire', T = 1125, F = 0.9086/
+&RAMP ID='fire', T = 1130, F = 0.9208/
+&RAMP ID='fire', T = 1135, F = 0.9437/
+&RAMP ID='fire', T = 1140, F = 0.9581/
+&RAMP ID='fire', T = 1145, F = 0.9578/
+&RAMP ID='fire', T = 1150, F = 0.9339/
+&RAMP ID='fire', T = 1155, F = 0.8904/
+&RAMP ID='fire', T = 1160, F = 0.8620/
+&RAMP ID='fire', T = 1165, F = 0.8766/
+&RAMP ID='fire', T = 1170, F = 0.9213/
+&RAMP ID='fire', T = 1175, F = 0.9515/
+&RAMP ID='fire', T = 1180, F = 0.9367/
+&RAMP ID='fire', T = 1185, F = 0.9188/
+&RAMP ID='fire', T = 1190, F = 0.9148/
+&RAMP ID='fire', T = 1195, F = 0.9069/
+&RAMP ID='fire', T = 1200, F = 0.8832/
+&RAMP ID='fire', T = 1205, F = 0.8684/
+&RAMP ID='fire', T = 1210, F = 0.9064/
+&RAMP ID='fire', T = 1215, F = 0.9463/
+&RAMP ID='fire', T = 1220, F = 0.9530/
+&RAMP ID='fire', T = 1225, F = 0.9490/
+&RAMP ID='fire', T = 1230, F = 0.9474/
+&RAMP ID='fire', T = 1235, F = 0.9095/
+&RAMP ID='fire', T = 1240, F = 0.8752/
+&RAMP ID='fire', T = 1245, F = 0.9040/
+&RAMP ID='fire', T = 1250, F = 0.9331/
+&RAMP ID='fire', T = 1255, F = 0.9281/
+&RAMP ID='fire', T = 1260, F = 0.9144/
+&RAMP ID='fire', T = 1265, F = 0.8816/
+&RAMP ID='fire', T = 1270, F = 0.8802/
+&RAMP ID='fire', T = 1275, F = 0.9385/
+&RAMP ID='fire', T = 1280, F = 0.9736/
+&RAMP ID='fire', T = 1285, F = 0.9656/
+&RAMP ID='fire', T = 1290, F = 0.9361/
+&RAMP ID='fire', T = 1295, F = 0.9210/
+&RAMP ID='fire', T = 1300, F = 0.9245/
+&RAMP ID='fire', T = 1305, F = 0.9214/
+&RAMP ID='fire', T = 1310, F = 0.9047/
+&RAMP ID='fire', T = 1315, F = 0.8978/
+&RAMP ID='fire', T = 1320, F = 0.9396/
+&RAMP ID='fire', T = 1325, F = 1.0000/
+&RAMP ID='fire', T = 1330, F = 0.9632/
+&RAMP ID='fire', T = 1335, F = 0.8764/
+&RAMP ID='fire', T = 1340, F = 0.8335/
+&RAMP ID='fire', T = 1345, F = 0.8489/
+&RAMP ID='fire', T = 1350, F = 0.9058/
+&RAMP ID='fire', T = 1355, F = 0.9346/
+&RAMP ID='fire', T = 1360, F = 0.9070/
+&RAMP ID='fire', T = 1365, F = 0.8418/
+&RAMP ID='fire', T = 1370, F = 0.7776/
+&RAMP ID='fire', T = 1375, F = 0.7530/
+&RAMP ID='fire', T = 1380, F = 0.7307/
+&RAMP ID='fire', T = 1385, F = 0.6831/
+&RAMP ID='fire', T = 1390, F = 0.6728/
+&RAMP ID='fire', T = 1395, F = 0.7158/
+&RAMP ID='fire', T = 1400, F = 0.7681/
+&RAMP ID='fire', T = 1405, F = 0.7859/
+&RAMP ID='fire', T = 1410, F = 0.7900/
+&RAMP ID='fire', T = 1415, F = 0.8294/
+&RAMP ID='fire', T = 1420, F = 0.9031/
+&RAMP ID='fire', T = 1425, F = 0.9515/
+&RAMP ID='fire', T = 1430, F = 0.9303/
+&RAMP ID='fire', T = 1435, F = 0.8838/
+&RAMP ID='fire', T = 1440, F = 0.9026/
+&RAMP ID='fire', T = 1445, F = 0.9270/
+&RAMP ID='fire', T = 1450, F = 0.8729/
+&RAMP ID='fire', T = 1455, F = 0.7320/
+&RAMP ID='fire', T = 1460, F = 0.5109/
+&RAMP ID='fire', T = 1465, F = 0.3054/
+&RAMP ID='fire', T = 1470, F = 0.1964/
+&RAMP ID='fire', T = 1475, F = 0.1621/
+&RAMP ID='fire', T = 1480, F = 0.1538/
+&RAMP ID='fire', T = 1485, F = 0.1495/
+&RAMP ID='fire', T = 1490, F = 0.1435/
+&RAMP ID='fire', T = 1495, F = 0.1424/
+&RAMP ID='fire', T = 1500, F = 0.1414/
+&RAMP ID='fire', T = 1505, F = 0.1408/
+&RAMP ID='fire', T = 1510, F = 0.1407/
+&RAMP ID='fire', T = 1515, F = 0.1395/
+&RAMP ID='fire', T = 1520, F = 0.1372/
+&RAMP ID='fire', T = 1525, F = 0.1263/
+&RAMP ID='fire', T = 1530, F = 0.0992/
+&RAMP ID='fire', T = 1535, F = 0.0697/
+&RAMP ID='fire', T = 1540, F = 0.0531/
+&RAMP ID='fire', T = 1545, F = 0.0424/
+&RAMP ID='fire', T = 1550, F = 0.0328/
+&RAMP ID='fire', T = 1555, F = 0.0271/
+&RAMP ID='fire', T = 1560, F = 0.0240/
+&RAMP ID='fire', T = 1565, F = 0.0223/
+&RAMP ID='fire', T = 1570, F = 0.0211/
+&RAMP ID='fire', T = 1575, F = 0.0203/
+&RAMP ID='fire', T = 1580, F = 0.0196/
+&RAMP ID='fire', T = 1585, F = 0.0178/
+&RAMP ID='fire', T = 1590, F = 0.0161/
+&RAMP ID='fire', T = 1595, F = 0.0155/
+&RAMP ID='fire', T = 1600, F = 0.0149/
