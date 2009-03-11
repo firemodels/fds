@@ -12,7 +12,7 @@ import matplotlib
 matplotlib.use('PDF')
 from matplotlib import rcParams
 rcParams['font.family'] = 'serif'
-rcParams['font.serif'] = ['Times New Roman']
+#rcParams['font.serif'] = ['Times New Roman']
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy.ma as M
@@ -42,7 +42,7 @@ def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
     mu_line = quantities[quantity_id]["Mu_Line"]
     sigma_lines = quantities[quantity_id]["Sigma_Lines"]
     
-    print "Write Scatter Plot:",title
+    #print "Plotting:",title
     
     x_data_set = []
     y_data_set = []
@@ -65,7 +65,7 @@ def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
         y_data_set.append(y_data)
         ax.scatter(x_data, y_data, s=symbolsize, c=symbolcolor, marker=symboltype, edgecolors=edgecolor, label=group_title)
     
-    mu_sigma = clc.mu_2sigma(x_data_set,y_data_set)
+    mu_sigma = clc.mu_2sigma(x_data_set,y_data_set,diagnostic_level)
     mu_val = mu_sigma[0]
     sigma_2_val = mu_sigma[1]
     mu_max = plot_max*(1+mu_val)
@@ -75,9 +75,9 @@ def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
     
     if exp_error_lines == 'yes':
         # Draw Upper Exp Error
-        exp_error_upper = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1+percent_error))], 'k:', linewidth=2.0, label='_nolegend_')
+        exp_error_upper = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1+percent_error))], 'k:', linewidth=1.0, label='_nolegend_')
         # Draw Lower Exp Error
-        exp_error_lower = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1-percent_error))], 'k:', linewidth=2.0, label='_nolegend_')
+        exp_error_lower = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1-percent_error))], 'k:', linewidth=1.0, label='_nolegend_')
     
     if mu_line == 'yes':
         # Draw Mu Line
@@ -92,8 +92,8 @@ def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
     plt.xlabel(ind_axis_title)
     plt.ylabel(dep_axis_title)
     ax.text(plot_max*title_position[0], plot_max*title_position[1], title, horizontalalignment='left') 
-    ax.text(plot_max*(title_position[0]+0.05), plot_max*(title_position[1]-0.10), r'$\mu='+"%2.2f" % (mu_val*100)+'\%$')
-    ax.text(plot_max*(title_position[0]+0.05), plot_max*(title_position[1]-0.05), r'$2\sigma='+"%2.2f" % (sigma_2_val*100)+'\%$')
+    ax.text(plot_max*(title_position[0]+0.05), plot_max*(title_position[1]-0.05), r'$\mu='+"%2.2f" % (mu_val*100)+'\%$')
+    ax.text(plot_max*(title_position[0]+0.05), plot_max*(title_position[1]-0.10), r'$2\sigma='+"%2.2f" % (sigma_2_val*100)+'\%$')
     
     if legend_loc != '':
         leg = ax.legend(loc=legend_loc)

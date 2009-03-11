@@ -168,7 +168,10 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
     count = 0
     number_of_columns = 0
     data_sets = {}
-    #import progress
+    import progress
+    
+    total = len(data_info.keys())
+    p = progress.ProgressMeter(total=total, unit='Data Records', rate_refresh=1.0)
     
     for key in data_info.keys():
         ind_scale = float(data_info[key]['Scale_Ind'])
@@ -225,7 +228,9 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
         number_of_columns += ((len(d1_data)-1)+(len(d2_data)-1))
         count += 1
         
-    if diagnostic_level >= 1:
+        p.update(1)
+        
+    if diagnostic_level >= 2:
         print count,"Data Info records processed."
         print "Found",number_of_columns,"columns of Y-Axis data."
     
