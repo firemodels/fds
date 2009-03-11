@@ -215,13 +215,13 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               ITMP = MIN(500,NINT(.05_EB*(TMP(I+1,J,K)+TMP(I,J,K))))
+               ITMP = MIN(5000,NINT(.5_EB*(TMP(I+1,J,K)+TMP(I,J,K))))
                HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
                H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
-               ITMP = MIN(500,NINT(.05_EB*(TMP(I,J+1,K)+TMP(I,J,K))))
+               ITMP = MIN(5000,NINT(.5_EB*(TMP(I,J+1,K)+TMP(I,J,K))))
                HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
                H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
-               ITMP = MIN(500,NINT(.05_EB*(TMP(I,J,K+1)+TMP(I,J,K))))
+               ITMP = MIN(5000,NINT(.5_EB*(TMP(I,J,K+1)+TMP(I,J,K))))
                HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
                H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
             ENDDO
@@ -306,7 +306,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ITMP = MIN(500,INT(0.1_EB*TMP(I,J,K)))
+               ITMP = MIN(5000,INT(TMP(I,J,K)))
                HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
                DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
             ENDDO
@@ -324,7 +324,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
    KDTDY => WORK2
    KDTDZ => WORK3
    KP    => WORK4
-   KP = Y2K_C(NINT(0.1_EB*TMPA))*SPECIES(0)%MW
+   KP = Y2K_C(NINT(TMPA))*SPECIES(0)%MW
    ! Compute thermal conductivity k (KP)
  
    K_DNS_OR_LES: IF (DNS) THEN
