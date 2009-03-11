@@ -7,7 +7,7 @@ import sys
 import os
 from math import sqrt
 
-def mu_2sigma(x_data_set,y_data_set):
+def mu_2sigma(x_data_set,y_data_set,diagnostic_level):
     epsilion_vals = []
     for i in range(len(x_data_set)):
         for j in range(len(x_data_set[i])):
@@ -23,12 +23,6 @@ def mu_2sigma(x_data_set,y_data_set):
         print '2 Sigma:', sigma_2_val
     
     return[mu_val,sigma_2_val]
-
-def test_mu_2sigma():
-    x_data_set = [[40.00,60.00,125.00,165.00,245.00],[300.00, 430.00, 500.00, 555.00, 600.00],[620.00, 615.00, 600.00, 653.00, 660.00, 646.00]]
-    y_data_set = [[50.80,69.23,119.71,167.59,256.20],[356.02, 425.82, 504.18, 553.45, 602.47],[624.12, 624.60, 656.12, 670.82, 668.81, 660.29]]
-    
-    mu_2sigma(x_data_set,y_data_set)
 
 def calc_min(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level):
     if diagnostic_level >= 3:
@@ -58,7 +52,7 @@ def calc_min(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level)
     return [d1_drop_value,d2_drop_value,relative_difference]
 
 def calc_max(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level):
-    if diagnostic_level >= 2:
+    if diagnostic_level >= 3:
         print "*** Compute Rise ***"
         
     temp_d1_data_values = [x for x in d1_data if x != -9999.0]
@@ -76,7 +70,7 @@ def calc_max(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level)
         print "\n*** Computing Rise Relative Difference ***"
     try:
         relative_difference = ((d2_rise_value-d1_rise_value)/d1_rise_value)
-        if diagnostic_level >= 2:
+        if diagnostic_level >= 3:
             print "Rise Relative Difference is:", relative_difference
     except:
         print "!!! Computation of Rise relative_difference failed. !!!\nCheck source data for columns listed above."
@@ -84,9 +78,14 @@ def calc_max(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level)
     
     return [d1_rise_value,d2_rise_value,relative_difference]
 
+def test_mu_2sigma():
+    x_data_set = [[40.00,60.00,125.00,165.00,245.00],[300.00, 430.00, 500.00, 555.00, 600.00],[620.00, 615.00, 600.00, 653.00, 660.00, 646.00]]
+    y_data_set = [[50.80,69.23,119.71,167.59,256.20],[356.02, 425.82, 504.18, 553.45, 602.47],[624.12, 624.60, 656.12, 670.82, 668.81, 660.29]]
+    
+    mu_2sigma(x_data_set,y_data_set,diagnostic_level)
+
 def main():
     test_mu_2sigma()
 
 if __name__ == '__main__':
     main()
-

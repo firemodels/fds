@@ -1,25 +1,26 @@
 import parser as pr
 import calcs as calc
 import plotter as plot
+import progress
 
 ### Set Diagnostic Output Level
 ## Uncomment the level of diagnostics desired.
 ## 1 = Minimal, 2 = Normal, 3 = Maximum.
 diagnostic_level = 2 # Input Value
 
-print "**** Diagnostics Set at Level", diagnostic_level, "****\n"
+print "**** Diagnostics Set at Level", diagnostic_level
 
 ### Set what plots to create: 
 ## BOTH (1), Comparison Only (2), Scatter Only (3)
-process_set = 2 # Input Value
+process_set = 1 # Input Value
 
 if diagnostic_level >= 1:
     if process_set == 1:
-        print "**** Plotting both Comparison and Scatter Data ****\n"
+        print "**** Plotting both Comparison and Scatter Data"
     if process_set == 2:
-        print "**** Plotting Only Comparison Data ****\n"
+        print "**** Plotting Only Comparison Data"
     if process_set == 3:
-        print "**** Plotting Only Scatter Data ****\n"
+        print "**** Plotting Only Scatter Data"
 
 ### Set character to be used for indicating the comparison data set in the config file.
 ## The default character is 'd' if you change the value below to something else 
@@ -28,7 +29,7 @@ if diagnostic_level >= 1:
 data_line_char = 'd' # Input Value
 
 if diagnostic_level >= 1:
-    print "**** Data Character Set to '"+data_line_char+"' ****\n"
+    print "**** Data Character Set to '"+data_line_char+"'"
 
 
 ## Validation Data Set (1), Verification Data Set (2), Examples Data Set (3), Trainier Data Set (4)
@@ -86,71 +87,87 @@ if diagnostic_level >= 2:
 pr.parse_data_info(config_file_name,data_line_char,diagnostic_level)
 
 data_info = pr.read_pickle(config_file_name+'_object.pkl',diagnostic_level)
-if diagnostic_level >= 1:
+if diagnostic_level >= 2:
     print "There are",len(data_info),"data records to process."
 
 #Start Processing records in data config file.
 data_sets = pr.collect_data_sets(data_info,data_directory,diagnostic_level)
 
-data_index_records = {} 
+data_index_records = {}
+
 for key in data_sets:
     data_index_records[key] = {}
     data_index_records[key]['d1_index_set'] = pr.find_start_stop_index(data_sets[key][0][0],data_info[key]['d1_Start'],data_info[key]['d1_End'],data_info[key]['d1_Comp_Start'],data_info[key]['d1_Comp_End'],diagnostic_level)
     data_index_records[key]['d2_index_set'] = pr.find_start_stop_index(data_sets[key][1][0],data_info[key]['d2_Start'],data_info[key]['d2_End'],data_info[key]['d2_Comp_Start'],data_info[key]['d2_Comp_End'],diagnostic_level)
-    #print data_index_records[key]['d1_index_set'],",",data_index_records[key]['d2_index_set']
 
-# Make Comparison Plots.
-if diagnostic_level >= 2:
-    print "Begin Comparison Plots"
-
-for key in data_info:
-    #print key, data_info[key]['Plot_Filename']
-    plot.comparison_plot(data_sets[key],data_info[key],data_index_records[key]['d1_index_set'],data_index_records[key]['d2_index_set'],output_directory,diagnostic_level)
-
-if diagnostic_level >= 2:
-    print "Finished Comparison Plots"
-
-# Create Scatter Plot Data Object based on quantities object.
-pr.make_scatter_dict(diagnostic_level)
-
-# Find metric data for scatter plots and write data to scatter_data_dict object.
-for key in data_info:
-    if data_info[key]['Quantity'] == str(0):
-        if diagnostic_level >= 1:
-            print "Quantity set to 0, no scatter data."
-            #This allows the d line Quantity value to be set to 0 when either d1 or d2 data is missing.
-    else:
-        d1_metric_start_index = data_index_records[key]['d1_index_set'][2]
-        d1_metric_stop_index = data_index_records[key]['d1_index_set'][3]
-        d2_metric_start_index = data_index_records[key]['d2_index_set'][2]
-        d2_metric_stop_index = data_index_records[key]['d2_index_set'][3]
+if process_set == 1 or process_set == 2:
+    # Make Comparison Plots.
+    if diagnostic_level >= 2:
+        print "Begin Comparison Plots"
+    
+    total = len(data_sets)
+    p = progress.ProgressMeter(total=total, unit='Comparison Plots', rate_refresh=0.25)
+    
+    for key in data_info:
+        plot.comparison_plot(data_sets[key],data_info[key],data_index_records[key]['d1_index_set'],data_index_records[key]['d2_index_set'],output_directory,diagnostic_level)
+        p.update(1)
         
-        if data_info[key]['Metric'] == 'max':
-            for data_index in range(len(data_sets[key][0][1:])):
-                max_results = calc.calc_max(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index],data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'],data_info[key]['d2_Initial_Value'],diagnostic_level)
-                pr.add_group_data_to_scatter_data_dict(data_info[key]['Quantity'],data_info[key]['Group'],max_results[:2],diagnostic_level)
-        elif data_info[key]['Metric'] == 'min':
-            for data_index in range(len(data_sets[key][0][1:])):
-                min_results = calc.calc_min(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index],data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'],data_info[key]['d2_Initial_Value'],diagnostic_level)
-                pr.add_group_data_to_scatter_data_dict(data_info[key]['Quantity'],data_info[key]['Group'],min_results[:2],diagnostic_level)
+    if diagnostic_level >= 2:
+        print "Finished Comparison Plots"
+
+# Scatter Plotting...
+if process_set == 1 or process_set == 3:
+    # Create Scatter Plot Data Object based on quantities object.
+    pr.make_scatter_dict(diagnostic_level)
+
+    # Find metric data for scatter plots and write data to scatter_data_dict object.
+    for key in data_info:
+        if data_info[key]['Quantity'] == str(0):
+            if diagnostic_level >= 3:
+                print "Quantity set to 0, no scatter data."
+                #This allows the d line Quantity value to be set to 0 when either d1 or d2 data is missing.
         else:
-            if diagnostic_level >= 1:
-                print "!!! Metric is undefined in the input file. !!!"
-            exit()
+            d1_metric_start_index = data_index_records[key]['d1_index_set'][2]
+            d1_metric_stop_index = data_index_records[key]['d1_index_set'][3]
+            d2_metric_start_index = data_index_records[key]['d2_index_set'][2]
+            d2_metric_stop_index = data_index_records[key]['d2_index_set'][3]
+        
+            if data_info[key]['Metric'] == 'max':
+                for data_index in range(len(data_sets[key][0][1:])):
+                    max_results = calc.calc_max(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index],data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'],data_info[key]['d2_Initial_Value'],diagnostic_level)
+                    pr.add_group_data_to_scatter_data_dict(data_info[key]['Quantity'],data_info[key]['Group'],max_results[:2],diagnostic_level)
+            elif data_info[key]['Metric'] == 'min':
+                for data_index in range(len(data_sets[key][0][1:])):
+                    min_results = calc.calc_min(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index],data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'],data_info[key]['d2_Initial_Value'],diagnostic_level)
+                    pr.add_group_data_to_scatter_data_dict(data_info[key]['Quantity'],data_info[key]['Group'],min_results[:2],diagnostic_level)
+            else:
+                if diagnostic_level >= 1:
+                    print "!!! Metric is undefined in the input file. !!!"
+                exit()
 
-# Make Scatter Plots.
-if diagnostic_level >= 1:
-    print "Begin Scatter Plots"
+    # Make Scatter Plots.
+    if diagnostic_level >= 1:
+        print "Begin Scatter Plots"
 
-scatter_data_dict = pr.read_pickle('scatter_data_dict_object.pkl',diagnostic_level)
-for quantity_key in scatter_data_dict:
-    if scatter_data_dict[quantity_key] != {}:
-        plot.scatter_plot(quantity_key,scatter_data_dict[quantity_key],output_directory,diagnostic_level)
-
-if diagnostic_level >= 1:
-    print "Finished Scatter Plots"
+    scatter_data_dict = pr.read_pickle('scatter_data_dict_object.pkl',diagnostic_level)
+    
+    count_no_data = 0
+    for quantity_key in scatter_data_dict:
+        if scatter_data_dict[quantity_key] == {}:
+            count_no_data += 1
+    
+    total = len(scatter_data_dict.keys())-count_no_data
+    p = progress.ProgressMeter(total=total, unit='Scatter Plots', rate_refresh=0.25)
+    
+    for quantity_key in scatter_data_dict:
+        if scatter_data_dict[quantity_key] != {}:
+            plot.scatter_plot(quantity_key,scatter_data_dict[quantity_key],output_directory,diagnostic_level)
+            p.update(1)
+            
+    if diagnostic_level >= 1:
+        print "Finished Scatter Plots"
 
 
 ## Report Completion.
 if diagnostic_level >= 1:
-    print "****  Processing finished, thank you for your patience.  ****"
+    print "****  Processing finished  ****"
