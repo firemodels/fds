@@ -2481,6 +2481,8 @@ T_LOOP_1: DO J=1,5000
             H_TMP(SS%INDEX) = 0._EB            
          CASE('ARGON')
             CP_TMP(SS%INDEX) = 519.75_EB
+         CASE('HELIUM')
+            CP_TMP(SS%INDEX) = 5196.5_EB
          CASE('SOOT')
             CP_TMP(SS%INDEX) = 904._EB !cp carbon
       END SELECT
