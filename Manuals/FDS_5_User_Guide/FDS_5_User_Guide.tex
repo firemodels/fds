@@ -8554,6 +8554,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct DT\_RESTART}               & Real         & Restart core dump interval        &  s        & 1000000.                          \\ \hline
 {\ct DT\_SLCF}                  & Real         & Slice dump interval               &  s        & $\Delta t${\ct /NFRAMES}    \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}      & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .TRUE.}                      \\ \hline
+%{\ct HEADERS}                   & Logical       & Print headers in *.csv output files &           & {\ct .TRUE.}                     \\ \hline
 {\ct MASS\_FILE}                & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                     \\ \hline
 {\ct MAXIMUM\_DROPLETS}         & Integer      & Max particles per mesh            &           & 500000                            \\ \hline
 {\ct NFRAMES}                   & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
@@ -8761,6 +8762,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}          & Character                   & MESH IDentifier                             &    &                  \\ \hline
 {\ct IJK}         & Integer Triplet             & No. cells in $x$, $y$, and $z$ directions   &    & 10               \\ \hline
 {\ct FYI}         & Character                   & Comment String (has no effect)              &    &                  \\ \hline
+%{\ct LEVEL}        & Integer                    & Level in EMBedded mesh hierarchy            &    & 0                \\ \hline
 {\ct MPI\_PROCESS} & Integer                    & See Section~\ref{info:multimesh}            &    &    \\ \hline
 {\ct RGB}         & Integer Triplet             & Color indices (0-255)                       &    & 0,0,0            \\ \hline
 {\ct SYNCHRONIZE} & Logical                     & Sync. time steps of multiple meshes         &    & {\ct .TRUE.}     \\ \hline
@@ -8800,18 +8802,30 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BNDF\_DEFAULT}             & Logical       & See Section~\ref{info:BNDF}                   &               & {\ct .TRUE.}      \\ \hline
 {\ct CFL\_MAX}                  & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                  & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
+%{\ct CFL\_VELOCITY\_NORM}       & Integer       & Select velocity norm used in CFL calculation  &               & 0                \\ \hline
 %{\ct CHECK\_POISSON}            & Logical       & Poisson solver diagnostic print out           &               & {\ct .FALSE.}     \\ \hline
+%{\ct CHECK\_VOLUME\_FLOW}       & Logical       & Multiple mesh diagnostic                      &               & {\ct .FALSE.}     \\ \hline
+%{\ct CHECK\_KINETIC\_ENERGY}    & Logical       & Estimate unresolved (subgrid) kinetic energy  &               & {\ct .FALSE.}     \\ \hline
+%{\ct CHECK\_MU\_DNS}            & Logical       & Store molecular dynamic viscosity             &               & {\ct .FALSE.}     \\ \hline
 %{\ct C\_FORCED}                 & Real          & Convective heat transfer coefficient          &               & 0.037             \\ \hline
 %{\ct C\_HORIZONTAL}             & Real          & Convective heat transfer coefficient          &               & 1.52             \\ \hline
 %{\ct C\_VERTICAL}               & Real          & Convective heat transfer coefficient          &               & 1.31             \\ \hline
 {\ct CSMAG}                     & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
 %{\ct COMPUTE\_VISCOSITY\_TWICE} & Logical       & Compute twice per time step                   &               & {\ct .TRUE.}     \\ \hline
 {\ct CONDUCTIVITY}              & Real          & See Section~\ref{info:SPEC}                   &  W/m/K        &                   \\ \hline
+%{\ct CONSTANT\_PROPERTIES}      & Logical       & Use exact fluid properties, not from table    &               & {\ct .FALSE.}     \\ \hline
 {\ct CO\_PRODUCTION}            & Logical       & See Section~\ref{info:combustion}             &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                       & Logical       & Direct Numerical Simulation                   &               & {\ct .FALSE.}     \\ \hline
+%{\ct DYNSMAG}                   & Logical       & Dynamic Smagorinsky model                     &               & {\ct .FALSE.}     \\ \hline
+%{\ct DSMAG\_FREQ}               & Integer       & Call DYNSMAG every DSMAG_FREQ time steps      &               & 1                 \\ \hline
 %{\ct EVAC\_PRESSURE\_ITERATIONS}& Character     & Pressure solves for Evac Model                &               &                   \\ \hline
 %{\ct EVAC\_SURF\_DEFAULT}       & Character     & Default SURFace type for Evac Model           &               & {\ct 'INERT'}     \\ \hline
 %{\ct EVAC\_TIME\_ITERATIONS}    & Character     & Time iterations for Evac Model                &               &                   \\ \hline
+%{\ct FDS6}                      & Logical       & FDS 6.0 expected default parameters turned on &               & {\ct .FALSE.}     \\ \hline
+%{\ct FISHPAK\_BC(3)}            & Integer       & Override FFT solver boundary conditions       &               & -1                \\ \hline
+%{\ct FLUX\_LIMITER}             & Integer       & Scalar transport scheme                       &               & -1                \\ \hline
+%{\ct FORCE\_VECTOR(3)}          & Real          & Uniform volumetric momentum source vector     &               & 0.                \\ \hline
+%{\ct FREEZE\_VELOCITY}          & Logical       & Do not update momentum equation               &               & {\ct .FALSE.}     \\ \hline
 {\ct FYI}                       & Character     & Comment String (has no effect)                &               &                   \\ \hline
 %{\ct GAMMA}                     & Real          & Ratio of specific heats                       &               & 1.4               \\ \hline
 {\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}         & m             & 0.                  \\ \hline
@@ -8821,13 +8835,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ISOTHERMAL}                & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}         &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES}                       & Logical       & Large Eddy Simulation                         &               & {\ct .TRUE.}      \\ \hline
+%{\ct LOCK\_TIME\_STEP}          & Logical       & Use constant time step                        &               & {\ct .FALSE.}     \\ \hline
 {\ct MW}                        & Real          & Molecular Weight (Section~\ref{info:SPEC})    &  g/mol        &                   \\ \hline
 {\ct NOISE}                     & Logical       & Toggle initial noise on and off               &               & {\ct .TRUE.}      \\ \hline
 %{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution             &               & 7                 \\ \hline
 {\ct PR}                        & Real          & Prandtl number (LES only)                     &               & 0.5               \\ \hline
 {\ct P\_INF}                    & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
+%{\ct PERIODIC\_TEST}           & Integer       & Initial condition for verification test       &               & 0                 \\ \hline
 {\ct POROUS\_FLOOR}             & Logical       & See Section~\ref{info:sprinklers}             &               & {\ct .TRUE.}      \\ \hline
 {\ct PRESSURE\_CORRECTION}      & Logical       & See Section~\ref{info:pressurecorrection}                    &               & {\ct .FALSE.}     \\ \hline
+%{\ct PROJECTION}                & Logical       & Use formal projection method (eliminates initial divergence errors) &               & {\ct .FALSE.}     \\ \hline
 {\ct RADIATION}                 & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
 {\ct RAMP\_GX}                  & Character     & Time function, $x$ comp. of gravity           &               &                   \\ \hline
 {\ct RAMP\_GY}                  & Character     & Time function, $y$ comp. of gravity           &               &                   \\ \hline
@@ -8843,10 +8860,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & See Section~\ref{info:texture_map}            & m             & (0.,0.,0.)        \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST}                   &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
+%{\ct TURB\_INIT}                & Logical       & Write `ini\_salsa.dat' for turb_init.exe      &               & {\ct .FALSE.}     \\ \hline
 {\ct U0,V0,W0}                  & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
 {\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
 {\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
+%{\ct WERNER\_WENGLE\_WALL\_MODEL} & Logical       & Werner and Wengle model for viscous wall stress &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
 
@@ -9315,7 +9334,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_FRACTION(I)}               & Real Array      & For species {\ct I}               & kg/m$^2$ s          &                         \\ \hline
 {\ct MATL\_ID}                        & Char.~Array     & (Layer,Component)                 &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION}            & Real Array      & (Layer,Component)                 &                     &                         \\ \hline
-{\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 1E12                    \\ \hline
+{\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 1.E12                   \\ \hline
 {\ct MLRPUA }                         & Real            & Mass loss rate per unit area      & kg/m$^2$s           & 0.                      \\ \hline
 {\ct NET\_HEAT\_FLUX}                 & Real            & Net flux at surface               & kW/m$^2$            & 0.                      \\ \hline
 {\ct NPPC}                            & Integer         & Number of particles per cell      &                     & 1                       \\ \hline
@@ -9329,6 +9348,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_T}                         & Character       & Ramp ID for temp.                 &                     &                         \\ \hline
 {\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
 {\ct RGB(3)}                          & Int.~Triplet    & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
+%{\ct Roughness}                       & Real            & Wall roughness height             & m                   & 0. (DNS), 4.5E-5 (LES)  \\ \hline
 {\ct SHRINK}                          & Logical         & Shrinking material                &                     & {\ct .TRUE.}            \\ \hline
 {\ct SLIP\_FACTOR    }                & Real            & Velocity Slip Condition           &                     & 0.5                     \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
