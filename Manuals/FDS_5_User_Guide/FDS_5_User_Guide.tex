@@ -2196,6 +2196,11 @@ in the flow field due to the boundary. Second, add \\
 to the {\ct DUMP} line, just for debugging purposes. This will prompt FDS to compute the volume flow at each mesh boundary to determine if the pressure correction
 scheme is working properly. If error messages appear on the screen or in the standard error file, post the case to the Issue Tracker.
 
+\begin{warning}
+\noindent If {\ct PRESSURE\_CORRECTION=.TRUE.}, the meshes cannot overlap. Also, if two adjacent meshes are of different resolution, any obstruction crossing the
+mesh interface must conform to the more coarse of the two. Otherwise, volume cannot be conserved.
+\end{warning}
+
 
 
 \subsection{Special Topic: Restoring the Baroclinic Vorticity}
@@ -6211,9 +6216,9 @@ Here is a very simple example of sprinkler:
 \end{verbatim} \normalsize
 
 \noindent
-A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties 
-are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with 
-another, so try to use {\ct ID}s that are as meaningful to you as possible.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does} 
+A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties
+are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with
+another, so try to use {\ct ID}s that are as meaningful to you as possible.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does}
 have a specific meaning to FDS, directing it to compute the activation of
 the device using the standard RTI algorithm. The various sprinkler properties will be discussed below.
 \footnote{Past versions of FDS used a separate file to store
@@ -6236,8 +6241,8 @@ sprinkler where the water droplets are initially placed in the simulation. It is
 at and beyond the {\ct OFFSET} the droplets have completely broken
 up and are transported independently of each other. (Default 0.05~m)
 \item[{\ct DROPLET\_VELOCITY}]  Initial droplet velocity. (Default 0~m/s)
-\item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity 
-by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the the droplet velocity is computed by dividing the 
+\item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity
+by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the the droplet velocity is computed by dividing the
 flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often
 the user must fine-tune {\ct DROPLET\_VELOCITY} in order to reproduce certain spray profile.
 The {\ct ORIFICE\_DIAMETER} input is not used, if either {\ct DROPLET\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is given.
