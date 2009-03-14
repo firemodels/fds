@@ -1110,15 +1110,15 @@ terms. Note that boldfaced quantities represent vectors. Boldfaced quantities wi
 represent tensors, which can be best understood as 3$\times$3 matrices.
 
 The mass conservation equation is often written in terms of the mass fractions of the individual gaseous species, $Y_\alpha$:
-\be \dod{ }{t}(\rho Y_\alpha) + \nabla \cdot \rho Y_\alpha \bu = \nabla \cdot \rho D_\alpha \nabla Y_\alpha + \dm_\alpha''' + \dm_{b,\alpha}'''  
-\label{species} 
+\be \dod{ }{t}(\rho Y_\alpha) + \nabla \cdot \rho Y_\alpha \bu = \nabla \cdot \rho D_\alpha \nabla Y_\alpha + \dm_\alpha''' + \dm_{b,\alpha}'''
+\label{species}
 \ee
-Here $\dm_{b,\alpha}'''$ is the production of species $\alpha$ by evaporating droplets or particles. 
+Here $\dm_{b,\alpha}'''$ is the production of species $\alpha$ by evaporating droplets or particles.
 Summing these equations over all species yields the original mass conservation equation because
 $\sum Y_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum
 \dm_{b,\alpha}'''=\dm_b'''$, by definition, and because it is assumed
-that $\sum \rho D_\alpha \nabla Y_\alpha = 0$. This last assertion is not true, in general. However, transport equations are solved for total 
-mass and all but one of the species, implying that the diffusion coefficient of the implicit species is chosen so that the sum of all the 
+that $\sum \rho D_\alpha \nabla Y_\alpha = 0$. This last assertion is not true, in general. However, transport equations are solved for total
+mass and all but one of the species, implying that the diffusion coefficient of the implicit species is chosen so that the sum of all the
 diffusive fluxes is zero.
 
 In the momentum equation, the term $\bu \bu$ is a diadic tensor.  In matrix notation, with $\bu=[u,v,w]^T$, the diadic is given by the tensor product of the vectors $\bu$ and $\bu^T$. The term $\nabla \cdot \rho \bu \bu$ is thus a vector formed by applying the vector operator $\nabla = (\dod{}{x},\dod{}{y},\dod{}{z})$ to the tensor.
@@ -1524,25 +1524,31 @@ fraction given by $X_\Hy$. The stoichiometric coefficient, $\nu_\So$, represents
 \be
    \nu_\So = \frac{W_\F}{W_\So} \; y_\So  \quad ; \quad  W_\So = X_\Hy W_\Hy + (1 - X_\Hy) W_\C  \label{soot_yield}
 \ee
-Likewise, the stoichiometric coefficient of CO, $\nu_\CO$, is related to the {\em CO yield}, $y_\CO$, via:
+Likewise, the stoichiometric coefficient of CO, $\nu_\CO$, is related to the CO {\em yield}, $y_\CO$, via:
 \be
    \nu_\CO = \frac{W_\F}{W_\CO} \; y_\CO  \label{CO_yield}
 \ee
 The yields of soot and CO are based on ``well-ventilated'' or ``post-flame'' measurements. The increased production of CO and soot in an under-ventilated
 compartment will be addressed in the following sections.
 
-The mixture fraction, $Z$, can be defined in terms of the mass fraction of fuel
+The traditional way of expressing the mixture fraction, $Z$, is as a linear combination of fuel and oxygen mass fractions:
+\be
+   Z = \frac{ s \, Y_F - (Y_\OTWO-Y_\OTWO^\infty) }{s \, Y_\F^I + Y_\OTWO^\infty} \quad ; \quad  s= \frac{\nu_\OTWO W_\OTWO}{\nu_F W_F} \quad ; \quad \nu_F=1  \label{Z_trad}
+\ee
+where $Y_\F^I$ is the fuel mass fraction in fuel stream.\footnote{It is assumed throughout that nitrogen is the only possible diluent in the fuel stream, and its mass
+fraction is denoted by $Y_\NTWO^I$.}
+However, the mixture fraction can also be defined in terms of the mass fraction of fuel
 and the carbon-carrying products of combustion:
 \be
-   Z = Y_\F + \frac{W_\F}{\hbox{x} W_\COTWO} \, Y_\COTWO + \frac{W_\F}{\hbox{x} W_\CO} \, Y_\CO  + \frac{W_\F}{\hbox{x} W_\So} \, Y_\So
+   Z = \frac{1}{Y_F^I} \left( Y_\F + \frac{W_\F}{\hbox{x} W_\COTWO} \, Y_\COTWO + \frac{W_\F}{\hbox{x} W_\CO} \, Y_\CO  + \frac{W_\F}{\hbox{x} W_\So} \, Y_\So  \right)
 \label{Zdef} \ee
-The mixture fraction satisfies the conservation equation
+Note that x is the number of carbon atoms in the fuel molecule. The mixture fraction satisfies the conservation equation
 \be \rho \DoD{Z}{t} = \nabla \cdot \rho D \nabla Z \label{Zeqn} \ee
 obtained by taking a linear combination of the transport equations for the fuel and the carbon carrying products.
 If it is assumed that combustion occurs so rapidly that the fuel and oxygen cannot
 co-exist, then both simultaneously vanish at a flame surface:
 \be Z(\bx,t) = Z_f \quad ; \quad
-Z_f = \frac{Y_\OTWO^\infty}{s \, Y_\F^I + Y_\OTWO^\infty} \label{flamesheet} \ee
+Z_f = \frac{Y_\OTWO^\infty}{s \, Y_\F^I + Y_\OTWO^\infty}   \label{flamesheet} \ee
 and all species can be related to $Z$ via the  ``state relations'' shown in Fig.~\ref{staterelations}.
 \begin{figure}
 \begin{minipage}[t]{4.1in}
@@ -1552,7 +1558,9 @@ and all species can be related to $Z$ via the  ``state relations'' shown in Fig.
 \end{minipage}
 \end{figure}
 In versions of FDS prior to 5, this one-step, instantaneous reaction of fuel and oxygen was assumed. However, starting in version 5, a more
-generalized formulation has been implemented and is described next.
+generalized formulation has been implemented and is described next. For this reason, it is more convenient to work with the definition of $Z$ in
+Eq.~(\ref{Zdef}). The traditional definition, Eq.~(\ref{Z_trad}), is more convenient when it is assumed that fuel and oxygen cannot co-exist and that
+the combustion occurs at an infinitely thin flame sheet.
 
 
 \subsubsection{A Single-Step Reaction, but with Local Extinction}
@@ -1597,8 +1605,9 @@ where fuel and oxygen react and form products according to Eq.~(\ref{stoich}). N
 no soot or CO is formed, but rather that their respective production rates are proportional to the fuel consumption rate.
 
 With the definition of the mixture fraction, Eq.~(\ref{Zdef}), in mind, consider a partitioning of $Z$ into the following components:
-\begin{eqnarray}  Z_1 &=& Y_\F  \label{Z1first}  \\*[.1in]
-                  Z_2 &=& \frac{W_\F}{\hbox{x} \, W_\COTWO } \,  Y_\COTWO  + \frac{W_\F}{\hbox{x} \, W_\CO } \, Y_\CO  + \frac{W_\F}{\hbox{x} \, W_\So }  \label{Z2first} \, Y_\So
+\begin{eqnarray}  Z_1 &=& \frac{Y_\F}{Y_F^I}  \label{Z1first}  \\*[.1in]
+                  Z_2 &=& \frac{1}{Y_F^I} \left( \frac{W_\F}{\hbox{x} \, W_\COTWO } \,  Y_\COTWO  + \frac{W_\F}{\hbox{x} \, W_\CO } \, Y_\CO  +
+                  \frac{W_\F}{\hbox{x} \, W_\So }  \label{Z2first} \, Y_\So \right)
 \end{eqnarray}
 such that $Z=Z_1+Z_2$. Transport equations are required for both $Z_1$ and $Z_2$.
 At the burner surface, $Z_1$ is assigned the mass flux of fuel,
@@ -1608,14 +1617,11 @@ If a reaction occurs, $Z_1$ is converted to $Z_2$ representing the
 conversion of fuel to products. The heat release rate of the fire is obtained by multiplying the fuel consumption rate by the
 heat of combustion.
 
-We expand upon this by allowing for the fuel stream to be diluted with an inert gas (nitrogen) and we note that since we are using our extra
-parameter to determine extinction, that the yields of CO and soot are still fixed.  Thus we can restate
-Eq.~(\ref{Z1first}) and Eq.~(\ref{Z2first}) as:
+If it is assumed that the yields of CO and soot are fixed, Eq.~(\ref{Z1first}) and Eq.~(\ref{Z2first}) can be simplified further:
 \begin{eqnarray} Z_1 &=& \frac{Y_\F}{Y_\F^I} \\*[.1in]
                  Z_2 &=& \frac{W_\F}{\big[\hbox{x}-\nu_\CO-(1-X_\Hy) \nu_\So \big] \, W_\COTWO } \frac{Y_\COTWO}{Y_\F^I}
 \end{eqnarray}
-where $Y_\F^I$ is the fuel mass fraction at the burner surface ($Y_\NTWO^I$ would be the diluent mass fraction at the
-burner surface).
+In this way, CO$_2$ becomes the surrogate for all combustion products.
 
 Since the mixture fraction variables result from linear combinations of the species transport equations, the converse
 is also true -- that species mass fractions are linear combinations of the mixture fraction variables.
@@ -1638,7 +1644,7 @@ The stoichiometric coefficients are defined:
 
 \parbox{2.5in}{
 \begin{eqnarray*}  \nu_\NTWO  &=& \frac{\hbox{a}}{2}\\*[.1in]
-                  \nu_\OTWO  &=& \nu_\COTWO + \frac{\nu_\CO+\nu_\HTWOO-z}{2}\\*[.1in]
+                  \nu_\OTWO  &=& \nu_\COTWO + \frac{\nu_\CO+\nu_\HTWOO-\hbox{z}}{2}\\*[.1in]
                   \nu_\COTWO &=& \hbox{x} - \nu_\CO - (1-X_\Hy) \nu_\So  \\*[.1in]
                   \nu_\M     &=& \hbox{b}  \end{eqnarray*} }
 \hfill \parbox{3.5in}{\begin{eqnarray}
@@ -1646,6 +1652,7 @@ The stoichiometric coefficients are defined:
                   \nu_\CO    &=& \frac{W_\F}{W_\CO} \; y_\CO \\*[.1in]
                   \nu_\So    &=& \frac{W_\F}{W_\So} \; y_\So
 \end{eqnarray} }
+Remember that x is the number of carbon atoms and z is the number of oxygen atoms in the fuel molecule.
 It is important to note that the definitions of $Z_1$ and $Z_2$, unlike in the single parameter model,
 do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
 
@@ -2138,7 +2145,7 @@ mass fluxes are given by:
 \footnote{In cylindrical and spherical coordinates, the mass fluxes are
 \be
    \dm_\gamma'' =\frac{1}{R} \int_0^R \dm_\gamma'''(x) \,r dr \;\; ; \;\;
-   \dm_\gamma'' =\frac{1}{R^2} \int_0^R \dm_\gamma'''(x) \,r^2 dr \;\; 
+   \dm_\gamma'' =\frac{1}{R^2} \int_0^R \dm_\gamma'''(x) \,r^2 dr \;\;
 \ee}
 
 \be
@@ -2464,9 +2471,9 @@ by the user; but the following dependencies are used to update the
 droplet boundary conditions for mass flow $\dot{m}$, droplet speed
 $u_d$ and median diameter $d_m$
 \begin{eqnarray}
-	\dot{m} & \propto & \sqrt{p} \\
-	u_d	& \propto & \sqrt{p} \\
-	d_m	& \propto & p^{-1/3}
+    \dot{m} & \propto & \sqrt{p} \\
+    u_d & \propto & \sqrt{p} \\
+    d_m & \propto & p^{-1/3}
 \end{eqnarray}
 
 In the numerical algorithm,
