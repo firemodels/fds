@@ -7378,6 +7378,11 @@ obstructions can be turned back on with {\ct BNDF\_OBST=.TRUE.} on
 the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled
 via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on).
 
+Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they
+are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening,
+set {\ct CELL\_CENTERED=.TRUE.} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this
+feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes.
+
 
 
 \subsection{Animated Isosurfaces: The \texorpdfstring{{\tt ISOF}}{ISOF} Namelist Group}
@@ -8400,11 +8405,12 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
 \hline \hline
 \endhead
-{\ct FYI}          & Character   & Comment String (has no effect)    &           &     \\ \hline
-{\ct PART\_ID}     & Character   & Particle identifier (if needed)   &           &     \\ \hline
-{\ct PROP\_ID}     & Character   & Property identifier (if needed)   &           &     \\ \hline
-{\ct QUANTITY}     & Character   & Quantity to visualize             &           &     \\ \hline
-{\ct SPEC\_ID}     & Character   & Species identifier (if needed)    &           &     \\ \hline
+{\ct CELL\_CENTERED}    & Logical     & Do not do corner averaging        &           & {\ct .FALSE.}   \\ \hline
+{\ct FYI}               & Character   & Comment String (has no effect)    &           &                 \\ \hline
+{\ct PART\_ID}          & Character   & Particle identifier (if needed)   &           &                 \\ \hline
+{\ct PROP\_ID}          & Character   & Property identifier (if needed)   &           &                 \\ \hline
+{\ct QUANTITY}          & Character   & Quantity to visualize             &           &                 \\ \hline
+{\ct SPEC\_ID}          & Character   & Species identifier (if needed)    &           &                 \\ \hline
 \end{longtable}
 
 
