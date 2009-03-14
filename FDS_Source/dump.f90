@@ -759,8 +759,8 @@ DO N=1,M%N_SLCF
    ELSE
       IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
       M%N_STRINGS = M%N_STRINGS + 1
-      IF (.NOT.SL%TERRAIN_SLICE .AND. .NOT.SL%CELL_CENTERED_SLICE) WRITE(M%STRING(M%N_STRINGS),'(A,I6)') 'SLCF',NM
-      IF (SL%CELL_CENTERED_SLICE) WRITE(M%STRING(M%N_STRINGS),'(A,I6)') 'SLCC',NM !! RJM
+      IF (.NOT.SL%TERRAIN_SLICE .AND. .NOT.SL%CELL_CENTERED) WRITE(M%STRING(M%N_STRINGS),'(A,I6)') 'SLCF',NM
+      IF (SL%CELL_CENTERED) WRITE(M%STRING(M%N_STRINGS),'(A,I6)') 'SLCC',NM
       IF (SL%TERRAIN_SLICE)THEN
         IF (SL%FIRE_LINE) THEN
            WRITE(M%STRING(M%N_STRINGS),'(A,I6,F10.4)') 'SLFL',NM,SL%SLICE_AGL
@@ -800,6 +800,7 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    I2B = MAX(JBP1,KBP1)
    ALLOCATE(M%PP(0:I1B,0:I2B),STAT=IZERO)
    CALL ChkMemErr('DUMP','PP',IZERO)
+   M%PP = 0._EB
    ALLOCATE(M%PPN(0:I1B,0:I2B),STAT=IZERO)
    CALL ChkMemErr('DUMP','PPN',IZERO)
    ALLOCATE(M%IBK(0:I1B,0:I2B),STAT=IZERO)
@@ -834,7 +835,11 @@ BOUNDARY_FILES: DO NF=1,N_BNDF
    ELSE RESTART
       IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
       M%N_STRINGS = M%N_STRINGS + 1
-      WRITE(M%STRING(M%N_STRINGS),'(A,2I6)') 'BNDF',NM,1  
+      IF (BF%CELL_CENTERED) THEN
+         WRITE(M%STRING(M%N_STRINGS),'(A,2I6)') 'BNDC',NM,1  
+      ELSE
+         WRITE(M%STRING(M%N_STRINGS),'(A,2I6)') 'BNDF',NM,1  
+      ENDIF
       M%N_STRINGS = M%N_STRINGS + 1
       WRITE(M%STRING(M%N_STRINGS),'(A)') FN_BNDF(NF,NM)
       M%N_STRINGS = M%N_STRINGS + 1
@@ -3004,7 +3009,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
       K1  = SL%K1
       K2  = SL%K2
       AGL_TERRAIN_SLICE = SL%TERRAIN_SLICE
-      CC_SLICE = SL%CELL_CENTERED_SLICE
+      CC_SLICE = SL%CELL_CENTERED
    ENDIF
  
    ! Determine what cells need to be evaluated to form cell-corner averages
@@ -4591,21 +4596,25 @@ FLOOP: DO NF=1,N_BNDF
                   IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(IG,J,K))) IBK(J,K)=1
                ENDDO
             ENDDO
-            DO K=K1-1,K2
-               DO J=J1-1,J2
-                  IF (IBK(J,K)==1)     PPN(J,K) = PPN(J,K) + PP(J,K)
-                  IF (IBK(J+1,K)==1)   PPN(J,K) = PPN(J,K) + PP(J+1,K)
-                  IF (IBK(J,K+1)==1)   PPN(J,K) = PPN(J,K) + PP(J,K+1)
-                  IF (IBK(J+1,K+1)==1) PPN(J,K) = PPN(J,K) + PP(J+1,K+1)
-                  ISUM = IBK(J,K)+IBK(J,K+1)+IBK(J+1,K)+IBK(J+1,K+1)
-                  IF (ISUM>0) THEN
-                  PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
-                  ELSE
-                  PPN(J,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
-                  ENDIF
+            IF (.NOT.BF%CELL_CENTERED) THEN
+               DO K=K1-1,K2
+                  DO J=J1-1,J2
+                     IF (IBK(J,K)==1)     PPN(J,K) = PPN(J,K) + PP(J,K)
+                     IF (IBK(J+1,K)==1)   PPN(J,K) = PPN(J,K) + PP(J+1,K)
+                     IF (IBK(J,K+1)==1)   PPN(J,K) = PPN(J,K) + PP(J,K+1)
+                     IF (IBK(J+1,K+1)==1) PPN(J,K) = PPN(J,K) + PP(J+1,K+1)
+                     ISUM = IBK(J,K)+IBK(J,K+1)+IBK(J+1,K)+IBK(J+1,K+1)
+                     IF (ISUM>0) THEN
+                        PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
+                     ELSE
+                        PPN(J,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                     ENDIF
+                  ENDDO
                ENDDO
-            ENDDO
-            WRITE(LU_BNDF(NF,NM)) ((PPN(J,K),J=J1-1,J2),K=K1-1,K2)
+               WRITE(LU_BNDF(NF,NM)) ((PPN(J,K),J=J1-1,J2),K=K1-1,K2)
+            ELSE
+               WRITE(LU_BNDF(NF,NM)) ((PP(J,K),J=J1,J2+1),K=K1,K2+1)
+            ENDIF
 
          CASE (2,-2)
             IF (IOR== 2) JG=1    
@@ -4622,21 +4631,25 @@ FLOOP: DO NF=1,N_BNDF
                   IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,JG,K))) IBK(I,K)=1
                ENDDO
             ENDDO
-            DO K=K1-1,K2
-               DO I=I1-1,I2
-                  IF (IBK(I,K)==1)     PPN(I,K) = PPN(I,K) + PP(I,K)
-                  IF (IBK(I+1,K)==1)   PPN(I,K) = PPN(I,K) + PP(I+1,K)
-                  IF (IBK(I,K+1)==1)   PPN(I,K) = PPN(I,K) + PP(I,K+1)
-                  IF (IBK(I+1,K+1)==1) PPN(I,K) = PPN(I,K) + PP(I+1,K+1)
-                  ISUM = IBK(I,K)+IBK(I,K+1)+IBK(I+1,K)+IBK(I+1,K+1)
-                  IF (ISUM>0) THEN
-                     PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
-                  ELSE
-                     PPN(I,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
-                  ENDIF
+            IF (.NOT.BF%CELL_CENTERED) THEN
+               DO K=K1-1,K2
+                  DO I=I1-1,I2
+                     IF (IBK(I,K)==1)     PPN(I,K) = PPN(I,K) + PP(I,K)
+                     IF (IBK(I+1,K)==1)   PPN(I,K) = PPN(I,K) + PP(I+1,K)
+                     IF (IBK(I,K+1)==1)   PPN(I,K) = PPN(I,K) + PP(I,K+1)
+                     IF (IBK(I+1,K+1)==1) PPN(I,K) = PPN(I,K) + PP(I+1,K+1)
+                     ISUM = IBK(I,K)+IBK(I,K+1)+IBK(I+1,K)+IBK(I+1,K+1)
+                     IF (ISUM>0) THEN
+                        PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
+                     ELSE
+                        PPN(I,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                     ENDIF
+                  ENDDO
                ENDDO
-            ENDDO
-            WRITE(LU_BNDF(NF,NM)) ((PPN(I,K),I=I1-1,I2),K=K1-1,K2)
+               WRITE(LU_BNDF(NF,NM)) ((PPN(I,K),I=I1-1,I2),K=K1-1,K2)
+            ELSE
+               WRITE(LU_BNDF(NF,NM)) ((PP(I,K),I=I1,I2+1),K=K1,K2+1)
+            ENDIF
  
          CASE(3,-3)
             IF (IOR== 3) KG=1    
@@ -4656,21 +4669,26 @@ FLOOP: DO NF=1,N_BNDF
                   IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,J,KG))) IBK(I,J)=1
                ENDDO
             ENDDO
-            DO J=J1-1,J2
-               DO I=I1-1,I2
-                  IF (IBK(I,J)==1)     PPN(I,J) = PPN(I,J) + PP(I,J)
-                  IF (IBK(I+1,J)==1)   PPN(I,J) = PPN(I,J) + PP(I+1,J)
-                  IF (IBK(I,J+1)==1)   PPN(I,J) = PPN(I,J) + PP(I,J+1)
-                  IF (IBK(I+1,J+1)==1) PPN(I,J) = PPN(I,J) + PP(I+1,J+1)
-                  ISUM = IBK(I,J)+IBK(I,J+1)+IBK(I+1,J)+IBK(I+1,J+1)
-                  IF (ISUM>0) THEN
-                     PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
-                  ELSE
-                     PPN(I,J) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
-                  ENDIF
+            IF (.NOT.BF%CELL_CENTERED) THEN
+               DO J=J1-1,J2
+                  DO I=I1-1,I2
+                     IF (IBK(I,J)==1)     PPN(I,J) = PPN(I,J) + PP(I,J)
+                     IF (IBK(I+1,J)==1)   PPN(I,J) = PPN(I,J) + PP(I+1,J)
+                     IF (IBK(I,J+1)==1)   PPN(I,J) = PPN(I,J) + PP(I,J+1)
+                     IF (IBK(I+1,J+1)==1) PPN(I,J) = PPN(I,J) + PP(I+1,J+1)
+                     ISUM = IBK(I,J)+IBK(I,J+1)+IBK(I+1,J)+IBK(I+1,J+1)
+                     IF (ISUM>0) THEN
+                        PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
+                     ELSE
+                        PPN(I,J) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                     ENDIF
+                  ENDDO
                ENDDO
-            ENDDO
-            WRITE(LU_BNDF(NF,NM)) ((PPN(I,J),I=I1-1,I2),J=J1-1,J2)
+               WRITE(LU_BNDF(NF,NM)) ((PPN(I,J),I=I1-1,I2),J=J1-1,J2)
+            ELSE
+               WRITE(LU_BNDF(NF,NM)) ((PP(I,J),I=I1,I2+1),J=J1,J2+1)
+            ENDIF
+
       END SELECT
  
    ENDDO WLOOP
@@ -4706,21 +4724,25 @@ FLOOP: DO NF=1,N_BNDF
                      IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY) IBK(J,K)=1
                   ENDDO
                ENDDO
-               DO K=K1-1,K2
-                  DO J=J1-1,J2
-                     IF (IBK(J,K)==1)     PPN(J,K) = PPN(J,K) + PP(J,K)
-                     IF (IBK(J+1,K)==1)   PPN(J,K) = PPN(J,K) + PP(J+1,K)
-                     IF (IBK(J,K+1)==1)   PPN(J,K) = PPN(J,K) + PP(J,K+1)
-                     IF (IBK(J+1,K+1)==1) PPN(J,K) = PPN(J,K) + PP(J+1,K+1)
-                     ISUM = IBK(J,K)+IBK(J,K+1)+IBK(J+1,K)+IBK(J+1,K+1)
-                     IF (ISUM>0) THEN
-                        PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
-                     ELSE
-                        PPN(J,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
-                     ENDIF
+               IF (.NOT.BF%CELL_CENTERED) THEN
+                  DO K=K1-1,K2
+                     DO J=J1-1,J2
+                        IF (IBK(J,K)==1)     PPN(J,K) = PPN(J,K) + PP(J,K)
+                        IF (IBK(J+1,K)==1)   PPN(J,K) = PPN(J,K) + PP(J+1,K)
+                        IF (IBK(J,K+1)==1)   PPN(J,K) = PPN(J,K) + PP(J,K+1)
+                        IF (IBK(J+1,K+1)==1) PPN(J,K) = PPN(J,K) + PP(J+1,K+1)
+                        ISUM = IBK(J,K)+IBK(J,K+1)+IBK(J+1,K)+IBK(J+1,K+1)
+                        IF (ISUM>0) THEN
+                           PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
+                        ELSE
+                           PPN(J,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                        ENDIF
+                     ENDDO
                   ENDDO
-               ENDDO
-               WRITE(LU_BNDF(NF,NM)) ((PPN(J,K),J=J1-1,J2),K=K1-1,K2)
+                  WRITE(LU_BNDF(NF,NM)) ((PPN(J,K),J=J1-1,J2),K=K1-1,K2)
+               ELSE
+                  WRITE(LU_BNDF(NF,NM)) ((PP(J,K),J=J1,J2+1),K=K1,K2+1)
+               ENDIF
  
             CASE(2,-2)
                IF (IOR== 2) J=J2+1
@@ -4732,22 +4754,26 @@ FLOOP: DO NF=1,N_BNDF
                      PP(I,K) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY) IBK(I,K)=1
                   ENDDO
-                  ENDDO
-               DO K=K1-1,K2
-                  DO I=I1-1,I2
-                     IF (IBK(I,K)==1)     PPN(I,K) = PPN(I,K) + PP(I,K)
-                     IF (IBK(I+1,K)==1)   PPN(I,K) = PPN(I,K) + PP(I+1,K)
-                     IF (IBK(I,K+1)==1)   PPN(I,K) = PPN(I,K) + PP(I,K+1)
-                     IF (IBK(I+1,K+1)==1) PPN(I,K) = PPN(I,K) + PP(I+1,K+1)
-                     ISUM = IBK(I,K)+IBK(I,K+1)+IBK(I+1,K)+IBK(I+1,K+1)
-                     IF (ISUM>0) THEN
-                        PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
-                     ELSE
-                        PPN(I,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
-                     ENDIF
-                  ENDDO
                ENDDO
-               WRITE(LU_BNDF(NF,NM)) ((PPN(I,K),I=I1-1,I2),K=K1-1,K2)
+               IF (.NOT.BF%CELL_CENTERED) THEN
+                  DO K=K1-1,K2
+                     DO I=I1-1,I2
+                        IF (IBK(I,K)==1)     PPN(I,K) = PPN(I,K) + PP(I,K)
+                        IF (IBK(I+1,K)==1)   PPN(I,K) = PPN(I,K) + PP(I+1,K)
+                        IF (IBK(I,K+1)==1)   PPN(I,K) = PPN(I,K) + PP(I,K+1)
+                        IF (IBK(I+1,K+1)==1) PPN(I,K) = PPN(I,K) + PP(I+1,K+1)
+                        ISUM = IBK(I,K)+IBK(I,K+1)+IBK(I+1,K)+IBK(I+1,K+1)
+                        IF (ISUM>0) THEN
+                           PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
+                        ELSE
+                           PPN(I,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                        ENDIF
+                     ENDDO
+                  ENDDO
+                  WRITE(LU_BNDF(NF,NM)) ((PPN(I,K),I=I1-1,I2),K=K1-1,K2)
+               ELSE
+                  WRITE(LU_BNDF(NF,NM)) ((PP(I,K),I=I1,I2+1),K=K1,K2+1)
+               ENDIF
        
             CASE(3,-3)
                IF (IOR== 3) K=K2+1
@@ -4763,21 +4789,26 @@ FLOOP: DO NF=1,N_BNDF
                      IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY) IBK(I,J)=1
                   ENDDO
                ENDDO
-               DO J=J1-1,J2
-                  DO I=I1-1,I2
-                     IF (IBK(I,J)==1)     PPN(I,J) = PPN(I,J) + PP(I,J)
-                     IF (IBK(I+1,J)==1)   PPN(I,J) = PPN(I,J) + PP(I+1,J)
-                     IF (IBK(I,J+1)==1)   PPN(I,J) = PPN(I,J) + PP(I,J+1)
-                     IF (IBK(I+1,J+1)==1) PPN(I,J) = PPN(I,J) + PP(I+1,J+1)
-                     ISUM = IBK(I,J)+IBK(I,J+1)+IBK(I+1,J)+IBK(I+1,J+1)
-                     IF (ISUM>0) THEN
-                        PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
-                     ELSE
-                        PPN(I,J) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
-                     ENDIF
+               IF (.NOT.BF%CELL_CENTERED) THEN
+                  DO J=J1-1,J2
+                     DO I=I1-1,I2
+                        IF (IBK(I,J)==1)     PPN(I,J) = PPN(I,J) + PP(I,J)
+                        IF (IBK(I+1,J)==1)   PPN(I,J) = PPN(I,J) + PP(I+1,J)
+                        IF (IBK(I,J+1)==1)   PPN(I,J) = PPN(I,J) + PP(I,J+1)
+                        IF (IBK(I+1,J+1)==1) PPN(I,J) = PPN(I,J) + PP(I+1,J+1)
+                        ISUM = IBK(I,J)+IBK(I,J+1)+IBK(I+1,J)+IBK(I+1,J+1)
+                        IF (ISUM>0) THEN
+                           PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
+                        ELSE
+                           PPN(I,J) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                        ENDIF
+                     ENDDO
                   ENDDO
-               ENDDO
-               WRITE(LU_BNDF(NF,NM)) ((PPN(I,J),I=I1-1,I2),J=J1-1,J2)
+                  WRITE(LU_BNDF(NF,NM)) ((PPN(I,J),I=I1-1,I2),J=J1-1,J2)
+               ELSE
+                  WRITE(LU_BNDF(NF,NM)) ((PP(I,J),I=I1,I2+1),J=J1,J2+1)
+               ENDIF
+
          END SELECT
  
       ENDDO OLOOP
