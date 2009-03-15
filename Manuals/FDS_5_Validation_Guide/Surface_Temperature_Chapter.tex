@@ -227,7 +227,7 @@ cylindrical coordinates.
 
 \clearpage
 
-\section{SP 2008 Adiabatic Surface Temperature Experiments}
+\section{SP Adiabatic Surface Temperature Experiments}
 
 Comparisons of FDS predictions of gas, plate thermometer, and steel temperatures for three compartment experiments conducted at SP, Sweden, are
 presented on the following pages. Each experiment was conducted in a standard compartment, 3.6~m long by 2.4~m wide by 2.4~m high, with a 0.8~m wide by
@@ -243,20 +243,20 @@ calculations of structures. The basic idea is as follows. The {\em net} heat flu
 of radiative and convective components:
 \be \dot{q}_r'' + \dot{q}_c'' = \epsilon \, \left( \dot{q}_{r,inc}'' - \sigma T_s^4 \right) + h (T_g - T_s)  \label{heat_flux} \ee
 where $\dot{q}_{r,inc}''$ is the incident radiative flux, $T_s$ the surface temperature, $T_g$ the gas temperature near the surface, and $h$ the convective heat transfer coefficient.
-Following the idea proposed by Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, the AST is defined as the surface temperature of a perfectly insulated solid. 
+Following the idea proposed by Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, the AST is defined as the surface temperature of a perfectly insulated solid.
 This is equivalent to saying that the net heat flux to this (hypothetical) surface is zero:
 \be 0 = \epsilon \, \left( \dot{q}_{r,inc}'' - \sigma T_{\hbox{\tiny AST}}^4 \right) + h (T_g - T_{\hbox{\tiny AST}} )  \label{AST_solid} \ee
-This definition of the AST forms the theory behind the plate thermometer, a 10~cm by 10~cm thin metal plate with an insulated backing that is designed to 
-measure the AST, albeit with a slight time lag due to the fact that it is not a perfect insulator. 
+This definition of the AST forms the theory behind the plate thermometer, a 10~cm by 10~cm thin metal plate with an insulated backing that is designed to
+measure the AST, albeit with a slight time lag due to the fact that it is not a perfect insulator.
 
-An alternative definition of the AST is that it can be considered an {\em effective} gas temperature, as in the following sense:
+FDS calculates the AST by solving the following equation implicitly for $T_{\hbox{\tiny AST}}$: 
 \be \dot{q}_r'' + \dot{q}_c'' = \epsilon \, \left( \sigma T_{\hbox{\tiny AST}}^4 - \sigma T_s^4 \right) + h (T_{\hbox{\tiny AST}} - T_s)  \label{AST_gas} \ee
-The two definitions of the AST given by Eqs.~(\ref{AST_solid}) and (\ref{AST_gas}) are equivalent -- they sum up to form Eq.~(\ref{heat_flux}), the definition
-of the net heat flux. 
+Equation~(\ref{AST_gas}) is simply Eq.~(\ref{heat_flux}) minus Eq.~(\ref{AST_solid}). As such, it shows that the AST can be regarded as an {\em effective} gas temperature for
+the purpose of providing boundary conditions for a detailed heat conduction calculation within the solid.
 
-FDS calculates the AST using Eq.~(\ref{AST_gas}) and the plate thermometer temperature via its standard one-dimensional heat conduction calculation for a 
-two layer solid of metal and insulating material. In the experiments, the plate thermometer temperature is obtained from a thermocouple preened to the back side of
-the thin metal plate, and the AST is derived from the measured plate thermometer temperatures by a back calculation involving only the thermal lag due to the
+FDS calculates the AST using Eq.~(\ref{AST_gas}) and the plate thermometer temperature via its standard one-dimensional heat conduction calculation for a
+two layer solid of metal and insulating material. In the experiments, the plate thermometer temperature was obtained from a thermocouple attached to the back side of
+the thin metal plate, and the AST was derived from the measured plate thermometer temperature by a back calculation involving only the thermal lag due to the
 plate, not the insulation material.
 
 

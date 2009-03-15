@@ -172,7 +172,7 @@ The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}.
 \begin{tabular}{|c||c|c|c|c|c|c|}
 \hline
 \multicolumn{7}{|c|}{\bf Heptane Spray Burner Test Series I}  \\ \hline \hline
-Test & Burner & Vent                    & First         & Total      & Draft    & Heat Release Rate \\ 
+Test & Burner & Vent                    & First         & Total      & Draft    & Heat Release Rate \\
 No.  & Pos.   & Operation               & Actuation (s) & Actuations & Curtains & MW @ s \\
 \hline \hline
 I-1   & B  & Closed                     & 65            & 11        & Yes  & 4.4 @ 50  \\ \hline
@@ -440,14 +440,14 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 
 \clearpage
 
-\section{SP 2009 Adiabatic Surface Temperature Experiments}
+\section{SP Adiabatic Surface Temperature Experiments}
 
-In 2009, three compartment experiments were performed at SP Technical Research Institute of Sweden under the sponsorship of Brandforsk, the Swedish Fire Research Board~\cite{Wickstrom_AST}. The
+In 2008, three compartment experiments were performed at SP Technical Research Institute of Sweden under the sponsorship of Brandforsk, the Swedish Fire Research Board~\cite{Wickstrom_AST}. The
 objective of the experiments was to demonstrate how plate thermometer measurements in the vicinity of a simple steel beam can be used to supply the boundary conditions
 for a multi-dimensional heat conduction calculation for the beam. The adiabatic surface temperature was derived from the plate temperatures and used by TASEF, a finite-element
 thermal-structural program.
 
-The experiments were performed inside a standard compartment designed for corner fire testing (ISO~9705).
+The experiments were performed inside a standard compartment designed for corner fire testing (ISO 9705).
 The compartment is 3.6~m deep, 2.4~m wide and 2.4~m high and includes a door opening 0.8~m by 2.0~m. The room was constructed of 20~cm thick light weight concrete
 blocks with a density of 600~kg/m$^3$ $\pm 100$~kg/m$^3$.
 The heat source was a gas burner run at a constant power of 450~kW. The top of the burner, with a square opening 30~cm by 30~cm, was placed 65~cm above the floor, 2.5~cm from the walls.
@@ -572,11 +572,43 @@ WTC             & 3000          & 2.7       &  0.33     & 1.0       & 1.5       
 
 
 
-\clearpage
+\chapter{Quantifying Model Error}
+
+This chapter describes a process by which we quantify the error of FDS. Note the use of the word ``error.'' The reason for using it is to distinguish it from the
+word ``uncertainty.'' Whenever a fire model is used to make a prediction of what will happen in the event of a fire, people want to know how reliable the prediction is.
+There are two reasons why a model prediction might be less than reliable -- error in the model itself or uncertainty in the measured or postulated input parameters. We use
+the term ``uncertainty'' to describe the latter because the word has a connotation that ranges from guesswork to insufficient information. For example, the heat release rate of 
+a specified design fire is not necessarily wrong, but rather uncertain in the sense that it is impossible to say precisely how big the fire is going to be in any given 
+building. Model error, on the other hand, is more easily quantified because it involves the laws of physics and mathematical equations. However, as will be shown in this chapter,
+quantifying model error cannot be done directly. Only via comparisons with a considerable number of small and full-scale experiments is it possible to assign some measure of
+accuracy.  
+
+\section{Model Error}
+
+First, we need to define a few terms. Unfortunately, there is no consensus on the meaning
+of various terms used to describe the error and uncertainty associated with fire model predictions. To simplify matters a bit, we will use the word
+``error'' when describing anything to do with a mathematical model, and we will use the word ``uncertainty'' when describing anything to do with an experimental measurement.
+Why the distinction? Models like FDS do not actually solve the Navier-Stokes equations, but rather an approximate form of these equations. The approximation involves simplifying
+physical assumptions, like the low-Mach number approximation, and the discretization of the governing equations. For example, the partial derivative of the density, $\rho$,
+with respect to the coordinate direction, $x$, is written in approximate form like:
+\be \frac{\partial \rho}{\partial x} = \frac{\rho_{i+1} - \rho_{i-1}}{2 \, \dx} + \mathcal{O}(\dx^2) \ee
+The second term on the right stands for all the terms of order $\dx^2$, also known as the {\em discretization error}. These extra terms are simply dropped from
+the equation set, the argument being that they become smaller and smaller with decreasing grid cell size, $\dx$. The effect of these neglected terms is captured, to
+some extent, but what is called the ``subgrid-scale'' turbulence model, which is yet another approximation of the real thing. What effect do these approximations have on
+the predicted results? It is very difficult to determine based on an analysis of the discretized equations. At best, one can demonstrate convergence towards some
+analytical solution of the non-turbulent Navier-Stokes equations at a rate determined by the spatial and temporal differencing schemes, but this still does not answer a
+question like, ``What is the error of an FDS prediction of the gas temperature at a particular point at a particular time?''
+
+To make matters worse, there are literally dozens of subroutines that make up FDS, from its radiation solver, solid phase heat transfer routines, pyrolysis model,
+empirical mass, momentum and energy transfer routines at the wall, and so on. A careful, systematic error analysis of the combination of all these routines is
+nearly impossible. Indeed the complexity of the analysis would approach that of FDS itself. For this reason, we rely on comparisons of FDS predictions to as many
+experiments as possible as a means of quantifying model error. That is the primary focus of this entire guide, and the first step in the process of quantifying the 
+model error is to quantify the uncertainty of the measurements against which the model predictions are to be compared.
+
 
 \section{Experimental Uncertainty}
 
-The documentation of the experiments described in this chapter have varying descriptions of the uncertainty in the reported measurements.
+The documentation of the experiments described in the previous chapter have varying descriptions of the uncertainty in the reported measurements.
 However, in order to assess the accuracy of FDS, there must be some estimate of the combined effect of the uncertainty in the reported
 input parameters, like the heat release rate of the fire, and the reported measurement of the quantity of interest, like the hot gas layer (HGL)
 temperature.
@@ -611,6 +643,57 @@ Surface Temperature         & 14    \\ \hline
 \end{center}
 \label{Uncertainty}
 \end{table}
+
+
+\section{Calculating Model Error}
+
+At this point in the analysis, we have a set of model predictions and a set experimental measurements. We will refer to the model predictions as
+$M_i$, where $i$ ranges from 1 to $n$. The experimental measurements are likewise referred to as $E_i$. Without loss of generality, assume that the
+ambient value of the quantity under consideration is zero. First, assume that $E|\theta \sim N(\theta,\sigma_E^2)$, meaning that the probability distribution of $E$
+is conditional on a particular value of $\theta$. This is the usual way of defining a likelihood function. The parameter $\theta$ is the ``true'' value of the quantity under
+consideration. Essentially, we are assuming that the experimental measurement has no bias and its standard deviation, $\sigma_E$, has been determined following the procedure described in the
+previous section. Table~\ref{Uncertainty} lists the relative experimental uncertainty, $\tilde{\sigma}_E=\sigma_E/\theta$, for the various quantities of interest. 
+In the analysis to follow, it is convenient to work with $\ln(E_i)$ because the standard deviation of $\ln(E)$ is approximately $\tilde{\sigma}_E$. 
+We can use the usual delta method~\cite{delta_method} to obtain the approximate distribution $\ln(E)|\theta \sim N(\ln(\theta),\tilde{\sigma}_E^2)$. 
+Using a Bayesian argument with a non-informative prior on $\ln(\theta)$, we obtain the posterior distribution as $\ln(\theta) \sim N(\ln(E),\tilde{\sigma}_E^2)$ .
+
+Next, assume that $M|\theta \sim N(\delta\theta,\sigma_M^2)$ , where $\delta$ is a systematic multiplicative bias and $\sigma_M$ is the standard deviation. 
+Again using the log transformation we obtain $\ln(M)|\theta \sim N(\ln(\delta)+\ln(\theta),\tilde{\sigma}_M^2)$
+where $\tilde{\sigma}_M=\sigma_M/\theta$. Now since $\ln(\theta)$ is random, and we have its posterior distribution from above we can obtain the marginal density 
+(that is for any $\theta$) of $\ln(M) \sim N(\ln(\delta)+\ln(E),\tilde{\sigma}_M^2+\tilde{\sigma}_E^2)$.
+
+Now, we actually have a number of pairs   , one for each experiment. Denote this by a subscript i, that is, there are now n pairs  . The formulation from above can be extended to assume that
+
+  and  for i=1,…,n. This will lead to   for i=1,…,n.
+
+Define
+
+                                                                    (1)
+
+and
+
+  .                                                                    (2)
+
+The usual least squares estimate of   is   and the estimate of  is
+
+ .                                                                      (3)
+
+Define
+
+  .                                                             (4)
+
+Then the least squares estimate of the standard deviation  of   , that is of   , is
+
+
+ .                                       (5)
+
+
+Note that this quantity is the total relative uncertainty of  .
+
+The model-intrinsic component   can be estimated by setting  and solving for   as
+
+
+ .                                                          (6)
 
 
 
