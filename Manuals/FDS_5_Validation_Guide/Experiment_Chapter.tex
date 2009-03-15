@@ -577,11 +577,11 @@ WTC             & 3000          & 2.7       &  0.33     & 1.0       & 1.5       
 This chapter describes a process by which we quantify the error of FDS. Note the use of the word ``error.'' The reason for using it is to distinguish it from the
 word ``uncertainty.'' Whenever a fire model is used to make a prediction of what will happen in the event of a fire, people want to know how reliable the prediction is.
 There are two reasons why a model prediction might be less than reliable -- error in the model itself or uncertainty in the measured or postulated input parameters. We use
-the term ``uncertainty'' to describe the latter because the word has a connotation that ranges from guesswork to insufficient information. For example, the heat release rate of 
-a specified design fire is not necessarily wrong, but rather uncertain in the sense that it is impossible to say precisely how big the fire is going to be in any given 
+the term ``uncertainty'' to describe the latter because the word has a connotation that ranges from guesswork to insufficient information. For example, the heat release rate of
+a specified design fire is not necessarily wrong, but rather uncertain in the sense that it is impossible to say precisely how big the fire is going to be in any given
 building. Model error, on the other hand, is more easily quantified because it involves the laws of physics and mathematical equations. However, as will be shown in this chapter,
 quantifying model error cannot be done directly. Only via comparisons with a considerable number of small and full-scale experiments is it possible to assign some measure of
-accuracy.  
+accuracy.
 
 \section{Model Error}
 
@@ -602,7 +602,7 @@ question like, ``What is the error of an FDS prediction of the gas temperature a
 To make matters worse, there are literally dozens of subroutines that make up FDS, from its radiation solver, solid phase heat transfer routines, pyrolysis model,
 empirical mass, momentum and energy transfer routines at the wall, and so on. A careful, systematic error analysis of the combination of all these routines is
 nearly impossible. Indeed the complexity of the analysis would approach that of FDS itself. For this reason, we rely on comparisons of FDS predictions to as many
-experiments as possible as a means of quantifying model error. That is the primary focus of this entire guide, and the first step in the process of quantifying the 
+experiments as possible as a means of quantifying model error. That is the primary focus of this entire guide, and the first step in the process of quantifying the
 model error is to quantify the uncertainty of the measurements against which the model predictions are to be compared.
 
 
@@ -647,53 +647,39 @@ Surface Temperature         & 14    \\ \hline
 
 \section{Calculating Model Error}
 
-At this point in the analysis, we have a set of model predictions and a set experimental measurements. We will refer to the model predictions as
-$M_i$, where $i$ ranges from 1 to $n$. The experimental measurements are likewise referred to as $E_i$. Without loss of generality, assume that the
-ambient value of the quantity under consideration is zero. First, assume that $E|\theta \sim N(\theta,\sigma_E^2)$, meaning that the probability distribution of $E$
+At this point in the analysis, we have a set of model predictions and a corresponding set of experimental measurements,
+$M_i$ and $E_i$, respectively, where $i$ ranges from 1 to $n$. Without loss of generality, assume that the
+ambient value of these quantities is zero. The other piece of information we have is an estimate of the uncertainty of the experimental measurements. With
+this information, {\em and only this information}, we seek to quantify the model error.
+
+First, assume that $E|\theta \sim N(\theta,\sigma_E^2)$, meaning that the probability distribution of $E$
 is conditional on a particular value of $\theta$. This is the usual way of defining a likelihood function. The parameter $\theta$ is the ``true'' value of the quantity under
 consideration. Essentially, we are assuming that the experimental measurement has no bias and its standard deviation, $\sigma_E$, has been determined following the procedure described in the
-previous section. Table~\ref{Uncertainty} lists the relative experimental uncertainty, $\tilde{\sigma}_E=\sigma_E/\theta$, for the various quantities of interest. 
-In the analysis to follow, it is convenient to work with $\ln(E_i)$ because the standard deviation of $\ln(E)$ is approximately $\tilde{\sigma}_E$. 
-We can use the usual delta method~\cite{delta_method} to obtain the approximate distribution $\ln(E)|\theta \sim N(\ln(\theta),\tilde{\sigma}_E^2)$. 
+previous section. Table~\ref{Uncertainty} lists the relative experimental uncertainty, $\tilde{\sigma}_E=\sigma_E/\theta$, for the various quantities of interest.
+In the analysis to follow, it is convenient to work with $\ln(E)$ because the standard deviation of $\ln(E)$ is approximately $\tilde{\sigma}_E$.
+We can use the usual delta method~\cite{delta_method} to obtain the approximate distribution $\ln(E)|\theta \sim N(\ln(\theta),\tilde{\sigma}_E^2)$.
 Using a Bayesian argument with a non-informative prior on $\ln(\theta)$, we obtain the posterior distribution as $\ln(\theta) \sim N(\ln(E),\tilde{\sigma}_E^2)$ .
 
-Next, assume that $M|\theta \sim N(\delta\theta,\sigma_M^2)$ , where $\delta$ is a systematic multiplicative bias and $\sigma_M$ is the standard deviation. 
+Next, assume that $M|\theta \sim N(\delta \, \theta,\sigma_M^2)$ , where $\delta$ is a systematic multiplicative bias and $\sigma_M$ is the standard deviation.
 Again using the log transformation we obtain $\ln(M)|\theta \sim N(\ln(\delta)+\ln(\theta),\tilde{\sigma}_M^2)$
-where $\tilde{\sigma}_M=\sigma_M/\theta$. Now since $\ln(\theta)$ is random, and we have its posterior distribution from above we can obtain the marginal density 
+where $\tilde{\sigma}_M=\sigma_M/\theta$. Now since $\ln(\theta)$ is random, and we have its posterior distribution from above we can obtain the marginal density
 (that is for any $\theta$) of $\ln(M) \sim N(\ln(\delta)+\ln(E),\tilde{\sigma}_M^2+\tilde{\sigma}_E^2)$.
 
-Now, we actually have a number of pairs   , one for each experiment. Denote this by a subscript i, that is, there are now n pairs  . The formulation from above can be extended to assume that
+What we need now is a way to estimate $\delta$, the bias, and $\tilde{\sigma}_M$, the relative uncertainty, of the model predictions. First, define:
+\be \bar{M} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(M_i)  \quad ; \quad \bar{E} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(E_i) \ee
+The usual least squares estimate of $\ln(\delta)$ is $\bar{M}-\bar{E}$, and, thus, the estimate of $\delta$ is
+\be \hat{\delta} = \exp(\bar{M}-\bar{E}) \ee
+Now define
+\be \hat{M}_i = \bar{M}-\bar{E} + \ln(E_i) \ee
+The least squares estimate of the standard deviation of $\ln(M_i)$, that is of $\sqrt{\tilde{\sigma}_M^2+\tilde{\sigma}_E^2}$, is
+\be u(M) = \sqrt{ \frac{1}{n-1} \sum_{i=1}^n \, \left[ \ln(M_i)-\hat{M}_i \right]^2 } \ee
+Note that this quantity is the {\em total relative uncertainty} of $M$.
+The model-intrinsic component, $\tilde{\sigma}_M$, can be estimated from
+\be u(M)^2 = \tilde{\sigma}_M^2 + \tilde{\sigma}_E^2 \ee
 
-  and  for i=1,…,n. This will lead to   for i=1,…,n.
-
-Define
-
-                                                                    (1)
-
-and
-
-  .                                                                    (2)
-
-The usual least squares estimate of   is   and the estimate of  is
-
- .                                                                      (3)
-
-Define
-
-  .                                                             (4)
-
-Then the least squares estimate of the standard deviation  of   , that is of   , is
-
-
- .                                       (5)
-
-
-Note that this quantity is the total relative uncertainty of  .
-
-The model-intrinsic component   can be estimated by setting  and solving for   as
-
-
- .                                                          (6)
-
-
-
+To verify this procedure, we generate 1000 random numbers between 0 and 1000. We say that these numbers represent the ``true'' temperature, $\theta_i$, from 1000 fire
+experiments. Of course, we would never know the true temperature -- this is only a hypothetical exercise. Next, for each $\theta_i$, we randomly choose an
+experimental measurement, $E_i$, from a normal distribution whose mean is $\theta_i$ and whose relative uncertainty is 0.07, based on Table~\ref{Uncertainty},
+``HGL Temperature.'' Finally, for each $\theta_i$ we randomly choose a model prediction, $M_i$, from a normal distribution whose mean is $1.2 \, \theta_i$
+and whose relative uncertainty is 0.3~. Given 1000 pairs of $(E_i,M_i)$ and the experimental uncertainty, {\em and nothing else},
+the procedure above ought to estimate the values of $\delta=1.2$ and $\tilde{\sigma}_M=0.3$~.
