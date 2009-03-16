@@ -1,5 +1,5 @@
 """
-pyroplot_parser.py
+pyrograph_parser.py
 
 This parser module processes the config files it is passed and 
 then writes the resulting three data sets to pickle objects.
@@ -163,7 +163,7 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
     count = 0
     number_of_columns = 0
     data_sets = {}
-    import pyroplot_progress as prgrs
+    import pyrograph_progress as prgrs
     
     total = len(data_info.keys())
     p = prgrs.ProgressMeter(total=total, unit='Data Records', rate_refresh=1.0)

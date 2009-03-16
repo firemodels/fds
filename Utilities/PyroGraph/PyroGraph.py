@@ -1,18 +1,18 @@
 import os
-import pyroplot_parser as prsr
-import pyroplot_calcs as calc
-import pyroplot_plotter as plot
-import pyroplot_progress as prgrs
+import pyrograph_parser as prsr
+import pyrograph_calcs as calc
+import pyrograph_plotter as plot
+import pyrograph_progress as prgrs
 
 import time
 start_time = time.time()
 
-print "\n***** PyroPlot Data Processing Utility *****\n"
+print "\n***** PyroGraph Data Processing Utility *****\n"
 
 #Process User Configuration file.
 user_config = {}
  
-file_name = "./config_files/pyroplot_config.txt"
+file_name = "./config_files/pyrograph_config.txt"
 config_file= open(file_name)
  
 for line in config_file:
@@ -21,7 +21,7 @@ for line in config_file:
         var,val = line.rsplit("=",1)
         user_config[var.strip()] = val.strip()
 
-config_files = ['pyroplot_groups','pyroplot_styles','pyroplot_quantities']
+config_files = ['pyrograph_groups','pyrograph_styles','pyrograph_quantities']
 
 diagnostic_level = int(user_config['diagnostic_level'])
 print "**** Diagnostics Set at Level", diagnostic_level
@@ -46,22 +46,15 @@ data_set = int(user_config['data_set'])
 if data_set == 1:
     data_directory = "../../Validation/"
     output_directory = "../../Manuals/FDS_5_Validation_Guide/FIGURES/"
-    config_file_name = "Validation_Data_Config_File.csv"
+    config_file_name = "validation_data_config"
     print "\n** Processing Validation Data Set\n"
 
 ## Verification Data
 if data_set == 2:
     data_directory = "../../Verification/"
     output_directory = "../../Manuals/FDS_5_Verification_Guide/FIGURES/"
-    config_file_name = "Verification_Data_Config_File.csv"
+    config_file_name = "verification_data_config"
     print "\n** Processing Verification Data Set\n"
-
-## Examples Data 
-if data_set == 3:
-    data_directory = "../../Test_cases/"
-    output_directory = "../../Manuals/FDS_5_User_Guide/FIGURES/"
-    config_file_name = "Examples_Data_Config_File.csv"
-    print "\n** Processing Examples Data Set\n"
 
 ## Trainier Data
 if data_set == 4:
@@ -80,7 +73,7 @@ if data_set == 5:
 
 ### Start of Main Code
 
-## Get information from pyroplot configuration files.
+## Get information from pyrograph configuration files.
 if diagnostic_level >= 2:
     print "Parsing Configs"
 prsr.parse_configs(config_files,diagnostic_level)

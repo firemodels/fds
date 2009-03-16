@@ -1,4 +1,4 @@
-How to use the PyroPlot data processing utility.
+How to use the PyroGraph data processing utility.
 
 ** QUANTITIES OVERVIEW **
 File name: quantities.csv
