@@ -70,7 +70,7 @@ def read_data_config(config_file,data_line_char,diagnostic_level):
     return data
 
 def pickle_object(name,data_object,diagnostic_level):
-    fh = file(name+'_object.pkl', 'w')
+    fh = file(name+'_object.pkl', 'wb')
     cP.dump(data_object, fh, protocol=2)
     fh.close()
     if diagnostic_level >= 3:
