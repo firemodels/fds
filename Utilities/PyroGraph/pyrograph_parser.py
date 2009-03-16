@@ -1,13 +1,6 @@
 """
 pyrograph_parser.py
 
-This parser module processes the config files it is passed and 
-then writes the resulting three data sets to pickle objects.
-
-1) Comparison Data for Plotting
-2) Data for Analytical Processing
-3) Scatter Data for Plotting
-
 """
 
 import sys
