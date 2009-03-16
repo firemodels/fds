@@ -1,4 +1,6 @@
 """
+pyrograph_plotter.py 
+
 General Plotting functions.
 
 Input parameters required:
@@ -17,15 +19,15 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy.ma as M
 from pylab import *
-import pyroplot_calcs as calc
-import pyroplot_parser as prsr
+import pyrograph_calcs as calc
+import pyrograph_parser as prsr
 
 
 def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
     # Read in quantities dictionary object.
-    quantities = prsr.read_pickle("pyroplot_quantities_object.pkl",diagnostic_level)
-    styles = prsr.read_pickle("pyroplot_styles_object.pkl",diagnostic_level)
-    groups = prsr.read_pickle("pyroplot_groups_object.pkl",diagnostic_level)
+    quantities = prsr.read_pickle("pyrograph_quantities_object.pkl",diagnostic_level)
+    styles = prsr.read_pickle("pyrograph_styles_object.pkl",diagnostic_level)
+    groups = prsr.read_pickle("pyrograph_groups_object.pkl",diagnostic_level)
     
     #Set Scatter Plot Settings
     title = quantities[quantity_id]["Scatter_Plot_Title"]
@@ -108,7 +110,7 @@ def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
 
 
 def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_directory,diagnostic_level):
-    styles = prsr.read_pickle("pyroplot_styles_object.pkl",diagnostic_level)
+    styles = prsr.read_pickle("pyrograph_styles_object.pkl",diagnostic_level)
     
     title = data_info["Plot_Title"]
     size = float(data_info["Plot_Width"])
