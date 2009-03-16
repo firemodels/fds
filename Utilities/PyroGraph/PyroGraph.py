@@ -62,13 +62,6 @@ if data_set == 4:
     output_directory = "../../Manuals/FDS_SMV_Training_Guide/datafigures/"
     config_file_name = "Training_Examples_Data_Config_File.csv"
     print "\n** Processing Training Data Set\n"
-    
-## Test Data
-if data_set == 5:
-    data_directory = "/Users/bwklein/Development/FDS-SMV/Validation/"
-    output_directory = "./plots/"
-    config_file_name = "validation_data_config"
-    print "\n** Processing Test Data Set\n"
 
 
 ### Start of Main Code
