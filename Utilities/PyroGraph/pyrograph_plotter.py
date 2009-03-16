@@ -1,13 +1,6 @@
 """
 pyrograph_plotter.py 
 
-General Plotting functions.
-
-Input parameters required:
-    x_data - pre-processed data.
-    y_data - pre-processed data with mask_value set for missing data.
-    dictionary record for plot settings.
-
 """
 
 import matplotlib
