@@ -665,7 +665,7 @@ Again using the log transformation we obtain $\ln(M)|\theta \sim N(\ln(\delta)+\
 where $\tilde{\sigma}_M=\sigma_M/\theta$. Now since $\ln(\theta)$ is random, and we have its posterior distribution from above we can obtain the marginal density
 (that is for any $\theta$) of $\ln(M) \sim N(\ln(\delta)+\ln(E),\tilde{\sigma}_M^2+\tilde{\sigma}_E^2)$.
 
-What we need now is a way to estimate $\delta$, the bias, and $\tilde{\sigma}_M$, the relative uncertainty, of the model predictions. First, define:
+What we need now is a way to estimate $\delta$, the bias factor, and $\tilde{\sigma}_M$, the relative uncertainty, of the model predictions. First, define:
 \be \bar{M} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(M_i)  \quad ; \quad \bar{E} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(E_i) \ee
 The usual least squares estimate of $\ln(\delta)$ is $\bar{M}-\bar{E}$, and, thus, the estimate of $\delta$ is
 \be \hat{\delta} = \exp(\bar{M}-\bar{E}) \ee
