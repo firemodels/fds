@@ -21,3 +21,6 @@
 20,"HGL_Temperature","HGL Temperature, Steckler Compartment","Measured Temperature Rise ($^\circ$C)","Predicted Temperature Rise ($^\circ$C)",0,300,14,"[0.015,0.94]","lower right",5,"yes","yes","yes","ScatterPlots/HGL_Temperature_Steckler"
 21,"Velocity","Doorway Velocity, Steckler Compartment","Measured Velocity (m/s)","Predicted Velocity (m/s)",0,5,10,"[0.015,0.94]","lower right",5,"yes","yes","yes","ScatterPlots/Velocity_Steckler"
 22,"Hydrogen_Concentration","INERIS Hydrogen Experiments","Measured Hydrogen Volume Fraction","Predicted Hydrogen Volume Fraction",0,0.25,10,"[0.015,0.94]","lower right",5,"yes","yes","yes","ScatterPlots/INERIS_H2"
+23,"Target_Temperature","Temperatures (SP 2009 AST Experiments)","Measured Temperature Rise ($^\circ$C)","Predicted Temperature Rise ($^\circ$C)",0,1000,14,"[0.015,0.94]","lower right",5,"yes","yes","yes","ScatterPlots/SP_Temperature"
+24,"Actuated_Sprinklers","Actuated Sprinklers","Measured Actuations","Predicted Actuations",0,20,0,"[0.015,0.94]","lower right",5,"yes","yes","yes","ScatterPlots/UL_NFPRF_Actuations"
+25,"Oxygen_Concentration","Oxygen Concentration, NIST FSE 2008","Measured Drop in Volume Fraction","Predicted Drop in Volume Fraction",0,0.25,9,"[0.015,0.94]","lower right",5,"yes","yes","yes","ScatterPlots/NIST_FSE_2008_Oxygen_Concentration"

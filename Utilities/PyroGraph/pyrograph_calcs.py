@@ -1,5 +1,5 @@
 """
-pyroplot_calcs.py
+pyrograph_calcs.py
 
 """
 
