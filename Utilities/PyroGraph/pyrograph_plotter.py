@@ -112,6 +112,8 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
     ind_axis_title = data_info["Ind_Title"]
     dep_axis_title = data_info["Dep_Title"]
     
+    flip_axis = data_info["Flip_Axis"]
+    
     xmin = float(data_info['Min_Ind'])
     xmax = float(data_info['Max_Ind'])
     ymin = float(data_info['Min_Dep'])
@@ -140,28 +142,28 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
     
     d1_data = data_set[0]
     d2_data = data_set[1]
-    d1_x_data = d1_data[0]
-    d2_x_data = d2_data[0]
+    d1_ind_data = d1_data[0]
+    d2_ind_data = d2_data[0]
     
-    d1_y_data = d1_data[1:]
-    d2_y_data = d2_data[1:]
+    d1_dep_data = d1_data[1:]
+    d2_dep_data = d2_data[1:]
     
     # Mask out data set to -9999.0 in y_data_set
-    d1_y_data_to_plot = []
-    d2_y_data_to_plot = []
+    d1_dep_data_to_plot = []
+    d2_dep_data_to_plot = []
     
-    for d1_y_data_subset in d1_y_data:
-        y_values = M.array(d1_y_data_subset)
-        d1_y_values_masked = M.masked_where(y_values == mask_value , y_values)
-        d1_y_data_to_plot.append(d1_y_values_masked)
+    for d1_dep_data_subset in d1_dep_data:
+        dep_values = M.array(d1_dep_data_subset)
+        d1_dep_values_masked = M.masked_where(dep_values == mask_value , dep_values)
+        d1_dep_data_to_plot.append(d1_dep_values_masked)
     
-    for d2_y_data_subset in d2_y_data:
-        y_values = M.array(d2_y_data_subset)
-        d2_y_values_masked = M.masked_where(y_values == mask_value , y_values)
-        d2_y_data_to_plot.append(d2_y_values_masked)
+    for d2_dep_data_subset in d2_dep_data:
+        dep_values = M.array(d2_dep_data_subset)
+        d2_dep_values_masked = M.masked_where(dep_values == mask_value , dep_values)
+        d2_dep_data_to_plot.append(d2_dep_values_masked)
     
     linecount = 0
-    for d1_y_masked_data in d1_y_data_to_plot:
+    for d1_dep_masked_data in d1_dep_data_to_plot:
         
         d1_style = eval(data_info["d1_Style"])
         d1_key = d1_column_names[linecount]
@@ -181,12 +183,19 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
             linewidth = 'none'
         else:
             linewidth = float(styles[int(d1_style[linecount])]['Line_Width'])
+            
+        if flip_axis == 'yes':
+            d1_x_data = d1_dep_masked_data[d1_index_set[0]:d1_index_set[1]]
+            d1_y_data = d1_ind_data[d1_index_set[0]:d1_index_set[1]]
+        else:
+            d1_x_data = d1_ind_data[d1_index_set[0]:d1_index_set[1]]
+            d1_y_data = d1_dep_masked_data[d1_index_set[0]:d1_index_set[1]]
         
-        plot_type_function[data_info['Plot_Type']](d1_x_data, d1_y_masked_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, label=d1_key)
+        plot_type_function[data_info['Plot_Type']](d1_x_data, d1_y_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, label=d1_key)
         linecount += 1
         
     linecount = 0
-    for d2_y_masked_data in d2_y_data_to_plot:
+    for d2_dep_masked_data in d2_dep_data_to_plot:
         
         d2_style = eval(data_info["d2_Style"])
         d2_key = d2_column_names[linecount]
@@ -206,17 +215,36 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
             linewidth = 'none'
         else:
             linewidth = float(styles[int(d2_style[linecount])]['Line_Width'])
+            
+        if flip_axis == 'yes':
+            d2_x_data = d2_dep_masked_data[d2_index_set[0]:d2_index_set[1]]
+            d2_y_data = d2_ind_data[d2_index_set[0]:d2_index_set[1]]
+        else:
+            d2_x_data = d2_ind_data[d2_index_set[0]:d2_index_set[1]]
+            d2_y_data = d2_dep_masked_data[d2_index_set[0]:d2_index_set[1]]
         
-        plot_type_function[data_info['Plot_Type']](d2_x_data, d2_y_masked_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, label=d2_key)
+        plot_type_function[data_info['Plot_Type']](d2_x_data, d2_y_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, label=d2_key)
         linecount += 1
         
-    plt.xlabel(ind_axis_title)
-    plt.ylabel(dep_axis_title)
+    if flip_axis == 'yes':
+        plt.xlabel(dep_axis_title)
+        plt.ylabel(ind_axis_title)
+        
+    else:
+        plt.xlabel(ind_axis_title)
+        plt.ylabel(dep_axis_title)
+    
+    if flip_axis == 'yes':
+        ax.axis([ymin,ymax,xmin,xmax])
+    else:
+        ax.axis([xmin,xmax,ymin,ymax])
+    
+    if flip_axis == 'yes':
+        ax.text((ymax-ymin)*title_x_pos, (xmax-xmin)*title_y_pos, title, horizontalalignment='left')
+    else:
+        ax.text((xmax-xmin)*title_x_pos, (ymax-ymin)*title_y_pos, title, horizontalalignment='left')
     
     ax.grid(False)
-    ax.axis([xmin,xmax,ymin,ymax])
-    
-    ax.text((xmax-xmin)*title_x_pos, (ymax-ymin)*title_y_pos, title, horizontalalignment='left')
     
     if legend_loc != 'none':
         leg = ax.legend(loc=legend_loc)
