@@ -30,6 +30,7 @@ Module EVAC
   Use DCDFLIB, Only :  DCDFLIB_Gamma => Gamma
   !
   Implicit None
+  !
   Character(255), Parameter :: evacid='$Id$'
   Character(255), Parameter :: evacrev='$Revision$'
   Character(255), Parameter :: evacdate='$Date$'
@@ -41,7 +42,7 @@ Module EVAC
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_evac
   ! Public variables (needed in the main program):
   !
-  Character(255):: EVAC_VERSION = '2.1.1'
+  Character(255):: EVAC_VERSION = '2.1.2'
   Character(255) :: EVAC_COMPILE_DATE
   Integer :: EVAC_MODULE_REV
   !
@@ -131,8 +132,9 @@ Module EVAC
      Real(EB) :: T_first=0._EB, T_last=0._EB, Flow_max=0._EB, Width=0._EB
      Real(EB) :: X1=0._EB, X2=0._EB, Y1=0._EB, Y2=0._EB, Z1=0._EB, Z2=0._EB, &
           X=0._EB, Y=0._EB, Z=0._EB, Xsmoke=0._EB, Ysmoke=0._EB, Zsmoke=0._EB, &
-          TIME_OPEN=0._EB, TIME_CLOSE=0._EB
-     Integer :: IOR=0, ICOUNT=0, IMESH=0, INODE=0, NTARGET=0
+          TIME_OPEN=0._EB, TIME_CLOSE=0._EB, R_NTARGET=0._EB
+     Integer :: IOR=0, ICOUNT=0, IMESH=0, INODE=0
+     Integer, Dimension(50) :: NTARGET=0
      Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      Integer :: II=0, JJ=0, KK=0, FED_MESH=0
      Logical :: CHECK_FLOW=.False., COUNT_ONLY=.False.
@@ -152,8 +154,9 @@ Module EVAC
      Real(EB) :: T_first=0._EB, T_last=0._EB, Flow_max=0._EB, Width=0._EB
      Real(EB) :: X1=0._EB, X2=0._EB, Y1=0._EB, Y2=0._EB, Z1=0._EB, Z2=0._EB, &
           X=0._EB, Y=0._EB, Z=0._EB, Xsmoke=0._EB, Ysmoke=0._EB, Zsmoke=0._EB, &
-          TIME_OPEN=0._EB, TIME_CLOSE=0._EB
-     Integer :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0, NTARGET=0
+          TIME_OPEN=0._EB, TIME_CLOSE=0._EB, R_NTARGET=0._EB
+     Integer :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0
+     Integer, Dimension(50) :: NTARGET=0
      Integer :: STR_INDX=0, STR_SUB_INDX=0
      Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      Integer :: II=0, JJ=0, KK=0, FED_MESH=0
@@ -234,7 +237,7 @@ Module EVAC
   !
   ! Linked list, needed for the corridors
   Type CORR_LL_Type
-     Type (HUMAN_Type) :: HUMAN
+     Type (HUMAN_TYPE) :: HUMAN
      Real(EB) :: T_in=0._EB, T_out=0._EB
      Logical :: From1_To2=.False.
      Integer :: Index=0
@@ -243,19 +246,6 @@ Module EVAC
   !
   ! Pointers to the allocatable arrays so one can use these as
   ! shorthands to the array elements.
-  Type (KNOWN_DOOR_Type), Pointer :: KDT
-  Type (GROUP_Type),      Pointer :: GR
-  Type (HUMAN_Type),      Pointer :: HR, HRE
-  Type (EVACUATION_Type), Pointer :: HPT, HPE
-  Type (EVAC_PERS_Type),  Pointer :: PCP
-  Type (EVAC_EXIT_Type),  Pointer :: PEX
-  Type (EVAC_DOOR_Type),  Pointer :: PDX, PDX2
-  Type (EVAC_ENTR_Type),  Pointer :: PNX, PNX2
-  Type (EVAC_CORR_Type),  Pointer :: PCX, PCX2
-  Type (EVAC_STRS_Type),  Pointer :: STRP
-  Type (EVAC_NODE_Type),  Pointer :: NODE
-  Type (EVAC_HOLE_Type),  Pointer :: EHX
-  Type (EVAC_SSTAND_Type),Pointer :: ESS
 
   !
   ! Next holds door information for groups
@@ -325,7 +315,9 @@ Module EVAC
        FC_DAMPING, EVAC_DT_MIN, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
        SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, TAU_CHANGE_DOOR, &
        HUMAN_SMOKE_HEIGHT, TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, &
-       CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF
+       CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
+       CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, FAC_DOOR_QUEUE, &
+       FAC_DOOR_WAIT, CF_MIN_B
   Integer, Dimension(3) :: DEAD_RGB
   !
   Real(EB), Dimension(:), Allocatable :: Tsteps
@@ -335,7 +327,7 @@ Module EVAC
   Logical, Dimension(:), Allocatable :: Is_Known_Door, Is_Visible_Door
   Integer, Dimension(:), Allocatable :: Color_Tmp
   !
-  Integer :: n_dead, icyc_old
+  Integer :: n_dead=0, icyc_old=0, n_change_doors=0, n_change_trials=0
   Real(EB) :: fed_max_alive, fed_max
   !
   ! Stairs constants
@@ -370,7 +362,7 @@ Contains
     Real(EB) :: DUMMY
     Real(EB) :: XB(6), XB1(6), XB2(6)
     Real(EB), Dimension(3) :: XYZ, XYZ_SMOKE
-    Integer :: IOS, IZERO, N, I, J, K, IOR, NM
+    Integer :: IOS, IZERO, N, I, J, K, IOR
     Character(30) QUANTITY, MAX_HUMANS_RAMP
     Character(60) FYI,ID,PERS_ID,TO_NODE,EVAC_ID, DEFAULT_PROPERTIES
     Character(26) FLOW_FIELD_ID
@@ -405,8 +397,7 @@ Contains
     Character(26), Dimension(51) :: KNOWN_DOOR_NAMES
     Real(EB), Dimension(51) :: KNOWN_DOOR_PROBS
 
-    Type (MESH_Type), Pointer :: M
-    Integer :: ii,jj,kk,II_C1,JJ_C1,II_C2,JJ_C2
+    Integer :: ii,jj,kk
 
     Integer :: size_rnd
     Integer, Dimension(8) :: t_rnd
@@ -470,12 +461,14 @@ Contains
          TAU_CHANGE_DOOR, RGB, COLOR, &
          AVATAR_COLOR, AVATAR_RGB, HUMAN_SMOKE_HEIGHT, &
          TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, CONST_CF, FAC_CF, &
-         FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF
+         FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
+         CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, &
+         FAC_DOOR_QUEUE, FAC_DOOR_WAIT, CF_MIN_B
     !
-   If (.Not. ANY(EVACUATION_GRID)) Then
-      N_EVAC = 0
-      RETURN
-   Endif
+    If (.Not. ANY(EVACUATION_GRID)) Then
+       N_EVAC = 0
+       Return
+    End If
 
     NPPS = 30000 ! Number Persons Per Set (dump to a file)
     !
@@ -538,6 +531,7 @@ Contains
   Contains
 
     Subroutine COUNT_EVAC_NODES
+      Implicit None
       !
       ! Determine total number of PERS lines in the input file
       !
@@ -840,6 +834,9 @@ Contains
     End Subroutine COUNT_EVAC_NODES
 
     Subroutine READ_PERS
+      Implicit None
+      !
+      Type (EVAC_PERS_Type), Pointer :: PCP=>NULL()
       !
       ! NEXT PARAMETERS ARE SAME FOR ALL HUMANS. THE LAST
       ! VALUES READ IN FROM 'PERS' LINES ARE VALID.
@@ -849,39 +846,54 @@ Contains
       NOISEME     = 0.0_EB
       NOISETH     = 0.01_EB
       NOISECM     = 3.0_EB
+      NOT_RANDOM = .False.
       I_FRIC_SW   = 1
-      V_MAX             = 20.0_EB
+      V_MAX             = 20.0_EB ! m/s
       V_ANGULAR_MAX     = 8.0_EB  ! rps
       V_ANGULAR         = 2.0_EB  ! rps
-      FC_DAMPING        = 500.0_EB
+      FC_DAMPING        = 500.0_EB ! N/(m/s)
+      ! Z_smoke = XB_z - EVACUATION_Z_OFFSET(NM) + HUMAN_SMOKE_HEIGHT, i.e. position
+      ! of the nose/eyes above the floor.  The smoke and gas densities are
+      ! taken from this level (FED calculation and visible doors etc.)
+      HUMAN_SMOKE_HEIGHT   = 1.60_EB  ! Nose above floor level
+
       GROUP_EFF         = 0.0_EB
       RADIUS_COMPLETE_0 = 0.2_EB
       RADIUS_COMPLETE_1 = 0.5_EB
-      NOT_RANDOM = .False.
-      ! Which doors are 'smoke free'
-      FED_DOOR_CRIT = 0.000001_EB
-      ! How to color humans?
-      ! Smoke is detected, when its density is larger than, e.g. 1 mg/m3
-      ! Default is no detection due to smoke.
+
+      ! TDET_SMOKE_DENS: Smoke is detected, when its density is larger than, e.g. 1 mg/m3
+      !                  Default is no detection due to smoke.
       TDET_SMOKE_DENS = -999.9_EB  ! 
-      DENS_INIT       = 0.0_EB
-      EVAC_DT_MAX     = 0.01_EB
-      EVAC_DT_MIN     = 0.001_EB
+      FED_DOOR_CRIT = 0.000001_EB ! Which doors are 'smoke free'
       GROUP_DENS      = 0.0_EB
       SMOKE_MIN_SPEED = 0.1_EB
       SMOKE_MIN_SPEED_VISIBILITY = 0.0_EB
       TAU_CHANGE_DOOR = 1.0_EB
-      TAU_CHANGE_V0 = -1.0_EB
-      THETA_SECTOR = -60.0_EB
-      CONST_DF = -0.1_EB
-      FAC_DF = 1.0_EB
-      CONST_CF = 1.0_EB
-      FAC_CF = 2.0_EB
-      FAC_1_WALL = 1.0_EB   ! direction is towards a wall
-      FAC_2_WALL = 5.5_EB   ! close to a wall
-      FAC_V0_DIR = 2.5_EB   ! v0*cos term for all sectors
-      FAC_V0_NOCF = 0.5_EB  ! prefer v0, if no counterflow
-      FAC_NOCF    = 0.1_EB  ! prefer v0, if no counterflow
+      DENS_INIT       = 0.0_EB
+      EVAC_DT_MAX     = 0.01_EB
+      EVAC_DT_MIN     = 0.001_EB
+
+      ! Next parameters are for the counterflow
+      TAU_CHANGE_V0   = -0.1_EB  !CF: How often direction is updated?
+      THETA_SECTOR    = -40.0_EB !CF: The angle of the first sector
+      CONST_DF        = -0.5_EB  !CF: prefer agents going in the same direction
+      FAC_DF          = 1.0_EB   !CF: prefer agents going in the same direction
+      CONST_CF        = 1.0_EB   !CF: dislike agents going in the opposite direction
+      FAC_CF          = 2.0_EB   !CF: dislike agents going in the opposite direction
+      FAC_1_WALL      = 1.0_EB   !CF: direction is towards a wall
+      FAC_2_WALL      = 1.0_EB   !CF: direction leads too close to a wall
+      FAC_V0_DIR      = 2.5_EB   !CF: v0*cos term for all sectors
+      FAC_V0_NOCF     = 1.0_EB   !CF: prefer v0, if no counterflow
+      FAC_NOCF        = 0.5_EB   !CF: prefer v0, if no counterflow
+      CF_MIN_A        = 0.1_EB   !CF: decrease social force
+      CF_MIN_B        = 0.3_EB   !CF: decrease social force range
+      CF_FAC_A_WALL   = 1.0_EB   !CF: decrease social force
+      CF_MIN_TAU      = 0.25_EB  !CF: increase motive force
+      CF_MIN_TAU_INER = 0.10_EB  !CF: increase motive force, rotation
+      CF_FAC_TAUS     = 0.5_EB   !CF: increase motive force, trans+rot
+      FAC_DOOR_QUEUE  = 0.0_EB
+      FAC_DOOR_WAIT   = 1.0_EB
+      
       OUTPUT_SPEED         = .False.
       OUTPUT_MOTIVE_FORCE  = .False.
       OUTPUT_MOTIVE_ANGLE  = .False.
@@ -891,10 +903,6 @@ Contains
       OUTPUT_CONTACT_FORCE = .False.
       OUTPUT_TOTAL_FORCE   = .False.
       DEAD_COLOR = 'null'
-      ! Z_smoke = XB_z - EVACUATION_Z_OFFSET(NM) + HUMAN_SMOKE_HEIGHT, i.e. position
-      ! of the nose/eyes above the floor.  The smoke and gas densities are
-      ! taken from this level (FED calculation and visible doors etc.)
-      HUMAN_SMOKE_HEIGHT   = 1.60_EB  ! above floor level
       ! 
       ! Read the PERS lines (no read for default n=0 case)
       !
@@ -1225,7 +1233,6 @@ Contains
          Continue
       Case (7)
          COLOR_METHOD = -1
-!         If (MYID==Max(0,EVAC_PROCESS)) Write (LU_EVACOUT,'(A)') &
          If (MYID==Max(0,EVAC_PROCESS)) Write (LU_ERR,'(A)') &
               ' WARNING: COLOR_METHOD=7 is not defined anymore, the default (-1) is used.'
       Case Default
@@ -1335,6 +1342,9 @@ Contains
       ! Read the EXIT lines
       !
       Integer nm, i1, i2, j1, j2
+      Type (EVAC_EXIT_Type), Pointer :: PEX=>NULL()
+      Type (EVAC_STRS_Type),  Pointer :: STRP=>NULL()
+      Type (MESH_TYPE), Pointer :: M=>NULL()
       !
       READ_EXIT_LOOP: Do N = 1, N_EXITS
          !
@@ -1642,6 +1652,8 @@ Contains
       !
       ! Read the DOOR lines
       !
+      Type (EVAC_DOOR_Type), Pointer :: PDX=>NULL()
+      Type (MESH_TYPE), Pointer :: M=>NULL()
       Integer nm, i1, i2, j1, j2
       !
       READ_DOOR_LOOP: Do N = 1, N_DOORS
@@ -1935,6 +1947,10 @@ Contains
     End Subroutine READ_DOOR
 
     Subroutine READ_CORR
+      Implicit None
+      !
+      Type (EVAC_CORR_Type), Pointer :: PCX=>NULL()
+      Type (MESH_TYPE), Pointer :: M=>NULL()
       !
       ! Read the CORR line
       !
@@ -2169,9 +2185,12 @@ Contains
     End Subroutine READ_CORR
 
     Subroutine READ_STRS
+      Implicit None
       !
       ! Local variables
+      !
       REAL(EB) Z_TMP
+      Type (EVAC_STRS_Type), Pointer :: STRP=>NULL()
 
       ! Read the STRS line
       READ_STRS_LOOP: Do N = 1,N_STRS
@@ -2423,10 +2442,10 @@ Contains
 
     End Subroutine READ_STRS
 
-
-
     Logical Function Is_Within_Bounds(P1x1,P1x2,P1y1,P1y2,P1z1,P1z2,& 
          P2x1,P2x2,P2y1,P2y2,P2z1,P2z2,xtol,ytol,ztol)
+      Implicit None
+      !
       Real(EB), Intent(IN) :: P1x1,P1x2,P1y1,P1y2,P1z1,P1z2
       Real(EB), Intent(IN) :: P2x1,P2x2,P2y1,P2y2,P2z1,P2z2,xtol,ytol,ztol
       !Returns .TRUE. if P2 is within the bounds of P1 with tolerances.
@@ -2438,7 +2457,8 @@ Contains
     End Function Is_Within_Bounds
 
     Subroutine COLLECT_NODE_INFO
-
+      Implicit None
+      !
       ! Now exits, doors, corrs and strs are already read in
       If (n_nodes > 0 .And. MYID==Max(0,EVAC_PROCESS)) Then
          n_tmp = 0
@@ -2524,31 +2544,34 @@ Contains
       ! Read the ENTR lines
       !
       Integer nm, i1, i2, j1, j2, NR
+      Type (EVAC_ENTR_Type), Pointer :: PNX=>NULL()
+      Type (EVAC_PERS_Type), Pointer :: PCP=>NULL()
+      Type (EVAC_STRS_Type), Pointer :: STRP=>NULL()
       !
       READ_ENTR_LOOP: Do N = 1, N_ENTRYS
          !
-         ID                      = 'null'
-         RGB                     = -1
-         COLOR                   = 'null'
-         AVATAR_RGB              = -1
-         AVATAR_COLOR            = 'null'
-         XB                      = 0.0_EB
-         IOR                     = 0
-         FLOW_FIELD_ID           = 'null'
-         MESH_ID                 = 'null'
-         EVAC_MESH               = 'null'
-         TO_NODE                 = 'null'
-         PERS_ID                 = 'null'
-         QUANTITY                = 'null'
-         MAX_FLOW                = 0.0_EB
-         WIDTH                   = 0.0_EB
-         AFTER_REACTION_TIME     = .False.
-         TIME_START              = -Huge(TIME_START)
-         TIME_STOP               =  Huge(TIME_STOP)
-         MAX_HUMANS              = -1
+         ID            = 'null'
+         RGB           = -1
+         COLOR         = 'null'
+         AVATAR_RGB    = -1
+         AVATAR_COLOR  = 'null'
+         XB            = 0.0_EB
+         IOR           = 0
+         FLOW_FIELD_ID = 'null'
+         MESH_ID       = 'null'
+         EVAC_MESH     = 'null'
+         TO_NODE       = 'null'
+         PERS_ID       = 'null'
+         QUANTITY      = 'null'
+         MAX_FLOW      = 0.0_EB
+         WIDTH         = 0.0_EB
+         AFTER_REACTION_TIME = .False.
+         TIME_START          = -Huge(TIME_START)
+         TIME_STOP           =  Huge(TIME_STOP)
+         MAX_HUMANS    = -1
          MAX_HUMANS_RAMP         = 'null'
-         KNOWN_DOOR_NAMES        = 'null'
-         KNOWN_DOOR_PROBS        = 1.0_EB
+         KNOWN_DOOR_NAMES         = 'null'
+         KNOWN_DOOR_PROBS         = 1.0_EB
          !
          !
          Call CHECKREAD('ENTR',LU_INPUT,IOS)
@@ -2619,14 +2642,14 @@ Contains
          Call ChkMemErr('Read_Evac','PNX%P_VENT_FFIELDS',IZERO) 
          !
 
-         PNX%TO_NODE          = TO_NODE
-         PNX%T_first          = T_BEGIN
-         PNX%T_last           = T_BEGIN
-         PNX%ICOUNT           = 0
-         PNX%Flow             = MAX_FLOW
-         PNX%T_Start          = TIME_START
-         PNX%T_Stop           = TIME_STOP
-         PNX%Max_Humans       = MAX_HUMANS
+         PNX%TO_NODE    = TO_NODE
+         PNX%T_first    = T_BEGIN
+         PNX%T_last     = T_BEGIN
+         PNX%ICOUNT     = 0
+         PNX%Flow       = MAX_FLOW
+         PNX%T_Start    = TIME_START
+         PNX%T_Stop     = TIME_STOP
+         PNX%Max_Humans = MAX_HUMANS
          PNX%Max_Humans_Ramp  = MAX_HUMANS_RAMP
 
          ! Check that the entry is properly specified
@@ -2666,7 +2689,7 @@ Contains
          End If
 
          nm = PNX%IMESH
-
+ 
          If (XB(1)/=XB(2) .And. XB(3)/=XB(4)) Then
             Write(MESSAGE,'(A,I4,A)') 'ERROR: ENTR',N,' must be a plane'
             Call SHUTDOWN(MESSAGE)
@@ -2829,9 +2852,13 @@ Contains
     End Subroutine READ_ENTRIES
 
     Subroutine READ_EVAC_LINES
+      Implicit None
       !
       ! Read the EVAC lines
       ! 
+      Type (EVACUATION_Type), Pointer :: HPT=>NULL()
+      Type (EVAC_PERS_Type),  Pointer :: PCP=>NULL()
+
       READ_EVAC_LOOP: Do N=1,NPC_EVAC
          !
          ID                       = 'null'
@@ -3070,9 +3097,12 @@ Contains
     End Subroutine READ_EVAC_LINES
 
     Subroutine READ_EVHO
+      Implicit None
       !
       ! Read the EVHO lines
       !
+      Type (EVAC_HOLE_Type),  Pointer :: EHX=>NULL()
+
       READ_EVHO_LOOP: Do N = 1, N_HOLES
          If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EVHO_LOOP
          EHX=>EVAC_HOLES(N)
@@ -3150,9 +3180,12 @@ Contains
     End Subroutine READ_EVHO
 
     Subroutine READ_EVSS
+      Implicit None
       !
       ! Read the EVSS lines
       !
+      Type (EVAC_SSTAND_Type), Pointer :: ESS=>NULL()
+
       READ_EVSS_LOOP: Do N = 1, N_SSTANDS
          If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EVSS_LOOP
          ESS => EVAC_SSTANDS(N)
@@ -3271,6 +3304,11 @@ Contains
     End Subroutine READ_EVSS
 
     Subroutine CHECK_EVAC_NODES
+      Implicit None
+      !
+      Type (EVAC_ENTR_Type), Pointer :: PNX=>NULL()
+      Type (EVAC_DOOR_Type), Pointer :: PDX=>NULL()
+      Type (EVAC_STRS_Type), Pointer :: STRP=>NULL()
       !
       ! Set the IMESH and IMESH2 for corridors
       Do n = 1, n_corrs
@@ -3405,7 +3443,7 @@ Contains
     Integer n_cols, i, j, nm, izero
     Logical L_fed_read, L_fed_save, L_eff_read, L_eff_save, L_status
     Integer(4) n_egrids_tmp, ibar_tmp, jbar_tmp, kbar_tmp, &
-         ntmp1, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6, ios,N
+         ntmp1, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6, ios, N
     Real(FB) u_tmp, v_tmp
     Character(60), Allocatable, Dimension(:) :: CTEMP
     !
@@ -3419,30 +3457,31 @@ Contains
     !      Format: 1. row: n_egrids >=0  (Old Format, version 1.10)
     !              1a. row: n < 0 (New Format)
     !              1b. row: n_egrids,4,n_corrs=0,4 (New Format, version 1.11)
+
+    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+
+    ! Evacuation files
+
+    LU_EVACCSV = GET_FILE_NUMBER()
+    FN_EVACCSV = TRIM(CHID)//'_evac.csv'
+    LU_EVACEFF = GET_FILE_NUMBER()
+    FN_EVACEFF = TRIM(CHID)//'_evac.eff'
+    LU_EVACFED = GET_FILE_NUMBER()
+    FN_EVACFED = TRIM(CHID)//'_evac.fed'
+    LU_EVACOUT = GET_FILE_NUMBER()
+    FN_EVACOUT = TRIM(CHID)//'_evac.out'
+
     !
 
-   IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+    ! Open evacuation output file
 
-   ! Evacuation files
+    IF (APPEND) THEN
+       OPEN (LU_EVACOUT,file=FN_EVACOUT,form='formatted',status='old', position='append')
+    ELSE
+       OPEN (LU_EVACOUT,file=FN_EVACOUT,form='formatted', status='replace')
+    ENDIF
 
-   LU_EVACCSV = GET_FILE_NUMBER()
-   FN_EVACCSV = TRIM(CHID)//'_evac.csv'
-   LU_EVACEFF = GET_FILE_NUMBER()
-   FN_EVACEFF = TRIM(CHID)//'_evac.eff'
-   LU_EVACFED = GET_FILE_NUMBER()
-   FN_EVACFED = TRIM(CHID)//'_evac.fed'
-   LU_EVACOUT = GET_FILE_NUMBER()
-   FN_EVACOUT = TRIM(CHID)//'_evac.out'
-
-   ! Open evacuation output file
-
-   IF (APPEND) THEN
-      OPEN (LU_EVACOUT,file=FN_EVACOUT,form='formatted',status='old', position='append')
-   ELSE
-      OPEN (LU_EVACOUT,file=FN_EVACOUT,form='formatted', status='replace')
-   ENDIF
-
-   ! Write program info
+    ! Write program info
 
     Write(EVAC_COMPILE_DATE,'(A)') evacrev(Index(evacrev,':')+1:Len_trim(evacrev)-2)
     Read (EVAC_COMPILE_DATE,'(I5)') EVAC_MODULE_REV
@@ -3782,28 +3821,28 @@ Contains
        EVAC_Z_MAX = Max(EVAC_Z_MAX,Real(MFF%ZF,FB))
     End Do
 
-   ! write STRS properties
-   If (MYID==Max(0,EVAC_PROCESS)) Then
-   Do N = 1, N_STRS
-      Write (LU_EVACOUT,'(A,A)')      '  Stair ',Trim(EVAC_STRS(N)%ID)
-      Write (LU_EVACOUT,'(A,6F10.3)') '   Co-ordinates: ',EVAC_STRS(N)%XB(1:6)
-      Write (LU_EVACOUT,'(A)')          '   Node coordinates'
-      Do NM = 1,EVAC_STRS(N)%N_NODES
-      If (EVAC_STRS(N)%NODE_TYPE(NM) == STRS_LANDING_TYPE) Then
-      Write (LU_EVACOUT,'(A,I3,8F8.3)') '   Landing ',NM,EVAC_STRS(N)%XB_NODE(NM,1:8)
-      Else
-      Write (LU_EVACOUT,'(A,I3,8F8.3)') '   Stair   ',NM,EVAC_STRS(N)%XB_NODE(NM,1:8)
-      Endif
-      ENDDO
-      Write (LU_EVACOUT,'(A)')          '   Nodes in '
-      DO NM = 1, EVAC_STRS(N)%N_NODES_IN
-      Write (LU_EVACOUT,'(I5,A,A)')          NM, ' ', EVAC_NODE_List(EVAC_STRS(N)%NODES_IN(NM))%ID
-      ENDDO
-      Write (LU_EVACOUT,'(A)')          '   Nodes out '
-      DO NM = 1, EVAC_STRS(N)%N_NODES_OUT
-      Write (LU_EVACOUT,'(I5,A,A)')          NM, ' ', EVAC_NODE_List(EVAC_STRS(N)%NODES_OUT(NM))%ID
-      ENDDO
-   Enddo
+    ! write STRS properties
+    If (MYID==Max(0,EVAC_PROCESS)) Then
+       Do N = 1, N_STRS
+          Write (LU_EVACOUT,'(A,A)')      '  Stair ',Trim(EVAC_STRS(N)%ID)
+          Write (LU_EVACOUT,'(A,6F10.3)') '   Co-ordinates: ',EVAC_STRS(N)%XB(1:6)
+          Write (LU_EVACOUT,'(A)')          '   Node coordinates'
+          Do NM = 1,EVAC_STRS(N)%N_NODES
+             If (EVAC_STRS(N)%NODE_TYPE(NM) == STRS_LANDING_TYPE) Then
+                Write (LU_EVACOUT,'(A,I3,8F8.3)') '   Landing ',NM,EVAC_STRS(N)%XB_NODE(NM,1:8)
+             Else
+                Write (LU_EVACOUT,'(A,I3,8F8.3)') '   Stair   ',NM,EVAC_STRS(N)%XB_NODE(NM,1:8)
+             Endif
+          ENDDO
+          Write (LU_EVACOUT,'(A)')          '   Nodes in '
+          DO NM = 1, EVAC_STRS(N)%N_NODES_IN
+             Write (LU_EVACOUT,'(I5,A,A)')          NM, ' ', EVAC_NODE_List(EVAC_STRS(N)%NODES_IN(NM))%ID
+          ENDDO
+          Write (LU_EVACOUT,'(A)')          '   Nodes out '
+          DO NM = 1, EVAC_STRS(N)%N_NODES_OUT
+             Write (LU_EVACOUT,'(I5,A,A)')          NM, ' ', EVAC_NODE_List(EVAC_STRS(N)%NODES_OUT(NM))%ID
+          ENDDO
+       Enddo
    End if
 
   End Subroutine Initialize_Evac_Dumps
@@ -3816,7 +3855,7 @@ Contains
     !
     Integer, Intent(IN) :: NM
     Integer, Intent(OUT) :: ISTOP
-    Real(EB) RN, RN1, simoDX, simoDY, TNOW
+    Real(EB) RN, simoDX, simoDY, TNOW
     Real(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, &
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
     Integer i,j,k,ii,jj,kk,ipc, izero, n_tmp, ie, nom
@@ -3829,9 +3868,14 @@ Contains
     Real(EB), Dimension(4) :: d_xy
     Logical, Dimension(4) :: FoundWall_xy
     ! 
-    Type (mesh_type), Pointer :: m
+    Type (MESH_TYPE), Pointer :: M
+    Type (EVAC_SSTAND_Type),Pointer :: ESS=>NULL()
+    Type (EVACUATION_Type), Pointer :: HPT=>NULL()
+    Type (EVAC_PERS_Type),  Pointer :: PCP=>NULL()
+    Type (EVAC_HOLE_Type),  Pointer :: EHX=>NULL()
+    Type (HUMAN_TYPE), Pointer :: HR=>NULL(), HRE=>NULL()
     !
-    tnow=SECOND()
+    TNOW = SECOND()
 
     If ( .Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) ) Return
     ! Next means that only EVAC_PROCESS is doing something
@@ -4016,7 +4060,6 @@ Contains
                 ! One member groups are not counted as group
                 If (group_size > 1) i33 = i33 + 1
                 If (group_size == 1) ilh = ilh + 1
-                Call Random_number(RN1)
              End If
              N_HUMANS = N_HUMANS + 1
              !
@@ -4027,7 +4070,7 @@ Contains
              End If
              !
              HR => HUMAN(N_HUMANS)
-             Call CLASS_PROPERTIES
+             Call CLASS_PROPERTIES(HR,PCP)
              HR%IPC = HPT%IPC  ! PERS-line index
              HR%IEL = IPC      ! EVAC-line index
              HR%I_Target = 0
@@ -4208,7 +4251,7 @@ Contains
                 ! Is a lonely soul
                 HR%GROUP_ID = -ilh
              End If
-             HR%Commitment = RN1
+             HR%Commitment = 0.0_EB
              HR%SHOW = .True.    
 
 
@@ -4312,10 +4355,13 @@ Contains
     !
     ! Initialize group lists, known doors, etc
     !
-    Integer I,J, IZERO, nom, j1
+    Integer I,J, IZERO, nom, j1, ii, i_target_old, i_change_old, i_tmp, i_tmp2
     Integer :: i_egrid, i_target, color_index, i_new_ffield
+    Real(EB) :: evel
     ! 
-    Type (MESH_TYPE), Pointer :: M
+    Type (MESH_TYPE), Pointer :: M=>NULL()
+    Type (EVAC_SSTAND_Type), Pointer :: ESS=>NULL()
+    Type (HUMAN_TYPE), Pointer :: HR=>NULL()
     !
     If (.Not.Any(EVACUATION_GRID)) Return
     If (PROCESS_STOP_STATUS > 0) Return
@@ -4351,6 +4397,11 @@ Contains
     Call ChkMemErr('Initialize_Evacuation','Color_Tmp',IZERO) 
 
     i_egrid = 0
+    n_change_doors  = 0 ! Count the initialization Nash Equilibrium iterations
+    n_change_trials = 0 ! Count the initialization Nash Equilibrium iterations
+    i_change_old    = -1
+    EVAC_DOORS(:)%R_NTARGET = 5.0_EB
+    EVAC_EXITS(:)%R_NTARGET = 5.0_EB
     Do nom = 1, NMESHES
        If ( .Not.(EVACUATION_ONLY(NoM) .And. EVACUATION_GRID(NoM)) ) Cycle
        M => MESHES(NOM)
@@ -4366,29 +4417,91 @@ Contains
           Group_List(j)%GROUP_X    = Group_List(j)%GROUP_X + HR%X
           Group_List(j)%GROUP_Y    = Group_List(j)%GROUP_Y + HR%Y
           Group_List(j)%Speed      = Group_List(j)%Speed + HR%Speed
+          Do ii = 1,n_doors
+             If (nom .Ne. EVAC_DOORS(ii)%Imesh) Cycle
+             evel = Sqrt((HR%X-EVAC_DOORS(ii)%X)**2 + (HR%Y-EVAC_DOORS(ii)%Y)**2)
+             EVAC_DOORS(ii)%R_NTARGET = Max(evel,EVAC_DOORS(ii)%R_NTARGET)
+          End Do
+          Do ii = 1,n_exits
+             If (nom .Ne. EVAC_EXITS(ii)%Imesh) Cycle
+             evel = Sqrt((HR%X-EVAC_EXITS(ii)%X)**2 + (HR%Y-EVAC_EXITS(ii)%Y)**2)
+             EVAC_EXITS(ii)%R_NTARGET = Max(evel,EVAC_EXITS(ii)%R_NTARGET)
+          End Do
        End Do
        Group_List(1:)%GROUP_X = Group_List(1:)%GROUP_X / Max(1,Group_List(1:)%GROUP_SIZE)
        Group_List(1:)%GROUP_Y = Group_List(1:)%GROUP_Y / Max(1,Group_List(1:)%GROUP_SIZE)
        Group_List(1:)%Speed   = Group_List(1:)%Speed / Max(1,Group_List(1:)%GROUP_SIZE)
-       Do i = 1, M%N_HUMANS
-          HR => M%HUMAN(I)
-          ! group_id > 0: +group_id
-          ! group_id < 0: -human_id (lonely humans)
-          j  =  Max(0,HR%GROUP_ID)
-          j1 = -Min(0,HR%GROUP_ID)
-          ! Test, if this group has already a ffield (on this floor)
-          ! Lonely humans have j=0 and group_i_ffields is always 0.
-          If (Group_List(j)%GROUP_I_FFIELDS(i_egrid) == 0) Then
-             Call Change_Target_Door(nom, nom, i, j, j1, i_egrid, 0, 0.0_EB, HR%X, HR%Y, i_target, color_index, i_new_ffield)
-          Else              ! this group has already a flow field
-             ! This group has already tried to change the field
-             If (COLOR_METHOD == 5 .And. j > 0) HR%COLOR_INDEX = Color_Tmp(j)
-             If (COLOR_METHOD == 4 .And. j > 0) HR%COLOR_INDEX = Color_Tmp(j)
-             HR%I_FFIELD    = Group_List(j)%GROUP_I_FFIELDS(i_egrid)
-             HR%FFIELD_NAME = Trim(MESH_NAME(HR%I_FFIELD))
-             HR%I_Target = Group_Known_Doors(j)%I_Target
-          End If            ! first member of a group or a lonely soul
-       End Do              ! 1, n_humans
+       i_tmp = 0
+       i_tmp2 = -1
+       Do While (.Not.(i_change_old == n_change_doors) .And. .Not.(i_tmp2 == i_tmp)) ! Iterate Nash equilibrium
+          i_change_old = n_change_doors
+          i_tmp = 0
+          Do i = 1, M%N_HUMANS
+             HR => M%HUMAN(I)
+             ! group_id > 0: +group_id
+             ! group_id < 0: -human_id (lonely humans)
+             j  =  Max(0,HR%GROUP_ID)
+             j1 = -Min(0,HR%GROUP_ID)
+             ! Test, if this group has already a ffield (on this floor)
+             ! Lonely humans have j=0 and group_i_ffields is always 0.
+             If (Group_List(j)%GROUP_I_FFIELDS(i_egrid) == 0) Then
+                i_target_old = HR%I_Target
+                n_change_trials = n_change_trials + 1
+                Call Change_Target_Door(nom, nom, i, j, j1, i_egrid, 0, 0.0_EB, HR%X, HR%Y, i_target, color_index, i_new_ffield, HR)
+                If (Abs(i_target_old) .Ne. Abs(i_target)) Then
+                   n_change_doors = n_change_doors + 1
+                   i_tmp = i
+                   If (i_target > 0) Then
+                      If (i_target <= n_doors ) Then
+                         evel = Sqrt((HR%X-EVAC_DOORS(i_target)%X)**2 + (HR%Y-EVAC_DOORS(i_target)%Y)**2)
+                         evel = 50.0_EB*evel/EVAC_DOORS(i_target)%R_NTARGET + 1.0_EB
+                         ii = Min(50,Max(1,Int(evel)))
+                         EVAC_DOORS(i_target)%NTARGET(ii:50) = EVAC_DOORS(i_target)%NTARGET(ii:50) + 1
+                      Else
+                         evel = Sqrt((HR%X-EVAC_EXITS(i_target-n_doors)%X)**2 + (HR%Y-EVAC_EXITS(i_target-n_doors)%Y)**2)
+                         evel = 50.0_EB*evel/EVAC_EXITS(i_target-n_doors)%R_NTARGET + 1.0_EB
+                         ii = Min(50,Max(1,Int(evel)))
+                         EVAC_EXITS(i_target-n_doors)%NTARGET(ii:50) = EVAC_EXITS(i_target-n_doors)%NTARGET(ii:50) + 1
+                      End If
+                   End If
+                   If (i_target_old > 0) Then
+                      If (i_target_old <= n_doors ) Then
+                         evel = Sqrt((HR%X-EVAC_DOORS(i_target_old)%X)**2 + (HR%Y-EVAC_DOORS(i_target_old)%Y)**2)
+                         evel = 50.0_EB*evel/EVAC_DOORS(i_target_old)%R_NTARGET + 1.0_EB
+                         ii = Min(50,Max(1,Int(evel)))
+                         EVAC_DOORS(i_target_old)%NTARGET(ii:50) = EVAC_DOORS(i_target_old)%NTARGET(ii:50) - 1
+                      Else
+                         evel = Sqrt((HR%X-EVAC_EXITS(i_target_old-n_doors)%X)**2 + &
+                              (HR%Y-EVAC_EXITS(i_target_old-n_doors)%Y)**2)
+                         evel = 50.0_EB*evel/EVAC_EXITS(i_target_old-n_doors)%R_NTARGET + 1.0_EB
+                         ii = Min(50,Max(1,Int(evel)))
+                         EVAC_EXITS(i_target_old-n_doors)%NTARGET(ii:50) = &
+                              EVAC_EXITS(i_target_old-n_doors)%NTARGET(ii:50) - 1
+                      End If
+                   End If
+                End If
+             Else              ! this group has already a flow field
+                ! This group has already tried to change the field
+                If (COLOR_METHOD == 5 .And. j > 0) HR%COLOR_INDEX = Color_Tmp(j)
+                If (COLOR_METHOD == 4 .And. j > 0) HR%COLOR_INDEX = Color_Tmp(j)
+                HR%I_FFIELD    = Group_List(j)%GROUP_I_FFIELDS(i_egrid)
+                HR%FFIELD_NAME = Trim(MESH_NAME(HR%I_FFIELD))
+                HR%I_Target = Group_Known_Doors(j)%I_Target
+             End If            ! first member of a group or a lonely soul
+          End Do              ! 1, n_humans
+          If (n_change_doors-i_change_old == 1) Then
+             i_tmp2 = i_tmp
+             Write(lu_evacout,fmt='(a,2i10)') ' Init: Door Changes i_tmp ',  i_tmp, i_tmp2
+          Else
+             i_tmp2 = -1
+          End If
+          If (n_change_doors/M%N_HUMANS > 10*M%N_HUMANS) i_tmp2 = i_tmp
+          Write(lu_evacout,fmt='(a,2i10)')' Init: Door Changes, Trials ',  n_change_doors,n_change_trials
+          If (FAC_DOOR_QUEUE <= 0.001_EB) i_change_old = n_change_doors  ! Do not iterate the Nash equilibrium
+       End Do         ! Nash iterations
+       If (FAC_DOOR_QUEUE > 0.001_EB) Write(lu_evacout,fmt='(a,f10.4,a,i4)') &
+            ' Init: Changes per agent ', Real(n_change_doors,EB)/Real(M%N_HUMANS,EB), &
+            ', Nash iterations', n_change_trials/M%N_HUMANS
     End Do                  ! 1, nmeshes
 
     Write (LU_EVACOUT,fmt='(/a)') ' EVAC: Initial positions of the humans'
@@ -4432,6 +4545,8 @@ Contains
        End Do
     End Do
     Write (LU_EVACOUT,fmt='(/)')
+    !n_change_doors  = 0 ! Do not count the initialization Nash Equilibrium iterations
+    !n_change_trials = 0 ! Do not count the initialization Nash Equilibrium iterations
 
   End Subroutine INIT_EVAC_GROUPS
 !
@@ -4745,7 +4860,7 @@ Contains
     Integer(4) ibar_tmp, jbar_tmp, kbar_tmp
     Integer nm_tim, i, j
     ! 
-    Type (MESH_TYPE), Pointer :: MFF
+    Type (MESH_TYPE), Pointer :: MFF=>NULL()
 
     If (.Not.Any(EVACUATION_GRID)) Return
 
@@ -4804,7 +4919,7 @@ Contains
     Real(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, tim_dist
     Real(EB), Dimension(4) :: d_xy
     Logical, Dimension(4) :: FoundWall_xy
-    Integer :: istat, STRS_INDX, i_target, color_index, i_new_ffield
+    Integer :: istat, STRS_INDX, i_target, color_index, i_new_ffield, i_target_old
     !
     !
     Real(EB) ::  scal_prod_over_rsqr, U_new, V_new, Vmax_timo, CosPhiFac, &
@@ -4840,11 +4955,14 @@ Contains
     Logical :: NM_STRS_MESH
     Real(EB), Dimension(n_sectors+1) :: Sum_suunta, u_theta, v_theta, cos_theta, sin_theta, thetas
     Real(EB) :: Sum_suunta_max, theta_step, theta_start, vr_2r, angle_hre, &
-         angle_hr, v_hr, v_hre, P2P_Suunta_MAX, angle_old
+         angle_hr, v_hr, v_hre, P2P_Suunta_MAX, angle_old, hr_x, hr_y, d_new, d_shift, commitment
     Integer :: i_suunta_max, N_suunta_back, N_suunta_backCF
     Integer, Dimension(n_sectors+1) :: N_suunta, N_suuntaCF
 
-    Type (MESH_TYPE), Pointer :: MFF
+    Type (MESH_TYPE), Pointer :: MFF=>NULL()
+    Type (EVAC_STRS_Type), Pointer :: STRP=>NULL()
+    Type (EVAC_SSTAND_Type), Pointer :: ESS=>NULL()
+    Type (HUMAN_TYPE), Pointer :: HR=>NULL(), HRE=>NULL()
     !
     TNOW=SECOND()
     If ( .Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) ) Return
@@ -4903,12 +5021,12 @@ Contains
        ! Initialize some counters etc. for this main evac mesh.
        Do i = 1, n_doors
           If ( EVAC_DOORS(i)%IMESH == nm) Then
-             EVAC_DOORS(i)%NTARGET = 0
+             EVAC_DOORS(i)%NTARGET(1:50) = 0
           End If
        End Do
        Do i = 1, n_exits
           If ( EVAC_EXITS(i)%IMESH == nm) Then
-             EVAC_EXITS(i)%NTARGET = 0
+             EVAC_EXITS(i)%NTARGET(1:50) = 0
           End If
        End Do
 
@@ -4927,6 +5045,8 @@ Contains
        Do j = 0, i33_dim
           Group_List(j)%GROUP_I_FFIELDS(i_egrid) = 0
        End Do
+       EVAC_DOORS(:)%R_NTARGET = 5.0_EB
+       EVAC_EXITS(:)%R_NTARGET = 5.0_EB
        Do i = 1, N_HUMANS
           HR=>HUMAN(I)
           j = Max(0,HR%GROUP_ID)  ! Group index of the agent
@@ -4937,7 +5057,18 @@ Contains
           Group_List(j)%IntDose    = Group_List(j)%IntDose + HR%IntDose
           Group_List(j)%Tpre       = Max(Group_List(j)%Tpre,HR%Tpre)
           Group_List(j)%Tdet       = Min(Group_List(j)%Tdet,HR%Tdet)
+          i_tmp = HR%I_TARGET
+          If (i_tmp > 0 .And. i_tmp <= n_doors ) Then
+             evel = Sqrt((HR%X- EVAC_DOORS(i_tmp)%X)**2 + (HR%Y-EVAC_DOORS(i_tmp)%Y)**2)
+             EVAC_DOORS(i_tmp)%R_NTARGET = Max(evel,EVAC_DOORS(i_tmp)%R_NTARGET)
+          End If
+          i_tmp = i_tmp - n_doors
+          If (i_tmp > 0 .And. i_tmp <= n_exits ) Then
+             evel = Sqrt((HR%X-EVAC_EXITS(i_tmp)%X)**2 + (HR%Y-EVAC_EXITS(i_tmp)%Y)**2)
+             EVAC_EXITS(i_tmp)%R_NTARGET = Max(evel,EVAC_EXITS(i_tmp)%R_NTARGET)
+          End If
        End Do
+
        Group_List(1:)%GROUP_X = Group_List(1:)%GROUP_X / Max(1,Group_List(1:)%GROUP_SIZE)
        Group_List(1:)%GROUP_Y = Group_List(1:)%GROUP_Y / Max(1,Group_List(1:)%GROUP_SIZE)
        Group_List(1:)%Speed   = Group_List(1:)%Speed   / Max(1,Group_List(1:)%GROUP_SIZE)
@@ -4955,11 +5086,17 @@ Contains
                Sqrt((HR%X - Group_List(j)%GROUP_X)**2 + (HR%Y - Group_List(j)%GROUP_Y)**2))
           i_tmp = HR%I_TARGET
           If (i_tmp > 0 .And. i_tmp <= n_doors ) Then
-             EVAC_DOORS(i_tmp)%NTARGET = EVAC_DOORS(i_tmp)%NTARGET + 1
+             evel = Sqrt((HR%X- EVAC_DOORS(i_tmp)%X)**2 + (HR%Y-EVAC_DOORS(i_tmp)%Y)**2)
+             evel = 50.0_EB*evel/EVAC_DOORS(i_tmp)%R_NTARGET + 1.0_EB
+             ie = Min(50,Max(1,Int(evel)))
+             EVAC_DOORS(i_tmp)%NTARGET(ie:50) = EVAC_DOORS(i_tmp)%NTARGET(ie:50) + 1
           End If
           i_tmp = i_tmp - n_doors
           If (i_tmp > 0 .And. i_tmp <= n_exits ) Then
-             EVAC_EXITS(i_tmp)%NTARGET = EVAC_EXITS(i_tmp)%NTARGET + 1
+             evel = Sqrt((HR%X-EVAC_EXITS(i_tmp)%X)**2 + (HR%Y-EVAC_EXITS(i_tmp)%Y)**2)
+             evel = 50.0_EB*evel/EVAC_EXITS(i_tmp)%R_NTARGET + 1.0_EB
+             ie = Min(50,Max(1,Int(evel)))
+             EVAC_EXITS(i_tmp)%NTARGET(ie:50) = EVAC_EXITS(i_tmp)%NTARGET(ie:50) + 1
           End If
        End Do
 
@@ -5020,7 +5157,40 @@ Contains
                 ! Test if this group/agent should update the exit door (exp. distribution)
                 Call Random_number(rn)
                 If (rn > Exp(-DTSP/dt_group_door) ) Then
-                   Call Change_Target_Door(nm, nm, ie, j, j1, i_egrid, 1, T, HR%X, HR%Y, i_target, color_index, i_new_ffield)
+                   i_target_old = HR%I_Target 
+                   n_change_trials = n_change_trials + 1
+                   Call Change_Target_Door(nm, nm, ie, j, j1, i_egrid, 1, T, HR%X, HR%Y, i_target, color_index, i_new_ffield, HR)
+                   If (Abs(i_target_old) .Ne. Abs(i_target)) Then
+                      n_change_doors = n_change_doors + 1
+                      If (i_target > 0) Then
+                         If (i_target <= n_doors ) Then
+                            evel = Sqrt((HR%X-EVAC_DOORS(i_target)%X)**2 + (HR%Y-EVAC_DOORS(i_target)%Y)**2)
+                            evel = 50.0_EB*evel/EVAC_DOORS(i_target)%R_NTARGET + 1.0_EB
+                            ii = Min(50,Max(1,Int(evel)))
+                            EVAC_DOORS(i_target)%NTARGET(ii:50) = EVAC_DOORS(i_target)%NTARGET(ii:50) + 1
+                         Else
+                            evel = Sqrt((HR%X-EVAC_EXITS(i_target-n_doors)%X)**2 + (HR%Y-EVAC_EXITS(i_target-n_doors)%Y)**2)
+                            evel = 50.0_EB*evel/EVAC_EXITS(i_target-n_doors)%R_NTARGET + 1.0_EB
+                            ii = Min(50,Max(1,Int(evel)))
+                            EVAC_EXITS(i_target-n_doors)%NTARGET(ii:50) = EVAC_EXITS(i_target-n_doors)%NTARGET(ii:50) + 1
+                         End If
+                      End If
+                      If (i_target_old > 0) Then
+                         If (i_target_old <= n_doors ) Then
+                            evel = Sqrt((HR%X-EVAC_DOORS(i_target_old)%X)**2 + (HR%Y-EVAC_DOORS(i_target_old)%Y)**2)
+                            evel = 50.0_EB*evel/EVAC_DOORS(i_target_old)%R_NTARGET + 1.0_EB
+                            ii = Min(50,Max(1,Int(evel)))
+                            EVAC_DOORS(i_target_old)%NTARGET(ii:50) = EVAC_DOORS(i_target_old)%NTARGET(ii:50) - 1
+                         Else
+                            evel = Sqrt((HR%X-EVAC_EXITS(i_target_old-n_doors)%X)**2 + &
+                                 (HR%Y-EVAC_EXITS(i_target_old-n_doors)%Y)**2)
+                            evel = 50.0_EB*evel/EVAC_EXITS(i_target_old-n_doors)%R_NTARGET + 1.0_EB
+                            ii = Min(50,Max(1,Int(evel)))
+                            EVAC_EXITS(i_target_old-n_doors)%NTARGET(ii:50) = &
+                                 EVAC_EXITS(i_target_old-n_doors)%NTARGET(ii:50) - 1
+                         End If
+                      End If
+                   End If
                 Else ! Do not update door flow field at this time step
                    If (j > 0) Group_Known_Doors(j)%I_Target = HR%I_Target 
                    If (COLOR_METHOD == 5 .And. j > 0) Color_Tmp(j) = HR%COLOR_INDEX
@@ -5087,9 +5257,11 @@ Contains
           hr_tau      = HR%Tau
           hr_tau_iner = HR%Tau_Iner
           ! Counterflow: increase motivation to go ahead
-          If (Abs(HR%angle_old) > 0.01_EB) Then
-             hr_tau      = Max(0.25_EB,0.5_EB*hr_tau)
-             hr_tau_iner = Max(0.10_EB,0.5_EB*hr_tau_iner)
+          If (HR%Commitment > 0.01_EB) Then
+             hr_tau      = Max(CF_MIN_TAU, &
+                  HR%Commitment*CF_FAC_TAUS*hr_tau + (1.0_EB-HR%Commitment)*hr_tau)
+             hr_tau_iner = Max(CF_MIN_TAU_INER, &
+                  HR%Commitment*CF_FAC_TAUS*hr_tau_iner + (1.0_EB-HR%Commitment)*hr_tau_iner)
           End If
           !
           ! In which grid cell is the agent?
@@ -5142,7 +5314,7 @@ Contains
           ! ========================================================
           ! Calculate persons prefered walking direction v0
           ! ========================================================
-          If (TAU_CHANGE_V0 > 0.0_EB) Then
+          If (TAU_CHANGE_V0 > 1.0E-12_EB) Then
              ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
              UBAR = HR%UBAR; VBAR = HR%VBAR
           Else
@@ -5277,30 +5449,26 @@ Contains
              Call Random_number(rn)
              If ( rn > Exp(-DTSP/(0.2_EB*hr_tau)) ) HR%NewRnd = .True.
              If ( HR%NewRnd ) Then
-                EVEL = (HR%UBAR**2 + HR%VBAR**2)/(HR%v0_fac**2)
+                HR%NewRnd = .False.
+                GaTh = GaTh*(HR%Speed/1.3_EB)**2
+                ! GaTh is found to be more or less nice for speeds about 1.3 m/s
+                HR%ksi = (GaussRand(GaMe, GaTh, GaCM))
+                Call Random_number(rn)
+                HR%eta = 2.0_EB*Pi*rn
+                EVEL = Sqrt(HR%U**2 + HR%V**2)
                 ! Random noice variance: GaTh = Max( GaTh, GaTh*(100.0_EB-110.0_EB*Abs(EVEL/HR%Speed)) )
                 ! Above GaTh is found to be more or less nice for speeds about 1.3 m/s
                 ! Scale the random force by the current target speed v0 (note: Sqrt(GaTh) = std.dev.)
                 ! Note: Speed reduction due to smoke is treated elsewhere.
-                If (EVEL>0.0_EB) Then
-                   GaTh = GaTh*EVEL/(1.3_EB**2)
-                   GaTh = Max(GaTh, GaTh*(100.0_EB-110.0_EB*Sqrt((HR%U**2 + HR%V**2)/EVEL)))
-                Else
-                   GaTh = GaTh*(HR%Speed/1.3_EB)**2
-                   GaTh = Max(GaTh, GaTh*(100.0_EB-110.0_EB*Sqrt((HR%U**2 + HR%V**2)/HR%Speed)))
-                End If
-                HR%NewRnd = .False.
-                HR%ksi = (GaussRand(GaMe, GaTh, GaCM))
-                Call Random_number(rn)
-                HR%eta = 2.0_EB*Pi*rn
                 HR%ksi = Abs(HR%ksi)
+                HR%ksi = Max(HR%ksi, HR%ksi*10.0_EB*(1.0_EB-Min(0.9_EB,EVEL/HR%Speed)))
              End If
           End If
 
           ! Add random force term
           If ( GaTh > 0.0_EB .And. T > T_BEGIN ) Then
-             U_new = U_new + 0.5_EB*DTSP*HR%v0_fac* HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
-             V_new = V_new + 0.5_EB*DTSP*HR%v0_fac* HR%Mass*HR%ksi*Sin(HR%eta)/HR%Mass
+             U_new = U_new + 0.5_EB*DTSP*HR%v0_fac*HR%Mass*HR%ksi*Cos(HR%eta)/HR%Mass
+             V_new = V_new + 0.5_EB*DTSP*HR%v0_fac*HR%Mass*HR%ksi*Sin(HR%eta)/HR%Mass
              Omega_new = Omega_new + 0.5_EB*DTSP* 1.0_EB*Sign(HR%ksi,HR%eta-Pi)
           End If
 
@@ -5613,10 +5781,23 @@ Contains
           End If
           hr_tau = HR%Tau
           hr_tau_iner = HR%Tau_Iner
-          ! Counterflow: increase motivation to go ahead
-          If (Abs(HR%angle_old) > 0.01_EB) Then
-             hr_tau      = Max(0.25_EB,0.5_EB*hr_tau)
-             hr_tau_iner = Max(0.10_EB,0.5_EB*hr_tau_iner)
+          ! =======================================================
+          ! Speed dependent social force
+          ! =======================================================
+          hr_a =  HR%A*Max(0.5_EB,(Sqrt(HR%U**2+HR%V**2)/HR%Speed))
+          A_Wall = Min(A_Wall, FAC_A_WALL*hr_a)
+
+          ! Counterflow: increase motivation to go ahead and decrease social force
+          If (HR%Commitment > 0.01_EB) Then
+             evel = Min(1.0_EB,Sqrt(HR%U**2+HR%V**2)/HR%Speed)
+             evel = HR%Commitment*evel + (1.0_EB-HR%Commitment)*1.0_EB
+             hr_tau      = Max(CF_MIN_TAU, &
+                  HR%Commitment*CF_FAC_TAUS*hr_tau + (1.0_EB-HR%Commitment)*hr_tau)
+             hr_tau_iner = Max(CF_MIN_TAU_INER, &
+                  HR%Commitment*CF_FAC_TAUS*hr_tau_iner + (1.0_EB-HR%Commitment)*hr_tau_iner)
+             hr_a =  HR%A*Max(CF_MIN_A,evel)
+             hr_b =  HR%B*Max(CF_MIN_B,evel)
+             A_Wall = Min(A_Wall, CF_FAC_A_WALL*FAC_A_WALL*hr_a)
           End If
           !
           ! Psychological force: cut-off when acceleration below 0.0001 m/s**2
@@ -5626,13 +5807,15 @@ Contains
              ! If large pressure then short range forces only (speed up)
              P2P_DIST_MAX = Min( P2P_DIST_MAX, -HR%B*Log(HR%SumForces2/(100.0_EB*HR%A)) )
           End If
-          P2P_DIST_MAX = Max(P2P_DIST_MAX, 1.5_EB*HR%B)
+          P2P_DIST_MAX = Max(P2P_DIST_MAX, 3.0_EB*HR%B)
           ! Next is the max distance for the collision avoidance, counterflow, etc.
           P2P_Suunta_MAX = Max(P2P_DIST_MAX, 1.5_EB)
 
           ! Speed up the dead agent loop, only contact forces are needed.
           If (L_Dead) P2P_DIST_MAX = 0.0_EB
           If (L_Dead) P2P_Suunta_MAX = 0.0_EB
+          ! Check if counterflow algorithm is not used.
+          If (TAU_CHANGE_V0 < 1.E-12_EB) P2P_Suunta_MAX = P2P_DIST_MAX
 
           ! In which grid cell is the agent, new coordinates:
           XI = CELLSI(Floor((HR%X-XS)*RDXINT))
@@ -5743,12 +5926,6 @@ Contains
             Call GetStairSpeedAndZ(speed_xm, speed_xp, speed_ym, speed_yp,STRP,HR)
           End If
 
-          ! =======================================================
-          ! Speed dependent social force
-          ! =======================================================
-          hr_a =  HR%A*Max(0.5_EB,(Sqrt(HR%U**2+HR%V**2)/HR%Speed))
-          A_Wall = Min(A_Wall, FAC_A_WALL*hr_a)
-
           ! ========================================================
           ! AGENT-AGENT INTERACTION FORCES
           ! ========================================================
@@ -5760,16 +5937,21 @@ Contains
           ! ========================================================
           ! Collision avoidance (incl. counterflow)
           ! ========================================================
-          ! Do not do this on every time step, do it every 0.1 s on the average.
-          If (TAU_CHANGE_V0 > 0.0_EB) Then
+          ! Do not do this on every time step, do it every 0.1 s on the average by default.
+          If (TAU_CHANGE_V0 > 1.0E-12_EB) Then
              Call Random_number(rnCF)
           Else
              rnCF = -1.0_EB
+             angle_old = 0.0_EB
+             commitment = 0.0_EB
           End If
           Change_v0_rnCF0: If ( rnCF > Exp(-DTSP/TAU_CHANGE_V0) ) Then
 
              v_hr = Max(0.1_EB,Min(1.0_EB,Sqrt(HR%U**2 + HR%V**2)/HR%Speed))
              theta_start = -Abs(THETA_SECTOR)
+             theta_step = 2.0_EB*Abs(theta_start)/Real(n_sectors-1,EB)
+             evel = Max(0.0_EB,Min(1.0_EB,(HR%U**2+HR%V**2)/HR%Speed))
+             theta_start = theta_start - 0.5_EB*(1.0_EB-evel)*Max(0.0_EB,(90.0_EB+theta_start-0.5_EB*theta_step))
              theta_step = 2.0_EB*Abs(theta_start)/Real(n_sectors-1,EB)
              If(HR%UBAR**2+HR%VBAR**2 < 0.1_EB) Then
                 HR%UBAR = UBAR; HR%VBAR = VBAR
@@ -5817,51 +5999,59 @@ Contains
                    angle_hr = 2.0_EB*Pi - Acos(UBAR/EVEL)
                 End If
                 If (angle_hr == 2.0_EB*Pi) angle_hr = 0.0_EB  ! agent HR angle is [0,2Pi)
-
-                EVEL = Sqrt((HRE%X-HR%X)**2+(HRE%Y-HR%Y)**2)
-                If ((HRE%Y-HR%Y) >= 0.0_EB) Then
-                   angle_hre = Acos((HRE%X-HR%X)/EVEL)
-                Else
-                   angle_hre = 2.0_EB*Pi - Acos((HRE%X-HR%X)/EVEL)
-                End If
-                If (angle_hre == 2.0_EB*Pi) angle_hre = 0.0_EB  ! agent HRE angle is [0,2Pi)
-                angle_hre = angle_hr - angle_hre
-
-                If (angle_hre >= Pi) angle_hre = 2.0_EB*Pi - angle_hre
-                If (angle_hre <= -Pi) angle_hre = 2.0_EB*Pi + angle_hre
-                ! Agent HRE is at this angle when measured from HR
-                ! If HRE is on the right hand side of HR then the angle is negative,
-                ! i.e., positive direction is anti-clockwise (as usual).
-                angle_hre = -180.0_EB*angle_hre/Pi  ! degrees
-
-                v_hre = (HRE%X-HR%X)*UBAR + (HRE%Y-HR%Y)*VBAR
-                v_hre = v_hre/Sqrt((HRE%X-HR%X)**2+(HRE%Y-HR%Y)**2) ! cos r_HRE vs v0
-                v_hre = Max(0.5_EB,v_hre)*P2P_Suunta_MAX ! look further ahead than sideways
-                If (P2P_DIST < (v_hre+HR%Radius+HRE%Radius) ) Then
-                   vr_2r = Sign(1.0_EB,HRE%UBAR*UBAR+HRE%VBAR*VBAR) ! -1 or +1: counterflow or not?
-                   If (angle_hre > 180.0_EB-theta_step .Or. angle_hre < -(180.0_EB-theta_step)) Then
-                      ! Count the agents which are behind
-                      N_suunta_back = N_suunta_back + 1
-                      If (vr_2r <= 0.0_EB) N_suunta_backCF = N_suunta_backCF + 1
+                
+                d_shift = 2.0_EB*(0.5_EB-Min(1.0_EB,Sqrt(HR%U**2+HR%V**2)/HR%Speed))*HR%Radius
+                hr_x = HR%X - UBAR*d_shift
+                hr_y = HR%Y - VBAR*d_shift
+                d_new = Sqrt((HRE%X-hr_x)**2 + (HRE%Y-hr_y)**2)
+                If (d_shift < 0.0_EB .Or. d_new > HR%r_torso) Then
+                   If ((HRE%Y-HR_Y) >= 0.0_EB) Then
+                      angle_hre = Acos((HRE%X-HR_X)/d_new)
+                   Else
+                      angle_hre = 2.0_EB*Pi - Acos((HRE%X-HR_X)/d_new)
                    End If
-                   ! Which sector if any
-                   iii = Int((angle_hre-(theta_start-1.5_EB*theta_step))/theta_step)
-                   If (iii > 0 .And. iii < n_sectors+1) Then
-                      ! (UBAR,VBAR) are unit vectors
-                      N_suunta(iii) = N_suunta(iii) + 1
-                      v_hre = HRE%U*UBAR + HRE%V*VBAR  ! HRE speed along the v0 direction
-                      If (vr_2r > 0.0_EB) Then ! Same direction
-                         v_hre = CONST_DF + FAC_DF*Max(0.0_EB,v_hre)
-                      Else ! Counterflow
-                         N_suuntaCF(iii) = N_suuntaCF(iii) + 1
-                         v_hre = -1.0_EB*(CONST_CF + FAC_CF*Max(0.0_EB,-v_hre))
-                      End If
-                      Sum_suunta(iii) = Sum_suunta(iii) + v_hre/Max(0.2_EB,(P2P_DIST-HR%Radius-HRE%Radius))
-                      If (angle_hre > -0.5_EB*theta_step .And. angle_hre < 0.5_EB*theta_step) Then
-                         ! The "additional" sector pointing on the v0 direction
-                         N_suunta(n_sectors+1) = N_suunta(n_sectors+1) + 1
-                         If (vr_2r <= 0.0_EB) N_suuntaCF(n_sectors+1) = N_suuntaCF(n_sectors+1) + 1
-                         Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + v_hre/Max(0.2_EB,(P2P_DIST-HR%Radius-HRE%Radius))
+                   If (angle_hre == 2.0_EB*Pi) angle_hre = 0.0_EB  ! agent HRE angle is [0,2Pi)
+                   angle_hre = angle_hr - angle_hre
+                   
+                   If (angle_hre >= Pi) angle_hre = 2.0_EB*Pi - angle_hre
+                   If (angle_hre <= -Pi) angle_hre = 2.0_EB*Pi + angle_hre
+                   ! Agent HRE is at this angle when measured from HR
+                   ! If HRE is on the right hand side of HR then the angle is negative,
+                   ! i.e., positive direction is anti-clockwise (as usual).
+                   angle_hre = -180.0_EB*angle_hre/Pi  ! degrees
+                   
+                   v_hre = (HRE%X-HR%X)*UBAR + (HRE%Y-HR%Y)*VBAR
+                   v_hre = v_hre/Sqrt((HRE%X-HR%X)**2+(HRE%Y-HR%Y)**2) ! cos r_HRE vs v0
+                   v_hre = Max(0.5_EB,v_hre)  ! look further ahead than sideways
+                   evel = Max(0.2_EB,Min(1.0_EB,Sqrt(HR%U**2+HR%V**2)/HR%Speed))
+                   tim_dist = Max(0.2_EB,Min(evel,v_hre))*P2P_Suunta_MAX + HR%Radius + HRE%Radius
+                   evel = Max(0.5_EB,Min(1.0_EB,Sqrt(HR%U**2+HR%V**2)/HR%Speed))
+                   v_hre = Max(0.5_EB,Min(evel,v_hre))*P2P_Suunta_MAX ! look further ahead than sideways
+                   If (P2P_DIST < (v_hre+HR%Radius+HRE%Radius) ) Then
+                      vr_2r = HRE%UBAR*UBAR+HRE%VBAR*VBAR ! counterflow or not?
+                      ! Which sector if any
+                      iii = Int((angle_hre-(theta_start-1.5_EB*theta_step))/theta_step)
+                      If (iii > 0 .And. iii < n_sectors+1) Then
+                         ! (UBAR,VBAR) are unit vectors
+                         If (P2P_DIST < tim_dist) N_suunta(iii) = N_suunta(iii) + 1
+                         If (P2P_DIST < tim_dist .And. vr_2r <= -0.2_EB) N_suuntaCF(iii) = N_suuntaCF(iii) + 1
+                         If (vr_2r > 0.0_EB) Then ! Same direction
+                            v_hre = HRE%U*UBAR + HRE%V*VBAR  ! HRE speed along the v0 direction
+                            v_hr  = Max(0.0_EB,HR%U*UBAR + HR%V*VBAR)  ! HR speed along the v0 direction
+                            v_hre = CONST_DF + FAC_DF*(Min(HR%v0_fac*HR%Speed,v_hre) - &
+                                 Min(HR%v0_fac*HR%Speed,v_hr))
+                         Else ! Counterflow
+                            v_hre = HRE%U*UBAR + HRE%V*VBAR  ! HRE speed along the v0 direction
+                            v_hre = -1.0_EB*(CONST_CF + FAC_CF*Max(0.0_EB,-v_hre))
+                         End If
+                         Sum_suunta(iii) = Sum_suunta(iii) + v_hre/Max(0.2_EB,(P2P_DIST-HR%Radius-HRE%Radius))
+                         If (angle_hre > -0.5_EB*theta_step .And. angle_hre < 0.5_EB*theta_step) Then
+                            ! The "additional" sector pointing on the v0 direction
+                            N_suunta(n_sectors+1) = N_suunta(n_sectors+1) + 1
+                            If (vr_2r <= -0.2_EB) N_suuntaCF(n_sectors+1) = N_suuntaCF(n_sectors+1) + 1
+                            Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + &
+                                 v_hre/Max(0.2_EB,(P2P_DIST-HR%Radius-HRE%Radius))
+                         End If
                       End If
                    End If
                 End If
@@ -6034,6 +6224,7 @@ Contains
           ! ========================================================
           Change_v0_rnCF2: If ( rnCF > Exp(-DTSP/TAU_CHANGE_V0) ) Then
              v_hr  = Max(0.1_EB,Sqrt(HR%U**2+HR%V**2)/HR%Speed)
+             tim_dist = 0.0_EB
              Do iii = 1, n_sectors
                 ! Awoid walls, do not take a direction where there is a wall closer than
                 ! d_perp = 0.6 m (perpendicular).
@@ -6053,6 +6244,16 @@ Contains
                    Sum_suunta(iii) = Sum_suunta(iii) + vr_2r/Max(0.2_EB,P2P_DIST)
                 End If
              End Do
+
+             If (FoundWall_xy(1)) tim_dist = tim_dist - 3.0_EB/Max(0.3_EB,Abs(HR%X-d_xy(1))-HR%Radius)
+             If (FoundWall_xy(2)) tim_dist = tim_dist - 3.0_EB/Max(0.3_EB,Abs(HR%X-d_xy(2))-HR%Radius)
+             If (FoundWall_xy(3)) tim_dist = tim_dist - 3.0_EB/Max(0.3_EB,Abs(HR%Y-d_xy(3))-HR%Radius)
+             If (FoundWall_xy(4)) tim_dist = tim_dist - 3.0_EB/Max(0.3_EB,Abs(HR%Y-d_xy(4))-HR%Radius)
+!!$             If (FoundWall_xy(1)) tim_dist = tim_dist - 3.0_EB/Max(0.3_EB,Abs(HR%X-d_xy(1))-HR%Radius)
+!!$             If (FoundWall_xy(2)) tim_dist = tim_dist - 3.0_EB/Max(0.3_EB,Abs(HR%X-d_xy(2))-HR%Radius)
+!!$             If (FoundWall_xy(3)) tim_dist = tim_dist - 3.0_EB/Max(0.3_EB,Abs(HR%Y-d_xy(3))-HR%Radius)
+!!$             If (FoundWall_xy(4)) tim_dist = tim_dist - 3.0_EB/Max(0.3_EB,Abs(HR%Y-d_xy(4))-HR%Radius)
+
              If (FoundWall_xy(1) .And. Abs(HR%X-d_xy(1))-HR%Radius < 0.1_EB) Then
                 Do iii = 1, n_sectors
                    If(u_theta(iii) < -0.10_EB) Then
@@ -6090,10 +6291,10 @@ Contains
                 Sum_suunta(iii) = Sum_suunta(iii) + FAC_V0_DIR*v_hr*((UBAR*u_theta(iii)+VBAR*v_theta(iii)))
              End Do
              If (N_suunta(n_sectors+1) < 1) Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + 50.0_EB  ! Empty space ahead
-             If (Sum(N_suuntaCF(1:n_sectors)) < 1) Then
+             If ((N_suuntaCF(n_sectors+1)) < 1) Then
                 ! No counterflow, prefer v0 direction, i.e., "stay on line"
                 Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + &
-                     (FAC_NOCF + FAC_V0_NOCF*v_hr)*Sum(N_suunta(1:n_sectors))
+                     (FAC_NOCF + FAC_V0_NOCF*v_hr)*(N_suunta(n_sectors+1))
              End If
              i_suunta_max = n_sectors + 1
              Sum_suunta_max = -Huge(Sum_suunta_max)
@@ -6108,27 +6309,38 @@ Contains
              ! If counterflow then try to pass sideways and decrease tau and tau_iner.
              ! Use this if there are more counterflow agents than downstrean agents.
              angle_old = 0.0_EB
-             If (v_hr < 0.3_EB .And. (Sum(N_suunta(1:n_sectors))-Sum(N_suuntaCF(1:n_sectors))) < &
-                  Sum(N_suuntaCF(1:n_sectors))) Then
-                angle_old = -Sign(1.0_EB,thetas(i_suunta_max))* &
-                     Max(0.1_EB,Abs(thetas(i_suunta_max)))*Pi/180.0_EB 
-                angle_old = angle_old - 75.0_EB*Pi/180.0_EB
+             commitment = 0.0_EB
+             If (v_hr < 0.3_EB .And. (N_suunta(n_sectors+1)-N_suuntaCF(n_sectors+1)) < &
+                  N_suuntaCF(n_sectors+1)-0) Then
+                commitment = Max(0.5_EB,Real(Sum(N_suuntaCF(1:n_sectors+1)),EB)/Max(1,Sum(N_suunta(1:n_sectors+1))))
+                angle_old = -Sign(1.0_EB,thetas(i_suunta_max))*Max(0.1_EB,Abs(thetas(i_suunta_max)))*Pi/180.0_EB 
+                angle_old = angle_old - 85.0_EB*Pi/180.0_EB
+             Else If (v_hr < 0.3_EB .And. Sum(N_suuntaCF(1:n_sectors)) >= 1 .And. tim_dist < -15.0_EB) Then
+                commitment = Max(0.5_EB,Real(Sum(N_suuntaCF(1:n_sectors)),EB)/Max(1,Sum(N_suunta(1:n_sectors))))
+                angle_old = -Sign(1.0_EB,thetas(i_suunta_max))*Max(0.1_EB,Abs(thetas(i_suunta_max)))*Pi/180.0_EB 
+                angle_old = angle_old - 85.0_EB*Pi/180.0_EB
              Else
                 angle_old = 0.0_EB
+                commitment = 0.0_EB
              End If
-          Else
+          Else ! Change_v0_rnCF2
              ! Do not change direction during this time step, use the previous direction
-             If (TAU_CHANGE_V0 > 0.0_EB) Then
+             If (TAU_CHANGE_V0 > 1.0E-12_EB) Then
                 UBAR = HR%UBAR
                 VBAR = HR%VBAR
                 angle_old = HR%angle_old
+                commitment = HR%Commitment
              Else
+                HR%UBAR = UBAR
+                HR%VBAR = VBAR
                 angle_old = 0.0_EB
+                commitment = 0.0_EB
              End If
           End If Change_v0_rnCF2 ! Collision avoidance ends
           HR%angle_old = angle_old
+          HR%Commitment = commitment
 
-          Call Wall_SocialForces(nm, x1, y1, HR%Radius, P2P_DIST_MAX, d_xy, P2P_U, P2P_V, Social_F, FoundWall_xy)
+          Call Wall_SocialForces(nm, x_tmp, y_tmp, r_tmp, P2P_DIST_MAX, d_xy, P2P_U, P2P_V, Social_F, FoundWall_xy)
 
           Call Wall_ContactForces(nm, x_tmp(1), y_tmp(1), r_tmp(1), u_tmp(1), v_tmp(1), d_xy, &
                P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy)
@@ -6469,6 +6681,7 @@ Contains
     Subroutine Find_Prefered_Direction(I, Nout, T, T_BEGIN, L_Dead, NM_STRS_MESH, &
          II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, hr_tau, Tpre)
       Implicit None
+      !
       ! Calculate the prefered walking direction
       !
       ! Inputs:
@@ -6484,7 +6697,6 @@ Contains
       !   NM_STRS_MESH: True, if the mesh is a stair mesh
       !   UBAR,VBAR: The prefered walking direction
       !   hr_tau: translational motion Tau
-      !   hr_tau: motive force relaxation time constant
       !   Tpre: Pre-movement time
       Integer, Intent(In) :: II, JJ, IIX, JJY, I
       Real(EB), Intent(In) :: XI, YJ, ZK, T, T_BEGIN
@@ -6495,11 +6707,12 @@ Contains
       Real(EB), Intent(Out) :: UBAR, VBAR, Tpre
       !
       ! Local varaibles
-      Integer :: N,MN_now, STRS_Indx, door_ior, KKZ, j
+      Integer :: N,MN_now, STRS_Indx, door_ior, KKZ, j, i1, j1
       Real(EB) :: x_target, y_target, door_width, Door_Dist, EVEL
       Logical :: NM_STRS_MESHS, straight_Line_To_Target
-      Type (MESH_TYPE), Pointer :: MFF
-      Type (HUMAN_Type), Pointer :: HR
+      Type (MESH_TYPE), Pointer :: MFF=>NULL()
+      Type (HUMAN_TYPE), Pointer :: HR=>NULL()
+      Type (EVAC_STRS_Type), Pointer :: STRP=>NULL()
 
       HR=>HUMAN(I)
       KKZ = 1
@@ -6576,6 +6789,28 @@ Contains
 !            UBAR = STRP%U_DOWN(II,JJ)
 !            VBAR = STRP%V_DOWN(II,JJ)
 !         End If
+!!$      Else If (II < IBAR/4 .And. Abs(JJ-JBAR/2)<3 ) Then 
+!!$         UBAR = 0.0_EB
+!!$         VBAR = Sign(1.0_EB,HR%VBAR)
+!!$      ! Else If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,1))) Then 
+!!$         ! There might be additional OBSTs at the door flow fields, which are not
+!!$         ! at the main evacuation mesh.  Try to find one grid cell away a field.
+!!$         !If (mn_now == HR%IMESH) Then
+!!$         !   UBAR = HR%UBAR
+!!$         !   VBAR = HR%VBAR
+!!$         !Else
+!!$         !   i1 = II - Nint(Sign(1.0_EB,HR%UBAR))
+!!$         !   j1 = JJ - Nint(Sign(1.0_EB,HR%VBAR))
+!!$         !   i1 = Max(1,Min(i1,MFF%IBAR))
+!!$         !   j1 = Max(1,Min(j1,MFF%JBAR))
+!!$         !   If (.Not. MFF%SOLID(MFF%CELL_INDEX(II,j1,1))) Then
+!!$         !      i1 = II
+!!$         !   Else If (.Not. MFF%SOLID(MFF%CELL_INDEX(i1,JJ,1))) Then
+!!$         !      j1 = JJ
+!!$         !   End If
+!!$         !   UBAR = MFF%U(i1,j1,1)
+!!$         !   VBAR = MFF%V(i1,j1,1)
+!!$         !End If
       Else
          ! For thin walls and large dx,dy one do not get nice
          ! interpolation by using AFILL2. AFILL2 does not notice that
@@ -6592,13 +6827,9 @@ Contains
          UBAR = UBAR/EVEL
          VBAR = VBAR/EVEL
       Else
-         ! No v0 found for the current location of the agent, continue
-         ! straight ahead (use the velocity vector of the agent).
-         EVEL = Sqrt(HR%U**2 + HR%V**2)
-         If (EVEL > 0.0_EB) Then
-            UBAR = HR%U/EVEL
-            VBAR = HR%V/EVEL
-         End If
+         ! No v0 found for the current location of the agent, use previous value
+         UBAR = HR%UBAR
+         VBAR = HR%VBAR
       End If
       If (L_Dead) Then
          UBAR = 0.0_EB
@@ -6672,6 +6903,7 @@ Contains
 
     Subroutine GetStairSpeedAndZ(speed_xm,speed_xp, speed_ym,speed_yp,SP,HP)
       Implicit None
+      !
       Real(EB) speed_xm, speed_xp, speed_ym, speed_yp
       Type (EVAC_STRS_TYPE), Pointer ::  SP
       Type (HUMAN_TYPE), Pointer :: HP
@@ -6686,6 +6918,7 @@ Contains
          J1 = 1
          J2 = STRP%N_NODES
       End If
+
       LoopSubIndx: Do J = J1,J2
          If (HP%X < SP%XB_NODE(J,1)) Cycle                
          If (HP%X > SP%XB_NODE(J,2)) Cycle                
@@ -6743,14 +6976,17 @@ Contains
     End Subroutine GetStairSpeedAndZ
 
     Subroutine Find_Target_Node_In_Strs(SP,HP)
-      Type (EVAC_STRS_TYPE), Pointer ::  SP
+      Implicit None
+      !
+      ! Passed variables
+      Type (EVAC_STRS_TYPE), Pointer :: SP
       Type (HUMAN_TYPE), Pointer :: HP
-      Type (EVAC_ENTR_TYPE), Pointer :: PNX
-
+      !
       ! Local variables
       Logical IsKnownDoor,FinalTargetFound
       Integer :: I_Target = 0, I, Id, Final_node, IG, IN, Inode
       Real(EB) z_node, z_final, dz_node, dz_final, z_final_unknown,dz_tmp1, dz_tmp2, dz_node_actual
+      Type (EVAC_ENTR_TYPE), Pointer :: PNX
 
       FinalTargetFound = .FALSE.
       IG = ABS(HP%GROUP_ID)
@@ -6903,7 +7139,7 @@ Contains
 
     Subroutine GET_IW(IIin,JJin,KKin,IOR,IW)
       Implicit None
-
+      !
       Integer, Intent(IN) :: IIin, JJin, KKin, IOR
       Integer, Intent(OUT) :: IW
       ! Local variables
@@ -6961,10 +7197,15 @@ Contains
       !
       ! Remove persons if they are found at an exit.
       !
+      ! Passed variables
       Real(EB), Intent(IN) :: T
       Integer, Intent(IN) :: NM
+      !
+      ! Local variables
       Real(EB) x_old, y_old, pexx1, pexx2, pexy1, pexy2
       Integer :: ie,i,n_tmp
+      Type (EVAC_EXIT_Type), Pointer :: PEX=>NULL()
+      Type (HUMAN_TYPE), Pointer :: HR=>NULL()
       !
       HUMAN(:)%IOR = 0
       PexLoop: Do ie = 1, n_exits
@@ -7022,8 +7263,12 @@ Contains
                End If
             End Select
             If (HR%IOR > 0) Then
-               Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4)') ' EVAC: Person n:o', HR%ILABEL, ' out at ', T, &
-                    ' s, exit ', Trim(PEX%ID), ' fed ', HR%IntDose
+               If (.Not. PEX%COUNT_ONLY) Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4,a,i4)') &
+                    ' Agent n:o', HR%ILABEL, ' out at ', T, ' s, exit ', Trim(PEX%ID), &
+                    ', FED=', HR%IntDose, ', color_i=', HR%COLOR_INDEX
+               If (      PEX%COUNT_ONLY) Write (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,a,a,f8.4,a,i4)') &
+                    ' Agent n:o', HR%ILABEL, ' counted at ', T, ' s, counter ', Trim(PEX%ID), &
+                    ', FED=', HR%IntDose, ', color_i=', HR%COLOR_INDEX
                If (HR%IOR == 2) HR%IOR = HUMAN_NO_TARGET
             End If
          End Do HumLoop
@@ -7045,14 +7290,19 @@ Contains
       !
       ! Replace persons if they are found at a door. 
       !
+      ! Passed variables
       Real(EB), Intent(IN) :: T
       Integer, Intent(IN) :: NM
+      !
+      ! Local variables
       Real(EB) x_old, y_old, xx, yy, zz, pdxx1, pdxx2, pdxy1, pdxy2, v, angle
       Integer :: ie,i,n_tmp, istat, ior_new, inode2, imesh2, n, ior
       Integer :: new_ffield_i, color_index, i_target, inode, STR_INDX, STR_SUB_INDX
       Character(60) :: TO_NODE
       Character(26) :: new_ffield_name
       Logical :: keep_xy, upstream
+      Type (EVAC_DOOR_Type), Pointer :: PDX=>NULL()
+      Type (HUMAN_TYPE), Pointer :: HR=>NULL()
       !
       keep_xy = .False.
       HUMAN(:)%IOR = HUMAN_NO_TARGET
@@ -7110,7 +7360,7 @@ Contains
                End If
                Call Check_Target_Node(inode,inode2,istat,xx,yy,zz,ior_new, &
                     imesh2,T,new_ffield_name,new_ffield_i,color_index,&
-                    i_target, keep_xy, angle, STR_INDX, STR_SUB_INDX)
+                    i_target, keep_xy, angle, STR_INDX, STR_SUB_INDX, HR)
                If (istat == 0 ) Then
                   ! Put person to a new node, i.e., target node has empty space
                   HR%X = xx
@@ -7245,15 +7495,20 @@ Contains
       !
       ! Entry persons from the corridors.
       !
+      ! Passed variables
       Real(EB), Intent(IN) :: T,DTSP
       Integer, Intent(IN) :: NM
+      !
+      ! Local variables
       Real(EB) x_old, y_old, xx, yy, zz, pcxx1, pcxx2, pcxy1, pcxy2, v, x_int, angle
       Integer :: ie,i,n_tmp, istat, ior_new, inode2, imesh2, n, ior
       Integer :: new_ffield_i, color_index, i_target, inode, STR_INDX, STR_SUB_INDX
       Character(60) :: TO_NODE
       Character(26) :: new_ffield_name
       Logical :: keep_xy
-      Type (CORR_LL_TYPE), Pointer :: Now_LL, Tmp_LL, Next_LL, Prev_LL
+      Type (EVAC_CORR_Type),  Pointer :: PCX=>NULL()
+      Type (CORR_LL_TYPE), Pointer :: Now_LL=>NULL(), Tmp_LL=>NULL(), Next_LL=>NULL(), Prev_LL=>NULL()
+      Type (HUMAN_TYPE), Pointer :: HR=>NULL()
       !
       keep_xy = .False.
       PcxLoop: Do ie = 1, n_corrs
@@ -7299,7 +7554,7 @@ Contains
             If ( (Now_LL%T_out) <= T) Then
                Call Check_Target_Node(inode,inode2,istat,xx,yy,zz,ior_new, &
                     imesh2,T,new_ffield_name,new_ffield_i,color_index, &
-                    i_target,keep_xy,angle,STR_INDX,STR_SUB_INDX)
+                    i_target,keep_xy,angle,STR_INDX,STR_SUB_INDX, HR)
 
                If (istat == 0 ) Then
                   ! Put person to a new node, i.e., target node has empty space
@@ -7419,7 +7674,7 @@ Contains
     !
     Subroutine Check_Target_Node(inode,inode2,istat,xx,yy,zz,ior_new, &
          imesh2,T,new_ffield_name,new_ffield_i,color_index,i_target,keep_xy,angle,&
-         STR_INDX, STR_SUB_INDX)
+         STR_INDX, STR_SUB_INDX, HR)
       Implicit None
       !
       ! Check, that the target node is free.
@@ -7433,22 +7688,33 @@ Contains
       ! istat   = 1: target is not free (do not move there)
       !           0: target is free
       !
+      ! Passed variables
       Integer, Intent(in) :: inode, inode2
       Integer, Intent(out) :: istat, ior_new, imesh2, color_index, i_target
-      Real(EB), Intent(out) :: xx,yy,zz, angle
+      Real(EB), Intent(out) :: xx, yy, zz, angle
       Integer, Intent(out) :: STR_INDX, STR_SUB_INDX
       Real(EB), Intent(in) :: T
       Integer, Intent(inout) :: new_ffield_i
       Logical, Intent(in) :: keep_xy
       Character(26), Intent(inout) :: new_ffield_name
+      Type (HUMAN_TYPE), Pointer :: HR
+      !
+      ! Local variables
       Real(EB) RN, x1, x2, y1, y2, z1, z2, d_max, dist, Width, &
            xx1,yy1, max_fed, ave_K
       Integer  II, JJ, KK, ior, irnmax, irn, ie, izero, j1
       Real(EB), Dimension(6) :: r_tmp, x_tmp, y_tmp
       Integer :: i_tmp, i_tim, iii, jjj
       Logical :: PP_see_door, keep_xy2, NM_STRS_MESH
-      Type (CORR_LL_TYPE), Pointer :: TmpCurrent, TmpLoop
-      Type (EVAC_STRS_TYPE), Pointer :: STRP
+
+      Type (CORR_LL_TYPE), Pointer :: TmpCurrent=>NULL(), TmpLoop=>NULL()
+      Type (EVAC_STRS_TYPE), Pointer :: STRP=>NULL()
+      Type (EVAC_DOOR_Type), Pointer :: PDX2=>NULL()
+      Type (MESH_TYPE), Pointer :: MMF=>NULL()
+      Type (EVACUATION_Type), Pointer :: HPT=>NULL()
+      Type (HUMAN_TYPE), Pointer :: HRE=>NULL()
+      Type (EVAC_ENTR_Type), Pointer :: PNX=>NULL(), PNX2=>NULL()
+      Type (EVAC_CORR_Type), Pointer :: PCX2=>NULL()
       !
       xx = 0.0_EB ; yy = 0.0_EB ; zz = 0.0_EB 
       I_Target = 0
@@ -7640,7 +7906,7 @@ Contains
                If (j > 0) I_Target = Group_Known_Doors(j)%I_Target
             Else
 
-               Call Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, T, HR%X, HR%Y, I_Target, color_index, new_ffield_i)
+               Call Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, T, HR%X, HR%Y, I_Target, color_index, new_ffield_i, HR)
 
                new_ffield_name = Trim(MESH_NAME(new_ffield_i))
                If ( j > 0 ) Then
@@ -7853,12 +8119,20 @@ Contains
       !
       ! Insert humans into the domain every 1/Flow seconds.
       !
+      ! Passed variables
       Real(EB), Intent(IN) :: Tin
       Integer,  Intent(IN) :: I_entry, NM
       Integer, Intent(OUT) :: istat
+      !
+      ! Local variables
       Real(EB) RN, x1, x2, y1, y2, z1, z2, d_max, dist, xx, yy, zz, xx1, yy1
       Integer  II, JJ, KK, ior, irnmax, irn, ie, NR
       Real(EB), Dimension(6) ::y_tmp, x_tmp, r_tmp
+
+      Type (EVAC_ENTR_Type), Pointer :: PNX=>NULL()
+      Type (MESH_TYPE), Pointer :: MFF=>NULL()
+      Type (EVAC_PERS_Type), Pointer :: PCP=>NULL()
+      Type (HUMAN_TYPE), Pointer :: HR=>NULL(), HRE=>NULL()
       !
       istat = 1
       PNX => EVAC_ENTRYS(I_entry)
@@ -7891,7 +8165,7 @@ Contains
       !
       PCP => EVAC_PERSON_CLASSES(PNX%IPC)
       HR  => MESHES(NM)%HUMAN(N_HUMANS+1)
-      Call CLASS_PROPERTIES
+      Call CLASS_PROPERTIES(HR,PCP)
       HR%Tpre = 0.0_EB
       HR%Tdet = T_BEGIN
       HR%IPC  = PNX%IPC
@@ -8265,77 +8539,181 @@ Contains
       !
 
       Integer, Intent(In) :: nm
-      Real(EB), Intent(In) :: x_tmp, y_tmp, r_tmp, p2p_dist_max
+      Real(EB), Intent(In) :: p2p_dist_max
+      Real(EB), Dimension(6), Intent(In) :: x_tmp, y_tmp, r_tmp
       Real(EB), Dimension(4), Intent(In) :: d_xy
       Logical, Dimension(4), Intent(In) :: FoundWall_xy
       Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F
       !
-      Integer :: is, idir
-      Real(EB) :: CosPhiFac, dist
+      Integer :: is, idir, iii
+      Real(EB) :: CosPhiFac, dist, F_soc, F_tmp
 
       ! -x direction
       is   = -1
       idir =  1
-      dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
-      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
-         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-            CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
-            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-         Else
-            CosPhiFac = 1.0_EB
+      F_soc = 0.0_EB
+      Do iii = 1,3
+         dist = Abs(d_xy(idir) - x_tmp(iii)) ! wall - agent centre distance
+         If (dist-r_tmp(iii) <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
+            If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+               CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
+               CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+            Else
+               CosPhiFac = 1.0_EB
+            End If
+            F_tmp = - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp(iii))/B_Wall )
+            If (Abs(F_tmp) > Abs(F_soc)) F_soc = F_tmp
          End If
-         P2P_U = P2P_U - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-      End If
+      End Do
+      P2P_U = P2P_U + F_soc
+      Social_F = Social_F + Abs(F_soc)
 
       is   = +1
       idir =  2
-      dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
-      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
-         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-            CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
-            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-         Else
-            CosPhiFac = 1.0_EB
+      F_soc = 0.0_EB
+      Do iii = 1,3
+         dist = Abs(d_xy(idir) - x_tmp(iii)) ! wall - agent centre distance
+         If (dist-r_tmp(iii) <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
+            If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+               CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
+               CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+            Else
+               CosPhiFac = 1.0_EB
+            End If
+            F_tmp = - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp(iii))/B_Wall )
+            If (Abs(F_tmp) > Abs(F_soc)) F_soc = F_tmp
          End If
-         P2P_U = P2P_U - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-      End If
+      End Do
+      P2P_U = P2P_U + F_soc
+      Social_F = Social_F + Abs(F_soc)
 
       is   = -1
       idir =  3
-      dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
-      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
-         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-            CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
-            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-         Else
-            CosPhiFac = 1.0_EB
+      F_soc = 0.0_EB
+      Do iii = 1,3
+         dist = Abs(d_xy(idir) - y_tmp(iii)) ! wall - agent centre distance
+         If (dist-r_tmp(iii) <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
+            If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+               CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
+               CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+            Else
+               CosPhiFac = 1.0_EB
+            End If
+            F_tmp = - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp(iii))/B_Wall )
+            If (Abs(F_tmp) > Abs(F_soc)) F_soc = F_tmp
          End If
-         P2P_V = P2P_V - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-      End If
+      End Do
+      P2P_V = P2P_V + F_soc
+      Social_F = Social_F + Abs(F_soc)
 
       is   = +1
       idir =  4
-      dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
-      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
-         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-            CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
-            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-         Else
-            CosPhiFac = 1.0_EB
+      F_soc = 0.0_EB
+      Do iii = 1,3
+         dist = Abs(d_xy(idir) - y_tmp(iii)) ! wall - agent centre distance
+         If (dist-r_tmp(iii) <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
+            If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+               CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
+               CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+            Else
+               CosPhiFac = 1.0_EB
+            End If
+            F_tmp = - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp(iii))/B_Wall )
+            If (Abs(F_tmp) > Abs(F_soc)) F_soc = F_tmp
          End If
-         P2P_V = P2P_V - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-      End If
+      End Do
+      P2P_V = P2P_V + F_soc
+      Social_F = Social_F + Abs(F_soc)
 
     End Subroutine Wall_SocialForces
+!!$    Subroutine Wall_SocialForces(nm, x_tmp, y_tmp, r_tmp, p2p_dist_max, d_xy, P2P_U, P2P_V, Social_F, FoundWall_xy)
+!!$      Implicit None
+!!$
+!!$      ! wall - agent social forces
+!!$      !
+!!$      ! Inputs:  FoundWall_xy(1-4): True for solid walls (False for outflow VENTs)
+!!$      !          x/y_tmp: coordinates of the centres of the spheres (1-3 used)
+!!$      !                   1: right, 2: centre, 3: left circle
+!!$      !          r_tmp: radii of the spheres
+!!$      !          p2p_dist_max: cutoff distance of the social force
+!!$      ! Outputs: 
+!!$      !          P2P_U/V: Forces x/y directions
+!!$      !          Social_F: Radial social line force
+!!$      !
+!!$
+!!$      Integer, Intent(In) :: nm
+!!$      Real(EB), Intent(In) :: x_tmp, y_tmp, r_tmp, p2p_dist_max
+!!$      !Real(EB), Dimension(6), Intent(In) :: x_tmp, y_tmp, r_tmp
+!!$      Real(EB), Dimension(4), Intent(In) :: d_xy
+!!$      Logical, Dimension(4), Intent(In) :: FoundWall_xy
+!!$      Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F
+!!$      !
+!!$      Integer :: is, idir
+!!$      Real(EB) :: CosPhiFac, dist
+!!$
+!!$      ! -x direction
+!!$      is   = -1
+!!$      idir =  1
+!!$      dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
+!!$      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
+!!$         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+!!$            CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
+!!$            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+!!$         Else
+!!$            CosPhiFac = 1.0_EB
+!!$         End If
+!!$         P2P_U = P2P_U - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
+!!$         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
+!!$      End If
+!!$
+!!$      is   = +1
+!!$      idir =  2
+!!$      dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
+!!$      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
+!!$         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+!!$            CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
+!!$            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+!!$         Else
+!!$            CosPhiFac = 1.0_EB
+!!$         End If
+!!$         P2P_U = P2P_U - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
+!!$         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
+!!$      End If
+!!$
+!!$      is   = -1
+!!$      idir =  3
+!!$      dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
+!!$      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
+!!$         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+!!$            CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
+!!$            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+!!$         Else
+!!$            CosPhiFac = 1.0_EB
+!!$         End If
+!!$         P2P_V = P2P_V - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
+!!$         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
+!!$      End If
+!!$
+!!$      is   = +1
+!!$      idir =  4
+!!$      dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
+!!$      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
+!!$         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
+!!$            CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
+!!$            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
+!!$         Else
+!!$            CosPhiFac = 1.0_EB
+!!$         End If
+!!$         P2P_V = P2P_V - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
+!!$         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
+!!$      End If
+!!$
+!!$    End Subroutine Wall_SocialForces
 
     Subroutine Wall_ContactForces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, d_xy,&
          P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy)
       Implicit None
-
+      !
       ! wall - agent contact forces
       !
       ! Inputs:  FoundWall_xy(1-4): True for solid walls (False for outflow VENTs)
@@ -8503,9 +8881,14 @@ Contains
 ! NEXT ARE EVAC MODULE SUBPROGRMAS
 ! ============================================================
 !
-  Subroutine CLASS_PROPERTIES
+  Subroutine CLASS_PROPERTIES(HR,PCP)
     Implicit None
     !
+    ! Passed variables
+    Type (HUMAN_TYPE), Pointer:: HR
+    Type (EVAC_PERS_Type), Pointer:: PCP
+    !
+    ! Local variables
     ! How many rnd numbers per one call to the rnd routine
     Integer, Parameter  :: n_rnd=1, n_max_par=4
     Integer  :: n_par, RandomType
@@ -8990,10 +9373,13 @@ Contains
   Subroutine RE_ALLOCATE_HUMANS(CODE,NM)
     Implicit None
     !
-    Type (HUMAN_TYPE), Allocatable, Dimension(:) :: DUMMY
-    Integer IZERO
+    ! Passed variables
     Integer, Intent(IN) :: CODE,NM
-    Type (MESH_TYPE), Pointer :: M
+    !
+    ! Local variables
+    Integer IZERO
+    Type (HUMAN_TYPE), Allocatable, Dimension(:) :: DUMMY
+    Type (MESH_TYPE), Pointer :: M=>NULL()
     !
     If (.Not.Any(EVACUATION_GRID)) Return
     If ( .Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) ) Return
@@ -9020,14 +9406,17 @@ Contains
   Subroutine DUMP_EVAC(T,NM)
     Implicit None
     !
-    !
+    ! Passed variables
     Integer, Intent(IN) :: NM
     Real(EB), Intent(IN) :: T
+    !
+    ! Local variables
     Integer :: NPP,NPLIM,i,izero,nn,n
     Real(EB) :: TNOW, EVEL, angle_hr
     Real(FB), Allocatable, Dimension(:) :: XP,YP,ZP
     Real(FB), Allocatable, Dimension(:,:) :: QP, AP
     Integer, Allocatable, Dimension(:) :: TA
+    Type (HUMAN_TYPE), Pointer :: HR=>NULL()
     !
     TNOW=SECOND() 
     !
@@ -9109,7 +9498,11 @@ Contains
              Case(246)  ! TOTAL_LINEFORCE, Human Pressure2: contact + social
                 QP(NPP,NN) = Real(HR%SumForces2 ,FB)
              Case(247)  ! COLOR, Human color index
-                QP(NPP,NN) = Real(HR%COLOR_INDEX - 1,FB)
+                If (Abs(HR%angle_old) < 0.01_EB) Then
+                   QP(NPP,NN) = Real(HR%COLOR_INDEX - 1,FB)
+                Else
+                   QP(NPP,NN) = Real(EVAC_AVATAR_NCOLOR - 1,FB) ! Cyan
+                End If
              Case(248)  ! MOTIVE_ANGLE, 
                 EVEL = Sqrt(HR%UBAR**2 + HR%VBAR**2)
                 If (EVEL > 0.0_EB) Then
@@ -9268,6 +9661,7 @@ Contains
 !
   Subroutine DUMP_EVAC_CSV(Tin)
     Implicit None
+    !
     ! Dump human data to CHID_evac.csv
     !
     Real(EB), Intent(In) :: Tin
@@ -9281,7 +9675,7 @@ Contains
     Call ChkMemErr('DUMP_EVAC_CSV','ITEMP', IZERO)
     !
     ! Output first the floors then the corridors
-    n_cols = n_egrids + n_corrs + n_exits + n_doors + 1
+    n_cols = n_egrids + n_corrs + n_exits + n_doors + 1 + n_exits - n_co_exits + n_doors
     n_tot_humans = 0
     Do i = 1, n_egrids
        n_tot_humans = n_tot_humans + MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS
@@ -9294,13 +9688,13 @@ Contains
     Do i = 1, n_exits
        If (.Not.EVAC_EXITS(i)%COUNT_ONLY) Then
           ii = ii + 1
-          ITEMP(ii) = EVAC_EXITS(i)%NTARGET
+          ITEMP(ii) = EVAC_EXITS(i)%NTARGET(50)
        End If
     End Do
     !
     If (n_dead >= 0) Then
        ! Write the 'fed' columns
-       Write(tcform,'(a,i4.4,a,a)') "(ES13.5E3,",n_cols+1+n_exits-n_co_exits+n_doors, &
+       Write(tcform,'(a,i4.4,a,a)') "(ES13.5E3,",n_cols, &
             "(',',i8)", ",',',ES13.5E3,',',ES13.5E3)"
        Write (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
             (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
@@ -9308,18 +9702,18 @@ Contains
             (EVAC_EXITS(i)%ICOUNT, i = 1,n_exits), &
             (EVAC_DOORS(i)%ICOUNT, i = 1,n_doors), &
             (ITEMP(i), i = 1,n_exits-n_co_exits), &
-            (EVAC_DOORS(i)%NTARGET, i = 1,n_doors), &
+            (EVAC_DOORS(i)%NTARGET(50), i = 1,n_doors), &
             n_dead, fed_max, fed_max_alive
     Else
        ! Do not write the 'fed' columns
-       Write(tcform,'(a,i4.4,a)') "(ES13.5E3,",n_cols+n_exits-n_co_exits+n_doors, "(',',i8))"
+       Write(tcform,'(a,i4.4,a)') "(ES13.5E3,",n_cols, "(',',i8),i8)"
        Write (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
             (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
             (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
             (EVAC_EXITS(i)%ICOUNT, i = 1,n_exits), &
             (EVAC_DOORS(i)%ICOUNT, i = 1,n_doors), &
             (ITEMP(i), i = 1,n_exits-n_co_exits), &
-            (EVAC_DOORS(i)%NTARGET, i = 1,n_doors)
+            (EVAC_DOORS(i)%NTARGET(50), i = 1,n_doors)
     End If
     Deallocate(ITEMP)
     !
@@ -9333,13 +9727,16 @@ Contains
     !          (r1_x,r1_y): co-ordinates of the first agent
     !          (r2_x,r2_y): co-ordinates of the second agent
     ! NOTE: This works for thick and thin OBSTs.
-
+    !
+    ! Passed variables
     Integer, Intent(In) :: nm
     Real(EB), Intent(In) :: r1_x, r1_y, r2_x, r2_y
+    !
+    ! Local variables
     Integer :: i, j, isx, isy, i_r1, i_r2, j_r1, j_r2
     Integer :: i_old, j_old, ic, ic2, iw, iw1, iw2
     Real(EB) :: x, y
-    Type (Mesh_Type), Pointer :: M
+    Type (MESH_TYPE), Pointer :: M
 
     M => MESHES(NM)
     See_each_other = .True.  ! Default
@@ -9422,14 +9819,17 @@ Contains
     !          (r2_x,r2_y): co-ordinates of the door
     ! Outputs: ave_K: average extinction coefficient of the path
     !          max_fed: maximum level of FED at the path
-
+    !
+    ! Passed variables
     Integer, Intent(In) :: nm, idoor, itarget
     Real(EB), Intent(In) :: r1_x, r1_y, r2_x, r2_y
     Real(EB), Intent(Out) :: ave_K, max_fed
+    !
+    ! Local variables
     Integer :: i, j, isx, isy, i_r1, i_r2, j_r1, j_r2
     Integer :: i_old, j_old, ic, ic2, iw, iw1, iw2
     Real(EB) :: x, y
-    Type (Mesh_Type), Pointer :: M
+    Type (MESH_TYPE), Pointer :: M
 
     M => MESHES(NM)
     See_door = .True.  ! Default
@@ -9525,6 +9925,7 @@ Contains
 
   Subroutine Find_walls(nm, r1_x, r1_y, r_circle, d_cutoff, Skip_Wall_Force_Ior, d_xy, FoundWall_xy, istat)
     Implicit None
+    !
     ! This subroutine checks if the circle is inside a solid (totally or partially inside). 
     ! Only the positions of the closest walls in the four main directions are returned.
     ! If a wall is further away than d_cutoff from the arc of the circle then
@@ -9544,15 +9945,18 @@ Contains
     !            =0 : circle is not inside a solid (only social forces)
     !            =1 : circle is partially inside a solid (contact forces also)
     ! NOTE: This works for thick and thin OBSTs.
-
+    !
+    ! Passed variables
     Integer, Intent(In) :: nm, Skip_Wall_Force_Ior
     Real(EB), Intent(In) :: r1_x, r1_y, r_circle, d_cutoff
     Real(EB), Dimension(4), Intent(Out) :: d_xy
     Logical, Dimension(4), Intent(Out) :: FoundWall_xy
     Integer, Intent(Out) :: istat
+    !
+    ! Local variables
     Integer :: ii, jj, iw, ic, ibc, is, i_end, iin, jjn, kkn
     Real(EB) :: dx, dy, d_mx, d_px, d_my, d_py
-    Type (Mesh_Type), Pointer :: M
+    Type (MESH_TYPE), Pointer :: M
 
     M => MESHES(NM)
     istat = 0            ! Default
@@ -9739,9 +10143,12 @@ Contains
 
   SUBROUTINE GET_FIRE_CONDITIONS(NOM,I,J,K,fed_indx,soot_dens,gas_temp,rad_flux)
     Implicit None
-    INTEGER, INTENT(IN) :: I,J,K,NOM
-    REAL(EB), INTENT(OUT) :: fed_indx,soot_dens,gas_temp,rad_flux
     !
+    ! Passed variables
+    INTEGER, INTENT(IN) :: I, J, K, NOM
+    REAL(EB), INTENT(OUT) :: fed_indx, soot_dens, gas_temp, rad_flux
+    !
+    ! Local variables
     REAL(EB) :: Y_MF_INT,YY_GET(1:N_SPECIES)
 
     ! Mass fraction array ==> soot density (mg/m3)
@@ -9758,7 +10165,7 @@ Contains
 
   END SUBROUTINE GET_FIRE_CONDITIONS
 
-  Subroutine Change_Target_Door(nm, nm2, ie, j, j1, i_egrid, imode, T, xx, yy, I_Target, I_Color, I_Field)
+  Subroutine Change_Target_Door(nm, nm2, ie, j, j1, i_egrid, imode, T, xx, yy, I_Target, I_Color, I_Field, HR)
     Implicit None
     !
     ! Door selection algorithm
@@ -9770,7 +10177,7 @@ Contains
     !   j:  group index
     !   j1: lonely agent index
     !   i_egrid: main evacuation mesh index
-    !   imode: 0= initialization, 1= evacuate_humans
+    !   imode: 0= initialization, 1= evacuate_humans, 2= check_target_node
     !   T: time
     !   xx: x co-ordinate of the agent
     !   yy: y co-ordinate of the agent
@@ -9780,10 +10187,11 @@ Contains
     !   I_Color: color index
     !   I_Field: new flow field index
     !
-    ! Arguments
+    ! Passed variables
     Integer, Intent(In) :: nm, nm2, ie, j, j1, i_egrid, imode
     Real(EB), Intent(In) :: T, xx, yy
     Integer, Intent(Out)  :: I_Target, I_Color, I_Field
+    Type (HUMAN_TYPE), Pointer :: HR
     !
     ! Local variables and arrays
     Real(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn
@@ -9792,6 +10200,10 @@ Contains
     Integer :: i, i_o, izero, nm_tmp
     Character(26) :: name_old_ffield, name_new_ffield
     Logical :: PP_see_door
+    Real(EB) :: T_tmp, T_tmp1, Width
+    Integer :: N_queue, ii
+    Type (EVACUATION_Type), Pointer :: HPT=>NULL()
+    Type (EVAC_ENTR_Type),  Pointer :: PNX=>NULL()
 
 
     If (imode < 2) Then
@@ -10042,14 +10454,25 @@ Contains
           If ( Is_Known_Door(i) .And. Is_Visible_Door(i) ) Then
              x_o = 0.0_EB
              y_o = 0.0_EB
+             N_queue = 0
              If (Trim(EVAC_Node_List(n_egrids+n_entrys+i)%Node_Type) == 'Door' ) Then
                 x_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
                 y_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
                 i_o = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%I_VENT_FFIELD
+                T_tmp1 = 50.0_EB*Sqrt((x1_old-x_o)**2 + (y1_old-y_o)**2)/ &
+                     EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%R_NTARGET + 1.0_EB
+                ii = Min(50,Max(1,Int(T_tmp1)-1))
+                Width = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Width
+                N_queue = EVAC_DOORS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%NTARGET(ii)
              Else      ! 'Exit'
                 x_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%X
                 y_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Y
                 i_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%I_VENT_FFIELD
+                T_tmp1 = 50.0_EB*Sqrt((x1_old-x_o)**2 + (y1_old-y_o)**2)/ &
+                     EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%R_NTARGET + 1.0_EB
+                ii = Min(50,Max(1,Int(T_tmp1)-1))
+                Width = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%Width
+                N_queue = EVAC_EXITS(EVAC_Node_List(i+n_egrids+n_entrys)%Node_Index)%NTARGET(ii)
              End If
              If (FED_DOOR_CRIT > 0.0_EB) Then
                 L2_tmp = FED_max_Door(i) * Sqrt((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
@@ -10057,10 +10480,22 @@ Contains
                 L2_tmp = K_ave_Door(i)
              End If
              If (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
-             If ( ((x_o-x1_old)**2 + (y_o-y1_old)**2) < L2_min .And. L2_tmp < Abs(FED_DOOR_CRIT)) Then
-                L2_min = (x_o-x1_old)**2 + (y_o-y1_old)**2 
-                L2_min = Max(0.0_EB,L2_min)
-                i_tmp = i
+             If (FAC_DOOR_QUEUE > 0.001_EB) Then
+                T_tmp  = Sqrt((x_o-x1_old)**2 + (y_o-y1_old)**2)
+                T_tmp1 = Min(1.5_EB*Pi*T_tmp**2/(FAC_DOOR_QUEUE*Width), Real(N_queue,EB)/(FAC_DOOR_QUEUE*Width))
+                T_tmp = (T_tmp/Speed) +  T_tmp1
+                If (i_o == i_old_ffield) T_tmp = T_tmp*FAC_DOOR_WAIT
+                If ( T_tmp < L2_min .And. L2_tmp < Abs(FED_DOOR_CRIT) ) Then
+                   L2_min = Max(0.0_EB,T_tmp)
+                   i_tmp = i
+                End If
+             Else
+                T_tmp  = Sqrt((x_o-x1_old)**2 + (y_o-y1_old)**2)
+                If (i_o == i_old_ffield) T_tmp = T_tmp*FAC_DOOR_WAIT
+                If (T_tmp < L2_min .And. L2_tmp < Abs(FED_DOOR_CRIT)) Then
+                   L2_min = Max(0.0_EB,T_tmp)
+                   i_tmp = i
+                End If
              End If
           End If
        End Do
@@ -10097,9 +10532,10 @@ Contains
                    l2_tmp = K_ave_Door(i)
                 End If
                 If (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
-                If ( ((x_o-x1_old)**2 + (y_o-y1_old)**2)<L2_min .And. L2_tmp<Abs(FED_DOOR_CRIT)) Then
-                   L2_min = (x_o-x1_old)**2 + (y_o-y1_old)**2 
-                   L2_min = Max(0.0_EB,L2_min)
+                T_tmp  = Sqrt((x_o-x1_old)**2 + (y_o-y1_old)**2)
+                If (i_o == i_old_ffield) T_tmp = T_tmp*FAC_DOOR_WAIT
+                If (T_tmp < L2_min .And. L2_tmp < Abs(FED_DOOR_CRIT)) Then
+                   L2_min = Max(0.0_EB,T_tmp)
                    i_tmp = i
                 End If
              End If
@@ -10138,9 +10574,10 @@ Contains
                       l2_tmp = K_ave_Door(i)
                    End If
                    If (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
-                   If ( ((x_o-x1_old)**2 + (y_o-y1_old)**2)<L2_min .And. L2_tmp<Abs(FED_DOOR_CRIT)) Then
-                      L2_min = (x_o-x1_old)**2 + (y_o-y1_old)**2
-                      L2_min = Max(0.0_EB,L2_min)
+                   T_tmp  = Sqrt((x_o-x1_old)**2 + (y_o-y1_old)**2)
+                   If (i_o == i_old_ffield) T_tmp = T_tmp*FAC_DOOR_WAIT
+                   If (T_tmp < L2_min .And. L2_tmp < Abs(FED_DOOR_CRIT)) Then
+                      L2_min = Max(0.0_EB,T_tmp)
                       i_tmp = i
                    End If
                 End If
@@ -10265,9 +10702,11 @@ Contains
        End If
     End If ! Any known or visible door
     HR%I_Target = i_tmp
+    If (imode < 2) I_Target = i_tmp
     If (i_tmp > 0 .And. .Not. Is_Visible_Door(Max(1,i_tmp))) Then
        ! I_Target > 0: visible, < 0: not visible
        HR%I_Target = -i_tmp
+       If (imode < 2) I_Target = -i_tmp
     End If
     If (j > 0) Group_Known_Doors(j)%I_Target = HR%I_Target
     If ( (i_new_ffield /= i_old_ffield) .Or. (imode == 0) ) Then
@@ -10278,6 +10717,7 @@ Contains
           HR%FFIELD_NAME = Trim(name_new_ffield)
           If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
           If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
+          If (FAC_DOOR_QUEUE > 0.001_EB) Return
           If (imode > 0) Then
              Write (LU_EVACOUT,fmt='(a,i5,a,a,a,a)') ' EVAC: Human ',ie,', new ffield: ', &
                   Trim(name_new_ffield), ', old ffield: ',Trim(name_old_ffield)
@@ -10292,6 +10732,7 @@ Contains
           If (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
           If (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
           Color_Tmp(j) = color_index
+          If (FAC_DOOR_QUEUE > 0.001_EB) Return
           If (imode > 0) Then
              Write (LU_EVACOUT,fmt='(a,i5,a,a,a,a)') ' EVAC: Group ',j,', new ffield: ', &
                   Trim(name_new_ffield), ', old ffield: ', Trim(name_old_ffield)
