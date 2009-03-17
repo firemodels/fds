@@ -661,9 +661,9 @@ We can use the usual delta method~\cite{delta_method} to obtain the approximate 
 Using a Bayesian argument with a non-informative prior on $\ln(\theta)$, we obtain the posterior distribution as $\ln(\theta) \sim N(\ln(E),\tilde{\sigma}_E^2)$ .
 
 Next, assume that $M|\theta \sim N(\delta \, \theta,\sigma_M^2)$ , where $\delta$ is a systematic multiplicative bias and $\sigma_M$ is the standard deviation.
-Again using the log transformation we obtain $\ln(M)|\theta \sim N(\ln(\delta)+\ln(\theta),\tilde{\sigma}_M^2)$
+Again using the log transformation we obtain $\ln(M)|\theta \sim N(\ln(\delta)+\ln(\theta),\tilde{\sigma}_M^2/\delta^2)$
 where $\tilde{\sigma}_M=\sigma_M/\theta$. Now since $\ln(\theta)$ is random, and we have its posterior distribution from above we can obtain the marginal density
-(that is for any $\theta$) of $\ln(M) \sim N(\ln(\delta)+\ln(E),\tilde{\sigma}_M^2+\tilde{\sigma}_E^2)$.
+(that is for any $\theta$) of $\ln(M) \sim N(\ln(\delta)+\ln(E),(\tilde{\sigma}_M/\delta)^2+\tilde{\sigma}_E^2)$.
 
 What we need now is a way to estimate $\delta$, the bias factor, and $\tilde{\sigma}_M$, the relative uncertainty, of the model predictions. First, define:
 \be \bar{M} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(M_i)  \quad ; \quad \bar{E} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(E_i) \ee
@@ -671,11 +671,13 @@ The usual least squares estimate of $\ln(\delta)$ is $\bar{M}-\bar{E}$, and, thu
 \be \hat{\delta} = \exp(\bar{M}-\bar{E}) \ee
 Now define
 \be \hat{M}_i = \bar{M}-\bar{E} + \ln(E_i) \ee
-The least squares estimate of the standard deviation of $\ln(M_i)$, that is of $\sqrt{\tilde{\sigma}_M^2+\tilde{\sigma}_E^2}$, is
+The least squares estimate of the standard deviation of $\ln(M_i)$, that is of $\sqrt{(\tilde{\sigma}_M/\delta)^2+\tilde{\sigma}_E^2}$, is
 \be u(M) = \sqrt{ \frac{1}{n-1} \sum_{i=1}^n \, \left[ \ln(M_i)-\hat{M}_i \right]^2 } \ee
 Note that this quantity is the {\em total relative uncertainty} of $M$.
 The model-intrinsic component, $\tilde{\sigma}_M$, can be estimated from
-\be u(M)^2 = \tilde{\sigma}_M^2 + \tilde{\sigma}_E^2 \ee
+\be u(M)^2 = (\tilde{\sigma}_M/\delta)^2 + \tilde{\sigma}_E^2 \ee
+Finally, the following expression is an estimate of $\sigma_M/\theta$, the relative model-intrinsic uncertainty with respect to the true value, $\theta$:
+\be \tilde{\sigma}_M = \hat{\delta} \, \sqrt{u(M)^2-\tilde{\sigma}_E^2} \ee
 
 To verify this procedure, we generate 1000 random numbers between 0 and 1000. We say that these numbers represent the ``true'' temperature, $\theta_i$, from 1000 fire
 experiments. Of course, we would never know the true temperature -- this is only a hypothetical exercise. Next, for each $\theta_i$, we randomly choose an
