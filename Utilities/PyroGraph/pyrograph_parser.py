@@ -224,7 +224,7 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
     
     return data_sets
 
-def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,diagnostic_level):
+def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,scale_ind,diagnostic_level):
     #This function is used to find index numbers for start and stop points in plotting and metric values.
     found_start = False
     found_stop = False
@@ -236,8 +236,9 @@ def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,d
     if diagnostic_level >= 3:
         print "Start Value:", start_value
         print "Stop Value:", stop_value
-        print "Metric Start Value:", start_value
-        print "Metric Stop Value:", stop_value
+        print "Metric Start Value:", start_comp
+        print "Metric Stop Value:", stop_comp
+        print "Independent Scale Value:", scale_ind
         
     ## Find Start Value Index Number    
     rowcounter = 0
@@ -254,7 +255,7 @@ def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,d
                     print "Metric Data starts at Index #:", rowcounter, "with a value of:", value
                 metric_start_index = rowcounter
                 found_comp_start = True
-            if float(data_set[len(data_set)-1]) <= float(stop_comp)and found_comp_stop == False:
+            if float(data_set[len(data_set)-1]) <= float(stop_comp) and found_comp_stop == False:
                 if diagnostic_level >= 3:
                     print "Specified end of Metric data is greater than or equal to the last value in the Independent Data Column.\nUsing last value in the Independent Data Column."
                     print "Metric Data stops at Index #:", len(data_set)-1, "with a value of:", data_set[len(data_set)-1]
@@ -287,49 +288,3 @@ def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,d
             break
     return (ind_col_start_index, ind_col_end_index, metric_start_index, metric_end_index)
 
-# Test Functions
-def test_add_group_data_to_scatter_dict():
-    add_group_data_to_scatter_data_dict(1,4,[['x1','y1'],['x2','y2']])
-    add_group_data_to_scatter_data_dict(1,4,[['x3','y3'],['x4','y4']])
-    
-    scatter_data_dict = read_pickle('scatter_data_dict_object.pkl')
-    for quantity in scatter_data_dict.keys():
-        for group in scatter_data_dict[quantity].keys():
-            for data_pair in scatter_data_dict[quantity][group]:
-                data_x = data_pair[0]
-                data_y = data_pair[1]
-                print data_x,",",data_y
-
-def test_pickle():
-    style_data = read_pickle('styles_object.pkl')
-    print "There are",len(style_data),"styles."
-    
-    group_data = read_pickle('groups_object.pkl')
-    print "There are",len(group_data),"groups."
-    
-    quantity_data = read_pickle('quantities_object.pkl')
-    print "There are",len(quantity_data),"quantities."
-    
-    data_info = read_pickle(data_config_file+'_object.pkl')
-    print "There are",len(data_info),"data records to process."
-    
-
-def test_process_csv_data_file():
-    print "Testing the CSV file import function."
-    
-    filename = "/Users/bwklein/Development/FDS-SMV/Validation/FM_SNL/FDS_Output_Files/FM_SNL_21_v5_devc.csv"
-    #filename = "/Users/bwklein/Development/FDS-SMV/Validation/Steckler_Compartment/Experimental_Data/Steckler_Test_10.csv"
-    column_names = ['FDS Time','Sector3 Ch15','Sector2 Ch6']
-    #column_names = ['Height','V_C','T_in','V_R1']
-    titles_row_number = 2
-    
-    col_data_set = process_csv_data_file(filename,column_names,titles_row_number)
-    #First list is X Axis Data
-    x_data = col_data_set.pop(0)
-    print "X Axis Data:",x_data
-    
-    #Subsequent Lists are Y Axis Data sets that pair with the X_Axis in the first list.
-    print "Y Axis Data:"
-    for data_col in col_data_set:
-        print data_col
-        print "***"
