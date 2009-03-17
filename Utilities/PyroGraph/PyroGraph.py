@@ -86,8 +86,8 @@ data_index_records = {}
 
 for key in data_sets:
     data_index_records[key] = {}
-    data_index_records[key]['d1_index_set'] = prsr.find_start_stop_index(data_sets[key][0][0],data_info[key]['d1_Start'],data_info[key]['d1_End'],data_info[key]['d1_Comp_Start'],data_info[key]['d1_Comp_End'],diagnostic_level)
-    data_index_records[key]['d2_index_set'] = prsr.find_start_stop_index(data_sets[key][1][0],data_info[key]['d2_Start'],data_info[key]['d2_End'],data_info[key]['d2_Comp_Start'],data_info[key]['d2_Comp_End'],diagnostic_level)
+    data_index_records[key]['d1_index_set'] = prsr.find_start_stop_index(data_sets[key][0][0],data_info[key]['d1_Start'],data_info[key]['d1_End'],data_info[key]['d1_Comp_Start'],data_info[key]['d1_Comp_End'],data_info[key]['Scale_Ind'],diagnostic_level)
+    data_index_records[key]['d2_index_set'] = prsr.find_start_stop_index(data_sets[key][1][0],data_info[key]['d2_Start'],data_info[key]['d2_End'],data_info[key]['d2_Comp_Start'],data_info[key]['d2_Comp_End'],data_info[key]['Scale_Ind'],diagnostic_level)
 
 # Comparison Plotting...
 if process_set == 1 or process_set == 2:
@@ -120,7 +120,7 @@ if process_set == 1 or process_set == 3:
             d1_metric_stop_index = data_index_records[key]['d1_index_set'][3]
             d2_metric_start_index = data_index_records[key]['d2_index_set'][2]
             d2_metric_stop_index = data_index_records[key]['d2_index_set'][3]
-        
+                        
             if data_info[key]['Metric'] == 'max':
                 for data_index in range(len(data_sets[key][0][1:])):
                     max_results = calc.calc_max(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index],data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'],data_info[key]['d2_Initial_Value'],diagnostic_level)
