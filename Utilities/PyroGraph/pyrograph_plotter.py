@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('PDF')
 from matplotlib import rcParams
 rcParams['font.family'] = 'serif'
-#rcParams['font.serif'] = ['Times New Roman']
+rcParams['font.serif'] = ['Times New Roman']
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy.ma as M
@@ -171,16 +171,16 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
         edgecolor = styles[int(d1_style[linecount])]['Edge_Color']
         symbolcolor = styles[int(d1_style[linecount])]['Fill_Color']
         
-        if styles[int(d1_style[linecount])]['Symbol_Size'] == 'none':
-            symbolsize = 'none'
+        if styles[int(d1_style[linecount])]['Symbol_Size'] == 'None':
+            symbolsize = 'None'
         else:
             symbolsize = int(styles[int(d1_style[linecount])]['Symbol_Size'])
         
         linecolor = styles[int(d1_style[linecount])]['Line_Color']
         linestyle = styles[int(d1_style[linecount])]['Line_Style']
         
-        if styles[int(d1_style[linecount])]['Line_Width'] == 'none':
-            linewidth = 'none'
+        if styles[int(d1_style[linecount])]['Line_Width'] == 'None':
+            linewidth = 'None'
         else:
             linewidth = float(styles[int(d1_style[linecount])]['Line_Width'])
             
@@ -191,7 +191,7 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
             d1_x_data = d1_ind_data[d1_index_set[0]:d1_index_set[1]]
             d1_y_data = d1_dep_masked_data[d1_index_set[0]:d1_index_set[1]]
         
-        plot_type_function[data_info['Plot_Type']](d1_x_data, d1_y_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, label=d1_key)
+        plot_type_function[data_info['Plot_Type']](d1_x_data, d1_y_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, marker=symboltype, ms=symbolsize, mfc=symbolcolor, mec=edgecolor, label=d1_key)
         linecount += 1
         
     linecount = 0
@@ -203,16 +203,16 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
         edgecolor = styles[int(d2_style[linecount])]['Edge_Color']
         symbolcolor = styles[int(d2_style[linecount])]['Fill_Color']
         
-        if styles[int(d2_style[linecount])]['Symbol_Size'] == 'none':
-            symbolsize = 'none'
+        if styles[int(d2_style[linecount])]['Symbol_Size'] == 'None':
+            symbolsize = 'None'
         else:
             symbolsize = int(styles[int(d2_style[linecount])]['Symbol_Size'])
         
         linecolor = styles[int(d2_style[linecount])]['Line_Color']
         linestyle = styles[int(d2_style[linecount])]['Line_Style']
         
-        if styles[int(d2_style[linecount])]['Line_Width'] == 'none':
-            linewidth = 'none'
+        if styles[int(d2_style[linecount])]['Line_Width'] == 'None':
+            linewidth = 'None'
         else:
             linewidth = float(styles[int(d2_style[linecount])]['Line_Width'])
             
@@ -223,7 +223,7 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
             d2_x_data = d2_ind_data[d2_index_set[0]:d2_index_set[1]]
             d2_y_data = d2_dep_masked_data[d2_index_set[0]:d2_index_set[1]]
         
-        plot_type_function[data_info['Plot_Type']](d2_x_data, d2_y_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, label=d2_key)
+        plot_type_function[data_info['Plot_Type']](d2_x_data, d2_y_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, marker=symboltype, ms=symbolsize, mfc=symbolcolor, mec=edgecolor, label=d2_key)
         linecount += 1
         
     if flip_axis == 'yes':
