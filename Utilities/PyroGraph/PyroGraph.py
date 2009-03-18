@@ -159,7 +159,8 @@ if process_set == 1 or process_set == 3:
 # Clean up temp files
 for file_name in config_files:
     os.remove(file_name+'_object.pkl')
-os.remove('scatter_data_dict_object.pkl')
+if process_set == 1 or process_set == 3:
+    os.remove('scatter_data_dict_object.pkl')
 os.remove(config_file_name+'_object.pkl')
 
 ## Report Completion.
