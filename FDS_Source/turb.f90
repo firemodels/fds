@@ -1738,11 +1738,11 @@ ENDDO SPECIES_LOOP
 END SUBROUTINE SUBGRID_SCALAR_VARIANCE
 
 
-SUBROUTINE WALL_MODEL(SF,U1,NU,DZ)
+SUBROUTINE WALL_MODEL(SF,U1,NU,DZ,ROUGHNESS)
 IMPLICIT NONE
 
 REAL(EB), INTENT(OUT) :: SF
-REAL(EB), INTENT(IN) :: U1,NU,DZ
+REAL(EB), INTENT(IN) :: U1,NU,DZ,ROUGHNESS
 
 REAL(EB), PARAMETER :: A=8.3_EB,B=1._EB/7._EB
 REAL(EB), PARAMETER :: Z_PLUS_TURBULENT = 11.81_EB
@@ -1750,8 +1750,10 @@ REAL(EB), PARAMETER :: ALPHA=7.202125273562269_EB !! ALPHA=(1._EB-B)/2._EB*A**((
 REAL(EB), PARAMETER :: BETA=1._EB+B
 REAL(EB), PARAMETER :: ETA=(1._EB+B)/A
 REAL(EB), PARAMETER :: GAMMA=2._EB/(1._EB+B)
+REAL(EB), PARAMETER :: ERROR_TOLERANCE=1.E-2_EB
 
-REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS
+REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS,U_TAU,U_TAU_OLD
+INTEGER :: I,MAX_ITERATIONS
 
 ! Werner and Wengle wall model
 !
@@ -1774,7 +1776,7 @@ REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS
 ! for LES of separated flows using statistical evaluations. Computers and
 ! Fluids, Vol. 36, pp. 817-837.
 !
-! McDermott, R. Notes on the wall model of Werner and Wengle.
+! McDermott, R. (2009) FDS Wall Flows, Part I: Straight Channels, NIST Technical Note.
 !
 ! The slip factor (SF) is based on the following approximation to the wall stress
 ! (note that u0 is the ghost cell value of the streamwise velocity component and
@@ -1782,12 +1784,27 @@ REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS
 ! tau_w = mu*(u1-u0)/dz = mu*(u1-SF*u1)/dz = mu*u1/dz*(1-SF)
 ! note that tau_w/rho = nu*u1/dz*(1-SF)
 
-NU_OVER_DZ = NU/DZ
-TAU_W = (ALPHA*NU_OVER_DZ**BETA + ETA*NU_OVER_DZ**B*ABS(U1))**GAMMA ! actually tau_w/rho
-Z_PLUS = SQRT(TAU_W)/NU_OVER_DZ
+IF (ROUGHNESS>0._EB) THEN
+   TAU_W = NU*2._EB*ABS(U1)/DZ ! guess tau_w/rho
+   U_TAU = SQRT(TAU_W)
+   MAX_ITERATIONS = 10
+ELSE
+   U_TAU = 1._EB
+   MAX_ITERATIONS = 1
+ENDIF
+
+DO I=1,MAX_ITERATIONS
+   NU_OVER_DZ = (NU + ROUGHNESS*U_TAU)/DZ
+   TAU_W = (ALPHA*(NU_OVER_DZ)**BETA + ETA*(NU_OVER_DZ)**B*ABS(U1))**GAMMA ! actually tau_w/rho
+   U_TAU_OLD = U_TAU
+   U_TAU = SQRT(TAU_W)
+   IF ( ABS((U_TAU-U_TAU_OLD)/U_TAU) < ERROR_TOLERANCE ) EXIT
+ENDDO
+
+Z_PLUS = DZ/(NU/U_TAU+ROUGHNESS)
 
 IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
-   SF = 1._EB-TAU_W/(NU_OVER_DZ*ABS(U1)) ! log layer
+   SF = 1._EB-TAU_W/(NU/DZ*ABS(U1)) ! log layer
 ELSE
    SF = -1._EB ! viscous sublayer
 ENDIF
