@@ -528,14 +528,20 @@ decision is made, the new version is given a number, it is tested, and then post
 
 \subsection{Version Number}
 
-New versions of FDS and Smokeview are identified using a specific numbering convention, for example, FDS 5.2.5.
-The version number consists of three integers where the first number
+New versions of FDS and Smokeview are identified using a specific numbering convention, for example, {\em FDS 5.2.5}.
+The version number consists of three integers separated by periods, where the first number
 is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance}
 release.  Major releases occur every few years, and as the name implies dramatically changed functionality of the
 model. Minor releases occur every few months, and may cause minor changes in functionality.
 Release notes can help you decide whether the changes should effect the type of applications that you typically do.
 Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity),
 and should not affect code functionality.
+
+For each release of FDS there is a unique Subversion (SVN) repository revision number associated with it.  
+For example, FDS version 5.3.0 was built from files in the repository at SVN revision number 3193.
+The document connecting the release version to the SVN revision number is found in the {\em FDS Release Notes} wiki page 
+located at \href{http://code.google.com/p/fds-smv/wiki/FDSReleaseNotes}{{\ct http://code.google.com/p/fds-smv/wiki/FDSReleaseNotes}}
+The SVN revision number allows users to checkout or update their local copy of the project files from the repository to the same state as any previous release of the software.
 
 \subsection{Testing a New Release}
 
