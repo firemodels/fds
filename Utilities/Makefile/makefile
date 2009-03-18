@@ -340,6 +340,24 @@ pgi_linux_mpi : obj = fds5_mpi_pgi_Opteron64
 pgi_linux_mpi : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
+#XLF-Compiler, IBM Power6 Core, OpenMP, full optimized settings
+xlf_openmp : FFLAGS  = -O3 -qhot -q64 -qtune=pwr6 -qarch=pwr6 -qmaxmem=-1 -bdatapsize:64K -bstackpsize:64K -btextpsize:64K -qsmp=omp
+xlf_openmp : CFLAGS  = -O3 -qhot -Dpp_noappend -q64 -qtune=pwr6 -qarch=pwr6 -qmaxmem=-1 -bdatapsize:64K -bstackpsize:64K -btextpsize:64K -qsmp=omp
+xlf_openmp : FCOMPL  = xlf90_r
+xlf_openmp : CCOMPL  = xlc_r
+xlf_openmp : obj     = fds5_xlf_openmp
+xlf_openmp : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial) 
+
+#XLF-Compiler, IBM Power6 Core, OpenMP, non-optimized setting
+xlf_openmp_nooptimization : FFLAGS  = -O0 -q64 -qsmp=omp
+xlf_openmp_nooptimization : CFLAGS  = -O0 -Dpp_noappend -q64 -qsmp=omp
+xlf_openmp_nooptimization : FCOMPL  = xlf90_r
+xlf_openmp_nooptimization : CCOMPL  = xlc_r
+xlf_openmp_nooptimization : obj     = fds5_xlf_openmp_nooptimization
+xlf_openmp_nooptimization : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial) 
+
 #AIX, JUMP, MPI-Version
 aix_mpi : FFLAGS  = -O3 -q64
 aix_mpi : CFLAGS  = -O3 -Dpp_noappend -q64
