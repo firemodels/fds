@@ -11,6 +11,22 @@
 <a href="http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/SMV_5/for_bundle/readme.html">Latest Smokeview release notes</a>
 <ul>
 
+<li>5.3.12 (build 3530) - March 18, 2009
+<ol>
+
+<li> enhancement: add support for viewing cell centered boundary file data.
+<li> enhancement: In smokezip, if slice data is truncated or chopped then collapse truncated data to a single color index 
+so that greater compression levels can occur.  A -no_chop command line option is added to compress as before
+<li> enhancement: add support for "Fire lines" to Smokeview
+<li> enhancement: add an option to display terrain using 2d or line contours in addition to shaded contours and a texture map
+<li> enhancement: add an option to hide blockages/vents on a mesh by mesh basis.  This is set using the Motion/View dialog box
+<li> enhancement: Output statistics when loading data files (bytes loaded, time required and bit rate).  This is 
+used to compare various network configurations for using smokeview (samba, nfs, local disk etc.)
+<li> fix: force iso-metric view for 2d cases
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=645&can=1&sort=-id">Issue 645</a>).
+<li> maintenance: Changes to both smokezip and smokeview to eliminate compiler warnings
+</ol>
+
 <li>5.3.11 (build 3279) - February 12, 2009 
 <ol>
 <li>enhancement: add widgets to the motion/view dialog box for setting x,y,z scaling and near/far depth planes
