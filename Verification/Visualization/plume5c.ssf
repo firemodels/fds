@@ -222,6 +222,24 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_bound_30
+// render cell centered boundary files
+UNLOADALL
+LOADINIFILE
+ plume5c_bound.ini
+LOADFILE
+ plume5c_04.bf
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_bound_cell_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_bound_cell_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_bound_cell_30
 // render smoke files
 UNLOADALL
 LOADFILE
