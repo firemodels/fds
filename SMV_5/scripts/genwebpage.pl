@@ -66,28 +66,21 @@ $sfc="</font>";
 # get cluster room temperature
 #
 $clustertemp="Unavailable";
-$clustertemptime="Unavailable";
 $doc = get 'http://129.6.160.15/temp';
-open(DOCOUT,">doc3.out");
-print DOCOUT $doc;
-close(DOCOUT);
+@temps=split('\|',$doc);
 $degsymbol = ' <sup>o</sup>';
-open(DOCIN,"<doc3.out");
-@doclines=<DOCIN>;
-#foreach $line (@doclines){
-#  ($clustertemptime,$temp1)=split(';',$line);
-#}
-  ($dummy,$temp1)=split('|',$doc);
-  $clustertempval=$temp1;
-  $clustertemp = int($clustertemp + 0.5);
-  $clustertemp = $clustertemp . $degsymbol ."F";
-  $degF = $clustertempval;
-  $degF = int($degF+0.5);
-  $degF = $degF. "<sup>o</sup>" ."F";
-  $degC = $clustertempval-32;
-  $degC = 5*$degC/9;
-  $degC = int($degC+0.5);
-  $degC = $degC. "<sup>o</sup>" ."C";
+
+$clustertempval=@temps[1];
+
+$degF = $clustertempval;
+$degF = int(4*$degF+0.5)/4.0;
+$degF = $degF. "<sup>o</sup>" ."F";
+
+$degC = $clustertempval-32;
+$degC = 5*$degC/9;
+$degC = int($degC+0.5);
+$degC = $degC. "<sup>o</sup>" ."C";
+
 #
 # cell phone called (once) when temperature exceeds 100F
 #
