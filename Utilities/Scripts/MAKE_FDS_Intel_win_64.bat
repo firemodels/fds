@@ -15,16 +15,12 @@ goto:eof
 
 :endif_envexist
 
-Rem location of batch files used to set up Intel compilation environment
-
-set intelbin=c:\bin
-
-call %intelbin%\iclvars intel64
-call %intelbin%\ifortvars intel64
-
 call %envfile%
 
 %svn_drive%
+
+call %svn_root%\Utilities\Scripts\SET_INTEL_64.bat
+
 cd %svn_root%\Utilities\Makefile\Intel_Win_64
 set out=intel_win_64.out
 echo. | tee -a  %out%
