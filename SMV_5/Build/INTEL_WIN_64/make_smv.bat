@@ -1,0 +1,1 @@
+make -f ..\Makefile intel_win_64
