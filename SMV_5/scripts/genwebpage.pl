@@ -73,7 +73,7 @@ $degsymbol = ' <sup>o</sup>';
 $clustertempval=@temps[1];
 
 $degF = $clustertempval;
-$degF = int(4*$degF+0.5)/4.0;
+$degF = int($degF+0.5);
 $degF = $degF. "<sup>o</sup>" ."F";
 
 $degC = $clustertempval-32;
@@ -319,7 +319,7 @@ print <<EOF;
 <li><a href="putty-0.58-installer.exe">Putty 0.58 self-installer</a>
 <li><a href="faq.html">Changing passwords, adding a new user and other Cluster FAQs</a>
 <li><a href="http://129.6.160.15">Temperature Sensors</a>
-<li><a href="http://acrux.cfr.nist.gov/load/temp_history.png">Cluster temperaturer (last 24 hours)</a>
+<li><a href="http://acrux.cfr.nist.gov/load/temp_history.png">Cluster temperaturer (last 72 hours)</a>
 
 </ul>
 
