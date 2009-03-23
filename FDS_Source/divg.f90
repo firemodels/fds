@@ -122,20 +122,25 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    RHO_D => WORK4
     
    IF (DNS .AND. SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) THEN
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,ITMP)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_01'
                ITMP = MIN(5000,NINT(TMP(I,J,K)))
                RHO_D(I,J,K) = RHOP(I,J,K)*SPECIES(N)%D(ITMP)
             ENDDO 
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
    ENDIF
     
    IF (DNS .AND. SPECIES(N)%MODE==MIXTURE_FRACTION_SPECIES) THEN
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YSUM) SHARED(RHO_D)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_02'
                ITMP = MIN(5000,NINT(TMP(I,J,K)))
                YSUM = SUM(YYP(I,J,K,:)) - SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
                ZZ_GET(:) = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
@@ -144,15 +149,18 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
    ENDIF
 
    IF (LES) RHO_D = MU*RSC
  
    ! Compute rho*D del Y
- 
+
+   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,DYDX,DYDY,DYDZ)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_03'
             DYDX = (YYP(I+1,J,K,N)-YYP(I,J,K,N))*RDXN(I)
             RHO_D_DYDX(I,J,K) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DYDX
             DYDY = (YYP(I,J+1,K,N)-YYP(I,J,K,N))*RDYN(J)
@@ -162,6 +170,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
    
    IF (FLUX_LIMITER>=0) THEN
       FX(:,:,:,N) = -RHO_D_DYDX
@@ -170,9 +179,11 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    ENDIF
    
    ! Correct rho*D del Y at boundaries and store rho*D at boundaries
- 
+
+   !$OMP PARALLEL DO PRIVATE(IW,IIG,JJG,KKG,RHO_D_DYDN,IOR)
    WALL_LOOP: DO IW=1,NWC
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP
+      !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_04'
       IIG = IJKW(6,IW) 
       JJG = IJKW(7,IW) 
       KKG = IJKW(8,IW) 
@@ -201,6 +212,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             RHO_D_DYDZ(IIG,JJG,KKG)   = 0._EB
       END SELECT
    ENDDO WALL_LOOP
+   !$OMP END PARALLEL DO
 
    
 
@@ -211,10 +223,13 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       H_RHO_D_DYDX => WORK4
       H_RHO_D_DYDY => WORK5
       H_RHO_D_DYDZ => WORK6
-    
+
+      !$OMP PARALLEL
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,HDIFF)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_05'
                ITMP = MIN(5000,NINT(.5_EB*(TMP(I+1,J,K)+TMP(I,J,K))))
                HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
                H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
@@ -227,8 +242,11 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
+      !$OMP DO PRIVATE(IW,IIG,JJG,KKG,IOR,ITMP,HDIFF,RHO_D_DYDN)
       WALL_LOOP2: DO IW=1,NWC
+         !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_06'
          IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2
          IIG = IJKW(6,IW)
          JJG = IJKW(7,IW)
@@ -253,26 +271,35 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          END SELECT
          DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - RDN(IW)*HDIFF*RHO_D_DYDN
       ENDDO WALL_LOOP2
+      !$OMP END DO
+      !$OMP END PARALLEL
  
       CYLINDER: SELECT CASE(CYLINDRICAL)
          CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
+            !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
+                     !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_07'
                      DP(I,J,K) = DP(I,J,K) + (H_RHO_D_DYDX(I,J,K)-H_RHO_D_DYDX(I-1,J,K))*RDX(I) + &
                                              (H_RHO_D_DYDY(I,J,K)-H_RHO_D_DYDY(I,J-1,K))*RDY(J) + &
                                              (H_RHO_D_DYDZ(I,J,K)-H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
                   ENDDO
                ENDDO
             ENDDO
+            !$OMP END PARALLEL DO
+
          CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
             J = 1
+            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(K,I)
             DO K=1,KBAR
                DO I=1,IBAR
+                  !$ IF ((K == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_08'
                   DP(I,J,K) = DP(I,J,K) + (R(I)*H_RHO_D_DYDX(I,J,K)-R(I-1)*H_RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
                                           (     H_RHO_D_DYDZ(I,J,K)-       H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
                ENDDO
             ENDDO
+            !$OMP END PARALLEL DO
       END SELECT CYLINDER
    ENDIF SPECIES_DIFFUSION
 
@@ -280,38 +307,47 @@ SPECIES_LOOP: DO N=1,N_SPECIES
  
    CYLINDER2: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_09'
                   DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + (RHO_D_DYDX(I,J,K)-RHO_D_DYDX(I-1,J,K))*RDX(I) + &
                                                                         (RHO_D_DYDY(I,J,K)-RHO_D_DYDY(I,J-1,K))*RDY(J) + &
                                                                         (RHO_D_DYDZ(I,J,K)-RHO_D_DYDZ(I,J,K-1))*RDZ(K)
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       CASE(.TRUE.) CYLINDER2  ! 2D Cylindrical Coords
          J=1
+         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(K,I)
          DO K=1,KBAR
             DO I=1,IBAR
+               !$ IF ((K == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_10'
                DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + &
                                                               (R(I)*RHO_D_DYDX(I,J,K)-R(I-1)*RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
                                                               (     RHO_D_DYDZ(I,J,K)-       RHO_D_DYDZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
    END SELECT CYLINDER2
    
    ! Compute -Sum h_n del dot rho*D del Y_n
  
    SPECIES_DIFFUSION_2: IF (.NOT.MIXTURE_FRACTION) THEN
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,HDIFF)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_11'
                ITMP = MIN(5000,INT(TMP(I,J,K)))
                HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
                DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
    ENDIF SPECIES_DIFFUSION_2
  
 ENDDO SPECIES_LOOP
@@ -328,10 +364,13 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
    ! Compute thermal conductivity k (KP)
  
    K_DNS_OR_LES: IF (DNS) THEN
+      !$OMP PARALLEL SHARED(KP)
       IF (N_SPECIES > 0 ) THEN
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YY_GET) 
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_12'
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = MIN(5000,NINT(TMP(I,J,K)))
                   YY_GET(:) = YYP(I,J,K,:)
@@ -339,17 +378,22 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END DO
       ELSE
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_13'
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = MIN(5000,NINT(TMP(I,J,K)))
                   KP(I,J,K) = Y2K_C(ITMP)*SPECIES(0)%MW
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END DO
       ENDIF
+      !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
       BOUNDARY_LOOP: DO IW=1,NEWC
          II  = IJKW(1,IW)
          JJ  = IJKW(2,IW)
@@ -359,6 +403,8 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
          KKG = IJKW(8,IW)
          KP(II,JJ,KK) = KP(IIG,JJG,KKG)
       ENDDO BOUNDARY_LOOP
+      !$OMP END DO
+      !$OMP END PARALLEL
 
    ELSE K_DNS_OR_LES
     
@@ -368,9 +414,12 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
  
    ! Compute k*dT/dx, etc
 
+   !$OMP PARALLEL
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DTDX,DTDY,DTDZ)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_14'
             DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
             KDTDX(I,J,K) = .5_EB*(KP(I+1,J,K)+KP(I,J,K))*DTDX
             DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
@@ -380,9 +429,11 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 
    ! Correct thermal gradient (k dT/dn) at boundaries
- 
+
+   !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR)
    CORRECTION_LOOP: DO IW=1,NWC
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE CORRECTION_LOOP
       II  = IJKW(1,IW) 
@@ -409,14 +460,17 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
       END SELECT
       DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - QCONF(IW)*RDN(IW)
    ENDDO CORRECTION_LOOP
+   !$OMP END DO
 
    ! Compute (q + del dot k del T) and add to the divergence
  
    CYLINDER3: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DELKDELT)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_15'
                   DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
                              (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
                              (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
@@ -424,10 +478,13 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                ENDDO 
             ENDDO
          ENDDO
+         !$OMP END DO
       CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DELKDELT)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_16'
                   DELKDELT = & 
                   (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
                        (KDTDZ(I,J,K)-       KDTDZ(I,J,K-1))*RDZ(K)
@@ -435,17 +492,22 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                ENDDO 
             ENDDO
          ENDDO
+         !$OMP END DO
    END SELECT CYLINDER3
+   !$OMP END PARALLEL
  
 ENDIF ENERGY
 
 ! Compute RTRM = R*sum(Y_i/M_i)/(PBAR*C_P) and multiply it by divergence terms already summed up
  
 RTRM => WORK1
+!$OMP PARALLEL
 IF (N_SPECIES==0) THEN
+  !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_17'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = MIN(5000,NINT(TMP(I,J,K)))
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM0/Y2CP_C(ITMP)
@@ -453,10 +515,13 @@ IF (N_SPECIES==0) THEN
          ENDDO
       ENDDO 
    ENDDO
+   !$OMP END DO
 ELSE
+   !$OMP DO PRIVATE(K,J,I,ITMP,YY_GET,CP_MF)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_18'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = MIN(5000,NINT(TMP(I,J,K)))
             YY_GET(:) = YYP(I,J,K,:)
@@ -466,54 +531,67 @@ ELSE
          ENDDO
       ENDDO 
    ENDDO
+   !$OMP END DO
 ENDIF 
 
 ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Y_n
 
 SPECIES_DIFFUSION_3: IF (.NOT.MIXTURE_FRACTION) THEN
+   !$OMP DO COLLAPSE(4) PRIVATE(N,K,J,I)
    DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               !$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_19'
                DP(I,J,K) = DP(I,J,K) + (SPECIES(N)%RCON-SPECIES(0)%RCON)/(RSUM(I,J,K)*RHOP(I,J,K))*DEL_RHO_D_DEL_Y(I,J,K,N)
             ENDDO
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 ENDIF SPECIES_DIFFUSION_3
 
 ! Add contribution of evaporating droplets
  
 IF (NLP>0 .AND. N_EVAP_INDICIES > 0) THEN
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_20'
             DP(I,J,K) = DP(I,J,K) + D_VAP(I,J,K)
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 ENDIF
  
 ! Atmospheric Stratification Term
 
 IF (STRATIFICATION) THEN
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_21'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,PRESSURE_ZONE(I,J,K)))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*GVEC(3)*RHO_0(K)
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 ENDIF
+!$OMP END PARALLEL
 
 ! Compute normal component of velocity at boundaries, UWS
 
 PREDICT_NORMALS: IF (PREDICTOR) THEN
  
    FDS_LEAK_AREA(:,:,NM) = 0._EB
- 
+
+   !$OMP PARALLEL DO PRIVATE(IW,IOR,IBC,SF,IPZ,IOPZ,TSI,TIME_RAMP_FACTOR,DELTA_P,PRES_RAMP_FACTOR,IIG,JJG,KKG,II,JJ,KK) 
    WALL_LOOP3: DO IW=1,NWC
+      !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_22'
       IOR = IJKW(4,IW)
       WALL_CELL_TYPE: SELECT CASE (BOUNDARY_TYPE(IW))
          CASE (NULL_BOUNDARY)
@@ -587,6 +665,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             END SELECT
       END SELECT WALL_CELL_TYPE
    ENDDO WALL_LOOP3
+   !$OMP END PARALLEL DO
 
    DUWDT(1:NEWC) = RDT*(UWS(1:NEWC)-UW(1:NEWC))
 
@@ -739,31 +818,40 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
 
    ! Add pressure derivative to divergence
 
+   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_25'
             IF (PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE 
             IF (SOLID(CELL_INDEX(I,J,K)))    CYCLE
             DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,IPZ))*D_PBAR_DT_P(IPZ)
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
 
 ENDDO PRESSURE_ZONE_LOOP
 
 ! Zero out divergence in solid cells
- 
+
+!$OMP PARALLEL 
+!$OMP DO PRIVATE(IC,I,J,K) 
 SOLID_LOOP: DO IC=1,CELL_COUNT
+   !$ IF ((IC == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_26'
    IF (.NOT.SOLID(IC)) CYCLE SOLID_LOOP
    I = I_CELL(IC)
    J = J_CELL(IC)
    K = K_CELL(IC)
    DP(I,J,K) = 0._EB
 ENDDO SOLID_LOOP
+!$OMP END DO
 
 ! Specify divergence in boundary cells to account for volume being generated at the walls
- 
+
+!$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IIG,JJG,KKG) 
 BC_LOOP: DO IW=1,NWC
+   !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_27'
    IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE BC_LOOP
    II = IJKW(1,IW)
    JJ = IJKW(2,IW)
@@ -793,6 +881,8 @@ BC_LOOP: DO IW=1,NWC
          DP(II,JJ,KK) = DP(IIG,JJG,KKG)
    END SELECT
 ENDDO BC_LOOP
+!$OMP END DO
+!$OMP END PARALLEL
 
 ! Compute time derivative of the divergence, dD/dt
 
@@ -800,23 +890,29 @@ TRUE_PROJECTION: IF (PROJECTION) THEN
 
    DIV=>WORK1
    IF (PREDICTOR) THEN
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K = 1,KBAR
          DO J = 1,JBAR
             DO I = 1,IBAR
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_28'
                DIV(I,J,K) = (U(I,J,K)-U(I-1,J,K))*RDX(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + (W(I,J,K)-W(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
       DDDT = (DP-DIV)*RDT
    ELSEIF (CORRECTOR) THEN
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K = 1,KBAR
          DO J = 1,JBAR
             DO I = 1,IBAR
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_29'
                DIV(I,J,K) = (U(I,J,K) -U(I-1,J,K)) *RDX(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
                           + (US(I,J,K)-US(I-1,J,K))*RDX(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
       D = DDDT
       DDDT = (2._EB*DP-DIV)*RDT
    ENDIF
@@ -835,7 +931,9 @@ ELSE TRUE_PROJECTION
    ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
    
    !! IF (NMESHES>1) THEN
+   !$OMP PARALLEL DO PRIVATE(IW,IIG,JJG,KKG)
    DO IW=1,NEWC
+      !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_30'
       IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE
       IIG = IJKW(6,IW)
       JJG = IJKW(7,IW)
@@ -843,6 +941,7 @@ ELSE TRUE_PROJECTION
       IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
       IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
    ENDDO
+   !$OMP END PARALLEL DO
    !! ENDIF
    
 ENDIF TRUE_PROJECTION
