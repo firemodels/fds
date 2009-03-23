@@ -4,24 +4,21 @@ pyrograph_plotter.py
 """
 
 import matplotlib
-matplotlib.use('PDF')
 from matplotlib import rcParams
 rcParams['font.family'] = 'serif'
 rcParams['font.serif'] = ['Times New Roman']
+rcParams['legend.fancybox'] = True
+rcParams['legend.fontsize'] = 'small'
+rcParams['legend.labelspacing'] = 0.2
+
+matplotlib.use('PDF')
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy.ma as M
 from pylab import *
 import pyrograph_calcs as calc
-import pyrograph_parser as prsr
 
-
-def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
-    # Read in quantities dictionary object.
-    quantities = prsr.read_pickle("pyrograph_quantities_object.pkl",diagnostic_level)
-    styles = prsr.read_pickle("pyrograph_styles_object.pkl",diagnostic_level)
-    groups = prsr.read_pickle("pyrograph_groups_object.pkl",diagnostic_level)
-    
+def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,diagnostic_level):
     #Set Scatter Plot Settings
     title = quantities[quantity_id]["Scatter_Plot_Title"]
     size = float(quantities[quantity_id]["Plot_Width"])
@@ -37,8 +34,6 @@ def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
     exp_error_lines = quantities[quantity_id]["Exp_Error_Lines"]
     mu_line = quantities[quantity_id]["Mu_Line"]
     sigma_lines = quantities[quantity_id]["Sigma_Lines"]
-    
-    #print "Plotting:",title
     
     x_data_set = []
     y_data_set = []
@@ -94,31 +89,27 @@ def scatter_plot(quantity_id,data_set,output_directory,diagnostic_level):
     if legend_loc != '':
         leg = ax.legend(loc=legend_loc)
     ax.axis([plot_min, plot_max, plot_min, plot_max])
-    if legend_loc != '':
-        for t in leg.get_texts():
-            t.set_fontsize('small')    # the legend text fontsize
+    # if legend_loc != '':
+    #         for t in leg.get_texts():
+    #             t.set_fontsize('small')    # the legend text fontsize
             
-    plt.show()
+    #plt.show()
     plt.savefig(output_directory+output_filename)
 
 
-def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_directory,diagnostic_level):
-    styles = prsr.read_pickle("pyrograph_styles_object.pkl",diagnostic_level)
-    
+def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_directory,diagnostic_level):
+    #Set Comparison Plot Settings
     title = data_info["Plot_Title"]
     size = float(data_info["Plot_Width"])
     output_filename = data_info["Plot_Filename"]
     legend_loc= data_info["Key_Position"]
     ind_axis_title = data_info["Ind_Title"]
     dep_axis_title = data_info["Dep_Title"]
-    
     flip_axis = data_info["Flip_Axis"]
-    
     xmin = float(data_info['Min_Ind'])
     xmax = float(data_info['Max_Ind'])
     ymin = float(data_info['Min_Dep'])
     ymax = float(data_info['Max_Dep'])
-    
     title_position = eval(data_info["Title_Position"])
     title_x_pos = float(title_position[0])
     title_y_pos = float(title_position[1])
@@ -253,6 +244,6 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,output_director
             for t in leg.get_texts():
                 t.set_fontsize('small')    # the legend text fontsize
             
-    plt.show()
+    #plt.show()
     plt.savefig(output_directory+output_filename)
 
