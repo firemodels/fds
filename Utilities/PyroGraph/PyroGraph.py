@@ -14,12 +14,12 @@ user_config = {}
  
 file_name = "./config_files/pyrograph_config.txt"
 config_file= open(file_name)
- 
 for line in config_file:
     line = line.strip()
     if line and line[0] is not "#" and line[-1] is not "=":
         var,val = line.rsplit("=",1)
         user_config[var.strip()] = val.strip()
+config_file.close()
 
 config_files = ['pyrograph_groups','pyrograph_styles','pyrograph_quantities']
 
@@ -81,6 +81,9 @@ if diagnostic_level >= 2:
 
 #Start Processing records in data config file.
 data_sets = prsr.collect_data_sets(data_info,data_directory,diagnostic_level)
+styles = prsr.read_pickle("pyrograph_styles_object.pkl",diagnostic_level)
+quantities = prsr.read_pickle("pyrograph_quantities_object.pkl",diagnostic_level)
+groups = prsr.read_pickle("pyrograph_groups_object.pkl",diagnostic_level)
 
 data_index_records = {}
 
@@ -94,12 +97,14 @@ if process_set == 1 or process_set == 2:
     if diagnostic_level >= 2:
         print "Begin Comparison Plots"
     
-    total = len(data_sets)
-    p = prgrs.ProgressMeter(total=total, unit='Comparison Plots', rate_refresh=0.25)
+    if diagnostic_level < 3:
+        total = len(data_sets)
+        p = prgrs.ProgressMeter(total=total, unit='Comparison Plots', rate_refresh=0.25)
     
     for key in data_info:
-        plot.comparison_plot(data_sets[key],data_info[key],data_index_records[key]['d1_index_set'],data_index_records[key]['d2_index_set'],output_directory,diagnostic_level)
-        p.update(1)
+        plot.comparison_plot(data_sets[key],data_info[key],data_index_records[key]['d1_index_set'],data_index_records[key]['d2_index_set'],styles,output_directory,diagnostic_level)
+        if diagnostic_level < 3:
+            p.update(1)
         
     if diagnostic_level >= 2:
         print "Finished Comparison Plots"
@@ -120,7 +125,10 @@ if process_set == 1 or process_set == 3:
             d1_metric_stop_index = data_index_records[key]['d1_index_set'][3]
             d2_metric_start_index = data_index_records[key]['d2_index_set'][2]
             d2_metric_stop_index = data_index_records[key]['d2_index_set'][3]
-                        
+            
+            if diagnostic_level >= 3:
+                print "Processing Data for:",data_info[key]['Plot_Filename']
+                
             if data_info[key]['Metric'] == 'max':
                 for data_index in range(len(data_sets[key][0][1:])):
                     max_results = calc.calc_max(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index],data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'],data_info[key]['d2_Initial_Value'],diagnostic_level)
@@ -144,14 +152,15 @@ if process_set == 1 or process_set == 3:
     for quantity_key in scatter_data_dict:
         if scatter_data_dict[quantity_key] == {}:
             count_no_data += 1
-    
-    total = len(scatter_data_dict.keys())-count_no_data
-    p = prgrs.ProgressMeter(total=total, unit='Scatter Plots', rate_refresh=0.25)
+    if diagnostic_level < 3:
+        total = len(scatter_data_dict.keys())-count_no_data
+        p = prgrs.ProgressMeter(total=total, unit='Scatter Plots', rate_refresh=0.25)
     
     for quantity_key in scatter_data_dict:
         if scatter_data_dict[quantity_key] != {}:
-            plot.scatter_plot(quantity_key,scatter_data_dict[quantity_key],output_directory,diagnostic_level)
-            p.update(1)
+            plot.scatter_plot(quantity_key,scatter_data_dict[quantity_key],quantities,groups,styles,output_directory,diagnostic_level)
+            if diagnostic_level < 3:
+                p.update(1)
             
     if diagnostic_level >= 1:
         print "Finished Scatter Plots"

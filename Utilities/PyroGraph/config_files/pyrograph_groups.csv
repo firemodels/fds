@@ -4,38 +4,38 @@
 3,"NBS Multiroom",14
 4,"FM/SNL",15
 5,"WTC",9
-6,"NIST/NRC (Cable B)",6
-7,"NIST/NRC (Cable D)",5
-8,"NIST/NRC (Cable F)",4
-9,"NIST/NRC (Cable G)",6
-10,"NIST/NRC (Long Wall)",1
-11,"NIST/NRC (Short Wall)",5
-12,"NIST/NRC (Ceiling)",4
-13,"NIST/NRC (Floor)",6
-14,"WTC (Column)",8
-15,"WTC (Truss)",11
-16,"WTC (Bar)",10
-17,"WTC (Slug Calorimeter)",13
-18,"WTC (Inside Ceiling)",7
-19,"WTC (Floor)",11
-20,"WTC (Column)",10
-21,"WTC (Ceiling)",8
-22,"WTC (Truss Support)",13
+6,"Cable B",6
+7,"Cable D",5
+8,"Cable F",4
+9,"Cable G",6
+10,"Long Wall",1
+11,"Short Wall",5
+12,"Ceiling",4
+13,"Floor",6
+14,"Column",8
+15,"Truss",11
+16,"Bar",10
+17,"Slug Calorimeter",13
+18,"Inside Ceiling",7
+19,"Floor",11
+20,"Column",10
+21,"Ceiling Surface",8
+22,"Truss Support",13
 23,"Smyth Slot",3
-24,"WTC (Wall)",11
-25,"WTC (Inside Wall)",12
-26,"Steckler, Position A",1
-27,"Steckler, Position B",5
-28,"Steckler, Position C",4
-29,"Steckler, Raised Burner",6
+24,"Wall Surface",11
+25,"Inside Wall",12
+26,"Position A",1
+27,"Position B",5
+28,"Position C",4
+29,"Raised Burner",6
 30,"INERIS H2",1
 31,"Heskestad Flame Height",1
 32,"NIST/NRC (Open Door)",2
 33,"NIST/NRC (Closed Door)",1
 34,"Plate Thermometer",25
-35,"Adiabatic Surface Temperature",5
-36,"Steel Temperature",1
-37,"Gas Temperature",28
-38,"Curtained Tests",26
-39,"Non-Curtained Tests",27
+35,"Adiabatic Surface",5
+36,"Steel",1
+37,"Gas",28
+38,"Curtained",26
+39,"Non-Curtained",27
 40,"NIST/FSE 2008",1

@@ -56,9 +56,17 @@ def calc_max(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level)
         print "*** Compute Rise ***"
         
     temp_d1_data_values = [x for x in d1_data if x != -9999.0]
-    d1_rise_value = max(temp_d1_data_values) - float(d1_initial_value)
     temp_d2_data_values = [x for x in d2_data if x != -9999.0]
-    d2_rise_value = max(temp_d2_data_values) - float(d2_initial_value)
+    
+    if len(temp_d1_data_values) == 0:
+        print "Error in d1 scatter data set, length of array is 0."
+        exit()
+    elif len(temp_d2_data_values) == 0:
+        print "Error in d2 scatter data set, length of array is 0."
+        exit()
+    else:
+        d1_rise_value = max(temp_d1_data_values) - float(d1_initial_value)
+        d2_rise_value = max(temp_d2_data_values) - float(d2_initial_value)
     
     if diagnostic_level >= 3:
         print "Data Set 1, Initial Value is:", d1_initial_value
