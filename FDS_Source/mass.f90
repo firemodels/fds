@@ -22,7 +22,7 @@ CONTAINS
 SUBROUTINE MASS_FINITE_DIFFERENCES(NM)
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,ISOTHERMAL,NULL_BOUNDARY,POROUS_BOUNDARY,PREDICTOR,CORRECTOR,EVACUATION_ONLY, &
-                            SOLID_PHASE_ONLY,TUSED
+                            SOLID_PHASE_ONLY,TUSED,DEBUG_OPENMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: FXYZ,PMDT,UDRHODN,TNOW
 INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR
@@ -59,34 +59,45 @@ EPSX => WORK1
 EPSY => WORK2
 EPSZ => WORK3
 
+!$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
+         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_01'
          EPSX(I,J,K) = PMDT*UU(I,J,K)*RDXN(I)
          EPSY(I,J,K) = PMDT*VV(I,J,K)*RDYN(J)
          EPSZ(I,J,K) = PMDT*WW(I,J,K)*RDZN(K)
       ENDDO
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 ! Compute spatial differences for density equation
  
 NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
- 
+
+   FRHO = 0._EB !Placed here for a faster OpenMP code
+   
    UDRHODX => WORK4
    VDRHODY => WORK5
    WDRHODZ => WORK6
+   !$OMP PARALLEL
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_02'
             UDRHODX(I,J,K) = UU(I,J,K)*(RHOP(I+1,J,K)-RHOP(I,J,K))*RDXN(I)
             VDRHODY(I,J,K) = VV(I,J,K)*(RHOP(I,J+1,K)-RHOP(I,J,K))*RDYN(J)
             WDRHODZ(I,J,K) = WW(I,J,K)*(RHOP(I,J,K+1)-RHOP(I,J,K))*RDZN(K)
          ENDDO
       ENDDO
    ENDDO
-   
+   !$OMP END DO
+
+   !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR,UDRHODN)
    WLOOP: DO IW=1,NWC
+      !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_03'
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WLOOP
       II  = IJKW(1,IW) 
       IIG = IJKW(6,IW)
@@ -111,8 +122,11 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
             WDRHODZ(II,JJ,KK-1) = UDRHODN
       END SELECT
    ENDDO WLOOP
+   !$OMP END DO
 
-   FRHO = 0._EB
+!   FRHO = 0._EB !Placed at beginning of IF
+   
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,FXYZ)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -127,6 +141,8 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
+   !$OMP END PARALLEL
 ENDIF NOT_ISOTHERMAL_IF
  
 ! Compute the species equation differences
@@ -141,19 +157,25 @@ ENDIF
  
 SPECIES_LOOP: DO N=1,N_SPECIES
 
+   !$OMP PARALLEL
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_04'
             UDRHODX(I,J,K) = UU(I,J,K)*( RHOP(I+1,J,K)*YYP(I+1,J,K,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDXN(I)
             VDRHODY(I,J,K) = VV(I,J,K)*( RHOP(I,J+1,K)*YYP(I,J+1,K,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDYN(J)
             WDRHODZ(I,J,K) = WW(I,J,K)*( RHOP(I,J,K+1)*YYP(I,J,K+1,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDZN(K)
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
  
    ! Correct U d(RHO*Y)/dx etc. on boundaries
- 
+
+   !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR,UDRHODN) 
    WLOOP2: DO IW=1,NWC
+      !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_05'
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WLOOP2
       II  = IJKW(1,IW) 
       IIG = IJKW(6,IW)
@@ -178,9 +200,11 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             WDRHODZ(II,JJ,KK-1) = UDRHODN
       END SELECT
    ENDDO WLOOP2
+   !$OMP END DO
  
   ! Sum up the convective and diffusive terms in the transport equation and store in DEL_RHO_D_DEL_Y
- 
+
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,FXYZ)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -194,6 +218,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
+   !$OMP END PARALLEL
  
 ENDDO SPECIES_LOOP
  
@@ -210,7 +236,7 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
                             CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_ZONE,MIXTURE_FRACTION_SPECIES, &
                             GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,BAROCLINIC, &
-                            RHO_LOWER_GLOBAL,RHO_UPPER_GLOBAL,RSUM0
+                            RHO_LOWER_GLOBAL,RHO_UPPER_GLOBAL,RSUM0,DEBUG_OPENMP
 REAL(EB) :: WFAC,DTRATIO,OMDTRATIO,TNOW,YY_GET(1:N_SPECIES)
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
@@ -227,63 +253,78 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
 
+      !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I)
       DO N=1,N_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  !$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_01'
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   YYS(I,J,K,N) = RHO(I,J,K)*YY(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N)
                ENDDO
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
 
    ELSE
 
       DTRATIO   = DT/DT_PREV
       OMDTRATIO = 1._EB - DTRATIO
+      !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I)
       DO N=1,N_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  !$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_02'
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   YYS(I,J,K,N) = OMDTRATIO*RHO(I,J,K) *YY(I,J,K,N) + DTRATIO*RHOS(I,J,K)*YYS(I,J,K,N)
                ENDDO
            ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
 
    ENDIF
 
    ! Predict the density at the next time step (RHOS or RHO^*)
 
    IF (.NOT.ISOTHERMAL) THEN
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_03'
                RHOS(I,J,K) = RHO(I,J,K)-DT*FRHO(I,J,K)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
    ELSE
 
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_04'
                RHOS(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(TMPA*SPECIES(0)%RCON)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
 
       DO N=1,N_SPECIES
          WFAC = 1._EB - SPECIES(N)%RCON/SPECIES(0)%RCON
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  !$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_05'
                   RHOS(I,J,K) = RHOS(I,J,K) + WFAC*YYS(I,J,K,N)
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       ENDDO
 
    ENDIF
@@ -300,6 +341,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Extract mass fraction from RHO * YY
 
+   !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I)
    DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
@@ -310,6 +352,7 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
 
    ! Correct mass fractions above or below clip limits
 
@@ -323,44 +366,56 @@ CASE(.TRUE.) PREDICTOR_STEP
 
 ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
    IF (N_SPECIES>0) THEN
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,YY_GET) SHARED(RSUM)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR   
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_06'
                YY_GET(:) = YYS(I,J,K,:)
                CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM(I,J,K))
                RSUM(I,J,K) = R0/RSUM(I,J,K)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
       IF (ISOTHERMAL) THEN
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_07'
                   RHOS(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(TMPA*RSUM(I,J,K))
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       ENDIF
    ENDIF
 
 ! Extract predicted temperature at next time step from Equation of State
    IF (.NOT. ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_08'
                   TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHOS(I,J,K))
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       ELSE
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_09'
                   TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       ENDIF
       TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
    ENDIF
@@ -371,45 +426,57 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Correct species mass fraction at next time step (YY here actually means YY*RHO)
 
+   !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I)
    DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               !$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_10'
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                YY(I,J,K,N) = .5_EB*(RHO(I,J,K)*YY(I,J,K,N) + RHOS(I,J,K)*YYS(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N) ) 
             ENDDO
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
 
    ! Correct density at next time step
 
    IF (.NOT.ISOTHERMAL) THEN
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_11'
                RHO(I,J,K) = .5_EB*(RHO(I,J,K)+RHOS(I,J,K)-DT*FRHO(I,J,K))
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
    ELSE
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_12'
                RHO(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(SPECIES(0)%RCON*TMPA)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
 
       DO N=1,N_SPECIES
          WFAC = 1._EB - SPECIES(N)%RCON/SPECIES(0)%RCON
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  !$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_13'
                   RHO(I,J,K) = RHO(I,J,K) + WFAC*YY(I,J,K,N)
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       ENDDO
    ENDIF
 
@@ -425,16 +492,19 @@ CASE(.FALSE.) PREDICTOR_STEP
  
    ! Extract Y_n from rho*Y_n
 
+   !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I)
    DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               !$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_14'
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                YY(I,J,K,N) = YY(I,J,K,N)/RHO(I,J,K)
             ENDDO
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
 
    ! Correct mass fractions above or below clip limits
 
@@ -448,44 +518,56 @@ CASE(.FALSE.) PREDICTOR_STEP
  
 ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
    IF (N_SPECIES>0) THEN
+      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,YY_GET) SHARED(RSUM)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR   
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_15'
                YY_GET(:) = YY(I,J,K,:)
                CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM(I,J,K))
                RSUM(I,J,K) = R0/RSUM(I,J,K)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END PARALLEL DO
       IF (ISOTHERMAL) THEN
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_16'
                   RHO(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(TMPA*RSUM(I,J,K))
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       ENDIF
    ENDIF
 
 ! Extract predicted temperature at next time step from Equation of State
    IF (.NOT. ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_17'
                   TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHO(I,J,K))
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       ELSE
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
+                  !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_18'
                   TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       ENDIF
       TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
    ENDIF
@@ -502,7 +584,7 @@ SUBROUTINE CHECK_DENSITY
  
 ! Redistribute mass from cells below or above the density cut-off limits
 
-USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,RHOMIN,RHOMAX 
+USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,RHOMIN,RHOMAX,DEBUG_OPENMP
 REAL(EB) :: SUM,CONST,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,RHO00,RMIN,RMAX
 INTEGER  :: IC,ISUM,I,J,K
 LOGICAL :: LC(-3:3)
@@ -520,9 +602,11 @@ ENDIF
 
 RHODELTA = 0._EB
 
+!$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,IC,RMIN,SUM,ISUM,LC,RHO00,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,CONST)
 DO K=1,KBAR
    DO J=1,JBAR
       CHECK_LOOP: DO I=1,IBAR
+         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_CHECK_DENSITY_01'
          IC = CELL_INDEX(I,J,K)
          IF (SOLID(IC)) CYCLE CHECK_LOOP
          RMIN = RHOMIN
@@ -585,15 +669,18 @@ DO K=1,KBAR
       ENDDO CHECK_LOOP
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 RHOP = MAX(RHOMIN,RHOP+RHODELTA)
 
 ! Correct overshoots
 
 RHODELTA = 0._EB
+!$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,IC,RMAX,SUM,ISUM,LC,RHO00,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,CONST)
 DO K=1,KBAR
    DO J=1,JBAR
       CHECK_LOOP2: DO I=1,IBAR
+         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_CHECK_DENSITY_02'
          IC = CELL_INDEX(I,J,K)
          IF (SOLID(IC)) CYCLE CHECK_LOOP2
          RMAX = RHOMAX
@@ -656,6 +743,7 @@ DO K=1,KBAR
       ENDDO CHECK_LOOP2
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 RHOP = MIN(RHOMAX,RHOP+RHODELTA)
 
@@ -666,7 +754,7 @@ SUBROUTINE CHECK_MASS_FRACTION
 
 ! Redistribute species mass from cells below or above the cut-off limits
 
-USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,YYMIN,YYMAX,POROUS_BOUNDARY
+USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,YYMIN,YYMAX,POROUS_BOUNDARY,DEBUG_OPENMP
 REAL(EB) :: SUM,CONST,RHYMI,RHYPI,RHYMJ,RHYPJ,RHYMK,RHYPK,RHY0,YMI,YPI,YMJ,YPJ,YMK,YPK,Y00,YMIN,YMAX
 INTEGER  :: IC,N,ISUM, IW_A(-3:3),I,J,K
 LOGICAL  :: LC(-3:3)
@@ -688,9 +776,12 @@ SPECIESLOOP: DO N=1,N_SPECIES
 
    ! Do undershoots
 
+   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,IC,IW_A,Y00,SUM,ISUM,LC,YMIN,YMI,YPI,YMJ,YPJ,YMK,YPK) &
+   !$OMP PRIVATE(RHY0,RHYPI,RHYMI,RHYPJ,RHYMJ,RHYPK,RHYMK,CONST)
    DO K=1,KBAR
       DO J=1,JBAR
          CHECK_LOOP: DO I=1,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_CHECK_M_FRACTION_01'
             IC = CELL_INDEX(I,J,K)
             IF (SOLID(IC)) CYCLE CHECK_LOOP
             IW_A = WALL_INDEX(IC,:)
@@ -831,14 +922,17 @@ SPECIESLOOP: DO N=1,N_SPECIES
          ENDDO CHECK_LOOP
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
    YYP(:,:,:,N) = YYP(:,:,:,N) + YYDELTA
    YYDELTA=0._EB
 
    ! Do overshoots
-
+   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,IC,IW_A,Y00,SUM,ISUM,LC,YMIN,YMI,YPI,YMK,YPK,YMJ,YPJ,YMAX) &
+   !$OMP PRIVATE(RHY0,RHYPI,RHYMI,RHYPJ,RHYMJ,RHYPK,RHYMK,CONST)
    DO K=1,KBAR
       DO J=1,JBAR
          CHECK_LOOP2: DO I=1,IBAR
+            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_CHECK_M_FRACTION_02'
             IC = CELL_INDEX(I,J,K)
             IF (SOLID(IC)) CYCLE CHECK_LOOP2
             IW_A  = WALL_INDEX(IC,:)
@@ -947,7 +1041,8 @@ SPECIESLOOP: DO N=1,N_SPECIES
             ENDIF
          ENDDO CHECK_LOOP2
       ENDDO
-   ENDDO   
+   ENDDO  
+   !$OMP END PARALLEL DO 
 
    YYP(:,:,:,N) = YYP(:,:,:,N) + YYDELTA   
 
