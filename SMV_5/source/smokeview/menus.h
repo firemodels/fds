@@ -5071,10 +5071,8 @@ static int in_menu=0;
         if(isonormtype==1)glutAddMenuEntry("*Smooth",4);
         if(isonormtype==0)glutAddMenuEntry("Smooth",4);
       }
-#ifdef _DEBUG
       if(showisonormals==1)glutAddMenuEntry("*Show normals",5);
       if(showisonormals==0)glutAddMenuEntry("Show normals",5);
-#endif
     }
   }
 
