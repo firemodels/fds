@@ -1183,9 +1183,9 @@ void drawiso(const mesh *meshi,int tranflag){
 		        norm3 = vertexnorm+i3;
           }
           for(k=0;k<3;k++){
-            vv1n[k]=vv1[k]+norm1[k]/(8.*32768.);
-            vv2n[k]=vv2[k]+norm2[k]/(8.*32768.);
-            vv3n[k]=vv3[k]+norm3[k]/(8.*32768.);
+            vv1n[k]=vv1[k]+norm1[k]/(8.*32768.)/4.0;
+            vv2n[k]=vv2[k]+norm2[k]/(8.*32768.)/4.0;
+            vv3n[k]=vv3[k]+norm3[k]/(8.*32768.)/4.0;
           }
 
           glVertex3fv(vv1);
@@ -1197,9 +1197,9 @@ void drawiso(const mesh *meshi,int tranflag){
         }
 		    else{
           for(k=0;k<3;k++){
-            vv1n[k]=vv1[k]+norm[k]/(8.*32768.);
-            vv2n[k]=vv2[k]+norm[k]/(8.*32768.);
-            vv3n[k]=vv3[k]+norm[k]/(8.*32768.);
+            vv1n[k]=vv1[k]+norm[k]/(8.*32768.)/4.0;
+            vv2n[k]=vv2[k]+norm[k]/(8.*32768.)/4.0;
+            vv3n[k]=vv3[k]+norm[k]/(8.*32768.)/4.0;
           }
           glVertex3fv(vv1);
           glVertex3fv(vv1n);
@@ -1663,9 +1663,9 @@ void drawtiso(const mesh *meshi,int tranflag){
 		        norm3 = vertexnorm+i3;
           }
           for(k=0;k<3;k++){
-            vv1n[k]=vv1[k]+norm1[k]/(8.*32768.);
-            vv2n[k]=vv2[k]+norm2[k]/(8.*32768.);
-            vv3n[k]=vv3[k]+norm3[k]/(8.*32768.);
+            vv1n[k]=vv1[k]+norm1[k]/(8.*32768.)/4.0;
+            vv2n[k]=vv2[k]+norm2[k]/(8.*32768.)/4.0;
+            vv3n[k]=vv3[k]+norm3[k]/(8.*32768.)/4.0;
           }
 
           glVertex3fv(vv1);
@@ -1677,9 +1677,9 @@ void drawtiso(const mesh *meshi,int tranflag){
         }
 		    else{
           for(k=0;k<3;k++){
-            vv1n[k]=vv1[k]+norm[k]/(8.*32768.);
-            vv2n[k]=vv2[k]+norm[k]/(8.*32768.);
-            vv3n[k]=vv3[k]+norm[k]/(8.*32768.);
+            vv1n[k]=vv1[k]+norm[k]/(8.*32768.)/4.0;
+            vv2n[k]=vv2[k]+norm[k]/(8.*32768.)/4.0;
+            vv3n[k]=vv3[k]+norm[k]/(8.*32768.)/4.0;
           }
           glVertex3fv(vv1);
           glVertex3fv(vv1n);
@@ -1955,9 +1955,9 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
 		    norm2 = vertexnorm+i2;
 		    norm3 = vertexnorm+i3;
         for(k=0;k<3;k++){
-          vv1n[k]=vv1[k]+norm1[k]/(8.*32768.);
-          vv2n[k]=vv2[k]+norm2[k]/(8.*32768.);
-          vv3n[k]=vv3[k]+norm3[k]/(8.*32768.);
+          vv1n[k]=vv1[k]+norm1[k]/(8.*32768.)/4.0;
+          vv2n[k]=vv2[k]+norm2[k]/(8.*32768.)/4.0;
+          vv3n[k]=vv3[k]+norm3[k]/(8.*32768.)/4.0;
         }
 
         glVertex3fv(vv1);
@@ -1969,9 +1969,9 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
       }
 		  else{
         for(k=0;k<3;k++){
-          vv1n[k]=vv1[k]+norm[k]/(8.*32768.);
-          vv2n[k]=vv2[k]+norm[k]/(8.*32768.);
-          vv3n[k]=vv3[k]+norm[k]/(8.*32768.);
+          vv1n[k]=vv1[k]+norm[k]/(8.*32768.)/4.0;
+          vv2n[k]=vv2[k]+norm[k]/(8.*32768.)/4.0;
+          vv3n[k]=vv3[k]+norm[k]/(8.*32768.)/4.0;
         }
 
         glVertex3fv(vv1);
