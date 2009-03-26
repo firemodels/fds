@@ -1,6 +1,6 @@
 ## Global Information
 
-&HEAD CHID='ATF_NIST_Multi-Floor_250kW_01', 
+&HEAD CHID='ATF_NIST_Multi-Floor_PulseProfile_01', 
       TITLE='ATF NIST Experiments with corridors on two floors connected by a single stairwell.' /
 
 #Half Resolution
@@ -67,12 +67,18 @@ SURF ID='burner', HRRPUA=3125.0, COLOR='RED' / 3125 is 500kW from 0.16m^2 area
 #Pulse Profile Ramp with 500kW Peak HRR
 &RAMP ID='pulseprofile', T= 0.0, F=0.0 /
 &RAMP ID='pulseprofile', T= 60.0, F=0.02 /
+&RAMP ID='pulseprofile', T= 179.5, F=0.02 /
 &RAMP ID='pulseprofile', T= 180.0, F=0.20 /
+&RAMP ID='pulseprofile', T= 299.5, F=0.20 /
 &RAMP ID='pulseprofile', T= 300.0, F=0.50 /
+&RAMP ID='pulseprofile', T= 419.5, F=0.50 /
 &RAMP ID='pulseprofile', T= 420.0, F=0.02 /
+&RAMP ID='pulseprofile', T= 539.5, F=0.02 /
 &RAMP ID='pulseprofile', T= 540.0, F=1.0 /
+&RAMP ID='pulseprofile', T= 659.5, F=1.0 /
 &RAMP ID='pulseprofile', T= 660.0, F=0.02 /
 &RAMP ID='pulseprofile', T= 900.0, F=0.02 /
+&RAMP ID='pulseprofile', T= 901.5, F=0.00 /
 
 
 ## Geometric Information
