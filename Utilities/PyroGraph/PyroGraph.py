@@ -89,8 +89,13 @@ data_index_records = {}
 
 for key in data_sets:
     data_index_records[key] = {}
-    data_index_records[key]['d1_index_set'] = prsr.find_start_stop_index(data_sets[key][0][0],data_info[key]['d1_Start'],data_info[key]['d1_End'],data_info[key]['d1_Comp_Start'],data_info[key]['d1_Comp_End'],data_info[key]['Scale_Ind'],diagnostic_level)
-    data_index_records[key]['d2_index_set'] = prsr.find_start_stop_index(data_sets[key][1][0],data_info[key]['d2_Start'],data_info[key]['d2_End'],data_info[key]['d2_Comp_Start'],data_info[key]['d2_Comp_End'],data_info[key]['Scale_Ind'],diagnostic_level)
+    data_index_records[key]['d1_index_set'] = prsr.find_start_stop_index(data_sets[key][0][0], \
+    data_info[key]['d1_Start'],data_info[key]['d1_End'],data_info[key]['d1_Comp_Start'], \
+    data_info[key]['d1_Comp_End'],data_info[key]['Scale_Ind'],diagnostic_level)
+    
+    data_index_records[key]['d2_index_set'] = prsr.find_start_stop_index(data_sets[key][1][0], \
+    data_info[key]['d2_Start'],data_info[key]['d2_End'],data_info[key]['d2_Comp_Start'], \
+    data_info[key]['d2_Comp_End'],data_info[key]['Scale_Ind'],diagnostic_level)
 
 # Comparison Plotting...
 if process_set == 1 or process_set == 2:
@@ -102,7 +107,9 @@ if process_set == 1 or process_set == 2:
         p = prgrs.ProgressMeter(total=total, unit='Comparison Plots', rate_refresh=0.25)
     
     for key in data_info:
-        plot.comparison_plot(data_sets[key],data_info[key],data_index_records[key]['d1_index_set'],data_index_records[key]['d2_index_set'],styles,output_directory,diagnostic_level)
+        plot.comparison_plot(data_sets[key],data_info[key],data_index_records[key]['d1_index_set'], \
+        data_index_records[key]['d2_index_set'],styles,output_directory,diagnostic_level)
+        
         if diagnostic_level < 3:
             p.update(1)
         
@@ -131,11 +138,17 @@ if process_set == 1 or process_set == 3:
                 
             if data_info[key]['Metric'] == 'max':
                 for data_index in range(len(data_sets[key][0][1:])):
-                    max_results = calc.calc_max(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index],data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'],data_info[key]['d2_Initial_Value'],diagnostic_level)
+                    max_results = calc.calc_max(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index], \
+                    data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'], \
+                    data_info[key]['d2_Initial_Value'],diagnostic_level)
+                    
                     prsr.add_group_data_to_scatter_data_dict(data_info[key]['Quantity'],data_info[key]['Group'],max_results[:2],diagnostic_level)
             elif data_info[key]['Metric'] == 'min':
                 for data_index in range(len(data_sets[key][0][1:])):
-                    min_results = calc.calc_min(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index],data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'],data_info[key]['d2_Initial_Value'],diagnostic_level)
+                    min_results = calc.calc_min(data_sets[key][0][data_index+1][d1_metric_start_index:d1_metric_stop_index], \
+                    data_sets[key][1][data_index+1][d2_metric_start_index:d2_metric_stop_index],data_info[key]['d1_Initial_Value'], \
+                    data_info[key]['d2_Initial_Value'],diagnostic_level)
+                    
                     prsr.add_group_data_to_scatter_data_dict(data_info[key]['Quantity'],data_info[key]['Group'],min_results[:2],diagnostic_level)
             else:
                 if diagnostic_level >= 1:

@@ -6,10 +6,17 @@ pyrograph_plotter.py
 import matplotlib
 from matplotlib import rcParams
 rcParams['font.family'] = 'serif'
-rcParams['font.serif'] = ['Times New Roman']
+rcParams['font.serif'] = ['Times']
 rcParams['legend.fancybox'] = True
-rcParams['legend.fontsize'] = 'small'
 rcParams['legend.labelspacing'] = 0.2
+rcParams['pdf.use14corefonts'] = True
+#rcParams['text.usetex'] = True
+rcParams['path.simplify'] = True
+rcParams['font.size'] = 8
+rcParams['axes.labelsize'] = 8
+rcParams['legend.fontsize'] = 8
+rcParams['xtick.labelsize'] = 8
+rcParams['ytick.labelsize'] = 8
 
 matplotlib.use('PDF')
 import matplotlib.pyplot as plt
@@ -82,20 +89,24 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     
     plt.xlabel(ind_axis_title)
     plt.ylabel(dep_axis_title)
+    
     ax.text((plot_max-plot_min)*title_position[0], (plot_max-plot_min)*title_position[1], title, horizontalalignment='left') 
     ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.07), r'$\mu='+"%2.2f" % (mu_val*100)+'\%$')
     ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.12), r'$2\sigma='+"%2.2f" % (sigma_2_val*100)+'\%$')
     
+    ax.axis([plot_min, plot_max, plot_min, plot_max])
+    
     if legend_loc != '':
         leg = ax.legend(loc=legend_loc)
-    ax.axis([plot_min, plot_max, plot_min, plot_max])
+        
+    
     # if legend_loc != '':
-    #         for t in leg.get_texts():
-    #             t.set_fontsize('small')    # the legend text fontsize
+    #                 for t in leg.get_texts():
+    #                     t.set_fontsize('small')    # the legend text fontsize
             
-    #plt.show()
+    plt.show()
     plt.savefig(output_directory+output_filename)
-
+    plt.close()
 
 def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_directory,diagnostic_level):
     #Set Comparison Plot Settings
@@ -216,7 +227,7 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_d
         
         plot_type_function[data_info['Plot_Type']](d2_x_data, d2_y_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, marker=symboltype, ms=symbolsize, mfc=symbolcolor, mec=edgecolor, label=d2_key)
         linecount += 1
-        
+    
     if flip_axis == 'yes':
         plt.xlabel(dep_axis_title)
         plt.ylabel(ind_axis_title)
@@ -226,24 +237,55 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_d
         plt.ylabel(dep_axis_title)
     
     if flip_axis == 'yes':
-        ax.axis([ymin,ymax,xmin,xmax])
-    else:
-        ax.axis([xmin,xmax,ymin,ymax])
-    
-    if flip_axis == 'yes':
         ax.text((ymax-ymin)*title_x_pos, (xmax-xmin)*title_y_pos, title, horizontalalignment='left')
     else:
         ax.text((xmax-xmin)*title_x_pos, (ymax-ymin)*title_y_pos, title, horizontalalignment='left')
     
-    ax.grid(False)
+    if flip_axis == 'yes':
+        ax.axis([ymin,ymax,xmin,xmax])
+    else:
+        ax.axis([xmin,xmax,ymin,ymax])
     
     if legend_loc != 'none':
         leg = ax.legend(loc=legend_loc)
     
-    if legend_loc != 'none':
-            for t in leg.get_texts():
-                t.set_fontsize('small')    # the legend text fontsize
+    # if legend_loc != 'none':
+    #                     for t in leg.get_texts():
+    #                         t.set_fontsize('small')    # the legend text fontsize
             
-    #plt.show()
+    plt.show()
     plt.savefig(output_directory+output_filename)
+    plt.close()
 
+
+# def parallel_plot(plot_type,plot_args,num_cpus=1):
+#     import math, sys, time
+#     import pp
+#     
+#     # Tuple of all parallel python servers to connect with
+#     ppservers = ()
+#     #ppservers = ("10.0.0.1",)
+#     
+#     if num_cpus >= 1:
+#         # Creates jobserver with ncpus workers
+#         job_server = pp.Server(num_cpus, ppservers=ppservers)
+#     else:
+#         # Creates jobserver with automatically detected number of workers
+#         job_server = pp.Server(ppservers=ppservers)
+# 
+#     print "Starting parallel plotting with", job_server.get_ncpus(), "workers."
+#     
+#     if plot_type == 's':
+#         #print "Running Scatter Plots"
+#         func = scatter_plot()
+#     elif plot_type == 'c':
+#         #print "Running Comparison Plots"
+#         func = comparison_plot()
+#         
+#     else:
+#         print "Plot type is not recognized."
+#         exit()
+#     
+#     start_time = time.time()
+    
+    
