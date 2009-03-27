@@ -1,0 +1,22 @@
+RENDERDIR
+ ..\..\Manuals\SMV_5_User_Guide\scriptfigures
+SETVIEWPOINT
+ view 1
+LOADFILE
+ fire_line_05.sf
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ fire_line_fireline_10
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ fire_line_fireline_20
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ fire_line_fireline_30
+SETTIMEVAL
+ 40.0
+RENDERONCE
+ fire_line_fireline_40
