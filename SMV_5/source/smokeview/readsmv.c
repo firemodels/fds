@@ -7455,6 +7455,12 @@ int readini2(char *inifile, int localfile){
       RenderMenu(render_option);
       continue;
       }
+    if(match(buffer,"SHOWISONORMALS",14)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&showisonormals);
+      if(showisonormals!=1)showisonormals=0;
+      continue;
+    }
     if(match(buffer,"SHOWISO",7)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visAIso);
@@ -8783,6 +8789,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",transparent_state);
   fprintf(fileout,"SHOWISO\n");
   fprintf(fileout," %i\n",visAIso);
+  fprintf(fileout,"SHOWISONORMALS\n");
+  fprintf(fileout," %i\n",showisonormals);
   fprintf(fileout,"SMOKESENSORS\n");
   fprintf(fileout," %i %i\n",show_smokesensors,test_smokesensors);
 
