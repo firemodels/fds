@@ -89,7 +89,7 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_vslicechop_30
-// render iso files
+// render iso files (solid)
 UNLOADALL
 UNLOADALL
 LOADINIFILE
@@ -108,6 +108,23 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_iso_solid_30
+// render iso files (solid with normals)
+LOADINIFILE
+ plume5c_iso_normal.ini
+LOADFILE
+ plume5c_01.iso
+SETTIMEVAL
+ 1.0
+RENDERONCE
+ plume5c_iso_solid_normal_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_iso_solid_normal_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_iso_solid_normal_30
 // render iso files (outline)
 LOADINIFILE
  plume5c_iso_outline.ini
