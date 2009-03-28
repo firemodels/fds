@@ -24,11 +24,19 @@ cd %svn_root%\Manuals\SMV_5_User_Guide
 erase scriptfigures\*.png
 erase scriptfigures\*.help
 erase scriptfigures\*.version
+
 smokeview -help > scriptfigures\smokeview.help
 smokeview -version > scriptfigures\smokeview.version
 smokezip -help > scriptfigures\smokezip.help
+
+cd %svn_root%\Manuals\SMV_5_Verification_Guide
+erase scriptfigures\*.version
+erase scriptfigures\*.png
+smokeview -version > scriptfigures\smokeview.version
+
 cd ..\..\Verification\Visualization
 smokeview -runscript colorconv
+smokeview -runscript fire_line
 smokeview -runscript plume5a
 smokeview -runscript plume5b
 smokeview -runscript plume5c
