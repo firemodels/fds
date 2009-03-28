@@ -1,0 +1,723 @@
+\documentclass[11pt,twoside]{book}
+\usepackage{times,mathptm,multirow,fancyvrb,color,array}
+\usepackage{picins}
+
+%\usepackage{wrapfig}
+\usepackage[pdftex]{graphicx}
+\usepackage[pdftex,
+        colorlinks=true,
+        urlcolor=linkblue,     % \href{...}{...} external (URL)
+        citecolor=linkred,     % citation number colors
+        linkcolor=linknavy,    % \ref{...} and \pageref{...}
+        pdftitle={User's Guide for Smokeview Version 5 - A Tool for Visualizing Fire Dynamics Simulation Data},
+        pdfauthor={Glenn Forney},
+        pdfsubject={Verification Guide},
+        pdfkeywords={FDS, Fire Model, NIST, BFRL},
+        pdfproducer={pdflatex},
+       % pagebackref,
+        pdfpagemode=UseNone,
+        bookmarksopen=true,
+        plainpages=false]{hyperref}
+\usepackage{hyperref}
+\pdfcompresslevel=9
+\DeclareGraphicsExtensions{.jpg,.pdf,.png}
+\usepackage{setspace,moreverb}
+
+%\usepackage{eso-pic}
+\usepackage{color}
+\definecolor{linknavy}{rgb}{0,0,0.50196}
+\definecolor{linkred}{rgb}{1,0,0}
+\definecolor{linkblue}{rgb}{0,0,1}
+
+%\makeatletter
+%   \AddToShipoutPicture{%
+%     \setlength{\@tempdimb}{.5\paperwidth}%
+%     \setlength{\@tempdimc}{.5\paperheight}%
+%     \setlength{\unitlength}{1pt}%
+%     \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){
+%
+%\makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}{8cm}\selectfont{DRAFT
+%}}}}
+%    }
+% }
+%\makeatother
+
+\pagestyle{empty}
+
+\setlength{\textwidth}{6.5in}
+\setlength{\oddsidemargin}{0.00in}
+\setlength{\evensidemargin}{0.0in}
+
+
+
+\setlength{\textheight}{9.0in}
+\setlength{\topmargin}{0.00in}
+\setlength{\parindent}{0.2in}
+
+\setlength{\headheight}{0.00in}
+\setlength{\headsep}{0.0in}
+\setlength{\paperheight}{11.0in}
+\setlength{\paperwidth}{8.5in}
+%
+% new commands for this paper
+%
+\newcommand{\fdsinput}[1]{
+{
+\scriptsize
+\verbatiminput{../../Test_cases/Visualization/#1}
+}
+}
+
+\newcommand{\svini}{{\tt smokeview.ini}\ }
+\newcommand{\bverb}{
+\begin{Verbatim}[frame=single,rulecolor=\color{blue},
+framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
+}
+\newcommand{\everb}{
+\end{Verbatim}
+}
+\newcommand{\degC}{$^\circ$C}
+\newcommand{\figoptions}{hbp}
+\newcommand{\hhref}[1]{\href{#1}{{\tt #1}
+}}
+\newcommand{\figheight}{1.5in}
+\newcommand{\infigheight}{0.75in}
+\newcommand{\figheightA}{2.5in}
+\newcommand{\figheightAbar}{2.2in}
+\newcommand{\figheightC}{2.5in}
+\newcommand{\figwidth}{3.333333in}
+\newcommand{\figwidthb}{2.0in}
+\newcommand{\FDS}{{FDS}}
+\newcommand{\fds}{{FDS}}
+\newcommand{\Smokeview}{{Smokeview}}
+\newcommand{\smokeview}{{Smokeview}}
+\newcommand{\parma}{.75}
+\newcommand{\parmb}{.5}
+\newcommand{\parmc}{0.25}
+\newcommand{\bold}[1]{{\bf #1}}
+\newcommand{\etc}{{\em etc}}
+\newcommand{\ie}{{\em i.e.}}
+\newcommand{\eg}{{\em e.g.}}
+\newcommand{\via}{{via\ }}
+\newcommand{\dialoguenmenu}{\fbox{\tt Dialog} }
+\newcommand{\optionmenu}{\fbox{\tt Option} }
+\newcommand{\loadmenu}{\fbox{\tt Load/Unload} }
+\newcommand{\tourmenu}{\fbox{\tt Tour} }
+\newcommand{\helpmenu}{\fbox{\tt Help} }
+\newcommand{\setbounds}{\fbox{\tt Set Bounds} }
+\newcommand{\showmenu}{\fbox{\tt Show/Hide} }
+\newcommand{\frameit}[1]{\fbox{\tt #1}}
+\newcommand{\blist}{
+\begin{list}
+{}{
+\setlength{\leftmargin}{\parma in}
+\setlength{\labelwidth}{\parmb in}
+\setlength{\labelsep}{\parmc in}
+\setlength{\listparindent}{0.3in}
+\setlength{\topsep}{.3in}
+\setlength{\parsep}{.0in}
+}}
+\newcommand{\elist}{\end{list}}
+\newcommand{\hitem}[1]{\item[{\bf #1} \hfill]}
+
+\bibliographystyle{unsrt}
+%\doublespace
+\begin{document}
+%
+% ----------------------  first cover/title page --------------------------
+%
+\begin{minipage}[t][9in][s]{6.5in}
+
+\huge
+\flushright{NIST Special Publication xxxx}
+
+
+\vspace{1in}
+
+\Huge
+\flushright{Verification Guide for Smokeview Version 5 }
+
+\vspace{.5in}
+\normalsize
+\flushright{Glenn P. Forney}
+
+\vfill
+
+%\flushright{\includegraphics[width=4.0in]{figures/nistlogo_1line}}
+\flushright{\includegraphics[width=2.in]{figures/nistident_flright_vec}}
+\end{minipage}
+
+\newpage
+
+\hspace{5in}
+\newpage
+
+%
+% ----------------------  second cover/title page --------------------------
+%
+\begin{minipage}[t][9in][s]{6.5in}
+
+\huge
+\flushright{NIST Special Publication xxxx}
+
+\vspace{1.in}
+
+\Huge
+\flushright{Verification Guide for Smokeview Version 5 }
+
+\vspace{.5in}
+
+\normalsize
+\flushright{Glenn P. Forney\\
+%\includegraphics[width=1in]{figures/bfrl}  \\
+{\em Fire Research Division} \\
+{\em Building and Fire Research Laboratory}  \\
+}
+
+\vspace{.25in}
+
+
+\flushright{July 2008\\
+$SVN Repository$~$Revision: 3090 $}
+%
+\vfill
+
+\flushright{\includegraphics[width=1in]{figures/doc} }
+
+\small
+\flushright{U.S. Department of Commerce \\
+{\em Carlos M. Gutierrez, Secretary} \\
+\hspace{1in} \\
+National Institute of Standards and Technology \\
+{\em Patrick Gallagher, Acting Director} }
+
+\end{minipage}
+
+
+\date{}
+
+\setlength{\parindent}{0.25in}
+
+\newpage
+
+\begin{minipage}[t][9in][s]{6.5in}
+
+
+\flushright{Certain commercial entities, equipment, or materials may be identified in this \\
+document in order to describe an experimental procedure or concept adequately. Such \\
+identification is not intended to imply recommendation or endorsement by the \\
+National Institute of Standards and Technology, nor is it intended to imply that the \\
+entities, materials, or equipment are necessarily the best available for the purpose.
+}
+
+\vspace{3in}
+
+
+\vspace{3in}
+
+\large
+\flushright{\bf National Institute of Standards and Technology Special Publication 1017-1 \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-1, 142 pages (July 2008) \\
+CODEN: NSPUE2 }
+
+\vfill
+
+\flushright{U.S. GOVERNMENT PRINTING OFFICE \\
+WASHINGTON: 2007 \\
+\rule{3.5in}{0.01in} \\
+For sale by the Superintendent of Documents, U.S. Government Printing Office \\
+Internet: bookstore.gpo.gov -- Phone: (202) 512-1800 -- Fax: (202) 512-2250 \\
+Mail: Stop SSOP, Washington, DC 20402-0001 }
+
+\end{minipage}
+
+
+\frontmatter
+
+\pagestyle{plain}
+
+%---------------------------------------------------------------------------------
+%------------------------ Preface ------------------------------------------------
+%---------------------------------------------------------------------------------
+
+\chapter{Preface}
+\Smokeview\ is a software tool designed to visualize numerical
+calculations generated by fire models such as the Fire Dynamics Simulator (\fds),
+a computational fluid dynamics (CFD) model of fire-driven fluid
+flow or CFAST, a zone fire model. Smokeview visualizes smoke and other attributes of the fire
+using traditional scientific methods such as displaying tracer
+particle flow, 2D or 3D shaded contours of gas flow data such as
+temperature and flow vectors showing flow direction and magnitude.
+Smokeview also visualizes fire attributes realistically so that one can
+{\em experience}\ the fire. This is done by displaying a series of
+partially transparent planes where the transparencies in each
+plane (at each grid node) are determined from soot densities
+computed by FDS.  \Smokeview\ also visualizes static data at
+particular times again using 2D or 3D contours of data such as
+temperature and flow vectors showing flow direction and magnitude.
+
+\Smokeview\ and associated
+documentation for Windows, Linux and Mac/OSX may be downloaded from the web site {\bf
+\hhref{http://fire.nist.gov/fds}} at no cost.
+
+%---------------------------------------------------------------------------------
+%------------------------ Disclaimer ---------------------------------------------
+%---------------------------------------------------------------------------------
+
+\chapter{Disclaimer}
+
+The US Department of Commerce makes no warranty,
+expressed or implied, to users of Smokeview, and accepts no
+responsibility for its use. Users of Smokeview assume sole
+responsibility under Federal law for determining the
+appropriateness of its use in any particular application; for any
+conclusions drawn from the results of its use; and for any actions
+taken or not taken as a result of analysis performed using this
+tools.
+
+Smokeview and the companion program FDS is intended for use only
+by those competent in the fields of fluid dynamics,
+thermodynamics, combustion, and heat transfer, and is intended
+only to supplement the informed judgment of the qualified user.
+These software packages may or may not have predictive capability
+when applied to a specific set of factual circumstances. Lack of
+accurate predictions could lead to erroneous conclusions with
+regard to fire safety. All results should be evaluated by an
+informed user.
+
+Throughout this document, the mention of computer hardware or
+commercial software does not constitute endorsement by NIST,
+nor does
+it indicate that the products are necessarily those
+best suited for the
+intended purpose.
+ glenn.forney@nist.gov .
+
+\tableofcontents
+\listoffigures
+
+\mainmatter
+
+\pagenumbering{arabic}
+
+%
+% .............. new section ..............................
+%
+%\pagestyle{fancy}
+%\newcounter{picno}
+%\setcounter{picno}{24}
+%\newcounter{picnoe}
+%\setcounter{picnoe}{24}
+%\fancyhead{} \fancyfoot[RO] {
+% \setlength{\unitlength}{1mm}
+% %\stepcounter{picno}
+% \addtocounter{picno}{-1}
+% \begin{picture}(0,0)
+%   \put(-15,0){
+%     \epsfig{height=1.125in,figure=figures/movies/tankfarm_\number\value{picno}.eps}
+%   }
+% \end{picture}
+%}
+%
+%\fancyfoot[LE]
+%{
+%  \setlength{\unitlength}{1mm}
+%  %\stepcounter{picnoe}{-1}
+%  \addtocounter{picnoe}{-1}
+%  \begin{picture}(0,0)
+%    \put(-15,0){
+%      \epsfig{height=1.25in,figure=figures/movies/townhouse3_\number\value{picnoe}.eps}
+%    }
+%  \end{picture}
+%}
+%\renewcommand{\headrulewidth}{0.0pt}
+%\renewcommand{\footrulewidth}{0.0pt}
+%\renewcommand{\footskip}{1.5in}
+
+%---------------------------------------------------------------------------------
+%------------------------ Introduction ----------------------------------------
+%---------------------------------------------------------------------------------
+\chapter{Introduction}
+\section{Overview}
+\Smokeview\ is an advanced scientific software tool designed to visualize numerical
+predictions generated by fire models such as the Fire Dynamics Simulator (\fds),
+a computational fluid dynamics (CFD) model of fire-driven fluid
+flow\cite{FDS_Tech_Guide_5} and CFAST, a zone model of compartment fire phenomena\cite{Jones:2004A}. This report documents version 5 of
+\smokeview\. For details on setting up and
+running FDS cases read the FDS User's
+guide\cite{FDS_Users_Guide_5}.
+
+\FDS\ and \smokeview\ are used to model and visualize time-varying fire
+phenomena. However, FDS and Smokeview are not limited to fire
+simulation. For example, one may use FDS and \smokeview\ to model
+other applications such as contaminant flow in a building.
+\Smokeview\ performs this visualization by displaying time
+dependent tracer particle flow, animated contour slices of
+computed gas variables and surface data. \Smokeview\ also presents
+contours and vector plots of static data anywhere within a
+simulation scene at a fixed time. Several examples using these
+techniques to investigate fire incidents are documented in Refs.
+\cite{CHERRYROAD,IOWA,HOUSTON,WTC}.
+
+
+%---------------------------------------------------------------------------------
+%------------------------ Visualization Test Cases %---------------------------------------------------------------------------------
+
+\newcommand{\figheightD}{2.75in}
+\newcommand{\figheightE}{2.5in}
+\newcommand{\figheightF}{2.25in}
+\newcommand{\figheightG}{1.9in}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+
+\chapter{Verifying Smokeview}
+This chapter presents FDS results in the form of Smokeview images used
+to verify that Smokeview is working as expected.  The version of Smokeview being
+tested is
+{
+%\scriptsize
+\verbatiminput{scriptfigures/smokeview.version}
+}
+
+FDS generated data is presumed
+to be correct.  FDS has its own set of verification cases to test the correctness of the data.
+The purpose of the cases here is to confirm that data is drawn correctly.
+In particular these cases confirm
+that correct files are loaded, data is scaled and drawn correctly, geometry is drawn correctly
+{\em etc.}   Three types of verification cases are presented. The first set are the most important, those cases that verify that data is drawn correctly.  The second set of
+cases verify that various geometric elements are drawn correctly and the third set verifies
+that the various options and underlying features are implemented and perform properly.
+
+
+
+\section{Data Presentation}
+Figure \ref{figboundtest} shows a series of boundary file images drawn at 5.0, 10.0 and 30.0
+seconds.
+The first column of images colors data according to temperature using temperature while the second column of images
+highlights regions where ignition has occurred defined by wherever the surface temperature exceeds a specified value.
+Figure \ref{figisotest} shows a series of temperature isosurface file drawn images at 5.0, 10.0 and 30.0
+seconds.  The three columns of images present the isosurfaces drawn as a solid, outline and points.
+Figure \ref{figparttest} shows a series of particle file images drawn at 5.0, 10.0 and 30.0
+seconds.
+The first column shows particles while the second and third columns shows streaks of length 0.5 s and 1.0 s.
+Figure \ref{figslicetest} shows a series of slice file images drawn at 5.0, 10.0 and 30.0
+seconds.
+The first column draws all of the data.  The second data discards or chops data below 140~\degC.
+Figure \ref{figvslicetest} shows a series of vector slice file images drawn at 5.0, 10.0 and 30.0
+seconds.
+Similar to the slice file images, the first column draws all of the data while the second column discards or chops data below 140~\degC.
+Figure \ref{figsmoketest} shows a series of 3D smoke images drawn at 5.0, 10.0 and 30.0
+seconds.  The images contain both opacity slices derived from soot densities and heat release rate  per unit volume (HRRPUV).
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cccl}
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00000}&
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00025}&
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00050}\\
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00075}&
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00100}&
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00125}\\
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00150}&
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00175}&
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00200}\\
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00225}&
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00250}&
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00275}\\
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00300}&
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_00325}&
+ \includegraphics[width=\figheightG]{scriptfigures/colorconv_slice_10000}\\
+&&&\raisebox{0.0in}[0pt]{\includegraphics[height=8.0in]{figures/colorbar_20_100}}\\
+\end{tabular}
+\end{center}
+ \caption[Color conversion test.]{Color conversion test.}
+\label{figboundtest}%
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rccl}
+ 1.0 s
+ & \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_01}
+ & \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_cell_01}\\
+ 10.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_10}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_cell_10}\\
+ 30.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_30}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_bound_cell_30}\\
+&\\
+&cell averaged  data&cell centered data\\
+ &&&\raisebox{1.0in}[0pt]{\includegraphics[height=7.0in]{figures/colorbar_20_620}}\\
+  \end{tabular}
+\end{center}
+ \caption[Boundary file test.]{Boundary file test.}
+\label{figboundtest}%
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rcc}
+ 1.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_01}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_normal_01}\\
+ 10.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_10}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_normal_10}\\
+ 30.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_30}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_normal_30}\\
+ &solid&solid with normals
+  \end{tabular}
+\end{center}
+ \caption{Isosurface file test 1.}
+\label{figisotest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rcc}
+ 1.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_outline_01}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_points_01}\\
+ 10.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_outline_10}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_points_10}\\
+ 30.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_outline_30}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_points_30}\\
+ &outline&points
+  \end{tabular}
+\end{center}
+ \caption{Isosurface file test 2.}
+\label{figisotest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rccc}
+ 1.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_01}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak_01}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak2_01}\\
+ 10.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_10}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak_10}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak2_10}\\
+  30.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_30}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak_30}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_part_streak2_30}\\
+ &points&0.5 s streaks&1.0 s streaks\\
+  \end{tabular}
+\end{center}
+ \caption{Particle file test.}
+\label{figparttest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cccl}
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_01}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_chop_01}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_cell_01}\\
+
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_10}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_chop_10}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_cell_10}\\
+
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_30}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_chop_30}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_slice_cell_30}\\
+
+ &data chopped below 140~\degC&cell centered data\\
+ &&&\raisebox{1.0in}[0pt]{\includegraphics[height=7.0in]{figures/colorbar_20_620}}\\
+ \end{tabular}
+\end{center}
+ \caption{Slice file test.}
+\label{figslicetest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rccl}
+ 1.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslice_01}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslicechop_01}\\
+ 10.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslice_10}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslicechop_10}\\
+ 30.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslice_30}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_vslicechop_30}\\
+ &&data chopped below 140~\degC\\
+ &&&\raisebox{1.0in}[0pt]{\includegraphics[height=7.0in]{figures/colorbar_20_620}}\\
+
+ \end{tabular}
+\end{center}
+ \caption{Vector slice file test.}
+\label{figvslicetest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=\figheightD]{scriptfigures/fire_line_fireline_10}&
+\includegraphics[height=\figheightD]{scriptfigures/fire_line_fireline_20}\\
+10 s&20 s\\
+
+\includegraphics[height=\figheightD]{scriptfigures/fire_line_fireline_30}&
+\includegraphics[height=\figheightD]{scriptfigures/fire_line_fireline_40}\\
+30 s&40 s\\
+
+ \end{tabular}
+\end{center}
+ \caption{Fire line test.}
+\label{figfirelinetest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rc}
+ 1.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_01}\\
+ 10.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_10}\\
+ 30.0 s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_30}\\
+
+ \end{tabular}
+\end{center}
+ \caption{3D smoke file test.}
+\label{figsmoketest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+ \centering
+\begin{tabular}{c}
+\includegraphics[height=\figheightF]{scriptfigures/smoke_sensor_l}\\
+\includegraphics[height=\figheightF]{scriptfigures/smoke_sensor_c}\\
+\includegraphics[height=\figheightF]{scriptfigures/smoke_sensor_r}\\
+
+ \end{tabular}
+\end{center}
+\caption[Smoke sensor test.]{Smoke sensor test.
+A small white (255,255,255) smokesensor appears in front of a grey (128,128,128) obstacle.
+The red dot indicates where the smoke opacity is recorded.
+}
+\label{figsmokesensor}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+ \centering
+\begin{tabular}{c}
+\includegraphics[width=6.0in]{figures/graysquares2}\\
+\includegraphics[width=6.0in]{figures/graysquares3}\\
+ \end{tabular}
+\end{center}
+ \caption[Shade of gray resolution test.]{Shade of gray resolution test.
+ The number within each square represents the shade of gray used to color that square,
+ 0 for black and 255 for white.  Adjacent squares are drawn with nearly equal shades
+ testing the ability of sensors such as the eye, computer monitor or the printed page
+ to distinguish them.
+ }
+\label{figgraysquare}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+ \centering
+\begin{tabular}{m{1in}m{3in}m{3in}}
+ &0.1 m grid&0.2 m grid\\
+ all planes&\includegraphics[height=\figheightF]{scriptfigures/smoke_test_all}&
+ \includegraphics[height=\figheightF]{scriptfigures/smoke_test2_all}\\
+ every 2nd plane&\includegraphics[height=\figheightF]{scriptfigures/smoke_test_every2}&
+ \includegraphics[height=\figheightF]{scriptfigures/smoke_test2_every2}\\
+ every 3rd plane&\includegraphics[height=\figheightF]{scriptfigures/smoke_test_every3}&
+  \includegraphics[height=\figheightF]{scriptfigures/smoke_test2_every3}\\
+ theoretical&\multicolumn{2}{c}{\includegraphics[height=1.0in]{figures/graysquares}}\\
+
+ \end{tabular}
+\end{center}
+ \caption[3D smoke file test 2.]{3D smoke file test 2.
+ A quantitative test of the smoke opacity calculation in Smokeview.  This test simplifies
+  the general case by assuming a uniform distribution of smoke.  Smoke grey levels are computed
+  using $grey level (GL) = 255*exp(-K*S*\Delta X)$
+  where $K=8700$~m2/kg is the mass extinction value, $S=79.67$~mg/m3 is the soot density
+  and $\Delta x$ is the smoke path length.  Path lengths (smoke sensor locations) are chosen to obtain grey levels of 192, 128, 64, 32, 16 and 8.
+ }
+\label{figsmoketest2}%
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_005}&
+ \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_gpu_005}\\
+ \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_010}&
+ \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_gpu_010}\\
+ \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_030}&
+ \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_gpu_030}\\
+ CPU corrected&GPU corrected\\
+ \end{tabular}
+\end{center}
+ \caption[3D smoke file test 3 - GPU Test]{3D smoke file test 3 - GPU Test}
+\label{figsmoketest3}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_plot3d_step}\\
+ step contours\\
+ \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_plot3d_line}\\
+ line contours\\
+ \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_plot3d_cont}\\
+ continuous contours
+ \end{tabular}
+\end{center}
+ \caption{PLOT3D file test}
+\label{figPLOT3Dtest}%
+\end{figure}
+\section{Geometry}
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_solid}\\
+ solid\\
+ \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_outline}\\
+ outline\\
+ \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_hidden}\\
+ hidden\\
+
+ \end{tabular}
+\end{center}
+ \caption{Obstacle view test.}
+\label{figobstest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_solid}\\
+ all vents\\
+ \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_noopen}\\
+ no open vents\\
+ \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_novents}\\
+ no vents\\
+
+ \end{tabular}
+\end{center}
+ \caption{Vent view test.}
+\label{figventest}%
+\end{figure}
+
+
+\section{Other}
+
+
+\end{document}
