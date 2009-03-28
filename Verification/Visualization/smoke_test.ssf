@@ -1,5 +1,5 @@
 RENDERDIR
- ..\..\Manuals\SMV_5_User_Guide\scriptfigures
+ ..\..\Manuals\SMV_5_Verification_Guide\scriptfigures
 UNLOADALL
 LOADFILE
  smoke_test_01.s3d

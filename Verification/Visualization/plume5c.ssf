@@ -1,6 +1,6 @@
 // put files in directory
 RENDERDIR
- ..\..\Manuals\SMV_5_User_Guide\scriptfigures
+ ..\..\Manuals\SMV_5_Verification_Guide\scriptfigures
 // render slice files
 UNLOADALL
 LOADINIFILE
