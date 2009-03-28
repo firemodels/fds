@@ -232,7 +232,7 @@ SUBROUTINE DENSITY(NM)
 ! Update the density and species mass fractions
 
 USE COMP_FUNCTIONS, ONLY: SECOND 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT
+USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
                             CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_ZONE,MIXTURE_FRACTION_SPECIES, &
                             GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,BAROCLINIC, &
@@ -364,7 +364,8 @@ CASE(.TRUE.) PREDICTOR_STEP
       PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
    ENDDO
 
-! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+
    IF (N_SPECIES>0) THEN
       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,YY_GET) SHARED(RSUM)
       DO K=1,KBAR
@@ -372,8 +373,7 @@ CASE(.TRUE.) PREDICTOR_STEP
             DO I=1,IBAR   
                !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_06'
                YY_GET(:) = YYS(I,J,K,:)
-               CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM(I,J,K))
-               RSUM(I,J,K) = R0/RSUM(I,J,K)
+               CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
             ENDDO
          ENDDO
       ENDDO
@@ -516,7 +516,8 @@ CASE(.FALSE.) PREDICTOR_STEP
       PBAR(:,I) = .5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_S_DT(I)*DT)
    ENDDO
  
-! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
+
    IF (N_SPECIES>0) THEN
       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,YY_GET) SHARED(RSUM)
       DO K=1,KBAR
@@ -524,8 +525,7 @@ CASE(.FALSE.) PREDICTOR_STEP
             DO I=1,IBAR   
                !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_15'
                YY_GET(:) = YY(I,J,K,:)
-               CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM(I,J,K))
-               RSUM(I,J,K) = R0/RSUM(I,J,K)
+               CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
             ENDDO
          ENDDO
       ENDDO
@@ -544,7 +544,8 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDIF
    ENDIF
 
-! Extract predicted temperature at next time step from Equation of State
+   ! Extract predicted temperature at next time step from Equation of State
+
    IF (.NOT. ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
          !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
@@ -575,8 +576,6 @@ END SELECT PREDICTOR_STEP
 
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
  
-!! CONTAINS
-
 END SUBROUTINE DENSITY
  
 
@@ -1066,7 +1065,7 @@ SUBROUTINE DENSITY_TVD(NM)
 ! Update the density and species mass fractions
 
 USE COMP_FUNCTIONS, ONLY: SECOND 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT
+USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
                             CHANGE_TIME_STEP,ISOTHERMAL,TMPA, N_ZONE,MIXTURE_FRACTION_SPECIES, LU_ERR, &
                             GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,FLUX_LIMITER, &
@@ -1155,8 +1154,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
          DO J=1,JBAR
             DO I=1,IBAR       
                YY_GET(:) = YYS(I,J,K,:)
-               CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM(I,J,K))
-               RSUM(I,J,K) = R0/RSUM(I,J,K)
+               CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
             ENDDO
          ENDDO
       ENDDO
@@ -1269,8 +1267,7 @@ ELSEIF (CORRECTOR) THEN
          DO J=1,JBAR
             DO I=1,IBAR   
                YY_GET(:) = YY(I,J,K,:)
-               CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM(I,J,K))
-               RSUM(I,J,K) = R0/RSUM(I,J,K)
+               CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
             ENDDO
          ENDDO
       ENDDO
