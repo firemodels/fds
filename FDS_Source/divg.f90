@@ -18,7 +18,7 @@ CONTAINS
 SUBROUTINE DIVERGENCE_PART_1(T,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_D,GET_K,GET_CP
+USE PHYSICAL_FUNCTIONS, ONLY: GET_DIFFUSIVITY,GET_CONDUCTIVITY,GET_SPECIFIC_HEAT
 
 ! Compute contributions to the divergence term
  
@@ -144,7 +144,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                ITMP = MIN(5000,NINT(TMP(I,J,K)))
                YSUM = SUM(YYP(I,J,K,:)) - SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
                ZZ_GET(:) = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
-               CALL GET_D(ZZ_GET,YSUM,RHO_D(I,J,K),ITMP)
+               CALL GET_DIFFUSIVITY(ZZ_GET,YSUM,RHO_D(I,J,K),ITMP)
                RHO_D(I,J,K) = RHOP(I,J,K)*RHO_D(I,J,K)
             ENDDO
          ENDDO
@@ -361,6 +361,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
    KDTDZ => WORK3
    KP    => WORK4
    KP = Y2K_C(NINT(TMPA))*SPECIES(0)%MW
+
    ! Compute thermal conductivity k (KP)
  
    K_DNS_OR_LES: IF (DNS) THEN
@@ -374,7 +375,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = MIN(5000,NINT(TMP(I,J,K)))
                   YY_GET(:) = YYP(I,J,K,:)
-                  CALL GET_K(YY_GET,KP(I,J,K),ITMP)     
+                  CALL GET_CONDUCTIVITY(YY_GET,KP(I,J,K),ITMP)     
                ENDDO
             ENDDO
          ENDDO
@@ -525,7 +526,7 @@ ELSE
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = MIN(5000,NINT(TMP(I,J,K)))
             YY_GET(:) = YYP(I,J,K,:)
-            CALL GET_CP(YY_GET,CP_MF,ITMP)
+            CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,ITMP)
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_MF
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
