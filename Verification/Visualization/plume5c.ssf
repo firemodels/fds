@@ -1,7 +1,11 @@
-// put files in directory
+
+// put rendered files in specified directory
+
 RENDERDIR
  ..\..\Manuals\SMV_5_Verification_Guide\scriptfigures
+
 // render slice files
+
 UNLOADALL
 LOADINIFILE
  plume5c_slice.ini
@@ -19,7 +23,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_slice_30
+
 // render cell centered slice files
+
 UNLOADALL
 LOADINIFILE
  plume5c_slice_cell.ini
@@ -37,7 +43,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_slice_cell_30
-// render slice files with chopping
+
+// render slice files with data chopping
+
 UNLOADALL
 LOADINIFILE
  plume5c_slicechop.ini
@@ -53,7 +61,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_slice_chop_30
-// render vslice files
+
+// render vector slice files
+
 UNLOADALL
 LOADINIFILE
  plume5c_vslice.ini
@@ -71,7 +81,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_vslice_30
-// render vslice files with chopping
+
+// render vector slice files with chopping
+
 UNLOADALL
 LOADINIFILE
  plume5c_vslicechop.ini
@@ -89,7 +101,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_vslicechop_30
+
 // render iso files (solid)
+
 UNLOADALL
 UNLOADALL
 LOADINIFILE
@@ -108,7 +122,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_iso_solid_30
+
 // render iso files (solid with normals)
+
 LOADINIFILE
  plume5c_iso_normal.ini
 LOADFILE
@@ -125,7 +141,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_iso_solid_normal_30
+
 // render iso files (outline)
+
 LOADINIFILE
  plume5c_iso_outline.ini
 UNLOADALL
@@ -143,7 +161,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_iso_outline_30
+
 // render iso files (points)
+
 LOADINIFILE
  plume5c_iso_points.ini
 UNLOADALL
@@ -161,7 +181,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_iso_points_30
-// render particle files
+
+// render particle files using points
+
 LOADINIFILE
  plume5c_part.ini
 UNLOADALL
@@ -181,7 +203,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_part_30
-// render particle streak files
+
+// render particle files using streaks
+
 UNLOADALL
 LOADINIFILE
  plume5c_part_streak.ini
@@ -201,7 +225,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_part_streak_30
-// render particle streak2 files
+
+// render particles using streaks (different length)
+
 UNLOADALL
 LOADINIFILE
  plume5c_part_streak2.ini
@@ -221,7 +247,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_part_streak2_30
+
 // render boundary files
+
 UNLOADALL
 LOADINIFILE
  plume5c_bound.ini
@@ -239,7 +267,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_bound_30
+
 // render cell centered boundary files
+
 UNLOADALL
 LOADINIFILE
  plume5c_bound.ini
@@ -257,7 +287,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  plume5c_bound_cell_30
-// render smoke files
+
+// render 3D smoke files
+
 UNLOADALL
 LOADFILE
  plume5c_01.s3d
