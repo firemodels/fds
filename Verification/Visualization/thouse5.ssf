@@ -1,5 +1,11 @@
+
+// put rendered files in specified directory
+
 RENDERDIR
  ..\..\Manuals\SMV_5_User_Guide\scriptfigures
+
+// render 3D smoke
+
 LOADINIFILE
  thouse5_part.ini
 UNLOADALL
@@ -23,6 +29,9 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_smoke_060
+
+// render 3D smoke using GPU
+
 LOADINIFILE
  thouse5_gpu.ini
 LOAD3DSMOKE
@@ -41,6 +50,9 @@ SETTIMEVAL
  30.0
 RENDERONCE
  thouse5_smoke_gpu_030 
+
+// render slice files
+
 UNLOADALL
 LOADSLICE
  TEMPERATURE
@@ -61,6 +73,9 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_slice_060
+
+// render chopped slice file (ceiling jet)
+
 LOADINIFILE
  thouse5_cjet.ini
 UNLOADALL
@@ -83,6 +98,9 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_cjet_060
+
+// render vector slice file
+
 UNLOADALL
 LOADVSLICE
  TEMPERATURE
@@ -103,6 +121,9 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_vslice_060
+
+// render iso-surface
+
 UNLOADALL
 LOADISO
  TEMPERATURE
@@ -122,6 +143,9 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_iso_060
+
+// render boundary file (cell averaged)
+
 UNLOADALL
 LOADFILE
  thouse5_03.bf
@@ -141,6 +165,9 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_bound_060
+
+// render boundary file (cell centered)
+
 LOADFILE
  thouse5_06.bf
 SETTIMEVAL
@@ -159,6 +186,9 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_bound_cell_060
+
+// render particles
+
 UNLOADALL
 LOADPARTICLES
 PARTCLASSCOLOR
@@ -185,6 +215,9 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_part_060
+
+// render particles using streaks
+
 LOADINIFILE
  thouse5_streak.ini
 SETTIMEVAL
@@ -203,25 +236,43 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_streak_060
+
+// render OBSTs using solid view
+
 UNLOADALL
 RENDERONCE
  thouse5_solid
+
+// render OBSTs using outline view
+
 LOADINIFILE
  thouse5_outline.ini
 RENDERONCE
  thouse5_outline
+
+// render geometry using hidden view (ie don't draw OBSTs)
+
 LOADINIFILE
  thouse5_hidden.ini
 RENDERONCE
  thouse5_hidden
+
+// render vents - don't show open vents
+
 LOADINIFILE
  thouse5_noopen.ini
 RENDERONCE
  thouse5_noopen
+
+// render vents - don't show any vents
+
 LOADINIFILE
  thouse5_novents.ini
 RENDERONCE
  thouse5_novents
+
+// render PLOT3D stepped contours
+
 UNLOADALL
 LOADINIFILE
  thouse5_plot3d.ini
@@ -231,6 +282,9 @@ SETVIEWPOINT
  view 2
 RENDERONCE
  thouse5_plot3d_step
+
+// render PLOT3D line contours
+
 UNLOADALL
 LOADINIFILE
  thouse5_plot3d2.ini
@@ -240,6 +294,9 @@ SETVIEWPOINT
  view 2
 RENDERONCE
  thouse5_plot3d_line
+
+// render PLOT3D continuous contours
+
 UNLOADALL
 LOADINIFILE
  thouse5_plot3d3.ini
@@ -249,6 +306,9 @@ SETVIEWPOINT
  view 2
 RENDERONCE
  thouse5_plot3d_cont
+
+// render 3D smoke with no clipping
+
 UNLOADALL
 LOAD3DSMOKE
  soot mass fraction
@@ -260,18 +320,27 @@ SETTIMEVAL
  30.000000
 RENDERONCE
  thouse5_smoke_noclip
+
+// render 3D smoke while clipping blockages (but not smoke)
+
 LOADINIFILE
  thouse5_clip_blockages.ini
 SETTIMEVAL
  30.000000
 RENDERONCE
  thouse5_smoke_clip_blockages
+
+// render 3D smoke, clipping blockages and smoke
+
 LOADINIFILE
  thouse5_clip_blockages_data.ini
 SETTIMEVAL
  30.000000
 RENDERONCE
  thouse5_smoke_clip_blockages_data
+
+// render geometry with ticks
+
 UNLOADALL
 LOADINIFILE
  thouse5_ticks.ini
@@ -279,6 +348,9 @@ SETVIEWPOINT
  front
 RENDERONCE
  thouse5_ticks
+
+// render two left/right stereo images
+
 UNLOADALL
 LOADISO
  MIXTURE FRACTION
@@ -288,18 +360,27 @@ SETTIMEVAL
  30.000000
 RENDERONCE
  thouse5_iso_lr_stereo
+
+// render two stereo images
+
 LOADINIFILE
  thouse5_rc_stereo.ini 
 SETTIMEVAL
  30.000000
 RENDERONCE
  thouse5_iso_rc_stereo
+
+// render two stereo images
+
 LOADINIFILE
  thouse5_rb_stereo.ini 
 SETTIMEVAL
  30.000000
 RENDERONCE
  thouse5_iso_rb_stereo
+
+// render same view but not using stereo
+
 LOADINIFILE
  thouse5_no_stereo.ini 
 SETTIMEVAL
