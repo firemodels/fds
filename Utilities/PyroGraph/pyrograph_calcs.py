@@ -5,7 +5,8 @@ pyrograph_calcs.py
 
 import sys
 import os
-from math import sqrt
+from math import log, sqrt, exp
+from statlib import stats
 
 def mu_2sigma(x_data_set,y_data_set,diagnostic_level):
     epsilion_vals = []
@@ -23,6 +24,49 @@ def mu_2sigma(x_data_set,y_data_set,diagnostic_level):
         print '2 Sigma:', sigma_2_val
     
     return[mu_val,sigma_2_val]
+    
+
+def delta_sigma(ind_data_set,dep_data_set,sigma_e,diagnostic_level):
+    E_values = []
+    M_values = []
+    
+    for i in range(len(ind_data_set)):
+        for E_value in ind_data_set[i]:
+            E_values.append(E_value)
+        for M_value in dep_data_set[i]:
+            M_values.append(M_value)
+    
+    # Find Length of data set.
+    n = len(E_values)
+    #print 'Length of set:', n
+    
+    # Compute natural log of each value in data sets.
+    ln_E_set = [log(abs(E_values[i])) for i in range(len(E_values))]
+    ln_M_set = [log(abs(M_values[i])) for i in range(len(M_values))]
+    #print 'ln_E_set:', ln_E_set
+    #print 'ln_M_set:', ln_M_set
+    
+    # Compute 'M_hat' for each value in ln_E_set.
+    M_hat = [stats.mean(ln_M_set)-stats.mean(ln_E_set)+ln_E_set[i] for i in range(len(ln_E_set))]
+    #print 'M_hat:', M_hat
+    
+    # Compute 'u' values.
+    u_temp = [((((ln_M_set[i])-(M_hat[i]))**2.0)/(n-1.0)) for i in range(len(ln_M_set))]
+    u = sqrt(sum(u_temp))
+    #print 'u:', u
+    
+    omega = sqrt(abs((u**2)-(sigma_e**2)))
+    #print 'omega:', omega
+    
+    # Compute 'delta'
+    delta=exp(stats.mean(ln_M_set)-stats.mean(ln_E_set)+(omega**2/2))
+    #print 'delta:', delta
+    
+    #Compute sigma
+    sigma  = omega*delta
+    #print 'sigma', sigma
+    
+    return[delta,sigma]
 
 def calc_min(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level):
     if diagnostic_level >= 3:
