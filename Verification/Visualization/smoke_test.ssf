@@ -17,3 +17,11 @@ LOADINIFILE
  smoke_test_every3.ini
 RENDERONCE
  smoke_test_every3
+UNLOADALL
+LOADINIFILE
+ smoke_test.ini
+SETVIEWPOINT
+ view 1
+RENDERONCE
+ smoke_test_side
+
