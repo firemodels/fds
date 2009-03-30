@@ -68,6 +68,13 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     sigma_2_val = mu_sigma[1]
     mu_max = plot_max*(1+mu_val)
     
+    delta_sigma = calc.delta_sigma(x_data_set,y_data_set,percent_error,diagnostic_level)
+    delta = delta_sigma[0]
+    sigma = delta_sigma[1]
+    print 'New Delta:',delta
+    print 'New Sigma:',sigma
+    bias_max = plot_max*delta
+    
     # Draw Center Line
     ax.plot([plot_min,plot_max],[plot_min,plot_max], 'k-', linewidth=2.0, label='_nolegend_')
     
@@ -80,6 +87,7 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     if mu_line == 'yes':
         # Draw Mu Line
         muline = ax.plot([plot_min,plot_max],[plot_min,mu_max], 'r-', linewidth=1.0, label='_nolegend_')
+        #bias_line = ax.plot([plot_min,plot_max],[plot_min,bias_max], 'g-', linewidth=1.0, label='_nolegend_')
     
     if sigma_lines == 'yes':
         # Upper 2 Sigma Line
@@ -93,6 +101,8 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     ax.text((plot_max-plot_min)*title_position[0], (plot_max-plot_min)*title_position[1], title, horizontalalignment='left') 
     ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.07), r'$\mu='+"%2.2f" % (mu_val*100)+'\%$')
     ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.12), r'$2\sigma='+"%2.2f" % (sigma_2_val*100)+'\%$')
+    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.17), r'$Bias'+"%2.2f" % ((delta-1)*100)+'\%$')
+    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.22), r'$\sigma='+"%2.2f" % (sigma*100)+'\%$')
     
     ax.axis([plot_min, plot_max, plot_min, plot_max])
     
