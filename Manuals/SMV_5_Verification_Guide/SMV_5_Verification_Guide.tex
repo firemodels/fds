@@ -109,7 +109,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \newcommand{\hitem}[1]{\item[{\bf #1} \hfill]}
 
 \bibliographystyle{unsrt}
-%\doublespace
+\doublespace
 \begin{document}
 %
 % ----------------------  first cover/title page --------------------------
@@ -370,8 +370,8 @@ that the various options and underlying features are implemented and perform pro
 
 
 \section{Surface contours (Boundary Files)}
-Figure \ref{figboundtest} presents images verifying the display of boundary file data.
-A series of boundary file images drawn at 5.0, 10.0 and 30.0
+Figure \ref{figboundtest} presents images verifying the display of surface contours or boundary file data.
+A series of boundary file images are drawn at 5.0, 10.0 and 30.0
 seconds.
 The first column of images colors data at cell nodes using temperatures averaged at surrounding cell centers.  The second column of images colors data using data values at cell centers.
 The FDS input file for this test is {\tt plume5c.fds}\ (see Appendix \ref{FDSplume5c}).
@@ -401,8 +401,8 @@ The images for this test were created automatically by running the smokeview scr
 Figures \ref{figisotest} and \ref{figisotest2} present images verifying the display of isosurfaces.
 A series of temperature isosurfaces are drawn at at 5.0, 10.0 and 30.0
 seconds.
-The first column in figure \ref{figisotest2}\ represents the iso-surface using points.  The second column represents the iso-surface using outlines.
-The first column in figure \ref{figisotest}\ represents the iso-surface using a solid surface.  The second column also represents the iso-surface using a solid surface but also includes normal vectors.
+The first column in figure \ref{figisotest2}\ presents the iso-surface using points.  The second column presents the iso-surface using triangulated outlines.
+The first column in figure \ref{figisotest}\ presents the iso-surface using a solid surface.  The second column also presents the iso-surface using a solid surface but also includes normal vectors.
 The FDS input file for this test is {\tt plume5c.fds}\ (see Appendix \ref{FDSplume5c}).
 The images for this test were created automatically by running the smokeview script, {\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}).
 
@@ -419,7 +419,7 @@ The images for this test were created automatically by running the smokeview scr
  30.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_outline_30}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_points_30}\\
- &outline&points
+ &outline view&point view
   \end{tabular}
 \end{center}
  \caption{Isosurface file test 1.}
@@ -438,7 +438,7 @@ The images for this test were created automatically by running the smokeview scr
  30.0 s&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_30}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_normal_30}\\
- &solid&solid with normals
+ &solid view&solid view with normal vectors
   \end{tabular}
 \end{center}
  \caption{Isosurface file test 2.}
@@ -551,7 +551,8 @@ The images for this test were created automatically by running the smokeview scr
 
  \end{tabular}
 \end{center}
- \caption{Fire line test.}
+ \caption[Fire line test]{Fire line test.  The fire line, a region of high temperature, follows the terrain as
+ it progresses from left to right.}
 \label{figfirelinetest}%
 \end{figure}
 
@@ -585,20 +586,33 @@ The images for this test were created automatically by running the smokeview scr
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
- \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_plot3d_step}\\
- step contours\\
  \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_plot3d_line}\\
  line contours\\
+ \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_plot3d_step}\\
+ step contours\\
  \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_plot3d_cont}\\
  continuous contours
  \end{tabular}
 \end{center}
- \caption{PLOT3D file test}
+ \caption[PLOT3D file test]{PLOT3D file test showing three different types of temperature contours (line,
+ stepped, continuous) in a townhouse stairwell.}
 \label{figPLOT3Dtest}%
 \end{figure}
 
-\chapter{Smoke Opacity Tests}
+\chapter{Smoke Visualization Tests}
 
+Correct smoke visualization requires that smoke be both computed and drawn correctly.  
+The FDS verification guide\cite{FDS_5_Verification_Guide} addresses the question of correct 
+computation in terms of soot/smoke production, transport {\em etc.}  In this chapter it is presumed that this component of the problem is a given and ask the question is smoke drawn correctly.  More precisely, given a known density and distribution of soot does the 3D smoke drawn by Smokeview match what the {\em theory}\ would suggest.
+
+The smoke drawing verification problem can be broken down into two main steps.  The first step is to verify that Smokeview can record or denote the the correct gray level of smoke that is drawn.  
+The second step is to verify that Smokeview can correctly integrate smoke density from the scene background towards the observation point (eye location).
+
+To record smoke gray levels, Smokeview makes use of a special FDS sensor or device.
+This device behaves like other FDS devices but has the additional property that when displayed by Smokeview, it displays the gray level at the sensor location as viewed by the observer.  The gray level is simply Smokeview's computation of smoke level between the sensor location and the eye.  As an aside, these computations are performed by the video card using OpenGL, the graphical library Smokeview uses to display FDS scenarios.  The user places a device with name smoke\_sensor at a particular x, y, z location.
+Smokeview displays the sensor as a white disk with color (255,255,255) always oriented towards the observer. When drawing smoke between the sensor and the observer (your eye) the smoke sensor is partially obscured.  Smokeview then alters the smoke sensor color according to how much and how thick the intervening smoke is.
+
+Figure \ref{figsmokesensor} illustrates an initial test of this process.  It verifies that Smokeview correctly {\em knows}\ where the sensor is located and can correctly record its gray level even when surrounded by other objects of different colors.  In this case, the smoke sensor is white and there is no intervening smoke.  The background is a neutral gray with gray level of 128.  The value displayed over the sensor then should always be 255 no matter how the scene is oriented.
 \begin{figure}[\figoptions]
 \begin{center}
  \centering
@@ -616,6 +630,8 @@ The red dot indicates where the smoke opacity is recorded.
 \label{figsmokesensor}%
 \end{figure}
 
+Figure \ref{figgraysquare} shows a reference shade of gray bar for shades near white and shades near black.
+The numerical values range from 0 (black) to 255 (white).  Of interest is the difficulty one has in distinguishing nearly equal shades.  This gives a benchmark on ones ability to distinguish smoke visualizations.
 \begin{figure}[\figoptions]
 \begin{center}
  \centering
@@ -631,6 +647,17 @@ The red dot indicates where the smoke opacity is recorded.
  to distinguish them.
  }
 \label{figgraysquare}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+ \centering
+\begin{tabular}{c}
+ \includegraphics[height=4.0in]{scriptfigures/smoke_test_side}
+ \end{tabular}
+\end{center}
+ \caption[Side view of 3D smoke test compartment]{Side view of 3D smoke test compartment}
+\label{figsmoketestgeom}%
 \end{figure}
 
 \begin{figure}[\figoptions]
