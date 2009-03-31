@@ -8,6 +8,8 @@ import os
 from math import log, sqrt, exp
 from statlib import stats
 
+tolerance = 1.0e-8
+
 def mu_2sigma(x_data_set,y_data_set,diagnostic_level):
     epsilion_vals = []
     for i in range(len(x_data_set)):
@@ -36,13 +38,16 @@ def delta_sigma(ind_data_set,dep_data_set,sigma_e,diagnostic_level):
         for M_value in dep_data_set[i]:
             M_values.append(M_value)
     
+    #print 'E_Values:', E_values
+    #print 'M_Values:', M_values
+    
     # Find Length of data set.
     n = len(E_values)
     #print 'Length of set:', n
     
     # Compute natural log of each value in data sets.
-    ln_E_set = [log(abs(E_values[i])) for i in range(len(E_values))]
-    ln_M_set = [log(abs(M_values[i])) for i in range(len(M_values))]
+    ln_E_set = [log(abs(float(E_values[i]))) for i in range(len(E_values))]
+    ln_M_set = [log(abs(float(M_values[i]))) for i in range(len(M_values))]
     #print 'ln_E_set:', ln_E_set
     #print 'ln_M_set:', ln_M_set
     
@@ -77,6 +82,15 @@ def calc_min(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level)
     temp_d2_data_values = [x for x in d2_data if x != -9999.0]
     d2_drop_value = float(d2_initial_value) - min(temp_d2_data_values)
     
+    if d1_drop_value == 0.0:
+        if diagnostic_level >= 3:
+            print 'Data set 1 has a zero drop value, setting value to lower tolerance.'
+        d1_drop_value = tolerance
+    if d2_drop_value == 0.0:
+        if diagnostic_level >= 3:
+            print 'Data set 2 has a zero drop value, setting value to lower tolerance.'
+        d2_drop_value = tolerance
+    
     if diagnostic_level >= 3:
         print "Data Set 1, Initial Value is:", d1_initial_value
         print "Data Set 1, Drop Value is:", d1_drop_value
@@ -90,7 +104,8 @@ def calc_min(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level)
         if diagnostic_level >= 3:
             print "Min Relative Difference is:", relative_difference
     except:
-        print "!!! Computation of Min relative_difference failed. !!!\nCheck source data for columns listed above."
+        print "!!! Computation of Min relative_difference failed. !!!\n \
+            Check source data for columns listed above."
         exit()
         
     return [d1_drop_value,d2_drop_value,relative_difference]
@@ -112,6 +127,15 @@ def calc_max(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level)
         d1_rise_value = max(temp_d1_data_values) - float(d1_initial_value)
         d2_rise_value = max(temp_d2_data_values) - float(d2_initial_value)
     
+    if d1_rise_value == 0.0:
+        if diagnostic_level >= 3:
+            print 'Data set 1 has a zero rise value, setting to lower tolerance.'
+        d1_rise_value = tolerance
+    if d2_rise_value == 0.0:
+        if diagnostic_level >= 3:
+            print 'Data set 2 has a zero rise value, setting to lower tolerance.'
+        d2_rise_value = tolerance
+        
     if diagnostic_level >= 3:
         print "Data Set 1, Initial Value is:", d1_initial_value
         print "Data Set 1, Rise Value is:", d1_rise_value
@@ -125,7 +149,8 @@ def calc_max(d1_data,d2_data,d1_initial_value,d2_initial_value,diagnostic_level)
         if diagnostic_level >= 3:
             print "Rise Relative Difference is:", relative_difference
     except:
-        print "!!! Computation of Rise relative_difference failed. !!!\nCheck source data for columns listed above."
+        print "!!! Computation of Rise relative_difference failed. !!!\n \
+            Check source data for columns listed above."
         exit()
     
     return [d1_rise_value,d2_rise_value,relative_difference]
