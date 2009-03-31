@@ -222,7 +222,7 @@ $SVN Repository$~$Revision$}
 
 \small
 \flushright{U.S. Department of Commerce \\
-{\em Carlos M. Gutierrez, Secretary} \\
+{\em Gary Locke, Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
 {\em Patrick Gallagher, Acting Director} }
@@ -323,9 +323,9 @@ user support, along with experimental model validation work.
 
 \section{Purpose}
 
-The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics Simulator (FDS). 
-Such a document is commonly referred to as a {\em Configuration Management Plan}, 
-known through the rest of this document as ``the Plan.'' This document will be updated as the necessity arises and will establish and provide 
+The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics Simulator (FDS).
+Such a document is commonly referred to as a {\em Configuration Management Plan},
+known through the rest of this document as ``the Plan.'' This document will be updated as the necessity arises and will establish and provide
 the basis for a uniform and concise standard of practice for the FDS development process. It is based in part on IEEE Standard 828~\cite{IEEE-828}.
 
 
@@ -375,7 +375,7 @@ Members of the FDS and Smokeview team share in the development and maintenance r
 \item Maintaining a suite of verification and validation cases to test model accuracy and reliability
 \item Developing and maintaining a ``Road Map'' of future development
 \end{enumerate}
-Most decisions concerning these various tasks are made individually or by consensus of the team members. 
+Most decisions concerning these various tasks are made individually or by consensus of the team members.
 In the event of a disagreement over technical issues, the decision is made by Kevin McGrattan, leader of the Fire Modeling Group in the Fire Research Division of BFRL,
 in consultation with team members at VTT, Finland.
 Non-technical issues are addressed by Anthony Hamins, Chief of the Fire Research Division in BFRL, or by
@@ -395,16 +395,16 @@ control of the project files and documents, procedures for making changes, and p
 
 \section{Document Identification and Control}
 
-Document identification and control consists of placing all project files in a central location and maintaining a record of changes to those files. 
+Document identification and control consists of placing all project files in a central location and maintaining a record of changes to those files.
 The central location is known as the {\em Repository}.
 
 
 \subsection{Project Repository}
 
-All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service 
-offered by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.  
-Under this system a centralized repository containing all project files resides on a Google Code server.  
-Subversion uses a single integer that identifies the version of the entire repository rather than of a specific file 
+All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service
+offered by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.
+Under this system a centralized repository containing all project files resides on a Google Code server.
+Subversion uses a single integer that identifies the version of the entire repository rather than of a specific file
 (i.e. anytime a change is made to the repository all files are incremented in version number).  A record of version number when a specific file was last changed is maintained.
 
 As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
@@ -464,11 +464,11 @@ the source code used for a particular compilation of FDS when reporting an error
 \subsection{Creating a Change Request}
 
 Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service that is part of
-Google Code.  To submit a new issue to the tracker or to provide follow up comments, the user must sign in with a Google Account.  
-The current location of the Issue Tracker can be found through a link under the 'Support' section of the menu 
+Google Code.  To submit a new issue to the tracker or to provide follow up comments, the user must sign in with a Google Account.
+The current location of the Issue Tracker can be found through a link under the 'Support' section of the menu
 on the FDS-SMV website \href{http://code.google.com/p/fds-smv/issues/list}{[Link to Tracker]}.
 
-A change request is initiated by opening a new issue.  The issue report contains the baseline identification (version number, compile date, and SVN revision number), 
+A change request is initiated by opening a new issue.  The issue report contains the baseline identification (version number, compile date, and SVN revision number),
 operating system, and a description of the defect or enhancement request.  Input files or other supporting documentation can be attached.
 
 \begin{figure}[ht!]
@@ -537,23 +537,23 @@ Release notes can help you decide whether the changes should effect the type of 
 Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity),
 and should not affect code functionality.
 
-For each release of FDS there is a unique Subversion (SVN) repository revision number associated with it.  
+For each release of FDS there is a unique Subversion (SVN) repository revision number associated with it.
 For example, FDS version 5.3.0 was built from files in the repository at SVN revision number 3193.
-The document connecting the release version to the SVN revision number is found in the {\em FDS Release Notes} wiki page 
+The document connecting the release version to the SVN revision number is found in the {\em FDS Release Notes} wiki page
 located at \href{http://code.google.com/p/fds-smv/wiki/FDS_Release_Notes}{{\ct http://code.google.com/p/fds-smv/wiki/FDS_Release_Notes}}
 The SVN revision number allows users to checkout or update their local copy of the project files from the repository to the same state as any previous release of the software.
 
 \subsection{Testing a New Release}
 
-Each proposed release undergoes software testing.  There are two sets of input files that are used to test new releases -- 
+Each proposed release undergoes software testing.  There are two sets of input files that are used to test new releases --
 a verification suite and a validation suite. The verification suite consists of a range of calculations, from ones that just test a feature to
 ones that compare FDS results with analytical solutions of the governing equations. The validation suite consists of simulations of a wide range
-of experiments.  
+of experiments.
 
 Testing will depend upon the type of baseline release:
 maintenance, minor, or major. A maintenance release occurs every few weeks.
 Each maintenance release is tested with the verification suite. Because each case requires no more than a few
-hours of computer time, the suite can be run overnight. The following day, the results of the calculations are automatically plotted and 
+hours of computer time, the suite can be run overnight. The following day, the results of the calculations are automatically plotted and
 compared with the expected results. This is done simply be recompiling the FDS User's Guide and Verification Guide, each of which contains pictures
 and graphs that demonstrate the test was successful.
 
@@ -565,7 +565,7 @@ the new version of the model has become noticeably less accurate than the old. W
 
 A major release of FDS occurs every few years. As the name implies, major changes are made to the algorithm, requiring months of beta testing, and several
 runs through the V\&V suites.
-   
+
 
 \subsection{Announcing a New Version}
 
