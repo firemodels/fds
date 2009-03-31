@@ -6,12 +6,10 @@ pyrograph_plotter.py
 import matplotlib
 from matplotlib import rcParams
 rcParams['font.family'] = 'serif'
-rcParams['font.serif'] = ['Times']
+rcParams['font.serif'] = ['Times New Roman']
 rcParams['legend.fancybox'] = True
 rcParams['legend.labelspacing'] = 0.2
-rcParams['pdf.use14corefonts'] = True
-#rcParams['text.usetex'] = True
-rcParams['path.simplify'] = True
+#rcParams['pdf.use14corefonts'] = True
 rcParams['font.size'] = 8
 rcParams['axes.labelsize'] = 8
 rcParams['legend.fontsize'] = 8
@@ -71,8 +69,9 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     delta_sigma = calc.delta_sigma(x_data_set,y_data_set,percent_error,diagnostic_level)
     delta = delta_sigma[0]
     sigma = delta_sigma[1]
-    print 'New Delta:',delta
-    print 'New Sigma:',sigma
+    if diagnostic_level >= 3:
+        print 'New Delta:',delta
+        print 'New Sigma:',sigma
     bias_max = plot_max*delta
     
     # Draw Center Line
@@ -87,7 +86,7 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     if mu_line == 'yes':
         # Draw Mu Line
         muline = ax.plot([plot_min,plot_max],[plot_min,mu_max], 'r-', linewidth=1.0, label='_nolegend_')
-        #bias_line = ax.plot([plot_min,plot_max],[plot_min,bias_max], 'g-', linewidth=1.0, label='_nolegend_')
+        bias_line = ax.plot([plot_min,plot_max],[plot_min,bias_max], 'g-', linewidth=1.0, label='_nolegend_')
     
     if sigma_lines == 'yes':
         # Upper 2 Sigma Line
@@ -101,8 +100,8 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     ax.text((plot_max-plot_min)*title_position[0], (plot_max-plot_min)*title_position[1], title, horizontalalignment='left') 
     ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.07), r'$\mu='+"%2.2f" % (mu_val*100)+'\%$')
     ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.12), r'$2\sigma='+"%2.2f" % (sigma_2_val*100)+'\%$')
-    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.17), r'$Bias'+"%2.2f" % ((delta-1)*100)+'\%$')
-    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.22), r'$\sigma='+"%2.2f" % (sigma*100)+'\%$')
+    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.17), r'$Bias='+"%2.2f" % ((delta-1)*100)+'\%$')
+    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.22), r'$2\sigma='+"%2.2f" % (2*sigma*100)+'\%$')
     
     ax.axis([plot_min, plot_max, plot_min, plot_max])
     
