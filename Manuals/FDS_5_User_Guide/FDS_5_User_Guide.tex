@@ -5504,7 +5504,8 @@ specify that the background gas species be something other than air. For a gas m
 $n$ species, FDS only solves transport equations for $n-1$ because it also solves an equation for
 total mass conservation. To set the properties of the implicitly defined {\ct BACKGROUND\_SPECIES}, use the
 {\ct MISC} line. If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW},
-and (optionally) its {\ct VISCOSITY} and {\ct CONDUCTIVITY}. In the absence of any of these parameters, the appropriate
+and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEAT},
+ {\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.  If either {\ct SPECIFIC\_HEAT} or {\ct ENTHALPY} is specified, then both must be specified.   The {\ct REFERENCE\_TEMPERATURE} is the temperature that corresponds to the specified value of {\ct SPECIFIC\_ENTHALPY).  In the absence of any of these parameters, the appropriate
 values of {\ct 'AIR'} are assumed.
 
 
@@ -9298,6 +9299,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0   \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & Initial mass fraction                       &                   & 0   \\ \hline
 {\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.  \\ \hline
+{\ct REFERENCE\_TEMPERATURE}        & Real        & Temperature for                          & $^\circ$C         & 25.  \\
+                                    &             & Specific Enthalpy                             &                   &     \\ \hline
+{\ct SPECIFIC\_ENTHALPY}            & Real        & Specific Enthalpy                            & kJ/kg             &      \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real        & Specific Heat                            & kJ/kg/K           &      \\ \hline
 {\ct SIGMALJ}                       & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
 {\ct VISCOSITY}                     & Real        & Dynamic Viscosity $mu$                      & kg/m/s            &     \\ \hline
 \end{longtable}
