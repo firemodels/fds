@@ -1196,7 +1196,8 @@ TYPE (OMESH_TYPE), POINTER :: OM
 LOGICAL :: SPEC_TANG_VEL(2)
 
 !! new for WERNER_WENGLE_WALL_MODEL
-REAL(EB) :: MU_WALL,RHO_WALL,SLIP_COEF,TAU_XY_WALL,TAU_YX_WALL,TAU_YZ_WALL,TAU_ZY_WALL,TAU_XZ_WALL,TAU_ZX_WALL
+REAL(EB) :: MU_WALL,RHO_WALL,SLIP_COEF,ROUGHNESS_HEIGHT(2), &
+            TAU_XY_WALL,TAU_YX_WALL,TAU_YZ_WALL,TAU_ZY_WALL,TAU_XZ_WALL,TAU_ZX_WALL
 
 IF (SOLID_PHASE_ONLY) RETURN
 
@@ -1271,6 +1272,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
    DO N_IOR=1,2
       SF  => SURFACE(IBC(N_IOR))
+      IF (WERNER_WENGLE_WALL_MODEL) ROUGHNESS_HEIGHT(N_IOR)=SF%ROUGHNESS
       IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY) THEN
          SPEC_TANG_VEL(N_IOR) = .FALSE.
          IF (SF%SLIP_FACTOR > -2._EB) THEN
@@ -1345,7 +1347,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(2)) VP = FVT(2,2)*PROF(2)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                          BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,VM,MU_WALL/RHO_WALL,DZ(KK),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,VM,MU_WALL/RHO_WALL,DZ(KK),ROUGHNESS_HEIGHT(2))
                         TAU_YZ_WALL = MU_WALL*RDZ(KK)*VM*(SLIP_COEF-1._EB)
                      ELSE
                         TAU_YZ_WALL = MUA*RDZ(KK)*(VP-VM)
@@ -1367,7 +1369,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(2)) VM = FVT(2,2)*PROF(2)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                          BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,VP,MU_WALL/RHO_WALL,DZ(KK),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,VP,MU_WALL/RHO_WALL,DZ(KK),ROUGHNESS_HEIGHT(2))
                         TAU_YZ_WALL = MU_WALL*RDZ(KK)*VP*(1._EB-SLIP_COEF)
                      ELSE
                         TAU_YZ_WALL = MUA*RDZ(KK)*(VP-VM)
@@ -1404,7 +1406,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(1)) WP = FVT(1,2)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                          BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,WM,MU_WALL/RHO_WALL,DY(JJ),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,WM,MU_WALL/RHO_WALL,DY(JJ),ROUGHNESS_HEIGHT(1))
                         TAU_ZY_WALL = MU_WALL*RDY(JJ)*WM*(SLIP_COEF-1._EB)
                      ELSE
                         TAU_ZY_WALL = MUA*RDY(JJ)*(WP-WM)
@@ -1426,7 +1428,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(1)) WM = FVT(1,2)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                          BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,WP,MU_WALL/RHO_WALL,DY(JJ),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,WP,MU_WALL/RHO_WALL,DY(JJ),ROUGHNESS_HEIGHT(1))
                         TAU_ZY_WALL = MU_WALL*RDY(JJ)*WP*(1._EB-SLIP_COEF)
                      ELSE
                         TAU_ZY_WALL = MUA*RDY(JJ)*(WP-WM)
@@ -1499,7 +1501,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(1)) UP = FVT(1,1)*PROF(1)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                          BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,UM,MU_WALL/RHO_WALL,DZ(KK),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,UM,MU_WALL/RHO_WALL,DZ(KK),ROUGHNESS_HEIGHT(1))
                         TAU_XZ_WALL = MU_WALL*RDZ(KK)*UM*(SLIP_COEF-1._EB)
                      ELSE
                         TAU_XZ_WALL = MUA*RDZ(KK)*(UP-UM)
@@ -1521,7 +1523,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(1)) UM = FVT(1,1)*PROF(1)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                         BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,UP,MU_WALL/RHO_WALL,DZ(KK),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,UP,MU_WALL/RHO_WALL,DZ(KK),ROUGHNESS_HEIGHT(1))
                         TAU_XZ_WALL = MU_WALL*RDZ(KK)*UP*(1._EB-SLIP_COEF)
                      ELSE
                         TAU_XZ_WALL = MUA*RDZ(KK)*(UP-UM)
@@ -1557,7 +1559,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(2)) WP = FVT(2,2)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                          BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,WM,MU_WALL/RHO_WALL,DX(II),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,WM,MU_WALL/RHO_WALL,DX(II),ROUGHNESS_HEIGHT(2))
                         TAU_ZX_WALL = MU_WALL*RDX(II)*WM*(SLIP_COEF-1._EB)
                      ELSE
                         TAU_ZX_WALL = MUA*RDX(II)*(WP-WM)
@@ -1579,7 +1581,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(2)) WM = FVT(2,2)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                          BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,WP,MU_WALL/RHO_WALL,DX(II),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,WP,MU_WALL/RHO_WALL,DX(II),ROUGHNESS_HEIGHT(2))
                         TAU_ZX_WALL = MU_WALL*RDX(II)*WP*(1._EB-SLIP_COEF)
                      ELSE
                         TAU_ZX_WALL = MUA*RDX(II)*(WP-WM)
@@ -1652,7 +1654,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(2)) UP = FVT(2,1)*PROF(2)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                          BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,UM,MU_WALL/RHO_WALL,DY(JJ),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,UM,MU_WALL/RHO_WALL,DY(JJ),ROUGHNESS_HEIGHT(2))
                         TAU_XY_WALL = MU_WALL*RDY(JJ)*UM*(SLIP_COEF-1._EB)
                      ELSE
                         TAU_XY_WALL = MUA*RDY(JJ)*(UP-UM)
@@ -1674,7 +1676,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(2)) UM = FVT(2,1)*PROF(2)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                         BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,UP,MU_WALL/RHO_WALL,DY(JJ),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,UP,MU_WALL/RHO_WALL,DY(JJ),ROUGHNESS_HEIGHT(2))
                         TAU_XY_WALL = MU_WALL*RDY(JJ)*UP*(1._EB-SLIP_COEF)
                      ELSE
                         TAU_XY_WALL = MUA*RDY(JJ)*(UP-UM)
@@ -1711,7 +1713,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(1)) VP = FVT(1,1)*PROF(1)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                         BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,VM,MU_WALL/RHO_WALL,DX(II),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,VM,MU_WALL/RHO_WALL,DX(II),ROUGHNESS_HEIGHT(1))
                         TAU_YX_WALL = MU_WALL*RDX(II)*VM*(SLIP_COEF-1._EB)
                      ELSE
                         TAU_YX_WALL = MUA*RDX(II)*(VP-VM)
@@ -1733,7 +1735,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (     SPEC_TANG_VEL(1)) VM = FVT(1,1)*PROF(1)
                      IF (WERNER_WENGLE_WALL_MODEL .AND. BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. &
                         BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                        CALL WALL_MODEL(SLIP_COEF,VP,MU_WALL/RHO_WALL,DX(II),SF%ROUGHNESS)
+                        CALL WALL_MODEL(SLIP_COEF,VP,MU_WALL/RHO_WALL,DX(II),ROUGHNESS_HEIGHT(1))
                         TAU_YX_WALL = MU_WALL*RDX(II)*VP*(1._EB-SLIP_COEF)
                      ELSE
                         TAU_YX_WALL = MUA*RDX(II)*(VP-VM)
