@@ -6,7 +6,6 @@ pyrograph_calcs.py
 import sys
 import os
 from math import log, sqrt, exp
-from statlib import stats
 
 tolerance = 1.0e-8
 
@@ -52,7 +51,7 @@ def delta_sigma(ind_data_set,dep_data_set,sigma_e,diagnostic_level):
     #print 'ln_M_set:', ln_M_set
     
     # Compute 'M_hat' for each value in ln_E_set.
-    M_hat = [stats.mean(ln_M_set)-stats.mean(ln_E_set)+ln_E_set[i] for i in range(len(ln_E_set))]
+    M_hat = [sum(ln_M_set)/len(ln_M_set)-sum(ln_E_set)/len(ln_E_set)+ln_E_set[i] for i in range(len(ln_E_set))]
     #print 'M_hat:', M_hat
     
     # Compute 'u' values.
@@ -64,7 +63,7 @@ def delta_sigma(ind_data_set,dep_data_set,sigma_e,diagnostic_level):
     #print 'omega:', omega
     
     # Compute 'delta'
-    delta=exp(stats.mean(ln_M_set)-stats.mean(ln_E_set)+(omega**2/2))
+    delta=exp(sum(ln_M_set)/len(ln_M_set)-sum(ln_E_set)/len(ln_E_set)+(omega**2/2))
     #print 'delta:', delta
     
     #Compute sigma
