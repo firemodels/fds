@@ -66,7 +66,7 @@ def delta_sigma(ind_data_set,dep_data_set,sigma_e,diagnostic_level):
     u = sqrt(sum(u_temp))
     #print 'u:', u
     
-    omega = sqrt(abs((u**2)-(sigma_e**2)))
+    omega = sqrt(abs((u**2)-((sigma_e/2)**2)))
     #print 'omega:', omega
     
     # Compute 'delta'
