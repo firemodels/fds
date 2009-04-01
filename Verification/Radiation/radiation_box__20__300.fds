@@ -37,11 +37,11 @@ RADI NUMBER_RADIATION_ANGLES=1000
 RADI NUMBER_RADIATION_ANGLES=2000  
 
 ------------------------------------------------------------------------
-&HEAD CHID='radiation_in_a_box', TITLE='Test wall heat transfer in a box, SVN $Revision$'/
+&HEAD CHID='radiation_box__20__300', TITLE='Test wall heat transfer in a box, SVN $Revision: 3499 $'/
 
 &MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK = 20,20,20 /
 
-&RADI NUMBER_RADIATION_ANGLES=100 
+&RADI NUMBER_RADIATION_ANGLES=300 
       TIME_STEP_INCREMENT = 1
       ANGLE_INCREMENT = 1 /
 
