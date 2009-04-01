@@ -5,18 +5,18 @@ SETVIEWPOINT
 LOADFILE
  fire_line_05.sf
 SETTIMEVAL
- 10.0
+ 10.05
 RENDERONCE
  fire_line_fireline_10
 SETTIMEVAL
- 20.0
+ 20.05
 RENDERONCE
  fire_line_fireline_20
 SETTIMEVAL
- 30.0
+ 30.05
 RENDERONCE
  fire_line_fireline_30
 SETTIMEVAL
- 40.0
+ 40.05
 RENDERONCE
  fire_line_fireline_40
