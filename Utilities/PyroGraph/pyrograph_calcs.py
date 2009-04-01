@@ -38,7 +38,7 @@ def delta_sigma(ind_data_set,dep_data_set,sigma_e,diagnostic_level):
         for M_value in dep_data_set[i]:
             M_values.append(M_value)
     
-    tempfile = open('tempfile.tmp', 'a')
+    tempfile = open('tempfile.csv', 'a')
     tempWriter = csv.writer(tempfile,delimiter=',')
     tempWriter.writerow(E_values)
     tempWriter.writerow(M_values)
