@@ -1174,10 +1174,11 @@ void script_settimeval(scriptdata *scripti){
   printf("\n");
   if(times!=NULL&&ntimes>0){
     if(timeval<times[0])timeval=times[0];
-    if(timeval>times[ntimes-1])timeval=times[ntimes-1];
+    if(timeval>times[ntimes-1]-0.0001)timeval=times[ntimes-1]-0.0001;
     for(i=0;i<ntimes-1;i++){
-      if(times[i]<=timeval&&timeval<=times[i+1]){
+      if(times[i]<=timeval&&timeval<times[i+1]){
         itime=i;
+        script_itime=i;
         stept=1;
         force_redisplay=1;
         update_framenumber(0);
@@ -1207,12 +1208,19 @@ void script_setviewpoint(scriptdata *scripti){
 
 /* ------------------ run_script ------------------------ */
 
-void run_script(void){
+int run_script(void){
+
+// This procedure should return 1 if the smokeview frame should not be advanced.
+// (to ensure images are rendered at the right time step)
+
   scriptdata *scripti;
+  int returnval;
+
+  returnval=0;
 
   if(current_script_command>scriptinfo+nscriptinfo-1){
     current_script_command=NULL;
-    return;
+    return returnval;
   }
   scripti = current_script_command;
 #ifdef _DEBUG
@@ -1232,9 +1240,11 @@ void run_script(void){
       break;
     case SCRIPT_RENDERONCE:
       keyboard('r',0,0);
+      returnval=1;
       break;
     case SCRIPT_RENDERDOUBLEONCE:
       keyboard('R',0,0);
+      returnval=1;
       break;
     case SCRIPT_RENDERALL:
       script_renderall(scripti);
@@ -1287,6 +1297,7 @@ void run_script(void){
       script_loadplot3d(scripti);
       break;
     case SCRIPT_SETTIMEVAL:
+      returnval=1;
       script_settimeval(scripti);
       break;
     case SCRIPT_SETVIEWPOINT:
@@ -1294,4 +1305,5 @@ void run_script(void){
       break;
   }
   GLUTPOSTREDISPLAY
+  return returnval;
 }
