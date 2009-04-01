@@ -1727,6 +1727,26 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ render scene +++++++++++++++++++++++++ */
 
 #ifdef pp_RENDER
+  Render(view_mode);
+#endif
+
+ /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
+
+#ifdef pp_COLOR
+  if(viscolorbarpath==1){
+    if(cb_hidesv==1){
+      setColorbarClipPlanes(0);
+    }
+  }
+#endif
+
+  sniffErrors("end of loop");
+
+}
+
+/* ------------------ update_rotation_index ------------------------ */
+
+void Render(int view_mode){
   if(RenderOnceNow==0&&RenderGif !=0
     &&render_double==0
     ){
@@ -1768,20 +1788,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       RenderSkip=1;
     }
   }
-#endif
-
- /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
-
-#ifdef pp_COLOR
-  if(viscolorbarpath==1){
-    if(cb_hidesv==1){
-      setColorbarClipPlanes(0);
-    }
-  }
-#endif
-
-  sniffErrors("end of loop");
-
 }
 
 /* ------------------ update_rotation_index ------------------------ */

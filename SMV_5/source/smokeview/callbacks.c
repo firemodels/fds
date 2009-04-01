@@ -1686,10 +1686,11 @@ void Display(void){
     ScriptMenu(default_script->id);
     runscript=2;
   }
+  script_render_flag=0;
   if(nscriptinfo>0&&current_script_command!=NULL){
     if(RenderGif==0){  // don't advance command if Smokeview is executing a RENDERALL command
       current_script_command++;
-      run_script();
+      script_render_flag=run_script();
       if(runscript==2&&noexit==0&&current_script_command==NULL){
         exit(0);
       }
@@ -1989,7 +1990,12 @@ void Idle(void){
           itime = interval_search(times,ntimes,elapsed_time,itime);
         }
         else{
-          itime+=FlowDir;
+          if(script_render_flag==0){
+            itime+=FlowDir;
+          }
+          else{
+            itime=script_itime;
+          }
         }
       }
       if(stept==1&&timedrag==0&&RenderGif!=0){
