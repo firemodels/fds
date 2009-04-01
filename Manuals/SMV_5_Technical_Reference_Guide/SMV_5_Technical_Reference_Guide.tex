@@ -84,7 +84,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \newcommand{\hitem}[1]{\item[{\bf #1} \hfill]}
 
 \bibliographystyle{unsrt}
-%\doublespace
+\doublespace
 \begin{document}
 \pagestyle{empty}
 %
@@ -143,7 +143,7 @@ SVN Repository~$Revision$}
 
 \small
 \flushright{U.S. Department of Commerce \\
-{\em Carlos M. Gutierrez, Secretary} \\
+{\em Gary Locke, Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
 {\em Patrick Gallagher, Acting Director} }
@@ -1529,7 +1529,7 @@ affordable. However, each data frame is decompressed {\em on the
 fly}\ so a compression format that can be rapidly decompressed is
 critical.
 
-Smokezip is a software program developed as a companion to Smokeview and FDS to compress FDS daa files.
+Smokezip is a software program developed as a companion to Smokeview and FDS to compress FDS data files.
 A second compression scheme is used by Smokezip to compress FDS files even more compactly.  Smokezip uses the ZLIB compression library available at (\hhref{http://zlib.net/}).
 
 %
@@ -1538,6 +1538,28 @@ A second compression scheme is used by Smokezip to compress FDS files even more 
 
 \part{Appendices}
 \appendix
+
+%
+% -------------------  Smokeview Program Structure ----------
+%
+\chapter{Smokeview Program Structure}
+
+This chapter gives an overview of the program structure of Smokeview.  It is not practical to give a line by line detailed description of the Smokeview source code.  Smokeview has more than 80,000 lines of code (not counting an additional 200,000 lines of code from external libraries used by Smokeview for various taks).  Smokeview is constantly changing.  With an overview, the interested user should be able to dig into the source code and decipher those parts that may be of interest.
+
+The program structure of Smokeview is fundamentally different than that of FDS in one important respect.  Smokeview is an {\bf event driven}\ program with a graphical user interface.  The term {\em event driven}\ means that the user controls the program flow using various means such as pressing a key, clicking or dragging the mouse, selecting a menu item {\em etc.}  In other words, the user initiates events.   The type of Smokeview response then depends on the particular {\em event}\ that has occurred.
+
+The program structure of Smokeview may then be described simply as follows.  Smokeview consists of initialization routines to define variables and the OpenGL environment followed by a call to a GLUT routine to implement the so called {\bf event loop}.  The {\em event loop}\ is literally a program loop which detects when the various user events are invoked (again, key clicks, mouse clicks, menu selection {\em etc.}).  Once an event is detected, a user {\em callback}\ routine is called.  The event loop itself is GLUT library code.  The callback routines are Smokeview code.  There is a Smokeview callback routine for every action that is performed.  There are callback  routines for each Smokeview menu, for clicking the mouse and dragging the scene.
+
+
+
+Figure \ref{figprogstruct} 
+\begin{figure}
+\includegraphics[width=5.0in]{figures/figprogstruct}
+\caption{Smokeview program structure}
+\label{figprogstruct}
+\end{figure}
+
+
 
 %
 % -------------------  Interfacing OpenGL with teh Host Operating System ----------
