@@ -22,6 +22,7 @@ import matplotlib.cm as cm
 import numpy.ma as M
 from pylab import *
 import pyrograph_calcs as calc
+import csv
 
 def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,diagnostic_level):
     #Set Scatter Plot Settings
@@ -65,6 +66,13 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     mu_val = mu_sigma[0]
     sigma_2_val = mu_sigma[1]
     mu_max = plot_max*(1+mu_val)
+    
+    id_column = [quantity_id,title]
+    
+    tempfile = open('tempfile.csv', 'a')
+    tempWriter = csv.writer(tempfile,delimiter=',')
+    tempWriter.writerow(id_column)
+    tempfile.close()
     
     delta_sigma = calc.delta_sigma(x_data_set,y_data_set,percent_error,diagnostic_level)
     delta = delta_sigma[0]
