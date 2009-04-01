@@ -6,6 +6,7 @@ pyrograph_calcs.py
 import sys
 import os
 from math import log, sqrt, exp
+import csv
 
 tolerance = 1.0e-8
 
@@ -36,6 +37,12 @@ def delta_sigma(ind_data_set,dep_data_set,sigma_e,diagnostic_level):
             E_values.append(E_value)
         for M_value in dep_data_set[i]:
             M_values.append(M_value)
+    
+    tempfile = open('tempfile.tmp', 'a')
+    tempWriter = csv.writer(tempfile,delimiter=',')
+    tempWriter.writerow(E_values)
+    tempWriter.writerow(M_values)
+    tempfile.close()
     
     #print 'E_Values:', E_values
     #print 'M_Values:', M_values
