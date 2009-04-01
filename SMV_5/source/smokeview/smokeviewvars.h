@@ -36,6 +36,7 @@ SVEXTERN int cellcenter_interp, cellcenter_slice_active, cellcenter_bound_active
 SVEXTERN int part5colorindex, show_tracers_always;
 SVEXTERN int navatar_colors;
 SVEXTERN float *avatar_colors;
+SVEXTERN int script_render_flag, script_itime;
 
 SVEXTERN int show_slice_in_obst, offset_slice;
 SVEXTERN int skip_slice_in_embedded_mesh;

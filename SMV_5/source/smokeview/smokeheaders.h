@@ -35,7 +35,7 @@ EXTERNCPP float get_vecfactor(int *iveclengths);
 EXTERNCPP void add_new_tour(void);
 EXTERNCPP void cleanbuffer(char *buffer, char *buffer2);
 EXTERNCPP void start_script(void);
-EXTERNCPP void run_script(void);
+EXTERNCPP int run_script(void);
 EXTERNCPP int compile_script(char *scriptfile);
 EXTERNCPP scriptfiledata *insert_scriptfile(char *file);
 EXTERNCPP int file_exist(char *file);
@@ -492,6 +492,7 @@ EXTERNCPP void drawpatch_texture_cellcenter(const mesh *gb);
 EXTERNCPP void drawpatch_texture_threshold(const mesh *gb);
 EXTERNCPP void drawpatch_threshold_cellcenter(mesh *meshi);
 
+EXTERNCPP void Render(int view_mode);
 EXTERNCPP void updateslicebounds(void);
 EXTERNCPP void updateallslicecolors(int islicetype,int *errorcode);
 EXTERNCPP void updatevslicetypes(void);
