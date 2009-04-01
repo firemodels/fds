@@ -5,7 +5,7 @@ diagnostic_level = 2
 
 # Set what plots to create: 
 # BOTH (1), Comparison Only (2), Scatter Only (3)
-process_set = 1
+process_set = 2
 
 # Set the character to be used for indicating 
 # the data rows to process in the data config files.
@@ -18,4 +18,4 @@ data_line_char = d
 # Validation Data Set (1)
 # Verification Data Set (2)
 # Trainer Data Set (3)
-data_set = 1
+data_set = 2
