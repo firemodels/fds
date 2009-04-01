@@ -52,7 +52,7 @@ if data_set == 1:
 ## Verification Data
 if data_set == 2:
     data_directory = "../../Verification/"
-    output_directory = "../../Manuals/FDS_5_Verification_Guide/FIGURES/"
+    output_directory = "../../Manuals/"
     config_file_name = "verification_data_config"
     print "\n** Processing Verification Data Set\n"
 
