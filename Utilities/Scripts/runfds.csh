@@ -1,5 +1,5 @@
 #!/bin/csh -f
-set scratchdir=~/bin
+set scratchdir=$SVNROOT/Utilities/Scripts/tmp
 set dir=$1
 set infile=$2
 set host=$3
