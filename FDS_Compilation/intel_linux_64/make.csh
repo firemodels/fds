@@ -2,6 +2,11 @@
 set mssg="64 bit Linux FDS"
 set target=intel_linux_64
 set out=$target.out
+set objdir=.
+if($#argv>0)then
+  set objdir=$1
+endif
+cd $objdir
 
 cd $1
 if ($#argv > 1) then
