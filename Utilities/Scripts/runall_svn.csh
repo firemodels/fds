@@ -7,12 +7,12 @@
 # This script is set up for the training cases.  It may however, be used for
 # any collection of test cases by changing below the directory and case names.
 
-# specify location of the fds5 executables
-setenv FDS ~/bin/fds5_linux
-setenv FDSMPI ~/bin/fds5_mpi_linux
-
 # specify location of repository root
 setenv SVNROOT ~/FDS-SMV
+
+# specify location of the fds5 executables
+setenv FDS $SVNROOT/FDS_Compilation/intel_linux_32/fds5_intel_linux_32
+setenv FDSMPI $SVNROOT/FDS_Compilation/mpi_intel_linux_32/fds5_mpi_linux_32
 
 # Option:
 # Uncomment the setenv line below to stop all FDS jobs running via this script.
