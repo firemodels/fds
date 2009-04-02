@@ -1,5 +1,5 @@
 #!/bin/csh -f
-set bindir=~/bin
+set scratchdir=~/bin
 set dir=$1
 set infile=$2
 set host=$3
@@ -9,7 +9,7 @@ set in=$infile.fds
 set out=$infile.err
 set stopfile=$infile.stop
 
-set scriptfile=$bindir/script.$$
+set scriptfile=$scratchdir/script.$$
 if(! -e $FDS) then
   echo "The file $FDS does not exit. Run aborted"
   exit
