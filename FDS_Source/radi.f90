@@ -207,14 +207,14 @@ ENDDO
 !
 !-----------------------------------------------------
 
-!
+ 
 ! General parameters
-!
-RTMPMAX = 2400._EB       ! Maximum temperature for property tables
+ 
+RTMPMAX = 2400._EB     ! Maximum temperature for property tables
 RTMPMIN = 300._EB      ! Minimum temperature for property tables
-! 
+  
 ! Setup spectral information
-!
+ 
 INIT_WIDE_BAND: IF (WIDE_BAND_MODEL) THEN
  
 ! Fraction of blackbody emission in a wavelength interval
@@ -281,17 +281,22 @@ ENDIF INIT_WIDE_BAND
 !          OMMAX=MAXIMUM WAVE NUMBER IN SPECTRUM, CM-1.
 !
 !-------------------------------------------------------------------------
+
 MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_FUEL /= 0 .OR. I_CO2 /= 0 .OR. I_WATER /=0) THEN 
+
    KAPPA_ARRAY = .TRUE.
-! Allocate arrays for RadCal
+
+   ! Allocate arrays for RadCal
+
    CALL RCALLOC
  
-! Set the Mean Beam Length to 5 times the smallest cell dimension unless the user desires otherwise
+   ! Set the Mean Beam Length to 5 times the smallest cell dimension unless the user desires otherwise
  
    IF (PATH_LENGTH < 0._EB) PATH_LENGTH = MIN( 10._EB , 5._EB*CHARACTERISTIC_CELL_SIZE )
    DD = MAX(PATH_LENGTH,1.0E-4_EB)
  
-! Using RadCal, create look-up tables for the absorption coefficients for all gas species, mixture fraction or aerosols
+   ! Using RadCal, create look-up tables for the absorption coefficients for all gas species, mixture fraction or aerosols
+
    N_KAPPA_ARRAY=0
    IF (MIXTURE_FRACTION) THEN
       N_KAPPA_ARRAY = 5
@@ -458,6 +463,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
       ENDDO T_LOOP_Z
    ENDDO BAND_LOOP_Z
    CALL RCDEALLOC  ! Deallocate RadCal arrays
+
 ENDIF MAKE_KAPPA_ARRAYS
  
 !-----------------------------------------------------
@@ -599,9 +605,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ZLOOPM
                   PC_LOOP: DO N = 1,N_PART
                      PC => PARTICLE_CLASS(N)
-!rm ->
-                     IF (.NOT. PC%TREE) THEN
-!rm <-
+                     IF (PC%TREE) CYCLE PC_LOOP
                      EVAP_INDEX = PC%EVAP_INDEX
                      IF (EVAP_INDEX==0) CYCLE PC_LOOP
                      IF (AVG_DROP_DEN(I,J,K,EVAP_INDEX)==0._EB) CYCLE PC_LOOP
@@ -614,57 +618,65 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         SCAEFF(I,J,K) = SCAEFF(I,J,K) + NCSDROP*QVAL
                      ENDIF
                      KFST4W(I,J,K) = KFST4W(I,J,K)+ BBF*KAPPAW(I,J,K)*FOUR_SIGMA*AVG_DROP_TMP(I,J,K,EVAP_INDEX)**4
-!rm ->
-                     ENDIF
-!rm <-
-                  END DO PC_LOOP
+                  ENDDO PC_LOOP
             ENDDO ZLOOPM
          ENDDO
       ENDDO
       QR_W = 0._EB
    ENDIF IF_DROPLETS_INCLUDED
 
-!rm ->
-! Compute raised vegetation absorption and emission source term 
+   ! Compute raised vegetation absorption and emission source term 
+
    IF_VEG_INCLUDED: IF (NLP>0 .AND. TREE_MESH(NM)) THEN
-    VEG_ELEM_LOOP: DO ID = 1,NLP
-     IPC = DROPLET(ID)%CLASS
-     IF(.NOT. PARTICLE_CLASS(IPC)%TREE) CYCLE VEG_ELEM_LOOP
-     XID = CELLSI(FLOOR((DROPLET(ID)%X-XS)*RDXINT))
-     YJD = CELLSJ(FLOOR((DROPLET(ID)%Y-YS)*RDYINT))
-     ZKD = CELLSK(FLOOR((DROPLET(ID)%Z-ZS)*RDZINT))
-     IID = FLOOR(XID+1._EB)
-     JJD = FLOOR(YJD+1._EB)
-     KKD = FLOOR(ZKD+1._EB)
-     KAPPAW(IID,JJD,KKD) = KAPPAW(IID,JJD,KKD) + DROPLET(ID)%VEG_KAPPA
-     KFST4W(IID,JJD,KKD) = KFST4W(IID,JJD,KKD) + DROPLET(ID)%VEG_EMISS
-    ENDDO VEG_ELEM_LOOP
-    QR_W = 0._EB
+      VEG_ELEM_LOOP: DO ID = 1,NLP
+         IPC = DROPLET(ID)%CLASS
+         IF (.NOT. PARTICLE_CLASS(IPC)%TREE) CYCLE VEG_ELEM_LOOP
+         XID = CELLSI(FLOOR((DROPLET(ID)%X-XS)*RDXINT))
+         YJD = CELLSJ(FLOOR((DROPLET(ID)%Y-YS)*RDYINT))
+         ZKD = CELLSK(FLOOR((DROPLET(ID)%Z-ZS)*RDZINT))
+         IID = FLOOR(XID+1._EB)
+         JJD = FLOOR(YJD+1._EB)
+         KKD = FLOOR(ZKD+1._EB)
+         KAPPAW(IID,JJD,KKD) = KAPPAW(IID,JJD,KKD) + DROPLET(ID)%VEG_KAPPA
+         KFST4W(IID,JJD,KKD) = KFST4W(IID,JJD,KKD) + DROPLET(ID)%VEG_EMISS
+      ENDDO VEG_ELEM_LOOP
+      QR_W = 0._EB
    ENDIF IF_VEG_INCLUDED
-!rm <-
  
-   ! Compute absorption coefficient KAPPA and source term KAPPA*4*SIGMA*TMP**4
+   ! Compute absorption coefficient KAPPA
  
-   BBF   = 1._EB
    KAPPA = KAPPA0
+
    IF (KAPPA_ARRAY) THEN
       DO K=1,KBAR
          DO J=1,JBAR
-            ZLOOP: DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ZLOOP
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                TYY = MIN(Y2KAPPA_T,INT((TMP(I,J,K) - RTMPMIN) * Y2KAPPA_T / (RTMPMAX-RTMPMIN)))
                YY_GET = YY(I,J,K,:)
                KAPPA(I,J,K) = KAPPA(I,J,K) + GET_KAPPA(YY_GET,TYY,IBND)
-               IF (WIDE_BAND_MODEL)  BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
-               KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-               IF (RADIATIVE_FRACTION>0._EB) THEN
-                  KFST4_ALTERNATIVE = BBF*RADIATIVE_FRACTION*Q(I,J,K)
-                  IF (KFST4_ALTERNATIVE > KFST4(I,J,K)) KFST4(I,J,K) = KFST4_ALTERNATIVE + KAPPA(I,J,K)*UII(I,J,K)
-               ENDIF
-            ENDDO ZLOOP
+            ENDDO
          ENDDO
       ENDDO
    ENDIF
+
+   ! Compute source term KAPPA*4*SIGMA*TMP**4
+
+   BBF = 1._EB
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (WIDE_BAND_MODEL)  BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
+            KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+            IF (RADIATIVE_FRACTION>0._EB) THEN
+               KFST4_ALTERNATIVE = BBF*RADIATIVE_FRACTION*Q(I,J,K)
+               IF (KFST4_ALTERNATIVE > KFST4(I,J,K)) KFST4(I,J,K) = KFST4_ALTERNATIVE + KAPPA(I,J,K)*UII(I,J,K)
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+
    ! Calculate extinction coefficient
  
    EXTCOE = KAPPA + KAPPAW + SCAEFF*RSA_RAT
@@ -1000,22 +1012,22 @@ IF (UPDATE_INTENSITY) UII = SUM(UIID, DIM = 4)
 IF (.NOT. WIDE_BAND_MODEL) THEN
    QR  = KAPPA*UII - KFST4
    IF (NLP>0 .AND. N_EVAP_INDICIES>0) QR_W = QR_W + KAPPAW*UII - KFST4W
-!rm ->
+
    IF_VEG_INCLUDED2: IF (NLP>0 .AND. TREE_MESH(NM)) THEN
-    VEG_ELEM_LOOP2: DO ID = 1,NLP
-     IPC = DROPLET(ID)%CLASS
-     IF(.NOT. PARTICLE_CLASS(IPC)%TREE) CYCLE VEG_ELEM_LOOP2
-     DROPLET(ID)%VEG_DIVQR = 0.0_EB
-     XID = CELLSI(FLOOR((DROPLET(ID)%X-XS)*RDXINT))
-     YJD = CELLSJ(FLOOR((DROPLET(ID)%Y-YS)*RDYINT))
-     ZKD = CELLSK(FLOOR((DROPLET(ID)%Z-ZS)*RDZINT))
-     IID = FLOOR(XID+1._EB)
-     JJD = FLOOR(YJD+1._EB)
-     KKD = FLOOR(ZKD+1._EB)
-     DROPLET(ID)%VEG_DIVQR = DROPLET(ID)%VEG_KAPPA*UII(IID,JJD,KKD) - DROPLET(ID)%VEG_EMISS
-    ENDDO VEG_ELEM_LOOP2
+      VEG_ELEM_LOOP2: DO ID = 1,NLP
+         IPC = DROPLET(ID)%CLASS
+         IF (.NOT. PARTICLE_CLASS(IPC)%TREE) CYCLE VEG_ELEM_LOOP2
+         DROPLET(ID)%VEG_DIVQR = 0.0_EB
+         XID = CELLSI(FLOOR((DROPLET(ID)%X-XS)*RDXINT))
+         YJD = CELLSJ(FLOOR((DROPLET(ID)%Y-YS)*RDYINT))
+         ZKD = CELLSK(FLOOR((DROPLET(ID)%Z-ZS)*RDZINT))
+         IID = FLOOR(XID+1._EB)
+         JJD = FLOOR(YJD+1._EB)
+         KKD = FLOOR(ZKD+1._EB)
+         DROPLET(ID)%VEG_DIVQR = DROPLET(ID)%VEG_KAPPA*UII(IID,JJD,KKD) - DROPLET(ID)%VEG_EMISS
+      ENDDO VEG_ELEM_LOOP2
    ENDIF IF_VEG_INCLUDED2
-!rm <-
+
 ENDIF
 
 ! Check for VIRTUAL devices
