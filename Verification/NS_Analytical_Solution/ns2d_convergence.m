@@ -5,7 +5,7 @@
 % This script processes the output for the ns2d analytical solution
 % verification test.
 %
-% The necessary FDS input files in \Verification\FDS_Input_Files\ are:
+% The necessary FDS input files in \Verification\NS_Analytical_Solution\ are:
 % 
 % ns2d_8.fds
 % ns2d_16.fds
@@ -71,6 +71,14 @@ xlabel('dx','fontsize',16)
 ylabel('u-velocity rms error','fontsize',16)
 legend(H(2:3),'O(dx)','O(dx^2)','Location','Northwest')
 
+% write error file ------
+M = [dx(1), dx(1), dx(1)^2, rms_error(1)];
+for j = 2:length(dx)
+    M = [ M; [dx(j), dx(j), dx(j)^2, rms_error(j)] ];
+end
+dlmwrite('error_inviscid.csv',M,'precision',6)
+% -----------------------
+
 clear all
 
 L = 2*pi;
@@ -115,7 +123,14 @@ for ff=1:length(N)
     ylabel('u-velocity, m/s','fontsize',16)
     legend(G,'FDS','Analytical Solution','Location','Northeast')
     
-    
+    % write error file ------
+    M = [t(1), u(1), U(1)];
+    for j = 2:length(t)
+        M = [ M; [t(j), u(j), U(j)] ];
+    end
+    dlmwrite(['uvel_',num2str(N(ff)),'.csv'],M,'precision',9)
+    % -----------------------
+
     rms_error(ff) = sqrt( mean( (U-u).^2 ) );
     max_error(ff) = max(abs(U-u));
 
@@ -129,4 +144,12 @@ axis tight
 xlabel('dx','fontsize',16)
 ylabel('u-velocity rms error','fontsize',16)
 legend(H(2:3),'O(dx)','O(dx^2)','Location','Northwest')
+
+% write error file ------
+M = [dx(1), dx(1), dx(1)^2, rms_error(1)];
+for j = 2:length(dx)
+    M = [ M; [dx(j), dx(j), dx(j)^2, rms_error(j)] ];
+end
+dlmwrite('error_viscous.csv',M,'precision',6)
+% -----------------------
 
