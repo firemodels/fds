@@ -310,4 +310,60 @@ SETTIMEVAL
 RENDERONCE
  plume5c_smoke_30
 
+// render PLOT3D stepped contours
+
+UNLOADALL
+LOADINIFILE
+ plume5c_plot3d_step.ini
+LOADFILE
+ plume5c_0001_00000040_01.q
+RENDERONCE
+ plume5c_plot3d_step
+
+// render PLOT3D line contours
+
+UNLOADALL
+LOADINIFILE
+ plume5c_plot3d_line.ini
+LOADFILE
+ plume5c_0001_00000040_01.q
+RENDERONCE
+ plume5c_plot3d_line
+
+// render PLOT3D continuous contours
+
+UNLOADALL
+LOADINIFILE
+ plume5c_plot3d_shaded.ini
+LOADFILE
+ plume5c_0001_00000040_01.q
+RENDERONCE
+ plume5c_plot3d_shaded
+
+
+// render OBSTs using solid view
+
+UNLOADALL
+LOADINIFILE
+ plume5c_solid.ini
+RENDERONCE
+ plume5c_solid
+
+// render OBSTs using outline view
+
+LOADINIFILE
+ plume5c_outline.ini
+RENDERONCE
+ plume5c_outline
+
+// render geometry using hidden view (ie don't draw OBSTs)
+
+LOADINIFILE
+ plume5c_hidden.ini
+RENDERONCE
+ plume5c_hidden
+
+
+
+
 
