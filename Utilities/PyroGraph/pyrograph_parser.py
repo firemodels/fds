@@ -127,8 +127,10 @@ def process_csv_data_file(file_name,column_names,titles_row_number,data_row_numb
     for i in range(titles_row_number-1):
         reader.next()
     titles = reader.next()
+    
     #Strip Whitespace from ends of Column Names.
     titles = [title.strip() for title in titles]
+    
     for i in range((data_row_number-titles_row_number)-1):
         reader.next()
     reader = csv.DictReader(fh, titles)
@@ -176,7 +178,8 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
             d1_column_names.append(data_info[key]['d1_Ind_Col_Name'].strip())
             d1_column_names.append(data_info[key]['d1_Dep_Col_Name'].strip())
         
-        d1_data = process_csv_data_file(data_directory+data_info[key]['d1_Filename'],d1_column_names,int(data_info[key]['d1_Col_Name_Row']),int(data_info[key]['d1_Data_Row']),ind_scale,dep_scale,diagnostic_level)
+        d1_data = process_csv_data_file(data_directory+data_info[key]['d1_Filename'],d1_column_names, \
+            int(data_info[key]['d1_Col_Name_Row']),int(data_info[key]['d1_Data_Row']),ind_scale,dep_scale,diagnostic_level)
         
         d2_column_names = []
         #print data_info[key]['d2_Filename']
@@ -189,7 +192,8 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
             d2_column_names.append(data_info[key]['d2_Ind_Col_Name'].strip())
             d2_column_names.append(data_info[key]['d2_Dep_Col_Name'].strip())
         
-        d2_data = process_csv_data_file(data_directory+data_info[key]['d2_Filename'],d2_column_names,int(data_info[key]['d2_Col_Name_Row']),int(data_info[key]['d2_Data_Row']),ind_scale,dep_scale,diagnostic_level)
+        d2_data = process_csv_data_file(data_directory+data_info[key]['d2_Filename'],d2_column_names, \
+            int(data_info[key]['d2_Col_Name_Row']),int(data_info[key]['d2_Data_Row']),ind_scale,dep_scale,diagnostic_level)
         
         # Scale Data Values
         #  Scale Independent Data Values
@@ -214,6 +218,7 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
                 column_count += 1
         
         data_sets[key] = [d1_data,d2_data]
+        
         number_of_columns += ((len(d1_data)-1)+(len(d2_data)-1))
         count += 1
         
@@ -222,8 +227,8 @@ def collect_data_sets(data_info,data_directory,diagnostic_level):
         
     if diagnostic_level >= 2:
         print count,"Data Info records processed."
-        print "Found",number_of_columns,"columns of Y-Axis data."
-    
+        print "Found",number_of_columns,"columns of data."
+        
     return data_sets
 
 def find_start_stop_index(data_set,start_value,stop_value,start_comp,stop_comp,scale_ind,diagnostic_level):

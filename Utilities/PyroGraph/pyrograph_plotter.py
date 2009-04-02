@@ -204,11 +204,11 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_d
             linewidth = float(styles[int(d1_style[linecount])]['Line_Width'])
             
         if flip_axis == 'yes':
-            d1_x_data = d1_dep_masked_data[d1_index_set[0]:d1_index_set[1]]
-            d1_y_data = d1_ind_data[d1_index_set[0]:d1_index_set[1]]
+            d1_x_data = d1_dep_masked_data[d1_index_set[0]:d1_index_set[1]+1]
+            d1_y_data = d1_ind_data[d1_index_set[0]:d1_index_set[1]+1]
         else:
-            d1_x_data = d1_ind_data[d1_index_set[0]:d1_index_set[1]]
-            d1_y_data = d1_dep_masked_data[d1_index_set[0]:d1_index_set[1]]
+            d1_x_data = d1_ind_data[d1_index_set[0]:d1_index_set[1]+1]
+            d1_y_data = d1_dep_masked_data[d1_index_set[0]:d1_index_set[1]+1]
         
         plot_type_function[data_info['Plot_Type']](d1_x_data, d1_y_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, marker=symboltype, ms=symbolsize, mfc=symbolcolor, mec=edgecolor, label=d1_key)
         linecount += 1
@@ -236,11 +236,11 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_d
             linewidth = float(styles[int(d2_style[linecount])]['Line_Width'])
             
         if flip_axis == 'yes':
-            d2_x_data = d2_dep_masked_data[d2_index_set[0]:d2_index_set[1]]
-            d2_y_data = d2_ind_data[d2_index_set[0]:d2_index_set[1]]
+            d2_x_data = d2_dep_masked_data[d2_index_set[0]:d2_index_set[1]+1]
+            d2_y_data = d2_ind_data[d2_index_set[0]:d2_index_set[1]+1]
         else:
-            d2_x_data = d2_ind_data[d2_index_set[0]:d2_index_set[1]]
-            d2_y_data = d2_dep_masked_data[d2_index_set[0]:d2_index_set[1]]
+            d2_x_data = d2_ind_data[d2_index_set[0]:d2_index_set[1]+1]
+            d2_y_data = d2_dep_masked_data[d2_index_set[0]:d2_index_set[1]+1]
         
         plot_type_function[data_info['Plot_Type']](d2_x_data, d2_y_data, c=linecolor, linestyle=linestyle, linewidth=linewidth, marker=symboltype, ms=symbolsize, mfc=symbolcolor, mec=edgecolor, label=d2_key)
         linecount += 1
