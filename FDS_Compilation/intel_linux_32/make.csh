@@ -3,8 +3,11 @@ set mssg="32 bit Linux FDS"
 set target=intel_linux_32
 
 set out=$target.out
-
-cd $1
+set objdir=.
+if($#argv>0)then
+  set objdir=$1
+endif
+cd $objdir
 if ($#argv > 1) then
 date | tee $out
 echo Cleaning $mssg |& tee -a $out
