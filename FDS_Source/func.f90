@@ -896,7 +896,145 @@ ENDDO
  
 END SUBROUTINE BLOCK_CELL
  
+
  
+SUBROUTINE ASSIGN_PRESSURE_ZONE(NM,XX,YY,ZZ,I_ZONE)
+
+! Given the point (XX,YY,ZZ) within Mesh NM, determine all mesh cells within the same pressure zone
+
+REAL(EB), INTENT(IN) :: XX,YY,ZZ
+REAL(EB) :: XI,YJ,ZK
+INTEGER, INTENT(IN) :: NM,I_ZONE
+INTEGER :: NN,IOR,IC,II,JJ,KK,III,JJJ,KKK,Q_N,IIO,JJO,KKO,NOM
+INTEGER, ALLOCATABLE, DIMENSION(:) :: Q_I,Q_J,Q_K
+TYPE (MESH_TYPE), POINTER :: M
+TYPE (OBSTRUCTION_TYPE), POINTER :: OB
+
+M=>MESHES(NM)
+
+ALLOCATE(Q_I(M%IBAR*M%JBAR*M%KBAR))
+ALLOCATE(Q_J(M%IBAR*M%JBAR*M%KBAR))
+ALLOCATE(Q_K(M%IBAR*M%JBAR*M%KBAR))
+
+! Find the cell indices corresponding to the given point
+
+XI  = MAX( 1._EB , MIN( REAL(M%IBAR,EB)+ALMOST_ONE , M%CELLSI(NINT((XX-M%XS)*M%RDXINT)) + 1._EB ) )
+YJ  = MAX( 1._EB , MIN( REAL(M%JBAR,EB)+ALMOST_ONE , M%CELLSJ(NINT((YY-M%YS)*M%RDYINT)) + 1._EB ) )
+ZK  = MAX( 1._EB , MIN( REAL(M%KBAR,EB)+ALMOST_ONE , M%CELLSK(NINT((ZZ-M%ZS)*M%RDZINT)) + 1._EB ) )
+II  = FLOOR(XI)
+JJ  = FLOOR(YJ)
+KK  = FLOOR(ZK)
+
+! Add the first entry to "queue" of cells that need a pressure zone number
+
+Q_I(1) = II
+Q_J(1) = JJ
+Q_K(1) = KK
+Q_N    = 1
+M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
+
+! Look to all cells adjacent to the starting cell and determine if they are in the ZONE as well. 
+! Repeat process until all cells are found.
+
+SORT_QUEUE: DO 
+
+   IF (Q_N<1) EXIT SORT_QUEUE
+
+   III = Q_I(Q_N)
+   JJJ = Q_J(Q_N)
+   KKK = Q_K(Q_N)
+   IC  = M%CELL_INDEX(III,JJJ,KKK)
+   Q_N = Q_N - 1
+
+   SEARCH_LOOP: DO IOR=-3,3
+
+      IF (IOR==0) CYCLE SEARCH_LOOP
+
+      SELECT CASE(IOR)
+         CASE(-1)
+            II = III-1
+            JJ = JJJ
+            KK = KKK
+         CASE( 1)
+            II = III+1
+            JJ = JJJ
+            KK = KKK
+         CASE(-2)
+            II = III
+            JJ = JJJ-1
+            KK = KKK
+         CASE( 2)
+            II = III
+            JJ = JJJ+1
+            KK = KKK
+         CASE(-3)
+            II = III
+            JJ = JJJ
+            KK = KKK-1
+         CASE( 3)
+            II = III
+            JJ = JJJ
+            KK = KKK+1
+      END SELECT
+
+      ! If the cell is outside the computational domain, check if it is in another mesh
+
+      IF (II<1 .OR. II>M%IBAR .OR. JJ<1 .OR. JJ>M%JBAR .OR. KK<1 .OR. KK>M%KBAR) THEN
+         CALL SEARCH_OTHER_MESHES(NM,M%XC(II),M%YC(JJ),M%ZC(KK),NOM,IIO,JJO,KKO)
+         IF (NOM>0) M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
+         CYCLE SEARCH_LOOP
+      ENDIF
+
+      ! Look for thin obstructions bordering the current cell
+
+      DO NN=1,M%N_OBST
+         OB=>M%OBSTRUCTION(NN)
+         SELECT CASE(IOR)
+            CASE(-1)
+               IF (II==  OB%I1 .AND. II==  OB%I2 .AND. JJ>OB%J1 .AND. JJ<=OB%J2 .AND. KK>OB%K1 .AND. KK<=OB%K2) CYCLE SEARCH_LOOP
+            CASE( 1)
+               IF (II-1==OB%I1 .AND. II-1==OB%I2 .AND. JJ>OB%J1 .AND. JJ<=OB%J2 .AND. KK>OB%K1 .AND. KK<=OB%K2) CYCLE SEARCH_LOOP
+            CASE(-2)
+               IF (JJ==  OB%J1 .AND. JJ==  OB%J2 .AND. II>OB%I1 .AND. II<=OB%I2 .AND. KK>OB%K1 .AND. KK<=OB%K2) CYCLE SEARCH_LOOP
+            CASE( 2)
+               IF (JJ-1==OB%J1 .AND. JJ-1==OB%J2 .AND. II>OB%I1 .AND. II<=OB%I2 .AND. KK>OB%K1 .AND. KK<=OB%K2) CYCLE SEARCH_LOOP
+            CASE(-3)
+               IF (KK==  OB%K1 .AND. KK==  OB%K2 .AND. II>OB%I1 .AND. II<=OB%I2 .AND. JJ>OB%J1 .AND. JJ<=OB%J2) CYCLE SEARCH_LOOP
+            CASE( 3)
+               IF (KK-1==OB%K1 .AND. KK-1==OB%K2 .AND. II>OB%I1 .AND. II<=OB%I2 .AND. JJ>OB%J1 .AND. JJ<=OB%J2) CYCLE SEARCH_LOOP
+         END SELECT
+      ENDDO
+
+      ! If an obstruction is found, assign its cells the current ZONE, just in case the obstruction is removed
+
+      IC = M%CELL_INDEX(II,JJ,KK)
+      IF (M%SOLID(IC) .AND. M%OBST_INDEX_C(IC)>0) THEN
+         OB => M%OBSTRUCTION(M%OBST_INDEX_C(IC))
+         M%PRESSURE_ZONE(OB%I1+1:OB%I2,OB%J1+1:OB%J2,OB%K1+1:OB%K2) = I_ZONE
+         CYCLE SEARCH_LOOP
+      ENDIF
+
+      ! If the neighboring cell is not solid, assign the pressure zone
+
+      IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(II,JJ,KK)<1) THEN
+         Q_N      = Q_N+1
+         Q_I(Q_N) = II
+         Q_J(Q_N) = JJ
+         Q_K(Q_N) = KK
+         M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
+      ENDIF
+
+   ENDDO SEARCH_LOOP
+
+END DO SORT_QUEUE
+
+DEALLOCATE(Q_I)
+DEALLOCATE(Q_J)
+DEALLOCATE(Q_K)
+
+END SUBROUTINE ASSIGN_PRESSURE_ZONE
+
+
 
 SUBROUTINE GET_N_LAYER_CELLS(DIFFUSIVITY,THICKNESS,STRETCH_FACTOR,CELL_SIZE_FACTOR,N_CELLS,DX_MIN)
 
