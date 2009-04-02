@@ -123,13 +123,15 @@ for ff=1:length(N)
     ylabel('u-velocity, m/s','fontsize',16)
     legend(G,'FDS','Analytical Solution','Location','Northeast')
     
-    % write error file ------
-    M = [t(1), u(1), U(1)];
-    for j = 2:length(t)
-        M = [ M; [t(j), u(j), U(j)] ];
+    if (N(ff)==64)
+        % analytical solution file ------
+        M = [t(1), u(1)];
+        for j = 2:length(t)
+            M = [ M; [t(j), u(j)] ];
+        end
+        dlmwrite(['ns2d_nupt1_uvel_exact_soln.csv'],M,'precision',9)
+        % -----------------------
     end
-    dlmwrite(['uvel_',num2str(N(ff)),'.csv'],M,'precision',9)
-    % -----------------------
 
     rms_error(ff) = sqrt( mean( (U-u).^2 ) );
     max_error(ff) = max(abs(U-u));
