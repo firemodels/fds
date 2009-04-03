@@ -721,11 +721,11 @@ Figure \ref{figventtest} tests vent display.  This figure shows all vents displa
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
- \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_solid}\\
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_allvents}\\
  show all vents\\
- \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_noopen}\\
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_noopen}\\
  show only vents that are not open vents\\
- \includegraphics[height=\figheightE]{../SMV_5_User_Guide/scriptfigures/thouse5_novents}\\
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_novents}\\
  do not draw any vents\\
 
  \end{tabular}
@@ -780,12 +780,12 @@ Figure \ref{figgputest} tests whether Smokeview produces identical images when u
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
- \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_005}&
- \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_gpu_005}\\
- \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_010}&
- \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_gpu_010}\\
- \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_030}&
- \includegraphics[height=\figheightD]{../SMV_5_User_Guide/scriptfigures/thouse5_smoke_gpu_030}\\
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_nongpu_05}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_gpu_05}\\
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_nongpu_10}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_gpu_10}\\
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_nongpu_30}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_smoke_gpu_30}\\
  CPU generated&GPU generated\\
  \end{tabular}
 \end{center}
@@ -801,10 +801,6 @@ Figure \ref{figgputest} tests whether Smokeview produces identical images when u
 \addcontentsline{toc}{chapter}{Appendices}
 
 \chapter{Input Files}
-\section{colorconv}
-\label{FDScolorconv}
-\fdsinput{colorconv.fds}
-
 \section{plume5c}
 \label{FDSplume5c}
 \fdsinput{plume5c.fds}
@@ -825,15 +821,11 @@ Figure \ref{figgputest} tests whether Smokeview produces identical images when u
 \label{FDSsmoketest2}
 \fdsinput{smoke_test2.fds}
 
-\section{thouse5}
-\label{FDSthouse5}
-\fdsinput{thouse5.fds}
+\section{colorconv}
+\label{FDScolorconv}
+\fdsinput{colorconv.fds}
 
 \chapter{Smokeview Scripts}
-\section{colorconv}
-\label{SSFcolorconv}
-\fdsinput{colorconv.ssf}
-
 \section{plume5c}
 \label{SSFplume5c}
 \fdsinput{plume5c.ssf}
@@ -854,8 +846,8 @@ Figure \ref{figgputest} tests whether Smokeview produces identical images when u
 \label{SSFsmoketest2}
 \fdsinput{smoke_test2.ssf}
 
-\section{thouse5}
-\label{SSFthouse5}
-\fdsinput{thouse5.ssf}
+\section{colorconv}
+\label{SSFcolorconv}
+\fdsinput{colorconv.ssf}
 
 \end{document}
