@@ -1,4 +1,3 @@
-
 // put rendered files in specified directory
 
 RENDERDIR
@@ -363,7 +362,88 @@ LOADINIFILE
 RENDERONCE
  plume5c_hidden
 
+// render PLOT3D stepped contours
+
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d.ini
+LOADFILE
+ thouse5_0001_00000061_00.q
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ thouse5_plot3d_step
 
 
+// render vents - don't show open vents
+
+LOADINIFILE
+ plume5c_noopenvents.ini
+SETVIEWPOINT
+ external
+RENDERONCE
+ plume5c_noopen
+
+// render vents - don't show any vents
+
+LOADINIFILE
+ plume5c_novents.ini
+SETVIEWPOINT
+ external
+RENDERONCE
+ plume5c_novents
+
+// render vents - show all vents
+
+LOADINIFILE
+ plume5c_allvents.ini
+SETVIEWPOINT
+ external
+RENDERONCE
+ plume5c_allvents
+
+// render 3D smoke GPU off
+
+UNLOADALL
+LOADINIFILE
+ plume5c_nongpu.ini
+LOADFILE
+ plume5c_01.s3d
+LOADFILE
+ plume5c_02.s3d
+SETTIMEVAL
+ 5.05
+RENDERONCE
+ plume5c_smoke_nongpu_05
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plume5c_smoke_nongpu_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_smoke_nongpu_30
+
+// render 3D smoke GPU on
+
+UNLOADALL
+LOADINIFILE
+ plume5c_gpu.ini
+LOADFILE
+ plume5c_01.s3d
+LOADFILE
+ plume5c_02.s3d
+SETTIMEVAL
+ 5.05
+RENDERONCE
+ plume5c_smoke_gpu_05
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plume5c_smoke_gpu_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_smoke_gpu_30
 
 
