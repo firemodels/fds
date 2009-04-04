@@ -314,8 +314,8 @@ RENDERONCE
 UNLOADALL
 LOADINIFILE
  plume5c_plot3d_step.ini
-LOADFILE
- plume5c_0001_00000040_01.q
+LOADPLOT3D
+ 1 40.0
 RENDERONCE
  plume5c_plot3d_step
 
@@ -324,8 +324,8 @@ RENDERONCE
 UNLOADALL
 LOADINIFILE
  plume5c_plot3d_line.ini
-LOADFILE
- plume5c_0001_00000040_01.q
+LOADPLOT3D
+ 1 40.0
 RENDERONCE
  plume5c_plot3d_line
 
@@ -334,8 +334,8 @@ RENDERONCE
 UNLOADALL
 LOADINIFILE
  plume5c_plot3d_shaded.ini
-LOADFILE
- plume5c_0001_00000040_01.q
+LOADPLOT3D
+ 1 40.0
 RENDERONCE
  plume5c_plot3d_shaded
 
