@@ -95,7 +95,7 @@ void glui_script_disable(void);
 //  1/2/3 (int)  val (float)
 
 // LOADPLOT3D
-//  time (float)
+//  mesh number (int) time (float)
 
 // UNLOADALL
 
@@ -752,7 +752,7 @@ int compile_script(char *scriptfile){
       init_scripti(scripti,SCRIPT_LOADPLOT3D);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
-      sscanf(buffer,"%f",&scripti->fval);
+      sscanf(buffer," %i %f",&scripti->ival,&scripti->fval);
 
       nscriptinfo++;
       continue;
@@ -1125,14 +1125,16 @@ void script_loadfile(scriptdata *scripti){
 void script_loadplot3d(scriptdata *scripti){
   int i;
   float time;
+  int blocknum;
 
   time = scripti->fval;
+  blocknum = scripti->ival;
 
   for(i=0;i<nplot3d;i++){
     plot3d *plot3di;
 
     plot3di = plot3dinfo + i;
-    if(fabs(plot3di->time-time)<0.5){
+    if(plot3di->blocknumber+1==blocknum&&fabs(plot3di->time-time)<0.5){
       LoadPlot3dMenu(i);
     }
   }
