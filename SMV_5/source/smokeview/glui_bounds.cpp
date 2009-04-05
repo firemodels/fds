@@ -132,6 +132,7 @@ GLUI *glui_bounds=NULL;
 GLUI_Rollout *panel_plot3d=NULL,*panel_evac=NULL,*panel_part=NULL,*panel_slice=NULL,*panel_bound=NULL,*panel_iso=NULL,*panel_smoke3d=NULL;
 GLUI_RadioGroup *bf_rlist=NULL, *p3rlist=NULL,*slice_rlist=NULL;
 GLUI_RadioGroup *part5_rlist=NULL;
+GLUI_RadioGroup *iso_isotype=NULL;
 GLUI_RadioGroup *plot3d_display=NULL;
 GLUI_EditText *con_slice_min=NULL, *con_slice_max=NULL;
 GLUI_EditText *con_slice_chopmin=NULL, *con_slice_chopmax=NULL;
@@ -166,6 +167,7 @@ GLUI_Spinner *SPINNER_isozipstep=NULL;
 GLUI_Spinner *SPINNER_boundzipstep=NULL;
 GLUI_Spinner *SPINNER_partstreaklength=NULL;
 GLUI_Spinner *SPINNER_partpointsize=NULL;
+GLUI_Spinner *SPINNER_isopointsize=NULL;
 GLUI_Spinner *SPINNER_streaklinewidth=NULL;
 GLUI_Spinner *SPINNER_vectorpointsize=NULL;
 GLUI_Spinner *SPINNER_vectorlinewidth=NULL;
@@ -266,6 +268,18 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_isoframestep=glui_bounds->add_spinner_to_panel(panel_iso,"Frame Skip",GLUI_SPINNER_INT,&isoframeskip,
       FRAMELOADING,Iso_CB);
     SPINNER_isoframestep->set_int_limits(0,100);
+    
+    SPINNER_isopointsize=glui_bounds->add_spinner_to_panel(panel_iso,"Particle size",GLUI_SPINNER_FLOAT,
+      &isopointsize);
+    SPINNER_isopointsize->set_float_limits(1.0,10.0);
+
+    iso_isotype = glui_bounds->add_radiogroup_to_panel(panel_iso,&visAIso);
+
+    glui_bounds->add_radiobutton_to_group(iso_isotype,"Hidden");
+    glui_bounds->add_radiobutton_to_group(iso_isotype,"Solid");
+    glui_bounds->add_radiobutton_to_group(iso_isotype,"Outline");
+    glui_bounds->add_radiobutton_to_group(iso_isotype,"Points");
+    
   }
 
   /* Particle File Bounds  */
@@ -809,6 +823,13 @@ void PLOT3D_CB(int var){
 extern "C" void updatetracers(void){
   if(showtracer_checkbox==NULL)return;
   showtracer_checkbox->set_int_val(show_tracers_always);
+}
+
+
+/* ------------------ update_glui_isotype ------------------------ */
+
+extern "C" void update_glui_isotype(void){
+  iso_isotype->set_int_val(visAIso);
 }
 
 /* ------------------ updatechar ------------------------ */

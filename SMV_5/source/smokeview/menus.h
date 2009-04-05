@@ -533,6 +533,7 @@ void IsoShowMenu(int value){
     if(visAIso!=0){
       plotstate=DYNAMIC_PLOTS;
     }
+    update_glui_isotype();
     break;
    case 94:
     transparent_state=ALL_SOLID;
@@ -3210,8 +3211,9 @@ void LoadPlot3dMenu(int value){
     ReadPlot3dFile=1;
     plot3dfile = plot3dinfo[value].file;
     if(scriptoutstream!=NULL&&loadplot3dall==0){
-      fprintf(scriptoutstream,"LOADFILE\n");
-      fprintf(scriptoutstream," %s\n",plot3dfile);
+      fprintf(scriptoutstream,"LOADPLOT3D\n");
+      fprintf(scriptoutstream," %i %f\n",
+        plot3dinfo[value].blocknumber,plot3dinfo[value].time);
     }
     readplot(plot3dfile,value,LOAD,&errorcode);
   }
