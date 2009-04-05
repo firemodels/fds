@@ -1220,6 +1220,7 @@ void drawiso(const mesh *meshi,int tranflag){
     asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
 
     antialias(1);
+    glPointSize(isopointsize);
     glBegin(GL_POINTS);
     for(i=0;i<nisolevels;i++){
       asurface++;
