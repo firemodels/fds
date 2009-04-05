@@ -28,6 +28,7 @@ int SUB_portfrustum(int quad,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
 
+EXTERNCPP void update_glui_isotype(void);
 EXTERNCPP void init_device(device *devicei, float *xyz, float *xyzn, int state0);
 EXTERNCPP void draw_devices_val(void);
 EXTERNCPP void getsmokesensors(void);
@@ -490,7 +491,7 @@ EXTERNCPP void drawpatch_cellcenter(const mesh *gb);
 EXTERNCPP void drawpatch_texture(const mesh *gb);
 EXTERNCPP void drawpatch_texture_cellcenter(const mesh *gb);
 EXTERNCPP void drawpatch_texture_threshold(const mesh *gb);
-EXTERNCPP void drawpatch_threshold_cellcenter(mesh *meshi);
+EXTERNCPP void drawpatch_threshold_cellcenter(const mesh *meshi);
 
 EXTERNCPP void Render(int view_mode);
 EXTERNCPP void updateslicebounds(void);
