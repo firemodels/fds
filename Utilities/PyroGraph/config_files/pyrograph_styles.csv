@@ -35,3 +35,9 @@ ID,Symbol_Style,Edge_Color,Fill_Color,Symbol_Size,Line_Color,Line_Style,Line_Wid
 34,None,w,w,None,g,-,0.5
 35,None,w,w,None,b,-,0.5
 36,None,w,w,None,y,-,0.5
+37,^,k,k,2,w,None,None
+38,None,w,w,None,k,-.,0.5
+39,None,w,w,None,r,-.,0.5
+40,None,w,w,None,g,-.,0.5
+41,None,w,w,None,b,-.,0.5
+42,None,w,w,None,y,-.,0.5
