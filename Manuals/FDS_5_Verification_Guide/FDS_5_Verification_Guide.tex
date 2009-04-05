@@ -677,19 +677,23 @@ that is, comments within the source code itself.  Plus, they must compile the co
 
 \chapter{The Basic Flow Solver}
 
-\section{Single Mesh, Nonreacting Periodic Test Cases}
+\section{Single Mesh, Non-reacting Periodic Test Cases}
 
-In this section we present test cases aimed at exercising the advective, pressure and viscous terms and the time integration for nonreacting flows with periodic boundary conditions in all directions (this eliminates the possibility of gravitational stratification).  In Section \ref{ns2d} we present an analytical solution that is useful for confirming the convergence rates of the truncation errors in the discretization schemes.  In Section \ref{decaying_isotropic_turbulence} we present a canonical flow for LES which tests that the subgrid stress model has been coded properly.
+In this section we present test cases aimed at exercising the advective, pressure and viscous terms and the time integration for non-reacting flows with periodic
+boundary conditions in all directions (this eliminates the possibility of gravitational stratification).
+In Section \ref{ns2d} we present an analytical solution that is useful for confirming the convergence rates of the truncation errors in the discretization schemes.
+In Section \ref{decaying_isotropic_turbulence} we present a canonical flow for LES which tests that the subgrid stress model has been coded properly.
 
 \subsection{2D Analytical Solution to Navier-Stokes}
 \label{ns2d}
 
-The velocity is given by $\mathbf{u} = [u, v]^T$. Let $A$ represent an arbitrary amplitude.  The kinematic viscosity and pressure are denoted $\nu$ and $p$, respectively, and the solution the 2D incompressible Navier-Stokes equations,
+Consider the 2D incompressible Navier-Stokes equations
 \begin{equation}
 \label{eqn_NS}
 \frac{\partial \mathbf{u}}{\partial t} + \mathbf{u} \cdot \nabla \mathbf{u} = - \nabla{p} + \nu \nabla^2 \mathbf{u} \,\mbox{,}
 \end{equation}
-is given by \cite{McDermott:NS2D}
+where the velocity is given by $\mathbf{u} = [u, v]^T$, and the kinematic viscosity and pressure are denoted $\nu$ and $p$, respectively.
+An analytical solution of these equations is given by \cite{McDermott:NS2D}
 \begin{eqnarray}
 \label{eqn_usoln}
 u(x,y,t) &=& 1 - A\cos(x-t)\sin(y-t)\,e^{-2\nu t} \,\mbox{,} \\
@@ -698,52 +702,78 @@ v(x,y,t) &=& 1 + A\sin(x-t)\cos(y-t)\,e^{-2\nu t} \,\mbox{,}
 \begin{equation}
 p(x,y,t) = -\frac{A^2}{4} \left[ \cos(2(x-t))+\cos(2(y-t))\right]e^{-4\nu t} \,\mbox{.}
 \end{equation}
+Here, $A$ represents an arbitrary amplitude and is assumed to take a value of 2 in this example.
 Note that this solution satisfies continuity for all time,
 \begin{equation}
 \label{eqn_divfree}
 \nabla\cdot\mathbf{u} = 0 \,\mbox{,}
 \end{equation}
-is period on an interval $2\pi$ in each direction, and is time periodic on $2\pi$ if $\nu=0$, else the solution decays exponentially.  Below we present two series of tests which demonstrate the second-order accuracy of the FDS numerical scheme and thus provide a strong form of code verification for the advective and viscous terms which are exercised.
+is spatially periodic on an interval $2\pi$ in each direction, and is temporally periodic on $2\pi$ if $\nu=0$; otherwise, the solution decays exponentially.
+Below we present two series of tests which demonstrate the second-order accuracy of the FDS numerical scheme and thus provide a strong form of code verification
+for the advective and viscous terms which are exercised.
 
-The physical domain of the problem is a square of side $L=2\pi$.  The grid spacing is uniform $\Delta x = \Delta y = L/N$ in each direction with $N =\{8,16,32,64\}$ for each test series.  The staggered grid locations are denoted $x_i = i \Delta x$ and $y_j = j \Delta y$, and the cell centers are marked by an overbar, $\bar{x}_i = x_i - \Delta x/2$ and $\bar{y}_j = y_j - \Delta y/2$.
+The physical domain of the problem is a square of side $L=2\pi$.  The grid spacing is uniform $\delta x = \delta y = L/N$ in each direction
+with $N =\{8,16,32,64\}$ for each test series.  The staggered grid locations are denoted $x_i = i \, \delta x$ and $y_j = j \, \delta y$, and the cell
+centers are marked by an overbar, $\bar{x}_i = x_i - \delta x/2$ and $\bar{y}_j = y_j - \delta y/2$.
 
-First, we present qualitative results for the case in which $\nu=0$.  Thus, only the advective discretization and the time integration are being tested. Figure \ref{fig_ns2d_smv} shows the initial and final $(t=2\pi)$ numerical solution for the case $N=64$.  As mentioned, with $\nu=0$ the solution is periodic in time and this figure demonstrates that, as should be the case, the FDS numerical solution is unaltered after one flow-through time.
+First, we present qualitative results for the case in which $\nu=0$.  Thus, only the advective discretization and the time integration are being tested.
+Figure \ref{fig_ns2d_smv} shows the initial and final $(t=2\pi)$ numerical solution for the case $N=64$.
+As mentioned, with $\nu=0$ the solution is periodic in time and this figure demonstrates that, as should be the case, the FDS numerical solution is unaltered after one flow-through time.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_64_0000.pdf} } &
       \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_64_1001.pdf} }
    \end{tabular*}
-   \caption{\label{fig_ns2d_smv} \small Initial and final states of the $u$-component of velocity.}
+   \caption{Initial and final states of the $u$-component of velocity.}
+   \label{fig_ns2d_smv}
 \end{figure}
 
-Next, in Figure \ref{fig_ns2d_timehistory}, we show time histories of the $u$-component of velocity at the center of the domain for the case in which $\nu = 0.1$.  It is clearly seen that the FDS solution (open circles) is converging to the analytical solution (solid line).
+Next, in Figure \ref{fig_ns2d_timehistory}, we show time histories of the $u$-component of velocity at the center of the domain for the case in which $\nu = 0.1$.
+It is clearly seen that the FDS solution (thin line) converges to the analytical solution (thick line).
+Note that the analytical solution is evaluated at the same location as the FDS staggered grid location for the $u$-component
+of velocity, $(x_{N/2},\bar{y}_{N/2})$, which is different in each case, $N =\{8,16,32,64\}$.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_vel_8.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_vel_16.pdf} } \\
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_vel_32.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_vel_64.pdf} }
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_8_nupt1.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_16_nupt1.pdf} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_32_nupt1.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_64_nupt1.pdf} }
    \end{tabular*}
-   \caption{\label{fig_ns2d_timehistory} \small Time history of the velocity at the center of the domain for a range of grid resolutions.  The domain is a square of side $L = 2\pi$ m.  The $N \times N$ grid is uniform.  Progressing from left to right and top to bottom we have resolutions $N =\{8,16,32,64\}$ clearly showing convergence of the FDS numerical solution (open circles) to the analytical solution (solid line).  The case is run with constant properties, $\rho=1$ kg/m$^3$ and $\mu = 0.1$ kg/m/s, and a CFL of 0.25.}
+   \caption{Time history of the $u$-component of velocity half a grid cell below the center of the domain for a range of grid resolutions.
+   The domain is a square of side $L = 2\pi$ m.  The $N \times N$ grid is uniform.  Progressing from left to right and top to bottom we have resolutions $N =\{8,16,32,64\}$
+   clearly showing convergence of the FDS numerical solution (open circles) to the analytical solution (solid line).
+   The case is run with constant properties, $\rho=1$ kg/m$^3$ and $\mu = 0.1$ kg/m/s, and a CFL of 0.25.}
+   \label{fig_ns2d_timehistory}
 \end{figure}
 
-Figure \ref{fig_ns2d_convergence} is the key quantitative result of this verification test.  In this figure we plot the rms error, $\varepsilon_{\mbox{\scriptsize rms}}$, in the $u$-component of velocity against the grid spacing.  The error is defined by
+Figure \ref{fig_ns2d_convergence} is the key quantitative result of this verification test.  In this figure we plot the rms error, $\varepsilon_{\mbox{\scriptsize rms}}$,
+in the $u$-component of velocity against the grid spacing.  The error is defined by
 \begin{equation}
 \label{eqn_rmserror}
 \varepsilon_{\mbox{\scriptsize rms}} \equiv \sqrt{ \frac{1}{M} \sum_{k=1}^{M} \left[ U_{ij}^k - u(x_i,\bar{y}_j,t_k) \right]^2 } \,\mbox{,}
 \end{equation}
-where $M$ is the number of time steps and $k$ is the time step index.  The spatial indices are $(i=N/2,j=N/2)$ and $U_{ij}^k$ represents the FDS value for the $u$-component of velocity at the staggered storage location for cell $(i,j)$ at time step $k$; $u(x_i,\bar{y}_j,t_k)$ is the analytical solution for the $u$-component at the corresponding location in space and time.  The figure confirms that the advective terms, the viscous terms, and the time integration in the FDS code are convergent and second-order accurate.
+where $M$ is the number of time steps and $k$ is the time step index.  The spatial indices are $(i=N/2,j=N/2)$ and $U_{ij}^k$ represents the FDS value for the $u$-component of
+velocity at the staggered storage location for cell $(i,j)$ at time step $k$; $u(x_i,\bar{y}_j,t_k)$ is the analytical solution for the $u$-component at
+the corresponding location in space and time.  The figure confirms that the advective terms, the viscous terms, and the time integration in the FDS code are convergent and second-order accurate.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_convergence.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_convergence.pdf} }
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_error.pdf} } &
+      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_error.pdf} }
    \end{tabular*}
-   \caption{\label{fig_ns2d_convergence} \small (Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the advective terms in the FDS code are second-order accurate.  The stars represent the rms error in the $u$-component for grid spacings of $\Delta x = L/N$ where $L = 2\pi$ m and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$ sec with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing that the viscous terms in the FDS code are second-order accurate.}
+   \caption{(Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the
+   advective terms in the FDS code are second-order accurate.  The triangles represent the rms error in the $u$-component for grid spacings of $\delta x = L/N$ where $L = 2\pi$ m
+   and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$~s
+   with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing
+   that the viscous terms in the FDS code are second-order accurate.}
+   \label{fig_ns2d_convergence}
 \end{figure}
 
+
+
+\clearpage
 
 \subsection{Decaying Isotropic Turbulence}
 \label{decaying_isotropic_turbulence}
@@ -779,12 +809,17 @@ To the right of each decay curve plot in Figure \ref{fig_cbc_energy} is the corr
 
 Overall, the agreement between the FDS simulations and the CBC data is satisfactory and any discrepancies can be explained by limitations of the model.  Therefore, as a verification the results here are positive in that nothing points to coding errors.
 
+
+
+
+\clearpage
+
 \subsection{The Dynamic Smagorinsky Model}
 \label{dynamic_smagorinsky_model}
 
 In the previous section, all calculations were performed with a constant and uniform Smagorinsky coefficient, $C_s = 0.2$.  For the canonical case of homogeneous decaying isotropic turbulence -- \emph{at sufficiently high Reynolds number} -- this model is sufficient.  However, we noticed that, even for the isotropic turbulence problem, when the grid Reynolds number is low (i.e., the flow is well-resolved) the constant coefficient model tends to over predict the dissipation of kinetic energy (see Figure \ref{fig_cbc_energy}).  This is because the eddy viscosity does not converge to zero at the proper rate; so long as strain is present in the flow (the magnitude of the stain rate tensor is nonzero), the eddy viscosity will be nonzero.  This violates a guiding principle in LES development: that the method should converge to a DNS if the flow field is sufficiently resolved \cite{McDermott:2007}.
 
-The dynamic procedure for calculating the model coefficient (invoked by setting {\tt DYNSMAG=.TRUE.} on the {\tt MISC} line) alleviates this problem.  The basis of the model is that the coefficient should be the same for two different filter scales within the inertial subrange.  Details of the procedure are explained in the following references \cite{Germano:1991,PinoMartin:2000,Moin:1991,Lund:1997,McDermott:2004}.  Here we present results for the implementation of the dynamic model in FDS.  In Figure \ref{fig_c_smag} we show contours of the Smagorinsky coefficient $C_s(\mathbf{x},t)$ at a time midway through a $64^3$ simulation of the CBC experiment.  Notice that the coefficient ranges from 0.00 to roughly 0.30 within the domain with the average value falling around 0.17.
+The dynamic procedure for calculating the model coefficient (invoked by setting {\tt DYNSMAG=.TRUE.} on the {\tt MISC} line) alleviates this problem.  The basis of the model is that the coefficient should be the same for two different filter scales within the inertial subrange.  Details of the procedure are explained in the following references \cite{Germano:1991,PinoMartin:2000,Moin:1991,Lund:1997,McDermott:2004}.  Here we present results for the implementation of the dynamic model in FDS.  In Figure~\ref{fig_c_smag} we show contours of the Smagorinsky coefficient $C_s(\mathbf{x},t)$ at a time midway through a $64^3$ simulation of the CBC experiment.  Notice that the coefficient ranges from 0.00 to roughly 0.30 within the domain with the average value falling around 0.17.
 
 \begin{figure}[t]
    \begin{center}
@@ -804,6 +839,10 @@ Next, in Figure \ref{fig_dynsmag_cbc}, we show results for the dynamic model ana
    \end{tabular*}
    \caption{\label{fig_dynsmag_cbc} \small Dynamic Smagorinsky model results (analogous to Figure \ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
+
+
+
+
 
 
 \chapter{Thermal Radiation}
