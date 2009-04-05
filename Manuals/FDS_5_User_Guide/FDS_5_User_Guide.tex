@@ -3527,28 +3527,44 @@ compartment whose walls conformed to the exterior of the computational domain. A
 increase (or decrease) the background pressure in this single compartment, and a leakage area could
 be defined between the compartment and the ambient exterior. Flow through the ``cracks'' was simply
 a function of the background pressure via the usual empirical rules.
-This idea has been generalized starting in FDS 5. Now, you can specify any number of sealed portions of the computational
-domain to have their own ``background'' pressures, and these zones can be connected via leakage and duct paths. The basic syntax
-for a pressure {\ct ZONE} is:
+This idea has been generalized starting in FDS 5. Now, you can specify any number of sealed compartments within the computational
+domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose
+flow rates are tied to the pressure of the adjacent zones.
+
+\subsection{Specifying Pressure Zones}
+
+A pressure zone can by any region within the computational domain that is separated from the rest of the domain, or the exterior,
+by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is
+necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
 
 \footnotesize
 \begin{verbatim}
 &ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5 /
-&ZONE XB=2.3,5.8,1.4,2.9,6.8,9.7 /
 \end{verbatim}
 \normalsize
 
 \noindent
-There are several restrictions to assigning pressure zones. First, the pressure zones must be completely surrounded by
-obstructions (an external boundary also suffices). It is possible to ``break'' pressure zones by removing
+This means that the rectangular region, $0.3<x<1.2$, $0.4<y<2.9$, $0.3<z<4.5$, is assumed to be within a sealed compartment. There can be multiple {\ct ZONE}s
+declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file.
+By default, the exterior of the computational
+domain is ``Zone~0.'' If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be ``Zone~1.''
+
+There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the
+domain that is bordered by solid obstructions. If the sealed region is not rectangular, FDS will extend the specified {\ct ZONE} boundaries to
+conform to the non-rectangular domain.~\footnote{The extention of pressure zones to non-rectangular regions is a feature that started with
+FDS version 5.3.1.} It is possible to ``break'' pressure zones by removing
 obstructions between them.\footnote{The ability to open pressure zones became available in FDS starting with version 5.3.0. Prior versions prevented it by issuing an
-error statement} An example of how to break pressure zones is given in Section~\ref{zone_break}.
-Second, the pressure zones {\bf can} span multiple meshes,
-but check the pressure in each mesh to ensure consistency.
+error statement.} An example of how to break pressure zones is given in Section~\ref{zone_break}.
+Second, pressure zones {\bf can} span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. Also, if the {\ct ZONE} does span multiple
+meshes, make sure that the specified rectangular coordinates do so as well. This allows FDS to determine the actual extent of the {\ct ZONE} independently for each
+mesh.
 
 Note that if you plan to have one zone open up to another via the removal of an obstruction, make sure that the coordinates of the two
-zones abut (i.e. touch) even if the volume includes the solid region between the zones. FDS recognizes that a zone boundary has been removed when
-two adjacent cells belong to two different zones but have no solid obstruction between them.
+zones abut (i.e. touch) even if the one of the zones includes the solid obstruction that separates them. FDS recognizes that a zone boundary has been removed when
+two adjacent cells belonging to two different zones have no solid obstruction between them. It is recommended that you extend at least one
+of the zone boundaries {\em into} the solid obstruction separating the two zones. That way, when the obstruction is removed, the newly created
+gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at
+which point the zones will merge and no longer have distinct background pressures.
 
 
 \subsection{Leaks}
@@ -5505,7 +5521,7 @@ $n$ species, FDS only solves transport equations for $n-1$ because it also solve
 total mass conservation. To set the properties of the implicitly defined {\ct BACKGROUND\_SPECIES}, use the
 {\ct MISC} line. If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW},
 and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEAT},
-{\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.  If either {\ct SPECIFIC\_HEAT} or {\ct ENTHALPY} is specified, then both must be specified.   
+{\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.  If either {\ct SPECIFIC\_HEAT} or {\ct ENTHALPY} is specified, then both must be specified.
  The {\ct REFERENCE\_TEMPERATURE} is the temperature that corresponds to the specified value of {\ct SPECIFIC\_ENTHALPY}.  In the absence of any of these parameters, the appropriate
 values of {\ct 'AIR'} are assumed.
 
