@@ -12,7 +12,7 @@ rcParams['legend.labelspacing'] = 0.2
 #rcParams['pdf.use14corefonts'] = True
 rcParams['font.size'] = 11
 rcParams['axes.labelsize'] = 11
-rcParams['legend.fontsize'] = 11
+rcParams['legend.fontsize'] = 8
 rcParams['xtick.labelsize'] = 11
 rcParams['ytick.labelsize'] = 11
 
