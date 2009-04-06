@@ -10,11 +10,11 @@ rcParams['font.serif'] = ['Times New Roman']
 rcParams['legend.fancybox'] = True
 rcParams['legend.labelspacing'] = 0.2
 #rcParams['pdf.use14corefonts'] = True
-rcParams['font.size'] = 8
-rcParams['axes.labelsize'] = 8
-rcParams['legend.fontsize'] = 8
-rcParams['xtick.labelsize'] = 8
-rcParams['ytick.labelsize'] = 8
+rcParams['font.size'] = 11
+rcParams['axes.labelsize'] = 11
+rcParams['legend.fontsize'] = 11
+rcParams['xtick.labelsize'] = 11
+rcParams['ytick.labelsize'] = 11
 
 matplotlib.use('PDF')
 import matplotlib.pyplot as plt
@@ -43,6 +43,17 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     
     x_data_set = []
     y_data_set = []
+    
+    # Margin size in inches.
+    left_margin = 0.51
+    right_margin = 0.01
+    top_margin = 0.01
+    bottom_margin = 0.4
+    
+    rc("figure.subplot", left=(left_margin/size))
+    rc("figure.subplot", right=((size-right_margin)/size))
+    rc("figure.subplot", bottom=(bottom_margin/size))
+    rc("figure.subplot", top=((size-top_margin)/size))
     
     fig = plt.figure(figsize=(float(size),float(size))) # (w,h) values are size in inches.
     ax = fig.add_subplot(111, aspect='equal')
@@ -144,6 +155,12 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_d
     
     mask_value = -9999.0
     
+    # Margin size in inches.
+    left_margin = 0.6
+    right_margin = 0.1
+    top_margin = 0.1
+    bottom_margin = 0.5
+    
     if data_info['d1_Key'][0] == '[':
         d1_column_names = eval(data_info['d1_Key'])
     else:
@@ -153,6 +170,11 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_d
         d2_column_names = eval(data_info['d2_Key'])
     else:
         d2_column_names = [data_info['d2_Key']]
+    
+    rc("figure.subplot", left=(left_margin/size))
+    rc("figure.subplot", right=((size-right_margin)/size))
+    rc("figure.subplot", bottom=(bottom_margin/(size*0.75)))
+    rc("figure.subplot", top=(((size*0.75)-top_margin)/(size*0.75)))
     
     fig = plt.figure(figsize=(size,size*0.75)) # (w,h) values are size in inches.
     ax = fig.add_subplot(111)
