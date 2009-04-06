@@ -58,13 +58,13 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     fig = plt.figure(figsize=(float(size),float(size))) # (w,h) values are size in inches.
     ax = fig.add_subplot(111, aspect='equal')
     
-    # Iterate through data_set and plot by Group_ID.
+    # Iterate through data_set and plot by Group_Index.
     for group_id in data_set:
         group_title = groups[group_id]["Group_Title"]
-        symboltype = styles[int(groups[group_id]["Style_ID"])]['Symbol_Style']
-        symbolcolor = styles[int(groups[group_id]["Style_ID"])]['Fill_Color']
-        symbolsize = int(styles[int(groups[group_id]["Style_ID"])]['Symbol_Size'])
-        edgecolor = styles[int(groups[group_id]["Style_ID"])]['Edge_Color']
+        symboltype = styles[int(groups[group_id]["Style_Index"])]['Symbol_Style']
+        symbolcolor = styles[int(groups[group_id]["Style_Index"])]['Fill_Color']
+        symbolsize = int(styles[int(groups[group_id]["Style_Index"])]['Symbol_Size'])
+        edgecolor = styles[int(groups[group_id]["Style_Index"])]['Edge_Color']
         
         #print "Data:",data_set[group_id]
         x_data = [x[0] for x in data_set[group_id]]

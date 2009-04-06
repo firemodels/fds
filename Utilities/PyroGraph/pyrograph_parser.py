@@ -23,10 +23,10 @@ def read_config(config_file,diagnostic_level):
     while True:
         try:
             rdr = reader.next()
-            ID_num = int(rdr['ID'])
-            data[ID_num] = rdr
-            # Remove redundant ID values from dictionaries
-            data[ID_num].pop('ID')
+            Index_num = int(rdr['Index'])
+            data[Index_num] = rdr
+            # Remove redundant Index values from dictionaries
+            data[Index_num].pop('Index')
         except StopIteration: break
     
     if diagnostic_level >= 3:
@@ -58,7 +58,7 @@ def read_data_config(config_file,data_line_char,diagnostic_level):
                 record_count += 1
                 data_key_name = str(record_count)+"~"+rdr['Quantity'].strip()+"~"+rdr['Group'].strip()
                 data[data_key_name] = rdr
-                # Remove redundant ID values from dictionaries
+                # Remove redundant Index values from dictionaries
                 data[data_key_name].pop('switch_id')
             else:
                 pass
@@ -109,13 +109,13 @@ def make_scatter_dict(pickle_file,diagnostic_level):
     if diagnostic_level >= 3:
         print"Built and Pickled Scatter Data Dictionary Object."
 
-def add_group_data_to_scatter_data_dict(quantity_ID,group_ID,data_set,diagnostic_level):
+def add_group_data_to_scatter_data_dict(quantity_Index,group_Index,data_set,diagnostic_level):
     scatter_data_dict = read_pickle('scatter_data_dict_object.pkl',diagnostic_level)
-    if int(group_ID) in scatter_data_dict[int(quantity_ID)]:
-        scatter_data_dict[int(quantity_ID)][int(group_ID)].append(data_set)
+    if int(group_Index) in scatter_data_dict[int(quantity_Index)]:
+        scatter_data_dict[int(quantity_Index)][int(group_Index)].append(data_set)
     else:
-        scatter_data_dict[int(quantity_ID)][int(group_ID)] = []
-        scatter_data_dict[int(quantity_ID)][int(group_ID)].append(data_set)
+        scatter_data_dict[int(quantity_Index)][int(group_Index)] = []
+        scatter_data_dict[int(quantity_Index)][int(group_Index)].append(data_set)
     pickle_object('scatter_data_dict',scatter_data_dict,diagnostic_level)
     if diagnostic_level >= 3:
         print "Added Group Information to Scatter Data Dictionary Object."
