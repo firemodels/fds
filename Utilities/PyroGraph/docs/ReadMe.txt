@@ -5,7 +5,7 @@ File name: quantities.csv
 This csv formatted file stores information on the quantities that are used to generate scatter plot data. Each quantity represents a single scatter plot.  The plot legend labels (groups) and symbols are defined in the groups.csv and styles.csv files respectively.
 
 * QUANTITIES PARAMETERS *
-- ID, this is a unique numeric value ID that is used to refer to the quantity entry.  This quantity number will be referred to in the data sets configuration file.
+- Index, this is a unique numeric value Index that is used to refer to the quantity entry.  This quantity number will be referred to in the data sets configuration file.
 
 - Quantity_Label, this is a shortened continuous character string used to identify the quantity.
 
@@ -36,46 +36,46 @@ File name: groups.csv
 This csv formatted file stores information on the groups that are used to organize scatter plot data.
 
 * GROUPS PARAMETERS *
-- ID, this is a unique numeric value ID that is used to refer to the group entry.  This group number will be referred to in the data sets configuration file.
+- Index, this is a unique numeric value Index that is used to refer to the group entry.  This group number will be referred to in the data sets configuration file.
 
 - Group_Title, this is the character string that is used as the group label.  All points in a group on the scatter plot will be identified with this label in the legend and symbol style on the plot.
 
-- Symbol_Style_ID, this is the 9 character ID code that is used to identify a style definition in the styles.csv file.  This links the group label to a style definition.
+- Symbol_Style_Index, this is the 9 character Index code that is used to identify a style definition in the styles.csv file.  This links the group label to a style definition.
 
 
 ** STYLES OVERVIEW **
 File name: styles.csv
 This csv formatted file stores information on styles for plotting.
 The plotter.py module will look to the parameters stored here to determine how to draw the lines and/or points on a plot.
-NOTE: Scatter plots will never have lines drawn, so if a Style_ID is used for a scatter plot Group that has Line parameters defined, they will be ignored.  This allows reuse of styles for both scatter and comparison plots.
+NOTE: Scatter plots will never have lines drawn, so if a Style_Index is used for a scatter plot Group that has Line parameters defined, they will be ignored.  This allows reuse of styles for both scatter and comparison plots.
 
 * STYLES PARAMETERS *
-- ID, this is a unique numeric ID that is used to refer to a style definition.  This style number will be referred to in the groups configuration file, to associate a group with a particular plotting style.  It will also be used in the data sets configuration file to assign styles to comparison plot lines.
+- Index, this is a unique numeric Index that is used to refer to a style definition.  This style number will be referred to in the groups configuration file, to associate a group with a particular plotting style.  It will also be used in the data sets configuration file to assign styles to comparison plot lines.
 
 - Symbol_Style, defines the shape of the symbol to use if required. If it is a line only plot and no symbol is required, then place 'na' in this field.
 The symbol style field accepts the following values shown in quotes;
-‘.’ (point)
-‘,’ (pixel)
-‘o’ (circle)
-‘v’ (triangle_down)
-‘^’ (triangle_up)
-‘<’ (triangle_left)
-‘>’ (triangle_right)
-‘1’ (tri_down)
-‘2’ (tri_up)
-‘3’ (tri_left)
-‘4’ (tri_right)
-‘s’ (square)
-‘p’ (pentagon)
-‘*’ (star)
-‘h’ (hexagon1)
-‘H’ (hexagon2)
-‘+’ (plus)
-‘x’ (x)
-‘D’ (diamond)
-‘d’ (thin_diamond)
-‘|’ (vline)
-‘_’ (hline)
+'.' (point)
+',' (pixel)
+'o' (circle)
+'v' (triangle_down)
+'^' (triangle_up)
+'<' (triangle_left)
+'>' (triangle_right)
+'1' (tri_down)
+'2' (tri_up)
+'3' (tri_left)
+'4' (tri_right)
+'s' (square)
+'p' (pentagon)
+'*' (star)
+'h' (hexagon1)
+'H' (hexagon2)
+'+' (plus)
+'x' (x)
+'D' (diamond)
+'d' (thin_diamond)
+'|' (vline)
+'_' (hline)
 
 - Edge_Color, If a symbol is used, and you want the symbol to have a different color for the edge than the fill color, or only want an edge to be colored and no fill is required, set the color for the symbol edges here.
 

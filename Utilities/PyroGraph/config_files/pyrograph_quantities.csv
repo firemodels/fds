@@ -1,4 +1,4 @@
-"ID","Quantity_Label","Scatter_Plot_Title","Ind_Title","Dep_Title","Plot_Min","Plot_Max","%error","Title_Position","Key_Position","Plot_Width","Exp_Error_Lines","Mu_Line","Sigma_Lines","Plot_Filename"
+"Index","Quantity_Label","Scatter_Plot_Title","Ind_Title","Dep_Title","Plot_Min","Plot_Max","%error","Title_Position","Key_Position","Plot_Width","Exp_Error_Lines","Mu_Line","Sigma_Lines","Plot_Filename"
 1,"HGL_Temperature","Hot Gas Layer Temperature","Measured Temperature Rise ($^\circ$C)","Predicted Temperature Rise ($^\circ$C)",0,800,14,"[0.015,0.94]","lower right",4,"yes","yes","yes","ScatterPlots/HGL_Temperature"
 2,"HGL_Depth","Hot Gas Layer Depth","Measured Layer Depth (m)","Predicted Layer Depth (m)",0,20,13,"[0.015,0.94]","lower right",4,"yes","yes","yes","ScatterPlots/HGL_Depth"
 3,"Ceiling_Jet_Temperature","Ceiling Jet Temperatures","Measured Temperature Rise ($^\circ$C)","Predicted Temperature Rise ($^\circ$C)",0,1000,16,"[0.015,0.94]","lower right",4,"yes","yes","yes","ScatterPlots/Ceiling_Jet_Temperature"

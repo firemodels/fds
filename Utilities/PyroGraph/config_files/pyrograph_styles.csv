@@ -1,4 +1,4 @@
-ID,Symbol_Style,Edge_Color,Fill_Color,Symbol_Size,Line_Color,Line_Style,Line_Width
+Index,Symbol_Style,Edge_Color,Fill_Color,Symbol_Size,Line_Color,Line_Style,Line_Width
 1,o,k,k,20,w,None,None
 2,o,k,w,20,w,None,None
 3,o,b,b,20,w,None,None
