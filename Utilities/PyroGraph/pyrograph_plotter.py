@@ -46,9 +46,9 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     
     # Margin size in inches.
     left_margin = 0.51
-    right_margin = 0.01
-    top_margin = 0.01
-    bottom_margin = 0.4
+    right_margin = 0.05
+    top_margin = 0.05
+    bottom_margin = 0.5
     
     rc("figure.subplot", left=(left_margin/size))
     rc("figure.subplot", right=((size-right_margin)/size))
@@ -156,7 +156,7 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_d
     mask_value = -9999.0
     
     # Margin size in inches.
-    left_margin = 0.6
+    left_margin = 0.75
     right_margin = 0.1
     top_margin = 0.1
     bottom_margin = 0.5
