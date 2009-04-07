@@ -1041,6 +1041,7 @@ void drawiso(const mesh *meshi,int tranflag){
 
     glPushAttrib(GL_LIGHTING_BIT);
     antialias(1);
+    glLineWidth(isolinewidth);
     glBegin(GL_LINES);
     for(i=0;i<nisolevels;i++){
       asurface++;
@@ -1131,6 +1132,7 @@ void drawiso(const mesh *meshi,int tranflag){
     asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
 
     antialias(1);
+    glLineWidth(isolinewidth);
     glBegin(GL_LINES);
     for(i=0;i<nisolevels;i++){
       asurface++;
@@ -1522,6 +1524,7 @@ void drawtiso(const mesh *meshi,int tranflag){
 
     glPushAttrib(GL_LIGHTING_BIT);
     antialias(1);
+    glLineWidth(isolinewidth);
     glBegin(GL_LINES);
     for(i=0;i<nisolevels;i++){
       asurface++;
@@ -1612,6 +1615,7 @@ void drawtiso(const mesh *meshi,int tranflag){
     asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
 
     antialias(1);
+    glLineWidth(isolinewidth);
     glBegin(GL_LINES);
     for(i=0;i<nisolevels;i++){
       asurface++;
@@ -1883,6 +1887,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
   if(surfacetype==2){
     glPushMatrix();
     antialias(1);
+    glLineWidth(plot3dlinewidth);
     glBegin(GL_LINES);
     glColor3fv(asurface->color);
     vertices_i=asurface->vertices;
@@ -1938,6 +1943,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
 
     glPushMatrix();
     antialias(1);
+    glLineWidth(plot3dlinewidth);
     glBegin(GL_LINES);
     glColor3f((float)1.,(float)1.,(float)1.);
     for(j=0;j<ntriangles;j++){
