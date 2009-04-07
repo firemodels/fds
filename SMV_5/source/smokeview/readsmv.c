@@ -7007,6 +7007,11 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f ",&isopointsize);
       continue;
     }
+    if(match(buffer,"PLOT3DPOINTSIZE",15)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f ",&plot3dpointsize);
+      continue;
+    }
     if(match(buffer,"VECTORPOINTSIZE",15)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f ",&vectorpointsize);
@@ -8480,6 +8485,8 @@ void writeini(int flag){
   fprintf(fileout,"VECTORPOINTSIZE\n");
   fprintf(fileout," %f\n",vectorpointsize);
   fprintf(fileout,"ISOPOINTSIZE\n");
+  fprintf(fileout," %f\n",isopointsize);
+  fprintf(fileout,"PLOT3DPOINTSIZE\n");
   fprintf(fileout," %f\n",isopointsize);
   fprintf(fileout,"VECTORLENGTH\n");
   fprintf(fileout," %f\n",VECFRACTION);

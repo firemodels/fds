@@ -28,6 +28,7 @@ int SUB_portfrustum(int quad,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
 
+EXTERNCPP void update_glui_plot3dtype(void);
 EXTERNCPP void update_glui_isotype(void);
 EXTERNCPP void init_device(device *devicei, float *xyz, float *xyzn, int state0);
 EXTERNCPP void draw_devices_val(void);

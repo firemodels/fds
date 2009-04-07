@@ -73,6 +73,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define STREAKLENGTH 19
 #define OUTPUTSLICEDATA 20
 #define TRACERS 21
+#define PLOTISOTYPE 22
 
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
@@ -133,6 +134,8 @@ GLUI_Rollout *panel_plot3d=NULL,*panel_evac=NULL,*panel_part=NULL,*panel_slice=N
 GLUI_RadioGroup *bf_rlist=NULL, *p3rlist=NULL,*slice_rlist=NULL;
 GLUI_RadioGroup *part5_rlist=NULL;
 GLUI_RadioGroup *iso_isotype=NULL;
+GLUI_RadioGroup *plot3d_isotype=NULL;
+GLUI_RadioButton *plot3d_iso_hidden=NULL;
 GLUI_RadioGroup *plot3d_display=NULL;
 GLUI_EditText *con_slice_min=NULL, *con_slice_max=NULL;
 GLUI_EditText *con_slice_chopmin=NULL, *con_slice_chopmax=NULL;
@@ -168,6 +171,7 @@ GLUI_Spinner *SPINNER_boundzipstep=NULL;
 GLUI_Spinner *SPINNER_partstreaklength=NULL;
 GLUI_Spinner *SPINNER_partpointsize=NULL;
 GLUI_Spinner *SPINNER_isopointsize=NULL;
+GLUI_Spinner *SPINNER_plot3dpointsize=NULL;
 GLUI_Spinner *SPINNER_streaklinewidth=NULL;
 GLUI_Spinner *SPINNER_vectorpointsize=NULL;
 GLUI_Spinner *SPINNER_vectorlinewidth=NULL;
@@ -391,6 +395,16 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_bounds->add_separator_to_panel(panel_plot3d);
 
     glui_bounds->add_checkbox_to_panel(panel_plot3d,"Show Isosurface",&visiso,PLOTISO,PLOT3D_CB);
+    plot3d_isotype=glui_bounds->add_radiogroup_to_panel(panel_plot3d,&p3dsurfacetype,PLOTISOTYPE,PLOT3D_CB);
+    plot3d_iso_hidden=glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Hidden");
+    glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Solid");
+    glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Triangles");
+    glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Points");
+    plot3d_iso_hidden->disable();
+
+    SPINNER_plot3dpointsize=glui_bounds->add_spinner_to_panel(panel_plot3d,"Particle size",GLUI_SPINNER_FLOAT,
+      &plot3dpointsize);
+    SPINNER_plot3dpointsize->set_float_limits(1.0,10.0);
 
     p3min_temp=p3min[0];
     p3max_temp=p3max[0];
@@ -737,6 +751,9 @@ void PLOT3D_CB(int var){
     handleiso();
     GLUTPOSTREDISPLAY
     break;
+  case PLOTISOTYPE:
+    updatemenu=1;
+    break;
   case UPDATEPLOT:
     GLUTPOSTREDISPLAY
     break;
@@ -832,6 +849,12 @@ extern "C" void update_glui_isotype(void){
   iso_isotype->set_int_val(visAIso);
 }
 
+
+/* ------------------ update_glui_isotype ------------------------ */
+
+extern "C" void update_glui_plot3dtype(void){
+  plot3d_isotype->set_int_val(p3dsurfacetype);
+}
 /* ------------------ updatechar ------------------------ */
 
 extern "C" void updatechar(void){
