@@ -1319,8 +1319,9 @@ void initvars1(void){
   clip_X_val=0.0, clip_Y_val=0.0, clip_Z_val=0.0;
   stepclip_x=0,stepclip_y=0,stepclip_z=0;
   stepclip_X=0,stepclip_Y=0,stepclip_Z=0;
-  partpointsize=2.0,vectorpointsize=3.0,streaklinewidth=1.0;
+  partpointsize=4.0,vectorpointsize=3.0,streaklinewidth=1.0;
   isopointsize=4.0;
+  plot3dpointsize=4.0;
   vectorpointsize=2.0, vectorlinewidth=1.0;
   sprinklerabssize=0.076f, sensorabssize=0.038f, heatabssize=0.076f;
   sensorrelsize=1.0;

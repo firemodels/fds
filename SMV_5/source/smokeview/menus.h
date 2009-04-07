@@ -1587,6 +1587,7 @@ void IsoSurfaceTypeMenu(int value){
       ASSERT(FFALSE);
       break;
     }
+    update_glui_plot3dtype();
     updatemenu=1;  
     GLUTPOSTREDISPLAY
   }
