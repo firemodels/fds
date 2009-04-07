@@ -418,7 +418,7 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
 
 /*  ------------------ drawcontours ------------------------ */
 
-void DrawContours(const contour *ci,int drawoption){
+void DrawContours(const contour *ci,int drawoption, float linewidth){
 /*
   drawoption = 1 ==> draw shaded contours
   drawoption = 2 ==> draw "line" contours
@@ -455,7 +455,7 @@ void DrawContours(const contour *ci,int drawoption){
       }
       if(drawoption==2){
         glColor4fv(rgb[n]);
-        glLineWidth((float)1.0);
+        glLineWidth(linewidth);
         glBegin(GL_LINES);
         for(iline=0;iline<nlinepts;iline++){glVertex3f(xyzval,*xline++,*yline++);}
         glEnd();
@@ -473,7 +473,7 @@ void DrawContours(const contour *ci,int drawoption){
       }
       if(drawoption==2){
         glColor4fv(rgb[n]);
-        glLineWidth((float)1.0);
+        glLineWidth(linewidth);
         glBegin(GL_LINES);
         for(iline=0;iline<nlinepts;iline++){glVertex3f(*xline++,xyzval,*yline++);}
         glEnd();
@@ -490,7 +490,7 @@ void DrawContours(const contour *ci,int drawoption){
       }
       if(drawoption==2){
         glColor4fv(rgb[n]);
-        glLineWidth((float)1.0);
+        glLineWidth(linewidth);
         glBegin(GL_LINES);
         for(iline=0;iline<nlinepts;iline++){glVertex3f(*xline++,*yline++,xyzval);}
         glEnd();
