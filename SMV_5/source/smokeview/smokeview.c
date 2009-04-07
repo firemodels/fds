@@ -1330,11 +1330,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         case 2:
           if(visTerrainType==1){
             if(cullfaces==1)glDisable(GL_CULL_FACE);
-            DrawContours(&meshinfo[i].terrain_contour,1);
+            DrawContours(&meshinfo[i].terrain_contour,1,plot3dlinewidth);
             if(cullfaces==1)glEnable(GL_CULL_FACE);
           }
           else{
-            DrawContours(&meshinfo[i].terrain_contour,2);
+            DrawContours(&meshinfo[i].terrain_contour,2,plot3dlinewidth);
           }
           break;
         case 0:

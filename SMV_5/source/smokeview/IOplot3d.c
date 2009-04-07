@@ -471,7 +471,7 @@ void drawplot3d_texture(mesh *meshi){
   /* +++++++++++++++++++++++++++   draw yz contours +++++++++++++++++++++++++++++++++++++ */
 
   if(visx!=0){
-    if(visVector==0)DrawContours(plot3dcontour1ptr,p3cont2d);
+    if(visVector==0)DrawContours(plot3dcontour1ptr,p3cont2d,plot3dlinewidth);
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       if(plotx<0){
         plotx=ibar;
@@ -581,7 +581,7 @@ void drawplot3d_texture(mesh *meshi){
 
   if(visy!=0){
     if(visVector==0){
-      DrawContours(plot3dcontour2ptr,p3cont2d);
+      DrawContours(plot3dcontour2ptr,p3cont2d,plot3dlinewidth);
     }
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       /*
@@ -691,7 +691,7 @@ void drawplot3d_texture(mesh *meshi){
 
   if(visz!=0){
     if(visVector==0){
-      DrawContours(plot3dcontour3ptr,p3cont2d);
+      DrawContours(plot3dcontour3ptr,p3cont2d,plot3dlinewidth);
     }
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       if(plotz<0){plotz=kbar;updateplotslice(3);}
@@ -880,7 +880,7 @@ void drawplot3d(mesh *meshi){
   /* +++++++++++++++++++++++++++   draw yz contours +++++++++++++++++++++++++++++++++++++ */
 
   if(visx!=0){
-    if(visVector==0)DrawContours(plot3dcontour1ptr,p3cont2d);
+    if(visVector==0)DrawContours(plot3dcontour1ptr,p3cont2d,plot3dlinewidth);
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       if(plotx<0){
         plotx=ibar;
@@ -987,7 +987,7 @@ void drawplot3d(mesh *meshi){
 
   if(visy!=0){
     if(visVector==0){
-      DrawContours(plot3dcontour2ptr,p3cont2d);
+      DrawContours(plot3dcontour2ptr,p3cont2d,plot3dlinewidth);
     }
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       /*
@@ -1097,7 +1097,7 @@ void drawplot3d(mesh *meshi){
 
   if(visz!=0){
     if(visVector==0){
-      DrawContours(plot3dcontour3ptr,p3cont2d);
+      DrawContours(plot3dcontour3ptr,p3cont2d,plot3dlinewidth);
     }
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       if(plotz<0){plotz=kbar;updateplotslice(3);}

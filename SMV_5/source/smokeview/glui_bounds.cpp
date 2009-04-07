@@ -171,7 +171,9 @@ GLUI_Spinner *SPINNER_boundzipstep=NULL;
 GLUI_Spinner *SPINNER_partstreaklength=NULL;
 GLUI_Spinner *SPINNER_partpointsize=NULL;
 GLUI_Spinner *SPINNER_isopointsize=NULL;
+GLUI_Spinner *SPINNER_isolinewidth=NULL;
 GLUI_Spinner *SPINNER_plot3dpointsize=NULL;
+GLUI_Spinner *SPINNER_plot3dlinewidth=NULL;
 GLUI_Spinner *SPINNER_streaklinewidth=NULL;
 GLUI_Spinner *SPINNER_vectorpointsize=NULL;
 GLUI_Spinner *SPINNER_vectorlinewidth=NULL;
@@ -273,9 +275,13 @@ extern "C" void glui_bounds_setup(int main_window){
       FRAMELOADING,Iso_CB);
     SPINNER_isoframestep->set_int_limits(0,100);
     
-    SPINNER_isopointsize=glui_bounds->add_spinner_to_panel(panel_iso,"Particle size",GLUI_SPINNER_FLOAT,
+    SPINNER_isopointsize=glui_bounds->add_spinner_to_panel(panel_iso,"Point size",GLUI_SPINNER_FLOAT,
       &isopointsize);
     SPINNER_isopointsize->set_float_limits(1.0,10.0);
+
+    SPINNER_isolinewidth=glui_bounds->add_spinner_to_panel(panel_iso,"Line width",GLUI_SPINNER_FLOAT,
+      &isolinewidth);
+    SPINNER_isolinewidth->set_float_limits(1.0,10.0);
 
     iso_isotype = glui_bounds->add_radiogroup_to_panel(panel_iso,&visAIso);
 
@@ -398,13 +404,17 @@ extern "C" void glui_bounds_setup(int main_window){
     plot3d_isotype=glui_bounds->add_radiogroup_to_panel(panel_plot3d,&p3dsurfacetype,PLOTISOTYPE,PLOT3D_CB);
     plot3d_iso_hidden=glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Hidden");
     glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Solid");
-    glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Triangles");
+    glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Outline");
     glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Points");
     plot3d_iso_hidden->disable();
 
-    SPINNER_plot3dpointsize=glui_bounds->add_spinner_to_panel(panel_plot3d,"Particle size",GLUI_SPINNER_FLOAT,
+    SPINNER_plot3dpointsize=glui_bounds->add_spinner_to_panel(panel_plot3d,"Point size",GLUI_SPINNER_FLOAT,
       &plot3dpointsize);
     SPINNER_plot3dpointsize->set_float_limits(1.0,10.0);
+
+    SPINNER_plot3dlinewidth=glui_bounds->add_spinner_to_panel(panel_plot3d,"Line width",GLUI_SPINNER_FLOAT,
+      &plot3dlinewidth);
+    SPINNER_plot3dlinewidth->set_float_limits(1.0,10.0);
 
     p3min_temp=p3min[0];
     p3max_temp=p3max[0];
@@ -755,6 +765,7 @@ void PLOT3D_CB(int var){
     updatemenu=1;
     break;
   case UPDATEPLOT:
+    updatemenu=1;
     GLUTPOSTREDISPLAY
     break;
   case FILETYPEINDEX:
