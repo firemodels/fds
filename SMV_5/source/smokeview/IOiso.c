@@ -1701,6 +1701,7 @@ void drawtiso(const mesh *meshi,int tranflag){
     asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
 
     antialias(1);
+    glPointSize(plot3dpointsize);
     glBegin(GL_POINTS);
     for(i=0;i<nisolevels;i++){
       asurface++;
@@ -1913,6 +1914,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
   if(surfacetype==3){
     glPushMatrix();
     antialias(1);
+    glPointSize(plot3dpointsize);
     glBegin(GL_POINTS);
     glColor3fv(asurface->color);
     nvertices=asurface->nvertices;
