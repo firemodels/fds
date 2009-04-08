@@ -29,3 +29,5 @@ date /t | tee -a  %out%
 time /t | tee -a  %out%
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64 | tee -a %out%
 pscp %out% %svn_logon%:%linux_svn_root%/FDS_Compilation/mpi_intel_win_64/mpi_intel_win_64.out
+
+pause
