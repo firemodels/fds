@@ -14,7 +14,7 @@ pause>NUL
 goto:eof
 
 :endif_envexist
-pause
+
 call %envfile%
 
 %svn_drive%
