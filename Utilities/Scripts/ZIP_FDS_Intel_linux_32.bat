@@ -19,8 +19,6 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Utilities\Makefile
 
-set bin=c:\bin
-
 set fdsroot=fds_%fds_version%_%fds_revision%_linux32
 set togoogle=%svn_root%\Utilities\to_google
 set fdsrootdir=%togoogle%\%fdsroot%
