@@ -29,14 +29,12 @@ goto exit
 echo setting up  64 bit build environment on 64 bit platform
 call %intelbin%\iclvars intel64
 call %intelbin%\ifortvars intel64
-pause
 goto exit
 
 :setup_64_on_32
 echo setting up  64 bit build environment on 32 bit platform
 call %intelbin%\iclvars ia32_intel64
 call %intelbin%\ifortvars ia32_intel64
-pause
 :exit
 
 
