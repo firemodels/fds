@@ -25,7 +25,7 @@ echo Updating %win_fdsdir% on the Windows repository to latest revision
 cd %win_fdsdir%
 svn update
 
-set scriptdir=%linux_svn_root%/Utilities/Scripts/
+set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts/
 set linux_fdsdir=%linux_svn_root%/FDS_Source
 
 echo.
