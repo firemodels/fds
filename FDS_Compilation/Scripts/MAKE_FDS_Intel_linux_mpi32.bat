@@ -19,8 +19,8 @@ Rem location of batch files used to set up Intel compilation environment
 
 call %envfile%
 
-set makefds=%linux_svn_root%/Utilities/Makefile/Mpi_Intel_Linux_32
+set makefds=%linux_svn_root%/FDS_Compilation/mpi_intel_linux_32
 
-plink %svn_logon% %makefds%/MAKE_fds.csh %makefds%
+plink %svn_logon% %makefds%/make_fds.csh %makefds%
 
 pause
