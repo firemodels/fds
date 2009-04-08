@@ -31,3 +31,5 @@ echo. | tee -a %out%
 date /t | tee -a  %out%
 time /t | tee -a  %out%
 make VPATH="../../FDS_Source" -f ..\makefile intel_win_32 | tee -a %out%
+
+pause
