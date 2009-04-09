@@ -20,7 +20,7 @@ cd %svn_root%\Utilities
 
 set LREPOS=FDS-SMV
 
-set testdir=examples_fds_smv_%verification_revision%
+set testdir=verification_%verification_revision%
 
 Rem get test cases for Linux/OSX systems
 
