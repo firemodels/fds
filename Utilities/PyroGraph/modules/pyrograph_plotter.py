@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy.ma as M
 from pylab import *
-import pyrograph_calcs as calc
+import modules.pyrograph_calcs as calc
 import csv
 
 def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,diagnostic_level):
@@ -35,11 +35,7 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     ind_axis_title = quantities[quantity_id]["Ind_Title"]
     dep_axis_title = quantities[quantity_id]["Dep_Title"]
     title_position = eval(quantities[quantity_id]["Title_Position"])
-    percent_error = float(quantities[quantity_id]["%error"])/100.0
-    
-    exp_error_lines = quantities[quantity_id]["Exp_Error_Lines"]
-    mu_line = quantities[quantity_id]["Mu_Line"]
-    sigma_lines = quantities[quantity_id]["Sigma_Lines"]
+    sigma_2_e = float(quantities[quantity_id]["Sigma_2_E"])/100.0
     
     x_data_set = []
     y_data_set = []
@@ -58,6 +54,21 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     fig = plt.figure(figsize=(float(size),float(size))) # (w,h) values are size in inches.
     ax = fig.add_subplot(111, aspect='equal')
     
+    # mu_sigma = calc.mu_2sigma(x_data_set,y_data_set,diagnostic_level)
+    # mu_val = mu_sigma[0]
+    # sigma_2_val = mu_sigma[1]
+    # mu_max = plot_max*(1+mu_val)
+    
+    id_column = [quantity_id,title]
+    
+    tempfile = open('tempfile.csv', 'a')
+    tempWriter = csv.writer(tempfile,delimiter=',')
+    tempWriter.writerow(id_column)
+    tempfile.close()
+    
+    # Draw Center Line
+    ax.plot([plot_min,plot_max],[plot_min,plot_max], 'k-', linewidth=2.0, label='_nolegend_')
+    
     # Iterate through data_set and plot by Group_Index.
     for group_id in data_set:
         group_title = groups[group_id]["Group_Title"]
@@ -73,45 +84,46 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
         y_data_set.append(y_data)
         ax.scatter(x_data, y_data, s=symbolsize, c=symbolcolor, marker=symboltype, edgecolors=edgecolor, label=group_title)
     
-    mu_sigma = calc.mu_2sigma(x_data_set,y_data_set,diagnostic_level)
-    mu_val = mu_sigma[0]
-    sigma_2_val = mu_sigma[1]
-    mu_max = plot_max*(1+mu_val)
-    
-    id_column = [quantity_id,title]
-    
-    tempfile = open('tempfile.csv', 'a')
-    tempWriter = csv.writer(tempfile,delimiter=',')
-    tempWriter.writerow(id_column)
-    tempfile.close()
-    
-    delta_sigma = calc.delta_sigma(x_data_set,y_data_set,percent_error,diagnostic_level)
-    delta = delta_sigma[0]
-    sigma = delta_sigma[1]
+    bias_sigma = calc.delta_sigma(x_data_set,y_data_set,sigma_2_e,diagnostic_level)
+    bias = bias_sigma[0]
+    sigma = bias_sigma[1]
     if diagnostic_level >= 3:
-        print 'New Delta:',delta
+        print 'New Bias:',bias
         print 'New Sigma:',sigma
-    bias_max = plot_max*delta
+    bias_max = plot_max*bias
     
-    # Draw Center Line
-    ax.plot([plot_min,plot_max],[plot_min,plot_max], 'k-', linewidth=2.0, label='_nolegend_')
+    line_style_list = [int(quantities[quantity_id]["Sigma_2_E_Style"]),int(quantities[quantity_id]["Bias_Style"]),int(quantities[quantity_id]["Sigma_2_M_Style"])]
     
-    if exp_error_lines == 'yes':
-        # Draw Upper Exp Error
-        exp_error_upper = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1+percent_error))], 'k:', linewidth=1.0, label='_nolegend_')
-        # Draw Lower Exp Error
-        exp_error_lower = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1-percent_error))], 'k:', linewidth=1.0, label='_nolegend_')
-    
-    if mu_line == 'yes':
-        # Draw Mu Line
-        muline = ax.plot([plot_min,plot_max],[plot_min,mu_max], 'r-', linewidth=1.0, label='_nolegend_')
-        bias_line = ax.plot([plot_min,plot_max],[plot_min,bias_max], 'g-', linewidth=1.0, label='_nolegend_')
-    
-    if sigma_lines == 'yes':
-        # Upper 2 Sigma Line
-        sigma2upper = ax.plot([plot_min,plot_max], [plot_min,(mu_max*(1+sigma_2_val))], 'r:', linewidth=1.0, label='_nolegend_')
-        # Lower 2 Sigma Line
-        sigma2lower = ax.plot([plot_min,plot_max], [plot_min,(mu_max*(1-sigma_2_val))], 'r:', linewidth=1.0, label='_nolegend_')
+    style_counter = 0
+    for style_value in line_style_list:
+        
+        linecolor = styles[style_value]['Line_Color']
+        linestyle = styles[style_value]['Line_Style']
+        
+        if styles[style_value]['Line_Width'] == 'None':
+            print 'No Line Width specified in the style',style_value,'chosen for scatter plot statistic lines.'
+            exit()
+        else:
+            linewidth = float(styles[style_value]['Line_Width'])
+            
+        if style_value != 0 and style_counter == 0:
+            # Draw Upper Exp Error
+            exp_error_upper = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1+sigma_2_e))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
+            # Draw Lower Exp Error
+            exp_error_lower = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1-sigma_2_e))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
+        
+        if style_value != 0 and style_counter == 1:
+            # Draw Bias Line
+            bias_line = ax.plot([plot_min,plot_max],[plot_min,bias_max], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
+        
+        if style_value != 0 and style_counter == 2:
+            # Upper 2 Sigma Line
+            sigma2upper = ax.plot([plot_min,plot_max], [plot_min,(bias_max*(1+sigma*2))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
+            # Lower 2 Sigma Line
+            sigma2lower = ax.plot([plot_min,plot_max], [plot_min,(bias_max*(1-sigma*2))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
+        
+        style_counter += 1
+        
     
     plt.xlabel(ind_axis_title)
     plt.ylabel(dep_axis_title)
@@ -119,7 +131,7 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     ax.text((plot_max-plot_min)*title_position[0], (plot_max-plot_min)*title_position[1], title, horizontalalignment='left') 
     #ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.07), r'$\mu='+"%2.2f" % (mu_val*100)+'\%$')
     #ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.12), r'$2\sigma='+"%2.2f" % (sigma_2_val*100)+'\%$')
-    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.07), r'$\mathrm{Bias}='+"%2.2f" % ((delta-1)*100)+'\%$')
+    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.07), r'$\mathrm{Bias}='+"%2.2f" % ((bias-1)*100)+'\%$')
     ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.15), r'$2\widetilde{\sigma}_M='+"%2.2f" % (2*sigma*100)+'\%$')
     
     ax.axis([plot_min, plot_max, plot_min, plot_max])
