@@ -21,7 +21,7 @@ cd %svn_root%\FDS_Compilation
 
 set bin=c:\bin
 
-set fdsroot=fds_%fds_version%_%fds_revision%_win32
+set fdsroot=fds_%fds_version%_win32
 set togoogle=%svn_root%\FDS_Compilation\to_google\%fdsroot%
 
 IF EXIST %togoogle% rmdir /S /Q %togoogle%

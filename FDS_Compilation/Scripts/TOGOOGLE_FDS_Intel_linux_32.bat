@@ -22,8 +22,8 @@ cd %svn_root%\FDS_Compilation\to_google
 set glabels=Type-Installer,Opsys-Linux,%fds_google_level%
 set dplatform=32 bit Linux
 set platform=linux32
-set summary=FDS %fds_version% for %dplatform% (SVN r%fds_revision%)
-set exe=fds_%fds_version%_%fds_revision%_%platform%.zip
+set summary=FDS %fds_version% executables for %dplatform% (SVN r%fds_revision%)
+set exe=fds_%fds_version%_%platform%.zip
 
 echo Uploading %exe%
 echo FDS %fds_google_level% version=%fds_version% revision=%fds_revision%
