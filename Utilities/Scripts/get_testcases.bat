@@ -20,7 +20,7 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Utilities\to_google\
 set excludefile=%svn_root%\Utilities\Scripts\examples_win.exclude
-set testdir=examples_fds_smv_%verification_revision%
+set testdir=verification_%verification_revision%
 
 if exist Examples rmdir /s /q Examples
 svn export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification Examples
