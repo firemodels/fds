@@ -1,8 +1,8 @@
 import os
-import pyrograph_parser as prsr
-import pyrograph_calcs as calc
-import pyrograph_plotter as plot
-import pyrograph_progress as prgrs
+import modules.pyrograph_parser as prsr
+import modules.pyrograph_calcs as calc
+import modules.pyrograph_plotter as plot
+import modules.pyrograph_progress as prgrs
 
 import time
 start_time = time.time()
@@ -12,7 +12,7 @@ print "\n***** PyroGraph Data Processing Utility *****\n"
 #Process User Configuration file.
 user_config = {}
  
-file_name = "./config_files/pyrograph_config.txt"
+file_name = "pyrograph_config.txt"
 config_file= open(file_name)
 for line in config_file:
     line = line.strip()

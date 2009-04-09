@@ -19,7 +19,7 @@ This csv formatted file stores information on the quantities that are used to ge
 
 - Plot_Max, the maximum axis value for both x and y axis.
 
-- %error, the calculated experimental error for bounding the quantity scatter data.
+- Sigma_2_E, the calculated experimental error for bounding the quantity scatter data.
 
 - Title_Position, where the title should be located on the plot. This is a pair of values that represent the percent of the x and y axis range from 0 to 1.  Ex. If the axis range is 0 to 200, and you want the title text to start at 10 x and 185 y the pair of values in this field would be [0.05,0.925] which is [(10/200),(185/200)].
 
