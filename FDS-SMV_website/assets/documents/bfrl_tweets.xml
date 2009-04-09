@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+<ModulePrefs title="FDS-SMV Twitter Feed" />
+<Content type="html"><![CDATA[
+
+<script src="http://www.gmodules.com/ig/ifr?url=http://customrss.googlepages.com/customrss.xml&amp;up_rssurl=http%3A%2F%2Fsearch.twitter.com%2Fsearch.atom%3Fq%5Cx3d%2523nist&amp;up_title=%23bfrl%20Twitter%20Feed&amp;up_titleurl=http%3A%2F%2Fbfrl.nist.gov&amp;up_num_entries=12&amp;up_linkaction=showdescription&amp;up_background=E1E9C3&amp;up_border=CFC58E&amp;up_round=0&amp;up_fontfamily=Arial&amp;up_fontsize=8pt&amp;up_openfontsize=9pt&amp;up_itempadding=3px&amp;up_bullet=arrows&amp;up_custicon=Overrides%20favicon.ico&amp;up_boxicon=0&amp;up_opacity=20&amp;up_itemlinkcolor=596F3E&amp;up_itemlinkweight=Normal&amp;up_itemlinkdecoration=None&amp;up_vlinkcolor=C7CFA8&amp;up_vlinkweight=Normal&amp;up_vlinkdecoration=None&amp;up_showdate=1&amp;up_datecolor=9F9F9F&amp;up_tcolor=1C57A9&amp;up_thighlight=FFF19D&amp;up_desclinkcolor=1B5790&amp;up_color=000000&amp;up_dback=FFFFFF&amp;up_dborder=DFCE6F&amp;up_desclinkweight=Bold&amp;up_desclinkdecoration=None&amp;synd=open&amp;w=320&amp;h=220&amp;title=BFRL+Twitter+Feed&amp;border=%23ffffff%7C3px%2C1px+solid+%23999999&amp;output=js"></script>
+
+]]></Content>
+</Module>
