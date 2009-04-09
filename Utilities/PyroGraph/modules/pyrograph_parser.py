@@ -7,7 +7,7 @@ import sys
 import os
 import csv
 import cPickle as cP
-import pyrograph_progress as prgrs
+import modules.pyrograph_progress as prgrs
 
 def read_config(config_file,diagnostic_level):
     #Create File Object
@@ -87,15 +87,15 @@ def read_pickle(pickle_file_name,diagnostic_level):
 
 def parse_configs(config_files,diagnostic_level):
     for config_name in config_files:
-        config_data = read_config('config_files/'+config_name+'.csv',diagnostic_level)    
+        config_data = read_config(config_name+'.csv',diagnostic_level)    
         pickle_object(config_name,config_data,diagnostic_level)
         if diagnostic_level >= 3:
-            print "Parsed config_files/"+config_name+".csv"
+            print "Parsed "+config_name+".csv"
     if diagnostic_level >= 3:
         print "Parsed all Config Files."
 
 def parse_data_info(data_config_file,data_line_char,diagnostic_level):
-    data_info = read_data_config('dataset_config_files/'+data_config_file+'.csv',data_line_char,diagnostic_level)
+    data_info = read_data_config(data_config_file+'.csv',data_line_char,diagnostic_level)
     pickle_object(data_config_file,data_info,diagnostic_level)
     if diagnostic_level >= 3:
         print "Parsed "+data_config_file+".csv"
