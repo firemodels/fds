@@ -45,7 +45,7 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     y_data_set = []
     
     # Margin size in inches.
-    left_margin = 0.51
+    left_margin = 0.75
     right_margin = 0.05
     top_margin = 0.05
     bottom_margin = 0.5
@@ -117,10 +117,10 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     plt.ylabel(dep_axis_title)
     
     ax.text((plot_max-plot_min)*title_position[0], (plot_max-plot_min)*title_position[1], title, horizontalalignment='left') 
-    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.07), r'$\mu='+"%2.2f" % (mu_val*100)+'\%$')
-    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.12), r'$2\sigma='+"%2.2f" % (sigma_2_val*100)+'\%$')
-    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.17), r'$Bias='+"%2.2f" % ((delta-1)*100)+'\%$')
-    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.22), r'$2\sigma='+"%2.2f" % (2*sigma*100)+'\%$')
+    #ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.07), r'$\mu='+"%2.2f" % (mu_val*100)+'\%$')
+    #ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.12), r'$2\sigma='+"%2.2f" % (sigma_2_val*100)+'\%$')
+    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.07), r'$\mathrm{Bias}='+"%2.2f" % ((delta-1)*100)+'\%$')
+    ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-0.15), r'$2\widetilde{\sigma}_M='+"%2.2f" % (2*sigma*100)+'\%$')
     
     ax.axis([plot_min, plot_max, plot_min, plot_max])
     
