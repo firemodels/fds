@@ -19,7 +19,7 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\FDS_Compilation
 
-set fdsroot=fds_%fds_version%_%fds_revision%_linux64
+set fdsroot=fds_%fds_version%_linux64
 set togoogle=%svn_root%\FDS_Compilation\to_google
 set fdsrootdir=%togoogle%\%fdsroot%
 set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts
