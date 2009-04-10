@@ -288,9 +288,9 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_d
         plt.ylabel(dep_axis_title)
     
     if flip_axis == 'yes':
-        ax.text((ymax-ymin)*title_x_pos, (xmax-xmin)*title_y_pos, title, horizontalalignment='left')
+        ax.text(ymin+(ymax-ymin)*title_x_pos, xmin+(xmax-xmin)*title_y_pos, title, horizontalalignment='left')
     else:
-        ax.text((xmax-xmin)*title_x_pos, (ymax-ymin)*title_y_pos, title, horizontalalignment='left')
+        ax.text(xmin+(xmax-xmin)*title_x_pos, ymin+(ymax-ymin)*title_y_pos, title, horizontalalignment='left')
     
     if flip_axis == 'yes':
         ax.axis([ymin,ymax,xmin,xmax])
