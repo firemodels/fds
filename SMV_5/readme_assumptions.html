@@ -13,19 +13,41 @@ Assumptions/Requirements -
 
 <h3>Initial Setup</h3>
 <ul>
+<li>Copy <tt>SMV_5\scripts\fds_smv_env.bat</tt> to your home directory (directory that opens up when you start up  a command shell)
+<li>Define keyword values (only needed to be done once) for your own setup.  Example:
+<blockquote>
+set svn_root=d:\fds-smv<br>
+set svn_drive=d:<br>
+set linux_svn_root=FDS-SMV<br>
+set linux_username=gforney<br>
+set google_username=gforney<br>
+set linux_hostname=acrux.cfr.nist.gov<br>
+</blockquote>
 <li><a href="scripts/EDIT_setup.bat">Edit configuration file</a> Define environmental variables used by the scripts on this page 
 (such as svn revision numbers, user names, local SVN repository location, <em>etc.</em>).
 <li>Intel Compilers
 <ol>
 <li>Install Intel Fortran and C/C++ compilers - version 11
-<li>Put Intel environment def scripts in <tt>c:\bin</tt> (copy <tt>iclvars.bat</tt> and <tt>ifortvars.bat</tt> from the
-<tt>Utilities/Scripts</tt> directory
-to <tt>c:\bin</tt>)
+<li>Put Intel environmental setup scripts in <tt>c:\bin</tt> (copy <tt>iclvars.bat</tt> and <tt>ifortvars.bat</tt> from the
+Intel compiler bin directories to <tt>c:\bin</tt>)
 </ol>
 <li>Putty
 <ol>
 <li>Install putty.  Doesn't matter where - just make sure the install directory is in the <em>path</em>
-<li>set up putty to enable no password logins (use pageant)
+<li>Set up ssh keys to let you login into the Linux cluster without a password.  Basically you are creating a public/private pair 
+of ssh keys.  You copy the private key to somewhere on your PC (doesn't really matter where) 
+and copy the public key into a file on the Linux cluster.  More precisely:
+<ol>
+<li>run puttygen
+<li>click on the <tt>SSH-2 RSA</tt> radio button
+<li>click on the <tt>Generate</tt> button.  Pick a <em>pass-phrase</em> that you can easily remember.
+<li>Save the private key into c:\bin\keys directory (create the directory it if it doesn't exist)
+<li>Save the public key and copy it to the Linux cluster.  Put the key at the end of the file <tt>authorized_key2</tt> which
+is located in the <tt>.ssh</tt> directory (in your home directory)
+</ol>
+<li>Run the program <tt>Pageant</tt> (it is part of the putty suite of programs) to activate the ssh keys.  
+You should put it in the startup directory so that it automatically runs when you boot your computuer.  It will direct you to open your private key
+and ask you for the pass-phrase used to create it.
 </ol>
 <li>Create a file named <tt>gc.passwd</tt> containing your google password and put it in your windows home directory.
 <li>Winzip
