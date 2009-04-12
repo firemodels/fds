@@ -6247,7 +6247,7 @@ int readini2(char *inifile, int localfile){
       continue;
     }
 
-    if(match(buffer,"ISOTRANS",8)==1){
+    if(match(buffer,"ISOTRAN2",8)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&transparent_state);
       continue;
@@ -8813,7 +8813,7 @@ void writeini(int flag){
   fprintf(fileout," %i %i %i %i\n",streak5show,streak5step,showstreakhead,streak_index);
   fprintf(fileout,"VECLENGTH\n");
   fprintf(fileout," %i\n",iveclengths);
-  fprintf(fileout,"ISOTRANS\n");
+  fprintf(fileout,"ISOTRAN2\n");
   fprintf(fileout," %i\n",transparent_state);
   fprintf(fileout,"SHOWISO\n");
   fprintf(fileout," %i\n",visAIso);
