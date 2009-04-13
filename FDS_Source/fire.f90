@@ -115,39 +115,45 @@ DO K=1,KBAR
             TMP_MIN   = TMPA
             TMP_F_MIN = TMPA
 
-            SEARCH_LOOP: DO IOR=-3,3
+            ! Get O2 and temperature in nearest neighbor cells
 
-               II = I
-               JJ = J
-               KK = K
-               SELECT CASE(IOR)
-                  CASE(-1)
-                     II = I-1
-                  CASE( 1)
-                     II = I+1
-                  CASE(-2)
-                     JJ = J-1
-                  CASE( 2)
-                     JJ = J+1
-                  CASE(-3)
-                     KK = K-1
-                  CASE( 3)
-                     KK = K+1
-               END SELECT
+            IF (SUPPRESSION_SEARCH) THEN
 
-               IW = WALL_INDEX(IC,IOR)
-               IF (IW==0 .OR. BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-                  IF (Y_O2(II,JJ,KK)>Y_O2_MAX) THEN
-                     Y_O2_MAX = Y_O2(II,JJ,KK)
-                     TMP_MIN  = TMP(II,JJ,KK)
+               SEARCH_LOOP: DO IOR=-3,3
+
+                  II = I
+                  JJ = J
+                  KK = K
+                  SELECT CASE(IOR)
+                     CASE(-1)
+                        II = I-1
+                     CASE( 1)
+                        II = I+1
+                     CASE(-2)
+                        JJ = J-1
+                     CASE( 2)
+                        JJ = J+1
+                     CASE(-3)
+                        KK = K-1
+                     CASE( 3)
+                        KK = K+1
+                  END SELECT
+   
+                  IW = WALL_INDEX(IC,IOR)
+                  IF (IW==0 .OR. BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+                     IF (Y_O2(II,JJ,KK)>Y_O2_MAX) THEN
+                        Y_O2_MAX = Y_O2(II,JJ,KK)
+                        TMP_MIN  = TMP(II,JJ,KK)
+                     ENDIF
+                     IF (YY(II,JJ,KK,I_FUEL)>Y_FU_MAX) THEN
+                        Y_FU_MAX   = YY(II,JJ,KK,I_FUEL)
+                        TMP_F_MIN = TMP(II,JJ,KK)
+                     ENDIF
                   ENDIF
-                  IF (YY(II,JJ,KK,I_FUEL)>Y_FU_MAX) THEN
-                     Y_FU_MAX   = YY(II,JJ,KK,I_FUEL)
-                     TMP_F_MIN = TMP(II,JJ,KK)
-                  ENDIF
-               ENDIF
 
-            ENDDO SEARCH_LOOP
+               ENDDO SEARCH_LOOP
+
+            ENDIF
 
             ! Evaluate empirical extinction criteria
             
