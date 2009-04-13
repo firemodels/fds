@@ -99,40 +99,42 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     space = 0.07
 
     for style_value in line_style_list:
-        
-        linecolor = styles[style_value]['Line_Color']
-        linestyle = styles[style_value]['Line_Style']
-        
-        if styles[style_value]['Line_Width'] == 'None':
-            print 'No Line Width specified in the style',style_value,'chosen for scatter plot statistic lines.'
-            exit()
+        if style_value != 0:
+            linecolor = styles[style_value]['Line_Color']
+            linestyle = styles[style_value]['Line_Style']
+            
+            if styles[style_value]['Line_Width'] == 'None':
+                print 'No Line Width specified in the style',style_value,'chosen for scatter plot statistic lines.'
+                exit()
+            else:
+                linewidth = float(styles[style_value]['Line_Width'])
+                
+            if style_counter == 0:
+                # Draw Bias Line
+                bias_line = ax.plot([plot_min,plot_max],[plot_min,bias_max], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
+                pos = pos + space
+                ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-pos), r'$\mathrm{Bias}='+"%2.2f" % bias+'$')
+                
+            if style_counter == 1:
+                # Upper 2 Sigma Line
+                sigma2upper = ax.plot([plot_min,plot_max], [plot_min,(bias_max*(1+sigma*2))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
+                # Lower 2 Sigma Line
+                sigma2lower = ax.plot([plot_min,plot_max], [plot_min,(bias_max*(1-sigma*2))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
+                pos = pos + space
+                ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-pos), r'$2 \, \widetilde{\sigma}_M='+"%2.2f" % (2*sigma)+'$')
+                
+            if style_counter == 2:
+                # Draw Upper Exp Error
+                exp_error_upper = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1+sigma_2_e))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
+                # Draw Lower Exp Error
+                exp_error_lower = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1-sigma_2_e))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
+                pos = pos + space
+                ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-pos), r'$2 \, \widetilde{\sigma}_E='+"%2.2f" % (sigma_2_e)+'$')
+                
+            style_counter += 1
         else:
-            linewidth = float(styles[style_value]['Line_Width'])   
-
-        if style_value != 0 and style_counter == 0:
-            # Draw Bias Line
-            bias_line = ax.plot([plot_min,plot_max],[plot_min,bias_max], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
-            pos = pos + space
-            ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-pos), r'$\mathrm{Bias}='+"%2.2f" % bias+'$')
-  
-        if style_value != 0 and style_counter == 1:
-            # Upper 2 Sigma Line
-            sigma2upper = ax.plot([plot_min,plot_max], [plot_min,(bias_max*(1+sigma*2))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
-            # Lower 2 Sigma Line
-            sigma2lower = ax.plot([plot_min,plot_max], [plot_min,(bias_max*(1-sigma*2))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
-            pos = pos + space
-            ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-pos), r'$2 \, \widetilde{\sigma}_M='+"%2.2f" % (2*sigma)+'$')
-  
-        if style_value != 0 and style_counter == 2:
-            # Draw Upper Exp Error
-            exp_error_upper = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1+sigma_2_e))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
-            # Draw Lower Exp Error
-            exp_error_lower = ax.plot([plot_min,plot_max], [plot_min,(plot_max*(1-sigma_2_e))], c=linecolor, linestyle=linestyle, linewidth=linewidth, label='_nolegend_')
-            pos = pos + space
-            ax.text((plot_max-plot_min)*(title_position[0]+0.05), (plot_max-plot_min)*(title_position[1]-pos), r'$2 \, \widetilde{\sigma}_E='+"%2.2f" % (sigma_2_e)+'$')
-               
-        style_counter += 1
-        
+            style_counter += 1
+            
     plt.xlabel(ind_axis_title)
     plt.ylabel(dep_axis_title)
     
