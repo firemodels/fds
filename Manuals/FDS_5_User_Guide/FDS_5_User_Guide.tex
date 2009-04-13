@@ -3701,7 +3701,7 @@ VOLUME\_FLUX}. Do not use both.  These parameters were already
 introduced in Section~\ref{info:SURF}. To simulate the behavior of a
 real fan, a few extra parameters need to be specified. To set $\Delta
 p_{\hbox{\footnotesize max}}$, the maximum operating over-pressure,
-add {\ct MAX\_PRESSURE} to the {\ct SURF} line. Note that {\ct MAX\_PRESSURE} 
+add {\ct MAX\_PRESSURE} to the {\ct SURF} line. Note that {\ct MAX\_PRESSURE}
 should always be positive and in units of Pa.  If in
 the simulation the computed pressure exceeds the specified {\ct MAX\_PRESSURE}, then there will be a backflow in the duct.
 \index{SURF!MAX\_PRESSURE}
@@ -3768,7 +3768,7 @@ is assigned to a solid wall. The {\ct DUCT\_PATH} defines the pressure
 {\ct ZONE}s downstream and upstream of the fan, respectively. The fan
 represented by the the {\ct SURF} line {\ct ID='BLOW LEFT'}, for example, blows air {\em into} {\ct ZONE}~1
 and draws air {\em out of} {\ct ZONE}~2 in the absence of a pressure difference between the compartments. The negative value of {\ct VEL} indicates
-that the fan blows in the negative coordinate direction, into {\ct ZONE}~1 and out of {\ct ZONE}~2, and this is consistent with the order of the {\ct ZONE}s listed by {\ct DUCT\_PATH}. 
+that the fan blows in the negative coordinate direction, into {\ct ZONE}~1 and out of {\ct ZONE}~2, and this is consistent with the order of the {\ct ZONE}s listed by {\ct DUCT\_PATH}.
 In short, {\ct DUCT\_PATH} and {\ct VEL} must be coordinated.
 
 The {\ct HOLE}s in the Partition Wall serve only to carve out space for the obstructions
@@ -3959,6 +3959,16 @@ the radiation penetrate and absorb into the solid. Correspondingly,
 the emission of the material is based on the internal temperatures,
 not just the surface.
 
+\subsubsection{Fuel Burnout}
+
+The thermal properties of a solid or liquid fuel determine the length of time for which it can burn. In general, the
+burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_s$, and the 
+layer thickness, $\delta_s$:
+\be t_b = \frac{\rho_s \, \delta_s}{\dm''} \ee
+However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be
+highlighted in the individual sections below.
+
+
 
 
 \subsection{Pyrolysis of Solid Fuels}
@@ -4142,9 +4152,14 @@ value of heat of combustion can be specified for each reaction and
 each gaseous species using the notation {\ct
 HEAT\_OF\_COMBUSTION(j,s)}, as explained in Section~\ref{nu_gas}.
 
+\subsubsection{Fuel Burnout}
+
+The burnout time of a reacting solid fuel is calculated automatically based on the layer {\ct THICKNESS}, component {\ct DENSITY}, and the calculated burning rate.
 
 
-\subsubsection{Testing Solid Phase Properties}
+
+
+\subsubsection{Testing Your Pyrolysis Model}
 
 Real materials that can burn can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the
 input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know
@@ -4574,6 +4589,21 @@ a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal proper
 those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on
 the conditions of the surrounding environment.
 
+\subsubsection{Fuel Burnout}
+
+If a heat release rate {\ct RAMP} function is not included for a solid fuel that burns at a specified rate, the surface will continue to
+burn at the specified rate indefinitely with no fuel burnout.  If detailed heat release rate versus time data is not available, you
+can estimate the burnout time for a surface using the heat of combustion, $\Delta H$,
+material density, $\rho_s$, material thickness, $\delta_s$, and {\ct HRRPUA}, $\dq_f''$:
+\be t_{b} = \frac{\rho_s \, \delta_s \, \Delta H}{\dq''_f} \ee
+
+\begin{warning}
+\noindent Note that FDS does not automatically calculate the burnout time for solid fuels with specified heat release rates.
+\end{warning}
+
+
+
+
 
 \subsection{Liquid Fuels}
 \index{Liquid Fuels}
@@ -4635,6 +4665,10 @@ Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
 denotes the absorption in depth of thermal radiation. Liquids do not
 just absorb radiation at the surface, but rather over a thin layer
 near the surface. Its effect on the burning rate is significant.
+
+\subsubsection{Fuel Burnout}
+
+The burnout time of a liquid fuel is calculated automatically based on the liquid layer {\ct THICKNESS}, liquid {\ct DENSITY}, and the calculated burning rate.
 
 
 

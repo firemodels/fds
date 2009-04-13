@@ -43,8 +43,8 @@ def scatter_plot(quantity_id,data_set,quantities,groups,styles,output_directory,
     # Margin size in inches.
     left_margin = 0.75
     right_margin = 0.25
-    top_margin = 0.75
-    bottom_margin = 0.25
+    top_margin = 0.25
+    bottom_margin = 0.75
     
     rc("figure.subplot", left=(left_margin/size))
     rc("figure.subplot", right=((size-right_margin)/size))
