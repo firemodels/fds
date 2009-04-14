@@ -51,6 +51,10 @@ def delta_sigma(ind_data_set,dep_data_set,sigma_e,diagnostic_level):
     n = len(E_values)
     #print 'Length of set:', n
     
+    if n == 1:
+        print 'Error: Not enough scatter data to compute statistics.'
+        exit()
+    
     # Compute natural log of each value in data sets.
     ln_E_set = [log(abs(float(E_values[i]))) for i in range(len(E_values))]
     ln_M_set = [log(abs(float(M_values[i]))) for i in range(len(M_values))]
