@@ -434,14 +434,13 @@ specific set of source code files used.  Rather one would need to know the SVN r
 recently committed source file.
 
 This is accomplished by using source file tagging.  In each source file a series of character parameter
-strings are defined.  For example, near the top of the file called main.f90 are lines of the form:
+strings are defined.  For example, near the top of the file called main.f90 at revision 3144 are lines of the form:
 
-\footnotesize
-\begin{verbatim}
-CHARACTER(255), PARAMETER :: mainid='$Id$'
-CHARACTER(255), PARAMETER :: mainrev='$Revision$'
-CHARACTER(255), PARAMETER :: maindate='$Date$'
-\end{verbatim} \normalsize
+\begin{figure}[ht!]
+\includegraphics[width=\textwidth]{FIGURES/RevisionStrings.jpg}
+\caption{\bf Example of Revision Identification Strings in main.f90}
+\label{fig:revstrings}
+\end{figure}
 
 \noindent
 The string contains the name of the source file, the version of the file (this reflects only the source
