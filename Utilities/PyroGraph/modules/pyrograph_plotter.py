@@ -292,11 +292,37 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_d
     else:
         plt.xlabel(ind_axis_title)
         plt.ylabel(dep_axis_title)
-    
+        
     if flip_axis == 'yes':
-        ax.text(ymin+(ymax-ymin)*title_x_pos, xmin+(xmax-xmin)*title_y_pos, title, horizontalalignment='left')
+        if data_info['Plot_Type'] == 'linear':
+            ax.text(ymin+(ymax-ymin)*title_x_pos, xmin+(xmax-xmin)*title_y_pos, title, horizontalalignment='left')
+        elif data_info['Plot_Type'] == 'loglog':
+            pos1 = 10**(log10(ymin)+((log10(ymax)-log10(ymin))*title_x_pos))
+            pos2 = 10**(log10(xmin)+((log10(xmax)-log10(xmin))*title_y_pos))
+            ax.text(pos1, pos2, title, horizontalalignment='left')
+        elif data_info['Plot_Type'] == 'semilogx':
+            pos1 = 10**(log10(ymin)+((log10(ymax)-log10(ymin))*title_x_pos))
+            pos2 = xmin+(xmax-xmin)*title_y_pos
+            ax.text(pos1, pos2, title, horizontalalignment='left')
+        elif data_info['Plot_Type'] == 'semilogy':
+            pos1 = ymin+(ymax-ymin)*title_x_pos
+            pos2 = 10**(log10(xmin)+((log10(xmax)-log10(xmin))*title_y_pos))
+            ax.text(pos1, pos2, title, horizontalalignment='left')
     else:
-        ax.text(xmin+(xmax-xmin)*title_x_pos, ymin+(ymax-ymin)*title_y_pos, title, horizontalalignment='left')
+        if data_info['Plot_Type'] == 'linear':
+            ax.text(xmin+(xmax-xmin)*title_x_pos, ymin+(ymax-ymin)*title_y_pos, title, horizontalalignment='left')
+        elif data_info['Plot_Type'] == 'loglog':
+            pos1 = 10**(log10(xmin)+((log10(xmax)-log10(xmin))*title_x_pos))
+            pos2 = 10**(log10(ymin)+((log10(ymax)-log10(ymin))*title_y_pos))
+            ax.text(pos1, pos2, title, horizontalalignment='left')
+        elif data_info['Plot_Type'] == 'semilogx':
+            pos1 = 10**(log10(xmin)+((log10(xmax)-log10(xmin))*title_x_pos))
+            pos2 = ymin+(ymax-ymin)*title_y_pos
+            ax.text(pos1, pos2, title, horizontalalignment='left')
+        elif data_info['Plot_Type'] == 'semilogy':
+            pos1 = xmin+(xmax-xmin)*title_x_pos
+            pos2 = 10**(log10(ymin)+((log10(ymax)-log10(ymin))*title_y_pos))
+            ax.text(pos1, pos2, title, horizontalalignment='left')
     
     if flip_axis == 'yes':
         ax.axis([ymin,ymax,xmin,xmax])
