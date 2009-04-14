@@ -19,7 +19,8 @@ Rem location of batch files used to set up Intel compilation environment
 
 set intelbin=c:\bin
 
-call %intelbin%\iclvars ia32
+Rem call %intelbin%\iclvars ia32
+call %intelbin%\clvars x86
 call %intelbin%\ifortvars ia32
 
 call %envfile%
