@@ -10,15 +10,14 @@ FDS Build notes <a href="Scripts/EDIT_build_fds.bat">(edit)</a> -
 
 <hr size="1">
 
-<h3>Configure the Build Scripts</h3>
-<ul>
-<li><a href="Scripts/EDIT_setup.bat">Update FDS version</a> for current build in fds_smv_set.bat
-<li><a href="Scripts/Update_REPOS_latest_svn.bat">Update all repositories (Windows, Linux, Mac) to the latest revision.</a>.
-</ul>
-
 <h3>Build, Package and Upload FDS</h3>
 
-<table border=on>
+<ul>
+<li><a href="Scripts/Update_REPOS_latest_svn.bat">Update repositories</a> (Windows, Linux and Mac) to the latest revision.</a>.
+<li><a href="Scripts/GET_fds_svn_num.bat">Get the SVN revision number of the FDS source</a>  (make sure it is what you expect)
+<li><a href="Scripts/EDIT_setup.bat">Update FDS version string</a> in fds_smv_set.bat
+</ul>
+<p><table border=on>
 <tr><th></th><th>Windows</th><th>Linux</th><th>OSX</th></tr>
 <tr>
 <th>32 bit</th>
@@ -65,7 +64,6 @@ Parallel - not implemented<br>
 </table>
 <h3>Other</h3>
 <ul>
-<li><a href="Scripts/GET_fds_svn_num.bat">Find the SVN revision number of the FDS source</a> 
 <li><a href="Scripts/Update_FDS_svn_num.bat">Update the FDS source to the revision specified </a> 
 in the <a href="Scripts/EDIT_setup.bat"><tt>fds_smv_env.bat</tt> configuration file.</a>
 <li><a href="Scripts/Update_FDS_latest_svn.bat">Update the FDS source to the latest revision</a>.
