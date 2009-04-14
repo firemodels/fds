@@ -1819,9 +1819,9 @@ SUBROUTINE MATCH_VELOCITY(NM)
 
 ! Force normal component of velocity to match at interpolated boundaries
 
-INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
+INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO,IIG,JJG,KKG,N_INT_CELLS
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,TNOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER
+REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,TNOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER,H_OTHER
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,OM_UU,OM_VV,OM_WW
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (MESH_TYPE), POINTER :: M2
@@ -1867,6 +1867,9 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
    JJ  = IJKW( 2,IW)
    KK  = IJKW( 3,IW)
    IOR = IJKW( 4,IW)
+   IIG = IJKW(6,IW)
+   JJG = IJKW(7,IW)
+   KKG = IJKW(8,IW)
    NOM = IJKW( 9,IW)
    OM => OMESH(NOM)
    M2 => MESHES(NOM)
@@ -1904,6 +1907,18 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
             ENDDO
          ENDDO
    END SELECT
+   
+   ! add for ALMS
+   H_OTHER = 0._EB
+   DO KKO=IJKW(12,IW),IJKW(15,IW)
+      DO JJO=IJKW(11,IW),IJKW(14,IW)
+         DO IIO=IJKW(10,IW),IJKW(13,IW)
+            H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
+         ENDDO
+      ENDDO
+   ENDDO
+   N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
+   H_OTHER = H_OTHER/REAL(N_INT_CELLS,EB)
 
    SELECT CASE(IOR)
       CASE( 1)
@@ -1915,7 +1930,17 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         UU_AVG = 0.5_EB*(UU(0,JJ,KK) + UU_OTHER)
+         
+         IF (ALMS) THEN
+            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
+               UU_AVG = UU(0,JJ,KK)
+            ELSE
+               UU_AVG = UU_OTHER
+            ENDIF
+         ELSE
+            UU_AVG = 0.5_EB*(UU(0,JJ,KK) + UU_OTHER)
+         ENDIF
+         
          IF (PREDICTOR) DS_CORR(IW) = (UU_AVG-UU(0,JJ,KK))*RDX(1)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(UU_AVG-UU(0,JJ,KK))*RDX(1)
          UVW_SAVE(IW) = UU(0,JJ,KK)
@@ -1930,7 +1955,17 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK) + UU_OTHER)
+         
+         IF (ALMS) THEN
+            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
+               UU_AVG = UU(IBAR,JJ,KK)
+            ELSE
+               UU_AVG = UU_OTHER
+            ENDIF
+         ELSE
+            UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK) + UU_OTHER)
+         ENDIF
+         
          IF (PREDICTOR) DS_CORR(IW) = -(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
          UVW_SAVE(IW) = UU(IBAR,JJ,KK)
@@ -1945,7 +1980,17 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         VV_AVG = 0.5_EB*(VV(II,0,KK) + VV_OTHER)
+         
+         IF (ALMS) THEN
+            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
+               VV_AVG = VV(II,0,KK)
+            ELSE
+               VV_AVG = VV_OTHER
+            ENDIF
+         ELSE
+            VV_AVG = 0.5_EB*(VV(II,0,KK) + VV_OTHER)
+         ENDIF
+         
          IF (PREDICTOR) DS_CORR(IW) = (VV_AVG-VV(II,0,KK))*RDY(1)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(VV_AVG-VV(II,0,KK))*RDY(1)
          UVW_SAVE(IW) = VV(II,0,KK)
@@ -1960,7 +2005,17 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         VV_AVG = 0.5_EB*(VV(II,JBAR,KK) + VV_OTHER)
+         
+         IF (ALMS) THEN
+            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
+               VV_AVG = VV(II,JBAR,KK)
+            ELSE
+               VV_AVG = VV_OTHER
+            ENDIF
+         ELSE
+            VV_AVG = 0.5_EB*(VV(II,JBAR,KK) + VV_OTHER)
+         ENDIF
+         
          IF (PREDICTOR) DS_CORR(IW) = -(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
          UVW_SAVE(IW) = VV(II,JBAR,KK)
@@ -1975,7 +2030,17 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         WW_AVG = 0.5_EB*(WW(II,JJ,0) + WW_OTHER)
+         
+         IF (ALMS) THEN
+            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
+               WW_AVG = WW(II,JJ,0)
+            ELSE
+               WW_AVG = WW_OTHER
+            ENDIF
+         ELSE
+            WW_AVG = 0.5_EB*(WW(II,JJ,0) + WW_OTHER)
+         ENDIF
+         
          IF (PREDICTOR) DS_CORR(IW) = (WW_AVG-WW(II,JJ,0))*RDZ(1)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(WW_AVG-WW(II,JJ,0))*RDZ(1)
          UVW_SAVE(IW) = WW(II,JJ,0)
@@ -1990,7 +2055,17 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         WW_AVG = 0.5_EB*(WW(II,JJ,KBAR) + WW_OTHER)
+         
+         IF (ALMS) THEN
+            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
+               WW_AVG = WW(II,JJ,KBAR)
+            ELSE
+               WW_AVG = WW_OTHER
+            ENDIF
+         ELSE
+            WW_AVG = 0.5_EB*(WW(II,JJ,KBAR) + WW_OTHER)
+         ENDIF
+         
          IF (PREDICTOR) DS_CORR(IW) = -(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
          IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
          UVW_SAVE(IW) = WW(II,JJ,KBAR)
