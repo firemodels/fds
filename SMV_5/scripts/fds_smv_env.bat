@@ -5,7 +5,7 @@ Rem This file contains user customizable settings for the FDS and Smokeview buil
 
 
 Rem ----------------------------------------------------------------------
-Rem ------ settings below changed only once ------------------------------------
+Rem ------ SETTINGS BELOW CHANGED ONLY ONCE ------------------------------
 Rem ----------------------------------------------------------------------
 
 Rem ---------- SVN repository locations ------------
@@ -24,44 +24,47 @@ set google_username=gforney
 set linux_hostname=acrux.cfr.nist.gov
 
 Rem ----------------------------------------------------------------------
-Rem ------ settings updated updated as repository changes ----------------
+Rem --- SETTINGS BELOW UPDATED MORE THAN ONCE - as repository changes ----
 Rem ----------------------------------------------------------------------
 
-Rem ----------- Software version and revision numbers -------------
+Rem ----------- version and revision numbers -------------
 
-set smv_version=5.3.11
-set smv_revision=3322
+set smv_version=test
+set smv_revision=3758
 
-set fds_version=xxxx
-set fds_revision=yyyy
+set fds_version=5.3.1
+set fds_revision=3729
 
-set docs_revision=3371
+set docs_revision=3533
 
-set verification_revision=3222a
+set verification_revision=3685
 
 
-Rem ----------- For Google Code Download site -----------------
+Rem ----------- for uploading to Google Code -----------------
 
 Rem *** Smokeview - comment 2 of the following 3 lines
+Rem    (the uncommented line is used for specifying type of Google upload)
 
 Rem set smv_google_level=Release-1_Major
 Rem set smv_google_level=Release-2_Minor
 set     smv_google_level=Release-3_Maintenance
 
 Rem *** Docs - comment 2 of the following 3 lines
+Rem    (the uncommented line is used for specifying type of Google upload)
 
 Rem set docs_google_level=Release-1_Major
 Rem docs_google_level=Release-2_Minor
     set     docs_google_level=Release-3_Maintenance
 
 Rem Example cases - comment 2 of the following 3 lines
+Rem    (the uncommented line is used for specifying type of Google upload)
 
 Rem set verification_google_level=Release-1_Major
 Rem set verification_google_level=Release-2_Minor
 set     verification_google_level=Release-3_Maintenance
 
-Rem define Google-code release level for FDS
-Rem  *** comment 2 of the following 3 lines
+Rem FDS - comment 2 of the following 3 lines
+Rem    (the uncommented line is used for specifying type of Google upload)
 
 Rem set fds_google_level=Release-1_Major
 Rem set fds_google_level=Release-2_Minor
@@ -69,7 +72,7 @@ set     fds_google_level=Release-3_Maintenance
 
 
 Rem --------------------------------------
-Rem --- should not need to edit below ----------------
+Rem --- should not need to edit below ----
 Rem --------------------------------------
 
 set svn_logon=%linux_username%@%linux_hostname%
