@@ -5,16 +5,23 @@
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Getting Started using FDS/Smokeview Build Scripts</h2>
 <a href="scripts/EDIT_getting_started.bat">Edit this page</a> -
-Assumptions/Requirements -
+Getting Started -
 <a href="../FDS_Compilation/build_fds.html">FDS Build notes</a> -
 <a href="build_smokeview.html">Smokeview Build notes</a> -
 <a href="../Utilities/build_other.html">Other Build Notes</a>
 <hr size="1">
 
 <h3>Initial Setup</h3>
+<p><strong>Warning: The <em>Edit this page</em> link above and most other links on this page will not
+work until the <tt>fds_smv_env.bat</tt> setup script is configured by specifying repository locations, 
+user names <em>etc</em>.
+The first time you edit this file, use notepad or wordpad.  </strong>
+
 <ul>
 <li>Copy <tt>SMV_5\scripts\fds_smv_env.bat</tt> to your home directory (directory that opens up when you start up  a command shell)
-<li>Define keyword values (only needed to be done once) for your own setup.  Example:
+<li>Define keyword values for your own setup by editing values in <tt>fds_smv_env.bat</tt>. Note: this only needs to be done once.
+<p><strong>Note, the first time you edit <tt>fds_smv_env.bat</tt>, use notepad or wordpad available from the Windows Start Menu. </strong>
+<p>Example edits:
 <blockquote>
 set svn_root=d:\fds-smv<br>
 set svn_drive=d:<br>
@@ -23,15 +30,19 @@ set linux_username=gforney<br>
 set google_username=gforney<br>
 set linux_hostname=acrux.cfr.nist.gov<br>
 </blockquote>
-<li><a href="scripts/EDIT_setup.bat">Edit configuration file</a> Define environmental variables used by the scripts on this page 
-(such as svn revision numbers, user names, local SVN repository location, <em>etc.</em>).
-<li>Intel Compilers
+<p>Note: other edits will be made when you start building FDS or Smokeview (specifying version strings, revision numbers etc).
+<p><li>Compilers
 <ol>
-<li>Install Intel Fortran and C/C++ compilers - version 11
-<li>Put Intel environmental setup scripts in <tt>c:\bin</tt> (copy <tt>iclvars.bat</tt> and <tt>ifortvars.bat</tt> from the
-Intel compiler bin directories to <tt>c:\bin</tt>)
+<li>Install Intel Fortran and (optionally) C/C++ compilers - version 11
+<li>Put the coompiler environmental setup scripts in <tt>c:\bin</tt> 
+<ol>
+<li>Intel environment: copy <tt>ifortvars.bat</tt> and <tt>iclvars.bat</tt> (if you are using the Intel C/C++ compiler) from the
+Intel compiler bin directories to <tt>c:\bin</tt>
+<li>Visual studio environment: copy <tt>clvars.bat</tt> from the <tt>FDS_Compiler/Scripts</tt> directory to <tt>c:\bin</tt> .  
+<p><strong>The file <tt>clvars.bat</tt> may need to be edited to specify the location of your version of Visual Studio.</strong>
 </ol>
-<li>Putty
+</ol>
+<p><li>Putty
 <ol>
 <li>Install putty.  Doesn't matter where - just make sure the install directory is in the <em>path</em>
 <li>Set up ssh keys to let you login into the Linux cluster without a password.  Basically you are creating a public/private pair 
@@ -49,8 +60,9 @@ is located in the <tt>.ssh</tt> directory (in your home directory)
 You should put it in the startup directory so that it automatically runs when you boot your computuer.  It will direct you to open your private key
 and ask you for the pass-phrase used to create it.
 </ol>
-<li>Create a file named <tt>gc.passwd</tt> containing your google password and put it in your windows home directory.
-<li>Winzip
+<p><li>Google password file
+<p>Create a file named <tt>gc.passwd</tt> containing your google password and put it in your windows home directory.
+<p><li>Winzip
 <ol>
 <li>Install Winzip version 12, Winzip command line tool and Winzip self extractor.  
 Note, The Winzip command line tool is free but is a separate download from Winzip 12.  
