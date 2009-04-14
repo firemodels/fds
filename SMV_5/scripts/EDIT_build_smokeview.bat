@@ -22,6 +22,5 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV_5
-echo %CD%
-start wordpad readme_assumptions.html
+cd %svn_root%\SMV_5\
+start wordpad build_smokeview.html
