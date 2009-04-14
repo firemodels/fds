@@ -4,24 +4,27 @@
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Getting Started using FDS/Smokeview Build Scripts</h2>
-<a href="scripts/EDIT_getting_started.bat">Edit this page</a> -
-Getting Started -
+<a href="scripts/EDIT_getting_started.bat">Edit this page</a> |
 <a href="../FDS_Compilation/build_fds.html">FDS Build notes</a> -
 <a href="build_smokeview.html">Smokeview Build notes</a> -
-<a href="../Utilities/build_other.html">Other Build Notes</a>
+<a href="../Utilities/build_other.html">Other Build Notes</a> -
+Getting Started
 <hr size="1">
 
-<h3>Initial Setup</h3>
 <p><strong>Warning: The <em>Edit this page</em> link above and most other links on this page will not
 work until the <tt>fds_smv_env.bat</tt> setup script is configured by specifying repository locations, 
 user names <em>etc</em>.
-The first time you edit this file, use notepad or wordpad.  </strong>
+The first time you edit this file, use wordpad accessible from the Windows Start menu.  </strong>
+
+<h3>Initial Setup</h3>
 
 <ul>
-<li>Copy <tt>SMV_5\scripts\fds_smv_env.bat</tt> to your home directory (directory that opens up when you start up  a command shell)
+<li>Setting up environment defintions
+<ol>
+<li>Copy <tt>SMV_5\scripts\fds_smv_env.bat</tt> from the repository to your home directory 
+(directory that opens up when you start up  a command shell)
 <li>Define keyword values for your own setup by editing values in <tt>fds_smv_env.bat</tt>. Note: this only needs to be done once.
-<p><strong>Note, the first time you edit <tt>fds_smv_env.bat</tt>, use notepad or wordpad available from the Windows Start Menu. </strong>
-<p>Example edits:
+<p>Example (remember to use wordpad to edit file):
 <blockquote>
 set svn_root=d:\fds-smv<br>
 set svn_drive=d:<br>
@@ -31,6 +34,7 @@ set google_username=gforney<br>
 set linux_hostname=acrux.cfr.nist.gov<br>
 </blockquote>
 <p>Note: other edits will be made when you start building FDS or Smokeview (specifying version strings, revision numbers etc).
+</ol>
 <p><li>Compilers
 <ol>
 <li>Install Intel Fortran and (optionally) C/C++ compilers - version 11
