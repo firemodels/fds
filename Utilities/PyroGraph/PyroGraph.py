@@ -154,29 +154,36 @@ if process_set == 1 or process_set == 3:
                 if diagnostic_level >= 1:
                     print "!!! Metric is undefined in the input file. !!!"
                 exit()
-
-    # Make Scatter Plots.
-    if diagnostic_level >= 1:
-        print "Begin Scatter Plots"
-
+                
     scatter_data_dict = prsr.read_pickle('scatter_data_dict_object.pkl',diagnostic_level)
+    dict_length = 0
     
-    count_no_data = 0
-    for quantity_key in scatter_data_dict:
-        if scatter_data_dict[quantity_key] == {}:
-            count_no_data += 1
-    if diagnostic_level < 3:
-        total = len(scatter_data_dict.keys())-count_no_data
-        p = prgrs.ProgressMeter(total=total, unit='Scatter Plots', rate_refresh=0.25)
-    
-    for quantity_key in scatter_data_dict:
-        if scatter_data_dict[quantity_key] != {}:
-            plot.scatter_plot(quantity_key,scatter_data_dict[quantity_key],quantities,groups,styles,output_directory,diagnostic_level)
-            if diagnostic_level < 3:
-                p.update(1)
+    for key in scatter_data_dict:
+        dict_length = dict_length + len(scatter_data_dict[key])
+
+    if dict_length > 0:
+        # Make Scatter Plots.
+        if diagnostic_level >= 1:
+            print "Begin Scatter Plots"
             
-    if diagnostic_level >= 1:
-        print "Finished Scatter Plots"
+        count_no_data = 0
+        for quantity_key in scatter_data_dict:
+            if scatter_data_dict[quantity_key] == {}:
+                count_no_data += 1
+        if diagnostic_level < 3:
+            total = len(scatter_data_dict.keys())-count_no_data
+            p = prgrs.ProgressMeter(total=total, unit='Scatter Plots', rate_refresh=0.25)
+    
+        for quantity_key in scatter_data_dict:
+            if scatter_data_dict[quantity_key] != {}:
+                plot.scatter_plot(quantity_key,scatter_data_dict[quantity_key],quantities,groups,styles,output_directory,diagnostic_level)
+                if diagnostic_level < 3:
+                    p.update(1)
+            
+        if diagnostic_level >= 1:
+            print "Finished Scatter Plots"
+    else:
+        print "No Scatter Plots to Create, all Quantities set to 0.\nConsider setting process_set=2 in pyrograph_config.txt"
 
 # Clean up temp files
 for file_name in config_files:
