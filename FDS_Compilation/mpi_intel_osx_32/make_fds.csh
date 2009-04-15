@@ -8,7 +8,6 @@ if($#argv>0)then
 endif
 cd $objdir
 
-cd $1
 if ($#argv > 1) then
 date | tee $out
 echo Cleaning $mssg |& tee -a $out
