@@ -4,9 +4,9 @@ Rem Configuration file for FDS-SMV scripts
 Rem This file contains user customizable settings for the FDS and Smokeview build scripts
 
 
-Rem ----------------------------------------------------------------------
-Rem ------ SETTINGS BELOW CHANGED ONLY ONCE ------------------------------
-Rem ----------------------------------------------------------------------
+Rem VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+Rem VVVVVVVV SETTINGS BELOW CHANGED ONLY ONCE VVVVVVVVVVVVVVVVVVVVVVVVVVVV
+Rem VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 Rem ---------- SVN repository locations ------------
 
@@ -23,6 +23,12 @@ set google_username=gforney
 
 set linux_hostname=acrux.cfr.nist.gov
 
+Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Rem ^^^^^^^^ SETTINGS ABOVE CHANGED ONLY ONCE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Rem **********************************************************************
+
 Rem ----------------------------------------------------------------------
 Rem --- SETTINGS BELOW UPDATED MORE THAN ONCE - as repository changes ----
 Rem ----------------------------------------------------------------------
@@ -35,10 +41,12 @@ set smv_revision=3758
 set fds_version=5.3.1
 set fds_revision=3729
 
+Rem this parameter is not needed now but am keeping it around in case we change our minds
+Rem about releasing docs on the download page
+
 set docs_revision=3533
 
 set verification_revision=3685
-
 
 Rem ----------- for uploading to Google Code -----------------
 
