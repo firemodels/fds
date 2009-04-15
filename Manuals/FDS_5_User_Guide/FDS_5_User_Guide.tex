@@ -1341,7 +1341,10 @@ simple text editor, in which case the punctuation marks may not transfer
 properly into the text file.
 \end{warning}
 
-
+\begin{warning}
+\noindent
+Note that depending on compiler and operating system, some text file encodings may not work on all systems.  If file reading errors occur and no typographical errors can be found in the input file, try saving the input file using a different encoding.  It does not appear that current Fortran compilers support the UTF-8 encoding standard for reading Namelist inputs.
+\end{warning}
 
 
 
