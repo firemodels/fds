@@ -43,21 +43,25 @@ Intel compiler bin directories to <tt>c:\bin</tt>
 </ol>
 <p><li>Putty
 <ol>
-<li>Install putty.  Doesn't matter where - just make sure the install directory is in the <em>path</em>
+<li>Install putty.  Doesn't matter where - just make sure the install directory is in the <em>path</em> .<br> 
+Test the installation by opening up a command shell and typing <tt>plink</tt> at the command line. 
 <li>Set up ssh keys to let you login into the Linux cluster without a password.  Basically you are creating a public/private pair 
-of ssh keys.  You copy the private key to somewhere on your PC (doesn't really matter where) 
+of ssh keys.  You copy the private key to somewhere on your PC (doesn't matter where) 
 and copy the public key into a file on the Linux cluster.  More precisely:
 <ol>
 <li>run puttygen
 <li>click on the <tt>SSH-2 RSA</tt> radio button
 <li>click on the <tt>Generate</tt> button.  Pick a <em>pass-phrase</em> that you can easily remember.
-<li>Save the private key into c:\bin\keys directory (create the directory it if it doesn't exist)
+<li>Save the private key into the <tt>c:\bin\keys</tt> directory (create the directory it if it doesn't already exist)
 <li>Save the public key and copy it to the Linux cluster.  Put the key at the end of the file <tt>authorized_key2</tt> which
 is located in the <tt>.ssh</tt> directory (in your home directory)
 </ol>
-<li>Run the program <tt>Pageant</tt> (it is part of the putty suite of programs) to activate the ssh keys.  
-You should put it in the startup directory so that it automatically runs when you boot your computuer.  It will direct you to open your private key
-and ask you for the pass-phrase used to create it.
+<li>On your PC, copy the file <tt>Pageant.exe</tt> to <tt>C:\Documents and Settings\gforney\Start Menu\Programs\Startup</tt> 
+(change <tt>gforney</tt> to your user name).  
+<li>Reboot your computer.
+<li>Open <tt>Pageant</tt> (an icon looking like looking like a terminal wearing a black hat should 
+appear in the right side of the task bar).
+This program will direct you to open your private key and ask you for the pass-phrase used to create it. 
 </ol>
 <p><li>Google password file
 <p>Create a file named <tt>gc.passwd</tt> containing your google password and put it in your windows home directory.
@@ -72,7 +76,7 @@ The Winzip self extractor needs to be purchased separately.
 
 <h3>Using the Scripts</h3>
 After the environment has been defined and the necessary software has been installed, the script pages below may be used to build
-FDS, Smokeview or other components (presently Verification cases).
+FDS, Smokeview or other components (presently just the Verification cases).
 
 <p><a href="build_fds.html">FDS Build notes</a> -
 <a href="../SMV_5/build_smokeview.html">Smokeview Build notes</a> -
