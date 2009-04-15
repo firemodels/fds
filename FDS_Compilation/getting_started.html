@@ -33,12 +33,17 @@ set linux_hostname=acrux.cfr.nist.gov<br>
 <p><li>Compilers
 <ol>
 <li>Install Intel Fortran and (optionally) C/C++ compilers - version 11
-<li>Put the coompiler environmental setup scripts in <tt>c:\bin</tt> 
+<li>Copy the compiler environmental setup scripts into <tt>c:\bin</tt>.  (Create <tt>c:\bin</tt> if it doesn't exist already.)
 <ol>
-<li>Intel environment: copy <tt>ifortvars.bat</tt> and <tt>iclvars.bat</tt> (if you are using the Intel C/C++ compiler) from the
+<li>Intel Fortran: copy <tt>ifortvars.bat</tt> from the
 Intel compiler bin directories to <tt>c:\bin</tt>
-<li>Visual studio environment: copy <tt>clvars.bat</tt> from the <tt>FDS_Compiler/Scripts</tt> directory to <tt>c:\bin</tt> .  
-<p><strong>The file <tt>clvars.bat</tt> may need to be edited to specify the location of your version of Visual Studio.</strong>
+<li>Intel C/C++: copy <tt>iclvars.bat</tt> from the
+Intel compiler bin directories to <tt>c:\bin</tt> .  
+Note this step is only necessary if you build Smokeview using these scripts.  In that case, you MUST also install the Intel C/C++ compilers.
+<li>Visual Studio C/C++: Open up the <tt>FDS_Compilation/Scripts</tt> directory and double click on the <tt>COPY_clvars.bat</tt> batch file.
+This will copy <tt>clvars.bat</tt> from the repository to <tt>c:\bin</tt>.
+<p><a href="Scripts/EDIT_clvars.bat"</a>Edit <tt>clvars.bat</tt></a> to make sure the path specified in this batch file
+matches your distribution of Visual Studio.
 </ol>
 </ol>
 <p><li>Putty
