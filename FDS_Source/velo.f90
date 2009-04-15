@@ -1821,7 +1821,7 @@ SUBROUTINE MATCH_VELOCITY(NM)
 
 INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO,IIG,JJG,KKG,N_INT_CELLS
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,TNOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER,H_OTHER
+REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,TNOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER,H_OTHER,RR
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,OM_UU,OM_VV,OM_WW
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (MESH_TYPE), POINTER :: M2
@@ -1851,6 +1851,10 @@ ENDIF
 
 IF (PREDICTOR) DS_CORR = 0._EB
 IF (CORRECTOR) D_CORR  = 0._EB
+
+! Set ALMS relaxation factor
+
+IF (ALMS) RR = ALMS_RELAXATION_FACTOR
 
 ! Loop over all cell edges and determine the appropriate velocity BCs
 
@@ -1933,9 +1937,9 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
          
          IF (ALMS) THEN
             IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               UU_AVG = UU(0,JJ,KK)
+               UU_AVG = RR*UU(0,JJ,KK) + (1._EB-RR)*UU_OTHER
             ELSE
-               UU_AVG = UU_OTHER
+               UU_AVG = (1._EB-RR)*UU(0,JJ,KK) + RR*UU_OTHER
             ENDIF
          ELSE
             UU_AVG = 0.5_EB*(UU(0,JJ,KK) + UU_OTHER)
@@ -1958,9 +1962,9 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
          
          IF (ALMS) THEN
             IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               UU_AVG = UU(IBAR,JJ,KK)
+               UU_AVG = RR*UU(IBAR,JJ,KK) + (1._EB-RR)*UU_OTHER
             ELSE
-               UU_AVG = UU_OTHER
+               UU_AVG = (1._EB-RR)*UU(IBAR,JJ,KK) + RR*UU_OTHER
             ENDIF
          ELSE
             UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK) + UU_OTHER)
@@ -1983,9 +1987,9 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
          
          IF (ALMS) THEN
             IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               VV_AVG = VV(II,0,KK)
+               VV_AVG = RR*VV(II,0,KK) + (1._EB-RR)*VV_OTHER
             ELSE
-               VV_AVG = VV_OTHER
+               VV_AVG = (1._EB-RR)*VV(II,0,KK) + RR*VV_OTHER
             ENDIF
          ELSE
             VV_AVG = 0.5_EB*(VV(II,0,KK) + VV_OTHER)
@@ -2008,9 +2012,9 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
          
          IF (ALMS) THEN
             IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               VV_AVG = VV(II,JBAR,KK)
+               VV_AVG = RR*VV(II,JBAR,KK) + (1._EB-RR)*VV_OTHER
             ELSE
-               VV_AVG = VV_OTHER
+               VV_AVG = (1._EB-RR)*VV(II,JBAR,KK) + RR*VV_OTHER
             ENDIF
          ELSE
             VV_AVG = 0.5_EB*(VV(II,JBAR,KK) + VV_OTHER)
@@ -2033,9 +2037,9 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
          
          IF (ALMS) THEN
             IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               WW_AVG = WW(II,JJ,0)
+               WW_AVG = RR*WW(II,JJ,0) + (1._EB-RR)*WW_OTHER
             ELSE
-               WW_AVG = WW_OTHER
+               WW_AVG = (1._EB-RR)*WW(II,JJ,0) + RR*WW_OTHER
             ENDIF
          ELSE
             WW_AVG = 0.5_EB*(WW(II,JJ,0) + WW_OTHER)
@@ -2058,9 +2062,9 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
          
          IF (ALMS) THEN
             IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               WW_AVG = WW(II,JJ,KBAR)
+               WW_AVG = RR*WW(II,JJ,KBAR) + (1._EB-RR)*WW_OTHER
             ELSE
-               WW_AVG = WW_OTHER
+               WW_AVG = (1._EB-RR)*WW(II,JJ,KBAR) + RR*WW_OTHER
             ENDIF
          ELSE
             WW_AVG = 0.5_EB*(WW(II,JJ,KBAR) + WW_OTHER)
