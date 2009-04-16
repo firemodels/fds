@@ -282,7 +282,7 @@ MAIN_LOOP: DO
    ! Force normal components of velocity to match at interpolated boundaries
 
    DO NM=1,NMESHES
-      IF (ACTIVE_MESH(NM) .AND. MESHES(NM)%MESH_LEVEL==0) CALL MATCH_VELOCITY(NM)
+      IF (ACTIVE_MESH(NM)) CALL MATCH_VELOCITY(NM)
    ENDDO
    
    ! Spectral energy output
@@ -972,13 +972,26 @@ END SUBROUTINE CORRECT_PRESSURE
 
 SUBROUTINE COMPUTE_VOLUME_FLOW
 
-REAL(EB) :: VDOT(NMESHES,NMESHES),ERROR
+REAL(EB) :: VDOT(NMESHES,NMESHES),AREA(NMESHES,NMESHES),ERROR
 TYPE (MESH_TYPE), POINTER :: M
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 INTEGER :: NM,II,JJ,KK,IOR,IW,NOM
 
 VDOT = 0._EB
+AREA = 0._EB
 DO NM=1,NMESHES
    M=>MESHES(NM)
+   
+   IF (PREDICTOR) THEN
+      UU=>M%US
+      VV=>M%VS
+      WW=>M%WS
+   ELSE
+      UU=>M%U
+      VV=>M%V
+      WW=>M%W
+   ENDIF
+   
    DO IW=1,M%NEWC
       IF (M%BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
          NOM = M%IJKW(9,IW)
@@ -988,17 +1001,23 @@ DO NM=1,NMESHES
          IOR = M%IJKW(4,IW)
          SELECT CASE(IOR)
             CASE( 1)
-               VDOT(NM,NOM) = VDOT(NM,NOM) + M%R(II)*M%DY(JJ)*M%DZ(KK)*M%U(0,JJ,KK)
+               VDOT(NM,NOM) = VDOT(NM,NOM) + M%R(II)*M%DY(JJ)*M%DZ(KK)*UU(0,JJ,KK)
+               !AREA(NM,NOM) = AREA(NM,NOM) + M%DY(JJ)*M%DZ(KK)
             CASE(-1)
-               VDOT(NM,NOM) = VDOT(NM,NOM) + M%R(II-1)*M%DY(JJ)*M%DZ(KK)*M%U(M%IBAR,JJ,KK)
+               VDOT(NM,NOM) = VDOT(NM,NOM) + M%R(II-1)*M%DY(JJ)*M%DZ(KK)*UU(M%IBAR,JJ,KK)
+               !AREA(NM,NOM) = AREA(NM,NOM) + M%DY(JJ)*M%DZ(KK)
             CASE( 2)
-               VDOT(NM,NOM) = VDOT(NM,NOM) + M%DX(II)*M%DZ(KK)*M%V(II,0,KK)
+               VDOT(NM,NOM) = VDOT(NM,NOM) + M%DX(II)*M%DZ(KK)*VV(II,0,KK)
+               !AREA(NM,NOM) = AREA(NM,NOM) + M%DX(II)*M%DZ(KK)
             CASE(-2)
-               VDOT(NM,NOM) = VDOT(NM,NOM) + M%DX(II)*M%DZ(KK)*M%V(II,M%JBAR,KK)
+               VDOT(NM,NOM) = VDOT(NM,NOM) + M%DX(II)*M%DZ(KK)*VV(II,M%JBAR,KK)
+               !AREA(NM,NOM) = AREA(NM,NOM) + M%DX(II)*M%DZ(KK)
             CASE( 3)
-               VDOT(NM,NOM) = VDOT(NM,NOM) + M%RC(II)*M%DX(II)*M%DY(JJ)*M%W(II,JJ,0)
+               VDOT(NM,NOM) = VDOT(NM,NOM) + M%RC(II)*M%DX(II)*M%DY(JJ)*WW(II,JJ,0)
+               !AREA(NM,NOM) = AREA(NM,NOM) + M%DX(II)*M%DY(JJ)
             CASE(-3)
-               VDOT(NM,NOM) = VDOT(NM,NOM) + M%RC(II)*M%DX(II)*M%DY(JJ)*M%W(II,JJ,M%KBAR)
+               VDOT(NM,NOM) = VDOT(NM,NOM) + M%RC(II)*M%DX(II)*M%DY(JJ)*WW(II,JJ,M%KBAR)
+               !AREA(NM,NOM) = AREA(NM,NOM) + M%DX(II)*M%DY(JJ)
          END SELECT
       ENDIF
    ENDDO
@@ -1006,10 +1025,10 @@ ENDDO
 
 DO NM=1,NMESHES
    DO NOM=1,NMESHES
-         ERROR = 2._EB*ABS(VDOT(NM,NOM)-VDOT(NOM,NM))/(ABS(VDOT(NM,NOM)+VDOT(NOM,NM))+1.E-10_EB)
-         IF (NM<=NOM .AND. ERROR>1.E-5_EB) THEN
-            WRITE(LU_ERR,'(A,I2,A,I2,A,E12.6)') 'Volume Flow Error, Meshes ',NM,' and ',NOM,' = ',ERROR
-         ENDIF
+      ERROR = 2._EB*ABS(VDOT(NM,NOM)-VDOT(NOM,NM))/(ABS(VDOT(NM,NOM)+VDOT(NOM,NM))+1.E-10_EB)
+      IF (NM<=NOM .AND. ERROR>1.E-5_EB) THEN
+         WRITE(LU_ERR,'(A,I2,A,I2,A,E12.6)') 'Volume Flow Error, Meshes ',NM,' and ',NOM,' = ',ERROR
+      ENDIF
    ENDDO
 ENDDO
  
