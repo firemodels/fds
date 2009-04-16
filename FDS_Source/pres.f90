@@ -169,46 +169,40 @@ WALL_CELL_LOOP: DO IW=1,NEWC
             
             SELECT CASE(IOR)
                CASE( 1)
-                     DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
                      IF (H(1,J,K) > H_OTHER) THEN
-                        BXS(J,K) = (RR*DX_OTHER*H(1,J,K) + (1._EB-RR)*DX(1)*H_OTHER)/(DX(1)+DX_OTHER)
+                        BXS(J,K) = RR*H(1,J,K) + (1._EB-RR)*H_OTHER
                      ELSE
-                        BXS(J,K) = ((1._EB-RR)*DX_OTHER*H(1,J,K) + RR*DX(1)*H_OTHER)/(DX(1)+DX_OTHER)
+                        BXS(J,K) = (1._EB-RR)*H(1,J,K) + RR*H_OTHER
                      ENDIF
                CASE(-1)
-                     DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
                      IF (H(IBAR,J,K) > H_OTHER) THEN
-                        BXF(J,K) = (RR*DX_OTHER*H(IBAR,J,K) + (1._EB-RR)*DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)
+                        BXF(J,K) = RR*H(IBAR,J,K) + (1._EB-RR)*H_OTHER
                      ELSE
-                        BXF(J,K) = ((1._EB-RR)*DX_OTHER*H(IBAR,J,K) + RR*DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)
+                        BXF(J,K) = (1._EB-RR)*H(IBAR,J,K) + RR*H_OTHER
                      ENDIF
                CASE( 2)
-                     DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
                      IF (H(I,1,K) > H_OTHER) THEN
-                        BYS(I,K) = (RR*DY_OTHER*H(I,1,K) + (1._EB-RR)*DY(1)*H_OTHER)/(DY(1)+DY_OTHER)
+                        BYS(I,K) = RR*H(I,1,K) + (1._EB-RR)*H_OTHER
                      ELSE
-                        BYS(I,K) = ((1._EB-RR)*DY_OTHER*H(I,1,K) + RR*DY(1)*H_OTHER)/(DY(1)+DY_OTHER)
+                        BYS(I,K) = (1._EB-RR)*H(I,1,K) + RR*H_OTHER
                      ENDIF
                CASE(-2)
-                     DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
                      IF (H(I,JBAR,K) > H_OTHER) THEN
-                        BYF(I,K) = (RR*DY_OTHER*H(I,JBAR,K) + (1._EB-RR)*DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)
+                        BYF(I,K) = RR*H(I,JBAR,K) + (1._EB-RR)*H_OTHER
                      ELSE
-                        BYF(I,K) = ((1._EB-RR)*DY_OTHER*H(I,JBAR,K) + RR*DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)
+                        BYF(I,K) = (1._EB-RR)*H(I,JBAR,K) + RR*H_OTHER
                      ENDIF
                CASE( 3)
-                     DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
                      IF (H(I,J,1) > H_OTHER) THEN
-                        BZS(I,J) = (RR*DZ_OTHER*H(I,J,1) + (1._EB-RR)*DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)
+                        BZS(I,J) = RR*H(I,J,1) + (1._EB-RR)*H_OTHER
                      ELSE
-                        BZS(I,J) = ((1._EB-RR)*DZ_OTHER*H(I,J,1) + RR*DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)
+                        BZS(I,J) = (1._EB-RR)*H(I,J,1) + RR*H_OTHER
                      ENDIF
                CASE(-3)
-                     DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
                      IF (H(I,J,KBAR) > H_OTHER) THEN
-                        BZF(I,J) = (RR*DZ_OTHER*H(I,J,KBAR) + (1._EB-RR)*DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)
+                        BZF(I,J) = RR*H(I,J,KBAR) + (1._EB-RR)*H_OTHER
                      ELSE
-                        BZF(I,J) = ((1._EB-RR)*DZ_OTHER*H(I,J,KBAR) + RR*DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)
+                        BZF(I,J) = (1._EB-RR)*H(I,J,KBAR) + RR*H_OTHER
                      ENDIF
             END SELECT
             
