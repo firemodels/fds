@@ -170,7 +170,7 @@
 
 \end{titlepage}
 
-\setcounter{page}{5}
+\setcounter{page}{4}
 
 \newpage
 
@@ -181,11 +181,10 @@
 This document describes how to simulate human egress using the
 evacuation module, FDS+Evac, developed at VTT Technical Research
 Centre of Finland, which is fully embedded in Fire Dynamics Simulator
-(FDS) developed at the National Institute of Standards and Technology
-(NIST).  This manual applies to the FDS+Evac version is 2.1.1, which
-is embedded in the current FDS version 5.3.0.  The most up to date
-version of this manual can be obtained from the FDS+Evac web pages at
-\texttt{http://www.vtt.fi/}\linebreak[4]\texttt{fdsevac/}. 
+(FDS).  This manual applies to the FDS+Evac version is 2.1.1, which is
+embedded in the current FDS version 5.3.0.  The most up to date
+version of this manual can be obtained from the FDS+Evac web page at
+\texttt{http://www.vtt.fi/}\linebreak[4]\texttt{fdsevac/}.
 
 The FDS+Evac Technical Reference and User's Guide does not contain
 information on how to operate FDS nor Smokeview, the companion
@@ -238,15 +237,13 @@ should be evaluated by an informed user.
 
 \noindent This document describes how to simulate human egress using the Fire
 Dynamics Simulator (FDS)~\cite{FDS_Manual, FDS_UserGuide,
-  FDS_VVGuide1, FDS_VVGuide2} developed at National Institute of
-Standards and Technology (NIST), and in particular, the evacuation
+  FDS_VVGuide1, FDS_VVGuide2}, and in particular, the evacuation
 module~\cite{Korhonen05, Korhonen07a, Korhonen07b, Korhonen08a,
-  Korhonen08b} developed at VTT Technical Research Centre of Finland.
-This combined fire and evacuation simulation program is called
-FDS+Evac in this document.  FDS+Evac allows simultaneous simulation of
-the fire and evacuation processes.  FDS+Evac can also be used to
-simulate only the human egress process without any fire effects,
-  \emph{e.g.}, a fire drill.
+  Korhonen08b}.  This combined fire and evacuation simulation program
+is called FDS+Evac in this document.  FDS+Evac allows simultaneous
+simulation of the fire and evacuation processes.  It can also be
+used to simulate only the human egress process without any fire
+effects, \emph{e.g.}, a fire drill.
 
 FDS+Evac treats each evacuee as a separate entity, or an 'agent',
 which has its own personal properties and escape strategies.  The
@@ -385,7 +382,7 @@ doors for the door selection algorithm.
 
 For now, the number of agents placed in the same main evacuation mesh
 is limited.  The programme stops and writes out an error message if
-more than 10000 agents are tried to place on the same evacuation mesh.
+more than 10~000 agents are tried to place on the same evacuation mesh.
 Usually, one main evacuation mesh extends over a whole floor of the
 building.  Several main evacuation meshes may coexist, \emph{e.g.},
 the different floors of the building, and the total number of agents
@@ -467,7 +464,7 @@ grid.
 \subsection{Most recent changes, version 2.1.0 vs 2.0.0}\label{Sec_210vs200}
 
 The version 2.0.0 demanded that a door should be defined such that it
-is slightly inside a wall, see Fig.~\ref{Fig_DoorGeom}.  One had to
+is slightly inside a wall, see Figure~\ref{Fig_DoorGeom}.  One had to
 define a small hole in the wall, where an exit (or a door) was placed.
 This is not anymore necessary in version 2.1.0.  The ``outflow'' vent
 and the exit door can be placed directly at the wall surface. 
@@ -490,7 +487,7 @@ now used to give the colouring information instead of the
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-    width=80mm]{FIGURES/door_geometry2}}
+    width=75mm]{FIGURES/door_geometry2}}
   \caption{How to make an exit or a door.}\label{Fig_DoorGeom} 
 \end{figure}
 %
@@ -506,11 +503,10 @@ together with some other (well) validated egress programme to study
 evacuation.  If the two (or more) methods give similar results then
 the predictions of the computational modelling should be quite good.
 
-It is not the purpose of this document (nor FDS+Evac) to give
-instructions on how to define the egress scenarios for the design
-purposes. Fire regulators and designers should agree on the relevant
-scenarios and acceptance criteria before any design by the engineering
-methods. 
+It is not the purpose of this document to give instructions on how to
+define the egress scenarios for the design purposes. Fire regulators
+and designers should agree on the relevant scenarios and acceptance
+criteria before any design by the engineering methods.
 
 
 \clearpage
@@ -538,23 +534,23 @@ documentation~\cite{SV_UserGuide}.
 fluid flow.  FDS is written using Fortran 90 programming language.
 The companion programme Smokeview, written in C/OpenGL programming
 languages, is used for graphical presentation of the simulation
-results. The evacuation calculation module developed at VTT is
-implemented as subroutines of FDS and these subroutines together with
-the FDS are called as FDS+Evac.  Since the version 5 of FDS, the
-program development and maintenance has utilised a version control
-system (SVN).  The source code is maintained at a public domain
-server.\footnote{The server is hosted by Google Code
-  (http://code.google.com/p/fds-smv/)} Changes in the version numbers
-correspond to major changes in the physical models or input
-parameters.  For minor changes and bug fixes, incremental versions are
-released, referenced according to fractions of the integer version
-numbers.  In addition, day-to-day bug fixes made in response to user
-feedback are referenced by a compilation date and a SVN revision
-number that are printed at the top of the diagnostic output file.  The
-latest official release version of FDS is obtainable on the web site
-{\tt http://fire.nist.gov/fds/}.  The latest documentation on the
-evacuation part of FDS+Evac can be found on the web page {\tt
-  http://www.vtt.fi/fdsevac/}.
+results. The evacuation calculation module developed at VTT Technical
+Research Centre of Finland (VTT) is implemented as subroutines of FDS
+and these subroutines together with the FDS are called as FDS+Evac.
+Since the version 5 of FDS, the program development and maintenance
+has utilised a version control system (SVN).  The source code is
+maintained at a public domain server.\footnote{The server is hosted by
+  Google Code (http://code.google.com/p/fds-smv/)} Changes in the
+version numbers correspond to major changes in the physical models or
+input parameters.  For minor changes and bug fixes, incremental
+versions are released, referenced according to fractions of the
+integer version numbers.  In addition, day-to-day bug fixes made in
+response to user feedback are referenced by a compilation date and a
+SVN revision number that are printed at the top of the diagnostic
+output file.  The latest official release version of FDS is obtainable
+on the web site {\tt http://fire.nist.gov/fds/}.  The latest
+documentation on the evacuation part of FDS+Evac can be found on the
+web page {\tt http://www.vtt.fi/fdsevac/}.
 
 \section{Type of the Model}
 
@@ -571,7 +567,7 @@ intelligence to model the exit selection processes of the evacuees.
 \section{Model Developers}
 
 \noindent The evacuation module of FDS was developed and its currently
-maintained by the VTT Technical Research Centre of Finland (VTT).  A
+maintained by the VTT Technical Research Centre of Finland.  A
 substantial contribution to the implementation of the evacuation
 calculation as a module of FDS was made by the Fire Research Division
 in the Building and Fire Research Laboratory (BFRL) at the National
@@ -698,7 +694,7 @@ relevant to maritime applications.  Concert halls and sport facilities
 may be difficult to model due to the limitations dictated by the
 rectangular computational mesh.  There is limitation on the number of
 humans per evacuation mesh (usually one mesh per one floor).  In the
-present version one floor can contain at most 10000 humans.  The
+present version one floor can contain at most 10~000 humans.  The
 present version of FDS+Evac supports parallel calculation only for the
 fire meshes, the evacuation meshes are always treated as a single
 thread.  Thus, it is not possible to divide the evacuation calculation
@@ -734,7 +730,7 @@ reaction function model is used to select the exit routes.
 Humans are modelled as agents, which are moving in a 2D geometries
 representing the floors of buildings.  The size of each agent is
 represented by three circles approximating the shape of the human
-body, see Fig.~\ref{Fig_HumanBody}, just like in the Simulex
+body, see Figure~\ref{Fig_HumanBody}, just like in the Simulex
 programme~\cite{Simulex96, Thompson95a, Thompson95b, Thompson03}, in
 the MASSEgress programme~\cite{Pan06}, and in the CrowdDMX
 model~\cite{Langston06, Langston09}.  The body dimensions and the
@@ -771,15 +767,30 @@ the flow of the fire calculation, \emph{e.g.}, by allowing the
 evacuees to open or close doors and windows, but this is not yet
 possible with the present version of the FDS+Evac programme.
 
+
+\section{Agent Movement Model}\label{Sec_MoveModel}
+
+\noindent The method of Helbing's group is used as the starting point of the
+agent movement algorithm of FDS+Evac, where a so-called ``social
+force'' is introduced to keep reasonable distances to walls and other
+agents, see Figure~\ref{Fig_SocForce}.  This model is shortly described
+below.  For a longer description, see the papers by Helbing's
+group~\cite{Helbing95, Helbing00, Helbing02, Werner03} and references
+therein.  For the modification of the one-circle representation of an
+agent to a three-circle one, see the papers by Langston {\em et
+  al.}~\cite{Langston06} and Korhonen {\em et al.}~\cite{Korhonen07a,
+  Korhonen07b, Korhonen08a, Korhonen08b}.
+
 %
-\begin{table}[bt]
+\begin{table}[b!]
 \begin{center}
 \caption{Unimpeded walking velocities and body dimensions in FDS+Evac.
    The offset of shoulder circles is given by $d_s = R_d - R_s$, for the
    definition of the other body size variables, $R_d$, $R_t$, $R_s$,
-   see Fig.~\protect\ref{Fig_HumanBody}.  The body sizes and walking
+   see Figure~\protect\ref{Fig_HumanBody}.  The body sizes and walking
    velocities of the agents are personalised by using them from uniform
    distributions, whose rages are also given.}\label{Table_DefaultHumans}  
+\vspace{12pt}
 \begin{tabular}{l c c c c c}\hline\hline 
 Body type & $R_d$& $R_t/R_d$ & $R_s/R_d$  & $d_s/R_d$ & Speed \\
           & (m)  & (-)   &  (-)    & (-)    & (m/s) \\ \hline
@@ -798,19 +809,6 @@ Elderly   & 0.250$\pm$0.020 & 0.6000 & 0.3600 & 0.6400 &
 \end{table}
 %
 
-\section{Agent Movement Model}\label{Sec_MoveModel}
-
-\noindent The method of Helbing's group is used as the starting point of the
-agent movement algorithm of FDS+Evac, where a so-called ``social
-force'' is introduced to keep reasonable distances to walls and other
-agents, see Fig.~\ref{Fig_SocForce}.  This model is shortly described
-below.  For a longer description, see the papers by Helbing's
-group~\cite{Helbing95, Helbing00, Helbing02, Werner03} and references
-therein.  For the modification of the one-circle representation of an
-agent to a three-circle one, see the papers by Langston {\em et
-  al.}~\cite{Langston06} and Korhonen {\em et al.}~\cite{Korhonen07a,
-  Korhonen07b, Korhonen08a, Korhonen08b}.
-
 FDS+Evac uses the laws of mechanics to follow the trajectories of the
 agents during the calculation.  Each agent follows its own equation of
 motion:
@@ -828,7 +826,7 @@ the agent, $\mathbf{v}_i (t)$, is given by $d\mathbf{x}_i/dt$.
 FDS+Evac treats agents as combination of three circles moving on a
 two-dimensional plane~\cite{Langston06}.  These circles are
 approximating the elliptical shape of the human body, see
-Fig.~\ref{Fig_HumanBody}.  The default body dimensions and the
+Figure~\ref{Fig_HumanBody}.  The default body dimensions and the
 unimpeded walking speeds of different predefined agent types of
 FDS+Evac are listed in Table~\ref{Table_DefaultHumans}.  Note, that
 FDS+Evac uses stochastic properties for the characteristics of the
@@ -971,7 +969,7 @@ The torque of the contact forces is calculated as
 %
 where $\mathbf{R}^c_{i}$ is the radial vector, which points from the
 centre of the agent $i$ to the point of contact, see
-Fig.~\ref{Fig_BodySize}.  In FDS+Evac, also the social forces exert
+Figure~\ref{Fig_BodySize}.  In FDS+Evac, also the social forces exert
 torques on the agents and these are given by the formula
 %
 \begin{equation}\label{Eq_soc_torque}
@@ -982,7 +980,7 @@ torques on the agents and these are given by the formula
 where only the circles, which are closest to each other, are
 considered.  The vector $\mathbf{R}^{soc}_{i}$ points from the centre
 of the agent $i$ to the fictitious contact point of the social force,
-see Fig.~\ref{Fig_BodySize}.
+see Figure~\ref{Fig_BodySize}.
 
 Analogous to the motive force, the first term on the right hand
 side of Eq.~\ref{Eq_force}, a motive torque is defined as
@@ -1014,7 +1012,7 @@ two-dimensional incompressible fluid to the given boundary conditions,
 where all walls are inert and the chosen exit door acts as a fan,
 which extracts fluid out of the domain.  This method, or rather a
 trick, produces a nice directional field for egress towards the chosen
-exit door, see Fig.~\ref{Fig_EvacFlowField}.  A field of this kind
+exit door, see Figure~\ref{Fig_EvacFlowField}.  A field of this kind
 will always guide agents to the chosen exit door.  This route will not
 be the shortest one, but usually it is quite close to it.  This field
 will guide more agents to the wider escape routes than on the narrower
@@ -1217,8 +1215,19 @@ implementation of the exit selection algorithm of FDS+Evac does not
 include all aspects of the method ideally and there are some quite
 crude approximation made, see Sec.~\ref{Sec_NumMethod} for details.
 
+
+Apart from the locations of exits and the actions of other agents,
+there are also other factors that influence the decision making
+process of an agent.  These factors are the conditions related to the
+fire, the familiarity of the agent with the exits and the visibility
+of the exits.  The effect of these factors is taken into account by
+adding constraints to the evacuation time minimisation problem.
+According to the three factors mentioned, the exits are divided to
+seven groups so that each exits will belong to one group.  The groups
+are given an order of preference.
+
 %
-\begin{table}[!tp]
+\begin{table}[!b]
 \begin{center}
 \caption{Preference order used in the exit selection algorithm.  The 
 last two rows have no preference.  This is because the agents are
@@ -1227,7 +1236,7 @@ can not select these exits.  The last column shows the colours used in
 Smokeview to show the status of the agents.}\label{Table_pref_order}
 \vspace{12pt}
 \begin{tabular}{c|c|c|c|c} \hline \hline
-preference&visible&familiar&disturbing conditions\\ \hline 
+Preference&Visible&Familiar&Disturbing conditions\\ \hline 
 1&yes&yes&no&black\\ \hline
 2&no&yes&no&yellow\\ \hline 
 3&yes&no&no&blue\\ \hline 
@@ -1240,16 +1249,6 @@ No preference&no&no&yes&cyan\\ \hline \hline
 \end{center}
 \end{table}
 %
-
-Apart from the locations of exits and the actions of other agents,
-there are also other factors that influence the decision making
-process of an agent.  These factors are the conditions related to the
-fire, the familiarity of the agent with the exits and the visibility
-of the exits.  The effect of these factors is taken into account by
-adding constraints to the evacuation time minimisation problem.
-According to the three factors mentioned, the exits are divided to
-seven groups so that each exits will belong to one group.  The groups
-are given an order of preference.
 
 The familiarity of each exit for each agent can be determined by the
 user in the input-file of FDS+Evac.  It is also possible to give a
@@ -1270,6 +1269,7 @@ phases.  First the exits are divided to the preference groups
 according to Table~\ref{Table_pref_order}.  Then, an exit is selected from
 the most preferred nonempty preference group by minimising the
 estimated evacuation time.
+
 
 According to socio-psychological literature~\cite{Pan06,Proulx1993},
 the familiarity of exit routes is an essential factor influencing
@@ -1371,7 +1371,11 @@ crude approximation but fast to compute).
 \chapter{Testing and Verification}\label{Sec_TestVerif}
 
 
+\vspace{\fill}
+
 \section{Introduction}
+
+\vspace{\fill}
 
 \noindent In the verification test cases the default parameter values of
 FDS+Evac for the different predefined agent types were used unless
@@ -1412,6 +1416,8 @@ quantitative verification of egress models.  Until such data becomes
 available the first three components of the verification process
 (component testing, functional verification, qualitative verification)
 are considered sufficient.''
+
+\vspace{\fill}
 
 
 \section{Component Testing}\label{Sec_CompTest}
@@ -1491,12 +1497,12 @@ eyes'' that the programme is working as it should.
   value of the maximum FED among the agents is compared to a value
   computed using an external worksheet and the FDS point measurements
   for gas densities.  The results of the comparison are shown in
-  Fig.~\ref{Fig_FED_Test}.  The results indicate that the FED
+  Figure~\ref{Fig_FED_Test}.  The results indicate that the FED
   calculation in FDS+Evac is implemented correctly.
 %
 \begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/FED_Test}}
-  \caption{A FED test}\label{Fig_FED_Test}
+  \centerline{\includegraphics[clip=true,width=75mm]{FIGURES/FED_Test}}
+  \caption{A FED test.}\label{Fig_FED_Test}
 \end{figure}
 %
 %
@@ -1510,7 +1516,7 @@ eyes'' that the programme is working as it should.
   114.9~mg/$\mathrm{m^3}$ on every 10 seconds.  The length of the
   simulation was 100~s and the unimpeded walking velocity for a
   smoke clear environment was set to 1.0~m/s.  The result of this test
-  is shown in Fig.~\ref{Fig_SmokeSpeedTest}.  In the figure, the line
+  is shown in Figure~\ref{Fig_SmokeSpeedTest}.  In the figure, the line
   labelled as ``Theory'' is the experimental correlation given in
   Eq.~\ref{Eq_SpeedSmoke}.  The velocities of the agents in FDS+Evac
   simulations were calculated using 8~s periods, like 22~s -- 30~s,
@@ -1521,7 +1527,7 @@ eyes'' that the programme is working as it should.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/Smoke_vs_speed}}
-  \caption{A smoke vs speed test}\label{Fig_SmokeSpeedTest}
+  \caption{A smoke vs speed test.}\label{Fig_SmokeSpeedTest}
 \end{figure}
 %
 %
@@ -1627,20 +1633,11 @@ where the results can not be checked as numbers but one should see
 \end{figure}
 %
 
-  
-%
-\begin{figure}[!bt]
-  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/DoorTestSmokeDens}}
-  \caption{The visibility at 10 s in the test case. Red and blue
-    colours indicate good and very bad visibilities,
-    respectively.}\label{Fig_ExitDoorSmokeDens} 
-\end{figure}
-%
 
 %
 \item Decision making model without smoke: The verification of the
   exit door selection algorithm of FDS+Evac was tested using the
-  geometry shown in Fig.~\ref{Fig_ExitDoorNoSmoke}.  The figure on the
+  geometry shown in Figure~\ref{Fig_ExitDoorNoSmoke}.  The figure on the
   left shows the target exit doors for the agents (blue: right bottom
   exit; green: top left exit) and in the figure on the right the
   colours of the agents mark the preference categories of the exit
@@ -1660,13 +1657,23 @@ where the results can not be checked as numbers but one should see
   may be changed to calculate the distance along the streamlines used
   to guide the agents towards the doors.
 
+  
+%
+\begin{figure}[!b]
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/DoorTestSmokeDens}}
+  \caption{The visibility at 10 s in the test case. Red and blue
+    colours indicate good and very bad visibilities,
+    respectively.}\label{Fig_ExitDoorSmokeDens} 
+\end{figure}
+%
+
 %
 \item Decision making model with smoke: The above test was modified by
   adding a fire that produces smoke to the building.
   Figure~\ref{Fig_ExitDoorSmokeDens} shows the visibility at the
   height of the human eyes at 10~s from the ignition.  The door
   selections and preference categories at the same time are shown in
-  Fig.~\ref{Fig_ExitDoorSmoke}.  Now the smokiness has changed the
+  Figure~\ref{Fig_ExitDoorSmoke}.  Now the smokiness has changed the
   preferences.  First choices are still the doors with no smoke.  The
   input files for the exit selection tests are on the FDS+Evac web
   page an interested reader is able to rerun the simulations and use
@@ -1778,7 +1785,7 @@ movement algorithm has not changed for version 2.1.1, so there is no
 need to recalculate these simulations.
 
 Two different geometries were used in the Monte Carlo simulations, see
-Fig.~\ref{Fig_Geoms}. One of the geometries was used to study the flow
+Figure~\ref{Fig_Geoms}. One of the geometries was used to study the flow
 through a narrow door and through a wide door and the other geometry
 was used to study flows in a corridor using densities 1.0 and 2.0
 persons per square metre.  There were 100 agents randomly located at
@@ -1793,7 +1800,7 @@ $B_w$, $\lambda_w$, $\omega^0_i$, $\tau^z_i$, and $I^z_{i}$ were
 varied $\pm 20~\%$ about their means using uniform distributions.  The
 monitored output quantity was the specific flow in all cases and the
 Spearman's rank correlation coefficients (RCC) were calculated for
-these four cases and they are shown in Fig.~\ref{Fig_RCC}.
+these four cases and they are shown in Figure~\ref{Fig_RCC}.
 
 %
 \begin{figure}[!tb]
@@ -1807,24 +1814,8 @@ these four cases and they are shown in Fig.~\ref{Fig_RCC}.
 \end{figure}
 %
 
-%
-\begin{figure}[!tb]
-  \centerline{ \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Anew} 
-  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Bnew}
-  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Lambdanew} } 
-  \centerline{ \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_v0new} 
-  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Taunew}
-  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Bwallnew} } 
-  \caption{Effects of different model parameters, $A_i$, $B_i$,
-    $\lambda_i$, $v^0$, $\tau_i$, and $B_w$ on the specific flows
-    through doors and corridors.  The corridor is 2.0~m wide, the
-    agent density is 2.0~$\mathrm{ \textrm{m}^\textrm{-2} }$, and two
-    different doors widths, 1.0~m and 2.0~m, are used.
-    \protect\hspace{200mm}}\label{Fig_Door1}
-\end{figure}
-%
 
-It is seen from Fig.~\ref{Fig_RCC} that the parameters $A_i$, $B_i$,
+It is seen from Figure~\ref{Fig_RCC} that the parameters $A_i$, $B_i$,
 $\lambda_i$, $v^0_i$, $\tau_i$, and $B_w$ have the largest impact on
 the specific flows through doors and corridors. Thus, further
 simulations were done to quantify these effects. Each of these six
@@ -1837,8 +1828,8 @@ specific flow has its maximum value.  For the density 1.~0 persons per
 square metre the corridor flow is mainly specified by the used
 distribution for the unimpeded walking speeds, because at this density
 the agents can move relatively independently of each others in the
-corridor.  The results of these, in total almost 20000 simulations,
-are shown in Fig.~\ref{Fig_Door1}, where the markers represent the
+corridor.  The results of these, in total almost 20~000 simulations,
+are shown in Figure~\ref{Fig_Door1}, where the markers represent the
 average of 100 simulations and standard deviations are shown as error
 bars.  Note that in FDS+Evac the initial properties and positions of
 the agents are not deterministic, because agents are randomly
@@ -1866,6 +1857,22 @@ wall force parameter $B_w$ is to modify the effective width of doors
 and corridors, thus, increasing its value will make the effective
 width smaller and this will decrease specific flows slightly.
 
+%
+\begin{figure}[!tb]
+  \centerline{ \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Anew} 
+  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Bnew}
+  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Lambdanew} } 
+  \centerline{ \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_v0new} 
+  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Taunew}
+  \includegraphics[clip=true, width=50mm]{FIGURES/DoorCorr_Bwallnew} } 
+  \caption{Effects of different model parameters, $A_i$, $B_i$,
+    $\lambda_i$, $v^0$, $\tau_i$, and $B_w$ on the specific flows
+    through doors and corridors.  The corridor is 2.0~m wide, the
+    agent density is 2.0~$\mathrm{ \textrm{m}^\textrm{-2} }$, and two
+    different doors widths, 1.0~m and 2.0~m, are used.
+    \protect\hspace{200mm}}\label{Fig_Door1}
+\end{figure}
+%
 
 \section{Summary}
 
@@ -1929,7 +1936,7 @@ there is no need to recalculate these simulations.
   hinder the walking.  In this test case, the specific flow rates
   given by the FDS+Evac code are compared to experimental walking
   velocities on horizontal floors in corridor geometry.  The geometry
-  is shown in Fig.~\ref{Fig_Geoms}.  The corridor is modelled as a
+  is shown in Figure~\ref{Fig_Geoms}.  The corridor is modelled as a
   loop to avoid the effects of inflow and outflow boundary conditions.
   In Figure~\ref{Fig_CorrResults}, the predicted flow rates are
   compared against some experimental results for pedestrian traffic
@@ -1949,8 +1956,10 @@ there is no need to recalculate these simulations.
 \end{figure}
 %
 
+
+
 %
-\begin{figure}[!bt]
+\begin{figure}[!b]
   \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/PorrasKuva}}
   \caption{A snapshot from a FDS+Evac simulation showing the geometry
   of the staircase.}\label{Fig_StairGeom} 
@@ -1972,6 +1981,7 @@ there is no need to recalculate these simulations.
   the default, and $\lambda_i=0.3$ which corresponds to more relaxed
   egress.  The calculations for staircases were performed using both
   models for staircases available in FDS+Evac.
+  
 
 %
 \begin{figure}[!tb]
@@ -1986,7 +1996,7 @@ there is no need to recalculate these simulations.
 %
 
 %
-\begin{figure}[!tb]
+\begin{figure}[!b]
   \centerline{\includegraphics[clip=true,width=60mm]{FIGURES/StairsType2Lam0p3}
   \includegraphics[clip=true,width=60mm]{FIGURES/StairsType2Lam0p5}}
   \caption{Comparison of FDS+Evac (staircase model type 2) and experimental
@@ -1995,25 +2005,27 @@ there is no need to recalculate these simulations.
     Different curves correspond to the different values of the
     staircase speed reduction parameter $k$.}\label{Fig_StairType2}
 \end{figure}
-  
-Figure~\ref{Fig_StairType1} shows a comparison of the experimental
-observations and the simulation results using the simple staircase
-model (type 1).  This model is implemented using the \Timtt{CORR}
-namelist, which is a crude model for stairs.  In each figure, several
-simulated curves are shown corresponding to different values of the
-staircase speed reduction parameter.  In Figure~\ref{Fig_StairType1},
-the best results are obtained when the value for the speed reduction
-parameter is 0.5, \emph{i.e.}, the movement speeds of the agents are
-reduced to $v = 0.5v_0$ at the stairs.  The results using more
-sophisticated way of defining staircases (type 2) are compared to the
-observed values in Figure~\ref{Fig_StairType2}.  In these simulations,
-the stairs are modelled as inclines (\Timtt{EVSS} namelist), where
-agents move at reduced speed.  Reducing the walking speed by a factor
-~0.7 gives a good agreement with the observations.  Whether the
-anisotropy parameter $\lambda_i$ is 0.3 or 0.5 does not have
-effect of any practical importance.
+
+  Figure~\ref{Fig_StairType1} shows a comparison of the experimental
+  observations and the simulation results using the simple staircase
+  model (type 1).  This model is implemented using the \Timtt{CORR}
+  namelist, which is a crude model for stairs.  In each figure,
+  several simulated curves are shown corresponding to different values
+  of the staircase speed reduction parameter.  In
+  Figure~\ref{Fig_StairType1}, the best results are obtained when the
+  value for the speed reduction parameter is 0.5, \emph{i.e.}, the
+  movement speeds of the agents are reduced to $v = 0.5v_0$ at the
+  stairs.  The results using more sophisticated way of defining
+  staircases (type 2) are compared to the observed values in
+  Figure~\ref{Fig_StairType2}.  In these simulations, the stairs are
+  modelled as inclines (\Timtt{EVSS} namelist), where agents move at
+  reduced speed.  Reducing the walking speed by a factor ~0.7 gives a
+  good agreement with the observations.  Whether the anisotropy
+  parameter $\lambda_i$ is 0.3 or 0.5 does not have effect of any
+  practical importance.
 %
 %
+
 
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/Library_Kuva2}}
@@ -2029,7 +2041,7 @@ effect of any practical importance.
   movement inside the floor, queueing to the staircase and finally
   movement through a narrow staircase to the exit.  The simulation
   geometry and the initial positions of the persons are shown in
-  Fig.~\ref{Fig_Kirjasto}.  As the majority of persons in the building
+  Figure~\ref{Fig_Kirjasto}.  As the majority of persons in the building
   used the north exit door, the main results are for this door.  Shown
   are also the results for the west door, where about 50\% of the
   people originated from the first floor.  In the simulations, only
@@ -2052,7 +2064,7 @@ standard agent type ``Adult''.  The pre-movement times were generated
 from symmetric triangular distribution with mean of 41~s and lower and
 upper limits of 11~s and 71~s, respectively.  A comparison of the
 simulated and experimentally observed flows is shown in
-Fig.~\ref{Fig_KirjastoResults}.  As can be seen, the predicted flow
+Figure~\ref{Fig_KirjastoResults}.  As can be seen, the predicted flow
 rates are in very good agreement with the experiments.  For the west
 door, the results reflect the goodness or badness of the assumed
 pre-movement time distribution because the flow rate through the door
@@ -2083,8 +2095,10 @@ version 2.1.0, but the basic movement algorithm has not changed for
 version 2.1.1, so there is no need to recalculate these simulations.
 %
 
+
+
 %
-\begin{figure}[!tb]
+\begin{figure}[!b]
   \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/SportHallGeom}}
   \caption{The geometry of the studied sports hall.  The open grey
     area shows, where the agents are at the start of the simulations.
@@ -2092,6 +2106,33 @@ version 2.1.1, so there is no need to recalculate these simulations.
     3 and, thus, this door is not used.}\label{Fig_SportGeom}
 \end{figure}
 %
+
+\begin{enumerate}
+%
+\item Sports hall: FDS+Evac simulations were compared to
+  Simulex~\cite{Simulex96, Thompson95a, Thompson95b, Thompson03}
+  simulations in a sports hall shown in Figure~\ref{Fig_SportGeom}.  The
+  hall was previously analysed by Paloposki \emph{et
+    al.}~\cite{Paloposki02}.  The sports hall is used to practice
+  different kind of sports.  There are no spectator stands in the hall
+  and neither are there any social spaces like showers.  People enter
+  the hall through the main entrance (``Door 1''), which is 1.8~m
+  wide.  Doors 2 and 3 are 4.0~m wide two leaf doors and doors 4 and 5
+  are 0.9~m wide single leaf doors.  It is assumed that a fire starts
+  close to door 3 (the shaded rectangle in Figure~\ref{Fig_SportGeom})
+  so that this door cannot be used for egress.  235 persons use the
+  closest door (``Door 5''), 130 persons use the main entrance (``Door
+  1''), 60 persons door 2, and 75 persons use door 4.  Persons are
+  initially located at the east end of the hall in an area of
+  20$\times$25~$\mathrm{m^2}$ (the open rectangle in
+  Figure~\ref{Fig_SportGeom}).  Three different reaction time scenarios
+  were considered, two having a normal distribution with a standard
+  deviation of 15~s but different means (60~s and 180~s), and one
+  having a log-normal distribution (median 75~s, standard deviation of
+  the logarithm of reaction time was 0.7).  Actually, the log-normal
+  distribution was approximated by two uniform distributions, because
+  the version of the Simulex, which was used, did not support
+  log-normal distributions for the reaction time.
 
 %
 \begin{figure}[!tb]
@@ -2102,35 +2143,9 @@ version 2.1.1, so there is no need to recalculate these simulations.
 \end{figure}
 %
 
-\begin{enumerate}
-%
-\item Sports hall: FDS+Evac simulations were compared to
-  Simulex~\cite{Simulex96, Thompson95a, Thompson95b, Thompson03}
-  simulations in a sports hall shown in Fig~\ref{Fig_SportGeom}.  The
-  hall was previously analysed by Paloposki \emph{et
-    al.}~\cite{Paloposki02}.  The sports hall is used to practice
-  different kind of sports.  There are no spectator stands in the hall
-  and neither are there any social spaces like showers.  People enter
-  the hall through the main entrance (``Door 1''), which is 1.8~m
-  wide.  Doors 2 and 3 are 4.0~m wide two leaf doors and doors 4 and 5
-  are 0.9~m wide single leaf doors.  It is assumed that a fire starts
-  close to door 3 (the shaded rectangle in Fig.~\ref{Fig_SportGeom})
-  so that this door cannot be used for egress.  235 persons use the
-  closest door (``Door 5''), 130 persons use the main entrance (``Door
-  1''), 60 persons door 2, and 75 persons use door 4.  Persons are
-  initially located at the east end of the hall in an area of
-  20$\times$25~$\mathrm{m^2}$ (the open rectangle in
-  Fig.~\ref{Fig_SportGeom}).  Three different reaction time scenarios
-  were considered, two having a normal distribution with a standard
-  deviation of 15~s but different means (60~s and 180~s), and one
-  having a log-normal distribution (median 75~s, standard deviation of
-  the logarithm of reaction time was 0.7).  Actually, the log-normal
-  distribution was approximated by two uniform distributions, because
-  the version of the Simulex, which was used, did not support
-  log-normal distributions for the reaction time.
   
   The results of the simulations are shown in
-  Fig.~\ref{Fig_SportResults}.  Since both FDS+Evac and Simulex are
+  Figure~\ref{Fig_SportResults}.  Since both FDS+Evac and Simulex are
   modelling human egress as a stochastic process, the presented
   results were collected from five different runs per case.  The
   FDS+Evac and Simulex results agree very well for the log-normal
@@ -2155,7 +2170,7 @@ version 2.1.1, so there is no need to recalculate these simulations.
 %
 
 %
-\begin{figure}[!tb]
+\begin{figure}[!b]
   \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/PankkiTulokset}}
   \caption{The comparison of FDS+Evac to Simulex in an open floor
     office case.}\label{Fig_OpenFloorResults} 
@@ -2163,7 +2178,7 @@ version 2.1.1, so there is no need to recalculate these simulations.
 %
 
 \item Open floor office: This test geometry was an open floor office,
-  whose floor plan is shown in Fig.~\ref{Fig_OpenFloorGeom}.  The
+  whose floor plan is shown in Figure~\ref{Fig_OpenFloorGeom}.  The
   floor has dimensions of 40$\times$40~$\mathrm{m^2}$ and there are
   initially 216 persons on this floor.  The properties of these agents
   were assumed to be as the ``Office Staff'' category in the Simulex
@@ -2176,17 +2191,17 @@ version 2.1.1, so there is no need to recalculate these simulations.
   case where two stairs are blocked.
   
   The results of FDS+Evac simulations are compared to results of
-  Simulex simulations in Fig.~\ref{Fig_OpenFloorResults}.  Only when
+  Simulex simulations in Figure~\ref{Fig_OpenFloorResults}.  Only when
   two exit doors were blocked, queues were formed at the door.  For
   two or three operational doors the main form of the evacuation
   curves arise from the reaction time distribution.  The FDS+Evac and
   Simulex results are quite similar.  It should be mentioned, that in
   the FDS+Evac simulations, the initial (random) positions of agents
   do not change between different door scenarios (see
-  Fig.~\ref{Fig_OpenFloorGeom}), whereas in Simulex runs the random
+  Figure~\ref{Fig_OpenFloorGeom}), whereas in Simulex runs the random
   initial positions are different in each calculation.  This explains
   why the Simulex results have larger scatter in the cases where a
-  certain number of doors are operational.
+  certain number of doors are operational.\vspace{\fill}
 
 
 
@@ -2195,19 +2210,20 @@ version 2.1.1, so there is no need to recalculate these simulations.
   \centerline{\includegraphics[clip=true,width=130mm]{FIGURES/AssemblySpaceGeom}}
   \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/AssemblySpace_Simulex_60s}}
   \caption{A snapshot from (a) FDS+Evac, (b) Simulex
-    calculation}\label{Fig_AssemblySnapshots} 
+    calculation.}\label{Fig_AssemblySnapshots} 
 \end{figure}
 %
 
+\pagebreak[3]
 %
 \item Assembly space: The second test case is a large fictitious
   assembly space having dimensions of 50$\times$60~$\mathrm{m^2}$ and
   1000 people initially inside.  There is only one 7.2~m wide corridor
   leading to the exit.  The geometry is shown in
-  Fig.~\ref{Fig_AssemblySnapshots}a.  The FDS+Evac results (``Evac'')
+  Figure~\ref{Fig_AssemblySnapshots}a.  The FDS+Evac results (``Evac'')
   are compared to those of Simulex (``Simulex'') and
   buildingExodus~\cite{Exodus3} (``Exodus'') in
-  Fig.~\ref{Fig_AssemblyResults}.  Note, that the FDS+Evac simulations
+  Figure~\ref{Fig_AssemblyResults}.  Note, that the FDS+Evac simulations
   were also done using parameters describing more relaxed egress
   (labels ``Evac 2''), where the value of the anisotropy
   parameter of the social force, $\lambda_i$, had a value of 0.3
@@ -2216,7 +2232,7 @@ version 2.1.1, so there is no need to recalculate these simulations.
   Considerable differences are shown between the results of FDS+Evac
   and the results of Simulex and buildingExodus programmes.  These
   differences can be traced back to the motion of the agents in the
-  corridor, see Fig~\ref{Fig_AssemblySnapshots}.  Simulex and
+  corridor, see Figure~\ref{Fig_AssemblySnapshots}.  Simulex and
   buildingExodus are not using the whole width of the corridor
   efficiently, when the simulations are done using the default values
   and standard input.  (An advanced user of these codes might be able
@@ -2236,6 +2252,13 @@ version 2.1.1, so there is no need to recalculate these simulations.
   \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/AssemblySpaceResults}}
   \caption{The comparison of FDS+Evac to buildingExodus
     and Simulex in an assembly space.}\label{Fig_AssemblyResults}
+\end{figure}
+%
+%
+%
+\begin{figure}[!b]
+  \centerline{\includegraphics[clip=true,width=80mm]{FIGURES/OviFlowRersults}}
+  \caption{The specific flows through doors.}\label{Fig_DoorResults}  
 \end{figure}
 %
 
@@ -2261,13 +2284,7 @@ version 2.1.1, so there is no need to recalculate these simulations.
   too large, but it is quite straightforward to modify the parameters
   of FDS+Evac to reach specific flows that are more relevant to a more
   relaxed egress.
-%
-%
-\begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,width=120mm]{FIGURES/OviFlowRersults}}
-  \caption{The specific flows through doors.}\label{Fig_DoorResults}  
-\end{figure}
-%
+
 %
 \end{enumerate}
 %
@@ -2393,7 +2410,7 @@ spread over many processors and computers.
   obstacles for the movement are, usually about one meter above the
   floor.  The \Timtt{EVAC\_Z\_OFFSET} parameter defines the floor
   level of this mesh measured from the mid $z$ level of the mesh.  See
-  Fig.~\ref{Fig_EvacGrid} and Sec.~\ref{Sec_EvacGrid}.  Note, that the
+  Figure~\ref{Fig_EvacGrid} and Sec.~\ref{Sec_EvacGrid}.  Note, that the
   smoke and other fire related quantities are taken at the level
   defined by the \Timtt{HUMAN\_SMOKE\_HEIGHT} parameter on (some)
   \Timtt{PERS} namelist.  Try to make the mesh division such that the
@@ -2423,7 +2440,7 @@ spread over many processors and computers.
 %
 \item Make additional holes with \verb|EVACUATION=.TRUE.|, where they
   are needed.  Usually these are needed at exits or doors.  See
-  Fig.~\ref{Fig_DoorGeom} and Sec.~\ref{Sec_SpecFeatures}.
+  Figure~\ref{Fig_DoorGeom} and Sec.~\ref{Sec_SpecFeatures}.
 %
 \item Run FDS+Evac (\Timtt{T\_END=0.0}) and see if the 2D geometry is
   looking correct.  If not, correct it by adding more \Timtt{OBST}s
@@ -2465,14 +2482,14 @@ spread over many processors and computers.
   \Timtt{DOOR}, \Timtt{EXIT}, and \Timtt{ENTR} to match the mesh cell
   boundaries.  The older versions of FDS+Evac were not doing this
   matching to the underlying computational mesh.  See
-  Sec.~\ref{Sec_SpecFeatures} and Fig.~\ref{Fig_DoorGeom} how doors
+  Sec.~\ref{Sec_SpecFeatures} and Figure~\ref{Fig_DoorGeom} how doors
   should be defined.
 %
 \item Place the agents inside the building using the \Timtt{EVAC}
   namelists.  Use \Timtt{EVHO} namelists if needed.  Note, that agents
   should not be placed between outflow vents and exits/doors, but this
   is no problem, because exits and doors are usually defined on solid
-  \Timtt{OBST}s, see Fig.~\ref{Fig_DoorGeom}.
+  \Timtt{OBST}s, see Figure~\ref{Fig_DoorGeom}.
 %
 \item Once again, run a short simulation.  See, that your agents have
   correct initial positions.  You can change the way how agents are
@@ -2924,11 +2941,12 @@ flow fields need different holes for different fields, then the item
   $\Rightarrow$ \Timtt{x\_LOW=0.0}.  If \Timtt{x\_HIGH} is not given,
   then \Timtt{x\_HIGH} is a 'very large' number.  Above, \Timtt{x}
   refers to one of the strings \Timts{DIA}, \Timts{VEL}, \Timts{TAU},
-  \Timtt{DET}, or \Timtt{PRE}.  See Eqs.~ \ref{Eq_GammaDist} -
-  \ref{Eq_GumbelDist} for the definition for the
-  distributions.}\label{Table_StatDists}
+  \Timtt{DET}, or \Timtt{PRE}.  See
+  Eqs.~\ref{Eq_GammaDist}--\ref{Eq_GumbelDist} for the definition for
+  the distributions.}\label{Table_StatDists}
+\vspace{12pt}
 \begin{tabular}{l|c|c} \hline \hline
-Distribution     & index & parameters \\ \hline 
+Distribution     & Index & Parameters \\ \hline 
 No distribution  & 0 & \_MEAN ($x$) \\
 Uniform          & 1 & \_LOW, \_HIGH ($x_\mathrm{min}$, $x_\mathrm{max}$) \\ 
 Truncated normal & 2 & \_MEAN, \_PARA, \_LOW, \_HIGH ($\bar{x}$,
@@ -2999,11 +3017,11 @@ some \Timtt{PERS} namelist group.
   distribution, see Table~\ref{Table_StatDists}.  Note, that the
   distribution is given for the diameter of the large body circle,
   which encircles the whole body ellipse, see
-  Fig.~\ref{Fig_HumanBody}.
+  Figure~\ref{Fig_HumanBody}.
 %
 \item[\Timts{DIA\_MEAN,DIA\_PARA,DIA\_PARA2,DIA\_LOW,DIA\_HIGH}] The
   parameters of the distribution used for the diameter of the agent
-  circle ($2R_d$), see Fig.~\ref{Fig_HumanBody} and
+  circle ($2R_d$), see Figure~\ref{Fig_HumanBody} and
   Tables~\ref{Table_DefaultHumans} and \ref{Table_StatDists}.
 %
 \item[\Timts{VELOCITY\_DIST}] The type index of the unimpeded walking
@@ -3029,7 +3047,7 @@ some \Timtt{PERS} namelist group.
 %
 \item[\Timts{D\_TORSO\_MEAN,D\_SHOULDER\_MEAN}] The mean diameters of
   the torso and shoulder circles, see Table~\ref{Table_DefaultHumans}
-  and Fig.~\ref{Fig_HumanBody}.  The variations of these diameters are
+  and Figure~\ref{Fig_HumanBody}.  The variations of these diameters are
   determined by the diameter distribution of the agent circle
   ($2R_d$).
 %
@@ -3584,7 +3602,7 @@ now there is no relation between the density and the movement speed
   \Timtt{CORR} by its name.
 %
 \item[\Timtt{MAX\_HUMANS\_INSIDE}] how many agents fit inside the
-  corridor.  A rule of thumb: 2 persons per square metre.
+  corridor.  A rule of thumb: two persons per square metre.
 %
 \item[\Timtt{TO\_NODE}] Where agents are going, when leaving this
   corridor. \Timtt{TO\_NODE} can be \Timtt{DOOR}, \Timtt{ EXIT},
@@ -3861,7 +3879,7 @@ save the file as ``Text Document - MS-DOS Format''.  This will change
 the line endings to the DOS style.
 
 
-\begin{figure}[!tb]
+\begin{figure}[!b]
   \centerline{\includegraphics[clip=true,
     width=75mm]{FIGURES/evac_example1_EvacGeom} \includegraphics[clip=true,
     width=75mm]{FIGURES/evac_example1_FireGeom}}
@@ -3871,11 +3889,12 @@ the line endings to the DOS style.
 
 
 The first input file specifies a fire in a room with two doors, see
-Fig.~\ref{Fig_Ex1EvacGeom}.  Agents are using both doors and they
+Figure~\ref{Fig_Ex1EvacGeom}.  Agents are using both doors and they
 select the door by using the exit door selection algorithm, thus, each
 of the two doors needs its own evacuation flow field.  This means that
 one needs to define the main evacuation mesh and two additional door
 flow field meshes for this case besides the fire mesh.
+\vspace{\fill}
 
 {\fontsize{10}{13}
 \selectfont
@@ -4100,8 +4119,16 @@ flow field meshes for this case besides the fire mesh.
 \end{verbatim}
 }
 
+
+\begin{figure}[!tb]
+  \centerline{\includegraphics[clip=true,
+    width=80mm]{FIGURES/evac_example2_EvacGeom}}
+  \caption{Example 2: Evacuation calculation
+    geometry.}\label{Fig_Ex2EvacGeom}
+\end{figure}
+
 The second input file specifies a two-floor building, see
-Fig.~\ref{Fig_Ex2EvacGeom}, each floor consisting of one egress area,
+Figure~\ref{Fig_Ex2EvacGeom}, each floor consisting of one egress area,
 thus only one main evacuation mesh per floor is needed.  There is a
 fire in downstairs and the smoke is going to the second floor by an
 opening at the ceiling.  The second floor is connected to the first
@@ -4112,13 +4139,6 @@ stairs going to the first floor (the right exit door) and one leading
 to the stairs leading directly to outside of the building (the left
 exit).  The first floor has two exit doors and one entry, which the
 agents from the second floor are using when entering the first floor.
-
-\begin{figure}[!tb]
-  \centerline{\includegraphics[clip=true,
-    width=120mm]{FIGURES/evac_example2_EvacGeom}}
-  \caption{Example 2: Evacuation calculation
-    geometry.}\label{Fig_Ex2EvacGeom}
-\end{figure}
 
 {\fontsize{10}{13}
 \selectfont
@@ -4632,33 +4652,32 @@ the visits of one of the authors (T.K.).
 %
 \bibitem{Korhonen05} Korhonen, T., Hostikka, S., and Keski-Rahkonen,
   O., ``A Proposal for the Goals and New Techniques of Modelling
-  Pedestrian Evacuation in Fires,'' Proceedings of the 8th
-  International Symposium on Fire Safety Science, International
-  Association for Fire Safety Science, pp.~557-567 (2005).
+  Pedestrian Evacuation in Fires'',  \emph{Fire Safety Science} 7:
+  pp.~557--567 (2005). 
 %
 \bibitem{Korhonen07a} Korhonen, T., Hostikka, S., Heli\"ovaara, S.,
-  Ehtamo, H., Matikainen, K., ``Integration of an Agent Based
-  Evacuation Simulation and the State-of-the-Art Fire Simulation,''
+  Ehtamo, H., and Matikainen, K., ``Integration of an Agent Based
+  Evacuation Simulation and the State-of-the-Art Fire Simulation'',
   Proceedings of the 7th Asia-Oceania Symposium on Fire Science \&
-  Technology, 20-22 September, 2007, Hong Kong, (in print).
+  Technology, 20--22 September, 2007, Hong Kong, (in print).
 %
 \bibitem{Korhonen07b} Korhonen, T., Hostikka, S., Heli\"ovaara, S.,
-  Ehtamo, H., Matikainen, K., ``FDS+Evac: Evacuation Module for Fire
-  Dynamics Simulator,'' Proceedings of the Interflam2007: 11th
+  Ehtamo, H., and Matikainen, K., ``FDS+Evac: Evacuation Module for
+  Fire Dynamics Simulator'', Proceedings of the Interflam2007: 11th
   International Conference on Fire Science and Engineering,
-  Interscience Communications Limited, London, UK, pp.~1443-1448
+  Interscience Communications Limited, London, UK, pp.~1443--1448
   (2007).
 %
 \bibitem{Korhonen08a} Korhonen, T., Hostikka, S., Heli\"ovaara, S.,
-  Ehtamo, H., ``FDS+Evac: Modelling Social Interactions in Fire
-  Evacuation,'' Proceedings of the 7th International Conference on
+  and Ehtamo, H., ``FDS+Evac: Modelling Social Interactions in Fire
+  Evacuation'', Proceedings of the 7th International Conference on
   Performance-Based Codes and Fire Safety Design Methods, SFPE,
-  Bethesda, MD, USA, pp.~241-250 (2008).
+  Bethesda, MD, USA, pp.~241--250 (2008).
 %
 \bibitem{Korhonen08b} Korhonen, T., Hostikka, S., Heli\"ovaara, S.,
-  Ehtamo, H., ``FDS+Evac: An Agent Based Fire Evacuation Model,''
+  and Ehtamo, H., ``FDS+Evac: An Agent Based Fire Evacuation Model'',
   Proceedings of the 4th International Conference on Pedestrian and
-  Evacuation Dynamics, February 27-29, 2008, Wuppertal, Germany.
+  Evacuation Dynamics, February 27--29, 2008, Wuppertal, Germany.
 %
 \bibitem{Hostikka07a} Hostikka, S., Korhonen, T., Paloposki, T.,
   Rinne, T., Heli\"ovaara, S., and Matikainen, K., ``Development and
@@ -4667,9 +4686,9 @@ the visits of one of the authors (T.K.).
   Finland, 2007, 64~p. (http://www.vtt.fi/publications/index.jsp)
 %
 \bibitem{Hostikka07b} Hostikka, S., Paloposki, T., Rinne, T., Saari,
-  J-M., Korhonen, T., Heli\"ovaara, S., ``Experimental Observations of
-  Evacuation Situations'', VTT Working Papers 85, VTT Technical
-  Research Centre of Finland, 2007, 52~p.
+  J.-M., Korhonen, T., and Heli\"ovaara, S., ``Experimental
+  Observations of Evacuation Situations'', VTT Working Papers 85, VTT
+  Technical Research Centre of Finland, 2007, 52~p.
   (http://www.vtt.fi/publications/index.jsp)
 %
 \bibitem{SV_UserGuide} Forney, G.P., ``User's Guide for Smokeview
@@ -4677,62 +4696,61 @@ the visits of one of the authors (T.K.).
   NIST Special Publication 1017-1, U.S.~Government Printing Office,
   Washington, 2007, 134~p.
 %
-\bibitem{Helbing95} Helbing, D., and Moln\'ar, P., ``Social force model
-  for pedestrian dynamics'', \emph{Physical Review E} 51: 4282-4286
-  (1995).
+\bibitem{Helbing95} Helbing, D., and Moln\'ar, P., ``Social force
+  model for pedestrian dynamics'', \emph{Physical Review E} 51:
+  4282--4286 (1995).
 %
 \bibitem{Helbing00} Helbing, D., Farkas, I., and Vicsek, T.,
-  ``Simulating dynamical features of escape panic,'' \emph{Nature}
-  407: 487-490 (2000).
+  ``Simulating dynamical features of escape panic'', \emph{Nature}
+  407: 487--490 (2000).
 %
 % Next is for book
 \bibitem{Helbing02} Helbing, D., Farkas, I., Moln\'ar, P., and
   Vicsek,T., ``Simulating of Pedestrian Crowds in Normal and
-  Evacuation Situations,'' \emph{Pedestrian and Evacuation Dynamics},
+  Evacuation Situations'', \emph{Pedestrian and Evacuation Dynamics},
   Schreckenberg, M. and Sharma, S.D. (eds.), Springer, Berlin, 2002,
-  pp.~21-58.
+  pp.~21--58.
 %
-\bibitem{Werner03} Werner, T. and Helbing, D., ``The social force
-  pedestrian model applied to real life scenarios,'' \emph{Pedestrian
-  and Evacuation Dynamics - Proceedings of the Seconnd
-  International Conference}, University of Greenwich, London, 2003,
-  pp.~17-26.
+\bibitem{Werner03} Werner, T., and Helbing, D., ``The social force
+  pedestrian model applied to real life scenarios'', \emph{Pedestrian
+    and Evacuation Dynamics -- Proceedings of the Seconnd International
+    Conference}, University of Greenwich, London, 2003, pp.~17--26.
 %
-\bibitem{Langston06} Langston, P.A., Masling, R., Asmar, B.N., ``Crowd
-  dynamics discrete element multi-circle model,'' \emph{Safety Science}
-  44: 395-417 (2006).
+\bibitem{Langston06} Langston, P.A., Masling, R., and Asmar, B.N.,
+  ``Crowd dynamics discrete element multi-circle model'', \emph{Safety
+    Science} 44: 395--417 (2006).
 %
 \bibitem{Langston09} Smith, A., James, C., Jones, R., Langston, P.,
   Lester, E., and Drury, J., ``Modelling contra-flow in crowd dynamics
-  DEM simulation,'' \emph{Safety Science} 47: 395-404 (2009).
+  DEM simulation'', \emph{Safety Science} 47: 395--404 (2009).
 %
 \bibitem{Simulex96} ``Simulex: Evacuation Modelling Software, User's
-  Guide,'' Integrated Environmental Solutions Ltd., Glasgow, Scotland,
+  Guide'', Integrated Environmental Solutions Ltd., Glasgow, Scotland,
   UK, 1996, 48~p.
 %
 \bibitem{Pan06} Pan, X., ``Computational Modeling of Human and Social
-  Behaviors for Emergency Egress Analysis,'', 127~p., PhD Thesis,
+  Behaviors for Emergency Egress Analysis'', 127~p., PhD Thesis,
   Stanford University, CA, 2006.
 %
-\bibitem{Thompson95a} P.A. Thompson and E.W. Marchant, ``A Computer
-  Model for the Evacuation of Large Building Populations,'' \em Fire
-  Safety Journal \em 24: 131-148 (1995).
+\bibitem{Thompson95a} Thompson, P.A., and Marchant, E.W., ``A Computer
+  Model for the Evacuation of Large Building Populations'', \em Fire
+  Safety Journal \em 24: 131--148 (1995).
 %
-\bibitem{Thompson95b} P.A. Thompson and E.W. Marchant, ``Testing and
-  Application of the Computer Model 'Simulex','' \em Fire
-  Safety Journal \em 24: 149-166 (1995).
+\bibitem{Thompson95b} Thompson, P.A., and Marchant, E.W., ``Testing
+  and Application of the Computer Model 'Simulex''', \em Fire Safety
+  Journal \em 24: 149--166 (1995).
 %
-\bibitem{Thompson03} P. Thompson, H. Lindstrom, P. Ohlsson,
-  S. Thompson, ``Simulex: Analysis and Changes for IMO Compliance,''
+\bibitem{Thompson03} Thompson, P., Lindstrom, H., Ohlsson, P., and
+  Thompson, S., ``Simulex: Analysis and Changes for IMO Compliance'',
   Proceedings of 2nd International Conference: Pedestrian and
-  Evacuation Dynamics, pp.~173-184 (2003).
+  Evacuation Dynamics, pp.~173--184 (2003).
 %
 \bibitem{Purser95} Purser, D.A., ``Toxicity Assessment of Combustion
   Products'', in \emph{SFPE Handbook of Fire Protection Engineering},
   2${}^\textrm{nd}$ ed., pp.~2/28--2/146, National Fire Protection
   Association, Quincy, MA, 1995.
 %
-\bibitem{Frantzich03} Frantzich, H.\ and Nilsson, D., ``Utrymning
+\bibitem{Frantzich03} Frantzich, H., and Nilsson, D., ``Utrymning
   genom tät r\"ok: beteende och f\"orflyttning'', 75~p., Report 3126,
   Department of Fire Safety Engineering, Lund University, Sweden,
   2003.
@@ -4742,26 +4760,26 @@ the visits of one of the authors (T.K.).
 %
 \bibitem{Heliovaara08} Heli\"ovaara, S., Ehtamo, H., Korhonen, T., and
   Hostikka, S., ``Modeling Evacuees' Exit Selection with Best-Response
-  Dynamics,'' Proceedings of the 4th International Conference on
-  Pedestrian and Evacuation Dynamics, February 27-29, 2008, Wuppertal,
-  Germany.
+  Dynamics'', Proceedings of the 4th International Conference on
+  Pedestrian and Evacuation Dynamics, February 27--29, 2008,
+  Wuppertal, Germany.
 %
-\bibitem{Proulx1993} Proulx, G., ''A Stress Model for People Facing a
+\bibitem{Proulx1993} Proulx, G., ``A Stress Model for People Facing a
   Fire'', \emph{Journal of Environmental Psychology} 13: 137--147,
   1993.
 %
-\bibitem{Fang03} Fang, Z., Lo, S.M.\ and Lu, J.A., ``On the
-  Relationship between Crowd Density and Movement Velocity'',
-  \emph{Fire Safety Journal} 38: 271--283, 2003.
+%\bibitem{Fang03} Fang, Z., Lo, S.M.\ and Lu, J.A., ``On the
+%  Relationship between Crowd Density and Movement Velocity'',
+%  \emph{Fire Safety Journal} 38: 271--283, 2003.
 %
 \bibitem{IMO02} IMO, ``Interim guidelines for evacuation analyses for
-  new and existing passenger ships,'' MSC/Circ.1033, International
+  new and existing passenger ships'', MSC/Circ.1033, International
   Maritime Organization, London, 6 June 2002.
 %
-\bibitem{Vattulainen02} Vattulainen, I., Karttunen, M., Besold, G.,\ 
+\bibitem{Vattulainen02} Vattulainen, I., Karttunen, M., Besold, G.,
   and Polson, J.M., ``Integration Schemes for Dissipative Particle
   Dynamics Simulations: From Softly Interacting Systems Towards Hybrid
-  Models'', \emph{Journal of Chemical Physics} 116: 3967-3979, 2002.
+  Models'', \emph{Journal of Chemical Physics} 116: 3967--3979, 2002.
 %
 \bibitem{Daamen04} Daamen, W., ``Modelling Passenger Flows in Public
   Transport Facilities'', 377~p., PhD Thesis, Delft University of
@@ -4770,7 +4788,7 @@ the visits of one of the authors (T.K.).
 \bibitem{Paloposki02} Paloposki, T., Myllym\"aki, J., and Weckman, H.,
   ``Application of reliability techniques for calculation of the
   evacuation safety of a sports hall'', VTT Research Notes 2281, VTT
-  Building and Transport, Espoo, Finland, 2002, 53~p.+app.\ 13~p. (in
+  Building and Transport, Espoo, Finland, 2002, 53~p.~+ app.\ 13~p. (in
   Finnish).
 %
 \bibitem{Exodus3} Gwynne, S., Galea, E.R., Lawrence, P., and

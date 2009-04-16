@@ -495,9 +495,11 @@
 \skip\@mpfootins = \skip\footins
 \setlength\fboxsep{3\p@}
 \setlength\fboxrule{.4\p@}
-\@addtoreset {equation}{chapter}
-\renewcommand\theequation
-  {\ifnum \c@chapter>\z@ \thechapter.\fi \@arabic\c@equation}
+
+%\@addtoreset {equation}{chapter}
+%\renewcommand\theequation
+%  {\ifnum \c@chapter>\z@ \thechapter.\fi \@arabic\c@equation}
+
 \newcounter{figure}
 \renewcommand \thefigure
      {\@arabic\c@figure}
@@ -641,9 +643,12 @@
 \let\l@table\l@figure
 \newdimen\bibindent
 \setlength\bibindent{1.5em}
+
 \newenvironment{thebibliography}[1]
-     {\chapter*{\bibname
-        \@mkboth{\bibname}{\bibname}}%
+     {\chapter*{{\vspace*{-144\p@}\bibname}
+        \@mkboth{}{}}%
+      %\@mkboth{\bibname}{\bibname}}%
+
       \normalfont\fontsize{10}{13}\selectfont
       \list{\@biblabel{\@arabic\c@enumiv}}%
            {\settowidth\labelwidth{\@biblabel{#1}}%
@@ -661,8 +666,10 @@
      {\def\@noitemerr
        {\@latex@warning{Empty `thebibliography' environment}}%
       \endlist}
+
 \newcommand\newblock{\hskip .11em\@plus.33em\@minus.07em}
 \let\@openbib@code\@empty
+
 \newenvironment{theindex}
                {\if@twocolumn
                   \@restonecolfalse
