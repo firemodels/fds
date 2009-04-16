@@ -19,8 +19,7 @@
 
 // svn revision character string
 char main_revision[]="$Revision$";
-//   dummy change to update version to 5.3.12
-//  dummy change to force revision change
+//   dummy change to update version to 5.3.13
 
 /* ------------------ main ------------------------ */
 
