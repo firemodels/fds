@@ -4,7 +4,7 @@ Rem Windows batch file to upload Smokeview test files to
 Rem the google download site.  This script assume that the Windows
 Rem batch file, MAKEtest.bat, has already been run.
 
-set envfile=%homedrive%\%homepath%\fds_smv_env.bat
+set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
