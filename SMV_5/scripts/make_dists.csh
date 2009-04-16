@@ -14,7 +14,6 @@ cd $FORBUNDLE
 mkdir -p $OSXDIR
 mkdir -p $OSXDIR/Documentation
 cp readme.html $OSXDIR/Documentation/.
-cp  ../../Manuals/All_PDF_Files/SMV_5_User_Guide.pdf $OSXDIR/Documentation/.
 
 scp $OSXHOST\:FDS-SMV/SMV_5/bin/smv5_osx_32 $OSXDIR/.
 scp $OSXHOST\:FDS-SMV/SMV_5/bin/smokezip_osx $OSXDIR/.
@@ -25,7 +24,6 @@ gzip $OSXDIR.tar
 mkdir -p $LINUXDIR
 mkdir -p $LINUXDIR/Documentation
 cp readme.html $LINUXDIR/Documentation/.
-cp  ../../Manuals/All_PDF_Files/SMV_5_User_Guide.pdf $LINUXDIR/Documentation/.
 cp $BINDIR/smv5_linux_32 $LINUXDIR/.
 cp $BINDIR/smokezip_linux $LINUXDIR/.
 rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
@@ -35,7 +33,7 @@ gzip $LINUXDIR.tar
 #mkdir -p $LINUXDIR64
 #mkdir -p $LINUXDIR64/Documentation
 #cp readme.html $LINUXDIR64/Documentation/.
-#cp  ../../Manuals/All_PDF_Files/SMV_5_User_Guide.pdf $LINUXDIR64/Documentation/.
+
 #cp $BINDIR/smv5_linux_64 $LINUXDIR64/.
 #cp $BINDIR/smokezip_linux $LINUXDIR64/.
 #rm -f $LINUXDIR64.tar $LINUXDIR64.tar.gz
