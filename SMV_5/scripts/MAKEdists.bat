@@ -22,7 +22,7 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\smv_5\scripts
-set version=%smv_version%_%smv_revision%
+set version=%smv_version%
 
 set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle

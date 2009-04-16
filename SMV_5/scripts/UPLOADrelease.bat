@@ -31,6 +31,8 @@ set upload_win32=1
 set upload_linux32=1
 set upload_osx32=1
 
+set version=%smv_version%
+
 echo Uploading Smokeview %level% version=%smv_version% revision=%smv_revision%
 pause
 
@@ -40,7 +42,7 @@ if not %upload_win32% == 1 goto endif_win32
   set dplatform=32 bit Windows
   set platform=win32
   set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
-  set exe=smv_%smv_version%_%smv_revision%_%platform%.exe
+  set exe=smv_%version%_%platform%.exe
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
@@ -54,7 +56,7 @@ if not %upload_linux32% == 1 goto endif_linux32
   set dplatform=32 bit Linux
   set platform=linux
   set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
-  set exe=smv_%smv_version%_%smv_revision%_%platform%.tar.gz
+  set exe=smv_%version%_%platform%.tar.gz
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
@@ -68,7 +70,7 @@ if not %upload_osx32% == 1 goto endif_osx32
   set dplatform=32 bit OSX
   set platform=osx
   set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
-  set exe=smv_%smv_version%_%smv_revision%_%platform%.tar.gz
+  set exe=smv_%version%_%platform%.tar.gz
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%

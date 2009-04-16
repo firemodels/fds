@@ -23,7 +23,6 @@ copy devices.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
 copy pthreadVC.dll %smvdir%\.
 copy readme.html %smvdir%\Documentation\.
-copy ..\..\Manuals\All_PDF_Files\SMV_5_User_Guide.pdf %smvdir%\Documentation\.
 
 echo
 echo winzipping distribution directory
