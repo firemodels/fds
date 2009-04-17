@@ -99,7 +99,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \Huge
 \flushright{Smokeview (Version 5) - A Tool for \\
 Visualizing Fire Dynamics Simulation Data\\
-Volume II: Technical Guide
+Volume II: Technical Reference Guide
 }
 %\flushright{(Draft: \today)}
 
@@ -131,7 +131,7 @@ Volume II: Technical Guide
 \Huge
 \flushright{Smokeview (Version 5) - A Tool for \\
 Visualizing Fire Dynamics Simulation Data\\
-Volume II: Technical Guide
+Volume II: Technical Reference Guide
 }
 
 \vspace{.5in}
@@ -439,7 +439,7 @@ Appendix \ref{smvprogstruct} gives some of the programmatic details in particula
 \chapter{Visualizing Data Quantitatively}
 Smokeview uses color and contours to visualize data quantitatively.  Color is used
 to indicate {\em how much}\ of a quantity is at a given location whereas
-contours are used to identify {\em where}\ rather than {\em how much}\ a specified quantity occurs.   
+contours are used to identify {\em where}\ rather than {\em how much}\ a specified quantity occurs.
 
 Coloring methods for visualizing data work by assigning colors based upon data values to various vertices within the scene.
 These vertices coincide with the FDS grid, either within a horizontal or vertical plane (slice or Plot3D file) or on a blockage exterior (boundary file).  The video card then interpolates these colors at the interior of the figure, usually a triangle, formed by the vertices.
