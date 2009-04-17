@@ -1,5 +1,6 @@
 #!/bin/csh -f
-set VDIR=~/FDS_Repository/Validation
+setenv SVNROOT ~/FDS-SMV
+set VDIR=$SVNROOT/Validation
 $VDIR/Flame_Height/FDS_Output_Files/Process_Output.csh
 $VDIR/FM_SNL/FDS_Output_Files/Process_Output.csh
 $VDIR/Hamins_CH4/FDS_Output_Files/Process_Output.csh
