@@ -1,7 +1,8 @@
 #!/bin/csh -f
-set PDIR=~/FDS_Repository/Utilities/Data_Processing
-set WDIR=~/FDS_Repository/Validation/FM_SNL/FDS_Output_Files
-set DDIR=~/FDS_Repository/Validation/FM_SNL/Current_Results
+setenv SVNROOT ~/FDS-SMV
+set PDIR=$SVNROOT/Utilities/Data_Processing
+set WDIR=$SVNROOT/Validation/FM_SNL/FDS_Output_Files
+set DDIR=$SVNROOT/Validation/FM_SNL/Current_Results
 cd $DDIR
 $PDIR/layer_height < $WDIR/FM_SNL_04_v5.input
 $PDIR/layer_height < $WDIR/FM_SNL_05_v5.input

@@ -1,7 +1,8 @@
 #!/bin/csh -f
-set PDIR=~/FDS_Repository/Utilities/Data_Processing
-set WDIR=~/FDS_Repository/Validation/Steckler_Compartment/FDS_Output_Files
-set DDIR=~/VALIDATION/Steckler_Compartment/FDS_5.3
+setenv SVNROOT ~/FDS-SMV
+set PDIR=$SVNROOT/Utilities/Data_Processing
+set WDIR=$SVNROOT/Validation/Steckler_Compartment/FDS_Output_Files
+set DDIR=$SVNROOT/Validation/Steckler_Compartment/Current_Results
 cd $DDIR
 $PDIR/fds2ascii $WDIR/Steckler_010_fds2ascii.input
 $PDIR/fds2ascii $WDIR/Steckler_011_fds2ascii.input

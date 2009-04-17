@@ -1,7 +1,8 @@
 #!/bin/csh -f
-set PDIR=~/FDS_Repository/Utilities/Data_Processing
-set WDIR=~/FDS_Repository/Validation/WTC/FDS_Output_Files
-set DDIR=~/VALIDATION/WTC/FDS_5.3
+setenv SVNROOT ~/FDS-SMV
+set PDIR=$SVNROOT/Utilities/Data_Processing
+set WDIR=$SVNROOT/Validation/WTC/FDS_Output_Files
+set DDIR=$SVNROOT/Validation/WTC/Current_Results
 cd $DDIR
 $PDIR/layer_height < $WDIR/WTC_01_v5_HGL.input
 $PDIR/layer_height < $WDIR/WTC_02_v5_HGL.input

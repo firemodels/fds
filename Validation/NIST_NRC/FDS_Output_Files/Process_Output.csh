@@ -1,7 +1,8 @@
 #!/bin/csh -f
-set PDIR=~/FDS_Repository/Utilities/Data_Processing
-set WDIR=~/FDS_Repository/Validation/NIST_NRC/FDS_Output_Files
-set DDIR=~/VALIDATION/NIST_NRC/FDS_5.3
+setenv SVNROOT ~/FDS-SMV
+set PDIR=$SVNROOT/Utilities/Data_Processing
+set WDIR=$SVNROOT/Validation/NIST_NRC/FDS_Output_Files
+set DDIR=$SVNROOT/Validation/NIST_NRC/Current_Results
 cd $DDIR
 $PDIR/layer_height < $WDIR/NIST_NRC_01_v5_HGL.input
 $PDIR/layer_height < $WDIR/NIST_NRC_02_v5_HGL.input

@@ -1,5 +1,6 @@
 #!/bin/csh -f
-set DDIR=~/FDS_Repository/Validation/UL_NFPRF/Current_Results
-set WDIR=~/FDS_Repository/Validation/UL_NFPRF/FDS_Output_Files
+setenv SVNROOT ~/FDS-SMV
+set DDIR=$SVNROOT/Validation/UL_NFPRF/Current_Results
+set WDIR=$SVNROOT/Validation/UL_NFPRF/FDS_Output_Files
 cp $DDIR/UL*devc.csv $WDIR
 

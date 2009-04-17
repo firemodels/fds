@@ -1,7 +1,8 @@
 #!/bin/csh -f
-set PDIR=~/FDS_Repository/Utilities/Data_Processing
-set WDIR=~/FDS_Repository/Validation/McCaffrey_Plume/FDS_Output_Files
-set DDIR=~/VALIDATION/MCCAFFREY_PLUME/FDS_5.3
+setenv SVNROOT ~/FDS-SMV
+set PDIR=$SVNROOT/Utilities/Data_Processing
+set WDIR=$SVNROOT/Validation/McCaffrey_Plume/FDS_Output_Files
+set DDIR=$SVNROOT/Validation/McCaffrey_Plume/Current_Results
 cd $DDIR
 $PDIR/fds2ascii $WDIR/McCaffrey_14_kW_fds2ascii.input
 $PDIR/fds2ascii $WDIR/McCaffrey_22_kW_fds2ascii.input
