@@ -3346,9 +3346,9 @@ interior of a tunnel, and a wind is blowing at one of the portals that affects t
 
 \noindent
 The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cal H$ is specified as
-\begin{eqnarray}{lclcl}
-{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad \mbox{(outgoing)}  \nonumber\\
-{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad \mbox{(incoming)}
+\begin{eqnarray}
+{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad  \mbox{(outgoing)}  \nonumber \\
+{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad                       \mbox{(incoming)} 
 \end{eqnarray}
 where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary.
 The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
@@ -3963,7 +3963,7 @@ not just the surface.
 \subsubsection{Fuel Burnout}
 
 The thermal properties of a solid or liquid fuel determine the length of time for which it can burn. In general, the
-burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_s$, and the 
+burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_s$, and the
 layer thickness, $\delta_s$:
 \be t_b = \frac{\rho_s \, \delta_s}{\dm''} \ee
 However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be
