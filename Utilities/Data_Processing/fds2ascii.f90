@@ -561,28 +561,28 @@ EXTRA_PLOT3D_FILES: DO
       READ(12) I1,I2,J1,J2,K1,K2                    
  
       IF (MV.EQ.1) THEN
-      I10=I1 ; I20=I2 ; J10=J1 ; J20=J2 ; K10=K1 ; K20=K2
-      IF (I1.EQ.I2) IOR_SLCF = 1
-      IF (J1.EQ.J2) IOR_SLCF = 2
-      IF (K1.EQ.K2) IOR_SLCF = 3
+         I10=I1 ; I20=I2 ; J10=J1 ; J20=J2 ; K10=K1 ; K20=K2
+         IF (I1.EQ.I2) IOR_SLCF = 1
+         IF (J1.EQ.J2) IOR_SLCF = 2
+         IF (K1.EQ.K2) IOR_SLCF = 3
       ELSE
-      IF (I1.EQ.I2 .AND. I10.EQ.I20) THEN
-         I1=I10
-         I2=I20
-         ENDIF
-      IF (J1.EQ.J2 .AND. J10.EQ.J20) THEN
-         J1=J10
-         J2=J20
-         ENDIF
-      IF (K1.EQ.K2 .AND. K10.EQ.K20) THEN
-         K1=K10
-         K2=K20
-         ENDIF
-      IF (((I2.NE.I10.OR.I2.NE.I20).AND.(I10.NE.I20)) .OR. &
-          ((J1.NE.J10.OR.J2.NE.J20).AND.(J10.NE.J20)) .OR. &
-          ((K1.NE.K10.OR.K2.NE.K20).AND.(K10.NE.K20))) THEN
-         WRITE(6,*) ' ERROR: Slice files are incompatible'
-         STOP
+         IF (I1.EQ.I2 .AND. I10.EQ.I20) THEN
+            I1=I10
+            I2=I20
+            ENDIF
+         IF (J1.EQ.J2 .AND. J10.EQ.J20) THEN
+            J1=J10
+            J2=J20
+            ENDIF
+         IF (K1.EQ.K2 .AND. K10.EQ.K20) THEN
+            K1=K10
+            K2=K20
+            ENDIF
+         IF (((I1.NE.I10.OR.I2.NE.I20).AND.(I10.NE.I20)) .OR. &
+             ((J1.NE.J10.OR.J2.NE.J20).AND.(J10.NE.J20)) .OR. &
+             ((K1.NE.K10.OR.K2.NE.K20).AND.(K10.NE.K20))) THEN
+            WRITE(6,*) ' ERROR: Slice files are incompatible'
+            STOP
          ENDIF
       ENDIF
  
