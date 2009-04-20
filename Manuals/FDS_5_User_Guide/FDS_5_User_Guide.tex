@@ -36,7 +36,7 @@
 \usepackage{lastpage} % Automatic last page number reference.
 \usepackage[T1]{fontenc}
 \usepackage{upquote}
-\usepackage{array,eqnarray}
+%\usepackage{array,eqnarray}
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}{\tt\small}
 %\newfont{\ct}{cmtt10 at 9pt}
@@ -1086,8 +1086,6 @@ interest. Indeed, burning a roomful of ordinary furniture is one of the most cha
 of the model. So be patient, and learn to dissect a given scenario into its constitutive parts.
 For example, do not attempt to simulate a fire spreading through an entire floor of a
 building unless you have simulated the burning of the various combustibles with relatively small calculations.
-The examples described in Part~\ref{part:samples} should help
-you to develop larger, more complicated simulations from smaller building blocks.
 
 Along with the FDS User's Guide, there are resources available on the Internet.
 These include an ``Issue Tracker,'' that allows you to report bugs, feature requests and ask specific clarifying questions,
@@ -1867,14 +1865,14 @@ By default the mesh cells that fill the computational domain are uniform in size
 However, it is possible to specify that the cells be non-uniform in one or two
 \begin{figure}[ht]
 \begin{minipage}[t]{3.1in}
-\includegraphics[width=3.1in]{FIGURES/piece_wise_linear.PDF}
+\includegraphics[width=3.1in]{FIGURES/piece_wise_linear}
 \vspace{-.2in}
 \caption{\bf Piecewise-Linear Transformation.}
 \label{fig:grid2}
 \end{minipage}
 \hfill
 \begin{minipage}[t]{3.1in}
-\includegraphics[width=3.1in]{FIGURES/polygonal.PDF}
+\includegraphics[width=3.1in]{FIGURES/polygonal}
 \vspace{-.2in}
 \caption{\bf Polynomial Transformation.}
 \label{fig:grid1}
@@ -3348,10 +3346,10 @@ interior of a tunnel, and a wind is blowing at one of the portals that affects t
 
 \noindent
 The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cal H$ is specified as
-\begin{equationarray}{lclcl}
-{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 &\quad& \mbox{(outgoing)}  \nonumber\\
-{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty &\quad& \mbox{(incoming)}
-\end{equationarray}
+\begin{eqnarray}{lclcl}
+{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad \mbox{(outgoing)}  \nonumber\\
+{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad \mbox{(incoming)}
+\end{eqnarray}
 where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary.
 The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
 need to ramp the pressure up or down starting at zero, like you do for various other ramps.
@@ -3690,7 +3688,7 @@ pressure difference the fan can operate upon. Figure~(\ref{fig:Fan_Curve} displa
 
 \begin{figure}[ht!]
 \begin{center}
-\includegraphics[width=3.5in]{FIGURES/Fan_Curve.PDF}
+\includegraphics[width=3.5in]{FIGURES/Fan_Curve}
 \caption{\bf Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}.}
 \label{fig:Fan_Curve}
 \end{center}
@@ -3754,8 +3752,8 @@ minus coordinate direction. This convention can make these types of calculations
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.1in]{FIGURES/fan_test_Pressure.PDF} &
-\includegraphics[width=3.1in]{FIGURES/fan_test_Volume_Flow.PDF}
+\includegraphics[width=3.1in]{FIGURES/fan_test_Pressure} &
+\includegraphics[width=3.1in]{FIGURES/fan_test_Volume_Flow}
 \end{tabular*}
 \caption[Fan curve example.]{Pressure and volume flow for the {\bf fan\_test}.}
 \label{fan_test}
@@ -4163,6 +4161,7 @@ The burnout time of a reacting solid fuel is calculated automatically based on t
 
 
 \subsubsection{Testing Your Pyrolysis Model}
+\label{solid_phase_verification}
 
 Real materials that can burn can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the
 input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know
@@ -4287,10 +4286,10 @@ burning rate (about 0.018~kg/m$^2$/s) yields a burning time of about 700~s. Afte
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Surface_Temperature.PDF} &
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Fluxes.PDF} \\
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Burning_Rate.PDF} &
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Thickness.PDF}
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Surface_Temperature} &
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Fluxes} \\
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Burning_Rate} &
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_Thickness}
 \end{tabular*}
 \caption[Output of {\bf thermoplastic} test case.]{Output of {\bf thermoplastic} test case.}
 \label{thermoplastic}
@@ -4392,8 +4391,8 @@ backing material. The initial peak is typical of char-forming solids.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/charring_solid_Surface_Temperature.PDF} &
-\includegraphics[width=3.2in]{FIGURES/charring_solid_Burning_Rate.PDF}
+\includegraphics[width=3.2in]{FIGURES/charring_solid_Surface_Temperature} &
+\includegraphics[width=3.2in]{FIGURES/charring_solid_Burning_Rate}
 \end{tabular*}
 \caption[Output of {\bf charring\_solid} test case.]{Output of {\bf charring\_solid} test case.}
 \label{charring_solid}
@@ -6065,7 +6064,7 @@ The HRR curve for this example is given in Fig.~\ref{spray_burner}.
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=4.5in]{FIGURES/spray_burner_HRR.PDF}
+\includegraphics[width=4.5in]{FIGURES/spray_burner_HRR}
 \end{center}
 \caption[HRR of spray burner.]{Heat Release Rate (HRR) of spray burner test.}
 \label{spray_burner}
@@ -6428,8 +6427,6 @@ and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} at the corresponding {\c
 Nozzles are very much like sprinklers, only they do not activate based on the standard RTI model.
 To simulate a nozzle that activates at a given time, for example,
 specify a {\ct QUANTITY} and {\ct SETPOINT} directly on the {\ct DEVC} line.
-Examples of nozzles can be found in Chapter~\ref{chapter:sprays}.
-
 The following lines:
 \footnotesize
 \begin{verbatim}
@@ -9807,7 +9804,7 @@ The current location of the FDS repository is \href{http://code.google.com/p/fds
 
 Example input files for FDS can be found in the FDS-SMV project Subversion repository.  There are a few ways to get a copy of these files,
 two different approaches will be covered here. The first is via the SVN Command Line Client and the second is to Download Individual Files from the Web Interface.
-Note: Some of these files are used for example input throughout this document, especially in Part \ref{part:samples}.
+Note: Some of these files are used for example input throughout this document.
 
 \begin{description}
 \item[{\bf Command Line SVN Client}]
