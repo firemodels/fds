@@ -3,7 +3,7 @@
 \usepackage[pdftex]{graphicx}
 %\usepackage{hyperref}
 
-\usepackage{pdfsync}
+%\usepackage{pdfsync}
 \usepackage[pdftex,
         colorlinks=true,
         urlcolor=linkblue,     % \href{...}{...} external (URL)
@@ -37,7 +37,7 @@
 \usepackage{lastpage} % Automatic last page number reference.
 \usepackage[T1]{fontenc}
 \usepackage{upquote}
-\usepackage{array,eqnarray}
+%\usepackage{array,eqnarray}
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}{\tt\small}
 
@@ -156,7 +156,7 @@ Jason Floyd}
 
 \vfill
 
-\flushright{\includegraphics[width=2.5in]{figures/nistident_flright_vec}}
+\flushright{\includegraphics[width=2.5in]{FIGURES/nistident_flright_vec}}
 
 \end{minipage}
 
@@ -990,7 +990,6 @@ In cylindrical and spherical coordinates, the heat conduction equation is writte
   \label{1dheatcyl} \quad ; \quad
   \rho_s c_s \; \dod{T_s}{t} = \frac{1}{r^2} \, \dod{}{r}
   \left(r^2k_s \dod{T_s}{r} \right)+\dq_s'''
-  \label{1dheatcyl}
 \ee
 FDS offers the user these options, with the assumption that the
 obstruction is not actually recti-linear, but rather cylindrical or
