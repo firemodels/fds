@@ -13454,6 +13454,7 @@ Contains
     ! 3: gamma  (TESTED: OK)
     ! 4: normal (TESTED: OK)
     ! 5: lognormal (TESTED: OK)
+    !    17th April 2009: high end truncated and shifted lognormal (TESTED: OK)
     ! 6==>2: Truncated normal (TESTED: OK)
     ! 7: Triangular (TESTED: OK)
     ! 8: Weibull (TESTED: OK) (alpha=1: Exponential)
@@ -13465,8 +13466,7 @@ Contains
        Call Uniform_rnd(n_rnd, RandomPara(2), RandomPara(3), rnd_vec)
     Case (2)   ! Truncated Normal
        ! Parameters: (ave,sigma,min,max)
-       Call TNormal_rnd(n_rnd, RandomPara(1), RandomPara(2), &
-            RandomPara(3), RandomPara(4), rnd_vec)
+       Call TNormal_rnd(n_rnd, RandomPara(1), RandomPara(2), RandomPara(3), RandomPara(4), rnd_vec)
     Case (3)   ! Gamma
        ! Parameters: (ave,alpha,beta) ave not used
        Call Gamma_rnd(n_rnd, RandomPara(2), RandomPara(3), rnd_vec)
@@ -13476,14 +13476,14 @@ Contains
     Case (5)   ! LogNormal
        ! mean and variance of log(x) should be given
        ! Parameters: (ave,sigma) of ln(x)
-       Call LogNormal_rnd(n_rnd, RandomPara(1), RandomPara(2), rnd_vec)
+       ! 17th April 2009: para3=cutoff high side, para4=shift
+       Call LogNormal_rnd(n_rnd, RandomPara(1), RandomPara(2), RandomPara(3), RandomPara(4), rnd_vec)
     Case (6)   ! Beta
        ! Parameters: (ave,a,b) ave not used
        Call Beta_rnd(n_rnd, RandomPara(2), RandomPara(3), rnd_vec)
     Case (7)   ! Triangular
        ! Parameters: (peak,min,max)
-       Call Triang_rnd(n_rnd, RandomPara(1), RandomPara(2), &
-            RandomPara(3), rnd_vec)
+       Call Triang_rnd(n_rnd, RandomPara(1), RandomPara(2), RandomPara(3), rnd_vec)
     Case(8)    ! Weibull  (alpha=1: Exponential)
        ! Parameters: (ave,alpha,lambda) ave not used
        Call Weibull_rnd(n_rnd, RandomPara(2), RandomPara(3), rnd_vec)
@@ -13625,24 +13625,30 @@ Contains
   ! N.B. The above formulae relate to population parameters; they will only be
   !      approximate if applied to sample values.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  Subroutine LogNormal_rnd(n_rnd,a,b,rnd_vec)
+  Subroutine LogNormal_rnd(n_rnd,a,b,cutoff,shift,rnd_vec)
     Implicit None
     ! Passed Variables
     Integer n_rnd
-    Real(EB) a, b
+    Real(EB) a, b, cutoff, shift
     Real(EB) rnd_vec(n_rnd)
     ! rnd_vec:  32 bit random numbers as a vector
     ! a: first parameter, b: second parameter, n_rnd: vector lenght
     Integer i, imode, status
-    Real(EB) p,q,x,bound
+    Real(EB) p,q,x,bound, pmax, pmin, xmax
     !
     Call Random_number(rnd_vec)
+    imode = 1   ! calculate cdf
+    xmax = Log(cutoff-shift) ! Natural logarithm, i.e., base is 'e'
+    Call cdfnor(imode,p,q,xmax,a,b,status,bound)
+    pmax = p
+    pmin = 0.0_EB
     imode = 2   ! calculate inverse cdf
     Do i = 1, n_rnd
-       p = rnd_vec(i)
+       p = rnd_vec(i)*(pmax-pmin) + pmin
        q = 1.0_EB-p
        Call cdfnor(imode,p,q,x,a,b,status,bound)
-       rnd_vec(i) = Exp(x)    ! lognormal
+       x = Min(x,xmax)
+       rnd_vec(i) = Exp(x)+shift    ! lognormal
     End Do
   End Subroutine LogNormal_rnd
 
@@ -13668,11 +13674,11 @@ Contains
     pmax = p
     imode = 2   ! calculate inverse cdf
     Do i = 1, n_rnd
-       p = rnd_vec(i)*(pmax-pmin) + pmin  
+       p = rnd_vec(i)*(pmax-pmin) + pmin
        q = 1.0_EB-p
        Call cdfnor(imode,p,q,x,a,b,status,bound)
-       rnd_vec(i) = Max(x,xmin)
-       rnd_vec(i) = Min(x,xmax)
+       rnd_vec(i) = Min(Max(x,xmin),xmax)
+       ! rnd_vec(i) = Min(x,xmax)
     End Do
   End Subroutine TNormal_rnd
 
