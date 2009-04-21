@@ -149,8 +149,8 @@
     { \normalfont\fontsize{22}{28}\selectfont\bfseries\sffamily
       Technical Reference and User's Guide }
 
-    %{ \normalfont\fontsize{14}{18}\selectfont\sffamily
-    %  (FDS 5.3.0, Evac 2.1.1, SVN Revision 3193) }
+    { \normalfont\fontsize{14}{18}\selectfont\sffamily
+      (FDS 5.3.1, Evac 2.1.2) }
 
     \vspace{15mm}
 
@@ -2953,8 +2953,9 @@ Truncated normal & 2 & \_MEAN, \_PARA, \_LOW, \_HIGH ($\bar{x}$,
 $\sigma$, $x_\mathrm{min}$, $x_\mathrm{max}$)  \\ 
 Gamma            & 3 & \_PARA, \_PARA2 ($\alpha$, $\beta$) \\ 
 Normal           & 4 & \_MEAN, \_PARA ($\bar{x}$, $\sigma$) \\ 
-Log-normal       & 5 & \_MEAN, \_PARA ($\overline{\ln(x)}$,
-$\sigma_{\ln(x)}$, $\ln(x)$ normal distr.)\\  
+Log-normal       & 5 & \_MEAN, \_PARA, \_HIGH, \_PARA2, $\ln(x-x_0)$ normal distr. \\  
+                 &   & ($\overline{\ln(x-x_0)}$,$\sigma_{\ln(x-x_0)}$,
+                 $x_\mathrm{max}$, $x_0$) \\
 Beta             & 6 & \_PARA, \_PARA2 ($\alpha$, $\beta$) \\ 
 Triangular       & 7 & \_MEAN, \_LOW, \_HIGH ($x_\mathrm{peak}$,
 $x_\mathrm{min}$, $x_\mathrm{max}$) \\  
@@ -3198,9 +3199,19 @@ The definition of the probability density function of the Normal
 distribution is:
 %
 \begin{equation}\label{Eq_NormalDist}
- f(x) = \frac{1}{ \sigma \sqrt{2\pi}} ~ \exp \left\{ -0.5(
- \frac{x-\bar{x}}{\sigma} )^2 \right\}   ~,~ \sigma > 0
+ f(x) = \frac{1}{ \sigma \sqrt{2\pi}} ~ \exp \left\{ -
+ \frac{(x-\bar{x})^2}{2 \sigma^2} \right\}   ~,~ \sigma > 0
 \end{equation}
+%
+The definition of the probability density function of the Log-Normal
+distribution is:
+%
+\begin{equation}\label{Eq_LogNormalDist}
+ f(x) = \frac{\mathrm{const}}{(x-x_0) \sigma \sqrt{2\pi}} ~ \exp \left\{ -
+ \frac{(\ln(x-x_0)-\mu)^2}{2\sigma}  \right\}   ~,~ \sigma > 0,~ x < x_\mathrm{max}
+\end{equation}
+where $\mu$ and $\sigma$ are the mean and the standard deviation of
+$\ln(x-x_0)$, respectively. 
 %
 %Log-normal 
 %%
