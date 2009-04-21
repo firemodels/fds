@@ -166,11 +166,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC
          ENDIF
          CP_TERM   = MAX(0._EB,-UW(IW))*RHOWAL*CP
          CP_TERM_F = MAX(0._EB,-UW(IW))*RHOWAL*CP_F
-         !!IF (FLUX_LIMITER<0) THEN
-            TMP_W(IW) = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G + CP_TERM*TMP_F(IW) - QCONF(IW) )/(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
-         !!ELSE
-         !!   TMP_W(IW) = ( RDN(IW)*KW(IW)*TMP_G - QCONF(IW) )/(RDN(IW)*KW(IW))
-         !!ENDIF
+         TMP_W(IW) = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G + CP_TERM*TMP_F(IW) - QCONF(IW) )/(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
          TMP_W(IW) = MAX(TMPMIN,TMP_W(IW))
          
       CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER
@@ -466,15 +462,8 @@ WALL_CELL_LOOP: DO IW=1,NWC
          SPECIES_LOOP: DO N=1,N_SPECIES
             DD    = RHODW(IW,N)*RDN(IW)
             YY_G(N)  = YYP(IIG,JJG,KKG,N)
-            IF (FLUX_LIMITER<0) THEN
-               DENOM = DD + (.5_EB*UN+EPSB)*RHO_W(IW)
-               YY_W(IW,N) = ( MASSFLUX(IW,N) + YY_G(N)*(DD + (EPSB-.5_EB*UN)*RHO_G) ) / DENOM
-            ELSE
-               UN = MFT/RHO_W(IW)
-               IF (PREDICTOR) UWS(IW) = -UN
-               DENOM = DD + UN*RHO_W(IW)
-               YY_W(IW,N) = ( MASSFLUX(IW,N) + YY_G(N)*DD ) / DENOM
-            ENDIF
+            DENOM = DD + (.5_EB*UN+EPSB)*RHO_W(IW)
+            YY_W(IW,N) = ( MASSFLUX(IW,N) + YY_G(N)*(DD + (EPSB-.5_EB*UN)*RHO_G) ) / DENOM
          ENDDO SPECIES_LOOP
 
       CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER
