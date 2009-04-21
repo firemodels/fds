@@ -26,7 +26,7 @@ Module EVAC
   Use MESH_POINTERS
 !  Use MESH_POINTERS, ONLY: DT,IJKW,BOUNDARY_TYPE,XW,YW,WALL_INDEX,POINT_TO_MESH
 !  Use EVAC_MESH_POINTERS
-  Use PHYSICAL_FUNCTIONS, Only : GET_MASS_FRACTION,FED
+  Use PHYSICAL_FUNCTIONS, Only : GET_MASS_FRACTION, FED
   Use DCDFLIB, Only :  DCDFLIB_Gamma => Gamma
   !
   Implicit None
@@ -39,7 +39,7 @@ Module EVAC
   ! Public subprograms (called from the main program)
   Public EVACUATE_HUMANS, INITIALIZE_EVACUATION, INIT_EVAC_GROUPS
   Public READ_EVAC, DUMP_EVAC, DUMP_EVAC_CSV, PREPARE_TO_EVACUATE
-  Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_evac
+  Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_EVAC
   ! Public variables (needed in the main program):
   !
   Character(255):: EVAC_VERSION = '2.1.2'
@@ -59,9 +59,9 @@ Module EVAC
      Integer :: GN_MIN=0, GN_MAX=0
      Integer :: N_VENT_FFIELDS=0, Avatar_Color_Index=0
      Integer, Dimension(3) :: RGB=-1, AVATAR_RGB=-1
-     Integer, Pointer, Dimension(:) :: I_DOOR_NODES
-     Integer, Pointer, Dimension(:) :: I_VENT_FFIELDS
-     Real(EB), Pointer, Dimension(:) :: P_VENT_FFIELDS
+     Integer, Pointer, Dimension(:) :: I_DOOR_NODES =>NULL()
+     Integer, Pointer, Dimension(:) :: I_VENT_FFIELDS =>NULL()
+     Real(EB), Pointer, Dimension(:) :: P_VENT_FFIELDS =>NULL()
   End Type EVACUATION_Type
   !
   ! An evacuatio hole, i.e., a rectangle where humans should
@@ -100,12 +100,12 @@ Module EVAC
      Real(EB) :: Speed=0._EB, IntDose=0._EB, Tpre=0._EB, Tdoor=0._EB, Tdet=0._EB
      Integer :: GROUP_SIZE=0, GROUP_ID=0, COMPLETE=0, IEL=0, Avatar_Color_Index=0
      Integer, Dimension(3) :: AVATAR_RGB=-1
-     Integer, Pointer, Dimension(:) :: GROUP_I_FFIELDS
+     Integer, Pointer, Dimension(:) :: GROUP_I_FFIELDS =>NULL()
   End Type GROUP_TYPE
   
   Type KNOWN_DOOR_TYPE
      Integer :: N_nodes=0, I_Target=0
-     Integer, Pointer, Dimension(:) :: I_nodes
+     Integer, Pointer, Dimension(:) :: I_nodes =>NULL()
   End Type KNOWN_DOOR_TYPE
   !
   ! This defines a class of persons, e.g. soccer fan.
@@ -189,18 +189,19 @@ Module EVAC
      Character(60) :: ID='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
-     Type (CORR_LL_Type), Pointer :: First
+     Type (CORR_LL_Type), Pointer :: First =>NULL()
   End Type EVAC_CORR_Type
   ! 
   ! STRS is a construct to build a staircase. STRS consists of stairs and
   ! landings. 
   Type EVAC_STRS_Type
      Real(EB) :: XB(6)
-     Real(EB), Pointer, Dimension(:,:)   :: XB_NODE, XB_CORE
+     Real(EB), Pointer, Dimension(:,:)   :: XB_NODE =>NULL(), XB_CORE =>NULL()
      Real(EB) :: FAC_V0_HORI, FAC_V0_DOWN, FAC_V0_UP
      Integer :: ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0, N_CORES = 0
      Integer :: N_LANDINGS, N_NODES, N_NODES_OUT, N_NODES_IN
-     Integer, Pointer, Dimension(:) :: NODE_IOR, NODE_TYPE, NODES_IN, NODES_OUT, I_CORE
+     Integer, Pointer, Dimension(:) :: NODE_IOR =>NULL(), NODE_TYPE =>NULL(), NODES_IN =>NULL()
+     Integer, Pointer, Dimension(:) :: NODES_OUT =>NULL(), I_CORE =>NULL()
      Character(60) :: ID
      Character(24) :: MESH_ID
      Logical RIGHT_HANDED
@@ -221,9 +222,9 @@ Module EVAC
      Character(30) :: GRID_NAME='null', Max_Humans_Ramp
      Logical :: After_Tpre=.False., No_Persons=.False.
      Integer :: N_VENT_FFIELDS=0, Avatar_Color_Index=0
-     Integer, Pointer, Dimension(:) :: I_DOOR_NODES
-     Integer, Pointer, Dimension(:) :: I_VENT_FFIELDS
-     Real(EB), Pointer, Dimension(:) :: P_VENT_FFIELDS
+     Integer, Pointer, Dimension(:) :: I_DOOR_NODES =>NULL()
+     Integer, Pointer, Dimension(:) :: I_VENT_FFIELDS =>NULL()
+     Real(EB), Pointer, Dimension(:) :: P_VENT_FFIELDS =>NULL()
      Integer, Dimension(3) :: RGB=-1, AVATAR_RGB=-1
   End Type EVAC_ENTR_Type
   !
@@ -241,7 +242,7 @@ Module EVAC
      Real(EB) :: T_in=0._EB, T_out=0._EB
      Logical :: From1_To2=.False.
      Integer :: Index=0
-     Type (CORR_LL_Type), Pointer :: Next
+     Type (CORR_LL_Type), Pointer :: Next =>NULL()
   End Type CORR_LL_Type
   !
   ! Pointers to the allocatable arrays so one can use these as
@@ -1472,9 +1473,9 @@ Contains
          XB(4) = Meshes(nm)%Y(J2)
          If ( Abs(XB(1)-PEX%X1)>1.E-4_EB .Or. Abs(XB(2)-PEX%X2)>1.E-4_EB .Or. &
               Abs(XB(3)-PEX%Y1)>1.E-4_EB .Or. Abs(XB(4)-PEX%Y2)>1.E-4_EB ) Then
-            Write(lu_err,fmt='(a,a,a,a)') ' WARNING: Exit line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
-            Write(lu_err,fmt='(a,6f12.4)') 'Old XB:', PEX%X1,PEX%X2,PEX%Y1,PEX%Y2,PEX%Z1,PEX%Z2
-            Write(lu_err,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+            Write(LU_ERR,fmt='(a,a,a,a)') ' WARNING: Exit line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
+            Write(LU_ERR,fmt='(a,6f12.4)') 'Old XB:', PEX%X1,PEX%X2,PEX%Y1,PEX%Y2,PEX%Z1,PEX%Z2
+            Write(LU_ERR,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
          End If
 
          ! Coordinates are lined up with the mesh.
@@ -1787,9 +1788,9 @@ Contains
          XB(4) = Meshes(nm)%Y(J2)
          If ( Abs(XB(1)-PDX%X1)>1.E-4_EB .Or. Abs(XB(2)-PDX%X2)>1.E-4_EB .Or. &
               Abs(XB(3)-PDX%Y1)>1.E-4_EB .Or. Abs(XB(4)-PDX%Y2)>1.E-4_EB ) Then
-            Write(lu_err,fmt='(a,a,a,a)') ' WARNING: Door line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
-            Write(lu_err,fmt='(a,6f12.4)') 'Old XB:', PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2
-            Write(lu_err,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+            Write(LU_ERR,fmt='(a,a,a,a)') ' WARNING: Door line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
+            Write(LU_ERR,fmt='(a,6f12.4)') 'Old XB:', PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2
+            Write(LU_ERR,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
          End If
 
          ! Coordinates are lined up with the mesh.
@@ -2720,9 +2721,9 @@ Contains
          XB(4) = Meshes(nm)%Y(J2)
          If ( Abs(XB(1)-PNX%X1)>1.E-4_EB .Or. Abs(XB(2)-PNX%X2)>1.E-4_EB .Or. &
               Abs(XB(3)-PNX%Y1)>1.E-4_EB .Or. Abs(XB(4)-PNX%Y2)>1.E-4_EB ) Then
-            Write(lu_err,fmt='(a,a,a,a)') ' WARNING: Entr line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
-            Write(lu_err,fmt='(a,6f12.4)') 'Old XB:', PNX%X1,PNX%X2,PNX%Y1,PNX%Y2,PNX%Z1,PNX%Z2
-            Write(lu_err,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+            Write(LU_ERR,fmt='(a,a,a,a)') ' WARNING: Entr line ',Trim(ID),' XB adjusted to mesh ',Trim(MESH_NAME(nm))
+            Write(LU_ERR,fmt='(a,6f12.4)') 'Old XB:', PNX%X1,PNX%X2,PNX%Y1,PNX%Y2,PNX%Z1,PNX%Z2
+            Write(LU_ERR,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
          End If
 
          ! Coordinates are lined up with the mesh.
@@ -3447,7 +3448,7 @@ Contains
     Real(FB) u_tmp, v_tmp
     Character(60), Allocatable, Dimension(:) :: CTEMP
     !
-    Type (MESH_TYPE), Pointer :: MFF
+    Type (MESH_TYPE), Pointer :: MFF =>NULL()
     !
 
     ! Logical unit numbers
@@ -3868,7 +3869,7 @@ Contains
     Real(EB), Dimension(4) :: d_xy
     Logical, Dimension(4) :: FoundWall_xy
     ! 
-    Type (MESH_TYPE), Pointer :: M
+    Type (MESH_TYPE), Pointer :: M =>NULL()
     Type (EVAC_SSTAND_Type),Pointer :: ESS=>NULL()
     Type (EVACUATION_Type), Pointer :: HPT=>NULL()
     Type (EVAC_PERS_Type),  Pointer :: PCP=>NULL()
@@ -4491,15 +4492,15 @@ Contains
           End Do              ! 1, n_humans
           If (n_change_doors-i_change_old == 1) Then
              i_tmp2 = i_tmp
-             Write(lu_evacout,fmt='(a,2i10)') ' Init: Door Changes i_tmp ',  i_tmp, i_tmp2
+             Write(LU_EVACOUT,fmt='(a,2i10)') ' Init: Door Changes i_tmp ',  i_tmp, i_tmp2
           Else
              i_tmp2 = -1
           End If
-          If (n_change_doors/M%N_HUMANS > 10*M%N_HUMANS) i_tmp2 = i_tmp
-          Write(lu_evacout,fmt='(a,2i10)')' Init: Door Changes, Trials ',  n_change_doors,n_change_trials
+          If (n_change_doors/Max(1,M%N_HUMANS) > 10*M%N_HUMANS) i_tmp2 = i_tmp
+          Write(LU_EVACOUT,fmt='(a,2i10)')' Init: Door Changes, Trials ',  n_change_doors,n_change_trials
           If (FAC_DOOR_QUEUE <= 0.001_EB) i_change_old = n_change_doors  ! Do not iterate the Nash equilibrium
        End Do         ! Nash iterations
-       If (FAC_DOOR_QUEUE > 0.001_EB) Write(lu_evacout,fmt='(a,f10.4,a,i4)') &
+       If (FAC_DOOR_QUEUE > 0.001_EB) Write(LU_EVACOUT,fmt='(a,f10.4,a,i4)') &
             ' Init: Changes per agent ', Real(n_change_doors,EB)/Real(M%N_HUMANS,EB), &
             ', Nash iterations', n_change_trials/M%N_HUMANS
     End Do                  ! 1, nmeshes
@@ -5809,7 +5810,7 @@ Contains
           End If
           P2P_DIST_MAX = Max(P2P_DIST_MAX, 3.0_EB*HR%B)
           ! Next is the max distance for the collision avoidance, counterflow, etc.
-          P2P_Suunta_MAX = Max(P2P_DIST_MAX, 1.5_EB)
+          P2P_Suunta_MAX = Max(P2P_DIST_MAX, 3.0_EB)
 
           ! Speed up the dead agent loop, only contact forces are needed.
           If (L_Dead) P2P_DIST_MAX = 0.0_EB
@@ -6286,10 +6287,23 @@ Contains
                    End If
                 End Do
              End If
-             Do iii = 1, n_sectors+1
-                ! Prefer flow field direction
-                Sum_suunta(iii) = Sum_suunta(iii) + FAC_V0_DIR*v_hr*((UBAR*u_theta(iii)+VBAR*v_theta(iii)))
+!!$             Do iii = 1, n_sectors+1
+!!$                ! Prefer flow field direction
+!!$                Sum_suunta(iii) = Sum_suunta(iii) + FAC_V0_DIR*v_hr*((UBAR*u_theta(iii)+VBAR*v_theta(iii)))
+!!$             End Do
+             Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + Abs(FAC_V0_DIR)*v_hr
+             Do iii = 1, n_sectors
+                If (N_suuntaCF(n_sectors+1) < 1) Then
+                   ! No counterflow: Prefer left (and straight ahead)
+                   Sum_suunta(iii) = Sum_suunta(iii) + Sign(1.0_EB,thetas(iii))* &
+                        FAC_V0_DIR*v_hr
+                Else
+                   ! Counterflow: Prefer right (and straight ahead)
+                   Sum_suunta(iii) = Sum_suunta(iii) - Sign(1.0_EB,thetas(iii))* &
+                        FAC_V0_DIR*v_hr
+                End If
              End Do
+
              If (N_suunta(n_sectors+1) < 1) Sum_suunta(n_sectors+1) = Sum_suunta(n_sectors+1) + 50.0_EB  ! Empty space ahead
              If ((N_suuntaCF(n_sectors+1)) < 1) Then
                 ! No counterflow, prefer v0 direction, i.e., "stay on line"
@@ -6314,11 +6328,11 @@ Contains
                   N_suuntaCF(n_sectors+1)-0) Then
                 commitment = Max(0.5_EB,Real(Sum(N_suuntaCF(1:n_sectors+1)),EB)/Max(1,Sum(N_suunta(1:n_sectors+1))))
                 angle_old = -Sign(1.0_EB,thetas(i_suunta_max))*Max(0.1_EB,Abs(thetas(i_suunta_max)))*Pi/180.0_EB 
-                angle_old = angle_old - 85.0_EB*Pi/180.0_EB
+                angle_old = angle_old + 85.0_EB*Pi/180.0_EB
              Else If (v_hr < 0.3_EB .And. Sum(N_suuntaCF(1:n_sectors)) >= 1 .And. tim_dist < -15.0_EB) Then
                 commitment = Max(0.5_EB,Real(Sum(N_suuntaCF(1:n_sectors)),EB)/Max(1,Sum(N_suunta(1:n_sectors))))
                 angle_old = -Sign(1.0_EB,thetas(i_suunta_max))*Max(0.1_EB,Abs(thetas(i_suunta_max)))*Pi/180.0_EB 
-                angle_old = angle_old - 85.0_EB*Pi/180.0_EB
+                angle_old = angle_old + 85.0_EB*Pi/180.0_EB
              Else
                 angle_old = 0.0_EB
                 commitment = 0.0_EB
@@ -6905,8 +6919,8 @@ Contains
       Implicit None
       !
       Real(EB) speed_xm, speed_xp, speed_ym, speed_yp
-      Type (EVAC_STRS_TYPE), Pointer ::  SP
-      Type (HUMAN_TYPE), Pointer :: HP
+      Type (EVAC_STRS_TYPE), Pointer ::  SP =>NULL()
+      Type (HUMAN_TYPE), Pointer :: HP =>NULL()
       ! Local variables
       Real(EB) cos_x, cos_y
       Integer J1, J2, J
@@ -6979,14 +6993,14 @@ Contains
       Implicit None
       !
       ! Passed variables
-      Type (EVAC_STRS_TYPE), Pointer :: SP
-      Type (HUMAN_TYPE), Pointer :: HP
+      Type (EVAC_STRS_TYPE), Pointer :: SP =>NULL()
+      Type (HUMAN_TYPE), Pointer :: HP =>NULL()
       !
       ! Local variables
       Logical IsKnownDoor,FinalTargetFound
       Integer :: I_Target = 0, I, Id, Final_node, IG, IN, Inode
       Real(EB) z_node, z_final, dz_node, dz_final, z_final_unknown,dz_tmp1, dz_tmp2, dz_node_actual
-      Type (EVAC_ENTR_TYPE), Pointer :: PNX
+      Type (EVAC_ENTR_TYPE), Pointer :: PNX =>NULL()
 
       FinalTargetFound = .FALSE.
       IG = ABS(HP%GROUP_ID)
@@ -7098,7 +7112,7 @@ Contains
 
     Subroutine STRS_U_AND_V(STRP,I_NODE,X,Y,Direction,UBAR,VBAR)
     ! Get preferred direction in STRS
-    Type (EVAC_STRS_TYPE), Pointer::  STRP
+    Type (EVAC_STRS_TYPE), Pointer::  STRP =>NULL()
     Integer, intent(IN) :: I_NODE, Direction
     REAL(EB), Intent(IN) :: X, Y
     REAL(EB), Intent(OUT) :: UBAR, VBAR
@@ -7204,8 +7218,8 @@ Contains
       ! Local variables
       Real(EB) x_old, y_old, pexx1, pexx2, pexy1, pexy2
       Integer :: ie,i,n_tmp
-      Type (EVAC_EXIT_Type), Pointer :: PEX=>NULL()
-      Type (HUMAN_TYPE), Pointer :: HR=>NULL()
+      Type (EVAC_EXIT_Type), Pointer :: PEX =>NULL()
+      Type (HUMAN_TYPE), Pointer :: HR =>NULL()
       !
       HUMAN(:)%IOR = 0
       PexLoop: Do ie = 1, n_exits
@@ -7301,8 +7315,8 @@ Contains
       Character(60) :: TO_NODE
       Character(26) :: new_ffield_name
       Logical :: keep_xy, upstream
-      Type (EVAC_DOOR_Type), Pointer :: PDX=>NULL()
-      Type (HUMAN_TYPE), Pointer :: HR=>NULL()
+      Type (EVAC_DOOR_Type), Pointer :: PDX =>NULL()
+      Type (HUMAN_TYPE), Pointer :: HR =>NULL()
       !
       keep_xy = .False.
       HUMAN(:)%IOR = HUMAN_NO_TARGET
@@ -7508,7 +7522,7 @@ Contains
       Logical :: keep_xy
       Type (EVAC_CORR_Type),  Pointer :: PCX=>NULL()
       Type (CORR_LL_TYPE), Pointer :: Now_LL=>NULL(), Tmp_LL=>NULL(), Next_LL=>NULL(), Prev_LL=>NULL()
-      Type (HUMAN_TYPE), Pointer :: HR=>NULL()
+      Type (HUMAN_TYPE), Pointer :: HR =>NULL()
       !
       keep_xy = .False.
       PcxLoop: Do ie = 1, n_corrs
@@ -7697,7 +7711,7 @@ Contains
       Integer, Intent(inout) :: new_ffield_i
       Logical, Intent(in) :: keep_xy
       Character(26), Intent(inout) :: new_ffield_name
-      Type (HUMAN_TYPE), Pointer :: HR
+      Type (HUMAN_TYPE), Pointer :: HR =>NULL()
       !
       ! Local variables
       Real(EB) RN, x1, x2, y1, y2, z1, z2, d_max, dist, Width, &
@@ -7707,14 +7721,14 @@ Contains
       Integer :: i_tmp, i_tim, iii, jjj
       Logical :: PP_see_door, keep_xy2, NM_STRS_MESH
 
-      Type (CORR_LL_TYPE), Pointer :: TmpCurrent=>NULL(), TmpLoop=>NULL()
-      Type (EVAC_STRS_TYPE), Pointer :: STRP=>NULL()
-      Type (EVAC_DOOR_Type), Pointer :: PDX2=>NULL()
-      Type (MESH_TYPE), Pointer :: MMF=>NULL()
-      Type (EVACUATION_Type), Pointer :: HPT=>NULL()
-      Type (HUMAN_TYPE), Pointer :: HRE=>NULL()
-      Type (EVAC_ENTR_Type), Pointer :: PNX=>NULL(), PNX2=>NULL()
-      Type (EVAC_CORR_Type), Pointer :: PCX2=>NULL()
+      Type (CORR_LL_TYPE), Pointer :: TmpCurrent =>NULL(), TmpLoop =>NULL()
+      Type (EVAC_STRS_TYPE), Pointer :: STRP =>NULL()
+      Type (EVAC_DOOR_Type), Pointer :: PDX2 =>NULL()
+      Type (MESH_TYPE), Pointer :: MMF =>NULL()
+      Type (EVACUATION_Type), Pointer :: HPT =>NULL()
+      Type (HUMAN_TYPE), Pointer :: HRE =>NULL()
+      Type (EVAC_ENTR_Type), Pointer :: PNX =>NULL(), PNX2 =>NULL()
+      Type (EVAC_CORR_Type), Pointer :: PCX2 =>NULL()
       !
       xx = 0.0_EB ; yy = 0.0_EB ; zz = 0.0_EB 
       I_Target = 0
@@ -8129,10 +8143,10 @@ Contains
       Integer  II, JJ, KK, ior, irnmax, irn, ie, NR
       Real(EB), Dimension(6) ::y_tmp, x_tmp, r_tmp
 
-      Type (EVAC_ENTR_Type), Pointer :: PNX=>NULL()
-      Type (MESH_TYPE), Pointer :: MFF=>NULL()
-      Type (EVAC_PERS_Type), Pointer :: PCP=>NULL()
-      Type (HUMAN_TYPE), Pointer :: HR=>NULL(), HRE=>NULL()
+      Type (EVAC_ENTR_Type), Pointer :: PNX =>NULL()
+      Type (MESH_TYPE), Pointer :: MFF =>NULL()
+      Type (EVAC_PERS_Type), Pointer :: PCP =>NULL()
+      Type (HUMAN_TYPE), Pointer :: HR=>NULL(), HRE =>NULL()
       !
       istat = 1
       PNX => EVAC_ENTRYS(I_entry)
@@ -8885,8 +8899,8 @@ Contains
     Implicit None
     !
     ! Passed variables
-    Type (HUMAN_TYPE), Pointer:: HR
-    Type (EVAC_PERS_Type), Pointer:: PCP
+    Type (HUMAN_TYPE), Pointer:: HR =>NULL()
+    Type (EVAC_PERS_Type), Pointer:: PCP =>NULL()
     !
     ! Local variables
     ! How many rnd numbers per one call to the rnd routine
@@ -8949,10 +8963,12 @@ Contains
     Case(5)   ! LogNormal
        ! mean and variance of log(x) should be given
        ! Parameters: (ave,sigma) of ln(x)
-       n_par = 2
+       n_par = 4
        Randomtype = 5
-       RandomPara(1) = PCP%V_mean
-       RandomPara(2) = PCP%V_para
+       RandomPara(1) = PCP%V_mean  ! mu of ln(x)
+       RandomPara(2) = PCP%V_para  ! sigma of ln(x)
+       RandomPara(3) = PCP%V_high  ! high end cutoff
+       RandomPara(4) = PCP%V_para2 ! shift
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Speed = rnd_vec(1)
     Case(6)   ! Beta
@@ -9037,10 +9053,12 @@ Contains
     Case(5)   ! LogNormal
        ! mean and variance of log(x) should be given
        ! Parameters: (ave,sigma) of ln(x)
-       n_par = 2
+       n_par = 4
        Randomtype = 5
-       RandomPara(1) = PCP%D_mean
-       RandomPara(2) = PCP%D_para
+       RandomPara(1) = PCP%D_mean  ! mu of ln(x)
+       RandomPara(2) = PCP%D_para  ! sigma of ln(x)
+       RandomPara(3) = PCP%D_high  ! high end cutoff
+       RandomPara(4) = PCP%D_para2 ! shift
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Radius = 0.5_EB*rnd_vec(1)
     Case(6)   ! Beta
@@ -9128,10 +9146,12 @@ Contains
     Case(5)   ! LogNormal
        ! mean and variance of log(x) should be given
        ! Parameters: (ave,sigma) of ln(x)
-       n_par = 2
+       n_par = 4
        Randomtype = 5
        RandomPara(1) = PCP%Tau_mean
        RandomPara(2) = PCP%Tau_para
+       RandomPara(3) = PCP%Tau_high  ! high end cutoff
+       RandomPara(4) = PCP%Tau_para2 ! shift
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tau = rnd_vec(1)
     Case(6)   ! Beta
@@ -9217,10 +9237,12 @@ Contains
     Case(5)   ! LogNormal
        ! mean and variance of log(x) should be given
        ! Parameters: (ave,sigma) of ln(x)
-       n_par = 2
+       n_par = 4
        Randomtype = 5
        RandomPara(1) = PCP%Tdet_mean
        RandomPara(2) = PCP%Tdet_para
+       RandomPara(3) = PCP%Tdet_high  ! high end cutoff
+       RandomPara(4) = PCP%Tdet_para2 ! shift
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     Case(6)   ! Beta
@@ -9306,10 +9328,12 @@ Contains
     Case(5)   ! LogNormal
        ! mean and variance of log(x) should be given
        ! Parameters: (ave,sigma) of ln(x)
-       n_par = 2
+       n_par = 4
        Randomtype = 5
        RandomPara(1) = PCP%Tpre_mean
        RandomPara(2) = PCP%Tpre_para
+       RandomPara(3) = PCP%Tpre_high  ! high end cutoff
+       RandomPara(4) = PCP%Tpre_para2 ! shift
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = Max(0._EB,rnd_vec(1))
     Case(6)   ! Beta
@@ -9379,7 +9403,7 @@ Contains
     ! Local variables
     Integer IZERO
     Type (HUMAN_TYPE), Allocatable, Dimension(:) :: DUMMY
-    Type (MESH_TYPE), Pointer :: M=>NULL()
+    Type (MESH_TYPE), Pointer :: M =>NULL()
     !
     If (.Not.Any(EVACUATION_GRID)) Return
     If ( .Not.(EVACUATION_ONLY(NM) .And. EVACUATION_GRID(NM)) ) Return
@@ -9416,7 +9440,7 @@ Contains
     Real(FB), Allocatable, Dimension(:) :: XP,YP,ZP
     Real(FB), Allocatable, Dimension(:,:) :: QP, AP
     Integer, Allocatable, Dimension(:) :: TA
-    Type (HUMAN_TYPE), Pointer :: HR=>NULL()
+    Type (HUMAN_TYPE), Pointer :: HR =>NULL()
     !
     TNOW=SECOND() 
     !
@@ -9736,7 +9760,7 @@ Contains
     Integer :: i, j, isx, isy, i_r1, i_r2, j_r1, j_r2
     Integer :: i_old, j_old, ic, ic2, iw, iw1, iw2
     Real(EB) :: x, y
-    Type (MESH_TYPE), Pointer :: M
+    Type (MESH_TYPE), Pointer :: M =>NULL()
 
     M => MESHES(NM)
     See_each_other = .True.  ! Default
@@ -9829,7 +9853,7 @@ Contains
     Integer :: i, j, isx, isy, i_r1, i_r2, j_r1, j_r2
     Integer :: i_old, j_old, ic, ic2, iw, iw1, iw2
     Real(EB) :: x, y
-    Type (MESH_TYPE), Pointer :: M
+    Type (MESH_TYPE), Pointer :: M =>NULL()
 
     M => MESHES(NM)
     See_door = .True.  ! Default
@@ -9956,7 +9980,7 @@ Contains
     ! Local variables
     Integer :: ii, jj, iw, ic, ibc, is, i_end, iin, jjn, kkn
     Real(EB) :: dx, dy, d_mx, d_px, d_my, d_py
-    Type (MESH_TYPE), Pointer :: M
+    Type (MESH_TYPE), Pointer :: M =>NULL()
 
     M => MESHES(NM)
     istat = 0            ! Default
@@ -10191,7 +10215,7 @@ Contains
     Integer, Intent(In) :: nm, nm2, ie, j, j1, i_egrid, imode
     Real(EB), Intent(In) :: T, xx, yy
     Integer, Intent(Out)  :: I_Target, I_Color, I_Field
-    Type (HUMAN_TYPE), Pointer :: HR
+    Type (HUMAN_TYPE), Pointer :: HR =>NULL()
     !
     ! Local variables and arrays
     Real(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn
@@ -10202,8 +10226,8 @@ Contains
     Logical :: PP_see_door
     Real(EB) :: T_tmp, T_tmp1, Width
     Integer :: N_queue, ii
-    Type (EVACUATION_Type), Pointer :: HPT=>NULL()
-    Type (EVAC_ENTR_Type),  Pointer :: PNX=>NULL()
+    Type (EVACUATION_Type), Pointer :: HPT =>NULL()
+    Type (EVAC_ENTR_Type),  Pointer :: PNX =>NULL()
 
 
     If (imode < 2) Then
