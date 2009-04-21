@@ -174,9 +174,9 @@ def comparison_plot(data_set,data_info,d1_index_set,d2_index_set,styles,output_d
     mask_value = -9999.0
     
     # Margin size in inches.
-    left_margin = 0.75
-    right_margin = 0.1
-    top_margin = 0.1
+    left_margin = 0.85
+    right_margin = 0.15
+    top_margin = 0.5
     bottom_margin = 0.5
     
     if data_info['d1_Key'][0] == '[':
