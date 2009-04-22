@@ -1,1 +1,6 @@
 1.  test show isosurface normal option
+2.  add widgets to File/BOunds Isosurface dialogbox panel for setting animated 
+isosurface point size and specifying the display type (hidden, solid, triangulated or points)
+3.  add widgets to File/BOunds Plot3D dialogbox panel for setting 
+isosurface point size and specifying the display type (solid, triangles or points)
+4. change default animated isosurface view type to "All levels solid"
