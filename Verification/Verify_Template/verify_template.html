@@ -1,16 +1,26 @@
 <html>
 <head>
-<TITLE>Verification Template</TITLE>
+<TITLE>Verification Using Scripting</TITLE>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
-<h2>Verification Template</h2>
+<h2>Verification Using Scripting</h2>
 <p><hr>
-This web page gives an example of how Smokeview scripting may be used to dynamically
-update web pages in order to examine or verify FDS results as FDS and/or Smokeview is updated.
+This web page gives an example of how scripting may be used to help 
+examine FDS results.  The use of scripts guarantee that results from
+one run to the next are consistent (same view points, same time <em>etc.</em>)  
 
-To adapt this to your own case, simply edit scripts to run your own case 
-and create a Smokeview script that 
-generates the images you wish to examine.
+<p>Windows batch files (scripts) 
+are used to run FDS and Smokeview.  
+
+<p>A <a href="case/plume5c.ssf">Smokeview script</a> is used to generate
+the images.
+These images may then be easily
+regenerated as FDS, Smokeview and/or the input file changes in order to
+examine the effect of these changes.
+
+<p>To adapt this example for your own case, edit the
+<tt>makeimages.bat</tt> and <tt>runcase.bat</tt> files located in the <tt>scripts</tt>
+directory to point to the case being examined.
 
 <h2>Generate Images</h2>
 The following two links run scripts that assume that the FDS repository
@@ -29,41 +39,52 @@ is in a different location.
 <p><li>Slice/Vector Slice File Verification
 <table>
 <tr>
-<td><img src="imgs/plume5c_slice_30.png" width=200>
-<td><img src="imgs/plume5c_slice_cell_30.png" width=200>
-<td><img src="imgs/plume5c_slice_chop_30.png" width=200>
+<td><img src="imgs/plume5c_slice_30.png" width=150>
+<td><img src="imgs/plume5c_slice_cell_30.png" width=150>
+<td><img src="imgs/plume5c_slice_chop_30.png" width=150>
 <tr>
-<td><img src="imgs/plume5c_vslice_30.png" width=200>
-<td><img src="imgs/plume5c_vslicechop_30.png" width=200>
+<td>cell averaged
+<td>cell centered
+<td>chopped
+<tr>
+<td><img src="imgs/plume5c_vslice_30.png" width=150>
+<td><img src="imgs/plume5c_vslicechop_30.png" width=150>
+<tr>
+<td>vector
+<td>vector chopped
 </table>
 
 <p><li>Isosurface File Verification
 <table>
 <tr>
-<td><img src="imgs/plume5c_iso_points_30.png" width=200>
-<td><img src="imgs/plume5c_iso_outline_30.png" width=200>
-<td><img src="imgs/plume5c_iso_solid_30.png" width=200>
+<td><img src="imgs/plume5c_iso_points_30.png" width=150>
+<td><img src="imgs/plume5c_iso_outline_30.png" width=150>
+<td><img src="imgs/plume5c_iso_solid_30.png" width=150>
+<tr>
+<td>points<td>outline<td>solid
 </table>
 
 <p><li>Particle/Streak Verification
 <table>
 <tr>
-<td><img src="imgs/plume5c_part_30.png" width=200>
-<td><img src="imgs/plume5c_part_streak2_30.png" width=200>
+<td><img src="imgs/plume5c_part_30.png" width=150>
+<td><img src="imgs/plume5c_part_streak2_30.png" width=150>
+<tr><td>particles<td>streaks
 </table>
 
 <p><li>Boundary File Verification
 <table>
 <tr>
-<td><img src="imgs/plume5c_bound_30.png" width=200>
-<td><img src="imgs/plume5c_bound_cell_30.png" width=200>
+<td><img src="imgs/plume5c_bound_30.png" width=150>
+<td><img src="imgs/plume5c_bound_cell_30.png" width=150>
+<tr><td>cell averaged<td>cell centered
 </table>
 
 <p><li>3D Smoke Verification
 <ul>
 <table>
 <tr>
-<td><img src="imgs/plume5c_smoke_30.png" width=200>
+<td><img src="imgs/plume5c_smoke_30.png" width=150>
 </table>
 
 <p><hr>
