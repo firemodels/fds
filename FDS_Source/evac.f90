@@ -6919,8 +6919,8 @@ Contains
       Implicit None
       !
       Real(EB) speed_xm, speed_xp, speed_ym, speed_yp
-      Type (EVAC_STRS_TYPE), Pointer ::  SP =>NULL()
-      Type (HUMAN_TYPE), Pointer :: HP =>NULL()
+      Type (EVAC_STRS_TYPE), Pointer ::  SP
+      Type (HUMAN_TYPE), Pointer :: HP 
       ! Local variables
       Real(EB) cos_x, cos_y
       Integer J1, J2, J
@@ -6993,8 +6993,8 @@ Contains
       Implicit None
       !
       ! Passed variables
-      Type (EVAC_STRS_TYPE), Pointer :: SP =>NULL()
-      Type (HUMAN_TYPE), Pointer :: HP =>NULL()
+      Type (EVAC_STRS_TYPE), Pointer :: SP
+      Type (HUMAN_TYPE), Pointer :: HP
       !
       ! Local variables
       Logical IsKnownDoor,FinalTargetFound
@@ -7112,7 +7112,7 @@ Contains
 
     Subroutine STRS_U_AND_V(STRP,I_NODE,X,Y,Direction,UBAR,VBAR)
     ! Get preferred direction in STRS
-    Type (EVAC_STRS_TYPE), Pointer::  STRP =>NULL()
+    Type (EVAC_STRS_TYPE), Pointer::  STRP
     Integer, intent(IN) :: I_NODE, Direction
     REAL(EB), Intent(IN) :: X, Y
     REAL(EB), Intent(OUT) :: UBAR, VBAR
@@ -7711,7 +7711,7 @@ Contains
       Integer, Intent(inout) :: new_ffield_i
       Logical, Intent(in) :: keep_xy
       Character(26), Intent(inout) :: new_ffield_name
-      Type (HUMAN_TYPE), Pointer :: HR =>NULL()
+      Type (HUMAN_TYPE), Pointer :: HR 
       !
       ! Local variables
       Real(EB) RN, x1, x2, y1, y2, z1, z2, d_max, dist, Width, &
@@ -8899,8 +8899,8 @@ Contains
     Implicit None
     !
     ! Passed variables
-    Type (HUMAN_TYPE), Pointer:: HR =>NULL()
-    Type (EVAC_PERS_Type), Pointer:: PCP =>NULL()
+    Type (HUMAN_TYPE), Pointer:: HR 
+    Type (EVAC_PERS_Type), Pointer:: PCP
     !
     ! Local variables
     ! How many rnd numbers per one call to the rnd routine
@@ -10215,7 +10215,7 @@ Contains
     Integer, Intent(In) :: nm, nm2, ie, j, j1, i_egrid, imode
     Real(EB), Intent(In) :: T, xx, yy
     Integer, Intent(Out)  :: I_Target, I_Color, I_Field
-    Type (HUMAN_TYPE), Pointer :: HR =>NULL()
+    Type (HUMAN_TYPE), Pointer :: HR
     !
     ! Local variables and arrays
     Real(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn
