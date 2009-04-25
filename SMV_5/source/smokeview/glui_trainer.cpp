@@ -75,6 +75,7 @@ extern "C" void glui_alert_setup(int main_window){
   glui_alert->hide();
   STATIC_alert = glui_alert->add_statictext("Loading smoke and fire data");
 }
+
 /* ------------------ hide_glui_trainer ------------------------ */
 
 extern "C" void hide_trainer(void){

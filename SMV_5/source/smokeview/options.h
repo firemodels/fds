@@ -75,6 +75,7 @@
 #endif
 
 #ifdef pp_BETA
+#define pp_SHOOTER
 #endif
 
 #ifdef pp_CULL
