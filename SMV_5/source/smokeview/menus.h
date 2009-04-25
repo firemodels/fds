@@ -872,6 +872,13 @@ void ViewpointMenu(int value){
 void DialogMenu(int value){
 
   switch (value){
+#ifdef pp_SHOOTER
+  case 27:
+    showshooter=1-showshooter;
+    if(showshooter==1)show_shooter();
+    if(showshooter==0)hide_shooter();
+    break;
+#endif
   case 25:
     showtrainer=1-showtrainer;
     if(showtrainer==1)show_trainer();
@@ -5693,6 +5700,10 @@ static int in_menu=0;
   if(showbounds==0)glutAddMenuEntry("File/Bound Settings...  ALT+f",14);
   if(showmotion==1)glutAddMenuEntry("*Motion/View...  ALT+m",15);
   if(showmotion==0)glutAddMenuEntry("Motion/View...  ALT+m",15);
+#ifdef pp_SHOOTER
+  if(showshooter==1)glutAddMenuEntry("*Particle Shooting...",27);
+  if(showshooter==0)glutAddMenuEntry("Particle Shooting...",27);
+#endif
   if(nsmoke3d>0){
     if(showbounds==1)glutAddMenuEntry("*Smoke3D Parameters...  ALT+s",20);
     if(showbounds==0)glutAddMenuEntry("Smoke3D Parameters...  ALT+s",20);

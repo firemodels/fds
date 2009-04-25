@@ -183,6 +183,10 @@ EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 
 EXTERNCPP void snap_view_angles(void);
+#ifdef pp_SHOOTER
+EXTERNCPP void show_shooter(void);
+EXTERNCPP void hide_shooter(void);
+#endif
 EXTERNCPP void show_trainer(void);
 EXTERNCPP void hide_trainer(void);
 EXTERNCPP int get_trainee_location(void);

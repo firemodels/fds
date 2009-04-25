@@ -365,6 +365,9 @@ SVEXTERN int parttype;
 SVEXTERN int allexterior,showexterior;
 SVEXTERN int allinterior;
 SVEXTERN int showbounds,showmotion,showedit, showclip, showgluistereo, showtour, showlabels, showcolorbar, showwui;
+#ifdef pp_SHOOTER
+SVEXTERN int showshooter;
+#endif
 SVEXTERN int showgluitrainer;
 SVEXTERN int colorbarcycle;
 SVEXTERN int colorbartype;

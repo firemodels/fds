@@ -27,6 +27,9 @@ char startup_revision[]="$Revision$";
 int getmaxrevision(void);
 void glui_colorbar_setup(int main_window);
 void glui_motion_setup(int main_window);
+#ifdef pp_SHOOTER
+void glui_shooter_setup(int main_window);
+#endif
 void glui_bounds_setup(int main_window);
 void glui_labels_setup(int main_window);
 void glui_edit_setup(int main_window);
@@ -111,6 +114,9 @@ int initcase_c(int argc, char **argv){
   glui_colorbar_setup(mainwindow_id);
   glui_motion_setup(mainwindow_id);
   glui_bounds_setup(mainwindow_id);
+#ifdef pp_SHOOTER
+  glui_shooter_setup(mainwindow_id);
+#endif
   glui_edit_setup(mainwindow_id);
   glui_clip_setup(mainwindow_id);
   glui_wui_setup(mainwindow_id);
@@ -1196,6 +1202,9 @@ void initvars1(void){
   allexterior=1,showexterior=1;
   allinterior=1;
   showbounds=0,showmotion=0,showedit=0, showclip=0, showgluistereo=0, showtour=0, showlabels=0, showcolorbar=0, showwui=0;
+#ifdef pp_SHOOTER
+  showshooter=0;
+#endif
   showterrain=0;
   showgluitrainer=0;
   colorbarcycle=0;
@@ -2149,6 +2158,9 @@ int getmaxrevision(void){
   MAXREV(endian_revision);
   MAXREV(getdatabounds_revision);
   MAXREV(getdatacolors_revision);
+#ifdef pp_SHOOTER
+  MAXREV(glui_shooter_revision);
+#endif
   MAXREV(glui_3dsmoke_revision);
   MAXREV(glui_blockedit_revision);
   MAXREV(glui_bounds_revision);
