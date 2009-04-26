@@ -1670,8 +1670,8 @@ setting view points, setting times and rendering images.
 \subsection{Example 1}
 
 This example describes the steps used to create a simple script.  This script
-will load a slice file, display and render it at 10 s, 20 s, 30 s, 40 s and 50 s
-and is listed 
+will load a slice file and then display and render it at 10 s, 20 s, 30 s, 40 s and 50 s.
+The script corresponding to the steps listed below is given
 in Figure \ref{figsimplescripttext} .
 \begin{figure}[\figoptions]
 \fdsinput{script_slice_test.ssf}
@@ -1679,9 +1679,7 @@ in Figure \ref{figsimplescripttext} .
 \label{figsimplescripttext}%
 \end{figure}
 
-The {\tt RENDERDIR}\ keyword may used to generate images in any directory not 
-just the current one.
-
+Note that the keyword, {\tt RENDERDIR}, may used to {\em direct}\ that rendered images be placed in any directory not just the current one.  Also, the {\tt RENDERONCE}\ keywords in this script have a blank line afterwards (put there by default by the Smokeview script recorder).  In this case, Smokeview uses the the default name for the resulting rendered image file.  If this line is not blank, it is then used for the file name.
 
 \begin{enumerate}
 \item Obtain the test case {\tt script\_slice\_test.fds}\ from the
@@ -1691,13 +1689,13 @@ the FDS$-$SMV repository.
 \item After opening the case in Smokeview,
 select the {\em Load/Unload$>$Script Options$>$Start Recording}\ menu item.
 \item Load a slice file (doesn't matter which one).
-\item Move the time bar to 10 s and 
+\item Move the time bar to 10 s and
 then press the `r' key.  Repeat for 20 s, 30 s, and 40 s
 \item Unload the slice file. (Not necessary, this step just makes the script action more obvious.)
 \item Select the {\em Load/Unload$>$Script Options$>$Stop Recording}\ menu item.  This is very important.  The script will not be saved
 if you exit Smokeview without selecting this option.
 \item Run the script using the
-  {\em Load/Unload$>$Script Options}\ menu .  
+  {\em Load/Unload$>$Script Options}\ menu .
 \end{enumerate}
 
 \subsection{Example 2}
