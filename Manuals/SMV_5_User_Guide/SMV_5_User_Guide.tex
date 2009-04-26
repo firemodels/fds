@@ -65,7 +65,7 @@
 \newcommand{\fdsinput}[1]{
 {
 \scriptsize
-\verbatiminput{../../Test_cases/Visualization/#1}
+\verbatiminput{../../Verification/Visualization/#1}
 }
 }
 
@@ -1667,9 +1667,42 @@ The recorder is turned on using the
 After performing a sequence of steps, it is turned off and the script is saved. Typically steps involve loading data files,
 setting view points, setting times and rendering images.
 
+\subsection{Example 1}
 
-\subsection{Example}
-This example describes the steps used to create the script listed
+This example describes the steps used to create a simple script.  This script
+will load a slice file, display and render it at 10 s, 20 s, 30 s, 40 s and 50 s
+and is listed 
+in Figure \ref{figsimplescripttext} .
+\begin{figure}[\figoptions]
+\fdsinput{script_slice_test.ssf}
+\caption{Script commands generated using the Smokeview script recorder option.}
+\label{figsimplescripttext}%
+\end{figure}
+
+The {\tt RENDERDIR}\ keyword may used to generate images in any directory not 
+just the current one.
+
+
+\begin{enumerate}
+\item Obtain the test case {\tt script\_slice\_test.fds}\ from the
+    {\tt Verification/Visualization} directory in
+the FDS$-$SMV repository.
+\item Run the case with FDS
+\item After opening the case in Smokeview,
+select the {\em Load/Unload$>$Script Options$>$Start Recording}\ menu item.
+\item Load a slice file (doesn't matter which one).
+\item Move the time bar to 10 s and 
+then press the `r' key.  Repeat for 20 s, 30 s, and 40 s
+\item Unload the slice file. (Not necessary, this step just makes the script action more obvious.)
+\item Select the {\em Load/Unload$>$Script Options$>$Stop Recording}\ menu item.  This is very important.  The script will not be saved
+if you exit Smokeview without selecting this option.
+\item Run the script using the
+  {\em Load/Unload$>$Script Options}\ menu .  
+\end{enumerate}
+
+\subsection{Example 2}
+This example describes the steps used to create a script that is more involved.
+It is listed
 in Figure \ref{figscripttext} which in turn was used to
 create the images
 illustrated in Figure \ref{figscriptimages}.  The script built here
@@ -1688,7 +1721,7 @@ left and right slice file images.
 
 \begin{enumerate}
 \item Obtain the test case {\tt script\_test.fds}\ from the
-    {\tt Test\_cases/Visualization} directory in
+    {\tt Verification/Visualization} directory in
 the FDS$-$SMV repository.  Copy this file to a separate directory
  if a local copy of the repository already exists
  ( so that svn updates will not overwrite the script file generated in this example).  Of course, these steps may be repeated
