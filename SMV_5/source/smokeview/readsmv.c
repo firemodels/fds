@@ -4624,6 +4624,20 @@ typedef struct {
   if(ybar-ybar0>xyzmaxdiff)xyzmaxdiff=ybar-ybar0;
   if(zbar-zbar0>xyzmaxdiff)xyzmaxdiff=zbar-zbar0;
 
+#ifdef pp_SHOOTER
+  shooter_xyz[0]=xbar/2.0;
+  shooter_xyz[1] = 0.0;
+  shooter_xyz[2] = zbar/2.0;
+  shooter_dxyz[0]=xbar/4.0;
+  shooter_dxyz[1]=0.0;
+  shooter_dxyz[2]=0.0;
+  shooter_nparts=100;
+  shooter_velmag=1.0;
+  shooter_veldir=0.0;
+  shooter_fps=10;
+  shooter_vel_type=0;
+#endif
+
   /* rescale both global and local xbar, ybar and zbar */
 
   xbar0ORIG = xbar0;

@@ -5696,8 +5696,8 @@ static int in_menu=0;
     if(showedit==1)glutAddMenuEntry("*Edit Geometry...  ALT+e",16);
     if(showedit==0)glutAddMenuEntry("Edit Geometry...  ALT+e",16);
   }
-  if(showbounds==1)glutAddMenuEntry("*File/Bound Settings...  ALT+f",14);
-  if(showbounds==0)glutAddMenuEntry("File/Bound Settings...  ALT+f",14);
+  if(showbounds==1)glutAddMenuEntry("*File/Bound/Script Settings...  ALT+f",14);
+  if(showbounds==0)glutAddMenuEntry("File/Bound/Script Settings...  ALT+f",14);
   if(showmotion==1)glutAddMenuEntry("*Motion/View...  ALT+m",15);
   if(showmotion==0)glutAddMenuEntry("Motion/View...  ALT+m",15);
 #ifdef pp_SHOOTER
