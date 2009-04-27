@@ -7838,7 +7838,7 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f %f",&shooter_velmag,&shooter_veldir);
       
       if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%i %i %i",&shooter_fps,&shooter_vel_type,&shooter_nparts);
+      sscanf(buffer,"%i %i %i %i",&shooter_fps,&shooter_vel_type,&shooter_nparts,&show_shooter_points);
       continue;
     }
 #endif
@@ -8891,7 +8891,7 @@ void writeini(int flag){
     fprintf(fileout," %f %f %f\n",shooter_xyz[0],shooter_xyz[1],shooter_xyz[2]);
     fprintf(fileout," %f %f %f\n",shooter_dxyz[0],shooter_dxyz[1],shooter_dxyz[2]);
     fprintf(fileout," %f %f\n",   shooter_velmag, shooter_veldir);
-    fprintf(fileout," %i %i %i\n",shooter_fps,shooter_vel_type,shooter_nparts);
+    fprintf(fileout," %i %i %i %i\n",shooter_fps,shooter_vel_type,shooter_nparts,show_shooter_points);
   }
 #endif
   fprintf(fileout,"SHOWLABELS\n");
