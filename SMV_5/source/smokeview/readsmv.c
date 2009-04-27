@@ -4635,7 +4635,7 @@ typedef struct {
   shooter_velmag=1.0;
   shooter_veldir=0.0;
   shooter_fps=10;
-  shooter_vel_type=0;
+  shooter_vel_type=1;
 #endif
 
   /* rescale both global and local xbar, ybar and zbar */
@@ -7826,6 +7826,22 @@ int readini2(char *inifile, int localfile){
       ReallocTourMemory();
       continue;
     }
+#ifdef pp_SHOOTER
+    if(localfile==1&&match(buffer,"SHOOTER",7) == 1){
+      if(fgets(buffer,255,stream)==NULL)break;
+      sscanf(buffer,"%f %f %f",shooter_xyz,shooter_xyz+1,shooter_xyz+2);
+      
+      if(fgets(buffer,255,stream)==NULL)break;
+      sscanf(buffer,"%f %f %f",shooter_dxyz,shooter_dxyz+1,shooter_dxyz+2);
+      
+      if(fgets(buffer,255,stream)==NULL)break;
+      sscanf(buffer,"%f %f",&shooter_velmag,&shooter_veldir);
+      
+      if(fgets(buffer,255,stream)==NULL)break;
+      sscanf(buffer,"%i %i %i",&shooter_fps,&shooter_vel_type,&shooter_nparts);
+      continue;
+    }
+#endif
     {
       int nkeyframes;
       float key_time, key_xyz[3], key_az_path, key_view[3], params[3], zzoom, key_elev_path;
@@ -8869,6 +8885,15 @@ void writeini(int flag){
     fprintf(fileout," %f %f %f\n",user_tick_step[0],user_tick_step[1],user_tick_step[2]);
     fprintf(fileout," %i %i %i\n",user_tick_show_x,user_tick_show_y,user_tick_show_z);
   }
+#ifdef pp_SHOOTER
+  if(flag==LOCAL_INI){
+    fprintf(fileout,"SHOOTER\n");
+    fprintf(fileout," %f %f %f\n",shooter_xyz[0],shooter_xyz[1],shooter_xyz[2]);
+    fprintf(fileout," %f %f %f\n",shooter_dxyz[0],shooter_dxyz[1],shooter_dxyz[2]);
+    fprintf(fileout," %f %f\n",   shooter_velmag, shooter_veldir);
+    fprintf(fileout," %i %i %i\n",shooter_fps,shooter_vel_type,shooter_nparts);
+  }
+#endif
   fprintf(fileout,"SHOWLABELS\n");
   fprintf(fileout," %i\n",visLabels);
   fprintf(fileout,"SHOWFRAMERATE\n");

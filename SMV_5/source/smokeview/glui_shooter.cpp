@@ -128,7 +128,7 @@ extern "C" void glui_shooter_setup(int main_window){
 void SHOOTER_CB(int var){
   switch (var){
     case SHOOTER_VEL_TYPE:
-      if(shooter_vel_type==0){
+      if(shooter_vel_type==1){
         SPINNER_shooter_velmag->enable();
         SPINNER_shooter_veldir->enable();
       }
