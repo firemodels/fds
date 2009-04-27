@@ -98,6 +98,7 @@ extern "C" void glui_shooter_setup(int main_window){
   SPINNER_shooter_fps=glui_shooter->add_spinner_to_panel(panel_shooter_frame,"frames per second",
     GLUI_SPINNER_INT,&shooter_fps);
   SPINNER_shooter_fps->set_int_limits(1,100);
+  glui_shooter->add_checkbox_to_panel(panel_shooter_frame,"Shoot particles",&show_shooter_points);
 
   panel_shooter_velocity=glui_shooter->add_panel("Initial Velocity");
   
