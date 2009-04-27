@@ -1,6 +1,6 @@
-// $Date: 2009-04-26 19:26:12 -0400 (Sun, 26 Apr 2009) $ 
-// $Revision: 3861 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #include "options.h"
 #ifdef pp_SHOOTER
@@ -18,8 +18,8 @@
 #include "smokeheaders.h"
 
 // svn revision character string
-char IOshooter_revision[]="$Revision: 3861 $";
-// $Date: 2009-04-26 19:26:12 -0400 (Sun, 26 Apr 2009) $ $Author: gforney $
+char IOshooter_revision[]="$Revision$";
+// $Date$ $Author$
 
 
 #endif
