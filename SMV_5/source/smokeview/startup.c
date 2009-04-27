@@ -2178,6 +2178,9 @@ int getmaxrevision(void){
   MAXREV(IOobject_revision);
   MAXREV(IOpart_revision);
   MAXREV(IOplot3d_revision);
+#ifdef pp_SHOOTER
+  MAXREV(IOshooter_revision);
+#endif
   MAXREV(IOslice_revision);
   MAXREV(IOscript_revision);
   MAXREV(IOsmoke_revision);
