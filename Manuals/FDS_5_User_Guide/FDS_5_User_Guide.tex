@@ -2983,8 +2983,9 @@ If you wish to define a surface as adiabatic, then you should set {\ct ADIABATIC
 
 \begin{notebox}
 \noindent
-Avoid using a Smokeview .smv file keyword for the {\ct ID}.  See the ``User's Guide for
-Smokeview Version~5''~\cite{Smokeview_Users_Guide_5} for a listing of these keywords.
+Avoid using a Smokeview .smv file keyword for the {\ct ID}. See the 
+``User's Guide for Smokeview Version~5''~\cite{Smokeview_Users_Guide_5}
+for a listing of these keywords.
 \end{notebox}
 
 
@@ -4044,11 +4045,9 @@ divided by the volume of the layer.  $\rho_{s0}$ is the initial
 density of the layer. Thus, $\rho_{s,i}/\rho_{s0}$ is a quantity that
 increases as the $i$th material is produced as a residue of some other
 reaction, and decreases as the $i$th material decomposes.  If the
-layer is composed of only one material, and if the reactions produce
-no solid residues, then $\rho_{s,i}/\rho_{s0}$ is always 1. $n_{s,ij}$
-is the reaction order and prescribed under the name {\ct N\_S(j)}, and
-is 1 by default. If the value of $n_s$ is not known, it is a good
-starting point to assume $n_s=1$.
+layer is composed of only one material, then $\rho_{s,i}/\rho_{s0}$ is initially 1. 
+$n_{s,ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default. 
+If the value of $n_s$ is not known, it is a good starting point to assume $n_s=1$.
 
 The pre-exponential factor, $A_{ij}$, is prescribed under the name
 {\ct A(j)}, with units of s$^{-1}$. $E_{ij}$, the activation energy,
