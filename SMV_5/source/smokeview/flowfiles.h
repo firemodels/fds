@@ -7,6 +7,27 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 
+#ifdef pp_SHOOTER
+
+/* --------------------------  point ------------------------------------ */
+
+typedef struct _shootpointdata {
+  struct _shootpointdata *prev;
+  float xyz[3], uvw[3], val;
+} shootpointdata;
+
+/* --------------------------  point ------------------------------------ */
+
+typedef struct {
+  float time;
+  int frame;
+  shootpointdata *beg, *end;
+} shoottimedata;
+
+#endif
+
+/* --------------------------  infiledata ------------------------------------ */
+
 typedef struct _inifiledata {
   struct _inifiledata *prev, *next;
   int id;
