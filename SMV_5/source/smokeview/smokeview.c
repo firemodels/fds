@@ -1303,6 +1303,14 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   }
   sniffErrors("drawBlockages");
 
+#ifdef pp_SHOOTER
+/* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
+
+  if(show_shooter_points!=0&&shooter_active==1){
+    draw_shooter();
+  }
+#endif
+
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
 
   if(visTerrainType!=4){
