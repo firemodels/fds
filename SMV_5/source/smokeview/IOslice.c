@@ -4091,8 +4091,8 @@ void init_Slicedata(void){
       fprintf(fileout,"\n");
       fprintf(fileout,"%i\n",sd->js2+1-sd->js1);
       for(j=sd->js1;j<=sd->js2;j++){
-        if(j!=sd->js2)fprintf(fileout,"%f, ",yplt[k]);
-        if(j==sd->js2)fprintf(fileout,"%f ",yplt[k]);
+        if(j!=sd->js2)fprintf(fileout,"%f, ",yplt[j]);
+        if(j==sd->js2)fprintf(fileout,"%f ",yplt[j]);
       }
       fprintf(fileout,"\n");
       break;
@@ -4113,8 +4113,8 @@ void init_Slicedata(void){
     case 3:
       fprintf(fileout,"%i\n",sd->js2+1-sd->js1);
       for(j=sd->js1;j<=sd->js2;j++){
-        if(j!=sd->js2)fprintf(fileout,"%f, ",yplt[k]);
-        if(j==sd->js2)fprintf(fileout,"%f ",yplt[k]);
+        if(j!=sd->js2)fprintf(fileout,"%f, ",yplt[j]);
+        if(j==sd->js2)fprintf(fileout,"%f ",yplt[j]);
       }
       fprintf(fileout,"\n");
       fprintf(fileout,"%i\n",sd->is2+1-sd->is1);
