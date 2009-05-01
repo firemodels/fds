@@ -355,6 +355,7 @@ Contains
   Subroutine READ_EVAC
     Implicit None
     !
+    ! Local variables
     Integer :: NUMBER_INITIAL_PERSONS, COLOR_METHOD_TMP, &
          SAMPLING_FACTOR, IPC, n_tmp, GN_MIN, GN_MAX, N_RAMP_INI
     Real(EB) :: DTSAM
@@ -837,6 +838,7 @@ Contains
     Subroutine READ_PERS
       Implicit None
       !
+      ! Local variables
       Type (EVAC_PERS_Type), Pointer :: PCP=>NULL()
       !
       ! NEXT PARAMETERS ARE SAME FOR ALL HUMANS. THE LAST
@@ -874,26 +876,26 @@ Contains
       EVAC_DT_MAX     = 0.01_EB
       EVAC_DT_MIN     = 0.001_EB
 
-      ! Next parameters are for the counterflow
+      ! Next parameters are for the counterflow (CF)
       TAU_CHANGE_V0   = -0.1_EB  !CF: How often direction is updated?
       THETA_SECTOR    = -40.0_EB !CF: The angle of the first sector
-      CONST_DF        = -0.5_EB  !CF: prefer agents going in the same direction
+      CONST_DF        = 0.5_EB   !CF: prefer agents going in the same direction
       FAC_DF          = 1.0_EB   !CF: prefer agents going in the same direction
       CONST_CF        = 1.0_EB   !CF: dislike agents going in the opposite direction
       FAC_CF          = 2.0_EB   !CF: dislike agents going in the opposite direction
-      FAC_1_WALL      = 1.0_EB   !CF: direction is towards a wall
-      FAC_2_WALL      = 1.0_EB   !CF: direction leads too close to a wall
-      FAC_V0_DIR      = 2.5_EB   !CF: v0*cos term for all sectors
+      FAC_1_WALL      = 5.0_EB   !CF: direction is towards a wall
+      FAC_2_WALL      = 10.0_EB  !CF: direction leads too close to a wall
+      FAC_V0_DIR      = 1.0_EB   !CF: v0*cos term for all sectors
       FAC_V0_NOCF     = 1.0_EB   !CF: prefer v0, if no counterflow
       FAC_NOCF        = 0.5_EB   !CF: prefer v0, if no counterflow
-      CF_MIN_A        = 0.1_EB   !CF: decrease social force
+      CF_MIN_A        = 0.5_EB   !CF: decrease social force
       CF_MIN_B        = 0.3_EB   !CF: decrease social force range
       CF_FAC_A_WALL   = 1.0_EB   !CF: decrease social force
-      CF_MIN_TAU      = 0.25_EB  !CF: increase motive force
-      CF_MIN_TAU_INER = 0.10_EB  !CF: increase motive force, rotation
-      CF_FAC_TAUS     = 0.5_EB   !CF: increase motive force, trans+rot
-      FAC_DOOR_QUEUE  = 0.0_EB
-      FAC_DOOR_WAIT   = 1.0_EB
+      CF_MIN_TAU      = 0.10_EB  !CF: increase motive force
+      CF_MIN_TAU_INER = 0.05_EB  !CF: increase motive force, rotation
+      CF_FAC_TAUS     = 0.25_EB  !CF: increase motive force, trans+rot
+      FAC_DOOR_QUEUE  = 0.0_EB   ! Door selection algorithm: persons/m/s
+      FAC_DOOR_WAIT   = 1.0_EB   ! Door selection algorithm: patience factor
       
       OUTPUT_SPEED         = .False.
       OUTPUT_MOTIVE_FORCE  = .False.
@@ -1342,6 +1344,7 @@ Contains
       !
       ! Read the EXIT lines
       !
+      ! Local variables
       Integer nm, i1, i2, j1, j2
       Type (EVAC_EXIT_Type), Pointer :: PEX=>NULL()
       Type (EVAC_STRS_Type),  Pointer :: STRP=>NULL()
@@ -1653,6 +1656,7 @@ Contains
       !
       ! Read the DOOR lines
       !
+      ! Local variables
       Type (EVAC_DOOR_Type), Pointer :: PDX=>NULL()
       Type (MESH_TYPE), Pointer :: M=>NULL()
       Integer nm, i1, i2, j1, j2
@@ -1950,6 +1954,7 @@ Contains
     Subroutine READ_CORR
       Implicit None
       !
+      ! Local variables
       Type (EVAC_CORR_Type), Pointer :: PCX=>NULL()
       Type (MESH_TYPE), Pointer :: M=>NULL()
       !
@@ -2189,7 +2194,6 @@ Contains
       Implicit None
       !
       ! Local variables
-      !
       REAL(EB) Z_TMP
       Type (EVAC_STRS_Type), Pointer :: STRP=>NULL()
 
@@ -2544,6 +2548,7 @@ Contains
       !
       ! Read the ENTR lines
       !
+      ! Local variables
       Integer nm, i1, i2, j1, j2, NR
       Type (EVAC_ENTR_Type), Pointer :: PNX=>NULL()
       Type (EVAC_PERS_Type), Pointer :: PCP=>NULL()
@@ -2857,6 +2862,7 @@ Contains
       !
       ! Read the EVAC lines
       ! 
+      ! Local variables
       Type (EVACUATION_Type), Pointer :: HPT=>NULL()
       Type (EVAC_PERS_Type),  Pointer :: PCP=>NULL()
 
@@ -3102,6 +3108,7 @@ Contains
       !
       ! Read the EVHO lines
       !
+      ! Local variables
       Type (EVAC_HOLE_Type),  Pointer :: EHX=>NULL()
 
       READ_EVHO_LOOP: Do N = 1, N_HOLES
@@ -3185,6 +3192,7 @@ Contains
       !
       ! Read the EVSS lines
       !
+      ! Local variables
       Type (EVAC_SSTAND_Type), Pointer :: ESS=>NULL()
 
       READ_EVSS_LOOP: Do N = 1, N_SSTANDS
@@ -3307,6 +3315,7 @@ Contains
     Subroutine CHECK_EVAC_NODES
       Implicit None
       !
+      ! Local variables
       Type (EVAC_ENTR_Type), Pointer :: PNX=>NULL()
       Type (EVAC_DOOR_Type), Pointer :: PDX=>NULL()
       Type (EVAC_STRS_Type), Pointer :: STRP=>NULL()
@@ -3439,7 +3448,7 @@ Contains
   Subroutine Initialize_Evac_Dumps
     Implicit None
     !
-    !
+    ! Local variables
     Character(50) tcform
     Integer n_cols, i, j, nm, izero
     Logical L_fed_read, L_fed_save, L_eff_read, L_eff_save, L_status
@@ -3854,8 +3863,11 @@ Contains
     !
     ! Insert humans into the domain at the start of calculation
     !
+    ! Passed variables
     Integer, Intent(IN) :: NM
     Integer, Intent(OUT) :: ISTOP
+    !
+    ! Local variables
     Real(EB) RN, simoDX, simoDY, TNOW
     Real(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, &
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
@@ -4356,6 +4368,7 @@ Contains
     !
     ! Initialize group lists, known doors, etc
     !
+    ! Local variables
     Integer I,J, IZERO, nom, j1, ii, i_target_old, i_change_old, i_tmp, i_tmp2
     Integer :: i_egrid, i_target, color_index, i_new_ffield
     Real(EB) :: evel
@@ -4398,12 +4411,12 @@ Contains
     Call ChkMemErr('Initialize_Evacuation','Color_Tmp',IZERO) 
 
     i_egrid = 0
-    n_change_doors  = 0 ! Count the initialization Nash Equilibrium iterations
-    n_change_trials = 0 ! Count the initialization Nash Equilibrium iterations
-    i_change_old    = -1
     EVAC_DOORS(:)%R_NTARGET = 5.0_EB
     EVAC_EXITS(:)%R_NTARGET = 5.0_EB
     Do nom = 1, NMESHES
+       n_change_doors  = 0 ! Count the initialization Nash Equilibrium iterations
+       n_change_trials = 0 ! Count the initialization Nash Equilibrium iterations
+       i_change_old    = -1
        If ( .Not.(EVACUATION_ONLY(NoM) .And. EVACUATION_GRID(NoM)) ) Cycle
        M => MESHES(NOM)
        Group_List(:)%GROUP_SIZE  = 0
@@ -4554,11 +4567,13 @@ Contains
   Subroutine EVAC_MESH_EXCHANGE(T,T_Save,I_mode, ICYC, EXCHANGE_EVACUATION, MODE)
     Implicit None
     !
+    ! Passed variables
     Real(EB), Intent(IN) :: T
     Integer, Intent(IN) :: I_mode, ICYC, MODE
     Logical, Intent(OUT) :: EXCHANGE_EVACUATION
-    Real(EB) T_Save
+    Real(EB), Intent(INOUT) :: T_Save
     !
+    ! Local variables
     Integer nm, nom, i, j, i1, j1, k1
     Integer ios
     Logical L_use_fed, L_fed_read, L_fed_save
@@ -4855,8 +4870,10 @@ Contains
     ! Do the mesh independent initializations for the 
     ! subroutine evacuate_humans.
     !
+    ! Passed variables
     Integer, Intent(IN) :: ICYC
     !
+    ! Local variables
     Logical L_eff_read, L_eff_save
     Integer(4) ibar_tmp, jbar_tmp, kbar_tmp
     Integer nm_tim, i, j
@@ -4910,9 +4927,11 @@ Contains
     !   NM: Mesh index
     !   ICYC: index of the FDS fire time step
     !
+    ! Passed variables
     Real(EB), Intent(IN) :: Tin
     Integer, Intent(IN) :: NM,ICYC
     !
+    ! Local variables
     Integer, Parameter :: n_sectors = 2
     Real(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
     Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1
@@ -6295,12 +6314,11 @@ Contains
              Do iii = 1, n_sectors
                 If (N_suuntaCF(n_sectors+1) < 1) Then
                    ! No counterflow: Prefer left (and straight ahead)
-                   Sum_suunta(iii) = Sum_suunta(iii) + Sign(1.0_EB,thetas(iii))* &
-                        FAC_V0_DIR*v_hr
+                   ! Sum_suunta(iii) = Sum_suunta(iii) + Sign(1.0_EB,thetas(iii))* &
+                   !     FAC_V0_DIR*v_hr
                 Else
                    ! Counterflow: Prefer right (and straight ahead)
-                   Sum_suunta(iii) = Sum_suunta(iii) - Sign(1.0_EB,thetas(iii))* &
-                        FAC_V0_DIR*v_hr
+                   Sum_suunta(iii) = Sum_suunta(iii) - Sign(1.0_EB,thetas(iii))*FAC_V0_DIR
                 End If
              End Do
 
@@ -6712,15 +6730,17 @@ Contains
       !   UBAR,VBAR: The prefered walking direction
       !   hr_tau: translational motion Tau
       !   Tpre: Pre-movement time
-      Integer, Intent(In) :: II, JJ, IIX, JJY, I
-      Real(EB), Intent(In) :: XI, YJ, ZK, T, T_BEGIN
-      Logical, Intent(In) :: L_Dead
-      Integer, Intent(Out) :: Nout
-      Logical, Intent(InOut) :: NM_STRS_MESH
-      Real(EB), Intent(InOut) :: hr_tau
-      Real(EB), Intent(Out) :: UBAR, VBAR, Tpre
       !
-      ! Local varaibles
+      ! Passed variables
+      Integer, Intent(IN) :: II, JJ, IIX, JJY, I
+      Real(EB), Intent(IN) :: XI, YJ, ZK, T, T_BEGIN
+      Logical, Intent(IN) :: L_Dead
+      Integer, Intent(OUT) :: Nout
+      Logical, Intent(INOUT) :: NM_STRS_MESH
+      Real(EB), Intent(INOUT) :: hr_tau
+      Real(EB), Intent(OUT) :: UBAR, VBAR, Tpre
+      !
+      ! Local variables
       Integer :: N,MN_now, STRS_Indx, door_ior, KKZ, j, i1, j1
       Real(EB) :: x_target, y_target, door_width, Door_Dist, EVEL
       Logical :: NM_STRS_MESHS, straight_Line_To_Target
@@ -6733,6 +6753,7 @@ Contains
       ! HR%I_FFIELD is the flow field mesh index for this agent
       NM_now = Max(1,HR%I_FFIELD)
       If (.Not.EVACUATION_ONLY(NM_now)) Then
+         write(lu_err,*)'*** ',i,HR%IPC,HR%IEL,HR%I_Target,HR%I_FFIELD,HR%ILABEL
          Write(MESSAGE,'(A,I6,A)') 'ERROR: Evacuate_Humans, mesh ', NM_now, ' is not an evacuation flow field.'
          Call SHUTDOWN(MESSAGE)
       End If
@@ -6918,9 +6939,11 @@ Contains
     Subroutine GetStairSpeedAndZ(speed_xm,speed_xp, speed_ym,speed_yp,SP,HP)
       Implicit None
       !
-      Real(EB) speed_xm, speed_xp, speed_ym, speed_yp
+      ! Passed variables
+      Real(EB), Intent(OUT) :: speed_xm, speed_xp, speed_ym, speed_yp
       Type (EVAC_STRS_TYPE), Pointer ::  SP
-      Type (HUMAN_TYPE), Pointer :: HP 
+      Type (HUMAN_TYPE), Pointer :: HP
+      !
       ! Local variables
       Real(EB) cos_x, cos_y
       Integer J1, J2, J
@@ -7111,51 +7134,58 @@ Contains
     End Subroutine Find_Target_Node_In_Strs
 
     Subroutine STRS_U_AND_V(STRP,I_NODE,X,Y,Direction,UBAR,VBAR)
-    ! Get preferred direction in STRS
-    Type (EVAC_STRS_TYPE), Pointer::  STRP
-    Integer, intent(IN) :: I_NODE, Direction
-    REAL(EB), Intent(IN) :: X, Y
-    REAL(EB), Intent(OUT) :: UBAR, VBAR
-    ! Local variables
-    Integer I_CORE
+      Implicit None
+      !
+      ! Get preferred direction in STRS
+      !
+      ! Passed variables
+      Type (EVAC_STRS_TYPE), Pointer::  STRP
+      Integer, Intent(IN) :: I_NODE, Direction
+      REAL(EB), Intent(IN) :: X, Y
+      REAL(EB), Intent(OUT) :: UBAR, VBAR
+      !
+      ! Local variables
+      Integer I_CORE
 
-    I_CORE = STRP%I_CORE(I_NODE)
+      I_CORE = STRP%I_CORE(I_NODE)
 
-    UBAR = 0._EB
-    VBAR = 0._EB
-    
-    If (STRP%RIGHT_HANDED) Then
-      If (Direction > 0) Then
-         IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR =  1._EB
-         IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
-         IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR = -1._EB
-         IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
+      UBAR = 0._EB
+      VBAR = 0._EB
+
+      If (STRP%RIGHT_HANDED) Then
+         If (Direction > 0) Then
+            IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR =  1._EB
+            IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
+            IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR = -1._EB
+            IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
+         Else
+            IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
+            IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR =  1._EB
+            IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
+            IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR = -1._EB
+         Endif
       Else
-         IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
-         IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR =  1._EB
-         IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
-         IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR = -1._EB
+         If (Direction < 0) Then
+            IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR =  1._EB
+            IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
+            IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR = -1._EB
+            IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
+         Else
+            IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
+            IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR =  1._EB
+            IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
+            IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR = -1._EB
+         Endif
       Endif
-    Else
-      If (Direction < 0) Then
-         IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR =  1._EB
-         IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
-         IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR = -1._EB
-         IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
-      Else
-         IF ((X <= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,4))) VBAR =  1._EB
-         IF ((X <= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,4))) UBAR =  1._EB
-         IF ((X >= STRP%XB_CORE(I_CORE,2)) .AND. (Y >= STRP%XB_CORE(I_CORE,3))) VBAR = -1._EB
-         IF ((X >= STRP%XB_CORE(I_CORE,1)) .AND. (Y <= STRP%XB_CORE(I_CORE,3))) UBAR = -1._EB
-      Endif
-    Endif
     End Subroutine STRS_U_AND_V
 
     Subroutine GET_IW(IIin,JJin,KKin,IOR,IW)
       Implicit None
       !
+      ! Passed variables
       Integer, Intent(IN) :: IIin, JJin, KKin, IOR
       Integer, Intent(OUT) :: IW
+      !
       ! Local variables
       Integer :: ii, jj, kk, ic
       !
@@ -7703,15 +7733,15 @@ Contains
       !           0: target is free
       !
       ! Passed variables
-      Integer, Intent(in) :: inode, inode2
-      Integer, Intent(out) :: istat, ior_new, imesh2, color_index, i_target
-      Real(EB), Intent(out) :: xx, yy, zz, angle
-      Integer, Intent(out) :: STR_INDX, STR_SUB_INDX
-      Real(EB), Intent(in) :: T
-      Integer, Intent(inout) :: new_ffield_i
-      Logical, Intent(in) :: keep_xy
-      Character(26), Intent(inout) :: new_ffield_name
-      Type (HUMAN_TYPE), Pointer :: HR 
+      Integer, Intent(IN) :: inode, inode2
+      Integer, Intent(OUT) :: istat, ior_new, imesh2, color_index, i_target
+      Real(EB), Intent(OUT) :: xx, yy, zz, angle
+      Integer, Intent(OUT) :: STR_INDX, STR_SUB_INDX
+      Real(EB), Intent(IN) :: T
+      Integer, Intent(INOUT) :: new_ffield_i
+      Logical, Intent(IN) :: keep_xy
+      Character(26), Intent(INOUT) :: new_ffield_name
+      Type (HUMAN_TYPE), Pointer :: HR
       !
       ! Local variables
       Real(EB) RN, x1, x2, y1, y2, z1, z2, d_max, dist, Width, &
@@ -8099,7 +8129,10 @@ Contains
       !
       ! Remove a person
       !
+      ! Passed variables
       Integer, Intent(IN) :: I
+      !
+      ! Local variables
       !
       HUMAN(I) = HUMAN(N_HUMANS)
       N_HUMANS = N_HUMANS - 1
@@ -8111,8 +8144,12 @@ Contains
       !
       ! Remove humans that do not lie in any mesh
       !
-      Integer :: IKILL,I,NM
-      Real(EB) :: T
+      ! Passed variables
+      Integer, Intent(IN) :: NM
+      Real(EB), Intent(IN) :: T
+      !
+      ! Local variables
+      Integer :: IKILL, I
       !
       IKILL = 0
       DROP_LOOP: Do I=1,N_HUMANS
@@ -8367,11 +8404,12 @@ Contains
       !          Contact_F: Radial contact line force
       !          d_walls: Shortest distance to walls
       !
-      
-      Real(EB), Intent(In) :: x1, y1, x11, y11, p2p_dist_max
-      Real(EB), Dimension(6), Intent(In) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
-      Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, d_walls
-      Integer, Intent(Out) :: istat
+      !
+      ! Passed variables
+      Real(EB), Intent(IN) :: x1, y1, x11, y11, p2p_dist_max
+      Real(EB), Dimension(6), Intent(IN) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
+      Real(EB), Intent(INOUT) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, d_walls
+      Integer, Intent(OUT) :: istat
       !
       ! Local variables
       Real(EB) :: dist, CosPhiFac, u, v, Fc_x, Fc_y, FricFac, k_fric, evel
@@ -8454,15 +8492,16 @@ Contains
       !          Social_F: Radial social line force
       !          Contact_F: Radial contact line force
       !          d_walls: Shortest distance to walls
-
-
-      Integer, Intent(In) :: nm
-      Real(EB), Intent(In) :: p2p_dist_max
-      Real(EB), Dimension(4), Intent(In) :: d_xy
-      Logical, Dimension(4), Intent(In) :: FoundWall_xy
-      Real(EB), Dimension(6), Intent(In) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
-      Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque
       !
+      ! Passed variables
+      Integer, Intent(IN) :: nm
+      Real(EB), Intent(IN) :: p2p_dist_max
+      Real(EB), Dimension(4), Intent(IN) :: d_xy
+      Logical, Dimension(4), Intent(IN) :: FoundWall_xy
+      Real(EB), Dimension(6), Intent(IN) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
+      Real(EB), Intent(INOUT) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque
+      !
+      ! Local variables
       Integer :: is, idir, iin, jjn, istat
       Real(EB) :: CosPhiFac, dist, dist1, dist2
 
@@ -8539,7 +8578,7 @@ Contains
 
     Subroutine Wall_SocialForces(nm, x_tmp, y_tmp, r_tmp, p2p_dist_max, d_xy, P2P_U, P2P_V, Social_F, FoundWall_xy)
       Implicit None
-
+      !
       ! wall - agent social forces
       !
       ! Inputs:  FoundWall_xy(1-4): True for solid walls (False for outflow VENTs)
@@ -8551,14 +8590,16 @@ Contains
       !          P2P_U/V: Forces x/y directions
       !          Social_F: Radial social line force
       !
-
-      Integer, Intent(In) :: nm
-      Real(EB), Intent(In) :: p2p_dist_max
-      Real(EB), Dimension(6), Intent(In) :: x_tmp, y_tmp, r_tmp
-      Real(EB), Dimension(4), Intent(In) :: d_xy
-      Logical, Dimension(4), Intent(In) :: FoundWall_xy
-      Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F
       !
+      ! Passed variables
+      Integer, Intent(IN) :: nm
+      Real(EB), Intent(IN) :: p2p_dist_max
+      Real(EB), Dimension(6), Intent(IN) :: x_tmp, y_tmp, r_tmp
+      Real(EB), Dimension(4), Intent(IN) :: d_xy
+      Logical, Dimension(4), Intent(IN) :: FoundWall_xy
+      Real(EB), Intent(INOUT) :: P2P_U, P2P_V, Social_F
+      !
+      ! Local variables
       Integer :: is, idir, iii
       Real(EB) :: CosPhiFac, dist, F_soc, F_tmp
 
@@ -8655,12 +8696,12 @@ Contains
 !!$      !          Social_F: Radial social line force
 !!$      !
 !!$
-!!$      Integer, Intent(In) :: nm
-!!$      Real(EB), Intent(In) :: x_tmp, y_tmp, r_tmp, p2p_dist_max
-!!$      !Real(EB), Dimension(6), Intent(In) :: x_tmp, y_tmp, r_tmp
-!!$      Real(EB), Dimension(4), Intent(In) :: d_xy
-!!$      Logical, Dimension(4), Intent(In) :: FoundWall_xy
-!!$      Real(EB), Intent(InOut) :: P2P_U, P2P_V, Social_F
+!!$      Integer, Intent(IN) :: nm
+!!$      Real(EB), Intent(IN) :: x_tmp, y_tmp, r_tmp, p2p_dist_max
+!!$      !Real(EB), Dimension(6), Intent(IN) :: x_tmp, y_tmp, r_tmp
+!!$      Real(EB), Dimension(4), Intent(IN) :: d_xy
+!!$      Logical, Dimension(4), Intent(IN) :: FoundWall_xy
+!!$      Real(EB), Intent(INOUT) :: P2P_U, P2P_V, Social_F
 !!$      !
 !!$      Integer :: is, idir
 !!$      Real(EB) :: CosPhiFac, dist
@@ -8743,12 +8784,14 @@ Contains
       !          Contact_F: Radial contact line force
       !          d_walls: Shortest distance to walls
       !
-      Integer, Intent(In) :: nm
-      Real(EB), Intent(In) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
-      Real(EB), Dimension(4), Intent(In) :: d_xy
-      Logical, Dimension(4), Intent(In) :: FoundWall_xy
-      Real(EB), Intent(InOut) :: P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls
+      ! Passed variables
+      Integer, Intent(IN) :: nm
+      Real(EB), Intent(IN) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
+      Real(EB), Dimension(4), Intent(IN) :: d_xy
+      Logical, Dimension(4), Intent(IN) :: FoundWall_xy
+      Real(EB), Intent(INOUT) :: P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls
       !
+      ! Local variables
       Integer :: is, idir
       Real(EB) :: Fc_y, Fc_x, dist, evel
 
@@ -8899,7 +8942,7 @@ Contains
     Implicit None
     !
     ! Passed variables
-    Type (HUMAN_TYPE), Pointer:: HR 
+    Type (HUMAN_TYPE), Pointer:: HR
     Type (EVAC_PERS_Type), Pointer:: PCP
     !
     ! Local variables
@@ -8967,8 +9010,8 @@ Contains
        Randomtype = 5
        RandomPara(1) = PCP%V_mean  ! mu of ln(x)
        RandomPara(2) = PCP%V_para  ! sigma of ln(x)
-       RandomPara(3) = PCP%V_high  ! high end cutoff
-       RandomPara(4) = PCP%V_para2 ! shift
+       RandomPara(3) = PCP%V_high  ! high end cutoff of x
+       RandomPara(4) = PCP%V_para2 ! shift of x
        Call RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Speed = rnd_vec(1)
     Case(6)   ! Beta
@@ -9688,7 +9731,10 @@ Contains
     !
     ! Dump human data to CHID_evac.csv
     !
-    Real(EB), Intent(In) :: Tin
+    ! Passed variables
+    Real(EB), Intent(IN) :: Tin
+    !
+    ! Local variables
     Character(50) tcform
     Integer n_cols, n_tot_humans, i, ii, izero
     Integer, Allocatable, Dimension(:) :: ITEMP
@@ -9753,8 +9799,8 @@ Contains
     ! NOTE: This works for thick and thin OBSTs.
     !
     ! Passed variables
-    Integer, Intent(In) :: nm
-    Real(EB), Intent(In) :: r1_x, r1_y, r2_x, r2_y
+    Integer, Intent(IN) :: nm
+    Real(EB), Intent(IN) :: r1_x, r1_y, r2_x, r2_y
     !
     ! Local variables
     Integer :: i, j, isx, isy, i_r1, i_r2, j_r1, j_r2
@@ -9845,9 +9891,9 @@ Contains
     !          max_fed: maximum level of FED at the path
     !
     ! Passed variables
-    Integer, Intent(In) :: nm, idoor, itarget
-    Real(EB), Intent(In) :: r1_x, r1_y, r2_x, r2_y
-    Real(EB), Intent(Out) :: ave_K, max_fed
+    Integer, Intent(IN) :: nm, idoor, itarget
+    Real(EB), Intent(IN) :: r1_x, r1_y, r2_x, r2_y
+    Real(EB), Intent(OUT) :: ave_K, max_fed
     !
     ! Local variables
     Integer :: i, j, isx, isy, i_r1, i_r2, j_r1, j_r2
@@ -9971,11 +10017,11 @@ Contains
     ! NOTE: This works for thick and thin OBSTs.
     !
     ! Passed variables
-    Integer, Intent(In) :: nm, Skip_Wall_Force_Ior
-    Real(EB), Intent(In) :: r1_x, r1_y, r_circle, d_cutoff
-    Real(EB), Dimension(4), Intent(Out) :: d_xy
-    Logical, Dimension(4), Intent(Out) :: FoundWall_xy
-    Integer, Intent(Out) :: istat
+    Integer, Intent(IN) :: nm, Skip_Wall_Force_Ior
+    Real(EB), Intent(IN) :: r1_x, r1_y, r_circle, d_cutoff
+    Real(EB), Dimension(4), Intent(OUT) :: d_xy
+    Logical, Dimension(4), Intent(OUT) :: FoundWall_xy
+    Integer, Intent(OUT) :: istat
     !
     ! Local variables
     Integer :: ii, jj, iw, ic, ibc, is, i_end, iin, jjn, kkn
@@ -10212,12 +10258,12 @@ Contains
     !   I_Field: new flow field index
     !
     ! Passed variables
-    Integer, Intent(In) :: nm, nm2, ie, j, j1, i_egrid, imode
-    Real(EB), Intent(In) :: T, xx, yy
-    Integer, Intent(Out)  :: I_Target, I_Color, I_Field
+    Integer, Intent(IN) :: nm, nm2, ie, j, j1, i_egrid, imode
+    Real(EB), Intent(IN) :: T, xx, yy
+    Integer, Intent(OUT)  :: I_Target, I_Color, I_Field
     Type (HUMAN_TYPE), Pointer :: HR
     !
-    ! Local variables and arrays
+    ! Local variables
     Real(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn
     Real(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o
     Integer :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index
@@ -10774,8 +10820,13 @@ Contains
   End Subroutine Change_Target_Door
   !
   Subroutine GET_REV_evac(MODULE_REV,MODULE_DATE)
+    !
+    ! Passed variables
     Integer,Intent(INOUT) :: MODULE_REV
     Character(255),Intent(INOUT) :: MODULE_DATE
+    !
+    ! Local variables
+    !
 
     Write(MODULE_DATE,'(A)') evacrev(Index(evacrev,':')+1:Len_trim(evacrev)-2)
     Read (MODULE_DATE,'(I5)') MODULE_REV
